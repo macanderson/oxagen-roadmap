@@ -115,10 +115,25 @@ await step(5, async () => {
   await fresh('#/agents');
   const a = await body();
   const s30 = a.match(/Spend · last 30 days \$([\d,]+\.\d\d)/i)?.[1];
-  is(5, /5 of 41 by spend/.test(a), 'the agent table admits it is a sample of 41');
+  is(5, /5 of 41 · one of each state and tier/.test(a) && !/by spend/.test(a),
+    'the agent table says what kind of sample it is, and does not claim to be the top five');
+  /* "by spend" would mean these are the highest five, which a $0.00 fifth row
+     makes impossible against any workspace total. */
+  const plaus = await page.evaluate(() => {
+    const shown = AGENTS.reduce((s, x) => s + x.spend, 0);
+    const min = Math.min(...AGENTS.map(x => x.spend));
+    return {shown, min, agents: WS.agents, total: WS.spend30d,
+      ceilingIfTopFive: shown + (WS.agents - AGENTS.length) * min};
+  });
+  is(5, plaus.shown < plaus.total && plaus.ceilingIfTopFive < plaus.total,
+    `the sample is smaller than the whole, and could not be the top five (${JSON.stringify(plaus)})`);
   await go('#/spend');
   const mtd = (await body()).match(/Spent \$([\d,]+\.\d\d)/i)?.[1];
   is(5, n_(s30) > n_(mtd), `30-day spend $${s30} exceeds 11-day spend $${mtd}`);
+  /* A trailing 30 days cannot exceed the two months it spans. */
+  const window30 = await page.evaluate(() => ({s30: WS.spend30d, aug: WS.augLedger, mtd: WS.spendMTD}));
+  is(5, window30.s30 <= window30.aug + window30.mtd,
+    `the 30-day window fits inside August plus September (${JSON.stringify(window30)})`);
 });
 
 /* ═══ 6 · the Runs panel shows what it claims ═══ */
@@ -127,8 +142,18 @@ await step(6, async () => {
   const rows = await page.locator('#view table tbody tr[data-go]').count();
   const note = await page.evaluate(() => [...document.querySelectorAll('.panel-h')]
     .find(h => h.querySelector('h2')?.textContent === 'Runs')?.querySelector('.note')?.textContent);
-  eq(6, note, `${rows} of ${rows} · newest first`, 'the Runs note matches the rows rendered');
-  is(6, (await body()).includes('run_01K6QWQ1F2'), 'the cancelled run named in the audit log is in the table');
+  /* `N of N` is a fraction compared to itself and can never disagree — the
+     denominator has to be the whole the panel is a sample of. */
+  const m = String(note).match(/^(\d+) of ([\d,]+) this month · newest first$/);
+  is(6, m && Number(m[1]) === rows && n_(m[2]) > rows,
+    `the Runs note names the rows shown against the whole month ("${note}", ${rows} rows)`);
+  /* And "newest first" has to be true, not merely printed. */
+  const order = await page.evaluate(() => [...document.querySelectorAll('#view tr[data-go]')]
+    .map(r => RUNS.find(x => x.id === r.dataset.go.split('/').pop()).started));
+  const sorted = [...order].sort().reverse();
+  is(6, order.length > 1 && JSON.stringify(order) === JSON.stringify(sorted),
+    `the rows really are newest first (${order[0]} → ${order[order.length - 1]})`);
+  is(6, (await body()).includes('run_01K6QW6H3D'), 'the cancelled run named in the audit log is in the table');
 });
 
 /* ═══ 7 · "Runs live" counts live runs ═══ */
@@ -173,8 +198,8 @@ await step(11, async () => {
   const last = Number(await page.locator('[data-frame]').last().getAttribute('data-frame'));
   await page.click('[role="tab"][data-val="Chain"]'); await page.waitForTimeout(60);
   const c = await body();
-  const total = Number(c.match(/(\d+) of \1 verified/)?.[1] ?? 0);
-  is(11, /126 of 126 verified/.test(c) && /dense 0–125/.test(c), 'the chain says 126 frames, dense 0–125');
+  const total = n_(c.match(/every one of ([\d,]+) verified/)?.[1]);
+  is(11, /every one of 126 verified/.test(c) && /dense 0–125/.test(c), 'the chain says 126 frames, dense 0–125');
   eq(11, last, total - 1, 'the last recorded frame index is inside the sealed sequence');
 });
 
@@ -325,15 +350,23 @@ await step(25, async () => {
 const runHrefs = [];
 await step(26, async () => {
   await fresh('#/fleet');
-  runHrefs.push(...await page.locator('#view tr[data-go]').evaluateAll(r => r.map(x => x.dataset.go)));
+  /* Compare two INDEPENDENT sources: the id printed in the row's own cell, and
+     the heading of the page that row opens. Reading the id back out of the
+     data-go attribute — the very thing the defect corrupts — cannot fail. */
+  const rows = await page.locator('#view tr[data-go]').evaluateAll(r =>
+    r.map(x => ({ id: x.querySelector('td a.rowlink').textContent.trim(), go: x.dataset.go })));
+  runHrefs.push(...rows.map(r => r.go));
+  const distinct = new Set(rows.map(r => r.go)).size === rows.length;
   const miss = [];
-  for(const href of runHrefs){
-    await go(href);
+  for(const row of rows){
+    await go(row.go);
     const h1 = await text('.head h1');
-    if(!h1.includes(href.split('/').pop())) miss.push([href, h1]);
+    if(!h1.startsWith(row.id)) miss.push([row.id, row.go, h1.split(' ')[0]]);
   }
-  is(26, runHrefs.length > 1 && miss.length === 0,
-    `all ${runHrefs.length} rows open their own run` + (miss.length ? ` — ${JSON.stringify(miss)}` : ''));
+  is(26, rows.length > 1 && distinct && miss.length === 0,
+    `all ${rows.length} rows open their own run, and no two rows share a destination`
+    + (!distinct ? ' — DESTINATIONS NOT DISTINCT' : '')
+    + (miss.length ? ` — ${JSON.stringify(miss)}` : ''));
 });
 
 /* ═══ 27 · no frame is a dead end ═══ */
@@ -343,10 +376,17 @@ await step(27, async () => {
     await fresh(href);
     const frames = await page.locator('[data-frame]').evaluateAll(b => b.map(x => x.dataset.frame));
     for(const f of frames){
+      const want = await page.locator(`[data-frame="${f}"] .frt`).innerText();
       await page.click(`[data-frame="${f}"]`); await page.waitForTimeout(20);
       const kv = await page.locator('#panel-runTab .kv').last().innerText();
+      /* Not just "the pane has content" — it has to be THIS frame's content, or
+         a regression that always shows frame 0 passes. */
+      const head = await page.locator('#panel-runTab .panel-h h2').last().innerText();
+      const note = await page.locator('#panel-runTab .panel-h .note').last().innerText();
       checked++;
-      if(/Select a frame/.test(kv) || kv.trim().length < 30) dead.push([href.split('/').pop(), f]);
+      if(/Select a frame/.test(kv) || kv.trim().length < 30) dead.push([href.split('/').pop(), f, 'empty']);
+      else if(head.trim() !== want.trim() || note.trim() !== `frame ${f}`)
+        dead.push([href.split('/').pop(), f, `showed "${head}" / "${note}"`]);
     }
   }
   is(27, checked > 40 && dead.length === 0,
@@ -590,10 +630,19 @@ await step(43, async () => {
   });
   is(43, w.bad === 0 && w.panels > 0 && w.labelled && w.roving === w.tabs,
     `tabs control real panels with roving tabindex (${JSON.stringify(w)})`);
+  /* `.click()` moves aria-selected by itself, so asserting on aria-selected
+     alone cannot catch a lost-focus regression. Read activeElement, and press
+     twice — every one of these bugs works exactly once. */
   await page.locator('[role="tab"][aria-selected="true"]').focus();
-  await page.keyboard.press('ArrowRight'); await page.waitForTimeout(100);
-  const now = await page.evaluate(() => document.querySelector('[role="tab"][aria-selected="true"]').dataset.val);
-  is(43, now !== 'Registry', `arrow keys move between tabs (now ${now})`);
+  await page.keyboard.press('ArrowRight'); await page.waitForTimeout(120);
+  const one = await page.evaluate(() => ({sel: document.querySelector('[role="tab"][aria-selected="true"]')?.dataset.val,
+    active: document.activeElement?.dataset?.val ?? document.activeElement?.tagName}));
+  await page.keyboard.press('ArrowRight'); await page.waitForTimeout(120);
+  const two = await page.evaluate(() => ({sel: document.querySelector('[role="tab"][aria-selected="true"]')?.dataset.val,
+    active: document.activeElement?.dataset?.val ?? document.activeElement?.tagName}));
+  is(43, one.sel === 'Connections' && one.active === 'Connections'
+      && two.sel === 'Policy' && two.active === 'Policy',
+    `arrow keys move twice and focus follows (${JSON.stringify(one)} then ${JSON.stringify(two)})`);
 });
 
 /* ═══ 44a · contrast ═══ */
@@ -639,6 +688,312 @@ await step(44, async () => {
   const r = await body();
   is(44, /matched, one line held out/.test(r) && !/matched to the cent/.test(r),
     'reconciliation describes the held-out line honestly');
+});
+
+/* ═════════ Second round: findings from the independent re-audits ═════════ */
+
+/* ═══ 45 · every run is reachable without a mouse ═══ */
+await step(45, async () => {
+  await fresh('#/fleet');
+  const links = await page.evaluate(() => [...document.querySelectorAll('#view tr[data-go]')]
+    .map(r => ({ go: r.dataset.go, href: r.querySelector('a[href]')?.getAttribute('href') ?? null })));
+  is(45, links.length > 1 && links.every(l => l.href === l.go),
+    `every run row carries a real link to its own run (${links.filter(l => !l.href).length} without one)`);
+  /* Walk the tab order and confirm each run id is actually reached. */
+  const seen = new Set();
+  await page.evaluate(() => document.body.focus());
+  for(let i = 0; i < 60; i++){
+    await page.keyboard.press('Tab');
+    const h = await page.evaluate(() => document.activeElement?.getAttribute?.('href') ?? null);
+    if(h && h.startsWith('#/run/')) seen.add(h);
+  }
+  is(45, links.every(l => seen.has(l.go)),
+    `a keyboard walk reaches all ${links.length} runs (reached ${seen.size})`);
+});
+
+/* ═══ 46 · state changes are announced ═══ */
+await step(46, async () => {
+  await fresh('#/fleet');
+  const region = await page.evaluate(() => {
+    const el = document.querySelector('[role="status"][aria-live], [aria-live]');
+    return el ? {id: el.id, live: el.getAttribute('aria-live')} : null;
+  });
+  is(46, region && region.live === 'polite', `a polite live region exists (${JSON.stringify(region)})`);
+  await page.click('[data-act="approve"][data-i="0"]');
+  await page.waitForTimeout(220);
+  const said = await page.evaluate(() => document.querySelector('#say').textContent);
+  is(46, /Approved/.test(said) && /rcp_/.test(said) && /waiting on a person/.test(said),
+    `approving is announced with its receipt ("${said}")`);
+  await page.click('[data-act="steer-all"]'); await page.waitForTimeout(220);
+  is(46, /Not in this mockup/.test(await page.evaluate(() => document.querySelector('#say').textContent)),
+    'the stub message is announced, not only drawn');
+  await page.waitForTimeout(1500);
+});
+
+/* ═══ 47 · focus survives the re-render ═══ */
+await step(47, async () => {
+  await fresh('#/run/run_01K5XQ7M4A');
+  await page.locator('[data-frame="13"]').focus();
+  await page.keyboard.press('Enter'); await page.waitForTimeout(120);
+  const afterFrame = await page.evaluate(() => document.activeElement?.dataset?.frame ?? document.activeElement.tagName);
+  is(47, afterFrame === '13', `selecting a frame by keyboard keeps focus on it (${afterFrame})`);
+  await fresh('#/fleet');
+  await page.locator('[data-act="approve"][data-i="0"]').focus();
+  await page.keyboard.press('Enter'); await page.waitForTimeout(150);
+  const afterApprove = await page.evaluate(() => {
+    const a = document.activeElement;
+    return {tag: a.tagName, act: a.dataset?.act ?? null, i: a.dataset?.i ?? null, inView: document.querySelector('#view').contains(a)};
+  });
+  is(47, afterApprove.inView && afterApprove.tag !== 'BODY',
+    `approving by keyboard does not dump focus to the document (${JSON.stringify(afterApprove)})`);
+});
+
+/* ═══ 48 · the in-page phone simulator contains its own overlays ═══ */
+await step(48, async () => {
+  await fresh('#/fleet');
+  await page.click('[data-width="phone"]'); await page.waitForTimeout(200);
+  await page.click('#navToggle'); await page.waitForTimeout(280);
+  const r = await page.evaluate(() => {
+    const box = el => { const b = el.getBoundingClientRect(); return {l: Math.round(b.left), w: Math.round(b.width)}; };
+    return {frame: box(document.querySelector('.frame')), rail: box(document.querySelector('#rail')),
+      scrim: box(document.querySelector('#scrim'))};
+  });
+  is(48, r.rail.l >= r.frame.l - 1 && r.scrim.w <= r.frame.w + 2,
+    `the drawer and the scrim stay inside the simulated device (${JSON.stringify(r)})`);
+  await page.keyboard.press('Escape'); await page.waitForTimeout(150);
+  await page.click('[data-width="desktop"]'); await page.waitForTimeout(150);
+});
+
+/* ═══ 49 · a finding cannot claim more than its scope spends ═══ */
+await step(49, async () => {
+  await fresh('#/spend');
+  const bad = await page.evaluate(() => FINDINGS
+    .filter(f => AGENT(f.scope) && f.at > AGENT(f.scope).spend)
+    .map(f => `${f.id}: ${f.at} > ${AGENT(f.scope).spend}`));
+  is(49, bad.length === 0, 'no finding claims more monthly waste than its agent spends'
+    + (bad.length ? ` — ${bad.join(', ')}` : ''));
+});
+
+/* ═══ 50 · a frame's turn label matches the cost table ═══ */
+await step(50, async () => {
+  await fresh('#/fleet');
+  const bad = await page.evaluate(() => {
+    const out = [];
+    for(const r of RUNS) for(const f of framesOf(r)){
+      const m = String(f.d).match(/turn (\d+)/);
+      if(!m) continue;
+      if(Number(m[1]) !== turnOf(r, f.n).i)
+        out.push(`${r.id} frame ${f.n}: says turn ${m[1]}, index is in turn ${turnOf(r, f.n).i}`);
+    }
+    return out;
+  });
+  is(50, bad.length === 0, 'every frame that names a turn agrees with the per-turn frame counts'
+    + (bad.length ? ` — ${bad.join('; ')}` : ''));
+});
+
+/* ═══ 51 · ULIDs sort the way their timestamps do ═══ */
+await step(51, async () => {
+  await fresh('#/fleet');
+  const r = await page.evaluate(() => {
+    const byId = [...RUNS].sort((a, b) => a.id.localeCompare(b.id)).map(x => x.id);
+    const byTime = [...RUNS].sort((a, b) => a.started.localeCompare(b.started)).map(x => x.id);
+    return {byId, byTime};
+  });
+  is(51, JSON.stringify(r.byId) === JSON.stringify(r.byTime),
+    'run ids sort into their start order, as ULIDs must');
+});
+
+/* ═══ 52 · the empty state teaches the path into THIS page ═══ */
+await step(52, async () => {
+  const wrong = [];
+  for(const p of ['fleet','agents','tools','ontology','steering','spend','billing','audit','organization']){
+    await fresh('#/' + p);
+    const t = await page.evaluate(() => { S.view = 'empty'; render();
+      const v = document.querySelector('#view');
+      return {text: v.innerText.replace(/\s+/g, ' '), cta: v.querySelector('.btn-primary')?.textContent.trim()}; });
+    if(p !== 'fleet' && /first run in this workspace|The first run appears here/.test(t.text) && p !== 'spend')
+      wrong.push(`${p}: run-shaped copy`);
+    if(p === 'ontology' && !/[Cc]onnect/.test(t.cta ?? "")) wrong.push('ontology: wrong call to action — ' + t.cta);
+    if(p === 'tools' && !/Import/.test(t.cta ?? "")) wrong.push('tools: wrong call to action — ' + t.cta);
+    if(p === 'steering' && !/Context PR/.test(t.cta ?? "")) wrong.push('steering: wrong call to action — ' + t.cta);
+  }
+  is(52, wrong.length === 0, 'each empty state names its own way in' + (wrong.length ? ` — ${wrong.join('; ')}` : ''));
+});
+
+/* ═══ 53 · the denied state changes the shell, not only the body ═══ */
+await step(53, async () => {
+  await fresh('#/billing');
+  const shell = await page.evaluate(() => { S.view = 'denied'; render();
+    return {name: document.querySelector('#acctName').textContent,
+      role: document.querySelector('#acctRole').textContent,
+      badge: document.querySelector('#navApprovals').hidden,
+      body: document.querySelector('#view').innerText.replace(/\s+/g, ' ')}; });
+  is(53, shell.name !== 'Marcus Bell' && shell.badge === true && !/Marcus Bell, its owner/.test(shell.body),
+    `the rail identity and the waiting badge follow the denied viewer (${shell.name} · ${shell.role} · badge hidden ${shell.badge})`);
+  await page.evaluate(() => { S.view = 'loaded'; render(); });
+  const back = await page.evaluate(() => document.querySelector('#acctName').textContent);
+  is(53, back === 'Marcus Bell', 'and the shell comes back when the state does');
+});
+
+/* ═══ 54 · the sidebar scrolls when the viewport is short ═══ */
+await step(54, async () => {
+  const zoom = await browser.newContext({ viewport:{width:320, height:256} });
+  const zp = await zoom.newPage();
+  await zp.goto(FILE + '#/fleet'); await zp.waitForTimeout(140);
+  await zp.click('#navToggle'); await zp.waitForTimeout(260);
+  const r = await zp.evaluate(() => {
+    const rail = document.querySelector('#rail');
+    return {scrollable: rail.scrollHeight > rail.clientHeight,
+      overflow: getComputedStyle(rail).overflowY,
+      canScroll: (rail.scrollTop = 9999, rail.scrollTop > 0)};
+  });
+  is(54, r.overflow === 'auto' && (!r.scrollable || r.canScroll),
+    `the rail can be scrolled to its last destination (${JSON.stringify(r)})`);
+  await zoom.close();
+});
+
+/* ═══ 55 · the assistant dock is modal where it covers the page ═══ */
+await step(55, async () => {
+  await pp.goto('about:blank'); await pp.goto(FILE + '#/fleet'); await pp.waitForTimeout(140);
+  await pp.click('#asstBtn'); await pp.waitForTimeout(200);
+  const covers = await pp.evaluate(() => {
+    const b = document.querySelector('#asst').getBoundingClientRect();
+    return Math.round(b.width) >= document.documentElement.clientWidth - 1;
+  });
+  await pp.keyboard.press('Escape'); await pp.waitForTimeout(200);
+  const closed = await pp.evaluate(() => document.querySelector('#asst').hidden);
+  is(55, covers && closed, `the full-screen dock closes on Escape (covers ${covers}, closed ${closed})`);
+  await pp.click('#asstBtn'); await pp.waitForTimeout(200);
+  for(let i = 0; i < 12; i++) await pp.keyboard.press('Tab');
+  const inside = await pp.evaluate(() => document.querySelector('#asst').contains(document.activeElement));
+  is(55, inside, 'and Tab stays inside it');
+  await pp.keyboard.press('Escape');
+});
+
+/* ═══ 56 · the command listbox is structurally valid ═══ */
+await step(56, async () => {
+  await fresh('#/fleet');
+  await page.click('#cmdBtn'); await page.waitForTimeout(90);
+  const good = await page.evaluate(() => {
+    const opts = [...document.querySelectorAll('[role="option"]')];
+    return {opts: opts.length,
+      focusableInside: opts.filter(o => o.querySelector('a,button,input')).length,
+      expanded: document.querySelector('#cmdIn').getAttribute('aria-expanded')};
+  });
+  is(56, good.opts > 0 && good.focusableInside === 0 && good.expanded === 'true',
+    `options hold no focusable descendants (${JSON.stringify(good)})`);
+  await page.fill('#cmdIn', 'zzzzzzz'); await page.waitForTimeout(90);
+  const none = await page.evaluate(() => ({
+    opts: document.querySelectorAll('[role="option"]').length,
+    expanded: document.querySelector('#cmdIn').getAttribute('aria-expanded'),
+    active: document.querySelector('#cmdIn').getAttribute('aria-activedescendant'),
+    status: document.querySelector('#cmdNone').textContent.trim()}));
+  is(56, none.opts === 0 && none.expanded === 'false' && none.active === null && /Nothing matches/.test(none.status),
+    `a no-match is a status, not a selectable option (${JSON.stringify(none)})`);
+  await page.press('#cmdIn', 'Escape'); await page.waitForTimeout(80);
+});
+
+/* ═══ 57 · the model contains what its version history says it added ═══ */
+await step(57, async () => {
+  await fresh('#/ontology');
+  const missing = await page.evaluate(() => {
+    const names = CLASSES.map(c => c.n);
+    return ['WarrantyClaim', 'Depot', 'DeploymentSite'].filter(n => !names.includes(n));
+  });
+  is(57, missing.length === 0, 'the classes named in the version history are in the model'
+    + (missing.length ? ` — missing ${missing.join(', ')}` : ''));
+});
+
+/* ═══ 58 · hover feedback only where hovering leads somewhere ═══ */
+await step(58, async () => {
+  await fresh('#/agents');
+  const r = await page.evaluate(() => {
+    const row = document.querySelector('#view tbody tr');
+    return {hasGo: !!row.dataset.go, cursor: getComputedStyle(row).cursor};
+  });
+  is(58, !r.hasGo && r.cursor !== 'pointer', `a non-navigable row is not dressed as a link (${JSON.stringify(r)})`);
+});
+
+/* ═══ 59 · targets are big enough to hit ═══ */
+await step(59, async () => {
+  await fresh('#/fleet');
+  await page.keyboard.press('Tab'); await page.waitForTimeout(80);
+  const skip = await page.evaluate(() => {
+    const b = document.activeElement.getBoundingClientRect();
+    return {w: Math.round(b.width), h: Math.round(b.height)};
+  });
+  const fold = await page.evaluate(() => {
+    const b = document.querySelector('#chromeFold').getBoundingClientRect();
+    return {w: Math.round(b.width), h: Math.round(b.height)};
+  });
+  is(59, skip.h >= 24 && fold.h >= 24, `skip link ${skip.h}px and chrome toggle ${fold.h}px clear 24px`);
+});
+
+/* ═══ 60 · approving moves the run it is about ═══ */
+await step(60, async () => {
+  await fresh('#/fleet');
+  const runId = await page.evaluate(() => APPROVALS[0].run);
+  await go('#/run/' + runId);
+  const before = await text('.head h1');
+  await go('#/fleet');
+  await page.click('[data-act="approve"][data-i="0"]'); await page.waitForTimeout(120);
+  await go('#/run/' + runId);
+  const after = await body();
+  is(60, /parked/.test(before) && !/parked/.test(after.split('\n')[0]) && /dispatched/.test(after),
+    `the approved run leaves the parked state (${runId})`);
+  const frame = await page.evaluate(() => framesOf(theRun()).map(f => f.t).join(','));
+  is(60, /approval\.granted/.test(frame) && !/approval\.requested/.test(frame),
+    `and its last frame becomes the decision (${frame.split(',').pop()})`);
+  await setAsst(true); await page.waitForTimeout(80);
+  const asst = (await page.locator('#asstBody').innerText()).replace(/\s+/g, ' ');
+  is(60, !/still parked/.test(asst) && /resumed/.test(asst),
+    'and the assistant stops insisting it is still parked');
+  await setAsst(false);
+});
+
+/* ═══ 61 · the chrome does not open on top of the primary action ═══ */
+await step(61, async () => {
+  await pp.goto('about:blank'); await pp.goto(FILE + '#/fleet'); await pp.waitForTimeout(160);
+  const r = await pp.evaluate(() => {
+    const c = document.querySelector('#chrome').getBoundingClientRect();
+    const p = document.querySelector('.btn-primary')?.getBoundingClientRect();
+    const hit = p && !(c.right < p.left || c.left > p.right || c.bottom < p.top || c.top > p.bottom);
+    return {folded: document.querySelector('#chromeBody').hidden, overlaps: !!hit, h: Math.round(c.height)};
+  });
+  is(61, r.folded && !r.overlaps, `on a small viewport the chrome starts folded and clears the primary action (${JSON.stringify(r)})`);
+});
+
+/* ═══ 62 · what a full-screen overlay covers is inert ═══ */
+await step(62, async () => {
+  await pp.goto('about:blank'); await pp.goto(FILE + '#/fleet'); await pp.waitForTimeout(160);
+  await pp.click('#navToggle'); await pp.waitForTimeout(240);
+  const drawer = await pp.evaluate(() => ({main: document.querySelector('#main').inert,
+    rail: document.querySelector('#rail').inert}));
+  await pp.keyboard.press('Escape'); await pp.waitForTimeout(200);
+  const afterDrawer = await pp.evaluate(() => document.querySelector('#main').inert);
+  await pp.click('#asstBtn'); await pp.waitForTimeout(240);
+  const dock = await pp.evaluate(() => ({main: document.querySelector('#main').inert,
+    rail: document.querySelector('#rail').inert}));
+  await pp.keyboard.press('Escape'); await pp.waitForTimeout(200);
+  const afterDock = await pp.evaluate(() => ({main: document.querySelector('#main').inert,
+    rail: document.querySelector('#rail').inert}));
+  is(62, drawer.main && !drawer.rail && !afterDrawer && dock.main && dock.rail && !afterDock.main && !afterDock.rail,
+    `the drawer and the dock each inert what they cover, and release it on close (drawer ${JSON.stringify(drawer)}, dock ${JSON.stringify(dock)})`);
+});
+
+/* ═══ the contrast guard runs as part of this one ═══ */
+await step(44, async () => {
+  const { execFileSync } = await import('node:child_process');
+  const { dirname: dn, resolve: rs } = await import('node:path');
+  const { fileURLToPath: f2u } = await import('node:url');
+  const here = dn(f2u(import.meta.url));
+  try {
+    const out = execFileSync(process.execPath, [rs(here, 'verify-contrast.js')],
+      {encoding:'utf8', env:{...process.env, TARGET: FILE.replace('file://', '')}});
+    is(44, /ALL PASS/.test(out), out.trim().split('\n').pop());
+  } catch(e){
+    bad(44, 'the contrast guard failed: ' + String(e.stdout ?? e.message).trim().split('\n').slice(-3).join(' | '));
+  }
 });
 
 /* ═══ no console errors anywhere ═══ */
