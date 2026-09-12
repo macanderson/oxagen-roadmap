@@ -1,0 +1,2344 @@
+<title>Sixty Seconds to Governed</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap">
+<style>
+/* ============================================================
+   Oxagen Mission Control — W1 "Sixty seconds to governed"
+   House system: /Projects/oxagen-house-brand/tokens/house-tokens.css
+   Dark-first. Gold is identity and never encodes a state.
+   ============================================================ */
+
+/* --- tokens: full dark palette on bare :root ---------------- */
+:root{
+  --ink:#10100F; --void:#0A0A09; --panel:#181715; --hl:#201F1C;
+  --border:#292722; --rule:#34322D;
+  --fg:#F2EEE5; --body:#DDD8CD; --muted:#9B958A; --dim:#6E6A62;
+  --gold:#D6962C; --gold-bright:#F1C364; --gold-deep:#8B5E1A;
+  --accent-text:#D6962C;
+  --gold-ink:#10100F;                 /* text sitting on gold */
+  --gold-wash:rgba(214,150,44,.10);
+  --gold-edge:rgba(214,150,44,.34);
+
+  /* semantic state colours — separate from gold, consistent everywhere */
+  --s-allow:#5FA37A;   --s-allow-w:rgba(95,163,122,.13);
+  --s-approve:#5B8DBE; --s-approve-w:rgba(91,141,190,.14);
+  --s-deny:#B4695C;    --s-deny-w:rgba(180,105,92,.14);
+  --s-proven:#4C9E97;  --s-proven-w:rgba(76,158,151,.14);
+  --s-fail:#C0483A;    --s-fail-w:rgba(192,72,58,.14);
+  --s-crit:#D8453A;    --s-crit-w:rgba(216,69,58,.16);
+
+  --skel:rgba(242,238,229,.055);
+  --shadow:0 1px 0 rgba(255,255,255,.03), 0 18px 44px rgba(0,0,0,.5);
+  --shadow-sm:0 1px 0 rgba(255,255,255,.02), 0 6px 18px rgba(0,0,0,.35);
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+  --sans:"Space Grotesk","Helvetica Neue",Arial,sans-serif;
+  --r-lg:14px; --r-md:12px; --r-sm:10px; --r-xs:6px;
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    --ink:#F2EEE5; --void:#E9E3D8; --panel:#F8F5EE; --hl:#EFEAE0;
+    --border:#D8CDBD; --rule:#C9BFAE;
+    --fg:#10100F; --body:#2A2823; --muted:#6B665C; --dim:#8C877C;
+    --accent-text:#8B5E1A;
+    --gold-wash:rgba(139,94,26,.09); --gold-edge:rgba(139,94,26,.30);
+    --s-allow:#33714D;   --s-allow-w:rgba(51,113,77,.11);
+    --s-approve:#2E5C88; --s-approve-w:rgba(46,92,136,.11);
+    --s-deny:#9C4B3D;    --s-deny-w:rgba(156,75,61,.11);
+    --s-proven:#2F6E69;  --s-proven-w:rgba(47,110,105,.11);
+    --s-fail:#9C3A2D;    --s-fail-w:rgba(156,58,45,.11);
+    --s-crit:#A8352A;    --s-crit-w:rgba(168,53,42,.13);
+    --skel:rgba(16,16,15,.06);
+    --shadow:0 1px 0 rgba(255,255,255,.7), 0 18px 44px rgba(16,16,15,.09);
+    --shadow-sm:0 1px 0 rgba(255,255,255,.6), 0 6px 18px rgba(16,16,15,.07);
+  }
+}
+:root[data-theme="light"]{
+  --ink:#F2EEE5; --void:#E9E3D8; --panel:#F8F5EE; --hl:#EFEAE0;
+  --border:#D8CDBD; --rule:#C9BFAE;
+  --fg:#10100F; --body:#2A2823; --muted:#6B665C; --dim:#8C877C;
+  --accent-text:#8B5E1A;
+  --gold-wash:rgba(139,94,26,.09); --gold-edge:rgba(139,94,26,.30);
+  --s-allow:#33714D;   --s-allow-w:rgba(51,113,77,.11);
+  --s-approve:#2E5C88; --s-approve-w:rgba(46,92,136,.11);
+  --s-deny:#9C4B3D;    --s-deny-w:rgba(156,75,61,.11);
+  --s-proven:#2F6E69;  --s-proven-w:rgba(47,110,105,.11);
+  --s-fail:#9C3A2D;    --s-fail-w:rgba(156,58,45,.11);
+  --s-crit:#A8352A;    --s-crit-w:rgba(168,53,42,.13);
+  --skel:rgba(16,16,15,.06);
+  --shadow:0 1px 0 rgba(255,255,255,.7), 0 18px 44px rgba(16,16,15,.09);
+  --shadow-sm:0 1px 0 rgba(255,255,255,.6), 0 6px 18px rgba(16,16,15,.07);
+}
+
+*,*::before,*::after{box-sizing:border-box}
+body{
+  margin:0; background:var(--ink); color:var(--fg);
+  font-family:var(--sans); font-size:15px; line-height:1.55;
+  -webkit-font-smoothing:antialiased; padding-block:0;
+}
+::selection{background:var(--gold-wash); color:var(--fg)}
+:focus-visible{outline:2px solid var(--accent-text); outline-offset:2px; border-radius:4px}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important}
+}
+
+/* --- the app frame: the container queries key off this ------ */
+#frame{
+  container-type:inline-size; container-name:app;
+  min-height:100dvh; background:var(--ink); position:relative;
+  transition:max-width .22s ease;
+}
+body[data-phone="1"] #frame{
+  max-width:400px; margin:20px auto 96px; min-height:812px;
+  border:1px solid var(--rule); border-radius:22px; overflow:hidden;
+  box-shadow:var(--shadow);
+}
+body[data-phone="1"]{background:var(--void); padding-block:0}
+
+/* --- primitives -------------------------------------------- */
+.eyebrow{font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--accent-text); font-weight:600; margin:0 0 10px}
+.eyebrow.q{color:var(--muted)}
+.mono{font-family:var(--mono); font-size:.9em; font-variant-numeric:tabular-nums}
+.num{font-variant-numeric:tabular-nums}
+h1,h2,h3,h4{margin:0; letter-spacing:-.015em; text-wrap:balance}
+h1{font-size:30px; font-weight:700; line-height:1.12}
+h2{font-size:21px; font-weight:600; line-height:1.2}
+h3{font-size:16px; font-weight:600}
+h4{font-size:13px; font-weight:600; letter-spacing:.01em}
+p{margin:0; color:var(--body)}
+a{color:var(--accent-text); text-decoration:none; border-bottom:1px solid transparent}
+a:hover{border-bottom-color:currentColor}
+hr.rule{border:0; border-top:1px solid var(--border); margin:0}
+.stack{display:flex; flex-direction:column}
+.row{display:flex; align-items:center}
+.wrapx{flex-wrap:wrap}
+.g4{gap:4px}.g6{gap:6px}.g8{gap:8px}.g10{gap:10px}.g12{gap:12px}.g14{gap:14px}
+.g16{gap:16px}.g20{gap:20px}.g24{gap:24px}.g28{gap:28px}.g32{gap:32px}
+.push{margin-left:auto}
+.muted{color:var(--muted)} .dim{color:var(--dim)} .fgc{color:var(--fg)} .bodyc{color:var(--body)}
+.f12{font-size:12px}.f13{font-size:13px}.f14{font-size:14px}.f16{font-size:16px}.f18{font-size:18px}
+.w500{font-weight:500}.w600{font-weight:600}.w700{font-weight:700}
+.lead{font-size:16px; line-height:1.55; color:var(--body); max-width:62ch}
+.cap{font-size:12.5px; color:var(--muted); line-height:1.5}
+.ctr{text-align:center}
+
+.panel{background:var(--panel); border:1px solid var(--border); border-radius:var(--r-lg)}
+.panel.flat{background:transparent}
+.pad{padding:20px 22px}
+.pad-s{padding:14px 16px}
+.logo{height:19px; width:auto; display:block; color:var(--fg)}
+.logo.sm{height:16px}
+.logo.lg{height:26px}
+
+/* --- buttons ------------------------------------------------ */
+.btn{
+  font-family:inherit; font-size:13.5px; font-weight:500; letter-spacing:.005em;
+  padding:9px 15px; border-radius:var(--r-sm); border:1px solid var(--border);
+  background:var(--hl); color:var(--fg); cursor:pointer; display:inline-flex;
+  align-items:center; justify-content:center; gap:8px; line-height:1.3;
+  transition:background .13s ease, border-color .13s ease, color .13s ease;
+  text-align:center; white-space:nowrap;
+}
+.btn:hover{background:var(--panel); border-color:var(--rule)}
+.btn.ghost{background:transparent}
+.btn.ghost:hover{background:var(--hl)}
+.btn.gold{background:var(--gold); border-color:var(--gold); color:var(--gold-ink); font-weight:600}
+.btn.gold:hover{background:var(--gold-bright); border-color:var(--gold-bright)}
+.btn.wide{width:100%}
+.btn.sm{font-size:12.5px; padding:6px 11px; border-radius:var(--r-xs)}
+.btn.lg{font-size:14.5px; padding:12px 20px}
+.btn[disabled],.btn[aria-disabled="true"]{opacity:.42; cursor:not-allowed}
+.btn.danger{color:var(--s-fail); border-color:var(--s-fail)}
+.btn.danger:hover{background:var(--s-fail-w)}
+.linkbtn{background:none; border:0; padding:0; font:inherit; color:var(--accent-text); cursor:pointer; border-bottom:1px solid transparent}
+.linkbtn:hover{border-bottom-color:currentColor}
+.linkbtn.q{color:var(--muted)}
+
+/* --- form --------------------------------------------------- */
+.field{display:flex; flex-direction:column; gap:6px}
+label.lab{font-size:12.5px; font-weight:500; color:var(--muted); letter-spacing:.01em}
+.input{
+  font-family:inherit; font-size:14.5px; color:var(--fg); background:var(--ink);
+  border:1px solid var(--border); border-radius:var(--r-sm); padding:10px 12px; width:100%;
+  transition:border-color .13s ease, background .13s ease;
+}
+.input::placeholder{color:var(--dim)}
+.input:focus{border-color:var(--accent-text); outline:none; background:var(--hl)}
+.input.err{border-color:var(--s-fail)}
+.input.mono{font-family:var(--mono); font-size:13.5px}
+textarea.input{resize:vertical; min-height:88px; line-height:1.5}
+.hint{font-size:12px; color:var(--dim); line-height:1.45}
+.errline{font-size:12.5px; color:var(--s-fail); display:flex; gap:6px; align-items:flex-start; line-height:1.45}
+.pw-wrap{position:relative}
+.pw-wrap .input{padding-right:62px}
+.pw-toggle{position:absolute; right:8px; top:50%; transform:translateY(-50%); background:none; border:0; color:var(--muted); font:inherit; font-size:12px; cursor:pointer; padding:4px 6px; border-radius:4px}
+.pw-toggle:hover{color:var(--fg); background:var(--hl)}
+.meter{display:flex; gap:4px; margin-top:2px}
+.meter i{height:3px; flex:1; background:var(--skel); border-radius:2px}
+.meter i.on{background:var(--s-allow)}
+.reqs{display:grid; gap:3px; margin-top:2px}
+.reqs span{font-size:11.5px; color:var(--dim); display:flex; gap:6px; align-items:center}
+.reqs span.ok{color:var(--s-allow)}
+.codes{display:flex; gap:8px}
+.codes input{
+  width:46px; height:54px; text-align:center; font-family:var(--mono); font-size:21px;
+  background:var(--ink); border:1px solid var(--border); border-radius:var(--r-sm); color:var(--fg);
+}
+.codes input:focus{border-color:var(--accent-text); outline:none; background:var(--hl)}
+.check{display:flex; gap:9px; align-items:flex-start; font-size:13px; color:var(--body); cursor:pointer}
+.check input{margin:2px 0 0; accent-color:var(--gold)}
+
+/* --- chips / badges ----------------------------------------- */
+.chip{
+  display:inline-flex; align-items:center; gap:6px; font-family:var(--mono);
+  font-size:11px; letter-spacing:.04em; text-transform:uppercase; font-weight:500;
+  padding:3px 8px; border-radius:var(--r-xs); border:1px solid var(--border);
+  color:var(--muted); background:var(--hl); white-space:nowrap;
+}
+.chip.allow{color:var(--s-allow); border-color:var(--s-allow); background:var(--s-allow-w)}
+.chip.approve{color:var(--s-approve); border-color:var(--s-approve); background:var(--s-approve-w)}
+.chip.deny{color:var(--s-deny); border-color:var(--s-deny); background:var(--s-deny-w)}
+.chip.proven{color:var(--s-proven); border-color:var(--s-proven); background:var(--s-proven-w)}
+.chip.fail{color:var(--s-fail); border-color:var(--s-fail); background:var(--s-fail-w)}
+.chip.crit{color:var(--s-crit); border-color:var(--s-crit); background:var(--s-crit-w)}
+.chip.idn{text-transform:none; letter-spacing:0; color:var(--body)}
+.dot{width:7px; height:7px; border-radius:50%; background:currentColor; flex:none}
+.dot.live{animation:pulse 1.9s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.32}}
+
+/* --- tables -------------------------------------------------- */
+.tw{overflow-x:auto; -webkit-overflow-scrolling:touch}
+table{border-collapse:collapse; width:100%; font-size:13.5px; min-width:0}
+th,td{text-align:left; padding:11px 14px; border-bottom:1px solid var(--border); vertical-align:middle}
+th{font-size:11px; letter-spacing:.09em; text-transform:uppercase; color:var(--muted); font-weight:600; white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td.num,th.num{font-variant-numeric:tabular-nums; text-align:right}
+tbody tr.clickable{cursor:pointer}
+tbody tr.clickable:hover{background:var(--hl)}
+
+/* --- code ---------------------------------------------------- */
+pre.code{
+  background:var(--ink); border:1px solid var(--border); border-radius:var(--r-sm);
+  padding:14px 16px; overflow-x:auto; font-family:var(--mono); font-size:12.5px;
+  line-height:1.65; color:var(--body); margin:0;
+}
+pre.code .k{color:var(--accent-text)} pre.code .s{color:var(--s-proven)} pre.code .c{color:var(--dim)}
+code.inl{font-family:var(--mono); font-size:.88em; background:var(--hl); padding:.1em .38em; border-radius:4px; color:var(--body)}
+.copy{position:relative; min-width:0}
+.copy .copybtn{position:absolute; top:8px; right:8px}
+/* a scroll container only zeroes its automatic minimum as a flex/grid ITEM;
+   inside a plain block its text width still propagates up and blows out the track */
+.stack > *, .wp-main > *, .wp-act > *, .wp-full > *, .cols > *, .sect, .panel{min-width:0}
+
+/* ============================================================
+   AUTH SHELL
+   ============================================================ */
+.auth{
+  min-height:100dvh; display:flex; flex-direction:column; align-items:center;
+  padding:0 20px 56px; position:relative; isolation:isolate;
+}
+.auth::before{
+  content:""; position:absolute; inset:0; z-index:-1; pointer-events:none;
+  background:
+    radial-gradient(760px 420px at 50% -6%, var(--gold-wash), transparent 70%),
+    repeating-linear-gradient(0deg, transparent 0 47px, var(--border) 47px 48px),
+    repeating-linear-gradient(90deg, transparent 0 47px, var(--border) 47px 48px);
+  opacity:.5; mask-image:linear-gradient(180deg, #000 0%, transparent 78%);
+}
+.auth-top{width:100%; max-width:1180px; padding:26px 0 0; display:flex; align-items:center; gap:16px}
+.auth-card{width:100%; max-width:448px; margin-top:44px}
+.auth-h{margin-bottom:22px}
+.auth-foot{margin-top:22px; font-size:13px; color:var(--muted); text-align:center}
+.sso{display:grid; gap:9px}
+.sso .btn{justify-content:flex-start; padding-left:14px}
+.sso .btn svg{flex:none}
+.or{display:flex; align-items:center; gap:12px; color:var(--dim); font-size:11.5px; letter-spacing:.1em; text-transform:uppercase}
+.or::before,.or::after{content:""; height:1px; background:var(--border); flex:1}
+.tagstrip{display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-top:26px}
+
+/* ============================================================
+   ONBOARDING GATE
+   ============================================================ */
+.gate{min-height:100dvh; display:flex; flex-direction:column; align-items:center; padding:0 20px 72px; position:relative; isolation:isolate}
+.gate::before{
+  content:""; position:absolute; inset:0; z-index:-1; pointer-events:none;
+  background:radial-gradient(900px 460px at 50% -10%, var(--gold-wash), transparent 72%);
+}
+.gate-in{width:100%; max-width:772px}
+.steps{display:flex; gap:0; margin:30px 0 30px; border:1px solid var(--border); border-radius:var(--r-md); overflow:hidden; background:var(--panel)}
+.steps a{
+  flex:1; padding:12px 14px; display:flex; gap:10px; align-items:center;
+  border-right:1px solid var(--border); color:var(--muted); font-size:13px; border-bottom:0;
+  background:transparent; transition:background .13s ease;
+}
+.steps a:last-child{border-right:0}
+.steps a:hover{background:var(--hl); border-bottom:0}
+.steps a[aria-current="step"]{color:var(--fg); background:var(--hl)}
+.steps a.done{color:var(--s-allow)}
+.steps .sn{
+  width:21px; height:21px; border-radius:50%; border:1px solid currentColor; flex:none;
+  display:grid; place-items:center; font-family:var(--mono); font-size:11px;
+}
+.steps a[aria-current="step"] .sn{border-color:var(--gold); color:var(--gold)}
+.switchwrap{background:var(--panel); border:1px solid var(--border); border-radius:var(--r-lg); overflow:hidden}
+.swtabs{display:grid; grid-template-columns:repeat(3,1fr); position:relative; border-bottom:1px solid var(--border)}
+.swtabs button{
+  font:inherit; background:transparent; border:0; border-right:1px solid var(--border); cursor:pointer;
+  padding:12px 14px; display:flex; flex-direction:column; gap:2px; align-items:flex-start; text-align:left;
+  color:var(--muted); transition:background .13s ease, color .13s ease; min-width:0;
+}
+.swtabs button:last-of-type{border-right:0}
+.swtabs button:hover{background:var(--hl); color:var(--fg)}
+.swtabs button .n{font-size:14px; font-weight:600; letter-spacing:-.01em; white-space:nowrap}
+.swtabs button .s{font-size:11px; color:var(--dim); font-family:var(--mono); white-space:nowrap;
+  overflow:hidden; text-overflow:ellipsis; max-width:100%}
+.swtabs button[aria-selected="true"]{color:var(--fg); background:var(--hl)}
+.swtabs button[aria-selected="true"] .s{color:var(--accent-text)}
+.swind{position:absolute; left:0; bottom:-1px; height:2px; width:calc(100%/3); background:var(--accent-text);
+  transform:translateX(calc(var(--i,0) * 100%)); transition:transform .34s cubic-bezier(.4,0,.2,1); pointer-events:none}
+.swview{overflow:hidden; transition:height .3s cubic-bezier(.4,0,.2,1)}
+.swtrack{display:grid; grid-auto-flow:column; grid-auto-columns:100%; align-items:start;
+  transition:transform .34s cubic-bezier(.4,0,.2,1)}
+.wpanel{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,344px); gap:16px;
+  padding:18px; align-content:start; align-items:start; min-width:0}
+.wp-main{display:flex; flex-direction:column; gap:12px; min-width:0}
+.wp-main h3{display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+.wp-act{background:var(--ink); border:1px solid var(--border); border-radius:var(--r-md);
+  padding:14px; display:flex; flex-direction:column; gap:10px; min-width:0}
+.wp-full{grid-column:1/-1; display:flex; flex-direction:column; gap:10px; min-width:0}
+.earn{display:grid; border:1px solid var(--border); border-radius:var(--r-sm); overflow:hidden}
+.earn > div{display:flex; align-items:center; gap:10px; padding:8px 11px; border-bottom:1px solid var(--border);
+  font-size:12.5px; color:var(--body); min-width:0}
+.earn > div:last-child{border-bottom:0}
+.earn > div > span:first-child{flex:1; min-width:0}
+@media (prefers-reduced-motion: reduce){.swtrack,.swind,.swview{transition:none}}
+.ostabs{display:flex; gap:4px; background:var(--ink); border:1px solid var(--border); border-radius:var(--r-xs); padding:3px}
+.ostabs button{
+  flex:1; font:inherit; font-size:12px; padding:5px 4px; border:0; border-radius:4px;
+  background:transparent; color:var(--muted); cursor:pointer;
+}
+.ostabs button[aria-selected="true"]{background:var(--hl); color:var(--fg)}
+.tokbox{
+  font-family:var(--mono); font-size:11.5px; color:var(--body); background:var(--ink);
+  border:1px dashed var(--border); border-radius:var(--r-xs); padding:8px 10px; overflow-wrap:anywhere;
+}
+.tokbox b{word-break:break-all}   /* only the key itself may break mid-word */
+
+/* --- waiting log -------------------------------------------- */
+.log{font-family:var(--mono); font-size:12px; line-height:1.85; color:var(--muted); display:grid; gap:0}
+.log div{display:flex; gap:12px; align-items:baseline}
+.log .t{color:var(--dim); flex:none}
+.log div.hit{color:var(--s-allow)}
+.log div.new{animation:slidein .34s ease}
+@keyframes slidein{from{opacity:0; transform:translateY(4px)}to{opacity:1; transform:none}}
+.spin{width:13px; height:13px; border-radius:50%; border:1.5px solid var(--border); border-top-color:var(--accent-text); animation:sp .7s linear infinite; flex:none; display:inline-block}
+@keyframes sp{to{transform:rotate(360deg)}}
+.bigspin{width:22px; height:22px; border-width:2px}
+
+/* ============================================================
+   INSTALLER WINDOW (native, not the web app)
+   ============================================================ */
+.instwrap{min-height:100dvh; display:grid; place-items:center; padding:40px 20px 80px; background:var(--void)}
+.instcol{width:100%; max-width:640px; display:flex; flex-direction:column; gap:18px}
+.win{background:var(--panel); border:1px solid var(--rule); border-radius:var(--r-lg); overflow:hidden; box-shadow:var(--shadow)}
+.win-bar{display:flex; align-items:center; gap:8px; padding:10px 14px; border-bottom:1px solid var(--border); background:var(--hl)}
+.win-bar .lights{display:flex; gap:6px}
+.win-bar .lights i{width:10px; height:10px; border-radius:50%; background:var(--rule); display:block}
+.win-bar .ttl{font-size:12.5px; color:var(--muted); margin:0 auto; padding-right:44px}
+.win-body{padding:26px 26px 22px; display:flex; flex-direction:column; gap:18px}
+.instep{display:flex; gap:11px; align-items:flex-start; font-size:13px; color:var(--dim)}
+.instep .mark{width:16px; height:16px; flex:none; margin-top:2px; display:grid; place-items:center; font-size:11px; font-family:var(--mono)}
+.instep.done{color:var(--body)} .instep.done .mark{color:var(--s-allow)}
+.instep.now{color:var(--fg)}
+.bar-track{height:4px; background:var(--ink); border:1px solid var(--border); border-radius:3px; overflow:hidden}
+.bar-fill{height:100%; background:var(--gold); width:0; transition:width .4s ease}
+
+/* ============================================================
+   APP SHELL
+   ============================================================ */
+.app{display:grid; grid-template-columns:242px 1fr; min-height:100dvh}
+.rail{
+  background:var(--void); border-right:1px solid var(--border); display:flex; flex-direction:column;
+  padding:14px 0 10px; gap:12px; position:sticky; top:0; height:100dvh; overflow-y:auto;
+}
+.rail-brand{padding:4px 16px 0; display:flex; align-items:center; gap:10px}
+.switcher{margin:0 10px; display:grid; gap:6px}
+.sw{
+  display:flex; align-items:center; gap:9px; padding:8px 10px; border:1px solid var(--border);
+  border-radius:var(--r-sm); background:var(--panel); cursor:pointer; font:inherit; text-align:left; width:100%;
+  color:var(--fg); transition:border-color .13s ease;
+}
+.sw:hover{border-color:var(--rule)}
+.sw .av{width:22px; height:22px; border-radius:var(--r-xs); background:var(--hl); border:1px solid var(--border); display:grid; place-items:center; font-size:10.5px; font-weight:600; color:var(--accent-text); flex:none; font-family:var(--mono)}
+.sw .tx{min-width:0; flex:1}
+.sw .tx b{display:block; font-size:13px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.sw .tx span{display:block; font-size:11px; color:var(--dim); font-family:var(--mono)}
+.sw .car{color:var(--dim); font-size:10px; flex:none}
+.navsec{padding:0 10px}
+.navsec > h5{margin:14px 8px 6px; font-size:10.5px; letter-spacing:.13em; text-transform:uppercase; color:var(--dim); font-weight:600}
+.nav a{
+  display:flex; align-items:center; gap:10px; padding:7px 10px; border-radius:var(--r-sm);
+  color:var(--muted); font-size:13.5px; border-bottom:0; transition:background .12s ease, color .12s ease;
+}
+.nav a:hover{background:var(--hl); color:var(--fg); border-bottom:0}
+.nav a[aria-current="page"]{background:var(--hl); color:var(--fg); font-weight:500}
+.nav a[aria-current="page"] .ic{color:var(--accent-text)}
+.nav .ic{width:15px; flex:none; display:grid; place-items:center; color:var(--dim)}
+.nav .tail{margin-left:auto; font-size:10.5px; font-family:var(--mono); color:var(--dim)}
+.rail-foot{margin-top:auto; padding:10px 16px 2px; border-top:1px solid var(--border)}
+
+.main{display:flex; flex-direction:column; min-width:0}
+.topbar{
+  position:sticky; top:0; z-index:30; display:flex; align-items:center; gap:12px;
+  padding:11px 22px; border-bottom:1px solid var(--border); background:var(--ink); min-height:53px;
+}
+.crumbs{display:flex; align-items:center; gap:8px; font-size:13px; color:var(--muted); min-width:0; overflow:hidden}
+.crumbs a{color:var(--muted); white-space:nowrap}
+.crumbs a:hover{color:var(--fg)}
+.crumbs .sep{color:var(--dim)}
+.crumbs b{color:var(--fg); font-weight:500; white-space:nowrap}
+.kbar{
+  display:flex; align-items:center; gap:8px; background:var(--panel); border:1px solid var(--border);
+  border-radius:var(--r-sm); padding:5px 9px; color:var(--dim); font-size:12.5px; cursor:pointer;
+  font-family:inherit; min-width:190px;
+}
+.kbar:hover{border-color:var(--rule); color:var(--muted)}
+.kbd{font-family:var(--mono); font-size:10.5px; border:1px solid var(--border); border-radius:4px; padding:1px 5px; color:var(--dim); background:var(--hl)}
+.iconbtn{
+  width:32px; height:32px; border-radius:var(--r-sm); border:1px solid var(--border); background:var(--panel);
+  color:var(--muted); cursor:pointer; display:grid; place-items:center; padding:0; flex:none;
+}
+.iconbtn:hover{color:var(--fg); border-color:var(--rule)}
+.iconbtn[aria-pressed="true"]{color:var(--accent-text); border-color:var(--gold-edge); background:var(--gold-wash)}
+.avatar{width:30px; height:30px; border-radius:50%; background:var(--hl); border:1px solid var(--border); display:grid; place-items:center; font-size:11px; font-weight:600; font-family:var(--mono); color:var(--body); cursor:pointer; flex:none}
+
+.content{padding:24px 22px 72px; min-width:0; flex:1}
+.pagehead{display:flex; align-items:flex-start; gap:16px; margin-bottom:20px; flex-wrap:wrap}
+.pagehead .lead{max-width:58ch}
+.stats{display:grid; grid-template-columns:repeat(5,1fr); gap:1px; border:1px solid var(--border); border-radius:var(--r-lg); overflow:hidden; background:var(--border); margin-bottom:20px}
+.stat{padding:13px 16px; background:var(--panel); display:flex; flex-direction:column; gap:3px; min-width:0}
+.stat .k{font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--dim); font-weight:600; white-space:nowrap}
+.stat .v{font-size:19px; font-weight:600; font-variant-numeric:tabular-nums; letter-spacing:-.01em; display:flex; align-items:baseline; gap:6px}
+.stat .v small{font-size:11px; font-weight:400; color:var(--dim); font-family:var(--mono)}
+
+.cols{display:grid; grid-template-columns:minmax(0,1fr) 328px; gap:18px; align-items:start}
+.sect{border:1px solid var(--border); border-radius:var(--r-lg); background:var(--panel); overflow:hidden}
+.sect > header{display:flex; align-items:center; gap:10px; padding:12px 16px; border-bottom:1px solid var(--border)}
+.sect > header h3{font-size:13.5px}
+.sect .empt{padding:34px 22px; text-align:center; display:flex; flex-direction:column; gap:10px; align-items:center}
+
+/* offer card — the one gold moment on Fleet */
+.offer{
+  border:1px solid var(--gold-edge); border-radius:var(--r-lg); padding:16px 17px;
+  background:linear-gradient(var(--gold-wash),var(--gold-wash)), var(--panel);
+  display:flex; flex-direction:column; gap:11px; position:relative;
+}
+.offer .x{position:absolute; top:9px; right:9px; background:none; border:0; color:var(--dim); cursor:pointer; font-size:15px; line-height:1; padding:4px; border-radius:4px}
+.offer .x:hover{color:var(--fg); background:var(--hl)}
+.offer .price{display:flex; align-items:baseline; gap:8px; padding:9px 11px; background:var(--ink); border:1px solid var(--border); border-radius:var(--r-sm)}
+.offer .price b{font-size:19px; font-weight:600; font-family:var(--mono); letter-spacing:-.01em}
+
+.banner{
+  display:flex; gap:12px; align-items:flex-start; padding:12px 15px; border-radius:var(--r-md);
+  border:1px solid var(--s-approve); background:var(--s-approve-w); margin-bottom:18px; font-size:13px; color:var(--body);
+}
+.banner .ib{color:var(--s-approve); flex:none; margin-top:1px}
+.banner.warn{border-color:var(--s-deny); background:var(--s-deny-w)} .banner.warn .ib{color:var(--s-deny)}
+
+.skel{background:var(--skel); border-radius:5px; height:11px; display:block; animation:sh 1.5s ease-in-out infinite}
+@keyframes sh{0%,100%{opacity:1}50%{opacity:.45}}
+
+.statepane{display:flex; flex-direction:column; align-items:center; gap:13px; padding:56px 24px; text-align:center; border:1px solid var(--border); border-radius:var(--r-lg); background:var(--panel)}
+.statepane .glyph{width:44px; height:44px; border-radius:var(--r-md); display:grid; place-items:center; border:1px solid var(--border); background:var(--hl); color:var(--muted)}
+.statepane.err .glyph{color:var(--s-fail); border-color:var(--s-fail); background:var(--s-fail-w)}
+.statepane.den .glyph{color:var(--s-deny); border-color:var(--s-deny); background:var(--s-deny-w)}
+.statepane p{max-width:52ch}
+
+/* --- run view ------------------------------------------------ */
+.coststrip{display:grid; grid-template-columns:repeat(auto-fit,minmax(132px,1fr)); gap:1px; border:1px solid var(--border); border-radius:var(--r-lg); overflow:hidden; background:var(--border)}
+.coststrip .c{padding:12px 15px; background:var(--panel)}
+.coststrip .c .k{font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--dim); font-weight:600}
+.coststrip .c .v{font-family:var(--mono); font-size:15px; font-weight:500; margin-top:3px; font-variant-numeric:tabular-nums}
+.frames{font-family:var(--mono); font-size:12.5px}
+.frame-row{display:grid; grid-template-columns:44px 92px 168px 1fr; gap:12px; padding:9px 16px; border-bottom:1px solid var(--border); align-items:baseline}
+.frame-row:last-child{border-bottom:0}
+.frame-row .sq{color:var(--dim)} .frame-row .ts{color:var(--dim)}
+.frame-row .kd{color:var(--accent-text)}
+.frame-row .bd{color:var(--muted); overflow-wrap:anywhere}
+.frame-row.new{animation:slidein .3s ease}
+
+/* --- dialogs -------------------------------------------------- */
+.scrim{position:fixed; inset:0; background:rgba(10,10,9,.62); backdrop-filter:blur(3px); z-index:80; display:grid; place-items:start center; padding:12vh 20px 20px; animation:fade .14s ease}
+body[data-phone="1"] .scrim{position:absolute; padding:60px 14px 20px}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.dlg{width:100%; max-width:520px; background:var(--panel); border:1px solid var(--rule); border-radius:var(--r-lg); box-shadow:var(--shadow); overflow:hidden}
+.dlg > header{padding:14px 18px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px}
+.dlg .bd{padding:18px}
+.dlg .ft{padding:13px 18px; border-top:1px solid var(--border); display:flex; gap:9px; justify-content:flex-end; background:var(--hl)}
+.cmdlist{max-height:340px; overflow-y:auto}
+.cmditem{display:flex; align-items:center; gap:11px; padding:9px 18px; cursor:pointer; font-size:13.5px; color:var(--body); border:0; background:none; width:100%; text-align:left; font-family:inherit}
+.cmditem:hover,.cmditem:focus-visible{background:var(--hl); color:var(--fg)}
+.cmditem .g{margin-left:auto; font-size:11px; color:var(--dim); font-family:var(--mono)}
+
+/* --- assistant drawer ----------------------------------------- */
+.drawer{
+  position:fixed; top:0; right:0; height:100dvh; width:352px; background:var(--panel);
+  border-left:1px solid var(--border); z-index:60; display:flex; flex-direction:column;
+  box-shadow:var(--shadow); animation:slidel .2s ease;
+}
+body[data-phone="1"] .drawer{position:absolute; width:100%; border-left:0}
+@keyframes slidel{from{transform:translateX(14px); opacity:0}to{transform:none; opacity:1}}
+.drawer > header{padding:12px 15px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:9px}
+.drawer .body{flex:1; overflow-y:auto; padding:16px 15px; display:flex; flex-direction:column; gap:14px}
+.msg{font-size:13.5px; line-height:1.55}
+.msg.a{color:var(--body)}
+.msg .who{font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--dim); font-weight:600; margin-bottom:5px}
+.msg.u{background:var(--hl); border:1px solid var(--border); border-radius:var(--r-sm); padding:9px 11px; color:var(--fg)}
+.drawer .foot{padding:12px 15px; border-top:1px solid var(--border)}
+
+/* --- unbuilt-page notice (mockup chrome inside the app) -------- */
+.unbuilt{
+  border:1px dashed var(--gold-edge); border-radius:var(--r-lg); padding:26px 24px;
+  font-family:var(--mono); font-size:12.5px; color:var(--muted); line-height:1.75;
+  background:repeating-linear-gradient(135deg, transparent 0 9px, var(--gold-wash) 9px 10px);
+}
+.unbuilt b{color:var(--accent-text); font-weight:600}
+
+/* ============================================================
+   MOCKUP CHROME — never product UI
+   ============================================================ */
+#chrome{
+  position:fixed; right:14px; bottom:14px; z-index:200; width:264px;
+  font-family:var(--mono); font-size:11.5px; color:var(--muted);
+  background:var(--void); border:1px dashed var(--gold-edge); border-radius:var(--r-sm);
+  box-shadow:var(--shadow); line-height:1.5;
+}
+#chrome header{
+  display:flex; align-items:center; gap:8px; padding:7px 10px; border-bottom:1px dashed var(--border);
+  color:var(--accent-text); letter-spacing:.1em; font-size:10px; text-transform:uppercase; font-weight:600;
+}
+#chrome header button{margin-left:auto; background:none; border:0; color:var(--dim); cursor:pointer; font:inherit; padding:2px 4px}
+#chrome header button:hover{color:var(--fg)}
+#chrome .cbody{padding:9px 10px; display:grid; gap:9px; max-height:min(62vh,520px); overflow-y:auto}
+#chrome.min .cbody{display:none}
+#chrome .grp{display:grid; gap:4px}
+#chrome .glab{color:var(--dim); font-size:9.5px; letter-spacing:.12em; text-transform:uppercase}
+#chrome .seg{display:flex; flex-wrap:wrap; gap:3px}
+#chrome .seg button{
+  font:inherit; font-size:10.5px; padding:3px 7px; border:1px solid var(--border); background:var(--ink);
+  color:var(--muted); border-radius:4px; cursor:pointer;
+}
+#chrome .seg button:hover:not([disabled]){color:var(--fg); border-color:var(--rule)}
+#chrome .seg button[aria-pressed="true"]{background:var(--gold-wash); border-color:var(--gold-edge); color:var(--accent-text)}
+#chrome .seg button[disabled]{opacity:.3; cursor:not-allowed}
+#chrome select{
+  font-family:inherit; font-size:11px; width:100%; background:var(--ink); color:var(--body);
+  border:1px solid var(--border); border-radius:4px; padding:4px 6px;
+}
+#chrome .note{color:var(--dim); font-size:10px; border-top:1px dashed var(--border); padding-top:7px}
+
+/* ============================================================
+   CONTAINER QUERIES — one set of rules for phone toggle + real phone
+   ============================================================ */
+@container app (max-width: 900px){
+  .cols{grid-template-columns:minmax(0,1fr)}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .wpanel{grid-template-columns:minmax(0,1fr)}
+  .wp-act{order:-1}
+}
+@container app (max-width: 720px){
+  .app{grid-template-columns:1fr}
+  .rail{
+    position:static; height:auto; border-right:0; border-bottom:1px solid var(--border);
+    flex-direction:column; padding:12px 0 8px;
+  }
+  .rail .switcher{grid-template-columns:1fr 1fr; display:grid}
+  .nav{display:flex; flex-wrap:wrap; gap:3px}
+  .nav a{padding:6px 9px; font-size:12.5px}
+  .nav .tail{display:none}
+  .navsec > h5{margin:10px 8px 4px}
+  .rail-foot{border-top:1px solid var(--border); margin-top:8px}
+  .content{padding:18px 14px 64px}
+  .topbar{padding:10px 14px; gap:8px}
+  .kbar{min-width:0; flex:1}
+  .kbar .kbd{display:none}
+  .crumbs{display:none}
+  .frame-row{grid-template-columns:36px 1fr; row-gap:2px}
+  .frame-row .ts{grid-column:2}
+  .frame-row .kd{grid-column:2}
+  .frame-row .bd{grid-column:2}
+  .steps a span.slab{display:none}
+  .auth-card{margin-top:26px}
+  .pagehead{gap:10px}
+  h1{font-size:24px}
+  .codes input{width:40px; height:48px; font-size:18px}
+  .drawer{width:100%}
+}
+@container app (max-width: 460px){
+  .swtabs button .s{display:none}
+  .swtabs button{padding:10px 9px}
+  .swtabs button .n{font-size:12.5px}
+  .wpanel{padding:14px}
+  .stats{grid-template-columns:1fr}
+  .codes{gap:5px}
+  .codes input{width:calc((100% - 25px)/6)}
+  .win-body{padding:20px 18px}
+  .content{padding:16px 12px 60px}
+}
+@media (max-width: 640px){
+  #chrome{right:8px; bottom:8px; width:calc(100% - 16px); max-width:280px}
+}
+</style>
+
+<div id="frame"></div>
+
+<div id="chrome" role="region" aria-label="Mockup chrome — not product UI">
+  <header>Mockup chrome <button type="button" id="chromeToggle" aria-expanded="true" title="Collapse">–</button></header>
+  <div class="cbody">
+    <div class="grp">
+      <span class="glab">Screen</span>
+      <select id="cScreen" aria-label="Jump to screen"></select>
+    </div>
+    <div class="grp">
+      <span class="glab">State</span>
+      <div class="seg" id="cState"></div>
+    </div>
+    <div class="grp">
+      <span class="glab">Viewport</span>
+      <div class="seg" id="cPhone">
+        <button type="button" data-v="0">desktop</button>
+        <button type="button" data-v="1">phone 400</button>
+      </div>
+    </div>
+    <div class="grp">
+      <span class="glab">Theme</span>
+      <div class="seg" id="cTheme">
+        <button type="button" data-v="system">system</button>
+        <button type="button" data-v="dark">dark</button>
+        <button type="button" data-v="light">light</button>
+      </div>
+    </div>
+    <div class="note">W1 — sixty seconds to governed. Acme Robotics demo data. This panel is not part of the product.</div>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* =========================================================================
+   Oxagen Mission Control — W1 mockup
+   Vocabulary is locked: operator, agent, run, turn, step, model call,
+   tool call, frame, context frame, context record, steering, Context PR,
+   governed action, agent tool, toolbelt, main repo, linked repo,
+   production branch, mandate, receipt, witness, enforcement tier,
+   data plane, funding source, price book, findings, proven run,
+   kill switch, connection, credential grant, policy version, ontology,
+   entity, source record, code graph.
+   ========================================================================= */
+
+/* ---------- the adaptive lockup, style block stripped ------------------- */
+const LOCKUP = `<svg class="logo LOGOCLS" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 574.244 106.313" role="img" aria-label="Oxagen"><g transform="translate(0,0) scale(2.842952)"><path d="M6.300 0.000L12.600 3.320L12.600 9.960L6.300 13.280L0.000 9.960L0.000 3.320ZM1.000 3.885L1.000 9.395L6.300 12.150L11.600 9.395L11.600 3.885L6.300 1.130Z M19.376 0.000L25.676 3.320L25.676 9.960L19.376 13.280L13.076 9.960L13.076 3.320ZM14.076 3.885L14.076 9.395L19.376 12.150L24.676 9.395L24.676 3.885L19.376 1.130Z M12.838 10.240L19.138 13.560L19.138 20.200L12.838 23.520L6.538 20.200L6.538 13.560ZM7.538 14.125L7.538 19.635L12.838 22.390L18.138 19.635L18.138 14.125L12.838 11.370Z M19.376 20.480L25.676 23.800L25.676 30.440L19.376 33.760L13.076 30.440L13.076 23.800ZM14.076 24.365L14.076 29.875L19.376 32.630L24.676 29.875L24.676 24.365L19.376 21.610Z" fill="currentColor"/><path d="M25.914 10.240L32.214 13.560L32.214 20.200L25.914 23.520L19.614 20.200L19.614 13.560Z M6.300 20.480L12.600 23.800L12.600 30.440L6.300 33.760L0.000 30.440L0.000 23.800Z" fill="#D6962C"/></g><g transform="translate(120.376,13.067)"><path d="M33.9083 68.758Q24.1657 68.758 16.4786 64.7737Q8.79142 60.7894 4.39571 53.2965Q0 45.8035 0 35.3862V33.3718Q0 22.9544 4.39571 15.4615Q8.79142 7.96854 16.4786 3.98427Q24.1657 0 33.9083 0Q43.6509 0 51.3381 3.98427Q59.0252 7.96854 63.4209 15.4615Q67.8166 22.9544 67.8166 33.3718V35.3862Q67.8166 45.8035 63.4209 53.2965Q59.0252 60.7894 51.3381 64.7737Q43.6509 68.758 33.9083 68.758ZM33.9083 55.3486Q42.1895 55.3486 47.4689 50.0198Q52.7484 44.691 52.7484 35.0142V33.7437Q52.7484 24.067 47.5233 18.7382Q42.2981 13.4094 33.9083 13.4094Q25.6502 13.4094 20.3592 18.7382Q15.0683 24.067 15.0683 33.7437V35.0142Q15.0683 44.691 20.3592 50.0198Q25.6502 55.3486 33.9083 55.3486Z M176.569 68.758Q169.637 68.758 164.119 66.3453Q158.601 63.9327 155.387 59.2935Q152.173 54.6542 152.173 48.0088Q152.173 41.3403 155.387 36.8558Q158.601 32.3712 164.27 30.1017Q169.94 27.8323 177.174 27.8323H196.047V23.8925Q196.047 18.7316 192.874 15.5274Q189.701 12.3232 182.99 12.3232Q176.411 12.3232 173.049 15.3842Q169.686 18.4452 168.627 23.3593L154.691 18.7315Q156.27 13.6133 159.748 9.39702Q163.225 5.18071 169.049 2.59035Q174.874 0 183.208 0Q195.972 0 203.326 6.42816Q210.681 12.8563 210.681 24.9392V50.4707Q210.681 54.4204 214.368 54.4204H219.795V66.9148H209.197Q204.464 66.9148 201.442 64.5334Q198.42 62.1521 198.42 58.1563V57.8864H196.126Q195.392 59.6967 193.399 62.2985Q191.406 64.9004 187.388 66.8292Q183.369 68.758 176.569 68.758ZM179.05 56.4348Q186.581 56.4348 191.314 52.1592Q196.047 47.8837 196.047 40.6031V39.2405H178.175Q173.175 39.2405 170.208 41.3881Q167.241 43.5358 167.241 47.5513Q167.241 51.5668 170.34 54.0008Q173.439 56.4348 179.05 56.4348Z M227.767 34.6423V32.6279Q227.767 22.3817 231.86 15.0863Q235.953 7.79081 242.768 3.8954Q249.582 0 257.706 0Q266.935 0 271.762 3.33256Q276.589 6.66512 278.81 10.4107H281.042V1.8432H295.801V79.33Q295.801 85.6989 292.104 89.4725Q288.408 93.2462 282.079 93.2462H238.369V80.0541H277.023Q280.779 80.0541 280.779 76.1043V57.2775H278.547Q277.161 59.5683 274.665 61.8904Q272.168 64.2125 268.057 65.7414Q263.946 67.2702 257.706 67.2702Q249.582 67.2702 242.756 63.3748Q235.93 59.4794 231.848 52.1724Q227.767 44.8655 227.767 34.6423ZM261.938 54.0781Q270.151 54.0781 275.573 48.8612Q280.996 43.6443 280.996 34.2704V32.9999Q280.996 23.4943 275.627 18.3432Q270.259 13.1921 261.938 13.1921Q253.749 13.1921 248.315 18.3432Q242.881 23.4943 242.881 32.9999V34.2704Q242.881 43.6443 248.315 48.8612Q253.749 54.0781 261.938 54.0781Z M344.764 68.758Q334.998 68.758 327.583 64.6108Q320.167 60.4636 316.031 52.9048Q311.896 45.346 311.896 35.1689V33.589Q311.896 23.3889 315.977 15.8416Q320.059 8.2944 327.397 4.1472Q334.735 0 344.385 0Q353.881 0 360.956 4.1867Q368.031 8.37341 371.981 15.8515Q375.931 23.3297 375.931 33.2895V38.6974H327.181Q327.468 46.3334 332.587 50.9496Q337.707 55.5658 345.198 55.5658Q352.522 55.5658 356.101 52.3534Q359.681 49.141 361.553 45.0629L373.985 51.4813Q372.119 55.0656 368.63 59.1042Q365.141 63.1428 359.394 65.9504Q353.648 68.758 344.764 68.758ZM327.313 27.2892H360.622Q360.095 20.7986 355.7 16.9954Q351.304 13.1921 344.277 13.1921Q337.055 13.1921 332.691 16.9954Q328.327 20.7986 327.313 27.2892Z M391.548 66.9148V1.8432H406.353V10.9769H408.585Q410.303 7.25429 414.832 3.99908Q419.361 0.743866 428.435 0.743866Q435.956 0.743866 441.695 4.12911Q447.434 7.51435 450.651 13.5903Q453.868 19.6663 453.868 27.9442V66.9148H438.8V29.1226Q438.8 21.1969 434.891 17.3492Q430.983 13.5015 423.9 13.5015Q415.872 13.5015 411.244 18.8237Q406.617 24.146 406.617 33.9445V66.9148Z" fill="currentColor"/><path d="M73.9979 66.9148 98.2261 34.0696 74.3764 1.8432H91.9626L107.9 24.3499H110.131L126.068 1.8432H143.654L119.805 34.0696L144.033 66.9148H126.206L110.131 44.0065H107.9L91.8244 66.9148Z" fill="#D6962C"/></g></svg>`;
+const logo = (cls="") => LOCKUP.replace("LOGOCLS", cls);
+
+/* ---------- tiny icon set (stroke, currentColor) ------------------------ */
+const I = {
+  fleet:'<svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="1.6" y="2.4" width="12.8" height="4" rx="1"/><rect x="1.6" y="9.6" width="12.8" height="4" rx="1"/></svg>',
+  run:'<svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="8" cy="8" r="6.2"/><path d="M8 4.4V8l2.4 1.6"/></svg>',
+  agents:'<svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="3" y="4.4" width="10" height="8" rx="2"/><path d="M8 1.6v2.8M5.6 8h.01M10.4 8h.01"/></svg>',
+  tools:'<svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M10.2 2.2a3.4 3.4 0 0 0-4 4.4l-4 4a1.4 1.4 0 0 0 2 2l4-4a3.4 3.4 0 0 0 4.4-4L11 6.2 9.4 4.6z"/></svg>',
+  ontology:'<svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="8" cy="3.2" r="1.9"/><circle cx="3.2" cy="12" r="1.9"/><circle cx="12.8" cy="12" r="1.9"/><path d="M6.7 4.8 4.3 10.3M9.3 4.8l2.4 5.5M5.1 12h5.8"/></svg>',
+  steering:'<svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M2.2 8h11.6M9.6 3.8 13.8 8l-4.2 4.2"/></svg>',
+  spend:'<svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M8 1.8v12.4M11 4.4H6.6a2 2 0 0 0 0 4h2.8a2 2 0 0 1 0 4H5"/></svg>',
+  org:'<svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="2.2" y="4" width="11.6" height="9.6" rx="1.2"/><path d="M5.6 4V2.4h4.8V4M5.6 7.4h1.2M9.2 7.4h1.2M5.6 10.2h1.2M9.2 10.2h1.2"/></svg>',
+  billing:'<svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="1.6" y="3.6" width="12.8" height="8.8" rx="1.4"/><path d="M1.6 6.6h12.8"/></svg>',
+  audit:'<svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M8 1.8 13.4 4v4c0 3.2-2.2 5.4-5.4 6.2C4.8 13.4 2.6 11.2 2.6 8V4z"/><path d="M6 8.1 7.4 9.5 10.2 6.7"/></svg>',
+  bot:'<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="2.6" y="5" width="10.8" height="7.6" rx="2"/><path d="M8 2.2v2.8M5.8 8.4h.01M10.2 8.4h.01"/></svg>',
+  search:'<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="7" cy="7" r="4.6"/><path d="m10.6 10.6 3 3"/></svg>',
+  bell:'<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4.2 6.6a3.8 3.8 0 0 1 7.6 0c0 3 1.2 4 1.2 4H3s1.2-1 1.2-4z"/><path d="M6.6 13a1.6 1.6 0 0 0 2.8 0"/></svg>',
+  github:'<svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .4a7.6 7.6 0 0 0-2.4 14.8c.38.07.52-.16.52-.36v-1.3c-2.1.46-2.55-1-2.55-1-.35-.88-.85-1.12-.85-1.12-.7-.47.05-.46.05-.46.77.06 1.17.79 1.17.79.68 1.17 1.79.83 2.23.64.07-.5.27-.83.48-1.03-1.68-.19-3.45-.84-3.6-3.73 0-.82.3-1.5.77-2.02-.08-.19-.33-.96.07-2 0 0 .63-.2 2.07.77a7.1 7.1 0 0 1 3.77 0c1.44-.97 2.07-.77 2.07-.77.4 1.04.15 1.81.07 2 .48.52.77 1.2.77 2.02 0 2.9-1.77 3.53-3.46 3.72.28.24.52.7.52 1.42v2.1c0 .2.14.44.52.36A7.6 7.6 0 0 0 8 .4z"/></svg>',
+  google:'<svg width="15" height="15" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.6 9.2c0-.6-.05-1.2-.16-1.8H9v3.4h4.8a4.1 4.1 0 0 1-1.8 2.7v2.2h2.9c1.7-1.6 2.7-3.9 2.7-6.5z"/><path fill="#34A853" d="M9 18c2.4 0 4.5-.8 6-2.2l-2.9-2.2c-.8.5-1.8.9-3.1.9-2.4 0-4.4-1.6-5.1-3.8H.9v2.3A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.9 10.7a5.4 5.4 0 0 1 0-3.4V5H.9a9 9 0 0 0 0 8z"/><path fill="#EA4335" d="M9 3.6c1.3 0 2.5.5 3.4 1.3l2.6-2.6A9 9 0 0 0 .9 5l3 2.3C4.6 5.2 6.6 3.6 9 3.6z"/></svg>',
+  lock:'<svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="3.2" y="7" width="9.6" height="7" rx="1.4"/><path d="M5.4 7V5a2.6 2.6 0 0 1 5.2 0v2"/></svg>',
+  apple:'<svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor"><path d="M11.2 8.5c0-1.5 1.2-2.2 1.3-2.3-.7-1-1.8-1.2-2.2-1.2-.9-.1-1.8.6-2.3.6s-1.2-.5-2-.5c-1 0-2 .6-2.5 1.5-1.1 1.9-.3 4.6.8 6.1.5.7 1.1 1.5 1.9 1.5s1-.5 2-.5 1.2.5 2 .5 1.3-.7 1.8-1.4a6 6 0 0 0 .8-1.6c-.1 0-1.6-.6-1.6-2.7zM9.8 3.9c.4-.5.7-1.2.6-1.9-.6 0-1.4.4-1.8.9-.4.5-.7 1.2-.6 1.9.7.1 1.4-.3 1.8-.9z"/></svg>',
+  linux:'<svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M6.2 2.6c0-1 .8-1.4 1.8-1.4s1.8.4 1.8 1.4v2.6c0 1.2 2.4 2.8 2.4 5.6 0 1.8-1.2 3-4.2 3s-4.2-1.2-4.2-3c0-2.8 2.4-4.4 2.4-5.6z"/><path d="M6.9 4.2h.01M9.1 4.2h.01"/></svg>',
+  win:'<svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor"><path d="M1.6 3.1 7 2.3v5.2H1.6zM7.8 2.2l6.6-1v6.3H7.8zM1.6 8.3H7v5.2l-5.4-.8zM7.8 8.3h6.6v6.4l-6.6-1z"/></svg>',
+  copy:'<svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="5.4" y="5.4" width="8.4" height="8.4" rx="1.4"/><path d="M10.6 5.4V3.6a1.4 1.4 0 0 0-1.4-1.4H3.6a1.4 1.4 0 0 0-1.4 1.4v5.6a1.4 1.4 0 0 0 1.4 1.4h1.8"/></svg>',
+  pause:'<svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><rect x="4" y="3" width="3" height="10" rx="1"/><rect x="9" y="3" width="3" height="10" rx="1"/></svg>',
+  play:'<svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M4.6 3.2 12.4 8l-7.8 4.8z"/></svg>',
+  stop:'<svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><rect x="3.6" y="3.6" width="8.8" height="8.8" rx="1.6"/></svg>',
+  warn:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M10 3.2 18 16.8H2z"/><path d="M10 8v3.6M10 14.1h.01"/></svg>',
+  info:'<svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="8" cy="8" r="6.2"/><path d="M8 7.4v3.6M8 5.2h.01"/></svg>',
+  inbox:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M2.6 11.4h3.4l1 2h6l1-2h3.4"/><path d="M4.4 3.6h11.2l1.8 7.8v4.2a1.4 1.4 0 0 1-1.4 1.4H4a1.4 1.4 0 0 1-1.4-1.4v-4.2z"/></svg>',
+  down:'<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M8 2.4v8.4M4.6 7.6 8 11l3.4-3.4M2.8 13.4h10.4"/></svg>'
+};
+
+/* ---------- demo data: Acme Robotics ------------------------------------ */
+const D = {
+  org:{name:"Acme Robotics", slug:"acme", ns:"acme", currency:"USD"},
+  ws:{name:"core-platform", ns:"core", mainRepo:"acme/platform", branch:"main",
+      linked:["acme/billing","acme/mobile"], mode:"team"},
+  operator:{name:"Marcus Bell", email:"marcus.bell@acmerobotics.com", initials:"MB", role:"workspace owner, core-platform"},
+  inviter:{name:"Priya Natarajan", initials:"PN", role:"org owner"},
+  other:{name:"Dana Okafor", email:"dana.okafor@acmerobotics.com", initials:"DO", role:"billing, finops"},
+  agent:{key:"acme.core.release-manager", name:"Release manager", harness:"Claude Code 2.1.14",
+         host:"mbp-marcus", device:"ed25519:9f2c4b71…a08e"},
+  enrollToken:"enr_8Qv2LkT9dR4pXm1sBw6j",
+  repo:{remote:"git@github.com:acme/platform.git", dir:"~/src/platform", branch:"main"},
+  run:{
+    id:"run_01JQ8F3K2MZ4YB7VQ", attempt:1, task:"acme/platform#4821 — cut 2026.9.2 release notes",
+    started:"14:02:11", model:"claude-opus-5", concrete:"claude-opus-5-20260812",
+    provider:"anthropic", frames:47, turns:2, modelCalls:9, toolCalls:6,
+    cost:0.285860, tier:"gateway", grade:"full",
+    tokens:[
+      {k:"input_uncached", n:12480, rate:"$5.00 / M",  usd:0.062400},
+      {k:"cache_read",     n:41220, rate:"$0.50 / M",  usd:0.020610},
+      {k:"cache_write_5m", n:12480, rate:"$6.25 / M",  usd:0.078000},
+      {k:"output",         n:3104,  rate:"$25.00 / M", usd:0.077600},
+      {k:"reasoning",      n:1890,  rate:"$25.00 / M", usd:0.047250}
+    ],
+    measured:[
+      {k:"tool_definition_tokens", n:1940},
+      {k:"context_frame_tokens",   n:0},
+      {k:"steering_tokens",        n:0}
+    ]
+  },
+  priceBook:"pb_2026_09_anthropic",
+  dates:{firstRun:"11 Sep 2026", offerEnds:"18 Sep 2026", provisionalEnds:"25 Sep 2026"}
+};
+const usd = n => "$" + n.toFixed(4);
+const usd2 = n => "$" + n.toFixed(2);
+const cacheHit = (() => {
+  const cr = D.run.tokens.find(t=>t.k==="cache_read").n;
+  const iu = D.run.tokens.find(t=>t.k==="input_uncached").n;
+  return (cr/(cr+iu)*100).toFixed(1);
+})();
+
+/* ---------- page state -------------------------------------------------- */
+const S = {
+  state:"loaded",
+  phone:false,
+  theme:"system",
+  /* onboarding */
+  orgNamed:false, agentPicked:null, repoBound:false, repoSkipped:false,
+  firstFrame:false, unlocked:false,
+  installerStep:0, installerPct:0,
+  /* app */
+  offerDismissed:false, runPaused:false, steerSent:false,
+  assistant:false, cmdOpen:false, dlg:null,
+  /* forms */
+  pwShown:false, pw:"", sdkLang:"ts", os:"macos", wrapTab:"cc",
+  logLines:0
+};
+let timers = [];
+const clearTimers = () => { timers.forEach(t => clearTimeout(t) || clearInterval(t)); timers = []; };
+const later = (fn, ms) => { const t = setTimeout(fn, ms); timers.push(t); return t; };
+
+const WRAPTABS = [
+  {id:"cc",    n:"Claude Code", s:"one click · gateway"},
+  {id:"codex", n:"Codex CLI",   s:"one click · gateway"},
+  {id:"sdk",   n:"SDK agent",   s:"five lines · gateway"}
+];
+
+/* ---------- routing ----------------------------------------------------- */
+const ROUTES = [
+  {id:"signup",     hash:"#/signup",                   label:"Sign up",              states:["loaded","loading","error"]},
+  {id:"verify",     hash:"#/verify",                   label:"Verify email",         states:["loaded","loading","error"]},
+  {id:"login",      hash:"#/login",                    label:"Log in",               states:["loaded","loading","error","denied"]},
+  {id:"twofactor",  hash:"#/two-factor",               label:"Two-factor",           states:["loaded","loading","error"]},
+  {id:"forgot",     hash:"#/forgot-password",          label:"Forgot password",      states:["loaded","loading","error"]},
+  {id:"reset",      hash:"#/reset-password",           label:"Reset password",       states:["loaded","loading","error","denied"]},
+  {id:"invite",     hash:"#/accept-invitation",        label:"Accept an invitation", states:["loaded","loading","error","denied"]},
+  {id:"ob1",        hash:"#/new-organization",         label:"Onboarding 1 — name the organization", states:["loaded","loading","error"]},
+  {id:"ob2",        hash:"#/new-organization/wrap",    label:"Onboarding 2 — wrap an agent",         states:["loaded","loading","error"]},
+  {id:"ob3",        hash:"#/new-organization/run",     label:"Onboarding 3 — start a run",           states:["loaded","loading","error"]},
+  {id:"installer",  hash:"#/installer",                label:"Installer (macOS)",    states:["loaded","loading","error"]},
+  {id:"fleet",      hash:"#/acme/core-platform",       label:"Fleet — first run",    states:["loaded","empty","loading","error","denied"]},
+  {id:"run",        hash:"#/acme/core-platform/runs/run_01JQ8F3K2MZ4YB7VQ", label:"Run — live", states:["loaded","loading","error","denied"]},
+  {id:"other",      hash:"#/acme/core-platform/agents",label:"Agents (not in W1)",   states:["loaded"]}
+];
+const routeFor = h => {
+  h = h || location.hash || "#/signup";
+  if (/^#\/acme\/core-platform\/runs\//.test(h)) return ROUTES.find(r=>r.id==="run");
+  if (/^#\/acme\/core-platform\/(agents|tools|ontology|steering|spend)/.test(h)) return ROUTES.find(r=>r.id==="other");
+  if (/^#\/acme\/(billing|audit|settings)/.test(h)) return ROUTES.find(r=>r.id==="other");
+  if (h === "#/acme") return ROUTES.find(r=>r.id==="other");
+  return ROUTES.find(r => r.hash === h) || ROUTES[0];
+};
+const go = h => { location.hash = h; };
+
+/* ---------- small builders ---------------------------------------------- */
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const chip = (t, cls="") => `<span class="chip ${cls}">${t}</span>`;
+const tierChip = t => `<span class="chip ${t==="gateway"?"allow":t==="harness"?"approve":""}" title="Enforcement tier recorded on this run">${t}</span>`;
+const copyBtn = (val, lab="Copy") =>
+  `<button type="button" class="btn sm ghost" data-copy="${esc(val)}">${I.copy}<span>${lab}</span></button>`;
+
+function authShell(inner, wide=false){
+  return `<div class="auth">
+    <div class="auth-top">${logo("")}</div>
+    <div class="auth-card" style="${wide?"max-width:560px":""}">${inner}</div>
+  </div>`;
+}
+
+/* =========================================================================
+   AUTH SCREENS
+   ========================================================================= */
+function vSignup(){
+  const st = S.state;
+  const err = st === "error";
+  return authShell(`
+    <div class="auth-h">
+      <p class="eyebrow">Create your account</p>
+      <h1>Govern the agents you already run.</h1>
+      <p class="lead" style="margin-top:10px">Wrap Claude Code, Codex CLI, Stella or an SDK agent. Every organization gets its
+        first 1,000 runs a month free, with every governance feature on.</p>
+    </div>
+    <div class="panel pad stack g16">
+      ${err ? `<div class="errline">${I.warn}<span><b>That email is already registered.</b> Log in instead, or reset your password.</span></div>` : ""}
+      <div class="sso">
+        <button type="button" class="btn">${I.google}<span>Continue with Google</span></button>
+        <button type="button" class="btn">${I.github}<span>Continue with GitHub</span></button>
+        <button type="button" class="btn">${I.lock}<span>Continue with SAML SSO</span></button>
+      </div>
+      <div class="or">or</div>
+      <form class="stack g14" data-submit="verify">
+        <div class="field">
+          <label class="lab" for="su-name">Name</label>
+          <input class="input" id="su-name" name="name" type="text" value="Marcus Bell" autocomplete="name">
+        </div>
+        <div class="field">
+          <label class="lab" for="su-email">Work email</label>
+          <input class="input${err?" err":""}" id="su-email" name="email" type="email" value="${D.operator.email}" autocomplete="email">
+          ${err ? `<span class="errline">An account for this address was created on 9 Sep 2026.</span>` : ""}
+        </div>
+        <div class="field">
+          <label class="lab" for="su-pw">Password</label>
+          ${pwField("su-pw")}
+        </div>
+        <button type="submit" class="btn gold wide lg" ${st==="loading"?'aria-disabled="true"':""}>
+          ${st==="loading" ? `<span class="spin"></span><span>Creating account…</span>` : "Create account"}
+        </button>
+        <p class="hint">By creating an account you agree to the Oxagen terms and privacy notice. Oxagen never stores your
+          model provider keys in plain text, and never returns them once saved.</p>
+      </form>
+    </div>
+    <p class="auth-foot">Already have an account? <a href="#/login">Log in</a></p>
+    <div class="tagstrip">
+      ${chip("1,000 runs free / month")}${chip("no token markup")}${chip("SOC 2 evidence built in")}
+    </div>
+  `);
+}
+
+function pwField(id){
+  const type = S.pwShown ? "text" : "password";
+  const v = S.pw || "Rq7!mesa-lattice";
+  const score = Math.min(4, Math.floor(v.length/4));
+  return `<div class="pw-wrap">
+      <input class="input" id="${id}" name="password" type="${type}" value="${esc(v)}" autocomplete="new-password" data-pw>
+      <button type="button" class="pw-toggle" data-pwtoggle>${S.pwShown?"Hide":"Show"}</button>
+    </div>
+    <div class="meter" aria-hidden="true">${[0,1,2,3].map(i=>`<i class="${i<score?"on":""}"></i>`).join("")}</div>
+    <div class="reqs">
+      <span class="${v.length>=12?"ok":""}">${v.length>=12?"✓":"·"} at least 12 characters</span>
+      <span class="${/[^A-Za-z0-9]/.test(v)?"ok":""}">${/[^A-Za-z0-9]/.test(v)?"✓":"·"} one symbol</span>
+      <span class="${/[0-9]/.test(v)?"ok":""}">${/[0-9]/.test(v)?"✓":"·"} one digit</span>
+    </div>`;
+}
+
+function vVerify(){
+  const st = S.state, err = st==="error";
+  return authShell(`
+    <div class="auth-h">
+      <p class="eyebrow">Step 1 of 2</p>
+      <h1>Check your email</h1>
+      <p class="lead" style="margin-top:10px">We sent a six-digit code to <span class="mono">${D.operator.email}</span>.
+        It is good for 10 minutes.</p>
+    </div>
+    <div class="panel pad stack g16">
+      ${err ? `<div class="errline">${I.warn}<span><b>That code has expired.</b> Codes last 10 minutes. Send a new one below.</span></div>` : ""}
+      <form class="stack g16" data-submit="ob1">
+        <div class="field">
+          <label class="lab" for="vc-1">Verification code</label>
+          <div class="codes" data-codes>${[1,2,3,4,5,6].map(i=>
+            `<input id="vc-${i}" inputmode="numeric" maxlength="1" aria-label="digit ${i}" value="${err?"":"481502"[i-1]}">`).join("")}</div>
+        </div>
+        <button type="submit" class="btn gold wide lg">${st==="loading"?`<span class="spin"></span><span>Verifying…</span>`:"Verify email"}</button>
+      </form>
+      <div class="row g12 f13">
+        <span class="muted">Did not arrive?</span>
+        <button type="button" class="linkbtn" data-noop>Send a new code</button>
+        <span class="push dim mono">0:42</span>
+      </div>
+    </div>
+    <p class="auth-foot">Wrong address? <a href="#/signup">Change it</a></p>
+  `);
+}
+
+function vLogin(){
+  const st = S.state;
+  if (st === "denied") return authShell(`
+    <div class="statepane den">
+      <div class="glyph">${I.lock}</div>
+      <h2>This account is suspended</h2>
+      <p class="cap">${D.inviter.name} (${D.inviter.role}, ${D.org.name}) suspended
+        <span class="mono">${D.operator.email}</span> on 9 Sep 2026. Runs already recorded are kept; no new run tokens are minted.</p>
+      <div class="row g8"><a class="btn" href="#/forgot-password">Contact your organization owner</a></div>
+    </div>`);
+  const err = st === "error";
+  return authShell(`
+    <div class="auth-h">
+      <p class="eyebrow">Welcome back</p>
+      <h1>Log in to Mission Control</h1>
+    </div>
+    <div class="panel pad stack g16">
+      ${err ? `<div class="errline">${I.warn}<span><b>Email or password is wrong.</b> Check both and try again, or reset your password.</span></div>` : ""}
+      <div class="sso">
+        <button type="button" class="btn">${I.google}<span>Continue with Google</span></button>
+        <button type="button" class="btn">${I.github}<span>Continue with GitHub</span></button>
+        <button type="button" class="btn">${I.lock}<span>Continue with SAML SSO</span></button>
+      </div>
+      <div class="or">or</div>
+      <form class="stack g14" data-submit="twofactor">
+        <div class="field">
+          <label class="lab" for="li-email">Work email</label>
+          <input class="input${err?" err":""}" id="li-email" type="email" value="${D.operator.email}" autocomplete="username">
+        </div>
+        <div class="field">
+          <div class="row"><label class="lab" for="li-pw">Password</label>
+            <a class="push f12" href="#/forgot-password">Forgot password?</a></div>
+          <div class="pw-wrap">
+            <input class="input${err?" err":""}" id="li-pw" type="${S.pwShown?"text":"password"}" value="Rq7!mesa-lattice" autocomplete="current-password">
+            <button type="button" class="pw-toggle" data-pwtoggle>${S.pwShown?"Hide":"Show"}</button>
+          </div>
+        </div>
+        <label class="check"><input type="checkbox" id="li-remember" checked><span>Keep me logged in on this device for 30 days</span></label>
+        <button type="submit" class="btn gold wide lg">${st==="loading"?`<span class="spin"></span><span>Logging in…</span>`:"Log in"}</button>
+      </form>
+    </div>
+    <p class="auth-foot">New to Oxagen? <a href="#/signup">Create an account</a> &nbsp;·&nbsp;
+      Have an invitation? <a href="#/accept-invitation">Accept it</a></p>
+  `);
+}
+
+function vTwoFactor(){
+  const st = S.state, err = st==="error";
+  return authShell(`
+    <div class="auth-h">
+      <p class="eyebrow">Step 2 of 2</p>
+      <h1>Two-factor authentication</h1>
+      <p class="lead" style="margin-top:10px">Enter the six-digit code from your authenticator app for
+        <span class="mono">${D.operator.email}</span>.</p>
+    </div>
+    <div class="panel pad stack g16">
+      ${err ? `<div class="errline">${I.warn}<span><b>That code is wrong.</b> 2 attempts left before a 15-minute lockout.</span></div>` : ""}
+      <form class="stack g16" data-submit="ob1">
+        <div class="field">
+          <label class="lab" for="tf-1">Authentication code</label>
+          <div class="codes" data-codes>${[1,2,3,4,5,6].map(i=>
+            `<input id="tf-${i}" inputmode="numeric" maxlength="1" aria-label="digit ${i}" value="${err?"":"602914"[i-1]}">`).join("")}</div>
+        </div>
+        <button type="submit" class="btn gold wide lg">${st==="loading"?`<span class="spin"></span><span>Verifying…</span>`:"Verify"}</button>
+      </form>
+      <div class="row g12 f13">
+        <button type="button" class="linkbtn" data-noop>Use a recovery code instead</button>
+        <span class="push dim mono">expires 0:24</span>
+      </div>
+    </div>
+    <p class="auth-foot"><a href="#/login">Back to log in</a></p>
+  `);
+}
+
+function vForgot(){
+  const st = S.state, err = st==="error";
+  if (S.forgotSent) return authShell(`
+    <div class="panel pad stack g14">
+      <div class="statepane" style="border:0;background:transparent;padding:18px 0">
+        <div class="glyph" style="color:var(--s-allow);border-color:var(--s-allow);background:var(--s-allow-w)">${I.inbox}</div>
+        <h2>Reset link sent</h2>
+        <p class="cap">If an account exists for <span class="mono">${D.operator.email}</span> a reset link is on its way.
+          The link is good for 60 minutes and can be used once.</p>
+        <a class="btn" href="#/reset-password">Open the link</a>
+      </div>
+    </div>
+    <p class="auth-foot"><a href="#/login">Back to log in</a></p>`);
+  return authShell(`
+    <div class="auth-h">
+      <p class="eyebrow">Password</p>
+      <h1>Reset your password</h1>
+      <p class="lead" style="margin-top:10px">We will email a link that is good for 60 minutes.</p>
+    </div>
+    <div class="panel pad stack g16">
+      ${err ? `<div class="errline">${I.warn}<span><b>We could not send that email.</b> Our mail provider returned a 502. Try again in a minute.</span></div>` : ""}
+      <form class="stack g14" data-submit="forgot-sent">
+        <div class="field">
+          <label class="lab" for="fp-email">Work email</label>
+          <input class="input" id="fp-email" type="email" value="${D.operator.email}" autocomplete="username">
+        </div>
+        <button type="submit" class="btn gold wide lg">${st==="loading"?`<span class="spin"></span><span>Sending…</span>`:"Send reset link"}</button>
+      </form>
+    </div>
+    <p class="auth-foot"><a href="#/login">Back to log in</a></p>
+  `);
+}
+
+function vReset(){
+  const st = S.state;
+  if (st === "denied") return authShell(`
+    <div class="statepane den">
+      <div class="glyph">${I.warn}</div>
+      <h2>This reset link has expired</h2>
+      <p class="cap">Reset links last 60 minutes and can be used once. This one was issued at 12:58 on 11 Sep 2026.
+        Request a new one and it will arrive in under a minute.</p>
+      <a class="btn" href="#/forgot-password">Request a new link</a>
+    </div>`);
+  const err = st==="error";
+  return authShell(`
+    <div class="auth-h">
+      <p class="eyebrow">Password</p>
+      <h1>Set a new password</h1>
+      <p class="lead" style="margin-top:10px">For <span class="mono">${D.operator.email}</span>. Setting a new password
+        logs out every other device.</p>
+    </div>
+    <div class="panel pad stack g16">
+      ${err ? `<div class="errline">${I.warn}<span><b>The two passwords do not match.</b> Retype the confirmation.</span></div>` : ""}
+      <form class="stack g14" data-submit="login">
+        <div class="field"><label class="lab" for="rp-pw">New password</label>${pwField("rp-pw")}</div>
+        <div class="field">
+          <label class="lab" for="rp-pw2">Confirm new password</label>
+          <input class="input${err?" err":""}" id="rp-pw2" type="password" value="${err?"Rq7!mesa-latice":"Rq7!mesa-lattice"}">
+        </div>
+        <button type="submit" class="btn gold wide lg">${st==="loading"?`<span class="spin"></span><span>Saving…</span>`:"Set password"}</button>
+      </form>
+    </div>
+  `);
+}
+
+function vInvite(){
+  const st = S.state;
+  if (st === "denied") return authShell(`
+    <div class="statepane den">
+      <div class="glyph">${I.lock}</div>
+      <h2>This invitation is for a different account</h2>
+      <p class="cap">${D.inviter.name} sent it to <span class="mono">${D.operator.email}</span>.
+        You are logged in as <span class="mono">${D.other.email}</span>. Log out and back in as the invited
+        address, or ask ${D.inviter.name} to send a new invitation.</p>
+      <div class="row g8"><a class="btn" href="#/login">Log in as someone else</a></div>
+    </div>`);
+  const err = st==="error";
+  return authShell(`
+    <div class="auth-h">
+      <p class="eyebrow">Invitation</p>
+      <h1>Join ${D.org.name} on Oxagen</h1>
+    </div>
+    <div class="panel pad stack g16">
+      ${err ? `<div class="errline">${I.warn}<span><b>This invitation has already been accepted.</b> It was used on 10 Sep 2026 at 09:14. Log in instead.</span></div>` : ""}
+      <div class="row g12">
+        <div class="avatar" style="width:38px;height:38px;font-size:13px">${D.inviter.initials}</div>
+        <div class="stack">
+          <b class="f14">${D.inviter.name}</b>
+          <span class="f13 muted">${D.inviter.role} · invited you on 11 Sep 2026</span>
+        </div>
+      </div>
+      <hr class="rule">
+      <dl class="stack g10" style="margin:0">
+        ${[["Organization",`${D.org.name} <span class="mono dim">(${D.org.slug})</span>`],
+           ["Organization role",`member`],
+           ["Workspace",`${D.ws.name} <span class="mono dim">(main repo ${D.ws.mainRepo})</span>`],
+           ["Workspace role",`owner`],
+           ["Invitation expires","18 Sep 2026"]].map(([k,v])=>
+          `<div class="row g12 f13"><dt class="muted" style="width:148px;flex:none">${k}</dt><dd style="margin:0" class="fgc">${v}</dd></div>`).join("")}
+      </dl>
+      <p class="hint">As workspace owner you can register agents, grant tools, set budgets, and approve parked calls in
+        ${D.ws.name}. You cannot change organization billing or the data plane.</p>
+      <div class="row g9">
+        <button type="button" class="btn gold" data-nav="#/acme/core-platform">
+          ${st==="loading"?`<span class="spin"></span><span>Accepting…</span>`:"Accept invitation"}</button>
+        <button type="button" class="btn ghost" data-noop>Decline</button>
+      </div>
+    </div>
+    <p class="auth-foot">Signed in as <span class="mono">${D.operator.email}</span> · <a href="#/login">Not you?</a></p>
+  `);
+}
+
+/* =========================================================================
+   ONBOARDING GATE
+   ========================================================================= */
+function gateShell(step, inner){
+  const steps = [
+    {n:1, lab:"Name the organization", href:"#/new-organization"},
+    {n:2, lab:"Wrap an agent",         href:"#/new-organization/wrap"},
+    {n:3, lab:"Start a run",           href:"#/new-organization/run"}
+  ];
+  return `<div class="gate">
+    <div class="auth-top" style="max-width:772px">${logo("")}
+      <span class="push chip idn">${D.operator.email}</span>
+    </div>
+    <div class="gate-in">
+      <nav class="steps" aria-label="Onboarding">
+        ${steps.map(s=>`<a href="${s.href}" class="${s.n<step?"done":""}" ${s.n===step?'aria-current="step"':""}>
+            <span class="sn">${s.n<step?"✓":s.n}</span><span class="slab">${s.lab}</span></a>`).join("")}
+      </nav>
+      ${inner}
+      <p class="cap" style="margin-top:22px;text-align:center">
+        Mission Control does not open until an agent has talked to Oxagen. That first frame is also the installer's smoke test,
+        so there is one path, not two.</p>
+    </div>
+  </div>`;
+}
+
+function vOb1(){
+  const st = S.state, err = st==="error";
+  return gateShell(1, `
+    <div class="panel pad stack g18" style="padding:26px 26px 24px">
+      <div>
+        <p class="eyebrow">Step 1 of 3</p>
+        <h1>Name your organization</h1>
+        <p class="lead" style="margin-top:10px">The organization is the tenant: it owns its own graph database, its own
+          encryption key, its billing account, and the namespace that appears in every agent key.</p>
+      </div>
+      ${err ? `<div class="errline">${I.warn}<span><b>That namespace is taken.</b> <span class="mono">acme</span> belongs to another
+        organization. Pick a different 2–6 character namespace.</span></div>` : ""}
+      <form class="stack g14" data-submit="ob2">
+        <div class="field">
+          <label class="lab" for="org-name">Organization name</label>
+          <input class="input" id="org-name" type="text" value="${D.org.name}" data-orgname>
+        </div>
+        <div class="row g16 wrapx" style="gap:16px">
+          <div class="field" style="flex:1;min-width:190px">
+            <label class="lab" for="org-url">Address</label>
+            <input class="input mono" id="org-url" value="oxagen.com/acme" readonly>
+            <span class="hint">Derived from the name. You can change it later.</span>
+          </div>
+          <div class="field" style="flex:1;min-width:190px">
+            <label class="lab" for="org-ns">Namespace</label>
+            <input class="input mono${err?" err":""}" id="org-ns" value="acme" maxlength="6">
+            <span class="hint">2–6 characters, <b>immutable</b>. Every agent key starts with it:
+              <span class="mono">acme.&lt;workspace&gt;.&lt;agent&gt;</span></span>
+          </div>
+        </div>
+        <hr class="rule">
+        <div class="stack g8">
+          <h4>First workspace</h4>
+          <div class="row g16 wrapx">
+            <div class="field" style="flex:1;min-width:190px">
+              <label class="lab" for="ws-name">Workspace name</label>
+              <input class="input" id="ws-name" value="${D.ws.name}">
+            </div>
+            <div class="field" style="flex:1;min-width:190px">
+              <label class="lab" for="ws-mode">Governance mode</label>
+              <select class="input" id="ws-mode">
+                <option>solo</option><option selected>team</option><option>regulated</option>
+              </select>
+            </div>
+          </div>
+          <p class="hint">A workspace is a governance partition: one main repo, one ontology, one steering set,
+            its own agents, tool grants and budgets.</p>
+        </div>
+        <div class="row g10">
+          <button type="submit" class="btn gold lg">${st==="loading"?`<span class="spin"></span><span>Creating…</span>`:"Continue"}</button>
+          <span class="cap">Creates <span class="mono">org_acme</span> and its graph database.</span>
+        </div>
+      </form>
+    </div>`);
+}
+
+function vOb2(){
+  const st = S.state;
+  if (st === "error") return gateShell(2, `
+    <div class="statepane err">
+      <div class="glyph">${I.warn}</div>
+      <h2>Could not mint an enrollment token</h2>
+      <p class="cap">The control plane refused the request: <span class="mono">kernel.invoke(issue_enrollment_token)</span>
+        returned <span class="mono">503 engine_unavailable</span> after 8.0s. Nothing was installed and nothing was charged.</p>
+      <p class="cap mono dim">request req_01JQ8F2W7KD3NX</p>
+      <button class="btn" type="button" data-retry>Try again</button>
+    </div>`);
+
+  const osTab = (id, lab, ic) =>
+    `<button type="button" data-os="${id}" aria-selected="${S.os===id}">${ic} ${lab}</button>`;
+  const osFile = {
+    macos:{f:"Oxagen-Agent-2.4.0.pkg", s:"14.2 MB", note:"notarized · Developer ID", sha:"sha256:3f9c71d2…b40a"},
+    windows:{f:"Oxagen-Agent-2.4.0.msi", s:"16.8 MB", note:"signed · EV certificate", sha:"sha256:7a21ce55…19f3"},
+    linux:{f:"oxagen-agent_2.4.0_amd64.deb", s:"12.9 MB", note:"deb, rpm and curl script", sha:"sha256:c40b8e19…62dd"}
+  }[S.os];
+
+  const sdk = {
+    ts:{lab:"TypeScript", install:'<span class="c">$</span> npm i @oxagen/sdk',
+        installPlain:"npm i @oxagen/sdk",
+        plain:'import { oxagen } from "@oxagen/sdk";\nconst agent = oxagen.agent.wrap({\n  key: "acme.core.docs-writer",\n  token: process.env.OXAGEN_AGENT_TOKEN,\n});', code:
+`<span class="k">import</span> { oxagen } <span class="k">from</span> <span class="s">"@oxagen/sdk"</span>;
+<span class="k">const</span> agent = oxagen.agent.wrap({
+  key: <span class="s">"acme.core.docs-writer"</span>,
+  token: process.env.OXAGEN_AGENT_TOKEN,
+});`},
+    py:{lab:"Python", install:'<span class="c">$</span> pip install oxagen',
+        installPlain:"pip install oxagen",
+        plain:'from oxagen import oxagen\nagent = oxagen.agent.wrap(\n    key="acme.core.docs-writer",\n    token=os.environ["OXAGEN_AGENT_TOKEN"],\n)', code:
+`<span class="k">from</span> oxagen <span class="k">import</span> oxagen
+agent = oxagen.agent.wrap(
+    key=<span class="s">"acme.core.docs-writer"</span>,
+    token=os.environ[<span class="s">"OXAGEN_AGENT_TOKEN"</span>],
+)`},
+    go:{lab:"Go", install:'<span class="c">$</span> go get github.com/oxagen/oxagen-go',
+        installPlain:"go get github.com/oxagen/oxagen-go",
+        plain:'import "github.com/oxagen/oxagen-go"\nagent := oxagen.Agent.Wrap(oxagen.WrapOptions{\n    Key:   "acme.core.docs-writer",\n    Token: os.Getenv("OXAGEN_AGENT_TOKEN"),\n})', code:
+`<span class="k">import</span> <span class="s">"github.com/oxagen/oxagen-go"</span>
+agent := oxagen.Agent.Wrap(oxagen.WrapOptions{
+    Key:   <span class="s">"acme.core.docs-writer"</span>,
+    Token: os.Getenv(<span class="s">"OXAGEN_AGENT_TOKEN"</span>),
+})`}
+  }[S.sdkLang];
+
+  return gateShell(2, `
+    <div class="stack g18">
+      <div>
+        <p class="eyebrow">Step 2 of 3</p>
+        <h1>Wrap an agent</h1>
+        <p class="lead" style="margin-top:10px">A wrapped agent routes through at least one gateway seam — the model proxy,
+          the tool gateway, or both. Nothing is copied or pasted: the installer carries a one-time enrollment token.</p>
+      </div>
+
+      <div class="switchwrap">
+        <div class="swtabs" role="tablist" aria-label="How to wrap an agent">
+          ${WRAPTABS.map((t,i)=>`<button type="button" role="tab" id="wt-${t.id}" aria-controls="wp-${t.id}"
+            aria-selected="${S.wrapTab===t.id}" tabindex="${S.wrapTab===t.id?0:-1}" data-wraptab="${t.id}">
+            <span class="n">${t.n}</span><span class="s">${t.s}</span></button>`).join("")}
+          <span class="swind" aria-hidden="true"></span>
+        </div>
+        <div class="swview">
+          <div class="swtrack">
+
+            <section class="wpanel" role="tabpanel" id="wp-cc" aria-labelledby="wt-cc">
+              <div class="wp-main">
+                <h3>Claude Code ${chip("recommended","allow")}</h3>
+                <p class="cap">The installer writes the hooks and <span class="mono">ANTHROPIC_BASE_URL</span>, installs the
+                  <span class="mono">oxagend</span> collector and the <span class="mono">oxagen-hook</span> binary, registers
+                  them to start at login, and enrolls this host with an Ed25519 device key. Nothing is copied or pasted —
+                  the one-time enrollment token is embedded in the download.</p>
+                <div class="earn">
+                  <div><span>Model calls</span>${tierChip("gateway")}</div>
+                  <div><span>MCP tool calls</span>${tierChip("gateway")}</div>
+                  <div><span>Native tools — Bash, Edit, Write</span>${tierChip("harness")}</div>
+                </div>
+                <p class="cap dim">The enforcement tier is computed per run from what was actually routed, never from what
+                  the adapter can do on paper. No report can render a stronger word than the tier allows.</p>
+              </div>
+              <div class="wp-act">
+                <p class="eyebrow" style="margin:0">Download</p>
+                <div class="ostabs" role="tablist" aria-label="Operating system">
+                  ${osTab("macos","macOS",I.apple)}${osTab("windows","Windows",I.win)}${osTab("linux","Linux",I.linux)}
+                </div>
+                <button type="button" class="btn wide" data-primary data-nav="#/installer" data-pick="claude-code">
+                  ${I.down}<span>Download for ${S.os==="macos"?"macOS":S.os==="windows"?"Windows":"Linux"}</span></button>
+                <div class="cap mono dim" style="line-height:1.6">${osFile.f}<br>${osFile.s} · ${osFile.note}<br>${osFile.sha}</div>
+                <div class="tokbox">one-time enrollment token embedded<br><b style="color:var(--accent-text)">${D.enrollToken}</b><br>
+                  <span style="color:var(--dim)">expires in 30 min · single use</span></div>
+                <div class="stack g6">
+                  <span class="cap">or run</span>
+                  <div class="copy">
+                    <pre class="code" style="padding-right:74px">oxagen agent enroll --token ${D.enrollToken}</pre>
+                    <span class="copybtn">${copyBtn("oxagen agent enroll --token "+D.enrollToken,"")}</span>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section class="wpanel" role="tabpanel" id="wp-codex" aria-labelledby="wt-codex">
+              <div class="wp-main">
+                <h3>Codex CLI</h3>
+                <p class="cap">The same installer, with the Codex profile. It writes
+                  <span class="mono">~/.codex/config.toml</span>: MCP servers pointed at the tool gateway,
+                  <span class="mono">OPENAI_BASE_URL</span> at the model proxy, the notify hook to the collector, and the
+                  approval policy routed through Oxagen.</p>
+                <div class="earn">
+                  <div><span>Model calls</span>${tierChip("gateway")}</div>
+                  <div><span>MCP tool calls</span>${tierChip("gateway")}</div>
+                  <div><span>Native shell and file tools</span>${tierChip("harness")}${chip("or observe")}</div>
+                </div>
+                <p class="cap dim">Which of the two the native tools earn depends on the harness version — on versions that
+                  do not expose an approval hook they are observed through the proxy's tool-call frames, and the run says so.
+                  The managed variant pins the config so an operator cannot unpick it.</p>
+              </div>
+              <div class="wp-act">
+                <p class="eyebrow" style="margin:0">Download</p>
+                <div class="ostabs" role="tablist" aria-label="Operating system">
+                  ${osTab("macos","macOS",I.apple)}${osTab("windows","Windows",I.win)}${osTab("linux","Linux",I.linux)}
+                </div>
+                <button type="button" class="btn wide" data-primary data-nav="#/installer" data-pick="codex">
+                  ${I.down}<span>Download for ${S.os==="macos"?"macOS":S.os==="windows"?"Windows":"Linux"}</span></button>
+                <div class="cap mono dim" style="line-height:1.6">${osFile.f}<br>${osFile.s} · ${osFile.note}<br>profile: codex-cli</div>
+                <div class="tokbox">one-time enrollment token embedded<br><b style="color:var(--accent-text)">${D.enrollToken}</b><br>
+                  <span style="color:var(--dim)">expires in 30 min · single use</span></div>
+                <div class="stack g6">
+                  <span class="cap">or run</span>
+                  <div class="copy">
+                    <pre class="code" style="padding-right:74px">oxagen agent enroll --harness codex-cli</pre>
+                    <span class="copybtn">${copyBtn("oxagen agent enroll --harness codex-cli","")}</span>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section class="wpanel" role="tabpanel" id="wp-sdk" aria-labelledby="wt-sdk">
+              <div class="wp-main">
+                <h3>SDK agent</h3>
+                <p class="cap">Five lines in your own process. <span class="mono">oxagen.agent.wrap({})</span> installs the
+                  proxy base URL, a frame emitter, the checkpoint gate before each turn, and the Oxagen MCP endpoint as the
+                  agent's tool server. Works with the OpenAI Agents SDK, the Claude Agent SDK, and any custom loop.</p>
+                <div class="earn">
+                  <div><span>Model calls</span>${tierChip("gateway")}</div>
+                  <div><span>Tool calls</span>${tierChip("gateway")}</div>
+                </div>
+              </div>
+              <div class="wp-act">
+                <p class="eyebrow" style="margin:0">Agent credential</p>
+                <div class="tokbox">issued once to the operator<br><b style="color:var(--accent-text)">oxa_live_••••••••••••3f7a</b><br>
+                  <span style="color:var(--dim)">hashed at rest · purpose-locked · revocable</span></div>
+                <p class="cap dim" style="margin:0">Set it as <span class="mono">OXAGEN_AGENT_TOKEN</span>. The gateway mints
+                  short-lived run tokens from it at run start; revoking the credential kills every run token at the next call.</p>
+                <div class="copy">
+                  <pre class="code" style="padding-right:74px">${sdk.install}</pre>
+                  <span class="copybtn">${copyBtn(sdk.installPlain,"")}</span>
+                </div>
+              </div>
+              <div class="wp-full">
+                <div class="row g10 wrapx">
+                  <div class="ostabs" role="tablist" aria-label="Language" style="max-width:300px;flex:1">
+                    ${["ts","py","go"].map(l=>`<button type="button" data-sdk="${l}" aria-selected="${S.sdkLang===l}">${
+                      {ts:"TypeScript",py:"Python",go:"Go"}[l]}</button>`).join("")}
+                  </div>
+                  <button type="button" class="btn push" data-primary data-copy="${esc(sdk.plain)}">
+                    ${I.copy}<span>Copy the five lines</span></button>
+                </div>
+                <pre class="code">${sdk.code}</pre>
+              </div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+
+      <div class="row g10 wrapx">
+        <button type="button" class="btn" data-nav="#/new-organization/run">I have already installed it — continue</button>
+        <span class="cap">Nothing unlocks until a frame arrives.</span>
+      </div>
+    </div>`);
+}
+
+function vOb3(){
+  const st = S.state;
+  if (st === "error") return gateShell(3, `
+    <div class="statepane err">
+      <div class="glyph">${I.warn}</div>
+      <h2>The collector cannot reach the model proxy</h2>
+      <p class="cap">The host <span class="mono">${D.agent.host}</span> enrolled, but every request to
+        <span class="mono">https://proxy.oxagen.com/v1</span> has been refused for 94 seconds
+        (<span class="mono">ECONNREFUSED</span>, 6 attempts). A proxy that cannot be reached means an unwrapped agent,
+        so Oxagen will not unlock on telemetry alone.</p>
+      <p class="cap">Check that outbound 443 to <span class="mono">proxy.oxagen.com</span> is allowed, then run
+        <span class="mono">oxagen agent status</span>.</p>
+      <p class="cap mono dim">request req_01JQ8F4B1PC7QM · host ${D.agent.host}</p>
+      <button class="btn" type="button" data-retry>Check again</button>
+    </div>`);
+
+  const lines = [
+    {t:"14:01:48", x:"host enrolled · device key " + D.agent.device},
+    {t:"14:01:52", x:"collector oxagend running · pid 4412 · launchd com.oxagen.oxagend"},
+    {t:"14:01:55", x:"hooks written · ~/.claude/settings.json · 7 events"},
+    {t:"14:01:58", x:"ANTHROPIC_BASE_URL set · https://proxy.oxagen.com/v1"},
+    {t:"14:02:01", x:"model proxy reachable · 41 ms · tier gateway"},
+    {t:"14:02:04", x:"MCP endpoint registered · 0 tools granted yet"},
+    {t:"14:02:11", x:"frame received · seq 0 · agent_start", hit:true}
+  ];
+  const shown = S.firstFrame ? lines.length : Math.min(S.logLines, lines.length - 1);
+
+  const waitPanel = S.firstFrame ? `
+    <div class="sect">
+      <header><span class="chip allow"><span class="dot"></span>connected</span>
+        <h3>First frame received</h3>
+        <span class="push mono f12 dim">14:02:11.402</span></header>
+      <div class="pad stack g14">
+        <div class="frames" style="border:1px solid var(--border);border-radius:var(--r-sm);overflow:hidden">
+          <div class="frame-row"><span class="sq">0</span><span class="ts">14:02:11.402</span>
+            <span class="kd">agent_start</span>
+            <span class="bd">harness=claude-code 2.1.14 · host=${D.agent.host} · attested=device-key · countersigned</span></div>
+          <div class="frame-row"><span class="sq">1</span><span class="ts">14:02:11.418</span>
+            <span class="kd">oxagen:run.start</span>
+            <span class="bd">run=${D.run.id} · operator=${D.operator.name} · tier=gateway · steering=none published</span></div>
+        </div>
+        <div class="row g8 wrapx">
+          ${tierChip("gateway")}${chip("replay grade: full","allow")}${chip("chain intact","allow")}
+        </div>
+        <p class="cap">Enforcement tier is computed from what was actually routed, not from what the adapter can do on paper.
+          Both seams answered, so this run is <b>gateway</b>.</p>
+        <div class="row g10 wrapx">
+          <button type="button" class="btn gold lg" data-unlock>Open Mission Control</button>
+          <span class="cap" id="autoNote">Opening automatically…</span>
+        </div>
+      </div>
+    </div>` : `
+    <div class="sect">
+      <header><span class="spin"></span><h3>Waiting for the first frame</h3>
+        <span class="push mono f12 dim">polling · 1s</span></header>
+      <div class="pad stack g14">
+        <div class="row g10 wrapx">
+          ${chip(D.agent.key,"idn")}${chip(D.agent.harness,"idn")}${chip("host "+D.agent.host,"idn")}
+        </div>
+        <div class="log">${lines.slice(0,shown).map((l,i)=>
+          `<div class="${l.hit?"hit":""} ${i===shown-1?"new":""}"><span class="t">${l.t}</span><span>${l.x}</span></div>`).join("")}
+          <div><span class="t">&nbsp;</span><span class="dim">waiting…</span></div>
+        </div>
+        <p class="cap">Start ${D.agent.name.toLowerCase()} in any repository on <span class="mono">${D.agent.host}</span>.
+          The installer already ran a one-turn smoke session; if it is still in flight this flips on its own.</p>
+      </div>
+    </div>`;
+
+  const repoPanel = S.repoBound ? `
+    <div class="sect">
+      <header><span class="chip allow"><span class="dot"></span>bound</span><h3>Main repo</h3></header>
+      <div class="pad stack g10">
+        <div class="row g10 wrapx">${chip(D.ws.mainRepo,"idn")}${chip("production branch: "+D.ws.branch,"idn")}${chip("GitHub App installed","allow")}</div>
+        <p class="cap">Steering, context records and agent definitions will live in
+          <span class="mono">${D.ws.mainRepo}</span> under <span class="mono">.oxagen/</span>, published through Context PRs.
+          Linked repos can be added later from Ontology → Repositories.</p>
+      </div>
+    </div>` : S.repoSkipped ? `
+    <div class="sect">
+      <header><span class="chip deny">provisional</span><h3>No main repo bound</h3></header>
+      <div class="pad stack g10">
+        <p class="cap"><b>${D.ws.name} is provisional until ${D.dates.provisionalEnds}</b> (14 days).
+          Runs record and spend counts. Steering, context records, and agent definitions stay off until a main repo is bound.</p>
+        <div class="row g8"><button type="button" class="btn sm" data-bind>Bind ${D.ws.mainRepo} now</button></div>
+      </div>
+    </div>` : `
+    <div class="sect">
+      <header><h3>Repository detected</h3><span class="push cap">reported by the installer</span></header>
+      <div class="pad stack g12">
+        <div class="stack g6">
+          <div class="row g10 wrapx">${chip(D.repo.remote,"idn")}</div>
+          <span class="cap">Read from the git remote of <span class="mono">${D.repo.dir}</span>, the directory the installer
+            ran in. Production branch <span class="mono">${D.repo.branch}</span>.</span>
+        </div>
+        <button type="button" class="btn ${S.firstFrame?"":"gold"}" data-bind>
+          ${I.github}<span>Bind ${D.ws.mainRepo} as the main repo</span></button>
+        <p class="cap">One click installs the GitHub App on <span class="mono">acme/platform</span>: repo binding,
+          Context PRs, checks, merge handling and the code graph.</p>
+        <hr class="rule">
+        <p class="cap"><button type="button" class="linkbtn q" data-skip>Skip for now</button> —
+          ${D.ws.name} stays <b>provisional for 14 days</b>. Runs record and spend counts, but steering,
+          context records and agent definitions stay off until a main repo is bound.</p>
+      </div>
+    </div>`;
+
+  return gateShell(3, `
+    <div class="stack g18">
+      <div>
+        <p class="eyebrow">Step 3 of 3</p>
+        <h1>Start a run</h1>
+        <p class="lead" style="margin-top:10px">The app unlocks the moment the first frame from
+          <span class="mono">${D.agent.key}</span> reaches Oxagen — and lands you on Fleet looking at your own run.</p>
+      </div>
+      ${waitPanel}
+      ${repoPanel}
+    </div>`);
+}
+
+/* =========================================================================
+   INSTALLER — its own three screens, native window
+   ========================================================================= */
+const INSTALL_STEPS = [
+  "Install the oxagend collector to /usr/local/bin",
+  "Install the oxagen-hook binary",
+  "Register a login item (launchd: com.oxagen.oxagend)",
+  "Write Claude Code hooks to ~/.claude/settings.json",
+  "Set ANTHROPIC_BASE_URL to the model proxy",
+  "Register the Oxagen MCP endpoint as a tool server",
+  "Enroll this host with an Ed25519 device key",
+  "Run a one-turn smoke session"
+];
+function vInstaller(){
+  const st = S.state;
+  if (st === "error") return `<div class="instwrap"><div class="instcol">
+    <div class="win"><div class="win-bar"><div class="lights"><i></i><i></i><i></i></div>
+      <span class="ttl">Oxagen Agent Installer</span></div>
+      <div class="win-body">
+        <div class="statepane err" style="border:0;background:transparent;padding:14px 0">
+          <div class="glyph">${I.warn}</div>
+          <h2>Enrollment token rejected</h2>
+          <p class="cap">The token <span class="mono">${D.enrollToken}</span> has already been used, at 13:58 on
+            11 Sep 2026 by host <span class="mono">mbp-marcus</span>. Enrollment tokens are single use.</p>
+          <p class="cap">Nothing was installed. Generate a fresh token from the wrap step and run the installer again.</p>
+          <a class="btn" href="#/new-organization/wrap">Back to wrap an agent</a>
+        </div>
+      </div></div>
+    <p class="cap ctr">Rollback is always one command: <span class="mono">oxagen agent unenroll --host ${D.agent.host} --restore</span></p>
+  </div></div>`;
+
+  const step = S.installerStep;
+  let body;
+  if (step === 0){
+    body = `<div class="win-body">
+      <div class="row g14">${logo("lg")}</div>
+      <div class="stack g8">
+        <h2>Install the Oxagen agent</h2>
+        <p class="cap">One signed package installs the collector, the hook binary and a login item, then enrolls this host to
+          <b>${D.org.name} / ${D.ws.name}</b>. Your one-time enrollment token is embedded — there is nothing to paste.</p>
+      </div>
+      <div class="stack g6" style="font-family:var(--mono);font-size:12px;color:var(--muted);line-height:1.75">
+        <div class="row g12"><span style="width:104px;color:var(--dim)">package</span><span>Oxagen-Agent-2.4.0.pkg</span></div>
+        <div class="row g12"><span style="width:104px;color:var(--dim)">size</span><span>14.2 MB</span></div>
+        <div class="row g12"><span style="width:104px;color:var(--dim)">signature</span><span>notarized · Developer ID Oxagen, Inc.</span></div>
+        <div class="row g12"><span style="width:104px;color:var(--dim)">sha-256</span><span>3f9c71d2…b40a</span></div>
+        <div class="row g12"><span style="width:104px;color:var(--dim)">token</span><span style="color:var(--accent-text)">${D.enrollToken}</span></div>
+      </div>
+      <div class="row g10">
+        <button type="button" class="btn gold lg" data-install>${I.down}<span>Install</span></button>
+        <button type="button" class="btn ghost" data-nav="#/new-organization/wrap">Cancel</button>
+      </div>
+      <p class="cap dim">Installs to your user account only. No sudo, no kernel extension, no data leaves the host
+        except frames.</p>
+    </div>`;
+  } else if (step === 1){
+    const done = Math.floor(S.installerPct / (100/INSTALL_STEPS.length));
+    body = `<div class="win-body">
+      <div class="stack g8"><h2>Installing…</h2>
+        <p class="cap">Step ${Math.min(done+1,INSTALL_STEPS.length)} of ${INSTALL_STEPS.length}</p></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${S.installerPct}%"></div></div>
+      <div class="stack g8">
+        ${INSTALL_STEPS.map((s,i)=>`<div class="instep ${i<done?"done":i===done?"now":""}">
+          <span class="mark">${i<done?"✓":i===done?"›":"·"}</span><span>${s}</span></div>`).join("")}
+      </div>
+    </div>`;
+  } else {
+    body = `<div class="win-body">
+      <div class="row g10"><span class="chip allow"><span class="dot"></span>connected</span>
+        <span class="cap push mono">14:02:11.402</span></div>
+      <div class="stack g8"><h2>Connected to ${D.org.name}</h2>
+        <p class="cap">The smoke session produced its first frame and Oxagen countersigned it.
+          <span class="mono">${D.agent.key}</span> is now wrapped at <b>gateway</b> tier.</p></div>
+      <div class="frames" style="border:1px solid var(--border);border-radius:var(--r-sm);overflow:hidden">
+        <div class="frame-row"><span class="sq">0</span><span class="ts">14:02:11.402</span>
+          <span class="kd">agent_start</span><span class="bd">device ${D.agent.device} · countersigned on ingest</span></div>
+      </div>
+      <div class="stack g6">
+        <span class="cap">Roll back at any time — removes the hooks, the login item and the base URL, and restores your
+          previous settings file:</span>
+        <div class="copy">
+          <pre class="code" style="padding-right:74px">oxagen agent unenroll --host ${D.agent.host} --restore</pre>
+          <span class="copybtn">${copyBtn("oxagen agent unenroll --host "+D.agent.host+" --restore","")}</span>
+        </div>
+      </div>
+      <div class="row g10">
+        <button type="button" class="btn gold lg" data-nav="#/new-organization/run" data-frame>Back to Oxagen</button>
+        <span class="cap">Mission Control is already unlocking in your browser.</span>
+      </div>
+    </div>`;
+  }
+  return `<div class="instwrap"><div class="instcol">
+    <div class="win"><div class="win-bar"><div class="lights"><i></i><i></i><i></i></div>
+      <span class="ttl">Oxagen Agent Installer</span></div>${body}</div>
+    <div class="row g8 ctr" style="justify-content:center;flex-wrap:wrap">
+      <span class="cap">Installer screen:</span>
+      ${["Download","Installing","Connected"].map((l,i)=>
+        `<button type="button" class="btn sm ${S.installerStep===i?"":"ghost"}" data-instep="${i}">${l}</button>`).join("")}
+    </div>
+  </div></div>`;
+}
+
+/* =========================================================================
+   APP SHELL
+   ========================================================================= */
+const NAV_WS = [
+  {id:"fleet",    lab:"Fleet",    href:"#/acme/core-platform",           ic:I.fleet,    tail:"1"},
+  {id:"run",      lab:"Run",      href:"#/acme/core-platform/runs/"+D.run.id, ic:I.run, tail:"live"},
+  {id:"agents",   lab:"Agents",   href:"#/acme/core-platform/agents",    ic:I.agents,   tail:"1"},
+  {id:"tools",    lab:"Tools",    href:"#/acme/core-platform/tools",     ic:I.tools,    tail:""},
+  {id:"ontology", lab:"Ontology", href:"#/acme/core-platform/ontology",  ic:I.ontology, tail:""},
+  {id:"steering", lab:"Steering", href:"#/acme/core-platform/steering",  ic:I.steering, tail:""},
+  {id:"spend",    lab:"Spend",    href:"#/acme/core-platform/spend",     ic:I.spend,    tail:""}
+];
+const NAV_ORG = [
+  {id:"organization", lab:"Organization", href:"#/acme",         ic:I.org},
+  {id:"billing",      lab:"Billing",      href:"#/acme/billing", ic:I.billing},
+  {id:"audit",        lab:"Audit",        href:"#/acme/audit",   ic:I.audit}
+];
+const WHICH_FLOW = {
+  agents:"W9 — the toolbelt, governed", tools:"W9 — the toolbelt, governed",
+  ontology:"W7 — the shape of your business", steering:"W6 — it learned, you approved, it changed",
+  spend:"W8 — every dollar, every operator", organization:"W10 — the CIO's console",
+  billing:"W8 — every dollar, every operator", audit:"W10 — the CIO's console"
+};
+
+function appShell(activeId, crumbs, content){
+  const provisional = S.repoSkipped && !S.repoBound;
+  return `<div class="app">
+    <aside class="rail">
+      <div class="rail-brand">${logo("sm")}</div>
+      <div class="switcher">
+        <button type="button" class="sw" data-dlg="switch-org">
+          <span class="av">AR</span><span class="tx"><b>${D.org.name}</b><span>org · ${D.org.slug}</span></span><span class="car">▾</span></button>
+        <button type="button" class="sw" data-dlg="switch-ws">
+          <span class="av">CP</span><span class="tx"><b>${D.ws.name}</b><span>workspace · ${D.ws.ns}</span></span><span class="car">▾</span></button>
+      </div>
+      <div class="navsec">
+        <h5>Workspace</h5>
+        <nav class="nav">${NAV_WS.map(n=>`<a href="${n.href}" ${n.id===activeId?'aria-current="page"':""}>
+          <span class="ic">${n.ic}</span><span>${n.lab}</span>${n.tail?`<span class="tail">${n.tail}</span>`:""}</a>`).join("")}</nav>
+        <h5>Organization</h5>
+        <nav class="nav">${NAV_ORG.map(n=>`<a href="${n.href}" ${n.id===activeId?'aria-current="page"':""}>
+          <span class="ic">${n.ic}</span><span>${n.lab}</span></a>`).join("")}</nav>
+      </div>
+      <div class="rail-foot">
+        <div class="row g8 f12 muted">
+          <span class="chip ${provisional?"deny":"allow"}" style="font-size:10px">${provisional?"provisional":"main repo bound"}</span>
+        </div>
+        <p class="cap dim" style="margin-top:6px;font-size:11px">${provisional
+          ? `until ${D.dates.provisionalEnds}`
+          : `${D.ws.mainRepo} · ${D.ws.branch}`}</p>
+      </div>
+    </aside>
+    <div class="main">
+      <header class="topbar">
+        <nav class="crumbs" aria-label="Breadcrumb">${crumbs}</nav>
+        <div class="push"></div>
+        <button type="button" class="kbar" data-cmd>${I.search}<span>Search or run a command</span>
+          <span class="push kbd">⌘K</span></button>
+        <button type="button" class="iconbtn" data-assistant aria-pressed="${S.assistant}" title="Assistant" aria-label="Assistant">${I.bot}</button>
+        <button type="button" class="iconbtn" data-noop title="Notifications" aria-label="Notifications">${I.bell}</button>
+        <button type="button" class="avatar" data-dlg="account" title="${D.operator.name}" aria-label="Account">${D.operator.initials}</button>
+      </header>
+      <main class="content">${content}</main>
+    </div>
+  </div>
+  ${S.assistant ? assistantDrawer() : ""}`;
+}
+
+function assistantDrawer(){
+  const down = S.state === "error";
+  return `<aside class="drawer" role="complementary" aria-label="Oxagen assistant">
+    <header>${I.bot}<h3 style="font-size:13.5px">Assistant</h3>
+      <span class="push chip ${down?"fail":"allow"}" style="font-size:10px">${down?"engine down":"stella engine"}</span>
+      <button type="button" class="iconbtn" data-assistant style="width:26px;height:26px">×</button></header>
+    <div class="body">
+      ${down ? `
+        <div class="statepane err" style="padding:30px 14px">
+          <div class="glyph">${I.warn}</div>
+          <h3>The engine is not answering</h3>
+          <p class="cap">The assistant runs on <span class="mono">stella serve</span> in its own container.
+            It returned <span class="mono">503</span> for 42 seconds. Nothing falls back to an in-process loop, so
+            the assistant is off until it recovers. Every other page still works.</p>
+        </div>` : `
+        <div class="msg a"><div class="who">Assistant</div>
+          <p>Your first run is recording. <span class="mono">${D.agent.key}</span> is wrapped at <b>gateway</b> tier,
+          so I can pause it, steer it, or cancel it from here.</p></div>
+        <div class="msg a"><div class="who">Assistant</div>
+          <p>Two things are worth doing next, and I can do either through the same governed actions you would click:</p>
+          <ul style="margin:8px 0 0;padding-left:18px;color:var(--body);font-size:13px;line-height:1.6">
+            <li>Grant <span class="mono">${D.agent.key}</span> a toolbelt — right now it has 0 tools and can only call the model.</li>
+            <li>Set a per-run budget. The default ceiling is the workspace's, which is unset.</li>
+          </ul></div>
+        <div class="msg u">what did that run cost?</div>
+        <div class="msg a"><div class="who">Assistant</div>
+          <p><b>${usd(D.run.cost)} ${D.org.currency}</b>, metered at the model proxy from 9 model calls against price book
+            <span class="mono">${D.priceBook}</span>. Cache read covered ${cacheHit}% of the prompt.
+            Your first 1,000 runs each month are free, so Oxagen billed <b>$0.00</b> for it.</p>
+          <p class="cap" style="margin-top:6px">This answer was one turn of the in-app agent: a run of its own,
+            recorded and metered like any other.</p></div>`}
+    </div>
+    <div class="foot">
+      <input class="input" id="asst-input" placeholder="${down?"Unavailable while the engine is down":"Ask about this workspace…"}" ${down?"disabled":""}>
+      <p class="cap dim" style="margin-top:7px;font-size:11px">Every assistant tool call is a governed action with a receipt.</p>
+    </div>
+  </aside>`;
+}
+
+/* ---------- Fleet -------------------------------------------------------- */
+function vFleet(){
+  const crumbs = `<a href="#/acme">${D.org.name}</a><span class="sep">/</span>
+    <a href="#/acme/core-platform">${D.ws.name}</a><span class="sep">/</span><b>Fleet</b>`;
+  const st = S.state;
+
+  if (st === "denied") return appShell("fleet", crumbs, `
+    <div class="statepane den">
+      <div class="glyph">${I.lock}</div>
+      <h2>You do not have access to ${D.ws.name}</h2>
+      <p class="cap">Your role in ${D.org.name} is <b>billing</b>, which carries no workspace role in
+        <span class="mono">${D.ws.name}</span>. Billing sees the organization's invoices and meters, not any workspace's runs.</p>
+      <p class="cap">Ask ${D.operator.name} (workspace owner) for a <span class="mono">viewer</span>,
+        <span class="mono">member</span> or <span class="mono">owner</span> role.</p>
+      <div class="row g8 wrapx" style="justify-content:center">
+        <a class="btn" href="#/acme/billing">Go to Billing</a>
+        <button type="button" class="btn ghost" data-noop>Request access</button>
+      </div>
+      <p class="cap dim mono">principal prn_dana_okafor · decision deny · policy pol_v1 · audited</p>
+    </div>`);
+
+  if (st === "error") return appShell("fleet", crumbs, `
+    <div class="statepane err">
+      <div class="glyph">${I.warn}</div>
+      <h2>Fleet could not load</h2>
+      <p class="cap">The graph service for <span class="mono">org_acme</span> did not answer in 8.0 s. Your runs are still
+        recording — the recorder writes to a queue that does not depend on this read path — so nothing is lost.</p>
+      <p class="cap mono dim">request req_01JQ8F7NX2VB4C · graph org_acme · 3 retries</p>
+      <button type="button" class="btn" data-retry>Retry</button>
+    </div>`);
+
+  if (st === "loading") return appShell("fleet", crumbs, `
+    <div class="pagehead"><div class="stack g8"><span class="skel" style="width:82px;height:10px"></span>
+      <span class="skel" style="width:190px;height:24px"></span></div></div>
+    <div class="stats">${[0,1,2,3,4].map(()=>`<div class="stat">
+      <span class="skel" style="width:64px"></span><span class="skel" style="width:46px;height:17px;margin-top:5px"></span></div>`).join("")}</div>
+    <div class="cols">
+      <div class="sect"><header><span class="skel" style="width:100px"></span></header>
+        ${[0,1,2].map(()=>`<div class="row g16" style="padding:14px 16px;border-bottom:1px solid var(--border)">
+          <span class="skel" style="width:150px"></span><span class="skel" style="width:120px"></span>
+          <span class="skel" style="width:80px"></span><span class="skel push" style="width:58px"></span></div>`).join("")}
+      </div>
+      <div class="stack g14">
+        <div class="panel pad stack g10"><span class="skel" style="width:130px"></span>
+          <span class="skel" style="width:100%"></span><span class="skel" style="width:72%"></span></div>
+        <div class="panel pad stack g10"><span class="skel" style="width:96px"></span><span class="skel" style="width:88%"></span></div>
+      </div>
+    </div>
+    <p class="cap dim" style="margin-top:16px">Reading run rollups from Postgres and frame counts from the graph…</p>`);
+
+  const provisional = S.repoSkipped && !S.repoBound;
+  const banner = provisional ? `
+    <div class="banner warn">
+      <span class="ib">${I.warn}</span>
+      <div><b>${D.ws.name} is provisional until ${D.dates.provisionalEnds}.</b>
+        Runs record and spend counts. Steering, context records and agent definitions stay off until a main repo is bound —
+        there is nowhere to publish them to.
+        <div class="row g8" style="margin-top:8px"><button type="button" class="btn sm" data-bind>Bind ${D.ws.mainRepo}</button></div>
+      </div>
+    </div>` : "";
+
+  if (st === "empty") return appShell("fleet", crumbs, `
+    ${banner}
+    <div class="pagehead">
+      <div><p class="eyebrow q">Workspace</p><h1>Fleet</h1>
+        <p class="lead" style="margin-top:8px">Every run, live and recent, with its enforcement tier, replay grade,
+          cost so far, and any parked approvals.</p></div>
+    </div>
+    <div class="stats">
+      ${[["Runs today","0"],["Live","0"],["Agents enrolled","1"],["Approvals pending","0"],
+         ["Spend today",'$0.0000 <small>USD</small>']].map(([k,v])=>
+        `<div class="stat"><span class="k">${k}</span><span class="v">${v}</span></div>`).join("")}
+    </div>
+    <div class="cols">
+      <div class="sect">
+        <header><h3>Runs</h3><span class="push chip">last 24 hours</span></header>
+        <div class="empt">
+          <div class="statepane" style="border:0;background:transparent;padding:6px">
+            <div class="glyph">${I.run}</div>
+            <h3>No runs yet</h3>
+            <p class="cap"><span class="mono">${D.agent.key}</span> is enrolled and idle on
+              <span class="mono">${D.agent.host}</span>. Start it in any repository and its first frame appears here
+              within a second.</p>
+            <div class="row g8 wrapx" style="justify-content:center">
+              <a class="btn" href="#/new-organization/wrap">Wrap another agent</a>
+              <a class="btn ghost" href="#/installer">Open the installer</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      ${fleetRail(true)}
+    </div>`);
+
+  /* loaded */
+  const paused = S.runPaused;
+  return appShell("fleet", crumbs, `
+    ${banner}
+    <div class="pagehead">
+      <div><p class="eyebrow q">Workspace</p><h1>Fleet</h1>
+        <p class="lead" style="margin-top:8px">Every run, live and recent, with its enforcement tier, replay grade,
+          cost so far, and any parked approvals.</p></div>
+    </div>
+    <div class="stats">
+      ${[["Runs today","1"],["Live", paused?'0 <small>1 paused</small>':"1"],["Agents enrolled","1"],
+         ["Approvals pending","0"],["Spend today",`${usd(D.run.cost)} <small>USD</small>`]].map(([k,v])=>
+        `<div class="stat"><span class="k">${k}</span><span class="v">${v}</span></div>`).join("")}
+    </div>
+    <div class="cols">
+      <div class="stack g16">
+        <div class="sect">
+          <header><h3>Runs</h3><span class="push chip">last 24 hours</span><span class="chip">1 of 1</span></header>
+          <div class="tw"><table>
+            <thead><tr>
+              <th>Run</th><th>Agent</th><th>Operator</th><th>Task</th><th>Started</th>
+              <th>Tier</th><th>Grade</th><th class="num">Frames</th><th class="num">Cost</th><th>Status</th><th></th>
+            </tr></thead>
+            <tbody>
+              <tr class="clickable" data-nav="#/acme/core-platform/runs/${D.run.id}">
+                <td class="mono">${D.run.id.slice(0,14)}…</td>
+                <td><span class="mono f12">${D.agent.key}</span><br><span class="dim f12">${D.agent.harness}</span></td>
+                <td>${D.operator.name}</td>
+                <td class="f12"><span class="mono">acme/platform#4821</span><br><span class="dim">cut 2026.9.2 release notes</span></td>
+                <td class="mono">${D.run.started}</td>
+                <td>${tierChip("gateway")}</td>
+                <td>${chip("full","allow")}</td>
+                <td class="num mono">${D.run.frames}</td>
+                <td class="num mono">${usd(D.run.cost)}</td>
+                <td>${paused ? `<span class="chip approve"><span class="dot"></span>paused</span>`
+                             : `<span class="chip allow"><span class="dot live"></span>running</span>`}</td>
+                <td style="text-align:right;white-space:nowrap">
+                  <button type="button" class="btn sm ghost" data-pause title="${paused?"Resume":"Pause"} this run">
+                    ${paused?I.play:I.pause}<span>${paused?"Resume":"Pause"}</span></button>
+                </td>
+              </tr>
+            </tbody>
+          </table></div>
+          <div class="pad-s row g10 wrapx" style="border-top:1px solid var(--border)">
+            <span class="cap">Cost is metered at the model proxy against price book
+              <span class="mono">${D.priceBook}</span>, to the micro-dollar.</span>
+            <a class="push f13" href="#/acme/core-platform/runs/${D.run.id}">Open the run →</a>
+          </div>
+        </div>
+        ${paused ? `<div class="banner"><span class="ib">${I.info}</span>
+          <div><b>Pause delivered.</b> The model proxy will return a paused response on the next request and the tool gateway
+          will deny the next call — the guarantee is "at the next boundary", not mid-token. A
+          <span class="mono">control.command</span> frame was written at seq 47, attributed to ${D.operator.name}.</div></div>` : ""}
+      </div>
+      ${fleetRail(false)}
+    </div>`);
+}
+
+function fleetRail(empty){
+  const offer = S.offerDismissed ? "" : `
+    <div class="offer">
+      <button type="button" class="x" data-dismiss aria-label="Dismiss offer">×</button>
+      <div><p class="eyebrow" style="margin:0 0 4px">Onboarding offer</p>
+        <h3>Convert during onboarding: 20% off usage for 12 months</h3></div>
+      ${empty ? `<p class="cap">Convert within 7 days of your first run. Prepay annually for a further 20%.</p>`
+              : `<div class="price">
+                   <b>${usd(D.run.cost)}</b>
+                   <span class="cap">${D.org.currency} · your first run</span>
+                 </div>
+                 <p class="cap">Metered at the model proxy: ${D.run.tokens.reduce((a,t)=>a+t.n,0).toLocaleString()} tokens
+                   across 5 classes, priced from <span class="mono">${D.priceBook}</span>.
+                   Oxagen billed <b>$0.00</b> — your first 1,000 runs each month are free, and Oxagen never marks up tokens.</p>
+                 <p class="cap">Convert by <b>${D.dates.offerEnds}</b> (7 days from your first run) for 20% off usage for
+                   12 months. Prepay annually for a further 20%.</p>`}
+      <div class="row g8 wrapx">
+        <a class="btn gold sm" href="#/acme/billing">See plans</a>
+        <button type="button" class="btn ghost sm" data-dismiss>Not now</button>
+      </div>
+    </div>`;
+
+  return `<div class="stack g14">
+    ${offer}
+    <div class="sect">
+      <header><h3>Approvals</h3><span class="push chip">0 pending</span></header>
+      <div class="empt">
+        <div class="glyph" style="width:38px;height:38px;border-radius:var(--r-sm);display:grid;place-items:center;border:1px solid var(--border);background:var(--hl);color:var(--muted)">${I.inbox}</div>
+        <h4>Nothing is waiting on you</h4>
+        <p class="cap">When a grant marked <span class="mono">require_approval</span>, a tool's risk grade, a budget threshold
+          or a taint on a write raises a call to a human, it parks here with the four-hop chain:
+          who asked, which agent, which action, which rule.</p>
+        <p class="cap dim">Parked calls time out after 10 minutes by policy bundle. Approve, deny and expiry are all frames.</p>
+      </div>
+    </div>
+    <div class="sect">
+      <header><h3>This workspace</h3></header>
+      <div class="pad-s stack g8 f13">
+        ${[["Main repo", S.repoBound?`<span class="mono">${D.ws.mainRepo}</span>`:`<span class="chip deny">not bound</span>`],
+           ["Production branch", S.repoBound?`<span class="mono">${D.ws.branch}</span>`:`<span class="dim">—</span>`],
+           ["Linked repos", `<span class="dim">none yet</span>`],
+           ["Governance mode", `<span class="mono">team</span>`],
+           ["Steering published", `<span class="dim">0 records</span>`],
+           ["Ontology", `<span class="dim">no version activated</span>`]].map(([k,v])=>
+          `<div class="row g12"><span class="muted" style="width:132px;flex:none">${k}</span><span>${v}</span></div>`).join("")}
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ---------- Run (live) --------------------------------------------------- */
+const FRAMES = [
+  [0,"14:02:11.402","agent_start","harness=claude-code 2.1.14 · host=mbp-marcus · device=ed25519:9f2c4b71…a08e"],
+  [1,"14:02:11.418","oxagen:run.start","operator=Marcus Bell · bundle=pb_v3 sha256:4a91…c7 · tier=gateway · steering=0 records"],
+  [2,"14:02:11.420","turn_start","turn 1 · prompt from operator · 214 tokens"],
+  [3,"14:02:11.431","context.assembled","budget=8,000 · context frames=0 (ontology empty) · usage report attached"],
+  [4,"14:02:11.446","model.request","anthropic · claude-opus-5 · input_uncached=12,480 · tool_definition_tokens=1,940"],
+  [5,"14:02:14.905","model.response","claude-opus-5-20260812 · stop=tool_use · output=892 · cost $0.0871"],
+  [6,"14:02:14.912","tool_requested","github__list_pull_requests@3 · risk=low · side_effect=read · egress=third_party"],
+  [7,"14:02:14.914","policy_decision","allow · policy pol_v1 · grant rg_7KQ2 · delegation ceiling satisfied · 2.1 ms"],
+  [8,"14:02:15.388","tool_call","result 14 pull requests · 4.2 KB · output schema valid · receipt rcp_01JQ8F…"],
+  [9,"14:02:15.401","model.request","anthropic · claude-opus-5 · cache_read=18,210 · input_uncached=1,104"],
+  [10,"14:02:19.733","model.response","stop=tool_use · output=1,406 · reasoning=1,120 · cost $0.0631"],
+  [11,"14:02:19.740","tool_requested","github__get_commit@2 · risk=low · side_effect=read"]
+];
+function vRun(){
+  const crumbs = `<a href="#/acme">${D.org.name}</a><span class="sep">/</span>
+    <a href="#/acme/core-platform">${D.ws.name}</a><span class="sep">/</span>
+    <a href="#/acme/core-platform">Fleet</a><span class="sep">/</span><b class="mono">${D.run.id.slice(0,14)}…</b>`;
+  const st = S.state;
+  if (st === "denied") return appShell("run", crumbs, `
+    <div class="statepane den"><div class="glyph">${I.lock}</div>
+      <h2>You cannot open this run</h2>
+      <p class="cap">Runs belong to a workspace. Your role in ${D.org.name} is <b>billing</b>, which carries no role in
+        <span class="mono">${D.ws.name}</span>. The decision was audited as a governed action.</p>
+      <a class="btn" href="#/acme/billing">Go to Billing</a></div>`);
+  if (st === "error") return appShell("run", crumbs, `
+    <div class="statepane err"><div class="glyph">${I.warn}</div>
+      <h2>Frame bodies are unavailable</h2>
+      <p class="cap">The run's metadata loaded from the graph, but object storage returned
+        <span class="mono">503 SlowDown</span> for the encrypted bodies. Render replay needs the bodies, so the player is
+        held rather than shown with gaps — a partial replay would misstate the replay grade.</p>
+      <p class="cap mono dim">request req_01JQ8FA3ZT8HRK · segment seg_01JQ8F…</p>
+      <button type="button" class="btn" data-retry>Retry</button></div>`);
+  if (st === "loading") return appShell("run", crumbs, `
+    <div class="stack g16">
+      <span class="skel" style="width:230px;height:22px"></span>
+      <div class="coststrip">${[0,1,2,3,4,5].map(()=>`<div class="c"><span class="skel" style="width:70px"></span>
+        <span class="skel" style="width:52px;height:15px;margin-top:6px"></span></div>`).join("")}</div>
+      <div class="sect"><header><span class="skel" style="width:110px"></span></header>
+        ${[0,1,2,3,4,5].map(()=>`<div style="padding:11px 16px;border-bottom:1px solid var(--border)">
+          <span class="skel" style="width:${50+Math.random()*40}%"></span></div>`).join("")}</div>
+    </div>`);
+
+  const paused = S.runPaused;
+  const extra = [];
+  if (paused) extra.push([47,"14:03:15.006","control.command","pause · issuer=Marcus Bell (operator) · delivered · applies at the next boundary"]);
+  if (S.steerSent) extra.push([paused?48:47,"14:03:22.771","control.steer",
+    "digest sha256:b71e…09 · issuer=Marcus Bell · injected at the steering position on the next model call"]);
+
+  return appShell("run", crumbs, `
+    <div class="pagehead">
+      <div class="stack g8" style="min-width:0">
+        <p class="eyebrow q">Run · attempt 1</p>
+        <h1 class="mono" style="font-size:22px">${D.run.id}</h1>
+        <div class="row g8 wrapx">
+          ${paused ? `<span class="chip approve"><span class="dot"></span>paused</span>`
+                   : `<span class="chip allow"><span class="dot live"></span>running</span>`}
+          ${tierChip("gateway")}${chip("replay grade: full","allow")}
+          ${chip("chain intact · seq 0–"+(D.run.frames+extra.length-1),"allow")}
+          ${chip("oxagen-attested","allow")}
+        </div>
+        <p class="cap">${D.agent.key} · ${D.agent.harness} · operator ${D.operator.name} ·
+          task <span class="mono">acme/platform#4821</span> · started ${D.run.started}</p>
+      </div>
+      <div class="row g8 wrapx push">
+        <button type="button" class="btn" data-pause>${paused?I.play:I.pause}<span>${paused?"Resume":"Pause"}</span></button>
+        <button type="button" class="btn" data-dlg="steer">${I.steering}<span>Steer</span></button>
+        <button type="button" class="btn danger" data-dlg="cancel">${I.stop}<span>Cancel</span></button>
+        <button type="button" class="btn ghost" data-noop>Export</button>
+      </div>
+    </div>
+
+    ${paused ? `<div class="banner"><span class="ib">${I.info}</span>
+      <div><b>Paused at the next boundary.</b> The model proxy returns a paused response on the next request; the tool
+      gateway denies the next call. The run token is still live — pause is cooperative, cancel revokes.</div></div>` : ""}
+    ${S.steerSent ? `<div class="banner"><span class="ib">${I.info}</span>
+      <div><b>Steering queued.</b> It will be injected as a volatile message immediately after the cached system block on the
+      next model call, attributed to ${D.operator.name} and recorded as a <span class="mono">control.steer</span> frame.
+      Steering text is evidence, quoted and cited — Oxagen never executes it.</div></div>` : ""}
+
+    <div class="coststrip" style="margin-bottom:18px">
+      <div class="c"><span class="k">Cost so far</span><span class="v">${usd(D.run.cost)}</span>
+        <span class="cap dim" style="font-size:10.5px">${D.org.currency} · measured</span></div>
+      <div class="c"><span class="k">Model calls</span><span class="v">${D.run.modelCalls}</span></div>
+      <div class="c"><span class="k">Tool calls</span><span class="v">${D.run.toolCalls}</span></div>
+      <div class="c"><span class="k">Frames</span><span class="v">${D.run.frames+extra.length}</span></div>
+      <div class="c"><span class="k">Cache hit rate</span><span class="v">${cacheHit}%</span></div>
+      <div class="c"><span class="k">Governed actions</span><span class="v">${D.run.toolCalls}</span></div>
+    </div>
+
+    <div class="cols">
+      <div class="sect">
+        <header><h3>Frames</h3><span class="push cap">showing ${FRAMES.length+extra.length} of ${D.run.frames+extra.length}</span></header>
+        <div class="frames">
+          ${extra.map(f=>`<div class="frame-row new"><span class="sq">${f[0]}</span><span class="ts">${f[1]}</span>
+            <span class="kd">${f[2]}</span><span class="bd">${f[3]}</span></div>`).join("")}
+          ${FRAMES.map(f=>`<div class="frame-row"><span class="sq">${f[0]}</span><span class="ts">${f[1]}</span>
+            <span class="kd">${f[2]}</span><span class="bd">${f[3]}</span></div>`).join("")}
+        </div>
+        <div class="pad-s" style="border-top:1px solid var(--border)">
+          <p class="cap">Every frame is hash-chained to its predecessor and its body is a content-addressed encrypted blob.
+            A gap is a <span class="mono">telemetry_gap</span> frame, never a repaired sequence.</p>
+        </div>
+      </div>
+
+      <div class="stack g14">
+        <div class="sect">
+          <header><h3>Cost basis</h3></header>
+          <div class="tw"><table>
+            <thead><tr><th>Token class</th><th class="num">Tokens</th><th class="num">Rate</th><th class="num">${D.org.currency}</th></tr></thead>
+            <tbody>
+              ${D.run.tokens.map(t=>`<tr><td class="mono f12">${t.k}</td><td class="num mono">${t.n.toLocaleString()}</td>
+                <td class="num mono dim">${t.rate}</td><td class="num mono">${t.usd.toFixed(4)}</td></tr>`).join("")}
+              <tr><td class="w600">total</td>
+                <td class="num mono w600">${D.run.tokens.reduce((a,t)=>a+t.n,0).toLocaleString()}</td>
+                <td></td><td class="num mono w600">${D.run.cost.toFixed(4)}</td></tr>
+            </tbody>
+          </table></div>
+          <div class="pad-s stack g6" style="border-top:1px solid var(--border)">
+            ${D.run.measured.map(m=>`<div class="row g12 f12"><span class="muted mono" style="flex:1">${m.k}</span>
+              <span class="mono">${m.n.toLocaleString()}</span></div>`).join("")}
+            <p class="cap dim" style="margin-top:4px">Measured by Oxagen from the request, not billed separately.
+              Price book <span class="mono">${D.priceBook}</span> · concrete model
+              <span class="mono">${D.run.concrete}</span> · funding source <span class="mono">customer_key</span>.</p>
+          </div>
+        </div>
+        <div class="sect">
+          <header><h3>Approvals on this run</h3><span class="push chip">0</span></header>
+          <div class="pad-s"><p class="cap">No call on this run has been parked. The agent holds no credentials —
+            every tool call brokered a per-call credential and returned a signed receipt.</p></div>
+        </div>
+      </div>
+    </div>`);
+}
+
+/* ---------- a page W1 does not mock -------------------------------------- */
+function vOther(){
+  const h = location.hash;
+  const id = (h.match(/\/(agents|tools|ontology|steering|spend|billing|audit)/) || [,"organization"])[1];
+  const lab = {agents:"Agents",tools:"Tools",ontology:"Ontology",steering:"Steering",spend:"Spend",
+               billing:"Billing",audit:"Audit",organization:"Organization"}[id];
+  const crumbs = `<a href="#/acme">${D.org.name}</a><span class="sep">/</span>
+    ${["billing","audit","organization"].includes(id)?"":`<a href="#/acme/core-platform">${D.ws.name}</a><span class="sep">/</span>`}<b>${lab}</b>`;
+  return appShell(id, crumbs, `
+    <div class="pagehead"><div><p class="eyebrow q">${["billing","audit","organization"].includes(id)?"Organization":"Workspace"}</p>
+      <h1>${lab}</h1></div></div>
+    <div class="unbuilt">
+      <b>Not mocked in W1.</b><br>
+      W1 covers the sign-in flows, the onboarding gate, the installer, and Fleet at the first run.<br>
+      ${lab} is mocked by <b>${WHICH_FLOW[id]}</b>.<br><br>
+      The navigation is real so the information architecture can be judged: seven workspace pages, three organization
+      pages, and nothing else in v1.
+    </div>`);
+}
+
+/* =========================================================================
+   DIALOGS
+   ========================================================================= */
+function dialog(){
+  if (S.cmdOpen) return `<div class="scrim" data-scrim>
+    <div class="dlg" role="dialog" aria-modal="true" aria-label="Command menu">
+      <header>${I.search}<input class="input" id="cmd-input" placeholder="Search runs, agents, tools, or type a command…"
+        style="border:0;background:transparent;padding:0;font-size:15px" autofocus></header>
+      <div class="cmdlist">
+        ${[["Open Fleet","#/acme/core-platform","G then F"],
+           ["Open the live run","#/acme/core-platform/runs/"+D.run.id,"G then R"],
+           ["Agents","#/acme/core-platform/agents","G then A"],
+           ["Tools","#/acme/core-platform/tools","G then T"],
+           ["Ontology","#/acme/core-platform/ontology","G then O"],
+           ["Steering","#/acme/core-platform/steering","G then S"],
+           ["Spend","#/acme/core-platform/spend","G then $"],
+           ["Billing","#/acme/billing",""],
+           ["Audit","#/acme/audit",""],
+           ["Wrap another agent","#/new-organization/wrap",""],
+           ["Open the installer","#/installer",""]].map(([l,h,g])=>
+          `<button type="button" class="cmditem" data-nav="${h}">${l}<span class="g">${g}</span></button>`).join("")}
+      </div>
+      <div class="ft"><span class="cap push" style="margin-right:auto">Every command here is a governed action or a route.</span>
+        <button type="button" class="btn sm ghost" data-close>Close</button></div>
+    </div></div>`;
+
+  if (!S.dlg) return "";
+  if (S.dlg === "steer") return `<div class="scrim" data-scrim>
+    <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="steer-h">
+      <header><h3 id="steer-h">Steer this run</h3></header>
+      <div class="bd stack g12">
+        <p class="cap">Delivered at the next boundary as additional context, attributed to you, and recorded as a
+          <span class="mono">control.steer</span> frame on this run.</p>
+        <textarea class="input" id="steer-text" aria-label="Steering text">Only include pull requests merged after the 2026.9.1 tag. Do not open the release PR yet — I want to read the notes first.</textarea>
+        <p class="cap dim">Steering text is evidence, quoted and cited. Whether the harness treats it as an instruction is
+          the harness's contract, not Oxagen's.</p>
+      </div>
+      <div class="ft"><button type="button" class="btn ghost" data-close>Cancel</button>
+        <button type="button" class="btn" data-steer>Send steering</button></div>
+    </div></div>`;
+  if (S.dlg === "cancel") return `<div class="scrim" data-scrim>
+    <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="can-h">
+      <header><span style="color:var(--s-fail)">${I.warn}</span><h3 id="can-h">Cancel this run</h3></header>
+      <div class="bd stack g12">
+        <p>Cancel revokes the run token. Every model request is refused, every tool call is refused, and the collector sends
+          <span class="mono">SIGTERM</span> where it owns the process.</p>
+        <p class="cap">Soft cancel is guaranteed while any seam is in path. Killing the process is best effort and is
+          recorded as such. The run seals with outcome <span class="mono">cancelled</span> and keeps every frame
+          written so far — ${D.run.frames} of them, costing ${usd(D.run.cost)}.</p>
+      </div>
+      <div class="ft"><button type="button" class="btn ghost" data-close>Keep running</button>
+        <button type="button" class="btn danger" data-close>Cancel the run</button></div>
+    </div></div>`;
+  if (S.dlg === "account") return `<div class="scrim" data-scrim>
+    <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="acc-h">
+      <header><div class="avatar">${D.operator.initials}</div><div class="stack">
+        <h3 id="acc-h" style="font-size:14px">${D.operator.name}</h3>
+        <span class="cap mono">${D.operator.email}</span></div></header>
+      <div class="bd stack g12">
+        <div class="stack g8 f13">
+          ${[["Organization role","member"],["Workspace role",D.ws.name+" · owner"],
+             ["Two-factor","authenticator app · enabled"],["Sessions","2 devices"],
+             ["Notifications","approvals and budget breaches, by email"]].map(([k,v])=>
+            `<div class="row g12"><span class="muted" style="width:146px;flex:none">${k}</span><span>${v}</span></div>`).join("")}
+        </div>
+        <p class="cap dim">Account, profile, preferences, privacy and security collapse into this one dialog —
+          it is not a page.</p>
+      </div>
+      <div class="ft"><button type="button" class="btn ghost" data-close>Close</button>
+        <button type="button" class="btn" data-nav="#/login">Log out</button></div>
+    </div></div>`;
+  if (S.dlg === "switch-org" || S.dlg === "switch-ws"){
+    const org = S.dlg === "switch-org";
+    return `<div class="scrim" data-scrim>
+      <div class="dlg" style="max-width:420px" role="dialog" aria-modal="true" aria-label="${org?"Switch organization":"Switch workspace"}">
+        <header><h3>${org?"Organizations":"Workspaces in "+D.org.name}</h3></header>
+        <div class="cmdlist">
+          ${(org ? [["Acme Robotics","org · acme · 1 workspace",true]]
+                 : [["core-platform","main repo acme/platform · 1 agent",true],
+                    ["finops","main repo acme/finops-agents · 0 agents",false]]).map(([n,s,cur])=>
+            `<button type="button" class="cmditem" data-close>
+              <span class="av" style="width:22px;height:22px;border-radius:var(--r-xs);background:var(--hl);border:1px solid var(--border);display:grid;place-items:center;font-size:10px;font-family:var(--mono);color:var(--accent-text)">${n.slice(0,2).toUpperCase()}</span>
+              <span class="stack" style="gap:1px"><b style="font-size:13px">${n}</b><span class="cap dim">${s}</span></span>
+              ${cur?'<span class="g">current</span>':""}</button>`).join("")}
+        </div>
+        <div class="ft"><button type="button" class="btn sm ghost" data-close>Close</button>
+          <button type="button" class="btn sm" data-close>${org?"New organization":"New workspace"}</button></div>
+      </div></div>`;
+  }
+  return "";
+}
+
+/* =========================================================================
+   RENDER
+   ========================================================================= */
+const VIEWS = {signup:vSignup, verify:vVerify, login:vLogin, twofactor:vTwoFactor, forgot:vForgot,
+  reset:vReset, invite:vInvite, ob1:vOb1, ob2:vOb2, ob3:vOb3, installer:vInstaller,
+  fleet:vFleet, run:vRun, other:vOther};
+
+function render(){
+  const r = routeFor();
+  if (!r.states.includes(S.state)) S.state = "loaded";
+  document.getElementById("frame").innerHTML = VIEWS[r.id]() + dialog();
+  syncChrome(r);
+  wire(r);
+  applyWrapTab(false);
+  const f = document.querySelector("[autofocus]"); if (f) f.focus();
+}
+
+function syncChrome(r){
+  const sel = document.getElementById("cScreen");
+  if (sel.options.length !== ROUTES.length){
+    sel.innerHTML = ROUTES.map(x=>`<option value="${x.hash}">${x.label}</option>`).join("");
+  }
+  sel.value = r.hash === sel.value ? sel.value : r.hash;
+  if (![...sel.options].some(o=>o.value===sel.value)) sel.value = r.hash;
+  const all = ["loaded","empty","loading","error","denied"];
+  document.getElementById("cState").innerHTML = all.map(s=>{
+    const ok = r.states.includes(s);
+    return `<button type="button" data-v="${s}" ${ok?"":"disabled"} aria-pressed="${S.state===s}">${s}</button>`;
+  }).join("");
+  document.querySelectorAll("#cPhone button").forEach(b=>b.setAttribute("aria-pressed", String(S.phone) === (b.dataset.v==="1"?"true":"false")));
+  document.querySelectorAll("#cTheme button").forEach(b=>b.setAttribute("aria-pressed", S.theme===b.dataset.v));
+}
+
+/* ---------- per-view wiring --------------------------------------------- */
+function wire(r){
+  const root = document.getElementById("frame");
+
+  root.querySelectorAll("[data-nav]").forEach(el => el.addEventListener("click", e=>{
+    if (e.target.closest("[data-pause],[data-dismiss]")) return;
+    const pick = el.dataset.pick; if (pick) S.agentPicked = pick;
+    if (el.dataset.frame) S.firstFrame = true;
+    S.dlg = null; S.cmdOpen = false;
+    go(el.dataset.nav);
+  }));
+  root.querySelectorAll("[data-submit]").forEach(f => f.addEventListener("submit", e=>{
+    e.preventDefault();
+    const t = f.dataset.submit;
+    if (t === "forgot-sent"){ S.forgotSent = true; render(); return; }
+    if (S.state === "error"){ S.state = "loaded"; }
+    const map = {verify:"#/verify", ob1:"#/new-organization", ob2:"#/new-organization/wrap",
+                 twofactor:"#/two-factor", login:"#/login"};
+    S.state = "loading"; render();
+    later(()=>{ S.state = "loaded"; go(map[t] || "#/acme/core-platform"); }, 620);
+  }));
+  root.querySelectorAll("[data-pwtoggle]").forEach(b=>b.addEventListener("click",()=>{ S.pwShown = !S.pwShown; render(); }));
+  root.querySelectorAll("[data-os]").forEach(b=>b.addEventListener("click",()=>{ S.os = b.dataset.os; render(); }));
+  const wtabs = [...root.querySelectorAll("[data-wraptab]")];
+  wtabs.forEach((b, n) => {
+    b.addEventListener("click", () => { S.wrapTab = b.dataset.wraptab; applyWrapTab(true); });
+    b.addEventListener("keydown", e => {
+      const d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+      let t = null;
+      if (d) t = wtabs[(n + d + wtabs.length) % wtabs.length];
+      else if (e.key === "Home") t = wtabs[0];
+      else if (e.key === "End") t = wtabs[wtabs.length - 1];
+      if (!t) return;
+      e.preventDefault(); S.wrapTab = t.dataset.wraptab; applyWrapTab(true); t.focus();
+    });
+  });
+  root.querySelectorAll("[data-sdk]").forEach(b=>b.addEventListener("click",()=>{ S.sdkLang = b.dataset.sdk; render(); }));
+  root.querySelectorAll("[data-copy]").forEach(b=>b.addEventListener("click",()=>{
+    navigator.clipboard?.writeText(b.dataset.copy).catch(()=>{});
+    const s = b.querySelector("span"); if (s){ const o = s.textContent; s.textContent = "Copied"; later(()=>{ s.textContent = o; }, 1200); }
+  }));
+  root.querySelectorAll("[data-noop]").forEach(b=>b.addEventListener("click", e=>e.preventDefault()));
+  root.querySelectorAll("[data-retry]").forEach(b=>b.addEventListener("click",()=>{
+    S.state = "loading"; render(); later(()=>{ S.state = "loaded"; render(); }, 700);
+  }));
+
+  /* onboarding */
+  root.querySelectorAll("[data-bind]").forEach(b=>b.addEventListener("click",()=>{
+    S.repoBound = true; S.repoSkipped = false; render();
+  }));
+  root.querySelectorAll("[data-skip]").forEach(b=>b.addEventListener("click",()=>{ S.repoSkipped = true; render(); }));
+  root.querySelectorAll("[data-unlock]").forEach(b=>b.addEventListener("click",()=>{ S.unlocked = true; go("#/acme/core-platform"); }));
+
+  /* installer */
+  root.querySelectorAll("[data-install]").forEach(b=>b.addEventListener("click",()=>{
+    S.installerStep = 1; S.installerPct = 0; render(); runInstaller();
+  }));
+  root.querySelectorAll("[data-instep]").forEach(b=>b.addEventListener("click",()=>{
+    clearTimers(); S.installerStep = +b.dataset.instep;
+    S.installerPct = S.installerStep === 2 ? 100 : S.installerStep === 1 ? 38 : 0;
+    render(); if (S.installerStep === 1) runInstaller();
+  }));
+
+  /* fleet + run */
+  root.querySelectorAll("[data-dismiss]").forEach(b=>b.addEventListener("click", e=>{
+    e.stopPropagation(); S.offerDismissed = true; render();
+  }));
+  root.querySelectorAll("[data-pause]").forEach(b=>b.addEventListener("click", e=>{
+    e.stopPropagation(); S.runPaused = !S.runPaused; render();
+  }));
+  root.querySelectorAll("[data-steer]").forEach(b=>b.addEventListener("click",()=>{ S.steerSent = true; S.dlg = null; render(); }));
+
+  /* chrome-in-app */
+  root.querySelectorAll("[data-assistant]").forEach(b=>b.addEventListener("click",()=>{ S.assistant = !S.assistant; render(); }));
+  root.querySelectorAll("[data-cmd]").forEach(b=>b.addEventListener("click",()=>{ S.cmdOpen = true; render(); }));
+  root.querySelectorAll("[data-dlg]").forEach(b=>b.addEventListener("click",()=>{ S.dlg = b.dataset.dlg; render(); }));
+  root.querySelectorAll("[data-close]").forEach(b=>b.addEventListener("click",()=>{ S.dlg = null; S.cmdOpen = false; render(); }));
+  const scrim = root.querySelector("[data-scrim]");
+  if (scrim) scrim.addEventListener("mousedown", e=>{ if (e.target === scrim){ S.dlg = null; S.cmdOpen = false; render(); } });
+
+  /* six-box code inputs */
+  root.querySelectorAll("[data-codes]").forEach(g=>{
+    const ins = [...g.querySelectorAll("input")];
+    ins.forEach((inp,i)=>inp.addEventListener("input",()=>{ if (inp.value && ins[i+1]) ins[i+1].focus(); }));
+    ins.forEach((inp,i)=>inp.addEventListener("keydown",e=>{ if (e.key==="Backspace" && !inp.value && ins[i-1]) ins[i-1].focus(); }));
+  });
+
+  /* the onboarding poll that flips on the first frame */
+  if (r.id === "ob3" && S.state === "loaded" && !S.firstFrame && !S.polling){
+    S.polling = true;
+    const tick = () => {
+      if (routeFor().id !== "ob3" || S.state !== "loaded"){ S.polling = false; return; }
+      S.logLines++;
+      if (S.logLines >= 6){ S.polling = false; S.firstFrame = true; render(); startUnlockCountdown(); return; }
+      render();
+      later(tick, 780);
+    };
+    later(tick, 520);
+  }
+  if (r.id === "ob3" && S.firstFrame && S.state === "loaded" && !S.countdownRan) startUnlockCountdown();
+}
+
+function applyWrapTab(animate){
+  const wrap = document.querySelector(".switchwrap");
+  if (!wrap) return;
+  const i = Math.max(0, WRAPTABS.findIndex(t => t.id === S.wrapTab));
+  const track = wrap.querySelector(".swtrack");
+  const view = wrap.querySelector(".swview");
+  const ind = wrap.querySelector(".swind");
+  const panels = [...wrap.querySelectorAll(".wpanel")];
+  const tabs = [...wrap.querySelectorAll('[role="tab"][data-wraptab]')];
+
+  if (!animate){ track.style.transition = "none"; view.style.transition = "none"; ind.style.transition = "none"; }
+  track.style.transform = "translateX(" + (-i * 100) + "%)";
+  ind.style.setProperty("--i", i);
+  tabs.forEach((t, n) => { t.setAttribute("aria-selected", String(n === i)); t.tabIndex = n === i ? 0 : -1; });
+  panels.forEach((pnl, n) => {
+    /* inert keeps focus and the accessibility tree out of the panels that slid away */
+    if (n === i){ pnl.removeAttribute("inert"); pnl.removeAttribute("aria-hidden"); }
+    else { pnl.setAttribute("inert", ""); pnl.setAttribute("aria-hidden", "true"); }
+    /* exactly one gold action on screen: it belongs to whichever panel is showing */
+    pnl.querySelectorAll("[data-primary]").forEach(b => b.classList.toggle("gold", n === i));
+  });
+  view.style.height = panels[i].offsetHeight + "px";
+  if (!animate) requestAnimationFrame(() => {
+    track.style.transition = ""; view.style.transition = ""; ind.style.transition = "";
+  });
+}
+
+function startUnlockCountdown(){
+  S.countdownRan = true;
+  let n = 6;
+  const note = () => document.getElementById("autoNote");
+  const t = setInterval(()=>{
+    const el = note();
+    if (!el){ clearInterval(t); return; }
+    n--;
+    if (n <= 0){ clearInterval(t); S.unlocked = true; go("#/acme/core-platform"); return; }
+    el.textContent = "Opening automatically in " + n + "…";
+  }, 1000);
+  timers.push(t);
+}
+
+function runInstaller(){
+  const step = () => {
+    S.installerPct = Math.min(100, S.installerPct + 100/INSTALL_STEPS.length);
+    const fill = document.querySelector(".bar-fill");
+    if (fill) fill.style.width = S.installerPct + "%";
+    if (S.installerPct >= 100){ later(()=>{ S.installerStep = 2; S.firstFrame = true; render(); }, 500); return; }
+    render(); later(step, 430);
+  };
+  later(step, 430);
+}
+
+/* =========================================================================
+   CHROME (mockup only)
+   ========================================================================= */
+document.getElementById("chromeToggle").addEventListener("click", e=>{
+  const c = document.getElementById("chrome");
+  c.classList.toggle("min");
+  const min = c.classList.contains("min");
+  e.target.textContent = min ? "+" : "–";
+  e.target.setAttribute("aria-expanded", String(!min));
+});
+document.getElementById("cScreen").addEventListener("change", e=>{
+  clearTimers(); S.logLines = 0; S.countdownRan = false;
+  if (e.target.value === "#/new-organization/run"){ S.firstFrame = false; S.polling = false; }
+  if (e.target.value === "#/installer") { S.installerStep = 0; S.installerPct = 0; }
+  go(e.target.value);
+});
+document.getElementById("cState").addEventListener("click", e=>{
+  const b = e.target.closest("button[data-v]"); if (!b || b.disabled) return;
+  clearTimers(); S.state = b.dataset.v; S.logLines = 0; S.countdownRan = false; S.polling = false; render();
+});
+document.getElementById("cPhone").addEventListener("click", e=>{
+  const b = e.target.closest("button[data-v]"); if (!b) return;
+  S.phone = b.dataset.v === "1";
+  document.body.dataset.phone = S.phone ? "1" : "0";
+  render();
+});
+document.getElementById("cTheme").addEventListener("click", e=>{
+  const b = e.target.closest("button[data-v]"); if (!b) return;
+  S.theme = b.dataset.v;
+  if (S.theme === "system") document.documentElement.removeAttribute("data-theme");
+  else document.documentElement.setAttribute("data-theme", S.theme);
+  render();
+});
+
+/* global keys */
+addEventListener("keydown", e=>{
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k"){
+    e.preventDefault();
+    if (/^#\/acme/.test(location.hash)){ S.cmdOpen = !S.cmdOpen; S.dlg = null; render(); }
+  }
+  if (e.key === "Escape" && (S.cmdOpen || S.dlg)){ S.cmdOpen = false; S.dlg = null; render(); }
+});
+
+addEventListener("resize", () => applyWrapTab(false));
+document.fonts && document.fonts.ready.then(() => applyWrapTab(false));
+
+addEventListener("hashchange", ()=>{
+  clearTimers();
+  S.dlg = null; S.cmdOpen = false;
+  if (routeFor().id !== "ob3"){ S.logLines = 0; S.countdownRan = false; S.polling = false; }
+  render();
+});
+
+if (!location.hash) location.hash = "#/signup";
+document.body.dataset.phone = "0";
+render();
+</script>
