@@ -929,6 +929,25 @@ details.cm-diff[open] summary::before{content:"▾"}
 .tx-kind[aria-pressed="true"]{background:var(--hl);color:var(--fg);box-shadow:inset 0 0 0 1px var(--rule)}
 .tx-kind[aria-pressed="false"]{text-decoration:line-through;color:var(--dim)}
 .tx-kind.err[aria-pressed="true"]{color:var(--st-failed)}
+/* ---- frame player transport + paused run ---- */
+.fp-bar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--panel);margin-bottom:14px}
+.fp-bar .btn.sm{padding:3px 8px;font-family:var(--mono);font-size:11.5px;min-width:30px;justify-content:center}
+.fp-bar .btn.sm[aria-pressed="true"]{background:var(--hl);border-color:var(--rule);color:var(--fg)}
+.fp-bar .play{min-width:82px}
+.fp-scrub{flex:1;min-width:180px;display:grid;gap:3px;margin:0 6px}
+.fp-range{width:100%;margin:0;accent-color:var(--fg);cursor:pointer}
+.fp-ticks{position:relative;height:6px;margin:0 7px}
+.fp-ticks i{position:absolute;top:0;width:4px;height:6px;border-radius:2px;margin-left:-2px}
+.fp-cnt{font-family:var(--mono);font-size:11px;color:var(--dim);white-space:nowrap;font-variant-numeric:tabular-nums}
+.fp-cnt b{color:var(--fg);font-weight:600}
+.fp-bar kbd{font-family:var(--mono);font-size:10px;border:1px solid var(--border);border-radius:4px;padding:0 4px;color:var(--muted);background:var(--void)}
+.fp-keys{display:inline-flex;gap:6px;align-items:center;font-size:11px;color:var(--dim);margin-left:auto}
+.fp-dot{width:6px;height:6px;border-radius:50%;flex:none}
+.fp-item[aria-current="true"] .fp-dot{box-shadow:0 0 0 2px var(--hl)}
+.pause-banner{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:11px 14px;border:1px dashed color-mix(in srgb,var(--st-approval) 65%,transparent);background:color-mix(in srgb,var(--st-approval) 9%,transparent);border-radius:10px;margin-bottom:16px;font-size:12.5px;color:var(--body)}
+.pause-banner .g{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;color:var(--st-approval);background:color-mix(in srgb,var(--st-approval) 14%,transparent);font-weight:700;flex:none}
+.pause-banner .q{font-style:italic;color:var(--fg)}
+#viewport.phone .fp-scrub{flex-basis:100%}
 .tx-play{display:flex;align-items:center;gap:4px;margin-left:auto;flex-wrap:wrap}
 .tx-play .btn.sm{padding:3px 8px;font-family:var(--mono);font-size:11.5px;min-width:30px;justify-content:center}
 .tx-play .btn.sm[aria-pressed="true"]{background:var(--hl);border-color:var(--rule);color:var(--fg)}
@@ -2369,7 +2388,8 @@ function flipHero(R){
 }
 function statusBadge(st){
   var m={live:["allowed","live"],parked:["approval","parked for approval"],sealed:["q","sealed"],
-         halted:["denied","halted"],compacted:["q","compacted"]};
+         halted:["denied","halted"],compacted:["q","compacted"],
+         paused:["approval","⏸ paused"],pausing:["approval","pausing · next boundary"],resuming:["allowed","resuming"]};
   var x=m[st]||["q",st];
   if(st==="live") return '<span class="live"><span class="p"></span>live</span>';
   return '<span class="b b-'+x[0]+'">'+x[1]+'</span>';
@@ -2599,7 +2619,7 @@ function applyHashTab(){
   var p=location.hash.replace(/^#\/?/,"").split("/");
   if(p.length>=4&&p[2]!=="runs"&&p[2]!=="agents") S.tab[p[2]]=p[3];
 }
-window.addEventListener("hashchange",function(){S.side=false;applyHashTab();render();});
+window.addEventListener("hashchange",function(){S.side=false;fpStop();applyHashTab();render();});
 
 var PAGES={fleet:"Fleet",run:"Run",agents:"Agents",agent:"Agents",mandate:"Agents",tools:"Tools",
   agentsource:"Agents",ontology:"Ontology",steering:"Steering",spend:"Spend",organization:"Organization",billing:"Billing",audit:"Audit"};
@@ -3202,7 +3222,7 @@ function pFleet(){
      '<td><span class="tid">'+h(r.id)+'</span><div class="dim" style="font-size:11.5px">'+h(r.taskTitle)+'</div></td>'+
      '<td><div class="row" style="gap:9px;flex-wrap:nowrap">'+agentAv(a,26)+'<div style="min-width:0"><span class="tkey">'+h(r.agent)+'</span><div class="dim" style="font-size:11.5px">'+h(a?a.harnessLabel:"")+'</div>'+(a?scorePair(a,true):'')+'</div></div></td>'+
      '<td><span class="row" style="gap:7px;flex-wrap:nowrap;white-space:nowrap">'+personAv(r.op,22)+h(PEOPLE[r.op].name)+'</span></td>'+
-     '<td>'+statusBadge(r.status)+'</td>'+
+     '<td>'+statusBadge(runStatus(r))+'</td>'+
      '<td>'+tierBadge(r.tier)+'</td>'+
      '<td>'+gradeBadge(r.grade)+'</td>'+
      '<td>'+verdictCell(r)+'</td>'+
@@ -3437,17 +3457,22 @@ function pRun(r){
 
   var a=agent(R.agent), t=tab("run","transcript"), govN=govCount();
   var compacted=R.status==="compacted";
-  var fr=FRAMES[Math.min(S.frame,FRAMES.length-1)];
+  var fr=FRAMES[Math.min(S.frame,FRAMES.length-1)], rs=runStatus(R);
 
   var head='<div class="phead"><div class="t"><p class="eyebrow">Run · '+h(R.agent)+'</p>'+
    '<h1 class="mono" style="font-size:19px">'+h(R.id)+'</h1>'+
-   '<div class="row" style="margin-top:8px">'+statusBadge(R.status)+tierBadge(R.tier)+gradeBadge(R.grade)+verdictBadge(R.verdict,R)+(a?scorePair(a,true):'')+
+   '<div class="row" style="margin-top:8px">'+statusBadge(rs)+tierBadge(R.tier)+gradeBadge(R.grade)+verdictBadge(R.verdict,R)+(a?scorePair(a,true):'')+
    '<span class="b b-q">task '+h(R.task)+'</span></div>'+
    '<p style="margin-top:8px">'+h(R.taskTitle)+' · started '+h(R.started)+(R.sealed?' · sealed '+h(R.sealed):'')+'</p></div>'+
    '<div class="acts">'+
-    (R.status==="live"?'<button class="btn" onclick="act(\'Pause queued. It takes effect at the next boundary.\')">Pause</button>'+
+    (rs==="live"?'<button class="btn" onclick="openDialog(\'pause\')" title="Takes effect at the next boundary · run.pause">❙❙ Pause run</button>'+
       '<button class="btn" onclick="openSteer()">Steer</button>'+
       '<button class="btn danger" onclick="act(\'Cancel issued. Run token revoked; process kill is best effort and recorded.\')">Cancel</button>':
+     rs==="pausing"?'<button class="btn" disabled>❙❙ Pausing…</button><button class="btn" onclick="openSteer()">Steer</button>':
+     rs==="paused"?'<button class="btn" onclick="resumeRun(\''+R.id+'\')" title="run.resume · the reason reaches the model as a control frame">▶ Resume run</button>'+
+      '<button class="btn" onclick="openSteer()">Steer</button>'+
+      '<button class="btn danger" onclick="act(\'Cancel issued. Run token revoked; process kill is best effort and recorded.\')">Cancel</button>':
+     rs==="resuming"?'<button class="btn" disabled>▶ Resuming…</button>':
       '<button class="btn" onclick="act(\'Fork replay started from frame '+S.frame+' with tool results served from the recording.\')">Fork replay</button>'+
       '<button class="btn" onclick="openDialog(\'bisect\')">Bisect</button>')+
     '<button class="btn" onclick="act(\'Signed bundle queued: segments, attestations, key ids and a verifier script.\')">Export</button>'+
@@ -3481,23 +3506,25 @@ function pRun(r){
   } else if(t==="player"){
     txStop();
     var timeline=FRAMES.map(function(f,i){
-      var on=i===S.frame;
-      return '<button class="navitem" style="font-size:12px;'+(on?'background:var(--hl);box-shadow:inset 2px 0 0 var(--gold);color:var(--fg)':'')+'" onclick="S.frame='+i+';render()">'+
+      var on=i===S.frame, mk=fpMark(f.kind);
+      return '<button class="navitem fp-item" aria-current="'+(on?"true":"false")+'" style="font-size:12px;'+(on?'background:var(--hl);box-shadow:inset 2px 0 0 var(--gold);color:var(--fg)':'')+'" onclick="fpSeek('+i+')">'+
        '<span class="mono dim" style="width:22px;flex:none;text-align:right">'+f.seq+'</span>'+
+       (mk?'<span class="fp-dot" style="background:'+mk+'"></span>':'<span class="fp-dot" style="background:transparent"></span>')+
        '<span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+h(f.kind)+'</span>'+
        (f.cost?'<span class="ct">$'+f.cost+'</span>':'')+'</button>';
     }).join("");
-    bodyHtml='<div class="split"><div class="panel"><div class="panel-h"><h3>Frame '+fr.seq+' · <span class="mono">'+h(fr.kind)+'</span></h3>'+
+    setTimeout(fpAfterRender,0);
+    bodyHtml=fpBar(R)+'<div class="split"><div class="panel"><div class="panel-h"><h3>Frame '+fr.seq+' · <span class="mono">'+h(fr.kind)+'</span></h3>'+
      '<div class="sp">'+tierBadge(fr.tier)+'<span class="mono dim" style="font-size:11px">'+h(fr.t)+'</span></div></div>'+
      '<div class="panel-b">'+
       '<p style="margin-bottom:14px">'+h(fr.sum)+'</p>'+ frameDetail(fr) +
       '<div class="row" style="margin-top:16px;border-top:1px solid var(--border);padding-top:13px">'+
-       '<button class="btn sm" onclick="S.frame=Math.max(0,S.frame-1);render()">← Previous</button>'+
-       '<button class="btn sm" onclick="S.frame=Math.min('+(FRAMES.length-1)+',S.frame+1);render()">Next →</button>'+
+       '<button class="btn sm" onclick="fpStep(-1)" title="← previous frame">◀ Previous</button>'+
+       '<button class="btn sm" onclick="fpStep(1)" title="→ next frame">Next ▶</button>'+
        '<span class="dim mono" style="font-size:11px;margin-left:auto">frame '+(S.frame+1)+' of '+FRAMES.length+' shown · '+R.frames+' in the run</span></div>'+
      '</div></div>'+
-     '<div><div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Timeline</h3></div>'+
-     '<div class="panel-b" style="padding:7px;max-height:420px;overflow-y:auto">'+timeline+'</div></div>'+
+     '<div><div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Timeline</h3><span class="dim" style="margin-left:auto;font-size:11px">'+(rs==="live"?'live · new frames append at the end':rs==="paused"?'paused · nothing new until resume':'sealed · complete')+'</span></div>'+
+     '<div class="panel-b" id="fptl" style="padding:7px;max-height:420px;overflow-y:auto">'+timeline+'</div></div>'+
      '</div></div><div style="margin-top:14px">'+approvalsPanel(R.ws,R.id)+'</div>';
   } else if(t==="proof"){
     bodyHtml=proofTab(R);
@@ -3516,7 +3543,7 @@ function pRun(r){
     bodyHtml=chainTab(R);
   }
   var hero=(R.verdict==="flipped"&&R.flip)?flipHero(R):'';
-  return head+runSummary(R)+linkedWork(R)+hero+strip+tabs+bodyHtml;
+  return head+pauseBanner(R)+runSummary(R)+linkedWork(R)+hero+strip+tabs+bodyHtml;
 }
 
 /* ===================== Transcript tab ===================== */
@@ -3528,6 +3555,8 @@ var TX_GROUPS=[["prompt","prompt",["prompt","steer"]],["text","responses",["text
                ["tool","tools",["tool"]],["usage","usage",["usage"]],["context","recall",["context_recall"]],["proof","proof",["proof","verdict","complete"]]];
 var GOV_KINDS={policy_decision:1,approval_request:1,token_issued:1};
 S.tx={on:{},q:"",errs:false,think:false,open:{},playing:true,speed:1,revealed:0,timer:null,runId:null};
+/* run controls (pause/resume are governed actions; the seed RUNS is never mutated) and the frame player */
+S.runCtl={}; S.fp={playing:false,speed:1,timer:null};
 TX_GROUPS.forEach(function(g){S.tx.on[g[0]]=true;});
 
 function govCount(){var n=0;FRAMES.forEach(function(f){if(f.kind==="policy_decision")n++;});return n;}
@@ -3705,7 +3734,7 @@ function transcriptTab(R,compacted){
      '<span class="cnt" id="txcnt"></span>':'<span class="cnt">search shows every match · unpaced</span>')+
    '</div></div>';
   var runbar='<div class="tx-runbar"><span class="name">'+h(R.task||R.id)+'</span><span class="meta">'+h(R.agent)+' · '+h(R.model)+' · '+R.turn+' turns · '+R.steps+' steps'+(synth?' · projected from the run record':' · '+all.length+' entries')+'</span>'+
-   '<span class="tx-chips" style="margin-left:0">'+(S.tx.errs?'<span class="tx-chip err">errors only</span>':'')+(R.status==="live"?'<span class="tx-chip ok">● live</span>':R.status==="parked"?'<span class="tx-chip warn">⏸ parked</span>':R.verdict==="flipped"?'<span class="tx-chip ok">✓ flipped</span>':R.verdict==="unmoved"?'<span class="tx-chip err">✗ unmoved</span>':'')+'</span>'+
+   '<span class="tx-chips" style="margin-left:0">'+(S.tx.errs?'<span class="tx-chip err">errors only</span>':'')+(runStatus(R)==="paused"?'<span class="tx-chip warn">⏸ paused</span>':R.status==="live"?'<span class="tx-chip ok">● live</span>':R.status==="parked"?'<span class="tx-chip warn">⏸ parked</span>':R.verdict==="flipped"?'<span class="tx-chip ok">✓ flipped</span>':R.verdict==="unmoved"?'<span class="tx-chip err">✗ unmoved</span>':'')+'</span>'+
    '<span class="tx-burn"><span>burn</span><span class="bar"><i id="txbar"></i></span><b id="txburn">'+txMoney2(0)+'</b><span>of '+txMoney2(total)+'</span></span></div>';
   var feed='<div class="tx-feed" id="txfeed" data-n="'+rows.length+'" data-paced="'+paced+'">'+(rows.length?html:'<div class="tx-empty">'+(S.tx.errs?'no failed calls in this run.':S.tx.q?'nothing matches this search.':'nothing to show with these filters.')+'</div>')+'</div>';
   setTimeout(txStart,0);
@@ -3754,6 +3783,109 @@ function txSpeed(s){S.tx.speed=s;txStop();document.querySelectorAll(".tx-play .s
 function txGroup(k){S.tx.on[k]=!S.tx.on[k];render();}
 function txOpen(i){S.tx.open[i]=!S.tx.open[i];render();}
 var txQTimer=null;
+
+/* ===================== Run controls: pause / resume =====================
+   A pause is a governed action, not a process signal. It takes effect at the next boundary (the model call or tool
+   call in flight completes; nothing new dispatches), holds the run token and the budget reservation, and is written as
+   a control.pause frame attributed to the operator. Resume writes control.resume and its reason reaches the model. */
+function runStatus(R){var c=R&&S.runCtl[R.id];return c&&c.status?c.status:R.status;}
+function nowT(){return new Date().toISOString().slice(11,23);}
+function pauseBody(){
+  var R=run(S.dlgArg)||RUNS[0];
+  return '<p class="muted" style="font-size:12.5px;margin-bottom:12px">Takes effect at the next boundary: the model call or tool call now in flight completes, and nothing new is dispatched. '+
+   'The run keeps its token and its budget reservation; pending approvals keep their clocks.</p>'+
+   '<dl class="kv" style="margin-bottom:12px"><dt>Run</dt><dd class="mono">'+h(R.id)+'</dd><dt>Position</dt><dd>turn '+R.turn+' · step '+R.steps+' · frame '+R.frames+'</dd>'+
+   '<dt>Recorded as</dt><dd><span class="mono">control.pause</span> frame · operator authority</dd></dl>'+
+   '<div class="field"><label>Reason — the model reads this on resume, so write it for the agent</label>'+
+   '<textarea id="pause-reason" rows="2" aria-label="Reason">Holding while finance confirms PO-4471 line 3.</textarea></div>'+
+   '<div class="note">Pause is not cancel. Nothing is revoked, and the run resumes exactly where it stopped; the gap is visible in the chain and the receipts.</div>';
+}
+function pauseRun(id){
+  var R=run(id)||RUNS[0], ta=el("pause-reason"), reason=ta?ta.value.trim():"";
+  closeDialog();
+  S.runCtl[R.id]={status:"pausing",by:"Marcus Bell",at:nowT(),reason:reason,turn:R.turn,step:R.steps};
+  toast("Pause queued for "+R.id+". It takes effect at the next boundary.","approval"); render();
+  setTimeout(function(){
+    var c=S.runCtl[R.id]; if(!c||c.status!=="pausing")return;
+    c.status="paused"; c.at=nowT();
+    FRAMES.push({seq:FRAMES.length,kind:"control.pause",tier:"gateway",cost:null,t:c.at,by:c.by,reason:c.reason,dig:"sha256:"+(FRAMES.length*7919).toString(16)+"a1…",
+      sum:c.by+" · paused at the boundary after seq "+(FRAMES.length-1)+" · token held · "+(c.reason||"no reason given")});
+    toast(R.id+" paused at turn "+c.turn+", step "+c.step+". control.pause frame written.","approval"); render();
+  },1400);
+}
+function resumeRun(id){
+  var R=run(id)||RUNS[0], c=S.runCtl[R.id]; if(!c)return;
+  c.status="resuming"; toast("Resume issued for "+R.id+".","allowed"); render();
+  setTimeout(function(){
+    var c2=S.runCtl[R.id]; if(!c2||c2.status!=="resuming")return;
+    var at=nowT();
+    FRAMES.push({seq:FRAMES.length,kind:"control.resume",tier:"gateway",cost:null,t:at,by:c2.by,reason:c2.reason,dig:"sha256:"+(FRAMES.length*104729).toString(16)+"c7…",
+      sum:c2.by+" · resumed after "+c2.at+" → "+at+" · reason delivered as a control frame"});
+    delete S.runCtl[R.id];
+    toast(R.id+" is live again. control.resume frame written; the reason reached the model.","allowed"); render();
+  },1200);
+}
+function pauseBanner(R){
+  var c=S.runCtl[R.id]; if(!c||c.status==="resuming")return "";
+  var paused=c.status==="paused";
+  return '<div class="pause-banner" role="status"><span class="g">❙❙</span><div class="grow"><b>'+(paused?'Paused':'Pausing')+'</b> at turn '+c.turn+' · step '+c.step+
+   (paused?' · by '+h(c.by)+' at '+h(c.at):' · takes effect at the next boundary')+(c.reason?' · <span class="q">“'+h(c.reason)+'”</span>':'')+
+   '<div class="dim" style="font-size:11.5px;margin-top:2px">run token held · budget reservation held · pending approvals keep their clocks · nothing new dispatches</div></div>'+
+   (paused?'<button class="btn sm" onclick="resumeRun(\''+R.id+'\')">▶ Resume run</button>':'')+
+   '<button class="btn sm ghost" onclick="S.tab.run=\'player\';fpSeek(FRAMES.length-1)">Open the pause frame</button></div>';
+}
+
+/* ===================== Frame player: pause / step / scrub =====================
+   Playback of the recording, paced by the frame timestamps (long thinking gaps are capped so a 30 s wait does not stall
+   the player). This never touches the run; the run's own pause is the governed action above. */
+var FP_SPEEDS=[1,4,16];
+function fpMs(t){var m=/^(\d+):(\d+):(\d+)(?:\.(\d+))?$/.exec(t||"");return m?((+m[1]*3600+ +m[2]*60+ +m[3])*1000+ +(m[4]||0)):0;}
+function fpMark(k){
+  if(k==="policy_decision")return "var(--st-allowed)"; if(k==="approval_request")return "var(--st-approval)";
+  if(/^control\./.test(k))return "var(--st-proven)"; if(k==="tool_requested"||k==="tool_call")return "var(--muted)"; return "";
+}
+function fpBar(R){
+  var n=FRAMES.length, i=Math.min(S.frame,n-1), f=FRAMES[i], done=i>=n-1;
+  var ticks=FRAMES.map(function(x,j){var mk=fpMark(x.kind);return mk?'<i style="left:'+(n>1?j/(n-1)*100:0)+'%;background:'+mk+'" title="'+h(x.seq+' · '+x.kind)+'"></i>':'';}).join("");
+  return '<div class="fp-bar" id="fpbar" role="group" aria-label="Playback">'+
+   '<button class="btn sm" title="to the first frame (Home)" onclick="fpSeek(0)">⏮</button>'+
+   '<button class="btn sm" title="previous frame (←)" onclick="fpStep(-1)">◀</button>'+
+   '<button class="btn sm play" id="fpplay" title="play or pause the playback (space)" onclick="fpPlay()">'+(S.fp.playing&&!done?'❙❙ pause':done?'▶ replay':'▶ play')+'</button>'+
+   '<button class="btn sm" title="next frame (→)" onclick="fpStep(1)">▶</button>'+
+   '<button class="btn sm" title="to the last frame (End)" onclick="fpSeek(1e9)">⏭</button>'+
+   '<div class="fp-scrub"><input class="fp-range" type="range" min="0" max="'+(n-1)+'" value="'+i+'" aria-label="Frame" oninput="fpSeek(+this.value,true)">'+
+    '<div class="fp-ticks">'+ticks+'</div></div>'+
+   '<span class="fp-cnt"><b>'+(i+1)+'</b> / '+n+' · seq '+f.seq+' · '+h(f.t)+'</span>'+
+   '<span class="seg" style="margin-left:4px">'+FP_SPEEDS.map(function(s){return '<button class="btn sm" aria-pressed="'+(S.fp.speed===s)+'" onclick="fpSpeed('+s+')">'+s+'×</button>';}).join("")+'</span>'+
+   '<span class="fp-keys"><kbd>←</kbd><kbd>→</kbd> step <kbd>space</kbd> play <kbd>home</kbd><kbd>end</kbd></span></div>';
+}
+function fpStop(){if(S.fp.timer){clearTimeout(S.fp.timer);S.fp.timer=null;}}
+function fpSeek(i,keepPlaying){
+  S.frame=Math.max(0,Math.min(FRAMES.length-1,i));
+  if(!keepPlaying)S.fp.playing=false;
+  fpStop(); render(); if(S.fp.playing)fpTick();
+}
+function fpStep(d){S.fp.playing=false;fpSeek(S.frame+d);}
+function fpPlay(){
+  var n=FRAMES.length;
+  if(S.frame>=n-1){S.frame=0;S.fp.playing=true;} else S.fp.playing=!S.fp.playing;
+  fpStop(); render(); if(S.fp.playing)fpTick();
+}
+function fpSpeed(s){S.fp.speed=s;fpStop();render();if(S.fp.playing)fpTick();}
+function fpTick(){
+  if(!el("fpbar")){fpStop();S.fp.playing=false;return;}
+  var n=FRAMES.length; if(!S.fp.playing||S.frame>=n-1){S.fp.playing=false;render();return;}
+  var cur=fpMs(FRAMES[S.frame].t), nxt=fpMs(FRAMES[S.frame+1].t), gap=Math.max(250,Math.min(5000,nxt-cur))/S.fp.speed;
+  S.fp.timer=setTimeout(function(){S.fp.timer=null;S.frame=Math.min(n-1,S.frame+1);render();fpTick();},gap);
+}
+function fpAfterRender(){var a=document.querySelector('#fptl .fp-item[aria-current="true"]');if(a&&a.scrollIntoView)a.scrollIntoView({block:"nearest"});}
+document.addEventListener("keydown",function(e){
+  if(!el("fpbar")||S.dlg)return;
+  var t=e.target, tag=t&&t.tagName; if(tag==="INPUT"||tag==="TEXTAREA"||tag==="SELECT"||(t&&t.isContentEditable))return;
+  if(e.metaKey||e.ctrlKey||e.altKey)return;
+  if(e.key==="ArrowLeft"){e.preventDefault();fpStep(-1);} else if(e.key==="ArrowRight"){e.preventDefault();fpStep(1);}
+  else if(e.key===" "){e.preventDefault();fpPlay();} else if(e.key==="Home"){e.preventDefault();fpSeek(0);} else if(e.key==="End"){e.preventDefault();fpSeek(1e9);}
+});
 function txQ(v){S.tx.q=v;clearTimeout(txQTimer);txQTimer=setTimeout(function(){var q=v;render();var inp=document.querySelector(".tx-tools input");if(inp){inp.focus();inp.setSelectionRange(q.length,q.length);}},160);}
 
 /* ===================== Linked work: the run node's neighbourhood ===================== */
@@ -3821,6 +3953,15 @@ function frameDetail(f){
      '  <span class="k">"taint"</span>: { <span class="k">"marked"</span>: false, <span class="k">"sources"</span>: [] },\n'+
      '  <span class="k">"kill_switches"</span>: <span class="s">"none armed for this tool"</span>,\n'+
      '  <span class="k">"enforcement_tier"</span>: <span class="s">"gateway"</span>\n}</pre>';
+  }
+  if(f.kind==="control.pause"||f.kind==="control.resume"){
+    var paused=f.kind==="control.pause";
+    return '<div class="panel" style="background:var(--ink)"><div class="panel-b">'+
+     '<p class="eyebrow q">'+(paused?'Took effect at the boundary after seq '+(f.seq-1)+' · attributed to the operator':'Delivered at the next boundary · the reason reached the model as a control frame')+'</p>'+
+     '<p style="margin:0;color:var(--fg)">'+h(f.reason||"—")+'</p>'+
+     '<div class="kv" style="margin-top:12px"><dt>Issuer</dt><dd>'+h(f.by||"Marcus Bell")+' · <span class="mono">'+(paused?'run.pause':'run.resume')+'</span></dd>'+
+     '<dt>While paused</dt><dd>'+(paused?'run token held · budget reservation held · pending approvals keep their clocks · no new dispatch':'the pause frame and this one are both in the chain; the gap is visible in the receipts')+'</dd>'+
+     '<dt>Digest</dt><dd class="mono">'+h(f.dig||"sha256:pending")+'</dd></div></div></div>';
   }
   if(f.kind==="control.steer"){
     return '<div class="panel" style="background:var(--ink)"><div class="panel-b">'+
@@ -4639,7 +4780,7 @@ function pAgent(r){
     body='<div class="panel"><div class="panel-h"><h3>Runs</h3><span class="mono dim" style="margin-left:auto;font-size:11px">'+a.runs30.toLocaleString()+' in 30 days · '+rr.length+' shown</span></div><div class="tw"><table>'+
      '<thead><tr><th>Run</th><th>Status</th><th>Verdict</th><th class="num">Cost</th><th class="num">Frames</th><th>Started</th></tr></thead><tbody>'+
      rr.map(function(x){return '<tr class="click'+(x.verdict==="flipped"?' flipped':'')+'" onclick="go(\'#/'+ORG.slug+'/'+x.ws+'/runs/'+x.id+'\')">'+
-      '<td class="tid">'+h(x.id)+'</td><td>'+statusBadge(x.status)+'</td><td>'+verdictCell(x)+'</td>'+
+      '<td class="tid">'+h(x.id)+'</td><td>'+statusBadge(runStatus(x))+'</td><td>'+verdictCell(x)+'</td>'+
       '<td class="num">'+usd(x.cost)+'</td><td class="num">'+x.frames+'</td><td class="mono dim" style="font-size:11px">'+h(x.started)+'</td></tr>';}).join("")+
      '</tbody></table></div></div>';
   } else {
@@ -6340,7 +6481,7 @@ function steerFleetBody(){
     return '<label class="check"><input type="checkbox"'+(on?' checked':'')+' onchange="steerToggleSel(\''+a.key+'\',this.checked)" aria-label="'+h(a.key)+'">'+
      '<div class="grow"><div class="n">'+h(a.key)+'</div><div class="d">'+
       (r?'<span class="mono">'+h(r.id)+'</span> · turn '+r.turn+' · '+h(r.taskTitle):'no run in flight · reads this at its next model call')+'</div></div>'+
-     scorePair(a,true)+(r?statusBadge(r.status):'<span class="b b-q"><span class="d"></span>idle</span>')+'</label>';}).join("");
+     scorePair(a,true)+(r?statusBadge(runStatus(r)):'<span class="b b-q"><span class="d"></span>idle</span>')+'</label>';}).join("");
   return '<div class="field"><div class="row" style="justify-content:space-between;margin-bottom:6px"><label style="margin:0">Agents · '+n+' of '+list.length+' selected</label>'+
     '<span class="row" style="gap:6px"><button class="btn sm ghost" onclick="steerSelAll(true)">All</button><button class="btn sm ghost" onclick="steerSelAll(false)">None</button></span></div>'+
     '<div class="steer-list">'+rows+'</div>'+
@@ -6459,6 +6600,9 @@ function dialog(){
      '<div class="hr"></div><button class="btn" onclick="closeDialog();openDialog(\'newws\')">Create a workspace</button>',
      f:'<button class="btn" onclick="closeDialog()">Close</button>'},
    avatar:avatarDlg(),
+   pause:{t:"Pause this run",w:false,b:pauseBody(),
+     f:'<span class="grow" style="font-size:12.5px;color:var(--muted)">Recorded as a <span class="mono">control.pause</span> frame under <span class="mono">run.pause</span>.</span>'+
+       '<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="pauseRun(S.dlgArg)">Pause at the next boundary</button>'},
    steer:{t:"Steer this run",w:false,b:
      steerTextField("Skip the mobile repo this cycle; 4.11.0 is platform only.")+
      '<div class="field"><label>Address</label><select aria-label="Address"><option>this run</option><option>@acme.core.release-manager — every live run of this agent</option></select>'+
