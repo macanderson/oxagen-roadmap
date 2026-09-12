@@ -1,0 +1,2348 @@
+<title>The Assistant on Every Page, and the Account</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap">
+<style>
+/* ─────────────────────────────────────────────────────────────────────────
+   Oxagen Mission Control — W11: the assistant on every page, and the account.
+   House system: /Projects/oxagen-house-brand (tokens/house-tokens.css).
+   Dark-first: :root is the dark palette; light is the override.
+   ───────────────────────────────────────────────────────────────────────── */
+:root{
+  /* house tokens, verbatim */
+  --gold:#D6962C; --gold-bright:#F1C364; --gold-deep:#8B5E1A;
+  --ink:#10100F; --void:#0A0A09; --panel:#181715; --hl:#201F1C;
+  --border:#292722; --rule:#34322D;
+  --fg:#F2EEE5; --body:#DDD8CD; --muted:#9B958A; --dim:#6E6A62;
+  --accent-text:#D6962C;
+  --gold-sheen:linear-gradient(45deg,#8B5E1A 0%,#D6962C 38%,#F1C364 56%,#D6962C 74%,#8B5E1A 100%);
+  /* semantic state — separate from gold, which never encodes a state */
+  --ok:#5FB98A; --wait:#6BA8DE; --bad:#E0664F; --crit:#F0563E;
+  --shadow:0 1px 0 rgba(255,255,255,.03), 0 18px 44px rgba(0,0,0,.5);
+  --shadow-lift:0 1px 0 rgba(255,255,255,.04), 0 28px 70px rgba(0,0,0,.62);
+  --scrim:rgba(10,10,9,.72);
+  /* derived state surfaces */
+  --ok-bg:color-mix(in srgb,var(--ok) 14%,transparent);
+  --ok-bd:color-mix(in srgb,var(--ok) 34%,transparent);
+  --wait-bg:color-mix(in srgb,var(--wait) 14%,transparent);
+  --wait-bd:color-mix(in srgb,var(--wait) 34%,transparent);
+  --bad-bg:color-mix(in srgb,var(--bad) 14%,transparent);
+  --bad-bd:color-mix(in srgb,var(--bad) 34%,transparent);
+  --gold-bg:color-mix(in srgb,var(--gold) 13%,transparent);
+  --gold-bd:color-mix(in srgb,var(--gold) 32%,transparent);
+  /* metrics */
+  --sb:238px; --rail:52px; --ap:412px; --tb:53px;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+  --font:"Space Grotesk","Helvetica Neue",Arial,sans-serif;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme:light){ :root:not([data-theme="dark"]){
+  --ink:#F2EEE5; --void:#E9E3D8; --panel:#F8F5EE; --hl:#EFEAE0;
+  --border:#D8CDBD; --rule:#C9BFAE;
+  --fg:#10100F; --body:#2A2823; --muted:#6B665C; --dim:#8C877C;
+  --accent-text:#8B5E1A;
+  --ok:#1F7A52; --wait:#1E5F92; --bad:#A93A22; --crit:#8E2A16;
+  --shadow:0 1px 0 rgba(255,255,255,.7), 0 18px 44px rgba(16,16,15,.08);
+  --shadow-lift:0 1px 0 rgba(255,255,255,.8), 0 28px 70px rgba(16,16,15,.14);
+  --scrim:rgba(42,40,35,.4);
+  color-scheme:light;
+}}
+:root[data-theme="light"]{
+  --ink:#F2EEE5; --void:#E9E3D8; --panel:#F8F5EE; --hl:#EFEAE0;
+  --border:#D8CDBD; --rule:#C9BFAE;
+  --fg:#10100F; --body:#2A2823; --muted:#6B665C; --dim:#8C877C;
+  --accent-text:#8B5E1A;
+  --ok:#1F7A52; --wait:#1E5F92; --bad:#A93A22; --crit:#8E2A16;
+  --shadow:0 1px 0 rgba(255,255,255,.7), 0 18px 44px rgba(16,16,15,.08);
+  --shadow-lift:0 1px 0 rgba(255,255,255,.8), 0 28px 70px rgba(16,16,15,.14);
+  --scrim:rgba(42,40,35,.4);
+  color-scheme:light;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--void); color:var(--fg);
+  font-family:var(--font); font-size:14px; line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+:focus-visible{outline:2px solid var(--gold); outline-offset:2px; border-radius:3px}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+a{color:var(--accent-text);text-decoration:none}
+a:hover{text-decoration:underline}
+.mono{font-family:var(--mono)}
+.num{font-variant-numeric:tabular-nums}
+
+/* ── frame: the whole app, so the phone toggle and a real narrow window
+      resolve through one ResizeObserver and one rule set ─────────────── */
+#frame{
+  width:100%; margin:0 auto; background:var(--ink); color:var(--fg);
+  height:100vh; display:flex; flex-direction:column; position:relative; overflow:hidden;
+}
+#frame.phone{
+  max-width:400px; height:min(860px,calc(100vh - 44px)); margin:22px auto;
+  border:1px solid var(--rule); border-radius:22px; overflow:hidden; box-shadow:var(--shadow-lift);
+}
+body.phone-mode{background:var(--void);padding:0 16px}
+
+/* ── top bar ─────────────────────────────────────────────────────────── */
+.tb{
+  height:var(--tb); flex:0 0 auto; display:flex; align-items:center; gap:10px;
+  padding:0 14px 0 0; border-bottom:1px solid var(--border); background:var(--panel);
+}
+.tb-brand{
+  width:var(--sb); flex:0 0 var(--sb); height:100%; display:flex; align-items:center;
+  gap:9px; padding-left:16px; border-right:1px solid var(--border);
+}
+.tb-brand svg{height:19px;width:auto;display:block;color:var(--fg)}
+.crumbs{display:flex;align-items:center;gap:7px;min-width:0;flex:1 1 auto;padding-left:14px}
+.crumb{font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crumb.here{color:var(--fg);font-weight:500}
+.crumb-sep{color:var(--dim);font-size:11px}
+.sw{
+  display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:7px;
+  border:1px solid var(--border); background:var(--ink); font-size:12.5px; font-weight:500;
+  white-space:nowrap;
+}
+.sw:hover{border-color:var(--rule);background:var(--hl)}
+.sw .car{color:var(--dim);font-size:9px}
+.sw .ns{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.tb-right{display:flex;align-items:center;gap:6px;flex:0 0 auto}
+.iconbtn{
+  width:30px;height:30px;border-radius:8px;display:grid;place-items:center;
+  color:var(--muted);border:1px solid transparent;position:relative;
+}
+.iconbtn:hover{background:var(--hl);color:var(--fg);border-color:var(--border)}
+.iconbtn.on{background:var(--gold-bg);color:var(--gold);border-color:var(--gold-bd)}
+.iconbtn svg{width:16px;height:16px;display:block}
+.dot{
+  position:absolute;top:4px;right:4px;min-width:14px;height:14px;padding:0 3px;border-radius:7px;
+  background:var(--bad);color:#fff;font-size:9px;font-weight:700;display:grid;place-items:center;
+  font-family:var(--mono);line-height:1;
+}
+.cmdk{
+  display:flex;align-items:center;gap:8px;height:30px;padding:0 9px;border-radius:8px;
+  border:1px solid var(--border);background:var(--ink);color:var(--dim);font-size:12.5px;
+  min-width:190px;
+}
+.cmdk:hover{border-color:var(--rule);color:var(--muted)}
+.kbd{
+  font-family:var(--mono);font-size:10px;border:1px solid var(--border);border-radius:4px;
+  padding:1px 4px;color:var(--dim);background:var(--hl);margin-left:auto;
+}
+.avat{
+  width:26px;height:26px;border-radius:50%;display:grid;place-items:center;
+  background:var(--hl);border:1px solid var(--border);font-size:10.5px;font-weight:600;
+  letter-spacing:.02em;color:var(--body);
+}
+
+/* ── body grid ───────────────────────────────────────────────────────── */
+.shell{flex:1 1 auto;display:grid;grid-template-columns:var(--sb) minmax(0,1fr) auto;min-height:0}
+.sb{
+  border-right:1px solid var(--border);background:var(--panel);overflow-y:auto;
+  padding:12px 10px 22px;display:flex;flex-direction:column;gap:3px;
+}
+.sb-lab{
+  font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);
+  font-weight:600;padding:14px 8px 6px;
+}
+.nav{
+  display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:8px;
+  color:var(--body);font-size:13px;font-weight:500;border:1px solid transparent;width:100%;text-align:left;
+}
+.nav:hover{background:var(--hl);color:var(--fg)}
+.nav.on{background:var(--hl);color:var(--fg);border-color:var(--border)}
+.nav.on .glyph{color:var(--gold)}
+.glyph{width:15px;flex:0 0 15px;display:grid;place-items:center;color:var(--dim)}
+.glyph svg{width:15px;height:15px;display:block}
+.nav .tag{
+  margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--dim);
+  background:var(--ink);border:1px solid var(--border);border-radius:5px;padding:0 4px;
+}
+.nav .tag.hot{color:var(--wait);border-color:var(--wait-bd);background:var(--wait-bg)}
+
+.main{overflow-y:auto;min-width:0;background:var(--ink)}
+.page{padding:22px 26px 60px;max-width:1180px}
+
+/* ── page furniture ──────────────────────────────────────────────────── */
+.eyebrow{
+  font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-text);
+  font-weight:600;margin:0 0 7px;
+}
+h1.pt{font-size:24px;font-weight:600;margin:0 0 5px;letter-spacing:-.01em;text-wrap:balance}
+.sub{color:var(--muted);margin:0 0 20px;font-size:13.5px;max-width:74ch}
+h2.st{font-size:15px;font-weight:600;margin:0;letter-spacing:-.005em}
+.sec{margin-top:26px}
+.sec-hd{display:flex;align-items:baseline;gap:10px;margin-bottom:11px;flex-wrap:wrap}
+.sec-hd .note{font-size:12px;color:var(--dim);margin-left:auto;font-family:var(--mono)}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:12px}
+.card.pad{padding:16px 18px}
+.grid{display:grid;gap:13px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(290px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(215px,1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(172px,1fr))}
+
+/* stat tiles — used only where the figure is the point */
+.stat{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:13px 15px}
+.stat .k{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:600}
+.stat .v{font-size:23px;font-weight:600;margin-top:5px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.stat .m{font-size:11.5px;color:var(--muted);margin-top:3px;font-family:var(--mono)}
+
+/* tables */
+.tw{overflow-x:auto;border:1px solid var(--border);border-radius:12px;background:var(--panel)}
+table{border-collapse:collapse;width:100%;font-size:12.5px;min-width:560px}
+th{
+  font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:600;
+  text-align:left;padding:9px 13px;border-bottom:1px solid var(--border);white-space:nowrap;
+}
+td{padding:9px 13px;border-bottom:1px solid var(--border);vertical-align:middle;color:var(--body)}
+tr:last-child td{border-bottom:0}
+tbody tr:hover{background:var(--hl)}
+td.r,th.r{text-align:right;font-variant-numeric:tabular-nums}
+.idc{font-family:var(--mono);font-size:11.5px;color:var(--fg)}
+.sc{font-family:var(--mono);font-size:11px;color:var(--dim)}
+
+/* badges: state in colour, strength in form */
+.b{
+  display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:10px;
+  font-weight:500;padding:1.5px 6px;border-radius:5px;border:1px solid var(--border);
+  color:var(--muted);background:var(--ink);white-space:nowrap;letter-spacing:.01em;
+}
+.b.ok{color:var(--ok);border-color:var(--ok-bd);background:var(--ok-bg)}
+.b.wait{color:var(--wait);border-color:var(--wait-bd);background:var(--wait-bg)}
+.b.bad{color:var(--bad);border-color:var(--bad-bd);background:var(--bad-bg)}
+.b.crit{color:#fff;background:var(--crit);border-color:var(--crit);font-weight:600}
+.b.gold{color:var(--accent-text);border-color:var(--gold-bd);background:var(--gold-bg)}
+/* enforcement tier: filled > outlined > dashed, so strength reads without the word */
+.tier{font-family:var(--mono);font-size:10px;padding:1.5px 6px;border-radius:5px;white-space:nowrap}
+.tier.gateway{background:var(--fg);color:var(--ink);font-weight:600}
+.tier.harness{border:1px solid var(--rule);color:var(--body)}
+.tier.observe{border:1px dashed var(--rule);color:var(--dim)}
+.grade{font-family:var(--mono);font-size:10px;color:var(--muted)}
+
+/* money always carries its basis */
+.money{font-variant-numeric:tabular-nums;font-family:var(--mono);color:var(--fg)}
+.basis{font-family:var(--mono);font-size:9.5px;color:var(--dim);letter-spacing:.02em}
+
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;font-size:12.5px;align-items:baseline}
+.kv dt{color:var(--muted);white-space:nowrap}
+.kv dd{margin:0;color:var(--body);font-family:var(--mono);font-size:11.5px;overflow-wrap:anywhere}
+
+.btn{
+  display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;
+  border:1px solid var(--border);background:var(--ink);color:var(--body);
+  font-size:12.5px;font-weight:500;
+}
+.btn:hover{background:var(--hl);color:var(--fg);border-color:var(--rule)}
+.btn.pri{background:var(--gold);border-color:var(--gold);color:#10100F;font-weight:600}
+.btn.pri:hover{background:var(--gold-bright);border-color:var(--gold-bright);color:#10100F}
+.btn.sm{padding:4px 9px;font-size:11.5px;border-radius:7px}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+
+pre{
+  background:var(--ink);border:1px solid var(--border);border-radius:9px;padding:11px 13px;
+  overflow-x:auto;font-family:var(--mono);font-size:11.5px;line-height:1.6;color:var(--body);margin:0;
+}
+pre .c{color:var(--dim)}
+pre .s{color:var(--ok)}
+pre .k2{color:var(--wait)}
+
+/* empty / loading / error / denied */
+.blank{
+  border:1px dashed var(--rule);border-radius:12px;padding:40px 26px;text-align:center;
+  display:flex;flex-direction:column;align-items:center;gap:9px;background:var(--panel);
+}
+.blank h3{margin:0;font-size:15px;font-weight:600}
+.blank p{margin:0;color:var(--muted);font-size:13px;max-width:56ch}
+.blank .ic{width:34px;height:34px;color:var(--dim)}
+.blank.err{border-style:solid;border-color:var(--bad-bd);background:var(--bad-bg)}
+.blank.den{border-style:solid;border-color:var(--wait-bd);background:var(--wait-bg)}
+.skel{background:var(--hl);border-radius:6px;position:relative;overflow:hidden}
+.skel::after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--fg) 7%,transparent),transparent);
+  animation:sweep 1.5s ease-in-out infinite;
+}
+@keyframes sweep{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+@media (prefers-reduced-motion:reduce){.skel::after{animation:none;opacity:.35}}
+
+/* ── assistant ───────────────────────────────────────────────────────── */
+.ap{
+  flex:0 0 auto;border-left:1px solid var(--border);background:var(--panel);
+  display:flex;flex-direction:column;min-height:0;
+}
+.ap.rail{width:var(--rail);align-items:center;padding:11px 0;gap:11px}
+.ap.open{width:var(--ap);}
+.railbtn{
+  width:34px;height:34px;border-radius:9px;display:grid;place-items:center;color:var(--muted);
+  border:1px solid transparent;position:relative;
+}
+.railbtn:hover{background:var(--hl);color:var(--fg);border-color:var(--border)}
+.railbtn.mark{border-color:var(--gold-bd);background:var(--gold-bg);color:var(--gold)}
+.railbtn svg{width:17px;height:17px;display:block}
+.rail-rot{
+  writing-mode:vertical-rl;font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--dim);font-weight:600;margin-top:4px;
+}
+.ap-hd{
+  flex:0 0 auto;padding:11px 13px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:8px;
+}
+.ap-hd .t{font-size:13px;font-weight:600;display:flex;align-items:center;gap:7px}
+.ap-hd .t svg{width:15px;height:15px;color:var(--gold)}
+.ap-ctx{
+  flex:0 0 auto;padding:8px 13px;border-bottom:1px solid var(--border);background:var(--ink);
+  font-size:11.5px;color:var(--muted);display:flex;align-items:center;gap:7px;flex-wrap:wrap;
+}
+.ap-ctx .pin{font-family:var(--mono);font-size:10.5px;color:var(--accent-text)}
+.ap-tabs{
+  flex:0 0 auto;display:flex;gap:2px;padding:7px 9px;border-bottom:1px solid var(--border);
+  overflow-x:auto;
+}
+.ap-tab{
+  padding:4px 9px;border-radius:7px;font-size:11.5px;font-weight:500;color:var(--muted);
+  white-space:nowrap;border:1px solid transparent;
+}
+.ap-tab:hover{background:var(--hl);color:var(--fg)}
+.ap-tab.on{background:var(--hl);color:var(--fg);border-color:var(--border)}
+.ap-body{flex:1 1 auto;overflow-y:auto;padding:14px 13px 18px;display:flex;flex-direction:column;gap:14px}
+.ap-foot{flex:0 0 auto;border-top:1px solid var(--border);padding:10px 11px;background:var(--panel)}
+.comp{
+  display:flex;align-items:flex-end;gap:8px;border:1px solid var(--border);border-radius:10px;
+  background:var(--ink);padding:8px 9px;
+}
+.comp textarea{
+  flex:1;border:0;background:none;color:var(--fg);font:inherit;font-size:12.5px;resize:none;
+  min-height:34px;max-height:110px;outline:none;line-height:1.5;
+}
+.comp textarea::placeholder{color:var(--dim)}
+.sendb{
+  width:28px;height:28px;border-radius:7px;background:var(--gold);color:#10100F;display:grid;
+  place-items:center;flex:0 0 auto;
+}
+.sendb:hover{background:var(--gold-bright)}
+.sendb svg{width:14px;height:14px}
+.ap-meter{
+  display:flex;gap:9px;align-items:center;font-family:var(--mono);font-size:10px;color:var(--dim);
+  margin-top:7px;flex-wrap:wrap;
+}
+
+/* messages */
+.msg{display:flex;flex-direction:column;gap:7px}
+.msg-who{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--muted);font-weight:500}
+.msg-who .av{
+  width:19px;height:19px;border-radius:50%;display:grid;place-items:center;font-size:8.5px;
+  font-weight:700;background:var(--hl);border:1px solid var(--border);color:var(--body);
+}
+.msg-who .av.ox{background:var(--gold-bg);border-color:var(--gold-bd);color:var(--gold)}
+.msg-who .av.ox svg{width:11px;height:11px}
+.msg-who time{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--dim)}
+.msg.op .bub{
+  background:var(--hl);border:1px solid var(--border);border-radius:10px;padding:9px 11px;
+  font-size:13px;color:var(--fg);
+}
+.msg .bd{font-size:13px;color:var(--body);display:flex;flex-direction:column;gap:9px}
+.msg .bd p{margin:0}
+.msg .bd strong{color:var(--fg);font-weight:600}
+.msg .bd code{font-family:var(--mono);font-size:11.5px;background:var(--hl);padding:.08em .32em;border-radius:4px;color:var(--fg)}
+
+/* the governed action card — the wow object */
+.ga{
+  border:1px solid var(--border);border-radius:10px;background:var(--ink);overflow:hidden;
+}
+.ga-hd{
+  display:flex;align-items:center;gap:7px;padding:7px 10px;border-bottom:1px solid var(--border);
+  background:var(--hl);flex-wrap:wrap;
+}
+.ga-hd .n{font-family:var(--mono);font-size:11.5px;color:var(--fg);font-weight:500}
+.ga-hd .seq{
+  font-family:var(--mono);font-size:9.5px;color:var(--dim);border:1px solid var(--border);
+  border-radius:4px;padding:0 4px;background:var(--ink);
+}
+.ga-bd{padding:8px 10px;display:flex;flex-direction:column;gap:6px}
+.ga-bd .l{font-size:11.5px;color:var(--muted);line-height:1.5}
+.ga-bd .l b{color:var(--body);font-weight:500}
+.ga-ft{
+  display:flex;align-items:center;gap:8px;padding:6px 10px;border-top:1px solid var(--border);
+  font-family:var(--mono);font-size:10px;color:var(--dim);flex-wrap:wrap;background:var(--panel);
+}
+.ga-ft .rcp{color:var(--accent-text);border-bottom:1px dotted var(--gold-bd);cursor:pointer}
+.ga-ft .rcp:hover{color:var(--gold-bright)}
+
+/* the assistant's own turn — a run like any other */
+.turnbar{
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:6px 9px;border-radius:8px;
+  border:1px dashed var(--border);background:var(--ink);font-family:var(--mono);font-size:10px;
+  color:var(--dim);
+}
+.turnbar a{color:var(--accent-text)}
+.turnbar .sep{color:var(--rule)}
+
+.chain{display:flex;flex-direction:column;gap:0;border-left:2px solid var(--rule);padding-left:0;margin-left:5px}
+.hop{display:grid;grid-template-columns:76px 1fr;gap:9px;padding:6px 0 6px 12px;position:relative}
+.hop::before{
+  content:"";position:absolute;left:-5px;top:12px;width:8px;height:8px;border-radius:50%;
+  background:var(--panel);border:2px solid var(--rule);
+}
+.hop.hot::before{border-color:var(--wait);background:var(--wait)}
+.hop .hk{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);font-weight:600;padding-top:2px}
+.hop .hv{font-size:12px;color:var(--body)}
+.hop .hv .mono{font-size:11px}
+
+.sugg{display:flex;flex-direction:column;gap:6px}
+.sugg button{
+  text-align:left;border:1px solid var(--border);border-radius:9px;background:var(--ink);
+  padding:8px 10px;font-size:12px;color:var(--body);line-height:1.45;
+}
+.sugg button:hover{background:var(--hl);color:var(--fg);border-color:var(--rule)}
+.sugg button .q{color:var(--dim);font-family:var(--mono);font-size:10px;margin-right:6px}
+
+.thinking{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
+.tdots{display:inline-flex;gap:3px}
+.tdots i{width:4px;height:4px;border-radius:50%;background:var(--gold);animation:bl 1.2s ease-in-out infinite}
+.tdots i:nth-child(2){animation-delay:.16s}
+.tdots i:nth-child(3){animation-delay:.32s}
+@keyframes bl{0%,60%,100%{opacity:.25}30%{opacity:1}}
+
+/* ── dialogs ─────────────────────────────────────────────────────────── */
+.scrim{
+  position:absolute;inset:0;background:var(--scrim);backdrop-filter:blur(3px);z-index:200;
+  display:flex;align-items:flex-start;justify-content:center;padding:8vh 16px 24px;overflow-y:auto;
+}
+.dlg{
+  width:100%;max-width:640px;background:var(--panel);border:1px solid var(--rule);
+  border-radius:14px;box-shadow:var(--shadow-lift);overflow:hidden;
+  display:flex;flex-direction:column;max-height:84vh;
+}
+.dlg.wide{max-width:760px}
+.dlg-hd{
+  display:flex;align-items:center;gap:10px;padding:13px 16px;border-bottom:1px solid var(--border);
+  flex:0 0 auto;
+}
+.dlg-hd h3{margin:0;font-size:15px;font-weight:600}
+.dlg-hd .x{margin-left:auto;color:var(--muted);width:26px;height:26px;border-radius:7px;display:grid;place-items:center}
+.dlg-hd .x:hover{background:var(--hl);color:var(--fg)}
+.dlg-bd{padding:16px;overflow-y:auto;flex:1 1 auto;display:flex;flex-direction:column;gap:16px}
+.dlg-ft{
+  padding:11px 16px;border-top:1px solid var(--border);display:flex;align-items:center;gap:9px;
+  flex:0 0 auto;font-size:11.5px;color:var(--dim);flex-wrap:wrap;
+}
+.dlg-ft .right{margin-left:auto;display:flex;gap:8px}
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);padding:0 16px;flex:0 0 auto;overflow-x:auto}
+.tab{
+  padding:8px 11px;font-size:12.5px;font-weight:500;color:var(--muted);border-bottom:2px solid transparent;
+  white-space:nowrap;margin-bottom:-1px;
+}
+.tab:hover{color:var(--fg)}
+.tab.on{color:var(--fg);border-bottom-color:var(--gold)}
+
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--dim);font-weight:600}
+.field .hint{font-size:11.5px;color:var(--muted);line-height:1.5}
+input[type=text],input[type=email],select{
+  background:var(--ink);border:1px solid var(--border);border-radius:8px;padding:7px 10px;
+  color:var(--fg);font:inherit;font-size:13px;width:100%;
+}
+input:hover,select:hover{border-color:var(--rule)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+.lst{display:flex;flex-direction:column;border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.lst > *{border-bottom:1px solid var(--border)}
+.lst > *:last-child{border-bottom:0}
+.li{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:var(--ink);width:100%;text-align:left}
+.li:hover{background:var(--hl)}
+.li .ic{width:22px;height:22px;border-radius:6px;display:grid;place-items:center;flex:0 0 auto;margin-top:1px}
+.li .ic svg{width:12px;height:12px}
+.li .bd2{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.li .t1{font-size:12.5px;color:var(--fg);font-weight:500}
+.li .t2{font-size:11.5px;color:var(--muted);line-height:1.45}
+.li time{font-family:var(--mono);font-size:10px;color:var(--dim);flex:0 0 auto;white-space:nowrap}
+.li.unread{background:color-mix(in srgb,var(--gold) 5%,var(--ink))}
+.li.unread .t1::before{
+  content:"";display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--gold);
+  margin-right:6px;vertical-align:middle;
+}
+
+/* command menu */
+.cmd-in{
+  display:flex;align-items:center;gap:9px;padding:13px 16px;border-bottom:1px solid var(--border);
+}
+.cmd-in input{border:0;background:none;font-size:15px;padding:0}
+.cmd-in input:hover{border:0}
+.cmd-in svg{width:16px;height:16px;color:var(--dim);flex:0 0 auto}
+.cmd-grp{padding:8px 0}
+.cmd-lab{
+  font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);font-weight:600;
+  padding:4px 16px 5px;display:flex;align-items:center;gap:8px;
+}
+.cmd-lab .c{font-family:var(--mono);letter-spacing:0;text-transform:none;color:var(--rule)}
+.cmd-it{
+  display:flex;align-items:center;gap:10px;padding:7px 16px;width:100%;text-align:left;
+}
+.cmd-it:hover,.cmd-it.sel{background:var(--hl)}
+.cmd-it .nm{font-size:13px;color:var(--fg);flex:0 0 auto;font-weight:500}
+.cmd-it .nm.mono{font-family:var(--mono);font-size:12px}
+.cmd-it .ds{font-size:11.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.cmd-it .tr{margin-left:auto;display:flex;gap:4px;flex:0 0 auto}
+
+/* ── the mockup's own chrome: never mistakable for product UI ────────── */
+#states{
+  position:fixed;right:12px;bottom:12px;z-index:900;font-family:var(--mono);font-size:10.5px;
+  background:#0A0A09;color:#9B958A;border:1px solid #34322D;border-radius:10px;
+  box-shadow:0 18px 44px rgba(0,0,0,.6);max-width:min(92vw,272px);
+}
+#states .sh{
+  display:flex;align-items:center;gap:7px;padding:7px 10px;border-bottom:1px solid #292722;
+  color:#6E6A62;letter-spacing:.1em;text-transform:uppercase;font-size:9px;font-weight:700;width:100%;
+}
+#states .sh b{color:#D6962C;font-weight:700}
+#states .sh .tg{margin-left:auto;color:#6E6A62}
+#states .sbd{padding:9px 10px;display:flex;flex-direction:column;gap:9px}
+#states .grp{display:flex;flex-direction:column;gap:4px}
+#states .gl{color:#6E6A62;font-size:9px;letter-spacing:.1em;text-transform:uppercase}
+#states .opts{display:flex;flex-wrap:wrap;gap:4px}
+#states button.o{
+  border:1px solid #292722;background:#10100F;color:#9B958A;border-radius:6px;padding:3px 7px;
+  font-family:var(--mono);font-size:10px;
+}
+#states button.o:hover{border-color:#34322D;color:#F2EEE5}
+#states button.o[aria-pressed=true]{background:#D6962C;border-color:#D6962C;color:#10100F;font-weight:600}
+#states.min .sbd{display:none}
+#states .nb{color:#6E6A62;font-size:9.5px;line-height:1.5;border-top:1px solid #292722;padding-top:7px}
+
+/* ── narrow / phone: one rule set, driven by a ResizeObserver ────────── */
+#frame.is-narrow .shell{grid-template-columns:1fr}
+#frame.is-narrow .sb{
+  position:absolute;inset:var(--tb) auto 0 0;width:246px;z-index:120;transform:translateX(-102%);
+  transition:transform .18s ease;box-shadow:var(--shadow-lift);height:calc(100% - var(--tb));
+}
+#frame.is-narrow.menu .sb{transform:none}
+#frame.is-narrow .tb-brand{width:auto;flex:0 0 auto;border-right:0;padding-left:10px;gap:7px}
+#frame.is-narrow .crumbs{display:none}
+#frame.is-narrow .cmdk{min-width:0;width:30px;padding:0;justify-content:center}
+#frame.is-narrow .cmdk span,#frame.is-narrow .cmdk .kbd{display:none}
+#frame.is-narrow .ap.open{
+  position:absolute;inset:var(--tb) 0 0 0;width:auto;z-index:130;border-left:0;
+  height:calc(100% - var(--tb));
+}
+#frame.is-narrow .ap.rail{
+  position:absolute;right:0;bottom:0;top:auto;width:auto;height:auto;border:0;background:none;
+  padding:0 12px 14px;z-index:110;
+}
+#frame.is-narrow .ap.rail .rail-rot,#frame.is-narrow .ap.rail .railbtn:not(.mark){display:none}
+#frame.is-narrow .ap.rail .railbtn.mark{
+  width:46px;height:46px;border-radius:50%;background:var(--gold);color:#10100F;
+  border-color:var(--gold);box-shadow:var(--shadow-lift);
+}
+#frame.is-narrow .ap.rail .railbtn.mark svg{width:20px;height:20px}
+#frame.is-narrow .page{padding:16px 16px 80px}
+#frame.is-narrow .shell{position:relative}
+#frame.is-narrow .row2{grid-template-columns:1fr}
+#frame.is-narrow .g2,#frame.is-narrow .g3,#frame.is-narrow .g4{grid-template-columns:1fr}
+#frame.is-narrow .scrim{padding:0;align-items:stretch}
+#frame.is-narrow .dlg{max-width:none;max-height:none;border-radius:0;border:0}
+#frame.is-narrow .hop{grid-template-columns:1fr;gap:1px}
+.mburg{display:none}
+#frame.is-narrow .mburg{display:grid}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><symbol id="oxlockup" viewBox="0 0 574.244 106.313"><g transform="translate(0,0.000) scale(2.842952)"><path d="M6.300 0.000L12.600 3.320L12.600 9.960L6.300 13.280L0.000 9.960L0.000 3.320ZM1.000 3.885L1.000 9.395L6.300 12.150L11.600 9.395L11.600 3.885L6.300 1.130Z M19.376 0.000L25.676 3.320L25.676 9.960L19.376 13.280L13.076 9.960L13.076 3.320ZM14.076 3.885L14.076 9.395L19.376 12.150L24.676 9.395L24.676 3.885L19.376 1.130Z M12.838 10.240L19.138 13.560L19.138 20.200L12.838 23.520L6.538 20.200L6.538 13.560ZM7.538 14.125L7.538 19.635L12.838 22.390L18.138 19.635L18.138 14.125L12.838 11.370Z M19.376 20.480L25.676 23.800L25.676 30.440L19.376 33.760L13.076 30.440L13.076 23.800ZM14.076 24.365L14.076 29.875L19.376 32.630L24.676 29.875L24.676 24.365L19.376 21.610Z" fill="currentColor"/><path d="M25.914 10.240L32.214 13.560L32.214 20.200L25.914 23.520L19.614 20.200L19.614 13.560Z M6.300 20.480L12.600 23.800L12.600 30.440L6.300 33.760L0.000 30.440L0.000 23.800Z" fill="#D6962C"/></g><g transform="translate(120.376,13.067)"><path d="M33.9083 68.758Q24.1657 68.758 16.4786 64.7737Q8.79142 60.7894 4.39571 53.2965Q0 45.8035 0 35.3862V33.3718Q0 22.9544 4.39571 15.4615Q8.79142 7.96854 16.4786 3.98427Q24.1657 0 33.9083 0Q43.6509 0 51.3381 3.98427Q59.0252 7.96854 63.4209 15.4615Q67.8166 22.9544 67.8166 33.3718V35.3862Q67.8166 45.8035 63.4209 53.2965Q59.0252 60.7894 51.3381 64.7737Q43.6509 68.758 33.9083 68.758ZM33.9083 55.3486Q42.1895 55.3486 47.4689 50.0198Q52.7484 44.691 52.7484 35.0142V33.7437Q52.7484 24.067 47.5233 18.7382Q42.2981 13.4094 33.9083 13.4094Q25.6502 13.4094 20.3592 18.7382Q15.0683 24.067 15.0683 33.7437V35.0142Q15.0683 44.691 20.3592 50.0198Q25.6502 55.3486 33.9083 55.3486Z M176.569 68.758Q169.637 68.758 164.119 66.3453Q158.601 63.9327 155.387 59.2935Q152.173 54.6542 152.173 48.0088Q152.173 41.3403 155.387 36.8558Q158.601 32.3712 164.27 30.1017Q169.94 27.8323 177.174 27.8323H196.047V23.8925Q196.047 18.7316 192.874 15.5274Q189.701 12.3232 182.99 12.3232Q176.411 12.3232 173.049 15.3842Q169.686 18.4452 168.627 23.3593L154.691 18.7315Q156.27 13.6133 159.748 9.39702Q163.225 5.18071 169.049 2.59035Q174.874 0 183.208 0Q195.972 0 203.326 6.42816Q210.681 12.8563 210.681 24.9392V50.4707Q210.681 54.4204 214.368 54.4204H219.795V66.9148H209.197Q204.464 66.9148 201.442 64.5334Q198.42 62.1521 198.42 58.1563V57.8864H196.126Q195.392 59.6967 193.399 62.2985Q191.406 64.9004 187.388 66.8292Q183.369 68.758 176.569 68.758ZM179.05 56.4348Q186.581 56.4348 191.314 52.1592Q196.047 47.8837 196.047 40.6031V39.2405H178.175Q173.175 39.2405 170.208 41.3881Q167.241 43.5358 167.241 47.5513Q167.241 51.5668 170.34 54.0008Q173.439 56.4348 179.05 56.4348Z M227.767 34.6423V32.6279Q227.767 22.3817 231.86 15.0863Q235.953 7.79081 242.768 3.8954Q249.582 0 257.706 0Q266.935 0 271.762 3.33256Q276.589 6.66512 278.81 10.4107H281.042V1.8432H295.801V79.33Q295.801 85.6989 292.104 89.4725Q288.408 93.2462 282.079 93.2462H238.369V80.0541H277.023Q280.779 80.0541 280.779 76.1043V57.2775H278.547Q277.161 59.5683 274.665 61.8904Q272.168 64.2125 268.057 65.7414Q263.946 67.2702 257.706 67.2702Q249.582 67.2702 242.756 63.3748Q235.93 59.4794 231.848 52.1724Q227.767 44.8655 227.767 34.6423ZM261.938 54.0781Q270.151 54.0781 275.573 48.8612Q280.996 43.6443 280.996 34.2704V32.9999Q280.996 23.4943 275.627 18.3432Q270.259 13.1921 261.938 13.1921Q253.749 13.1921 248.315 18.3432Q242.881 23.4943 242.881 32.9999V34.2704Q242.881 43.6443 248.315 48.8612Q253.749 54.0781 261.938 54.0781Z M344.764 68.758Q334.998 68.758 327.583 64.6108Q320.167 60.4636 316.031 52.9048Q311.896 45.346 311.896 35.1689V33.589Q311.896 23.3889 315.977 15.8416Q320.059 8.2944 327.397 4.1472Q334.735 0 344.385 0Q353.881 0 360.956 4.1867Q368.031 8.37341 371.981 15.8515Q375.931 23.3297 375.931 33.2895V38.6974H327.181Q327.468 46.3334 332.587 50.9496Q337.707 55.5658 345.198 55.5658Q352.522 55.5658 356.101 52.3534Q359.681 49.141 361.553 45.0629L373.985 51.4813Q372.119 55.0656 368.63 59.1042Q365.141 63.1428 359.394 65.9504Q353.648 68.758 344.764 68.758ZM327.313 27.2892H360.622Q360.095 20.7986 355.7 16.9954Q351.304 13.1921 344.277 13.1921Q337.055 13.1921 332.691 16.9954Q328.327 20.7986 327.313 27.2892Z M391.548 66.9148V1.8432H406.353V10.9769H408.585Q410.303 7.25429 414.832 3.99908Q419.361 0.743866 428.435 0.743866Q435.956 0.743866 441.695 4.12911Q447.434 7.51435 450.651 13.5903Q453.868 19.6663 453.868 27.9442V66.9148H438.8V29.1226Q438.8 21.1969 434.891 17.3492Q430.983 13.5015 423.9 13.5015Q415.872 13.5015 411.244 18.8237Q406.617 24.146 406.617 33.9445V66.9148Z" fill="currentColor"/><path d="M73.9979 66.9148 98.2261 34.0696 74.3764 1.8432H91.9626L107.9 24.3499H110.131L126.068 1.8432H143.654L119.805 34.0696L144.033 66.9148H126.206L110.131 44.0065H107.9L91.8244 66.9148Z" fill="#D6962C"/></g></symbol></svg>
+
+<div id="frame"></div>
+
+<div id="states" role="region" aria-label="Mockup states control">
+  <button class="sh" id="st-toggle" aria-expanded="true">
+    <b>mockup</b><span>states</span><span class="tg" aria-hidden="true">&#9662;</span>
+  </button>
+  <div class="sbd" id="st-body"></div>
+</div>
+
+<script>
+"use strict";
+/* ═══════════════════════════════════════════════════════════════════════
+   Oxagen Mission Control — W11
+   One demo customer: Acme Robotics (org acme), workspaces core-platform
+   and finops. Every figure below is internally consistent: run totals sum
+   to the operator, the mandate ledger balances, the price book prices the
+   concrete model id the provider returned.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+const NOW = "15:47:12Z";
+const TODAY = "2026-09-11";
+
+/* ── icons ─────────────────────────────────────────────────────────── */
+const I = {
+  fleet:'<path d="M2 3h5v5H2zM9 3h5v5H9zM2 9h5v4H2zM9 9h5v4H9"/>',
+  run:'<path d="M3 2.5v11l9-5.5z"/>',
+  agents:'<rect x="3" y="4" width="10" height="8" rx="2"/><path d="M8 1.5V4M5.5 7.5h.01M10.5 7.5h.01M1 7v2M15 7v2"/>',
+  tools:'<path d="M10.5 2a3.5 3.5 0 0 0-3 5.3L2 12.8 3.2 14l5.5-5.5A3.5 3.5 0 1 0 10.5 2z"/>',
+  ontology:'<circle cx="8" cy="3" r="2"/><circle cx="3" cy="12" r="2"/><circle cx="13" cy="12" r="2"/><path d="M7 4.7 4 10.2M9 4.7l3 5.5M5 12h6"/>',
+  steering:'<path d="M3 2h8a2 2 0 0 1 2 2v10H5a2 2 0 0 1-2-2z"/><path d="M6 5.5h5M6 8h5"/>',
+  spend:'<path d="M8 1.5v13M11 4.5H6.5a2 2 0 0 0 0 4h3a2 2 0 0 1 0 4H4.5"/>',
+  org:'<path d="M2 14V3l6-1.5V14M8 14V6l6 1.5V14"/><path d="M4.5 5.5h.01M4.5 8h.01M4.5 10.5h.01M11 9.5h.01M11 12h.01"/>',
+  billing:'<rect x="1.5" y="3.5" width="13" height="9" rx="2"/><path d="M1.5 7h13M4 10h3"/>',
+  audit:'<path d="M8 1.5 13.5 4v4c0 3.2-2.3 5.6-5.5 6.5C4.8 13.6 2.5 11.2 2.5 8V4z"/><path d="m5.8 8 1.6 1.6L10.4 6.6"/>',
+  search:'<circle cx="7" cy="7" r="4.5"/><path d="m10.5 10.5 3.5 3.5"/>',
+  bell:'<path d="M4 6.5a4 4 0 0 1 8 0c0 3 1.2 4 1.2 4H2.8S4 9.5 4 6.5z"/><path d="M6.5 13a1.6 1.6 0 0 0 3 0"/>',
+  spark:'<path d="M8 1.5 9.6 6 14 7.6 9.6 9.2 8 13.6 6.4 9.2 2 7.6 6.4 6z"/>',
+  close:'<path d="m4 4 8 8M12 4l-8 8"/>',
+  send:'<path d="M2 8h11M8.5 3.5 13 8l-4.5 4.5"/>',
+  menu:'<path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h11"/>',
+  chev:'<path d="m5.5 3.5 4 4.5-4 4.5"/>',
+  ext:'<path d="M9 2.5h4.5V7M13.5 2.5 7 9M11 9.5v3a1 1 0 0 1-1 1H3.5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h3"/>',
+  check:'<path d="m3 8.2 3.2 3.3L13 4.5"/>',
+  clock:'<circle cx="8" cy="8" r="6"/><path d="M8 4.5V8l2.5 1.5"/>',
+  lock:'<rect x="3" y="7" width="10" height="7" rx="1.6"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2"/>',
+  warn:'<path d="M8 2 14.5 13.5h-13z"/><path d="M8 6.5v3M8 11.5h.01"/>',
+  git:'<circle cx="4" cy="4" r="2"/><circle cx="4" cy="12" r="2"/><circle cx="12" cy="8" r="2"/><path d="M4 6v4M6 4h2a2 2 0 0 1 2 2"/>',
+  plus:'<path d="M8 3v10M3 8h10"/>',
+  user:'<circle cx="8" cy="5.5" r="2.8"/><path d="M2.8 14a5.4 5.4 0 0 1 10.4 0"/>'
+};
+const ico = (n, cls) => '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" '
+  + 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"'
+  + (cls ? ' class="' + cls + '"' : '') + '>' + (I[n] || '') + '</svg>';
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ── the fleet ─────────────────────────────────────────────────────── */
+const ORG = {
+  name:"Acme Robotics", slug:"acme", ns:"acme", plan:"team",
+  displayCurrency:"USD", billingCurrency:"USD", funding:"platform",
+  neo4j:"org_acme", denyGen:41, retentionDays:2555, mode:"cloud"
+};
+const WS = {
+  "core-platform":{ name:"core-platform", ns:"core", mainRepo:"acme/platform", branch:"main",
+    linked:["acme/billing","acme/mobile"], governance:"team", bundle:214, ontology:"v23" },
+  "finops":{ name:"finops", ns:"finops", mainRepo:"acme/finops-agents", branch:"main",
+    linked:[], governance:"regulated", bundle:96, ontology:"v7" }
+};
+const PEOPLE = {
+  priya:{ name:"Priya Natarajan", init:"PN", email:"priya@acmerobotics.com", orgRole:"owner",
+          principal:"prn_01K3F8QA2M", ws:{"core-platform":"owner","finops":"viewer"} },
+  marcus:{ name:"Marcus Bell", init:"MB", email:"marcus@acmerobotics.com", orgRole:"member",
+          principal:"prn_01K3F8QB7T", ws:{"core-platform":"owner"} },
+  dana:{ name:"Dana Okafor", init:"DO", email:"dana@acmerobotics.com", orgRole:"billing",
+          principal:"prn_01K3F8QC4X", ws:{"finops":"owner"} }
+};
+const AGENTS = [
+  { key:"acme.core.release-manager", harness:"claude-code", hv:"2.4.1", ws:"core-platform",
+    op:"marcus", tier:"gateway", tools:18, budget:"$2.00 / run", status:"active" },
+  { key:"acme.core.stella-ci", harness:"stella", hv:"0.14.2", ws:"core-platform",
+    op:"marcus", tier:"gateway", tools:12, budget:"$1.20 / run", status:"active" },
+  { key:"acme.core.triage", harness:"codex-cli", hv:"0.7.9", ws:"core-platform",
+    op:"marcus", tier:"gateway", tools:40, budget:"none", status:"active" },
+  { key:"acme.finops.invoice-bot", harness:"openai-agents-sdk", hv:"0.9.2", ws:"finops",
+    op:"dana", tier:"gateway", tools:9, budget:"$3.00 / run", status:"active", mandate:"mnd_4471" },
+  { key:"acme.core.docs-writer", harness:"custom", hv:"@oxagen/sdk 1.2.0", ws:"core-platform",
+    op:"priya", tier:"gateway", tools:7, budget:"$0.80 / run", status:"active" }
+];
+const RUNS = [
+  { id:"run_01K5YQ7F3M", agent:"acme.finops.invoice-bot", op:"dana", started:"13:58:41Z",
+    state:"sealed", tier:"gateway", grade:"full", cost:"0.4127", verdict:"none",
+    task:"acme/finops-agents#212", turns:3, steps:11, frames:52 },
+  { id:"run_01K5ZB4T8P", agent:"acme.core.release-manager", op:"marcus", started:"15:31:08Z",
+    state:"live", tier:"gateway", grade:"full", cost:"1.8840", verdict:"—",
+    task:"acme/platform#1893", turns:6, steps:31, frames:148 },
+  { id:"run_01K5ZC1H9K", agent:"acme.core.triage", op:"marcus", started:"15:44:02Z",
+    state:"live", tier:"gateway", grade:"full", cost:"0.2210", verdict:"—",
+    task:"acme/platform#1901", turns:2, steps:7, frames:33 },
+  { id:"run_01K5YX2D6R", agent:"acme.core.stella-ci", op:"marcus", started:"15:02:19Z",
+    state:"sealed", tier:"gateway", grade:"full", cost:"0.9314", verdict:"flipped",
+    task:"acme/platform#1887", turns:4, steps:19, frames:91 },
+  { id:"run_01K5YW8N3C", agent:"acme.core.docs-writer", op:"priya", started:"14:47:55Z",
+    state:"sealed", tier:"gateway", grade:"full", cost:"0.1902", verdict:"waived",
+    task:"acme/platform#1884", turns:2, steps:6, frames:27 },
+  { id:"run_01K5YV5K1Q", agent:"acme.core.triage", op:"marcus", started:"14:22:03Z",
+    state:"sealed", tier:"harness", grade:"partial", cost:"0.6688", verdict:"unmoved",
+    task:"acme/mobile#402", turns:5, steps:22, frames:104 },
+  { id:"run_01K5YT9G7W", agent:"acme.core.release-manager", op:"marcus", started:"13:11:40Z",
+    state:"sealed", tier:"gateway", grade:"full", cost:"2.4415", verdict:"flipped",
+    task:"acme/platform#1879", turns:8, steps:44, frames:203 },
+  { id:"run_01K5YS2P4A", agent:"acme.finops.invoice-bot", op:"dana", started:"12:04:12Z",
+    state:"sealed", tier:"gateway", grade:"full", cost:"0.3871", verdict:"none",
+    task:"acme/finops-agents#210", turns:2, steps:9, frames:41 }
+];
+const ASSISTANT_RUNS = {
+  grant:{ id:"run_01K5ZQ2V8N", turns:1, steps:4, model:"glm-5.3", cost:"0.0038",
+          tokens:"3,186 in / 512 out", cache:"0.71", actions:2 },
+  why:{ id:"run_01K5ZR6M1D", turns:1, steps:9, model:"glm-5.3", cost:"0.0117",
+        tokens:"11,402 in / 968 out", cache:"0.83", actions:4 },
+  onboarding:{ id:"run_01K3F8Q1AA", turns:4, steps:14, model:"glm-5.3", cost:"0.0214",
+        tokens:"9,118 in / 1,744 out", cache:"0.44", actions:5 }
+};
+
+/* ── mandate mnd_4471, and the 14:03 park ──────────────────────────── */
+const MANDATE = {
+  id:"mnd_4471", agent:"acme.finops.invoice-bot", grantedBy:"Dana Okafor",
+  roleAtGrant:"org.billing", second:"Priya Natarajan", effects:"commits_spend",
+  currency:"USD", perCall:"$250.00", perPeriod:"$2,000.00", period:"monthly",
+  callsPerDay:50, allow:"vendor:aws, vendor:github", deny:"*",
+  tools:"stripe__create_payment@*, aws_billing__purchase_savings_plan@2",
+  approvalAbove:"$100.00", alwaysFor:"moves_funds", approvers:"role:org.billing",
+  purpose:"monthly infrastructure invoices, PO-4471",
+  from:"2026-09-01", to:"2026-12-31", twoPerson:true, status:"active",
+  settled:"$1,283.40", reserved:"$0.00", remaining:"$716.60"
+};
+
+/* ── receipts, opened from inside an assistant reply ───────────────── */
+const RECEIPTS = {
+  rcp_8f2c41:{
+    tool:"set_role_grants", version:"1", when:"2026-09-11T15:46:08.402Z",
+    who:[["operator","Marcus Bell · prn_01K3F8QB7T"],["agent","oxagen.assistant (service principal)"],
+         ["run","run_01K5ZQ2V8N"],["turn / step","1 / 2"],["task reference","—"]],
+    what:[["tool version","set_role_grants@1"],["schema digest","sha256:41ba9c7e…d012"],
+          ["canonical input digest","sha256:7c8e1f02…9a44"],
+          ["input","{ role: \"agent.triage\", subject_kind: \"tool\", subject: \"linear__get_issue@2\", effect: \"allow\", resource_scope: { side_effects: [\"read\"], egress: [\"third_party\"] } }"]],
+    authority:[["decision","allow"],["policy version","v18"],["rule ids","grant.workspace_owner, belt.read_only_third_party"],
+          ["grants used","role:workspace.owner @ core-platform"],["delegation ceiling","held — agent grants ∩ operator grants"],
+          ["mandate","none (financial effect: none)"],["approval","not required"],["taint sources","none"]],
+    credential:[["credential grant","none — control-plane action, no tool server dispatched"]],
+    effect:[["dispatched","2026-09-11T15:46:08.411Z"],["response digest","sha256:2ad4c118…7e31"],
+          ["output validation","pass"],["external effect ids","bundle_version: 214"],
+          ["idempotency key","idm_7c8e1f02_01K5ZQ2V8N_2"],["duplicate suppressed","no"]],
+    integrity:[["frame hash","sha256:be07d4a1…c5f9"],["chain position","seq 12 of 31"],
+          ["gateway signature","ed25519:9f2c…a18e · key_id att_acme_02"],["enforcement tier","gateway"]]
+  },
+  rcp_8f2c42:{
+    tool:"set_budget", version:"1", when:"2026-09-11T15:46:08.907Z",
+    who:[["operator","Marcus Bell · prn_01K3F8QB7T"],["agent","oxagen.assistant (service principal)"],
+         ["run","run_01K5ZQ2V8N"],["turn / step","1 / 3"],["task reference","—"]],
+    what:[["tool version","set_budget@1"],["schema digest","sha256:c0192bb4…8f70"],
+          ["canonical input digest","sha256:d41e77a9…1b62"],
+          ["input","{ scope_kind: \"agent\", scope_id: \"acme.core.triage\", limit_micros: 5000000, currency: \"USD\", period: \"rolling\", window_days: 0, mode: \"hard\" }"]],
+    authority:[["decision","allow"],["policy version","v18"],["rule ids","budget.workspace_owner"],
+          ["grants used","role:workspace.owner @ core-platform"],["delegation ceiling","held"],
+          ["mandate","none"],["approval","not required"],["taint sources","none"]],
+    credential:[["credential grant","none — control-plane action"]],
+    effect:[["dispatched","2026-09-11T15:46:08.913Z"],["response digest","sha256:6b3f90cd…4402"],
+          ["output validation","pass"],["external effect ids","budget_id: bdg_01K5ZQ33"],
+          ["idempotency key","idm_d41e77a9_01K5ZQ2V8N_3"],["duplicate suppressed","no"]],
+    integrity:[["frame hash","sha256:14c8e0b7…9d2a"],["chain position","seq 19 of 31"],
+          ["gateway signature","ed25519:3ba7…10cc · key_id att_acme_02"],["enforcement tier","gateway"]]
+  },
+  rcp_5a10d7:{
+    tool:"update_workspace", version:"2", when:"2026-09-11T15:49:31.226Z",
+    who:[["operator","Priya Natarajan · prn_01K3F8QA2M"],["agent","oxagen.assistant (service principal)"],
+         ["run","run_01K5ZR6M1D"],["turn / step","2 / 1"],["task reference","—"]],
+    what:[["tool version","update_workspace@2"],["schema digest","sha256:9e41a0d3…bb17"],
+          ["canonical input digest","sha256:3f0c8ab5…de90"],
+          ["input","{ workspace: \"finops\", approval_timeout_seconds: 3600 }"]],
+    authority:[["decision","allow"],["policy version","v9 (finops)"],["rule ids","workspace.org_owner_override"],
+          ["grants used","role:org.owner @ acme"],["delegation ceiling","held"],
+          ["mandate","none"],["approval","not required"],["taint sources","none"]],
+    credential:[["credential grant","none — control-plane action"]],
+    effect:[["dispatched","2026-09-11T15:49:31.230Z"],["response digest","sha256:ae5512f8…0071"],
+          ["output validation","pass"],["external effect ids","bundle_version: 97"],
+          ["idempotency key","idm_3f0c8ab5_01K5ZR6M1D_1"],["duplicate suppressed","no"]],
+    integrity:[["frame hash","sha256:77b201ec…5a4d"],["chain position","seq 8 of 24"],
+          ["gateway signature","ed25519:c810…7f2b · key_id att_acme_02"],["enforcement tier","gateway"]]
+  },
+  rcp_3c77e0:{
+    tool:"create_org", version:"1", when:"2026-08-26T09:14:02.771Z",
+    who:[["operator","Priya Natarajan · prn_01K3F8QA2M"],["agent","oxagen.assistant (service principal)"],
+         ["run","run_01K3F8Q1AA"],["turn / step","2 / 1"],["task reference","—"]],
+    what:[["tool version","create_org@1"],["schema digest","sha256:b7710ffa…3c85"],
+          ["canonical input digest","sha256:5518cc2e…7a13"],
+          ["input","{ name: \"Acme Robotics\", slug: \"acme\", namespace: \"acme\", display_currency: \"USD\" }"]],
+    authority:[["decision","allow"],["policy version","v1"],["rule ids","org.create_first"],
+          ["grants used","authenticated user, no organization yet"],["delegation ceiling","n/a"],
+          ["mandate","none"],["approval","not required"],["taint sources","none"]],
+    credential:[["credential grant","none — control-plane action"]],
+    effect:[["dispatched","2026-08-26T09:14:02.778Z"],["response digest","sha256:0d9e4417…c260"],
+          ["output validation","pass"],
+          ["external effect ids","org_id: org_01K3F8PZ9E · neo4j_database: org_acme · kek_key_id: kms_acme_01"],
+          ["idempotency key","idm_5518cc2e_01K3F8Q1AA_1"],["duplicate suppressed","no"]],
+    integrity:[["frame hash","sha256:e2440aa6…118f"],["chain position","seq 4 of 61"],
+          ["gateway signature","ed25519:44ea…9013 · key_id att_acme_01"],["enforcement tier","gateway"]]
+  },
+  rcp_3c77e1:{
+    tool:"create_workspace", version:"1", when:"2026-08-26T09:14:03.108Z",
+    who:[["operator","Priya Natarajan · prn_01K3F8QA2M"],["agent","oxagen.assistant (service principal)"],
+         ["run","run_01K3F8Q1AA"],["turn / step","2 / 2"],["task reference","—"]],
+    what:[["tool version","create_workspace@1"],["schema digest","sha256:2c60b1e9…ff4a"],
+          ["canonical input digest","sha256:81aa03d7…62be"],
+          ["input","{ name: \"core-platform\", namespace: \"core\", main_repo: \"acme/platform\", production_branch: \"main\", governance_mode: \"team\" }"]],
+    authority:[["decision","allow"],["policy version","v1"],["rule ids","workspace.org_owner_override"],
+          ["grants used","role:org.owner @ acme"],["delegation ceiling","held"],
+          ["mandate","none"],["approval","not required"],["taint sources","none"]],
+    credential:[["credential grant","cgr_01K3F8Q2 · connection con_github_acme · scope repo:acme/platform · TTL 300 s"]],
+    effect:[["dispatched","2026-08-26T09:14:03.115Z"],["response digest","sha256:cc71e0a4…39d8"],
+          ["output validation","pass"],
+          ["external effect ids","workspace_id: wrk_01K3F8Q22F · github_installation: 84201993"],
+          ["idempotency key","idm_81aa03d7_01K3F8Q1AA_2"],["duplicate suppressed","no"]],
+    integrity:[["frame hash","sha256:5a1bd730…ee02"],["chain position","seq 9 of 61"],
+          ["gateway signature","ed25519:71c0…3ae5 · key_id att_acme_01"],["enforcement tier","gateway"]]
+  }
+};
+
+/* ── notifications ─────────────────────────────────────────────────── */
+const NOTIFS = [
+  { kind:"approval.requested", tone:"wait", unread:true, t:"15:44",
+    title:"Approval waiting · github__merge_pull_request@3",
+    body:"acme.core.release-manager on run_01K5ZB4T8P wants to merge acme/platform#1893 into main. Rule merge.requires_approval. Expires 15:54." },
+  { kind:"budget.breached", tone:"bad", unread:true, t:"15:21",
+    title:"Hard budget reached · acme.core.docs-writer",
+    body:"$0.80 per run reached at turn 3 of run_01K5ZA0J2M. The run was paused at the model proxy before the call." },
+  { kind:"approval.resolved", tone:"bad", unread:true, t:"14:13",
+    title:"Approval expired · stripe__create_payment@4",
+    body:"No approver resolved apr_01K5YQ9T2B within 10 minutes. $184.20 USD to vendor:aws was never dispatched; mandate mnd_4471 released the reservation." },
+  { kind:"context_pr.opened", tone:"gold", unread:false, t:"13:02",
+    title:"Context PR opened · acme/platform#1892",
+    body:"The promoter proposed a directive on lineage lin_7fa2: “Do not re-read CHANGELOG.md after the first read in a run.” Supported by 14 runs across 3 agents." },
+  { kind:"run.proven", tone:"ok", unread:false, t:"15:09",
+    title:"Run proven · run_01K5YX2D6R",
+    body:"Witness wit_01K5YX51 flipped: failing on main at 9c41ab0, passing on refs/pull/1887/head at 3d8f77e. Oracle test_flip, disclosure grain L0." },
+  { kind:"repository.indexed", tone:"ok", unread:false, t:"12:40",
+    title:"Code graph current · acme/platform",
+    body:"Push 3d8f77e to main indexed in 41 s. 18 files re-parsed, 62 symbols versioned, 3 data-layer edges raised to confirmed." },
+  { kind:"reconciliation.exception", tone:"bad", unread:false, t:"09:12",
+    title:"Reconciliation variance · anthropic key pk_9f21",
+    body:"2026-09-10 key-day variance $0.83 above the one-cent threshold. 4 client-attested frames carry no provider request id and match only at level 2." },
+  { kind:"kill_switch.flipped", tone:"crit", unread:false, t:"2026-09-09",
+    title:"Kill switch flipped · tool version",
+    body:"Priya Natarajan disabled slack__post_message@7 across acme after a schema regression. 2 runs saw the deny at their next call boundary." }
+];
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Three conversations. Every reply names the governed actions it took,
+   links their receipts, and ends with the run of the assistant's own turn.
+   ═══════════════════════════════════════════════════════════════════════ */
+const CONVOS = {
+  grant:{
+    label:"Grant a tool, cap a run",
+    who:"marcus",
+    title:"Grant linear__get_issue to triage",
+    msgs:[
+      { role:"op", who:"marcus", t:"15:46",
+        text:"grant <code>linear__get_issue</code> to triage and cap it at $5 a run" },
+      { role:"ox", t:"15:46", blocks:[
+        { p:"Two changes to <code>acme.core.triage</code>, both as governed actions under your grants. Your workspace-owner role on <b>core-platform</b> authorized each one, and triage's effective permission is still its own grants intersected with yours." },
+        { ga:{ tool:"set_role_grants", ver:"1", seq:"step 2", decision:"allow", policy:"v18",
+          rules:["grant.workspace_owner","belt.read_only_third_party"], receipt:"rcp_8f2c41",
+          lines:[
+            "Added <b>linear__get_issue@2</b> to role <b>agent.triage</b> with effect <b>allow</b>.",
+            "Resource scope: side effects <b>read</b>, egress <b>third_party</b>. No write, no delete.",
+            "The tool lives on the Linear server, connection <b>linear-acme</b>, owned by Dana Okafor, review date 2026-12-01. triage holds no Linear credential — the broker mints a restricted token per call and the agent never sees it."
+          ] } },
+        { ga:{ tool:"set_budget", ver:"1", seq:"step 3", decision:"allow", policy:"v18",
+          rules:["budget.workspace_owner"], receipt:"rcp_8f2c42",
+          lines:[
+            "Scope <b>agent</b> · <b>acme.core.triage</b> · <b>$5.00 USD per run</b> · mode <b>hard</b>.",
+            "A hard budget is enforced at the model proxy <i>before</i> the call, so triage is stopped at the boundary. It is not asked to stop."
+          ] } },
+        { p:"<b>Two things worth knowing.</b>" },
+        { p:"triage's belt is now <b>41 tools</b>, one over this workspace's full-belt limit of 40. Its next run switches to a <b>searchable belt</b>: the model gets <code>search_tools</code> and <code>load_tools</code> instead of 41 definitions, which takes about <b>3,400 tokens</b> a turn out of the prompt. A search never returns a tool outside the belt, so nothing new becomes reachable." },
+        { p:"$5.00 is <b>3.4&times;</b> triage's median run of $0.0147 &times; 100 — median <b>$1.47</b> over the last 30 days, p95 <b>$4.12</b>. It will bind on roughly one run in forty." },
+        { status:{ tone:"ok", text:"Bundle version 214 pushed. Both changes are live at the next call boundary." } },
+        { turn:"grant" }
+      ]},
+      { role:"op", who:"marcus", t:"15:47", text:"will that break the nightly triage sweep?" },
+      { role:"ox", t:"15:47", blocks:[
+        { p:"No. The sweep is 31 runs a night; the most expensive in the last 30 days was <b>$3.88</b>, on 2026-09-03, when Linear rate-limited and the agent retried eleven times. That run would have finished under the cap with $1.12 to spare." },
+        { p:"One caveat I would not have caught last month: the retry storm on 2026-09-03 is already a finding on <b>Spend</b> worth <b>$61.20 a month</b>. With a hard cap in place a repeat of it now ends as a paused run instead of a cost, which is better, but the pause still lands on you at 03:00. Fix the retries and the cap never fires." },
+        { p:"I read four things to answer this and wrote nothing: <code>get_spend</code>, <code>list_runs</code>, <code>list_findings</code>, <code>get_agent</code>. Reads are governed actions too — they are on the receipt trail, they just change nothing." },
+        { turn:"grant2" }
+      ]}
+    ]
+  },
+
+  why:{
+    label:"Explain a run",
+    who:"priya",
+    title:"Why invoice-bot stopped at 14:03",
+    msgs:[
+      { role:"op", who:"priya", t:"15:48", text:"why did invoice-bot stop at 14:03" },
+      { role:"ox", t:"15:48", blocks:[
+        { p:"<b>It did not stop. It parked.</b> At <b>14:03:22.118Z</b> <code>acme.finops.invoice-bot</code> called <code>stripe__create_payment@4</code> for <b>$184.20 USD</b> to <code>vendor:aws</code>, and the tool gateway held the call for a human at step 5 of turn 3." },
+        { chain:[
+          ["who asked","<b>Dana Okafor</b> — run opened 13:58:41Z from the monthly invoice schedule she owns. The schedule has no authority of its own; the operator is the person behind it."],
+          ["which agent","<code>acme.finops.invoice-bot</code> · OpenAI Agents SDK 0.9.2 · enforcement tier <b>gateway</b> · run <a data-nav=\"#/acme/finops/runs/run_01K5YQ7F3M\">run_01K5YQ7F3M</a>"],
+          ["which action","<code>stripe__create_payment@4</code> · amount <b>$184.20 USD</b> · counterparty <code>vendor:aws</code> · input digest <code>sha256:9c1a…</code> · <b>not tainted</b>"],
+          ["which rule","Mandate <b>mnd_4471</b>'s own approval rule — <code>approval.above_micros: 100000000</code>, which is <b>$100.00</b>. The call is 1.8&times; that. Policy <b>v18</b>, rule <code>mandate.above_threshold</code>."]
+        ], hot:3 },
+        { p:"<b>Then nothing happened, which is the actual answer.</b> The approval request went to <code>role:org.billing</code> — Dana, and you. Dana's last session activity was 13:41. Nobody resolved it. At <b>14:13:22Z</b> the ten-minute park timed out:" },
+        { tl:[
+          ["14:03:22.118Z","<code>policy.decision</code> — outcome <b>approve</b>, rule <code>mandate.above_threshold</code>"],
+          ["14:03:22.140Z","<code>approval_request</code> — apr_01K5YQ9T2B, expires 14:13:22Z, notified Mission Control + Slack"],
+          ["14:13:22.140Z","<code>approval_decision</code> — <b>expired</b>, no approver, no reason"],
+          ["14:13:22.402Z","<code>tool_call</code> result — <b>approval_expired</b>, never dispatched"],
+          ["14:13:26.811Z","<code>agent_stop</code> — the model read the expiry as the permission reason and ended the turn"]
+        ] },
+        { p:"<b>Money did not move.</b> The mandate ledger reserved $184.20 at 14:03:22 and released it at 14:13:22; the period balance never changed. The reconciler has no external transaction against connection <code>stripe-acme</code> for that window and therefore no exception — an unreceipted transaction would have been severity <b>critical</b>." },
+        { kv:[
+          ["mandate","mnd_4471 · active · two-person"],
+          ["period","monthly · settled $1,283.40 · reserved $0.00 · remaining $716.60 of $2,000.00"],
+          ["this call","reserve $184.20 at 14:03:22Z → release $184.20 at 14:13:22Z · balance after: unchanged"],
+          ["run cost","$0.4127 USD · gateway_observed · of which $0.0891 was spent after the park"]
+        ] },
+        { p:"Two ways to stop it happening again. The first I can do now. The second I can open but not finish." },
+        { buttons:[
+          { label:"Raise the approval window to 60 minutes", act:"timeout", pri:true },
+          { label:"Add org owners as approvers on mnd_4471", act:"approvers" }
+        ] },
+        { turn:"why" }
+      ]}
+    ]
+  },
+
+  onboarding:{
+    label:"Onboarding",
+    who:"priya",
+    title:"First run · 2026-08-26",
+    archived:true,
+    msgs:[
+      { role:"ox", t:"09:13", blocks:[
+        { p:"I'm the Oxagen assistant. I onboard an organization, change its configuration through the same governed actions the screens use, and explain any run afterwards. My engine is <code>stella serve</code> in its own container — it holds no credentials and no authority, and every tool call it wants comes back here to be decided." },
+        { p:"Three steps, then the app opens. <b>Oxagen does not open until an agent has talked to it</b>, because a mission control with nothing to control is a settings page." },
+        { p:"First: what should this organization be called?" }
+      ]},
+      { role:"op", who:"priya", t:"09:14", text:"Acme Robotics" },
+      { role:"ox", t:"09:14", blocks:[
+        { ga:{ tool:"create_org", ver:"1", seq:"step 1", decision:"allow", policy:"v1",
+          rules:["org.create_first"], receipt:"rcp_3c77e0",
+          lines:[
+            "Organization <b>Acme Robotics</b> · slug <code>acme</code> · namespace <code>acme</code>.",
+            "The namespace is <b>immutable</b>: it is inside every agent key forever, so <code>acme.core.release-manager</code> reads the same in five years.",
+            "Created with it: the Neo4j database <code>org_acme</code>, a key-encryption key in KMS, a billing account, and a retention policy of 2,555 days."
+          ] } },
+        { ga:{ tool:"create_workspace", ver:"1", seq:"step 2", decision:"allow", policy:"v1",
+          rules:["workspace.org_owner_override"], receipt:"rcp_3c77e1",
+          lines:[
+            "Workspace <b>core-platform</b> · namespace <code>core</code> · governance mode <b>team</b>.",
+            "The installer read the git remote of the directory it ran in and offered <b>acme/platform</b> as the main repo. You confirmed <code>main</code> as the production branch — the only branch whose commits update the code graph.",
+            "Every workspace has exactly one main repo. It is where steering, agent definitions and the ontology live in source control."
+          ] } },
+        { p:"Now wrap an agent. One click installs the collector and the hook, or five lines wrap an SDK agent." },
+        { buttons:[
+          { label:"Wrap Claude Code", act:"noop", pri:true },
+          { label:"Wrap Codex", act:"noop" },
+          { label:"Show the SDK snippet", act:"noop" }
+        ] }
+      ]},
+      { role:"op", who:"priya", t:"09:16", text:"Show the SDK snippet." },
+      { role:"ox", t:"09:16", blocks:[
+        { code:'<span class="c">// one package, one call, any harness</span>\n<span class="k2">import</span> { oxagen } <span class="k2">from</span> <span class="s">"@oxagen/sdk"</span>;\n\n<span class="k2">await</span> oxagen.agent.<span class="k2">wrap</span>({\n  agentKey: <span class="s">"acme.core.release-manager"</span>,\n  credential: process.env.OXAGEN_AGENT_CREDENTIAL,\n});' },
+        { p:"That points the harness's base URL at the model proxy and its MCP client at this workspace's tool gateway, and installs the checkpoint gate before each turn. Both seams are what earn the run <b>gateway</b> tier. Nothing about the tier is claimed — it is computed from what actually routed." },
+        { status:{ tone:"wait", text:"Waiting for the first frame. The app opens the moment one arrives." } }
+      ]},
+      { role:"ox", t:"09:21", blocks:[
+        { status:{ tone:"ok", text:"First frame received at 09:21:44Z. Mission Control is open." } },
+        { p:"<code>acme.core.release-manager</code> ran one turn: 14 frames, 2 model calls, 1 tool call, sealed and attested. It cost <b>$0.0412 USD</b>, gateway-observed, priced against the concrete model the provider returned rather than the alias you configured." },
+        { p:"You are on the free tier: <b>1,000 runs a month with every governance feature on</b>. Convert within seven days of this run and usage is 20% off for twelve months." },
+        { turn:"onboarding" }
+      ]}
+    ]
+  }
+};
+
+/* replies the buttons produce — the same governed-action shape, appended live */
+const REPLIES = {
+  timeout:{ t:"15:49", blocks:[
+    { ga:{ tool:"update_workspace", ver:"2", seq:"step 1", decision:"allow", policy:"v9 (finops)",
+      rules:["workspace.org_owner_override"], receipt:"rcp_5a10d7",
+      lines:[
+        "Workspace <b>finops</b> · approval timeout <b>10 minutes → 60 minutes</b>.",
+        "Your org-owner role carried this; the workspace is in <b>regulated</b> mode, so the change is also written to <code>.oxagen/rules/governance.toml</code> in <b>acme/finops-agents</b> on the next Context PR and appended to the promotion ledger."
+      ] } },
+    { p:"Bundle 96 → 97, pushed. A parked financial call now waits an hour, which covers a meeting. It does not cover a weekend, and I would not raise it further: a call parked longer than the invoice run that made it is a call nobody remembers approving." },
+    { turn:"timeout" }
+  ]},
+  approvers:{ t:"15:50", blocks:[
+    { p:"I opened it. I cannot finish it, and that is the mandate working." },
+    { ga:{ tool:"grant_mandate", ver:"1", seq:"step 1", decision:"approve", policy:"v9 (finops)",
+      rules:["mandate.two_person_change"], receipt:null,
+      parked:"parked · waiting on Dana Okafor · expires 16:52Z",
+      lines:[
+        "Revision of <b>mnd_4471</b>: approvers <code>role:org.billing</code> → <code>role:org.billing, role:org.owner</code>. Nothing else changes — limits, counterparties, tools and the $100.00 threshold are untouched.",
+        "<b>mnd_4471 carries <code>two_person: true</code></b>, so a change to it needs a second human. You granted nothing to yourself here; you asked for a widening and it went to the other named approver.",
+        "No receipt yet. A receipt is written when the call is decided and dispatched, and this one is parked."
+      ] } },
+    { p:"If Dana approves, it takes effect at the next bundle refresh and you become a valid approver for invoice-bot's payments. If she lets it expire, the mandate stays exactly as it is — which is the safe direction for a change that widens who can move money." },
+    { turn:"approvers" }
+  ]}
+};
+const EXTRA_TURNS = {
+  grant2:{ id:"run_01K5ZQ2V8N", turns:2, steps:8, model:"glm-5.3", cost:"0.0061",
+           tokens:"6,904 in / 741 out", cache:"0.88", actions:4 },
+  timeout:{ id:"run_01K5ZR6M1D", turns:2, steps:12, model:"glm-5.3", cost:"0.0149",
+           tokens:"14,220 in / 1,102 out", cache:"0.86", actions:5 },
+  approvers:{ id:"run_01K5ZR6M1D", turns:3, steps:15, model:"glm-5.3", cost:"0.0181",
+           tokens:"17,884 in / 1,390 out", cache:"0.87", actions:6 }
+};
+
+/* per-page suggestions — the panel knows where it is standing */
+const SUGGEST = {
+  fleet:[["6 live","Which of the six live runs is costing the most, and why?"],
+         ["3 waiting","Summarise the three approvals waiting and who they belong to"],
+         ["halt","Pause every agent Marcus operates until the release lands"]],
+  run:[["cost","Where did the $0.41 on this run actually go?"],
+       ["explain","Why did invoice-bot stop at 14:03"],
+       ["export","Export this run as a signed bundle with its verifier"]],
+  agents:[["grant","grant linear__get_issue to triage and cap it at $5 a run"],
+          ["belt","Which tools has release-manager not called in 30 days?"],
+          ["wrap","Wrap Claude Code on a second machine"]],
+  tools:[["policy","Simulate policy v19 against the last 14 days"],
+         ["mandate","Who can move money in this organization, and up to what?"],
+         ["kill","Kill every moves_funds tool across acme right now"]],
+  ontology:[["ask","Which customers are on contracts renewing in Q4?"],
+            ["drift","What data-layer drift did the last sync find?"],
+            ["sync","Re-index acme/platform from the production branch head"]],
+  steering:[["effect","Which published records has nothing cited in 30 days?"],
+            ["open","Open a Context PR retiring the changelog directive"],
+            ["why","Why is proposal lin_7fa2 still open?"]],
+  spend:[["findings","Act on the top finding and tell me what it saves"],
+         ["proven","How much of last month turned into proven work?"],
+         ["budget","Cap every agent in core-platform at $5 a run"]],
+  organization:[["invite","Invite a contractor as a viewer on core-platform only"],
+                ["route","Point the complex tier at a pinned model id"],
+                ["plane","What would moving acme to a dedicated data plane change?"]],
+  billing:[["runs","Are we going to pass 10,000 runs this month?"],
+           ["meter","What is the retention meter actually storing?"],
+           ["plan","Model the enterprise plan against our last three months"]],
+  audit:[["incident","Show me every unresolved incident above severity 3"],
+         ["hold","Place a legal hold on every run for acme/billing"],
+         ["export","Export the audit trail for the SOC 2 window"]]
+};
+
+/* the command menu is search_tools — it can only return what the belt holds */
+const CMD = {
+  pages:[
+    ["Fleet","every run, live and recent","#/acme/core-platform","fleet"],
+    ["Run","frame-by-frame player","#/acme/core-platform/runs/run_01K5YQ7F3M","run"],
+    ["Agents","identity, toolbelt, mandates, budgets","#/acme/core-platform/agents","agents"],
+    ["Tools","registry, connections, policy, kill switches","#/acme/core-platform/tools","tools"],
+    ["Ontology","the model of your business","#/acme/core-platform/ontology","ontology"],
+    ["Steering","records, proposals, Context PRs","#/acme/core-platform/steering","steering"],
+    ["Spend","findings, proven spend, reconciliation","#/acme/core-platform/spend","spend"],
+    ["Organization","people, workspaces, funding, routes","#/acme","org"],
+    ["Billing","plan, allowance, meters, invoices","#/acme/billing","billing"],
+    ["Audit","events, incidents, holds, exports","#/acme/audit","audit"]
+  ],
+  agentTools:[
+    ["set_role_grants","a role's grants and resource scopes","medium","write"],
+    ["set_budget","a spend budget at any level","low","write"],
+    ["list_approvals","the queue with its four-hop chain","low","read"],
+    ["resolve_approval","approve or deny; mints the single-use token","high","irreversible"],
+    ["dispatch_command","pause, resume, steer, cancel, revoke","high","write"],
+    ["export_run","a signed bundle with its verifier","low","read"],
+    ["grant_mandate","financial authority to one agent","critical","irreversible"],
+    ["set_kill_switch","deny at any level, at the next call boundary","critical","irreversible"]
+  ],
+  belt:[
+    ["github__create_pull_request@3","open a pull request on a linked repo","medium","write"],
+    ["github__merge_pull_request@3","merge — requires approval","high","irreversible"],
+    ["linear__get_issue@2","read one Linear issue","low","read"],
+    ["stripe__create_payment@4","move funds — mandate required","critical","irreversible"]
+  ],
+  runs:[
+    ["run_01K5ZB4T8P","release-manager · live · $1.8840","#/acme/core-platform/runs/run_01K5ZB4T8P"],
+    ["run_01K5YQ7F3M","invoice-bot · sealed · $0.4127","#/acme/finops/runs/run_01K5YQ7F3M"]
+  ]
+};
+
+/* ═══════════════════════════════════════════════════════════════════════
+   State and routing. Everything lives in the hash, so Back works for a
+   page, a conversation, a dialog and a mockup state alike.
+   ═══════════════════════════════════════════════════════════════════════ */
+const S = { path:"/acme/core-platform", page:"fleet", ws:"core-platform", run:null,
+  ap:"why", dialog:null, dtab:null, view:"loaded", engine:"up", phone:false,
+  theme:"system", menu:false, appended:[], cmdq:"", tab:{} };
+
+const PAGES = [
+  { k:"fleet", label:"Fleet", icon:"fleet", path:ws=>"/acme/"+ws, tag:"6", hot:false },
+  { k:"run", label:"Run", icon:"run", path:ws=>"/acme/"+ws+"/runs/run_01K5YQ7F3M" },
+  { k:"agents", label:"Agents", icon:"agents", path:ws=>"/acme/"+ws+"/agents", tag:"50" },
+  { k:"tools", label:"Tools", icon:"tools", path:ws=>"/acme/"+ws+"/tools" },
+  { k:"ontology", label:"Ontology", icon:"ontology", path:ws=>"/acme/"+ws+"/ontology" },
+  { k:"steering", label:"Steering", icon:"steering", path:ws=>"/acme/"+ws+"/steering", tag:"2", hot:true },
+  { k:"spend", label:"Spend", icon:"spend", path:ws=>"/acme/"+ws+"/spend" }
+];
+const ORG_PAGES = [
+  { k:"org", label:"Organization", icon:"org", path:()=>"/acme" },
+  { k:"billing", label:"Billing", icon:"billing", path:()=>"/acme/billing" },
+  { k:"audit", label:"Audit", icon:"audit", path:()=>"/acme/audit", tag:"1", hot:true }
+];
+const PAGE_LABEL = { fleet:"Fleet", run:"Run", agents:"Agents", tools:"Tools", ontology:"Ontology",
+  steering:"Steering", spend:"Spend", org:"Organization", billing:"Billing", audit:"Audit" };
+
+function parseHash(){
+  const raw = location.hash.replace(/^#/, "") || "/acme/core-platform";
+  const [path, qs] = raw.split("?");
+  const q = new URLSearchParams(qs || "");
+  S.path = path;
+  const seg = path.split("/").filter(Boolean);   // acme / ws / …
+  S.run = null;
+  if (seg.length === 1) { S.page = "org"; }
+  else if (seg[1] === "billing") { S.page = "billing"; }
+  else if (seg[1] === "audit") { S.page = "audit"; }
+  else {
+    S.ws = WS[seg[1]] ? seg[1] : "core-platform";
+    if (seg[2] === "runs") { S.page = "run"; S.run = seg[3] || "run_01K5YQ7F3M"; }
+    else if (seg[2] && PAGE_LABEL[seg[2]]) { S.page = seg[2]; }
+    else { S.page = "fleet"; }
+  }
+  S.ap     = q.get("ap") || "0";
+  S.dialog = q.get("d");
+  S.dtab   = q.get("t");
+  S.view   = q.get("v") || "loaded";
+  S.engine = q.get("e") || "up";
+  S.phone  = q.get("ph") === "1";
+  S.theme  = q.get("th") || "system";
+}
+function go(patch, replace){
+  const [path, qs] = (location.hash.replace(/^#/,"") || "/acme/core-platform").split("?");
+  const q = new URLSearchParams(qs || "");
+  let p = patch.path !== undefined ? patch.path : path;
+  Object.keys(patch).forEach(k => {
+    if (k === "path") return;
+    if (patch[k] === null) q.delete(k);
+    else q.set(k, patch[k]);
+  });
+  const s = q.toString();
+  const h = "#" + p + (s ? "?" + s : "");
+  if (replace) location.replace(h); else location.hash = h;
+}
+
+/* ── small builders ────────────────────────────────────────────────── */
+const money = (v, basis) => '<span class="money">$' + v + '</span>'
+  + (basis ? ' <span class="basis">' + basis + '</span>' : '');
+const tier  = t => '<span class="tier ' + t + '">' + t + '</span>';
+const VERDICT = { flipped:"ok", failing:"bad", unmoved:"", unsatisfied:"bad",
+  tampered:"crit", unverified:"", waived:"", none:"", "—":"" };
+const verdict = v => '<span class="b ' + (VERDICT[v] || "") + '">' + v + '</span>';
+const card = (inner, cls) => '<div class="card ' + (cls || "") + '">' + inner + '</div>';
+const stat = (k, v, m) => '<div class="stat"><div class="k">' + k + '</div><div class="v">' + v
+  + '</div><div class="m">' + m + '</div></div>';
+const sec = (title, note, body) => '<section class="sec"><div class="sec-hd"><h2 class="st">'
+  + title + '</h2>' + (note ? '<span class="note">' + note + '</span>' : '') + '</div>' + body + '</section>';
+const tbl = (head, rows) => '<div class="tw"><table><thead><tr>' + head + '</tr></thead><tbody>'
+  + rows + '</tbody></table></div>';
+const kvl = pairs => '<dl class="kv">' + pairs.map(p =>
+  '<dt>' + p[0] + '</dt><dd>' + p[1] + '</dd>').join("") + '</dl>';
+
+/* ── the four non-loaded page states ───────────────────────────────── */
+function blankState(view, pageName){
+  if (view === "loading") {
+    return '<div class="grid g4" style="margin-bottom:13px">'
+      + Array.from({length:4}, () => '<div class="stat"><div class="skel" style="height:11px;width:52%"></div>'
+      + '<div class="skel" style="height:23px;width:74%;margin-top:9px"></div>'
+      + '<div class="skel" style="height:10px;width:40%;margin-top:7px"></div></div>').join("")
+      + '</div><div class="card" style="padding:0;overflow:hidden">'
+      + Array.from({length:7}, (_, i) => '<div style="display:flex;gap:14px;padding:11px 14px;'
+      + (i ? 'border-top:1px solid var(--border)' : '') + '">'
+      + '<div class="skel" style="height:11px;width:96px"></div>'
+      + '<div class="skel" style="height:11px;width:' + (150 + (i * 23) % 90) + 'px"></div>'
+      + '<div class="skel" style="height:11px;width:58px;margin-left:auto"></div></div>').join("")
+      + '</div><p class="sub" style="margin-top:14px"><span class="sc">'
+      + 'reading the run ledger · graph query in flight</span></p>';
+  }
+  if (view === "error") {
+    return '<div class="blank err">' + ico("warn", "ic")
+      + '<h3>' + pageName + ' could not load</h3>'
+      + '<p>The graph service for <code class="mono">org_acme</code> returned '
+      + '<b class="mono">neo4j_unavailable</b> after 3 attempts. The last succeeded at 15:44:51Z. '
+      + 'Recording is unaffected — frames are spooling and nothing is being lost.</p>'
+      + '<p class="sc">incident inc_01K5ZS4H2P · severity 3 · detected by control_plane · opened 15:46:02Z</p>'
+      + '<div style="display:flex;gap:8px;margin-top:4px">'
+      + '<button class="btn pri" data-act="reload">Try again</button>'
+      + '<button class="btn" data-act="status">Open the incident</button></div></div>';
+  }
+  if (view === "denied") {
+    return '<div class="blank den">' + ico("lock", "ic")
+      + '<h3>You do not have access to ' + pageName + ' here</h3>'
+      + '<p>Your role in <b>finops</b> is <b>viewer</b>. Reading this page needs '
+      + '<code class="mono">workspace.member</code> or above. Nothing was shown and nothing was denied '
+      + 'silently — the decision is on the audit trail either way.</p>'
+      + '<p class="sc">iam decision deny · policy v9 · rule page.requires_member · '
+      + 'principal prn_01K3F8QA2M · audit evt_01K5ZS9R4T</p>'
+      + '<div style="display:flex;gap:8px;margin-top:4px">'
+      + '<button class="btn pri" data-act="askaccess">Ask Marcus Bell for access</button>'
+      + '<button class="btn" data-nav="#/acme/core-platform">Go to core-platform</button></div></div>';
+  }
+  return "";
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   The ten pages. Every figure is the demo customer's, to the cent, with
+   its basis, and nothing is placeholder text.
+   ═══════════════════════════════════════════════════════════════════════ */
+const P = {};
+
+P.fleet = () => {
+  const rows = RUNS.map(r => {
+    const a = AGENTS.find(x => x.key === r.agent) || {};
+    return '<tr data-nav="#/acme/' + (a.ws || "core-platform") + '/runs/' + r.id + '">'
+      + '<td><span class="idc">' + r.id + '</span><div class="sc">' + r.task + '</div></td>'
+      + '<td><span class="mono" style="font-size:11.5px">' + r.agent + '</span></td>'
+      + '<td>' + PEOPLE[r.op].name + '</td>'
+      + '<td>' + (r.state === "live"
+          ? '<span class="b ok">live</span>' : '<span class="b">sealed</span>') + '</td>'
+      + '<td>' + tier(r.tier) + '</td>'
+      + '<td><span class="grade">' + r.grade + '</span></td>'
+      + '<td class="r">' + money(r.cost) + '</td>'
+      + '<td>' + verdict(r.verdict) + '</td></tr>';
+  }).join("");
+  const appr = [
+    ["github__merge_pull_request@3","acme.core.release-manager","Marcus Bell","merge.requires_approval","expires 15:54Z","wait"],
+    ["aws_billing__purchase_savings_plan@2","acme.finops.invoice-bot","Dana Okafor","mandate.above_threshold · $1,180.00","expires 16:02Z","wait"],
+    ["bash(rm -rf node_modules)","acme.core.triage","Marcus Bell","harness.irreversible_path","expires 15:51Z","wait"]
+  ].map(a => '<div class="li"><div class="ic" style="background:var(--wait-bg);color:var(--wait)">'
+    + ico("clock") + '</div><div class="bd2"><div class="t1 mono">' + a[0] + '</div>'
+    + '<div class="t2">' + a[1] + ' · operator ' + a[2] + '<br><span class="sc">rule ' + a[3] + '</span></div>'
+    + '<div style="display:flex;gap:6px;margin-top:5px">'
+    + '<button class="btn sm pri" data-act="approve">Approve</button>'
+    + '<button class="btn sm" data-act="deny">Deny</button></div></div>'
+    + '<time>' + a[4] + '</time></div>').join("");
+  return '<p class="eyebrow">Workspace · ' + S.ws + '</p><h1 class="pt">Fleet</h1>'
+    + '<p class="sub">Every run in this workspace, live and recent, with what Oxagen could actually '
+    + 'enforce on it. Pause, resume and cancel take effect at the next call boundary.</p>'
+    + '<div class="grid g4">'
+    + stat("Agents", "50", "47 active · 2 suspended · 1 unenrolled")
+    + stat("Runs live", "6", "4,812 sealed this month")
+    + stat("Approvals waiting", "3", "oldest parked 6 m 11 s")
+    + stat("Spend, month to date", "$18,472.36", "94.2% gateway_observed")
+    + '</div>'
+    + sec("Approvals", "list_approvals · the four-hop chain", '<div class="lst">' + appr + '</div>')
+    + sec("Runs", "list_runs · 8 of 4,818",
+        tbl('<th>Run</th><th>Agent</th><th>Operator</th><th>State</th><th>Tier</th>'
+          + '<th>Replay</th><th class="r">Cost</th><th>Verdict</th>', rows));
+};
+
+/* the in-app agent's turns are runs, recorded and replayable like any other */
+const ASSIST_RUNS = {
+  run_01K5ZQ2V8N:{ op:"marcus", ws:"core-platform", started:"15:46:07Z", turns:3, steps:11,
+    frames:31, cost:"0.0094", why:"Marcus asked for a grant and a cap, then asked a follow-up",
+    frameRows:[
+      ["0","15:46:07.884Z","run.start","agent oxagen.assistant · operator Marcus Bell · bundle v214 · tool surface remote",""],
+      ["1","15:46:07.901Z","turn_start","prompt: grant linear__get_issue to triage and cap it at $5 a run",""],
+      ["2","15:46:07.912Z","model.request","complex tier → z-ai/glm-latest · 3,186 in · 11 agent tool definitions",""],
+      ["3","15:46:08.390Z","model.response","concrete model glm-5.3 · stop_reason tool_use · cache_read 2,262 · $0.0011","ok"],
+      ["4","15:46:08.402Z","tool_requested","set_role_grants@1 · the engine asked; Oxagen decides",""],
+      ["5","15:46:08.404Z","policy.decision","allow · policy v18 · rule grant.workspace_owner","ok"],
+      ["6","15:46:08.411Z","tool_call","dispatched · receipt rcp_8f2c41 · bundle v213 → v214","ok"],
+      ["7","15:46:08.907Z","tool_requested","set_budget@1",""],
+      ["8","15:46:08.909Z","policy.decision","allow · policy v18 · rule budget.workspace_owner","ok"],
+      ["9","15:46:08.913Z","tool_call","dispatched · receipt rcp_8f2c42 · budget bdg_01K5ZQ33","ok"],
+      ["10","15:46:09.601Z","model.response","stop_reason end_turn · 512 out · $0.0027","ok"],
+      ["11","15:46:09.640Z","turn_end","2 governed actions, 0 denied, 0 parked",""]
+    ] },
+  run_01K5ZR6M1D:{ op:"priya", ws:"finops", started:"15:48:02Z", turns:3, steps:15,
+    frames:24, cost:"0.0181",
+    why:"Priya asked why invoice-bot stopped at 14:03, then acted on the answer",
+    frameRows:[
+      ["0","15:48:02.110Z","run.start","agent oxagen.assistant · operator Priya Natarajan · bundle v96",""],
+      ["1","15:48:02.140Z","turn_start","prompt: why did invoice-bot stop at 14:03",""],
+      ["2","15:48:02.402Z","tool_call","get_run@1 · run_01K5YQ7F3M · 52 frame headers read","ok"],
+      ["3","15:48:02.910Z","tool_call","list_approvals@1 · apr_01K5YQ9T2B · decision expired","ok"],
+      ["4","15:48:03.221Z","tool_call","list_mandates@1 · mnd_4471 · ledger reserve then release","ok"],
+      ["5","15:48:03.688Z","tool_call","search_graph@1 · 6 frames cited, 2 records, 1 entity","ok"],
+      ["6","15:48:06.004Z","model.response","glm-5.3 · 968 out · cache_read 9,462 · $0.0117","ok"],
+      ["7","15:49:31.226Z","tool_requested","update_workspace@2 · approval timeout 600 s → 3600 s",""],
+      ["8","15:49:31.228Z","policy.decision","allow · policy v9 · rule workspace.org_owner_override","ok"],
+      ["9","15:49:31.230Z","tool_call","dispatched · receipt rcp_5a10d7 · bundle v96 → v97","ok"],
+      ["10","15:50:14.882Z","tool_requested","grant_mandate@1 · mnd_4471 approvers widened",""],
+      ["11","15:50:14.884Z","policy.decision","approve · policy v9 · rule mandate.two_person_change","wait"],
+      ["12","15:50:14.901Z","approval_request","apr_01K5ZS0M4E · approver Dana Okafor · expires 16:52Z","wait"]
+    ] },
+  run_01K3F8Q1AA:{ op:"priya", ws:"core-platform", started:"2026-08-26 09:13:40Z", turns:4, steps:14,
+    frames:61, cost:"0.0214", why:"The onboarding conversation that created this organization",
+    frameRows:[
+      ["0","09:13:40.002Z","run.start","agent oxagen.assistant · no organization yet · bundle v0",""],
+      ["4","09:14:02.778Z","tool_call","create_org@1 · org_01K3F8PZ9E · neo4j org_acme · receipt rcp_3c77e0","ok"],
+      ["9","09:14:03.115Z","tool_call","create_workspace@1 · wrk_01K3F8Q22F · main repo acme/platform","ok"],
+      ["22","09:16:40.118Z","tool_call","get_install_instructions@1 · harness claude-agent-sdk","ok"],
+      ["38","09:21:44.006Z","record.appended","observation · first frame received from acme.core.release-manager","ok"],
+      ["60","09:21:44.882Z","seal","61 frames · merkle 8c02f71d…4a19 · onboarding_state gated → unlocked","ok"]
+    ] }
+};
+
+P.run = () => {
+  const ar = ASSIST_RUNS[S.run];
+  if (ar) {
+    const rows = ar.frameRows.map(f => '<tr><td class="sc">' + f[0] + '</td><td class="sc">' + f[1]
+      + '</td><td><span class="b ' + f[4] + '">' + f[2] + '</span></td>'
+      + '<td class="sc" style="color:var(--body)">' + f[3] + '</td></tr>').join("");
+    return '<p class="eyebrow">Workspace · ' + ar.ws + ' &nbsp;·&nbsp; in-app agent</p>'
+      + '<h1 class="pt mono" style="font-size:19px">' + S.run + '</h1>'
+      + '<p class="sub">' + ar.why + '. A turn of the assistant is a run like any other: the engine\'s '
+      + 'checkpoint and events are frames, so it replays from Oxagen\'s record and its cost is attributed '
+      + 'to the operator who asked.</p>'
+      + '<div class="grid g4">'
+      + stat("Cost", "$" + ar.cost, "gateway_observed · assistant usage, at cost")
+      + stat("Billable", "no", "assistant turns are not billable runs")
+      + stat("Enforcement tier", "gateway", "every tool call through kernel.invoke()")
+      + stat("Credentials held", "none", "the engine sees results, never a secret")
+      + '</div>'
+      + sec("Frames", ar.frames + " frames · " + ar.turns + " turns · " + ar.steps + " steps",
+          tbl('<th style="width:44px">seq</th><th style="width:126px">time</th>'
+            + '<th style="width:140px">kind</th><th>body</th>', rows))
+      + sec("The engine", "stella serve, in its own container", card(kvl([
+          ["engine","stella serve 0.14.2 · engine.oxagen.internal:8080"],
+          ["what it holds","a bearer token and the tool surface remote. No credentials, no authority."],
+          ["completions","answered by the model layer · the key stays in Oxagen · the engine sees text"],
+          ["tool calls","answered by kernel.invoke() · IAM, entitlement, approval and budget gates"],
+          ["persistence","Oxagen\'s — the turn\'s checkpoint and events are frames in this run"],
+          ["if it is down","the panel says so with a named error; nothing falls back to an in-process loop"]
+        ]), "pad"));
+  }
+  const r = RUNS.find(x => x.id === S.run) || RUNS[0];
+  const frames = [
+    ["41","14:02:58.004Z","model.request","glm-5.3 · 11,904 in · steering digest sha256:6b1e… · 4 context frames",""],
+    ["42","14:03:21.880Z","model.response","stop_reason tool_use · 412 out · cache_read 9,118 · $0.0311","ok"],
+    ["43","14:03:22.061Z","tool_requested","stripe__create_payment@4 · $184.20 USD → vendor:aws",""],
+    ["44","14:03:22.118Z","policy.decision","outcome approve · policy v18 · rule mandate.above_threshold","wait"],
+    ["45","14:03:22.140Z","approval_request","apr_01K5YQ9T2B · approvers role:org.billing · expires 14:13:22Z","wait"],
+    ["46","14:13:22.140Z","approval_decision","expired · no approver · no reason given","bad"],
+    ["47","14:13:22.402Z","tool_call","approval_expired · never dispatched · mandate reservation released","bad"],
+    ["48","14:13:24.010Z","model.request","glm-5.3 · the expiry reason is what the model read",""],
+    ["49","14:13:26.404Z","model.response","stop_reason end_turn · 168 out · $0.0089","ok"],
+    ["50","14:13:26.811Z","agent_stop","outcome completed · no side effect kept",""],
+    ["51","14:13:27.002Z","seal","52 frames · merkle 3f7c9a21…b804 · attested ed25519:9f2c…a18e","ok"]
+  ].map(f => '<tr><td class="sc">' + f[0] + '</td><td class="sc">' + f[1] + '</td>'
+    + '<td><span class="b ' + f[4] + '">' + f[2] + '</span></td>'
+    + '<td class="sc" style="color:var(--body)">' + f[3] + '</td></tr>').join("");
+  return '<p class="eyebrow">Workspace · ' + S.ws + ' &nbsp;·&nbsp; ' + r.task + '</p>'
+    + '<h1 class="pt mono" style="font-size:19px">' + r.id + '</h1>'
+    + '<p class="sub">' + r.agent + ' · operator ' + PEOPLE[r.op].name + ' · started ' + r.started
+    + ' · ' + r.turns + ' turns, ' + r.steps + ' steps, ' + r.frames + ' frames</p>'
+    + '<div class="grid g4">'
+    + stat("Cost", "$" + r.cost, "gateway_observed · USD")
+    + stat("Enforcement tier", "gateway", "model proxy + tool gateway routed")
+    + stat("Replay grade", "full", "bodies retained · content_exact")
+    + stat("Verdict", r.verdict, r.verdict === "none" ? "no witness authored" : "witness flip")
+    + '</div>'
+    + sec("Frames", "the replay unit · hash-chained, dense seq, no gaps",
+        tbl('<th style="width:44px">seq</th><th style="width:126px">time</th>'
+          + '<th style="width:132px">kind</th><th>body</th>', frames))
+    + sec("Chain", "seal fence · one-shot finalization", card(kvl([
+        ["frames","52 · dense seq 0–51 · no telemetry_gap"],
+        ["merkle root","sha256:3f7c9a21…b804 (RFC 6962)"],
+        ["attestation","ed25519:9f2c…a18e · key att_acme_02 · valid 2026-06-01 → 2027-06-01"],
+        ["archive segment","blob://org_acme/seg/01K5YQ7F3M.ndjson · 318 KB · object-lock compliance"],
+        ["verified offline","yes — 2026-09-11T14:14:02Z by the export verifier"]
+      ]), "pad"));
+};
+
+P.agents = () => {
+  const rows = AGENTS.map(a => '<tr data-nav="#/acme/' + a.ws + '/agents">'
+    + '<td><span class="idc">' + a.key + '</span></td>'
+    + '<td><span class="sc">' + a.harness + ' ' + a.hv + '</span></td>'
+    + '<td>' + tier(a.tier) + '</td>'
+    + '<td class="r">' + a.tools + '</td>'
+    + '<td class="sc">' + a.budget + '</td>'
+    + '<td>' + (a.mandate ? '<span class="b gold mono">' + a.mandate + '</span>' : '<span class="sc">—</span>') + '</td>'
+    + '<td><span class="b ok">' + a.status + '</span></td></tr>').join("");
+  return '<p class="eyebrow">Workspace · ' + S.ws + '</p><h1 class="pt">Agents</h1>'
+    + '<p class="sub">Identity lives in Postgres, because it must be revocable in a second. '
+    + 'The definition lives in <code class="mono">.oxagen/agents/&lt;slug&gt;.toml</code> in the main repo, '
+    + 'because it must be reviewed. The agent key joins them.</p>'
+    + '<div class="grid g4">'
+    + stat("Registered", "50", "5 shown · 45 more in this workspace")
+    + stat("Enrolled hosts", "38", "launchd 22 · systemd 11 · task 5")
+    + stat("Holding a mandate", "1", "acme.finops.invoice-bot")
+    + stat("Tamper incidents", "1", "hooks_removed · laptop-mb-02 · 2026-09-08")
+    + '</div>'
+    + sec("Fleet", "list_agents",
+        tbl('<th>Agent key</th><th>Harness</th><th>Tier</th><th class="r">Belt</th>'
+          + '<th>Budget</th><th>Mandate</th><th>Status</th>', rows))
+    + sec("acme.core.triage", "get_agent · definition at acme/platform@3d8f77e", card(
+        '<div class="grid g2"><div>' + kvl([
+          ["definition",".oxagen/agents/triage.toml"],
+          ["digest","sha256:c41f7b09…2ae5"],
+          ["model tier","complex → z-ai/glm-latest"],
+          ["belt","41 tools — searchable belt (limit 40)"],
+          ["budget","$5.00 / run · hard · set 15:46 today"],
+          ["credential","agent credential · last used 15:44:07Z"]
+        ]) + '</div><div>'
+        + '<pre><span class="c"># .oxagen/agents/triage.toml</span>\nslug = <span class="s">"triage"</span>\n'
+        + 'model_tier = <span class="s">"complex"</span>\ntools = [<span class="s">"github__*"</span>, '
+        + '<span class="s">"linear__get_issue"</span>, <span class="s">"search_graph"</span>]\n'
+        + 'deny_tools = [<span class="s">"github__delete_*@*"</span>]\n'
+        + 'side_effects = [<span class="s">"read"</span>, <span class="s">"write"</span>]\n'
+        + 'budget = { per_run_micros = <span class="k2">5000000</span> }</pre>'
+        + '</div></div>', "pad"));
+};
+
+P.tools = () => {
+  const conns = [
+    ["github-acme","github_app","Priya Natarajan","no","installation token","2026-12-01","ok"],
+    ["linear-acme","oauth","Dana Okafor","no","token_exchange","2026-12-01","ok"],
+    ["stripe-acme","api_key","Dana Okafor","yes","restricted_key","2026-10-15","ok"],
+    ["aws-billing","cloud_role","Priya Natarajan","yes","session_policy","2026-11-30","ok"]
+  ].map(c => '<tr><td><span class="idc">' + c[0] + '</span></td><td class="sc">' + c[1] + '</td>'
+    + '<td>' + c[2] + '</td><td>' + (c[3] === "yes"
+      ? '<span class="b gold">financial</span>' : '<span class="sc">—</span>') + '</td>'
+    + '<td class="sc">' + c[4] + '</td><td class="sc">' + c[5] + '</td>'
+    + '<td><span class="b ok">active</span></td></tr>').join("");
+  return '<p class="eyebrow">Workspace · ' + S.ws + '</p><h1 class="pt">Tools</h1>'
+    + '<p class="sub">The registry is the only source of tools an agent can see. '
+    + 'A wrapped agent holds no credentials at all — the broker mints the narrowest one the provider '
+    + 'allows, per call, and the agent receives results.</p>'
+    + '<div class="grid g4">'
+    + stat("Tool versions", "312", "4 servers · 9 awaiting schema approval")
+    + stat("Connections", "4", "2 financial · 0 expiring in 30 days")
+    + stat("Policy version", "v18", "active since 2026-09-04 · v19 simulated")
+    + stat("Assurance suite", "10 / 10", "v1.4.0 · run 2026-09-10 against the live gateway")
+    + '</div>'
+    + sec("Connections", "list_connections · secrets are never returned",
+        tbl('<th>Connection</th><th>Kind</th><th>Owner</th><th>Class</th><th>Downscope</th>'
+          + '<th>Review</th><th>Status</th>', conns))
+    + sec("Mandate ledger", "list_mandates · the CFO's office can read this", card(
+        '<div class="grid g2"><div>' + kvl([
+          ["mandate", MANDATE.id + " · " + MANDATE.status],
+          ["agent", MANDATE.agent],
+          ["granted by", MANDATE.grantedBy + " as " + MANDATE.roleAtGrant],
+          ["second approver", MANDATE.second + " · two-person"],
+          ["per call / period", MANDATE.perCall + " · " + MANDATE.perPeriod + " " + MANDATE.period],
+          ["counterparties", "allow " + MANDATE.allow + " · deny *"]
+        ]) + '</div><div>' + kvl([
+          ["approval above", MANDATE.approvalAbove + " · always for moves_funds"],
+          ["purpose", MANDATE.purpose],
+          ["valid", MANDATE.from + " → " + MANDATE.to],
+          ["settled this period", MANDATE.settled],
+          ["reserved now", MANDATE.reserved],
+          ["remaining", MANDATE.remaining + " of " + MANDATE.perPeriod]
+        ]) + '</div></div>', "pad"))
+    + sec("Kill switches", "set_kill_switch · effective at the next call boundary", card(
+        '<div style="display:flex;gap:8px;flex-wrap:wrap">'
+        + ['every moves_funds tool','every irreversible tool','every third-party egress tool',
+           'slack__post_message@7'].map((k, i) => '<span class="b ' + (i === 3 ? "crit" : "") + '">'
+           + (i === 3 ? "flipped · " : "armed · ") + k + '</span>').join("")
+        + '</div>', "pad"));
+};
+
+P.ontology = () => {
+  const tab = S.tab.ontology || "model";
+  const tabs = ["model","graph","sources","repositories","versions"].map(t =>
+    '<button class="tab' + (t === tab ? " on" : "") + '" data-act="tab:ontology:' + t + '">'
+    + t.charAt(0).toUpperCase() + t.slice(1) + '</button>').join("");
+  let body;
+  if (tab === "repositories") {
+    body = tbl('<th>Repository</th><th>Role</th><th>Production branch</th><th>Last indexed</th>'
+      + '<th>Events</th><th>Issues</th>', [
+      ["acme/platform","main","main","3d8f77e · 12:40 today","healthy · 0 missed","1,402 imported"],
+      ["acme/billing","linked","release","a10c4f2 · 2026-09-10","healthy · 0 missed","318 imported"],
+      ["acme/mobile","linked","main","77be091 · 2026-09-09","1 redelivered","206 imported"]
+    ].map(r => '<tr><td><span class="idc">' + r[0] + '</span></td>'
+      + '<td><span class="b ' + (r[1] === "main" ? "gold" : "") + '">' + r[1] + '</span></td>'
+      + '<td class="sc">' + r[2] + '</td><td class="sc">' + r[3] + '</td>'
+      + '<td class="sc">' + r[4] + '</td><td class="sc">' + r[5] + '</td></tr>').join(""));
+  } else if (tab === "versions") {
+    body = card(kvl([
+      ["active","v23 · merged 2026-09-08 · acme/platform#1871"],
+      ["path",".oxagen/ontology/ — manifest.json, schemas/sales_crm, schemas/github"],
+      ["open proposal","v24 · acme/platform#1894 · adds Contract.renewal_date, 2 relation types"],
+      ["checks","schema validity · naming · no orphaned relation · diff against the pinned version"],
+      ["as_of","every prior version stays queryable by its temporal fields"]
+    ]), "pad");
+  } else {
+    body = tbl('<th>Class</th><th class="r">Entities</th><th>Freshness</th><th>Sources</th>'
+      + '<th class="r">Cited by agents</th><th>Drift</th>', [
+      ["Customer","1,284","12:40 today","github, linear, postgres","418","—"],
+      ["Repository","3","12:40 today","github","1,902","—"],
+      ["Issue","1,926","12:41 today","github, linear","2,744","—"],
+      ["Symbol","48,110","12:40 today","github code graph","6,188","—"],
+      ["Table","212","12:40 today","github data layer","904","3 declared, not live"],
+      ["Contract","417","2026-09-10","postgres","96","1 column missing"]
+    ].map(r => '<tr><td><span class="idc">' + r[0] + '</span></td><td class="r">' + r[1] + '</td>'
+      + '<td class="sc">' + r[2] + '</td><td class="sc">' + r[3] + '</td>'
+      + '<td class="r">' + r[4] + '</td><td>' + (r[5] === "—" ? '<span class="sc">—</span>'
+      : '<span class="b bad">' + r[5] + '</span>') + '</td></tr>').join(""));
+  }
+  return '<p class="eyebrow">Workspace · ' + S.ws + '</p><h1 class="pt">Ontology</h1>'
+    + '<p class="sub">The workspace\'s model of its business, inferred from what it already has, '
+    + 'proposed as a pull request, and activated by merge. Entities never go to git; the schema does.</p>'
+    + '<div class="tabs" style="padding:0;margin-bottom:16px">' + tabs + '</div>' + body;
+};
+
+P.steering = () => {
+  const rows = [
+    ["ctx.review.changelog-convention","directive","workspace","published","62 runs rendered · 48 cited","2026-08-30"],
+    ["ctx.arch.no-direct-stripe-calls","directive","workspace","published","41 rendered · 39 cited · 2 violated","2026-08-22"],
+    ["ctx.repo.mobile-uses-detox","knowledge","repository","published","18 rendered · 11 cited","2026-09-02"],
+    ["ctx.review.skip-generated-files","directive","workspace","proposed","—","open PR #1892"],
+    ["ctx.data.invoices-are-immutable","knowledge","workspace","published","7 rendered · 0 cited","2026-07-14"]
+  ].map(r => '<tr><td><span class="idc">' + r[0] + '</span></td>'
+    + '<td class="sc">' + r[1] + '</td><td class="sc">' + r[2] + '</td>'
+    + '<td>' + (r[3] === "published" ? '<span class="b ok">published</span>'
+      : '<span class="b wait">proposed</span>') + '</td>'
+    + '<td class="sc">' + r[4] + '</td><td class="sc">' + r[5] + '</td></tr>').join("");
+  return '<p class="eyebrow">Workspace · ' + S.ws + '</p><h1 class="pt">Steering</h1>'
+    + '<p class="sub">Nothing steers until it is published, and publication is a merged pull request '
+    + 'on <code class="mono">' + WS[S.ws].mainRepo + '</code>. The graph remembers everything about a record; '
+    + 'git decides what is in force.</p>'
+    + '<div class="grid g4">'
+    + stat("Published records", "34", "28 directive · 6 knowledge")
+    + stat("Open Context PRs", "2", "#1892 opened 13:02 · #1888 awaiting review")
+    + stat("Proposals", "6", "threshold: 5 runs, 2 agents, confidence 0.72")
+    + stat("Retirement candidates", "1", "ctx.data.invoices-are-immutable · 0 citations in 60 days")
+    + '</div>'
+    + sec("Records", "list_records · effect measured per record",
+        tbl('<th>Lineage</th><th>Kind</th><th>Scope</th><th>Status</th><th>Effect</th>'
+          + '<th>Published</th>', rows));
+};
+
+P.spend = () => {
+  const f = [
+    ["Tool-list bloat","acme.core.triage","$412.80","41 tool definitions average 3,412 tokens a turn; 14 of them were not called in the last 200 runs.","agent"],
+    ["Cache writes never read","acme.core.docs-writer","$188.40","cache_write_5m on the last turn of 61 one-turn runs, never read inside the TTL.","agent"],
+    ["Duplicate tool calls","acme.core.release-manager","$96.10","github__get_file_contents called twice with the same input digest in 38 runs. Opened as a proposal.","agent"],
+    ["Wrong tier","acme.core.triage","$61.20","11 runs were entirely classification-shaped on the complex tier.","agent"],
+    ["Retry storms","acme.core.triage","$61.20","Linear 429s retried 11 times in one turn on 2026-09-03.","run"]
+  ].map(x => '<tr><td><b style="color:var(--fg)">' + x[0] + '</b><div class="t2 sc" '
+    + 'style="color:var(--muted);white-space:normal">' + x[3] + '</div></td>'
+    + '<td><span class="mono" style="font-size:11px">' + x[1] + '</span></td>'
+    + '<td class="sc">' + x[4] + '</td>'
+    + '<td class="r money">' + x[2] + '<div class="basis">per month</div></td>'
+    + '<td class="r"><button class="btn sm" data-act="finding">Act</button></td></tr>').join("");
+  return '<p class="eyebrow">Workspace · ' + S.ws + '</p><h1 class="pt">Spend</h1>'
+    + '<p class="sub">Customer spend, accounted per model call by normalized token class, attributed '
+    + 'operator → agent → run → turn → step, and reconciled against the provider\'s own statement. '
+    + 'Oxagen bills per run and never marks up a token.</p>'
+    + '<div class="grid g4">'
+    + stat("Month to date", "$18,472.36", "94.2% gateway_observed")
+    + stat("Proven spend", "$6,118.94", "33.1% · witness verdict flipped")
+    + stat("Productive ratio", "0.71", "share of steps that advanced the task")
+    + stat("Cache hit rate", "0.68", "cache_read / (input_uncached + cache_read)")
+    + '</div>'
+    + sec("Findings", "list_findings · ranked by money at stake",
+        tbl('<th>Finding</th><th>Scope</th><th>Level</th><th class="r">At stake</th><th></th>', f))
+    + sec("Reconciliation", "get_reconciliation · matched to the provider statement", card(kvl([
+        ["matched by provider request id","98.7% of provider spend · level 1"],
+        ["matched by key, model, day","1.2% · client-attested frames with no request id"],
+        ["open variance","$0.83 · one key-day · anthropic pk_9f21 · 2026-09-10"],
+        ["status","exception open · 4 unmatched frames attached"]
+      ]), "pad"));
+};
+
+P.org = () => {
+  const mem = [PEOPLE.priya, PEOPLE.marcus, PEOPLE.dana].map(p =>
+    '<tr><td><b style="color:var(--fg)">' + p.name + '</b><div class="sc">' + p.email + '</div></td>'
+    + '<td><span class="b">' + p.orgRole + '</span></td>'
+    + '<td class="sc">' + Object.keys(p.ws).map(w => w + " · " + p.ws[w]).join("<br>") + '</td>'
+    + '<td class="sc">' + p.principal + '</td></tr>').join("");
+  return '<p class="eyebrow">Organization</p><h1 class="pt">Acme Robotics</h1>'
+    + '<p class="sub">The organization is the tenant and the hard isolation boundary: one Neo4j '
+    + 'database, one key-encryption key, one billing account. A workspace is a governance partition '
+    + 'inside it, never a second tenant.</p>'
+    + '<div class="grid g4">'
+    + stat("People", "14", "1 owner · 1 billing · 12 members")
+    + stat("Workspaces", "2", "core-platform · finops")
+    + stat("Funding source", "platform", "at vendor cost, capped at $250.00 / month")
+    + stat("Data plane", "shared", "postgres · neo4j · objects — all shared")
+    + '</div>'
+    + sec("People", "list_members",
+        tbl('<th>Person</th><th>Org role</th><th>Workspaces</th><th>Principal</th>', mem))
+    + sec("Model routes", "set_model_route · the alias is configured, the concrete id is recorded",
+        tbl('<th>Tier</th><th>Route</th><th>Resolved today</th><th>Fallback</th>', [
+          ["complex","z-ai/glm-latest","GLM 5.3 · 1.3M context","z-ai/glm-4.7"],
+          ["light","z-ai/glm-flash-latest","GLM 5.3 Flash","—"],
+          ["embed","voyage-4 (direct API)","1024 dimensions","—"],
+          ["rerank","rerank-2.5 (direct API)","n/a","—"]
+        ].map(r => '<tr><td><span class="b gold">' + r[0] + '</span></td>'
+          + '<td class="idc">' + r[1] + '</td><td class="sc">' + r[2] + '</td>'
+          + '<td class="sc">' + r[3] + '</td></tr>').join("")));
+};
+
+P.billing = () => '<p class="eyebrow">Organization</p><h1 class="pt">Billing</h1>'
+  + '<p class="sub">Per run, on a plan allowance, with the first 1,000 runs every month free and every '
+  + 'governance feature on. Governed actions and retained storage are reported, not charged.</p>'
+  + '<div class="grid g4">'
+  + stat("Plan", "Team", "monthly · cancel any time")
+  + stat("Runs this period", "4,812", "1,000 free + 3,812 at $0.30")
+  + stat("This period", "$1,143.60", "USD · excludes provider spend")
+  + stat("Retention", "11.2 GB", "13 months included · then $0.10 / GB-month")
+  + '</div>'
+  + sec("Meters", "reported on every statement", card(kvl([
+      ["billable runs","4,812 — a sealed run with at least one model call"],
+      ["not counted","runs Oxagen halted before any model call · in-app agent turns · witness runs"],
+      ["governed actions","61,904 this period · secondary meter, priced at zero"],
+      ["assistant usage","$4.18 — tokens Oxagen bought on your behalf, at cost"],
+      ["onboarding discount","20% for 12 months · converted 2026-08-28, two days after the first run"]
+    ]), "pad"))
+  + sec("Invoices", "held by Stripe; Oxagen holds the meter",
+      tbl('<th>Period</th><th>Runs</th><th class="r">Amount</th><th>Status</th>', [
+        ["2026-08","3,914","$874.20","paid 2026-09-01"],
+        ["2026-07","2,806","$541.80","paid 2026-08-01"],
+        ["2026-06","1,240","$72.00","paid 2026-07-01"]
+      ].map(r => '<tr><td class="sc">' + r[0] + '</td><td class="r">' + r[1] + '</td>'
+        + '<td class="r money">' + r[2] + '</td><td><span class="b ok">' + r[3] + '</span></td></tr>').join("")));
+
+P.audit = () => '<p class="eyebrow">Organization</p><h1 class="pt">Audit</h1>'
+  + '<p class="sub">Control-plane events and incidents, append-only, seven years. Every badge here '
+  + 'renders the recorded value and nothing stronger.</p>'
+  + '<div class="grid g4">'
+  + stat("Events this month", "2,914", "append-only · 7-year retention")
+  + stat("Open incidents", "1", "hooks_removed · severity 3")
+  + stat("Legal holds", "0", "no run is pinned")
+  + stat("Key rotation", "2026-06-01", "att_acme_02 · valid to 2027-06-01")
+  + '</div>'
+  + sec("Events", "query_audit_log",
+      tbl('<th>Kind</th><th>Severity</th><th>Actor</th><th>Target</th><th>Detected by</th><th>When</th>', [
+        ["hooks_removed","3","—","laptop-mb-02 · claude-code","collector","2026-09-08 open","bad"],
+        ["credential_probe","10","acme.core.triage","witness storage","gateway","2026-09-05 resolved","crit"],
+        ["steering_published","1","Marcus Bell","ctx.review.changelog-convention","control_plane","2026-08-30","ok"],
+        ["mandate_granted","3","Dana Okafor","mnd_4471","control_plane","2026-09-01","ok"],
+        ["kill_switch.flipped","3","Priya Natarajan","slack__post_message@7","control_plane","2026-09-09","bad"]
+      ].map(e => '<tr><td><span class="idc">' + e[0] + '</span></td>'
+        + '<td><span class="b ' + e[6] + '">' + e[1] + '</span></td>'
+        + '<td class="sc">' + e[2] + '</td><td class="sc">' + e[3] + '</td>'
+        + '<td class="sc">' + e[4] + '</td><td class="sc">' + e[5] + '</td></tr>').join("")));
+
+/* ═══════════════════════════════════════════════════════════════════════
+   The assistant. One turn of the in-app agent is a run of its own, and it
+   reaches every tool through the same kernel call the screens use.
+   ═══════════════════════════════════════════════════════════════════════ */
+const TURNS = Object.assign({}, ASSISTANT_RUNS, EXTRA_TURNS);
+
+function turnbar(k){
+  const t = TURNS[k]; if (!t) return "";
+  return '<div class="turnbar">'
+    + '<span>this turn is a run</span><span class="sep">·</span>'
+    + '<a data-nav="#/acme/' + S.ws + '/runs/' + t.id + '">' + t.id + '</a><span class="sep">·</span>'
+    + '<span>' + t.turns + ' turn' + (t.turns > 1 ? "s" : "") + ', ' + t.steps + ' steps</span><span class="sep">·</span>'
+    + '<span>' + t.actions + ' governed action' + (t.actions > 1 ? "s" : "") + '</span><span class="sep">·</span>'
+    + '<span>' + t.model + ' · ' + t.tokens + ' · cache ' + t.cache + '</span><span class="sep">·</span>'
+    + '<span>$' + t.cost + '</span><span class="sep">·</span>'
+    + '<span class="tier gateway" style="font-size:9px">gateway</span>'
+    + '<span class="sep">·</span><span>free — assistant turns are not billable runs</span></div>';
+}
+function gaCard(g){
+  const dec = g.decision === "allow" ? '<span class="b ok">allow</span>'
+    : g.decision === "approve" ? '<span class="b wait">approve · routed to a human</span>'
+    : '<span class="b bad">deny</span>';
+  return '<div class="ga"><div class="ga-hd">'
+    + '<span class="b gold">governed action</span>'
+    + '<span class="n">' + g.tool + '@' + g.ver + '</span>'
+    + '<span class="seq">' + g.seq + '</span>'
+    + '<span style="margin-left:auto">' + dec + '</span></div>'
+    + '<div class="ga-bd">' + g.lines.map(l => '<div class="l">' + l + '</div>').join("") + '</div>'
+    + '<div class="ga-ft"><span>policy ' + g.policy + '</span><span>·</span>'
+    + '<span>rule ' + g.rules.join(", ") + '</span><span>·</span>'
+    + (g.receipt
+        ? '<span class="rcp" data-act="receipt:' + g.receipt + '">receipt ' + g.receipt + ' &rarr;</span>'
+        : '<span>' + (g.parked || "no receipt yet") + '</span>')
+    + '</div></div>';
+}
+function blk(b){
+  if (b.p) return '<p>' + b.p + '</p>';
+  if (b.code) return '<pre>' + b.code + '</pre>';
+  if (b.ga) return gaCard(b.ga);
+  if (b.turn) return turnbar(b.turn);
+  if (b.kv) return kvl(b.kv);
+  if (b.chain) return '<div class="chain">' + b.chain.map((h, i) =>
+      '<div class="hop' + (i === b.hot ? " hot" : "") + '"><div class="hk">' + h[0] + '</div>'
+      + '<div class="hv">' + h[1] + '</div></div>').join("") + '</div>';
+  if (b.tl) return '<div class="chain">' + b.tl.map(h =>
+      '<div class="hop"><div class="hk mono" style="letter-spacing:0;text-transform:none">'
+      + h[0] + '</div><div class="hv">' + h[1] + '</div></div>').join("") + '</div>';
+  if (b.status) return '<div class="turnbar" style="border-style:solid;border-color:var(--'
+      + b.status.tone + '-bd);background:var(--' + b.status.tone + '-bg);color:var(--' + b.status.tone
+      + ');font-family:var(--font);font-size:11.5px">' + ico("check") + '<span>' + b.status.text
+      + '</span></div>';
+  if (b.buttons) return '<div style="display:flex;gap:7px;flex-wrap:wrap">' + b.buttons.map(x =>
+      '<button class="btn sm' + (x.pri ? " pri" : "") + '" data-act="reply:' + x.act + '">'
+      + x.label + '</button>').join("") + '</div>';
+  return "";
+}
+function msgEl(m){
+  if (m.role === "op") {
+    const p = PEOPLE[m.who];
+    return '<div class="msg op"><div class="msg-who"><span class="av">' + p.init + '</span>'
+      + '<span>' + p.name + '</span><time>' + m.t + '</time></div>'
+      + '<div class="bub">' + m.text + '</div></div>';
+  }
+  return '<div class="msg"><div class="msg-who"><span class="av ox">' + ico("spark") + '</span>'
+    + '<span>Oxagen assistant</span><time>' + m.t + '</time></div>'
+    + '<div class="bd">' + m.blocks.map(blk).join("") + '</div></div>';
+}
+function engineDown(){
+  return '<div class="blank err" style="padding:24px 18px;text-align:left;align-items:stretch">'
+    + '<div style="display:flex;align-items:center;gap:8px">' + ico("warn")
+    + '<h3 style="font-size:14px">The assistant is unavailable</h3></div>'
+    + '<p><code class="mono">stella serve</code> at <code class="mono">engine.oxagen.internal:8080</code> '
+    + 'returned <b class="mono">engine_unreachable</b> after 3 attempts. Last attempt 15:42:08Z, '
+    + 'connect timeout 2000 ms.</p>'
+    + '<p>The engine is a required service. <b>Nothing falls back to an in-process loop</b>, so I will not '
+    + 'answer from a path that could not be recorded as a run.</p>'
+    + '<p>Everything else is unaffected: the gateway, recording, approvals, budgets and all ten pages '
+    + 'work with the engine down. Only this panel is out.</p>'
+    + '<p class="sc" style="color:var(--dim)">incident inc_01K5ZP1F8A · severity 3 · '
+    + 'detected by control_plane · opened 15:40:11Z · 0 runs affected</p>'
+    + '<div style="display:flex;gap:8px;margin-top:6px">'
+    + '<button class="btn pri" data-act="engineup">Retry now</button>'
+    + '<button class="btn" data-act="incident">Open the incident</button></div></div>';
+}
+function suggestions(){
+  const list = SUGGEST[S.page] || SUGGEST.fleet;
+  return '<div class="sugg">' + list.map(s =>
+    '<button data-act="ask"><span class="q">' + s[0] + '</span>' + s[1] + '</button>').join("") + '</div>';
+}
+function renderAssistant(){
+  if (S.ap === "0") {
+    return '<aside class="ap rail" aria-label="Assistant, collapsed">'
+      + '<button class="railbtn mark" data-act="ap:why" title="Open the assistant" '
+      + 'aria-label="Open the assistant">' + ico("spark") + '</button>'
+      + '<span class="rail-rot">assistant</span>'
+      + '<button class="railbtn" data-act="ap:why" title="Explain a run">' + ico("clock") + '</button>'
+      + '<button class="railbtn" data-act="ap:grant" title="Change configuration">' + ico("tools") + '</button>'
+      + '<button class="railbtn" data-act="ap:onboarding" title="Past conversations">' + ico("git") + '</button>'
+      + '</aside>';
+  }
+  const c = CONVOS[S.ap] || CONVOS.why;
+  const body = S.engine === "down" ? engineDown()
+    : c.msgs.map(msgEl).join("")
+      + S.appended.filter(a => a.convo === S.ap).map(a =>
+          msgEl({ role:"ox", t:REPLIES[a.act].t, blocks:REPLIES[a.act].blocks })).join("")
+      + '<div style="margin-top:2px"><div class="sb-lab" style="padding:0 0 6px">'
+      + 'Ask about ' + PAGE_LABEL[S.page] + '</div>' + suggestions() + '</div>';
+  const tabs = Object.keys(CONVOS).map(k =>
+    '<button class="ap-tab' + (k === S.ap ? " on" : "") + '" data-act="ap:' + k + '">'
+    + CONVOS[k].label + (CONVOS[k].archived ? " ·" : "") + '</button>').join("");
+  return '<aside class="ap open" aria-label="Assistant">'
+    + '<div class="ap-hd"><span class="t">' + ico("spark") + 'Assistant</span>'
+    + '<span class="b ' + (S.engine === "down" ? "bad" : "ok") + '" style="margin-left:auto">'
+    + (S.engine === "down" ? "engine down" : "stella serve") + '</span>'
+    + '<button class="iconbtn" data-act="ap:0" aria-label="Collapse the assistant">'
+    + ico("close") + '</button></div>'
+    + '<div class="ap-ctx">' + ico("pin") + '<span>Looking at</span>'
+    + '<span class="pin">' + PAGE_LABEL[S.page] + ' · ' + (S.page === "org" || S.page === "billing"
+      || S.page === "audit" ? "acme" : S.ws) + '</span>'
+    + '<span style="margin-left:auto" class="sc">' + (S.ap === "onboarding"
+      ? "archived · 2026-08-26" : "live") + '</span></div>'
+    + '<div class="ap-tabs">' + tabs + '</div>'
+    + '<div class="ap-body" id="apbody">' + body + '</div>'
+    + '<div class="ap-foot"><div class="comp">'
+    + '<textarea id="apin" rows="1" placeholder="'
+    + (S.engine === "down" ? "Unavailable while the engine is down"
+       : "Ask, or tell it to change something…") + '"'
+    + (S.engine === "down" ? " disabled" : "") + '></textarea>'
+    + '<button class="sendb" data-act="send" aria-label="Send">' + ico("send") + '</button></div>'
+    + '<div class="ap-meter"><span>tools: 11 agent tool contracts</span><span>·</span>'
+    + '<span>no credentials held</span><span>·</span>'
+    + '<span>every call decided by kernel.invoke()</span></div></div></aside>';
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Dialogs: the account, notifications, the command menu, a receipt.
+   ═══════════════════════════════════════════════════════════════════════ */
+function dlgAccount(){
+  const tab = S.dtab || "profile";
+  const me = PEOPLE.priya;
+  const tabs = [["profile","Profile"],["preferences","Preferences"],
+                ["security","Security"],["privacy","Privacy"]].map(t =>
+    '<button class="tab' + (t[0] === tab ? " on" : "") + '" data-act="dtab:' + t[0] + '">'
+    + t[1] + '</button>').join("");
+  let body = "";
+  if (tab === "profile") {
+    body = '<div style="display:flex;gap:14px;align-items:center">'
+      + '<span class="avat" style="width:52px;height:52px;font-size:17px">' + me.init + '</span>'
+      + '<div><div style="font-size:16px;font-weight:600">' + me.name + '</div>'
+      + '<div class="sc">' + me.email + ' · verified 2026-08-26</div></div></div>'
+      + '<div class="row2"><div class="field"><label for="ac-name">Display name</label>'
+      + '<input id="ac-name" type="text" value="Priya Natarajan"></div>'
+      + '<div class="field"><label for="ac-email">Email</label>'
+      + '<input id="ac-email" type="email" value="priya@acmerobotics.com"></div></div>'
+      + '<div class="field"><label>Roles</label>' + kvl([
+        ["acme","org.owner"],
+        ["core-platform","workspace.owner"],
+        ["finops","workspace.viewer"],
+        ["principal","prn_01K3F8QA2M · kind human"]
+      ]) + '<p class="hint">A role is changed on the Organization page by someone who holds '
+      + '<code class="mono">set_member_role</code>, never here. This is where you see what you hold.</p></div>';
+  } else if (tab === "preferences") {
+    body = '<div class="row2">'
+      + '<div class="field"><label for="ac-loc">Locale</label><select id="ac-loc">'
+      + '<option>English (United States)</option>'
+      + '<option disabled>Deutsch — Series A</option>'
+      + '<option disabled>日本語 — Series A</option></select>'
+      + '<p class="hint">Dates, numbers and currencies format to this. Prose the models generate — '
+      + 'findings, explanations, assistant replies — is generated in this locale and recorded on the frame. '
+      + 'Machine-readable fields in records, receipts and exports are never translated.</p></div>'
+      + '<div class="field"><label for="ac-cur">Display currency</label><select id="ac-cur">'
+      + '<option>USD — US dollar</option><option disabled>EUR — Series A</option></select>'
+      + '<p class="hint">Display only. The value of record stays the provider\'s billing currency, and '
+      + 'every converted number carries its rate and source.</p></div></div>'
+      + '<div class="row2"><div class="field"><label for="ac-tz">Time zone</label>'
+      + '<select id="ac-tz"><option>UTC — every timestamp in this mockup</option>'
+      + '<option>America/Los_Angeles</option></select></div>'
+      + '<div class="field"><label for="ac-th">Theme</label><select id="ac-th">'
+      + '<option>Match the system</option><option>Ink</option><option>Paper</option></select></div></div>'
+      + '<div class="field"><label>Preview</label>'
+      + card(kvl([["date","11 September 2026, 15:47 UTC"],["number","18,472.36"],
+        ["money","$18,472.36 USD"],["duration","6 m 11 s"]]), "pad") + '</div>';
+  } else if (tab === "security") {
+    body = '<div class="field"><label>Two-factor</label>'
+      + '<div class="lst"><div class="li"><div class="ic" style="background:var(--ok-bg);color:var(--ok)">'
+      + ico("lock") + '</div><div class="bd2"><div class="t1">Authenticator app</div>'
+      + '<div class="t2">TOTP, added 2026-08-26. 8 of 10 recovery codes unused.</div></div>'
+      + '<button class="btn sm">Regenerate codes</button></div>'
+      + '<div class="li"><div class="ic" style="background:var(--hl);color:var(--dim)">' + ico("user")
+      + '</div><div class="bd2"><div class="t1">Passkey</div>'
+      + '<div class="t2">Not set up. A passkey replaces the password, not the second factor.</div></div>'
+      + '<button class="btn sm">Add</button></div></div></div>'
+      + '<div class="field"><label>Active sessions</label><div class="lst">'
+      + [["MacBook Pro · Chrome 141","San Francisco · 73.15.240.8","now, this session",true],
+         ["iPhone 17 · Safari","San Francisco · 73.15.240.8","2026-09-11 08:12Z",false],
+         ["oxagen CLI · macOS","San Francisco · 73.15.240.8","2026-09-10 17:40Z",false]].map(s =>
+        '<div class="li"><div class="bd2"><div class="t1">' + s[0]
+        + (s[3] ? ' <span class="b ok">this device</span>' : '') + '</div>'
+        + '<div class="t2">' + s[1] + '</div></div><time>' + s[2] + '</time>'
+        + (s[3] ? '' : '<button class="btn sm">Revoke</button>') + '</div>').join("")
+      + '</div><p class="hint">Revoking a session ends it at the next request. It does not touch an '
+      + 'agent credential or a run token — those are revoked on the Agents page, and that is what makes '
+      + 'a halt stick.</p></div>';
+  } else {
+    body = '<div class="field"><label>Export</label>'
+      + '<p class="hint">A signed bundle: archive segments, attestations, key ids and a verifier script, '
+      + 'so an auditor can check the chain offline without trusting Oxagen. Runs as '
+      + '<code class="mono">export_data</code> — a governed action with third-party egress.</p>'
+      + '<div style="display:flex;gap:8px"><button class="btn">Export my activity</button>'
+      + '<button class="btn">Export the organization</button></div></div>'
+      + '<div class="field"><label>Erasure</label>'
+      + '<p class="hint">Erasure is <b>crypto-shredding</b>: bodies attributable to a person are encrypted '
+      + 'under a per-subject key, and erasure destroys the key and writes a tombstone frame holding the '
+      + 'digests that remain. The chain stays intact and verifiable; the content is unrecoverable. '
+      + 'It cannot be undone, and it needs an org owner.</p>'
+      + '<button class="btn" style="border-color:var(--bad-bd);color:var(--bad)">Request erasure</button></div>'
+      + '<div class="field"><label>What is kept, and for how long</label>' + kvl([
+        ["frame bodies","7 years from the seal · write-once · per-organization key"],
+        ["run ledger","forever — run, attempt, seal, attestation, frame digests and costs"],
+        ["retention mode","content_exact — bodies retained, replay grade full"],
+        ["data plane","shared · us-west-2"],
+        ["legal holds","none on your activity"]
+      ]) + '</div>';
+  }
+  return { title:"Account", tabs:tabs, body:body,
+    foot:'<span>Changes here run as <code class="mono">set_preferences</code> — a governed action, '
+      + 'audited like any other.</span><div class="right">'
+      + '<button class="btn" data-act="close">Cancel</button>'
+      + '<button class="btn pri" data-act="close">Save</button></div>' };
+}
+function dlgNotifs(){
+  const tone = { wait:"wait", bad:"bad", ok:"ok", gold:"gold", crit:"crit" };
+  const body = '<div class="lst">' + NOTIFS.map(n =>
+    '<div class="li' + (n.unread ? " unread" : "") + '">'
+    + '<div class="ic" style="background:var(--' + tone[n.tone] + '-bg,var(--hl));color:var(--'
+    + tone[n.tone] + ',var(--dim))">' + ico(n.tone === "ok" ? "check"
+      : n.tone === "wait" ? "clock" : n.tone === "gold" ? "git" : "warn") + '</div>'
+    + '<div class="bd2"><div class="t1">' + n.title + '</div>'
+    + '<div class="t2">' + n.body + '</div>'
+    + '<div class="sc" style="margin-top:3px">' + n.kind + '</div></div>'
+    + '<time>' + n.t + '</time></div>').join("") + '</div>';
+  return { title:"Notifications", tabs:null, body:body,
+    foot:'<span><code class="mono">list_notifications</code> · 3 unread · every kind here maps to a '
+      + 'frame kind or an audit event, never to something invented for a bell.</span>'
+      + '<div class="right"><button class="btn" data-act="close">Mark all read</button></div>' };
+}
+function dlgCommand(){
+  const q = S.cmdq.toLowerCase();
+  const hit = s => !q || s.toLowerCase().includes(q);
+  const grp = (label, note, items) => items.length
+    ? '<div class="cmd-grp"><div class="cmd-lab">' + label
+      + (note ? '<span class="c">' + note + '</span>' : '') + '</div>' + items.join("") + '</div>' : "";
+  const pages = CMD.pages.filter(p => hit(p[0]) || hit(p[1])).map(p =>
+    '<button class="cmd-it" data-nav="' + p[2] + '"><span class="glyph">' + ico(p[3]) + '</span>'
+    + '<span class="nm">' + p[0] + '</span><span class="ds">' + p[1] + '</span></button>');
+  const risk = r => '<span class="b ' + (r === "critical" ? "crit" : r === "high" ? "bad"
+    : r === "medium" ? "wait" : "") + '">' + r + '</span>';
+  const at = CMD.agentTools.filter(t => hit(t[0]) || hit(t[1])).map(t =>
+    '<button class="cmd-it" data-act="ask"><span class="nm mono">' + t[0] + '</span>'
+    + '<span class="ds">' + t[1] + '</span><span class="tr">' + risk(t[2])
+    + '<span class="b">' + t[3] + '</span></span></button>');
+  const belt = CMD.belt.filter(t => hit(t[0]) || hit(t[1])).map(t =>
+    '<button class="cmd-it" data-act="ask"><span class="nm mono">' + t[0] + '</span>'
+    + '<span class="ds">' + t[1] + '</span><span class="tr">' + risk(t[2])
+    + '<span class="b">' + t[3] + '</span></span></button>');
+  const runs = CMD.runs.filter(r => hit(r[0]) || hit(r[1])).map(r =>
+    '<button class="cmd-it" data-nav="' + r[2] + '"><span class="nm mono">' + r[0] + '</span>'
+    + '<span class="ds">' + r[1] + '</span></button>');
+  const any = pages.length + at.length + belt.length + runs.length;
+  const body = any
+    ? grp("Pages", "", pages)
+      + grp("Agent tools", "your grants ∩ the workspace belt", at)
+      + grp("Tools on the belt", "risk and side effect, the same trailer the model sees", belt)
+      + grp("Runs", "", runs)
+    : '<div class="blank" style="margin:16px;border:0;background:none;padding:26px 10px">'
+      + ico("search", "ic") + '<h3>Nothing on your belt matches “' + esc(S.cmdq) + '”</h3>'
+      + '<p>A search never returns a tool outside the belt. What you cannot call, you cannot find — '
+      + 'which is also what stops a prompt injection from naming one.</p></div>';
+  return { command:true, body:body,
+    foot:'<span><code class="mono">search_tools</code> · this search is itself a governed call, '
+      + 'recorded as a frame on <span class="mono">run_01K5ZQ2V8N</span></span>'
+      + '<div class="right"><span class="kbd">&uarr;&darr;</span><span class="kbd">&crarr;</span>'
+      + '<span class="kbd">esc</span></div>' };
+}
+function dlgReceipt(id){
+  const r = RECEIPTS[id];
+  if (!r) return { title:"Receipt", body:"<p>Unknown receipt.</p>", foot:"" };
+  const grp = (label, pairs) => '<div class="field"><label>' + label + '</label>'
+    + kvl(pairs.map(p => [p[0], esc(p[1])])) + '</div>';
+  return { title:"Receipt " + id, wide:true,
+    body:'<p class="sub" style="margin:0">One signed record of one call, assembled by the gateway from '
+      + 'the call\'s frames and stored as its own frame. This is what an auditor, a security lead or a '
+      + 'CFO opens.</p>'
+      + grp("Who", r.who) + grp("What", r.what) + grp("Authority", r.authority)
+      + grp("Credential", r.credential) + grp("Effect", r.effect) + grp("Integrity", r.integrity),
+    foot:'<span>' + r.tool + '@' + r.version + ' · ' + r.when + '</span>'
+      + '<div class="right"><button class="btn" data-act="close">Export signed</button>'
+      + '<button class="btn" data-act="close">Close</button></div>' };
+}
+function renderDialog(){
+  if (!S.dialog) return "";
+  let d;
+  if (S.dialog === "account") d = dlgAccount();
+  else if (S.dialog === "notifications") d = dlgNotifs();
+  else if (S.dialog === "command") d = dlgCommand();
+  else if (S.dialog.indexOf("receipt:") === 0) d = dlgReceipt(S.dialog.slice(8));
+  else return "";
+  if (d.command) {
+    return '<div class="scrim" data-act="close-scrim"><div class="dlg" role="dialog" aria-modal="true" '
+      + 'aria-label="Command menu" data-stop><div class="cmd-in">' + ico("search")
+      + '<input id="cmdq" type="text" value="' + esc(S.cmdq)
+      + '" placeholder="Search pages, agent tools, your belt, runs…" autocomplete="off"></div>'
+      + '<div class="dlg-bd" style="padding:0;gap:0">' + d.body + '</div>'
+      + '<div class="dlg-ft">' + d.foot + '</div></div></div>';
+  }
+  return '<div class="scrim" data-act="close-scrim"><div class="dlg' + (d.wide ? " wide" : "")
+    + '" role="dialog" aria-modal="true" aria-label="' + d.title + '" data-stop>'
+    + '<div class="dlg-hd"><h3>' + d.title + '</h3>'
+    + '<button class="x" data-act="close" aria-label="Close">' + ico("close") + '</button></div>'
+    + (d.tabs ? '<div class="tabs">' + d.tabs + '</div>' : '')
+    + '<div class="dlg-bd">' + d.body + '</div>'
+    + '<div class="dlg-ft">' + d.foot + '</div></div></div>';
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Shell
+   ═══════════════════════════════════════════════════════════════════════ */
+function navItem(p, on){
+  return '<button class="nav' + (on ? " on" : "") + '" data-nav="#' + p.path(S.ws) + '">'
+    + '<span class="glyph">' + ico(p.icon) + '</span><span>' + p.label + '</span>'
+    + (p.tag ? '<span class="tag' + (p.hot ? " hot" : "") + '">' + p.tag + '</span>' : '') + '</button>';
+}
+function render(){
+  const orgScope = S.page === "org" || S.page === "billing" || S.page === "audit";
+  const crumbs = orgScope
+    ? [["Acme Robotics", "#/acme"], [PAGE_LABEL[S.page], null]]
+    : [["Acme Robotics", "#/acme"], [S.ws, "#/acme/" + S.ws], [PAGE_LABEL[S.page], null]]
+        .concat(S.page === "run" ? [[S.run, null]] : []);
+  const tb = '<header class="tb">'
+    + '<div class="tb-brand">'
+    + '<button class="iconbtn mburg" data-act="menu" aria-label="Menu">' + ico("menu") + '</button>'
+    + '<svg viewBox="0 0 574.244 106.313" style="height:19px;width:auto" role="img" '
+    + 'aria-label="oxagen"><use href="#oxlockup"></use></svg></div>'
+    + '<nav class="crumbs" aria-label="Breadcrumb">'
+    + '<button class="sw" data-act="switch-org">' + ORG.name
+    + '<span class="ns">' + ORG.ns + '</span><span class="car">&#9662;</span></button>'
+    + (orgScope ? "" : '<span class="crumb-sep">/</span>'
+      + '<button class="sw" data-act="switch-ws">' + S.ws
+      + '<span class="ns">' + WS[S.ws].ns + '</span><span class="car">&#9662;</span></button>')
+    + crumbs.slice(orgScope ? 1 : 2).map(c => '<span class="crumb-sep">/</span>'
+      + '<span class="crumb' + (c[1] ? "" : " here") + '">' + c[0] + '</span>').join("")
+    + '</nav>'
+    + '<div class="tb-right">'
+    + '<button class="cmdk" data-act="command" aria-label="Open the command menu">'
+    + ico("search") + '<span>Search everything</span><span class="kbd">&#8984;K</span></button>'
+    + '<button class="iconbtn" data-act="notifications" aria-label="Notifications, 3 unread">'
+    + ico("bell") + '<span class="dot">3</span></button>'
+    + '<button class="iconbtn' + (S.ap !== "0" ? " on" : "") + '" data-act="ap:toggle" '
+    + 'aria-pressed="' + (S.ap !== "0") + '" aria-label="Toggle the assistant">' + ico("spark") + '</button>'
+    + '<button class="avat" data-act="account" aria-label="Account, Priya Natarajan">PN</button>'
+    + '</div></header>';
+  const sb = '<nav class="sb" aria-label="Pages">'
+    + '<div class="sb-lab">Workspace</div>'
+    + PAGES.map(p => navItem(p, p.k === S.page)).join("")
+    + '<div class="sb-lab">Organization</div>'
+    + ORG_PAGES.map(p => navItem(p, p.k === S.page)).join("")
+    + '<div style="margin-top:auto;padding:14px 8px 0">'
+    + '<div class="sc" style="line-height:1.7">bundle v' + WS[S.ws].bundle
+    + '<br>ontology ' + WS[S.ws].ontology + '<br>deny gen ' + ORG.denyGen
+    + '<br>plane shared</div></div></nav>';
+  const pageBody = S.view === "loaded"
+    ? (P[S.page] ? P[S.page]() : "<p>Not built.</p>")
+    : S.view === "empty" ? emptyFor(S.page) : blankState(S.view, PAGE_LABEL[S.page]);
+  const head = S.view === "loaded" || S.view === "empty" ? "" :
+    '<p class="eyebrow">' + (S.page === "org" || S.page === "billing" || S.page === "audit"
+      ? "Organization" : "Workspace · " + S.ws) + '</p><h1 class="pt">' + PAGE_LABEL[S.page]
+    + '</h1><p class="sub">&nbsp;</p>';
+  return tb + '<div class="shell">' + sb
+    + '<main class="main"><div class="page">' + head + pageBody + '</div></main>'
+    + renderAssistant() + '</div>' + renderDialog();
+}
+function emptyFor(page){
+  const copy = {
+    fleet:["No runs yet in this workspace","Wrap an agent and start it. The first frame that reaches Oxagen opens this page on your own run — which is also the installer's smoke test, so there is one path and not two.","Wrap Claude Code"],
+    run:["This run has no frames","The run token was minted and the run opened, but no frame arrived before the token expired 15 minutes later. Nothing was recorded, and nothing was billed.","Back to Fleet"],
+    agents:["No agents registered","An agent is a file in the main repo before it is an identity here. Registering one opens a Context PR adding .oxagen/agents/&lt;slug&gt;.toml; merge creates the principal.","Register an agent"],
+    tools:["No tool servers imported","Import an MCP server and Oxagen pulls tools/list, versions every tool, and stores both schemas. Until then the belt is empty and every call by name is unknown_tool.","Import a server"],
+    ontology:["No sources connected","Connect GitHub, Linear or a Postgres database. The profiler reads a sample, proposes classes it actually saw, and opens the proposal as a pull request.","Link a repository"],
+    steering:["Nothing published yet","Agents learn by appending context records. When enough runs agree, the promoter opens a Context PR. Nothing steers until it is merged.","Open a Context PR"],
+    spend:["No spend to account for","Spend appears per model call, priced against the concrete model the provider returned, the moment a wrapped agent makes one.","Wrap an agent"],
+    org:["No workspaces yet","A workspace needs a main repo at creation — the place its steering and agent definitions live in source control. A workspace without one cannot exist.","Create a workspace"],
+    billing:["No billable runs this period","A run counts when it seals with at least one model call. Runs Oxagen halted before any model call, assistant turns and witness runs are free.","See the plan"],
+    audit:["No audit events in this window","Control-plane actions, IAM changes, repo bindings and incidents land here as they happen, append-only, for seven years.","Widen the window"]
+  }[page] || ["Nothing here","","Back"];
+  return '<div class="blank">' + ico("plus", "ic") + '<h3>' + copy[0] + '</h3><p>' + copy[1] + '</p>'
+    + '<button class="btn pri" data-act="noop" style="margin-top:4px">' + copy[2] + '</button></div>';
+}
+
+I.pin = '<circle cx="8" cy="8" r="2.2"/><circle cx="8" cy="8" r="5.8"/>';
+
+/* two more replies, for anything typed that is not one of the three scripts */
+REPLIES.read = { t:NOW.slice(0,5), blocks:[
+  { p:"Of the six live runs, <a data-nav=\"#/acme/core-platform/runs/run_01K5ZB4T8P\">run_01K5ZB4T8P</a> "
+    + "is the expensive one at <b>$1.8840</b> and climbing — <code>acme.core.release-manager</code>, "
+    + "6 turns, 31 steps, operator Marcus Bell, on <code>acme/platform#1893</code>." },
+  { p:"Where it is going: <b>68%</b> of the spend is uncached input, and the cache hit rate fell from "
+    + "0.84 on turn 2 to <b>0.19</b> on turn 5. The system-context digest changed between those turns "
+    + "while the conversation prefix did not, which means a configuration change invalidated the prefix "
+    + "mid-run. The change was the steering publish at 15:34 — <code>ctx.review.skip-generated-files</code>." },
+  { p:"That is finding <b>cache misses after a stable prefix changed</b>, and it is worth about "
+    + "<b>$0.41</b> on this run alone. It is on Spend with the frames that prove it." },
+  { turn:"read" }
+]};
+REPLIES.act = { t:NOW.slice(0,5), blocks:[
+  { p:"I opened it and stopped where my authority stops." },
+  { ga:{ tool:"dispatch_command", ver:"1", seq:"step 1", decision:"approve", policy:"v18",
+    rules:["command.fleet_scope_requires_approval"], receipt:null,
+    parked:"parked · waiting on a human · expires in 10 m",
+    lines:[
+      "Command <b>pause</b>, target kind <b>operator's agents</b>, target <b>Marcus Bell</b> — 12 agents, 3 of them with live runs.",
+      "A fleet-scope command from the assistant principal is <code>require_approval</code> on this workspace's policy. I hold agent tool contracts and nothing else; I have no standing authority to halt anyone's fleet.",
+      "If you approve, each run is denied at its <b>next call boundary</b> and the pause shows on every affected run as a <code>policy.decision</code> frame. Work already dispatched finishes; nothing new starts."
+    ] } },
+  { p:"A pause is cooperative at the boundary. If you want it to stick regardless of what the harness "
+    + "does, the command you want is <b>revoke</b> — that kills the agent credential and every run token "
+    + "with it, and it holds even if the hooks were stripped." },
+  { turn:"act" }
+]};
+TURNS.read = { id:"run_01K5ZQ2V8N", turns:3, steps:11, model:"glm-5.3", cost:"0.0094",
+  tokens:"9,810 in / 802 out", cache:"0.85", actions:5 };
+TURNS.act = { id:"run_01K5ZQ2V8N", turns:3, steps:6, model:"glm-5.3", cost:"0.0052",
+  tokens:"5,204 in / 441 out", cache:"0.82", actions:3 };
+
+function classify(t){
+  const s = t.toLowerCase();
+  if (/grant|linear|cap it|budget|\$5/.test(s)) return { convo:"grant" };
+  if (/14:03|invoice-bot|why did|parked|stop/.test(s)) return { convo:"why" };
+  if (/pause|halt|cancel|revoke|kill|wrap|invite|erase|export|hold|sync|open a/.test(s))
+    return { reply:"act" };
+  return { reply:"read" };
+}
+
+/* ── interaction ───────────────────────────────────────────────────── */
+let pending = null;
+const frame = document.getElementById("frame");
+
+frame.addEventListener("click", e => {
+  const nav = e.target.closest("[data-nav]");
+  const act = e.target.closest("[data-act]");
+  if (act) {
+    const a = act.getAttribute("data-act");
+    e.preventDefault();
+    if (a === "close" || a === "close-scrim") {
+      if (a === "close-scrim" && e.target.closest("[data-stop]")) return;
+      go({ d:null, t:null }); return;
+    }
+    if (a === "account")       { go({ d:"account", t:"profile" }); return; }
+    if (a === "notifications") { go({ d:"notifications", t:null }); return; }
+    if (a === "command")       { S.cmdq = ""; go({ d:"command", t:null }); return; }
+    if (a.indexOf("receipt:") === 0) { go({ d:a, t:null }); return; }
+    if (a.indexOf("dtab:") === 0)    { go({ t:a.slice(5) }); return; }
+    if (a.indexOf("tab:") === 0) {
+      const p = a.split(":"); S.tab[p[1]] = p[2]; paint(); return;
+    }
+    if (a === "ap:toggle") { go({ ap:S.ap === "0" ? "why" : "0" }); return; }
+    if (a.indexOf("ap:") === 0) { go({ ap:a.slice(3) }); return; }
+    if (a === "menu") { S.menu = !S.menu; paint(); return; }
+    if (a === "engineup") { go({ e:"up" }); return; }
+    if (a === "reload")   { go({ v:"loading" }); setTimeout(() => go({ v:"loaded" }, true), 1100); return; }
+    if (a.indexOf("reply:") === 0) {
+      const k = a.slice(6);
+      if (k === "noop") return;
+      if (!S.appended.some(x => x.convo === S.ap && x.act === k)) {
+        pending = { convo:S.ap, act:k }; paint();
+        setTimeout(() => { S.appended.push(pending); pending = null; paint(); scrollPanel(); }, 850);
+      }
+      return;
+    }
+    if (a === "send" || a === "ask") {
+      let text = "";
+      if (a === "ask") text = act.textContent.replace(/^\s*\S+\s*/, "").trim();
+      else { const ta = document.getElementById("apin"); text = ta ? ta.value.trim() : ""; }
+      if (!text) return;
+      if (S.dialog) go({ d:null, t:null });
+      const c = classify(text);
+      if (c.convo) { go({ ap:c.convo }); setTimeout(scrollPanel, 30); return; }
+      if (!S.appended.some(x => x.convo === S.ap && x.act === c.reply)) {
+        pending = { convo:S.ap, act:c.reply }; paint();
+        setTimeout(() => { S.appended.push(pending); pending = null; paint(); scrollPanel(); }, 850);
+      }
+      return;
+    }
+    return;  /* every other data-act is a mockup affordance that does nothing */
+  }
+  if (nav) { e.preventDefault(); const h = nav.getAttribute("data-nav");
+    const [p, q] = h.replace(/^#/, "").split("?");
+    go(Object.assign({ path:p, d:null, t:null }, q ? Object.fromEntries(new URLSearchParams(q)) : {}));
+  }
+});
+frame.addEventListener("input", e => {
+  if (e.target.id === "cmdq") {
+    S.cmdq = e.target.value;
+    const box = frame.querySelector(".dlg-bd");
+    if (box) { const d = dlgCommand(); box.innerHTML = d.body; }
+  }
+});
+frame.addEventListener("keydown", e => {
+  if (e.target.id === "apin" && e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    const b = frame.querySelector('[data-act="send"]'); if (b) b.click();
+  }
+});
+document.addEventListener("keydown", e => {
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+    e.preventDefault(); S.cmdq = ""; go({ d:"command", t:null });
+  } else if (e.key === "Escape" && S.dialog) { go({ d:null, t:null }); }
+});
+function scrollPanel(){
+  const b = document.getElementById("apbody");
+  if (b) b.scrollTop = b.scrollHeight;
+}
+
+/* ── paint ─────────────────────────────────────────────────────────── */
+function paint(){
+  document.documentElement.setAttribute("data-theme", S.theme);
+  if (S.theme === "system") document.documentElement.removeAttribute("data-theme");
+  document.body.classList.toggle("phone-mode", S.phone);
+  frame.classList.toggle("phone", S.phone);
+  frame.classList.toggle("menu", S.menu);
+  frame.innerHTML = render();
+  if (pending) {
+    const b = document.getElementById("apbody");
+    if (b) {
+      const d = document.createElement("div");
+      d.className = "thinking";
+      d.innerHTML = '<span class="tdots"><i></i><i></i><i></i></span>'
+        + '<span>Working — one turn, opened as its own run</span>';
+      b.appendChild(d); b.scrollTop = b.scrollHeight;
+    }
+  }
+  const q = document.getElementById("cmdq"); if (q) { q.focus(); q.setSelectionRange(q.value.length, q.value.length); }
+  renderStates();
+}
+function route(){ parseHash(); S.menu = false; paint(); }
+window.addEventListener("hashchange", route);
+
+/* ── the mockup's own chrome ───────────────────────────────────────── */
+const ST = [
+  { k:"v", label:"page state", opts:[["loaded","loaded"],["empty","empty"],["loading","loading"],
+      ["error","error"],["denied","denied"]] },
+  { k:"e", label:"assistant engine", opts:[["up","serving"],["down","engine down"]] },
+  { k:"ap", label:"assistant panel", opts:[["0","collapsed"],["why","explain"],["grant","configure"],
+      ["onboarding","onboarding"]] },
+  { k:"d", label:"dialog", opts:[["","none"],["account","account"],["notifications","notifications"],
+      ["command","command menu"],["receipt:rcp_8f2c41","a receipt"]] },
+  { k:"ph", label:"width", opts:[["0","desktop"],["1","phone 400"]] },
+  { k:"th", label:"theme", opts:[["system","system"],["dark","ink"],["light","paper"]] }
+];
+function renderStates(){
+  const cur = { v:S.view, e:S.engine, ap:S.ap, d:S.dialog || "", ph:S.phone ? "1" : "0", th:S.theme };
+  document.getElementById("st-body").innerHTML = ST.map(g =>
+    '<div class="grp"><div class="gl">' + g.label + '</div><div class="opts">'
+    + g.opts.map(o => '<button class="o" data-st="' + g.k + '|' + o[0] + '" aria-pressed="'
+      + (cur[g.k] === o[0]) + '">' + o[1] + '</button>').join("")
+    + '</div></div>').join("")
+    + '<div class="nb">W11 · mockup chrome, not product UI. Every page carries the assistant; '
+    + 'the panel, the account dialog, notifications and the command menu are the flow.</div>';
+}
+document.getElementById("states").addEventListener("click", e => {
+  const t = e.target.closest("[data-st]");
+  if (t) {
+    const [k, v] = t.getAttribute("data-st").split("|");
+    if (k === "d") { S.cmdq = ""; go({ d:v || null, t:v === "account" ? "profile" : null }); }
+    else if (k === "ph") go({ ph:v === "1" ? "1" : null });
+    else if (k === "th") go({ th:v });
+    else go({ [k]:v });
+    return;
+  }
+  if (e.target.closest("#st-toggle")) {
+    const el = document.getElementById("states");
+    el.classList.toggle("min");
+    document.getElementById("st-toggle").setAttribute("aria-expanded", !el.classList.contains("min"));
+  }
+});
+
+/* one rule set for narrow: the phone toggle and a real narrow window agree */
+new ResizeObserver(es => {
+  for (const en of es) frame.classList.toggle("is-narrow", en.contentRect.width < 880);
+}).observe(frame);
+
+route();
+</script>
+
+<!-- list-controls: search · sort · column filters · rows per page · pager -->
+<style>
+/* List controls: search, column filters, rows per page, sortable headers, pager.
+   Colors derive from the page's own text color so the block reads correctly in
+   every mockup theme; only the accent leans on --gold. */
+.lt{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:9px 12px;border-bottom:1px solid var(--border,color-mix(in srgb,currentColor 16%,transparent));font-family:inherit;font-size:12.5px}
+.lt.free{border:1px solid var(--border,color-mix(in srgb,currentColor 16%,transparent));border-radius:10px;margin-bottom:10px}
+.lt .lt-q{flex:1 1 200px;min-width:140px;background:color-mix(in srgb,currentColor 5%,transparent);border:1px solid var(--border,color-mix(in srgb,currentColor 16%,transparent));border-radius:8px;padding:6px 10px;font-size:12.5px;color:inherit;outline:none;font-family:inherit;transition:border-color .12s}
+.lt .lt-q:focus{border-color:var(--gold,#D6962C)}
+.lt .lt-q::placeholder{color:inherit;opacity:.5}
+.lt select{appearance:auto;background:color-mix(in srgb,currentColor 5%,transparent);border:1px solid var(--border,color-mix(in srgb,currentColor 16%,transparent));border-radius:8px;padding:5px 8px;font-size:12px;color:inherit;outline:none;font-family:inherit;max-width:220px;transition:border-color .12s}
+.lt select:focus{border-color:var(--gold,#D6962C)}
+.lt .lt-rows{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--muted,inherit);white-space:nowrap;margin-left:auto}
+.lp{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 12px;font-size:11.5px;color:var(--muted,inherit);font-family:inherit}
+.lp.free{border:1px solid var(--border,color-mix(in srgb,currentColor 16%,transparent));border-radius:10px;margin-top:10px}
+.lp .lp-n{font-family:var(--mono,ui-monospace,monospace);font-variant-numeric:tabular-nums;opacity:.85}
+.lp .lp-pg{margin-left:auto;display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+.lp .lp-b{border:1px solid var(--border,color-mix(in srgb,currentColor 16%,transparent));background:color-mix(in srgb,currentColor 5%,transparent);color:inherit;border-radius:7px;padding:2px 8px;min-width:28px;font-size:12px;font-family:inherit;cursor:pointer;font-variant-numeric:tabular-nums;line-height:1.5;transition:border-color .12s}
+.lp .lp-b:hover{border-color:color-mix(in srgb,currentColor 35%,transparent)}
+.lp .lp-b[aria-current="page"]{border-color:var(--gold,#D6962C);color:var(--gold,#D6962C)}
+.lp .lp-b:disabled{opacity:.4;cursor:default}
+.lp .lp-pg .el{padding:0 4px;opacity:.6}
+th.sortable{cursor:pointer;user-select:none}
+th.sortable::after{content:"↕";margin-left:5px;opacity:.35;font-size:10px}
+th.sortable[aria-sort="ascending"]::after{content:"↑";color:var(--gold,#D6962C);opacity:1}
+th.sortable[aria-sort="descending"]::after{content:"↓";color:var(--gold,#D6962C);opacity:1}
+.lt-empty td{opacity:.6;text-align:center;padding:18px}
+@media (max-width:520px){.lt .lt-q{flex-basis:100%}.lt .lt-rows{margin-left:0}}
+</style>
+<script>
+/* ============================== List controls ============================== */
+/* Self-contained: every table with a thead gets a search box, sortable column
+   headers, a filter select for each column that is a small enumeration, a
+   rows-per-page select and a pager. Installs itself through a DOM observer so
+   it works with any render path; state is keyed by page + column signature so
+   a full re-render lands back on the same page, sort and query. */
+(function(){
+"use strict";
+if(window.__ltInstalled)return; window.__ltInstalled=true;
+var STORE={}, PER=[5,10,25,50,0], BUSY=false, TIMER=null;
+var FACET=/status|state|tier|kind|role|risk|severity|result|health|effect|mode|side|level|verdict|decision|origin|scope|period|basis|algorithm|trend|position|governance|two-factor|sso|replay|grade|outcome/i;
+function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function num(s){
+  s=String(s==null?"":s).trim();
+  if(!s||/^\d{4}-\d{2}/.test(s))return null;
+  var c=s.replace(/[$,%×]/g,""), m=c.match(/^[-+]?\d*\.?\d+(?:e[-+]?\d+)?/i);
+  if(!m)return null;
+  var n=parseFloat(m[0]), u=c.slice(m[0].length).match(/^\s*([kKMB])(?![A-Za-z])/);
+  if(u){ if(u[1]==="k"||u[1]==="K")n*=1e3; else if(u[1]==="M")n*=1e6; else n*=1e9; }
+  return n;
+}
+function cmp(a,b,isNum,dir){
+  if(isNum){var x=a.n,y=b.n; if(x==null&&y==null)return 0; if(x==null)return 1; if(y==null)return -1; if(x!==y)return (x-y)*dir;}
+  return a.t.localeCompare(b.t,undefined,{numeric:true,sensitivity:"base"})*dir;
+}
+function el(html){var d=document.createElement("div");d.innerHTML=html;return d.firstChild;}
+function pageCtx(){var h1=document.querySelector("main h1, .page h1, h1"); return location.hash+"|"+(h1?h1.textContent.trim().slice(0,40):"");}
+function state(sig,ord){var key=pageCtx()+"|"+sig+"#"+ord; return STORE[key]||(STORE[key]={q:"",sort:null,dir:1,per:10,page:1,f:{}});}
+
+function pager(st,total,onPage){
+  var per=st.per||total||1, pages=Math.max(1,Math.ceil(total/per));
+  if(st.page>pages)st.page=pages; if(st.page<1)st.page=1;
+  var from=total?((st.page-1)*per+1):0, to=Math.min(total,st.page*per);
+  var html='<div class="lp"><span class="lp-n">'+(total?from+'–'+to+' of '+total:'0 of 0')+'</span><span class="lp-pg">'+
+   '<button type="button" class="lp-b" data-p="prev" aria-label="Previous page"'+(st.page<=1?' disabled':'')+'>‹</button>';
+  var nums=[]; if(pages<=7){for(var i=1;i<=pages;i++)nums.push(i);} else {
+    nums=[1]; var lo=Math.max(2,st.page-1), hi=Math.min(pages-1,st.page+1);
+    if(lo>2)nums.push("…"); for(var j=lo;j<=hi;j++)nums.push(j); if(hi<pages-1)nums.push("…"); nums.push(pages);}
+  nums.forEach(function(p){html+= p==="…"?'<span class="el">…</span>':'<button type="button" class="lp-b" data-p="'+p+'"'+(p===st.page?' aria-current="page"':'')+'>'+p+'</button>';});
+  html+='<button type="button" class="lp-b" data-p="next" aria-label="Next page"'+(st.page>=pages?' disabled':'')+'>›</button></span></div>';
+  var lp=el(html);
+  lp.addEventListener("click",function(e){var b=e.target.closest("button[data-p]"); if(!b||b.disabled)return; e.stopPropagation(); var p=b.getAttribute("data-p");
+    st.page = p==="prev"?st.page-1 : p==="next"?st.page+1 : +p; onPage();});
+  return lp;
+}
+function bar(st,opts,apply){
+  var html='<div class="lt"><input class="lt-q" type="search" placeholder="'+esc(opts.ph)+'" aria-label="'+esc(opts.ph)+'" value="'+esc(st.q)+'">';
+  (opts.filters||[]).forEach(function(f){
+    html+='<select class="lt-f" data-k="'+esc(f.key)+'" aria-label="Filter by '+esc(f.label)+'"><option value="">All · '+esc(f.label)+'</option>'+
+      f.values.map(function(v){return '<option value="'+esc(v)+'"'+(st.f[f.key]===v?' selected':'')+'>'+esc(v)+'</option>';}).join("")+'</select>';});
+  html+='<label class="lt-rows">Rows<select class="lt-per">'+PER.map(function(p){return '<option value="'+p+'"'+(st.per===p?' selected':'')+'>'+(p||"All")+'</option>';}).join("")+'</select></label></div>';
+  var b=el(html);
+  b.addEventListener("click",function(e){e.stopPropagation();});
+  b.querySelector(".lt-q").addEventListener("input",function(e){st.q=e.target.value;st.page=1;apply();});
+  b.querySelectorAll(".lt-f").forEach(function(s){s.addEventListener("change",function(e){st.f[s.getAttribute("data-k")]=e.target.value;st.page=1;apply();});});
+  b.querySelector(".lt-per").addEventListener("change",function(e){st.per=+e.target.value;st.page=1;apply();});
+  return b;
+}
+/* A column earns a filter when it is a small enumeration: 2–8 distinct short
+   values across at least 4 rows, and not unique per row. At most three per list. */
+function facets(cols,vals,rows){
+  if(rows<4)return [];
+  var c=cols.filter(function(col){ if(!col.name||col.num)return false;
+    var set={},n=0,ok=true; vals.forEach(function(v){var t=v[col.i].t; if(!t)return; if(t.length>28)ok=false; if(!set[t]){set[t]=1;n++;}});
+    if(!ok||n<2||n>8||n>=rows)return false; col.values=Object.keys(set).sort(); return true;});
+  c.sort(function(a,b){var pa=FACET.test(a.name)?0:1,pb=FACET.test(b.name)?0:1; return pa-pb||a.values.length-b.values.length;});
+  return c.slice(0,3).map(function(col){return {key:String(col.i),label:col.name,values:col.values};});
+}
+function sigOf(table){return [].slice.call(table.tHead.rows[0].cells).map(function(c){return c.textContent.trim();}).join("/");}
+function enhance(table,ord){
+  var tbody=table.tBodies[0], rows=[].slice.call(tbody.rows);
+  var ths=[].slice.call(table.tHead.rows[0].cells);
+  var cols=ths.map(function(th,i){return {i:i,name:th.textContent.trim(),num:th.classList.contains("num")};});
+  var st=state(sigOf(table),ord);
+  var vals=rows.map(function(r){return cols.map(function(c){var cell=r.cells[c.i]; var t=cell?cell.textContent.replace(/\s+/g," ").trim():""; return {t:t,n:num(t)};});});
+  cols.forEach(function(c){ if(c.num)return; var k=0,tot=0; vals.forEach(function(v){if(v[c.i].t){tot++; if(v[c.i].n!=null)k++;}}); if(tot&&k/tot>=.6)c.num=true; });
+  var texts=rows.map(function(r){return r.textContent.replace(/\s+/g," ").toLowerCase();});
+  var fs=facets(cols,vals,rows.length);
+  var wrap=table.parentNode, host=wrap.parentNode, ph="Search this list";
+  if(!host||wrap===document.body){wrap=table;host=table.parentNode;}
+  /* A lone search box sitting directly above the table becomes the list's search. */
+  var prev=wrap.previousElementSibling;
+  if(prev&&!prev.matches("table,thead,tbody")){
+    var ins=prev.querySelectorAll("input,select,button,a,textarea");
+    var inp=prev.matches("input")?prev:prev.querySelector("input[placeholder^='Search']");
+    if(inp&&inp.placeholder&&/^Search/.test(inp.placeholder)&&ins.length<=1&&!prev.textContent.trim()){ph=inp.placeholder;prev.remove();}
+  }
+  var free=!/panel|card|box/.test(host.className||"");
+  var b=bar(st,{ph:ph,filters:fs},apply), lp=document.createElement("div");
+  if(free)b.classList.add("free");
+  host.insertBefore(b,wrap); host.insertBefore(lp,wrap.nextSibling);
+  ths.forEach(function(th,i){ if(!cols[i].name)return; th.classList.add("sortable"); th.tabIndex=0; th.setAttribute("role","button");
+    function tog(e){ if(e)e.stopPropagation(); if(st.sort===i){ if(st.dir===1)st.dir=-1; else {st.sort=null;st.dir=1;} } else {st.sort=i;st.dir=1;} st.page=1; apply(); }
+    th.addEventListener("click",tog); th.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();tog(e);}}); });
+  function apply(){
+    ths.forEach(function(th,i){ if(!cols[i].name)return; th.setAttribute("aria-sort",st.sort===i?(st.dir===1?"ascending":"descending"):"none"); });
+    var q=st.q.trim().toLowerCase();
+    var idx=rows.map(function(_,i){return i;}).filter(function(i){
+      if(q&&texts[i].indexOf(q)<0)return false;
+      for(var k in st.f){ if(st.f[k]&&vals[i][+k]&&vals[i][+k].t!==st.f[k])return false; } return true; });
+    if(st.sort!=null&&cols[st.sort]){var c=cols[st.sort]; idx.sort(function(a,b){return cmp(vals[a][c.i],vals[b][c.i],c.num,st.dir)||(a-b);});}
+    var total=idx.length, per=st.per||total||1, pages=Math.max(1,Math.ceil(total/per)); if(st.page>pages)st.page=pages;
+    var slice=st.per?idx.slice((st.page-1)*st.per,st.page*st.per):idx;
+    BUSY=true;
+    while(tbody.firstChild)tbody.removeChild(tbody.firstChild);
+    if(!slice.length){var tr=document.createElement("tr"),td=document.createElement("td");tr.className="lt-empty";td.colSpan=cols.length;td.textContent="No rows match.";tr.appendChild(td);tbody.appendChild(tr);}
+    slice.forEach(function(i){tbody.appendChild(rows[i]);});
+    var nlp=pager(st,total,apply); lp.replaceWith(nlp); lp=nlp; if(free)lp.classList.add("free");
+    BUSY=false;
+  }
+  apply();
+}
+function run(){
+  BUSY=true;
+  try{
+    var ords={};
+    [].slice.call(document.querySelectorAll("table")).forEach(function(t){
+      if(!t.tHead||!t.tHead.rows[0]||!t.tBodies[0]||t.closest("[data-lt-skip]"))return;
+      if([].slice.call(t.tHead.rows[0].cells).some(function(c){return c.colSpan>1;}))return;
+      var sig=sigOf(t), ord=ords[sig]||0; ords[sig]=ord+1;
+      if(t.getAttribute("data-lt"))return;
+      t.setAttribute("data-lt","1"); enhance(t,ord);
+    });
+  } finally { BUSY=false; }
+}
+new MutationObserver(function(muts){
+  if(BUSY)return;
+  for(var i=0;i<muts.length;i++){ if(muts[i].addedNodes.length){ clearTimeout(TIMER); TIMER=setTimeout(run,0); return; } }
+}).observe(document.documentElement,{childList:true,subtree:true});
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",run); else run();
+window.listify=run;
+})();
+</script>

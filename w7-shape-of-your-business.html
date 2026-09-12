@@ -1,0 +1,2489 @@
+<title>The shape of your business</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap">
+<style>
+/* ───────────────────────────────────────────────────────────────
+   Oxagen Mission Control · Ontology
+   House system: oxagen-house-brand/tokens/house-tokens.css
+   Dark-first: :root carries the dark palette; light overrides follow.
+   ─────────────────────────────────────────────────────────────── */
+
+:root{
+  /* house tokens, dark */
+  --ox-gold:#D6962C; --ox-gold-bright:#F1C364; --ox-gold-deep:#8B5E1A;
+
+  --bg:#10100F;
+  --bg-deep:#0A0A09;
+  --panel:#181715;
+  --panel-2:#201F1C;
+  --hl:#201F1C;
+  --border:#292722;
+  --rule:#34322D;
+
+  --fg:#F2EEE5;
+  --body:#DDD8CD;
+  --muted:#9B958A;
+  --dim:#6E6A62;
+
+  --gold:#D6962C;          /* identity + the one primary action */
+  --gold-text:#D6962C;
+  --gold-hover:#F1C364;
+  --on-gold:#10100F;
+
+  /* semantic states — separate from gold, gold never encodes state */
+  --ok:#48A98A;            /* allowed · proven · healthy · confirmed */
+  --wait:#6E9DE0;          /* needs approval · proposed · in progress */
+  --bad:#DB625A;           /* denied · failed · critical */
+  --drift:#A98AD0;         /* drift · unverified · stale */
+  --neutral:#9B958A;       /* unmoved · waived · not applicable */
+
+  --focus:#F1C364;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+  --font:"Space Grotesk","Helvetica Neue",Arial,sans-serif;
+
+  --r-panel:12px;
+  --r-lg:14px;
+  --r-sm:6px;
+  --r-btn:8px;
+
+  --sidebar-w:246px;
+  --topbar-h:52px;
+}
+
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    --bg:#F2EEE5;
+    --bg-deep:#E8E2D5;
+    --panel:#F8F5EE;
+    --panel-2:#FDFBF6;
+    --hl:#EDE7DA;
+    --border:#D8CDBD;
+    --rule:#C9BFAE;
+
+    --fg:#10100F;
+    --body:#2A2823;
+    --muted:#6B665C;
+    --dim:#8C877C;
+
+    --gold-text:#8B5E1A;
+    --gold-hover:#A87424;
+    --on-gold:#10100F;
+
+    --ok:#1F6E52;
+    --wait:#2C5BA0;
+    --bad:#A53229;
+    --drift:#6A4B96;
+    --neutral:#6B665C;
+
+    --focus:#8B5E1A;
+  }
+}
+
+:root[data-theme="light"]{
+  --bg:#F2EEE5;
+  --bg-deep:#E8E2D5;
+  --panel:#F8F5EE;
+  --panel-2:#FDFBF6;
+  --hl:#EDE7DA;
+  --border:#D8CDBD;
+  --rule:#C9BFAE;
+
+  --fg:#10100F;
+  --body:#2A2823;
+  --muted:#6B665C;
+  --dim:#8C877C;
+
+  --gold-text:#8B5E1A;
+  --gold-hover:#A87424;
+  --on-gold:#10100F;
+
+  --ok:#1F6E52;
+  --wait:#2C5BA0;
+  --bad:#A53229;
+  --drift:#6A4B96;
+  --neutral:#6B665C;
+
+  --focus:#8B5E1A;
+}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--body);
+  font-family:var(--font);
+  font-weight:400;
+  font-size:14px;
+  line-height:1.45;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4{margin:0;font-weight:600;color:var(--fg);text-wrap:balance;letter-spacing:-0.01em}
+p{margin:0}
+a{color:inherit}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:4px}
+code,kbd,.mono,pre{font-family:var(--mono)}
+.num{font-variant-numeric:tabular-nums}
+
+/* ── mockup chrome (never product UI) ─────────────────────────── */
+#statebar{
+  position:fixed;right:14px;bottom:14px;z-index:900;
+  display:flex;flex-wrap:wrap;gap:4px;align-items:center;
+  background:#0A0A09;color:#9B958A;
+  border:1px solid #34322D;border-radius:8px;
+  padding:7px 8px;
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.02em;
+  max-width:min(92vw,420px);
+  box-shadow:0 8px 28px rgba(0,0,0,.45);
+}
+#statebar .sb-label{color:#6E6A62;padding-right:4px;text-transform:uppercase;letter-spacing:.12em}
+#statebar button{
+  background:#181715;border:1px solid #292722;color:#9B958A;
+  border-radius:4px;padding:3px 7px;cursor:pointer;
+  font-family:var(--mono);font-size:10.5px;
+}
+#statebar button:hover{border-color:#6E6A62;color:#F2EEE5}
+#statebar button[aria-pressed="true"]{background:#F2EEE5;color:#10100F;border-color:#F2EEE5}
+
+/* ── viewport (container for the whole app; phone state shrinks it) ── */
+.viewport{
+  container-type:inline-size;
+  container-name:app;
+  background:var(--bg);
+}
+.viewport.phone{
+  width:400px;max-width:100%;
+  height:820px;
+  margin:26px auto;
+  overflow-y:auto;overflow-x:hidden;
+  border:1px solid var(--rule);
+  border-radius:24px;
+  box-shadow:0 30px 70px rgba(0,0,0,.4);
+}
+body:has(.viewport.phone){background:var(--bg-deep)}
+
+/* ── app shell ────────────────────────────────────────────────── */
+.shell{display:grid;grid-template-columns:var(--sidebar-w) minmax(0,1fr);min-height:100vh}
+.viewport.phone .shell{min-height:0}
+
+/* sidebar */
+.side{
+  border-right:1px solid var(--border);
+  background:var(--panel);
+  position:sticky;top:0;align-self:start;
+  height:100vh;overflow:auto;
+  display:flex;flex-direction:column;
+}
+.viewport.phone .side{height:auto}
+.side-top{padding:14px 14px 10px;border-bottom:1px solid var(--border)}
+.lockup{display:block;width:118px;height:auto;color:var(--fg)}
+.orgswitch{
+  margin-top:12px;width:100%;display:flex;align-items:center;gap:8px;
+  background:var(--panel-2);border:1px solid var(--border);border-radius:var(--r-btn);
+  padding:7px 9px;cursor:pointer;text-align:left;
+}
+.orgswitch:hover{border-color:var(--rule)}
+.orgswitch .ini{
+  width:22px;height:22px;border-radius:5px;flex:0 0 auto;
+  background:var(--gold);color:var(--on-gold);
+  display:grid;place-items:center;font-weight:700;font-size:11px;
+}
+.orgswitch .txt{min-width:0;flex:1}
+.orgswitch .txt b{display:block;font-size:12.5px;font-weight:600;color:var(--fg);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.orgswitch .txt span{display:block;font-size:11px;color:var(--muted);font-family:var(--mono)}
+.orgswitch .chev{color:var(--dim);font-size:10px}
+
+.navgroup{padding:12px 10px 4px}
+.navgroup .eyebrow{
+  font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--dim);font-weight:600;padding:0 6px 8px;
+}
+.nav{display:flex;flex-direction:column;gap:1px}
+.nav a{
+  display:flex;align-items:center;gap:9px;
+  padding:7px 9px;border-radius:var(--r-btn);
+  text-decoration:none;color:var(--body);font-size:13.5px;font-weight:500;
+  border:1px solid transparent;
+}
+.nav a:hover{background:var(--hl);color:var(--fg)}
+.nav a[aria-current="page"]{background:var(--hl);color:var(--fg);border-color:var(--border)}
+.nav a[aria-current="page"] .ico{color:var(--gold-text)}
+.nav .ico{width:15px;height:15px;flex:0 0 auto;color:var(--dim)}
+.nav .tail{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--dim)}
+.nav .tail.alert{color:var(--wait)}
+.side-foot{margin-top:auto;padding:12px 14px;border-top:1px solid var(--border);display:flex;align-items:center;gap:9px}
+.avatar{width:26px;height:26px;border-radius:50%;background:var(--panel-2);border:1px solid var(--rule);display:grid;place-items:center;font-size:10.5px;font-weight:600;color:var(--fg);flex:0 0 auto}
+.side-foot .who b{display:block;font-size:12.5px;color:var(--fg);font-weight:600}
+.side-foot .who span{display:block;font-size:11px;color:var(--muted)}
+
+/* main */
+.main{min-width:0;display:flex;flex-direction:column;background:var(--bg)}
+.topbar{
+  position:sticky;top:0;z-index:40;
+  height:var(--topbar-h);flex:0 0 auto;
+  display:flex;align-items:center;gap:10px;
+  padding:0 18px;
+  border-bottom:1px solid var(--border);
+  background:color-mix(in srgb,var(--bg) 88%,transparent);
+  backdrop-filter:blur(10px);
+}
+.hamburger{display:none;background:none;border:1px solid var(--border);border-radius:var(--r-sm);padding:5px 7px;cursor:pointer;color:var(--body)}
+.crumbs{display:flex;align-items:center;gap:7px;font-size:13px;min-width:0;overflow:hidden}
+.crumbs a{color:var(--muted);text-decoration:none;white-space:nowrap}
+.crumbs a:hover{color:var(--fg)}
+.crumbs .sep{color:var(--dim)}
+.crumbs b{color:var(--fg);font-weight:600;white-space:nowrap}
+.topbar .spacer{flex:1}
+.cmdk{
+  display:flex;align-items:center;gap:8px;
+  background:var(--panel);border:1px solid var(--border);border-radius:var(--r-btn);
+  padding:5px 9px;cursor:pointer;color:var(--muted);font-size:12.5px;min-width:190px;
+}
+.cmdk:hover{border-color:var(--rule);color:var(--body)}
+.cmdk kbd{
+  margin-left:auto;font-size:10.5px;background:var(--panel-2);
+  border:1px solid var(--border);border-radius:4px;padding:1px 5px;color:var(--dim);
+}
+.iconbtn{
+  background:var(--panel);border:1px solid var(--border);border-radius:var(--r-btn);
+  padding:6px 8px;cursor:pointer;color:var(--body);display:inline-flex;align-items:center;gap:6px;font-size:12.5px;
+}
+.iconbtn:hover{border-color:var(--rule);color:var(--fg)}
+.iconbtn[aria-pressed="true"]{border-color:var(--gold);color:var(--gold-text)}
+.iconbtn svg{width:14px;height:14px}
+
+/* page */
+.page{padding:20px 22px 90px;display:flex;flex-direction:column;gap:16px;min-width:0}
+.pagehead{display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap}
+.pagehead .ph-title{min-width:0;flex:1 1 320px}
+.eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-text);font-weight:600;margin-bottom:7px}
+.pagehead h1{font-size:24px;line-height:1.15}
+.pagehead .sub{color:var(--muted);font-size:13px;margin-top:5px;max-width:66ch}
+.headtools{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+
+/* buttons */
+.btn{
+  background:var(--panel);border:1px solid var(--border);color:var(--body);
+  border-radius:var(--r-btn);padding:7px 12px;cursor:pointer;font-size:13px;font-weight:500;
+  display:inline-flex;align-items:center;gap:7px;white-space:nowrap;
+}
+.btn:hover{border-color:var(--rule);color:var(--fg)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn svg{width:14px;height:14px;flex:0 0 auto}
+.btn-primary{background:var(--gold);border-color:var(--gold);color:var(--on-gold);font-weight:600}
+.btn-primary:hover{background:var(--gold-hover);border-color:var(--gold-hover);color:#10100F}
+.btn-sm{padding:4px 9px;font-size:12px}
+.btn-quiet{background:transparent;border-color:transparent;color:var(--muted)}
+.btn-quiet:hover{background:var(--hl);color:var(--fg);border-color:var(--border)}
+.btn-danger{border-color:color-mix(in srgb,var(--bad) 45%,var(--border));color:var(--bad)}
+
+/* select */
+.sel{
+  background:var(--panel);border:1px solid var(--border);color:var(--body);
+  border-radius:var(--r-btn);padding:6px 10px;font-size:12.5px;cursor:pointer;
+}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.input{
+  background:var(--panel-2);border:1px solid var(--border);border-radius:var(--r-btn);
+  padding:8px 10px;font-size:13px;color:var(--fg);width:100%;
+}
+.input::placeholder{color:var(--dim)}
+
+/* tabs */
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:thin}
+.tabs a{
+  padding:9px 13px;text-decoration:none;color:var(--muted);font-size:13.5px;font-weight:500;
+  border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;display:flex;align-items:center;gap:7px;
+}
+.tabs a:hover{color:var(--fg)}
+.tabs a[aria-current="page"]{color:var(--fg);border-bottom-color:var(--gold)}
+.tabs .cnt{font-family:var(--mono);font-size:11px;color:var(--dim)}
+
+/* panels */
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--r-panel);min-width:0}
+.panel-hd{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  padding:12px 14px;border-bottom:1px solid var(--border);
+}
+.panel-hd h3{font-size:14px}
+.panel-hd .hint{color:var(--muted);font-size:12px}
+.panel-hd .right{margin-left:auto;display:flex;align-items:center;gap:7px}
+.panel-bd{padding:14px}
+.panel-bd.flush{padding:0}
+.panel-ft{padding:10px 14px;border-top:1px solid var(--border);color:var(--muted);font-size:12px}
+
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.split{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:14px;align-items:start}
+.split-l{display:grid;grid-template-columns:290px minmax(0,1fr);gap:14px;align-items:start}
+
+/* stat strip */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:0;border:1px solid var(--border);border-radius:var(--r-panel);overflow:hidden;background:var(--panel)}
+.stat{padding:11px 14px;border-right:1px solid var(--border);min-width:0}
+.stat:last-child{border-right:none}
+.stat .k{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.stat .v{font-size:19px;font-weight:600;color:var(--fg);margin-top:3px;font-variant-numeric:tabular-nums;display:flex;align-items:baseline;gap:6px}
+.stat .v small{font-size:11.5px;font-weight:500;color:var(--muted);font-family:var(--mono)}
+.stat .b{font-size:11.5px;color:var(--dim);margin-top:2px;font-family:var(--mono)}
+
+/* badges */
+.badge{
+  display:inline-flex;align-items:center;gap:5px;
+  border-radius:100px;padding:2px 8px;font-size:11.5px;font-weight:500;
+  border:1px solid var(--border);color:var(--muted);white-space:nowrap;
+}
+.badge .dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex:0 0 auto}
+.badge.ok{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 40%,transparent);background:color-mix(in srgb,var(--ok) 11%,transparent)}
+.badge.wait{color:var(--wait);border-color:color-mix(in srgb,var(--wait) 40%,transparent);background:color-mix(in srgb,var(--wait) 11%,transparent)}
+.badge.bad{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 40%,transparent);background:color-mix(in srgb,var(--bad) 11%,transparent)}
+.badge.drift{color:var(--drift);border-color:color-mix(in srgb,var(--drift) 40%,transparent);background:color-mix(in srgb,var(--drift) 11%,transparent)}
+.badge.mono{font-family:var(--mono);font-size:11px}
+.badge.plain{background:var(--panel-2)}
+
+.tag{
+  display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:11px;
+  background:var(--panel-2);border:1px solid var(--border);border-radius:var(--r-sm);
+  padding:1px 6px;color:var(--muted);
+}
+.tag.gold{color:var(--gold-text);border-color:color-mix(in srgb,var(--gold) 40%,transparent)}
+
+/* tables */
+.tbl-wrap{overflow-x:auto}
+table.tbl{width:100%;border-collapse:collapse;font-size:13px;min-width:520px}
+table.tbl th{
+  text-align:left;font-size:11px;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--muted);font-weight:600;padding:9px 12px;border-bottom:1px solid var(--border);
+  white-space:nowrap;background:var(--panel);
+}
+table.tbl td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:top;color:var(--body)}
+table.tbl tr:last-child td{border-bottom:none}
+table.tbl tbody tr:hover{background:var(--hl)}
+table.tbl td.n,table.tbl th.n{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--mono);font-size:12.5px}
+table.tbl td b{color:var(--fg);font-weight:600}
+.rowlink{cursor:pointer}
+
+/* code */
+pre.code{
+  background:var(--bg-deep);border:1px solid var(--border);border-radius:10px;
+  padding:12px 14px;overflow-x:auto;font-size:12.5px;line-height:1.6;color:var(--body);margin:0;
+}
+pre.code .kw{color:var(--gold-text);font-weight:500}
+pre.code .lbl{color:var(--ok)}
+pre.code .str{color:var(--drift)}
+pre.code .cmt{color:var(--dim)}
+pre.code .inj{color:var(--wait)}
+pre.code .bad{color:var(--bad);text-decoration:underline wavy}
+pre.code mark{background:color-mix(in srgb,var(--bad) 22%,transparent);color:var(--fg);border-radius:3px;padding:0 2px}
+pre.code mark.ins{background:color-mix(in srgb,var(--wait) 20%,transparent)}
+
+/* diff */
+.diff{background:var(--bg-deep);border:1px solid var(--border);border-radius:10px;overflow:hidden;font-family:var(--mono);font-size:12px;line-height:1.65}
+.diff .fname{padding:7px 12px;border-bottom:1px solid var(--border);color:var(--fg);background:var(--panel-2);display:flex;gap:8px;align-items:center}
+.diff .lines{overflow-x:auto;padding:8px 0}
+.diff .ln{display:block;padding:0 12px;white-space:pre}
+.diff .ln.add{background:color-mix(in srgb,var(--ok) 13%,transparent);color:var(--ok)}
+.diff .ln.del{background:color-mix(in srgb,var(--bad) 13%,transparent);color:var(--bad)}
+.diff .ln.hunk{color:var(--muted);background:var(--hl)}
+
+/* map */
+.mapwrap{overflow-x:auto;background:var(--bg-deep);border-bottom:1px solid var(--border)}
+.map{display:block;min-width:790px;width:100%;height:auto}
+.map .node rect{fill:var(--panel);stroke:var(--border);stroke-width:1;transition:stroke .12s,fill .12s}
+.map .node:hover rect,.map .node.sel rect{stroke:var(--gold);fill:var(--panel-2)}
+.map .node.proposed rect{stroke:var(--wait);stroke-dasharray:4 3}
+.map .node{cursor:pointer}
+.map .nm{fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--font)}
+.map .ct{fill:var(--muted);font-size:12px;font-family:var(--mono)}
+.map .edge{stroke:var(--rule);stroke-width:1.2;fill:none;opacity:.7}
+.map .edge.lit{stroke:var(--gold);opacity:1;stroke-width:1.6}
+.map .edge.dim{opacity:.16}
+.map .elabel{fill:var(--gold-text);font-size:10px;font-family:var(--mono);opacity:0}
+.map .elabel.lit{opacity:1}
+.map .schema-box{fill:none;stroke:var(--border);stroke-dasharray:3 4;rx:12}
+.map .schema-lbl{fill:var(--dim);font-size:10.5px;font-family:var(--mono);letter-spacing:.1em;text-transform:uppercase}
+.map .node:focus{outline:none}
+.map .node:focus-visible rect{stroke:var(--focus);stroke-width:2}
+
+.legend{display:flex;flex-wrap:wrap;gap:14px;padding:10px 14px;font-size:11.5px;color:var(--muted);align-items:center}
+.legend .li{display:flex;align-items:center;gap:6px}
+.legend .sw{width:9px;height:9px;border-radius:50%}
+.legend .swbox{width:16px;height:11px;border-radius:3px;border:1px dashed var(--wait)}
+
+/* rail */
+.rail{display:flex;flex-direction:column;gap:0}
+.rail .sec{padding:12px 14px;border-bottom:1px solid var(--border)}
+.rail .sec:last-child{border-bottom:none}
+.rail .sec h4{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:8px}
+.kv{display:flex;justify-content:space-between;gap:12px;padding:3px 0;font-size:12.5px}
+.kv .k{color:var(--muted);white-space:nowrap}
+.kv .v{color:var(--fg);text-align:right;font-variant-numeric:tabular-nums;min-width:0}
+.kv .v.mono{font-family:var(--mono);font-size:12px}
+
+.list{display:flex;flex-direction:column}
+.list .it{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:flex-start;cursor:pointer}
+.list .it:last-child{border-bottom:none}
+.list .it:hover{background:var(--hl)}
+.list .it.sel{background:var(--hl);box-shadow:inset 2px 0 0 var(--gold)}
+.list .it .mainc{min-width:0;flex:1}
+.list .it b{display:block;color:var(--fg);font-size:13px;font-weight:600}
+.list .it span{display:block;color:var(--muted);font-size:11.5px;font-family:var(--mono);overflow:hidden;text-overflow:ellipsis}
+
+/* frames (context frames) */
+.frame{border:1px solid var(--border);border-radius:10px;background:var(--panel-2);overflow:hidden}
+.frame .fh{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:8px 11px;border-bottom:1px solid var(--border);background:var(--panel)}
+.frame .fb{padding:10px 11px;font-size:12.5px;color:var(--body)}
+.frame .fm{padding:8px 11px;border-top:1px solid var(--border);display:flex;gap:12px;flex-wrap:wrap;font-family:var(--mono);font-size:11px;color:var(--dim)}
+
+/* meters */
+.meter{height:5px;border-radius:100px;background:var(--hl);overflow:hidden;border:1px solid var(--border)}
+.meter i{display:block;height:100%;background:var(--ok)}
+.meter i.wait{background:var(--wait)}
+.meter i.bad{background:var(--bad)}
+.meter i.drift{background:var(--drift)}
+
+/* severity stripe rows */
+.sev{border-left:3px solid var(--border);padding-left:11px}
+.sev.bad{border-left-color:var(--bad)}
+.sev.drift{border-left-color:var(--drift)}
+.sev.wait{border-left-color:var(--wait)}
+.sev.ok{border-left-color:var(--ok)}
+
+/* dialog */
+.scrim{position:fixed;inset:0;background:rgba(10,10,9,.62);backdrop-filter:blur(2px);z-index:200;display:grid;place-items:center;padding:20px}
+.dialog{
+  background:var(--panel);border:1px solid var(--rule);border-radius:var(--r-lg);
+  width:min(660px,100%);max-height:86vh;overflow:auto;
+  box-shadow:0 24px 60px rgba(0,0,0,.5);
+}
+.dialog .dh{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.dialog .dh h3{font-size:15px}
+.dialog .dh .x{margin-left:auto}
+.dialog .db{padding:16px;display:flex;flex-direction:column;gap:14px}
+.dialog .df{padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+
+/* command menu */
+.cmdpal{width:min(600px,100%);align-self:start;margin-top:9vh}
+.cmdpal .cinput{width:100%;border:none;background:transparent;padding:14px 16px;font-size:15px;color:var(--fg);outline:none}
+.cmdrow{display:flex;align-items:center;gap:10px;padding:9px 16px;cursor:pointer;font-size:13px;border-top:1px solid var(--border)}
+.cmdrow:hover,.cmdrow.on{background:var(--hl)}
+.cmdrow .cg{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--dim)}
+
+/* assistant */
+.assistant{
+  border-left:1px solid var(--border);background:var(--panel);
+  width:340px;flex:0 0 340px;position:sticky;top:var(--topbar-h);
+  height:calc(100vh - var(--topbar-h));overflow:auto;display:flex;flex-direction:column;
+}
+.withassist{display:grid;grid-template-columns:minmax(0,1fr) auto}
+.assistant[hidden]{display:none}
+.msg{padding:11px 14px;border-bottom:1px solid var(--border);font-size:13px}
+.msg .who{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:5px;display:flex;gap:7px;align-items:center}
+.msg.agent .who{color:var(--gold-text)}
+
+/* states */
+.skel{background:linear-gradient(90deg,var(--hl) 25%,var(--panel-2) 50%,var(--hl) 75%);background-size:220% 100%;animation:sh 1.3s linear infinite;border-radius:6px}
+@keyframes sh{to{background-position:-220% 0}}
+.statebox{
+  border:1px solid var(--border);border-radius:var(--r-panel);background:var(--panel);
+  padding:34px 26px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;
+}
+.statebox .icon{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;border:1px solid var(--border);background:var(--panel-2)}
+.statebox h3{font-size:16px}
+.statebox p{color:var(--muted);font-size:13px;max-width:52ch}
+.statebox .acts{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:4px}
+.statebox.err .icon{border-color:color-mix(in srgb,var(--bad) 45%,transparent);color:var(--bad)}
+.statebox.denied .icon{border-color:color-mix(in srgb,var(--wait) 45%,transparent);color:var(--wait)}
+
+.toast{
+  position:fixed;left:50%;transform:translateX(-50%);bottom:22px;z-index:800;
+  background:var(--panel-2);border:1px solid var(--rule);border-radius:10px;
+  padding:10px 14px;font-size:13px;color:var(--fg);display:flex;gap:10px;align-items:center;
+  box-shadow:0 14px 34px rgba(0,0,0,.4);max-width:min(92vw,540px);
+}
+.toast .tg{font-family:var(--mono);font-size:11px;color:var(--muted)}
+
+hr.rule{border:none;border-top:1px solid var(--border);margin:0}
+.muted{color:var(--muted)}
+.dimtx{color:var(--dim)}
+.small{font-size:12px}
+.xsmall{font-size:11.5px}
+.mono-sm{font-family:var(--mono);font-size:11.5px}
+.stack{display:flex;flex-direction:column;gap:10px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.rowb{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.nowrap{white-space:nowrap}
+.right{margin-left:auto}
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important}
+}
+
+/* ── container responsiveness (also drives the phone state) ───── */
+@container app (max-width: 1180px){
+  .split{grid-template-columns:minmax(0,1fr)}
+  .g4{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@container app (max-width: 980px){
+  .shell{grid-template-columns:minmax(0,1fr)}
+  .side{
+    position:fixed;left:0;top:0;z-index:300;width:var(--sidebar-w);
+    transform:translateX(-102%);transition:transform .18s ease;height:100vh;
+  }
+  .shell.navopen .side{transform:none;box-shadow:0 0 60px rgba(0,0,0,.5)}
+  .hamburger{display:inline-flex}
+  .split-l{grid-template-columns:minmax(0,1fr)}
+  .g3{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .withassist{grid-template-columns:minmax(0,1fr)}
+  .assistant{display:none}
+  .withassist.assist-open .assistant{
+    display:flex;position:fixed;right:0;top:0;height:100vh;z-index:250;width:min(340px,88vw);flex-basis:auto;
+  }
+}
+@container app (max-width: 620px){
+  .page{padding:16px 16px 90px}
+  .g2,.g3,.g4{grid-template-columns:minmax(0,1fr)}
+  .cmdk{min-width:0}
+  .cmdk .cmdk-txt{display:none}
+  .pagehead h1{font-size:20px}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .stat{border-right:1px solid var(--border);border-bottom:1px solid var(--border)}
+  .topbar{padding:0 12px;gap:7px}
+  .crumbs .hide-sm{display:none}
+  .assistant{width:100%}
+}
+</style>
+
+<div class="viewport" id="viewport">
+<div class="shell" id="shell">
+
+  <!-- ── sidebar ─────────────────────────────────────────────── -->
+  <aside class="side" id="side">
+    <div class="side-top">
+      <svg class="lockup" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 574.244 106.313" role="img" aria-label="oxagen"><g transform="translate(0,0.000) scale(2.842952)"><path class="cells" d="M6.300 0.000L12.600 3.320L12.600 9.960L6.300 13.280L0.000 9.960L0.000 3.320ZM1.000 3.885L1.000 9.395L6.300 12.150L11.600 9.395L11.600 3.885L6.300 1.130Z M19.376 0.000L25.676 3.320L25.676 9.960L19.376 13.280L13.076 9.960L13.076 3.320ZM14.076 3.885L14.076 9.395L19.376 12.150L24.676 9.395L24.676 3.885L19.376 1.130Z M12.838 10.240L19.138 13.560L19.138 20.200L12.838 23.520L6.538 20.200L6.538 13.560ZM7.538 14.125L7.538 19.635L12.838 22.390L18.138 19.635L18.138 14.125L12.838 11.370Z M19.376 20.480L25.676 23.800L25.676 30.440L19.376 33.760L13.076 30.440L13.076 23.800ZM14.076 24.365L14.076 29.875L19.376 32.630L24.676 29.875L24.676 24.365L19.376 21.610Z" fill="currentColor"/><path class="accent" d="M25.914 10.240L32.214 13.560L32.214 20.200L25.914 23.520L19.614 20.200L19.614 13.560Z M6.300 20.480L12.600 23.800L12.600 30.440L6.300 33.760L0.000 30.440L0.000 23.800Z" fill="#D6962C"/></g><g transform="translate(120.376,13.067)"><path class="letters" d="M33.9083 68.758Q24.1657 68.758 16.4786 64.7737Q8.79142 60.7894 4.39571 53.2965Q0 45.8035 0 35.3862V33.3718Q0 22.9544 4.39571 15.4615Q8.79142 7.96854 16.4786 3.98427Q24.1657 0 33.9083 0Q43.6509 0 51.3381 3.98427Q59.0252 7.96854 63.4209 15.4615Q67.8166 22.9544 67.8166 33.3718V35.3862Q67.8166 45.8035 63.4209 53.2965Q59.0252 60.7894 51.3381 64.7737Q43.6509 68.758 33.9083 68.758ZM33.9083 55.3486Q42.1895 55.3486 47.4689 50.0198Q52.7484 44.691 52.7484 35.0142V33.7437Q52.7484 24.067 47.5233 18.7382Q42.2981 13.4094 33.9083 13.4094Q25.6502 13.4094 20.3592 18.7382Q15.0683 24.067 15.0683 33.7437V35.0142Q15.0683 44.691 20.3592 50.0198Q25.6502 55.3486 33.9083 55.3486Z M176.569 68.758Q169.637 68.758 164.119 66.3453Q158.601 63.9327 155.387 59.2935Q152.173 54.6542 152.173 48.0088Q152.173 41.3403 155.387 36.8558Q158.601 32.3712 164.27 30.1017Q169.94 27.8323 177.174 27.8323H196.047V23.8925Q196.047 18.7316 192.874 15.5274Q189.701 12.3232 182.99 12.3232Q176.411 12.3232 173.049 15.3842Q169.686 18.4452 168.627 23.3593L154.691 18.7315Q156.27 13.6133 159.748 9.39702Q163.225 5.18071 169.049 2.59035Q174.874 0 183.208 0Q195.972 0 203.326 6.42816Q210.681 12.8563 210.681 24.9392V50.4707Q210.681 54.4204 214.368 54.4204H219.795V66.9148H209.197Q204.464 66.9148 201.442 64.5334Q198.42 62.1521 198.42 58.1563V57.8864H196.126Q195.392 59.6967 193.399 62.2985Q191.406 64.9004 187.388 66.8292Q183.369 68.758 176.569 68.758ZM179.05 56.4348Q186.581 56.4348 191.314 52.1592Q196.047 47.8837 196.047 40.6031V39.2405H178.175Q173.175 39.2405 170.208 41.3881Q167.241 43.5358 167.241 47.5513Q167.241 51.5668 170.34 54.0008Q173.439 56.4348 179.05 56.4348Z M227.767 34.6423V32.6279Q227.767 22.3817 231.86 15.0863Q235.953 7.79081 242.768 3.8954Q249.582 0 257.706 0Q266.935 0 271.762 3.33256Q276.589 6.66512 278.81 10.4107H281.042V1.8432H295.801V79.33Q295.801 85.6989 292.104 89.4725Q288.408 93.2462 282.079 93.2462H238.369V80.0541H277.023Q280.779 80.0541 280.779 76.1043V57.2775H278.547Q277.161 59.5683 274.665 61.8904Q272.168 64.2125 268.057 65.7414Q263.946 67.2702 257.706 67.2702Q249.582 67.2702 242.756 63.3748Q235.93 59.4794 231.848 52.1724Q227.767 44.8655 227.767 34.6423ZM261.938 54.0781Q270.151 54.0781 275.573 48.8612Q280.996 43.6443 280.996 34.2704V32.9999Q280.996 23.4943 275.627 18.3432Q270.259 13.1921 261.938 13.1921Q253.749 13.1921 248.315 18.3432Q242.881 23.4943 242.881 32.9999V34.2704Q242.881 43.6443 248.315 48.8612Q253.749 54.0781 261.938 54.0781Z M344.764 68.758Q334.998 68.758 327.583 64.6108Q320.167 60.4636 316.031 52.9048Q311.896 45.346 311.896 35.1689V33.589Q311.896 23.3889 315.977 15.8416Q320.059 8.2944 327.397 4.1472Q334.735 0 344.385 0Q353.881 0 360.956 4.1867Q368.031 8.37341 371.981 15.8515Q375.931 23.3297 375.931 33.2895V38.6974H327.181Q327.468 46.3334 332.587 50.9496Q337.707 55.5658 345.198 55.5658Q352.522 55.5658 356.101 52.3534Q359.681 49.141 361.553 45.0629L373.985 51.4813Q372.119 55.0656 368.63 59.1042Q365.141 63.1428 359.394 65.9504Q353.648 68.758 344.764 68.758ZM327.313 27.2892H360.622Q360.095 20.7986 355.7 16.9954Q351.304 13.1921 344.277 13.1921Q337.055 13.1921 332.691 16.9954Q328.327 20.7986 327.313 27.2892Z M391.548 66.9148V1.8432H406.353V10.9769H408.585Q410.303 7.25429 414.832 3.99908Q419.361 0.743866 428.435 0.743866Q435.956 0.743866 441.695 4.12911Q447.434 7.51435 450.651 13.5903Q453.868 19.6663 453.868 27.9442V66.9148H438.8V29.1226Q438.8 21.1969 434.891 17.3492Q430.983 13.5015 423.9 13.5015Q415.872 13.5015 411.244 18.8237Q406.617 24.146 406.617 33.9445V66.9148Z" fill="currentColor"/><path class="accent" d="M73.9979 66.9148 98.2261 34.0696 74.3764 1.8432H91.9626L107.9 24.3499H110.131L126.068 1.8432H143.654L119.805 34.0696L144.033 66.9148H126.206L110.131 44.0065H107.9L91.8244 66.9148Z" fill="#D6962C"/></g></svg>
+      <button class="orgswitch" id="orgswitch" type="button" aria-haspopup="dialog">
+        <span class="ini">A</span>
+        <span class="txt"><b>Acme Robotics</b><span>acme · USD</span></span>
+        <span class="chev">▾</span>
+      </button>
+      <button class="orgswitch" id="wsswitch" type="button" aria-haspopup="dialog" style="margin-top:6px">
+        <span class="ini" style="background:var(--panel);color:var(--fg);border:1px solid var(--rule)">C</span>
+        <span class="txt"><b>core-platform</b><span>acme/platform · main</span></span>
+        <span class="chev">▾</span>
+      </button>
+    </div>
+
+    <div class="navgroup">
+      <div class="eyebrow">Workspace</div>
+      <nav class="nav" id="nav-ws"></nav>
+    </div>
+    <div class="navgroup">
+      <div class="eyebrow">Organization</div>
+      <nav class="nav" id="nav-org"></nav>
+    </div>
+
+    <div class="side-foot">
+      <span class="avatar">MB</span>
+      <span class="who"><b>Marcus Bell</b><span>workspace owner</span></span>
+    </div>
+  </aside>
+
+  <!-- ── main ────────────────────────────────────────────────── -->
+  <div class="main">
+    <header class="topbar">
+      <button class="hamburger" id="hamburger" type="button" aria-label="Open navigation">
+        <svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 4h12M2 8h12M2 12h12"/></svg>
+      </button>
+      <nav class="crumbs" aria-label="Breadcrumb">
+        <a href="#/acme" class="hide-sm">Acme Robotics</a>
+        <span class="sep hide-sm">/</span>
+        <a href="#/acme/core-platform">core-platform</a>
+        <span class="sep">/</span>
+        <b>Ontology</b>
+        <span class="sep" id="crumb-sep-tab">/</span>
+        <b id="crumb-tab">Model</b>
+      </nav>
+      <span class="spacer"></span>
+      <button class="cmdk" id="cmdk-open" type="button">
+        <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 14 14"/></svg>
+        <span class="cmdk-txt">Search or run a command</span>
+        <kbd>⌘K</kbd>
+      </button>
+      <button class="iconbtn" id="theme-toggle" type="button" title="Switch theme" aria-label="Switch theme">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="8" cy="8" r="3.2"/><path d="M8 1v1.6M8 13.4V15M1 8h1.6M13.4 8H15M3 3l1.1 1.1M11.9 11.9 13 13M13 3l-1.1 1.1M4.1 11.9 3 13"/></svg>
+      </button>
+      <button class="iconbtn" id="assist-toggle" type="button" aria-pressed="false">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2 4.2A1.7 1.7 0 0 1 3.7 2.5h8.6A1.7 1.7 0 0 1 14 4.2v5.1a1.7 1.7 0 0 1-1.7 1.7H6.6L3.3 13.6V11H3.7A1.7 1.7 0 0 1 2 9.3z"/></svg>
+        <span class="cmdk-txt">Assistant</span>
+      </button>
+    </header>
+
+    <div class="withassist" id="withassist">
+      <main class="page" id="page"></main>
+      <aside class="assistant" id="assistant" hidden></aside>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- mockup chrome — not product UI -->
+<div id="statebar" role="group" aria-label="Mockup state switcher">
+  <span class="sb-label">states</span>
+  <button type="button" data-state="loaded" aria-pressed="true">loaded</button>
+  <button type="button" data-state="loading" aria-pressed="false">loading</button>
+  <button type="button" data-state="empty" aria-pressed="false">empty</button>
+  <button type="button" data-state="error" aria-pressed="false">error</button>
+  <button type="button" data-state="denied" aria-pressed="false">denied</button>
+  <button type="button" data-phone="1" aria-pressed="false">phone 400</button>
+</div>
+
+<div id="overlay"></div>
+<div id="toasts"></div>
+
+<script>
+"use strict";
+/* ═══════════════════════════════════════════════════════════════
+   Oxagen Mission Control — Ontology (W7)
+   Demo tenant: Acme Robotics · org acme · workspace core-platform
+   No backend. State lives in this page. Hash routes.
+   ═══════════════════════════════════════════════════════════════ */
+
+const ORG = { slug:"acme", name:"Acme Robotics", currency:"USD" };
+const WS  = { slug:"core-platform", mainRepo:"acme/platform", prodBranch:"main" };
+const BASE = "#/" + ORG.slug + "/" + WS.slug;
+
+/* ── sidebar: seven workspace pages, three organization pages ── */
+const NAV_WS = [
+  ["Fleet",     BASE,                "fleet",    "12 live"],
+  ["Runs",      BASE+"/runs",        "runs",     ""],
+  ["Agents",    BASE+"/agents",      "agents",   "50"],
+  ["Tools",     BASE+"/tools",       "tools",    ""],
+  ["Ontology",  BASE+"/ontology",    "ontology", ""],
+  ["Steering",  BASE+"/steering",    "steer",    "3 PRs"],
+  ["Spend",     BASE+"/spend",       "spend",    ""]
+];
+const NAV_ORG = [
+  ["Organization", "#/"+ORG.slug,          "org",   ""],
+  ["Billing",      "#/"+ORG.slug+"/billing","bill", ""],
+  ["Audit",        "#/"+ORG.slug+"/audit",  "audit",""]
+];
+
+const ICONS = {
+  fleet:'<path d="M2 12h3l1.5-3 2 6 2-9 2 6 1.5-3H15"/>',
+  runs:'<rect x="2" y="3" width="12" height="10" rx="2"/><path d="M6.5 6.2 10 8l-3.5 1.8z" fill="currentColor" stroke="none"/>',
+  agents:'<circle cx="8" cy="5.5" r="2.4"/><path d="M3 13.2a5 5 0 0 1 10 0"/>',
+  tools:'<path d="M10.2 2.6a3.4 3.4 0 0 0-4.3 4.3L2.6 10.2a1.4 1.4 0 0 0 2 2l3.3-3.3a3.4 3.4 0 0 0 4.3-4.3l-2 2-1.6-1.6z"/>',
+  ontology:'<circle cx="8" cy="3.4" r="1.8"/><circle cx="3.3" cy="11.6" r="1.8"/><circle cx="12.7" cy="11.6" r="1.8"/><path d="M6.7 4.9 4.6 10M9.3 4.9 11.4 10M5.1 11.6h5.8"/>',
+  steer:'<path d="M3 3v10M3 4.2c3-1.6 7 1.6 10 0v5.6c-3 1.6-7-1.6-10 0"/>',
+  spend:'<circle cx="8" cy="8" r="6"/><path d="M8 4.6v6.8M6.2 6.2h3.1a1.3 1.3 0 0 1 0 2.6H6.8a1.3 1.3 0 0 0 0 2.6h3"/>',
+  org:'<rect x="2.5" y="4" width="11" height="9" rx="1.4"/><path d="M5.5 4V2.8h5V4M5.5 7h1.6M5.5 9.8h1.6M9 7h1.6M9 9.8h1.6"/>',
+  bill:'<rect x="2" y="3.5" width="12" height="9" rx="1.6"/><path d="M2 6.6h12"/>',
+  audit:'<path d="M8 1.8 13 4v4.1c0 3-2.1 5.2-5 6.1-2.9-.9-5-3.1-5-6.1V4z"/><path d="m6 8 1.5 1.6L10.2 6.6"/>'
+};
+
+/* ── ontology: classes, one per node on the map ───────────────── */
+const SCHEMAS = {
+  sales_crm:{ label:"sales_crm", source:"Postgres · Linear" },
+  fleet_ops:{ label:"fleet_ops", source:"Postgres · Linear" },
+  github:{ label:"github (builtin)", source:"GitHub App" },
+  data_layer:{ label:"data_layer", source:"code graph" }
+};
+
+// freshness: minutes since last materialization
+const CLASSES = [
+  { id:"Customer", schema:"sales_crm", x:130, y:66, n:1284, fresh:4, sources:["P","L"],
+    key:"billing_email", props:[["name","string"],["billing_email","string · natural key"],["region","enum"],["health_score","float"],["csm","principal"],["created_at","datetime"]],
+    cite:{rank:1, frames:3914, runs:612}, rules:4, proven:84, drift:2, since:"v1",
+    ruleNames:["write to customers.billing_email → approval","deny delete on customers","financial class: invoice join → approval","PII: region never embedded"] },
+  { id:"Contract", schema:"sales_crm", x:330, y:66, n:412, fresh:4, sources:["P"],
+    key:"contract_number", props:[["contract_number","string · natural key"],["starts_at","date"],["ends_at","date"],["acv_usd","money"],["auto_renew","bool"]],
+    cite:{rank:6, frames:812, runs:181}, rules:2, proven:19, drift:0, since:"v1",
+    ruleNames:["financial class: acv_usd read → allowed, write → denied","contract mutation requires mandate"] },
+  { id:"Subscription", schema:"sales_crm", x:130, y:176, n:1190, fresh:4, sources:["P"],
+    key:"subscription_id", props:[["subscription_id","string · natural key"],["plan","enum"],["seats","int"],["mrr_usd","money"],["status","enum"]],
+    cite:{rank:9, frames:604, runs:140}, rules:2, proven:11, drift:0, since:"v12",
+    ruleNames:["financial class","seats write → approval"] },
+  { id:"Invoice", schema:"sales_crm", x:330, y:176, n:8640, fresh:38, sources:["P"],
+    key:"invoice_number", props:[["invoice_number","string · natural key"],["issued_at","date"],["total_usd","money"],["tax_rate","numeric(6,4)"],["status","enum"]],
+    cite:{rank:11, frames:441, runs:96}, rules:5, proven:7, drift:1, since:"v1",
+    ruleNames:["financial class: all writes → mandate","deny refund without approval","PII: billing address redacted before embedding","invoice export → receipt","rate limit 20/run"] },
+
+  { id:"Robot", schema:"fleet_ops", x:600, y:176, n:2317, fresh:2, sources:["P","L"],
+    key:"serial", props:[["serial","string · natural key"],["model","enum"],["firmware","version"],["uptime_pct","float"],["last_seen","datetime"]],
+    cite:{rank:2, frames:2880, runs:497}, rules:3, proven:61, drift:0, since:"v13",
+    ruleNames:["fleet command tools → approval","firmware pin write → mandate","telemetry read → allowed"] },
+  { id:"DeploymentSite", schema:"fleet_ops", x:790, y:66, n:186, fresh:61, sources:["P"],
+    key:"site_code", props:[["site_code","string · natural key"],["customer","ref Customer"],["country","enum"],["robots_installed","int"]],
+    cite:{rank:14, frames:212, runs:58}, rules:1, proven:4, drift:0, since:"v13",
+    ruleNames:["site address → PII class"] },
+  { id:"Incident", schema:"fleet_ops", x:600, y:290, n:318, fresh:3, sources:["L"],
+    key:"incident_key", props:[["incident_key","string · natural key"],["severity","enum"],["status","enum"],["opened_at","datetime"],["robot","ref Robot"]],
+    cite:{rank:5, frames:1460, runs:388}, rules:2, proven:33, drift:0, since:"v13",
+    ruleNames:["incident close → approval","severity write → denied to agents"] },
+  { id:"FirmwareRelease", schema:"fleet_ops", x:790, y:176, n:96, fresh:9, sources:["G","P"],
+    key:"version", props:[["version","semver · natural key"],["channel","enum"],["signed_by","principal"],["commit","ref Commit"]],
+    cite:{rank:12, frames:388, runs:112}, rules:3, proven:26, drift:0, since:"v13",
+    ruleNames:["promote to stable → mandate","unsigned release → denied","rollback → approval"] },
+  { id:"WarrantyClaim", schema:"fleet_ops", x:790, y:290, n:0, fresh:null, sources:["P"], proposed:true,
+    key:"claim_number", props:[["claim_number","string · natural key"],["filed_at","date"],["robot","ref Robot"],["status","enum"],["cost_usd","money"]],
+    cite:{rank:null, frames:0, runs:0}, rules:0, proven:0, drift:0, since:"proposed in PR #1188",
+    ruleNames:[] },
+
+  { id:"Issue", schema:"github", x:130, y:410, n:2764, fresh:1, sources:["G","L"],
+    key:"repo+number", props:[["number","int · natural key"],["title","string"],["state","enum"],["labels","string[]"],["assignee","principal"]],
+    cite:{rank:3, frames:2110, runs:534}, rules:1, proven:71, drift:0, since:"v1",
+    ruleNames:["issue comment write → allowed, close → approval"] },
+  { id:"PullRequest", schema:"github", x:330, y:410, n:4918, fresh:1, sources:["G"],
+    key:"repo+number", props:[["number","int · natural key"],["state","enum"],["merged_at","datetime"],["additions","int"],["deletions","int"]],
+    cite:{rank:4, frames:1902, runs:511}, rules:2, proven:118, drift:0, since:"v1",
+    ruleNames:["merge → approval + witness flip","force-push branch → denied"] },
+  { id:"Commit", schema:"github", x:540, y:410, n:61402, fresh:1, sources:["G"],
+    key:"sha", props:[["sha","string · natural key"],["message","string"],["authored_at","datetime"],["branch","string"]],
+    cite:{rank:8, frames:702, runs:404}, rules:0, proven:96, drift:0, since:"v1", ruleNames:[] },
+  { id:"Repository", schema:"github", x:750, y:410, n:3, fresh:1, sources:["G"],
+    key:"full_name", props:[["full_name","string · natural key"],["production_branch","string"],["role","enum main|linked"],["issues_enabled","bool"]],
+    cite:{rank:16, frames:96, runs:88}, rules:1, proven:12, drift:0, since:"v1",
+    ruleNames:["change production branch → org owner + approval"] },
+  { id:"Release", schema:"github", x:540, y:520, n:74, fresh:9, sources:["G"],
+    key:"tag", props:[["tag","string · natural key"],["published_at","datetime"],["draft","bool"]],
+    cite:{rank:18, frames:41, runs:29}, rules:0, proven:9, drift:0, since:"v1", ruleNames:[] },
+  { id:"File", schema:"github", x:330, y:520, n:12884, fresh:1, sources:["G"],
+    key:"repo+path", props:[["path","string · natural key"],["language","enum"],["loc","int"],["valid_from","commit"]],
+    cite:{rank:7, frames:788, runs:466}, rules:0, proven:88, drift:0, since:"v1", ruleNames:[] },
+  { id:"Symbol", schema:"github", x:130, y:520, n:98331, fresh:1, sources:["G"],
+    key:"file+qualified_name", props:[["qualified_name","string · natural key"],["kind","enum"],["signature","string"],["docstring","string"]],
+    cite:{rank:10, frames:512, runs:390}, rules:0, proven:74, drift:1, since:"v1", ruleNames:[] },
+
+  { id:"Column", schema:"data_layer", x:130, y:640, n:1873, fresh:1, sources:["G","P"],
+    key:"table+name", props:[["name","string · natural key"],["type","string"],["nullable","bool"],["data_class","enum pii|financial|regulated|none"]],
+    cite:{rank:13, frames:266, runs:203}, rules:6, proven:44, drift:2, since:"v12",
+    ruleNames:["data_class financial → write requires mandate","data_class pii → never embedded","data_class regulated → receipt on read","drop column → denied","alter type → approval","add column → allowed in PR only"] },
+  { id:"Table", schema:"data_layer", x:330, y:640, n:142, fresh:1, sources:["G","P"],
+    key:"schema+name", props:[["name","string · natural key"],["schema","string"],["row_estimate","int"],["data_class","enum"]],
+    cite:{rank:15, frames:188, runs:174}, rules:4, proven:38, drift:3, since:"v12",
+    ruleNames:["write to financial table → mandate","truncate → denied","DDL outside a migration → denied","unreferenced table → finding"] },
+  { id:"Migration", schema:"data_layer", x:540, y:640, n:87, fresh:1, sources:["G"],
+    key:"filename", props:[["filename","string · natural key"],["applied_at","datetime · nullable"],["checksum","string"]],
+    cite:{rank:17, frames:74, runs:61}, rules:2, proven:16, drift:1, since:"v12",
+    ruleNames:["apply migration → approval","edit an applied migration → denied"] },
+  { id:"StorageBucket", schema:"data_layer", x:750, y:640, n:9, fresh:1, sources:["G"],
+    key:"provider+name", props:[["name","string · natural key"],["provider","enum"],["region","string"],["public","bool"]],
+    cite:{rank:19, frames:22, runs:19}, rules:2, proven:3, drift:0, since:"v12",
+    ruleNames:["write to a public bucket → denied","presign URL → approval"] }
+];
+
+const RELATIONS = [
+  ["Customer","Contract","SIGNED_CONTRACT","1:n"],
+  ["Contract","Subscription","HAS_SUBSCRIPTION","1:n"],
+  ["Subscription","Invoice","BILLED_AS","1:n"],
+  ["Customer","Robot","OPERATES","1:n"],
+  ["Robot","DeploymentSite","DEPLOYED_AT","n:1"],
+  ["Robot","FirmwareRelease","RUNS_FIRMWARE","n:1"],
+  ["Robot","Incident","RAISED","1:n"],
+  ["Robot","WarrantyClaim","FILED_AGAINST","1:n"],
+  ["Incident","Issue","TRACKED_BY","1:1"],
+  ["Issue","PullRequest","RESOLVED_BY","n:n"],
+  ["PullRequest","Commit","MERGED_AS","1:1"],
+  ["FirmwareRelease","Release","SHIPPED_AS","1:1"],
+  ["Repository","Commit","HAS_COMMIT","1:n"],
+  ["Repository","File","CONTAINS","1:n"],
+  ["File","Symbol","DEFINES","1:n"],
+  ["Symbol","Table","READS · WRITES","n:n"],
+  ["Symbol","StorageBucket","WRITES","n:n"],
+  ["Table","Column","HAS_COLUMN","1:n"],
+  ["Migration","Table","ALTERS","n:n"]
+];
+
+/* ── ontology versions (git history of .oxagen/ontology/) ─────── */
+const VERSIONS = [
+  { v:"v14", sha:"a0f3c19", pr:1142, title:"ontology: add Incident.severity and RESOLVED_BY",
+    author:"Marcus Bell", proposedBy:"acme.core.triage", at:"2026-09-04 09:41 UTC", active:true,
+    delta:"+1 property, +1 relation type", classes:20, entities:196930,
+    absent:[] },
+  { v:"v13", sha:"5e8a2d0", pr:1098, title:"ontology: fleet_ops schema from profiler run prof_1904",
+    author:"Marcus Bell", proposedBy:"acme.core.triage", at:"2026-08-21 16:08 UTC", active:false,
+    delta:"+4 classes, +31 properties, +6 relation types", classes:19, entities:181004,
+    absent:["WarrantyClaim"] },
+  { v:"v12", sha:"b91c40f", pr:1044, title:"ontology: data layer from the code graph",
+    author:"Priya Natarajan", proposedBy:"Priya Natarajan", at:"2026-08-02 11:22 UTC", active:false,
+    delta:"+4 classes, +18 properties, +3 relation types; Subscription natural key changed", classes:15, entities:88410,
+    absent:["WarrantyClaim","Robot","DeploymentSite","Incident","FirmwareRelease"] },
+  { v:"v11", sha:"3d77ea4", pr:1002, title:"ontology: Subscription and Invoice from acme_prod",
+    author:"Priya Natarajan", proposedBy:"acme.core.triage", at:"2026-07-19 08:57 UTC", active:false,
+    delta:"+2 classes, +9 properties", classes:11, entities:41208,
+    absent:["WarrantyClaim","Robot","DeploymentSite","Incident","FirmwareRelease","Table","Column","Migration","StorageBucket"] },
+  { v:"v1", sha:"0c1ab88", pr:812, title:"ontology: github builtin fragment on first repo link",
+    author:"Priya Natarajan", proposedBy:"Oxagen GitHub App", at:"2026-06-18 13:04 UTC", active:false,
+    delta:"+8 classes, +11 relation types (builtin, never edited by hand)", classes:9, entities:12884,
+    absent:["WarrantyClaim","Robot","DeploymentSite","Incident","FirmwareRelease","Table","Column","Migration","StorageBucket","Customer","Contract","Subscription","Invoice"] }
+];
+
+const OPEN_PROPOSAL = {
+  pr:1188, branch:"oxagen/ontology/warranty-claim", repo:"acme/platform",
+  title:"ontology: WarrantyClaim from profiler run prof_2211",
+  by:"acme.core.triage", byKind:"agent (Codex CLI)", opened:"2h ago", reviewers:["Marcus Bell"],
+  provenance:{ records:1402, table:"acme_prod.warranty_claims", run:"prof_2211", sample:"1,402 of 1,402 rows profiled" },
+  checks:[
+    ["schema validity","pass","every property has a declared type"],
+    ["naming","pass","PascalCase label, SCREAMING_SNAKE relation"],
+    ["no orphaned relation","pass","FILED_AGAINST binds Robot → WarrantyClaim, both present"],
+    ["no label removed under entities","pass","no removals in this diff"],
+    ["diff against pinned v14","pass","+1 class, +5 properties, +1 relation type"],
+    ["protocol conformance","pass","contextgraph/1.0 fixtures, 214 assertions"],
+    ["migration plan present","pass","0 existing entities carry the label"]
+  ],
+  migration:"0 entities carry :WarrantyClaim today. On merge the engine upserts 1,402 entities keyed on claim_number and links each DERIVED_FROM its acme_prod source record. No existing entity is relabelled. Estimated materialization: 41s.",
+  diff:[
+    { file:".oxagen/ontology/manifest.json", lines:[
+      ["hunk","@@ -3,7 +3,7 @@"],
+      ["ctx",'   "version": 14,'],
+      ["del",'-  "published_at": "2026-09-04T09:41:12Z",'],
+      ["add",'+  "published_at": null,'],
+      ["ctx",'   "enforcement_mode": "strict",'],
+      ["ctx",'   "schemas": ['],
+      ["ctx",'     { "name": "github", "source": "builtin", "enabled": true },'],
+      ["del",'-    { "name": "fleet_ops", "source": "postgres:acme_prod", "enabled": true }'],
+      ["add",'+    { "name": "fleet_ops", "source": "postgres:acme_prod", "enabled": true, "labels": 5 }']
+    ]},
+    { file:".oxagen/ontology/schemas/fleet_ops/labels/WarrantyClaim.json", lines:[
+      ["hunk","@@ -0,0 +1,24 @@ new file"],
+      ["add",'+{'],
+      ["add",'+  "label": "WarrantyClaim",'],
+      ["add",'+  "description": "A claim filed against a robot under warranty.",'],
+      ["add",'+  "natural_key_props": ["claim_number"],'],
+      ["add",'+  "properties": ['],
+      ["add",'+    { "name": "claim_number", "type": "string", "nullable": false },'],
+      ["add",'+    { "name": "filed_at", "type": "date", "nullable": false },'],
+      ["add",'+    { "name": "status", "type": "enum", "values": ["open","approved","denied","paid"] },'],
+      ["add",'+    { "name": "cost_usd", "type": "money", "data_class": "financial" },'],
+      ["add",'+    { "name": "robot", "type": "ref", "target": "Robot" }'],
+      ["add",'+  ],'],
+      ["add",'+  "synonyms": ["warranty case", "RMA"],'],
+      ["add",'+  "sources": ["postgres:acme_prod.warranty_claims"]'],
+      ["add",'+}']
+    ]},
+    { file:".oxagen/ontology/schemas/fleet_ops/relationships/FILED_AGAINST.json", lines:[
+      ["hunk","@@ -0,0 +1,9 @@ new file"],
+      ["add",'+{'],
+      ["add",'+  "type": "FILED_AGAINST",'],
+      ["add",'+  "start_label": "WarrantyClaim",'],
+      ["add",'+  "end_label": "Robot",'],
+      ["add",'+  "cardinality": "n:1",'],
+      ["add",'+  "description": "The robot a warranty claim was filed against."'],
+      ["add",'+}']
+    ]}
+  ]
+};
+
+/* ── sources / connectors ─────────────────────────────────────── */
+const CONNECTORS = [
+  { id:"github", name:"GitHub", detail:"Oxagen GitHub App · installation 41882206",
+    health:"ok", lastSync:"41s ago", cursor:"delivery 8f2c-11ef-a19b", cursorLabel:"last delivery id",
+    records:"184,022 source records", window:"18,402 deliveries in 24h · 0 failed · 1 gap recovered 2026-09-08",
+    classes:["Repository","PullRequest","Issue","Commit","File","Symbol","Release"], egress:"none — webhooks in" },
+  { id:"linear", name:"Linear", detail:"team ACME · 11 teams, 24 projects",
+    health:"ok", lastSync:"3m ago", cursor:"updatedAt > 2026-09-11T14:22:08Z", cursorLabel:"sync cursor",
+    records:"9,884 source records", window:"4,106 issues · 318 incidents · 612 project updates",
+    classes:["Incident","Issue","Customer","Robot"], egress:"read-only API key, brokered per call" },
+  { id:"postgres", name:"Postgres", detail:"acme_prod read replica · 14 tables selected",
+    health:"degraded", lastSync:"4m ago", cursor:"id > 8842991", cursorLabel:"watermark",
+    records:"1,204,880 source records", window:"invoices lagging 38m — statement timeout at 30s, 2 retries queued",
+    classes:["Customer","Contract","Subscription","Invoice","Robot","DeploymentSite","Table","Column"],
+    egress:"tenant plane only", error:"sync_run syn_9f21 · statement timeout on acme_prod.invoices (30,000 ms) · retry 3 of 5 at 15:12 UTC" }
+];
+
+const ENTITY = {
+  id:"ent_01J9KQ4R7M2X", name:"Northwind Logistics", cls:"Customer", version:"v14",
+  validFrom:"2024-03-11", validTo:"—", ws:"core-platform",
+  props:[["name","Northwind Logistics"],["billing_email","ap@northwind-logistics.com"],["region","NA-EAST"],["health_score","0.62"],["csm","Dana Okafor"]],
+  resolution:{ matchedOn:"billing_email + model-assisted match", confidence:0.94, threshold:0.85, note:"threshold is a workspace setting" },
+  records:[
+    { src:"postgres:acme_prod.customers#8842", digest:"sha256:9f2c41a0…b7e1", synced:"4m ago", fields:"name, billing_email, region, created_at", run:"syn_9f18" },
+    { src:"linear:ACME/customer/NWL", digest:"sha256:41ab8c73…2d90", synced:"3m ago", fields:"health_score, csm", run:"syn_9f20" },
+    { src:"github:acme/platform#issue/2211", digest:"sha256:c70d1e55…4a13", synced:"1m ago", fields:"mention — \"Northwind\" matched in issue body", run:"evt_8f2c" }
+  ],
+  neighbors:[["Contract","CT-2024-0188"],["Robot","148 robots"],["Incident","2 open · critical"],["Invoice","61 invoices"]]
+};
+
+const INDEXES = [
+  { name:"entity_voyage4_1024", model:"voyage-4", dims:1024, nodes:14221, recall:0.91, cite:0.68, trend:"steady", backfill:"2026-08-21", cost:"$18.44 USD" },
+  { name:"symbol_voyagecode3_1024", model:"voyage-code-3", dims:1024, nodes:98331, recall:0.87, cite:0.54, trend:"falling", backfill:"2026-09-04", cost:"$61.20 USD" },
+  { name:"chunk_voyagecontext3_1024", model:"voyage-context-3", dims:1024, nodes:42880, recall:0.83, cite:0.61, trend:"steady", backfill:"2026-08-02", cost:"$29.07 USD" }
+];
+
+/* ── repositories ─────────────────────────────────────────────── */
+const REPOS = [
+  { name:"acme/platform", role:"main", branch:"main", defaultBranch:"main",
+    confirmedBy:"Marcus Bell", confirmedAt:"2026-07-02",
+    head:"a0f3c19", headMsg:"fix(billing): clamp proration window to the period", headAt:"6m ago", headBy:"Marcus Bell",
+    events:{ health:"ok", last:"41s ago", day:18402, failed:0, gaps:"1 recovered 2026-09-08 (force-push, compare range replayed)" },
+    issues:{ enabled:true, done:2211, total:2211 },
+    code:{ files:9104, symbols:71208, edges:214880, langs:"TypeScript 71% · SQL 12% · Rust 9% · Python 8%" },
+    data:{ tables:96, columns:1204, migrations:61, buckets:6, unresolved:38 } },
+  { name:"acme/billing", role:"linked", branch:"release", defaultBranch:"main",
+    confirmedBy:"Priya Natarajan", confirmedAt:"2026-07-14", prompt:"GitHub's default branch is main; this workspace ships from release.",
+    head:"7c41be2", headMsg:"feat(ledger): reconcile provider statement 2026-08", headAt:"22m ago", headBy:"acme.core.release-manager",
+    events:{ health:"ok", last:"3m ago", day:2104, failed:0, gaps:"none" },
+    issues:{ enabled:true, done:402, total:402 },
+    code:{ files:2180, symbols:18940, edges:56102, langs:"TypeScript 88% · SQL 12%" },
+    data:{ tables:38, columns:544, migrations:22, buckets:2, unresolved:11 } },
+  { name:"acme/mobile", role:"linked", branch:"main", defaultBranch:"main",
+    confirmedBy:"Marcus Bell", confirmedAt:"2026-09-10",
+    head:"e22b901", headMsg:"chore: bump fleet sdk to 4.2.0", headAt:"1h ago", headBy:"Dana Okafor",
+    events:{ health:"ok", last:"11m ago", day:388, failed:0, gaps:"none" },
+    issues:{ enabled:true, done:1402, total:2060, importing:true },
+    code:{ files:1600, symbols:8183, edges:19442, langs:"Swift 54% · Kotlin 38% · TypeScript 8%" },
+    data:{ tables:8, columns:125, migrations:4, buckets:1, unresolved:3 } }
+];
+
+const DRIFT = [
+  { sev:"bad", kind:"code references a column the database does not have",
+    obj:"customers.churn_risk_score", repo:"acme/platform", conf:"high",
+    detail:"3 symbols read this column; acme_prod.customers has 14 columns and none is churn_risk_score.",
+    ev:["apps/console/src/CustomerRiskPanel.tsx:41 — select literal","packages/risk/src/score.ts:88 — Drizzle model field","ops/reports/risk_report.sql:12 — SQL literal"],
+    fix:"Apply migration 0042, or drop the field from the model." },
+  { sev:"bad", kind:"migration declared but not applied",
+    obj:"0042_add_churn_risk_score.sql", repo:"acme/platform", conf:"high",
+    detail:"Declared on the production branch 2026-08-29. acme_prod reports schema_migrations max version 0041.",
+    ev:["db/migrations/0042_add_churn_risk_score.sql — ALTERS customers","acme_prod.schema_migrations — last applied 0041 on 2026-08-27"],
+    fix:"Apply the migration, or revert it on main." },
+  { sev:"drift", kind:"declared type does not match the live column",
+    obj:"invoices.tax_rate", repo:"acme/platform", conf:"high",
+    detail:"Code declares numeric(6,4); acme_prod has numeric(5,2). Four decimal places are silently rounded on write.",
+    ev:["packages/db/schema/invoices.ts:31 — Drizzle numeric(6,4)","acme_prod.invoices.tax_rate — numeric(5,2)"],
+    fix:"Align the model to the database, or migrate the column." },
+  { sev:"drift", kind:"table nothing references",
+    obj:"legacy_shipments", repo:"acme/platform", conf:"medium",
+    detail:"1,204 rows, 96 tables scanned, no symbol in the code graph reads or writes it. Last observed access: never.",
+    ev:["acme_prod.legacy_shipments — 1,204 rows","code graph — 0 READS, 0 WRITES, 0 OBSERVED_ACCESS"],
+    fix:"Candidate for removal. Open an issue rather than a drop." },
+  { sev:"wait", kind:"observed access with no static edge",
+    obj:"robot_telemetry", repo:"acme/platform", conf:"runtime",
+    detail:"Run run_01K4TQ8V wrote this table through a dynamically built query. The parser found no query site — coverage gap, not an error.",
+    ev:["run_01K4TQ8V frame 412 — tool call sql.execute, effect WRITES robot_telemetry","code graph — 0 static edges to robot_telemetry"],
+    fix:"Offered to the findings job as an ontology proposal." }
+];
+
+/* ── the ask box ──────────────────────────────────────────────── */
+const QUERIES = [
+  {
+    id:"q1", verdict:"ran",
+    q:"Which customers have a contract renewing in the next 90 days and an open critical incident?",
+    cypher:[
+      ["kw","MATCH"," (c:"],["lbl","Customer",")-[:"],["kw","SIGNED_CONTRACT","]->(k:"],["lbl","Contract",")"]
+    ],
+    cypherText:
+`MATCH (c:Customer)-[:SIGNED_CONTRACT]->(k:Contract)
+WHERE k.ends_at >= date() AND k.ends_at <= date() + duration({days: 90})
+MATCH (c)-[:OPERATES]->(r:Robot)-[:RAISED]->(i:Incident)
+WHERE i.status = 'open' AND i.severity = 'critical'
+WITH c, k, count(DISTINCT i) AS incidents, count(DISTINCT r) AS robots
+RETURN c.name AS customer, k.ends_at AS contract_ends, incidents, robots
+ORDER BY incidents DESC, contract_ends ASC`,
+    injected:
+`WHERE c.ws = $ws AND k.ws = $ws AND r.ws = $ws AND i.ws = $ws
+LIMIT 200`,
+    plan:{ estimated:18402, budget:250000, verdict:"accepted", ms:214 },
+    model:"z-ai/glm-latest (complex tier, via OpenRouter)",
+    confidence:0.86,
+    cost:{ usd:"0.0041", basis:"price book v22 · 3,180 input + 412 output tokens · no cache read" },
+    version:"v14 · .oxagen/ontology @ a0f3c19",
+    rows:[
+      ["Harbor Freight Systems","2026-11-29",3,212],
+      ["Northwind Logistics","2026-10-24",2,148],
+      ["Cobalt Foods","2026-11-02",1,96],
+      ["Vantage Grocers","2026-12-04",1,41]
+    ],
+    cols:["customer","contract_ends","incidents","robots"],
+    frames:[
+      { kind:"fact", label:"Customer", title:"Northwind Logistics", id:"ent_01J9KQ4R7M2X",
+        body:"Customer · NA-EAST · health 0.62 · CSM Dana Okafor · 148 robots across 4 sites",
+        src:"postgres:acme_prod.customers#8842", digest:"sha256:9f2c41a0…b7e1", tokens:118, from:"2024-03-11" },
+      { kind:"fact", label:"Contract", title:"CT-2024-0188",
+        body:"Contract · ACV $412,000.00 USD · starts 2024-10-24 · ends 2026-10-24 · auto_renew false",
+        src:"postgres:acme_prod.contracts#1188", digest:"sha256:7b01de24…9c55", tokens:96, from:"2024-10-24" },
+      { kind:"fact", label:"Incident", title:"INC-3312 — arm calibration loop, line 4",
+        body:"Incident · critical · open since 2026-09-08 · robot NWL-RX-0442 · 2 of 148 robots affected",
+        src:"linear:ACME/issue/INC-3312", digest:"sha256:aa41f2c8…6e02", tokens:141, from:"2026-09-08" },
+      { kind:"graph", label:"subgraph", title:"Harbor Freight Systems → 3 open critical incidents",
+        body:"4 nodes, 6 edges · OPERATES, RAISED, DEPLOYED_AT · hop budget 3, used 2",
+        src:"graph:core-platform", digest:"sha256:31c8a09f…de71", tokens:204, from:"2026-09-11" }
+    ]
+  },
+  {
+    id:"q2", verdict:"rejected-write",
+    q:"Delete the test customers we created last quarter",
+    reason:"Write clause rejected before the query ran",
+    detail:"The compiler produced a DETACH DELETE. query_graph accepts MATCH, OPTIONAL MATCH, WHERE, WITH, RETURN, ORDER BY, SKIP, LIMIT, UNWIND and an allowlist of read procedures. Nothing else reaches the database. The parser rejected this at compile time; the graph service was never called.",
+    cypherText:
+`MATCH (c:Customer)
+WHERE c.created_at >= date('2026-04-01') AND c.name CONTAINS 'test'
+DETACH DELETE c`,
+    badLine:2,
+    cost:{ usd:"0.0028", basis:"price book v22 · 2,104 input + 96 output tokens · compile only, nothing executed" },
+    model:"z-ai/glm-latest (complex tier, via OpenRouter)",
+    version:"v14 · .oxagen/ontology @ a0f3c19",
+    next:"Deleting entities is not a question. Resolve or retire them from Sources, which is a governed action with a receipt."
+  },
+  {
+    id:"q3", verdict:"rejected-budget",
+    q:"For every symbol in the repo, list every column it has ever read, at any point in history",
+    reason:"Plan exceeds the node budget",
+    detail:"EXPLAIN estimated 4,182,900 db hits against this workspace's node budget of 250,000. The query was rejected before it ran; the budget is a resource-scope setting on your role, not a timeout.",
+    cypherText:
+`MATCH (s:Symbol)-[r:READS]->(col:Column)
+WHERE r.valid_from IS NOT NULL
+RETURN s.qualified_name, collect(DISTINCT col.name) AS columns`,
+    plan:{ estimated:4182900, budget:250000, verdict:"rejected", ms:31 },
+    cost:{ usd:"0.0033", basis:"price book v22 · 2,480 input + 142 output tokens · plan only, nothing executed" },
+    model:"z-ai/glm-latest (complex tier, via OpenRouter)",
+    version:"v14 · .oxagen/ontology @ a0f3c19",
+    next:"Narrow it: name a file, a package, or an as_of window. Scoping to packages/billing brings the estimate to 41,200 db hits."
+  }
+];
+
+/* ── graph explorer instances ─────────────────────────────────── */
+const INSTANCES = [
+  { id:"ent_01J9KQ4R7M2X", cls:"Customer", name:"Northwind Logistics", sub:"NA-EAST · 148 robots · health 0.62" },
+  { id:"ent_01J9KQ51B8TY", cls:"Customer", name:"Harbor Freight Systems", sub:"NA-WEST · 212 robots · health 0.44" },
+  { id:"ent_01J9KQ5Q2PDC", cls:"Customer", name:"Cobalt Foods", sub:"EU-CENTRAL · 96 robots · health 0.78" },
+  { id:"ent_01J9KR08MM4F", cls:"Robot", name:"NWL-RX-0442", sub:"RX-4 · firmware 4.2.1 · uptime 97.2%" },
+  { id:"ent_01J9KR2XA7QQ", cls:"Incident", name:"INC-3312", sub:"critical · open · arm calibration loop" },
+  { id:"ent_01J9KR44K0ZB", cls:"FirmwareRelease", name:"4.2.1", sub:"stable · signed by acme.core.release-manager" },
+  { id:"ent_01J9KR6P1NVA", cls:"Table", name:"acme_prod.customers", sub:"14 columns · 1,284 rows · financial" },
+  { id:"ent_01J9KR8T3CDE", cls:"PullRequest", name:"acme/platform#4918", sub:"merged · witness flipped · run_01K4TQ8V" }
+];
+
+const NEIGHBORS = {
+  ent_01J9KQ4R7M2X:[
+    { rel:"SIGNED_CONTRACT", dir:"out", cls:"Contract", name:"CT-2024-0188", sub:"ACV $412,000.00 USD · ends 2026-10-24" },
+    { rel:"OPERATES", dir:"out", cls:"Robot", name:"148 robots", sub:"NWL-RX-0442 … NWL-RX-0589" },
+    { rel:"OPERATES → RAISED", dir:"out", cls:"Incident", name:"INC-3312, INC-3344", sub:"2 open · critical" },
+    { rel:"BILLED_AS", dir:"out", cls:"Invoice", name:"61 invoices", sub:"$1,914,400.00 USD lifetime" },
+    { rel:"DEPLOYED_AT", dir:"out", cls:"DeploymentSite", name:"4 sites", sub:"NWL-EWR, NWL-BOS, NWL-PHL, NWL-BWI" }
+  ]
+};
+
+/* ═══════════════════ helpers ═══════════════════ */
+const $ = (s,r)=> (r||document).querySelector(s);
+const $$ = (s,r)=> Array.from((r||document).querySelectorAll(s));
+const esc = s => String(s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const nf = n => n.toLocaleString("en-US");
+const CLS = Object.fromEntries(CLASSES.map(c=>[c.id,c]));
+
+function freshBadge(mins){
+  if (mins===null) return ['wait','not materialized'];
+  if (mins<15) return ['ok', mins+'m ago'];
+  if (mins<60) return ['drift', mins+'m ago'];
+  return ['drift', Math.round(mins/60)+'h ago'];
+}
+const SRCNAME = {P:"Postgres", L:"Linear", G:"GitHub"};
+
+/* ── routing ── */
+const TABS = [
+  ["model","Model"], ["graph","Graph"], ["sources","Sources"],
+  ["repositories","Repositories"], ["versions","Versions"]
+];
+let route = { tab:"model", params:new URLSearchParams() };
+let uiState = "loaded";      // loaded | loading | empty | error | denied
+let phone = false;
+let assistOpen = false;
+
+function parseHash(){
+  const raw = location.hash.replace(/^#/,"") || "/"+ORG.slug+"/"+WS.slug+"/ontology/model";
+  const [path, qs] = raw.split("?");
+  const segs = path.split("/").filter(Boolean);
+  const tab = segs[3] && TABS.some(t=>t[0]===segs[3]) ? segs[3] : "model";
+  route = { tab, params:new URLSearchParams(qs||"") };
+}
+function go(tab, params){
+  const p = new URLSearchParams(params||{});
+  const q = p.toString();
+  location.hash = "/"+ORG.slug+"/"+WS.slug+"/ontology/"+tab + (q? "?"+q : "");
+}
+function setParam(k,v){
+  const p = new URLSearchParams(route.params);
+  if (v===null || v===undefined) p.delete(k); else p.set(k,v);
+  go(route.tab, p);
+}
+
+/* ── toast ── */
+let toastTimer;
+function toast(msg, tag){
+  const host = $("#toasts");
+  host.innerHTML = '<div class="toast" role="status">'+
+    '<svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="var(--ok)" stroke-width="1.6"><circle cx="8" cy="8" r="6.2"/><path d="m5.4 8.2 1.8 1.8 3.4-3.8"/></svg>'+
+    '<span>'+esc(msg)+'</span>'+ (tag? '<span class="tg">'+esc(tag)+'</span>':'') +'</div>';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>{ host.innerHTML=""; }, 4200);
+}
+
+/* ── dialogs (hash-backed so Back closes them) ── */
+function openDialog(name, extra){
+  const p = new URLSearchParams(route.params);
+  p.set("dialog", name);
+  if (extra) Object.entries(extra).forEach(([k,v])=>p.set(k,v));
+  go(route.tab, p);
+}
+function closeDialog(){
+  if (route.params.get("dialog")) history.back();
+  else renderOverlay();
+}
+
+/* ═══════════════════ chrome ═══════════════════ */
+function renderNav(){
+  const draw = (items, host, cur) => {
+    host.innerHTML = items.map(([label, href, icon, tail])=>{
+      const on = label==="Ontology";
+      return '<a href="'+href+'"'+(on?' aria-current="page"':'')+'>'+
+        '<svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.35">'+ICONS[icon]+'</svg>'+
+        '<span>'+label+'</span>'+
+        (tail? '<span class="tail'+(tail.includes("PR")||tail.includes("live")?' alert':'')+'">'+tail+'</span>':'')+
+      '</a>';
+    }).join("");
+  };
+  draw(NAV_WS, $("#nav-ws"));
+  draw(NAV_ORG, $("#nav-org"));
+}
+
+/* ═══════════════════ shared state screens ═══════════════════ */
+function skel(w,h,mb){ return '<div class="skel" style="width:'+w+';height:'+(h||12)+'px'+(mb?';margin-bottom:'+mb+'px':'')+'"></div>'; }
+
+function loadingView(){
+  return '<div class="stack">'+
+   '<div class="stats">'+[0,1,2,3,4].map(()=>'<div class="stat">'+skel("58%",10,8)+skel("44%",18)+'</div>').join("")+'</div>'+
+   '<div class="panel"><div class="panel-hd">'+skel("180px",13)+'</div>'+
+   '<div class="panel-bd"><div style="display:flex;flex-direction:column;gap:10px">'+
+     skel("100%",190)+ skel("70%",12)+ skel("52%",12)+
+   '</div></div></div>'+
+   '<p class="mono-sm dimtx">Reading ontology v14 from the graph · one database per organization · workspace predicate injected</p>'+
+   '</div>';
+}
+
+function emptyView(tab){
+  const copy = {
+    model:["No ontology yet","Connect a source and the profiler proposes classes from what it actually sees. It never invents a class it did not find in your data. The GitHub fragment arrives on its own when you link the first repository.","Add a source","sources"],
+    graph:["Nothing to explore yet","The graph explorer answers questions about entities. Entities appear once a source is connected and an ontology version is active.","Add a source","sources"],
+    sources:["No sources connected","Three connectors ship in v1: GitHub, Linear and Postgres. Each syncs into source records the profiler reads; nothing is materialized until an ontology version is merged.","Add a source",null],
+    repositories:["No repositories linked","A workspace has exactly one main repo, bound at creation. This workspace is provisional for 12 more days: runs record and spend counts, but steering, records, and agent definitions stay off until a main repo is bound.","Link a repository",null],
+    versions:["No ontology versions","The ontology lives in .oxagen/ontology/ on the main repo. A proposal is a pull request; merge is activation. Nothing activates any other way.","Link a repository","repositories"]
+  }[tab];
+  return '<div class="statebox">'+
+    '<div class="icon"><svg viewBox="0 0 16 16" width="18" height="18" fill="none" stroke="var(--dim)" stroke-width="1.3"><circle cx="8" cy="3.4" r="1.8"/><circle cx="3.3" cy="11.6" r="1.8"/><circle cx="12.7" cy="11.6" r="1.8"/><path d="M6.7 4.9 4.6 10M9.3 4.9 11.4 10M5.1 11.6h5.8"/></svg></div>'+
+    '<h3>'+copy[0]+'</h3><p>'+copy[1]+'</p>'+
+    '<div class="acts"><button class="btn btn-primary" data-act="add-source">'+copy[2]+'</button>'+
+    '<button class="btn" data-act="docs">How the profiler works</button></div>'+
+  '</div>';
+}
+
+function errorView(){
+  return '<div class="statebox err">'+
+    '<div class="icon"><svg viewBox="0 0 16 16" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2.6 14.4 13.4H1.6z"/><path d="M8 6.4v3.1M8 11.3v.1"/></svg></div>'+
+    '<h3>The graph service did not answer</h3>'+
+    '<p>Neo4j database <span class="mono">org_acme</span> refused the connection after 5,000&nbsp;ms. Nothing was read and nothing was written. The run record and spend are unaffected — they are in Postgres.</p>'+
+    '<p class="mono-sm dimtx">graph_unavailable · request req_01K5F2M8QT · 15:14:02 UTC · retried 2 of 3</p>'+
+    '<div class="acts"><button class="btn btn-primary" data-act="retry">Try again</button>'+
+    '<button class="btn" data-act="status">Open status</button>'+
+    '<button class="btn btn-quiet" data-act="copy-req">Copy request id</button></div>'+
+  '</div>';
+}
+
+function deniedView(){
+  return '<div class="statebox denied">'+
+    '<div class="icon"><svg viewBox="0 0 16 16" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3.2" y="7" width="9.6" height="6.4" rx="1.4"/><path d="M5.6 7V5.2a2.4 2.4 0 0 1 4.8 0V7"/></svg></div>'+
+    '<h3>You cannot read this workspace&rsquo;s ontology</h3>'+
+    '<p>Your role in <span class="mono">core-platform</span> does not grant <span class="mono">ontology:read</span>. IAM decided this, it was audited, and no data was fetched.</p>'+
+    '<div class="panel" style="max-width:520px;text-align:left;margin-top:6px"><div class="panel-bd" style="display:flex;flex-direction:column;gap:7px">'+
+      '<div class="kv"><span class="k">principal</span><span class="v mono">prn_dana_okafor · human</span></div>'+
+      '<div class="kv"><span class="k">role held</span><span class="v mono">billing (workspace finops)</span></div>'+
+      '<div class="kv"><span class="k">permission required</span><span class="v mono">ontology:read on ws core-platform</span></div>'+
+      '<div class="kv"><span class="k">policy version</span><span class="v mono">v31 · active since 2026-09-02</span></div>'+
+      '<div class="kv"><span class="k">decision</span><span class="v"><span class="badge bad"><span class="dot"></span>denied</span></span></div>'+
+      '<div class="kv"><span class="k">audit event</span><span class="v mono">aud_01K5F2P0ZR</span></div>'+
+    '</div></div>'+
+    '<div class="acts"><button class="btn btn-primary" data-act="request-access">Ask Marcus Bell for access</button>'+
+    '<button class="btn" data-act="switch-ws">Switch to finops</button></div>'+
+  '</div>';
+}
+
+/* ═══════════════════ MODEL tab ═══════════════════ */
+const NODE_W = 150, NODE_H = 52;
+const VER_SCALE = { v14:1, v13:0.93, v12:0.45, v11:0.21, v1:0.066 };
+
+function activeVersion(){ return route.params.get("as_of") || "v14"; }
+function versionRec(v){ return VERSIONS.find(x=>x.v===v) || VERSIONS[0]; }
+function visibleClasses(){
+  const vr = versionRec(activeVersion());
+  return CLASSES.filter(c=>!vr.absent.includes(c.id));
+}
+function scaledCount(c){
+  const v = activeVersion();
+  if (v==="v14") return c.n;
+  return Math.round(c.n * (VER_SCALE[v]||1));
+}
+
+function anchorPoint(from,to){
+  const dx = to.x-from.x, dy = to.y-from.y;
+  const hw = NODE_W/2+7, hh = NODE_H/2+7;
+  const sx = dx===0 ? Infinity : Math.abs(hw/dx);
+  const sy = dy===0 ? Infinity : Math.abs(hh/dy);
+  const s = Math.min(sx,sy);
+  return { x:from.x+dx*s, y:from.y+dy*s };
+}
+
+function renderMap(selId){
+  const vis = visibleClasses();
+  const ids = new Set(vis.map(c=>c.id));
+  const rels = RELATIONS.filter(r=>ids.has(r[0]) && ids.has(r[1]));
+
+  // schema cluster boxes
+  const boxes = Object.keys(SCHEMAS).map(sc=>{
+    const ns = vis.filter(c=>c.schema===sc);
+    if (!ns.length) return "";
+    const pad = 20;
+    const x1 = Math.min(...ns.map(n=>n.x))-NODE_W/2-pad;
+    const x2 = Math.max(...ns.map(n=>n.x))+NODE_W/2+pad;
+    const y1 = Math.min(...ns.map(n=>n.y))-NODE_H/2-pad-12;
+    const y2 = Math.max(...ns.map(n=>n.y))+NODE_H/2+pad;
+    return '<rect class="schema-box" x="'+x1+'" y="'+y1+'" width="'+(x2-x1)+'" height="'+(y2-y1)+'" rx="12"/>'+
+           '<text class="schema-lbl" x="'+(x1+11)+'" y="'+(y1+15)+'">'+esc(SCHEMAS[sc].label)+'</text>';
+  }).join("");
+
+  const edges = rels.map((r,i)=>{
+    const a = CLS[r[0]], b = CLS[r[1]];
+    const p1 = anchorPoint(a,b), p2 = anchorPoint(b,a);
+    const lit = selId && (r[0]===selId || r[1]===selId);
+    const dim = selId && !lit;
+    const mx = (p1.x+p2.x)/2, my = (p1.y+p2.y)/2;
+    const w = r[2].length*5.6+10;
+    return '<g data-edge="'+i+'">'+
+      '<path class="edge'+(lit?' lit':'')+(dim?' dim':'')+'" d="M'+p1.x.toFixed(1)+' '+p1.y.toFixed(1)+' L'+p2.x.toFixed(1)+' '+p2.y.toFixed(1)+'"/>'+
+      (lit? '<rect x="'+(mx-w/2)+'" y="'+(my-8)+'" width="'+w+'" height="16" rx="4" fill="var(--bg-deep)" stroke="var(--border)"/>'+
+            '<text class="elabel lit" x="'+mx+'" y="'+(my+4)+'" text-anchor="middle">'+esc(r[2])+'</text>' : '')+
+    '</g>';
+  }).join("");
+
+  const nodes = vis.map(c=>{
+    const [fc, ftxt] = freshBadge(c.proposed? null : c.fresh);
+    const sel = c.id===selId;
+    const x = c.x-NODE_W/2, y = c.y-NODE_H/2;
+    const pips = c.sources.map((s,i)=>
+      '<rect x="'+(x+NODE_W-16-i*11)+'" y="'+(y+NODE_H-16)+'" width="8" height="8" rx="2" fill="var(--dim)"><title>'+SRCNAME[s]+'</title></rect>').join("");
+    return '<g class="node'+(c.proposed?' proposed':'')+(sel?' sel':'')+'" data-class="'+c.id+'" tabindex="0" role="button" aria-label="'+esc(c.id)+', '+nf(scaledCount(c))+' entities">'+
+      '<rect x="'+x+'" y="'+y+'" width="'+NODE_W+'" height="'+NODE_H+'" rx="9"/>'+
+      '<circle cx="'+(x+13)+'" cy="'+(y+15)+'" r="3.6" fill="var(--'+fc+')"><title>'+ftxt+'</title></circle>'+
+      '<text class="nm" x="'+(x+24)+'" y="'+(y+19)+'">'+esc(c.id)+'</text>'+
+      '<text class="ct" x="'+(x+13)+'" y="'+(y+39)+'">'+(c.proposed? 'proposed · 1,402' : nf(scaledCount(c))+' entities')+'</text>'+
+      pips+
+    '</g>';
+  }).join("");
+
+  return '<svg class="map" viewBox="0 0 900 712" role="img" aria-label="Ontology class map for core-platform, '+vis.length+' classes">'+
+    boxes + edges + nodes + '</svg>';
+}
+
+function railFor(c){
+  if (!c) return '<div class="rail">'+
+    '<div class="sec"><h4>Consequence</h4>'+
+    '<p class="small muted">Hover or click a class on the map. This rail shows what depends on it: who cites it, which rules name it, how many proven runs touched it, and what has drifted.</p></div>'+
+    '<div class="sec"><h4>Most cited by agents · 30 days</h4>'+
+      CLASSES.filter(c=>c.cite.rank && c.cite.rank<=5).sort((a,b)=>a.cite.rank-b.cite.rank).map(c=>
+        '<div class="kv"><span class="k">'+c.cite.rank+'. '+c.id+'</span><span class="v mono">'+nf(c.cite.frames)+' frames</span></div>').join("")+
+    '</div>'+
+    '<div class="sec"><h4>Drift found</h4>'+
+      '<div class="kv"><span class="k">data layer</span><span class="v"><span class="badge bad"><span class="dot"></span>2 breaking</span></span></div>'+
+      '<div class="kv"><span class="k">type and coverage</span><span class="v"><span class="badge drift"><span class="dot"></span>3 open</span></span></div>'+
+      '<p class="small muted" style="margin-top:8px">All five are on <b>Repositories</b>, with the file and line that declared each one.</p>'+
+    '</div></div>';
+
+  const [fc, ftxt] = freshBadge(c.proposed? null : c.fresh);
+  const outRel = RELATIONS.filter(r=>r[0]===c.id);
+  const inRel  = RELATIONS.filter(r=>r[1]===c.id);
+  return '<div class="rail">'+
+    '<div class="sec">'+
+      '<div class="row" style="justify-content:space-between;align-items:flex-start">'+
+        '<div><h3 style="font-size:16px">'+esc(c.id)+'</h3>'+
+        '<div class="mono-sm dimtx" style="margin-top:3px">'+esc(SCHEMAS[c.schema].label)+' · since '+esc(c.since)+'</div></div>'+
+        (c.proposed? '<span class="badge wait"><span class="dot"></span>proposed</span>'
+                   : '<span class="badge '+fc+'"><span class="dot"></span>'+ftxt+'</span>')+
+      '</div>'+
+      '<div style="margin-top:10px">'+
+        '<div class="kv"><span class="k">entities</span><span class="v mono">'+(c.proposed? '0 · 1,402 on merge' : nf(scaledCount(c)))+'</span></div>'+
+        '<div class="kv"><span class="k">natural key</span><span class="v mono">'+esc(c.key)+'</span></div>'+
+        '<div class="kv"><span class="k">sources</span><span class="v mono">'+c.sources.map(s=>SRCNAME[s]).join(", ")+'</span></div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="sec"><h4>Consequence</h4>'+
+      '<div class="kv"><span class="k">most cited by agents</span><span class="v">'+(c.cite.rank? '#'+c.cite.rank+' of '+CLASSES.length : '—')+'</span></div>'+
+      '<div class="kv"><span class="k">context frames · 30d</span><span class="v mono">'+nf(c.cite.frames)+'</span></div>'+
+      '<div class="kv"><span class="k">runs that cited it</span><span class="v mono">'+nf(c.cite.runs)+'</span></div>'+
+      '<div class="kv"><span class="k">proven runs</span><span class="v">'+(c.proven? '<span class="badge ok"><span class="dot"></span>'+c.proven+'</span>':'<span class="mono dimtx">0</span>')+'</span></div>'+
+      '<div class="kv"><span class="k">drift found</span><span class="v">'+(c.drift? '<span class="badge bad"><span class="dot"></span>'+c.drift+'</span>':'<span class="mono dimtx">none</span>')+'</span></div>'+
+    '</div>'+
+    (c.ruleNames.length? '<div class="sec"><h4>Rules that reference it · policy v31</h4>'+
+      c.ruleNames.map(r=>'<div class="sev wait small" style="margin:6px 0">'+esc(r)+'</div>').join("")+
+    '</div>':'')+
+    '<div class="sec"><h4>Properties</h4>'+
+      c.props.map(p=>'<div class="kv"><span class="k mono" style="color:var(--body)">'+esc(p[0])+'</span><span class="v mono dimtx">'+esc(p[1])+'</span></div>').join("")+
+    '</div>'+
+    '<div class="sec"><h4>Relations</h4>'+
+      outRel.map(r=>'<div class="kv"><span class="k mono" style="color:var(--gold-text)">'+esc(r[2])+'</span><span class="v mono">→ '+esc(r[1])+' · '+r[3]+'</span></div>').join("")+
+      inRel.map(r=>'<div class="kv"><span class="k mono" style="color:var(--muted)">'+esc(r[2])+'</span><span class="v mono">← '+esc(r[0])+' · '+r[3]+'</span></div>').join("")+
+      (!outRel.length && !inRel.length? '<p class="small muted">None yet.</p>':'')+
+    '</div>'+
+    '<div class="sec"><div class="row">'+
+      '<button class="btn btn-sm" data-act="explore" data-cls="'+c.id+'">Explore instances</button>'+
+      '<button class="btn btn-sm" data-act="propose" data-cls="'+c.id+'">Propose a change</button>'+
+    '</div></div>'+
+  '</div>';
+}
+
+function modelTab(){
+  const v = activeVersion();
+  const vr = versionRec(v);
+  const vis = visibleClasses();
+  const sel = route.params.get("cls");
+  const totalEntities = vis.reduce((a,c)=>a+scaledCount(c),0);
+  const activeCount = vis.filter(c=>!c.proposed).length;
+  const proposedCount = vis.filter(c=>c.proposed).length;
+  const visRels = RELATIONS.filter(r=>vis.some(c=>c.id===r[0]) && vis.some(c=>c.id===r[1])).length;
+  const asOfBanner = v!=="v14" ? '<div class="panel" style="border-color:color-mix(in srgb,var(--drift) 45%,var(--border))"><div class="panel-bd" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">'+
+      '<span class="badge drift"><span class="dot"></span>as_of '+esc(vr.at.slice(0,10))+'</span>'+
+      '<span class="small">You are looking at ontology <b>'+esc(v)+'</b>, activated by PR #'+vr.pr+'. '+esc(vr.absent.length)+' classes that exist today did not exist yet; counts are what the graph held then.</span>'+
+      '<button class="btn btn-sm right" data-act="as-now">Back to now</button>'+
+    '</div></div>' : "";
+
+  return asOfBanner +
+  '<div class="stats">'+
+    '<div class="stat"><div class="k">Classes</div><div class="v">'+activeCount+' <small>'+(proposedCount?'+'+proposedCount+' proposed':'')+'</small></div><div class="b">'+Object.keys(SCHEMAS).length+' schemas</div></div>'+
+    '<div class="stat"><div class="k">Entities</div><div class="v">'+nf(totalEntities)+'</div><div class="b">resolved, with provenance</div></div>'+
+    '<div class="stat"><div class="k">Ontology version</div><div class="v">'+esc(v)+' <small>'+(vr.active?'active':'historical')+'</small></div><div class="b">'+esc(vr.sha)+' · PR #'+vr.pr+'</div></div>'+
+    '<div class="stat"><div class="k">Sources</div><div class="v">3 <small>1 degraded</small></div><div class="b">GitHub · Linear · Postgres</div></div>'+
+    '<div class="stat"><div class="k">Drift found</div><div class="v">5</div><div class="b">2 breaking · 3 open</div></div>'+
+  '</div>'+
+
+  '<div class="split">'+
+    '<div class="panel">'+
+      '<div class="panel-hd">'+
+        '<h3>The map</h3>'+
+        '<span class="hint">'+activeCount+' classes · '+visRels+' relation types · drawn from the active version in git</span>'+
+        '<span class="right">'+
+          '<button class="btn btn-sm" data-act="fit">Fit</button>'+
+          '<button class="btn btn-sm btn-primary" data-act="propose">Propose a change</button>'+
+        '</span>'+
+      '</div>'+
+      '<div class="mapwrap" id="mapwrap">'+renderMap(sel)+'</div>'+
+      '<div class="legend">'+
+        '<span class="li"><span class="sw" style="background:var(--ok)"></span>materialized under 15m ago</span>'+
+        '<span class="li"><span class="sw" style="background:var(--drift)"></span>stale</span>'+
+        '<span class="li"><span class="swbox"></span>proposed — in PR #1188, not active</span>'+
+        '<span class="li"><span class="sw" style="background:var(--dim);border-radius:2px"></span>one pip per source</span>'+
+        '<span class="li right mono-sm">click a class for consequence · hover lights its relations</span>'+
+      '</div>'+
+    '</div>'+
+    '<div class="panel">'+railFor(sel? CLS[sel] : null)+'</div>'+
+  '</div>'+
+
+  '<div class="panel">'+
+    '<div class="panel-hd"><h3>Every class</h3><span class="hint">count, freshness, sources, and what depends on it</span>'+
+      '<span class="right mono-sm dimtx">sorted by how often agents cite it</span></div>'+
+    '<div class="panel-bd flush"><div class="tbl-wrap"><table class="tbl">'+
+      '<thead><tr><th>Class</th><th>Schema</th><th class="n">Entities</th><th>Freshness</th><th>Sources</th><th class="n">Frames 30d</th><th class="n">Rules</th><th class="n">Proven runs</th><th>Drift</th></tr></thead><tbody>'+
+      vis.slice().sort((a,b)=>(a.cite.rank||99)-(b.cite.rank||99)).map(c=>{
+        const [fc,ftxt] = freshBadge(c.proposed?null:c.fresh);
+        return '<tr class="rowlink" data-class="'+c.id+'">'+
+          '<td><b>'+esc(c.id)+'</b>'+(c.proposed?' <span class="badge wait">proposed</span>':'')+'</td>'+
+          '<td class="mono-sm muted">'+esc(c.schema)+'</td>'+
+          '<td class="n">'+nf(scaledCount(c))+'</td>'+
+          '<td><span class="badge '+fc+'"><span class="dot"></span>'+ftxt+'</span></td>'+
+          '<td class="mono-sm muted">'+c.sources.map(s=>SRCNAME[s]).join(" · ")+'</td>'+
+          '<td class="n">'+nf(c.cite.frames)+'</td>'+
+          '<td class="n">'+c.rules+'</td>'+
+          '<td class="n">'+c.proven+'</td>'+
+          '<td>'+(c.drift? '<span class="badge bad"><span class="dot"></span>'+c.drift+'</span>':'<span class="dimtx mono-sm">—</span>')+'</td>'+
+        '</tr>';
+      }).join("")+
+    '</tbody></table></div></div>'+
+    '<div class="panel-ft">Entity counts are the graph&rsquo;s, read at 15:14 UTC. Frames, rules and proven runs are attributed from the run record; a class with no rule naming it is governed by the workspace default, not ungoverned.</div>'+
+  '</div>';
+}
+
+/* ═══════════════════ GRAPH tab ═══════════════════ */
+function cypherHTML(text, badLine){
+  const kws = /\b(MATCH|OPTIONAL MATCH|WHERE|WITH|RETURN|ORDER BY|SKIP|LIMIT|UNWIND|AND|OR|AS|COLLECT|COUNT|DISTINCT|DETACH DELETE|DELETE|CREATE|SET|MERGE|REMOVE)\b/g;
+  return text.split("\n").map((ln,i)=>{
+    let h = esc(ln)
+      .replace(kws, m=>'<span class="kw">'+m+'</span>')
+      .replace(/:([A-Z][A-Za-z]+)/g, ':<span class="lbl">$1</span>')
+      .replace(/'([^']*)'/g, "'<span class=\"str\">$1</span>'");
+    if (badLine && i===badLine) h = '<mark>'+h+'</mark>';
+    return h;
+  }).join("\n");
+}
+
+function frameCard(f){
+  return '<div class="frame">'+
+    '<div class="fh">'+
+      '<span class="tag">'+esc(f.kind)+'</span>'+
+      '<span class="tag">'+esc(f.label)+'</span>'+
+      '<b style="font-size:12.5px;color:var(--fg)">'+esc(f.title)+'</b>'+
+      (f.id? '<span class="mono-sm dimtx right">'+esc(f.id)+'</span>':'')+
+    '</div>'+
+    '<div class="fb">'+esc(f.body)+'</div>'+
+    '<div class="fm">'+
+      '<span>'+esc(f.src)+'</span>'+
+      '<span>'+esc(f.digest)+'</span>'+
+      '<span>'+f.tokens+' tokens</span>'+
+      '<span>valid_from '+esc(f.from)+'</span>'+
+    '</div>'+
+  '</div>';
+}
+
+function askResult(q){
+  if (q.verdict==="ran"){
+    return '<div class="stack">'+
+      '<div class="panel">'+
+        '<div class="panel-hd"><h3>'+q.rows.length+' rows</h3>'+
+          '<span class="badge ok"><span class="dot"></span>ran on a read-only role</span>'+
+          '<span class="right mono-sm dimtx">ontology '+esc(q.version)+'</span></div>'+
+        '<div class="panel-bd flush"><div class="tbl-wrap"><table class="tbl">'+
+          '<thead><tr>'+q.cols.map((c,i)=>'<th'+(i>1?' class="n"':'')+'>'+esc(c)+'</th>').join("")+'</tr></thead>'+
+          '<tbody>'+q.rows.map(r=>'<tr>'+r.map((cell,i)=>'<td'+(i>1?' class="n"':'')+'>'+(i===0?'<b>'+esc(cell)+'</b>':esc(cell))+'</td>').join("")+'</tr>').join("")+'</tbody>'+
+        '</table></div></div>'+
+      '</div>'+
+
+      '<div class="g2 grid">'+
+        '<div class="panel">'+
+          '<div class="panel-hd"><h3>The Cypher it ran</h3><span class="hint">compiled, parsed, then scoped</span></div>'+
+          '<div class="panel-bd" style="display:flex;flex-direction:column;gap:10px">'+
+            '<pre class="code">'+cypherHTML(q.cypherText)+'</pre>'+
+            '<div>'+
+              '<div class="mono-sm" style="color:var(--wait);margin-bottom:5px">injected by the graph service — never left to the model</div>'+
+              '<pre class="code" style="border-color:color-mix(in srgb,var(--wait) 40%,var(--border))"><span class="inj">'+esc(q.injected)+'</span></pre>'+
+            '</div>'+
+            '<div class="kv"><span class="k">plan check</span><span class="v"><span class="badge ok"><span class="dot"></span>'+nf(q.plan.estimated)+' of '+nf(q.plan.budget)+' db hits</span></span></div>'+
+            '<div class="kv"><span class="k">executed in</span><span class="v mono">'+q.plan.ms+' ms</span></div>'+
+            '<div class="kv"><span class="k">compiler</span><span class="v mono" style="font-size:11px">'+esc(q.model)+'</span></div>'+
+            '<div class="kv"><span class="k">confidence</span><span class="v">'+q.confidence+' <span class="dimtx small">(the compiler&rsquo;s)</span></span></div>'+
+            '<div class="kv"><span class="k">cost</span><span class="v mono">$'+q.cost.usd+' USD</span></div>'+
+            '<div class="kv"><span class="k">basis</span><span class="v mono dimtx" style="font-size:11px">'+esc(q.cost.basis)+'</span></div>'+
+          '</div>'+
+        '</div>'+
+        '<div class="panel">'+
+          '<div class="panel-hd"><h3>Cited context frames</h3><span class="hint">'+q.frames.length+' returned · each carries its provenance</span></div>'+
+          '<div class="panel-bd" style="display:flex;flex-direction:column;gap:9px">'+
+            q.frames.map(frameCard).join("")+
+            '<p class="small muted">The same frames a wrapped agent would receive. Every one of these is recorded as a frame in this question&rsquo;s run, so the answer can be explained later without re-running it.</p>'+
+          '</div>'+
+        '</div>'+
+      '</div>';
+  }
+
+  const isWrite = q.verdict==="rejected-write";
+  return '<div class="stack">'+
+    '<div class="panel" style="border-color:color-mix(in srgb,var(--bad) 45%,var(--border))">'+
+      '<div class="panel-hd" style="border-bottom-color:color-mix(in srgb,var(--bad) 30%,var(--border))">'+
+        '<span class="badge bad"><span class="dot"></span>rejected</span>'+
+        '<h3>'+esc(q.reason)+'</h3>'+
+        '<span class="right mono-sm dimtx">nothing reached the database</span>'+
+      '</div>'+
+      '<div class="panel-bd" style="display:flex;flex-direction:column;gap:12px">'+
+        '<p style="max-width:74ch">'+esc(q.detail)+'</p>'+
+        '<div>'+
+          '<div class="mono-sm dimtx" style="margin-bottom:5px">what the compiler produced'+(isWrite?' — the marked clause is why it stopped':'')+'</div>'+
+          '<pre class="code">'+cypherHTML(q.cypherText, q.badLine)+'</pre>'+
+        '</div>'+
+        (q.plan? '<div class="stack" style="gap:6px">'+
+          '<div class="kv"><span class="k">EXPLAIN estimate</span><span class="v mono" style="color:var(--bad)">'+nf(q.plan.estimated)+' db hits</span></div>'+
+          '<div class="kv"><span class="k">node budget on your role</span><span class="v mono">'+nf(q.plan.budget)+'</span></div>'+
+          '<div class="meter"><i class="bad" style="width:100%"></i></div>'+
+          '<div class="kv"><span class="k">planned in</span><span class="v mono">'+q.plan.ms+' ms</span></div>'+
+        '</div>':'')+
+        '<div class="stack" style="gap:6px">'+
+          '<div class="kv"><span class="k">compiler</span><span class="v mono" style="font-size:11px">'+esc(q.model)+'</span></div>'+
+          '<div class="kv"><span class="k">cost of the attempt</span><span class="v mono">$'+q.cost.usd+' USD</span></div>'+
+          '<div class="kv"><span class="k">basis</span><span class="v mono dimtx" style="font-size:11px">'+esc(q.cost.basis)+'</span></div>'+
+          '<div class="kv"><span class="k">ontology version</span><span class="v mono" style="font-size:11px">'+esc(q.version)+'</span></div>'+
+        '</div>'+
+        '<div class="sev wait" style="padding:8px 0 8px 11px"><b style="color:var(--fg)">What to do instead</b><div class="small muted" style="margin-top:3px">'+esc(q.next)+'</div></div>'+
+      '</div>'+
+    '</div>'+
+  '</div>';
+}
+
+function graphTab(){
+  const qid = route.params.get("q") || "q1";
+  const q = QUERIES.find(x=>x.id===qid) || QUERIES[0];
+  const entId = route.params.get("entity") || "ent_01J9KQ4R7M2X";
+  const ent = INSTANCES.find(i=>i.id===entId) || INSTANCES[0];
+  const nb = NEIGHBORS[ent.id] || [];
+  const expanded = route.params.get("expand")==="1";
+
+  return '<div class="panel">'+
+    '<div class="panel-hd"><h3>Ask the graph</h3>'+
+      '<span class="hint">plain English, compiled to Cypher, parsed, scoped to this workspace, then run read-only</span></div>'+
+    '<div class="panel-bd" style="display:flex;flex-direction:column;gap:11px">'+
+      '<div class="row">'+
+        QUERIES.map(x=>'<button class="btn btn-sm'+(x.id===qid?' btn-primary':'')+'" data-act="ask" data-q="'+x.id+'">'+
+          (x.verdict==="ran"? 'renewals at risk' : x.verdict==="rejected-write"? 'a question that writes' : 'a question past budget')+'</button>').join("")+
+        '<span class="right mono-sm dimtx">three recorded questions</span>'+
+      '</div>'+
+      '<div class="row" style="flex-wrap:nowrap;gap:8px;align-items:stretch">'+
+        '<input class="input" id="askbox" value="'+esc(q.q)+'" aria-label="Ask the graph a question">'+
+        '<button class="btn btn-primary" data-act="ask" data-q="'+qid+'" style="flex:0 0 auto">'+
+          '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2.5 8h10M9 4.5 12.5 8 9 11.5"/></svg>Ask</button>'+
+      '</div>'+
+      '<div class="row xsmall muted">'+
+        '<span class="tag">as_of now</span>'+
+        '<span class="tag">labels: your resource scope</span>'+
+        '<span class="tag">hops ≤ 3</span>'+
+        '<span class="tag">nodes ≤ 250,000</span>'+
+        '<span class="tag">time ≤ 8s</span>'+
+        '<span>Questions are untrusted text. Nothing in one reaches Cypher except through the compiler, and nothing reaches the database except through the parser and the injector.</span>'+
+      '</div>'+
+    '</div>'+
+  '</div>'+
+
+  askResult(q)+
+
+  '<div class="split-l">'+
+    '<div class="panel">'+
+      '<div class="panel-hd"><h3>Instances</h3><span class="right mono-sm dimtx">'+INSTANCES.length+' of 196,930</span></div>'+
+      '<div class="panel-bd" style="padding:10px 10px 0"><input class="input" placeholder="Filter entities…" aria-label="Filter entities"></div>'+
+      '<div class="list" style="margin-top:10px">'+
+        INSTANCES.map(i=>'<div class="it'+(i.id===ent.id?' sel':'')+'" data-act="entity" data-entity="'+i.id+'" role="button" tabindex="0">'+
+          '<span class="tag" style="margin-top:2px">'+esc(i.cls)+'</span>'+
+          '<span class="mainc"><b>'+esc(i.name)+'</b><span>'+esc(i.sub)+'</span></span></div>').join("")+
+      '</div>'+
+    '</div>'+
+    '<div class="panel">'+
+      '<div class="panel-hd">'+
+        '<h3>'+esc(ent.name)+'</h3><span class="tag">'+esc(ent.cls)+'</span>'+
+        '<span class="mono-sm dimtx">'+esc(ent.id)+'</span>'+
+        '<span class="right"><button class="btn btn-sm" data-act="provenance" data-entity="'+ent.id+'">Provenance</button>'+
+        '<button class="btn btn-sm" data-act="resolve">Resolve entity</button></span>'+
+      '</div>'+
+      '<div class="panel-bd" style="display:flex;flex-direction:column;gap:12px">'+
+        (nb.length? '<div>'+
+          '<div class="row" style="margin-bottom:8px"><h4 style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)">Typed neighbors</h4>'+
+            '<span class="right mono-sm dimtx">hop 1 of 3 · '+(expanded? '31 nodes' : '5 edges')+'</span></div>'+
+          '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Relation</th><th>Class</th><th>Node</th><th>Detail</th></tr></thead><tbody>'+
+            nb.map(n=>'<tr><td class="mono-sm" style="color:var(--gold-text)">'+esc(n.rel)+'</td><td class="mono-sm muted">'+esc(n.cls)+'</td><td><b>'+esc(n.name)+'</b></td><td class="muted small">'+esc(n.sub)+'</td></tr>').join("")+
+            (expanded? [
+              ['SIGNED_CONTRACT → HAS_SUBSCRIPTION','Subscription','SUB-88214','Fleet Enterprise · 148 seats · $34,333.33 USD MRR'],
+              ['OPERATES → RUNS_FIRMWARE','FirmwareRelease','4.2.1','stable · 141 of 148 robots · 7 pending'],
+              ['OPERATES → RAISED → TRACKED_BY','Issue','acme/platform#2211','open · label incident · assignee Marcus Bell'],
+              ['DEPLOYED_AT → CONTAINS','DeploymentSite','NWL-EWR','Newark NJ · 61 robots · 2 critical']
+            ].map(r=>'<tr><td class="mono-sm" style="color:var(--gold-text)">'+esc(r[0])+'</td><td class="mono-sm muted">'+esc(r[1])+'</td><td><b>'+esc(r[2])+'</b></td><td class="muted small">'+esc(r[3])+'</td></tr>').join("") : "")+
+          '</tbody></table></div>'+
+          '<div class="row" style="margin-top:10px">'+
+            '<button class="btn btn-sm" data-act="expand">'+(expanded? 'Collapse to hop 1' : 'Expand typed neighbors · hop 2')+'</button>'+
+            '<span class="mono-sm dimtx">expand_graph · allowed relationship types only · budget 3 hops / 250,000 nodes</span>'+
+          '</div>'+
+        '</div>' : '<p class="muted small">No typed neighbors recorded at hop 1 for this entity.</p>')+
+      '</div>'+
+    '</div>'+
+  '</div>';
+}
+
+/* ═══════════════════ SOURCES tab ═══════════════════ */
+function sourcesTab(){
+  return '<div class="grid g3">'+
+    CONNECTORS.map(c=>{
+      const ok = c.health==="ok";
+      return '<div class="panel">'+
+        '<div class="panel-hd">'+
+          '<h3>'+esc(c.name)+'</h3>'+
+          '<span class="badge '+(ok?'ok':'drift')+'"><span class="dot"></span>'+(ok?'healthy':'degraded')+'</span>'+
+        '</div>'+
+        '<div class="panel-bd" style="display:flex;flex-direction:column;gap:6px">'+
+          '<p class="mono-sm dimtx">'+esc(c.detail)+'</p>'+
+          '<div class="kv"><span class="k">last sync</span><span class="v mono">'+esc(c.lastSync)+'</span></div>'+
+          '<div class="kv"><span class="k">'+esc(c.cursorLabel)+'</span><span class="v mono" style="font-size:11px">'+esc(c.cursor)+'</span></div>'+
+          '<div class="kv"><span class="k">ingested</span><span class="v mono">'+esc(c.records)+'</span></div>'+
+          '<div class="kv"><span class="k">egress</span><span class="v mono" style="font-size:11px">'+esc(c.egress)+'</span></div>'+
+          '<div class="'+(ok?'sev ok':'sev drift')+' small" style="margin-top:4px">'+esc(c.window)+'</div>'+
+          (c.error? '<div class="sev bad small"><b style="color:var(--fg)">Open error</b><div class="mono-sm" style="margin-top:3px;color:var(--muted)">'+esc(c.error)+'</div></div>':'')+
+          '<div style="margin-top:6px"><div class="mono-sm dimtx" style="margin-bottom:5px">feeds</div><div class="row">'+
+            c.classes.map(k=>'<span class="tag">'+esc(k)+'</span>').join("")+
+          '</div></div>'+
+        '</div>'+
+        '<div class="panel-ft" style="display:flex;gap:7px">'+
+          '<button class="btn btn-sm" data-act="sync-source" data-src="'+c.id+'">Sync now</button>'+
+          '<button class="btn btn-sm btn-quiet" data-act="src-settings" data-src="'+c.id+'">Settings</button>'+
+        '</div>'+
+      '</div>';
+    }).join("")+
+  '</div>'+
+
+  '<div class="split">'+
+    '<div class="panel">'+
+      '<div class="panel-hd"><h3>Entity provenance</h3>'+
+        '<span class="hint">one entity, walked back to the rows that made it</span>'+
+        '<span class="right"><button class="btn btn-sm" data-act="pick-entity">Change entity</button></span></div>'+
+      '<div class="panel-bd" style="display:flex;flex-direction:column;gap:13px">'+
+        '<div class="row" style="gap:10px">'+
+          '<span class="tag">'+esc(ENTITY.cls)+'</span>'+
+          '<b style="font-size:15px;color:var(--fg)">'+esc(ENTITY.name)+'</b>'+
+          '<span class="mono-sm dimtx">'+esc(ENTITY.id)+'</span>'+
+          '<span class="right badge plain mono">ontology '+esc(ENTITY.version)+'</span>'+
+        '</div>'+
+        '<div class="grid g2">'+
+          '<div>'+ENTITY.props.map(p=>'<div class="kv"><span class="k mono">'+esc(p[0])+'</span><span class="v">'+esc(p[1])+'</span></div>').join("")+'</div>'+
+          '<div>'+
+            '<div class="kv"><span class="k">valid_from</span><span class="v mono">'+esc(ENTITY.validFrom)+'</span></div>'+
+            '<div class="kv"><span class="k">valid_to</span><span class="v mono">'+esc(ENTITY.validTo)+'</span></div>'+
+            '<div class="kv"><span class="k">workspace</span><span class="v mono">'+esc(ENTITY.ws)+'</span></div>'+
+            '<div class="kv"><span class="k">resolved on</span><span class="v mono" style="font-size:11px">'+esc(ENTITY.resolution.matchedOn)+'</span></div>'+
+            '<div class="kv"><span class="k">match confidence</span><span class="v">'+ENTITY.resolution.confidence+' <span class="dimtx small">/ threshold '+ENTITY.resolution.threshold+'</span></span></div>'+
+            '<p class="xsmall dimtx" style="margin-top:4px">'+esc(ENTITY.resolution.note)+'</p>'+
+          '</div>'+
+        '</div>'+
+        '<div>'+
+          '<h4 style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">DERIVED_FROM · '+ENTITY.records.length+' source records</h4>'+
+          '<div class="stack" style="gap:8px">'+
+            ENTITY.records.map((r,i)=>'<div class="frame">'+
+              '<div class="fh"><span class="tag">'+(i+1)+'</span><b style="font-size:12px;font-family:var(--mono);color:var(--fg)">'+esc(r.src)+'</b>'+
+                '<span class="right badge plain mono">'+esc(r.synced)+'</span></div>'+
+              '<div class="fb small">'+esc(r.fields)+'</div>'+
+              '<div class="fm"><span>'+esc(r.digest)+'</span><span>sync run '+esc(r.run)+'</span></div>'+
+            '</div>').join("")+
+          '</div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="panel-ft">Every property above came from exactly one of those records. Change the source row and the digest changes; the entity is re-materialized and the old value stays queryable with <span class="mono">as_of</span>.</div>'+
+    '</div>'+
+
+    '<div class="panel">'+
+      '<div class="panel-hd"><h3>Connected to</h3></div>'+
+      '<div class="rail">'+
+        '<div class="sec">'+ENTITY.neighbors.map(n=>'<div class="kv"><span class="k">'+esc(n[0])+'</span><span class="v">'+esc(n[1])+'</span></div>').join("")+'</div>'+
+        '<div class="sec"><h4>Cited in runs · 30 days</h4>'+
+          '<div class="kv"><span class="k">context frames</span><span class="v mono">412</span></div>'+
+          '<div class="kv"><span class="k">runs</span><span class="v mono">88</span></div>'+
+          '<div class="kv"><span class="k">proven runs</span><span class="v"><span class="badge ok"><span class="dot"></span>19</span></span></div>'+
+        '</div>'+
+        '<div class="sec"><div class="row"><button class="btn btn-sm" data-act="open-graph">Open in Graph</button>'+
+        '<button class="btn btn-sm" data-act="resolve">Resolve duplicates</button></div></div>'+
+      '</div>'+
+    '</div>'+
+  '</div>'+
+
+  '<div class="panel">'+
+    '<div class="panel-hd"><h3>Embedding indexes</h3>'+
+      '<span class="hint">one model per index, never mixed · recall and citation rate come from what agents actually cited</span>'+
+      '<span class="right mono-sm dimtx">vectors never leave org_acme</span></div>'+
+    '<div class="panel-bd flush"><div class="tbl-wrap"><table class="tbl">'+
+      '<thead><tr><th>Index</th><th>Model</th><th class="n">Dims</th><th class="n">Nodes</th><th class="n">Recall@10</th><th>Citation rate</th><th>Last backfill</th><th class="n">Backfill cost</th><th></th></tr></thead><tbody>'+
+      INDEXES.map(ix=>{
+        const falling = ix.trend==="falling";
+        return '<tr>'+
+          '<td class="mono-sm"><b>'+esc(ix.name)+'</b></td>'+
+          '<td class="mono-sm muted">'+esc(ix.model)+'</td>'+
+          '<td class="n">'+ix.dims+'</td>'+
+          '<td class="n">'+nf(ix.nodes)+'</td>'+
+          '<td class="n">'+ix.recall.toFixed(2)+'</td>'+
+          '<td><div style="display:flex;flex-direction:column;gap:4px;min-width:120px">'+
+            '<div class="row" style="gap:6px"><span class="mono-sm">'+Math.round(ix.cite*100)+'%</span>'+
+            (falling? '<span class="badge drift"><span class="dot"></span>falling</span>':'<span class="badge ok"><span class="dot"></span>steady</span>')+'</div>'+
+            '<div class="meter"><i class="'+(falling?'drift':'')+'" style="width:'+Math.round(ix.cite*100)+'%"></i></div>'+
+          '</div></td>'+
+          '<td class="mono-sm muted">'+esc(ix.backfill)+'</td>'+
+          '<td class="n">'+esc(ix.cost)+'</td>'+
+          '<td><button class="btn btn-sm" data-act="upgrade-index" data-ix="'+esc(ix.name)+'">Upgrade</button></td>'+
+        '</tr>';
+      }).join("")+
+    '</tbody></table></div></div>'+
+    '<div class="panel-ft">Costs are Voyage AI charges on this organization&rsquo;s funding source, priced per model call at price book v22. A falling citation rate is a finding, not a failure: the symbol index is being cited less since the code graph grew 18% in August.</div>'+
+  '</div>';
+}
+
+/* ═══════════════════ REPOSITORIES tab ═══════════════════ */
+function repositoriesTab(){
+  return '<div class="stack">'+
+    REPOS.map(r=>{
+      const importing = r.issues.importing;
+      const pct = Math.round(r.issues.done/r.issues.total*100);
+      return '<div class="panel">'+
+        '<div class="panel-hd">'+
+          '<h3 class="mono" style="font-family:var(--mono);font-size:14px">'+esc(r.name)+'</h3>'+
+          (r.role==="main"? '<span class="badge plain mono" style="color:var(--gold-text);border-color:color-mix(in srgb,var(--gold) 40%,transparent)">main repo</span>'
+                          : '<span class="badge plain mono">linked</span>')+
+          '<span class="badge '+(r.events.health==="ok"?'ok':'bad')+'"><span class="dot"></span>events '+esc(r.events.health==="ok"?"healthy":"failing")+'</span>'+
+          (importing? '<span class="badge wait"><span class="dot"></span>importing issues '+pct+'%</span>':'')+
+          '<span class="right">'+
+            '<button class="btn btn-sm" data-act="set-branch" data-repo="'+esc(r.name)+'">Set production branch</button>'+
+            '<button class="btn btn-sm'+(r.role==="main"?' btn-primary':'')+'" data-act="sync-repo" data-repo="'+esc(r.name)+'">Sync now</button>'+
+          '</span>'+
+        '</div>'+
+        '<div class="panel-bd grid g4">'+
+          '<div class="stack" style="gap:4px">'+
+            '<div class="mono-sm dimtx">production branch</div>'+
+            '<div class="row" style="gap:6px"><b class="mono" style="color:var(--fg);font-size:13px">'+esc(r.branch)+'</b>'+
+              (r.branch!==r.defaultBranch? '<span class="badge drift"><span class="dot"></span>not GitHub&rsquo;s default</span>':'')+'</div>'+
+            '<div class="xsmall muted">confirmed by '+esc(r.confirmedBy)+' on '+esc(r.confirmedAt)+'</div>'+
+            (r.prompt? '<div class="xsmall dimtx">'+esc(r.prompt)+'</div>':'')+
+            '<div class="xsmall dimtx">Only this branch updates the code graph.</div>'+
+          '</div>'+
+          '<div class="stack" style="gap:4px">'+
+            '<div class="mono-sm dimtx">last indexed commit</div>'+
+            '<div class="row" style="gap:6px"><b class="mono" style="color:var(--fg);font-size:13px">'+esc(r.head)+'</b><span class="xsmall muted">'+esc(r.headAt)+'</span></div>'+
+            '<div class="xsmall muted" style="overflow:hidden;text-overflow:ellipsis">'+esc(r.headMsg)+'</div>'+
+            '<div class="xsmall dimtx">by '+esc(r.headBy)+'</div>'+
+          '</div>'+
+          '<div class="stack" style="gap:4px">'+
+            '<div class="mono-sm dimtx">event stream</div>'+
+            '<div class="row" style="gap:6px"><b style="color:var(--fg)">'+nf(r.events.day)+'</b><span class="xsmall muted">deliveries · 24h</span></div>'+
+            '<div class="xsmall muted">last '+esc(r.events.last)+' · '+r.events.failed+' failed</div>'+
+            '<div class="xsmall dimtx">gaps: '+esc(r.events.gaps)+'</div>'+
+          '</div>'+
+          '<div class="stack" style="gap:4px">'+
+            '<div class="mono-sm dimtx">issue import</div>'+
+            '<div class="row" style="gap:6px"><b style="color:var(--fg)">'+nf(r.issues.done)+'</b><span class="xsmall muted">of '+nf(r.issues.total)+'</span></div>'+
+            '<div class="meter"><i class="'+(importing?'wait':'')+'" style="width:'+pct+'%"></i></div>'+
+            '<div class="xsmall dimtx">'+(importing? 'resumable · rate-limit aware · 12m remaining' : 'complete · events keep them current')+'</div>'+
+          '</div>'+
+        '</div>'+
+        '<hr class="rule">'+
+        '<div class="panel-bd grid g2" style="padding-top:12px">'+
+          '<div>'+
+            '<h4 style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Code graph</h4>'+
+            '<div class="kv"><span class="k">files</span><span class="v mono">'+nf(r.code.files)+'</span></div>'+
+            '<div class="kv"><span class="k">symbols</span><span class="v mono">'+nf(r.code.symbols)+'</span></div>'+
+            '<div class="kv"><span class="k">edges · DEFINES, IMPORTS, CALLS, REFERENCES</span><span class="v mono">'+nf(r.code.edges)+'</span></div>'+
+            '<div class="kv"><span class="k">languages</span><span class="v mono" style="font-size:11px">'+esc(r.code.langs)+'</span></div>'+
+          '</div>'+
+          '<div>'+
+            '<h4 style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Data layer</h4>'+
+            '<div class="kv"><span class="k">tables · columns</span><span class="v mono">'+nf(r.data.tables)+' · '+nf(r.data.columns)+'</span></div>'+
+            '<div class="kv"><span class="k">migrations</span><span class="v mono">'+r.data.migrations+'</span></div>'+
+            '<div class="kv"><span class="k">storage objects</span><span class="v mono">'+r.data.buckets+'</span></div>'+
+            '<div class="kv"><span class="k">unresolved query sites</span><span class="v mono" style="color:var(--drift)">'+r.data.unresolved+'</span></div>'+
+          '</div>'+
+        '</div>'+
+      '</div>';
+    }).join("")+
+
+    '<div class="panel">'+
+      '<div class="panel-hd"><h3>Data layer drift</h3>'+
+        '<span class="hint">what the code declares against what the database actually has</span>'+
+        '<span class="right"><span class="badge bad"><span class="dot"></span>2 breaking</span>'+
+        '<span class="badge drift"><span class="dot"></span>2 open</span>'+
+        '<span class="badge wait"><span class="dot"></span>1 coverage gap</span></span></div>'+
+      '<div class="panel-bd" style="display:flex;flex-direction:column;gap:12px">'+
+        DRIFT.map((d,i)=>'<div class="sev '+d.sev+'" style="padding:2px 0 2px 12px">'+
+          '<div class="row" style="gap:8px">'+
+            '<b class="mono" style="color:var(--fg);font-size:13px">'+esc(d.obj)+'</b>'+
+            '<span class="badge '+d.sev+'"><span class="dot"></span>'+esc(d.kind)+'</span>'+
+            '<span class="tag">'+esc(d.repo)+'</span>'+
+            '<span class="tag">confidence '+esc(d.conf)+'</span>'+
+            '<span class="right"><button class="btn btn-sm" data-act="propose-drift" data-i="'+i+'">Open a proposal</button></span>'+
+          '</div>'+
+          '<p class="small" style="margin-top:5px;max-width:82ch">'+esc(d.detail)+'</p>'+
+          '<div class="mono-sm dimtx" style="margin-top:5px;display:flex;flex-direction:column;gap:2px">'+
+            d.ev.map(e=>'<span>· '+esc(e)+'</span>').join("")+
+          '</div>'+
+          '<p class="xsmall muted" style="margin-top:5px"><b style="color:var(--body)">Fix:</b> '+esc(d.fix)+'</p>'+
+        '</div>').join("")+
+      '</div>'+
+      '<div class="panel-ft">Static edges come from the parsers; a run that actually executed a query raises its edge to <span class="mono">confirmed</span>. An observed access with no static edge is a coverage gap, recorded so the picture stays honest — not hidden.</div>'+
+    '</div>'+
+  '</div>';
+}
+
+/* ═══════════════════ VERSIONS tab ═══════════════════ */
+function versionsTab(){
+  const showPR = route.params.get("pr")==="1188";
+  const P = OPEN_PROPOSAL;
+  const asOf = activeVersion();
+
+  const prPanel = '<div class="panel" style="border-color:color-mix(in srgb,var(--wait) 45%,var(--border))">'+
+    '<div class="panel-hd" style="border-bottom-color:color-mix(in srgb,var(--wait) 30%,var(--border))">'+
+      '<span class="badge wait"><span class="dot"></span>open proposal</span>'+
+      '<h3>'+esc(P.title)+'</h3>'+
+      '<span class="mono-sm dimtx">'+esc(P.repo)+' #'+P.pr+'</span>'+
+      '<span class="right"><button class="btn btn-sm btn-quiet" data-act="close-pr">'+(showPR?'Hide diff':'Show diff')+'</button></span>'+
+    '</div>'+
+    '<div class="panel-bd" style="display:flex;flex-direction:column;gap:12px">'+
+      '<div class="grid g3">'+
+        '<div><div class="kv"><span class="k">branch</span><span class="v mono" style="font-size:11px">'+esc(P.branch)+'</span></div>'+
+          '<div class="kv"><span class="k">opened by</span><span class="v mono" style="font-size:11px">'+esc(P.by)+'</span></div>'+
+          '<div class="kv"><span class="k">kind</span><span class="v mono" style="font-size:11px">'+esc(P.byKind)+'</span></div>'+
+          '<div class="kv"><span class="k">opened</span><span class="v">'+esc(P.opened)+'</span></div></div>'+
+        '<div><div class="kv"><span class="k">reviewer</span><span class="v">'+P.reviewers.join(", ")+'</span></div>'+
+          '<div class="kv"><span class="k">inferred from</span><span class="v mono" style="font-size:11px">'+nf(P.provenance.records)+' source records</span></div>'+
+          '<div class="kv"><span class="k">table</span><span class="v mono" style="font-size:11px">'+esc(P.provenance.table)+'</span></div>'+
+          '<div class="kv"><span class="k">profiler run</span><span class="v mono" style="font-size:11px">'+esc(P.provenance.run)+'</span></div></div>'+
+        '<div><div class="kv"><span class="k">checks</span><span class="v"><span class="badge ok"><span class="dot"></span>'+P.checks.length+' of '+P.checks.length+' passed</span></span></div>'+
+          '<div class="kv"><span class="k">approvals</span><span class="v"><span class="badge wait"><span class="dot"></span>0 of 1</span></span></div>'+
+          '<div class="kv"><span class="k">merge means</span><span class="v">activation</span></div>'+
+          '<div class="kv"><span class="k">sample</span><span class="v mono" style="font-size:11px">'+esc(P.provenance.sample)+'</span></div></div>'+
+      '</div>'+
+      '<div class="sev wait" style="padding:4px 0 4px 12px"><b style="color:var(--fg);font-size:12.5px">Migration plan</b>'+
+        '<p class="small muted" style="margin-top:3px;max-width:86ch">'+esc(P.migration)+'</p></div>'+
+      (showPR? '<div class="stack" style="gap:10px">'+
+        '<div><h4 style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Checks</h4>'+
+          '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Check</th><th>Result</th><th>What it proved</th></tr></thead><tbody>'+
+            P.checks.map(c=>'<tr><td class="mono-sm"><b>'+esc(c[0])+'</b></td>'+
+              '<td><span class="badge ok"><span class="dot"></span>'+esc(c[1])+'</span></td>'+
+              '<td class="muted small">'+esc(c[2])+'</td></tr>').join("")+
+          '</tbody></table></div></div>'+
+        '<div><h4 style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Diff · 3 files</h4>'+
+          '<div class="stack" style="gap:10px">'+
+            P.diff.map(f=>'<div class="diff"><div class="fname">'+
+              '<svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="var(--dim)" stroke-width="1.4"><path d="M9 1.8H4.2A1.4 1.4 0 0 0 2.8 3.2v9.6a1.4 1.4 0 0 0 1.4 1.4h7.6a1.4 1.4 0 0 0 1.4-1.4V5.6z"/><path d="M9 1.8v3.8h4.2"/></svg>'+
+              esc(f.file)+'</div><div class="lines">'+
+              f.lines.map(l=>'<span class="ln '+(l[0]==="hunk"?"hunk":l[0]==="add"?"add":l[0]==="del"?"del":"")+'">'+esc(l[1])+'</span>').join("")+
+            '</div></div>').join("")+
+          '</div></div>'+
+      '</div>':'')+
+    '</div>'+
+    '<div class="panel-ft" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">'+
+      '<button class="btn btn-sm btn-primary" data-act="review-pr">Review on GitHub</button>'+
+      '<button class="btn btn-sm" data-act="'+(showPR?'close-pr':'open-pr')+'">'+(showPR?'Hide diff':'Show the diff')+'</button>'+
+      '<span class="right mono-sm dimtx">nothing activates except by merge · the merged manifest freezes the version and moves the pin</span>'+
+    '</div>'+
+  '</div>';
+
+  return '<div class="stats">'+
+    '<div class="stat"><div class="k">Active version</div><div class="v">v14</div><div class="b">a0f3c19 · PR #1142</div></div>'+
+    '<div class="stat"><div class="k">Versions in git</div><div class="v">14</div><div class="b">every one queryable as_of</div></div>'+
+    '<div class="stat"><div class="k">Open proposals</div><div class="v">1</div><div class="b">#1188 · 7 checks green</div></div>'+
+    '<div class="stat"><div class="k">Files under .oxagen/ontology</div><div class="v">41</div><div class="b">20 labels · 19 relations · manifest</div></div>'+
+    '<div class="stat"><div class="k">Enforcement mode</div><div class="v" style="font-size:15px">strict</div><div class="b">ingestion grounded against v14</div></div>'+
+  '</div>'+
+
+  prPanel +
+
+  '<div class="panel">'+
+    '<div class="panel-hd"><h3>.oxagen/ontology/ on acme/platform</h3>'+
+      '<span class="hint">the git history is the version history · merge is activation</span>'+
+      '<span class="right mono-sm dimtx">as_of '+esc(asOf)+'</span></div>'+
+    '<div class="panel-bd flush"><div class="tbl-wrap"><table class="tbl">'+
+      '<thead><tr><th>Version</th><th>Commit</th><th>Change</th><th>Proposed by</th><th>Merged by</th><th>Activated</th><th class="n">Classes</th><th></th></tr></thead><tbody>'+
+      VERSIONS.map(v=>'<tr class="rowlink" data-act="as-of" data-v="'+v.v+'">'+
+        '<td><b>'+esc(v.v)+'</b>'+(v.active?' <span class="badge ok"><span class="dot"></span>active</span>':'')+
+          (asOf===v.v && !v.active? ' <span class="badge drift"><span class="dot"></span>viewing</span>':'')+'</td>'+
+        '<td class="mono-sm muted">'+esc(v.sha)+'</td>'+
+        '<td><div style="max-width:46ch"><b style="font-weight:500">'+esc(v.title)+'</b>'+
+          '<div class="xsmall dimtx mono">'+esc(v.delta)+'</div></div></td>'+
+        '<td class="mono-sm muted">'+esc(v.proposedBy)+'</td>'+
+        '<td class="small">'+esc(v.author)+'</td>'+
+        '<td class="mono-sm muted">'+esc(v.at)+'</td>'+
+        '<td class="n">'+v.classes+'</td>'+
+        '<td><button class="btn btn-sm" data-act="as-of" data-v="'+v.v+'">View the map</button></td>'+
+      '</tr>').join("")+
+    '</tbody></table></div></div>'+
+    '<div class="panel-ft">Click a version to see the Model map as it stood then. Prior versions stay queryable: <span class="mono">as_of</span> uses the node and edge temporal fields, so &ldquo;what did we know about this account in June&rdquo; is a query, not an export.</div>'+
+  '</div>'+
+
+  '<div class="panel">'+
+    '<div class="panel-hd"><h3>Layout in the repo</h3><span class="hint">the registry&rsquo;s export layout, unchanged — one file per label and per relation type</span></div>'+
+    '<div class="panel-bd"><pre class="code">'+esc(
+`.oxagen/ontology/
+  manifest.json                        version 14 · strict · 4 schemas
+  schemas/
+    github/                            source = "builtin", never edited by hand
+      labels/        Repository.json  PullRequest.json  Issue.json  Commit.json
+                     File.json  Symbol.json  Release.json
+      relationships/ HAS_COMMIT.json  CONTAINS.json  DEFINES.json  MERGED_AS.json
+    sales_crm/
+      labels/        Customer.json  Contract.json  Subscription.json  Invoice.json
+      relationships/ SIGNED_CONTRACT.json  HAS_SUBSCRIPTION.json  BILLED_AS.json
+    fleet_ops/
+      labels/        Robot.json  DeploymentSite.json  Incident.json
+                     FirmwareRelease.json
+      relationships/ OPERATES.json  DEPLOYED_AT.json  RAISED.json  RUNS_FIRMWARE.json
+    data_layer/
+      labels/        Table.json  Column.json  Migration.json  StorageBucket.json
+      relationships/ HAS_COLUMN.json  ALTERS.json  READS.json  WRITES.json`)+'</pre>'+
+    '<p class="small muted" style="margin-top:10px;max-width:80ch">An ontology is the schema, not the data. Entities never go to git — they are the graph&rsquo;s, in the millions. This workspace is 41 small files.</p>'+
+    '</div>'+
+  '</div>';
+}
+
+/* ═══════════════════ page assembly ═══════════════════ */
+const TAB_COUNTS = { model:"19", graph:"196,930", sources:"3", repositories:"3", versions:"14" };
+
+function renderPage(){
+  const tabName = (TABS.find(t=>t[0]===route.tab)||TABS[0])[1];
+  $("#crumb-tab").textContent = tabName;
+
+  const head =
+   '<div class="pagehead">'+
+     '<div class="ph-title">'+
+       '<div class="eyebrow">Workspace · core-platform</div>'+
+       '<h1>Ontology</h1>'+
+       '<p class="sub">What kinds of things exist at Acme Robotics, how many of each the graph holds, where every one came from, and which version of that model is in force. Proposed in a pull request, activated on merge, versioned in <span class="mono">.oxagen/ontology/</span> on <span class="mono">acme/platform</span>.</p>'+
+     '</div>'+
+     '<div class="headtools">'+
+       '<label class="field" style="gap:3px">'+
+         '<span style="font-size:10.5px">as_of</span>'+
+         '<select class="sel" id="asof" aria-label="Ontology version to view">'+
+           VERSIONS.map(v=>'<option value="'+v.v+'"'+(v.v===activeVersion()?' selected':'')+'>'+
+             (v.active? 'now — '+v.v : v.v+' — '+v.at.slice(0,10))+'</option>').join("")+
+         '</select>'+
+       '</label>'+
+       '<button class="btn" data-act="add-source"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 3v10M3 8h10"/></svg>Add a source</button>'+
+       '<button class="btn" data-act="link-repo">Link a repository</button>'+
+     '</div>'+
+   '</div>'+
+   '<nav class="tabs" aria-label="Ontology sections">'+
+     TABS.map(t=>'<a href="#/'+ORG.slug+'/'+WS.slug+'/ontology/'+t[0]+'"'+(t[0]===route.tab?' aria-current="page"':'')+'>'+
+       t[1]+'<span class="cnt">'+TAB_COUNTS[t[0]]+'</span></a>').join("")+
+   '</nav>';
+
+  let body;
+  if (uiState==="loading") body = loadingView();
+  else if (uiState==="empty") body = emptyView(route.tab);
+  else if (uiState==="error") body = errorView();
+  else if (uiState==="denied") body = deniedView();
+  else body = { model:modelTab, graph:graphTab, sources:sourcesTab,
+                repositories:repositoriesTab, versions:versionsTab }[route.tab]();
+
+  $("#page").innerHTML = head + body;
+}
+
+/* ═══════════════════ dialogs + command menu ═══════════════════ */
+const DIALOGS = {
+  "link-repo":{
+    title:"Link a repository",
+    body:
+      '<p class="small muted">Oxagen installs its GitHub App on the repository, confirms the production branch, subscribes every event the product uses, imports issues, and builds the code graph — in that order, each visible here with its own status.</p>'+
+      '<div class="field"><label for="d-repo">Repository</label><input class="input" id="d-repo" value="acme/simulation" ></div>'+
+      '<div class="field"><label for="d-branch">Production branch</label>'+
+        '<select class="sel" id="d-branch" style="width:100%"><option>main — GitHub&rsquo;s default</option><option>release</option><option>production</option></select>'+
+        '<p class="xsmall dimtx">Only this branch updates the code graph. If GitHub&rsquo;s default changes later, Oxagen prompts you — the binding never moves on its own.</p></div>'+
+      '<div class="field"><label>Role</label><div class="row">'+
+        '<span class="badge plain mono">linked</span>'+
+        '<span class="xsmall dimtx">This workspace already has a main repo (acme/platform). Changing which repo is main is an org-owner action with approval, recorded as a security event.</span>'+
+      '</div></div>'+
+      '<div class="sev wait small" style="padding:6px 0 6px 11px">Linking is a governed action. It writes an audit record and returns a signed receipt.</div>',
+    primary:["Link repository","Linked acme/simulation · production branch main","governed action · act_01K5F3"]
+  },
+  "add-source":{
+    title:"Add a source",
+    body:
+      '<p class="small muted">Three connectors ship in v1. A source syncs into source records; the profiler reads a sample and proposes classes as a pull request. Nothing is materialized until that pull request merges.</p>'+
+      '<div class="grid g3" style="gap:10px">'+
+        ['GitHub','Linear','Postgres'].map((n,i)=>'<label class="panel" style="padding:11px;cursor:pointer;display:flex;gap:8px;align-items:flex-start">'+
+          '<input type="radio" name="src" id="src-'+n.toLowerCase()+'"'+(i===2?' checked':'')+'>'+
+          '<span><b style="display:block;color:var(--fg);font-size:13px">'+n+'</b>'+
+          '<span class="xsmall dimtx">'+(i===0?'repos, PRs, issues, code graph':i===1?'teams, projects, issues':'tables you select')+'</span></span></label>').join("")+
+      '</div>'+
+      '<div class="field"><label for="d-dsn">Connection</label><input class="input" id="d-dsn" value="acme_prod_replica (read-only, brokered per call)"></div>'+
+      '<div class="field"><label for="d-tables">Tables</label><input class="input" id="d-tables" value="warranty_claims, service_visits"></div>'+
+      '<p class="xsmall dimtx">Oxagen holds no credential for you. The tool gateway brokers a per-call credential and signs a receipt for every sync.</p>',
+    primary:["Add source","Added Postgres source · profiler queued for 2 tables","governed action · act_01K5F4"]
+  },
+  "propose":{
+    title:"Propose a change to the ontology",
+    body:
+      '<p class="small muted">A proposal is a pull request on the main repo. The engine&rsquo;s inferred changes, an edit here, and a hand edit all take the same path and get the same checks.</p>'+
+      '<div class="field"><label for="d-title">Title</label><input class="input" id="d-title" value="ontology: add Customer.renewal_owner"></div>'+
+      '<div class="field"><label for="d-branch2">Branch</label><input class="input" id="d-branch2" value="oxagen/ontology/customer-renewal-owner"></div>'+
+      '<div class="field"><label for="d-body">What changes</label><textarea class="input" id="d-body" rows="3">Add renewal_owner (ref Principal) to Customer. Populated from acme_prod.customers.csm_user_id, which the profiler saw on 1,284 of 1,284 rows.</textarea></div>'+
+      '<div class="sev wait small" style="padding:6px 0 6px 11px">Checks that will run: schema validity · naming · no orphaned relation · no label removed under entities · diff against pinned v14 · protocol conformance · migration plan present.</div>',
+    primary:["Open pull request","Opened acme/platform#1189 · 7 checks queued","governed action · act_01K5F5"]
+  },
+  "set-branch":{
+    title:"Set the production branch",
+    body:
+      '<p class="small muted">The production branch is the only branch whose commits update the code graph. Changing it re-indexes from that branch&rsquo;s head and archives what the full pass does not see.</p>'+
+      '<div class="field"><label for="d-pb">Production branch</label>'+
+        '<select class="sel" id="d-pb" style="width:100%"><option>main</option><option selected>release</option><option>production</option></select></div>'+
+      '<div class="kv"><span class="k">GitHub&rsquo;s default branch</span><span class="v mono">main</span></div>'+
+      '<div class="kv"><span class="k">current binding</span><span class="v mono">release · confirmed 2026-07-14</span></div>'+
+      '<div class="kv"><span class="k">effect</span><span class="v">full re-index · idempotent</span></div>'+
+      '<div class="sev bad small" style="padding:6px 0 6px 11px">Re-indexing archives symbols the full pass does not see, with the current commit as valid_to. Nothing is deleted; history stays queryable as_of.</div>',
+    primary:["Confirm branch","Production branch confirmed · full re-index queued","governed action · act_01K5F6"]
+  },
+  "resolve":{
+    title:"Resolve entity",
+    body:
+      '<p class="small muted">Two entities resolved to separate nodes below the confidence threshold. Merging keeps both source records and both provenance chains; nothing is discarded.</p>'+
+      '<div class="grid g2" style="gap:10px">'+
+        '<div class="panel" style="padding:11px"><b style="color:var(--fg);font-size:13px">Northwind Logistics</b>'+
+          '<div class="mono-sm dimtx">ent_01J9KQ4R7M2X · 3 source records · 412 frames</div></div>'+
+        '<div class="panel" style="padding:11px"><b style="color:var(--fg);font-size:13px">Northwind Logistics Inc.</b>'+
+          '<div class="mono-sm dimtx">ent_01J9M2T8XQ7P · 1 source record · 4 frames</div></div>'+
+      '</div>'+
+      '<div class="kv"><span class="k">match confidence</span><span class="v">0.81 <span class="dimtx small">/ threshold 0.85 — below, so it did not merge on its own</span></span></div>'+
+      '<div class="kv"><span class="k">matched on</span><span class="v mono" style="font-size:11px">name trigram + region; billing_email differs</span></div>'+
+      '<div class="kv"><span class="k">survivor</span><span class="v mono">ent_01J9KQ4R7M2X</span></div>',
+    primary:["Merge entities","Merged into ent_01J9KQ4R7M2X · 4 source records now on the survivor","governed action · act_01K5F7"]
+  },
+  "upgrade-index":{
+    title:"Upgrade an embedding index",
+    body:
+      '<p class="small muted">A model upgrade is a migration, never a swap. The new index is built alongside, backfilled in batch, and retrieval cuts over only when the evaluation set is at least as good. Queries never span two models.</p>'+
+      '<div class="kv"><span class="k">index</span><span class="v mono">entity_voyage4_1024</span></div>'+
+      '<div class="kv"><span class="k">current model</span><span class="v mono">voyage-4 · 1024 dims</span></div>'+
+      '<div class="kv"><span class="k">upgrade to</span><span class="v mono">voyage-4-large · 1024 dims</span></div>'+
+      '<div class="kv"><span class="k">nodes to backfill</span><span class="v mono">14,221</span></div>'+
+      '<div class="kv"><span class="k">estimated cost</span><span class="v mono">$41.88 USD</span></div>'+
+      '<div class="kv"><span class="k">basis</span><span class="v mono" style="font-size:11px">Voyage batch pricing · 8.4M input tokens · price book v22</span></div>'+
+      '<div class="kv"><span class="k">funding source</span><span class="v mono">platform key (org acme)</span></div>'+
+      '<div class="kv"><span class="k">cut over when</span><span class="v">recall@10 ≥ 0.91 on the workspace evaluation set</span></div>',
+    primary:["Build alongside","Building entity_voyage4large_1024 · cutover gated on the evaluation set","governed action · act_01K5F8"]
+  },
+  "sync-repo":{
+    title:"Sync repository now",
+    body:
+      '<p class="small muted">A manual sync does a full re-index of the production branch head. It is idempotent, it archives anything the full pass does not see with the current commit as <span class="mono">valid_to</span>, and it is never scheduled — this is what you reach for after a force-push, a history rewrite, or a doubt.</p>'+
+      '<div class="kv"><span class="k">repository</span><span class="v mono">acme/platform</span></div>'+
+      '<div class="kv"><span class="k">production branch</span><span class="v mono">main @ a0f3c19</span></div>'+
+      '<div class="kv"><span class="k">to re-parse</span><span class="v mono">9,104 files</span></div>'+
+      '<div class="kv"><span class="k">estimated</span><span class="v mono">3m 20s · ephemeral clone, discarded after</span></div>'+
+      '<div class="kv"><span class="k">agent tool</span><span class="v mono">sync_repository</span></div>',
+    primary:["Sync now","Full re-index started · acme/platform @ a0f3c19","governed action · act_01K5F9 · receipt rcp_7712"]
+  },
+  "sync-source":{
+    title:"Sync source now",
+    body:
+      '<p class="small muted">Runs the connector from its recorded cursor. The lagging table is retried first.</p>'+
+      '<div class="kv"><span class="k">source</span><span class="v mono">postgres · acme_prod replica</span></div>'+
+      '<div class="kv"><span class="k">watermark</span><span class="v mono">id &gt; 8842991</span></div>'+
+      '<div class="kv"><span class="k">open error</span><span class="v mono" style="font-size:11px;color:var(--bad)">statement timeout on invoices</span></div>'+
+      '<div class="kv"><span class="k">this run will</span><span class="v">retry invoices with a 90s timeout, then continue</span></div>',
+    primary:["Sync now","Sync started · invoices retried with a 90s statement timeout","governed action · act_01K5FA"]
+  },
+  "propose-drift":{
+    title:"Open a proposal from this finding",
+    body:
+      '<p class="small muted">The finding becomes a branch and a pull request on the main repo, with the evidence in the body. It gets the same checks any ontology proposal gets.</p>'+
+      '<div class="field"><label for="d-dtitle">Title</label><input class="input" id="d-dtitle" value="data layer: robot_telemetry write site is dynamic, add it to the ontology"></div>'+
+      '<div class="field"><label for="d-dbody">Body</label><textarea class="input" id="d-dbody" rows="4">Run run_01K4TQ8V wrote acme_prod.robot_telemetry through a dynamically built query. The parsers found no static query site, so the code graph has no WRITES edge for it — a coverage gap, recorded rather than hidden.\n\nProposal: declare robot_telemetry in data_layer with data_class = none, and add the observed write as a confirmed edge from the enclosing symbol.</textarea></div>'+
+      '<div class="sev wait small" style="padding:6px 0 6px 11px">Evidence carried into the PR body: frame 412 of run_01K4TQ8V, the tool call, and the resolved effect.</div>',
+    primary:["Open pull request","Opened acme/platform#1190 · findings job notified","governed action · act_01K5FB"]
+  },
+  "pick-entity":{
+    title:"Pick an entity",
+    body:'<div class="list" style="border:1px solid var(--border);border-radius:10px">'+
+      INSTANCES.slice(0,6).map(i=>'<div class="it" data-act="entity" data-entity="'+i.id+'"><span class="tag" style="margin-top:2px">'+esc(i.cls)+'</span>'+
+      '<span class="mainc"><b>'+esc(i.name)+'</b><span>'+esc(i.id)+'</span></span></div>').join("")+'</div>',
+    primary:null
+  },
+  "request-access":{
+    title:"Ask for access",
+    body:'<p class="small muted">This sends Marcus Bell a request to grant <span class="mono">ontology:read</span> on <span class="mono">core-platform</span>. Granting a role is itself a governed action with an audit record.</p>'+
+      '<div class="field"><label for="d-why">Why you need it</label><textarea class="input" id="d-why" rows="3">Reconciling finops invoices against Contract.acv_usd for the August statement.</textarea></div>',
+    primary:["Send request","Access request sent to Marcus Bell","governed action · act_01K5FC"]
+  }
+};
+
+function renderOverlay(){
+  const name = route.params.get("dialog");
+  const host = $("#overlay");
+  if (!name){ host.innerHTML=""; return; }
+
+  if (name==="cmdk"){
+    const cmds = [
+      ["Ask the graph a question","Ontology · Graph","graph"],
+      ["Open the ontology map","Ontology · Model","model"],
+      ["Show the open ontology proposal","acme/platform#1188","versions"],
+      ["Sync acme/platform now","governed action","sync"],
+      ["Link a repository","governed action","link"],
+      ["Add a source","governed action","source"],
+      ["Set the production branch","governed action","branch"],
+      ["Show data layer drift","Ontology · Repositories","repositories"],
+      ["Open Fleet","12 runs live","nav"],
+      ["Open Spend","findings ranked by money","nav"]
+    ];
+    host.innerHTML = '<div class="scrim" data-close="1"><div class="dialog cmdpal" role="dialog" aria-label="Command menu">'+
+      '<input class="cinput" id="cmdinput" placeholder="Search or run a command…" autocomplete="off">'+
+      cmds.map((c,i)=>'<div class="cmdrow'+(i===0?' on':'')+'" data-cmd="'+c[2]+'">'+
+        '<svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="var(--dim)" stroke-width="1.4"><path d="M2.5 8h10M9 4.5 12.5 8 9 11.5"/></svg>'+
+        '<span>'+esc(c[0])+'</span><span class="cg">'+esc(c[1])+'</span></div>').join("")+
+    '</div></div>';
+    const inp = $("#cmdinput"); if (inp) inp.focus();
+    return;
+  }
+
+  const d = DIALOGS[name];
+  if (!d){ host.innerHTML=""; return; }
+  host.innerHTML = '<div class="scrim" data-close="1"><div class="dialog" role="dialog" aria-modal="true" aria-label="'+esc(d.title)+'">'+
+    '<div class="dh"><h3>'+esc(d.title)+'</h3><button class="btn btn-sm btn-quiet x" data-close="1" aria-label="Close">Close</button></div>'+
+    '<div class="db">'+d.body+'</div>'+
+    (d.primary? '<div class="df"><button class="btn" data-close="1">Cancel</button>'+
+      '<button class="btn btn-primary" data-confirm="'+esc(name)+'">'+esc(d.primary[0])+'</button></div>':'')+
+  '</div></div>';
+}
+
+/* ═══════════════════ assistant panel ═══════════════════ */
+function renderAssistant(){
+  const a = $("#assistant");
+  a.hidden = !assistOpen;
+  $("#withassist").classList.toggle("assist-open", assistOpen);
+  $("#assist-toggle").setAttribute("aria-pressed", String(assistOpen));
+  if (!assistOpen) return;
+  a.innerHTML =
+    '<div class="msg" style="background:var(--panel-2)"><div class="who">Assistant'+
+      '<span class="badge ok"><span class="dot"></span>engine up</span></div>'+
+      '<p class="small muted">Every turn is a run of its own, recorded and metered. I act through the same governed actions these screens use — never around them.</p></div>'+
+    '<div class="msg"><div class="who">Marcus Bell</div>'+
+      '<p>Why did the Customer count jump last night?</p></div>'+
+    '<div class="msg agent"><div class="who">Assistant · run run_01K5F0QW</div>'+
+      '<p>The Postgres connector picked up 41 new rows in <span class="mono">acme_prod.customers</span> at 02:14 UTC, and entity resolution merged 3 pairs that had been below the 0.85 threshold until the <span class="mono">billing_email</span> backfill landed. Net +38.</p>'+
+      '<p class="xsmall dimtx" style="margin-top:7px">query_graph · 1 tool call · 214 ms · $0.0039 USD · frames 4</p></div>'+
+    '<div class="msg"><div class="who">Marcus Bell</div>'+
+      '<p>Sync the platform repo.</p></div>'+
+    '<div class="msg agent"><div class="who">Assistant · run run_01K5F0QW</div>'+
+      '<p>Done. <span class="mono">sync_repository</span> on <span class="mono">acme/platform</span> at <span class="mono">a0f3c19</span> — full re-index, 9,104 files, 3m 20s.</p>'+
+      '<div class="frame" style="margin-top:8px"><div class="fh"><span class="tag">receipt</span><b style="font-size:12px;color:var(--fg)">rcp_7712</b></div>'+
+      '<div class="fm"><span>act_01K5F9</span><span>IAM allowed</span><span>credential brokered per call</span><span>$0.0000 USD</span></div></div></div>'+
+    '<div class="msg"><div class="row" style="gap:8px"><input class="input" placeholder="Ask about this workspace…" aria-label="Message the assistant">'+
+      '<button class="btn btn-sm" data-act="assist-send">Send</button></div></div>';
+}
+
+/* ═══════════════════ events ═══════════════════ */
+function render(){
+  renderPage();
+  renderOverlay();
+  renderAssistant();
+  wirePage();
+}
+
+function wirePage(){
+  const asof = $("#asof");
+  if (asof) asof.addEventListener("change", e=>{
+    const v = e.target.value;
+    const p = new URLSearchParams(route.params);
+    if (v==="v14") p.delete("as_of"); else p.set("as_of", v);
+    p.delete("cls");
+    go(route.tab, p);
+  });
+
+  // map: hover lights relations, click pins the rail
+  const wrap = $("#mapwrap");
+  if (wrap){
+    let pinned = route.params.get("cls");
+    wrap.addEventListener("mouseover", e=>{
+      const g = e.target.closest("[data-class]");
+      if (!g) return;
+      const id = g.dataset.class;
+      if (id === currentHover) return;
+      currentHover = id;
+      wrap.innerHTML = renderMap(id);
+      const rail = $(".split .panel:last-child");
+      if (rail) rail.innerHTML = railFor(CLS[id]);
+    });
+    wrap.addEventListener("mouseleave", ()=>{
+      currentHover = null;
+      wrap.innerHTML = renderMap(pinned);
+      const rail = $(".split .panel:last-child");
+      if (rail) rail.innerHTML = railFor(pinned? CLS[pinned] : null);
+    });
+    wrap.addEventListener("focusin", e=>{
+      const g = e.target.closest("[data-class]");
+      if (!g) return;
+      const rail = $(".split .panel:last-child");
+      if (rail) rail.innerHTML = railFor(CLS[g.dataset.class]);
+    });
+  }
+}
+let currentHover = null;
+
+document.addEventListener("click", e=>{
+  const t = e.target;
+
+  // close a dialog
+  if (t.closest("[data-close]")){ e.preventDefault(); closeDialog(); return; }
+
+  // command menu rows
+  const cmd = t.closest("[data-cmd]");
+  if (cmd){
+    const k = cmd.dataset.cmd;
+    const map = { graph:"graph", model:"model", versions:"versions", repositories:"repositories" };
+    if (map[k]) { history.back(); setTimeout(()=>go(map[k]),0); }
+    else if (k==="sync") { history.back(); setTimeout(()=>openDialog("sync-repo"),0); }
+    else if (k==="link") { history.back(); setTimeout(()=>openDialog("link-repo"),0); }
+    else if (k==="source"){ history.back(); setTimeout(()=>openDialog("add-source"),0); }
+    else if (k==="branch"){ history.back(); setTimeout(()=>openDialog("set-branch"),0); }
+    else { history.back(); setTimeout(()=>toast("Fleet and Spend are their own pages — this mockup covers Ontology.","W7"),0); }
+    return;
+  }
+
+  // dialog confirm → governed action + receipt
+  const conf = t.closest("[data-confirm]");
+  if (conf){
+    const d = DIALOGS[conf.dataset.confirm];
+    closeDialog();
+    if (d && d.primary) setTimeout(()=>toast(d.primary[1], d.primary[2]), 60);
+    return;
+  }
+
+  // map node / table row → pin a class
+  const node = t.closest("[data-class]");
+  if (node && route.tab==="model"){ setParam("cls", node.dataset.class); return; }
+
+  const act = t.closest("[data-act]");
+  if (!act) return;
+  const a = act.dataset.act;
+
+  switch(a){
+    case "ask": {
+      const q = act.dataset.q || "q1";
+      setParam("q", q);
+      break;
+    }
+    case "entity": {
+      const p = new URLSearchParams(route.params);
+      p.set("entity", act.dataset.entity);
+      p.delete("dialog"); p.delete("expand");
+      if (route.tab!=="graph") { go("graph", p); } else { go("graph", p); }
+      break;
+    }
+    case "expand": setParam("expand", route.params.get("expand")==="1" ? null : "1"); break;
+    case "explore": {
+      const p = new URLSearchParams(); p.set("q","q1");
+      go("graph", p);
+      break;
+    }
+    case "as-of": {
+      const p = new URLSearchParams(route.params);
+      const v = act.dataset.v;
+      p.delete("pr"); p.delete("cls");
+      if (v==="v14") p.delete("as_of"); else p.set("as_of", v);
+      go("model", p);
+      toast(v==="v14" ? "Map back to now — ontology v14" : "Map as of "+versionRec(v).at.slice(0,10)+" — ontology "+v, "as_of");
+      break;
+    }
+    case "as-now": { const p=new URLSearchParams(route.params); p.delete("as_of"); go("model",p); break; }
+    case "open-pr": setParam("pr","1188"); break;
+    case "close-pr": setParam("pr", route.params.get("pr")? null : "1188"); break;
+    case "review-pr": toast("GitHub is where the review happens — merge is the activation event.","acme/platform#1188"); break;
+    case "fit": { const w=$("#mapwrap"); if(w) w.scrollLeft=0; toast("Map fitted · 19 active classes, 19 relation types","v14"); break; }
+    case "open-graph": go("graph", {q:"q1", entity:ENTITY.id}); break;
+    case "retry": setState("loaded"); toast("Graph service answered · ontology v14 read at 15:14:31 UTC","req_01K5F2M9"); break;
+    case "status": toast("org_acme · Neo4j 5.26 · one database per organization","status"); break;
+    case "copy-req": toast("Copied req_01K5F2M8QT","clipboard"); break;
+    case "switch-ws": toast("finops is Dana Okafor's workspace — this mockup is core-platform.","W7"); break;
+    case "docs": toast("The profiler is deterministic first; a model only names what it already found.","§11.2"); break;
+    case "assist-send": toast("Queued as a turn on run run_01K5F0QW","in-app agent"); break;
+    case "src-settings": toast("Connector settings are a governed action — schedule, tables, redaction classes.","§11.2"); break;
+
+    case "link-repo": case "add-source": case "propose": case "set-branch":
+    case "resolve": case "upgrade-index": case "sync-repo": case "sync-source":
+    case "propose-drift": case "pick-entity": case "request-access":
+      openDialog(a, act.dataset.cls? {cls:act.dataset.cls} : null);
+      break;
+  }
+});
+
+/* keyboard */
+document.addEventListener("keydown", e=>{
+  if ((e.metaKey||e.ctrlKey) && e.key.toLowerCase()==="k"){ e.preventDefault(); openDialog("cmdk"); return; }
+  if (e.key==="Escape" && route.params.get("dialog")){ e.preventDefault(); closeDialog(); return; }
+  if (e.key==="Enter"){
+    const it = e.target.closest && e.target.closest("[data-act='entity']");
+    if (it){ e.preventDefault(); it.click(); }
+  }
+});
+
+/* chrome buttons */
+$("#cmdk-open").addEventListener("click", ()=>openDialog("cmdk"));
+$("#assist-toggle").addEventListener("click", ()=>{ assistOpen=!assistOpen; renderAssistant(); });
+$("#hamburger").addEventListener("click", ()=>$("#shell").classList.toggle("navopen"));
+$("#orgswitch").addEventListener("click", ()=>toast("Acme Robotics · 2 workspaces: core-platform, finops","organization"));
+$("#wsswitch").addEventListener("click", ()=>toast("core-platform · main repo acme/platform · production branch main","workspace"));
+$("#theme-toggle").addEventListener("click", ()=>{
+  const cur = document.documentElement.getAttribute("data-theme");
+  const sysDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const next = cur ? (cur==="dark"?"light":"dark") : (sysDark?"light":"dark");
+  document.documentElement.setAttribute("data-theme", next);
+  toast("Theme: "+next, "viewer preference");
+});
+
+/* mockup state switcher */
+function setState(s){
+  uiState = s;
+  $$("#statebar button[data-state]").forEach(b=>b.setAttribute("aria-pressed", String(b.dataset.state===s)));
+  render();
+}
+$$("#statebar button[data-state]").forEach(b=>{
+  b.addEventListener("click", ()=>setState(b.dataset.state));
+});
+$("#statebar button[data-phone]").addEventListener("click", e=>{
+  phone = !phone;
+  $("#viewport").classList.toggle("phone", phone);
+  e.currentTarget.setAttribute("aria-pressed", String(phone));
+  if (phone) $("#shell").classList.remove("navopen");
+});
+
+/* boot */
+window.addEventListener("hashchange", ()=>{ parseHash(); currentHover=null; render(); window.scrollTo({top:0}); });
+parseHash();
+if (!location.hash) history.replaceState(null,"", "#/"+ORG.slug+"/"+WS.slug+"/ontology/model");
+renderNav();
+render();
+</script>
+
+<!-- list-controls: search · sort · column filters · rows per page · pager -->
+<style>
+/* List controls: search, column filters, rows per page, sortable headers, pager.
+   Colors derive from the page's own text color so the block reads correctly in
+   every mockup theme; only the accent leans on --gold. */
+.lt{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:9px 12px;border-bottom:1px solid var(--border,color-mix(in srgb,currentColor 16%,transparent));font-family:inherit;font-size:12.5px}
+.lt.free{border:1px solid var(--border,color-mix(in srgb,currentColor 16%,transparent));border-radius:10px;margin-bottom:10px}
+.lt .lt-q{flex:1 1 200px;min-width:140px;background:color-mix(in srgb,currentColor 5%,transparent);border:1px solid var(--border,color-mix(in srgb,currentColor 16%,transparent));border-radius:8px;padding:6px 10px;font-size:12.5px;color:inherit;outline:none;font-family:inherit;transition:border-color .12s}
+.lt .lt-q:focus{border-color:var(--gold,#D6962C)}
+.lt .lt-q::placeholder{color:inherit;opacity:.5}
+.lt select{appearance:auto;background:color-mix(in srgb,currentColor 5%,transparent);border:1px solid var(--border,color-mix(in srgb,currentColor 16%,transparent));border-radius:8px;padding:5px 8px;font-size:12px;color:inherit;outline:none;font-family:inherit;max-width:220px;transition:border-color .12s}
+.lt select:focus{border-color:var(--gold,#D6962C)}
+.lt .lt-rows{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--muted,inherit);white-space:nowrap;margin-left:auto}
+.lp{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 12px;font-size:11.5px;color:var(--muted,inherit);font-family:inherit}
+.lp.free{border:1px solid var(--border,color-mix(in srgb,currentColor 16%,transparent));border-radius:10px;margin-top:10px}
+.lp .lp-n{font-family:var(--mono,ui-monospace,monospace);font-variant-numeric:tabular-nums;opacity:.85}
+.lp .lp-pg{margin-left:auto;display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+.lp .lp-b{border:1px solid var(--border,color-mix(in srgb,currentColor 16%,transparent));background:color-mix(in srgb,currentColor 5%,transparent);color:inherit;border-radius:7px;padding:2px 8px;min-width:28px;font-size:12px;font-family:inherit;cursor:pointer;font-variant-numeric:tabular-nums;line-height:1.5;transition:border-color .12s}
+.lp .lp-b:hover{border-color:color-mix(in srgb,currentColor 35%,transparent)}
+.lp .lp-b[aria-current="page"]{border-color:var(--gold,#D6962C);color:var(--gold,#D6962C)}
+.lp .lp-b:disabled{opacity:.4;cursor:default}
+.lp .lp-pg .el{padding:0 4px;opacity:.6}
+th.sortable{cursor:pointer;user-select:none}
+th.sortable::after{content:"↕";margin-left:5px;opacity:.35;font-size:10px}
+th.sortable[aria-sort="ascending"]::after{content:"↑";color:var(--gold,#D6962C);opacity:1}
+th.sortable[aria-sort="descending"]::after{content:"↓";color:var(--gold,#D6962C);opacity:1}
+.lt-empty td{opacity:.6;text-align:center;padding:18px}
+@media (max-width:520px){.lt .lt-q{flex-basis:100%}.lt .lt-rows{margin-left:0}}
+</style>
+<script>
+/* ============================== List controls ============================== */
+/* Self-contained: every table with a thead gets a search box, sortable column
+   headers, a filter select for each column that is a small enumeration, a
+   rows-per-page select and a pager. Installs itself through a DOM observer so
+   it works with any render path; state is keyed by page + column signature so
+   a full re-render lands back on the same page, sort and query. */
+(function(){
+"use strict";
+if(window.__ltInstalled)return; window.__ltInstalled=true;
+var STORE={}, PER=[5,10,25,50,0], BUSY=false, TIMER=null;
+var FACET=/status|state|tier|kind|role|risk|severity|result|health|effect|mode|side|level|verdict|decision|origin|scope|period|basis|algorithm|trend|position|governance|two-factor|sso|replay|grade|outcome/i;
+function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function num(s){
+  s=String(s==null?"":s).trim();
+  if(!s||/^\d{4}-\d{2}/.test(s))return null;
+  var c=s.replace(/[$,%×]/g,""), m=c.match(/^[-+]?\d*\.?\d+(?:e[-+]?\d+)?/i);
+  if(!m)return null;
+  var n=parseFloat(m[0]), u=c.slice(m[0].length).match(/^\s*([kKMB])(?![A-Za-z])/);
+  if(u){ if(u[1]==="k"||u[1]==="K")n*=1e3; else if(u[1]==="M")n*=1e6; else n*=1e9; }
+  return n;
+}
+function cmp(a,b,isNum,dir){
+  if(isNum){var x=a.n,y=b.n; if(x==null&&y==null)return 0; if(x==null)return 1; if(y==null)return -1; if(x!==y)return (x-y)*dir;}
+  return a.t.localeCompare(b.t,undefined,{numeric:true,sensitivity:"base"})*dir;
+}
+function el(html){var d=document.createElement("div");d.innerHTML=html;return d.firstChild;}
+function pageCtx(){var h1=document.querySelector("main h1, .page h1, h1"); return location.hash+"|"+(h1?h1.textContent.trim().slice(0,40):"");}
+function state(sig,ord){var key=pageCtx()+"|"+sig+"#"+ord; return STORE[key]||(STORE[key]={q:"",sort:null,dir:1,per:10,page:1,f:{}});}
+
+function pager(st,total,onPage){
+  var per=st.per||total||1, pages=Math.max(1,Math.ceil(total/per));
+  if(st.page>pages)st.page=pages; if(st.page<1)st.page=1;
+  var from=total?((st.page-1)*per+1):0, to=Math.min(total,st.page*per);
+  var html='<div class="lp"><span class="lp-n">'+(total?from+'–'+to+' of '+total:'0 of 0')+'</span><span class="lp-pg">'+
+   '<button type="button" class="lp-b" data-p="prev" aria-label="Previous page"'+(st.page<=1?' disabled':'')+'>‹</button>';
+  var nums=[]; if(pages<=7){for(var i=1;i<=pages;i++)nums.push(i);} else {
+    nums=[1]; var lo=Math.max(2,st.page-1), hi=Math.min(pages-1,st.page+1);
+    if(lo>2)nums.push("…"); for(var j=lo;j<=hi;j++)nums.push(j); if(hi<pages-1)nums.push("…"); nums.push(pages);}
+  nums.forEach(function(p){html+= p==="…"?'<span class="el">…</span>':'<button type="button" class="lp-b" data-p="'+p+'"'+(p===st.page?' aria-current="page"':'')+'>'+p+'</button>';});
+  html+='<button type="button" class="lp-b" data-p="next" aria-label="Next page"'+(st.page>=pages?' disabled':'')+'>›</button></span></div>';
+  var lp=el(html);
+  lp.addEventListener("click",function(e){var b=e.target.closest("button[data-p]"); if(!b||b.disabled)return; e.stopPropagation(); var p=b.getAttribute("data-p");
+    st.page = p==="prev"?st.page-1 : p==="next"?st.page+1 : +p; onPage();});
+  return lp;
+}
+function bar(st,opts,apply){
+  var html='<div class="lt"><input class="lt-q" type="search" placeholder="'+esc(opts.ph)+'" aria-label="'+esc(opts.ph)+'" value="'+esc(st.q)+'">';
+  (opts.filters||[]).forEach(function(f){
+    html+='<select class="lt-f" data-k="'+esc(f.key)+'" aria-label="Filter by '+esc(f.label)+'"><option value="">All · '+esc(f.label)+'</option>'+
+      f.values.map(function(v){return '<option value="'+esc(v)+'"'+(st.f[f.key]===v?' selected':'')+'>'+esc(v)+'</option>';}).join("")+'</select>';});
+  html+='<label class="lt-rows">Rows<select class="lt-per">'+PER.map(function(p){return '<option value="'+p+'"'+(st.per===p?' selected':'')+'>'+(p||"All")+'</option>';}).join("")+'</select></label></div>';
+  var b=el(html);
+  b.addEventListener("click",function(e){e.stopPropagation();});
+  b.querySelector(".lt-q").addEventListener("input",function(e){st.q=e.target.value;st.page=1;apply();});
+  b.querySelectorAll(".lt-f").forEach(function(s){s.addEventListener("change",function(e){st.f[s.getAttribute("data-k")]=e.target.value;st.page=1;apply();});});
+  b.querySelector(".lt-per").addEventListener("change",function(e){st.per=+e.target.value;st.page=1;apply();});
+  return b;
+}
+/* A column earns a filter when it is a small enumeration: 2–8 distinct short
+   values across at least 4 rows, and not unique per row. At most three per list. */
+function facets(cols,vals,rows){
+  if(rows<4)return [];
+  var c=cols.filter(function(col){ if(!col.name||col.num)return false;
+    var set={},n=0,ok=true; vals.forEach(function(v){var t=v[col.i].t; if(!t)return; if(t.length>28)ok=false; if(!set[t]){set[t]=1;n++;}});
+    if(!ok||n<2||n>8||n>=rows)return false; col.values=Object.keys(set).sort(); return true;});
+  c.sort(function(a,b){var pa=FACET.test(a.name)?0:1,pb=FACET.test(b.name)?0:1; return pa-pb||a.values.length-b.values.length;});
+  return c.slice(0,3).map(function(col){return {key:String(col.i),label:col.name,values:col.values};});
+}
+function sigOf(table){return [].slice.call(table.tHead.rows[0].cells).map(function(c){return c.textContent.trim();}).join("/");}
+function enhance(table,ord){
+  var tbody=table.tBodies[0], rows=[].slice.call(tbody.rows);
+  var ths=[].slice.call(table.tHead.rows[0].cells);
+  var cols=ths.map(function(th,i){return {i:i,name:th.textContent.trim(),num:th.classList.contains("num")};});
+  var st=state(sigOf(table),ord);
+  var vals=rows.map(function(r){return cols.map(function(c){var cell=r.cells[c.i]; var t=cell?cell.textContent.replace(/\s+/g," ").trim():""; return {t:t,n:num(t)};});});
+  cols.forEach(function(c){ if(c.num)return; var k=0,tot=0; vals.forEach(function(v){if(v[c.i].t){tot++; if(v[c.i].n!=null)k++;}}); if(tot&&k/tot>=.6)c.num=true; });
+  var texts=rows.map(function(r){return r.textContent.replace(/\s+/g," ").toLowerCase();});
+  var fs=facets(cols,vals,rows.length);
+  var wrap=table.parentNode, host=wrap.parentNode, ph="Search this list";
+  if(!host||wrap===document.body){wrap=table;host=table.parentNode;}
+  /* A lone search box sitting directly above the table becomes the list's search. */
+  var prev=wrap.previousElementSibling;
+  if(prev&&!prev.matches("table,thead,tbody")){
+    var ins=prev.querySelectorAll("input,select,button,a,textarea");
+    var inp=prev.matches("input")?prev:prev.querySelector("input[placeholder^='Search']");
+    if(inp&&inp.placeholder&&/^Search/.test(inp.placeholder)&&ins.length<=1&&!prev.textContent.trim()){ph=inp.placeholder;prev.remove();}
+  }
+  var free=!/panel|card|box/.test(host.className||"");
+  var b=bar(st,{ph:ph,filters:fs},apply), lp=document.createElement("div");
+  if(free)b.classList.add("free");
+  host.insertBefore(b,wrap); host.insertBefore(lp,wrap.nextSibling);
+  ths.forEach(function(th,i){ if(!cols[i].name)return; th.classList.add("sortable"); th.tabIndex=0; th.setAttribute("role","button");
+    function tog(e){ if(e)e.stopPropagation(); if(st.sort===i){ if(st.dir===1)st.dir=-1; else {st.sort=null;st.dir=1;} } else {st.sort=i;st.dir=1;} st.page=1; apply(); }
+    th.addEventListener("click",tog); th.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();tog(e);}}); });
+  function apply(){
+    ths.forEach(function(th,i){ if(!cols[i].name)return; th.setAttribute("aria-sort",st.sort===i?(st.dir===1?"ascending":"descending"):"none"); });
+    var q=st.q.trim().toLowerCase();
+    var idx=rows.map(function(_,i){return i;}).filter(function(i){
+      if(q&&texts[i].indexOf(q)<0)return false;
+      for(var k in st.f){ if(st.f[k]&&vals[i][+k]&&vals[i][+k].t!==st.f[k])return false; } return true; });
+    if(st.sort!=null&&cols[st.sort]){var c=cols[st.sort]; idx.sort(function(a,b){return cmp(vals[a][c.i],vals[b][c.i],c.num,st.dir)||(a-b);});}
+    var total=idx.length, per=st.per||total||1, pages=Math.max(1,Math.ceil(total/per)); if(st.page>pages)st.page=pages;
+    var slice=st.per?idx.slice((st.page-1)*st.per,st.page*st.per):idx;
+    BUSY=true;
+    while(tbody.firstChild)tbody.removeChild(tbody.firstChild);
+    if(!slice.length){var tr=document.createElement("tr"),td=document.createElement("td");tr.className="lt-empty";td.colSpan=cols.length;td.textContent="No rows match.";tr.appendChild(td);tbody.appendChild(tr);}
+    slice.forEach(function(i){tbody.appendChild(rows[i]);});
+    var nlp=pager(st,total,apply); lp.replaceWith(nlp); lp=nlp; if(free)lp.classList.add("free");
+    BUSY=false;
+  }
+  apply();
+}
+function run(){
+  BUSY=true;
+  try{
+    var ords={};
+    [].slice.call(document.querySelectorAll("table")).forEach(function(t){
+      if(!t.tHead||!t.tHead.rows[0]||!t.tBodies[0]||t.closest("[data-lt-skip]"))return;
+      if([].slice.call(t.tHead.rows[0].cells).some(function(c){return c.colSpan>1;}))return;
+      var sig=sigOf(t), ord=ords[sig]||0; ords[sig]=ord+1;
+      if(t.getAttribute("data-lt"))return;
+      t.setAttribute("data-lt","1"); enhance(t,ord);
+    });
+  } finally { BUSY=false; }
+}
+new MutationObserver(function(muts){
+  if(BUSY)return;
+  for(var i=0;i<muts.length;i++){ if(muts[i].addedNodes.length){ clearTimeout(TIMER); TIMER=setTimeout(run,0); return; } }
+}).observe(document.documentElement,{childList:true,subtree:true});
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",run); else run();
+window.listify=run;
+})();
+</script>

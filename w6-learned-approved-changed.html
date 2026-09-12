@@ -1,0 +1,2494 @@
+<title>It learned, you approved, it changed</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+/* ── Oxagen house tokens · dark is the default ───────────────────────── */
+:root{
+  color-scheme: dark light;
+  --ink:#10100F; --void:#0A0A09; --panel:#181715; --hl:#201F1C;
+  --border:#292722; --rule:#34322D;
+  --fg:#F2EEE5; --body:#DDD8CD; --muted:#9B958A; --dim:#6E6A62;
+  --gold:#D6962C; --gold-bright:#F1C364; --gold-deep:#8B5E1A;
+  --accent-text:#D6962C; --on-gold:#10100F;
+  --gold-sheen:linear-gradient(45deg,#8B5E1A 0%,#D6962C 38%,#F1C364 56%,#D6962C 74%,#8B5E1A 100%);
+  --shadow:0 1px 0 rgba(255,255,255,.03),0 18px 44px rgba(0,0,0,.5);
+  --shadow-sm:0 1px 0 rgba(255,255,255,.03),0 6px 18px rgba(0,0,0,.35);
+  /* semantic state scale — never gold, never overlapping identity */
+  --s-allowed:#66A77B; --s-approval:#6C9BD2; --s-denied:#C96A4E;
+  --s-proven:#4FA88C; --s-failed:#D0574B; --s-critical:#E0483A;
+  --s-queued:#7C776E; --s-running:#8E86D8;
+  --add-bg:rgba(102,167,123,.11); --del-bg:rgba(201,106,78,.11);
+  --new-bg:rgba(214,150,44,.10);
+  --font:"Space Grotesk","Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: light){ :root:not([data-theme="dark"]){
+  --ink:#F2EEE5; --void:#E9E3D8; --panel:#F8F5EE; --hl:#EFEAE0;
+  --border:#D8CDBD; --rule:#C9BFAE;
+  --fg:#10100F; --body:#2A2823; --muted:#6B665C; --dim:#8C877C;
+  --accent-text:#8B5E1A; --on-gold:#10100F;
+  --shadow:0 1px 0 rgba(255,255,255,.7),0 18px 44px rgba(16,16,15,.08);
+  --shadow-sm:0 1px 0 rgba(255,255,255,.6),0 4px 12px rgba(16,16,15,.06);
+  --s-allowed:#2F6B45; --s-approval:#2C5C8F; --s-denied:#9B4426;
+  --s-proven:#1F6B58; --s-failed:#A83428; --s-critical:#B02D1E;
+  --s-queued:#6B665C; --s-running:#5A51A8;
+  --add-bg:rgba(47,107,69,.10); --del-bg:rgba(155,68,38,.10);
+  --new-bg:rgba(139,94,26,.10);
+}}
+:root[data-theme="light"]{
+  --ink:#F2EEE5; --void:#E9E3D8; --panel:#F8F5EE; --hl:#EFEAE0;
+  --border:#D8CDBD; --rule:#C9BFAE;
+  --fg:#10100F; --body:#2A2823; --muted:#6B665C; --dim:#8C877C;
+  --accent-text:#8B5E1A; --on-gold:#10100F;
+  --shadow:0 1px 0 rgba(255,255,255,.7),0 18px 44px rgba(16,16,15,.08);
+  --shadow-sm:0 1px 0 rgba(255,255,255,.6),0 4px 12px rgba(16,16,15,.06);
+  --s-allowed:#2F6B45; --s-approval:#2C5C8F; --s-denied:#9B4426;
+  --s-proven:#1F6B58; --s-failed:#A83428; --s-critical:#B02D1E;
+  --s-queued:#6B665C; --s-running:#5A51A8;
+  --add-bg:rgba(47,107,69,.10); --del-bg:rgba(155,68,38,.10);
+  --new-bg:rgba(139,94,26,.10);
+}
+
+*,*::before,*::after{box-sizing:border-box}
+body{background:var(--ink);color:var(--body);font-family:var(--font);font-weight:400;
+     font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;margin:0}
+h1,h2,h3,h4{font-weight:600;color:var(--fg);margin:0;letter-spacing:-.01em}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+:focus-visible{outline:2px solid var(--gold-bright);outline-offset:2px;border-radius:3px}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;
+    transition-duration:.001ms!important;scroll-behavior:auto!important}
+}
+.mono{font-family:var(--mono);font-size:.86em;letter-spacing:-.01em}
+code{font-family:var(--mono);font-size:.88em;background:var(--hl);padding:.1em .35em;
+     border-radius:4px;color:var(--fg);border:1px solid var(--border)}
+.eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;
+     color:var(--accent-text);margin:0 0 10px}
+.eyebrow.q{color:var(--muted)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+
+/* ── frame + shell ──────────────────────────────────────────────────── */
+#stage{min-height:100vh;background:var(--ink);transition:background .2s}
+.frame{container-type:inline-size;width:100%;background:var(--ink)}
+body.phone #stage{background:var(--void);padding:26px 12px 90px;display:flex;justify-content:center;align-items:flex-start}
+body.phone .frame{width:400px;max-width:100%;height:840px;overflow:auto;border:1px solid var(--rule);
+  border-radius:20px;box-shadow:var(--shadow);scrollbar-width:thin}
+.app{display:grid;grid-template-columns:238px minmax(0,1fr);min-height:100vh;align-items:start}
+body.phone .app{min-height:838px}
+
+/* ── sidebar ────────────────────────────────────────────────────────── */
+.side{border-right:1px solid var(--border);background:var(--void);min-height:100vh;
+  position:sticky;top:0;display:flex;flex-direction:column;padding:14px 0 10px}
+body.phone .side{min-height:0}
+.brand{padding:2px 16px 16px;display:flex;align-items:center}
+.brand svg{height:19px;width:auto;color:var(--fg)}
+.switcher{margin:0 10px 4px;border:1px solid var(--border);border-radius:10px;background:var(--panel)}
+.sw{display:flex;align-items:center;gap:9px;width:100%;padding:8px 10px;text-align:left}
+.sw+.sw{border-top:1px solid var(--border)}
+.sw:hover{background:var(--hl)}
+.sw-av{width:22px;height:22px;border-radius:6px;flex:0 0 auto;display:grid;place-items:center;
+  font-size:10.5px;font-weight:700;letter-spacing:.02em}
+.sw-av.org{background:var(--gold-sheen);color:#10100F}
+.sw-av.ws{background:var(--hl);border:1px solid var(--rule);color:var(--muted);font-family:var(--mono)}
+.sw-t{min-width:0;flex:1;display:block}
+.sw-k{display:block;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);line-height:1.35}
+.sw-v{display:block;font-size:12.5px;font-weight:500;color:var(--fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.35}
+.sw-c{color:var(--dim);flex:0 0 auto}
+.nav{padding:12px 10px 0;overflow-y:auto;flex:1}
+.nav-h{font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--dim);
+  padding:10px 8px 6px;font-weight:600}
+.nav a{display:flex;align-items:center;gap:9px;padding:6.5px 9px;border-radius:8px;
+  color:var(--muted);font-size:13px;font-weight:500;margin-bottom:1px}
+.nav a:hover{background:var(--hl);color:var(--fg)}
+.nav a.on{background:var(--hl);color:var(--fg)}
+.nav a.on .ni{color:var(--gold)}
+.ni{width:15px;height:15px;flex:0 0 auto;color:var(--dim)}
+.nav a .cnt{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--dim);
+  background:var(--panel);border:1px solid var(--border);border-radius:5px;padding:0 5px}
+.nav a.on .cnt{color:var(--body)}
+.side-foot{padding:10px 16px 2px;border-top:1px solid var(--border);margin:8px 10px 0}
+.side-foot .ln{display:flex;justify-content:space-between;font-size:11px;color:var(--dim);
+  font-family:var(--mono);padding:2px 0}
+.side-foot .ln b{color:var(--muted);font-weight:500}
+
+/* ── topbar ─────────────────────────────────────────────────────────── */
+.main{min-width:0;display:flex;flex-direction:column}
+.top{position:sticky;top:0;z-index:40;background:color-mix(in srgb,var(--ink) 88%,transparent);
+  backdrop-filter:blur(10px);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;padding:9px 18px;min-height:49px}
+.crumbs{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted);
+  min-width:0;overflow:hidden;white-space:nowrap}
+.crumbs a:hover{color:var(--fg)}
+.crumbs .sep{color:var(--dim)}
+.crumbs .cur{color:var(--fg);font-weight:500}
+.top-sp{flex:1}
+.tbtn{display:flex;align-items:center;gap:6px;border:1px solid var(--border);background:var(--panel);
+  border-radius:8px;padding:5px 9px;font-size:12px;color:var(--muted);font-weight:500}
+.tbtn:hover{background:var(--hl);color:var(--fg)}
+.tbtn.on{color:var(--fg);border-color:var(--rule)}
+.tbtn kbd{font-family:var(--mono);font-size:10px;color:var(--dim);border:1px solid var(--border);
+  border-radius:4px;padding:0 3px;background:var(--ink)}
+.avatar{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:10.5px;
+  font-weight:700;background:var(--hl);border:1px solid var(--rule);color:var(--body);flex:0 0 auto}
+
+/* ── page ───────────────────────────────────────────────────────────── */
+.page{padding:22px 26px 90px;max-width:1280px;width:100%}
+.phead{display:flex;align-items:flex-start;gap:16px;margin-bottom:4px}
+.phead h1{font-size:23px;line-height:1.2}
+.phead .sub{color:var(--muted);font-size:13px;margin-top:5px;max-width:74ch}
+.phead-a{margin-left:auto;display:flex;gap:8px;align-items:center;flex:0 0 auto}
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);margin:18px 0 20px;
+  overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs a{padding:8px 12px;font-size:13px;font-weight:500;color:var(--muted);
+  border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;display:flex;gap:7px;align-items:center}
+.tabs a:hover{color:var(--fg)}
+.tabs a.on{color:var(--fg);border-bottom-color:var(--gold)}
+.tabs .n{font-family:var(--mono);font-size:10.5px;color:var(--dim);background:var(--panel);
+  border:1px solid var(--border);border-radius:5px;padding:0 4px}
+
+/* ── buttons ────────────────────────────────────────────────────────── */
+.btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--border);background:var(--panel);
+  border-radius:9px;padding:7px 13px;font-size:13px;font-weight:500;color:var(--body);white-space:nowrap}
+.btn:hover{background:var(--hl);color:var(--fg);border-color:var(--rule)}
+.btn.sm{padding:5px 10px;font-size:12px;border-radius:8px}
+.btn.gold{background:var(--gold);border-color:var(--gold);color:var(--on-gold);font-weight:600}
+.btn.gold:hover{background:var(--gold-bright);border-color:var(--gold-bright);color:#10100F}
+.btn[disabled]{opacity:.42;cursor:not-allowed}
+.btn[disabled]:hover{background:var(--panel);color:var(--body);border-color:var(--border)}
+.btn .ni{color:currentColor;width:14px;height:14px}
+
+/* ── panels + tables ───────────────────────────────────────────────── */
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.panel+.panel{margin-top:16px}
+.ph{display:flex;align-items:center;gap:10px;padding:11px 15px;border-bottom:1px solid var(--border);background:var(--hl)}
+.ph h3{font-size:13.5px}
+.ph .sp{flex:1}
+.ph .note{font-size:11.5px;color:var(--dim);font-family:var(--mono)}
+.pb{padding:15px}
+.pb.flush{padding:0}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.split{display:grid;grid-template-columns:minmax(0,1fr) 344px;gap:16px;align-items:start}
+.split.rev{grid-template-columns:356px minmax(0,1fr)}
+.tw{overflow-x:auto;scrollbar-width:thin}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th{text-align:left;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);
+  font-weight:600;padding:9px 14px;border-bottom:1px solid var(--border);white-space:nowrap;background:var(--hl)}
+td{padding:11px 14px;border-bottom:1px solid var(--border);vertical-align:top}
+tbody tr:last-child td{border-bottom:none}
+tbody tr.click{cursor:pointer}
+tbody tr.click:hover{background:var(--hl)}
+td .t1{color:var(--fg);font-weight:500}
+td .t2{color:var(--muted);font-size:12px;margin-top:3px}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+
+/* ── badges ─────────────────────────────────────────────────────────── */
+.b{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10.5px;
+  letter-spacing:.02em;padding:2px 7px;border-radius:5px;border:1px solid;white-space:nowrap;
+  background:var(--panel);color:var(--muted);border-color:var(--border)}
+.b.dot::before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor;flex:0 0 auto}
+.b.allowed{color:var(--s-allowed);border-color:color-mix(in srgb,var(--s-allowed) 40%,transparent);background:color-mix(in srgb,var(--s-allowed) 12%,transparent)}
+.b.proven {color:var(--s-proven); border-color:color-mix(in srgb,var(--s-proven) 40%,transparent); background:color-mix(in srgb,var(--s-proven) 12%,transparent)}
+.b.approval{color:var(--s-approval);border-color:color-mix(in srgb,var(--s-approval) 40%,transparent);background:color-mix(in srgb,var(--s-approval) 12%,transparent)}
+.b.denied{color:var(--s-denied);border-color:color-mix(in srgb,var(--s-denied) 40%,transparent);background:color-mix(in srgb,var(--s-denied) 12%,transparent)}
+.b.failed{color:var(--s-failed);border-color:color-mix(in srgb,var(--s-failed) 40%,transparent);background:color-mix(in srgb,var(--s-failed) 12%,transparent)}
+.b.critical{color:var(--s-critical);border-color:color-mix(in srgb,var(--s-critical) 52%,transparent);background:color-mix(in srgb,var(--s-critical) 14%,transparent);font-weight:600}
+.b.running{color:var(--s-running);border-color:color-mix(in srgb,var(--s-running) 40%,transparent);background:color-mix(in srgb,var(--s-running) 12%,transparent)}
+.b.queued{color:var(--s-queued);border-color:var(--border)}
+.b.new{color:var(--accent-text);border-color:color-mix(in srgb,var(--gold) 46%,transparent);background:var(--new-bg);font-weight:600}
+.b.lg{font-size:11.5px;padding:3px 9px}
+
+/* ── record statement blocks ───────────────────────────────────────── */
+.stmt{color:var(--fg);font-size:13.5px;line-height:1.55}
+.lin{font-family:var(--mono);font-size:11.5px;color:var(--accent-text)}
+.meta{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:11.5px;color:var(--dim);font-family:var(--mono);margin-top:7px}
+.meta b{color:var(--muted);font-weight:500}
+.effect{display:flex;gap:14px;flex-wrap:wrap;min-width:196px}
+.ef{min-width:62px}
+.ef .k{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:600}
+.ef .v{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:14px;color:var(--fg);margin-top:2px}
+.ef .v.up{color:var(--s-proven)} .ef .v.down{color:var(--s-failed)} .ef .v.flat{color:var(--muted)}
+.bar{height:4px;border-radius:2px;background:var(--hl);overflow:hidden;margin-top:6px;min-width:110px}
+.bar i{display:block;height:100%;background:var(--s-proven);border-radius:2px}
+.bar i.pre{background:var(--s-queued)}
+
+/* ── code / diff ────────────────────────────────────────────────────── */
+pre{margin:0;font-family:var(--mono);font-size:12px;line-height:1.6;color:var(--body);
+  overflow-x:auto;scrollbar-width:thin}
+.code{background:var(--ink);border:1px solid var(--border);border-radius:10px;padding:13px 15px;overflow-x:auto}
+.diff{background:var(--ink);border-top:1px solid var(--border);font-family:var(--mono);font-size:12px;line-height:1.62}
+.diff .fl{display:flex;align-items:center;gap:9px;padding:9px 14px;background:var(--hl);
+  border-bottom:1px solid var(--border);font-size:12px}
+.diff .fl .p{color:var(--fg);font-weight:500}
+.diff .rows{overflow-x:auto;scrollbar-width:thin}
+.dl{display:flex;min-width:max-content}
+.dl .g{flex:0 0 46px;text-align:right;padding:0 9px;color:var(--dim);user-select:none;
+  font-variant-numeric:tabular-nums;border-right:1px solid var(--border)}
+.dl .c{padding:0 14px;white-space:pre;color:var(--body)}
+.dl.add{background:var(--add-bg)} .dl.add .c{color:var(--fg)}
+.dl.add .c::first-letter{color:var(--s-allowed)}
+.dl.del{background:var(--del-bg)}
+.dl.hunk{background:var(--hl)} .dl.hunk .c{color:var(--muted)}
+
+/* ── check runs ─────────────────────────────────────────────────────── */
+.chk{display:flex;align-items:flex-start;gap:11px;padding:11px 15px;border-bottom:1px solid var(--border)}
+.chk:last-child{border-bottom:none}
+.chk .ic{width:17px;height:17px;flex:0 0 auto;margin-top:1px;display:grid;place-items:center;border-radius:50%}
+.chk .ic svg{width:17px;height:17px}
+.chk .nm{color:var(--fg);font-weight:500;font-size:13px;font-family:var(--mono)}
+.chk .ds{color:var(--muted);font-size:12px;margin-top:3px}
+.chk .tm{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--dim);flex:0 0 auto}
+.spin{width:15px;height:15px;border-radius:50%;border:2px solid color-mix(in srgb,var(--s-running) 30%,transparent);
+  border-top-color:var(--s-running);animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.mergebar{display:flex;align-items:center;gap:12px;padding:14px 15px;border-top:1px solid var(--border);background:var(--hl)}
+.mergebar .ttl{font-weight:600;color:var(--fg);font-size:13.5px}
+.mergebar .ds{font-size:12px;color:var(--muted);margin-top:2px}
+
+/* ── timeline / frames ──────────────────────────────────────────────── */
+.frames{max-height:560px;overflow-y:auto;scrollbar-width:thin}
+.fr{display:flex;gap:10px;padding:8px 13px;border-bottom:1px solid var(--border);cursor:pointer;align-items:flex-start}
+.fr:hover{background:var(--hl)}
+.fr.on{background:var(--hl);box-shadow:inset 2px 0 0 var(--gold)}
+.fr .sq{font-family:var(--mono);font-size:11px;color:var(--dim);flex:0 0 26px;text-align:right;padding-top:1px}
+.fr .kd{font-family:var(--mono);font-size:11.5px;color:var(--fg)}
+.fr .sm{font-size:11.5px;color:var(--muted);margin-top:2px;line-height:1.4}
+.kv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 16px;font-size:12.5px}
+.kv dt{color:var(--dim);font-family:var(--mono);font-size:11.5px;white-space:nowrap}
+.kv dd{margin:0;color:var(--body);font-family:var(--mono);font-size:11.5px;word-break:break-word}
+.kv dd b{color:var(--fg);font-weight:500}
+.steerblk{border:1px solid var(--border);border-radius:9px;overflow:hidden;background:var(--ink)}
+.steerblk .r{display:flex;gap:10px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.steerblk .r:last-child{border-bottom:none}
+.steerblk .r.hit{background:var(--new-bg);box-shadow:inset 2px 0 0 var(--gold)}
+.steerblk .r .lin{flex:1;min-width:160px}
+
+/* ── callout ────────────────────────────────────────────────────────── */
+.call{border:1px solid color-mix(in srgb,var(--gold) 40%,transparent);background:var(--new-bg);
+  border-radius:11px;padding:13px 15px;display:flex;gap:11px;align-items:flex-start}
+.call .ni{color:var(--gold);margin-top:1px}
+.call .tx{font-size:12.5px;color:var(--body);line-height:1.55}
+.call .tx b{color:var(--fg);font-weight:600}
+.note-i{border:1px solid var(--border);background:var(--ink);border-radius:10px;padding:11px 13px;
+  font-size:12px;color:var(--muted);line-height:1.55}
+.note-i b{color:var(--fg);font-weight:500}
+
+/* ── flow rail ──────────────────────────────────────────────────────── */
+.rail{display:flex;align-items:center;gap:0;padding:10px 14px;background:var(--panel);
+  border:1px solid var(--border);border-radius:11px;overflow-x:auto;scrollbar-width:thin;margin-bottom:18px}
+.rail .st{display:flex;align-items:center;gap:7px;padding:4px 10px;border-radius:7px;white-space:nowrap;
+  font-size:12px;color:var(--dim);font-weight:500}
+.rail .st .d{width:7px;height:7px;border-radius:50%;background:var(--rule);flex:0 0 auto}
+.rail .st.done{color:var(--muted)} .rail .st.done .d{background:var(--s-proven)}
+.rail .st.now{color:var(--fg);background:var(--hl)} .rail .st.now .d{background:var(--gold)}
+.rail .ar{color:var(--rule);flex:0 0 auto;padding:0 1px}
+
+/* ── dialog ─────────────────────────────────────────────────────────── */
+.scrim{position:fixed;inset:0;background:rgba(10,10,9,.66);backdrop-filter:blur(3px);z-index:90;
+  display:flex;align-items:flex-start;justify-content:center;padding:7vh 16px 16px;overflow-y:auto}
+.dlg{background:var(--panel);border:1px solid var(--rule);border-radius:14px;width:100%;max-width:640px;
+  box-shadow:var(--shadow);overflow:hidden}
+.dlg.wide{max-width:760px}
+.dlg-h{display:flex;align-items:flex-start;gap:12px;padding:15px 17px;border-bottom:1px solid var(--border)}
+.dlg-h h3{font-size:15px}
+.dlg-h .s{font-size:12.5px;color:var(--muted);margin-top:4px}
+.dlg-b{padding:17px;max-height:min(58vh,540px);overflow-y:auto;scrollbar-width:thin}
+.dlg-f{display:flex;gap:9px;align-items:center;padding:13px 17px;border-top:1px solid var(--border);background:var(--hl)}
+.dlg-f .sp{flex:1}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--dim);
+  font-weight:600;margin-bottom:5px}
+.field .hint{font-size:11.5px;color:var(--dim);margin-top:5px}
+.inp{width:100%;background:var(--ink);border:1px solid var(--border);border-radius:8px;padding:8px 11px;
+  color:var(--fg);font-family:var(--mono);font-size:12.5px}
+.inp:focus{outline:2px solid var(--gold-bright);outline-offset:-1px;border-color:var(--gold)}
+textarea.inp{font-family:var(--font);font-size:13px;line-height:1.55;resize:vertical;min-height:72px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-family:var(--mono);font-size:11.5px;padding:3px 8px;border-radius:6px;background:var(--ink);
+  border:1px solid var(--border);color:var(--body)}
+.chip.deny{color:var(--s-denied);border-color:color-mix(in srgb,var(--s-denied) 36%,transparent)}
+.seg{display:inline-flex;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--ink)}
+.seg button{padding:6px 12px;font-size:12.5px;color:var(--muted);border-right:1px solid var(--border)}
+.seg button:last-child{border-right:none}
+.seg button.on{background:var(--hl);color:var(--fg);font-weight:500}
+.seg button[disabled]{opacity:.4;cursor:not-allowed}
+
+/* ── command menu ───────────────────────────────────────────────────── */
+.cmd{background:var(--panel);border:1px solid var(--rule);border-radius:13px;width:100%;max-width:560px;
+  box-shadow:var(--shadow);overflow:hidden}
+.cmd-i{display:flex;align-items:center;gap:10px;padding:13px 15px;border-bottom:1px solid var(--border)}
+.cmd-i input{flex:1;background:none;border:none;color:var(--fg);font-size:15px;font-family:var(--font)}
+.cmd-i input:focus{outline:none}
+.cmd-l{max-height:340px;overflow-y:auto;padding:6px}
+.cmd-g{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);padding:9px 10px 5px;font-weight:600}
+.cmd-r{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;width:100%;text-align:left;font-size:13px}
+.cmd-r:hover,.cmd-r.on{background:var(--hl)}
+.cmd-r .ni{color:var(--dim)}
+.cmd-r .h{color:var(--fg)}
+.cmd-r .sub{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--dim)}
+
+/* ── assistant panel ────────────────────────────────────────────────── */
+.asst{position:fixed;top:0;right:0;bottom:0;width:352px;max-width:100%;background:var(--panel);
+  border-left:1px solid var(--rule);z-index:60;display:flex;flex-direction:column;box-shadow:var(--shadow)}
+.asst-h{display:flex;align-items:center;gap:9px;padding:12px 14px;border-bottom:1px solid var(--border)}
+.asst-b{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px;scrollbar-width:thin}
+.msg{font-size:13px;line-height:1.6}
+.msg.u{background:var(--hl);border:1px solid var(--border);border-radius:10px;padding:9px 11px;color:var(--fg)}
+.msg.a .who{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-text);
+  font-weight:600;margin-bottom:5px}
+.msg.a p{margin:0 0 9px}
+.asst-f{padding:12px 14px;border-top:1px solid var(--border)}
+.asst-rec{border:1px solid var(--border);border-radius:8px;padding:8px 10px;background:var(--ink);
+  font-family:var(--mono);font-size:11px;color:var(--dim);line-height:1.6}
+.asst-rec b{color:var(--muted);font-weight:500}
+
+/* ── states ─────────────────────────────────────────────────────────── */
+.sk{background:linear-gradient(90deg,var(--hl) 25%,var(--panel) 50%,var(--hl) 75%);
+  background-size:400% 100%;animation:shim 1.5s ease-in-out infinite;border-radius:6px;height:13px}
+@keyframes shim{0%{background-position:100% 0}100%{background-position:-100% 0}}
+.blank{border:1px dashed var(--rule);border-radius:13px;padding:44px 28px;text-align:center;background:var(--panel)}
+.blank .ic{width:40px;height:40px;border-radius:11px;background:var(--hl);border:1px solid var(--border);
+  display:grid;place-items:center;margin:0 auto 15px;color:var(--dim)}
+.blank h3{font-size:16px;margin-bottom:7px}
+.blank p{color:var(--muted);font-size:13px;max-width:52ch;margin:0 auto 17px;line-height:1.6}
+.blank.err .ic{color:var(--s-failed);border-color:color-mix(in srgb,var(--s-failed) 34%,transparent);
+  background:color-mix(in srgb,var(--s-failed) 10%,transparent)}
+.blank.den .ic{color:var(--s-denied);border-color:color-mix(in srgb,var(--s-denied) 34%,transparent);
+  background:color-mix(in srgb,var(--s-denied) 10%,transparent)}
+.hop{display:grid;grid-template-columns:auto minmax(0,1fr);gap:7px 14px;text-align:left;max-width:520px;
+  margin:0 auto;font-family:var(--mono);font-size:12px;background:var(--ink);border:1px solid var(--border);
+  border-radius:10px;padding:13px 15px}
+.hop dt{color:var(--dim);white-space:nowrap} .hop dd{margin:0;color:var(--body)}
+.hop dd b{color:var(--fg);font-weight:500}
+
+/* ── mockup chrome — deliberately not product UI ────────────────────── */
+#chrome{position:fixed;right:14px;bottom:14px;z-index:120;font-family:var(--mono);font-size:11px;
+  background:#0A0A09;color:#9B958A;border:1px dashed #45413A;border-radius:10px;padding:8px 9px;
+  box-shadow:0 10px 30px rgba(0,0,0,.55);max-width:min(94vw,420px)}
+#chrome .hd{display:flex;align-items:center;gap:7px;color:#6E6A62;letter-spacing:.1em;
+  text-transform:uppercase;font-size:9.5px;margin-bottom:7px}
+#chrome .hd .dt{width:6px;height:6px;border-radius:50%;background:#D6962C}
+#chrome .row{display:flex;flex-wrap:wrap;gap:4px}
+#chrome button{border:1px solid #34322D;background:#10100F;color:#9B958A;border-radius:6px;
+  padding:3px 8px;font-family:var(--mono);font-size:11px}
+#chrome button:hover{border-color:#6E6A62;color:#F2EEE5}
+#chrome button.on{background:#D6962C;border-color:#D6962C;color:#10100F;font-weight:700}
+#chrome .sep{width:1px;background:#34322D;margin:2px 4px}
+#chrome .ft{margin-top:7px;color:#4d4a44;font-size:9.5px;line-height:1.5}
+#chrome.min{padding:5px 8px}
+#chrome .tg{margin-left:auto;color:#6E6A62}
+
+/* ── narrow / phone reflow via container query ─────────────────────── */
+@container (max-width: 900px){
+  .split,.split.rev{grid-template-columns:minmax(0,1fr)}
+  .grid3{grid-template-columns:minmax(0,1fr)}
+}
+@container (max-width: 720px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .side{display:none}
+  .side.open{display:flex;position:fixed;inset:0 auto 0 0;width:250px;z-index:80}
+  .grid2{grid-template-columns:minmax(0,1fr)}
+  .page{padding:16px 14px 90px}
+  .phead{flex-wrap:wrap}
+  .phead-a{margin-left:0;width:100%}
+  .phead h1{font-size:19px}
+  .top{padding:8px 12px;gap:7px}
+  .crumbs .hide-sm{display:none}
+  .tbtn .lab{display:none}
+  .asst{width:100%;border-left:none}
+  .effect{gap:10px}
+  .mergebar{flex-wrap:wrap}
+  .rail{gap:0}
+}
+.only-sm{display:none}
+@container (max-width: 720px){ .only-sm{display:inline-flex} .hide-sm{display:none!important} }
+</style>
+
+<div id="stage">
+<div class="frame" id="frame">
+<div class="app">
+
+  <!-- ── sidebar ──────────────────────────────────────────────────── -->
+  <aside class="side" id="side">
+    <div class="brand">
+      <svg viewBox="0 0 574.244 106.313" role="img" aria-label="Oxagen"><g transform="translate(0,0) scale(2.842952)"><path d="M6.300 0.000L12.600 3.320L12.600 9.960L6.300 13.280L0.000 9.960L0.000 3.320ZM1.000 3.885L1.000 9.395L6.300 12.150L11.600 9.395L11.600 3.885L6.300 1.130Z M19.376 0.000L25.676 3.320L25.676 9.960L19.376 13.280L13.076 9.960L13.076 3.320ZM14.076 3.885L14.076 9.395L19.376 12.150L24.676 9.395L24.676 3.885L19.376 1.130Z M12.838 10.240L19.138 13.560L19.138 20.200L12.838 23.520L6.538 20.200L6.538 13.560ZM7.538 14.125L7.538 19.635L12.838 22.390L18.138 19.635L18.138 14.125L12.838 11.370Z M19.376 20.480L25.676 23.800L25.676 30.440L19.376 33.760L13.076 30.440L13.076 23.800ZM14.076 24.365L14.076 29.875L19.376 32.630L24.676 29.875L24.676 24.365L19.376 21.610Z" fill="currentColor"/><path d="M25.914 10.240L32.214 13.560L32.214 20.200L25.914 23.520L19.614 20.200L19.614 13.560Z M6.300 20.480L12.600 23.800L12.600 30.440L6.300 33.760L0.000 30.440L0.000 23.800Z" fill="#D6962C"/></g><g transform="translate(120.376,13.067)"><path d="M33.9083 68.758Q24.1657 68.758 16.4786 64.7737Q8.79142 60.7894 4.39571 53.2965Q0 45.8035 0 35.3862V33.3718Q0 22.9544 4.39571 15.4615Q8.79142 7.96854 16.4786 3.98427Q24.1657 0 33.9083 0Q43.6509 0 51.3381 3.98427Q59.0252 7.96854 63.4209 15.4615Q67.8166 22.9544 67.8166 33.3718V35.3862Q67.8166 45.8035 63.4209 53.2965Q59.0252 60.7894 51.3381 64.7737Q43.6509 68.758 33.9083 68.758ZM33.9083 55.3486Q42.1895 55.3486 47.4689 50.0198Q52.7484 44.691 52.7484 35.0142V33.7437Q52.7484 24.067 47.5233 18.7382Q42.2981 13.4094 33.9083 13.4094Q25.6502 13.4094 20.3592 18.7382Q15.0683 24.067 15.0683 33.7437V35.0142Q15.0683 44.691 20.3592 50.0198Q25.6502 55.3486 33.9083 55.3486Z M176.569 68.758Q169.637 68.758 164.119 66.3453Q158.601 63.9327 155.387 59.2935Q152.173 54.6542 152.173 48.0088Q152.173 41.3403 155.387 36.8558Q158.601 32.3712 164.27 30.1017Q169.94 27.8323 177.174 27.8323H196.047V23.8925Q196.047 18.7316 192.874 15.5274Q189.701 12.3232 182.99 12.3232Q176.411 12.3232 173.049 15.3842Q169.686 18.4452 168.627 23.3593L154.691 18.7315Q156.27 13.6133 159.748 9.39702Q163.225 5.18071 169.049 2.59035Q174.874 0 183.208 0Q195.972 0 203.326 6.42816Q210.681 12.8563 210.681 24.9392V50.4707Q210.681 54.4204 214.368 54.4204H219.795V66.9148H209.197Q204.464 66.9148 201.442 64.5334Q198.42 62.1521 198.42 58.1563V57.8864H196.126Q195.392 59.6967 193.399 62.2985Q191.406 64.9004 187.388 66.8292Q183.369 68.758 176.569 68.758ZM179.05 56.4348Q186.581 56.4348 191.314 52.1592Q196.047 47.8837 196.047 40.6031V39.2405H178.175Q173.175 39.2405 170.208 41.3881Q167.241 43.5358 167.241 47.5513Q167.241 51.5668 170.34 54.0008Q173.439 56.4348 179.05 56.4348Z M227.767 34.6423V32.6279Q227.767 22.3817 231.86 15.0863Q235.953 7.79081 242.768 3.8954Q249.582 0 257.706 0Q266.935 0 271.762 3.33256Q276.589 6.66512 278.81 10.4107H281.042V1.8432H295.801V79.33Q295.801 85.6989 292.104 89.4725Q288.408 93.2462 282.079 93.2462H238.369V80.0541H277.023Q280.779 80.0541 280.779 76.1043V57.2775H278.547Q277.161 59.5683 274.665 61.8904Q272.168 64.2125 268.057 65.7414Q263.946 67.2702 257.706 67.2702Q249.582 67.2702 242.756 63.3748Q235.93 59.4794 231.848 52.1724Q227.767 44.8655 227.767 34.6423ZM261.938 54.0781Q270.151 54.0781 275.573 48.8612Q280.996 43.6443 280.996 34.2704V32.9999Q280.996 23.4943 275.627 18.3432Q270.259 13.1921 261.938 13.1921Q253.749 13.1921 248.315 18.3432Q242.881 23.4943 242.881 32.9999V34.2704Q242.881 43.6443 248.315 48.8612Q253.749 54.0781 261.938 54.0781Z M344.764 68.758Q334.998 68.758 327.583 64.6108Q320.167 60.4636 316.031 52.9048Q311.896 45.346 311.896 35.1689V33.589Q311.896 23.3889 315.977 15.8416Q320.059 8.2944 327.397 4.1472Q334.735 0 344.385 0Q353.881 0 360.956 4.1867Q368.031 8.37341 371.981 15.8515Q375.931 23.3297 375.931 33.2895V38.6974H327.181Q327.468 46.3334 332.587 50.9496Q337.707 55.5658 345.198 55.5658Q352.522 55.5658 356.101 52.3534Q359.681 49.141 361.553 45.0629L373.985 51.4813Q372.119 55.0656 368.63 59.1042Q365.141 63.1428 359.394 65.9504Q353.648 68.758 344.764 68.758ZM327.313 27.2892H360.622Q360.095 20.7986 355.7 16.9954Q351.304 13.1921 344.277 13.1921Q337.055 13.1921 332.691 16.9954Q328.327 20.7986 327.313 27.2892Z M391.548 66.9148V1.8432H406.353V10.9769H408.585Q410.303 7.25429 414.832 3.99908Q419.361 0.743866 428.435 0.743866Q435.956 0.743866 441.695 4.12911Q447.434 7.51435 450.651 13.5903Q453.868 19.6663 453.868 27.9442V66.9148H438.8V29.1226Q438.8 21.1969 434.891 17.3492Q430.983 13.5015 423.9 13.5015Q415.872 13.5015 411.244 18.8237Q406.617 24.146 406.617 33.9445V66.9148Z" fill="currentColor"/><path d="M73.9979 66.9148 98.2261 34.0696 74.3764 1.8432H91.9626L107.9 24.3499H110.131L126.068 1.8432H143.654L119.805 34.0696L144.033 66.9148H126.206L110.131 44.0065H107.9L91.8244 66.9148Z" fill="#D6962C"/></g></svg>
+    </div>
+
+    <div class="switcher">
+      <button class="sw" onclick="toast('Organization switcher — Acme Robotics is the only organization on this account.')">
+        <span class="sw-av org">AR</span>
+        <span class="sw-t"><span class="sw-k">Organization</span><span class="sw-v">Acme Robotics</span></span>
+        <svg class="sw-c ni" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 6.5 8 3.5l3 3M5 9.5l3 3 3-3"/></svg>
+      </button>
+      <button class="sw" onclick="toast('Workspace switcher — core-platform and finops. This flow stays in core-platform.')">
+        <span class="sw-av ws">cp</span>
+        <span class="sw-t"><span class="sw-k">Workspace</span><span class="sw-v">core-platform</span></span>
+        <svg class="sw-c ni" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 6.5 8 3.5l3 3M5 9.5l3 3 3-3"/></svg>
+      </button>
+    </div>
+
+    <nav class="nav" id="nav"></nav>
+
+    <div class="side-foot">
+      <div class="ln"><span>bundle</span><b id="sf-bundle">bundle_v214</b></div>
+      <div class="ln"><span>governance</span><b>team</b></div>
+      <div class="ln"><span>main repo</span><b>acme/platform</b></div>
+    </div>
+  </aside>
+
+  <!-- ── main ─────────────────────────────────────────────────────── -->
+  <div class="main">
+    <header class="top">
+      <button class="tbtn only-sm" onclick="document.getElementById('side').classList.toggle('open')" aria-label="Menu">
+        <svg class="ni" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2.5 4h11M2.5 8h11M2.5 12h11"/></svg>
+      </button>
+      <nav class="crumbs" id="crumbs" aria-label="Breadcrumb"></nav>
+      <span class="top-sp"></span>
+      <button class="tbtn" onclick="openCmd()" title="Command menu">
+        <svg class="ni" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.4"/><path d="m10.4 10.4 3.1 3.1"/></svg>
+        <span class="lab">Search</span><kbd class="hide-sm">⌘K</kbd>
+      </button>
+      <button class="tbtn" id="themeBtn" onclick="toggleTheme()" title="Theme">
+        <svg class="ni" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="3.2"/><path d="M8 1v1.6M8 13.4V15M15 8h-1.6M2.6 8H1M12.9 3.1l-1.1 1.1M4.2 11.8l-1.1 1.1M12.9 12.9l-1.1-1.1M4.2 4.2 3.1 3.1"/></svg>
+      </button>
+      <button class="tbtn" id="asstBtn" onclick="toggleAsst()" title="Assistant">
+        <svg class="ni" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1.6 9.7 6l4.4 1.7L9.7 9.4 8 13.8 6.3 9.4 1.9 7.7 6.3 6Z"/></svg>
+        <span class="lab">Assistant</span>
+      </button>
+      <button class="avatar" onclick="toast('Account dialog — Marcus Bell · workspace owner, core-platform.')" title="Marcus Bell">MB</button>
+    </header>
+    <main id="view" class="page"></main>
+  </div>
+
+</div>
+</div>
+</div>
+
+<div id="overlay"></div>
+<div id="asstRoot"></div>
+<div id="toast" style="position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:130;
+  background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:9px 14px;font-size:12.5px;
+  color:var(--fg);box-shadow:var(--shadow);display:none;max-width:min(92vw,520px)"></div>
+
+<!-- ── mockup chrome · not product UI ──────────────────────────────── -->
+<div id="chrome">
+  <div class="hd"><span class="dt"></span><span>mockup · states</span>
+    <button class="tg" onclick="document.getElementById('chrome').classList.toggle('min')" aria-label="Collapse">–</button></div>
+  <div id="chrome-body">
+    <div class="row" id="stateRow"></div>
+    <div class="row" style="margin-top:5px">
+      <button id="phoneBtn" onclick="togglePhone()">phone 400px</button>
+      <span class="sep"></span>
+      <button onclick="resetDemo()">reset demo</button>
+    </div>
+    <div class="ft">W6 · It learned, you approved, it changed<br>Not product UI. Oxagen Mission Control mockup.</div>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+/* ══════════════════════════════════════════════════════════════════════
+   Demo corpus — Acme Robotics / core-platform.
+   Every value here is content, not placeholder. Money is USD to the cent.
+   ══════════════════════════════════════════════════════════════════════ */
+
+const ORG = { slug:"acme", name:"Acme Robotics", currency:"USD" };
+const WS  = { slug:"core-platform", mainRepo:"acme/platform", prodBranch:"main",
+              linked:["acme/billing","acme/mobile"], governance:"team", fleet:50 };
+
+const PEOPLE = {
+  marcus:{ name:"Marcus Bell", init:"MB", role:"workspace owner, core-platform" },
+  priya: { name:"Priya Natarajan", init:"PN", role:"organization owner" },
+  dana:  { name:"Dana Okafor", init:"DO", role:"billing, finops" },
+};
+
+/* ── published steering records ─────────────────────────────────────── */
+const PUBLISHED = [
+  { lin:"ctx.core.release-pr-never-merged-by-agent", kind:"directive", sub:"forbid", authority:"must",
+    stmt:"An agent never merges a pull request on acme/platform. Open it, request review, and stop.",
+    scope:"workspace · core-platform", file:".oxagen/rules/ctx.core.release-pr-never-merged-by-agent.toml",
+    pub:"2026-06-02", by:"Marcus Bell", pr:"acme/platform#188", commit:"7a19d3c",
+    rendered:1204, cited:96, violated:0, before:84.1, after:91.6 },
+  { lin:"ctx.core.migration-expand-contract", kind:"directive", sub:"require", authority:"must",
+    stmt:"Schema changes ship expand-then-contract: add the column, backfill, switch readers, drop in a later release. Never drop a column in the same pull request that stops reading it.",
+    scope:"workspace · core-platform", file:".oxagen/rules/ctx.core.migration-expand-contract.toml",
+    pub:"2026-06-19", by:"Priya Natarajan", pr:"acme/platform#221", commit:"b04e77f",
+    rendered:612, cited:143, violated:2, before:72.4, after:88.0 },
+  { lin:"ctx.core.no-secrets-in-workflow-inputs", kind:"directive", sub:"forbid", authority:"must",
+    stmt:"Never pass a secret through a workflow_dispatch input. Read it from the environment the job already has.",
+    scope:"workspace · core-platform", file:".oxagen/rules/ctx.core.no-secrets-in-workflow-inputs.toml",
+    pub:"2026-07-04", by:"Marcus Bell", pr:"acme/platform#254", commit:"e6c22a9",
+    rendered:921, cited:34, violated:0, before:88.2, after:88.9 },
+  { lin:"ctx.core.changelog-keepachangelog", kind:"knowledge", sub:"decision", authority:"should",
+    stmt:"Release notes follow Keep a Changelog 1.1.0 with the four headings this repository already uses: Added, Changed, Fixed, Removed.",
+    scope:"workspace · core-platform", file:".oxagen/rules/ctx.core.changelog-keepachangelog.toml",
+    pub:"2026-07-21", by:"Marcus Bell", pr:"acme/platform#288", commit:"11ff58d",
+    rendered:388, cited:301, violated:1, before:79.8, after:83.2 },
+  { lin:"ctx.billing.currency-minor-units", kind:"knowledge", sub:"fact", authority:"info",
+    stmt:"acme/billing stores every amount in minor units as an integer with an ISO 4217 code beside it. There is no floating-point money anywhere in that repository.",
+    scope:"repository · acme/billing", file:".oxagen/rules/ctx.billing.currency-minor-units.toml",
+    pub:"2026-08-05", by:"Dana Okafor", pr:"acme/billing#96", commit:"3d81c40",
+    rendered:274, cited:208, violated:0, before:81.0, after:86.7 },
+  { lin:"ctx.core.test-file-naming", kind:"directive", sub:"require", authority:"should",
+    stmt:"Name test files <subject>.test.ts beside the subject they cover.",
+    scope:"workspace · core-platform", file:".oxagen/rules/ctx.core.test-file-naming.toml",
+    pub:"2026-05-14", by:"Marcus Bell", pr:"acme/platform#160", commit:"9ba0e12",
+    rendered:1188, cited:0, violated:0, before:86.5, after:86.4, retire:true,
+    retireWhy:"Rendered 1,188 times in 90 days and cited in none of them. The repository's eslint rule already fails the build on a misnamed test file, so the record costs 41 steering tokens a turn and changes nothing." },
+  { lin:"ctx.mobile.detox-retry-once", kind:"directive", sub:"require", authority:"should",
+    stmt:"Retry a failed Detox suite once before reporting a failure on acme/mobile.",
+    scope:"repository · acme/mobile", file:".oxagen/rules/ctx.mobile.detox-retry-once.toml",
+    pub:"2026-07-30", by:"Marcus Bell", pr:"acme/mobile#77", commit:"c5720ab",
+    rendered:96, cited:3, violated:11, before:64.2, after:61.8, retire:true,
+    retireWhy:"Violated 11 times against 3 citations, and the proof rate fell 2.4 points after publication. The proposal ctx.core.no-retry-on-nondeterminism contradicts it directly." },
+];
+
+/* ── proposals ──────────────────────────────────────────────────────── */
+const PROPOSALS = [
+  {
+    id:"prop_01K52C4M8T", lin:"ctx.core.openapi-regen-on-route-change", hero:true, status:"ready",
+    kind:"directive", sub:"require", authority:"must",
+    stmt:"When a file under apps/api/src/routes/ changes, run pnpm openapi:generate and commit the regenerated packages/contracts/openapi.json in the same pull request.",
+    scopeAsked:"workspace · core-platform", target:"acme/platform",
+    runs:4, agents:2, confidence:0.91, floor:0.70, needRuns:3, needAgents:2,
+    contradiction:null, opened:"2026-09-11 09:48:12 UTC",
+    rationale:"Four runs on acme/platform changed a route handler and left packages/contracts/openapi.json stale. In three of them the contract-drift witness failed on the pull request and passed on main, and a person regenerated the file by hand before the release could go out. The generate step already exists in package.json and takes 4 s. Stating it as a requirement removes the whole class of failure rather than catching it one pull request at a time.",
+    support:[
+      { rec:"rec_01K3ZP9M2A", kind:"observation", run:"run_01K3ZP7QW2", agent:"acme.core.release-manager",
+        op:"Marcus Bell", date:"2026-08-24", frame:"frame:run_01K3ZP7QW2/482", verdict:"failing",
+        line:"Witness contract-drift failed on the pull request; openapi.json was 3 routes behind." },
+      { rec:"rec_01K44M4C7H", kind:"observation", run:"run_01K44M1XKD", agent:"acme.core.release-manager",
+        op:"Marcus Bell", date:"2026-08-29", frame:"frame:run_01K44M1XKD/311", verdict:"failing",
+        line:"Same witness, same file. The operator regenerated by hand and re-ran." },
+      { rec:"rec_01K4B8V1QE", kind:"memory", run:"run_01K4B8T5NV", agent:"acme.core.triage",
+        op:"Priya Natarajan", date:"2026-09-02", frame:"frame:run_01K4B8T5NV/96", verdict:"unmoved",
+        line:"Agent asked to remember: route edits need the contract regenerated." },
+      { rec:"rec_01K4RCB3TT", kind:"observation", run:"run_01K4RC9ZH1", agent:"acme.core.release-manager",
+        op:"Marcus Bell", date:"2026-09-08", frame:"frame:run_01K4RC9ZH1/540", verdict:"failing",
+        line:"Third contract-drift failure in sixteen days; release 2026.9.1 slipped by 2 h 10 m." },
+    ],
+    feedback:[
+      { rec:"rec_01K4RCD0WQ", kind:"context_use_feedback", line:"Context frame cf_openapi_conventions rendered and ignored in 4 of 4 runs — a fact was available, a directive was not." },
+      { rec:"rec_01K4S1F7NB", kind:"evidence", line:"Tool output digest sha256:c40a91… — pnpm openapi:generate --check exited 1 on all three failing pull requests." },
+    ],
+    hash:"sha256:9f2c1d84e7b035a61c0fd2795a4e6b18cc3f0a7d91e28b64f5d0c73ae1b94f20",
+  },
+  {
+    id:"prop_01K51X0J4E", lin:"ctx.core.pin-actions-by-sha", status:"ready",
+    kind:"directive", sub:"require", authority:"must",
+    stmt:"Pin every GitHub Action to a full commit sha, never to a tag or a branch.",
+    scopeAsked:"workspace · core-platform", target:"acme/platform",
+    runs:5, agents:3, confidence:0.88, floor:0.70, needRuns:3, needAgents:2, contradiction:null,
+    opened:"2026-09-10 16:02:44 UTC",
+    rationale:"Five runs across three agents edited a workflow file and reached for a tag. Two of them pulled a moving v4 that had changed under the repository since the last release. Supply-chain review already asks for this in the contributing guide; nothing delivers it to an agent at run time.",
+    support:[], feedback:[], hash:"sha256:2e77b0a4…",
+  },
+  {
+    id:"prop_01K4ZH6P1R", lin:"ctx.core.linear-issue-on-revert", status:"gathering",
+    kind:"directive", sub:"require", authority:"should",
+    stmt:"Open a Linear issue whenever you revert a commit on main, and link the issue in the revert body.",
+    scopeAsked:"workspace · core-platform", target:"acme/platform",
+    runs:2, agents:1, confidence:0.63, floor:0.70, needRuns:3, needAgents:2, contradiction:null,
+    opened:"2026-09-06 11:19:35 UTC",
+    rationale:"Two reverts on main in August carried no issue and no follow-up. Support is below the workspace threshold: this needs one more run and one more agent before the promoter will open a Context PR.",
+    support:[], feedback:[], hash:"sha256:8c01de5b…",
+  },
+];
+
+/* ── check runs on the steering Context PR ──────────────────────────── */
+const PR_CHECKS = [
+  { name:"oxagen/schema",    ms:1400, dur:"1.4s",
+    ok:"context-record/v0.1 valid. 1 file changed, 1 record, 1 lineage.",
+    run:"Validating context-record/v0.1 against the changed file…" },
+  { name:"oxagen/hash",      ms:2300, dur:"0.9s",
+    ok:"record_hash recomputed over RFC 8785 canonical bytes: sha256:9f2c1d84… matches the file.",
+    run:"Recomputing record_hash…" },
+  { name:"oxagen/conflicts", ms:4100, dur:"1.8s",
+    ok:"No active record contradicts this one. 41 published records checked; no forbid against this require on packages/contracts/openapi.json.",
+    run:"Checking 41 published records for a conflicting subject…" },
+  { name:"oxagen/secrets",   ms:5400, dur:"1.3s",
+    ok:"No secret or PII match in statement, rationale, or truth probes. 0 findings.",
+    run:"Scanning statement, rationale and probes…" },
+  { name:"oxagen/probes",    ms:7600, dur:"2.2s",
+    ok:"Truth probe openapi-fresh ran on 3 commits of acme/platform: 3 pass, 0 fail.",
+    run:"Running truth probe openapi-fresh on 3 commits…" },
+];
+
+/* ── check runs on the agent definition Context PR ──────────────────── */
+const AGENT_CHECKS = [
+  { name:"oxagen/schema", ms:1200, dur:"1.2s",
+    ok:"agent-definition/v0.1 valid. slug docs-writer is free in ws_core_platform.",
+    run:"Validating agent-definition/v0.1…" },
+  { name:"oxagen/tools-exist", ms:2600, dur:"1.4s",
+    ok:"All 4 tool patterns resolve in the registry: github__* (31 versions), search_graph@2, recall_context@1, read_file@1.",
+    run:"Resolving tool patterns against the registry…" },
+  { name:"oxagen/mandate", ms:3900, dur:"0.6s",
+    ok:"side_effects declares read and write only. No irreversible tool in the belt, so no mandate is required.",
+    run:"Checking side-effect classes against held mandates…" },
+  { name:"oxagen/secrets", ms:5100, dur:"1.1s",
+    ok:"No secret or PII match in the instructions body. 0 findings.",
+    run:"Scanning the instructions body…" },
+  { name:"oxagen/generated-in-sync", ms:7000, dur:"1.9s",
+    ok:".claude/agents/docs-writer.md regenerates byte-identical from source_digest sha256:71ad3e0c…",
+    run:"Regenerating harness files and comparing…" },
+];
+
+/* ── the record file diff ───────────────────────────────────────────── */
+const RECORD_TOML = `schema = "context-record/v0.1"
+lineage_id = "ctx.core.openapi-regen-on-route-change"
+kind = "directive"
+status = "active"
+statement = """
+When a file under apps/api/src/routes/ changes, run \`pnpm openapi:generate\`
+and commit the regenerated packages/contracts/openapi.json in the same
+pull request.
+"""
+
+[scope]
+organization_id = "org_acme"
+workspace_id    = "ws_core_platform"
+sharing_scope   = "workspace"
+
+[steering]
+authority  = "must"
+applies_to = ["repository:acme/platform"]
+phase      = ["plan", "implement", "review"]
+
+[enforcement]
+constraint_effect = "require"
+blocking          = false
+subject           = "packages/contracts/openapi.json"
+
+[[truth_probes]]
+id      = "openapi-fresh"
+command = "pnpm openapi:generate --check"
+expect  = "exit:0"
+
+[provenance]
+promoted_from = [
+  "rec_01K3ZP9M2A",
+  "rec_01K44M4C7H",
+  "rec_01K4B8V1QE",
+  "rec_01K4RCB3TT",
+]
+evidence_links = [
+  "frame:run_01K3ZP7QW2/482",
+  "frame:run_01K44M1XKD/311",
+  "frame:run_01K4RC9ZH1/540",
+]
+
+record_hash = "sha256:9f2c1d84e7b035a61c0fd2795a4e6b18cc3f0a7d91e28b64f5d0c73ae1b94f20"`;
+
+const PR_BODY = `## Require a regenerated OpenAPI contract when a route changes
+
+Promoted by the Oxagen promoter from **4 runs across 2 agents**, confidence
+0.91 against a workspace floor of 0.70.
+
+### What this asks for
+A run that touches \`apps/api/src/routes/\` must run \`pnpm openapi:generate\`
+and commit \`packages/contracts/openapi.json\` in the same pull request.
+Authority \`must\`. Constraint effect \`require\`; it grants nothing.
+
+### Why
+| Run | Agent | Date | Witness | Frame |
+|---|---|---|---|---|
+| run_01K3ZP7QW2 | acme.core.release-manager | 2026-08-24 | contract-drift \`failing\` | 482 |
+| run_01K44M1XKD | acme.core.release-manager | 2026-08-29 | contract-drift \`failing\` | 311 |
+| run_01K4B8T5NV | acme.core.triage | 2026-09-02 | \`unmoved\` | 96 |
+| run_01K4RC9ZH1 | acme.core.release-manager | 2026-09-08 | contract-drift \`failing\` | 540 |
+
+Release 2026.9.1 slipped 2 h 10 m on the last of these.
+
+### Effect to watch
+Proof rate on runs touching \`apps/api/src/routes/\` is **61.9 %** over the
+last 90 days. The promoter will report rendered, cited and violated counts
+and the proof rate after publication on the Steering page.
+
+---
+Opened by Oxagen · workspace \`core-platform\` · governance \`team\`
+Checks: [Oxagen check run](#)`;
+
+/* ── the agent definition files ─────────────────────────────────────── */
+const AGENT_TOML = `schema = "agent-definition/v0.1"
+slug = "docs-writer"
+name = "Docs writer"
+description = "Keeps the developer documentation in step with the API. Opens a pull request; a person merges it."
+model_tier = "complex"
+tools = ["github__*", "search_graph", "recall_context", "read_file"]
+deny_tools = ["github__merge_pull_request@*", "github__delete_*@*"]
+side_effects = ["read", "write"]
+budget = { per_run_micros = 1500000 }
+
+[instructions]
+body = """
+You keep the developer documentation in step with the API of this
+repository. Read the conventions in .oxagen/rules before you write.
+When a route changes, update the guide that covers it and the reference
+page generated from packages/contracts/openapi.json. Open a pull request
+and stop; a person merges it.
+"""
+
+[harness.claude-code]
+color = "blue"`;
+
+const AGENT_MD = `---
+# Generated by Oxagen from .oxagen/agents/docs-writer.toml
+# source_digest: sha256:71ad3e0c9b4f2265d81a03ce7fb5904e18cc22d7a6390bbf4e0d1c8a75326fd1
+# Do not edit. Edit the source file; the checks regenerate this one.
+name: docs-writer
+description: Keeps the developer documentation in step with the API. Opens a pull request; a person merges it.
+model: complex
+color: blue
+tools: Read, Grep, Glob, mcp__oxagen__github__*, mcp__oxagen__search_graph, mcp__oxagen__recall_context
+---
+
+You keep the developer documentation in step with the API of this
+repository. Read the conventions in .oxagen/rules before you write.
+When a route changes, update the guide that covers it and the reference
+page generated from packages/contracts/openapi.json. Open a pull request
+and stop; a person merges it.`;
+
+/* ── agents in core-platform ────────────────────────────────────────── */
+const AGENTS = [
+  { key:"acme.core.release-manager", name:"Release manager", harness:"Claude Code", status:"enrolled",
+    tier:"gateway", runs:218, spend:412.66, op:"Marcus Bell", tools:18, mandate:null,
+    digest:"sha256:5b31ac7e…" },
+  { key:"acme.core.stella-ci", name:"CI reviewer", harness:"Stella", status:"enrolled",
+    tier:"gateway", runs:1904, spend:98.14, op:"Marcus Bell", tools:11, mandate:null,
+    digest:"sha256:d0a4e219…" },
+  { key:"acme.core.triage", name:"Issue triage", harness:"Codex CLI", status:"enrolled",
+    tier:"gateway · harness", runs:641, spend:74.09, op:"Priya Natarajan", tools:9, mandate:null,
+    digest:"sha256:7c6fb188…" },
+];
+
+const DOCS_WRITER = {
+  key:"acme.core.docs-writer", name:"Docs writer", harness:"Claude Agent SDK (custom, SDK-wrapped)",
+  op:"Marcus Bell", tools:4, budget:"1.50", digest:"sha256:71ad3e0c…",
+};
+
+/* ── the next run: new steering visible in model.request ────────────── */
+const RUN = {
+  id:"run_01K52JN4D8", agent:"acme.core.release-manager", op:"Marcus Bell", opInit:"MB",
+  started:"2026-09-11 14:36:52 UTC", tier:"gateway", grade:"fork replay",
+  task:"acme/platform#3391 — Release 2026.9.2", bundle:"bundle_v215",
+  harness:"Claude Code 2.14.3", model:"claude-opus-5", cost:"0.4812", frames:14,
+  repo:"acme/platform", base:"4c1f9ab",
+};
+
+const FRAMES = [
+  { seq:0,  kind:"agent_start",      sum:"bundle_v215 · enforcement tier gateway · toolbelt 18 tools (full belt)" },
+  { seq:1,  kind:"checkpoint",       sum:"signed by host device key ed25519:9f13… · countersigned on ingest" },
+  { seq:2,  kind:"turn_start",       sum:"operator prompt · Marcus Bell · “cut release 2026.9.2”" },
+  { seq:3,  kind:"context.assembled",sum:"budget 6,000 · 5 context frames · 4,182 tokens · composition digest sha256:a71b…" },
+  { seq:4,  kind:"model.request",    sum:"claude-opus-5 · 4 steering records injected · 1 published 15 m ago", hot:true },
+  { seq:5,  kind:"model.response",   sum:"stop_reason tool_use · 612 output tokens · $0.0914 USD" },
+  { seq:6,  kind:"tool_requested",   sum:"github__get_pull_request_files@3 · acme/platform#3391" },
+  { seq:7,  kind:"tool_call",        sum:"allowed · 14 files · 2 under apps/api/src/routes/", state:"allowed" },
+  { seq:8,  kind:"model.request",    sum:"claude-opus-5 · same steering block · cache_read 22,104" },
+  { seq:9,  kind:"model.response",   sum:"stop_reason tool_use · 341 output tokens · $0.0688 USD" },
+  { seq:10, kind:"tool_requested",   sum:"bash__run@1 · pnpm openapi:generate" },
+  { seq:11, kind:"tool_call",        sum:"allowed at harness tier · wrote packages/contracts/openapi.json", state:"allowed" },
+  { seq:12, kind:"model.request",    sum:"claude-opus-5 · cache_read 26,980" },
+  { seq:13, kind:"model.response",   sum:"stop_reason end_turn · release notes and contract in one pull request" },
+];
+
+const STEER_BLOCK = [
+  { lin:"ctx.core.release-pr-never-merged-by-agent", auth:"must",   hash:"sha256:3b7e40a1…", toks:38 },
+  { lin:"ctx.core.migration-expand-contract",        auth:"must",   hash:"sha256:a10c9d52…", toks:64 },
+  { lin:"ctx.core.openapi-regen-on-route-change",    auth:"must",   hash:"sha256:9f2c1d84…", toks:59, isNew:true },
+  { lin:"ctx.core.changelog-keepachangelog",         auth:"should", hash:"sha256:66d1f8b3…", toks:41 },
+  { lin:"ctx.core.no-secrets-in-workflow-inputs",    auth:"must",   hash:"sha256:c802ae77…", toks:66 },
+];
+
+const STEER_TEXT = `<steering bundle="bundle_v215" workspace="core-platform" authority-order="must,should">
+  <record lineage="ctx.core.release-pr-never-merged-by-agent" authority="must">
+    An agent never merges a pull request on acme/platform. Open it, request
+    review, and stop.
+  </record>
+  <record lineage="ctx.core.migration-expand-contract" authority="must">
+    Schema changes ship expand-then-contract: add the column, backfill,
+    switch readers, drop in a later release.
+  </record>
+  <record lineage="ctx.core.openapi-regen-on-route-change" authority="must">
+    When a file under apps/api/src/routes/ changes, run
+    \`pnpm openapi:generate\` and commit the regenerated
+    packages/contracts/openapi.json in the same pull request.
+  </record>
+  <record lineage="ctx.core.changelog-keepachangelog" authority="should">
+    Release notes follow Keep a Changelog 1.1.0 with the four headings this
+    repository already uses: Added, Changed, Fixed, Removed.
+  </record>
+  <record lineage="ctx.core.no-secrets-in-workflow-inputs" authority="must">
+    Never pass a secret through a workflow_dispatch input.
+  </record>
+</steering>`;
+
+/* ── mutable demo state ─────────────────────────────────────────────── */
+const S = {
+  view:"loaded",       // loaded | empty | loading | error | denied
+  phone:false,
+  theme:null,          // null = follow system
+  pr:"none",           // none | open | checking | passed | merged
+  agentPr:"none",      // none | open | checking | passed | merged
+  checks:[],
+  agentChecks:[],
+  asst:false,
+  timers:[],
+};
+</script>
+
+<script>
+"use strict";
+
+/* ══════════════════════════════════════════════════════════════════════
+   Helpers
+   ══════════════════════════════════════════════════════════════════════ */
+const $ = s => document.querySelector(s);
+const h = s => String(s).replace(/[&<>"']/g, c =>
+  ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const money = n => "$" + Number(n).toFixed(2) + " USD";
+const pct = n => Number(n).toFixed(1) + " %";
+
+const I = {
+  fleet:'<path d="M1.5 8h3l2-5 3 10 2-5h3"/>',
+  run:'<path d="M4.5 3.2 12.5 8l-8 4.8Z"/>',
+  agents:'<rect x="3" y="3" width="10" height="10" rx="2.2"/><path d="M6 6.5h4M6 9.5h2.5M6 1.2v1.8M10 1.2v1.8M6 13v1.8M10 13v1.8"/>',
+  tools:'<path d="M10.4 2.6a3.4 3.4 0 0 0-4.3 4.3l-4 4a1.4 1.4 0 0 0 2 2l4-4a3.4 3.4 0 0 0 4.3-4.3l-2 2-1.9-.4-.4-1.9Z"/>',
+  ontology:'<circle cx="8" cy="3.4" r="1.9"/><circle cx="3.2" cy="12" r="1.9"/><circle cx="12.8" cy="12" r="1.9"/><path d="M6.6 4.9 4.4 10.3M9.4 4.9l2.2 5.4M5.1 12h5.8"/>',
+  steering:'<path d="M2.8 2.6h7.4l2.4 2.6-2.4 2.6H2.8Z"/><path d="M6.4 7.8v5.6M4.2 13.4h4.4"/>',
+  spend:'<ellipse cx="8" cy="4.2" rx="5.2" ry="2.2"/><path d="M2.8 4.2v3.6c0 1.2 2.3 2.2 5.2 2.2s5.2-1 5.2-2.2V4.2"/><path d="M2.8 7.8v3.6c0 1.2 2.3 2.2 5.2 2.2s5.2-1 5.2-2.2V7.8"/>',
+  org:'<path d="M2.6 13.4V3.2l5-1.6v11.8M7.6 13.4h5.8V6.4l-5.8-1.4"/><path d="M4.6 5.6h1M4.6 8h1M4.6 10.4h1M9.6 8h1.4M9.6 10.6h1.4"/>',
+  billing:'<rect x="1.8" y="3.4" width="12.4" height="9.2" rx="2"/><path d="M1.8 6.6h12.4M4.4 10h3"/>',
+  audit:'<path d="M8 1.6 13.4 3.6v4.2c0 3.2-2.2 5.5-5.4 6.6-3.2-1.1-5.4-3.4-5.4-6.6V3.6Z"/><path d="m5.8 7.9 1.6 1.6 3-3.2"/>',
+  check:'<path d="m3.6 8.4 2.9 2.9 5.9-6.2"/>',
+  x:'<path d="m4.2 4.2 7.6 7.6M11.8 4.2l-7.6 7.6"/>',
+  pr:'<circle cx="4.2" cy="3.6" r="1.8"/><circle cx="4.2" cy="12.4" r="1.8"/><circle cx="11.8" cy="12.4" r="1.8"/><path d="M4.2 5.4v5.2M11.8 10.6V6.6a2.2 2.2 0 0 0-2.2-2.2H6.8"/><path d="M8.4 2.6 6.6 4.4l1.8 1.8"/>',
+  branch:'<circle cx="4.4" cy="3.6" r="1.7"/><circle cx="4.4" cy="12.4" r="1.7"/><circle cx="11.6" cy="5.4" r="1.7"/><path d="M4.4 5.3v5.4M11.6 7.1c0 2.4-1.9 3.3-4.2 3.7"/>',
+  merge:'<circle cx="4.4" cy="3.6" r="1.7"/><circle cx="4.4" cy="12.4" r="1.7"/><circle cx="11.6" cy="8" r="1.7"/><path d="M4.4 5.3v5.4M6.1 3.9c1.2 3 2.3 3.9 3.9 4.1"/>',
+  file:'<path d="M9 1.8H4.2a1.4 1.4 0 0 0-1.4 1.4v9.6a1.4 1.4 0 0 0 1.4 1.4h7.6a1.4 1.4 0 0 0 1.4-1.4V5.8Z"/><path d="M9 1.8v4h4.2"/>',
+  plus:'<path d="M8 3.4v9.2M3.4 8h9.2"/>',
+  clock:'<circle cx="8" cy="8" r="6"/><path d="M8 4.6V8l2.4 1.5"/>',
+  spark:'<path d="M8 1.6 9.7 6l4.4 1.7L9.7 9.4 8 13.8 6.3 9.4 1.9 7.7 6.3 6Z"/>',
+  arrow:'<path d="M3 8h9.4M8.8 4.4 12.4 8l-3.6 3.6"/>',
+  chev:'<path d="m6.2 3.8 4.2 4.2-4.2 4.2"/>',
+  alert:'<path d="M8 2.4 14.2 13H1.8Z"/><path d="M8 6.6v3M8 11.3v.1"/>',
+  inbox:'<path d="M2 8.6h3.2l1 2h3.6l1-2H14"/><path d="M3.8 2.8h8.4L14 8.6v4a1.4 1.4 0 0 1-1.4 1.4H3.4A1.4 1.4 0 0 1 2 12.6v-4Z"/>',
+  lock:'<rect x="3" y="7" width="10" height="7" rx="1.8"/><path d="M5.4 7V5.2a2.6 2.6 0 0 1 5.2 0V7"/>',
+  retire:'<path d="M2.6 4.4h10.8M5.4 4.4V3a1.2 1.2 0 0 1 1.2-1.2h2.8A1.2 1.2 0 0 1 10.6 3v1.4M4 4.4l.7 8.4a1.4 1.4 0 0 0 1.4 1.2h3.8a1.4 1.4 0 0 0 1.4-1.2l.7-8.4"/>',
+  bolt:'<path d="M9 1.6 3.4 9.2h4L7 14.4 12.6 6.8h-4Z"/>',
+};
+const ic = (n, cls="ni") =>
+  `<svg class="${cls}" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"
+     stroke-linecap="round" stroke-linejoin="round">${I[n]||""}</svg>`;
+
+/* ══════════════════════════════════════════════════════════════════════
+   Context PRs
+   ══════════════════════════════════════════════════════════════════════ */
+const RETIRE_DIFF = [
+  { t:"hunk", g:"", c:"@@ .oxagen/rules/ctx.core.test-file-naming.toml @@" },
+  { t:"ctx",  g:"3", c:' kind = "directive"' },
+  { t:"del",  g:"4", c:'-status = "active"' },
+  { t:"add",  g:"4", c:'+status = "archived"' },
+  { t:"add",  g:"5", c:'+retired_at = "2026-09-11"' },
+  { t:"add",  g:"6", c:'+retired_reason = "Rendered 1,188 times in 90 days, cited 0. The eslint rule enforces it."' },
+  { t:"ctx",  g:"7", c:' statement = """' },
+];
+
+function prList(){
+  const rows = [];
+  if (S.pr !== "none") rows.push({
+    num:412, repo:"acme/platform", branch:"context/ctx.core.openapi-regen-on-route-change",
+    title:"Require a regenerated OpenAPI contract when a route changes",
+    kind:"steering", opened:"2026-09-11 14:06 UTC", by:"Oxagen promoter",
+    state: S.pr === "merged" ? "merged" : (S.pr === "passed" ? "passed" : "checking"),
+  });
+  if (S.agentPr !== "none") rows.push({
+    num:413, repo:"acme/platform", branch:"agents/docs-writer",
+    title:"Add agent acme.core.docs-writer",
+    kind:"agent", opened:"2026-09-11 14:31 UTC", by:"Marcus Bell",
+    state: S.agentPr === "merged" ? "merged" : (S.agentPr === "passed" ? "passed" : "checking"),
+  });
+  rows.push({
+    num:409, repo:"acme/mobile", branch:"context/ctx.mobile.snapshot-baseline",
+    title:"Record the snapshot baseline convention for acme/mobile",
+    kind:"steering", opened:"2026-09-09 10:14 UTC", by:"Oxagen promoter", state:"review",
+  },{
+    num:407, repo:"acme/platform", branch:"context/ctx.core.test-file-naming",
+    title:"Retire ctx.core.test-file-naming",
+    kind:"retirement", opened:"2026-09-08 17:40 UTC", by:"Marcus Bell", state:"review",
+  });
+  return rows;
+}
+
+function publishedRecords(){
+  const list = PUBLISHED.slice();
+  if (S.pr === "merged"){
+    const p = PROPOSALS[0];
+    list.unshift({ lin:p.lin, kind:p.kind, sub:p.sub, authority:p.authority, stmt:p.stmt,
+      scope:"workspace · core-platform", file:".oxagen/rules/"+p.lin+".toml",
+      pub:"2026-09-11", by:"Marcus Bell", pr:"acme/platform#412", commit:"4c1f9ab",
+      rendered:7, cited:5, violated:0, before:61.9, after:null, fresh:true });
+  }
+  return list;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   Chrome: nav, breadcrumbs, theme, toast
+   ══════════════════════════════════════════════════════════════════════ */
+const BASE = "#/acme/core-platform";
+const NAV = [
+  { h:"Workspace" },
+  { t:"Fleet",     i:"fleet",    r:BASE,               n:"12 live" },
+  { t:"Runs",      i:"run",      r:BASE+"/runs/"+RUN.id },
+  { t:"Agents",    i:"agents",   r:BASE+"/agents",     n:String(WS.fleet) },
+  { t:"Tools",     i:"tools",    r:BASE+"/tools" },
+  { t:"Ontology",  i:"ontology", r:BASE+"/ontology" },
+  { t:"Steering",  i:"steering", r:BASE+"/steering" },
+  { t:"Spend",     i:"spend",    r:BASE+"/spend" },
+  { h:"Organization" },
+  { t:"Organization", i:"org",     r:"#/acme" },
+  { t:"Billing",      i:"billing", r:"#/acme/billing" },
+  { t:"Audit",        i:"audit",   r:"#/acme/audit" },
+];
+
+function renderNav(){
+  const path = location.hash || BASE+"/steering";
+  const on = t => {
+    if (t === "Steering") return path.includes("/steering");
+    if (t === "Agents")   return path.includes("/agents");
+    if (t === "Runs")     return path.includes("/runs");
+    if (t === "Fleet")    return path === BASE || path === BASE+"/";
+    return path.includes("/"+t.toLowerCase());
+  };
+  $("#nav").innerHTML = NAV.map(x => x.h
+    ? `<div class="nav-h">${x.h}</div>`
+    : `<a href="${x.r}" class="${on(x.t)?"on":""}">${ic(x.i)}<span>${x.t}</span>${
+        x.n?`<span class="cnt">${x.n}</span>`:""}</a>`).join("");
+  $("#sf-bundle").textContent = S.pr === "merged" ? "bundle_v215" : "bundle_v214";
+}
+
+function crumbs(parts){
+  $("#crumbs").innerHTML = parts.map((p,i) => {
+    const last = i === parts.length - 1;
+    const cls = last ? "cur" : (i < parts.length-2 ? "hide-sm" : "");
+    const el = p.r && !last ? `<a href="${p.r}" class="${cls}">${h(p.t)}</a>`
+                            : `<span class="${cls}">${h(p.t)}</span>`;
+    return (i ? `<span class="sep ${i<parts.length-1?"hide-sm":""}">${ic("chev","ni")}</span>` : "") + el;
+  }).join("").replace(/<svg class="ni"/g,'<svg class="ni" style="width:11px;height:11px"');
+}
+
+function toggleTheme(){
+  const cur = document.documentElement.getAttribute("data-theme");
+  const sysDark = matchMedia("(prefers-color-scheme: dark)").matches;
+  const next = cur ? (cur === "dark" ? "light" : null) : (sysDark ? "light" : "dark");
+  if (next) document.documentElement.setAttribute("data-theme", next);
+  else document.documentElement.removeAttribute("data-theme");
+  toast("Theme: " + (next || "follow system"));
+}
+
+let toastT;
+function toast(msg){
+  const el = $("#toast");
+  el.textContent = msg; el.style.display = "block";
+  clearTimeout(toastT); toastT = setTimeout(() => el.style.display = "none", 3200);
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   Router
+   ══════════════════════════════════════════════════════════════════════ */
+function route(){
+  const p = (location.hash || BASE+"/steering").replace(/^#\/?/, "").split("/").filter(Boolean);
+  // acme / core-platform / <page> / ...
+  const page = p[2] || "fleet";
+  const a = p[3], b = p[4];
+  window.scrollTo(0,0);
+  renderNav();
+  if (p[1] === "billing" || p[1] === "audit" || p.length === 1) return renderOrgStub(p[1]);
+  if (page === "steering") return renderSteering(a, b);
+  if (page === "agents")   return renderAgents(a);
+  if (page === "runs")     return renderRun(b);
+  return renderStub(page);
+}
+addEventListener("hashchange", route);
+
+/* ══════════════════════════════════════════════════════════════════════
+   State stand-ins (loading / empty / error / denied)
+   ══════════════════════════════════════════════════════════════════════ */
+function skeleton(){
+  const row = w => `<div class="sk" style="width:${w}%"></div>`;
+  return `<div class="panel"><div class="ph"><div class="sk" style="width:120px"></div></div>
+    <div class="pb" style="display:flex;flex-direction:column;gap:13px">
+      ${[92,78,86,64,88,72,80].map(w=>`<div style="display:flex;flex-direction:column;gap:7px">
+        ${row(w)}<div class="sk" style="width:${Math.round(w*0.42)}%;height:9px"></div></div>`).join("")}
+    </div></div>
+    <div class="panel"><div class="pb" style="display:flex;gap:16px">
+      ${[1,2,3,4].map(()=>`<div style="flex:1"><div class="sk" style="width:54%;height:9px"></div>
+        <div class="sk" style="width:80%;height:17px;margin-top:8px"></div></div>`).join("")}
+    </div></div>
+    <p class="mono" style="color:var(--dim);margin-top:14px;font-size:11.5px">
+      Loading published records from the graph, verified against acme/platform@main…</p>`;
+}
+
+let DENY_CTX = { subj:"steering:read", page:"steering", noun:"steering in core-platform",
+                 line:"Steering records are workspace-scoped, and no grant reaches this workspace." };
+function blankState(kind, ctx){
+  if (kind === "empty") return `<div class="blank">
+    <div class="ic">${ic("inbox")}</div>
+    <h3>${h(ctx.t)}</h3><p>${ctx.p}</p>
+    ${ctx.a ? `<a class="btn gold" href="${ctx.ar||"#"}">${ic("plus")}${h(ctx.a)}</a>` : ""}
+    <p class="mono" style="color:var(--dim);font-size:11.5px;margin:16px 0 0">${ctx.n||""}</p>
+  </div>`;
+  if (kind === "error") return `<div class="blank err">
+    <div class="ic">${ic("alert")}</div>
+    <h3>The graph did not answer</h3>
+    <p>Oxagen could not read ${h(DENY_CTX.noun)}. Nothing was changed, and nothing was delivered
+       from a stale index while this is true.</p>
+    <div class="hop" style="margin-bottom:17px">
+      <dt>error</dt><dd><b>graph_unavailable</b></dd>
+      <dt>store</dt><dd>neo4j · org_acme · read replica 2</dd>
+      <dt>request</dt><dd>req_01K52JQ7F3M0</dd>
+      <dt>at</dt><dd>2026-09-11 14:41:07 UTC</dd>
+      <dt>effect</dt><dd>Runs continue on <b>bundle_v${S.pr==="merged"?"215":"214"}</b>, which is already signed and cached.</dd>
+    </div>
+    <button class="btn" onclick="setView('loaded')">${ic("arrow")}Retry</button>
+  </div>`;
+  return `<div class="blank den">
+    <div class="ic">${ic("lock")}</div>
+    <h3>You cannot read ${h(DENY_CTX.noun)}</h3>
+    <p>Dana Okafor holds the billing role in <code>finops</code>. ${DENY_CTX.line}
+       Here is the whole decision, not a summary.</p>
+    <dl class="hop">
+      <dt>principal</dt><dd><b>Dana Okafor</b> · human · prn_01J8YQ4K2X</dd>
+      <dt>asked for</dt><dd>${h(DENY_CTX.subj)} · ws_core_platform</dd>
+      <dt>roles held</dt><dd>billing@finops, member@acme</dd>
+      <dt>grant</dt><dd>no role_grant matches subject <b>${h(DENY_CTX.subj)}</b> at this scope</dd>
+      <dt>resolver</dt><dd>agent tool default = <b>deny</b> (no org-owner override)</dd>
+      <dt>policy</dt><dd>policy_v88 · deny_generation 41</dd>
+      <dt>recorded</dt><dd>evt_01K52JR0T8 · not a governed action (denials are free)</dd>
+    </dl>
+    <p style="margin-top:17px"><button class="btn" onclick="toast('Request routed to Marcus Bell, workspace owner of core-platform.')">${ic("arrow")}Ask Marcus Bell for access</button></p>
+  </div>`;
+}
+
+function wrapState(body, emptyCtx){
+  if (S.view === "loading") return skeleton();
+  if (S.view === "error")   return blankState("error");
+  if (S.view === "denied")  return blankState("denied");
+  if (S.view === "empty")   return blankState("empty", emptyCtx);
+  return body;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   Page: Steering
+   ══════════════════════════════════════════════════════════════════════ */
+function steerTabs(active){
+  const n = publishedRecords().length;
+  const props = PROPOSALS.filter(p => !(S.pr === "merged" && p.hero)).length;
+  const prs = prList().filter(r => r.state !== "merged").length;
+  const ret = PUBLISHED.filter(r => r.retire).length;
+  const t = [
+    ["published","Published", n], ["proposals","Proposals", props],
+    ["prs","Context PRs", prs], ["retirement","Retirement", ret],
+  ];
+  return `<nav class="tabs">${t.map(([k,l,c]) =>
+    `<a href="${BASE}/steering${k==="published"?"":"/"+k}" class="${active===k?"on":""}">${h(l)}<span class="n">${c}</span></a>`
+  ).join("")}</nav>`;
+}
+
+function renderSteering(tab, arg){
+  tab = tab || "published";
+  DENY_CTX = { subj:"steering:read", page:"steering", noun:"steering in core-platform",
+    line:"Steering records are workspace-scoped, and no grant reaches this workspace." };
+  crumbs([{t:"Acme Robotics",r:"#/acme"},{t:"core-platform",r:BASE},{t:"Steering",r:BASE+"/steering"}]
+    .concat(tab==="published"?[]:[{t:{proposals:"Proposals",prs:"Context PRs",retirement:"Retirement"}[tab]}])
+    .concat(arg?[{t:arg}]:[]));
+
+  if (tab === "prs" && arg)       return renderPR(arg);
+  if (tab === "proposals" && arg) return renderProposal(arg);
+
+  const head = `
+    <div class="phead">
+      <div>
+        <p class="eyebrow">Workspace steering · acme/platform</p>
+        <h1>Steering</h1>
+        <p class="sub">Published records reach every run in this workspace as compiled steering in the
+          signed bundle and as a volatile message on each model call. Git decides what is in force;
+          the graph remembers everything about it.</p>
+      </div>
+      <div class="phead-a">
+        <a class="btn" href="${BASE}/steering/prs">${ic("pr")}Context PRs</a>
+        <button class="btn" onclick="toast('Effect report exported as CSV: rendered, cited, violated and proof rate per record, 90 days.')">${ic("file")}Export effect</button>
+      </div>
+    </div>
+    ${steerTabs(tab)}`;
+
+  let body;
+  if (tab === "published")  body = tabPublished();
+  else if (tab === "proposals") body = tabProposals();
+  else if (tab === "prs")   body = tabPRs();
+  else body = tabRetirement();
+
+  const emptyCtx = {
+    published:{ t:"No published steering yet", p:"Nothing steers a run in core-platform. Records arrive here when a Context PR merges on <code>acme/platform</code>. The promoter opens one as soon as a candidate crosses this workspace's thresholds: 3 runs, 2 agents, confidence 0.70.", a:"Write a record", n:"0 records · bundle_v212 carries an empty context.system block" },
+    proposals:{ t:"No proposals on the table", p:"The promoter aggregates observations and memories after each run seals. When support crosses 3 runs across 2 agents with confidence above 0.70 and nothing active contradicts it, a proposal appears here.", n:"Last aggregation 2026-09-11 14:02 UTC · 0 candidates above threshold" },
+    prs:{ t:"No open Context PRs", p:"Every change to steering in this workspace is a pull request on <code>acme/platform</code> with the Oxagen checks attached. There are none open right now.", n:"4 merged in the last 30 days" },
+    retirement:{ t:"Nothing is a retirement candidate", p:"A record becomes a candidate when it has been rendered for a full window without being cited, or when the proof rate fell after it was published. Every record in force is currently earning its tokens.", n:"7 records measured over 90 days" },
+  }[tab];
+
+  $("#view").innerHTML = head + wrapState(body, emptyCtx);
+}
+
+/* ── tab: published ─────────────────────────────────────────────────── */
+function tabPublished(){
+  const recs = publishedRecords();
+  const rows = recs.map(r => {
+    const delta = r.after === null ? null : (r.after - r.before);
+    const dcls = delta === null ? "" : (delta > 0.5 ? "up" : (delta < -0.5 ? "down" : "flat"));
+    return `<tr>
+      <td style="min-width:290px">
+        <div class="stmt">${h(r.stmt)}</div>
+        <div class="lin" style="margin-top:6px">${h(r.lin)}${r.fresh?' <span class="b new" style="margin-left:4px">published 14:21 UTC</span>':""}</div>
+        <div class="meta"><span><b>${h(r.file)}</b></span><span>${h(r.pr)} · ${h(r.commit)}</span>
+          <span>merged ${h(r.pub)} by ${h(r.by)}</span></div>
+      </td>
+      <td><span class="b dot ${r.kind==="directive"?"approval":"proven"}">${h(r.kind)}</span>
+        <div class="meta" style="margin-top:6px"><span>${h(r.sub)}</span><span>authority <b>${h(r.authority)}</b></span></div></td>
+      <td class="mono" style="font-size:11.5px;color:var(--muted)">${h(r.scope)}</td>
+      <td>
+        <div class="effect">
+          <div class="ef"><div class="k">rendered</div><div class="v">${r.rendered.toLocaleString()}</div></div>
+          <div class="ef"><div class="k">cited</div><div class="v ${r.cited===0?"down":""}">${r.cited.toLocaleString()}</div></div>
+          <div class="ef"><div class="k">violated</div><div class="v ${r.violated>0?"down":"flat"}">${r.violated}</div></div>
+        </div>
+      </td>
+      <td style="min-width:168px">
+        ${r.after === null ? `
+          <div class="num" style="color:var(--muted)">${pct(r.before)} <span style="color:var(--dim)">→</span>
+            <span style="color:var(--accent-text)">measuring</span></div>
+          <div class="bar"><i class="pre" style="width:${r.before}%"></i></div>
+          <div class="meta"><span>7 runs since publication · needs 30</span></div>`
+        : `
+          <div class="num">${pct(r.before)} <span style="color:var(--dim)">→</span>
+            <span class="${dcls==="up"?"":""}" style="color:${dcls==="up"?"var(--s-proven)":dcls==="down"?"var(--s-failed)":"var(--fg)"}">${pct(r.after)}</span></div>
+          <div class="bar"><i style="width:${r.after}%;background:${dcls==="down"?"var(--s-failed)":"var(--s-proven)"}"></i></div>
+          <div class="meta"><span>${delta>0?"+":""}${delta.toFixed(1)} points · 90 days</span></div>`}
+      </td>
+    </tr>`;
+  }).join("");
+
+  const banner = S.pr === "merged" ? `
+    <div class="call" style="margin-bottom:16px">${ic("spark")}
+      <div class="tx"><b>ctx.core.openapi-regen-on-route-change is in force.</b>
+        Merged into <code>acme/platform@4c1f9ab</code> at 14:21:06 UTC, re-indexed from the merged commit,
+        bundle bumped <span class="mono">bundle_v214 → bundle_v215</span>. Seven runs have started since,
+        and the first of them shows it in the prompt.
+        <a href="${BASE}/runs/${RUN.id}/4" style="color:var(--accent-text);font-weight:600">
+          Open run_01K52JN4D8, frame 4 ${ic("arrow","ni")}</a></div></div>` : "";
+
+  return banner + `
+  <div class="grid3" style="margin-bottom:16px">
+    <div class="panel"><div class="pb">
+      <p class="eyebrow q">In force</p>
+      <div class="num" style="font-size:26px;color:var(--fg)">${recs.length}</div>
+      <div class="meta"><span>${recs.filter(r=>r.kind==="directive").length} directive · ${recs.filter(r=>r.kind==="knowledge").length} knowledge</span></div>
+    </div></div>
+    <div class="panel"><div class="pb">
+      <p class="eyebrow q">Steering tokens per turn</p>
+      <div class="num" style="font-size:26px;color:var(--fg)">${S.pr==="merged"?"268":"209"}</div>
+      <div class="meta"><span>must in the stable prefix · should selected by relevance</span></div>
+    </div></div>
+    <div class="panel"><div class="pb">
+      <p class="eyebrow q">Workspace proof rate</p>
+      <div class="num" style="font-size:26px;color:var(--s-proven)">87.4 %</div>
+      <div class="meta"><span>1,806 proven runs of 2,066 · 90 days</span></div>
+    </div></div>
+  </div>
+  <div class="panel"><div class="ph"><h3>Published records</h3><span class="sp"></span>
+    <span class="note">indexed from acme/platform@${S.pr==="merged"?"4c1f9ab":"e91b2d7"} · verified</span></div>
+    <div class="tw"><table>
+      <thead><tr><th>Statement</th><th>Kind</th><th>Scope</th><th>Effect · 90 days</th><th>Proof rate before → after</th></tr></thead>
+      <tbody>${rows}</tbody></table></div>
+  </div>`;
+}
+
+/* ── tab: proposals ─────────────────────────────────────────────────── */
+function tabProposals(){
+  const list = PROPOSALS.map(p => {
+    const merged = S.pr === "merged" && p.hero;
+    const met = p.runs >= p.needRuns && p.agents >= p.needAgents && p.confidence >= p.floor;
+    const badge = merged ? `<span class="b proven dot">published</span>`
+      : p.status === "ready" ? `<span class="b approval dot">ready for a Context PR</span>`
+      : `<span class="b queued dot">gathering support</span>`;
+    const action = merged
+      ? `<a class="btn sm" href="${BASE}/steering/prs/412">${ic("merge")}Merged in #412</a>`
+      : p.hero && S.pr !== "none"
+      ? `<a class="btn sm" href="${BASE}/steering/prs/412">${ic("pr")}Open Context PR #412</a>`
+      : p.status === "ready"
+      ? `<a class="btn sm ${p.hero?"gold":""}" href="${BASE}/steering/proposals/${p.id}">${ic("arrow")}Review</a>`
+      : `<a class="btn sm" href="${BASE}/steering/proposals/${p.id}">${ic("arrow")}Review</a>`;
+    return `<div class="panel"><div class="pb">
+      <div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap">
+        <div style="flex:1;min-width:260px">
+          ${badge}
+          <div class="stmt" style="margin-top:9px">${h(p.stmt)}</div>
+          <div class="lin" style="margin-top:6px">${h(p.lin)} · ${h(p.id)}</div>
+          <div class="meta"><span>proposed kind <b>${h(p.kind)} · ${h(p.sub)}</b></span>
+            <span>authority <b>${h(p.authority)}</b></span>
+            <span>asks for scope <b>${h(p.scopeAsked)}</b></span>
+            <span>opened ${h(p.opened)}</span></div>
+        </div>
+        <div style="flex:0 0 auto">${action}</div>
+      </div>
+      <div class="effect" style="margin-top:14px;padding-top:13px;border-top:1px solid var(--border)">
+        <div class="ef"><div class="k">supporting runs</div>
+          <div class="v ${p.runs>=p.needRuns?"up":"down"}">${p.runs}<span style="color:var(--dim);font-size:11px"> / ${p.needRuns}</span></div></div>
+        <div class="ef"><div class="k">distinct agents</div>
+          <div class="v ${p.agents>=p.needAgents?"up":"down"}">${p.agents}<span style="color:var(--dim);font-size:11px"> / ${p.needAgents}</span></div></div>
+        <div class="ef"><div class="k">confidence</div>
+          <div class="v ${p.confidence>=p.floor?"up":"down"}">${p.confidence.toFixed(2)}<span style="color:var(--dim);font-size:11px"> / ${p.floor.toFixed(2)}</span></div></div>
+        <div class="ef"><div class="k">contradiction</div>
+          <div class="v ${p.contradiction?"down":"flat"}">${p.contradiction||"none"}</div></div>
+        <div class="ef" style="flex:1;min-width:180px"><div class="k">threshold</div>
+          <div class="meta" style="margin-top:4px"><span>${met?"met — the promoter may open a Context PR":"not met — the promoter is still aggregating"}</span></div></div>
+      </div>
+    </div></div>`;
+  }).join("");
+
+  return `<div class="note-i" style="margin-bottom:16px">
+      A proposal steers nothing. It lives in <b>.oxagen/proposals/</b> and in the graph until a person merges a
+      Context PR on <b>acme/platform</b>. An agent may propose a directive; only a merge publishes one.
+    </div>` + list;
+}
+
+/* ── proposal detail ────────────────────────────────────────────────── */
+function renderProposal(id){
+  const p = PROPOSALS.find(x => x.id === id) || PROPOSALS[0];
+  crumbs([{t:"Acme Robotics",r:"#/acme"},{t:"core-platform",r:BASE},
+          {t:"Steering",r:BASE+"/steering"},{t:"Proposals",r:BASE+"/steering/proposals"},{t:p.lin}]);
+
+  const support = p.support.length ? p.support.map(s => `<tr class="click" onclick="toast('Opens run ${s.run} at ${s.frame} — outside this flow.')">
+      <td><div class="t1 mono" style="font-size:12px">${h(s.run)}</div>
+          <div class="t2">${h(s.line)}</div></td>
+      <td class="mono" style="font-size:11.5px">${h(s.agent)}<div class="t2">${h(s.op)}</div></td>
+      <td class="mono" style="font-size:11.5px;white-space:nowrap">${h(s.date)}</td>
+      <td><span class="b ${s.verdict==="failing"?"failed":"queued"} dot">${h(s.verdict)}</span></td>
+      <td class="mono" style="font-size:11px;color:var(--accent-text)">${h(s.frame)}</td>
+      <td class="mono" style="font-size:11px;color:var(--muted)">${h(s.rec)}<div class="t2">${h(s.kind)}</div></td>
+    </tr>`).join("")
+    : `<tr><td colspan="6" style="color:var(--muted);font-size:12.5px">Supporting records for this proposal are
+        summarized above; the full list opens on the record's lineage in the graph.</td></tr>`;
+
+  const canOpen = p.status === "ready" && !(S.pr !== "none" && p.hero);
+  const openedAlready = p.hero && S.pr !== "none";
+
+  const body = `
+  <div class="split">
+    <div>
+      <div class="panel"><div class="ph"><h3>Proposed record</h3><span class="sp"></span>
+        <span class="note">${h(p.id)}</span></div>
+        <div class="pb">
+          <div class="stmt" style="font-size:15px;line-height:1.6">${h(p.stmt)}</div>
+          <div class="meta" style="margin-top:12px">
+            <span>lineage <b>${h(p.lin)}</b></span><span>kind <b>${h(p.kind)} · ${h(p.sub)}</b></span>
+            <span>authority <b>${h(p.authority)}</b></span><span>constraint effect <b>${h(p.sub)}</b></span>
+            <span>sharing scope <b>${h(p.scopeAsked)}</b></span><span>record_hash <b>${h(p.hash.slice(0,26))}…</b></span>
+          </div>
+          <div class="note-i" style="margin-top:13px">A record can never grant authority. This one's
+            <b>constraint_effect</b> is <code>${h(p.sub)}</code>, checked against every active record before the
+            pull request may merge.</div>
+        </div>
+      </div>
+
+      <div class="panel"><div class="ph"><h3>Why the promoter raised it</h3></div>
+        <div class="pb"><p style="margin:0;font-size:13.5px;line-height:1.65;color:var(--body)">${h(p.rationale)}</p></div>
+      </div>
+
+      <div class="panel"><div class="ph"><h3>Supporting runs and evidence</h3><span class="sp"></span>
+        <span class="note">${p.runs} runs · ${p.agents} agents</span></div>
+        <div class="tw"><table><thead><tr>
+          <th>Run and what it taught</th><th>Agent</th><th>Date</th><th>Verdict</th><th>Frame</th><th>Record</th>
+        </tr></thead><tbody>${support}</tbody></table></div>
+        ${p.feedback.length ? `<div class="pb" style="border-top:1px solid var(--border)">
+          <p class="eyebrow q">Also cited</p>
+          ${p.feedback.map(f=>`<div class="meta" style="margin:0 0 7px">
+            <span class="mono" style="color:var(--accent-text)">${h(f.rec)}</span>
+            <span>${h(f.kind)}</span></div><div style="font-size:12.5px;color:var(--body);margin-bottom:12px">${h(f.line)}</div>`).join("")}
+        </div>`:""}
+      </div>
+    </div>
+
+    <div>
+      <div class="panel"><div class="ph"><h3>Open a Context PR</h3></div>
+        <div class="pb">
+          <dl class="kv" style="margin-bottom:14px">
+            <dt>target</dt><dd><b>${h(p.target)}</b> (main repo)</dd>
+            <dt>branch</dt><dd><b>context/${h(p.lin)}</b></dd>
+            <dt>file</dt><dd><b>.oxagen/rules/${h(p.lin)}.toml</b></dd>
+            <dt>base</dt><dd>main · e91b2d7</dd>
+            <dt>governance</dt><dd><b>team</b> — a code-owner review is required</dd>
+            <dt>checks</dt><dd>schema, hash, conflicts, secrets, probes</dd>
+          </dl>
+          ${openedAlready
+            ? `<a class="btn" style="width:100%;justify-content:center" href="${BASE}/steering/prs/412">${ic("pr")}Open pull request #412</a>
+               <p class="meta" style="justify-content:center;margin-top:10px"><span>opened 14:06 UTC by the Oxagen promoter</span></p>`
+            : canOpen
+            ? `<button class="btn gold" style="width:100%;justify-content:center" onclick="openContextPR()">${ic("pr")}Open Context PR</button>
+               <p class="hint" style="font-size:11.5px;color:var(--dim);margin-top:10px">
+                 Creates the branch, commits the single record file, opens the pull request with this rationale
+                 in its body, and attaches the Oxagen check runs. Nothing steers a run until a person merges it.</p>`
+            : `<button class="btn" style="width:100%;justify-content:center" disabled>${ic("pr")}Open Context PR</button>
+               <p class="hint" style="font-size:11.5px;color:var(--dim);margin-top:10px">
+                 Blocked: support is ${p.runs} runs across ${p.agents} agent${p.agents===1?"":"s"} and confidence
+                 ${p.confidence.toFixed(2)}. This workspace requires ${p.needRuns} runs, ${p.needAgents} agents and
+                 ${p.floor.toFixed(2)}.</p>`}
+        </div>
+      </div>
+      <div class="panel"><div class="ph"><h3>If it publishes</h3></div><div class="pb">
+        <dl class="kv">
+          <dt>reaches</dt><dd>every run in <b>core-platform</b> on acme/platform</dd>
+          <dt>as</dt><dd>compiled steering in the bundle, a volatile message on each model call, and a <b>fact</b> context frame</dd>
+          <dt>costs</dt><dd><b>59 steering tokens</b> a turn, measured on every model call</dd>
+          <dt>measured by</dt><dd>rendered, cited, violated, and proof rate before and after</dd>
+          <dt>baseline</dt><dd>proof rate <b>61.9 %</b> on runs touching apps/api/src/routes/</dd>
+        </dl>
+      </div></div>
+    </div>
+  </div>`;
+
+  $("#view").innerHTML = `
+    <div class="phead"><div>
+      <p class="eyebrow">Proposal · ${h(p.status === "ready" ? "ready for a Context PR" : "gathering support")}</p>
+      <h1>${h(p.lin)}</h1>
+      <p class="sub">Aggregated by the promoter across ${p.runs} runs and ${p.agents} agents. It steers nothing yet.</p>
+    </div><div class="phead-a">
+      <a class="btn" href="${BASE}/steering/proposals">${ic("arrow")}All proposals</a>
+    </div></div>` + wrapState(body, {t:"This proposal was withdrawn",p:"The lineage has no open proposal. A contradicting record may have been published, or support decayed below the floor."});
+}
+
+/* ── tab: Context PRs ───────────────────────────────────────────────── */
+function tabPRs(){
+  const rows = prList().map(r => {
+    const st = { checking:["running","checks running"], passed:["allowed","5 / 5 checks passed"],
+                 merged:["proven","merged"], review:["approval","awaiting code-owner review"] }[r.state];
+    return `<tr class="click" onclick="location.hash='${BASE}/steering/prs/${r.num}'">
+      <td><div class="t1">${h(r.title)}</div>
+        <div class="meta"><span class="mono" style="color:var(--accent-text)">${h(r.repo)}#${r.num}</span>
+          <span>opened ${h(r.opened)} by ${h(r.by)}</span></div></td>
+      <td class="mono" style="font-size:11.5px;color:var(--muted)">${h(r.branch)}</td>
+      <td><span class="b ${r.kind==="retirement"?"queued":r.kind==="agent"?"approval":"proven"} dot">${h(r.kind)}</span></td>
+      <td><span class="b ${st[0]} dot">${h(st[1])}</span></td>
+      <td style="text-align:right">${ic("chev")}</td>
+    </tr>`;
+  }).join("");
+  return `<div class="note-i" style="margin-bottom:16px">
+      Every change to what steers an agent — a new record, a retirement, an agent definition — is a pull request
+      on a repository your organization already reviews, with named reviewers, required checks and a history
+      you can verify without Oxagen.
+    </div>
+    <div class="panel"><div class="ph"><h3>Open and recent Context PRs</h3><span class="sp"></span>
+      <span class="note">governance: team · code-owner review required</span></div>
+      <div class="tw"><table><thead><tr>
+        <th>Pull request</th><th>Branch</th><th>Kind</th><th>State</th><th></th>
+      </tr></thead><tbody>${rows}</tbody></table></div></div>`;
+}
+
+/* ── tab: retirement ────────────────────────────────────────────────── */
+function tabRetirement(){
+  const cands = PUBLISHED.filter(r => r.retire);
+  return `<div class="note-i" style="margin-bottom:16px">
+      A record that is rendered and never cited still costs tokens on every turn. Effect is measured for every
+      published record; these two stopped earning their place. Retirement is a Context PR that sets
+      <code>status = "archived"</code> in place — files are never deleted, so the lineage keeps its history.
+    </div>` + cands.map(r => {
+    const d = r.after - r.before;
+    return `<div class="panel"><div class="pb">
+      <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start">
+        <div style="flex:1;min-width:260px">
+          <span class="b ${d<-0.5?"failed":"queued"} dot">${d<-0.5?"proof rate fell":"never cited"}</span>
+          <div class="stmt" style="margin-top:9px">${h(r.stmt)}</div>
+          <div class="lin" style="margin-top:6px">${h(r.lin)}</div>
+          <div class="meta"><span><b>${h(r.file)}</b></span><span>published ${h(r.pub)} · ${h(r.pr)}</span></div>
+        </div>
+        <div style="flex:0 0 auto;display:flex;gap:8px">
+          ${r.lin === "ctx.core.test-file-naming"
+            ? `<a class="btn sm" href="${BASE}/steering/prs/407">${ic("pr")}Retirement PR #407 open</a>`
+            : `<button class="btn sm" onclick="toast('Opens a Context PR on acme/mobile setting status = archived on ${h(r.lin)}. Outside this flow.')">${ic("retire")}Open retirement PR</button>`}
+        </div>
+      </div>
+      <div class="effect" style="margin-top:14px;padding-top:13px;border-top:1px solid var(--border)">
+        <div class="ef"><div class="k">rendered</div><div class="v">${r.rendered.toLocaleString()}</div></div>
+        <div class="ef"><div class="k">cited</div><div class="v ${r.cited===0?"down":""}">${r.cited}</div></div>
+        <div class="ef"><div class="k">violated</div><div class="v ${r.violated?"down":"flat"}">${r.violated}</div></div>
+        <div class="ef"><div class="k">proof before</div><div class="v flat">${pct(r.before)}</div></div>
+        <div class="ef"><div class="k">proof after</div><div class="v ${d<0?"down":"flat"}">${pct(r.after)}</div></div>
+        <div class="ef"><div class="k">delta</div><div class="v ${d<0?"down":"flat"}">${d>0?"+":""}${d.toFixed(1)}</div></div>
+      </div>
+      <div class="note-i" style="margin-top:13px">${h(r.retireWhy)}</div>
+    </div></div>`;
+  }).join("");
+}
+</script>
+
+<script>
+"use strict";
+
+/* ══════════════════════════════════════════════════════════════════════
+   The Context PR: branch, diff, body, checks, merge
+   ══════════════════════════════════════════════════════════════════════ */
+function openContextPR(){
+  S.pr = "checking";
+  S.checks = PR_CHECKS.map(c => ({ ...c, state:"queued" }));
+  location.hash = BASE + "/steering/prs/412";
+  runChecks("pr");
+  toast("Branch context/ctx.core.openapi-regen-on-route-change pushed. Pull request acme/platform#412 opened.");
+}
+
+function runChecks(which){
+  const list  = which === "pr" ? S.checks : S.agentChecks;
+  const specs = which === "pr" ? PR_CHECKS : AGENT_CHECKS;
+  S.timers.forEach(clearTimeout); S.timers = [];
+  specs.forEach((c, i) => {
+    const startAt = i === 0 ? 250 : specs[i-1].ms;
+    S.timers.push(setTimeout(() => { list[i].state = "running"; route(); }, startAt));
+    S.timers.push(setTimeout(() => {
+      list[i].state = "success";
+      if (i === specs.length - 1){
+        if (which === "pr") S.pr = "passed"; else S.agentPr = "passed";
+      }
+      route();
+    }, c.ms));
+  });
+}
+
+function mergePR(){
+  S.pr = "merged";
+  route();
+  toast("Merged. promotion_event written, bundle_v215 signed, steering_published audited.");
+}
+function mergeAgentPR(){
+  S.agentPr = "merged";
+  route();
+  toast("Merged. Principal created for acme.core.docs-writer. Status: unenrolled until credentials are issued.");
+}
+
+function checkRow(c){
+  const st = c.state || "success";
+  const ic_ = st === "success"
+    ? `<span class="ic" style="color:var(--s-allowed)">${ic("check","")}</span>`
+    : st === "running" ? `<span class="ic"><span class="spin"></span></span>`
+    : `<span class="ic" style="color:var(--s-queued)">${ic("clock","")}</span>`;
+  return `<div class="chk">${ic_}
+    <div style="min-width:0">
+      <div class="nm">${h(c.name)}</div>
+      <div class="ds">${h(st === "success" ? c.ok : st === "running" ? c.run : "Queued")}</div>
+    </div>
+    <span class="tm">${st === "success" ? c.dur : st === "running" ? "running" : "queued"}</span>
+  </div>`;
+}
+
+function diffLines(text){
+  return text.split("\n").map((l,i) =>
+    `<div class="dl add"><span class="g">${i+1}</span><span class="c">+${h(l)}</span></div>`).join("");
+}
+
+function renderPR(num){
+  crumbs([{t:"Acme Robotics",r:"#/acme"},{t:"core-platform",r:BASE},{t:"Steering",r:BASE+"/steering"},
+          {t:"Context PRs",r:BASE+"/steering/prs"},{t:"#"+num}]);
+
+  if (num === "413") return renderAgentPR();
+
+  const stat = { "409":{repo:"acme/mobile", branch:"context/ctx.mobile.snapshot-baseline",
+      title:"Record the snapshot baseline convention for acme/mobile", by:"Oxagen promoter",
+      opened:"2026-09-09 10:14 UTC", base:"main · 8d40c11", kind:"steering" },
+    "407":{repo:"acme/platform", branch:"context/ctx.core.test-file-naming",
+      title:"Retire ctx.core.test-file-naming", by:"Marcus Bell",
+      opened:"2026-09-08 17:40 UTC", base:"main · e91b2d7", kind:"retirement" } }[num];
+
+  if (stat) return renderStaticPR(num, stat);
+
+  if (S.pr === "none"){ location.replace(BASE+"/steering/proposals/"+PROPOSALS[0].id); return; }
+
+  const p = PROPOSALS[0];
+  const merged = S.pr === "merged";
+  const passed = S.pr === "passed" || merged;
+  const done = S.checks.filter(c => c.state === "success").length;
+
+  const state = merged ? `<span class="b proven dot lg">merged</span>`
+    : passed ? `<span class="b allowed dot lg">checks passed</span>`
+    : `<span class="b running dot lg">checks running · ${done} / 5</span>`;
+
+  const body = `
+  <div class="rail">
+    <span class="st done"><span class="d"></span>proposal</span>${ic("arrow","ar ni")}
+    <span class="st ${merged?"done":"now"}"><span class="d"></span>Context PR</span>${ic("arrow","ar ni")}
+    <span class="st ${passed?"done":merged?"done":"now"}"><span class="d"></span>checks</span>${ic("arrow","ar ni")}
+    <span class="st ${merged?"done":""}"><span class="d"></span>review</span>${ic("arrow","ar ni")}
+    <span class="st ${merged?"done":""}"><span class="d"></span>merge</span>${ic("arrow","ar ni")}
+    <span class="st ${merged?"done":""}"><span class="d"></span>promotion_event</span>${ic("arrow","ar ni")}
+    <span class="st ${merged?"done":""}"><span class="d"></span>published</span>${ic("arrow","ar ni")}
+    <span class="st ${merged?"now":""}"><span class="d"></span>delivered</span>
+  </div>
+
+  <div class="split">
+    <div>
+      <div class="panel">
+        <div class="ph">${ic("branch")}<h3 class="mono" style="font-weight:500;font-size:12.5px">${h("context/"+p.lin)}</h3>
+          <span class="sp"></span><span class="note">base main · e91b2d7</span></div>
+        <div class="pb">
+          <dl class="kv">
+            <dt>repository</dt><dd><b>acme/platform</b> — main repo of core-platform</dd>
+            <dt>head</dt><dd>4c1f9ab · 1 commit · 1 file changed, 47 insertions</dd>
+            <dt>author</dt><dd>Oxagen promoter (service principal svc_promoter)</dd>
+            <dt>one concern</dt><dd>1 record, 1 lineage — the checks refuse a second</dd>
+          </dl>
+        </div>
+        <div class="diff">
+          <div class="fl">${ic("file")}<span class="p mono">.oxagen/rules/${h(p.lin)}.toml</span>
+            <span class="b allowed" style="margin-left:auto">new file · +47</span></div>
+          <div class="rows">${diffLines(RECORD_TOML)}</div>
+        </div>
+      </div>
+
+      <div class="panel"><div class="ph"><h3>Pull request body</h3><span class="sp"></span>
+        <span class="note">written by the promoter</span></div>
+        <div class="pb"><pre class="code" style="background:var(--ink)">${h(PR_BODY)}</pre></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="panel">
+        <div class="ph">${ic("pr")}<h3>Checks</h3><span class="sp"></span>${state}</div>
+        <div>${S.checks.map(checkRow).join("")}</div>
+        <div class="mergebar">
+          ${merged ? `<div style="flex:1"><div class="ttl" style="color:var(--s-proven)">Merged by Marcus Bell</div>
+              <div class="ds">2026-09-11 14:21:06 UTC · squashed into main as 4c1f9ab</div></div>`
+            : passed ? `<div style="flex:1"><div class="ttl">Five checks passed</div>
+              <div class="ds">Governance <b>team</b>: a code-owner review is required. Marcus Bell owns
+                <code>.oxagen/rules/</code>.</div></div>
+              <button class="btn gold" onclick="mergePR()">${ic("merge")}Merge pull request</button>`
+            : `<div style="flex:1"><div class="ttl">Checks are running</div>
+              <div class="ds">Merge is blocked until schema, hash, conflicts, secrets and probes all report.</div></div>
+              <button class="btn" disabled>${ic("merge")}Merge pull request</button>`}
+        </div>
+      </div>
+
+      ${merged ? `
+      <div class="panel"><div class="ph">${ic("spark")}<h3>promotion_event</h3><span class="sp"></span>
+        <span class="note">written by the promoter, never by an agent</span></div>
+        <div class="pb"><dl class="kv">
+          <dt>record_id</dt><dd><b>rec_01K52H8XQ4M7VYB3NDCF0P</b></dd>
+          <dt>kind</dt><dd>promotion_event</dd>
+          <dt>lineage_id</dt><dd>${h(p.lin)}</dd>
+          <dt>from → to</dt><dd>proposed <span style="color:var(--dim)">→</span> <b>published</b></dd>
+          <dt>approver</dt><dd><b>Marcus Bell</b> · workspace owner, core-platform</dd>
+          <dt>pr_url</dt><dd>github.com/acme/platform/pull/412</dd>
+          <dt>commit_sha</dt><dd>4c1f9ab</dd>
+          <dt>merged_at</dt><dd>2026-09-11 14:21:06 UTC</dd>
+          <dt>re-indexed</dt><dd>from the merged commit · record_hash verified against the file</dd>
+          <dt>bundle</dt><dd>bundle_v214 <span style="color:var(--dim)">→</span> <b>bundle_v215</b> · signed 14:21:09 UTC</dd>
+          <dt>audit</dt><dd>steering_published · evt_01K52H8XR1</dd>
+          <dt>ledger</dt><dd>promotions.jsonl <b>not written</b> — hash-chained ledger entries are regulated mode only; this workspace is <b>team</b></dd>
+        </dl></div>
+      </div>
+      <div class="call">${ic("bolt")}<div class="tx">
+        <b>It is delivered.</b> The next model call on any run in core-platform carries this record in the
+        steering block after the cached system block.
+        <a href="${BASE}/runs/${RUN.id}/4" style="color:var(--accent-text);font-weight:600">
+          See it in run_01K52JN4D8 ${ic("arrow","ni")}</a></div></div>`
+      : `<div class="panel"><div class="ph"><h3>What merge will do</h3></div><div class="pb"><dl class="kv">
+          <dt>1</dt><dd>write a <b>promotion_event</b> record in the graph with the approver, pull request url and commit sha</dd>
+          <dt>2</dt><dd>re-index the record <b>from the merged commit</b>; a hash mismatch is a steering_drift incident that blocks delivery</dd>
+          <dt>3</dt><dd>bump the workspace bundle and re-sign it</dd>
+          <dt>4</dt><dd>emit <b>steering_published</b> and <b>context_pr.merged</b></dd>
+          <dt>5</dt><dd>deliver it on the next model call of every run in core-platform</dd>
+        </dl></div></div>`}
+    </div>
+  </div>`;
+
+  $("#view").innerHTML = `
+    <div class="phead"><div>
+      <p class="eyebrow">Context PR · acme/platform#412</p>
+      <h1>${h(p.hero ? "Require a regenerated OpenAPI contract when a route changes" : p.lin)}</h1>
+      <p class="sub">One concern, one record file, five checks. Opened by the promoter from four runs;
+        merged by a person.</p>
+    </div><div class="phead-a">
+      <a class="btn" href="${BASE}/steering/prs">${ic("arrow")}All Context PRs</a>
+    </div></div>` + wrapState(body, {t:"That pull request is gone",p:"It was closed or the branch was deleted. The proposal is still on the Proposals tab."});
+}
+
+function renderStaticPR(num, m){
+  const isRetire = m.kind === "retirement";
+  const rows = isRetire
+    ? RETIRE_DIFF.map(d => `<div class="dl ${d.t}"><span class="g">${h(d.g)}</span><span class="c">${h(d.c)}</span></div>`).join("")
+    : diffLines(`schema = "context-record/v0.1"
+lineage_id = "ctx.mobile.snapshot-baseline"
+kind = "knowledge"
+status = "active"
+statement = """
+Snapshot baselines for acme/mobile live in e2e/__snapshots__/ and are
+regenerated only on a release branch, never on a feature branch.
+"""
+
+[scope]
+repository_id = "repo_acme_mobile"
+sharing_scope = "repository"
+
+[steering]
+authority = "should"
+
+record_hash = "sha256:41d0be7c9a2f…"`);
+
+  const body = `
+  <div class="split">
+    <div>
+      <div class="panel">
+        <div class="ph">${ic("branch")}<h3 class="mono" style="font-weight:500;font-size:12.5px">${h(m.branch)}</h3>
+          <span class="sp"></span><span class="note">base ${h(m.base)}</span></div>
+        <div class="pb"><dl class="kv">
+          <dt>repository</dt><dd><b>${h(m.repo)}</b>${m.repo==="acme/mobile"?" — linked repo; repository-scoped records live here":" — main repo"}</dd>
+          <dt>author</dt><dd>${h(m.by)}</dd>
+          <dt>opened</dt><dd>${h(m.opened)}</dd>
+          <dt>kind</dt><dd>${isRetire?"retirement — status set to archived in place, file never deleted":"new record"}</dd>
+        </dl></div>
+        <div class="diff"><div class="fl">${ic("file")}
+          <span class="p mono">${isRetire?".oxagen/rules/ctx.core.test-file-naming.toml":".oxagen/rules/ctx.mobile.snapshot-baseline.toml"}</span>
+          <span class="b ${isRetire?"queued":"allowed"}" style="margin-left:auto">${isRetire?"modified · +3 −1":"new file · +21"}</span></div>
+          <div class="rows">${rows}</div></div>
+      </div>
+    </div>
+    <div>
+      <div class="panel"><div class="ph">${ic("pr")}<h3>Checks</h3><span class="sp"></span>
+        <span class="b allowed dot lg">5 / 5 passed</span></div>
+        <div>${PR_CHECKS.map(c => checkRow({ ...c, state:"success",
+          ok: isRetire && c.name==="oxagen/conflicts"
+            ? "Archiving releases the subject. No active record depends on it."
+            : c.ok })).join("")}</div>
+        <div class="mergebar">
+          <div style="flex:1"><div class="ttl">Awaiting code-owner review</div>
+            <div class="ds">Governance <b>team</b>. Requested from Marcus Bell ${isRetire?"3 days":"2 days"} ago.</div></div>
+          <button class="btn" onclick="toast('Reviewing #${num} is outside this flow — W6 follows acme/platform#412 end to end.')">${ic("arrow")}Review</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+
+  $("#view").innerHTML = `
+    <div class="phead"><div>
+      <p class="eyebrow">Context PR · ${h(m.repo)}#${num}</p><h1>${h(m.title)}</h1>
+      <p class="sub">${isRetire?"A retirement is a Context PR like any other: it sets status to archived in place.":"A repository-scoped record. It steers only runs bound to acme/mobile, and it may narrow what workspace records allow, never widen it."}</p>
+    </div><div class="phead-a"><a class="btn" href="${BASE}/steering/prs">${ic("arrow")}All Context PRs</a></div></div>`
+    + wrapState(body, {t:"That pull request is gone",p:"It was closed or the branch was deleted."});
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   Agent definition: dialog → Context PR → unenrolled agent
+   ══════════════════════════════════════════════════════════════════════ */
+function renderAgentPR(){
+  const merged = S.agentPr === "merged";
+  const passed = S.agentPr === "passed" || merged;
+  const done = S.agentChecks.filter(c => c.state === "success").length;
+
+  const body = `
+  <div class="rail">
+    <span class="st done"><span class="d"></span>defined in the UI</span>${ic("arrow","ar ni")}
+    <span class="st ${merged?"done":"now"}"><span class="d"></span>Context PR</span>${ic("arrow","ar ni")}
+    <span class="st ${passed?"done":"now"}"><span class="d"></span>checks</span>${ic("arrow","ar ni")}
+    <span class="st ${merged?"done":""}"><span class="d"></span>merge</span>${ic("arrow","ar ni")}
+    <span class="st ${merged?"done":""}"><span class="d"></span>principal created</span>${ic("arrow","ar ni")}
+    <span class="st ${merged?"now":""}"><span class="d"></span>unenrolled</span>${ic("arrow","ar ni")}
+    <span class="st"><span class="d"></span>enrolled</span>
+  </div>
+
+  <div class="split">
+    <div>
+      <div class="panel"><div class="ph">${ic("branch")}
+        <h3 class="mono" style="font-weight:500;font-size:12.5px">agents/docs-writer</h3>
+        <span class="sp"></span><span class="note">base main · ${S.pr==="merged"?"4c1f9ab":"e91b2d7"}</span></div>
+        <div class="pb"><dl class="kv">
+          <dt>repository</dt><dd><b>acme/platform</b> — main repo of core-platform</dd>
+          <dt>changed</dt><dd>2 files · the canonical definition and the harness file generated beside it</dd>
+          <dt>author</dt><dd><b>Marcus Bell</b> — created in Mission Control, committed by Oxagen</dd>
+          <dt>rule</dt><dd>the canonical file is the only one a person or an agent edits; a pull request that
+            touches a generated file without regenerating it fails the checks</dd>
+        </dl></div>
+        <div class="diff"><div class="fl">${ic("file")}
+          <span class="p mono">.oxagen/agents/docs-writer.toml</span>
+          <span class="b allowed" style="margin-left:auto">new file · canonical</span></div>
+          <div class="rows">${diffLines(AGENT_TOML)}</div></div>
+        <div class="diff"><div class="fl">${ic("file")}
+          <span class="p mono">.claude/agents/docs-writer.md</span>
+          <span class="b queued" style="margin-left:auto">new file · generated</span></div>
+          <div class="rows">${diffLines(AGENT_MD)}</div></div>
+      </div>
+    </div>
+    <div>
+      <div class="panel"><div class="ph">${ic("pr")}<h3>Checks</h3><span class="sp"></span>
+        ${merged?`<span class="b proven dot lg">merged</span>`
+          :passed?`<span class="b allowed dot lg">checks passed</span>`
+          :`<span class="b running dot lg">running · ${done} / 5</span>`}</div>
+        <div>${S.agentChecks.map(checkRow).join("")}</div>
+        <div class="mergebar">
+          ${merged?`<div style="flex:1"><div class="ttl" style="color:var(--s-proven)">Merged by Marcus Bell</div>
+              <div class="ds">2026-09-11 14:44:18 UTC · principal prn_01K52K0M7D created</div></div>`
+           :passed?`<div style="flex:1"><div class="ttl">Five checks passed</div>
+              <div class="ds">Merging creates the principal, the roles the definition asks for, and the toolbelt.</div></div>
+              <button class="btn gold" onclick="mergeAgentPR()">${ic("merge")}Merge pull request</button>`
+           :`<div style="flex:1"><div class="ttl">Checks are running</div>
+              <div class="ds">Nothing is written to Postgres until this merges.</div></div>
+              <button class="btn" disabled>${ic("merge")}Merge pull request</button>`}
+        </div>
+      </div>
+      <div class="panel"><div class="ph"><h3>${merged?"What the merge did":"What merge will do"}</h3></div><div class="pb">
+        <dl class="kv">
+          <dt>1</dt><dd>create principal <b>prn_01K52K0M7D</b>, agent key <b>acme.core.docs-writer</b>, immutable</dd>
+          <dt>2</dt><dd>record <b>definition_digest</b> sha256:71ad3e0c… — the version every run of this agent reports</dd>
+          <dt>3</dt><dd>materialize the toolbelt from the definition ∩ grants ∩ the delegation ceiling</dd>
+          <dt>4</dt><dd>set status <b>unenrolled</b> — identity exists, no credential has been issued</dd>
+          <dt>5</dt><dd>the next time Marcus opens Claude Code in acme/platform, the agent is there</dd>
+        </dl>
+        ${merged?`<a class="btn gold" style="width:100%;justify-content:center;margin-top:14px"
+          href="${BASE}/agents/docs-writer">${ic("agents")}Open acme.core.docs-writer</a>`:""}
+      </div></div>
+    </div>
+  </div>`;
+
+  $("#view").innerHTML = `
+    <div class="phead"><div>
+      <p class="eyebrow">Context PR · acme/platform#413</p>
+      <h1>Add agent acme.core.docs-writer</h1>
+      <p class="sub">An agent has two halves. Its identity lives in Postgres and must be revocable in one second.
+        Its definition is a file in the main repo. Creating one in Mission Control does not write Postgres first —
+        it opens a pull request.</p>
+    </div><div class="phead-a"><a class="btn" href="${BASE}/agents">${ic("arrow")}Agents</a></div></div>`
+    + wrapState(body, {t:"That pull request is gone",p:"The branch agents/docs-writer no longer exists."});
+}
+
+function openAgentDialog(){
+  overlay(`<div class="dlg wide" role="dialog" aria-modal="true" aria-label="New agent">
+    <div class="dlg-h">
+      <div style="flex:1"><h3>New agent in core-platform</h3>
+        <div class="s">This opens a Context PR on <b>acme/platform</b>. Nothing is created until it merges.</div></div>
+      <button class="tbtn" onclick="closeOverlay()" aria-label="Close">${ic("x")}</button>
+    </div>
+    <div class="dlg-b">
+      <div class="grid2">
+        <div class="field"><label>Slug — becomes the file name and the agent key</label>
+          <input class="inp" value="docs-writer" readonly>
+          <div class="hint">Agent key <code>acme.core.docs-writer</code>, immutable once merged.</div></div>
+        <div class="field"><label>Name</label><input class="inp" style="font-family:var(--font)" value="Docs writer" readonly></div>
+      </div>
+      <div class="field"><label>Description</label>
+        <textarea class="inp" rows="2" readonly>Keeps the developer documentation in step with the API. Opens a pull request; a person merges it.</textarea></div>
+      <div class="field"><label>Instructions</label>
+        <textarea class="inp" rows="5" readonly>You keep the developer documentation in step with the API of this repository. Read the conventions in .oxagen/rules before you write. When a route changes, update the guide that covers it and the reference page generated from packages/contracts/openapi.json. Open a pull request and stop; a person merges it.</textarea>
+        <div class="hint">Scanned for secrets and PII by the <code>oxagen/secrets</code> check before merge.</div></div>
+      <div class="grid2">
+        <div class="field"><label>Model tier</label>
+          <div class="seg"><button class="on">complex</button><button onclick="toast('Light tier routes to the flash model.')">light</button><button onclick="toast('A pinned model id is allowed instead of a tier.')">pinned id</button></div>
+          <div class="hint">Routed by Oxagen; the concrete model id is recorded on every frame.</div></div>
+        <div class="field"><label>Harness</label>
+          <div class="seg"><button class="on">Claude Agent SDK</button><button onclick="toast('Claude Code reads .claude/agents/docs-writer.md, generated beside the canonical file.')">Claude Code</button><button onclick="toast('Codex CLI has its own generated file; the format is an adapter table, not a product change.')">Codex CLI</button></div>
+          <div class="hint">Wrapped with <code>oxagen.agent.wrap({})</code>.</div></div>
+      </div>
+      <div class="field"><label>Tools</label>
+        <div class="chips"><span class="chip">github__*</span><span class="chip">search_graph</span>
+          <span class="chip">recall_context</span><span class="chip">read_file</span></div>
+        <div class="hint">4 patterns, resolved against the registry by the <code>oxagen/tools-exist</code> check.
+          The toolbelt is the only tool list the model is ever shown.</div></div>
+      <div class="field"><label>Denied tools — deny always wins</label>
+        <div class="chips"><span class="chip deny">github__merge_pull_request@*</span>
+          <span class="chip deny">github__delete_*@*</span></div></div>
+      <div class="grid2">
+        <div class="field"><label>Side-effect classes</label>
+          <div class="seg"><button class="on">read</button><button class="on">write</button>
+            <button disabled title="A mandate is required">irreversible</button></div>
+          <div class="hint">Irreversible is unavailable: it requires a mandate, and this agent holds none.</div></div>
+        <div class="field"><label>Budget per run</label>
+          <input class="inp" value="1500000 micros  ·  $1.50 USD" readonly>
+          <div class="hint">Enforced at the model proxy; a breach pauses the run.</div></div>
+      </div>
+      <div class="note-i">Merging writes <b>.oxagen/agents/docs-writer.toml</b> and, generated beside it,
+        <b>.claude/agents/docs-writer.md</b> carrying the source file name and its digest. One source, every harness.</div>
+    </div>
+    <div class="dlg-f">
+      <span class="mono" style="font-size:11px;color:var(--dim)">register_agent · governed action · audited</span>
+      <span class="sp"></span>
+      <button class="btn" onclick="closeOverlay()">Cancel</button>
+      <button class="btn gold" onclick="submitAgent()">${ic("pr")}Open Context PR</button>
+    </div>
+  </div>`);
+}
+
+function submitAgent(){
+  closeOverlay();
+  S.agentPr = "checking";
+  S.agentChecks = AGENT_CHECKS.map(c => ({ ...c, state:"queued" }));
+  location.hash = BASE + "/steering/prs/413";
+  runChecks("agent");
+  toast("Branch agents/docs-writer pushed with 2 files. Pull request acme/platform#413 opened.");
+}
+</script>
+
+<script>
+"use strict";
+
+/* ══════════════════════════════════════════════════════════════════════
+   Page: Agents
+   ══════════════════════════════════════════════════════════════════════ */
+function renderAgents(arg){
+  DENY_CTX = { subj:"agent:read", page:"agents", noun:"agents in core-platform",
+    line:"Agent identity is workspace-scoped, and no grant reaches this workspace." };
+  if (arg === "docs-writer") return renderDocsWriter();
+  crumbs([{t:"Acme Robotics",r:"#/acme"},{t:"core-platform",r:BASE},{t:"Agents"}]);
+
+  const dw = S.agentPr === "none" ? null : {
+    key:DOCS_WRITER.key, name:DOCS_WRITER.name, harness:DOCS_WRITER.harness,
+    status: S.agentPr === "merged" ? "unenrolled" : "pending merge",
+    tier:"—", runs:0, spend:0, op:DOCS_WRITER.op, tools:DOCS_WRITER.tools, digest:DOCS_WRITER.digest,
+  };
+  const all = AGENTS.concat(dw ? [dw] : []);
+
+  const rows = all.map(a => {
+    const st = a.status === "enrolled" ? "allowed"
+             : a.status === "unenrolled" ? "approval" : "queued";
+    const href = a.key === DOCS_WRITER.key
+      ? (S.agentPr === "merged" ? BASE+"/agents/docs-writer" : BASE+"/steering/prs/413")
+      : null;
+    return `<tr class="click" onclick="${href?`location.hash='${href}'`:`toast('Agent detail for ${h(a.key)} is outside this flow.')`}">
+      <td><div class="t1 mono" style="font-size:12.5px">${h(a.key)}</div>
+        <div class="t2">${h(a.name)} · operator ${h(a.op)}</div></td>
+      <td class="mono" style="font-size:11.5px;color:var(--muted)">${h(a.harness)}</td>
+      <td><span class="b ${st} dot">${h(a.status)}</span>
+        ${a.status==="pending merge"?`<div class="t2 mono" style="font-size:11px">acme/platform#413</div>`:""}
+        ${a.status==="unenrolled"?`<div class="t2" style="font-size:11px">identity exists · no credential issued</div>`:""}</td>
+      <td class="mono" style="font-size:11.5px;color:var(--muted)">${h(a.tier)}</td>
+      <td class="num">${a.tools}</td>
+      <td class="num">${a.runs.toLocaleString()}</td>
+      <td class="num">${a.spend ? money(a.spend) : "—"}</td>
+      <td class="mono" style="font-size:11px;color:var(--dim)">${h(a.digest)}</td>
+    </tr>`;
+  }).join("");
+
+  const body = `
+  ${S.agentPr === "merged" ? `<div class="call" style="margin-bottom:16px">${ic("agents")}<div class="tx">
+      <b>acme.core.docs-writer exists and is unenrolled.</b> The merge of acme/platform#413 created the principal,
+      the roles the definition asked for and the toolbelt. It stays <span class="mono">unenrolled</span> until a
+      credential is issued — an identity with no way to run.
+      <a href="${BASE}/agents/docs-writer" style="color:var(--accent-text);font-weight:600">Open it ${ic("arrow","ni")}</a></div></div>`
+    : S.agentPr !== "none" ? `<div class="call" style="margin-bottom:16px">${ic("pr")}<div class="tx">
+      <b>acme.core.docs-writer is not created yet.</b> Its definition is waiting in acme/platform#413.
+      Nothing was written to Postgres.
+      <a href="${BASE}/steering/prs/413" style="color:var(--accent-text);font-weight:600">Open the pull request ${ic("arrow","ni")}</a></div></div>` : ""}
+
+  <div class="panel"><div class="ph"><h3>Agents in core-platform</h3><span class="sp"></span>
+    <span class="note">${all.length} of ${WS.fleet} in the fleet · 46 in finops and other workspaces</span></div>
+    <div class="tw"><table><thead><tr>
+      <th>Agent key</th><th>Harness</th><th>Status</th><th>Tier</th><th>Belt</th><th>Runs</th><th>Spend</th><th>Definition digest</th>
+    </tr></thead><tbody>${rows}</tbody></table></div>
+  </div>
+  <div class="note-i" style="margin-top:16px">An agent's <b>identity</b> — principal, credentials, roles, mandates —
+    lives in Postgres and is revocable in one second. Its <b>definition</b> — what it is for, its instructions, which
+    tools it may use — is a file in <b>.oxagen/agents/</b> in the main repo. They are joined by the agent key and by
+    <b>definition_digest</b>, the hash of the file at the commit the agent last ran from.</div>`;
+
+  $("#view").innerHTML = `
+    <div class="phead"><div>
+      <p class="eyebrow">Workspace fleet · ${WS.fleet} agents</p><h1>Agents</h1>
+      <p class="sub">Identity, run credential, roles, toolbelt, mandates, budgets and enrollment status.
+        Creating one here opens a Context PR; it does not write the control plane.</p>
+    </div><div class="phead-a">
+      <button class="btn" onclick="toast('Wrap Claude Code produces a signed installer link with a one-time enrollment token. That is W1.')">${ic("bolt")}Wrap Claude Code</button>
+      ${S.agentPr === "none"
+        ? `<button class="btn gold" onclick="openAgentDialog()">${ic("plus")}New agent</button>`
+        : `<button class="btn" disabled>${ic("plus")}New agent</button>`}
+    </div></div>`
+    + wrapState(body, {t:"No agents in this workspace yet", p:"core-platform has no registered agent. Wrap a coding harness in one click, or define an agent in git — either way the identity is created when the Context PR merges.", a:"New agent", ar:"#", n:"0 of 50 fleet agents are in this workspace"});
+}
+
+function renderDocsWriter(){
+  DENY_CTX = { subj:"agent:read", page:"agents", noun:"acme.core.docs-writer",
+    line:"Agent identity is workspace-scoped, and no grant reaches core-platform." };
+  crumbs([{t:"Acme Robotics",r:"#/acme"},{t:"core-platform",r:BASE},{t:"Agents",r:BASE+"/agents"},{t:"acme.core.docs-writer"}]);
+  const body = `
+  <div class="split">
+    <div>
+      <div class="panel"><div class="ph"><h3>Identity</h3><span class="sp"></span>
+        <span class="b approval dot lg">unenrolled</span></div>
+        <div class="pb"><dl class="kv">
+          <dt>agent_key</dt><dd><b>acme.core.docs-writer</b> — immutable</dd>
+          <dt>principal_id</dt><dd>prn_01K52K0M7D · kind agent</dd>
+          <dt>workspace</dt><dd>ws_core_platform</dd>
+          <dt>harness</dt><dd>claude-agent-sdk · wrapped with <b>oxagen.agent.wrap({})</b></dd>
+          <dt>operator</dt><dd><b>Marcus Bell</b> — accountable for every run</dd>
+          <dt>credential</dt><dd><b>none issued</b> — the agent cannot start a run</dd>
+          <dt>created by</dt><dd>merge of acme/platform#413 at 2026-09-11 14:44:18 UTC</dd>
+          <dt>definition</dt><dd>.oxagen/agents/docs-writer.toml @ 9e2b7f4</dd>
+          <dt>definition_digest</dt><dd>sha256:71ad3e0c9b4f2265d81a03ce7fb5904e18cc22d7a6390bbf4e0d1c8a75326fd1</dd>
+        </dl></div>
+      </div>
+      <div class="panel"><div class="ph"><h3>Toolbelt</h3><span class="sp"></span>
+        <span class="note">grants ∩ delegation ceiling ∩ policy bundle ∩ kill switches</span></div>
+        <div class="tw"><table><thead><tr><th>Tool version</th><th>Risk</th><th>Side effect</th><th>Decision</th><th>Schema digest</th></tr></thead><tbody>
+          <tr><td class="mono" style="font-size:12px">github__create_pull_request@3</td><td><span class="b dot">medium</span></td><td class="mono" style="font-size:11.5px">write</td><td><span class="b allowed dot">allow</span></td><td class="mono" style="font-size:11px;color:var(--dim)">sha256:4a0c21…</td></tr>
+          <tr><td class="mono" style="font-size:12px">github__get_file_contents@2</td><td><span class="b dot">low</span></td><td class="mono" style="font-size:11.5px">read</td><td><span class="b allowed dot">allow</span></td><td class="mono" style="font-size:11px;color:var(--dim)">sha256:9d17bb…</td></tr>
+          <tr><td class="mono" style="font-size:12px">search_graph@2</td><td><span class="b dot">low</span></td><td class="mono" style="font-size:11.5px">read</td><td><span class="b allowed dot">allow</span></td><td class="mono" style="font-size:11px;color:var(--dim)">sha256:c3f902…</td></tr>
+          <tr><td class="mono" style="font-size:12px">recall_context@1</td><td><span class="b dot">low</span></td><td class="mono" style="font-size:11.5px">read</td><td><span class="b allowed dot">allow</span></td><td class="mono" style="font-size:11px;color:var(--dim)">sha256:70ee48…</td></tr>
+          <tr><td class="mono" style="font-size:12px">github__merge_pull_request@3</td><td><span class="b dot">high</span></td><td class="mono" style="font-size:11.5px">irreversible</td><td><span class="b denied dot">deny</span></td><td class="mono" style="font-size:11px;color:var(--dim)">not shown to the model</td></tr>
+        </tbody></table></div>
+        <div class="pb" style="border-top:1px solid var(--border)">
+          <div class="note-i">Four tool versions are in the belt, so the model sees the <b>full belt</b> — every
+            definition in the request. The denied pattern is not in the belt: the model cannot see it, cannot
+            search for it, and a call by name is rejected before lookup as <code>unknown_tool</code>.</div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="panel"><div class="ph"><h3>Enrollment</h3></div><div class="pb">
+        <p style="margin:0 0 13px;font-size:13px;color:var(--body)">The identity exists. Issue the long-lived agent
+          credential to Marcus Bell once, and the gateway will mint fifteen-minute run tokens from it.</p>
+        <button class="btn gold" style="width:100%;justify-content:center"
+          onclick="toast('Issuing the credential is W1 — sixty seconds to governed. This flow ends at unenrolled.')">${ic("bolt")}Issue run credential</button>
+        <dl class="kv" style="margin-top:14px">
+          <dt>status</dt><dd><b>unenrolled</b></dd>
+          <dt>runs</dt><dd>0</dd>
+          <dt>spend</dt><dd>$0.00 USD</dd>
+          <dt>budget</dt><dd>$1.50 USD per run</dd>
+          <dt>mandates</dt><dd>none — the definition declares read and write only</dd>
+          <dt>tamper incidents</dt><dd>none</dd>
+        </dl>
+      </div></div>
+      <div class="panel"><div class="ph"><h3>Definition in git</h3></div><div class="pb">
+        <pre class="code">${h(AGENT_TOML)}</pre>
+        <div class="note-i" style="margin-top:12px">Deleting this agent is a pull request that removes the file.
+          The principal is retired, never deleted, so its runs keep their identity.</div>
+      </div></div>
+    </div>
+  </div>`;
+
+  $("#view").innerHTML = `
+    <div class="phead"><div>
+      <p class="eyebrow">Agent · created by merge</p><h1>acme.core.docs-writer</h1>
+      <p class="sub">Docs writer. Defined in the main repo, identified in the control plane, and not yet able to run.</p>
+    </div><div class="phead-a"><a class="btn" href="${BASE}/agents">${ic("arrow")}Agents</a>
+      <a class="btn" href="${BASE}/steering/prs/413">${ic("pr")}#413</a></div></div>`
+    + wrapState(body, {t:"No agent here", p:"acme.core.docs-writer does not exist. Its definition has not merged."});
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   Page: Run — the next run, with the new steering in model.request
+   ══════════════════════════════════════════════════════════════════════ */
+function renderRun(sel){
+  DENY_CTX = { subj:"run:read", page:"run", noun:"run_01K52JN4D8",
+    line:"A run is readable by its operator and by anyone holding run:read in its workspace." };
+  const seq = Number(sel ?? 4);
+  crumbs([{t:"Acme Robotics",r:"#/acme"},{t:"core-platform",r:BASE},{t:"Fleet",r:BASE},{t:RUN.id}]);
+  const live = S.pr === "merged";
+
+  const frameList = FRAMES.map(f => `
+    <div class="fr ${f.seq===seq?"on":""}" onclick="location.hash='${BASE}/runs/${RUN.id}/${f.seq}'"
+         tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();location.hash='${BASE}/runs/${RUN.id}/${f.seq}'}">
+      <span class="sq">${f.seq}</span>
+      <div style="min-width:0;flex:1">
+        <div class="kd">${h(f.kind)}${f.hot&&live?' <span class="b new" style="margin-left:5px">new steering</span>':""}</div>
+        <div class="sm">${h(f.sum)}</div>
+      </div>
+      ${f.state?`<span class="b ${f.state} dot" style="flex:0 0 auto">${h(f.state)}</span>`:""}
+    </div>`).join("");
+
+  const detail = seq === 4 ? frame4(live) : frameOther(seq);
+
+  const body = `
+  <div class="panel" style="margin-bottom:16px"><div class="pb" style="display:flex;gap:22px;flex-wrap:wrap">
+    <div><p class="eyebrow q">Enforcement tier</p><span class="b allowed dot lg">${h(RUN.tier)}</span>
+      <div class="meta"><span>model proxy and tool gateway both in path</span></div></div>
+    <div><p class="eyebrow q">Replay grade</p><span class="b proven dot lg">${h(RUN.grade)}</span>
+      <div class="meta"><span>bodies retained · no completeness gaps</span></div></div>
+    <div><p class="eyebrow q">Bundle</p><div class="num" style="color:var(--fg);font-size:15px">${live?"bundle_v215":"bundle_v214"}</div>
+      <div class="meta"><span>${live?"signed 14:21:09 UTC":"signed 2026-09-08 09:02 UTC"}</span></div></div>
+    <div><p class="eyebrow q">Cost so far</p><div class="num" style="color:var(--fg);font-size:15px">${money(RUN.cost)}</div>
+      <div class="meta"><span>basis: metered at the proxy · price book pb_2026_09</span></div></div>
+    <div><p class="eyebrow q">Chain</p><span class="b proven dot lg">intact · 14 frames</span>
+      <div class="meta"><span>dense seq 0–13 · no telemetry_gap</span></div></div>
+  </div></div>
+
+  ${live ? `<div class="call" style="margin-bottom:16px">${ic("spark")}<div class="tx">
+    <b>Frame 4 carries a record that did not exist an hour ago.</b> The steering block on this run's first model
+    call has four records where <span class="mono">bundle_v214</span> had three. The fourth arrived when
+    Marcus Bell merged acme/platform#412 at 14:21:06 UTC, fifteen minutes before this run started.</div></div>`
+   : `<div class="note-i" style="margin-bottom:16px">This run is on <b>bundle_v214</b>. Merge
+      <a href="${BASE}/steering/prs/412" style="color:var(--accent-text)">acme/platform#412</a> and come back:
+      the steering block on frame 4 gains a record.</div>`}
+
+  <div class="split rev">
+    <div class="panel"><div class="ph"><h3>Frames</h3><span class="sp"></span>
+      <span class="note">${RUN.frames} frames · sealed</span></div>
+      <div class="frames">${frameList}</div></div>
+    <div>${detail}</div>
+  </div>`;
+
+  $("#view").innerHTML = `
+    <div class="phead"><div>
+      <p class="eyebrow">Run · ${h(RUN.agent)}</p><h1>${h(RUN.id)}</h1>
+      <p class="sub">Operator ${h(RUN.op)} · started ${h(RUN.started)} · task ${h(RUN.task)} ·
+        ${h(RUN.harness)} on ${h(RUN.repo)}@${h(RUN.base)}</p>
+    </div><div class="phead-a">
+      <button class="btn" onclick="toast('Steering a live run is W2 — stop it, steer it.')">${ic("arrow")}Steer</button>
+      <button class="btn" onclick="toast('Fork replay re-runs from this frame with the recorded context and tool results as a cassette. That is W4.')">${ic("run")}Fork replay</button>
+    </div></div>`
+    + wrapState(body, {t:"No frames on this run", p:"The run started and no frame has been ingested. The enforcement tier is <code>observe</code> until the first frame arrives."});
+}
+
+function frame4(live){
+  const rows = STEER_BLOCK.filter(r => live || !r.isNew).map(r => `
+    <div class="r ${r.isNew&&live?"hit":""}">
+      <span class="b ${r.auth==="must"?"approval":"queued"}">${h(r.auth)}</span>
+      <span class="lin">${h(r.lin)}</span>
+      <span class="mono" style="font-size:10.5px;color:var(--dim)">${h(r.hash)}</span>
+      <span class="mono" style="font-size:10.5px;color:var(--dim)">${r.toks} tok</span>
+      ${r.isNew&&live?`<span class="b new">new · bundle_v215</span>`:""}
+    </div>`).join("");
+
+  const toks = live ? 268 : 209;
+  const text = live ? STEER_TEXT : STEER_TEXT.replace(/  <record lineage="ctx\.core\.openapi-regen-on-route-change"[\s\S]*?<\/record>\n/, "");
+
+  return `
+  <div class="panel"><div class="ph"><h3 class="mono" style="font-weight:500">model.request</h3>
+    <span class="sp"></span><span class="note">seq 4 · frame 01K52JN5QP</span></div>
+    <div class="pb">
+      <dl class="kv" style="margin-bottom:15px">
+        <dt>provider</dt><dd>anthropic · via the Oxagen model proxy</dd>
+        <dt>model</dt><dd><b>claude-opus-5</b> (model tier complex)</dd>
+        <dt>request id</dt><dd>req_01K52JNQ8P4V0C</dd>
+        <dt>emitted by</dt><dd>model proxy — Oxagen-attested, not client-attested</dd>
+        <dt>prev_hash</dt><dd>sha256:d81c40aa7e…</dd>
+        <dt>hash</dt><dd>sha256:1f6b32c904…</dd>
+      </dl>
+
+      <p class="eyebrow">Steering injected</p>
+      <p style="font-size:12.5px;color:var(--muted);margin:0 0 10px">A volatile message placed immediately after
+        the cached system block, so the cache prefix is never invalidated by a steering change.</p>
+      <div class="steerblk">${rows}</div>
+
+      <div style="margin-top:15px">
+        <p class="eyebrow">What the agent was told, verbatim</p>
+        <pre class="code">${h(text)}</pre>
+        <p class="meta" style="margin-top:9px"><span>Steering is <b>evidence</b>, quoted and cited. Oxagen never
+          executes it as an instruction; whether a harness treats it as one is the harness's contract.</span></p>
+      </div>
+
+      <div style="margin-top:15px">
+        <p class="eyebrow">Context frames · 5 · 4,182 tokens</p>
+        <dl class="kv">
+          <dt>cf_openapi_conventions</dt><dd>fact · from record ctx.core.openapi-regen-on-route-change · valid_from 14:21:06 UTC · 412 tok</dd>
+          <dt>cf_release_checklist</dt><dd>knowledge · acme/platform@4c1f9ab · 980 tok</dd>
+          <dt>cf_changelog_headings</dt><dd>fact · from record ctx.core.changelog-keepachangelog · 244 tok</dd>
+          <dt>cf_pr_3391_body</dt><dd>evidence · github__get_issue@2 output digest sha256:b7e0… · 1,806 tok</dd>
+          <dt>cf_last_release</dt><dd>memory · run_01K4RC9ZH1 · 740 tok</dd>
+        </dl>
+      </div>
+
+      <div style="margin-top:15px">
+        <p class="eyebrow">Token accounting</p>
+        <div class="tw"><table style="font-size:12.5px"><thead><tr>
+          <th>Class</th><th style="text-align:right">Tokens</th><th>Note</th></tr></thead><tbody>
+          <tr><td class="mono">input_uncached</td><td class="num" style="text-align:right">1,204</td><td class="t2">fresh prompt tokens</td></tr>
+          <tr><td class="mono">cache_read</td><td class="num" style="text-align:right">18,640</td><td class="t2">served from the 1 h cache</td></tr>
+          <tr><td class="mono">cache_write_1h</td><td class="num" style="text-align:right">0</td><td class="t2">prefix unchanged</td></tr>
+          <tr><td class="mono">tool_definition_tokens</td><td class="num" style="text-align:right">3,910</td><td class="t2">18 tools, full belt</td></tr>
+          <tr><td class="mono">context_frame_tokens</td><td class="num" style="text-align:right">4,182</td><td class="t2">5 frames, protocol accounting</td></tr>
+          <tr><td class="mono" style="color:var(--accent-text)">steering_tokens</td><td class="num" style="text-align:right;color:var(--accent-text)">${toks}</td><td class="t2">${live?"4 records — 59 of these are the new one":"3 records"}</td></tr>
+        </tbody></table></div>
+        <div class="meta" style="margin-top:10px">
+          <span>cache hit rate <b>93.9 %</b></span>
+          <span>effective input price <b>$1.94 / M USD</b></span>
+          <span>time to first token <b>612 ms</b></span>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function frameOther(seq){
+  const f = FRAMES.find(x => x.seq === seq) || FRAMES[0];
+  const bodies = {
+    0:[["bundle","bundle_v215 · signed 14:21:09 UTC"],["enforcement tier","gateway — model proxy and tool gateway both routed"],
+       ["toolbelt","18 tool versions · full belt (limit 40 tools / 12k tokens)"],["agent version","definition_digest sha256:5b31ac7e…"],
+       ["authorization snapshot","authz_01K52JN4F2 · policy_v88 · deny_generation 41"],["repository","acme/platform @ 4c1f9ab"]],
+    1:[["producer","host device key ed25519:9f13c0…"],["countersigned","Oxagen attester key ak_acme_03 at ingest"],
+       ["covers","frames 0–1"],["note","Oxagen attests receipt and chain integrity, not the truth of client-attested content."]],
+    2:[["issuer","Marcus Bell · operator"],["prompt","cut release 2026.9.2"],["turn","1 of 1"]],
+    3:[["budget","6,000 tokens"],["used","4,182 tokens across 5 context frames"],
+       ["composition digest","sha256:a71b6c02…"],["provider","Oxagen exchange provider · contextgraph/1.0"]],
+    5:[["stop_reason","tool_use"],["output","612 tokens"],["reasoning","0 tokens"],
+       ["cost","$0.0914 USD · basis metered at the proxy"],["latency","4.12 s · time to first token 612 ms"],
+       ["provider request id","req_01K52JNQ8P4V0C"]],
+    6:[["tool","github__get_pull_request_files@3"],["input digest","sha256:3ca771e9…"],
+       ["schema digest","sha256:4a0c21bb…"],["idempotency key","derived from the canonical digest"]],
+    7:[["decision","allow"],["policy version","policy_v88"],["grant","role release-manager@core-platform → github__* allow"],
+       ["result","14 files · 2 under apps/api/src/routes/"],["credential","github-app installation 41802, downscoped by token exchange"],
+       ["receipt","rcp_01K52JNX2M · signed"],["egress","third_party"]],
+    8:[["model","claude-opus-5"],["cache_read","22,104"],["steering","same 4 records · digests unchanged"]],
+    9:[["stop_reason","tool_use"],["output","341 tokens"],["cost","$0.0688 USD"]],
+    10:[["tool","bash__run@1 — harness-native"],["command","pnpm openapi:generate"],["tier","harness — the hook enforced the decision; Oxagen did not carry a credential"]],
+    11:[["decision","allow"],["tier","harness"],["wrote","packages/contracts/openapi.json · 1 file · 214 lines changed"],
+        ["why it ran","the agent read ctx.core.openapi-regen-on-route-change in the steering block at frame 4"],
+        ["receipt","rcp_01K52JP4C0 · client-attested, countersigned"]],
+    12:[["model","claude-opus-5"],["cache_read","26,980"]],
+    13:[["stop_reason","end_turn"],["output","1,024 tokens"],["result","release notes and the regenerated contract in one pull request: acme/platform#3392"],
+        ["cost","$0.1402 USD"]],
+  }[seq] || [["kind",f.kind]];
+
+  return `<div class="panel"><div class="ph">
+    <h3 class="mono" style="font-weight:500">${h(f.kind)}</h3><span class="sp"></span>
+    <span class="note">seq ${f.seq}</span></div>
+    <div class="pb">
+      <p style="margin:0 0 14px;font-size:13px;color:var(--body)">${h(f.sum)}</p>
+      <dl class="kv">${bodies.map(([k,v]) => `<dt>${h(k)}</dt><dd>${h(v)}</dd>`).join("")}</dl>
+      ${seq===11?`<div class="call" style="margin-top:15px">${ic("spark")}<div class="tx">
+        <b>This is the record doing its job.</b> No run of this agent regenerated the contract without being asked
+        before 14:21 UTC today.</div></div>`:""}
+      <p class="meta" style="margin-top:14px"><span>Open frame
+        <a href="${BASE}/runs/${RUN.id}/4" style="color:var(--accent-text)">4 · model.request</a>
+        to see what the agent was told.</span></p>
+    </div></div>`;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   Stubs for pages outside this flow
+   ══════════════════════════════════════════════════════════════════════ */
+const STUB = {
+  fleet:["Fleet","Every run, live and recent, with tier, replay grade, cost so far and pending approvals.","W1, W2"],
+  tools:["Tools","The registry, connections, credential grants, the mandates ledger, policy versions with simulation, kill switches.","W3, W9"],
+  ontology:["Ontology","The workspace's model of its business: Model, Graph, Sources, Repositories, Versions.","W7"],
+  spend:["Spend","Findings ranked by money at stake, proven versus unproven spend, reconciliation, budgets.","W8"],
+};
+function renderStub(page){
+  const [t,d,w] = STUB[page] || ["Fleet", STUB.fleet[1], "W1, W2"];
+  crumbs([{t:"Acme Robotics",r:"#/acme"},{t:"core-platform",r:BASE},{t}]);
+  $("#view").innerHTML = `<div class="phead"><div><p class="eyebrow">Workspace</p><h1>${h(t)}</h1>
+    <p class="sub">${h(d)}</p></div></div>
+    <div class="blank"><div class="ic">${ic("arrow")}</div>
+      <h3>Mocked in another flow</h3>
+      <p>This page is real in Mission Control and is covered by scenario <b>${h(w)}</b>.
+        W6 follows one thing end to end: a record an agent learned becoming a rule it reads.</p>
+      <a class="btn gold" href="${BASE}/steering">${ic("steering")}Back to Steering</a></div>`;
+}
+function renderOrgStub(which){
+  const t = which === "billing" ? "Billing" : which === "audit" ? "Audit" : "Organization";
+  const w = which === "billing" ? "W8" : "W10";
+  crumbs([{t:"Acme Robotics",r:"#/acme"},{t}]);
+  $("#view").innerHTML = `<div class="phead"><div><p class="eyebrow">Organization · acme</p><h1>${h(t)}</h1></div></div>
+    <div class="blank"><div class="ic">${ic("arrow")}</div><h3>Mocked in another flow</h3>
+      <p>Organization-scope pages are covered by scenario <b>${h(w)}</b>.</p>
+      <a class="btn gold" href="${BASE}/steering">${ic("steering")}Back to Steering</a></div>`;
+}
+</script>
+
+<script>
+"use strict";
+
+/* ══════════════════════════════════════════════════════════════════════
+   Overlays: dialog + command menu
+   ══════════════════════════════════════════════════════════════════════ */
+let lastFocus = null;
+function overlay(html){
+  lastFocus = document.activeElement;
+  $("#overlay").innerHTML = `<div class="scrim" onclick="if(event.target===this)closeOverlay()">${html}</div>`;
+  const f = $("#overlay").querySelector("input,button,textarea");
+  if (f) f.focus();
+}
+function closeOverlay(){
+  $("#overlay").innerHTML = "";
+  if (lastFocus && lastFocus.focus) lastFocus.focus();
+}
+
+const CMDS = [
+  { g:"Steering", t:"Published records", s:"go", r:BASE+"/steering", i:"steering" },
+  { g:"Steering", t:"Proposals", s:"go", r:BASE+"/steering/proposals", i:"spark" },
+  { g:"Steering", t:"Open Context PRs", s:"go", r:BASE+"/steering/prs", i:"pr" },
+  { g:"Steering", t:"Retirement candidates", s:"go", r:BASE+"/steering/retirement", i:"retire" },
+  { g:"Actions", t:"Open a Context PR for ctx.core.openapi-regen-on-route-change", s:"run",
+    a:() => { closeOverlay(); if (S.pr === "none") openContextPR(); else location.hash = BASE+"/steering/prs/412"; }, i:"pr" },
+  { g:"Actions", t:"New agent in core-platform", s:"run",
+    a:() => { closeOverlay(); if (S.agentPr === "none") openAgentDialog(); else location.hash = BASE+"/steering/prs/413"; }, i:"plus" },
+  { g:"Runs", t:"run_01K52JN4D8 — Release 2026.9.2", s:"go", r:BASE+"/runs/"+RUN.id+"/4", i:"run" },
+  { g:"Agents", t:"acme.core.release-manager", s:"go", r:BASE+"/agents", i:"agents" },
+  { g:"Agents", t:"acme.core.docs-writer", s:"go", r:BASE+"/agents/docs-writer", i:"agents" },
+  { g:"Ask the assistant", t:"Why did this rule change?", s:"ask",
+    a:() => { closeOverlay(); S.asst = true; renderAsst(); }, i:"spark" },
+];
+
+function openCmd(){
+  const groups = [...new Set(CMDS.map(c => c.g))];
+  overlay(`<div class="cmd" role="dialog" aria-modal="true" aria-label="Command menu">
+    <div class="cmd-i">${ic("spark")}
+      <input id="cmdq" placeholder="Search records, runs, agents, or type an action…" autocomplete="off"
+             oninput="filterCmd(this.value)" onkeydown="if(event.key==='Escape')closeOverlay()">
+      <kbd style="font-family:var(--mono);font-size:10px;color:var(--dim);border:1px solid var(--border);border-radius:4px;padding:1px 4px">esc</kbd>
+    </div>
+    <div class="cmd-l" id="cmdl">${groups.map(g => `<div data-g="${h(g)}">
+      <div class="cmd-g">${h(g)}</div>
+      ${CMDS.filter(c => c.g === g).map((c, i) => {
+        const idx = CMDS.indexOf(c);
+        return `<button class="cmd-r" data-t="${h(c.t.toLowerCase())}" onclick="runCmd(${idx})">
+          ${ic(c.i)}<span class="h">${h(c.t)}</span><span class="sub">${h(c.s)}</span></button>`;
+      }).join("")}</div>`).join("")}</div>
+  </div>`);
+}
+function runCmd(i){ const c = CMDS[i]; if (c.a) c.a(); else { closeOverlay(); location.hash = c.r; } }
+function filterCmd(q){
+  q = q.trim().toLowerCase();
+  $("#cmdl").querySelectorAll(".cmd-r").forEach(b => {
+    b.style.display = !q || b.dataset.t.includes(q) ? "" : "none";
+  });
+  $("#cmdl").querySelectorAll("[data-g]").forEach(g => {
+    g.style.display = g.querySelector('.cmd-r:not([style*="none"])') ? "" : "none";
+  });
+}
+
+addEventListener("keydown", e => {
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k"){ e.preventDefault(); openCmd(); }
+  if (e.key === "Escape"){ if ($("#overlay").innerHTML) closeOverlay(); }
+});
+
+/* ══════════════════════════════════════════════════════════════════════
+   Assistant panel — present on every screen, its own governed run
+   ══════════════════════════════════════════════════════════════════════ */
+function toggleAsst(){ S.asst = !S.asst; renderAsst(); }
+function renderAsst(){
+  $("#asstBtn").classList.toggle("on", S.asst);
+  if (!S.asst){ $("#asstRoot").innerHTML = ""; return; }
+  const merged = S.pr === "merged";
+  $("#asstRoot").innerHTML = `<aside class="asst" role="complementary" aria-label="Assistant">
+    <div class="asst-h">${ic("spark")}<h3 style="font-size:13.5px;flex:1">Assistant</h3>
+      <button class="tbtn" onclick="toggleAsst()" aria-label="Close assistant">${ic("x")}</button></div>
+    <div class="asst-b">
+      <div class="msg u">Why did this rule change?</div>
+      <div class="msg a"><div class="who">Oxagen</div>
+        <p>${merged
+          ? `<b>ctx.core.openapi-regen-on-route-change</b> was published 15 minutes ago. The promoter raised it after
+             four runs on <b>acme/platform</b> left <code>packages/contracts/openapi.json</code> stale; three of them
+             failed the <b>contract-drift</b> witness on the pull request and passed on <code>main</code>.`
+          : `Nothing has changed yet. The promoter has a proposal ready —
+             <b>ctx.core.openapi-regen-on-route-change</b>, from four runs across two agents — and it steers nothing
+             until a Context PR merges on <b>acme/platform</b>.`}</p>
+        <p>Marcus Bell merged <b>acme/platform#412</b>${merged?` at 14:21:06 UTC`:``}. ${merged
+          ? `That wrote a <code>promotion_event</code>, re-indexed the record from the merged commit and bumped the
+             bundle to <b>bundle_v215</b>.` : `Five checks are attached: schema, hash, conflicts, secrets, probes.`}</p>
+        <p>I cannot publish a directive. Only a merge can.</p>
+      </div>
+      <div class="asst-rec">
+        <b>run</b> run_01K52JQ0A6 · in-app agent<br>
+        <b>operator</b> Marcus Bell<br>
+        <b>governed actions</b> list_records, get_promotion_event<br>
+        <b>cost</b> $0.0041 USD · z-ai/glm-latest via OpenRouter<br>
+        <b>tier</b> gateway · every turn recorded and metered
+      </div>
+    </div>
+    <div class="asst-f">
+      <input class="inp" placeholder="Ask about this workspace…"
+        onkeydown="if(event.key==='Enter'){toast('Every assistant turn is a run of its own, recorded and metered. Full flow is W11.');this.value=''}">
+    </div>
+  </aside>`;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   Mockup chrome
+   ══════════════════════════════════════════════════════════════════════ */
+const VIEWS = ["loaded","empty","loading","error","denied"];
+function renderChrome(){
+  $("#stateRow").innerHTML = VIEWS.map(v =>
+    `<button class="${S.view===v?"on":""}" onclick="setView('${v}')">${v}</button>`).join("");
+  $("#phoneBtn").classList.toggle("on", S.phone);
+}
+function setView(v){ S.view = v; renderChrome(); route(); }
+function togglePhone(){
+  S.phone = !S.phone;
+  document.body.classList.toggle("phone", S.phone);
+  renderChrome();
+  if (S.phone) toast("Phone reflow · 400 px. The sidebar collapses behind the menu button.");
+}
+function resetDemo(){
+  S.timers.forEach(clearTimeout); S.timers = [];
+  S.pr = "none"; S.agentPr = "none"; S.checks = []; S.agentChecks = [];
+  S.view = "loaded"; S.asst = false;
+  closeOverlay(); renderAsst(); renderChrome();
+  location.hash = BASE + "/steering";
+  route();
+  toast("Demo reset. The proposal is on the table again and nothing has merged.");
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   Boot
+   ══════════════════════════════════════════════════════════════════════ */
+renderChrome();
+if (!location.hash) location.hash = BASE + "/steering";
+route();
+</script>
+
+<!-- list-controls: search · sort · column filters · rows per page · pager -->
+<style>
+/* List controls: search, column filters, rows per page, sortable headers, pager.
+   Colors derive from the page's own text color so the block reads correctly in
+   every mockup theme; only the accent leans on --gold. */
+.lt{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:9px 12px;border-bottom:1px solid var(--border,color-mix(in srgb,currentColor 16%,transparent));font-family:inherit;font-size:12.5px}
+.lt.free{border:1px solid var(--border,color-mix(in srgb,currentColor 16%,transparent));border-radius:10px;margin-bottom:10px}
+.lt .lt-q{flex:1 1 200px;min-width:140px;background:color-mix(in srgb,currentColor 5%,transparent);border:1px solid var(--border,color-mix(in srgb,currentColor 16%,transparent));border-radius:8px;padding:6px 10px;font-size:12.5px;color:inherit;outline:none;font-family:inherit;transition:border-color .12s}
+.lt .lt-q:focus{border-color:var(--gold,#D6962C)}
+.lt .lt-q::placeholder{color:inherit;opacity:.5}
+.lt select{appearance:auto;background:color-mix(in srgb,currentColor 5%,transparent);border:1px solid var(--border,color-mix(in srgb,currentColor 16%,transparent));border-radius:8px;padding:5px 8px;font-size:12px;color:inherit;outline:none;font-family:inherit;max-width:220px;transition:border-color .12s}
+.lt select:focus{border-color:var(--gold,#D6962C)}
+.lt .lt-rows{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--muted,inherit);white-space:nowrap;margin-left:auto}
+.lp{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 12px;font-size:11.5px;color:var(--muted,inherit);font-family:inherit}
+.lp.free{border:1px solid var(--border,color-mix(in srgb,currentColor 16%,transparent));border-radius:10px;margin-top:10px}
+.lp .lp-n{font-family:var(--mono,ui-monospace,monospace);font-variant-numeric:tabular-nums;opacity:.85}
+.lp .lp-pg{margin-left:auto;display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+.lp .lp-b{border:1px solid var(--border,color-mix(in srgb,currentColor 16%,transparent));background:color-mix(in srgb,currentColor 5%,transparent);color:inherit;border-radius:7px;padding:2px 8px;min-width:28px;font-size:12px;font-family:inherit;cursor:pointer;font-variant-numeric:tabular-nums;line-height:1.5;transition:border-color .12s}
+.lp .lp-b:hover{border-color:color-mix(in srgb,currentColor 35%,transparent)}
+.lp .lp-b[aria-current="page"]{border-color:var(--gold,#D6962C);color:var(--gold,#D6962C)}
+.lp .lp-b:disabled{opacity:.4;cursor:default}
+.lp .lp-pg .el{padding:0 4px;opacity:.6}
+th.sortable{cursor:pointer;user-select:none}
+th.sortable::after{content:"↕";margin-left:5px;opacity:.35;font-size:10px}
+th.sortable[aria-sort="ascending"]::after{content:"↑";color:var(--gold,#D6962C);opacity:1}
+th.sortable[aria-sort="descending"]::after{content:"↓";color:var(--gold,#D6962C);opacity:1}
+.lt-empty td{opacity:.6;text-align:center;padding:18px}
+@media (max-width:520px){.lt .lt-q{flex-basis:100%}.lt .lt-rows{margin-left:0}}
+</style>
+<script>
+/* ============================== List controls ============================== */
+/* Self-contained: every table with a thead gets a search box, sortable column
+   headers, a filter select for each column that is a small enumeration, a
+   rows-per-page select and a pager. Installs itself through a DOM observer so
+   it works with any render path; state is keyed by page + column signature so
+   a full re-render lands back on the same page, sort and query. */
+(function(){
+"use strict";
+if(window.__ltInstalled)return; window.__ltInstalled=true;
+var STORE={}, PER=[5,10,25,50,0], BUSY=false, TIMER=null;
+var FACET=/status|state|tier|kind|role|risk|severity|result|health|effect|mode|side|level|verdict|decision|origin|scope|period|basis|algorithm|trend|position|governance|two-factor|sso|replay|grade|outcome/i;
+function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function num(s){
+  s=String(s==null?"":s).trim();
+  if(!s||/^\d{4}-\d{2}/.test(s))return null;
+  var c=s.replace(/[$,%×]/g,""), m=c.match(/^[-+]?\d*\.?\d+(?:e[-+]?\d+)?/i);
+  if(!m)return null;
+  var n=parseFloat(m[0]), u=c.slice(m[0].length).match(/^\s*([kKMB])(?![A-Za-z])/);
+  if(u){ if(u[1]==="k"||u[1]==="K")n*=1e3; else if(u[1]==="M")n*=1e6; else n*=1e9; }
+  return n;
+}
+function cmp(a,b,isNum,dir){
+  if(isNum){var x=a.n,y=b.n; if(x==null&&y==null)return 0; if(x==null)return 1; if(y==null)return -1; if(x!==y)return (x-y)*dir;}
+  return a.t.localeCompare(b.t,undefined,{numeric:true,sensitivity:"base"})*dir;
+}
+function el(html){var d=document.createElement("div");d.innerHTML=html;return d.firstChild;}
+function pageCtx(){var h1=document.querySelector("main h1, .page h1, h1"); return location.hash+"|"+(h1?h1.textContent.trim().slice(0,40):"");}
+function state(sig,ord){var key=pageCtx()+"|"+sig+"#"+ord; return STORE[key]||(STORE[key]={q:"",sort:null,dir:1,per:10,page:1,f:{}});}
+
+function pager(st,total,onPage){
+  var per=st.per||total||1, pages=Math.max(1,Math.ceil(total/per));
+  if(st.page>pages)st.page=pages; if(st.page<1)st.page=1;
+  var from=total?((st.page-1)*per+1):0, to=Math.min(total,st.page*per);
+  var html='<div class="lp"><span class="lp-n">'+(total?from+'–'+to+' of '+total:'0 of 0')+'</span><span class="lp-pg">'+
+   '<button type="button" class="lp-b" data-p="prev" aria-label="Previous page"'+(st.page<=1?' disabled':'')+'>‹</button>';
+  var nums=[]; if(pages<=7){for(var i=1;i<=pages;i++)nums.push(i);} else {
+    nums=[1]; var lo=Math.max(2,st.page-1), hi=Math.min(pages-1,st.page+1);
+    if(lo>2)nums.push("…"); for(var j=lo;j<=hi;j++)nums.push(j); if(hi<pages-1)nums.push("…"); nums.push(pages);}
+  nums.forEach(function(p){html+= p==="…"?'<span class="el">…</span>':'<button type="button" class="lp-b" data-p="'+p+'"'+(p===st.page?' aria-current="page"':'')+'>'+p+'</button>';});
+  html+='<button type="button" class="lp-b" data-p="next" aria-label="Next page"'+(st.page>=pages?' disabled':'')+'>›</button></span></div>';
+  var lp=el(html);
+  lp.addEventListener("click",function(e){var b=e.target.closest("button[data-p]"); if(!b||b.disabled)return; e.stopPropagation(); var p=b.getAttribute("data-p");
+    st.page = p==="prev"?st.page-1 : p==="next"?st.page+1 : +p; onPage();});
+  return lp;
+}
+function bar(st,opts,apply){
+  var html='<div class="lt"><input class="lt-q" type="search" placeholder="'+esc(opts.ph)+'" aria-label="'+esc(opts.ph)+'" value="'+esc(st.q)+'">';
+  (opts.filters||[]).forEach(function(f){
+    html+='<select class="lt-f" data-k="'+esc(f.key)+'" aria-label="Filter by '+esc(f.label)+'"><option value="">All · '+esc(f.label)+'</option>'+
+      f.values.map(function(v){return '<option value="'+esc(v)+'"'+(st.f[f.key]===v?' selected':'')+'>'+esc(v)+'</option>';}).join("")+'</select>';});
+  html+='<label class="lt-rows">Rows<select class="lt-per">'+PER.map(function(p){return '<option value="'+p+'"'+(st.per===p?' selected':'')+'>'+(p||"All")+'</option>';}).join("")+'</select></label></div>';
+  var b=el(html);
+  b.addEventListener("click",function(e){e.stopPropagation();});
+  b.querySelector(".lt-q").addEventListener("input",function(e){st.q=e.target.value;st.page=1;apply();});
+  b.querySelectorAll(".lt-f").forEach(function(s){s.addEventListener("change",function(e){st.f[s.getAttribute("data-k")]=e.target.value;st.page=1;apply();});});
+  b.querySelector(".lt-per").addEventListener("change",function(e){st.per=+e.target.value;st.page=1;apply();});
+  return b;
+}
+/* A column earns a filter when it is a small enumeration: 2–8 distinct short
+   values across at least 4 rows, and not unique per row. At most three per list. */
+function facets(cols,vals,rows){
+  if(rows<4)return [];
+  var c=cols.filter(function(col){ if(!col.name||col.num)return false;
+    var set={},n=0,ok=true; vals.forEach(function(v){var t=v[col.i].t; if(!t)return; if(t.length>28)ok=false; if(!set[t]){set[t]=1;n++;}});
+    if(!ok||n<2||n>8||n>=rows)return false; col.values=Object.keys(set).sort(); return true;});
+  c.sort(function(a,b){var pa=FACET.test(a.name)?0:1,pb=FACET.test(b.name)?0:1; return pa-pb||a.values.length-b.values.length;});
+  return c.slice(0,3).map(function(col){return {key:String(col.i),label:col.name,values:col.values};});
+}
+function sigOf(table){return [].slice.call(table.tHead.rows[0].cells).map(function(c){return c.textContent.trim();}).join("/");}
+function enhance(table,ord){
+  var tbody=table.tBodies[0], rows=[].slice.call(tbody.rows);
+  var ths=[].slice.call(table.tHead.rows[0].cells);
+  var cols=ths.map(function(th,i){return {i:i,name:th.textContent.trim(),num:th.classList.contains("num")};});
+  var st=state(sigOf(table),ord);
+  var vals=rows.map(function(r){return cols.map(function(c){var cell=r.cells[c.i]; var t=cell?cell.textContent.replace(/\s+/g," ").trim():""; return {t:t,n:num(t)};});});
+  cols.forEach(function(c){ if(c.num)return; var k=0,tot=0; vals.forEach(function(v){if(v[c.i].t){tot++; if(v[c.i].n!=null)k++;}}); if(tot&&k/tot>=.6)c.num=true; });
+  var texts=rows.map(function(r){return r.textContent.replace(/\s+/g," ").toLowerCase();});
+  var fs=facets(cols,vals,rows.length);
+  var wrap=table.parentNode, host=wrap.parentNode, ph="Search this list";
+  if(!host||wrap===document.body){wrap=table;host=table.parentNode;}
+  /* A lone search box sitting directly above the table becomes the list's search. */
+  var prev=wrap.previousElementSibling;
+  if(prev&&!prev.matches("table,thead,tbody")){
+    var ins=prev.querySelectorAll("input,select,button,a,textarea");
+    var inp=prev.matches("input")?prev:prev.querySelector("input[placeholder^='Search']");
+    if(inp&&inp.placeholder&&/^Search/.test(inp.placeholder)&&ins.length<=1&&!prev.textContent.trim()){ph=inp.placeholder;prev.remove();}
+  }
+  var free=!/panel|card|box/.test(host.className||"");
+  var b=bar(st,{ph:ph,filters:fs},apply), lp=document.createElement("div");
+  if(free)b.classList.add("free");
+  host.insertBefore(b,wrap); host.insertBefore(lp,wrap.nextSibling);
+  ths.forEach(function(th,i){ if(!cols[i].name)return; th.classList.add("sortable"); th.tabIndex=0; th.setAttribute("role","button");
+    function tog(e){ if(e)e.stopPropagation(); if(st.sort===i){ if(st.dir===1)st.dir=-1; else {st.sort=null;st.dir=1;} } else {st.sort=i;st.dir=1;} st.page=1; apply(); }
+    th.addEventListener("click",tog); th.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();tog(e);}}); });
+  function apply(){
+    ths.forEach(function(th,i){ if(!cols[i].name)return; th.setAttribute("aria-sort",st.sort===i?(st.dir===1?"ascending":"descending"):"none"); });
+    var q=st.q.trim().toLowerCase();
+    var idx=rows.map(function(_,i){return i;}).filter(function(i){
+      if(q&&texts[i].indexOf(q)<0)return false;
+      for(var k in st.f){ if(st.f[k]&&vals[i][+k]&&vals[i][+k].t!==st.f[k])return false; } return true; });
+    if(st.sort!=null&&cols[st.sort]){var c=cols[st.sort]; idx.sort(function(a,b){return cmp(vals[a][c.i],vals[b][c.i],c.num,st.dir)||(a-b);});}
+    var total=idx.length, per=st.per||total||1, pages=Math.max(1,Math.ceil(total/per)); if(st.page>pages)st.page=pages;
+    var slice=st.per?idx.slice((st.page-1)*st.per,st.page*st.per):idx;
+    BUSY=true;
+    while(tbody.firstChild)tbody.removeChild(tbody.firstChild);
+    if(!slice.length){var tr=document.createElement("tr"),td=document.createElement("td");tr.className="lt-empty";td.colSpan=cols.length;td.textContent="No rows match.";tr.appendChild(td);tbody.appendChild(tr);}
+    slice.forEach(function(i){tbody.appendChild(rows[i]);});
+    var nlp=pager(st,total,apply); lp.replaceWith(nlp); lp=nlp; if(free)lp.classList.add("free");
+    BUSY=false;
+  }
+  apply();
+}
+function run(){
+  BUSY=true;
+  try{
+    var ords={};
+    [].slice.call(document.querySelectorAll("table")).forEach(function(t){
+      if(!t.tHead||!t.tHead.rows[0]||!t.tBodies[0]||t.closest("[data-lt-skip]"))return;
+      if([].slice.call(t.tHead.rows[0].cells).some(function(c){return c.colSpan>1;}))return;
+      var sig=sigOf(t), ord=ords[sig]||0; ords[sig]=ord+1;
+      if(t.getAttribute("data-lt"))return;
+      t.setAttribute("data-lt","1"); enhance(t,ord);
+    });
+  } finally { BUSY=false; }
+}
+new MutationObserver(function(muts){
+  if(BUSY)return;
+  for(var i=0;i<muts.length;i++){ if(muts[i].addedNodes.length){ clearTimeout(TIMER); TIMER=setTimeout(run,0); return; } }
+}).observe(document.documentElement,{childList:true,subtree:true});
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",run); else run();
+window.listify=run;
+})();
+</script>

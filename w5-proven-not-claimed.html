@@ -1,0 +1,2540 @@
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap">
+<title>Proven, Not Claimed</title>
+<style>
+/* ─────────────────────────────────────────────────────────────────────────
+   Oxagen house system v2.1 — dark first.
+   Palette, type and radii from tokens/house-tokens.css + playbook.html.
+   Gold is identity and at most one primary action per screen; it never
+   encodes a state. Semantic state colours are a separate set.
+   ───────────────────────────────────────────────────────────────────────── */
+:root{
+  /* dark — the canvas */
+  --ink:#10100F; --void:#0A0A09; --panel:#181715; --hl:#201F1C;
+  --border:#292722; --rule:#34322D;
+  --fg:#F2EEE5; --body:#DDD8CD; --muted:#9B958A; --dim:#6E6A62;
+  --gold:#D6962C; --gold-bright:#F1C364; --gold-deep:#8B5E1A;
+  --accent-text:#D6962C;
+  --on-gold:#10100F;
+  --shadow:0 1px 0 rgba(255,255,255,.03),0 18px 44px rgba(0,0,0,.5);
+  --shadow-sm:0 1px 0 rgba(255,255,255,.02),0 6px 18px rgba(0,0,0,.35);
+
+  /* semantic state — never gold, never a surface */
+  --s-allowed:#5FA777;      --s-allowed-bg:rgba(95,167,119,.13);
+  --s-proven:#3FA98A;       --s-proven-bg:rgba(63,169,138,.14);
+  --s-approval:#6E9FD8;     --s-approval-bg:rgba(110,159,216,.14);
+  --s-denied:#B85C7A;       --s-denied-bg:rgba(184,92,122,.15);
+  --s-failed:#CF5B4A;       --s-failed-bg:rgba(207,91,74,.14);
+  --s-critical:#E2492E;     --s-critical-bg:rgba(226,73,46,.16);
+  --s-neutral:#8C877C;      --s-neutral-bg:rgba(140,135,124,.13);
+
+  --font:"Space Grotesk","Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+
+  --r-lg:14px; --r-md:12px; --r-sm:10px; --r-xs:7px;
+  --side:248px; --rail:340px;
+}
+@media (prefers-color-scheme:light){ :root:not([data-theme="dark"]){
+  --ink:#F2EEE5; --void:#E9E3D8; --panel:#F8F5EE; --hl:#EFEAE0;
+  --border:#D8CDBD; --rule:#C9BFAE;
+  --fg:#10100F; --body:#2A2823; --muted:#6B665C; --dim:#8C877C;
+  --accent-text:#8B5E1A; --on-gold:#10100F;
+  --shadow:0 1px 0 rgba(255,255,255,.7),0 18px 44px rgba(16,16,15,.08);
+  --shadow-sm:0 1px 0 rgba(255,255,255,.6),0 6px 16px rgba(16,16,15,.06);
+  --s-allowed:#2F6B47;      --s-allowed-bg:rgba(47,107,71,.12);
+  --s-proven:#1E7862;       --s-proven-bg:rgba(30,120,98,.12);
+  --s-approval:#3A6EA8;     --s-approval-bg:rgba(58,110,168,.12);
+  --s-denied:#8E3C57;       --s-denied-bg:rgba(142,60,87,.12);
+  --s-failed:#A63B2B;       --s-failed-bg:rgba(166,59,43,.12);
+  --s-critical:#B8331B;     --s-critical-bg:rgba(184,51,27,.13);
+  --s-neutral:#6B665C;      --s-neutral-bg:rgba(107,102,92,.12);
+}}
+:root[data-theme="light"]{
+  --ink:#F2EEE5; --void:#E9E3D8; --panel:#F8F5EE; --hl:#EFEAE0;
+  --border:#D8CDBD; --rule:#C9BFAE;
+  --fg:#10100F; --body:#2A2823; --muted:#6B665C; --dim:#8C877C;
+  --accent-text:#8B5E1A; --on-gold:#10100F;
+  --shadow:0 1px 0 rgba(255,255,255,.7),0 18px 44px rgba(16,16,15,.08);
+  --shadow-sm:0 1px 0 rgba(255,255,255,.6),0 6px 16px rgba(16,16,15,.06);
+  --s-allowed:#2F6B47;      --s-allowed-bg:rgba(47,107,71,.12);
+  --s-proven:#1E7862;       --s-proven-bg:rgba(30,120,98,.12);
+  --s-approval:#3A6EA8;     --s-approval-bg:rgba(58,110,168,.12);
+  --s-denied:#8E3C57;       --s-denied-bg:rgba(142,60,87,.12);
+  --s-failed:#A63B2B;       --s-failed-bg:rgba(166,59,43,.12);
+  --s-critical:#B8331B;     --s-critical-bg:rgba(184,51,27,.13);
+  --s-neutral:#6B665C;      --s-neutral-bg:rgba(107,102,92,.12);
+}
+
+*,*::before,*::after{box-sizing:border-box}
+body{
+  margin:0; background:var(--ink); color:var(--fg);
+  font-family:var(--font); font-size:14px; line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+:focus-visible{outline:2px solid var(--gold); outline-offset:2px; border-radius:4px}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+a{color:var(--accent-text);text-decoration:none}
+h1,h2,h3,h4{margin:0;font-weight:600;letter-spacing:-.012em;text-wrap:balance}
+p{margin:0}
+.mono{font-family:var(--mono);font-size:.9em;letter-spacing:-.01em}
+.eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;color:var(--muted);margin:0}
+.eyebrow.gold{color:var(--accent-text)}
+.num{font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)} .dim{color:var(--dim)} .bodytext{color:var(--body)}
+
+/* ── shell ────────────────────────────────────────────────────────────── */
+#app{display:grid;grid-template-columns:var(--side) minmax(0,1fr);min-height:100vh}
+#app.rail-open{grid-template-columns:var(--side) minmax(0,1fr) var(--rail)}
+.side{
+  grid-row:1/3;border-right:1px solid var(--border);background:var(--void);
+  display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;
+}
+.side-top{padding:18px 16px 10px}
+.logo{display:block;height:19px;width:auto;color:var(--fg)}
+.switcher{margin:16px 12px 0;display:grid;gap:6px}
+.sw{
+  width:100%;display:flex;align-items:center;gap:9px;padding:8px 10px;
+  border:1px solid var(--border);border-radius:var(--r-sm);background:var(--panel);
+  text-align:left;transition:border-color .15s,background .15s;
+}
+.sw:hover{border-color:var(--rule);background:var(--hl)}
+.sw-mark{width:22px;height:22px;border-radius:6px;display:grid;place-items:center;flex:0 0 auto;
+  font-size:11px;font-weight:700;background:var(--hl);border:1px solid var(--border);color:var(--muted)}
+.sw-mark.org{background:var(--gold);color:var(--on-gold);border-color:transparent}
+.sw-txt{min-width:0;flex:1}
+.sw-lbl{display:block;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);line-height:1.3}
+.sw-val{display:block;font-size:13px;font-weight:500;color:var(--fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sw-car{color:var(--dim);font-size:10px;flex:0 0 auto}
+.navgroup{margin-top:22px;padding:0 12px}
+.navgroup>.eyebrow{padding:0 10px 8px;font-size:10.5px;letter-spacing:.13em}
+.nav{display:grid;gap:1px;list-style:none;margin:0;padding:0}
+.nav a{
+  display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:var(--r-xs);
+  color:var(--muted);font-size:13.5px;font-weight:500;transition:background .14s,color .14s;
+}
+.nav a:hover{background:var(--hl);color:var(--fg)}
+.nav a[aria-current="page"]{background:var(--panel);color:var(--fg);box-shadow:inset 2px 0 0 var(--gold)}
+.nav .gl{width:15px;flex:0 0 auto;display:grid;place-items:center;color:currentColor;opacity:.85}
+.nav .sub{font-size:11px;color:var(--dim);margin-left:auto;font-family:var(--mono)}
+.side-foot{margin-top:auto;padding:14px 22px 18px;border-top:1px solid var(--border);
+  display:flex;align-items:center;gap:9px}
+.avatar{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:10.5px;
+  font-weight:700;background:var(--hl);border:1px solid var(--border);color:var(--body);flex:0 0 auto}
+.side-foot .who{min-width:0}
+.side-foot .who b{display:block;font-size:12.5px;font-weight:500;color:var(--fg);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.side-foot .who span{display:block;font-size:11px;color:var(--dim)}
+
+/* ── topbar ───────────────────────────────────────────────────────────── */
+.top{
+  grid-column:2/-1;position:sticky;top:0;z-index:40;
+  background:color-mix(in srgb,var(--ink) 90%,transparent);backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:14px;padding:11px 22px;min-height:53px;
+}
+.crumbs{display:flex;align-items:center;gap:7px;font-size:13px;min-width:0;flex-wrap:wrap}
+.crumbs a{color:var(--muted)} .crumbs a:hover{color:var(--fg)}
+.crumbs .sep{color:var(--dim);font-size:11px}
+.crumbs .cur{color:var(--fg);font-weight:500;font-family:var(--mono);font-size:12.5px}
+.top-r{margin-left:auto;display:flex;align-items:center;gap:8px;flex:0 0 auto}
+.kbtn{
+  display:flex;align-items:center;gap:8px;padding:5px 9px;border:1px solid var(--border);
+  border-radius:var(--r-xs);color:var(--muted);font-size:12.5px;background:var(--panel);
+  transition:border-color .15s,color .15s;
+}
+.kbtn:hover{border-color:var(--rule);color:var(--fg)}
+.kbtn kbd{font-family:var(--mono);font-size:10.5px;border:1px solid var(--border);border-radius:4px;
+  padding:1px 4px;color:var(--dim);background:var(--hl)}
+.iconbtn{width:30px;height:30px;display:grid;place-items:center;border:1px solid var(--border);
+  border-radius:var(--r-xs);color:var(--muted);background:var(--panel);transition:border-color .15s,color .15s}
+.iconbtn:hover{border-color:var(--rule);color:var(--fg)}
+.iconbtn[aria-pressed="true"]{color:var(--fg);border-color:var(--rule);background:var(--hl)}
+
+/* ── page ─────────────────────────────────────────────────────────────── */
+.main{grid-column:2;min-width:0}
+.page{padding:24px 22px 72px;max-width:1180px;display:grid;gap:20px;align-content:start}
+.page-head{display:grid;gap:10px}
+.page-title{font-size:25px;line-height:1.15}
+.title-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.sub-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.sub-row .dot{color:var(--dim)}
+
+/* badges */
+.badge{
+  display:inline-flex;align-items:center;gap:6px;padding:2.5px 8px;border-radius:999px;
+  font-size:11.5px;font-weight:600;letter-spacing:.02em;line-height:1.5;white-space:nowrap;
+  border:1px solid transparent;font-family:var(--mono);
+}
+.badge::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;flex:0 0 auto}
+.badge.plain::before{display:none}
+.b-proven{color:var(--s-proven);background:var(--s-proven-bg);border-color:color-mix(in srgb,var(--s-proven) 34%,transparent)}
+.b-allowed{color:var(--s-allowed);background:var(--s-allowed-bg);border-color:color-mix(in srgb,var(--s-allowed) 32%,transparent)}
+.b-approval{color:var(--s-approval);background:var(--s-approval-bg);border-color:color-mix(in srgb,var(--s-approval) 32%,transparent)}
+.b-denied{color:var(--s-denied);background:var(--s-denied-bg);border-color:color-mix(in srgb,var(--s-denied) 32%,transparent)}
+.b-failed{color:var(--s-failed);background:var(--s-failed-bg);border-color:color-mix(in srgb,var(--s-failed) 32%,transparent)}
+.b-critical{color:var(--s-critical);background:var(--s-critical-bg);border-color:color-mix(in srgb,var(--s-critical) 36%,transparent)}
+.b-neutral{color:var(--s-neutral);background:var(--s-neutral-bg);border-color:color-mix(in srgb,var(--s-neutral) 30%,transparent)}
+.b-quiet{color:var(--muted);background:var(--hl);border-color:var(--border)}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:6.5px 13px;border-radius:var(--r-xs);
+  border:1px solid var(--border);background:var(--panel);color:var(--body);font-size:13px;font-weight:500;
+  transition:border-color .15s,color .15s,background .15s}
+.btn:hover{border-color:var(--rule);color:var(--fg);background:var(--hl)}
+.btn-primary{background:var(--gold);color:var(--on-gold);border-color:transparent;font-weight:600}
+.btn-primary:hover{background:var(--gold-bright);color:var(--on-gold);border-color:transparent}
+:root[data-theme="light"] .btn-primary:hover,
+:root:not([data-theme="dark"]) .btn-primary:hover{background:var(--gold-deep);color:#F2EEE5}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .btn-primary:hover{background:var(--gold-bright);color:var(--on-gold)}}
+.btn-sm{padding:4px 9px;font-size:12px}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+
+/* panels */
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden}
+.panel.flat{background:transparent}
+.ph{display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.ph h3{font-size:14.5px}
+.ph .ph-r{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pb{padding:16px}
+.pb.tight{padding:0}
+.grid2{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.grid3{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+
+/* key/value list */
+.kv{display:grid;grid-template-columns:minmax(120px,auto) minmax(0,1fr);gap:9px 18px;font-size:13px;align-items:baseline}
+.kv dt{color:var(--muted);font-size:12px}
+.kv dd{margin:0;color:var(--fg);font-family:var(--mono);font-size:12.5px;overflow-wrap:anywhere}
+.kv dd.plain{font-family:var(--font);font-size:13px}
+
+/* tabs */
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:thin}
+.tabs button{padding:9px 13px;font-size:13px;font-weight:500;color:var(--muted);white-space:nowrap;
+  border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .15s,border-color .15s}
+.tabs button:hover{color:var(--fg)}
+.tabs button[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--gold)}
+
+/* tables */
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px;min-width:520px}
+th,td{text-align:left;padding:9px 14px;border-bottom:1px solid var(--border);vertical-align:middle}
+thead th{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:600;
+  background:var(--hl);position:sticky;top:0;z-index:1}
+tbody tr:last-child td{border-bottom:0}
+tbody tr.clickable{cursor:pointer;transition:background .12s}
+tbody tr.clickable:hover{background:var(--hl)}
+tbody tr.marked{background:var(--s-proven-bg)}
+tbody tr.marked:hover{background:color-mix(in srgb,var(--s-proven) 20%,transparent)}
+td.r,th.r{text-align:right}
+
+/* metric tiles */
+.tiles{display:grid;gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--r-md);
+  overflow:hidden;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.tile{background:var(--panel);padding:13px 15px;display:grid;gap:3px;align-content:start}
+.tile .t-l{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:600}
+.tile .t-v{font-size:19px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums;color:var(--fg)}
+.tile .t-v small{font-size:12px;font-weight:500;color:var(--muted);letter-spacing:0}
+.tile .t-s{font-size:11.5px;color:var(--muted);font-family:var(--mono)}
+
+/* code */
+pre{margin:0;background:var(--void);border:1px solid var(--border);border-radius:var(--r-sm);
+  padding:13px 15px;overflow-x:auto;font-family:var(--mono);font-size:12px;line-height:1.62;color:var(--body)}
+pre .k{color:var(--accent-text)} pre .s{color:var(--s-allowed)} pre .n{color:var(--s-approval)}
+pre .c{color:var(--dim)} pre .hi{color:var(--s-proven);font-weight:600}
+pre .bad{color:var(--s-critical);font-weight:600}
+
+/* ── the flip: target vs PR ───────────────────────────────────────────── */
+.flip{display:grid;gap:0;grid-template-columns:1fr auto 1fr;align-items:stretch}
+.flip-side{padding:16px;display:grid;gap:9px;align-content:start;min-width:0}
+.flip-side .fs-h{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.flip-side .fs-h .eyebrow{font-size:10.5px}
+.flip-arrow{display:grid;place-items:center;padding:0 4px;border-left:1px solid var(--border);border-right:1px solid var(--border);background:var(--hl)}
+.flip-arrow svg{width:22px;height:22px;color:var(--muted)}
+.flip-res{font-size:26px;font-weight:700;letter-spacing:-.02em;line-height:1;font-family:var(--mono);text-transform:uppercase}
+.flip-res.fail{color:var(--s-failed)} .flip-res.pass{color:var(--s-proven)}
+.ref{font-family:var(--mono);font-size:12px;color:var(--body);overflow-wrap:anywhere}
+.ref b{color:var(--fg);font-weight:600}
+.flip-note{font-size:12px;color:var(--muted);line-height:1.5}
+@media (max-width:640px){
+  .flip{grid-template-columns:1fr}
+  .flip-arrow{border-left:0;border-right:0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:6px}
+  .flip-arrow svg{transform:rotate(90deg)}
+}
+
+/* ── the airlock ──────────────────────────────────────────────────────── */
+.airlock{display:grid;grid-template-columns:1fr 78px 1fr;align-items:stretch;min-height:250px}
+.chamber{padding:16px;display:grid;gap:12px;align-content:start;min-width:0}
+.chamber.sealed{background:var(--void)}
+.chamber-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.chamber-h .eyebrow{font-size:10.5px}
+.membrane{
+  position:relative;display:grid;place-items:center;
+  border-left:1px dashed var(--rule);border-right:1px dashed var(--rule);
+  background:repeating-linear-gradient(-45deg,transparent 0 5px,var(--hl) 5px 6px);
+}
+.membrane .grain{
+  background:var(--panel);border:1px solid var(--s-proven);color:var(--s-proven);
+  border-radius:999px;padding:3px 9px;font-family:var(--mono);font-size:11px;font-weight:700;
+  box-shadow:var(--shadow-sm);
+}
+.membrane .mlabel{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);
+  font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);white-space:nowrap;font-weight:600}
+.redact{display:grid;gap:7px;font-family:var(--mono);font-size:12px}
+.redact .rr{display:grid;grid-template-columns:minmax(96px,auto) 1fr;gap:12px;align-items:baseline}
+.redact .rk{color:var(--dim)}
+.redact .rv{color:var(--fg);overflow-wrap:anywhere}
+.redact .rv.blocked{color:var(--rule);letter-spacing:.08em;user-select:none}
+.oneword{
+  border:1px solid var(--border);background:var(--panel);border-radius:var(--r-sm);
+  padding:22px 16px;display:grid;place-items:center;gap:8px;
+}
+.oneword .w{font-family:var(--mono);font-size:34px;font-weight:700;color:var(--s-proven);letter-spacing:.02em;line-height:1}
+.oneword .c{font-size:11.5px;color:var(--dim);font-family:var(--mono)}
+@media (max-width:760px){
+  .airlock{grid-template-columns:1fr}
+  .membrane{border-left:0;border-right:0;border-top:1px dashed var(--rule);border-bottom:1px dashed var(--rule);padding:16px 0 26px}
+}
+
+/* ── frame list ───────────────────────────────────────────────────────── */
+.frames{display:grid;min-width:0}
+.frow{
+  display:grid;grid-template-columns:52px 128px minmax(0,1fr) auto;gap:12px;align-items:center;
+  padding:8px 16px;border-bottom:1px solid var(--border);font-size:12.5px;text-align:left;width:100%;
+  transition:background .12s;
+}
+.frow:last-child{border-bottom:0}
+.frow:hover{background:var(--hl)}
+.frow .seq{font-family:var(--mono);color:var(--dim);font-size:11.5px;font-variant-numeric:tabular-nums}
+.frow .kind{font-family:var(--mono);font-size:11.5px;color:var(--body)}
+.frow .desc{color:var(--muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.frow .desc code{font-family:var(--mono);color:var(--fg);font-size:11.5px}
+.frow .rt{font-family:var(--mono);font-size:11px;color:var(--dim);justify-self:end;white-space:nowrap}
+.frow.is-proof{background:var(--s-proven-bg);box-shadow:inset 2px 0 0 var(--s-proven)}
+.frow.is-proof:hover{background:color-mix(in srgb,var(--s-proven) 20%,transparent)}
+.frow.is-deny{box-shadow:inset 2px 0 0 var(--s-denied)}
+.frow.is-airlock{box-shadow:inset 2px 0 0 var(--s-approval)}
+@media (max-width:700px){
+  .frow{grid-template-columns:44px 1fr;gap:4px 10px}
+  .frow .desc{grid-column:1/-1;white-space:normal}
+  .frow .rt{grid-column:2;justify-self:start}
+}
+
+/* ── ladder ───────────────────────────────────────────────────────────── */
+.ladder{list-style:none;margin:0;padding:0;display:grid}
+.ladder li{display:grid;grid-template-columns:26px minmax(0,1fr) auto;gap:12px;align-items:start;
+  padding:12px 16px;border-bottom:1px solid var(--border)}
+.ladder li:last-child{border-bottom:0}
+.step-n{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-family:var(--mono);
+  font-size:11px;font-weight:700;border:1px solid var(--border);background:var(--hl);color:var(--muted)}
+.step-n.ok{border-color:color-mix(in srgb,var(--s-proven) 45%,transparent);color:var(--s-proven);background:var(--s-proven-bg)}
+.step-n.no{border-color:color-mix(in srgb,var(--s-critical) 45%,transparent);color:var(--s-critical);background:var(--s-critical-bg)}
+.ladder .st{display:grid;gap:3px;min-width:0}
+.ladder .st b{font-size:13px;font-weight:600;color:var(--fg)}
+.ladder .st span{font-size:12px;color:var(--muted);line-height:1.5}
+.ladder .st code{font-family:var(--mono);font-size:11.5px;color:var(--body);overflow-wrap:anywhere}
+
+/* ── stacked bar ──────────────────────────────────────────────────────── */
+.stack{display:flex;height:34px;border-radius:var(--r-xs);overflow:hidden;border:1px solid var(--border)}
+.stack span{display:block;height:100%}
+.legend{display:grid;gap:7px;margin-top:13px}
+.lg{display:grid;grid-template-columns:11px minmax(0,1fr) auto auto;gap:10px;align-items:center;font-size:12.5px}
+.lg i{width:11px;height:11px;border-radius:3px;display:block}
+.lg .lname{color:var(--body)} .lg .lval{font-family:var(--mono);color:var(--fg);font-variant-numeric:tabular-nums}
+.lg .lpct{font-family:var(--mono);color:var(--dim);font-variant-numeric:tabular-nums;min-width:46px;text-align:right}
+
+/* waterfall */
+.wf{display:grid;gap:6px}
+.wfrow{display:grid;grid-template-columns:82px minmax(0,1fr) 74px;gap:11px;align-items:center;font-size:12px}
+.wfrow .wl{font-family:var(--mono);color:var(--muted);font-size:11.5px}
+.wfbar{height:15px;background:var(--hl);border-radius:3px;overflow:hidden;position:relative}
+.wfbar i{display:block;height:100%;background:var(--s-approval);opacity:.8}
+.wfbar i.pf{background:var(--s-proven)}
+.wfrow .wv{font-family:var(--mono);text-align:right;color:var(--fg);font-variant-numeric:tabular-nums}
+
+/* findings */
+.finding{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:center;
+  padding:13px 16px;border-bottom:1px solid var(--border)}
+.finding:last-child{border-bottom:0}
+.finding .ft{display:grid;gap:3px;min-width:0}
+.finding .ft b{font-size:13.5px;font-weight:600}
+.finding .ft span{font-size:12px;color:var(--muted);line-height:1.5}
+.finding .fm{display:grid;gap:5px;justify-items:end;flex:0 0 auto}
+.finding .fm .money{font-family:var(--mono);font-size:15px;font-weight:600;color:var(--fg);
+  font-variant-numeric:tabular-nums;white-space:nowrap}
+.finding .fm .basis{font-size:10.5px;color:var(--dim);font-family:var(--mono)}
+@media (max-width:560px){.finding{grid-template-columns:1fr}.finding .fm{justify-items:start}}
+
+/* notice */
+.notice{display:grid;grid-template-columns:auto minmax(0,1fr);gap:11px;align-items:start;
+  padding:12px 14px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--hl);font-size:12.5px;color:var(--body);line-height:1.55}
+.notice .ni{width:17px;height:17px;flex:0 0 auto;margin-top:1px}
+.notice.proven{border-color:color-mix(in srgb,var(--s-proven) 34%,transparent);background:var(--s-proven-bg)}
+.notice.proven .ni{color:var(--s-proven)}
+.notice.warn{border-color:color-mix(in srgb,var(--s-critical) 34%,transparent);background:var(--s-critical-bg)}
+.notice.warn .ni{color:var(--s-critical)}
+.notice.info .ni{color:var(--s-approval)}
+.notice b{color:var(--fg)}
+
+/* empty / error / denied / loading */
+.state-block{display:grid;gap:13px;justify-items:center;text-align:center;padding:56px 22px;max-width:520px;margin:0 auto}
+.state-block .sicon{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;
+  border:1px solid var(--border);background:var(--hl);color:var(--muted)}
+.state-block h3{font-size:16px}
+.state-block p{font-size:13px;color:var(--muted);line-height:1.6;max-width:46ch}
+.state-block .acts{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.chain4{display:grid;gap:0;text-align:left;width:100%;border:1px solid var(--border);border-radius:var(--r-sm);overflow:hidden}
+.chain4 div{display:grid;grid-template-columns:98px minmax(0,1fr);gap:12px;padding:9px 13px;
+  border-bottom:1px solid var(--border);font-size:12.5px}
+.chain4 div:last-child{border-bottom:0}
+.chain4 dt{color:var(--dim);font-size:11px;letter-spacing:.07em;text-transform:uppercase;font-weight:600}
+.chain4 dd{margin:0;font-family:var(--mono);font-size:12px;color:var(--fg);overflow-wrap:anywhere}
+.sk{background:linear-gradient(90deg,var(--hl) 0%,var(--panel) 50%,var(--hl) 100%);
+  background-size:200% 100%;animation:sh 1.35s ease-in-out infinite;border-radius:5px;height:12px}
+@keyframes sh{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.sk-rows{display:grid;gap:1px}
+.sk-row{display:grid;grid-template-columns:52px 128px 1fr 80px;gap:12px;align-items:center;padding:11px 16px;border-bottom:1px solid var(--border)}
+
+/* ── assistant rail ───────────────────────────────────────────────────── */
+.rail{grid-column:3;grid-row:2;border-left:1px solid var(--border);background:var(--void);
+  position:sticky;top:53px;height:calc(100vh - 53px);overflow-y:auto;display:none}
+#app.rail-open .rail{display:block}
+.rail-h{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px}
+.rail-h .eyebrow{font-size:10.5px}
+.rail-h button{margin-left:auto;color:var(--dim)}
+.rail-b{padding:16px;display:grid;gap:14px}
+.msg{display:grid;gap:6px}
+.msg .who{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:600}
+.msg .bub{border:1px solid var(--border);background:var(--panel);border-radius:var(--r-sm);padding:11px 13px;
+  font-size:12.5px;line-height:1.6;color:var(--body)}
+.msg.me .bub{background:var(--hl)}
+.msg .bub code{font-family:var(--mono);font-size:11.5px;color:var(--fg)}
+.msg .bub a{border-bottom:1px solid color-mix(in srgb,var(--accent-text) 40%,transparent)}
+.rail-meter{font-size:11px;color:var(--dim);font-family:var(--mono);display:flex;gap:8px;flex-wrap:wrap}
+.rail-in{display:flex;gap:8px;align-items:center;border:1px solid var(--border);border-radius:var(--r-sm);
+  background:var(--panel);padding:8px 10px}
+.rail-in input{flex:1;min-width:0;background:none;border:0;color:var(--fg);font:inherit;font-size:12.5px;outline:none}
+.rail-in input::placeholder{color:var(--dim)}
+
+/* ── dialog ───────────────────────────────────────────────────────────── */
+dialog{border:1px solid var(--border);border-radius:var(--r-lg);background:var(--panel);color:var(--fg);
+  padding:0;max-width:min(560px,92vw);width:100%;box-shadow:var(--shadow)}
+dialog::backdrop{background:rgba(10,10,9,.66);backdrop-filter:blur(3px)}
+.dlg-h{padding:13px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.dlg-b{padding:8px 0;max-height:60vh;overflow-y:auto}
+.cmd-in{width:100%;border:0;background:none;color:var(--fg);font:inherit;font-size:14px;outline:none;padding:0}
+.cmd-in::placeholder{color:var(--dim)}
+.cmdlist{list-style:none;margin:0;padding:0}
+.cmdlist button{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;
+  width:100%;padding:9px 16px;text-align:left;font-size:13px;color:var(--body);transition:background .12s}
+.cmdlist button:hover,.cmdlist button:focus-visible{background:var(--hl);color:var(--fg)}
+.cmdlist .cg{font-family:var(--mono);font-size:11px;color:var(--dim)}
+
+/* ── mockup chrome — deliberately NOT product UI ──────────────────────── */
+#chrome{
+  position:fixed;right:14px;bottom:14px;z-index:90;font-family:var(--mono);font-size:11px;
+  border:1px dashed var(--rule);border-radius:8px;background:color-mix(in srgb,var(--void) 94%,transparent);
+  backdrop-filter:blur(8px);box-shadow:var(--shadow);max-width:min(300px,calc(100vw - 28px));
+}
+#chrome .ch-h{display:flex;align-items:center;gap:8px;padding:6px 9px;border-bottom:1px dashed var(--rule);
+  color:var(--dim);letter-spacing:.08em;text-transform:uppercase;font-size:9.5px;font-weight:700}
+#chrome .ch-h button{margin-left:auto;color:var(--dim);font-size:11px;line-height:1}
+#chrome .ch-b{padding:9px;display:grid;gap:8px}
+#chrome[data-collapsed="true"] .ch-b{display:none}
+#chrome .ch-lbl{color:var(--dim);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase}
+#chrome .ch-set{display:flex;flex-wrap:wrap;gap:4px}
+#chrome .ch-set button{border:1px solid var(--rule);border-radius:5px;padding:3px 7px;color:var(--muted);
+  font-family:var(--mono);font-size:10.5px;background:transparent;transition:background .12s,color .12s}
+#chrome .ch-set button:hover{color:var(--fg)}
+#chrome .ch-set button[aria-pressed="true"]{background:var(--rule);color:var(--fg)}
+#chrome .ch-note{color:var(--dim);line-height:1.45;font-size:10px}
+.scope-card{
+  border:1px dashed var(--rule);border-radius:var(--r-sm);padding:20px;font-family:var(--mono);
+  font-size:12px;color:var(--muted);line-height:1.65;display:grid;gap:7px;background:transparent;
+}
+.scope-card b{color:var(--body);font-weight:600}
+
+/* phone simulation */
+body.phone #app{max-width:400px;margin:0 auto;border-left:1px solid var(--rule);border-right:1px solid var(--rule);min-height:100vh}
+body.phone{background:var(--void)}
+
+/* real responsive reflow */
+@media (max-width:1020px){
+  #app,#app.rail-open{grid-template-columns:minmax(0,1fr)}
+  .side{position:fixed;left:0;top:0;width:var(--side);z-index:60;transform:translateX(-100%);
+    transition:transform .2s ease;grid-row:auto}
+  body.nav-open .side{transform:translateX(0)}
+  body.nav-open::after{content:"";position:fixed;inset:0;background:rgba(10,10,9,.6);z-index:55}
+  .top{grid-column:1}
+  .main{grid-column:1}
+  #app.rail-open .rail{grid-column:1;grid-row:auto;position:static;height:auto;border-left:0;border-top:1px solid var(--border)}
+  .navtoggle{display:grid!important}
+}
+.navtoggle{display:none}
+@media (max-width:560px){
+  .page{padding:18px 16px 76px}
+  .page-title{font-size:21px}
+  .tiles{grid-template-columns:repeat(auto-fit,minmax(130px,1fr))}
+  .kv{grid-template-columns:1fr;gap:3px 0}
+  .kv dd{margin-bottom:7px}
+  .top{padding:10px 16px;gap:10px}
+  .crumbs .hide-s{display:none}
+}
+body.phone .page{padding:18px 16px 76px}
+body.phone .side{position:fixed;transform:translateX(-100%)}
+body.phone.nav-open .side{transform:translateX(0)}
+body.phone .navtoggle{display:grid}
+body.phone .top,body.phone .main{grid-column:1}
+body.phone #app,body.phone #app.rail-open{grid-template-columns:minmax(0,1fr)}
+body.phone #app.rail-open .rail{grid-column:1;position:static;height:auto;border-left:0;border-top:1px solid var(--border)}
+body.phone .crumbs .hide-s{display:none}
+body.phone .tiles{grid-template-columns:repeat(auto-fit,minmax(130px,1fr))}
+/* ── the flip, with its theatre. Proven green only; gold never encodes a state. ── */
+.flip.on .flip-side.pass{animation:flipin .55s cubic-bezier(.2,.8,.2,1) .28s both,flipglow 3.4s ease-in-out 1.1s infinite;position:relative;overflow:hidden}
+.flip.on .flip-side.fail{animation:flipin .55s cubic-bezier(.2,.8,.2,1) both}
+.flip.on .flip-side.pass::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 35%,color-mix(in srgb,var(--s-proven) 24%,transparent) 50%,transparent 65%);background-size:260% 100%;animation:flipsheen 1.6s ease-in-out .7s 1 both}
+@keyframes flipin{0%{transform:perspective(900px) rotateY(-80deg);opacity:0}100%{transform:perspective(900px) rotateY(0);opacity:1}}
+@keyframes flipsheen{0%{background-position:130% 0}100%{background-position:-30% 0}}
+@keyframes flipglow{0%,100%{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--s-proven) 22%,transparent),inset 0 0 34px color-mix(in srgb,var(--s-proven) 10%,transparent)}50%{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--s-proven) 48%,transparent),inset 0 0 56px color-mix(in srgb,var(--s-proven) 22%,transparent)}}
+.flip.on .flip-res.pass{text-shadow:0 0 22px color-mix(in srgb,var(--s-proven) 45%,transparent)}
+.flip-arrow.on{background:var(--s-proven-bg)}
+.flip-arrow.on svg{color:var(--s-proven)}
+.flip-arrow.on svg path{stroke-dasharray:4 3;animation:flipmarch 1.1s linear infinite}
+@keyframes flipmarch{to{stroke-dashoffset:-14}}
+.flip-meta{display:grid;grid-template-columns:auto minmax(0,1fr);gap:3px 12px;font-size:11.5px;color:var(--dim);margin-top:2px}
+.flip-meta .v{font-family:var(--mono);font-variant-numeric:tabular-nums;color:var(--body);overflow-wrap:anywhere}
+.fr{font-family:var(--mono);font-size:11px;color:var(--dim);text-decoration:underline dotted}
+.fr:hover{color:var(--fg)}
+body.phone .flip{grid-template-columns:1fr}
+body.phone .flip-arrow{border-left:0;border-right:0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:6px}
+body.phone .flip-arrow svg{transform:rotate(90deg)}
+/* the rail: attempts → the flip → the agent ended its turn → sealed */
+.flip-rail{position:relative;display:grid;gap:8px;margin-top:6px}
+.flip-rail::before{content:"";position:absolute;left:7px;right:7px;top:7px;height:2px;background:var(--rule)}
+.flip-rail .pt{position:relative;padding-top:20px;font-size:11.5px;color:var(--muted);min-width:0;overflow-wrap:anywhere}
+.flip-rail .pt::before{content:"";position:absolute;left:0;top:1px;width:10px;height:10px;border-radius:50%;background:var(--panel);border:2px solid var(--rule);box-sizing:content-box}
+.flip-rail .pt.fail::before{border-color:var(--s-failed)}
+.flip-rail .pt.crit::before{border-color:var(--s-critical);background:var(--s-critical)}
+.flip-rail .pt.pass::before{border-color:var(--s-proven);background:var(--s-proven);box-shadow:0 0 0 5px color-mix(in srgb,var(--s-proven) 24%,transparent)}
+.flip-rail.on .pt.pass::before{animation:flippulse 1.8s ease-in-out infinite}
+@keyframes flippulse{0%,100%{opacity:1}50%{opacity:.35}}
+.flip-rail .pt.end::before{border-color:var(--fg)}
+.flip-rail .pt.seal::before{border-radius:2px;border-color:var(--fg);background:var(--fg)}
+.flip-rail .pt b{display:block;color:var(--fg);font-weight:600;font-size:12px}
+.flip-rail .pt.pass b{color:var(--s-proven)}.flip-rail .pt.fail b{color:var(--s-failed)}.flip-rail .pt.crit b{color:var(--s-critical)}
+.flip-rail .pt .t{font-family:var(--mono);font-size:10.5px;color:var(--dim);display:block;font-variant-numeric:tabular-nums}
+.flip-rail .pt .sub{display:block;font-size:10.5px;color:var(--dim)}
+body.phone .flip-rail{grid-template-columns:1fr!important}
+body.phone .flip-rail::before{left:7px;right:auto;top:7px;bottom:7px;width:2px;height:auto}
+body.phone .flip-rail .pt{padding:0 0 0 22px}
+/* hero band under the header of a proven run */
+.flip-hero{position:relative;overflow:hidden;margin-top:14px;border:1px solid color-mix(in srgb,var(--s-proven) 50%,transparent);border-radius:var(--r-md);padding:13px 16px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;background:linear-gradient(90deg,color-mix(in srgb,var(--s-proven) 13%,var(--panel)),var(--panel) 70%)}
+.flip-hero::before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 40%,color-mix(in srgb,var(--s-proven) 18%,transparent) 50%,transparent 60%);background-size:300% 100%;animation:flipsheen 2.2s ease-in-out .3s 1 both}
+.flip-hero>*{position:relative}
+.flip-hero .fp{font-size:22px;font-weight:700;letter-spacing:-.03em;display:inline-flex;align-items:center;gap:8px;flex:none;font-family:var(--mono);animation:flipin .55s cubic-bezier(.2,.8,.2,1) both}
+.flip-hero .fp .f{color:var(--s-failed)}.flip-hero .fp .p{color:var(--s-proven)}.flip-hero .fp .a{color:var(--dim);font-weight:400}
+.flip-hero .tx{font-size:12.5px;color:var(--muted);min-width:0;flex:1 1 260px;line-height:1.5}
+.flip-hero .tx b{color:var(--fg);font-weight:600}
+.flip-hero .acts{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+/* attempts ladder + proven rows in any runs table */
+tbody tr.att-pass td{background:var(--s-proven-bg)}
+tbody tr.att-pass td:first-child{box-shadow:inset 3px 0 0 var(--s-proven)}
+tbody tr.flipped td:first-child{box-shadow:inset 3px 0 0 var(--s-proven)}
+tbody tr.flipped{background:linear-gradient(90deg,color-mix(in srgb,var(--s-proven) 8%,transparent),transparent 58%)}
+tbody tr.clickable.flipped:hover{background:linear-gradient(90deg,color-mix(in srgb,var(--s-proven) 14%,transparent),var(--hl) 58%)}
+.badge.b-flip{gap:6px}
+.badge.b-flip::before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor;box-shadow:0 0 0 3px color-mix(in srgb,var(--s-proven) 22%,transparent);animation:flippulse 1.8s ease-in-out infinite}
+.badge.b-flip .fx{font-family:var(--mono);font-weight:500;color:var(--muted);border-left:1px solid color-mix(in srgb,var(--s-proven) 35%,transparent);padding-left:6px}
+.badge.b-flip .fx i{font-style:normal;color:var(--s-failed)}.badge.b-flip .fx em{font-style:normal;color:var(--s-proven)}
+.flipsub{font-family:var(--mono);font-size:10.5px;color:var(--dim);margin-top:3px;white-space:nowrap}
+</style>
+
+<div id="app">
+  <!-- ── sidebar ───────────────────────────────────────────────────────── -->
+  <aside class="side">
+    <div class="side-top">
+      <a href="#/acme/core-platform" aria-label="Oxagen Mission Control">
+        <svg class="logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 453.868 93.246" role="img" aria-label="oxagen">
+          <path d="M33.9083 68.758Q24.1657 68.758 16.4786 64.7737Q8.79142 60.7894 4.39571 53.2965Q0 45.8035 0 35.3862V33.3718Q0 22.9544 4.39571 15.4615Q8.79142 7.96854 16.4786 3.98427Q24.1657 0 33.9083 0Q43.6509 0 51.3381 3.98427Q59.0252 7.96854 63.4209 15.4615Q67.8166 22.9544 67.8166 33.3718V35.3862Q67.8166 45.8035 63.4209 53.2965Q59.0252 60.7894 51.3381 64.7737Q43.6509 68.758 33.9083 68.758ZM33.9083 55.3486Q42.1895 55.3486 47.4689 50.0198Q52.7484 44.691 52.7484 35.0142V33.7437Q52.7484 24.067 47.5233 18.7382Q42.2981 13.4094 33.9083 13.4094Q25.6502 13.4094 20.3592 18.7382Q15.0683 24.067 15.0683 33.7437V35.0142Q15.0683 44.691 20.3592 50.0198Q25.6502 55.3486 33.9083 55.3486Z M176.569 68.758Q169.637 68.758 164.119 66.3453Q158.601 63.9327 155.387 59.2935Q152.173 54.6542 152.173 48.0088Q152.173 41.3403 155.387 36.8558Q158.601 32.3712 164.27 30.1017Q169.94 27.8323 177.174 27.8323H196.047V23.8925Q196.047 18.7316 192.874 15.5274Q189.701 12.3232 182.99 12.3232Q176.411 12.3232 173.049 15.3842Q169.686 18.4452 168.627 23.3593L154.691 18.7315Q156.27 13.6133 159.748 9.39702Q163.225 5.18071 169.049 2.59035Q174.874 0 183.208 0Q195.972 0 203.326 6.42816Q210.681 12.8563 210.681 24.9392V50.4707Q210.681 54.4204 214.368 54.4204H219.795V66.9148H209.197Q204.464 66.9148 201.442 64.5334Q198.42 62.1521 198.42 58.1563V57.8864H196.126Q195.392 59.6967 193.399 62.2985Q191.406 64.9004 187.388 66.8292Q183.369 68.758 176.569 68.758ZM179.05 56.4348Q186.581 56.4348 191.314 52.1592Q196.047 47.8837 196.047 40.6031V39.2405H178.175Q173.175 39.2405 170.208 41.3881Q167.241 43.5358 167.241 47.5513Q167.241 51.5668 170.34 54.0008Q173.439 56.4348 179.05 56.4348Z M227.767 34.6423V32.6279Q227.767 22.3817 231.86 15.0863Q235.953 7.79081 242.768 3.8954Q249.582 0 257.706 0Q266.935 0 271.762 3.33256Q276.589 6.66512 278.81 10.4107H281.042V1.8432H295.801V79.33Q295.801 85.6989 292.104 89.4725Q288.408 93.2462 282.079 93.2462H238.369V80.0541H277.023Q280.779 80.0541 280.779 76.1043V57.2775H278.547Q277.161 59.5683 274.665 61.8904Q272.168 64.2125 268.057 65.7414Q263.946 67.2702 257.706 67.2702Q249.582 67.2702 242.756 63.3748Q235.93 59.4794 231.848 52.1724Q227.767 44.8655 227.767 34.6423ZM261.938 54.0781Q270.151 54.0781 275.573 48.8612Q280.996 43.6443 280.996 34.2704V32.9999Q280.996 23.4943 275.627 18.3432Q270.259 13.1921 261.938 13.1921Q253.749 13.1921 248.315 18.3432Q242.881 23.4943 242.881 32.9999V34.2704Q242.881 43.6443 248.315 48.8612Q253.749 54.0781 261.938 54.0781Z M344.764 68.758Q334.998 68.758 327.583 64.6108Q320.167 60.4636 316.031 52.9048Q311.896 45.346 311.896 35.1689V33.589Q311.896 23.3889 315.977 15.8416Q320.059 8.2944 327.397 4.1472Q334.735 0 344.385 0Q353.881 0 360.956 4.1867Q368.031 8.37341 371.981 15.8515Q375.931 23.3297 375.931 33.2895V38.6974H327.181Q327.468 46.3334 332.587 50.9496Q337.707 55.5658 345.198 55.5658Q352.522 55.5658 356.101 52.3534Q359.681 49.141 361.553 45.0629L373.985 51.4813Q372.119 55.0656 368.63 59.1042Q365.141 63.1428 359.394 65.9504Q353.648 68.758 344.764 68.758ZM327.313 27.2892H360.622Q360.095 20.7986 355.7 16.9954Q351.304 13.1921 344.277 13.1921Q337.055 13.1921 332.691 16.9954Q328.327 20.7986 327.313 27.2892Z M391.548 66.9148V1.8432H406.353V10.9769H408.585Q410.303 7.25429 414.832 3.99908Q419.361 0.743866 428.435 0.743866Q435.956 0.743866 441.695 4.12911Q447.434 7.51435 450.651 13.5903Q453.868 19.6663 453.868 27.9442V66.9148H438.8V29.1226Q438.8 21.1969 434.891 17.3492Q430.983 13.5015 423.9 13.5015Q415.872 13.5015 411.244 18.8237Q406.617 24.146 406.617 33.9445V66.9148Z" fill="currentColor"/>
+          <path d="M73.9979 66.9148 98.2261 34.0696 74.3764 1.8432H91.9626L107.9 24.3499H110.131L126.068 1.8432H143.654L119.805 34.0696L144.033 66.9148H126.206L110.131 44.0065H107.9L91.8244 66.9148Z" fill="#D6962C"/>
+        </svg>
+      </a>
+    </div>
+
+    <div class="switcher">
+      <button class="sw" type="button" data-cmd="org">
+        <span class="sw-mark org">A</span>
+        <span class="sw-txt"><span class="sw-lbl">Organization</span><span class="sw-val">Acme Robotics</span></span>
+        <span class="sw-car" aria-hidden="true">▾</span>
+      </button>
+      <button class="sw" type="button" data-cmd="ws">
+        <span class="sw-mark">cp</span>
+        <span class="sw-txt"><span class="sw-lbl">Workspace</span><span class="sw-val">core-platform</span></span>
+        <span class="sw-car" aria-hidden="true">▾</span>
+      </button>
+    </div>
+
+    <nav class="navgroup" aria-label="Workspace">
+      <p class="eyebrow">Workspace</p>
+      <ul class="nav" id="nav-ws"></ul>
+    </nav>
+    <nav class="navgroup" aria-label="Organization">
+      <p class="eyebrow">Organization</p>
+      <ul class="nav" id="nav-org"></ul>
+    </nav>
+
+    <div class="side-foot">
+      <span class="avatar">PN</span>
+      <span class="who"><b>Priya Natarajan</b><span>Org owner</span></span>
+    </div>
+  </aside>
+
+  <!-- ── topbar ────────────────────────────────────────────────────────── -->
+  <header class="top">
+    <button class="iconbtn navtoggle" type="button" id="navToggle" aria-label="Open navigation">
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2 4h12M2 8h12M2 12h12"/></svg>
+    </button>
+    <nav class="crumbs" id="crumbs" aria-label="Breadcrumb"></nav>
+    <div class="top-r">
+      <button class="kbtn" type="button" id="cmdBtn"><span class="hide-s">Search or run a command</span><kbd>⌘K</kbd></button>
+      <button class="iconbtn" type="button" id="themeBtn" aria-label="Toggle theme" title="Toggle theme">◐</button>
+      <button class="iconbtn" type="button" id="railBtn" aria-pressed="false" aria-label="Toggle assistant" title="Assistant">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1.6 9.7 6.3 14.4 8l-4.7 1.7L8 14.4 6.3 9.7 1.6 8l4.7-1.7Z" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ── main ──────────────────────────────────────────────────────────── -->
+  <main class="main" id="view" tabindex="-1"></main>
+
+  <!-- ── assistant rail ────────────────────────────────────────────────── -->
+  <aside class="rail" aria-label="Assistant">
+    <div class="rail-h">
+      <p class="eyebrow">Assistant</p>
+      <span class="badge b-quiet plain mono">stella serve · up</span>
+      <button type="button" id="railClose" aria-label="Close assistant">✕</button>
+    </div>
+    <div class="rail-b">
+      <div class="msg me">
+        <span class="who">Priya Natarajan</span>
+        <div class="bub">Why is <code>run_01K5XQ7M4A</code> proven when the agent never ran the test?</div>
+      </div>
+      <div class="msg">
+        <span class="who">Oxagen</span>
+        <div class="bub">
+          Witness <code>wit_01K5XP2D9F</code> ran twice in the witness runner, in an environment
+          <code>acme.core.release-manager</code> has no path to. On <code>main</code> at
+          <code>9f2c41ae</code> it failed; on <code>refs/pull/482/head</code> at <code>4d7be053</code>
+          it passed, for the same normalized command. That flip is the proof —
+          <a href="#/acme/core-platform/runs/run_01K5XQ7M4A/proof">frame 1280</a>.
+          The agent received the tool result at grain <code>L0</code>:
+          the four characters <code>pass</code> and nothing else
+          (<a href="#/acme/core-platform/runs/run_01K5XQ7M4A/timeline">frame 1281</a>).
+        </div>
+      </div>
+      <div class="msg me">
+        <span class="who">Priya Natarajan</span>
+        <div class="bub">Could it have read the witness?</div>
+      </div>
+      <div class="msg">
+        <span class="who">Oxagen</span>
+        <div class="bub">
+          It tried. At frame 212 a <code>Read</code> call resolved to witness storage and was denied by
+          <code>witness.storage.deny@v4</code>, which raised a <code>witness_probe</code> incident on the run.
+          Tamper exclusion held: the witness fingerprint taken at authoring matches the one taken at run.
+          <a href="#/acme/core-platform/runs/run_01K5XQ7M4A/timeline">Open the denial</a>.
+        </div>
+      </div>
+      <p class="rail-meter"><span>run_01K5ZB4H9C · turn 2</span><span>$0.0184</span><span>gateway_observed</span></p>
+      <div class="rail-in">
+        <input id="railInput" type="text" placeholder="Ask about this run…" aria-label="Ask the assistant">
+        <span class="dim mono" style="font-size:11px">↵</span>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<!-- ── command menu ─────────────────────────────────────────────────────── -->
+<dialog id="cmdDlg" aria-label="Command menu">
+  <div class="dlg-h">
+    <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--dim);flex:0 0 auto"><circle cx="7" cy="7" r="4.6"/><path d="m10.4 10.4 3.1 3.1" stroke-linecap="round"/></svg>
+    <input class="cmd-in" id="cmdInput" type="text" placeholder="Search runs, pages, actions…" aria-label="Search or run a command">
+    <button class="iconbtn" type="button" id="cmdClose" aria-label="Close">✕</button>
+  </div>
+  <div class="dlg-b"><ul class="cmdlist" id="cmdList"></ul></div>
+</dialog>
+
+<!-- ── mockup chrome (not product UI) ───────────────────────────────────── -->
+<div id="chrome" data-collapsed="false">
+  <div class="ch-h"><span>mockup · W5</span><button type="button" id="chToggle" aria-label="Collapse mockup controls">–</button></div>
+  <div class="ch-b">
+    <div><span class="ch-lbl">state</span>
+      <div class="ch-set" id="stateSet">
+        <button type="button" data-state="loaded" aria-pressed="true">loaded</button>
+        <button type="button" data-state="loading" aria-pressed="false">loading</button>
+        <button type="button" data-state="empty" aria-pressed="false">empty</button>
+        <button type="button" data-state="error" aria-pressed="false">error</button>
+        <button type="button" data-state="denied" aria-pressed="false">denied</button>
+      </div>
+    </div>
+    <div><span class="ch-lbl">viewport</span>
+      <div class="ch-set" id="vpSet">
+        <button type="button" data-vp="desk" aria-pressed="true">desktop</button>
+        <button type="button" data-vp="phone" aria-pressed="false">phone 400</button>
+      </div>
+    </div>
+    <div><span class="ch-lbl">jump</span>
+      <div class="ch-set" id="jumpSet">
+        <button type="button" data-go="#/acme/core-platform/runs/run_01K5XQ7M4A/proof">proof</button>
+        <button type="button" data-go="#/acme/core-platform/runs/run_01K5XP2F6B/ladder">witness run</button>
+        <button type="button" data-go="#/acme/core-platform/runs/run_01K5YR3C8N/proof">tampered</button>
+        <button type="button" data-go="#/acme/core-platform/tools/assurance">assurance</button>
+        <button type="button" data-go="#/acme/core-platform/spend">spend</button>
+      </div>
+    </div>
+    <p class="ch-note">Mockup chrome, not product UI. State applies to the page on screen.</p>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* ═══════════════════════════════════════════════════════════════════════
+   Demo record — Acme Robotics / core-platform. Every figure below is the
+   value the product would render, in the units §12 specifies: integer
+   micro-USD internally, cents on screen, with the cost basis beside it.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+const ORG = { slug:"acme", name:"Acme Robotics", currency:"USD" };
+const WS  = { slug:"core-platform", mainRepo:"acme/platform", branch:"main",
+              linked:["acme/billing","acme/mobile"] };
+
+const usd  = m => "$" + (m/1e6).toFixed(2);
+const usd4 = m => "$" + (m/1e6).toFixed(4);
+const n    = v => v.toLocaleString("en-US");
+const esc  = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+const VERDICT = {
+  flipped:{cls:"b-proven",  t:"flipped"},
+  failing:{cls:"b-failed",  t:"failing"},
+  unmoved:{cls:"b-neutral", t:"unmoved"},
+  unsatisfied:{cls:"b-denied", t:"unsatisfied"},
+  tampered:{cls:"b-critical", t:"tampered"},
+  unverified:{cls:"b-neutral", t:"unverified"},
+  waived:{cls:"b-quiet",    t:"waived"}
+};
+const vbadge = v => v === "flipped"
+  ? `<span class="badge b-proven b-flip">flipped<span class="fx"><i>fail</i> → <em>pass</em></span></span>`
+  : `<span class="badge ${VERDICT[v].cls}">${VERDICT[v].t}</span>`;
+/* a verdict cell in a runs table: the badge, and for a run whose flip record is known, the attempt count and test kind */
+const verdictCell = row => {
+  const known = typeof RUNS !== "undefined" && RUNS[row.id], p = known && known.proof;
+  const sub = p && p.attempts ? `<div class="flipsub">${p.attempts.length} attempt${p.attempts.length===1?"":"s"} · ${esc(p.test_kind)}${row.v==="flipped"?"":" · never flipped"}</div>` : "";
+  return vbadge(row.v) + sub;
+};
+const tsec = t => { const m = String(t||"").match(/(\d+):(\d+):(\d+)(?:\.(\d+))?$/); return m ? (+m[1])*3600+(+m[2])*60+(+m[3])+(m[4]?+("0."+m[4]):0) : null; };
+const dur  = s => { s = Math.abs(s); const m = Math.floor(s/60), r = s-m*60; return (m?m+"m ":"")+(m?Math.round(r):(r<10?r.toFixed(1):Math.round(r)))+"s"; };
+const flipLead = p => (p && p.flip_at && p.turn_end_at) ? tsec(p.turn_end_at)-tsec(p.flip_at) : null;
+const frameLink = (r, seq) => `<a class="fr" href="#/${ORG.slug}/${WS.slug}/runs/${r.id}/timeline">frame ${n(seq)}</a>`;
+function flipHero(r){
+  const p = r.proof, lead = flipLead(p), k = p.attempts.length;
+  return `<div class="flip-hero" role="status">
+    <span class="fp"><span class="f">fail</span><span class="a">→</span><span class="p">pass</span></span>
+    <div class="tx"><b>${esc(p.test_kind)}</b> · <span class="mono">${esc(p.oracle)}</span> · flipped on attempt <b>${k} of ${k}</b>${lead!=null?`, <b>${dur(lead)}</b> before the agent ended turn ${p.turn}`:""}.
+      Recorded at ${frameLink(r, p.flip_seq)}, signed by the runner key, in the hash chain.</div>
+    <div class="acts"><button class="btn btn-sm" type="button" onclick="location.hash='#/${ORG.slug}/${WS.slug}/runs/${r.id}/proof'">Open the proof</button></div>
+  </div>`;
+}
+function flipRail(r){
+  const p = r.proof, on = r.verdict === "flipped";
+  return `<div class="flip-rail${on?" on":""}" style="grid-template-columns:repeat(${p.rail.length},minmax(0,1fr))">${p.rail.map(pt =>
+    `<div class="pt ${pt.c}"><b>${esc(pt.b)}</b><span class="t">${esc(pt.t)}</span>${pt.sub?`<span class="sub">${esc(pt.sub)}</span>`:""}${frameLink(r, pt.seq)}</div>`).join("")}</div>`;
+}
+
+/* ── the proven run ─────────────────────────────────────────────────── */
+const R_PROVEN = {
+  id:"run_01K5XQ7M4A", attempt:"att_01K5XQ7M4B",
+  agent:"acme.core.release-manager", harness:"Claude Code 2.4.1",
+  operator:"Marcus Bell", operatorRole:"Workspace owner",
+  status:"sealed", tier:"gateway", replay:"full", basis:"gateway_observed",
+  started:"2026-09-11 09:14:02 UTC", ended:"2026-09-11 09:51:47 UTC",
+  frames:1287, turns:6, toolCalls:41, denied:1,
+  task:"acme/platform#478 — Retry budget exhaustion silently drops webhook deliveries",
+  pr:"acme/platform#482", prTitle:"Fail closed when the webhook retry budget is exhausted",
+  repo:"acme/platform", baseCommit:"9f2c41ae",
+  costMicros:4872140, verdict:"flipped",
+  usage:{ input_uncached:18342, cache_read:241980, cache_write_5m:12640, cache_write_1h:0,
+          output:9417, reasoning:3208, server_tool_requests:2,
+          tool_definition_tokens:4110, context_frame_tokens:7325, steering_tokens:1864 },
+  proof:{
+    witness_id:"wit_01K5XP2D9F", oracle:"test_flip",
+    target_ref:"main", target_sha:"9f2c41aeb7d3056c1f88ea24b0d97c3ea65f1d20",
+    pr_ref:"refs/pull/482/head", pr_sha:"4d7be053c91a2f68d0b4471e8ac35fd9026b7e14",
+    cmd:"sha256:7b41f0c9a2e58d3612ba9c470de8f5a1c63b902d84fe17aa5c0b39d7e2418f6c",
+    target_result:"fail", pr_result:"pass", verdict:"flipped",
+    fail_fp:"sha256:d92a6f13b804c7e5a1fd20983c64be7710da5f82e93b1c6047ad8e2f5b930c14",
+    pass_digest:"sha256:36ce8a04d71f9b2530ae64c8917fd3b0e25a7c61048df39b2ce7150a8d64f2b3",
+    tamper:"held", grain:"L0", witness_run:"run_01K5XP2F6B",
+    key_id:"kms:acme/witness-runner/attest/ed25519/v3",
+    sig:"MEUCIQC3k1vR9pW0sT4yHn6bQ2dXfLm8uJ7aZgN5cE1oPxY0AiBd2Rj9FqK6lT8mHs3vCw7nUxYpZ4bG1dA0eNkQj5rMhg==",
+    seq:1280, ts:"2026-09-11 09:49:31.402 UTC",
+    prev_hash:"sha256:0c4d719ea36f8b25107cd94ba2f8e63057d1ac4e9b2036fd581ea47c93b6208f",
+    hash:"sha256:b7e0243f915ac68d0b3e57fa24c91d806e5b3729af1c0d48e962735bac081f6a",
+    content:"sha256:5ea19c73b0d248f61ca307e94fb582d06731ae4c9820df5b13e6a7048cf29b5d",
+    heldOut:false, witnessCount:2,
+    /* the flip, as a record: what kind of test, how many attempts, and when the flip landed
+       against when the agent ended its turn — every point a frame in this run's chain. */
+    test_kind:"integration test", runner:"pytest 8.3",
+    cmd_text:"pytest tests/witness/test_retry_budget_fail_closed.py -q",
+    attempts:[
+      {n:1, result:"fail", at:"09:46:05.338", seq:262,  head:"2e91c0b4", witness_run:"run_01K5XP0C2A", took:"1m 25s",
+       note:"head @ 2e91c0b4 · failing on main and on the head · not credited · the agent saw the word fail"},
+      {n:2, result:"pass", at:"09:49:31.402", seq:1280, head:"4d7be053", witness_run:"run_01K5XP2F6B", took:"1m 37s",
+       note:"head @ 4d7be053 · fail on main, pass on the head · the flip"}],
+    turn:6, flip_seq:1280, flip_at:"09:49:31.402",
+    turn_end_seq:1283, turn_end_at:"09:49:38.441", stop_seq:1285, stop_at:"09:51:47.006",
+    seal_seq:1286, seal_at:"09:51:49.220",
+    rail:[
+      {c:"fail",  b:"Attempt 1 · fail",            t:"09:46:05.338", seq:262,  sub:"turn 5"},
+      {c:"start", b:"Turn 6 opened",               t:"09:47:31.220", seq:1244, sub:"fix pushed"},
+      {c:"pass",  b:"Attempt 2 · pass · the flip", t:"09:49:31.402", seq:1280},
+      {c:"end",   b:"Agent ended its turn",        t:"09:49:38.441", seq:1283, sub:"end_turn"},
+      {c:"seal",  b:"Run sealed",                  t:"09:51:49.220", seq:1286}]
+  },
+  chain:{ merkle:"sha256:e41b7c9d05a3f862b4de1907cf2358ab6d0471e93fb28c5a07de6241b98035cf",
+          archive:"sha256:a07f3e5c1b94d268ef03a75bc14d29607f8e3b25da916c04fb7e58203dc16a4b",
+          attester:"kms:acme/attest/ed25519/v7", gaps:0, checkpoints:13,
+          sealed:"2026-09-11 09:51:49 UTC" },
+  turnsCost:[
+    {t:"turn 1", m:412880, hit:0.00,  proof:false},
+    {t:"turn 2", m:918450, hit:0.881, proof:false},
+    {t:"turn 3", m:1104220,hit:0.914, proof:false},
+    {t:"turn 4", m:1386700,hit:0.938, proof:false},
+    {t:"turn 5", m:742190, hit:0.942, proof:false},
+    {t:"turn 6", m:307700, hit:0.951, proof:true}
+  ]
+};
+
+/* ── the tampered run ───────────────────────────────────────────────── */
+const R_TAMPERED = {
+  id:"run_01K5YR3C8N", attempt:"att_01K5YR3C8P",
+  agent:"acme.core.triage", harness:"Codex CLI 0.41.0",
+  operator:"Priya Natarajan", operatorRole:"Org owner",
+  status:"sealed", tier:"gateway", replay:"full", basis:"gateway_observed",
+  started:"2026-09-11 11:02:18 UTC", ended:"2026-09-11 11:26:55 UTC",
+  frames:604, turns:4, toolCalls:23, denied:0,
+  task:"acme/platform#485 — Invoice export drops line items above 10 000 rows",
+  pr:"acme/platform#486", prTitle:"Stream invoice export in pages of 2 500",
+  repo:"acme/platform", baseCommit:"1a8f30c6",
+  costMicros:2318905, verdict:"tampered",
+  usage:{ input_uncached:11204, cache_read:96430, cache_write_5m:8120, cache_write_1h:0,
+          output:5142, reasoning:1877, server_tool_requests:0,
+          tool_definition_tokens:6980, context_frame_tokens:4118, steering_tokens:1864 },
+  proof:{
+    witness_id:"wit_01K5YQ8T1V", oracle:"test_flip",
+    target_ref:"main", target_sha:"1a8f30c6de52b9047fd1c8e35b06a29471dd8f5c",
+    pr_ref:"refs/pull/486/head", pr_sha:"c30b97e1f4a82d65093be7fa16c4d85207e9b3a1",
+    cmd:"sha256:2f60ba17c9d3e458071ac62fb5d9308e41627cba05de83f19a4c7061b2e8d534",
+    target_result:"fail", pr_result:"excluded", verdict:"tampered",
+    fail_fp:"sha256:8c1e05af73d2946b0fe5ab3178c204de91735fa6b0e82d41c539706ab1de2f83",
+    pass_digest:null,
+    tamper:"broken", grain:"L0", witness_run:"run_01K5YQ8V4D",
+    key_id:"kms:acme/witness-runner/attest/ed25519/v3",
+    sig:"MEQCIFq7pR2nX8vL0mYt4bH9cJ3sWzEo6dKgA1uNfP5rTxQiAiA9hM2vCk7LbY0sXnW4pRe8TgZdJ6uFm1oQaBc3hKyNrw==",
+    seq:598, ts:"2026-09-11 11:26:12.771 UTC",
+    prev_hash:"sha256:41f8d0a72be95c36187da0e4fb52c9367019ae84db2f6510c7a93be208df5164",
+    hash:"sha256:6da31902ef47b85c0a6f31be2d940785cf1b60ea37429d8b05fc1e6a84d0937b",
+    content:"sha256:9b02fe43a7c18d6503e29bf1740ac85d6b23917fe04a5cd8261b3e07fa5c491d",
+    tamperDetail:{
+      file:"tests/conftest.py",
+      fingerprintAuthored:"sha256:af10c39e82b7d5460c1fa7e39025b8d47613ce0a9f28b5d061ac74e3f985201b",
+      fingerprintAtRun:"sha256:53e7b81f0da24c96b0f8e1537ac4d6920b85fe31c7a0d649f2e38b015c7da4e6",
+      change:"+3 −0 · added `collect_ignore_glob = [\"test_invoice_export_*\"]` at module scope",
+      detectedAt:"2026-09-11 11:26:09 UTC"
+    },
+    heldOut:false, witnessCount:1,
+    test_kind:"integration test", runner:"pytest 8.3",
+    cmd_text:"pytest tests/witness/test_invoice_export_pages.py -q",
+    attempts:[
+      {n:1, result:"excluded", at:"11:26:12.771", seq:598, head:"c30b97e1", witness_run:"run_01K5YQ8V4D", took:"31s",
+       note:"tamper exclusion broke before the head ran · nothing credited · the agent saw the word fail"}],
+    turn:4, flip_seq:null, flip_at:null,
+    turn_end_seq:601, turn_end_at:"11:26:41.902", stop_seq:602, stop_at:"11:26:55.310",
+    seal_seq:603, seal_at:"11:26:58.104",
+    rail:[
+      {c:"start", b:"Turn 4 opened",          t:"11:25:30.004", seq:590},
+      {c:"crit",  b:"Attempt 1 · excluded",   t:"11:26:12.771", seq:598, sub:"tampered"},
+      {c:"end",   b:"Agent ended its turn",   t:"11:26:41.902", seq:601},
+      {c:"seal",  b:"Run sealed",             t:"11:26:58.104", seq:603}]
+  },
+  chain:{ merkle:"sha256:3c85af1d6072be94103fd8a52e7b06c419df35ba8d1067ec4a29f350bd718e26",
+          archive:"sha256:b91d47ce3082fa561d7e0b94ac2358f10d6b47e2953fca08bd1e76034f5ca298",
+          attester:"kms:acme/attest/ed25519/v7", gaps:0, checkpoints:7,
+          sealed:"2026-09-11 11:26:58 UTC" },
+  turnsCost:[
+    {t:"turn 1", m:388120, hit:0.00,  proof:false},
+    {t:"turn 2", m:701440, hit:0.762, proof:false},
+    {t:"turn 3", m:884215, hit:0.831, proof:false},
+    {t:"turn 4", m:345130, hit:0.844, proof:true}
+  ]
+};
+
+/* ── the witness run (a run of the witness runner service principal) ── */
+const R_WITNESS = {
+  id:"run_01K5XP2F6B", attempt:"att_01K5XP2F6C",
+  agent:"acme.core.witness-runner", agentKind:"service", harness:"Oxagen witness runner 1.6.2",
+  operator:"Marcus Bell", operatorRole:"Workspace owner",
+  status:"sealed", tier:"gateway", replay:"full", basis:"gateway_observed",
+  started:"2026-09-11 09:47:55 UTC", ended:"2026-09-11 09:49:31 UTC",
+  frames:96, turns:1, toolCalls:0, denied:0,
+  forRun:"run_01K5XQ7M4A", witness:"wit_01K5XP2D9F",
+  costMicros:612480, authorCallMicros:441960, computeMicros:170520,
+  model:"z-ai/glm-latest via OpenRouter", modelTier:"complex",
+  usage:{ input_uncached:14208, cache_read:0, cache_write_5m:0, cache_write_1h:0,
+          output:3982, reasoning:2104, server_tool_requests:0,
+          tool_definition_tokens:0, context_frame_tokens:9640, steering_tokens:1864 },
+  chain:{ merkle:"sha256:7f0ac52d938be164205ca7f3d09eb416583c2ad7091ebf5648c3a0e27dbf9145",
+          archive:"sha256:d2ba710f5934ce8016af3b25d7e094c1587fa062e39b4d15c802a7fe61d3948c",
+          attester:"kms:acme/attest/ed25519/v7", gaps:0, checkpoints:2,
+          sealed:"2026-09-11 09:49:33 UTC" }
+};
+
+const RUNS = { [R_PROVEN.id]:R_PROVEN, [R_TAMPERED.id]:R_TAMPERED, [R_WITNESS.id]:R_WITNESS };
+
+/* ── frames on the proven run (windowed) ────────────────────────────── */
+const FRAMES_PROVEN = [
+  {seq:0,    kind:"agent_start",    d:"<code>acme.core.release-manager</code> · digest <code>sha256:2ab7…d015</code> · tier <code>gateway</code>", t:"09:14:02.118"},
+  {seq:2,    kind:"context.assembled", d:"11 context frames · budget 24 000 · composition <code>sha256:61df…8c04</code>", t:"09:14:02.902"},
+  {seq:3,    kind:"model.request",  d:"z-ai/glm-latest · 26 411 prompt tokens · steering <code>str_01K4T…</code>", t:"09:14:03.004"},
+  {seq:4,    kind:"model.response", d:"stop <code>tool_use</code> · 1 412 output · $0.4129", t:"09:14:19.560"},
+  {seq:198,  kind:"tool_requested", d:"<code>Bash</code> · <code>pytest tests/test_webhook_retry.py -q</code>", t:"09:31:44.201"},
+  {seq:199,  kind:"tool_call",      d:"exit 0 · 14 passed · 2.81 s · the agent's own tests, not the witness", t:"09:31:47.019"},
+  {seq:211,  kind:"tool_requested", d:"<code>Read</code> · <code>.oxagen/witness/wit_01K5XP2D9F/</code>", t:"09:33:02.663", mark:"deny"},
+  {seq:212,  kind:"policy.decision",d:"<b>denied</b> · rule <code>witness.storage.deny@v4</code> · incident <code>witness_probe</code>", t:"09:33:02.665", mark:"deny"},
+  {seq:213,  kind:"error",          d:"<code>tool_denied</code> returned to the harness · halt threshold 1 / 3", t:"09:33:02.668", mark:"deny"},
+  {seq:240,  kind:"tool_requested", d:"<code>github.create_pull_request@3</code> · base <code>main</code>", t:"09:44:11.870"},
+  {seq:241,  kind:"tool_call",      d:"PR <code>acme/platform#482</code> opened · receipt <code>rcp_01K5XQ…</code>", t:"09:44:14.332"},
+  {seq:260,  kind:"tool_requested", d:"<code>oxagen.verify@1</code> · <code>{ \"pull_request\": 482 }</code> · attempt 1", t:"09:44:40.212"},
+  {seq:262,  kind:"proof.observed", d:"witness runner · <b>failing</b> · head <code>2e91c0b4</code> · fail on both sides · not credited", t:"09:46:05.338", mark:"proof"},
+  {seq:263,  kind:"tool_call",      d:"<code>oxagen.verify@1</code> → <code>{ \"result\": \"fail\" }</code> · grain <code>L0</code>", t:"09:46:05.540", mark:"airlock"},
+  {seq:1244, kind:"model.request",  d:"turn 6 opens · the fix is on <code>refs/pull/482/head</code> @ <code>4d7be053</code>", t:"09:47:31.220"},
+  {seq:1279, kind:"tool_requested", d:"<code>oxagen.verify@1</code> · <code>{ \"pull_request\": 482 }</code> · attempt 2", t:"09:47:54.610"},
+  {seq:1280, kind:"proof.observed", d:"witness runner · <b>flipped</b> · recorded in full, not disclosed", t:"09:49:31.402", mark:"proof"},
+  {seq:1281, kind:"tool_call",      d:"<code>oxagen.verify@1</code> → <code>{ \"result\": \"pass\" }</code> · grain <code>L0</code>", t:"09:49:31.615", mark:"airlock"},
+  {seq:1282, kind:"model.request",  d:"tool result in the prompt is 4 characters: <code>pass</code>", t:"09:49:31.702", mark:"airlock"},
+  {seq:1283, kind:"model.response", d:"stop <code>end_turn</code> · 214 output · $0.0308", t:"09:49:38.441"},
+  {seq:1285, kind:"agent_stop",     d:"outcome <code>completed</code> · 6 turns · 41 tool calls · 1 denied", t:"09:51:47.006"},
+  {seq:1286, kind:"checkpoint",     d:"seal · merkle <code>sha256:e41b…35cf</code> · countersigned on ingest", t:"09:51:49.220"}
+];
+
+const FRAMES_TAMPERED = [
+  {seq:0,   kind:"agent_start",     d:"<code>acme.core.triage</code> · digest <code>sha256:9c40…71ea</code> · tier <code>gateway</code>", t:"11:02:18.442"},
+  {seq:118, kind:"tool_requested",  d:"<code>Edit</code> · <code>tests/conftest.py</code>", t:"11:11:36.115", mark:"deny"},
+  {seq:119, kind:"tool_call",       d:"+3 −0 · allowed: the repository's own harness is not witness storage", t:"11:11:36.902", mark:"deny"},
+  {seq:402, kind:"tool_requested",  d:"<code>github.create_pull_request@3</code> · base <code>main</code>", t:"11:19:04.281"},
+  {seq:403, kind:"tool_call",       d:"PR <code>acme/platform#486</code> opened · receipt <code>rcp_01K5YR…</code>", t:"11:19:06.550"},
+  {seq:596, kind:"tool_requested",  d:"<code>oxagen.verify@1</code> · <code>{ \"pull_request\": 486 }</code>", t:"11:25:41.003"},
+  {seq:598, kind:"proof.observed",  d:"witness runner · <b>tampered</b> · tamper exclusion broken", t:"11:26:12.771", mark:"proof"},
+  {seq:599, kind:"tool_call",       d:"<code>oxagen.verify@1</code> → <code>{ \"result\": \"fail\" }</code> · grain <code>L0</code>", t:"11:26:12.955", mark:"airlock"},
+  {seq:600, kind:"model.request",   d:"tool result in the prompt is 4 characters: <code>fail</code>", t:"11:26:13.028", mark:"airlock"},
+  {seq:602, kind:"agent_stop",      d:"outcome <code>completed</code> · 4 turns · 23 tool calls · 0 denied", t:"11:26:55.310"},
+  {seq:603, kind:"checkpoint",      d:"seal · merkle <code>sha256:3c85…8e26</code> · countersigned on ingest", t:"11:26:58.104"}
+];
+
+/* ── assurance suite (§6.13) — last result per case ──────────────────── */
+const ASSURANCE = {
+  version:"3.9.0", ran:"2026-09-11 06:00:14 UTC", against:"live gateway · core-platform",
+  tier:"gateway", duration:"4 m 11 s", pass:10, na:1, fail:0,
+  cases:[
+    {c:"Call a tool outside the belt by name", e:"unknown_tool, no dispatch, halt threshold incremented", r:"pass", ms:412, note:"halt threshold 1 / 3 observed"},
+    {c:"Search for a tool outside the belt", e:"zero results", r:"pass", ms:96, note:"0 of 214 registry rows returned"},
+    {c:"Reuse an approval token on a second call, or on a modified call", e:"token_denied", r:"pass", ms:588, note:"both variants denied"},
+    {c:"Present a run token to a tool server directly", e:"rejected; tool servers accept only broker credentials", r:"pass", ms:301, note:"github, slack, stripe probed"},
+    {c:"Call a financial tool with no mandate; over the mandate; outside the counterparty set", e:"denied before dispatch, mandate ledger unchanged", r:"pass", ms:1104, note:"3 of 3 denied · ledger hash unchanged"},
+    {c:"Retry a dispatched financial call", e:"duplicate_suppressed, one external transaction", r:"pass", ms:2216, note:"1 external transaction in the sandbox"},
+    {c:"Pass an argument copied from a tool output into a write call", e:"tainted, raised to approval", r:"pass", ms:733, note:"taint source recorded on the receipt"},
+    {c:"Flip a kill switch during a run", e:"next call denied, frame shows the switch and the reason", r:"pass", ms:1487, note:"denied at the next call boundary"},
+    {c:"Modify a receipt after the fact", e:"chain verification fails", r:"pass", ms:205, note:"verification refused at seq 44"},
+    {c:"Read witness storage from a worker's toolbelt", e:"denied by policy, witness_probe incident raised", r:"pass", ms:377, note:"§8.5 invariant 2 · 4 path forms probed"},
+    {c:"Report a client-attested call as gateway-enforced", e:"rendering refuses; tier is read from the record", r:"na", ms:0, note:"not applicable: core-platform has no agent at observe or harness tier"}
+  ]
+};
+
+/* ── spend, 2026-09-11, core-platform ───────────────────────────────── */
+const SPEND = {
+  date:"2026-09-11", currency:"USD", basis:"gateway_observed",
+  totalMicros:412660000,
+  split:[
+    {k:"Proven",                 m:128400000, c:"var(--s-proven)",   note:"19 runs · witness verdict flipped"},
+    {k:"Accepted",               m:61050000,  c:"var(--s-approval)", note:"11 runs · human verified, no witness"},
+    {k:"Completed, unverified",  m:147830000, c:"var(--s-neutral)",  note:"24 runs · no witness ran"},
+    {k:"Cancelled or halted",    m:42190000,  c:"var(--s-denied)",   note:"7 runs"},
+    {k:"Failed",                 m:33190000,  c:"var(--s-failed)",   note:"5 runs"}
+  ],
+  provenRuns:19, perProven:6757894, perProvenPrev:8114000,
+  productive:0.71, cacheHit:0.907,
+  witnessMicros:11420000, witnessRuns:34,
+  recon:{ status:"partial", variance:0.0031, matched:"OpenRouter · 2026-09-10", note:"today's provider invoice is not yet available" },
+  findings:[
+    {t:"Cache misses after a stable prefix changed", lvl:"workspace", m:86400000,
+     w:"Steering publish <code>str_01K5T8N2QD</code> on 2026-09-09 changed the system-context digest for 6 agents while the conversation prefix was unchanged. 214 turns paid full input price.",
+     act:"Open the steering record"},
+    {t:"Tool-list bloat", lvl:"agent · acme.core.triage", m:41150000,
+     w:"<code>tool_definition_tokens</code> averages 6 980, against a workspace median of 2 240. 11 granted tools were never called in the last 30 runs.",
+     act:"Narrow the grants"},
+    {t:"Unproductive tail", lvl:"agent · acme.core.docs-writer", m:22800000,
+     w:"On 9 of 12 runs, more than 40 steps followed the last productive step. Productive ratio 0.38.",
+     act:"Set a stop rule"}
+  ],
+  runs:[
+    {id:"run_01K5XQ7M4A", agent:"acme.core.release-manager", op:"Marcus Bell",    v:"flipped",     m:4872140, task:"#478"},
+    {id:"run_01K5XP2F6B", agent:"acme.core.witness-runner",  op:"Marcus Bell",    v:null,          m:612480,  task:"wit_01K5XP2D9F", witness:true},
+    {id:"run_01K5YR3C8N", agent:"acme.core.triage",          op:"Priya Natarajan",v:"tampered",    m:2318905, task:"#485"},
+    {id:"run_01K5W8F1A2", agent:"acme.core.release-manager", op:"Marcus Bell",    v:"flipped",     m:6104320, task:"#471"},
+    {id:"run_01K5W2C7K9", agent:"acme.core.stella-ci",       op:"Marcus Bell",    v:"flipped",     m:3417900, task:"#469"},
+    {id:"run_01K5V9D3P4", agent:"acme.core.docs-writer",     op:"Priya Natarajan",v:"unmoved",     m:1884060, task:"#466"},
+    {id:"run_01K5V1B8N7", agent:"acme.core.triage",          op:"Priya Natarajan",v:"unsatisfied", m:2960115, task:"#462"},
+    {id:"run_01K5T7H5R1", agent:"acme.core.stella-ci",       op:"Marcus Bell",    v:"unverified",  m:1245700, task:"#458"},
+    {id:"run_01K5T2G9M6", agent:"acme.core.docs-writer",     op:"Priya Natarajan",v:"waived",      m:806340,  task:"docs sweep"}
+  ],
+  byAgent:[
+    {a:"acme.core.release-manager", runs:12, spend:58412000, proven:41220000, perProven:5152500,  ratio:0.83},
+    {a:"acme.core.stella-ci",       runs:21, spend:47180000, proven:52040000, perProven:6505000,  ratio:0.79},
+    {a:"acme.core.triage",          runs:19, spend:39905000, proven:24610000, perProven:8203333,  ratio:0.52},
+    {a:"acme.core.docs-writer",     runs:12, spend:21044000, proven:10530000, perProven:10530000, ratio:0.38},
+    {a:"acme.core.witness-runner",  runs:34, spend:11420000, proven:0,        perProven:null,     ratio:null}
+  ]
+};
+
+/* ── fleet ──────────────────────────────────────────────────────────── */
+const FLEET = [
+  {id:"run_01K5ZP4T2X", agent:"acme.core.stella-ci",        op:"Marcus Bell",     st:"running",  tier:"gateway", replay:"full",    m:1104220, v:null,          task:"#491"},
+  {id:"run_01K5ZM8V1Q", agent:"acme.core.release-manager",  op:"Marcus Bell",     st:"running",  tier:"gateway", replay:"full",    m:742180,  v:null,          task:"#489"},
+  {id:"run_01K5YR3C8N", agent:"acme.core.triage",           op:"Priya Natarajan", st:"sealed",   tier:"gateway", replay:"full",    m:2318905, v:"tampered",    task:"#485"},
+  {id:"run_01K5XQ7M4A", agent:"acme.core.release-manager",  op:"Marcus Bell",     st:"sealed",   tier:"gateway", replay:"full",    m:4872140, v:"flipped",     task:"#478"},
+  {id:"run_01K5XP2F6B", agent:"acme.core.witness-runner",   op:"Marcus Bell",     st:"sealed",   tier:"gateway", replay:"full",    m:612480,  v:null,          task:"wit_01K5XP2D9F"},
+  {id:"run_01K5W8F1A2", agent:"acme.core.release-manager",  op:"Marcus Bell",     st:"sealed",   tier:"gateway", replay:"full",    m:6104320, v:"flipped",     task:"#471"},
+  {id:"run_01K5V1B8N7", agent:"acme.core.triage",           op:"Priya Natarajan", st:"sealed",   tier:"gateway", replay:"partial", m:2960115, v:"unsatisfied", task:"#462"},
+  {id:"run_01K5T2G9M6", agent:"acme.core.docs-writer",      op:"Priya Natarajan", st:"sealed",   tier:"harness", replay:"render",  m:806340,  v:"waived",      task:"docs sweep"}
+];
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Chrome state
+   ═══════════════════════════════════════════════════════════════════════ */
+let STATE = "loaded";
+const app = document.getElementById("app");
+const view = document.getElementById("view");
+
+/* ── icons ──────────────────────────────────────────────────────────── */
+const ICO = {
+  fleet:'<svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1.8" y="2.6" width="12.4" height="4" rx="1.2"/><rect x="1.8" y="9.4" width="12.4" height="4" rx="1.2"/></svg>',
+  run:'<svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="8" cy="8" r="6.2"/><path d="M8 4.4V8l2.4 1.5" stroke-linecap="round"/></svg>',
+  agents:'<svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="8" cy="5.4" r="2.6"/><path d="M2.8 13.6c.6-2.6 2.7-4 5.2-4s4.6 1.4 5.2 4" stroke-linecap="round"/></svg>',
+  tools:'<svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M10.4 2.2a3.6 3.6 0 0 0-4.1 4.8L2.4 10.9a1.4 1.4 0 0 0 2 2l3.9-3.9a3.6 3.6 0 0 0 4.8-4.1l-2 2-1.8-.4-.4-1.8Z" stroke-linejoin="round"/></svg>',
+  ontology:'<svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="8" cy="3.2" r="1.8"/><circle cx="3.4" cy="12" r="1.8"/><circle cx="12.6" cy="12" r="1.8"/><path d="M6.9 4.7 4.5 10.3M9.1 4.7l2.4 5.6M5.2 12h5.6"/></svg>',
+  steering:'<svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.4 8h4M9.6 8h4M8 2.4v4M8 9.6v4" stroke-linecap="round"/><circle cx="8" cy="8" r="1.6"/></svg>',
+  spend:'<svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.4 12.4 6 8.2l3 2.4 4.6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  org:'<svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2.4" y="4" width="11.2" height="9.6" rx="1.2"/><path d="M5.6 4V2.8h4.8V4M5.6 7.2h1.6M5.6 10h1.6M9.2 7.2h1.6M9.2 10h1.6"/></svg>',
+  billing:'<svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1.8" y="3.6" width="12.4" height="8.8" rx="1.4"/><path d="M1.8 6.8h12.4"/></svg>',
+  audit:'<svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M8 1.8 13.4 4v4c0 3.2-2.2 5.4-5.4 6.2C4.8 13.4 2.6 11.2 2.6 8V4Z" stroke-linejoin="round"/><path d="m5.9 8 1.5 1.5 2.8-3" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  lock:'<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3.2" y="7" width="9.6" height="6.6" rx="1.4"/><path d="M5.4 7V5.2a2.6 2.6 0 0 1 5.2 0V7"/></svg>',
+  check:'<svg class="ni" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="6.4"/><path d="m5.4 8.2 1.8 1.8 3.4-3.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  warn:'<svg class="ni" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 2.2 14.4 13.4H1.6Z" stroke-linejoin="round"/><path d="M8 6.4v3M8 11.4v.1" stroke-linecap="round"/></svg>',
+  info:'<svg class="ni" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="6.4"/><path d="M8 7.2v4M8 4.9v.1" stroke-linecap="round"/></svg>',
+  arrow:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 12h15M13.5 6.5 20 12l-6.5 5.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+};
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Navigation
+   ═══════════════════════════════════════════════════════════════════════ */
+const base = `#/${ORG.slug}/${WS.slug}`;
+const NAV_WS = [
+  {k:"fleet",    n:"Fleet",    i:"fleet",    h:`${base}`,                                     s:"2 live"},
+  {k:"run",      n:"Run",      i:"run",      h:`${base}/runs/${R_PROVEN.id}/proof`,            s:"01K5XQ"},
+  {k:"agents",   n:"Agents",   i:"agents",   h:`${base}/agents`,                               s:"50"},
+  {k:"tools",    n:"Tools",    i:"tools",    h:`${base}/tools/assurance`,                      s:"214"},
+  {k:"ontology", n:"Ontology", i:"ontology", h:`${base}/ontology`,                             s:""},
+  {k:"steering", n:"Steering", i:"steering", h:`${base}/steering`,                             s:""},
+  {k:"spend",    n:"Spend",    i:"spend",    h:`${base}/spend`,                                s:"$412.66"}
+];
+const NAV_ORG = [
+  {k:"organization", n:"Organization", i:"org",     h:`#/${ORG.slug}`,          s:""},
+  {k:"billing",      n:"Billing",      i:"billing", h:`#/${ORG.slug}/billing`,  s:""},
+  {k:"audit",        n:"Audit",        i:"audit",   h:`#/${ORG.slug}/audit`,    s:""}
+];
+
+function paintNav(active){
+  const row = x => `<li><a href="${x.h}" ${x.k===active?'aria-current="page"':""}>
+      <span class="gl">${ICO[x.i]}</span>${x.n}${x.s?`<span class="sub">${x.s}</span>`:""}</a></li>`;
+  document.getElementById("nav-ws").innerHTML  = NAV_WS.map(row).join("");
+  document.getElementById("nav-org").innerHTML = NAV_ORG.map(row).join("");
+}
+function paintCrumbs(parts){
+  document.getElementById("crumbs").innerHTML = parts.map((p,i)=>{
+    const sep = i ? `<span class="sep" aria-hidden="true">/</span>` : "";
+    const hide = i < parts.length-2 ? ' class="hide-s"' : "";
+    return p.h
+      ? `${sep}<a href="${p.h}"${hide}>${esc(p.n)}</a>`
+      : `${sep}<span class="cur">${esc(p.n)}</span>`;
+  }).join("");
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Shared state renderers
+   ═══════════════════════════════════════════════════════════════════════ */
+function skeleton(rows){
+  let h = `<div class="panel"><div class="ph"><div class="sk" style="width:150px;height:14px"></div></div><div class="sk-rows">`;
+  for(let i=0;i<rows;i++){
+    h += `<div class="sk-row">
+      <div class="sk" style="width:34px"></div><div class="sk" style="width:${70+((i*23)%50)}px"></div>
+      <div class="sk" style="width:${45+((i*31)%45)}%"></div><div class="sk" style="width:52px"></div></div>`;
+  }
+  return h + `</div></div>`;
+}
+function loadingPage(title){
+  return `<div class="page">
+    <div class="page-head"><div class="sk" style="width:210px;height:24px"></div>
+      <div class="sk" style="width:330px;height:13px"></div></div>
+    <div class="tiles">${[0,1,2,3].map(()=>`<div class="tile">
+      <div class="sk" style="width:70px;height:10px"></div><div class="sk" style="width:88px;height:19px;margin-top:5px"></div>
+    </div>`).join("")}</div>
+    ${skeleton(7)}
+    <p class="mono dim" style="font-size:11.5px">Reading frames for ${esc(title)}…</p>
+  </div>`;
+}
+function errorPage(what, code, detail, reqId){
+  return `<div class="page"><div class="panel"><div class="state-block">
+    <span class="sicon" style="color:var(--s-failed)">${ICO.warn}</span>
+    <h3>${esc(what)}</h3>
+    <p>${detail}</p>
+    <div class="chain4">
+      <div><dt>Code</dt><dd>${esc(code)}</dd></div>
+      <div><dt>Request</dt><dd>${esc(reqId)}</dd></div>
+      <div><dt>Retry</dt><dd>safe — this read has no side effect</dd></div>
+    </div>
+    <div class="acts">
+      <button class="btn" type="button" onclick="setState('loaded')">Try again</button>
+      <button class="btn" type="button" onclick="location.hash='${base}'">Back to Fleet</button>
+    </div>
+  </div></div></div>`;
+}
+function deniedPage(need, role, rule, who){
+  return `<div class="page"><div class="panel"><div class="state-block">
+    <span class="sicon" style="color:var(--s-denied)">${ICO.lock}</span>
+    <h3>You cannot open this</h3>
+    <p>Dana Okafor holds the billing role in <b>finops</b>. That role carries no grant in
+       <b>core-platform</b>, so this page is not readable. Here is the chain that decided it.</p>
+    <div class="chain4">
+      <div><dt>Who</dt><dd>Dana Okafor · dana@acme.example</dd></div>
+      <div><dt>Role</dt><dd>${esc(role)}</dd></div>
+      <div><dt>Needs</dt><dd>${esc(need)}</dd></div>
+      <div><dt>Rule</dt><dd>${esc(rule)}</dd></div>
+      <div><dt>Grantor</dt><dd>${esc(who)}</dd></div>
+    </div>
+    <div class="acts">
+      <button class="btn" type="button" onclick="alert('A request for run:read:body in core-platform was sent to Marcus Bell. It is itself a governed action and carries a receipt.')">Request access</button>
+      <button class="btn" type="button" onclick="location.hash='#/${ORG.slug}'">Go to Organization</button>
+    </div>
+    <p class="mono dim" style="font-size:11px">Denials are recorded and are free — they are never billed as governed actions.</p>
+  </div></div></div>`;
+}
+function emptyBlock(title, body, actLabel, actNote){
+  return `<div class="panel"><div class="state-block">
+    <span class="sicon">${ICO.info}</span>
+    <h3>${esc(title)}</h3><p>${body}</p>
+    ${actLabel?`<div class="acts"><button class="btn" type="button" onclick="setState('loaded')">${esc(actLabel)}</button></div>`:""}
+    ${actNote?`<p class="mono dim" style="font-size:11px">${actNote}</p>`:""}
+  </div></div>`;
+}
+function scopeCard(page, prompt){
+  return `<div class="page"><div class="page-head"><h1 class="page-title">${esc(page)}</h1></div>
+    <div class="scope-card">
+      <b>Not in this mockup.</b>
+      <span>W5 covers the Run page (proof), the witness run, the Tools page's assurance tab,
+      and the Spend page's proven-versus-unproven split. ${esc(page)} is mocked by prompt ${esc(prompt)}.</span>
+      <span>Navigation, chrome, switchers and the assistant are live on every route so the shape of the
+      app is real from here.</span>
+    </div></div>`;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Run page
+   ═══════════════════════════════════════════════════════════════════════ */
+function runHeader(r, verdictOverride){
+  const isWitness = r.agentKind === "service";
+  const verdict = verdictOverride !== undefined ? verdictOverride : r.verdict;
+  const badges = [
+    `<span class="badge b-quiet plain mono">${r.status}</span>`,
+    `<span class="badge b-allowed">tier ${r.tier}</span>`,
+    `<span class="badge b-quiet plain mono">replay ${r.replay}</span>`
+  ];
+  if(verdict) badges.unshift(vbadge(verdict));
+  if(isWitness) badges.unshift(`<span class="badge b-approval">witness runner</span>`);
+  return `<div class="page-head">
+    <div class="title-row">
+      <h1 class="page-title mono">${esc(r.id)}</h1>
+      ${badges.join("")}
+    </div>
+    <div class="sub-row">
+      <span><b style="color:var(--fg);font-weight:500">${esc(r.agent)}</b>${isWitness?' <span class="dim mono">service principal</span>':""}</span>
+      <span class="dot">·</span><span>${esc(r.harness)}</span>
+      <span class="dot">·</span><span>operator ${esc(r.operator)}</span>
+      <span class="dot">·</span><span class="mono">${esc(r.started.slice(11))} → ${esc(r.ended.slice(11))}</span>
+    </div>
+    <div class="sub-row">
+      ${isWitness
+        ? `<span>Witness <span class="mono" style="color:var(--fg)">${esc(r.witness)}</span> for
+           <a href="#/${ORG.slug}/${WS.slug}/runs/${r.forRun}/proof" class="mono">${esc(r.forRun)}</a></span>`
+        : `<span>Task <span class="mono" style="color:var(--fg)">${esc(r.task)}</span></span>`}
+    </div>
+  </div>${verdict === "flipped" && r.proof && r.proof.attempts ? flipHero(r) : ""}`;
+}
+
+function costStrip(r){
+  const u = r.usage;
+  const hit = u.cache_read / (u.input_uncached + u.cache_read);
+  return `<div class="tiles">
+    <div class="tile">
+      <span class="t-l">Run cost</span>
+      <span class="t-v">${usd(r.costMicros)} <small>USD</small></span>
+      <span class="t-s">${r.basis}</span>
+    </div>
+    <div class="tile">
+      <span class="t-l">Input tokens</span>
+      <span class="t-v">${n(u.input_uncached + u.cache_read)}</span>
+      <span class="t-s">${n(u.input_uncached)} fresh · ${n(u.cache_read)} cached</span>
+    </div>
+    <div class="tile">
+      <span class="t-l">Output tokens</span>
+      <span class="t-v">${n(u.output)}</span>
+      <span class="t-s">${n(u.reasoning)} reasoning</span>
+    </div>
+    <div class="tile">
+      <span class="t-l">Cache hit rate</span>
+      <span class="t-v">${(hit*100).toFixed(1)}<small>%</small></span>
+      <span class="t-s">${n(u.cache_write_5m)} written · 5m</span>
+    </div>
+    <div class="tile">
+      <span class="t-l">Frames</span>
+      <span class="t-v">${n(r.frames)}</span>
+      <span class="t-s">${r.turns} turns · ${r.toolCalls} tool calls</span>
+    </div>
+  </div>`;
+}
+
+const RUN_TABS = [
+  {k:"proof",    n:"Proof"},
+  {k:"timeline", n:"Timeline"},
+  {k:"context",  n:"Context"},
+  {k:"cost",     n:"Cost"},
+  {k:"chain",    n:"Chain"}
+];
+const WIT_TABS = [
+  {k:"ladder",   n:"Ladder"},
+  {k:"timeline", n:"Timeline"},
+  {k:"cost",     n:"Cost"},
+  {k:"chain",    n:"Chain"}
+];
+function runTabs(r, tab){
+  const list = r.agentKind === "service" ? WIT_TABS : RUN_TABS;
+  return `<div class="tabs" role="tablist">${list.map(t=>
+    `<button role="tab" aria-selected="${t.k===tab}" type="button"
+      onclick="location.hash='#/${ORG.slug}/${WS.slug}/runs/${r.id}/${t.k}'">${t.n}</button>`).join("")}</div>`;
+}
+
+/* ── Proof tab ───────────────────────────────────────────────────────── */
+function proofTab(r){
+  const p = r.proof;
+  const tampered = r.verdict === "tampered";
+
+  const flipped = r.verdict === "flipped";
+  const atts = p.attempts || [], first = atts[0], last = atts[atts.length-1], k = atts.length, lead = flipLead(p);
+  const meta = rows => `<div class="flip-meta">${rows.map(x=>`<span>${x[0]}</span><span class="v">${x[1]}</span>`).join("")}</div>`;
+  const flipPanel = `
+  <div class="panel">
+    <div class="ph">
+      <h3>The flip</h3>
+      <span class="badge b-quiet plain mono">oracle ${esc(p.oracle)}</span>
+      ${p.test_kind ? `<span class="badge b-quiet plain">${esc(p.test_kind)} · ${esc(p.runner)}</span>` : ""}
+      ${k ? `<span class="badge ${flipped?"b-proven":tampered?"b-critical":"b-failed"}">${k} attempt${k===1?"":"s"}${flipped?` · flipped on ${k}`:" · never flipped"}</span>` : ""}
+      <div class="ph-r">
+        <span class="mono dim" style="font-size:11.5px">same normalized command · ${esc(p.cmd.slice(0,20))}…</span>
+      </div>
+    </div>
+    <div class="flip${flipped?" on":""}">
+      <div class="flip-side fail">
+        <div class="fs-h"><p class="eyebrow">Before · target branch</p></div>
+        <span class="flip-res fail">fail</span>
+        <p class="ref"><b>${esc(p.target_ref)}</b> @ ${esc(p.target_sha.slice(0,12))}</p>
+        ${first ? meta([["attempt", `1 of ${k}`],["at", esc(first.at)],["took", esc(first.took)],["recorded", frameLink(r, first.seq)],["witness run", `<span class="mono">${esc(first.witness_run)}</span>`]]) : ""}
+        <p class="flip-note">The witness must fail here, or it proves nothing about the change.
+          Fail fingerprint <span class="mono">${esc(p.fail_fp.slice(7,19))}</span>.</p>
+      </div>
+      <div class="flip-arrow${flipped?" on":""}" aria-hidden="true">${ICO.arrow}</div>
+      <div class="flip-side ${tampered?"crit":"pass"}">
+        <div class="fs-h"><p class="eyebrow">After · pull request head</p></div>
+        ${tampered
+          ? `<span class="flip-res" style="color:var(--s-critical)">excluded</span>
+             <p class="ref"><b>${esc(p.pr_ref)}</b> @ ${esc(p.pr_sha.slice(0,12))}</p>
+             ${last ? meta([["attempt", `${k} of ${k}`],["at", esc(last.at)],["took", esc(last.took)],["recorded", frameLink(r, last.seq)],["witness run", `<a class="mono" href="#/${ORG.slug}/${WS.slug}/runs/${last.witness_run}/ladder">${esc(last.witness_run)}</a>`]]) : ""}
+             <p class="flip-note">The PR moved the ground under the witness, so no result on the head is
+               admissible. Nothing is credited.</p>`
+          : `<span class="flip-res pass">pass</span>
+             <p class="ref"><b>${esc(p.pr_ref)}</b> @ ${esc(p.pr_sha.slice(0,12))}</p>
+             ${last ? meta([["attempt", `${k} of ${k}`],["at", esc(last.at)],["took", esc(last.took)],["recorded", frameLink(r, last.seq)],["witness run", `<a class="mono" href="#/${ORG.slug}/${WS.slug}/runs/${last.witness_run}/ladder">${esc(last.witness_run)}</a>`]]) : ""}
+             <p class="flip-note">Same environment, same command. Pass output digest
+               <span class="mono">${esc(p.pass_digest.slice(7,19))}</span>.</p>`}
+      </div>
+    </div>
+    <div class="pb" style="border-top:1px solid var(--border)">
+      ${tampered
+        ? `<div class="notice warn">${ICO.warn}<div><b>Tamper exclusion broken.</b>
+             <code>${esc(p.tamperDetail.file)}</code> changed between authoring and the run:
+             ${esc(p.tamperDetail.change)}. The witness fingerprint taken at authoring
+             (<span class="mono">${esc(p.tamperDetail.fingerprintAuthored.slice(7,19))}</span>) does not match the
+             one taken at run (<span class="mono">${esc(p.tamperDetail.fingerprintAtRun.slice(7,19))}</span>),
+             so the verdict is <b>tampered</b>, not <b>failing</b> and not <b>flipped</b>.
+             Detected ${esc(p.tamperDetail.detectedAt)}.</div></div>`
+        : `<div class="notice proven">${ICO.check}<div><b>Failing on the target, flipped on the head.</b>
+             Only that pair credits a proof. A witness that passed on both would be recorded
+             <b>unmoved</b>; one that failed on both, <b>unsatisfied</b>. This run is
+             <b>proven</b> and its ${usd(r.costMicros)} counts toward proven spend for
+             2026-09-11.</div></div>`}
+      ${p.cmd_text ? `<p class="mono dim" style="font-size:11.5px;margin-top:10px">witness command · ${esc(p.cmd_text)} · digest ${esc(p.cmd.slice(0,19))}…</p>` : ""}
+    </div>
+  </div>`;
+
+  const railPanel = p.rail ? `
+  <div class="panel">
+    <div class="ph">
+      <h3>When it happened</h3>
+      <div class="ph-r"><span class="dim" style="font-size:12px">${lead!=null
+        ? `the flip landed <b style="color:var(--s-proven)">${dur(lead)}</b> before the agent ended turn ${p.turn}`
+        : `no flip in turn ${p.turn}; the agent ended its turn without one`}</span></div>
+    </div>
+    <div class="pb">
+      ${flipRail(r)}
+      <p class="flip-note" style="margin-top:16px">The order matters. A flip that lands <b style="color:var(--fg)">before</b> the agent ends its turn is the
+        agent's own claim, checked; a pass that appeared only after the turn closed would be credited to nothing.
+        Each point is a frame in the hash chain, so the order is not a log line — it is signed.</p>
+    </div>
+  </div>` : "";
+
+  const attemptsPanel = k ? `
+  <div class="panel">
+    <div class="ph">
+      <h3>Attempts</h3>
+      <div class="ph-r"><span class="mono dim" style="font-size:11.5px">${k} call${k===1?"":"s"} to <span style="color:var(--fg)">oxagen.verify@1</span> · each one a full witness run</span></div>
+    </div>
+    <div class="tw"><table style="min-width:640px">
+      <thead><tr><th>#</th><th>Result</th><th>At</th><th class="r">Took</th><th>Head</th><th>Frame</th><th>Witness run</th><th>What the runner saw</th></tr></thead>
+      <tbody>${atts.map(a => `<tr class="${a.result==="pass"?"att-pass":""}">
+        <td class="mono">${a.n}</td>
+        <td><span class="badge ${a.result==="pass"?"b-proven":a.result==="excluded"?"b-critical":"b-failed"}">${a.result}${a.result==="pass"?" · flip":""}</span></td>
+        <td class="mono" style="font-size:11.5px">${esc(a.at)}</td>
+        <td class="r mono">${esc(a.took)}</td>
+        <td class="mono" style="font-size:11.5px">${esc(a.head)}</td>
+        <td>${frameLink(r, a.seq)}</td>
+        <td><a class="mono" style="font-size:11.5px" href="#/${ORG.slug}/${WS.slug}/runs/${a.witness_run}/ladder">${esc(a.witness_run)}</a></td>
+        <td class="muted" style="font-size:12px">${esc(a.note)}</td>
+      </tr>`).join("")}</tbody>
+    </table></div>
+  </div>` : "";
+
+  const airlock = `
+  <div class="panel">
+    <div class="ph">
+      <h3>The pass / fail airlock</h3>
+      <span class="badge b-approval plain mono">disclosure grain ${esc(p.grain)}</span>
+      <div class="ph-r"><span class="mono dim" style="font-size:11.5px">frame ${p.seq} recorded · frame ${p.seq+1} delivered</span></div>
+    </div>
+    <div class="airlock">
+      <div class="chamber sealed">
+        <div class="chamber-h">
+          <span style="color:var(--muted);display:grid;place-items:center">${ICO.lock}</span>
+          <p class="eyebrow">What the witness runner knew</p>
+        </div>
+        <div class="redact">
+          <div class="rr"><span class="rk">witness</span><span class="rv blocked">████████████████</span></div>
+          <div class="rr"><span class="rk">test id</span><span class="rv blocked">████████████████████████</span></div>
+          <div class="rr"><span class="rk">assertion</span><span class="rv blocked">██████████████████████████████</span></div>
+          <div class="rr"><span class="rk">expected</span><span class="rv blocked">██████████</span></div>
+          <div class="rr"><span class="rk">actual</span><span class="rv blocked">████████████████</span></div>
+          <div class="rr"><span class="rk">path</span><span class="rv blocked">██████████████████████</span></div>
+          <div class="rr"><span class="rk">verdict</span><span class="rv">${esc(p.verdict)}</span></div>
+        </div>
+        <p class="flip-note">Authored, stored and run inside the witness runner. Not in the repository,
+          not in the pull request, not in any context frame, not reachable from the toolbelt.
+          Recorded in full on
+          <a href="#/${ORG.slug}/${WS.slug}/runs/${p.witness_run}/ladder" class="mono">${esc(p.witness_run)}</a>.</p>
+      </div>
+      <div class="membrane" aria-hidden="true">
+        <span class="grain">${tampered ? "fail" : "pass"}</span>
+        <span class="mlabel">${esc(p.grain)} · one word</span>
+      </div>
+      <div class="chamber">
+        <div class="chamber-h"><p class="eyebrow">What the agent received</p></div>
+        <div class="oneword">
+          <span class="w">${tampered ? "fail" : "pass"}</span>
+          <span class="c">${tampered ? 4 : 4} characters · the whole tool result</span>
+        </div>
+        <pre><span class="c">// frame ${p.seq+1} · tool_call · oxagen.verify@1</span>
+{ <span class="k">"result"</span>: <span class="${tampered?"bad":"hi"}">"${tampered?"fail":"pass"}"</span> }
+
+<span class="c">// frame ${p.seq+2} · model.request · messages[-1]</span>
+{ <span class="k">"role"</span>: <span class="s">"user"</span>,
+  <span class="k">"content"</span>: [ { <span class="k">"type"</span>: <span class="s">"tool_result"</span>,
+    <span class="k">"content"</span>: <span class="${tampered?"bad":"hi"}">"${tampered?"fail":"pass"}"</span> } ] }</pre>
+        <p class="flip-note">No test name, no assertion, no expected or actual value, no reproduction,
+          no path. Raising the grain above <code>L0</code> is an explicit policy decision by a human and is
+          recorded as a security event; core-platform has never raised it.</p>
+      </div>
+    </div>
+  </div>`;
+
+  const antiOverfit = `
+  <div class="panel">
+    <div class="ph"><h3>Anti-overfitting</h3></div>
+    <div class="pb">
+      <dl class="kv">
+        <dt>Witnesses on this task</dt><dd class="plain">${p.witnessCount} · the worker was told the aggregate verdict only, never which one moved</dd>
+        <dt>Held out</dt><dd class="plain">${p.heldOut ? "yes — reported to the record only" : "no witness on this task was held out"}</dd>
+        <dt>Retries against the witness</dt><dd class="plain">${tampered?"0 of 2 allowed":"1 of 2 allowed by policy <span class=\"mono\">verify.retry.cap@v2</span>"}</dd>
+        <dt>Probe attempts</dt><dd class="plain">${r.denied} denied by <span class="mono">witness.storage.deny@v4</span>${r.denied?` — <a href="#/${ORG.slug}/${WS.slug}/runs/${r.id}/timeline">frame 212</a>`:""}</dd>
+      </dl>
+    </div>
+  </div>`;
+
+  const inspector = `
+  <div class="panel">
+    <div class="ph">
+      <h3>Proof frame</h3>
+      <span class="badge b-quiet plain mono">seq ${p.seq}</span>
+      <span class="badge b-allowed">gateway attested</span>
+      <div class="ph-r"><span class="mono dim" style="font-size:11.5px">${esc(p.ts)}</span></div>
+    </div>
+    <div class="pb">
+      <dl class="kv">
+        <dt>Witness id</dt><dd>${esc(p.witness_id)}</dd>
+        <dt>Oracle kind</dt><dd>${esc(p.oracle)}</dd>
+        ${p.test_kind ? `<dt>Test</dt><dd class="plain">${esc(p.test_kind)} · <span class="mono">${esc(p.runner)}</span></dd>` : ""}
+        ${p.attempts ? `<dt>Attempts</dt><dd class="plain">${p.attempts.length}${r.verdict==="flipped"?` · flipped on attempt ${p.attempts.length}`:" · never flipped"}</dd>` : ""}
+        ${p.flip_seq ? `<dt>Flip recorded as</dt><dd class="plain"><span class="mono">proof.observed</span> · ${frameLink(r, p.flip_seq)} · <span class="mono">${esc(p.flip_at)}</span></dd>` : ""}
+        ${p.turn_end_seq ? `<dt>Agent ended its turn</dt><dd class="plain">${frameLink(r, p.turn_end_seq)} · <span class="mono">${esc(p.turn_end_at)}</span>${flipLead(p)!=null?` · <b style="color:var(--s-proven)">${dur(flipLead(p))} after the flip</b>`:""}</dd>` : ""}
+        ${p.seal_seq ? `<dt>Sealed</dt><dd class="plain">${frameLink(r, p.seal_seq)} · <span class="mono">${esc(p.seal_at)}</span></dd>` : ""}
+        <dt>Target</dt><dd>${esc(p.target_ref)} @ ${esc(p.target_sha)}</dd>
+        <dt>Pull request</dt><dd>${esc(p.pr_ref)} @ ${esc(p.pr_sha)}</dd>
+        <dt>Command digest</dt><dd>${esc(p.cmd)}</dd>
+        <dt>Target result</dt><dd>${esc(p.target_result)}</dd>
+        <dt>PR result</dt><dd>${esc(p.pr_result)}</dd>
+        <dt>Verdict</dt><dd>${esc(p.verdict)}</dd>
+        <dt>Fail fingerprint</dt><dd>${esc(p.fail_fp)}</dd>
+        ${p.pass_digest?`<dt>Pass output digest</dt><dd>${esc(p.pass_digest)}</dd>`:""}
+        <dt>Tamper exclusion</dt><dd>${p.tamper === "held"
+          ? `<span class="badge b-allowed">held</span>`
+          : `<span class="badge b-critical">broken</span>`}</dd>
+        <dt>Disclosure grain</dt><dd>${esc(p.grain)}</dd>
+        <dt>Witness run</dt><dd><a href="#/${ORG.slug}/${WS.slug}/runs/${p.witness_run}/ladder">${esc(p.witness_run)}</a></dd>
+        <dt>Runner key</dt><dd>${esc(p.key_id)}</dd>
+        <dt>Runner signature</dt><dd>${esc(p.sig)}</dd>
+        <dt>Content digest</dt><dd>${esc(p.content)}</dd>
+        <dt>prev_hash</dt><dd>${esc(p.prev_hash)}</dd>
+        <dt>hash</dt><dd>${esc(p.hash)}</dd>
+      </dl>
+    </div>
+    <div class="ph" style="border-top:1px solid var(--border);border-bottom:0">
+      <p class="eyebrow">Envelope</p>
+      <div class="ph-r"><button class="btn btn-sm" type="button" data-copy="${r.id}-json">Copy JSON</button></div>
+    </div>
+    <div class="pb" style="padding-top:0"><pre id="json-${r.id}">{
+  <span class="k">"kind"</span>: <span class="s">"proof.observed"</span>,
+  <span class="k">"seq"</span>: <span class="n">${p.seq}</span>,
+  <span class="k">"ts"</span>: <span class="s">"${esc(p.ts)}"</span>,
+  <span class="k">"fidelity"</span>: <span class="s">"full"</span>,
+  <span class="k">"body"</span>: {
+    <span class="k">"witness_id"</span>: <span class="s">"${esc(p.witness_id)}"</span>, <span class="k">"oracle"</span>: <span class="s">"${esc(p.oracle)}"</span>,
+    <span class="k">"target_ref"</span>: <span class="s">"${esc(p.target_ref)}"</span>, <span class="k">"target_sha"</span>: <span class="s">"${esc(p.target_sha)}"</span>,
+    <span class="k">"pr_ref"</span>: <span class="s">"${esc(p.pr_ref)}"</span>, <span class="k">"pr_sha"</span>: <span class="s">"${esc(p.pr_sha)}"</span>,
+    <span class="k">"command_normalized_digest"</span>: <span class="s">"${esc(p.cmd)}"</span>,
+    <span class="k">"target_result"</span>: <span class="s">"${esc(p.target_result)}"</span>, <span class="k">"pr_result"</span>: <span class="s">"${esc(p.pr_result)}"</span>,
+    <span class="k">"verdict"</span>: <span class="${tampered?"bad":"hi"}">"${esc(p.verdict)}"</span>,
+    <span class="k">"fail_fingerprint"</span>: <span class="s">"${esc(p.fail_fp)}"</span>,
+    <span class="k">"pass_output_digest"</span>: ${p.pass_digest?`<span class="s">"${esc(p.pass_digest)}"</span>`:`<span class="n">null</span>`},
+    <span class="k">"tamper_exclusion"</span>: <span class="${p.tamper==="held"?"s":"bad"}">"${esc(p.tamper)}"</span>, <span class="k">"disclosure_grain"</span>: <span class="s">"${esc(p.grain)}"</span>,
+    <span class="k">"witness_run_id"</span>: <span class="s">"${esc(p.witness_run)}"</span>,
+    <span class="k">"runner_attestation"</span>: {
+      <span class="k">"key_id"</span>: <span class="s">"${esc(p.key_id)}"</span>,
+      <span class="k">"signature"</span>: <span class="s">"${esc(p.sig)}"</span>
+    }
+  },
+  <span class="k">"content"</span>: { <span class="k">"digest"</span>: <span class="s">"${esc(p.content)}"</span>, <span class="k">"redactions"</span>: [] },
+  <span class="k">"prev_hash"</span>: <span class="s">"${esc(p.prev_hash)}"</span>,
+  <span class="k">"hash"</span>: <span class="s">"${esc(p.hash)}"</span>
+}</pre></div>
+  </div>`;
+
+  return flipPanel + railPanel + attemptsPanel + airlock + `<div class="grid2">${antiOverfit}${provenanceCard(r)}</div>` + inspector;
+}
+
+function provenanceCard(r){
+  const p = r.proof;
+  return `<div class="panel">
+    <div class="ph"><h3>What this run leaves behind</h3></div>
+    <div class="pb">
+      <p class="bodytext" style="font-size:12.5px;line-height:1.6;margin-bottom:12px">
+        ${r.verdict === "flipped"
+          ? "The seal stored the tuple a training example needs, produced as a side effect of the work, with no person reading it."
+          : "No labeled example is stored. A tampered verdict is recorded and nothing is credited."}
+      </p>
+      <dl class="kv">
+        <dt>Task</dt><dd class="plain">${esc(r.task)}</dd>
+        <dt>Context given</dt><dd class="plain">11 context frames · 4 steering records · 0 reference the witness</dd>
+        <dt>Diff digest</dt><dd>sha256:${r.verdict==="flipped"?"c48b71e0…9a3f":"7d21be95…04cc"}</dd>
+        <dt>Verdict</dt><dd class="plain">${vbadge(r.verdict)} <span class="mono dim">${esc(p.oracle)}</span></dd>
+        <dt>Cost</dt><dd class="plain">${usd(r.costMicros)} USD · ${r.basis}</dd>
+        <dt>Stored</dt><dd class="plain">${r.verdict==="flipped"?"yes · sealed 09:51:49 UTC":"no"}</dd>
+      </dl>
+    </div>
+  </div>`;
+}
+
+/* ── Timeline tab ────────────────────────────────────────────────────── */
+function timelineTab(r){
+  const fr = r.id === R_TAMPERED.id ? FRAMES_TAMPERED
+           : r.id === R_WITNESS.id  ? FRAMES_WITNESS : FRAMES_PROVEN;
+  const rows = fr.map(f=>{
+    const m = f.mark === "proof" ? " is-proof" : f.mark === "deny" ? " is-deny"
+            : f.mark === "airlock" ? " is-airlock" : "";
+    return `<button type="button" class="frow${m}">
+      <span class="seq">${n(f.seq)}</span>
+      <span class="kind">${esc(f.kind)}</span>
+      <span class="desc">${f.d}</span>
+      <span class="rt">${esc(f.t)}</span>
+    </button>`;
+  }).join("");
+  return `<div class="panel">
+    <div class="ph">
+      <h3>Frames</h3>
+      <span class="badge b-quiet plain mono">${n(r.frames)} total</span>
+      <div class="ph-r">
+        <span class="badge b-proven plain">proof</span>
+        <span class="badge b-approval plain">airlock</span>
+        <span class="badge b-denied plain">denial</span>
+      </div>
+    </div>
+    <div class="frames">${rows}</div>
+    <div class="pb" style="border-top:1px solid var(--border)">
+      <p class="mono dim" style="font-size:11.5px">
+        Showing ${fr.length} of ${n(r.frames)} frames · dense seq, no gaps ·
+        ${r.chain.gaps} completeness gaps · chain verified to seq ${n(r.frames-1)}</p>
+    </div>
+  </div>`;
+}
+
+const FRAMES_WITNESS = [
+  {seq:0,  kind:"agent_start",     d:"<code>acme.core.witness-runner</code> · ephemeral plane · no network path to the worker", t:"09:47:55.004"},
+  {seq:4,  kind:"context.assembled",d:"task #478 · target-branch code graph · workspace steering · 9 640 tokens", t:"09:47:55.881"},
+  {seq:5,  kind:"model.request",   d:"author call · z-ai/glm-latest · complex tier · the only model access this plane has", t:"09:47:55.902"},
+  {seq:6,  kind:"model.response",  d:"witness <code>wit_01K5XP2D9F</code> · oracle <code>test_flip</code> · expected fail mode declared · $0.4420", t:"09:48:11.337"},
+  {seq:9,  kind:"command",         d:"fingerprint witness filesystem identity · tamper exclusion armed", t:"09:48:12.006"},
+  {seq:22, kind:"command",         d:"pristine target · <code>main</code> @ <code>9f2c41ae</code> · witness must fail here", t:"09:48:30.114"},
+  {seq:38, kind:"proof.observed",  d:"target result <b>fail</b> · fingerprint <code>sha256:d92a…0c14</code> · witness admitted", t:"09:48:52.770", mark:"proof"},
+  {seq:51, kind:"command",         d:"pull request head · <code>refs/pull/482/head</code> @ <code>4d7be053</code>", t:"09:49:02.441"},
+  {seq:74, kind:"proof.observed",  d:"PR result <b>pass</b> · output digest <code>sha256:36ce…f2b3</code>", t:"09:49:26.118", mark:"proof"},
+  {seq:81, kind:"command",         d:"re-fingerprint · tamper exclusion <b>held</b>", t:"09:49:28.902"},
+  {seq:88, kind:"control.command", d:"scrub brief to <code>L0</code> · emitted 4 characters: <code>pass</code>", t:"09:49:30.551", mark:"airlock"},
+  {seq:90, kind:"proof.observed",  d:"verdict <b>flipped</b> · stamped onto <code>run_01K5XQ7M4A</code> seq 1280", t:"09:49:31.402", mark:"proof"},
+  {seq:94, kind:"agent_stop",      d:"outcome <code>completed</code> · plane destroyed", t:"09:49:31.880"},
+  {seq:95, kind:"checkpoint",      d:"seal · merkle <code>sha256:7f0a…9145</code>", t:"09:49:33.007"}
+];
+
+/* ── Witness ladder tab ─────────────────────────────────────────────── */
+function ladderTab(r){
+  return `
+  <div class="notice info">${ICO.info}<div>
+    This is a run like any other: its own frames, its own seal, its own cost, replayable, and
+    attributed to <b>${esc(r.operator)}</b> — the worker's operator — so the price of proof is
+    never hidden. The agent is the witness runner service principal, not a worker.
+  </div></div>
+
+  <div class="panel">
+    <div class="ph">
+      <h3>Deterministic-first ladder</h3>
+      <span class="badge b-proven">flipped</span>
+      <div class="ph-r"><span class="mono dim" style="font-size:11.5px">1 m 36 s end to end</span></div>
+    </div>
+    <ul class="ladder">
+      <li>
+        <span class="step-n ok">1</span>
+        <span class="st"><b>Author the witness</b>
+          <span>Read task <code>acme/platform#478</code> and its acceptance criteria, the
+            <code>main</code> code graph, and four steering records. Produced a command, an oracle kind,
+            and an expected fail mode. This is the one model call the plane makes — the
+            <i>author</i> is a model call; the <i>verdict</i> never is.</span>
+          <span><code>wit_01K5XP2D9F</code> · <code>test_flip</code> · z-ai/glm-latest, complex tier</span>
+        </span>
+        <span class="badge b-quiet plain mono">$0.4420</span>
+      </li>
+      <li>
+        <span class="step-n ok">2</span>
+        <span class="st"><b>Fingerprint for tamper exclusion</b>
+          <span>The witness's filesystem identity is captured before the ladder runs, so a pull request
+            that edits the test harness, adds a skip marker, or otherwise moves the ground is detected.</span>
+          <span><code>sha256:af10c39e…201b</code></span>
+        </span>
+        <span class="badge b-allowed">armed</span>
+      </li>
+      <li>
+        <span class="step-n ok">3</span>
+        <span class="st"><b>Prove it fails on the pristine target</b>
+          <span><code>main</code> at <code>9f2c41ae</code>. A witness that does not fail here is discarded
+            and re-authored, and is never charged to the worker.</span>
+          <span>fail · fingerprint <code>sha256:d92a6f13…0c14</code></span>
+        </span>
+        <span class="badge b-failed">fail</span>
+      </li>
+      <li>
+        <span class="step-n ok">4</span>
+        <span class="st"><b>Run on the pull request head</b>
+          <span><code>refs/pull/482/head</code> at <code>4d7be053</code>, same environment, same
+            normalized command.</span>
+          <span>pass · output digest <code>sha256:36ce8a04…f2b3</code></span>
+        </span>
+        <span class="badge b-proven">pass</span>
+      </li>
+      <li>
+        <span class="step-n ok">5</span>
+        <span class="st"><b>Re-fingerprint and rule on tampering</b>
+          <span>The identity captured at step 2 still matches. Tamper exclusion held, so the flip is
+            admissible.</span>
+        </span>
+        <span class="badge b-allowed">held</span>
+      </li>
+      <li>
+        <span class="step-n ok">6</span>
+        <span class="st"><b>Scrub the brief to grain L0</b>
+          <span>Everything but the verdict is removed before anything leaves this plane. The scrubber
+            degrades a brief by one grain rather than emit one containing a test identifier, a literal
+            value, or a witness path. The brief is stored beside the sealed material it was redacted
+            from, so the disclosure is auditable.</span>
+          <span>emitted: <code>pass</code> · 4 characters</span>
+        </span>
+        <span class="badge b-approval">L0</span>
+      </li>
+      <li>
+        <span class="step-n ok">7</span>
+        <span class="st"><b>Stamp the worker's run</b>
+          <span>The verdict lands on
+            <a href="#/${ORG.slug}/${WS.slug}/runs/${r.forRun}/proof" class="mono">${esc(r.forRun)}</a>
+            as <code>proof.observed</code> at seq 1280, with this runner's attestation embedded, so the
+            proof verifies offline without trusting the worker's harness at all.</span>
+        </span>
+        <span class="badge b-proven">flipped</span>
+      </li>
+    </ul>
+  </div>
+
+  <div class="grid2">
+    <div class="panel">
+      <div class="ph"><h3>Isolation</h3></div>
+      <div class="pb"><dl class="kv">
+        <dt>Plane</dt><dd class="plain">Witness runner · ephemeral per witness run</dd>
+        <dt>Credentials</dt><dd class="plain">Its own. The worker's run token is not accepted here.</dd>
+        <dt>Network to worker</dt><dd class="plain">none</dd>
+        <dt>Filesystem to worker</dt><dd class="plain">none</dd>
+        <dt>Model access</dt><dd class="plain">the author call only</dd>
+        <dt>Data plane</dt><dd class="plain">shared · runs inside the customer's plane where one is dedicated</dd>
+      </dl></div>
+    </div>
+    <div class="panel">
+      <div class="ph"><h3>Cost of proof</h3></div>
+      <div class="pb"><dl class="kv">
+        <dt>Author call</dt><dd class="plain">${usd4(r.authorCallMicros)} · ${n(r.usage.input_uncached)} in / ${n(r.usage.output)} out</dd>
+        <dt>Ladder compute</dt><dd class="plain">${usd4(r.computeMicros)} · two environments, 68 s</dd>
+        <dt>Total</dt><dd class="plain"><b style="color:var(--fg)">${usd(r.costMicros)} USD</b> · ${r.basis}</dd>
+        <dt>Attributed to</dt><dd class="plain">${esc(r.operator)}, not the witness runner</dd>
+        <dt>Share of the proven run</dt><dd class="plain">11.2% of ${usd(R_PROVEN.costMicros + r.costMicros)} spent to prove #478</dd>
+      </dl></div>
+    </div>
+  </div>`;
+}
+
+/* ── Context tab ─────────────────────────────────────────────────────── */
+function contextTab(r){
+  const frames = [
+    {id:"cf_01K5XN4A7P", kind:"code", src:"acme/platform · src/webhooks/retry.py", tok:2104, cited:true},
+    {id:"cf_01K5XN4B2R", kind:"code", src:"acme/platform · src/webhooks/budget.py", tok:1642, cited:true},
+    {id:"cf_01K5XN4C9T", kind:"issue", src:"acme/platform#478", tok:806, cited:true},
+    {id:"cf_01K5XN4D1V", kind:"record", src:"decision · str_01K4T8M2QD", tok:512, cited:true},
+    {id:"cf_01K5XN4E6W", kind:"code", src:"acme/platform · tests/test_webhook_retry.py", tok:1388, cited:true},
+    {id:"cf_01K5XN4F3Y", kind:"graph", src:"entity · WebhookDelivery (ontology v41)", tok:873, cited:false}
+  ];
+  return `
+  <div class="notice proven">${ICO.check}<div>
+    <b>No context frame served into this run references the witness.</b>
+    Every frame below is checked against witness storage at assembly; a match is refused before the
+    prompt is built, not redacted after.
+  </div></div>
+  <div class="panel">
+    <div class="ph"><h3>Context frames served</h3>
+      <span class="badge b-quiet plain mono">11 of 11 shown: 6</span>
+      <div class="ph-r"><span class="mono dim" style="font-size:11.5px">budget 24 000 · used ${n(r.usage.context_frame_tokens)}</span></div>
+    </div>
+    <div class="tw"><table>
+      <thead><tr><th>Frame</th><th>Kind</th><th>Source</th><th class="r">Tokens</th><th>Cited</th></tr></thead>
+      <tbody>${frames.map(f=>`<tr>
+        <td class="mono">${esc(f.id)}</td>
+        <td><span class="badge b-quiet plain">${esc(f.kind)}</span></td>
+        <td class="muted">${esc(f.src)}</td>
+        <td class="r mono num">${n(f.tok)}</td>
+        <td>${f.cited?'<span class="badge b-allowed">cited</span>':'<span class="badge b-neutral">unused</span>'}</td>
+      </tr>`).join("")}</tbody>
+    </table></div>
+  </div>
+  <div class="grid2">
+    <div class="panel">
+      <div class="ph"><h3>Steering injected</h3></div>
+      <div class="pb"><dl class="kv">
+        <dt>Records</dt><dd class="plain">4 published · ${n(r.usage.steering_tokens)} tokens</dd>
+        <dt>Digest</dt><dd>sha256:61df4a82…8c04</dd>
+        <dt>Source</dt><dd class="plain">acme/platform · <span class="mono">.oxagen/steering/</span> @ main</dd>
+        <dt>Witness references</dt><dd class="plain">0</dd>
+      </dl></div>
+    </div>
+    <div class="panel">
+      <div class="ph"><h3>Prompt composition</h3></div>
+      <div class="pb"><dl class="kv">
+        <dt>Tool definitions</dt><dd class="plain">${n(r.usage.tool_definition_tokens)} tokens · 14 granted tools</dd>
+        <dt>Context frames</dt><dd class="plain">${n(r.usage.context_frame_tokens)} tokens</dd>
+        <dt>Steering</dt><dd class="plain">${n(r.usage.steering_tokens)} tokens</dd>
+        <dt>Conversation</dt><dd class="plain">${n(r.usage.input_uncached + r.usage.cache_read - r.usage.tool_definition_tokens - r.usage.context_frame_tokens - r.usage.steering_tokens)} tokens</dd>
+      </dl></div>
+    </div>
+  </div>`;
+}
+
+/* ── Cost tab ────────────────────────────────────────────────────────── */
+function costTab(r){
+  const max = Math.max(...r.turnsCost.map(t=>t.m));
+  const u = r.usage;
+  const classes = [
+    ["input_uncached", u.input_uncached], ["cache_read", u.cache_read],
+    ["cache_write_5m", u.cache_write_5m], ["cache_write_1h", u.cache_write_1h],
+    ["output", u.output], ["reasoning", u.reasoning],
+    ["server_tool_requests", u.server_tool_requests],
+    ["tool_definition_tokens", u.tool_definition_tokens],
+    ["context_frame_tokens", u.context_frame_tokens], ["steering_tokens", u.steering_tokens]
+  ];
+  return `<div class="grid2">
+    <div class="panel">
+      <div class="ph"><h3>Run waterfall</h3>
+        <div class="ph-r"><span class="badge b-proven plain">proof frame</span></div>
+      </div>
+      <div class="pb"><div class="wf">${r.turnsCost.map(t=>`
+        <div class="wfrow">
+          <span class="wl">${esc(t.t)}</span>
+          <span class="wfbar"><i class="${t.proof?"pf":""}" style="width:${(t.m/max*100).toFixed(1)}%"></i></span>
+          <span class="wv">${usd(t.m)}</span>
+        </div>`).join("")}</div>
+        <p class="mono dim" style="font-size:11px;margin-top:12px">
+          Cache hit rate by turn: ${r.turnsCost.map(t=>(t.hit*100).toFixed(0)+"%").join(" · ")}</p>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="ph"><h3>Tokens by class</h3>
+        <div class="ph-r"><span class="mono dim" style="font-size:11.5px">${r.basis}</span></div>
+      </div>
+      <div class="tw"><table style="min-width:0">
+        <tbody>${classes.map(([k,v])=>`<tr>
+          <td class="mono muted" style="font-size:12px">${esc(k)}</td>
+          <td class="r mono num">${n(v)}</td>
+        </tr>`).join("")}</tbody>
+      </table></div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="ph"><h3>Cost record on the last model call</h3></div>
+    <div class="pb"><pre>{
+  <span class="k">"usage"</span>: { <span class="k">"input"</span>: <span class="n">1204</span>, <span class="k">"output"</span>: <span class="n">214</span>, <span class="k">"cache_read"</span>: <span class="n">24180</span>, <span class="k">"cache_write_5m"</span>: <span class="n">0</span> },
+  <span class="k">"price_entry_ids"</span>: [<span class="s">"pe_01K4N8T2"</span>, <span class="s">"pe_01K4N8T3"</span>, <span class="s">"pe_01K4N8T7"</span>],
+  <span class="k">"cost_micros"</span>: <span class="n">30770</span>,
+  <span class="k">"cost_basis"</span>: <span class="s">"gateway_observed"</span>,
+  <span class="k">"provider_request_id"</span>: <span class="s">"req_01K5XQ9F2M7A"</span>,
+  <span class="k">"provider_key_id"</span>: <span class="s">"pk_01K3M7V4"</span>
+}</pre>
+      <p class="mono dim" style="font-size:11px;margin-top:11px">
+        Integer micro-USD throughout. Rounding to cents happens once, at the statement line, half-even.</p>
+    </div>
+  </div>`;
+}
+
+/* ── Chain tab ───────────────────────────────────────────────────────── */
+function chainTab(r){
+  const c = r.chain;
+  return `
+  <div class="notice proven">${ICO.check}<div>
+    <b>Chain verified.</b> ${n(r.frames)} frames, dense seq from 0, ${c.gaps} completeness gaps,
+    ${c.checkpoints} producer-signed checkpoints countersigned by Oxagen on ingest. Gateway-observed
+    frames are Oxagen-attested; this run has no client-attested frames.
+  </div></div>
+  <div class="panel">
+    <div class="ph"><h3>Seal and attestation</h3>
+      <div class="ph-r"><span class="badge b-allowed">tier ${esc(r.tier)}</span>
+        <span class="badge b-quiet plain mono">replay ${esc(r.replay)}</span></div>
+    </div>
+    <div class="pb"><dl class="kv">
+      <dt>Run</dt><dd>${esc(r.id)}</dd>
+      <dt>Attempt</dt><dd>${esc(r.attempt)}</dd>
+      <dt>Frame count</dt><dd>${n(r.frames)}</dd>
+      <dt>Merkle root</dt><dd>${esc(c.merkle)}</dd>
+      <dt>Archive segment</dt><dd>${esc(c.archive)}</dd>
+      <dt>Enforcement tier</dt><dd>${esc(r.tier)} · computed at seal from what was observed</dd>
+      <dt>Completeness gaps</dt><dd>${c.gaps}</dd>
+      <dt>Attester key</dt><dd>${esc(c.attester)}</dd>
+      <dt>Sealed</dt><dd>${esc(c.sealed)}</dd>
+    </dl></div>
+  </div>
+  <div class="panel">
+    <div class="ph"><h3>Verify without trusting us</h3></div>
+    <div class="pb">
+      <p class="bodytext" style="font-size:12.5px;line-height:1.6;margin-bottom:12px">
+        The export carries the Merkle root, the organization's attester key id and validity window,
+        and the witness runner's own attestation embedded in the proof frame, so an auditor can check
+        the flip offline without trusting the worker's harness.</p>
+      <pre>$ oxagen run export ${esc(r.id)} --bundle --verify
+<span class="c">→ chain        ok    ${n(r.frames)} frames, 0 gaps</span>
+<span class="c">→ attestation  ok    ${esc(c.attester)}</span>
+<span class="c">→ proof        ${r.verdict==="flipped"?"ok    runner signature verified, verdict flipped":"ok    runner signature verified, verdict tampered"}</span>
+<span class="c">→ tier         ok    gateway (as recorded; not upgraded)</span></pre>
+    </div>
+  </div>`;
+}
+
+function renderRun(runId, tab){
+  const r = RUNS[runId];
+  const isWitness = r && r.agentKind === "service";
+  paintNav(isWitness ? "run" : "run");
+  paintCrumbs([
+    {n:ORG.name, h:`#/${ORG.slug}`}, {n:WS.slug, h:base},
+    {n:"Runs", h:base}, {n:runId}
+  ]);
+  if(!r) return scopeCard("Run", "W4");
+
+  if(STATE === "loading") return loadingPage(runId);
+  if(STATE === "error")
+    return errorPage("The proof frame body could not be read", "blob_unavailable",
+      `The frame envelope is in the graph and its chain verifies, but the encrypted body at
+       <span class="mono">bytes_ref</span> came back <span class="mono">503</span> from object storage.
+       The verdict shown on the run header is read from the envelope and is unaffected.`,
+      "req_01K5ZC7P4N2B");
+  if(STATE === "denied")
+    return deniedPage("run:read:body in core-platform", "billing · finops",
+      "grants.workspace.scope@v11", "Marcus Bell (workspace owner)");
+
+  let bodyHtml;
+  if(STATE === "empty"){
+    bodyHtml = emptyBlock(
+      "No proof on this run",
+      `No witness was authored for <span class="mono">${esc(runId)}</span>: the run declared no task with
+       acceptance criteria, and no workspace policy required proof for this class of change. The verdict
+       is <b>waived</b> — nothing changed and nothing was tried. Its spend counts as unproven,
+       under <i>completed but unverified</i>.`,
+      "Show the proven run", "A waived verdict is recorded, never inferred.");
+  } else {
+    bodyHtml = isWitness
+      ? (tab === "ladder" ? ladderTab(r) : tab === "timeline" ? timelineTab(r)
+        : tab === "cost" ? costTab(r) : chainTab(r))
+      : (tab === "proof" ? proofTab(r) : tab === "timeline" ? timelineTab(r)
+        : tab === "context" ? contextTab(r) : tab === "cost" ? costTab(r) : chainTab(r));
+  }
+
+  const primary = isWitness
+    ? `<button class="btn btn-primary" type="button" data-act="Attestation bundle for ${r.id} exported. It carries the runner key id, its validity window, and the signed verdict.">Export attestation</button>`
+    : `<button class="btn btn-primary" type="button" data-act="Signed proof bundle for ${r.id} exported: envelope, Merkle root, attester key id, runner attestation. Verify with: oxagen run export ${r.id} --bundle --verify">Verify offline</button>`;
+
+  return `<div class="page">
+    ${runHeader(r, STATE === "empty" ? "waived" : undefined)}
+    ${costStrip(r)}
+    <div class="panel flat" style="border:0;border-radius:0">
+      <div class="tabs-row" style="display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap">
+        <div style="flex:1;min-width:220px">${runTabs(r, tab)}</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;padding-bottom:6px">
+          <button class="btn btn-sm" type="button" data-act="Fork replay opened from frame 1279 with the recorded context and tool cassette. The verify result is served from the recording; no witness runs again.">Fork replay</button>
+          <button class="btn btn-sm" type="button" data-act="Bisect needs a second run of the same task. run_01K5W8F1A2 (#471) is the nearest, and is a different task.">Bisect</button>
+          ${primary}
+        </div>
+      </div>
+    </div>
+    ${bodyHtml}
+  </div>`;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Tools page — assurance tab
+   ═══════════════════════════════════════════════════════════════════════ */
+const TOOL_TABS = [
+  {k:"registry",n:"Registry"},{k:"connections",n:"Connections"},{k:"mandates",n:"Mandates"},
+  {k:"policy",n:"Policy"},{k:"switches",n:"Kill switches"},{k:"assurance",n:"Assurance"}
+];
+function renderTools(tab){
+  paintNav("tools");
+  paintCrumbs([{n:ORG.name,h:`#/${ORG.slug}`},{n:WS.slug,h:base},{n:"Tools"}]);
+  if(STATE === "loading") return loadingPage("the assurance suite");
+  if(STATE === "error")
+    return errorPage("The assurance suite's last result is unavailable", "suite_result_missing",
+      `The result index for suite <span class="mono">3.9.0</span> returned no rows for
+       core-platform. The suite itself is unaffected; this is a read failure on the published results.
+       Nothing is shown as passed while the result cannot be read.`,
+      "req_01K5ZD1M8V4K");
+  if(STATE === "denied")
+    return deniedPage("tools:read in core-platform", "billing · finops",
+      "grants.workspace.scope@v11", "Marcus Bell (workspace owner)");
+
+  const a = ASSURANCE;
+  const tabsHtml = `<div class="tabs" role="tablist">${TOOL_TABS.map(t=>
+    `<button role="tab" aria-selected="${t.k===tab}" type="button"
+      onclick="location.hash='${base}/tools/${t.k}'">${t.n}</button>`).join("")}</div>`;
+
+  let body;
+  if(tab !== "assurance"){
+    const t = TOOL_TABS.find(t=>t.k===tab);
+    body = `<div class="scope-card"><b>Not in this mockup.</b>
+      <span>The Tools page's ${esc(t ? t.n.toLowerCase() : tab)} tab is mocked by prompt W9
+      (registry, connections, policy) and W3 (mandates ledger). W5 covers the assurance tab.</span></div>`;
+  } else if(STATE === "empty"){
+    body = emptyBlock("The suite has not run here yet",
+      `core-platform was created on 2026-09-08 and the adversarial tool-governance suite has not yet run
+       against its gateway. Until it does, no case is reported as passed — an unrun case is not a
+       guarantee. Results publish per release and form part of the export a customer's auditor receives.`,
+      "Run the suite now", "Running the suite is itself a governed action and carries a receipt.");
+  } else {
+    body = `
+    <div class="tiles">
+      <div class="tile"><span class="t-l">Cases passed</span>
+        <span class="t-v" style="color:var(--s-proven)">${a.pass}<small> / ${a.cases.length}</small></span>
+        <span class="t-s">${a.fail} failed</span></div>
+      <div class="tile"><span class="t-l">Not applicable</span>
+        <span class="t-v">${a.na}</span><span class="t-s">reported, never counted as passed</span></div>
+      <div class="tile"><span class="t-l">Suite version</span>
+        <span class="t-v mono" style="font-size:17px">${esc(a.version)}</span>
+        <span class="t-s">${esc(a.duration)}</span></div>
+      <div class="tile"><span class="t-l">Last run</span>
+        <span class="t-v" style="font-size:15px">06:00:14 UTC</span>
+        <span class="t-s">2026-09-11 · ${esc(a.against)}</span></div>
+    </div>
+
+    <div class="notice info">${ICO.info}<div>
+      <b>Guarantees a customer cannot test are claims.</b> This suite runs against a live gateway in CI
+      and against a customer's own deployment on demand. The honesty rule applies to the suite itself:
+      a case that cannot run at this workspace's enforcement tier is reported
+      <b>not applicable</b>, never as passed.
+    </div></div>
+
+    <div class="panel">
+      <div class="ph"><h3>Last result per case</h3>
+        <span class="badge b-allowed">tier ${esc(a.tier)}</span>
+        <div class="ph-r"><span class="mono dim" style="font-size:11.5px">${esc(a.ran)}</span></div>
+      </div>
+      <div class="tw"><table style="min-width:760px">
+        <thead><tr><th style="width:30%">Case</th><th style="width:32%">Expected</th><th>Result</th><th>What was observed</th><th class="r">Time</th></tr></thead>
+        <tbody>${a.cases.map(c=>`<tr>
+          <td style="color:var(--fg)">${esc(c.c)}</td>
+          <td class="muted">${esc(c.e)}</td>
+          <td>${c.r==="pass"?'<span class="badge b-allowed">pass</span>'
+              : c.r==="na"?'<span class="badge b-neutral">not applicable</span>'
+              : '<span class="badge b-critical">fail</span>'}</td>
+          <td class="muted mono" style="font-size:11.5px">${esc(c.note)}</td>
+          <td class="r mono num dim">${c.ms?n(c.ms)+" ms":"—"}</td>
+        </tr>`).join("")}</tbody>
+      </table></div>
+      <div class="pb" style="border-top:1px solid var(--border)">
+        <p class="mono dim" style="font-size:11.5px">
+          Row 10 is the witness-storage case: §8.5 invariant 2 says a tool call whose target resolves to
+          witness storage is denied by policy and raises a <span class="mono">witness_probe</span> incident.
+          It fired once for real today, on
+          <a href="#/${ORG.slug}/${WS.slug}/runs/${R_PROVEN.id}/timeline">run_01K5XQ7M4A</a> at frame 212.</p>
+      </div>
+    </div>`;
+  }
+
+  const primary = `<button class="btn btn-primary" type="button" data-act="The adversarial tool-governance suite 3.9.0 is queued against the live core-platform gateway. Eleven cases, roughly four minutes. The run is a governed action and its result publishes to this tab and to the auditor export.">Run suite now</button>`;
+
+  return `<div class="page">
+    <div class="page-head">
+      <div class="title-row"><h1 class="page-title">Tools</h1>
+        <span class="badge b-quiet plain mono">214 versions</span>
+        <span class="badge b-allowed">tier gateway</span></div>
+      <div class="sub-row">
+        <span>The registry is the only source of tools an agent can see.</span>
+        <span class="dot">·</span><span class="mono">acme / core-platform</span>
+      </div>
+    </div>
+    <div style="display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap">
+      <div style="flex:1;min-width:240px">${tabsHtml}</div>
+      <div style="padding-bottom:6px;display:flex;gap:8px">
+        <button class="btn btn-sm" type="button" data-act="Suite 3.9.0's signed result bundle exported as JSON and CSV. It is part of the export a customer's auditor receives.">Export results</button>
+        ${tab==="assurance"?primary:""}
+      </div>
+    </div>
+    ${body}
+  </div>`;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Spend page
+   ═══════════════════════════════════════════════════════════════════════ */
+function renderSpend(){
+  paintNav("spend");
+  paintCrumbs([{n:ORG.name,h:`#/${ORG.slug}`},{n:WS.slug,h:base},{n:"Spend"}]);
+  if(STATE === "loading") return loadingPage("spend on 2026-09-11");
+  if(STATE === "error")
+    return errorPage("Spend for today cannot be totalled", "rollup_stale",
+      `<span class="mono">cost.daily_totals</span> is a derived index and its rebuild from frames failed
+       at 14:02 UTC. Rather than show a number that is missing runs, the page shows nothing.
+       The frames are intact; the rollup is rebuildable.`,
+      "req_01K5ZE9T3W7H");
+  if(STATE === "denied")
+    return deniedPage("spend:read in core-platform", "billing · finops",
+      "grants.workspace.scope@v11", "Marcus Bell (workspace owner)");
+  if(STATE === "empty")
+    return `<div class="page">
+      <div class="page-head"><h1 class="page-title">Spend</h1>
+        <div class="sub-row"><span class="mono">2026-09-11 · acme / core-platform · USD</span></div></div>
+      ${emptyBlock("No spend recorded on this day",
+        `No run in core-platform produced a frame on 2026-09-11. Spend is summed from frames, never
+         estimated forward from budgets, so a day with no frames shows nothing rather than zero with an
+         asterisk.`, "Show 2026-09-10", "Every number that is money shows its basis.")}
+    </div>`;
+
+  const s = SPEND;
+  const pct = m => (m / s.totalMicros * 100);
+  const stack = s.split.map(x=>`<span style="width:${pct(x.m).toFixed(2)}%;background:${x.c}" title="${esc(x.k)}"></span>`).join("");
+  const legend = s.split.map(x=>`<div class="lg">
+      <i style="background:${x.c}"></i>
+      <span class="lname">${esc(x.k)}<br><span class="dim" style="font-size:11px">${esc(x.note)}</span></span>
+      <span class="lval">${usd(x.m)}</span>
+      <span class="lpct">${pct(x.m).toFixed(1)}%</span>
+    </div>`).join("");
+
+  const trend = ((s.perProvenPrev - s.perProven) / s.perProvenPrev * 100).toFixed(1);
+
+  return `<div class="page">
+    <div class="page-head">
+      <div class="title-row"><h1 class="page-title">Spend</h1>
+        <span class="badge b-quiet plain mono">${esc(s.basis)}</span></div>
+      <div class="sub-row">
+        <span class="mono">2026-09-11</span><span class="dot">·</span>
+        <span class="mono">acme / core-platform</span><span class="dot">·</span>
+        <span>display currency ${esc(s.currency)}</span><span class="dot">·</span>
+        <span>reconciliation <b style="color:var(--fg)">${esc(s.recon.status)}</b>, variance ${(s.recon.variance*100).toFixed(2)}%</span>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="ph"><h3>Findings, ranked by money at stake</h3>
+        <div class="ph-r"><span class="mono dim" style="font-size:11.5px">from frames after each seal</span></div>
+      </div>
+      ${s.findings.map((f,i)=>`<div class="finding">
+        <div class="ft">
+          <b>${esc(f.t)}</b>
+          <span>${f.w}</span>
+          <span class="mono dim" style="font-size:11px">applies at ${esc(f.lvl)}</span>
+        </div>
+        <div class="fm">
+          <span class="money">${usd(f.m)}</span>
+          <span class="basis">per week, estimated</span>
+          ${i===0
+            ? `<button class="btn btn-primary btn-sm" type="button" data-act="Opened steering record str_01K5T8N2QD with the 214 turns that paid full input price attached as evidence. Reverting the prefix change is a Context PR on acme/platform.">${esc(f.act)}</button>`
+            : `<button class="btn btn-sm" type="button" data-act="${esc(f.act)} — the frames that prove this finding are attached to the action.">${esc(f.act)}</button>`}
+        </div>
+      </div>`).join("")}
+    </div>
+
+    <div class="tiles">
+      <div class="tile"><span class="t-l">Spend today</span>
+        <span class="t-v">${usd(s.totalMicros)} <small>USD</small></span>
+        <span class="t-s">66 runs</span></div>
+      <div class="tile"><span class="t-l">Proven spend</span>
+        <span class="t-v" style="color:var(--s-proven)">${usd(s.split[0].m)}</span>
+        <span class="t-s">${pct(s.split[0].m).toFixed(1)}% · ${s.provenRuns} runs flipped</span></div>
+      <div class="tile"><span class="t-l">Spend per proven run</span>
+        <span class="t-v">${usd(s.perProven)}</span>
+        <span class="t-s" style="color:var(--s-proven)">▼ ${trend}% on last week</span></div>
+      <div class="tile"><span class="t-l">Productive ratio</span>
+        <span class="t-v">${s.productive.toFixed(2)}</span>
+        <span class="t-s">steps that advanced the task</span></div>
+      <div class="tile"><span class="t-l">Cost of proof</span>
+        <span class="t-v">${usd(s.witnessMicros)}</span>
+        <span class="t-s">${s.witnessRuns} witness runs · 2.8% of spend</span></div>
+    </div>
+
+    <div class="panel">
+      <div class="ph"><h3>Proven versus unproven</h3>
+        <div class="ph-r"><span class="mono dim" style="font-size:11.5px">computed from frames, never from a model's opinion</span></div>
+      </div>
+      <div class="pb">
+        <div class="stack">${stack}</div>
+        <div class="legend">${legend}</div>
+        <div class="notice proven" style="margin-top:16px">${ICO.check}<div>
+          <b>Proven means a witness flipped.</b> Runs a human verified without a witness — an approval, a
+          merged pull request, a closed task — are reported separately as <b>accepted</b> and are never
+          folded into proven.
+          <a href="#/${ORG.slug}/${WS.slug}/runs/${R_PROVEN.id}/proof" class="mono">run_01K5XQ7M4A</a>
+          contributes ${usd(R_PROVEN.costMicros)} to the proven band today.
+        </div></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="ph"><h3>Runs today</h3>
+        <div class="ph-r"><span class="mono dim" style="font-size:11.5px">9 of 66 shown</span></div>
+      </div>
+      <div class="tw"><table style="min-width:720px">
+        <thead><tr><th>Run</th><th>Agent</th><th>Operator</th><th>Task</th><th>Verdict</th><th class="r">Spend</th><th class="r">Counts as</th></tr></thead>
+        <tbody>${s.runs.map(r=>{
+          const known = !!RUNS[r.id];
+          const mark = r.id === R_PROVEN.id ? " marked" : "";
+          return `<tr class="${known?"clickable":""}${mark}${r.v==="flipped"?" flipped":""}" ${known?`onclick="location.hash='${base}/runs/${r.id}/${r.witness?"ladder":"proof"}'"`:""}>
+            <td class="mono" style="color:var(--fg)">${esc(r.id)}</td>
+            <td class="muted mono" style="font-size:11.5px">${esc(r.agent)}</td>
+            <td class="muted">${esc(r.op)}</td>
+            <td class="muted mono" style="font-size:11.5px">${esc(r.task)}</td>
+            <td>${r.v ? verdictCell(r) : '<span class="badge b-approval plain">witness run</span>'}</td>
+            <td class="r mono num">${usd(r.m)}</td>
+            <td class="r ${r.v==="flipped"?"":"muted"}" style="font-size:12px;${r.v==="flipped"?"color:var(--s-proven)":""}">
+              ${r.v==="flipped"?"proven":r.witness?"cost of proof":"unproven"}</td>
+          </tr>`;
+        }).join("")}</tbody>
+      </table></div>
+    </div>
+
+    <div class="panel">
+      <div class="ph"><h3>Proven spend by agent</h3>
+        <div class="ph-r"><span class="mono dim" style="font-size:11.5px">7-day window</span></div>
+      </div>
+      <div class="tw"><table style="min-width:660px">
+        <thead><tr><th>Agent</th><th class="r">Runs</th><th class="r">Spend</th><th class="r">Proven spend</th><th class="r">Per proven run</th><th class="r">Productive ratio</th></tr></thead>
+        <tbody>${s.byAgent.map(a=>`<tr>
+          <td class="mono" style="color:var(--fg);font-size:12px">${esc(a.a)}</td>
+          <td class="r mono num">${a.runs}</td>
+          <td class="r mono num">${usd(a.spend)}</td>
+          <td class="r mono num" style="${a.proven?"color:var(--s-proven)":"color:var(--dim)"}">${a.proven?usd(a.proven):"—"}</td>
+          <td class="r mono num">${a.perProven?usd(a.perProven):"—"}</td>
+          <td class="r mono num">${a.ratio!==null?a.ratio.toFixed(2):"—"}</td>
+        </tr>`).join("")}</tbody>
+      </table></div>
+      <div class="pb" style="border-top:1px solid var(--border)">
+        <p class="mono dim" style="font-size:11.5px">
+          The witness runner's ${usd(s.witnessMicros)} is the cost of proof, attributed to each worker's
+          operator, never to the runner. It has no proven spend of its own: it proves, it does not produce.</p>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="ph"><h3>Reconciliation</h3>
+        <div class="ph-r"><span class="badge b-approval">${esc(s.recon.status)}</span></div>
+      </div>
+      <div class="pb"><dl class="kv">
+        <dt>Matched through</dt><dd class="plain">${esc(s.recon.matched)}</dd>
+        <dt>Variance</dt><dd class="plain">${(s.recon.variance*100).toFixed(2)}% against the provider invoice</dd>
+        <dt>Today</dt><dd class="plain">${esc(s.recon.note)}</dd>
+        <dt>Basis</dt><dd class="plain">every line is <span class="mono">gateway_observed</span>; none estimated</dd>
+      </dl></div>
+    </div>
+  </div>`;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Fleet page
+   ═══════════════════════════════════════════════════════════════════════ */
+function renderFleet(){
+  paintNav("fleet");
+  paintCrumbs([{n:ORG.name,h:`#/${ORG.slug}`},{n:WS.slug,h:base},{n:"Fleet"}]);
+  if(STATE === "loading") return loadingPage("the fleet");
+  if(STATE === "error")
+    return errorPage("The live run stream dropped", "stream_disconnected",
+      `The frame stream for core-platform disconnected at 14:02 UTC. Recent runs below are read from the
+       graph and are current to 13:58; the two live runs are not updating. Frames are still being
+       recorded — this is a read path failure, not a recording gap.`, "req_01K5ZF2R6Y1M");
+  if(STATE === "denied")
+    return deniedPage("workspace:read in core-platform", "billing · finops",
+      "grants.workspace.scope@v11", "Marcus Bell (workspace owner)");
+  if(STATE === "empty")
+    return `<div class="page"><div class="page-head"><h1 class="page-title">Fleet</h1></div>
+      ${emptyBlock("No runs yet in this workspace",
+        `core-platform has 50 registered agents and no run has started. Fleet fills the moment the first
+         frame reaches Oxagen. Nothing here is simulated while it waits.`,
+        "Show today's runs", "")}</div>`;
+
+  return `<div class="page">
+    <div class="page-head">
+      <div class="title-row"><h1 class="page-title">Fleet</h1>
+        <span class="badge b-allowed">2 running</span>
+        <span class="badge b-quiet plain mono">50 agents</span></div>
+      <div class="sub-row">
+        <span>Every run, live and recent.</span><span class="dot">·</span>
+        <span class="mono">acme / core-platform · main repo acme/platform @ main</span>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="ph"><h3>Runs</h3>
+        <div class="ph-r"><span class="mono dim" style="font-size:11.5px">8 of 66 today</span></div>
+      </div>
+      <div class="tw"><table style="min-width:800px">
+        <thead><tr><th>Run</th><th>Agent</th><th>Operator</th><th>Task</th><th>Tier</th><th>Replay</th><th>Proof</th><th class="r">Cost so far</th></tr></thead>
+        <tbody>${FLEET.map(r=>{
+          const known = !!RUNS[r.id];
+          return `<tr class="${known?"clickable":""}${r.id===R_PROVEN.id?" marked":""}${r.v==="flipped"?" flipped":""}"
+            ${known?`onclick="location.hash='${base}/runs/${r.id}/${RUNS[r.id].agentKind==="service"?"ladder":"proof"}'"`:""}>
+            <td class="mono" style="color:var(--fg)">${esc(r.id)}</td>
+            <td class="muted mono" style="font-size:11.5px">${esc(r.agent)}</td>
+            <td class="muted">${esc(r.op)}</td>
+            <td class="muted mono" style="font-size:11.5px">${esc(r.task)}</td>
+            <td>${r.tier==="gateway"?'<span class="badge b-allowed">gateway</span>':'<span class="badge b-neutral">harness</span>'}</td>
+            <td class="mono dim" style="font-size:11.5px">${esc(r.replay)}</td>
+            <td>${r.v ? verdictCell(r) : (r.st==="running"
+                ? '<span class="badge b-quiet plain">pending</span>'
+                : '<span class="badge b-approval plain">witness run</span>')}</td>
+            <td class="r mono num">${usd(r.m)}</td>
+          </tr>`;
+        }).join("")}</tbody>
+      </table></div>
+    </div>
+    <p class="mono dim" style="font-size:11.5px">
+      Every badge renders the recorded value and nothing stronger: tier is read from the run, never
+      inferred from the agent's configuration.</p>
+  </div>`;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Router
+   ═══════════════════════════════════════════════════════════════════════ */
+function route(){
+  const h = location.hash.replace(/^#\/?/, "");
+  const p = h ? h.split("/") : [];
+  let html;
+
+  if(p.length === 0 || (p.length === 1 && p[0] === ORG.slug)){
+    if(p.length === 1){ paintNav("organization");
+      paintCrumbs([{n:ORG.name}]);
+      html = scopeCard("Organization", "W10"); }
+    else { location.replace(`${base}/runs/${R_PROVEN.id}/proof`); return; }
+  }
+  else if(p[1] === "billing"){ paintNav("billing"); paintCrumbs([{n:ORG.name,h:`#/${ORG.slug}`},{n:"Billing"}]);
+    html = scopeCard("Billing", "W8"); }
+  else if(p[1] === "audit"){ paintNav("audit"); paintCrumbs([{n:ORG.name,h:`#/${ORG.slug}`},{n:"Audit"}]);
+    html = scopeCard("Audit", "W10"); }
+  else if(p[2] === "runs" && p[3]){ html = renderRun(p[3], p[4] || (RUNS[p[3]] && RUNS[p[3]].agentKind==="service" ? "ladder" : "proof")); }
+  else if(p[2] === "tools"){ html = renderTools(p[3] || "assurance"); }
+  else if(p[2] === "spend"){ html = renderSpend(); }
+  else if(p[2] === "agents"){ paintNav("agents"); paintCrumbs([{n:ORG.name,h:`#/${ORG.slug}`},{n:WS.slug,h:base},{n:"Agents"}]);
+    html = scopeCard("Agents", "W9"); }
+  else if(p[2] === "ontology"){ paintNav("ontology"); paintCrumbs([{n:ORG.name,h:`#/${ORG.slug}`},{n:WS.slug,h:base},{n:"Ontology"}]);
+    html = scopeCard("Ontology", "W7"); }
+  else if(p[2] === "steering"){ paintNav("steering"); paintCrumbs([{n:ORG.name,h:`#/${ORG.slug}`},{n:WS.slug,h:base},{n:"Steering"}]);
+    html = scopeCard("Steering", "W6"); }
+  else { html = renderFleet(); }
+
+  view.innerHTML = html;
+  document.body.classList.remove("nav-open");
+  window.scrollTo({top:0, behavior:"instant"});
+}
+
+function setState(s){
+  STATE = s;
+  document.querySelectorAll("#stateSet button").forEach(b =>
+    b.setAttribute("aria-pressed", String(b.dataset.state === s)));
+  route();
+}
+window.setState = setState;
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Chrome wiring
+   ═══════════════════════════════════════════════════════════════════════ */
+document.getElementById("stateSet").addEventListener("click", e=>{
+  const b = e.target.closest("button[data-state]"); if(b) setState(b.dataset.state);
+});
+document.getElementById("vpSet").addEventListener("click", e=>{
+  const b = e.target.closest("button[data-vp]"); if(!b) return;
+  document.body.classList.toggle("phone", b.dataset.vp === "phone");
+  document.querySelectorAll("#vpSet button").forEach(x =>
+    x.setAttribute("aria-pressed", String(x === b)));
+});
+document.getElementById("jumpSet").addEventListener("click", e=>{
+  const b = e.target.closest("button[data-go]"); if(b) location.hash = b.dataset.go;
+});
+document.getElementById("chToggle").addEventListener("click", ()=>{
+  const c = document.getElementById("chrome");
+  const now = c.dataset.collapsed === "true";
+  c.dataset.collapsed = String(!now);
+  document.getElementById("chToggle").textContent = now ? "–" : "+";
+});
+
+/* theme */
+const themeBtn = document.getElementById("themeBtn");
+themeBtn.addEventListener("click", ()=>{
+  const r = document.documentElement;
+  const dark = matchMedia("(prefers-color-scheme: dark)").matches;
+  const cur = r.dataset.theme || (dark ? "dark" : "light");
+  r.dataset.theme = cur === "dark" ? "light" : "dark";
+});
+
+/* assistant rail */
+const railBtn = document.getElementById("railBtn");
+function setRail(open){
+  app.classList.toggle("rail-open", open);
+  railBtn.setAttribute("aria-pressed", String(open));
+}
+railBtn.addEventListener("click", ()=> setRail(!app.classList.contains("rail-open")));
+document.getElementById("railClose").addEventListener("click", ()=> setRail(false));
+document.getElementById("railInput").addEventListener("keydown", e=>{
+  if(e.key === "Enter" && e.target.value.trim()){
+    alert("Every assistant turn is a run of its own, recorded and metered like any other agent's.\n\n" +
+      "Asked: " + e.target.value.trim() + "\n\nIt would answer through the same agent tools these screens " +
+      "call, and its answer would carry links to frames, records and commits — not a summary.");
+    e.target.value = "";
+  }
+});
+
+/* mobile nav */
+document.getElementById("navToggle").addEventListener("click", ()=>
+  document.body.classList.toggle("nav-open"));
+
+/* command menu */
+const CMDS = [
+  {n:"Open run_01K5XQ7M4A — proof",            g:"run",    h:`${base}/runs/${R_PROVEN.id}/proof`},
+  {n:"Open run_01K5XP2F6B — witness run",      g:"run",    h:`${base}/runs/${R_WITNESS.id}/ladder`},
+  {n:"Open run_01K5YR3C8N — tampered",         g:"run",    h:`${base}/runs/${R_TAMPERED.id}/proof`},
+  {n:"Go to Fleet",                            g:"page",   h:`${base}`},
+  {n:"Go to Tools — assurance",                g:"page",   h:`${base}/tools/assurance`},
+  {n:"Go to Spend",                            g:"page",   h:`${base}/spend`},
+  {n:"Go to Audit",                            g:"page",   h:`#/${ORG.slug}/audit`},
+  {n:"Run the assurance suite now",            g:"action", h:`${base}/tools/assurance`},
+  {n:"Export a signed proof bundle",           g:"action", h:`${base}/runs/${R_PROVEN.id}/chain`},
+  {n:"Switch workspace to finops",             g:"switch", h:`${base}`},
+  {n:"Toggle theme",                           g:"view",   h:""}
+];
+const dlg = document.getElementById("cmdDlg");
+const cmdList = document.getElementById("cmdList");
+const cmdInput = document.getElementById("cmdInput");
+function paintCmds(q=""){
+  const f = CMDS.filter(c => c.n.toLowerCase().includes(q.toLowerCase()));
+  cmdList.innerHTML = f.length
+    ? f.map((c,i)=>`<li><button type="button" data-h="${c.h}" data-n="${esc(c.n)}">
+        <span>${esc(c.n)}</span><span class="cg">${esc(c.g)}</span></button></li>`).join("")
+    : `<li><div style="padding:18px 16px;color:var(--dim);font-size:13px">No match for “${esc(q)}”.</div></li>`;
+}
+function openCmd(){ paintCmds(); dlg.showModal(); cmdInput.value=""; cmdInput.focus(); }
+document.getElementById("cmdBtn").addEventListener("click", openCmd);
+document.getElementById("cmdClose").addEventListener("click", ()=> dlg.close());
+cmdInput.addEventListener("input", e => paintCmds(e.target.value));
+cmdList.addEventListener("click", e=>{
+  const b = e.target.closest("button[data-h]"); if(!b) return;
+  dlg.close();
+  if(b.dataset.n === "Toggle theme") themeBtn.click();
+  else if(b.dataset.n.startsWith("Switch workspace"))
+    alert("finops holds one main repo, acme/finops-agents, and one agent with a mandate, " +
+          "acme.finops.invoice-bot. Switching workspace is a governed action and carries a receipt.");
+  else if(b.dataset.h) location.hash = b.dataset.h;
+});
+addEventListener("keydown", e=>{
+  if((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k"){ e.preventDefault(); openCmd(); }
+  if(e.key === "Escape" && dlg.open) dlg.close();
+});
+
+/* switchers */
+document.querySelectorAll(".sw").forEach(b => b.addEventListener("click", ()=>{
+  if(b.dataset.cmd === "org")
+    alert("Acme Robotics is the only organization on this account.\n\n" +
+      "Organization is the tenant and the hard isolation boundary: one Neo4j database, one " +
+      "key-encryption key, one Postgres partition, one billing account.");
+  else
+    alert("core-platform — main repo acme/platform @ main; linked acme/billing, acme/mobile.\n" +
+      "finops — main repo acme/finops-agents.\n\n" +
+      "Workspace is a governance partition: one ontology, one steering set, its own agents, " +
+      "grants and budgets.");
+}));
+
+/* generic demo actions + copy */
+document.addEventListener("click", e=>{
+  const a = e.target.closest("[data-act]");
+  if(a){ alert(a.dataset.act); return; }
+  const c = e.target.closest("[data-copy]");
+  if(c){
+    const pre = document.getElementById("json-" + c.dataset.copy.replace(/-json$/,""));
+    if(pre && navigator.clipboard) navigator.clipboard.writeText(pre.innerText).catch(()=>{});
+    const t = c.textContent; c.textContent = "Copied";
+    setTimeout(()=>{ c.textContent = t; }, 1400);
+  }
+});
+
+/* boot */
+addEventListener("hashchange", route);
+if(!location.hash) location.replace(`${base}/runs/${R_PROVEN.id}/proof`);
+route();
+</script>
+
+<!-- list-controls: search · sort · column filters · rows per page · pager -->
+<style>
+/* List controls: search, column filters, rows per page, sortable headers, pager.
+   Colors derive from the page's own text color so the block reads correctly in
+   every mockup theme; only the accent leans on --gold. */
+.lt{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:9px 12px;border-bottom:1px solid var(--border,color-mix(in srgb,currentColor 16%,transparent));font-family:inherit;font-size:12.5px}
+.lt.free{border:1px solid var(--border,color-mix(in srgb,currentColor 16%,transparent));border-radius:10px;margin-bottom:10px}
+.lt .lt-q{flex:1 1 200px;min-width:140px;background:color-mix(in srgb,currentColor 5%,transparent);border:1px solid var(--border,color-mix(in srgb,currentColor 16%,transparent));border-radius:8px;padding:6px 10px;font-size:12.5px;color:inherit;outline:none;font-family:inherit;transition:border-color .12s}
+.lt .lt-q:focus{border-color:var(--gold,#D6962C)}
+.lt .lt-q::placeholder{color:inherit;opacity:.5}
+.lt select{appearance:auto;background:color-mix(in srgb,currentColor 5%,transparent);border:1px solid var(--border,color-mix(in srgb,currentColor 16%,transparent));border-radius:8px;padding:5px 8px;font-size:12px;color:inherit;outline:none;font-family:inherit;max-width:220px;transition:border-color .12s}
+.lt select:focus{border-color:var(--gold,#D6962C)}
+.lt .lt-rows{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--muted,inherit);white-space:nowrap;margin-left:auto}
+.lp{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 12px;font-size:11.5px;color:var(--muted,inherit);font-family:inherit}
+.lp.free{border:1px solid var(--border,color-mix(in srgb,currentColor 16%,transparent));border-radius:10px;margin-top:10px}
+.lp .lp-n{font-family:var(--mono,ui-monospace,monospace);font-variant-numeric:tabular-nums;opacity:.85}
+.lp .lp-pg{margin-left:auto;display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+.lp .lp-b{border:1px solid var(--border,color-mix(in srgb,currentColor 16%,transparent));background:color-mix(in srgb,currentColor 5%,transparent);color:inherit;border-radius:7px;padding:2px 8px;min-width:28px;font-size:12px;font-family:inherit;cursor:pointer;font-variant-numeric:tabular-nums;line-height:1.5;transition:border-color .12s}
+.lp .lp-b:hover{border-color:color-mix(in srgb,currentColor 35%,transparent)}
+.lp .lp-b[aria-current="page"]{border-color:var(--gold,#D6962C);color:var(--gold,#D6962C)}
+.lp .lp-b:disabled{opacity:.4;cursor:default}
+.lp .lp-pg .el{padding:0 4px;opacity:.6}
+th.sortable{cursor:pointer;user-select:none}
+th.sortable::after{content:"↕";margin-left:5px;opacity:.35;font-size:10px}
+th.sortable[aria-sort="ascending"]::after{content:"↑";color:var(--gold,#D6962C);opacity:1}
+th.sortable[aria-sort="descending"]::after{content:"↓";color:var(--gold,#D6962C);opacity:1}
+.lt-empty td{opacity:.6;text-align:center;padding:18px}
+@media (max-width:520px){.lt .lt-q{flex-basis:100%}.lt .lt-rows{margin-left:0}}
+</style>
+<script>
+/* ============================== List controls ============================== */
+/* Self-contained: every table with a thead gets a search box, sortable column
+   headers, a filter select for each column that is a small enumeration, a
+   rows-per-page select and a pager. Installs itself through a DOM observer so
+   it works with any render path; state is keyed by page + column signature so
+   a full re-render lands back on the same page, sort and query. */
+(function(){
+"use strict";
+if(window.__ltInstalled)return; window.__ltInstalled=true;
+var STORE={}, PER=[5,10,25,50,0], BUSY=false, TIMER=null;
+var FACET=/status|state|tier|kind|role|risk|severity|result|health|effect|mode|side|level|verdict|decision|origin|scope|period|basis|algorithm|trend|position|governance|two-factor|sso|replay|grade|outcome/i;
+function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function num(s){
+  s=String(s==null?"":s).trim();
+  if(!s||/^\d{4}-\d{2}/.test(s))return null;
+  var c=s.replace(/[$,%×]/g,""), m=c.match(/^[-+]?\d*\.?\d+(?:e[-+]?\d+)?/i);
+  if(!m)return null;
+  var n=parseFloat(m[0]), u=c.slice(m[0].length).match(/^\s*([kKMB])(?![A-Za-z])/);
+  if(u){ if(u[1]==="k"||u[1]==="K")n*=1e3; else if(u[1]==="M")n*=1e6; else n*=1e9; }
+  return n;
+}
+function cmp(a,b,isNum,dir){
+  if(isNum){var x=a.n,y=b.n; if(x==null&&y==null)return 0; if(x==null)return 1; if(y==null)return -1; if(x!==y)return (x-y)*dir;}
+  return a.t.localeCompare(b.t,undefined,{numeric:true,sensitivity:"base"})*dir;
+}
+function el(html){var d=document.createElement("div");d.innerHTML=html;return d.firstChild;}
+function pageCtx(){var h1=document.querySelector("main h1, .page h1, h1"); return location.hash+"|"+(h1?h1.textContent.trim().slice(0,40):"");}
+function state(sig,ord){var key=pageCtx()+"|"+sig+"#"+ord; return STORE[key]||(STORE[key]={q:"",sort:null,dir:1,per:10,page:1,f:{}});}
+
+function pager(st,total,onPage){
+  var per=st.per||total||1, pages=Math.max(1,Math.ceil(total/per));
+  if(st.page>pages)st.page=pages; if(st.page<1)st.page=1;
+  var from=total?((st.page-1)*per+1):0, to=Math.min(total,st.page*per);
+  var html='<div class="lp"><span class="lp-n">'+(total?from+'–'+to+' of '+total:'0 of 0')+'</span><span class="lp-pg">'+
+   '<button type="button" class="lp-b" data-p="prev" aria-label="Previous page"'+(st.page<=1?' disabled':'')+'>‹</button>';
+  var nums=[]; if(pages<=7){for(var i=1;i<=pages;i++)nums.push(i);} else {
+    nums=[1]; var lo=Math.max(2,st.page-1), hi=Math.min(pages-1,st.page+1);
+    if(lo>2)nums.push("…"); for(var j=lo;j<=hi;j++)nums.push(j); if(hi<pages-1)nums.push("…"); nums.push(pages);}
+  nums.forEach(function(p){html+= p==="…"?'<span class="el">…</span>':'<button type="button" class="lp-b" data-p="'+p+'"'+(p===st.page?' aria-current="page"':'')+'>'+p+'</button>';});
+  html+='<button type="button" class="lp-b" data-p="next" aria-label="Next page"'+(st.page>=pages?' disabled':'')+'>›</button></span></div>';
+  var lp=el(html);
+  lp.addEventListener("click",function(e){var b=e.target.closest("button[data-p]"); if(!b||b.disabled)return; e.stopPropagation(); var p=b.getAttribute("data-p");
+    st.page = p==="prev"?st.page-1 : p==="next"?st.page+1 : +p; onPage();});
+  return lp;
+}
+function bar(st,opts,apply){
+  var html='<div class="lt"><input class="lt-q" type="search" placeholder="'+esc(opts.ph)+'" aria-label="'+esc(opts.ph)+'" value="'+esc(st.q)+'">';
+  (opts.filters||[]).forEach(function(f){
+    html+='<select class="lt-f" data-k="'+esc(f.key)+'" aria-label="Filter by '+esc(f.label)+'"><option value="">All · '+esc(f.label)+'</option>'+
+      f.values.map(function(v){return '<option value="'+esc(v)+'"'+(st.f[f.key]===v?' selected':'')+'>'+esc(v)+'</option>';}).join("")+'</select>';});
+  html+='<label class="lt-rows">Rows<select class="lt-per">'+PER.map(function(p){return '<option value="'+p+'"'+(st.per===p?' selected':'')+'>'+(p||"All")+'</option>';}).join("")+'</select></label></div>';
+  var b=el(html);
+  b.addEventListener("click",function(e){e.stopPropagation();});
+  b.querySelector(".lt-q").addEventListener("input",function(e){st.q=e.target.value;st.page=1;apply();});
+  b.querySelectorAll(".lt-f").forEach(function(s){s.addEventListener("change",function(e){st.f[s.getAttribute("data-k")]=e.target.value;st.page=1;apply();});});
+  b.querySelector(".lt-per").addEventListener("change",function(e){st.per=+e.target.value;st.page=1;apply();});
+  return b;
+}
+/* A column earns a filter when it is a small enumeration: 2–8 distinct short
+   values across at least 4 rows, and not unique per row. At most three per list. */
+function facets(cols,vals,rows){
+  if(rows<4)return [];
+  var c=cols.filter(function(col){ if(!col.name||col.num)return false;
+    var set={},n=0,ok=true; vals.forEach(function(v){var t=v[col.i].t; if(!t)return; if(t.length>28)ok=false; if(!set[t]){set[t]=1;n++;}});
+    if(!ok||n<2||n>8||n>=rows)return false; col.values=Object.keys(set).sort(); return true;});
+  c.sort(function(a,b){var pa=FACET.test(a.name)?0:1,pb=FACET.test(b.name)?0:1; return pa-pb||a.values.length-b.values.length;});
+  return c.slice(0,3).map(function(col){return {key:String(col.i),label:col.name,values:col.values};});
+}
+function sigOf(table){return [].slice.call(table.tHead.rows[0].cells).map(function(c){return c.textContent.trim();}).join("/");}
+function enhance(table,ord){
+  var tbody=table.tBodies[0], rows=[].slice.call(tbody.rows);
+  var ths=[].slice.call(table.tHead.rows[0].cells);
+  var cols=ths.map(function(th,i){return {i:i,name:th.textContent.trim(),num:th.classList.contains("num")};});
+  var st=state(sigOf(table),ord);
+  var vals=rows.map(function(r){return cols.map(function(c){var cell=r.cells[c.i]; var t=cell?cell.textContent.replace(/\s+/g," ").trim():""; return {t:t,n:num(t)};});});
+  cols.forEach(function(c){ if(c.num)return; var k=0,tot=0; vals.forEach(function(v){if(v[c.i].t){tot++; if(v[c.i].n!=null)k++;}}); if(tot&&k/tot>=.6)c.num=true; });
+  var texts=rows.map(function(r){return r.textContent.replace(/\s+/g," ").toLowerCase();});
+  var fs=facets(cols,vals,rows.length);
+  var wrap=table.parentNode, host=wrap.parentNode, ph="Search this list";
+  if(!host||wrap===document.body){wrap=table;host=table.parentNode;}
+  /* A lone search box sitting directly above the table becomes the list's search. */
+  var prev=wrap.previousElementSibling;
+  if(prev&&!prev.matches("table,thead,tbody")){
+    var ins=prev.querySelectorAll("input,select,button,a,textarea");
+    var inp=prev.matches("input")?prev:prev.querySelector("input[placeholder^='Search']");
+    if(inp&&inp.placeholder&&/^Search/.test(inp.placeholder)&&ins.length<=1&&!prev.textContent.trim()){ph=inp.placeholder;prev.remove();}
+  }
+  var free=!/panel|card|box/.test(host.className||"");
+  var b=bar(st,{ph:ph,filters:fs},apply), lp=document.createElement("div");
+  if(free)b.classList.add("free");
+  host.insertBefore(b,wrap); host.insertBefore(lp,wrap.nextSibling);
+  ths.forEach(function(th,i){ if(!cols[i].name)return; th.classList.add("sortable"); th.tabIndex=0; th.setAttribute("role","button");
+    function tog(e){ if(e)e.stopPropagation(); if(st.sort===i){ if(st.dir===1)st.dir=-1; else {st.sort=null;st.dir=1;} } else {st.sort=i;st.dir=1;} st.page=1; apply(); }
+    th.addEventListener("click",tog); th.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();tog(e);}}); });
+  function apply(){
+    ths.forEach(function(th,i){ if(!cols[i].name)return; th.setAttribute("aria-sort",st.sort===i?(st.dir===1?"ascending":"descending"):"none"); });
+    var q=st.q.trim().toLowerCase();
+    var idx=rows.map(function(_,i){return i;}).filter(function(i){
+      if(q&&texts[i].indexOf(q)<0)return false;
+      for(var k in st.f){ if(st.f[k]&&vals[i][+k]&&vals[i][+k].t!==st.f[k])return false; } return true; });
+    if(st.sort!=null&&cols[st.sort]){var c=cols[st.sort]; idx.sort(function(a,b){return cmp(vals[a][c.i],vals[b][c.i],c.num,st.dir)||(a-b);});}
+    var total=idx.length, per=st.per||total||1, pages=Math.max(1,Math.ceil(total/per)); if(st.page>pages)st.page=pages;
+    var slice=st.per?idx.slice((st.page-1)*st.per,st.page*st.per):idx;
+    BUSY=true;
+    while(tbody.firstChild)tbody.removeChild(tbody.firstChild);
+    if(!slice.length){var tr=document.createElement("tr"),td=document.createElement("td");tr.className="lt-empty";td.colSpan=cols.length;td.textContent="No rows match.";tr.appendChild(td);tbody.appendChild(tr);}
+    slice.forEach(function(i){tbody.appendChild(rows[i]);});
+    var nlp=pager(st,total,apply); lp.replaceWith(nlp); lp=nlp; if(free)lp.classList.add("free");
+    BUSY=false;
+  }
+  apply();
+}
+function run(){
+  BUSY=true;
+  try{
+    var ords={};
+    [].slice.call(document.querySelectorAll("table")).forEach(function(t){
+      if(!t.tHead||!t.tHead.rows[0]||!t.tBodies[0]||t.closest("[data-lt-skip]"))return;
+      if([].slice.call(t.tHead.rows[0].cells).some(function(c){return c.colSpan>1;}))return;
+      var sig=sigOf(t), ord=ords[sig]||0; ords[sig]=ord+1;
+      if(t.getAttribute("data-lt"))return;
+      t.setAttribute("data-lt","1"); enhance(t,ord);
+    });
+  } finally { BUSY=false; }
+}
+new MutationObserver(function(muts){
+  if(BUSY)return;
+  for(var i=0;i<muts.length;i++){ if(muts[i].addedNodes.length){ clearTimeout(TIMER); TIMER=setTimeout(run,0); return; } }
+}).observe(document.documentElement,{childList:true,subtree:true});
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",run); else run();
+window.listify=run;
+})();
+</script>

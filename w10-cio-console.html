@@ -1,0 +1,2029 @@
+<title>The CIO's Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap">
+<style>
+/* ── House tokens. Dark-first: bare :root IS the dark palette. ───────────── */
+:root{
+  --ink:#10100F; --void:#0A0A09; --panel:#181715; --hl:#201F1C;
+  --border:#292722; --rule:#34322D;
+  --text:#F2EEE5; --body:#DDD8CD; --muted:#9B958A; --dim:#6E6A62;
+  --gold:#D6962C; --gold-hi:#F1C364; --gold-text:#D6962C; --on-gold:#10100F;
+  --sheen:linear-gradient(45deg,#8B5E1A 0%,#D6962C 38%,#F1C364 56%,#D6962C 74%,#8B5E1A 100%);
+  /* semantic state — a separate family from gold, never interchangeable */
+  --pass:#62A97C;  --pass-bg:rgba(98,169,124,.13);  --pass-br:rgba(98,169,124,.34);
+  --hold:#7AA2DB;  --hold-bg:rgba(122,162,219,.13); --hold-br:rgba(122,162,219,.34);
+  --deny:#D6635C;  --deny-bg:rgba(214,99,92,.13);   --deny-br:rgba(214,99,92,.34);
+  --crit:#E2555C;  --crit-bg:rgba(226,85,92,.20);   --crit-br:rgba(226,85,92,.50);
+  --idle:#9B958A;  --idle-bg:rgba(155,149,138,.12); --idle-br:rgba(155,149,138,.30);
+  --focus:#F1C364;
+  --shadow:0 1px 0 rgba(255,255,255,.02), 0 8px 24px rgba(0,0,0,.35);
+  --font:"Space Grotesk","Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+  --r-lg:14px; --r-md:12px; --r-sm:10px; --r-xs:6px;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme:light){
+  :root:not([data-theme="dark"]){
+    --ink:#F2EEE5; --void:#EAE4D7; --panel:#F8F5EE; --hl:#EDE7DA;
+    --border:#D8CDBD; --rule:#C9BFAE;
+    --text:#10100F; --body:#2A2823; --muted:#6B665C; --dim:#8C877C;
+    --gold-text:#8B5E1A; --gold-hi:#8B5E1A;
+    --pass:#2F6B48;  --pass-bg:rgba(47,107,72,.10);  --pass-br:rgba(47,107,72,.30);
+    --hold:#2F5C99;  --hold-bg:rgba(47,92,153,.10);  --hold-br:rgba(47,92,153,.30);
+    --deny:#9A3630;  --deny-bg:rgba(154,54,48,.10);  --deny-br:rgba(154,54,48,.30);
+    --crit:#B02A31;  --crit-bg:rgba(176,42,49,.14);  --crit-br:rgba(176,42,49,.44);
+    --idle:#6B665C;  --idle-bg:rgba(107,102,92,.10); --idle-br:rgba(107,102,92,.28);
+    --focus:#8B5E1A;
+    --shadow:0 1px 0 rgba(255,255,255,.6), 0 8px 20px rgba(40,34,24,.10);
+    color-scheme:light;
+  }
+}
+:root[data-theme="light"]{
+  --ink:#F2EEE5; --void:#EAE4D7; --panel:#F8F5EE; --hl:#EDE7DA;
+  --border:#D8CDBD; --rule:#C9BFAE;
+  --text:#10100F; --body:#2A2823; --muted:#6B665C; --dim:#8C877C;
+  --gold-text:#8B5E1A; --gold-hi:#8B5E1A;
+  --pass:#2F6B48;  --pass-bg:rgba(47,107,72,.10);  --pass-br:rgba(47,107,72,.30);
+  --hold:#2F5C99;  --hold-bg:rgba(47,92,153,.10);  --hold-br:rgba(47,92,153,.30);
+  --deny:#9A3630;  --deny-bg:rgba(154,54,48,.10);  --deny-br:rgba(154,54,48,.30);
+  --crit:#B02A31;  --crit-bg:rgba(176,42,49,.14);  --crit-br:rgba(176,42,49,.44);
+  --idle:#6B665C;  --idle-bg:rgba(107,102,92,.10); --idle-br:rgba(107,102,92,.28);
+  --focus:#8B5E1A;
+  --shadow:0 1px 0 rgba(255,255,255,.6), 0 8px 20px rgba(40,34,24,.10);
+  color-scheme:light;
+}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--ink);color:var(--body);font-family:var(--font);font-weight:400;
+  font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{margin:0;color:var(--text);font-weight:600;text-wrap:balance;letter-spacing:-.01em}
+a{color:var(--gold-text);text-decoration:none}
+a:hover{text-decoration:underline}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:4px}
+.mono{font-family:var(--mono);font-size:.86em;font-variant-numeric:tabular-nums}
+.num{font-variant-numeric:tabular-nums}
+.eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:.14em;font-weight:600;color:var(--muted);margin:0}
+
+/* ── App shell ──────────────────────────────────────────────────────────── */
+.stage{padding:0;min-height:100vh;background:var(--void)}
+.stage.phone{padding:22px 16px 90px;display:flex;justify-content:center}
+.app{container-type:inline-size;background:var(--ink);min-height:100vh;
+  display:grid;grid-template-columns:248px 1fr;width:100%}
+.stage.phone .app{max-width:400px;min-height:760px;height:760px;overflow-y:auto;overflow-x:hidden;
+  border:1px solid var(--rule);border-radius:26px;box-shadow:var(--shadow);position:relative}
+.stage.phone .main{min-height:0}
+
+/* sidebar */
+.side{border-right:1px solid var(--border);background:var(--ink);display:flex;flex-direction:column;
+  min-height:100vh;position:sticky;top:0;height:100vh}
+.side-top{padding:16px 14px 10px;display:flex;align-items:center;gap:10px}
+.lockup{height:20px;width:auto;color:var(--text);display:block}
+.switcher{margin:6px 10px 2px;display:flex;flex-direction:column;gap:6px}
+.sw{display:flex;align-items:center;gap:9px;width:100%;text-align:left;background:var(--panel);
+  border:1px solid var(--border);border-radius:var(--r-sm);padding:7px 9px;cursor:pointer}
+.sw:hover{background:var(--hl);border-color:var(--rule)}
+.sw-mark{width:22px;height:22px;border-radius:var(--r-xs);flex:none;display:grid;place-items:center;
+  font-size:11px;font-weight:700;letter-spacing:.02em;color:var(--on-gold);background:var(--sheen)}
+.sw-mark.ws{background:var(--hl);color:var(--muted);border:1px solid var(--rule)}
+.sw-txt{min-width:0;flex:1}
+.sw-k{display:block;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);line-height:1.3}
+.sw-v{display:block;font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sw-c{color:var(--dim);flex:none}
+nav{padding:12px 10px;overflow-y:auto;flex:1}
+.nav-h{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);
+  padding:12px 8px 6px;font-weight:600}
+.nav-i{display:flex;align-items:center;gap:10px;padding:7px 9px;border-radius:var(--r-sm);
+  color:var(--muted);font-weight:500;font-size:13.5px;border-left:2px solid transparent;cursor:pointer}
+.nav-i:hover{background:var(--hl);color:var(--text);text-decoration:none}
+.nav-i.on{background:var(--panel);color:var(--text);border-left-color:var(--gold)}
+.nav-i.sub{margin-left:22px;font-size:12.5px;padding:5px 9px}
+.nav-i svg{width:15px;height:15px;flex:none;opacity:.85}
+.nav-tag{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--dim)}
+.side-foot{padding:10px;border-top:1px solid var(--border)}
+
+/* top bar */
+.main{min-width:0;display:flex;flex-direction:column}
+.topbar{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:12px;
+  padding:0 20px;height:52px;border-bottom:1px solid var(--border);background:color-mix(in srgb,var(--ink) 88%,transparent);
+  backdrop-filter:blur(8px)}
+.crumbs{display:flex;align-items:center;gap:7px;font-size:13px;min-width:0;flex:1;color:var(--muted)}
+.crumbs b{font-weight:500;color:var(--text)}
+.crumbs span{color:var(--dim)}
+.cmdk{display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--border);
+  border-radius:var(--r-sm);padding:5px 9px;color:var(--muted);cursor:pointer;font-size:12.5px;min-width:190px}
+.cmdk:hover{border-color:var(--rule);color:var(--text)}
+.cmdk kbd{margin-left:auto;font-family:var(--mono);font-size:10.5px;border:1px solid var(--rule);
+  border-radius:4px;padding:1px 4px;color:var(--dim)}
+.icon-btn{display:grid;place-items:center;width:30px;height:30px;border-radius:var(--r-xs);
+  background:transparent;border:1px solid transparent;color:var(--muted);cursor:pointer}
+.icon-btn:hover{background:var(--hl);color:var(--text);border-color:var(--border)}
+.icon-btn.on{background:var(--panel);border-color:var(--rule);color:var(--text)}
+.icon-btn svg{width:16px;height:16px}
+.avatar{width:26px;height:26px;border-radius:50%;background:var(--hl);border:1px solid var(--rule);
+  display:grid;place-items:center;font-size:10.5px;font-weight:600;color:var(--text);cursor:pointer}
+
+/* content */
+.content{padding:22px 20px 72px;min-width:0;flex:1}
+.page-head{display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:4px}
+.page-head h1{font-size:24px;line-height:1.15}
+.page-sub{color:var(--muted);font-size:13px;margin-top:5px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.page-act{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);margin:18px 0 20px;overflow-x:auto;
+  scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{white-space:nowrap;padding:8px 11px;font-size:13.5px;font-weight:500;color:var(--muted);
+  border-bottom:2px solid transparent;margin-bottom:-1px;cursor:pointer;background:none;border-top:0;border-left:0;border-right:0}
+.tab:hover{color:var(--text)}
+.tab[aria-selected="true"]{color:var(--text);border-bottom-color:var(--gold)}
+.tab .n{font-family:var(--mono);font-size:10.5px;color:var(--dim);margin-left:5px}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;gap:7px;background:var(--panel);border:1px solid var(--border);
+  color:var(--text);border-radius:var(--r-sm);padding:7px 12px;font-size:13px;font-weight:500;cursor:pointer}
+.btn:hover{background:var(--hl);border-color:var(--rule)}
+.btn svg{width:14px;height:14px}
+.btn.sm{padding:4px 9px;font-size:12px;border-radius:var(--r-xs)}
+.btn.primary{background:var(--gold);border-color:var(--gold);color:var(--on-gold);font-weight:600}
+.btn.primary:hover{background:var(--gold-hi);border-color:var(--gold-hi);color:#10100F}
+.btn.ghost{background:transparent}
+.btn.danger{color:var(--deny);border-color:var(--deny-br)}
+.btn.danger:hover{background:var(--deny-bg)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+
+/* panels */
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden}
+.panel + .panel{margin-top:16px}
+.ph{display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.ph h3{font-size:14.5px}
+.ph .ph-sub{font-size:12.5px;color:var(--muted)}
+.ph .ph-act{margin-left:auto;display:flex;gap:7px;flex-wrap:wrap}
+.pb{padding:16px}
+.pb.flush{padding:0}
+.store{font-family:var(--mono);font-size:10.5px;color:var(--dim);border:1px solid var(--border);
+  border-radius:4px;padding:1px 6px;white-space:nowrap}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+
+/* stat tiles */
+.stats{display:grid;gap:12px;grid-template-columns:repeat(4,minmax(0,1fr))}
+.stat{background:var(--panel);border:1px solid var(--border);border-radius:var(--r-md);padding:13px 14px}
+.stat .k{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.stat .v{font-size:23px;font-weight:600;color:var(--text);margin-top:6px;font-variant-numeric:tabular-nums;
+  letter-spacing:-.02em;display:flex;align-items:baseline;gap:7px}
+.stat .v small{font-size:12px;font-weight:500;color:var(--muted);letter-spacing:0}
+.stat .m{font-size:12px;color:var(--muted);margin-top:4px}
+
+/* fact rows */
+.facts{display:flex;flex-direction:column}
+.fact{display:flex;gap:14px;align-items:baseline;padding:8px 0;border-bottom:1px dashed var(--border)}
+.fact:last-child{border-bottom:0}
+.fact dt{flex:none;width:186px;color:var(--muted);font-size:12.5px}
+.fact dd{margin:0;flex:1;min-width:0;color:var(--body);font-size:13px;overflow-wrap:anywhere}
+
+/* tables */
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--dim);
+  font-weight:600;padding:9px 14px;border-bottom:1px solid var(--border);white-space:nowrap;background:var(--panel)}
+td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:top}
+tbody tr:last-child td{border-bottom:0}
+tbody tr.click{cursor:pointer}
+tbody tr.click:hover{background:var(--hl)}
+td.r,th.r{text-align:right;font-variant-numeric:tabular-nums}
+.t-main{color:var(--text);font-weight:500}
+.t-sub{color:var(--muted);font-size:12px;margin-top:2px}
+
+/* chips */
+.chip{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:2px 8px;
+  font-size:11.5px;font-weight:500;border:1px solid var(--idle-br);background:var(--idle-bg);color:var(--idle);white-space:nowrap}
+.chip.pass{border-color:var(--pass-br);background:var(--pass-bg);color:var(--pass)}
+.chip.hold{border-color:var(--hold-br);background:var(--hold-bg);color:var(--hold)}
+.chip.deny{border-color:var(--deny-br);background:var(--deny-bg);color:var(--deny)}
+.chip.crit{border-color:var(--crit-br);background:var(--crit-bg);color:var(--crit);font-weight:600}
+.chip.tier{font-family:var(--mono);font-size:10.5px;letter-spacing:.02em}
+.dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex:none}
+.kv{font-family:var(--mono);font-size:11.5px;color:var(--muted)}
+
+/* misc */
+.note{font-size:12.5px;color:var(--muted);line-height:1.55}
+.callout{border:1px solid var(--border);border-left:2px solid var(--gold);background:var(--hl);
+  border-radius:var(--r-sm);padding:11px 13px;font-size:12.5px;color:var(--body)}
+pre.code{background:var(--ink);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px 14px;
+  overflow-x:auto;font-family:var(--mono);font-size:12px;line-height:1.6;color:var(--body);margin:0}
+.bar{height:5px;border-radius:3px;background:var(--hl);overflow:hidden;border:1px solid var(--border)}
+.bar i{display:block;height:100%;background:var(--pass)}
+.bar i.hold{background:var(--hold)}
+.sep{height:1px;background:var(--border);margin:14px 0}
+.modes{display:grid;gap:10px;grid-template-columns:repeat(3,minmax(0,1fr))}
+.mode{text-align:left;background:var(--ink);border:1px solid var(--border);border-radius:var(--r-md);
+  padding:12px 13px;cursor:pointer}
+.mode:hover{border-color:var(--rule)}
+.mode[aria-pressed="true"]{border-color:var(--gold);background:var(--hl)}
+.mode .mt{font-weight:600;color:var(--text);font-size:13.5px;display:flex;align-items:center;gap:7px}
+.mode .md{font-size:12px;color:var(--muted);margin-top:5px;line-height:1.45}
+.seg{display:inline-flex;background:var(--ink);border:1px solid var(--border);border-radius:var(--r-sm);padding:2px}
+.seg button{background:none;border:0;border-radius:var(--r-xs);padding:5px 11px;font-size:12.5px;
+  font-weight:500;color:var(--muted);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--panel);color:var(--text);box-shadow:var(--shadow)}
+.search{display:flex;align-items:center;gap:9px;background:var(--ink);border:1px solid var(--border);
+  border-radius:var(--r-sm);padding:8px 11px}
+.search input{background:none;border:0;outline:none;flex:1;font-size:13px;font-family:var(--mono);min-width:0}
+.search svg{width:15px;height:15px;color:var(--dim);flex:none}
+select.inp,input.inp{background:var(--ink);border:1px solid var(--border);border-radius:var(--r-sm);
+  padding:7px 10px;font-size:13px;width:100%;outline:none}
+select.inp:focus,input.inp:focus{border-color:var(--gold)}
+label.fld{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;font-weight:500}
+.fldset{display:grid;gap:13px}
+
+/* skeleton / error / denied */
+@keyframes sk{0%{opacity:.45}50%{opacity:.8}100%{opacity:.45}}
+.sk{background:var(--hl);border-radius:var(--r-xs);animation:sk 1.4s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){.sk{animation:none}}
+.blank{display:grid;place-items:center;text-align:center;padding:56px 22px;gap:12px}
+.blank .bi{width:42px;height:42px;border-radius:var(--r-md);display:grid;place-items:center;
+  border:1px solid var(--border);background:var(--hl);color:var(--muted)}
+.blank h3{font-size:16px}
+.blank p{margin:0;max-width:48ch;color:var(--muted);font-size:13px}
+
+/* assistant */
+.assist{width:344px;flex:none;border-left:1px solid var(--border);background:var(--panel);
+  display:flex;flex-direction:column;position:sticky;top:52px;height:calc(100vh - 52px)}
+.assist-h{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px}
+.assist-b{padding:14px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:13px}
+.msg{font-size:13px;line-height:1.55}
+.msg .who{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);font-weight:600;margin-bottom:5px}
+.msg.op .bub{background:var(--hl);border:1px solid var(--border);border-radius:var(--r-sm);padding:9px 11px}
+.assist-f{padding:12px 14px;border-top:1px solid var(--border)}
+.shell{display:flex;min-width:0}
+
+/* dialogs */
+dialog{border:1px solid var(--rule);background:var(--panel);color:var(--body);border-radius:var(--r-lg);
+  padding:0;max-width:min(760px,calc(100vw - 32px));width:100%;box-shadow:var(--shadow)}
+dialog::backdrop{background:rgba(6,6,5,.66);backdrop-filter:blur(2px)}
+dialog.wide{max-width:min(920px,calc(100vw - 32px))}
+.dh{display:flex;align-items:flex-start;gap:12px;padding:15px 18px;border-bottom:1px solid var(--border)}
+.dh h3{font-size:16px}
+.dh .dsub{font-size:12.5px;color:var(--muted);margin-top:3px}
+.db{padding:18px;max-height:min(66vh,620px);overflow-y:auto}
+.df{padding:13px 18px;border-top:1px solid var(--border);display:flex;gap:9px;justify-content:flex-end;flex-wrap:wrap}
+.cmd-list{max-height:340px;overflow-y:auto}
+.cmd{display:flex;align-items:center;gap:11px;width:100%;text-align:left;background:none;border:0;
+  padding:9px 18px;cursor:pointer;color:var(--body);font-size:13.5px}
+.cmd:hover,.cmd.hi{background:var(--hl);color:var(--text)}
+.cmd .cg{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--dim)}
+
+/* receipt groups */
+.rg{border:1px solid var(--border);border-radius:var(--r-md);overflow:hidden}
+.rg + .rg{margin-top:12px}
+.rg > h4{font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);
+  padding:9px 13px;background:var(--hl);border-bottom:1px solid var(--border)}
+.rg > .rb{padding:11px 13px}
+
+/* mockup chrome — deliberately not product UI */
+.chrome{position:fixed;right:14px;bottom:14px;z-index:120;font-family:var(--mono);font-size:11px;
+  background:#0A0A09;color:#9B958A;border:1px dashed #4A4740;border-radius:8px;padding:8px 10px;
+  max-width:calc(100vw - 28px);box-shadow:0 10px 30px rgba(0,0,0,.5)}
+:root[data-theme="light"] .chrome,
+.chrome{color:#9B958A}
+.chrome .ch-t{color:#6E6A62;letter-spacing:.12em;text-transform:uppercase;font-size:9.5px;margin-bottom:6px;
+  display:flex;gap:8px;align-items:center}
+.chrome .ch-t b{color:#9B958A;font-weight:400}
+.chrome-row{display:flex;gap:5px;flex-wrap:wrap}
+.chrome button{background:#181715;border:1px solid #34322D;color:#9B958A;border-radius:5px;
+  padding:3px 7px;font-family:var(--mono);font-size:11px;cursor:pointer}
+.chrome button:hover{border-color:#6E6A62;color:#F2EEE5}
+.chrome button[aria-pressed="true"]{background:#292722;color:#F2EEE5;border-color:#6E6A62}
+
+/* ── container-query reflow (serves narrow viewport AND the 400px frame) ── */
+@container (max-width:1180px){ .assist{display:none} .assist.pinned{display:flex} }
+@container (max-width:1080px){ .g4{grid-template-columns:repeat(2,minmax(0,1fr))} .stats{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@container (max-width:900px){
+  .app{grid-template-columns:1fr}
+  .side{display:none}
+  .g3,.g2,.modes{grid-template-columns:1fr}
+  .assist,.assist.pinned{display:none}
+}
+@container (max-width:620px){
+  .content{padding:16px 16px 80px}
+  .stats{grid-template-columns:1fr}
+  .page-head h1{font-size:20px}
+  .page-act{margin-left:0;width:100%}
+  .cmdk{min-width:0;width:34px;justify-content:center;padding:5px}
+  .cmdk span,.cmdk kbd{display:none}
+  .fact{flex-direction:column;gap:2px}
+  .fact dt{width:auto}
+  .crumbs .hide-sm{display:none}
+}
+.only-sm{display:none}
+@container (max-width:900px){ .only-sm{display:inline-flex} }
+</style>
+<div class="stage" id="stage"><div class="app" id="app"></div></div>
+<div class="chrome" id="chrome"></div>
+<dialog id="dlg"></dialog>
+<script>
+"use strict";
+/* ══ Demo record. Acme Robotics — org_7QK3M8VZ · namespace acme · USD ══ */
+
+const LOCKUP = '<svg class="lockup" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 574.244 106.313" role="img" aria-label="Oxagen"><g transform="translate(0,0) scale(2.842952)"><path d="M6.300 0.000L12.600 3.320L12.600 9.960L6.300 13.280L0.000 9.960L0.000 3.320ZM1.000 3.885L1.000 9.395L6.300 12.150L11.600 9.395L11.600 3.885L6.300 1.130Z M19.376 0.000L25.676 3.320L25.676 9.960L19.376 13.280L13.076 9.960L13.076 3.320ZM14.076 3.885L14.076 9.395L19.376 12.150L24.676 9.395L24.676 3.885L19.376 1.130Z M12.838 10.240L19.138 13.560L19.138 20.200L12.838 23.520L6.538 20.200L6.538 13.560ZM7.538 14.125L7.538 19.635L12.838 22.390L18.138 19.635L18.138 14.125L12.838 11.370Z M19.376 20.480L25.676 23.800L25.676 30.440L19.376 33.760L13.076 30.440L13.076 23.800ZM14.076 24.365L14.076 29.875L19.376 32.630L24.676 29.875L24.676 24.365L19.376 21.610Z" fill="currentColor"/><path d="M25.914 10.240L32.214 13.560L32.214 20.200L25.914 23.520L19.614 20.200L19.614 13.560Z M6.300 20.480L12.600 23.800L12.600 30.440L6.300 33.760L0.000 30.440L0.000 23.800Z" fill="#D6962C"/></g><g transform="translate(120.376,13.067)"><path d="M33.9083 68.758Q24.1657 68.758 16.4786 64.7737Q8.79142 60.7894 4.39571 53.2965Q0 45.8035 0 35.3862V33.3718Q0 22.9544 4.39571 15.4615Q8.79142 7.96854 16.4786 3.98427Q24.1657 0 33.9083 0Q43.6509 0 51.3381 3.98427Q59.0252 7.96854 63.4209 15.4615Q67.8166 22.9544 67.8166 33.3718V35.3862Q67.8166 45.8035 63.4209 53.2965Q59.0252 60.7894 51.3381 64.7737Q43.6509 68.758 33.9083 68.758ZM33.9083 55.3486Q42.1895 55.3486 47.4689 50.0198Q52.7484 44.691 52.7484 35.0142V33.7437Q52.7484 24.067 47.5233 18.7382Q42.2981 13.4094 33.9083 13.4094Q25.6502 13.4094 20.3592 18.7382Q15.0683 24.067 15.0683 33.7437V35.0142Q15.0683 44.691 20.3592 50.0198Q25.6502 55.3486 33.9083 55.3486Z M176.569 68.758Q169.637 68.758 164.119 66.3453Q158.601 63.9327 155.387 59.2935Q152.173 54.6542 152.173 48.0088Q152.173 41.3403 155.387 36.8558Q158.601 32.3712 164.27 30.1017Q169.94 27.8323 177.174 27.8323H196.047V23.8925Q196.047 18.7316 192.874 15.5274Q189.701 12.3232 182.99 12.3232Q176.411 12.3232 173.049 15.3842Q169.686 18.4452 168.627 23.3593L154.691 18.7315Q156.27 13.6133 159.748 9.39702Q163.225 5.18071 169.049 2.59035Q174.874 0 183.208 0Q195.972 0 203.326 6.42816Q210.681 12.8563 210.681 24.9392V50.4707Q210.681 54.4204 214.368 54.4204H219.795V66.9148H209.197Q204.464 66.9148 201.442 64.5334Q198.42 62.1521 198.42 58.1563V57.8864H196.126Q195.392 59.6967 193.399 62.2985Q191.406 64.9004 187.388 66.8292Q183.369 68.758 176.569 68.758ZM179.05 56.4348Q186.581 56.4348 191.314 52.1592Q196.047 47.8837 196.047 40.6031V39.2405H178.175Q173.175 39.2405 170.208 41.3881Q167.241 43.5358 167.241 47.5513Q167.241 51.5668 170.34 54.0008Q173.439 56.4348 179.05 56.4348Z M227.767 34.6423V32.6279Q227.767 22.3817 231.86 15.0863Q235.953 7.79081 242.768 3.8954Q249.582 0 257.706 0Q266.935 0 271.762 3.33256Q276.589 6.66512 278.81 10.4107H281.042V1.8432H295.801V79.33Q295.801 85.6989 292.104 89.4725Q288.408 93.2462 282.079 93.2462H238.369V80.0541H277.023Q280.779 80.0541 280.779 76.1043V57.2775H278.547Q277.161 59.5683 274.665 61.8904Q272.168 64.2125 268.057 65.7414Q263.946 67.2702 257.706 67.2702Q249.582 67.2702 242.756 63.3748Q235.93 59.4794 231.848 52.1724Q227.767 44.8655 227.767 34.6423ZM261.938 54.0781Q270.151 54.0781 275.573 48.8612Q280.996 43.6443 280.996 34.2704V32.9999Q280.996 23.4943 275.627 18.3432Q270.259 13.1921 261.938 13.1921Q253.749 13.1921 248.315 18.3432Q242.881 23.4943 242.881 32.9999V34.2704Q242.881 43.6443 248.315 48.8612Q253.749 54.0781 261.938 54.0781Z M344.764 68.758Q334.998 68.758 327.583 64.6108Q320.167 60.4636 316.031 52.9048Q311.896 45.346 311.896 35.1689V33.589Q311.896 23.3889 315.977 15.8416Q320.059 8.2944 327.397 4.1472Q334.735 0 344.385 0Q353.881 0 360.956 4.1867Q368.031 8.37341 371.981 15.8515Q375.931 23.3297 375.931 33.2895V38.6974H327.181Q327.468 46.3334 332.587 50.9496Q337.707 55.5658 345.198 55.5658Q352.522 55.5658 356.101 52.3534Q359.681 49.141 361.553 45.0629L373.985 51.4813Q372.119 55.0656 368.63 59.1042Q365.141 63.1428 359.394 65.9504Q353.648 68.758 344.764 68.758ZM327.313 27.2892H360.622Q360.095 20.7986 355.7 16.9954Q351.304 13.1921 344.277 13.1921Q337.055 13.1921 332.691 16.9954Q328.327 20.7986 327.313 27.2892Z M391.548 66.9148V1.8432H406.353V10.9769H408.585Q410.303 7.25429 414.832 3.99908Q419.361 0.743866 428.435 0.743866Q435.956 0.743866 441.695 4.12911Q447.434 7.51435 450.651 13.5903Q453.868 19.6663 453.868 27.9442V66.9148H438.8V29.1226Q438.8 21.1969 434.891 17.3492Q430.983 13.5015 423.9 13.5015Q415.872 13.5015 411.244 18.8237Q406.617 24.146 406.617 33.9445V66.9148Z" fill="currentColor"/><path d="M73.9979 66.9148 98.2261 34.0696 74.3764 1.8432H91.9626L107.9 24.3499H110.131L126.068 1.8432H143.654L119.805 34.0696L144.033 66.9148H126.206L110.131 44.0065H107.9L91.8244 66.9148Z" fill="#D6962C"/></g></svg>';
+
+const I = {
+  fleet:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l2.5 2.5M16.5 16.5L19 19M19 5l-2.5 2.5M7.5 16.5L5 19"/></svg>',
+  run:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 6h16M4 12h10M4 18h13"/><circle cx="19" cy="12" r="2"/></svg>',
+  agents:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="4" y="7" width="16" height="12" rx="3"/><path d="M12 3v4M9 13h.01M15 13h.01"/></svg>',
+  tools:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M14.5 5.5a4 4 0 105 5L15 15l-6 6-3-3 6-6z"/></svg>',
+  onto:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="5" r="2.4"/><circle cx="5" cy="18" r="2.4"/><circle cx="19" cy="18" r="2.4"/><path d="M12 7.4 6.6 15.8M12 7.4l5.4 8.4M7.4 18h9.2"/></svg>',
+  steer:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.5"/><path d="M12 4v5.5M4 12h5.5M20 12h-5.5M12 20v-5.5"/></svg>',
+  spend:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg>',
+  org:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 21V7l7-4 7 4v14M21 21V11l-4-2"/><path d="M8 12h4M8 16h4"/></svg>',
+  bill:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18M7 15h4"/></svg>',
+  audit:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3l7 3v6c0 4.2-2.9 7.5-7 9-4.1-1.5-7-4.8-7-9V6z"/><path d="M9.5 12.2l1.9 1.9 3.4-3.7"/></svg>',
+  search:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>',
+  chev:'<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 9l5 5 5-5"/></svg>',
+  sparkle:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18.5 16.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/></svg>',
+  sun:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4"/></svg>',
+  bell:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M18 15V10a6 6 0 10-12 0v5l-1.6 2.4h15.2z"/><path d="M10 20a2 2 0 004 0"/></svg>',
+  plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>',
+  down:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 4v11M7.5 11L12 15.5 16.5 11M4 20h16"/></svg>',
+  lock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8.5 10V7.5a3.5 3.5 0 017 0V10"/></svg>',
+  warn:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 4l9 16H3z"/><path d="M12 10v4M12 17h.01"/></svg>',
+  key:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="8" cy="12" r="4"/><path d="M12 12h9M18 12v3M15.5 12v2.5"/></svg>'
+};
+
+const ORG = { name:'Acme Robotics', slug:'acme', id:'org_7QK3M8VZ', ns:'acme',
+  plan:'Enterprise · annual', currency:'USD', members:34, agents:50 };
+
+const WORKSPACES = [
+  { slug:'core-platform', ns:'core', id:'wrk_2HD91XKA', name:'Core platform',
+    mainRepo:'acme/platform', branch:'main', linked:['acme/billing','acme/mobile'],
+    agents:38, gov:'regulated', retention:'content_exact', owner:'Marcus Bell',
+    belt:'40 tools · 12k tokens', bound:'2026-02-14' },
+  { slug:'finops', ns:'fin', id:'wrk_5TR03PQW', name:'FinOps',
+    mainRepo:'acme/finops-agents', branch:'main', linked:[],
+    agents:12, gov:'team', retention:'content_exact', owner:'Dana Okafor',
+    belt:'40 tools · 12k tokens', bound:'2026-04-02' }
+];
+
+const MEMBERS = [
+  ['Priya Natarajan','priya@acme.example','owner',[['core-platform','owner'],['finops','owner']],'2 min ago','hardware key','scim'],
+  ['Marcus Bell','marcus@acme.example','admin',[['core-platform','owner']],'14 min ago','app + hardware key','scim'],
+  ['Dana Okafor','dana@acme.example','billing',[['finops','owner']],'1 h ago','hardware key','scim'],
+  ['Sofia Ruiz','sofia@acme.example','compliance',[['core-platform','viewer'],['finops','viewer']],'3 h ago','app','scim'],
+  ['Helena Vogt','helena@acme.example','admin',[['core-platform','member']],'yesterday','app','scim'],
+  ['Jae-won Park','jaewon@acme.example','member',[['core-platform','member']],'yesterday','app','scim'],
+  ['Tobias Lang','tobias@acme.example','member',[['core-platform','member'],['finops','member']],'2 d ago','app','scim'],
+  ['Ama Boateng','ama@acme.example','viewer',[['finops','viewer']],'6 d ago','app','manual']
+];
+const ORG_ROLES = ['owner','admin','member','billing','compliance','viewer'];
+
+const INVITES = [
+  ['rohan@acme.example','member','core-platform · member','Marcus Bell','2026-09-09 09:12Z','in 5 days'],
+  ['klara@acme.example','compliance','— (org only)','Priya Natarajan','2026-09-10 16:40Z','in 6 days'],
+  ['auditor@brandt-kpm.example','viewer','core-platform · viewer','Sofia Ruiz','2026-09-11 08:02Z','in 7 days']
+];
+
+const ROUTES = [
+  ['complex','in-app agent turns, reflection reasoning, promotion rationale, Context PR bodies',
+   'OpenRouter','z-ai/glm-latest','GLM 5.3 · 1.3M context','z-ai/glm-air-latest','18,442','$214.87'],
+  ['light','classification, labeling, record kind detection, approval summaries, reranking hints',
+   'OpenRouter','z-ai/glm-flash-latest','GLM 5.3 Flash','openai/gpt-5-mini','241,905','$61.40'],
+  ['embed','embeddings for entities, records, documents, issues, code',
+   'Voyage AI (direct)','voyage-4 · voyage-code-3 · voyage-context-3','1024-dim per family','—','8.42M tok','$92.15'],
+  ['rerank','reordering hybrid retrieval candidates','Voyage AI (direct)','rerank-2.5','rerank-2.5','—','96,310','$28.94']
+];
+
+const FIREWALL_ROUTES = [
+  ['complex','https://models.acme.internal/v1','Anthropic Messages-compatible','llama-4-405b-instruct (self-served)','reachable'],
+  ['light','https://models.acme.internal/v1','OpenAI Chat Completions-compatible','qwen3-32b-instruct (self-served)','reachable'],
+  ['embed','https://embed.acme.internal','one model per index','bge-m3 (1024-dim)','reachable'],
+  ['rerank','https://embed.acme.internal','—','bge-reranker-v2-m3','reachable']
+];
+
+const APIKEYS = [
+  ['FinOps export','ox_live_7f2c…a19','svc_finops_export','cost.read, run.read','Dana Okafor','2026-09-11 06:00Z','2027-01-04','ok'],
+  ['Terraform provisioning','ox_live_a91b…4dd','svc_terraform','workspace.write, agent.write, grant.write','Marcus Bell','2026-09-10 22:14Z','2026-12-01','ok'],
+  ['Auditor read-only — Brandt KPM','ox_live_3kd0…77c','svc_auditor_bkpm','audit.read, receipt.read, export.read','Sofia Ruiz','2026-09-11 08:41Z','2026-10-02','expiring'],
+  ['CI smoke checks','ox_live_ee54…0b2','svc_ci','run.read','Helena Vogt','never used','2026-11-15','unused']
+];
+
+let AUDIT_EVENTS = [
+  ['2026-09-11 09:41:02Z','Sofia Ruiz','human','export.create','evidence bundle · 2026-08 · core-platform','shared','allowed','evt_9KQ2M4'],
+  ['2026-09-11 08:41:55Z','Sofia Ruiz','human','api_key.create','svc_auditor_bkpm','shared','allowed','evt_9KQ2M1'],
+  ['2026-09-11 08:02:10Z','Sofia Ruiz','human','invitation.create','auditor@brandt-kpm.example · viewer','shared','allowed','evt_9KQ1Z8'],
+  ['2026-09-11 07:55:31Z','oxagen.assistant','agent','budget.set','acme.core.docs-writer · $40.00/day','dedicated','allowed','evt_9KQ1Y2'],
+  ['2026-09-11 06:12:44Z','svc_finops_export','service','cost.read','cost.daily_totals · 2026-08','dedicated','allowed','evt_9KQ1P7'],
+  ['2026-09-10 22:14:08Z','svc_terraform','service','workspace.update','finops · retention_mode content_exact','shared','allowed','evt_9KP8V3'],
+  ['2026-09-10 19:30:22Z','Marcus Bell','human','policy.activate','pol_2026.08.3 · core-platform','shared','allowed','evt_9KP7T1'],
+  ['2026-09-10 16:40:09Z','Priya Natarajan','human','invitation.create','klara@acme.example · compliance','shared','allowed','evt_9KP6R9'],
+  ['2026-09-10 14:22:41Z','Dana Okafor','human','approval.resolve','call_8XQ4D1 · approved · PO-4471','dedicated','allowed','evt_9KP6K4'],
+  ['2026-09-10 11:04:17Z','Tobias Lang','human','connection.read','conn_stripe_prod · credential read','dedicated','denied','evt_9KP5B8'],
+  ['2026-09-09 17:48:52Z','Priya Natarajan','human','model_funding.set','customer_key · OpenRouter pk_or_9T4…','shared','allowed','evt_9KN9W2'],
+  ['2026-09-09 15:02:30Z','Marcus Bell','human','kill_switch.flip','class moves_funds · org-wide · 41 min','shared','allowed','evt_9KN8L5'],
+  ['2026-09-08 10:17:06Z','Priya Natarajan','human','key.rotate','KEK gen 4 · org_acme','dedicated','allowed','evt_9KM2C3'],
+  ['2026-09-07 09:00:00Z','svc_archiver','service','hold.place','hold_LIT-2026-03 · 412 runs','dedicated','allowed','evt_9KL0A1']
+];
+
+const INCIDENTS = [
+  { id:'inc_7742', sev:'critical', title:'Money moved that Oxagen did not govern',
+    kind:'mandate_exception', at:'2026-09-06 03:18Z', by:'reconciler',
+    scope:'connection conn_stripe_prod · finops',
+    detail:'A Stripe charge of $412.00 USD (pi_3Q8LrT2eZvKY) settled against the governed connection with no receipt. Every call Oxagen dispatched that day reconciles; this one has no frame, so it did not come through the tool gateway.',
+    resolution:'Traced to a manual charge made by a person in the Stripe dashboard using the same restricted key. The key was rotated, the connection set to two-person on mandate change, and dashboard access to the key removed. Reconciliation for 2026-09 closes at 100% of governed spend.',
+    status:'resolved', closedAt:'2026-09-06 11:52Z', closedBy:'Dana Okafor', runs:0 },
+  { id:'inc_7739', sev:'high', title:'Tool call resolved to witness storage',
+    kind:'witness_probe', at:'2026-09-05 14:06Z', by:'policy engine',
+    scope:'acme.core.triage · run_6MB2QW',
+    detail:'A Bash tool call read a path that resolves inside witness storage. Policy denied it before dispatch and raised the incident on the run; the worker received a typed error and nothing about the witness.',
+    resolution:'The agent definition was narrowing its own search path from a stale steering record. Record retired in Context PR #318; the run was re-opened and sealed with verdict flipped.',
+    status:'resolved', closedAt:'2026-09-05 18:22Z', closedBy:'Marcus Bell', runs:1 },
+  { id:'inc_7736', sev:'high', title:'Chain verification failed on an export bundle',
+    kind:'chain_break', at:'2026-09-03 08:30Z', by:'verifier',
+    scope:'export exp_2026-08_core · segment 41 of 118',
+    detail:'The bundle verifier reported a Merkle root mismatch on one archive segment. A tampered receipt and a truncated read look identical to the verifier, so the incident opens at high until the cause is known.',
+    resolution:'Object storage returned a short read on a multipart object. Segment re-read, root matched, bundle re-signed and re-issued as exp_2026-08_core.r2. No frame body changed; digests identical.',
+    status:'resolved', closedAt:'2026-09-03 12:15Z', closedBy:'Sofia Ruiz', runs:0 },
+  { id:'inc_7731', sev:'medium', title:'Tainted argument on a financial call, raised to approval',
+    kind:'taint_raised', at:'2026-08-29 16:44Z', by:'policy engine',
+    scope:'acme.finops.invoice-bot · run_5QT8HV',
+    detail:'The recipient argument on stripe__create_payment@4 derived from a PDF the run had ingested. Taint raised the decision from allow to approve; the approver read the source frame beside the call.',
+    resolution:'Denied by Dana Okafor with the reason "vendor not on PO-4471". The reason is what the model read; the run continued and closed without the payment.',
+    status:'resolved', closedAt:'2026-08-29 16:59Z', closedBy:'Dana Okafor', runs:1 },
+  { id:'inc_7728', sev:'medium', title:'Repeated calls to tools outside the belt',
+    kind:'unknown_tool', at:'2026-08-27 11:20Z', by:'tool gateway',
+    scope:'acme.core.docs-writer · run_5JH1KP',
+    detail:'Eleven calls by name to notion__update_page@2, which is not in the agent’s toolbelt. Each was rejected before lookup and counted toward the halt threshold; the run halted at ten.',
+    resolution:'The definition asked for a tool the workspace never granted. Grant added under review in Context PR #305, threshold left at ten.',
+    status:'resolved', closedAt:'2026-08-27 15:40Z', closedBy:'Helena Vogt', runs:1 },
+  { id:'inc_7725', sev:'low', title:'Run token presented directly to a tool server',
+    kind:'credential_probe', at:'2026-08-25 09:55Z', by:'gateway',
+    scope:'acme.core.stella-ci · run_5DA0RM',
+    detail:'A run token was sent to api.github.com instead of the tool gateway. GitHub rejected it; the gateway recorded the attempt. Tool servers accept broker credentials only, so the token was never valid there.',
+    resolution:'A retry path in a custom script bypassed the MCP endpoint. Script corrected; no credential was exposed.',
+    status:'resolved', closedAt:'2026-08-25 10:31Z', closedBy:'Marcus Bell', runs:1 },
+  { id:'inc_7749', sev:'medium', title:'Assurance case not applicable at observe tier',
+    kind:'assurance_gap', at:'2026-09-11 04:00Z', by:'assurance suite',
+    scope:'acme.core.docs-writer · observe tier',
+    detail:'Two suite cases cannot run against an agent Oxagen only observes. They are reported as not applicable, never as passed.',
+    resolution:'Open. Enrolling the agent through the SDK wrapper would move it to gateway tier; owner has until 2026-09-30.',
+    status:'open', closedAt:'', closedBy:'', runs:0 }
+];
+
+const RECEIPTS = [
+  { id:'rcp_8XQ4D1', at:'2026-09-10 14:22:07.412Z', agent:'acme.finops.invoice-bot',
+    operator:'Dana Okafor', tool:'stripe__create_payment@4', decision:'approve', tier:'gateway',
+    effect:'pi_3Q8LrT2eZvKY', amount:'$412.00 USD', ws:'finops',
+    who:[['operator','Dana Okafor · usr_4KP2NX · role org.billing'],['agent','acme.finops.invoice-bot · prn_9TA4'],
+         ['run','run_8XQ4 · attempt 1 · turn 3 · step 14'],['task','PO-4471 · monthly infrastructure invoices']],
+    what:[['tool version','stripe__create_payment@4'],['schema digest','sha256:9c1f4a…d20b'],
+          ['input digest','sha256:41ab77…8e31'],['amount (declared path $.amount)','412000000 micro-USD → $412.00 USD'],
+          ['counterparty ($.recipient)','vendor:aws'],['input','retained in full · content_exact · 2 fields redacted before write']],
+    authority:[['decision','approve → approved'],['policy version','pol_2026.08.3 (signed)'],
+          ['rules fired','mandate.limit.per_call · financial.always_for.moves_funds'],
+          ['grants used','role finops.operator → stripe__create_payment@*'],
+          ['delegation ceiling','satisfied — agent ∩ operator'],
+          ['mandate','mnd_5FT9JQ · reserved $412.00 of $2,000.00 monthly · $1,142.50 remaining'],
+          ['approval','apv_LM20QD · single-use · bound to call digest · approver Dana Okafor'],
+          ['approver reason','"PO-4471 matches the invoice. AWS only."'],['taint sources','none']],
+    credential:[['credential grant','cgr_7HQ1ZZ'],['connection','conn_stripe_prod · owner Dana Okafor · reviewed 2026-08-01'],
+          ['minted','restricted key · payments:create · customer cus_acme only'],['ttl','5 minutes'],
+          ['provider token id','rk_live_…9f2'],['agent saw','the result. Never the key.']],
+    effectRows:[['dispatched','2026-09-10 14:22:07.412Z'],['tool server','stripe'],
+          ['response digest','sha256:bb02e1…4470'],['output validation','pass'],['redactions','2 (card last4, email)'],
+          ['external effect id','pi_3Q8LrT2eZvKY'],['idempotency key','idm_8XQ4D1-41ab77'],['duplicate suppressed','no']],
+    integrity:[['frame hash','sha256:6d90cc…a113'],['chain position','214 of 388 · verified'],
+          ['gateway signature','ed25519:MEUCIQ…1f0 · verified'],['enforcement tier','gateway — Oxagen carried the credential']] },
+  { id:'rcp_7PM0K9', at:'2026-09-10 11:58:44.207Z', agent:'acme.core.release-manager',
+    operator:'Marcus Bell', tool:'github__create_pull_request@3', decision:'allow', tier:'gateway',
+    effect:'acme/platform#2411', amount:'—', ws:'core-platform',
+    who:[['operator','Marcus Bell · usr_2BX8LM · role core-platform.owner'],['agent','acme.core.release-manager · prn_3RD1'],
+         ['run','run_7PM0 · attempt 1 · turn 2 · step 9'],['task','release 2026.09.2']],
+    what:[['tool version','github__create_pull_request@3'],['schema digest','sha256:2ef801…c99a'],
+          ['input digest','sha256:77dd04…1b62'],['repository','acme/platform'],['base','main (production branch)'],
+          ['input','retained in full · content_exact']],
+    authority:[['decision','allow'],['policy version','pol_2026.08.3 (signed)'],
+          ['rules fired','grant.allow.github_write · sideeffect.write.permitted'],
+          ['grants used','role core.contributor → github__*'],['delegation ceiling','satisfied'],
+          ['mandate','not required — financial.effect none'],['approval','not required'],['taint sources','none']],
+    credential:[['credential grant','cgr_7HP9MM'],['connection','conn_github_app · installation 48812391'],
+          ['minted','GitHub App installation token · repositories: acme/platform only'],['ttl','10 minutes'],
+          ['provider token id','ghs_…c41'],['agent saw','the result. Never the token.']],
+    effectRows:[['dispatched','2026-09-10 11:58:44.207Z'],['tool server','github'],
+          ['response digest','sha256:0a5511…77ee'],['output validation','pass'],['redactions','0'],
+          ['external effect id','acme/platform#2411'],['idempotency key','idm_7PM0K9-77dd04'],['duplicate suppressed','no']],
+    integrity:[['frame hash','sha256:c41200…9f8d'],['chain position','96 of 241 · verified'],
+          ['gateway signature','ed25519:MEQCIB…7ac · verified'],['enforcement tier','gateway']] },
+  { id:'rcp_6QW3T2', at:'2026-09-09 19:11:02.884Z', agent:'acme.core.docs-writer',
+    operator:'Helena Vogt', tool:'notion__append_block@2', decision:'allow', tier:'observe',
+    effect:'blk_9a71…', amount:'—', ws:'core-platform',
+    who:[['operator','Helena Vogt · usr_6VG3QQ · role core-platform.member'],['agent','acme.core.docs-writer · prn_8DW2'],
+         ['run','run_6QW3 · attempt 1 · turn 1 · step 4'],['task','architecture notes']],
+    what:[['tool version','notion__append_block@2'],['schema digest','sha256:5b1290…aa04'],
+          ['input digest','sha256:9e33ab…c027'],['input','attested by the client · size and type checked only']],
+    authority:[['decision','observed — Oxagen did not decide this call'],['policy version','n/a at observe tier'],
+          ['rules fired','none — no gate ran'],['grants used','not consulted'],['delegation ceiling','not evaluated'],
+          ['mandate','n/a'],['approval','n/a'],['taint sources','not computed']],
+    credential:[['credential grant','none — the agent used its own credential'],['connection','not brokered'],
+          ['minted','—'],['ttl','—'],['provider token id','—'],['agent saw','whatever it held. Oxagen cannot say.']],
+    effectRows:[['dispatched','reported by the client at 2026-09-09 19:11:02.884Z'],['tool server','notion (unverified)'],
+          ['response digest','sha256:1f7702…33bd (client-attested)'],['output validation','size and type only'],
+          ['redactions','0'],['external effect id','blk_9a71… (client-attested)'],['idempotency key','not enforced'],['duplicate suppressed','unknown']],
+    integrity:[['frame hash','sha256:aa7711…0c2e'],['chain position','12 of 58 · verified'],
+          ['gateway signature','ed25519:MEUCIF…b90 · verified (signs the record, not the call)'],
+          ['enforcement tier','observe — recorded, not enforced. This receipt can never be shown as gateway-enforced.']] },
+  { id:'rcp_5QT8HV', at:'2026-08-29 16:44:51.006Z', agent:'acme.finops.invoice-bot',
+    operator:'Dana Okafor', tool:'stripe__create_payment@4', decision:'deny', tier:'gateway',
+    effect:'none — denied before dispatch', amount:'$1,980.00 USD', ws:'finops',
+    who:[['operator','Dana Okafor · usr_4KP2NX · role org.billing'],['agent','acme.finops.invoice-bot · prn_9TA4'],
+         ['run','run_5QT8 · attempt 1 · turn 5 · step 31'],['task','PO-4471']],
+    what:[['tool version','stripe__create_payment@4'],['schema digest','sha256:9c1f4a…d20b'],
+          ['input digest','sha256:c0771e…9d44'],['amount ($.amount)','1980000000 micro-USD → $1,980.00 USD'],
+          ['counterparty ($.recipient)','vendor:northwind-logistics']],
+    authority:[['decision','approve → denied by the approver'],['policy version','pol_2026.08.2'],
+          ['rules fired','taint.write_or_financial → approve · mandate.counterparty.not_allowed'],
+          ['grants used','role finops.operator → stripe__create_payment@*'],['delegation ceiling','satisfied'],
+          ['mandate','mnd_5FT9JQ · reservation released on denial · ledger unchanged'],
+          ['approval','apv_JJ81PL · denied · approver Dana Okafor'],
+          ['approver reason','"vendor not on PO-4471"'],
+          ['taint sources','frm_5QT8-118 (tool output: invoice PDF, ingested at turn 4)']],
+    credential:[['credential grant','none minted — denied before brokerage'],['connection','conn_stripe_prod'],
+          ['minted','—'],['ttl','—'],['provider token id','—'],['agent saw','the denial and the reason. Nothing else.']],
+    effectRows:[['dispatched','never'],['tool server','—'],['response digest','—'],['output validation','—'],
+          ['redactions','—'],['external effect id','none'],['idempotency key','idm_5QT8HV-c0771e (unused)'],['duplicate suppressed','n/a']],
+    integrity:[['frame hash','sha256:31be0d…7712'],['chain position','131 of 205 · verified'],
+          ['gateway signature','ed25519:MEQCIA…5d1 · verified'],['enforcement tier','gateway']] }
+];
+
+const HOLDS = [
+  ['hold_LIT-2026-03','Northwind arbitration — document preservation','workspace finops + 412 named runs',
+   'Sofia Ruiz','2026-09-07 09:00Z','—','active','Blocks erasure and retention expiry. Crypto-shredding refused while held.'],
+  ['hold_REG-2026-01','FCA model-governance inquiry','agent acme.finops.invoice-bot · all runs',
+   'Priya Natarajan','2026-06-19 11:20Z','2026-08-30 17:04Z','released','Released after the inquiry closed. Normal retention resumed.'],
+  ['hold_INT-2025-11','Internal review — release tooling','runs of acme.core.release-manager, 2025-10-01 to 2025-12-31',
+   'Marcus Bell','2025-11-02 08:45Z','2026-02-14 10:00Z','released','Released; segments returned to the 7-year clock.']
+];
+
+const EXPORTS = [
+  { id:'exp_2026-08_core', what:'Evidence bundle — core-platform, August 2026',
+    range:'2026-08-01 → 2026-08-31', runs:'4,118 runs · 118 archive segments · 1,004,212 frames',
+    size:'3.9 GB', at:'2026-09-11 09:41Z', by:'Sofia Ruiz', status:'ready',
+    sig:'ed25519:MEUCIQD8…4f21', keys:'kek org_acme gen 3, gen 4 · 2 subject keys withheld (erased)' },
+  { id:'exp_2026-08_finops', what:'Evidence bundle — finops, August 2026',
+    range:'2026-08-01 → 2026-08-31', runs:'962 runs · 31 archive segments · 188,440 frames',
+    size:'0.8 GB', at:'2026-09-11 09:44Z', by:'Sofia Ruiz', status:'ready',
+    sig:'ed25519:MEQCIGa1…9c07', keys:'kek org_acme gen 4' },
+  { id:'exp_rcpt_q3_finops', what:'Receipt export — finops, financial tools only (CSV + JSON)',
+    range:'2026-07-01 → 2026-09-11', runs:'1,204 receipts · all financial.effect ≠ none',
+    size:'46 MB', at:'2026-09-11 09:50Z', by:'Dana Okafor', status:'building',
+    sig:'pending', keys:'kek org_acme gen 4' },
+  { id:'exp_assurance_142', what:'Assurance suite result — release 1.4.2, in-firewall deployment',
+    range:'run 2026-09-11 04:00Z', runs:'10 cases · 8 passed · 2 not applicable',
+    size:'12 MB', at:'2026-09-11 04:22Z', by:'assurance runner', status:'ready',
+    sig:'ed25519:MEUCIBf0…77ad', keys:'signing key gw_sign gen 7' }
+];
+
+const KEYS = [
+  ['KEK · org_acme','kek_org_acme_g4','AES-256-GCM (KMS)','4','2026-09-08 10:17Z','—','active','all new bodies, segments, subject keys'],
+  ['KEK · org_acme','kek_org_acme_g3','AES-256-GCM (KMS)','3','2026-03-08 09:00Z','2026-09-08 10:17Z','retiring','1.42M objects — decrypt only, re-wrap 61% done'],
+  ['KEK · org_acme','kek_org_acme_g2','AES-256-GCM (KMS)','2','2025-09-08 09:00Z','2026-03-08 09:00Z','retired','0 objects — re-wrap complete'],
+  ['Gateway signing · receipts','gw_sign_g7','Ed25519','7','2026-07-01 00:00Z','2027-01-01 00:00Z','active','signs every receipt and seal'],
+  ['Gateway signing · receipts','gw_sign_g6','Ed25519','6','2026-01-01 00:00Z','2026-07-01 00:00Z','retiring','verify only — 3.1M receipts still cite it'],
+  ['Host device key · mac-mbell','dev_mbell_ed1','Ed25519','1','2026-02-14 12:02Z','2027-02-14 12:02Z','active','signs Claude Code checkpoints'],
+  ['Host device key · ci-runner-04','dev_ci04_ed1','Ed25519','1','2026-05-03 08:30Z','2027-05-03 08:30Z','active','signs Stella CI checkpoints'],
+  ['Host device key · mac-tlang','dev_tlang_ed1','Ed25519','1','2025-11-20 14:00Z','2026-09-01 14:00Z','expired','unenrolled 2026-09-01; runs keep their signatures']
+];
+
+const ASSURANCE = [
+  ['Call a tool outside the belt by name','unknown_tool, no dispatch, halt threshold incremented','pass','412 attempts, 412 rejected before lookup'],
+  ['Search for a tool outside the belt','zero results','pass','searchable belt · 1,100 queries, 0 leaks'],
+  ['Reuse an approval token on a second call, or on a modified call','token_denied','pass','2 reuse, 2 modified — 4 denied'],
+  ['Present a run token to a tool server directly','rejected; tool servers accept only broker credentials','pass','github, stripe, linear — all rejected'],
+  ['Call a financial tool with no mandate; over the mandate; outside its counterparties','denied before dispatch, mandate ledger unchanged','pass','3 cases · ledger byte-identical after'],
+  ['Retry a dispatched financial call','duplicate_suppressed, one external transaction','pass','20 retries → 1 payment intent'],
+  ['Pass an argument copied from a tool output into a write call','tainted, raised to approval','pass','taint traced to the source frame'],
+  ['Flip a kill switch during a run','next call denied, frame shows the switch and the reason','pass','denied at the next call boundary, 1.2 s'],
+  ['Modify a receipt after the fact','chain verification fails','pass','byte flip detected at position 214'],
+  ['Report a client-attested call as gateway-enforced','rendering refuses; tier is read from the record','pass','renderer refused 58 observe-tier receipts']
+];
+const ASSURANCE_NA = [
+  ['Flip a kill switch during a run','not applicable at observe tier — nothing to enforce','acme.core.docs-writer'],
+  ['Pass an argument copied from a tool output into a write call','not applicable at observe tier — no gate to raise','acme.core.docs-writer']
+];
+const ASSURANCE_HISTORY = [
+  ['1.4.2','2026-09-11 04:00Z','assurance/2026.08','10','8','0','2','in-firewall · acme-dc1'],
+  ['1.4.1','2026-08-14 04:00Z','assurance/2026.08','10','8','0','2','in-firewall · acme-dc1'],
+  ['1.4.0','2026-07-30 04:00Z','assurance/2026.07','10','10','0','0','Oxagen cloud · eu-central-1'],
+  ['1.3.9','2026-07-02 04:00Z','assurance/2026.06','10','10','0','0','Oxagen cloud · eu-central-1']
+];
+
+const ERASURE = [
+  ['ers_2026_0412','data subject · customer contact (hashed dsr-8841)','2026-09-04 10:12Z','Sofia Ruiz',
+   'keys destroyed','2026-09-05 02:00Z','1,204 bodies · 3 tombstone frames written','—'],
+  ['ers_2026_0418','data subject · former employee (hashed dsr-8902)','2026-09-09 15:30Z','Sofia Ruiz',
+   'blocked by hold','—','812 bodies in scope','hold_LIT-2026-03 pins them until the arbitration closes'],
+  ['ers_2026_0421','data subject · support requester (hashed dsr-8930)','2026-09-11 07:45Z','Priya Natarajan',
+   'pending','due 2026-09-13 07:45Z','estimated 96 bodies','scheduled for the next archiver pass']
+];
+
+/* ══ helpers ═══════════════════════════════════════════════════════════════ */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const mono = s => `<span class="mono">${esc(s)}</span>`;
+const chip = (t,k='') => `<span class="chip ${k}"><i class="dot"></i>${esc(t)}</span>`;
+const plain = (t,k='') => `<span class="chip ${k}">${esc(t)}</span>`;
+const facts = rows => `<dl class="facts">${rows.map(([k,v])=>
+  `<div class="fact"><dt>${esc(k)}</dt><dd>${v}</dd></div>`).join('')}</dl>`;
+const store = t => `<span class="store">${esc(t)}</span>`;
+const tbl = (head, body, cls='') => `<div class="tw"><table class="${cls}"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`;
+
+const SEV = {critical:'crit', high:'deny', medium:'hold', low:'idle'};
+const RESULT = {allowed:'pass', denied:'deny', allow:'pass', deny:'deny', approve:'hold'};
+
+/* app state */
+const S = {
+  page:'organization', tab:'people', state:'loaded',
+  phone:false, assistant:false, ws:'core-platform', wsSettings:'core-platform',
+  plane:'dedicated', funding:'customer_key', receipt:null, rq:''
+};
+
+/* ══ shell ════════════════════════════════════════════════════════════════ */
+const WS_NAV = [
+  ['fleet','Fleet',I.fleet,'52 live'],
+  ['run','Run',I.run,'run_8XQ4'],
+  ['agents','Agents',I.agents,'50'],
+  ['tools','Tools',I.tools,''],
+  ['ontology','Ontology',I.onto,''],
+  ['steering','Steering',I.steer,'6 open'],
+  ['spend','Spend',I.spend,'']
+];
+const ORG_NAV = [
+  ['organization','Organization',I.org,''],
+  ['billing','Billing',I.bill,''],
+  ['audit','Audit',I.audit,'1 open']
+];
+
+function sidebar(){
+  const ws = WORKSPACES.find(w=>w.slug===S.ws);
+  const navItem = ([key,label,icon,tag],active) =>
+    `<a class="nav-i${active?' on':''}${key==='run'?' sub':''}" href="#/${ORG.slug}/${key==='organization'?'':key}" data-act="nav" data-nav="${key}">
+       ${icon}<span>${esc(label)}</span>${tag?`<span class="nav-tag">${esc(tag)}</span>`:''}</a>`;
+  return `<aside class="side">
+    <div class="side-top">${LOCKUP}</div>
+    <div class="switcher">
+      <button class="sw" data-act="switch-org">
+        <span class="sw-mark">AR</span>
+        <span class="sw-txt"><span class="sw-k">Organization</span><span class="sw-v">${esc(ORG.name)}</span></span>
+        <span class="sw-c">${I.chev}</span>
+      </button>
+      <button class="sw" data-act="switch-ws">
+        <span class="sw-mark ws">${esc(ws.ns)}</span>
+        <span class="sw-txt"><span class="sw-k">Workspace</span><span class="sw-v">${esc(ws.slug)}</span></span>
+        <span class="sw-c">${I.chev}</span>
+      </button>
+    </div>
+    <nav>
+      <div class="nav-h">Workspace</div>
+      ${WS_NAV.map(n=>navItem(n,false)).join('')}
+      <div class="nav-h">Organization</div>
+      ${ORG_NAV.map(n=>navItem(n, S.page===n[0])).join('')}
+    </nav>
+    <div class="side-foot">
+      <a class="nav-i" href="#/${ORG.slug}/audit/assurance">${I.lock}<span>Enforcement: gateway</span>
+        <span class="nav-tag">46 / 50</span></a>
+    </div>
+  </aside>`;
+}
+
+function topbar(){
+  const tabs = S.page==='organization' ? ORG_TABS : AUDIT_TABS;
+  const t = tabs.find(x=>x[0]===S.tab);
+  return `<header class="topbar">
+    <div class="crumbs">
+      <button class="icon-btn only-sm" data-act="menu" aria-label="Open navigation">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+      <span class="hide-sm">${esc(ORG.name)}</span><span class="hide-sm">/</span>
+      <b>${S.page==='organization'?'Organization':'Audit'}</b>
+      ${t?`<span>/</span><b>${esc(t[1])}</b>`:''}
+    </div>
+    <button class="cmdk" data-act="cmdk"><span>${I.search}</span><span>Search or run a command</span><kbd>⌘K</kbd></button>
+    <button class="icon-btn" data-act="theme" aria-label="Switch theme">${I.sun}</button>
+    <button class="icon-btn" data-act="notif" aria-label="Notifications">${I.bell}</button>
+    <button class="icon-btn${S.assistant?' on':''}" data-act="assistant" aria-label="Assistant" aria-pressed="${S.assistant}">${I.sparkle}</button>
+    <button class="avatar" data-act="account" aria-label="Account">PN</button>
+  </header>`;
+}
+
+function assistantPanel(){
+  if(!S.assistant) return '';
+  return `<aside class="assist pinned">
+    <div class="assist-h">${I.sparkle}<b style="font-size:13.5px;color:var(--text)">Assistant</b>
+      <span class="store" style="margin-left:auto">run of oxagen.assistant</span></div>
+    <div class="assist-b">
+      <div class="msg op"><div class="who">Priya Natarajan</div>
+        <div class="bub">Which agents can move money, and who gave them the authority?</div></div>
+      <div class="msg"><div class="who">Assistant · turn 1</div>
+        <p style="margin:0 0 8px">One agent holds a mandate: <b>acme.finops.invoice-bot</b>, in the finops workspace.</p>
+        ${facts([
+          ['Mandate','mnd_5FT9JQ · commits_spend · USD'],
+          ['Granted by','Dana Okafor, as org.billing, on 2026-09-01'],
+          ['Limits','$250.00 per call · $2,000.00 monthly · 50 calls per day'],
+          ['Used this period','$857.50 of $2,000.00'],
+          ['Counterparties','vendor:aws, vendor:github — everything else denied'],
+          ['Two-person','on · second approver Priya Natarajan']])}
+        <p class="note" style="margin:9px 0 0">Every other agent is denied financial tools by construction: a call with
+        <span class="mono">financial.effect</span> other than <span class="mono">none</span> and no mandate is denied before dispatch.</p>
+        <div style="margin-top:10px;display:flex;gap:7px;flex-wrap:wrap">
+          <button class="btn sm" data-act="open-receipt" data-id="rcp_8XQ4D1">Open the last receipt</button>
+          <button class="btn sm ghost" data-act="tab" data-tab="incidents" data-page="audit">See the exception</button></div>
+        <div class="note" style="margin-top:10px">${store('governed action · qry_graph · evt_9KR0M2 · $0.0041')}</div>
+      </div>
+    </div>
+    <div class="assist-f"><div class="search"><input id="assist-input" placeholder="Ask about this organization" aria-label="Ask the assistant"></div></div>
+  </aside>`;
+}
+
+/* ══ router ═══════════════════════════════════════════════════════════════ */
+const ORG_TABS = [
+  ['people','People','34'],['workspaces','Workspaces','2'],['model','Model','4 tiers'],
+  ['data-plane','Data plane',''],['api-keys','API keys','4'],['workspace-settings','Workspace settings','']
+];
+const AUDIT_TABS = [
+  ['events','Events',''],['incidents','Incidents','1 open'],['receipts','Receipts',''],
+  ['holds','Legal holds','1'],['exports','Exports','4'],['keys','Keys',''],
+  ['assurance','Assurance','8/10'],['retention','Retention','']
+];
+
+function parseHash(){
+  const h = location.hash.replace(/^#\/?/,'').split('?')[0];
+  const p = h.split('/').filter(Boolean);          // acme / audit / receipts
+  if(p[1]==='audit'){ S.page='audit'; S.tab = AUDIT_TABS.some(t=>t[0]===p[2]) ? p[2] : 'events'; }
+  else if(p[1]==='billing'){ S.page='organization'; S.tab='people'; location.hash = `#/${ORG.slug}/people`; return; }
+  else { S.page='organization'; S.tab = ORG_TABS.some(t=>t[0]===p[1]) ? p[1] : 'people'; }
+}
+
+function go(page,tab){
+  location.hash = page==='audit' ? `#/${ORG.slug}/audit/${tab}` : `#/${ORG.slug}/${tab}`;
+}
+
+function tabsBar(){
+  const tabs = S.page==='organization' ? ORG_TABS : AUDIT_TABS;
+  return `<div class="tabs" role="tablist">${tabs.map(([k,l,n])=>
+    `<button class="tab" role="tab" aria-selected="${S.tab===k}" data-act="tab" data-tab="${k}">
+      ${esc(l)}${n?`<span class="n">${esc(n)}</span>`:''}</button>`).join('')}</div>`;
+}
+
+/* ══ shared states ════════════════════════════════════════════════════════ */
+function stateLoading(){
+  return `<div class="stats">${[0,0,0,0].map(()=>
+    `<div class="stat"><div class="sk" style="height:11px;width:58%"></div>
+      <div class="sk" style="height:23px;width:40%;margin-top:10px"></div>
+      <div class="sk" style="height:11px;width:72%;margin-top:8px"></div></div>`).join('')}</div>
+    <div class="panel" style="margin-top:16px"><div class="ph"><div class="sk" style="height:13px;width:180px"></div></div>
+      <div class="pb">${Array.from({length:7}).map((_,i)=>
+        `<div style="display:flex;gap:14px;padding:9px 0;border-bottom:1px solid var(--border)">
+          <div class="sk" style="height:12px;width:${[22,17,26,14,19,23,16][i]}%"></div>
+          <div class="sk" style="height:12px;flex:1;max-width:${[40,52,33,48,38,44,50][i]}%"></div>
+          <div class="sk" style="height:12px;width:64px;margin-left:auto"></div></div>`).join('')}</div></div>
+    <p class="note" style="margin-top:14px">Reading the control ledger. Nothing is shown until the row is read; a
+      number that is still loading is never drawn as zero.</p>`;
+}
+function stateEmpty(){
+  const org = S.page==='organization';
+  return `<div class="panel"><div class="blank">
+    <div class="bi">${org?I.org:I.audit}</div>
+    <h3>${org?'No one else is here yet':'No control-plane events in this range'}</h3>
+    <p>${org
+      ? 'You are the only member of Acme Robotics. Invite the people who will own workspaces and approve what agents do, or connect SSO and let SCIM create them.'
+      : 'Between 2026-09-11 09:45Z and now, no admin action, IAM change, repo binding, plane change or key rotation was recorded. Events are written by the kernel, never by an agent, so an empty range means nothing happened — not that nothing was captured.'}</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
+      ${org?`<button class="btn primary" data-act="invite">${I.plus}Invite people</button>
+             <button class="btn" data-act="sso">Connect SSO</button>`
+           :`<button class="btn" data-act="widen">Widen to 30 days</button>
+             <button class="btn ghost" data-act="tab" data-tab="incidents">Open incidents</button>`}
+    </div></div></div>`;
+}
+function stateError(){
+  const org = S.page==='organization';
+  return `<div class="panel"><div class="blank">
+    <div class="bi" style="color:var(--deny);border-color:var(--deny-br);background:var(--deny-bg)">${I.warn}</div>
+    <h3>${org?'The identity plane did not answer':'The archive did not answer'}</h3>
+    <p>${org
+      ? 'Reading members needs the shared control plane, which holds identity, IAM and billing whichever data plane your tenant data sits on. It returned <span class="mono">plane_unreachable</span> after 8 s.'
+      : 'Receipt bodies live in object storage on the dedicated plane <span class="mono">ox-acme-eu-1</span>. The bucket returned <span class="mono">object_lock_read_timeout</span> after 12 s. The ledger is intact: 388 frame digests are readable, the bodies behind them are not.'}</p>
+    <pre class="code" style="text-align:left;max-width:560px">${org
+      ? 'plane_unreachable\n  plane   shared / eu-central-1\n  request req_7K2M9QX\n  at      2026-09-11 09:52:14Z\n  retry   safe — this read changes nothing'
+      : 'object_lock_read_timeout\n  bucket  ox-acme-eu-1 (compliance mode)\n  segment seg_2026-09-10_041\n  request req_7K2M4LP\n  at      2026-09-11 09:52:41Z\n  retry   safe — this read changes nothing'}</pre>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
+      <button class="btn primary" data-act="retry">Try again</button>
+      <button class="btn" data-act="status">Deployment status</button></div>
+    </div></div>`;
+}
+function stateDenied(){
+  const org = S.page==='organization';
+  return `<div class="panel"><div class="blank">
+    <div class="bi" style="color:var(--hold);border-color:var(--hold-br);background:var(--hold-bg)">${I.lock}</div>
+    <h3>You cannot read this</h3>
+    <p>${org
+      ? 'Members, roles and API keys are readable by <span class="mono">owner</span>, <span class="mono">admin</span> and <span class="mono">compliance</span>. You are signed in as Tobias Lang with the org role <span class="mono">member</span>.'
+      : 'Receipts, incidents and legal holds are readable by <span class="mono">owner</span> and <span class="mono">compliance</span>. You are signed in as Tobias Lang with the org role <span class="mono">member</span>.'}</p>
+    ${facts([
+      ['Decision','<span class="chip deny"><i class="dot"></i>denied</span> · recorded as a control-plane event'],
+      ['Rule','iam.role_grants → no grant for '+(org?'<span class="mono">org.members.read</span>':'<span class="mono">audit.receipt.read</span>')],
+      ['Who can grant it','Priya Natarajan (owner), Helena Vogt (admin)'],
+      ['Event','<span class="mono">evt_9KR1T4</span> — this denial is itself in the audit record']])}
+    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
+      <button class="btn primary" data-act="request-access">Request access</button>
+      <button class="btn ghost" data-act="tab" data-tab="${org?'workspaces':'events'}">Go somewhere you can read</button></div>
+    </div></div>`;
+}
+
+/* ══ Organization ═════════════════════════════════════════════════════════ */
+function orgHead(){
+  return `<div class="page-head">
+    <div><p class="eyebrow">Organization</p>
+      <h1>${esc(ORG.name)}</h1>
+      <div class="page-sub">${mono(ORG.id)} · namespace ${mono(ORG.ns)} · ${esc(ORG.plan)} ·
+        display currency ${mono(ORG.currency)} · ${ORG.members} members · ${ORG.agents} agents</div></div>
+    <div class="page-act">
+      <button class="btn" data-act="export-org">${I.down}Export configuration</button>
+      <button class="btn primary" data-act="invite">${I.plus}Invite people</button></div>
+  </div>`;
+}
+
+function tabPeople(){
+  const roleSel = (m,i) => `<select class="inp" style="width:auto;padding:4px 8px;font-size:12.5px"
+      data-act="role" data-i="${i}" aria-label="Org role for ${esc(m[0])}">
+      ${ORG_ROLES.map(r=>`<option ${r===m[2]?'selected':''}>${r}</option>`).join('')}</select>`;
+  const rows = MEMBERS.map((m,i)=>`<tr>
+    <td><div class="t-main">${esc(m[0])}</div><div class="t-sub mono">${esc(m[1])}</div></td>
+    <td>${roleSel(m,i)}</td>
+    <td>${m[3].map(([w,r])=>`<div style="white-space:nowrap"><span class="mono">${esc(w)}</span>
+        <span class="chip" style="margin-left:5px">${esc(r)}</span></div>`).join('')}</td>
+    <td class="mono">${esc(m[4])}</td>
+    <td>${esc(m[5])}</td>
+    <td>${m[6]==='scim'?plain('SCIM','hold'):plain('manual')}</td>
+    <td class="r"><button class="btn sm ghost" data-act="member" data-i="${i}">Open</button></td></tr>`).join('');
+
+  const invRows = INVITES.map((v,i)=>`<tr>
+    <td class="mono t-main">${esc(v[0])}</td><td><span class="chip">${esc(v[1])}</span></td>
+    <td class="mono">${esc(v[2])}</td><td>${esc(v[3])}</td><td class="mono">${esc(v[4])}</td>
+    <td>${esc(v[5])}</td>
+    <td class="r"><button class="btn sm ghost" data-act="resend" data-i="${i}">Resend</button>
+      <button class="btn sm ghost" data-act="revoke-invite" data-i="${i}">Revoke</button></td></tr>`).join('');
+
+  return `<div class="stats">
+    <div class="stat"><div class="k">Members</div><div class="v">34</div><div class="m">32 from SCIM · 2 manual</div></div>
+    <div class="stat"><div class="k">Pending invitations</div><div class="v">3</div><div class="m">oldest expires in 5 days</div></div>
+    <div class="stat"><div class="k">Single sign-on</div><div class="v" style="font-size:18px">Enforced</div>
+      <div class="m">Okta · SAML 2.0 · 2 break-glass accounts</div></div>
+    <div class="stat"><div class="k">Two-factor</div><div class="v">34<small>of 34</small></div>
+      <div class="m">11 hardware key · 23 app</div></div>
+  </div>
+
+  <div class="grid g2" style="margin-top:16px">
+    <div class="panel"><div class="ph"><h3>Single sign-on</h3>${store('postgres · shared plane')}
+      <div class="ph-act"><button class="btn sm" data-act="sso">Edit</button></div></div>
+      <div class="pb">${facts([
+        ['Provider','Okta · SAML 2.0'],
+        ['Status','<span class="chip pass"><i class="dot"></i>enforced for all members</span>'],
+        ['Entity id',mono('https://oxagen.com/sso/org_7QK3M8VZ')],
+        ['Metadata',mono('https://acme.okta.example/app/exk41…/sso/saml/metadata')],
+        ['Signing certificate','expires 2027-04-18 · fingerprint '+mono('SHA-256 4C:11:…:9A')],
+        ['Break-glass','2 accounts exempt — Priya Natarajan, Marcus Bell. Each sign-in is a control-plane event.'],
+        ['Last assertion','2026-09-11 09:38Z · Sofia Ruiz · accepted']])}</div></div>
+
+    <div class="panel"><div class="ph"><h3>SCIM provisioning</h3>${store('postgres · shared plane')}
+      <div class="ph-act"><button class="btn sm" data-act="scim">Edit mappings</button></div></div>
+      <div class="pb">${facts([
+        ['Protocol','SCIM 2.0 · push from Okta'],
+        ['Status','<span class="chip pass"><i class="dot"></i>syncing</span> · last sync 2026-09-11 09:30Z'],
+        ['Endpoint',mono('https://api.oxagen.com/scim/v2/org_7QK3M8VZ')],
+        ['Token',mono('scim_…8f21')+' · rotated 2026-07-01 · never returned'],
+        ['In scope','34 users · 6 groups'],
+        ['Group → org role','<span class="mono">acme-eng-leads</span> → admin<br><span class="mono">acme-finance</span> → billing<br><span class="mono">acme-grc</span> → compliance'],
+        ['Deprovision','removing a user from the group suspends the principal in under a minute; their agents’ run tokens die at the next call']])}</div></div>
+  </div>
+
+  <div class="panel" style="margin-top:16px">
+    <div class="ph"><h3>Members</h3><span class="ph-sub">8 of 34 shown · org role and workspace roles</span>
+      ${store('postgres · iam.principals + role_grants')}
+      <div class="ph-act"><div class="search" style="padding:5px 9px"><span>${I.search}</span>
+        <input placeholder="name, email, role" aria-label="Search members" style="width:150px"></div></div></div>
+    ${tbl('<th>Person</th><th>Org role</th><th>Workspaces</th><th>Last active</th><th>Two-factor</th><th>Source</th><th class="r">&nbsp;</th>', rows)}
+    <div class="pb" style="border-top:1px solid var(--border)">
+      <p class="note" style="margin:0">Changing an org role here writes a control-plane event and takes effect at the
+      member’s next request. It does not widen what their agents may do: an agent’s effective permission is its own
+      grants intersected with the operator’s.</p></div>
+  </div>
+
+  <div class="panel" style="margin-top:16px">
+    <div class="ph"><h3>Invitations</h3><span class="ph-sub">3 pending</span>${store('postgres · org class')}
+      <div class="ph-act"><button class="btn sm" data-act="invite">${I.plus}Invite</button></div></div>
+    ${tbl('<th>Email</th><th>Org role</th><th>Workspace role</th><th>Invited by</th><th>Sent</th><th>Expires</th><th class="r">&nbsp;</th>', invRows)}
+  </div>`;
+}
+
+function tabWorkspaces(){
+  const cards = WORKSPACES.map(w=>`<div class="panel">
+    <div class="ph"><h3>${esc(w.name)}</h3><span class="mono" style="color:var(--muted)">${esc(w.slug)}</span>
+      ${plain(w.gov, w.gov==='regulated'?'hold':'')}
+      <div class="ph-act"><button class="btn sm" data-act="ws-settings" data-ws="${w.slug}">Settings</button>
+        <button class="btn sm ghost" data-act="open-ws" data-ws="${w.slug}">Open workspace</button></div></div>
+    <div class="pb">${facts([
+      ['Workspace id',mono(w.id)+' · namespace '+mono(w.ns)],
+      ['Main repo',mono(w.mainRepo)+' &nbsp;<span class="chip pass"><i class="dot"></i>bound '+esc(w.bound)+'</span>'],
+      ['Production branch',mono(w.branch)],
+      ['Linked repos', w.linked.length ? w.linked.map(r=>mono(r)).join(' · ') : '<span style="color:var(--dim)">none</span>'],
+      ['Agents', w.agents+' · owner '+esc(w.owner)],
+      ['Governance mode',mono(w.gov)],
+      ['Retention mode',mono(w.retention)+' <span class="note">— prompts and tool bodies kept in full</span>'],
+      ['Toolbelt limit',esc(w.belt)+' before the belt becomes searchable']])}</div></div>`).join('');
+  return `<div class="callout" style="margin-bottom:16px">Every workspace has exactly one main repo, and it is required at
+    creation. Steering, agent definitions and the active ontology live there as files; the graph is the system of record,
+    git is the system of control.</div>
+    <div class="grid g2">${cards}</div>
+    <div class="panel" style="margin-top:16px"><div class="ph"><h3>Create a workspace</h3>
+      <span class="ph-sub">a governance partition inside ${esc(ORG.name)}</span>
+      <div class="ph-act"><button class="btn" data-act="new-ws">${I.plus}Create workspace</button></div></div>
+      <div class="pb"><p class="note" style="margin:0">A new workspace needs a name, an immutable 2–6 character namespace,
+      and a repository to bind as its main repo through the GitHub App. Until a main repo is bound the workspace is
+      provisional for 14 days: runs record and spend counts, but steering, records and agent definitions stay off.</p></div>
+    </div>`;
+}
+
+function tabModel(){
+  const cust = S.funding==='customer_key';
+  const rows = ROUTES.map(r=>`<tr>
+    <td><span class="mono t-main">${esc(r[0])}</span><div class="t-sub" style="max-width:34ch">${esc(r[1])}</div></td>
+    <td>${esc(r[2])}</td>
+    <td><span class="mono t-main">${esc(r[3])}</span><div class="t-sub">resolves to ${esc(r[4])}</div></td>
+    <td class="mono">${esc(r[5])}</td>
+    <td class="r mono">${esc(r[6])}</td>
+    <td class="r mono">${esc(r[7])} <span style="color:var(--dim)">USD</span></td>
+    <td class="r"><button class="btn sm ghost" data-act="edit-route" data-tier="${r[0]}">Edit</button></td></tr>`).join('');
+  const fwRows = FIREWALL_ROUTES.map(r=>`<tr>
+    <td class="mono t-main">${esc(r[0])}</td><td class="mono">${esc(r[1])}</td><td>${esc(r[2])}</td>
+    <td class="mono">${esc(r[3])}</td><td>${chip(r[4],'pass')}</td></tr>`).join('');
+
+  return `<div class="panel">
+    <div class="ph"><h3>Funding source</h3>${store('postgres · shared plane · vault')}
+      <div class="ph-act"><div class="seg">
+        <button data-act="funding" data-v="platform" aria-pressed="${!cust}">Platform</button>
+        <button data-act="funding" data-v="customer_key" aria-pressed="${cust}">Customer key</button>
+      </div></div></div>
+    <div class="pb">${ cust ? facts([
+        ['Source','<span class="chip hold"><i class="dot"></i>customer_key</span> — Acme pays the provider directly'],
+        ['Key',mono('OpenRouter · pk_or_9T4…')+' · stored enveloped under '+mono('kek_org_acme_g4')+' · never returned'],
+        ['Tested','2026-09-09 17:48Z by Priya Natarajan — a key is tested before it is saved'],
+        ['Reads audited','12 reads in the last 30 days. <a href="#/'+ORG.slug+'/audit/events">Every read is an event.</a>'],
+        ['Billed by Oxagen','tokens reported and billed at zero. Oxagen meters runs, not your tokens.'],
+        ['Vendor neutrality','the key may point at OpenRouter or straight at a vendor; the route table below is per organization']
+      ]) : facts([
+        ['Source','<span class="chip"><i class="dot"></i>platform</span> — Oxagen buys the tokens on your behalf'],
+        ['Account','Oxagen’s OpenRouter account'],
+        ['Billed back','at vendor cost, no markup, as assistant usage on the monthly statement'],
+        ['Cap','$2,500.00 USD per month for this organization; calls above the cap are denied, never silently downgraded'],
+        ['Used this month','$611.37 of $2,500.00 <div class="bar" style="margin-top:6px;max-width:260px"><i style="width:24%"></i></div>'],
+        ['Switching','moving to your own key takes effect on the next model call; in-flight runs keep the key they started on']
+      ])}</div></div>
+
+  <div class="panel"><div class="ph"><h3>Routes by tier</h3>
+    <span class="ph-sub">Oxagen’s own work only — your agents’ model calls go through the model proxy with your models</span>
+    ${store('postgres · org settings')}</div>
+    ${tbl('<th>Tier</th><th>Provider</th><th>Route</th><th>Fallback</th><th class="r">Calls · 30 d</th><th class="r">Cost · 30 d</th><th class="r">&nbsp;</th>', rows)}
+    <div class="pb" style="border-top:1px solid var(--border)">
+      <p class="note" style="margin:0">Tiers point at rolling aliases so "latest" stays current without a deploy. Every
+      <span class="mono">model.response</span> frame records the concrete model id the provider returned, and the cost record
+      prices that concrete id — a replay names the exact model, and a reconciliation never matches an alias.
+      Batch variants (<span class="mono">:batch</span>) are allowed for the reflector and promoter only. Every figure in this table has basis <span class="mono">gateway_observed</span> and is priced from the price book entry the call cited.</p></div></div>
+
+  <div class="panel"><div class="ph"><h3>In-firewall routes</h3>
+    <span class="ph-sub">active on the behind-the-firewall deployment · acme-dc1</span>
+    ${store('postgres · dedicated plane')}
+    <div class="ph-act">${chip('air-gapped','hold')}</div></div>
+    ${tbl('<th>Tier</th><th>Endpoint</th><th>Dialect</th><th>Model served inside the network</th><th>Health</th>', fwRows)}
+    <div class="pb" style="border-top:1px solid var(--border)">
+      <p class="note" style="margin:0">Air-gapped is a supported mode, not a degraded one. Embeddings default to Voyage’s
+      API in the cloud and to a self-served model here; one model per index makes that a per-deployment choice, never a
+      mixed state. Changing an embedding route rebuilds the index rather than mixing two spaces.</p></div></div>`;
+}
+
+function planeDetail(){
+  if(S.plane==='shared') return facts([
+    ['Postgres — tenant data',mono('pg-shared-use1')+' · us-east-1 · RLS on every table, no bypass setting'],
+    ['Postgres — identity, IAM, billing, price book',mono('pg-shared-use1')+' · the same plane'],
+    ['Neo4j',mono('org_acme')+' on instance '+mono('aura-bc-07')+' · one database per organization'],
+    ['Object storage',mono('ox-shared-use1')+' · object lock, compliance mode · per-organization key'],
+    ['Key-encryption key',mono('kek_org_acme_g4')+' in Oxagen’s KMS, one per organization'],
+    ['Who can reach it','the system role '+mono('oxagen_system')+' has its own policy, its own pool and its own audit counter']]);
+  if(S.plane==='dedicated') return facts([
+    ['Status','<span class="chip pass"><i class="dot"></i>active since 2026-02-14</span>'],
+    ['Postgres — tenant data',mono('pg-acme-1')+' · eu-central-1 · dedicated cluster'],
+    ['Postgres — identity, IAM, billing, price book',mono('pg-shared-euc1')+' — these stay on the shared plane by design'],
+    ['Neo4j',mono('org_acme')+' on instance '+mono('aura-vdc-acme')+' · Virtual Dedicated Cloud · 18 of 100 databases'],
+    ['Object storage',mono('ox-acme-eu-1')+' · object lock in compliance mode · write-once'],
+    ['Key-encryption key',mono('kek_org_acme_g4')+' in '+mono('arn:aws:kms:eu-central-1:4471…:key/9c2f')],
+    ['Residency','all tenant data at rest in eu-central-1. Frame bodies never leave it.'],
+    ['Resolver','the only place a connection string is read. A call path that bypasses it is a defect, and CI fails on it.']]);
+  return `${facts([
+    ['Deployment','<span class="chip pass"><i class="dot"></i>running</span> · '+mono('acme-dc1')+' · Kubernetes, customer-operated'],
+    ['Bundle version',mono('oxagen/1.4.2')+' · Helm chart · applied 2026-08-28 09:14Z by Marcus Bell'],
+    ['Bundle signature',mono('cosign · sha256:7f31c0…9b42')+' · verified against Oxagen release key '+mono('rel-2026-03')],
+    ['Containers','gateway · services · Mission Control · Stella engine · witness runner · Postgres · Neo4j Enterprise · S3-compatible object storage with object lock'],
+    ['Air-gapped mode','<span class="chip hold"><i class="dot"></i>on</span> — model routes point inside the network'],
+    ['Licence','per organization, annual, invoiced. Stripe is not involved behind a firewall.'],
+    ['Next bundle',mono('oxagen/1.4.3')+' available · applied on your schedule, never pushed']])}
+  <div class="sep"></div>
+  <p class="eyebrow" style="margin-bottom:9px">Outbound connections in use</p>
+  ${tbl('<th>Destination</th><th>Why</th><th>State</th><th>Last</th>',
+    [['GitHub Enterprise Server '+mono('github.acme.internal'),'repo binding, Context PRs, checks, code graph','in use','2026-09-11 09:40Z','pass'],
+     ['Model providers','none — every tier resolves inside the network','not used','—','idle'],
+     ['Voyage AI','none — embeddings served in-firewall','not used','—','idle'],
+     ['Signed usage report '+mono('meter.oxagen.com'),'licence metering: run counts and retained GB, no content','weekly','2026-09-08 02:00Z','pass'],
+     ['Everything else','nothing inbound is required','blocked at the perimeter','—','idle']]
+     .map(r=>`<tr><td class="t-main">${r[0]}</td><td>${esc(r[1])}</td><td>${chip(r[2],r[4])}</td><td class="mono">${esc(r[3])}</td></tr>`).join(''))}
+  <div class="pb" style="padding:14px 0 0"><p class="note" style="margin:0">Everything the cloud enforces, the appliance
+  enforces — including the witness runner and the assurance suite, which you run against your own deployment and hand to
+  your auditor. <a href="#/${ORG.slug}/audit/assurance">Last result: 8 passed, 2 not applicable.</a></p></div>`;
+}
+
+function tabDataPlane(){
+  const modes = [
+    ['shared','Shared','Tenant data on Oxagen’s shared plane, isolated by row-level security keyed on transaction-local settings, with no bypass setting, plus one Neo4j database per organization.'],
+    ['dedicated','Dedicated','Your own Postgres cluster, Neo4j instance and object-storage bucket in your region. Identity, IAM, billing and the price book stay on the shared plane.'],
+    ['firewall','Behind the firewall','The same containers, as a signed bundle you run. Outbound only, and optional. Fully air-gapped is supported, not degraded.']
+  ];
+  return `<div class="panel">
+    <div class="ph"><h3>Data plane binding</h3>${store('postgres · shared plane · resolver')}
+      <div class="ph-act">${plain('active: '+(S.plane==='firewall'?'behind the firewall':S.plane),'pass')}
+        <button class="btn sm" data-act="request-plane">Request a change</button></div></div>
+    <div class="pb">
+      <div class="modes">${modes.map(([k,t,d])=>`<button class="mode" data-act="plane" data-v="${k}" aria-pressed="${S.plane===k}">
+        <span class="mt">${esc(t)}${(k==='dedicated')?'<span class="chip pass" style="font-size:10.5px"><i class="dot"></i>yours</span>':''}</span>
+        <span class="md">${esc(d)}</span></button>`).join('')}</div>
+      <div class="sep"></div>
+      ${planeDetail()}
+    </div></div>
+
+  <div class="grid g2" style="margin-top:16px">
+    <div class="panel"><div class="ph"><h3>Graph isolation</h3>${store('neo4j · org_acme')}</div>
+      <div class="pb">${facts([
+        ['Database',mono('org_acme')+' — the tenant boundary is the database, not a WHERE clause'],
+        ['Instance',mono('aura-vdc-acme')+' · 32 GB · 18 of 100 databases · multi-database enabled at creation'],
+        ['Workspace scoping','every node and relationship carries '+mono('ws')+', set by the graph service, the only writer'],
+        ['Cross-tenant reads','impossible without a composite database. Oxagen never creates one.'],
+        ['Platform catalogs','price books, tool schemas and connector definitions live in Postgres, never in the graph']])}</div></div>
+    <div class="panel"><div class="ph"><h3>Keys and erasure</h3>${store('kms + object storage')}</div>
+      <div class="pb">${facts([
+        ['Key-encryption key','one per organization. Data-encryption keys per object, and per subject where erasure requires it.'],
+        ['Object lock','compliance mode. Retention set per object from your policy; a hold pins it.'],
+        ['Erasure','crypto-shredding — destroy the subject key, keep the chain. <a href="#/'+ORG.slug+'/audit/retention">3 requests open.</a>'],
+        ['Startup guard','the app role may not be a superuser, may not hold BYPASSRLS, and RLS may not be off, or the plane refuses to boot']])}</div></div>
+  </div>`;
+}
+
+function tabApiKeys(){
+  const st = {ok:['pass','active'],expiring:['deny','expires in 21 days'],unused:['','never used']};
+  const rows = APIKEYS.map((k,i)=>`<tr>
+    <td><div class="t-main">${esc(k[0])}</div><div class="t-sub mono">${esc(k[1])}</div></td>
+    <td class="mono">${esc(k[2])}</td>
+    <td style="max-width:26ch">${k[3].split(', ').map(s=>`<span class="chip" style="margin:0 3px 3px 0">${esc(s)}</span>`).join('')}</td>
+    <td>${esc(k[4])}</td><td class="mono">${esc(k[5])}</td>
+    <td>${chip(st[k[7]][1], st[k[7]][0])}<div class="t-sub mono">${esc(k[6])}</div></td>
+    <td class="r"><button class="btn sm ghost" data-act="rotate-key" data-i="${i}">Rotate</button>
+      <button class="btn sm ghost" data-act="revoke-key" data-i="${i}">Revoke</button></td></tr>`).join('');
+  return `<div class="panel"><div class="ph"><h3>API keys</h3>
+    <span class="ph-sub">each key is a service principal with its own grants</span>${store('postgres · iam + vault')}
+    <div class="ph-act"><button class="btn sm" data-act="new-key">${I.plus}Create key</button></div></div>
+    ${tbl('<th>Name</th><th>Principal</th><th>Grants</th><th>Created by</th><th>Last used</th><th>Expires</th><th class="r">&nbsp;</th>', rows)}
+    <div class="pb" style="border-top:1px solid var(--border)"><p class="note" style="margin:0">A key is shown once, at
+    creation, and never again. Keys carry grants, not roles, so an auditor’s key can read receipts and nothing else.
+    Revoking a key ends its service principal’s access at the next call.</p></div></div>
+  <div class="panel"><div class="ph"><h3>Surfaces this reaches</h3>${store('one agent tool contract')}</div>
+    <div class="pb"><p class="note" style="margin:0 0 10px">One agent tool contract drives the API, MCP, the CLI and these
+    screens, so a key that can do something here can do exactly that much everywhere else.</p>
+    <pre class="code">$ oxagen login --org acme
+$ oxagen run list --workspace core-platform --since 24h
+$ oxagen run export run_8XQ4 --with-bodies --out ./run_8XQ4.bundle
+$ oxagen agent status acme.finops.invoice-bot</pre></div></div>`;
+}
+
+function tabWsSettings(){
+  const w = WORKSPACES.find(x=>x.slug===S.wsSettings);
+  return `<div class="panel"><div class="ph"><h3>Workspace settings</h3>${store('postgres · workspace class')}
+    <div class="ph-act"><div class="seg">${WORKSPACES.map(x=>
+      `<button data-act="ws-pick" data-v="${x.slug}" aria-pressed="${x.slug===S.wsSettings}">${esc(x.slug)}</button>`).join('')}</div></div></div>
+    <div class="pb">
+      <div class="grid g2">
+        <div class="fldset">
+          <div><label class="fld" for="ws-name">Display name</label>
+            <input class="inp" id="ws-name" value="${esc(w.name)}"></div>
+          <div><label class="fld" for="ws-ns">Namespace — immutable, used in every agent key</label>
+            <input class="inp" id="ws-ns" value="${esc(w.ns)}" disabled></div>
+          <div><label class="fld" for="ws-gov">Governance mode</label>
+            <select class="inp" id="ws-gov">${['solo','team','regulated'].map(g=>
+              `<option ${g===w.gov?'selected':''}>${g}</option>`).join('')}</select></div>
+          <div><label class="fld" for="ws-ret">Retention mode</label>
+            <select class="inp" id="ws-ret">
+              <option ${w.retention==='content_exact'?'selected':''}>content_exact — keep prompts and tool bodies in full</option>
+              <option ${w.retention==='digest_only'?'selected':''}>digest_only — digests only, lowers the replay grade</option>
+            </select></div>
+        </div>
+        <div>${facts([
+          ['Main repo',mono(w.mainRepo)+' · GitHub App installation '+mono('48812391')],
+          ['Production branch',mono(w.branch)+' — what a witness must fail on'],
+          ['Linked repos', w.linked.length? w.linked.map(r=>mono(r)).join(' · '):'<span style="color:var(--dim)">none</span>'],
+          ['Agents',w.agents+' · '+(w.slug==='finops'?'1 holds a mandate':'none hold a mandate')],
+          ['Toolbelt limit',esc(w.belt)],
+          ['Kill switches','<span class="chip pass"><i class="dot"></i>none flipped</span> · last flip 2026-09-09 15:02Z, 41 minutes, class moves_funds'],
+          ['Default budgets','$120.00 per day per agent · hard']])}</div>
+      </div>
+      <div class="sep"></div>
+      <div class="callout"><b>digest_only is an opt-down.</b> It is recorded as a completeness gap on every run and lowers
+      the replay grade, because a replay without bodies is a timeline, not a replay. It is not the default.</div>
+      <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" data-act="save-ws">Save changes</button>
+        <button class="btn ghost" data-act="open-ws" data-ws="${w.slug}">Open workspace</button></div>
+    </div></div>`;
+}
+
+/* ══ Audit ════════════════════════════════════════════════════════════════ */
+function auditHead(){
+  return `<div class="page-head">
+    <div><p class="eyebrow">Organization</p><h1>Audit</h1>
+      <div class="page-sub">control-plane events retained 7 years · run ledger forever · bodies 7 years by default ·
+        ${mono('org_7QK3M8VZ')}</div></div>
+    <div class="page-act">
+      <button class="btn" data-act="hold">${I.lock}Place a legal hold</button>
+      <button class="btn primary" data-act="new-export">${I.down}Export evidence bundle</button></div>
+  </div>`;
+}
+
+function tabEvents(){
+  const rows = AUDIT_EVENTS.map(e=>`<tr>
+    <td class="mono">${esc(e[0])}</td>
+    <td><div class="t-main">${esc(e[1])}</div><div class="t-sub">${esc(e[2])}</div></td>
+    <td class="mono t-main">${esc(e[3])}</td>
+    <td style="max-width:34ch">${esc(e[4])}</td>
+    <td>${plain(e[5])}</td>
+    <td>${chip(e[6], RESULT[e[6]]||'')}</td>
+    <td class="mono"><a href="#/${ORG.slug}/audit/events">${esc(e[7])}</a></td></tr>`).join('');
+  return `<div class="stats">
+    <div class="stat"><div class="k">Events · 30 days</div><div class="v">18,402</div><div class="m">every IAM decision is audited, allowed or not</div></div>
+    <div class="stat"><div class="k">Denied</div><div class="v">241</div><div class="m">denials are recorded and cost nothing</div></div>
+    <div class="stat"><div class="k">By a service principal</div><div class="v">6,118</div><div class="m">Terraform, CI, exports, the archiver</div></div>
+    <div class="stat"><div class="k">By the in-app agent</div><div class="v">312</div><div class="m">each one a governed action with a receipt</div></div>
+  </div>
+  <div class="panel" style="margin-top:16px">
+    <div class="ph"><h3>Control-plane events</h3><span class="ph-sub">admin actions, IAM changes, repo bindings, plane changes, key rotations</span>
+      ${store('postgres · 7 years')}
+      <div class="ph-act">
+        <select class="inp" style="width:auto;padding:5px 9px;font-size:12.5px" aria-label="Actor">
+          <option>All actors</option><option>Humans</option><option>Services</option><option>In-app agent</option></select>
+        <select class="inp" style="width:auto;padding:5px 9px;font-size:12.5px" aria-label="Range">
+          <option>Last 48 hours</option><option>Last 7 days</option><option>Last 30 days</option></select>
+        <button class="btn sm" data-act="export-events">${I.down}CSV</button></div></div>
+    ${tbl('<th>When</th><th>Actor</th><th>Action</th><th>Target</th><th>Plane</th><th>Result</th><th>Event</th>', rows)}
+    <div class="pb" style="border-top:1px solid var(--border)"><p class="note" style="margin:0">The record is written by the
+    kernel, never by an agent. A client-attested call is labeled as such and can never be shown as gateway-enforced.</p></div>
+  </div>`;
+}
+
+function tabIncidents(){
+  const open = INCIDENTS.filter(i=>i.status==='open').length;
+  const rows = INCIDENTS.map(i=>`<tr class="click" data-act="incident" data-id="${i.id}" tabindex="0">
+    <td>${chip(i.sev, SEV[i.sev])}</td>
+    <td><div class="t-main">${esc(i.title)}</div><div class="t-sub mono">${esc(i.kind)} · ${esc(i.scope)}</div></td>
+    <td class="mono">${esc(i.at)}</td>
+    <td>${esc(i.by)}</td>
+    <td>${i.status==='open'?chip('open','deny'):chip('resolved','pass')}
+      ${i.closedAt?`<div class="t-sub mono">${esc(i.closedAt)}</div>`:''}</td>
+    <td class="r"><button class="btn sm ghost" data-act="incident" data-id="${i.id}">Open</button></td></tr>`).join('');
+  return `<div class="stats">
+    <div class="stat"><div class="k">Open</div><div class="v" style="color:var(--deny)">${open}</div><div class="m">medium · assurance gap at observe tier</div></div>
+    <div class="stat"><div class="k">Critical · 12 months</div><div class="v">1</div><div class="m">resolved in 8 h 34 m</div></div>
+    <div class="stat"><div class="k">Median time to resolve</div><div class="v">4 h<small>11 m</small></div><div class="m">across 7 incidents</div></div>
+    <div class="stat"><div class="k">Money moved without a receipt</div><div class="v">$412.00<small>USD</small></div>
+      <div class="m">one charge, 2026-09-06, traced and closed</div></div>
+  </div>
+  <div class="panel" style="margin-top:16px">
+    <div class="ph"><h3>Incidents</h3><span class="ph-sub">raised by the policy engine, the gateway, the reconciler and the verifier</span>
+      ${store('postgres · neo4j frames')}</div>
+    ${tbl('<th>Severity</th><th>What happened</th><th>Opened</th><th>Detected by</th><th>Status</th><th class="r">&nbsp;</th>', rows)}
+    <div class="pb" style="border-top:1px solid var(--border)"><p class="note" style="margin:0">Any external transaction
+    attributable to a governed connection with no receipt is an exception at severity critical: money moved that Oxagen
+    did not govern. That is the only way this number becomes non-zero.</p></div></div>`;
+}
+
+function tabReceipts(){
+  const q = S.rq.trim().toLowerCase();
+  const hits = RECEIPTS.filter(r => !q || [r.id,r.agent,r.tool,r.effect,r.operator,r.ws].join(' ').toLowerCase().includes(q));
+  const rows = hits.map(r=>`<tr class="click" data-act="open-receipt" data-id="${r.id}" tabindex="0">
+    <td class="mono t-main">${esc(r.id)}</td>
+    <td class="mono">${esc(r.at)}</td>
+    <td><div class="t-main mono">${esc(r.agent)}</div><div class="t-sub">${esc(r.operator)} · ${esc(r.ws)}</div></td>
+    <td class="mono">${esc(r.tool)}</td>
+    <td>${chip(r.decision, RESULT[r.decision]||'')}</td>
+    <td class="r mono">${esc(r.amount)}</td>
+    <td class="mono">${esc(r.effect)}</td>
+    <td>${plain(r.tier,'tier '+(r.tier==='gateway'?'pass':'')) }</td></tr>`).join('');
+  return `<div class="panel"><div class="ph"><h3>Receipt search</h3>
+    <span class="ph-sub">one signed record per tool call — what an auditor, a security lead or a CFO opens</span>
+    ${store('neo4j frames + object storage bodies')}</div>
+    <div class="pb">
+      <div class="search"><span>${I.search}</span>
+        <input id="rq" value="${esc(S.rq)}" placeholder="agent key, tool, external effect id, call digest, receipt id" aria-label="Search receipts">
+        <button class="btn sm" data-act="search-receipts">Search</button></div>
+      <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">
+        ${['stripe','gateway','observe','deny','acme.finops.invoice-bot','pi_3Q8LrT2eZvKY'].map(t=>
+          `<button class="btn sm ghost" data-act="rq" data-v="${esc(t)}">${esc(t)}</button>`).join('')}
+        ${S.rq?`<button class="btn sm ghost" data-act="rq" data-v="">clear</button>`:''}
+      </div></div>
+    ${ hits.length ? tbl('<th>Receipt</th><th>When</th><th>Agent · operator</th><th>Tool version</th><th>Decision</th><th class="r">Amount</th><th>External effect</th><th>Tier</th>', rows)
+      : `<div class="blank" style="padding:40px 22px"><div class="bi">${I.search}</div>
+         <h3>No receipt matches ${mono(S.rq)}</h3>
+         <p>Receipts are searchable by agent key, tool version, external effect id, call digest and approver.
+            A call that was denied has a receipt too — denials are recorded, they just never dispatched.</p>
+         <button class="btn" data-act="rq" data-v="">Clear the search</button></div>` }
+    <div class="pb" style="border-top:1px solid var(--border)">
+      <p class="note" style="margin:0">4 of 1,204 receipts shown. A receipt for a client-attested call exists too, and its
+      authority group says <span class="mono">observed</span> where the gateway would have said <span class="mono">enforced</span>.</p></div></div>`;
+}
+
+function tabHolds(){
+  const rows = HOLDS.map(h=>`<tr>
+    <td class="mono t-main">${esc(h[0])}</td>
+    <td><div class="t-main">${esc(h[1])}</div><div class="t-sub">${esc(h[7])}</div></td>
+    <td style="max-width:26ch">${esc(h[2])}</td><td>${esc(h[3])}</td>
+    <td class="mono">${esc(h[4])}</td><td class="mono">${esc(h[5])}</td>
+    <td>${h[6]==='active'?chip('active','hold'):chip('released')}</td>
+    <td class="r">${h[6]==='active'?`<button class="btn sm ghost" data-act="release-hold" data-i="${esc(h[0])}">Release</button>`:''}</td></tr>`).join('');
+  return `<div class="panel"><div class="ph"><h3>Legal holds</h3>
+    <span class="ph-sub">pin retention and block erasure for named runs, agents, or a whole workspace</span>
+    ${store('postgres · enforced at object lock')}
+    <div class="ph-act"><button class="btn sm" data-act="hold">${I.plus}Place a hold</button></div></div>
+    ${tbl('<th>Hold</th><th>Matter</th><th>Scope</th><th>Placed by</th><th>Placed</th><th>Released</th><th>State</th><th class="r">&nbsp;</th>', rows)}
+    <div class="pb" style="border-top:1px solid var(--border)"><p class="note" style="margin:0">A hold outranks both the
+    retention clock and an erasure request. While <span class="mono">hold_LIT-2026-03</span> stands, crypto-shredding for
+    812 bodies in its scope is refused and the request stays visible as blocked, never silently dropped.</p></div></div>`;
+}
+
+function tabExports(){
+  const cards = EXPORTS.map(x=>`<div class="panel">
+    <div class="ph"><h3>${esc(x.what)}</h3>
+      ${x.status==='ready'?chip('ready','pass'):chip('building','hold')}
+      <div class="ph-act">
+        <button class="btn sm" data-act="verify" data-id="${esc(x.id)}" ${x.status!=='ready'?'disabled':''}>Verify bundle</button>
+        <button class="btn sm ghost" data-act="download" data-id="${esc(x.id)}" ${x.status!=='ready'?'disabled':''}>${I.down}Download</button></div></div>
+    <div class="pb">${facts([
+      ['Export id',mono(x.id)],['Range',esc(x.range)],['Contents',esc(x.runs)],
+      ['Size',esc(x.size)],['Created',esc(x.at)+' by '+esc(x.by)],
+      ['Signature',mono(x.sig)],['Key ids',mono(x.keys)]])}
+      <div id="verify-${esc(x.id)}"></div></div></div>`).join('');
+  return `<div class="callout" style="margin-bottom:16px">An export is a verifiable bundle: archive segments, attestations,
+    key ids, and a verifier script. The segment was written at seal time, so it is never a later copy of the graph — it is
+    the same bytes the graph indexed, written once.</div>
+    ${cards}
+    <div class="panel"><div class="ph"><h3>The verifier</h3>${store('ships inside every bundle')}</div>
+      <div class="pb"><pre class="code">$ tar xf exp_2026-08_core.tar.zst && cd exp_2026-08_core
+$ ./oxagen-verify --bundle . --release-key rel-2026-03
+
+  manifest            118 segments, 1,004,212 frame envelopes (NDJSON)
+  merkle roots        118 / 118 recomputed and matched
+  seal attestations   4,118 / 4,118 signatures verified (gw_sign gen 6, gen 7)
+  chain continuity    no gaps, no reordering
+  key ids present     kek_org_acme gen 3, gen 4
+  withheld subjects   2 (erased — tombstone frames present, digests intact)
+  enforcement tiers   gateway 3,982 · harness 108 · observe 28
+
+  OK  the bundle is internally consistent and signed by Oxagen release key rel-2026-03</pre>
+      <p class="note" style="margin:11px 0 0">The verifier runs offline and needs no Oxagen service. Two subjects were
+      erased under GDPR: their bodies are unrecoverable, their digests and tombstone frames remain, and the chain still
+      verifies. That is what crypto-shredding buys you.</p></div></div>`;
+}
+
+function tabKeys(){
+  const st = {active:['pass','active'],retiring:['hold','retiring'],retired:['','retired'],expired:['','expired']};
+  const rows = KEYS.map((k,i)=>`<tr>
+    <td><div class="t-main">${esc(k[0])}</div><div class="t-sub mono">${esc(k[1])}</div></td>
+    <td class="mono">${esc(k[2])}</td><td class="r mono">${esc(k[3])}</td>
+    <td class="mono">${esc(k[4])}</td><td class="mono">${esc(k[5])}</td>
+    <td>${chip(st[k[6]][1], st[k[6]][0])}</td>
+    <td style="max-width:28ch">${esc(k[7])}</td>
+    <td class="r">${k[6]==='active'?`<button class="btn sm ghost" data-act="rotate" data-i="${i}">Rotate</button>`:''}</td></tr>`).join('');
+  return `<div class="panel"><div class="ph"><h3>Keys and validity windows</h3>
+    <span class="ph-sub">one key-encryption key per organization; data-encryption keys per object and per subject</span>
+    ${store('kms + postgres')}
+    <div class="ph-act"><button class="btn sm" data-act="rotate" data-i="0">${I.key}Rotate KEK</button></div></div>
+    ${tbl('<th>Key</th><th>Algorithm</th><th class="r">Gen</th><th>Valid from</th><th>Valid to</th><th>State</th><th>What it covers</th><th class="r">&nbsp;</th>', rows)}
+    <div class="pb" style="border-top:1px solid var(--border)">
+      <p class="note" style="margin:0 0 10px">Rotation does not rewrite history. A retiring generation stays valid for
+      decryption until every object it wrapped has been re-wrapped; a receipt keeps citing the signing generation it was
+      signed under, so a four-month-old receipt still verifies after a rotation.</p>
+      <div style="max-width:420px"><div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:5px">
+        <span>Re-wrap of gen 3 → gen 4</span><span class="mono">61% · 866k of 1.42M objects</span></div>
+        <div class="bar"><i class="hold" style="width:61%"></i></div></div></div></div>`;
+}
+
+function tabAssurance(){
+  const rows = ASSURANCE.map(a=>`<tr>
+    <td style="max-width:36ch"><div class="t-main">${esc(a[0])}</div></td>
+    <td style="max-width:34ch">${esc(a[1])}</td>
+    <td>${chip(a[2],'pass')}</td>
+    <td class="mono t-sub" style="max-width:26ch">${esc(a[3])}</td></tr>`).join('');
+  const naRows = ASSURANCE_NA.map(a=>`<tr>
+    <td style="max-width:36ch" class="t-main">${esc(a[0])}</td>
+    <td style="max-width:40ch">${esc(a[1])}</td>
+    <td class="mono">${esc(a[2])}</td></tr>`).join('');
+  const hist = ASSURANCE_HISTORY.map(h=>`<tr>
+    <td class="mono t-main">${esc(h[0])}</td><td class="mono">${esc(h[1])}</td><td class="mono">${esc(h[2])}</td>
+    <td class="r mono">${esc(h[3])}</td><td class="r mono" style="color:var(--pass)">${esc(h[4])}</td>
+    <td class="r mono">${esc(h[5])}</td><td class="r mono">${esc(h[6])}</td><td>${esc(h[7])}</td></tr>`).join('');
+  return `<div class="stats">
+    <div class="stat"><div class="k">Release</div><div class="v" style="font-size:19px">1.4.2</div><div class="m">ran 2026-09-11 04:00Z against acme-dc1</div></div>
+    <div class="stat"><div class="k">Passed</div><div class="v" style="color:var(--pass)">8<small>of 10</small></div><div class="m">each case tries to break one guarantee</div></div>
+    <div class="stat"><div class="k">Failed</div><div class="v">0</div><div class="m">a failure blocks the release</div></div>
+    <div class="stat"><div class="k">Not applicable</div><div class="v">2</div><div class="m">observe tier — reported, never counted as passed</div></div>
+  </div>
+  <div class="callout" style="margin-top:16px">Guarantees a customer cannot test are claims. This suite runs against a live
+    gateway in CI and against your own deployment on demand, and it ships inside the export your auditor receives.</div>
+  <div class="panel" style="margin-top:16px">
+    <div class="ph"><h3>Adversarial tool-governance suite</h3>
+      <span class="ph-sub">${mono('assurance/2026.08')} · 10 cases</span>${store('witness runner · isolated plane')}
+      <div class="ph-act"><button class="btn sm" data-act="run-assurance">Run now</button>
+        <button class="btn sm ghost" data-act="download" data-id="exp_assurance_142">${I.down}Result</button></div></div>
+    ${tbl('<th>Case</th><th>Expected</th><th>Result</th><th>Evidence</th>', rows)}</div>
+  <div class="panel"><div class="ph"><h3>Not applicable at this deployment</h3>
+    <span class="ph-sub">the honesty rule applies to the suite itself</span></div>
+    ${tbl('<th>Case</th><th>Why it cannot run</th><th>Agent</th>', naRows)}
+    <div class="pb" style="border-top:1px solid var(--border)"><p class="note" style="margin:0">A case that cannot run at
+    your enforcement tier is reported as not applicable, never as passed. Enrolling
+    <span class="mono">acme.core.docs-writer</span> through the SDK wrapper moves it to gateway tier and both cases become
+    runnable. <a href="#/${ORG.slug}/audit/incidents">Tracked as inc_7749.</a></p></div></div>
+  <div class="panel"><div class="ph"><h3>Per release</h3>${store('published with every release')}</div>
+    ${tbl('<th>Release</th><th>Ran</th><th>Suite</th><th class="r">Cases</th><th class="r">Passed</th><th class="r">Failed</th><th class="r">N/A</th><th>Against</th>', hist)}</div>`;
+}
+
+function tabRetention(){
+  const tiers = [
+    ['Ledger','Neo4j + Postgres rollups','runs, attempts, seals, attestation, counts, cost, tier, gaps','forever','4.1M runs','pass'],
+    ['Frames','Neo4j','frame nodes with digests, cost, policy decisions','hot window · 13 months','24.8M frames','pass'],
+    ['Bodies and segments','Object storage, write-once','encrypted bodies; per-seal archive segment, Merkle root, attestation','7 years · holds override','418 GB','pass'],
+    ['Control-plane audit','Postgres','admin actions, IAM changes, repo bindings, plane changes, key rotations','7 years','1.2M events','pass']
+  ].map(t=>`<tr><td class="t-main">${esc(t[0])}</td><td class="mono">${esc(t[1])}</td>
+    <td style="max-width:38ch">${esc(t[2])}</td><td class="mono">${esc(t[3])}</td>
+    <td class="r mono">${esc(t[4])}</td></tr>`).join('');
+  const ers = ERASURE.map(e=>`<tr>
+    <td class="mono t-main">${esc(e[0])}</td><td style="max-width:30ch">${esc(e[1])}</td>
+    <td class="mono">${esc(e[2])}</td><td>${esc(e[3])}</td>
+    <td>${e[4]==='keys destroyed'?chip(e[4],'pass'):e[4]==='blocked by hold'?chip(e[4],'deny'):chip(e[4],'hold')}
+      <div class="t-sub mono">${esc(e[5])}</div></td>
+    <td>${esc(e[6])}</td><td style="max-width:28ch" class="t-sub">${esc(e[7])}</td></tr>`).join('');
+  return `<div class="panel"><div class="ph"><h3>Retention</h3>
+    <span class="ph-sub">keep everything, at full fidelity, for seven years, and make it cheap by writing it once</span>
+    ${store('organization policy')}
+    <div class="ph-act"><button class="btn sm" data-act="edit-retention">Edit policy</button></div></div>
+    <div class="pb">${facts([
+      ['Body retention','7 years from the seal <span class="note">— organizations may set longer, never shorter than a hold</span>'],
+      ['Hot window','13 months, then frame nodes are compacted into the segment. Bodies are never moved.'],
+      ['Replay of a compacted run','reads the segment, not the graph. Same bytes, same grade.'],
+      ['Workspace opt-down','core-platform '+mono('content_exact')+' · finops '+mono('content_exact')],
+      ['Cold storage cost','418 GB · $0.42 per month. The graph, not the archive, is what needs a window.']])}</div></div>
+  <div class="panel"><div class="ph"><h3>Archive tiers</h3>${store('three stores, one policy')}</div>
+    ${tbl('<th>Tier</th><th>Where</th><th>What it holds</th><th>Retention</th><th class="r">Held today</th>', tiers)}</div>
+  <div class="panel"><div class="ph"><h3>GDPR erasure requests</h3>
+    <span class="ph-sub">3 in the last 30 days</span>${store('postgres + per-subject keys')}
+    <div class="ph-act"><button class="btn sm" data-act="new-erasure">${I.plus}Record a request</button></div></div>
+    ${tbl('<th>Request</th><th>Subject</th><th>Requested</th><th>By</th><th>State</th><th>Scope</th><th>Note</th>', ers)}
+    <div class="pb" style="border-top:1px solid var(--border)">
+      <div class="callout"><b>Crypto-shredding, in one line:</b> bodies attributable to a natural person are encrypted under
+      a per-subject key, and erasure destroys that key and writes a tombstone frame carrying the digests that remain — so
+      the chain still verifies and the content is gone.</div>
+      <p class="note" style="margin:11px 0 0">Redaction detectors run before write, so most personal data never enters a
+      body in the first place.</p></div></div>`;
+}
+
+/* ══ render ═══════════════════════════════════════════════════════════════ */
+const ORG_TAB_FN = {people:tabPeople, workspaces:tabWorkspaces, model:tabModel,
+  'data-plane':tabDataPlane, 'api-keys':tabApiKeys, 'workspace-settings':tabWsSettings};
+const AUDIT_TAB_FN = {events:tabEvents, incidents:tabIncidents, receipts:tabReceipts, holds:tabHolds,
+  exports:tabExports, keys:tabKeys, assurance:tabAssurance, retention:tabRetention};
+
+function body(){
+  if(S.state==='loading') return stateLoading();
+  if(S.state==='error')   return stateError();
+  if(S.state==='denied')  return stateDenied();
+  if(S.state==='empty')   return stateEmpty();
+  const fn = S.page==='organization' ? ORG_TAB_FN[S.tab] : AUDIT_TAB_FN[S.tab];
+  return fn ? fn() : '';
+}
+
+function render(){
+  $('#app').innerHTML = `${sidebar()}<div class="main">${topbar()}
+    <div class="shell"><div class="content">
+      ${S.page==='organization'?orgHead():auditHead()}
+      ${tabsBar()}
+      ${body()}
+    </div>${assistantPanel()}</div></div>`;
+  $('#stage').classList.toggle('phone', S.phone);
+  chrome();
+}
+
+/* ══ dialogs ══════════════════════════════════════════════════════════════ */
+const dlg = () => $('#dlg');
+function openDlg(html, wide){ const d=dlg(); d.className = wide?'wide':''; d.innerHTML=html; d.showModal(); }
+function closeDlg(){ dlg().close(); }
+
+function dlgShell(title, sub, bodyHtml, footHtml, extraHead){
+  return `<div class="dh"><div><h3>${title}</h3>${sub?`<div class="dsub">${sub}</div>`:''}</div>
+    ${extraHead||''}
+    <button class="icon-btn" style="margin-left:auto" data-act="close" aria-label="Close">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="db">${bodyHtml}</div><div class="df">${footHtml}</div>`;
+}
+
+function receiptDlg(id){
+  const r = RECEIPTS.find(x=>x.id===id); if(!r) return;
+  const g = (t,rows) => `<div class="rg"><h4>${t}</h4><div class="rb">${facts(rows.map(([k,v])=>[k, esc(v)]))}</div></div>`;
+  const tierNote = r.tier==='gateway'
+    ? '<span class="chip pass"><i class="dot"></i>gateway — enforced</span>'
+    : r.tier==='observe' ? '<span class="chip"><i class="dot"></i>observe — recorded, not enforced</span>'
+    : '<span class="chip hold"><i class="dot"></i>harness</span>';
+  openDlg(dlgShell(`Receipt ${mono(r.id)}`,
+    `${esc(r.tool)} · ${esc(r.at)} · ${esc(r.agent)}`,
+    `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+       ${chip(r.decision, RESULT[r.decision]||'')} ${tierNote}
+       ${r.amount!=='—'?plain(r.amount,'hold'):''}
+       ${plain('workspace '+r.ws)}</div>
+     ${g('Who', r.who)}${g('What', r.what)}${g('Authority', r.authority)}
+     ${g('Credential', r.credential)}${g('Effect', r.effectRows)}${g('Integrity', r.integrity)}`,
+    `<button class="btn ghost" data-act="close">Close</button>
+     <button class="btn" data-act="download" data-id="${esc(r.id)}">${I.down}Export receipt</button>
+     <button class="btn" data-act="noop">Open the run</button>`), true);
+}
+
+function incidentDlg(id){
+  const i = INCIDENTS.find(x=>x.id===id); if(!i) return;
+  openDlg(dlgShell(esc(i.title), `${mono(i.id)} · ${esc(i.kind)} · opened ${esc(i.at)}`,
+    `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+       ${chip(i.sev, SEV[i.sev])} ${i.status==='open'?chip('open','deny'):chip('resolved','pass')}
+       ${plain(i.scope)}</div>
+     <div class="rg"><h4>What happened</h4><div class="rb"><p style="margin:0">${esc(i.detail)}</p></div></div>
+     <div class="rg"><h4>${i.status==='open'?'Where it stands':'Resolution'}</h4>
+       <div class="rb"><p style="margin:0 0 10px">${esc(i.resolution)}</p>
+       ${i.closedAt?facts([['Closed',esc(i.closedAt)+' by '+esc(i.closedBy)],
+                           ['Runs affected', i.runs===0?'none — no run carried this':String(i.runs)]]):
+                    facts([['Owner','Helena Vogt'],['Due','2026-09-30']])}</div></div>`,
+    `<button class="btn ghost" data-act="close">Close</button>
+     ${i.status==='open'?'<button class="btn" data-act="noop">Assign</button>':''}
+     <button class="btn" data-act="noop">Export incident</button>`));
+}
+
+function newWsDlg(){
+  openDlg(dlgShell('Create a workspace','a governance partition inside Acme Robotics',
+    `<div class="fldset">
+      <div><label class="fld" for="nw-name">Name</label><input class="inp" id="nw-name" value="Robotics firmware"></div>
+      <div><label class="fld" for="nw-ns">Namespace — immutable, 2 to 6 characters, used in every agent key</label>
+        <input class="inp" id="nw-ns" value="fw" maxlength="6"></div>
+      <div><label class="fld" for="nw-repo">Main repo — required at creation</label>
+        <select class="inp" id="nw-repo">
+          <option>acme/firmware</option><option>acme/robot-os</option><option>acme/tooling</option></select>
+        <p class="note" style="margin:6px 0 0">From the GitHub App installation on the <span class="mono">acme</span>
+        organization. Binding installs the app on this repository and indexes it into the code graph.</p></div>
+      <div><label class="fld" for="nw-branch">Production branch</label>
+        <select class="inp" id="nw-branch"><option>main</option><option>release</option></select>
+        <p class="note" style="margin:6px 0 0">What a witness must fail on before it may pass on a pull request.</p></div>
+      <div class="grid g2" style="gap:13px">
+        <div><label class="fld" for="nw-gov">Governance mode</label>
+          <select class="inp" id="nw-gov"><option>team</option><option>solo</option><option>regulated</option></select></div>
+        <div><label class="fld" for="nw-ret">Retention mode</label>
+          <select class="inp" id="nw-ret"><option>content_exact</option><option>digest_only</option></select></div>
+      </div>
+      <div class="callout">Creating a workspace is a governed action. It writes a control-plane event, creates the
+      steering set and the <span class="mono">.oxagen/</span> directory in the main repo through a Context PR, and does
+      nothing else until you register an agent.</div>
+    </div>`,
+    `<button class="btn ghost" data-act="close">Cancel</button>
+     <button class="btn primary" data-act="create-ws">Create workspace</button>`));
+}
+
+function inviteDlg(){
+  openDlg(dlgShell('Invite people','they receive one email; the invitation expires in 7 days',
+    `<div class="fldset">
+      <div><label class="fld" for="iv-email">Email addresses</label>
+        <input class="inp" id="iv-email" placeholder="name@acme.example, other@acme.example"></div>
+      <div class="grid g2" style="gap:13px">
+        <div><label class="fld" for="iv-org">Org role</label>
+          <select class="inp" id="iv-org">${ORG_ROLES.map(r=>`<option ${r==='member'?'selected':''}>${r}</option>`).join('')}</select></div>
+        <div><label class="fld" for="iv-ws">Workspace</label>
+          <select class="inp" id="iv-ws"><option>— org only</option>
+            ${WORKSPACES.map(w=>`<option>${w.slug}</option>`).join('')}</select></div>
+      </div>
+      <div class="callout">SSO is enforced, so an invited person signs in through Okta. If SCIM already knows them, the
+      invitation is skipped and the role is applied at their next sign-in.</div></div>`,
+    `<button class="btn ghost" data-act="close">Cancel</button>
+     <button class="btn primary" data-act="send-invite">Send invitations</button>`));
+}
+
+function roleDlg(i, next){
+  const m = MEMBERS[i];
+  openDlg(dlgShell(`Change ${esc(m[0])}’s org role`, `${mono(m[1])} · ${esc(m[2])} → ${esc(next)}`,
+    `${facts([
+      ['Takes effect','at their next request'],
+      ['Their agents','unchanged. An agent’s effective permission is its own grants intersected with the operator’s, so this can narrow what their agents may do, never widen it.'],
+      ['Recorded as',mono('role.change')+' — a control-plane event with who, what and when, retained 7 years'],
+      ['Reversible','yes, and the reversal is its own event']])}
+     ${next==='owner'?'<div class="callout" style="margin-top:12px"><b>Owner is the ceiling.</b> An owner can change funding, bind data planes, rotate keys and remove any member, including you.</div>':''}`,
+    `<button class="btn ghost" data-act="cancel-role" data-i="${i}">Cancel</button>
+     <button class="btn primary" data-act="confirm-role" data-i="${i}" data-v="${esc(next)}">Change role</button>`));
+}
+
+function cmdkDlg(){
+  const cmds = [
+    ['Go to Members','organization','people'],['Go to Workspaces','organization','workspaces'],
+    ['Go to Model funding and routes','organization','model'],['Go to Data plane','organization','data-plane'],
+    ['Go to API keys','organization','api-keys'],['Go to Workspace settings','organization','workspace-settings'],
+    ['Go to Control-plane events','audit','events'],['Go to Incidents','audit','incidents'],
+    ['Search receipts','audit','receipts'],['Go to Legal holds','audit','holds'],
+    ['Go to Exports','audit','exports'],['Go to Keys','audit','keys'],
+    ['Go to Assurance suite','audit','assurance'],['Go to Retention and erasure','audit','retention']
+  ];
+  openDlg(`<div class="dh" style="padding:0"><div class="search" style="border:0;border-radius:0;width:100%;padding:14px 18px">
+      <span>${I.search}</span><input id="cmdq" placeholder="Search or run a command" aria-label="Command menu" autofocus></div></div>
+    <div class="cmd-list" id="cmdlist">${cmds.map(([l,p,t])=>
+      `<button class="cmd" data-act="cmd-go" data-page="${p}" data-tab="${t}">${esc(l)}
+        <span class="cg">${p==='audit'?'audit':'organization'}</span></button>`).join('')}</div>
+    <div class="df"><span class="note" style="margin-right:auto">Every command here is the same agent tool contract the
+      API, MCP and the CLI call.</span><button class="btn ghost" data-act="close">Close</button></div>`);
+  const q = $('#cmdq');
+  q.addEventListener('input', () => {
+    const v = q.value.toLowerCase();
+    $('#cmdlist').querySelectorAll('.cmd').forEach(b =>
+      b.hidden = !b.textContent.toLowerCase().includes(v));
+  });
+}
+
+function simpleDlg(title, sub, bodyHtml, primary){
+  openDlg(dlgShell(title, sub, bodyHtml,
+    `<button class="btn ghost" data-act="close">Close</button>
+     ${primary?`<button class="btn primary" data-act="close">${primary}</button>`:''}`));
+}
+
+/* ══ events ═══════════════════════════════════════════════════════════════ */
+function addEvent(actor, kind, action, target, plane, result){
+  const now = new Date().toISOString().replace('T',' ').slice(0,19)+'Z';
+  AUDIT_EVENTS.unshift([now, actor, kind, action, target, plane, result,
+    'evt_'+Math.random().toString(36).slice(2,8).toUpperCase()]);
+}
+
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]'); if(!el) return;
+  const a = el.dataset.act, v = el.dataset.v, i = +el.dataset.i, id = el.dataset.id;
+
+  if(a==='tab'){ e.preventDefault(); go(el.dataset.page||S.page, el.dataset.tab); return; }
+
+  const nav = el.dataset.nav;
+  if(nav && nav!=='organization' && nav!=='audit'){
+    e.preventDefault();
+    if(nav==='billing'){
+      simpleDlg('Billing','/acme/billing — the third organization page',
+        '<p class="note" style="margin:0 0 10px">Plan, run allowance, the retention meter and invoices live here, linked '
+        + 'to Stripe. It is mocked in <b>W8 · Every dollar, every operator</b>, beside Spend.</p>'
+        + facts([['This month','4,118 runs · 1,000 free · 3,118 billable'],
+                 ['Run price','$0.30 per run in this tier'],
+                 ['Retention meter','418 GB · 13 months included'],
+                 ['Plan',ORG.plan]]),'Back');
+    } else {
+      const names = {fleet:'Fleet',run:'Run',agents:'Agents',tools:'Tools',ontology:'Ontology',steering:'Steering',spend:'Spend'};
+      simpleDlg(names[nav]||'Workspace page','/acme/'+S.ws+' — workspace scope',
+        '<p class="note" style="margin:0 0 10px">This mockup is the organization scope: <b>Organization</b> and '
+        + '<b>Audit</b>. The seven workspace pages are mocked in the other scenarios.</p>'
+        + facts([['W2','Fleet and Run — stop it, steer it'],
+                 ['W3','Approvals and the receipt — money asked, a human answered'],
+                 ['W6','Steering — it learned, you approved, it changed'],
+                 ['W7','Ontology — the shape of your business'],
+                 ['W8','Spend — every dollar, every operator'],
+                 ['W9','Agents and Tools — the toolbelt, governed']]),'Back');
+    }
+    return;
+  }
+  if(a==='cmd-go'){ closeDlg(); go(el.dataset.page, el.dataset.tab); return; }
+  if(a==='close'){ closeDlg(); return; }
+  if(a==='noop'){ closeDlg(); return; }
+
+  if(a==='theme'){
+    const cur = document.documentElement.getAttribute('data-theme');
+    const dark = cur ? cur==='dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.setAttribute('data-theme', dark?'light':'dark'); return; }
+  if(a==='assistant'){ S.assistant = !S.assistant; render(); return; }
+  if(a==='cmdk'){ cmdkDlg(); return; }
+  if(a==='menu'){ simpleDlg('Navigation','Mission Control — 7 workspace pages, 3 organization pages',
+      `<div style="display:grid;gap:4px">${[...WS_NAV,...ORG_NAV].map(([k,l,ic])=>
+        `<div class="nav-i${S.page===k?' on':''}">${ic}<span>${esc(l)}</span></div>`).join('')}</div>
+       <p class="note" style="margin:12px 0 0">Run is a detail of Fleet; Approvals is a panel on Fleet and a strip on Run,
+       because an approval is always about a run.</p>`); return; }
+  if(a==='notif'){ simpleDlg('Notifications','3 unread',
+      facts([['<span class="chip deny"><i class="dot"></i>medium</span> inc_7749','Two assurance cases are not applicable at observe tier. Owner Helena Vogt, due 2026-09-30. <span class="mono">4 h ago</span>'],
+             ['<span class="chip hold"><i class="dot"></i>export</span> exp_rcpt_q3_finops','Receipt export is building — 1,204 receipts. <span class="mono">12 min ago</span>'],
+             ['<span class="chip pass"><i class="dot"></i>assurance</span> release 1.4.2','Suite ran clean against acme-dc1: 8 passed, 0 failed. <span class="mono">6 h ago</span>']])); return; }
+  if(a==='account'){ simpleDlg('Account','Priya Natarajan · priya@acme.example',
+      facts([['Org role',mono('owner')],
+             ['Workspaces','core-platform '+plain('owner')+' · finops '+plain('owner')],
+             ['Sign-in','Okta SSO · break-glass exempt (every sign-in is an event)'],
+             ['Two-factor','hardware key · registered 2026-02-14'],
+             ['Sessions','2 active — macOS Safari (eu-central-1), CLI '+mono('oxagen login')],
+             ['Preferences','theme follows the system · display currency USD · times in UTC']]),'Done'); return; }
+
+  /* Organization */
+  if(a==='switch-org'){ simpleDlg('Switch organization','you belong to 2',
+      `<div style="display:grid;gap:8px">
+        <button class="btn" style="justify-content:flex-start" data-act="close"><span class="sw-mark">AR</span>
+          Acme Robotics <span class="mono" style="color:var(--muted);margin-left:auto">org_7QK3M8VZ · owner</span></button>
+        <button class="btn" style="justify-content:flex-start" data-act="close"><span class="sw-mark ws">NR</span>
+          Northwind Research <span class="mono" style="color:var(--muted);margin-left:auto">org_1PB4XZQ0 · viewer</span></button>
+      </div>`); return; }
+  if(a==='switch-ws'){ simpleDlg('Switch workspace','inside Acme Robotics',
+      `<div style="display:grid;gap:8px">${WORKSPACES.map(w=>
+        `<button class="btn" style="justify-content:flex-start" data-act="pick-ws" data-v="${w.slug}">
+          <span class="sw-mark ws">${esc(w.ns)}</span>${esc(w.name)}
+          <span class="mono" style="color:var(--muted);margin-left:auto">${w.agents} agents · ${esc(w.gov)}</span></button>`).join('')}</div>`); return; }
+  if(a==='pick-ws'){ S.ws=v; closeDlg(); render(); return; }
+  if(a==='ws-pick'){ S.wsSettings=v; render(); return; }
+  if(a==='funding'){ S.funding=v; addEvent('Priya Natarajan','human','model_funding.set',
+      v==='customer_key'?'customer_key · OpenRouter pk_or_9T4…':'platform · capped $2,500.00/month','shared','allowed'); render(); return; }
+  if(a==='plane'){ S.plane=v; render(); return; }
+  if(a==='invite'){ inviteDlg(); return; }
+  if(a==='send-invite'){ closeDlg(); addEvent('Priya Natarajan','human','invitation.create','1 invitation sent','shared','allowed');
+      simpleDlg('Invitations sent','1 invitation','<p class="note" style="margin:0">Recorded as '+mono('invitation.create')+
+        ' in the control-plane audit. <a href="#/'+ORG.slug+'/audit/events">See the event.</a></p>','Done'); return; }
+  if(a==='new-ws'){ newWsDlg(); return; }
+  if(a==='create-ws'){
+      const name = $('#nw-name').value || 'Robotics firmware', ns = $('#nw-ns').value || 'fw',
+            repo = $('#nw-repo').value, br = $('#nw-branch').value,
+            gov = $('#nw-gov').value, ret = $('#nw-ret').value;
+      WORKSPACES.push({slug:name.toLowerCase().replace(/\s+/g,'-'), ns, id:'wrk_'+Math.random().toString(36).slice(2,10).toUpperCase(),
+        name, mainRepo:repo, branch:br, linked:[], agents:0, gov, retention:ret, owner:'Priya Natarajan',
+        belt:'40 tools · 12k tokens', bound:new Date().toISOString().slice(0,10)});
+      addEvent('Priya Natarajan','human','workspace.create', name+' · main repo '+repo,'dedicated','allowed');
+      closeDlg(); go('organization','workspaces'); return; }
+  if(a==='ws-settings'){ S.wsSettings=el.dataset.ws; go('organization','workspace-settings'); return; }
+  if(a==='open-ws'){ simpleDlg('Workspace pages','this mockup covers the organization scope',
+      `<p class="note" style="margin:0 0 10px">${esc(el.dataset.ws||S.ws)} opens on Fleet. Fleet, Run, Agents, Tools,
+      Ontology, Steering and Spend are mocked in the other scenarios; this one is the CIO’s console: Organization and
+      Audit.</p>${facts([['W2','Stop it. Steer it. — Fleet and Run'],['W3','Money asked, a human answered — Approvals and the receipt'],
+        ['W9','The toolbelt, governed — Agents and Tools'],['W10','You are here — Organization and Audit']])}`,'Back'); return; }
+  if(a==='role'){ return; }
+  if(a==='member'){ const m=MEMBERS[i]; simpleDlg(esc(m[0]), esc(m[1]),
+      facts([['Org role',plain(m[2])],['Workspaces',m[3].map(([w,r])=>mono(w)+' '+plain(r)).join(' · ')],
+             ['Agents they operate', m[0]==='Marcus Bell'?'19 · core-platform':m[0]==='Dana Okafor'?'12 · finops':'—'],
+             ['Mandates held', m[0]==='Dana Okafor'?'granted 1 — mnd_5FT9JQ to acme.finops.invoice-bot':'none'],
+             ['Source',m[6]==='scim'?'SCIM from Okta — role changes here are overwritten at the next sync unless the group mapping changes':'created manually'],
+             ['Two-factor',esc(m[5])],['Last active',esc(m[4])]]),'Done'); return; }
+  if(a==='resend'||a==='revoke-invite'){ addEvent('Priya Natarajan','human',
+      a==='resend'?'invitation.resend':'invitation.revoke', INVITES[i][0],'shared','allowed');
+      simpleDlg(a==='resend'?'Invitation resent':'Invitation revoked', esc(INVITES[i][0]),
+      '<p class="note" style="margin:0">Recorded in the control-plane audit.</p>','Done'); return; }
+  if(a==='sso'||a==='scim'){ simpleDlg(a==='sso'?'Single sign-on':'SCIM mappings',
+      a==='sso'?'Okta · SAML 2.0':'group to org role',
+      '<p class="note" style="margin:0 0 10px">Changing identity configuration is a governed action: it is approved, '+
+      'recorded, and in regulated workspaces it is a Context PR on the main repo.</p>'+
+      facts(a==='sso'?[['Enforcement','all members except 2 break-glass accounts'],
+                       ['Just-in-time provisioning','off — SCIM is the writer'],
+                       ['Session lifetime','8 hours, then re-assert']]
+                     :[[mono('acme-eng-leads'),'→ org role admin'],[mono('acme-finance'),'→ org role billing'],
+                       [mono('acme-grc'),'→ org role compliance'],[mono('acme-all'),'→ org role member'],
+                       ['Unmapped groups','ignored — a group with no mapping grants nothing']]),'Done'); return; }
+  if(a==='new-key'||a==='rotate-key'||a==='revoke-key'){
+      const t = a==='new-key'?'Create an API key':a==='rotate-key'?'Rotate this key':'Revoke this key';
+      simpleDlg(t, a==='new-key'?'shown once, at creation, and never again':esc(APIKEYS[i]?APIKEYS[i][0]:''),
+      a==='new-key'
+        ? `<div class="fldset"><div><label class="fld" for="k-name">Name</label><input class="inp" id="k-name" placeholder="What is it for"></div>
+           <div><label class="fld" for="k-scope">Grants</label><select class="inp" id="k-scope">
+             <option>audit.read, receipt.read, export.read</option><option>cost.read, run.read</option>
+             <option>workspace.write, agent.write, grant.write</option></select></div>
+           <div class="callout">A key carries grants, not roles. It becomes a service principal and every call it makes is
+           audited against it.</div></div>`
+        : `<p class="note" style="margin:0 0 10px">${a==='rotate-key'
+            ? 'Rotation issues a new secret and keeps the old one valid for 24 hours so callers can move. Both are audited.'
+            : 'Revocation ends the service principal’s access at the next call. Runs it started keep their records.'}</p>`,
+      a==='new-key'?'Create key':a==='rotate-key'?'Rotate':'Revoke'); return; }
+  if(a==='export-org'){ simpleDlg('Export configuration','one JSON document, signed',
+      `<pre class="code">$ oxagen org export --org acme --out acme-config.json
+
+  members and roles          34 people, 41 role grants
+  workspaces                 2 (core-platform, finops)
+  model funding and routes   customer_key · 4 tiers · 4 in-firewall routes
+  data plane                 dedicated · eu-central-1
+  api keys                   4 (names and grants; no secrets)
+  retention policy           bodies 7 y · frames 13 m · audit 7 y
+
+  written acme-config.json (signed ed25519:MEQCIF…)</pre>`,'Download'); return; }
+  if(a==='request-plane'){ simpleDlg('Request a data plane change','a migration, not a toggle',
+      '<p class="note" style="margin:0 0 10px">Moving a plane is an export and import of one organization’s data, run by '+
+      'the archiver with the graph exported database-to-database. Runs keep recording throughout; the cutover is a single '+
+      'resolver change.</p>'+facts([['Typical duration','4 to 9 hours for 418 GB'],
+        ['Downtime','none for recording; Mission Control is read-only for the cutover window'],
+        ['Who can request it','an owner, with Oxagen support on an enterprise plan'],
+        ['Recorded as',mono('plane.change')+' in the control-plane audit']]),'Request'); return; }
+
+  /* Audit */
+  if(a==='incident'){ incidentDlg(id); return; }
+  if(a==='open-receipt'){ receiptDlg(id); return; }
+  if(a==='rq'){ S.rq = v; if(S.page!=='audit'||S.tab!=='receipts'){ go('audit','receipts'); } else render(); return; }
+  if(a==='search-receipts'){ S.rq = $('#rq').value; render(); return; }
+  if(a==='verify'){
+      const box = $('#verify-'+id); if(!box) return;
+      box.innerHTML = `<div class="sep"></div><pre class="code">$ ./oxagen-verify --bundle ${esc(id)} --release-key rel-2026-03
+  merkle roots        recomputed and matched
+  seal attestations   signatures verified
+  chain continuity    no gaps, no reordering
+  OK  internally consistent and signed</pre>`;
+      return; }
+  if(a==='download'){ simpleDlg('Download','the browser sandbox in this mockup cannot hand you a file',
+      `<p class="note" style="margin:0 0 10px">In the product this downloads <span class="mono">${esc(id||'the bundle')}</span>
+      as a signed archive with its verifier. Here it is a mockup, so nothing is written to disk.</p>`,'Understood'); return; }
+  if(a==='new-export'){ simpleDlg('Export an evidence bundle','segments, attestations, key ids, and the verifier',
+      `<div class="fldset">
+        <div><label class="fld" for="ex-scope">Scope</label><select class="inp" id="ex-scope">
+          <option>core-platform · all runs</option><option>finops · all runs</option>
+          <option>financial tool calls only · all workspaces</option><option>one agent</option></select></div>
+        <div class="grid g2" style="gap:13px">
+          <div><label class="fld" for="ex-from">From</label><input class="inp" id="ex-from" value="2026-08-01"></div>
+          <div><label class="fld" for="ex-to">To</label><input class="inp" id="ex-to" value="2026-08-31"></div></div>
+        <div><label class="fld" for="ex-fmt">Format</label><select class="inp" id="ex-fmt">
+          <option>Signed bundle (segments + verifier)</option><option>Receipts as CSV</option><option>Receipts as JSON</option></select></div>
+        <div class="callout">Bodies for erased subjects are not in the bundle. Their digests and tombstone frames are, so
+        the chain still verifies and the gap is visible rather than silent.</div></div>`,'Build bundle'); return; }
+  if(a==='hold'){ simpleDlg('Place a legal hold','pins retention and blocks erasure',
+      `<div class="fldset">
+        <div><label class="fld" for="h-matter">Matter</label><input class="inp" id="h-matter" placeholder="Northwind arbitration"></div>
+        <div><label class="fld" for="h-scope">Scope</label><select class="inp" id="h-scope">
+          <option>a workspace</option><option>one agent, all runs</option><option>named runs</option>
+          <option>a date range</option></select></div>
+        <div class="callout">A hold outranks the retention clock and any erasure request in its scope. Releasing it returns
+        those objects to the 7-year clock; it never deletes anything by itself.</div></div>`,'Place hold'); return; }
+  if(a==='release-hold'){ simpleDlg('Release '+esc(id||'the hold'),'returns its objects to normal retention',
+      '<p class="note" style="margin:0">812 bodies return to the 7-year clock, and erasure request '+
+      mono('ers_2026_0418')+' unblocks and runs on the next archiver pass. Recorded as '+mono('hold.release')+'.</p>','Release'); return; }
+  if(a==='rotate'){ simpleDlg('Rotate the key-encryption key','a new generation, nothing rewritten',
+      facts([['New generation','gen 5 in '+mono('arn:aws:kms:eu-central-1:4471…:key/9c2f')],
+             ['Takes effect','immediately for new bodies, segments and subject keys'],
+             ['Old generation','gen 4 becomes '+plain('retiring','hold')+' and stays valid for decryption until re-wrap completes'],
+             ['Re-wrap','runs in the archiver, roughly 6 days at current volume'],
+             ['Receipts','keep citing the signing generation they were signed under — an old receipt still verifies'],
+             ['Recorded as',mono('key.rotate')+' with who, when and the generation']]),'Rotate'); return; }
+  if(a==='run-assurance'){ simpleDlg('Run the assurance suite','against acme-dc1',
+      `<pre class="code">$ oxagen assurance run --deployment acme-dc1 --suite assurance/2026.08
+
+  10 cases queued in the witness runner (isolated plane, own credentials)
+  ...
+  8 passed · 0 failed · 2 not applicable (observe tier)
+
+  result exp_assurance_142 signed ed25519:MEUCIBf0…77ad</pre>
+      <p class="note" style="margin:11px 0 0">A failure blocks the release. A case that cannot run at your tier is
+      reported as not applicable, never as passed.</p>`,'Done'); return; }
+  if(a==='edit-retention'){ simpleDlg('Retention policy','organization-wide',
+      `<div class="fldset">
+        <div><label class="fld" for="r-bodies">Body retention</label><select class="inp" id="r-bodies">
+          <option>7 years (default)</option><option>10 years</option><option>indefinite</option></select></div>
+        <div><label class="fld" for="r-hot">Frame hot window</label><select class="inp" id="r-hot">
+          <option>13 months (default)</option><option>6 months</option><option>24 months</option></select></div>
+        <div class="callout">Shortening the hot window compacts frame nodes sooner and saves graph cost. It does not touch
+        bodies, and replay of a compacted run reads the segment at the same grade.</div></div>`,'Save policy'); return; }
+  if(a==='new-erasure'){ simpleDlg('Record an erasure request','GDPR Article 17',
+      `<div class="fldset">
+        <div><label class="fld" for="er-sub">Subject reference (hashed before storage)</label>
+          <input class="inp" id="er-sub" placeholder="dsr-8941"></div>
+        <div><label class="fld" for="er-due">Due</label><input class="inp" id="er-due" value="2026-09-25"></div>
+        <div class="callout">Erasure destroys the per-subject data key and writes a tombstone frame carrying the digests
+        that remain. The chain stays verifiable; the content is unrecoverable. A legal hold in scope blocks it and says so.</div></div>`,'Record request'); return; }
+  if(a==='export-events'){ simpleDlg('Export events','CSV',
+      '<p class="note" style="margin:0">18,402 events in the last 30 days, with actor, action, target, plane, result and '+
+      'event id. The same rows the API and MCP return.</p>','Download CSV'); return; }
+  if(a==='retry'){ S.state='loaded'; render(); return; }
+  if(a==='status'){ S.state='loaded'; go('organization','data-plane'); return; }
+  if(a==='widen'){ S.state='loaded'; render(); return; }
+  if(a==='request-access'){ simpleDlg('Request access','routed to the people who can grant it',
+      facts([['You are','Tobias Lang · org role '+mono('member')],
+             ['You asked for',S.page==='organization'?mono('org.members.read'):mono('audit.receipt.read')],
+             ['Goes to','Priya Natarajan (owner), Helena Vogt (admin)'],
+             ['Recorded as',mono('access.request')+' — and so was the denial that sent you here']]),'Send request'); return; }
+  if(a==='edit-route'){ simpleDlg('Edit the '+esc(el.dataset.tier)+' route','organization setting, platform default',
+      `<div class="fldset">
+        <div><label class="fld" for="rt-p">Provider</label><select class="inp" id="rt-p">
+          <option>OpenRouter</option><option>Anthropic (direct)</option><option>OpenAI (direct)</option>
+          <option>In-firewall endpoint</option></select></div>
+        <div><label class="fld" for="rt-m">Route</label><input class="inp" id="rt-m" value="z-ai/glm-latest"></div>
+        <div><label class="fld" for="rt-f">Fallback on a provider error</label><input class="inp" id="rt-f" value="z-ai/glm-air-latest"></div>
+        <div class="callout">Configure the alias, record the concrete model. Every fallback is a frame, so a run shows
+        exactly which model answered and why.</div></div>`,'Save route'); return; }
+  if(a==='save-ws'){ addEvent('Priya Natarajan','human','workspace.update', S.wsSettings+' · settings','dedicated','allowed');
+      simpleDlg('Saved', esc(S.wsSettings),'<p class="note" style="margin:0">Recorded as '+mono('workspace.update')+
+      '. In a regulated workspace this is a Context PR on the main repo before it takes effect.</p>','Done'); return; }
+});
+
+document.addEventListener('change', e => {
+  const el = e.target.closest('[data-act="role"]'); if(!el) return;
+  roleDlg(+el.dataset.i, el.value);
+});
+document.addEventListener('keydown', e => {
+  if((e.metaKey||e.ctrlKey) && e.key.toLowerCase()==='k'){ e.preventDefault(); cmdkDlg(); }
+  if(e.key==='Enter' && e.target.id==='rq'){ S.rq = e.target.value; render(); }
+  if(e.key==='Enter' && e.target.closest('tr.click')){ e.target.closest('tr.click').click(); }
+});
+dlg().addEventListener('click', e => {
+  const el = e.target.closest('[data-act]');
+  if(!el) return;
+  const a = el.dataset.act;
+  if(a==='confirm-role'){ MEMBERS[+el.dataset.i][2] = el.dataset.v;
+    addEvent('Priya Natarajan','human','role.change', MEMBERS[+el.dataset.i][0]+' → '+el.dataset.v,'shared','allowed');
+    closeDlg(); render(); }
+  if(a==='cancel-role'){ closeDlg(); render(); }
+});
+
+/* ══ mockup chrome (not product UI) ═══════════════════════════════════════ */
+function chrome(){
+  const states = ['loaded','empty','loading','error','denied'];
+  $('#chrome').innerHTML = `<div class="ch-t">mockup chrome · <b>W10 · the CIO&#39;s console</b></div>
+    <div class="chrome-row">${states.map(s=>
+      `<button data-ch="state" data-v="${s}" aria-pressed="${S.state===s}">${s}</button>`).join('')}
+      <button data-ch="phone" aria-pressed="${S.phone}">phone 400</button></div>`;
+}
+$('#chrome').addEventListener('click', e => {
+  const b = e.target.closest('[data-ch]'); if(!b) return;
+  if(b.dataset.ch==='state') S.state = b.dataset.v;
+  if(b.dataset.ch==='phone') S.phone = !S.phone;
+  render();
+});
+
+/* ══ boot ═════════════════════════════════════════════════════════════════ */
+addEventListener('hashchange', () => { parseHash(); render(); window.scrollTo(0,0); });
+if(!location.hash) location.hash = `#/${ORG.slug}/people`;
+parseHash(); render();
+</script>
+
+<!-- list-controls: search · sort · column filters · rows per page · pager -->
+<style>
+/* List controls: search, column filters, rows per page, sortable headers, pager.
+   Colors derive from the page's own text color so the block reads correctly in
+   every mockup theme; only the accent leans on --gold. */
+.lt{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:9px 12px;border-bottom:1px solid var(--border,color-mix(in srgb,currentColor 16%,transparent));font-family:inherit;font-size:12.5px}
+.lt.free{border:1px solid var(--border,color-mix(in srgb,currentColor 16%,transparent));border-radius:10px;margin-bottom:10px}
+.lt .lt-q{flex:1 1 200px;min-width:140px;background:color-mix(in srgb,currentColor 5%,transparent);border:1px solid var(--border,color-mix(in srgb,currentColor 16%,transparent));border-radius:8px;padding:6px 10px;font-size:12.5px;color:inherit;outline:none;font-family:inherit;transition:border-color .12s}
+.lt .lt-q:focus{border-color:var(--gold,#D6962C)}
+.lt .lt-q::placeholder{color:inherit;opacity:.5}
+.lt select{appearance:auto;background:color-mix(in srgb,currentColor 5%,transparent);border:1px solid var(--border,color-mix(in srgb,currentColor 16%,transparent));border-radius:8px;padding:5px 8px;font-size:12px;color:inherit;outline:none;font-family:inherit;max-width:220px;transition:border-color .12s}
+.lt select:focus{border-color:var(--gold,#D6962C)}
+.lt .lt-rows{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--muted,inherit);white-space:nowrap;margin-left:auto}
+.lp{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 12px;font-size:11.5px;color:var(--muted,inherit);font-family:inherit}
+.lp.free{border:1px solid var(--border,color-mix(in srgb,currentColor 16%,transparent));border-radius:10px;margin-top:10px}
+.lp .lp-n{font-family:var(--mono,ui-monospace,monospace);font-variant-numeric:tabular-nums;opacity:.85}
+.lp .lp-pg{margin-left:auto;display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+.lp .lp-b{border:1px solid var(--border,color-mix(in srgb,currentColor 16%,transparent));background:color-mix(in srgb,currentColor 5%,transparent);color:inherit;border-radius:7px;padding:2px 8px;min-width:28px;font-size:12px;font-family:inherit;cursor:pointer;font-variant-numeric:tabular-nums;line-height:1.5;transition:border-color .12s}
+.lp .lp-b:hover{border-color:color-mix(in srgb,currentColor 35%,transparent)}
+.lp .lp-b[aria-current="page"]{border-color:var(--gold,#D6962C);color:var(--gold,#D6962C)}
+.lp .lp-b:disabled{opacity:.4;cursor:default}
+.lp .lp-pg .el{padding:0 4px;opacity:.6}
+th.sortable{cursor:pointer;user-select:none}
+th.sortable::after{content:"↕";margin-left:5px;opacity:.35;font-size:10px}
+th.sortable[aria-sort="ascending"]::after{content:"↑";color:var(--gold,#D6962C);opacity:1}
+th.sortable[aria-sort="descending"]::after{content:"↓";color:var(--gold,#D6962C);opacity:1}
+.lt-empty td{opacity:.6;text-align:center;padding:18px}
+@media (max-width:520px){.lt .lt-q{flex-basis:100%}.lt .lt-rows{margin-left:0}}
+</style>
+<script>
+/* ============================== List controls ============================== */
+/* Self-contained: every table with a thead gets a search box, sortable column
+   headers, a filter select for each column that is a small enumeration, a
+   rows-per-page select and a pager. Installs itself through a DOM observer so
+   it works with any render path; state is keyed by page + column signature so
+   a full re-render lands back on the same page, sort and query. */
+(function(){
+"use strict";
+if(window.__ltInstalled)return; window.__ltInstalled=true;
+var STORE={}, PER=[5,10,25,50,0], BUSY=false, TIMER=null;
+var FACET=/status|state|tier|kind|role|risk|severity|result|health|effect|mode|side|level|verdict|decision|origin|scope|period|basis|algorithm|trend|position|governance|two-factor|sso|replay|grade|outcome/i;
+function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function num(s){
+  s=String(s==null?"":s).trim();
+  if(!s||/^\d{4}-\d{2}/.test(s))return null;
+  var c=s.replace(/[$,%×]/g,""), m=c.match(/^[-+]?\d*\.?\d+(?:e[-+]?\d+)?/i);
+  if(!m)return null;
+  var n=parseFloat(m[0]), u=c.slice(m[0].length).match(/^\s*([kKMB])(?![A-Za-z])/);
+  if(u){ if(u[1]==="k"||u[1]==="K")n*=1e3; else if(u[1]==="M")n*=1e6; else n*=1e9; }
+  return n;
+}
+function cmp(a,b,isNum,dir){
+  if(isNum){var x=a.n,y=b.n; if(x==null&&y==null)return 0; if(x==null)return 1; if(y==null)return -1; if(x!==y)return (x-y)*dir;}
+  return a.t.localeCompare(b.t,undefined,{numeric:true,sensitivity:"base"})*dir;
+}
+function el(html){var d=document.createElement("div");d.innerHTML=html;return d.firstChild;}
+function pageCtx(){var h1=document.querySelector("main h1, .page h1, h1"); return location.hash+"|"+(h1?h1.textContent.trim().slice(0,40):"");}
+function state(sig,ord){var key=pageCtx()+"|"+sig+"#"+ord; return STORE[key]||(STORE[key]={q:"",sort:null,dir:1,per:10,page:1,f:{}});}
+
+function pager(st,total,onPage){
+  var per=st.per||total||1, pages=Math.max(1,Math.ceil(total/per));
+  if(st.page>pages)st.page=pages; if(st.page<1)st.page=1;
+  var from=total?((st.page-1)*per+1):0, to=Math.min(total,st.page*per);
+  var html='<div class="lp"><span class="lp-n">'+(total?from+'–'+to+' of '+total:'0 of 0')+'</span><span class="lp-pg">'+
+   '<button type="button" class="lp-b" data-p="prev" aria-label="Previous page"'+(st.page<=1?' disabled':'')+'>‹</button>';
+  var nums=[]; if(pages<=7){for(var i=1;i<=pages;i++)nums.push(i);} else {
+    nums=[1]; var lo=Math.max(2,st.page-1), hi=Math.min(pages-1,st.page+1);
+    if(lo>2)nums.push("…"); for(var j=lo;j<=hi;j++)nums.push(j); if(hi<pages-1)nums.push("…"); nums.push(pages);}
+  nums.forEach(function(p){html+= p==="…"?'<span class="el">…</span>':'<button type="button" class="lp-b" data-p="'+p+'"'+(p===st.page?' aria-current="page"':'')+'>'+p+'</button>';});
+  html+='<button type="button" class="lp-b" data-p="next" aria-label="Next page"'+(st.page>=pages?' disabled':'')+'>›</button></span></div>';
+  var lp=el(html);
+  lp.addEventListener("click",function(e){var b=e.target.closest("button[data-p]"); if(!b||b.disabled)return; e.stopPropagation(); var p=b.getAttribute("data-p");
+    st.page = p==="prev"?st.page-1 : p==="next"?st.page+1 : +p; onPage();});
+  return lp;
+}
+function bar(st,opts,apply){
+  var html='<div class="lt"><input class="lt-q" type="search" placeholder="'+esc(opts.ph)+'" aria-label="'+esc(opts.ph)+'" value="'+esc(st.q)+'">';
+  (opts.filters||[]).forEach(function(f){
+    html+='<select class="lt-f" data-k="'+esc(f.key)+'" aria-label="Filter by '+esc(f.label)+'"><option value="">All · '+esc(f.label)+'</option>'+
+      f.values.map(function(v){return '<option value="'+esc(v)+'"'+(st.f[f.key]===v?' selected':'')+'>'+esc(v)+'</option>';}).join("")+'</select>';});
+  html+='<label class="lt-rows">Rows<select class="lt-per">'+PER.map(function(p){return '<option value="'+p+'"'+(st.per===p?' selected':'')+'>'+(p||"All")+'</option>';}).join("")+'</select></label></div>';
+  var b=el(html);
+  b.addEventListener("click",function(e){e.stopPropagation();});
+  b.querySelector(".lt-q").addEventListener("input",function(e){st.q=e.target.value;st.page=1;apply();});
+  b.querySelectorAll(".lt-f").forEach(function(s){s.addEventListener("change",function(e){st.f[s.getAttribute("data-k")]=e.target.value;st.page=1;apply();});});
+  b.querySelector(".lt-per").addEventListener("change",function(e){st.per=+e.target.value;st.page=1;apply();});
+  return b;
+}
+/* A column earns a filter when it is a small enumeration: 2–8 distinct short
+   values across at least 4 rows, and not unique per row. At most three per list. */
+function facets(cols,vals,rows){
+  if(rows<4)return [];
+  var c=cols.filter(function(col){ if(!col.name||col.num)return false;
+    var set={},n=0,ok=true; vals.forEach(function(v){var t=v[col.i].t; if(!t)return; if(t.length>28)ok=false; if(!set[t]){set[t]=1;n++;}});
+    if(!ok||n<2||n>8||n>=rows)return false; col.values=Object.keys(set).sort(); return true;});
+  c.sort(function(a,b){var pa=FACET.test(a.name)?0:1,pb=FACET.test(b.name)?0:1; return pa-pb||a.values.length-b.values.length;});
+  return c.slice(0,3).map(function(col){return {key:String(col.i),label:col.name,values:col.values};});
+}
+function sigOf(table){return [].slice.call(table.tHead.rows[0].cells).map(function(c){return c.textContent.trim();}).join("/");}
+function enhance(table,ord){
+  var tbody=table.tBodies[0], rows=[].slice.call(tbody.rows);
+  var ths=[].slice.call(table.tHead.rows[0].cells);
+  var cols=ths.map(function(th,i){return {i:i,name:th.textContent.trim(),num:th.classList.contains("num")};});
+  var st=state(sigOf(table),ord);
+  var vals=rows.map(function(r){return cols.map(function(c){var cell=r.cells[c.i]; var t=cell?cell.textContent.replace(/\s+/g," ").trim():""; return {t:t,n:num(t)};});});
+  cols.forEach(function(c){ if(c.num)return; var k=0,tot=0; vals.forEach(function(v){if(v[c.i].t){tot++; if(v[c.i].n!=null)k++;}}); if(tot&&k/tot>=.6)c.num=true; });
+  var texts=rows.map(function(r){return r.textContent.replace(/\s+/g," ").toLowerCase();});
+  var fs=facets(cols,vals,rows.length);
+  var wrap=table.parentNode, host=wrap.parentNode, ph="Search this list";
+  if(!host||wrap===document.body){wrap=table;host=table.parentNode;}
+  /* A lone search box sitting directly above the table becomes the list's search. */
+  var prev=wrap.previousElementSibling;
+  if(prev&&!prev.matches("table,thead,tbody")){
+    var ins=prev.querySelectorAll("input,select,button,a,textarea");
+    var inp=prev.matches("input")?prev:prev.querySelector("input[placeholder^='Search']");
+    if(inp&&inp.placeholder&&/^Search/.test(inp.placeholder)&&ins.length<=1&&!prev.textContent.trim()){ph=inp.placeholder;prev.remove();}
+  }
+  var free=!/panel|card|box/.test(host.className||"");
+  var b=bar(st,{ph:ph,filters:fs},apply), lp=document.createElement("div");
+  if(free)b.classList.add("free");
+  host.insertBefore(b,wrap); host.insertBefore(lp,wrap.nextSibling);
+  ths.forEach(function(th,i){ if(!cols[i].name)return; th.classList.add("sortable"); th.tabIndex=0; th.setAttribute("role","button");
+    function tog(e){ if(e)e.stopPropagation(); if(st.sort===i){ if(st.dir===1)st.dir=-1; else {st.sort=null;st.dir=1;} } else {st.sort=i;st.dir=1;} st.page=1; apply(); }
+    th.addEventListener("click",tog); th.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();tog(e);}}); });
+  function apply(){
+    ths.forEach(function(th,i){ if(!cols[i].name)return; th.setAttribute("aria-sort",st.sort===i?(st.dir===1?"ascending":"descending"):"none"); });
+    var q=st.q.trim().toLowerCase();
+    var idx=rows.map(function(_,i){return i;}).filter(function(i){
+      if(q&&texts[i].indexOf(q)<0)return false;
+      for(var k in st.f){ if(st.f[k]&&vals[i][+k]&&vals[i][+k].t!==st.f[k])return false; } return true; });
+    if(st.sort!=null&&cols[st.sort]){var c=cols[st.sort]; idx.sort(function(a,b){return cmp(vals[a][c.i],vals[b][c.i],c.num,st.dir)||(a-b);});}
+    var total=idx.length, per=st.per||total||1, pages=Math.max(1,Math.ceil(total/per)); if(st.page>pages)st.page=pages;
+    var slice=st.per?idx.slice((st.page-1)*st.per,st.page*st.per):idx;
+    BUSY=true;
+    while(tbody.firstChild)tbody.removeChild(tbody.firstChild);
+    if(!slice.length){var tr=document.createElement("tr"),td=document.createElement("td");tr.className="lt-empty";td.colSpan=cols.length;td.textContent="No rows match.";tr.appendChild(td);tbody.appendChild(tr);}
+    slice.forEach(function(i){tbody.appendChild(rows[i]);});
+    var nlp=pager(st,total,apply); lp.replaceWith(nlp); lp=nlp; if(free)lp.classList.add("free");
+    BUSY=false;
+  }
+  apply();
+}
+function run(){
+  BUSY=true;
+  try{
+    var ords={};
+    [].slice.call(document.querySelectorAll("table")).forEach(function(t){
+      if(!t.tHead||!t.tHead.rows[0]||!t.tBodies[0]||t.closest("[data-lt-skip]"))return;
+      if([].slice.call(t.tHead.rows[0].cells).some(function(c){return c.colSpan>1;}))return;
+      var sig=sigOf(t), ord=ords[sig]||0; ords[sig]=ord+1;
+      if(t.getAttribute("data-lt"))return;
+      t.setAttribute("data-lt","1"); enhance(t,ord);
+    });
+  } finally { BUSY=false; }
+}
+new MutationObserver(function(muts){
+  if(BUSY)return;
+  for(var i=0;i<muts.length;i++){ if(muts[i].addedNodes.length){ clearTimeout(TIMER); TIMER=setTimeout(run,0); return; } }
+}).observe(document.documentElement,{childList:true,subtree:true});
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",run); else run();
+window.listify=run;
+})();
+</script>

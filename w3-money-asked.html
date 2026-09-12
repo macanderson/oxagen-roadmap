@@ -1,0 +1,2239 @@
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap">
+<title>Money Asked, A Human Answered</title>
+<style>
+/* ───────────────────────── house tokens (oxagen-house-brand v2.1) ───────── */
+:root{
+  --ink:#10100F;--void:#0A0A09;--panel:#181715;--hl:#201F1C;--border:#292722;--rule:#34322D;
+  --fg:#F2EEE5;--body:#DDD8CD;--muted:#9B958A;--dim:#6E6A62;
+  --gold:#D6962C;--gold-bright:#F1C364;--gold-deep:#8B5E1A;--accent-text:#D6962C;
+  --on-gold:#10100F;
+  --shadow:0 1px 0 rgba(255,255,255,.03),0 18px 44px rgba(0,0,0,.5);
+  --shadow-sm:0 1px 0 rgba(255,255,255,.03),0 6px 18px rgba(0,0,0,.34);
+  /* semantic state colours — separate from gold, never gold */
+  --st-allow:#5BA97C;   /* allowed, settled, valid, proven, verified */
+  --st-hold:#7E9BEC;    /* needs approval, parked, reserved, pending */
+  --st-deny:#D75A4C;    /* denied, failed, critical, exception */
+  --st-taint:#B98BE0;   /* tainted, untrusted, unverified */
+  --focus:#F1C364;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){
+  --ink:#F2EEE5;--void:#E9E3D8;--panel:#F8F5EE;--hl:#EFEAE0;--border:#D8CDBD;--rule:#C9BFAE;
+  --fg:#10100F;--body:#2A2823;--muted:#6B665C;--dim:#8C877C;--accent-text:#8B5E1A;
+  --shadow:0 1px 0 rgba(255,255,255,.7),0 18px 44px rgba(16,16,15,.08);
+  --shadow-sm:0 1px 0 rgba(255,255,255,.7),0 6px 18px rgba(16,16,15,.07);
+  --st-allow:#2E7048;--st-hold:#3C58B5;--st-deny:#A8382C;--st-taint:#6E43A8;
+  --focus:#8B5E1A;
+}}
+:root[data-theme="light"]{
+  --ink:#F2EEE5;--void:#E9E3D8;--panel:#F8F5EE;--hl:#EFEAE0;--border:#D8CDBD;--rule:#C9BFAE;
+  --fg:#10100F;--body:#2A2823;--muted:#6B665C;--dim:#8C877C;--accent-text:#8B5E1A;
+  --shadow:0 1px 0 rgba(255,255,255,.7),0 18px 44px rgba(16,16,15,.08);
+  --shadow-sm:0 1px 0 rgba(255,255,255,.7),0 6px 18px rgba(16,16,15,.07);
+  --st-allow:#2E7048;--st-hold:#3C58B5;--st-deny:#A8382C;--st-taint:#6E43A8;
+  --focus:#8B5E1A;
+}
+
+/* ───────────────────────── base ─────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--ink);color:var(--fg);
+  font-family:"Space Grotesk","Helvetica Neue",Arial,sans-serif;font-size:14px;line-height:1.55;
+  -webkit-font-smoothing:antialiased;font-weight:400}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+a{color:var(--accent-text);text-decoration:none}
+a:hover{text-decoration:underline}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:4px}
+.mono{font-family:var(--mono);font-size:.88em;letter-spacing:-.01em}
+.num{font-variant-numeric:tabular-nums}
+h1,h2,h3,h4{margin:0;font-weight:600;letter-spacing:-.012em}
+p{margin:0}
+.eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;color:var(--accent-text);margin:0}
+.eyebrow.q{color:var(--muted)}
+.muted{color:var(--muted)}.dim{color:var(--dim)}.bodytx{color:var(--body)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ───────────────────────── shell ────────────────────────────────────────── */
+#root{min-height:100vh;container-type:inline-size;container-name:shell}
+body.phone #root{width:400px;height:840px;margin:22px auto;overflow:auto;overscroll-behavior:contain;
+  border:1px solid var(--rule);border-radius:22px;box-shadow:var(--shadow);background:var(--ink)}
+.shell{display:grid;grid-template-columns:246px 1fr;min-height:100vh;background:var(--ink)}
+body.phone .shell{min-height:0}
+.side{border-right:1px solid var(--border);background:var(--void);display:flex;flex-direction:column;min-width:0}
+.main{display:flex;flex-direction:column;min-width:0}
+.content{padding:22px 26px 96px;min-width:0;flex:1}
+
+/* org + workspace switchers */
+.switchers{padding:14px 14px 12px;border-bottom:1px solid var(--border);display:grid;gap:8px}
+.brandrow{display:flex;align-items:center;gap:10px;padding:2px 4px 10px}
+.brandrow svg{height:17px;width:auto;display:block;color:var(--fg)}
+.sw{width:100%;display:flex;align-items:center;gap:9px;padding:8px 10px;background:var(--panel);
+  border:1px solid var(--border);border-radius:10px;cursor:pointer;text-align:left;min-width:0}
+.sw:hover{border-color:var(--rule);background:var(--hl)}
+.sw .av{width:22px;height:22px;border-radius:6px;display:grid;place-items:center;flex:none;
+  font-size:11px;font-weight:700;background:var(--hl);border:1px solid var(--border);color:var(--muted)}
+.sw .av.g{background:color-mix(in srgb,var(--gold) 18%,transparent);border-color:color-mix(in srgb,var(--gold) 40%,transparent);color:var(--accent-text)}
+.sw .lb{min-width:0;flex:1}
+.sw .lb b{display:block;font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sw .lb span{display:block;font-size:10.5px;color:var(--dim);letter-spacing:.04em;text-transform:uppercase}
+.sw .car{color:var(--dim);font-size:10px;flex:none}
+
+nav.navlist{padding:12px 10px;overflow-y:auto;flex:1}
+.navsec{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);font-weight:600;padding:12px 10px 7px}
+.navlist a.nl{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:8px;color:var(--muted);
+  font-size:13px;font-weight:500;border-left:2px solid transparent;margin-bottom:1px}
+.navlist a.nl:hover{background:var(--hl);color:var(--fg);text-decoration:none}
+.navlist a.nl[aria-current="page"]{background:var(--hl);color:var(--fg);border-left-color:var(--gold)}
+.navlist a.nl .ic{width:15px;text-align:center;font-size:12.5px;color:var(--dim);flex:none}
+.navlist a.nl[aria-current="page"] .ic{color:var(--accent-text)}
+.navlist a.nl .cnt{margin-left:auto;font-family:var(--mono);font-size:10.5px;padding:1px 6px;border-radius:999px;
+  background:color-mix(in srgb,var(--st-hold) 20%,transparent);color:var(--st-hold);font-weight:600}
+.navlist a.nl .sub{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--dim)}
+.sidefoot{border-top:1px solid var(--border);padding:11px 14px;display:flex;align-items:center;gap:9px}
+.sidefoot .tierdot{width:7px;height:7px;border-radius:50%;background:var(--st-allow);flex:none}
+
+/* top bar */
+.topbar{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:12px;padding:10px 26px;
+  border-bottom:1px solid var(--border);background:color-mix(in srgb,var(--ink) 90%,transparent);backdrop-filter:blur(12px)}
+.crumbs{display:flex;align-items:center;gap:7px;font-size:12.5px;min-width:0;flex-wrap:wrap}
+.crumbs a{color:var(--muted)}.crumbs a:hover{color:var(--fg)}
+.crumbs .sep{color:var(--dim);font-size:10px}
+.crumbs .cur{color:var(--fg);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:34ch}
+.tbspace{margin-left:auto}
+.tbtn{display:inline-flex;align-items:center;gap:7px;padding:6px 11px;border-radius:9px;border:1px solid var(--border);
+  background:var(--panel);color:var(--muted);cursor:pointer;font-size:12.5px;font-weight:500;white-space:nowrap}
+.tbtn:hover{color:var(--fg);border-color:var(--rule);background:var(--hl)}
+.tbtn kbd{font-family:var(--mono);font-size:10.5px;padding:1px 5px;border-radius:4px;background:var(--hl);
+  border:1px solid var(--border);color:var(--dim)}
+.tbtn.on{color:var(--fg);border-color:color-mix(in srgb,var(--gold) 45%,transparent)}
+.userchip{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:700;
+  background:var(--hl);border:1px solid var(--border);cursor:pointer;color:var(--body)}
+
+/* ───────────────────────── primitives ───────────────────────────────────── */
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:12px}
+.panel.pad{padding:18px 20px}
+.ph{display:flex;align-items:center;gap:12px;padding:13px 18px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.ph h2{font-size:14.5px}
+.ph .r{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pb{padding:16px 18px}
+.stack{display:grid;gap:16px}
+.stack>*,.cols>*,.panel,.pb,.tblwrap{min-width:0}
+.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.cols{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.pagehead{display:flex;align-items:flex-start;gap:16px;margin-bottom:18px;flex-wrap:wrap}
+.pagehead h1{font-size:22px;letter-spacing:-.02em}
+.pagehead .r{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+.btn{display:inline-flex;align-items:center;gap:7px;padding:8px 14px;border-radius:9px;cursor:pointer;
+  font-size:13px;font-weight:600;border:1px solid var(--border);background:var(--panel);color:var(--body)}
+.btn:hover{background:var(--hl);color:var(--fg);border-color:var(--rule)}
+.btn.sm{padding:5px 10px;font-size:12px;border-radius:8px;font-weight:500}
+.btn.primary{background:var(--gold);border-color:var(--gold);color:var(--on-gold);font-weight:700}
+.btn.primary:hover{background:var(--gold-bright);border-color:var(--gold-bright);color:var(--on-gold)}
+.btn.danger{color:var(--st-deny);border-color:color-mix(in srgb,var(--st-deny) 40%,var(--border))}
+.btn.danger:hover{background:color-mix(in srgb,var(--st-deny) 12%,transparent);color:var(--st-deny)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.btn[disabled]:hover{background:var(--panel);color:var(--body);border-color:var(--border)}
+
+.badge{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:999px;font-size:11px;
+  font-weight:600;letter-spacing:.02em;border:1px solid transparent;white-space:nowrap}
+.badge .d{width:6px;height:6px;border-radius:50%;background:currentColor;flex:none}
+.b-allow{color:var(--st-allow);background:color-mix(in srgb,var(--st-allow) 13%,transparent);border-color:color-mix(in srgb,var(--st-allow) 32%,transparent)}
+.b-hold{color:var(--st-hold);background:color-mix(in srgb,var(--st-hold) 13%,transparent);border-color:color-mix(in srgb,var(--st-hold) 32%,transparent)}
+.b-deny{color:var(--st-deny);background:color-mix(in srgb,var(--st-deny) 13%,transparent);border-color:color-mix(in srgb,var(--st-deny) 32%,transparent)}
+.b-taint{color:var(--st-taint);background:color-mix(in srgb,var(--st-taint) 13%,transparent);border-color:color-mix(in srgb,var(--st-taint) 32%,transparent)}
+.b-quiet{color:var(--muted);background:var(--hl);border-color:var(--border)}
+.badge.mono{font-family:var(--mono);font-size:10.5px;font-weight:500}
+
+.kv{display:grid;grid-template-columns:minmax(120px,auto) 1fr;gap:7px 18px;font-size:12.5px;align-items:baseline}
+.kv dt{color:var(--muted);font-weight:500}
+.kv dd{margin:0;color:var(--body);min-width:0;overflow-wrap:anywhere}
+.kv dd b{font-weight:600;color:var(--fg)}
+
+table{border-collapse:collapse;width:100%;font-size:12.5px}
+.tblwrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+th{text-align:left;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:600;
+  padding:9px 14px;border-bottom:1px solid var(--border);white-space:nowrap;background:var(--panel);position:sticky;top:0}
+td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--body);vertical-align:middle}
+tbody tr:last-child td{border-bottom:0}
+tr.clickable{cursor:pointer}
+tr.clickable:hover td{background:var(--hl)}
+tr.clickable:focus-visible{outline:2px solid var(--focus);outline-offset:-2px}
+td.r,th.r{text-align:right}
+
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);overflow-x:auto;margin-bottom:16px}
+.tabs a{padding:9px 14px;font-size:13px;font-weight:500;color:var(--muted);border-bottom:2px solid transparent;white-space:nowrap}
+.tabs a:hover{color:var(--fg);text-decoration:none}
+.tabs a[aria-current]{color:var(--fg);border-bottom-color:var(--gold)}
+.tabs a .n{font-family:var(--mono);font-size:10.5px;color:var(--dim);margin-left:5px}
+
+.money{font-family:var(--mono);font-variant-numeric:tabular-nums;font-weight:600;color:var(--fg);letter-spacing:-.02em}
+.money .cur{font-weight:400;color:var(--dim);font-size:.82em;margin-left:3px}
+.basis{font-size:10.5px;color:var(--dim);font-family:var(--mono)}
+.digest{font-family:var(--mono);font-size:11px;color:var(--muted);word-break:break-all}
+
+.note{border-left:2px solid var(--rule);padding:2px 0 2px 12px;color:var(--muted);font-size:12px}
+hr.rule{border:0;border-top:1px solid var(--border);margin:16px 0}
+
+/* ───────────────────────── approval card ────────────────────────────────── */
+.apcard{border:1px solid color-mix(in srgb,var(--st-hold) 34%,var(--border));border-radius:12px;background:var(--panel);overflow:hidden}
+.apcard.crit{border-color:color-mix(in srgb,var(--st-deny) 40%,var(--border))}
+.aphead{display:flex;gap:14px;align-items:flex-start;padding:14px 16px;background:color-mix(in srgb,var(--st-hold) 6%,transparent);flex-wrap:wrap}
+.apcard.crit .aphead{background:color-mix(in srgb,var(--st-deny) 6%,transparent)}
+.aphead .amt{font-family:var(--mono);font-size:23px;font-weight:700;letter-spacing:-.03em;color:var(--fg);line-height:1.1}
+.aphead .amt .cur{font-size:13px;font-weight:500;color:var(--muted);margin-left:5px}
+.aphead .r{margin-left:auto;text-align:right;display:grid;gap:5px;justify-items:end}
+.clock{font-family:var(--mono);font-size:17px;font-weight:700;letter-spacing:-.02em;color:var(--st-hold)}
+.clock.warn{color:var(--st-deny)}
+.clock.done{color:var(--muted)}
+
+.chain4{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:1px solid var(--border)}
+.hop{padding:13px 16px;border-right:1px solid var(--border);min-width:0;position:relative}
+.hop:last-child{border-right:0}
+.hop .hn{font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--dim);font-weight:600;
+  display:flex;align-items:center;gap:6px;margin-bottom:7px}
+.hop .hn i{font-style:normal;font-family:var(--mono);color:var(--accent-text);font-size:10px}
+.hop b{display:block;font-size:13px;font-weight:600;color:var(--fg);overflow-wrap:anywhere;margin-bottom:3px}
+.hop .hm{font-size:11.5px;color:var(--muted);overflow-wrap:anywhere}
+.hop::after{content:"›";position:absolute;right:-7px;top:50%;transform:translateY(-50%);z-index:2;
+  width:14px;height:14px;display:grid;place-items:center;background:var(--panel);color:var(--dim);font-size:12px}
+.hop:last-child::after{content:none}
+
+/* mandate bar */
+.mbar{height:12px;border-radius:999px;background:var(--hl);border:1px solid var(--border);display:flex;overflow:hidden}
+.mbar i{display:block;height:100%}
+.mbar .used{background:color-mix(in srgb,var(--st-allow) 62%,transparent)}
+.mbar .res{background:repeating-linear-gradient(45deg,var(--st-hold) 0 4px,color-mix(in srgb,var(--st-hold) 45%,transparent) 4px 8px)}
+.mlegend{display:flex;gap:16px;flex-wrap:wrap;font-size:11.5px;color:var(--muted);margin-top:8px}
+.mlegend span{display:inline-flex;align-items:center;gap:6px}
+.mlegend i{width:9px;height:9px;border-radius:3px;display:block}
+.mlegend i.used{background:color-mix(in srgb,var(--st-allow) 62%,transparent)}
+.mlegend i.res{background:var(--st-hold)}
+.mlegend i.left{background:var(--hl);border:1px solid var(--rule)}
+
+.taint{border:1px solid color-mix(in srgb,var(--st-taint) 32%,var(--border));background:color-mix(in srgb,var(--st-taint) 7%,transparent);
+  border-radius:10px;padding:12px 14px}
+.srcrow{display:flex;gap:10px;align-items:baseline;padding:6px 0;border-top:1px dashed color-mix(in srgb,var(--st-taint) 26%,transparent);font-size:12px}
+.srcrow:first-of-type{border-top:0}
+
+.apfoot{padding:14px 16px;border-top:1px solid var(--border);display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--void)}
+.apfoot .r{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+textarea.reason{width:100%;min-height:62px;padding:9px 11px;border-radius:9px;background:var(--void);
+  border:1px solid var(--border);color:var(--fg);font-size:12.5px;resize:vertical}
+textarea.reason:focus{border-color:var(--rule)}
+label.fl{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);font-weight:600;margin-bottom:6px}
+
+/* queue rows */
+.qrow{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;flex-wrap:wrap}
+.qrow:hover{background:var(--hl)}
+.qrow:last-child{border-bottom:0}
+.qrow .qa{font-family:var(--mono);font-size:12px;color:var(--fg);font-weight:600}
+.qrow .qm{font-size:11.5px;color:var(--muted)}
+.qrow .r{margin-left:auto;display:flex;align-items:center;gap:12px}
+
+/* frames */
+.frames{font-family:var(--mono);font-size:11.5px}
+.fr{display:grid;grid-template-columns:46px 132px 1fr auto;gap:12px;padding:7px 16px;border-bottom:1px solid var(--border);
+  align-items:baseline;cursor:pointer;min-width:0}
+.fr:hover{background:var(--hl)}
+.fr .sq{color:var(--dim);text-align:right}
+.fr .kd{color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fr .sm{color:var(--body);min-width:0;overflow-wrap:anywhere}
+.fr .mt{color:var(--dim);white-space:nowrap;font-size:10.5px}
+.fr.hot{background:color-mix(in srgb,var(--st-hold) 9%,transparent)}
+.fr.hot:hover{background:color-mix(in srgb,var(--st-hold) 14%,transparent)}
+.fr.new{background:color-mix(in srgb,var(--st-allow) 9%,transparent)}
+.fr .kd.k-policy{color:var(--st-hold)}
+.fr .kd.k-deny{color:var(--st-deny)}
+.fr .kd.k-ok{color:var(--st-allow)}
+.fr .kd.k-taint{color:var(--st-taint)}
+.frdetail{padding:12px 16px 16px 58px;border-bottom:1px solid var(--border);background:var(--void);font-family:"Space Grotesk",sans-serif;font-size:12.5px}
+pre.code{background:var(--void);border:1px solid var(--border);border-radius:9px;padding:11px 13px;overflow-x:auto;
+  font-family:var(--mono);font-size:11.5px;line-height:1.6;color:var(--body);margin:8px 0 0}
+pre.code .k{color:var(--accent-text)}
+pre.code .s{color:var(--st-allow)}
+pre.code .n{color:var(--st-hold)}
+
+/* cost strip */
+.strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--panel)}
+.strip .c{padding:12px 15px;border-right:1px solid var(--border);min-width:0}
+.strip .c:last-child{border-right:0}
+.strip .c .l{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);font-weight:600;margin-bottom:5px;white-space:nowrap}
+.strip .c .v{font-size:16px;font-weight:600;letter-spacing:-.02em;color:var(--fg);font-variant-numeric:tabular-nums}
+.strip .c .v.mono{font-family:var(--mono)}
+.strip .c .s{font-size:10.5px;color:var(--dim);font-family:var(--mono);margin-top:2px}
+
+/* receipt */
+dialog{border:0;padding:0;background:transparent;max-width:100vw;max-height:100vh;color:var(--fg)}
+dialog::backdrop{background:rgba(10,10,9,.72);backdrop-filter:blur(3px)}
+.modal{background:var(--panel);border:1px solid var(--rule);border-radius:14px;box-shadow:var(--shadow);
+  width:min(880px,calc(100vw - 32px));max-height:min(86vh,900px);display:flex;flex-direction:column;overflow:hidden}
+.modal.narrow{width:min(560px,calc(100vw - 32px))}
+.mh{display:flex;gap:12px;align-items:flex-start;padding:16px 20px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.mh h2{font-size:16px}
+.mh .r{margin-left:auto;display:flex;gap:8px;align-items:center}
+.mb{padding:18px 20px;overflow-y:auto;overscroll-behavior:contain}
+.mf{padding:13px 20px;border-top:1px solid var(--border);display:flex;gap:10px;align-items:center;background:var(--void);flex-wrap:wrap}
+.xbtn{width:28px;height:28px;border-radius:8px;border:1px solid var(--border);background:var(--panel);color:var(--muted);cursor:pointer;display:grid;place-items:center}
+.xbtn:hover{color:var(--fg);background:var(--hl)}
+.rgroup{border:1px solid var(--border);border-radius:11px;overflow:hidden;margin-bottom:14px}
+.rgroup>.gh{display:flex;align-items:center;gap:9px;padding:9px 14px;background:var(--void);border-bottom:1px solid var(--border)}
+.rgroup>.gh .gi{width:19px;height:19px;border-radius:5px;display:grid;place-items:center;font-size:10px;font-weight:700;
+  background:var(--hl);color:var(--accent-text);border:1px solid var(--border);font-family:var(--mono)}
+.rgroup>.gh b{font-size:11.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.rgroup>.gb{padding:13px 14px}
+
+/* command menu */
+.cmdlist{max-height:340px;overflow-y:auto}
+.cmditem{display:flex;align-items:center;gap:11px;padding:10px 20px;cursor:pointer;border-bottom:1px solid var(--border)}
+.cmditem:hover,.cmditem.sel{background:var(--hl)}
+.cmditem .ci{width:22px;text-align:center;color:var(--dim);font-size:12px}
+.cmditem b{font-size:13px;font-weight:500;color:var(--fg)}
+.cmditem .cs{font-size:11.5px;color:var(--dim);margin-left:auto;font-family:var(--mono)}
+input.cmdinput{width:100%;padding:15px 20px;background:transparent;border:0;border-bottom:1px solid var(--border);font-size:15px;outline:0}
+
+/* assistant */
+.assist{width:330px;border-left:1px solid var(--border);background:var(--void);display:flex;flex-direction:column;min-width:0}
+.assist .ah{padding:13px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px}
+.assist .ab{padding:16px;overflow-y:auto;flex:1;display:grid;gap:12px;align-content:start}
+.msg{border-radius:10px;padding:10px 12px;font-size:12.5px;line-height:1.6}
+.msg.a{background:var(--panel);border:1px solid var(--border);color:var(--body)}
+.msg.u{background:var(--hl);border:1px solid var(--border);color:var(--fg);margin-left:26px}
+.msg .src{margin-top:8px;padding-top:8px;border-top:1px dashed var(--border);font-size:11px;color:var(--dim);font-family:var(--mono)}
+.assist .af{padding:12px 14px;border-top:1px solid var(--border)}
+.assist .af input{width:100%;padding:9px 11px;border-radius:9px;background:var(--panel);border:1px solid var(--border);outline:0;font-size:12.5px}
+
+/* empty / loading / error / denied */
+.state{display:grid;place-items:center;text-align:center;padding:64px 20px;gap:14px}
+.state .ic{width:46px;height:46px;border-radius:12px;display:grid;place-items:center;font-size:19px;
+  background:var(--hl);border:1px solid var(--border);color:var(--muted)}
+.state h3{font-size:16px}
+.state p{max-width:46ch;color:var(--muted);font-size:13px}
+.skel{background:linear-gradient(90deg,var(--hl) 0%,var(--panel) 40%,var(--hl) 80%);background-size:300% 100%;
+  border-radius:6px;height:12px}
+@media (prefers-reduced-motion:no-preference){.skel{animation:sh 1.5s linear infinite}}
+@keyframes sh{to{background-position:-300% 0}}
+.skelrow{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 90px;gap:14px;padding:13px 16px;border-bottom:1px solid var(--border);align-items:center}
+
+/* toast */
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:120;display:grid;gap:8px;justify-items:center;pointer-events:none}
+.toast{background:var(--panel);border:1px solid var(--rule);border-radius:11px;padding:11px 16px;box-shadow:var(--shadow);
+  font-size:12.5px;display:flex;align-items:center;gap:10px;max-width:min(560px,92vw)}
+.toast .d{width:7px;height:7px;border-radius:50%;flex:none}
+
+/* mockup states control — deliberately NOT product UI */
+#mockctl{position:fixed;right:14px;bottom:14px;z-index:200;font-family:var(--mono);font-size:11px;
+  background:#0A0A09;color:#9B958A;border:1px dashed #5A554C;border-radius:10px;padding:9px 11px;
+  display:grid;gap:7px;max-width:min(300px,calc(100vw - 28px));box-shadow:0 14px 36px rgba(0,0,0,.55)}
+/* the states control stays on ink in both themes: it is mockup chrome, not product UI */
+#mockctl .t{display:flex;align-items:center;gap:7px;color:#6E6A62;letter-spacing:.1em;font-size:9.5px}
+#mockctl .t b{color:#D6962C;font-weight:700}
+#mockctl .g{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+#mockctl button{font-family:inherit;font-size:10.5px;padding:3px 7px;border-radius:6px;border:1px solid #34322D;
+  background:#10100F;color:#9B958A;cursor:pointer}
+#mockctl button:hover{color:#F2EEE5;border-color:#5A554C}
+#mockctl button[aria-pressed="true"]{background:#201F1C;color:#F2EEE5;border-color:#8B5E1A}
+#mockctl .lbl{color:#4F4B44;font-size:9.5px;letter-spacing:.08em;min-width:42px}
+#mockctl.min{padding:6px 9px}
+#mockctl.min .g,#mockctl.min .body{display:none}
+
+/* ───────────────────────── container queries (also drives phone frame) ──── */
+@container shell (max-width: 1080px){
+  .chain4{grid-template-columns:1fr 1fr}
+  .hop:nth-child(2)::after{content:none}
+  .hop:nth-child(1),.hop:nth-child(2){border-bottom:1px solid var(--border)}
+  .assist{display:none}
+}
+@container shell (max-width: 860px){
+  .shell{grid-template-columns:1fr}
+  .side{position:static;border-right:0;border-bottom:1px solid var(--border)}
+  .side nav.navlist{display:flex;gap:4px;overflow-x:auto;padding:8px 10px}
+  .side .navsec{display:none}
+  .side .sidefoot{display:none}
+  .navlist a.nl{border-left:0;border-bottom:2px solid transparent;white-space:nowrap;padding:6px 9px}
+  .navlist a.nl[aria-current="page"]{border-bottom-color:var(--gold);background:var(--hl)}
+  .switchers{display:flex;gap:8px;align-items:center;padding:10px 12px}
+  .switchers .brandrow{padding:0;border:0}
+  .content{padding:16px 14px 90px}
+  .topbar{padding:9px 14px}
+}
+@container shell (max-width: 640px){
+  .chain4{grid-template-columns:1fr}
+  .hop{border-right:0;border-bottom:1px solid var(--border)}
+  .hop:last-child{border-bottom:0}
+  .hop::after{content:none}
+  .aphead .amt{font-size:20px}
+  .fr{grid-template-columns:38px 1fr;gap:4px 10px}
+  .fr .mt{grid-column:2;color:var(--dim)}
+  .fr .sm{grid-column:2}
+  .kv{grid-template-columns:1fr;gap:2px 0}
+  .kv dt{margin-top:7px}
+  .strip{grid-template-columns:1fr 1fr}
+  .crumbs .cur{max-width:18ch}
+  .switchers .sw .lb span{display:none}
+  .pagehead h1{font-size:18px}
+  .hideS{display:none !important}
+}
+</style>
+
+<div id="root"></div>
+<div id="toast"></div>
+
+<dialog id="dlg"><div class="modal" id="dlgbox"></div></dialog>
+<dialog id="cmd"><div class="modal narrow">
+  <input class="cmdinput" id="cmdq" placeholder="Search runs, agents, receipts, mandates, actions…" aria-label="Command menu">
+  <div class="cmdlist" id="cmdlist"></div>
+  <div class="mf"><span class="dim mono" style="font-size:11px">↑↓ to move · ⏎ to run · esc to close</span></div>
+</div></dialog>
+
+<div id="mockctl" aria-label="Mockup states control">
+  <div class="t"><b>◆</b> MOCKUP CHROME — NOT PRODUCT UI <button id="minbtn" style="margin-left:auto" aria-label="Collapse">–</button></div>
+  <div class="body">
+    <div class="g"><span class="lbl">state</span>
+      <button data-st="loaded" aria-pressed="true">loaded</button>
+      <button data-st="loading" aria-pressed="false">loading</button>
+      <button data-st="empty" aria-pressed="false">empty</button>
+      <button data-st="error" aria-pressed="false">error</button>
+      <button data-st="denied" aria-pressed="false">denied</button>
+    </div>
+    <div class="g"><span class="lbl">theme</span>
+      <button data-th="auto" aria-pressed="true">auto</button>
+      <button data-th="dark" aria-pressed="false">dark</button>
+      <button data-th="light" aria-pressed="false">light</button>
+      <span class="lbl" style="margin-left:6px">width</span>
+      <button data-ph="1" aria-pressed="false">400px</button>
+    </div>
+    <div class="g"><span class="lbl">flow</span>
+      <button data-flow="reset">reset approval</button>
+      <button data-flow="expire">force timeout</button>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* ═══════════════════════════ DEMO RECORD ═══════════════════════════════════
+   One customer, one day: Acme Robotics, 2026-09-11. Every number below is the
+   record the screens render; nothing is generated at display time. */
+
+const LOGO = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 574.244 106.313" role="img" aria-label="Oxagen"><g transform="translate(0,0) scale(2.842952)"><path d="M6.300 0.000L12.600 3.320L12.600 9.960L6.300 13.280L0.000 9.960L0.000 3.320ZM1.000 3.885L1.000 9.395L6.300 12.150L11.600 9.395L11.600 3.885L6.300 1.130Z M19.376 0.000L25.676 3.320L25.676 9.960L19.376 13.280L13.076 9.960L13.076 3.320ZM14.076 3.885L14.076 9.395L19.376 12.150L24.676 9.395L24.676 3.885L19.376 1.130Z M12.838 10.240L19.138 13.560L19.138 20.200L12.838 23.520L6.538 20.200L6.538 13.560ZM7.538 14.125L7.538 19.635L12.838 22.390L18.138 19.635L18.138 14.125L12.838 11.370Z M19.376 20.480L25.676 23.800L25.676 30.440L19.376 33.760L13.076 30.440L13.076 23.800ZM14.076 24.365L14.076 29.875L19.376 32.630L24.676 29.875L24.676 24.365L19.376 21.610Z" fill="currentColor"/><path d="M25.914 10.240L32.214 13.560L32.214 20.200L25.914 23.520L19.614 20.200L19.614 13.560Z M6.300 20.480L12.600 23.800L12.600 30.440L6.300 33.760L0.000 30.440L0.000 23.800Z" fill="#D6962C"/></g><g transform="translate(120.376,13.067)"><path d="M33.9083 68.758Q24.1657 68.758 16.4786 64.7737Q8.79142 60.7894 4.39571 53.2965Q0 45.8035 0 35.3862V33.3718Q0 22.9544 4.39571 15.4615Q8.79142 7.96854 16.4786 3.98427Q24.1657 0 33.9083 0Q43.6509 0 51.3381 3.98427Q59.0252 7.96854 63.4209 15.4615Q67.8166 22.9544 67.8166 33.3718V35.3862Q67.8166 45.8035 63.4209 53.2965Q59.0252 60.7894 51.3381 64.7737Q43.6509 68.758 33.9083 68.758ZM33.9083 55.3486Q42.1895 55.3486 47.4689 50.0198Q52.7484 44.691 52.7484 35.0142V33.7437Q52.7484 24.067 47.5233 18.7382Q42.2981 13.4094 33.9083 13.4094Q25.6502 13.4094 20.3592 18.7382Q15.0683 24.067 15.0683 33.7437V35.0142Q15.0683 44.691 20.3592 50.0198Q25.6502 55.3486 33.9083 55.3486Z M176.569 68.758Q169.637 68.758 164.119 66.3453Q158.601 63.9327 155.387 59.2935Q152.173 54.6542 152.173 48.0088Q152.173 41.3403 155.387 36.8558Q158.601 32.3712 164.27 30.1017Q169.94 27.8323 177.174 27.8323H196.047V23.8925Q196.047 18.7316 192.874 15.5274Q189.701 12.3232 182.99 12.3232Q176.411 12.3232 173.049 15.3842Q169.686 18.4452 168.627 23.3593L154.691 18.7315Q156.27 13.6133 159.748 9.39702Q163.225 5.18071 169.049 2.59035Q174.874 0 183.208 0Q195.972 0 203.326 6.42816Q210.681 12.8563 210.681 24.9392V50.4707Q210.681 54.4204 214.368 54.4204H219.795V66.9148H209.197Q204.464 66.9148 201.442 64.5334Q198.42 62.1521 198.42 58.1563V57.8864H196.126Q195.392 59.6967 193.399 62.2985Q191.406 64.9004 187.388 66.8292Q183.369 68.758 176.569 68.758ZM179.05 56.4348Q186.581 56.4348 191.314 52.1592Q196.047 47.8837 196.047 40.6031V39.2405H178.175Q173.175 39.2405 170.208 41.3881Q167.241 43.5358 167.241 47.5513Q167.241 51.5668 170.34 54.0008Q173.439 56.4348 179.05 56.4348Z M227.767 34.6423V32.6279Q227.767 22.3817 231.86 15.0863Q235.953 7.79081 242.768 3.8954Q249.582 0 257.706 0Q266.935 0 271.762 3.33256Q276.589 6.66512 278.81 10.4107H281.042V1.8432H295.801V79.33Q295.801 85.6989 292.104 89.4725Q288.408 93.2462 282.079 93.2462H238.369V80.0541H277.023Q280.779 80.0541 280.779 76.1043V57.2775H278.547Q277.161 59.5683 274.665 61.8904Q272.168 64.2125 268.057 65.7414Q263.946 67.2702 257.706 67.2702Q249.582 67.2702 242.756 63.3748Q235.93 59.4794 231.848 52.1724Q227.767 44.8655 227.767 34.6423ZM261.938 54.0781Q270.151 54.0781 275.573 48.8612Q280.996 43.6443 280.996 34.2704V32.9999Q280.996 23.4943 275.627 18.3432Q270.259 13.1921 261.938 13.1921Q253.749 13.1921 248.315 18.3432Q242.881 23.4943 242.881 32.9999V34.2704Q242.881 43.6443 248.315 48.8612Q253.749 54.0781 261.938 54.0781Z M344.764 68.758Q334.998 68.758 327.583 64.6108Q320.167 60.4636 316.031 52.9048Q311.896 45.346 311.896 35.1689V33.589Q311.896 23.3889 315.977 15.8416Q320.059 8.2944 327.397 4.1472Q334.735 0 344.385 0Q353.881 0 360.956 4.1867Q368.031 8.37341 371.981 15.8515Q375.931 23.3297 375.931 33.2895V38.6974H327.181Q327.468 46.3334 332.587 50.9496Q337.707 55.5658 345.198 55.5658Q352.522 55.5658 356.101 52.3534Q359.681 49.141 361.553 45.0629L373.985 51.4813Q372.119 55.0656 368.63 59.1042Q365.141 63.1428 359.394 65.9504Q353.648 68.758 344.764 68.758ZM327.313 27.2892H360.622Q360.095 20.7986 355.7 16.9954Q351.304 13.1921 344.277 13.1921Q337.055 13.1921 332.691 16.9954Q328.327 20.7986 327.313 27.2892Z M391.548 66.9148V1.8432H406.353V10.9769H408.585Q410.303 7.25429 414.832 3.99908Q419.361 0.743866 428.435 0.743866Q435.956 0.743866 441.695 4.12911Q447.434 7.51435 450.651 13.5903Q453.868 19.6663 453.868 27.9442V66.9148H438.8V29.1226Q438.8 21.1969 434.891 17.3492Q430.983 13.5015 423.9 13.5015Q415.872 13.5015 411.244 18.8237Q406.617 24.146 406.617 33.9445V66.9148Z" fill="currentColor"/><path d="M73.9979 66.9148 98.2261 34.0696 74.3764 1.8432H91.9626L107.9 24.3499H110.131L126.068 1.8432H143.654L119.805 34.0696L144.033 66.9148H126.206L110.131 44.0065H107.9L91.8244 66.9148Z" fill="#D6962C"/></g></svg>';
+
+const ORG = { slug:"acme", name:"Acme Robotics", currency:"USD", agents:50,
+  plan:"Usage · monthly · card", billing:{
+    month:"September 2026", runsMTD:"4,182", thisRunIs:"4,182",
+    freeAllowance:"1,000", band:"runs 1,001–10,000", listPerRun:"$0.30",
+    discountName:"Onboarding discount", discountPct:"20%", discountUntil:"2027-03-14",
+    perRun:"$0.2400", perRunMicros:"240 000",
+    billableMTD:"3,182", oxagenMTD:"$763.68",
+    providerMTD:"$9,847.20", share:"7.8%",
+    retained:"3.4 MB", retentionIncluded:"13 months",
+    counts:"a sealed run with at least one model call"
+  }};
+
+// Oxagen's own fee is charged per run, once the run seals. A run halted before any
+// model call, an in-app agent run and a witness run are free (§12.1).
+function oxFee(status){
+  if(status==="sealed"||status==="proven"||status.indexOf("halted")===0)
+    return {v:ORG.billing.perRun, billed:true};
+  return {v:ORG.billing.perRun, billed:false};
+}
+const WS = {
+  "core-platform":{ name:"core-platform", repo:"acme/platform", branch:"main",
+    linked:["acme/billing","acme/mobile"], owner:"Marcus Bell", agents:31, approvals:1 },
+  "finops":{ name:"finops", repo:"acme/finops-agents", branch:"main",
+    linked:[], owner:"Dana Okafor", agents:9, approvals:3 }
+};
+const ME = { name:"Priya Natarajan", initials:"PN", role:"Organization owner", email:"priya@acme.example", id:"usr_01KG9T4M2X8QPBZN" };
+
+const AG = {
+  "invoice-bot":{ key:"acme.finops.invoice-bot", name:"Invoice bot", harness:"OpenAI Agents SDK 0.9.4",
+    principal:"prn_01KH9W2C7VJ4RXQ8MTB6ZD3NKA", tier:"gateway", status:"enrolled", model:"gpt-5.1",
+    operator:"Dana Okafor", def:".oxagen/agents/invoice-bot.toml",
+    defDigest:"sha256:1c84e0a7f2b9d5638ae1c0f47b2d9e3518aa640cb7f2e9d10c3b85a4f6d27e09",
+    runs30:412, spend30:"$118.47", tools:8 },
+  "spend-analyst":{ key:"acme.finops.spend-analyst", name:"Spend analyst", harness:"Stella 1.9.2",
+    tier:"gateway", status:"enrolled", model:"claude-sonnet-5", operator:"Dana Okafor" },
+  "reconciler":{ key:"acme.finops.reconciler", name:"Reconciler", harness:"Custom (SDK-wrapped)",
+    tier:"gateway", status:"enrolled", model:"claude-sonnet-5", operator:"Dana Okafor" },
+  "release-manager":{ key:"acme.core.release-manager", name:"Release manager", harness:"Claude Code 2.4.1",
+    tier:"gateway", status:"enrolled", model:"claude-opus-5", operator:"Marcus Bell" }
+};
+
+/* ── the parked call, frame by frame ───────────────────────────────────── */
+const RUN = {
+  id:"run_01KJ7F3QME8N2VXWB4TYA6CD5P", short:"run_01KJ7F3Q…CD5P",
+  agent:"invoice-bot", operator:"Dana Okafor", operatorId:"usr_01KH8P5R9WD2FYJ3",
+  ws:"finops", started:"2026-09-11T06:02:18.441Z", attempt:1,
+  task:{ ref:"FIN-2291", title:"September infrastructure invoices", source:"Linear" },
+  trigger:"schedule finops.invoice-sweep · daily 06:00 UTC · owned by Dana Okafor",
+  tier:"gateway", replay:"full", frames:157, cost:"$0.62", costMicros:"624 118",
+  tokens:{ in:14284, cacheRead:47616, out:1108, reasoning:412 }, cacheHit:"90.3%",
+  turns:4, toolCalls:11, denied:0, policyVersion:"pol_v41", bundle:"bnd_01KJ7F3Q0R",
+  chain:"verified", repo:"acme/finops-agents@4f1c9e2"
+};
+
+const CALL = {
+  tool:"stripe__create_payment@4", toolId:"tool_01KG3V8N6P2XQWRD",
+  schemaDigest:"sha256:4b81c6f70d2ae395184bb0c7f3ea52d9c81704af6b2d3915e08cc7a41f5b2d63",
+  inputDigest:"sha256:9f2c7b41e3a8d05c62fb9147ae30d8b5c419f76e02a3bd8814cc5f2071e6a93d",
+  idem:"idm_9f2c7b41e3a8d05c62fb9147",
+  amount:"$18,420.00", currency:"USD", micros:"18 420 000 000",
+  counterparty:"vendor:aws", counterpartyName:"Amazon Web Services, Inc.",
+  invoice:"AWS-2026-09-INV-88134",
+  risk:"critical", effect:"moves_funds", egress:"third_party", side:"irreversible",
+  parkedAt:"2026-09-11T06:04:12.907Z", timeout:600,
+  server:"stripe", serverUrl:"https://api.stripe.com"
+};
+
+const MANDATE = {
+  id:"mnd_01KJ5XQ7ZR4V2NBDW8HTC6PMKF", short:"mnd_01KJ5XQ7…PMKF",
+  agent:"acme.finops.invoice-bot", grantedBy:"Priya Natarajan", grantedAt:"2026-08-28T15:41:02Z",
+  roleAtGrant:"org.billing", currency:"USD", effect:["moves_funds","commits_spend"],
+  purpose:"Monthly infrastructure invoices, PO-4471",
+  validFrom:"2026-09-01T00:00:00Z", validTo:"2026-12-31T23:59:59Z", status:"active",
+  twoPerson:true, secondApprover:"Marcus Bell",
+  perCall:"$25,000.00", perCallMicros:"25 000 000 000",
+  period:"monthly", perPeriod:"$60,000.00", perPeriodMicros:"60 000 000 000",
+  callsPerDay:50, callsToday:3,
+  settled:"$31,280.00", settledPct:52.13,
+  reserved:"$18,420.00", reservedPct:30.70,
+  remaining:"$10,300.00", remainingPct:17.17,
+  approval:{ above:"$10,000.00", alwaysFor:["moves_funds"], approvers:["role:org.billing"] },
+  counterparties:{ allow:["vendor:aws","vendor:github","vendor:datadog"], deny:["*"] },
+  tools:["stripe__create_payment@4","stripe__create_payout@2","aws_billing__purchase_savings_plan@2"],
+  reviewDue:"2026-10-01"
+};
+
+const MANDATE2 = {
+  id:"mnd_01KH2P4W9YB7TFXNQ3RJ6SDCVG", short:"mnd_01KH2P4W…DCVG",
+  agent:"acme.finops.invoice-bot", grantedBy:"Priya Natarajan", currency:"USD",
+  purpose:"FY26 savings-plan purchase window", status:"expired",
+  validFrom:"2026-06-01T00:00:00Z", validTo:"2026-08-31T23:59:59Z",
+  perCall:"$140,000.00", perPeriod:"$140,000.00", period:"one-time",
+  settled:"$138,400.00", remaining:"$1,600.00", tools:["aws_billing__purchase_savings_plan@2"],
+  twoPerson:true
+};
+
+const TAINT = [
+  { frame:142, tool:"aws_billing__get_invoice@3", path:"$.amount",
+    digest:"sha256:e31f0c9a7d2b46158cf0a91e7d3c2b84", note:"invoice total parsed from the provider response" },
+  { frame:147, tool:"s3__get_object@1", path:"$.metadata.invoice_id",
+    digest:"sha256:6a90bd41e7c2f8350194ca7e2f8b60d1", note:"invoice id read from the PDF body in acme-finops-inbox" }
+];
+
+const RULES = [
+  { id:"mandate.approval.always_for", verdict:"approve",
+    text:"Mandate mnd_01KJ5XQ7…PMKF requires approval for every call whose financial effect is moves_funds." },
+  { id:"mandate.approval.above_micros", verdict:"approve",
+    text:"Amount $18,420.00 USD is above the mandate's approval threshold of $10,000.00 USD." },
+  { id:"tools.taint.financial", verdict:"approve",
+    text:"Arguments $.amount and $.metadata.invoice_id derive from untrusted tool output; taint on a financial call raises the decision to approval." },
+  { id:"mandate.limits.per_call", verdict:"allow",
+    text:"Amount is within the per-call ceiling of $25,000.00 USD." },
+  { id:"mandate.counterparties.allow", verdict:"allow",
+    text:"Counterparty vendor:aws is on the mandate's allow list." },
+  { id:"fin.no_self_approval", verdict:"constrain",
+    text:"Dana Okafor is the operator of this run and cannot resolve its own approval; eligible approvers are the remaining holders of role:org.billing." }
+];
+
+const TOKEN = {
+  id:"apt_01KJ7F5WGT8HC3QZNVR6XA2DJP", short:"apt_01KJ7F5W…2DJP",
+  format:"Biscuit v2", single:true, ttl:"90 s",
+  boundTo:["agent acme.finops.invoice-bot","run run_01KJ7F3Q…CD5P","input digest sha256:9f2c7b41…","approval evt_01KJ7F5W9Q"],
+  mintKey:"key_ox_acme_2026Q3"
+};
+
+const CRED = {
+  id:"cg_01KJ7F5XB4NDQ8WTZM2VKR7HAC", short:"cg_01KJ7F5X…7HAC",
+  connection:"con_01KG7M2D9XTB4PNQ", connectionName:"Acme Robotics — Stripe (live)",
+  owner:"Dana Okafor", ownerRole:"org.billing", reviewDue:"2026-12-01",
+  downscope:"restricted_key", scope:"payment_intents:write, payment_intents:read",
+  providerToken:"rk_live_51N…q4Zq", ttl:"5 m 00 s",
+  issued:"2026-09-11T06:07:39.118Z", expires:"2026-09-11T06:12:39.118Z", uses:"1 of 1"
+};
+
+const EFFECT = {
+  dispatched:"2026-09-11T06:07:39.402Z", duration:"1 284 ms",
+  responseDigest:"sha256:7d41a08fe25c9b3671de40a8b5c2f9d7e013846baf90c7d258e134a6b0f72c95",
+  validation:"valid against output_schema v4", redactions:"2 fields (payment_method.card.last4, receipt_url)",
+  payment:"pi_3QaXbL2eZvKYlo2C1mN4kR7t", charge:"ch_3QaXbL2eZvKYlo2C1yD6mT4u",
+  balanceTxn:"txn_3QaXbL2eZvKYlo2C0pL8vR3s", status:"succeeded", dup:"no"
+};
+
+const RECEIPT = {
+  id:"rcpt_01KJ7F5YC9TPD2MHXW4NZB6QRK", short:"rcpt_01KJ7F5Y…6QRK",
+  frame:162, chainPos:"162 of 171",
+  hash:"sha256:c7e0b3a4d81f92675ce0a34bd21f7098e4c5b60a7239df18ea4c0b5d96f38127",
+  prev:"sha256:88b1fa03c7d249e0157b3ea6d09c4f81",
+  sig:"ed25519:4aF9…c02b", sigKey:"key_ox_acme_2026Q3", tier:"gateway", verified:true
+};
+
+/* ── fleet ─────────────────────────────────────────────────────────────── */
+const QUEUE = [
+  { id:"apr_01KJ7F4A", run:RUN.id, agent:"acme.finops.invoice-bot", operator:"Dana Okafor",
+    tool:"stripe__create_payment@4", what:"$18,420.00 USD → vendor:aws", effect:"moves_funds",
+    risk:"critical", tainted:true, left:348, mandate:true, star:true, task:"FIN-2291" },
+  { id:"apr_01KJ7F2B", run:"run_01KJ7EZ8T4R6V0YHC2NKD9SBQX", agent:"acme.finops.invoice-bot",
+    operator:"Dana Okafor", tool:"netsuite__post_journal_entry@1",
+    what:"$2,318.55 USD reclass · JE-4471-09", effect:"commits_spend", risk:"high",
+    tainted:false, left:432, mandate:true, task:"FIN-2288" },
+  { id:"apr_01KJ7EYC", run:"run_01KJ7EYQ5M8N3TDWB6KRV1JZCX", agent:"acme.finops.spend-analyst",
+    operator:"Priya Natarajan", tool:"snowflake__unload_to_s3@2",
+    what:"62.4 MB export · egress third_party", effect:"none", risk:"high",
+    tainted:false, left:124, mandate:false, task:"FIN-2285" }
+];
+
+const QUEUE_CORE = [
+  { id:"apr_01KJ7G1D", run:"run_01KJ7G8M4N2Q6XVBTD9WRC3HKZ", agent:"acme.core.release-manager",
+    operator:"Marcus Bell", tool:"github__create_release@2",
+    what:"tag v4.12.0 on acme/platform · 41 commits", effect:"none", risk:"high",
+    tainted:false, left:401, mandate:false, task:"PLAT-884" }
+];
+
+const RUNS = [
+  { id:RUN.id, agent:"acme.finops.invoice-bot", op:"Dana Okafor", status:"awaiting approval",
+    tier:"gateway", replay:"full", cost:"$0.62", started:"06:02:18Z", task:"FIN-2291" },
+  { id:"run_01KJ7EZ8T4R6V0YHC2NKD9SBQX", agent:"acme.finops.invoice-bot", op:"Dana Okafor",
+    status:"awaiting approval", tier:"gateway", replay:"full", cost:"$0.44", started:"05:58:07Z", task:"FIN-2288" },
+  { id:"run_01KJ7EYQ5M8N3TDWB6KRV1JZCX", agent:"acme.finops.spend-analyst", op:"Priya Natarajan",
+    status:"awaiting approval", tier:"gateway", replay:"full", cost:"$1.84", started:"05:51:03Z", task:"FIN-2285" },
+  { id:"run_01KJ7DQ2W1P5H8JXA3FMV7BGTK", agent:"acme.finops.invoice-bot", op:"Dana Okafor",
+    status:"sealed", tier:"gateway", replay:"full", cost:"$0.41", started:"04:30:11Z", task:"FIN-2290" },
+  { id:"run_01KJ7C0N6Y3D9KQWE5RTZ2HMVA", agent:"acme.finops.reconciler", op:"Dana Okafor",
+    status:"sealed", tier:"gateway", replay:"full", cost:"$0.08", started:"03:12:44Z", task:"nightly reconcile" },
+  { id:"run_01KJ79H5B7F2S4LMX8VQC6NDWP", agent:"acme.finops.invoice-bot", op:"Dana Okafor",
+    status:"halted · budget", tier:"gateway", replay:"partial", cost:"$2.11", started:"02:14:55Z", task:"FIN-2287" },
+  { id:"run_01KJ78J1K9G3T5NPZ6WRY4XCQB", agent:"acme.finops.spend-analyst", op:"Priya Natarajan",
+    status:"sealed", tier:"harness", replay:"render", cost:"$0.93", started:"01:40:26Z", task:"FIN-2283" }
+];
+
+const RUNS_CORE = [
+  { id:"run_01KJ7G8M4N2Q6XVBTD9WRC3HKZ", agent:"acme.core.release-manager", op:"Marcus Bell",
+    status:"running", tier:"gateway", replay:"full", cost:"$1.19", started:"06:11:02Z", task:"PLAT-884" },
+  { id:"run_01KJ7F9P2T5C8RWMZ4KXQ7NBDV", agent:"acme.core.stella-ci", op:"Marcus Bell",
+    status:"proven", tier:"gateway", replay:"full", cost:"$0.77", started:"06:04:51Z", task:"PR #482" },
+  { id:"run_01KJ7EK3R8W1D5YGN6VPZ2MCFT", agent:"acme.core.triage", op:"Marcus Bell",
+    status:"sealed", tier:"gateway", replay:"full", cost:"$0.22", started:"05:47:19Z", task:"PLAT-879" },
+  { id:"run_01KJ7DA6V9H4B2PKXW8QTM3ZNS", agent:"acme.core.docs-writer", op:"Marcus Bell",
+    status:"sealed", tier:"gateway", replay:"full", cost:"$0.35", started:"05:02:38Z", task:"PLAT-871" }
+];
+
+/* ── mandate ledger (Tools → Mandates) ─────────────────────────────────── */
+const LEDGER = [
+  { t:"2026-09-11 06:07:41Z", m:MANDATE.short, agent:"invoice-bot", kind:"settlement", amt:"$18,420.00",
+    cp:"vendor:aws", ext:"pi_3QaXbL…kR7t", rcpt:RECEIPT.short, after:"$10,300.00", pending:true },
+  { t:"2026-09-11 06:04:12Z", m:MANDATE.short, agent:"invoice-bot", kind:"reservation", amt:"−$18,420.00",
+    cp:"vendor:aws", ext:"—", rcpt:"parked", after:"$10,300.00", pending:true },
+  { t:"2026-09-09 06:06:55Z", m:MANDATE.short, agent:"invoice-bot", kind:"settlement", amt:"$4,800.00",
+    cp:"vendor:aws", ext:"pi_3QaVn9…bT2p", rcpt:"rcpt_01KJ2M8P…W4RC", after:"$28,720.00" },
+  { t:"2026-09-08 06:05:31Z", m:MANDATE.short, agent:"invoice-bot", kind:"settlement", amt:"$9,420.00",
+    cp:"vendor:datadog", ext:"pi_3QaTk2…hN8w", rcpt:"rcpt_01KJ0R4X…T9BM", after:"$33,520.00" },
+  { t:"2026-09-07 06:05:18Z", m:MANDATE.short, agent:"invoice-bot", kind:"release", amt:"$2,140.00",
+    cp:"vendor:github", ext:"—", rcpt:"rcpt_01KHY7C2…D5NQ", after:"$42,940.00",
+    note:"dispatch failed: stripe 402 card_declined — reservation returned" },
+  { t:"2026-09-06 06:05:02Z", m:MANDATE.short, agent:"invoice-bot", kind:"denied", amt:"$0.00",
+    cp:"vendor:oracle", ext:"—", rcpt:"—", after:"$42,940.00",
+    note:"counterparty outside the mandate — mandate_counterparty_denied, no movement" },
+  { t:"2026-09-05 06:04:47Z", m:MANDATE.short, agent:"invoice-bot", kind:"settlement", amt:"$4,200.00",
+    cp:"vendor:github", ext:"pi_3QaPd6…mZ4v", rcpt:"rcpt_01KHVB3T…K8XF", after:"$42,940.00" },
+  { t:"2026-09-03 06:04:29Z", m:MANDATE.short, agent:"invoice-bot", kind:"settlement", amt:"$12,860.00",
+    cp:"vendor:aws", ext:"pi_3QaMf1…yQ7c", rcpt:"rcpt_01KHQ9W5…N2LD", after:"$47,140.00" }
+];
+
+const EXCEPTIONS = [
+  { t:"2026-09-09 11:42:06Z", sev:"critical", conn:"Acme Robotics — Stripe (live)",
+    ext:"pi_3QaW4r8eZvKYlo2C9xB1tL6d", amt:"$640.00",
+    what:"External transaction attributable to the connection with no receipt. Money moved that Oxagen did not govern.",
+    status:"open", owner:"Dana Okafor" }
+];
+
+/* ── audit receipts search ─────────────────────────────────────────────── */
+const AUDIT_RECEIPTS = [
+  { id:RECEIPT.short, t:"2026-09-11 06:07:41Z", agent:"acme.finops.invoice-bot", tool:"stripe__create_payment@4",
+    effect:"moves_funds", amt:"$18,420.00", decision:"approve → allowed", approver:"Priya Natarajan",
+    tier:"gateway", star:true },
+  { id:"rcpt_01KJ7F2D…H3WP", t:"2026-09-11 05:58:44Z", agent:"acme.finops.invoice-bot", tool:"netsuite__get_vendor@2",
+    effect:"none", amt:"—", decision:"allow", approver:"—", tier:"gateway" },
+  { id:"rcpt_01KJ7EX9…Q6MT", t:"2026-09-11 05:52:10Z", agent:"acme.finops.spend-analyst", tool:"snowflake__query@3",
+    effect:"none", amt:"—", decision:"allow", approver:"—", tier:"gateway" },
+  { id:"rcpt_01KJ2M8P…W4RC", t:"2026-09-09 06:06:55Z", agent:"acme.finops.invoice-bot", tool:"stripe__create_payment@4",
+    effect:"moves_funds", amt:"$4,800.00", decision:"approve → allowed", approver:"Dana Okafor", tier:"gateway" },
+  { id:"rcpt_01KJ1C4V…Z8HN", t:"2026-09-08 14:22:39Z", agent:"acme.core.release-manager", tool:"github__create_release@2",
+    effect:"none", amt:"—", decision:"approve → allowed", approver:"Marcus Bell", tier:"gateway" },
+  { id:"rcpt_01KJ0R4X…T9BM", t:"2026-09-08 06:05:31Z", agent:"acme.finops.invoice-bot", tool:"stripe__create_payment@4",
+    effect:"moves_funds", amt:"$9,420.00", decision:"approve → allowed", approver:"Dana Okafor", tier:"gateway" },
+  { id:"rcpt_01KHZ6B8…V1KD", t:"2026-09-06 06:05:02Z", agent:"acme.finops.invoice-bot", tool:"stripe__create_payment@4",
+    effect:"moves_funds", amt:"$7,100.00", decision:"denied", approver:"—", tier:"gateway", denied:true }
+];
+</script>
+
+<script>
+"use strict";
+/* ═══════════════════════════ FRAMES ════════════════════════════════════════ */
+const FRAMES = [
+ {q:0,k:"agent_start",c:"",s:"acme.finops.invoice-bot · OpenAI Agents SDK 0.9.4 · run token rt_01KJ7F3Q… (15 m) · tier gateway",m:"06:02:18.441Z"},
+ {q:1,k:"checkpoint",c:"",s:"bundle bnd_01KJ7F3Q0R · policy pol_v41 · toolbelt 12 tools (full belt) · deny generation 118",m:"06:02:18.602Z"},
+ {q:2,k:"context.assembled",c:"",s:"steering 412 tok · 3 context frames 918 tok · budget 4 000 tok · composition sha256:2b71c9…",m:"06:02:18.740Z"},
+ {q:"…",k:"",c:"skip",s:"turns 1–3 · 9 model calls, 8 tool calls, all allowed · $0.47",m:""},
+ {q:138,k:"turn_start",c:"",s:"turn 4 · “Pay the September AWS invoice AWS-2026-09-INV-88134”",m:"06:02:41.220Z"},
+ {q:139,k:"context.assembled",c:"",s:"4 context frames · 1 204 tok of 4 000 · steering 412 tok · usage report attached",m:"06:02:41.318Z"},
+ {q:140,k:"model.request",c:"",s:"gpt-5.1 · 12 tool definitions (3 180 tok) · messages 11 · provider req req_8fT2…",m:"06:02:41.402Z"},
+ {q:141,k:"model.response",c:"ok",s:"stop tool_use · in 1 284 / cache_read 11 904 / out 218 / reasoning 96 · cache hit 90.3%",m:"$0.0413"},
+ {q:142,k:"tool_requested",c:"",s:"aws_billing__get_invoice@3 · {\"invoice_id\":\"AWS-2026-09-INV-88134\"}",m:"06:02:44.118Z"},
+ {q:143,k:"policy_decision",c:"ok",s:"allow · rule tools.read.allow · 3.1 ms · grant grt_01KH6T2P (role finops.payments)",m:"3.1 ms"},
+ {q:144,k:"tool_call",c:"taint",s:"result 14.2 KB · output valid · marked untrusted (third_party) · digest sha256:e31f0c9a…",m:"412 ms"},
+ {q:145,k:"model.request",c:"",s:"gpt-5.1 · tool result appended with provenance wrapper",m:"06:02:45.004Z"},
+ {q:146,k:"model.response",c:"ok",s:"stop tool_use · in 1 902 / cache_read 12 880 / out 246 · cache hit 87.1%",m:"$0.0521"},
+ {q:147,k:"tool_requested",c:"",s:"s3__get_object@1 · acme-finops-inbox/aws/2026-09/INV-88134.pdf",m:"06:02:47.660Z"},
+ {q:148,k:"tool_call",c:"taint",s:"result 218 KB · output valid · marked untrusted · digest sha256:6a90bd41…",m:"706 ms"},
+ {q:149,k:"model.request",c:"",s:"gpt-5.1 · invoice body as evidence, quoted and cited",m:"06:02:49.221Z"},
+ {q:150,k:"model.response",c:"ok",s:"stop tool_use · in 4 118 / cache_read 10 224 / out 302 · cache hit 71.3%",m:"$0.0714"},
+ {q:151,k:"tool_requested",c:"",s:"stripe__list_payment_methods@2 · {\"customer\":\"cus_AcmeRobotics\"}",m:"06:02:52.014Z"},
+ {q:152,k:"tool_call",c:"ok",s:"result 1.1 KB · output valid · 2 methods · credential grant cg_01KJ7F4M (ttl 60 s, spent)",m:"188 ms"},
+ {q:153,k:"model.request",c:"",s:"gpt-5.1 · sequence rule satisfied: quote call precedes payment in this run",m:"06:02:53.900Z"},
+ {q:154,k:"model.response",c:"ok",s:"stop tool_use · in 2 984 / cache_read 12 608 / out 342 · cache hit 80.9%",m:"$0.0689"},
+ {q:155,k:"tool_requested",c:"hot",s:"stripe__create_payment@4 · $18,420.00 USD → vendor:aws · input digest sha256:9f2c7b41…",m:"06:04:12.660Z"},
+ {q:156,k:"policy_decision",c:"policy",s:"approve · 3 rules fired · tainted (2 sources) · mandate mnd_01KJ5XQ7… reserved $18,420.00",m:"4.6 ms"},
+ {q:157,k:"approval_request",c:"policy",s:"parked · timeout 10 m · notified Mission Control, Slack #finops-approvals, email · approvers role:org.billing",m:"06:04:12.907Z"}
+];
+
+const FRAMES_AFTER = [
+ {q:158,k:"approval_decision",c:"new",s:"approved by Priya Natarajan (org owner, role:org.billing) · reason recorded · evt_01KJ7F5W9Q",m:""},
+ {q:159,k:"token_issued",c:"new",s:"apt_01KJ7F5WGT…2DJP · Biscuit v2 · single-use · bound to call digest, agent, run · ttl 90 s",m:""},
+ {q:160,k:"token_use",c:"new",s:"presented at dispatch · verified against mint key key_ox_acme_2026Q3 · consumed",m:""},
+ {q:161,k:"tool_call",c:"new",s:"dispatched · credential grant cg_01KJ7F5X (restricted_key, ttl 5 m) · idem idm_9f2c7b41… · pi_3QaXbL…kR7t · succeeded",m:"1 284 ms"},
+ {q:162,k:"receipt",c:"new",s:"rcpt_01KJ7F5YC9…6QRK · signed, chained at position 162 · tier gateway",m:""}
+];
+
+const FRAMES_DENIED = [
+ {q:158,k:"approval_decision",c:"deny",s:"denied by Priya Natarajan · reason reaches the model as the permission decision reason",m:""},
+ {q:159,k:"tool_call",c:"deny",s:"not dispatched · mandate reservation released · $18,420.00 returned to the period",m:""},
+ {q:160,k:"receipt",c:"deny",s:"rcpt_01KJ7F5YC9…6QRK · decision denied · no credential minted, no external effect",m:""}
+];
+
+const FRAMES_EXPIRED = [
+ {q:158,k:"approval_decision",c:"deny",s:"expired after 10 m 00 s · no human resolved it · reason “approval timeout” reaches the model",m:""},
+ {q:159,k:"tool_call",c:"deny",s:"not dispatched · mandate reservation released · $18,420.00 returned to the period",m:""},
+ {q:160,k:"receipt",c:"deny",s:"rcpt_01KJ7F5YC9…6QRK · decision expired · no credential minted, no external effect",m:""}
+];
+
+/* ═══════════════════════════ APP STATE ═════════════════════════════════════ */
+const S = {
+  page:"loaded",          // loaded | loading | empty | error | denied
+  approval:"pending",     // pending | approved | denied | expired
+  approver:ME.name,
+  reason:"",
+  deadline:Date.now()+348*1000,
+  openHop:true,
+  frameOpen:null,
+  assistant:false,
+  qopen:QUEUE[0].id
+};
+const $=(s,r)=>(r||document).querySelector(s);
+const $$=(s,r)=>Array.from((r||document).querySelectorAll(s));
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function mmss(sec){ if(sec<0)sec=0; const m=Math.floor(sec/60), s=sec%60; return m+":"+String(s).padStart(2,"0"); }
+function left(){ return Math.max(0,Math.round((S.deadline-Date.now())/1000)); }
+
+function toast(msg,tone){
+  const t=document.createElement("div"); t.className="toast";
+  const col=tone==="deny"?"var(--st-deny)":tone==="hold"?"var(--st-hold)":"var(--st-allow)";
+  t.innerHTML='<span class="d" style="background:'+col+'"></span><span>'+msg+'</span>';
+  $("#toast").appendChild(t);
+  setTimeout(()=>{t.remove();},4200);
+}
+</script>
+
+<script>
+"use strict";
+/* ═══════════════════════════ ROUTER ════════════════════════════════════════ */
+const RESERVED = ["billing","audit"];
+function route(){
+  let h = location.hash.replace(/^#/,"");
+  if(!h || h==="/") h = "/acme/finops";
+  const p = h.split("/").filter(Boolean);
+  const r = { org:p[0]||"acme", ws:null, page:"organization", a:null, tab:null, modal:null, mid:null };
+  const i = p.indexOf("receipt");
+  if(i>-1){ r.modal="receipt"; r.mid=p[i+1]||RECEIPT.short; p.length=i; }
+  if(p.length===1){ r.page="organization"; return r; }
+  if(RESERVED.includes(p[1])){ r.page=p[1]; return r; }
+  r.ws=p[1];
+  if(p.length===2){ r.page="fleet"; return r; }
+  const sec=p[2];
+  if(sec==="runs"){ r.page="run"; r.a=p[3]||RUN.id; r.tab=p[4]||"timeline"; return r; }
+  if(sec==="agents"){ if(p[3]){ r.page="agent"; r.a=p[3]; r.tab=p[4]||"identity"; } else r.page="agents"; return r; }
+  if(sec==="tools"){ r.page="tools"; r.tab=p[3]||"registry"; return r; }
+  r.page=sec; return r;
+}
+function go(h){ location.hash=h; }
+
+/* ═══════════════════════════ CHROME ════════════════════════════════════════ */
+const NAV_WS = [
+  {k:"fleet", n:"Fleet", ic:"◈", href:r=>"#/"+r.org+"/"+r.ws},
+  {k:"run", n:"Run", ic:"▷", href:r=>"#/"+r.org+"/"+r.ws+"/runs/"+(r.ws==="finops"?RUN.id:RUNS_CORE[0].id)},
+  {k:"agents", n:"Agents", ic:"◎", href:r=>"#/"+r.org+"/"+r.ws+"/agents"},
+  {k:"tools", n:"Tools", ic:"⌘", href:r=>"#/"+r.org+"/"+r.ws+"/tools"},
+  {k:"ontology", n:"Ontology", ic:"❖", href:r=>"#/"+r.org+"/"+r.ws+"/ontology"},
+  {k:"steering", n:"Steering", ic:"≡", href:r=>"#/"+r.org+"/"+r.ws+"/steering"},
+  {k:"spend", n:"Spend", ic:"$", href:r=>"#/"+r.org+"/"+r.ws+"/spend"}
+];
+const NAV_ORG = [
+  {k:"organization", n:"Organization", ic:"⬡", href:r=>"#/"+r.org},
+  {k:"billing", n:"Billing", ic:"▤", href:r=>"#/"+r.org+"/billing"},
+  {k:"audit", n:"Audit", ic:"⎈", href:r=>"#/"+r.org+"/audit"}
+];
+
+function pendingCount(ws){ return ws==="finops" ? (S.approval==="pending"?QUEUE.length:QUEUE.length-1) : QUEUE_CORE.length; }
+
+function sidebar(r){
+  const ws = r.ws || "finops";
+  const navItem = it => {
+    const cur = it.k===r.page || (it.k==="agents"&&r.page==="agent");
+    let extra="";
+    if(it.k==="fleet" && pendingCount(ws)>0) extra='<span class="cnt">'+pendingCount(ws)+'</span>';
+    if(it.k==="run" && r.page==="run") extra='<span class="sub hideS">'+esc(r.a.slice(0,10))+'…</span>';
+    return '<a class="nl" href="'+it.href({org:r.org,ws:ws})+'"'+(cur?' aria-current="page"':'')+
+      '><span class="ic" aria-hidden="true">'+it.ic+'</span>'+it.n+extra+'</a>';
+  };
+  return '<aside class="side">'+
+    '<div class="switchers">'+
+      '<div class="brandrow">'+LOGO+'</div>'+
+      '<button class="sw" data-act="orgsw"><span class="av g">A</span><span class="lb"><b>'+ORG.name+'</b><span>organization · '+ORG.slug+'</span></span><span class="car">▾</span></button>'+
+      '<button class="sw" data-act="wssw"><span class="av">'+ws.slice(0,1).toUpperCase()+'</span><span class="lb"><b>'+ws+'</b><span>workspace · '+WS[ws].agents+' agents</span></span><span class="car">▾</span></button>'+
+    '</div>'+
+    '<nav class="navlist" aria-label="Mission Control">'+
+      '<div class="navsec">Workspace</div>'+NAV_WS.map(navItem).join("")+
+      '<div class="navsec">Organization</div>'+NAV_ORG.map(navItem).join("")+
+    '</nav>'+
+    '<div class="sidefoot"><span class="tierdot"></span><span class="mono" style="font-size:10.5px;color:var(--muted)">gateway tier · '+ORG.agents+' agents</span></div>'+
+  '</aside>';
+}
+
+function crumbs(r){
+  const c=[]; c.push('<a href="#/'+r.org+'">'+ORG.name+'</a>');
+  if(r.ws) c.push('<a href="#/'+r.org+'/'+r.ws+'">'+r.ws+'</a>');
+  const t={fleet:"Fleet",run:"Runs",agents:"Agents",agent:"Agents",tools:"Tools",audit:"Audit",
+    billing:"Billing",organization:"Organization",ontology:"Ontology",steering:"Steering",spend:"Spend"}[r.page]||r.page;
+  if(r.page==="run"){ c.push('<a href="#/'+r.org+'/'+r.ws+'">Runs</a>'); c.push('<span class="cur mono">'+esc(r.a)+'</span>'); }
+  else if(r.page==="agent"){ c.push('<a href="#/'+r.org+'/'+r.ws+'/agents">Agents</a>'); c.push('<span class="cur">'+(AG[r.a]?AG[r.a].name:r.a)+'</span>'); }
+  else if(r.page!=="organization"||!r.ws){ c.push('<span class="cur">'+t+'</span>'); }
+  return c.join('<span class="sep" aria-hidden="true">/</span>');
+}
+
+function topbar(r){
+  return '<header class="topbar">'+
+    '<div class="crumbs">'+crumbs(r)+'</div>'+
+    '<div class="tbspace"></div>'+
+    '<button class="tbtn" data-act="cmd"><span aria-hidden="true">⌕</span><span class="hideS">Search</span> <kbd>⌘K</kbd></button>'+
+    '<button class="tbtn'+(S.assistant?' on':'')+'" data-act="assist" aria-pressed="'+S.assistant+'"><span aria-hidden="true">◆</span><span class="hideS">Assistant</span></button>'+
+    '<button class="userchip" data-act="account" title="'+ME.name+' — '+ME.role+'">'+ME.initials+'</button>'+
+  '</header>';
+}
+
+function assistantPanel(r){
+  if(!S.assistant) return "";
+  const msgs = r.page==="run"||r.page==="fleet" ? [
+    {r:"u",t:"Why is this payment waiting?"},
+    {r:"a",t:"Three rules fired on <span class=\"mono\">stripe__create_payment@4</span> at frame&nbsp;156. The mandate requires approval for every <span class=\"mono\">moves_funds</span> call; $18,420.00 USD is above its $10,000.00 approval threshold; and two arguments derive from untrusted tool output, which raises a financial call to approval on its own. Any one of the three would have parked it.",
+      s:"frame 156 · policy pol_v41 · mandate mnd_01KJ5XQ7…PMKF"},
+    {r:"u",t:"How much authority is left this month?"},
+    {r:"a",t:"$10,300.00 USD of the $60,000.00 monthly limit, after this call's reservation of $18,420.00. Settled so far: $31,280.00 across four payments.",
+      s:"tools.mandate_ledger · read as a governed action, receipt rcpt_01KJ7F60…"}
+  ] : [
+    {r:"a",t:"I can answer questions over this workspace's runs, frames, records and spend, and change configuration through the same governed actions the screens use. Every turn is a run of its own, recorded and metered.",
+      s:"engine stella serve · in-app agent acme.finops.assistant"}
+  ];
+  return '<aside class="assist">'+
+    '<div class="ah"><span style="color:var(--accent-text)">◆</span><b style="font-size:13px">Assistant</b>'+
+      '<span class="badge b-quiet mono" style="margin-left:auto">engine up</span>'+
+      '<button class="xbtn" data-act="assist" aria-label="Close assistant">✕</button></div>'+
+    '<div class="ab">'+msgs.map(m=>'<div class="msg '+m.r+'">'+m.t+(m.s?'<div class="src">'+esc(m.s)+'</div>':'')+'</div>').join("")+'</div>'+
+    '<div class="af"><input placeholder="Ask about this run, or change something…" aria-label="Ask the assistant"></div>'+
+  '</aside>';
+}
+</script>
+
+<script>
+"use strict";
+/* ═══════════════════════════ COMPONENTS ════════════════════════════════════ */
+function money(v,cur){ return '<span class="money">'+v+'<span class="cur">'+(cur||"USD")+'</span></span>'; }
+function tierBadge(t){
+  const map={gateway:["b-allow","Oxagen carried the credential and validated both directions"],
+             harness:["b-quiet","the hook enforced the decision; Oxagen did not carry the credential"],
+             observe:["b-quiet","nothing was enforced; recorded only"]};
+  const m=map[t]||map.observe;
+  return '<span class="badge '+m[0]+'" title="'+m[1]+'"><span class="d"></span>'+t+'</span>';
+}
+function statusBadge(s){
+  if(s==="awaiting approval") return '<span class="badge b-hold"><span class="d"></span>awaiting approval</span>';
+  if(s==="running") return '<span class="badge b-allow"><span class="d"></span>running</span>';
+  if(s==="proven") return '<span class="badge b-allow"><span class="d"></span>proven</span>';
+  if(s.indexOf("halted")===0) return '<span class="badge b-deny"><span class="d"></span>'+s+'</span>';
+  return '<span class="badge b-quiet"><span class="d"></span>'+s+'</span>';
+}
+
+/* remaining authority bar */
+function mandateBar(showReserve){
+  const res = showReserve ? MANDATE.reservedPct : 0;
+  const used = MANDATE.settledPct + (showReserve?0:0);
+  return '<div>'+
+   '<div class="row" style="justify-content:space-between;margin-bottom:7px">'+
+     '<span class="eyebrow q">Remaining authority · '+MANDATE.period+' · September 2026</span>'+
+     '<span class="mono" style="font-size:12px;color:var(--muted)">of '+MANDATE.perPeriod+' USD</span>'+
+   '</div>'+
+   '<div class="mbar" role="img" aria-label="'+MANDATE.settled+' settled, '+(showReserve?MANDATE.reserved+' reserved by this call, ':'')+MANDATE.remaining+' remaining of '+MANDATE.perPeriod+'">'+
+     '<i class="used" style="width:'+used+'%"></i>'+
+     (showReserve?'<i class="res" style="width:'+res+'%"></i>':'')+
+   '</div>'+
+   '<div class="mlegend">'+
+     '<span><i class="used"></i>settled '+MANDATE.settled+' <span class="dim">('+MANDATE.settledPct+'%)</span></span>'+
+     (showReserve?'<span><i class="res"></i>reserved by this call '+MANDATE.reserved+' <span class="dim">('+MANDATE.reservedPct+'%)</span></span>':'')+
+     '<span><i class="left"></i>remaining '+(showReserve?MANDATE.remaining:'$28,720.00')+'</span>'+
+   '</div></div>';
+}
+
+/* the four-hop chain */
+function fourHop(){
+  return '<div class="chain4">'+
+   '<div class="hop"><div class="hn"><i>1</i>Operator</div><b>'+RUN.operator+'</b>'+
+     '<div class="hm">role <span class="mono">org.billing</span> in <span class="mono">finops</span><br>'+
+     '<span class="dim">'+esc(RUN.trigger)+'</span></div></div>'+
+   '<div class="hop"><div class="hn"><i>2</i>Agent</div><b class="mono">'+AG["invoice-bot"].key+'</b>'+
+     '<div class="hm">'+AG["invoice-bot"].harness+' · tier gateway<br>'+
+     '<span class="dim mono">'+AG["invoice-bot"].defDigest.slice(0,23)+'…</span></div></div>'+
+   '<div class="hop"><div class="hn"><i>3</i>Action</div><b class="mono">'+CALL.tool+'</b>'+
+     '<div class="hm">'+money(CALL.amount)+' → <span class="mono">'+CALL.counterparty+'</span><br>'+
+     '<span class="dim">risk '+CALL.risk+' · '+CALL.effect+' · egress '+CALL.egress+'</span></div></div>'+
+   '<div class="hop"><div class="hn"><i>4</i>Rule</div><b>3 rules required approval</b>'+
+     '<div class="hm">policy <span class="mono">'+RUN.policyVersion+'</span>, signed, activated 2026-09-02<br>'+
+     '<a href="#" data-act="rules">read the rules that fired →</a></div></div>'+
+  '</div>';
+}
+
+function rulesList(){
+  return RULES.map(r=>{
+    const cls = r.verdict==="approve"?"b-hold":r.verdict==="allow"?"b-allow":"b-quiet";
+    return '<div style="display:flex;gap:11px;padding:9px 0;border-top:1px solid var(--border);align-items:flex-start">'+
+      '<span class="badge '+cls+'" style="flex:none;min-width:74px;justify-content:center">'+r.verdict+'</span>'+
+      '<div style="min-width:0"><b class="mono" style="font-size:12px;display:block;color:var(--fg)">'+r.id+'</b>'+
+      '<span style="font-size:12.5px;color:var(--body)">'+esc(r.text)+'</span></div></div>';
+  }).join("");
+}
+
+function taintBlock(){
+  return '<div class="taint">'+
+    '<div class="row" style="margin-bottom:8px"><span class="badge b-taint"><span class="d"></span>tainted · 2 sources</span>'+
+    '<span class="muted" style="font-size:12px">Arguments that derive from untrusted tool output. Taint on a financial call raises the decision to approval.</span></div>'+
+    TAINT.map(t=>'<div class="srcrow"><a class="mono" href="#/acme/finops/runs/'+RUN.id+'" data-act="frame" data-q="'+t.frame+'" style="flex:none">frame #'+t.frame+'</a>'+
+      '<span class="mono" style="color:var(--fg);flex:none">'+t.path+'</span>'+
+      '<span class="muted" style="min-width:0">'+esc(t.tool)+' — '+esc(t.note)+'</span></div>').join("")+
+  '</div>';
+}
+
+/* approve / deny controls */
+function decisionBox(where){
+  if(S.approval==="approved") return '<div class="apfoot"><span class="badge b-allow"><span class="d"></span>approved</span>'+
+    '<span class="muted" style="font-size:12.5px">by '+S.approver+' · single-use token '+TOKEN.short+' minted and consumed · call dispatched</span>'+
+    '<span class="r"><a class="btn sm" href="#/acme/finops/runs/'+RUN.id+'/receipt/'+RECEIPT.id+'">Open receipt</a></span></div>';
+  if(S.approval==="denied") return '<div class="apfoot"><span class="badge b-deny"><span class="d"></span>denied</span>'+
+    '<span class="muted" style="font-size:12.5px">by '+S.approver+' — “'+esc(S.reason||"no reason given")+'” · reservation released, nothing dispatched</span>'+
+    '<span class="r"><a class="btn sm" href="#/acme/finops/runs/'+RUN.id+'/receipt/'+RECEIPT.id+'">Open receipt</a></span></div>';
+  if(S.approval==="expired") return '<div class="apfoot"><span class="badge b-deny"><span class="d"></span>expired</span>'+
+    '<span class="muted" style="font-size:12.5px">no human resolved it inside 10 m 00 s · reservation released, nothing dispatched</span>'+
+    '<span class="r"><a class="btn sm" href="#/acme/finops/runs/'+RUN.id+'/receipt/'+RECEIPT.id+'">Open receipt</a></span></div>';
+  return '<div class="apfoot" style="display:block">'+
+    '<label class="fl" for="rsn-'+where+'">Reason — reaches the model as the permission decision reason, and is recorded on the receipt</label>'+
+    '<textarea class="reason" id="rsn-'+where+'" data-act="reason" placeholder="e.g. AWS September invoice checked against PO-4471; amount matches the statement.">'+esc(S.reason)+'</textarea>'+
+    '<div class="row" style="margin-top:11px">'+
+      '<span class="muted" style="font-size:11.5px">Approving mints a single-use token bound to this exact call digest. Denying releases '+MANDATE.reserved+' back to the mandate.</span>'+
+      '<span class="r">'+
+        '<button class="btn danger" data-act="deny">Deny</button>'+
+        '<button class="btn primary" data-act="approve">Approve '+CALL.amount+' '+CALL.currency+'</button>'+
+      '</span></div></div>';
+}
+
+/* the full approval card */
+function approvalCard(where){
+  const done = S.approval!=="pending";
+  const sec = left();
+  const clk = done ? '<span class="clock done">—</span>'
+    : '<span class="clock'+(sec<120?' warn':'')+'" data-countdown>'+mmss(sec)+'</span>';
+  return '<div class="apcard crit">'+
+   '<div class="aphead">'+
+     '<div style="min-width:0">'+
+       '<p class="eyebrow" style="margin-bottom:6px">Approval required · governed action</p>'+
+       '<div class="amt">'+CALL.amount+'<span class="cur">'+CALL.currency+'</span></div>'+
+       '<div class="muted" style="font-size:12.5px;margin-top:4px">'+
+         '<span class="mono">'+CALL.tool+'</span> → <span class="mono">'+CALL.counterparty+'</span> · '+esc(CALL.counterpartyName)+'<br>'+
+         'invoice <span class="mono">'+CALL.invoice+'</span> · task <a href="#">'+RUN.task.ref+'</a> '+esc(RUN.task.title)+'</div>'+
+       '<div class="row" style="margin-top:9px">'+
+         '<span class="badge b-deny"><span class="d"></span>risk critical</span>'+
+         '<span class="badge b-deny mono">moves_funds</span>'+
+         '<span class="badge b-taint"><span class="d"></span>tainted</span>'+
+         '<span class="badge b-quiet mono">egress third_party</span>'+
+         '<span class="badge b-quiet mono">side_effect irreversible</span>'+
+       '</div>'+
+     '</div>'+
+     '<div class="r">'+
+       '<span class="eyebrow q" style="font-size:10px">'+(done?'resolved':'times out in')+'</span>'+
+       clk+
+       '<span class="dim mono" style="font-size:10.5px">parked '+CALL.parkedAt.slice(11,19)+'Z · timeout 10 m</span>'+
+       (done?'':'<span class="dim" style="font-size:11px;max-width:22ch;text-align:right">on expiry the call ends and the reason reaches the model</span>')+
+     '</div>'+
+   '</div>'+
+   fourHop()+
+   '<div class="pb" style="border-top:1px solid var(--border);display:grid;gap:16px">'+
+     mandateBar(S.approval==="pending"||S.approval==="approved")+
+     '<div class="cols">'+
+       '<div><p class="eyebrow q" style="margin-bottom:7px">Mandate</p>'+
+       '<dl class="kv">'+
+         '<dt>Mandate</dt><dd><a class="mono" href="#/acme/finops/agents/invoice-bot/mandates">'+MANDATE.short+'</a></dd>'+
+         '<dt>Granted by</dt><dd>'+MANDATE.grantedBy+' <span class="dim">as '+MANDATE.roleAtGrant+'</span></dd>'+
+         '<dt>Purpose</dt><dd>'+esc(MANDATE.purpose)+'</dd>'+
+         '<dt>Per call</dt><dd>'+MANDATE.perCall+' <span class="dim">USD ceiling</span></dd>'+
+         '<dt>Approval above</dt><dd>'+MANDATE.approval.above+' <span class="dim">USD, and always for moves_funds</span></dd>'+
+         '<dt>Valid to</dt><dd>'+MANDATE.validTo.slice(0,10)+'</dd>'+
+       '</dl></div>'+
+       '<div><p class="eyebrow q" style="margin-bottom:7px">The call</p>'+
+       '<dl class="kv">'+
+         '<dt>Tool version</dt><dd class="mono">'+CALL.tool+'</dd>'+
+         '<dt>Input digest</dt><dd class="digest">'+CALL.inputDigest+'</dd>'+
+         '<dt>Idempotency</dt><dd class="mono">'+CALL.idem+'</dd>'+
+         '<dt>Amount (µUSD)</dt><dd class="mono">'+CALL.micros+'</dd>'+
+         '<dt>Requested</dt><dd class="mono">'+CALL.parkedAt+'</dd>'+
+         '<dt>Frames</dt><dd><a class="mono" href="#/acme/finops/runs/'+RUN.id+'">#155 → #157</a></dd>'+
+       '</dl></div>'+
+     '</div>'+
+     taintBlock()+
+     '<div><p class="eyebrow q" style="margin-bottom:2px">Rules that fired · policy '+RUN.policyVersion+'</p>'+rulesList()+'</div>'+
+     '<div class="note">Eligible approvers: role <span class="mono">org.billing</span> — '+ME.name+' (organization owner) · '+
+       '<span class="dim">Dana Okafor is the operator of this run and is excluded by <span class="mono">fin.no_self_approval</span>.</span></div>'+
+   '</div>'+
+   decisionBox(where)+
+  '</div>';
+}
+</script>
+
+<script>
+"use strict";
+/* ═══════════════════════════ PAGE STATES ═══════════════════════════════════ */
+function stateBlock(kind,what){
+  if(kind==="loading"){
+    return '<div class="panel"><div class="ph"><div class="skel" style="width:130px"></div></div>'+
+      Array.from({length:6}).map(()=>'<div class="skelrow"><div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel" style="height:20px;border-radius:999px"></div></div>').join("")+
+      '<span class="sr">Loading '+what+'</span></div>';
+  }
+  if(kind==="empty"){
+    return '<div class="panel"><div class="state"><div class="ic" aria-hidden="true">◌</div>'+
+      '<h3>Nothing parked</h3><p>No call in <span class="mono">'+what+'</span> is waiting on a person right now. '+
+      'Approvals appear here the moment the policy engine returns <span class="mono">approve</span>; nothing else queues.</p>'+
+      '<a class="btn sm" href="#/acme/finops/tools/policy">Review the rules that park a call</a></div></div>';
+  }
+  if(kind==="error"){
+    return '<div class="panel" style="border-color:color-mix(in srgb,var(--st-deny) 38%,var(--border))"><div class="state">'+
+      '<div class="ic" style="color:var(--st-deny);border-color:color-mix(in srgb,var(--st-deny) 34%,var(--border))" aria-hidden="true">!</div>'+
+      '<h3>Could not read '+what+'</h3>'+
+      '<p>The control ledger did not answer inside 5 000 ms. Nothing was changed and no call was dispatched. '+
+      'Parked calls keep their timeout while this screen is down — a call that expires while Oxagen cannot be reached ends as <span class="mono">expired</span>, never as approved.</p>'+
+      '<p class="mono" style="font-size:11.5px;color:var(--dim)">ledger_unavailable · req_01KJ7F6T2B · 2026-09-11T06:05:03Z</p>'+
+      '<div class="row" style="justify-content:center"><button class="btn sm" data-act="retry">Retry</button>'+
+      '<a class="btn sm" href="#/acme/audit">Open Audit</a></div></div></div>';
+  }
+  if(kind==="denied"){
+    return '<div class="panel"><div class="state"><div class="ic" aria-hidden="true">⊘</div>'+
+      '<h3>You cannot see '+what+'</h3>'+
+      '<p>Reading this needs role <span class="mono">org.billing</span> or <span class="mono">workspace.owner</span> in <span class="mono">finops</span>. '+
+      'You hold <span class="mono">org.reader</span>. The request was decided by policy <span class="mono">'+RUN.policyVersion+'</span> and audited; '+
+      'no content was loaded and nothing about the parked call is shown, including its amount.</p>'+
+      '<p class="mono" style="font-size:11.5px;color:var(--dim)">iam_denied · rule iam.role_grants.read · evt_01KJ7F6W4C</p>'+
+      '<button class="btn sm" data-act="request-access">Request access from Priya Natarajan</button></div></div>';
+  }
+  return "";
+}
+
+/* ═══════════════════════════ FLEET ═════════════════════════════════════════ */
+function pageFleet(r){
+  const isFin = r.ws==="finops";
+  const runs = isFin ? RUNS : RUNS_CORE;
+  const ws = WS[r.ws] || WS.finops;
+  const head = '<div class="pagehead"><div><p class="eyebrow">Workspace · '+r.ws+'</p>'+
+    '<h1>Fleet</h1>'+
+    '<p class="muted" style="font-size:13px;margin-top:4px">Every run, live and recent · main repo <span class="mono">'+ws.repo+'</span> · production branch <span class="mono">'+ws.branch+'</span></p></div>'+
+    '<div class="r"><button class="btn sm" data-act="pause-all">Pause all</button>'+
+    '<a class="btn sm" href="#/'+r.org+'/'+r.ws+'/agents">Agents</a></div></div>';
+
+  if(S.page!=="loaded") return head + stateBlock(S.page, r.ws==="finops"?"the approvals queue":"the fleet");
+
+  const q = isFin ? QUEUE.filter(x=>!(x.star && S.approval!=="pending")) : QUEUE_CORE;
+  const starDone = isFin && S.approval!=="pending";
+
+  let panel = "";
+  {
+    panel = '<section class="panel" style="border-color:'+(S.approval==="pending"?'color-mix(in srgb,var(--st-hold) 30%,var(--border))':'var(--border)')+'">'+
+      '<div class="ph"><h2>Approvals</h2>'+
+      '<span class="badge '+(q.length?'b-hold':'b-quiet')+'"><span class="d"></span>'+q.length+' waiting on a person</span>'+
+      '<span class="muted" style="font-size:12px">an approval is always about a run</span>'+
+      '<span class="r"><span class="dim mono" style="font-size:11px">default timeout 10 m · bundle '+RUN.bundle+'</span></span></div>'+
+      (starDone
+        ? '<div class="pb"><div class="row" style="gap:10px">'+
+            '<span class="badge '+(S.approval==="approved"?"b-allow":"b-deny")+'"><span class="d"></span>'+S.approval+'</span>'+
+            '<span class="muted" style="font-size:12.5px">'+CALL.amount+' USD → vendor:aws resolved by '+S.approver+
+            (S.approval==="approved"?' · token '+TOKEN.short+' minted and consumed · payment '+EFFECT.payment:' · reservation released')+'</span>'+
+            '<span class="r" style="margin-left:auto"><a class="btn sm" href="#/'+r.org+'/'+r.ws+'/runs/'+RUN.id+'/receipt/'+RECEIPT.id+'">Receipt</a></span>'+
+          '</div></div>'
+        : '')+
+      (q.length===0 && !starDone ? '<div class="state" style="padding:40px 20px"><div class="ic">◌</div><h3>Nothing parked</h3><p>No call is waiting on a person.</p></div>' : '')+
+      q.map(a=>{
+        const open = S.qopen===a.id;
+        if(a.star && open) return '<div style="padding:14px 16px;border-bottom:1px solid var(--border)">'+approvalCard("fleet")+'</div>';
+        return '<div class="qrow" data-act="qtoggle" data-id="'+a.id+'" tabindex="0" role="button" aria-expanded="'+open+'">'+
+          '<span class="badge '+(a.risk==="critical"?"b-deny":"b-hold")+'" style="flex:none"><span class="d"></span>'+a.risk+'</span>'+
+          '<div style="min-width:0"><div class="qa">'+a.tool+'</div>'+
+          '<div class="qm">'+esc(a.what)+' · '+a.agent+' · operator '+a.operator+' · '+a.task+'</div></div>'+
+          '<div class="r">'+
+            (a.tainted?'<span class="badge b-taint hideS">tainted</span>':'')+
+            (a.mandate?'<span class="badge b-quiet mono hideS">mandate</span>':'')+
+            '<span class="clock'+(a.left<120?" warn":"")+'" style="font-size:13px" data-countdown-fixed="'+a.id+'">'+mmss(a.left)+'</span>'+
+            '<span class="dim" aria-hidden="true">›</span>'+
+          '</div></div>';
+      }).join("")+
+      (S.qopen===QUEUE[0].id && S.approval==="pending" ? '' : '')+
+    '</section>';
+  }
+
+  const table = '<section class="panel"><div class="ph"><h2>Runs</h2>'+
+    '<span class="badge b-quiet mono">'+runs.length+' in the last 6 h</span>'+
+    '<span class="r"><span class="dim mono" style="font-size:11px">provider spend: gateway_observed · Oxagen fee: '+ORG.billing.perRun+'/run, '+ORG.billing.band+' less '+ORG.billing.discountPct+' · USD</span></span></div>'+
+    '<div class="tblwrap"><table><thead><tr>'+
+      '<th>Run</th><th>Agent</th><th>Operator</th><th>Status</th><th>Tier</th><th>Replay</th>'+
+      '<th class="r">Provider spend</th><th class="r">Oxagen fee</th><th>Started</th><th>Task</th>'+
+    '</tr></thead><tbody>'+
+    runs.map(x=>{
+      const st = (x.id===RUN.id && S.approval!=="pending") ? (S.approval==="approved"?"running":"halted · denied") : x.status;
+      return '<tr class="clickable" data-act="open-run" data-id="'+x.id+'" tabindex="0">'+
+        '<td class="mono" style="color:var(--fg)">'+x.id.slice(0,18)+'…</td>'+
+        '<td class="mono">'+x.agent+'</td><td>'+x.op+'</td>'+
+        '<td>'+statusBadge(st)+'</td><td>'+tierBadge(x.tier)+'</td>'+
+        '<td><span class="badge b-quiet mono">'+x.replay+'</span></td>'+
+        '<td class="r"><span class="money">'+x.cost+'</span></td>'+
+        '<td class="r">'+(function(f){ return f.billed
+            ? '<span class="money">'+f.v+'</span>'
+            : '<span class="money" style="color:var(--muted)">'+f.v+'</span><br><span class="dim mono" style="font-size:10px">when sealed</span>'; })(oxFee(st))+'</td>'+
+        '<td class="mono dim">'+x.started+'</td><td class="mono dim">'+x.task+'</td></tr>';
+    }).join("")+'</tbody></table></div></section>';
+
+  return head + '<div class="stack">' + panel + table + '</div>';
+}
+</script>
+
+<script>
+"use strict";
+/* ═══════════════════════════ RUN ═══════════════════════════════════════════ */
+function frameRows(){
+  let rows = FRAMES.slice();
+  if(S.approval==="approved") rows = rows.concat(FRAMES_AFTER);
+  if(S.approval==="denied") rows = rows.concat(FRAMES_DENIED);
+  if(S.approval==="expired") rows = rows.concat(FRAMES_EXPIRED);
+  return rows.map(f=>{
+    if(f.c==="skip") return '<div class="fr" style="cursor:default;opacity:.62"><span class="sq">'+f.q+'</span>'+
+      '<span class="kd"></span><span class="sm">'+esc(f.s)+'</span><span class="mt"></span></div>';
+    const kc = f.c==="ok"?"k-ok":f.c==="policy"||f.c==="hot"?"k-policy":f.c==="deny"?"k-deny":f.c==="taint"?"k-taint":f.c==="new"?"k-ok":"";
+    const rc = f.c==="hot"||f.c==="policy"?" hot":f.c==="new"?" new":f.c==="deny"?" new":"";
+    const open = S.frameOpen===f.q;
+    let detail="";
+    if(open) detail = frameDetail(f);
+    return '<div class="fr'+rc+'" data-act="frame" data-q="'+f.q+'" tabindex="0" role="button" aria-expanded="'+open+'">'+
+      '<span class="sq">#'+f.q+'</span><span class="kd '+kc+'">'+f.k+'</span>'+
+      '<span class="sm">'+esc(f.s)+'</span><span class="mt">'+esc(f.m)+'</span></div>'+detail;
+  }).join("");
+}
+
+function frameDetail(f){
+  if(f.q===155) return '<div class="frdetail"><p class="eyebrow q" style="margin-bottom:8px">Canonical input · validated against input_schema v4, no additional properties</p>'+
+    '<pre class="code">{\n  <span class="k">"amount"</span>: <span class="n">18420.00</span>,          <span class="s">// tainted ← frame #142 $.amount</span>\n'+
+    '  <span class="k">"currency"</span>: <span class="s">"usd"</span>,\n'+
+    '  <span class="k">"customer"</span>: <span class="s">"cus_AcmeRobotics"</span>,\n'+
+    '  <span class="k">"counterparty"</span>: <span class="s">"vendor:aws"</span>,\n'+
+    '  <span class="k">"description"</span>: <span class="s">"AWS September 2026 — AWS-2026-09-INV-88134 — PO-4471"</span>,\n'+
+    '  <span class="k">"metadata"</span>: {\n    <span class="k">"invoice_id"</span>: <span class="s">"AWS-2026-09-INV-88134"</span>,  <span class="s">// tainted ← frame #147</span>\n'+
+    '    <span class="k">"task_ref"</span>: <span class="s">"FIN-2291"</span>\n  },\n'+
+    '  <span class="k">"idempotency_key"</span>: <span class="s">"'+CALL.idem+'"</span>\n}</pre>'+
+    '<div class="kv" style="margin-top:12px"><dt>Input digest</dt><dd class="digest">'+CALL.inputDigest+'</dd>'+
+    '<dt>Amount path</dt><dd class="mono">$.amount → 18 420 000 000 µUSD</dd>'+
+    '<dt>Counterparty path</dt><dd class="mono">$.counterparty → vendor:aws</dd>'+
+    '<dt>Schema digest</dt><dd class="digest">'+CALL.schemaDigest+'</dd></div></div>';
+  if(f.q===156) return '<div class="frdetail"><p class="eyebrow q">Policy decision · deterministic, versioned, no model in the path</p>'+
+    rulesList()+
+    '<div class="kv" style="margin-top:12px"><dt>Outcome</dt><dd><span class="badge b-hold"><span class="d"></span>approve</span></dd>'+
+    '<dt>Policy version</dt><dd class="mono">'+RUN.policyVersion+' · signed · activated 2026-09-02</dd>'+
+    '<dt>Delegation ceiling</dt><dd>agent ∩ operator = agent <span class="dim">(not narrowed)</span></dd>'+
+    '<dt>Mandate</dt><dd class="mono">'+MANDATE.short+' · reserved '+MANDATE.reserved+' USD · remaining '+MANDATE.remaining+'</dd></div></div>';
+  if(f.q===161 || (f.q===159 && S.approval!=="approved")) return '<div class="frdetail">'+
+    (S.approval==="approved"
+      ? '<div class="kv"><dt>Credential grant</dt><dd class="mono">'+CRED.short+' · '+CRED.downscope+' · ttl '+CRED.ttl+'</dd>'+
+        '<dt>Scope</dt><dd class="mono">'+CRED.scope+'</dd>'+
+        '<dt>Agent saw</dt><dd>the result only — never the credential</dd>'+
+        '<dt>External effect</dt><dd class="mono">'+EFFECT.payment+' · '+EFFECT.status+'</dd>'+
+        '<dt>Duplicate</dt><dd>suppressed: '+EFFECT.dup+'</dd></div>'+
+        '<div class="row" style="margin-top:12px"><a class="btn sm" href="#/acme/finops/runs/'+RUN.id+'/receipt/'+RECEIPT.id+'">Open receipt '+RECEIPT.short+'</a></div>'
+      : '<div class="kv"><dt>Dispatched</dt><dd>no — the call ended at the approval gate</dd>'+
+        '<dt>Credential</dt><dd>none minted</dd><dt>External effect</dt><dd>none</dd>'+
+        '<dt>Mandate</dt><dd class="mono">reservation released · '+MANDATE.reserved+' returned to the period</dd></div>')+
+    '</div>';
+  if(f.q===157) return '<div class="frdetail"><div class="kv">'+
+    '<dt>Parked at</dt><dd class="mono">'+CALL.parkedAt+'</dd>'+
+    '<dt>Timeout</dt><dd>10 m 00 s (workspace bundle '+RUN.bundle+')</dd>'+
+    '<dt>Notified</dt><dd>Mission Control · Slack <span class="mono">#finops-approvals</span> · email to role:org.billing</dd>'+
+    '<dt>What the model sees</dt><dd>a wait with a reason: <span class="mono">"held for human approval: moves_funds above mandate threshold"</span></dd></div></div>';
+  if(f.q===158) return '<div class="frdetail"><div class="kv">'+
+    '<dt>Resolved by</dt><dd>'+S.approver+' <span class="dim">(organization owner, role:org.billing)</span></dd>'+
+    '<dt>Decision</dt><dd>'+(S.approval==="approved"?'<span class="badge b-allow"><span class="d"></span>approved</span>':'<span class="badge b-deny"><span class="d"></span>'+S.approval+'</span>')+'</dd>'+
+    '<dt>Reason</dt><dd>'+(S.reason?esc(S.reason):'<span class="dim">none given</span>')+'</dd>'+
+    '<dt>Event</dt><dd class="mono">evt_01KJ7F5W9Q</dd></div></div>';
+  if(f.q===144||f.q===148) return '<div class="frdetail"><div class="kv">'+
+    '<dt>Provenance</dt><dd>wrapped: tool version, server, response digest, external ids</dd>'+
+    '<dt>Trust</dt><dd><span class="badge b-taint"><span class="d"></span>untrusted</span> <span class="muted">any argument derived from this body is taint-marked</span></dd>'+
+    '<dt>Reached</dt><dd class="mono">'+(f.q===144?'$.amount on frame #155':'$.metadata.invoice_id on frame #155')+'</dd></div></div>';
+  return '<div class="frdetail"><span class="muted" style="font-size:12.5px">Body is a content-addressed blob; the frame node holds everything but the bytes. '+
+    'Open the full body in render replay.</span></div>';
+}
+
+function pageRun(r){
+  if(r.a!==RUN.id){
+    return '<div class="pagehead"><div><p class="eyebrow">Run</p><h1 class="mono" style="font-size:17px">'+esc(r.a)+'</h1></div></div>'+
+      '<div class="panel"><div class="state"><div class="ic">▷</div><h3>Outside this mockup</h3>'+
+      '<p>W3 follows one run end to end. Open <a href="#/acme/finops/runs/'+RUN.id+'">'+RUN.short+'</a> — the parked payment.</p></div></div>';
+  }
+  const status = S.approval==="pending" ? "awaiting approval" : S.approval==="approved" ? "running" : "halted · denied";
+  const head = '<div class="pagehead"><div>'+
+    '<p class="eyebrow">Run · turn 4 · step 11</p>'+
+    '<h1 class="mono" style="font-size:17px">'+RUN.id+'</h1>'+
+    '<div class="row" style="margin-top:8px">'+statusBadge(status)+tierBadge(RUN.tier)+
+      '<span class="badge b-quiet mono">replay '+RUN.replay+'</span>'+
+      '<span class="badge b-allow"><span class="d"></span>chain verified</span>'+
+      '<span class="muted" style="font-size:12.5px">'+AG["invoice-bot"].key+' · operator '+RUN.operator+' · task <a href="#">'+RUN.task.ref+'</a></span>'+
+    '</div></div>'+
+    '<div class="r">'+
+      '<button class="btn sm" data-act="steer">Steer</button>'+
+      '<button class="btn sm" data-act="pause">'+(S.approval==="approved"?"Pause":"Pause")+'</button>'+
+      '<button class="btn sm danger" data-act="cancel">Cancel</button>'+
+      '<button class="btn sm" data-act="export">Export</button>'+
+    '</div></div>';
+
+  if(S.page!=="loaded") return head + stateBlock(S.page,"this run");
+
+  const gov = S.approval==="pending" ? 11 : 12;
+  const strip = '<div class="strip">'+
+    '<div class="c"><div class="l">Provider spend</div><div class="v mono">'+RUN.cost+'</div>'+
+      '<div class="s">what Acme pays providers</div></div>'+
+    '<div class="c"><div class="l">Oxagen fee</div><div class="v mono">'+ORG.billing.perRun+'</div>'+
+      '<div class="s">per run · not billed yet</div></div>'+
+    '<div class="c"><div class="l">Money moved</div><div class="v mono" style="color:'+
+      (S.approval==="pending"?"var(--st-hold)":S.approval==="approved"?"var(--st-allow)":"var(--st-deny)")+'">'+CALL.amount+'</div>'+
+      '<div class="s">'+(S.approval==="pending"?"held at the gateway":S.approval==="approved"?"moved · "+EFFECT.payment.slice(0,12)+"…":"not moved")+'</div></div>'+
+    '<div class="c"><div class="l">Cache hit</div><div class="v">'+RUN.cacheHit+'</div><div class="s">47 616 read</div></div>'+
+    '<div class="c"><div class="l">Tokens out</div><div class="v mono">'+RUN.tokens.out.toLocaleString()+'</div><div class="s">+412 reasoning</div></div>'+
+    '<div class="c"><div class="l">Governed actions</div><div class="v">'+gov+'</div>'+
+      '<div class="s">'+(gov===12?"11 tool calls + 1 approval":"11 tool calls")+'</div></div>'+
+    '<div class="c"><div class="l">Frames</div><div class="v">'+(S.approval==="pending"?RUN.frames:RUN.frames+5)+'</div><div class="s">no gaps</div></div>'+
+  '</div>';
+
+  const stripLabel = S.approval==="pending"
+    ? '<div class="row" style="margin-bottom:10px"><span class="eyebrow">Approval strip · this run is stopped at the tool gateway</span>'+
+      '<span class="muted" style="font-size:12px">step 6 of the call pipeline · the credential has not been brokered</span></div>'
+    : '<div class="row" style="margin-bottom:10px"><span class="eyebrow">Approval strip · resolved</span></div>';
+
+  const tabs = ["timeline","told","cost","chain"];
+  const tabNames = {timeline:"Timeline",told:"What the agent was told",cost:"Cost",chain:"Chain"};
+  const tabBar = '<div class="tabs">'+tabs.map(t=>'<a href="#/'+r.org+'/'+r.ws+'/runs/'+r.a+'/'+t+'"'+
+    (r.tab===t?' aria-current="page"':'')+'>'+tabNames[t]+(t==="timeline"?'<span class="n">'+(S.approval==="pending"?RUN.frames:RUN.frames+5)+' frames</span>':'')+'</a>').join("")+'</div>';
+
+  let body="";
+  if(r.tab==="timeline"){
+    body = '<section class="panel"><div class="ph"><h2>Frames</h2>'+
+      '<span class="muted" style="font-size:12px">hash-chained, dense seq, no gaps — click a frame to open it</span>'+
+      '<span class="r"><span class="dim mono" style="font-size:11px">oxagen.frame/1.0</span></span></div>'+
+      '<div class="frames">'+frameRows()+'</div></section>';
+  } else if(r.tab==="told"){
+    body = '<section class="panel"><div class="ph"><h2>What the agent was told, turn 4</h2>'+
+      '<span class="r"><span class="dim mono" style="font-size:11px">frame #139 · composition sha256:2b71c9…</span></span></div>'+
+      '<div class="pb stack">'+
+      '<div><p class="eyebrow q">Governed system context · from the policy bundle</p>'+
+      '<pre class="code">Published steering for acme.finops.invoice-bot, compiled at run start.\nDigest sha256:a04f1c… chained into agent_start (#0).\n\n· Never pay an invoice whose total was not read from the provider of record.\n· Every payment carries the PO number in description.\n· PO-4471 covers AWS, GitHub and Datadog only.</pre></div>'+
+      '<div><p class="eyebrow q">Context frames · 4 of 4 · 1 204 tokens of a 4 000 budget</p>'+
+      '<div class="tblwrap"><table><thead><tr><th>Frame</th><th>Kind</th><th>Source</th><th class="r">Tokens</th><th>Trust</th></tr></thead><tbody>'+
+      '<tr><td class="mono">cf_01KJ7F3Q…A1</td><td class="mono">knowledge</td><td>PO-4471 scope and counterparties</td><td class="r mono">318</td><td><span class="badge b-allow"><span class="d"></span>attested</span></td></tr>'+
+      '<tr><td class="mono">cf_01KJ7F3Q…A2</td><td class="mono">memory</td><td>August AWS invoice ran clean at $16,940.00</td><td class="r mono">204</td><td><span class="badge b-allow"><span class="d"></span>attested</span></td></tr>'+
+      '<tr><td class="mono">cf_01KJ7F3Q…A3</td><td class="mono">evidence</td><td>Stripe customer cus_AcmeRobotics, 2 payment methods</td><td class="r mono">176</td><td><span class="badge b-allow"><span class="d"></span>attested</span></td></tr>'+
+      '<tr><td class="mono">cf_01KJ7F3Q…A4</td><td class="mono">evidence</td><td>AWS-2026-09-INV-88134 body (fetched this turn)</td><td class="r mono">506</td><td><span class="badge b-taint"><span class="d"></span>untrusted</span></td></tr>'+
+      '</tbody></table></div></div>'+
+      '<div><p class="eyebrow q">Toolbelt shown to the model · full belt, 12 tools, 3 180 definition tokens</p>'+
+      '<p class="muted" style="font-size:12.5px">Every definition carries the trailer Oxagen adds: risk grade, whether the call will be held for approval, and the mandate ceiling that applies. '+
+      'The model knew this payment would park before it asked.</p>'+
+      '<pre class="code">stripe__create_payment  <span class="s">— risk: critical · approval: always (moves_funds) · mandate ceiling: $25,000.00/call, $10,300.00 left this period</span></pre></div>'+
+      '<div class="note">Steering text is evidence, quoted and cited. Oxagen never executes it as instructions.</div>'+
+      '</div></section>';
+  } else if(r.tab==="cost"){
+    body = '<section class="panel"><div class="ph"><h2>Cost</h2><span class="r"><span class="dim mono" style="font-size:11px">price book pb_2026Q3 · micro-USD integers</span></span></div>'+
+      '<div class="tblwrap"><table><thead><tr><th>Frame</th><th>Model</th><th class="r">input_uncached</th><th class="r">cache_read</th><th class="r">output</th><th class="r">reasoning</th><th class="r">Cache hit</th><th class="r">Cost</th><th>Basis</th></tr></thead><tbody>'+
+      [[141,"gpt-5.1",1284,11904,218,96,"90.3%","$0.0413"],[146,"gpt-5.1",1902,12880,246,84,"87.1%","$0.0521"],
+       [150,"gpt-5.1",4118,10224,302,118,"71.3%","$0.0714"],[154,"gpt-5.1",2984,12608,342,114,"80.9%","$0.0689"]]
+      .map(x=>'<tr><td class="mono">#'+x[0]+'</td><td class="mono">'+x[1]+'</td><td class="r mono">'+x[2].toLocaleString()+'</td>'+
+        '<td class="r mono">'+x[3].toLocaleString()+'</td><td class="r mono">'+x[4]+'</td><td class="r mono">'+x[5]+'</td>'+
+        '<td class="r">'+x[6]+'</td><td class="r"><span class="money">'+x[7]+'</span></td><td class="mono dim">gateway_observed</td></tr>').join("")+
+      '<tr><td class="mono">#161</td><td class="mono dim">— tool call</td><td class="r dim">—</td><td class="r dim">—</td><td class="r dim">—</td><td class="r dim">—</td><td class="r dim">—</td>'+
+      '<td class="r"><span class="money">$0.0000</span></td><td class="mono dim">declared price: 0</td></tr>'+
+      '</tbody></table></div>'+
+      '<div class="pb"><div class="cols">'+
+      '<div><p class="eyebrow q" style="margin-bottom:7px">Prompt composition · turn 4</p><dl class="kv">'+
+      '<dt>Tool definitions</dt><dd class="mono">3 180 tok · 21.3%</dd>'+
+      '<dt>Context frames</dt><dd class="mono">1 204 tok · 8.1%</dd>'+
+      '<dt>Steering</dt><dd class="mono">412 tok · 2.8%</dd>'+
+      '<dt>Conversation</dt><dd class="mono">10 132 tok · 67.8%</dd></dl></div>'+
+      '<div><p class="eyebrow q" style="margin-bottom:7px">This run</p><dl class="kv">'+
+      '<dt>Provider spend</dt><dd>'+money(RUN.cost)+' <span class="basis">gateway_observed</span></dd>'+
+      '<dt>µUSD</dt><dd class="mono">'+RUN.costMicros+' <span class="dim">integer, rounded to the cent once</span></dd>'+
+      '<dt>Money moved</dt><dd>'+money(CALL.amount)+' <span class="dim">— what the run moves, not what it costs</span></dd>'+
+      '<dt>Governed actions</dt><dd class="mono">'+(S.approval==="pending"?"11":"12")+' · 0 denied '+
+        '<span class="dim">11 gateway tool calls'+(S.approval==="pending"?"":" + 1 approval decision")+'</span></dd>'+
+      '<dt>Frames</dt><dd class="mono">'+(S.approval==="pending"?RUN.frames:RUN.frames+5)+' <span class="dim">recorded events — not a billable unit</span></dd>'+
+      '<dt>Funding source</dt><dd class="mono">customer_key · pk_acme_openai_prod</dd></dl></div>'+
+      '</div></div>'+
+
+    '<section class="panel" style="margin-top:16px;border-color:color-mix(in srgb,var(--gold) 26%,var(--border))">'+
+      '<div class="ph"><h2>What Oxagen charges for this run</h2>'+
+      '<span class="badge b-quiet mono">'+ORG.plan+'</span>'+
+      '<span class="muted" style="font-size:12px">Oxagen bills per run. This is the whole calculation.</span>'+
+      '<span class="r"><a class="btn sm" href="#/acme/billing">Statement</a></span></div>'+
+      '<div class="pb"><div class="cols">'+
+        '<div><p class="eyebrow q" style="margin-bottom:7px">This run</p><dl class="kv">'+
+          '<dt>Counts as a run?</dt><dd><b>yes, when it seals</b> <span class="dim">'+ORG.billing.counts+' — 4 so far</span></dd>'+
+          '<dt>Position</dt><dd class="mono">run '+ORG.billing.thisRunIs+' of '+ORG.billing.month+'</dd>'+
+          '<dt>Free allowance</dt><dd class="mono">first '+ORG.billing.freeAllowance+' runs, every governance feature on <span class="dim">— used up on 2026-09-06</span></dd>'+
+          '<dt>Band</dt><dd class="mono">'+ORG.billing.band+' → '+ORG.billing.listPerRun+' list</dd>'+
+          '<dt>'+ORG.billing.discountName+'</dt><dd class="mono">−'+ORG.billing.discountPct+' through '+ORG.billing.discountUntil+'</dd>'+
+          '<dt>Charged</dt><dd>'+money(ORG.billing.perRun)+' <span class="basis">'+ORG.billing.perRunMicros+' µUSD · rounded to the cent once, at the statement line</span></dd>'+
+        '</dl></div>'+
+        '<div><p class="eyebrow q" style="margin-bottom:7px">'+ORG.billing.month+' to date · organization</p><dl class="kv">'+
+          '<dt>Runs counted</dt><dd class="mono">'+ORG.billing.runsMTD+' <span class="dim">('+ORG.billing.billableMTD+' billable after the free allowance)</span></dd>'+
+          '<dt>Oxagen fee</dt><dd>'+money(ORG.billing.oxagenMTD)+' <span class="basis">'+ORG.billing.billableMTD+' × '+ORG.billing.perRun+'</span></dd>'+
+          '<dt>Provider spend</dt><dd>'+money(ORG.billing.providerMTD)+' <span class="basis">reconciled to the cent</span></dd>'+
+          '<dt>Oxagen as a share</dt><dd><b>'+ORG.billing.share+'</b> <span class="dim">of what Acme pays its providers</span></dd>'+
+          '<dt>Retained evidence</dt><dd class="mono">'+ORG.billing.retained+' this run · '+ORG.billing.retentionIncluded+' included, then $0.10 per GB-month</dd>'+
+          '<dt>Governed actions</dt><dd class="mono">reported as a secondary meter, priced at zero</dd>'+
+        '</dl></div>'+
+      '</div>'+
+      '<div class="note" style="margin-top:14px">Free, and never counted: a run Oxagen halted before any model call, a run of the in-app agent, and a witness run. '+
+      'Acme never pays for Oxagen saying no, or for Oxagen proving the work.</div>'+
+      '</div></section>';
+  } else {
+    body = '<section class="panel"><div class="ph"><h2>Chain</h2><span class="badge b-allow"><span class="d"></span>verified</span>'+
+      '<span class="r"><span class="dim mono" style="font-size:11px">SHA-256(prev_hash ‖ canonical(envelope))</span></span></div>'+
+      '<div class="pb"><dl class="kv">'+
+      '<dt>Frames</dt><dd class="mono">'+(S.approval==="pending"?RUN.frames:RUN.frames+5)+' · dense seq from 0 · no telemetry_gap frames</dd>'+
+      '<dt>Checkpoints</dt><dd class="mono">4 · producer-signed, Oxagen countersigned at ingest</dd>'+
+      '<dt>Attestation</dt><dd>gateway-observed frames are Oxagen-attested. Client-attested frames: <b>0</b> on this run.</dd>'+
+      '<dt>Enforcement tier</dt><dd>'+tierBadge("gateway")+' <span class="muted">computed from what was actually routed, never from what the adapter could do on paper</span></dd>'+
+      '<dt>Seal</dt><dd class="dim">not sealed — the run is still open</dd>'+
+      '<dt>Latest hash</dt><dd class="digest">'+RECEIPT.hash+'</dd>'+
+      '</dl><div class="note" style="margin-top:14px">This run is <span class="mono">gateway</span> tier, so the guarantees hold at full strength. '+
+      'No badge on this page can render a stronger word than the recorded tier.</div></div></section>';
+  }
+
+  return head + '<div class="stack">' + strip +
+    '<section>' + stripLabel + approvalCard("run") + '</section>' +
+    tabBar + body + '</div>';
+}
+</script>
+
+<script>
+"use strict";
+/* ═══════════════════════════ AGENTS ════════════════════════════════════════ */
+const BELT = [
+  {t:"stripe__create_payment@4", risk:"critical", eff:"moves_funds", rule:"require_approval", mandate:true},
+  {t:"stripe__create_payout@2", risk:"critical", eff:"moves_funds", rule:"require_approval", mandate:true},
+  {t:"stripe__list_payment_methods@2", risk:"low", eff:"none", rule:"allow", mandate:false},
+  {t:"aws_billing__get_invoice@3", risk:"low", eff:"none", rule:"allow", mandate:false},
+  {t:"aws_billing__purchase_savings_plan@2", risk:"critical", eff:"commits_spend", rule:"require_approval", mandate:true},
+  {t:"netsuite__post_journal_entry@1", risk:"high", eff:"commits_spend", rule:"require_approval", mandate:true},
+  {t:"netsuite__get_vendor@2", risk:"low", eff:"none", rule:"allow", mandate:false},
+  {t:"s3__get_object@1", risk:"medium", eff:"none", rule:"allow", mandate:false}
+];
+
+function pageAgents(r){
+  const head='<div class="pagehead"><div><p class="eyebrow">Workspace · '+r.ws+'</p><h1>Agents</h1>'+
+    '<p class="muted" style="font-size:13px;margin-top:4px">Identity in Postgres, definition in git — <span class="mono">'+WS[r.ws].repo+'/.oxagen/agents/</span></p></div>'+
+    '<div class="r"><button class="btn sm" data-act="wrap">Wrap an agent</button></div></div>';
+  if(S.page!=="loaded") return head+stateBlock(S.page,"the agent list");
+  const list=[["invoice-bot",1,"$118.47"],["spend-analyst",0,"$402.19"],["reconciler",0,"$31.08"]];
+  return head+'<section class="panel"><div class="ph"><h2>'+WS[r.ws].agents+' agents</h2>'+
+    '<span class="r"><span class="dim mono" style="font-size:11px">'+ORG.agents+' in the organization</span></span></div>'+
+    '<div class="tblwrap"><table><thead><tr><th>Agent</th><th>Harness</th><th>Tier</th><th>Status</th><th class="r">Mandates</th><th class="r">Runs 30 d</th><th class="r">Spend 30 d</th></tr></thead><tbody>'+
+    list.map(x=>{const a=AG[x[0]];return '<tr class="clickable" data-act="open-agent" data-id="'+x[0]+'" tabindex="0">'+
+      '<td class="mono" style="color:var(--fg)">'+a.key+'</td><td>'+a.harness+'</td><td>'+tierBadge(a.tier)+'</td>'+
+      '<td><span class="badge b-allow"><span class="d"></span>'+a.status+'</span></td>'+
+      '<td class="r">'+(x[1]?'<span class="badge b-hold mono">'+x[1]+' active</span>':'<span class="dim">—</span>')+'</td>'+
+      '<td class="r mono">'+(a.runs30||"—")+'</td><td class="r"><span class="money">'+x[2]+'</span></td></tr>';}).join("")+
+    '</tbody></table></div></section>';
+}
+
+function mandateDetail(){
+  const M=MANDATE;
+  return '<div class="panel"><div class="ph">'+
+    '<h2 class="mono" style="font-size:13.5px">'+M.id+'</h2>'+
+    '<span class="badge b-allow"><span class="d"></span>'+M.status+'</span>'+
+    (M.twoPerson?'<span class="badge b-hold"><span class="d"></span>two-person rule</span>':'')+
+    '<span class="r"><button class="btn sm" data-act="revoke-mandate">Revoke</button>'+
+    '<a class="btn sm" href="#/acme/finops/tools/mandates">Open in the ledger</a></span></div>'+
+   '<div class="pb stack">'+
+    '<div class="cols">'+
+     '<div><p class="eyebrow q" style="margin-bottom:7px">Authority</p><dl class="kv">'+
+      '<dt>Agent</dt><dd class="mono">'+M.agent+'</dd>'+
+      '<dt>Granted by</dt><dd>'+M.grantedBy+' <span class="dim">as '+M.roleAtGrant+' on '+M.grantedAt.slice(0,10)+'</span></dd>'+
+      '<dt>Purpose</dt><dd>'+esc(M.purpose)+'</dd>'+
+      '<dt>Effect</dt><dd>'+M.effect.map(e=>'<span class="badge b-deny mono">'+e+'</span>').join(" ")+'</dd>'+
+      '<dt>Currency</dt><dd class="mono">'+M.currency+'</dd>'+
+      '<dt>Valid</dt><dd class="mono">'+M.validFrom.slice(0,10)+' → '+M.validTo.slice(0,10)+'</dd>'+
+      '<dt>Review due</dt><dd class="mono">'+M.reviewDue+'</dd>'+
+     '</dl></div>'+
+     '<div><p class="eyebrow q" style="margin-bottom:7px">Limits</p><dl class="kv">'+
+      '<dt>Per call</dt><dd>'+money(M.perCall)+' <span class="dim mono">'+M.perCallMicros+' µUSD</span></dd>'+
+      '<dt>Per period</dt><dd>'+money(M.perPeriod)+' <span class="dim">'+M.period+'</span></dd>'+
+      '<dt>Calls per day</dt><dd class="mono">'+M.callsToday+' of '+M.callsPerDay+' used today</dd>'+
+      '<dt>Two-person</dt><dd><b>on</b> — every change to this mandate needs a second approver (<span class="mono">'+M.secondApprover+'</span>)</dd>'+
+      '<dt>Ledger</dt><dd class="mono">tools.mandate_ledger · reservations at decision, settlements at receipt</dd>'+
+     '</dl></div>'+
+    '</div>'+
+    '<div>'+mandateBar(S.approval==="pending"||S.approval==="approved")+
+      '<p class="muted" style="font-size:12px;margin-top:10px">Remaining authority is a Postgres ledger, not a computed sum, so two concurrent calls cannot both fit under the same limit.</p></div>'+
+    '<div class="cols">'+
+     '<div><p class="eyebrow q" style="margin-bottom:7px">Approval rules</p>'+
+      '<div class="panel" style="background:var(--void)"><div class="pb"><dl class="kv">'+
+      '<dt>Above</dt><dd>'+money(M.approval.above)+' <span class="dim">per call</span></dd>'+
+      '<dt>Always for</dt><dd>'+M.approval.alwaysFor.map(x=>'<span class="badge b-deny mono">'+x+'</span>').join(" ")+'</dd>'+
+      '<dt>Approvers</dt><dd class="mono">'+M.approval.approvers.join(", ")+'</dd>'+
+      '<dt>Timeout</dt><dd class="mono">10 m 00 s, then the call ends</dd>'+
+      '</dl></div></div></div>'+
+     '<div><p class="eyebrow q" style="margin-bottom:7px">Counterparties</p>'+
+      '<div class="panel" style="background:var(--void)"><div class="pb">'+
+      '<div class="row" style="margin-bottom:9px"><span class="badge b-allow"><span class="d"></span>allow</span>'+
+      M.counterparties.allow.map(c=>'<span class="badge b-quiet mono">'+c+'</span>').join("")+'</div>'+
+      '<div class="row"><span class="badge b-deny"><span class="d"></span>deny</span>'+
+      M.counterparties.deny.map(c=>'<span class="badge b-quiet mono">'+c+'</span>').join("")+'</div>'+
+      '<p class="muted" style="font-size:11.5px;margin-top:10px">Read from the call by the tool version\'s declared <span class="mono">counterparty_path</span>. '+
+      'A payment to <span class="mono">vendor:oracle</span> was denied before dispatch on 2026-09-06.</p>'+
+      '</div></div></div>'+
+    '</div>'+
+    '<div><p class="eyebrow q" style="margin-bottom:7px">Tools this mandate covers</p>'+
+     '<div class="tblwrap"><table><thead><tr><th>Tool version</th><th>Financial effect</th><th>Amount path</th><th>Decision</th></tr></thead><tbody>'+
+     [["stripe__create_payment@4","moves_funds","$.amount","require_approval"],
+      ["stripe__create_payout@2","moves_funds","$.amount","require_approval"],
+      ["aws_billing__purchase_savings_plan@2","commits_spend","$.commitment.upfront","require_approval"]]
+     .map(t=>'<tr><td class="mono" style="color:var(--fg)">'+t[0]+'</td><td class="mono">'+t[1]+'</td><td class="mono">'+t[2]+'</td>'+
+      '<td><span class="badge b-hold">'+t[3]+'</span></td></tr>').join("")+
+     '</tbody></table></div>'+
+     '<p class="muted" style="font-size:11.5px;margin-top:9px">A financial tool whose schema does not expose an amount cannot be granted a mandate and is denied by construction.</p></div>'+
+   '</div></div>';
+}
+
+function pageAgent(r){
+  const a=AG[r.a];
+  if(!a) return '<div class="panel"><div class="state"><div class="ic">◎</div><h3>Unknown agent</h3>'+
+    '<p>Try <a href="#/acme/finops/agents/invoice-bot/mandates">acme.finops.invoice-bot</a>.</p></div></div>';
+  const head='<div class="pagehead"><div><p class="eyebrow">Agent</p><h1 class="mono" style="font-size:18px">'+a.key+'</h1>'+
+    '<div class="row" style="margin-top:8px">'+tierBadge(a.tier)+
+    '<span class="badge b-allow"><span class="d"></span>'+a.status+'</span>'+
+    '<span class="badge b-hold"><span class="d"></span>1 mandate</span>'+
+    '<span class="muted" style="font-size:12.5px">'+a.harness+' · operator '+a.operator+'</span></div></div>'+
+    '<div class="r"><button class="btn sm danger" data-act="revoke">Revoke credential</button>'+
+    '<a class="btn sm" href="#/acme/finops">Runs</a></div></div>';
+  if(S.page!=="loaded") return head+stateBlock(S.page,"this agent");
+  const tabs=["identity","toolbelt","mandates","budgets"];
+  const names={identity:"Identity",toolbelt:"Toolbelt",mandates:"Mandates",budgets:"Budgets"};
+  const bar='<div class="tabs">'+tabs.map(t=>'<a href="#/'+r.org+'/'+r.ws+'/agents/'+r.a+'/'+t+'"'+
+    (r.tab===t?' aria-current="page"':'')+'>'+names[t]+(t==="toolbelt"?'<span class="n">'+BELT.length+'</span>':t==="mandates"?'<span class="n">2</span>':'')+'</a>').join("")+'</div>';
+  let body="";
+  if(r.tab==="mandates"){
+    body='<div class="stack">'+
+      '<div class="row"><span class="eyebrow">Active</span><span class="muted" style="font-size:12px">authority a human granted to this agent to cause a financial effect — nothing in a role or a grant substitutes for it</span></div>'+
+      mandateDetail()+
+      '<div class="row" style="margin-top:6px"><span class="eyebrow q">Expired</span></div>'+
+      '<div class="panel"><div class="ph"><h2 class="mono" style="font-size:13px">'+MANDATE2.id+'</h2>'+
+      '<span class="badge b-quiet"><span class="d"></span>expired '+MANDATE2.validTo.slice(0,10)+'</span>'+
+      '<span class="r"><span class="dim mono" style="font-size:11px">settled '+MANDATE2.settled+' of '+MANDATE2.perPeriod+'</span></span></div>'+
+      '<div class="pb"><dl class="kv"><dt>Purpose</dt><dd>'+esc(MANDATE2.purpose)+'</dd>'+
+      '<dt>Tools</dt><dd class="mono">'+MANDATE2.tools.join(", ")+'</dd>'+
+      '<dt>Unused</dt><dd>'+money(MANDATE2.remaining)+' <span class="dim">returned when the window closed</span></dd></dl></div></div>'+
+    '</div>';
+  } else if(r.tab==="toolbelt"){
+    body='<section class="panel"><div class="ph"><h2>Toolbelt</h2>'+
+      '<span class="badge b-quiet mono">full belt · 12 tools · 3 180 definition tokens</span>'+
+      '<span class="muted" style="font-size:12px">grants ∩ delegation ceiling ∩ policy bundle ∩ kill switches</span></div>'+
+      '<div class="tblwrap"><table><thead><tr><th>Tool version</th><th>Risk</th><th>Financial effect</th><th>Decision rule</th><th>Mandate</th><th>Schema</th></tr></thead><tbody>'+
+      BELT.map(b=>'<tr><td class="mono" style="color:var(--fg)">'+b.t+'</td>'+
+        '<td>'+(b.risk==="critical"?'<span class="badge b-deny">critical</span>':b.risk==="high"?'<span class="badge b-deny">high</span>':'<span class="badge b-quiet">'+b.risk+'</span>')+'</td>'+
+        '<td class="mono">'+b.eff+'</td>'+
+        '<td>'+(b.rule==="allow"?'<span class="badge b-allow">allow</span>':'<span class="badge b-hold">require_approval</span>')+'</td>'+
+        '<td>'+(b.mandate?'<a class="mono" href="#/acme/finops/agents/invoice-bot/mandates">'+MANDATE.short+'</a>':'<span class="dim">—</span>')+'</td>'+
+        '<td class="mono dim">in + out</td></tr>').join("")+
+      '</tbody></table></div>'+
+      '<div class="pb"><div class="note">This agent holds no credentials — not an API key, not an OAuth token, not a cloud role. '+
+      'It holds one run token good for talking to Oxagen and nothing else. Every secret stays in the broker.</div></div></section>';
+  } else if(r.tab==="budgets"){
+    body='<section class="panel"><div class="ph"><h2>Budgets</h2><span class="r"><span class="dim mono" style="font-size:11px">enforced at the model proxy before the call</span></span></div>'+
+      '<div class="tblwrap"><table><thead><tr><th>Scope</th><th>Period</th><th>Mode</th><th class="r">Limit</th><th class="r">Used</th><th>Position</th></tr></thead><tbody>'+
+      '<tr><td class="mono">agent</td><td>per run</td><td><span class="badge b-deny">hard</span></td><td class="r"><span class="money">$2.00</span></td><td class="r"><span class="money">$0.62</span></td><td><span class="badge b-allow"><span class="d"></span>31%</span></td></tr>'+
+      '<tr><td class="mono">agent</td><td>daily</td><td><span class="badge b-deny">hard</span></td><td class="r"><span class="money">$12.00</span></td><td class="r"><span class="money">$4.18</span></td><td><span class="badge b-allow"><span class="d"></span>35%</span></td></tr>'+
+      '<tr><td class="mono">workspace</td><td>monthly</td><td><span class="badge b-quiet">soft</span></td><td class="r"><span class="money">$900.00</span></td><td class="r"><span class="money">$551.74</span></td><td><span class="badge b-allow"><span class="d"></span>61%</span></td></tr>'+
+      '</tbody></table></div></section>';
+  } else {
+    body='<div class="cols">'+
+      '<section class="panel"><div class="ph"><h2>Identity</h2></div><div class="pb"><dl class="kv">'+
+      '<dt>Agent key</dt><dd class="mono">'+a.key+' <span class="dim">immutable</span></dd>'+
+      '<dt>Principal</dt><dd class="mono">'+a.principal+'</dd>'+
+      '<dt>Harness</dt><dd>'+a.harness+'</dd>'+
+      '<dt>Model tier</dt><dd class="mono">complex → '+a.model+'</dd>'+
+      '<dt>Operator</dt><dd>'+a.operator+' <span class="dim">accountable for every run</span></dd>'+
+      '<dt>Run credential</dt><dd class="mono">agc_01KH9W2C… <span class="dim">hashed, purpose-locked, revocable</span></dd>'+
+      '<dt>Run tokens</dt><dd class="mono">1 active · 15 m · refreshed on the control channel</dd>'+
+      '<dt>Tamper incidents</dt><dd><span class="badge b-allow"><span class="d"></span>none</span></dd>'+
+      '</dl></div></section>'+
+      '<section class="panel"><div class="ph"><h2>Definition · in git</h2>'+
+      '<span class="r"><a class="btn sm" href="#">Open Context PR</a></span></div><div class="pb"><dl class="kv">'+
+      '<dt>File</dt><dd class="mono">'+a.def+'</dd>'+
+      '<dt>Repo</dt><dd class="mono">'+WS.finops.repo+'@'+WS.finops.branch+'</dd>'+
+      '<dt>Digest</dt><dd class="digest">'+a.defDigest+'</dd>'+
+      '<dt>Generated</dt><dd class="mono dim">none — the SDK wrapper reads the canonical file</dd>'+
+      '</dl><pre class="code">side_effects = [<span class="s">"read"</span>, <span class="s">"write"</span>, <span class="s">"irreversible"</span>]\n'+
+      '<span class="s"># irreversible is only accepted because a mandate exists</span>\nbudget = { per_run_micros = <span class="n">2000000</span> }</pre></div></section>'+
+    '</div>';
+  }
+  return head+bar+body;
+}
+</script>
+
+<script>
+"use strict";
+/* ═══════════════════════════ TOOLS ═════════════════════════════════════════ */
+function ledgerRows(){
+  const rows = LEDGER.filter(l=>{
+    if(l.pending && S.approval==="pending") return l.kind==="reservation";
+    if(l.pending && S.approval!=="approved") return false;
+    return true;
+  });
+  return rows.map(l=>{
+    const kc = l.kind==="settlement"?"b-allow":l.kind==="reservation"?"b-hold":l.kind==="denied"?"b-deny":"b-quiet";
+    const live = l.pending ? ' style="background:color-mix(in srgb,var(--st-hold) 8%,transparent)"' : '';
+    return '<tr'+live+'><td class="mono dim">'+l.t+'</td>'+
+      '<td><span class="badge '+kc+'">'+l.kind+'</span></td>'+
+      '<td class="mono">'+l.agent+'</td>'+
+      '<td class="r"><span class="money">'+l.amt+'</span></td>'+
+      '<td class="mono">'+l.cp+'</td>'+
+      '<td class="mono">'+(l.ext==="—"?'<span class="dim">—</span>':l.ext)+'</td>'+
+      '<td class="mono">'+(l.rcpt===RECEIPT.short
+        ? '<a href="#/acme/audit/receipt/'+RECEIPT.id+'">'+l.rcpt+'</a>'
+        : l.rcpt==="—"||l.rcpt==="parked"?'<span class="dim">'+l.rcpt+'</span>':l.rcpt)+'</td>'+
+      '<td class="r mono">'+l.after+'</td></tr>'+
+      (l.note?'<tr><td colspan="8" style="padding-top:0;color:var(--muted);font-size:11.5px;border-bottom:1px solid var(--border)">↳ '+esc(l.note)+'</td></tr>':'');
+  }).join("");
+}
+
+function pageTools(r){
+  const head='<div class="pagehead"><div><p class="eyebrow">Workspace · '+r.ws+'</p><h1>Tools</h1>'+
+    '<p class="muted" style="font-size:13px;margin-top:4px">The registry, the connections behind it, and the authority that governs what they move</p></div>'+
+    '<div class="r"><button class="btn sm danger" data-act="killswitch">Kill switch</button></div></div>';
+  if(S.page!=="loaded") return head+stateBlock(S.page,"the tool registry");
+  const tabs=["registry","connections","mandates","policy","switches","assurance"];
+  const names={registry:"Registry",connections:"Connections",mandates:"Mandates",policy:"Policy",switches:"Kill switches",assurance:"Assurance"};
+  const bar='<div class="tabs">'+tabs.map(t=>'<a href="#/'+r.org+'/'+r.ws+'/tools/'+t+'"'+
+    (r.tab===t?' aria-current="page"':'')+'>'+names[t]+(t==="mandates"?'<span class="n">2</span>':t==="registry"?'<span class="n">68</span>':'')+'</a>').join("")+'</div>';
+
+  if(r.tab==="mandates"){
+    const active = S.approval==="pending"
+      ? {res:MANDATE.reserved, rem:MANDATE.remaining, note:"$18,420.00 reserved by a call parked for approval"}
+      : S.approval==="approved"
+      ? {res:"$0.00", rem:MANDATE.remaining, note:"reservation settled against pi_3QaXbL…kR7t"}
+      : {res:"$0.00", rem:"$28,720.00", note:"reservation released — the call was not dispatched"};
+    const body='<div class="stack">'+
+      '<section class="panel"><div class="ph"><h2>Mandates</h2>'+
+        '<span class="muted" style="font-size:12px">who granted what authority to which agent, how much is used, what it was for</span>'+
+        '<span class="r"><button class="btn sm" data-act="grant-mandate">Grant a mandate</button></span></div>'+
+        '<div class="tblwrap"><table><thead><tr><th>Mandate</th><th>Agent</th><th>Effect</th><th>Granted by</th><th class="r">Per call</th><th class="r">Per period</th><th class="r">Settled</th><th class="r">Reserved</th><th class="r">Remaining</th><th>Status</th></tr></thead><tbody>'+
+        '<tr class="clickable" data-act="open-mandate" tabindex="0"><td class="mono" style="color:var(--fg)">'+MANDATE.short+'</td>'+
+        '<td class="mono">invoice-bot</td><td class="mono">moves_funds</td><td>'+MANDATE.grantedBy+'</td>'+
+        '<td class="r mono">'+MANDATE.perCall+'</td><td class="r mono">'+MANDATE.perPeriod+'</td>'+
+        '<td class="r"><span class="money">'+MANDATE.settled+'</span></td>'+
+        '<td class="r"><span class="money" style="color:var(--st-hold)">'+active.res+'</span></td>'+
+        '<td class="r"><span class="money">'+active.rem+'</span></td>'+
+        '<td><span class="badge b-allow"><span class="d"></span>active</span></td></tr>'+
+        '<tr><td colspan="10" style="padding-top:0;color:var(--muted);font-size:11.5px">↳ '+esc(active.note)+' · monthly period, resets 2026-10-01 · two-person on changes</td></tr>'+
+        '<tr><td class="mono">'+MANDATE2.short+'</td><td class="mono">invoice-bot</td><td class="mono">commits_spend</td><td>'+MANDATE2.grantedBy+'</td>'+
+        '<td class="r mono">'+MANDATE2.perCall+'</td><td class="r mono">'+MANDATE2.perPeriod+'</td>'+
+        '<td class="r"><span class="money">'+MANDATE2.settled+'</span></td><td class="r dim">—</td>'+
+        '<td class="r"><span class="money">'+MANDATE2.remaining+'</span></td>'+
+        '<td><span class="badge b-quiet"><span class="d"></span>expired</span></td></tr>'+
+        '</tbody></table></div></section>'+
+
+      '<section class="panel"><div class="ph"><h2>Ledger</h2>'+
+        '<span class="badge b-quiet mono">tools.mandate_ledger</span>'+
+        '<span class="muted" style="font-size:12px">reservations at decision time, settlements at receipt time, releases on failure</span>'+
+        '<span class="r"><button class="btn sm" data-act="export-ledger">Export CSV</button></span></div>'+
+        '<div class="tblwrap"><table><thead><tr><th>Time</th><th>Movement</th><th>Agent</th><th class="r">Amount</th><th>Counterparty</th><th>External transaction</th><th>Receipt</th><th class="r">Available after</th></tr></thead><tbody>'+
+        ledgerRows()+'</tbody></table></div>'+
+        '<div class="pb"><div class="note">Every financial receipt records the external transaction id and the mandate it drew on. '+
+        'The reconciler matches settlements to the provider statement.</div></div></section>'+
+
+      '<section class="panel" style="border-color:color-mix(in srgb,var(--st-deny) 38%,var(--border))">'+
+        '<div class="ph"><h2>Exceptions</h2><span class="badge b-deny"><span class="d"></span>1 open · critical</span>'+
+        '<span class="r"><span class="dim mono" style="font-size:11px">reconciliation against the Stripe statement, daily</span></span></div>'+
+        EXCEPTIONS.map(e=>'<div class="pb" style="border-top:1px solid var(--border)">'+
+          '<div class="row" style="margin-bottom:8px"><span class="badge b-deny"><span class="d"></span>'+e.sev+'</span>'+
+          '<span class="mono" style="color:var(--fg)">'+e.ext+'</span>'+money(e.amt)+
+          '<span class="dim mono" style="font-size:11px;margin-left:auto">'+e.t+'</span></div>'+
+          '<p style="font-size:12.5px;color:var(--body)">'+esc(e.what)+'</p>'+
+          '<div class="row" style="margin-top:10px"><span class="muted" style="font-size:12px">connection '+esc(e.conn)+' · owner '+e.owner+'</span>'+
+          '<span style="margin-left:auto"><button class="btn sm" data-act="open-exception">Investigate</button></span></div></div>').join("")+
+      '</section>'+
+    '</div>';
+    return head+bar+body;
+  }
+
+  if(r.tab==="connections"){
+    return head+bar+'<section class="panel"><div class="ph"><h2>Connections</h2>'+
+      '<span class="muted" style="font-size:12px">the customer\'s credentials, enveloped under the organization key — the agent never sees one</span></div>'+
+      '<div class="tblwrap"><table><thead><tr><th>Connection</th><th>Kind</th><th>Downscope</th><th>Owner</th><th>Financial</th><th>Grants 24 h</th><th>Review due</th></tr></thead><tbody>'+
+      '<tr><td style="color:var(--fg)">'+CRED.connectionName+'</td><td class="mono">api_key</td><td class="mono">restricted_key</td>'+
+      '<td>'+CRED.owner+' <span class="dim">('+CRED.ownerRole+')</span></td><td><span class="badge b-deny">moves_funds</span></td>'+
+      '<td class="mono">14</td><td class="mono">'+CRED.reviewDue+'</td></tr>'+
+      '<tr><td>Acme Robotics — AWS (billing read)</td><td class="mono">cloud_role</td><td class="mono">session_policy</td>'+
+      '<td>Dana Okafor</td><td><span class="badge b-quiet">none</span></td><td class="mono">38</td><td class="mono">2027-01-15</td></tr>'+
+      '<tr><td>Acme Robotics — NetSuite</td><td class="mono">oauth</td><td class="mono">token_exchange</td>'+
+      '<td>Dana Okafor</td><td><span class="badge b-deny">commits_spend</span></td><td class="mono">6</td><td class="mono">2026-11-30</td></tr>'+
+      '</tbody></table></div><div class="pb"><div class="note">The gateway refuses to expose a full-scope key to a tool whose financial effect is not <span class="mono">none</span>. '+
+      'Every financial connection needs a named human owner with a finance role and a mandate for every agent that may use it.</div></div></section>';
+  }
+  if(r.tab==="policy"){
+    return head+bar+'<section class="panel"><div class="ph"><h2>Policy versions</h2>'+
+      '<span class="badge b-allow"><span class="d"></span>'+RUN.policyVersion+' active</span>'+
+      '<span class="r"><button class="btn sm" data-act="simulate">Simulate against 30 days</button></span></div>'+
+      '<div class="tblwrap"><table><thead><tr><th>Version</th><th>Activated</th><th>Tests</th><th>Simulation</th><th>Approved by</th></tr></thead><tbody>'+
+      '<tr><td class="mono" style="color:var(--fg)">pol_v41</td><td class="mono">2026-09-02</td>'+
+      '<td><span class="badge b-allow"><span class="d"></span>212 of 212</span></td>'+
+      '<td class="mono">+41 would need approval · +3 would be denied · 0 newly allowed</td><td>Priya Natarajan</td></tr>'+
+      '<tr><td class="mono">pol_v40</td><td class="mono">2026-08-11</td><td><span class="badge b-allow"><span class="d"></span>198 of 198</span></td>'+
+      '<td class="mono dim">—</td><td>Priya Natarajan</td></tr>'+
+      '</tbody></table></div><div class="pb"><div class="note">Deterministic: same call, same policy version, same answer. No model in the decision path, ever.</div></div></section>';
+  }
+  if(r.tab==="switches"){
+    return head+bar+'<section class="panel"><div class="ph"><h2>Kill switches</h2>'+
+      '<span class="badge b-allow"><span class="d"></span>none flipped</span>'+
+      '<span class="r"><span class="dim mono" style="font-size:11px">deny generation 118 · effective at the next call boundary</span></span></div>'+
+      '<div class="pb stack">'+
+      ['every moves_funds tool, across the organization','every irreversible tool','every tool with egress third_party',
+       'connection: Acme Robotics — Stripe (live)','agent: acme.finops.invoice-bot','workspace: finops']
+      .map(x=>'<div class="row" style="justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)">'+
+        '<span style="font-size:12.5px">'+esc(x)+'</span><button class="btn sm danger" data-act="flip">Deny now</button></div>').join("")+
+      '<div class="note">A flip is a security event with who, why, and what it stopped, and it shows on every affected run as a <span class="mono">policy.decision</span> frame.</div>'+
+      '</div></section>';
+  }
+  if(r.tab==="assurance"){
+    return head+bar+'<section class="panel"><div class="ph"><h2>Adversarial tool-governance suite</h2>'+
+      '<span class="badge b-allow"><span class="d"></span>10 of 10 caught</span>'+
+      '<span class="r"><span class="dim mono" style="font-size:11px">suite v3.2 · ran 2026-09-11 04:00Z against this gateway</span></span></div>'+
+      '<div class="tblwrap"><table><thead><tr><th>Case</th><th>Expected</th><th>Result</th></tr></thead><tbody>'+
+      [["Call a financial tool with no mandate","denied before dispatch, ledger unchanged","caught"],
+       ["Call with an amount over the mandate","denied before dispatch","caught"],
+       ["Call with a counterparty outside the mandate","denied before dispatch","caught"],
+       ["Reuse an approval token on a second call","token_denied","caught"],
+       ["Reuse an approval token on a modified call","token_denied","caught"],
+       ["Retry a dispatched financial call","duplicate_suppressed, one external transaction","caught"],
+       ["Present a run token to Stripe directly","rejected — tool servers accept only broker credentials","caught"],
+       ["Pass an argument copied from tool output into a write call","tainted, raised to approval","caught"],
+       ["Modify a receipt after the fact","chain verification fails","caught"],
+       ["Report a client-attested call as gateway-enforced","rendering refuses; tier is read from the record","caught"]]
+      .map(c=>'<tr><td>'+esc(c[0])+'</td><td class="mono dim">'+esc(c[1])+'</td>'+
+        '<td><span class="badge b-allow"><span class="d"></span>'+c[2]+'</span></td></tr>').join("")+
+      '</tbody></table></div></section>';
+  }
+  return head+bar+'<section class="panel"><div class="ph"><h2>Registry</h2>'+
+    '<span class="badge b-quiet mono">6 servers · 68 tool versions</span></div>'+
+    '<div class="tblwrap"><table><thead><tr><th>Tool version</th><th>Server</th><th>Risk</th><th>Side effect</th><th>Financial</th><th>Egress</th><th>Credential</th><th>Schemas</th></tr></thead><tbody>'+
+    [["stripe__create_payment@4","stripe","critical","irreversible","moves_funds","third_party","restricted_key","declared"],
+     ["stripe__create_payout@2","stripe","critical","irreversible","moves_funds","third_party","restricted_key","declared"],
+     ["netsuite__post_journal_entry@1","netsuite","high","write","commits_spend","third_party","token_exchange","imported"],
+     ["aws_billing__purchase_savings_plan@2","aws_billing","critical","irreversible","commits_spend","third_party","session_policy","declared"],
+     ["aws_billing__get_invoice@3","aws_billing","low","read","none","third_party","session_policy","declared"],
+     ["s3__get_object@1","s3","medium","read","none","internal","session_policy","declared"]]
+    .map(t=>'<tr><td class="mono" style="color:var(--fg)">'+t[0]+'</td><td class="mono">'+t[1]+'</td>'+
+      '<td>'+(t[2]==="critical"||t[2]==="high"?'<span class="badge b-deny">'+t[2]+'</span>':'<span class="badge b-quiet">'+t[2]+'</span>')+'</td>'+
+      '<td class="mono">'+t[3]+'</td><td class="mono">'+(t[4]==="none"?'<span class="dim">none</span>':t[4])+'</td>'+
+      '<td class="mono">'+t[5]+'</td><td class="mono">'+t[6]+'</td><td class="mono dim">'+t[7]+'</td></tr>').join("")+
+    '</tbody></table></div></section>';
+}
+</script>
+
+<script>
+"use strict";
+/* ═══════════════════════════ AUDIT ═════════════════════════════════════════ */
+function pageAudit(r){
+  const head='<div class="pagehead"><div><p class="eyebrow">Organization · '+ORG.slug+'</p><h1>Audit</h1>'+
+    '<p class="muted" style="font-size:13px;margin-top:4px">Receipts are the unit this page searches — one signed record per tool call, exportable individually and in bulk</p></div>'+
+    '<div class="r"><button class="btn sm" data-act="export-bundle">Export signed bundle</button>'+
+    '<button class="btn sm" data-act="hold">Legal hold</button></div></div>';
+  if(S.page!=="loaded") return head+stateBlock(S.page,"the audit record");
+  const rows = AUDIT_RECEIPTS.filter(x=>!(x.star && S.approval==="pending"));
+  return head+'<div class="stack">'+
+    '<section class="panel"><div class="ph" style="gap:10px">'+
+      '<input placeholder="effect:moves_funds agent:invoice-bot" value="effect:moves_funds" aria-label="Search receipts" '+
+      'style="flex:1;min-width:180px;padding:7px 11px;border-radius:9px;background:var(--void);border:1px solid var(--border);outline:0;font-family:var(--mono);font-size:12px">'+
+      '<span class="badge b-deny mono">moves_funds</span><span class="badge b-quiet mono">last 7 days</span>'+
+      '<span class="r"><span class="dim mono" style="font-size:11px">'+rows.length+' receipts</span></span></div>'+
+      '<div class="tblwrap"><table><thead><tr><th>Receipt</th><th>Time</th><th>Agent</th><th>Tool version</th><th>Financial effect</th><th class="r">Amount</th><th>Decision</th><th>Approver</th><th>Tier</th></tr></thead><tbody>'+
+      rows.map(x=>'<tr class="clickable" data-act="open-receipt" data-id="'+x.id+'" tabindex="0"'+(x.star?' style="background:color-mix(in srgb,var(--st-allow) 7%,transparent)"':'')+'>'+
+        '<td class="mono" style="color:var(--fg)">'+x.id+'</td><td class="mono dim">'+x.t+'</td>'+
+        '<td class="mono">'+x.agent+'</td><td class="mono">'+x.tool+'</td>'+
+        '<td class="mono">'+(x.effect==="none"?'<span class="dim">none</span>':x.effect)+'</td>'+
+        '<td class="r">'+(x.amt==="—"?'<span class="dim">—</span>':'<span class="money">'+x.amt+'</span>')+'</td>'+
+        '<td>'+(x.denied?'<span class="badge b-deny"><span class="d"></span>denied</span>':x.decision==="allow"?'<span class="badge b-allow">allow</span>':'<span class="badge b-hold">'+x.decision+'</span>')+'</td>'+
+        '<td>'+(x.approver==="—"?'<span class="dim">—</span>':x.approver)+'</td><td>'+tierBadge(x.tier)+'</td></tr>').join("")+
+      '</tbody></table></div>'+
+      (S.approval==="pending"?'<div class="pb"><div class="note">The parked call has no receipt yet. A receipt is written at step 10 of the call pipeline, and the result reaches the agent only after it is durable.</div></div>':'')+
+    '</section>'+
+    '<section class="panel"><div class="ph"><h2>Control-plane audit events</h2><span class="r"><span class="dim mono" style="font-size:11px">every IAM decision, always audited</span></span></div>'+
+      '<div class="tblwrap"><table><thead><tr><th>Time</th><th>Event</th><th>Actor</th><th>Subject</th><th>Outcome</th></tr></thead><tbody>'+
+      (S.approval!=="pending"?'<tr><td class="mono dim">2026-09-11 06:07:38Z</td><td class="mono">approval.resolved</td><td>'+S.approver+'</td>'+
+        '<td class="mono">apr_01KJ7F4A → '+RUN.id.slice(0,14)+'…</td><td>'+(S.approval==="approved"?'<span class="badge b-allow"><span class="d"></span>approved</span>':'<span class="badge b-deny"><span class="d"></span>'+S.approval+'</span>')+'</td></tr>':'')+
+      '<tr><td class="mono dim">2026-09-11 06:04:12Z</td><td class="mono">approval.requested</td><td class="mono">gateway</td>'+
+      '<td class="mono">stripe__create_payment@4 · $18,420.00</td><td><span class="badge b-hold"><span class="d"></span>parked</span></td></tr>'+
+      '<tr><td class="mono dim">2026-09-09 11:42:06Z</td><td class="mono">reconciliation.exception</td><td class="mono">reconciler</td>'+
+      '<td class="mono">pi_3QaW4r…tL6d · no receipt</td><td><span class="badge b-deny"><span class="d"></span>critical</span></td></tr>'+
+      '<tr><td class="mono dim">2026-08-28 15:41:02Z</td><td class="mono">mandate.granted</td><td>Priya Natarajan</td>'+
+      '<td class="mono">'+MANDATE.short+' → invoice-bot</td><td><span class="badge b-allow"><span class="d"></span>two-person, second Marcus Bell</span></td></tr>'+
+      '</tbody></table></div></section>'+
+  '</div>';
+}
+
+/* ═══════════════════════════ STUBS ═════════════════════════════════════════ */
+function pageStub(r,name,which){
+  return '<div class="pagehead"><div><p class="eyebrow">'+(r.ws?"Workspace · "+r.ws:"Organization · "+ORG.slug)+'</p><h1>'+name+'</h1></div></div>'+
+    '<div class="panel"><div class="state"><div class="ic" aria-hidden="true">◇</div>'+
+    '<h3>'+name+' is real, and it is mocked elsewhere</h3>'+
+    '<p>This file is the <b>W3</b> flow: money asked, a human answered. '+name+' belongs to '+which+'. '+
+    'The chrome around it — the sidebar, the switchers, the breadcrumbs, the command menu, the assistant — is the same on every page, which is why it is navigable here.</p>'+
+    '<a class="btn sm" href="#/acme/finops">Back to Fleet</a></div></div>';
+}
+function pageOrganization(r){
+  const head='<div class="pagehead"><div><p class="eyebrow">Organization</p><h1>'+ORG.name+'</h1>'+
+    '<p class="muted" style="font-size:13px;margin-top:4px">'+ORG.agents+' agents · 2 workspaces · display currency '+ORG.currency+'</p></div></div>';
+  if(S.page!=="loaded") return head+stateBlock(S.page,"the organization");
+  return head+'<div class="cols">'+
+    '<section class="panel"><div class="ph"><h2>People with financial authority</h2></div>'+
+    '<div class="tblwrap"><table><thead><tr><th>Person</th><th>Role</th><th>Scope</th><th class="r">Mandates granted</th><th class="r">Approvals 30 d</th></tr></thead><tbody>'+
+    '<tr><td>Priya Natarajan</td><td class="mono">org.owner, org.billing</td><td class="mono">acme</td><td class="r mono">2</td><td class="r mono">18</td></tr>'+
+    '<tr><td>Dana Okafor</td><td class="mono">org.billing</td><td class="mono">acme/finops</td><td class="r mono">0</td><td class="r mono">41</td></tr>'+
+    '<tr><td>Marcus Bell</td><td class="mono">workspace.owner</td><td class="mono">acme/core-platform</td><td class="r mono">0</td><td class="r mono">9</td></tr>'+
+    '</tbody></table></div></section>'+
+    '<section class="panel"><div class="ph"><h2>Workspaces</h2></div>'+
+    '<div class="tblwrap"><table><thead><tr><th>Workspace</th><th>Main repo</th><th>Production branch</th><th class="r">Agents</th></tr></thead><tbody>'+
+    Object.values(WS).map(w=>'<tr class="clickable" data-act="open-ws" data-id="'+w.name+'" tabindex="0"><td class="mono" style="color:var(--fg)">'+w.name+'</td>'+
+      '<td class="mono">'+w.repo+'</td><td class="mono">'+w.branch+'</td><td class="r mono">'+w.agents+'</td></tr>').join("")+
+    '</tbody></table></div></section></div>';
+}
+</script>
+
+<script>
+"use strict";
+/* ═══════════════════════════ RECEIPT ═══════════════════════════════════════ */
+function grp(n,title,inner){
+  return '<div class="rgroup"><div class="gh"><span class="gi">'+n+'</span><b>'+title+'</b></div><div class="gb">'+inner+'</div></div>';
+}
+function receiptView(){
+  const ok = S.approval==="approved";
+  const verdict = ok ? "allowed" : S.approval==="denied" ? "denied" : "expired";
+  const vb = ok ? '<span class="badge b-allow"><span class="d"></span>approve → allowed</span>'
+                : '<span class="badge b-deny"><span class="d"></span>approve → '+verdict+'</span>';
+  return '<div class="mh">'+
+    '<div style="min-width:0"><p class="eyebrow" style="margin-bottom:5px">Receipt · signed, chained, exportable</p>'+
+    '<h2 class="mono">'+RECEIPT.id+'</h2>'+
+    '<div class="row" style="margin-top:7px">'+vb+tierBadge(RECEIPT.tier)+
+    '<span class="badge b-allow"><span class="d"></span>chain verified</span>'+
+    '<span class="muted" style="font-size:12px">frame #'+RECEIPT.frame+' · '+esc(RECEIPT.chainPos)+'</span></div></div>'+
+    '<div class="r"><button class="btn sm" data-act="rcpt-export">Export JSON</button>'+
+    '<button class="xbtn" data-act="close" aria-label="Close">✕</button></div></div>'+
+   '<div class="mb">'+
+    grp("1","Who",
+      '<dl class="kv"><dt>Operator</dt><dd><b>'+RUN.operator+'</b> <span class="dim mono">'+RUN.operatorId+'</span> · role <span class="mono">org.billing</span></dd>'+
+      '<dt>Agent</dt><dd class="mono">'+AG["invoice-bot"].key+' <span class="dim">'+AG["invoice-bot"].principal.slice(0,20)+'…</span></dd>'+
+      '<dt>Run</dt><dd><a class="mono" href="#/acme/finops/runs/'+RUN.id+'">'+RUN.id+'</a> · attempt 1</dd>'+
+      '<dt>Turn / step</dt><dd class="mono">turn 4 · step 11</dd>'+
+      '<dt>Task</dt><dd><span class="mono">'+RUN.task.ref+'</span> '+esc(RUN.task.title)+' <span class="dim">('+RUN.task.source+')</span></dd></dl>')+
+    grp("2","What",
+      '<dl class="kv"><dt>Tool version</dt><dd class="mono"><b>'+CALL.tool+'</b> · '+CALL.toolId+'</dd>'+
+      '<dt>Schema digest</dt><dd class="digest">'+CALL.schemaDigest+'</dd>'+
+      '<dt>Input digest</dt><dd class="digest">'+CALL.inputDigest+'</dd>'+
+      '<dt>Amount</dt><dd>'+money(CALL.amount)+' <span class="dim mono">'+CALL.micros+' µUSD, read from $.amount</span></dd>'+
+      '<dt>Counterparty</dt><dd class="mono">'+CALL.counterparty+' <span class="dim">'+esc(CALL.counterpartyName)+', read from $.counterparty</span></dd>'+
+      '<dt>Input</dt><dd class="dim">retained, redacted per retention policy rp_v3 — 2 fields removed, digest still verifies</dd></dl>')+
+    grp("3","Authority",
+      '<dl class="kv"><dt>Decision</dt><dd>'+vb+'</dd>'+
+      '<dt>Policy version</dt><dd class="mono">'+RUN.policyVersion+' · signed · activated 2026-09-02</dd>'+
+      '<dt>Rules that fired</dt><dd class="mono">mandate.approval.always_for · mandate.approval.above_micros · tools.taint.financial</dd>'+
+      '<dt>Grants used</dt><dd class="mono">grt_01KH6T2P (role finops.payments, effect require_approval on stripe__create_payment@*)</dd>'+
+      '<dt>Delegation ceiling</dt><dd>agent ∩ operator = agent <span class="dim">(not narrowed)</span></dd>'+
+      '<dt>Mandate</dt><dd><a class="mono" href="#/acme/finops/agents/invoice-bot/mandates">'+MANDATE.id+'</a> · reserved '+money(MANDATE.reserved)+'</dd>'+
+      '<dt>Approval token</dt><dd class="mono">'+TOKEN.id+' <span class="dim">'+TOKEN.format+' · single-use · ttl '+TOKEN.ttl+'</span></dd>'+
+      '<dt>Approver</dt><dd><b>'+S.approver+'</b> — “'+esc(S.reason||"no reason given")+'”</dd>'+
+      '<dt>Taint sources</dt><dd>'+TAINT.map(t=>'<span class="mono">frame #'+t.frame+' '+t.path+'</span>').join(' · ')+'</dd></dl>')+
+    grp("4","Credential",
+      ok ? '<dl class="kv"><dt>Credential grant</dt><dd class="mono"><b>'+CRED.id+'</b></dd>'+
+      '<dt>Connection</dt><dd>'+esc(CRED.connectionName)+' <span class="dim mono">'+CRED.connection+'</span> · owner '+CRED.owner+'</dd>'+
+      '<dt>Downscope</dt><dd class="mono">'+CRED.downscope+' <span class="dim">— the narrowest the provider allows</span></dd>'+
+      '<dt>Scope</dt><dd class="mono">'+CRED.scope+'</dd>'+
+      '<dt>TTL</dt><dd class="mono">'+CRED.ttl+' · issued '+CRED.issued.slice(11,23)+'Z · expired '+CRED.expires.slice(11,23)+'Z · used '+CRED.uses+'</dd>'+
+      '<dt>Provider token</dt><dd class="mono">'+CRED.providerToken+'</dd>'+
+      '<dt>Agent saw</dt><dd><b>nothing</b> — the credential was minted for this one call and never left the gateway</dd></dl>'
+        : '<p class="muted" style="font-size:12.5px">No credential was minted. The call ended at the approval gate, before step 7 of the pipeline. '+
+          'The broker was never asked and the connection was never read.</p>')+
+    grp("5","Effect",
+      ok ? '<dl class="kv"><dt>Dispatched</dt><dd class="mono">'+EFFECT.dispatched+' · '+EFFECT.duration+'</dd>'+
+      '<dt>Tool server</dt><dd class="mono">'+CALL.server+' · '+CALL.serverUrl+'</dd>'+
+      '<dt>External transaction</dt><dd class="mono"><b>'+EFFECT.payment+'</b> · '+EFFECT.status+'</dd>'+
+      '<dt>Also recorded</dt><dd class="mono">'+EFFECT.charge+' · '+EFFECT.balanceTxn+'</dd>'+
+      '<dt>Response digest</dt><dd class="digest">'+EFFECT.responseDigest+'</dd>'+
+      '<dt>Output validation</dt><dd><span class="badge b-allow"><span class="d"></span>'+EFFECT.validation+'</span></dd>'+
+      '<dt>Redactions</dt><dd class="mono">'+EFFECT.redactions+'</dd>'+
+      '<dt>Idempotency</dt><dd class="mono">'+CALL.idem+' · duplicate suppressed: '+EFFECT.dup+'</dd></dl>'
+        : '<p class="muted" style="font-size:12.5px">Nothing was dispatched. No payment intent exists at Stripe for this call, '+
+          'and the idempotency key <span class="mono">'+CALL.idem+'</span> was never spent.</p>')+
+    grp("6","Integrity",
+      '<dl class="kv"><dt>Frame hash</dt><dd class="digest">'+RECEIPT.hash+'</dd>'+
+      '<dt>Previous</dt><dd class="digest">'+RECEIPT.prev+'</dd>'+
+      '<dt>Chain position</dt><dd class="mono">'+RECEIPT.chainPos+' · dense seq, no gaps</dd>'+
+      '<dt>Gateway signature</dt><dd class="mono">'+RECEIPT.sig+' <span class="dim">key '+RECEIPT.sigKey+'</span></dd>'+
+      '<dt>Enforcement tier</dt><dd>'+tierBadge(RECEIPT.tier)+' <span class="muted">Oxagen carried the credential and validated both directions. This receipt cannot render a stronger word.</span></dd>'+
+      '<dt>Verification</dt><dd><span class="badge b-allow"><span class="d"></span>verified offline against the published attester key</span></dd></dl>')+
+    '<div class="rgroup" style="border-color:color-mix(in srgb,var(--st-hold) 30%,var(--border))">'+
+      '<div class="gh"><span class="gi">◷</span><b>Mandate ledger movement</b></div><div class="gb">'+
+      '<div class="tblwrap"><table><thead><tr><th>Time</th><th>Movement</th><th class="r">Amount</th><th class="r">Available after</th></tr></thead><tbody>'+
+      '<tr><td class="mono dim">2026-09-11 06:04:12Z</td><td><span class="badge b-hold">reservation</span></td>'+
+      '<td class="r"><span class="money">−'+MANDATE.reserved+'</span></td><td class="r mono">'+MANDATE.remaining+'</td></tr>'+
+      (ok ? '<tr><td class="mono dim">2026-09-11 06:07:41Z</td><td><span class="badge b-allow">settlement</span></td>'+
+        '<td class="r"><span class="money">'+MANDATE.reserved+'</span></td><td class="r mono">'+MANDATE.remaining+'</td></tr>'
+          : '<tr><td class="mono dim">2026-09-11 06:0'+(S.approval==="denied"?"5":"4")+':—Z</td><td><span class="badge b-quiet">release</span></td>'+
+        '<td class="r"><span class="money">+'+MANDATE.reserved+'</span></td><td class="r mono">$28,720.00</td></tr>')+
+      '</tbody></table></div>'+
+      '<p class="muted" style="font-size:11.5px;margin-top:9px">'+
+      (ok?'The settlement is what the reconciler matches to the Stripe statement. An external transaction on this connection with no receipt is an exception at severity critical.'
+         :'The reservation was released, so the September period keeps its authority. Nothing to reconcile.')+'</p>'+
+    '</div></div>'+
+   '</div>'+
+   '<div class="mf"><span class="muted" style="font-size:12px">Exportable as CSV, JSON, or a signed bundle — the unit the Audit page searches.</span>'+
+    '<span style="margin-left:auto"><a class="btn sm" href="#/acme/audit">Find similar receipts</a>'+
+    '<button class="btn sm" data-act="close">Close</button></span></div>';
+}
+
+/* ═══════════════════════════ SMALL DIALOGS ═════════════════════════════════ */
+function dlgRules(){
+  return '<div class="mh"><div><p class="eyebrow" style="margin-bottom:5px">Policy '+RUN.policyVersion+'</p>'+
+    '<h2>Rules that fired on this call</h2></div><div class="r"><button class="xbtn" data-act="close" aria-label="Close">✕</button></div></div>'+
+    '<div class="mb">'+rulesList()+
+    '<div class="note" style="margin-top:14px">Deterministic, versioned, replayable. No model participates in the decision.</div></div>'+
+    '<div class="mf"><span style="margin-left:auto"><button class="btn sm" data-act="close">Close</button></span></div>';
+}
+function dlgAccount(){
+  return '<div class="mh"><div><p class="eyebrow" style="margin-bottom:5px">Account</p><h2>'+ME.name+'</h2></div>'+
+    '<div class="r"><button class="xbtn" data-act="close" aria-label="Close">✕</button></div></div>'+
+    '<div class="mb"><dl class="kv"><dt>Email</dt><dd class="mono">'+ME.email+'</dd>'+
+    '<dt>Principal</dt><dd class="mono">'+ME.id+'</dd>'+
+    '<dt>Roles</dt><dd class="mono">org.owner, org.billing</dd>'+
+    '<dt>Approvals</dt><dd>You are an eligible approver for <span class="mono">role:org.billing</span> in <span class="mono">finops</span>.</dd>'+
+    '<dt>Two-factor</dt><dd><span class="badge b-allow"><span class="d"></span>hardware key</span></dd>'+
+    '<dt>Notifications</dt><dd>Mission Control, Slack <span class="mono">#finops-approvals</span>, email</dd></dl></div>'+
+    '<div class="mf"><span style="margin-left:auto"><button class="btn sm" data-act="close">Close</button></span></div>';
+}
+function dlgSwitcher(kind){
+  const items = kind==="org"
+    ? [{n:ORG.name,s:"organization · acme · "+ORG.plan,h:"#/acme",cur:true}]
+    : Object.values(WS).map(w=>({n:w.name,s:"main repo "+w.repo+" · "+w.agents+" agents",h:"#/acme/"+w.name,cur:w.name===route().ws}));
+  return '<div class="mh"><h2>'+(kind==="org"?"Organizations":"Workspaces")+'</h2>'+
+    '<div class="r"><button class="xbtn" data-act="close" aria-label="Close">✕</button></div></div>'+
+    '<div class="mb" style="padding:8px 0">'+items.map(i=>'<a class="cmditem" href="'+i.h+'" data-act="nav-close">'+
+      '<span class="ci">'+(i.cur?"●":"○")+'</span><div><b>'+i.n+'</b><div class="dim" style="font-size:11.5px">'+esc(i.s)+'</div></div>'+
+      (i.cur?'<span class="cs">current</span>':'')+'</a>').join("")+
+    '</div><div class="mf"><span class="dim mono" style="font-size:11px">an organization is the tenant; a workspace is a governance partition inside it</span></div>';
+}
+</script>
+
+<script>
+"use strict";
+/* ═══════════════════════════ RENDER ════════════════════════════════════════ */
+function pageFor(r){
+  switch(r.page){
+    case "fleet": return pageFleet(r);
+    case "run": return pageRun(r);
+    case "agents": return pageAgents(r);
+    case "agent": return pageAgent(r);
+    case "tools": return pageTools(r);
+    case "audit": return pageAudit(r);
+    case "organization": return pageOrganization(r);
+    case "billing": return pageStub(r,"Billing","W8 — every dollar, every operator");
+    case "ontology": return pageStub(r,"Ontology","W7 — the shape of your business");
+    case "steering": return pageStub(r,"Steering","W6 — it learned, you approved, it changed");
+    case "spend": return pageStub(r,"Spend","W8 — every dollar, every operator");
+    default: return pageStub(r,r.page,"another scenario");
+  }
+}
+
+let RAF=null;
+function render(){
+  const r=route();
+  document.getElementById("root").innerHTML =
+    '<div class="shell">'+sidebar(r)+
+    '<div class="main">'+topbar(r)+'<main class="content" id="view">'+pageFor(r)+'</main></div>'+
+    assistantPanel(r)+'</div>';
+  // modal from the route
+  const dlg=document.getElementById("dlg");
+  if(r.modal==="receipt" && S.approval!=="pending"){
+    document.getElementById("dlgbox").innerHTML=receiptView();
+    if(!dlg.open) dlg.showModal();
+  } else if(r.modal==="receipt"){
+    document.getElementById("dlgbox").innerHTML=
+      '<div class="mh"><h2>No receipt yet</h2><div class="r"><button class="xbtn" data-act="close">✕</button></div></div>'+
+      '<div class="mb"><p class="muted" style="font-size:13px">A receipt is written at step 10 of the call pipeline, after a decision. '+
+      'This call is still parked. Resolve it on the run and the receipt appears here.</p></div>'+
+      '<div class="mf"><span style="margin-left:auto"><a class="btn sm primary" href="#/acme/finops/runs/'+RUN.id+'">Open the run</a></span></div>';
+    if(!dlg.open) dlg.showModal();
+  } else if(dlg.open && dlg.dataset.kind==="receipt"){ dlg.close(); }
+  dlg.dataset.kind = r.modal==="receipt" ? "receipt" : "";
+  tick();
+}
+
+/* countdown */
+function tick(){
+  if(S.approval==="pending"){
+    const sec=left();
+    $$("[data-countdown]").forEach(e=>{ e.textContent=mmss(sec); e.classList.toggle("warn",sec<120); });
+    if(sec<=0 && S.approval==="pending"){
+      S.approval="expired"; S.approver="—";
+      toast("Approval expired after 10 m 00 s — the call ended and the reservation was released.","deny");
+      render(); return;
+    }
+  }
+  QUEUE.forEach(a=>{ if(!a.star && a.left>0) a.left-=1; });
+  $$("[data-countdown-fixed]").forEach(e=>{
+    const a=QUEUE.find(x=>x.id===e.getAttribute("data-countdown-fixed"));
+    if(!a) return;
+    e.textContent=mmss(a.left); e.classList.toggle("warn",a.left<120);
+  });
+}
+setInterval(tick,1000);
+
+/* ═══════════════════════════ ACTIONS ═══════════════════════════════════════ */
+function openDlg(html,kind){
+  const d=document.getElementById("dlg");
+  document.getElementById("dlgbox").innerHTML=html;
+  d.dataset.kind=kind||"x";
+  if(!d.open) d.showModal();
+}
+function approve(){
+  S.approval="approved"; S.approver=ME.name;
+  if(!S.reason) S.reason="AWS September invoice checked against PO-4471; amount matches the statement.";
+  toast("Token "+TOKEN.short+" minted — single-use, bound to the call digest. Credential brokered, call dispatched: "+EFFECT.payment,"allow");
+  render();
+  setTimeout(()=>toast("Receipt "+RECEIPT.short+" written, signed and chained at position 162. Mandate settled: "+MANDATE.remaining+" left this period.","allow"),1300);
+}
+function deny(){
+  if(!S.reason.trim()){
+    const t=$("[data-act='reason']"); if(t){ t.focus(); toast("A denial needs a reason — it reaches the model as the permission decision reason.","deny"); return; }
+    S.reason="Amount does not match the September statement; re-run after reconciliation.";
+  }
+  S.approval="denied"; S.approver=ME.name;
+  toast("Denied. Nothing dispatched, no credential minted, "+MANDATE.reserved+" released back to the mandate.","deny");
+  render();
+}
+
+const CMDS=[
+  {n:"Open the parked payment on its run", s:"run", h:"#/acme/finops/runs/"+RUN.id},
+  {n:"Approvals queue on Fleet", s:"fleet", h:"#/acme/finops"},
+  {n:"Receipt for the AWS payment", s:"receipt", h:"#/acme/audit/receipt/"+RECEIPT.id},
+  {n:"Mandate mnd_01KJ5XQ7…PMKF", s:"mandate", h:"#/acme/finops/agents/invoice-bot/mandates"},
+  {n:"Mandates ledger", s:"tools", h:"#/acme/finops/tools/mandates"},
+  {n:"Kill switch: every moves_funds tool", s:"tools", h:"#/acme/finops/tools/switches"},
+  {n:"Assurance suite results", s:"tools", h:"#/acme/finops/tools/assurance"},
+  {n:"Receipts search", s:"audit", h:"#/acme/audit"},
+  {n:"acme.finops.invoice-bot toolbelt", s:"agent", h:"#/acme/finops/agents/invoice-bot/toolbelt"},
+  {n:"Switch to core-platform", s:"workspace", h:"#/acme/core-platform"}
+];
+function renderCmds(q){
+  const f=CMDS.filter(c=>c.n.toLowerCase().includes(q.toLowerCase())||c.s.includes(q.toLowerCase()));
+  document.getElementById("cmdlist").innerHTML = f.length
+    ? f.map((c,i)=>'<a class="cmditem'+(i===0?' sel':'')+'" href="'+c.h+'" data-act="nav-cmd"><span class="ci">›</span><b>'+esc(c.n)+'</b><span class="cs">'+c.s+'</span></a>').join("")
+    : '<div class="cmditem" style="cursor:default"><span class="ci">·</span><span class="muted">Nothing matches. The command menu only offers governed actions you hold.</span></div>';
+}
+function openCmd(){
+  const d=document.getElementById("cmd");
+  document.getElementById("cmdq").value=""; renderCmds("");
+  if(!d.open) d.showModal();
+  setTimeout(()=>document.getElementById("cmdq").focus(),20);
+}
+
+document.addEventListener("click",e=>{
+  const t=e.target.closest("[data-act]");
+  if(!t) return;
+  const a=t.getAttribute("data-act");
+  const stop=()=>{e.preventDefault();};
+  switch(a){
+    case "approve": stop(); approve(); break;
+    case "deny": stop(); deny(); break;
+    case "cmd": stop(); openCmd(); break;
+    case "assist": stop(); S.assistant=!S.assistant; render(); break;
+    case "account": stop(); openDlg(dlgAccount(),"acct"); break;
+    case "orgsw": stop(); openDlg(dlgSwitcher("org"),"sw"); break;
+    case "wssw": stop(); openDlg(dlgSwitcher("ws"),"sw"); break;
+    case "rules": stop(); openDlg(dlgRules(),"rules"); break;
+    case "close": stop(); document.getElementById("dlg").close(); break;
+    case "nav-close": document.getElementById("dlg").close(); break;
+    case "nav-cmd": document.getElementById("cmd").close(); break;
+    case "open-run": stop(); go("#/acme/"+route().ws+"/runs/"+t.getAttribute("data-id")); break;
+    case "open-agent": stop(); go("#/acme/"+route().ws+"/agents/"+t.getAttribute("data-id")+"/identity"); break;
+    case "open-ws": stop(); go("#/acme/"+t.getAttribute("data-id")); break;
+    case "open-mandate": stop(); go("#/acme/finops/agents/invoice-bot/mandates"); break;
+    case "open-receipt": stop();
+      if(t.getAttribute("data-id")===RECEIPT.short) go("#/acme/audit/receipt/"+RECEIPT.id);
+      else toast("This mockup carries the full record for one receipt: "+RECEIPT.short+".","hold");
+      break;
+    case "qtoggle": stop(); S.qopen = S.qopen===t.getAttribute("data-id")?null:t.getAttribute("data-id"); render(); break;
+    case "frame": stop(); { const q=t.getAttribute("data-q");
+      const n = isNaN(parseInt(q,10))?q:parseInt(q,10);
+      S.frameOpen = S.frameOpen===n?null:n;
+      if(route().page!=="run"){ go("#/acme/finops/runs/"+RUN.id); } else render();
+      break; }
+    case "retry": stop(); S.page="loading"; syncCtl(); render();
+      setTimeout(()=>{S.page="loaded";syncCtl();render();toast("Reconnected to the control ledger.","allow");},1100); break;
+    case "pause": stop(); toast("pause queued — applied at the next boundary. The parked call is already stopped at the gateway.","hold"); break;
+    case "cancel": stop(); toast("cancel refuses every request and revokes the run token. Soft cancel is guaranteed; a process kill is best effort and recorded.","deny"); break;
+    case "steer": stop(); toast("steer delivered at the next boundary as a control.steer frame, attributed to you.","hold"); break;
+    case "export": case "rcpt-export": case "export-ledger": case "export-bundle": stop();
+      toast("Export queued as a governed action — every export is audited.","hold"); break;
+    case "killswitch": case "flip": stop();
+      toast("A kill switch is a security event with who, why, and what it stopped. Not flipped in this mockup.","deny"); break;
+    default: stop(); toast("Governed action — not wired in this mockup.","hold");
+  }
+});
+document.addEventListener("input",e=>{
+  if(e.target.matches("[data-act='reason']")) S.reason=e.target.value;
+  if(e.target.id==="cmdq") renderCmds(e.target.value);
+});
+document.addEventListener("keydown",e=>{
+  if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==="k"){ e.preventDefault(); openCmd(); }
+  if(e.key==="Enter"&&e.target.id==="cmdq"){ const f=$("#cmdlist .cmditem[href]"); if(f){ document.getElementById("cmd").close(); go(f.getAttribute("href")); } }
+  if(e.key==="Enter"||e.key===" "){
+    const t=e.target.closest&&e.target.closest("[data-act='qtoggle'],[data-act='frame'],tr.clickable");
+    if(t){ e.preventDefault(); t.click(); }
+  }
+});
+document.getElementById("dlg").addEventListener("close",()=>{
+  if(route().modal==="receipt") history.back();
+});
+window.addEventListener("hashchange",()=>{ render();
+  const box = document.body.classList.contains("phone") ? document.getElementById("root") : window;
+  box.scrollTo({top:0,behavior:"instant"});
+});
+
+/* ═══════════════════════════ MOCKUP CHROME ═════════════════════════════════ */
+function syncCtl(){
+  $$("#mockctl [data-st]").forEach(b=>b.setAttribute("aria-pressed",String(b.getAttribute("data-st")===S.page)));
+}
+document.getElementById("mockctl").addEventListener("click",e=>{
+  const b=e.target.closest("button"); if(!b) return;
+  if(b.id==="minbtn"){ const c=document.getElementById("mockctl"); c.classList.toggle("min");
+    b.textContent=c.classList.contains("min")?"+":"–"; return; }
+  if(b.hasAttribute("data-st")){ S.page=b.getAttribute("data-st"); syncCtl(); render(); return; }
+  if(b.hasAttribute("data-th")){
+    const v=b.getAttribute("data-th");
+    if(v==="auto") document.documentElement.removeAttribute("data-theme");
+    else document.documentElement.setAttribute("data-theme",v);
+    $$("#mockctl [data-th]").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));
+    return;
+  }
+  if(b.hasAttribute("data-ph")){
+    const on=document.body.classList.toggle("phone");
+    b.setAttribute("aria-pressed",String(on)); return;
+  }
+  if(b.getAttribute("data-flow")==="reset"){
+    S.approval="pending"; S.reason=""; S.approver=ME.name; S.deadline=Date.now()+348*1000;
+    S.qopen=QUEUE[0].id; S.frameOpen=null;
+    const d=document.getElementById("dlg"); if(d.open) d.close();
+    if(route().modal) go("#/acme/finops/runs/"+RUN.id);
+    render(); toast("Flow reset — the call is parked again with 5:48 on the clock.","hold"); return;
+  }
+  if(b.getAttribute("data-flow")==="expire"){ S.deadline=Date.now()+1500; toast("Timeout forced.","deny"); return; }
+});
+
+/* ═══════════════════════════ BOOT ══════════════════════════════════════════ */
+if(!location.hash) location.replace("#/acme/finops");
+render();
+</script>
+
+<!-- list-controls: search · sort · column filters · rows per page · pager -->
+<style>
+/* List controls: search, column filters, rows per page, sortable headers, pager.
+   Colors derive from the page's own text color so the block reads correctly in
+   every mockup theme; only the accent leans on --gold. */
+.lt{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:9px 12px;border-bottom:1px solid var(--border,color-mix(in srgb,currentColor 16%,transparent));font-family:inherit;font-size:12.5px}
+.lt.free{border:1px solid var(--border,color-mix(in srgb,currentColor 16%,transparent));border-radius:10px;margin-bottom:10px}
+.lt .lt-q{flex:1 1 200px;min-width:140px;background:color-mix(in srgb,currentColor 5%,transparent);border:1px solid var(--border,color-mix(in srgb,currentColor 16%,transparent));border-radius:8px;padding:6px 10px;font-size:12.5px;color:inherit;outline:none;font-family:inherit;transition:border-color .12s}
+.lt .lt-q:focus{border-color:var(--gold,#D6962C)}
+.lt .lt-q::placeholder{color:inherit;opacity:.5}
+.lt select{appearance:auto;background:color-mix(in srgb,currentColor 5%,transparent);border:1px solid var(--border,color-mix(in srgb,currentColor 16%,transparent));border-radius:8px;padding:5px 8px;font-size:12px;color:inherit;outline:none;font-family:inherit;max-width:220px;transition:border-color .12s}
+.lt select:focus{border-color:var(--gold,#D6962C)}
+.lt .lt-rows{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--muted,inherit);white-space:nowrap;margin-left:auto}
+.lp{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 12px;font-size:11.5px;color:var(--muted,inherit);font-family:inherit}
+.lp.free{border:1px solid var(--border,color-mix(in srgb,currentColor 16%,transparent));border-radius:10px;margin-top:10px}
+.lp .lp-n{font-family:var(--mono,ui-monospace,monospace);font-variant-numeric:tabular-nums;opacity:.85}
+.lp .lp-pg{margin-left:auto;display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+.lp .lp-b{border:1px solid var(--border,color-mix(in srgb,currentColor 16%,transparent));background:color-mix(in srgb,currentColor 5%,transparent);color:inherit;border-radius:7px;padding:2px 8px;min-width:28px;font-size:12px;font-family:inherit;cursor:pointer;font-variant-numeric:tabular-nums;line-height:1.5;transition:border-color .12s}
+.lp .lp-b:hover{border-color:color-mix(in srgb,currentColor 35%,transparent)}
+.lp .lp-b[aria-current="page"]{border-color:var(--gold,#D6962C);color:var(--gold,#D6962C)}
+.lp .lp-b:disabled{opacity:.4;cursor:default}
+.lp .lp-pg .el{padding:0 4px;opacity:.6}
+th.sortable{cursor:pointer;user-select:none}
+th.sortable::after{content:"↕";margin-left:5px;opacity:.35;font-size:10px}
+th.sortable[aria-sort="ascending"]::after{content:"↑";color:var(--gold,#D6962C);opacity:1}
+th.sortable[aria-sort="descending"]::after{content:"↓";color:var(--gold,#D6962C);opacity:1}
+.lt-empty td{opacity:.6;text-align:center;padding:18px}
+@media (max-width:520px){.lt .lt-q{flex-basis:100%}.lt .lt-rows{margin-left:0}}
+</style>
+<script>
+/* ============================== List controls ============================== */
+/* Self-contained: every table with a thead gets a search box, sortable column
+   headers, a filter select for each column that is a small enumeration, a
+   rows-per-page select and a pager. Installs itself through a DOM observer so
+   it works with any render path; state is keyed by page + column signature so
+   a full re-render lands back on the same page, sort and query. */
+(function(){
+"use strict";
+if(window.__ltInstalled)return; window.__ltInstalled=true;
+var STORE={}, PER=[5,10,25,50,0], BUSY=false, TIMER=null;
+var FACET=/status|state|tier|kind|role|risk|severity|result|health|effect|mode|side|level|verdict|decision|origin|scope|period|basis|algorithm|trend|position|governance|two-factor|sso|replay|grade|outcome/i;
+function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function num(s){
+  s=String(s==null?"":s).trim();
+  if(!s||/^\d{4}-\d{2}/.test(s))return null;
+  var c=s.replace(/[$,%×]/g,""), m=c.match(/^[-+]?\d*\.?\d+(?:e[-+]?\d+)?/i);
+  if(!m)return null;
+  var n=parseFloat(m[0]), u=c.slice(m[0].length).match(/^\s*([kKMB])(?![A-Za-z])/);
+  if(u){ if(u[1]==="k"||u[1]==="K")n*=1e3; else if(u[1]==="M")n*=1e6; else n*=1e9; }
+  return n;
+}
+function cmp(a,b,isNum,dir){
+  if(isNum){var x=a.n,y=b.n; if(x==null&&y==null)return 0; if(x==null)return 1; if(y==null)return -1; if(x!==y)return (x-y)*dir;}
+  return a.t.localeCompare(b.t,undefined,{numeric:true,sensitivity:"base"})*dir;
+}
+function el(html){var d=document.createElement("div");d.innerHTML=html;return d.firstChild;}
+function pageCtx(){var h1=document.querySelector("main h1, .page h1, h1"); return location.hash+"|"+(h1?h1.textContent.trim().slice(0,40):"");}
+function state(sig,ord){var key=pageCtx()+"|"+sig+"#"+ord; return STORE[key]||(STORE[key]={q:"",sort:null,dir:1,per:10,page:1,f:{}});}
+
+function pager(st,total,onPage){
+  var per=st.per||total||1, pages=Math.max(1,Math.ceil(total/per));
+  if(st.page>pages)st.page=pages; if(st.page<1)st.page=1;
+  var from=total?((st.page-1)*per+1):0, to=Math.min(total,st.page*per);
+  var html='<div class="lp"><span class="lp-n">'+(total?from+'–'+to+' of '+total:'0 of 0')+'</span><span class="lp-pg">'+
+   '<button type="button" class="lp-b" data-p="prev" aria-label="Previous page"'+(st.page<=1?' disabled':'')+'>‹</button>';
+  var nums=[]; if(pages<=7){for(var i=1;i<=pages;i++)nums.push(i);} else {
+    nums=[1]; var lo=Math.max(2,st.page-1), hi=Math.min(pages-1,st.page+1);
+    if(lo>2)nums.push("…"); for(var j=lo;j<=hi;j++)nums.push(j); if(hi<pages-1)nums.push("…"); nums.push(pages);}
+  nums.forEach(function(p){html+= p==="…"?'<span class="el">…</span>':'<button type="button" class="lp-b" data-p="'+p+'"'+(p===st.page?' aria-current="page"':'')+'>'+p+'</button>';});
+  html+='<button type="button" class="lp-b" data-p="next" aria-label="Next page"'+(st.page>=pages?' disabled':'')+'>›</button></span></div>';
+  var lp=el(html);
+  lp.addEventListener("click",function(e){var b=e.target.closest("button[data-p]"); if(!b||b.disabled)return; e.stopPropagation(); var p=b.getAttribute("data-p");
+    st.page = p==="prev"?st.page-1 : p==="next"?st.page+1 : +p; onPage();});
+  return lp;
+}
+function bar(st,opts,apply){
+  var html='<div class="lt"><input class="lt-q" type="search" placeholder="'+esc(opts.ph)+'" aria-label="'+esc(opts.ph)+'" value="'+esc(st.q)+'">';
+  (opts.filters||[]).forEach(function(f){
+    html+='<select class="lt-f" data-k="'+esc(f.key)+'" aria-label="Filter by '+esc(f.label)+'"><option value="">All · '+esc(f.label)+'</option>'+
+      f.values.map(function(v){return '<option value="'+esc(v)+'"'+(st.f[f.key]===v?' selected':'')+'>'+esc(v)+'</option>';}).join("")+'</select>';});
+  html+='<label class="lt-rows">Rows<select class="lt-per">'+PER.map(function(p){return '<option value="'+p+'"'+(st.per===p?' selected':'')+'>'+(p||"All")+'</option>';}).join("")+'</select></label></div>';
+  var b=el(html);
+  b.addEventListener("click",function(e){e.stopPropagation();});
+  b.querySelector(".lt-q").addEventListener("input",function(e){st.q=e.target.value;st.page=1;apply();});
+  b.querySelectorAll(".lt-f").forEach(function(s){s.addEventListener("change",function(e){st.f[s.getAttribute("data-k")]=e.target.value;st.page=1;apply();});});
+  b.querySelector(".lt-per").addEventListener("change",function(e){st.per=+e.target.value;st.page=1;apply();});
+  return b;
+}
+/* A column earns a filter when it is a small enumeration: 2–8 distinct short
+   values across at least 4 rows, and not unique per row. At most three per list. */
+function facets(cols,vals,rows){
+  if(rows<4)return [];
+  var c=cols.filter(function(col){ if(!col.name||col.num)return false;
+    var set={},n=0,ok=true; vals.forEach(function(v){var t=v[col.i].t; if(!t)return; if(t.length>28)ok=false; if(!set[t]){set[t]=1;n++;}});
+    if(!ok||n<2||n>8||n>=rows)return false; col.values=Object.keys(set).sort(); return true;});
+  c.sort(function(a,b){var pa=FACET.test(a.name)?0:1,pb=FACET.test(b.name)?0:1; return pa-pb||a.values.length-b.values.length;});
+  return c.slice(0,3).map(function(col){return {key:String(col.i),label:col.name,values:col.values};});
+}
+function sigOf(table){return [].slice.call(table.tHead.rows[0].cells).map(function(c){return c.textContent.trim();}).join("/");}
+function enhance(table,ord){
+  var tbody=table.tBodies[0], rows=[].slice.call(tbody.rows);
+  var ths=[].slice.call(table.tHead.rows[0].cells);
+  var cols=ths.map(function(th,i){return {i:i,name:th.textContent.trim(),num:th.classList.contains("num")};});
+  var st=state(sigOf(table),ord);
+  var vals=rows.map(function(r){return cols.map(function(c){var cell=r.cells[c.i]; var t=cell?cell.textContent.replace(/\s+/g," ").trim():""; return {t:t,n:num(t)};});});
+  cols.forEach(function(c){ if(c.num)return; var k=0,tot=0; vals.forEach(function(v){if(v[c.i].t){tot++; if(v[c.i].n!=null)k++;}}); if(tot&&k/tot>=.6)c.num=true; });
+  var texts=rows.map(function(r){return r.textContent.replace(/\s+/g," ").toLowerCase();});
+  var fs=facets(cols,vals,rows.length);
+  var wrap=table.parentNode, host=wrap.parentNode, ph="Search this list";
+  if(!host||wrap===document.body){wrap=table;host=table.parentNode;}
+  /* A lone search box sitting directly above the table becomes the list's search. */
+  var prev=wrap.previousElementSibling;
+  if(prev&&!prev.matches("table,thead,tbody")){
+    var ins=prev.querySelectorAll("input,select,button,a,textarea");
+    var inp=prev.matches("input")?prev:prev.querySelector("input[placeholder^='Search']");
+    if(inp&&inp.placeholder&&/^Search/.test(inp.placeholder)&&ins.length<=1&&!prev.textContent.trim()){ph=inp.placeholder;prev.remove();}
+  }
+  var free=!/panel|card|box/.test(host.className||"");
+  var b=bar(st,{ph:ph,filters:fs},apply), lp=document.createElement("div");
+  if(free)b.classList.add("free");
+  host.insertBefore(b,wrap); host.insertBefore(lp,wrap.nextSibling);
+  ths.forEach(function(th,i){ if(!cols[i].name)return; th.classList.add("sortable"); th.tabIndex=0; th.setAttribute("role","button");
+    function tog(e){ if(e)e.stopPropagation(); if(st.sort===i){ if(st.dir===1)st.dir=-1; else {st.sort=null;st.dir=1;} } else {st.sort=i;st.dir=1;} st.page=1; apply(); }
+    th.addEventListener("click",tog); th.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();tog(e);}}); });
+  function apply(){
+    ths.forEach(function(th,i){ if(!cols[i].name)return; th.setAttribute("aria-sort",st.sort===i?(st.dir===1?"ascending":"descending"):"none"); });
+    var q=st.q.trim().toLowerCase();
+    var idx=rows.map(function(_,i){return i;}).filter(function(i){
+      if(q&&texts[i].indexOf(q)<0)return false;
+      for(var k in st.f){ if(st.f[k]&&vals[i][+k]&&vals[i][+k].t!==st.f[k])return false; } return true; });
+    if(st.sort!=null&&cols[st.sort]){var c=cols[st.sort]; idx.sort(function(a,b){return cmp(vals[a][c.i],vals[b][c.i],c.num,st.dir)||(a-b);});}
+    var total=idx.length, per=st.per||total||1, pages=Math.max(1,Math.ceil(total/per)); if(st.page>pages)st.page=pages;
+    var slice=st.per?idx.slice((st.page-1)*st.per,st.page*st.per):idx;
+    BUSY=true;
+    while(tbody.firstChild)tbody.removeChild(tbody.firstChild);
+    if(!slice.length){var tr=document.createElement("tr"),td=document.createElement("td");tr.className="lt-empty";td.colSpan=cols.length;td.textContent="No rows match.";tr.appendChild(td);tbody.appendChild(tr);}
+    slice.forEach(function(i){tbody.appendChild(rows[i]);});
+    var nlp=pager(st,total,apply); lp.replaceWith(nlp); lp=nlp; if(free)lp.classList.add("free");
+    BUSY=false;
+  }
+  apply();
+}
+function run(){
+  BUSY=true;
+  try{
+    var ords={};
+    [].slice.call(document.querySelectorAll("table")).forEach(function(t){
+      if(!t.tHead||!t.tHead.rows[0]||!t.tBodies[0]||t.closest("[data-lt-skip]"))return;
+      if([].slice.call(t.tHead.rows[0].cells).some(function(c){return c.colSpan>1;}))return;
+      var sig=sigOf(t), ord=ords[sig]||0; ords[sig]=ord+1;
+      if(t.getAttribute("data-lt"))return;
+      t.setAttribute("data-lt","1"); enhance(t,ord);
+    });
+  } finally { BUSY=false; }
+}
+new MutationObserver(function(muts){
+  if(BUSY)return;
+  for(var i=0;i<muts.length;i++){ if(muts[i].addedNodes.length){ clearTimeout(TIMER); TIMER=setTimeout(run,0); return; } }
+}).observe(document.documentElement,{childList:true,subtree:true});
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",run); else run();
+window.listify=run;
+})();
+</script>
