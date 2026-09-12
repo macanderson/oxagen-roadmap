@@ -135,6 +135,24 @@ run_mut "65 break an operator subtotal by a cent" \
 run_mut "66 stop marking the generated run name" \
   's/<span class="gen" title="written by the classifier, not by a person">auto<\/span>//'
 
+# ── the tool grammar and the Agent IAM surface ──────────────────────────────
+run_mut "67 put the sidebar label back to just Agents" \
+  's/<\/svg>Agents &amp; IAM<\/a>/<\/svg>Agents<\/a>/'
+run_mut "68 send every agent row to the same agent" \
+  's/<a class="rowlink" href="#\/agents\/\$\{esc\(a\.slug\)\}">/<a class="rowlink" href="#\/agents\/release-manager">/'
+run_mut "69 drop the invoking person from the intersection" \
+  's/\.concat\(\[\[a\.operator, "the person invoking it · " \+ a\.opRole\]\]\)/.concat([])/'
+run_mut "70 give an agent a belt it holds no role for" \
+  's/  "acme\.core\.docs-writer":\[\],/  "acme.core.docs-writer":[{id:"repo.search\@2", dec:"allow", rule:"grant:none"}],/'
+run_mut "71 lose a tool from both the belt and the hidden list" \
+  's/return TOOLS\.filter\(t => !on\.has\(t\.id\)\)\.map\(t => \(\{\.\.\.t,/return TOOLS.filter(t => !on.has(t.id)).slice(1).map(t => ({...t,/'
+run_mut "72 shorten the denial so it stops showing its reasoning" \
+  's/      \["Financial class", `<span class="mono">moves_funds<\/span>, read from the tool version.s declared amount path`\],\n//'
+run_mut "73 stop making an agent tab a place you can link to" \
+  's/    location\.hash = `#\/agents\/\$\{S\.agentSlug\}\/\$\{t\.dataset\.val\}`;\n    return;/    S.agentTab = t.dataset.val; render(); return;/'
+run_mut "74 take the dashed border off the gates that stop for a person" \
+  's/\.gt\.g-require_approval,\.gt\.g-mandate\{color:var\(--wait\);border-style:dashed;/.gt.g-require_approval,.gt.g-mandate{color:var(--wait);/'
+
 echo
 echo "caught $caught · missed $missed · skipped $skipped"
 [ "$missed" -eq 0 ] && [ "$skipped" -eq 0 ]

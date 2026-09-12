@@ -209,7 +209,7 @@ await step(12, async () => {
   const f = await body();
   is(12, /above the \$10,000\.00 approval threshold/.test(f) && !/per-call ceiling/.test(f),
     'the approval cites the threshold it actually crossed');
-  await go('#/agents');
+  await go('#/agents/invoice-bot/Mandate');
   is(12, /Per call \$25,000\.00 ceiling/.test(await body()), 'the mandate still states its $25,000 per-call ceiling');
   await go('#/fleet'); await setAsst(true); await page.waitForTimeout(60);
   const t = (await page.locator('#asstBody').innerText()).replace(/\s+/g, ' ');
@@ -528,13 +528,13 @@ await step(36, async () => {
 /* ═══ 37 · one tool grammar ═══ */
 await step(37, async () => {
   await fresh('#/tools');
-  const ids = await page.locator('.tool .mono').evaluateAll(e => e.map(x => x.textContent.trim()));
+  const ids = await page.locator('.tc > .mono').evaluateAll(e => e.map(x => x.textContent.trim()));
   is(37, ids.length >= 5 && ids.every(t => /^[a-z_.]+(__[a-z_]+)?@\d+$/.test(t)),
     `every tool identity is name@version (${ids.join(', ')})`);
-  const badges = await page.locator('#panel-toolsTab tbody tr .st.flat').count();
+  const badges = await page.locator('#panel-toolsTab tbody tr .tcb').count();
   is(37, badges >= ids.length, `every registry row carries a category badge (${badges} badges for ${ids.length} tools)`);
   await go('#/fleet');
-  const a = await page.locator('.appr .tool .mono').evaluateAll(e => e.map(x => x.textContent.trim()));
+  const a = await page.locator('.appr .tc > .mono').evaluateAll(e => e.map(x => x.textContent.trim()));
   is(37, a.length === 3 && a.every(t => /@\d+$/.test(t)), `approvals use the same grammar (${a.join(', ')})`);
 });
 
@@ -918,7 +918,7 @@ await step(58, async () => {
       return {go: !!tr.dataset.go, bg: getComputedStyle(tr.querySelector('td')).backgroundColor};
     }, sel);
   };
-  const plain = await groundOf('#/agents', '#view tbody tr');
+  const plain = await groundOf('#/tools', '#view tbody tr');
   const navigable = await groundOf('#/fleet', '#view tbody tr[data-go]');
   const base = await page.evaluate(() => getComputedStyle(document.querySelector('#view .panel')).backgroundColor);
   is(58, !plain.go && navigable.go && plain.bg !== navigable.bg && navigable.bg !== base,
@@ -1085,6 +1085,152 @@ await step(66, async () => {
     marked: !!document.querySelector('.head-t .gen')}));
   is(66, run.marked && run.summary.length > 60 && /retry budget/.test(run.summary),
     `the run page carries the generated summary, marked (${run.summary.slice(0, 60)}…)`);
+});
+
+/* ═════════ The Agent IAM surface ═════════ */
+
+/* ═══ 67 · the sidebar says what the destination is ═══ */
+await step(67, async () => {
+  await fresh('#/fleet');
+  const label = await page.evaluate(() => document.querySelector('.navsec a[data-nav="agents"]').textContent.trim());
+  is(67, /IAM/.test(label) && /Agents/.test(label), `the nav names both the agents and the surface ("${label}")`);
+  const title = await page.evaluate(() => { location.hash = '#/agents'; return null; });
+  await page.waitForTimeout(90);
+  is(67, /IAM/.test(await page.title()), `and the document title carries it too ("${await page.title()}")`);
+});
+
+/* ═══ 68 · an agent row opens that agent's access surface ═══ */
+await step(68, async () => {
+  await fresh('#/agents');
+  /* Read the LINK, not the data-go beside it — the row's mouse affordance is
+     not the thing a keyboard follows, and reading the attribute a defect does
+     not corrupt is how this assertion passed with every link pointing at one
+     agent. Compare it against the agent key printed in the row itself. */
+  const rows = await page.locator('#view tr[data-go]').evaluateAll(r =>
+    r.map(x => ({ key: x.querySelector('td .s.mono').textContent.trim(),
+                  href: x.querySelector('td a.rowlink').getAttribute('href'),
+                  go: x.dataset.go })));
+  is(68, rows.length === 5
+      && new Set(rows.map(r => r.href)).size === rows.length
+      && rows.every(r => r.href === r.go),
+    `every agent row links somewhere of its own, and the row and its link agree (${rows.length} rows)`);
+  const miss = [];
+  for(const row of rows){
+    await go(row.href);
+    const h1 = await text('.phead h1');
+    if(h1 !== row.key) miss.push([row.key, row.href, h1]);
+  }
+  is(68, miss.length === 0, `each opens the principal its own row names`
+    + (miss.length ? ` — ${JSON.stringify(miss)}` : ''));
+});
+
+/* ═══ 69 · effective permission is shown as the intersection it is ═══ */
+await step(69, async () => {
+  await fresh('#/agents/release-manager/Identity');
+  const w = await page.evaluate(() => {
+    const el = document.querySelector('.iamw');
+    return el ? {terms: [...el.querySelectorAll('.t')].map(t => t.textContent.trim()),
+      ops: el.querySelectorAll('.op').length, out: el.querySelector('.t.out')?.textContent.trim() ?? null} : null;
+  });
+  /* n terms joined by n-1 intersection operators, and the last one is the result. */
+  is(69, w && w.terms.length >= 3 && w.ops === w.terms.length - 2 && w.out,
+    `the formula reads as an intersection (${w?.terms.length} terms, ${w?.ops} operators)`);
+  is(69, /tool versions/.test(w?.out ?? ''), `and resolves to the belt (${w?.out})`);
+  /* The person invoking it is one of the terms — that is the delegation ceiling. */
+  is(69, w.terms.some(t => /Marcus Bell/.test(t)),
+    'the person invoking it is a term, so the ceiling is visible');
+  const sr = await page.evaluate(() => document.querySelector('.iamw .sr')?.textContent ?? '');
+  is(69, /intersected with/.test(sr), 'and the operator is read out, not left as a glyph');
+});
+
+/* ═══ 70 · no roles means no reach, and the page says so ═══ */
+await step(70, async () => {
+  await fresh('#/agents/docs-writer/Identity');
+  const t = await body();
+  is(70, /none held/.test(t), 'an agent with no roles says it holds none');
+  const nil = await page.locator('.iamw .t.nil').count();
+  is(70, nil === 1, 'and the intersection resolves to the empty result, marked as such');
+  await go('#/agents/docs-writer/Toolbelt');
+  const belt = await body();
+  is(70, /shown no tools at all/.test(belt) && /cannot reach a single tool server/.test(belt),
+    'its belt is empty, and the page explains what that means');
+});
+
+/* ═══ 71 · the belt and what is hidden partition the registry ═══ */
+await step(71, async () => {
+  await fresh('#/agents/release-manager/Toolbelt');
+  const r = await page.evaluate(() => {
+    const tables = [...document.querySelectorAll('#panel-agentTab table')];
+    const ids = t => [...t.querySelectorAll('tbody tr td:first-child .tc > .mono')].map(x => x.textContent.trim());
+    return {belt: ids(tables[0]), outside: ids(tables[1]), registry: TOOLS.length};
+  });
+  is(71, r.belt.length > 0 && r.outside.length > 0
+      && r.belt.length + r.outside.length === r.registry
+      && r.belt.every(id => !r.outside.includes(id)),
+    `${r.belt.length} shown + ${r.outside.length} hidden = ${r.registry} in the registry, with no overlap`);
+  const reasons = await page.evaluate(() => {
+    const t = [...document.querySelectorAll('#panel-agentTab table')][1];
+    return [...t.querySelectorAll('tbody tr td:last-child')].map(x => x.textContent.trim());
+  });
+  is(71, reasons.length === r.outside.length && reasons.every(x => x.length > 20),
+    'and every hidden tool says why it is hidden');
+});
+
+/* ═══ 72 · a refusal shows its reasoning ═══ */
+await step(72, async () => {
+  await fresh('#/agents/release-manager/Mandate');
+  const steps = await page.evaluate(() => [...document.querySelectorAll('.iamc li')]
+    .map(li => ({l: li.querySelector('.l').textContent.trim(), v: li.querySelector('.v').textContent.trim()})));
+  is(72, steps.length === 4 && steps[0].l === 'Call' && /Decision/.test(steps[3].l),
+    `the denial is a numbered walk from the call to the decision (${steps.length} steps)`);
+  is(72, /no_mandate/.test(steps[3]?.v ?? '') && /denied/.test(steps[3]?.v ?? ''),
+    'and the last step names the gate and the reason');
+  /* The agent that does hold one shows the mandate instead. */
+  await go('#/agents/invoice-bot/Mandate');
+  const m = await body();
+  is(72, /Per call/.test(m) && !/no_mandate/.test(m), 'the mandated agent shows its mandate, not a denial');
+});
+
+/* ═══ 73 · a tab of an agent is a place you can send somebody ═══ */
+await step(73, async () => {
+  await fresh('#/agents/release-manager/Identity');
+  await page.click('[role="tab"][data-val="Toolbelt"]'); await page.waitForTimeout(140);
+  is(73, page.url().endsWith('#/agents/release-manager/Toolbelt'),
+    `clicking a tab writes the hash (${page.url().split('#')[1]})`);
+  /* And the deep link opens on that tab, not on the default. */
+  await fresh('#/agents/invoice-bot/Mandate');
+  const sel = await page.evaluate(() => document.querySelector('[role="tab"][aria-selected="true"]')?.dataset.val);
+  is(73, sel === 'Mandate', `a deep link opens on its own tab (${sel})`);
+  /* A slug that does not exist falls back rather than throwing. */
+  await fresh('#/agents/not-an-agent');
+  is(73, !(await body()).includes('undefined'), 'an unknown agent slug falls back to the list');
+});
+
+/* ═══ 74 · the tool grammar is the same everywhere it appears ═══ */
+await step(74, async () => {
+  await fresh('#/tools');
+  const reg = await page.evaluate(() => ({
+    badges: document.querySelectorAll("#panel-toolsTab tbody tr .tcb").length,
+    distinct: new Set([...document.querySelectorAll("#panel-toolsTab .tcb")].map(x => x.textContent.trim())).size,
+    allCats: TCAT_ORDER.length,
+    hazards: document.querySelectorAll("#panel-toolsTab .hz").length,
+    gates: document.querySelectorAll("#panel-toolsTab .gt").length,
+    rows: document.querySelectorAll("#panel-toolsTab tbody tr").length }));
+  is(74, reg.badges === reg.rows && reg.gates === reg.rows && reg.hazards === reg.rows * 2,
+    `every registry row carries one category, one gate and both hazard marks (${JSON.stringify(reg)})`);
+  is(74, reg.distinct === reg.allCats,
+    `and the sample covers every category the grammar defines (${reg.distinct} of ${reg.allCats})`);
+  /* A dashed gate means a person stands in the way — and only then. */
+  const dashed = await page.evaluate(() => [...document.querySelectorAll('#panel-toolsTab .gt')]
+    .map(g => ({cls: g.className, dashed: getComputedStyle(g).borderStyle === 'dashed'})));
+  is(74, dashed.every(g => g.dashed === /g-(require_approval|mandate)/.test(g.cls)),
+    'a dashed border appears on exactly the gates that stop for a person');
+  /* And the same grammar renders on the belt and in an approval. */
+  await go('#/agents/release-manager/Toolbelt');
+  const belt = await page.evaluate(() => document.querySelectorAll('#panel-agentTab .tcb').length);
+  await go('#/fleet');
+  const appr = await page.evaluate(() => document.querySelectorAll('.appr .tcb').length);
+  is(74, belt > 0 && appr === 3, `the belt (${belt}) and the approvals (${appr}) use the same badge`);
 });
 
 /* ═══ the contrast guard runs as part of this one ═══ */

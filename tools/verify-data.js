@@ -25,7 +25,8 @@ vm.createContext(ctx);
 try {
   vm.runInContext(src + `
     ;globalThis.D = {ORG, WS, WS2, PERIOD, ORG_AGENTS, ORG_RUNS, BILLABLE, RUN_CHARGE, ARCHIVE,
-      CHARGES, TOOLS, TOOL_CLASS, HAZARD, REGISTRY, TOOL, BELT, APPROVALS, RECEIPTS, RUNS, FRAMES_OF,
+      CHARGES, TOOLS, TCAT, TCAT_ORDER, TOOLMETA, toolMeta, toolParts, REGISTRY, TOOL,
+      ROLES, BELTS, beltOf, beltSize, outsideOf, agentBySlug, APPROVALS, RECEIPTS, RUNS, FRAMES_OF,
       framesOf, runCost, runFrames, cached, turnOf, AGENTS, AGENT, MANDATE, FINDINGS, RECORDS,
       CONTEXT_PR, CLASSES, GROUPS, groupSum, ENTITIES, SOURCES, ONT, ONT_N, VERSIONS, SIM,
       OPERATORS, SUMMARY, PROMPT};`, ctx);
@@ -138,8 +139,11 @@ check('every run belongs to a core-platform agent',
 for(const a of D.APPROVALS){
   check(`approval ${a.tool}: names a run that exists`, D.RUNS.some(r => r.id === a.run), a.run);
   check(`approval ${a.tool}: names a tool in the registry`, !!D.TOOL(a.tool));
-  check(`approval ${a.tool}: its tool is gated on approval`, D.TOOL(a.tool)?.gate === 'needs approval',
-    `gate is "${D.TOOL(a.tool)?.gate}" — a denied or allowed tool produces no queue item`);
+  /* Only a gate that stops for a person produces a queue item. An allowed tool
+     never reaches the queue, and a denied one is refused before it. */
+  check(`approval ${a.tool}: its tool is gated on a person`,
+    ['require_approval', 'mandate'].includes(D.TOOL(a.tool)?.dec),
+    `gate is "${D.TOOL(a.tool)?.dec}" — an allowed or denied tool produces no queue item`);
   const run = D.RUNS.find(r => r.id === a.run);
   check(`approval ${a.tool}: its run is parked`, run?.state === 'parked', `run is ${run?.state}`);
   check(`approval ${a.tool}: operator matches the run`, run?.op === a.op, `${a.op} vs ${run?.op}`);
@@ -154,7 +158,41 @@ check('receipt ids use the ULID alphabet (no I, L, O, U)',
 check('every registry tool is name@version',
   D.TOOLS.every(t => /^[a-z_.]+(__[a-z_]+)?@\d+$/.test(t.id)),
   D.TOOLS.filter(t => !/^[a-z_.]+(__[a-z_]+)?@\d+$/.test(t.id)).map(t=>t.id).join(', '));
-check('every tool has a known category', D.TOOLS.every(t => t.cls in D.TOOL_CLASS));
+check('every tool resolves to a known category',
+  D.TOOLS.every(t => D.toolMeta(t.id).cat in D.TCAT),
+  D.TOOLS.filter(t => !(D.toolMeta(t.id).cat in D.TCAT)).map(t => t.id).join(', '));
+check('every category in the order table is defined',
+  D.TCAT_ORDER.every(c => c in D.TCAT));
+check('every defined category is in the order table',
+  Object.keys(D.TCAT).every(c => D.TCAT_ORDER.includes(c)));
+check('every category carries a label, a definition and an example',
+  Object.values(D.TCAT).every(c => c.l && c.s && c.eg && c.i));
+check('every tool carries all three axes',
+  D.TOOLS.every(t => t.risk && t.eff && t.dec && t.eg && t.fin),
+  D.TOOLS.filter(t => !(t.risk && t.eff && t.dec && t.eg && t.fin)).map(t => t.id).join(', '));
+check('every risk is one of the four marks',
+  D.TOOLS.every(t => ['low','medium','high','critical'].includes(t.risk)));
+check('every side effect is one of the three glyphs',
+  D.TOOLS.every(t => ['read','write','irreversible'].includes(t.eff)));
+check('every gate is one of the five states',
+  D.TOOLS.every(t => ['allow','require_approval','mandate','deny','killed'].includes(t.dec)));
+/* A financial tool is never merely allowed — it needs a mandate. */
+check('a financial tool is gated on a mandate',
+  D.TOOLS.filter(t => t.fin === 'moves_funds').every(t => t.dec === 'mandate'),
+  D.TOOLS.filter(t => t.fin === 'moves_funds' && t.dec !== 'mandate').map(t => t.id).join(', '));
+/* An irreversible tool is never merely allowed either. */
+check('an irreversible tool always stops for someone',
+  D.TOOLS.filter(t => t.eff === 'irreversible').every(t => t.dec !== 'allow'),
+  D.TOOLS.filter(t => t.eff === 'irreversible' && t.dec === 'allow').map(t => t.id).join(', '));
+/* The verb heuristic has to work, or the registry cannot grow without a table. */
+check('an unlisted tool is still categorised by its verb',
+  D.toolMeta('confluence__delete_page').cat === 'record'
+  && D.toolMeta('s3__list_objects').cat === 'read'
+  && D.toolMeta('k8s__scale_deployment').cat === 'infra'
+  && D.toolMeta('okta__rotate_key').cat === 'access'
+  && D.toolMeta('sandbox__run_python').cat === 'exec',
+  `got ${['confluence__delete_page','s3__list_objects','k8s__scale_deployment','okta__rotate_key','sandbox__run_python']
+    .map(x => x + '→' + D.toolMeta(x).cat).join(', ')}`);
 check('the registry is a sample of a larger registry', D.TOOLS.length < D.REGISTRY.tools);
 check('external connections do not exceed servers', D.REGISTRY.external < D.REGISTRY.servers);
 /* every tool named inside a frame must be in the registry, or the badge throws */
@@ -254,10 +292,10 @@ for(const r of D.RUNS) guarded(`${r.id}: frame turn labels match the cost table`
   }
 });
 
-/* Every agent that runs or is listed needs a belt size, or the frame throws. */
+/* Every agent that runs or is listed needs a belt, or the frame throws. */
 const agentIds = new Set([...D.RUNS.map(r => r.agent), ...D.AGENTS.map(a => a.id)]);
 for(const id of agentIds)
-  check(`belt size known for ${id}`, typeof D.BELT[id] === "number");
+  check(`belt known for `, Array.isArray(D.BELTS[id]));
 
 /* The model has to contain the classes its own version history says it added. */
 for(const want of ["WarrantyClaim", "Depot", "DeploymentSite"])
@@ -271,14 +309,72 @@ check('the active version in the table is the active version in the tile',
 
 /* Tools are ordered least to most consequential, which is the grammar's rule
    — and NOT by call volume, which the list is not sorted by. */
-const RANK = {read_only:0, side_effect:1, irreversible:2, moves_funds:3};
-const ranks = D.TOOLS.map(t => RANK[t.cls]);
+const ranks = D.TOOLS.map(t => D.TCAT_ORDER.indexOf(D.toolMeta(t.id).cat));
 check('the registry is ordered least to most consequential',
   ranks.every((v, i) => i === 0 || v >= ranks[i - 1]), ranks.join(','));
 
 /* Billing is org-scope, so its graph line must count both workspaces. */
 check('the finops workspace contributes entities of its own',
   D.WS2.entities > 0);
+
+/* ══════ Agent IAM: an access surface has to be internally honest ══════ */
+
+check('agent slugs are unique', new Set(D.AGENTS.map(a => a.slug)).size === D.AGENTS.length);
+check('every agent slug resolves', D.AGENTS.every(a => D.agentBySlug(a.slug) === a));
+check('every agent principal is unique', new Set(D.AGENTS.map(a => a.principal)).size === D.AGENTS.length);
+
+for(const a of D.AGENTS){
+  check(`${a.slug}: every role it holds is a defined role`,
+    a.roles.every(r => r in D.ROLES), a.roles.filter(r => !(r in D.ROLES)).join(', '));
+  check(`${a.slug}: the role of the person invoking it is defined`, a.opRole in D.ROLES, a.opRole);
+  check(`${a.slug}: the invoking role is a human role`,
+    D.ROLES[a.opRole]?.kind === 'human', `kind is ${D.ROLES[a.opRole]?.kind}`);
+  check(`${a.slug}: every role it holds is an agent role`,
+    a.roles.every(r => D.ROLES[r].kind === 'agent'),
+    a.roles.filter(r => D.ROLES[r].kind !== 'agent').join(', '));
+  /* The whole claim of the page: no roles means no reach. */
+  check(`${a.slug}: holding no roles means being shown no tools`,
+    a.roles.length > 0 || D.beltSize(a.id) === 0, `${D.beltSize(a.id)} tools on an empty intersection`);
+  check(`${a.slug}: a day's ceiling is not below a run's`, a.budgetDay >= a.budgetRun);
+  check(`${a.slug}: an unenrolled agent has no host`, a.enrolled || !a.host);
+  check(`${a.slug}: an enrolled agent has a host`, !a.enrolled || !!a.host);
+}
+
+for(const [id, belt] of Object.entries(D.BELTS)){
+  for(const b of belt){
+    check(`belt ${id}: ${b.id} is in the registry`, !!D.TOOL(b.id));
+    check(`belt ${id}: ${b.id} has a gate`,
+      ['allow','require_approval','mandate','deny','killed'].includes(b.dec), b.dec);
+    check(`belt ${id}: ${b.id} names the rule that decided it`, !!b.rule);
+    /* A tool on a belt is never more permissive than the registry allows. */
+    const reg = D.TOOL(b.id);
+    if(reg) check(`belt ${id}: ${b.id} is not looser than the registry`,
+      !(reg.dec !== 'allow' && b.dec === 'allow'),
+      `registry says ${reg.dec}, the belt says ${b.dec}`);
+    /* A financial tool on a belt means the agent must hold a mandate. */
+    if(reg && reg.fin === 'moves_funds')
+      check(`belt ${id}: a financial tool implies a mandate`, id === D.MANDATE.agent,
+        `${id} is shown ${b.id} but holds no mandate`);
+  }
+  check(`belt ${id}: no tool appears twice`,
+    new Set(belt.map(b => b.id)).size === belt.length);
+}
+
+check('the mandate belongs to an agent that exists',
+  D.AGENTS.some(a => a.id === D.MANDATE.agent), D.MANDATE.agent);
+check('only the mandated agent holds the paying role',
+  D.AGENTS.filter(a => a.roles.includes('agent.finance.pay')).every(a => a.id === D.MANDATE.agent));
+
+/* The belt and what is outside it partition the registry exactly — no tool is
+   both shown and hidden, and none is neither. */
+for(const a of D.AGENTS) guarded(`${a.slug}: belt and outside partition the registry`, () => {
+  const on = D.beltOf(a).map(t => t.id), off = D.outsideOf(a).map(t => t.id);
+  check(`${a.slug}: nothing is both on the belt and outside it`,
+    on.every(id => !off.includes(id)), on.filter(id => off.includes(id)).join(', '));
+  check(`${a.slug}: belt + outside covers the whole registry`,
+    on.length + off.length === D.TOOLS.length, `${on.length} + ${off.length} vs ${D.TOOLS.length}`);
+  check(`${a.slug}: every outside entry says why`, D.outsideOf(a).every(t => t.why && t.why.length > 20));
+});
 
 /* ── spend by operator has to reconcile to spend by workspace ── */
 const opRuns   = D.OPERATORS.reduce((s, o) => s + o.runs, 0);
@@ -313,7 +409,7 @@ for(const r of D.RUNS) guarded(`${r.id}: its prompt builds`, () => {
   const t = D.turnOf(r, 0);
   const p = D.PROMPT(r, t);
   check(`${r.id}: the prompt names the agent`, p.includes(r.agent));
-  check(`${r.id}: the prompt names the belt size`, p.includes(String(D.BELT[r.agent])));
+  check(`: the prompt names the belt size`, p.includes(String(D.beltSize(r.agent))));
   check(`${r.id}: the prompt carries the records in force`,
     D.RECORDS.every(x => p.includes(x.s)));
 });

@@ -60,7 +60,7 @@ run "the proposed record is already published" \
 run "90 days holds fewer runs than 11 days" \
   's/proven90:9612, witnessed90:10998/proven90:806, witnessed90:1066/'
 run "a tool identity loses its schema version" \
-  's/\{id:"bash\@1",/{id:"bash",/'
+  's/\{n:"bash",(\s+)v:"1",/{n:"bash",$1v:"",/'
 run "an approval names a tool that is not gated" \
   's/tool:"bash\@1", args:"rm -rf node_modules"/tool:"linear__get_issue\@2", args:"rm -rf node_modules"/'
 run "the simulation outcomes stop partitioning the calls" \
@@ -81,12 +81,12 @@ run "a run id sorts against its own start time" \
   's/\{id:"run_01K6QW2A8C"/{id:"run_01K6QXZ9Z9"/'
 run "a turn label is typed instead of derived" \
   's/d:`claude-fable-5-1 · turn \$\{t\.i\} · \$\{t\.what\.toLowerCase\(\)\}`/d:`claude-fable-5-1 · turn 3 · \${t.what.toLowerCase()}`/'
-run "an agent loses its belt size" \
-  's/"acme\.core\.fleet-ops-bot":6,//'
+run "a belt entry stops naming the rule that decided it" \
+  's/\{id:"repo\.search\@2",          dec:"allow",            rule:"grant:agent\.repo\.read #1"\},\n    \{id:"linear__get_issue\@2",    dec:"allow",            rule:"grant:agent\.issue\.write #1"\},/{id:"repo.search\@2",          dec:"allow",            rule:""},\n    {id:"linear__get_issue\@2",    dec:"allow",            rule:"grant:agent.issue.write #1"},/'
 run "a class named in the version history goes missing" \
   's/\{n:"WarrantyClaim", c:148, g:"sales_crm"\},//'
 run "the registry stops being ordered by consequence" \
-  's/\{id:"repo\.search\@2",                server:"builtin",cls:"read_only",    gate:"allowed",        calls:12880\},\n  \{id:"linear__get_issue\@2",          server:"linear", cls:"read_only",    gate:"allowed",        calls:3914\},\n  \{id:"bash\@1",                       server:"harness",cls:"irreversible", gate:"needs approval", calls:6102\},/{id:"bash\@1",                       server:"harness",cls:"irreversible", gate:"needs approval", calls:6102},\n  {id:"repo.search\@2",                server:"builtin",cls:"read_only",    gate:"allowed",        calls:12880},\n  {id:"linear__get_issue\@2",          server:"linear", cls:"read_only",    gate:"allowed",        calls:3914},/'
+  's/  "repo\.search":\["Search the repository","read"\],/  "repo.search":["Search the repository","finance"],/'
 run "two versions claim to be active" \
   's/\["v13", "Split <span class=\\"mono\\">Site<\/span> into DeploymentSite and Depot", "PR #1098 · 2026-08-21 · Marcus Bell", false\]/["v13", "Split <span class=\\"mono\\">Site<\/span> into DeploymentSite and Depot", "PR #1098 · 2026-08-21 · Marcus Bell", true]/'
 
@@ -103,6 +103,24 @@ run "a summary is written for a run that does not exist" \
   's/const SUMMARY = \{/const SUMMARY = {\n  run_01K6QZZZZZ:"A summary for a run that is not in the table, which nothing would ever show.",/'
 run "the prompt stops carrying the records in force" \
   's/  \$\{RECORDS\.map\(x => "· " \+ x\.s\)\.join\("\\n  "\)\}//'
+
+# ── the Agent IAM model ─────────────────────────────────────────────────────
+run "a belt is looser than the registry allows" \
+  's/\{id:"bash\@1",                 dec:"require_approval", rule:"grant:agent\.shell #1 · pol_v41 R-14"\}\n  \],\n  "acme\.core\.release-manager"/{id:"bash\@1",                 dec:"allow", rule:"grant:agent.shell #1 · pol_v41 R-14"}\n  ],\n  "acme.core.release-manager"/'
+run "a financial tool lands on an unmandated belt" \
+  's/    \{id:"repo\.search\@2",          dec:"allow",            rule:"grant:agent\.repo\.read #1"\},\n    \{id:"linear__get_issue\@2",    dec:"allow",            rule:"grant:agent\.issue\.write #1"\},\n    \{id:"linear__update_issue\@2", dec:"allow",            rule:"grant:agent\.issue\.write #2"\},\n    \{id:"bash\@1",                 dec:"require_approval", rule:"grant:agent\.shell #1 · pol_v41 R-14"\}\n  \],\n  "acme\.core\.docs-writer"/    {id:"stripe__create_payment\@4", dec:"mandate", rule:"grant:none"}\n  ],\n  "acme.core.docs-writer"/'
+run "an agent holds a role that does not exist" \
+  's/roles:\["agent\.repo\.read","agent\.repo\.write"\],/roles:["agent.repo.read","agent.repo.admin"],/'
+run "an agent is invoked by an agent role rather than a person" \
+  's/operator:"Dana Okafor", opRole:"org\.billing",/operator:"Dana Okafor", opRole:"agent.repo.read",/'
+run "a hidden tool stops saying why it is hidden" \
+  's/      : "No grant on this agent.s roles reaches this version\."\}\)\);/      : "no"}));/'
+run "a day ceiling drops below a run ceiling" \
+  's/budgetRun:4\.00, budgetDay:120\.00/budgetRun:400.00, budgetDay:120.00/'
+run "an unenrolled agent is given a host" \
+  's/enrolled:false, host:null,/enrolled:false, host:"ghost-01",/'
+run "a tool identity loses its category" \
+  's/  exec:   \{l:"Code & shell",/  execX:  {l:"Code \& shell",/'
 
 # ── the contrast guard, same contract ───────────────────────────────────────
 runc () {

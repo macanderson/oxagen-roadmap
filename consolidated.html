@@ -238,14 +238,50 @@ td a.rowlink{border-bottom:1px solid var(--rule-2)}
 .st.flat{background:none;border:1px solid var(--rule);color:var(--muted)}
 .st.flat::before{display:none}
 
-/* ─── Tool grammar. One identity everywhere: name@schema-version.
-       Category is a glyph and a word, never a hue. ─── */
-.tool{display:inline-flex;align-items:center;gap:6px;min-width:0}
-.tool > .mono{color:var(--fg);overflow-wrap:anywhere}
-.haz{width:13px;height:13px;flex:none;stroke:var(--fail);fill:none;stroke-width:1.8;
-  stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px}
-.cat svg{width:12px;height:12px;flex:none;stroke:currentColor;fill:none;stroke-width:1.7;
+/* ─── Tool grammar. Three axes, three grammars, never mixed.
+       Category is a glyph and a word — monochrome, because a ten-hue scale is
+       unreadable to anyone who cannot separate ten hues, and the glyph already
+       carries the meaning. Hazard and gate keep the state palette, because
+       those two ARE state. ─── */
+.tc{display:inline-flex;align-items:center;gap:7px;min-width:0}
+.tc > .mono{color:var(--fg);overflow-wrap:anywhere}
+.tc .tv{color:var(--dim)}
+.cg{width:15px;height:15px;flex:none;stroke:currentColor;fill:none;stroke-width:1.7;
   stroke-linecap:round;stroke-linejoin:round}
+.tc > .cg{width:24px;height:24px;padding:4px;border-radius:6px;color:var(--fg);
+  background:var(--hl);border:1px solid var(--rule);box-sizing:border-box}
+
+.tcb{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:600;
+  letter-spacing:.05em;text-transform:uppercase;padding:2px 8px 2px 6px;border-radius:6px;
+  border:1px solid var(--rule);background:var(--hl);color:var(--body);white-space:nowrap;line-height:1.6}
+.tcb .cg{width:12px;height:12px}
+
+.hz{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;
+  white-space:nowrap;line-height:1.6;letter-spacing:.02em}
+.hz + .hz{margin-left:10px}
+.hzi{width:14px;height:14px;flex:none;stroke:currentColor;fill:none;stroke-width:2;
+  stroke-linecap:round;stroke-linejoin:round}
+.hz.r-low,.hz.e-read{color:var(--muted)}
+.hz.r-medium,.hz.e-write{color:var(--wait)}
+.hz.r-high,.hz.e-irreversible{color:var(--fail)}
+.hz.r-critical{color:var(--crit)}
+
+.gt{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;
+  letter-spacing:.02em;padding:2px 8px 2px 6px;border-radius:6px;border:1px solid;
+  white-space:nowrap;line-height:1.6}
+.gti{width:12px;height:12px;flex:none;stroke:currentColor;fill:none;stroke-width:2.2;
+  stroke-linecap:round;stroke-linejoin:round}
+.gt.g-allow{color:var(--ok);border-color:var(--ok-wash);background:var(--ok-wash)}
+/* Dashed means a person still stands in the way. */
+.gt.g-require_approval,.gt.g-mandate{color:var(--wait);border-style:dashed;
+  border-color:var(--wait);background:var(--wait-wash)}
+.gt.g-deny{color:var(--deny);border-color:var(--deny-wash);background:var(--deny-wash)}
+.gt.g-killed{color:var(--crit);border-color:var(--crit);background:var(--crit-wash)}
+
+/* A row whose tool could do real damage carries it on the row, not only in a cell. */
+tr.hz-row-critical > td:first-child{box-shadow:inset 3px 0 0 var(--crit)}
+tr.hz-row-high > td:first-child{box-shadow:inset 3px 0 0 var(--fail)}
+
 .toolargs{display:block;font-family:var(--mono);font-size:11.5px;color:var(--muted);margin-top:2px}
 
 .kv{display:grid;grid-template-columns:minmax(120px,auto) 1fr;gap:8px 18px;font-size:13px;min-width:0}
@@ -273,6 +309,39 @@ td a.rowlink{border-bottom:1px solid var(--rule-2)}
 .appr-a{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
 .appr-amt{margin-top:7px;font-size:19px;font-weight:600;color:var(--fg)}
 .appr-amt span{font-size:12px;font-weight:400;color:var(--muted)}
+
+/* ─── Agent IAM. Two shapes carry the whole page.
+
+       The intersection: effective permission is what the agent was granted
+       AND what the person invoking it holds. It is written as the formula it
+       is, so nobody has to be told that subagents can only narrow.
+
+       The chain: a numbered walk from the call to the decision. Used where the
+       answer is "no", because a refusal that does not show its reasoning is
+       indistinguishable from a bug. ─── */
+.iamw{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.iamw .t{display:block;padding:7px 10px;border:1px solid var(--rule);border-radius:var(--r-sm);
+  background:var(--ink);font-size:11.5px;line-height:1.35;color:var(--fg);font-weight:500}
+.iamw .t i{display:block;font-style:normal;font-size:10.5px;color:var(--muted);margin-top:2px;font-weight:400}
+.iamw .op,.iamw .eqs{color:var(--muted);font-family:var(--mono);font-size:13px;flex:0 0 auto}
+.iamw .t.out{border-color:var(--rule-2);background:var(--hl)}
+.iamw .t.nil{border-style:dashed;color:var(--ok)}
+
+.iamc{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.iamc li{display:flex;gap:10px;align-items:flex-start;padding:9px 11px;border:1px solid var(--rule);
+  border-radius:var(--r-sm);background:var(--ink)}
+.iamc li > .n{flex:0 0 auto;width:19px;height:19px;border-radius:50%;border:1px solid var(--rule-2);
+  display:grid;place-items:center;font-size:10.5px;color:var(--muted);font-family:var(--mono)}
+.iamc li .l{display:block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--muted);font-weight:600;margin-bottom:3px}
+.iamc li .v{font-size:12.5px;color:var(--body);min-width:0;overflow-wrap:anywhere}
+
+/* The agent header: the key is the identity, so the key is the heading. */
+.phead{display:flex;align-items:flex-start;gap:20px;flex-wrap:wrap;margin-bottom:18px}
+.phead .t{flex:1;min-width:280px}
+.phead h1{font-family:var(--mono);font-size:19px;letter-spacing:-.01em}
+.phead .badges{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-top:9px}
+.phead p.d{margin-top:9px;color:var(--muted);max-width:66ch}
 
 /* ─── The flight recorder. Selection carries a spine and weight, not a 1.13:1
        wash — colour alone was the only channel and it was below the floor. ─── */
@@ -420,7 +489,7 @@ body[data-w="phone"]{background:var(--panel-2)}
     <nav class="navsec" aria-label="Workspace">
       <h3>Workspace</h3>
       <a href="#/fleet" data-nav="fleet"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h3.5l2 5.5L12 5l2.5 8 1.5-3H21"/></svg>Fleet<span class="wait-n" id="navApprovals" aria-hidden="true"></span><span class="sr" id="navApprovalsSr"></span></a>
-      <a href="#/agents" data-nav="agents"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="7.5" width="16" height="11.5" rx="3"/><path d="M12 4.5v3M9.2 12.5h.01M14.8 12.5h.01M9.8 16h4.4"/></svg>Agents</a>
+      <a href="#/agents" data-nav="agents"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="7.5" width="16" height="11.5" rx="3"/><path d="M12 4.5v3M9.2 12.5h.01M14.8 12.5h.01M9.8 16h4.4"/></svg>Agents &amp; IAM</a>
       <a href="#/tools" data-nav="tools"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.6 5.6a4 4 0 0 0 4.8 4.8L14 15.8 10.2 19.6 7 16.4l3.8-3.8 3.8-7z"/></svg>Tools</a>
       <a href="#/ontology" data-nav="ontology"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5.2" r="2.3"/><circle cx="5.2" cy="18" r="2.3"/><circle cx="18.8" cy="18" r="2.3"/><path d="M10.7 7.1 6.4 15.9M13.3 7.1l4.3 8.8M7.5 18h9"/></svg>Ontology</a>
       <a href="#/steering" data-nav="steering"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6.5h16M4 12h9M4 17.5h6"/><circle cx="17" cy="15.5" r="3"/></svg>Steering<span class="wait-n" id="navSteering" aria-hidden="true"></span><span class="sr" id="navSteeringSr"></span></a>
@@ -563,30 +632,115 @@ const RUN_CHARGE = BILLABLE * PERIOD.rate;              /* 1,159.00 */
 const ARCHIVE    = PERIOD.archiveGB * PERIOD.archiveRate;
 const CHARGES    = RUN_CHARGE + ARCHIVE;
 
-/* ─── Tools. One identity: name@schema-version, everywhere it appears. ─── */
-const TOOL_CLASS = {read_only:"read only", side_effect:"side effect",
-  irreversible:"irreversible", moves_funds:"moves funds"};
-const HAZARD = {irreversible:"cannot be undone", moves_funds:"moves money"};
-/* Ordered least to most consequential, which is the grammar's own ordering.
-   NOT ordered by call volume: these five are one per class and gate, and 41
-   calls is not a top-five figure in a registry that replayed 67,412. */
+/* ═══════════════════════ Tool grammar ═══════════════════════
+   Three orthogonal axes, three visual grammars, never mixed:
+
+     category = what the tool ACTS ON     → a glyph and a word. Monochrome: the
+                                            icon carries the category, never a hue,
+                                            because a ten-hue scale fails the reader
+                                            who cannot separate ten hues.
+     hazard   = how bad a wrong call is   → a risk mark (circle · diamond · outline
+                                            triangle · filled triangle) beside a
+                                            side-effect glyph, in the state hues.
+     gate     = what the belt DECIDED     → a badge. A dashed border means a person
+                                            still stands in the way.
+
+   Ten categories, ordered least to most consequential. The order is the grammar:
+   a reader who learns it once can rank an unfamiliar tool by its badge alone. ─── */
+const TCAT_ORDER = ["read","query","record","message","file","exec","vcs","infra","access","finance"];
+const TCAT = {
+  read:   {l:"Read-only", s:"Observes and returns. Changes nothing anywhere.",
+    eg:"github__get_file_contents · linear__get_issue · repo.search",
+    i:`<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.6"/>`},
+  query:  {l:"Data query", s:"Bulk read from a store. Read-only, but the result set is the exfiltration and the cost.",
+    eg:"snowflake__run_query · aws_billing__get_cost_and_usage",
+    i:`<ellipse cx="12" cy="6" rx="7.5" ry="3"/><path d="M4.5 6v12c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3V6M4.5 12c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3"/>`},
+  record: {l:"Record write", s:"Creates or updates a record in a system of work. Reversible by another write.",
+    eg:"linear__update_issue · notion__update_page",
+    i:`<path d="M11 4H5.5A2.5 2.5 0 0 0 3 6.5v12A2.5 2.5 0 0 0 5.5 21h12a2.5 2.5 0 0 0 2.5-2.5V13"/><path d="M18.4 3.6a1.9 1.9 0 0 1 2.7 2.7L12.5 15l-3.5.8.8-3.5z"/>`},
+  message:{l:"Messaging & authoring", s:"Speaks to people on the organization's behalf. A sent message cannot be unsent.",
+    eg:"slack__post_message · gmail__send_message",
+    i:`<path d="M21 3 10.5 13.5"/><path d="M21 3 14.5 21l-4-8-8-4z"/>`},
+  file:   {l:"File mutation", s:"Writes, edits, moves or deletes files in a workspace or a drive.",
+    eg:"write__file · edit__file · drive__trash_file",
+    i:`<path d="M13.5 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8.5z"/><path d="M13.5 3v5.5H19M9 14.5h5"/>`},
+  exec:   {l:"Code & shell", s:"Runs a command or a program. Its effect is whatever the sandbox allows.",
+    eg:"bash · sandbox__run_python",
+    i:`<path d="M4.5 6.5 9.5 12l-5 5.5"/><path d="M12.5 17.5h7"/>`},
+  vcs:    {l:"Source control", s:"Changes code history: branches, pull requests, merges, releases, repositories.",
+    eg:"github__create_pull_request · github__merge_pull_request",
+    i:`<circle cx="7" cy="6" r="2.2"/><circle cx="7" cy="18" r="2.2"/><circle cx="17" cy="9" r="2.2"/><path d="M7 8.2v7.6M17 11.2c0 3-4 3.3-6.2 4"/>`},
+  infra:  {l:"Infrastructure", s:"Deploys, scales, pauses or reconfigures a running system.",
+    eg:"vercel__deploy_to_vercel · k8s__scale_deployment",
+    i:`<rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="13" width="18" height="7" rx="2"/><path d="M7 7.5h.01M7 16.5h.01"/>`},
+  access: {l:"Access & identity", s:"Grants, shares, rotates or revokes access. Widens what every later call can reach.",
+    eg:"drive__share_file · iam__rotate_key · oxagen__grant_role",
+    i:`<circle cx="8" cy="14" r="4"/><path d="M10.8 11.2 20 2m-3 3 2.5 2.5M14.5 7.5 17 10"/>`},
+  finance:{l:"Financial control", s:"Moves funds or commits spend. Never callable without a mandate.",
+    eg:"stripe__create_payment · stripe__create_refund",
+    i:`<path d="M12 3v18M16.5 7.5c0-1.7-2-3-4.5-3S7.5 5.8 7.5 7.5s2 2.7 4.5 3.3 4.5 1.6 4.5 3.5-2 3.2-4.5 3.2-4.5-1.3-4.5-3"/>`}
+};
+/* The label and category for names the verb heuristic would misfile. Anything
+   not here is inferred, so a new tool needs no entry to render correctly. */
+const TOOLMETA = {
+  "repo.search":["Search the repository","read"],
+  "linear__get_issue":["Get issue","read"],
+  "linear__update_issue":["Update issue","record"],
+  "snowflake__run_query":["Run query","query"],
+  "slack__post_message":["Post message","message"],
+  "write__file":["Write file","file"],
+  "bash":["Run a shell command","exec"],
+  "github__merge_pull_request":["Merge pull request","vcs"],
+  "vercel__deploy_to_vercel":["Deploy","infra"],
+  "drive__share_file":["Share file","access"],
+  "stripe__create_payment":["Create payment","finance"]
+};
+/* Ordered least to most consequential — the grammar's own ordering, and NOT by
+   call volume: 18 calls is not a top-ten figure in a registry that replayed
+   67,412. One tool per category, so the page teaches the whole scale. */
 const TOOLS = [
-  {id:"repo.search@2",                server:"builtin",cls:"read_only",    gate:"allowed",        calls:12880},
-  {id:"linear__get_issue@2",          server:"linear", cls:"read_only",    gate:"allowed",        calls:3914},
-  {id:"bash@1",                       server:"harness",cls:"irreversible", gate:"needs approval", calls:6102},
-  {id:"github__merge_pull_request@3", server:"github", cls:"irreversible", gate:"needs approval", calls:41},
-  {id:"stripe__create_payment@4",     server:"stripe", cls:"moves_funds",  gate:"needs approval", calls:18}
+  {n:"repo.search",               v:"2", s:"builtin", risk:"low",      eff:"read",         eg:"internal",     fin:"none",        dec:"allow",            dig:"sha256:7c41a9…", calls:12880},
+  {n:"linear__get_issue",         v:"2", s:"linear",  risk:"low",      eff:"read",         eg:"third_party",  fin:"none",        dec:"allow",            dig:"sha256:3ab704…", calls:3914},
+  {n:"snowflake__run_query",      v:"1", s:"snowflake",risk:"medium",  eff:"read",         eg:"internal",     fin:"none",        dec:"allow",            dig:"sha256:b02f18…", calls:812},
+  {n:"linear__update_issue",      v:"2", s:"linear",  risk:"low",      eff:"write",        eg:"third_party",  fin:"none",        dec:"allow",            dig:"sha256:5d9c33…", calls:1204},
+  {n:"slack__post_message",       v:"1", s:"slack",   risk:"medium",   eff:"irreversible", eg:"third_party",  fin:"none",        dec:"require_approval", dig:"sha256:pending", calls:388},
+  {n:"write__file",               v:"1", s:"harness", risk:"medium",   eff:"write",        eg:"none",         fin:"none",        dec:"allow",            dig:"sha256:e17b40…", calls:9044},
+  {n:"bash",                      v:"1", s:"harness", risk:"critical", eff:"irreversible", eg:"none",         fin:"none",        dec:"require_approval", dig:"sha256:aa2e90…", calls:6102},
+  {n:"github__merge_pull_request",v:"3", s:"github",  risk:"critical", eff:"irreversible", eg:"third_party",  fin:"none",        dec:"require_approval", dig:"sha256:c81d6e…", calls:41},
+  {n:"vercel__deploy_to_vercel",  v:"1", s:"vercel",  risk:"high",     eff:"irreversible", eg:"third_party",  fin:"commits_spend",dec:"require_approval",dig:"sha256:41ba07…", calls:96},
+  {n:"drive__share_file",         v:"2", s:"drive",   risk:"high",     eff:"irreversible", eg:"third_party",  fin:"none",        dec:"deny",             dig:"sha256:90cc2b…", calls:0},
+  {n:"stripe__create_payment",    v:"4", s:"stripe",  risk:"critical", eff:"irreversible", eg:"third_party",  fin:"moves_funds", dec:"mandate",          dig:"sha256:4fe8b1…", calls:18}
 ];
-const REGISTRY = {tools:214, servers:6, external:3};
+TOOLS.forEach(t => { t.id = t.n + "@" + t.v; });
+
+/* `name@version` split once, so nothing else has to know the shape. */
+const toolParts = id => { const s = String(id ?? ""), i = s.lastIndexOf("@");
+  return i > 0 ? {n:s.slice(0, i), v:s.slice(i + 1)} : {n:s, v:""}; };
+
+/* A tool nobody has classified still has to render. The verb carries the
+   category well enough that an unlisted tool lands in the right place, which
+   is what lets the registry grow without a lookup table growing with it. */
+function toolMeta(id){
+  const p = toolParts(id), m = TOOLMETA[p.n];
+  if(m) return {n:p.n, v:p.v, l:m[0], cat:m[1]};
+  const local = p.n.split("__").pop(), verb = local.split(/[_.]/)[0].toLowerCase();
+  let cat = "record";
+  if(/^(get|list|search|read|fetch|find|describe|show)$/.test(verb)) cat = "read";
+  else if(/^(query|select|aggregate|export)$/.test(verb)) cat = "query";
+  else if(/^(write|edit|move|copy|trash|mkdir)$/.test(verb)) cat = "file";
+  else if(/^(bash|run|exec|execute|eval)$/.test(verb)) cat = "exec";
+  else if(/^(post|send|reply|forward|publish|upload)$/.test(verb)) cat = "message";
+  else if(/^(pay|refund|purchase|charge|transfer|payout)$/.test(verb)) cat = "finance";
+  else if(/^(deploy|scale|pause|restart|provision)$/.test(verb)) cat = "infra";
+  else if(/^(grant|share|rotate|revoke|invite)$/.test(verb)) cat = "access";
+  else if(/^(merge|rebase|tag|release|push|fork)$/.test(verb)) cat = "vcs";
+  return {n:p.n, v:p.v, cat,
+    l: local.replace(/_/g, " ").replace(/^./, c => c.toUpperCase())};
+}
+
+const REGISTRY = {tools:214, servers:8, external:5};
 const TOOL = id => TOOLS.find(t => t.id === id);
 
-/* The belt is a property of the agent, not of the turn — the same agent showed
-   two different belt sizes on the same day when this was typed per frame. */
-const BELT = {
-  "acme.core.release-manager":9, "acme.core.stella-ci":7, "acme.core.invoice-bot":5,
-  "acme.core.triage":4, "acme.core.docs-writer":3, "acme.core.fleet-ops-bot":6,
-  "acme.core.flake-hunter":7, "acme.core.ledger-recon":5
-};
 
 /* ─── Approvals. Each is about a run, and resolving one moves that run. ─── */
 const APPROVALS = [
@@ -751,7 +905,7 @@ const topRecord = () => RECORDS.reduce((a, b) => a.cited >= b.cited ? a : b);
    the prefix it is, with the turn appended. */
 const PROMPT = (r, t) => `<stable prefix — ${WS.records} records in force, cached>
   You are ${r.agent}, running on ${r.harness} in the ${WS.name} workspace
-  of ${ORG.name}. Your toolbelt holds ${BELT[r.agent]} tools; it is the only
+  of ${ORG.name}. Your toolbelt holds ${beltSize(r.agent)} tools; it is the only
   tool list you will be shown.
 
   ${RECORDS.map(x => "· " + x.s).join("\n  ")}
@@ -777,7 +931,7 @@ const F = {
   req: (n, r) => { const t = turnOf(r, n); return {n, t:"model.request",
     d:`claude-fable-5-1 · turn ${t.i} · ${t.what.toLowerCase()}`, kv:[
     ["Model", "claude-fable-5-1"], ["Turn", `${t.i} of ${r.turns.length} · ${t.what}`],
-    ["Tools offered", `${BELT[r.agent]} of ${REGISTRY.tools} · the belt, not the registry`],
+    ["Tools offered", `${beltSize(r.agent)} of ${REGISTRY.tools} · the belt, not the registry`],
     ["Sampling", "temperature 0 · max 8,192"],
     ["Recorded", "in full · this request is replayable"]],
     /* The prompt is the thing a sceptic most wants to read and the thing a
@@ -793,10 +947,12 @@ const F = {
     ["Stop reason", reason],
     ["Cost", mon4(cost) + " · gateway observed"]]}),
 
-  toolReq: (n, id, args) => ({n, t:"tool_requested", d:`${id} · validated input`, kv:[
-    ["Tool", id], ["Class", TOOL_CLASS[TOOL(id).cls]], ["Server", TOOL(id).server],
-    ["Arguments", args], ["Schema", "validated against " + id],
-    ["Requested by", "the model, in this turn"]]}),
+  toolReq: (n, id, args) => { const t = TOOL(id), m = toolMeta(id);
+    return {n, t:"tool_requested", d:`${id} · validated input`, kv:[
+    ["Tool", id], ["Category", TCAT[m.cat].l], ["Server", t.s],
+    ["Hazard", `risk ${t.risk} · side effect ${t.eff}`],
+    ["Egress", t.eg], ["Arguments", args],
+    ["Schema", t.dig], ["Requested by", "the model, in this turn"]]}; },
 
   policy: (n, decision, rule, note) => ({n, t:"policy.decision",
     d:`${decision} · ${rule} · pol_v41`, kv:[
@@ -937,17 +1093,135 @@ const FRAMES_OF = {
 };
 const framesOf = r => FRAMES_OF[r.id](r);
 
+/* ─── Roles. An agent's reach is never what a role says on its own: it is the
+       intersection of the roles the agent holds with the grants of the person
+       who invoked it. A subagent can only ever narrow that. ─── */
+const ROLES = {
+  "agent.repo.read":   {kind:"agent", scope:"workspace", desc:"Read any linked repository.",
+    perms:["repo.search@* allow", "github:get_* allow"]},
+  "agent.repo.write":  {kind:"agent", scope:"workspace", desc:"Open and update pull requests. Never merge without a person.",
+    perms:["github:create_pull_request@* allow", "github:merge_pull_request@* require_approval", "github:delete_* deny"]},
+  "agent.issue.write": {kind:"agent", scope:"workspace", desc:"Read and update issues on the linked trackers.",
+    perms:["linear:get_* allow", "linear:update_* allow"]},
+  "agent.shell":       {kind:"agent", scope:"workspace", desc:"Run commands in the run sandbox. Irreversible paths ask first.",
+    perms:["bash@* require_approval", "write__file@* allow"]},
+  "agent.finance.pay": {kind:"agent", scope:"workspace", desc:"Raise a payment, inside a mandate and never outside one.",
+    perms:["stripe:create_payment@* mandate"]},
+  "workspace.owner":   {kind:"human", scope:"workspace", desc:"Owns core-platform. The ceiling every agent it invokes is capped by.",
+    perms:["*@* allow", "org.billing:* deny"]},
+  "org.billing":       {kind:"human", scope:"organization", desc:"Grants mandates and settles invoices.",
+    perms:["stripe:* allow", "mandate:grant allow"]}
+};
+
 /* ─── Agents. Five of forty-one, chosen to show one of each state and tier —
        NOT the five highest spenders, which the $0.00 row would make
        arithmetically impossible against a workspace total. ─── */
 const AGENTS = [
-  {n:"Stella CI",       id:"acme.core.stella-ci",       h:"Stella 0.9.14",           st:"active", tier:"gateway", belt:"searchable", spend:1208.44},
-  {n:"Release manager", id:"acme.core.release-manager", h:"Claude Code 2.1.4",       st:"active", tier:"gateway", belt:"searchable", spend:412.78},
-  {n:"Invoice bot",     id:"acme.core.invoice-bot",     h:"OpenAI Agents SDK 1.4.2", st:"active", tier:"gateway", belt:"full",       spend:143.09},
-  {n:"Triage",          id:"acme.core.triage",          h:"Codex CLI 0.42.1",        st:"active", tier:"gateway", belt:"full",       spend:96.20},
-  {n:"Docs writer",     id:"acme.core.docs-writer",     h:"Custom · SDK-wrapped",    st:"unenrolled", tier:"observe", belt:"full",   spend:0.00}
+  {n:"Stella CI", id:"acme.core.stella-ci", slug:"stella-ci", h:"Stella 0.9.14",
+   st:"active", tier:"gateway", tierNative:"gateway", belt:"searchable", spend:1208.44,
+   model:"z-ai/glm-latest", operator:"Marcus Bell", opRole:"workspace.owner",
+   roles:["agent.repo.read","agent.issue.write","agent.shell"],
+   principal:"prn_01JQ8W3F2M6XKD7A9RZT4BVCNF", runs30:1042, incidents:0,
+   enrolled:true, host:"ci-runner-07", budgetRun:4.00, budgetDay:120.00, replay:"re-run",
+   desc:"Runs the deterministic ladder on every pull request and authors the witnesses."},
+
+  {n:"Release manager", id:"acme.core.release-manager", slug:"release-manager", h:"Claude Code 2.1.4",
+   st:"active", tier:"gateway", tierNative:"harness", belt:"searchable", spend:412.78,
+   model:"claude-fable-5-1", operator:"Marcus Bell", opRole:"workspace.owner",
+   roles:["agent.repo.read","agent.repo.write"],
+   principal:"prn_01JQ8W3F2M6XKD7A9RZT4BVCNE", runs30:184, incidents:0,
+   enrolled:true, host:"mbell-mbp-16", budgetRun:2.00, budgetDay:50.00, replay:"fork",
+   desc:"Prepares the release notes and opens the release pull request. Never merges one."},
+
+  {n:"Invoice bot", id:"acme.core.invoice-bot", slug:"invoice-bot", h:"OpenAI Agents SDK 1.4.2",
+   st:"active", tier:"gateway", tierNative:"gateway", belt:"full", spend:143.09,
+   model:"claude-fable-5-1", operator:"Dana Okafor", opRole:"org.billing",
+   roles:["agent.repo.read","agent.finance.pay"],
+   principal:"prn_01JQ8W3F2M6XKD7A9RZT4BVCNG", runs30:212, incidents:0,
+   enrolled:true, host:"finops-worker-02", budgetRun:1.50, budgetDay:40.00, replay:"re-run",
+   desc:"Settles the monthly infrastructure invoices, inside one mandate and never outside it."},
+
+  {n:"Triage", id:"acme.core.triage", slug:"triage", h:"Codex CLI 0.42.1",
+   st:"active", tier:"gateway", tierNative:"harness", belt:"full", spend:96.20,
+   model:"claude-fable-5-1", operator:"Marcus Bell", opRole:"workspace.owner",
+   roles:["agent.repo.read","agent.issue.write","agent.shell"],
+   principal:"prn_01JQ8W3F2M6XKD7A9RZT4BVCNH", runs30:96, incidents:1,
+   enrolled:true, host:"mbell-mbp-16", budgetRun:0.50, budgetDay:10.00, replay:"fork",
+   desc:"Reads a failing build, reproduces it, and files what it finds."},
+
+  {n:"Docs writer", id:"acme.core.docs-writer", slug:"docs-writer", h:"Custom · SDK-wrapped",
+   st:"unenrolled", tier:"observe", tierNative:"observe", belt:"full", spend:0.00,
+   model:"claude-fable-5-1", operator:"Marcus Bell", opRole:"workspace.owner",
+   roles:[],
+   principal:"prn_01JQ8W3F2M6XKD7A9RZT4BVCNJ", runs30:0, incidents:0,
+   enrolled:false, host:null, budgetRun:0.50, budgetDay:5.00, replay:"render",
+   desc:"Wrapped but never enrolled. It holds no roles, so it can reach nothing but its own run channel."}
 ];
 const AGENT = id => AGENTS.find(a => a.id === id);
+const agentBySlug = slug => AGENTS.find(a => a.slug === slug);
+
+/* ─── The belt: the tool versions an agent's model is actually shown, with the
+       decision its own grants produced and the rule that produced it. Tool
+       facts are NOT repeated here — risk, side effect, egress, financial class
+       and schema digest all come from the registry, so approving a schema in
+       one place changes it everywhere. ─── */
+const BELTS = {
+  "acme.core.stella-ci":[
+    {id:"repo.search@2",          dec:"allow",            rule:"grant:agent.repo.read #1"},
+    {id:"linear__get_issue@2",    dec:"allow",            rule:"grant:agent.issue.write #1"},
+    {id:"linear__update_issue@2", dec:"allow",            rule:"grant:agent.issue.write #2"},
+    {id:"write__file@1",          dec:"allow",            rule:"grant:agent.shell #2"},
+    {id:"bash@1",                 dec:"require_approval", rule:"grant:agent.shell #1 · pol_v41 R-14"}
+  ],
+  "acme.core.release-manager":[
+    {id:"repo.search@2",                dec:"allow",            rule:"grant:agent.repo.read #1"},
+    {id:"linear__get_issue@2",          dec:"allow",            rule:"grant:agent.repo.read #2"},
+    {id:"github__merge_pull_request@3", dec:"require_approval", rule:"grant:agent.repo.write #2",
+     note:"The record also forbids merging without a person. Both agree, and the stricter one is what runs."}
+  ],
+  "acme.core.invoice-bot":[
+    {id:"repo.search@2",             dec:"allow",   rule:"grant:agent.repo.read #1"},
+    {id:"stripe__create_payment@4",  dec:"mandate", rule:"grant:agent.finance.pay #1 · mnd_7Q2KX4"}
+  ],
+  "acme.core.triage":[
+    {id:"repo.search@2",          dec:"allow",            rule:"grant:agent.repo.read #1"},
+    {id:"linear__get_issue@2",    dec:"allow",            rule:"grant:agent.issue.write #1"},
+    {id:"linear__update_issue@2", dec:"allow",            rule:"grant:agent.issue.write #2"},
+    {id:"bash@1",                 dec:"require_approval", rule:"grant:agent.shell #1 · pol_v41 R-14"}
+  ],
+  "acme.core.docs-writer":[],
+  /* Agents outside the five-row sample still run, so they still have belts. */
+  "acme.core.fleet-ops-bot":[
+    {id:"repo.search@2",               dec:"allow",            rule:"grant:agent.repo.read #1"},
+    {id:"snowflake__run_query@1",      dec:"allow",            rule:"grant:agent.fleet.read #1"},
+    {id:"vercel__deploy_to_vercel@1",  dec:"require_approval", rule:"grant:agent.fleet.ship #1 · pol_v41 R-09"}
+  ],
+  "acme.core.flake-hunter":[
+    {id:"repo.search@2",          dec:"allow",            rule:"grant:agent.repo.read #1"},
+    {id:"linear__get_issue@2",    dec:"allow",            rule:"grant:agent.issue.write #1"},
+    {id:"linear__update_issue@2", dec:"allow",            rule:"grant:agent.issue.write #2"},
+    {id:"bash@1",                 dec:"require_approval", rule:"grant:agent.shell #1 · pol_v41 R-14"}
+  ],
+  "acme.core.ledger-recon":[
+    {id:"repo.search@2",          dec:"allow", rule:"grant:agent.repo.read #1"},
+    {id:"snowflake__run_query@1", dec:"allow", rule:"grant:agent.ledger.read #1"}
+  ]
+};
+const beltOf = a => (BELTS[a.id] ?? []).map(b => ({...TOOL(b.id), ...b}));
+/* The size is the belt's own length. It used to be a second, hand-kept number,
+   which is how one agent came to show two different belt sizes on one day. */
+const beltSize = agentId => (BELTS[agentId] ?? []).length;
+
+/* What an agent cannot see, and why. Derived, so a tool added to the registry
+   appears here the moment it is not on the belt. */
+function outsideOf(a){
+  const on = new Set((BELTS[a.id] ?? []).map(b => b.id));
+  return TOOLS.filter(t => !on.has(t.id)).map(t => ({...t,
+    why: t.fin !== "none"
+      ? `A financial tool, and this agent holds ${a.roles.includes("agent.finance.pay") ? "no mandate covering it" : "no mandate"}.`
+      : t.dec === "deny" ? "Denied for every agent by the workspace policy."
+      : "No grant on this agent's roles reaches this version."}));
+}
 const MANDATE = {agent:"acme.core.invoice-bot", purpose:"Monthly infrastructure invoices, PO-4471",
   perCall:25000.00, approveAbove:10000.00, grantedBy:"Priya Natarajan, as org billing",
   validTo:"2026-12-31", authority:60000.00, settled:31280.00, reserved:18420.00};
@@ -1066,21 +1340,67 @@ const st = (label, cls) => `<span class="st ${cls ?? STATE_CLASS[label] ?? ""}">
 /* ─── Tool grammar. Identity, category and gate render the same way in the
        registry, in an approval, in a kill switch and in a frame. Category is a
        glyph and a word — never a hue. ─── */
-const hazIcon = `<svg class="haz" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4.6 21.2 19.4H2.8z"/><path d="M12 10.2v3.4M12 16.4h.01"/></svg>`;
-const CAT_ICON = {
-  read_only:`<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.6"/>`,
-  side_effect:`<path d="M4 20.5 4.9 16 16.4 4.5a2.2 2.2 0 0 1 3.1 3.1L8 19.1z"/>`,
-  irreversible:`<path d="M4.5 7.5h15M9.5 7.5V5h5v2.5M6.5 7.5l1 12h9l1-12"/>`,
-  moves_funds:`<ellipse cx="12" cy="6.5" rx="7.5" ry="3"/><path d="M4.5 6.5v11c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3v-11M4.5 12c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3"/>`
-};
+const SVG = (body, cls) => `<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true">${body}</svg>`;
+const catSvg = c => SVG((TCAT[c] ?? TCAT.record).i, "cg");
+
+/* The cell. Every tool display in the file goes through it, so the identity
+   is the same string in the registry, in an approval, on a belt and in a frame. */
 const toolCell = id => {
-  const t = TOOL(id), h = t && HAZARD[t.cls];
-  return `<span class="tool"><span class="mono">${esc(id)}</span>${
-    h ? `${hazIcon}<span class="sr">${esc(h)}</span>` : ""}</span>`;
+  const m = toolMeta(id);
+  return `<span class="tc" title="${esc(m.l)} · ${esc(TCAT[m.cat].l)}">${catSvg(m.cat)}<span class="mono">${
+    esc(m.n)}${m.v ? `<span class="tv">@${esc(m.v)}</span>` : ""}</span></span>`;
 };
-const catBadge = cls => `<span class="st flat cat"><svg viewBox="0 0 24 24" aria-hidden="true">${
-  CAT_ICON[cls] ?? ""}</svg>${esc(TOOL_CLASS[cls] ?? cls)}</span>`;
-const gateBadge = g => st(g);
+
+/* Category: a glyph and a word. The examples ride in the title, which is why
+   this file needs no legend panel. */
+const catBadge = c => `<span class="tcb t-${esc(c)}" title="${esc(TCAT[c].s)} e.g. ${esc(TCAT[c].eg)}">${
+  catSvg(c)}${esc(TCAT[c].l)}</span>`;
+
+/* Hazard: how bad a wrong call is. Risk is a shape that gets heavier —
+   circle, diamond, outline triangle, filled triangle — so it reads without
+   colour; the side effect sits beside it. */
+const RISK_SVG = {
+  low:`<circle cx="12" cy="12" r="8"/><path d="M12 12h.01"/>`,
+  medium:`<path d="M12 3l9 9-9 9-9-9z"/><path d="M12 12h.01"/>`,
+  high:`<path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4M12 17.5v.5"/>`,
+  critical:`<path d="M12 3 2 20h20L12 3z" fill="currentColor"/><path d="M12 10v4M12 17.5v.5" stroke="var(--panel)"/>`
+};
+const EFF_SVG = {
+  read:`<circle cx="12" cy="12" r="8"/><path d="M8 12h8"/>`,
+  write:`<path d="M4 20h4L18 10l-4-4L4 16z"/><path d="M12 8l4 4"/>`,
+  irreversible:`<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>`
+};
+const hazard = (risk, eff) =>
+  `<span class="hz r-${esc(risk)}" title="risk ${esc(risk)}">${SVG(RISK_SVG[risk] ?? RISK_SVG.low, "hzi")}${esc(risk)}</span>`
+  + (eff ? `<span class="hz e-${esc(eff)}" title="side effect ${esc(eff)}">${SVG(EFF_SVG[eff] ?? EFF_SVG.read, "hzi")}${esc(eff)}</span>` : "");
+
+/* Gate: what the belt decided. A dashed border means a person still stands in
+   the way — the one thing an operator has to be able to see across a table. */
+const GATE_L = {allow:"allowed", require_approval:"needs approval", mandate:"mandate + approval",
+  deny:"denied", killed:"kill switch"};
+const GATE_SVG = {
+  allow:`<path d="M5 12.5l4.5 4.5L19 7.5"/>`,
+  require_approval:`<path d="M12 3l8 3.5v5c0 4.6-3.2 8.6-8 9.5-4.8-.9-8-4.9-8-9.5v-5z"/><path d="M12 8v4l2.5 1.5"/>`,
+  mandate:`<path d="M12 3v18M16.5 7.5c0-1.7-2-3-4.5-3S7.5 5.8 7.5 7.5s2 2.7 4.5 3.3 4.5 1.6 4.5 3.5-2 3.2-4.5 3.2-4.5-1.3-4.5-3"/>`,
+  deny:`<circle cx="12" cy="12" r="8.5"/><path d="M6 6l12 12"/>`,
+  killed:`<path d="M12 3v9"/><path d="M6.3 6.3a8 8 0 1 0 11.4 0"/>`
+};
+const gateBadge = (g, note) => `<span class="gt g-${esc(g)}"${note ? ` title="${esc(note)}"` : ""}>${
+  SVG(GATE_SVG[g] ?? GATE_SVG.allow, "gti")}${esc(GATE_L[g] ?? g)}</span>`;
+
+/* Why a gate decided what it did — the one thing an operator asks next. */
+const GATE_NOTE = {
+  allow:"a grant reaches this version and no rule narrows it",
+  require_approval:"pol_v41 · require_approval on side_effect:irreversible",
+  mandate:"a financial effect: a mandate is required, and its own rule decides when a person approves",
+  deny:"denied for every agent by the workspace policy",
+  killed:"a kill switch is on for this version or its server"
+};
+
+/* A financial class is the one fact that outranks the gate, so it is said
+   separately rather than folded into it. */
+const finBadge = f => f && f !== "none"
+  ? `<span class="st flat mono" style="font-size:10.5px">${esc(f)}</span>` : `<span class="sub">none</span>`;
 </script>
 
 <script>
@@ -1125,8 +1445,10 @@ PAGES.fleet = () => {
           ${esc(a.agent)} · operator ${esc(a.op)} ·
           <a class="mono" href="#/run/${esc(a.run)}" style="border-bottom:1px solid var(--rule-2)">${esc(a.run)}</a> ·
           rule <span class="mono">${esc(a.rule)}</span></div>
-        <div style="display:flex;gap:6px;margin-top:7px;flex-wrap:wrap">
-          ${catBadge(TOOL(a.tool).cls)} ${gateBadge(TOOL(a.tool).gate)}</div>
+        <div style="display:flex;gap:6px;margin-top:7px;flex-wrap:wrap;align-items:center">
+          ${catBadge(toolMeta(a.tool).cat)}
+          ${hazard(TOOL(a.tool).risk, TOOL(a.tool).eff)}
+          ${gateBadge(TOOL(a.tool).dec)}</div>
         ${a.amount ? `<div class="appr-amt num">${money(a.amount)}
           <span>above the ${money(MANDATE.approveAbove)} approval threshold on this mandate</span></div>` : ""}
       </div>
@@ -1280,9 +1602,24 @@ const runChain = r => panel("Chain and seal", "verified", `<div class="panel-b">
 
 <script>
 "use strict";
+/* The intersection formula. Every governed computation on this page renders
+   through it, so "effective permission is an intersection" is shown, not said. */
+const iamWire = (terms, out, nil) =>
+  `<div class="iamw">${terms.map((t, i) =>
+    (i ? `<span class="op" aria-hidden="true">&cap;</span><span class="sr"> intersected with </span>` : "")
+    + `<span class="t">${esc(t[0])}${t[1] ? `<i>${esc(t[1])}</i>` : ""}</span>`).join("")
+  }<span class="eqs" aria-hidden="true">=</span><span class="sr"> equals </span><span class="t ${nil ? "nil" : "out"}">${
+    esc(out[0])}${out[1] ? `<i>${esc(out[1])}</i>` : ""}</span></div>`;
+
+/* A numbered walk from the call to the decision. Used where the answer is no. */
+const iamChain = steps => `<ol class="iamc">${steps.map((st2, i) =>
+  `<li><span class="n">${i + 1}</span><div style="min-width:0"><span class="l">${esc(st2[0])}</span>
+    <div class="v">${st2[1]}</div></div></li>`).join("")}</ol>`;
+
+const tierBadge = t => st("tier " + t, t === "gateway" ? "proven" : t === "harness" ? "wait" : "flat");
+
 PAGES.agents = () => {
   const shown = AGENTS.reduce((s, a) => s + a.spend, 0);
-  const m = MANDATE, remaining = m.authority - m.settled - m.reserved;
   return `
   <div class="head"><div class="head-t">
     <span class="eyebrow">Workspace · ${esc(WS.name)}</span>
@@ -1300,22 +1637,160 @@ PAGES.agents = () => {
   ${panel("Fleet",
     `${AGENTS.length} of ${int(WS.agents)} · one of each state and tier · ${money(shown)} of ${money(WS.spend30d)}`,
     `<div class="scroll"><table>
-    <thead><tr><th>Agent</th><th>Harness</th><th>Status</th><th>Tier</th><th>Belt</th><th class="r">Spend 30d</th></tr></thead>
-    <tbody>${AGENTS.map(a => `<tr>
-      <td><b>${esc(a.n)}</b><span class="s mono">${esc(a.id)}</span></td>
-      <td style="font-size:12.5px">${esc(a.h)}</td>
+    <thead><tr><th>Agent</th><th>Harness</th><th>Status</th><th>Tier</th><th class="r">Belt</th><th class="r">Mandates</th><th class="r">Spend 30d</th></tr></thead>
+    <tbody>${AGENTS.map(a => `<tr data-go="#/agents/${esc(a.slug)}">
+      <td><b><a class="rowlink" href="#/agents/${esc(a.slug)}">${esc(a.n)}</a></b><span class="s mono">${esc(a.id)}</span></td>
+      <td style="font-size:12.5px">${esc(a.h)}<span class="s mono">${esc(a.model)}</span></td>
       <td>${st(a.st)}</td>
-      <td>${st(a.tier, "flat")}</td>
-      <td class="sub" style="font-size:12.5px">${esc(a.belt)} · ${BELT[a.id]} tools</td>
-      <td class="r num">${money(a.spend)}</td></tr>`).join("")}</tbody></table></div>`)}
+      <td>${tierBadge(a.tier)}</td>
+      <td class="r"><b class="num">${beltOf(a).length}</b><span class="s">${esc(a.belt)} belt</span></td>
+      <td class="r">${a.id === MANDATE.agent ? st("1", "crit") : `<span class="sub">none</span>`}</td>
+      <td class="r num">${money(a.spend)}<span class="s">${int(a.runs30)} runs</span></td></tr>`).join("")}</tbody></table></div>
+    <div class="panel-b" style="border-top:1px solid var(--rule)"><p class="sub" style="margin:0;font-size:12.5px">
+      Tier is computed from what was actually routed, never from what the adapter could do on paper.
+      Open an agent for its identity, the roles it holds, and the belt its model is shown.</p></div>`)}
+`;
+};
 
-  ${panel("Mandate · " + esc(m.agent), "the only agent here that may move money", `<div class="panel-b">
+/* ═══════════════ One agent: the whole access surface for one principal ═══════════════
+   Who it is, what credential it holds (none), what its roles intersect down to,
+   the belt its model is actually shown, and the money it may move. Every tab is
+   a route, so a link can point at one of them. */
+const ATABS = [["Identity", null], ["Toolbelt", null], ["Mandate", null]];
+
+PAGES.agent = () => {
+  const a = agentBySlug(S.agentSlug) ?? AGENTS[0];
+  const list = [["Identity", a.roles.length, "roles"], ["Toolbelt", beltOf(a).length, "tools"],
+                ["Mandate", a.id === MANDATE.agent ? 1 : 0, "in force"]];
+  const active = list.some(t => t[0] === S.agentTab) ? S.agentTab : "Identity";
+  const body = {Identity: aIdentity, Toolbelt: aToolbelt, Mandate: aMandate}[active](a);
+  return `
+  <div class="phead"><div class="t">
+    <span class="eyebrow">Agent · ${esc(a.h)}</span>
+    <h1>${esc(a.id)}</h1>
+    <div class="badges">
+      ${st(a.st)} ${tierBadge(a.tier)} <span class="sub" style="font-size:10.5px">model + tools</span>
+      ${tierBadge(a.tierNative)} <span class="sub" style="font-size:10.5px">harness-native</span>
+      ${st("replay " + a.replay, "flat")}
+      ${st("operator " + a.operator, "flat")}
+    </div>
+    <p class="d">${esc(a.desc)}</p>
+  </div><button class="btn btn-primary" data-act="see-belt">See the belt as the model sees it</button></div>
+
+  ${tiles([
+    ["Credentials held", "0", "every secret is minted per call by the broker"],
+    ["Tools its model is shown", beltOf(a).length, `${esc(a.belt)} belt · ${int(REGISTRY.tools)} in the registry`],
+    ["Spend ceiling", money(a.budgetRun), `per run, enforced · ${money(a.budgetDay)} a day`]
+  ])}
+
+  ${tabs(list, active, "agentTab")}
+  ${tabpanel("agentTab", active, body)}
+`;
+};
+
+const aIdentity = a => `
+  ${panel("Roles, and the ceiling they intersect with",
+    "a subagent can only narrow — never widen", `<div class="panel-b">
+    ${iamWire(
+      (a.roles.length ? a.roles.map(r => [r, ROLES[r].kind]) : [["no roles held", "nothing to intersect"]])
+        .concat([[a.operator, "the person invoking it · " + a.opRole]]),
+      [beltOf(a).length + " tool versions", "the belt its model is shown"],
+      beltOf(a).length === 0)}
+    <dl class="kv" style="margin-top:14px">
+      ${a.roles.length ? a.roles.map(r => `<dt class="mono">${esc(r)}</dt><dd class="mono" style="font-size:11.5px">${
+        esc(ROLES[r].perms.join(" · "))}<span class="s">${esc(ROLES[r].desc)}</span></dd>`).join("")
+        : `<dt>Roles</dt><dd class="sub">none held — it can reach nothing but its own run channel</dd>`}
+      <dt>Invoked by</dt><dd>${esc(a.operator)} <span class="mono sub">${esc(a.opRole)}</span>
+        <span class="s">${esc(ROLES[a.opRole].desc)}</span></dd>
+      <dt>Can move money</dt><dd>${a.id === MANDATE.agent
+        ? `${st("1 mandate", "wait")} — and only inside it`
+        : `${st("no", "ok")} — no mandate, so a financial call is refused before dispatch`}</dd>
+    </dl></div>`)}
+
+  ${panel("Credentials this agent holds", "the property most of the threat model rests on",
+    `<div class="panel-b">
+    <div class="iamw">
+      ${[["API key","none"],["OAuth token","none"],["Cloud role","none"],["Repository token","none"],
+         ["Run token","one, and it reaches Oxagen only"]].map(p =>
+        `<span class="t">${esc(p[0])}<i>${esc(p[1])}</i></span>`).join("")}
+    </div>
+    <p class="sub" style="margin:12px 0 0;font-size:12.5px">Every secret a call needs is minted by the broker
+      at dispatch, scoped to that one call, and never transmitted to the agent. A leaked run token cannot
+      reach a tool server — it can only talk to Oxagen, and revoking it kills every live run token at the
+      next call boundary. That is what makes a halt stick.</p></div>`)}
+
+  ${panel("Identity", "in Postgres, revocable in one second", `<div class="panel-b"><dl class="kv">
+    <dt>Agent key</dt><dd class="mono">${esc(a.id)}</dd>
+    <dt>Principal</dt><dd class="mono">${esc(a.principal)}<span class="s">minted at registration and never reused</span></dd>
+    <dt>Harness</dt><dd>${esc(a.h)}</dd>
+    <dt>Model</dt><dd class="mono">${esc(a.model)}</dd>
+    <dt>Enrollment</dt><dd>${a.enrolled
+      ? `${st("enrolled", "ok")} <span class="mono sub">${esc(a.host)}</span>`
+      : `${st("unenrolled", "flat")} <span class="sub">no host, so nothing it does is signed</span>`}</dd>
+    <dt>Definition</dt><dd class="mono">.oxagen/agents/${esc(a.slug)}.toml<span class="s">changing it is a pull request, not a form</span></dd>
+    <dt>Tamper incidents</dt><dd>${a.incidents
+      ? `${st(a.incidents + " open", "crit")}` : `${st("0", "ok")} <span class="sub">across ${int(a.runs30)} runs in 30 days</span>`}</dd>
+  </dl></div>`)}
+`;
+
+const aToolbelt = a => {
+  const belt = beltOf(a), outside = outsideOf(a);
+  return `
+  ${panel("How this belt was computed", "four narrowings, in order", `<div class="panel-b">
+    ${iamWire([["the roles it holds", a.roles.length + " granted"],
+               ["the delegation ceiling", a.operator + " · " + a.opRole],
+               ["the policy bundle", "pol_v41"],
+               ["the kill switches", "3 armed, none on"]],
+              [belt.length + " tool versions", "what its model is shown"], belt.length === 0)}
+    <p class="sub" style="margin:12px 0 0;font-size:12.5px">The belt is the only tool list this model is ever
+      shown. A search never returns a tool outside it, so there is nothing to be tempted by and nothing to
+      hallucinate a call to.</p></div>`)}
+
+  ${belt.length ? panel("The belt", `${belt.length} tool versions · the decision is this agent's, not the registry's`,
+    `<div class="scroll"><table>
+    <thead><tr><th>Tool</th><th>Category</th><th>Gate</th><th>Hazard</th><th>Why</th></tr></thead>
+    <tbody>${belt.map(t => `<tr class="hz-row-${esc(t.risk)}">
+      <td>${toolCell(t.id)}</td>
+      <td>${catBadge(toolMeta(t.id).cat)}</td>
+      <td>${gateBadge(t.dec, t.note)}</td>
+      <td>${hazard(t.risk, t.eff)}</td>
+      <td class="sub mono" style="font-size:11px">${esc(t.rule)}${
+        t.note ? `<span class="s">${esc(t.note)}</span>` : ""}</td></tr>`).join("")}
+    </tbody></table></div>`)
+  : panel("The belt", "empty", `<div class="empty"><b>This agent is shown no tools at all</b>
+      It holds no roles, so the intersection above is empty. It can start a run and talk to Oxagen; it
+      cannot reach a single tool server.</div>`)}
+
+  ${panel("What this agent cannot see", `${outside.length} of ${int(REGISTRY.tools)} · and why`,
+    `<div class="scroll"><table>
+    <thead><tr><th>Tool</th><th>Category</th><th>Why it is out</th></tr></thead>
+    <tbody>${outside.map(t => `<tr>
+      <td>${toolCell(t.id)}</td>
+      <td>${catBadge(toolMeta(t.id).cat)}</td>
+      <td class="sub" style="font-size:12.5px">${esc(t.why)}</td></tr>`).join("")}
+    </tbody></table></div>`)}
+`;
+};
+
+const aMandate = a => {
+  const m = MANDATE, remaining = m.authority - m.settled - m.reserved;
+  if(a.id !== m.agent) return panel("Mandate", "none in force", `<div class="panel-b">
+    <p class="sub" style="margin:0 0 14px;font-size:12.5px">This agent holds no mandate, so a financial call
+      is refused before anything is dispatched. Here is the walk, for a call it will never make:</p>
+    ${iamChain([
+      ["Call", `<span class="mono">stripe__create_payment@4</span> · amount $1,204.18 USD`],
+      ["Financial class", `<span class="mono">moves_funds</span>, read from the tool version's declared amount path`],
+      ["Mandate lookup", `none for <span class="mono">${esc(a.id)}</span>`],
+      ["Decision", `${gateBadge("deny")} <span class="mono">no_mandate</span> · the ledger is unchanged and no credential was minted`]
+    ])}</div>`);
+
+  return panel("Mandate · " + esc(m.agent), "financial authority, bounded and expiring", `<div class="panel-b">
     <dl class="kv">
       <dt>Purpose</dt><dd>${esc(m.purpose)}</dd>
       <dt>Per call</dt><dd class="num">${money(m.perCall)} ceiling</dd>
       <dt>Approval above</dt><dd class="num">${money(m.approveAbove)} — and always for <span class="mono">moves_funds</span></dd>
       <dt>Granted by</dt><dd>${esc(m.grantedBy)}</dd>
-      <dt>Valid to</dt><dd>${esc(m.validTo)}</dd>
+      <dt>Valid to</dt><dd>${esc(m.validTo)}<span class="s">it expires on its own; nobody has to remember to remove it</span></dd>
     </dl>
     <div style="margin-top:14px">
       <div style="display:flex;justify-content:space-between;font-size:11.5px" class="sub">
@@ -1327,8 +1802,7 @@ PAGES.agents = () => {
         <span>${st("settled " + money(m.settled), "ok")}</span>
         <span>${st("reserved by this call " + money(m.reserved), "wait")}</span>
         <span class="num">remaining ${money(remaining)}</span></div>
-    </div></div>`)}
-`;
+    </div></div>`);
 };
 
 PAGES.tools = () => {
@@ -1337,13 +1811,23 @@ PAGES.tools = () => {
   const active = list.some(t => t[0] === S.toolsTab) ? S.toolsTab : "Registry";
   const body =
     active === "Registry" ? panel("Registry",
-      `${TOOLS.length} of ${int(REGISTRY.tools)} · one per class and gate · ordered by consequence`,
+      `${TOOLS.length} of ${int(REGISTRY.tools)} · all ${TCAT_ORDER.length} categories · ordered by consequence, least first`,
       `<div class="scroll"><table>
-      <thead><tr><th>Tool</th><th>Server</th><th>Class</th><th>Gate</th><th class="r">Calls 30d</th></tr></thead>
-      <tbody>${TOOLS.map(t => `<tr>
-        <td>${toolCell(t.id)}</td><td>${esc(t.server)}</td>
-        <td>${catBadge(t.cls)}</td><td>${gateBadge(t.gate)}</td>
-        <td class="r num">${int(t.calls)}</td></tr>`).join("")}</tbody></table></div>`)
+      <thead><tr><th>Tool</th><th>Category</th><th>Gate</th><th>Hazard</th><th>Egress</th><th>Financial</th><th class="r">Calls 30d</th></tr></thead>
+      <tbody>${TOOLS.map(t => `<tr class="hz-row-${esc(t.risk)}">
+        <td>${toolCell(t.id)}<span class="s mono">${esc(t.s)}</span></td>
+        <td>${catBadge(toolMeta(t.id).cat)}</td>
+        <td>${gateBadge(t.dec, GATE_NOTE[t.dec])}</td>
+        <td>${hazard(t.risk, t.eff)}</td>
+        <td><span class="st flat mono" style="font-size:10.5px">${esc(t.eg)}</span></td>
+        <td>${finBadge(t.fin)}</td>
+        <td class="r num">${int(t.calls)}</td></tr>`).join("")}</tbody></table></div>
+      <div class="panel-b" style="border-top:1px solid var(--rule)"><p class="sub" style="margin:0;font-size:12.5px">
+        Three axes, and they are independent. <b style="color:var(--fg)">Category</b> is what the tool acts on —
+        a glyph and a word, never a hue, because a ten-hue scale is unreadable to anyone who cannot separate ten
+        hues. <b style="color:var(--fg)">Hazard</b> is how bad a wrong call would be: the risk mark gets heavier
+        as it climbs, so it reads without colour. <b style="color:var(--fg)">Gate</b> is what the belt decided,
+        and a dashed border means a person still stands in the way.</p></div>`)
 
     : active === "Connections" ? panel("Connections", "no agent holds any of these",
       `<div class="scroll"><table>
@@ -1373,9 +1857,9 @@ PAGES.tools = () => {
       `<div class="scroll"><table>
       <thead><tr><th>Switch</th><th>Scope</th><th>State</th></tr></thead>
       <tbody>
-        <tr><td><b>Every <span class="mono">moves_funds</span> tool</b><span class="s">class-wide</span><div style="margin-top:5px">${catBadge("moves_funds")}</div></td><td>organization</td><td>${st("armed, off", "flat")}</td></tr>
+        <tr><td><b>Every <span class="mono">moves_funds</span> tool</b><span class="s">class-wide</span><div style="margin-top:5px">${catBadge("finance")}</div></td><td>organization</td><td>${st("armed, off", "flat")}</td></tr>
         <tr><td><b>acme.core.triage</b><span class="s">one agent</span></td><td>${esc(WS.name)}</td><td>${st("armed, off", "flat")}</td></tr>
-        <tr><td><b>stripe server</b><span class="s">one server</span><div style="margin-top:5px">${catBadge("moves_funds")}</div></td><td>organization</td><td>${st("armed, off", "flat")}</td></tr>
+        <tr><td><b>stripe server</b><span class="s">one server</span><div style="margin-top:5px">${catBadge("finance")}</div></td><td>organization</td><td>${st("armed, off", "flat")}</td></tr>
       </tbody></table></div>`);
 
   return `
@@ -1652,24 +2136,26 @@ PAGES.audit = () => `
 "use strict";
 /* ═══════════════════════════ State and controller ═══════════════════════════ */
 const S = {page:"fleet", runId:"run_01K5XQ7M4A", runTab:"Timeline", toolsTab:"Registry",
-  ontTab:"Model", frame:118, view:"loaded", width:"desktop", chrome:true};
+  ontTab:"Model", agentSlug:"release-manager", agentTab:"Identity",
+  frame:118, view:"loaded", width:"desktop", chrome:true};
 
 /* The chrome is fixed to the bottom-right corner. On a small viewport that
    corner is on top of the page's one primary action, so it starts folded
    there — dismissible was not enough when it opened over the button. */
 if(innerWidth < 700) S.chrome = false;
 
-const TITLE = {fleet:"Fleet", run:"Run", agents:"Agents", tools:"Tools", ontology:"Ontology",
-  steering:"Steering", spend:"Spend", organization:"Organization", billing:"Billing", audit:"Audit"};
+const TITLE = {fleet:"Fleet", run:"Run", agents:"Agents & IAM", agent:"Agent", tools:"Tools",
+  ontology:"Ontology", steering:"Steering", spend:"Spend", organization:"Organization",
+  billing:"Billing", audit:"Audit"};
 
 /* A run is a Fleet detail view, so Fleet stays lit in the sidebar and stays
    reachable in the breadcrumb — the operator never loses their bearings. */
-const NAV_OF = {run:"fleet"};
+const NAV_OF = {run:"fleet", agent:"agents"};
 
 /* Whether a page belongs to a workspace or to the organization. The denied and
    empty states have to know, or they write sentences that cannot be true. */
-const SCOPE = {fleet:"ws", run:"ws", agents:"ws", tools:"ws", ontology:"ws", steering:"ws",
-  spend:"ws", organization:"org", billing:"org", audit:"org"};
+const SCOPE = {fleet:"ws", run:"ws", agents:"ws", agent:"ws", tools:"ws", ontology:"ws",
+  steering:"ws", spend:"ws", organization:"org", billing:"org", audit:"org"};
 
 /* The empty state is the first-run tutorial, so it has to teach the path into
    THIS page. One shared sentence about runs sent an operator looking at an
@@ -1678,6 +2164,7 @@ const EMPTY = {
   fleet:   ["Nothing has run in " + WS.name + " yet", "The first run appears here the moment its first frame arrives.", "wrap", "Wrap an agent"],
   run:     ["This run has recorded no frames", "Frames appear as the agent works. A run with none has not started its first turn.", "back-to-fleet", "Back to Fleet"],
   agents:  ["No agents in " + WS.name + " yet", "An agent is a definition in git and an identity in Postgres. Wrapping one takes a minute.", "wrap", "Wrap an agent"],
+  agent:   ["This agent holds nothing yet", "No roles, no belt, no mandate. Grant it a role and the belt its model is shown follows from that.", "grant-role", "Grant a role"],
   tools:   ["No tools in the registry", "Tools arrive by importing an MCP server. Nothing can be called until one is.", "import", "Import from an MCP server"],
   ontology:["No model in force yet", "The ontology fills from connectors, not from runs. Connect a source and the classes it resolves appear here.", "connect", "Connect a source"],
   steering:["No records in force", "Records reach runs from git. Open a Context PR, and merging it publishes the first one.", "propose", "Open a Context PR"],
@@ -1748,10 +2235,14 @@ function render(){
   $$(".navsec a").forEach(a =>
     a.getAttribute("data-nav") === nav ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current"));
 
-  $("#crumbTail").innerHTML = S.page === "run"
-    ? `<a class="here" href="#/fleet">Fleet</a><span class="sep" aria-hidden="true">/</span>
-       <span class="here mono">${esc(S.runId)}</span>`
-    : `<span class="here">${esc(TITLE[S.page])}</span>`;
+  $("#crumbTail").innerHTML =
+    S.page === "run"
+      ? `<a class="here" href="#/fleet">Fleet</a><span class="sep" aria-hidden="true">/</span>
+         <span class="here mono">${esc(S.runId)}</span>`
+    : S.page === "agent"
+      ? `<a class="here" href="#/agents">${esc(TITLE.agents)}</a><span class="sep" aria-hidden="true">/</span>
+         <span class="here mono">${esc(S.agentSlug)}</span>`
+      : `<span class="here">${esc(TITLE[S.page])}</span>`;
 
   paintBadges();
   paintViewer();
@@ -1790,6 +2281,16 @@ function route(){
   const parts = location.hash.replace(/^#\//, "").split("/");
   const p = parts[0] || "fleet";
   S.page = PAGES[p] ? p : "fleet";
+  /* #/agents is the list; #/agents/<slug>[/<tab>] is one principal's whole
+     access surface, so a link can point at a tab of it. */
+  if(S.page === "agents" && parts[1]){
+    const hit = agentBySlug(parts[1]);
+    if(hit){
+      S.page = "agent";
+      S.agentSlug = hit.slug;
+      S.agentTab = ["Identity","Toolbelt","Mandate"].includes(parts[2]) ? parts[2] : "Identity";
+    }
+  }
   if(S.page === "run"){
     const hit = RUNS.find(r => r.id === parts[1]);
     S.runId = hit ? hit.id : RUNS[0].id;
@@ -1952,6 +2453,12 @@ document.addEventListener("click", e => {
   const t = e.target.closest("[data-tab],[data-view],[data-width],[data-theme-set],[data-frame],[data-go],[data-act],[data-close],[data-cmd]");
   if(!t) return;
 
+  if(t.dataset.tab === "agentTab"){
+    /* This one writes the hash, because an agent's tab is a place you can send
+       somebody, not just a state this session happens to be in. */
+    location.hash = `#/agents/${S.agentSlug}/${t.dataset.val}`;
+    return;
+  }
   if(t.dataset.tab){ S[t.dataset.tab] = t.dataset.val; render(); return; }
   if(t.dataset.view){ S.view = t.dataset.view; render(); say(`Simulating the ${t.dataset.view} state.`); return; }
   if(t.dataset.width){ S.width = t.dataset.width; document.body.dataset.w = S.width; paintChrome(); return; }
@@ -1976,6 +2483,7 @@ document.addEventListener("click", e => {
   if(t.dataset.act === "retry"){ S.view = "loaded"; render(); return; }
   if(t.dataset.act === "cost-basis"){ openBasis(theRun()); return; }
   if(t.dataset.act === "back-to-fleet"){ S.view = "loaded"; location.hash = "#/fleet"; return; }
+  if(t.dataset.act === "see-belt"){ location.hash = `#/agents/${S.agentSlug}/Toolbelt`; return; }
 
   if(t.dataset.act === "approve" || t.dataset.act === "deny"){
     /* Write the decision to the approval itself, not to the DOM: a receipt that
