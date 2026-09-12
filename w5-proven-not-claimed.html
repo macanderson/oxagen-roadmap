@@ -491,6 +491,64 @@ body.phone #app,body.phone #app.rail-open{grid-template-columns:minmax(0,1fr)}
 body.phone #app.rail-open .rail{grid-column:1;position:static;height:auto;border-left:0;border-top:1px solid var(--border)}
 body.phone .crumbs .hide-s{display:none}
 body.phone .tiles{grid-template-columns:repeat(auto-fit,minmax(130px,1fr))}
+/* ── the flip, with its theatre. Proven green only; gold never encodes a state. ── */
+.flip.on .flip-side.pass{animation:flipin .55s cubic-bezier(.2,.8,.2,1) .28s both,flipglow 3.4s ease-in-out 1.1s infinite;position:relative;overflow:hidden}
+.flip.on .flip-side.fail{animation:flipin .55s cubic-bezier(.2,.8,.2,1) both}
+.flip.on .flip-side.pass::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 35%,color-mix(in srgb,var(--s-proven) 24%,transparent) 50%,transparent 65%);background-size:260% 100%;animation:flipsheen 1.6s ease-in-out .7s 1 both}
+@keyframes flipin{0%{transform:perspective(900px) rotateY(-80deg);opacity:0}100%{transform:perspective(900px) rotateY(0);opacity:1}}
+@keyframes flipsheen{0%{background-position:130% 0}100%{background-position:-30% 0}}
+@keyframes flipglow{0%,100%{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--s-proven) 22%,transparent),inset 0 0 34px color-mix(in srgb,var(--s-proven) 10%,transparent)}50%{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--s-proven) 48%,transparent),inset 0 0 56px color-mix(in srgb,var(--s-proven) 22%,transparent)}}
+.flip.on .flip-res.pass{text-shadow:0 0 22px color-mix(in srgb,var(--s-proven) 45%,transparent)}
+.flip-arrow.on{background:var(--s-proven-bg)}
+.flip-arrow.on svg{color:var(--s-proven)}
+.flip-arrow.on svg path{stroke-dasharray:4 3;animation:flipmarch 1.1s linear infinite}
+@keyframes flipmarch{to{stroke-dashoffset:-14}}
+.flip-meta{display:grid;grid-template-columns:auto minmax(0,1fr);gap:3px 12px;font-size:11.5px;color:var(--dim);margin-top:2px}
+.flip-meta .v{font-family:var(--mono);font-variant-numeric:tabular-nums;color:var(--body);overflow-wrap:anywhere}
+.fr{font-family:var(--mono);font-size:11px;color:var(--dim);text-decoration:underline dotted}
+.fr:hover{color:var(--fg)}
+body.phone .flip{grid-template-columns:1fr}
+body.phone .flip-arrow{border-left:0;border-right:0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:6px}
+body.phone .flip-arrow svg{transform:rotate(90deg)}
+/* the rail: attempts → the flip → the agent ended its turn → sealed */
+.flip-rail{position:relative;display:grid;gap:8px;margin-top:6px}
+.flip-rail::before{content:"";position:absolute;left:7px;right:7px;top:7px;height:2px;background:var(--rule)}
+.flip-rail .pt{position:relative;padding-top:20px;font-size:11.5px;color:var(--muted);min-width:0;overflow-wrap:anywhere}
+.flip-rail .pt::before{content:"";position:absolute;left:0;top:1px;width:10px;height:10px;border-radius:50%;background:var(--panel);border:2px solid var(--rule);box-sizing:content-box}
+.flip-rail .pt.fail::before{border-color:var(--s-failed)}
+.flip-rail .pt.crit::before{border-color:var(--s-critical);background:var(--s-critical)}
+.flip-rail .pt.pass::before{border-color:var(--s-proven);background:var(--s-proven);box-shadow:0 0 0 5px color-mix(in srgb,var(--s-proven) 24%,transparent)}
+.flip-rail.on .pt.pass::before{animation:flippulse 1.8s ease-in-out infinite}
+@keyframes flippulse{0%,100%{opacity:1}50%{opacity:.35}}
+.flip-rail .pt.end::before{border-color:var(--fg)}
+.flip-rail .pt.seal::before{border-radius:2px;border-color:var(--fg);background:var(--fg)}
+.flip-rail .pt b{display:block;color:var(--fg);font-weight:600;font-size:12px}
+.flip-rail .pt.pass b{color:var(--s-proven)}.flip-rail .pt.fail b{color:var(--s-failed)}.flip-rail .pt.crit b{color:var(--s-critical)}
+.flip-rail .pt .t{font-family:var(--mono);font-size:10.5px;color:var(--dim);display:block;font-variant-numeric:tabular-nums}
+.flip-rail .pt .sub{display:block;font-size:10.5px;color:var(--dim)}
+body.phone .flip-rail{grid-template-columns:1fr!important}
+body.phone .flip-rail::before{left:7px;right:auto;top:7px;bottom:7px;width:2px;height:auto}
+body.phone .flip-rail .pt{padding:0 0 0 22px}
+/* hero band under the header of a proven run */
+.flip-hero{position:relative;overflow:hidden;margin-top:14px;border:1px solid color-mix(in srgb,var(--s-proven) 50%,transparent);border-radius:var(--r-md);padding:13px 16px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;background:linear-gradient(90deg,color-mix(in srgb,var(--s-proven) 13%,var(--panel)),var(--panel) 70%)}
+.flip-hero::before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 40%,color-mix(in srgb,var(--s-proven) 18%,transparent) 50%,transparent 60%);background-size:300% 100%;animation:flipsheen 2.2s ease-in-out .3s 1 both}
+.flip-hero>*{position:relative}
+.flip-hero .fp{font-size:22px;font-weight:700;letter-spacing:-.03em;display:inline-flex;align-items:center;gap:8px;flex:none;font-family:var(--mono);animation:flipin .55s cubic-bezier(.2,.8,.2,1) both}
+.flip-hero .fp .f{color:var(--s-failed)}.flip-hero .fp .p{color:var(--s-proven)}.flip-hero .fp .a{color:var(--dim);font-weight:400}
+.flip-hero .tx{font-size:12.5px;color:var(--muted);min-width:0;flex:1 1 260px;line-height:1.5}
+.flip-hero .tx b{color:var(--fg);font-weight:600}
+.flip-hero .acts{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+/* attempts ladder + proven rows in any runs table */
+tbody tr.att-pass td{background:var(--s-proven-bg)}
+tbody tr.att-pass td:first-child{box-shadow:inset 3px 0 0 var(--s-proven)}
+tbody tr.flipped td:first-child{box-shadow:inset 3px 0 0 var(--s-proven)}
+tbody tr.flipped{background:linear-gradient(90deg,color-mix(in srgb,var(--s-proven) 8%,transparent),transparent 58%)}
+tbody tr.clickable.flipped:hover{background:linear-gradient(90deg,color-mix(in srgb,var(--s-proven) 14%,transparent),var(--hl) 58%)}
+.badge.b-flip{gap:6px}
+.badge.b-flip::before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor;box-shadow:0 0 0 3px color-mix(in srgb,var(--s-proven) 22%,transparent);animation:flippulse 1.8s ease-in-out infinite}
+.badge.b-flip .fx{font-family:var(--mono);font-weight:500;color:var(--muted);border-left:1px solid color-mix(in srgb,var(--s-proven) 35%,transparent);padding-left:6px}
+.badge.b-flip .fx i{font-style:normal;color:var(--s-failed)}.badge.b-flip .fx em{font-style:normal;color:var(--s-proven)}
+.flipsub{font-family:var(--mono);font-size:10.5px;color:var(--dim);margin-top:3px;white-space:nowrap}
 </style>
 
 <div id="app">
@@ -666,7 +724,33 @@ const VERDICT = {
   unverified:{cls:"b-neutral", t:"unverified"},
   waived:{cls:"b-quiet",    t:"waived"}
 };
-const vbadge = v => `<span class="badge ${VERDICT[v].cls}">${VERDICT[v].t}</span>`;
+const vbadge = v => v === "flipped"
+  ? `<span class="badge b-proven b-flip">flipped<span class="fx"><i>fail</i> → <em>pass</em></span></span>`
+  : `<span class="badge ${VERDICT[v].cls}">${VERDICT[v].t}</span>`;
+/* a verdict cell in a runs table: the badge, and for a run whose flip record is known, the attempt count and test kind */
+const verdictCell = row => {
+  const known = typeof RUNS !== "undefined" && RUNS[row.id], p = known && known.proof;
+  const sub = p && p.attempts ? `<div class="flipsub">${p.attempts.length} attempt${p.attempts.length===1?"":"s"} · ${esc(p.test_kind)}${row.v==="flipped"?"":" · never flipped"}</div>` : "";
+  return vbadge(row.v) + sub;
+};
+const tsec = t => { const m = String(t||"").match(/(\d+):(\d+):(\d+)(?:\.(\d+))?$/); return m ? (+m[1])*3600+(+m[2])*60+(+m[3])+(m[4]?+("0."+m[4]):0) : null; };
+const dur  = s => { s = Math.abs(s); const m = Math.floor(s/60), r = s-m*60; return (m?m+"m ":"")+(m?Math.round(r):(r<10?r.toFixed(1):Math.round(r)))+"s"; };
+const flipLead = p => (p && p.flip_at && p.turn_end_at) ? tsec(p.turn_end_at)-tsec(p.flip_at) : null;
+const frameLink = (r, seq) => `<a class="fr" href="#/${ORG.slug}/${WS.slug}/runs/${r.id}/timeline">frame ${n(seq)}</a>`;
+function flipHero(r){
+  const p = r.proof, lead = flipLead(p), k = p.attempts.length;
+  return `<div class="flip-hero" role="status">
+    <span class="fp"><span class="f">fail</span><span class="a">→</span><span class="p">pass</span></span>
+    <div class="tx"><b>${esc(p.test_kind)}</b> · <span class="mono">${esc(p.oracle)}</span> · flipped on attempt <b>${k} of ${k}</b>${lead!=null?`, <b>${dur(lead)}</b> before the agent ended turn ${p.turn}`:""}.
+      Recorded at ${frameLink(r, p.flip_seq)}, signed by the runner key, in the hash chain.</div>
+    <div class="acts"><button class="btn btn-sm" type="button" onclick="location.hash='#/${ORG.slug}/${WS.slug}/runs/${r.id}/proof'">Open the proof</button></div>
+  </div>`;
+}
+function flipRail(r){
+  const p = r.proof, on = r.verdict === "flipped";
+  return `<div class="flip-rail${on?" on":""}" style="grid-template-columns:repeat(${p.rail.length},minmax(0,1fr))">${p.rail.map(pt =>
+    `<div class="pt ${pt.c}"><b>${esc(pt.b)}</b><span class="t">${esc(pt.t)}</span>${pt.sub?`<span class="sub">${esc(pt.sub)}</span>`:""}${frameLink(r, pt.seq)}</div>`).join("")}</div>`;
+}
 
 /* ── the proven run ─────────────────────────────────────────────────── */
 const R_PROVEN = {
@@ -698,7 +782,25 @@ const R_PROVEN = {
     prev_hash:"sha256:0c4d719ea36f8b25107cd94ba2f8e63057d1ac4e9b2036fd581ea47c93b6208f",
     hash:"sha256:b7e0243f915ac68d0b3e57fa24c91d806e5b3729af1c0d48e962735bac081f6a",
     content:"sha256:5ea19c73b0d248f61ca307e94fb582d06731ae4c9820df5b13e6a7048cf29b5d",
-    heldOut:false, witnessCount:2
+    heldOut:false, witnessCount:2,
+    /* the flip, as a record: what kind of test, how many attempts, and when the flip landed
+       against when the agent ended its turn — every point a frame in this run's chain. */
+    test_kind:"integration test", runner:"pytest 8.3",
+    cmd_text:"pytest tests/witness/test_retry_budget_fail_closed.py -q",
+    attempts:[
+      {n:1, result:"fail", at:"09:46:05.338", seq:262,  head:"2e91c0b4", witness_run:"run_01K5XP0C2A", took:"1m 25s",
+       note:"head @ 2e91c0b4 · failing on main and on the head · not credited · the agent saw the word fail"},
+      {n:2, result:"pass", at:"09:49:31.402", seq:1280, head:"4d7be053", witness_run:"run_01K5XP2F6B", took:"1m 37s",
+       note:"head @ 4d7be053 · fail on main, pass on the head · the flip"}],
+    turn:6, flip_seq:1280, flip_at:"09:49:31.402",
+    turn_end_seq:1283, turn_end_at:"09:49:38.441", stop_seq:1285, stop_at:"09:51:47.006",
+    seal_seq:1286, seal_at:"09:51:49.220",
+    rail:[
+      {c:"fail",  b:"Attempt 1 · fail",            t:"09:46:05.338", seq:262,  sub:"turn 5"},
+      {c:"start", b:"Turn 6 opened",               t:"09:47:31.220", seq:1244, sub:"fix pushed"},
+      {c:"pass",  b:"Attempt 2 · pass · the flip", t:"09:49:31.402", seq:1280},
+      {c:"end",   b:"Agent ended its turn",        t:"09:49:38.441", seq:1283, sub:"end_turn"},
+      {c:"seal",  b:"Run sealed",                  t:"09:51:49.220", seq:1286}]
   },
   chain:{ merkle:"sha256:e41b7c9d05a3f862b4de1907cf2358ab6d0471e93fb28c5a07de6241b98035cf",
           archive:"sha256:a07f3e5c1b94d268ef03a75bc14d29607f8e3b25da916c04fb7e58203dc16a4b",
@@ -751,7 +853,20 @@ const R_TAMPERED = {
       change:"+3 −0 · added `collect_ignore_glob = [\"test_invoice_export_*\"]` at module scope",
       detectedAt:"2026-09-11 11:26:09 UTC"
     },
-    heldOut:false, witnessCount:1
+    heldOut:false, witnessCount:1,
+    test_kind:"integration test", runner:"pytest 8.3",
+    cmd_text:"pytest tests/witness/test_invoice_export_pages.py -q",
+    attempts:[
+      {n:1, result:"excluded", at:"11:26:12.771", seq:598, head:"c30b97e1", witness_run:"run_01K5YQ8V4D", took:"31s",
+       note:"tamper exclusion broke before the head ran · nothing credited · the agent saw the word fail"}],
+    turn:4, flip_seq:null, flip_at:null,
+    turn_end_seq:601, turn_end_at:"11:26:41.902", stop_seq:602, stop_at:"11:26:55.310",
+    seal_seq:603, seal_at:"11:26:58.104",
+    rail:[
+      {c:"start", b:"Turn 4 opened",          t:"11:25:30.004", seq:590},
+      {c:"crit",  b:"Attempt 1 · excluded",   t:"11:26:12.771", seq:598, sub:"tampered"},
+      {c:"end",   b:"Agent ended its turn",   t:"11:26:41.902", seq:601},
+      {c:"seal",  b:"Run sealed",             t:"11:26:58.104", seq:603}]
   },
   chain:{ merkle:"sha256:3c85af1d6072be94103fd8a52e7b06c419df35ba8d1067ec4a29f350bd718e26",
           archive:"sha256:b91d47ce3082fa561d7e0b94ac2358f10d6b47e2953fca08bd1e76034f5ca298",
@@ -800,7 +915,11 @@ const FRAMES_PROVEN = [
   {seq:213,  kind:"error",          d:"<code>tool_denied</code> returned to the harness · halt threshold 1 / 3", t:"09:33:02.668", mark:"deny"},
   {seq:240,  kind:"tool_requested", d:"<code>github.create_pull_request@3</code> · base <code>main</code>", t:"09:44:11.870"},
   {seq:241,  kind:"tool_call",      d:"PR <code>acme/platform#482</code> opened · receipt <code>rcp_01K5XQ…</code>", t:"09:44:14.332"},
-  {seq:1279, kind:"tool_requested", d:"<code>oxagen.verify@1</code> · <code>{ \"pull_request\": 482 }</code>", t:"09:47:54.610"},
+  {seq:260,  kind:"tool_requested", d:"<code>oxagen.verify@1</code> · <code>{ \"pull_request\": 482 }</code> · attempt 1", t:"09:44:40.212"},
+  {seq:262,  kind:"proof.observed", d:"witness runner · <b>failing</b> · head <code>2e91c0b4</code> · fail on both sides · not credited", t:"09:46:05.338", mark:"proof"},
+  {seq:263,  kind:"tool_call",      d:"<code>oxagen.verify@1</code> → <code>{ \"result\": \"fail\" }</code> · grain <code>L0</code>", t:"09:46:05.540", mark:"airlock"},
+  {seq:1244, kind:"model.request",  d:"turn 6 opens · the fix is on <code>refs/pull/482/head</code> @ <code>4d7be053</code>", t:"09:47:31.220"},
+  {seq:1279, kind:"tool_requested", d:"<code>oxagen.verify@1</code> · <code>{ \"pull_request\": 482 }</code> · attempt 2", t:"09:47:54.610"},
   {seq:1280, kind:"proof.observed", d:"witness runner · <b>flipped</b> · recorded in full, not disclosed", t:"09:49:31.402", mark:"proof"},
   {seq:1281, kind:"tool_call",      d:"<code>oxagen.verify@1</code> → <code>{ \"result\": \"pass\" }</code> · grain <code>L0</code>", t:"09:49:31.615", mark:"airlock"},
   {seq:1282, kind:"model.request",  d:"tool result in the prompt is 4 characters: <code>pass</code>", t:"09:49:31.702", mark:"airlock"},
@@ -1069,7 +1188,7 @@ function runHeader(r, verdictOverride){
            <a href="#/${ORG.slug}/${WS.slug}/runs/${r.forRun}/proof" class="mono">${esc(r.forRun)}</a></span>`
         : `<span>Task <span class="mono" style="color:var(--fg)">${esc(r.task)}</span></span>`}
     </div>
-  </div>`;
+  </div>${verdict === "flipped" && r.proof && r.proof.attempts ? flipHero(r) : ""}`;
 }
 
 function costStrip(r){
@@ -1129,33 +1248,41 @@ function proofTab(r){
   const p = r.proof;
   const tampered = r.verdict === "tampered";
 
+  const flipped = r.verdict === "flipped";
+  const atts = p.attempts || [], first = atts[0], last = atts[atts.length-1], k = atts.length, lead = flipLead(p);
+  const meta = rows => `<div class="flip-meta">${rows.map(x=>`<span>${x[0]}</span><span class="v">${x[1]}</span>`).join("")}</div>`;
   const flipPanel = `
   <div class="panel">
     <div class="ph">
       <h3>The flip</h3>
       <span class="badge b-quiet plain mono">oracle ${esc(p.oracle)}</span>
+      ${p.test_kind ? `<span class="badge b-quiet plain">${esc(p.test_kind)} · ${esc(p.runner)}</span>` : ""}
+      ${k ? `<span class="badge ${flipped?"b-proven":tampered?"b-critical":"b-failed"}">${k} attempt${k===1?"":"s"}${flipped?` · flipped on ${k}`:" · never flipped"}</span>` : ""}
       <div class="ph-r">
         <span class="mono dim" style="font-size:11.5px">same normalized command · ${esc(p.cmd.slice(0,20))}…</span>
       </div>
     </div>
-    <div class="flip">
-      <div class="flip-side">
-        <div class="fs-h"><p class="eyebrow">Target branch</p></div>
+    <div class="flip${flipped?" on":""}">
+      <div class="flip-side fail">
+        <div class="fs-h"><p class="eyebrow">Before · target branch</p></div>
         <span class="flip-res fail">fail</span>
         <p class="ref"><b>${esc(p.target_ref)}</b> @ ${esc(p.target_sha.slice(0,12))}</p>
+        ${first ? meta([["attempt", `1 of ${k}`],["at", esc(first.at)],["took", esc(first.took)],["recorded", frameLink(r, first.seq)],["witness run", `<span class="mono">${esc(first.witness_run)}</span>`]]) : ""}
         <p class="flip-note">The witness must fail here, or it proves nothing about the change.
           Fail fingerprint <span class="mono">${esc(p.fail_fp.slice(7,19))}</span>.</p>
       </div>
-      <div class="flip-arrow" aria-hidden="true">${ICO.arrow}</div>
-      <div class="flip-side">
-        <div class="fs-h"><p class="eyebrow">Pull request head</p></div>
+      <div class="flip-arrow${flipped?" on":""}" aria-hidden="true">${ICO.arrow}</div>
+      <div class="flip-side ${tampered?"crit":"pass"}">
+        <div class="fs-h"><p class="eyebrow">After · pull request head</p></div>
         ${tampered
           ? `<span class="flip-res" style="color:var(--s-critical)">excluded</span>
              <p class="ref"><b>${esc(p.pr_ref)}</b> @ ${esc(p.pr_sha.slice(0,12))}</p>
+             ${last ? meta([["attempt", `${k} of ${k}`],["at", esc(last.at)],["took", esc(last.took)],["recorded", frameLink(r, last.seq)],["witness run", `<a class="mono" href="#/${ORG.slug}/${WS.slug}/runs/${last.witness_run}/ladder">${esc(last.witness_run)}</a>`]]) : ""}
              <p class="flip-note">The PR moved the ground under the witness, so no result on the head is
                admissible. Nothing is credited.</p>`
           : `<span class="flip-res pass">pass</span>
              <p class="ref"><b>${esc(p.pr_ref)}</b> @ ${esc(p.pr_sha.slice(0,12))}</p>
+             ${last ? meta([["attempt", `${k} of ${k}`],["at", esc(last.at)],["took", esc(last.took)],["recorded", frameLink(r, last.seq)],["witness run", `<a class="mono" href="#/${ORG.slug}/${WS.slug}/runs/${last.witness_run}/ladder">${esc(last.witness_run)}</a>`]]) : ""}
              <p class="flip-note">Same environment, same command. Pass output digest
                <span class="mono">${esc(p.pass_digest.slice(7,19))}</span>.</p>`}
       </div>
@@ -1174,8 +1301,46 @@ function proofTab(r){
              <b>unmoved</b>; one that failed on both, <b>unsatisfied</b>. This run is
              <b>proven</b> and its ${usd(r.costMicros)} counts toward proven spend for
              2026-09-11.</div></div>`}
+      ${p.cmd_text ? `<p class="mono dim" style="font-size:11.5px;margin-top:10px">witness command · ${esc(p.cmd_text)} · digest ${esc(p.cmd.slice(0,19))}…</p>` : ""}
     </div>
   </div>`;
+
+  const railPanel = p.rail ? `
+  <div class="panel">
+    <div class="ph">
+      <h3>When it happened</h3>
+      <div class="ph-r"><span class="dim" style="font-size:12px">${lead!=null
+        ? `the flip landed <b style="color:var(--s-proven)">${dur(lead)}</b> before the agent ended turn ${p.turn}`
+        : `no flip in turn ${p.turn}; the agent ended its turn without one`}</span></div>
+    </div>
+    <div class="pb">
+      ${flipRail(r)}
+      <p class="flip-note" style="margin-top:16px">The order matters. A flip that lands <b style="color:var(--fg)">before</b> the agent ends its turn is the
+        agent's own claim, checked; a pass that appeared only after the turn closed would be credited to nothing.
+        Each point is a frame in the hash chain, so the order is not a log line — it is signed.</p>
+    </div>
+  </div>` : "";
+
+  const attemptsPanel = k ? `
+  <div class="panel">
+    <div class="ph">
+      <h3>Attempts</h3>
+      <div class="ph-r"><span class="mono dim" style="font-size:11.5px">${k} call${k===1?"":"s"} to <span style="color:var(--fg)">oxagen.verify@1</span> · each one a full witness run</span></div>
+    </div>
+    <div class="tw"><table style="min-width:640px">
+      <thead><tr><th>#</th><th>Result</th><th>At</th><th class="r">Took</th><th>Head</th><th>Frame</th><th>Witness run</th><th>What the runner saw</th></tr></thead>
+      <tbody>${atts.map(a => `<tr class="${a.result==="pass"?"att-pass":""}">
+        <td class="mono">${a.n}</td>
+        <td><span class="badge ${a.result==="pass"?"b-proven":a.result==="excluded"?"b-critical":"b-failed"}">${a.result}${a.result==="pass"?" · flip":""}</span></td>
+        <td class="mono" style="font-size:11.5px">${esc(a.at)}</td>
+        <td class="r mono">${esc(a.took)}</td>
+        <td class="mono" style="font-size:11.5px">${esc(a.head)}</td>
+        <td>${frameLink(r, a.seq)}</td>
+        <td><a class="mono" style="font-size:11.5px" href="#/${ORG.slug}/${WS.slug}/runs/${a.witness_run}/ladder">${esc(a.witness_run)}</a></td>
+        <td class="muted" style="font-size:12px">${esc(a.note)}</td>
+      </tr>`).join("")}</tbody>
+    </table></div>
+  </div>` : "";
 
   const airlock = `
   <div class="panel">
@@ -1253,6 +1418,11 @@ function proofTab(r){
       <dl class="kv">
         <dt>Witness id</dt><dd>${esc(p.witness_id)}</dd>
         <dt>Oracle kind</dt><dd>${esc(p.oracle)}</dd>
+        ${p.test_kind ? `<dt>Test</dt><dd class="plain">${esc(p.test_kind)} · <span class="mono">${esc(p.runner)}</span></dd>` : ""}
+        ${p.attempts ? `<dt>Attempts</dt><dd class="plain">${p.attempts.length}${r.verdict==="flipped"?` · flipped on attempt ${p.attempts.length}`:" · never flipped"}</dd>` : ""}
+        ${p.flip_seq ? `<dt>Flip recorded as</dt><dd class="plain"><span class="mono">proof.observed</span> · ${frameLink(r, p.flip_seq)} · <span class="mono">${esc(p.flip_at)}</span></dd>` : ""}
+        ${p.turn_end_seq ? `<dt>Agent ended its turn</dt><dd class="plain">${frameLink(r, p.turn_end_seq)} · <span class="mono">${esc(p.turn_end_at)}</span>${flipLead(p)!=null?` · <b style="color:var(--s-proven)">${dur(flipLead(p))} after the flip</b>`:""}</dd>` : ""}
+        ${p.seal_seq ? `<dt>Sealed</dt><dd class="plain">${frameLink(r, p.seal_seq)} · <span class="mono">${esc(p.seal_at)}</span></dd>` : ""}
         <dt>Target</dt><dd>${esc(p.target_ref)} @ ${esc(p.target_sha)}</dd>
         <dt>Pull request</dt><dd>${esc(p.pr_ref)} @ ${esc(p.pr_sha)}</dd>
         <dt>Command digest</dt><dd>${esc(p.cmd)}</dd>
@@ -1304,7 +1474,7 @@ function proofTab(r){
 }</pre></div>
   </div>`;
 
-  return flipPanel + airlock + `<div class="grid2">${antiOverfit}${provenanceCard(r)}</div>` + inspector;
+  return flipPanel + railPanel + attemptsPanel + airlock + `<div class="grid2">${antiOverfit}${provenanceCard(r)}</div>` + inspector;
 }
 
 function provenanceCard(r){
@@ -1925,12 +2095,12 @@ function renderSpend(){
         <tbody>${s.runs.map(r=>{
           const known = !!RUNS[r.id];
           const mark = r.id === R_PROVEN.id ? " marked" : "";
-          return `<tr class="${known?"clickable":""}${mark}" ${known?`onclick="location.hash='${base}/runs/${r.id}/${r.witness?"ladder":"proof"}'"`:""}>
+          return `<tr class="${known?"clickable":""}${mark}${r.v==="flipped"?" flipped":""}" ${known?`onclick="location.hash='${base}/runs/${r.id}/${r.witness?"ladder":"proof"}'"`:""}>
             <td class="mono" style="color:var(--fg)">${esc(r.id)}</td>
             <td class="muted mono" style="font-size:11.5px">${esc(r.agent)}</td>
             <td class="muted">${esc(r.op)}</td>
             <td class="muted mono" style="font-size:11.5px">${esc(r.task)}</td>
-            <td>${r.v ? vbadge(r.v) : '<span class="badge b-approval plain">witness run</span>'}</td>
+            <td>${r.v ? verdictCell(r) : '<span class="badge b-approval plain">witness run</span>'}</td>
             <td class="r mono num">${usd(r.m)}</td>
             <td class="r ${r.v==="flipped"?"":"muted"}" style="font-size:12px;${r.v==="flipped"?"color:var(--s-proven)":""}">
               ${r.v==="flipped"?"proven":r.witness?"cost of proof":"unproven"}</td>
@@ -2015,7 +2185,7 @@ function renderFleet(){
         <thead><tr><th>Run</th><th>Agent</th><th>Operator</th><th>Task</th><th>Tier</th><th>Replay</th><th>Proof</th><th class="r">Cost so far</th></tr></thead>
         <tbody>${FLEET.map(r=>{
           const known = !!RUNS[r.id];
-          return `<tr class="${known?"clickable":""}${r.id===R_PROVEN.id?" marked":""}"
+          return `<tr class="${known?"clickable":""}${r.id===R_PROVEN.id?" marked":""}${r.v==="flipped"?" flipped":""}"
             ${known?`onclick="location.hash='${base}/runs/${r.id}/${RUNS[r.id].agentKind==="service"?"ladder":"proof"}'"`:""}>
             <td class="mono" style="color:var(--fg)">${esc(r.id)}</td>
             <td class="muted mono" style="font-size:11.5px">${esc(r.agent)}</td>
@@ -2023,7 +2193,7 @@ function renderFleet(){
             <td class="muted mono" style="font-size:11.5px">${esc(r.task)}</td>
             <td>${r.tier==="gateway"?'<span class="badge b-allowed">gateway</span>':'<span class="badge b-neutral">harness</span>'}</td>
             <td class="mono dim" style="font-size:11.5px">${esc(r.replay)}</td>
-            <td>${r.v ? vbadge(r.v) : (r.st==="running"
+            <td>${r.v ? verdictCell(r) : (r.st==="running"
                 ? '<span class="badge b-quiet plain">pending</span>'
                 : '<span class="badge b-approval plain">witness run</span>')}</td>
             <td class="r mono num">${usd(r.m)}</td>

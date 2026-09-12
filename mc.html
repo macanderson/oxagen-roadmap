@@ -10,7 +10,6 @@
   --st-allowed:#57A97C; --st-approval:#5B93D6; --st-denied:#C66A4A;
   --st-proven:#3FA2A2; --st-failed:#C0453C; --st-critical:#D6455E; --st-observe:#9B958A;
   --k-rule:#9D8BE3; --k-constraint:#D677B5; --k-procedure:#A6B95E; --k-fact:#5CB5D6; --k-memory:#94A3C2; --k-preference:#D08FA0;
-  --t-read:#6FB1DA; --t-query:#5FBFB0; --t-record:#E08BA6; --t-message:#E39A6E; --t-file:#9FBE62; --t-exec:#B48EE0; --t-vcs:#8A96E8; --t-infra:#6E9E8F; --t-access:#A3B1C6; --t-finance:#C97AD0;
   --shadow:0 1px 0 rgba(255,255,255,.03),0 18px 44px rgba(0,0,0,.5);
   --shadow-sm:0 1px 2px rgba(0,0,0,.4);
   --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
@@ -23,7 +22,6 @@
   --st-allowed:#2F7D52; --st-approval:#2E6BA8; --st-denied:#9B4526;
   --st-proven:#1F7676; --st-failed:#992F28; --st-critical:#AE2540; --st-observe:#6B665C;
   --k-rule:#5D4AB5; --k-constraint:#A0397F; --k-procedure:#5F7A1F; --k-fact:#1E7392; --k-memory:#4E6280; --k-preference:#98485E;
-  --t-read:#1E6F99; --t-query:#1E7A6E; --t-record:#A63F62; --t-message:#A8532A; --t-file:#5A7A1C; --t-exec:#6A46B5; --t-vcs:#4553B0; --t-infra:#2F6656; --t-access:#4F6075; --t-finance:#8B3E96;
   --shadow:0 1px 0 rgba(255,255,255,.7),0 18px 44px rgba(16,16,15,.08);
   --shadow-sm:0 1px 2px rgba(16,16,15,.06);
 }}
@@ -34,7 +32,6 @@
   --st-allowed:#2F7D52; --st-approval:#2E6BA8; --st-denied:#9B4526;
   --st-proven:#1F7676; --st-failed:#992F28; --st-critical:#AE2540; --st-observe:#6B665C;
   --k-rule:#5D4AB5; --k-constraint:#A0397F; --k-procedure:#5F7A1F; --k-fact:#1E7392; --k-memory:#4E6280; --k-preference:#98485E;
-  --t-read:#1E6F99; --t-query:#1E7A6E; --t-record:#A63F62; --t-message:#A8532A; --t-file:#5A7A1C; --t-exec:#6A46B5; --t-vcs:#4553B0; --t-infra:#2F6656; --t-access:#4F6075; --t-finance:#8B3E96;
   --shadow:0 1px 0 rgba(255,255,255,.7),0 18px 44px rgba(16,16,15,.08);
   --shadow-sm:0 1px 2px rgba(16,16,15,.06);
 }
@@ -214,13 +211,12 @@ tr:last-child td{border-bottom:0}
 
 /* ---------- tools ----------
    Three orthogonal axes, three visual grammars, never mixed:
-     category = what the tool ACTS ON   → icon badge, one hue per category (like a record kind; never gold, never a state hue)
+     category = what the tool ACTS ON   → monochrome icon badge; the Lucide glyph carries the category, the fill is the house neutral scale (never gold, never a state hue)
      hazard   = how bad a wrong call is → risk mark (circle · diamond · triangle · filled triangle) + side-effect glyph, in state hues
      gate     = what the belt decided   → dot-style badge; a dashed border means a person still stands in the way */
-.t-read{--tc:var(--t-read)} .t-query{--tc:var(--t-query)} .t-record{--tc:var(--t-record)} .t-message{--tc:var(--t-message)} .t-file{--tc:var(--t-file)}
-.t-exec{--tc:var(--t-exec)} .t-vcs{--tc:var(--t-vcs)} .t-infra{--tc:var(--t-infra)} .t-access{--tc:var(--t-access)} .t-finance{--tc:var(--t-finance)}
+/* .t-<cat> stays on the markup as a hook for tests and filters; it no longer sets a colour */
 .tc{display:inline-grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:10px;align-items:center;min-width:0;max-width:100%;text-align:left;vertical-align:middle}
-.tc .ti{grid-row:1/3;width:28px;height:28px;border-radius:8px;display:grid;place-items:center;color:var(--tc);background:color-mix(in srgb,var(--tc) 14%,transparent);border:1px solid color-mix(in srgb,var(--tc) 34%,transparent)}
+.tc .ti{grid-row:1/3;width:28px;height:28px;border-radius:8px;display:grid;place-items:center;color:var(--fg);background:var(--hl);border:1px solid var(--border)}
 .tc .ti svg{width:15px;height:15px}
 .tc .tl{font-weight:600;font-size:13px;color:var(--fg);line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .tc .ta{font-family:var(--mono);font-size:11px;color:var(--muted);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
@@ -230,7 +226,7 @@ tr:last-child td{border-bottom:0}
 .tc.lg{column-gap:12px}.tc.lg .ti{width:42px;height:42px;border-radius:11px}.tc.lg .ti svg{width:21px;height:21px}.tc.lg .tl{font-size:18px;letter-spacing:-.015em}.tc.lg .ta{font-size:12px}
 .tc.api .tl{font-family:var(--mono);font-weight:500;font-size:12.5px}.tc.api .ta{font-family:var(--font);font-weight:500}
 .tc.lg.api .tl{font-size:15px}
-.tcb{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:2px 8px 2px 6px;border-radius:6px;border:1px solid;white-space:nowrap;line-height:1.5;color:var(--tc);border-color:color-mix(in srgb,var(--tc) 45%,transparent);background:color-mix(in srgb,var(--tc) 12%,transparent)}
+.tcb{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:2px 8px 2px 6px;border-radius:6px;border:1px solid;white-space:nowrap;line-height:1.5;color:var(--body);border-color:var(--rule);background:var(--hl)}
 .tcb svg{width:12px;height:12px;flex:none}
 .hz{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;white-space:nowrap;line-height:1.5;letter-spacing:.02em}
 .hz svg{width:14px;height:14px;flex:none}
@@ -246,17 +242,17 @@ tr:last-child td{border-bottom:0}
 tr.hz-row-critical>td:first-child{box-shadow:inset 3px 0 0 var(--st-critical)}
 tr.hz-row-high>td:first-child{box-shadow:inset 3px 0 0 color-mix(in srgb,var(--st-denied) 65%,transparent)}
 tr.tgrp td{background:var(--hl);padding-top:8px;padding-bottom:8px;border-bottom:1px solid var(--border)}
-tr.tgrp .ti{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:6px;vertical-align:middle;margin-right:9px;color:var(--tc);background:color-mix(in srgb,var(--tc) 14%,transparent);border:1px solid color-mix(in srgb,var(--tc) 34%,transparent)}
+tr.tgrp .ti{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:6px;vertical-align:middle;margin-right:9px;color:var(--fg);background:var(--ink);border:1px solid var(--rule)}
 tr.tgrp .ti svg{width:12px;height:12px}
 tr.tgrp b{font-size:12.5px;margin-right:9px;color:var(--fg)}
 tr.tgrp .muted{font-size:11.5px}
 .seg{display:inline-flex;gap:2px;padding:2px;border:1px solid var(--border);border-radius:8px;background:var(--void)}
 .seg .btn{border-color:transparent;background:transparent}
 .seg .btn[aria-pressed="true"],.tcs .btn[aria-pressed="true"]{background:var(--hl);border-color:var(--rule);color:var(--fg)}
-.tcs .btn svg{width:12px;height:12px;color:var(--tc)}
+.tcs .btn svg{width:12px;height:12px;color:var(--muted)} .tcs .btn[aria-pressed="true"] svg{color:var(--fg)}
 .tleg{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
-.tleg .c{display:grid;grid-template-columns:auto 1fr;gap:12px;padding:12px;border:1px solid var(--border);border-left:3px solid var(--tc);border-radius:10px;background:var(--void);min-width:0}
-.tleg .ti{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;color:var(--tc);background:color-mix(in srgb,var(--tc) 14%,transparent);border:1px solid color-mix(in srgb,var(--tc) 32%,transparent)}
+.tleg .c{display:grid;grid-template-columns:auto 1fr;gap:12px;padding:12px;border:1px solid var(--border);border-radius:10px;background:var(--void);min-width:0}
+.tleg .ti{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;color:var(--fg);background:var(--hl);border:1px solid var(--border)}
 .tleg .ti svg{width:17px;height:17px}
 .tleg .l{font-weight:600;font-size:13px;color:var(--fg)} .tleg .s{font-size:12px;color:var(--muted);margin-top:2px} .tleg .eg{font-family:var(--mono);font-size:10.5px;color:var(--dim);margin-top:6px;word-break:break-word}
 .axes{display:grid;gap:8px;font-size:12px}
@@ -499,15 +495,21 @@ tbody tr.click:hover .drill-lnk{border-bottom-style:solid}
 .dlg .tabs{margin:0;padding:0 18px}
 .dlg .tab{margin-bottom:-1px}
 .avat{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:var(--hl);border:1px solid var(--border);font-size:17px;font-weight:600;letter-spacing:.02em;color:var(--body);flex:none}
-/* avatars — people are round, agents are squircles; the kind (emoji, initials, photo) and the fill live on the record */
-.avx{display:inline-grid;place-items:center;flex:none;overflow:hidden;box-sizing:border-box;vertical-align:middle;font-weight:600;line-height:1;letter-spacing:.02em;background:var(--hl);color:var(--fg);border:1px solid rgba(0,0,0,.18);text-decoration:none}
+/* avatars — people are round, agents are squircles; the kind (icon, initials, photo) and the tone live on the record.
+   Three tones, all from the house scale and nothing else: solid · soft · line. No free colour, no gradient.
+   Every tone is relative to the theme (solid = the foreground ink as a disc, soft = a lifted panel, line = a hairline), so the
+   three stay distinct on ink and on paper alike and the glyph always has full contrast against its ground. */
+.avx{display:inline-grid;place-items:center;flex:none;overflow:hidden;box-sizing:border-box;vertical-align:middle;font-weight:600;line-height:1;letter-spacing:.02em;text-decoration:none;border:1px solid transparent}
+.avx svg{width:56%;height:56%}
+.avx.tn-solid{background:var(--fg);color:var(--ink);border-color:var(--fg)}
+.avx.tn-soft{background:var(--hl);color:var(--fg);border-color:var(--border)}
+.avx.tn-line{background:transparent;color:var(--fg);border-color:var(--rule)}
 .avx.person{border-radius:50%}
 .avx.agent{border-radius:27%}
 .avx img{width:100%;height:100%;object-fit:cover;display:block}
 .avx.f-sans{font-family:var(--font)}
 .avx.f-serif{font-family:Georgia,"Iowan Old Style","Times New Roman",serif;font-weight:500}
 .avx.f-mono{font-family:var(--mono);font-weight:600}
-.avx.emo{font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;letter-spacing:0}
 .inv{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px}
 .inv-i{display:inline-flex;align-items:center;gap:9px;padding:5px 12px 5px 6px;border:1px solid var(--border);border-radius:999px;background:var(--ink);color:var(--fg);font-size:12.5px;text-decoration:none;max-width:100%;min-width:0}
 a.inv-i:hover{border-color:var(--rule);text-decoration:none}
@@ -532,20 +534,19 @@ a.inv-i:hover{border-color:var(--rule);text-decoration:none}
 .av-seg button[aria-pressed="true"]{background:var(--hl);color:var(--fg);font-weight:600}
 .av-seg button.f-serif{font-family:Georgia,"Times New Roman",serif}
 .av-seg button.f-mono{font-family:var(--mono)}
-.av-emo{display:grid;grid-template-columns:repeat(auto-fill,minmax(34px,1fr));gap:4px;margin-top:8px}
-.av-emo button{border:1px solid transparent;background:var(--ink);border-radius:8px;height:34px;font-size:19px;cursor:pointer;padding:0;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif}
-.av-emo button:hover{border-color:var(--rule)}
-.av-emo button[aria-pressed="true"]{border-color:var(--fg);background:var(--hl)}
-.av-sw{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;align-items:center}
-.av-sw button.sw{width:24px;height:24px;border-radius:50%;border:1px solid rgba(0,0,0,.25);cursor:pointer;padding:0;box-shadow:var(--shadow-sm)}
-.av-sw button.sw[aria-pressed="true"]{outline:2px solid var(--fg);outline-offset:2px}
-.av-sw input[type=color]{width:34px;height:26px;padding:0 2px;border:1px solid var(--border);border-radius:7px;background:var(--ink);cursor:pointer}
-.av-sw .lbl{font-size:11px;color:var(--dim);font-family:var(--mono)}
+.av-ico{display:grid;grid-template-columns:repeat(auto-fill,minmax(36px,1fr));gap:4px;margin-top:8px}
+.av-ico button{border:1px solid transparent;background:var(--ink);border-radius:8px;height:36px;cursor:pointer;padding:0;color:var(--muted);display:grid;place-items:center}
+.av-ico button svg{width:18px;height:18px}
+.av-ico button:hover{border-color:var(--rule);color:var(--fg)}
+.av-ico button[aria-pressed="true"]{border-color:var(--fg);background:var(--hl);color:var(--fg)}
+.av-tone{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;align-items:center}
+.av-tone button{border:1px solid transparent;background:none;border-radius:11px;padding:3px;cursor:pointer;display:grid;place-items:center}
+.av-tone button:hover{border-color:var(--rule)}
+.av-tone button[aria-pressed="true"]{border-color:var(--fg)}
 .av-drop{border:1px dashed var(--rule);border-radius:10px;padding:14px;text-align:center;background:var(--ink);font-size:12.5px;color:var(--muted)}
 .av-drop input[type=file]{display:block;margin:8px auto 0;font-size:12px;width:auto;max-width:100%}
 .avb .field{margin-bottom:12px}
 .avb .field input.short{width:120px;font-size:15px;letter-spacing:.08em}
-.avb .field input.emo{width:80px;font-size:20px;text-align:center;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif}
 #layer.phone .avb{grid-template-columns:1fr}
 #viewport.phone .inv-i .tx b,#viewport.phone .inv-i .tx span{max-width:150px}
 .sc{font-family:var(--mono);font-size:11px;color:var(--dim)}
@@ -916,6 +917,171 @@ details.cm-diff[open] summary::before{content:"▾"}
 #viewport.phone .reg-tabs button .s{display:none}
 #viewport.phone .reg-top .who{display:none}
 #viewport.phone .reg-foot .sp{margin-left:0;width:100%}
+
+/* ---- Transcript tab: the stella-transcript / arenabench grammar on house tokens ---- */
+.txs{--tx-inspect:var(--muted);--tx-mutate:var(--fg);--tx-execute:var(--fg);--tx-verify:var(--st-proven);--tx-repo:var(--muted);--tx-delegate:var(--muted);
+  --tx-you:var(--muted);--tx-agent:var(--fg);
+  font-family:var(--mono);font-size:12.5px;line-height:1.65;color:var(--fg)}
+.tx-tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:0 0 10px}
+.tx-tools input{background:var(--void);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-family:var(--mono);font-size:12px;color:var(--fg);width:220px;max-width:100%}
+.tx-kinds{display:flex;flex-wrap:wrap;gap:2px}
+.tx-kind{border:0;background:none;padding:3px 7px;border-radius:6px;font-family:var(--mono);font-size:11px;color:var(--muted)}
+.tx-kind[aria-pressed="true"]{background:var(--hl);color:var(--fg);box-shadow:inset 0 0 0 1px var(--rule)}
+.tx-kind[aria-pressed="false"]{text-decoration:line-through;color:var(--dim)}
+.tx-kind.err[aria-pressed="true"]{color:var(--st-failed)}
+.tx-play{display:flex;align-items:center;gap:4px;margin-left:auto;flex-wrap:wrap}
+.tx-play .btn.sm{padding:3px 8px;font-family:var(--mono);font-size:11.5px;min-width:30px;justify-content:center}
+.tx-play .btn.sm[aria-pressed="true"]{background:var(--hl);border-color:var(--rule);color:var(--fg)}
+.tx-play .cnt{font-size:10.5px;color:var(--dim);font-variant-numeric:tabular-nums;margin-left:4px;white-space:nowrap}
+.tx-frame{background:var(--void);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.tx-runbar{display:flex;align-items:center;gap:12px;padding:9px 14px;border-bottom:1px solid var(--border);background:var(--panel);flex-wrap:wrap}
+.tx-runbar .name{font-weight:700;letter-spacing:.05em}
+.tx-runbar .meta{color:var(--dim);font-size:11px}
+.tx-burn{display:flex;align-items:center;gap:8px;margin-left:auto;font-size:10.5px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.tx-burn .bar{width:120px;height:4px;border-radius:2px;background:var(--hl);overflow:hidden}
+.tx-burn .bar i{display:block;height:100%;width:0;background:var(--st-approval);transition:width .2s}
+.tx-burn b{color:var(--fg);font-weight:600}
+.tx-feed{max-height:640px;overflow-y:auto;padding:6px 0 10px}
+.tx-row{display:grid;grid-template-columns:82px 30px minmax(0,1fr);align-items:baseline;padding:1px 12px 1px 0}
+.tx-row[hidden]{display:none}
+.tx-clock{color:var(--dim);font-size:10.5px;text-align:right;padding-right:10px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tx-node{position:relative;text-align:center;align-self:stretch}
+.tx-node::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--border)}
+.tx-dot{position:relative;z-index:1;display:inline-block;width:7px;height:7px;margin-top:6px;border-radius:50%;background:var(--void);border:2px solid currentColor}
+.tx-dot.solid{background:currentColor}
+.tx-role{display:grid;grid-template-columns:72px minmax(0,1fr);padding:9px 0;border-bottom:1px solid var(--border)}
+.tx-rolegut{text-align:right;padding-right:14px}
+.tx-roletag{font-size:10px;font-weight:700;letter-spacing:.14em;padding:1px 7px;border-radius:4px;color:var(--ink);background:var(--muted)}
+.tx-role.you .tx-roletag{background:var(--tx-you)}
+.tx-role.agent .tx-roletag{background:var(--tx-agent)}
+.tx-role.steer .tx-roletag{background:var(--gold);color:var(--on-gold)}
+.tx-prose{max-width:72ch;white-space:pre-wrap;overflow-wrap:anywhere;color:var(--body)}
+.tx-role.you .tx-prose{color:var(--fg)}
+.tx-answer{border-left:2px solid var(--tx-agent);padding-left:14px;color:var(--fg)}
+.tx-sub{font-size:10.5px;color:var(--dim);margin-top:5px;display:flex;gap:6px;flex-wrap:wrap;align-items:baseline}
+.tx-stage{display:flex;align-items:center;gap:10px;padding:8px 0 4px;color:var(--muted);font-weight:600}
+.tx-stage::after{content:"";flex:1;height:1px;background:var(--border)}
+.tx-think{color:var(--dim);font-style:italic;white-space:pre-wrap;overflow-wrap:anywhere;max-width:72ch}
+.tx-fold{border:0;background:none;padding:0;font-family:var(--mono);font-size:10.5px;color:var(--dim)}
+.tx-fold:hover{color:var(--muted)}
+.tx-call{display:flex;align-items:baseline;gap:8px;min-width:0}
+.tx-call .g{color:var(--dim);user-select:none;flex:none}
+.tx-call .g.bad{color:var(--st-failed)}
+.tx-call .nm{font-weight:600;flex:none;min-width:8.5rem}
+.tx-call .arg{min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted)}
+.tx-call .nm.inspect{color:var(--tx-inspect)}.tx-call .nm.mutate{color:var(--tx-mutate)}.tx-call .nm.execute{color:var(--tx-execute)}
+.tx-call .nm.verify{color:var(--tx-verify)}.tx-call .nm.repo{color:var(--tx-repo)}.tx-call .nm.delegate{color:var(--tx-delegate)}.tx-call .nm.bad{color:var(--st-failed)}
+.tx-chips{margin-left:auto;display:flex;gap:5px;flex-wrap:wrap;flex:none;align-items:baseline}
+.tx-chip{font-size:10.5px;color:var(--muted);background:var(--panel);border:1px solid var(--border);border-radius:5px;padding:0 6px;white-space:nowrap;line-height:1.6;font-variant-numeric:tabular-nums}
+.tx-chip.ok{color:var(--st-allowed)}.tx-chip.warn{color:var(--st-approval)}.tx-chip.err{color:var(--st-failed)}
+.tx-chip.cost{color:var(--fg);border-color:var(--rule)}
+.tx-chip.burn{color:var(--dim)}
+.tx-chip.gov{color:var(--st-approval);cursor:pointer;border-color:color-mix(in srgb,var(--st-approval) 40%,transparent)}
+.tx-chip.gov.appr{color:var(--gold);border-color:color-mix(in srgb,var(--gold) 45%,transparent)}
+.tx-chip.gov:hover{color:var(--fg)}
+.tx-out{margin:2px 0 4px 20px;color:var(--muted);white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;line-height:1.55;background:none;border:0;padding:0;border-radius:0}
+.tx-out.err{color:var(--st-failed)}
+.tx-args{margin:2px 0 4px 20px;color:var(--dim);font-size:11px;background:none;border:0;padding:0;border-radius:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.tx-diffwrap{margin:4px 0 6px 20px}
+.tx-diffwrap .path{display:flex;gap:10px;align-items:center;font-size:11px;color:var(--muted);padding:4px 10px;background:var(--panel);border:1px solid var(--border);border-bottom:0;border-radius:9px 9px 0 0}
+.tx-diffwrap .path b{color:var(--fg);font-weight:600;font-family:var(--mono)}
+.tx-diffwrap .path .dstat{margin-left:auto}
+.tx-diffwrap .diff{border-radius:0 0 9px 9px;max-height:320px}
+.tx-usage{font-size:10.5px;color:var(--dim);display:flex;gap:8px;align-items:baseline;min-width:0}
+.tx-usage .u{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tx-proof{color:var(--st-proven);font-weight:600}
+.tx-proof.bad{color:var(--st-approval)}
+.tx-recall{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:2px 12px;font-size:11px;margin:3px 0 2px 20px;align-items:baseline}
+.tx-recall .k{color:var(--dim)}.tx-recall .l{color:var(--body);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.tx-recall .n{color:var(--dim);text-align:right;font-variant-numeric:tabular-nums}
+.tx-empty{padding:18px 16px;color:var(--dim)}
+.txs mark{background:var(--gold);color:var(--on-gold);border-radius:2px;padding:0 1px}
+#viewport.phone .tx-row{grid-template-columns:0 22px minmax(0,1fr)}
+#viewport.phone .tx-clock{display:none}
+#viewport.phone .tx-role{grid-template-columns:1fr;gap:4px}
+#viewport.phone .tx-rolegut{text-align:left;padding:0}
+#viewport.phone .tx-call .nm{min-width:0}
+#viewport.phone .tx-feed{max-height:70vh}
+#viewport.phone .tx-play{margin-left:0}
+/* ---- Linked work: what the graph holds on the run node ---- */
+.lw{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-bottom:14px}
+.lw>*{min-width:0}
+.lw .panel-b{padding:8px 14px 10px}
+.lw-item{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-top:1px solid var(--border);font-size:12.5px;min-width:0}
+.lw-item:first-child{border-top:0}
+.lw-item .ic{flex:none;width:18px;color:var(--dim);text-align:center;padding-top:1px;font-family:var(--mono)}
+.lw-item .t{min-width:0;flex:1}
+.lw-item .t b{display:block;color:var(--fg);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lw-item .t .sub{display:block;color:var(--muted);font-size:11.5px;line-height:1.5}
+.lw-item .ev{display:flex;gap:5px;flex-wrap:wrap;margin-top:4px}
+.edge{display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:10px;padding:0 6px;border-radius:5px;border:1px solid var(--border);color:var(--muted);line-height:1.7;white-space:nowrap;background:none}
+.edge.observed{color:var(--st-proven);border-color:color-mix(in srgb,var(--st-proven) 40%,transparent)}
+.edge.stated{color:var(--st-approval);border-color:color-mix(in srgb,var(--st-approval) 40%,transparent)}
+.edge.inferred{color:var(--k-rule);border-color:color-mix(in srgb,var(--k-rule) 40%,transparent)}
+button.edge{cursor:pointer}
+button.edge:hover{color:var(--fg)}
+.lw-files details{border-top:1px solid var(--border)}
+.lw-files details:first-child{border-top:0}
+.lw-files summary{cursor:pointer;list-style:none;display:flex;gap:10px;align-items:center;padding:8px 0;font-size:12.5px;min-width:0}
+.lw-files summary::-webkit-details-marker{display:none}
+.lw-files summary::before{content:"▸";color:var(--dim);flex:none}
+.lw-files details[open] summary::before{content:"▾"}
+.lw-files summary .p{font-family:var(--mono);font-size:11.5px;color:var(--fg);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lw-files summary .dstat{margin-left:auto;font-family:var(--mono);font-size:11px;flex:none}
+.lw-files .diff{margin-bottom:10px;max-height:360px}
+.lw-note{font-size:11px;color:var(--dim);margin:0 0 12px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+/* ---- agent scores: trust and spend, 0–1000, traffic-lit by band ---- */
+.sc{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:2px 7px 2px 6px;border-radius:6px;border:1px solid;white-space:nowrap;line-height:1.5;font-variant-numeric:tabular-nums}
+.sc i{width:7px;height:7px;border-radius:50%;background:currentColor;flex:none;box-shadow:0 0 0 2px color-mix(in srgb,currentColor 22%,transparent)}
+.sc b{font-family:var(--mono);font-weight:700}
+.sc em{font-style:normal;font-weight:500;opacity:.7;font-size:10px}
+.sc.sm{font-size:10px;padding:0 5px 0 4px;gap:4px}
+.sc-good{color:var(--st-allowed);border-color:color-mix(in srgb,var(--st-allowed) 42%,transparent);background:color-mix(in srgb,var(--st-allowed) 11%,transparent)}
+.sc-avg{color:var(--gold);border-color:color-mix(in srgb,var(--gold) 45%,transparent);background:color-mix(in srgb,var(--gold) 12%,transparent)}
+.sc-bad{color:var(--st-failed);border-color:color-mix(in srgb,var(--st-failed) 42%,transparent);background:color-mix(in srgb,var(--st-failed) 11%,transparent)}
+.scs{display:inline-flex;gap:5px;flex-wrap:wrap;align-items:center}
+.steer-list .check>.scs{flex:none;margin-left:6px}
+.scm{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:13px 15px}
+.scm-h{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:10px}
+.scm-h .k{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--dim);font-weight:600}
+.scm-h .dim{margin-left:auto;font-family:var(--mono);font-size:10.5px}
+.scm-bar{position:relative;height:8px;border-radius:5px;overflow:visible;display:flex;gap:2px}
+.scm-bar .z{height:100%;border-radius:3px;opacity:.5}
+.scm-bar .z.bad{flex:0 0 40%;background:var(--st-failed)}
+.scm-bar .z.avg{flex:0 0 30%;background:var(--gold)}
+.scm-bar .z.good{flex:1;background:var(--st-allowed)}
+.scm-bar .mk{position:absolute;top:-4px;width:3px;height:16px;border-radius:2px;background:var(--fg);transform:translateX(-50%);box-shadow:0 0 0 2px var(--panel)}
+.scm-lg{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--dim);margin-top:6px}
+.scm .kv{margin-top:10px;font-size:12px}
+.scm .kv dd{font-family:var(--mono);font-size:11.5px}
+.scm .kv dd .up{color:var(--st-allowed)} .scm .kv dd .dn{color:var(--st-failed)}
+.sc-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--muted);align-items:center}
+/* ---- roles editor and rule editor ---- */
+.perm-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:6px 0 14px}
+.perm-grid .pg{border:1px solid var(--border);border-radius:9px;background:var(--ink);padding:9px 11px}
+.perm-grid .pg .h{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--dim);font-weight:600;margin-bottom:6px}
+.perm-grid .check{display:flex;margin:0 0 4px;padding:4px 2px;border:0;background:none;align-items:center;font-size:inherit;font-weight:inherit;color:inherit;gap:8px}
+.perm-grid .check input{width:auto;flex:none;margin:0;padding:0}
+.perm-grid .check .n{font-size:11.5px;font-weight:500}
+.rl-chip{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:11px;padding:2px 4px 2px 8px;border-radius:6px;border:1px solid var(--border);background:var(--hl);color:var(--body);margin:0 4px 4px 0;max-width:100%}
+.rl-chip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rl-chip button{border:0;background:none;color:var(--dim);font-size:13px;line-height:1;padding:0 4px;cursor:pointer;border-radius:4px}
+.rl-chip button:hover{color:var(--st-failed);background:color-mix(in srgb,var(--st-failed) 12%,transparent)}
+.rl-tog{position:relative;width:34px;height:20px;border-radius:12px;border:1px solid var(--border);background:var(--ink);cursor:pointer;padding:0;flex:none}
+.rl-tog::after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:var(--dim);transition:transform .15s,background .15s}
+.rl-tog[aria-checked="true"]{background:color-mix(in srgb,var(--st-allowed) 25%,transparent);border-color:color-mix(in srgb,var(--st-allowed) 50%,transparent)}
+.rl-tog[aria-checked="true"]::after{transform:translateX(14px);background:var(--st-allowed)}
+.rule-th{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.rng{display:grid;grid-template-columns:minmax(0,1fr) 72px;gap:10px;align-items:center}
+.rng input[type=range]{width:100%;accent-color:var(--gold);margin:0}
+.rng input[type=number]{width:100%}
+.rng-prev{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:6px}
+.rowacts{white-space:nowrap}
+.rowacts .btn{margin-right:4px}
+#viewport.phone .perm-grid{grid-template-columns:minmax(0,1fr)}
+.field label.check{display:flex;font-size:inherit;font-weight:inherit;color:inherit;margin-bottom:8px}
+.field .check input{width:auto;flex:none;margin:3px 0 0}
+.field .check .d{font-weight:400}
 </style>
 
 <div id="viewport"><div id="app"></div></div>
@@ -958,12 +1124,12 @@ var BRANCHES = [
 ];
 
 /* a stylised sample portrait so the photo path renders without a network or an upload */
-var AV_SAMPLE_PHOTO="data:image/svg+xml;utf8,"+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2E6BA8"/><stop offset="1" stop-color="#1F7676"/></linearGradient></defs><rect width="96" height="96" fill="url(#g)"/><path d="M14 98c2-24 16-34 34-34s32 10 34 34z" fill="#F2EEE5"/><circle cx="48" cy="38" r="17" fill="#E8C4A2"/><path d="M31 36c0-14 8-21 17-21s17 7 17 21c-4-6-9-9-17-9s-13 3-17 9z" fill="#3B2A22"/></svg>');
+var AV_SAMPLE_PHOTO="data:image/svg+xml;utf8,"+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96"><rect width="96" height="96" fill="#292722"/><path d="M14 98c2-24 16-34 34-34s32 10 34 34z" fill="#9B958A"/><circle cx="48" cy="38" r="17" fill="#DDD8CD"/><path d="M31 36c0-14 8-21 17-21s17 7 17 21c-4-6-9-9-17-9s-13 3-17 9z" fill="#10100F"/></svg>');
 var PEOPLE = {
   priya:{name:"Priya Natarajan", role:"org.owner", initials:"PN", email:"priya@acme.example", mfa:"passkey + TOTP",
-   avatar:{kind:"initials", text:"PN", font:"serif", bg:{mode:"gradient", a:"#D677B5", b:"#9D8BE3", angle:135}}},
+   avatar:{kind:"initials", text:"PN", font:"serif", tone:"solid"}},
   marcus:{name:"Marcus Bell", role:"workspace.owner · core-platform", initials:"MB", email:"marcus@acme.example", mfa:"TOTP",
-   avatar:{kind:"initials", text:"MB", font:"sans", bg:{mode:"solid", a:"#5B93D6"}}},
+   avatar:{kind:"initials", text:"MB", font:"sans", tone:"soft"}},
   dana:{name:"Dana Okafor", role:"org.billing · finops", initials:"DO", email:"dana@acme.example", mfa:"passkey",
    avatar:{kind:"photo", src:AV_SAMPLE_PHOTO}}
 };
@@ -974,35 +1140,35 @@ var AGENTS = [
   belt:14, beltMode:"full", runs30:212, spend30:"612.48", proven30:"318.22", ratio:0.62,
   digest:"sha256:9f21c4ab7e30d5ef", commit:"a4c91e2", budget:"2.00", budgetUsed:1.36,
   desc:"Prepares release notes and opens the release PR. Never merges.",
-  avatar:{kind:"emoji", text:"🚀", bg:{mode:"gradient", a:"#5B93D6", b:"#9D8BE3", angle:135}},
+  avatar:{kind:"icon", icon:"rocket", tone:"solid"},
   mandates:[], incidents:0, model:"complex"},
  {key:"acme.core.stella-ci", name:"Stella CI", harness:"stella", harnessLabel:"Stella",
   ws:"core-platform", operator:"marcus", status:"enrolled", tier:"gateway", tierNative:"gateway",
   belt:9, beltMode:"full", runs30:486, spend30:"1104.70", proven30:"881.19", ratio:0.79,
   digest:"sha256:1c07be93d4a28f60", commit:"a4c91e2", budget:"1.50", budgetUsed:0.71,
   desc:"Runs the deterministic ladder on every pull request and reports the flip.",
-  avatar:{kind:"initials", text:"CI", font:"mono", bg:{mode:"solid", a:"#3FA2A2"}},
+  avatar:{kind:"initials", text:"CI", font:"mono", tone:"soft"},
   mandates:[], incidents:0, model:"complex"},
  {key:"acme.core.triage", name:"Triage", harness:"codex-cli", harnessLabel:"Codex CLI",
   ws:"core-platform", operator:"marcus", status:"enrolled", tier:"gateway", tierNative:"observe",
   belt:52, beltMode:"searchable", runs30:1340, spend30:"402.11", proven30:"38.90", ratio:0.31,
   digest:"sha256:73ad0e15f8c9b224", commit:"a4c91e2", budget:"0.40", budgetUsed:0.29,
   desc:"Labels incoming issues, reproduces where it can, and opens a proposal when it cannot.",
-  avatar:{kind:"emoji", text:"🩺", bg:{mode:"solid", a:"#A6B95E"}},
+  avatar:{kind:"icon", icon:"stethoscope", tone:"line"},
   mandates:[], incidents:1, model:"light"},
  {key:"acme.finops.invoice-bot", name:"Invoice bot", harness:"claude-agent-sdk", harnessLabel:"OpenAI Agents SDK",
   ws:"finops", operator:"dana", status:"enrolled", tier:"gateway", tierNative:"gateway",
   belt:6, beltMode:"full", runs30:88, spend30:"96.34", proven30:"0.00", ratio:0.55,
   digest:"sha256:5be8f2470a1d39cc", commit:"7e0b331", budget:"1.00", budgetUsed:0.18,
   desc:"Settles monthly infrastructure invoices under PO-4471. Holds one mandate.",
-  avatar:{kind:"initials", text:"INV", font:"serif", bg:{mode:"gradient", a:"#C66A4A", b:"#D08FA0", angle:180}},
+  avatar:{kind:"initials", text:"INV", font:"serif", tone:"line"},
   mandates:["mnd_7K2ETQ4"], incidents:0, model:"complex"},
  {key:"acme.core.docs-writer", name:"Docs writer", harness:"custom", harnessLabel:"Custom (SDK-wrapped)",
   ws:"core-platform", operator:"priya", status:"enrolled", tier:"gateway", tierNative:"observe",
   belt:7, beltMode:"full", runs30:64, spend30:"71.09", proven30:"0.00", ratio:0.48,
   digest:"sha256:e30c95a1b7482fd6", commit:"a4c91e2", budget:"0.80", budgetUsed:0.09,
   desc:"Keeps the operator guide in step with what shipped. Opens a PR, never merges.",
-  avatar:{kind:"emoji", text:"📝", bg:{mode:"solid", a:"#94A3C2"}},
+  avatar:{kind:"icon", icon:"pencil-line", tone:"solid"},
   mandates:[], incidents:0, model:"complex"}
 ];
 
@@ -1183,6 +1349,125 @@ var FRAMES = [
  {seq:15,kind:"approval_request",tier:"gateway",cost:null,t:"09:14:51.404",
   sum:"apr_01K5RS3K7 · notified Mission Control, Slack #releases, marcus@acme.example"}
 ];
+
+/* ===================== transcript seeds ===================== */
+/* The transcript is the model-visible projection of a run's frames: the prompt, the agent's prose,
+   its tool calls with their outputs, and the usage each model step burned. Times are seconds from
+   R.started. `fr` on an entry points at the governed frame (FRAMES seq) the gateway wrote for it. */
+var NOTES_V1 = [
+ "# 4.11.0 — 2026-09-11","",
+ "27 pull requests merged since 4.10.3 (acme/platform only; acme/mobile ships separately this cycle).","",
+ "## Features",
+ "- Run tokens carry a delegation ceiling; a call above it is parked, never denied silently (#478)",
+ "- `oxagen runs export` writes a signed bundle with the verifier script alongside (#480)",
+ "- Context recall reports its budget per provider (#474)",
+ "- Kill switches gained a deny generation, visible in every later decision (#469)",
+ "- Mission Control shows a run's cost basis next to the number (#472)","",
+ "## Fixes",
+ "- Cache reads were mis-attributed when steering landed mid-conversation (#477)",
+ "- `github__create_release` schema accepted an empty tag (#475)",
+ "- Approval cards no longer expire early when the clock skews (#470)",
+ "- Ledger rollups double-counted a retried model call (#468)","",
+ "## Breaking",
+ "- `policy.decide` no longer returns allow for an untainted call with no matching rule; the default is approve (#481)",
+ "- `frame.kind` value `tool_call` is renamed `tool.call` in exports (#479)"
+].join("\n");
+var NOTES_V2 = NOTES_V1.replace(
+ "## Fixes\n- Cache reads were mis-attributed when steering landed mid-conversation (#477)\n- `github__create_release` schema accepted an empty tag (#475)\n- Approval cards no longer expire early when the clock skews (#470)\n- Ledger rollups double-counted a retried model call (#468)\n\n## Breaking\n- `policy.decide` no longer returns allow for an untainted call with no matching rule; the default is approve (#481)\n- `frame.kind` value `tool_call` is renamed `tool.call` in exports (#479)",
+ "## Breaking\n- `policy.decide` no longer returns allow for an untainted call with no matching rule; the default is approve (#481)\n- `frame.kind` value `tool_call` is renamed `tool.call` in exports (#479)\n\n## Fixes\n- Cache reads were mis-attributed when steering landed mid-conversation (#477)\n- `github__create_release` schema accepted an empty tag (#475)\n- Approval cards no longer expire early when the clock skews (#470)\n- Ledger rollups double-counted a retried model call (#468)");
+
+var TRANSCRIPTS = {
+ "run_01K5RS7M2E8FJ3QW": [
+  {t:0, kind:"prompt", body:"Cut the 4.11.0 release notes for acme/platform.\n\nDraft from every pull request merged since the v4.10.3 tag, group them under Features, Fixes and Breaking, and write the draft to release/4.11.0-notes.md on a release branch. Then create the GitHub release v4.11.0 as a draft so nothing publishes until it is approved. Follow ctx.release.notes-format. Do not touch main.", meta:{task:"acme/platform#482", by:"Marcus Bell"}},
+  {t:0.3, kind:"context_recall", title:"recall", meta:{frames:6, tok:11204, scored:41, ms:3.1}, fr:1},
+  {t:7.7, kind:"reasoning", body:"The task wants three groups and a house format. Reading the changelog once tells me the heading order and the tone; listing merged pull requests since the tag gives the range without guessing at dates."},
+  {t:7.7, kind:"text", body:"I'll list the pull requests merged since v4.10.3 first, then read CHANGELOG.md once for the format."},
+  {t:7.7, kind:"usage", meta:{model:"claude-opus-5", tin:3368, cache:12000, tout:412, cost:0.4126, req:"req_01JQ7F2K"}, fr:3},
+  {t:7.8, kind:"tool", title:"github__list_pull_requests", cls:"repo", arg:"acme/platform · state closed · base main · merged since v4.10.3", raw:'{"repo":"acme/platform","state":"closed","base":"main","merged_after":"v4.10.3","per_page":50}',
+   gov:{o:"allow",rule:"rg_0088",fr:5}, res:{ms:1128, body:"31 pull requests\n#482 Cut 4.11.0 release notes (open, this task)\n#481 policy.decide: default approve for unmatched untainted calls\n#480 runs export: signed bundle + verifier\n#479 exports: rename tool_call → tool.call\n#478 run tokens: delegation ceiling\n#477 cache attribution under mid-conversation steering\n#476 backport 4.10.3 onto release/4.10 (acme/mobile)\n#475 create_release schema: reject empty tag\n#474 recall budget per provider\n… 22 more"}, fr:7},
+  {t:16.7, kind:"reasoning", body:"31 in the range, but four of them (#476, #466, #463, #459) are acme/mobile and the task is platform. I'll read the changelog for the format before deciding whether to keep them."},
+  {t:16.7, kind:"text", body:"31 merged in range. Reading CHANGELOG.md for the heading order and tone."},
+  {t:16.7, kind:"usage", meta:{model:"claude-opus-5", tin:902, cache:14190, tout:688, cost:0.5518, req:"req_01JQ7F4M"}, fr:9},
+  {t:16.8, kind:"tool", title:"github__get_file_contents", cls:"inspect", arg:"acme/platform · CHANGELOG.md @ a4c91e2", raw:'{"repo":"acme/platform","path":"CHANGELOG.md","ref":"a4c91e2"}',
+   gov:{o:"allow",rule:"rg_0088",fr:5}, res:{ms:604, body:"212 lines\n# Changelog\n\n## 4.10.3 — 2026-08-27\n\n### Fixes\n- Worker restart no longer drops the in-flight approval (#452)\n- Ledger export escapes commas in vendor names (#449)\n\n### Breaking\n- none\n\n## 4.10.2 — 2026-08-12\n…"}},
+  {t:42.0, kind:"steer", body:"Skip the mobile repo this cycle; 4.11.0 is platform only.", meta:{by:"Marcus Bell", role:"operator authority", tok:22}, fr:10},
+  {t:49.3, kind:"reasoning", body:"Steering settles it: drop the four acme/mobile pull requests. 27 remain. The changelog puts Fixes before Breaking, so I'll follow that order."},
+  {t:49.3, kind:"text", body:"Dropping the four acme/mobile pull requests per your steer. Writing the draft for the remaining 27."},
+  {t:49.3, kind:"usage", meta:{model:"claude-opus-5", tin:264, cache:15020, tout:501, cost:0.3904, req:"req_01JQ7F6P"}, fr:12},
+  {t:49.4, kind:"tool", title:"write_file", cls:"mutate", arg:"release/4.11.0-notes.md", raw:'{"path":"release/4.11.0-notes.md","content":"# 4.11.0 — 2026-09-11 …"}',
+   diff:{path:"release/4.11.0-notes.md", before:"", after:NOTES_V1}, res:{ms:41, body:"Wrote release/4.11.0-notes.md"}},
+  {t:61.2, kind:"tool", title:"Bash", cls:"verify", arg:"pnpm release:lint release/4.11.0-notes.md", raw:'{"command":"pnpm release:lint release/4.11.0-notes.md"}',
+   res:{ms:2310, err:true, body:"> acme-platform@4.10.3 release:lint\n> node scripts/release-lint.mjs release/4.11.0-notes.md\n\nerror: heading order — Breaking must precede Fixes (line 12)\n  rule: ctx.release.notes-format §2\n  found: Features, Fixes, Breaking\n  want:  Features, Breaking, Fixes\n\n1 error, 0 warnings\n ELIFECYCLE  Command failed with exit code 1."}},
+  {t:70.0, kind:"reasoning", body:"The linter encodes ctx.release.notes-format and it wants Breaking above Fixes. The old changelog had it the other way; the steering record is the authority, not the history. Swap the two sections and lint again."},
+  {t:70.0, kind:"text", body:"The lint rule wants Breaking before Fixes. Swapping the sections."},
+  {t:70.0, kind:"usage", meta:{model:"claude-opus-5", tin:1188, cache:15284, tout:734, cost:0.6220, req:"req_01JQ7F8R"}},
+  {t:70.1, kind:"tool", title:"edit_file", cls:"mutate", arg:"release/4.11.0-notes.md · move Breaking above Fixes", raw:'{"path":"release/4.11.0-notes.md","old_string":"## Fixes\\n…## Breaking\\n…","new_string":"## Breaking\\n…## Fixes\\n…"}',
+   diff:{path:"release/4.11.0-notes.md", before:NOTES_V1, after:NOTES_V2}, res:{ms:38, body:"Applied edit to release/4.11.0-notes.md"}},
+  {t:72.4, kind:"tool", title:"Bash", cls:"verify", arg:"pnpm release:lint release/4.11.0-notes.md", raw:'{"command":"pnpm release:lint release/4.11.0-notes.md"}',
+   res:{ms:2104, body:"> acme-platform@4.10.3 release:lint\n> node scripts/release-lint.mjs release/4.11.0-notes.md\n\nok · 3 sections · 27 entries · 0 warnings"}},
+  {t:80.4, kind:"reasoning", body:"Lint is clean. Commit on a release branch so main is untouched, then push it so the release can point at the branch."},
+  {t:80.4, kind:"text", body:"Lint passes. Committing the draft to release/4.11.0-notes and pushing the branch."},
+  {t:80.4, kind:"usage", meta:{model:"claude-opus-5", tin:640, cache:16472, tout:388, cost:0.7105, req:"req_01JQ7FAT"}},
+  {t:80.5, kind:"tool", title:"Bash", cls:"repo", arg:"git checkout -b release/4.11.0-notes && git add release/4.11.0-notes.md && git commit -m \"release: 4.11.0 notes draft\"", raw:'{"command":"git checkout -b release/4.11.0-notes && git add release/4.11.0-notes.md && git commit -m \\"release: 4.11.0 notes draft\\""}',
+   res:{ms:212, body:"Switched to a new branch 'release/4.11.0-notes'\n[release/4.11.0-notes 3f2a9c1] release: 4.11.0 notes draft\n 1 file changed, 20 insertions(+)\n create mode 100644 release/4.11.0-notes.md"}},
+  {t:81.0, kind:"tool", title:"Bash", cls:"repo", arg:"git push -u origin release/4.11.0-notes", raw:'{"command":"git push -u origin release/4.11.0-notes"}',
+   res:{ms:1840, body:"To github.com:acme/platform.git\n * [new branch]      release/4.11.0-notes -> release/4.11.0-notes\nbranch 'release/4.11.0-notes' set up to track 'origin/release/4.11.0-notes'."}},
+  {t:88.0, kind:"reasoning", body:"Before cutting the release, check the range once more: the compare between the tag and main should count the same 27 platform pull requests the notes list."},
+  {t:88.0, kind:"text", body:"Checking the tag-to-main compare against the 27 entries before I create the release."},
+  {t:88.0, kind:"usage", meta:{model:"claude-opus-5", tin:512, cache:17104, tout:296, cost:0.5812, req:"req_01JQ7FCV"}},
+  {t:88.1, kind:"tool", title:"github__compare_commits", cls:"verify", arg:"acme/platform · v4.10.3...main", raw:'{"repo":"acme/platform","base":"v4.10.3","head":"main"}',
+   gov:{o:"allow",rule:"rg_0088",fr:5}, res:{ms:930, body:"27 commits ahead, 0 behind · 27 merged pull requests · matches release/4.11.0-notes.md (27 entries)"}},
+  {t:96.9, kind:"reasoning", body:"Everything lines up. Create v4.11.0 as a draft release pointing at the branch; it is irreversible once published, so a draft keeps the decision with the operator."},
+  {t:96.9, kind:"text", body:"Creating the v4.11.0 draft release from release/4.11.0-notes. It stays unpublished until someone approves."},
+  {t:96.9, kind:"usage", meta:{model:"claude-opus-5", tin:1490, cache:17600, tout:912, cost:0.8615, req:"req_01JQ7FEX"}},
+  {t:97.1, kind:"tool", title:"github__create_release", cls:"mutate", arg:"acme/platform · tag v4.11.0 · draft · target release/4.11.0-notes", raw:'{"repo":"acme/platform","tag_name":"v4.11.0","target_commitish":"release/4.11.0-notes","name":"4.11.0","draft":true,"body":"<release/4.11.0-notes.md>"}',
+   gov:{o:"approve",rule:"rg_0093",fr:14}, parked:{ap:"apr_01K5RS3K7", fr:15}, fr:13}
+ ]
+};
+
+/* ===================== the run node's neighbourhood in the graph ===================== */
+/* Every item is an edge on the run node. `edge` says who wrote it: observed = the gateway, from a
+   tool call it saw (cites frames); stated = carried by the task or the mandate; inferred = a light-tier
+   model read the frames and proposed it with a confidence and the frames it leaned on. An inferred
+   edge is labelled as such everywhere it appears and never stands in for the record. */
+var RUNGRAPH = {
+ "run_01K5RS7M2E8FJ3QW": {
+  repos:[{name:"acme/platform", ref:"a4c91e2 · main", note:"read; branch release/4.11.0-notes pushed · main untouched", edge:"observed", fr:[5,7]},
+         {name:"acme/mobile", ref:"excluded", note:"4 pull requests dropped after the operator's steer", edge:"inferred", conf:0.97, fr:[10,12]}],
+  issues:[{ref:"acme/platform#482", title:"Cut 4.11.0 release notes", rel:"task", edge:"stated"},
+          {ref:"acme/platform#471", title:"Changelog duplicated the 4.10.3 fixes under two headings", rel:"resolves · the draft lists each fix once", edge:"inferred", conf:0.84, fr:[9,12]},
+          {ref:"acme/platform#465", title:"Release notes should follow ctx.release.notes-format", rel:"relates · lint rule applied", edge:"inferred", conf:0.91, fr:[12]}],
+  artifacts:[{kind:"branch", ref:"release/4.11.0-notes @ 3f2a9c1", title:"1 file · +20 −0 · pushed to origin", state:"pushed", edge:"observed"},
+             {kind:"release", ref:"v4.11.0 · draft", title:"github__create_release · parked for approval", state:"pending", edge:"observed", fr:[14,15]},
+             {kind:"pr", ref:"none yet", title:"the draft rides the branch; a pull request follows approval", state:"none", edge:"inferred", conf:0.78}],
+  files:[{path:"release/4.11.0-notes.md", before:"", after:NOTES_V2, note:"new file · 2 writes"}]
+ },
+ "run_01K5RQ4B9C7XTN2P": {
+  repos:[{name:"acme/platform", ref:"f70b3d9 · refs/pull/482/head vs a4c91e2 main", note:"checked out read-only; nothing written", edge:"observed", fr:[58,71]}],
+  issues:[{ref:"acme/platform#482", title:"Cut 4.11.0 release notes", rel:"witnesses the contract on this pull request", edge:"stated"}],
+  artifacts:[{kind:"witness", ref:"wit_01K5RQ8M4", title:"notes.contract.test.ts · fail, fail, pass", state:"sealed", edge:"observed", fr:[62,66,71]}],
+  files:[]
+ },
+ "run_01K5RP2D6H4KLM8V": {
+  repos:[{name:"acme/platform", ref:"issue #511", note:"labels and one comment; no branch", edge:"observed"}],
+  issues:[{ref:"acme/platform#511", title:"Label: flaky worker restart", rel:"task · labelled flaky-test, area:worker", edge:"stated"},
+          {ref:"acme/platform#452", title:"Worker restart drops the in-flight approval", rel:"relates · same restart path", edge:"inferred", conf:0.72}],
+  artifacts:[{kind:"comment", ref:"#511 · comment", title:"reproduction command posted", state:"posted", edge:"observed"}],
+  files:[]
+ },
+ "run_01K5RM1A5Z9QWE4R": {
+  repos:[{name:"acme/platform", ref:"docs/operator", note:"branch docs/kill-switches pushed", edge:"observed"}],
+  issues:[{ref:"acme/platform#490", title:"Operator guide: explain deny generation", rel:"resolves · closed by the pull request", edge:"inferred", conf:0.88}],
+  artifacts:[{kind:"pr", ref:"acme/platform#498", title:"docs: kill-switches deny generation · +84 −12", state:"open", edge:"observed"}],
+  files:[{path:"docs/operator/kill-switches.md", before:"## Kill switches\n\nA kill switch stops a tool for everyone.\n\nFlip it and the next call is denied.", after:"## Kill switches\n\nA kill switch stops a tool for everyone in the workspace.\n\nFlip it and every later policy decision carries the deny generation, so a reader can tell which decisions the switch shaped.\n\n### Worked example\n\n1. Arm `stripe__create_payment` at 09:12.\n2. The parked call at 09:14 is denied with generation 118.", note:"+84 −12 on the pull request; excerpt"}]
+ },
+ "run_01K5RK7C2V8BNM3X": {
+  repos:[{name:"acme/platform", ref:"release/4.10", note:"four cherry-pick attempts, all conflicted", edge:"observed"}],
+  issues:[{ref:"acme/platform#462", title:"Backport 4.10.3 to release/4.10", rel:"task", edge:"stated"}],
+  artifacts:[{kind:"pr", ref:"acme/platform#476", title:"backport 4.10.3 · check failing", state:"failing", edge:"observed"}],
+  files:[{path:"packages/release/backport.ts", before:"export function pick(sha: string) {\n  return run(`git cherry-pick ${sha}`);\n}", after:"export function pick(sha: string) {\n<<<<<<< HEAD\n  return run(`git cherry-pick ${sha}`);\n=======\n  return run(`git cherry-pick -x ${sha}`);\n>>>>>>> 4.10.3\n}", note:"conflict marker left in the tree"}]
+ }
+};
 
 var FINDINGS = [
  {id:"fnd_01K5RTGH",kind:"Unpaged results",level:"tool",subject:"aws_billing__get_cost_and_usage",
@@ -1878,31 +2163,22 @@ function run(id){for(var i=0;i<RUNS.length;i++){if(RUNS[i].id===id)return RUNS[i
 
 /* ===================== avatars ===================== */
 /* One record shape for people and agents, stored on the record itself:
-   {kind:"emoji"|"initials"|"photo", text, font:"sans"|"serif"|"mono",
-    bg:{mode:"solid"|"gradient", a:"#hex", b:"#hex", angle}, src:"data:…"}
+   {kind:"icon"|"initials"|"photo", icon:"rocket", text:"PN", font:"sans"|"serif"|"mono", tone:"solid"|"soft"|"line", src:"data:…"}
+   Tone is one of three from the house scale, each relative to the theme. There is no free colour and no gradient, so every avatar sits inside the palette
+   and none can fall outside it. Glyphs are Lucide (ISC), the set the product ships, one line weight, drawn in currentColor.
    People render round, agents render as squircles, so the two never read alike at a glance. */
-var AV_PALETTE=["#5B93D6","#3FA2A2","#57A97C","#A6B95E","#9D8BE3","#D677B5","#D08FA0","#C66A4A","#94A3C2","#9B958A","#34322D","#F2EEE5"];
-var AV_EMOJI=["🚀","🧭","🔬","🩺","📝","🧾","🛠️","🧪","🔐","📦","🛰️","🤖","🦉","🐙","🦀","🌱","⚙️","🧠","🔎","📡","🪄","🧱","🎯","🗂️"];
-function avRgb(c){c=String(c||"#6E6A62").replace("#","");if(c.length===3)c=c[0]+c[0]+c[1]+c[1]+c[2]+c[2];return [parseInt(c.slice(0,2),16)||0,parseInt(c.slice(2,4),16)||0,parseInt(c.slice(4,6),16)||0];}
-function avHex(r){return "#"+r.map(function(v){v=Math.max(0,Math.min(255,Math.round(v)));return (v<16?"0":"")+v.toString(16);}).join("").toUpperCase();}
-function avLum(c){var r=avRgb(c);return (0.2126*r[0]+0.7152*r[1]+0.0722*r[2])/255;}
-function avInk(bg){bg=bg||{};var l=bg.mode==="gradient"?(avLum(bg.a)+avLum(bg.b||avAuto(bg.a)))/2:avLum(bg.a);return l>0.6?"#10100F":"#F2EEE5";}
-/* auto gradient: rotate the hue forty degrees and lift the lightness a touch, so any solid gets a companion in the same family */
-function avAuto(c){
-  var r=avRgb(c).map(function(v){return v/255;}),mx=Math.max(r[0],r[1],r[2]),mn=Math.min(r[0],r[1],r[2]),l=(mx+mn)/2,hh=0,sa=0,d=mx-mn;
-  if(d){sa=l>0.5?d/(2-mx-mn):d/(mx+mn);hh=mx===r[0]?((r[1]-r[2])/d+(r[1]<r[2]?6:0)):mx===r[1]?((r[2]-r[0])/d+2):((r[0]-r[1])/d+4);hh/=6;}
-  hh=(hh+40/360)%1; l=Math.min(0.85,l+0.12); sa=Math.min(1,sa+0.05);
-  var q=l<0.5?l*(1+sa):l+sa-l*sa,p=2*l-q,f=function(t){t=(t+1)%1;return t<1/6?p+(q-p)*6*t:t<1/2?q:t<2/3?p+(q-p)*(2/3-t)*6:p;};
-  return avHex([f(hh+1/3)*255,f(hh)*255,f(hh-1/3)*255]);
-}
-function avFill(bg){bg=bg||{mode:"solid",a:"#6E6A62"};return bg.mode==="gradient"?"linear-gradient("+(bg.angle||135)+"deg,"+bg.a+" 0%,"+(bg.b||avAuto(bg.a))+" 100%)":bg.a;}
+var AV_TONES=[["solid","Solid"],["soft","Soft"],["line","Line"]];
+var AV_ICON_ORDER=["rocket", "compass", "microscope", "stethoscope", "pencil-line", "receipt", "wrench", "flask-conical", "key-round", "package", "satellite", "bot", "bird", "bug", "sprout", "cog", "brain", "search", "radio-tower", "wand-sparkles", "brick-wall", "target", "folder-tree", "shield-check"];
+var AV_ICONS={"rocket":'<path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09"/><path d="M9 12a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.4 22.4 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 .05 5 .05"/>',"compass":'<circle cx="12" cy="12" r="10"/><path d="m16.24 7.76-1.804 5.411a2 2 0 0 1-1.265 1.265L7.76 16.24l1.804-5.411a2 2 0 0 1 1.265-1.265z"/>',"microscope":'<path d="M6 18h8"/><path d="M3 22h18"/><path d="M14 22a7 7 0 1 0 0-14h-1"/><path d="M9 14h2"/><path d="M9 12a2 2 0 0 1-2-2V6h6v4a2 2 0 0 1-2 2Z"/><path d="M12 6V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3"/>',"stethoscope":'<path d="M11 2v2"/><path d="M5 2v2"/><path d="M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1"/><path d="M8 15a6 6 0 0 0 12 0v-3"/><circle cx="20" cy="10" r="2"/>',"pencil-line":'<path d="M13 21h8"/><path d="m15 5 4 4"/><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>',"receipt":'<path d="M12 17V7"/><path d="M16 8h-6a2 2 0 0 0 0 4h4a2 2 0 0 1 0 4H8"/><path d="M4 3a1 1 0 0 1 1-1 1.3 1.3 0 0 1 .7.2l.933.6a1.3 1.3 0 0 0 1.4 0l.934-.6a1.3 1.3 0 0 1 1.4 0l.933.6a1.3 1.3 0 0 0 1.4 0l.933-.6a1.3 1.3 0 0 1 1.4 0l.934.6a1.3 1.3 0 0 0 1.4 0l.933-.6A1.3 1.3 0 0 1 19 2a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1 1.3 1.3 0 0 1-.7-.2l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.934.6a1.3 1.3 0 0 1-1.4 0l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-1.4 0l-.934-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-.7.2 1 1 0 0 1-1-1z"/>',"wrench":'<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z"/>',"flask-conical":'<path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"/><path d="M6.453 15h11.094"/><path d="M8.5 2h7"/>',"key-round":'<path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"/><circle cx="16.5" cy="7.5" r=".5" fill="currentColor"/>',"package":'<path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><polyline points="3.29 7 12 12 20.71 7"/><path d="m7.5 4.27 9 5.15"/>',"satellite":'<path d="m13.5 6.5-3.148-3.148a1.205 1.205 0 0 0-1.704 0L6.352 5.648a1.205 1.205 0 0 0 0 1.704L9.5 10.5"/><path d="M16.5 7.5 19 5"/><path d="m17.5 10.5 3.148 3.148a1.205 1.205 0 0 1 0 1.704l-2.296 2.296a1.205 1.205 0 0 1-1.704 0L13.5 14.5"/><path d="M9 21a6 6 0 0 0-6-6"/><path d="M9.352 10.648a1.205 1.205 0 0 0 0 1.704l2.296 2.296a1.205 1.205 0 0 0 1.704 0l4.296-4.296a1.205 1.205 0 0 0 0-1.704l-2.296-2.296a1.205 1.205 0 0 0-1.704 0z"/>',"bot":'<path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/>',"bird":'<path d="M16 7h.01"/><path d="M3.4 18H12a8 8 0 0 0 8-8V7a4 4 0 0 0-7.28-2.3L2 20"/><path d="m20 7 2 .5-2 .5"/><path d="M10 18v3"/><path d="M14 17.75V21"/><path d="M7 18a6 6 0 0 0 3.84-10.61"/>',"bug":'<path d="M12 20v-9"/><path d="M14 7a4 4 0 0 1 4 4v3a6 6 0 0 1-12 0v-3a4 4 0 0 1 4-4z"/><path d="M14.12 3.88 16 2"/><path d="M21 21a4 4 0 0 0-3.81-4"/><path d="M21 5a4 4 0 0 1-3.55 3.97"/><path d="M22 13h-4"/><path d="M3 21a4 4 0 0 1 3.81-4"/><path d="M3 5a4 4 0 0 0 3.55 3.97"/><path d="M6 13H2"/><path d="m8 2 1.88 1.88"/><path d="M9 7.13V6a3 3 0 1 1 6 0v1.13"/>',"sprout":'<path d="M14 9.536V7a4 4 0 0 1 4-4h1.5a.5.5 0 0 1 .5.5V5a4 4 0 0 1-4 4 4 4 0 0 0-4 4c0 2 1 3 1 5a5 5 0 0 1-1 3"/><path d="M4 9a5 5 0 0 1 8 4 5 5 0 0 1-8-4"/><path d="M5 21h14"/>',"cog":'<path d="M11 10.27 7 3.34"/><path d="m11 13.73-4 6.93"/><path d="M12 22v-2"/><path d="M12 2v2"/><path d="M14 12h8"/><path d="m17 20.66-1-1.73"/><path d="m17 3.34-1 1.73"/><path d="M2 12h2"/><path d="m20.66 17-1.73-1"/><path d="m20.66 7-1.73 1"/><path d="m3.34 17 1.73-1"/><path d="m3.34 7 1.73 1"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="12" r="8"/>',"brain":'<path d="M12 18V5"/><path d="M15 13a4.17 4.17 0 0 1-3-4 4.17 4.17 0 0 1-3 4"/><path d="M17.598 6.5A3 3 0 1 0 12 5a3 3 0 1 0-5.598 1.5"/><path d="M17.997 5.125a4 4 0 0 1 2.526 5.77"/><path d="M18 18a4 4 0 0 0 2-7.464"/><path d="M19.967 17.483A4 4 0 1 1 12 18a4 4 0 1 1-7.967-.517"/><path d="M6 18a4 4 0 0 1-2-7.464"/><path d="M6.003 5.125a4 4 0 0 0-2.526 5.77"/>',"search":'<path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/>',"radio-tower":'<path d="M4.9 16.1C1 12.2 1 5.8 4.9 1.9"/><path d="M7.8 4.7a6.14 6.14 0 0 0-.8 7.5"/><circle cx="12" cy="9" r="2"/><path d="M16.2 4.8c2 2 2.26 5.11.8 7.47"/><path d="M19.1 1.9a9.96 9.96 0 0 1 0 14.1"/><path d="M9.5 18h5"/><path d="m8 22 4-11 4 11"/>',"wand-sparkles":'<path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72"/><path d="m14 7 3 3"/><path d="M5 6v4"/><path d="M19 14v4"/><path d="M10 2v2"/><path d="M7 8H3"/><path d="M21 16h-4"/><path d="M11 3H9"/>',"brick-wall":'<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M12 9v6"/><path d="M16 15v6"/><path d="M16 3v6"/><path d="M3 15h18"/><path d="M3 9h18"/><path d="M8 15v6"/><path d="M8 3v6"/>',"target":'<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',"folder-tree":'<path d="M20 10a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-2.5a1 1 0 0 1-.8-.4l-.9-1.2A1 1 0 0 0 15 3h-2a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1Z"/><path d="M20 21a1 1 0 0 0 1-1v-3a1 1 0 0 0-1-1h-2.9a1 1 0 0 1-.88-.55l-.42-.85a1 1 0 0 0-.92-.6H13a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1Z"/><path d="M3 5a2 2 0 0 0 2 2h3"/><path d="M3 3v13a2 2 0 0 0 2 2h3"/>',"shield-check":'<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>'};
+function avSvg(name){var d=AV_ICONS[name]||AV_ICONS.bot;return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+d+'</svg>';}
+function avTone(t){for(var i=0;i<AV_TONES.length;i++){if(AV_TONES[i][0]===t)return t;}return "soft";}
 function avatarHtml(av,size,shape,extra){
-  size=size||28; av=av||{kind:"initials",text:"?",font:"sans",bg:{mode:"solid",a:"#6E6A62"}};
+  size=size||28; av=av||{kind:"initials",text:"?",font:"sans",tone:"soft"};
   var st="width:"+size+"px;height:"+size+"px;",cls="avx "+(shape||"person")+(extra?" "+extra:""),inner="";
   if(av.kind==="photo"&&av.src){inner='<img src="'+h(av.src)+'" alt="">';}
-  else if(av.kind==="emoji"){cls+=" emo";st+="background:"+avFill(av.bg)+";font-size:"+Math.round(size*0.56)+"px;";inner=h(av.text||"🤖");}
-  else{var t=String(av.text||"?").slice(0,3);cls+=" f-"+(av.font||"sans");
-    st+="background:"+avFill(av.bg)+";color:"+avInk(av.bg)+";font-size:"+Math.round(size*(t.length>=3?0.36:t.length===2?0.42:0.5))+"px;";inner=h(t);}
+  else if(av.kind==="icon"){cls+=" ic tn-"+avTone(av.tone);inner=avSvg(av.icon);}
+  else{var t=String(av.text||"?").slice(0,3);cls+=" f-"+(av.font||"sans")+" tn-"+avTone(av.tone);
+    st+="font-size:"+Math.round(size*(t.length>=3?0.36:t.length===2?0.42:0.5))+"px;";inner=h(t);}
   return '<span class="'+cls+'" style="'+st+'" aria-hidden="true">'+inner+'</span>';
 }
 function personAv(key,size){var p=PEOPLE[key];return p?avatarHtml(p.avatar,size,"person"):"";}
@@ -1911,8 +2187,7 @@ function agentUrl(a){return "#/"+ORG.slug+"/"+a.ws+"/agents/"+a.key.split(".").p
 function avDescribe(av){
   if(!av) return "no avatar";
   if(av.kind==="photo") return av.src?"photo · "+Math.max(1,Math.round(av.src.length*0.75/1024))+" KB":"photo · none chosen yet";
-  var bg=av.bg&&av.bg.mode==="gradient"?"gradient "+av.bg.a+" → "+(av.bg.b||avAuto(av.bg.a)):"solid "+(av.bg?av.bg.a:"");
-  return (av.kind==="emoji"?"emoji":"initials · "+(av.font||"sans"))+" · "+bg;
+  return (av.kind==="icon"?"icon · "+(AV_ICONS[av.icon]?av.icon:"bot"):"initials · "+(av.font||"sans"))+" · "+avTone(av.tone)+" tone";
 }
 /* who is involved in a run: the agent that acted, carrying the operator's authority */
 function involved(R){
@@ -1939,29 +2214,30 @@ function runSummary(R){
 /* ===================== avatar builder ===================== */
 /* S.dlgArg is "agent:<key>", "person:<key>" or "new"; the draft lives on S.avDraft until Save. */
 function avTarget(){var s=String(S.dlgArg||""),i=s.indexOf(":");return i<0?{kind:s}:{kind:s.slice(0,i),key:s.slice(i+1)};}
-function avDefault(text){return {kind:"initials",text:text||"AG",font:"sans",bg:{mode:"gradient",a:"#5B93D6",b:avAuto("#5B93D6"),angle:135}};}
+function avDefault(text,icon){return icon?{kind:"icon",icon:icon,tone:"solid"}:{kind:"initials",text:text||"AG",font:"sans",tone:"solid"};}
 function avClone(av){return JSON.parse(JSON.stringify(av));}
-function newAgentAv(){return S.newAv||avDefault("PW");}
+function newAgentAv(){return S.newAv||avDefault(null,"radio-tower");}
 function openAvatar(target){
   var i=target.indexOf(":"),kind=i<0?target:target.slice(0,i),key=i<0?null:target.slice(i+1),cur=null;
   if(kind==="agent"&&agent(key))cur=agent(key).avatar;
   else if(kind==="person"&&PEOPLE[key])cur=PEOPLE[key].avatar;
   else if(kind==="new")cur=S.newAv;
-  S.avDraft=avClone(cur||avDefault(kind==="new"?"PW":"?"));
-  if(!S.avDraft.bg)S.avDraft.bg={mode:"solid",a:"#5B93D6"};
-  if(!S.avDraft.text)S.avDraft.text=kind==="new"?"PW":"?";
+  var d=avClone(cur||(kind==="new"?newAgentAv():avDefault("?")));
+  d.tone=avTone(d.tone);
+  if(d.kind==="icon"&&!AV_ICONS[d.icon])d.icon="bot";
+  if(d.kind==="initials"&&!(d.text||"").trim())d.text=kind==="new"?"PW":"?";
+  if(d.kind!=="icon"&&d.kind!=="initials"&&d.kind!=="photo")d.kind="initials";
+  S.avDraft=d;
   openDialog("avatar",target);
 }
 function avSet(k,v){var d=S.avDraft;if(!d)return;
-  if(k==="mode"){d.bg.mode=v;if(v==="gradient"&&!d.bg.b)d.bg.b=avAuto(d.bg.a);}
-  else if(k==="a"||k==="b"||k==="angle"){d.bg[k]=v;}
-  else if(k==="kind"){d.kind=v;if(v==="emoji"&&!/\p{Extended_Pictographic}/u.test(d.text||""))d.text="🤖";if(v==="initials"&&/\p{Extended_Pictographic}/u.test(d.text||""))d.text="AG";}
+  if(k==="kind"){d.kind=v;if(v==="icon"&&!AV_ICONS[d.icon])d.icon="bot";if(v==="initials"&&!(d.text||"").trim())d.text="AG";}
+  else if(k==="tone"){d.tone=avTone(v);}
+  else if(k==="icon"){if(AV_ICONS[v])d.icon=v;}
   else d[k]=v;
   render();}
-function avType(k,v){var d=S.avDraft;if(!d)return;if(k==="a"||k==="b")d.bg[k]=v;else d[k]=v;avPatch();}
-function avPatch(){var p=el("av-prev");if(p)p.innerHTML=avPrevInner();var l=el("av-lbl-a");if(l)l.textContent=S.avDraft.bg.a;var m=el("av-lbl-b");if(m)m.textContent=S.avDraft.bg.b||"";}
-function avAutoNow(){var d=S.avDraft;d.bg.mode="gradient";d.bg.b=avAuto(d.bg.a);render();}
-function avShuffle(){var d=S.avDraft,a=AV_PALETTE[Math.floor(Math.random()*9)];d.bg.a=a;d.bg.b=avAuto(a);d.bg.mode="gradient";d.bg.angle=[90,135,180,225][Math.floor(Math.random()*4)];render();}
+function avType(k,v){var d=S.avDraft;if(!d)return;d[k]=v;avPatch();}
+function avPatch(){var p=el("av-prev");if(p)p.innerHTML=avPrevInner();}
 function avClearSrc(){S.avDraft.src=null;render();}
 function avSample(){S.avDraft.kind="photo";S.avDraft.src=AV_SAMPLE_PHOTO;render();}
 function avFile(inp){
@@ -1974,15 +2250,19 @@ function avPrevInner(){
   return avatarHtml(d,72,shape)+'<div class="sizes">'+avatarHtml(d,36,shape)+avatarHtml(d,24,shape)+avatarHtml(d,18,shape)+'</div><div class="cap">'+h(avDescribe(d))+'</div>';
 }
 function avSeg(items,cur,k){return '<div class="av-seg" role="group">'+items.map(function(x){return '<button type="button" class="'+(x[2]||"")+'" aria-pressed="'+(cur===x[0])+'" onclick="avSet(\''+k+'\',\''+x[0]+'\')">'+x[1]+'</button>';}).join("")+'</div>';}
+/* the three tones as live swatches: each is the draft itself in that tone, so what you pick is what you get */
+function avToneRow(d,shape){
+  return '<div class="av-tone" role="group" aria-label="Tone">'+AV_TONES.map(function(t){var s=avClone(d);s.tone=t[0];
+    return '<button type="button" aria-pressed="'+(avTone(d.tone)===t[0])+'" aria-label="'+t[1]+'" title="'+t[1]+'" onclick="avSet(\'tone\',\''+t[0]+'\')">'+avatarHtml(s,32,shape)+'</button>';}).join("")+'</div>';
+}
 function avatarBody(){
   var d=S.avDraft; if(!d) return '';
-  var t=avTarget(), forPerson=t.kind==="person";
+  var t=avTarget(), forPerson=t.kind==="person", shape=forPerson?"person":"agent";
   var out='<div class="avb"><div class="avb-prev" id="av-prev">'+avPrevInner()+'</div><div>';
-  out+='<div class="field"><label>Kind</label>'+avSeg([["emoji","Emoji"],["initials","Initials"],["photo","Photo"]],d.kind,"kind")+'</div>';
-  if(d.kind==="emoji"){
-    out+='<div class="field"><label for="av-emoji">Emoji</label><input id="av-emoji" class="emo" maxlength="8" value="'+h(d.text||"")+'" oninput="avType(\'text\',this.value)" aria-label="Emoji">'+
-     '<div class="av-emo">'+AV_EMOJI.map(function(e){return '<button type="button" aria-pressed="'+(d.text===e)+'" onclick="avSet(\'text\',\''+e+'\')">'+e+'</button>';}).join("")+'</div>'+
-     '<div class="hint">One emoji. Type any, or pick one here.</div></div>';
+  out+='<div class="field"><label>Kind</label>'+avSeg([["icon","Icon"],["initials","Initials"],["photo","Photo"]],d.kind,"kind")+'</div>';
+  if(d.kind==="icon"){
+    out+='<div class="field"><label>Icon</label><div class="av-ico">'+AV_ICON_ORDER.map(function(n){return '<button type="button" aria-pressed="'+(d.icon===n)+'" aria-label="'+n+'" title="'+n+'" onclick="avSet(\'icon\',\''+n+'\')">'+avSvg(n)+'</button>';}).join("")+'</div>'+
+     '<div class="hint">Lucide glyphs, the set the product ships. One line weight, drawn in the tone\'s ink.</div></div>';
   } else if(d.kind==="initials"){
     out+='<div class="fields"><div class="field"><label for="av-txt">Letters</label><input id="av-txt" class="short" maxlength="3" value="'+h(d.text||"")+'" oninput="avType(\'text\',this.value.slice(0,3))" aria-label="Letters"><div class="hint">Up to three.</div></div>'+
      '<div class="field"><label>Typeface</label>'+avSeg([["sans","Sans","f-sans"],["serif","Serif","f-serif"],["mono","Mono","f-mono"]],d.font||"sans","font")+'</div></div>';
@@ -1993,15 +2273,8 @@ function avatarBody(){
      '<div class="hint">Stored content-addressed; the definition carries the digest, never the bytes.</div></div>';
   }
   if(d.kind!=="photo"){
-    var bg=d.bg;
-    out+='<div class="field"><label>Background</label>'+avSeg([["solid","Solid"],["gradient","Gradient"]],bg.mode,"mode")+
-     '<div class="av-sw">'+AV_PALETTE.map(function(c){return '<button type="button" class="sw" style="background:'+c+'" aria-pressed="'+(String(bg.a).toUpperCase()===c)+'" aria-label="'+c+'" title="'+c+'" onclick="avSet(\'a\',\''+c+'\')"></button>';}).join("")+'</div>'+
-     '<div class="av-sw" style="margin-top:10px"><input type="color" value="'+h(bg.a)+'" oninput="avType(\'a\',this.value)" aria-label="Start colour"><span class="lbl" id="av-lbl-a">'+h(bg.a)+'</span>'+
-     (bg.mode==="gradient"?'<input type="color" value="'+h(bg.b||avAuto(bg.a))+'" oninput="avType(\'b\',this.value)" aria-label="End colour" style="margin-left:8px"><span class="lbl" id="av-lbl-b">'+h(bg.b||avAuto(bg.a))+'</span>'+
-       '<select aria-label="Angle" style="width:auto;margin-left:8px;padding:4px 8px;font-size:12px" onchange="avSet(\'angle\',+this.value)">'+[45,90,135,180,225].map(function(g){return '<option value="'+g+'"'+((bg.angle||135)===g?' selected':'')+'>'+g+'°</option>';}).join("")+'</select>'+
-       '<button type="button" class="btn sm" style="margin-left:4px" onclick="avAutoNow()">Auto</button>':'')+
-     '<button type="button" class="btn sm ghost" style="margin-left:4px" onclick="avShuffle()">Shuffle</button></div>'+
-     '<div class="hint">'+(bg.mode==="gradient"?'Auto picks the second colour from the first: forty degrees round the wheel and a touch lighter.':'Letters flip to ink or paper on their own for contrast.')+'</div></div>';
+    out+='<div class="field"><label>Tone</label>'+avToneRow(d,shape)+
+     '<div class="hint">Solid, soft or line. Three tones from the house scale, each fixing its own glyph colour, so there is no combination that fails.</div></div>';
   }
   out+='</div></div>';
   out+='<div class="note" style="margin-top:6px">'+(forPerson?'Saved with <span class="mono">set_preferences</span> and recorded as a frame, like any change to your account.':
@@ -2020,8 +2293,9 @@ function avatarDlg(){
 function avCancel(){var t=avTarget();S.avDraft=null;if(t.kind==="new")openDialog("register");else if(t.kind==="person")openDialog("account","profile");else closeDialog();}
 function avSave(){
   var t=avTarget(),d=S.avDraft; if(!d){closeDialog();return;}
-  if(d.kind==="photo"&&!d.src){act("Choose a photo first, or switch to emoji or initials.");return;}
-  if(d.kind!=="photo"&&!(d.text||"").trim()){act(d.kind==="emoji"?"Pick an emoji first.":"Type at least one letter.");return;}
+  if(d.kind==="photo"&&!d.src){act("Choose a photo first, or switch to an icon or initials.");return;}
+  if(d.kind==="initials"&&!(d.text||"").trim()){act("Type at least one letter.");return;}
+  if(d.kind==="icon"&&!AV_ICONS[d.icon]){act("Pick an icon first.");return;}
   if(d.kind!=="photo")delete d.src;
   S.avDraft=null;
   if(t.kind==="agent"&&agent(t.key)){agent(t.key).avatar=d;closeDialog();act("Avatar updated on "+t.key+". The definition change opens as a Context PR; the badge shows here now.");}
@@ -2134,25 +2408,25 @@ function toolById(id){for(var i=0;i<TOOLS.length;i++){if(TOOLS[i].n+"@"+TOOLS[i]
 var TCAT_ORDER=["read","query","record","message","file","exec","vcs","infra","access","finance"];
 var TCAT={
  read:{l:"Read-only",s:"Observes and returns. Changes nothing anywhere.",eg:"github__get_file_contents · slack__get_thread · search_graph",
-   i:'<path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"/><circle cx="12" cy="12" r="3"/>'},
+   i:'<path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/>'},
  query:{l:"Data query",s:"Bulk read from a store. Read-only, but the result set is the exfiltration and the cost.",eg:"snowflake__run_query · aws_billing__get_cost_and_usage",
-   i:'<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/>'},
+   i:'<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/>'},
  record:{l:"Record write",s:"Creates or updates a record in a system of work. Reversible by another write.",eg:"linear__update_issue · calendar__create_event · notion__update_page",
-   i:'<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h8M8 17h5"/>'},
+   i:'<rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/>'},
  message:{l:"Messaging & authoring",s:"Speaks to people on the organization’s behalf. A sent message cannot be unsent.",eg:"slack__post_message · slack__upload_file · gmail__send_message",
-   i:'<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1.1-4.2A8 8 0 1 1 21 12z"/><path d="M8 11h8M8 14h5"/>'},
+   i:'<path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"/><path d="M7 11h10"/><path d="M7 15h6"/><path d="M7 7h8"/>'},
  file:{l:"File mutation",s:"Writes, edits, moves or deletes files in a workspace or a drive.",eg:"write__file · edit__file · drive__trash_file",
-   i:'<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 15l2 2 4-4"/>'},
+   i:'<path d="M14.364 13.634a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506l4.013-4.009a1 1 0 0 0-3.004-3.004z"/><path d="M14.487 7.858A1 1 0 0 1 14 7V2"/><path d="M20 19.645V20a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l2.516 2.516"/><path d="M8 18h1"/>'},
  exec:{l:"Code execution",s:"Runs a command or a program. Its effect is whatever the sandbox allows.",eg:"claude_code__Bash · bash__run · sandbox__run_python",
-   i:'<path d="m4 17 6-5-6-5M12 19h8"/>'},
+   i:'<path d="M12 19h8"/><path d="m4 17 6-6-6-6"/>'},
  vcs:{l:"Source control",s:"Changes code history: branches, pull requests, merges, releases, repositories.",eg:"github__create_pull_request · github__merge_pull_request · github__delete_repository",
-   i:'<circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="8" r="2.5"/><path d="M6 8.5v7M18 10.5c0 4-12 2-12 6"/>'},
+   i:'<path d="M15 6a9 9 0 0 0-9 9V3"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/>'},
  infra:{l:"Infrastructure",s:"Deploys, scales, pauses or reconfigures a running system.",eg:"vercel__deploy_to_vercel · vercel__pause_project · k8s__scale_deployment",
-   i:'<rect x="3" y="4" width="18" height="6" rx="1.5"/><rect x="3" y="14" width="18" height="6" rx="1.5"/><path d="M7 7h.01M7 17h.01"/>'},
+   i:'<rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/>'},
  access:{l:"Access & identity",s:"Grants, shares, rotates or revokes access. Widens what every later call can reach.",eg:"drive__share_file · iam__rotate_key · oxagen__grant_role",
-   i:'<circle cx="8" cy="12" r="4"/><path d="M12 12h9M18 12v3M15 12v2"/>'},
+   i:'<path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"/><circle cx="16.5" cy="7.5" r=".5" fill="currentColor"/>'},
  finance:{l:"Financial control",s:"Moves funds or commits spend. Never callable without a mandate.",eg:"stripe__create_payment · stripe__create_refund · aws_billing__purchase_savings_plan",
-   i:'<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01M18 12h.01"/>'}
+   i:'<rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/>'}
 };
 /* label + category per API name. Anything not listed is humanized and classified by its verb. */
 var TOOLMETA={
@@ -2305,6 +2579,7 @@ function route(){
   var org=p[0];
   if(p.length===1) return {page:"organization",org:org};
   if(p[1]==="api-keys"){S.tab.organization="keys";return {page:"organization",org:org,tab:"keys"};}
+  if(p[1]==="roles"){S.tab.organization="roles";return {page:"organization",org:org,tab:"roles"};}
   if(p[1]==="billing") return {page:"billing",org:org};
   if(p[1]==="audit"){if(p[2])S.tab.audit=p[2];return {page:"audit",org:org};}
   var w=p[1]; S.ws=w;
@@ -2925,7 +3200,7 @@ function pFleet(){
     var a=agent(r.agent);
     return '<tr class="click'+(r.verdict==="flipped"?' flipped':'')+'" onclick="go(\'#/'+ORG.slug+'/'+w.slug+'/runs/'+r.id+'\')">'+
      '<td><span class="tid">'+h(r.id)+'</span><div class="dim" style="font-size:11.5px">'+h(r.taskTitle)+'</div></td>'+
-     '<td><div class="row" style="gap:9px;flex-wrap:nowrap">'+agentAv(a,26)+'<div style="min-width:0"><span class="tkey">'+h(r.agent)+'</span><div class="dim" style="font-size:11.5px">'+h(a?a.harnessLabel:"")+'</div></div></div></td>'+
+     '<td><div class="row" style="gap:9px;flex-wrap:nowrap">'+agentAv(a,26)+'<div style="min-width:0"><span class="tkey">'+h(r.agent)+'</span><div class="dim" style="font-size:11.5px">'+h(a?a.harnessLabel:"")+'</div>'+(a?scorePair(a,true):'')+'</div></div></td>'+
      '<td><span class="row" style="gap:7px;flex-wrap:nowrap;white-space:nowrap">'+personAv(r.op,22)+h(PEOPLE[r.op].name)+'</span></td>'+
      '<td>'+statusBadge(r.status)+'</td>'+
      '<td>'+tierBadge(r.tier)+'</td>'+
@@ -3070,12 +3345,13 @@ function approvalCard(a){
    '<div class="aphead"><div style="min-width:0">'+
     '<p class="eyebrow" style="margin-bottom:6px">'+(done?'Approval '+h(st.status):'Approval required')+' · governed action</p>'+
     (a.amount?'<div class="amt">'+usd(a.amount)+'<span class="cur">'+h(a.currency)+'</span></div>':'<div class="amt" style="font-size:17px">'+h(a.tool)+'</div>')+
+    '<div class="row" style="margin-top:6px;gap:7px"><span class="mono" style="font-size:11.5px">'+h(a.agent)+'</span>'+scorePair(a.agent,true)+'</div>'+
     '<div class="muted" style="font-size:12.5px;margin-top:4px">'+(a.amount?'<span class="mono">'+h(a.tool)+'</span> → ':'')+'<span class="mono">'+h(a.counterparty)+'</span>'+
      (r?'<br>task <span class="mono">'+h(r.task)+'</span> '+h(r.taskTitle):'')+'</div>'+
     '<div class="row" style="margin-top:9px">'+riskBadge(a.risk)+
      '<span class="b '+(a.side==="irreversible"?"b-denied":"b-q")+' mono">side_effect '+h(a.side)+'</span>'+
      (a.tainted?'<span class="b b-critical"><span class="d"></span>tainted</span>':'')+
-     '<span class="b b-q mono">egress '+h(a.egress)+'</span>'+tierBadge(a.tier)+'</div></div>'+
+     '<span class="b b-q mono">egress '+h(a.egress)+'</span>'+tierBadge(a.tier)+'</div>'+autoEligibilityLine(a)+'</div>'+
     '<div class="r"><span class="eyebrow q" style="font-size:10px;margin:0">'+(done?'resolved':'times out in')+'</span>'+clk+
      '<span class="dim mono" style="font-size:10.5px">parked '+h(a.parkedAt||"")+' · timeout '+h(a.timeout)+'</span>'+
      (done?'':'<span class="dim" style="font-size:11px;max-width:22ch;text-align:right">on expiry the call ends and the reason reaches the model</span>')+'</div></div>'+
@@ -3159,13 +3435,13 @@ function pRun(r){
     "Oxagen minted a run token and the agent has not made its first model call. Nothing is wrong; a run with no frames has cost nothing and is not billable.",
     '<button class="btn" onclick="go(\'#/'+ORG.slug+'/'+S.ws+'\')">Back to Fleet</button>');
 
-  var a=agent(R.agent), t=tab("run","player");
+  var a=agent(R.agent), t=tab("run","transcript"), govN=govCount();
   var compacted=R.status==="compacted";
   var fr=FRAMES[Math.min(S.frame,FRAMES.length-1)];
 
   var head='<div class="phead"><div class="t"><p class="eyebrow">Run · '+h(R.agent)+'</p>'+
    '<h1 class="mono" style="font-size:19px">'+h(R.id)+'</h1>'+
-   '<div class="row" style="margin-top:8px">'+statusBadge(R.status)+tierBadge(R.tier)+gradeBadge(R.grade)+verdictBadge(R.verdict,R)+
+   '<div class="row" style="margin-top:8px">'+statusBadge(R.status)+tierBadge(R.tier)+gradeBadge(R.grade)+verdictBadge(R.verdict,R)+(a?scorePair(a,true):'')+
    '<span class="b b-q">task '+h(R.task)+'</span></div>'+
    '<p style="margin-top:8px">'+h(R.taskTitle)+' · started '+h(R.started)+(R.sealed?' · sealed '+h(R.sealed):'')+'</p></div>'+
    '<div class="acts">'+
@@ -3184,7 +3460,7 @@ function pRun(r){
    '<div class="stat"><span class="k">Productive ratio</span><span class="v">'+per(R.ratio)+'</span><span class="s">steps that advanced the task</span></div></div>';
 
   var tabs='<div class="tabs" role="tablist">'+
-   [["player","Player",R.frames],["proof","Proof"],["cost","Cost"],["policy","Policy"],["context","Context"],["chain","Chain and seal"]]
+   [["transcript","Transcript",txEntries(R).length],["player",govN?"Governed actions":"Player",govN||R.frames],["proof","Proof"],["cost","Cost"],["policy","Policy"],["context","Context"],["chain","Chain and seal"]]
    .map(function(x){return '<button class="tab" role="tab" aria-selected="'+(t===x[0])+'" onclick="S.tab.run=\''+x[0]+'\';render()">'+x[1]+(x[2]?'<span class="n">'+x[2]+'</span>':'')+'</button>';}).join("")+'</div>';
 
   var bodyHtml="";
@@ -3200,7 +3476,10 @@ function pRun(r){
      '<dt>What remains in the graph</dt><dd>the run node, frame_count 118, merkle_root, segment_ref, and the rollups</dd>'+
      '</dl><div class="row" style="margin-top:14px"><button class="btn primary" onclick="act(\'Segment fetched. Rendering 118 frames from the archive.\')">Render from the segment</button>'+
      '<button class="btn" onclick="act(\'Verifier script and key ids downloaded.\')">Verify offline</button></div></div></div>';
+  } else if(t==="transcript"){
+    bodyHtml=transcriptTab(R,compacted);
   } else if(t==="player"){
+    txStop();
     var timeline=FRAMES.map(function(f,i){
       var on=i===S.frame;
       return '<button class="navitem" style="font-size:12px;'+(on?'background:var(--hl);box-shadow:inset 2px 0 0 var(--gold);color:var(--fg)':'')+'" onclick="S.frame='+i+';render()">'+
@@ -3237,7 +3516,278 @@ function pRun(r){
     bodyHtml=chainTab(R);
   }
   var hero=(R.verdict==="flipped"&&R.flip)?flipHero(R):'';
-  return head+runSummary(R)+hero+strip+tabs+bodyHtml;
+  return head+runSummary(R)+linkedWork(R)+hero+strip+tabs+bodyHtml;
+}
+
+/* ===================== Transcript tab ===================== */
+/* Playback state lives on S.tx. The feed is rendered once per render() with every row present; the
+   timer reveals rows in place (hidden attribute) so pacing never rebuilds the page. Filters and folds
+   go through render() like everything else in this file. */
+var TX_SPEEDS=[1,2,3,6];
+var TX_GROUPS=[["prompt","prompt",["prompt","steer"]],["text","responses",["text"]],["reasoning","thinking",["reasoning"]],
+               ["tool","tools",["tool"]],["usage","usage",["usage"]],["context","recall",["context_recall"]],["proof","proof",["proof","verdict","complete"]]];
+var GOV_KINDS={policy_decision:1,approval_request:1,token_issued:1};
+S.tx={on:{},q:"",errs:false,think:false,open:{},playing:true,speed:1,revealed:0,timer:null,runId:null};
+TX_GROUPS.forEach(function(g){S.tx.on[g[0]]=true;});
+
+function govCount(){var n=0;FRAMES.forEach(function(f){if(f.kind==="policy_decision")n++;});return n;}
+function txGroupOf(kind){for(var i=0;i<TX_GROUPS.length;i++){if(TX_GROUPS[i][2].indexOf(kind)>=0)return TX_GROUPS[i][0];}return null;}
+/* the speed divides the ceiling as well as the gap: a run's gaps are either ~0 (one model step's rows) or
+   many seconds (a model thinking), so a fixed 1.2 s cap would make 6× look like 1× */
+function txPaced(gap,speed){return Math.max(90/speed,Math.min(1400/speed,gap*1000/speed));}
+function txClock(R,t){
+  var p=String(R.started||"00:00:00").split(":"),base=(+p[0])*3600+(+p[1])*60+(+p[2]);
+  var s=base+t,hh=Math.floor(s/3600)%24,mm=Math.floor(s/60)%60,ss=s%60;
+  return (hh<10?"0":"")+hh+":"+(mm<10?"0":"")+mm+":"+(ss<10?"0":"")+ss.toFixed(1);
+}
+function txMoney(n){return "$"+(Math.round(n*10000)/10000).toFixed(4);}
+function txMoney2(n){return "$"+n.toFixed(2);}
+function txFold(text){
+  var m=String(text).match(/^[\s\S]*?[.!?](?=\s|$)/);
+  if(!m||m[0].length>=text.length-1)return {head:text,rest:""};
+  return {head:m[0],rest:text.slice(m[0].length).replace(/^\s+/,"")};
+}
+function txHi(text,q){
+  text=String(text==null?"":text);
+  if(!q)return h(text);
+  var lo=text.toLowerCase(),n=q.toLowerCase(),out="",i=0,at;
+  while((at=lo.indexOf(n,i))>=0){out+=h(text.slice(i,at))+"<mark>"+h(text.slice(at,at+q.length))+"</mark>";i=at+q.length;}
+  return out+h(text.slice(i));
+}
+var TX_SALIENT=["error","warning","failed","failure","panic","assert","fatal","exception"];
+function txSalient(lines){
+  var first=0,seen=false;
+  for(var i=0;i<lines.length;i++){
+    var tr=lines[i].replace(/^\s+/,"");if(!seen&&tr!==""){first=i;seen=true;}
+    var lo=tr.toLowerCase();
+    for(var k=0;k<TX_SALIENT.length;k++){var m=TX_SALIENT[k];if(lo.indexOf(m)===0)return i;var a=lo.indexOf(m+":");if(a>=0&&a<=12)return i;}
+  }
+  return first;
+}
+function txDiffRows(before,after){
+  if(!before)return after.split("\n").map(function(s,i){return {t:"+",b:i+1,s:s};});
+  if(!after)return before.split("\n").map(function(s,i){return {t:"-",a:i+1,s:s};});
+  return diffLines(before,after);
+}
+function txDiffBlock(d,open){
+  var rows=txDiffRows(d.before,d.after),st=diffStat(rows);
+  var cap=12,shown=rows,hidden=0;
+  if(!open&&rows.length>cap){shown=rows.slice(0,cap);hidden=rows.length-cap;}
+  var html=diffHtml(shown,2);
+  if(hidden)html=html.replace(/<\/div>$/,'<div class="dl gap"><span></span><span></span><span>⋯ '+hidden+' more line'+(hidden===1?'':'s')+'</span></div></div>');
+  return '<div class="tx-diffwrap"><div class="path"><b>'+h(d.path)+'</b>'+(d.before?'':'<span>new file</span>')+
+   '<span class="dstat"><b class="a">+'+st.add+'</b> <b class="d">−'+st.del+'</b></span></div>'+html+'</div>';
+}
+/* a run without a recorded transcript still has a prompt, an answer and its proof: synthesise the
+   projection from what the run record carries, and say so in the runbar */
+function txEntries(R){
+  if(TRANSCRIPTS[R.id])return TRANSCRIPTS[R.id];
+  var e=[{t:0,kind:"prompt",body:R.taskTitle+(R.task?"\n\nTask "+R.task+".":""),meta:{task:R.task,by:PEOPLE[R.op]?PEOPLE[R.op].name:""}}];
+  var t=2;
+  if(R.flip&&R.flip.attempts){
+    e.push({t:t,kind:"text",body:"Running the "+R.flip.testKind+" against "+R.flip.prRef+" with "+R.flip.runner+"."});
+    R.flip.attempts.forEach(function(a){
+      t+=6+a.ms/1000;
+      e.push({t:t,kind:"tool",title:"Bash",cls:"verify",arg:R.flip.cmd,raw:'{"command":"'+R.flip.cmd+'"}',fr:a.seq,
+        res:{ms:a.ms,err:a.result!=="pass",body:(a.result==="pass"?"ok · ":"error: ")+a.note+"\nexit "+a.exit}});
+    });
+    t+=3;
+    e.push({t:t,kind:"proof",title:"witness "+R.flip.witness+" · flipped at attempt "+R.flip.attempts.length,body:"fingerprint "+R.flip.fingerprint+" · "+R.flip.heldOut+" held out · sealed "+R.flip.sealedAt});
+  }
+  if(R.summary){t+=4;e.push({t:t,kind:"text",body:R.summary});}
+  t+=0.2;e.push({t:t,kind:"usage",meta:{model:R.model,tin:null,cache:null,tout:null,cost:parseFloat(R.cost)||0,req:"rollup · "+R.frames+" frames"}});
+  if(R.status==="sealed"||R.status==="compacted")e.push({t:t+0.5,kind:"complete",title:"sealed "+(R.sealed||""),body:R.verdict?"verdict "+R.verdict:""});
+  return e;
+}
+function txVisible(R){
+  var q=S.tx.q.trim().toLowerCase(),errs=S.tx.errs;
+  return txEntries(R).filter(function(e){
+    if(errs)return e.kind==="tool"&&e.res&&e.res.err;
+    var g=txGroupOf(e.kind);if(g&&!S.tx.on[g])return false;
+    if(!q)return true;
+    var hay=[e.body,e.title,e.arg,e.res&&e.res.body,e.diff&&e.diff.after,e.meta&&e.meta.model].join("\n").toLowerCase();
+    return hay.indexOf(q)>=0;
+  });
+}
+function txCostTotal(R){var s=0;txEntries(R).forEach(function(e){if(e.kind==="usage"&&e.meta)s+=e.meta.cost||0;});return s;}
+function txAnswerIdx(rows,R){
+  if(R.status==="live"||R.status==="parked")return -1;
+  var last=-1;rows.forEach(function(e,i){if(e.kind==="text")last=i;});return last;
+}
+function txGovChip(g){
+  if(!g)return "";
+  return '<button class="tx-chip gov'+(g.o==="approve"?" appr":"")+'" title="policy decision · frame '+g.fr+'" onclick="S.tab.run=\'player\';S.frame='+g.fr+';render()">⚖ '+h(g.o)+' · '+h(g.rule)+' · fr '+g.fr+'</button>';
+}
+function txRow(R,e,i,cum,rows,answerIdx){
+  var q=S.tx.q.trim(),open=!!S.tx.open[i],inner="",dot="",body=e.body||"";
+  if(e.kind==="prompt"){
+    inner='<div class="tx-role you"><div class="tx-rolegut"><span class="tx-roletag">YOU</span></div><div><div class="tx-prose">'+txHi(body,q)+'</div>'+
+     '<div class="tx-sub">'+(e.meta&&e.meta.by?'<span>'+h(e.meta.by)+' · operator</span>':'')+(e.meta&&e.meta.task?'<span class="mono">task '+h(e.meta.task)+'</span>':'')+'<span>the prompt is the question every row below is read against</span></div></div></div>';
+  } else if(e.kind==="steer"){
+    inner='<div class="tx-role steer"><div class="tx-rolegut"><span class="tx-roletag">STEER</span></div><div><div class="tx-prose">“'+txHi(body,q)+'”</div>'+
+     '<div class="tx-sub"><span>'+h(e.meta.by)+' · '+h(e.meta.role)+'</span><span>delivered at the next boundary · '+e.meta.tok+' tok</span>'+
+     (e.fr!=null?'<button class="tx-chip gov appr" onclick="S.tab.run=\'player\';S.frame='+e.fr+';render()">control.steer · fr '+e.fr+'</button>':'')+'</div></div></div>';
+  } else if(e.kind==="text"){
+    var isAns=i===answerIdx,f=txFold(body),folded=!isAns&&!open&&f.rest.length>0;
+    inner='<div class="tx-role agent"><div class="tx-rolegut"><span class="tx-roletag">'+(isAns?"ANSWER":"AGENT")+'</span></div><div class="tx-prose'+(isAns?' tx-answer':'')+'">'+
+     (f.rest.length>0&&!isAns?'<button class="tx-fold" style="padding-right:6px" onclick="txOpen('+i+')" aria-expanded="'+(!folded)+'">'+(folded?"⏵":"⏶")+'</button>':'')+
+     txHi(folded?f.head:body,q)+(folded?' <span class="dim">…</span>':'')+'</div></div>';
+  } else if(e.kind==="reasoning"){
+    var lines=body.split("\n"),tf=txFold(body),show=S.tx.think||open,fd=!show&&tf.rest.length>0;
+    inner='<div><button class="tx-fold" onclick="txOpen('+i+')">'+(show?"⏶":"⏵")+' thinking · '+lines.length+' line'+(lines.length===1?'':'s')+'</button>'+
+     '<div class="tx-think">'+txHi(fd?tf.head:body,q)+(fd?' …':'')+'</div></div>';
+  } else if(e.kind==="usage"){
+    var m=e.meta||{};
+    inner='<div class="tx-usage"><span class="u">usage — '+h(m.model||"")+(m.tin!=null?' · in '+tokn(m.tin)+' · cache '+tokn(m.cache||0)+' · out '+tokn(m.tout||0):'')+(m.req?' · '+h(m.req):'')+'</span>'+
+     '<span class="tx-chips"><span class="tx-chip cost">'+txMoney(m.cost||0)+'</span><span class="tx-chip burn">Σ '+txMoney(cum)+'</span>'+
+     (e.fr!=null?'<button class="tx-chip gov" onclick="S.tab.run=\'player\';S.frame='+e.fr+';render()">model.response · fr '+e.fr+'</button>':'')+'</span></div>';
+  } else if(e.kind==="context_recall"){
+    var m2=e.meta||{},list=open?CTXF:CTXF.slice(0,3),hid=CTXF.length-list.length,hidTok=0;
+    CTXF.slice(list.length).forEach(function(f){hidTok+=f.tok;});
+    inner='<div><button class="tx-fold" style="color:var(--st-proven);font-weight:600;font-size:12.5px" onclick="txOpen('+i+')">◉ recall · '+m2.frames+' frames · '+tokn(m2.tok)+' tok · '+m2.scored+' scored · '+m2.ms+' ms</button>'+
+     '<div class="tx-recall">'+list.map(function(f){return '<span class="k">'+h(f.kind)+'</span><span class="l">'+txHi(f.label,q)+(open?' <span class="dim">· '+h(f.node)+' · score '+f.score+'</span>':'')+'</span><span class="n">'+tokn(f.tok)+' tok</span>';}).join("")+'</div>'+
+     (hid>0?'<button class="tx-fold" style="margin-left:20px" onclick="txOpen('+i+')">⋯ '+hid+' more · '+tokn(hidTok)+' tok · provenance</button>':'')+
+     (e.fr!=null?'<div class="tx-sub" style="margin-left:20px"><button class="tx-chip gov" onclick="S.tab.run=\'player\';S.frame='+e.fr+';render()">context.assembled · fr '+e.fr+'</button><button class="tx-chip" style="cursor:pointer" onclick="S.tab.run=\'context\';render()">open the Context tab</button></div>':'')+'</div>';
+  } else if(e.kind==="tool"){
+    var r=e.res,failed=!!(r&&r.err),pending=!r,cls=e.cls||"execute";
+    dot='<span class="tx-dot'+(cls==="mutate"?' solid':'')+'" style="color:var(--'+(failed?'st-failed':'tx-'+cls)+')"></span>';
+    var chips="";
+    if(e.diff){var st=diffStat(txDiffRows(e.diff.before,e.diff.after));chips+='<span class="tx-chip"><span style="color:var(--st-allowed)">+'+st.add+'</span> <span style="color:var(--st-denied)">−'+st.del+'</span></span>';}
+    if(r&&r.ms!=null)chips+='<span class="tx-chip'+(failed?' err':'')+'">'+(r.ms>=1000?(r.ms/1000).toFixed(1)+' s':r.ms+' ms')+'</span>';
+    if(r&&r.body&&!e.diff){var ln=r.body.split("\n").length;if(ln>1)chips+='<span class="tx-chip'+(failed?' err':'')+'">'+ln+' lines</span>';}
+    if(e.parked)chips+='<button class="tx-chip gov appr" onclick="S.tab.run=\'player\';S.frame='+e.parked.fr+';render()">⏸ parked · '+h(e.parked.ap)+' · fr '+e.parked.fr+'</button>';
+    else if(pending)chips+='<span class="tx-chip">running…</span>';
+    chips+=txGovChip(e.gov);
+    if(e.raw)chips+='<button class="tx-fold" onclick="txOpen('+i+')" aria-label="'+(open?"hide":"show")+' arguments">'+(open?"⏶":"⋯")+'</button>';
+    inner='<div><div class="tx-call"><span class="g'+(failed?' bad':'')+'">'+(failed?"✗":"●")+'</span><span class="nm '+(failed?'bad':cls)+'">'+txHi(e.title,q)+'</span>'+
+     (e.arg?'<span class="arg" title="'+h(e.arg)+'">'+txHi(e.arg,q)+'</span>':'')+'<span class="tx-chips">'+chips+'</span></div>';
+    if(open&&e.raw)inner+='<pre class="tx-args">'+txHi(e.raw,q)+'</pre>';
+    if(e.diff)inner+=txDiffBlock(e.diff,open);
+    if(r&&r.body&&!e.diff){
+      var L=r.body.split("\n"),budget=6,anchor=Math.min(txSalient(L),Math.max(0,L.length-budget)),shown=open?L:L.slice(anchor,anchor+budget),hidden=open?0:L.length-shown.length;
+      inner+='<pre class="tx-out'+(failed?' err':'')+'">'+txHi(shown.join("\n"),q)+'</pre>';
+      if(hidden>0)inner+='<button class="tx-fold" style="margin-left:20px" onclick="txOpen('+i+')">⋯ '+hidden+' more line'+(hidden===1?'':'s')+'</button>';
+      else if(open&&L.length>budget)inner+='<button class="tx-fold" style="margin-left:20px" onclick="txOpen('+i+')">⏶ collapse</button>';
+    }
+    if(e.parked)inner+='<div class="tx-sub" style="margin-left:20px">held at the gateway for up to ten minutes; the model sees a wait with a reason, not a failure. Approve or deny from the card under Governed actions.</div>';
+    inner+='</div>';
+  } else if(e.kind==="proof"){
+    inner='<div><span class="tx-proof">⊢ '+txHi(e.title,q)+'</span>'+(body?'<div class="tx-think" style="font-style:normal">'+txHi(body,q)+'</div>':'')+'</div>';
+  } else if(e.kind==="complete"||e.kind==="verdict"){
+    inner='<div><span style="color:var(--st-allowed);font-weight:600">'+txHi(e.title,q)+'</span>'+(body?' <span class="dim">'+txHi(body,q)+'</span>':'')+'</div>';
+  } else if(e.kind==="stage"){
+    inner='<div class="tx-stage">'+txHi(e.title||body,q)+'</div>';
+  } else {
+    inner='<div class="tx-prose">'+txHi(body||e.title,q)+'</div>';
+  }
+  return '<div class="tx-row" data-txrow="'+i+'"><span class="tx-clock">'+txClock(R,e.t)+'</span><span class="tx-node">'+dot+'</span><div style="min-width:0">'+inner+'</div></div>';
+}
+function transcriptTab(R,compacted){
+  if(S.tx.runId!==R.id){S.tx.runId=R.id;S.tx.revealed=0;S.tx.playing=true;S.tx.open={};S.tx.q="";S.tx.errs=false;}
+  var all=txEntries(R),rows=txVisible(R),paced=!S.tx.q.trim(),answerIdx=txAnswerIdx(rows,R);
+  var errN=0;all.forEach(function(e){if(e.kind==="tool"&&e.res&&e.res.err)errN++;});
+  var total=txCostTotal(R),cum=0,html="";
+  rows.forEach(function(e,i){if(e.kind==="usage"&&e.meta)cum+=e.meta.cost||0;html+=txRow(R,e,i,cum,rows,answerIdx);});
+  var synth=!TRANSCRIPTS[R.id];
+  var tools='<div class="tx-tools">'+
+   '<input type="search" value="'+h(S.tx.q)+'" placeholder="Search the transcript…" aria-label="search the transcript" oninput="txQ(this.value)">'+
+   (S.tx.q.trim()?'<span class="dim mono" style="font-size:10.5px">'+rows.length+' of '+all.length+' entries</span>':'')+
+   '<div class="tx-kinds">'+TX_GROUPS.map(function(g){return '<button class="tx-kind" aria-pressed="'+(!!S.tx.on[g[0]])+'" onclick="txGroup(\''+g[0]+'\')">'+g[1]+'</button>';}).join("")+
+   '<button class="tx-kind err" aria-pressed="'+S.tx.errs+'" title="'+(errN?'show only failed calls':'no failures in this run')+'" onclick="S.tx.errs=!S.tx.errs;render()">✗ errors'+(errN?' ('+errN+')':'')+'</button></div>'+
+   '<div class="tx-play">'+
+    '<button class="btn sm ghost" onclick="S.tx.think=!S.tx.think;S.tx.open={};render()">'+(S.tx.think?"collapse thinking":"expand thinking")+'</button>'+
+    (paced?'<button class="btn sm" title="rewind" onclick="txSeek(0)">⏮</button>'+
+     '<button class="btn sm" title="step back" onclick="txStep(-1)">◀</button>'+
+     '<button class="btn sm" id="txplay" style="min-width:74px" onclick="txPlay()">❙❙ pause</button>'+
+     '<button class="btn sm" title="step forward" onclick="txStep(1)">▶</button>'+
+     '<button class="btn sm" title="to the end" onclick="txSeek(1e9)">⏭</button>'+
+     '<span class="seg" style="margin-left:4px">'+TX_SPEEDS.map(function(s){return '<button class="btn sm" aria-pressed="'+(S.tx.speed===s)+'" onclick="txSpeed('+s+')">'+s+'×</button>';}).join("")+'</span>'+
+     '<span class="cnt" id="txcnt"></span>':'<span class="cnt">search shows every match · unpaced</span>')+
+   '</div></div>';
+  var runbar='<div class="tx-runbar"><span class="name">'+h(R.task||R.id)+'</span><span class="meta">'+h(R.agent)+' · '+h(R.model)+' · '+R.turn+' turns · '+R.steps+' steps'+(synth?' · projected from the run record':' · '+all.length+' entries')+'</span>'+
+   '<span class="tx-chips" style="margin-left:0">'+(S.tx.errs?'<span class="tx-chip err">errors only</span>':'')+(R.status==="live"?'<span class="tx-chip ok">● live</span>':R.status==="parked"?'<span class="tx-chip warn">⏸ parked</span>':R.verdict==="flipped"?'<span class="tx-chip ok">✓ flipped</span>':R.verdict==="unmoved"?'<span class="tx-chip err">✗ unmoved</span>':'')+'</span>'+
+   '<span class="tx-burn"><span>burn</span><span class="bar"><i id="txbar"></i></span><b id="txburn">'+txMoney2(0)+'</b><span>of '+txMoney2(total)+'</span></span></div>';
+  var feed='<div class="tx-feed" id="txfeed" data-n="'+rows.length+'" data-paced="'+paced+'">'+(rows.length?html:'<div class="tx-empty">'+(S.tx.errs?'no failed calls in this run.':S.tx.q?'nothing matches this search.':'nothing to show with these filters.')+'</div>')+'</div>';
+  setTimeout(txStart,0);
+  return (compacted?'<div class="warn" style="margin-bottom:12px"><b>Compacted.</b> This transcript is rendered from the archive segment; the frames left the graph after the hot window and nothing was recomputed.</div>':'')+
+   '<div class="txs">'+tools+'<div class="tx-frame">'+runbar+feed+'</div>'+
+   '<p class="note" style="margin-top:12px">What the agent showed its operator, row for row: the prompt, its prose, each tool call with the output it read, and what every model step cost. The gateway\'s own frames sit behind the ⚖ chips; the transcript never replaces them.</p></div>';
+}
+/* ---- playback ---- */
+function txStart(){
+  var feed=el("txfeed");if(!feed)return;
+  var n=+feed.getAttribute("data-n"),paced=feed.getAttribute("data-paced")==="true";
+  if(!paced){S.tx.revealed=n;txSync();txStop();return;}
+  if(S.tx.revealed>n)S.tx.revealed=n;
+  txSync();txStop();txTick();
+}
+function txStop(){if(S.tx.timer){clearTimeout(S.tx.timer);S.tx.timer=null;}}
+function txTick(){
+  var feed=el("txfeed");if(!feed){txStop();return;}
+  var n=+feed.getAttribute("data-n");
+  if(!S.tx.playing||S.tx.revealed>=n){txSync();return;}
+  var R=run(S.tx.runId),rows=R?txVisible(R):[];
+  var prev=S.tx.revealed>0&&rows[S.tx.revealed-1]?rows[S.tx.revealed-1].t:0,cur=rows[S.tx.revealed]?rows[S.tx.revealed].t:prev;
+  S.tx.timer=setTimeout(function(){S.tx.revealed=Math.min(n,S.tx.revealed+1);txSync();txTick();},txPaced(Math.max(0,cur-prev),S.tx.speed));
+}
+function txSync(){
+  var feed=el("txfeed");if(!feed)return;
+  var n=+feed.getAttribute("data-n"),R=run(S.tx.runId),rows=R?txVisible(R):[],cum=0;
+  feed.querySelectorAll(".tx-row").forEach(function(row){var i=+row.getAttribute("data-txrow");row.hidden=i>=S.tx.revealed;});
+  for(var i=0;i<Math.min(S.tx.revealed,rows.length);i++){if(rows[i].kind==="usage"&&rows[i].meta)cum+=rows[i].meta.cost||0;}
+  var total=R?txCostTotal(R):0,bar=el("txbar"),burn=el("txburn"),cnt=el("txcnt"),play=el("txplay");
+  if(bar)bar.style.width=(total?Math.min(100,cum/total*100):0)+"%";
+  if(burn)burn.textContent=txMoney2(cum);
+  if(cnt)cnt.textContent=S.tx.revealed+" / "+n;
+  var done=S.tx.revealed>=n&&n>0;
+  if(play)play.textContent=done?"▶ replay":S.tx.playing?"❙❙ pause":"▶ play";
+  if(S.tx.playing&&!done)feed.scrollTop=feed.scrollHeight;
+}
+function txPlay(){
+  var feed=el("txfeed"),n=feed?+feed.getAttribute("data-n"):0;
+  if(S.tx.revealed>=n){S.tx.revealed=0;S.tx.playing=true;}else S.tx.playing=!S.tx.playing;
+  txStop();txSync();if(S.tx.playing)txTick();
+}
+function txSeek(n){var feed=el("txfeed"),max=feed?+feed.getAttribute("data-n"):0;S.tx.revealed=Math.max(0,Math.min(max,n));txStop();txSync();if(S.tx.playing&&S.tx.revealed<max)txTick();}
+function txStep(d){S.tx.playing=false;txSeek(S.tx.revealed+d);}
+function txSpeed(s){S.tx.speed=s;txStop();document.querySelectorAll(".tx-play .seg .btn").forEach(function(b){b.setAttribute("aria-pressed",b.textContent===s+"×");});if(S.tx.playing)txTick();}
+function txGroup(k){S.tx.on[k]=!S.tx.on[k];render();}
+function txOpen(i){S.tx.open[i]=!S.tx.open[i];render();}
+var txQTimer=null;
+function txQ(v){S.tx.q=v;clearTimeout(txQTimer);txQTimer=setTimeout(function(){var q=v;render();var inp=document.querySelector(".tx-tools input");if(inp){inp.focus();inp.setSelectionRange(q.length,q.length);}},160);}
+
+/* ===================== Linked work: the run node's neighbourhood ===================== */
+function runGraphOf(R){
+  if(RUNGRAPH[R.id])return RUNGRAPH[R.id];
+  var m=String(R.task||"").match(/^([\w.-]+\/[\w.-]+)#(\d+)$/);
+  return {repos:m?[{name:m[1],ref:"from the task",note:"no tool call on this repository was observed",edge:"stated"}]:[],
+          issues:R.task?[{ref:R.task,title:R.taskTitle,rel:"task",edge:"stated"}]:[],
+          artifacts:(R.touched||[]).map(function(t){return {kind:"touched",ref:t,title:"named in the generated summary",state:"",edge:"inferred",conf:0.7};}),
+          files:[]};
+}
+function edgeChip(it){
+  var lab=it.edge==="observed"?"observed":it.edge==="stated"?"stated":"inferred"+(it.conf!=null?" · "+Math.round(it.conf*100)+"%":"");
+  var frs=(it.fr||[]).map(function(f){return '<button class="edge" onclick="S.tab.run=\'player\';S.frame='+f+';render()">fr '+f+'</button>';}).join("");
+  return '<span class="ev"><span class="edge '+h(it.edge)+'">'+lab+'</span>'+frs+'</span>';
+}
+function lwItem(ic,title,sub,it){return '<div class="lw-item"><span class="ic">'+ic+'</span><div class="t"><b title="'+h(title)+'">'+h(title)+'</b>'+(sub?'<span class="sub">'+h(sub)+'</span>':'')+edgeChip(it)+'</div></div>';}
+function linkedWork(R){
+  var g=runGraphOf(R),inf=0,obs=0;
+  [].concat(g.repos,g.issues,g.artifacts).forEach(function(it){if(it.edge==="inferred")inf++;else if(it.edge==="observed")obs++;});
+  var artIc={pr:"⇄",release:"⬡",branch:"⑂",witness:"⊢",comment:"✎",touched:"·"};
+  var artState={open:"b-approval",pushed:"b-proven",pending:"b-approval",failing:"b-denied",sealed:"b-proven",posted:"b-proven",merged:"b-allowed",none:"b-q"};
+  var panel=function(title,items,empty){return '<div class="panel"><div class="panel-h"><h3>'+title+'</h3><span class="b b-q" style="margin-left:auto">'+items.length+'</span></div><div class="panel-b">'+(items.length?items.join(""):'<div class="lw-item"><span class="ic">—</span><div class="t"><span class="sub">'+empty+'</span></div></div>')+'</div></div>';};
+  var repos=g.repos.map(function(r){return lwItem("⌂",r.name,(r.ref?r.ref+" · ":"")+(r.note||""),r);});
+  var issues=g.issues.map(function(i){return lwItem("◌",i.ref+" · "+i.title,i.rel,i);});
+  var arts=g.artifacts.map(function(a){return '<div class="lw-item"><span class="ic">'+(artIc[a.kind]||"·")+'</span><div class="t"><b>'+h(a.ref)+(a.state?' <span class="b '+(artState[a.state]||"b-q")+'" style="font-size:10px;vertical-align:1px">'+h(a.state)+'</span>':'')+'</b><span class="sub">'+h(a.title)+'</span>'+edgeChip(a)+'</div></div>';});
+  var files=g.files.length?'<div class="panel lw-files" style="margin-bottom:16px"><div class="panel-h"><h3>Files changed</h3><span class="b b-q" style="margin-left:auto">'+g.files.length+' file'+(g.files.length===1?'':'s')+' · as the harness reported them</span></div><div class="panel-b" style="padding-top:2px">'+
+   g.files.map(function(f){var rows=txDiffRows(f.before,f.after),st=diffStat(rows);return '<details><summary><span class="p">'+h(f.path)+'</span>'+(f.note?'<span class="dim" style="font-size:11px;flex:none">'+h(f.note)+'</span>':'')+'<span class="dstat"><b class="a">+'+st.add+'</b> <b class="d">−'+st.del+'</b></span></summary>'+diffHtml(rows,3)+'</details>';}).join("")+'</div></div>':'';
+  return '<section aria-label="Linked work">'+
+   '<div class="lw-note"><p class="eyebrow q" style="margin:0">Linked work · edges on the run node</p>'+
+    '<span><span class="edge observed">observed</span> written by the gateway from a tool call it saw</span>'+
+    '<span><span class="edge stated">stated</span> carried by the task</span>'+
+    '<span><span class="edge inferred">inferred</span> a light-tier model read the frames and proposed it, scored and cited · '+inf+' of '+(g.repos.length+g.issues.length+g.artifacts.length)+'</span></div>'+
+   '<div class="lw">'+panel("Repositories",repos,"no repository was touched")+panel("Issues and tasks",issues,"no issue is linked")+panel("Pull requests and artifacts",arts,"nothing was produced yet")+'</div>'+files+'</section>';
 }
 
 function frameDetail(f){
@@ -3935,6 +4485,7 @@ function pAgents(){
   var rows=list.map(function(a){
     return '<tr class="click" onclick="go(\'#/'+ORG.slug+'/'+w.slug+'/agents/'+a.key.split(".").pop()+'\')">'+
      '<td><div class="row" style="gap:9px;flex-wrap:nowrap">'+agentAv(a,28)+'<div style="min-width:0"><span class="tkey">'+h(a.key)+'</span><div class="dim" style="font-size:11.5px">'+h(a.desc)+'</div></div></div></td>'+
+     '<td>'+scorePair(a,true)+'</td>'+
      '<td>'+h(a.harnessLabel)+'<div class="dim mono" style="font-size:10.5px">'+h(a.harness)+'</div></td>'+
      '<td><span class="row" style="gap:7px;flex-wrap:nowrap;white-space:nowrap">'+personAv(a.operator,22)+h(PEOPLE[a.operator].name)+'</span></td>'+
      '<td><span class="b b-allowed"><span class="d"></span>'+h(a.status)+'</span></td>'+
@@ -3944,7 +4495,10 @@ function pAgents(){
      '<td class="num">'+usd(a.spend30)+'</td>'+
      '<td class="num">'+usd(a.proven30)+'</td>'+
      '<td>'+(a.mandates.length?'<span class="b b-approval"><span class="d"></span>'+a.mandates.length+'</span>':'<span class="dim">—</span>')+'</td>'+
-     '<td>'+(a.incidents?'<span class="b b-critical"><span class="d"></span>'+a.incidents+'</span>':'<span class="dim">0</span>')+'</td></tr>';
+     '<td>'+(a.incidents?'<span class="b b-critical"><span class="d"></span>'+a.incidents+'</span>':'<span class="dim">0</span>')+'</td>'+
+     '<td class="rowacts" onclick="event.stopPropagation()"><button class="btn sm" onclick="S.tab.agent=\'definition\';go(\'#/'+ORG.slug+'/'+w.slug+'/agents/'+a.key.split(".").pop()+'\')">Edit</button>'+
+     '<button class="btn sm" onclick="openDialog(\'assignrole\',\''+a.key+'\')">Roles</button>'+
+     '<button class="btn sm danger" onclick="openDialog(\'delagent\',\''+a.key+'\')">Deregister</button></td></tr>';
   }).join("");
 
   return '<div class="phead"><div class="t"><p class="eyebrow">Workspace · '+h(w.name)+'</p><h1>Agents</h1>'+
@@ -3958,8 +4512,8 @@ function pAgents(){
    '<div class="stat"><span class="k">Tamper incidents</span><span class="v" style="color:var(--st-critical)">1</span><span class="s">acme.core.triage · hooks_removed, 2026-09-02</span></div></div>'+
    '<div class="panel"><div class="panel-h"><h3>Registered in '+h(w.name)+'</h3>'+
    '<span class="mono dim" style="margin-left:auto;font-size:11px">.oxagen/agents/ @ '+h(list[0]?list[0].commit:"")+'</span></div>'+
-   '<div class="tw"><table><thead><tr><th>Agent</th><th>Harness</th><th>Operator</th><th>Status</th><th>Tier</th>'+
-   '<th class="num">Belt</th><th class="num">Runs 30d</th><th class="num">Spend 30d</th><th class="num">Proven 30d</th><th>Mandates</th><th>Incidents</th>'+
+   '<div class="tw"><table><thead><tr><th>Agent</th><th>Trust · Spend</th><th>Harness</th><th>Operator</th><th>Status</th><th>Tier</th>'+
+   '<th class="num">Belt</th><th class="num">Runs 30d</th><th class="num">Spend 30d</th><th class="num">Proven 30d</th><th>Mandates</th><th>Incidents</th><th></th>'+
    '</tr></thead><tbody>'+rows+'</tbody></table></div></div>';
 }
 
@@ -4018,8 +4572,8 @@ function pAgent(r){
      '<dt>Run tokens</dt><dd>15 minutes, refreshed on the control channel · 3 live now</dd>'+
      '<dt>Host device key</dt><dd class="mono">ed25519:9c4a…e17b</dd>'+
      '<dt>Delegation ceiling</dt><dd>its own grants ∩ '+h(PEOPLE[a.operator].name)+'’s grants — subagents can only narrow</dd>'+
-     '<dt>Roles</dt><dd class="mono">agent.repo.write(acme/platform), agent.graph.read</dd></dl>'+
-     '<div class="row" style="margin-top:14px"><button class="btn danger" onclick="act(\'Credential revoked. Every run token dies at the next call.\')">Revoke credential</button>'+
+     '<dt>Roles</dt><dd>'+agentRoleChips(a)+'</dd></dl>'+
+     '<div class="row" style="margin-top:14px"><button class="btn" onclick="openDialog(\'identity\',\''+a.key+'\')">Change identity</button><button class="btn danger" onclick="act(\'Credential revoked. Every run token dies at the next call.\')">Revoke credential</button>'+
      '<button class="btn" onclick="act(\'Agent suspended in the bundle. The next call is denied even if the daemon is down.\')">Suspend</button></div></div></div>'+
      '<div class="panel"><div class="panel-h"><h3>What was actually enforced</h3></div><div class="panel-b"><dl class="kv">'+
      '<dt>Model calls</dt><dd>'+tierBadge(a.tier)+' · through the model proxy at <span class="mono">ANTHROPIC_BASE_URL</span></dd>'+
@@ -4107,10 +4661,11 @@ function pAgent(r){
   }
   return '<div class="phead">'+agentAv(a,60)+'<div class="t"><p class="eyebrow">Agent</p><h1 class="mono" style="font-size:20px">'+h(a.key)+'</h1>'+
    '<div class="row" style="margin-top:8px">'+tierBadge(a.tier)+'<span class="b b-allowed"><span class="d"></span>'+h(a.status)+'</span>'+
-   '<span class="b b-q">'+h(a.harnessLabel)+'</span><span class="b b-q">operator '+h(PEOPLE[a.operator].name)+'</span></div>'+
+   '<span class="b b-q">'+h(a.harnessLabel)+'</span><span class="b b-q">operator '+h(PEOPLE[a.operator].name)+'</span>'+scorePair(a)+'</div>'+
    '<p style="margin-top:8px">'+h(a.desc)+'</p></div>'+
    '<div class="acts"><button class="btn" onclick="openAvatar(\'agent:'+a.key+'\')">Edit avatar</button><button class="btn" onclick="S.tab.agent=\'definition\';render()">Edit definition</button>'+
-   '<button class="btn danger" onclick="act(\'Agent suspended. Every run token dies at the next call.\')">Suspend</button></div></div>'+tabs+body;
+   '<button class="btn danger" onclick="act(\'Agent suspended. Every run token dies at the next call.\')">Suspend</button>'+
+   '<button class="btn danger" onclick="openDialog(\'delagent\',\''+a.key+'\')">Deregister</button></div></div>'+scoreStrip(a)+tabs+body;
 }
 
 function pMandate(r){
@@ -4149,7 +4704,7 @@ function pMandate(r){
      '<td><span class="b b-denied"><span class="d"></span>released</span></td><td class="dim">dispatch failed · released</td><td><a href="#">rcp_01K4V7…</a></td></tr>'+
     '</tbody></table></div></div>'+
    '<div><div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>The grant</h3></div><div class="panel-b"><dl class="kv">'+
-    '<dt>Agent</dt><dd class="mono">'+h(m.agent)+'</dd>'+
+    '<dt>Agent</dt><dd><span class="mono">'+h(m.agent)+'</span> '+scorePair(m.agent,true)+'</dd>'+
     '<dt>Granted by</dt><dd>'+h(m.by)+' · <span class="mono">'+h(m.roleAt)+'</span> at grant</dd>'+
     '<dt>Second approver</dt><dd>'+h(m.second)+'</dd>'+
     '<dt>Effect</dt><dd class="mono">'+h(m.effect)+'</dd>'+
@@ -4177,7 +4732,7 @@ function pTools(){
   var np=proposals().length;
   var tabs='<div class="tabs" role="tablist">'+
    [["registry","Registry",np?np+" to approve":"",np?"var(--st-approval)":""],["connections","Connections",CONNECTIONS.length],["mandates","Mandates ledger",MANDATES.length],
-    ["policy","Policy",POLICIES.length],["switches","Kill switches",switchesOn()],["assurance","Assurance"]]
+    ["policy","Policy",POLICIES.length],["switches","Kill switches",switchesOn()],["auto","Auto-approvals",AUTORULES.filter(function(r){return r.on;}).length],["assurance","Assurance"]]
    .map(function(x){return '<button class="tab" role="tab" aria-selected="'+(t===x[0])+'" onclick="go(\'#/'+ORG.slug+'/'+w.slug+'/tools/'+x[0]+'\')">'+x[1]+
      (x[2]?'<span class="n"'+(x[3]?' style="color:'+x[3]+'"':'')+'>'+x[2]+'</span>':'')+'</button>';}).join("")+'</div>';
 
@@ -4305,6 +4860,8 @@ function pTools(){
      '<pre><span class="c">// a payment requires a prior quote call in the same run</span>\n'+
      '<span class="k">forbid</span> (principal, action == Action::<span class="s">"stripe__create_payment"</span>, resource)\n'+
      '<span class="k">unless</span> { context.run.has_prior_call(<span class="s">"stripe__list_prices"</span>) };</pre></div></div></div>';
+  } else if(t==="auto"){
+    body=autoRulesBody();
   } else if(t==="switches"){
     var cls=SWITCHES.filter(function(s){return s.cls;}), rest=SWITCHES.filter(function(s){return !s.cls;});
     body='<div class="ks-stack">'+
@@ -4708,9 +5265,9 @@ function pSpend(){
      '<div class="note">Every run has exactly one operator, even when a schedule or a webhook started it: the operator is the person who owns that trigger. A run that arrived without one is attributed to the agent’s owning operator and flagged — never dropped, never spread.</div></div></div>';
   } else if(t==="agent"){
     body='<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>By agent</h3><span class="dim mono" style="margin-left:auto;font-size:11px">open a row for every metric and its findings</span></div><div class="tw"><table>'+
-     '<thead><tr><th>Agent</th><th class="num">Runs</th><th class="num">Spend</th><th class="num">Proven spend</th><th class="num">Spend per proven run</th><th class="num">Potential savings</th><th>Trend</th></tr></thead><tbody>'+
+     '<thead><tr><th>Agent</th><th>Trust · Spend</th><th class="num">Runs</th><th class="num">Spend</th><th class="num">Proven spend</th><th class="num">Spend per proven run</th><th class="num">Potential savings</th><th>Trend</th></tr></thead><tbody>'+
      SPEND.byAgent.map(function(a){
-      return '<tr'+drillRow("agent",a.k)+'><td class="tkey" style="font-size:12px">'+drillName("agent",a.k)+'</td><td class="num">'+a.runs.toLocaleString()+'</td>'+
+      return '<tr'+drillRow("agent",a.k)+'><td class="tkey" style="font-size:12px">'+drillName("agent",a.k)+'</td><td>'+scorePair(a.k,true)+'</td><td class="num">'+a.runs.toLocaleString()+'</td>'+
        '<td class="num">'+usd(a.spend)+'</td><td class="num">'+usd(a.proven)+'</td>'+
        '<td class="num">'+(a.perProven==="—"?'<span class="dim">—</span>':usd(a.perProven))+'</td>'+savingsCell("agent",a.k)+
        '<td><span class="b b-'+(a.trend.charAt(0)==="-"?"proven":"approval")+'">'+h(a.trend)+'</span></td></tr>';}).join("")+
@@ -5039,7 +5596,7 @@ var APIKEYS=[
 /* The keys tab has its own address (#/acme/api-keys) so it can be linked from the command menu and the docs; the other tabs live on #/acme. */
 function orgTab(t){
   S.tab.organization=t;
-  var want=t==="keys"?"#/"+ORG.slug+"/api-keys":"#/"+ORG.slug;
+  var want=t==="keys"?"#/"+ORG.slug+"/api-keys":t==="roles"?"#/"+ORG.slug+"/roles":"#/"+ORG.slug;
   if(location.hash!==want) go(want); else render();
 }
 function pOrganization(){
@@ -5052,7 +5609,7 @@ function pOrganization(){
     '<button class="btn primary" onclick="openDialog(\'newws\')">Create a workspace</button>');
 
   var tabs='<div class="tabs" role="tablist">'+
-   [["people","People and roles",MEMBERS.length],["invitations","Invitations",INVITES.length],["workspaces","Workspaces",WS.length],
+   [["people","People",MEMBERS.length],["roles","Roles",ROLES.length],["invitations","Invitations",INVITES.length],["workspaces","Workspaces",WS.length],
     ["funding","Model funding and routes"],["plane","Data plane"],["keys","API keys"]]
    .map(function(x){return '<button class="tab" role="tab" aria-selected="'+(t===x[0])+'" onclick="orgTab(\''+x[0]+'\')">'+x[1]+(x[2]?'<span class="n">'+x[2]+'</span>':'')+'</button>';}).join("")+'</div>';
 
@@ -5068,22 +5625,16 @@ function pOrganization(){
        '<td>'+h(m.ws)+'</td><td>'+h(m.mfa)+'</td><td>'+h(m.sso)+'</td>'+
        '<td class="mono dim" style="font-size:11px">'+h(m.last)+'</td>'+
        '<td><span class="b b-allowed"><span class="d"></span>'+h(m.status)+'</span></td>'+
-       '<td><button class="btn sm" onclick="openDialog(\'role\')">Change role</button></td></tr>';}).join("")+
+       '<td class="rowacts"><button class="btn sm" onclick="openDialog(\'role\')">Change role</button><button class="btn sm danger" onclick="openDialog(\'removemember\',\''+m.p+'\')">Remove</button></td></tr>';}).join("")+
      '</tbody></table></div><div class="panel-b">'+
      '<div class="note">Changing a role is a governed action. It passes IAM, writes an audit record, and bills as one action — the same path the in-app agent takes when it does it for you.</div></div></div>'+
      '<div class="grid g2" style="margin-top:14px">'+
      '<div class="panel"><div class="panel-h"><h3>The delegation ceiling</h3></div><div class="panel-b">'+
      '<p class="muted" style="font-size:12.5px">An agent’s effective permission is its own grants intersected with the invoking human’s grants. Subagents can only narrow. This is what stops a confused deputy.</p>'+
      '<pre>effective = agent.grants\n          ∩ operator.grants\n          ∩ policy_bundle\n          ∩ kill_switches</pre></div></div>'+
-     '<div class="panel"><div class="panel-h"><h3>Roles in use</h3></div><div class="tw"><table class="narrow"><tbody>'+
-     [["org.owner",1,"everything, including the data plane and funding"],
-      ["org.billing",1,"mandates, connections with a financial class, invoices"],
-      ["org.auditor",0,"read-only across the audit record; invited, not yet accepted"],
-      ["workspace.owner",1,"agents, tools, policy, budgets in one workspace"],
-      ["workspace.member",0,"runs and steering in one workspace"]]
-     .map(function(r){return '<tr><td class="mono" style="font-size:11.5px">'+h(r[0])+'</td><td class="num">'+r[1]+'</td>'+
-      '<td class="dim" style="font-size:11.5px">'+h(r[2])+'</td></tr>';}).join("")+
-     '</tbody></table></div></div></div>';
+     rolesInUsePanel()+'</div>';
+  } else if(t==="roles"){
+    body=rolesBody();
   } else if(t==="invitations"){
     body='<div class="panel"><div class="panel-h"><h3>Pending invitations</h3>'+
      '<button class="btn sm" style="margin-left:auto" onclick="openDialog(\'invite\')">Invite</button></div><div class="tw"><table>'+
@@ -5102,7 +5653,7 @@ function pOrganization(){
       '<td class="mono dim" style="font-size:11.5px">'+(w.linked.length?h(w.linked.join(", ")):"—")+'</td>'+
       '<td class="num">'+w.agents+'</td><td>'+h(w.owner)+'</td>'+
       '<td><span class="b b-q">team</span></td>'+
-      '<td><button class="btn sm" onclick="S.ws=\''+w.slug+'\';go(\'#/'+ORG.slug+'/'+w.slug+'\')">Open</button></td></tr>';}).join("")+
+      '<td class="rowacts"><button class="btn sm" onclick="S.ws=\''+w.slug+'\';go(\'#/'+ORG.slug+'/'+w.slug+'\')">Open</button><button class="btn sm" onclick="openDialog(\'editws\',\''+w.slug+'\')">Edit</button><button class="btn sm danger" onclick="openDialog(\'archivews\',\''+w.slug+'\')">Archive</button></td></tr>';}).join("")+
      '</tbody></table></div><div class="panel-b">'+
      '<div class="note">Changing which repository is main is an org-owner action with approval, recorded as a security event. A repository may be linked to more than one workspace; it is main for at most one.</div></div></div>';
   } else if(t==="funding"){
@@ -5789,7 +6340,7 @@ function steerFleetBody(){
     return '<label class="check"><input type="checkbox"'+(on?' checked':'')+' onchange="steerToggleSel(\''+a.key+'\',this.checked)" aria-label="'+h(a.key)+'">'+
      '<div class="grow"><div class="n">'+h(a.key)+'</div><div class="d">'+
       (r?'<span class="mono">'+h(r.id)+'</span> · turn '+r.turn+' · '+h(r.taskTitle):'no run in flight · reads this at its next model call')+'</div></div>'+
-     (r?statusBadge(r.status):'<span class="b b-q"><span class="d"></span>idle</span>')+'</label>';}).join("");
+     scorePair(a,true)+(r?statusBadge(r.status):'<span class="b b-q"><span class="d"></span>idle</span>')+'</label>';}).join("");
   return '<div class="field"><div class="row" style="justify-content:space-between;margin-bottom:6px"><label style="margin:0">Agents · '+n+' of '+list.length+' selected</label>'+
     '<span class="row" style="gap:6px"><button class="btn sm ghost" onclick="steerSelAll(true)">All</button><button class="btn sm ghost" onclick="steerSelAll(false)">None</button></span></div>'+
     '<div class="steer-list">'+rows+'</div>'+
@@ -5928,10 +6479,20 @@ function dialog(){
      '<div class="note">Merge is the publication. The checks recompute the record hash, scan for secrets and PII, and fail a <span class="mono">forbid</span> that conflicts with an active <span class="mono">require</span> on the same subject.</div>',
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Branch context/ctx.release.no-reread-changelog pushed and acme/platform#519 opened.\')">Open the pull request</button>'},
    commit:{t:"Commit this change",w:true,b:commitBody(),f:commitFoot()},
+   roleedit:S.dlg==="roleedit"?roleEditDlg():{t:"Role",w:true,b:"",f:""},
+   roledel:roleDelDlg(),
+   assignrole:assignRoleDlg(),
+   identity:identityDlg(),
+   ruleedit:S.dlg==="ruleedit"?ruleEditDlg():{t:"Rule",w:true,b:"",f:""},
+   ruledel:ruleDelDlg(),
+   delagent:agentDelDlg(),
+   removemember:memberDelDlg(),
+   editws:wsEditDlg(),
+   archivews:wsArchiveDlg(),
    register:{t:"Register an agent",w:false,b:
      '<div class="field"><label>Slug</label><input value="perf-watch" aria-label="Slug"><div class="hint">The agent key becomes <span class="mono">acme.core.perf-watch</span> and is immutable.</div></div>'+
      '<div class="field"><label>Avatar</label><div class="row" style="gap:12px;flex-wrap:nowrap">'+avatarHtml(newAgentAv(),44,"agent")+
-      '<div style="min-width:0;font-size:12.5px;color:var(--body)">'+h(avDescribe(newAgentAv()))+'<div class="hint" style="margin-top:2px">Emoji, up to three letters, or a photo, on a solid or gradient fill.</div></div>'+
+      '<div style="min-width:0;font-size:12.5px;color:var(--body)">'+h(avDescribe(newAgentAv()))+'<div class="hint" style="margin-top:2px">An icon, up to three letters, or a photo, in one of three house tones.</div></div>'+
       '<button class="btn sm" style="margin-left:auto;flex:none" onclick="openAvatar(\'new\')">Design</button></div></div>'+
      '<div class="field"><label>Harness</label><select aria-label="Harness"><option>claude-code</option><option>stella</option><option>codex-cli</option><option>claude-agent-sdk</option><option>custom</option></select></div>'+
      '<div class="field"><label>Model tier</label><select aria-label="Model tier"><option>complex</option><option>light</option></select></div>'+
@@ -6347,7 +6908,7 @@ var CMDS=[
    ["run_01K4QJ9E4T6YUI1O · stella-ci · compacted","#/acme/core-platform/runs/run_01K4QJ9E4T6YUI1O"]]},
  {g:"Actions — each one is a governed action",i:[
    ["Pause every live run in this workspace",null],["Steer the fleet","!openSteerFleet()"],["Register an agent","!regStart()"],
-   ["Open a Context PR",null],["Grant a mandate",null],["Flip a kill switch",null],
+   ["Open a Context PR",null],["Grant a mandate",null],["Create a role","!roleNew()"],["Create an auto-approval rule","!ruleNew()"],["Flip a kill switch",null],
    ["Simulate a policy version",null],["Export a signed bundle",null],["Create an API key",null]]},
  {g:"Ask the graph",i:[["Which customers on an enterprise contract raised a ticket this quarter?",null],
    ["What does releaseNotes() call?",null],["Which tables does acme.core.triage write?",null]]}
@@ -6369,6 +6930,387 @@ function cmdMenu(){
    '<span style="margin-left:auto" class="mono">every action here is the same contract the screens use</span></div></div></div>';
 }
 
+
+
+/* ============================== Scores, roles, identities, auto-approvals ==============================
+   Two scores per agent, 0–1000, traffic-lit: trust (does it do what it is allowed to, provably) and spend
+   (does what it costs buy proven value). Roles are IAM roles with a permission set; agents hold roles the
+   way people do, intersected with their operator’s grants. Auto-approval rules let a customer skip the
+   human gate when an agent’s trust score meets a floor — never for tainted input or a critical hazard. */
+var SCORES={
+ "acme.core.release-manager":{trust:842,spend:731},
+ "acme.core.stella-ci":{trust:911,spend:868},
+ "acme.core.triage":{trust:312,spend:454},
+ "acme.core.docs-writer":{trust:687,spend:522},
+ "acme.finops.invoice-bot":{trust:764,spend:388}
+};
+var SCORE_LABEL={good:"good",avg:"average",bad:"poor"};
+function clamp1k(v){return Math.max(0,Math.min(1000,Math.round(v)));}
+function scoreBand(v){return v>=700?"good":v>=400?"avg":"bad";}
+function agentScores(a){
+  if(typeof a==="string")a=agent(a);
+  if(!a) return null;
+  if(SCORES[a.key]) return SCORES[a.key];
+  if((a.runs30||0)<=1) return {trust:500,spend:500,prov:true};
+  return {trust:clamp1k(500+(a.ratio||0)*400-(a.incidents||0)*250),spend:clamp1k((a.ratio||0)*600+300)};
+}
+function scorePill(kind,v,sm,prov){
+  var b=scoreBand(v);
+  return '<span class="sc sc-'+b+(sm?' sm':'')+'" title="'+kind+' score '+v+' of 1000 · '+SCORE_LABEL[b]+(prov?' · provisional until 20 runs':'')+'"><i></i>'+kind+' <b>'+v+'</b>'+(prov?'<em>prov.</em>':'')+'</span>';
+}
+function scorePair(a,sm){
+  var s=agentScores(a); if(!s) return '';
+  return '<span class="scs">'+scorePill("Trust",s.trust,sm,s.prov)+scorePill("Spend",s.spend,sm,s.prov)+'</span>';
+}
+function scoreMeter(kind,v,inputs,what){
+  return '<div class="scm"><div class="scm-h"><span class="k">'+kind+' score</span>'+scorePill(kind,v)+'<span class="dim">0–1000 · recomputed nightly from frames</span></div>'+
+   '<div class="scm-bar"><i class="z bad"></i><i class="z avg"></i><i class="z good"></i><span class="mk" style="left:'+(v/10)+'%"></span></div>'+
+   '<div class="scm-lg"><span>poor &lt; 400</span><span>average 400–699</span><span>good ≥ 700</span></div>'+
+   '<p class="muted" style="font-size:12px;margin:10px 0 0">'+what+'</p>'+
+   '<dl class="kv">'+inputs.map(function(x){return '<dt>'+h(x[0])+'</dt><dd>'+x[1]+(x[2]?' <span class="'+(x[2]>0?'up':'dn')+'">'+(x[2]>0?'+':'')+x[2]+'</span>':'')+'</dd>';}).join("")+'</dl></div>';
+}
+function scoreStrip(a){
+  if(typeof a==="string")a=agent(a);
+  if(!a) return '';
+  var s=agentScores(a), w=ws();
+  var q=AUTORULES.filter(function(r){return r.on&&(r.ws==="*"||r.ws===a.ws);}), qn=q.filter(function(r){return ruleQualifies(r,a);}).length;
+  var runs=a.runs30||0, flips=Math.round(runs*(a.ratio||0));
+  return '<div class="grid g2" style="margin-bottom:16px">'+
+   scoreMeter("Trust",s.trust,[
+     ["Proof rate",flips+' of '+runs+' runs flipped · '+per(a.ratio||0),s.trust>=700?12:-8],
+     ["Policy denials 30d",a.incidents?'6 · 1 escalated':'2 · none escalated'],
+     ["Tamper incidents",a.incidents?'<span class="dn">'+a.incidents+' · hooks_removed</span>':'0'],
+     ["Approvals overturned","0 of "+Math.max(1,Math.round(runs/9))],
+     ["Chain integrity","intact on every sealed run"]],
+     s.prov?'Provisional: fewer than 20 runs. It starts at 500 and moves with evidence.':'What it did against what it was allowed to do, weighted by how much of it a witness proved.')+
+   scoreMeter("Spend",s.spend,[
+     ["Cost per proven flip",flips?usd((parseFloat(String(a.spend30).replace(/,/g,""))/flips).toFixed(2)):'—',s.spend>=700?9:-11],
+     ["Proven ÷ spend 30d",usd(a.proven30)+' ÷ '+usd(a.spend30)],
+     ["Cache hit rate",per(a.cache||0.78)],
+     ["Wasted spend share",a.ratio>0.6?'4%':'19%'],
+     ["Business value",flips?flips+' flips · '+usd(a.proven30)+' proven':'accepted by a human, never folded into proven']],
+     s.prov?'Provisional: fewer than 20 runs.':'Tokens against outcomes: how efficiently it spends, and whether the spend bought business value a witness could prove.')+
+   '</div>'+
+   '<div class="banner" style="margin-bottom:16px"><div class="sc-legend"><b style="color:var(--fg)">Auto-approvals</b>'+
+   (q.length?'<span style="white-space:nowrap">qualifies for <b style="color:var(--fg)">'+qn+' of '+q.length+'</b> rule'+(q.length===1?'':'s')+' in '+h(w.name)+'</span>':'<span style="white-space:nowrap">no rule in '+h(w.name)+' yet</span>')+
+   '<span class="dim">tainted input and critical hazard never auto-approve</span></div>'+
+   '<button class="btn sm" style="margin-left:auto" onclick="go(\'#/'+ORG.slug+'/'+a.ws+'/tools/auto\')">Rules</button></div>';
+}
+
+/* ---- IAM roles: a permission set with a kind (human, agent, service) and a scope ---- */
+var ROLES=[
+ {id:"org.owner",kind:"human",builtin:true,scope:"organization",desc:"everything, including the data plane and funding",perms:["org.*"]},
+ {id:"org.billing",kind:"human",builtin:true,scope:"organization",desc:"mandates, connections with a financial class, invoices",perms:["mandate.grant","mandate.draw","invoice.read","budget.set"]},
+ {id:"org.auditor",kind:"human",builtin:true,scope:"organization",desc:"read-only across the audit record",perms:["audit.read","run.read","frame.read"]},
+ {id:"workspace.owner",kind:"human",builtin:true,scope:"workspace",desc:"agents, tools, policy, budgets in one workspace",perms:["agent.read","agent.register","agent.suspend","agent.roles.assign","tool.read","tool.grant","policy.simulate","policy.activate","switch.flip","budget.set","run.read","run.steer","run.pause","run.cancel","steering.read","steering.propose"]},
+ {id:"workspace.member",kind:"human",builtin:true,scope:"workspace",desc:"runs and steering in one workspace",perms:["run.read","run.steer","steering.read","steering.propose"]},
+ {id:"agent.repo.write",kind:"agent",builtin:true,scope:"repository",desc:"open branches and pull requests on a named repository; never merge",perms:["repo.read","repo.branch.write","repo.pr.open"]},
+ {id:"agent.graph.read",kind:"agent",builtin:true,scope:"workspace",desc:"search and traverse the knowledge graph",perms:["graph.search","graph.expand","context.recall"]},
+ {id:"agent.release",kind:"agent",builtin:false,scope:"repository",desc:"cut a release after approval",perms:["repo.read","repo.release.create","repo.tag.create"],by:"Priya Natarajan",at:"2026-08-30"},
+ {id:"agent.finance.pay",kind:"agent",builtin:false,scope:"workspace",desc:"draw on a mandate; nothing without one",perms:["mandate.draw","invoice.read"],by:"Dana Okafor",at:"2026-07-14"},
+ {id:"svc.ci",kind:"service",builtin:false,scope:"organization",desc:"the CI service principal behind the release key",perms:["run.read","frame.read","export.create"],by:"Marcus Bell",at:"2026-06-02"}
+];
+var PERMS=[
+ ["Runs",["run.read","run.steer","run.pause","run.cancel","export.create"]],
+ ["Agents",["agent.read","agent.register","agent.suspend","agent.roles.assign"]],
+ ["Tools and policy",["tool.read","tool.grant","policy.simulate","policy.activate","switch.flip"]],
+ ["Repository",["repo.read","repo.branch.write","repo.pr.open","repo.release.create","repo.tag.create","repo.merge"]],
+ ["Graph and steering",["graph.search","graph.expand","context.recall","steering.read","steering.propose"]],
+ ["Money",["mandate.draw","mandate.grant","invoice.read","budget.set"]],
+ ["Audit",["audit.read","frame.read","org.*"]]
+];
+S.agentRoles={
+ "acme.core.release-manager":["agent.repo.write(acme/platform)","agent.graph.read","agent.release(acme/platform)"],
+ "acme.core.stella-ci":["agent.repo.write(acme/platform)","agent.graph.read"],
+ "acme.core.triage":["agent.graph.read"],
+ "acme.core.docs-writer":["agent.repo.write(acme/platform)","agent.graph.read"],
+ "acme.finops.invoice-bot":["agent.finance.pay","agent.graph.read"]
+};
+S.roleEdit=null; S.roleKind="all";
+function roleById(id){for(var i=0;i<ROLES.length;i++){if(ROLES[i].id===id)return ROLES[i];}return null;}
+function roleBase(s){return String(s).replace(/\(.*$/,"");}
+function agentRolesOf(key){return S.agentRoles[key]||(S.agentRoles[key]=[]);}
+function roleAssignees(id){
+  var people=MEMBERS.filter(function(m){var p=PEOPLE[m.p];return p&&p.role.indexOf(id)===0;}).length;
+  var agents=0;for(var k in S.agentRoles){if(S.agentRoles[k].some(function(r){return roleBase(r)===id;}))agents++;}
+  var svc=APIKEYS.filter(function(k){return (k.grants||[]).indexOf(id)>=0||k.principal===id;}).length;
+  return {people:people,agents:agents,svc:svc,total:people+agents+svc};
+}
+function permChips(perms,max){
+  var shown=perms.slice(0,max||4);
+  return shown.map(function(p){return '<span class="b b-q" style="margin:0 3px 3px 0;font-family:var(--mono);font-weight:500">'+h(p)+'</span>';}).join("")+
+   (perms.length>shown.length?'<span class="dim" style="font-size:11px">+'+(perms.length-shown.length)+' more</span>':'');
+}
+function kindBadge(k){return '<span class="b '+(k==="agent"?"b-proven":k==="service"?"b-approval":"b-q")+'">'+h(k)+'</span>';}
+function rolesInUsePanel(){
+  var list=ROLES.filter(function(r){return r.kind==="human";});
+  return '<div class="panel"><div class="panel-h"><h3>Roles in use</h3><button class="btn sm" style="margin-left:auto" onclick="orgTab(\'roles\')">Manage roles</button></div><div class="tw"><table class="narrow"><tbody>'+
+   list.map(function(r){var n=roleAssignees(r.id);return '<tr class="click" onclick="orgTab(\'roles\');roleOpen(\''+r.id+'\')"><td class="mono" style="font-size:11.5px">'+h(r.id)+'</td><td class="num">'+n.total+'</td>'+
+    '<td class="dim" style="font-size:11.5px">'+h(r.desc)+'</td></tr>';}).join("")+
+   '</tbody></table></div><div class="panel-b" style="padding-top:10px"><span class="dim" style="font-size:11.5px">'+ROLES.filter(function(r){return r.kind==="agent";}).length+' agent roles and '+ROLES.filter(function(r){return r.kind==="service";}).length+' service role are on the Roles tab.</span></div></div>';
+}
+function rolesBody(){
+  var list=ROLES.slice();
+  var rows=list.map(function(r){
+    var n=roleAssignees(r.id), locked=r.builtin, busy=n.total>0;
+    return '<tr class="click" onclick="roleOpen(\''+r.id+'\')"><td><span class="tkey">'+h(r.id)+'</span><div class="dim" style="font-size:11.5px">'+h(r.desc)+'</div></td>'+
+     '<td>'+kindBadge(r.kind)+'</td><td class="mono" style="font-size:11.5px">'+h(r.scope)+'</td>'+
+     '<td style="max-width:30ch">'+permChips(r.perms)+'</td>'+
+     '<td style="font-size:12px;white-space:nowrap">'+(n.total?[n.people?n.people+' people':'',n.agents?n.agents+' agent'+(n.agents>1?'s':''):'',n.svc?n.svc+' key'+(n.svc>1?'s':''):''].filter(Boolean).join(' · '):'<span class="dim">nobody</span>')+'</td>'+
+     '<td style="font-size:11.5px">'+(locked?'<span class="b b-q">built-in</span>':'<span class="dim">'+h(r.by)+' · '+h(r.at)+'</span>')+'</td>'+
+     '<td class="rowacts" onclick="event.stopPropagation()"><button class="btn sm" onclick="roleOpen(\''+r.id+'\')">'+(locked?'View':'Edit')+'</button>'+
+      '<button class="btn sm" onclick="roleDup(\''+r.id+'\')">Duplicate</button>'+
+      '<button class="btn sm danger"'+(locked?' disabled title="Built-in roles cannot be deleted"':busy?' disabled title="Reassign the '+n.total+' holder'+(n.total>1?'s':'')+' first"':'')+' onclick="openDialog(\'roledel\',\''+r.id+'\')">Delete</button></td></tr>';
+  }).join("");
+  return '<div class="panel"><div class="panel-h"><h3>Roles</h3>'+
+   '<div class="sp"><span class="b b-q">postgres · iam</span><button class="btn sm primary" onclick="roleNew()">Create role</button></div></div>'+
+   '<div class="tw"><table><thead><tr><th>Role</th><th>Kind</th><th>Scope</th><th>Permissions</th><th>Held by</th><th>Origin</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
+   '<div class="panel-b"><div class="note">A role is a permission set, nothing more. An agent’s effective permission is its roles ∩ its operator’s grants ∩ the policy bundle ∩ the kill switches — a role can widen what an agent may ask for, never what its operator may.</div></div></div>';
+}
+function roleNew(){S.roleEdit={id:"",kind:"agent",scope:"workspace",desc:"",perms:{},isNew:true};openDialog("roleedit");}
+function roleOpen(id){var r=roleById(id);if(!r)return;var p={};r.perms.forEach(function(x){p[x]=true;});S.roleEdit={id:r.id,orig:r.id,kind:r.kind,scope:r.scope,desc:r.desc,perms:p,builtin:r.builtin,isNew:false};openDialog("roleedit");}
+function roleDup(id){var r=roleById(id);if(!r)return;var p={};r.perms.forEach(function(x){p[x]=true;});S.roleEdit={id:r.id+".copy",kind:r.kind,scope:r.scope,desc:r.desc,perms:p,isNew:true};openDialog("roleedit");}
+function rolePerm(p,on){if(S.roleEdit){S.roleEdit.perms[p]=!!on;var n=el("rolePermN");if(n)n.textContent=Object.keys(S.roleEdit.perms).filter(function(k){return S.roleEdit.perms[k];}).length;}}
+function roleSave(){
+  var d=S.roleEdit; if(!d) return;
+  var id=(el("roleId")?el("roleId").value:d.id).trim().toLowerCase().replace(/[^a-z0-9.\-_]+/g,".");
+  var desc=el("roleDesc")?el("roleDesc").value:d.desc;
+  var kind=el("roleKind")?el("roleKind").value:d.kind, scope=el("roleScope")?el("roleScope").value:d.scope;
+  var perms=Object.keys(d.perms).filter(function(k){return d.perms[k];});
+  if(!id){act("A role needs a name.");return;}
+  if(!perms.length){act("A role with no permissions grants nothing — pick at least one.");return;}
+  if(d.isNew){ if(roleById(id)){act("A role named "+id+" already exists.");return;}
+    ROLES.push({id:id,kind:kind,scope:scope,desc:desc,perms:perms,builtin:false,by:PEOPLE.marcus.name,at:"2026-09-11"});
+    closeDialog(); act("Role "+id+" created — a governed action, recorded with your name on it.","gold");
+  } else { var r=roleById(d.orig); if(r){r.desc=desc;r.kind=kind;r.scope=scope;r.perms=perms;}
+    closeDialog(); act("Role "+d.orig+" updated. Every holder’s effective permission is recomputed at its next call."); }
+}
+function roleDeleteConfirm(id){
+  var i=-1;ROLES.forEach(function(r,ix){if(r.id===id)i=ix;});
+  if(i<0)return; ROLES.splice(i,1); closeDialog(); act("Role "+id+" deleted. The audit record keeps its definition and every grant it ever carried.");
+}
+function roleEditDlg(){
+  var d=S.roleEdit; if(!d) return {t:"Role",w:true,b:"",f:""};
+  var ro=!!d.builtin, n=Object.keys(d.perms).filter(function(k){return d.perms[k];}).length;
+  var holders=d.isNew?null:roleAssignees(d.orig);
+  var b='<div class="grid g2"><div class="field"><label>Role name</label><input id="roleId" value="'+h(d.id)+'" aria-label="Role name" class="mono"'+(ro||!d.isNew?' readonly':'')+' oninput="S.roleEdit.id=this.value">'+
+    '<div class="hint">'+(d.isNew?'Immutable once created. Use the kind as the prefix: <span class="mono">agent.</span>, <span class="mono">org.</span>, <span class="mono">workspace.</span>, <span class="mono">svc.</span>':'Names are immutable; duplicate the role to rename it.')+'</div></div>'+
+   '<div class="field"><label>Description</label><input id="roleDesc" value="'+h(d.desc)+'" aria-label="Description"'+(ro?' readonly':'')+' oninput="S.roleEdit.desc=this.value"></div></div>'+
+   '<div class="grid g2"><div class="field"><label>Kind</label><select id="roleKind" aria-label="Kind"'+(ro?' disabled':'')+' onchange="S.roleEdit.kind=this.value">'+["human","agent","service"].map(function(k){return '<option'+(d.kind===k?' selected':'')+'>'+k+'</option>';}).join("")+'</select>'+
+    '<div class="hint">Who can hold it. An agent role can be assigned only to agents.</div></div>'+
+   '<div class="field"><label>Scope</label><select id="roleScope" aria-label="Scope"'+(ro?' disabled':'')+' onchange="S.roleEdit.scope=this.value">'+["organization","workspace","repository"].map(function(k){return '<option'+(d.scope===k?' selected':'')+'>'+k+'</option>';}).join("")+'</select>'+
+    '<div class="hint">A repository-scoped role is bound to a named repo at assignment.</div></div></div>'+
+   '<div class="row" style="justify-content:space-between;margin-bottom:4px"><label style="font-size:12px;font-weight:600;color:var(--muted)">Permissions · <span id="rolePermN">'+n+'</span> selected</label>'+(ro?'<span class="b b-q">built-in · read-only</span>':'')+'</div>'+
+   '<div class="perm-grid">'+PERMS.map(function(g){return '<div class="pg"><div class="h">'+h(g[0])+'</div>'+g[1].map(function(p){
+     return '<label class="check"><input type="checkbox"'+(d.perms[p]?' checked':'')+(ro?' disabled':'')+' onchange="rolePerm(\''+p+'\',this.checked)"><span class="n mono">'+h(p)+'</span></label>';}).join("")+'</div>';}).join("")+'</div>'+
+   (holders&&holders.total?'<div class="banner" style="margin-bottom:12px"><span>Held by '+holders.total+' principal'+(holders.total>1?'s':'')+'. Saving changes their effective permission at the next call — nothing in flight is cut.</span></div>':'')+
+   '<div class="note">Saving is a governed action: it passes IAM, writes an audit record, and bills as one action. <span class="mono">org.*</span> is the only wildcard and only <span class="mono">org.owner</span> carries it.</div>';
+  var f='<button class="btn" onclick="closeDialog()">'+(ro?'Close':'Cancel')+'</button>'+
+   (ro?'<button class="btn primary" onclick="roleDup(\''+h(d.orig)+'\')">Duplicate as custom</button>':'<button class="btn primary" onclick="roleSave()">'+(d.isNew?'Create role':'Save changes')+'</button>');
+  return {t:d.isNew?"Create a role":(ro?"Built-in role":"Edit role"),s:d.isNew?"":d.orig,w:true,b:b,f:f};
+}
+function roleDelDlg(){
+  var r=S.dlg==="roledel"?roleById(S.dlgArg):null; if(!r) return {t:"Delete role",w:false,b:"",f:""};
+  var n=roleAssignees(r.id);
+  return {t:"Delete role",s:r.id,w:false,b:
+   '<p style="font-size:13px">This removes <span class="mono">'+h(r.id)+'</span> from IAM. Its definition and every grant it carried stay in the audit record.</p>'+
+   (n.total?'<div class="warn">Held by '+n.total+' principal'+(n.total>1?'s':'')+'. Reassign them first — a role cannot be deleted out from under a holder.</div>':'<div class="note">Nobody holds it. Deleting is a governed action and is recorded.</div>'),
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn danger"'+(n.total?' disabled':'')+' onclick="roleDeleteConfirm(\''+h(r.id)+'\')">Delete role</button>'};
+}
+
+/* ---- identities and role assignment on an agent ---- */
+function agentRoleChips(a){
+  var list=agentRolesOf(a.key);
+  return (list.length?list.map(function(r){return '<span class="rl-chip"><span>'+h(r)+'</span><button type="button" aria-label="Remove '+h(r)+'" title="Remove role" onclick="roleUnassign(\''+h(a.key)+'\',\''+h(r)+'\')">×</button></span>';}).join(""):'<span class="dim">none — it can call nothing</span>')+
+   '<div><button class="btn sm" style="margin-top:6px" onclick="openDialog(\'assignrole\',\''+h(a.key)+'\')">Assign role</button></div>';
+}
+function roleUnassign(key,r){var l=agentRolesOf(key);var i=l.indexOf(r);if(i>=0)l.splice(i,1);render();act("Removed "+r+" from "+key+". Its belt is recomputed at the next run start.");}
+function roleAssign(){
+  var key=S.dlgArg, sel=el("asgRole"), scope=el("asgScope"), why=el("asgWhy"); if(!key||!sel) return;
+  var r=roleById(sel.value); if(!r){act("Pick a role.");return;}
+  var full=r.id+(r.scope==="repository"&&scope&&scope.value?'('+scope.value+')':'');
+  var l=agentRolesOf(key); if(l.indexOf(full)>=0){act(key+" already holds "+full+".");return;}
+  l.push(full); closeDialog(); act(full+" assigned to "+key+(why&&why.value?' · “'+why.value+'”':'')+". Recorded with your name; effective at its next call.","gold");
+}
+function assignRoleDlg(){
+  var a=S.dlg==="assignrole"?agent(S.dlgArg):null; if(!a) return {t:"Assign a role",w:false,b:"",f:""};
+  var held=agentRolesOf(a.key).map(roleBase), opts=ROLES.filter(function(r){return r.kind==="agent";});
+  var first=opts.filter(function(r){return held.indexOf(r.id)<0;})[0]||opts[0];
+  return {t:"Assign a role",s:a.key,w:false,b:
+   '<div class="field"><label>Role</label><select id="asgRole" aria-label="Role" onchange="var s=el(\'asgScopeF\');if(s)s.hidden=(roleById(this.value)||{}).scope!==\'repository\'">'+
+    opts.map(function(r){return '<option value="'+h(r.id)+'"'+(first&&r.id===first.id?' selected':'')+(held.indexOf(r.id)>=0?' disabled':'')+'>'+h(r.id)+(held.indexOf(r.id)>=0?' · held':'')+' — '+h(r.desc)+'</option>';}).join("")+'</select>'+
+    '<div class="hint">Only agent-kind roles are listed. <a href="#" onclick="closeDialog();orgTab(\'roles\');return false">Manage roles</a></div></div>'+
+   '<div class="field" id="asgScopeF"'+(first&&first.scope==="repository"?'':' hidden')+'><label>Repository</label><select id="asgScope" aria-label="Repository">'+[ws().main].concat(ws().linked||[]).map(function(x){return '<option>'+h(x)+'</option>';}).join("")+'</select>'+
+    '<div class="hint">A repository-scoped role is bound to one repo.</div></div>'+
+   '<div class="field"><label>Why</label><input id="asgWhy" value="" placeholder="Read by the approver and kept in the audit record" aria-label="Reason"></div>'+
+   '<div class="note">Effective permission stays <span class="mono">roles ∩ '+h(PEOPLE[a.operator].name)+'’s grants</span>. A role cannot lift an agent above its operator.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="roleAssign()">Assign</button>'};
+}
+function identitySave(){
+  var a=agent(S.dlgArg), op=el("idOp"); if(!a||!op) return;
+  a.operator=op.value; closeDialog(); act(a.key+" now acts on behalf of "+PEOPLE[a.operator].name+". Its delegation ceiling is recomputed at the next call.","gold");
+}
+function identityDlg(){
+  var a=S.dlg==="identity"?agent(S.dlgArg):null; if(!a) return {t:"Identity",w:false,b:"",f:""};
+  return {t:"Change identity",s:a.key,w:false,b:
+   '<div class="field"><label>Principal</label><input value="prn_01K2M7A4E8 · kind agent" readonly aria-label="Principal"><div class="hint">The principal is the agent’s IAM identity. It is created at registration and never reused.</div></div>'+
+   '<div class="field"><label>Acts on behalf of</label><select id="idOp" aria-label="Parent user">'+Object.keys(PEOPLE).map(function(k){return '<option value="'+k+'"'+(a.operator===k?' selected':'')+'>'+h(PEOPLE[k].name)+' · '+h(PEOPLE[k].role)+'</option>';}).join("")+'</select>'+
+    '<div class="hint">The parent user sets the delegation ceiling: the agent can never do what this person cannot.</div></div>'+
+   '<div class="field"><label>Roles held</label><div>'+agentRolesOf(a.key).map(function(r){return '<span class="b b-q mono" style="margin:0 3px 3px 0;font-weight:500">'+h(r)+'</span>';}).join("")+'</div><div class="hint">Change roles from the Identity panel with Assign role and the × on each chip.</div></div>'+
+   '<div class="note">Changing the parent user is a governed action with approval by the new parent. The old ceiling applies until they accept.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="identitySave()">Request the change</button>'};
+}
+
+/* ---- auto-approval rules: skip the human gate when trust meets a floor ---- */
+var AUTORULES=[
+ {id:"aar_01K5RT7Q",name:"Trusted release tooling",tool:"github__create_release@*",ws:"core-platform",minTrust:800,minSpend:null,maxAmount:null,on:true,by:"Priya Natarajan",at:"2026-08-30",hits30:14,skipped30:3},
+ {id:"aar_01K5RT8C",name:"Small vendor payments",tool:"stripe__create_payment@*",ws:"finops",minTrust:750,minSpend:400,maxAmount:"250.00",on:true,by:"Dana Okafor",at:"2026-09-02",hits30:41,skipped30:6},
+ {id:"aar_01K5RT9A",name:"Linear triage writes",tool:"linear__*",ws:"core-platform",minTrust:600,minSpend:null,maxAmount:null,on:false,by:"Marcus Bell",at:"2026-09-08",hits30:0,skipped30:0}
+];
+var RULE_TOOLS=["github__create_release@*","github__create_pull_request@*","github__merge_pull_request@*","stripe__create_payment@*","aws_billing__purchase_savings_plan@*","linear__*","bash__run@*","write__file@*","edit__file@*","*"];
+S.ruleEdit=null; S.ruleN=0;
+function ruleById(id){for(var i=0;i<AUTORULES.length;i++){if(AUTORULES[i].id===id)return AUTORULES[i];}return null;}
+function globMatch(pat,s){return new RegExp("^"+String(pat).replace(/[.+?^\$\{\}()|[\]\\]/g,"\\$&").replace(/\*/g,".*")+"$").test(String(s));}
+function ruleQualifies(r,a){var s=agentScores(a);return !!s&&!s.prov&&s.trust>=r.minTrust&&(r.minSpend==null||s.spend>=r.minSpend);}
+function ruleAgents(r){return AGENTS.filter(function(a){return r.ws==="*"||a.ws===r.ws;});}
+function autoEligibility(ap){
+  var a=agent(ap.agent), s=a?agentScores(a):null;
+  var rules=AUTORULES.filter(function(r){return r.on&&(r.ws==="*"||r.ws===ap.ws)&&globMatch(r.tool,ap.tool);});
+  if(!rules.length) return null;
+  var r=rules[0], why=[];
+  if(!s) why.push("agent unknown");
+  else { if(s.prov) why.push("score provisional");
+    if(s.trust<r.minTrust) why.push("trust "+s.trust+" &lt; "+r.minTrust);
+    if(r.minSpend!=null&&s.spend<r.minSpend) why.push("spend "+s.spend+" &lt; "+r.minSpend); }
+  if(r.maxAmount!=null&&ap.amount&&money(ap.amount)>money(r.maxAmount)) why.push(usd(ap.amount)+" above the "+usd(r.maxAmount)+" ceiling");
+  if(ap.tainted) why.push("tainted input never auto-approves");
+  if(ap.risk==="critical") why.push("critical hazard never auto-approves");
+  var floors=ap.tainted||ap.risk==="critical";
+  return {rule:r,ok:!why.length,why:why,floor:floors,score:s};
+}
+function autoEligibilityLine(ap){
+  var e=autoEligibility(ap); if(!e) return '';
+  return '<div style="font-size:11.5px;margin-top:7px;color:var(--muted)"><span class="b '+(e.ok?"b-allowed":"b-q")+'" style="margin-right:6px">'+(e.ok?'auto-approval eligible':'not auto-approved')+'</span>'+
+   'rule <span class="mono">'+h(e.rule.name)+'</span> · trust ≥ '+e.rule.minTrust+(e.rule.minSpend!=null?' · spend ≥ '+e.rule.minSpend:'')+
+   (e.ok?' · parked anyway: '+(ap.mandate?'the mandate requires a human above its threshold':ap.side==="irreversible"?'the policy requires a human on an irreversible side effect, which outranks any rule':'policy returned approve')+'':' · '+e.why.join(", "))+'</div>';
+}
+function autoRulesBody(){
+  var w=ws(), on=AUTORULES.filter(function(r){return r.on;}).length;
+  var hits=AUTORULES.reduce(function(s,r){return s+r.hits30;},0), skipped=AUTORULES.reduce(function(s,r){return s+r.skipped30;},0);
+  var rows=AUTORULES.map(function(r){
+    var pool=ruleAgents(r), q=pool.filter(function(a){return ruleQualifies(r,a);});
+    return '<tr class="click'+(r.on?'':' dim')+'" onclick="ruleOpen(\''+r.id+'\')"><td><b style="font-size:13px">'+h(r.name)+'</b><div class="dim mono" style="font-size:10.5px">'+h(r.id)+' · '+h(r.by)+' · '+h(r.at)+'</div></td>'+
+     '<td><span class="mono" style="font-size:11.5px">'+h(r.tool)+'</span><div class="dim" style="font-size:11px">'+(r.ws==="*"?'every workspace':h(r.ws))+'</div></td>'+
+     '<td><div class="scs">'+scorePill("Trust ≥",r.minTrust,true)+(r.minSpend!=null?scorePill("Spend ≥",r.minSpend,true):'')+(r.maxAmount!=null?'<span class="b b-q">≤ '+usd(r.maxAmount)+'</span>':'')+'</div></td>'+
+     '<td style="font-size:12px">'+q.length+' of '+pool.length+(q.length?'<div class="scs" style="margin-top:4px">'+q.slice(0,3).map(function(a){return '<span class="b b-q mono" style="font-weight:500">'+h(a.key.split(".").pop())+'</span>';}).join("")+(q.length>3?'<span class="dim">+'+(q.length-3)+'</span>':'')+'</div>':'')+'</td>'+
+     '<td class="num">'+r.hits30+'<div class="dim" style="font-size:10.5px">'+r.skipped30+' held by a floor</div></td>'+
+     '<td onclick="event.stopPropagation()"><button class="rl-tog" role="switch" aria-checked="'+r.on+'" aria-label="'+(r.on?'Disable':'Enable')+' '+h(r.name)+'" onclick="ruleToggle(\''+r.id+'\')"></button></td>'+
+     '<td class="rowacts" onclick="event.stopPropagation()"><button class="btn sm" onclick="ruleOpen(\''+r.id+'\')">Edit</button><button class="btn sm danger" onclick="openDialog(\'ruledel\',\''+r.id+'\')">Delete</button></td></tr>';
+  }).join("");
+  return '<div class="grid g4" style="margin-bottom:16px">'+
+   '<div class="stat"><span class="k">Rules on</span><span class="v">'+on+'</span><span class="s">of '+AUTORULES.length+' · in the policy bundle</span></div>'+
+   '<div class="stat"><span class="k">Auto-approved 30d</span><span class="v" style="color:var(--st-allowed)">'+hits+'</span><span class="s">each one a frame with the rule id</span></div>'+
+   '<div class="stat"><span class="k">Held by a floor</span><span class="v">'+skipped+'</span><span class="s">tainted, critical, or above a ceiling</span></div>'+
+   '<div class="stat"><span class="k">Median wait saved</span><span class="v">3m 40s</span><span class="s">per call, against a human gate</span></div></div>'+
+   '<div class="panel"><div class="panel-h"><h3>Auto-approvals — trust-gated</h3>'+
+   '<span class="dim" style="font-size:12px">a rule replaces the human gate for agents whose scores meet its floor</span>'+
+   '<div class="sp"><button class="btn sm primary" onclick="ruleNew()">Create rule</button></div></div>'+
+   '<div class="tw"><table><thead><tr><th>Rule</th><th>Applies to</th><th>Requires</th><th>Qualifying now</th><th class="num">Approved 30d</th><th>On</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
+   '<div class="panel-b"><div class="note">Deny wins. A rule never auto-approves tainted input, a critical hazard, a call outside a mandate, or an agent whose score is provisional. Every auto-approval is a <span class="mono">policy.decision</span> frame naming the rule, so a replay shows who decided: the rule, and the person who created it.</div></div></div>';
+}
+function ruleNew(){S.ruleEdit={id:null,name:"",tool:RULE_TOOLS[0],ws:ws().slug,minTrust:750,minSpend:null,maxAmount:"",on:true,isNew:true};openDialog("ruleedit");}
+function ruleOpen(id){var r=ruleById(id);if(!r)return;S.ruleEdit={id:r.id,name:r.name,tool:r.tool,ws:r.ws,minTrust:r.minTrust,minSpend:r.minSpend,maxAmount:r.maxAmount==null?"":r.maxAmount,on:r.on,isNew:false};openDialog("ruleedit");}
+function ruleToggle(id){var r=ruleById(id);if(!r)return;r.on=!r.on;render();act("Rule “"+r.name+"” "+(r.on?"enabled":"disabled")+". Bundle bumped; the next call sees it.");}
+function ruleLive(){
+  var d=S.ruleEdit; if(!d) return;
+  var t=el("ruleTrust"), tn=el("ruleTrustN"); if(t&&tn){ if(document.activeElement===tn) t.value=tn.value; else tn.value=t.value; d.minTrust=clamp1k(+t.value); }
+  var sOn=el("ruleSpendOn"), s=el("ruleSpend"), sn=el("ruleSpendN");
+  if(sOn){ if(sOn.checked&&s&&sn){ if(document.activeElement===sn) s.value=sn.value; else sn.value=s.value; d.minSpend=clamp1k(+s.value);} else d.minSpend=null; if(s)s.disabled=!sOn.checked; if(sn)sn.disabled=!sOn.checked; }
+  var wsel=el("ruleWs"); if(wsel) d.ws=wsel.value;
+  var tp=el("ruleTrustPill"); if(tp) tp.outerHTML=scorePill("Trust ≥",d.minTrust,false).replace('<span class="sc','<span id="ruleTrustPill" class="sc');
+  var sp=el("ruleSpendPill"); if(sp) sp.outerHTML=(d.minSpend==null?'<span id="ruleSpendPill" class="dim" style="font-size:12px">no spend floor</span>':scorePill("Spend ≥",d.minSpend,false).replace('<span class="sc','<span id="ruleSpendPill" class="sc'));
+  var pool=ruleAgents({ws:d.ws}), q=pool.filter(function(a){return ruleQualifies(d,a);});
+  var pv=el("rulePrev"); if(pv) pv.innerHTML='<b style="color:var(--fg)">'+q.length+' of '+pool.length+'</b> agents qualify now'+(q.length?': '+q.map(function(a){return '<span class="mono">'+h(a.key.split(".").pop())+'</span>';}).join(", "):'')+'.';
+}
+function ruleSave(){
+  var d=S.ruleEdit; if(!d) return; ruleLive();
+  var name=(el("ruleName")?el("ruleName").value:d.name).trim(), tool=el("ruleTool")?el("ruleTool").value:d.tool, amt=el("ruleAmt")?el("ruleAmt").value.trim():"";
+  if(!name){act("Give the rule a name people will read in the audit record.");return;}
+  var rec={name:name,tool:tool,ws:d.ws,minTrust:d.minTrust,minSpend:d.minSpend,maxAmount:amt?amt:null,on:el("ruleOn")?el("ruleOn").checked:d.on};
+  if(d.isNew){ S.ruleN++; rec.id="aar_01K5RV"+("0"+S.ruleN).slice(-2)+"Z"; rec.by=PEOPLE.marcus.name; rec.at="2026-09-11"; rec.hits30=0; rec.skipped30=0; AUTORULES.push(rec);
+    closeDialog(); act("Rule “"+name+"” created. It is in the bundle at the next bump; every auto-approval it makes names it.","gold"); }
+  else { var r=ruleById(d.id); if(r){for(var k in rec)r[k]=rec[k];} closeDialog(); act("Rule “"+name+"” updated. Bundle bumped."); }
+}
+function ruleDeleteConfirm(id){var i=-1;AUTORULES.forEach(function(r,ix){if(r.id===id)i=ix;});if(i<0)return;var n=AUTORULES[i].name;AUTORULES.splice(i,1);closeDialog();act("Rule “"+n+"” deleted. Calls it covered park for a human again from the next bundle.");}
+function ruleEditDlg(){
+  var d=S.ruleEdit; if(!d) return {t:"Rule",w:true,b:"",f:""};
+  var pool=ruleAgents({ws:d.ws}), q=pool.filter(function(a){return ruleQualifies(d,a);});
+  var b='<div class="grid g2"><div class="field"><label>Name</label><input id="ruleName" value="'+h(d.name)+'" placeholder="Trusted release tooling" aria-label="Name" oninput="S.ruleEdit.name=this.value"></div>'+
+   '<div class="field"><label>Workspace</label><select id="ruleWs" aria-label="Workspace" onchange="ruleLive()">'+WS.map(function(w){return '<option value="'+h(w.slug)+'"'+(d.ws===w.slug?' selected':'')+'>'+h(w.name)+'</option>';}).join("")+'<option value="*"'+(d.ws==="*"?' selected':'')+'>every workspace</option></select></div></div>'+
+   '<div class="field"><label>Applies to</label><select id="ruleTool" aria-label="Tool pattern" onchange="S.ruleEdit.tool=this.value">'+RULE_TOOLS.map(function(t){return '<option'+(d.tool===t?' selected':'')+'>'+h(t)+'</option>';}).join("")+'</select>'+
+    '<div class="hint">A tool version pattern. The rule only matters where the gate is <span class="mono">require_approval</span>; a deny stays a deny.</div></div>'+
+   '<div class="field"><label>Minimum trust score</label><div class="rng"><input id="ruleTrust" type="range" min="0" max="1000" step="10" value="'+d.minTrust+'" aria-label="Minimum trust" oninput="ruleLive()"><input id="ruleTrustN" type="number" min="0" max="1000" value="'+d.minTrust+'" aria-label="Minimum trust value" oninput="ruleLive()"></div>'+
+    '<div class="rng-prev">'+scorePill("Trust ≥",d.minTrust,false).replace('<span class="sc','<span id="ruleTrustPill" class="sc')+'<span>Below 700 you are trusting an average agent. Most customers start at 750.</span></div></div>'+
+   '<div class="field"><label class="check" style="margin:0 0 8px;padding:8px 11px"><input id="ruleSpendOn" type="checkbox"'+(d.minSpend!=null?' checked':'')+' onchange="ruleLive()" style="width:auto"><span class="grow"><span class="n" style="font-family:var(--font)">Also require a spend score</span><span class="d">Keeps an agent that burns tokens for little proven value on the human gate even when it behaves.</span></span></label>'+
+    '<div class="rng"><input id="ruleSpend" type="range" min="0" max="1000" step="10" value="'+(d.minSpend==null?400:d.minSpend)+'" aria-label="Minimum spend"'+(d.minSpend==null?' disabled':'')+' oninput="ruleLive()"><input id="ruleSpendN" type="number" min="0" max="1000" value="'+(d.minSpend==null?400:d.minSpend)+'" aria-label="Minimum spend value"'+(d.minSpend==null?' disabled':'')+' oninput="ruleLive()"></div>'+
+    '<div class="rng-prev">'+(d.minSpend==null?'<span id="ruleSpendPill" class="dim" style="font-size:12px">no spend floor</span>':scorePill("Spend ≥",d.minSpend,false).replace('<span class="sc','<span id="ruleSpendPill" class="sc'))+'</div></div>'+
+   '<div class="grid g2"><div class="field"><label>Amount ceiling (USD, optional)</label><input id="ruleAmt" value="'+h(d.maxAmount||"")+'" placeholder="250.00" aria-label="Amount ceiling"><div class="hint">Read from the call by the tool’s <span class="mono">amount_path</span>. Above it, a human decides.</div></div>'+
+   '<div class="field"><label>State</label><label class="check" style="margin:0;padding:8px 11px"><input id="ruleOn" type="checkbox"'+(d.on?' checked':'')+' style="width:auto"><span class="grow"><span class="n" style="font-family:var(--font)">Enabled</span><span class="d">Off keeps the rule but parks every call for a human.</span></span></label></div></div>'+
+   '<div class="banner" style="margin-bottom:12px"><span id="rulePrev"><b style="color:var(--fg)">'+q.length+' of '+pool.length+'</b> agents qualify now'+(q.length?': '+q.map(function(a){return '<span class="mono">'+h(a.key.split(".").pop())+'</span>';}).join(", "):'')+'.</span></div>'+
+   '<div class="note">Floors you cannot switch off: tainted input, critical hazard, calls outside a mandate, provisional scores. Every auto-approval is a frame that names this rule and you.</div>';
+  return {t:d.isNew?"Create an auto-approval rule":"Edit rule",s:d.isNew?"":d.id,w:true,b:b,
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="ruleSave()">'+(d.isNew?'Create rule':'Save changes')+'</button>'};
+}
+function ruleDelDlg(){
+  var r=S.dlg==="ruledel"?ruleById(S.dlgArg):null; if(!r) return {t:"Delete rule",w:false,b:"",f:""};
+  return {t:"Delete rule",s:r.name,w:false,b:'<p style="font-size:13px">Calls matching <span class="mono">'+h(r.tool)+'</span> in '+(r.ws==="*"?'every workspace':'<b>'+h(r.ws)+'</b>')+' park for a human again from the next bundle. The '+r.hits30+' approvals it made stay in the record with its id.</p>'+
+   '<div class="note">Prefer switching it off if you might want it back — a deleted rule id is never reused.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn" onclick="ruleToggle(\''+h(r.id)+'\');closeDialog()">Switch off instead</button><button class="btn danger" onclick="ruleDeleteConfirm(\''+h(r.id)+'\')">Delete rule</button>'};
+}
+
+/* ---- the missing delete and edit affordances: agents, members, workspaces ---- */
+function agentDelete(key){
+  var i=-1;AGENTS.forEach(function(a,ix){if(a.key===key)i=ix;});
+  if(i<0)return; var a=AGENTS[i]; AGENTS.splice(i,1); delete S.agentRoles[key];
+  WS.forEach(function(w){if(w.slug===a.ws&&w.agents>0)w.agents--;});
+  closeDialog(); go('#/'+ORG.slug+'/'+a.ws+'/agents'); act(key+" deregistered. Credential revoked, definition archived by Context PR, every run and frame kept.");
+}
+function agentDelDlg(){
+  var a=S.dlg==="delagent"?agent(S.dlgArg):null; if(!a) return {t:"Deregister agent",w:false,b:"",f:""};
+  var live=RUNS.filter(function(r){return r.agent===a.key&&r.status==="live";}).length;
+  return {t:"Deregister agent",s:a.key,w:false,b:
+   '<p style="font-size:13px">This ends the agent’s identity. Its credential is revoked, every run token dies at the next call, and a Context PR archives <span class="mono">.oxagen/agents/'+h(a.key.split(".").pop())+'.toml</span>.</p>'+
+   '<dl class="kv"><dt>Kept</dt><dd>every run, frame, receipt and score — the record is never deleted</dd><dt>Ends</dt><dd>'+agentRolesOf(a.key).length+' role'+(agentRolesOf(a.key).length===1?'':'s')+', '+a.mandates.length+' mandate'+(a.mandates.length===1?'':'s')+', the host enrollment</dd>'+
+   (live?'<dt>In flight</dt><dd><span style="color:var(--st-failed)">'+live+' live run'+(live>1?'s':'')+'</span> — cancelled at the next boundary and recorded</dd>':'')+'</dl>'+
+   '<label class="check" style="margin-top:12px"><input type="checkbox" id="delAgentOk" onchange="el(\'delAgentBtn\').disabled=!this.checked"><span class="grow"><span class="n" style="font-family:var(--font)">I understand this cannot be undone</span><span class="d">Re-registering creates a new principal with a provisional score.</span></span></label>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button id="delAgentBtn" class="btn danger" disabled onclick="agentDelete(\''+h(a.key)+'\')">Deregister</button>'};
+}
+function memberRemove(p){var i=-1;MEMBERS.forEach(function(m,ix){if(m.p===p)i=ix;});if(i<0)return;MEMBERS.splice(i,1);closeDialog();act(PEOPLE[p].name+" removed. Grants ended; runs stay attributed to them.");}
+function memberDelDlg(){
+  var p=S.dlg==="removemember"?PEOPLE[S.dlgArg]:null; if(!p) return {t:"Remove person",w:false,b:"",f:""};
+  var owns=AGENTS.filter(function(a){return a.operator===S.dlgArg;}).length;
+  return {t:"Remove from the organization",s:p.name,w:false,b:'<p style="font-size:13px">'+h(p.name)+' loses <span class="mono">'+h(p.role)+'</span> and every workspace grant. Their sessions end now.</p>'+
+   (owns?'<div class="warn">'+owns+' agent'+(owns>1?'s act':' acts')+' on their behalf. Each one’s delegation ceiling collapses to nothing until a new parent user accepts — reassign them first from the agent’s Identity panel.</div>':'<div class="note">No agent acts on their behalf. Removing is a governed action and is recorded.</div>'),
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn danger"'+(owns?' disabled':'')+' onclick="memberRemove(\''+h(S.dlgArg)+'\')">Remove</button>'};
+}
+function wsById(slug){for(var i=0;i<WS.length;i++){if(WS[i].slug===slug)return WS[i];}return null;}
+function wsSave(){var w=wsById(S.dlgArg);if(!w)return;var n=el("wsName"),b=el("wsBranch");if(n&&n.value.trim())w.name=n.value.trim();if(b)w.branch=b.value;closeDialog();act("Workspace "+w.name+" updated. Recorded as a security event.");}
+function wsEditDlg(){
+  var w=S.dlg==="editws"?wsById(S.dlgArg):null; if(!w) return {t:"Edit workspace",w:false,b:"",f:""};
+  return {t:"Edit workspace",s:w.slug,w:false,b:'<div class="field"><label>Name</label><input id="wsName" value="'+h(w.name)+'" aria-label="Name"></div>'+
+   '<div class="field"><label>Main repository</label><input value="'+h(w.main)+'" readonly aria-label="Main repository"><div class="hint">Changing main is an org-owner action with approval — start it from the repository row on Ontology.</div></div>'+
+   '<div class="field"><label>Production branch</label><select id="wsBranch" aria-label="Production branch">'+["main","release","production"].map(function(x){return '<option'+(w.branch===x?' selected':'')+'>'+x+'</option>';}).join("")+'</select></div>'+
+   '<div class="field"><label>Governance mode</label><select aria-label="Governance mode"><option>team — one code-owner review</option><option>solo — merge on green checks</option><option>regulated — two reviews and a promotion ledger</option></select></div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="wsSave()">Save</button>'};
+}
+function wsArchive(slug){var i=-1;WS.forEach(function(w,ix){if(w.slug===slug)i=ix;});if(i<0)return;var w=WS[i];WS.splice(i,1);if(S.ws===slug)S.ws=WS[0]?WS[0].slug:S.ws;closeDialog();act("Workspace "+w.name+" archived. Runs and frames stay readable; nothing new can start there.");}
+function wsArchiveDlg(){
+  var w=S.dlg==="archivews"?wsById(S.dlgArg):null; if(!w) return {t:"Archive workspace",w:false,b:"",f:""};
+  var n=AGENTS.filter(function(a){return a.ws===w.slug;}).length;
+  return {t:"Archive workspace",s:w.name,w:false,b:'<p style="font-size:13px">Archiving freezes <b>'+h(w.name)+'</b>: runs, frames, records and spend stay readable forever; agents cannot start, tools cannot be granted, and the main repo binding is released.</p>'+
+   (n?'<div class="warn">'+n+' agent'+(n>1?'s are':' is')+' registered here. Deregister or move them first.</div>':'<div class="note">No agents here. Archiving is an org-owner action, recorded as a security event.</div>'),
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn danger"'+(n?' disabled':'')+' onclick="wsArchive(\''+h(w.slug)+'\')">Archive</button>'};
+}
 
 /* ============================== Register Agent (the W1 onboarding gate, in-app) ==============================
    Fleet's "Register Agent" runs the onboarding gate inside the app: name the agent, wrap it, wait for its

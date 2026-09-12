@@ -18,6 +18,7 @@
   --gold-sheen:linear-gradient(45deg,#8B5E1A 0%,#D6962C 38%,#F1C364 56%,#D6962C 74%,#8B5E1A 100%);
   /* semantic state — separate from gold, which never encodes a state */
   --ok:#5FB98A; --wait:#6BA8DE; --bad:#E0664F; --crit:#F0563E;
+  --k-rule:#9D8BE3; --k-constraint:#D677B5; --k-procedure:#A6B95E; --k-fact:#5CB5D6; --k-memory:#94A3C2; --k-preference:#D08FA0;
   --shadow:0 1px 0 rgba(255,255,255,.03), 0 18px 44px rgba(0,0,0,.5);
   --shadow-lift:0 1px 0 rgba(255,255,255,.04), 0 28px 70px rgba(0,0,0,.62);
   --scrim:rgba(10,10,9,.72);
@@ -42,6 +43,7 @@
   --fg:#10100F; --body:#2A2823; --muted:#6B665C; --dim:#8C877C;
   --accent-text:#8B5E1A;
   --ok:#1F7A52; --wait:#1E5F92; --bad:#A93A22; --crit:#8E2A16;
+  --k-rule:#5D4AB5; --k-constraint:#A0397F; --k-procedure:#5F7A1F; --k-fact:#1E7392; --k-memory:#4E6280; --k-preference:#98485E;
   --shadow:0 1px 0 rgba(255,255,255,.7), 0 18px 44px rgba(16,16,15,.08);
   --shadow-lift:0 1px 0 rgba(255,255,255,.8), 0 28px 70px rgba(16,16,15,.14);
   --scrim:rgba(42,40,35,.4);
@@ -53,6 +55,7 @@
   --fg:#10100F; --body:#2A2823; --muted:#6B665C; --dim:#8C877C;
   --accent-text:#8B5E1A;
   --ok:#1F7A52; --wait:#1E5F92; --bad:#A93A22; --crit:#8E2A16;
+  --k-rule:#5D4AB5; --k-constraint:#A0397F; --k-procedure:#5F7A1F; --k-fact:#1E7392; --k-memory:#4E6280; --k-preference:#98485E;
   --shadow:0 1px 0 rgba(255,255,255,.7), 0 18px 44px rgba(16,16,15,.08);
   --shadow-lift:0 1px 0 rgba(255,255,255,.8), 0 28px 70px rgba(16,16,15,.14);
   --scrim:rgba(42,40,35,.4);
@@ -215,6 +218,29 @@ td.r,th.r{text-align:right;font-variant-numeric:tabular-nums}
 .b.bad{color:var(--bad);border-color:var(--bad-bd);background:var(--bad-bg)}
 .b.crit{color:#fff;background:var(--crit);border-color:var(--crit);font-weight:600}
 .b.gold{color:var(--accent-text);border-color:var(--gold-bd);background:var(--gold-bg)}
+/* context records: the statement is the record, the kind is the second thing you see.
+   icon badge = kind, dot/plain badge = state; kind hues never reuse a state hue and never use gold */
+.k-rule{--kc:var(--k-rule)} .k-constraint{--kc:var(--k-constraint)} .k-procedure{--kc:var(--k-procedure)}
+.k-fact{--kc:var(--k-fact)} .k-memory{--kc:var(--k-memory)} .k-preference{--kc:var(--k-preference)}
+.kb{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:1.5px 7px 1.5px 5px;border-radius:5px;border:1px solid;white-space:nowrap;color:var(--kc);border-color:color-mix(in srgb,var(--kc) 45%,transparent);background:color-mix(in srgb,var(--kc) 12%,transparent)}
+.kb svg{width:11px;height:11px}
+.recs{display:grid}
+.rec{display:grid;grid-template-columns:auto 1fr;gap:0 14px;padding:14px 16px 14px 13px;border-top:1px solid var(--border);border-left:3px solid var(--kc);min-width:0}
+.rec:first-child{border-top:0;border-top-left-radius:12px}
+.rec:last-child{border-bottom-left-radius:12px}
+.rec .kt{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;color:var(--kc);background:color-mix(in srgb,var(--kc) 14%,transparent);border:1px solid color-mix(in srgb,var(--kc) 32%,transparent)}
+.rec .kt svg{width:17px;height:17px}
+.rec .rm{min-width:0}
+.rec .r-top{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:7px}
+.rec .r-top .sp{margin-left:auto;display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.rec .r-st{font-size:15px;line-height:1.45;color:var(--fg);font-weight:500;margin:0;max-width:78ch;overflow-wrap:anywhere}
+.rec .r-meta{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:9px;font-size:11.5px;color:var(--dim)}
+.rec .r-meta .mono{font-size:11px}
+.rec .r-meta b{font-weight:600;color:var(--muted)}
+.phone .rec,.rec.narrow{grid-template-columns:1fr}
+.phone .rec .kt{display:none}
+.phone .rec .r-top .sp{margin-left:0}
+@media (max-width:640px){.rec{grid-template-columns:1fr}.rec .kt{display:none}.rec .r-top .sp{margin-left:0}}
 /* enforcement tier: filled > outlined > dashed, so strength reads without the word */
 .tier{font-family:var(--mono);font-size:10px;padding:1.5px 6px;border-radius:5px;white-space:nowrap}
 .tier.gateway{background:var(--fg);color:var(--ink);font-weight:600}
@@ -970,7 +996,7 @@ const NOTIFS = [
     body:"No approver resolved apr_01K5YQ9T2B within 10 minutes. $184.20 USD to vendor:aws was never dispatched; mandate mnd_4471 released the reservation." },
   { kind:"context_pr.opened", tone:"gold", unread:false, t:"13:02",
     title:"Context PR opened · acme/platform#1892",
-    body:"The promoter proposed a directive on lineage lin_7fa2: “Do not re-read CHANGELOG.md after the first read in a run.” Supported by 14 runs across 3 agents." },
+    body:"The promoter proposed a rule on lineage lin_7fa2: “Do not re-read CHANGELOG.md after the first read in a run.” Supported by 14 runs across 3 agents." },
   { kind:"run.proven", tone:"ok", unread:false, t:"15:09",
     title:"Run proven · run_01K5YX2D6R",
     body:"Witness wit_01K5YX51 flipped: failing on main at 9c41ab0, passing on refs/pull/1887/head at 3d8f77e. Oracle test_flip, disclosure grain L0." },
@@ -1170,7 +1196,7 @@ const SUGGEST = {
             ["drift","What data-layer drift did the last sync find?"],
             ["sync","Re-index acme/platform from the production branch head"]],
   steering:[["effect","Which published records has nothing cited in 30 days?"],
-            ["open","Open a Context PR retiring the changelog directive"],
+            ["open","Open a Context PR retiring the changelog rule"],
             ["why","Why is proposal lin_7fa2 still open?"]],
   spend:[["findings","Act on the top finding and tell me what it saves"],
          ["proven","How much of last month turned into proven work?"],
@@ -1301,6 +1327,28 @@ const tbl = (head, rows) => '<div class="tw"><table><thead><tr>' + head + '</tr>
   + rows + '</tbody></table></div>';
 const kvl = pairs => '<dl class="kv">' + pairs.map(p =>
   '<dt>' + p[0] + '</dt><dd>' + p[1] + '</dd>').join("") + '</dl>';
+
+/* the six kinds of context-record/v0.1; one icon and one hue each. the statement is always the headline */
+const KINDS = {
+  rule:{l:"rule",d:"A directive that steers behaviour",i:'<path d="M4 12h14M13 7l5 5-5 5"/>'},
+  constraint:{l:"constraint",d:"A hard boundary: require or forbid",i:'<path d="M12 3l8 3.5v5c0 4.6-3.2 8.6-8 9.5-4.8-.9-8-4.9-8-9.5v-5z"/><path d="M9 12h6"/>'},
+  procedure:{l:"procedure",d:"Steps, in order",i:'<path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/>'},
+  fact:{l:"fact",d:"A checkable claim about the world",i:'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.5"/>'},
+  memory:{l:"memory",d:"A durable recollection",i:'<path d="M6 3h12v18l-6-4-6 4z"/>'},
+  preference:{l:"preference",d:"Soft and often unfalsifiable",i:'<path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/>'}
+};
+const kindSvg = k => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (KINDS[k] || KINDS.rule).i + '</svg>';
+const kindBadge = k => '<span class="kb k-' + esc(k) + '" title="' + esc((KINDS[k] || KINDS.rule).d) + '">' + kindSvg(k) + esc((KINDS[k] || KINDS.rule).l) + '</span>';
+/* one record, statement first: r = {id, kind, force, ce, st, scope, status, effect, pub}; x.right replaces the status badge */
+const recordCard = (r, x = {}) => '<div class="rec k-' + esc(r.kind) + '"><div class="kt">' + kindSvg(r.kind) + '</div><div class="rm">'
+  + '<div class="r-top">' + kindBadge(r.kind)
+  + (r.force ? '<span class="b" title="steering force">' + esc(r.force) + '</span>' : '')
+  + (r.ce ? '<span class="b ' + (r.ce === "forbid" ? "bad" : "wait") + '" title="constraint effect">' + esc(r.ce) + '</span>' : '')
+  + '<span class="sp">' + (x.right != null ? x.right : (r.status === "published" ? '<span class="b ok">published</span>' : '<span class="b wait">' + esc(r.status) + '</span>')) + '</span></div>'
+  + '<p class="r-st">' + esc(r.st) + '</p>'
+  + '<div class="r-meta">' + (x.meta || '') + '<span><b>' + esc(r.scope) + '</b></span>'
+  + (r.effect ? '<span>' + esc(r.effect) + '</span>' : '') + '<span class="mono">' + esc(r.id) + '</span>'
+  + (r.pub ? '<span>' + esc(r.pub) + '</span>' : '') + '</div></div></div>';
 
 /* ── the four non-loaded page states ───────────────────────────────── */
 function blankState(view, pageName){
@@ -1640,29 +1688,35 @@ P.ontology = () => {
 
 P.steering = () => {
   const rows = [
-    ["ctx.review.changelog-convention","directive","workspace","published","62 runs rendered · 48 cited","2026-08-30"],
-    ["ctx.arch.no-direct-stripe-calls","directive","workspace","published","41 rendered · 39 cited · 2 violated","2026-08-22"],
-    ["ctx.repo.mobile-uses-detox","knowledge","repository","published","18 rendered · 11 cited","2026-09-02"],
-    ["ctx.review.skip-generated-files","directive","workspace","proposed","—","open PR #1892"],
-    ["ctx.data.invoices-are-immutable","knowledge","workspace","published","7 rendered · 0 cited","2026-07-14"]
-  ].map(r => '<tr><td><span class="idc">' + r[0] + '</span></td>'
-    + '<td class="sc">' + r[1] + '</td><td class="sc">' + r[2] + '</td>'
-    + '<td>' + (r[3] === "published" ? '<span class="b ok">published</span>'
-      : '<span class="b wait">proposed</span>') + '</td>'
-    + '<td class="sc">' + r[4] + '</td><td class="sc">' + r[5] + '</td></tr>').join("");
+    {id:"ctx.review.changelog-convention",kind:"rule",force:"should",scope:"workspace",status:"published",
+     st:"Every user-facing change adds a CHANGELOG.md entry under Unreleased, in the same pull request.",effect:"62 runs rendered · 48 cited",pub:"2026-08-30"},
+    {id:"ctx.arch.no-direct-stripe-calls",kind:"constraint",force:"must",ce:"forbid",scope:"workspace",status:"published",
+     st:"Never call the Stripe API directly. Every charge, refund and webhook goes through packages/billing.",effect:"41 rendered · 39 cited · 2 violated",pub:"2026-08-22"},
+    {id:"ctx.release.cut-order",kind:"procedure",force:"should",scope:"workspace",status:"published",
+     st:"Cut a release in this order: freeze main, dry-run the migrations, tag, then publish the notes.",effect:"12 rendered · 12 cited",pub:"2026-08-21"},
+    {id:"ctx.repo.mobile-uses-detox",kind:"fact",force:"info",scope:"repository",status:"published",
+     st:"The mobile app\u2019s end-to-end suite is Detox, not Playwright.",effect:"18 rendered · 11 cited",pub:"2026-09-02"},
+    {id:"ctx.ci.safari-flake-august",kind:"memory",force:"info",scope:"workspace",status:"published",
+     st:"The checkout e2e suite flaked on Safari through August. A retry there is not evidence of a regression.",effect:"9 rendered · 3 cited",pub:"2026-09-02"},
+    {id:"ctx.triage.short-labels",kind:"preference",force:"may",scope:"workspace",status:"published",
+     st:"Prefer one-word labels on triaged issues. Longer labels are tolerated, not encouraged.",effect:"40 rendered · 22 cited",pub:"2026-08-09"},
+    {id:"ctx.review.skip-generated-files",kind:"rule",force:"should",scope:"workspace",status:"proposed",
+     st:"Do not review files under a generated directory; review the generator instead.",effect:"",pub:"open PR #1892"},
+    {id:"ctx.data.invoices-are-immutable",kind:"constraint",force:"must",ce:"forbid",scope:"workspace",status:"published",
+     st:"An issued invoice is never edited. A correction is a credit note.",effect:"7 rendered · 0 cited",pub:"2026-07-14"}
+  ].map(r => recordCard(r)).join("");
   return '<p class="eyebrow">Workspace · ' + S.ws + '</p><h1 class="pt">Steering</h1>'
     + '<p class="sub">Nothing steers until it is published, and publication is a merged pull request '
     + 'on <code class="mono">' + WS[S.ws].mainRepo + '</code>. The graph remembers everything about a record; '
     + 'git decides what is in force.</p>'
     + '<div class="grid g4">'
-    + stat("Published records", "34", "28 directive · 6 knowledge")
+    + stat("Published records", "34", "rule 14 · constraint 9 · procedure 4 · fact 4 · memory 2 · preference 1")
     + stat("Open Context PRs", "2", "#1892 opened 13:02 · #1888 awaiting review")
     + stat("Proposals", "6", "threshold: 5 runs, 2 agents, confidence 0.72")
     + stat("Retirement candidates", "1", "ctx.data.invoices-are-immutable · 0 citations in 60 days")
     + '</div>'
     + sec("Records", "list_records · effect measured per record",
-        tbl('<th>Lineage</th><th>Kind</th><th>Scope</th><th>Status</th><th>Effect</th>'
-          + '<th>Published</th>', rows));
+        '<div class="card recs">' + rows + '</div>');
 };
 
 P.spend = () => {
