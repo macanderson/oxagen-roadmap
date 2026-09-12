@@ -3718,7 +3718,7 @@ function runSeries(R){
   return {n:n,cost:cost,cache:cache,steps:steps,model:model,tool:tool,adv:adv,idle:idle,peak:peak,cacheAvg:cacheAvg,
     saved:total*cacheAvg*0.9*0.55, perTurn:total/n, modelN:model.reduce(function(a,b){return a+b;},0), toolN:tool.reduce(function(a,b){return a+b;},0)};
 }
-function tsec(t){var p=String(t).split(":");return (+p[0])*3600+(+p[1])*60+parseFloat(p[2]||0);}
+function frameSec(t){var p=String(t).split(":");return (+p[0])*3600+(+p[1])*60+parseFloat(p[2]||0);}
 /* hover layer: one tooltip node, text only, same content on focus */
 function tipAttr(s){return ' data-tip="'+h(s)+'" onmouseenter="rtTip(this,event)" onmousemove="rtTip(this,event)" onmouseleave="rtTipHide()" onfocus="rtTip(this)" onblur="rtTipHide()"';}
 function rtTip(node,ev){
@@ -3768,8 +3768,8 @@ function runInstruments(R){
   '</div>';
 }
 function runTimeline(R){
-  var fr=FRAMES,t0=tsec(fr[0].t),t1=tsec(fr[fr.length-1].t),span=Math.max(1,t1-t0),i;
-  var xs=fr.map(function(f){return (tsec(f.t)-t0)/span*100;});
+  var fr=FRAMES,t0=frameSec(fr[0].t),t1=frameSec(fr[fr.length-1].t),span=Math.max(1,t1-t0),i;
+  var xs=fr.map(function(f){return (frameSec(f.t)-t0)/span*100;});
   for(i=1;i<xs.length;i++)if(xs[i]<xs[i-1]+1.7)xs[i]=xs[i-1]+1.7;
   var last=xs[xs.length-1];if(last>97)xs=xs.map(function(x){return x/last*97;});
   var bounds=[];fr.forEach(function(f,i){if(f.kind==="agent_start"||f.kind==="control.steer")bounds.push(i);});if(bounds[0]!==0)bounds.unshift(0);
@@ -7447,7 +7447,7 @@ function permChips(perms,max){
   return shown.map(function(p){return '<span class="b b-q" style="margin:0 3px 3px 0;font-family:var(--mono);font-weight:500">'+h(p)+'</span>';}).join("")+
    (perms.length>shown.length?'<span class="dim" style="font-size:11px">+'+(perms.length-shown.length)+' more</span>':'');
 }
-function kindBadge(k){return '<span class="b '+(k==="agent"?"b-proven":k==="service"?"b-approval":"b-q")+'">'+h(k)+'</span>';}
+function roleKindBadge(k){return '<span class="b '+(k==="agent"?"b-proven":k==="service"?"b-approval":"b-q")+'">'+h(k)+'</span>';}
 function rolesInUsePanel(){
   var list=ROLES.filter(function(r){return r.kind==="human";});
   return '<div class="panel"><div class="panel-h"><h3>Roles in use</h3><button class="btn sm" style="margin-left:auto" onclick="orgTab(\'roles\')">Manage roles</button></div><div class="tw"><table class="narrow"><tbody>'+
@@ -7460,7 +7460,7 @@ function rolesBody(){
   var rows=list.map(function(r){
     var n=roleAssignees(r.id), locked=r.builtin, busy=n.total>0;
     return '<tr class="click" onclick="roleOpen(\''+r.id+'\')"><td><span class="tkey">'+h(r.id)+'</span><div class="dim" style="font-size:11.5px">'+h(r.desc)+'</div></td>'+
-     '<td>'+kindBadge(r.kind)+'</td><td class="mono" style="font-size:11.5px">'+h(r.scope)+'</td>'+
+     '<td>'+roleKindBadge(r.kind)+'</td><td class="mono" style="font-size:11.5px">'+h(r.scope)+'</td>'+
      '<td style="max-width:30ch">'+permChips(r.perms)+'</td>'+
      '<td style="font-size:12px;white-space:nowrap">'+(n.total?[n.people?n.people+' people':'',n.agents?n.agents+' agent'+(n.agents>1?'s':''):'',n.svc?n.svc+' key'+(n.svc>1?'s':''):''].filter(Boolean).join(' · '):'<span class="dim">nobody</span>')+'</td>'+
      '<td style="font-size:11.5px">'+(locked?'<span class="b b-q">built-in</span>':'<span class="dim">'+h(r.by)+' · '+h(r.at)+'</span>')+'</td>'+
