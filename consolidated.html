@@ -10,22 +10,24 @@
 </head>
 <body>
 <style>
-/* ─── Tokens. Oxagen house brand. Light is the bare :root; dark overrides. ─── */
+/* ─── Tokens. Oxagen house brand. Light is the bare :root; dark overrides.
+       Every text colour here clears 4.5:1 against every surface it can land on,
+       including the row-hover highlight and its own state wash. ─── */
 :root{
   --ink:#F2EEE5; --panel:#F8F5EE; --panel-2:#FFFDF8; --hl:#EDE7DA;
   --rule:#D8CDBD; --rule-2:#C9BCA6;
-  --fg:#10100F; --body:#2A2823; --muted:#6E6A62; --dim:#948E83;
-  --gold:#8B5E1A; --gold-ink:#FFFDF8; --gold-solid:#D6962C;
-  --gold-wash:rgba(139,94,26,.10); --gold-edge:rgba(139,94,26,.30);
-  --ok:#2F7A4F;   --ok-wash:rgba(47,122,79,.12);
-  --proven:#0F7A6C; --proven-wash:rgba(15,122,108,.12);
-  --wait:#3C6BA8; --wait-wash:rgba(60,107,168,.12);
-  --deny:#A33A48; --deny-wash:rgba(163,58,72,.11);
-  --fail:#A8501F; --fail-wash:rgba(168,80,31,.12);
-  --crit:#B02A22; --crit-wash:rgba(176,42,34,.12);
-  --neutral:#6E6A62; --neutral-wash:rgba(110,106,98,.10);
+  --fg:#10100F; --body:#2A2823; --muted:#5F5B54; --dim:#6D675C;
+  --gold:#825511; --gold-ink:#FFFDF8; --gold-solid:#D6962C;
+  --gold-wash:rgba(130,85,17,.10); --gold-edge:rgba(130,85,17,.30);
+  --ok:#1E693E;      --ok-wash:rgba(30,105,62,.12);
+  --proven:#00685A;  --proven-wash:rgba(0,104,90,.12);
+  --wait:#2E5D9A;    --wait-wash:rgba(46,93,154,.12);
+  --deny:#A13846;    --deny-wash:rgba(161,56,70,.11);
+  --fail:#994110;    --fail-wash:rgba(153,65,16,.12);
+  --crit:#AD271F;    --crit-wash:rgba(173,39,31,.12);
+  --neutral:#625E56; --neutral-wash:rgba(98,94,86,.10);
   --shadow:0 1px 2px rgba(16,16,15,.06),0 10px 28px rgba(16,16,15,.07);
-  --focus:#8B5E1A;
+  --scrim:rgba(28,24,18,.46);
   --sans:"Space Grotesk","Helvetica Neue",Arial,sans-serif;
   --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
   --r:12px; --r-sm:8px; --r-xs:5px;
@@ -34,34 +36,34 @@
 @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
   --ink:#10100F; --panel:#181715; --panel-2:#1D1C19; --hl:#201F1C;
   --rule:#292722; --rule-2:#34322D;
-  --fg:#F2EEE5; --body:#DDD8CD; --muted:#9B958A; --dim:#6E6A62;
+  --fg:#F2EEE5; --body:#DDD8CD; --muted:#A8A298; --dim:#8A867E;
   --gold:#D6962C; --gold-ink:#10100F; --gold-solid:#D6962C;
   --gold-wash:rgba(214,150,44,.12); --gold-edge:rgba(214,150,44,.32);
-  --ok:#5BA97C;   --ok-wash:rgba(91,169,124,.14);
-  --proven:#4FB3A3; --proven-wash:rgba(79,179,163,.14);
-  --wait:#6E9BD6; --wait-wash:rgba(110,155,214,.14);
-  --deny:#C4646F; --deny-wash:rgba(196,100,111,.14);
-  --fail:#CF6A3C; --fail-wash:rgba(207,106,60,.14);
-  --crit:#E0483F; --crit-wash:rgba(224,72,63,.15);
-  --neutral:#8B857A; --neutral-wash:rgba(139,133,122,.13);
+  --ok:#5BA97C;      --ok-wash:rgba(91,169,124,.14);
+  --proven:#4FB3A3;  --proven-wash:rgba(79,179,163,.14);
+  --wait:#6E9BD6;    --wait-wash:rgba(110,155,214,.14);
+  --deny:#DB7B86;    --deny-wash:rgba(219,123,134,.14);
+  --fail:#E17C4E;    --fail-wash:rgba(225,124,78,.14);
+  --crit:#FD655C;    --crit-wash:rgba(253,101,92,.15);
+  --neutral:#9C968B; --neutral-wash:rgba(156,150,139,.13);
   --shadow:0 1px 0 rgba(255,255,255,.03),0 12px 32px rgba(0,0,0,.44);
-  --focus:#F1C364;
+  --scrim:rgba(4,4,4,.62);
 }}
 :root[data-theme="dark"]{
   --ink:#10100F; --panel:#181715; --panel-2:#1D1C19; --hl:#201F1C;
   --rule:#292722; --rule-2:#34322D;
-  --fg:#F2EEE5; --body:#DDD8CD; --muted:#9B958A; --dim:#6E6A62;
+  --fg:#F2EEE5; --body:#DDD8CD; --muted:#A8A298; --dim:#8A867E;
   --gold:#D6962C; --gold-ink:#10100F; --gold-solid:#D6962C;
   --gold-wash:rgba(214,150,44,.12); --gold-edge:rgba(214,150,44,.32);
-  --ok:#5BA97C;   --ok-wash:rgba(91,169,124,.14);
-  --proven:#4FB3A3; --proven-wash:rgba(79,179,163,.14);
-  --wait:#6E9BD6; --wait-wash:rgba(110,155,214,.14);
-  --deny:#C4646F; --deny-wash:rgba(196,100,111,.14);
-  --fail:#CF6A3C; --fail-wash:rgba(207,106,60,.14);
-  --crit:#E0483F; --crit-wash:rgba(224,72,63,.15);
-  --neutral:#8B857A; --neutral-wash:rgba(139,133,122,.13);
+  --ok:#5BA97C;      --ok-wash:rgba(91,169,124,.14);
+  --proven:#4FB3A3;  --proven-wash:rgba(79,179,163,.14);
+  --wait:#6E9BD6;    --wait-wash:rgba(110,155,214,.14);
+  --deny:#DB7B86;    --deny-wash:rgba(219,123,134,.14);
+  --fail:#E17C4E;    --fail-wash:rgba(225,124,78,.14);
+  --crit:#FD655C;    --crit-wash:rgba(253,101,92,.15);
+  --neutral:#9C968B; --neutral-wash:rgba(156,150,139,.13);
   --shadow:0 1px 0 rgba(255,255,255,.03),0 12px 32px rgba(0,0,0,.44);
-  --focus:#F1C364;
+  --scrim:rgba(4,4,4,.62);
 }
 
 *{box-sizing:border-box}
@@ -75,13 +77,22 @@ h3{font-size:13px}
 a{color:inherit;text-decoration:none}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 table{border-collapse:collapse;width:100%}
-:focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:3px}
+:focus-visible{outline:2px solid var(--fg);outline-offset:2px;border-radius:3px}
 .mono{font-family:var(--mono);font-size:.92em;font-variant-ligatures:none}
 .num{font-variant-numeric:tabular-nums}
 .eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.12em;
   color:var(--gold);font-weight:600}
 .sub{color:var(--muted)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* Visually hidden but reachable by a screen reader. Never `hidden` — that
+   removes the element from the accessibility tree as well as the screen. */
+.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+  clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0}
+.skip{position:absolute;left:-9999px;top:0}
+.skip:focus{position:fixed;left:10px;top:10px;z-index:120;background:var(--panel);
+  color:var(--fg);border:1px solid var(--rule-2);border-radius:var(--r-sm);
+  padding:9px 14px;font-size:13px;font-weight:500;box-shadow:var(--shadow)}
 
 /* ─── Shell ─── */
 #app{display:grid;grid-template-columns:var(--rail) 1fr;min-height:100vh}
@@ -100,10 +111,12 @@ table{border-collapse:collapse;width:100%}
 .navsec a svg{width:16px;height:16px;flex:none;stroke:currentColor;fill:none;
   stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;opacity:.72}
 .navsec a:hover{background:var(--hl);color:var(--fg)}
+/* Current page is marked with weight, ground and a spine — never with gold.
+   Gold is identity in this product; it does not encode state. */
 .navsec a[aria-current="page"]{background:var(--hl);color:var(--fg);font-weight:500}
-.navsec a[aria-current="page"] svg{opacity:1;color:var(--gold)}
+.navsec a[aria-current="page"] svg{opacity:1}
 .navsec a[aria-current="page"]::before{content:"";position:absolute;left:-8px;top:7px;bottom:7px;
-  width:2px;border-radius:0 2px 2px 0;background:var(--gold)}
+  width:2px;border-radius:0 2px 2px 0;background:var(--fg)}
 /* A count appears only when something is waiting on a person. */
 .wait-n{margin-left:auto;font-family:var(--mono);font-size:11px;padding:1px 6px;border-radius:999px;
   background:var(--wait-wash);color:var(--wait)}
@@ -119,7 +132,7 @@ table{border-collapse:collapse;width:100%}
 .bar{height:var(--bar);border-bottom:1px solid var(--rule);background:var(--ink);
   display:flex;align-items:center;gap:10px;padding:0 18px;position:sticky;top:0;z-index:40}
 /* The org and workspace switchers live in the breadcrumb, not the sidebar. */
-.crumb{display:flex;align-items:center;gap:2px;min-width:0;flex:1}
+.crumb{display:flex;align-items:center;gap:2px;min-width:0;flex:1;flex-wrap:wrap}
 .crumb .sep{color:var(--dim);padding:0 2px}
 .chip-sw{display:flex;align-items:center;gap:6px;padding:4px 8px;border-radius:var(--r-sm);
   color:var(--body);font-size:13px;max-width:200px}
@@ -127,6 +140,8 @@ table{border-collapse:collapse;width:100%}
 .chip-sw .tag{font-family:var(--mono);font-size:10.5px;color:var(--dim)}
 .chip-sw svg{width:10px;height:10px;stroke:currentColor;fill:none;stroke-width:1.8;opacity:.6}
 .crumb .here{padding:4px 6px;color:var(--fg);font-weight:500;font-size:13px}
+.crumb a.here{color:var(--body);font-weight:400;border-radius:var(--r-sm)}
+.crumb a.here:hover{background:var(--hl);color:var(--fg)}
 .search{display:flex;align-items:center;gap:8px;height:30px;padding:0 10px;min-width:0;
   border:1px solid var(--rule);border-radius:var(--r-sm);background:var(--panel);
   color:var(--muted);font-size:13px;width:250px}
@@ -136,12 +151,11 @@ table{border-collapse:collapse;width:100%}
 .bar-btn{display:flex;align-items:center;gap:7px;height:30px;padding:0 11px;border-radius:var(--r-sm);
   border:1px solid var(--rule);color:var(--body);font-size:13px}
 .bar-btn:hover{background:var(--hl);color:var(--fg)}
-.bar-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.7;
-  stroke-linecap:round;stroke-linejoin:round}
-.bar-btn[aria-pressed="true"]{border-color:var(--gold-edge);color:var(--gold);background:var(--gold-wash)}
+.bar-btn[aria-pressed="true"]{border-color:var(--rule-2);color:var(--fg);background:var(--hl);font-weight:500}
 
 .canvas{padding:26px 26px 90px;min-width:0}
 .page{max-width:var(--page);margin:0 auto;min-width:0}
+.page:focus{outline:none}
 .head{display:flex;align-items:flex-start;gap:20px;flex-wrap:wrap;margin-bottom:22px}
 .head-t{flex:1;min-width:260px}
 .head p{margin:7px 0 0;color:var(--muted);max-width:64ch}
@@ -165,14 +179,23 @@ table{border-collapse:collapse;width:100%}
   font-variant-numeric:tabular-nums;letter-spacing:-.02em;line-height:1.1}
 .summary small{display:block;margin-top:3px;font-size:11.5px;color:var(--muted)}
 
+/* A simulation result is not a page summary, so it does not borrow the tile
+   element — three tiles per page is the ceiling and the page already spends it. */
+.simrow{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+.simrow > div{flex:1 1 190px;min-width:0;border:1px solid var(--rule);border-radius:var(--r-sm);
+  background:var(--ink);padding:10px 13px}
+.simrow b{display:block;color:var(--fg);font-size:17px;font-weight:600;font-variant-numeric:tabular-nums}
+.simrow span{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+
 .tabs{display:flex;gap:2px;border-bottom:1px solid var(--rule);margin-bottom:20px;
   overflow-x:auto;scrollbar-width:none}
 .tabs::-webkit-scrollbar{display:none}
 .tabs button{padding:9px 12px;font-size:13.5px;color:var(--muted);white-space:nowrap;
   border-bottom:2px solid transparent;margin-bottom:-1px}
 .tabs button:hover{color:var(--fg)}
-.tabs button[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--gold);font-weight:500}
+.tabs button[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--fg);font-weight:500}
 .tabs .n{font-family:var(--mono);font-size:11px;color:var(--dim);margin-left:5px}
+[role="tabpanel"]:focus{outline:none}
 
 .panel{border:1px solid var(--rule);border-radius:var(--r);background:var(--panel);margin-bottom:18px;overflow:hidden}
 .panel-h{display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid var(--rule);flex-wrap:wrap}
@@ -189,6 +212,7 @@ tbody tr:hover td{background:var(--hl)}
 td b{color:var(--fg);font-weight:500;display:block}
 td .s{display:block;color:var(--muted);font-size:11.5px;margin-top:2px}
 .r{text-align:right}
+tr[data-go]{cursor:pointer}
 
 /* State reads as form as well as colour: a dot plus a word. */
 .st{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:999px;
@@ -202,6 +226,14 @@ td .s{display:block;color:var(--muted);font-size:11.5px;margin-top:2px}
 .st.crit{background:var(--crit-wash);color:var(--crit)}
 .st.flat{background:none;border:1px solid var(--rule);color:var(--muted)}
 .st.flat::before{display:none}
+
+/* ─── Tool grammar. One identity everywhere: name@schema-version.
+       Category is a glyph and a word, never a hue. ─── */
+.tool{display:inline-flex;align-items:center;gap:6px;min-width:0}
+.tool > .mono{color:var(--fg);overflow-wrap:anywhere}
+.haz{width:13px;height:13px;flex:none;stroke:var(--fail);fill:none;stroke-width:1.8;
+  stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px}
+.toolargs{display:block;font-family:var(--mono);font-size:11.5px;color:var(--muted);margin-top:2px}
 
 .kv{display:grid;grid-template-columns:minmax(120px,auto) 1fr;gap:8px 18px;font-size:13px;min-width:0}
 .kv dt{color:var(--muted)}
@@ -219,6 +251,15 @@ td .s{display:block;color:var(--muted);font-size:11.5px;margin-top:2px}
 .notice.deny{border-color:var(--deny-wash);background:var(--deny-wash)}
 .notice.crit{border-color:var(--crit-wash);background:var(--crit-wash)}
 .notice b{color:var(--fg);display:block;margin-bottom:2px}
+
+/* ─── Approvals. Resolving one writes a receipt that survives navigation. ─── */
+.appr{display:flex;gap:14px;align-items:flex-start;padding:13px 16px;
+  border-bottom:1px solid var(--rule);flex-wrap:wrap}
+.appr:last-child{border-bottom:0}
+.appr-t{flex:1;min-width:220px}
+.appr-a{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.appr-amt{margin-top:7px;font-size:19px;font-weight:600;color:var(--fg)}
+.appr-amt span{font-size:12px;font-weight:400;color:var(--muted)}
 
 /* ─── Assistant. One dock, same on every page. ─── */
 .asst{border-left:1px solid var(--rule);background:var(--panel);position:sticky;top:0;
@@ -241,7 +282,7 @@ td .s{display:block;color:var(--muted);font-size:11.5px;margin-top:2px}
 /* ─── Dialogs ─── */
 dialog{border:1px solid var(--rule);border-radius:var(--r);background:var(--panel);color:var(--body);
   padding:0;max-width:min(560px,calc(100vw - 32px));width:100%;box-shadow:var(--shadow)}
-dialog::backdrop{background:rgba(8,8,7,.62)}
+dialog::backdrop{background:var(--scrim)}
 .dlg-h{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--rule)}
 .dlg-h h2{flex:1}
 .dlg-b{padding:16px;max-height:65vh;overflow-y:auto}
@@ -249,22 +290,36 @@ dialog::backdrop{background:rgba(8,8,7,.62)}
   background:none;color:var(--fg);font:inherit;font-size:15px}
 .cmd ul{list-style:none;margin:0;padding:6px}
 .cmd li a{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:var(--r-sm);font-size:13.5px}
-.cmd li a:hover,.cmd li a:focus-visible{background:var(--hl);color:var(--fg)}
+.cmd li a:hover,.cmd li a:focus-visible,.cmd li[aria-selected="true"] a{background:var(--hl);color:var(--fg)}
 .cmd li .k{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--dim)}
 
-/* ─── Mockup chrome. Deliberately unlike the product. ─── */
+/* ─── Mockup chrome. Deliberately unlike the product, and dismissible —
+       it must never be the thing standing between you and a control. ─── */
 .chrome{position:fixed;right:14px;bottom:14px;z-index:90;background:var(--panel);
   border:1px dashed var(--rule-2);border-radius:var(--r-sm);padding:9px 11px;
-  font-family:var(--mono);font-size:11px;color:var(--muted);box-shadow:var(--shadow);max-width:calc(100vw - 28px)}
+  font-family:var(--mono);font-size:11px;color:var(--muted);box-shadow:var(--shadow);
+  max-width:calc(100vw - 28px)}
+.chrome-top{display:flex;align-items:center;gap:10px}
 .chrome-r{display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-top:6px}
 .chrome b{color:var(--gold);font-weight:600;letter-spacing:.06em}
 .chrome button{padding:2px 7px;border-radius:var(--r-xs);border:1px solid var(--rule);
   font-family:var(--mono);font-size:11px;color:var(--muted)}
-.chrome button[aria-pressed="true"]{background:var(--gold-wash);border-color:var(--gold-edge);color:var(--gold)}
+.chrome button:hover{color:var(--fg);background:var(--hl)}
+.chrome button[aria-pressed="true"]{background:var(--hl);border-color:var(--rule-2);color:var(--fg)}
+.chrome .fold{margin-left:auto}
 
-/* ─── Phone. The query sits on a wrapper, never on the element it sizes. ─── */
-.frame{container-type:inline-size;min-width:0}
-@container (max-width:640px){
+/* The drawer scrim: a way out of the phone navigation that is not the
+   button that opened it. */
+.scrim{position:fixed;inset:0;background:var(--scrim);z-index:60;border:0;padding:0;width:100%}
+
+/* ─── Phone. Two containers, because two different widths are being asked about.
+       `app` is the whole application frame — it decides whether the shell is a
+       sidebar or a drawer. `canvas` is the width the page content actually gets,
+       which shrinks when the assistant opens; content queries must read that one,
+       or a 528px canvas keeps rendering as if it had 1,100px. ─── */
+.frame{container-type:inline-size;container-name:app;min-width:0}
+.canvas{container-type:inline-size;container-name:canvas}
+@container app (max-width:640px){
   #app,#app[data-asst="open"]{grid-template-columns:1fr}
   .rail{position:fixed;left:0;top:0;bottom:0;width:250px;z-index:70;
     transform:translateX(-100%);transition:transform .2s}
@@ -272,19 +327,27 @@ dialog::backdrop{background:rgba(8,8,7,.62)}
   .asst{position:fixed;inset:0;width:100%;height:100dvh;z-index:80;border-left:0}
   .navtoggle{display:inline-flex!important}
   .canvas{padding:18px 16px 90px}
-  .summary{grid-template-columns:1fr}
-  .summary > div + div{border-left:0;border-top:1px solid var(--rule)}
   .search{width:auto;flex:1}
   .search kbd,.hide-s{display:none}
+}
+@container canvas (max-width:640px){
+  .summary{grid-template-columns:1fr}
+  .summary > div + div{border-left:0;border-top:1px solid var(--rule)}
   h1{font-size:21px}
   .kv{grid-template-columns:1fr;gap:3px 0}
   .kv dd{margin-bottom:7px}
+}
+@container canvas (max-width:760px){
+  .split{grid-template-columns:1fr!important}
+  .split3{grid-template-columns:1fr!important}
 }
 .navtoggle{display:none}
 body[data-w="phone"] .frame{max-width:400px;margin:0 auto;border-left:1px solid var(--rule);
   border-right:1px solid var(--rule);min-height:100vh}
 body[data-w="phone"]{background:var(--panel-2)}
 </style>
+
+<a class="skip" href="#view">Skip to page content</a>
 <div class="frame">
 <div id="app" data-asst="closed">
 
@@ -318,29 +381,29 @@ body[data-w="phone"]{background:var(--panel-2)}
 
   <div style="min-width:0">
     <header class="bar">
-      <button class="bar-btn navtoggle" id="navToggle" aria-label="Menu"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+      <button class="bar-btn navtoggle" id="navToggle" aria-label="Menu" aria-expanded="false" aria-controls="rail"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
 
       <nav class="crumb" aria-label="Breadcrumb">
-        <button class="chip-sw" id="orgSw" aria-haspopup="listbox">Acme Robotics <span class="tag">acme</span>
+        <button class="chip-sw" id="orgSw" aria-haspopup="listbox" data-act="switch-org">Acme Robotics <span class="tag">acme</span>
           <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 4.7 6 2.4l2.5 2.3M3.5 7.3 6 9.6l2.5-2.3"/></svg></button>
         <span class="sep" aria-hidden="true">/</span>
-        <button class="chip-sw" id="wsSw" aria-haspopup="listbox">core-platform
+        <button class="chip-sw" id="wsSw" aria-haspopup="listbox" data-act="switch-ws">core-platform
           <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 4.7 6 2.4l2.5 2.3M3.5 7.3 6 9.6l2.5-2.3"/></svg></button>
         <span class="sep" aria-hidden="true">/</span>
-        <span class="here" id="crumbHere">Fleet</span>
+        <span id="crumbTail"><span class="here">Fleet</span></span>
       </nav>
 
       <button class="search hide-s" id="cmdBtn">
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
         Search or run a command <kbd>⌘K</kbd>
       </button>
-      <button class="bar-btn" id="asstBtn" aria-pressed="false">
+      <button class="bar-btn" id="asstBtn" aria-pressed="false" aria-controls="asst">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l1.9 4.9 4.9 1.9-4.9 1.9L12 17.1l-1.9-4.9-4.9-1.9 4.9-1.9z"/></svg>
         <span class="hide-s">Assistant</span>
       </button>
     </header>
 
-    <main class="canvas"><div class="page" id="view"></div></main>
+    <main class="canvas"><div class="page" id="view" tabindex="-1"></div></main>
   </div>
 
   <aside class="asst" id="asst" hidden aria-label="Assistant">
@@ -351,16 +414,20 @@ body[data-w="phone"]{background:var(--panel-2)}
     </div>
     <div class="asst-b" id="asstBody"></div>
     <div class="asst-f">
-      <label class="sr" for="asstIn" hidden>Ask the assistant</label>
+      <label class="sr" for="asstIn">Ask the assistant</label>
       <input id="asstIn" placeholder="Ask, or tell it to change something">
     </div>
   </aside>
 
 </div>
 </div>
+<button class="scrim" id="scrim" hidden aria-label="Close the menu"></button>
+
 <dialog id="cmd" class="cmd" aria-label="Command menu">
-  <input id="cmdIn" placeholder="Search runs, agents, tools, or type a command" autocomplete="off">
-  <ul id="cmdList"></ul>
+  <label class="sr" for="cmdIn">Search runs, agents, tools, or type a command</label>
+  <input id="cmdIn" placeholder="Search runs, agents, tools, or type a command" autocomplete="off"
+    role="combobox" aria-expanded="true" aria-controls="cmdList" aria-autocomplete="list">
+  <ul id="cmdList" role="listbox" aria-label="Results"></ul>
 </dialog>
 
 <dialog id="acct" aria-label="Account">
@@ -378,347 +445,754 @@ body[data-w="phone"]{background:var(--panel-2)}
 </dialog>
 
 <div class="chrome" id="chrome">
-  <b>MOCKUP</b> · not product UI
-  <div class="chrome-r" id="stateRow"></div>
-  <div class="chrome-r" id="widthRow"></div>
+  <div class="chrome-top"><b>MOCKUP</b> · not product UI
+    <button class="fold" id="chromeFold" aria-expanded="true" aria-controls="chromeBody">hide</button></div>
+  <div id="chromeBody">
+    <div class="chrome-r" id="stateRow"></div>
+    <div class="chrome-r" id="widthRow"></div>
+  </div>
 </div>
 
 <script>
 "use strict";
-/* ───────────────────────── Demo data. Acme Robotics, one consistent customer. ───────────────────────── */
-const APPROVALS = [
-  {tool:"stripe__create_payment@4", agent:"acme.finops.invoice-bot", op:"Dana Okafor",
-   rule:"mandate.above_threshold", amount:"$18,420.00", left:"5m 47s", risk:"critical"},
-  {tool:"github__merge_pull_request@3", agent:"acme.core.release-manager", op:"Marcus Bell",
-   rule:"merge.requires_approval", amount:null, left:"9m 12s", risk:null},
-  {tool:"bash(rm -rf node_modules)", agent:"acme.core.triage", op:"Marcus Bell",
-   rule:"harness.irreversible_path", amount:null, left:"4m 03s", risk:null}
+/* ═══════════════════════════════════════════════════════════════════════════
+   Canonical figures. Acme Robotics, one consistent customer.
+
+   Every number rendered anywhere in this file is either in this block or
+   derived from it in code. Nothing is typed twice — that is the only way a
+   mockup with ten pages stays internally true after it is edited.
+   ═══════════════════════════════════════════════════════════════════════════ */
+const ORG = {name:"Acme Robotics", ns:"acme", id:"org_7QK3M8VZ", members:34,
+  plan:"Enterprise, annual", currency:"USD"};
+
+const WS = {name:"core-platform", repo:"acme/platform", agents:41,
+  runsMTD:2904, spendMTD:18407.62, provenSpend:7913.28, provenRuns:1204,
+  spendToday:1204.71, spend30d:50188.34,
+  proven90:9612, witnessed90:10998,           /* Steering proof rate, 90 days */
+  records:7, recordMix:"4 rule · 2 procedure · 1 constraint", proposals:2};
+
+const WS2 = {name:"finops", repo:"acme/finops-agents", agents:9, runsMTD:414};
+
+/* Billing is org-scope, so it meters both workspaces. */
+const PERIOD = {label:"1 Sep – 11 Sep", free:1000, rate:0.50,
+  archiveGB:184, archiveRate:0.02, next:"1 Oct 2026", terms:"net 30"};
+
+const ORG_AGENTS = WS.agents + WS2.agents;              /* 50 */
+const ORG_RUNS   = WS.runsMTD + WS2.runsMTD;            /* 3,318 */
+const BILLABLE   = Math.max(0, ORG_RUNS - PERIOD.free); /* 2,318 */
+const RUN_CHARGE = BILLABLE * PERIOD.rate;              /* 1,159.00 */
+const ARCHIVE    = PERIOD.archiveGB * PERIOD.archiveRate;
+const CHARGES    = RUN_CHARGE + ARCHIVE;
+
+/* ─── Tools. One identity: name@schema-version, everywhere it appears. ─── */
+const TOOL_CLASS = {read_only:"read only", side_effect:"side effect",
+  irreversible:"irreversible", moves_funds:"moves funds"};
+const HAZARD = {irreversible:"cannot be undone", moves_funds:"moves money"};
+const TOOLS = [
+  {id:"github__merge_pull_request@3", server:"github", cls:"irreversible", gate:"needs approval", calls:41},
+  {id:"stripe__create_payment@4",     server:"stripe", cls:"moves_funds",  gate:"needs approval", calls:18},
+  {id:"linear__get_issue@2",          server:"linear", cls:"read_only",    gate:"allowed",        calls:3914},
+  {id:"repo.search@2",                server:"builtin",cls:"read_only",    gate:"allowed",        calls:12880},
+  {id:"bash@1",                       server:"harness",cls:"irreversible", gate:"needs approval", calls:6102}
 ];
+const REGISTRY = {tools:214, servers:6, external:3};
+const TOOL = id => TOOLS.find(t => t.id === id);
+
+/* ─── Approvals. Each is about a run, and each survives being resolved. ─── */
+const APPROVALS = [
+  {tool:"stripe__create_payment@4", args:null, run:"run_01K6QWZ4T7",
+   agent:"acme.core.invoice-bot", op:"Dana Okafor",
+   rule:"mandate.above_threshold", amount:18420.00, left:"5m 47s", risk:"critical", resolved:null},
+  {tool:"github__merge_pull_request@3", args:"acme/platform#503", run:"run_01K6QX7M3E",
+   agent:"acme.core.release-manager", op:"Marcus Bell",
+   rule:"merge.requires_approval", amount:null, left:"9m 12s", risk:null, resolved:null},
+  {tool:"bash@1", args:"rm -rf node_modules", run:"run_01K6QX2B1C",
+   agent:"acme.core.triage", op:"Marcus Bell",
+   rule:"harness.irreversible_path", amount:null, left:"4m 03s", risk:null, resolved:null}
+];
+/* ULID alphabet — no I, L, O or U. One receipt per decision, never reused. */
+const RECEIPTS = ["rcp_01K6R41D","rcp_01K6R41E","rcp_01K6R41F",
+                  "rcp_01K6R41G","rcp_01K6R41H","rcp_01K6R41J"];
+let receiptN = 0;
+const mintReceipt = () => RECEIPTS[receiptN] ?? ("rcp_01K6R4" + (receiptN + 20));
+
+/* ─── Runs. Cost and frame count are summed from the per-turn ledger, so a
+       row in the Fleet table can never disagree with the run's own Cost tab. ─── */
 const RUNS = [
   {id:"run_01K6QX7M3E", task:"Cut the 2026.9 release", agent:"acme.core.release-manager",
-   op:"Marcus Bell", harness:"Claude Code 2.1.4", state:"live", step:"turn 5 · model call", cost:"$2.78", verdict:null},
+   op:"Marcus Bell", harness:"Claude Code 2.1.4", state:"parked", verdict:null,
+   step:"waiting on merge approval", started:"2026-09-11 13:41:08Z", ended:null,
+   inTok:618440, freshTok:58728,
+   turns:[["T1","Assemble the changelog",18,0.6120,0.0018],
+          ["T2","Run the release checks",26,0.9940,0.0042],
+          ["T3","Open the release PR and ask",27,1.1618,0.0062]]},
+
   {id:"run_01K6QX5J8A", task:"Repair the flaky deploy test", agent:"acme.core.stella-ci",
-   op:"Marcus Bell", harness:"Stella 0.9.14", state:"live", step:"turn 3 · tool call", cost:"$1.12", verdict:null},
-  {id:"run_01K6QWZ4T7", task:"Settle September vendor invoices", agent:"acme.finops.invoice-bot",
-   op:"Dana Okafor", harness:"OpenAI Agents SDK 1.4.2", state:"parked", step:"waiting on approval", cost:"$0.94", verdict:null},
+   op:"Marcus Bell", harness:"Stella 0.9.14", state:"live", verdict:null,
+   step:"turn 3 · tool call", started:"2026-09-11 13:52:19Z", ended:null,
+   inTok:402118, freshTok:52276,
+   turns:[["T1","Reproduce the flake",15,0.4210,0.0016],
+          ["T2","Isolate the shared fixture",12,0.3388,0.0024],
+          ["T3","Write the regression test",11,0.3540,0.0022]]},
+
+  {id:"run_01K6QX9F4D", task:"Roll firmware 4.2 to the Halvorsen fleet", agent:"acme.core.fleet-ops-bot",
+   op:"Marcus Bell", harness:"Stella 0.9.14", state:"live", verdict:null,
+   step:"turn 2 · tool call", started:"2026-09-11 13:58:44Z", ended:null,
+   inTok:71004, freshTok:12784,
+   turns:[["T1","Read the deployment sites",9,0.2410,0.0011],
+          ["T2","Stage the rollout",7,0.1960,0.0019]]},
+
+  {id:"run_01K6QWZ4T7", task:"Settle September vendor invoices", agent:"acme.core.invoice-bot",
+   op:"Dana Okafor", harness:"OpenAI Agents SDK 1.4.2", state:"parked", verdict:null,
+   step:"waiting on approval", started:"2026-09-11 13:48:02Z", ended:null,
+   inTok:128904, freshTok:17714,
+   turns:[["T1","Read the open invoices",9,0.3110,0.0009],
+          ["T2","Match them to purchase orders",8,0.2988,0.0031],
+          ["T3","Raise the payment and ask",7,0.3240,0.0022]]},
+
+  {id:"run_01K6QX2B1C", task:"Clear the stale node_modules on the CI image", agent:"acme.core.triage",
+   op:"Marcus Bell", harness:"Codex CLI 0.42.1", state:"parked", verdict:null,
+   step:"waiting on approval", started:"2026-09-11 13:55:31Z", ended:null,
+   inTok:41220, freshTok:9040,
+   turns:[["T1","Measure the image",6,0.1620,0.0008],
+          ["T2","Propose the removal and ask",5,0.1460,0.0012]]},
+
   {id:"run_01K5XQ7M4A", task:"Retry budget exhaustion drops webhooks", agent:"acme.core.release-manager",
-   op:"Marcus Bell", harness:"Claude Code 2.1.4", state:"sealed", step:"39 steps", cost:"$4.87", verdict:"flipped"},
+   op:"Marcus Bell", harness:"Claude Code 2.1.4", state:"sealed", verdict:"flipped",
+   step:"sealed 09:51:47Z", started:"2026-09-11 09:14:02Z", ended:"2026-09-11 09:51:47Z",
+   issue:"acme/platform#478",
+   subtitle:"Retry budget exhaustion silently drops webhook deliveries",
+   inTok:1184902, freshTok:82943,
+   turns:[["T1","Reproduce the drift",14,0.7994,0.0021],
+          ["T2","Write the failing test",21,0.7680,0.0038],
+          ["T3","Fix it — paused and steered mid-turn",44,2.4070,0.0094],
+          ["T4","Open the PR and wait for the witness",47,0.8756,0.0047]],
+   proof:{witness:"wit_retry_budget", oracle:"test_flip", frame:118,
+     target:"main @ 9f2c41aeb7d3", targetResult:"FAIL", targetNote:"fingerprint d92a6f13b804",
+     head:"refs/pull/482/head @ 4d7be053c91a", headResult:"PASS",
+     verdict:"flipped", saw:"pass", grain:"L0"},
+   chain:{root:"9f2a41c7e0b83d…2f8c04", key:"att_acme_2026Q3_8c41",
+     from:"2026-07-01", to:"2027-01-01", grade:"full"}},
+
   {id:"run_01K6QWW6D3", task:"Quarantine flaky specs in acme/mobile", agent:"acme.core.flake-hunter",
-   op:"Marcus Bell", harness:"Stella 0.9.14", state:"sealed", step:"22 steps", cost:"$0.61", verdict:"unmoved"},
-  {id:"run_01K6QWV2R8", task:"Reconcile August provider invoices", agent:"acme.finops.ledger-recon",
-   op:"Dana Okafor", harness:"OpenAI Agents SDK 1.4.2", state:"sealed", step:"14 steps", cost:"$0.38", verdict:"flipped"}
+   op:"Marcus Bell", harness:"Stella 0.9.14", state:"sealed", verdict:"unmoved",
+   step:"sealed 12:06:11Z", started:"2026-09-11 11:44:50Z", ended:"2026-09-11 12:06:11Z",
+   inTok:296510, freshTok:42392,
+   turns:[["T1","Collect the failing specs",31,0.2044,0.0018],
+          ["T2","Re-run them in isolation",28,0.1910,0.0026],
+          ["T3","Quarantine and open the issue",25,0.2078,0.0024]],
+   proof:{witness:"wit_mobile_specs", oracle:"test_flip", frame:60,
+     target:"main @ 71ce09b42a8f", targetResult:"PASS", targetNote:"the witness never failed here",
+     head:"refs/pull/487/head @ 0b61d2e7ac95", headResult:"PASS",
+     verdict:"unmoved", saw:"pass", grain:"L0"},
+   chain:{root:"3c81be04f7a19d…6b2e71", key:"att_acme_2026Q3_8c41",
+     from:"2026-07-01", to:"2027-01-01", grade:"full"}},
+
+  {id:"run_01K6QWV2R8", task:"Reconcile August provider invoices", agent:"acme.core.ledger-recon",
+   op:"Dana Okafor", harness:"OpenAI Agents SDK 1.4.2", state:"sealed", verdict:"flipped",
+   step:"sealed 10:39:28Z", started:"2026-09-11 10:21:07Z", ended:"2026-09-11 10:39:28Z",
+   inTok:88402, freshTok:17498,
+   turns:[["T1","Load both ledgers",22,0.1512,0.0014],
+          ["T2","Diff them line by line",18,0.1140,0.0018],
+          ["T3","Raise the one exception",12,0.1100,0.0016]],
+   proof:{witness:"wit_ledger_tie_out", oracle:"test_flip", frame:40,
+     target:"main @ a4f0182be6cd", targetResult:"FAIL", targetNote:"fingerprint 7b10ce4492af",
+     head:"refs/pull/489/head @ e72a9c05fb31", headResult:"PASS",
+     verdict:"flipped", saw:"pass", grain:"L0"},
+   chain:{root:"d41b7a90c2e856…18f3aa", key:"att_acme_2026Q3_8c41",
+     from:"2026-07-01", to:"2027-01-01", grade:"full"}},
+
+  {id:"run_01K6QWQ1F2", task:"Settle the Bedrock overage line", agent:"acme.core.invoice-bot",
+   op:"Dana Okafor", harness:"OpenAI Agents SDK 1.4.2", state:"cancelled", verdict:null,
+   step:"killed at turn 2 · class moves_funds", started:"2026-09-11 11:18:40Z", ended:"2026-09-11 11:22:07Z",
+   inTok:22118, freshTok:6716,
+   turns:[["T1","Read the overage line",6,0.1180,0.0006],
+          ["T2","Raise the payment",3,0.0910,0.0004]]}
 ];
-const FRAMES = [
-  {n:0,  k:"run",     t:"agent_start", d:"acme.core.release-manager · Claude Code 2.1.4", cost:null},
-  {n:7,  k:"context", t:"context.assembled", d:"7 context frames · 6,310 of 24,000 tokens", cost:null},
-  {n:12, k:"model",   t:"model.request", d:"claude-fable-5-1 · steering in the stable prefix", cost:null},
-  {n:13, k:"model",   t:"model.response", d:"2,216,660 in · 9,417 out · 93.0% cached", cost:"$0.3149"},
-  {n:21, k:"tool",    t:"tool_requested", d:"repo.search@2.3.0 · validated input", cost:null},
-  {n:22, k:"policy",  t:"policy.decision", d:"allow · wrk.repo.read.linked_repo · pol_v41", cost:null},
-  {n:23, k:"tool",    t:"tool_call", d:"repo.search → 14 hits · 2 fields redacted", cost:"$0.0004"},
-  {n:118,k:"proof",   t:"proof.observed", d:"witness wit_retry_budget · flipped", cost:null},
-  {n:126,k:"run",     t:"agent_stop", d:"sealed · merkle root 9f2a41c…2f8c04", cost:null}
-];
-const FRAME_DETAIL = {
-  "proof.observed":[["Witness","wit_retry_budget"],["Oracle","test_flip"],
-    ["On main @ 9f2c41a","FAIL · fingerprint d92a6f13b804"],["On refs/pull/482/head @ 4d7be05","PASS"],
-    ["Verdict","flipped"],["What the agent saw","the four characters pass"],["Disclosure grain","L0"]],
-  "model.response":[["Model","claude-fable-5-1"],["Input tokens","260,322 · 18,342 fresh · 241,980 cached"],
-    ["Output tokens","9,417 · 3,208 reasoning"],["Cache hit rate","93.0%"],["Cost","$0.3149 · gateway observed"]],
-  "policy.decision":[["Decision","allow"],["Rule","wrk.repo.read.linked_repo"],["Policy version","pol_v41 · activated 2026-09-02"],
-    ["Enforcement tier","gateway"],["Deny generation","41"]]
+
+const runCost   = r => r.turns.reduce((s,t) => s + t[3] + t[4], 0);
+const runFrames = r => r.turns.reduce((s,t) => s + t[2], 0);
+const cached    = r => r.inTok - r.freshTok;
+
+/* ─── Frame factories. Every frame carries its own detail, so no frame in the
+       flight recorder is a dead end — that is the product's central claim. ─── */
+const int   = n => n.toLocaleString("en-US");
+const money = n => "$" + n.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+const mon4  = n => "$" + n.toFixed(4);
+const pct1  = (a,b) => (a / b * 100).toFixed(1) + "%";
+
+const F = {
+  start: (n, r) => ({n, t:"agent_start", d:`${r.agent} · ${r.harness}`, kv:[
+    ["Run", r.id], ["Agent", r.agent], ["Harness", r.harness], ["Operator", r.op],
+    ["Task", r.task], ["Started", r.started], ["Enforcement tier", "gateway"]]}),
+
+  ctx: (n, recs, tok, top) => ({n, t:"context.assembled",
+    d:`${recs} context records · ${int(tok)} of 24,000 tokens`, kv:[
+    ["Records in force", `${recs} · indexed from ${WS.repo}@e91b2d7`],
+    ["Prefix tokens", `${int(tok)} of 24,000`],
+    ["Stable prefix", "yes · cacheable across the run"],
+    ["Highest-cited record", top],
+    ["Assembled by", "the context service, not the agent"]]}),
+
+  req: (n, model, note, belt) => ({n, t:"model.request", d:`${model} · ${note}`, kv:[
+    ["Model", model], ["Prompt", note],
+    ["Tools offered", `${belt} of ${REGISTRY.tools} · the belt, not the registry`],
+    ["Sampling", "temperature 0 · max 8,192"],
+    ["Recorded", "in full · this request is replayable"]]}),
+
+  res: (n, inT, fresh, outT, reason, cost) => ({n, t:"model.response",
+    d:`${int(inT)} in · ${int(outT)} out · ${pct1(inT - fresh, inT)} cached`, cost:mon4(cost), kv:[
+    ["Model", "claude-fable-5-1"],
+    ["Input tokens", `${int(inT)} · ${int(fresh)} fresh · ${int(inT - fresh)} cached`],
+    ["Output tokens", int(outT)],
+    ["Cache hit rate", pct1(inT - fresh, inT)],
+    ["Stop reason", reason],
+    ["Cost", mon4(cost) + " · gateway observed"]]}),
+
+  toolReq: (n, id, args) => ({n, t:"tool_requested", d:`${id} · validated input`, kv:[
+    ["Tool", id], ["Class", TOOL_CLASS[TOOL(id).cls]], ["Server", TOOL(id).server],
+    ["Arguments", args], ["Schema", "validated against " + id],
+    ["Requested by", "the model, in this turn"]]}),
+
+  policy: (n, decision, rule, note) => ({n, t:"policy.decision",
+    d:`${decision} · ${rule} · pol_v41`, kv:[
+    ["Decision", decision], ["Rule", rule],
+    ["Policy version", "pol_v41 · activated 2026-09-02"],
+    ["Enforcement tier", "gateway"], ["Deny generation", "41"], ["What follows", note]]}),
+
+  call: (n, id, result, cost, ms) => ({n, t:"tool_call", d:`${id} → ${result}`, cost:mon4(cost), kv:[
+    ["Tool", id], ["Result", result],
+    ["Credential", "single-use, minted for this call and expired after it"],
+    ["Latency", ms + " ms"], ["Cost", mon4(cost) + " · gateway observed"]]}),
+
+  ask: (n, who, left, rule) => ({n, t:"approval.requested", d:`${who} · ${left} left`, kv:[
+    ["Sent to", who], ["Rule", rule], ["Expires in", left],
+    ["Run state", "parked at the call boundary"],
+    ["Dispatched", "nothing — the credential is minted only on approval"]]}),
+
+  proof: (n, p) => ({n, t:"proof.observed", d:`witness ${p.witness} · ${p.verdict}`, kv:[
+    ["Witness", p.witness], ["Oracle", p.oracle],
+    ["On " + p.target, p.targetResult + " · " + p.targetNote],
+    ["On " + p.head, p.headResult],
+    ["Verdict", p.verdict],
+    ["What the agent saw", "the four characters " + p.saw],
+    ["Disclosure grain", p.grain]]}),
+
+  stop: (n, r) => ({n, t:"agent_stop", d:`sealed · merkle root ${r.chain.root}`, kv:[
+    ["Outcome", "sealed"],
+    ["Frames", `${runFrames(r)} · dense 0–${runFrames(r) - 1}`],
+    ["Merkle root", "sha256:" + r.chain.root],
+    ["Attestation key", r.chain.key],
+    ["Run cost", money(runCost(r)) + " · gateway observed"],
+    ["Ended", r.ended]]}),
+
+  killed: (n, by, why) => ({n, t:"run.cancelled", d:`${why} · ${by}`, kv:[
+    ["Outcome", "cancelled"], ["Cancelled by", by], ["Reason", why],
+    ["Took effect", "at the next call boundary"],
+    ["Frames", "sealed up to this point, and still replayable"],
+    ["Billing", "the frames before the switch are billable; nothing after it exists"]]})
 };
+
+/* One recorded frame list per run. The lists are samples of a longer chain and
+   say so; the last frame of a sealed run is its real last index. */
+const FRAMES_OF = {
+  run_01K5XQ7M4A: r => [
+    F.start(0, r),
+    F.ctx(7, WS.records, 6310, "ctx.core.release-pr-never-merged-by-agent"),
+    F.req(12, "claude-fable-5-1", "steering in the stable prefix", 9),
+    F.res(13, 260322, 18342, 9417, "tool_use", 0.3149),
+    F.toolReq(21, "repo.search@2", "q=\"retry budget\" · path=services/webhooks"),
+    F.policy(22, "allow", "wrk.repo.read.linked_repo", "the call dispatches with a single-use credential"),
+    F.call(23, "repo.search@2", "14 hits · 2 fields redacted", 0.0004, 412),
+    F.proof(118, r.proof),
+    F.stop(runFrames(r) - 1, r)],
+
+  run_01K6QX7M3E: r => [
+    F.start(0, r),
+    F.ctx(6, WS.records, 6310, "ctx.core.release-pr-never-merged-by-agent"),
+    F.req(52, "claude-fable-5-1", "turn 3 · the release checklist", 9),
+    F.res(53, 214880, 20114, 4102, "tool_use", 0.2610),
+    F.toolReq(68, "github__merge_pull_request@3", "repo=acme/platform · pull=503"),
+    F.policy(69, "ask", "merge.requires_approval", "the run parks and a person is asked"),
+    F.ask(runFrames(r) - 1, "Marcus Bell", "9m 12s", "merge.requires_approval")],
+
+  run_01K6QX5J8A: r => [
+    F.start(0, r),
+    F.ctx(4, WS.records, 5940, "ctx.core.migration-expand-contract"),
+    F.req(20, "claude-fable-5-1", "turn 3 · the isolated fixture", 7),
+    F.res(21, 141002, 19844, 3180, "tool_use", 0.1712),
+    F.toolReq(36, "repo.search@2", "q=\"shared fixture\" · path=test/deploy"),
+    F.call(runFrames(r) - 1, "repo.search@2", "6 hits", 0.0003, 288)],
+
+  run_01K6QX9F4D: r => [
+    F.start(0, r),
+    F.ctx(3, WS.records, 5210, "ctx.core.migration-expand-contract"),
+    F.req(8, "claude-fable-5-1", "turn 2 · the staged rollout", 6),
+    F.res(9, 38420, 7108, 2044, "tool_use", 0.0642),
+    F.toolReq(14, "repo.search@2", "q=\"firmware 4.2\" · path=fleet/releases"),
+    F.call(runFrames(r) - 1, "repo.search@2", "3 hits", 0.0002, 194)],
+
+  run_01K6QWZ4T7: r => [
+    F.start(0, r),
+    F.ctx(3, WS.records, 4880, "ctx.core.no-secrets-in-workflow-inputs"),
+    F.req(14, "claude-fable-5-1", "turn 3 · the matched purchase order", 5),
+    F.res(15, 61204, 9118, 2610, "tool_use", 0.0904),
+    F.toolReq(21, "stripe__create_payment@4", "amount=18420.00 · currency=usd · po=PO-4471"),
+    F.policy(22, "ask", "mandate.above_threshold", "over $10,000.00, so a person decides"),
+    F.ask(runFrames(r) - 1, "Dana Okafor", "5m 47s", "mandate.above_threshold")],
+
+  run_01K6QX2B1C: r => [
+    F.start(0, r),
+    F.ctx(2, WS.records, 4120, "ctx.core.migration-expand-contract"),
+    F.req(6, "claude-fable-5-1", "turn 2 · the image inventory", 4),
+    F.res(7, 19840, 4402, 1180, "tool_use", 0.0388),
+    F.toolReq(8, "bash@1", "rm -rf node_modules"),
+    F.policy(9, "ask", "harness.irreversible_path", "the path cannot be restored, so a person decides"),
+    F.ask(runFrames(r) - 1, "Marcus Bell", "4m 03s", "harness.irreversible_path")],
+
+  run_01K6QWW6D3: r => [
+    F.start(0, r),
+    F.ctx(5, WS.records, 5620, "ctx.core.migration-expand-contract"),
+    F.req(30, "claude-fable-5-1", "turn 2 · the isolated re-run", 7),
+    F.res(31, 98420, 14108, 3944, "tool_use", 0.1204),
+    F.proof(60, r.proof),
+    F.stop(runFrames(r) - 1, r)],
+
+  run_01K6QWV2R8: r => [
+    F.start(0, r),
+    F.ctx(4, WS.records, 4910, "ctx.core.no-secrets-in-workflow-inputs"),
+    F.req(18, "claude-fable-5-1", "turn 2 · the line-by-line diff", 5),
+    F.res(19, 42118, 8204, 2118, "tool_use", 0.0611),
+    F.proof(40, r.proof),
+    F.stop(runFrames(r) - 1, r)],
+
+  run_01K6QWQ1F2: r => [
+    F.start(0, r),
+    F.ctx(2, WS.records, 3980, "ctx.core.no-secrets-in-workflow-inputs"),
+    F.req(4, "claude-fable-5-1", "turn 2 · the overage line", 4),
+    F.res(5, 14204, 3618, 940, "tool_use", 0.0288),
+    F.toolReq(7, "stripe__create_payment@4", "amount=812.40 · currency=usd"),
+    F.killed(runFrames(r) - 1, "Priya Natarajan", "kill switch, class moves_funds")]
+};
+const framesOf = r => FRAMES_OF[r.id](r);
+
+/* ─── Agents. The table is a sample of the workspace, and says so. ─── */
 const AGENTS = [
-  {n:"Release manager", id:"acme.core.release-manager", h:"Claude Code 2.1.4", st:"active", tier:"gateway", belt:"searchable", spend:"$412.78"},
-  {n:"Stella CI",       id:"acme.core.stella-ci",       h:"Stella 0.9.14",     st:"active", tier:"gateway", belt:"searchable", spend:"$1,208.44"},
-  {n:"Triage",          id:"acme.core.triage",          h:"Codex CLI 0.42.1",  st:"active", tier:"gateway", belt:"full", spend:"$96.20"},
-  {n:"Invoice bot",     id:"acme.finops.invoice-bot",   h:"OpenAI Agents SDK 1.4.2", st:"active", tier:"gateway", belt:"full", spend:"$143.09"},
-  {n:"Docs writer",     id:"acme.core.docs-writer",     h:"Custom · SDK-wrapped",    st:"unenrolled", tier:"observe", belt:"full", spend:"$0.00"}
+  {n:"Stella CI",       id:"acme.core.stella-ci",       h:"Stella 0.9.14",           st:"active", tier:"gateway", belt:"searchable", spend:1208.44},
+  {n:"Release manager", id:"acme.core.release-manager", h:"Claude Code 2.1.4",       st:"active", tier:"gateway", belt:"searchable", spend:412.78},
+  {n:"Invoice bot",     id:"acme.core.invoice-bot",     h:"OpenAI Agents SDK 1.4.2", st:"active", tier:"gateway", belt:"full",       spend:143.09},
+  {n:"Triage",          id:"acme.core.triage",          h:"Codex CLI 0.42.1",        st:"active", tier:"gateway", belt:"full",       spend:96.20},
+  {n:"Docs writer",     id:"acme.core.docs-writer",     h:"Custom · SDK-wrapped",    st:"unenrolled", tier:"observe", belt:"full",   spend:0.00}
 ];
+const MANDATE = {agent:"acme.core.invoice-bot", purpose:"Monthly infrastructure invoices, PO-4471",
+  perCall:25000.00, approveAbove:10000.00, grantedBy:"Priya Natarajan, as org billing",
+  validTo:"2026-12-31", authority:60000.00, settled:31280.00, reserved:18420.00};
+
+/* ─── Spend findings. The tile totals whatever is in this list. ─── */
 const FINDINGS = [
   {n:"Cache misses after a stable prefix changed", id:"fnd_9c41", scope:"acme.core.release-manager", at:1842.16, frames:4},
   {n:"Tool-list bloat on every model call",        id:"fnd_9c3d", scope:"acme.core.triage",          at:964.02,  frames:6},
-  {n:"Cache writes never read back",               id:"fnd_9c52", scope:"acme.core.docs-writer",     at:555.19,  frames:3},
+  {n:"Cache writes never read back",               id:"fnd_9c52", scope:"acme.core.stella-ci",       at:555.19,  frames:3},
   {n:"Retry storms against one provider key",      id:"fnd_9c58", scope:"provider key pk_bdrk_7f2a", at:441.87,  frames:5}
 ];
+
+/* ─── Steering. The six record kinds are rule, constraint, procedure, fact,
+       memory and preference. `directive` and `knowledge` were invented and
+       removed; nothing here may use them. ─── */
 const RECORDS = [
-  {s:"An agent never merges a pull request on acme/platform. Open it, request review, and stop.",
-   id:"ctx.core.release-pr-never-merged-by-agent", kind:"directive", before:84.1, after:91.6, cited:96, violated:0},
+  {s:"An agent never merges to main on acme/platform without a person's approval. Open the pull request, request review, and stop.",
+   id:"ctx.core.release-pr-never-merged-by-agent", kind:"rule", before:84.1, after:91.6, cited:96, violated:0},
   {s:"Schema changes ship expand-then-contract: add the column, backfill, switch readers, drop later.",
-   id:"ctx.core.migration-expand-contract", kind:"directive", before:72.4, after:88.0, cited:143, violated:2},
+   id:"ctx.core.migration-expand-contract", kind:"procedure", before:72.4, after:88.0, cited:143, violated:2},
   {s:"Never pass a secret through a workflow_dispatch input. Read it from the environment.",
-   id:"ctx.core.no-secrets-in-workflow-inputs", kind:"directive", before:79.0, after:94.2, cited:34, violated:0}
+   id:"ctx.core.no-secrets-in-workflow-inputs", kind:"rule", before:79.0, after:94.2, cited:34, violated:0}
 ];
+const CONTEXT_PR = {n:221, id:"ctx.core.no-plaintext-secrets-in-ci-logs", kind:"rule",
+  statement:"Never echo a resolved secret into a CI log, even redacted."};
+
+/* ─── Ontology. Group sums drive the source counts and the entity total. ─── */
 const CLASSES = [
   {n:"Customer", c:1284, g:"sales_crm"}, {n:"Contract", c:412, g:"sales_crm"},
   {n:"Subscription", c:1190, g:"sales_crm"}, {n:"Invoice", c:8640, g:"sales_crm"},
   {n:"Robot", c:2317, g:"fleet_ops"}, {n:"FirmwareRelease", c:96, g:"fleet_ops"},
   {n:"DeploymentSite", c:186, g:"fleet_ops"}, {n:"Incident", c:318, g:"fleet_ops"},
-  {n:"Issue", c:2764, g:"github"}, {n:"PullRequest", c:4918, g:"github"},
-  {n:"Commit", c:61402, g:"github"}, {n:"Repository", c:3, g:"github"}
+  {n:"PullRequest", c:4918, g:"github"}, {n:"Commit", c:61402, g:"github"},
+  {n:"Repository", c:3, g:"github"},
+  {n:"Issue", c:2764, g:"linear"}
 ];
+const GROUPS = [...new Set(CLASSES.map(c => c.g))];
+const groupSum = g => CLASSES.filter(c => c.g === g).reduce((s,c) => s + c.c, 0);
+const ENTITIES = CLASSES.reduce((s,c) => s + c.c, 0);
+/* Each connector owns whole class groups, so no entity is counted twice. */
+const SOURCES = [
+  {n:"GitHub", s:"acme/platform + 2 linked", health:"syncing", cursor:"commit e91b2d7", groups:["github"]},
+  {n:"Linear", s:"acme workspace", health:"syncing", cursor:"2026-09-11T09:30Z", groups:["linear"]},
+  {n:"Postgres", s:"acme production replica", health:"degraded", cursor:"lsn 0/3A2F1C8", groups:["sales_crm","fleet_ops"]}
+];
+const ONT = {version:"v14", pr:1142, proposed:1};
+
+/* ─── Policy simulation. The three outcomes partition the replayed calls. ─── */
+const SIM = {version:"pol_v42", calls:67412, deny:148, ask:2204, runs:31};
+SIM.unchanged = SIM.calls - SIM.deny - SIM.ask;
 </script>
+
 <script>
 "use strict";
-const $ = (s,r=document)=>r.querySelector(s);
+const $  = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const money = n => "$" + n.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+const slug = s => String(s).toLowerCase().replace(/[^a-z0-9]+/g, "-");
 
 /* Three tiles. Never more — the fourth is always the one nobody reads. */
 const tiles = items => `<dl class="summary">${items.map(t =>
   `<div><dt>${t[0]}</dt><dd>${t[1]}</dd><small>${t[2]}</small></div>`).join("")}</dl>`;
 
-const tabs = (list, active, key) => `<div class="tabs" role="tablist">${list.map(t =>
-  `<button role="tab" aria-selected="${t[0]===active}" data-tab="${key}" data-val="${t[0]}">${t[0]}${
-    t[1]!=null ? `<span class="n">${t[1]}</span>` : ""}</button>`).join("")}</div>`;
+/* A tab list that a screen reader can actually use: every tab owns its panel,
+   and only the selected tab is in the tab order — arrows move between them. */
+const tabs = (list, active, key) => `<div class="tabs" role="tablist" data-tablist="${key}">${list.map(t =>
+  `<button role="tab" id="tab-${key}-${slug(t[0])}" aria-controls="panel-${key}"
+    aria-selected="${t[0] === active}" tabindex="${t[0] === active ? 0 : -1}"
+    data-tab="${key}" data-val="${esc(t[0])}">${esc(t[0])}${
+    t[1] != null ? `<span class="n">${esc(String(t[1]))}</span>` : ""}</button>`).join("")}</div>`;
+
+const tabpanel = (key, active, body) => `<div role="tabpanel" id="panel-${key}"
+  aria-labelledby="tab-${key}-${slug(active)}" tabindex="0">${body}</div>`;
 
 const panel = (title, note, body) => `<section class="panel">
   <div class="panel-h"><h2>${title}</h2>${note ? `<span class="note">${note}</span>` : ""}</div>
   ${body}</section>`;
 
-const STATE_CLASS = {live:"ok", parked:"wait", sealed:"", flipped:"proven", unmoved:"", tampered:"crit",
-  active:"ok", unenrolled:"", failing:"fail", denied:"deny"};
+const STATE_CLASS = {live:"ok", parked:"wait", sealed:"", cancelled:"deny",
+  flipped:"proven", unmoved:"", unsatisfied:"fail", tampered:"crit",
+  active:"ok", unenrolled:"", failing:"fail", denied:"deny", degraded:"fail",
+  syncing:"ok", allowed:"ok", "needs approval":"wait", granted:"ok", simulated:""};
 const st = (label, cls) => `<span class="st ${cls ?? STATE_CLASS[label] ?? ""}">${esc(label)}</span>`;
 
-/* ───────────────────────── Pages ───────────────────────── */
+/* ─── Tool grammar. Identity, category and gate render the same way in the
+       registry, in an approval, in a kill switch and in a frame. ─── */
+const hazIcon = `<svg class="haz" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4.6 21.2 19.4H2.8z"/><path d="M12 10.2v3.4M12 16.4h.01"/></svg>`;
+const toolCell = id => {
+  const t = TOOL(id), h = t && HAZARD[t.cls];
+  return `<span class="tool"><span class="mono">${esc(id)}</span>${
+    h ? `${hazIcon}<span class="sr">${esc(h)}</span>` : ""}</span>`;
+};
+const catBadge = cls => st(TOOL_CLASS[cls] ?? cls, "flat");
+const gateBadge = g => st(g);
+</script>
+
+<script>
+"use strict";
+/* ═══════════════════════════ Pages ═══════════════════════════ */
 const PAGES = {};
 
-PAGES.fleet = () => `
+const pendingApprovals = () => APPROVALS.filter(a => !a.resolved);
+const liveRuns = () => RUNS.filter(r => r.state === "live");
+
+PAGES.fleet = () => {
+  const pending = pendingApprovals();
+  return `
   <div class="head"><div class="head-t">
-    <span class="eyebrow">Workspace · core-platform</span>
+    <span class="eyebrow">Workspace · ${esc(WS.name)}</span>
     <h1>Fleet</h1>
     <p>Every run in this workspace, live and recent. Pause, steer and cancel take effect at the next call boundary.</p>
   </div><button class="btn btn-primary" data-act="steer-all">Message the fleet</button></div>
 
   ${tiles([
-    ["Runs live","6","50 agents · 4,812 sealed this month"],
-    ["Waiting on a person","3","oldest parked 5m 47s"],
-    ["Spent today","$402.86","gateway observed · USD"]
+    ["Runs live", liveRuns().length, `${int(WS.agents)} agents · ${int(WS.runsMTD)} runs this month`],
+    ["Waiting on a person", pending.length,
+      pending.length ? `oldest parked ${esc(pending[pending.length - 1].left)}` : "nothing is waiting"],
+    ["Spent today", money(WS.spendToday), "gateway observed · " + esc(ORG.currency)]
   ])}
 
-  ${panel("Approvals", "an approval is always about a run", `<div>${APPROVALS.map((a,i)=>`
-    <div style="display:flex;gap:14px;align-items:flex-start;padding:13px 16px;border-bottom:1px solid var(--rule);flex-wrap:wrap">
-      <div style="flex:1;min-width:220px">
-        <b class="mono" style="color:var(--fg)">${esc(a.tool)}</b>
-        <div class="sub" style="font-size:12px;margin-top:3px">
-          ${esc(a.agent)} · operator ${esc(a.op)} · rule <span class="mono">${esc(a.rule)}</span></div>
-        ${a.amount ? `<div style="margin-top:7px;font-size:19px;font-weight:600;color:var(--fg)" class="num">${a.amount}
-          <span class="sub" style="font-size:12px;font-weight:400">above the mandate's per-call ceiling</span></div>` : ""}
+  ${panel("Approvals", "an approval is always about a run", `<div>${APPROVALS.map((a, i) => `
+    <div class="appr">
+      <div class="appr-t">
+        ${toolCell(a.tool)}
+        ${a.args ? `<span class="toolargs">${esc(a.args)}</span>` : ""}
+        <div class="sub" style="font-size:12px;margin-top:5px">
+          ${esc(a.agent)} · operator ${esc(a.op)} ·
+          <a class="mono" href="#/run/${esc(a.run)}" style="border-bottom:1px solid var(--rule-2)">${esc(a.run)}</a> ·
+          rule <span class="mono">${esc(a.rule)}</span></div>
+        <div style="display:flex;gap:6px;margin-top:7px;flex-wrap:wrap">
+          ${catBadge(TOOL(a.tool).cls)} ${gateBadge(TOOL(a.tool).gate)}</div>
+        ${a.amount ? `<div class="appr-amt num">${money(a.amount)}
+          <span>above the ${money(MANDATE.approveAbove)} approval threshold on this mandate</span></div>` : ""}
       </div>
-      <div style="display:flex;gap:7px;align-items:center">
-        ${a.risk ? st("risk critical","crit") : ""}
-        <span class="sub mono" style="font-size:11.5px">${a.left}</span>
-        <button class="btn btn-sm" data-act="approve" data-i="${i}">Approve</button>
-        <button class="btn btn-sm" data-act="deny" data-i="${i}">Deny</button>
+      <div class="appr-a">${a.resolved
+        ? `${st(a.resolved.granted ? "approved" : "denied", a.resolved.granted ? "ok" : "deny")}
+           <span class="sub mono" style="font-size:11.5px">receipt ${esc(a.resolved.receipt)}</span>
+           ${a.resolved.granted ? `<span class="sub" style="font-size:11.5px">single-use credential minted, call dispatched</span>` : ""}`
+        : `${a.risk ? st("risk critical", "crit") : ""}
+           <span class="sub mono" style="font-size:11.5px">${esc(a.left)}</span>
+           <button class="btn btn-sm" data-act="approve" data-i="${i}">Approve</button>
+           <button class="btn btn-sm" data-act="deny" data-i="${i}">Deny</button>`}
       </div>
     </div>`).join("")}</div>`)}
 
-  ${panel("Runs", "16 of 16", `<div class="scroll"><table>
+  ${panel("Runs", `${RUNS.length} of ${RUNS.length} · newest first`, `<div class="scroll"><table>
     <thead><tr><th>Run</th><th>Agent</th><th>Operator</th><th>State</th><th>Now</th><th class="r">Cost</th></tr></thead>
-    <tbody>${RUNS.map(r=>`<tr data-go="#/run">
+    <tbody>${RUNS.map(r => `<tr data-go="#/run/${esc(r.id)}">
       <td><b class="mono">${esc(r.id)}</b><span class="s">${esc(r.task)}</span></td>
       <td class="mono" style="font-size:12px">${esc(r.agent)}<span class="s">${esc(r.harness)}</span></td>
       <td>${esc(r.op)}</td>
       <td>${st(r.state)}${r.verdict ? " " + st(r.verdict) : ""}</td>
       <td class="sub" style="font-size:12.5px">${esc(r.step)}</td>
-      <td class="r num">${r.cost}</td></tr>`).join("")}</tbody></table></div>`)}
+      <td class="r num">${money(runCost(r))}</td></tr>`).join("")}</tbody></table></div>`)}
 `;
+};
 
-PAGES.run = () => `
+/* ─── The run page. Every row in Fleet opens its own run, and a run only
+       offers the tabs its own state can honestly fill. ─── */
+const theRun = () => RUNS.find(r => r.id === S.runId) ?? RUNS[0];
+const runTabList = r => {
+  const list = [["Timeline", runFrames(r)], ["Cost", null]];
+  if(r.proof) list.push(["Proof", null]);
+  if(r.chain) list.push(["Chain", null]);
+  return list;
+};
+
+PAGES.run = () => {
+  const r = theRun();
+  const list = runTabList(r);
+  const active = list.some(t => t[0] === S.runTab) ? S.runTab : "Timeline";
+  const body = {
+    Timeline: runTimeline, Cost: runCostTab, Proof: runProof, Chain: runChain
+  }[active](r);
+  return `
   <div class="head"><div class="head-t">
-    <h1 class="mono" style="font-size:22px">run_01K5XQ7M4A
-      ${st("sealed")} ${st("flipped")} ${st("tier gateway","flat")}</h1>
-    <p>acme.core.release-manager · Claude Code 2.4.1 · operator Marcus Bell · 09:14:02 → 09:51:47 UTC<br>
-      Task <span class="mono">acme/platform#478</span> — Retry budget exhaustion silently drops webhook deliveries</p>
+    <h1 class="mono" style="font-size:22px">${esc(r.id)}
+      ${st(r.state)} ${r.verdict ? st(r.verdict) : ""} ${st("tier gateway", "flat")}</h1>
+    <p>${esc(r.agent)} · ${esc(r.harness)} · operator ${esc(r.op)} ·
+      ${esc(r.started)}${r.ended ? " → " + esc(r.ended) : " · still running"}
+      ${r.issue ? `<br>Task <span class="mono">${esc(r.issue)}</span> — ${esc(r.subtitle)}` : `<br>${esc(r.task)}`}</p>
   </div><button class="btn btn-primary" data-act="fork">Fork replay</button></div>
 
   ${tiles([
-    ["Run cost","$4.87","gateway observed · 126 frames"],
-    ["Cache hit rate","93.0%","241,980 of 260,322 input tokens"],
-    ["Proof","flipped","failed on main, passed on the PR"]
+    [r.ended ? "Run cost" : "Run cost so far", money(runCost(r)),
+      `gateway observed · ${int(runFrames(r))} frames`],
+    ["Cache hit rate", pct1(cached(r), r.inTok),
+      `${int(cached(r))} of ${int(r.inTok)} input tokens, across the run`],
+    r.proof ? ["Proof", r.proof.verdict, r.proof.verdict === "flipped"
+        ? "failed on the target, passed on the head"
+        : "passed on both, so it proves nothing about the change"]
+      : ["State", r.state, esc(r.step)]
   ])}
 
-  ${tabs([["Timeline",126],["Proof",null],["Cost",null],["Chain",null]], S.runTab, "runTab")}
-  ${PAGES["run_"+S.runTab.toLowerCase()]()}
+  ${tabs(list, active, "runTab")}
+  ${tabpanel("runTab", active, body)}
 `;
+};
 
-PAGES.run_timeline = () => `<div style="display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:16px"
-    class="split">
+const runTimeline = r => {
+  const frames = framesOf(r);
+  const sel = frames.find(f => f.t === S.frame) ?? frames[0];
+  return `<div style="display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:16px" class="split">
   <section class="panel" style="margin:0">
-    <div class="panel-h"><h2>Frames</h2><span class="note">126</span></div>
-    <div>${FRAMES.map(f=>`<button data-frame="${f.n}"
+    <div class="panel-h"><h2>Frames</h2>
+      <span class="note">${frames.length} of ${int(runFrames(r))} · sampled</span></div>
+    <div>${frames.map(f => `<button data-frame="${f.n}"
       style="display:flex;gap:9px;width:100%;text-align:left;padding:9px 14px;border-bottom:1px solid var(--rule);
-      ${f.t===S.frame?"background:var(--hl)":""}">
+      ${f.n === sel.n ? "background:var(--hl)" : ""}" aria-current="${f.n === sel.n}">
       <span class="mono sub" style="font-size:11px;min-width:26px">${f.n}</span>
       <span style="flex:1;min-width:0">
         <span class="mono" style="color:var(--fg);font-size:12px">${esc(f.t)}</span>
         <span class="s sub" style="display:block;font-size:11.5px">${esc(f.d)}</span></span>
-      ${f.cost?`<span class="mono sub num" style="font-size:11px">${f.cost}</span>`:""}
+      ${f.cost ? `<span class="mono sub num" style="font-size:11px">${esc(f.cost)}</span>` : ""}
     </button>`).join("")}</div>
   </section>
   <section class="panel" style="margin:0">
-    <div class="panel-h"><h2 class="mono">${esc(S.frame)}</h2><span class="note">frame ${
-      FRAMES.find(f=>f.t===S.frame)?.n ?? 0}</span></div>
-    <div class="panel-b"><dl class="kv">${(FRAME_DETAIL[S.frame]||[["Frame","Select a frame on the left."]])
-      .map(([k,v])=>`<dt>${esc(k)}</dt><dd class="${/^[a-z0-9_.@#/ -]+$/i.test(v)&&v.length<48?"mono":""}">${esc(v)}</dd>`).join("")}</dl></div>
+    <div class="panel-h"><h2 class="mono">${esc(sel.t)}</h2><span class="note">frame ${sel.n}</span></div>
+    <div class="panel-b"><dl class="kv">${sel.kv.map(([k, v]) =>
+      /* Identifiers are set in mono; prose is not. A space is the tell. */
+      `<dt>${esc(k)}</dt><dd class="${!/\s/.test(v) && String(v).length < 48 ? "mono" : ""}">${esc(v)}</dd>`
+      ).join("")}</dl></div>
   </section></div>`;
+};
 
-PAGES.run_proof = () => `
-  ${panel("The flip", "oracle test_flip · same normalized command", `<div class="panel-b">
+const runCostTab = r => panel(`Where the ${money(runCost(r))} went`, "every figure is gateway observed",
+  `<div class="scroll"><table>
+    <thead><tr><th>Turn</th><th>What happened</th><th class="r">Model</th><th class="r">Tools</th><th class="r">Cost</th></tr></thead>
+    <tbody>${r.turns.map(t => `<tr>
+      <td>${esc(t[0])}</td><td>${esc(t[1])}<span class="s">${t[2]} frames</span></td>
+      <td class="r num">${mon4(t[3])}</td><td class="r num">${mon4(t[4])}</td>
+      <td class="r num">${mon4(t[3] + t[4])}</td></tr>`).join("")}
+    </tbody></table></div>`);
+
+const runProof = r => {
+  const p = r.proof, flipped = p.verdict === "flipped";
+  return `
+  ${panel("The flip", `oracle ${esc(p.oracle)} · same normalized command`, `<div class="panel-b">
     <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:18px;align-items:center" class="split3">
       <div><div class="eyebrow">Target branch</div>
-        <div style="font-size:27px;font-weight:700;color:var(--fail);margin:4px 0 6px">FAIL</div>
-        <p class="sub" style="margin:0;font-size:12.5px"><span class="mono">main</span> @ 9f2c41aeb7d3 —
-          the witness must fail here, or it proves nothing about the change.</p></div>
+        <div style="font-size:27px;font-weight:700;color:var(--${p.targetResult === "FAIL" ? "fail" : "proven"});margin:4px 0 6px">${esc(p.targetResult)}</div>
+        <p class="sub" style="margin:0;font-size:12.5px"><span class="mono">${esc(p.target)}</span> —
+          ${esc(p.targetNote)}.</p></div>
       <div class="sub" aria-hidden="true" style="font-size:20px">→</div>
       <div><div class="eyebrow">Pull request head</div>
-        <div style="font-size:27px;font-weight:700;color:var(--proven);margin:4px 0 6px">PASS</div>
-        <p class="sub" style="margin:0;font-size:12.5px"><span class="mono">refs/pull/482/head</span> @ 4d7be053c91a —
+        <div style="font-size:27px;font-weight:700;color:var(--proven);margin:4px 0 6px">${esc(p.headResult)}</div>
+        <p class="sub" style="margin:0;font-size:12.5px"><span class="mono">${esc(p.head)}</span> —
           same environment, same command.</p></div>
     </div></div>`)}
-  <div class="notice"><div><b>Failing on the target, flipped on the head.</b>
-    Only that pair credits a proof. Passing on both is recorded <span class="mono">unmoved</span>;
-    failing on both, <span class="mono">unsatisfied</span>. This run is proven, and its $4.87 counts toward proven spend.</div></div>
-  ${panel("What the agent received", "disclosure grain L0", `<div class="panel-b">
+  <div class="notice"><div><b>${flipped
+    ? "Failing on the target, flipped on the head."
+    : "Passing on both, so this run is recorded unmoved."}</b>
+    Only a target-fail paired with a head-pass credits a proof. Passing on both is recorded
+    <span class="mono">unmoved</span>; failing on both, <span class="mono">unsatisfied</span>.
+    ${flipped
+      ? `This run is proven, and its ${money(runCost(r))} counts toward proven spend.`
+      : `This run is not proven, and its ${money(runCost(r))} does not count toward proven spend.`}</div></div>
+  ${panel("What the agent received", `disclosure grain ${esc(p.grain)}`, `<div class="panel-b">
     <p style="margin:0 0 10px" class="sub">The witness ran as its own service principal. The agent never saw the test,
       the assertion, or the diff — only the verdict:</p>
     <div class="mono" style="font-size:24px;color:var(--proven);padding:14px;border:1px solid var(--rule);
-      border-radius:var(--r-sm);background:var(--ink);text-align:center">pass</div>
-    <p class="sub" style="margin:10px 0 0;font-size:12.5px">Four characters, in frame #118. Nothing an agent cannot see,
+      border-radius:var(--r-sm);background:var(--ink);text-align:center">${esc(p.saw)}</div>
+    <p class="sub" style="margin:10px 0 0;font-size:12.5px">Four characters, in frame #${p.frame}. Nothing an agent cannot see,
       it cannot fake.</p></div>`)}`;
+};
 
-PAGES.run_cost = () => panel("Where the $4.87 went", "every figure is gateway observed",
-  `<div class="scroll"><table>
-    <thead><tr><th>Turn</th><th>What happened</th><th class="r">Model</th><th class="r">Tools</th><th class="r">Cost</th></tr></thead>
-    <tbody>
-      <tr><td>T1</td><td>Reproduce the drift<span class="s">14 frames</span></td><td class="r num">$0.7994</td><td class="r num">$0.0021</td><td class="r num">$0.8015</td></tr>
-      <tr><td>T2</td><td>Write the failing test<span class="s">21 frames</span></td><td class="r num">$0.7680</td><td class="r num">$0.0038</td><td class="r num">$0.7718</td></tr>
-      <tr><td>T3</td><td>Fix it — paused and steered mid-turn<span class="s">44 frames</span></td><td class="r num">$2.4070</td><td class="r num">$0.0094</td><td class="r num">$2.4164</td></tr>
-      <tr><td>T4</td><td>Open the PR and wait for the witness<span class="s">47 frames</span></td><td class="r num">$0.8756</td><td class="r num">$0.0047</td><td class="r num">$0.8803</td></tr>
-    </tbody></table></div>`);
-
-PAGES.run_chain = () => panel("Chain and seal", "verified", `<div class="panel-b"><dl class="kv">
-  <dt>Frames</dt><dd>126 of 126 verified</dd>
-  <dt>Sequence</dt><dd>dense 0–125 · no gaps</dd>
-  <dt>Merkle root</dt><dd class="mono">sha256:9f2a41c7e0b83d…2f8c04</dd>
-  <dt>Attestation key</dt><dd class="mono">att_acme_2026Q3_8c41</dd>
-  <dt>Key validity</dt><dd>2026-07-01 → 2027-01-01</dd>
-  <dt>Replay grade</dt><dd>${st("full","proven")} every model call and tool call is recorded</dd>
+const runChain = r => panel("Chain and seal", "verified", `<div class="panel-b"><dl class="kv">
+  <dt>Frames</dt><dd>${int(runFrames(r))} of ${int(runFrames(r))} verified</dd>
+  <dt>Sequence</dt><dd>dense 0–${runFrames(r) - 1} · no gaps</dd>
+  <dt>Merkle root</dt><dd class="mono">sha256:${esc(r.chain.root)}</dd>
+  <dt>Attestation key</dt><dd class="mono">${esc(r.chain.key)}</dd>
+  <dt>Key validity</dt><dd>${esc(r.chain.from)} → ${esc(r.chain.to)}</dd>
+  <dt>Replay grade</dt><dd>${st(r.chain.grade, "proven")} every model call and tool call is recorded</dd>
 </dl></div>`);
 </script>
+
 <script>
 "use strict";
-PAGES.agents = () => `
+PAGES.agents = () => {
+  const shown = AGENTS.reduce((s, a) => s + a.spend, 0);
+  const m = MANDATE, remaining = m.authority - m.settled - m.reserved;
+  return `
   <div class="head"><div class="head-t">
-    <span class="eyebrow">Workspace · core-platform</span>
+    <span class="eyebrow">Workspace · ${esc(WS.name)}</span>
     <h1>Agents</h1>
     <p>Every agent holds an identity in Postgres and a definition in git. None of them holds a credential.
       What each one can do is its toolbelt, and the belt is the only tool list its model is ever shown.</p>
   </div><button class="btn btn-primary" data-act="wrap">Wrap an agent</button></div>
 
   ${tiles([
-    ["Agents here","5","50 in the organization"],
-    ["Credentials held by agents","0","every secret sits in the broker"],
-    ["Spend · last 30 days","$1,860.51","metered from model and tool receipts"]
+    ["Agents here", int(WS.agents), `${int(ORG_AGENTS)} in the organization`],
+    ["Credentials held by agents", "0", "every secret sits in the broker"],
+    ["Spend · last 30 days", money(WS.spend30d), "metered from model and tool receipts"]
   ])}
 
-  ${panel("Fleet", "tier is computed from what was actually routed", `<div class="scroll"><table>
+  ${panel("Fleet", `${AGENTS.length} of ${int(WS.agents)} by spend · ${money(shown)} of ${money(WS.spend30d)}`,
+    `<div class="scroll"><table>
     <thead><tr><th>Agent</th><th>Harness</th><th>Status</th><th>Tier</th><th>Belt</th><th class="r">Spend 30d</th></tr></thead>
-    <tbody>${AGENTS.map(a=>`<tr>
+    <tbody>${AGENTS.map(a => `<tr>
       <td><b>${esc(a.n)}</b><span class="s mono">${esc(a.id)}</span></td>
       <td style="font-size:12.5px">${esc(a.h)}</td>
       <td>${st(a.st)}</td>
-      <td>${st(a.tier,"flat")}</td>
+      <td>${st(a.tier, "flat")}</td>
       <td class="sub" style="font-size:12.5px">${esc(a.belt)}</td>
-      <td class="r num">${esc(a.spend)}</td></tr>`).join("")}</tbody></table></div>`)}
+      <td class="r num">${money(a.spend)}</td></tr>`).join("")}</tbody></table></div>`)}
 
-  ${panel("Mandate · acme.finops.invoice-bot", "the only agent here that may move money", `<div class="panel-b">
+  ${panel("Mandate · " + esc(m.agent), "the only agent here that may move money", `<div class="panel-b">
     <dl class="kv">
-      <dt>Purpose</dt><dd>Monthly infrastructure invoices, PO-4471</dd>
-      <dt>Per call</dt><dd class="num">$25,000.00 ceiling</dd>
-      <dt>Approval above</dt><dd class="num">$10,000.00 — and always for <span class="mono">moves_funds</span></dd>
-      <dt>Granted by</dt><dd>Priya Natarajan, as org billing</dd>
-      <dt>Valid to</dt><dd>2026-12-31</dd>
+      <dt>Purpose</dt><dd>${esc(m.purpose)}</dd>
+      <dt>Per call</dt><dd class="num">${money(m.perCall)} ceiling</dd>
+      <dt>Approval above</dt><dd class="num">${money(m.approveAbove)} — and always for <span class="mono">moves_funds</span></dd>
+      <dt>Granted by</dt><dd>${esc(m.grantedBy)}</dd>
+      <dt>Valid to</dt><dd>${esc(m.validTo)}</dd>
     </dl>
     <div style="margin-top:14px">
       <div style="display:flex;justify-content:space-between;font-size:11.5px" class="sub">
-        <span>Remaining authority · September 2026</span><span class="num">of $60,000.00</span></div>
+        <span>Remaining authority · September 2026</span><span class="num">of ${money(m.authority)}</span></div>
       <div class="bar-meter" style="margin-top:6px">
-        <i style="width:52.1%;background:var(--ok)"></i><i style="width:30.7%;background:var(--wait)"></i></div>
-      <div style="display:flex;gap:16px;margin-top:7px;font-size:11.5px" class="sub">
-        <span>${st("settled $31,280.00","ok")}</span>
-        <span>${st("reserved by this call $18,420.00","wait")}</span>
-        <span class="num">remaining $10,300.00</span></div>
+        <i style="width:${(m.settled / m.authority * 100).toFixed(1)}%;background:var(--ok)"></i>
+        <i style="width:${(m.reserved / m.authority * 100).toFixed(1)}%;background:var(--wait)"></i></div>
+      <div style="display:flex;gap:16px;margin-top:7px;font-size:11.5px;flex-wrap:wrap" class="sub">
+        <span>${st("settled " + money(m.settled), "ok")}</span>
+        <span>${st("reserved by this call " + money(m.reserved), "wait")}</span>
+        <span class="num">remaining ${money(remaining)}</span></div>
     </div></div>`)}
 `;
+};
 
-PAGES.tools = () => `
-  <div class="head"><div class="head-t">
-    <span class="eyebrow">Workspace · core-platform</span>
-    <h1>Tools</h1>
-    <p>What exists, who may call it, and what happens when the policy changes. Every tool is versioned by its schema.</p>
-  </div><button class="btn btn-primary" data-act="import">Import from an MCP server</button></div>
+PAGES.tools = () => {
+  const list = [["Registry", REGISTRY.tools], ["Connections", REGISTRY.external],
+                ["Policy", null], ["Kill switches", null]];
+  const active = list.some(t => t[0] === S.toolsTab) ? S.toolsTab : "Registry";
+  const body =
+    active === "Registry" ? panel("Registry",
+      `${TOOLS.length} of ${int(REGISTRY.tools)} by call volume · ${REGISTRY.servers} servers`,
+      `<div class="scroll"><table>
+      <thead><tr><th>Tool</th><th>Server</th><th>Class</th><th>Gate</th><th class="r">Calls 30d</th></tr></thead>
+      <tbody>${TOOLS.map(t => `<tr>
+        <td>${toolCell(t.id)}</td><td>${esc(t.server)}</td>
+        <td>${catBadge(t.cls)}</td><td>${gateBadge(t.gate)}</td>
+        <td class="r num">${int(t.calls)}</td></tr>`).join("")}</tbody></table></div>`)
 
-  ${tabs([["Registry",214],["Connections",6],["Policy",null],["Kill switches",null]], S.toolsTab, "toolsTab")}
-  ${S.toolsTab==="Registry" ? panel("Registry","214 tools across 6 servers",`<div class="scroll"><table>
-      <thead><tr><th>Tool</th><th>Server</th><th>Class</th><th>Decision</th><th class="r">Calls 30d</th></tr></thead>
-      <tbody>
-        <tr><td class="mono">github__merge_pull_request@3</td><td>github</td><td>${st("side_effect irreversible","flat")}</td><td>${st("needs approval","wait")}</td><td class="r num">41</td></tr>
-        <tr><td class="mono">stripe__create_payment@4</td><td>stripe</td><td>${st("moves_funds","flat")}</td><td>${st("needs approval","wait")}</td><td class="r num">18</td></tr>
-        <tr><td class="mono">linear__get_issue@2</td><td>linear</td><td>${st("read_only","flat")}</td><td>${st("allowed","ok")}</td><td class="r num">3,914</td></tr>
-        <tr><td class="mono">repo.search@2.3.0</td><td>builtin</td><td>${st("read_only","flat")}</td><td>${st("allowed","ok")}</td><td class="r num">12,880</td></tr>
-        <tr><td class="mono">bash@1</td><td>harness</td><td>${st("side_effect","flat")}</td><td>${st("denied on irreversible paths","deny")}</td><td class="r num">6,102</td></tr>
-      </tbody></table></div>`)
-    : S.toolsTab==="Connections" ? panel("Connections","no agent holds any of these",`<div class="scroll"><table>
+    : active === "Connections" ? panel("Connections", "no agent holds any of these",
+      `<div class="scroll"><table>
       <thead><tr><th>Connection</th><th>Owner</th><th>Downscoped by</th><th>Review due</th></tr></thead>
       <tbody>
         <tr><td><b>GitHub · acme</b><span class="s">installation 48210221</span></td><td>Marcus Bell</td><td>fine-grained token, per call</td><td>2026-12-01</td></tr>
         <tr><td><b>Stripe · acme live</b><span class="s">restricted key</span></td><td>Priya Natarajan</td><td>single-use token, per call</td><td>2026-10-15</td></tr>
         <tr><td><b>Linear · acme</b><span class="s">OAuth app</span></td><td>Marcus Bell</td><td>read scope only</td><td>2027-02-01</td></tr>
-      </tbody></table></div>`)
-    : S.toolsTab==="Policy" ? panel("Simulate pol_v42 against the last 30 days","67,412 real calls replayed, nothing dispatched",`<div class="panel-b">
-      ${tiles([["Would deny","148","0.22% of calls · 31 runs affected"],
-               ["Would newly ask","2,204","3.27% · mostly repo writes"],
-               ["Unchanged","65,060","96.51%"]])}
+      </tbody></table></div>
+      <div class="panel-b" style="border-top:1px solid var(--rule)"><p class="sub" style="margin:0;font-size:12.5px">
+        Three external servers hold a credential. The other ${REGISTRY.servers - REGISTRY.external} —
+        <span class="mono">builtin</span>, <span class="mono">harness</span> and the Postgres store binding —
+        hold none, so there is nothing to downscope.</p></div>`)
+
+    : active === "Policy" ? panel(`Simulate ${esc(SIM.version)} against the last 30 days`,
+      `${int(SIM.calls)} real calls replayed, nothing dispatched`, `<div class="panel-b">
+      <div class="simrow">
+        <div><b class="num">${int(SIM.deny)}</b><span>would deny · ${pct1(SIM.deny, SIM.calls)} of calls · ${SIM.runs} runs affected</span></div>
+        <div><b class="num">${int(SIM.ask)}</b><span>would newly ask · ${pct1(SIM.ask, SIM.calls)} · mostly repo writes</span></div>
+        <div><b class="num">${int(SIM.unchanged)}</b><span>unchanged · ${pct1(SIM.unchanged, SIM.calls)}</span></div>
+      </div>
       <p class="sub" style="margin:0">Simulation reads the recorded calls and the candidate policy. It never dispatches.
         Switch the version on only when the list above is one you would defend.</p>
-      <div style="margin-top:12px"><button class="btn">Open the 31 affected runs</button></div></div>`)
-    : panel("Kill switches","a switch takes effect at the next call boundary, everywhere",`<div class="scroll"><table>
+      <div style="margin-top:12px"><button class="btn" data-act="open-affected">Open the ${SIM.runs} affected runs</button></div></div>`)
+
+    : panel("Kill switches", "a switch takes effect at the next call boundary, everywhere",
+      `<div class="scroll"><table>
       <thead><tr><th>Switch</th><th>Scope</th><th>State</th></tr></thead>
       <tbody>
-        <tr><td><b>Every <span class="mono">moves_funds</span> tool</b><span class="s">class-wide</span></td><td>organization</td><td>${st("armed, off","flat")}</td></tr>
-        <tr><td><b>acme.core.triage</b><span class="s">one agent</span></td><td>core-platform</td><td>${st("armed, off","flat")}</td></tr>
-        <tr><td><b>stripe server</b><span class="s">one server</span></td><td>organization</td><td>${st("armed, off","flat")}</td></tr>
-      </tbody></table></div>`)}
-`;
+        <tr><td><b>Every <span class="mono">moves_funds</span> tool</b><span class="s">class-wide</span><div style="margin-top:5px">${catBadge("moves_funds")}</div></td><td>organization</td><td>${st("armed, off", "flat")}</td></tr>
+        <tr><td><b>acme.core.triage</b><span class="s">one agent</span></td><td>${esc(WS.name)}</td><td>${st("armed, off", "flat")}</td></tr>
+        <tr><td><b>stripe server</b><span class="s">one server</span><div style="margin-top:5px">${catBadge("moves_funds")}</div></td><td>organization</td><td>${st("armed, off", "flat")}</td></tr>
+      </tbody></table></div>`);
 
-PAGES.ontology = () => `
+  return `
   <div class="head"><div class="head-t">
-    <span class="eyebrow">Workspace · core-platform</span>
-    <h1>Ontology</h1>
-    <p>What kinds of things exist at Acme Robotics, how many of each, and which version of that model is in force.
-      Proposed in a pull request, activated on merge, versioned in <span class="mono">.oxagen/ontology/</span>.</p>
-  </div><button class="btn btn-primary" data-act="propose">Propose a change</button></div>
+    <span class="eyebrow">Workspace · ${esc(WS.name)}</span>
+    <h1>Tools</h1>
+    <p>What exists, who may call it, and what happens when the policy changes. Every tool is versioned by its schema.</p>
+  </div><button class="btn btn-primary" data-act="import">Import from an MCP server</button></div>
 
-  ${tiles([
-    ["Classes","19","+1 proposed · 4 schemas"],
-    ["Entities","196,930","resolved, with provenance"],
-    ["Version","v14","active · PR #1142"]
-  ])}
+  ${tabs(list, active, "toolsTab")}
+  ${tabpanel("toolsTab", active, body)}
+`;
+};
 
-  ${tabs([["Model",19],["Ask",null],["Sources",3],["Versions",14]], S.ontTab, "ontTab")}
-  ${S.ontTab==="Model" ? panel("The map","19 classes, drawn from the active version in git", `<div class="panel-b">
-      ${["sales_crm","fleet_ops","github"].map(g=>`
+PAGES.ontology = () => {
+  const list = [["Model", CLASSES.length], ["Ask", null],
+                ["Sources", SOURCES.length], ["Versions", 14]];
+  const active = list.some(t => t[0] === S.ontTab) ? S.ontTab : "Model";
+  const body =
+    active === "Model" ? panel("The map",
+      `${CLASSES.length} classes across ${GROUPS.length} schemas, drawn from the active version in git`,
+      `<div class="panel-b">
+      ${GROUPS.map(g => `
         <div style="margin-bottom:14px">
-          <div class="eyebrow" style="color:var(--dim);margin-bottom:7px">${g}</div>
+          <div class="eyebrow" style="color:var(--dim);margin-bottom:7px">${esc(g)} ·
+            ${int(groupSum(g))} entities</div>
           <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px">
-            ${CLASSES.filter(c=>c.g===g).map(c=>`
+            ${CLASSES.filter(c => c.g === g).map(c => `
               <div style="border:1px solid var(--rule);border-radius:var(--r-sm);padding:9px 11px;background:var(--ink);min-width:0">
                 <b style="color:var(--fg);font-size:13px">${esc(c.n)}</b>
-                <div class="mono sub num" style="font-size:11.5px;margin-top:2px">${c.c.toLocaleString()} entities</div>
+                <div class="mono sub num" style="font-size:11.5px;margin-top:2px">${int(c.c)} entities</div>
               </div>`).join("")}
           </div></div>`).join("")}</div>`)
-    : S.ontTab==="Ask" ? panel("Ask in plain English","answers cite the entities they came from",`<div class="panel-b">
+
+    : active === "Ask" ? panel("Ask in plain English", "answers cite the entities they came from",
+      `<div class="panel-b">
       <div style="border:1px solid var(--rule);border-radius:var(--r-sm);padding:11px 13px;background:var(--ink);margin-bottom:14px">
         Which customers have an open incident on a robot running firmware older than 4.2?</div>
       <div class="scroll"><table style="border:1px solid var(--rule);border-radius:var(--r-sm)">
@@ -735,43 +1209,70 @@ WHERE i.status = 'open' AND r.firmware &lt; '4.2'
 RETURN c.name, r.id, r.firmware, i.id LIMIT 50</pre>
       <p class="sub" style="margin:10px 0 0;font-size:12.5px">Read-only, budgeted. A question that would write, or scan past
         the budget, is refused with the reason.</p></div>`)
-    : S.ontTab==="Sources" ? panel("Sources","every entity walks back to a source record",`<div class="scroll"><table>
+
+    : active === "Sources" ? panel("Sources",
+      `every entity walks back to one source · ${int(ENTITIES)} in total`,
+      `<div class="scroll"><table>
       <thead><tr><th>Connector</th><th>Health</th><th>Cursor</th><th class="r">Entities</th></tr></thead>
-      <tbody>
-        <tr><td><b>GitHub</b><span class="s">acme/platform + 2 linked</span></td><td>${st("syncing","ok")}</td><td class="mono">commit e91b2d7</td><td class="r num">69,087</td></tr>
-        <tr><td><b>Linear</b><span class="s">acme workspace</span></td><td>${st("syncing","ok")}</td><td class="mono">2026-09-11T09:30Z</td><td class="r num">2,764</td></tr>
-        <tr><td><b>Postgres</b><span class="s">acme production replica</span></td><td>${st("degraded","fail")}</td><td class="mono">lsn 0/3A2F1C8</td><td class="r num">125,079</td></tr>
+      <tbody>${SOURCES.map(s => `<tr>
+        <td><b>${esc(s.n)}</b><span class="s">${esc(s.s)}</span><span class="s mono">${s.groups.join(" · ")}</span></td>
+        <td>${st(s.health)}</td><td class="mono">${esc(s.cursor)}</td>
+        <td class="r num">${int(s.groups.reduce((a, g) => a + groupSum(g), 0))}</td></tr>`).join("")}
       </tbody></table></div>`)
-    : panel("Versions","the git history of the model",`<div class="scroll"><table>
+
+    : panel("Versions", "the git history of the model", `<div class="scroll"><table>
       <thead><tr><th>Version</th><th>Change</th><th>Merged</th></tr></thead>
       <tbody>
-        <tr><td class="mono">v14 ${st("active","ok")}</td><td>Add <span class="mono">WarrantyClaim</span>, relate to Contract</td><td>PR #1142 · 2026-09-08 · Priya Natarajan</td></tr>
+        <tr><td class="mono">v14 ${st("active", "ok")}</td><td>Add <span class="mono">WarrantyClaim</span>, relate to Contract</td><td>PR #1142 · 2026-09-08 · Priya Natarajan</td></tr>
         <tr><td class="mono">v13</td><td>Split <span class="mono">Site</span> into DeploymentSite and Depot</td><td>PR #1098 · 2026-08-21 · Marcus Bell</td></tr>
         <tr><td class="mono">v12</td><td>Add firmware to Robot, backfill from Postgres</td><td>PR #1054 · 2026-08-02 · Marcus Bell</td></tr>
-      </tbody></table></div>`)}
+      </tbody></table></div>`);
+
+  return `
+  <div class="head"><div class="head-t">
+    <span class="eyebrow">Workspace · ${esc(WS.name)}</span>
+    <h1>Ontology</h1>
+    <p>What kinds of things exist at ${esc(ORG.name)}, how many of each, and which version of that model is in force.
+      Proposed in a pull request, activated on merge, versioned in <span class="mono">.oxagen/ontology/</span>.</p>
+  </div><button class="btn btn-primary" data-act="propose">Propose a change</button></div>
+
+  ${tiles([
+    ["Classes", CLASSES.length, `+${ONT.proposed} proposed · ${GROUPS.length} schemas`],
+    ["Entities", int(ENTITIES), "resolved, with provenance"],
+    ["Version", ONT.version, `active · PR #${ONT.pr}`]
+  ])}
+
+  ${tabs(list, active, "ontTab")}
+  ${tabpanel("ontTab", active, body)}
 `;
+};
 </script>
+
 <script>
 "use strict";
 PAGES.steering = () => `
   <div class="head"><div class="head-t">
-    <span class="eyebrow">Workspace · core-platform</span>
+    <span class="eyebrow">Workspace · ${esc(WS.name)}</span>
     <h1>Steering</h1>
     <p>Published records reach every run in this workspace. Git decides what is in force; the graph remembers
       what each record changed.</p>
   </div><button class="btn btn-primary" data-act="propose">Open a Context PR</button></div>
 
   ${tiles([
-    ["In force","7","5 directive · 2 knowledge"],
-    ["Proposals waiting","2","with the runs that support them"],
-    ["Proof rate","87.4%","1,806 proven of 2,066 · 90 days"]
+    ["In force", WS.records, esc(WS.recordMix)],
+    ["Proposals waiting", WS.proposals, "with the runs that support them"],
+    ["Proof rate", pct1(WS.proven90, WS.witnessed90),
+      `${int(WS.proven90)} proven of ${int(WS.witnessed90)} witnessed runs · 90 days`]
   ])}
 
-  ${panel("Published records", "indexed from acme/platform@e91b2d7", `<div>${RECORDS.map(r=>`
+  ${panel("Published records", `${RECORDS.length} of ${WS.records} · indexed from ${esc(WS.repo)}@e91b2d7`,
+    `<div>${RECORDS.map(r => `
     <div style="padding:14px 16px;border-bottom:1px solid var(--rule);display:flex;gap:18px;flex-wrap:wrap">
       <div style="flex:1;min-width:260px">
         <div style="color:var(--fg)">${esc(r.s)}</div>
-        <div class="mono sub" style="font-size:11.5px;margin-top:5px">${esc(r.id)}</div>
+        <div style="display:flex;gap:8px;align-items:center;margin-top:7px;flex-wrap:wrap">
+          ${st(r.kind, "flat")}
+          <span class="mono sub" style="font-size:11.5px">${esc(r.id)}</span></div>
       </div>
       <div style="min-width:150px">
         <div class="sub" style="font-size:11px;text-transform:uppercase;letter-spacing:.1em">Proof rate, 90 days</div>
@@ -781,37 +1282,43 @@ PAGES.steering = () => `
       </div>
     </div>`).join("")}</div>`)}
 
-  ${panel("Context PR #221", "the record is one file, so review is one diff", `<div class="panel-b">
+  ${panel(`Context PR #${CONTEXT_PR.n}`, "the record is one file, so review is one diff", `<div class="panel-b">
     <pre class="mono scroll" style="margin:0 0 12px;padding:12px;border:1px solid var(--rule);border-radius:var(--r-sm);
-      background:var(--ink);font-size:12px;color:var(--body)">+ [[rule]]
-+ id        = "ctx.core.no-secrets-in-workflow-inputs"
+      background:var(--ink);font-size:12px;color:var(--body)">+ [[${esc(CONTEXT_PR.kind)}]]
++ id        = "${esc(CONTEXT_PR.id)}"
 + authority = "must"
 + effect    = "forbid"
-+ statement = "Never pass a secret through a workflow_dispatch input."</pre>
++ statement = "${esc(CONTEXT_PR.statement)}"</pre>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
-      ${st("schema passed","ok")} ${st("hash passed","ok")} ${st("conflicts passed","ok")}
-      ${st("secrets passed","ok")} ${st("probes 12 of 12","ok")}
+      ${st("schema passed", "ok")} ${st("hash passed", "ok")} ${st("conflicts passed", "ok")}
+      ${st("secrets passed", "ok")} ${st("probes 12 of 12", "ok")}
     </div>
-    <p class="sub" style="margin:11px 0 0;font-size:12.5px">Merging mints the promotion event. The next run on this
-      workspace carries the record in its stable prefix — visible in its <span class="mono">model.request</span> frame.</p></div>`)}
+    <p class="sub" style="margin:11px 0 0;font-size:12.5px">This record is not in force yet. Merging mints the promotion
+      event, and the next run on this workspace carries it in the stable prefix — visible in its
+      <span class="mono">model.request</span> frame.</p></div>`)}
 `;
 
-PAGES.spend = () => `
+PAGES.spend = () => {
+  const atStake = FINDINGS.reduce((s, f) => s + f.at, 0);
+  return `
   <div class="head"><div class="head-t">
-    <span class="eyebrow">Workspace · core-platform</span>
+    <span class="eyebrow">Workspace · ${esc(WS.name)}</span>
     <h1>Spend</h1>
     <p>September 2026, month to date. Every figure carries its basis; the ledger is kept in micro-USD.</p>
   </div><button class="btn btn-primary" data-act="export">Export statement</button></div>
 
   ${tiles([
-    ["Spent","$18,407.62","3,318 runs · gateway observed"],
-    ["Proven","$7,913.28","43.0% · 1,204 runs flipped a witness"],
-    ["At stake in findings","$4,517.46","per month, across 9 findings"]
+    ["Spent", money(WS.spendMTD), `${int(WS.runsMTD)} runs · ${esc(PERIOD.label)} · gateway observed`],
+    ["Proven", money(WS.provenSpend),
+      `${pct1(WS.provenSpend, WS.spendMTD)} of spend · ${int(WS.provenRuns)} runs flipped a witness`],
+    ["At stake in findings", money(atStake), `per month, across ${FINDINGS.length} findings`]
   ])}
 
-  ${panel("Findings, ranked by money at stake", "each cites the frames that prove it", `<div class="scroll"><table>
+  ${panel("Findings, ranked by money at stake",
+    `${FINDINGS.length} of ${FINDINGS.length} · each cites the frames that prove it`,
+    `<div class="scroll"><table>
     <thead><tr><th>Finding</th><th>Scope</th><th class="r">At stake / month</th><th class="r">Frames</th></tr></thead>
-    <tbody>${FINDINGS.map(f=>`<tr>
+    <tbody>${FINDINGS.map(f => `<tr>
       <td><b>${esc(f.n)}</b><span class="s mono">${esc(f.id)}</span></td>
       <td class="mono" style="font-size:12px">${esc(f.scope)}</td>
       <td class="r num" style="color:var(--fg)">${money(f.at)}</td>
@@ -819,38 +1326,40 @@ PAGES.spend = () => `
 
   ${panel("Reconciliation", "August 2026", `<div class="panel-b"><dl class="kv">
     <dt>Provider statements</dt><dd class="num">$21,884.03</dd>
-    <dt>Oxagen ledger</dt><dd class="num">$21,884.03 ${st("matched to the cent","ok")}</dd>
-    <dt>Open exceptions</dt><dd>1 — a Bedrock line dated after the statement closed, $4.12, under review</dd>
+    <dt>Oxagen ledger</dt><dd class="num">$21,879.91 ${st("matched, one line held out", "ok")}</dd>
+    <dt>Open exceptions</dt><dd>1 — a Bedrock line dated after the statement closed, $4.12, under review.
+      It is the whole of the $4.12 difference above.</dd>
   </dl></div>`)}
 `;
+};
 
 PAGES.organization = () => `
   <div class="head"><div class="head-t">
     <span class="eyebrow">Organization</span>
-    <h1>Acme Robotics</h1>
-    <p><span class="mono">org_7QK3M8VZ</span> · namespace <span class="mono">acme</span> · Enterprise, annual ·
-      display currency USD · 34 members · 50 agents</p>
+    <h1>${esc(ORG.name)}</h1>
+    <p><span class="mono">${esc(ORG.id)}</span> · namespace <span class="mono">${esc(ORG.ns)}</span> ·
+      ${esc(ORG.plan)} · display currency ${esc(ORG.currency)} · ${ORG.members} members · ${ORG_AGENTS} agents</p>
   </div><button class="btn btn-primary" data-act="invite">Invite people</button></div>
 
   ${tiles([
-    ["Members","34","32 from SCIM · 2 manual"],
-    ["Single sign-on","Enforced","Okta · SAML 2.0 · 2 break-glass accounts"],
-    ["Two-factor","34 of 34","11 hardware key · 23 app"]
+    ["Members", ORG.members, "32 from SCIM · 2 manual"],
+    ["Single sign-on", "Enforced", "Okta · SAML 2.0 · 2 break-glass accounts"],
+    ["Two-factor", `${ORG.members} of ${ORG.members}`, "11 hardware key · 23 app"]
   ])}
 
   ${panel("Where the data lives", "one binding per store", `<div class="scroll"><table>
     <thead><tr><th>Store</th><th>Mode</th><th>State</th><th>Rotated</th></tr></thead>
     <tbody>
-      <tr><td><b>Postgres</b><span class="s">control plane and ledger</span></td><td>dedicated</td><td>${st("active","ok")}</td><td>2026-07-01</td></tr>
-      <tr><td><b>Neo4j</b><span class="s">org_acme</span></td><td>dedicated</td><td>${st("active","ok")}</td><td>2026-07-01</td></tr>
-      <tr><td><b>Objects</b><span class="s">frame archive segments</span></td><td>shared</td><td>${st("active","ok")}</td><td>2026-07-01</td></tr>
+      <tr><td><b>Postgres</b><span class="s">control plane and ledger</span></td><td>dedicated</td><td>${st("active")}</td><td>2026-07-01</td></tr>
+      <tr><td><b>Neo4j</b><span class="s">org_acme</span></td><td>dedicated</td><td>${st("active")}</td><td>2026-07-01</td></tr>
+      <tr><td><b>Objects</b><span class="s">frame archive segments</span></td><td>shared</td><td>${st("active")}</td><td>2026-07-01</td></tr>
     </tbody></table></div>`)}
 
-  ${panel("Workspaces", "each binds one main repo", `<div class="scroll"><table>
-    <thead><tr><th>Workspace</th><th>Main repo</th><th>Production branch</th><th class="r">Agents</th></tr></thead>
+  ${panel("Workspaces", `each binds one main repo · ${ORG_AGENTS} agents in total`, `<div class="scroll"><table>
+    <thead><tr><th>Workspace</th><th>Main repo</th><th>Production branch</th><th class="r">Agents</th><th class="r">Runs this month</th></tr></thead>
     <tbody>
-      <tr><td><b>core-platform</b><span class="s">2 linked repos</span></td><td class="mono">acme/platform</td><td class="mono">main</td><td class="r num">41</td></tr>
-      <tr><td><b>finops</b></td><td class="mono">acme/finops-agents</td><td class="mono">main</td><td class="r num">9</td></tr>
+      <tr><td><b>${esc(WS.name)}</b><span class="s">2 linked repos</span></td><td class="mono">${esc(WS.repo)}</td><td class="mono">main</td><td class="r num">${WS.agents}</td><td class="r num">${int(WS.runsMTD)}</td></tr>
+      <tr><td><b>${esc(WS2.name)}</b></td><td class="mono">${esc(WS2.repo)}</td><td class="mono">main</td><td class="r num">${WS2.agents}</td><td class="r num">${int(WS2.runsMTD)}</td></tr>
     </tbody></table></div>`)}
 `;
 
@@ -858,22 +1367,24 @@ PAGES.billing = () => `
   <div class="head"><div class="head-t">
     <span class="eyebrow">Organization</span>
     <h1>Billing</h1>
-    <p>Runs are the meter. The first 1,000 a month are free, with every governance feature on.</p>
-  </div><button class="btn btn-primary" data-act="prepay">Prepay annually, save 18%</button></div>
+    <p>Runs are the meter. The first ${int(PERIOD.free)} a month are free, with every governance feature on.</p>
+  </div><button class="btn btn-primary" data-act="invoices">Download invoices</button></div>
 
   ${tiles([
-    ["This period","3,318 runs","1 Sep – 11 Sep · 2,318 billable"],
-    ["Charges to date","$1,159.00","runs, plus two secondary meters"],
-    ["Next invoice","1 Oct 2026","Enterprise, annual · net 30"]
+    ["This period", int(ORG_RUNS) + " runs",
+      `${esc(PERIOD.label)} · both workspaces · ${int(BILLABLE)} billable`],
+    ["Charges to date", money(CHARGES), `runs ${money(RUN_CHARGE)} · frame archive ${money(ARCHIVE)}`],
+    ["Next invoice", esc(PERIOD.next), `${esc(ORG.plan)} · ${esc(PERIOD.terms)}`]
   ])}
 
   ${panel("How this period is priced", "tiers apply within the period", `<div class="scroll"><table>
     <thead><tr><th>Tier</th><th>Runs</th><th class="r">Rate</th><th class="r">Amount</th></tr></thead>
     <tbody>
-      <tr><td>Free</td><td class="num">1,000</td><td class="r num">$0.00</td><td class="r num">$0.00</td></tr>
-      <tr><td>1,001 – 10,000</td><td class="num">2,318</td><td class="r num">$0.50</td><td class="r num">$1,159.00</td></tr>
-      <tr><td>Frame archive</td><td class="sub">184 GB month</td><td class="r num">$0.02 / GB</td><td class="r num">$3.68</td></tr>
-      <tr><td>Graph entities</td><td class="sub">196,930</td><td class="r num">included</td><td class="r num">$0.00</td></tr>
+      <tr><td>Free</td><td class="num">${int(PERIOD.free)}</td><td class="r num">$0.00</td><td class="r num">$0.00</td></tr>
+      <tr><td>1,001 – 10,000</td><td class="num">${int(BILLABLE)}</td><td class="r num">${money(PERIOD.rate)}</td><td class="r num">${money(RUN_CHARGE)}</td></tr>
+      <tr><td>Frame archive</td><td class="sub">${PERIOD.archiveGB} GB month</td><td class="r num">${money(PERIOD.archiveRate)} / GB</td><td class="r num">${money(ARCHIVE)}</td></tr>
+      <tr><td>Graph entities</td><td class="sub">${int(ENTITIES)}</td><td class="r num">included</td><td class="r num">$0.00</td></tr>
+      <tr><td><b>Total</b></td><td></td><td></td><td class="r num" style="color:var(--fg);font-weight:600">${money(CHARGES)}</td></tr>
     </tbody></table></div>`)}
 `;
 
@@ -885,73 +1396,111 @@ PAGES.audit = () => `
   </div><button class="btn btn-primary" data-act="export">Export a signed bundle</button></div>
 
   ${tiles([
-    ["Events · 30 days","41,208","control plane only; run frames live on the run"],
-    ["Open incidents","1","severity 2 · SCIM deprovision lag"],
-    ["Retention","2,555 days","content exact · archive after 90"]
+    ["Events · 30 days", "41,208", "control plane only; run frames live on the run"],
+    ["Open incidents", "1", "severity 2 · SCIM deprovision lag"],
+    ["Retention", "2,555 days", "content exact · archive after 90"]
   ])}
 
   ${panel("Recent events", "newest first", `<div class="scroll"><table>
     <thead><tr><th>When</th><th>Event</th><th>Actor</th><th>Result</th></tr></thead>
     <tbody>
-      <tr><td class="mono" style="font-size:12px">09-11 14:03:11Z</td><td><b>approval.granted</b><span class="s mono">stripe__create_payment@4 · $18,420.00</span></td><td>Dana Okafor</td><td>${st("granted","ok")}</td></tr>
-      <tr><td class="mono" style="font-size:12px">09-11 13:58:40Z</td><td><b>policy.activated</b><span class="s mono">pol_v41 · deny generation 41</span></td><td>Priya Natarajan</td><td>${st("active","ok")}</td></tr>
-      <tr><td class="mono" style="font-size:12px">09-11 11:22:07Z</td><td><b>run.cancelled</b><span class="s mono">run_01K6QWQ1F2 · kill switch, class moves_funds</span></td><td>Priya Natarajan</td><td>${st("cancelled","deny")}</td></tr>
-      <tr><td class="mono" style="font-size:12px">09-11 09:30:02Z</td><td><b>scim.sync</b><span class="s mono">34 users · 6 groups</span></td><td>Okta</td><td>${st("degraded","fail")}</td></tr>
+      <tr><td class="mono" style="font-size:12px">09-11 13:58:40Z</td><td><b>policy.simulated</b><span class="s mono">${esc(SIM.version)} · ${int(SIM.deny)} would deny · ${int(SIM.ask)} would newly ask</span></td><td>Priya Natarajan</td><td>${st("simulated", "flat")}</td></tr>
+      <tr><td class="mono" style="font-size:12px">09-11 11:22:07Z</td><td><b>run.cancelled</b><span class="s mono">run_01K6QWQ1F2 · kill switch, class moves_funds</span></td><td>Priya Natarajan</td><td>${st("cancelled")}</td></tr>
+      <tr><td class="mono" style="font-size:12px">09-11 09:30:02Z</td><td><b>scim.sync</b><span class="s mono">${ORG.members} users · 6 groups</span></td><td>Okta</td><td>${st("degraded")}</td></tr>
+      <tr><td class="mono" style="font-size:12px">09-10 16:41:52Z</td><td><b>approval.granted</b><span class="s mono">stripe__create_payment@4 · $12,905.40 · August settlement</span></td><td>Dana Okafor</td><td>${st("granted")}</td></tr>
     </tbody></table></div>`)}
 `;
 </script>
-<style>
-@container (max-width:760px){ .split{grid-template-columns:1fr!important} .split3{grid-template-columns:1fr!important} }
-</style>
+
 <script>
 "use strict";
-/* ───────────────────────── State ───────────────────────── */
-const S = {page:"fleet", runTab:"Timeline", toolsTab:"Registry", ontTab:"Model",
-  frame:"proof.observed", view:"loaded", width:"desktop"};
+/* ═══════════════════════════ State and controller ═══════════════════════════ */
+const S = {page:"fleet", runId:"run_01K5XQ7M4A", runTab:"Timeline", toolsTab:"Registry",
+  ontTab:"Model", frame:"proof.observed", view:"loaded", width:"desktop", chrome:true};
 
 const TITLE = {fleet:"Fleet", run:"Run", agents:"Agents", tools:"Tools", ontology:"Ontology",
   steering:"Steering", spend:"Spend", organization:"Organization", billing:"Billing", audit:"Audit"};
 
-/* The four states that are not "loaded" replace the page body, never the shell —
-   the operator never loses their bearings because one panel failed. */
+/* A run is a Fleet detail view, so Fleet stays lit in the sidebar and stays
+   reachable in the breadcrumb — the operator never loses their bearings. */
+const NAV_OF = {run:"fleet"};
+
+/* Whether a page belongs to a workspace or to the organization. The denied and
+   empty states have to know, or they write sentences that cannot be true. */
+const SCOPE = {fleet:"ws", run:"ws", agents:"ws", tools:"ws", ontology:"ws", steering:"ws",
+  spend:"ws", organization:"org", billing:"org", audit:"org"};
+
+/* The four states that are not "loaded" replace the page body, never the shell. */
 const VIEWS = {
-  empty: () => `<div class="head"><div class="head-t"><h1>${TITLE[S.page]}</h1></div></div>
-    <section class="panel"><div class="empty"><b>Nothing here yet</b>
-      The first run in this workspace will appear the moment its first frame arrives.
-      <div style="margin-top:14px"><button class="btn btn-primary" data-act="wrap">Wrap an agent</button></div></div></section>`,
-  loading: () => `<div class="head"><div class="head-t"><h1>${TITLE[S.page]}</h1></div></div>
-    <dl class="summary">${[0,1,2].map(()=>`<div><dt><span class="skel" style="display:block;width:80px"></span></dt>
+  empty: () => `<div class="head"><div class="head-t"><h1>${esc(TITLE[S.page])}</h1></div></div>
+    <section class="panel"><div class="empty">${SCOPE[S.page] === "ws"
+      ? `<b>Nothing in ${esc(WS.name)} yet</b>
+         The first run in this workspace will appear the moment its first frame arrives.
+         <div style="margin-top:14px"><button class="btn btn-primary" data-act="wrap">Wrap an agent</button></div>`
+      : `<b>Nothing across ${esc(ORG.name)} yet</b>
+         Organization pages fill in once one of its workspaces records its first run.
+         <div style="margin-top:14px"><button class="btn btn-primary" data-act="new-workspace">Create a workspace</button></div>`
+    }</div></section>`,
+
+  loading: () => `<div class="head"><div class="head-t"><h1>${esc(TITLE[S.page])}</h1></div></div>
+    <dl class="summary">${[0,1,2].map(() => `<div><dt><span class="skel" style="display:block;width:80px"></span></dt>
       <dd><span class="skel" style="display:block;width:110px;height:24px;margin-top:6px"></span></dd></div>`).join("")}</dl>
-    <section class="panel"><div class="panel-b">${[0,1,2,3,4].map(i=>
-      `<div class="skel" style="width:${94-i*9}%;margin-bottom:11px"></div>`).join("")}</div></section>`,
-  error: () => `<div class="head"><div class="head-t"><h1>${TITLE[S.page]}</h1></div></div>
+    <section class="panel"><div class="panel-b">${[0,1,2,3,4].map(i =>
+      `<div class="skel" style="width:${94 - i * 9}%;margin-bottom:11px"></div>`).join("")}</div></section>`,
+
+  error: () => `<div class="head"><div class="head-t"><h1>${esc(TITLE[S.page])}</h1></div></div>
     <div class="notice crit"><div><b>This page could not be loaded</b>
       The query timed out after 10 seconds. Nothing was changed. Reference
       <span class="mono">err_01K6R2T8</span> — quote it if you contact support.
       <div style="margin-top:11px"><button class="btn btn-sm" data-act="retry">Try again</button></div></div></div>`,
-  denied: () => `<div class="head"><div class="head-t"><h1>${TITLE[S.page]}</h1></div></div>
+
+  denied: () => `<div class="head"><div class="head-t"><h1>${esc(TITLE[S.page])}</h1></div></div>
     <div class="notice deny"><div><b>You do not have access to this page</b>
-      You are signed in as Dana Okafor, with the billing role on finops. ${TITLE[S.page]} on core-platform needs a
-      grant on that workspace. Marcus Bell, its owner, can give you one.
+      You are signed in as Sam Okonkwo, an observer on ${esc(WS2.name)}. ${SCOPE[S.page] === "ws"
+        ? `${esc(TITLE[S.page])} belongs to ${esc(WS.name)} and needs a grant on that workspace.
+           Marcus Bell, its owner, can give you one.`
+        : `${esc(TITLE[S.page])} is an organization page and needs the org billing or owner role.
+           Priya Natarajan, as org billing, can give you one.`}
       <div style="margin-top:11px"><button class="btn btn-sm" data-act="request">Request access</button></div></div></div>`
 };
 
 function render(){
   const v = $("#view");
   v.innerHTML = S.view === "loaded" ? PAGES[S.page]() : VIEWS[S.view]();
-  $("#crumbHere").textContent = TITLE[S.page];
-  document.querySelectorAll(".navsec a").forEach(a =>
-    a.getAttribute("data-nav") === S.page ? a.setAttribute("aria-current","page") : a.removeAttribute("aria-current"));
+
+  const nav = NAV_OF[S.page] ?? S.page;
+  $$(".navsec a").forEach(a =>
+    a.getAttribute("data-nav") === nav ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current"));
+
+  $("#crumbTail").innerHTML = S.page === "run"
+    ? `<a class="here" href="#/fleet">Fleet</a><span class="sep" aria-hidden="true">/</span>
+       <span class="here mono">${esc(S.runId)}</span>`
+    : `<span class="here">${esc(TITLE[S.page])}</span>`;
+
+  const waiting = pendingApprovals().length;
+  const badge = $("#navApprovals");
+  badge.textContent = waiting;
+  badge.hidden = waiting === 0;
+
   document.title = TITLE[S.page] + " · Oxagen Mission Control";
   paintChrome();
 }
 
 function route(){
-  const p = (location.hash.replace(/^#\//,"") || "fleet").split("/")[0];
+  const parts = location.hash.replace(/^#\//, "").split("/");
+  const p = parts[0] || "fleet";
   S.page = PAGES[p] ? p : "fleet";
-  document.body.dataset.nav = "";
+  if(S.page === "run"){
+    const hit = RUNS.find(r => r.id === parts[1]);
+    S.runId = hit ? hit.id : "run_01K5XQ7M4A";
+    /* A different run may not offer the tab you were on, and its frames are
+       its own — reset both rather than showing another run's selection. */
+    S.runTab = "Timeline";
+    S.frame = framesOf(theRun())[0].t;
+  }
+  closeNav();
   render();
-  window.scrollTo(0,0);
+  window.scrollTo(0, 0);
 }
 addEventListener("hashchange", route);
 
@@ -959,59 +1508,92 @@ addEventListener("hashchange", route);
 const ASST = [
   {you:"Grant linear__get_issue to triage and cap it at $5 a run.",
    it:"Done. Two governed actions, both with receipts.",
-   did:[["tool.grant","linear__get_issue@2 → acme.core.triage · read scope","rcp_01K6R41A"],
-        ["budget.set","acme.core.triage · $5.00 a run, hard","rcp_01K6R41B"]]},
-  {you:"Why did invoice-bot stop at 14:03?",
-   it:"It did not stop — it parked. The call was $18,420.00 against a mandate whose per-call ceiling is $10,000.00, so the rule mandate.above_threshold sent it to a person. Dana Okafor approved it 5 minutes later and the call dispatched.",
-   did:[["run.read","run_01K6QWZ4T7 · frames #155 → #157","rcp_01K6R41C"]]}
+   did:[["tool.grant", "linear__get_issue@2 → acme.core.triage · read scope", "rcp_01K6R41A"],
+        ["budget.set", "acme.core.triage · $5.00 a run, hard", "rcp_01K6R41B"]]},
+  {you:"Why did invoice-bot stop at 13:48?",
+   it:"It did not stop — it parked. The call is $18,420.00 against a mandate that sends anything above $10,000.00 to a person, so mandate.above_threshold moved it to the approval queue. It is still parked with 5m 47s left, at the top of Fleet. Nothing dispatched: the credential is minted only on approval.",
+   did:[["run.read", "run_01K6QWZ4T7 · frames #21 → #23", "rcp_01K6R41C"]]}
 ];
+const asstLog = [...ASST];
+
 function renderAsst(){
-  $("#asstBody").innerHTML = ASST.map(m => `
+  $("#asstBody").innerHTML = asstLog.map(m => `
     <div class="msg you">${esc(m.you)}</div>
     <div class="msg it"><b>Assistant</b>${esc(m.it)}
-      <div class="did"><span class="eyebrow">What it did</span>${m.did.map(d=>`
+      ${m.did.length ? `<div class="did"><span class="eyebrow">What it did</span>${m.did.map(d => `
         <div style="margin-bottom:6px;font-size:12.5px">
           <span class="mono" style="color:var(--fg)">${esc(d[0])}</span>
           <span class="sub"> · ${esc(d[1])}</span><br>
           <a href="#/audit" class="mono" style="font-size:11.5px">${esc(d[2])}</a></div>`).join("")}
-      </div></div>`).join("");
+      </div>` : ""}</div>`).join("");
+  const b = $("#asstBody");
+  b.scrollTop = b.scrollHeight;
 }
+
 function toggleAsst(open){
-  const app = $("#app"), a = $("#asst");
-  app.dataset.asst = open ? "open" : "closed";
-  a.hidden = !open;
+  $("#app").dataset.asst = open ? "open" : "closed";
+  $("#asst").hidden = !open;
   $("#asstBtn").setAttribute("aria-pressed", String(open));
-  if(open) renderAsst();
+  if(open){ renderAsst(); $("#asstIn").focus(); }
 }
 
 /* ───────────────────────── Command menu ───────────────────────── */
-const CMDS = [...Object.keys(TITLE).map(k => ["Go to " + TITLE[k], "#/" + k]),
-  ["Pause every run in core-platform", "#/fleet"],
+const CMDS = [...Object.keys(TITLE).filter(k => k !== "run").map(k => ["Go to " + TITLE[k], "#/" + k]),
+  ...RUNS.map(r => [`${r.id} — ${r.task}`, "#/run/" + r.id]),
+  ["Pause every run in " + WS.name, "#/fleet"],
   ["Approve the parked payment", "#/fleet"],
   ["Search tools · search_tools", "#/tools"]];
-function renderCmd(q=""){
-  const hits = CMDS.filter(c => c[0].toLowerCase().includes(q.toLowerCase())).slice(0,8);
-  $("#cmdList").innerHTML = hits.length ? hits.map(c =>
-    `<li><a href="${c[1]}" data-cmd>${esc(c[0])}<span class="k">↵</span></a></li>`).join("")
-    : `<li><a style="color:var(--muted)">Nothing matches “${esc(q)}”.</a></li>`;
+let cmdHits = [], cmdI = 0;
+
+function renderCmd(q = ""){
+  cmdHits = CMDS.filter(c => c[0].toLowerCase().includes(q.toLowerCase())).slice(0, 8);
+  cmdI = 0;
+  paintCmd(q);
+}
+function paintCmd(q = ""){
+  $("#cmdList").innerHTML = cmdHits.length
+    ? cmdHits.map((c, i) => `<li role="option" id="cmdopt-${i}" aria-selected="${i === cmdI}">
+        <a href="${c[1]}" data-cmd>${esc(c[0])}<span class="k">↵</span></a></li>`).join("")
+    : `<li role="option" aria-selected="false"><a style="color:var(--muted)">Nothing matches “${esc(q)}”.</a></li>`;
+  $("#cmdIn").setAttribute("aria-activedescendant", cmdHits.length ? "cmdopt-" + cmdI : "");
 }
 
 /* ───────────────────────── Mockup chrome ───────────────────────── */
 function paintChrome(){
   $("#stateRow").innerHTML = "state " + ["loaded","empty","loading","error","denied"].map(v =>
-    `<button data-view="${v}" aria-pressed="${S.view===v}">${v}</button>`).join("");
+    `<button data-view="${v}" aria-pressed="${S.view === v}">${v}</button>`).join("");
   $("#widthRow").innerHTML = "width " + ["desktop","phone"].map(v =>
-    `<button data-width="${v}" aria-pressed="${S.width===v}">${v==="phone"?"phone 400":v}</button>`).join("");
+    `<button data-width="${v}" aria-pressed="${S.width === v}">${v === "phone" ? "phone 400" : v}</button>`).join("");
   const t = document.documentElement.getAttribute("data-theme") || "system";
   const row = $("#themeRow");
   if(row) row.innerHTML = ["system","dark","light"].map(v =>
-    `<button class="btn btn-sm" data-theme-set="${v}" ${t===v?'style="border-color:var(--gold-edge);color:var(--gold)"':""}>${v}</button>`).join(" ");
+    `<button class="btn btn-sm" data-theme-set="${v}" aria-pressed="${t === v}"${
+      t === v ? ' style="border-color:var(--rule-2);background:var(--hl);font-weight:600"' : ""}>${v}</button>`).join(" ");
+  $("#chromeBody").hidden = !S.chrome;
+  $("#chromeFold").textContent = S.chrome ? "hide" : "show";
+  $("#chromeFold").setAttribute("aria-expanded", String(S.chrome));
+}
+
+/* ───────────────────────── Phone drawer ───────────────────────── */
+function openNav(){
+  document.body.dataset.nav = "open";
+  $("#scrim").hidden = false;
+  $("#navToggle").setAttribute("aria-expanded", "true");
+  $(".navsec a").focus();
+}
+function closeNav(back){
+  if(document.body.dataset.nav !== "open"){ $("#scrim").hidden = true; return; }
+  document.body.dataset.nav = "";
+  $("#scrim").hidden = true;
+  $("#navToggle").setAttribute("aria-expanded", "false");
+  if(back) $("#navToggle").focus();
 }
 
 /* ───────────────────────── One delegated listener ───────────────────────── */
 document.addEventListener("click", e => {
   const t = e.target.closest("[data-tab],[data-view],[data-width],[data-theme-set],[data-frame],[data-go],[data-act],[data-close],[data-cmd]");
   if(!t) return;
+
   if(t.dataset.tab){ S[t.dataset.tab] = t.dataset.val; render(); return; }
   if(t.dataset.view){ S.view = t.dataset.view; render(); return; }
   if(t.dataset.width){ S.width = t.dataset.width; document.body.dataset.w = S.width; paintChrome(); return; }
@@ -1021,38 +1603,100 @@ document.addEventListener("click", e => {
                    : document.documentElement.setAttribute("data-theme", v);
     paintChrome(); return;
   }
-  if(t.dataset.frame){ S.frame = FRAMES.find(f => String(f.n) === t.dataset.frame).t; render(); return; }
+  if(t.dataset.frame){
+    const f = framesOf(theRun()).find(x => String(x.n) === t.dataset.frame);
+    if(f){ S.frame = f.t; render(); }
+    return;
+  }
   if(t.dataset.go){ location.hash = t.dataset.go; return; }
   if(t.dataset.cmd){ $("#cmd").close(); return; }
   if(t.dataset.close){ $("#" + t.dataset.close).close(); return; }
   if(t.dataset.act === "retry"){ S.view = "loaded"; render(); return; }
+
   if(t.dataset.act === "approve" || t.dataset.act === "deny"){
-    /* Capture the parent before writing to it — the write destroys `t`. */
-    const wrap = t.parentElement;
-    const granted = t.dataset.act === "approve";
-    wrap.innerHTML = `<span class="st ${granted ? "ok" : "deny"}">${
-      granted ? "approved" : "denied"} · receipt rcp_01K6R41D</span>`
-      + (granted ? ` <span class="sub" style="font-size:11.5px">single-use credential minted, call dispatched</span>` : "");
+    /* Write the decision to the approval itself, not to the DOM: a receipt that
+       vanishes when you leave the page is not a receipt. */
+    const a = APPROVALS[Number(t.dataset.i)];
+    if(a && !a.resolved){
+      a.resolved = {granted: t.dataset.act === "approve", receipt: mintReceipt()};
+      receiptN++;
+    }
+    render();
     return;
   }
+
   /* Every other action is a stub: say so rather than pretending. */
   if(t.dataset.act){
     const b = t.closest("button");
-    const was = b.textContent; b.textContent = "Not in this mockup";
-    setTimeout(() => { b.textContent = was; }, 1400);
+    if(!b || b.dataset.stub) return;          /* a second click must not capture the label */
+    b.dataset.stub = "1";
+    const was = b.innerHTML;
+    b.style.minWidth = b.offsetWidth + "px";
+    b.textContent = "Not in this mockup";
+    setTimeout(() => { b.innerHTML = was; b.style.minWidth = ""; delete b.dataset.stub; }, 1400);
   }
 });
 
+/* Arrow keys move between tabs, which is what `role="tab"` promises. */
+document.addEventListener("keydown", e => {
+  const t = e.target.closest?.('[role="tab"]');
+  if(!t || !["ArrowLeft","ArrowRight","Home","End"].includes(e.key)) return;
+  const list = $$('[role="tab"]', t.closest('[role="tablist"]'));
+  const i = list.indexOf(t);
+  const next = e.key === "Home" ? 0 : e.key === "End" ? list.length - 1
+    : e.key === "ArrowLeft" ? (i - 1 + list.length) % list.length : (i + 1) % list.length;
+  e.preventDefault();
+  list[next].focus();
+  list[next].click();
+});
+
 $("#asstBtn").onclick = () => toggleAsst($("#asst").hidden);
-$("#asstClose").onclick = () => toggleAsst(false);
+$("#asstClose").onclick = () => { toggleAsst(false); $("#asstBtn").focus(); };
 $("#acctBtn").onclick = () => { $("#acct").showModal(); paintChrome(); };
-$("#cmdBtn").onclick = () => { renderCmd(); $("#cmd").showModal(); $("#cmdIn").focus(); };
+$("#cmdBtn").onclick = () => { renderCmd(); $("#cmd").showModal(); $("#cmdIn").value = ""; $("#cmdIn").focus(); };
 $("#cmdIn").oninput = e => renderCmd(e.target.value);
-$("#navToggle").onclick = () => {
-  document.body.dataset.nav = document.body.dataset.nav === "open" ? "" : "open";
+$("#chromeFold").onclick = () => { S.chrome = !S.chrome; paintChrome(); };
+$("#navToggle").onclick = () => document.body.dataset.nav === "open" ? closeNav(true) : openNav();
+$("#scrim").onclick = () => closeNav(true);
+
+/* A command menu whose ↵ hint does nothing is worse than no hint. */
+$("#cmdIn").onkeydown = e => {
+  if(!cmdHits.length) return;
+  if(e.key === "ArrowDown" || e.key === "ArrowUp"){
+    e.preventDefault();
+    cmdI = (cmdI + (e.key === "ArrowDown" ? 1 : -1) + cmdHits.length) % cmdHits.length;
+    paintCmd($("#cmdIn").value);
+  } else if(e.key === "Enter"){
+    e.preventDefault();
+    const target = cmdHits[cmdI][1];
+    $("#cmd").close();
+    if(location.hash === target) route(); else location.hash = target;
+  }
 };
+
+/* The assistant is scripted, but it must not swallow what you typed. */
+$("#asstIn").onkeydown = e => {
+  if(e.key !== "Enter") return;
+  const text = e.target.value.trim();
+  if(!text) return;
+  asstLog.push({you:text, did:[],
+    it:"Not in this mockup — the assistant here replays two recorded exchanges. In the product this would be a governed action with a receipt, or a refusal with the reason."});
+  e.target.value = "";
+  renderAsst();
+};
+
 addEventListener("keydown", e => {
   if((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k"){ e.preventDefault(); $("#cmdBtn").click(); }
+  if(e.key === "Escape") closeNav(true);
+  /* While the drawer is open it is the only thing on screen, so keep focus in it. */
+  if(e.key === "Tab" && document.body.dataset.nav === "open"){
+    const f = $$('a[href],button:not([disabled])', $("#rail"));
+    if(!f.length) return;
+    const first = f[0], last = f[f.length - 1];
+    if(!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+    else if(e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+    else if(!$("#rail").contains(document.activeElement)){ e.preventDefault(); first.focus(); }
+  }
 });
 
 route();
