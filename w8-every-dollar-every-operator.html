@@ -498,7 +498,7 @@ body[data-width="phone"] .asst{position:absolute;inset:0;width:100%;height:auto;
     <div class="orgsw">
       <button class="sw" id="orgSw" aria-haspopup="dialog">
         <span class="sw-mark">AR</span>
-        <span class="sw-txt"><span class="sw-k">Organization</span><span class="sw-v">Acme Robotics</span></span>
+        <span class="sw-txt"><span class="sw-k">Organization</span><span class="sw-v">Anderson Intelligence Corp.</span></span>
         <svg class="sw-car" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 4.75 6 2.5l2.5 2.25M3.5 7.25 6 9.5l2.5-2.25"/></svg>
       </button>
     </div>
@@ -512,29 +512,29 @@ body[data-width="phone"] .asst{position:absolute;inset:0;width:100%;height:auto;
 
     <nav class="navsec nav" aria-label="Workspace">
       <div class="navsec-h">Workspace</div>
-      <a href="#/acme/core-platform/fleet" data-nav="fleet">
+      <a href="#/a-intel/core-platform/fleet" data-nav="fleet">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l2 6 4-15 2 9h6"/></svg>Fleet<span class="cnt">14</span></a>
-      <a href="#/acme/core-platform/runs/run_8f3a2c91" data-nav="run">
+      <a href="#/a-intel/core-platform/runs/run_8f3a2c91" data-nav="run">
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>Run</a>
-      <a href="#/acme/core-platform/agents" data-nav="agents">
+      <a href="#/a-intel/core-platform/agents" data-nav="agents">
         <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="7" width="16" height="12" rx="3"/><path d="M12 4v3M9 12h.01M15 12h.01M9.5 16h5"/></svg>Agents<span class="cnt">4</span></a>
-      <a href="#/acme/core-platform/tools" data-nav="tools">
+      <a href="#/a-intel/core-platform/tools" data-nav="tools">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 5.5a4 4 0 0 0 5 5L14 16l-4 4-3-3 4-4 3.5-7.5z"/></svg>Tools</a>
-      <a href="#/acme/core-platform/ontology" data-nav="ontology">
+      <a href="#/a-intel/core-platform/ontology" data-nav="ontology">
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="2.4"/><circle cx="5" cy="18" r="2.4"/><circle cx="19" cy="18" r="2.4"/><path d="M10.6 7 6.4 15.8M13.4 7l4.2 8.8M7.4 18h9.2"/></svg>Ontology</a>
-      <a href="#/acme/core-platform/steering" data-nav="steering">
+      <a href="#/a-intel/core-platform/steering" data-nav="steering">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h10M4 18h7"/><circle cx="18" cy="14" r="3"/></svg>Steering<span class="cnt">3</span></a>
-      <a href="#/acme/core-platform/spend" data-nav="spend">
+      <a href="#/a-intel/core-platform/spend" data-nav="spend">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M16.5 7.5c0-1.7-2-2.5-4.5-2.5s-4.5.9-4.5 2.8S9.5 11 12 11.5s4.5 1 4.5 3-2 2.8-4.5 2.8-4.5-.8-4.5-2.5"/></svg>Spend<span class="cnt">9</span></a>
     </nav>
 
     <nav class="navsec nav" aria-label="Organization">
       <div class="navsec-h">Organization</div>
-      <a href="#/acme/organization" data-nav="organization">
+      <a href="#/a-intel/organization" data-nav="organization">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V7l7-3 7 3v13M9 20v-5h6v5M8 10h.01M12 10h.01M16 10h.01"/></svg>Organization</a>
-      <a href="#/acme/billing" data-nav="billing">
+      <a href="#/a-intel/billing" data-nav="billing">
         <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M3 10h18M6.5 14.5h3"/></svg>Billing</a>
-      <a href="#/acme/audit" data-nav="audit">
+      <a href="#/a-intel/audit" data-nav="audit">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5 19 6v6c0 4-3 7-7 8.5C8 19 5 16 5 12V6l7-2.5z"/><path d="M9.5 12l1.8 1.8 3.4-3.6"/></svg>Audit</a>
     </nav>
 
@@ -599,7 +599,7 @@ body[data-width="phone"] .asst{position:absolute;inset:0;width:100%;height:auto;
 <script>
 /* ==========================================================================
    Oxagen Mission Control — W8. Every dollar, every operator
-   Demo tenant: Acme Robotics (acme) · workspace core-platform
+   Demo tenant: Anderson Intelligence Corp. (a-intel) · workspace core-platform
    Money is integer micro-USD everywhere; cents are produced once, at render.
    ========================================================================== */
 "use strict";
@@ -618,8 +618,8 @@ const FX_AT = "2026-09-11T06:00:00Z";
 let CUR = "USD";
 
 const DB = {
-  org:{name:"Acme Robotics",slug:"acme",ns:"acme",displayCurrency:"USD",plan:"team",funding:"customer_key"},
-  ws:{name:"core-platform",mainRepo:"acme/platform",branch:"main",linked:["acme/billing","acme/mobile"]},
+  org:{name:"Anderson Intelligence Corp.",slug:"a-intel",ns:"a-intel",displayCurrency:"USD",plan:"team",funding:"customer_key"},
+  ws:{name:"core-platform",mainRepo:"a-intel/platform",branch:"main",linked:["a-intel/billing","a-intel/mobile"]},
 
   /* ---------------- workspace rollup, Sep MTD ---------------- */
   totals:{
@@ -648,7 +648,7 @@ const DB = {
   /* ---------------- findings, ranked by money at stake (§12.8) ---------------- */
   findings:[
     {id:"fnd_9c41",kind:"Cache misses after a stable prefix changed",level:"agent",
-     scope:"acme.core.release-manager",micros:M(1842.16),frames:4,sev:"critical",
+     scope:"a-intel.core.release-manager",micros:M(1842.16),frames:4,sev:"critical",
      detect:"System-context digest differs between consecutive turns while the conversation prefix is unchanged.",
      tells:"Publishing steering record <code>str_release_gate</code> on 3 Sep rewrote the cached prefix for every run of this agent. Cache hit rate fell from 78.9% to 66.1% overnight and has not recovered. Republishing off-peak, or moving the volatile clause out of the cached prefix, restores it.",
      evidence:[
@@ -658,7 +658,7 @@ const DB = {
        {f:"frame 00119",run:"run_8b44f019",turn:2,note:"same prefix re-written — never read inside the TTL",d:"$0.8062"}],
      actions:[{t:"Open a Context PR to pin the prefix",p:1},{t:"Schedule publishes off-peak"},{t:"Dismiss with a reason"}],
      exact:"1842164200"},
-    {id:"fnd_9c3d",kind:"Tool-list bloat",level:"agent",scope:"acme.core.triage",
+    {id:"fnd_9c3d",kind:"Tool-list bloat",level:"agent",scope:"a-intel.core.triage",
      micros:M(906.44),frames:6,sev:"failed",
      detect:"tool_definition_tokens above the workspace median for the agent's grants.",
      tells:"This agent carries 41 granted tool versions and spends 12,408 tokens per turn describing them, against a workspace median of 3,912. Eleven of the 41 have not been called in the last 500 runs.",
@@ -671,7 +671,7 @@ const DB = {
        {f:"idle tool",run:"—",turn:"—",note:"and 8 more idle grants",d:"4,204 tok"}],
      actions:[{t:"Narrow the agent's grants",p:1},{t:"Turn on tool search for this belt"},{t:"Dismiss with a reason"}],
      exact:"906441800"},
-    {id:"fnd_9c52",kind:"Cache writes never read",level:"agent",scope:"acme.core.docs-writer",
+    {id:"fnd_9c52",kind:"Cache writes never read",level:"agent",scope:"a-intel.core.docs-writer",
      micros:M(612.77),frames:3,sev:"failed",
      detect:"cache_write greater than zero on a run's last turn, or a write with no later read inside the TTL.",
      tells:"178 of this agent's runs were a single turn long. Each one paid to write a 5-minute cache prefix that no later turn ever read. One-turn runs should not write cache at all.",
@@ -690,7 +690,7 @@ const DB = {
        {f:"and 7 more",run:"7 runs",turn:"—",note:"same key, same 29-minute window",d:"$317.49"}],
      actions:[{t:"Add a fallback route for this key",p:1},{t:"Open the key's health record"},{t:"Dismiss with a reason"}],
      exact:"408193000"},
-    {id:"fnd_9c61",kind:"Duplicate tool calls",level:"agent",scope:"acme.core.stella-ci",
+    {id:"fnd_9c61",kind:"Duplicate tool calls",level:"agent",scope:"a-intel.core.stella-ci",
      micros:M(276.03),frames:12,sev:"approval",
      detect:"Same tool version and input digest called twice inside one run.",
      tells:"<code>repo.read_file@2.3</code> was called on <code>services/ratelimit/window.ts</code> twice in 312 runs — once early, once after a model call that had the content in context. A steering record would stop it.",
@@ -699,7 +699,7 @@ const DB = {
        {f:"and 10 more",run:"312 runs",turn:"—",note:"same pair shape",d:"$276.03"}],
      actions:[{t:"Open a steering proposal",p:1},{t:"Open the run waterfall"},{t:"Dismiss with a reason"}],
      exact:"276031400"},
-    {id:"fnd_9c6a",kind:"Unproductive tail",level:"agent",scope:"acme.core.triage",
+    {id:"fnd_9c6a",kind:"Unproductive tail",level:"agent",scope:"a-intel.core.triage",
      micros:M(219.85),frames:5,sev:"neutral",
      detect:"Steps after the last productive step exceed the workspace threshold.",
      tells:"412 runs averaged 9.4 steps after their last step that produced a kept side effect. A stop rule at 4 idle steps would have ended them sooner without losing work.",
@@ -708,7 +708,7 @@ const DB = {
        {f:"pattern",run:"412 runs",turn:"—",note:"mean tail 9.4 steps",d:"$219.85"}],
      actions:[{t:"Set a stop rule for this agent",p:1},{t:"Dismiss with a reason"}],
      exact:"219851200"},
-    {id:"fnd_9c70",kind:"Wrong tier",level:"agent",scope:"acme.core.docs-writer",
+    {id:"fnd_9c70",kind:"Wrong tier",level:"agent",scope:"a-intel.core.docs-writer",
      micros:M(154.40),frames:4,sev:"neutral",
      detect:"A run whose steps were all classification-shaped, on a flagship model.",
      tells:"88 runs used <code>claude-opus-5</code> for label-and-route work with a mean output of 41 tokens. Routing this agent's light tier to <code>claude-haiku-4-5-20251001</code> costs 8% of the same work.",
@@ -724,7 +724,7 @@ const DB = {
        {f:"budget",run:"—",turn:"—",note:"mean 11,842 tokens served per turn against a norm of 8,000",d:"1.48×"}],
      actions:[{t:"Lower the context budget",p:1},{t:"Dismiss with a reason"}],
      exact:"97620400"},
-    {id:"fnd_9c7c",kind:"Budget headroom",level:"agent",scope:"acme.core.stella-ci",
+    {id:"fnd_9c7c",kind:"Budget headroom",level:"agent",scope:"a-intel.core.stella-ci",
      micros:0,frames:0,sev:"neutral",noMoney:true,
      detect:"An operator or agent consistently below or above budget.",
      tells:"This agent has used between 18% and 24% of its $24,000.00 monthly soft budget for nine consecutive periods. Resizing it to $8,000.00 leaves headroom and makes the notify thresholds mean something.",
@@ -739,14 +739,14 @@ const DB = {
 DB.attr = {
   operator:{label:"Operator",rows:[
     {n:"Marcus Bell",m:"Workspace owner · 3 agents · 2,400 runs",v:M(12491.35),basis:"mixed",
-     flag:"$1,252.91 from 296 runs that arrived without an operator, attributed to the agent's owning operator and flagged",href:"#/acme/core-platform/spend/operators/marcus-bell"},
+     flag:"$1,252.91 from 296 runs that arrived without an operator, attributed to the agent's owning operator and flagged",href:"#/a-intel/core-platform/spend/operators/marcus-bell"},
     {n:"Priya Natarajan",m:"Organization owner · 2 agents · 918 runs",v:M(5916.27),basis:"gateway_observed",
-     href:"#/acme/core-platform/spend/operators/priya-natarajan"}]},
+     href:"#/a-intel/core-platform/spend/operators/priya-natarajan"}]},
   agent:{label:"Agent",rows:[
-    {n:"acme.core.release-manager",m:"Claude Code · gateway tier · 1,142 runs",v:M(8914.07),basis:"gateway_observed",href:"#/acme/core-platform/spend/agents/release-manager"},
-    {n:"acme.core.stella-ci",m:"Stella · gateway tier · 1,486 runs",v:M(5203.88),basis:"gateway_observed",href:"#/acme/core-platform/spend/agents/stella-ci"},
-    {n:"acme.core.triage",m:"Codex CLI · harness tier · 512 runs",v:M(2847.19),basis:"client_attested",href:"#/acme/core-platform/spend/agents/triage"},
-    {n:"acme.core.docs-writer",m:"Custom, SDK-wrapped · gateway tier · 178 runs",v:M(1442.48),basis:"gateway_observed",href:"#/acme/core-platform/spend/agents/docs-writer"}]},
+    {n:"a-intel.core.release-manager",m:"Claude Code · gateway tier · 1,142 runs",v:M(8914.07),basis:"gateway_observed",href:"#/a-intel/core-platform/spend/agents/release-manager"},
+    {n:"a-intel.core.stella-ci",m:"Stella · gateway tier · 1,486 runs",v:M(5203.88),basis:"gateway_observed",href:"#/a-intel/core-platform/spend/agents/stella-ci"},
+    {n:"a-intel.core.triage",m:"Codex CLI · harness tier · 512 runs",v:M(2847.19),basis:"client_attested",href:"#/a-intel/core-platform/spend/agents/triage"},
+    {n:"a-intel.core.docs-writer",m:"Custom, SDK-wrapped · gateway tier · 178 runs",v:M(1442.48),basis:"gateway_observed",href:"#/a-intel/core-platform/spend/agents/docs-writer"}]},
   model:{label:"Model",rows:[
     {n:"claude-opus-5",m:"Anthropic · complex tier",v:M(11602.33),basis:"gateway_observed"},
     {n:"claude-sonnet-5",m:"Anthropic · standard tier",v:M(4118.90),basis:"gateway_observed"},
@@ -758,39 +758,39 @@ DB.attr = {
     {n:"pk_or_5c08",m:"OpenRouter · funding source customer_key",v:M(2053.15),basis:"gateway_observed"},
     {n:"pk_bdrk_7f2a",m:"AWS Bedrock us-east-1 · 1 open exception",v:M(633.24),basis:"mixed",warn:true}]},
   repository:{label:"Repository",rows:[
-    {n:"acme/platform",m:"main repo · production branch main",v:M(12884.17),basis:"mixed"},
-    {n:"acme/billing",m:"linked repo",v:M(3671.09),basis:"mixed"},
-    {n:"acme/mobile",m:"linked repo",v:M(1510.42),basis:"gateway_observed"},
+    {n:"a-intel/platform",m:"main repo · production branch main",v:M(12884.17),basis:"mixed"},
+    {n:"a-intel/billing",m:"linked repo",v:M(3671.09),basis:"mixed"},
+    {n:"a-intel/mobile",m:"linked repo",v:M(1510.42),basis:"gateway_observed"},
     {n:"— no repository",m:"runs with no repository on the task reference",v:M(341.94),basis:"client_attested"}]},
   task:{label:"Task",rows:[
-    {n:"acme/platform#4182",m:"Ratelimit window regression under burst",v:M(2104.66),basis:"gateway_observed"},
-    {n:"acme/platform#4166",m:"Move billing webhooks behind the tool gateway",v:M(1918.30),basis:"gateway_observed"},
-    {n:"acme/billing#312",m:"Invoice PDF regeneration after a price correction",v:M(1402.88),basis:"mixed"},
-    {n:"acme/platform#4190",m:"Neo4j driver upgrade to 6.2",v:M(1188.51),basis:"gateway_observed"},
-    {n:"acme/mobile#77",m:"Offline queue flush loses the last frame",v:M(874.29),basis:"gateway_observed"},
+    {n:"a-intel/platform#4182",m:"Ratelimit window regression under burst",v:M(2104.66),basis:"gateway_observed"},
+    {n:"a-intel/platform#4166",m:"Move billing webhooks behind the tool gateway",v:M(1918.30),basis:"gateway_observed"},
+    {n:"a-intel/billing#312",m:"Invoice PDF regeneration after a price correction",v:M(1402.88),basis:"mixed"},
+    {n:"a-intel/platform#4190",m:"Neo4j driver upgrade to 6.2",v:M(1188.51),basis:"gateway_observed"},
+    {n:"a-intel/mobile#77",m:"Offline queue flush loses the last frame",v:M(874.29),basis:"gateway_observed"},
     {n:"214 other tasks",m:"each below 4% of workspace spend",v:M(10918.98),basis:"mixed"}]}
 };
 
 /* ---------------- operators (§12.9 operator view) ---------------- */
 DB.operators = {
-  "marcus-bell":{name:"Marcus Bell",initials:"MB",role:"Workspace owner · core-platform",email:"marcus.bell@acmerobotics.com",
+  "marcus-bell":{name:"Marcus Bell",initials:"MB",role:"Workspace owner · core-platform",email:"marcus.bell@a-intelrobotics.com",
     spend:M(12491.35),runs:2400,proven:M(5802.44),accepted:M(2188.19),productive:0.64,provenRuns:842,
     budget:{limit:M(16000),spent:M(12491.35),mode:"soft",period:"monthly",notify:[50,80,100],fired:[50,80]},
     flagged:{micros:M(1252.91),runs:296},
-    agents:[{n:"acme.core.release-manager",v:M(7206.28),r:884,pr:412},
-            {n:"acme.core.stella-ci",v:M(3437.88),r:1104,pr:398},
-            {n:"acme.core.triage",v:M(1847.19),r:412,pr:32}],
+    agents:[{n:"a-intel.core.release-manager",v:M(7206.28),r:884,pr:412},
+            {n:"a-intel.core.stella-ci",v:M(3437.88),r:1104,pr:398},
+            {n:"a-intel.core.triage",v:M(1847.19),r:412,pr:32}],
     models:[{n:"claude-opus-5",p:"Anthropic",v:M(8404.11)},{n:"claude-sonnet-5",p:"Anthropic",v:M(2613.09)},
             {n:"z-ai/glm-latest",p:"OpenRouter",v:M(1024.88)},{n:"claude-haiku-4-5-20251001",p:"AWS Bedrock",v:M(351.10)},
             {n:"z-ai/glm-flash-latest",p:"OpenRouter",v:M(98.17)}],
     findings:["fnd_9c41","fnd_9c3d","fnd_9c61","fnd_9c6a"]},
-  "priya-natarajan":{name:"Priya Natarajan",initials:"PN",role:"Organization owner",email:"priya.natarajan@acmerobotics.com",
+  "priya-natarajan":{name:"Priya Natarajan",initials:"PN",role:"Organization owner",email:"priya.natarajan@a-intelrobotics.com",
     spend:M(5916.27),runs:918,proven:M(2110.84),accepted:M(916.72),productive:0.56,provenRuns:362,
     budget:{limit:M(9000),spent:M(5916.27),mode:"soft",period:"monthly",notify:[50,80,100],fired:[50]},
-    agents:[{n:"acme.core.release-manager",v:M(1707.79),r:258,pr:98},
-            {n:"acme.core.stella-ci",v:M(1766.00),r:382,pr:214},
-            {n:"acme.core.docs-writer",v:M(1442.48),r:178,pr:24},
-            {n:"acme.core.triage",v:M(1000.00),r:100,pr:26}],
+    agents:[{n:"a-intel.core.release-manager",v:M(1707.79),r:258,pr:98},
+            {n:"a-intel.core.stella-ci",v:M(1766.00),r:382,pr:214},
+            {n:"a-intel.core.docs-writer",v:M(1442.48),r:178,pr:24},
+            {n:"a-intel.core.triage",v:M(1000.00),r:100,pr:26}],
     models:[{n:"claude-opus-5",p:"Anthropic",v:M(3198.22)},{n:"claude-sonnet-5",p:"Anthropic",v:M(1505.81)},
             {n:"z-ai/glm-latest",p:"OpenRouter",v:M(819.73)},{n:"claude-haiku-4-5-20251001",p:"AWS Bedrock",v:M(282.14)},
             {n:"z-ai/glm-flash-latest",p:"OpenRouter",v:M(110.37)}],
@@ -799,7 +799,7 @@ DB.operators = {
 
 /* ---------------- agent view (§12.9) ---------------- */
 DB.agents = {
-  "stella-ci":{key:"acme.core.stella-ci",harness:"Stella",tier:"gateway",grade:"A — full bodies",
+  "stella-ci":{key:"a-intel.core.stella-ci",harness:"Stella",tier:"gateway",grade:"A — full bodies",
     owner:"Marcus Bell",def:".oxagen/agents/stella-ci.toml",commit:"a41c9f2",
     spend:M(5203.88),runs:1486,proven:M(2894.16),provenRuns:612,productive:0.71,cacheHit:0.8118,
     perProven:[{m:"Mar 2026",v:9.84},{m:"Apr 2026",v:8.72},{m:"May 2026",v:7.95},{m:"Jun 2026",v:6.41},
@@ -825,9 +825,9 @@ DB.cacheTrend = {
 <script>
 /* ---------------- run waterfall (§12.9) ---------------- */
 DB.run = {
-  id:"run_8f3a2c91",agent:"acme.core.stella-ci",operator:"Marcus Bell",
-  task:"acme/platform#4182",taskTitle:"Ratelimit window regression under burst",
-  repo:"acme/platform",pr:"acme/platform#4211",tier:"gateway",grade:"A — full bodies",
+  id:"run_8f3a2c91",agent:"a-intel.core.stella-ci",operator:"Marcus Bell",
+  task:"a-intel/platform#4182",taskTitle:"Ratelimit window regression under burst",
+  repo:"a-intel/platform",pr:"a-intel/platform#4211",tier:"gateway",grade:"A — full bodies",
   started:"2026-09-09 14:02:11Z",sealed:"2026-09-09 14:31:47Z",
   turns:7,steps:41,modelCalls:28,toolCalls:13,total:M(6.4218),basis:"gateway_observed",
   verdict:"flipped",oracle:"test_flip",proofFrame:118,productive:0.78,
@@ -854,7 +854,7 @@ DB.recon = {
   exception:{id:"rec_2f81",key:"pk_bdrk_7f2a",provider:"AWS Bedrock",region:"us-east-1",
     level:"key_day",day:"2026-09-08",matched:M(84.16),provider_micros:M(96.63),variance:M(12.47),
     status:"exception",opened:"2026-09-09 03:14Z",
-    cause:"Three provider usage lines carry no request id that resolves to a frame. The runs behind them came from acme.core.triage at the harness tier, so their model calls are client-attested and match only at level 2.",
+    cause:"Three provider usage lines carry no request id that resolves to a frame. The runs behind them came from a-intel.core.triage at the harness tier, so their model calls are client-attested and match only at level 2.",
     lines:[{model:"claude-haiku-4-5-20251001",cls:"input_uncached",units:"2,418,904",v:M(6.05)},
            {model:"claude-haiku-4-5-20251001",cls:"output",units:"118,442",v:M(4.74)},
            {model:"claude-haiku-4-5-20251001",cls:"cache_read",units:"1,884,120",v:M(1.68)}],
@@ -863,17 +863,17 @@ DB.recon = {
 
 /* ---------------- budgets (§12.5) ---------------- */
 DB.budgets = [
-  {scope:"org",name:"Acme Robotics",limit:M(80000),spent:M(26291.88),period:"monthly",mode:"soft",notify:[50,80,100],fired:[]},
+  {scope:"org",name:"Anderson Intelligence Corp.",limit:M(80000),spent:M(26291.88),period:"monthly",mode:"soft",notify:[50,80,100],fired:[]},
   {scope:"workspace",name:"core-platform",limit:M(40000),spent:M(18407.62),period:"monthly",mode:"hard",notify:[60,85,100],fired:[]},
   {scope:"workspace",name:"finops",limit:M(12000),spent:M(7884.26),period:"monthly",mode:"hard",notify:[50,80,95],fired:[50]},
   {scope:"operator",name:"Marcus Bell",limit:M(16000),spent:M(12491.35),period:"monthly",mode:"soft",notify:[50,80,100],fired:[50,80]},
   {scope:"operator",name:"Priya Natarajan",limit:M(9000),spent:M(5916.27),period:"monthly",mode:"soft",notify:[50,80,100],fired:[50]},
-  {scope:"agent",name:"acme.core.release-manager",limit:M(12000),spent:M(8914.07),period:"monthly",mode:"hard",notify:[70,90,100],fired:[70]},
-  {scope:"agent",name:"acme.core.stella-ci",limit:M(24000),spent:M(5203.88),period:"monthly",mode:"soft",notify:[50,80,100],fired:[],finding:"fnd_9c7c"},
-  {scope:"agent",name:"acme.core.triage",limit:M(3000),spent:M(2847.19),period:"rolling 7 days",mode:"hard",notify:[60,85,95],fired:[60,85],near:true},
-  {scope:"agent",name:"acme.core.docs-writer",limit:M(2500),spent:M(1442.48),period:"monthly",mode:"hard",notify:[50,80,100],fired:[50]}
+  {scope:"agent",name:"a-intel.core.release-manager",limit:M(12000),spent:M(8914.07),period:"monthly",mode:"hard",notify:[70,90,100],fired:[70]},
+  {scope:"agent",name:"a-intel.core.stella-ci",limit:M(24000),spent:M(5203.88),period:"monthly",mode:"soft",notify:[50,80,100],fired:[],finding:"fnd_9c7c"},
+  {scope:"agent",name:"a-intel.core.triage",limit:M(3000),spent:M(2847.19),period:"rolling 7 days",mode:"hard",notify:[60,85,95],fired:[60,85],near:true},
+  {scope:"agent",name:"a-intel.core.docs-writer",limit:M(2500),spent:M(1442.48),period:"monthly",mode:"hard",notify:[50,80,100],fired:[50]}
 ];
-DB.breach = {agent:"acme.core.docs-writer",at:"2026-08-29 11:41:06Z",limit:M(2500),
+DB.breach = {agent:"a-intel.core.docs-writer",at:"2026-08-29 11:41:06Z",limit:M(2500),
   run:"run_7c12d0a4",frame:"policy.decision frame 00094",outcome:"run paused by policy",
   note:"A hard budget is enforced at the model proxy before the call. The breach is a policy.decision frame and, by policy, a pause."};
 
@@ -913,30 +913,30 @@ const EV = {
   fnd_9c41:{confidence:"high",trend:"14.7 pts below the 30-day baseline, not recovering",basis:"gateway_observed",
     signal:"cache hit rate",measured:"66.1%",baseline:"78.9% before 3 Sep",
     counterfactual:"the same 1,142 runs at the 78.9% baseline hit rate",
-    method:[["Measured","Hit rate on acme.core.release-manager fell from 78.9% to 66.1% overnight on 3 September and sits at 64.2% today."],
+    method:[["Measured","Hit rate on a-intel.core.release-manager fell from 78.9% to 66.1% overnight on 3 September and sits at 64.2% today."],
       ["Cause pinned","Frames 00041 and 00042 of run_8a19c4d2 are consecutive turns with an identical conversation prefix and a different system-context digest. The publish of str_release_gate is the only change between them."],
       ["Paid twice","Every run since re-writes a 214,880-token prefix on its first turn and reads the old one never. The write premium and the lost reads are both on the frames."],
       ["Counterfactual","Re-price every model call since 3 Sep at the baseline hit rate. The difference, per month, is the money at stake."]],
-    who:{agent:"acme.core.release-manager",op:"Marcus Bell",opRole:"Workspace owner · owns this agent",opHref:"#/acme/core-platform/spend/operators/marcus-bell",agHref:"#/acme/core-platform/spend/agents/release-manager",
+    who:{agent:"a-intel.core.release-manager",op:"Marcus Bell",opRole:"Workspace owner · owns this agent",opHref:"#/a-intel/core-platform/spend/operators/marcus-bell",agHref:"#/a-intel/core-platform/spend/agents/release-manager",
       note:"Marcus published str_release_gate at 09:14Z on a Wednesday with 31 runs live. The record put a volatile clause inside the cached prefix, so every conversation since starts cold."},
-    runs:[["run_8a19c4d2","acme/platform#482 · Cut 4.11.0 release notes","3 Sep 09:16","4.87","1.61","prefix re-written at turn 3 · 214,880 tok cache_write"],
-      ["run_8b44f019","acme/platform#480 · Release checklist 4.11.0","3 Sep 10:02","3.10","1.61","two cold writes, neither read inside the TTL"],
-      ["run_8b7e2a55","acme/platform#486 · Cut 4.11.1 release notes","6 Sep 14:40","4.02","0.81","cold prefix · hit rate 58%"],
-      ["run_8c1190f4","acme/platform#490 · Release PR 4.11.1","8 Sep 09:31","3.66","0.81","cold prefix · hit rate 61%"],
-      ["run_8cb3d2e7","acme/platform#495 · Cut 4.12.0 release notes","11 Sep 08:12","4.41","0.81","cold prefix · hit rate 63%"]]},
+    runs:[["run_8a19c4d2","a-intel/platform#482 · Cut 4.11.0 release notes","3 Sep 09:16","4.87","1.61","prefix re-written at turn 3 · 214,880 tok cache_write"],
+      ["run_8b44f019","a-intel/platform#480 · Release checklist 4.11.0","3 Sep 10:02","3.10","1.61","two cold writes, neither read inside the TTL"],
+      ["run_8b7e2a55","a-intel/platform#486 · Cut 4.11.1 release notes","6 Sep 14:40","4.02","0.81","cold prefix · hit rate 58%"],
+      ["run_8c1190f4","a-intel/platform#490 · Release PR 4.11.1","8 Sep 09:31","3.66","0.81","cold prefix · hit rate 61%"],
+      ["run_8cb3d2e7","a-intel/platform#495 · Cut 4.12.0 release notes","11 Sep 08:12","4.41","0.81","cold prefix · hit rate 63%"]]},
   fnd_9c3d:{confidence:"high",trend:"+9% over 30 days as grants were added",basis:"client_attested",
     signal:"tool_definition_tokens per turn",measured:"12,408",baseline:"3,912 (workspace median)",
     counterfactual:"the 30 tool versions actually called · 8,204 tok per turn",
-    method:[["Measured","Every turn on acme.core.triage carries 12,408 tokens of tool definitions for 41 granted tool versions."],
+    method:[["Measured","Every turn on a-intel.core.triage carries 12,408 tokens of tool definitions for 41 granted tool versions."],
       ["Baseline","The workspace median is 3,912 tokens per turn. The other three agents carry between 9 and 17 tools."],
       ["Never used","11 of the 41 have not been called once in the last 500 runs. Their 4,204 tokens were paid on every turn of every run."],
       ["Counterfactual","Grant the 30 tools the runs call. Difference × turns × the input price on each call."]],
-    who:{agent:"acme.core.triage",op:"Marcus Bell",opRole:"Workspace owner · owns this agent",opHref:"#/acme/core-platform/spend/operators/marcus-bell",agHref:"#/acme/core-platform/spend/agents/triage",
+    who:{agent:"a-intel.core.triage",op:"Marcus Bell",opRole:"Workspace owner · owns this agent",opHref:"#/a-intel/core-platform/spend/operators/marcus-bell",agHref:"#/a-intel/core-platform/spend/agents/triage",
       note:"Marcus wrapped triage with the jira, pagerduty and s3 servers granted whole. A wrap that grants a server grants every tool it exposes; nobody chose the 11 idle ones."},
-    runs:[["run_8c02d771","acme/platform#511 · Label: flaky worker restart","11 Sep 08:51","1.94","0.66","4,204 idle-tool tokens × 9 turns"],
-      ["run_8c33a1b0","acme/platform#509 · Triage: build cache miss","11 Sep 08:22","2.12","0.72","4,204 tok × 11 turns"],
-      ["run_8c5f90c3","acme/platform#507 · Label: docs-only change","11 Sep 07:58","1.31","0.44","4,204 tok × 7 turns"],
-      ["run_8c8ad4e1","acme/platform#503 · Triage: release blocker?","11 Sep 07:02","2.41","0.86","4,204 tok × 13 turns"]]},
+    runs:[["run_8c02d771","a-intel/platform#511 · Label: flaky worker restart","11 Sep 08:51","1.94","0.66","4,204 idle-tool tokens × 9 turns"],
+      ["run_8c33a1b0","a-intel/platform#509 · Triage: build cache miss","11 Sep 08:22","2.12","0.72","4,204 tok × 11 turns"],
+      ["run_8c5f90c3","a-intel/platform#507 · Label: docs-only change","11 Sep 07:58","1.31","0.44","4,204 tok × 7 turns"],
+      ["run_8c8ad4e1","a-intel/platform#503 · Triage: release blocker?","11 Sep 07:02","2.41","0.86","4,204 tok × 13 turns"]]},
   fnd_9c52:{confidence:"high",trend:"flat · every one-turn run",basis:"gateway_observed",
     signal:"cache_write_5m with no read inside the TTL",measured:"178 of 178 one-turn runs",baseline:"0 expected",
     counterfactual:"no cache write on one-turn runs",
@@ -944,12 +944,12 @@ const EV = {
       ["Never read","Each run sealed within a minute of the write. No later call read the prefix before the 5-minute TTL expired."],
       ["Paid for nothing","A cache write costs 1.25× the input price. The premium was the whole cost of the write; nothing came back."],
       ["Counterfactual","Price the 178 calls without the write premium."]],
-    who:{agent:"acme.core.docs-writer",op:"Priya Natarajan",opRole:"Organization owner · owns this agent",opHref:"#/acme/core-platform/spend/operators/priya-natarajan",agHref:"#/acme/core-platform/spend/agents/docs-writer",
+    who:{agent:"a-intel.core.docs-writer",op:"Priya Natarajan",opRole:"Organization owner · owns this agent",opHref:"#/a-intel/core-platform/spend/operators/priya-natarajan",agHref:"#/a-intel/core-platform/spend/agents/docs-writer",
       note:"docs-writer is SDK-wrapped custom code. Its request builder marks the system block cacheable on every call, whether or not a second turn will ever read it."},
-    runs:[["run_8d71ba03","acme/platform#477 · Docs: 4.11 upgrade guide","11 Sep 06:30","0.62","0.33","cache_write 88,412 tok · sealed 41s later"],
-      ["run_8d9c4e12","acme/platform#469 · Docs: gateway README","10 Sep 15:20","0.58","0.33","cache_write 88,412 tok · never read"],
-      ["run_8dc27f88","acme/platform#462 · Docs: policy reference","9 Sep 09:12","0.61","0.33","cache_write 88,412 tok · never read"],
-      ["run_8de0b3a4","acme/platform#458 · Docs: CLI flags","8 Sep 11:04","0.57","0.33","cache_write 88,412 tok · never read"]]},
+    runs:[["run_8d71ba03","a-intel/platform#477 · Docs: 4.11 upgrade guide","11 Sep 06:30","0.62","0.33","cache_write 88,412 tok · sealed 41s later"],
+      ["run_8d9c4e12","a-intel/platform#469 · Docs: gateway README","10 Sep 15:20","0.58","0.33","cache_write 88,412 tok · never read"],
+      ["run_8dc27f88","a-intel/platform#462 · Docs: policy reference","9 Sep 09:12","0.61","0.33","cache_write 88,412 tok · never read"],
+      ["run_8de0b3a4","a-intel/platform#458 · Docs: CLI flags","8 Sep 11:04","0.57","0.33","cache_write 88,412 tok · never read"]]},
   fnd_9c58:{confidence:"high",trend:"one window · recurs on every throttle",basis:"gateway_observed",
     signal:"provider 529 retries inside one turn",measured:"4 paid attempts per turn",baseline:"1 attempt",
     counterfactual:"one attempt, then a fallback route",
@@ -957,12 +957,12 @@ const EV = {
       ["Retried blind","The harness retried each turn four times on the same key and region. Every attempt was billed; none succeeded until the fifth."],
       ["Same key","This is the key that carries the open reconciliation exception, so the attempts also match only at level 2."],
       ["Counterfactual","One attempt, then a fallback to the second region or the direct key. The four extra attempts per turn are the saving."]],
-    who:{agent:"acme.core.stella-ci",op:"Priya Natarajan",opRole:"Organization owner · holds the provider key",opHref:"#/acme/core-platform/spend/operators/priya-natarajan",agHref:"#/acme/core-platform/spend/agents/stella-ci",
+    who:{agent:"a-intel.core.stella-ci",op:"Priya Natarajan",opRole:"Organization owner · holds the provider key",opHref:"#/a-intel/core-platform/spend/operators/priya-natarajan",agHref:"#/a-intel/core-platform/spend/agents/stella-ci",
       note:"The key has no fallback route configured. Priya added it in March for a single region; the retry policy is the harness default, four attempts on the same route."},
-    runs:[["run_8e40c112","acme/platform#498 · Witness: rate limiter","8 Sep 06:12","52.14","45.35","529 × 4 retries at turn 4 and 5"],
-      ["run_8e4a8d20","acme/platform#499 · Witness: window rollover","8 Sep 06:19","49.80","44.90","529 × 4 retries at turn 3"],
-      ["run_8e51c7a9","acme/platform#500 · Witness: burst path","8 Sep 06:27","51.02","45.35","529 × 4 retries at turn 4"],
-      ["run_8e5be0f3","acme/platform#501 · Witness: idle timeout","8 Sep 06:38","48.66","44.01","529 × 4 retries at turn 2"]]},
+    runs:[["run_8e40c112","a-intel/platform#498 · Witness: rate limiter","8 Sep 06:12","52.14","45.35","529 × 4 retries at turn 4 and 5"],
+      ["run_8e4a8d20","a-intel/platform#499 · Witness: window rollover","8 Sep 06:19","49.80","44.90","529 × 4 retries at turn 3"],
+      ["run_8e51c7a9","a-intel/platform#500 · Witness: burst path","8 Sep 06:27","51.02","45.35","529 × 4 retries at turn 4"],
+      ["run_8e5be0f3","a-intel/platform#501 · Witness: idle timeout","8 Sep 06:38","48.66","44.01","529 × 4 retries at turn 2"]]},
   fnd_9c61:{confidence:"high",trend:"flat",basis:"gateway_observed",
     signal:"identical tool input digests within a run",measured:"2 reads per run",baseline:"1 read per run",
     counterfactual:"one repo.read_file@2.3 of window.ts per run",
@@ -970,12 +970,12 @@ const EV = {
       ["Same answer","On 312 of 312 repeats the response digest matched the first read. The file did not change between them."],
       ["Paid twice","The second read costs the tool call, the 2,900-token file re-entering the window, and the model turn spent deciding to re-read."],
       ["Counterfactual","One read per run. The repeat calls and the tokens they added to every later turn are the saving."]],
-    who:{agent:"acme.core.stella-ci",op:"Marcus Bell",opRole:"Workspace owner · owns this agent",opHref:"#/acme/core-platform/spend/operators/marcus-bell",agHref:"#/acme/core-platform/spend/agents/stella-ci",
+    who:{agent:"a-intel.core.stella-ci",op:"Marcus Bell",opRole:"Workspace owner · owns this agent",opHref:"#/a-intel/core-platform/spend/operators/marcus-bell",agHref:"#/a-intel/core-platform/spend/agents/stella-ci",
       note:"The agent's brief says to confirm the rate-limit window before asserting on it. It confirms by re-reading the file it already has in context."},
-    runs:[["run_8f3a2c91","acme/platform#482 · Witness: release notes contract","11 Sep 09:02","2.87","0.88","window.ts read at frame 00062 and again at 00071"],
-      ["run_8f4d10a2","acme/platform#481 · Witness: rate limiter","10 Sep 14:02","2.66","0.88","read twice · same digest"],
-      ["run_8f602b7c","acme/platform#479 · Witness: window rollover","10 Sep 10:40","2.41","0.88","read twice · same digest"],
-      ["run_8f77e3d5","acme/platform#476 · Witness: burst path","9 Sep 09:55","2.93","0.88","read twice · same digest"]]},
+    runs:[["run_8f3a2c91","a-intel/platform#482 · Witness: release notes contract","11 Sep 09:02","2.87","0.88","window.ts read at frame 00062 and again at 00071"],
+      ["run_8f4d10a2","a-intel/platform#481 · Witness: rate limiter","10 Sep 14:02","2.66","0.88","read twice · same digest"],
+      ["run_8f602b7c","a-intel/platform#479 · Witness: window rollover","10 Sep 10:40","2.41","0.88","read twice · same digest"],
+      ["run_8f77e3d5","a-intel/platform#476 · Witness: burst path","9 Sep 09:55","2.93","0.88","read twice · same digest"]]},
   fnd_9c6a:{confidence:"high",trend:"flat",basis:"client_attested",
     signal:"steps after the last kept side effect",measured:"9.4 on average",baseline:"0–2 on the workspace's other agents",
     counterfactual:"stop four steps after the last kept effect",
@@ -983,11 +983,11 @@ const EV = {
       ["What they did","The tail steps re-read the issue just labelled, listed the thread again, and asked the model whether it was done, 2.1 model calls per step."],
       ["Nothing kept","No tail step produced a side effect the run kept. The witness confirms the labels were identical before and after the tail."],
       ["Counterfactual","Cut each run four steps after its last kept effect. The tail's model calls are the saving."]],
-    who:{agent:"acme.core.triage",op:"Marcus Bell",opRole:"Workspace owner · owns this agent",opHref:"#/acme/core-platform/spend/operators/marcus-bell",agHref:"#/acme/core-platform/spend/agents/triage",
+    who:{agent:"a-intel.core.triage",op:"Marcus Bell",opRole:"Workspace owner · owns this agent",opHref:"#/a-intel/core-platform/spend/operators/marcus-bell",agHref:"#/a-intel/core-platform/spend/agents/triage",
       note:"triage runs under Codex CLI at the harness tier. Its loop has no stop rule; it ends when the model says it is done, and the model checks its work several times before saying so."},
-    runs:[["run_8c02d771","acme/platform#511 · Label: flaky worker restart","11 Sep 08:51","1.94","0.53","11 steps after the last kept effect at frame 00140"],
-      ["run_8c33a1b0","acme/platform#509 · Triage: build cache miss","11 Sep 08:22","2.12","0.49","9 steps after the last kept effect"],
-      ["run_8c8ad4e1","acme/platform#503 · Triage: release blocker?","11 Sep 07:02","2.41","0.61","12 steps after the last kept effect"]]},
+    runs:[["run_8c02d771","a-intel/platform#511 · Label: flaky worker restart","11 Sep 08:51","1.94","0.53","11 steps after the last kept effect at frame 00140"],
+      ["run_8c33a1b0","a-intel/platform#509 · Triage: build cache miss","11 Sep 08:22","2.12","0.49","9 steps after the last kept effect"],
+      ["run_8c8ad4e1","a-intel/platform#503 · Triage: release blocker?","11 Sep 07:02","2.41","0.61","12 steps after the last kept effect"]]},
   fnd_9c70:{confidence:"medium",trend:"flat",basis:"gateway_observed",
     signal:"model tier per step shape",measured:"claude-opus-5 on 88 classification runs",baseline:"light tier expected",
     counterfactual:"the same runs on claude-haiku-4-5-20251001",
@@ -995,11 +995,11 @@ const EV = {
       ["Shape","Every step in those runs is classification-shaped: one label from a fixed set, under 100 output tokens, no tool call."],
       ["Same output","On 84 of 88 runs the light tier produced the same label on the same input elsewhere this month. Medium confidence because 4 differed."],
       ["Counterfactual","Re-price the 88 runs at the light tier, which costs 8% of the same work."]],
-    who:{agent:"acme.core.docs-writer",op:"Priya Natarajan",opRole:"Organization owner · owns this agent",opHref:"#/acme/core-platform/spend/operators/priya-natarajan",agHref:"#/acme/core-platform/spend/agents/docs-writer",
+    who:{agent:"a-intel.core.docs-writer",op:"Priya Natarajan",opRole:"Organization owner · owns this agent",opHref:"#/a-intel/core-platform/spend/operators/priya-natarajan",agHref:"#/a-intel/core-platform/spend/agents/docs-writer",
       note:"docs-writer has one model route for everything, set when it was wrapped. Its classify step inherits the flagship model the writing step needs."},
-    runs:[["run_8d71ba03","acme/platform#477 · Docs: route this request","11 Sep 06:30","0.62","0.041","claude-opus-5 · output 38 tokens"],
-      ["run_8d84f2c6","acme/platform#470 · Docs: route this request","10 Sep 16:12","0.59","0.041","claude-opus-5 · output 44 tokens"],
-      ["run_8da1b7e9","acme/platform#463 · Docs: route this request","9 Sep 10:08","0.61","0.041","claude-opus-5 · output 40 tokens"]]},
+    runs:[["run_8d71ba03","a-intel/platform#477 · Docs: route this request","11 Sep 06:30","0.62","0.041","claude-opus-5 · output 38 tokens"],
+      ["run_8d84f2c6","a-intel/platform#470 · Docs: route this request","10 Sep 16:12","0.59","0.041","claude-opus-5 · output 44 tokens"],
+      ["run_8da1b7e9","a-intel/platform#463 · Docs: route this request","9 Sep 10:08","0.61","0.041","claude-opus-5 · output 40 tokens"]]},
   fnd_9c77:{confidence:"medium",trend:"+3% over 30 days",basis:"gateway_observed",
     signal:"context_frame_tokens served per turn",measured:"11,842",baseline:"8,000 (budget norm)",
     counterfactual:"an 8,000-token context budget with the same citation set",
@@ -1007,19 +1007,19 @@ const EV = {
       ["Cited","context_use_feedback shows 22.4% of served frames were cited by the model. The other 77.6% were paid for and not used."],
       ["Within budget","The cited frames fit inside 8,000 tokens on 96% of turns. Medium confidence because the other 4% would lose a cited frame."],
       ["Counterfactual","Serve 8,000 tokens per turn. The uncited surplus × turns × input price is the saving."]],
-    who:{agent:"every agent on core-platform",op:"Marcus Bell",opRole:"Workspace owner · owns the retrieval budget",opHref:"#/acme/core-platform/spend/operators/marcus-bell",agHref:"#/acme/core-platform/spend/agents",
+    who:{agent:"every agent on core-platform",op:"Marcus Bell",opRole:"Workspace owner · owns the retrieval budget",opHref:"#/a-intel/core-platform/spend/operators/marcus-bell",agHref:"#/a-intel/core-platform/spend/agents",
       note:"The workspace context budget was raised to 12,000 in July for a migration and never lowered. The retrieval kinds still include the migration's memory frames."},
-    runs:[["run_8a19c4d2","acme/platform#482 · Cut 4.11.0 release notes","3 Sep 09:16","4.87","0.42","11,900 tok served · 2,410 cited"],
-      ["run_8f3a2c91","acme/platform#482 · Witness: release notes contract","11 Sep 09:02","2.87","0.31","12,100 tok served · 2,880 cited"],
-      ["run_8c02d771","acme/platform#511 · Label: flaky worker restart","11 Sep 08:51","1.94","0.22","11,400 tok served · 1,960 cited"]]},
+    runs:[["run_8a19c4d2","a-intel/platform#482 · Cut 4.11.0 release notes","3 Sep 09:16","4.87","0.42","11,900 tok served · 2,410 cited"],
+      ["run_8f3a2c91","a-intel/platform#482 · Witness: release notes contract","11 Sep 09:02","2.87","0.31","12,100 tok served · 2,880 cited"],
+      ["run_8c02d771","a-intel/platform#511 · Label: flaky worker restart","11 Sep 08:51","1.94","0.22","11,400 tok served · 1,960 cited"]]},
   fnd_9c7c:{confidence:"high",trend:"nine periods, no change",basis:"control-plane audit",
     signal:"budget used per period",measured:"18%–24% of $24,000",baseline:"a soft budget's notify thresholds at 50%, 80%, 100%",
     counterfactual:"an $8,000 soft budget the thresholds can reach",
-    method:[["Measured","acme.core.stella-ci has used between 18% and 24% of its $24,000 monthly soft budget for nine consecutive periods."],
+    method:[["Measured","a-intel.core.stella-ci has used between 18% and 24% of its $24,000 monthly soft budget for nine consecutive periods."],
       ["Thresholds idle","Notify thresholds sit at 50%, 80% and 100%. None has fired since January, so a real overrun would not be noticed until the hard cap."],
       ["No money wasted","This finding moves no spend. It exists so the budget means something again."],
       ["Counterfactual","Resize to $8,000. The 50% notice would have fired twice this year."]],
-    who:{agent:"acme.core.stella-ci",op:"Marcus Bell",opRole:"Workspace owner · set the budget",opHref:"#/acme/core-platform/spend/operators/marcus-bell",agHref:"#/acme/core-platform/spend/agents/stella-ci",
+    who:{agent:"a-intel.core.stella-ci",op:"Marcus Bell",opRole:"Workspace owner · set the budget",opHref:"#/a-intel/core-platform/spend/operators/marcus-bell",agHref:"#/a-intel/core-platform/spend/agents/stella-ci",
       note:"Marcus set $24,000 in January from a projection that assumed the witness runs would be billed as model spend. They are reported, not priced."},
     runs:[["Sep 2026 MTD","period · 21.7% of limit","—","5,203.88","0.00","no threshold reached"],
       ["Aug 2026","period · 23.9% of limit","—","5,736.00","0.00","no threshold reached"],
@@ -1032,10 +1032,10 @@ const FIX = {
     before:{lang:"toml",code:`<span class="c"># .oxagen/rules/str_release_gate.toml — as it stands</span>\n<span class="k">kind</span>      = <span class="s">"directive"</span>\n<span class="k">position</span>  = <span class="s">"system"</span>        <span class="c"># inside the cached prefix</span>\n<span class="k">statement</span> = <span class="s">"Release window is {{release.window}} — do not cut a release outside it."</span>`},
     after:{lang:"toml",code:`<span class="c"># .oxagen/rules/str_release_gate.toml — volatile clause out of the prefix</span>\n<span class="k">kind</span>      = <span class="s">"directive"</span>\n<span class="k">position</span>  = <span class="s">"turn"</span>          <span class="c"># injected after the cached block</span>\n<span class="k">statement</span> = <span class="s">"Release window is {{release.window}} — do not cut a release outside it."</span>\n\n<span class="c"># .oxagen/workspace.toml</span>\n[<span class="k">context</span>]\n<span class="k">publish</span> = <span class="s">"windowed"</span>\n<span class="k">publish_windows</span> = [<span class="s">"00:00Z"</span>]`},
     steps:["Move any clause with a template variable to the turn position. The cached prefix then stays byte-identical across publishes of that record.","Batch publications to a window so live runs finish on the old bundle and new runs start warm together.","The hit-rate chart on this tab shows the recovery the next day; the frames carry the prefix digest so you can confirm it."],
-    action:"Move the clause and set a publish window",done:"Context PR opened on acme/platform: str_release_gate moves to the turn position and publishes are windowed at 00:00Z."},
+    action:"Move the clause and set a publish window",done:"Context PR opened on a-intel/platform: str_release_gate moves to the turn position and publishes are windowed at 00:00Z."},
   "Tool-list bloat":{shape:"article",
     title:"Why a 41-tool belt costs you on every turn",
-    why:"Tool definitions are not free context. Every model call carries the JSON schema of every tool on the belt, and the model reads all of it before it reads the task. On acme.core.triage that block is 12,408 tokens, and 11 of the 41 granted tool versions have not been called in 500 runs. The agent was wrapped with each server's full export, which is the default when a wrap grants a server instead of a tool.",
+    why:"Tool definitions are not free context. Every model call carries the JSON schema of every tool on the belt, and the model reads all of it before it reads the task. On a-intel.core.triage that block is 12,408 tokens, and 11 of the 41 granted tool versions have not been called in 500 runs. The agent was wrapped with each server's full export, which is the default when a wrap grants a server instead of a tool.",
     before:{lang:"yaml",code:`<span class="c"># agents/triage/wrap.yaml — as it stands</span>\n<span class="k">grants</span>:\n  - <span class="k">server</span>: <span class="s">github</span>       <span class="c"># 18 tools · 16 called</span>\n  - <span class="k">server</span>: <span class="s">jira</span>         <span class="c"># 11 tools · 7 called</span>\n  - <span class="k">server</span>: <span class="s">pagerduty</span>    <span class="c"># 7 tools · 4 called</span>\n  - <span class="k">server</span>: <span class="s">s3</span>           <span class="c"># 5 tools · 3 called</span>`},
     after:{lang:"yaml",code:`<span class="c"># agents/triage/wrap.yaml — grant the 30 tools the runs call</span>\n<span class="k">grants</span>:\n  - <span class="k">server</span>: <span class="s">github</span>\n    <span class="k">tools</span>: [<span class="s">issue.get</span>, <span class="s">issue.comment@1.2</span>, <span class="s">issue.labels.add</span>, …]\n  - <span class="k">server</span>: <span class="s">jira</span>\n    <span class="k">tools</span>: [<span class="s">issue.get</span>, <span class="s">issue.comment</span>, …]      <span class="c"># issue.transition@2.1 dropped</span>\n  - <span class="k">server</span>: <span class="s">pagerduty</span>\n    <span class="k">tools</span>: [<span class="s">incident.get</span>, <span class="s">incident.note</span>, …]  <span class="c"># incident.ack@1.4 dropped</span>\n<span class="k">belt</span>: <span class="s">searchable</span>                        <span class="c"># rare tools fetched on demand</span>`},
     steps:["Grant tools, not servers. The belt is compiled from the grants, so the definition block shrinks to what is listed.","Set the belt to searchable if the agent sometimes needs a rare tool: it then sees a one-line index and fetches a definition on demand.","A tool a run calls without a grant is denied and recorded, so a narrowing that was too tight shows up as a policy.decision frame, not a silent failure."],
@@ -1046,7 +1046,7 @@ const FIX = {
     before:{lang:"python",code:`<span class="c"># agents/docs_writer/request.py — as it stands</span>\nsystem = [{<span class="s">"type"</span>: <span class="s">"text"</span>, <span class="s">"text"</span>: SYSTEM,\n           <span class="s">"cache_control"</span>: {<span class="s">"type"</span>: <span class="s">"ephemeral"</span>}}]   <span class="c"># on every call</span>`},
     after:{lang:"python",code:`<span class="c"># agents/docs_writer/request.py — write the cache only when a read will follow</span>\ncacheable = run.expected_turns > 1 <span class="k">or</span> schedule.next_within(minutes=5)\nsystem = [{<span class="s">"type"</span>: <span class="s">"text"</span>, <span class="s">"text"</span>: SYSTEM,\n           **({<span class="s">"cache_control"</span>: {<span class="s">"type"</span>: <span class="s">"ephemeral"</span>}} <span class="k">if</span> cacheable <span class="k">else</span> {})}]`},
     steps:["Write the cache when a read is likely: multi-turn runs, or a schedule that fires again inside the TTL.","Alternatively batch the one-turn runs: 178 runs five minutes apart would share one write and read it 177 times.","The gateway records cache_write and cache_read on every frame, so this tab shows the premium disappearing the next day."],
-    action:"Stop writing cache on one-turn runs",done:"Recorded on acme.core.docs-writer: cache writes only when a read is expected. Priya is notified as the operator."},
+    action:"Stop writing cache on one-turn runs",done:"Recorded on a-intel.core.docs-writer: cache writes only when a read is expected. Priya is notified as the operator."},
   "Retry storms":{shape:"article",
     title:"Why a throttled key pays four times for every turn",
     why:"When a provider returns 529, the harness retries the turn. The default policy retries four times on the same key and the same region, with a short backoff, and every attempt is billed whether or not it succeeds. On 8 September Bedrock us-east-1 throttled pk_bdrk_7f2a for 29 minutes; nine turns each paid five attempts to get one answer. A key with a fallback route would have paid one attempt and moved.",
@@ -1056,14 +1056,14 @@ const FIX = {
     action:"Add a fallback route",done:"Fallback routes recorded on pk_bdrk_7f2a: us-west-2, then the direct key. Retries on this key are capped at one."},
   "Duplicate tool calls":{shape:"pr",lineage:"ctx.ci.no-reread-window",kind:"directive",effect:"forbid",
     statement:"Do not re-read services/ratelimit/window.ts within a run; the first read stays in context.",
-    pr:"acme/platform#523",branch:"context/ctx.ci.no-reread-window"},
+    pr:"a-intel/platform#523",branch:"context/ctx.ci.no-reread-window"},
   "Unproductive tail":{shape:"article",
     title:"Why this agent keeps stepping after the work is done",
-    why:"A custom agent loop that runs until the model says it is finished will, on most models, re-read what it just wrote, list the thread again, and ask itself whether it is done, several times over. None of that produces a side effect the run keeps. On acme.core.triage those tail steps average 2.1 model calls each, and 412 runs carried a mean of 9.4 of them after the last kept effect.",
+    why:"A custom agent loop that runs until the model says it is finished will, on most models, re-read what it just wrote, list the thread again, and ask itself whether it is done, several times over. None of that produces a side effect the run keeps. On a-intel.core.triage those tail steps average 2.1 model calls each, and 412 runs carried a mean of 9.4 of them after the last kept effect.",
     before:{lang:"python",code:`<span class="c"># agents/triage/loop.py — as it stands</span>\n<span class="k">while</span> <span class="k">not</span> done:\n    step = agent.next_step(ctx)\n    ctx.apply(step)\n    done = step.kind == <span class="s">"final"</span>     <span class="c"># the model decides when to stop</span>`},
     after:{lang:"python",code:`<span class="c"># agents/triage/loop.py — stop after four unproductive steps</span>\nidle = 0\n<span class="k">while</span> <span class="k">not</span> done:\n    step = agent.next_step(ctx)\n    effect = ctx.apply(step)\n    idle = 0 <span class="k">if</span> effect.kept <span class="k">else</span> idle + 1\n    done = step.kind == <span class="s">"final"</span> <span class="k">or</span> idle >= 4\n<span class="c"># effect.kept comes from the gateway: did the side effect survive to the sealed run?</span>`},
     steps:["Count unproductive steps from the gateway's own signal: a step is productive when its side effect is kept in the sealed run.","Four idle steps is the workspace threshold; tune it on the agent, not globally.","The witness already confirms the labels are identical before and after the tail, so cutting it changes nothing the run keeps."],
-    action:"Set the stop rule",done:"Stop rule after four unproductive steps recorded as a definition change on acme.core.triage. The loop reads it from the bundle."},
+    action:"Set the stop rule",done:"Stop rule after four unproductive steps recorded as a definition change on a-intel.core.triage. The loop reads it from the bundle."},
   "Wrong tier":{shape:"article",
     title:"Why a flagship model is routing 41-token labels",
     why:"docs-writer has a single model route, set when it was wrapped, and its classify step inherits the flagship model its writing step needs. Every label-and-route call therefore runs on claude-opus-5 for a mean output of 41 tokens. The light tier produced the same label on 84 of the 88 runs this month, at 8% of the price.",
@@ -1128,7 +1128,7 @@ let ROUTE = {page:"spend",tab:"findings",sub:null};
 
 function parseHash(){
   const h = (location.hash||"").replace(/^#\/?/,"").split("/").filter(Boolean);
-  // acme / core-platform / spend / <tab> / <sub>   |   acme / billing
+  // a-intel / core-platform / spend / <tab> / <sub>   |   a-intel / billing
   if(h[1]==="billing") return {page:"billing"};
   if(h[1]==="organization") return {page:"organization"};
   if(h[1]==="audit") return {page:"audit"};
@@ -1146,9 +1146,9 @@ const PAGE_TITLE = {spend:"Spend",billing:"Billing",fleet:"Fleet",run:"Run",agen
 
 function crumbs(){
   const r=ROUTE, out=[];
-  out.push(`<a href="#/acme/organization">Acme Robotics</a>`);
+  out.push(`<a href="#/a-intel/organization">Anderson Intelligence Corp.</a>`);
   const orgPage = ["billing","organization","audit"].includes(r.page);
-  if(!orgPage){ out.push(`<span class="sep">/</span><a class="hide-s" href="#/acme/core-platform/fleet">core-platform</a>`); }
+  if(!orgPage){ out.push(`<span class="sep">/</span><a class="hide-s" href="#/a-intel/core-platform/fleet">core-platform</a>`); }
   const t = PAGE_TITLE[r.page]||r.page;
   out.push(`<span class="sep">/</span><span class="cur">${esc(t)}</span>`);
   if(r.page==="spend" && r.tab && r.tab!=="findings"){
@@ -1293,7 +1293,7 @@ function spendHeader(){
       [["findings","Findings",DB.findings.length],["attribution","Attribution",null],["value","Value",null],
        ["operators","Operators",2],["agents","Agents",4],["tools","By tool",null],["waste","Wasted spend",DB.waste.runs.length],
        ["reconciliation","Reconciliation",1],["budgets","Budgets",DB.budgets.length]]
-      .map(([k,l,c])=>`<a href="#/acme/core-platform/spend/${k}" ${ROUTE.tab===k?'aria-current="page"':""}>${l}${c!==null?`<span class="cnt">${c}</span>`:""}</a>`).join("")}
+      .map(([k,l,c])=>`<a href="#/a-intel/core-platform/spend/${k}" ${ROUTE.tab===k?'aria-current="page"':""}>${l}${c!==null?`<span class="cnt">${c}</span>`:""}</a>`).join("")}
     </nav>
   </div>`;
 }
@@ -1386,7 +1386,7 @@ function viewAttribution(){
       <div class="panel-b flush"><div class="tw"><table>
         <thead><tr><th>${esc(d.label)}</th><th class="r">Spend</th><th class="r" style="width:150px">Share</th><th class="r">%</th><th>Basis</th></tr></thead>
         <tbody>${d.rows.map(r=>`<tr${r.href?' class="clickable" data-href="'+r.href+'" tabindex="0" role="button"':""}>
-          <td><div style="color:var(--fg);font-weight:500${/^acme\.|^pk_|^acme\//.test(r.n)||r.n.includes("/")?";font-family:var(--mono);font-size:12px":""}">${esc(r.n)}${r.warn?' '+chip("exception open","failed"):""}</div>
+          <td><div style="color:var(--fg);font-weight:500${/^a-intel\.|^pk_|^a-intel\//.test(r.n)||r.n.includes("/")?";font-family:var(--mono);font-size:12px":""}">${esc(r.n)}${r.warn?' '+chip("exception open","failed"):""}</div>
               <div class="cellsub">${esc(r.m)}</div>
               ${r.flag?`<div class="cellsub" style="color:var(--st-approval);margin-top:3px">⚑ ${esc(r.flag)}</div>`:""}</td>
           <td class="money">${money0(r.v)}</td>
@@ -1425,8 +1425,8 @@ function viewValue(){
                {n:"Failed",v:t.failed,c:"var(--st-failed)"}];
   const unproven = t.unverified+t.halted+t.failed;
   const agents = DB.attr.agent.rows;
-  const prod=[{n:"acme.core.stella-ci",v:0.71},{n:"acme.core.release-manager",v:0.66},
-              {n:"acme.core.docs-writer",v:0.52},{n:"acme.core.triage",v:0.41}];
+  const prod=[{n:"a-intel.core.stella-ci",v:0.71},{n:"a-intel.core.release-manager",v:0.66},
+              {n:"a-intel.core.docs-writer",v:0.52},{n:"a-intel.core.triage",v:0.41}];
   return `
   <div class="stack g16" style="margin-top:18px">
     <div class="panel">
@@ -1474,12 +1474,12 @@ function viewValue(){
         <div class="panel-b flush"><div class="tw"><table>
           <thead><tr><th>Agent</th><th class="r">Spend</th><th class="r">Proven</th><th class="r">Proven share</th></tr></thead>
           <tbody>
-            <tr><td class="mono" style="font-size:11.5px">acme.core.stella-ci</td><td class="money">${money0(M(5203.88))}</td><td class="money" style="color:var(--st-proven)">${money0(M(2894.16))}</td><td class="r mono qq">55.6%</td></tr>
-            <tr><td class="mono" style="font-size:11.5px">acme.core.release-manager</td><td class="money">${money0(M(8914.07))}</td><td class="money" style="color:var(--st-proven)">${money0(M(4116.44))}</td><td class="r mono qq">46.2%</td></tr>
-            <tr><td class="mono" style="font-size:11.5px">acme.core.docs-writer</td><td class="money">${money0(M(1442.48))}</td><td class="money" style="color:var(--st-proven)">${money0(M(612.94))}</td><td class="r mono qq">42.5%</td></tr>
-            <tr><td class="mono" style="font-size:11.5px">acme.core.triage</td><td class="money">${money0(M(2847.19))}</td><td class="money" style="color:var(--st-proven)">${money0(M(289.74))}</td><td class="r mono qq">10.2%</td></tr>
+            <tr><td class="mono" style="font-size:11.5px">a-intel.core.stella-ci</td><td class="money">${money0(M(5203.88))}</td><td class="money" style="color:var(--st-proven)">${money0(M(2894.16))}</td><td class="r mono qq">55.6%</td></tr>
+            <tr><td class="mono" style="font-size:11.5px">a-intel.core.release-manager</td><td class="money">${money0(M(8914.07))}</td><td class="money" style="color:var(--st-proven)">${money0(M(4116.44))}</td><td class="r mono qq">46.2%</td></tr>
+            <tr><td class="mono" style="font-size:11.5px">a-intel.core.docs-writer</td><td class="money">${money0(M(1442.48))}</td><td class="money" style="color:var(--st-proven)">${money0(M(612.94))}</td><td class="r mono qq">42.5%</td></tr>
+            <tr><td class="mono" style="font-size:11.5px">a-intel.core.triage</td><td class="money">${money0(M(2847.19))}</td><td class="money" style="color:var(--st-proven)">${money0(M(289.74))}</td><td class="r mono qq">10.2%</td></tr>
           </tbody></table></div></div>
-        <div class="panel-f"><span class="qq">acme.core.triage runs at the harness tier — most of its work carries no witness.</span></div>
+        <div class="panel-f"><span class="qq">a-intel.core.triage runs at the harness tier — most of its work carries no witness.</span></div>
       </div>
     </div>
   </div>`;
@@ -1579,7 +1579,7 @@ function viewAgentSpend(){
   const d=a.decisions, dt=d.allow+d.approve+d.deny;
   return `
   <div class="stack g16" style="margin-top:18px">
-    ${ROUTE.sub && ROUTE.sub!=="stella-ci" ? `<div class="note warn"><b>Only acme.core.stella-ci is mocked in this flow.</b>
+    ${ROUTE.sub && ROUTE.sub!=="stella-ci" ? `<div class="note warn"><b>Only a-intel.core.stella-ci is mocked in this flow.</b>
       The agent view is the same report for any agent in the fleet.</div>`:""}
     <div class="row g8 wrapr">
       <div class="seg" role="group" aria-label="Agent">${DB.attr.agent.rows.map(r=>{
@@ -1659,7 +1659,7 @@ function viewWaterfall(){
       <div class="panel-h">
         <div class="stack" style="min-width:0"><h2 class="mono" style="font-size:15px">${r.id}</h2>
           <p class="sub"><span class="mono">${esc(r.agent)}</span> · operator ${esc(r.operator)} ·
-            task <a href="#/acme/core-platform/spend/waterfall">${esc(r.task)}</a> ${esc(r.taskTitle)}</p></div>
+            task <a href="#/a-intel/core-platform/spend/waterfall">${esc(r.task)}</a> ${esc(r.taskTitle)}</p></div>
         <div class="mla row g6 wrapr">${chip("enforcement tier · "+r.tier,"allowed")}${chip("verdict · "+r.verdict,"proven")}${chip("replay grade "+r.grade,"neutral")}</div>
       </div>
       <div class="panel-b flush"><div class="tiles" style="border:0;border-radius:0">
@@ -1768,25 +1768,25 @@ DB.waste = {
     {c:"halted early",spend:M(86.18),runs:37,why:"a policy deny at turn 1 after the prompt was already paid for"}
   ],
   runs:[
-    {id:"run_9b02e7f1",agent:"acme.core.release-manager",op:"Marcus Bell",when:"2026-09-10 07:02Z",task:"Release 4.10.2 notes",cost:M(5.08),wasted:M(5.08),frames:203,steps:47,cache:0.74,model:"claude-opus-5",
+    {id:"run_9b02e7f1",agent:"a-intel.core.release-manager",op:"Marcus Bell",when:"2026-09-10 07:02Z",task:"Release 4.10.2 notes",cost:M(5.08),wasted:M(5.08),frames:203,steps:47,cache:0.74,model:"claude-opus-5",
      badges:[["tampered","critical"],["no proof","failed"],["47 steps, 0 advanced","approval"]],
      what:"Evidence chain broke at frame 00171: an evidence-ledger row was rewritten after seal. Nothing this run produced can be trusted, so the whole cost is unproven."},
-    {id:"run_6d4c11aa",agent:"acme.core.release-manager",op:"Marcus Bell",when:"2026-09-10 07:58Z",task:"Backport 4.10.3 to release",cost:M(3.42),wasted:M(2.10),frames:141,steps:33,cache:0.80,model:"claude-opus-5",
+    {id:"run_6d4c11aa",agent:"a-intel.core.release-manager",op:"Marcus Bell",when:"2026-09-10 07:58Z",task:"Backport 4.10.3 to release",cost:M(3.42),wasted:M(2.10),frames:141,steps:33,cache:0.80,model:"claude-opus-5",
      badges:[["verdict failing","failed"],["retry loop ×3","denied"]],
      what:"Turns 4–6 repeated github.create_pull_request@3 with identical arguments after a 422; the backport never landed."},
-    {id:"run_8a19c4d2",agent:"acme.core.release-manager",op:"Marcus Bell",when:"2026-09-03 09:16Z",task:"Cut 4.9.4 release notes",cost:M(4.91),wasted:M(1.83),frames:186,steps:41,cache:0.31,model:"claude-opus-5",
+    {id:"run_8a19c4d2",agent:"a-intel.core.release-manager",op:"Marcus Bell",when:"2026-09-03 09:16Z",task:"Cut 4.9.4 release notes",cost:M(4.91),wasted:M(1.83),frames:186,steps:41,cache:0.31,model:"claude-opus-5",
      badges:[["cache miss after prefix change","approval"],["finding fnd_9c41","neutral"]],
      what:"Frames 00041 and 00042 are consecutive turns with an identical conversation prefix and a different system-context digest. Every turn after the steering publish re-read the prefix at full price."},
-    {id:"run_8f3a2c91",agent:"acme.core.stella-ci",op:"Marcus Bell",when:"2026-09-09 14:02Z",task:"Ratelimit window regression under burst",cost:M(6.4218),wasted:M(0.88),frames:171,steps:41,cache:0.79,model:"claude-opus-5",
+    {id:"run_8f3a2c91",agent:"a-intel.core.stella-ci",op:"Marcus Bell",when:"2026-09-09 14:02Z",task:"Ratelimit window regression under burst",cost:M(6.4218),wasted:M(0.88),frames:171,steps:41,cache:0.79,model:"claude-opus-5",
      badges:[["duplicate tool call","denied"],["proven","proven"]],
      what:"repo.read_file@2.3 was called on the same file twice at turn 4, 38 seconds apart, with the content already in context. The run is proven; the second read still bought nothing."},
-    {id:"run_5e77b0c3",agent:"acme.core.triage",op:"Marcus Bell",when:"2026-09-10 08:51Z",task:"Label: flaky worker restart",cost:M(0.94),wasted:M(0.53),frames:38,steps:9,cache:0.64,model:"claude-haiku-4-5",
+    {id:"run_5e77b0c3",agent:"a-intel.core.triage",op:"Marcus Bell",when:"2026-09-10 08:51Z",task:"Label: flaky worker restart",cost:M(0.94),wasted:M(0.53),frames:38,steps:9,cache:0.64,model:"claude-haiku-4-5",
      badges:[["unmoved","failed"],["productive ratio 0.44","approval"],["client_attested","neutral"]],
      what:"Triage labelled the issue but the witness found the label already present. Five of nine steps changed nothing."},
-    {id:"run_7c12d0a4",agent:"acme.core.docs-writer",op:"Priya Natarajan",when:"2026-09-10 08:40Z",task:"Operator guide: kill switches",cost:M(1.36),wasted:M(0.38),frames:52,steps:11,cache:0.77,model:"claude-opus-5",
+    {id:"run_7c12d0a4",agent:"a-intel.core.docs-writer",op:"Priya Natarajan",when:"2026-09-10 08:40Z",task:"Operator guide: kill switches",cost:M(1.36),wasted:M(0.38),frames:52,steps:11,cache:0.77,model:"claude-opus-5",
      badges:[["idle while parked","approval"],["3 turns waiting","neutral"]],
      what:"Paused by policy at frame 00094 pending approval. Three turns re-asked whether the approval had arrived; a wake-on-decision would have cost none."},
-    {id:"run_a3f0d9e2",agent:"acme.core.triage",op:"Marcus Bell",when:"2026-09-10 07:41Z",task:"Reproduce: checkout 500",cost:M(0.22),wasted:M(0.22),frames:14,steps:3,cache:0.12,model:"claude-haiku-4-5",
+    {id:"run_a3f0d9e2",agent:"a-intel.core.triage",op:"Marcus Bell",when:"2026-09-10 07:41Z",task:"Reproduce: checkout 500",cost:M(0.22),wasted:M(0.22),frames:14,steps:3,cache:0.12,model:"claude-haiku-4-5",
      badges:[["halted turn 1","failed"],["cache 12%","approval"]],
      what:"Policy denied the first tool call. The prompt, including a cold 14k-token context, was already paid for."}
   ]
@@ -1811,7 +1811,7 @@ function viewWaste(){
     </div>
     <div class="panel">
       <div class="panel-h"><div class="stack"><h2>Runs that prove it</h2><p class="sub">worst first · badges name what was wrong</p></div></div>
-      <div class="panel-b stack g10">${W.runs.map(r=>{const frac=Math.min(1,r.wasted/r.cost), href="#/acme/core-platform/runs/"+r.id; return `
+      <div class="panel-b stack g10">${W.runs.map(r=>{const frac=Math.min(1,r.wasted/r.cost), href="#/a-intel/core-platform/runs/"+r.id; return `
         <div class="wrun">
           <div class="t"><a class="mono" href="${href}" style="color:var(--accent-text)">${esc(r.id)}</a>
             <span class="qq">${esc(r.agent)} · ${esc(r.op)} · ${esc(r.when)}</span>
@@ -1935,7 +1935,7 @@ function viewBudgets(){
         <div class="panel-h"><div class="stack"><h2>Near a hard limit</h2>
           <p class="sub">One budget is inside its last notify threshold.</p></div></div>
         <div class="panel-b stack g10">
-          <div class="row g8 wrapr"><span class="mono" style="color:var(--fg)">acme.core.triage</span>${chip("hard","denied")}
+          <div class="row g8 wrapr"><span class="mono" style="color:var(--fg)">a-intel.core.triage</span>${chip("hard","denied")}
             <span class="mla mono">${money0(M(2847.19))} of ${money0(M(3000))}</span></div>
           <div class="meter crit"><i style="width:94.9%"></i><span class="notch" style="left:60%"></span><span class="notch" style="left:85%"></span><span class="notch" style="left:95%"></span></div>
           <p class="sub">94.9% of a rolling 7-day hard budget. At 100% the model proxy refuses the next call, writes a
@@ -1969,8 +1969,8 @@ function viewBilling(){
   return `
   <div class="stack g16">
     <div class="row wrapr g16" style="align-items:flex-end">
-      <div class="stack"><p class="eyebrow">Organization · Acme Robotics</p><h1>Billing</h1>
-        <p class="sub">What Oxagen charges. Customer token spend is on <a href="#/acme/core-platform/spend/findings">Spend</a> and is billed at zero.</p></div>
+      <div class="stack"><p class="eyebrow">Organization · Anderson Intelligence Corp.</p><h1>Billing</h1>
+        <p class="sub">What Oxagen charges. Customer token spend is on <a href="#/a-intel/core-platform/spend/findings">Spend</a> and is billed at zero.</p></div>
       <div class="row g8 wrapr mla">${curPicker()}
         <button class="btn" data-dlg="plan">Change plan</button></div>
     </div>
@@ -2122,7 +2122,7 @@ function stateEmpty(page){
       ? "This organization has not billed a period yet. The first 1,000 runs each month are free, so the first invoice may well be $0.00."
       : "Spend is computed from frames, and no run in core-platform has sealed between 1 and 11 September. Findings, attribution and reconciliation appear as soon as one does."}</p>
     <div class="row g8 wrapr" style="justify-content:center">
-      <a class="btn" href="#/acme/core-platform/fleet">Open Fleet</a>
+      <a class="btn" href="#/a-intel/core-platform/fleet">Open Fleet</a>
       <button class="btn" data-dlg="period">Choose another period</button></div>
     <p class="qq" style="font-size:11.5px">Runs that never reached a model call are free and are never counted here.</p>
   </div>`;
@@ -2146,7 +2146,7 @@ function stateError(){
       the numbers are simply not addable yet.</p>
     <div class="row g8 wrapr" style="justify-content:center">
       <button class="btn" onclick="setState('loaded')">Try again</button>
-      <a class="btn" href="#/acme/core-platform/runs/run_8f3a2c91">Open a run instead</a></div>
+      <a class="btn" href="#/a-intel/core-platform/runs/run_8f3a2c91">Open a run instead</a></div>
     <p class="qq mono" style="font-size:11px">rebuild_job job_4c81e0 · started 14:08:22Z · 61% · frames 1,842,006 of 3,018,441</p>
   </div>`;
 }
@@ -2155,7 +2155,7 @@ function stateDenied(page){
     <div class="state-ico deny">${ICO.denied}</div>
     <h2>You cannot see ${page==="billing"?"this organization's billing":"core-platform spend"}</h2>
     <p>You are signed in as <b>Dana Okafor</b> with the <span class="mono">billing</span> role on
-      <span class="mono">acme</span>, and <span class="mono">member</span> on the <span class="mono">finops</span> workspace only.
+      <span class="mono">a-intel</span>, and <span class="mono">member</span> on the <span class="mono">finops</span> workspace only.
       ${page==="billing"
         ? "The billing role reads invoices for the organization, not the run meter behind them."
         : "Reading another workspace's spend needs a grant on that workspace."}</p>
@@ -2168,7 +2168,7 @@ function stateDenied(page){
       </dl></div></div>
     <div class="row g8 wrapr" style="justify-content:center">
       <button class="btn" data-dlg="request">Request access from Priya Natarajan</button>
-      <a class="btn ghost" href="#/acme/finops/spend/findings">Go to finops</a></div>
+      <a class="btn ghost" href="#/a-intel/finops/spend/findings">Go to finops</a></div>
     <p class="qq" style="font-size:11.5px">IAM decides; everything else attributes. Every decision is audited, allowed or not.</p>
   </div>`;
 }
@@ -2182,8 +2182,8 @@ function statePlaceholder(page){
       ${esc(PAGE_TITLE[page]||page)} belongs to scenario ${esc(owner)}. The sidebar is here because the information
       architecture is real: seven workspace pages, three organization pages, and no others.</p>
     <div class="row g8 wrapr" style="justify-content:center">
-      <a class="btn" href="#/acme/core-platform/spend/findings">Go to Spend</a>
-      <a class="btn ghost" href="#/acme/billing">Go to Billing</a></div>
+      <a class="btn" href="#/a-intel/core-platform/spend/findings">Go to Spend</a>
+      <a class="btn ghost" href="#/a-intel/billing">Go to Billing</a></div>
   </div>`;
 }
 
@@ -2214,7 +2214,7 @@ function render(){
   c.scrollTop=0;
 }
 function spendlessHeader(t){
-  return `<div class="stack" style="margin-bottom:4px"><p class="eyebrow">${t==="Billing"?"Organization · Acme Robotics":"Workspace · core-platform"}</p>
+  return `<div class="stack" style="margin-bottom:4px"><p class="eyebrow">${t==="Billing"?"Organization · Anderson Intelligence Corp.":"Workspace · core-platform"}</p>
     <h1>${esc(t)}</h1><p class="sub">${t==="Billing"?"September 2026":PERIOD}</p></div>`;
 }
 function setState(s){
@@ -2275,7 +2275,7 @@ function openFinding(id){
       <div class="stack g8"><h3>${f.noMoney?"Recent periods":"Recent runs where money was wasted"}</h3>
         <div class="panel" data-lt-skip><div class="tw"><table class="ev-runs">
           <thead><tr><th>${f.noMoney?"Period":"Run"}</th><th>${f.noMoney?"Position":"Task"}</th><th>Started</th><th class="r">Cost</th><th class="r">Wasted</th><th>What was wasted</th></tr></thead>
-          <tbody>${runs.map(r=>`<tr ${f.noMoney?"":`class="clickable" data-href="#/acme/core-platform/run/${esc(r[0])}" tabindex="0" role="button"`}>
+          <tbody>${runs.map(r=>`<tr ${f.noMoney?"":`class="clickable" data-href="#/a-intel/core-platform/run/${esc(r[0])}" tabindex="0" role="button"`}>
             <td class="mono" style="font-size:11px;white-space:nowrap">${esc(r[0])}</td>
             <td style="font-size:11.5px">${esc(r[1])}</td>
             <td class="mono qq" style="font-size:10.5px;white-space:nowrap">${esc(r[2])}</td>
@@ -2347,7 +2347,7 @@ function fixSpec(id){
             <tbody>${["Schema","Lineage uniqueness","record_hash recomputation","Secret and PII scan","Conflict against active records","constraint_effect ∈ {require, forbid}"].map(c=>`<tr><td style="font-size:12px;padding:6px 10px">${esc(c)}</td><td class="r" style="padding:6px 10px">${chip("on push","neutral")}</td></tr>`).join("")}</tbody></table></div></div></div>
         </div>
         <div class="note">Merge is the publication. Until then the record steers nothing; after it, this tab shows the repeat reads disappearing on the next ${esc(f.scope)} run.</div>`,
-      foot:`<span class="q" style="font-size:12px;flex:1;min-width:24ch;align-self:center">Opens on <span class="mono">acme/platform</span> as ${esc(x.pr)} · team mode, a code-owner review is required.</span>
+      foot:`<span class="q" style="font-size:12px;flex:1;min-width:24ch;align-self:center">Opens on <span class="mono">a-intel/platform</span> as ${esc(x.pr)} · team mode, a code-owner review is required.</span>
         <button class="btn ghost" data-close>Cancel</button><button class="btn primary" data-close data-toast="Branch ${esc(x.branch)} pushed and ${esc(x.pr)} opened with ${f.id} as supporting evidence.">Open the pull request</button>`};
   }
   return {t:"Fix · "+x.title,wide:true,sub:`Help article · ${f.kind} · chosen by the finding kind`,
@@ -2371,7 +2371,7 @@ const DLG = {
   budget:()=>({t:"Set budget",b:`
     <p class="lede">Budgets live per organization, workspace, operator or agent, with a period and a hard or soft mode.</p>
     <dl class="kv">
-      <dt>Scope</dt><dd><span class="mono">agent · acme.core.stella-ci</span></dd>
+      <dt>Scope</dt><dd><span class="mono">agent · a-intel.core.stella-ci</span></dd>
       <dt>Current</dt><dd class="mono">${money0(M(24000))} monthly, soft — 21.7% used for nine periods</dd>
       <dt>Proposed</dt><dd class="mono" style="color:var(--fg)">${money0(M(8000))} monthly, soft</dd>
       <dt>Notify at</dt><dd class="mono">50%, 80%, 100%</dd>
@@ -2380,7 +2380,7 @@ const DLG = {
     <div class="note"><b>Changing a budget is a governed action.</b> It passes IAM, writes an audit record, and bills as one action.</div>`,
     ok:"Set budget"}),
   report:()=>({t:"Export a spend report",b:`
-    <p class="lede">Everything on this page for the timeframe you pick — by operator, agent, tool, wasted spend, reconciliation and budgets — as CSV and a signed PDF, sent to <span class="mono">marcus@acme.example</span>.</p>
+    <p class="lede">Everything on this page for the timeframe you pick — by operator, agent, tool, wasted spend, reconciliation and budgets — as CSV and a signed PDF, sent to <span class="mono">marcus@a-intel.example</span>.</p>
     <div class="fld"><label for="rep-range">Timeframe</label>
       <select id="rep-range" aria-label="Timeframe">
         <option>This month · September 2026 (to date)</option><option>Last month · August 2026</option>
@@ -2413,7 +2413,7 @@ const DLG = {
     <dl class="kv"><dt>Variance</dt><dd class="mono" style="color:var(--st-failed)">${money0(M(12.47))}</dd>
       <dt>Key</dt><dd class="mono">pk_bdrk_7f2a · AWS Bedrock us-east-1</dd>
       <dt>Resolution</dt><dd>Accept — client-attested frames from a harness-tier agent match only at level 2.</dd></dl>
-    <div class="note warn">Wrapping <span class="mono">acme.core.triage</span> at the gateway tier would give every model call a
+    <div class="note warn">Wrapping <span class="mono">a-intel.core.triage</span> at the gateway tier would give every model call a
       provider request id and close this class of variance for good.</div>`,ok:"Resolve"}),
   prepay:()=>({t:"Prepay twelve months",b:`
     <p class="lede">One charge today, at ${money0(DB.billing.annual.afterPrepay)}, covering twelve months of usage at the current run rate.</p>
@@ -2488,7 +2488,7 @@ function renderAssistant(){
         <div class="bubble">Why did cache hit rate drop on the 3rd?</div></div>
       <div class="msg ag"><div class="who-l">Oxagen</div><div class="bubble">
         Publishing the steering record <span class="mono">str_release_gate</span> at 09:14Z on 3 September rewrote the cached prefix
-        for every run of <span class="mono">acme.core.release-manager</span>. Frames <span class="mono">00041</span> and
+        for every run of <span class="mono">a-intel.core.release-manager</span>. Frames <span class="mono">00041</span> and
         <span class="mono">00042</span> of <span class="mono">run_8a19c4d2</span> are consecutive turns with an identical conversation
         prefix and a different system-context digest, so the cache could not be reused.<br><br>
         Hit rate fell from 78.9% to 66.1% and has stayed near 64%. That is
@@ -2500,7 +2500,7 @@ function renderAssistant(){
         Done. It had used between 18% and 24% of ${money0(M(24000))} for nine periods.</div>
         <div class="receipt" style="margin-top:8px">
           action &nbsp;<b>budget.set</b><br>
-          scope &nbsp;&nbsp;agent · acme.core.stella-ci<br>
+          scope &nbsp;&nbsp;agent · a-intel.core.stella-ci<br>
           from &nbsp;&nbsp;&nbsp;${money(M(24000),{code:true})} monthly soft<br>
           to &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${money(M(8000),{code:true})} monthly soft<br>
           iam &nbsp;&nbsp;&nbsp;&nbsp;allow · rule ws_owner_budget@v14<br>
@@ -2522,16 +2522,16 @@ function toggleAsst(on){
 
 /* ==================== command menu ==================== */
 const CMDS=[
-  {t:"Go to Spend · Findings",h:"#/acme/core-platform/spend/findings",g:"page"},
-  {t:"Go to Spend · Attribution",h:"#/acme/core-platform/spend/attribution",g:"page"},
-  {t:"Go to Spend · Value",h:"#/acme/core-platform/spend/value",g:"page"},
-  {t:"Go to Spend · Operators",h:"#/acme/core-platform/spend/operators",g:"page"},
-  {t:"Go to Spend · Agents",h:"#/acme/core-platform/spend/agents",g:"page"},
-  {t:"Go to Spend · By tool",h:"#/acme/core-platform/spend/tools",g:"page"},
-  {t:"Go to Spend · Wasted spend",h:"#/acme/core-platform/spend/waste",g:"page"},
-  {t:"Go to Spend · Reconciliation",h:"#/acme/core-platform/spend/reconciliation",g:"page"},
-  {t:"Go to Spend · Budgets",h:"#/acme/core-platform/spend/budgets",g:"page"},
-  {t:"Go to Billing",h:"#/acme/billing",g:"page"},
+  {t:"Go to Spend · Findings",h:"#/a-intel/core-platform/spend/findings",g:"page"},
+  {t:"Go to Spend · Attribution",h:"#/a-intel/core-platform/spend/attribution",g:"page"},
+  {t:"Go to Spend · Value",h:"#/a-intel/core-platform/spend/value",g:"page"},
+  {t:"Go to Spend · Operators",h:"#/a-intel/core-platform/spend/operators",g:"page"},
+  {t:"Go to Spend · Agents",h:"#/a-intel/core-platform/spend/agents",g:"page"},
+  {t:"Go to Spend · By tool",h:"#/a-intel/core-platform/spend/tools",g:"page"},
+  {t:"Go to Spend · Wasted spend",h:"#/a-intel/core-platform/spend/waste",g:"page"},
+  {t:"Go to Spend · Reconciliation",h:"#/a-intel/core-platform/spend/reconciliation",g:"page"},
+  {t:"Go to Spend · Budgets",h:"#/a-intel/core-platform/spend/budgets",g:"page"},
+  {t:"Go to Billing",h:"#/a-intel/billing",g:"page"},
   {t:"Open finding · Cache misses after a stable prefix changed",f:"fnd_9c41",g:"finding"},
   {t:"Open finding · Tool-list bloat",f:"fnd_9c3d",g:"finding"},
   {t:"Open finding · Cache writes never read",f:"fnd_9c52",g:"finding"},
@@ -2578,8 +2578,8 @@ document.addEventListener("click",e=>{
   const dlg=t.closest("[data-dlg]"); if(dlg){ e.preventDefault(); openDlg(dlg.dataset.dlg,dlg.dataset.inv); return; }
   const href=t.closest("[data-href]"); if(href){ go(href.dataset.href); return; }
   const dim=t.closest("[data-dim]"); if(dim){ ATTR_DIM=dim.dataset.dim; render(); return; }
-  const op=t.closest("[data-op]"); if(op){ go("#/acme/core-platform/spend/operators/"+op.dataset.op); return; }
-  const ag=t.closest("[data-ag]"); if(ag){ go("#/acme/core-platform/spend/agents/"+ag.dataset.ag); return; }
+  const op=t.closest("[data-op]"); if(op){ go("#/a-intel/core-platform/spend/operators/"+op.dataset.op); return; }
+  const ag=t.closest("[data-ag]"); if(ag){ go("#/a-intel/core-platform/spend/agents/"+ag.dataset.ag); return; }
   const cur=t.closest("[data-cur]"); if(cur){ CUR=cur.dataset.cur; render(); return; }
   const act=t.closest("[data-act]"); if(act){ act.textContent="✓ "+act.dataset.act; act.disabled=true; return; }
   if(t.closest("#scrim")) closeAll();
@@ -2613,7 +2613,7 @@ $("#mgTheme").addEventListener("click",e=>{ const b=e.target.closest("button"); 
   else document.documentElement.setAttribute("data-theme",v); });
 
 /* boot — at rest on the flow's first screen */
-if(!location.hash) location.replace("#/acme/core-platform/spend/findings");
+if(!location.hash) location.replace("#/a-intel/core-platform/spend/findings");
 ROUTE=parseHash();
 render();
 </script>

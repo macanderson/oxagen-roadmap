@@ -313,7 +313,7 @@ body[data-w="phone"]{background:var(--panel-2)}
       <button class="bar-btn navtoggle" id="navToggle" aria-label="Menu"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
 
       <nav class="crumb" aria-label="Breadcrumb">
-        <button class="chip-sw" id="orgSw" aria-haspopup="listbox">Acme Robotics <span class="tag">acme</span>
+        <button class="chip-sw" id="orgSw" aria-haspopup="listbox">Anderson Intelligence Corp. <span class="tag">a-intel</span>
           <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 4.7 6 2.4l2.5 2.3M3.5 7.3 6 9.6l2.5-2.3"/></svg></button>
         <span class="sep" aria-hidden="true">/</span>
         <button class="chip-sw" id="wsSw" aria-haspopup="listbox">core-platform
@@ -360,7 +360,7 @@ body[data-w="phone"]{background:var(--panel-2)}
   <div class="dlg-b">
     <dl class="kv">
       <dt>Name</dt><dd>Marcus Bell</dd>
-      <dt>Email</dt><dd class="mono">marcus.bell@acmerobotics.com</dd>
+      <dt>Email</dt><dd class="mono">marcus.bell@a-intelrobotics.com</dd>
       <dt>Org role</dt><dd>member · workspace owner on core-platform</dd>
       <dt>Display currency</dt><dd>USD · set by the organization</dd>
       <dt>Two-factor</dt><dd><span class="st ok">hardware key</span></dd>
@@ -377,31 +377,31 @@ body[data-w="phone"]{background:var(--panel-2)}
 
 <script>
 "use strict";
-/* ───────────────────────── Demo data. Acme Robotics, one consistent customer. ───────────────────────── */
+/* ───────────────────────── Demo data. Anderson Intelligence Corp., one consistent customer. ───────────────────────── */
 const APPROVALS = [
-  {tool:"stripe__create_payment@4", agent:"acme.finops.invoice-bot", op:"Dana Okafor",
+  {tool:"stripe__create_payment@4", agent:"a-intel.finops.invoice-bot", op:"Dana Okafor",
    rule:"mandate.above_threshold", amount:"$18,420.00", left:"5m 47s", risk:"critical"},
-  {tool:"github__merge_pull_request@3", agent:"acme.core.release-manager", op:"Marcus Bell",
+  {tool:"github__merge_pull_request@3", agent:"a-intel.core.release-manager", op:"Marcus Bell",
    rule:"merge.requires_approval", amount:null, left:"9m 12s", risk:null},
-  {tool:"bash(rm -rf node_modules)", agent:"acme.core.triage", op:"Marcus Bell",
+  {tool:"bash(rm -rf node_modules)", agent:"a-intel.core.triage", op:"Marcus Bell",
    rule:"harness.irreversible_path", amount:null, left:"4m 03s", risk:null}
 ];
 const RUNS = [
-  {id:"run_01K6QX7M3E", task:"Cut the 2026.9 release", agent:"acme.core.release-manager",
+  {id:"run_01K6QX7M3E", task:"Cut the 2026.9 release", agent:"a-intel.core.release-manager",
    op:"Marcus Bell", harness:"Claude Code 2.1.4", state:"live", step:"turn 5 · model call", cost:"$2.78", verdict:null},
-  {id:"run_01K6QX5J8A", task:"Repair the flaky deploy test", agent:"acme.core.stella-ci",
+  {id:"run_01K6QX5J8A", task:"Repair the flaky deploy test", agent:"a-intel.core.stella-ci",
    op:"Marcus Bell", harness:"Stella 0.9.14", state:"live", step:"turn 3 · tool call", cost:"$1.12", verdict:null},
-  {id:"run_01K6QWZ4T7", task:"Settle September vendor invoices", agent:"acme.finops.invoice-bot",
+  {id:"run_01K6QWZ4T7", task:"Settle September vendor invoices", agent:"a-intel.finops.invoice-bot",
    op:"Dana Okafor", harness:"OpenAI Agents SDK 1.4.2", state:"parked", step:"waiting on approval", cost:"$0.94", verdict:null},
-  {id:"run_01K5XQ7M4A", task:"Retry budget exhaustion drops webhooks", agent:"acme.core.release-manager",
+  {id:"run_01K5XQ7M4A", task:"Retry budget exhaustion drops webhooks", agent:"a-intel.core.release-manager",
    op:"Marcus Bell", harness:"Claude Code 2.1.4", state:"sealed", step:"39 steps", cost:"$4.87", verdict:"flipped"},
-  {id:"run_01K6QWW6D3", task:"Quarantine flaky specs in acme/mobile", agent:"acme.core.flake-hunter",
+  {id:"run_01K6QWW6D3", task:"Quarantine flaky specs in a-intel/mobile", agent:"a-intel.core.flake-hunter",
    op:"Marcus Bell", harness:"Stella 0.9.14", state:"sealed", step:"22 steps", cost:"$0.61", verdict:"unmoved"},
-  {id:"run_01K6QWV2R8", task:"Reconcile August provider invoices", agent:"acme.finops.ledger-recon",
+  {id:"run_01K6QWV2R8", task:"Reconcile August provider invoices", agent:"a-intel.finops.ledger-recon",
    op:"Dana Okafor", harness:"OpenAI Agents SDK 1.4.2", state:"sealed", step:"14 steps", cost:"$0.38", verdict:"flipped"}
 ];
 const FRAMES = [
-  {n:0,  k:"run",     t:"agent_start", d:"acme.core.release-manager · Claude Code 2.1.4", cost:null},
+  {n:0,  k:"run",     t:"agent_start", d:"a-intel.core.release-manager · Claude Code 2.1.4", cost:null},
   {n:7,  k:"context", t:"context.assembled", d:"7 context frames · 6,310 of 24,000 tokens", cost:null},
   {n:12, k:"model",   t:"model.request", d:"claude-fable-5-1 · steering in the stable prefix", cost:null},
   {n:13, k:"model",   t:"model.response", d:"2,216,660 in · 9,417 out · 93.0% cached", cost:"$0.3149"},
@@ -421,20 +421,20 @@ const FRAME_DETAIL = {
     ["Enforcement tier","gateway"],["Deny generation","41"]]
 };
 const AGENTS = [
-  {n:"Release manager", id:"acme.core.release-manager", h:"Claude Code 2.1.4", st:"active", tier:"gateway", belt:"searchable", spend:"$412.78"},
-  {n:"Stella CI",       id:"acme.core.stella-ci",       h:"Stella 0.9.14",     st:"active", tier:"gateway", belt:"searchable", spend:"$1,208.44"},
-  {n:"Triage",          id:"acme.core.triage",          h:"Codex CLI 0.42.1",  st:"active", tier:"gateway", belt:"full", spend:"$96.20"},
-  {n:"Invoice bot",     id:"acme.finops.invoice-bot",   h:"OpenAI Agents SDK 1.4.2", st:"active", tier:"gateway", belt:"full", spend:"$143.09"},
-  {n:"Docs writer",     id:"acme.core.docs-writer",     h:"Custom · SDK-wrapped",    st:"unenrolled", tier:"observe", belt:"full", spend:"$0.00"}
+  {n:"Release manager", id:"a-intel.core.release-manager", h:"Claude Code 2.1.4", st:"active", tier:"gateway", belt:"searchable", spend:"$412.78"},
+  {n:"Stella CI",       id:"a-intel.core.stella-ci",       h:"Stella 0.9.14",     st:"active", tier:"gateway", belt:"searchable", spend:"$1,208.44"},
+  {n:"Triage",          id:"a-intel.core.triage",          h:"Codex CLI 0.42.1",  st:"active", tier:"gateway", belt:"full", spend:"$96.20"},
+  {n:"Invoice bot",     id:"a-intel.finops.invoice-bot",   h:"OpenAI Agents SDK 1.4.2", st:"active", tier:"gateway", belt:"full", spend:"$143.09"},
+  {n:"Docs writer",     id:"a-intel.core.docs-writer",     h:"Custom · SDK-wrapped",    st:"unenrolled", tier:"observe", belt:"full", spend:"$0.00"}
 ];
 const FINDINGS = [
-  {n:"Cache misses after a stable prefix changed", id:"fnd_9c41", scope:"acme.core.release-manager", at:1842.16, frames:4},
-  {n:"Tool-list bloat on every model call",        id:"fnd_9c3d", scope:"acme.core.triage",          at:964.02,  frames:6},
-  {n:"Cache writes never read back",               id:"fnd_9c52", scope:"acme.core.docs-writer",     at:555.19,  frames:3},
+  {n:"Cache misses after a stable prefix changed", id:"fnd_9c41", scope:"a-intel.core.release-manager", at:1842.16, frames:4},
+  {n:"Tool-list bloat on every model call",        id:"fnd_9c3d", scope:"a-intel.core.triage",          at:964.02,  frames:6},
+  {n:"Cache writes never read back",               id:"fnd_9c52", scope:"a-intel.core.docs-writer",     at:555.19,  frames:3},
   {n:"Retry storms against one provider key",      id:"fnd_9c58", scope:"provider key pk_bdrk_7f2a", at:441.87,  frames:5}
 ];
 const RECORDS = [
-  {s:"An agent never merges a pull request on acme/platform. Open it, request review, and stop.",
+  {s:"An agent never merges a pull request on a-intel/platform. Open it, request review, and stop.",
    id:"ctx.core.release-pr-never-merged-by-agent", kind:"directive", before:84.1, after:91.6, cited:96, violated:0},
   {s:"Schema changes ship expand-then-contract: add the column, backfill, switch readers, drop later.",
    id:"ctx.core.migration-expand-contract", kind:"directive", before:72.4, after:88.0, cited:143, violated:2},
@@ -520,8 +520,8 @@ PAGES.run = () => `
   <div class="head"><div class="head-t">
     <h1 class="mono" style="font-size:22px">run_01K5XQ7M4A
       ${st("sealed")} ${st("flipped")} ${st("tier gateway","flat")}</h1>
-    <p>acme.core.release-manager · Claude Code 2.4.1 · operator Marcus Bell · 09:14:02 → 09:51:47 UTC<br>
-      Task <span class="mono">acme/platform#478</span> — Retry budget exhaustion silently drops webhook deliveries</p>
+    <p>a-intel.core.release-manager · Claude Code 2.4.1 · operator Marcus Bell · 09:14:02 → 09:51:47 UTC<br>
+      Task <span class="mono">a-intel/platform#478</span> — Retry budget exhaustion silently drops webhook deliveries</p>
   </div><button class="btn btn-primary" data-act="fork">Fork replay</button></div>
 
   ${tiles([
@@ -593,7 +593,7 @@ PAGES.run_chain = () => panel("Chain and seal", "verified", `<div class="panel-b
   <dt>Frames</dt><dd>126 of 126 verified</dd>
   <dt>Sequence</dt><dd>dense 0–125 · no gaps</dd>
   <dt>Merkle root</dt><dd class="mono">sha256:9f2a41c7e0b83d…2f8c04</dd>
-  <dt>Attestation key</dt><dd class="mono">att_acme_2026Q3_8c41</dd>
+  <dt>Attestation key</dt><dd class="mono">att_a-intel_2026Q3_8c41</dd>
   <dt>Key validity</dt><dd>2026-07-01 → 2027-01-01</dd>
   <dt>Replay grade</dt><dd>${st("full","proven")} every model call and tool call is recorded</dd>
 </dl></div>`);
@@ -624,7 +624,7 @@ PAGES.agents = () => `
       <td class="sub" style="font-size:12.5px">${esc(a.belt)}</td>
       <td class="r num">${esc(a.spend)}</td></tr>`).join("")}</tbody></table></div>`)}
 
-  ${panel("Mandate · acme.finops.invoice-bot", "the only agent here that may move money", `<div class="panel-b">
+  ${panel("Mandate · a-intel.finops.invoice-bot", "the only agent here that may move money", `<div class="panel-b">
     <dl class="kv">
       <dt>Purpose</dt><dd>Monthly infrastructure invoices, PO-4471</dd>
       <dt>Per call</dt><dd class="num">$25,000.00 ceiling</dd>
@@ -664,9 +664,9 @@ PAGES.tools = () => `
     : S.toolsTab==="Connections" ? panel("Connections","no agent holds any of these",`<div class="scroll"><table>
       <thead><tr><th>Connection</th><th>Owner</th><th>Downscoped by</th><th>Review due</th></tr></thead>
       <tbody>
-        <tr><td><b>GitHub · acme</b><span class="s">installation 48210221</span></td><td>Marcus Bell</td><td>fine-grained token, per call</td><td>2026-12-01</td></tr>
-        <tr><td><b>Stripe · acme live</b><span class="s">restricted key</span></td><td>Priya Natarajan</td><td>single-use token, per call</td><td>2026-10-15</td></tr>
-        <tr><td><b>Linear · acme</b><span class="s">OAuth app</span></td><td>Marcus Bell</td><td>read scope only</td><td>2027-02-01</td></tr>
+        <tr><td><b>GitHub · a-intel</b><span class="s">installation 48210221</span></td><td>Marcus Bell</td><td>fine-grained token, per call</td><td>2026-12-01</td></tr>
+        <tr><td><b>Stripe · a-intel live</b><span class="s">restricted key</span></td><td>Priya Natarajan</td><td>single-use token, per call</td><td>2026-10-15</td></tr>
+        <tr><td><b>Linear · a-intel</b><span class="s">OAuth app</span></td><td>Marcus Bell</td><td>read scope only</td><td>2027-02-01</td></tr>
       </tbody></table></div>`)
     : S.toolsTab==="Policy" ? panel("Simulate pol_v42 against the last 30 days","67,412 real calls replayed, nothing dispatched",`<div class="panel-b">
       ${tiles([["Would deny","148","0.22% of calls · 31 runs affected"],
@@ -679,7 +679,7 @@ PAGES.tools = () => `
       <thead><tr><th>Switch</th><th>Scope</th><th>State</th></tr></thead>
       <tbody>
         <tr><td><b>Every <span class="mono">moves_funds</span> tool</b><span class="s">class-wide</span></td><td>organization</td><td>${st("armed, off","flat")}</td></tr>
-        <tr><td><b>acme.core.triage</b><span class="s">one agent</span></td><td>core-platform</td><td>${st("armed, off","flat")}</td></tr>
+        <tr><td><b>a-intel.core.triage</b><span class="s">one agent</span></td><td>core-platform</td><td>${st("armed, off","flat")}</td></tr>
         <tr><td><b>stripe server</b><span class="s">one server</span></td><td>organization</td><td>${st("armed, off","flat")}</td></tr>
       </tbody></table></div>`)}
 `;
@@ -688,7 +688,7 @@ PAGES.ontology = () => `
   <div class="head"><div class="head-t">
     <span class="eyebrow">Workspace · core-platform</span>
     <h1>Ontology</h1>
-    <p>What kinds of things exist at Acme Robotics, how many of each, and which version of that model is in force.
+    <p>What kinds of things exist at Anderson Intelligence Corp., how many of each, and which version of that model is in force.
       Proposed in a pull request, activated on merge, versioned in <span class="mono">.oxagen/ontology/</span>.</p>
   </div><button class="btn btn-primary" data-act="propose">Propose a change</button></div>
 
@@ -730,9 +730,9 @@ RETURN c.name, r.id, r.firmware, i.id LIMIT 50</pre>
     : S.ontTab==="Sources" ? panel("Sources","every entity walks back to a source record",`<div class="scroll"><table>
       <thead><tr><th>Connector</th><th>Health</th><th>Cursor</th><th class="r">Entities</th></tr></thead>
       <tbody>
-        <tr><td><b>GitHub</b><span class="s">acme/platform + 2 linked</span></td><td>${st("syncing","ok")}</td><td class="mono">commit e91b2d7</td><td class="r num">69,087</td></tr>
-        <tr><td><b>Linear</b><span class="s">acme workspace</span></td><td>${st("syncing","ok")}</td><td class="mono">2026-09-11T09:30Z</td><td class="r num">2,764</td></tr>
-        <tr><td><b>Postgres</b><span class="s">acme production replica</span></td><td>${st("degraded","fail")}</td><td class="mono">lsn 0/3A2F1C8</td><td class="r num">125,079</td></tr>
+        <tr><td><b>GitHub</b><span class="s">a-intel/platform + 2 linked</span></td><td>${st("syncing","ok")}</td><td class="mono">commit e91b2d7</td><td class="r num">69,087</td></tr>
+        <tr><td><b>Linear</b><span class="s">a-intel workspace</span></td><td>${st("syncing","ok")}</td><td class="mono">2026-09-11T09:30Z</td><td class="r num">2,764</td></tr>
+        <tr><td><b>Postgres</b><span class="s">a-intel production replica</span></td><td>${st("degraded","fail")}</td><td class="mono">lsn 0/3A2F1C8</td><td class="r num">125,079</td></tr>
       </tbody></table></div>`)
     : panel("Versions","the git history of the model",`<div class="scroll"><table>
       <thead><tr><th>Version</th><th>Change</th><th>Merged</th></tr></thead>
@@ -759,7 +759,7 @@ PAGES.steering = () => `
     ["Proof rate","87.4%","1,806 proven of 2,066 · 90 days"]
   ])}
 
-  ${panel("Published records", "indexed from acme/platform@e91b2d7", `<div>${RECORDS.map(r=>`
+  ${panel("Published records", "indexed from a-intel/platform@e91b2d7", `<div>${RECORDS.map(r=>`
     <div style="padding:14px 16px;border-bottom:1px solid var(--rule);display:flex;gap:18px;flex-wrap:wrap">
       <div style="flex:1;min-width:260px">
         <div style="color:var(--fg)">${esc(r.s)}</div>
@@ -819,8 +819,8 @@ PAGES.spend = () => `
 PAGES.organization = () => `
   <div class="head"><div class="head-t">
     <span class="eyebrow">Organization</span>
-    <h1>Acme Robotics</h1>
-    <p><span class="mono">org_7QK3M8VZ</span> · namespace <span class="mono">acme</span> · Enterprise, annual ·
+    <h1>Anderson Intelligence Corp.</h1>
+    <p><span class="mono">org_7QK3M8VZ</span> · namespace <span class="mono">a-intel</span> · Enterprise, annual ·
       display currency USD · 34 members · 50 agents</p>
   </div><button class="btn btn-primary" data-act="invite">Invite people</button></div>
 
@@ -834,15 +834,15 @@ PAGES.organization = () => `
     <thead><tr><th>Store</th><th>Mode</th><th>State</th><th>Rotated</th></tr></thead>
     <tbody>
       <tr><td><b>Postgres</b><span class="s">control plane and ledger</span></td><td>dedicated</td><td>${st("active","ok")}</td><td>2026-07-01</td></tr>
-      <tr><td><b>Neo4j</b><span class="s">org_acme</span></td><td>dedicated</td><td>${st("active","ok")}</td><td>2026-07-01</td></tr>
+      <tr><td><b>Neo4j</b><span class="s">org_a-intel</span></td><td>dedicated</td><td>${st("active","ok")}</td><td>2026-07-01</td></tr>
       <tr><td><b>Objects</b><span class="s">frame archive segments</span></td><td>shared</td><td>${st("active","ok")}</td><td>2026-07-01</td></tr>
     </tbody></table></div>`)}
 
   ${panel("Workspaces", "each binds one main repo", `<div class="scroll"><table>
     <thead><tr><th>Workspace</th><th>Main repo</th><th>Production branch</th><th class="r">Agents</th></tr></thead>
     <tbody>
-      <tr><td><b>core-platform</b><span class="s">2 linked repos</span></td><td class="mono">acme/platform</td><td class="mono">main</td><td class="r num">41</td></tr>
-      <tr><td><b>finops</b></td><td class="mono">acme/finops-agents</td><td class="mono">main</td><td class="r num">9</td></tr>
+      <tr><td><b>core-platform</b><span class="s">2 linked repos</span></td><td class="mono">a-intel/platform</td><td class="mono">main</td><td class="r num">41</td></tr>
+      <tr><td><b>finops</b></td><td class="mono">a-intel/finops-agents</td><td class="mono">main</td><td class="r num">9</td></tr>
     </tbody></table></div>`)}
 `;
 
@@ -951,8 +951,8 @@ addEventListener("hashchange", route);
 const ASST = [
   {you:"Grant linear__get_issue to triage and cap it at $5 a run.",
    it:"Done. Two governed actions, both with receipts.",
-   did:[["tool.grant","linear__get_issue@2 → acme.core.triage · read scope","rcp_01K6R41A"],
-        ["budget.set","acme.core.triage · $5.00 a run, hard","rcp_01K6R41B"]]},
+   did:[["tool.grant","linear__get_issue@2 → a-intel.core.triage · read scope","rcp_01K6R41A"],
+        ["budget.set","a-intel.core.triage · $5.00 a run, hard","rcp_01K6R41B"]]},
   {you:"Why did invoice-bot stop at 14:03?",
    it:"It did not stop — it parked. The call was $18,420.00 against a mandate whose per-call ceiling is $10,000.00, so the rule mandate.above_threshold sent it to a person. Dana Okafor approved it 5 minutes later and the call dispatched.",
    did:[["run.read","run_01K6QWZ4T7 · frames #155 → #157","rcp_01K6R41C"]]}

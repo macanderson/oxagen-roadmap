@@ -770,7 +770,7 @@ var TG=(function(){
 "use strict";
 /* ═══════════════════════════════════════════════════════════════════════
    Oxagen Mission Control — W11
-   One demo customer: Acme Robotics (org acme), workspaces core-platform
+   One demo customer: Anderson Intelligence Corp. (org a-intel), workspaces core-platform
    and finops. Every figure below is internally consistent: run totals sum
    to the operator, the mandate ledger balances, the price book prices the
    concrete model id the provider returned.
@@ -814,61 +814,61 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':
 
 /* ── the fleet ─────────────────────────────────────────────────────── */
 const ORG = {
-  name:"Acme Robotics", slug:"acme", ns:"acme", plan:"team",
+  name:"Anderson Intelligence Corp.", slug:"a-intel", ns:"a-intel", plan:"team",
   displayCurrency:"USD", billingCurrency:"USD", funding:"platform",
-  neo4j:"org_acme", denyGen:41, retentionDays:2555, mode:"cloud"
+  neo4j:"org_a-intel", denyGen:41, retentionDays:2555, mode:"cloud"
 };
 const WS = {
-  "core-platform":{ name:"core-platform", ns:"core", mainRepo:"acme/platform", branch:"main",
-    linked:["acme/billing","acme/mobile"], governance:"team", bundle:214, ontology:"v23" },
-  "finops":{ name:"finops", ns:"finops", mainRepo:"acme/finops-agents", branch:"main",
+  "core-platform":{ name:"core-platform", ns:"core", mainRepo:"a-intel/platform", branch:"main",
+    linked:["a-intel/billing","a-intel/mobile"], governance:"team", bundle:214, ontology:"v23" },
+  "finops":{ name:"finops", ns:"finops", mainRepo:"a-intel/finops-agents", branch:"main",
     linked:[], governance:"regulated", bundle:96, ontology:"v7" }
 };
 const PEOPLE = {
-  priya:{ name:"Priya Natarajan", init:"PN", email:"priya@acmerobotics.com", orgRole:"owner",
+  priya:{ name:"Priya Natarajan", init:"PN", email:"priya@a-intelrobotics.com", orgRole:"owner",
           principal:"prn_01K3F8QA2M", ws:{"core-platform":"owner","finops":"viewer"} },
-  marcus:{ name:"Marcus Bell", init:"MB", email:"marcus@acmerobotics.com", orgRole:"member",
+  marcus:{ name:"Marcus Bell", init:"MB", email:"marcus@a-intelrobotics.com", orgRole:"member",
           principal:"prn_01K3F8QB7T", ws:{"core-platform":"owner"} },
-  dana:{ name:"Dana Okafor", init:"DO", email:"dana@acmerobotics.com", orgRole:"billing",
+  dana:{ name:"Dana Okafor", init:"DO", email:"dana@a-intelrobotics.com", orgRole:"billing",
           principal:"prn_01K3F8QC4X", ws:{"finops":"owner"} }
 };
 const AGENTS = [
-  { key:"acme.core.release-manager", harness:"claude-code", hv:"2.4.1", ws:"core-platform",
+  { key:"a-intel.core.release-manager", harness:"claude-code", hv:"2.4.1", ws:"core-platform",
     op:"marcus", tier:"gateway", tools:18, budget:"$2.00 / run", status:"active" },
-  { key:"acme.core.stella-ci", harness:"stella", hv:"0.14.2", ws:"core-platform",
+  { key:"a-intel.core.stella-ci", harness:"stella", hv:"0.14.2", ws:"core-platform",
     op:"marcus", tier:"gateway", tools:12, budget:"$1.20 / run", status:"active" },
-  { key:"acme.core.triage", harness:"codex-cli", hv:"0.7.9", ws:"core-platform",
+  { key:"a-intel.core.triage", harness:"codex-cli", hv:"0.7.9", ws:"core-platform",
     op:"marcus", tier:"gateway", tools:40, budget:"none", status:"active" },
-  { key:"acme.finops.invoice-bot", harness:"openai-agents-sdk", hv:"0.9.2", ws:"finops",
+  { key:"a-intel.finops.invoice-bot", harness:"openai-agents-sdk", hv:"0.9.2", ws:"finops",
     op:"dana", tier:"gateway", tools:9, budget:"$3.00 / run", status:"active", mandate:"mnd_4471" },
-  { key:"acme.core.docs-writer", harness:"custom", hv:"@oxagen/sdk 1.2.0", ws:"core-platform",
+  { key:"a-intel.core.docs-writer", harness:"custom", hv:"@oxagen/sdk 1.2.0", ws:"core-platform",
     op:"priya", tier:"gateway", tools:7, budget:"$0.80 / run", status:"active" }
 ];
 const RUNS = [
-  { id:"run_01K5YQ7F3M", agent:"acme.finops.invoice-bot", op:"dana", started:"13:58:41Z",
+  { id:"run_01K5YQ7F3M", agent:"a-intel.finops.invoice-bot", op:"dana", started:"13:58:41Z",
     state:"sealed", tier:"gateway", grade:"full", cost:"0.4127", verdict:"none",
-    task:"acme/finops-agents#212", turns:3, steps:11, frames:52 },
-  { id:"run_01K5ZB4T8P", agent:"acme.core.release-manager", op:"marcus", started:"15:31:08Z",
+    task:"a-intel/finops-agents#212", turns:3, steps:11, frames:52 },
+  { id:"run_01K5ZB4T8P", agent:"a-intel.core.release-manager", op:"marcus", started:"15:31:08Z",
     state:"live", tier:"gateway", grade:"full", cost:"1.8840", verdict:"—",
-    task:"acme/platform#1893", turns:6, steps:31, frames:148 },
-  { id:"run_01K5ZC1H9K", agent:"acme.core.triage", op:"marcus", started:"15:44:02Z",
+    task:"a-intel/platform#1893", turns:6, steps:31, frames:148 },
+  { id:"run_01K5ZC1H9K", agent:"a-intel.core.triage", op:"marcus", started:"15:44:02Z",
     state:"live", tier:"gateway", grade:"full", cost:"0.2210", verdict:"—",
-    task:"acme/platform#1901", turns:2, steps:7, frames:33 },
-  { id:"run_01K5YX2D6R", agent:"acme.core.stella-ci", op:"marcus", started:"15:02:19Z",
+    task:"a-intel/platform#1901", turns:2, steps:7, frames:33 },
+  { id:"run_01K5YX2D6R", agent:"a-intel.core.stella-ci", op:"marcus", started:"15:02:19Z",
     state:"sealed", tier:"gateway", grade:"full", cost:"0.9314", verdict:"flipped",
-    task:"acme/platform#1887", turns:4, steps:19, frames:91 },
-  { id:"run_01K5YW8N3C", agent:"acme.core.docs-writer", op:"priya", started:"14:47:55Z",
+    task:"a-intel/platform#1887", turns:4, steps:19, frames:91 },
+  { id:"run_01K5YW8N3C", agent:"a-intel.core.docs-writer", op:"priya", started:"14:47:55Z",
     state:"sealed", tier:"gateway", grade:"full", cost:"0.1902", verdict:"waived",
-    task:"acme/platform#1884", turns:2, steps:6, frames:27 },
-  { id:"run_01K5YV5K1Q", agent:"acme.core.triage", op:"marcus", started:"14:22:03Z",
+    task:"a-intel/platform#1884", turns:2, steps:6, frames:27 },
+  { id:"run_01K5YV5K1Q", agent:"a-intel.core.triage", op:"marcus", started:"14:22:03Z",
     state:"sealed", tier:"harness", grade:"partial", cost:"0.6688", verdict:"unmoved",
-    task:"acme/mobile#402", turns:5, steps:22, frames:104 },
-  { id:"run_01K5YT9G7W", agent:"acme.core.release-manager", op:"marcus", started:"13:11:40Z",
+    task:"a-intel/mobile#402", turns:5, steps:22, frames:104 },
+  { id:"run_01K5YT9G7W", agent:"a-intel.core.release-manager", op:"marcus", started:"13:11:40Z",
     state:"sealed", tier:"gateway", grade:"full", cost:"2.4415", verdict:"flipped",
-    task:"acme/platform#1879", turns:8, steps:44, frames:203 },
-  { id:"run_01K5YS2P4A", agent:"acme.finops.invoice-bot", op:"dana", started:"12:04:12Z",
+    task:"a-intel/platform#1879", turns:8, steps:44, frames:203 },
+  { id:"run_01K5YS2P4A", agent:"a-intel.finops.invoice-bot", op:"dana", started:"12:04:12Z",
     state:"sealed", tier:"gateway", grade:"full", cost:"0.3871", verdict:"none",
-    task:"acme/finops-agents#210", turns:2, steps:9, frames:41 }
+    task:"a-intel/finops-agents#210", turns:2, steps:9, frames:41 }
 ];
 const ASSISTANT_RUNS = {
   grant:{ id:"run_01K5ZQ2V8N", turns:1, steps:4, model:"glm-5.3", cost:"0.0038",
@@ -881,7 +881,7 @@ const ASSISTANT_RUNS = {
 
 /* ── mandate mnd_4471, and the 14:03 park ──────────────────────────── */
 const MANDATE = {
-  id:"mnd_4471", agent:"acme.finops.invoice-bot", grantedBy:"Dana Okafor",
+  id:"mnd_4471", agent:"a-intel.finops.invoice-bot", grantedBy:"Dana Okafor",
   roleAtGrant:"org.billing", second:"Priya Natarajan", effects:"commits_spend",
   currency:"USD", perCall:"$250.00", perPeriod:"$2,000.00", period:"monthly",
   callsPerDay:50, allow:"vendor:aws, vendor:github", deny:"*",
@@ -909,7 +909,7 @@ const RECEIPTS = {
           ["output validation","pass"],["external effect ids","bundle_version: 214"],
           ["idempotency key","idm_7c8e1f02_01K5ZQ2V8N_2"],["duplicate suppressed","no"]],
     integrity:[["frame hash","sha256:be07d4a1…c5f9"],["chain position","seq 12 of 31"],
-          ["gateway signature","ed25519:9f2c…a18e · key_id att_acme_02"],["enforcement tier","gateway"]]
+          ["gateway signature","ed25519:9f2c…a18e · key_id att_a-intel_02"],["enforcement tier","gateway"]]
   },
   rcp_8f2c42:{
     tool:"set_budget", version:"1", when:"2026-09-11T15:46:08.907Z",
@@ -917,7 +917,7 @@ const RECEIPTS = {
          ["run","run_01K5ZQ2V8N"],["turn / step","1 / 3"],["task reference","—"]],
     what:[["tool version","set_budget@1"],["schema digest","sha256:c0192bb4…8f70"],
           ["canonical input digest","sha256:d41e77a9…1b62"],
-          ["input","{ scope_kind: \"agent\", scope_id: \"acme.core.triage\", limit_micros: 5000000, currency: \"USD\", period: \"rolling\", window_days: 0, mode: \"hard\" }"]],
+          ["input","{ scope_kind: \"agent\", scope_id: \"a-intel.core.triage\", limit_micros: 5000000, currency: \"USD\", period: \"rolling\", window_days: 0, mode: \"hard\" }"]],
     authority:[["decision","allow"],["policy version","v18"],["rule ids","budget.workspace_owner"],
           ["grants used","role:workspace.owner @ core-platform"],["delegation ceiling","held"],
           ["mandate","none"],["approval","not required"],["taint sources","none"]],
@@ -926,7 +926,7 @@ const RECEIPTS = {
           ["output validation","pass"],["external effect ids","budget_id: bdg_01K5ZQ33"],
           ["idempotency key","idm_d41e77a9_01K5ZQ2V8N_3"],["duplicate suppressed","no"]],
     integrity:[["frame hash","sha256:14c8e0b7…9d2a"],["chain position","seq 19 of 31"],
-          ["gateway signature","ed25519:3ba7…10cc · key_id att_acme_02"],["enforcement tier","gateway"]]
+          ["gateway signature","ed25519:3ba7…10cc · key_id att_a-intel_02"],["enforcement tier","gateway"]]
   },
   rcp_5a10d7:{
     tool:"update_workspace", version:"2", when:"2026-09-11T15:49:31.226Z",
@@ -936,14 +936,14 @@ const RECEIPTS = {
           ["canonical input digest","sha256:3f0c8ab5…de90"],
           ["input","{ workspace: \"finops\", approval_timeout_seconds: 3600 }"]],
     authority:[["decision","allow"],["policy version","v9 (finops)"],["rule ids","workspace.org_owner_override"],
-          ["grants used","role:org.owner @ acme"],["delegation ceiling","held"],
+          ["grants used","role:org.owner @ a-intel"],["delegation ceiling","held"],
           ["mandate","none"],["approval","not required"],["taint sources","none"]],
     credential:[["credential grant","none — control-plane action"]],
     effect:[["dispatched","2026-09-11T15:49:31.230Z"],["response digest","sha256:ae5512f8…0071"],
           ["output validation","pass"],["external effect ids","bundle_version: 97"],
           ["idempotency key","idm_3f0c8ab5_01K5ZR6M1D_1"],["duplicate suppressed","no"]],
     integrity:[["frame hash","sha256:77b201ec…5a4d"],["chain position","seq 8 of 24"],
-          ["gateway signature","ed25519:c810…7f2b · key_id att_acme_02"],["enforcement tier","gateway"]]
+          ["gateway signature","ed25519:c810…7f2b · key_id att_a-intel_02"],["enforcement tier","gateway"]]
   },
   rcp_3c77e0:{
     tool:"create_org", version:"1", when:"2026-08-26T09:14:02.771Z",
@@ -951,17 +951,17 @@ const RECEIPTS = {
          ["run","run_01K3F8Q1AA"],["turn / step","2 / 1"],["task reference","—"]],
     what:[["tool version","create_org@1"],["schema digest","sha256:b7710ffa…3c85"],
           ["canonical input digest","sha256:5518cc2e…7a13"],
-          ["input","{ name: \"Acme Robotics\", slug: \"acme\", namespace: \"acme\", display_currency: \"USD\" }"]],
+          ["input","{ name: \"Anderson Intelligence Corp.\", slug: \"a-intel\", namespace: \"a-intel\", display_currency: \"USD\" }"]],
     authority:[["decision","allow"],["policy version","v1"],["rule ids","org.create_first"],
           ["grants used","authenticated user, no organization yet"],["delegation ceiling","n/a"],
           ["mandate","none"],["approval","not required"],["taint sources","none"]],
     credential:[["credential grant","none — control-plane action"]],
     effect:[["dispatched","2026-08-26T09:14:02.778Z"],["response digest","sha256:0d9e4417…c260"],
           ["output validation","pass"],
-          ["external effect ids","org_id: org_01K3F8PZ9E · neo4j_database: org_acme · kek_key_id: kms_acme_01"],
+          ["external effect ids","org_id: org_01K3F8PZ9E · neo4j_database: org_a-intel · kek_key_id: kms_a-intel_01"],
           ["idempotency key","idm_5518cc2e_01K3F8Q1AA_1"],["duplicate suppressed","no"]],
     integrity:[["frame hash","sha256:e2440aa6…118f"],["chain position","seq 4 of 61"],
-          ["gateway signature","ed25519:44ea…9013 · key_id att_acme_01"],["enforcement tier","gateway"]]
+          ["gateway signature","ed25519:44ea…9013 · key_id att_a-intel_01"],["enforcement tier","gateway"]]
   },
   rcp_3c77e1:{
     tool:"create_workspace", version:"1", when:"2026-08-26T09:14:03.108Z",
@@ -969,17 +969,17 @@ const RECEIPTS = {
          ["run","run_01K3F8Q1AA"],["turn / step","2 / 2"],["task reference","—"]],
     what:[["tool version","create_workspace@1"],["schema digest","sha256:2c60b1e9…ff4a"],
           ["canonical input digest","sha256:81aa03d7…62be"],
-          ["input","{ name: \"core-platform\", namespace: \"core\", main_repo: \"acme/platform\", production_branch: \"main\", governance_mode: \"team\" }"]],
+          ["input","{ name: \"core-platform\", namespace: \"core\", main_repo: \"a-intel/platform\", production_branch: \"main\", governance_mode: \"team\" }"]],
     authority:[["decision","allow"],["policy version","v1"],["rule ids","workspace.org_owner_override"],
-          ["grants used","role:org.owner @ acme"],["delegation ceiling","held"],
+          ["grants used","role:org.owner @ a-intel"],["delegation ceiling","held"],
           ["mandate","none"],["approval","not required"],["taint sources","none"]],
-    credential:[["credential grant","cgr_01K3F8Q2 · connection con_github_acme · scope repo:acme/platform · TTL 300 s"]],
+    credential:[["credential grant","cgr_01K3F8Q2 · connection con_github_a-intel · scope repo:a-intel/platform · TTL 300 s"]],
     effect:[["dispatched","2026-08-26T09:14:03.115Z"],["response digest","sha256:cc71e0a4…39d8"],
           ["output validation","pass"],
           ["external effect ids","workspace_id: wrk_01K3F8Q22F · github_installation: 84201993"],
           ["idempotency key","idm_81aa03d7_01K3F8Q1AA_2"],["duplicate suppressed","no"]],
     integrity:[["frame hash","sha256:5a1bd730…ee02"],["chain position","seq 9 of 61"],
-          ["gateway signature","ed25519:71c0…3ae5 · key_id att_acme_01"],["enforcement tier","gateway"]]
+          ["gateway signature","ed25519:71c0…3ae5 · key_id att_a-intel_01"],["enforcement tier","gateway"]]
   }
 };
 
@@ -987,28 +987,28 @@ const RECEIPTS = {
 const NOTIFS = [
   { kind:"approval.requested", tone:"wait", unread:true, t:"15:44",
     title:"Approval waiting · github__merge_pull_request@3",
-    body:"acme.core.release-manager on run_01K5ZB4T8P wants to merge acme/platform#1893 into main. Rule merge.requires_approval. Expires 15:54." },
+    body:"a-intel.core.release-manager on run_01K5ZB4T8P wants to merge a-intel/platform#1893 into main. Rule merge.requires_approval. Expires 15:54." },
   { kind:"budget.breached", tone:"bad", unread:true, t:"15:21",
-    title:"Hard budget reached · acme.core.docs-writer",
+    title:"Hard budget reached · a-intel.core.docs-writer",
     body:"$0.80 per run reached at turn 3 of run_01K5ZA0J2M. The run was paused at the model proxy before the call." },
   { kind:"approval.resolved", tone:"bad", unread:true, t:"14:13",
     title:"Approval expired · stripe__create_payment@4",
     body:"No approver resolved apr_01K5YQ9T2B within 10 minutes. $184.20 USD to vendor:aws was never dispatched; mandate mnd_4471 released the reservation." },
   { kind:"context_pr.opened", tone:"gold", unread:false, t:"13:02",
-    title:"Context PR opened · acme/platform#1892",
+    title:"Context PR opened · a-intel/platform#1892",
     body:"The promoter proposed a rule on lineage lin_7fa2: “Do not re-read CHANGELOG.md after the first read in a run.” Supported by 14 runs across 3 agents." },
   { kind:"run.proven", tone:"ok", unread:false, t:"15:09",
     title:"Run proven · run_01K5YX2D6R",
     body:"Witness wit_01K5YX51 flipped: failing on main at 9c41ab0, passing on refs/pull/1887/head at 3d8f77e. Oracle test_flip, disclosure grain L0." },
   { kind:"repository.indexed", tone:"ok", unread:false, t:"12:40",
-    title:"Code graph current · acme/platform",
+    title:"Code graph current · a-intel/platform",
     body:"Push 3d8f77e to main indexed in 41 s. 18 files re-parsed, 62 symbols versioned, 3 data-layer edges raised to confirmed." },
   { kind:"reconciliation.exception", tone:"bad", unread:false, t:"09:12",
     title:"Reconciliation variance · anthropic key pk_9f21",
     body:"2026-09-10 key-day variance $0.83 above the one-cent threshold. 4 client-attested frames carry no provider request id and match only at level 2." },
   { kind:"kill_switch.flipped", tone:"crit", unread:false, t:"2026-09-09",
     title:"Kill switch flipped · tool version",
-    body:"Priya Natarajan disabled slack__post_message@7 across acme after a schema regression. 2 runs saw the deny at their next call boundary." }
+    body:"Priya Natarajan disabled slack__post_message@7 across a-intel after a schema regression. 2 runs saw the deny at their next call boundary." }
 ];
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -1024,18 +1024,18 @@ const CONVOS = {
       { role:"op", who:"marcus", t:"15:46",
         text:"grant <code>linear__get_issue</code> to triage and cap it at $5 a run" },
       { role:"ox", t:"15:46", blocks:[
-        { p:"Two changes to <code>acme.core.triage</code>, both as governed actions under your grants. Your workspace-owner role on <b>core-platform</b> authorized each one, and triage's effective permission is still its own grants intersected with yours." },
+        { p:"Two changes to <code>a-intel.core.triage</code>, both as governed actions under your grants. Your workspace-owner role on <b>core-platform</b> authorized each one, and triage's effective permission is still its own grants intersected with yours." },
         { ga:{ tool:"set_role_grants", ver:"1", seq:"step 2", decision:"allow", policy:"v18",
           rules:["grant.workspace_owner","belt.read_only_third_party"], receipt:"rcp_8f2c41",
           lines:[
             "Added <b>linear__get_issue@2</b> to role <b>agent.triage</b> with effect <b>allow</b>.",
             "Resource scope: side effects <b>read</b>, egress <b>third_party</b>. No write, no delete.",
-            "The tool lives on the Linear server, connection <b>linear-acme</b>, owned by Dana Okafor, review date 2026-12-01. triage holds no Linear credential — the broker mints a restricted token per call and the agent never sees it."
+            "The tool lives on the Linear server, connection <b>linear-a-intel</b>, owned by Dana Okafor, review date 2026-12-01. triage holds no Linear credential — the broker mints a restricted token per call and the agent never sees it."
           ] } },
         { ga:{ tool:"set_budget", ver:"1", seq:"step 3", decision:"allow", policy:"v18",
           rules:["budget.workspace_owner"], receipt:"rcp_8f2c42",
           lines:[
-            "Scope <b>agent</b> · <b>acme.core.triage</b> · <b>$5.00 USD per run</b> · mode <b>hard</b>.",
+            "Scope <b>agent</b> · <b>a-intel.core.triage</b> · <b>$5.00 USD per run</b> · mode <b>hard</b>.",
             "A hard budget is enforced at the model proxy <i>before</i> the call, so triage is stopped at the boundary. It is not asked to stop."
           ] } },
         { p:"<b>Two things worth knowing.</b>" },
@@ -1061,10 +1061,10 @@ const CONVOS = {
     msgs:[
       { role:"op", who:"priya", t:"15:48", text:"why did invoice-bot stop at 14:03" },
       { role:"ox", t:"15:48", blocks:[
-        { p:"<b>It did not stop. It parked.</b> At <b>14:03:22.118Z</b> <code>acme.finops.invoice-bot</code> called <code>stripe__create_payment@4</code> for <b>$184.20 USD</b> to <code>vendor:aws</code>, and the tool gateway held the call for a human at step 5 of turn 3." },
+        { p:"<b>It did not stop. It parked.</b> At <b>14:03:22.118Z</b> <code>a-intel.finops.invoice-bot</code> called <code>stripe__create_payment@4</code> for <b>$184.20 USD</b> to <code>vendor:aws</code>, and the tool gateway held the call for a human at step 5 of turn 3." },
         { chain:[
           ["who asked","<b>Dana Okafor</b> — run opened 13:58:41Z from the monthly invoice schedule she owns. The schedule has no authority of its own; the operator is the person behind it."],
-          ["which agent","<code>acme.finops.invoice-bot</code> · OpenAI Agents SDK 0.9.2 · enforcement tier <b>gateway</b> · run <a data-nav=\"#/acme/finops/runs/run_01K5YQ7F3M\">run_01K5YQ7F3M</a>"],
+          ["which agent","<code>a-intel.finops.invoice-bot</code> · OpenAI Agents SDK 0.9.2 · enforcement tier <b>gateway</b> · run <a data-nav=\"#/a-intel/finops/runs/run_01K5YQ7F3M\">run_01K5YQ7F3M</a>"],
           ["which action","<code>stripe__create_payment@4</code> · amount <b>$184.20 USD</b> · counterparty <code>vendor:aws</code> · input digest <code>sha256:9c1a…</code> · <b>not tainted</b>"],
           ["which rule","Mandate <b>mnd_4471</b>'s own approval rule — <code>approval.above_micros: 100000000</code>, which is <b>$100.00</b>. The call is 1.8&times; that. Policy <b>v18</b>, rule <code>mandate.above_threshold</code>."]
         ], hot:3 },
@@ -1076,7 +1076,7 @@ const CONVOS = {
           ["14:13:22.402Z","<code>tool_call</code> result — <b>approval_expired</b>, never dispatched"],
           ["14:13:26.811Z","<code>agent_stop</code> — the model read the expiry as the permission reason and ended the turn"]
         ] },
-        { p:"<b>Money did not move.</b> The mandate ledger reserved $184.20 at 14:03:22 and released it at 14:13:22; the period balance never changed. The reconciler has no external transaction against connection <code>stripe-acme</code> for that window and therefore no exception — an unreceipted transaction would have been severity <b>critical</b>." },
+        { p:"<b>Money did not move.</b> The mandate ledger reserved $184.20 at 14:03:22 and released it at 14:13:22; the period balance never changed. The reconciler has no external transaction against connection <code>stripe-a-intel</code> for that window and therefore no exception — an unreceipted transaction would have been severity <b>critical</b>." },
         { kv:[
           ["mandate","mnd_4471 · active · two-person"],
           ["period","monthly · settled $1,283.40 · reserved $0.00 · remaining $716.60 of $2,000.00"],
@@ -1104,20 +1104,20 @@ const CONVOS = {
         { p:"Three steps, then the app opens. <b>Oxagen does not open until an agent has talked to it</b>, because a mission control with nothing to control is a settings page." },
         { p:"First: what should this organization be called?" }
       ]},
-      { role:"op", who:"priya", t:"09:14", text:"Acme Robotics" },
+      { role:"op", who:"priya", t:"09:14", text:"Anderson Intelligence Corp." },
       { role:"ox", t:"09:14", blocks:[
         { ga:{ tool:"create_org", ver:"1", seq:"step 1", decision:"allow", policy:"v1",
           rules:["org.create_first"], receipt:"rcp_3c77e0",
           lines:[
-            "Organization <b>Acme Robotics</b> · slug <code>acme</code> · namespace <code>acme</code>.",
-            "The namespace is <b>immutable</b>: it is inside every agent key forever, so <code>acme.core.release-manager</code> reads the same in five years.",
-            "Created with it: the Neo4j database <code>org_acme</code>, a key-encryption key in KMS, a billing account, and a retention policy of 2,555 days."
+            "Organization <b>Anderson Intelligence Corp.</b> · slug <code>a-intel</code> · namespace <code>a-intel</code>.",
+            "The namespace is <b>immutable</b>: it is inside every agent key forever, so <code>a-intel.core.release-manager</code> reads the same in five years.",
+            "Created with it: the Neo4j database <code>org_a-intel</code>, a key-encryption key in KMS, a billing account, and a retention policy of 2,555 days."
           ] } },
         { ga:{ tool:"create_workspace", ver:"1", seq:"step 2", decision:"allow", policy:"v1",
           rules:["workspace.org_owner_override"], receipt:"rcp_3c77e1",
           lines:[
             "Workspace <b>core-platform</b> · namespace <code>core</code> · governance mode <b>team</b>.",
-            "The installer read the git remote of the directory it ran in and offered <b>acme/platform</b> as the main repo. You confirmed <code>main</code> as the production branch — the only branch whose commits update the code graph.",
+            "The installer read the git remote of the directory it ran in and offered <b>a-intel/platform</b> as the main repo. You confirmed <code>main</code> as the production branch — the only branch whose commits update the code graph.",
             "Every workspace has exactly one main repo. It is where steering, agent definitions and the ontology live in source control."
           ] } },
         { p:"Now wrap an agent. One click installs the collector and the hook, or five lines wrap an SDK agent." },
@@ -1129,13 +1129,13 @@ const CONVOS = {
       ]},
       { role:"op", who:"priya", t:"09:16", text:"Show the SDK snippet." },
       { role:"ox", t:"09:16", blocks:[
-        { code:'<span class="c">// one package, one call, any harness</span>\n<span class="k2">import</span> { oxagen } <span class="k2">from</span> <span class="s">"@oxagen/sdk"</span>;\n\n<span class="k2">await</span> oxagen.agent.<span class="k2">wrap</span>({\n  agentKey: <span class="s">"acme.core.release-manager"</span>,\n  credential: process.env.OXAGEN_AGENT_CREDENTIAL,\n});' },
+        { code:'<span class="c">// one package, one call, any harness</span>\n<span class="k2">import</span> { oxagen } <span class="k2">from</span> <span class="s">"@oxagen/sdk"</span>;\n\n<span class="k2">await</span> oxagen.agent.<span class="k2">wrap</span>({\n  agentKey: <span class="s">"a-intel.core.release-manager"</span>,\n  credential: process.env.OXAGEN_AGENT_CREDENTIAL,\n});' },
         { p:"That points the harness's base URL at the model proxy and its MCP client at this workspace's tool gateway, and installs the checkpoint gate before each turn. Both seams are what earn the run <b>gateway</b> tier. Nothing about the tier is claimed — it is computed from what actually routed." },
         { status:{ tone:"wait", text:"Waiting for the first frame. The app opens the moment one arrives." } }
       ]},
       { role:"ox", t:"09:21", blocks:[
         { status:{ tone:"ok", text:"First frame received at 09:21:44Z. Mission Control is open." } },
-        { p:"<code>acme.core.release-manager</code> ran one turn: 14 frames, 2 model calls, 1 tool call, sealed and attested. It cost <b>$0.0412 USD</b>, gateway-observed, priced against the concrete model the provider returned rather than the alias you configured." },
+        { p:"<code>a-intel.core.release-manager</code> ran one turn: 14 frames, 2 model calls, 1 tool call, sealed and attested. It cost <b>$0.0412 USD</b>, gateway-observed, priced against the concrete model the provider returned rather than the alias you configured." },
         { p:"You are on the free tier: <b>1,000 runs a month with every governance feature on</b>. Convert within seven days of this run and usage is 20% off for twelve months." },
         { turn:"onboarding" }
       ]}
@@ -1150,7 +1150,7 @@ const REPLIES = {
       rules:["workspace.org_owner_override"], receipt:"rcp_5a10d7",
       lines:[
         "Workspace <b>finops</b> · approval timeout <b>10 minutes → 60 minutes</b>.",
-        "Your org-owner role carried this; the workspace is in <b>regulated</b> mode, so the change is also written to <code>.oxagen/rules/governance.toml</code> in <b>acme/finops-agents</b> on the next Context PR and appended to the promotion ledger."
+        "Your org-owner role carried this; the workspace is in <b>regulated</b> mode, so the change is also written to <code>.oxagen/rules/governance.toml</code> in <b>a-intel/finops-agents</b> on the next Context PR and appended to the promotion ledger."
       ] } },
     { p:"Bundle 96 → 97, pushed. A parked financial call now waits an hour, which covers a meeting. It does not cover a weekend, and I would not raise it further: a call parked longer than the invoice run that made it is a call nobody remembers approving." },
     { turn:"timeout" }
@@ -1191,10 +1191,10 @@ const SUGGEST = {
           ["wrap","Wrap Claude Code on a second machine"]],
   tools:[["policy","Simulate policy v19 against the last 14 days"],
          ["mandate","Who can move money in this organization, and up to what?"],
-         ["kill","Kill every moves_funds tool across acme right now"]],
+         ["kill","Kill every moves_funds tool across a-intel right now"]],
   ontology:[["ask","Which customers are on contracts renewing in Q4?"],
             ["drift","What data-layer drift did the last sync find?"],
-            ["sync","Re-index acme/platform from the production branch head"]],
+            ["sync","Re-index a-intel/platform from the production branch head"]],
   steering:[["effect","Which published records has nothing cited in 30 days?"],
             ["open","Open a Context PR retiring the changelog rule"],
             ["why","Why is proposal lin_7fa2 still open?"]],
@@ -1203,28 +1203,28 @@ const SUGGEST = {
          ["budget","Cap every agent in core-platform at $5 a run"]],
   organization:[["invite","Invite a contractor as a viewer on core-platform only"],
                 ["route","Point the complex tier at a pinned model id"],
-                ["plane","What would moving acme to a dedicated data plane change?"]],
+                ["plane","What would moving a-intel to a dedicated data plane change?"]],
   billing:[["runs","Are we going to pass 10,000 runs this month?"],
            ["meter","What is the retention meter actually storing?"],
            ["plan","Model the enterprise plan against our last three months"]],
   audit:[["incident","Show me every unresolved incident above severity 3"],
-         ["hold","Place a legal hold on every run for acme/billing"],
+         ["hold","Place a legal hold on every run for a-intel/billing"],
          ["export","Export the audit trail for the SOC 2 window"]]
 };
 
 /* the command menu is search_tools — it can only return what the belt holds */
 const CMD = {
   pages:[
-    ["Fleet","every run, live and recent","#/acme/core-platform","fleet"],
-    ["Run","frame-by-frame player","#/acme/core-platform/runs/run_01K5YQ7F3M","run"],
-    ["Agents","identity, toolbelt, mandates, budgets","#/acme/core-platform/agents","agents"],
-    ["Tools","registry, connections, policy, kill switches","#/acme/core-platform/tools","tools"],
-    ["Ontology","the model of your business","#/acme/core-platform/ontology","ontology"],
-    ["Steering","records, proposals, Context PRs","#/acme/core-platform/steering","steering"],
-    ["Spend","findings, proven spend, reconciliation","#/acme/core-platform/spend","spend"],
-    ["Organization","people, workspaces, funding, routes","#/acme","org"],
-    ["Billing","plan, allowance, meters, invoices","#/acme/billing","billing"],
-    ["Audit","events, incidents, holds, exports","#/acme/audit","audit"]
+    ["Fleet","every run, live and recent","#/a-intel/core-platform","fleet"],
+    ["Run","frame-by-frame player","#/a-intel/core-platform/runs/run_01K5YQ7F3M","run"],
+    ["Agents","identity, toolbelt, mandates, budgets","#/a-intel/core-platform/agents","agents"],
+    ["Tools","registry, connections, policy, kill switches","#/a-intel/core-platform/tools","tools"],
+    ["Ontology","the model of your business","#/a-intel/core-platform/ontology","ontology"],
+    ["Steering","records, proposals, Context PRs","#/a-intel/core-platform/steering","steering"],
+    ["Spend","findings, proven spend, reconciliation","#/a-intel/core-platform/spend","spend"],
+    ["Organization","people, workspaces, funding, routes","#/a-intel","org"],
+    ["Billing","plan, allowance, meters, invoices","#/a-intel/billing","billing"],
+    ["Audit","events, incidents, holds, exports","#/a-intel/audit","audit"]
   ],
   agentTools:[
     ["set_role_grants","a role's grants and resource scopes","medium","write"],
@@ -1243,8 +1243,8 @@ const CMD = {
     ["stripe__create_payment@4","move funds — mandate required","critical","irreversible"]
   ],
   runs:[
-    ["run_01K5ZB4T8P","release-manager · live · $1.8840","#/acme/core-platform/runs/run_01K5ZB4T8P"],
-    ["run_01K5YQ7F3M","invoice-bot · sealed · $0.4127","#/acme/finops/runs/run_01K5YQ7F3M"]
+    ["run_01K5ZB4T8P","release-manager · live · $1.8840","#/a-intel/core-platform/runs/run_01K5ZB4T8P"],
+    ["run_01K5YQ7F3M","invoice-bot · sealed · $0.4127","#/a-intel/finops/runs/run_01K5YQ7F3M"]
   ]
 };
 
@@ -1252,33 +1252,33 @@ const CMD = {
    State and routing. Everything lives in the hash, so Back works for a
    page, a conversation, a dialog and a mockup state alike.
    ═══════════════════════════════════════════════════════════════════════ */
-const S = { path:"/acme/core-platform", page:"fleet", ws:"core-platform", run:null,
+const S = { path:"/a-intel/core-platform", page:"fleet", ws:"core-platform", run:null,
   ap:"why", dialog:null, dtab:null, view:"loaded", engine:"up", phone:false,
   theme:"system", menu:false, appended:[], cmdq:"", tab:{} };
 
 const PAGES = [
-  { k:"fleet", label:"Fleet", icon:"fleet", path:ws=>"/acme/"+ws, tag:"6", hot:false },
-  { k:"run", label:"Run", icon:"run", path:ws=>"/acme/"+ws+"/runs/run_01K5YQ7F3M" },
-  { k:"agents", label:"Agents", icon:"agents", path:ws=>"/acme/"+ws+"/agents", tag:"50" },
-  { k:"tools", label:"Tools", icon:"tools", path:ws=>"/acme/"+ws+"/tools" },
-  { k:"ontology", label:"Ontology", icon:"ontology", path:ws=>"/acme/"+ws+"/ontology" },
-  { k:"steering", label:"Steering", icon:"steering", path:ws=>"/acme/"+ws+"/steering", tag:"2", hot:true },
-  { k:"spend", label:"Spend", icon:"spend", path:ws=>"/acme/"+ws+"/spend" }
+  { k:"fleet", label:"Fleet", icon:"fleet", path:ws=>"/a-intel/"+ws, tag:"6", hot:false },
+  { k:"run", label:"Run", icon:"run", path:ws=>"/a-intel/"+ws+"/runs/run_01K5YQ7F3M" },
+  { k:"agents", label:"Agents", icon:"agents", path:ws=>"/a-intel/"+ws+"/agents", tag:"50" },
+  { k:"tools", label:"Tools", icon:"tools", path:ws=>"/a-intel/"+ws+"/tools" },
+  { k:"ontology", label:"Ontology", icon:"ontology", path:ws=>"/a-intel/"+ws+"/ontology" },
+  { k:"steering", label:"Steering", icon:"steering", path:ws=>"/a-intel/"+ws+"/steering", tag:"2", hot:true },
+  { k:"spend", label:"Spend", icon:"spend", path:ws=>"/a-intel/"+ws+"/spend" }
 ];
 const ORG_PAGES = [
-  { k:"org", label:"Organization", icon:"org", path:()=>"/acme" },
-  { k:"billing", label:"Billing", icon:"billing", path:()=>"/acme/billing" },
-  { k:"audit", label:"Audit", icon:"audit", path:()=>"/acme/audit", tag:"1", hot:true }
+  { k:"org", label:"Organization", icon:"org", path:()=>"/a-intel" },
+  { k:"billing", label:"Billing", icon:"billing", path:()=>"/a-intel/billing" },
+  { k:"audit", label:"Audit", icon:"audit", path:()=>"/a-intel/audit", tag:"1", hot:true }
 ];
 const PAGE_LABEL = { fleet:"Fleet", run:"Run", agents:"Agents", tools:"Tools", ontology:"Ontology",
   steering:"Steering", spend:"Spend", org:"Organization", billing:"Billing", audit:"Audit" };
 
 function parseHash(){
-  const raw = location.hash.replace(/^#/, "") || "/acme/core-platform";
+  const raw = location.hash.replace(/^#/, "") || "/a-intel/core-platform";
   const [path, qs] = raw.split("?");
   const q = new URLSearchParams(qs || "");
   S.path = path;
-  const seg = path.split("/").filter(Boolean);   // acme / ws / …
+  const seg = path.split("/").filter(Boolean);   // a-intel / ws / …
   S.run = null;
   if (seg.length === 1) { S.page = "org"; }
   else if (seg[1] === "billing") { S.page = "billing"; }
@@ -1298,7 +1298,7 @@ function parseHash(){
   S.theme  = q.get("th") || "system";
 }
 function go(patch, replace){
-  const [path, qs] = (location.hash.replace(/^#/,"") || "/acme/core-platform").split("?");
+  const [path, qs] = (location.hash.replace(/^#/,"") || "/a-intel/core-platform").split("?");
   const q = new URLSearchParams(qs || "");
   let p = patch.path !== undefined ? patch.path : path;
   Object.keys(patch).forEach(k => {
@@ -1369,7 +1369,7 @@ function blankState(view, pageName){
   if (view === "error") {
     return '<div class="blank err">' + ico("warn", "ic")
       + '<h3>' + pageName + ' could not load</h3>'
-      + '<p>The graph service for <code class="mono">org_acme</code> returned '
+      + '<p>The graph service for <code class="mono">org_a-intel</code> returned '
       + '<b class="mono">neo4j_unavailable</b> after 3 attempts. The last succeeded at 15:44:51Z. '
       + 'Recording is unaffected — frames are spooling and nothing is being lost.</p>'
       + '<p class="sc">incident inc_01K5ZS4H2P · severity 3 · detected by control_plane · opened 15:46:02Z</p>'
@@ -1387,7 +1387,7 @@ function blankState(view, pageName){
       + 'principal prn_01K3F8QA2M · audit evt_01K5ZS9R4T</p>'
       + '<div style="display:flex;gap:8px;margin-top:4px">'
       + '<button class="btn pri" data-act="askaccess">Ask Marcus Bell for access</button>'
-      + '<button class="btn" data-nav="#/acme/core-platform">Go to core-platform</button></div></div>';
+      + '<button class="btn" data-nav="#/a-intel/core-platform">Go to core-platform</button></div></div>';
   }
   return "";
 }
@@ -1401,7 +1401,7 @@ const P = {};
 P.fleet = () => {
   const rows = RUNS.map(r => {
     const a = AGENTS.find(x => x.key === r.agent) || {};
-    return '<tr data-nav="#/acme/' + (a.ws || "core-platform") + '/runs/' + r.id + '">'
+    return '<tr data-nav="#/a-intel/' + (a.ws || "core-platform") + '/runs/' + r.id + '">'
       + '<td><span class="idc">' + r.id + '</span><div class="sc">' + r.task + '</div></td>'
       + '<td><span class="mono" style="font-size:11.5px">' + r.agent + '</span></td>'
       + '<td>' + PEOPLE[r.op].name + '</td>'
@@ -1413,9 +1413,9 @@ P.fleet = () => {
       + '<td>' + verdict(r.verdict) + '</td></tr>';
   }).join("");
   const appr = [
-    ["github__merge_pull_request@3","acme.core.release-manager","Marcus Bell","merge.requires_approval","expires 15:54Z","wait"],
-    ["aws_billing__purchase_savings_plan@2","acme.finops.invoice-bot","Dana Okafor","mandate.above_threshold · $1,180.00","expires 16:02Z","wait"],
-    ["bash(rm -rf node_modules)","acme.core.triage","Marcus Bell","harness.irreversible_path","expires 15:51Z","wait"]
+    ["github__merge_pull_request@3","a-intel.core.release-manager","Marcus Bell","merge.requires_approval","expires 15:54Z","wait"],
+    ["aws_billing__purchase_savings_plan@2","a-intel.finops.invoice-bot","Dana Okafor","mandate.above_threshold · $1,180.00","expires 16:02Z","wait"],
+    ["bash(rm -rf node_modules)","a-intel.core.triage","Marcus Bell","harness.irreversible_path","expires 15:51Z","wait"]
   ].map(a => '<div class="li"><div class="ic" style="background:var(--wait-bg);color:var(--wait)">'
     + ico("clock") + '</div><div class="bd2"><div class="t1">' + (a[0].includes("@") ? TG.cell(a[0], {sz:"sm"}) : '<span class="mono">' + a[0] + '</span>') + '</div>'
     + '<div class="t2">' + TG.gate("require_approval") + ' ' + a[1] + ' · operator ' + a[2] + '<br><span class="sc">rule ' + a[3] + '</span></div>'
@@ -1478,10 +1478,10 @@ const ASSIST_RUNS = {
     frames:61, cost:"0.0214", why:"The onboarding conversation that created this organization",
     frameRows:[
       ["0","09:13:40.002Z","run.start","agent oxagen.assistant · no organization yet · bundle v0",""],
-      ["4","09:14:02.778Z","tool_call","create_org@1 · org_01K3F8PZ9E · neo4j org_acme · receipt rcp_3c77e0","ok"],
-      ["9","09:14:03.115Z","tool_call","create_workspace@1 · wrk_01K3F8Q22F · main repo acme/platform","ok"],
+      ["4","09:14:02.778Z","tool_call","create_org@1 · org_01K3F8PZ9E · neo4j org_a-intel · receipt rcp_3c77e0","ok"],
+      ["9","09:14:03.115Z","tool_call","create_workspace@1 · wrk_01K3F8Q22F · main repo a-intel/platform","ok"],
       ["22","09:16:40.118Z","tool_call","get_install_instructions@1 · harness claude-agent-sdk","ok"],
-      ["38","09:21:44.006Z","record.appended","observation · first frame received from acme.core.release-manager","ok"],
+      ["38","09:21:44.006Z","record.appended","observation · first frame received from a-intel.core.release-manager","ok"],
       ["60","09:21:44.882Z","seal","61 frames · merkle 8c02f71d…4a19 · onboarding_state gated → unlocked","ok"]
     ] }
 };
@@ -1547,14 +1547,14 @@ P.run = () => {
     + sec("Chain", "seal fence · one-shot finalization", card(kvl([
         ["frames","52 · dense seq 0–51 · no telemetry_gap"],
         ["merkle root","sha256:3f7c9a21…b804 (RFC 6962)"],
-        ["attestation","ed25519:9f2c…a18e · key att_acme_02 · valid 2026-06-01 → 2027-06-01"],
-        ["archive segment","blob://org_acme/seg/01K5YQ7F3M.ndjson · 318 KB · object-lock compliance"],
+        ["attestation","ed25519:9f2c…a18e · key att_a-intel_02 · valid 2026-06-01 → 2027-06-01"],
+        ["archive segment","blob://org_a-intel/seg/01K5YQ7F3M.ndjson · 318 KB · object-lock compliance"],
         ["verified offline","yes — 2026-09-11T14:14:02Z by the export verifier"]
       ]), "pad"));
 };
 
 P.agents = () => {
-  const rows = AGENTS.map(a => '<tr data-nav="#/acme/' + a.ws + '/agents">'
+  const rows = AGENTS.map(a => '<tr data-nav="#/a-intel/' + a.ws + '/agents">'
     + '<td><span class="idc">' + a.key + '</span></td>'
     + '<td><span class="sc">' + a.harness + ' ' + a.hv + '</span></td>'
     + '<td>' + tier(a.tier) + '</td>'
@@ -1569,13 +1569,13 @@ P.agents = () => {
     + '<div class="grid g4">'
     + stat("Registered", "50", "5 shown · 45 more in this workspace")
     + stat("Enrolled hosts", "38", "launchd 22 · systemd 11 · task 5")
-    + stat("Holding a mandate", "1", "acme.finops.invoice-bot")
+    + stat("Holding a mandate", "1", "a-intel.finops.invoice-bot")
     + stat("Tamper incidents", "1", "hooks_removed · laptop-mb-02 · 2026-09-08")
     + '</div>'
     + sec("Fleet", "list_agents",
         tbl('<th>Agent key</th><th>Harness</th><th>Tier</th><th class="r">Belt</th>'
           + '<th>Budget</th><th>Mandate</th><th>Status</th>', rows))
-    + sec("acme.core.triage", "get_agent · definition at acme/platform@3d8f77e", card(
+    + sec("a-intel.core.triage", "get_agent · definition at a-intel/platform@3d8f77e", card(
         '<div class="grid g2"><div>' + kvl([
           ["definition",".oxagen/agents/triage.toml"],
           ["digest","sha256:c41f7b09…2ae5"],
@@ -1595,9 +1595,9 @@ P.agents = () => {
 
 P.tools = () => {
   const conns = [
-    ["github-acme","github_app","Priya Natarajan","no","installation token","2026-12-01","ok"],
-    ["linear-acme","oauth","Dana Okafor","no","token_exchange","2026-12-01","ok"],
-    ["stripe-acme","api_key","Dana Okafor","yes","restricted_key","2026-10-15","ok"],
+    ["github-a-intel","github_app","Priya Natarajan","no","installation token","2026-12-01","ok"],
+    ["linear-a-intel","oauth","Dana Okafor","no","token_exchange","2026-12-01","ok"],
+    ["stripe-a-intel","api_key","Dana Okafor","yes","restricted_key","2026-10-15","ok"],
     ["aws-billing","cloud_role","Priya Natarajan","yes","session_policy","2026-11-30","ok"]
   ].map(c => '<tr><td><span class="idc">' + c[0] + '</span></td><td class="sc">' + c[1] + '</td>'
     + '<td>' + c[2] + '</td><td>' + (c[3] === "yes"
@@ -1651,18 +1651,18 @@ P.ontology = () => {
   if (tab === "repositories") {
     body = tbl('<th>Repository</th><th>Role</th><th>Production branch</th><th>Last indexed</th>'
       + '<th>Events</th><th>Issues</th>', [
-      ["acme/platform","main","main","3d8f77e · 12:40 today","healthy · 0 missed","1,402 imported"],
-      ["acme/billing","linked","release","a10c4f2 · 2026-09-10","healthy · 0 missed","318 imported"],
-      ["acme/mobile","linked","main","77be091 · 2026-09-09","1 redelivered","206 imported"]
+      ["a-intel/platform","main","main","3d8f77e · 12:40 today","healthy · 0 missed","1,402 imported"],
+      ["a-intel/billing","linked","release","a10c4f2 · 2026-09-10","healthy · 0 missed","318 imported"],
+      ["a-intel/mobile","linked","main","77be091 · 2026-09-09","1 redelivered","206 imported"]
     ].map(r => '<tr><td><span class="idc">' + r[0] + '</span></td>'
       + '<td><span class="b ' + (r[1] === "main" ? "gold" : "") + '">' + r[1] + '</span></td>'
       + '<td class="sc">' + r[2] + '</td><td class="sc">' + r[3] + '</td>'
       + '<td class="sc">' + r[4] + '</td><td class="sc">' + r[5] + '</td></tr>').join(""));
   } else if (tab === "versions") {
     body = card(kvl([
-      ["active","v23 · merged 2026-09-08 · acme/platform#1871"],
+      ["active","v23 · merged 2026-09-08 · a-intel/platform#1871"],
       ["path",".oxagen/ontology/ — manifest.json, schemas/sales_crm, schemas/github"],
-      ["open proposal","v24 · acme/platform#1894 · adds Contract.renewal_date, 2 relation types"],
+      ["open proposal","v24 · a-intel/platform#1894 · adds Contract.renewal_date, 2 relation types"],
       ["checks","schema validity · naming · no orphaned relation · diff against the pinned version"],
       ["as_of","every prior version stays queryable by its temporal fields"]
     ]), "pad");
@@ -1721,11 +1721,11 @@ P.steering = () => {
 
 P.spend = () => {
   const f = [
-    ["Tool-list bloat","acme.core.triage","$412.80","41 tool definitions average 3,412 tokens a turn; 14 of them were not called in the last 200 runs.","agent"],
-    ["Cache writes never read","acme.core.docs-writer","$188.40","cache_write_5m on the last turn of 61 one-turn runs, never read inside the TTL.","agent"],
-    ["Duplicate tool calls","acme.core.release-manager","$96.10","github__get_file_contents called twice with the same input digest in 38 runs. Opened as a proposal.","agent"],
-    ["Wrong tier","acme.core.triage","$61.20","11 runs were entirely classification-shaped on the complex tier.","agent"],
-    ["Retry storms","acme.core.triage","$61.20","Linear 429s retried 11 times in one turn on 2026-09-03.","run"]
+    ["Tool-list bloat","a-intel.core.triage","$412.80","41 tool definitions average 3,412 tokens a turn; 14 of them were not called in the last 200 runs.","agent"],
+    ["Cache writes never read","a-intel.core.docs-writer","$188.40","cache_write_5m on the last turn of 61 one-turn runs, never read inside the TTL.","agent"],
+    ["Duplicate tool calls","a-intel.core.release-manager","$96.10","github__get_file_contents called twice with the same input digest in 38 runs. Opened as a proposal.","agent"],
+    ["Wrong tier","a-intel.core.triage","$61.20","11 runs were entirely classification-shaped on the complex tier.","agent"],
+    ["Retry storms","a-intel.core.triage","$61.20","Linear 429s retried 11 times in one turn on 2026-09-03.","run"]
   ].map(x => '<tr><td><b style="color:var(--fg)">' + x[0] + '</b><div class="t2 sc" '
     + 'style="color:var(--muted);white-space:normal">' + x[3] + '</div></td>'
     + '<td><span class="mono" style="font-size:11px">' + x[1] + '</span></td>'
@@ -1758,7 +1758,7 @@ P.org = () => {
     + '<td><span class="b">' + p.orgRole + '</span></td>'
     + '<td class="sc">' + Object.keys(p.ws).map(w => w + " · " + p.ws[w]).join("<br>") + '</td>'
     + '<td class="sc">' + p.principal + '</td></tr>').join("");
-  return '<p class="eyebrow">Organization</p><h1 class="pt">Acme Robotics</h1>'
+  return '<p class="eyebrow">Organization</p><h1 class="pt">Anderson Intelligence Corp.</h1>'
     + '<p class="sub">The organization is the tenant and the hard isolation boundary: one Neo4j '
     + 'database, one key-encryption key, one billing account. A workspace is a governance partition '
     + 'inside it, never a second tenant.</p>'
@@ -1812,12 +1812,12 @@ P.audit = () => '<p class="eyebrow">Organization</p><h1 class="pt">Audit</h1>'
   + stat("Events this month", "2,914", "append-only · 7-year retention")
   + stat("Open incidents", "1", "hooks_removed · severity 3")
   + stat("Legal holds", "0", "no run is pinned")
-  + stat("Key rotation", "2026-06-01", "att_acme_02 · valid to 2027-06-01")
+  + stat("Key rotation", "2026-06-01", "att_a-intel_02 · valid to 2027-06-01")
   + '</div>'
   + sec("Events", "query_audit_log",
       tbl('<th>Kind</th><th>Severity</th><th>Actor</th><th>Target</th><th>Detected by</th><th>When</th>', [
         ["hooks_removed","3","—","laptop-mb-02 · claude-code","collector","2026-09-08 open","bad"],
-        ["credential_probe","10","acme.core.triage","witness storage","gateway","2026-09-05 resolved","crit"],
+        ["credential_probe","10","a-intel.core.triage","witness storage","gateway","2026-09-05 resolved","crit"],
         ["steering_published","1","Marcus Bell","ctx.review.changelog-convention","control_plane","2026-08-30","ok"],
         ["mandate_granted","3","Dana Okafor","mnd_4471","control_plane","2026-09-01","ok"],
         ["kill_switch.flipped","3","Priya Natarajan","slack__post_message@7","control_plane","2026-09-09","bad"]
@@ -1836,7 +1836,7 @@ function turnbar(k){
   const t = TURNS[k]; if (!t) return "";
   return '<div class="turnbar">'
     + '<span>this turn is a run</span><span class="sep">·</span>'
-    + '<a data-nav="#/acme/' + S.ws + '/runs/' + t.id + '">' + t.id + '</a><span class="sep">·</span>'
+    + '<a data-nav="#/a-intel/' + S.ws + '/runs/' + t.id + '">' + t.id + '</a><span class="sep">·</span>'
     + '<span>' + t.turns + ' turn' + (t.turns > 1 ? "s" : "") + ', ' + t.steps + ' steps</span><span class="sep">·</span>'
     + '<span>' + t.actions + ' governed action' + (t.actions > 1 ? "s" : "") + '</span><span class="sep">·</span>'
     + '<span>' + t.model + ' · ' + t.tokens + ' · cache ' + t.cache + '</span><span class="sep">·</span>'
@@ -1944,7 +1944,7 @@ function renderAssistant(){
     + ico("close") + '</button></div>'
     + '<div class="ap-ctx">' + ico("pin") + '<span>Looking at</span>'
     + '<span class="pin">' + PAGE_LABEL[S.page] + ' · ' + (S.page === "org" || S.page === "billing"
-      || S.page === "audit" ? "acme" : S.ws) + '</span>'
+      || S.page === "audit" ? "a-intel" : S.ws) + '</span>'
     + '<span style="margin-left:auto" class="sc">' + (S.ap === "onboarding"
       ? "archived · 2026-08-26" : "live") + '</span></div>'
     + '<div class="ap-tabs">' + tabs + '</div>'
@@ -1979,9 +1979,9 @@ function dlgAccount(){
       + '<div class="row2"><div class="field"><label for="ac-name">Display name</label>'
       + '<input id="ac-name" type="text" value="Priya Natarajan"></div>'
       + '<div class="field"><label for="ac-email">Email</label>'
-      + '<input id="ac-email" type="email" value="priya@acmerobotics.com"></div></div>'
+      + '<input id="ac-email" type="email" value="priya@a-intelrobotics.com"></div></div>'
       + '<div class="field"><label>Roles</label>' + kvl([
-        ["acme","org.owner"],
+        ["a-intel","org.owner"],
         ["core-platform","workspace.owner"],
         ["finops","workspace.viewer"],
         ["principal","prn_01K3F8QA2M · kind human"]
@@ -2161,8 +2161,8 @@ function navItem(p, on){
 function render(){
   const orgScope = S.page === "org" || S.page === "billing" || S.page === "audit";
   const crumbs = orgScope
-    ? [["Acme Robotics", "#/acme"], [PAGE_LABEL[S.page], null]]
-    : [["Acme Robotics", "#/acme"], [S.ws, "#/acme/" + S.ws], [PAGE_LABEL[S.page], null]]
+    ? [["Anderson Intelligence Corp.", "#/a-intel"], [PAGE_LABEL[S.page], null]]
+    : [["Anderson Intelligence Corp.", "#/a-intel"], [S.ws, "#/a-intel/" + S.ws], [PAGE_LABEL[S.page], null]]
         .concat(S.page === "run" ? [[S.run, null]] : []);
   const tb = '<header class="tb">'
     + '<div class="tb-brand">'
@@ -2228,9 +2228,9 @@ I.pin = '<circle cx="8" cy="8" r="2.2"/><circle cx="8" cy="8" r="5.8"/>';
 
 /* two more replies, for anything typed that is not one of the three scripts */
 REPLIES.read = { t:NOW.slice(0,5), blocks:[
-  { p:"Of the six live runs, <a data-nav=\"#/acme/core-platform/runs/run_01K5ZB4T8P\">run_01K5ZB4T8P</a> "
-    + "is the expensive one at <b>$1.8840</b> and climbing — <code>acme.core.release-manager</code>, "
-    + "6 turns, 31 steps, operator Marcus Bell, on <code>acme/platform#1893</code>." },
+  { p:"Of the six live runs, <a data-nav=\"#/a-intel/core-platform/runs/run_01K5ZB4T8P\">run_01K5ZB4T8P</a> "
+    + "is the expensive one at <b>$1.8840</b> and climbing — <code>a-intel.core.release-manager</code>, "
+    + "6 turns, 31 steps, operator Marcus Bell, on <code>a-intel/platform#1893</code>." },
   { p:"Where it is going: <b>68%</b> of the spend is uncached input, and the cache hit rate fell from "
     + "0.84 on turn 2 to <b>0.19</b> on turn 5. The system-context digest changed between those turns "
     + "while the conversation prefix did not, which means a configuration change invalidated the prefix "

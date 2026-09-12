@@ -4,7 +4,7 @@ Every mockup is a single self-contained HTML file. Open it in a browser, or serv
 the folder (`python3 -m http.server`) and browse to it. Each file carries its own
 mockup chrome (states, phone width, theme) in the corner; that chrome is not product UI.
 
-The demo record is the same everywhere: Acme Robotics (`acme`), workspace
+The demo record is the same everywhere: Anderson Intelligence Corp. (`a-intel`), workspace
 `core-platform`, operator Marcus Bell.
 
 ## The showboat
