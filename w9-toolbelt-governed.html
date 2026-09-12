@@ -442,6 +442,81 @@ tr.tg-grp .s{font-size:11.5px;color:var(--muted,#9B958A)}
 .tg-axes .k{min-width:96px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted,#9B958A);font-weight:600}
 .tg-axes .note{font-size:11.5px;color:var(--dim,#6E6A62)}
 @media(max-width:520px){.tg-leg{grid-template-columns:1fr}}
+/* ── agent definition: form over the file, source editor, commit dialog ─────────── */
+#flash{position:fixed;left:50%;bottom:22px;transform:translate(-50%,10px);opacity:0;pointer-events:none;background:var(--panel);border:1px solid var(--rule);border-radius:var(--r-sm);padding:10px 14px;font-size:12.5px;color:var(--fg);box-shadow:var(--shadow);z-index:400;display:flex;gap:9px;align-items:center;max-width:min(90vw,640px);transition:opacity .2s,transform .2s}
+#flash.on{opacity:1;transform:translate(-50%,0)}
+#flash .dot{width:6px;height:6px;border-radius:50%;flex:none}
+.btn.strong{border-color:var(--rule);color:var(--fg);font-weight:600;background:var(--hl)}
+.def-split{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;align-items:start}
+.def-split>*{min-width:0}
+@container app (max-width:900px){.def-split{grid-template-columns:minmax(0,1fr)}}
+.def-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 14px;border:1px solid color-mix(in srgb,var(--st-approve) 42%,transparent);background:var(--st-approve-bg);border-radius:var(--r-sm);font-size:12.5px;color:var(--body)}
+.def-bar.pend{border-color:color-mix(in srgb,var(--st-proven) 42%,transparent);background:var(--st-proven-bg)}
+.def-bar.deny{border-color:color-mix(in srgb,var(--st-deny) 42%,transparent);background:var(--st-deny-bg)}
+.def-bar .sp{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center;background:var(--void);border:1px solid var(--border);border-radius:var(--r-xs);padding:6px 8px;min-height:38px;transition:border-color .15s}
+.chips:focus-within{border-color:var(--gold)}
+.chipx{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-family:var(--mono);padding:2px 4px 2px 8px;border:1px solid var(--border);border-radius:5px;background:var(--hl);color:var(--fg);max-width:100%}
+.chipx span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chipx button{border:0;background:none;color:var(--dim);font-size:14px;line-height:1;padding:0 3px;cursor:pointer;border-radius:4px}
+.chipx button:hover{color:var(--st-deny);background:var(--st-deny-bg)}
+.fld .chips input{width:auto;flex:1;min-width:110px;border:0;background:none;padding:2px 4px;font-size:12px}
+.fld input[readonly]{color:var(--muted);background:var(--hl);cursor:default}
+.fxl{display:grid;gap:8px}
+.fxl .check{display:flex;text-transform:none;letter-spacing:0;font-size:12.5px;font-weight:400;color:var(--fg);margin:0}
+.fxl .check input{width:auto}
+.fxl .check.off{opacity:.55;cursor:not-allowed}
+.srclink{display:flex;align-items:center;flex-wrap:wrap;gap:6px 8px;padding:9px 11px;border:1px solid var(--border);border-radius:var(--r-xs);background:var(--void);color:var(--fg);font-family:var(--mono);font-size:12px;text-decoration:none;transition:border-color .15s;min-width:0}
+.srclink:hover{border-color:var(--rule)}
+.srclink .ic{color:var(--dim);flex:none}
+.srclink .p{min-width:0;overflow-wrap:anywhere}
+.srclink .ar{margin-left:auto;color:var(--accent-text);font-family:var(--sans);font-size:11.5px;white-space:nowrap;flex:none}
+.dstat b{font-weight:600}.dstat .a{color:var(--st-allow)}.dstat .d{color:var(--st-deny)}
+/* the editor: find-marks < highlighted pre < real textarea with transparent text, one scroll container */
+.ed{--ed-lh:20px;--ed-pad:12px}
+.ed-bar{display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid var(--border);font-size:12px;color:var(--muted);background:var(--panel);flex-wrap:wrap}
+.ed-sp{flex:1}
+.ed-dot{width:8px;height:8px;border-radius:50%;background:transparent;border:1px solid var(--rule);flex:none}
+.ed-dot[data-on]{background:var(--st-approve);border-color:var(--st-approve)}
+.ed-find{display:flex;align-items:center;gap:6px}
+.ed-find input{background:var(--void);border:1px solid var(--border);border-radius:var(--r-xs);padding:4px 8px;font-size:12px;width:170px;max-width:100%;outline:none;color:var(--fg);font-family:var(--mono)}
+.ed-find input:focus{border-color:var(--gold)}
+.ed-scroll{display:grid;grid-template-columns:max-content minmax(max-content,1fr);overflow:auto;max-height:calc(100vh - 330px);min-height:320px;background:var(--void);font-family:var(--mono);font-size:12.5px;line-height:var(--ed-lh);tab-size:2;scrollbar-width:thin}
+body.phone .ed-scroll{max-height:380px}
+.ed-gut{padding:var(--ed-pad) 10px var(--ed-pad) 14px;text-align:right;color:var(--dim);user-select:none;white-space:pre;border-right:1px solid var(--border);position:sticky;left:0;background:var(--void);z-index:4;min-width:44px}
+.ed-wrap{position:relative;min-width:0}
+.ed-hl,.ed-mk,.ed-t{margin:0;padding:var(--ed-pad) 18px var(--ed-pad) 14px;font:inherit;line-height:inherit;white-space:pre;tab-size:2;border:0;background:transparent;border-radius:0;overflow:visible;letter-spacing:0}
+.ed-hl{position:relative;z-index:2;color:var(--body);min-height:100%}
+.ed-mk{position:absolute;inset:0;z-index:1;color:transparent;pointer-events:none}
+.ed-mk mark{background:color-mix(in srgb,var(--gold) 28%,transparent);color:transparent;border-radius:2px}
+.ed-mk mark.cur{background:color-mix(in srgb,var(--gold) 55%,transparent);outline:1px solid var(--gold)}
+.ed-t{position:absolute;inset:0;width:100%;height:100%;color:transparent;-webkit-text-fill-color:transparent;caret-color:var(--fg);outline:none;resize:none;overflow:hidden;z-index:3;display:block}
+.ed-t::selection{background:color-mix(in srgb,var(--st-approve) 32%,transparent)}
+.ed-cl{position:absolute;left:0;right:0;height:var(--ed-lh);top:var(--ed-pad);background:var(--hl);z-index:0;pointer-events:none}
+.ed-status{display:flex;gap:14px;padding:6px 14px;border-top:1px solid var(--border);font-size:11px;color:var(--muted);flex-wrap:wrap;background:var(--panel)}
+body.phone .ed-status .keys{display:none}
+.tk-k{color:var(--accent-text)} .tk-s{color:var(--st-allow)} .tk-c{color:var(--dim);font-style:italic} .tk-n{color:var(--st-approve)}
+.tk-b{color:var(--st-proven)} .tk-t{color:var(--st-proven);font-weight:600} .tk-p{color:var(--muted)} .tk-e{text-decoration:underline wavy var(--st-fail);text-underline-offset:3px}
+.diff{background:var(--void);border:1px solid var(--border);border-radius:var(--r-xs);overflow:auto;font-size:11.5px;line-height:1.6;max-height:280px;font-family:var(--mono)}
+.dl{display:grid;grid-template-columns:34px 34px minmax(0,1fr);white-space:pre}
+.dl>span:nth-child(-n+2){text-align:right;padding:0 6px;color:var(--dim);user-select:none;border-right:1px solid var(--border)}
+.dl>span:last-child{padding:0 10px;white-space:pre-wrap;overflow-wrap:anywhere}
+.dl.add{background:var(--st-allow-bg);color:var(--fg)} .dl.del{background:var(--st-deny-bg);color:var(--fg)}
+.dl.gap>span:last-child{color:var(--dim);text-align:center}
+.cm-repo{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;align-items:baseline;padding:10px 12px;border:1px dashed var(--rule);border-radius:var(--r-xs);background:var(--hl);margin-bottom:14px;font-size:12.5px}
+.cm-repo .k{color:var(--dim);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:600}
+.cm-repo .v{font-family:var(--mono);color:var(--fg);display:flex;gap:8px;align-items:center;flex-wrap:wrap;min-width:0}
+.cm-repo .hint{grid-column:1/-1;color:var(--muted);font-size:11.5px;line-height:1.5}
+.cm-draft{display:flex;align-items:center;gap:7px;flex-wrap:wrap;font-size:11.5px;color:var(--muted);margin-top:2px}
+.cm-sw{display:flex;align-items:flex-start;gap:12px;padding:10px 12px;border:1px solid var(--border);border-radius:var(--r-xs);background:var(--void);margin-bottom:14px}
+.cm-sw .sw{flex:none;margin-top:2px;border:0;background:none;padding:0}
+.sw.ok.on i{background:var(--st-approve-bg);border-color:var(--st-approve)} .sw.ok.on i::after{background:var(--st-approve)}
+.cm-sw .tx{font-size:12.5px;color:var(--muted);min-width:0;line-height:1.5}
+.cm-sw .tx b{display:block;color:var(--fg);font-weight:600}
+details.cm-diff{margin-bottom:14px}
+details.cm-diff summary{cursor:pointer;font-size:12.5px;color:var(--muted);margin-bottom:8px;list-style:none;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+details.cm-diff summary::-webkit-details-marker{display:none}
+details.cm-diff summary::before{content:"▸";color:var(--dim)} details.cm-diff[open] summary::before{content:"▾"}
 </style>
 
 <div class="appwrap">
@@ -1379,6 +1454,438 @@ function agentsEmpty(r){
 /* ═══════════════════════════════════════════════════════════════
    Agents — detail
    ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════
+   Agent definition — the TOML file is the record; the form is a view of it.
+   S.defBase[slug] = file at the head of the branch it was last committed to (main until the first commit)
+   S.defSrc[slug]  = working draft shared by the form and the source editor
+   S.defPending    = a commit that exists on a branch but is not merged; the running definition is still main's
+   ═══════════════════════════════════════════════════════════════ */
+S.defSrc={}; S.defBase={}; S.defPending={}; S.ed=null; S.cm=null;
+const AG_COMMIT="a41f0c7", AG_DIGEST="sha256:6b20e9c4…f118";
+const HSLUG={"Claude Code":"claude-code","Stella":"stella","Codex CLI":"codex-cli","OpenAI Agents SDK":"openai-agents"};
+const hslug=a=>HSLUG[a.harness]||String(a.harness).toLowerCase().replace(/[^a-z0-9]+/g,"-");
+const BRANCHES=[
+  {name:"agents/release-manager-budget-cap", pr:null, ahead:2, by:"Marcus Bell", when:"2 days ago"},
+  {name:"context/ctx.release.no-reread-changelog", pr:"acme/platform#519", ahead:1, by:"Marcus Bell", when:"5 hours ago"},
+  {name:"ops/kill-switch-runbook", pr:"acme/platform#517", ahead:4, by:"Priya Natarajan", when:"yesterday"}
+];
+function agentBySlug(slug){for(const w in AGENTS){const a=AGENTS[w].find(x=>x.slug===slug);if(a)return a;}return null;}
+function wsOf(a){for(const w in AGENTS){if(AGENTS[w].includes(a))return WS[w];}return WS["core-platform"];}
+function flash(msg,tone){
+  let t=$("#flash"); if(!t){t=document.createElement("div");t.id="flash";document.body.appendChild(t);}
+  t.innerHTML=`<span class="dot" style="background:${tone==="gold"?"var(--gold)":"var(--st-allow)"}"></span>${esc(msg)}`;
+  t.classList.add("on"); clearTimeout(flash._t); flash._t=setTimeout(()=>t.classList.remove("on"),4200);
+}
+function agentTomlSeed(a){
+  const slug=a.slug;
+  const instr=slug==="release-manager"
+   ?"You prepare releases for this repository. Read the changelog\nconventions in .oxagen/rules before writing notes. Open a pull\nrequest; a person merges it."
+   :"You are "+a.name+". "+a.desc+"\nWork inside the toolbelt you were given; when a step needs\nauthority you do not hold, stop and say so.";
+  return '# .oxagen/agents/'+slug+'.toml\n'+
+   'schema = "agent-definition/v0.1"\n'+
+   'slug = "'+slug+'"\n'+
+   'name = "'+a.name+'"\n'+
+   'description = "'+a.desc+'"\n'+
+   'model_tier = "complex"\n'+
+   'tools = ["github__*", "linear__get_issue", "search_graph", "recall_context"]\n'+
+   'deny_tools = ["github__merge_pull_request@*", "github__delete_*@*"]\n'+
+   'side_effects = ["read", "write"]   # never "irreversible" without a mandate\n'+
+   'budget = { per_run_micros = '+Math.round(parseFloat(a.budgetRun)*1e6)+' }\n\n'+
+   '[instructions]\n'+
+   'body = """\n'+instr+'\n"""\n\n'+
+   '[harness.'+hslug(a)+']\n'+
+   'color = "blue"\n';
+}
+function defBase(slug){if(S.defBase[slug]==null)S.defBase[slug]=agentTomlSeed(agentBySlug(slug));return S.defBase[slug];}
+function defSrc(slug){if(S.defSrc[slug]==null)S.defSrc[slug]=defBase(slug);return S.defSrc[slug];}
+function defDirty(slug){return defSrc(slug)!==defBase(slug);}
+function defDiscard(slug){S.defSrc[slug]=defBase(slug);render();}
+function sha7(s){let x=2166136261;for(let i=0;i<s.length;i++){x^=s.charCodeAt(i);x=Math.imul(x,16777619)>>>0;}return ("0000000"+x.toString(16)).slice(-7);}
+
+/* ── TOML subset: strings, multi-line strings, numbers, booleans, arrays, inline tables, [tables] ── */
+function tomlParse(text){
+  const doc={}, lines=text.split("\n"), n=lines.length; let cur=doc, i=0;
+  const err=(m,ln)=>{const e=new Error(m+" (line "+(ln+1)+")");e.line=ln+1;throw e;};
+  const setPath=(obj,path,val)=>{const p=path.split(".");for(let j=0;j<p.length-1;j++){if(typeof obj[p[j]]!=="object"||obj[p[j]]===null||Array.isArray(obj[p[j]]))obj[p[j]]={};obj=obj[p[j]];}obj[p[p.length-1]]=val;};
+  const table=path=>{const p=path.split(".");let o=doc;for(let j=0;j<p.length;j++){if(typeof o[p[j]]!=="object"||o[p[j]]===null)o[p[j]]={};o=o[p[j]];}return o;};
+  const ws=(s,p)=>{while(p<s.length&&(s[p]===" "||s[p]==="\t"))p++;return p;};
+  const ESC={n:"\n",t:"\t",r:"\r",'"':'"',"\\":"\\"};
+  function value(s,p,ln){
+    p=ws(s,p); const c=s[p];
+    if(c==='"'){
+      if(s.substr(p,3)==='"""'){
+        const buf=s.slice(p+3); let k=buf.indexOf('"""');
+        if(k>=0) return [buf.slice(0,k).replace(/^\n/,""), p+3+k+3];
+        const parts=[]; if(buf.length)parts.push(buf);
+        i++;
+        for(;i<n;i++){k=lines[i].indexOf('"""');if(k>=0){parts.push(lines[i].slice(0,k));return [parts.join("\n"),-1];}parts.push(lines[i]);}
+        err("unterminated multi-line string",ln);
+      }
+      let out="",q=p+1;
+      for(;q<s.length;q++){const ch=s[q];if(ch==="\\"){const nx=s[q+1];out+=ESC[nx]!=null?ESC[nx]:nx;q++;continue;}if(ch==='"')return [out,q+1];out+=ch;}
+      err("unterminated string",ln);
+    }
+    if(c==="'"){const e=s.indexOf("'",p+1);if(e<0)err("unterminated string",ln);return [s.slice(p+1,e),e+1];}
+    if(c==="["){const arr=[];p++;for(;;){p=ws(s,p);if(s[p]==="]")return [arr,p+1];if(p>=s.length)err("unterminated array",ln);const r=value(s,p,ln);arr.push(r[0]);p=ws(s,r[1]);if(s[p]===",")p++;else if(s[p]!=="]")err("expected , or ] in array",ln);}}
+    if(c==="{"){const obj={};p++;for(;;){p=ws(s,p);if(s[p]==="}")return [obj,p+1];const m=/^([A-Za-z0-9_.\-]+|"[^"]*")\s*=/.exec(s.slice(p));if(!m)err("expected key in inline table",ln);p+=m[0].length;const r2=value(s,p,ln);setPath(obj,m[1].replace(/^"|"$/g,""),r2[0]);p=ws(s,r2[1]);if(s[p]===",")p++;else if(s[p]!=="}")err("expected , or } in inline table",ln);}}
+    const m2=/^(true|false)\b/.exec(s.slice(p)); if(m2)return [m2[1]==="true",p+m2[0].length];
+    const m3=/^[-+]?(?:\d[\d_]*)(?:\.\d[\d_]*)?(?:[eE][-+]?\d+)?\b/.exec(s.slice(p)); if(m3)return [parseFloat(m3[0].replace(/_/g,"")),p+m3[0].length];
+    err(c==null?"missing value":"cannot read value starting at "+JSON.stringify(c),ln);
+  }
+  for(i=0;i<n;i++){
+    const s=lines[i].replace(/^\s+/,"");
+    if(!s||s[0]==="#")continue;
+    const t=/^\[\[?([^\]]+)\]\]?\s*(#.*)?$/.exec(s);
+    if(t){cur=table(t[1].trim());continue;}
+    const kv=/^([A-Za-z0-9_.\-]+|"[^"]*")\s*=/.exec(s);
+    if(!kv)err("expected key = value",i);
+    const res=value(s,kv[0].length,i);
+    if(res[1]>=0){const rest=s.slice(res[1]).trim();if(rest&&rest[0]!=="#")err("unexpected text after value",i);}
+    setPath(cur,kv[1].replace(/^"|"$/g,""),res[0]);
+  }
+  return doc;
+}
+const tomlStr=v=>'"'+String(v).replace(/\\/g,"\\\\").replace(/"/g,'\\"').replace(/\n/g,"\\n")+'"';
+function tomlLit(v){
+  if(Array.isArray(v))return "["+v.map(tomlLit).join(", ")+"]";
+  if(typeof v==="number"||typeof v==="boolean")return String(v);
+  if(v&&typeof v==="object")return "{ "+Object.keys(v).map(k=>k+" = "+tomlLit(v[k])).join(", ")+" }";
+  return tomlStr(v);
+}
+const tomlMulti=v=>'"""\n'+String(v).replace(/"""/g,'\\"""')+'\n"""';
+/* replace one key's literal in place and keep every other byte, comments included; section null = root */
+function tomlSet(text,section,key,lit){
+  const lines=text.split("\n"); let start=-1,end=lines.length,i,j;
+  if(section===null){start=0;for(i=0;i<lines.length;i++){if(/^\s*\[/.test(lines[i])){end=i;break;}}}
+  else{for(i=0;i<lines.length;i++){const t=/^\s*\[\[?([^\]]+)\]\]?/.exec(lines[i]);if(t&&t[1].trim()===section){start=i+1;for(j=start;j<lines.length;j++){if(/^\s*\[/.test(lines[j])){end=j;break;}}break;}}}
+  if(start<0){while(lines.length&&lines[lines.length-1]==="")lines.pop();lines.push("","["+section+"]",key+" = "+lit,"");return lines.join("\n");}
+  const re=new RegExp("^(\\s*"+key.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"\\s*=\\s*)");
+  for(i=start;i<end;i++){
+    const m=re.exec(lines[i]); if(!m)continue;
+    const rest=lines[i].slice(m[1].length); let tail="",span=1;
+    if(rest.indexOf('"""')===0&&rest.indexOf('"""',3)<0){for(let k=i+1;k<end;k++){span++;if(lines[k].indexOf('"""')>=0)break;}}
+    else{const cm=/\s+#.*$/.exec(rest);if(cm)tail=cm[0];}
+    lines.splice(i,span,...(m[1]+lit+tail).split("\n"));
+    return lines.join("\n");
+  }
+  let at=end; while(at>start&&lines[at-1]==="")at--;
+  lines.splice(at,0,key+" = "+lit);
+  return lines.join("\n");
+}
+function defDoc(slug){try{return {doc:tomlParse(defSrc(slug)),err:null};}catch(e){return {doc:{},err:e};}}
+function defSet(slug,section,key,val,multi){S.defSrc[slug]=tomlSet(defSrc(slug),section,key,multi?tomlMulti(val):tomlLit(val));}
+function defChip(slug,key,i,val){const d=defDoc(slug).doc;const arr=(Array.isArray(d[key])?d[key]:[]).slice();if(i<0){if(arr.includes(val))return;arr.push(val);}else arr.splice(i,1);defSet(slug,null,key,arr);render();}
+function defFx(slug,val,on){const d=defDoc(slug).doc;const arr=(Array.isArray(d.side_effects)?d.side_effects:[]).filter(x=>x!==val);if(on)arr.push(val);const order=["read","write","irreversible"];arr.sort((a,b)=>order.indexOf(a)-order.indexOf(b));defSet(slug,null,"side_effects",arr);render();}
+function defBudget(slug,usdv){const n=Math.round(parseFloat(usdv)*1e6);if(isNaN(n)||n<0){render();return;}defSet(slug,null,"budget",{per_run_micros:n});render();}
+function defField(slug,section,key,val){defSet(slug,section,key,val);render();}
+function defInstr(slug,val){defSet(slug,"instructions","body",val.replace(/\r/g,""),true);render();}
+
+/* ── the Definition tab: a form over the file, the file one link away ── */
+function aDefinition(a,r){
+  const slug=a.slug, w=WS[r.ws], {doc:d,err:perr}=defDoc(slug), dirty=defDirty(slug), pend=S.defPending[slug];
+  const srcHref=`#/${r.org}/${r.ws}/agents/${slug}/source`;
+  const rows=dirty?diffLines(defBase(slug),defSrc(slug)):null, st=rows?diffStat(rows):null;
+  const fld=(label,html,hint)=>`<div class="fld"><label>${label}</label>${html}${hint?`<div class="hint">${hint}</div>`:""}</div>`;
+  const txt=(section,key,val,ro)=>`<input ${ro?"readonly ":""}value="${esc(val==null?"":val)}" aria-label="${esc(key)}"${ro?"":` onchange="defField('${slug}',${section?`'${section}'`:"null"},'${key}',this.value)"`}>`;
+  const chips=(key,arr)=>{arr=Array.isArray(arr)?arr:[];return `<div class="chips">${arr.map((v,i)=>`<span class="chipx"><span>${esc(v)}</span><button type="button" aria-label="Remove ${esc(v)}" onclick="defChip('${slug}','${key}',${i},null)">×</button></span>`).join("")}<input placeholder="add a tool pattern, Enter to keep" aria-label="Add to ${key}" onkeydown="if(event.key==='Enter'&&this.value.trim()){defChip('${slug}','${key}',-1,this.value.trim());event.preventDefault();}"></div>`;};
+  const fx=Array.isArray(d.side_effects)?d.side_effects:[];
+  const check=(v,desc,locked)=>`<label class="check${locked?" off":""}"><input type="checkbox"${fx.includes(v)?" checked":""}${locked?" disabled":""} onchange="defFx('${slug}','${v}',this.checked)"><span class="grow"><span class="n">${v}</span><div class="d">${desc}</div></span></label>`;
+  const micros=d.budget&&typeof d.budget.per_run_micros==="number"?d.budget.per_run_micros:null;
+  const hsec="harness."+hslug(a), hv=(d.harness&&d.harness[hslug(a)])||{};
+
+  let bar="";
+  if(perr) bar=`<div class="def-bar deny"><b>The file does not parse:</b> ${esc(perr.message)}. The form shows what it could read; fix the line in the source editor.<span class="sp"><a class="btn sm" href="${srcHref}">Open the source</a><button class="btn sm" onclick="defDiscard('${slug}')">Discard changes</button></span></div>`;
+  else if(dirty) bar=`<div class="def-bar"><b>Unsaved changes</b><span class="dstat mono"><b class="a">+${st.add}</b> <b class="d">−${st.del}</b></span> against <span class="mono">${pend?esc(pend.branch):esc(w.branch)+" @ "+AG_COMMIT}</span>. Nothing is written until you commit.<span class="sp"><button class="btn sm" onclick="defDiscard('${slug}')">Discard</button><button class="btn sm strong" onclick="openCommit('${slug}','form')">Save changes</button></span></div>`;
+  else if(pend) bar=`<div class="def-bar pend"><b>On branch <span class="mono">${esc(pend.branch)}</span></b> · ${esc(pend.title)} · <span class="dstat mono"><b class="a">+${pend.add}</b> <b class="d">−${pend.del}</b></span>${pend.pr?` · <a href="#" class="mono">${esc(pend.pr)}</a> open`:" · no pull request yet"}. The running definition is still <span class="mono">${esc(w.branch)} @ ${AG_COMMIT}</span> until it merges.${pend.pr?"":`<span class="sp"><button class="btn sm" onclick="openCommit('${slug}','form')">Open a pull request</button></span>`}</div>`;
+
+  const panel=(h2,sub,body)=>`<div class="panel"><div class="p-h"><div class="grow"><h2>${h2}</h2>${sub?`<p class="mono">${sub}</p>`:""}</div></div><div class="p-b">${body}</div></div>`;
+  const left=`<div class="stack">
+    ${panel("Identity","root table",
+      `<div class="row">${fld("Schema",txt(null,"schema",d.schema,true))}${fld("Slug",txt(null,"slug",d.slug,true),`Immutable. The agent key <span class="mono">${esc(a.key)}</span> is derived from it.`)}</div>
+       ${fld("Name",txt(null,"name",d.name))}
+       ${fld("Description",txt(null,"description",d.description),"One sentence. Shown on the Agents list and in every receipt this agent produces.")}`)}
+    ${panel("Model and budget","",
+      `<div class="row">${fld("Model tier",`<select aria-label="Model tier" onchange="defField('${slug}',null,'model_tier',this.value)">${["complex","light"].map(v=>`<option${d.model_tier===v?" selected":""}>${v}</option>`).join("")}</select>`,
+         `<span class="mono">complex</span> routes to z-ai/glm-latest, <span class="mono">light</span> to z-ai/glm-flash-latest, through the model proxy.`)}
+       ${fld("Per-run budget (USD)",`<input type="number" step="0.01" min="0" value="${micros==null?"":(micros/1e6).toFixed(2)}" aria-label="Per-run budget" onchange="defBudget('${slug}',this.value)">`,
+         `Stored as <span class="mono">budget = { per_run_micros = ${micros==null?"…":micros} }</span>. Hard: enforced at the proxy before the call.`)}</div>`)}
+    ${panel("Tools","belt = grants ∩ this list − deny_tools",
+      `${fld("tools",chips("tools",d.tools),`Patterns against the registry. <span class="mono">github__*</span> grants every github tool the operator can delegate.`)}
+       ${fld("deny_tools",chips("deny_tools",d.deny_tools),`A deny here wins over any grant. Version-pinned patterns like <span class="mono">@*</span> deny every version.`)}
+       <div class="fld"><label>Side effects</label><div class="fxl">${check("read","May read through the gateway.")}${check("write","May write through the gateway; every write is a receipt.")}${check("irreversible",`Needs a mandate. This agent holds ${a.mandates||"none"}.`,!a.mandates)}</div></div>`)}
+    ${panel("Instructions","[instructions] body",
+      `<div class="fld"><textarea rows="6" aria-label="Instructions" onchange="defInstr('${slug}',this.value)">${esc((d.instructions&&d.instructions.body)||"")}</textarea>
+       <div class="hint">Compiled into <span class="mono">.claude/agents/${esc(slug)}.md</span> beside this file. The checks scan it for secrets and PII before a merge.</div></div>`)}
+    ${panel("Harness",`[${esc(hsec)}]`,
+      `<div class="row">${fld("Harness",`<input readonly value="${esc(hslug(a))}" aria-label="Harness">`,"Set at registration. Changing it is a new agent.")}
+       ${fld("Color",`<select aria-label="Color" onchange="defField('${slug}','${hsec}','color',this.value)">${["blue","green","gold","red","gray"].map(v=>`<option${hv.color===v?" selected":""}>${v}</option>`).join("")}</select>`,"Cosmetic: the label the harness shows on its own screen.")}</div>`)}
+  </div>`;
+  const right=`<div class="stack">
+    <div class="panel"><div class="p-h"><div class="grow"><h2>Source</h2></div><span class="chip out">source of truth</span></div><div class="p-b stack" style="gap:12px">
+      <a class="srclink" href="${srcHref}"><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg><span class="p">.oxagen/agents/${esc(slug)}.toml</span><span class="ar">Open in the source editor</span></a>
+      <p class="muted" style="font-size:12px;margin:0">Every field on this page is a view of that file. Editing here patches one key in place; editing there changes anything. Both go through the same commit.</p>
+      <dl class="kv"><dt>Repository</dt><dd class="mono">${esc(w.mainRepo)} · ${esc(w.branch)}</dd>
+        <dt>definition_digest</dt><dd class="mono">${AG_DIGEST}</dd>
+        <dt>At commit</dt><dd class="mono">${AG_COMMIT}${dirty?` · <span style="color:var(--st-approve)">draft ${sha7(defSrc(slug))}</span>`:""}</dd>
+        <dt>Generated files</dt><dd class="mono">.claude/agents/${esc(slug)}.md<span class="sub">header names the source file and its digest, marked generated</span></dd>
+        <dt>Stella</dt><dd class="mono">.stella/agents → .oxagen/agents<span class="sub">a symlink; Stella needs no generated file</span></dd>
+        <dt>Open proposals</dt><dd>${pend?`<span class="mono">${esc(pend.branch)}</span>${pend.pr?" · "+esc(pend.pr):""}`:"none"}</dd></dl></div></div>
+    <div class="panel"><div class="p-h"><div class="grow"><h2>Changing this agent</h2></div></div><div class="p-b">
+      <div class="note"><b>Changing this is a pull request, not a write.</b> Save here or in the source editor and a commit lands on a branch of ${esc(w.mainRepo)}; nothing touches Postgres first. The checks validate the schema, that every tool named exists in the registry, that no <span class="mono">irreversible</span> side effect is claimed without a mandate, and that the instructions pass the secret and PII scan. Governance mode <span class="mono">team</span> asks a code owner to review. The identity, the roles and the belt update on merge.</div>
+      <p class="muted" style="font-size:12px;margin-top:12px">Deleting an agent is a pull request that removes the file. The principal is retired, never deleted, so its runs keep their identity.</p></div></div>
+  </div>`;
+  return `<div class="stack">${bar}<div class="def-split">${left}${right}</div></div>`;
+}
+
+/* ── TOML highlighter: one regex pass, classes only, colours come from the theme tokens ── */
+function hlToml(src){
+  const re=/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:[^"\\\n]|\\.)*"|'[^'\n]*')|(#[^\n]*)|(\[\[?[^\]\n]*\]\]?)|(\b(?:true|false)\b)|([-+]?\d[\d_]*(?:\.\d[\d_]*)?(?:[eE][-+]?\d+)?\b)|([A-Za-z0-9_\-]+(?:\.[A-Za-z0-9_\-]+)*(?=\s*=))|([=\[\]{},])|(\n)|([ \t]+)|([^\s"'#\[\]{},=]+|.)/g;
+  let out="",m,lineStart=true,afterEq=false;
+  while((m=re.exec(src))){
+    const t=m[0]; let cls="";
+    if(m[8]){out+="\n";lineStart=true;afterEq=false;continue;}
+    if(m[9]){out+=t;continue;}
+    if(m[1])cls="tk-s";
+    else if(m[2])cls="tk-c";
+    else if(m[3]){if(lineStart)cls="tk-t";else{re.lastIndex=m.index+1;out+='<span class="tk-p">[</span>';lineStart=false;continue;}}
+    else if(m[4])cls="tk-b";
+    else if(m[5])cls=afterEq?"tk-n":"tk-e";
+    else if(m[6])cls="tk-k";
+    else if(m[7]){cls="tk-p";if(t==="=")afterEq=true;}
+    else cls="tk-e";
+    out+='<span class="'+cls+'">'+esc(t)+'</span>';
+    lineStart=false;
+  }
+  return out;
+}
+function edMarks(text,q,cur){
+  if(!q)return "";
+  const lo=text.toLowerCase(),ql=q.toLowerCase(); let out="",p=0,i,n=0;
+  while((i=lo.indexOf(ql,p))>=0){out+=esc(text.slice(p,i))+'<mark'+(i===cur?' class="cur"':'')+'>'+esc(text.slice(i,i+q.length))+'</mark>';p=i+q.length;n++;}
+  out+=esc(text.slice(p)); S.ed.matches=n; return out;
+}
+
+/* ── the source page: route agents/<slug>/source ── */
+function aSource(a,r){
+  const slug=a.slug, w=WS[r.ws], path=`.oxagen/agents/${slug}.toml`;
+  if(!S.ed||S.ed.slug!==slug)S.ed={slug,sel:[0,0],find:"",cur:-1,matches:0};
+  const dirty=defDirty(slug), pend=S.defPending[slug];
+  return `${S.killBanner||""}
+  <div class="head"><div class="grow">
+    <p class="eyebrow gold"><button class="link" onclick="go('${r.org}/${r.ws}/agents')" style="color:inherit;text-decoration:none">Agents</button> · <button class="link" onclick="go('${r.org}/${r.ws}/agents/${slug}/definition')" style="color:inherit;text-decoration:none">${esc(a.name)}</button> · source</p>
+    <h1 class="mono" style="font-size:19px">${esc(path)}</h1>
+    <div class="wire" style="margin-top:9px"><span class="b">${esc(w.mainRepo)}</span>${pend?`<span class="chip c-approve"><span class="dot"></span>${esc(pend.branch)}</span>`:`<span class="b">${esc(w.branch)} @ ${AG_COMMIT}</span>`}<span class="chip out">source of truth</span><span class="chip sq">${esc(a.key)}</span></div>
+    <p class="lede">Every field on the agent form is a view of this file. Saving opens the same commit dialog the form uses; nothing is written to Postgres.</p></div>
+    <div class="head-actions"><button class="btn" onclick="edBack()">Back to the form</button><button class="btn" id="edDiscard" onclick="edDiscard()"${dirty?"":" disabled"}>Discard</button><button class="btn primary" id="edSave" onclick="edSave()">Save</button></div></div>
+  <div class="panel ed" id="ed">
+    <div class="ed-bar"><span class="mono" style="color:var(--fg)">${esc(path)}</span><span class="ed-dot" id="edDot"${dirty?' data-on="1"':""} title="unsaved changes"></span><span class="dim">${dirty?"modified":"unchanged"}</span><span class="ed-sp"></span>
+      <label class="ed-find"><input id="edFind" placeholder="Find  ⌘F" aria-label="Find in file" value="${esc(S.ed.find||"")}"><span id="edFindN" class="mono dim"></span></label></div>
+    <div class="ed-scroll" id="edS"><div class="ed-gut" id="edG" aria-hidden="true"></div>
+      <div class="ed-wrap"><div class="ed-cl" id="edCL"></div><pre class="ed-mk" id="edM" aria-hidden="true"></pre><pre class="ed-hl" id="edH" aria-hidden="true"></pre>
+      <textarea id="edT" class="ed-t" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" wrap="off" aria-label="${esc(path)}"></textarea></div></div>
+    <div class="ed-status"><span id="edPos">Ln 1, Col 1</span><span>TOML</span><span>Spaces: 2</span><span>LF</span><span>UTF-8</span><span class="ed-sp"></span><span class="keys dim">⌘S save · Tab indent · ⇧Tab outdent · ⌘/ comment · ⌘F find · ⌘Z undo</span></div></div>`;
+}
+function edMount(){
+  const t=$("#edT"); if(!t||!S.ed) return;
+  t.value=defSrc(S.ed.slug);
+  edPaint();
+  try{t.setSelectionRange(S.ed.sel[0],S.ed.sel[1]);}catch(e){}
+  t.addEventListener("input",()=>{S.defSrc[S.ed.slug]=t.value;S.ed.cur=-1;edPaint();});
+  t.addEventListener("keydown",edKey);
+  ["keyup","click","select"].forEach(ev=>t.addEventListener(ev,edPos));
+  const f=$("#edFind");
+  f.addEventListener("input",()=>{S.ed.find=f.value;S.ed.cur=-1;edPaint();});
+  f.addEventListener("keydown",e=>{
+    if(e.key==="Enter"){e.preventDefault();edFindNext(e.shiftKey?-1:1);}
+    if(e.key==="Escape"){e.stopPropagation();f.value="";S.ed.find="";S.ed.cur=-1;edPaint();t.focus();}
+  });
+  if(!DLG&&!S.ed.keepFocus)t.focus();
+  S.ed.keepFocus=false;
+}
+function edPaint(){
+  const t=$("#edT"),H=$("#edH"),G=$("#edG"),M=$("#edM"); if(!t||!H)return;
+  const text=t.value;
+  H.innerHTML=hlToml(text)+"\n";
+  M.innerHTML=edMarks(text,S.ed.find,S.ed.cur)+"\n";
+  const n=text.split("\n").length; let g=""; for(let i=1;i<=n;i++)g+=i+"\n";
+  G.textContent=g;
+  const fn=$("#edFindN"); if(fn)fn.textContent=S.ed.find?(S.ed.matches?(S.ed.cur>=0?edMatchIndex()+" of ":"")+S.ed.matches:"0"):"";
+  const dirty=text!==defBase(S.ed.slug);
+  const dot=$("#edDot"); if(dot){if(dirty)dot.setAttribute("data-on","1");else dot.removeAttribute("data-on");if(dot.nextSibling)dot.nextSibling.textContent=dirty?"modified":"unchanged";}
+  const dis=$("#edDiscard"); if(dis)dis.disabled=!dirty;
+  edPos();
+}
+function edMatchIndex(){const t=$("#edT"),lo=t.value.toLowerCase(),q=S.ed.find.toLowerCase();let p=0,i,k=0;while((i=lo.indexOf(q,p))>=0){k++;if(i===S.ed.cur)return k;p=i+q.length;}return k;}
+function edPos(){
+  const t=$("#edT"); if(!t||!S.ed)return;
+  const p=t.selectionStart,e=t.selectionEnd; S.ed.sel=[p,e];
+  const ln=t.value.slice(0,p).split("\n"),line=ln.length,col=ln[ln.length-1].length+1;
+  const pos=$("#edPos"); if(pos)pos.textContent="Ln "+line+", Col "+col+(e>p?"  ("+(e-p)+" selected)":"");
+  const cl=$("#edCL"); if(cl)cl.style.top=(12+(line-1)*20)+"px";
+}
+function edFindNext(dir){
+  const t=$("#edT"),q=S.ed.find; if(!t||!q)return;
+  const lo=t.value.toLowerCase(),ql=q.toLowerCase(),from=dir>0?t.selectionEnd:t.selectionStart-1; let i;
+  if(dir>0){i=lo.indexOf(ql,from);if(i<0)i=lo.indexOf(ql);}else{i=from<0?-1:lo.lastIndexOf(ql,from-1);if(i<0)i=lo.lastIndexOf(ql);}
+  if(i<0)return;
+  S.ed.cur=i; t.setSelectionRange(i,i+q.length); edPaint();
+  const s=$("#edS"),line=t.value.slice(0,i).split("\n").length-1;
+  s.scrollTop=Math.max(0,line*20-s.clientHeight/2);
+}
+const ED_PAIR={'"':'"',"[":"]","{":"}"};
+function edKey(e){
+  const t=e.target,v=t.value,s=t.selectionStart,en=t.selectionEnd,mod=e.metaKey||e.ctrlKey,key=e.key;
+  const ins=str=>{t.focus();let ok=false;try{ok=document.execCommand("insertText",false,str);}catch(x){}if(!ok){t.setRangeText(str,t.selectionStart,t.selectionEnd,"end");t.dispatchEvent(new Event("input"));}};
+  const lineBounds=()=>{const a=v.lastIndexOf("\n",s-1)+1;let b=v.indexOf("\n",en);if(b<0)b=v.length;return [a,b];};
+  if(mod&&key.toLowerCase()==="s"){e.preventDefault();e.stopPropagation();edSave();return;}
+  if(mod&&key.toLowerCase()==="f"){e.preventDefault();e.stopPropagation();const f=$("#edFind");if(f){f.focus();f.select();}return;}
+  if(mod&&key==="/"){e.preventDefault();const lb=lineBounds(),ls=v.slice(lb[0],lb[1]).split("\n"),all=ls.every(l=>/^\s*#/.test(l)||!l.trim());
+    const out=ls.map(l=>!l.trim()?l:all?l.replace(/^(\s*)#\s?/,"$1"):l.replace(/^(\s*)/,"$1# ")).join("\n");
+    t.setSelectionRange(lb[0],lb[1]);ins(out);t.setSelectionRange(lb[0],lb[0]+out.length);edPos();return;}
+  if(key==="Tab"){e.preventDefault();const lb2=lineBounds(),multi=v.slice(s,en).indexOf("\n")>=0;
+    if(!e.shiftKey&&!multi){ins("  ");edPos();return;}
+    const blk=v.slice(lb2[0],lb2[1]).split("\n").map(l=>e.shiftKey?l.replace(/^ {1,2}/,""):"  "+l).join("\n");
+    t.setSelectionRange(lb2[0],lb2[1]);ins(blk);t.setSelectionRange(lb2[0],lb2[0]+blk.length);edPos();return;}
+  if(key==="Enter"&&!mod){e.preventDefault();const a0=v.lastIndexOf("\n",s-1)+1,cur=v.slice(a0,s);let ind=(/^\s*/.exec(cur)||[""])[0];if(/[\[{]\s*$/.test(cur))ind+="  ";ins("\n"+ind);edPos();return;}
+  if(!mod&&s===en&&(key==="]"||key==="}"||key==='"')&&v[s]===key){e.preventDefault();t.setSelectionRange(s+1,s+1);edPos();return;}
+  if(!mod&&s===en&&ED_PAIR[key]){const nx=v[s];if((nx==null||/[\s\]\},]/.test(nx))&&!(key==='"'&&v[s-1]==='"')){e.preventDefault();ins(key+ED_PAIR[key]);t.setSelectionRange(s+1,s+1);edPos();return;}}
+  if(key==="Backspace"&&s===en&&s>0&&!mod){const pr=ED_PAIR[v[s-1]];if(pr&&v[s]===pr){e.preventDefault();t.setSelectionRange(s-1,s+1);ins("");edPos();return;}}
+  if(key==="Escape"&&S.ed.find){e.stopPropagation();const f2=$("#edFind");if(f2)f2.value="";S.ed.find="";S.ed.cur=-1;edPaint();}
+}
+function edBack(){const r=parse(),slug=S.ed?S.ed.slug:r.a;S.ed=null;go(`${r.org}/${r.ws}/agents/${slug}/definition`);}
+function edDiscard(){if(!S.ed)return;S.defSrc[S.ed.slug]=defBase(S.ed.slug);const t=$("#edT");if(t)t.value=S.defSrc[S.ed.slug];edPaint();}
+function edSave(){if(!S.ed)return;S.ed.keepFocus=true;openCommit(S.ed.slug,"editor");}
+
+/* ── line diff (LCS; definitions are tens of lines) ── */
+function diffLines(a,b){
+  const A=a.split("\n"),B=b.split("\n"),n=A.length,m=B.length,L=[]; let i,j;
+  for(i=0;i<=n;i++)L.push(new Array(m+1).fill(0));
+  for(i=n-1;i>=0;i--)for(j=m-1;j>=0;j--)L[i][j]=A[i]===B[j]?L[i+1][j+1]+1:Math.max(L[i+1][j],L[i][j+1]);
+  const out=[]; i=0;j=0;
+  while(i<n&&j<m){if(A[i]===B[j]){out.push({t:" ",a:i+1,b:j+1,s:A[i]});i++;j++;}else if(L[i+1][j]>=L[i][j+1]){out.push({t:"-",a:i+1,s:A[i]});i++;}else{out.push({t:"+",b:j+1,s:B[j]});j++;}}
+  while(i<n){out.push({t:"-",a:i+1,s:A[i]});i++;} while(j<m){out.push({t:"+",b:j+1,s:B[j]});j++;}
+  return out;
+}
+function diffStat(rows){let p=0,m=0;rows.forEach(r=>{if(r.t==="+")p++;else if(r.t==="-")m++;});return {add:p,del:m};}
+function diffHtml(rows,ctx){
+  ctx=ctx==null?2:ctx;
+  const keep=rows.map((r,i)=>{if(r.t!==" ")return true;for(let k=Math.max(0,i-ctx);k<=Math.min(rows.length-1,i+ctx);k++)if(rows[k].t!==" ")return true;return false;});
+  let html="",gap=false;
+  rows.forEach((r,i)=>{
+    if(!keep[i]){if(!gap){html+='<div class="dl gap"><span></span><span></span><span>⋯</span></div>';gap=true;}return;}
+    gap=false;
+    html+='<div class="dl'+(r.t==="+"?" add":r.t==="-"?" del":"")+'"><span>'+(r.a||"")+'</span><span>'+(r.b||"")+'</span><span>'+r.t+' '+esc(r.s)+'</span></div>';
+  });
+  return '<div class="diff">'+html+'</div>';
+}
+
+/* ── the light-tier draft: structured field diff in, title + description + branch name out ── */
+function defChanges(slug){
+  let base,cur; try{base=tomlParse(defBase(slug));}catch(e){base={};} try{cur=tomlParse(defSrc(slug));}catch(e){return null;}
+  const out=[];
+  const walk=(a,b,path)=>{const keys={};Object.keys(a||{}).concat(Object.keys(b||{})).forEach(k=>keys[k]=1);
+    Object.keys(keys).forEach(k=>{const x=a?a[k]:undefined,y=b?b[k]:undefined,p=path?path+"."+k:k;
+      if(x&&y&&typeof x==="object"&&typeof y==="object"&&!Array.isArray(x)&&!Array.isArray(y))return walk(x,y,p);
+      if(JSON.stringify(x)!==JSON.stringify(y))out.push({key:p,from:x,to:y});});};
+  walk(base,cur,""); return out;
+}
+function draftCommit(slug){
+  const ch=defChanges(slug)||[], a=agentBySlug(slug);
+  const AREA={model_tier:"model routing","budget.per_run_micros":"budget",tools:"toolbelt",deny_tools:"toolbelt",side_effects:"side effects","instructions.body":"instructions",name:"metadata",description:"metadata"};
+  const fmt=v=>v===undefined?"unset":Array.isArray(v)?"["+v.join(", ")+"]":(typeof v==="string"&&v.length>48)?JSON.stringify(v.slice(0,45)+"…"):JSON.stringify(v);
+  const money=m=>"$"+((m||0)/1e6).toFixed(2);
+  const areas={},lines=[],risk=[];
+  ch.forEach(c=>{
+    const area=AREA[c.key]||(c.key.indexOf("harness.")===0?"harness":"definition"); areas[area]=1;
+    const f=Array.isArray(c.from)?c.from:[],t=Array.isArray(c.to)?c.to:[];
+    if(c.key==="budget.per_run_micros")lines.push("Per-run budget "+money(c.from)+" to "+money(c.to)+(c.to<c.from?"; the highest run this month was "+usd(parseFloat(a.budgetRun)*0.68)+".":"."));
+    else if(c.key==="model_tier")lines.push("Model tier "+c.from+" to "+c.to+(c.to==="light"?"; classification-shaped work stays on the light tier.":"; reasoning steps go to the complex tier."));
+    else if(c.key==="tools"||c.key==="deny_tools"){const added=t.filter(x=>!f.includes(x)),removed=f.filter(x=>!t.includes(x));
+      if(added.length)lines.push((c.key==="tools"?"Grants ":"Denies ")+added.join(", ")+".");
+      if(removed.length)lines.push((c.key==="tools"?"Withdraws ":"Stops denying ")+removed.join(", ")+".");
+      if(c.key==="tools"&&added.length)risk.push("widens the toolbelt"); if(c.key==="deny_tools"&&removed.length)risk.push("removes a deny");}
+    else if(c.key==="side_effects"){lines.push("Side effects "+fmt(c.from)+" to "+fmt(c.to)+".");if(t.includes("irreversible")&&!f.includes("irreversible"))risk.push("adds irreversible, which needs a mandate");}
+    else if(c.key==="instructions.body")lines.push("Rewrites the instructions ("+String(c.from||"").split(/\s+/).filter(Boolean).length+" to "+String(c.to||"").split(/\s+/).filter(Boolean).length+" words).");
+    else lines.push(c.key+" "+fmt(c.from)+" to "+fmt(c.to)+".");
+  });
+  const al=Object.keys(areas),c0=ch[0]; let title;
+  if(!ch.length)title="Reformat "+slug+".toml, no field changed";
+  else if(ch.length===1)title=c0.key==="model_tier"?"Move "+slug+" to the "+c0.to+" tier"
+    :c0.key==="budget.per_run_micros"?(c0.to<c0.from?"Lower":"Raise")+" "+slug+" per-run budget to "+money(c0.to)
+    :c0.key==="instructions.body"?"Rewrite "+slug+" instructions"
+    :(c0.key==="tools"||c0.key==="deny_tools")?"Change "+slug+" toolbelt"
+    :"Update "+slug+" "+c0.key.split(".").pop();
+  else title="Update "+slug+": "+al.join(", ");
+  const kind=risk.length?"widens authority":!ch.length?"formatting":(al.length===1&&(al[0]==="metadata"||al[0]==="harness"))?"cosmetic":"behavioural";
+  const branch="agent/"+slug+"/"+(title.replace(slug,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,40)||"edit");
+  const tok=310+ch.length*46+lines.join(" ").length;
+  return {title,body:lines.join("\n"),areas:al,risk,kind,changes:ch,branch,model:"z-ai/glm-flash-latest",tokens:tok,cost:(tok*0.0000004).toFixed(4),ms:420+ch.length*90};
+}
+
+/* ── the commit dialog: repo fixed, branch chosen, PR a switch ── */
+function openCommit(slug,from){
+  const d=draftCommit(slug),pend=S.defPending[slug],prOnly=!!(pend&&!pend.pr&&!defDirty(slug));
+  S.cm={slug,from,title:d.title,body:d.body,branch:"__new",newName:d.branch,pr:true,draft:d,prOnly};
+  if(prOnly){S.cm.branch=pend.branch;S.cm.title=pend.title;S.cm.body=pend.body||"";}
+  openDlg("commit");
+}
+function cmSet(k,v){if(S.cm)S.cm[k]=v;}
+function cmRedraft(){if(!S.cm)return;const d=draftCommit(S.cm.slug);S.cm.title=d.title;S.cm.body=d.body;S.cm.newName=d.branch;S.cm.draft=d;paintDlg();}
+function cmBranch(){if(!S.cm||S.cm.branch==="__new")return null;return BRANCHES.find(b=>b.name===S.cm.branch)||null;}
+function commitDlg(){
+  if(!S.cm)return shell("Commit this change","",`<div class="empty"><p>Nothing to commit.</p></div>`,`<button class="btn" style="margin-left:auto" onclick="closeDlg()">Close</button>`);
+  const c=S.cm,a=agentBySlug(c.slug),w=wsOf(a),d=c.draft,ex=cmBranch(),pend=S.defPending[c.slug];
+  const rows=diffLines(c.prOnly?agentTomlSeed(a):defBase(c.slug),defSrc(c.slug)),st=diffStat(rows);
+  const lock='<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>';
+  const sub=`<span class="mono">.oxagen/agents/${esc(c.slug)}.toml</span> · <span class="dstat"><b class="a">+${st.add}</b> <b class="d">−${st.del}</b></span> · ${c.prOnly?"already on the branch, no pull request yet":"from the "+(c.from==="editor"?"source editor":"form")}`;
+  const body=`
+   <div class="cm-repo"><span class="k">Repository</span><span class="v">${esc(w.mainRepo)}<span class="chip sq out" style="gap:4px">${lock} primary</span></span>
+     <span class="k">Base</span><span class="v">${esc(w.branch)} @ ${AG_COMMIT}</span>
+     <span class="hint">The primary repository bound to workspace ${esc(w.name)}. Every agent definition in this workspace lives here; it is not chosen per change.</span></div>
+   <div class="row">
+     <div class="fld"><label>Branch</label><select aria-label="Branch" onchange="cmSet('branch',this.value);paintDlg()">
+       <option value="__new"${c.branch==="__new"?" selected":""}>+ New branch</option>
+       ${pend?`<option value="${esc(pend.branch)}"${c.branch===pend.branch?" selected":""}>${esc(pend.branch)} · this agent’s open change</option>`:""}
+       ${BRANCHES.filter(b=>!pend||b.name!==pend.branch).map(b=>`<option value="${esc(b.name)}"${c.branch===b.name?" selected":""}>${esc(b.name)}${b.pr?" · "+esc(b.pr):""}</option>`).join("")}</select></div>
+     ${c.branch==="__new"
+      ?`<div class="fld"><label>New branch name</label><input value="${esc(c.newName)}" aria-label="New branch name" oninput="cmSet('newName',this.value)"><div class="hint">Cut from ${esc(w.branch)} @ ${AG_COMMIT}. Suggested by the same draft as the summary.</div></div>`
+      :`<div class="fld"><label>Branch head</label><div class="hint" style="margin-top:8px">${ex?`${ex.ahead} commit${ex.ahead===1?"":"s"} ahead of ${esc(w.branch)} · ${esc(ex.by)} · ${esc(ex.when)}${ex.pr?`<br><span class="mono">${esc(ex.pr)}</span> is open for it; this commit joins that pull request.`:"<br>No pull request yet."}`:"Your open change for this agent."}</div></div>`}
+   </div>
+   <div class="fld"><label>Summary</label><input value="${esc(c.title)}" aria-label="Summary" oninput="cmSet('title',this.value)" style="font-family:var(--sans);font-size:13px">
+     <div class="cm-draft"><span class="chip sq out">${esc(d.kind)}</span>${d.areas.map(x=>`<span class="chip sq out">${esc(x)}</span>`).join("")}<span>Drafted by <span class="mono">${esc(d.model)}</span> · light tier · ${d.tokens} tokens · $${d.cost} · ${d.ms} ms</span><button class="btn sm" type="button" onclick="cmRedraft()">Redraft</button></div></div>
+   <div class="fld"><label>Description</label><textarea rows="4" aria-label="Description" oninput="cmSet('body',this.value)" style="font-family:var(--sans);font-size:13px">${esc(c.body)}</textarea>
+     <div class="hint">Becomes the commit message${c.pr||(ex&&ex.pr)?" and the pull request body":""}. The draft is a starting point; what you commit is what you wrote.</div></div>
+   ${d.risk.length?`<div class="note deny" style="margin-bottom:14px">This change ${esc(d.risk.join(" and "))}. The checks will hold the merge for a code-owner review${d.risk.some(x=>/mandate/.test(x))?" and an active mandate":""}.</div>`:""}
+   ${c.prOnly
+    ?`<div class="cm-sw"><span class="chip c-approve" style="margin-top:2px"><span class="dot"></span>PR</span><div class="tx"><b>Opens the pull request for <span class="mono">${esc(c.branch)}</span></b>The commit is already on the branch. This asks the code owners of <span class="mono">.oxagen/agents/</span> to review it against ${esc(w.branch)}.</div></div>`
+    :ex&&ex.pr
+    ?`<div class="cm-sw"><span class="chip c-approve" style="margin-top:2px"><span class="dot"></span>PR open</span><div class="tx"><b>${esc(ex.pr)} already covers this branch</b>The commit lands on the branch and the pull request updates itself; no second one is opened.</div></div>`
+    :`<div class="cm-sw"><button type="button" class="sw ok${c.pr?" on":""}" role="switch" aria-checked="${c.pr?"true":"false"}" aria-label="Open a pull request" onclick="cmSet('pr',!S.cm.pr);paintDlg()"><i></i></button>
+      <div class="tx"><b>Open a pull request</b>${c.pr
+       ?`Against ${esc(w.branch)}, titled from the summary. Governance mode <span class="mono">team</span> asks the code owners of <span class="mono">.oxagen/agents/</span> to review; merge is the change.`
+       :`Push the commit to the branch only. Nothing changes for the running agent until someone opens and merges a pull request; your coding agent can pick the branch up from the repo.`}</div></div>`}
+   <details class="cm-diff"${c.prOnly?" open":""}><summary>Diff against ${pend&&c.branch===pend.branch&&!c.prOnly?esc(pend.branch):esc(w.branch)} · ${rows.filter(r=>r.t!==" ").length} line${st.add+st.del===1?"":"s"} changed</summary>${diffHtml(rows,2)}</details>
+   <div class="note">Merge is the change. The principal, roles, and toolbelt update when the pull request merges; until then the running definition stays at <span class="mono">${AG_COMMIT}</span> and <span class="mono">definition_digest</span> does not move.</div>`;
+  const name=c.branch==="__new"?c.newName:c.branch;
+  const label=c.prOnly?"Open the pull request":ex&&ex.pr?"Commit to the branch":c.pr?"Commit and open the pull request":"Commit to the branch";
+  const foot=`<span class="grow">${c.branch==="__new"?"New branch ":""}<span class="mono">${esc(name)}</span> on <span class="mono">${esc(w.mainRepo)}</span></span>
+   <button class="btn" onclick="closeDlg()">Cancel</button><button class="btn primary" onclick="commitConfirm()"${name&&c.title.trim()?"":" disabled"}>${label}</button>`;
+  return shell("Commit this change",sub,body,foot,true);
+}
+function commitConfirm(){
+  const c=S.cm; if(!c)return;
+  const slug=c.slug,a=agentBySlug(slug),w=wsOf(a),branch=(c.branch==="__new"?c.newName:c.branch).trim(),ex=cmBranch();
+  const rows=diffLines(defBase(slug),defSrc(slug)),st=diffStat(rows),pend=S.defPending[slug];
+  let pr=null,opened=false;
+  if(c.prOnly){pr=w.mainRepo+"#"+(2839+Object.keys(S.defPending).length);pend.pr=pr;pend.title=c.title.trim();pend.body=c.body;if(ex)ex.pr=pr;S.cm=null;closeDlg();render();flash(pr+" opened for "+branch+" · "+pend.title,"gold");return;}
+  if(ex&&ex.pr)pr=ex.pr; else if(pend&&pend.branch===branch&&pend.pr)pr=pend.pr; else if(c.pr){pr=w.mainRepo+"#"+(2839+Object.keys(S.defPending).length);opened=true;}
+  S.defBase[slug]=defSrc(slug);
+  S.defPending[slug]={branch,pr,sha:sha7(defSrc(slug)),title:c.title.trim(),body:c.body,add:st.add+(pend&&pend.branch===branch?pend.add:0),del:st.del+(pend&&pend.branch===branch?pend.del:0)};
+  if(ex){ex.ahead++;if(pr)ex.pr=pr;} else if(c.branch==="__new")BRANCHES.push({name:branch,pr,ahead:1,by:"Marcus Bell",when:"just now"});
+  S.cm=null; closeDlg(); render();
+  flash("Committed +"+st.add+" −"+st.del+" to "+branch+" on "+w.mainRepo+(pr?" · "+pr+(opened?" opened":" updated"):" · no pull request"),pr?"gold":undefined);
+}
+
 const ATABS = [["identity","Identity"],["toolbelt","Toolbelt"],["mandates","Mandates"],
   ["budgets","Budgets"],["enrollment","Enrollment"],["incidents","Tamper incidents"],["definition","Definition"]];
 
@@ -1391,6 +1898,7 @@ function pageAgent(r){
   const st = stateBlock(r, "This agent");
   if(st) return st;
   const tab = r.b || "toolbelt";
+  if(tab==="source") return aSource(a,r);
   const body = ({
     identity:aIdentity, toolbelt:aToolbelt, mandates:aMandates, budgets:aBudgets,
     enrollment:aEnrollment, incidents:aIncidents, definition:aDefinition
@@ -1520,6 +2028,7 @@ function aToolbelt(a,r){
       <td>${riskChip(t.risk)}${effChip(t.eff)}</td>
       <td><span class="chip sq">${esc(t.eg)}</span></td>
       <td>${finChip(t.fin)}</td>
+      <td>${decChip(t.dec)}<span class="sub mono">${esc(t.rule)}</span></td>
       <td><span class="mono dim" style="font-size:11px">${esc(t.dig)}</span></td>
     </tr>`;
   const rows = S.beltView==="group"
@@ -2811,6 +3320,8 @@ $ oxagen agent enroll --agent acme.core.release-manager --managed
     `<button class="btn" style="margin-left:auto" onclick="closeDlg()">Cancel</button>
      <button class="btn primary" onclick="closeDlg()">Rotate</button>`);
 
+  case "commit": return commitDlg();
+
   case "context-pr": return shell("Change the definition",
     "Every change to an agent is a pull request on the main repo.",
     `<pre>acme/platform <span class="k">#2839</span>  <span class="s">"release-manager: allow linear__update_issue"</span>
@@ -3003,6 +3514,7 @@ function render(){
   else if(r.page==="tools") html = pageTools(r);
   else html = pageStub(r);
   $("#main").innerHTML = `<div class="pad">${html}</div>`;
+  if(r.page==="agents"&&r.b==="source") edMount();
   paintPad();
 }
 
