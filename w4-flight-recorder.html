@@ -369,29 +369,30 @@ nav.pages a .sub{display:block;font-family:var(--mono);font-size:10.5px;color:va
 /* waterfall tab */
 .wf{padding:14px 24px 0}
 .wfchart{border:1px solid var(--border);border-radius:var(--r);background:var(--panel);padding:16px;overflow-x:auto}
-.wfrow{display:grid;grid-template-columns:168px minmax(340px,1fr) 100px;gap:16px;align-items:center;
-  padding:13px 0;border-bottom:1px solid var(--border)}
-.wfrow:last-child{border-bottom:0}
-.wfrow .nm{font-size:12.5px;color:var(--fg);font-weight:500;display:flex;align-items:center;flex-wrap:wrap;gap:0 6px}
-.wfrow .nm small{display:block;flex-basis:100%;font-family:var(--mono);font-size:10.5px;color:var(--dim);font-weight:400;margin-top:2px}
+/* the chart itself: bar height is the turn's cost on the left scale, bar width is its
+   wall clock, and the gold dashed line is cost accumulating to the total at the right. */
+.wfsvg{width:100%;height:auto;display:block;min-width:560px}
+.wfsvg text{font-family:var(--mono);font-size:10px;fill:var(--dim)}
+.wfsvg .gl{stroke:var(--rule);stroke-width:1}
+.wfsvg .base{stroke:var(--border);stroke-width:1}
+.wfsvg .bl{fill:var(--fg);font-size:10.5px}
+.wfsvg .tl{fill:var(--muted);font-size:11px;font-weight:600}
+.wfsvg .tot{fill:var(--accent-text);font-size:10.5px}
+.wfsvg .wb{cursor:pointer}
+.wfsvg .wb:hover,.wfsvg .wb.on{stroke:var(--fg);stroke-width:1.5}
+.wfsvg .cum{fill:none;stroke:var(--gold);stroke-width:1.8;stroke-dasharray:4 3;stroke-linejoin:round}
+.wfsvg .cdot{fill:var(--gold)}
+.wfsvg .wmk{cursor:pointer;--mk:var(--st-proven)}
+.wfsvg .wmk.fnd{--mk:var(--st-denied)}
+.wfsvg .wmk line{stroke:var(--mk);stroke-width:2}
+.wfsvg .wmk circle{fill:var(--mk)}
+.wfsvg .wmk:hover line,.wfsvg .wmk.on line{stroke-width:3.5}
+.wfsvg .wmk:hover circle,.wfsvg .wmk.on circle{r:5}
+.wfsvg [tabindex]:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
 .wfinfo{width:15px;height:15px;flex:none;border-radius:50%;border:1px solid var(--border);background:var(--hl);
-  color:var(--dim);font:600 9.5px/1 var(--mono);display:grid;place-items:center;cursor:pointer;padding:0}
+  color:var(--dim);font:600 9.5px/1 var(--mono);display:inline-grid;place-items:center;cursor:pointer;padding:0;
+  vertical-align:middle;margin-left:6px}
 .wfinfo:hover,.wfinfo:focus-visible,.wfinfo.on{color:var(--fg);border-color:var(--muted)}
-.wftrack{position:relative;height:30px;background:var(--ink);border-radius:6px;border:1px solid var(--border);overflow:hidden}
-.wfbar{position:absolute;top:0;bottom:0;background:color-mix(in srgb,var(--gold) 26%,transparent);
-  border-left:2px solid var(--gold)}
-.wfbar .lbl{position:absolute;left:6px;top:50%;transform:translateY(-50%);font-family:var(--mono);
-  font-size:10.5px;color:var(--fg);white-space:nowrap}
-.wfmark{position:absolute;top:0;bottom:0;width:2px;background:var(--mk);z-index:2;border:0;padding:0;margin:0;
-  cursor:pointer;--mk:var(--st-proven)}
-/* the ::before is both the hit area and the hover band: an outward box-shadow would be
-   clipped away by .wftrack's overflow:hidden, so the highlight lives inside the track. */
-.wfmark::before{content:"";position:absolute;top:0;bottom:0;left:-5px;right:-5px;border-radius:3px}
-.wfmark:hover,.wfmark:focus-visible,.wfmark.on{width:3px;outline:0}
-.wfmark:hover::before,.wfmark:focus-visible::before,.wfmark.on::before{background:color-mix(in srgb,var(--mk) 26%,transparent)}
-.wfmark.fnd{--mk:var(--st-denied)}
-.wfrow .amt{font-family:var(--mono);font-size:12px;text-align:right;font-variant-numeric:tabular-nums;color:var(--fg)}
-.wfrow .amt small{display:block;color:var(--dim);font-size:10.5px}
 
 /* lightweight anchored popovers, for the waterfall marks and turn info — more room
    than a title="" tooltip, without the weight of the full-screen <dialog>. */
@@ -597,8 +598,6 @@ body.phone .app{grid-template-columns:1fr}
   .kv dt{margin-top:6px}
   .bis{grid-template-columns:1fr}
   .bis > div:first-child{border-right:0;border-bottom:1px solid var(--border)}
-  .wfrow{grid-template-columns:1fr;gap:6px}
-  .wfrow .amt{text-align:left}
   .crumbs .hidesm{display:none}
 }
 @media(max-width:460px){
@@ -2575,32 +2574,92 @@ function wfDeliveryCard(){
       grant ? ["Credential grant", esc(grant[1]) + " · " + esc(grant[2]) + " at " + frameBtn(prF.seq)] : null
     ]) + "</div></section>";
 }
-function waterfallTab(){
-  const R = ROLL, t0 = R.turns[0].start, t1 = R.turns[R.turns.length-1].end, span = t1 - t0;
+/* findings that cite at least one frame inside this turn, earliest first */
+function wfFindingsIn(tn){
+  return FINDINGS.map(fd => {
+    const here = fd.frames.map(sq => FRAMES[sq]).filter(fr => fr && fr.turn === tn).sort((a,b) => a.ts - b.ts);
+    return here.length ? {fd, at:here[0], count:here.length} : null;
+  }).filter(Boolean);
+}
+function wfChart(){
+  const T = ROLL.turns, t0 = T[0].start, t1 = T[T.length-1].end, span = (t1 - t0) || 1;
+  const W = 860, H = 268, pad = {t:18, r:60, b:46, l:58};
+  const iw = W - pad.l - pad.r, ih = H - pad.t - pad.b;
+  const maxTurn = Math.max.apply(null, T.map(t => t.cost)), total = ROLL.total;
+  const X  = ts => pad.l + (ts - t0)/span * iw;
+  const Yb = v  => pad.t + ih - (v/maxTurn) * ih;   /* bars: one turn's cost */
+  const Yc = v  => pad.t + ih - (v/total)   * ih;   /* line: cost so far */
   const proofFrame = FRAMES.find(f => f.kind === "proof.observed");
+
+  let grid = "", axis = "";
+  for(let i = 0; i <= 4; i++){
+    const v = maxTurn * i/4, y = Yb(v);
+    grid += '<line class="gl" x1="' + pad.l + '" y1="' + y.toFixed(1) + '" x2="' + (W-pad.r) + '" y2="' + y.toFixed(1) + '"/>';
+    axis += '<text class="ax" x="' + (pad.l-8) + '" y="' + (y+3.4).toFixed(1) + '" text-anchor="end">' + usd(v,2) + "</text>";
+  }
+
+  let bars = "", labs = "", cum = 0;
+  const pts = [X(t0).toFixed(1) + "," + Yc(0).toFixed(1)];
+  T.forEach(t => {
+    const x = X(t.start), bwv = Math.max(4, X(t.end) - X(t.start)), y = Yb(t.cost), bh = Math.max(2, pad.t + ih - y);
+    const hasProof = !!(proofFrame && proofFrame.turn === t.n), finds = wfFindingsIn(t.n);
+    const fill = hasProof ? "var(--st-proven)" : finds.length ? "var(--st-denied)" : "var(--st-approval)";
+    bars += '<rect class="wb" x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + bwv.toFixed(1) +
+      '" height="' + bh.toFixed(1) + '" rx="3" fill="' + fill + '" opacity="' + (hasProof || finds.length ? ".95" : ".78") +
+      '" data-wfpop="turn:' + t.n + '" tabindex="0" role="button" aria-expanded="false" aria-label="Turn ' + t.n +
+      " · " + esc(t.title) + " · " + usd(t.cost) + '"><title>Turn ' + t.n + " · " + esc(t.title) + " · " + usd(t.cost) +
+      " · cache hit " + pct(t.hit,0) + "</title></rect>";
+    const mid = x + bwv/2;
+    labs += '<text class="bl" x="' + mid.toFixed(1) + '" y="' + (y-6).toFixed(1) + '" text-anchor="middle">' + usd(t.cost) + "</text>";
+    labs += '<text class="tl" x="' + mid.toFixed(1) + '" y="' + (pad.t+ih+16) + '" text-anchor="middle">T' + t.n + "</text>";
+    labs += '<text x="' + mid.toFixed(1) + '" y="' + (pad.t+ih+29) + '" text-anchor="middle">' + dur((t.end-t.start)/1000) + "</text>";
+    cum += t.cost;
+    pts.push(X(t.end).toFixed(1) + "," + Yc(cum).toFixed(1));
+  });
+
+  const mark = (x, cls, attrs, label) =>
+    '<g class="wmk ' + cls + '" ' + attrs + ' tabindex="0" role="button" aria-label="' + label + '">' +
+    '<rect x="' + (x-7).toFixed(1) + '" y="' + pad.t + '" width="14" height="' + ih + '" fill="transparent"/>' +
+    '<line x1="' + x.toFixed(1) + '" y1="' + pad.t + '" x2="' + x.toFixed(1) + '" y2="' + (pad.t+ih) + '"/>' +
+    '<circle cx="' + x.toFixed(1) + '" cy="' + (pad.t-6) + '" r="3.4"/></g>';
+  let marks = "";
+  if(proofFrame)
+    marks += mark(X(proofFrame.ts), "proof", 'data-wfpop="proof" aria-expanded="false"',
+      "Witness flipped · frame " + proofFrame.seq);
+  /* one mark per finding, at its earliest cited frame: a tick per frame put five of them
+     1.4% apart in turn 3 — a blob at any width, unclickable below full width. */
+  T.forEach(t => wfFindingsIn(t.n).forEach(x => {
+    marks += mark(X(x.at.ts), "fnd", 'data-finding="' + x.fd.id + '"',
+      esc(x.fd.title) + " · " + x.count + " frame" + (x.count===1?"":"s") + " in turn " + t.n);
+  }));
+
+  return '<svg class="wfsvg" viewBox="0 0 ' + W + " " + H + '" preserveAspectRatio="xMidYMid meet" role="img" ' +
+    'aria-label="Cost by turn across the run’s wall clock, with cost accumulating to ' + usd(total) + '">' +
+    grid + axis +
+    '<line class="base" x1="' + pad.l + '" y1="' + (pad.t+ih) + '" x2="' + (W-pad.r) + '" y2="' + (pad.t+ih) + '"/>' +
+    bars +
+    '<path class="cum" d="M' + pts.join("L") + '"/>' +
+    pts.map(p => '<circle class="cdot" cx="' + p.split(",")[0] + '" cy="' + p.split(",")[1] + '" r="2.6"/>').join("") +
+    '<text class="tot" x="' + (W-pad.r+8) + '" y="' + (Yc(total)+3.4).toFixed(1) + '" text-anchor="start">' + usd(total) + "</text>" +
+    '<text x="' + (W-pad.r+8) + '" y="' + (Yc(total)+15.4).toFixed(1) + '" text-anchor="start">total</text>' +
+    /* the axis is wall clock, so say where it starts and ends */
+    '<text x="' + pad.l + '" y="' + (H-6) + '" text-anchor="start">' + clock(t0).slice(0,8) + "</text>" +
+    '<text x="' + (W-pad.r) + '" y="' + (H-6) + '" text-anchor="end">' + clock(t1).slice(0,8) + " · " + dur(span/1000) + " wall clock</text>" +
+    marks + labs + "</svg>";
+}
+function waterfallTab(){
+  const R = ROLL;
   let acc = 0;
   const rows = R.turns.map(t => {
-    const left = (t.start - t0)/span*100, width = (t.end - t.start)/span*100;
     const from = acc; acc += t.cost;
-    const marks = [];
-    if(proofFrame && proofFrame.turn === t.n)
-      marks.push('<button type="button" class="wfmark" style="left:' + ((proofFrame.ts - t0)/span*100).toFixed(2) +
-        '%" data-wfpop="proof" aria-expanded="false" aria-label="Witness flipped · frame ' + proofFrame.seq + '"></button>');
-    /* one mark per finding per turn, at its earliest frame here. A tick per cited frame
-       put five of them 1.4% apart on turn 3 — a blob at any width, unclickable at narrow. */
-    FINDINGS.forEach(fd => {
-      const here = fd.frames.map(sq => FRAMES[sq]).filter(fr => fr && fr.turn === t.n).sort((a,b) => a.ts - b.ts);
-      if(!here.length) return;
-      marks.push('<button type="button" class="wfmark fnd" style="left:' + ((here[0].ts - t0)/span*100).toFixed(2) +
-        '%" data-finding="' + fd.id + '" aria-label="' + esc(fd.title) + ' · ' + here.length + ' frame' +
-        (here.length===1?"":"s") + ' in this turn"></button>');
-    });
-    return '<div class="wfrow"><div class="nm">Turn ' + t.n + " · " + esc(t.title) +
-      '<button type="button" class="wfinfo" data-wfpop="turn:' + t.n + '" aria-expanded="false" aria-label="What turn ' + t.n + ' spent and called">i</button>' +
-      "<small>" + t.steps + " steps · " + t.frames + " frames · cache hit " + pct(t.hit) + "</small></div>" +
-      '<div class="wftrack"><span class="wfbar" style="left:' + left.toFixed(2) + "%;width:" + Math.max(width,2).toFixed(2) + '%">' +
-      '<span class="lbl">' + usd(from) + " → " + usd(acc) + "</span></span>" + marks.join("") + "</div>" +
-      '<div class="amt">' + usd(t.cost) + "<small>" + dur((t.end-t.start)/1000) + "</small></div></div>";
+    const finds = wfFindingsIn(t.n);
+    return "<tr><td>T" + t.n + " · " + esc(t.title) +
+      '<button type="button" class="wfinfo" data-wfpop="turn:' + t.n + '" aria-expanded="false" aria-label="What turn ' +
+      t.n + ' spent and called">i</button></td>' +
+      '<td class="r m">' + t.steps + '</td><td class="r m">' + t.frames + '</td><td class="r m">' + pct(t.hit) + "</td>" +
+      '<td class="r m">' + usd(t.cost) + '</td><td class="r m dim">' + usd(from) + " → " + usd(acc) + "</td>" +
+      "<td>" + (finds.length ? finds.map(x => '<button class="fr" type="button" data-finding="' + x.fd.id + '">' +
+        esc(x.fd.title) + "</button>").join(' <span class="dim">·</span> ') : '<span class="dim">—</span>') + "</td></tr>";
   }).join("");
   const classRows = [["input_uncached", R.usage.input, 3], ["cache_read", R.usage.cache_read, 0.3],
     ["cache_write_5m", R.usage.cache_write_5m, 3.75], ["output", R.usage.output, 15], ["reasoning", R.usage.reasoning, 15]]
@@ -2613,7 +2672,13 @@ function waterfallTab(){
     '<span class="sp" style="margin-left:auto"></span>' +
     flipChip(RUN.witness.verdict, "proof · " + RUN.witness.verdict, "font-size:10.5px;padding:2px 7px") +
     chip("findings · " + FINDINGS.length, "denied") + "</div>" +
-    rows + "</div>" +
+    wfChart() +
+    '<p class="muted" style="font-size:11.5px;margin:10px 0 14px">Bar height is that turn’s cost on the left scale, bar width is its wall clock, ' +
+      'and the gold line is cost accumulating to ' + usd(R.total) + ' at the right. Ticks are frames: ' +
+      '<span style="color:var(--st-proven)">the flip</span>, and <span style="color:var(--st-denied)">a finding</span>. Every one of them opens.</p>' +
+    '<div class="tbwrap"><table class="tb"><thead><tr><th>turn</th><th class="r">steps</th><th class="r">frames</th>' +
+      '<th class="r">cache hit</th><th class="r">cost</th><th class="r">running total</th><th>findings</th></tr></thead>' +
+      "<tbody>" + rows + "</tbody></table></div></div>" +
     '<div class="g2" style="margin-top:14px">' +
     '<section class="card" style="margin:0"><div class="card-h"><h2>Spend by token class</h2></div><div class="card-b">' +
       '<div class="tbwrap"><table class="tb"><thead><tr><th>class</th><th class="r">tokens</th><th class="r">cost USD</th><th class="r">share</th></tr></thead><tbody>' +
@@ -3103,9 +3168,11 @@ function onWfPopOutside(e){
   if(wfPopEl && !wfPopEl.contains(e.target) && !e.target.closest("[data-wfpop]")) closeWfPop();
 }
 function openWfPop(trigger, key){
-  const reopening = wfPopKey === key;
+  /* same trigger toggles shut; the same key from a different trigger (a bar and its table
+     row both open "turn:3") re-anchors instead of closing. */
+  const toggling = wfPopKey === key && wfPopTrigger === trigger;
   closeWfPop();
-  if(reopening) return;
+  if(toggling) return;
   const html = wfPopContent(key);
   if(!html) return;
   const el = document.createElement("div");
