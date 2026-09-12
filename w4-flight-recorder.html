@@ -382,11 +382,14 @@ nav.pages a .sub{display:block;font-family:var(--mono);font-size:10.5px;color:va
   border-left:2px solid var(--gold)}
 .wfbar .lbl{position:absolute;left:6px;top:50%;transform:translateY(-50%);font-family:var(--mono);
   font-size:10.5px;color:var(--fg);white-space:nowrap}
-.wfmark{position:absolute;top:0;bottom:0;width:2px;background:var(--st-proven);z-index:2;border:0;padding:0;margin:0;cursor:pointer}
-.wfmark::before{content:"";position:absolute;top:0;bottom:0;left:-5px;right:-5px}
-.wfmark:hover,.wfmark:focus-visible{width:3px;box-shadow:0 0 0 5px color-mix(in srgb,var(--st-proven) 24%,transparent);outline:0}
-.wfmark.fnd{background:var(--st-denied)}
-.wfmark.fnd:hover,.wfmark.fnd:focus-visible{box-shadow:0 0 0 5px color-mix(in srgb,var(--st-denied) 24%,transparent)}
+.wfmark{position:absolute;top:0;bottom:0;width:2px;background:var(--mk);z-index:2;border:0;padding:0;margin:0;
+  cursor:pointer;--mk:var(--st-proven)}
+/* the ::before is both the hit area and the hover band: an outward box-shadow would be
+   clipped away by .wftrack's overflow:hidden, so the highlight lives inside the track. */
+.wfmark::before{content:"";position:absolute;top:0;bottom:0;left:-5px;right:-5px;border-radius:3px}
+.wfmark:hover,.wfmark:focus-visible,.wfmark.on{width:3px;outline:0}
+.wfmark:hover::before,.wfmark:focus-visible::before,.wfmark.on::before{background:color-mix(in srgb,var(--mk) 26%,transparent)}
+.wfmark.fnd{--mk:var(--st-denied)}
 .wfrow .amt{font-family:var(--mono);font-size:12px;text-align:right;font-variant-numeric:tabular-nums;color:var(--fg)}
 .wfrow .amt small{display:block;color:var(--dim);font-size:10.5px}
 
@@ -2534,28 +2537,42 @@ function wfGroupTally(frames){
   frames.forEach(f => { if(f.kind !== "tool_call") return; const c = TG.meta(f.payload.step.tool).cat; t[c] = (t[c]||0) + 1; });
   return t;
 }
+function wfDeniedFrames(){ return FRAMES.filter(f => f.kind === "policy.decision" && f.denied); }
 function wfGroupsCard(){
-  const t = wfGroupTally(FRAMES), total = ROLL.toolCalls;
+  const t = wfGroupTally(FRAMES), total = ROLL.toolCalls, denied = wfDeniedFrames();
   const rows = Object.keys(t).sort((a,b) => t[b]-t[a]).map(c =>
     '<div class="pop-grow">' + TG.cat(c) + '<b>' + t[c] + '<span class="dim" style="font-weight:400"> · ' + pct(t[c]/total,0) + '</span></b></div>').join("");
+  /* the denied request never became a tool_call frame, so it is outside the tally above;
+     say so rather than let the total quietly disagree with the run's request count. */
+  const deniedNote = denied.length ? '<p class="muted" style="font-size:11.5px;margin-top:11px">' +
+    denied.length + " more " + (denied.length === 1 ? "was" : "were") + " requested and denied before running, so " +
+    (denied.length === 1 ? "it is" : "they are") + " not counted above: " +
+    denied.map(f => TG.cat(TG.meta(f.payload.step.tool).cat) + ' <span class="mono">' + esc(f.payload.step.tool) + "</span> · " + frameBtn(f.seq)).join(", ") + "</p>" : "";
   return '<section class="card" style="margin:0"><div class="card-h"><h2>Tool calls by group</h2><span class="sp"></span>' +
-    '<span class="mono dim" style="font-size:10.5px">' + total + ' total</span></div><div class="card-b">' +
-    '<div class="pop-groups">' + rows + '</div>' +
+    '<span class="mono dim" style="font-size:10.5px">' + total + ' ran</span></div><div class="card-b">' +
+    '<div class="pop-groups">' + rows + '</div>' + deniedNote +
     '<p class="muted" style="font-size:11.5px;margin-top:11px">Grouped by what the tool acts on — the same taxonomy the toolbelt and every policy decision use, not by which server hosts it.</p></div></section>';
 }
 function wfDeliveryCard(){
   const prF = wfToolFrame("github.open_pull_request"), diffF = wfToolFrame("repo.diff");
   const pr = prF && prF.payload.step.out.output, diff = diffF && diffF.payload.step.out.output;
+  const prEff = prF && prF.payload.step.out.effects;
   const grant = prF && prF.payload.step.pol.conds.find(c => c[0] === "credential grant");
-  const deniedFrame = FRAMES.find(f => f.kind === "policy.decision" && f.denied);
+  const denied = wfDeniedFrames();
+  const gated = FRAMES.filter(f => f.kind === "policy.decision" && f.payload.step.pol.outcome === "require_approval");
   return '<section class="card" style="margin:0"><div class="card-h"><h2>Delivery &amp; governance</h2></div><div class="card-b">' +
     kv([
-      pr ? ["Pull request", '<a href="' + esc(pr.url) + '" target="_blank" rel="noopener">acme/billing#' + pr.number + '</a> · ' + esc(pr.state) + " · " + frameBtn(prF.seq)] : null,
-      diff ? ["Diff", diff.files + " file" + (diff.files===1?"":"s") + ' · <span style="color:var(--st-proven)">+' + diff.added + '</span> <span style="color:var(--st-failed)">−' + diff.removed + '</span> · ' + frameBtn(diffF.seq)] : null,
+      pr ? ["Pull request", '<a href="' + esc(pr.url) + '" target="_blank" rel="noopener">' +
+        esc((prEff && prEff.pull_request) || ("#" + pr.number)) + "</a> · " + esc(pr.state) + " · " + frameBtn(prF.seq)] : null,
+      diff ? ["Diff", diff.files + " file" + (diff.files===1?"":"s") + ' · <span style="color:var(--st-proven)">+' + diff.added +
+        '</span> <span style="color:var(--st-failed)">−' + diff.removed + '</span> · ' + frameBtn(diffF.seq)] : null,
       pr ? ["Checks", esc(pr.checks) + " · as recorded at PR open, " + frameBtn(prF.seq)] : null,
-      ["Approval gates crossed", "0 this run · every third-party call cleared on policy rule alone"],
-      deniedFrame ? ["Denied", "1 call · " + frameBtn(deniedFrame.seq)] : null,
-      grant ? ["Credential grant issued", esc(grant[1]) + " · " + frameBtn(prF.seq)] : null
+      ["Approval gates", gated.length
+        ? gated.length + " crossed · " + gated.map(f => frameBtn(f.seq)).join(", ")
+        : "none · every call cleared on a policy rule, so nothing waited on a person"],
+      denied.length ? ["Denied", denied.length + " call" + (denied.length===1?"":"s") + " · " +
+        denied.map(f => '<span class="mono">' + esc(f.payload.step.tool) + "</span> " + frameBtn(f.seq)).join(", ")] : null,
+      grant ? ["Credential grant", esc(grant[1]) + " · " + esc(grant[2]) + " at " + frameBtn(prF.seq)] : null
     ]) + "</div></section>";
 }
 function waterfallTab(){
@@ -2567,14 +2584,19 @@ function waterfallTab(){
     const from = acc; acc += t.cost;
     const marks = [];
     if(proofFrame && proofFrame.turn === t.n)
-      marks.push('<button type="button" class="wfmark" style="left:' + ((proofFrame.ts - t0)/span*100).toFixed(2) + '%" data-wfpop="proof" aria-label="proof.observed · flipped"></button>');
-    FINDINGS.forEach(fd => fd.frames.forEach(sq => {
-      const fr = FRAMES[sq];
-      if(fr && fr.turn === t.n)
-        marks.push('<button type="button" class="wfmark fnd" style="left:' + ((fr.ts - t0)/span*100).toFixed(2) + '%" data-finding="' + fd.id + '" aria-label="' + esc(fd.title) + ' · frame ' + sq + '"></button>');
-    }));
+      marks.push('<button type="button" class="wfmark" style="left:' + ((proofFrame.ts - t0)/span*100).toFixed(2) +
+        '%" data-wfpop="proof" aria-expanded="false" aria-label="Witness flipped · frame ' + proofFrame.seq + '"></button>');
+    /* one mark per finding per turn, at its earliest frame here. A tick per cited frame
+       put five of them 1.4% apart on turn 3 — a blob at any width, unclickable at narrow. */
+    FINDINGS.forEach(fd => {
+      const here = fd.frames.map(sq => FRAMES[sq]).filter(fr => fr && fr.turn === t.n).sort((a,b) => a.ts - b.ts);
+      if(!here.length) return;
+      marks.push('<button type="button" class="wfmark fnd" style="left:' + ((here[0].ts - t0)/span*100).toFixed(2) +
+        '%" data-finding="' + fd.id + '" aria-label="' + esc(fd.title) + ' · ' + here.length + ' frame' +
+        (here.length===1?"":"s") + ' in this turn"></button>');
+    });
     return '<div class="wfrow"><div class="nm">Turn ' + t.n + " · " + esc(t.title) +
-      '<button type="button" class="wfinfo" data-wfpop="turn:' + t.n + '" aria-label="Tool calls by group for turn ' + t.n + '">i</button>' +
+      '<button type="button" class="wfinfo" data-wfpop="turn:' + t.n + '" aria-expanded="false" aria-label="What turn ' + t.n + ' spent and called">i</button>' +
       "<small>" + t.steps + " steps · " + t.frames + " frames · cache hit " + pct(t.hit) + "</small></div>" +
       '<div class="wftrack"><span class="wfbar" style="left:' + left.toFixed(2) + "%;width:" + Math.max(width,2).toFixed(2) + '%">' +
       '<span class="lbl">' + usd(from) + " → " + usd(acc) + "</span></span>" + marks.join("") + "</div>" +
@@ -2589,8 +2611,8 @@ function waterfallTab(){
     '<h2 style="font-size:14px">Cost accumulating across the run</h2>' +
     '<span class="muted" style="font-size:12px">left to right in wall clock · ' + usd(R.total) + ' USD total</span>' +
     '<span class="sp" style="margin-left:auto"></span>' +
-    flipChip(RUN.witness.verdict, "proof · flipped", "font-size:10.5px;padding:2px 7px") +
-    '<span class="muted" style="font-size:11.5px"><i style="display:inline-block;width:9px;height:9px;background:var(--st-denied);vertical-align:0;margin-right:5px"></i>finding</span></div>' +
+    flipChip(RUN.witness.verdict, "proof · " + RUN.witness.verdict, "font-size:10.5px;padding:2px 7px") +
+    chip("findings · " + FINDINGS.length, "denied") + "</div>" +
     rows + "</div>" +
     '<div class="g2" style="margin-top:14px">' +
     '<section class="card" style="margin:0"><div class="card-h"><h2>Spend by token class</h2></div><div class="card-b">' +
@@ -3022,38 +3044,60 @@ function renderAssistant(){
 }
 
 /* ---------------- waterfall popovers ---------------- */
-let wfPopEl = null, wfPopKey = null;
+let wfPopEl = null, wfPopKey = null, wfPopTrigger = null, wfPopScroller = null;
+const POP_CLOSE = '<button type="button" class="pop-close" data-pop-close aria-label="Close">×</button>';
 function wfPopContent(key){
   if(key === "proof"){
     const w = RUN.witness, F = flipFacts(), proof = FRAMES.find(f => f.kind === "proof.observed");
-    return '<div class="pop-h">' + flipChip(w.verdict) + '<button type="button" class="pop-close" data-pop-close aria-label="Close">×</button></div>' +
+    const k = F ? F.attempts.length : 0;
+    const greenAt = F ? F.attempts.findIndex(a => a.result === "pass") + 1 : 0;
+    const last = k ? F.attempts[k-1] : null;
+    return '<div class="pop-h">' + flipChip(w.verdict) + POP_CLOSE + "</div>" +
       '<div class="pop-b">' + kv([
-        ["Oracle", esc(w.oracle)],
-        F ? ["Test", esc(F.testKind) + " · " + esc(F.runner)] : null,
-        F ? ["Attempts", F.attempts.length + " of " + F.attempts.length + " · green"] : null,
-        ["Target", esc(w.target_ref) + " · fail"],
-        ["PR head", esc(w.pr_ref) + " · pass"]
-      ]) + (proof ? '<button class="btn sm" type="button" data-frame="' + proof.seq + '" style="margin-top:2px">Open the proof frame</button>' : "") + "</div>";
+        ["Oracle", '<span class="mono">' + esc(w.oracle) + "</span>"],
+        F ? ["Witness", esc(F.testKind) + " · " + esc(F.runner)] : null,
+        k ? ["Attempts", greenAt ? k + " · green on " + greenAt : k + " · never green"] : null,
+        (last && last.passed != null) ? ["Last run", last.passed + " passed, " + last.failed + " failed · exit " + last.exit] : null,
+        ["Target " + esc(w.target_ref), '<span style="color:var(--st-failed)">fail</span> at ' + esc(w.target_sha.slice(0,10))],
+        ["PR head", '<span style="color:var(--st-proven)">pass</span> at ' + esc(w.pr_sha.slice(0,10))],
+        (F && F.lead != null) ? ["Flipped", lead(F.lead) + " before the agent ended turn " + F.proof.turn] : null
+      ]) + (proof ? '<button class="btn sm" type="button" data-frame="' + proof.seq + '">Open the proof frame</button>' : "") + "</div>";
   }
   const m = /^turn:(\d+)$/.exec(key);
   if(m){
     const tn = parseInt(m[1], 10), t = ROLL.turns.find(x => x.n === tn);
+    if(!t) return "";
     const frames = FRAMES.filter(f => f.turn === tn);
     const groups = wfGroupTally(frames);
+    const calls = Object.keys(groups).reduce((a,c) => a + groups[c], 0);
+    const models = frames.filter(f => f.kind === "model.response").length;
     const denied = frames.filter(f => f.kind === "policy.decision" && f.denied).length;
     const groupRows = Object.keys(groups).sort((a,b) => groups[b]-groups[a])
-      .map(c => '<div class="pop-grow">' + TG.cat(c) + '<b>' + groups[c] + '</b></div>').join("");
-    return '<div class="pop-h"><b>Turn ' + tn + ' · ' + esc(t.title) + '</b><button type="button" class="pop-close" data-pop-close aria-label="Close">×</button></div>' +
+      .map(c => '<div class="pop-grow">' + TG.cat(c) + "<b>" + groups[c] + "</b></div>").join("");
+    return '<div class="pop-h"><b>Turn ' + tn + " · " + esc(t.title) + "</b>" + POP_CLOSE + "</div>" +
       '<div class="pop-b">' +
-      (groupRows ? '<div class="pop-groups">' + groupRows + '</div>' : '<p class="muted" style="font-size:11.5px">No tool calls in this turn.</p>') +
-      kv([["Frames", t.frames], denied ? ["Denied", denied + " call" + (denied===1?"":"s")] : null]) + "</div>";
+      (groupRows ? '<div class="pop-groups">' + groupRows + "</div>"
+                 : '<p class="muted" style="font-size:11.5px">No tool calls in this turn.</p>') +
+      kv([
+        ["Tool calls", calls + " of " + ROLL.toolCalls + " in the run"],
+        ["Model calls", models],
+        ["Steps", (models + calls) + " · " + t.frames + " frames"],
+        ["Spend", usd(t.cost) + " · " + pct(t.cost/ROLL.total,0) + " of the run"],
+        denied ? ["Denied", denied + " call" + (denied===1?"":"s")] : null
+      ]) + '<button class="btn sm" type="button" data-turn="' + tn + '">Open turn ' + tn + " in replay</button></div>";
   }
   return "";
 }
 function closeWfPop(){
   if(!wfPopEl) return;
   wfPopEl.remove(); wfPopEl = null; wfPopKey = null;
+  if(wfPopTrigger){
+    wfPopTrigger.classList.remove("on");
+    wfPopTrigger.setAttribute("aria-expanded", "false");
+    wfPopTrigger = null;
+  }
   document.removeEventListener("click", onWfPopOutside, true);
+  if(wfPopScroller){ wfPopScroller.removeEventListener("scroll", closeWfPop); wfPopScroller = null; }
 }
 function onWfPopOutside(e){
   if(wfPopEl && !wfPopEl.contains(e.target) && !e.target.closest("[data-wfpop]")) closeWfPop();
@@ -3065,15 +3109,24 @@ function openWfPop(trigger, key){
   const html = wfPopContent(key);
   if(!html) return;
   const el = document.createElement("div");
-  el.className = "wfpop"; el.setAttribute("role", "dialog"); el.innerHTML = html;
+  el.className = "wfpop"; el.setAttribute("role", "dialog");
+  el.setAttribute("aria-label", trigger.getAttribute("aria-label") || "Details");
+  el.style.visibility = "hidden";   /* measure before it is ever painted */
+  el.innerHTML = html;
   document.body.appendChild(el);
-  const r = trigger.getBoundingClientRect();
-  const top = window.scrollY + r.bottom + 8;
-  let left = window.scrollX + r.left;
-  const maxLeft = window.scrollX + document.documentElement.clientWidth - el.offsetWidth - 12;
-  if(left > maxLeft) left = Math.max(12, maxLeft);
-  el.style.top = top + "px"; el.style.left = left + "px";
-  wfPopEl = el; wfPopKey = key;
+  const r = trigger.getBoundingClientRect(), w = el.offsetWidth, h = el.offsetHeight;
+  const vw = document.documentElement.clientWidth, vh = document.documentElement.clientHeight;
+  const below = r.bottom + 8 + h <= vh || r.top - 8 - h < 0;
+  el.style.top = (window.scrollY + (below ? r.bottom + 8 : r.top - 8 - h)) + "px";
+  el.style.left = Math.max(12, Math.min(window.scrollX + r.left, window.scrollX + vw - w - 12)) + "px";
+  el.style.visibility = "";
+  wfPopEl = el; wfPopKey = key; wfPopTrigger = trigger;
+  trigger.classList.add("on");
+  trigger.setAttribute("aria-expanded", "true");
+  /* .wfchart scrolls horizontally on narrow viewports, and the panel is anchored in
+     page coordinates, so it would drift away from its mark. Close instead. */
+  wfPopScroller = trigger.closest(".wfchart");
+  if(wfPopScroller) wfPopScroller.addEventListener("scroll", closeWfPop);
   setTimeout(() => document.addEventListener("click", onWfPopOutside, true), 0);
 }
 
