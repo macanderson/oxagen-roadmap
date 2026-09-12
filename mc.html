@@ -411,11 +411,24 @@ tbody tr.click.flipped:hover{background:linear-gradient(90deg,color-mix(in srgb,
 .b-flip .fx i{font-style:normal;color:var(--st-failed)}.b-flip .fx em{font-style:normal;color:var(--st-proven)}
 .flipsub{font-family:var(--mono);font-size:10.5px;color:var(--dim);margin-top:3px;white-space:nowrap}
 
-/* ---------- assistant ---------- */
-.asst{position:fixed;top:0;right:0;bottom:0;width:392px;background:var(--panel);border-left:1px solid var(--border);z-index:60;display:flex;flex-direction:column;box-shadow:var(--shadow)}
-#viewport.phone .asst{width:100%;border-left:0}
+/* ---------- assistant: a bottom dock, not a side panel ----------
+   The in-app agent is one reach away on every page. The bottom edge is the
+   thumb's edge on a phone and a persistent bar on a desktop, and the dock is
+   never the subject of the page it sits under. .page already reserves 80px of
+   bottom padding, which clears the 56px bar. */
+.asst{position:fixed;left:0;right:0;bottom:0;top:auto;width:auto;background:var(--void);border-top:1px solid var(--border);
+  z-index:60;display:flex;flex-direction:column;box-shadow:var(--shadow);padding-bottom:env(safe-area-inset-bottom)}
+#viewport.phone .asst{width:100%;max-width:400px;left:50%;right:auto;transform:translateX(-50%);
+  border-left:1px solid var(--rule);border-right:1px solid var(--rule)}
+.asst-in{max-width:1500px;margin:0 auto;width:100%}
+.asst-bar{display:flex;gap:9px;align-items:center;padding:9px 14px;min-height:56px}
+.asst-g{width:28px;height:28px;border-radius:9px;flex:none;display:grid;place-items:center;background:var(--gold);color:var(--on-gold)}
+.asst-open{flex:1;min-width:0;border:1px solid var(--border);border-radius:9px;background:var(--panel);padding:7px 11px;
+  font-size:13px;color:var(--muted);display:flex;gap:8px;align-items:center;text-align:left;cursor:pointer}
+.asst-open>span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.asst-k{font-family:var(--mono);font-size:10px;border:1px solid var(--border);border-radius:5px;padding:0 5px;color:var(--dim);flex:none}
 .asst-h{padding:12px 15px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
-.asst-b{flex:1;overflow-y:auto;padding:15px}
+.asst-b{max-height:50vh;overflow-y:auto;padding:15px}
 .asst-f{border-top:1px solid var(--border);padding:11px 13px}
 .asst-f .box{background:var(--ink);border:1px solid var(--border);border-radius:10px;padding:9px 11px;display:flex;gap:9px;align-items:flex-end}
 .asst-f textarea{flex:1;background:none;border:0;resize:none;outline:none;font-size:13px;line-height:1.5;min-height:38px;color:var(--fg)}
@@ -621,7 +634,8 @@ a.inv-i:hover{border-color:var(--rule);text-decoration:none}
 .rel{position:relative}
 
 /* ---------- mockup chrome (never product UI) ---------- */
-#chrome{position:fixed;right:12px;bottom:12px;z-index:200;font-family:var(--mono);font-size:11px}
+/* sits above the in-app agent dock, which owns the bottom edge */
+#chrome{position:fixed;right:12px;bottom:68px;z-index:200;font-family:var(--mono);font-size:11px}
 #chrome .cbar{background:#0A0A09;border:1px solid #34322D;border-radius:10px;padding:7px;display:flex;gap:5px;align-items:center;box-shadow:0 8px 30px rgba(0,0,0,.6);flex-wrap:wrap;max-width:min(92vw,660px);color:#9B958A}
 #chrome .lab{color:#6E6A62;letter-spacing:.08em;text-transform:uppercase;font-size:9.5px;padding:0 3px}
 #chrome button{background:#181715;border:1px solid #292722;color:#9B958A;border-radius:6px;padding:3px 8px;font-family:inherit;font-size:11px}
@@ -678,6 +692,60 @@ a.inv-i:hover{border-color:var(--rule);text-decoration:none}
 .bar i.hold{background:var(--st-approval)}
 .sel-sm{background:var(--ink);border:1px solid var(--border);border-radius:7px;padding:4px 8px;font-size:12px;color:var(--fg);outline:none}
 .sel-sm:focus{border-color:var(--gold)}
+
+/* ---- guided scenario rail ------------------------------------------------
+   A scenario does not get its own screens. It steps the real ones and says
+   what to look at, so the demo and the product cannot drift apart. The rail
+   is the only thing the scenario adds, and it sits above the page. */
+.scn{border:1px solid color-mix(in srgb,var(--gold) 40%,var(--border));border-radius:12px;
+  background:color-mix(in srgb,var(--gold) 5%,var(--panel));padding:13px 15px;margin-bottom:16px;display:grid;gap:9px}
+.scn-h{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.scn-eb{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-text)}
+.scn-h b{font-size:14px;font-weight:600}
+.scn-ct{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap}
+.scn-say{font-size:14.5px;line-height:1.5;color:var(--fg);margin:0;max-width:82ch}
+.scn-note{font-size:12px;color:var(--muted);margin:0;max-width:82ch}
+.scn-f{display:flex;gap:7px;align-items:center;flex-wrap:wrap;padding-top:2px}
+.scn-dots{display:flex;gap:5px;margin-left:auto}
+.scn-dots i{width:7px;height:7px;border-radius:50%;background:var(--rule);display:block}
+.scn-dots i.on{background:var(--gold)}
+.scn-card{border:1px solid var(--border);border-radius:10px;background:var(--panel);padding:11px 13px;display:grid;gap:6px}
+.scn-card b{font-size:13px}
+.scn-card p{margin:0;font-size:12.5px;color:var(--muted)}
+@media(max-width:640px){.scn-ct{margin-left:0}.scn-dots{margin-left:0}}
+#viewport.phone .scn-ct,#viewport.phone .scn-dots{margin-left:0}
+
+/* ---- small approval card ------------------------------------------------
+   The same anatomy as the full card below (eyebrow, amount or tool, agent,
+   countdown, hazard badges, two decisions) at a size that reads as a row in a
+   list. An approval is urgent, which is not the same as being the subject of
+   the page, so this is what every list and rail uses. The full card is reached
+   deliberately, in a dialog. */
+.apsm{border:1px solid color-mix(in srgb,var(--st-approval) 34%,var(--border));border-radius:10px;background:var(--ink);
+  padding:10px 11px;display:grid;gap:8px;min-width:0}
+.apsm.crit{border-color:color-mix(in srgb,var(--st-critical) 40%,var(--border))}
+.apsm.done{border-color:var(--border);opacity:.72}
+.apsm-h{display:flex;gap:9px;align-items:center;min-width:0}
+.apsm-h .g{width:26px;height:26px;border-radius:8px;flex:none;display:grid;place-items:center;
+  color:var(--st-approval);background:color-mix(in srgb,var(--st-approval) 13%,transparent)}
+.apsm.crit .apsm-h .g{color:var(--st-critical);background:color-mix(in srgb,var(--st-critical) 13%,transparent)}
+.apsm-h .tt{min-width:0;flex:1}
+.apsm-h .tt b{display:block;font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.apsm-h .tt span{display:block;font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.apsm-clk{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--st-approval);font-variant-numeric:tabular-nums;flex:none}
+.apsm-clk.warn{color:var(--st-critical)}
+.apsm-clk.done{color:var(--dim);font-weight:500}
+.apsm-m{display:flex;gap:5px;flex-wrap:wrap}
+.apsm-t{display:grid;gap:2px;font-size:11.5px;color:var(--muted);font-family:var(--mono)}
+.apsm-t i{font-style:normal;color:var(--body)}
+.apsm-a{display:flex;gap:6px;flex-wrap:wrap}
+.apsm-a .btn{flex:0 1 auto;justify-content:center;min-width:92px}
+.apwrap{display:grid;gap:10px}
+@media(min-width:900px){.apwrap.two{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.apsm-a .btn{flex:1 1 auto}}
+.apwrap.two>.apfull{grid-column:1/-1}
+#viewport.phone .apwrap.two{grid-template-columns:1fr}
+#viewport.phone .apsm-a .btn{flex:1 1 auto}
 
 /* ---- approval card (presentation ported from W3 money-asked) ---- */
 .apcard{border:1px solid color-mix(in srgb,var(--st-approval) 34%,var(--border));border-radius:12px;background:var(--panel);overflow:hidden;min-width:0}
@@ -2737,6 +2805,7 @@ function deniedState(what,need){
 
 /* -------- routing -------- */
 function route(){
+  S.scn=null;                      /* self healing: any non scenario route drops the rail */
   var hs=location.hash.replace(/^#\/?/,"");
   var p=hs?hs.split("/"):[];
   if(!p.length) return {page:"fleet",org:ORG.slug,ws:S.ws};
@@ -2751,6 +2820,19 @@ function route(){
   if(p.length===2) return {page:"fleet",org:org,ws:w};
   var sec=p[2];
   if(sec==="tools"&&p[3]) S.tab.tools=p[3];
+  if(sec==="scenarios"){
+    var sid=p[3];
+    if(!sid) return {page:"scenarios",org:org,ws:w};
+    var sc=SCENARIOS[sid];
+    if(sc){
+      var stp=parseInt(p[4]||"1",10); if(!(stp>=1)) stp=1; if(stp>sc.steps.length) stp=sc.steps.length;
+      S.scn={id:sid,step:stp};
+      var st=sc.steps[stp-1];
+      if(st.setup) st.setup();
+      return st.route(org);
+    }
+    return {page:"scenarios",org:org,ws:w};
+  }
   if(sec==="register") return {page:"register",org:org,ws:w,step:p[3]||"name"};
   if(sec==="spend"){ if(p[3]) S.tab.spend=p[3]; S.spendDrill=(p[3]&&p[4])?{kind:p[3],id:decodeURIComponent(p[4])}:null; }
   if(sec==="runs") return {page:"run",org:org,ws:w,id:p[3]};
@@ -2767,7 +2849,8 @@ function applyHashTab(){
 window.addEventListener("hashchange",function(){S.side=false;fpStop();applyHashTab();render();});
 
 var PAGES={fleet:"Fleet",run:"Run",agents:"Agents",agent:"Agents",mandate:"Agents",tools:"Tools",
-  agentsource:"Agents",ontology:"Ontology",steering:"Steering",spend:"Spend",organization:"Organization",billing:"Billing",audit:"Audit"};
+  agentsource:"Agents",ontology:"Ontology",steering:"Steering",spend:"Spend",organization:"Organization",billing:"Billing",audit:"Audit",
+  scenarios:"Scenarios"};
 
 /* ============================== agent definition: the TOML file is the record ==============================
    S.defBase[slug]  = the file at the head of the branch it was last committed to (main until the first commit)
@@ -3211,11 +3294,14 @@ function icon(n){
    tools:'<path d="M14.7 6.3a4 4 0 0 0 5 5L15 16l-3.5 3.5a2.1 2.1 0 0 1-3-3L12 13z"/>',
    ontology:'<circle cx="6" cy="7" r="2.5"/><circle cx="18" cy="7" r="2.5"/><circle cx="12" cy="17" r="2.5"/><path d="M8.5 7h7M7.4 9.2 10.8 15M16.6 9.2 13.2 15"/>',
    steering:'<path d="M4 5h16M4 12h10M4 19h7"/><circle cx="18" cy="17" r="3"/>',
+   scenarios:'<path d="M4 5h11a3 3 0 0 1 3 3v11"/><path d="M15 16l3 3 3-3"/><path d="M4 10h7M4 15h4"/>',
    spend:'<path d="M12 2v20M17 6.5C17 4.6 14.8 3.5 12 3.5S7 4.6 7 6.8s2.2 3 5 3.7 5 1.6 5 3.7-2.2 3.3-5 3.3-5-1.1-5-3"/>',
    organization:'<rect x="3" y="7" width="8" height="13" rx="1"/><rect x="13" y="3" width="8" height="17" rx="1"/><path d="M6 11h2M6 15h2M16 7h2M16 11h2M16 15h2"/>',
    billing:'<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/>',
    audit:'<path d="M12 3l8 3.5v5c0 4.6-3.2 8.6-8 9.5-4.8-.9-8-4.9-8-9.5v-5z"/><path d="M9 12l2 2 4-4"/>',
    lock:'<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+   assistant:'<path d="M12 3v3m0 12v3M5 12H2m20 0h-3"/><rect x="7" y="7" width="10" height="10" rx="3"/>',
+   shield:'<path d="M12 3 5 6v6c0 4 3 7.5 7 9 4-1.5 7-5 7-9V6z"/>',
    user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>'};
   return '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">'+(p[n]||'')+'</svg>';
 }
@@ -3269,6 +3355,7 @@ function sidebar(r){
    item("ontology","Ontology",base+"/ontology")+
    item("steering","Steering",base+"/steering",PROPOSALS.length)+
    item("spend","Spend",base+"/spend")+
+   item("scenarios","Scenarios",base+"/scenarios")+
    '<div class="navlabel">Organization</div>'+
    item("organization","Organization","#/"+ORG.slug)+
    item("billing","Billing","#/"+ORG.slug+"/billing")+
@@ -3297,6 +3384,7 @@ function crumbs(r){
       out.push('<a class="mono" href="'+base+'/agents/'+h(r.id)+'">'+h(r.id)+'</a>');out.push('<b class="mono">'+h(r.mid)+'</b>');}
     if(r.page==="tools")out.push('<b>Tools</b>');
     if(r.page==="ontology")out.push('<b>Ontology</b>');
+    if(r.page==="scenarios")out.push('<b>Scenarios</b>');
     if(r.page==="steering")out.push('<b>Steering</b>');
     if(r.page==="spend")out.push('<b>Spend</b>');
   }
@@ -3415,11 +3503,14 @@ function approvalsPanel(wsSlug,inRun){
      '<p class="dim" style="font-size:11.5px;margin:8px 0 0">A call parks here when policy returns <span class="mono">approve</span>. Denials never park — they end the call and are free.</p>'+
      '</div></div></div>';
   }
-  var cards=list.map(function(a){return approvalCard(a);}).join("");
+  var cards=list.map(function(a){
+    return '<div'+(S.apOpen[a.id]?' class="apfull"':'')+'>'+approvalCardSm(a)+
+     (S.apOpen[a.id]?'<div style="margin-top:10px">'+approvalCard(a)+'</div>':'')+'</div>';
+  }).join("");
   var open=list.filter(function(a){return apState(a.id).status==="pending";}).length;
   return '<div class="panel"><div class="panel-h"><h3>Approvals</h3>'+
    '<span class="b '+(open?'b-approval':'b-q')+'" style="margin-left:auto"><span class="d"></span>'+open+' parked</span></div>'+
-   (cards?'<div class="panel-b apwrap" style="display:grid;gap:14px;border-bottom:1px solid var(--border)">'+cards+'</div>'
+   (cards?'<div class="panel-b apwrap'+(list.length>1?' two':'')+'" style="border-bottom:1px solid var(--border)">'+cards+'</div>'
          :'<div class="panel-b muted" style="font-size:12.5px">Nothing parked on this run.</div>')+
    '<div class="panel-b" style="font-size:11.5px"><span class="dim">A resolution mints a single-use approval token bound to the call digest, the agent, the run, and an expiry. It cannot be replayed on a second call.</span></div></div>';
 }
@@ -3500,6 +3591,38 @@ function decisionFoot(a){
    '<span class="r"><button class="btn ghost sm" onclick="go(\''+runHref+'\')">Open run</button>'+
    '<button class="btn danger" onclick="openDialog(\'deny\',\''+a.id+'\')">Deny</button>'+
    '<button class="btn primary" onclick="openDialog(\'approve\',\''+a.id+'\')">Approve'+(a.amount?' '+usd(a.amount)+' '+h(a.currency):'')+'</button></span></div>';
+}
+/* The small card. Same reading order as the full one: what is being asked,
+   who is asking, how long is left, how dangerous it is, and the two
+   decisions. Everything that needs a paragraph to explain lives behind
+   Details, which expands the full card in place. */
+S.apOpen={};
+function apToggle(id){S.apOpen[id]=!S.apOpen[id];render();}
+function approvalCardSm(a){
+  var st=apState(a.id), done=st.status!=="pending", sec=apLeft(a.id), r=run(a.run);
+  var crit=a.risk==="critical"||a.side==="irreversible"||a.tainted;
+  var clk=done
+   ?'<span class="apsm-clk done">\u2014</span>'
+   :'<span class="apsm-clk'+(sec<120?' warn':'')+'" data-countdown="'+a.id+'">'+mmss(sec)+'</span>';
+  var title=a.amount?usd(a.amount)+' '+h(a.currency):h(a.tool);
+  var acts=done
+   ?'<div class="apsm-a"><span class="b '+(st.status==="approved"?'b-allowed':'b-denied')+'"><span class="d"></span>'+h(st.status)+
+     (st.by?' by '+h(st.by):'')+'</span></div>'
+   :'<div class="apsm-a">'+
+     '<button class="btn primary" onclick="openDialog(\'approve\',\''+a.id+'\')">Approve</button>'+
+     '<button class="btn danger" onclick="openDialog(\'deny\',\''+a.id+'\')">Deny</button>'+
+     '<button class="btn ghost sm" onclick="apToggle(\''+a.id+'\')" aria-expanded="'+(S.apOpen[a.id]?"true":"false")+'">'+
+      (S.apOpen[a.id]?'Hide details':'Details')+'</button></div>';
+  return '<div class="apsm'+(crit?' crit':'')+(done?' done':'')+'" id="apsm-'+a.id+'">'+
+   '<div class="apsm-h"><span class="g">'+icon("shield")+'</span>'+
+    '<span class="tt"><b>'+title+'</b><span>'+h(a.agent)+(r?' · '+h(r.taskTitle):'')+'</span></span>'+clk+'</div>'+
+   '<div class="apsm-m">'+riskBadge(a.risk)+
+    '<span class="b '+(a.side==="irreversible"?"b-denied":"b-q")+' mono">'+h(a.side)+'</span>'+
+    (a.tainted?'<span class="b b-critical"><span class="d"></span>tainted</span>':'')+tierBadge(a.tier)+'</div>'+
+   '<div class="apsm-t">'+(a.amount?'<div>Tool <i>'+h(a.tool)+'</i></div>':'')+
+    '<div>To <i>'+h(a.counterparty)+'</i></div>'+
+    (done?'':'<div>Times out in <i>'+h(a.timeout)+'</i>, then the call ends</div>')+'</div>'+
+   acts+'</div>';
 }
 function approvalCard(a){
   var st=apState(a.id), done=st.status!=="pending", m=mandateFor(a), sec=apLeft(a.id), r=run(a.run);
@@ -6606,13 +6729,27 @@ function placeHold(){
 }
 
 /* ============================== assistant ============================== */
+/* The dock is on every page. The bar is always there; the sheet opens above
+   it. Nothing else moves, because .page already reserves the bottom padding. */
 function assistant(){
-  if(!S.asst) return '';
+  return '<aside class="asst" role="complementary" aria-label="In-app agent">'+
+   (S.asst?'<div class="asst-in">'+asstSheet()+'</div>':'')+
+   '<div class="asst-in asst-bar">'+
+    '<span class="asst-g">'+icon("assistant")+'</span>'+
+    '<button class="asst-open" onclick="S.asst=!S.asst;render()" aria-expanded="'+(S.asst?"true":"false")+'">'+
+     '<span>'+(S.asst?"Ask about a run, or change something":"Ask Oxagen about this workspace")+'</span>'+
+     '<span class="asst-k">'+(S.asstEngine==="down"?"engine down":"glm-flash")+'</span></button>'+
+    '<button class="iconbtn" onclick="S.asst=!S.asst;render()" aria-label="'+(S.asst?"Collapse":"Expand")+'">'+
+     (S.asst?'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M5 9l7 7 7-7"/></svg>'
+            :'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M5 15l7-7 7 7"/></svg>')+'</button>'+
+   '</div></aside>';
+}
+function asstSheet(){
   if(S.asstEngine==="down"){
-    return '<aside class="asst" role="complementary" aria-label="Assistant">'+
+    return ''+
      '<div class="asst-h"><b style="font-size:13.5px">Assistant</b>'+
      '<span class="b b-failed" style="margin-left:auto"><span class="d"></span>engine down</span>'+
-     '<button class="iconbtn" onclick="S.asst=false;render()" aria-label="Close">×</button></div>'+
+     '<button class="iconbtn" onclick="S.asst=false;render()" aria-label="Collapse">×</button></div>'+
      '<div class="asst-b"><div class="state-wrap" style="padding:30px 6px">'+
      '<div class="ico" style="color:var(--st-failed);border-color:color-mix(in srgb,var(--st-failed) 40%,transparent)">'+
      '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 8v5M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg></div>'+
@@ -6620,9 +6757,9 @@ function assistant(){
      '<p style="font-size:12.5px"><code>stella serve</code> returned <code>503</code> from the engine container. The engine is a required service; nothing falls back to an in-process loop, so the assistant says so by name rather than degrading quietly.</p>'+
      '<div class="acts"><button class="btn sm" onclick="S.asstEngine=\'up\';render()">Retry</button></div>'+
      '<p class="mono dim" style="font-size:11px;margin-top:14px">engine 0.31.4 · last healthy 09:02:11Z</p></div></div>'+
-     '<div class="asst-f"><div class="box"><textarea placeholder="Unavailable while the engine is down" disabled aria-label="Message"></textarea></div></div></aside>';
+     '<div class="asst-f"><div class="box"><textarea placeholder="Unavailable while the engine is down" disabled aria-label="Message"></textarea></div></div>';
   }
-  return '<aside class="asst" role="complementary" aria-label="Assistant">'+
+  return ''+
    '<div class="asst-h"><b style="font-size:13.5px">Assistant</b>'+
    '<span class="b b-q" style="margin-left:auto">every turn is a run of its own</span>'+
    '<button class="iconbtn" onclick="S.asst=false;render()" aria-label="Close">×</button></div>'+
@@ -6650,7 +6787,7 @@ function assistant(){
    '<div class="asst-f"><div class="box">'+
    '<textarea placeholder="Ask about a run, or change something" aria-label="Message the assistant"></textarea>'+
    '<button class="btn primary sm" onclick="act(\'Turn posted. It opens a run of the in-app agent, recorded and metered like any other.\')">Send</button></div>'+
-   '<p class="dim" style="font-size:11px;margin:8px 0 0">The assistant acts through the same governed actions these screens use. It holds no authority and no credentials.</p></div></aside>';
+   '<p class="dim" style="font-size:11px;margin:8px 0 0">The assistant acts through the same governed actions these screens use. It holds no authority and no credentials.</p></div>';
 }
 
 /* ============================== dialogs ============================== */
@@ -6707,6 +6844,94 @@ function doFlip(id){
   closeDialog();
 }
 function closeDialog(){S.dlg=null;S.dlgArg=null;render();}
+
+/* ============================== guided scenarios ==============================
+   W2 (stop-it-steer-it) and W3 (money-asked) as routes over the real product.
+   Each step names the route to render, optionally arranges state first, and
+   says the one thing to look at. Nothing here draws a screen of its own. */
+S.scn=null;
+var SCENARIOS={
+ "stop-it-steer-it":{
+  title:"Stop it, steer it", ws:"core-platform",
+  blurb:"An agent is mid run and wrong about the scope. Stopping it is one grant; steering it is another.",
+  steps:[
+   {say:"Release manager is cutting 4.11.0 right now, and nobody has told it the mobile repo is out of scope this cycle.",
+    note:"One live run. Runs are not started from Fleet; agents start them, and this is where you stop, steer, or open one.",
+    route:function(o){return {page:"fleet",org:o,ws:"core-platform"};}},
+   {say:"Open the run. It is on turn 4 at gateway tier, and the next call it wants is a release against acme/platform.",
+    note:"Gateway tier means every tool call was served through Oxagen, so this is enforcement and not attestation.",
+    route:function(o){return {page:"run",org:o,ws:"core-platform",id:"run_01K5RS7M2E8FJ3QW"};}},
+   {say:"Steer it. At the boundary the agent finishes the turn it is on; interrupt cuts the in-flight tool call and records the cancellation.",
+    note:"That is the whole difference, and it is the reason the two are separate controls rather than one button.",
+    route:function(o){return {page:"steering",org:o,ws:"core-platform"};},
+    act:["Open the steer dialog","openSteer()"]},
+   {say:"Oxagen never executes steering as an instruction. It enters the run as evidence at the steering position, carrying your authority.",
+    note:"Recorded per run as a control.steer frame attributed to you, preceded by control.interrupt when you cut a call.",
+    route:function(o){return {page:"steering",org:o,ws:"core-platform"};},
+    act:["Steer the whole fleet","openSteerFleet()"]},
+   {say:"The delivery report says who read it and when. The agent's next model call is where it takes effect, not the moment you pressed send.",
+    note:"An agent with no run in flight reads it at its next run, so a fleet steer is never silently dropped.",
+    route:function(o){return {page:"run",org:o,ws:"core-platform",id:"run_01K5RS7M2E8FJ3QW"};}}
+  ]},
+ "money-asked":{
+  title:"Money asked, a human answered", ws:"finops",
+  blurb:"An agent asked to move real money. The call parked instead of failing, and the receipt names the human forever.",
+  steps:[
+   {say:"An invoice bot wants to move $2,450.00 to vendor:aws. The call is parked, not failed, and not quietly allowed.",
+    note:"A denial would end the call and cost nothing. Parking it is the expensive, correct thing to do when a human should decide.",
+    route:function(o){return {page:"fleet",org:o,ws:"finops"};}},
+   {say:"The mandate is what parked it: approval above $100.00, and a per-call ceiling of $250.00 that routes the excess to a human instead of refusing it.",
+    note:"Read the rules that fired. Every one of them is a line somebody wrote, not a model's opinion.",
+    route:function(o){return {page:"fleet",org:o,ws:"finops"};},
+    setup:function(){S.apOpen["apr_01K5RN9T4"]=true;},
+    act:["Collapse the detail","S.apOpen['apr_01K5RN9T4']=false;render()"]},
+   {say:"Dana started this run, so Dana cannot answer it. fin.no_self_approval leaves the remaining holders of role:org.billing.",
+    note:"Separation of duties is a rule in the mandate, which is why it shows up here as a constraint rather than as a missing button.",
+    route:function(o){return {page:"fleet",org:o,ws:"finops"};},
+    setup:function(){S.apOpen["apr_01K5RN9T4"]=true;}},
+   {say:"Answering mints a single-use token bound to this exact call digest, the agent, the run, and an expiry. It cannot be replayed on a second call.",
+    note:"On expiry the call ends and the reason reaches the model as the permission decision. Nothing dispatches.",
+    route:function(o){return {page:"fleet",org:o,ws:"finops"};},
+    setup:function(){S.apOpen["apr_01K5RN9T4"]=true;},
+    act:["Approve it","openDialog('approve','apr_01K5RN9T4')"]},
+   {say:"The receipt names the human, the rule that fired, and the money. That record is the product.",
+    note:"Same trail whether a person did it or the in-app agent did it for them, which is what makes the audit log answerable.",
+    route:function(o){return {page:"audit",org:o};},
+    setup:function(){S.tab.audit="receipts";}}
+  ]}
+};
+function scnHref(id,step){var s=SCENARIOS[id];return "#/"+ORG.slug+"/"+s.ws+"/scenarios/"+id+"/"+step;}
+function scnExit(){var s=SCENARIOS[S.scn.id];S.scn=null;go("#/"+ORG.slug+"/"+s.ws);}
+function scnRail(){
+  if(!S.scn) return "";
+  var s=SCENARIOS[S.scn.id]; if(!s) return "";
+  var i=S.scn.step, st=s.steps[i-1], n=s.steps.length;
+  var dots=""; for(var k=1;k<=n;k++) dots+='<i class="'+(k<=i?"on":"")+'"></i>';
+  return '<section class="scn" aria-label="Scenario">'+
+   '<div class="scn-h"><span class="scn-eb">Scenario</span><b>'+h(s.title)+'</b>'+
+    '<span class="scn-ct">'+i+' of '+n+'</span></div>'+
+   '<p class="scn-say">'+st.say+'</p>'+
+   (st.note?'<p class="scn-note">'+st.note+'</p>':'')+
+   '<div class="scn-f">'+
+    (i>1?'<button class="btn sm" onclick="go(\''+scnHref(S.scn.id,i-1)+'\')">Back</button>':
+         '<button class="btn sm" disabled>Back</button>')+
+    (i<n?'<button class="btn primary sm" onclick="go(\''+scnHref(S.scn.id,i+1)+'\')">Next</button>':
+         '<button class="btn primary sm" onclick="scnExit()">Finish</button>')+
+    (st.act?'<button class="btn sm ghost" onclick="'+st.act[1]+'">'+h(st.act[0])+'</button>':'')+
+    '<button class="btn sm ghost" onclick="scnExit()">Leave</button>'+
+    '<span class="scn-dots" aria-hidden="true">'+dots+'</span>'+
+   '</div></section>';
+}
+function pScenarios(){
+  var ids=Object.keys(SCENARIOS);
+  return '<p class="eyebrow">Workspace \u00b7 '+h(ws().name)+'</p><h1>Scenarios</h1>'+
+   '<p class="lede">Two demos, each one a walk through the real screens. A scenario owns no screens of its own, so it cannot drift away from the product it is demonstrating.</p>'+
+   '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px">'+ids.map(function(id){var s=SCENARIOS[id];
+     return '<div class="scn-card"><b>'+h(s.title)+'</b><p>'+h(s.blurb)+'</p>'+
+      '<p class="mono dim" style="font-size:11px;margin:0">'+s.steps.length+' steps \u00b7 workspace '+h(s.ws)+'</p>'+
+      '<div><button class="btn primary sm" onclick="go(\''+scnHref(id,1)+'\')">Start</button></div></div>';
+   }).join("")+'</div>';
+}
 
 /* ---- steering: one run, or the fleet. State lives on S; the switch flips and re-renders. ---- */
 S.steerSel=null; S.steerInt=false; S.steerText=null;
@@ -8358,6 +8583,7 @@ function render(){
   else if(r.page==="agentsource")page=pAgentSource(r);
   else if(r.page==="tools")page=pTools();
   else if(r.page==="ontology")page=pOntology();
+  else if(r.page==="scenarios")page=pScenarios();
   else if(r.page==="steering")page=pSteering();
   else if(r.page==="spend")page=pSpend();
   else if(r.page==="organization")page=pOrganization();
@@ -8367,7 +8593,7 @@ function render(){
   else page=pFleet();
 
   el("app").innerHTML=r.page==="register"?pRegister(r):r.page==="welcome"?pWelcome(r):'<div class="app">'+sidebar(r)+'<div class="main">'+topbar(r)+
-    '<main class="page" id="pg">'+page+'</main></div></div>'+assistant();
+    '<main class="page" id="pg">'+scnRail()+page+'</main></div></div>'+assistant();
   if(r.page==="register")regSchedule(regStepOf(r));
   else if(r.page==="welcome")regSchedule(r.step);
   el("layer").innerHTML=dialog();

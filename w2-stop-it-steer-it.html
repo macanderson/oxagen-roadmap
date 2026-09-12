@@ -16,14 +16,19 @@
   --accent-text:#D6962C;
   --on-gold:#10100F;
 
-  /* Semantic state colours. Deliberately no gold in this set. */
-  --s-allowed:#5FA97F;   --s-allowed-bg:rgba(95,169,127,.13);
-  --s-approval:#6E9BD2;  --s-approval-bg:rgba(110,155,210,.14);
-  --s-denied:#C2705E;    --s-denied-bg:rgba(194,112,94,.14);
-  --s-failed:#D25548;    --s-failed-bg:rgba(210,85,72,.14);
-  --s-critical:#E1483A;  --s-critical-bg:rgba(225,72,58,.16);
-  --s-proven:#5FA97F;    --s-proven-bg:rgba(95,169,127,.13);
-  --s-neutral:#8D877C;   --s-neutral-bg:rgba(141,135,124,.12);
+  /* Semantic state colours, deliberately no gold in this set. The canonical
+     --st-* names are the ones mc.html carries; this file's --s-* names are
+     aliases onto them, and each wash is a color-mix over its alias so it
+     tracks the theme instead of being hand-tuned in every block. */
+  --st-allowed:#57A97C; --st-approval:#5B93D6; --st-denied:#C66A4A;
+  --st-proven:#3FA2A2; --st-failed:#C0453C; --st-critical:#D6455E; --st-observe:#9B958A;
+  --s-allowed:var(--st-allowed);   --s-allowed-bg:color-mix(in srgb,var(--st-allowed) 13%,transparent);
+  --s-approval:var(--st-approval); --s-approval-bg:color-mix(in srgb,var(--st-approval) 14%,transparent);
+  --s-denied:var(--st-denied);     --s-denied-bg:color-mix(in srgb,var(--st-denied) 14%,transparent);
+  --s-failed:var(--st-failed);     --s-failed-bg:color-mix(in srgb,var(--st-failed) 14%,transparent);
+  --s-critical:var(--st-critical); --s-critical-bg:color-mix(in srgb,var(--st-critical) 16%,transparent);
+  --s-proven:var(--st-proven);     --s-proven-bg:color-mix(in srgb,var(--st-proven) 13%,transparent);
+  --s-neutral:var(--st-observe);   --s-neutral-bg:color-mix(in srgb,var(--st-observe) 12%,transparent);
 
   --shadow:0 1px 0 rgba(255,255,255,.03),0 18px 44px rgba(0,0,0,.5);
   --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
@@ -36,13 +41,8 @@
   --border:#D8CDBD; --rule:#C9BFAE;
   --fg:#10100F; --body:#2A2823; --muted:#6B665C; --dim:#8C877C;
   --accent-text:#8B5E1A; --on-gold:#10100F;
-  --s-allowed:#357E57;   --s-allowed-bg:rgba(53,126,87,.12);
-  --s-approval:#2F6299;  --s-approval-bg:rgba(47,98,153,.12);
-  --s-denied:#9C4632;    --s-denied-bg:rgba(156,70,50,.12);
-  --s-failed:#A93225;    --s-failed-bg:rgba(169,50,37,.12);
-  --s-critical:#B32B1C;  --s-critical-bg:rgba(179,43,28,.14);
-  --s-proven:#357E57;    --s-proven-bg:rgba(53,126,87,.12);
-  --s-neutral:#6B665C;   --s-neutral-bg:rgba(107,102,92,.11);
+  --st-allowed:#2F7D52; --st-approval:#2E6BA8; --st-denied:#9B4526;
+  --st-proven:#1F7676; --st-failed:#992F28; --st-critical:#AE2540; --st-observe:#6B665C;
   --shadow:0 1px 0 rgba(255,255,255,.7),0 18px 44px rgba(16,16,15,.08);
 }}
 :root[data-theme="light"]{
@@ -50,13 +50,8 @@
   --border:#D8CDBD; --rule:#C9BFAE;
   --fg:#10100F; --body:#2A2823; --muted:#6B665C; --dim:#8C877C;
   --accent-text:#8B5E1A; --on-gold:#10100F;
-  --s-allowed:#357E57;   --s-allowed-bg:rgba(53,126,87,.12);
-  --s-approval:#2F6299;  --s-approval-bg:rgba(47,98,153,.12);
-  --s-denied:#9C4632;    --s-denied-bg:rgba(156,70,50,.12);
-  --s-failed:#A93225;    --s-failed-bg:rgba(169,50,37,.12);
-  --s-critical:#B32B1C;  --s-critical-bg:rgba(179,43,28,.14);
-  --s-proven:#357E57;    --s-proven-bg:rgba(53,126,87,.12);
-  --s-neutral:#6B665C;   --s-neutral-bg:rgba(107,102,92,.11);
+  --st-allowed:#2F7D52; --st-approval:#2E6BA8; --st-denied:#9B4526;
+  --st-proven:#1F7676; --st-failed:#992F28; --st-critical:#AE2540; --st-observe:#6B665C;
   --shadow:0 1px 0 rgba(255,255,255,.7),0 18px 44px rgba(16,16,15,.08);
 }
 
@@ -449,8 +444,25 @@ table.deliv .why{color:var(--muted);font-size:11.5px}
   border-bottom:1px solid var(--border);align-items:center}
 
 /* ---------------- mockup chrome (NOT product UI) ---------------- */
+/* ---- the in-app agent lives on the bottom edge ------------------------
+   A persistent bar on every screen, one reach away, and the subject of none
+   of them. Opening it raises the assistant as a bottom sheet. .page already
+   reserves 90px of bottom padding, which clears the 57px bar. */
+#dock{position:fixed;left:0;right:0;bottom:0;z-index:70;background:var(--void);
+  border-top:1px solid var(--border);padding-bottom:env(safe-area-inset-bottom)}
+#dock .db{display:flex;gap:9px;align-items:center;padding:9px 14px;max-width:1560px;margin:0 auto;min-height:56px}
+#dock .g{width:28px;height:28px;border-radius:9px;flex:none;display:grid;place-items:center;
+  background:var(--gold);color:var(--on-gold);font-size:13px}
+#dock .open{flex:1;min-width:0;border:1px solid var(--border);border-radius:9px;background:var(--panel);
+  padding:7px 11px;font-size:13px;color:var(--muted);display:flex;gap:8px;align-items:center;
+  text-align:left;cursor:pointer;font-family:inherit}
+#dock .open>span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#dock .k{font-family:var(--mono);font-size:10px;border:1px solid var(--border);border-radius:5px;
+  padding:0 5px;color:var(--dim);flex:none}
+
+/* sits above the dock, which owns the bottom edge */
 #chrome{
-  position:fixed;right:12px;bottom:12px;z-index:90;font-family:var(--mono);font-size:11px;
+  position:fixed;right:12px;bottom:68px;z-index:90;font-family:var(--mono);font-size:11px;
   background:#0A0A09;border:1px dashed #4a4740;border-radius:8px;color:#9B958A;
   box-shadow:0 12px 34px rgba(0,0,0,.55);max-width:calc(100vw - 24px);
 }
@@ -492,7 +504,7 @@ body.phone .insp,body.phone .rail{position:static}
 body.phone .ph h1{font-size:21px}
 body.phone .stat{min-width:50%;border-right:0;border-bottom:1px solid var(--border)}
 body.phone .crumbs .hide-sm{display:none}
-body.phone #chrome{right:8px;bottom:8px;left:8px}
+body.phone #chrome{right:8px;bottom:64px;left:8px}
 body.phone #chrome .ch-body,body.phone #chrome .ch-note{max-width:none}
 body.phone .dlg{max-height:calc(100vh - 24px)}
 body.phone .grid2{grid-template-columns:1fr}
@@ -730,6 +742,17 @@ tr.tg-grp .s{font-size:11.5px;color:var(--muted,#9B958A)}
 </div>
 
 <div id="modal"></div>
+
+<div id="dock">
+  <div class="db">
+    <span class="g">◆</span>
+    <button class="open" type="button" id="dockAsst" aria-label="Open the in-app agent">
+      <span>Ask Oxagen about this workspace</span>
+      <span class="k">glm-flash</span>
+    </button>
+    <button class="icon-btn" type="button" id="dockAsstX" aria-label="Expand">⌃</button>
+  </div>
+</div>
 
 <div id="chrome">
   <div class="ch-head"><b>Mockup states</b><button type="button" id="chromeMin">hide</button></div>
@@ -1809,7 +1832,7 @@ function renderModal(){
 
   if (state.modal === "assistant"){
     m.innerHTML =
-      '<div class="scrim" style="justify-items:end;padding:0"><div class="dlg" role="dialog" aria-modal="true" style="width:min(400px,100%);height:100vh;max-height:100vh;border-radius:0;border-right:0;border-top:0;border-bottom:0">' +
+      '<div class="scrim" style="align-items:end;justify-items:stretch;padding:0"><div class="dlg" role="dialog" aria-modal="true" style="width:100%;max-width:1560px;margin:0 auto;max-height:62vh;margin-bottom:57px;border-radius:14px 14px 0 0">' +
         '<div class="dlg-head"><div><p class="eyebrow">In-app agent</p><h2 style="font-size:15px">Assistant</h2>' +
         '<p style="font-size:12px">Every turn is a run of its own, recorded and metered like any other agent&rsquo;s.</p></div>' +
         '<button class="icon-btn" type="button" data-close="1" aria-label="Close" style="margin-left:auto"><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button></div>' +
@@ -2390,7 +2413,7 @@ document.addEventListener("click", ev => {
   if (id === "railToggle"){ state.railOpen = !state.railOpen; render(); return; }
   if (id === "massBtn"){ state.modal = "mass"; state.addr = "@agents"; renderModal(); return; }
   if (id === "cmdBtn"){ state.modal = "cmdk"; renderModal(); return; }
-  if (id === "asstBtn"){ state.modal = "assistant"; renderModal(); return; }
+  if (id === "asstBtn" || id === "dockAsst" || id === "dockAsstX"){ state.modal = "assistant"; renderModal(); return; }
   if (id === "acctBtn"){ state.modal = "account"; renderModal(); return; }
   if (id === "orgSwitch"){ toast("Acme Robotics is the only organization on this account. Organization is the tenant and the hard isolation boundary."); return; }
   if (id === "wsSwitch"){ toast("core-platform and finops. Switching changes the ontology, the steering set, the toolbelt and the budgets."); return; }
