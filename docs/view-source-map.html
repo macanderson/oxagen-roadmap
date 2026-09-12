@@ -168,7 +168,8 @@ a:focus-visible{outline:2px solid var(--gold); outline-offset:2px}
   truth, and whether that source exists in code today.</p>
   <p class="sub">Three answers come out of it. Which surfaces are drawn but have nothing
   behind them. Which numbers are typed into markup and cannot be restated. And which parts of
-  the specification have no surface at all.</p>
+  the specification have no surface at all. Twenty-five defects found along the way are fixed
+  on the same branch, and the last section says what they were and what was left alone.</p>
 
   <div class="counts">
     <div><b>28</b><span>routes handled in the consolidated mockup</span></div>
@@ -436,6 +437,13 @@ a:focus-visible{outline:2px solid var(--gold); outline-offset:2px}
   <p class="dek">Figures typed into markup, and figures whose label claims a basis the mockup
   cannot produce. These are the ones that will not survive contact with real data, because
   nothing computes them.</p>
+
+  <div class="note"><p><b>Twenty-three of these are now fixed.</b> Everything described below
+  as a contradicting total, a stated-but-uncomputed formula, or a mismatched identity has been
+  made derived on this branch, so the number and the rows under it can no longer drift apart.
+  Rows carrying a <strong>FIXED on this branch</strong> note in the table above are the ones
+  that changed. The subsections below keep the original finding, because the reasoning is what
+  makes the next one recognisable. What stays open is listed at the end of each subsection.</p></div>
   <h3>Totals that contradict the rows beneath them</h3>
   <p class="dek">The worst class, because both numbers are on one screen and a reader can do the
   arithmetic. Each of these is a tile or a header typed by hand above a table that disagrees
@@ -506,10 +514,24 @@ a:focus-visible{outline:2px solid var(--gold); outline-offset:2px}
     <li>On an operator drill-down, the productive ratio tile and the proven spend tile's sub-label both read 55 per cent, side by side in one row of four.</li>
     <li>On Agent detail the proof rate is computed by multiplying the run count by the productive ratio, and labelled as runs flipped. That agent has no flipped run at all. Cost per proven flip and business value both inherit the error.</li>
   </ul>
-  <div class="note"><p><b>This is the one to fix before the numbers become real.</b> The other
-  defects are wrong values that a real query would replace. This one is a wrong definition that a
-  real query would faithfully implement, because the label and the formula disagree and only the
-  label is visible.</p></div>
+  <div class="note"><p><b>This was the one to fix before the numbers became real, and it is
+  fixed.</b> The other defects were wrong values that a real query would replace. This one was a
+  wrong definition that a real query would have faithfully implemented, because the label and the
+  formula disagreed and only the label was visible. Agent records now carry a flipped-run count
+  of their own, the two agents with no proven spend carry zero, and the productive ratio has its
+  own row beside the proof rate.</p></div>
+
+  <h3>What stays open</h3>
+  <p class="dek">These were left alone deliberately. Each needs a decision rather than a
+  patch, and inventing a number would be worse than leaving the one that is there.</p>
+  <ul>
+    <li><strong>The fixture is five agents deep against a fifty-agent story.</strong> The workspace agent count is a real field and stays, but no 30-day figure can be derived from five records. Deepening the fixture is a content decision.</li>
+    <li><strong>Cross-cut spend contradicts itself by direction.</strong> Each entity's breakdown sums exactly to its own spend, yet the same dollar appears once as a named tool and once as unattributed when read the other way. Fixing this means rebuilding the spend fixture as one matrix rather than per-entity lists.</li>
+    <li><strong>The reconciliation variance is attributed to an agent whose total spend is a third of it,</strong> and a notification reports a different variance for the same mechanism. Which story is right is a product decision.</li>
+    <li><strong>Two of three invoices do not follow the page's own price list,</strong> and the retention price differs between two pages by a factor of a hundred. Both need someone to say which figure is correct.</li>
+    <li><strong>Frame-level detail panels print one record's values for every frame.</strong> Fixing this means giving each frame kind its own body in the fixture, which is a larger content pass.</li>
+    <li><strong>The run summary says 38 pull requests where everything else says 27.</strong> A one-word change, but it is demo narrative rather than a derivation, so it belongs with whoever owns the script.</li>
+  </ul>
 </section>
 
 <section id="unbuilt">
@@ -577,14 +599,46 @@ a:focus-visible{outline:2px solid var(--gold); outline-offset:2px}
     <li><strong>The shared denied panel names a different person than the one signed in,</strong> on every page that can show it.</li>
   </ul>
 
-  <h3>Defects fixed while writing this</h3>
-  <p class="dek">Two functions were declared twice at the top level of the file, so the later
-  declaration won by hoisting and the earlier one became dead code.</p>
+  <h3>What this pass fixed</h3>
+  <p class="dek">Twenty-five defects, in three groups. Every change was driven in a headless
+  browser across the affected routes, with no script errors.</p>
+
+  <h4>Two functions were declared twice, so the later one won by hoisting</h4>
   <ul>
-    <li><strong>The record kind badge was dead.</strong> A second function of the same name, written later for identity role kinds, took over the records page. Every Steering record and proposal card rendered a plain grey chip with a bare word, losing the six-kind icon badge and its tooltip that the statement-first card design is built around. The role version is now named for what it does, and the records page renders its badges again.</li>
-    <li><strong>A timestamp parser lost its guard.</strong> Two parsers shared a name; the looser one won, so the proof tab's flip-timing calculation lost the null check that protected it against a malformed timestamp and would have printed a non-number instead. Each caller now gets the parser it was written against.</li>
+    <li><strong>The record kind badge was dead.</strong> A second function of the same name, written later for identity role kinds, took over the records page. Every Steering record and proposal card rendered a plain grey chip with a bare word, losing the six-kind icon badge and its tooltip that the statement-first card design is built around. The role version is now named for what it does, and all seven cards render their badges again.</li>
+    <li><strong>A timestamp parser lost its guard.</strong> Two parsers shared a name; the looser one won, so the proof tab's flip-timing calculation lost the null check protecting it against a malformed timestamp and would have printed a non-number. Each caller now gets the parser it was written against.</li>
   </ul>
-  <p>No duplicate top-level function name remains in the file, and the script parses.</p>
+  <p>No duplicate top-level function name remains. One command catches the whole class, and it
+  is worth running before any edit to this file, because everything lives in one script:</p>
+  <div class="tw"><table><tbody><tr><td><code>rg -o '^function ([A-Za-z_$][A-Za-z0-9_$]*)' mc.html -r '$1' | sort | uniq -d</code></td></tr></tbody></table></div>
+
+  <h4>Nine totals that contradicted their own rows now derive from them</h4>
+  <p class="dek">Each was a hand-typed figure above a table that disagreed. They cannot drift
+  again, because the header and the rows now read the same records.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Where</th><th>Was</th><th>Now</th></tr></thead>
+    <tbody>
+      <tr><td>Tools registry header and shown-count</td><td>3,182 tool versions</td><td>263, summed from the server rows</td></tr>
+      <tr><td>Ontology entity tile</td><td>176,879</td><td>158,120, summed from the class rows</td></tr>
+      <tr><td>Ontology relation and drift tiles</td><td>21 and 6, typed</td><td>Counted, with the drifting class names derived</td></tr>
+      <tr><td>Audit event strip, four tiles</td><td>12,418, 96, 4,117, 212</td><td>14, 1, 1 and 0, counted through the page's own actor classifier</td></tr>
+      <tr><td>Audit receipts footer</td><td>1,204</td><td>4, the receipt count</td></tr>
+      <tr><td>Agents enrolment tile</td><td>A second copy of the agent count</td><td>A separate workspace field, naming the shortfall</td></tr>
+      <tr><td>Agents mandate and incident tiles</td><td>Typed ones</td><td>Counted across the agent records, naming the agents</td></tr>
+      <tr><td>Steering records list</td><td>Tab said 7, chip said 8, list showed 8</td><td>All three say 7, matching the panel's own heading</td></tr>
+      <tr><td>Fleet spend tile</td><td>Called today, summed the filtered list</td><td>Named for what it sums, with every basis present shown</td></tr>
+    </tbody>
+  </table></div>
+
+  <h4>Fourteen figures that stated a formula now run it</h4>
+  <ul>
+    <li><strong>The proof rate is no longer the productive ratio.</strong> The single most consequential fix, for the reason given above.</li>
+    <li><strong>Both cache hit rates derive.</strong> Fleet spend-weights the runs it is showing; the agent strip reads its 30-day rollup. Each says plainly when nothing records the figure, instead of printing a constant.</li>
+    <li><strong>Spend per proven run derives from a flipped-run count</strong> on both the agent strip and the spend rollup, so it can never again equal spend per run.</li>
+    <li><strong>The oldest approval wait reads the same live clock the cards count down,</strong> rather than a frozen string copied from another workspace.</li>
+    <li><strong>Wasted spend share and approvals overturned</strong> derive, replacing two hard-coded percentages and an invented denominator.</li>
+    <li><strong>The denied panel names the person who is signed in.</strong> It was naming someone else while the top bar showed the real user. There is now one session accessor.</li>
+  </ul>
 </section>
 
 <footer>
@@ -615,10 +669,10 @@ R("Shell","every table","Pager, 1 to 10 of 10","derived","ltPager counts rendere
 R("Fleet","stats","Live runs","derived","RUNS filtered to status live, length (3384)","Run nodes with no Seal; cost.run_totals.sealed_at is null","schema","agent.agent_runs has no reader",null);
 R("Fleet","stats","of 38 agents in this workspace","fixture","w.agents (3394)","Count of iam.principals kind agent","live","agent.agents",null);
 R("Fleet","stats","Waiting on a human","derived","pendingCount (3395)","control.approvals still pending","schema","agent.approval_requests",null);
-R("Fleet","stats","oldest has waited 4m 12s of 10m","literal","hard-coded string (3395)","Now minus the earliest control.approvals.requested_at, against expires_at","schema","agent.approval_requests","The 4m 12s belongs to the finops workspace approval, not either approval shown here. It is also frozen while the card's own clock counts down from 5:48.");
-R("Fleet","stats","Spend today, $21.50","derived","RUNS reduce over parseFloat of cost (3385)","Sum of cost.run_totals.cost_micros for the day","partial","ClickHouse billing.token_usage sums cost_usd_micros","Includes a run sealed 2 July 2025, so it is not today. It also recomputes when the run filter changes: $4.13 on live, $6.66 on proven.");
-R("Fleet","stats","gateway_observed, USD","literal","hard-coded basis label (3396)","cost.run_totals.cost_basis, per run","schema","No cost_basis column exists","One run inside the same total is client_attested.");
-R("Fleet","stats","Cache hit rate 81%","literal","per(0.81) (3397)","cache_read divided by input_uncached plus cache_read, section 12.6","partial","cached_tokens column exists; no rate is computed anywhere","The caption under it states the formula. Every run carries a cache field that is never aggregated.");
+R("Fleet","stats","oldest has waited 4m 12s of 10m","derived","max elapsed over pending approvals, off the live clock","Now minus the earliest control.approvals.requested_at, against expires_at","schema","agent.approval_requests","FIXED on this branch. Was a literal copied from another workspace and frozen while the card counted down. Now reads the same clock the cards do.");
+R("Fleet","stats","Spend today, $21.50","derived","sum over the runs currently listed (pFleet)","Sum of cost.run_totals.cost_micros for the day","partial","ClickHouse billing.token_usage sums cost_usd_micros","FIXED on this branch. Relabelled \"Spend, runs shown\": it always summed the filtered list, never the day, and the old label made the filter look like a bug.");
+R("Fleet","stats","gateway_observed, USD","derived","distinct basis values across the runs summed","cost.run_totals.cost_basis, per run","schema","No cost_basis column exists","FIXED on this branch. Was a hard-coded basis over a total that mixes two. Now renders every basis present, so the mixed case is visible.");
+R("Fleet","stats","Cache hit rate 81%","derived","spend-weighted over the runs shown (pFleet)","cache_read divided by input_uncached plus cache_read, section 12.6","partial","cached_tokens column exists; no rate is computed anywhere","FIXED on this branch. Was per(0.81), a constant under a caption stating the formula. Now derived from the same runs the tile sums, and says so when no run records it.");
 R("Fleet","table","Run id and task title","fixture","r.id, r.taskTitle (3368)","Run node id; FOR_TASK edge to an Issue or PullRequest","schema","agent.agent_runs",null);
 R("Fleet","table","Status badge","derived","statusBadge of runStatus (3371)","Run lifecycle from frames, with pause from control.commands","schema","agent.agent_runs",null);
 R("Fleet","table","Enforcement tier badge","fixture","tierBadge of r.tier (3372)","cost.run_totals.enforcement_tier, computed at seal","schema","No column exists",null);
@@ -678,21 +732,21 @@ R("Run","chain","Checkpoints 7, telemetry_gap frames 0","literal","literals (485
 R("Run","chain","Merkle root, sha256:b41e07c9a2f5308d","literal","literal (4864)","Seal merkle_root, an RFC 6962 root over every frame hash","schema","agent_run_attempt_seals exists, unread","Sixteen hex characters here, thirty-two in the compacted panel. Both typed by hand.");
 
 /* ── Agents ── */
-R("Agents","stats","Agents here, 38","fixture","w.agents (4910)","Count of iam.principals kind agent","live","agent.agents","The table beneath shows four rows.");
-R("Agents","stats","Enrolled, 38","fixture","w.agents again (4911)","control.enrollments at status active","partial","tacho enrollment handlers","Re-uses the agent count rather than counting enrolled status, so it claims every agent is enrolled.");
-R("Agents","stats","Holding a mandate, 1","literal","literal (4912)","Count of tools.mandates at status active","absent",null,"Happens to equal the fixture sum, but is typed.");
-R("Agents","stats","Tamper incidents, 1","literal","literal (4913)","audit.audit_events of kind hooks_removed and its siblings","live","security.security_events",null);
+R("Agents","stats","Agents here, 38","fixture","the workspace row agent count (pAgents)","Count of iam.principals kind agent","live","agent.agents","FIXED on this branch. The count is a legitimate workspace field, so it stays; the sub-label now says how many are actually listed and derives the org total.");
+R("Agents","stats","Enrolled, 38","fixture","the workspace row enrolled count","control.enrollments at status active","partial","tacho enrollment handlers","FIXED on this branch. Was a second copy of the agent count, which claimed every agent was enrolled. The workspace row now carries enrolment separately and the tile names the shortfall.");
+R("Agents","stats","Holding a mandate, 1","derived","agents carrying a mandate, counted (pAgents)","Count of tools.mandates at status active","absent",null,"FIXED on this branch. Was a literal that happened to match. Now counted, and it names the agents.");
+R("Agents","stats","Tamper incidents, 1","derived","incidents summed across agent records (pAgents)","audit.audit_events of kind hooks_removed and its siblings","live","security.security_events","FIXED on this branch. Was a literal that happened to match. Now summed.");
 R("Agents","table","Belt, 14","fixture","a.belt","Count of role grants resolving to tool versions","partial","iam.role_grants",null);
 R("Agents","table","Runs 30d 212, Spend 30d $612.48, Proven 30d $318.22","fixture","agent fixture fields","cost.daily_totals by agent, section 12.7","partial","usage analytics by principal","Proven spend needs a verdict, which nothing produces.");
 
 /* ── Agent detail ── */
 R("Agent","score","Trust score, 842","fixture","the scores fixture (7372)","Nothing in the specification","absent",null,"Unlisted agents fall back to 500 plus ratio times 400 minus incidents times 250.");
-R("Agent","score","Proof rate, 131 of 212 runs flipped, 62%","derived","runs30 multiplied by the agent ratio (7386)","Count of runs whose verdict is flipped, section 8.5","absent",null,"Multiplies by the productive ratio, which measures steps that advanced the task. That agent has no flipped run in the fixture at all.");
-R("Agent","score","Cost per proven flip, $4.67","derived","spend30 divided by the flip count (7393)","Spend per proven run, section 12.8","absent",null,"Inherits the mislabelled flip count.");
-R("Agent","score","Cache hit rate, 78%","derived","per of the agent cache field or 0.78 (7395)","Section 12.6","partial",null,"Agent records carry no cache field, so this is always the fallback.");
-R("Agent","score","Wasted spend share, 4%","literal","a ternary on the ratio (7396)","cost.findings estimated saving, section 12.8","absent",null,"Two hard-coded percentages chosen by a threshold.");
+R("Agent","score","Proof rate, 131 of 212 runs flipped, 62%","fixture","the agent row flipped30 count (scoreStrip)","Count of runs whose verdict is flipped, section 8.5","absent",null,"FIXED on this branch. Was the run count multiplied by the productive ratio and labelled as flipped runs. Agents now carry a flipped-run count, the two agents with no proven spend carry zero, and the productive ratio gets its own row so the two measures can no longer be read as one.");
+R("Agent","score","Cost per proven flip, $4.67","derived","spend divided by the flipped-run count (scoreStrip)","Spend per proven run, section 12.8","absent",null,"FIXED on this branch. Relabelled \"Spend per proven run\" and now divides by real flipped runs, so it no longer inherits the mislabelled count.");
+R("Agent","score","Cache hit rate, 78%","derived","the agent spend rollup, else its runs (agentCache)","Section 12.6","partial",null,"FIXED on this branch. Was always the 0.78 fallback because agent records carry no cache field. Now reads the 30-day rollup and says so when nothing records it.");
+R("Agent","score","Wasted spend share, 4%","derived","wasted over spend from the agent rollup","cost.findings estimated saving, section 12.8","absent",null,"FIXED on this branch. Was one of two hard-coded percentages chosen by a threshold on an unrelated ratio.");
 R("Agent","score","Trust delta, +12 or -8","literal","a ternary on the score band (7386)","A trend over cost.daily_totals","absent",null,null);
-R("Agent","score","Approvals overturned, 0 of 24","derived","zero, over runs30 divided by nine (7389)","control.approvals decisions for this agent","absent",null,"The denominator is invented arithmetic.");
+R("Agent","score","Approvals overturned, 0 of 24","derived","denied over resolved approvals for this agent","control.approvals decisions for this agent","absent",null,"FIXED on this branch. The denominator was the run count divided by nine. Now counts real approvals, and says so when none have parked.");
 R("Agent","identity","principal id, credential prefix, 3 live now, device key","literal","hard-coded (4970)","iam.principals.public_id, iam.credentials prefix, control.enrollments.device_public_key","live","iam.principals, auth.api_keys",null);
 R("Agent","definition","Every definition field","derived","a real TOML parse of a seeded document (2779)","The agent definition file in the main repository, section 6.2","absent",null,"No repository-backed agent definition exists in code; agents are rows, not files.");
 R("Agent","definition","draft sha, 1a2b3c4","derived","an FNV hash of the draft text (2803)","definition_digest at the last merged commit","partial","agent.agent_versions",null);
@@ -711,7 +765,7 @@ R("Mandate","ledger","Reserve, settle and release rows","literal","hard-coded ro
 R("Mandate","detail","Stripe charge for $18.00 has no receipt","literal","hard-coded (5117)","The reconciler matching settlements against the connection's own activity, section 6.9","absent",null,"Presented at severity critical, money moved that Oxagen did not govern, and stated twice. No record behind it anywhere in the fixtures.");
 
 /* ── Tools ── */
-R("Tools","registry","Eight servers, 3,182 tool versions","literal","hard-coded (5170)","Count of tools.tool_versions in the workspace","live","agent.tool_versions","The server fixtures sum to 206 tools and 263 versions. The same 3,182 recurs inside a kill-switch blast radius.");
+R("Tools","registry","Eight servers, 3,182 tool versions","derived","server count and summed versions (srvCount, verCount)","Count of tools.tool_versions in the workspace","live","agent.tool_versions","FIXED on this branch. Was a literal over rows summing to 263. Both the header and the shown-count now derive, so they cannot drift again.");
 R("Tools","registry","15 of 3,182 shown","derived","the selection length, against the literal (5176)","Count","live","agent.tool_versions",null);
 R("Tools","registry","Server row: tools 41, versions 63, health","fixture","server fixture fields (5144)","tools.tool_servers, a count of tool_versions, last_import_at","live","mcp.mcp_servers, mcp.tool_snapshots",null);
 R("Tools","registry","Gate today","derived","kill switch, then financial tag, then irreversible effect (2666)","The compiled policy decision, section 6.12","absent",null,"One of the few genuinely derived governance displays in the file.");
@@ -731,7 +785,7 @@ R("Tools","auto-approvals","Median wait saved, 3m 40s","literal","literal (7620)
 R("Tools","assurance","9 pass, 1 not applicable, 0 fail","fixture","assurance fixture counts (5279)","The adversarial tool-governance suite's published results, section 6.13","absent",null,"Eval tables exist in ClickHouse for a different purpose. There is no assurance concept in code.");
 /* ── Ontology ── */
 R("Ontology","model","Classes, 9","derived","CLASSES.length (5337)","Class nodes defined by the active OntologyVersion","partial","schema_registry.node_labels",null);
-R("Ontology","model","Entities, 176,879","literal","hard-coded (5338)","Count of Entity nodes in the workspace","partial","Neo4j entity labels exist","The nine class rows beneath it sum to 158,120. The tile is 18,759 higher and nothing explains the difference.");
+R("Ontology","model","Entities, 176,879","derived","entity counts summed across the class rows (ontEntities)","Count of Entity nodes in the workspace","partial","Neo4j entity labels exist","FIXED on this branch. Was a literal 18,759 above the sum of its own rows. Relation types and drift now derive too, including the class names in the sub-label.");
 R("Ontology","model","Relation types, 21","literal","hard-coded (5339)","Count of RelationType nodes","partial",null,"Typed, and correct: the class rows do name 21 distinct relations. A reader cannot tell it apart from the entity tile, which is typed and wrong.");
 R("Ontology","model","Drift found, 6","literal","hard-coded (5340)","Declared tables compared against the live schema, section 11.7","absent",null,"Typed, and matches the sum of the per-class drift counts.");
 R("Ontology","model","Per class: entities, freshness, most cited, rules, proven runs","fixture","class fixture fields (5329)","Entity counts, sync recency, USED_CONTEXT edges, rules referencing the class, proven runs per class","partial","graph.stats gives node and edge counts only",null);
@@ -749,7 +803,7 @@ R("Ontology","versions","as_of picker offering v16","literal","hard-coded (5489)
 
 /* ── Steering ── */
 R("Steering","records","Records tab badge, 7","derived","published records counted (5509)","Record nodes at status published","partial","agent.context_records",null);
-R("Steering","records","All chip, 8","derived","RECORDS.length (5522)","Count of records","partial",null,"Seven and eight for the same list, inches apart. The chip counts the archived record, the tab does not.");
+R("Steering","records","All chip, 8","derived","published records counted, matching the tab","Count of records","partial",null,"FIXED on this branch. The panel is headed \"Published records\", so the list, the chips and the tab badge now all count published. The archived record still appears on Retirement.");
 R("Steering","records","Kind badge on every record card","derived","kindBadge over the six-kind map (3232)","Record kind from the protocol vocabulary, section 9","partial","agent.context_records has a kind column","Was rendering a plain grey chip: a second function of the same name, defined later for IAM role kinds, won by hoisting. Fixed on this branch.");
 R("Steering","records","rendered 212, cited 188, violated 3","fixture","one opaque prose string (3243)","context_use_feedback records counting rendered, cited and ignored frames, section 9.1","partial","agent.memory_citation handlers","Three counts inside one string that nothing parses, sums or checks.");
 R("Steering","proposals","Checks badge, 6 of 6 pass","derived","a string prefix test on the checks field (5550)","Oxagen check runs on the Context PR, section 10.3","absent",null,"The badge colour is chosen by testing whether the string starts with a particular number.");
@@ -768,7 +822,7 @@ R("Spend","findings","3 operators involved, 8 high confidence, 1 medium","derive
 R("Spend","by operator","Agents, runs, spend, proven, productive ratio","fixture","operator fixture fields (5660)","cost.daily_totals by operator, section 12.7","partial","usage analytics group by principal",null);
 R("Spend","by operator","Potential savings, $840.95 from 6 findings","derived","sum of findings matched to this operator (5757)","Findings at operator level","absent",null,"Two findings attach to an operator who does not own that agent's spend, so savings and spend land on different people for the same agent.");
 R("Spend","by operator","Budget bar, 83% of $15,000.00","fixture","the pre-baked used fraction, not spend over budget (5663)","billing.budgets spent_micros over limit_micros","live","billing.spend_budgets","Reads a stored fraction rather than dividing the two figures shown beside it.");
-R("Spend","by agent","Spend per proven run, $2.27","fixture","the per-proven fixture field (5672)","Spend divided by runs whose verdict is flipped, section 12.8","absent",null,"For that agent this equals its spend per run exactly, which would mean every run proved. The same drill shows a productive ratio of 71 per cent.");
+R("Spend","by agent","Spend per proven run, $2.27","derived","spend divided by flipped runs (perProvenRun)","Spend divided by runs whose verdict is flipped, section 12.8","absent",null,"FIXED on this branch. The stored figure equalled spend per run, which would mean every run proved. The rollup now carries a flipped count matching the agent records, and the rate is derived so it cannot drift back.");
 R("Spend","by agent","Trend badge, -8%","fixture","a sign test on the trend string (5673)","Trend over cost.daily_totals","partial","period-over-period deltas are computed on the org dashboard",null);
 R("Spend","by model","Model calls, spend, cache hit rate, basis","fixture","model fixture fields (5676)","cost.daily_totals by model and provider key","partial","billing.token_usage groups by model","The panel is titled by model and provider key and has no provider-key column. The one provider key in the whole mockup appears inside a notification body.");
 R("Spend","by tool","Cumulative, average per call, average per run","fixture","pre-computed fixture fields, bars scaled to the column maximum (5927)","cost.daily_totals by tool, from tool-call frames","partial","telemetry.tool_invocations",null);
@@ -805,14 +859,14 @@ R("Billing","invoices","Invoice runs and amounts","fixture","invoice fixtures (6
 R("Billing","meters","Governed actions, 61,904","fixture","a meter string (6159)","Governed actions per run, reported as a secondary meter","partial",null,"The same figure is typed again as a number on the Spend reconciliation tab.");
 
 /* ── Audit ── */
-R("Audit","events","Events over 30 days, 12,418","literal","a literal passed to the tile renderer (6352)","Count of audit.audit_events in the window","live","security.security_events","The table beneath renders fourteen rows. The same figure is retyped in the export dialog.");
-R("Audit","events","Denied, 96","literal","literal (6353)","Audit events of a denial kind","live","security.security_events","Exactly one denial row exists in the fixture.");
-R("Audit","events","By a service principal, 4,117","literal","literal (6354)","Events grouped by actor principal kind","live","security.security_events","The page's own actor classifier puts one row in that class.");
-R("Audit","events","By the in-app agent, 212","literal","literal (6355)","Events whose actor is the assistant's service principal","live",null,"No assistant row exists in the fixture at all.");
+R("Audit","events","Events over 30 days, 12,418","derived","rows counted in the table beneath (auditEvents)","Count of audit.audit_events in the window","live","security.security_events","FIXED on this branch. All four tiles in this strip were literals contradicting the table. Each now counts the rows, through the same actor classifier the table uses.");
+R("Audit","events","Denied, 96","derived","rows whose result is a denial","Audit events of a denial kind","live","security.security_events","FIXED on this branch. Now counted.");
+R("Audit","events","By a service principal, 4,117","derived","rows classified as a service actor","Events grouped by actor principal kind","live","security.security_events","FIXED on this branch. Now counted through the page’s own actor classifier.");
+R("Audit","events","By the in-app agent, 212","derived","rows whose actor is the assistant","Events whose actor is the assistant's service principal","live",null,"FIXED on this branch. Now counted, and it reads zero, which is the truth about this fixture.");
 R("Audit","events","Actor kind sub-label under each actor","derived","pattern match on the actor string (6310)","audit.audit_events.actor_principal_id joined to iam.principals.kind","live","security_events joins org_users","Inferred from the shape of a name rather than read from a principal.");
 R("Audit","incidents","Open, 2, one critical","derived","counted over the incident fixtures (6376)","audit.audit_events of incident kinds with no resolved_at","live","security.security_events",null);
 R("Audit","incidents","Median time to resolve, 2h 38m across 5 resolved","literal","literal (6378)","Resolution times over resolved incidents","live",null,"The five resolved incidents give a median of 1h 22m and a mean of 1h 3m. Neither is the figure shown.");
-R("Audit","receipts","N of 1,204 receipts shown","derived","the filtered count, against a literal total (6407)","Count of receipt frames, section 6.10","absent",null,"The fixture holds four receipts. No receipt object exists in code; only Stripe payment receipts share the name.");
+R("Audit","receipts","N of 1,204 receipts shown","derived","the receipt count","Count of receipt frames, section 6.10","absent",null,"FIXED on this branch. Was a literal over a four-record fixture.");
 R("Audit","receipts","Receipt authority group, $884.60 settled, $1,115.40 remaining","fixture","receipt fixture rows (6235)","The mandate ledger balance after the settle","absent",null,"The mandate's own fields give $1,265.40 remaining. The receipt is $150 short and hand-typed.");
 R("Audit","receipts","Chain position 27 of 31, verified","fixture","a fixture string (6237)","Frame hash and chain position, checked at read time","schema","agent_run_events is digest-chained but unread","Asserts verified as text. Nothing verifies.");
 R("Audit","holds","812 bodies in its scope is refused","literal","literal (6421)","audit.legal_holds pinning retention against the bodies in scope","absent",null,"No legal hold object exists in code.");
@@ -840,7 +894,7 @@ R("Onboarding","verify","Resend countdown, 0:42","literal","literal (7811)","A r
 R("Onboarding","wrap","Installer file, size and digest per platform","literal","a literal table keyed on the chosen platform (7812)","The signed installer the enrollment produces","live","enrollment handlers issue a bundle",null);
 R("Onboarding","run","Install log, seven lines with timings and a first frame","literal","a literal array revealed on a timer (7862)","Real enrollment and the first frames the host sends","live","tacho enrollment and event ingest","The reveal is paced by a poll that advances a counter, so the timings are fixed text.");
 R("Onboarding","run","Provisional until 25 September, 14 days","literal","literal (8144)","The repository binding's provisional window","partial","repository_bindings exist","Correct against the date beside it, and typed.");
-R("Every page","denied state","Signed in as Dana Okafor, org.billing","literal","hard-coded in the shared denied state (2733)","The current principal and the role that was missing","live","session and role lookups exist","The top bar and user menu stay Marcus Bell on the same screen, so the denied panel names a different person than the one signed in.");
+R("Every page","denied state","Signed in as Dana Okafor, org.billing","derived","the session user, through one accessor","The current principal and the role that was missing","live","session and role lookups exist","FIXED on this branch. The denied panel named a different person than the top bar on the same screen. Both now read one session accessor.");
 /* ROWS-SPLICE */
 
 (function(){

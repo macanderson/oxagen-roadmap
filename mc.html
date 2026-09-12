@@ -1274,9 +1274,9 @@ var ORG = {slug:"acme", name:"Acme Robotics", currency:"USD", plan:"Team", dataP
 
 var WS = [
   {slug:"core-platform", name:"Core platform", main:"acme/platform", branch:"main",
-   linked:["acme/billing","acme/mobile"], agents:38, owner:"Marcus Bell"},
+   linked:["acme/billing","acme/mobile"], agents:38, enrolled:36, owner:"Marcus Bell"},
   {slug:"finops", name:"FinOps", main:"acme/finops-agents", branch:"main",
-   linked:[], agents:12, owner:"Dana Okafor"}
+   linked:[], agents:12, enrolled:12, owner:"Dana Okafor"}
 ];
 
 /* branches on the workspace's primary repo — what the commit dialog offers beside "+ New branch" */
@@ -1300,35 +1300,35 @@ var PEOPLE = {
 var AGENTS = [
  {key:"acme.core.release-manager", name:"Release manager", harness:"claude-code", harnessLabel:"Claude Code",
   ws:"core-platform", operator:"marcus", status:"enrolled", tier:"gateway", tierNative:"harness",
-  belt:14, beltMode:"full", runs30:212, spend30:"612.48", proven30:"318.22", ratio:0.62,
+  belt:14, beltMode:"full", runs30:212, spend30:"612.48", proven30:"318.22", flipped30:61, ratio:0.62,
   digest:"sha256:9f21c4ab7e30d5ef", commit:"a4c91e2", budget:"2.00", budgetUsed:1.36,
   desc:"Prepares release notes and opens the release PR. Never merges.",
   avatar:{kind:"icon", icon:"rocket", tone:"solid"},
   mandates:[], incidents:0, model:"complex"},
  {key:"acme.core.stella-ci", name:"Stella CI", harness:"stella", harnessLabel:"Stella",
   ws:"core-platform", operator:"marcus", status:"enrolled", tier:"gateway", tierNative:"gateway",
-  belt:9, beltMode:"full", runs30:486, spend30:"1104.70", proven30:"881.19", ratio:0.79,
+  belt:9, beltMode:"full", runs30:486, spend30:"1104.70", proven30:"881.19", flipped30:389, ratio:0.79,
   digest:"sha256:1c07be93d4a28f60", commit:"a4c91e2", budget:"1.50", budgetUsed:0.71,
   desc:"Runs the deterministic ladder on every pull request and reports the flip.",
   avatar:{kind:"initials", text:"CI", font:"mono", tone:"soft"},
   mandates:[], incidents:0, model:"complex"},
  {key:"acme.core.triage", name:"Triage", harness:"codex-cli", harnessLabel:"Codex CLI",
   ws:"core-platform", operator:"marcus", status:"enrolled", tier:"gateway", tierNative:"observe",
-  belt:52, beltMode:"searchable", runs30:1340, spend30:"402.11", proven30:"38.90", ratio:0.31,
+  belt:52, beltMode:"searchable", runs30:1340, spend30:"402.11", proven30:"38.90", flipped30:47, ratio:0.31,
   digest:"sha256:73ad0e15f8c9b224", commit:"a4c91e2", budget:"0.40", budgetUsed:0.29,
   desc:"Labels incoming issues, reproduces where it can, and opens a proposal when it cannot.",
   avatar:{kind:"icon", icon:"stethoscope", tone:"line"},
   mandates:[], incidents:1, model:"light"},
  {key:"acme.finops.invoice-bot", name:"Invoice bot", harness:"claude-agent-sdk", harnessLabel:"OpenAI Agents SDK",
   ws:"finops", operator:"dana", status:"enrolled", tier:"gateway", tierNative:"gateway",
-  belt:6, beltMode:"full", runs30:88, spend30:"96.34", proven30:"0.00", ratio:0.55,
+  belt:6, beltMode:"full", runs30:88, spend30:"96.34", proven30:"0.00", flipped30:0, ratio:0.55,
   digest:"sha256:5be8f2470a1d39cc", commit:"7e0b331", budget:"1.00", budgetUsed:0.18,
   desc:"Settles monthly infrastructure invoices under PO-4471. Holds one mandate.",
   avatar:{kind:"initials", text:"INV", font:"serif", tone:"line"},
   mandates:["mnd_7K2ETQ4"], incidents:0, model:"complex"},
  {key:"acme.core.docs-writer", name:"Docs writer", harness:"custom", harnessLabel:"Custom (SDK-wrapped)",
   ws:"core-platform", operator:"priya", status:"enrolled", tier:"gateway", tierNative:"observe",
-  belt:7, beltMode:"full", runs30:64, spend30:"71.09", proven30:"0.00", ratio:0.48,
+  belt:7, beltMode:"full", runs30:64, spend30:"71.09", proven30:"0.00", flipped30:0, ratio:0.48,
   digest:"sha256:e30c95a1b7482fd6", commit:"a4c91e2", budget:"0.80", budgetUsed:0.09,
   desc:"Keeps the operator guide in step with what shipped. Opens a PR, never merges.",
   avatar:{kind:"icon", icon:"pencil-line", tone:"solid"},
@@ -2136,12 +2136,15 @@ var SPEND = {
     {p:"priya",agents:19,runs:702,spend:"3,918.22",proven:"901.48",ratio:0.23,budget:"5,000.00",used:0.78},
     {p:"dana",agents:9,runs:530,spend:"2,044.25",proven:"210.00",ratio:0.10,budget:"3,000.00",used:0.68}
   ],
+  /* `flipped` is the count of runs whose witness verdict flipped (§8.5), and it must match
+     AGENTS[].flipped30. Spend per proven run is derived from it, never stored, so it can
+     never come to equal spend per run — which would silently claim every run proved. */
   byAgent:[
-    {k:"acme.core.stella-ci",runs:486,spend:"1,104.70",proven:"881.19",perProven:"2.27",trend:"-8%"},
-    {k:"acme.core.release-manager",runs:212,spend:"612.48",proven:"318.22",perProven:"5.14",trend:"-3%"},
-    {k:"acme.core.triage",runs:1340,spend:"402.11",proven:"38.90",perProven:"34.11",trend:"+12%"},
-    {k:"acme.finops.invoice-bot",runs:88,spend:"96.34",proven:"0.00",perProven:"—",trend:"+1%"},
-    {k:"acme.core.docs-writer",runs:64,spend:"71.09",proven:"0.00",perProven:"—",trend:"-1%"}
+    {k:"acme.core.stella-ci",runs:486,flipped:389,spend:"1,104.70",proven:"881.19",trend:"-8%"},
+    {k:"acme.core.release-manager",runs:212,flipped:61,spend:"612.48",proven:"318.22",trend:"-3%"},
+    {k:"acme.core.triage",runs:1340,flipped:47,spend:"402.11",proven:"38.90",trend:"+12%"},
+    {k:"acme.finops.invoice-bot",runs:88,flipped:0,spend:"96.34",proven:"0.00",trend:"+1%"},
+    {k:"acme.core.docs-writer",runs:64,flipped:0,spend:"71.09",proven:"0.00",trend:"-1%"}
   ],
   byModel:[
     {m:"claude-opus-5",calls:41220,spend:"13,918.02",cache:0.84},
@@ -2321,6 +2324,34 @@ seedApprovals();
 function h(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
 function el(id){return document.getElementById(id);}
 function ws(){for(var i=0;i<WS.length;i++){if(WS[i].slug===S.ws)return WS[i];}return WS[0];}
+function wsBySlug(slug){for(var i=0;i<WS.length;i++){if(WS[i].slug===slug)return WS[i];}return null;}
+/* The signed-in person, in one place. The top bar, the account dialog and the denied panel
+   must never name different people on the same screen. */
+var SESSION_USER="marcus";
+function me(){return PEOPLE[SESSION_USER]||PEOPLE.marcus;}
+
+/* ── Rollups over the fixtures, so a header can never drift from the rows under it. ──
+   Each of these replaced a hand-typed total that disagreed with its own table. */
+function srvCount(){return SERVERS.length;}
+function verCount(){return SERVERS.reduce(function(n,x){return n+(x.versions||0);},0);}
+function srvToolCount(){return SERVERS.reduce(function(n,x){return n+(x.tools||0);},0);}
+function ontEntities(){return CLASSES.reduce(function(n,c){return n+(c.ents||0);},0);}
+function ontRelTypes(){
+  var seen={},out=[];
+  CLASSES.forEach(function(c){String(c.rel||"").split(",").forEach(function(r){
+    r=r.trim(); if(r&&!seen[r]){seen[r]=1;out.push(r);}
+  });});
+  return out;
+}
+function ontDrift(){return CLASSES.reduce(function(n,c){return n+(c.drift||0);},0);}
+function ontDriftClasses(){return CLASSES.filter(function(c){return (c.drift||0)>0;}).map(function(c){return c.n;});}
+/* Spend per proven run: spend divided by runs whose verdict flipped (§12.8). Derived, so it
+   can never drift into equalling spend per run. */
+function perProvenRun(row){
+  var f=row.flipped||0, sp=money(row.spend);
+  if(!f) return '<span class="dim">no proven run</span>';
+  return usd(fmt2(sp/f));
+}
 function agent(k){for(var i=0;i<AGENTS.length;i++){if(AGENTS[i].key===k)return AGENTS[i];}return null;}
 function run(id){for(var i=0;i<RUNS.length;i++){if(RUNS[i].id===id)return RUNS[i];}return null;}
 
@@ -2730,7 +2761,7 @@ function deniedState(what,need){
    '<div class="acts"><button class="btn primary" onclick="openDialog(\'request-access\')">Request access</button>'+
    '<button class="btn" onclick="go(\'#/'+ORG.slug+'/'+S.ws+'\')">Back to Fleet</button></div>'+
    '<div class="kv" style="margin-top:20px;text-align:left;max-width:420px">'+
-   '<dt>Signed in as</dt><dd>Dana Okafor · <span class="mono">org.billing</span></dd>'+
+   '<dt>Signed in as</dt><dd>'+h(me().name)+' · <span class="mono">'+h(me().role)+'</span></dd>'+
    '<dt>Needed</dt><dd><span class="mono">'+h(need)+'</span></dd>'+
    '<dt>Decided by</dt><dd><span class="mono">pol_v41</span> · deny wins over every allow</dd></div></div>';
 }
@@ -3382,7 +3413,19 @@ function pFleet(){
   }).join("");
 
   var live=list.filter(function(r){return r.status==="live";}).length;
-  var spendToday=list.reduce(function(s,r){return s+parseFloat(r.cost);},0).toFixed(2);
+  /* This sums the runs currently listed, so the filter changes it. Say so in the label rather
+     than calling it "today", and read the basis off the runs instead of asserting one. */
+  var spendShown=list.reduce(function(s,r){return s+parseFloat(r.cost);},0).toFixed(2);
+  var bases=[]; list.forEach(function(r){if(r.basis&&bases.indexOf(r.basis)<0)bases.push(r.basis);});
+  var basisLabel=bases.length?bases.map(function(b){return '<span class="basis">'+h(b)+'</span>';}).join(' + '):'<span class="dim">no basis recorded</span>';
+  /* Cache hit rate over the same runs, spend-weighted (§12.6), never a constant. */
+  var cNum=0,cDen=0;
+  list.forEach(function(r){ if(typeof r.cache==="number"){var c=parseFloat(r.cost)||0;cNum+=r.cache*c;cDen+=c;} });
+  var cacheRate=cDen?cNum/cDen:null;
+  /* Oldest wait comes off the same live clock the approval cards count down. */
+  var pend=APPROVALS.filter(function(a){return a.ws===w.slug&&apState(a.id).status==="pending";});
+  var oldest=0; pend.forEach(function(a){var e=600-apLeft(a.id); if(e>oldest)oldest=e;});
+  var waitLabel=pend.length?'oldest has waited '+mmss(oldest)+' of 10m':'nothing is parked';
 
   return ''+
   '<div class="phead"><div class="t"><p class="eyebrow">Workspace · '+h(w.name)+'</p>'+
@@ -3392,9 +3435,9 @@ function pFleet(){
 
   '<div class="grid g4" style="margin-bottom:16px">'+
    '<div class="stat"><span class="k">Live runs</span><span class="v">'+live+'</span><span class="s">of '+w.agents+' agents in this workspace</span></div>'+
-   '<div class="stat"><span class="k">Waiting on a human</span><span class="v" style="color:var(--st-approval)">'+pendingCount(w.slug)+'</span><span class="s">oldest has waited 4m 12s of 10m</span></div>'+
-   '<div class="stat"><span class="k">Spend today</span><span class="v">'+usd(spendToday)+'</span><span class="s"><span class="basis">gateway_observed</span> · USD</span></div>'+
-   '<div class="stat"><span class="k">Cache hit rate</span><span class="v">'+per(0.81)+'</span><span class="s">cache_read ÷ (input_uncached + cache_read)</span></div></div>'+
+   '<div class="stat"><span class="k">Waiting on a human</span><span class="v" style="color:var(--st-approval)">'+pendingCount(w.slug)+'</span><span class="s">'+waitLabel+'</span></div>'+
+   '<div class="stat"><span class="k">Spend, runs shown</span><span class="v">'+usd(spendShown)+'</span><span class="s">'+basisLabel+' · '+ORG.currency+'</span></div>'+
+   '<div class="stat"><span class="k">Cache hit rate</span><span class="v">'+(cacheRate==null?'<span class="dim">—</span>':per(cacheRate))+'</span><span class="s">'+(cacheRate==null?'no run shown records it':'cache_read ÷ (input_uncached + cache_read)')+'</span></div></div>'+
 
   approvalsPanel(w.slug)+'<div style="height:14px"></div>'+
    '<div class="panel"><div class="panel-h"><h3>Runs</h3>'+
@@ -4907,10 +4950,19 @@ function pAgents(){
    '<div class="acts"><button class="btn" onclick="openDialog(\'register\')">Register an agent</button>'+
    '<button class="btn primary" onclick="openDialog(\'wrap\')">Wrap Claude Code</button></div></div>'+
    '<div class="grid g4" style="margin-bottom:16px">'+
-   '<div class="stat"><span class="k">Agents here</span><span class="v">'+w.agents+'</span><span class="s">50 across the organization</span></div>'+
-   '<div class="stat"><span class="k">Enrolled</span><span class="v">'+w.agents+'</span><span class="s">all at gateway tier for model calls</span></div>'+
-   '<div class="stat"><span class="k">Holding a mandate</span><span class="v">1</span><span class="s">acme.finops.invoice-bot · in FinOps</span></div>'+
-   '<div class="stat"><span class="k">Tamper incidents</span><span class="v" style="color:var(--st-critical)">1</span><span class="s">acme.core.triage · hooks_removed, 2026-09-02</span></div></div>'+
+   /* Every tile here is a count, so every tile derives from a record. The workspace's own
+      agent and enrolment counts come from the workspace row; the mandate and incident counts
+      are summed across the agent records, org-wide, which is the scope their sub-labels name. */
+   (function(){
+     var orgAgents=AGENTS.length?AGENTS:[], allAgents=WS.reduce(function(n,x){return n+(x.agents||0);},0);
+     var withMandate=orgAgents.filter(function(x){return (x.mandates||[]).length;});
+     var tampered=orgAgents.filter(function(x){return (x.incidents||0)>0;});
+     var incidents=orgAgents.reduce(function(n,x){return n+(x.incidents||0);},0);
+     return '<div class="stat"><span class="k">Agents here</span><span class="v">'+w.agents+'</span><span class="s">'+allAgents+' across the organization · '+list.length+' listed below</span></div>'+
+     '<div class="stat"><span class="k">Enrolled</span><span class="v">'+(w.enrolled==null?w.agents:w.enrolled)+'</span><span class="s">'+(w.enrolled!=null&&w.enrolled<w.agents?(w.agents-w.enrolled)+' not yet enrolled':'all at gateway tier for model calls')+'</span></div>'+
+     '<div class="stat"><span class="k">Holding a mandate</span><span class="v">'+withMandate.length+'</span><span class="s">'+(withMandate.length?withMandate.map(function(x){return x.key+' · in '+(wsBySlug(x.ws)||{name:x.ws}).name;}).join(', '):'no agent holds one')+'</span></div>'+
+     '<div class="stat"><span class="k">Tamper incidents</span><span class="v"'+(incidents?' style="color:var(--st-critical)"':'')+'>'+incidents+'</span><span class="s">'+(tampered.length?tampered.map(function(x){return x.key;}).join(', ')+' · hooks_removed':'none recorded')+'</span></div>';
+   })()+'</div>'+
    '<div class="panel"><div class="panel-h"><h3>Registered in '+h(w.name)+'</h3>'+
    '<span class="mono dim" style="margin-left:auto;font-size:11px">.oxagen/agents/ @ '+h(list[0]?list[0].commit:"")+'</span></div>'+
    '<div class="tw"><table><thead><tr><th>Agent</th><th>Trust · Spend</th><th>Harness</th><th>Operator</th><th>Status</th><th>Tier</th>'+
@@ -5167,13 +5219,13 @@ function pTools(){
       'and every run that used them says so in its completeness record.</div>'+
       '<button class="btn" onclick="openDialog(\'schema\')">Review</button></div>':'')+
      '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Tool servers</h3>'+
-     '<p class="muted" style="margin:2px 0 0;font-size:12px">Eight servers, 3,182 tool versions. The registry is the catalog; a belt is what one agent may reach.</p></div>'+
+     '<p class="muted" style="margin:2px 0 0;font-size:12px">'+srvCount()+' servers, '+verCount().toLocaleString()+' tool versions. The registry is the catalog; a belt is what one agent may reach.</p></div>'+
      '<div class="sp"><button class="btn sm" onclick="openDialog(\'import\')">Import tools from an MCP server</button></div></div>'+
      '<div class="tw"><table><thead><tr><th>Server</th><th>Kind</th><th class="num">Tools</th><th>Health</th><th>Schemas</th><th>Connection</th><th>Last import</th></tr></thead>'+
      '<tbody>'+srows+'</tbody></table></div></div>'+
      '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Tool versions</h3>'+
      '<p class="muted" style="margin:2px 0 0;font-size:12px">RBAC reaches the version. A server shipping a new version does not silently widen a belt.</p></div>'+
-     '<div class="sp">'+namesToggle()+'<span class="b b-q">'+tsel.length+' of 3,182 shown</span></div></div>'+
+     '<div class="sp">'+namesToggle()+'<span class="b b-q">'+tsel.length+' of '+verCount().toLocaleString()+' shown</span></div></div>'+
      '<div class="panel-b" style="border-bottom:1px solid var(--border)">'+catChips(rcount,rc,"S.regCat='%s';render()",TOOLS.length)+'</div>'+
      '<div class="tw"><table><thead><tr><th>Tool version</th><th>Category</th><th>Hazard</th><th>Gate today</th><th>Egress</th><th>Financial</th><th>Schema origin</th><th>Digest</th>'+
      '<th class="num">On belts</th><th class="num">Calls 30d</th></tr></thead><tbody>'+trows+'</tbody></table></div>'+
@@ -5335,9 +5387,9 @@ function pOntology(){
        '<dt>Relations</dt><dd class="mono" style="font-size:10.5px">'+h(c.rel)+'</dd></dl></div></div>';}).join("");
     body='<div class="grid g4" style="margin-bottom:16px">'+
      '<div class="stat"><span class="k">Classes</span><span class="v">'+CLASSES.length+'</span><span class="s">active version v18</span></div>'+
-     '<div class="stat"><span class="k">Entities</span><span class="v">176,879</span><span class="s">instances never go to git</span></div>'+
-     '<div class="stat"><span class="k">Relation types</span><span class="v">21</span><span class="s">one file per class and relation</span></div>'+
-     '<div class="stat"><span class="k">Drift found</span><span class="v" style="color:var(--st-critical)">6</span><span class="s">across Customer, Device, Table</span></div></div>'+
+     '<div class="stat"><span class="k">Entities</span><span class="v">'+ontEntities().toLocaleString()+'</span><span class="s">instances never go to git</span></div>'+
+     '<div class="stat"><span class="k">Relation types</span><span class="v">'+ontRelTypes().length+'</span><span class="s">one file per class and relation</span></div>'+
+     '<div class="stat"><span class="k">Drift found</span><span class="v">'+ontDrift()+'</span><span class="s">'+(ontDriftClasses().length?'across '+ontDriftClasses().join(', '):'none found')+'</span></div></div>'+
      '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>The live map</h3>'+
      '<div class="sp"><span class="b b-q">consequence shown on every class</span>'+
      '<button class="btn sm" onclick="openDialog(\'ontprop\')">Open a proposal</button></div></div>'+
@@ -5512,13 +5564,16 @@ function pSteering(){
 
   var body="";
   if(t==="records"){
+    /* The panel is headed "Published records" and the tab badge counts published, so the
+       list and its kind chips count published too. The archived record lives on Retirement. */
     var rk=S.recKind||"", kc={};
-    RECORDS.forEach(function(r){kc[r.kind]=(kc[r.kind]||0)+1;});
-    var shown=RECORDS.filter(function(r){return !rk||r.kind===rk;});
+    var pub=RECORDS.filter(function(r){return r.status==="published";});
+    pub.forEach(function(r){kc[r.kind]=(kc[r.kind]||0)+1;});
+    var shown=pub.filter(function(r){return !rk||r.kind===rk;});
     body='<div class="panel"><div class="panel-h"><h3>Published records</h3>'+
      '<span class="b b-q" style="margin-left:auto">the graph remembers everything; git decides what is in force</span></div>'+
      '<div class="kf" role="group" aria-label="Filter records by kind">'+
-     '<button class="btn sm" aria-pressed="'+(!rk)+'" onclick="S.recKind=\'\';render()">All <span class="dim">'+RECORDS.length+'</span></button>'+
+     '<button class="btn sm" aria-pressed="'+(!rk)+'" onclick="S.recKind=\'\';render()">All <span class="dim">'+pub.length+'</span></button>'+
      Object.keys(KINDS).map(function(k){return '<button class="btn sm k-'+k+'" aria-pressed="'+(rk===k)+'" title="'+h(KINDS[k].d)+'" onclick="S.recKind=\''+k+'\';render()">'+kindSvg(k)+h(KINDS[k].l)+'<span class="dim">'+(kc[k]||0)+'</span></button>';}).join("")+'</div>'+
      '<div class="recs">'+(shown.length?shown.map(function(r){return recordCard(r);}).join(""):'<div class="panel-b dim">No record of that kind in this workspace.</div>')+'</div>'+
      '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">A record can never grant authority. The checks enforce <span class="mono">constraint_effect ∈ {require, forbid}</span>, and a repository record may narrow what a workspace record allows, never widen it.</div></div></div>'+
@@ -5670,7 +5725,7 @@ function pSpend(){
      SPEND.byAgent.map(function(a){
       return '<tr'+drillRow("agent",a.k)+'><td class="tkey" style="font-size:12px">'+drillName("agent",a.k)+'</td><td>'+scorePair(a.k,true)+'</td><td class="num">'+a.runs.toLocaleString()+'</td>'+
        '<td class="num">'+usd(a.spend)+'</td><td class="num">'+usd(a.proven)+'</td>'+
-       '<td class="num">'+(a.perProven==="—"?'<span class="dim">—</span>':usd(a.perProven))+'</td>'+savingsCell("agent",a.k)+
+       '<td class="num">'+perProvenRun(a)+'</td>'+savingsCell("agent",a.k)+
        '<td><span class="b b-'+(a.trend.charAt(0)==="-"?"proven":"approval")+'">'+h(a.trend)+'</span></td></tr>';}).join("")+
      '</tbody></table></div><div class="panel-b"><div class="note">Two agents show no proven spend: <span class="mono">invoice-bot</span> does finance work no witness covers, and <span class="mono">docs-writer</span>’s output is accepted by a human, which is reported separately and never folded into proven.</div></div></div>'+
      '<div class="panel"><div class="panel-h"><h3>By model and provider key</h3></div><div class="tw"><table>'+
@@ -5861,7 +5916,7 @@ function spendDrill(dr){
        ["Accepted, not proven", fmt$(d.accepted||0), 'a human verified it'],
        ["Unproven", fmt$(d.unproven||0), 'no witness flipped'],
        ["Wasted", fmt$(wasted), per(wasted/spend)+' of spend', "var(--st-critical)"],
-       ["Spend per proven run", r.perProven==="—"?'<span class="dim">—</span>':usd(r.perProven), 'spend ÷ runs whose verdict flipped'],
+       ["Spend per proven run", perProvenRun(r), 'spend ÷ runs whose verdict flipped'],
        ["Spend per run", fmt$(d.perRun||spend/r.runs), r.runs.toLocaleString()+' runs'],
        ["Productive ratio", per(d.ratio||0), 'steps that advanced the task'],
        ["Cache hit rate", per(d.cache||0), 'prefix reads served from cache'],
@@ -6349,10 +6404,15 @@ function auditEvents(){
      '<td>'+auditBadge(AUD_DEC[res],res)+'</td>'+
      '<td>'+auditBadge(AUD_SEV[e.sev]||"q",e.sev)+'</td>'+
      '<td class="mono dim" style="font-size:11px">'+h(e.ref)+'</td></tr>';}).join("");
-  return auditStats([["Events · 30 days","12,418","every IAM decision is recorded, allowed or not"],
-    ["Denied","96","denials are recorded and cost nothing"],
-    ["By a service principal","4,117","Terraform, CI, exports, the archiver"],
-    ["By the in-app agent","212","each one a governed action with a receipt"]])+
+  /* Every tile counts the rows in the table beneath it, through the same actor classifier
+     the table uses, so the strip and the list can never tell different stories. */
+  var svc=AUDIT.filter(function(e){return auditActorKind(e.who)==="service";}).length;
+  var asst=AUDIT.filter(function(e){return auditActorKind(e.who)==="in-app agent";}).length;
+  var den=AUDIT.filter(function(e){return auditResult(e)==="denied";}).length;
+  return auditStats([["Events · 30 days",AUDIT.length.toLocaleString(),"every IAM decision is recorded, allowed or not"],
+    ["Denied",String(den),"denials are recorded and cost nothing"],
+    ["By a service principal",String(svc),"Terraform, CI, exports, the archiver"],
+    ["By the in-app agent",String(asst),"each one a governed action with a receipt"]])+
    '<div class="panel"><div class="panel-h"><h3>Control-plane events</h3><span class="muted" style="font-size:12.5px">admin actions, IAM changes, repo bindings, plane changes, key rotations</span>'+
    '<div class="sp">'+auditStore("postgres · 7 years")+
    '<select class="sel-sm" aria-label="Actor" onchange="act(\'Filtering is a mockup here. The API takes actor_kind.\')"><option>All actors</option><option>Humans</option><option>Agents</option><option>Services</option><option>In-app agent</option></select>'+
@@ -6404,7 +6464,7 @@ function auditReceipts(){
    (q?'<button class="btn sm ghost" onclick="S.rq=\'\';render()">clear</button>':'')+'</div></div>'+
    (hits.length?'<div class="tw"><table><thead><tr><th>Receipt</th><th>When</th><th>Agent · operator</th><th>Tool version</th><th>Decision</th><th class="num">Amount</th><th>External effect</th><th>Tier</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
     :emptyState("No receipt matches “"+(S.rq||"")+"”","Receipts are searchable by agent key, tool version, external effect id, call digest and approver. A call that was denied has a receipt too — denials are recorded, they just never dispatched.",'<button class="btn" onclick="S.rq=\'\';render()">Clear the search</button>'))+
-   '<div class="panel-b"><div class="note">'+hits.length+' of 1,204 receipts shown. A receipt for a client-attested call exists too, and its authority group says <span class="mono">observed</span> where the gateway would have said <span class="mono">enforced</span>. The rendering refuses to say otherwise.</div></div></div>';
+   '<div class="panel-b"><div class="note">'+hits.length+' of '+RECEIPTS.length+' receipts shown. A receipt for a client-attested call exists too, and its authority group says <span class="mono">observed</span> where the gateway would have said <span class="mono">enforced</span>. The rendering refuses to say otherwise.</div></div></div>';
 }
 
 function auditHolds(){
@@ -7375,25 +7435,53 @@ function scoreMeter(kind,v,inputs,what){
    '<p class="muted" style="font-size:12px;margin:10px 0 0">'+what+'</p>'+
    '<dl class="kv">'+inputs.map(function(x){return '<dt>'+h(x[0])+'</dt><dd>'+x[1]+(x[2]?' <span class="'+(x[2]>0?'up':'dn')+'">'+(x[2]>0?'+':'')+x[2]+'</span>':'')+'</dd>';}).join("")+'</dl></div>';
 }
+/* The 30-day rollup for one agent, which is what the score strip's window is. Prefer the
+   spend rollup; fall back to a spend-weighted mean over this agent's recorded runs. Both
+   return null when nothing carries the figure, so the caller says so rather than printing a
+   fallback that reads as measured. */
+function agentRollup(a){ return SPEND_DETAIL["agent:"+a.key]||null; }
+function agentCache(a){
+  var d=agentRollup(a);
+  if(d&&typeof d.cache==="number") return d.cache;
+  var rs=RUNS.filter(function(r){return r.agent===a.key&&typeof r.cache==="number";});
+  if(!rs.length) return null;
+  var num=0,den=0;
+  rs.forEach(function(r){var c=parseFloat(r.cost)||0;num+=r.cache*c;den+=c;});
+  return den?num/den:null;
+}
+function agentWasteShare(a){
+  var d=agentRollup(a), sp=money(a.spend30);
+  if(!d||typeof d.wasted!=="number"||!sp) return null;
+  return d.wasted/sp;
+}
 function scoreStrip(a){
   if(typeof a==="string")a=agent(a);
   if(!a) return '';
   var s=agentScores(a), w=ws();
   var q=AUTORULES.filter(function(r){return r.on&&(r.ws==="*"||r.ws===a.ws);}), qn=q.filter(function(r){return ruleQualifies(r,a);}).length;
-  var runs=a.runs30||0, flips=Math.round(runs*(a.ratio||0));
+  /* Proof rate counts runs whose witness verdict flipped (§8.5). It is NOT the productive
+     ratio (§12.8), which measures steps that advanced the task. They are different measures
+     and must never be derived from one another. */
+  var runs=a.runs30||0, flips=(a.flipped30==null?0:a.flipped30);
   return '<div class="grid g2" style="margin-bottom:16px">'+
    scoreMeter("Trust",s.trust,[
-     ["Proof rate",flips+' of '+runs+' runs flipped · '+per(a.ratio||0),s.trust>=700?12:-8],
+     ["Proof rate",runs?flips+' of '+runs+' runs flipped · '+per(flips/runs):'no runs in 30 days',s.trust>=700?12:-8],
+     ["Productive ratio",per(a.ratio||0)+' of steps advanced the task'],
      ["Policy denials 30d",a.incidents?'6 · 1 escalated':'2 · none escalated'],
      ["Tamper incidents",a.incidents?'<span class="dn">'+a.incidents+' · hooks_removed</span>':'0'],
-     ["Approvals overturned","0 of "+Math.max(1,Math.round(runs/9))],
+     ["Approvals overturned",(function(){
+        var mine=APPROVALS.filter(function(x){return x.agent===a.key;});
+        var done=mine.filter(function(x){var st=apState(x.id).status;return st==="approved"||st==="denied";});
+        if(!mine.length) return 'no approval has parked on this agent';
+        return done.filter(function(x){return apState(x.id).status==="denied";}).length+' of '+done.length+' resolved';
+      })()],
      ["Chain integrity","intact on every sealed run"]],
      s.prov?'Provisional: fewer than 20 runs. It starts at 500 and moves with evidence.':'What it did against what it was allowed to do, weighted by how much of it a witness proved.')+
    scoreMeter("Spend",s.spend,[
-     ["Cost per proven flip",flips?usd((parseFloat(String(a.spend30).replace(/,/g,""))/flips).toFixed(2)):'—',s.spend>=700?9:-11],
-     ["Proven ÷ spend 30d",usd(a.proven30)+' ÷ '+usd(a.spend30)],
-     ["Cache hit rate",per(a.cache||0.78)],
-     ["Wasted spend share",a.ratio>0.6?'4%':'19%'],
+     ["Spend per proven run",flips?usd((parseFloat(String(a.spend30).replace(/,/g,""))/flips).toFixed(2)):'no proven run yet',s.spend>=700?9:-11],
+     ["Proven ÷ spend 30d",usd(a.proven30)+' ÷ '+usd(a.spend30)+' · '+per(money(a.proven30)/Math.max(1e-9,money(a.spend30)))],
+     ["Cache hit rate",agentCache(a)==null?'not recorded on this agent':per(agentCache(a))],
+     ["Wasted spend share",agentWasteShare(a)==null?'not computed for this agent':per(agentWasteShare(a))+' of '+usd(a.spend30)],
      ["Business value",flips?flips+' flips · '+usd(a.proven30)+' proven':'accepted by a human, never folded into proven']],
      s.prov?'Provisional: fewer than 20 runs.':'Tokens against outcomes: how efficiently it spends, and whether the spend bought business value a witness could prove.')+
    '</div>'+
