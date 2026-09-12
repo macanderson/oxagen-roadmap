@@ -1,6 +1,6 @@
 """Re-apply the a-intel rename and the volume block to a base mc.html.
 
-    python3 tools/build.py "$(git show main:mc.html > /tmp/base.html; echo /tmp/base.html)" mc.html
+    git show main:mc.html > /tmp/base.html && python3 tools/build.py /tmp/base.html mc.html
 
 main moves several commits an hour while the mockup jobs run, and this change rewrites
 most of mc.html, so it is kept as a transform rather than as a merge: hand it whatever
@@ -112,6 +112,70 @@ rep("""      'The <span class="mono">slack</span> server declares no <span class
         return k.map(function(n){return '<span class="mono">'+h(n)+'</span>';}).join(k.length>2?', ':' and ');})()+
         (Object.keys(props.reduce(function(m,t){m[t.s]=1;return m;},{})).length>1?' servers declare':' server declares')+
         ' no <span class="mono">outputSchema</span> for '+(props.length>1?'these tools':'this tool')+'. '+""")
+
+# The mandate page resolved nothing from the route and rendered a hardcoded ledger.
+rep("""function pMandate(r){
+  var m=MANDATES[0];""",
+    """function pMandate(r){
+  /* Resolve the mandate the route names. This read MANDATES[0] unconditionally, which was
+     invisible while the demo had one mandate and wrong the moment it had more. */
+  var m=null; for(var mi=0;mi<MANDATES.length;mi++){if(MANDATES[mi].id===(r&&r.mid))m=MANDATES[mi];}
+  if(!m)m=MANDATES[0];""")
+
+# status and two-person are properties of the mandate, not of the one it used to be
+rep("""   '<div class="row" style="margin-top:8px"><span class="b b-allowed"><span class="d"></span>'+h(m.status)+'</span>'+
+   '<span class="b b-approval"><span class="d"></span>two-person</span><span class="b b-q">'+h(m.currency)+'</span></div>'+""",
+    """   '<div class="row" style="margin-top:8px"><span class="b b-'+(m.status==="active"?"allowed":m.status==="expired"?"q":"denied")+'"><span class="d"></span>'+h(m.status)+'</span>'+
+   (m.twoPerson?'<span class="b b-approval"><span class="d"></span>two-person</span>':'<span class="b b-q">single approver</span>')+
+   '<span class="b b-q">'+h(m.currency)+'</span></div>'+""")
+
+# the ledger comes off the record
+rep("""    '<div class="tw"><table><thead><tr><th>When</th><th>Call</th><th class="num">Amount</th><th>State</th><th>External id</th><th>Receipt</th></tr></thead><tbody>'+
+    '<tr><td class="mono" style="font-size:11.5px">08:40:19</td><td class="mono" style="font-size:11.5px">stripe__create_payment@4</td><td class="num">$2,450.00</td>'+
+     '<td><span class="b b-approval"><span class="d"></span>reserved</span></td><td class="dim">— awaiting approval</td><td class="dim">—</td></tr>'+
+    '<tr><td class="mono" style="font-size:11.5px">2026-09-04</td><td class="mono" style="font-size:11.5px">stripe__create_payment@4</td><td class="num">$884.60</td>'+
+     '<td><span class="b b-allowed"><span class="d"></span>settled</span></td><td class="mono" style="font-size:11.5px">pi_3QaL8f2Xk</td><td><a href="#">rcp_01K4X8…</a></td></tr>'+
+    '<tr><td class="mono" style="font-size:11.5px">2026-09-02</td><td class="mono" style="font-size:11.5px">aws_billing__purchase_savings_plan@2</td><td class="num">$400.00</td>'+
+     '<td><span class="b b-allowed"><span class="d"></span>settled</span></td><td class="mono" style="font-size:11.5px">sp-0a4f91c</td><td><a href="#">rcp_01K4W2…</a></td></tr>'+
+    '<tr><td class="mono" style="font-size:11.5px">2026-09-01</td><td class="mono" style="font-size:11.5px">stripe__create_payment@4</td><td class="num">$0.00</td>'+
+     '<td><span class="b b-denied"><span class="d"></span>released</span></td><td class="dim">dispatch failed · released</td><td><a href="#">rcp_01K4V7…</a></td></tr>'+
+    '</tbody></table></div></div>'+""",
+    """    '<div class="tw"><table><thead><tr><th>When</th><th>Call</th><th class="num">Amount</th><th>State</th><th>External id</th><th>Receipt</th></tr></thead><tbody>'+
+    (m.ledger||[]).map(function(x){
+      var sb={settled:"allowed",reserved:"approval",released:"denied"}[x.state]||"q";
+      return '<tr><td class="mono" style="font-size:11.5px">'+h(x.when)+'</td>'+
+       '<td class="mono" style="font-size:11.5px">'+h(x.call)+'</td><td class="num">'+usd(x.amount)+'</td>'+
+       '<td><span class="b b-'+sb+'"><span class="d"></span>'+h(x.state)+'</span></td>'+
+       '<td class="'+(x.ext.indexOf("—")===0||/failed/.test(x.ext)?"dim":"mono")+'" style="font-size:11.5px">'+h(x.ext)+'</td>'+
+       '<td>'+(x.rcp?'<a href="#">'+h(x.rcp)+'</a>':'<span class="dim">—</span>')+'</td></tr>';}).join("")+
+    '</tbody></table></div></div>'+""")
+
+# The reconciliation exception is about the connection behind the seed mandate, so it
+# only shows there; every other mandate reports a clean September.
+rep(r"""    '<div class="warn"><b>One exception, severity critical.</b> Stripe charge <span class="mono">ch_3Qa8</span> for $18.00 USD is attributable to <span class="mono">con_01K2A9</span> and has no receipt. Money moved that Oxagen did not govern.</div>'+
+    '<button class="btn" style="margin-top:12px" onclick="go(\'#/'+ORG.slug+'/audit/incidents\')">Open on Audit</button></div></div></div></div>';""",
+    r"""    (m.id!=="mnd_7K2ETQ4"
+      ? '<div class="note">Every draw on this mandate reconciles: each settlement has a receipt and each receipt has a frame. Nothing is outstanding for September.</div>'
+      : '<div class="warn"><b>One exception, severity critical.</b> Stripe charge <span class="mono">ch_3Qa8</span> for $18.00 USD is attributable to <span class="mono">con_01K2A9</span> and has no receipt. Money moved that Oxagen did not govern.</div>'+
+        '<button class="btn" style="margin-top:12px" onclick="go(\'#/'+ORG.slug+'/audit/incidents\')">Open on Audit</button>')+
+    '</div></div></div></div>';""")
+
+# the amount at stake on the evidence dialog wants its separator, like the card
+rep("""     '<div class="stat"><span class="k">At stake</span><span class="v">'+usd(f.save)+'</span>""",
+    """     '<div class="stat"><span class="k">At stake</span><span class="v">'+usd(fmt2(n$(f.save)))+'</span>""")
+
+# a three-row table with a totals row does not want search, sort and a rows-per-page control,
+# and the enhancer counts the totals row as data ("1-4 of 4" under three runs)
+rep("""<div class="tw" style="margin-bottom:16px"><table class="narrow"><thead><tr><th>Run</th><th>Task</th><th>Started</th><th class="num">Cost</th><th class="num">Wasted</th>""",
+    """<div class="tw" style="margin-bottom:16px"><table class="narrow" data-lt="off"><thead><tr><th>Run</th><th>Task</th><th>Started</th><th class="num">Cost</th><th class="num">Wasted</th>""")
+
+# The ledger table was closed out of its own panel, so it was a bare child of the two-column
+# .split grid and the list enhancer's search bar and pager landed in the right-hand column,
+# detached from the table, pushing the grant column out of the grid entirely. Close .panel
+# after the table instead of before it: the table's own trailing "</div></div>" then closes
+# .tw and .panel, and .split gets back its two children.
+rep("""    '<div class="dim" style="font-size:11.5px;margin-top:8px">Two concurrent calls cannot both fit under the same remaining limit \u2014 the reservation is taken before dispatch.</div></div></div>'+""",
+    """    '<div class="dim" style="font-size:11.5px;margin-top:8px">Two concurrent calls cannot both fit under the same remaining limit \u2014 the reservation is taken before dispatch.</div></div>'+""")
 
 open(DST, 'w').write(s)
 print('wrote', DST, len(s))

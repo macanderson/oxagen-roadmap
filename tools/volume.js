@@ -157,6 +157,29 @@
     {id:"mnd_5T2HVX",agent:"a-intel.finops.invoice-bot",by:"Dana Okafor",roleAt:"org.billing",effect:"moves_funds",currency:"USD",perCall:"250.00",perPeriod:"5,000.00",period:"monthly",callsPerDay:50,
      used:"4,988.10",reserved:"0.00",remaining:"11.90",allow:"vendor:aws, vendor:github",deny:"*",tools:"stripe__create_payment@*",approvalAbove:"100.00",alwaysFor:"moves_funds",approvers:"role:org.billing",
      purpose:"monthly infrastructure invoices, PO-4471 (August)",from:"2026-08-01",to:"2026-08-31",twoPerson:true,second:"Priya Natarajan",status:"expired"});
+  /* Each mandate carries its own ledger. The seed mandate's four rows are the hand-authored
+     ones the page used to hardcode, including the reservation that matches the parked payment. */
+  MANDATES.forEach(function(m){
+    if(m.id==="mnd_7K2ETQ4"){
+      m.ledger=[
+       {when:"08:40:19",call:"stripe__create_payment@4",amount:"2,450.00",state:"reserved",ext:"— awaiting approval",rcp:null},
+       {when:"2026-09-04",call:"stripe__create_payment@4",amount:"884.60",state:"settled",ext:"pi_3QaL8f2Xk",rcp:"rcp_01K4X8…"},
+       {when:"2026-09-02",call:"aws_billing__purchase_savings_plan@2",amount:"400.00",state:"settled",ext:"sp-0a4f91c",rcp:"rcp_01K4W2…"},
+       {when:"2026-09-01",call:"stripe__create_payment@4",amount:"0.00",state:"released",ext:"dispatch failed · released",rcp:"rcp_01K4V7…"}];
+      return;
+    }
+    var tool=m.tools.split(",")[0].trim().replace(/@\*$/,"@4"), rows=[], n=ri(4,11);
+    for(var q=0;q<n;q++){
+      var d=ri(1,28), amt=Math.min(num$(m.perCall),rf(18,num$(m.perCall)));
+      var st=m.status==="expired"?"settled":wpick([["settled",82],["released",11],["reserved",7]]);
+      rows.push({when:dstr(TODAY-d*86400000),call:tool,amount:st==="released"?"0.00":mc(amt),state:st,
+        ext:st==="settled"?(/stripe/.test(tool)?"pi_"+ulid(10):/aws/.test(tool)?"sp-"+hex(7):"ext_"+ulid(8)):st==="reserved"?"— awaiting approval":"dispatch failed · released",
+        rcp:st==="reserved"?null:"rcp_01K"+ulid(4)+"…",_d:d});
+    }
+    rows.sort(function(a,b){return a._d-b._d;});
+    rows.forEach(function(x){delete x._d;});
+    m.ledger=rows;
+  });
   var agentsBy={}; AGENTS.forEach(function(a){agentsBy[a.key]=a;});
 
   /* ---------- repos, branches, sources, ontology ---------- */
