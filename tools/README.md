@@ -86,9 +86,14 @@ checks. Go to `about:blank` first when you want a clean load.
 back **UPPERCASED** while everything else does not. Match them
 case-insensitively or read `textContent`.
 
-Escape `@` in the `perl` patterns in the mutation scripts (`\@`). Unescaped,
-perl reads it as the start of an array interpolation, the pattern never
-matches, and you get a `SKIP` — a silent hole rather than a failure.
+Escape `@` in the `perl` patterns in the mutation scripts (`\@`), and `$(` in
+the replacements (`\$(`). Unescaped, `@` reads as the start of an array
+interpolation and the pattern never matches — a `SKIP`, which is a silent hole.
+Unescaped `$(` is perl's GID variable and interpolates into the replacement,
+which turns the mutant into a syntax error: the guard then "catches" it, but
+for the wrong reason, and every assertion times out on a page that never runs.
+If one mutation takes many minutes while the others take two, that is what
+happened.
 
 Every handler that calls `render()` replaces `#view.innerHTML` and destroys
 whatever was focused. Test any keyboard interaction **twice in a row**: these

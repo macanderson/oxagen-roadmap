@@ -22,8 +22,17 @@ trap 'rm -rf "$TMP"' EXIT
 
 missed=0 caught=0 skipped=0
 
+# Each mutation launches a browser, so the full sweep is long and memory-hungry.
+# Pass a space-separated list of leading numbers to run a subset:
+#   bash tools/mutate-oracle.sh "46 47 48"
+ONLY="${1:-}"
+
 run_mut () {
   local name="$1"; shift
+  if [ -n "$ONLY" ]; then
+    local num="${name%% *}"
+    case " $ONLY " in *" $num "*) ;; *) return ;; esac
+  fi
   cp "$SRC" "$TMP/m.html"
   perl -0pi -e "$1" "$TMP/m.html"
   if cmp -s "$SRC" "$TMP/m.html"; then
@@ -108,8 +117,11 @@ run_mut "60 leave the approved run parked" \
   's/run\.state = "live";//'
 run_mut "61 let the chrome open over the primary action" \
   's/if\(innerWidth < 700\) S\.chrome = false;//'
+# NOTE: `$(` in a replacement is perl's GID variable and interpolates, which
+# turns the mutant into a syntax error instead of the defect you meant — escape
+# it as \$( . The same trap as an unescaped `@` in a pattern.
 run_mut "62 stop inerting what the drawer covers" \
-  's/  \$\("#main"\)\.inert = true;\n  \$\("\.navsec a"\)\.focus\(\);/  $(".navsec a").focus();/'
+  's/  \$\("#main"\)\.inert = true;\n(  \$\("\.navsec a"\)\.focus\(\);)/$1/'
 
 echo
 echo "caught $caught · missed $missed · skipped $skipped"

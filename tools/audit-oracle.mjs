@@ -906,12 +906,23 @@ await step(57, async () => {
 
 /* ═══ 58 · hover feedback only where hovering leads somewhere ═══ */
 await step(58, async () => {
-  await fresh('#/agents');
-  const r = await page.evaluate(() => {
-    const row = document.querySelector('#view tbody tr');
-    return {hasGo: !!row.dataset.go, cursor: getComputedStyle(row).cursor};
-  });
-  is(58, !r.hasGo && r.cursor !== 'pointer', `a non-navigable row is not dressed as a link (${JSON.stringify(r)})`);
+  /* The defect is in the hover GROUND, so reading the cursor cannot catch it.
+     Hover a row that goes nowhere and a row that does, and require them to
+     differ — a positive control, so this cannot pass by the rule being absent. */
+  const groundOf = async (route, sel) => {
+    await fresh(route);
+    await page.locator(sel).first().hover();
+    await page.waitForTimeout(120);
+    return page.evaluate(s => {
+      const tr = document.querySelector(s);
+      return {go: !!tr.dataset.go, bg: getComputedStyle(tr.querySelector('td')).backgroundColor};
+    }, sel);
+  };
+  const plain = await groundOf('#/agents', '#view tbody tr');
+  const navigable = await groundOf('#/fleet', '#view tbody tr[data-go]');
+  const base = await page.evaluate(() => getComputedStyle(document.querySelector('#view .panel')).backgroundColor);
+  is(58, !plain.go && navigable.go && plain.bg !== navigable.bg && navigable.bg !== base,
+    `only a navigable row lights up on hover (plain ${plain.bg}, navigable ${navigable.bg}, panel ${base})`);
 });
 
 /* ═══ 59 · targets are big enough to hit ═══ */
