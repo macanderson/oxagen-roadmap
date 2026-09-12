@@ -932,6 +932,25 @@ details.cm-diff[open] summary::before{content:"▾"}
 .tx-kind[aria-pressed="true"]{background:var(--hl);color:var(--fg);box-shadow:inset 0 0 0 1px var(--rule)}
 .tx-kind[aria-pressed="false"]{text-decoration:line-through;color:var(--dim)}
 .tx-kind.err[aria-pressed="true"]{color:var(--st-failed)}
+/* ---- frame player transport + paused run ---- */
+.fp-bar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--panel);margin-bottom:14px}
+.fp-bar .btn.sm{padding:3px 8px;font-family:var(--mono);font-size:11.5px;min-width:30px;justify-content:center}
+.fp-bar .btn.sm[aria-pressed="true"]{background:var(--hl);border-color:var(--rule);color:var(--fg)}
+.fp-bar .play{min-width:82px}
+.fp-scrub{flex:1;min-width:180px;display:grid;gap:3px;margin:0 6px}
+.fp-range{width:100%;margin:0;accent-color:var(--fg);cursor:pointer}
+.fp-ticks{position:relative;height:6px;margin:0 7px}
+.fp-ticks i{position:absolute;top:0;width:4px;height:6px;border-radius:2px;margin-left:-2px}
+.fp-cnt{font-family:var(--mono);font-size:11px;color:var(--dim);white-space:nowrap;font-variant-numeric:tabular-nums}
+.fp-cnt b{color:var(--fg);font-weight:600}
+.fp-bar kbd{font-family:var(--mono);font-size:10px;border:1px solid var(--border);border-radius:4px;padding:0 4px;color:var(--muted);background:var(--void)}
+.fp-keys{display:inline-flex;gap:6px;align-items:center;font-size:11px;color:var(--dim);margin-left:auto}
+.fp-dot{width:6px;height:6px;border-radius:50%;flex:none}
+.fp-item[aria-current="true"] .fp-dot{box-shadow:0 0 0 2px var(--hl)}
+.pause-banner{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:11px 14px;border:1px dashed color-mix(in srgb,var(--st-approval) 65%,transparent);background:color-mix(in srgb,var(--st-approval) 9%,transparent);border-radius:10px;margin-bottom:16px;font-size:12.5px;color:var(--body)}
+.pause-banner .g{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;color:var(--st-approval);background:color-mix(in srgb,var(--st-approval) 14%,transparent);font-weight:700;flex:none}
+.pause-banner .q{font-style:italic;color:var(--fg)}
+#viewport.phone .fp-scrub{flex-basis:100%}
 .tx-play{display:flex;align-items:center;gap:4px;margin-left:auto;flex-wrap:wrap}
 .tx-play .btn.sm{padding:3px 8px;font-family:var(--mono);font-size:11.5px;min-width:30px;justify-content:center}
 .tx-play .btn.sm[aria-pressed="true"]{background:var(--hl);border-color:var(--rule);color:var(--fg)}
@@ -1115,8 +1134,7 @@ button.edge:hover{color:var(--fg)}
 .cols .base{position:absolute;left:0;right:0;bottom:0;height:1px;background:var(--border)}
 .ax{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--dim);margin-top:3px}
 /* stacked ratio bar: 2px gaps, no borders */
-.stk{display:flex;gap:2px;height:8px;border-radius:4px;position:relative;margin-top:4px}
-.stk .ref{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--fg);border-left:1px solid var(--panel);border-right:1px solid var(--panel);margin-left:-2px}
+.stk{display:flex;gap:2px;height:8px;border-radius:4px;overflow:hidden}
 .stk i{display:block;height:100%;background:var(--c);min-width:2px}
 .stk i:first-child{border-radius:4px 0 0 4px} .stk i:last-child{border-radius:0 4px 4px 0}
 .mtr{height:8px;border-radius:4px;background:var(--hl);overflow:hidden;position:relative}
@@ -1131,20 +1149,17 @@ button.edge:hover{color:var(--fg)}
 .rt-leg span{display:inline-flex;align-items:center;gap:5px;font-variant-numeric:tabular-nums}
 .rt-leg i{width:8px;height:8px;border-radius:2px;background:var(--c);flex:none}
 .rt-leg b{color:var(--fg);font-weight:600}
-.rt-track{position:relative;height:50px;margin:2px 0 0}
-.rt-turns{position:relative;height:16px;font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:.06em;text-transform:uppercase}
-.rt-turns span{position:absolute;top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-left:2px;box-sizing:border-box}
-.rt-marks{position:relative;height:14px;margin-top:3px}
-#viewport.phone .rt-marks{display:none}
+.rt-track{position:relative;height:58px;margin:8px 0 2px}
 .rt-band{position:absolute;top:0;bottom:16px;background:var(--hl);border-radius:6px;border:1px solid var(--border)}
 .rt-band.alt{background:transparent}
+.rt-band .t{position:absolute;left:8px;top:4px;font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
 .rt-tick{position:absolute;bottom:16px;width:4px;height:18px;margin-left:-2px;border:0;padding:0;background:var(--c);border-radius:2px 2px 0 0;cursor:pointer;box-shadow:0 0 0 2px var(--panel)}
 .rt-tick::before{content:"";position:absolute;inset:-6px -8px}
 .rt-tick.tall{height:30px}
 .rt-tick.cost{height:24px}
 .rt-tick:hover,.rt-tick:focus-visible{filter:brightness(1.2);z-index:3}
 .rt-tick.on{outline:2px solid var(--fg);outline-offset:1px;z-index:2}
-.rt-mark{position:absolute;top:0;transform:translateX(-50%);font-family:var(--mono);font-size:10px;color:var(--muted);white-space:nowrap;pointer-events:none}
+.rt-mark{position:absolute;top:-2px;transform:translateX(-50%);font-family:var(--mono);font-size:10px;color:var(--muted);white-space:nowrap;background:var(--panel);padding:0 4px;border-radius:4px;pointer-events:none}
 .rt-mark.right{transform:translateX(-100%);}
 .rt-axis{position:absolute;left:0;right:0;bottom:0;height:14px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--dim);padding-top:2px}
 .rt-foot{display:flex;gap:12px;flex-wrap:wrap;font-size:11px;color:var(--dim);margin-top:8px;align-items:center}
@@ -1165,6 +1180,71 @@ button.edge:hover{color:var(--fg)}
 .tx-kind[aria-pressed="false"] span:not(.d){text-decoration:line-through}
 .tx-kind.all{color:var(--muted);padding-left:8px}
 .tx-kind.err .d{display:none}
+/* ---- Onboarding demo — W1's sign-up, log-in and gate screens, reachable from the account dialog. Demo chrome; not shipped. ---- */
+.ob-auth{min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:0 20px 56px;position:relative;isolation:isolate;background:var(--ink)}
+.ob-auth::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.5;background:radial-gradient(760px 420px at 50% -6%,color-mix(in srgb,var(--gold) 14%,transparent),transparent 70%),repeating-linear-gradient(0deg,transparent 0 47px,var(--border) 47px 48px),repeating-linear-gradient(90deg,transparent 0 47px,var(--border) 47px 48px);-webkit-mask-image:linear-gradient(180deg,#000 0%,transparent 78%);mask-image:linear-gradient(180deg,#000 0%,transparent 78%)}
+.ob-top{width:100%;max-width:1180px;padding:26px 0 0;display:flex;align-items:center;gap:12px}
+.ob-top .brandmark{margin:0}
+.ob-top .btn{margin-left:auto}
+.ob-card{width:100%;max-width:448px;margin-top:44px}
+.ob-card.wide{max-width:560px}
+.ob-h{margin-bottom:22px}
+.ob-h h1{font-size:28px;line-height:1.15;letter-spacing:-.015em;margin:0}
+.ob-lead{font-size:14.5px;color:var(--muted);line-height:1.55;margin:10px 0 0;max-width:62ch}
+.ob-panel{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:20px 22px;display:flex;flex-direction:column;gap:16px}
+.ob-panel .field{margin-bottom:0}
+.ob-panel .field input:not([type="checkbox"]){padding:10px 12px;font-size:14px}
+.ob-sso{display:grid;gap:9px}
+.ob-sso .btn{justify-content:flex-start;padding:9px 14px;font-size:13.5px}
+.ob-sso .btn svg{flex:none}
+.ob-or{display:flex;align-items:center;gap:12px;color:var(--dim);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase}
+.ob-or::before,.ob-or::after{content:"";height:1px;background:var(--border);flex:1}
+.ob-form{display:flex;flex-direction:column;gap:14px}
+.ob-form .btn.primary.wide{width:100%;justify-content:center;padding:11px 16px;font-size:14px}
+.ob-err{display:flex;gap:8px;align-items:flex-start;font-size:12.5px;color:var(--st-failed);line-height:1.45;padding:10px 12px;border:1px solid color-mix(in srgb,var(--st-failed) 40%,transparent);background:color-mix(in srgb,var(--st-failed) 10%,transparent);border-radius:9px}
+.ob-err svg{flex:none;margin-top:1px}
+.ob-err b{color:var(--fg)}
+.field input.ob-bad{border-color:var(--st-failed)}
+.ob-pw{position:relative}
+.ob-pw input{padding-right:62px}
+.ob-pw button{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:0;color:var(--muted);font:inherit;font-size:12px;padding:4px 6px;border-radius:4px}
+.ob-pw button:hover{color:var(--fg);background:var(--hl)}
+.ob-meter{display:flex;gap:4px;margin-top:8px}
+.ob-meter i{height:3px;flex:1;background:var(--hl);border-radius:2px}
+.ob-meter i.on{background:var(--st-allowed)}
+.ob-reqs{display:grid;gap:3px;margin-top:6px}
+.ob-reqs span{font-size:11.5px;color:var(--dim);display:flex;gap:6px;align-items:center}
+.ob-reqs span.ok{color:var(--st-allowed)}
+.ob-codes{display:flex;gap:8px}
+.ob-panel .ob-codes input{width:46px;height:54px;text-align:center;font-family:var(--mono);font-size:21px;padding:0}
+.ob-check{display:flex;gap:9px;align-items:flex-start;font-size:13px;color:var(--body);cursor:pointer}
+.ob-check input{margin:2px 0 0;accent-color:var(--gold);width:auto}
+.ob-foot{margin-top:22px;font-size:13px;color:var(--muted);text-align:center}
+.ob-foot a{color:var(--accent-text);text-decoration:none}
+.ob-foot a:hover{text-decoration:underline}
+.ob-tags{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:26px}
+.ob-state{display:flex;flex-direction:column;align-items:center;gap:13px;padding:40px 24px;text-align:center;background:var(--panel);border:1px solid var(--border);border-radius:14px}
+.ob-state .glyph{width:44px;height:44px;border-radius:11px;display:grid;place-items:center;border:1px solid var(--border);background:var(--hl);color:var(--muted)}
+.ob-state.deny .glyph{color:var(--st-denied);border-color:color-mix(in srgb,var(--st-denied) 45%,transparent);background:color-mix(in srgb,var(--st-denied) 12%,transparent)}
+.ob-state.ok .glyph{color:var(--st-allowed);border-color:color-mix(in srgb,var(--st-allowed) 45%,transparent);background:color-mix(in srgb,var(--st-allowed) 12%,transparent)}
+.ob-state h2{margin:0}
+.ob-state p{margin:0;max-width:52ch;font-size:13px;color:var(--muted);line-height:1.55}
+.ob-link{background:none;border:0;padding:0;font:inherit;color:var(--accent-text);cursor:pointer}
+.ob-link:hover{text-decoration:underline}
+.ob-spin{width:13px;height:13px;border-radius:50%;border:1.5px solid color-mix(in srgb,var(--on-gold) 35%,transparent);border-top-color:var(--on-gold);animation:regsp .7s linear infinite;flex:none;display:inline-block}
+.ob-repo{margin-top:14px}
+.ob-steps{display:flex;flex-direction:column;border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.ob-steps>div{display:flex;align-items:center;gap:12px;padding:10px 12px;border-bottom:1px solid var(--border);background:var(--ink)}
+.ob-steps>div:last-child{border-bottom:0}
+.ob-steps .sn{width:22px;height:22px;border-radius:50%;border:1px solid var(--rule);display:grid;place-items:center;font-family:var(--mono);font-size:11px;color:var(--muted);flex:none}
+.ob-steps .t1{font-size:13px;font-weight:500;color:var(--fg)}
+.ob-steps .t2{font-size:11.5px;color:var(--dim);margin-top:1px}
+.ob-steps .bd2{flex:1;min-width:0}
+#viewport.phone .ob-auth{padding:0 16px 48px}
+#viewport.phone .ob-card{margin-top:26px}
+#viewport.phone .ob-h h1{font-size:23px}
+#viewport.phone .ob-codes{gap:5px}
+#viewport.phone .ob-panel .ob-codes input{width:calc((100% - 25px)/6);height:48px;font-size:18px}
 </style>
 
 <div id="viewport"><div id="app"></div></div>
@@ -2453,7 +2533,8 @@ function flipHero(R){
 }
 function statusBadge(st){
   var m={live:["allowed","live"],parked:["approval","parked for approval"],sealed:["q","sealed"],
-         halted:["denied","halted"],compacted:["q","compacted"]};
+         halted:["denied","halted"],compacted:["q","compacted"],
+         paused:["approval","⏸ paused"],pausing:["approval","pausing · next boundary"],resuming:["allowed","resuming"]};
   var x=m[st]||["q",st];
   if(st==="live") return '<span class="live"><span class="p"></span>live</span>';
   return '<span class="b b-'+x[0]+'">'+x[1]+'</span>';
@@ -2660,6 +2741,7 @@ function route(){
   var hs=location.hash.replace(/^#\/?/,"");
   var p=hs?hs.split("/"):[];
   if(!p.length) return {page:"fleet",org:ORG.slug,ws:S.ws};
+  if(p[0]==="welcome") return {page:"welcome",step:p[1]||"signup"};
   var org=p[0];
   if(p.length===1) return {page:"organization",org:org};
   if(p[1]==="api-keys"){S.tab.organization="keys";return {page:"organization",org:org,tab:"keys"};}
@@ -2683,7 +2765,7 @@ function applyHashTab(){
   var p=location.hash.replace(/^#\/?/,"").split("/");
   if(p.length>=4&&p[2]!=="runs"&&p[2]!=="agents") S.tab[p[2]]=p[3];
 }
-window.addEventListener("hashchange",function(){S.side=false;applyHashTab();render();});
+window.addEventListener("hashchange",function(){S.side=false;fpStop();applyHashTab();render();});
 
 var PAGES={fleet:"Fleet",run:"Run",agents:"Agents",agent:"Agents",mandate:"Agents",tools:"Tools",
   agentsource:"Agents",ontology:"Ontology",steering:"Steering",spend:"Spend",organization:"Organization",billing:"Billing",audit:"Audit"};
@@ -3260,6 +3342,7 @@ function userMenu(){
    '<button class="menu-i" onclick="openDialog(\'account\',\'preferences\')">Preferences</button>'+
    '<button class="menu-i" onclick="openDialog(\'account\',\'security\')">Security and sessions</button>'+
    '<button class="menu-i" onclick="openDialog(\'account\',\'privacy\')">Privacy and data</button>'+
+   '<button class="menu-i" onclick="openDialog(\'account\',\'onboarding\')">Onboarding demo</button>'+
    '<div class="hr" style="margin:5px 0"></div>'+
    '<button class="menu-i" onclick="toggleTheme()">Switch theme</button>'+
    '<button class="menu-i" onclick="S.layer=null;render()">Sign out</button></div>';
@@ -3286,7 +3369,7 @@ function pFleet(){
      '<td><span class="tid">'+h(r.id)+'</span><div class="dim" style="font-size:11.5px">'+h(r.taskTitle)+'</div></td>'+
      '<td><div class="row" style="gap:9px;flex-wrap:nowrap">'+agentAv(a,26)+'<div style="min-width:0"><span class="tkey">'+h(r.agent)+'</span><div class="dim" style="font-size:11.5px">'+h(a?a.harnessLabel:"")+'</div>'+(a?scorePair(a,true):'')+'</div></div></td>'+
      '<td><span class="row" style="gap:7px;flex-wrap:nowrap;white-space:nowrap">'+personAv(r.op,22)+h(PEOPLE[r.op].name)+'</span></td>'+
-     '<td>'+statusBadge(r.status)+'</td>'+
+     '<td>'+statusBadge(runStatus(r))+'</td>'+
      '<td>'+tierBadge(r.tier)+'</td>'+
      '<td>'+gradeBadge(r.grade)+'</td>'+
      '<td>'+verdictCell(r)+'</td>'+
@@ -3521,17 +3604,22 @@ function pRun(r){
 
   var a=agent(R.agent), t=tab("run","transcript"), govN=govCount();
   var compacted=R.status==="compacted";
-  var fr=FRAMES[Math.min(S.frame,FRAMES.length-1)];
+  var fr=FRAMES[Math.min(S.frame,FRAMES.length-1)], rs=runStatus(R);
 
   var head='<div class="phead"><div class="t"><p class="eyebrow">Run · '+h(R.agent)+'</p>'+
    '<h1 class="mono" style="font-size:19px">'+h(R.id)+'</h1>'+
-   '<div class="row" style="margin-top:8px">'+statusBadge(R.status)+tierBadge(R.tier)+gradeBadge(R.grade)+verdictBadge(R.verdict,R)+(a?scorePair(a,true):'')+
+   '<div class="row" style="margin-top:8px">'+statusBadge(rs)+tierBadge(R.tier)+gradeBadge(R.grade)+verdictBadge(R.verdict,R)+(a?scorePair(a,true):'')+
    '<span class="b b-q">task '+h(R.task)+'</span></div>'+
    '<p style="margin-top:8px">'+h(R.taskTitle)+' · started '+h(R.started)+(R.sealed?' · sealed '+h(R.sealed):'')+'</p></div>'+
    '<div class="acts">'+
-    (R.status==="live"?'<button class="btn" onclick="act(\'Pause queued. It takes effect at the next boundary.\')">Pause</button>'+
+    (rs==="live"?'<button class="btn" onclick="openDialog(\'pause\')" title="Takes effect at the next boundary · run.pause">❙❙ Pause run</button>'+
       '<button class="btn" onclick="openSteer()">Steer</button>'+
       '<button class="btn danger" onclick="act(\'Cancel issued. Run token revoked; process kill is best effort and recorded.\')">Cancel</button>':
+     rs==="pausing"?'<button class="btn" disabled>❙❙ Pausing…</button><button class="btn" onclick="openSteer()">Steer</button>':
+     rs==="paused"?'<button class="btn" onclick="resumeRun(\''+R.id+'\')" title="run.resume · the reason reaches the model as a control frame">▶ Resume run</button>'+
+      '<button class="btn" onclick="openSteer()">Steer</button>'+
+      '<button class="btn danger" onclick="act(\'Cancel issued. Run token revoked; process kill is best effort and recorded.\')">Cancel</button>':
+     rs==="resuming"?'<button class="btn" disabled>▶ Resuming…</button>':
       '<button class="btn" onclick="act(\'Fork replay started from frame '+S.frame+' with tool results served from the recording.\')">Fork replay</button>'+
       '<button class="btn" onclick="openDialog(\'bisect\')">Bisect</button>')+
     '<button class="btn" onclick="act(\'Signed bundle queued: segments, attestations, key ids and a verifier script.\')">Export</button>'+
@@ -3559,23 +3647,25 @@ function pRun(r){
   } else if(t==="player"){
     txStop();
     var timeline=FRAMES.map(function(f,i){
-      var on=i===S.frame;
-      return '<button class="navitem" style="font-size:12px;'+(on?'background:var(--hl);box-shadow:inset 2px 0 0 var(--gold);color:var(--fg)':'')+'" onclick="S.frame='+i+';render()">'+
+      var on=i===S.frame, mk=fpMark(f.kind);
+      return '<button class="navitem fp-item" aria-current="'+(on?"true":"false")+'" style="font-size:12px;'+(on?'background:var(--hl);box-shadow:inset 2px 0 0 var(--gold);color:var(--fg)':'')+'" onclick="fpSeek('+i+')">'+
        '<span class="mono dim" style="width:22px;flex:none;text-align:right">'+f.seq+'</span>'+
+       (mk?'<span class="fp-dot" style="background:'+mk+'"></span>':'<span class="fp-dot" style="background:transparent"></span>')+
        '<span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+h(f.kind)+'</span>'+
        (f.cost?'<span class="ct">$'+f.cost+'</span>':'')+'</button>';
     }).join("");
-    bodyHtml='<div class="split"><div class="panel"><div class="panel-h"><h3>Frame '+fr.seq+' · <span class="mono">'+h(fr.kind)+'</span></h3>'+
+    setTimeout(fpAfterRender,0);
+    bodyHtml=fpBar(R)+'<div class="split"><div class="panel"><div class="panel-h"><h3>Frame '+fr.seq+' · <span class="mono">'+h(fr.kind)+'</span></h3>'+
      '<div class="sp">'+tierBadge(fr.tier)+'<span class="mono dim" style="font-size:11px">'+h(fr.t)+'</span></div></div>'+
      '<div class="panel-b">'+
       '<p style="margin-bottom:14px">'+h(fr.sum)+'</p>'+ frameDetail(fr) +
       '<div class="row" style="margin-top:16px;border-top:1px solid var(--border);padding-top:13px">'+
-       '<button class="btn sm" onclick="S.frame=Math.max(0,S.frame-1);render()">← Previous</button>'+
-       '<button class="btn sm" onclick="S.frame=Math.min('+(FRAMES.length-1)+',S.frame+1);render()">Next →</button>'+
+       '<button class="btn sm" onclick="fpStep(-1)" title="← previous frame">◀ Previous</button>'+
+       '<button class="btn sm" onclick="fpStep(1)" title="→ next frame">Next ▶</button>'+
        '<span class="dim mono" style="font-size:11px;margin-left:auto">frame '+(S.frame+1)+' of '+FRAMES.length+' shown · '+R.frames+' in the run</span></div>'+
      '</div></div>'+
-     '<div><div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Timeline</h3></div>'+
-     '<div class="panel-b" style="padding:7px;max-height:420px;overflow-y:auto">'+timeline+'</div></div>'+
+     '<div><div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Timeline</h3><span class="dim" style="margin-left:auto;font-size:11px">'+(rs==="live"?'live · new frames append at the end':rs==="paused"?'paused · nothing new until resume':'sealed · complete')+'</span></div>'+
+     '<div class="panel-b" id="fptl" style="padding:7px;max-height:420px;overflow-y:auto">'+timeline+'</div></div>'+
      '</div></div><div style="margin-top:14px">'+approvalsPanel(R.ws,R.id)+'</div>';
   } else if(t==="proof"){
     bodyHtml=proofTab(R);
@@ -3594,7 +3684,7 @@ function pRun(r){
     bodyHtml=chainTab(R);
   }
   var hero=(R.verdict==="flipped"&&R.flip)?flipHero(R):'';
-  return head+runSummary(R)+linkedWork(R)+hero+strip+tabs+bodyHtml;
+  return head+pauseBanner(R)+runSummary(R)+linkedWork(R)+hero+strip+tabs+bodyHtml;
 }
 
 /* ===================== Run instruments · timeline · tab state · kind chips ===================== */
@@ -3672,8 +3762,8 @@ function runInstruments(R){
     '<div class="leg"><span><i style="--c:var(--fk-model)"></i>model calls <b>'+s.modelN+'</b></span><span><i style="--c:var(--fk-tool)"></i>tool calls <b>'+s.toolN+'</b></span></div></div>'+
    '<div class="inst"><div class="ih"><span class="k">Productive ratio</span><span class="basis">steps that advanced the task</span></div>'+
     '<div class="iv">'+per(R.ratio)+(ref!=null?'<small>'+deltaHtml(R.ratio*100,ref*100,function(d){return Math.round(d)+" pts";},true)+' vs 30-day '+per(ref)+'</small>':'')+'</div>'+
-    '<div class="stk"><i class="fk-model" style="flex:'+adv+'"'+tipAttr(adv+" steps advanced the task")+'></i><i style="flex:'+idle+';background:var(--rule)"'+tipAttr(idle+" steps did not: retries, re-reads and waits")+'></i>'+
-    (ref!=null?'<span class="ref" style="left:'+Math.round(ref*100)+'%"'+tipAttr("this agent’s 30-day productive ratio · "+per(ref))+'></span>':'')+'</div>'+
+    '<div class="mtr fk-model"'+tipAttr(per(R.ratio)+" productive · marker: this agent’s 30-day "+(ref!=null?per(ref):"—"))+'><i style="width:'+Math.round(R.ratio*100)+'%"></i>'+(ref!=null?'<span class="ref" style="left:'+Math.round(ref*100)+'%"></span>':'')+'</div>'+
+    '<div class="stk"><i class="fk-model" style="flex:'+adv+'"'+tipAttr(adv+" steps advanced the task")+'></i><i style="flex:'+idle+';background:var(--rule)"'+tipAttr(idle+" steps did not: retries, re-reads and waits")+'></i></div>'+
     '<div class="leg"><span><i style="--c:var(--fk-model)"></i>advanced <b>'+adv+'</b></span><span><i style="--c:var(--rule)"></i>did not <b>'+idle+'</b></span></div>'+
     '<div class="is">'+(idle?'<b>'+idle+'</b> steps did not move the task: '+Math.ceil(idle*0.55)+' retries, '+Math.floor(idle*0.3)+' re-reads, '+Math.max(0,idle-Math.ceil(idle*0.55)-Math.floor(idle*0.3))+' waits. The Cost tab pins each one to its turn.':'Every step advanced the task.')+'</div></div>'+
   '</div>';
@@ -3685,19 +3775,17 @@ function runTimeline(R){
   var last=xs[xs.length-1];if(last>97)xs=xs.map(function(x){return x/last*97;});
   var bounds=[];fr.forEach(function(f,i){if(f.kind==="agent_start"||f.kind==="control.steer")bounds.push(i);});if(bounds[0]!==0)bounds.unshift(0);
   var bands=bounds.map(function(b,k){var l=Math.max(0,xs[b]-1.2),r=k+1<bounds.length?xs[bounds[k+1]]-1.2:100;
-    return '<div class="rt-band'+(k%2?" alt":"")+'" style="left:'+l.toFixed(2)+'%;width:'+(r-l).toFixed(2)+'%"></div>';}).join("");
-  var turns=bounds.map(function(b,k){var l=Math.max(0,xs[b]-1.2),r=k+1<bounds.length?xs[bounds[k+1]]-1.2:100,w=r-l;
-    return '<span style="left:'+l.toFixed(2)+'%;width:'+w.toFixed(2)+'%">'+(w<14?'t'+(k+1):'turn '+(k+1)+(k?' · after steer':''))+'</span>';}).join("");
+    return '<div class="rt-band'+(k%2?" alt":"")+'" style="left:'+l.toFixed(2)+'%;width:'+(r-l).toFixed(2)+'%"><span class="t">turn '+(k+1)+(k?' · after steer':'')+'</span></div>';}).join("");
   var marks="",ticks=fr.map(function(f,i){
     var k=fkOf(f.kind),tall=k==="op"||f.kind==="approval_request"||(f.kind==="policy_decision"&&/approve/.test(f.sum)),on=i===S.frame&&S.tab.run==="player";
     if(f.kind==="control.steer")marks+='<span class="rt-mark" style="left:'+xs[i].toFixed(2)+'%">steer</span>';
-    if(f.kind==="policy_decision"&&/approve/.test(f.sum))marks+='<span class="rt-mark right" style="left:'+xs[i].toFixed(2)+'%">parked · approval</span>';
+    if(f.kind==="approval_request"||(f.kind==="policy_decision"&&/approve/.test(f.sum)))marks+='<span class="rt-mark right" style="left:'+xs[i].toFixed(2)+'%">parked · approval</span>';
     return '<button type="button" class="rt-tick fk-'+k+(tall?" tall":f.cost&&+f.cost?" cost":"")+(on?" on":"")+'" style="left:'+xs[i].toFixed(2)+'%"'+
       tipAttr("frame "+f.seq+" · "+f.kind+"\n"+f.t+(f.cost&&+f.cost?" · $"+f.cost:"")+"\n"+f.sum)+' aria-label="frame '+f.seq+' '+h(f.kind)+'" onclick="S.tab.run=\'player\';S.frame='+i+';render()"></button>';}).join("");
   var c=fkCounts(fr),leg=FK_ORDER.filter(function(k){return c[k];}).map(function(k){return '<span class="fk-'+k+'"><i></i>'+FK_LABEL[k]+' <b>'+c[k]+'</b></span>';}).join("");
   var el=Math.round(t1-t0),elapsed=el>=60?Math.floor(el/60)+"m "+(el%60)+"s":el+" s";
   return '<div class="panel rt"><div class="panel-h"><h3>Timeline</h3><span class="mono dim" style="font-size:11px">'+fr.length+' frames shown · '+R.frames+' in the run</span><div class="rt-leg">'+leg+'</div></div>'+
-   '<div class="panel-b"><div class="rt-turns">'+turns+'</div><div class="rt-track">'+bands+ticks+'<div class="rt-axis"><span>'+h(fr[0].t.slice(0,8))+'</span><span>+'+elapsed+' · '+h(fr[fr.length-1].t.slice(0,8))+(R.status==="live"?' · live':'')+'</span></div></div><div class="rt-marks">'+marks+'</div>'+
+   '<div class="panel-b"><div class="rt-track">'+bands+marks+ticks+'<div class="rt-axis"><span>'+h(fr[0].t.slice(0,8))+'</span><span>+'+elapsed+' · '+h(fr[fr.length-1].t.slice(0,8))+(R.status==="live"?' · live':'')+'</span></div></div>'+
    '<div class="rt-foot"><span class="grow">Every tick is a frame; the taller ones need a person. Click one to open it in the Player; hover for the record.</span>'+
    '<span>'+bounds.length+' turn'+(bounds.length===1?'':'s')+' in view</span></div></div></div>';
 }
@@ -3729,6 +3817,8 @@ var TX_GROUPS=[["prompt","prompt",["prompt","steer"]],["text","responses",["text
                ["tool","tools",["tool"]],["usage","usage",["usage"]],["context","recall",["context_recall"]],["proof","proof",["proof","verdict","complete"]]];
 var GOV_KINDS={policy_decision:1,approval_request:1,token_issued:1};
 S.tx={on:{},q:"",errs:false,think:false,open:{},playing:true,speed:1,revealed:0,timer:null,runId:null};
+/* run controls (pause/resume are governed actions; the seed RUNS is never mutated) and the frame player */
+S.runCtl={}; S.fp={playing:false,speed:1,timer:null};
 TX_GROUPS.forEach(function(g){S.tx.on[g[0]]=true;});
 
 function govCount(){var n=0;FRAMES.forEach(function(f){if(f.kind==="policy_decision")n++;});return n;}
@@ -3905,7 +3995,7 @@ function transcriptTab(R,compacted){
      '<span class="cnt" id="txcnt"></span>':'<span class="cnt">search shows every match · unpaced</span>')+
    '</div></div>';
   var runbar='<div class="tx-runbar"><span class="name">'+h(R.task||R.id)+'</span><span class="meta">'+h(R.agent)+' · '+h(R.model)+' · '+R.turn+' turns · '+R.steps+' steps'+(synth?' · projected from the run record':' · '+all.length+' entries')+'</span>'+
-   '<span class="tx-chips" style="margin-left:0">'+(S.tx.errs?'<span class="tx-chip err">errors only</span>':'')+(R.status==="live"?'<span class="tx-chip ok">● live</span>':R.status==="parked"?'<span class="tx-chip warn">⏸ parked</span>':R.verdict==="flipped"?'<span class="tx-chip ok">✓ flipped</span>':R.verdict==="unmoved"?'<span class="tx-chip err">✗ unmoved</span>':'')+'</span>'+
+   '<span class="tx-chips" style="margin-left:0">'+(S.tx.errs?'<span class="tx-chip err">errors only</span>':'')+(runStatus(R)==="paused"?'<span class="tx-chip warn">⏸ paused</span>':R.status==="live"?'<span class="tx-chip ok">● live</span>':R.status==="parked"?'<span class="tx-chip warn">⏸ parked</span>':R.verdict==="flipped"?'<span class="tx-chip ok">✓ flipped</span>':R.verdict==="unmoved"?'<span class="tx-chip err">✗ unmoved</span>':'')+'</span>'+
    '<span class="tx-burn"><span>burn</span><span class="bar"><i id="txbar"></i></span><b id="txburn">'+txMoney2(0)+'</b><span>of '+txMoney2(total)+'</span></span></div>';
   var feed='<div class="tx-feed" id="txfeed" data-n="'+rows.length+'" data-paced="'+paced+'">'+(rows.length?html:'<div class="tx-empty">'+(S.tx.errs?'no failed calls in this run.':S.tx.q?'nothing matches this search.':'nothing to show with these filters.')+'</div>')+'</div>';
   setTimeout(txStart,0);
@@ -3954,6 +4044,109 @@ function txSpeed(s){S.tx.speed=s;txStop();document.querySelectorAll(".tx-play .s
 function txGroup(k){S.tx.on[k]=!S.tx.on[k];render();}
 function txOpen(i){S.tx.open[i]=!S.tx.open[i];render();}
 var txQTimer=null;
+
+/* ===================== Run controls: pause / resume =====================
+   A pause is a governed action, not a process signal. It takes effect at the next boundary (the model call or tool
+   call in flight completes; nothing new dispatches), holds the run token and the budget reservation, and is written as
+   a control.pause frame attributed to the operator. Resume writes control.resume and its reason reaches the model. */
+function runStatus(R){var c=R&&S.runCtl[R.id];return c&&c.status?c.status:R.status;}
+function nowT(){return new Date().toISOString().slice(11,23);}
+function pauseBody(){
+  var R=run(S.dlgArg)||RUNS[0];
+  return '<p class="muted" style="font-size:12.5px;margin-bottom:12px">Takes effect at the next boundary: the model call or tool call now in flight completes, and nothing new is dispatched. '+
+   'The run keeps its token and its budget reservation; pending approvals keep their clocks.</p>'+
+   '<dl class="kv" style="margin-bottom:12px"><dt>Run</dt><dd class="mono">'+h(R.id)+'</dd><dt>Position</dt><dd>turn '+R.turn+' · step '+R.steps+' · frame '+R.frames+'</dd>'+
+   '<dt>Recorded as</dt><dd><span class="mono">control.pause</span> frame · operator authority</dd></dl>'+
+   '<div class="field"><label>Reason — the model reads this on resume, so write it for the agent</label>'+
+   '<textarea id="pause-reason" rows="2" aria-label="Reason">Holding while finance confirms PO-4471 line 3.</textarea></div>'+
+   '<div class="note">Pause is not cancel. Nothing is revoked, and the run resumes exactly where it stopped; the gap is visible in the chain and the receipts.</div>';
+}
+function pauseRun(id){
+  var R=run(id)||RUNS[0], ta=el("pause-reason"), reason=ta?ta.value.trim():"";
+  closeDialog();
+  S.runCtl[R.id]={status:"pausing",by:"Marcus Bell",at:nowT(),reason:reason,turn:R.turn,step:R.steps};
+  toast("Pause queued for "+R.id+". It takes effect at the next boundary.","approval"); render();
+  setTimeout(function(){
+    var c=S.runCtl[R.id]; if(!c||c.status!=="pausing")return;
+    c.status="paused"; c.at=nowT();
+    FRAMES.push({seq:FRAMES.length,kind:"control.pause",tier:"gateway",cost:null,t:c.at,by:c.by,reason:c.reason,dig:"sha256:"+(FRAMES.length*7919).toString(16)+"a1…",
+      sum:c.by+" · paused at the boundary after seq "+(FRAMES.length-1)+" · token held · "+(c.reason||"no reason given")});
+    toast(R.id+" paused at turn "+c.turn+", step "+c.step+". control.pause frame written.","approval"); render();
+  },1400);
+}
+function resumeRun(id){
+  var R=run(id)||RUNS[0], c=S.runCtl[R.id]; if(!c)return;
+  c.status="resuming"; toast("Resume issued for "+R.id+".","allowed"); render();
+  setTimeout(function(){
+    var c2=S.runCtl[R.id]; if(!c2||c2.status!=="resuming")return;
+    var at=nowT();
+    FRAMES.push({seq:FRAMES.length,kind:"control.resume",tier:"gateway",cost:null,t:at,by:c2.by,reason:c2.reason,dig:"sha256:"+(FRAMES.length*104729).toString(16)+"c7…",
+      sum:c2.by+" · resumed after "+c2.at+" → "+at+" · reason delivered as a control frame"});
+    delete S.runCtl[R.id];
+    toast(R.id+" is live again. control.resume frame written; the reason reached the model.","allowed"); render();
+  },1200);
+}
+function pauseBanner(R){
+  var c=S.runCtl[R.id]; if(!c||c.status==="resuming")return "";
+  var paused=c.status==="paused";
+  return '<div class="pause-banner" role="status"><span class="g">❙❙</span><div class="grow"><b>'+(paused?'Paused':'Pausing')+'</b> at turn '+c.turn+' · step '+c.step+
+   (paused?' · by '+h(c.by)+' at '+h(c.at):' · takes effect at the next boundary')+(c.reason?' · <span class="q">“'+h(c.reason)+'”</span>':'')+
+   '<div class="dim" style="font-size:11.5px;margin-top:2px">run token held · budget reservation held · pending approvals keep their clocks · nothing new dispatches</div></div>'+
+   (paused?'<button class="btn sm" onclick="resumeRun(\''+R.id+'\')">▶ Resume run</button>':'')+
+   '<button class="btn sm ghost" onclick="S.tab.run=\'player\';fpSeek(FRAMES.length-1)">Open the pause frame</button></div>';
+}
+
+/* ===================== Frame player: pause / step / scrub =====================
+   Playback of the recording, paced by the frame timestamps (long thinking gaps are capped so a 30 s wait does not stall
+   the player). This never touches the run; the run's own pause is the governed action above. */
+var FP_SPEEDS=[1,4,16];
+function fpMs(t){var m=/^(\d+):(\d+):(\d+)(?:\.(\d+))?$/.exec(t||"");return m?((+m[1]*3600+ +m[2]*60+ +m[3])*1000+ +(m[4]||0)):0;}
+function fpMark(k){
+  if(k==="policy_decision")return "var(--st-allowed)"; if(k==="approval_request")return "var(--st-approval)";
+  if(/^control\./.test(k))return "var(--st-proven)"; if(k==="tool_requested"||k==="tool_call")return "var(--muted)"; return "";
+}
+function fpBar(R){
+  var n=FRAMES.length, i=Math.min(S.frame,n-1), f=FRAMES[i], done=i>=n-1;
+  var ticks=FRAMES.map(function(x,j){var mk=fpMark(x.kind);return mk?'<i style="left:'+(n>1?j/(n-1)*100:0)+'%;background:'+mk+'" title="'+h(x.seq+' · '+x.kind)+'"></i>':'';}).join("");
+  return '<div class="fp-bar" id="fpbar" role="group" aria-label="Playback">'+
+   '<button class="btn sm" title="to the first frame (Home)" onclick="fpSeek(0)">⏮</button>'+
+   '<button class="btn sm" title="previous frame (←)" onclick="fpStep(-1)">◀</button>'+
+   '<button class="btn sm play" id="fpplay" title="play or pause the playback (space)" onclick="fpPlay()">'+(S.fp.playing&&!done?'❙❙ pause':done?'▶ replay':'▶ play')+'</button>'+
+   '<button class="btn sm" title="next frame (→)" onclick="fpStep(1)">▶</button>'+
+   '<button class="btn sm" title="to the last frame (End)" onclick="fpSeek(1e9)">⏭</button>'+
+   '<div class="fp-scrub"><input class="fp-range" type="range" min="0" max="'+(n-1)+'" value="'+i+'" aria-label="Frame" oninput="fpSeek(+this.value,true)">'+
+    '<div class="fp-ticks">'+ticks+'</div></div>'+
+   '<span class="fp-cnt"><b>'+(i+1)+'</b> / '+n+' · seq '+f.seq+' · '+h(f.t)+'</span>'+
+   '<span class="seg" style="margin-left:4px">'+FP_SPEEDS.map(function(s){return '<button class="btn sm" aria-pressed="'+(S.fp.speed===s)+'" onclick="fpSpeed('+s+')">'+s+'×</button>';}).join("")+'</span>'+
+   '<span class="fp-keys"><kbd>←</kbd><kbd>→</kbd> step <kbd>space</kbd> play <kbd>home</kbd><kbd>end</kbd></span></div>';
+}
+function fpStop(){if(S.fp.timer){clearTimeout(S.fp.timer);S.fp.timer=null;}}
+function fpSeek(i,keepPlaying){
+  S.frame=Math.max(0,Math.min(FRAMES.length-1,i));
+  if(!keepPlaying)S.fp.playing=false;
+  fpStop(); render(); if(S.fp.playing)fpTick();
+}
+function fpStep(d){S.fp.playing=false;fpSeek(S.frame+d);}
+function fpPlay(){
+  var n=FRAMES.length;
+  if(S.frame>=n-1){S.frame=0;S.fp.playing=true;} else S.fp.playing=!S.fp.playing;
+  fpStop(); render(); if(S.fp.playing)fpTick();
+}
+function fpSpeed(s){S.fp.speed=s;fpStop();render();if(S.fp.playing)fpTick();}
+function fpTick(){
+  if(!el("fpbar")){fpStop();S.fp.playing=false;return;}
+  var n=FRAMES.length; if(!S.fp.playing||S.frame>=n-1){S.fp.playing=false;render();return;}
+  var cur=fpMs(FRAMES[S.frame].t), nxt=fpMs(FRAMES[S.frame+1].t), gap=Math.max(250,Math.min(5000,nxt-cur))/S.fp.speed;
+  S.fp.timer=setTimeout(function(){S.fp.timer=null;S.frame=Math.min(n-1,S.frame+1);render();fpTick();},gap);
+}
+function fpAfterRender(){var a=document.querySelector('#fptl .fp-item[aria-current="true"]');if(a&&a.scrollIntoView)a.scrollIntoView({block:"nearest"});}
+document.addEventListener("keydown",function(e){
+  if(!el("fpbar")||S.dlg)return;
+  var t=e.target, tag=t&&t.tagName; if(tag==="INPUT"||tag==="TEXTAREA"||tag==="SELECT"||(t&&t.isContentEditable))return;
+  if(e.metaKey||e.ctrlKey||e.altKey)return;
+  if(e.key==="ArrowLeft"){e.preventDefault();fpStep(-1);} else if(e.key==="ArrowRight"){e.preventDefault();fpStep(1);}
+  else if(e.key===" "){e.preventDefault();fpPlay();} else if(e.key==="Home"){e.preventDefault();fpSeek(0);} else if(e.key==="End"){e.preventDefault();fpSeek(1e9);}
+});
 function txQ(v){S.tx.q=v;clearTimeout(txQTimer);txQTimer=setTimeout(function(){var q=v;render();var inp=document.querySelector(".tx-tools input");if(inp){inp.focus();inp.setSelectionRange(q.length,q.length);}},160);}
 
 /* ===================== Linked work: the run node's neighbourhood ===================== */
@@ -4021,6 +4214,15 @@ function frameDetail(f){
      '  <span class="k">"taint"</span>: { <span class="k">"marked"</span>: false, <span class="k">"sources"</span>: [] },\n'+
      '  <span class="k">"kill_switches"</span>: <span class="s">"none armed for this tool"</span>,\n'+
      '  <span class="k">"enforcement_tier"</span>: <span class="s">"gateway"</span>\n}</pre>';
+  }
+  if(f.kind==="control.pause"||f.kind==="control.resume"){
+    var paused=f.kind==="control.pause";
+    return '<div class="panel" style="background:var(--ink)"><div class="panel-b">'+
+     '<p class="eyebrow q">'+(paused?'Took effect at the boundary after seq '+(f.seq-1)+' · attributed to the operator':'Delivered at the next boundary · the reason reached the model as a control frame')+'</p>'+
+     '<p style="margin:0;color:var(--fg)">'+h(f.reason||"—")+'</p>'+
+     '<div class="kv" style="margin-top:12px"><dt>Issuer</dt><dd>'+h(f.by||"Marcus Bell")+' · <span class="mono">'+(paused?'run.pause':'run.resume')+'</span></dd>'+
+     '<dt>While paused</dt><dd>'+(paused?'run token held · budget reservation held · pending approvals keep their clocks · no new dispatch':'the pause frame and this one are both in the chain; the gap is visible in the receipts')+'</dd>'+
+     '<dt>Digest</dt><dd class="mono">'+h(f.dig||"sha256:pending")+'</dd></div></div></div>';
   }
   if(f.kind==="control.steer"){
     return '<div class="panel" style="background:var(--ink)"><div class="panel-b">'+
@@ -4839,7 +5041,7 @@ function pAgent(r){
     body='<div class="panel"><div class="panel-h"><h3>Runs</h3><span class="mono dim" style="margin-left:auto;font-size:11px">'+a.runs30.toLocaleString()+' in 30 days · '+rr.length+' shown</span></div><div class="tw"><table>'+
      '<thead><tr><th>Run</th><th>Status</th><th>Verdict</th><th class="num">Cost</th><th class="num">Frames</th><th>Started</th></tr></thead><tbody>'+
      rr.map(function(x){return '<tr class="click'+(x.verdict==="flipped"?' flipped':'')+'" onclick="go(\'#/'+ORG.slug+'/'+x.ws+'/runs/'+x.id+'\')">'+
-      '<td class="tid">'+h(x.id)+'</td><td>'+statusBadge(x.status)+'</td><td>'+verdictCell(x)+'</td>'+
+      '<td class="tid">'+h(x.id)+'</td><td>'+statusBadge(runStatus(x))+'</td><td>'+verdictCell(x)+'</td>'+
       '<td class="num">'+usd(x.cost)+'</td><td class="num">'+x.frames+'</td><td class="mono dim" style="font-size:11px">'+h(x.started)+'</td></tr>';}).join("")+
      '</tbody></table></div></div>';
   } else {
@@ -6548,7 +6750,7 @@ function steerFleetBody(){
     return '<label class="check"><input type="checkbox"'+(on?' checked':'')+' onchange="steerToggleSel(\''+a.key+'\',this.checked)" aria-label="'+h(a.key)+'">'+
      '<div class="grow"><div class="n">'+h(a.key)+'</div><div class="d">'+
       (r?'<span class="mono">'+h(r.id)+'</span> · turn '+r.turn+' · '+h(r.taskTitle):'no run in flight · reads this at its next model call')+'</div></div>'+
-     scorePair(a,true)+(r?statusBadge(r.status):'<span class="b b-q"><span class="d"></span>idle</span>')+'</label>';}).join("");
+     scorePair(a,true)+(r?statusBadge(runStatus(r)):'<span class="b b-q"><span class="d"></span>idle</span>')+'</label>';}).join("");
   return '<div class="field"><div class="row" style="justify-content:space-between;margin-bottom:6px"><label style="margin:0">Agents · '+n+' of '+list.length+' selected</label>'+
     '<span class="row" style="gap:6px"><button class="btn sm ghost" onclick="steerSelAll(true)">All</button><button class="btn sm ghost" onclick="steerSelAll(false)">None</button></span></div>'+
     '<div class="steer-list">'+rows+'</div>'+
@@ -6652,7 +6854,7 @@ function dialog(){
        '<button class="btn" onclick="markAllRead()">Mark all read</button>'},
    approve:{t:"Approve this action",w:false,b:approveBody(),f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="resolveApproval(S.dlgArg,\'approved\')">Approve and mint the token</button>'},
    deny:{t:"Deny this action",w:false,b:denyBody(),f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn danger" onclick="resolveApproval(S.dlgArg,\'denied\')">Deny with this reason</button>'},
-   account:{t:"Account",w:false,tabs:accountTabs(),b:accountBody(),f:'<span class="grow">Changes here run as <span class="mono">set_preferences</span> — a governed action, audited like any other.</span>'+
+   account:{t:"Account",w:false,tabs:accountTabs(),b:accountBody(),f:S.dlgArg==="onboarding"?'<span class="grow">Demo chrome, not product UI — nothing on these screens writes anything.</span><button class="btn" onclick="closeDialog()">Close</button>':'<span class="grow">Changes here run as <span class="mono">set_preferences</span> — a governed action, audited like any other.</span>'+
      '<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Saved. set_preferences recorded as a frame.\')">Save</button>'},
    "org-switch":{t:"Switch organization",w:false,b:
      '<div class="field"><input placeholder="Search organizations" aria-label="Search organizations"></div>'+
@@ -6667,6 +6869,9 @@ function dialog(){
      '<div class="hr"></div><button class="btn" onclick="closeDialog();openDialog(\'newws\')">Create a workspace</button>',
      f:'<button class="btn" onclick="closeDialog()">Close</button>'},
    avatar:avatarDlg(),
+   pause:{t:"Pause this run",w:false,b:pauseBody(),
+     f:'<span class="grow" style="font-size:12.5px;color:var(--muted)">Recorded as a <span class="mono">control.pause</span> frame under <span class="mono">run.pause</span>.</span>'+
+       '<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="pauseRun(S.dlgArg)">Pause at the next boundary</button>'},
    steer:{t:"Steer this run",w:false,b:
      steerTextField("Skip the mobile repo this cycle; 4.11.0 is platform only.")+
      '<div class="field"><label>Address</label><select aria-label="Address"><option>this run</option><option>@a-intel.core.release-manager — every live run of this agent</option></select>'+
@@ -7031,7 +7236,7 @@ function mandateBody(){
 }
 function accountTabs(){
   var cur=S.dlgArg||"profile";
-  return [["profile","Profile"],["preferences","Preferences"],["security","Security"],["privacy","Privacy"]].map(function(t){
+  return [["profile","Profile"],["preferences","Preferences"],["security","Security"],["privacy","Privacy"],["onboarding","Onboarding"]].map(function(t){
     return '<button class="tab" role="tab" aria-selected="'+(t[0]===cur)+'" onclick="S.dlgArg=\''+t[0]+'\';render()">'+t[1]+'</button>';}).join("");
 }
 function kvl(pairs,cls){
@@ -7039,6 +7244,7 @@ function kvl(pairs,cls){
 }
 function accountBody(){
   var tab=S.dlgArg||"profile";
+  if(tab==="onboarding") return obAccountTab();
   if(tab==="preferences"){
     var th=S.theme||"system";
     var opt=function(v,l){return '<option value="'+v+'"'+(th===v?' selected':'')+'>'+l+'</option>';};
@@ -7110,7 +7316,8 @@ var CMDS=[
  {g:"Go",i:[["Fleet","#/a-intel/core-platform","⌘ 1"],["Agents","#/a-intel/core-platform/agents","⌘ 2"],
    ["Tools","#/a-intel/core-platform/tools","⌘ 3"],["Ontology","#/a-intel/core-platform/ontology","⌘ 4"],
    ["Steering","#/a-intel/core-platform/steering","⌘ 5"],["Spend","#/a-intel/core-platform/spend","⌘ 6"],
-   ["Organization","#/a-intel"],["API keys","#/a-intel/api-keys"],["Billing","#/a-intel/billing"],["Audit","#/a-intel/audit"]]},
+   ["Organization","#/a-intel"],["API keys","#/a-intel/api-keys"],["Billing","#/a-intel/billing"],["Audit","#/a-intel/audit"],
+   ["Onboarding demo — sign up","#/welcome"],["Onboarding demo — log in","#/welcome/login"]]},
  {g:"Runs",i:[["run_01K5RS7M2E8FJ3QW · release-manager · live","#/a-intel/core-platform/runs/run_01K5RS7M2E8FJ3QW"],
    ["run_01K5RQ4B9C7XTN2P · stella-ci · flipped","#/a-intel/core-platform/runs/run_01K5RQ4B9C7XTN2P"],
    ["run_01K4QJ9E4T6YUI1O · stella-ci · compacted","#/a-intel/core-platform/runs/run_01K4QJ9E4T6YUI1O"]]},
@@ -7532,7 +7739,8 @@ var REG_HARNESS={"claude-code":"Claude Code","codex-cli":"Codex CLI",stella:"Ste
 S.reg=null; S.regN=0;
 function regTabFor(harness){return harness==="claude-code"?"cc":harness==="codex-cli"?"codex":"sdk";}
 function regNew(){return {slug:"perf-watch",harness:"claude-code",tier:"complex",os:"macos",lang:"ts",tab:"cc",log:0,first:false,polling:false,countdown:false,timers:[]};}
-function regHash(step){return '#/'+ORG.slug+'/'+ws().slug+'/register'+(step&&step!=="name"?'/'+step:'');}
+function regHash(step){if(S.reg&&S.reg.mode==="onboard")return obHash(step);return '#/'+ORG.slug+'/'+ws().slug+'/register'+(step&&step!=="name"?'/'+step:'');}
+function regCancelBtn(){return '<button class="btn" onclick="regCancel()">'+(S.reg&&S.reg.mode==="onboard"?"Exit demo":"Cancel")+'</button>';}
 function regStart(){S.dlg=null;S.dlgArg=null;S.layer=null;S.reg=regNew();regNav("name");}
 function regNav(step){var hh=regHash(step);if(location.hash!==hh)location.hash=hh;else render();}
 function regLater(fn,ms){var t=setTimeout(fn,ms);if(S.reg)S.reg.timers.push(t);return t;}
@@ -7542,6 +7750,7 @@ function regKey(){return ORG.slug+"."+ws().slug.split("-")[0]+"."+regSlug();}
 function regKeyLive(){S.reg.slug=el("regSlug").value;var k=regKey();document.querySelectorAll(".regKeyLive").forEach(function(n){n.textContent=k;});}
 function regStepOf(r){var s=r.step||"name";if(!S.reg)S.reg=regNew();return s==="wrap"||s==="run"?s:"name";}
 function regCancel(){
+  if(S.reg&&S.reg.mode==="onboard")return obExit();
   var wasLive=!!(S.reg&&S.reg.first);
   regClear(); S.reg=null;
   go('#/'+ORG.slug+'/'+ws().slug);
@@ -7549,7 +7758,7 @@ function regCancel(){
 }
 function regFinish(){
   if(!S.reg) return;
-  var r=S.reg, key=regKey(), w=ws();
+  var r=S.reg, key=regKey(), w=ws(), ob=r.mode==="onboard";
   regClear();
   if(!agent(key)){
     AGENTS.push({key:key,name:regSlug().replace(/-/g," ").replace(/^./,function(c){return c.toUpperCase();}),harness:r.harness,harnessLabel:REG_HARNESS[r.harness]||r.harness,
@@ -7563,7 +7772,8 @@ function regFinish(){
     grade:"full",verdict:null,task:"smoke",taskTitle:"Installer smoke session",started:"14:02:11",model:r.tier==="light"?"claude-haiku-4-5":"claude-opus-5",cache:0,provenSpend:"0.00",ratio:0,sealed:null});
   S.reg=null; S.runFilter="all";
   go('#/'+ORG.slug+'/'+w.slug);
-  act(key+' registered — first frame received. Its smoke run is live on Fleet.','gold');
+  act(ob?'Welcome to Mission Control. First frame received from '+key+' — its run is live on Fleet, and the organization is out of the gate.'
+        :key+' registered — first frame received. Its smoke run is live on Fleet.','gold');
 }
 function regInstall(harness){
   if(!S.reg) S.reg=regNew();
@@ -7572,16 +7782,20 @@ function regInstall(harness){
   regNav("run");
 }
 function regShell(step,inner){
-  var steps=[{id:"name",n:1,lab:"Name the agent"},{id:"wrap",n:2,lab:"Wrap the agent"},{id:"run",n:3,lab:"Wait for the first frame"}];
+  var ob=!!(S.reg&&S.reg.mode==="onboard");
+  var steps=ob?[{id:"organization",n:1,lab:"Name the organization"},{id:"wrap",n:2,lab:"Wrap an agent"},{id:"run",n:3,lab:"Start a run"}]
+              :[{id:"name",n:1,lab:"Name the agent"},{id:"wrap",n:2,lab:"Wrap the agent"},{id:"run",n:3,lab:"Wait for the first frame"}];
   var cur=step==="wrap"?2:step==="run"?3:1, me=PEOPLE.marcus;
   return '<div class="reg-gate"><div class="reg-top"><div class="brandmark">'+LOGO+'</div><span class="who">'+h(me.email)+'</span>'+
-   '<button class="btn sm" onclick="regCancel()">Cancel</button></div>'+
-   '<div class="reg-in"><nav class="reg-steps" aria-label="Register an agent">'+steps.map(function(s){
+   '<button class="btn sm" onclick="regCancel()">'+(ob?"Exit demo":"Cancel")+'</button></div>'+
+   '<div class="reg-in"><nav class="reg-steps" aria-label="'+(ob?"Onboarding":"Register an agent")+'">'+steps.map(function(s){
      var done=s.n<cur;
      return '<button type="button"'+(done?' class="done" onclick="regNav(\''+s.id+'\')"':'')+(s.n===cur?' aria-current="step"':'')+(s.n>cur?' disabled':'')+'>'+
       '<span class="sn">'+(done?'✓':s.n)+'</span><span class="slab">'+h(s.lab)+'</span></button>';}).join("")+'</nav>'+
    inner+
-   '<p class="reg-cap" style="margin-top:22px;text-align:center">Registration does not complete until the agent has talked to Oxagen. That first frame is also the installer’s smoke test, so there is one path, not two. Cancel at any time — nothing is kept until the frame arrives.</p></div></div>';
+   '<p class="reg-cap" style="margin-top:22px;text-align:center">'+(ob
+    ?'Mission Control does not open until an agent has talked to Oxagen. That first frame is also the installer’s smoke test, so there is one path, not two.'
+    :'Registration does not complete until the agent has talked to Oxagen. That first frame is also the installer’s smoke test, so there is one path, not two. Cancel at any time — nothing is kept until the frame arrives.')+'</p></div></div>';
 }
 function regName(){
   var r=S.reg, w=ws(), key=regKey();
@@ -7599,7 +7813,7 @@ function regName(){
     '<div class="hint">Routed through the model proxy; the tier is recorded on every frame.</div></div></div>'+
    '<div class="note">Continue mints a one-time enrollment token for <span class="mono regKeyLive">'+h(key)+'</span>. Nothing is written to Postgres and no PR is opened until the first frame arrives; the smoke session then opens the Context PR that adds the definition file.</div>'+
    '</div></div>'+
-   '<div class="reg-foot"><button class="btn" onclick="regCancel()">Cancel</button><div class="sp"><button class="btn primary" onclick="regNav(\'wrap\')">Continue</button></div></div>';
+   '<div class="reg-foot">'+regCancelBtn()+'<div class="sp"><button class="btn primary" onclick="regNav(\'wrap\')">Continue</button></div></div>';
 }
 function regWrap(){
   var r=S.reg, key=regKey();
@@ -7647,11 +7861,11 @@ function regWrap(){
      '<button class="btn" style="margin-left:auto" onclick="act(\'Five lines copied.\')">Copy the five lines</button></div>'+
      '<pre>'+sdk.code+'</pre></div></section>';
   }
-  return '<div><p class="eyebrow">Step 2 of 3</p><h1>Wrap the agent</h1>'+
+  return '<div><p class="eyebrow">Step 2 of 3</p><h1>'+(S.reg.mode==="onboard"?"Wrap an agent":"Wrap the agent")+'</h1>'+
    '<p class="reg-lead">A wrapped agent routes through at least one gateway seam — the model proxy, the tool gateway, or both. Nothing is copied or pasted: the installer carries a one-time enrollment token for <span class="mono">'+h(key)+'</span>.</p></div>'+
    '<div class="reg-card"><div class="reg-tabs" role="tablist" aria-label="How to wrap the agent">'+REG_TABS.map(function(t){
      return '<button type="button" role="tab" aria-selected="'+(r.tab===t.id)+'" onclick="S.reg.tab=\''+t.id+'\';render()"><span class="n">'+t.n+'</span><span class="s">'+t.s+'</span></button>';}).join("")+'</div>'+panel+'</div>'+
-   '<div class="reg-foot"><button class="btn" onclick="regCancel()">Cancel</button><button class="btn" onclick="regNav(\'name\')">Back</button>'+
+   '<div class="reg-foot">'+regCancelBtn()+'<button class="btn" onclick="regNav(\''+(S.reg.mode==="onboard"?"organization":"name")+'\')">Back</button>'+
    '<div class="sp"><span class="reg-cap">Nothing completes until a frame arrives.</span><button class="btn" onclick="regInstall(null)">I have already installed it — continue</button></div></div>';
 }
 function regLines(){
@@ -7670,7 +7884,10 @@ function regLines(){
 }
 function regRun(){
   var r=S.reg, key=regKey(), me=PEOPLE.marcus, hl=REG_HARNESS[r.harness]||r.harness;
-  var head='<div><p class="eyebrow">Step 3 of 3</p><h1>Wait for the first frame</h1>'+
+  var ob=r.mode==="onboard";
+  var head=ob?'<div><p class="eyebrow">Step 3 of 3</p><h1>Start a run</h1>'+
+   '<p class="reg-lead">Mission Control opens the moment the first frame from <span class="mono">'+h(key)+'</span> reaches Oxagen — and lands you on Fleet looking at your own run.</p></div>'
+   :'<div><p class="eyebrow">Step 3 of 3</p><h1>Wait for the first frame</h1>'+
    '<p class="reg-lead">Registration completes the moment the first frame from <span class="mono">'+h(key)+'</span> reaches Oxagen — and lands you on Fleet looking at its run.</p></div>';
   if(S.state==="error") return head+
    '<div class="reg-card"><div class="reg-err"><h2>The collector cannot reach the model proxy</h2>'+
@@ -7678,7 +7895,7 @@ function regRun(){
    '<p>Check that outbound 443 to <span class="mono">proxy.oxagen.com</span> is allowed, then run <span class="mono">oxagen agent status</span>.</p>'+
    '<p class="mono dim" style="font-size:11px">request req_01JQ8F4B1PC7QM · host '+REG_HOST+'</p>'+
    '<button class="btn" onclick="act(\'Checked again — still refused. Nothing has changed on the host.\')">Check again</button></div></div>'+
-   '<div class="reg-foot"><button class="btn" onclick="regCancel()">Cancel</button><button class="btn" onclick="regNav(\'wrap\')">Back</button></div>';
+   '<div class="reg-foot">'+regCancelBtn()+'<button class="btn" onclick="regNav(\'wrap\')">Back</button></div>';
   var lines=regLines(), shown=r.first?lines.length:Math.min(r.log,lines.length-1);
   var body, foot;
   if(r.first){
@@ -7688,34 +7905,36 @@ function regRun(){
      '<div><span class="sq">1</span><span class="ts">14:02:11.418</span><span class="kd">oxagen:run.start</span><span class="bd">agent='+h(key)+' · operator='+h(me.name)+' · tier=gateway · steering=none published</span></div></div>'+
      '<div class="row" style="margin-top:12px">'+tierBadge("gateway")+'<span class="b b-q">replay grade: full</span><span class="b b-q">chain intact</span></div>'+
      '<p class="muted" style="font-size:12.5px;margin:12px 0 0">Enforcement tier is computed from what was actually routed, not from what the adapter can do on paper. Both seams answered, so this run is <b>gateway</b>.</p></div></div>';
-    foot='<div class="reg-foot"><button class="btn" onclick="regCancel()">Cancel</button>'+
-     '<div class="sp"><span class="reg-cap" id="regAuto">Opening automatically…</span><button class="btn primary" onclick="regFinish()">Open in Fleet</button></div></div>';
+    foot='<div class="reg-foot">'+regCancelBtn()+''+
+     '<div class="sp"><span class="reg-cap" id="regAuto">Opening automatically…</span><button class="btn primary" onclick="regFinish()">'+(ob?"Open Mission Control":"Open in Fleet")+'</button></div></div>';
   } else {
     body='<div class="reg-card"><div class="ch"><span class="reg-spin"></span><h3>Waiting for the first frame</h3><span class="sp">polling · 1s</span></div>'+
      '<div class="cb"><div class="row" style="margin-bottom:12px"><span class="b b-q mono">'+h(key)+'</span><span class="b b-q">'+h(hl)+'</span><span class="b b-q">host '+REG_HOST+'</span></div>'+
      '<div class="reg-log">'+lines.slice(0,shown).map(function(l,i){return '<div class="'+(l.hit?'hit':'')+(i===shown-1?' new':'')+'"><span class="t">'+l.t+'</span><span>'+l.x+'</span></div>';}).join("")+
      '<div><span class="t">&nbsp;</span><span class="dim">waiting…</span></div></div>'+
      '<p class="muted" style="font-size:12.5px;margin:12px 0 0">Start '+h(hl)+' in any repository on <span class="mono">'+REG_HOST+'</span>. The installer already ran a one-turn smoke session; if it is still in flight this flips on its own.</p></div></div>';
-    foot='<div class="reg-foot"><button class="btn" onclick="regCancel()">Cancel</button><button class="btn" onclick="regNav(\'wrap\')">Back</button>'+
+    foot='<div class="reg-foot">'+regCancelBtn()+'<button class="btn" onclick="regNav(\'wrap\')">Back</button>'+
      '<div class="sp"><span class="reg-cap">There is no Done button — the frame is the completion.</span></div></div>';
   }
-  return head+body+foot;
+  return head+body+(ob?obRepoPanel():"")+foot;
 }
 function pRegister(r){
+  if(S.reg&&S.reg.mode==="onboard"){regClear();S.reg=null;}
   var step=regStepOf(r);
   if(S.state==="loading") return regShell(step,skeleton());
   if(S.state==="denied") return regShell(step,deniedState("agent registration","agent.register on "+ws().slug));
   return regShell(step,step==="name"?regName():step==="wrap"?regWrap():regRun());
 }
 /* the poll that flips on the first frame, and the auto-open countdown after it. Called from render(). */
-function regSchedule(r){
-  if(!S.reg||regStepOf(r)!=="run"||S.state!=="loaded") return;
+function regSchedule(step){
+  if(!S.reg||step!=="run"||S.state!=="loaded") return;
   var g=S.reg;
   if(!g.first&&!g.polling){
     g.polling=true;
     regLater(function tick(){
-      var rr=route();
-      if(!S.reg||rr.page!=="register"||regStepOf(rr)!=="run"||S.state!=="loaded"){if(S.reg)S.reg.polling=false;return;}
+      if(!S.reg) return;
+      var rr=route(), on=(rr.page==="register"&&regStepOf(rr)==="run")||(rr.page==="welcome"&&rr.step==="run");
+      if(!on||S.state!=="loaded"){S.reg.polling=false;return;}
       S.reg.log++;
       if(S.reg.log>=6){S.reg.polling=false;S.reg.first=true;render();return;}
       render(); regLater(tick,780);
@@ -7732,6 +7951,235 @@ function regSchedule(r){
     },1000);
     g.timers.push(t);
   }
+}
+
+/* ============================== Onboarding demo (W1 — sixty seconds to governed) ==============================
+   Sign-up, verification, log-in and the three-step gate, reachable from the account dialog, the user menu and ⌘K.
+   Demo chrome only — none of it ships in the live app. The gate reuses the Register Agent screens in "onboard"
+   mode, so the wrap and first-frame panels here are the same components Fleet's Register Agent uses.
+   Mutable state: S.ob for the auth forms, S.reg (mode "onboard") for the gate; both are cleared on exit. */
+var OB_STEPS=[
+ {id:"signup",lab:"Sign up",sub:"Create the account — SSO, or email and password"},
+ {id:"verify",lab:"Verify email",sub:"Six-digit code, good for ten minutes"},
+ {id:"organization",lab:"Name the organization",sub:"Tenant, namespace and the first workspace"},
+ {id:"wrap",lab:"Wrap an agent",sub:"Claude Code, Codex CLI or an SDK agent"},
+ {id:"run",lab:"Start a run",sub:"The first frame is what opens Mission Control"}];
+var OB_ALT=[
+ {id:"login",lab:"Log in",sub:"Returning operator, then two-factor"},
+ {id:"forgot",lab:"Forgot password",sub:"Reset link, good for sixty minutes"},
+ {id:"reset",lab:"Set a new password",sub:"Logs out every other device"},
+ {id:"invite",lab:"Accept an invitation",sub:"Joining an organization someone else created"}];
+var OB_GATE={organization:1,wrap:1,run:1};
+var OB_ICON={
+ google:'<svg width="15" height="15" viewBox="0 0 18 18" aria-hidden="true"><path fill="#4285F4" d="M17.6 9.2c0-.6-.05-1.2-.16-1.8H9v3.4h4.8a4.1 4.1 0 0 1-1.8 2.7v2.2h2.9c1.7-1.6 2.7-3.9 2.7-6.5z"/><path fill="#34A853" d="M9 18c2.4 0 4.5-.8 6-2.2l-2.9-2.2c-.8.5-1.8.9-3.1.9-2.4 0-4.4-1.6-5.1-3.8H.9v2.3A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.9 10.7a5.4 5.4 0 0 1 0-3.4V5H.9a9 9 0 0 0 0 8z"/><path fill="#EA4335" d="M9 3.6c1.3 0 2.5.5 3.4 1.3l2.6-2.6A9 9 0 0 0 .9 5l3 2.3C4.6 5.2 6.6 3.6 9 3.6z"/></svg>',
+ github:'<svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 .4a7.6 7.6 0 0 0-2.4 14.8c.38.07.52-.16.52-.36v-1.3c-2.1.46-2.55-1-2.55-1-.35-.88-.85-1.12-.85-1.12-.7-.47.05-.46.05-.46.77.06 1.17.79 1.17.79.68 1.17 1.79.83 2.23.64.07-.5.27-.83.48-1.03-1.68-.19-3.45-.84-3.6-3.73 0-.82.3-1.5.77-2.02-.08-.19-.33-.96.07-2 0 0 .63-.2 2.07.77a7.1 7.1 0 0 1 3.77 0c1.44-.97 2.07-.77 2.07-.77.4 1.04.15 1.81.07 2 .48.52.77 1.2.77 2.02 0 2.9-1.77 3.53-3.46 3.72.28.24.52.7.52 1.42v2.1c0 .2.14.44.52.36A7.6 7.6 0 0 0 8 .4z"/></svg>',
+ warn:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4M12 17.5v.5"/></svg>',
+ inbox:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 13h4l2 3h6l2-3h4"/><path d="M5 4h14l2 9v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5z"/></svg>'};
+S.ob={pwShown:false,pw:"Rq7!mesa-lattice",forgotSent:false};
+
+function obNew(){var r=regNew();r.mode="onboard";r.slug="release-manager";r.repo=null;return r;}
+function obHash(step){return "#/welcome"+(step&&step!=="signup"?"/"+step:"");}
+function obGo(step){
+  S.dlg=null;S.dlgArg=null;S.layer=null;
+  if(OB_GATE[step]&&!(S.reg&&S.reg.mode==="onboard")){regClear();S.reg=obNew();}
+  var hh=obHash(step); if(location.hash!==hh)location.hash=hh; else render();
+}
+function obExit(){regClear();S.reg=null;go('#/'+ORG.slug+'/'+ws().slug);act('Onboarding demo closed. Nothing was written.');}
+function obSignedIn(){regClear();S.reg=null;go('#/'+ORG.slug+'/'+ws().slug);act('Signed in as '+PEOPLE.marcus.name+'. The session is recorded like any other governed action.');}
+function obBind(){if(S.reg)S.reg.repo="bound";render();act('GitHub App installed on '+ws().main+'. Main repo bound — Context PRs, checks and the code graph are on.');}
+function obSkip(){if(S.reg)S.reg.repo="skipped";render();}
+
+/* the account dialog's Onboarding tab: the path, and the screens beside it */
+function obAccountTab(){
+  function row(s,i){return '<div><span class="sn">'+(typeof i==="number"?i+1:"·")+'</span><div class="bd2"><div class="t1">'+h(s.lab)+'</div><div class="t2">'+h(s.sub)+'</div></div>'+
+   '<button class="btn sm" onclick="obGo(\''+s.id+'\')">Open</button></div>';}
+  return '<div class="note" style="margin-bottom:16px"><b>Clickable demo only.</b> These are the screens a new operator sees before Mission Control opens — sign-up through the first frame. They are reachable from here so a walkthrough can start from the account you are signed in as. Nothing on them writes anything; Exit demo on any screen brings you back here, still signed in.</div>'+
+   '<div class="field"><label>The path — sixty seconds to governed</label><div class="ob-steps">'+OB_STEPS.map(row).join("")+'</div></div>'+
+   '<div class="field"><label>Also in the set</label><div class="ob-steps">'+OB_ALT.map(function(s){return row(s,null);}).join("")+'</div></div>'+
+   '<div class="row"><button class="btn primary" onclick="obGo(\'signup\')">Start from sign-up</button>'+
+   '<span class="dim" style="font-size:12px">The mockup-state bar still applies: error and denied render each screen’s failure.</span></div>';
+}
+
+/* ---- auth shell and form pieces ---- */
+function obShell(inner,wide){
+  return '<div class="ob-auth"><div class="ob-top"><div class="brandmark">'+LOGO+'</div>'+
+   '<button class="btn sm" onclick="obExit()">Exit demo</button></div>'+
+   '<div class="ob-card'+(wide?" wide":"")+'">'+inner+'</div></div>';
+}
+function obErr(html){return '<div class="ob-err">'+OB_ICON.warn+'<span>'+html+'</span></div>';}
+function obPrimary(label,busy){
+  var busyNow=S.state==="loading";
+  return '<button type="submit" class="btn primary wide"'+(busyNow?' aria-disabled="true"':'')+'>'+(busyNow?'<span class="ob-spin"></span><span>'+busy+'</span>':label)+'</button>';
+}
+function obSso(next){
+  var go_=next==="fleet"?"obSignedIn()":"obGo('organization')";
+  return '<div class="ob-sso"><button type="button" class="btn" onclick="'+go_+'">'+OB_ICON.google+'<span>Continue with Google</span></button>'+
+   '<button type="button" class="btn" onclick="'+go_+'">'+OB_ICON.github+'<span>Continue with GitHub</span></button>'+
+   '<button type="button" class="btn" onclick="'+go_+'">'+icon("lock")+'<span>Continue with SAML SSO</span></button></div>';
+}
+function obPwBits(){
+  var v=S.ob.pw||"", score=Math.min(4,Math.floor(v.length/4));
+  var req=[[v.length>=12,"at least 12 characters"],[/[^A-Za-z0-9]/.test(v),"one symbol"],[/[0-9]/.test(v),"one digit"]];
+  return {meter:[0,1,2,3].map(function(i){return '<i class="'+(i<score?"on":"")+'"></i>';}).join(""),
+          reqs:req.map(function(x){return '<span class="'+(x[0]?"ok":"")+'">'+(x[0]?"✓":"·")+' '+x[1]+'</span>';}).join("")};
+}
+function obPwMeter(){var b=obPwBits(),m=el("obMeter"),r=el("obReqs");if(m)m.innerHTML=b.meter;if(r)r.innerHTML=b.reqs;}
+function obPwField(id,auto,bare){
+  var b=obPwBits();
+  return '<div class="ob-pw"><input id="'+id+'" type="'+(S.ob.pwShown?"text":"password")+'" value="'+h(S.ob.pw)+'" autocomplete="'+(auto||"new-password")+'" oninput="S.ob.pw=this.value;obPwMeter()">'+
+   '<button type="button" onclick="S.ob.pwShown=!S.ob.pwShown;render()">'+(S.ob.pwShown?"Hide":"Show")+'</button></div>'+
+   (bare?'':'<div class="ob-meter" id="obMeter" aria-hidden="true">'+b.meter+'</div><div class="ob-reqs" id="obReqs">'+b.reqs+'</div>');
+}
+function obCodes(prefix,code){
+  return '<div class="ob-codes">'+[0,1,2,3,4,5].map(function(i){
+    return '<input id="'+prefix+(i+1)+'" inputmode="numeric" maxlength="1" aria-label="digit '+(i+1)+'" value="'+(code[i]||"")+'" oninput="obCodeNext(this)" onkeydown="obCodeBack(event,this)">';}).join("")+'</div>';
+}
+function obCodeNext(inp){if(inp.value&&inp.nextElementSibling)inp.nextElementSibling.focus();}
+function obCodeBack(e,inp){if(e.key==="Backspace"&&!inp.value&&inp.previousElementSibling)inp.previousElementSibling.focus();}
+
+/* ---- the auth screens ---- */
+function obSignup(){
+  var err=S.state==="error", me=PEOPLE.marcus;
+  return obShell('<div class="ob-h"><p class="eyebrow">Create your account</p><h1>Govern the agents you already run.</h1>'+
+   '<p class="ob-lead">Wrap Claude Code, Codex CLI, Stella or an SDK agent. Every organization gets its first 1,000 runs a month free, with every governance feature on.</p></div>'+
+   '<div class="ob-panel">'+(err?obErr('<b>That email is already registered.</b> Log in instead, or reset your password.'):'')+
+   obSso("organization")+'<div class="ob-or">or</div>'+
+   '<form class="ob-form" onsubmit="event.preventDefault();obGo(\'verify\')">'+
+   '<div class="field"><label for="ob-name">Name</label><input id="ob-name" type="text" value="'+h(me.name)+'" autocomplete="name"></div>'+
+   '<div class="field"><label for="ob-email">Work email</label><input id="ob-email" type="email" class="'+(err?"ob-bad":"")+'" value="'+h(me.email)+'" autocomplete="email">'+
+    (err?'<div class="hint" style="color:var(--st-failed)">An account for this address was created on 9 Sep 2026.</div>':'')+'</div>'+
+   '<div class="field"><label for="ob-pw">Password</label>'+obPwField("ob-pw")+'</div>'+
+   obPrimary("Create account","Creating account…")+
+   '<p class="hint" style="margin:0;font-size:11.5px;color:var(--dim);line-height:1.45">By creating an account you agree to the Oxagen terms and privacy notice. Oxagen never stores your model provider keys in plain text, and never returns them once saved.</p></form></div>'+
+   '<p class="ob-foot">Already have an account? <a href="#/welcome/login">Log in</a></p>'+
+   '<div class="ob-tags"><span class="b b-q">1,000 runs free / month</span><span class="b b-q">no token markup</span><span class="b b-q">SOC 2 evidence built in</span></div>');
+}
+function obVerify(){
+  var err=S.state==="error", me=PEOPLE.marcus;
+  return obShell('<div class="ob-h"><p class="eyebrow">Step 1 of 2</p><h1>Check your email</h1>'+
+   '<p class="ob-lead">We sent a six-digit code to <span class="mono">'+h(me.email)+'</span>. It is good for 10 minutes.</p></div>'+
+   '<div class="ob-panel">'+(err?obErr('<b>That code has expired.</b> Codes last 10 minutes. Send a new one below.'):'')+
+   '<form class="ob-form" onsubmit="event.preventDefault();obGo(\'organization\')">'+
+   '<div class="field"><label for="ob-vc1">Verification code</label>'+obCodes("ob-vc",err?"":"481502")+'</div>'+
+   obPrimary("Verify email","Verifying…")+'</form>'+
+   '<div class="row" style="font-size:13px"><span class="muted">Did not arrive?</span><button type="button" class="ob-link" onclick="act(\'A new code is on its way. The old one is void.\')">Send a new code</button><span class="mono dim" style="margin-left:auto">0:42</span></div></div>'+
+   '<p class="ob-foot">Wrong address? <a href="#/welcome">Change it</a></p>');
+}
+function obLogin(){
+  var me=PEOPLE.marcus, p=PEOPLE.priya;
+  if(S.state==="denied") return obShell('<div class="ob-state deny"><div class="glyph">'+icon("lock")+'</div><h2>This account is suspended</h2>'+
+   '<p>'+h(p.name)+' (organization owner, '+h(ORG.name)+') suspended <span class="mono">'+h(me.email)+'</span> on 9 Sep 2026. Runs already recorded are kept; no new run tokens are minted.</p>'+
+   '<button class="btn" onclick="act(\'A message to the organization owner is drafted. Nothing else changes until they act.\')">Contact your organization owner</button></div>');
+  var err=S.state==="error";
+  return obShell('<div class="ob-h"><p class="eyebrow">Welcome back</p><h1>Log in to Mission Control</h1></div>'+
+   '<div class="ob-panel">'+(err?obErr('<b>Email or password is wrong.</b> Check both and try again, or reset your password.'):'')+
+   obSso("fleet")+'<div class="ob-or">or</div>'+
+   '<form class="ob-form" onsubmit="event.preventDefault();obGo(\'two-factor\')">'+
+   '<div class="field"><label for="ob-li-email">Work email</label><input id="ob-li-email" type="email" class="'+(err?"ob-bad":"")+'" value="'+h(me.email)+'" autocomplete="username"></div>'+
+   '<div class="field"><div class="row" style="justify-content:space-between;margin-bottom:5px"><label for="ob-li-pw" style="margin:0">Password</label><a href="#/welcome/forgot" style="font-size:12px;color:var(--accent-text);text-decoration:none">Forgot password?</a></div>'+obPwField("ob-li-pw","current-password",true)+'</div>'+
+   '<label class="ob-check"><input type="checkbox" checked><span>Keep me logged in on this device for 30 days</span></label>'+
+   obPrimary("Log in","Logging in…")+'</form></div>'+
+   '<p class="ob-foot">New to Oxagen? <a href="#/welcome">Create an account</a> &nbsp;·&nbsp; Have an invitation? <a href="#/welcome/invite">Accept it</a></p>');
+}
+function obTwoFactor(){
+  var err=S.state==="error", me=PEOPLE.marcus;
+  return obShell('<div class="ob-h"><p class="eyebrow">Step 2 of 2</p><h1>Two-factor authentication</h1>'+
+   '<p class="ob-lead">Enter the six-digit code from your authenticator app for <span class="mono">'+h(me.email)+'</span>.</p></div>'+
+   '<div class="ob-panel">'+(err?obErr('<b>That code is wrong.</b> 2 attempts left before a 15-minute lockout.'):'')+
+   '<form class="ob-form" onsubmit="event.preventDefault();obSignedIn()">'+
+   '<div class="field"><label for="ob-tf1">Authentication code</label>'+obCodes("ob-tf",err?"":"602914")+'</div>'+
+   obPrimary("Verify","Verifying…")+'</form>'+
+   '<div class="row" style="font-size:13px"><button type="button" class="ob-link" onclick="act(\'Recovery codes are single use. 8 of 10 remain.\')">Use a recovery code instead</button><span class="mono dim" style="margin-left:auto">expires 0:24</span></div></div>'+
+   '<p class="ob-foot"><a href="#/welcome/login">Back to log in</a></p>');
+}
+function obForgot(){
+  var err=S.state==="error", me=PEOPLE.marcus;
+  if(S.ob.forgotSent) return obShell('<div class="ob-state ok"><div class="glyph">'+OB_ICON.inbox+'</div><h2>Reset link sent</h2>'+
+   '<p>If an account exists for <span class="mono">'+h(me.email)+'</span> a reset link is on its way. The link is good for 60 minutes and can be used once.</p>'+
+   '<button class="btn" onclick="obGo(\'reset\')">Open the link</button></div><p class="ob-foot"><a href="#/welcome/login">Back to log in</a></p>');
+  return obShell('<div class="ob-h"><p class="eyebrow">Password</p><h1>Reset your password</h1><p class="ob-lead">We will email a link that is good for 60 minutes.</p></div>'+
+   '<div class="ob-panel">'+(err?obErr('<b>We could not send that email.</b> Our mail provider returned a 502. Try again in a minute.'):'')+
+   '<form class="ob-form" onsubmit="event.preventDefault();S.ob.forgotSent=true;render()">'+
+   '<div class="field"><label for="ob-fp">Work email</label><input id="ob-fp" type="email" value="'+h(me.email)+'" autocomplete="username"></div>'+
+   obPrimary("Send reset link","Sending…")+'</form></div><p class="ob-foot"><a href="#/welcome/login">Back to log in</a></p>');
+}
+function obReset(){
+  var me=PEOPLE.marcus;
+  if(S.state==="denied") return obShell('<div class="ob-state deny"><div class="glyph">'+OB_ICON.warn+'</div><h2>This reset link has expired</h2>'+
+   '<p>Reset links last 60 minutes and can be used once. This one was issued at 12:58 on 11 Sep 2026. Request a new one and it will arrive in under a minute.</p>'+
+   '<button class="btn" onclick="S.ob.forgotSent=false;obGo(\'forgot\')">Request a new link</button></div>');
+  var err=S.state==="error";
+  return obShell('<div class="ob-h"><p class="eyebrow">Password</p><h1>Set a new password</h1><p class="ob-lead">For <span class="mono">'+h(me.email)+'</span>. Setting a new password logs out every other device.</p></div>'+
+   '<div class="ob-panel">'+(err?obErr('<b>The two passwords do not match.</b> Retype the confirmation.'):'')+
+   '<form class="ob-form" onsubmit="event.preventDefault();S.ob.forgotSent=false;obGo(\'login\');act(\'Password set. Every other device was logged out.\')">'+
+   '<div class="field"><label for="ob-rp">New password</label>'+obPwField("ob-rp")+'</div>'+
+   '<div class="field"><label for="ob-rp2">Confirm new password</label><input id="ob-rp2" type="password" class="'+(err?"ob-bad":"")+'" value="'+(err?"Rq7!mesa-latice":h(S.ob.pw))+'"></div>'+
+   obPrimary("Set password","Saving…")+'</form></div>');
+}
+function obInvite(){
+  var me=PEOPLE.marcus, p=PEOPLE.priya, d=PEOPLE.dana, w=ws();
+  if(S.state==="denied") return obShell('<div class="ob-state deny"><div class="glyph">'+icon("lock")+'</div><h2>This invitation is for a different account</h2>'+
+   '<p>'+h(p.name)+' sent it to <span class="mono">'+h(me.email)+'</span>. You are logged in as <span class="mono">'+h(d.email)+'</span>. Log out and back in as the invited address, or ask '+h(p.name)+' to send a new invitation.</p>'+
+   '<button class="btn" onclick="obGo(\'login\')">Log in as someone else</button></div>');
+  var err=S.state==="error";
+  return obShell('<div class="ob-h"><p class="eyebrow">Invitation</p><h1>Join '+h(ORG.name)+' on Oxagen</h1></div>'+
+   '<div class="ob-panel">'+(err?obErr('<b>This invitation has already been accepted.</b> It was used on 10 Sep 2026 at 09:14. Log in instead.'):'')+
+   '<div class="row" style="flex-wrap:nowrap">'+personAv("priya",38)+'<div style="min-width:0"><div style="font-size:14px;font-weight:600">'+h(p.name)+'</div><div class="muted" style="font-size:12.5px">organization owner · invited you on 11 Sep 2026</div></div></div>'+
+   '<div class="hr" style="margin:0"></div>'+
+   kvl([["Organization",h(ORG.name)+' <span class="mono dim">('+h(ORG.slug)+')</span>'],["Organization role","member"],["Workspace",h(w.slug)+' <span class="mono dim">(main repo '+h(w.main)+')</span>'],["Workspace role","owner"],["Invitation expires","18 Sep 2026"]])+
+   '<p class="dim" style="margin:0;font-size:12px;line-height:1.5">As workspace owner you can register agents, grant tools, set budgets, and approve parked calls in '+h(w.slug)+'. You cannot change organization billing or the data plane.</p>'+
+   '<div class="row"><button class="btn primary" onclick="obSignedIn()">'+(S.state==="loading"?'<span class="ob-spin"></span><span>Accepting…</span>':'Accept invitation')+'</button>'+
+   '<button class="btn" onclick="act(\'Invitation declined. The inviter is told; nothing else changes.\')">Decline</button></div></div>'+
+   '<p class="ob-foot">Signed in as <span class="mono">'+h(me.email)+'</span> · <a href="#/welcome/login">Not you?</a></p>', true);
+}
+
+/* ---- gate step 1 (the org); steps 2 and 3 are regWrap/regRun in onboard mode ---- */
+function obOrg(){
+  var err=S.state==="error", w=ws();
+  return '<div><p class="eyebrow">Step 1 of 3</p><h1>Name your organization</h1>'+
+   '<p class="reg-lead">The organization is the tenant: it owns its own graph database, its own encryption key, its billing account, and the namespace that appears in every agent key.</p></div>'+
+   '<div class="reg-card"><div class="cb">'+(err?obErr('<b>That namespace is taken.</b> <span class="mono">'+h(ORG.slug)+'</span> belongs to another organization. Pick a different 2–6 character namespace.')+'<div style="height:14px"></div>':'')+
+   '<div class="field"><label for="ob-org">Organization name</label><input id="ob-org" type="text" value="'+h(ORG.name)+'"></div>'+
+   '<div class="grid g2"><div class="field"><label for="ob-url">Address</label><input id="ob-url" class="mono" value="oxagen.com/'+h(ORG.slug)+'" readonly><div class="hint">Derived from the name. You can change it later.</div></div>'+
+   '<div class="field"><label for="ob-ns">Namespace</label><input id="ob-ns" class="mono'+(err?" ob-bad":"")+'" value="'+h(ORG.slug)+'" maxlength="6"><div class="hint">2–6 characters, <b>immutable</b>. Every agent key starts with it: <span class="mono">'+h(ORG.slug)+'.&lt;workspace&gt;.&lt;agent&gt;</span></div></div></div>'+
+   '<div class="hr"></div><h3 style="font-size:13px;margin:0 0 10px">First workspace</h3>'+
+   '<div class="grid g2"><div class="field"><label for="ob-ws">Workspace name</label><input id="ob-ws" value="'+h(w.slug)+'"></div>'+
+   '<div class="field"><label for="ob-mode">Governance mode</label><select id="ob-mode"><option>solo</option><option selected>team</option><option>regulated</option></select></div></div>'+
+   '<div class="dim" style="font-size:12px;line-height:1.5">A workspace is a governance partition: one main repo, one ontology, one steering set, its own agents, tool grants and budgets.</div>'+
+   '</div></div>'+
+   '<div class="reg-foot">'+regCancelBtn()+'<div class="sp"><span class="reg-cap">Creates <span class="mono">org_'+h(ORG.slug)+'</span> and its graph database.</span><button class="btn primary" onclick="regNav(\'wrap\')">Continue</button></div></div>';
+}
+/* step 3, onboard mode: the repo the installer saw — bind it, or stay provisional */
+function obRepoPanel(){
+  var r=S.reg, w=ws();
+  if(r.repo==="bound") return '<div class="reg-card ob-repo"><div class="ch"><span class="reg-ok"><span class="dot"></span>bound</span><h3>Main repo</h3></div><div class="cb">'+
+   '<div class="row" style="margin-bottom:10px"><span class="b b-q mono">'+h(w.main)+'</span><span class="b b-q">production branch: '+h(w.branch)+'</span><span class="b b-allowed"><span class="d"></span>GitHub App installed</span></div>'+
+   '<p class="muted" style="font-size:12.5px;margin:0">Steering, context records and agent definitions will live in <span class="mono">'+h(w.main)+'</span> under <span class="mono">.oxagen/</span>, published through Context PRs. Linked repos can be added later from Ontology → Repositories.</p></div></div>';
+  if(r.repo==="skipped") return '<div class="reg-card ob-repo"><div class="ch"><span class="b b-denied">provisional</span><h3>No main repo bound</h3></div><div class="cb">'+
+   '<p class="muted" style="font-size:12.5px;margin:0 0 10px"><b>'+h(w.slug)+' is provisional until 25 Sep 2026</b> (14 days). Runs record and spend counts. Steering, context records, and agent definitions stay off until a main repo is bound.</p>'+
+   '<button class="btn sm" onclick="obBind()">Bind '+h(w.main)+' now</button></div></div>';
+  return '<div class="reg-card ob-repo"><div class="ch"><h3>Repository detected</h3><span class="sp">reported by the installer</span></div><div class="cb">'+
+   '<div class="row" style="margin-bottom:6px"><span class="b b-q mono">git@github.com:'+h(w.main)+'.git</span></div>'+
+   '<p class="muted" style="font-size:12.5px;margin:0 0 12px">Read from the git remote of <span class="mono">~/src/platform</span>, the directory the installer ran in. Production branch <span class="mono">'+h(w.branch)+'</span>.</p>'+
+   '<button class="btn'+(r.first?"":" primary")+'" onclick="obBind()">'+OB_ICON.github+'<span>Bind '+h(w.main)+' as the main repo</span></button>'+
+   '<p class="muted" style="font-size:12.5px;margin:12px 0 0">One click installs the GitHub App on <span class="mono">'+h(w.main)+'</span>: repo binding, Context PRs, checks, merge handling and the code graph.</p>'+
+   '<div class="hr"></div><p class="muted" style="font-size:12.5px;margin:0"><button type="button" class="ob-link" style="color:var(--muted)" onclick="obSkip()">Skip for now</button> — '+h(w.slug)+' stays <b>provisional for 14 days</b>. Runs record and spend counts, but steering, context records and agent definitions stay off until a main repo is bound.</p></div></div>';
+}
+function pWelcome(r){
+  var step=r.step||"signup";
+  if(OB_GATE[step]){
+    if(!S.reg||S.reg.mode!=="onboard"){regClear();S.reg=obNew();}
+    if(S.state==="loading") return regShell(step,skeleton());
+    if(S.state==="denied") return regShell(step,deniedState("onboarding","org.create for "+PEOPLE.marcus.email));
+    return regShell(step,step==="organization"?obOrg():step==="wrap"?regWrap():regRun());
+  }
+  if(step==="verify") return obVerify();
+  if(step==="login") return obLogin();
+  if(step==="two-factor") return obTwoFactor();
+  if(step==="forgot") return obForgot();
+  if(step==="reset") return obReset();
+  if(step==="invite") return obInvite();
+  return obSignup();
 }
 
 /* ============================== render ============================== */
@@ -7924,12 +8372,13 @@ function render(){
   else if(r.page==="organization")page=pOrganization();
   else if(r.page==="billing")page=pBilling();
   else if(r.page==="audit")page=pAudit();
-  else if(r.page==="register")page="";
+  else if(r.page==="register"||r.page==="welcome")page="";
   else page=pFleet();
 
-  el("app").innerHTML=r.page==="register"?pRegister(r):'<div class="app">'+sidebar(r)+'<div class="main">'+topbar(r)+
+  el("app").innerHTML=r.page==="register"?pRegister(r):r.page==="welcome"?pWelcome(r):'<div class="app">'+sidebar(r)+'<div class="main">'+topbar(r)+
     '<main class="page" id="pg">'+page+'</main></div></div>'+assistant();
-  if(r.page==="register")regSchedule(r);
+  if(r.page==="register")regSchedule(regStepOf(r));
+  else if(r.page==="welcome")regSchedule(r.step);
   el("layer").innerHTML=dialog();
   if(r.page==="agentsource")edMount();
   listify();
@@ -7959,7 +8408,7 @@ el("cIndex").addEventListener("click",function(){openDialog("cmd");});
 el("cReset").addEventListener("click",function(){seedApprovals();S.dlg=null;S.dlgArg=null;render();toast("Approvals reset — every parked call is pending again with a fresh clock.","gold");});
 document.addEventListener("keydown",function(e){
   if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==="k"){e.preventDefault();openDialog("cmd");}
-  if(e.key==="Escape"){if(S.dlg)closeDialog();else if(S.layer){S.layer=null;render();}else if(route().page==="register")regCancel();}
+  if(e.key==="Escape"){if(S.dlg)closeDialog();else if(S.layer){S.layer=null;render();}else{var rp=route();if(rp.page==="register")regCancel();else if(rp.page==="welcome"&&S.reg&&S.reg.mode==="onboard")obExit();}}
 });
 document.addEventListener("click",function(e){
   if(S.layer&&!e.target.closest(".rel"))

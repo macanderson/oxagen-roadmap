@@ -309,6 +309,60 @@ td.strong{color:var(--fg);font-weight:500}
 .xbtn:hover{background:var(--hl);color:var(--fg)}
 .xbtn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round}
 
+/* spend findings: savings hero, ranked cards, evidence drawer, fix dialog */
+.sv-hero{display:grid;grid-template-columns:minmax(220px,1fr) minmax(0,1.5fr);gap:18px 30px;align-items:end;padding:18px 20px;
+  background:var(--panel);border:1px solid var(--border);border-radius:var(--r-lg)}
+.sv-hero>*{min-width:0}
+.sv-amt{font-family:var(--mono);font-size:40px;font-weight:600;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums;color:var(--fg)}
+.sv-sub{font-size:12.5px;color:var(--muted);margin-top:8px}
+.sv-strip{display:flex;height:16px;border-radius:5px;overflow:hidden;gap:2px;margin-bottom:9px}
+.sv-strip i{display:block;height:100%;background:var(--st-approval);min-width:3px}
+.sv-legend{display:flex;flex-wrap:wrap;gap:5px 14px;font-size:11.5px;color:var(--muted)}
+.sv-legend i{display:inline-block;width:9px;height:9px;border-radius:2px;background:var(--st-approval);margin-right:5px;vertical-align:-1px}
+.sv-facts{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:12px;color:var(--muted);margin-top:12px;padding-top:10px;border-top:1px solid var(--border)}
+.sv-facts b{color:var(--fg)}
+.fnd{display:grid;grid-template-columns:30px minmax(0,1fr) 220px;gap:14px;padding:14px 16px;border:1px solid var(--border);
+  border-radius:var(--r-lg);background:var(--panel);transition:border-color .15s}
+.fnd>*{min-width:0}
+.fnd:hover{border-color:var(--rule)}
+.fnd .rank{font-family:var(--mono);font-size:12px;color:var(--dim);padding-top:4px}
+.fnd .t{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:14px;color:var(--fg)}
+.fnd .who{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);margin:6px 0 8px;flex-wrap:wrap}
+.fnd .who a{color:var(--body);text-decoration:none}
+.fnd .who a:hover{color:var(--fg);text-decoration:underline}
+.av{width:20px;height:20px;border-radius:50%;background:var(--hl);border:1px solid var(--border);display:grid;place-items:center;font-size:9.5px;font-weight:600;color:var(--body);flex:none}
+.fnd .why{margin:0 0 8px;font-size:12.5px;color:var(--body)}
+.fnd .why code{font-family:var(--mono);font-size:.92em;background:var(--hl);padding:.1em .35em;border-radius:4px}
+.fnd .meta{font-family:var(--mono);font-size:10.5px;color:var(--dim)}
+.fnd .amt{text-align:right;display:grid;gap:5px;align-content:start}
+.fnd .amt .v{font-family:var(--mono);font-size:22px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.1;color:var(--fg)}
+.fnd .amt .s{font-size:11px;color:var(--muted)}
+.fnd .amt .bar{min-width:0}
+.fnd .acts{display:flex;gap:7px;justify-content:flex-end;margin-top:4px}
+@media(max-width:640px){.fnd{grid-template-columns:minmax(0,1fr)}.fnd .rank{display:none}.fnd .amt{text-align:left}.fnd .acts{justify-content:flex-start}.sv-hero{grid-template-columns:minmax(0,1fr)}.sv-amt{font-size:32px}}
+.ev-runs th{font-size:10px}
+.ev-chain{list-style:none;margin:0;padding:0;display:grid;gap:0}
+.ev-chain li{position:relative;padding:0 0 12px 20px;border-left:1px solid var(--rule);margin-left:5px;font-size:12.5px;color:var(--body)}
+.ev-chain li:last-child{border-left-color:transparent;padding-bottom:0}
+.ev-chain li::before{content:"";position:absolute;left:-5px;top:5px;width:9px;height:9px;border-radius:50%;background:var(--gold);border:2px solid var(--gold)}
+.ev-chain .h{display:block;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:600;margin-bottom:2px}
+.ev-who{display:flex;gap:11px;align-items:flex-start;padding:11px 12px;border:1px solid var(--border);border-radius:var(--r-md);background:var(--ink)}
+.ev-who .av{width:36px;height:36px;font-size:12.5px}
+.ev-who a{text-decoration:none}
+.ev-who a:hover{text-decoration:underline}
+.linkbtn{background:none;border:0;padding:0;color:var(--accent-text);font:inherit;cursor:pointer;text-decoration:none}
+.linkbtn:hover{text-decoration:underline}
+pre.code{background:var(--void);border:1px solid var(--border);border-radius:var(--r-md);padding:12px 14px;overflow-x:auto;font-size:11.5px;line-height:1.55;color:var(--body);font-family:var(--mono);margin:0}
+pre.code .c{color:var(--dim)}
+pre.code .k{color:var(--gold)}
+pre.code .s{color:var(--st-allowed)}
+.fix-two{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+.fix-two>*{min-width:0}
+.fix-two .lab{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:600;margin-bottom:6px}
+.dlg.wide{width:min(860px,calc(100vw - 32px))}
+.drawer{width:min(760px,100%)}
+.dlg-h .sub{margin-top:3px}
+
 /* dialog */
 .dlg{position:fixed;z-index:82;top:50%;left:50%;transform:translate(-50%,-48%) scale(.98);
   width:min(620px,calc(100vw - 32px));max-height:min(80vh,720px);background:var(--panel);
@@ -419,6 +473,19 @@ body[data-width="phone"] .crumb .hide-s{display:none}
 body[data-width="phone"] .drawer,body[data-width="phone"] .scrim,body[data-width="phone"] .dlg{position:absolute}
 body[data-width="phone"] .asst{position:absolute;inset:0;width:100%;height:auto;border-left:0}
 .split{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));align-items:start}
+/* dialog form fields + toast — added with the spend-report export */
+.fld{display:flex;flex-direction:column;gap:5px;min-width:0}
+.fld label{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);font-weight:600}
+.fld select,.fld input{width:100%;background:var(--void);border:1px solid var(--border);border-radius:9px;padding:8px 11px;font-size:13px;color:var(--fg);font-family:inherit;color-scheme:dark light}
+.fld select:focus,.fld input:focus{border-color:var(--gold);outline:none}
+.fld2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:560px){.fld2{grid-template-columns:1fr}}
+.toasts{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:90;display:flex;flex-direction:column;gap:8px;pointer-events:none;max-width:min(92vw,520px)}
+.toast{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-size:12.5px;color:var(--fg);box-shadow:var(--shadow-sm);display:flex;gap:9px;align-items:center}
+.toast .dot{width:6px;height:6px;border-radius:50%;background:var(--st-allowed);flex:none}
+.wrun{display:grid;gap:8px;padding:13px 15px;border:1px solid var(--border);border-radius:var(--r-lg);background:var(--void)}
+.wrun .t{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px}
+.wrun .bar{min-width:0;height:5px}
 .split3{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));align-items:start}
 </style>
 
@@ -838,6 +905,182 @@ DB.billing = {
 </script>
 <script>
 /* ==================== helpers ==================== */
+/* ==================== Spend › Findings: evidence and fixes ====================
+   EV is keyed by finding id: how the saving was measured, who is involved, and recent runs where the money went.
+   FIX is keyed by finding kind: a Context PR when the fix is a steering record the agent reads, a help article
+   when the fix lives in the customer's own agent code or configuration. Nothing here is a model's opinion. */
+const EV = {
+  fnd_9c41:{confidence:"high",trend:"14.7 pts below the 30-day baseline, not recovering",basis:"gateway_observed",
+    signal:"cache hit rate",measured:"66.1%",baseline:"78.9% before 3 Sep",
+    counterfactual:"the same 1,142 runs at the 78.9% baseline hit rate",
+    method:[["Measured","Hit rate on acme.core.release-manager fell from 78.9% to 66.1% overnight on 3 September and sits at 64.2% today."],
+      ["Cause pinned","Frames 00041 and 00042 of run_8a19c4d2 are consecutive turns with an identical conversation prefix and a different system-context digest. The publish of str_release_gate is the only change between them."],
+      ["Paid twice","Every run since re-writes a 214,880-token prefix on its first turn and reads the old one never. The write premium and the lost reads are both on the frames."],
+      ["Counterfactual","Re-price every model call since 3 Sep at the baseline hit rate. The difference, per month, is the money at stake."]],
+    who:{agent:"acme.core.release-manager",op:"Marcus Bell",opRole:"Workspace owner · owns this agent",opHref:"#/acme/core-platform/spend/operators/marcus-bell",agHref:"#/acme/core-platform/spend/agents/release-manager",
+      note:"Marcus published str_release_gate at 09:14Z on a Wednesday with 31 runs live. The record put a volatile clause inside the cached prefix, so every conversation since starts cold."},
+    runs:[["run_8a19c4d2","acme/platform#482 · Cut 4.11.0 release notes","3 Sep 09:16","4.87","1.61","prefix re-written at turn 3 · 214,880 tok cache_write"],
+      ["run_8b44f019","acme/platform#480 · Release checklist 4.11.0","3 Sep 10:02","3.10","1.61","two cold writes, neither read inside the TTL"],
+      ["run_8b7e2a55","acme/platform#486 · Cut 4.11.1 release notes","6 Sep 14:40","4.02","0.81","cold prefix · hit rate 58%"],
+      ["run_8c1190f4","acme/platform#490 · Release PR 4.11.1","8 Sep 09:31","3.66","0.81","cold prefix · hit rate 61%"],
+      ["run_8cb3d2e7","acme/platform#495 · Cut 4.12.0 release notes","11 Sep 08:12","4.41","0.81","cold prefix · hit rate 63%"]]},
+  fnd_9c3d:{confidence:"high",trend:"+9% over 30 days as grants were added",basis:"client_attested",
+    signal:"tool_definition_tokens per turn",measured:"12,408",baseline:"3,912 (workspace median)",
+    counterfactual:"the 30 tool versions actually called · 8,204 tok per turn",
+    method:[["Measured","Every turn on acme.core.triage carries 12,408 tokens of tool definitions for 41 granted tool versions."],
+      ["Baseline","The workspace median is 3,912 tokens per turn. The other three agents carry between 9 and 17 tools."],
+      ["Never used","11 of the 41 have not been called once in the last 500 runs. Their 4,204 tokens were paid on every turn of every run."],
+      ["Counterfactual","Grant the 30 tools the runs call. Difference × turns × the input price on each call."]],
+    who:{agent:"acme.core.triage",op:"Marcus Bell",opRole:"Workspace owner · owns this agent",opHref:"#/acme/core-platform/spend/operators/marcus-bell",agHref:"#/acme/core-platform/spend/agents/triage",
+      note:"Marcus wrapped triage with the jira, pagerduty and s3 servers granted whole. A wrap that grants a server grants every tool it exposes; nobody chose the 11 idle ones."},
+    runs:[["run_8c02d771","acme/platform#511 · Label: flaky worker restart","11 Sep 08:51","1.94","0.66","4,204 idle-tool tokens × 9 turns"],
+      ["run_8c33a1b0","acme/platform#509 · Triage: build cache miss","11 Sep 08:22","2.12","0.72","4,204 tok × 11 turns"],
+      ["run_8c5f90c3","acme/platform#507 · Label: docs-only change","11 Sep 07:58","1.31","0.44","4,204 tok × 7 turns"],
+      ["run_8c8ad4e1","acme/platform#503 · Triage: release blocker?","11 Sep 07:02","2.41","0.86","4,204 tok × 13 turns"]]},
+  fnd_9c52:{confidence:"high",trend:"flat · every one-turn run",basis:"gateway_observed",
+    signal:"cache_write_5m with no read inside the TTL",measured:"178 of 178 one-turn runs",baseline:"0 expected",
+    counterfactual:"no cache write on one-turn runs",
+    method:[["Measured","178 of this agent's runs this month were one turn long, and each one's only model call wrote an 88,412-token cache prefix."],
+      ["Never read","Each run sealed within a minute of the write. No later call read the prefix before the 5-minute TTL expired."],
+      ["Paid for nothing","A cache write costs 1.25× the input price. The premium was the whole cost of the write; nothing came back."],
+      ["Counterfactual","Price the 178 calls without the write premium."]],
+    who:{agent:"acme.core.docs-writer",op:"Priya Natarajan",opRole:"Organization owner · owns this agent",opHref:"#/acme/core-platform/spend/operators/priya-natarajan",agHref:"#/acme/core-platform/spend/agents/docs-writer",
+      note:"docs-writer is SDK-wrapped custom code. Its request builder marks the system block cacheable on every call, whether or not a second turn will ever read it."},
+    runs:[["run_8d71ba03","acme/platform#477 · Docs: 4.11 upgrade guide","11 Sep 06:30","0.62","0.33","cache_write 88,412 tok · sealed 41s later"],
+      ["run_8d9c4e12","acme/platform#469 · Docs: gateway README","10 Sep 15:20","0.58","0.33","cache_write 88,412 tok · never read"],
+      ["run_8dc27f88","acme/platform#462 · Docs: policy reference","9 Sep 09:12","0.61","0.33","cache_write 88,412 tok · never read"],
+      ["run_8de0b3a4","acme/platform#458 · Docs: CLI flags","8 Sep 11:04","0.57","0.33","cache_write 88,412 tok · never read"]]},
+  fnd_9c58:{confidence:"high",trend:"one window · recurs on every throttle",basis:"gateway_observed",
+    signal:"provider 529 retries inside one turn",measured:"4 paid attempts per turn",baseline:"1 attempt",
+    counterfactual:"one attempt, then a fallback route",
+    method:[["Measured","Between 06:12 and 06:41 UTC on 8 September, 9 turns on key pk_bdrk_7f2a received 529 ThrottlingException from Bedrock us-east-1."],
+      ["Retried blind","The harness retried each turn four times on the same key and region. Every attempt was billed; none succeeded until the fifth."],
+      ["Same key","This is the key that carries the open reconciliation exception, so the attempts also match only at level 2."],
+      ["Counterfactual","One attempt, then a fallback to the second region or the direct key. The four extra attempts per turn are the saving."]],
+    who:{agent:"acme.core.stella-ci",op:"Priya Natarajan",opRole:"Organization owner · holds the provider key",opHref:"#/acme/core-platform/spend/operators/priya-natarajan",agHref:"#/acme/core-platform/spend/agents/stella-ci",
+      note:"The key has no fallback route configured. Priya added it in March for a single region; the retry policy is the harness default, four attempts on the same route."},
+    runs:[["run_8e40c112","acme/platform#498 · Witness: rate limiter","8 Sep 06:12","52.14","45.35","529 × 4 retries at turn 4 and 5"],
+      ["run_8e4a8d20","acme/platform#499 · Witness: window rollover","8 Sep 06:19","49.80","44.90","529 × 4 retries at turn 3"],
+      ["run_8e51c7a9","acme/platform#500 · Witness: burst path","8 Sep 06:27","51.02","45.35","529 × 4 retries at turn 4"],
+      ["run_8e5be0f3","acme/platform#501 · Witness: idle timeout","8 Sep 06:38","48.66","44.01","529 × 4 retries at turn 2"]]},
+  fnd_9c61:{confidence:"high",trend:"flat",basis:"gateway_observed",
+    signal:"identical tool input digests within a run",measured:"2 reads per run",baseline:"1 read per run",
+    counterfactual:"one repo.read_file@2.3 of window.ts per run",
+    method:[["Measured","repo.read_file@2.3 was called on services/ratelimit/window.ts twice in each of 312 runs, with the same input digest."],
+      ["Same answer","On 312 of 312 repeats the response digest matched the first read. The file did not change between them."],
+      ["Paid twice","The second read costs the tool call, the 2,900-token file re-entering the window, and the model turn spent deciding to re-read."],
+      ["Counterfactual","One read per run. The repeat calls and the tokens they added to every later turn are the saving."]],
+    who:{agent:"acme.core.stella-ci",op:"Marcus Bell",opRole:"Workspace owner · owns this agent",opHref:"#/acme/core-platform/spend/operators/marcus-bell",agHref:"#/acme/core-platform/spend/agents/stella-ci",
+      note:"The agent's brief says to confirm the rate-limit window before asserting on it. It confirms by re-reading the file it already has in context."},
+    runs:[["run_8f3a2c91","acme/platform#482 · Witness: release notes contract","11 Sep 09:02","2.87","0.88","window.ts read at frame 00062 and again at 00071"],
+      ["run_8f4d10a2","acme/platform#481 · Witness: rate limiter","10 Sep 14:02","2.66","0.88","read twice · same digest"],
+      ["run_8f602b7c","acme/platform#479 · Witness: window rollover","10 Sep 10:40","2.41","0.88","read twice · same digest"],
+      ["run_8f77e3d5","acme/platform#476 · Witness: burst path","9 Sep 09:55","2.93","0.88","read twice · same digest"]]},
+  fnd_9c6a:{confidence:"high",trend:"flat",basis:"client_attested",
+    signal:"steps after the last kept side effect",measured:"9.4 on average",baseline:"0–2 on the workspace's other agents",
+    counterfactual:"stop four steps after the last kept effect",
+    method:[["Measured","412 runs averaged 9.4 steps after the last step whose side effect survived to the sealed run."],
+      ["What they did","The tail steps re-read the issue just labelled, listed the thread again, and asked the model whether it was done, 2.1 model calls per step."],
+      ["Nothing kept","No tail step produced a side effect the run kept. The witness confirms the labels were identical before and after the tail."],
+      ["Counterfactual","Cut each run four steps after its last kept effect. The tail's model calls are the saving."]],
+    who:{agent:"acme.core.triage",op:"Marcus Bell",opRole:"Workspace owner · owns this agent",opHref:"#/acme/core-platform/spend/operators/marcus-bell",agHref:"#/acme/core-platform/spend/agents/triage",
+      note:"triage runs under Codex CLI at the harness tier. Its loop has no stop rule; it ends when the model says it is done, and the model checks its work several times before saying so."},
+    runs:[["run_8c02d771","acme/platform#511 · Label: flaky worker restart","11 Sep 08:51","1.94","0.53","11 steps after the last kept effect at frame 00140"],
+      ["run_8c33a1b0","acme/platform#509 · Triage: build cache miss","11 Sep 08:22","2.12","0.49","9 steps after the last kept effect"],
+      ["run_8c8ad4e1","acme/platform#503 · Triage: release blocker?","11 Sep 07:02","2.41","0.61","12 steps after the last kept effect"]]},
+  fnd_9c70:{confidence:"medium",trend:"flat",basis:"gateway_observed",
+    signal:"model tier per step shape",measured:"claude-opus-5 on 88 classification runs",baseline:"light tier expected",
+    counterfactual:"the same runs on claude-haiku-4-5-20251001",
+    method:[["Measured","88 runs used claude-opus-5 for label-and-route work with a mean output of 41 tokens."],
+      ["Shape","Every step in those runs is classification-shaped: one label from a fixed set, under 100 output tokens, no tool call."],
+      ["Same output","On 84 of 88 runs the light tier produced the same label on the same input elsewhere this month. Medium confidence because 4 differed."],
+      ["Counterfactual","Re-price the 88 runs at the light tier, which costs 8% of the same work."]],
+    who:{agent:"acme.core.docs-writer",op:"Priya Natarajan",opRole:"Organization owner · owns this agent",opHref:"#/acme/core-platform/spend/operators/priya-natarajan",agHref:"#/acme/core-platform/spend/agents/docs-writer",
+      note:"docs-writer has one model route for everything, set when it was wrapped. Its classify step inherits the flagship model the writing step needs."},
+    runs:[["run_8d71ba03","acme/platform#477 · Docs: route this request","11 Sep 06:30","0.62","0.041","claude-opus-5 · output 38 tokens"],
+      ["run_8d84f2c6","acme/platform#470 · Docs: route this request","10 Sep 16:12","0.59","0.041","claude-opus-5 · output 44 tokens"],
+      ["run_8da1b7e9","acme/platform#463 · Docs: route this request","9 Sep 10:08","0.61","0.041","claude-opus-5 · output 40 tokens"]]},
+  fnd_9c77:{confidence:"medium",trend:"+3% over 30 days",basis:"gateway_observed",
+    signal:"context_frame_tokens served per turn",measured:"11,842",baseline:"8,000 (budget norm)",
+    counterfactual:"an 8,000-token context budget with the same citation set",
+    method:[["Measured","Retrieval served a mean of 11,842 context-frame tokens per turn across core-platform, 1.48× the budget norm."],
+      ["Cited","context_use_feedback shows 22.4% of served frames were cited by the model. The other 77.6% were paid for and not used."],
+      ["Within budget","The cited frames fit inside 8,000 tokens on 96% of turns. Medium confidence because the other 4% would lose a cited frame."],
+      ["Counterfactual","Serve 8,000 tokens per turn. The uncited surplus × turns × input price is the saving."]],
+    who:{agent:"every agent on core-platform",op:"Marcus Bell",opRole:"Workspace owner · owns the retrieval budget",opHref:"#/acme/core-platform/spend/operators/marcus-bell",agHref:"#/acme/core-platform/spend/agents",
+      note:"The workspace context budget was raised to 12,000 in July for a migration and never lowered. The retrieval kinds still include the migration's memory frames."},
+    runs:[["run_8a19c4d2","acme/platform#482 · Cut 4.11.0 release notes","3 Sep 09:16","4.87","0.42","11,900 tok served · 2,410 cited"],
+      ["run_8f3a2c91","acme/platform#482 · Witness: release notes contract","11 Sep 09:02","2.87","0.31","12,100 tok served · 2,880 cited"],
+      ["run_8c02d771","acme/platform#511 · Label: flaky worker restart","11 Sep 08:51","1.94","0.22","11,400 tok served · 1,960 cited"]]},
+  fnd_9c7c:{confidence:"high",trend:"nine periods, no change",basis:"control-plane audit",
+    signal:"budget used per period",measured:"18%–24% of $24,000",baseline:"a soft budget's notify thresholds at 50%, 80%, 100%",
+    counterfactual:"an $8,000 soft budget the thresholds can reach",
+    method:[["Measured","acme.core.stella-ci has used between 18% and 24% of its $24,000 monthly soft budget for nine consecutive periods."],
+      ["Thresholds idle","Notify thresholds sit at 50%, 80% and 100%. None has fired since January, so a real overrun would not be noticed until the hard cap."],
+      ["No money wasted","This finding moves no spend. It exists so the budget means something again."],
+      ["Counterfactual","Resize to $8,000. The 50% notice would have fired twice this year."]],
+    who:{agent:"acme.core.stella-ci",op:"Marcus Bell",opRole:"Workspace owner · set the budget",opHref:"#/acme/core-platform/spend/operators/marcus-bell",agHref:"#/acme/core-platform/spend/agents/stella-ci",
+      note:"Marcus set $24,000 in January from a projection that assumed the witness runs would be billed as model spend. They are reported, not priced."},
+    runs:[["Sep 2026 MTD","period · 21.7% of limit","—","5,203.88","0.00","no threshold reached"],
+      ["Aug 2026","period · 23.9% of limit","—","5,736.00","0.00","no threshold reached"],
+      ["Jul 2026","period · 18.2% of limit","—","4,368.00","0.00","no threshold reached"]]}
+};
+const FIX = {
+  "Cache misses after a stable prefix changed":{shape:"article",
+    title:"Why a mid-week steering publish empties the prompt cache",
+    why:"Every model call on a run starts with the same system block: the compiled steering bundle, then the tool definitions. Providers cache that prefix by content hash. Publish a steering record and the bundle hash changes, so every live conversation pays full input price on its next call and again until the new prefix is warm. str_release_gate went further: it put a volatile clause, the release window, inside the cached prefix, so the hash changes every time the window does.",
+    before:{lang:"toml",code:`<span class="c"># .oxagen/rules/str_release_gate.toml — as it stands</span>\n<span class="k">kind</span>      = <span class="s">"directive"</span>\n<span class="k">position</span>  = <span class="s">"system"</span>        <span class="c"># inside the cached prefix</span>\n<span class="k">statement</span> = <span class="s">"Release window is {{release.window}} — do not cut a release outside it."</span>`},
+    after:{lang:"toml",code:`<span class="c"># .oxagen/rules/str_release_gate.toml — volatile clause out of the prefix</span>\n<span class="k">kind</span>      = <span class="s">"directive"</span>\n<span class="k">position</span>  = <span class="s">"turn"</span>          <span class="c"># injected after the cached block</span>\n<span class="k">statement</span> = <span class="s">"Release window is {{release.window}} — do not cut a release outside it."</span>\n\n<span class="c"># .oxagen/workspace.toml</span>\n[<span class="k">context</span>]\n<span class="k">publish</span> = <span class="s">"windowed"</span>\n<span class="k">publish_windows</span> = [<span class="s">"00:00Z"</span>]`},
+    steps:["Move any clause with a template variable to the turn position. The cached prefix then stays byte-identical across publishes of that record.","Batch publications to a window so live runs finish on the old bundle and new runs start warm together.","The hit-rate chart on this tab shows the recovery the next day; the frames carry the prefix digest so you can confirm it."],
+    action:"Move the clause and set a publish window",done:"Context PR opened on acme/platform: str_release_gate moves to the turn position and publishes are windowed at 00:00Z."},
+  "Tool-list bloat":{shape:"article",
+    title:"Why a 41-tool belt costs you on every turn",
+    why:"Tool definitions are not free context. Every model call carries the JSON schema of every tool on the belt, and the model reads all of it before it reads the task. On acme.core.triage that block is 12,408 tokens, and 11 of the 41 granted tool versions have not been called in 500 runs. The agent was wrapped with each server's full export, which is the default when a wrap grants a server instead of a tool.",
+    before:{lang:"yaml",code:`<span class="c"># agents/triage/wrap.yaml — as it stands</span>\n<span class="k">grants</span>:\n  - <span class="k">server</span>: <span class="s">github</span>       <span class="c"># 18 tools · 16 called</span>\n  - <span class="k">server</span>: <span class="s">jira</span>         <span class="c"># 11 tools · 7 called</span>\n  - <span class="k">server</span>: <span class="s">pagerduty</span>    <span class="c"># 7 tools · 4 called</span>\n  - <span class="k">server</span>: <span class="s">s3</span>           <span class="c"># 5 tools · 3 called</span>`},
+    after:{lang:"yaml",code:`<span class="c"># agents/triage/wrap.yaml — grant the 30 tools the runs call</span>\n<span class="k">grants</span>:\n  - <span class="k">server</span>: <span class="s">github</span>\n    <span class="k">tools</span>: [<span class="s">issue.get</span>, <span class="s">issue.comment@1.2</span>, <span class="s">issue.labels.add</span>, …]\n  - <span class="k">server</span>: <span class="s">jira</span>\n    <span class="k">tools</span>: [<span class="s">issue.get</span>, <span class="s">issue.comment</span>, …]      <span class="c"># issue.transition@2.1 dropped</span>\n  - <span class="k">server</span>: <span class="s">pagerduty</span>\n    <span class="k">tools</span>: [<span class="s">incident.get</span>, <span class="s">incident.note</span>, …]  <span class="c"># incident.ack@1.4 dropped</span>\n<span class="k">belt</span>: <span class="s">searchable</span>                        <span class="c"># rare tools fetched on demand</span>`},
+    steps:["Grant tools, not servers. The belt is compiled from the grants, so the definition block shrinks to what is listed.","Set the belt to searchable if the agent sometimes needs a rare tool: it then sees a one-line index and fetches a definition on demand.","A tool a run calls without a grant is denied and recorded, so a narrowing that was too tight shows up as a policy.decision frame, not a silent failure."],
+    action:"Narrow the grants",done:"Draft wrap opened with the 30 called tool versions granted and the belt set to searchable. Publish it and the belt recompiles on the next run."},
+  "Cache writes never read":{shape:"article",
+    title:"Why cache writes on one-turn runs are a pure premium",
+    why:"A cache write costs 1.25× the input price and pays back only if a later call reads the prefix inside the TTL. 178 of docs-writer's runs this month were one turn long, and the agent's request builder marks the system block cacheable on every call. Each of those runs wrote an 88,412-token prefix that expired unread. The premium was the whole cost of the write.",
+    before:{lang:"python",code:`<span class="c"># agents/docs_writer/request.py — as it stands</span>\nsystem = [{<span class="s">"type"</span>: <span class="s">"text"</span>, <span class="s">"text"</span>: SYSTEM,\n           <span class="s">"cache_control"</span>: {<span class="s">"type"</span>: <span class="s">"ephemeral"</span>}}]   <span class="c"># on every call</span>`},
+    after:{lang:"python",code:`<span class="c"># agents/docs_writer/request.py — write the cache only when a read will follow</span>\ncacheable = run.expected_turns > 1 <span class="k">or</span> schedule.next_within(minutes=5)\nsystem = [{<span class="s">"type"</span>: <span class="s">"text"</span>, <span class="s">"text"</span>: SYSTEM,\n           **({<span class="s">"cache_control"</span>: {<span class="s">"type"</span>: <span class="s">"ephemeral"</span>}} <span class="k">if</span> cacheable <span class="k">else</span> {})}]`},
+    steps:["Write the cache when a read is likely: multi-turn runs, or a schedule that fires again inside the TTL.","Alternatively batch the one-turn runs: 178 runs five minutes apart would share one write and read it 177 times.","The gateway records cache_write and cache_read on every frame, so this tab shows the premium disappearing the next day."],
+    action:"Stop writing cache on one-turn runs",done:"Recorded on acme.core.docs-writer: cache writes only when a read is expected. Priya is notified as the operator."},
+  "Retry storms":{shape:"article",
+    title:"Why a throttled key pays four times for every turn",
+    why:"When a provider returns 529, the harness retries the turn. The default policy retries four times on the same key and the same region, with a short backoff, and every attempt is billed whether or not it succeeds. On 8 September Bedrock us-east-1 throttled pk_bdrk_7f2a for 29 minutes; nine turns each paid five attempts to get one answer. A key with a fallback route would have paid one attempt and moved.",
+    before:{lang:"toml",code:`<span class="c"># .oxagen/keys/pk_bdrk_7f2a.toml — as it stands</span>\n<span class="k">provider</span> = <span class="s">"aws-bedrock"</span>\n<span class="k">region</span>   = <span class="s">"us-east-1"</span>\n<span class="c"># retry: inherited — harness default is 4 attempts, same route</span>`},
+    after:{lang:"toml",code:`<span class="c"># .oxagen/keys/pk_bdrk_7f2a.toml — one attempt, then move</span>\n<span class="k">provider</span> = <span class="s">"aws-bedrock"</span>\n<span class="k">region</span>   = <span class="s">"us-east-1"</span>\n\n[<span class="k">retry</span>]\n<span class="k">max</span>        = <span class="s">1</span>\n<span class="k">on</span>         = [<span class="s">"429"</span>, <span class="s">"529"</span>]\n\n[[<span class="k">fallback</span>]]\n<span class="k">region</span>     = <span class="s">"us-west-2"</span>\n[[<span class="k">fallback</span>]]\n<span class="k">key</span>        = <span class="s">"pk_anth_direct_31c0"</span>`},
+    steps:["Set retry.max to one on the throttled route and give the key a fallback region, then a fallback key.","A fallback attempt carries a provider request id like any other, so it reconciles at level 1 instead of joining this key's open exception.","The key's health record on the Reconciliation tab shows the storm; after the change it shows the fallback firing instead."],
+    action:"Add a fallback route",done:"Fallback routes recorded on pk_bdrk_7f2a: us-west-2, then the direct key. Retries on this key are capped at one."},
+  "Duplicate tool calls":{shape:"pr",lineage:"ctx.ci.no-reread-window",kind:"directive",effect:"forbid",
+    statement:"Do not re-read services/ratelimit/window.ts within a run; the first read stays in context.",
+    pr:"acme/platform#523",branch:"context/ctx.ci.no-reread-window"},
+  "Unproductive tail":{shape:"article",
+    title:"Why this agent keeps stepping after the work is done",
+    why:"A custom agent loop that runs until the model says it is finished will, on most models, re-read what it just wrote, list the thread again, and ask itself whether it is done, several times over. None of that produces a side effect the run keeps. On acme.core.triage those tail steps average 2.1 model calls each, and 412 runs carried a mean of 9.4 of them after the last kept effect.",
+    before:{lang:"python",code:`<span class="c"># agents/triage/loop.py — as it stands</span>\n<span class="k">while</span> <span class="k">not</span> done:\n    step = agent.next_step(ctx)\n    ctx.apply(step)\n    done = step.kind == <span class="s">"final"</span>     <span class="c"># the model decides when to stop</span>`},
+    after:{lang:"python",code:`<span class="c"># agents/triage/loop.py — stop after four unproductive steps</span>\nidle = 0\n<span class="k">while</span> <span class="k">not</span> done:\n    step = agent.next_step(ctx)\n    effect = ctx.apply(step)\n    idle = 0 <span class="k">if</span> effect.kept <span class="k">else</span> idle + 1\n    done = step.kind == <span class="s">"final"</span> <span class="k">or</span> idle >= 4\n<span class="c"># effect.kept comes from the gateway: did the side effect survive to the sealed run?</span>`},
+    steps:["Count unproductive steps from the gateway's own signal: a step is productive when its side effect is kept in the sealed run.","Four idle steps is the workspace threshold; tune it on the agent, not globally.","The witness already confirms the labels are identical before and after the tail, so cutting it changes nothing the run keeps."],
+    action:"Set the stop rule",done:"Stop rule after four unproductive steps recorded as a definition change on acme.core.triage. The loop reads it from the bundle."},
+  "Wrong tier":{shape:"article",
+    title:"Why a flagship model is routing 41-token labels",
+    why:"docs-writer has a single model route, set when it was wrapped, and its classify step inherits the flagship model its writing step needs. Every label-and-route call therefore runs on claude-opus-5 for a mean output of 41 tokens. The light tier produced the same label on 84 of the 88 runs this month, at 8% of the price.",
+    before:{lang:"yaml",code:`<span class="c"># agents/docs_writer/agent.yaml — as it stands</span>\n<span class="k">model</span>:\n  <span class="k">route</span>: <span class="s">complex</span>          <span class="c"># claude-opus-5 for every step</span>`},
+    after:{lang:"yaml",code:`<span class="c"># agents/docs_writer/agent.yaml — route by step shape</span>\n<span class="k">model</span>:\n  <span class="k">route</span>: <span class="s">complex</span>\n  <span class="k">by_step</span>:\n    <span class="k">classify</span>: <span class="s">light</span>      <span class="c"># claude-haiku-4-5-20251001</span>\n    <span class="k">write</span>:    <span class="s">complex</span>\n  <span class="k">escalate_on</span>: <span class="s">disagreement</span>  <span class="c"># two light calls that differ go to complex</span>`},
+    steps:["Route the classify step to the light tier and keep the writing step where it is.","Keep escalation for the 4 in 88 that differed: escalate_on disagreement sends a second light call that disagrees with the first to the complex tier.","The route each call took is on its frame as model, so this tab shows the fix taking effect the same day."],
+    action:"Change the model route",done:"docs-writer's classify step now routes to the light tier. Recorded as a definition change; takes effect on the next run."},
+  "Context bloat":{shape:"article",
+    title:"Why serving 11,842 context tokens a turn costs more than it returns",
+    why:"Retrieval fills the context budget with the frames it ranks highest, and the model pays to read all of them. context_use_feedback records which served frames the model actually cited: 22.4% on core-platform this month. The budget was raised to 12,000 in July for a migration and never lowered, and the retrieval kinds still include that migration's memory frames.",
+    before:{lang:"toml",code:`<span class="c"># .oxagen/workspace.toml — as it stands</span>\n[<span class="k">context</span>]\n<span class="k">budget_tokens</span> = <span class="s">12000</span>      <span class="c"># raised in July for the migration</span>\n<span class="k">kinds</span> = [<span class="s">"fact"</span>, <span class="s">"memory"</span>, <span class="s">"steering"</span>, <span class="s">"migration"</span>]`},
+    after:{lang:"toml",code:`<span class="c"># .oxagen/workspace.toml — back to the norm, migration frames retired</span>\n[<span class="k">context</span>]\n<span class="k">budget_tokens</span> = <span class="s">8000</span>\n<span class="k">kinds</span> = [<span class="s">"fact"</span>, <span class="s">"memory"</span>, <span class="s">"steering"</span>]\n<span class="k">min_citation_rate</span> = <span class="s">0.35</span>   <span class="c"># retrieval tightens itself below this</span>`},
+    steps:["Lower the budget to the workspace norm; the cited frames fit inside it on 96% of turns.","Drop the migration kind from retrieval, or retire those frames with a Context PR.","Watch the citation rate on this tab: it should rise as the surplus disappears, and a fall means a kind was needed after all."],
+    action:"Lower the context budget",done:"Context budget set to 8,000 tokens and the migration kind removed from retrieval. Recorded as a workspace change."},
+  "Budget headroom":{shape:"budget"}
+};
+
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 
@@ -878,7 +1121,7 @@ function curPicker(){
 
 /* ==================== router ==================== */
 const ROUTES = {
-  spend:["findings","attribution","value","operators","agents","waterfall","reconciliation","budgets"]
+  spend:["findings","attribution","value","operators","agents","tools","waste","reconciliation","budgets"]
 };
 let STATE = "loaded";            // loaded | empty | loading | error | denied
 let ROUTE = {page:"spend",tab:"findings",sub:null};
@@ -910,7 +1153,7 @@ function crumbs(){
   out.push(`<span class="sep">/</span><span class="cur">${esc(t)}</span>`);
   if(r.page==="spend" && r.tab && r.tab!=="findings"){
     const lbl = {attribution:"Attribution",value:"Value",operators:"Operators",agents:"Agents",
-      waterfall:"Run waterfall",reconciliation:"Reconciliation",budgets:"Budgets"}[r.tab];
+      tools:"By tool",waste:"Wasted spend",reconciliation:"Reconciliation",budgets:"Budgets"}[r.tab];
     out.push(`<span class="sep">/</span><span class="cur hide-s">${esc(lbl)}</span>`);
   }
   return out.join("");
@@ -1025,7 +1268,7 @@ function spendHeader(){
       </div>
       <div class="row g8 wrapr mla">
         ${curPicker()}
-        <button class="btn" data-dlg="statement"><svg viewBox="0 0 24 24"><path d="M12 3v12m0 0-4-4m4 4 4-4M4 19h16"/></svg>Export statement</button>
+        <button class="btn" data-dlg="report"><svg viewBox="0 0 24 24"><path d="M12 3v12m0 0-4-4m4 4 4-4M4 19h16"/></svg>Export report</button>
       </div>
     </div>
     ${fxBanner()}
@@ -1048,7 +1291,7 @@ function spendHeader(){
     </div>
     <nav class="tabs" aria-label="Spend views">${
       [["findings","Findings",DB.findings.length],["attribution","Attribution",null],["value","Value",null],
-       ["operators","Operators",2],["agents","Agents",4],["waterfall","Run waterfall",null],
+       ["operators","Operators",2],["agents","Agents",4],["tools","By tool",null],["waste","Wasted spend",DB.waste.runs.length],
        ["reconciliation","Reconciliation",1],["budgets","Budgets",DB.budgets.length]]
       .map(([k,l,c])=>`<a href="#/acme/core-platform/spend/${k}" ${ROUTE.tab===k?'aria-current="page"':""}>${l}${c!==null?`<span class="cnt">${c}</span>`:""}</a>`).join("")}
     </nav>
@@ -1057,52 +1300,49 @@ function spendHeader(){
 
 /* ==================== Spend › Findings ==================== */
 function viewFindings(){
-  const top3 = DB.findings.slice(0,3), t3 = sum(top3.map(f=>f.micros));
-  const max = Math.max(...DB.findings.map(f=>f.micros));
+  const F = DB.findings, priced = F.filter(f=>!f.noMoney);
+  const total = sum(priced.map(f=>f.micros)), top = Math.max(...priced.map(f=>f.micros));
+  const ops = new Set(priced.map(f=>(EV[f.id]||{who:{}}).who.op).filter(Boolean));
+  const conf = priced.reduce((a,f)=>{const e=EV[f.id]; if(e) a[e.confidence]=(a[e.confidence]||0)+1; return a;},{});
+  const ramp=[1,.82,.66,.52,.42,.34,.27,.22];
+  const strip = priced.map((f,i)=>`<i style="flex:${f.micros};opacity:${ramp[i%ramp.length]}" title="${esc(f.kind)} · ${money0(f.micros)}"></i>`).join("");
+  const legend = priced.map((f,i)=>`<span><i style="opacity:${ramp[i%ramp.length]}"></i>${esc(f.kind)} <span class="mono qq">${Math.round(f.micros/total*100)}%</span></span>`).join("");
   return `
   <div class="stack g16" style="margin-top:18px">
-    <div class="lead-band">
-      <div class="stack" style="min-width:0;flex:1">
-        <p class="eyebrow" style="margin-bottom:4px">Where to optimize</p>
-        <div class="row g12 wrapr" style="align-items:baseline">
-          <span class="lead-n">${money0(t3)}</span>
-          <span class="q" style="font-size:13.5px">a month, from the top three findings alone</span>
-        </div>
-        <p class="sub">Each finding names the level it applies to and the frames that prove it. Findings are written by the
-          findings job after every seal, ranked by money at stake.</p>
-      </div>
-      <button class="btn primary" data-find="fnd_9c41">Act on the top finding
-        <svg viewBox="0 0 24 24"><path d="M5 12h13m0 0-5-5m5 5-5 5"/></svg></button>
+    <div class="sv-hero">
+      <div><p class="eyebrow" style="margin-bottom:6px">Savings identified · ${esc(PERIOD.split(" · ")[0])}</p>
+        <div class="sv-amt">${money0(total)}</div>
+        <div class="sv-sub">${pct(total/DB.totals.spend)} of ${money0(DB.totals.spend)} spent this period · about ${money0(total*12)} a year at this run rate</div>
+        <div style="margin-top:14px"><button class="btn primary" data-fix="${priced[0].id}">Fix the top finding
+          <svg viewBox="0 0 24 24"><path d="M5 12h13m0 0-5-5m5 5-5 5"/></svg></button></div></div>
+      <div><div class="sv-strip" role="img" aria-label="Share of identified savings by finding">${strip}</div>
+        <div class="sv-legend">${legend}</div>
+        <div class="sv-facts"><span><b>${priced.length}</b> priced findings</span><span><b>${ops.size}</b> operators involved</span>
+          <span><b>${conf.high||0}</b> high confidence · <b>${conf.medium||0}</b> medium</span><span>every one opens to its evidence</span></div></div>
     </div>
 
-    <div class="panel">
-      <div class="panel-h">
-        <div class="stack"><h2>Findings, ranked by money at stake</h2>
-          <p class="sub">Estimated monthly saving from the frames each finding cites. Money at stake is an estimate and is labelled as one; the frames are the record.</p></div>
-      </div>
-      <div class="panel-b flush"><div class="tw"><table class="find-t">
-        <thead><tr><th class="rank">#</th><th>Finding</th><th>Level</th><th>Scope</th>
-          <th class="r">At stake / month</th><th class="r">Share</th><th class="r">Frames</th><th></th></tr></thead>
-        <tbody>${DB.findings.map((f,i)=>`
-          <tr class="clickable" data-find="${f.id}" tabindex="0" role="button" aria-label="Open finding ${esc(f.kind)}">
-            <td class="rank">${i+1}</td>
-            <td><div class="strong" style="color:var(--fg);font-weight:500">${esc(f.kind)}</div>
-                <div class="id">${f.id}</div></td>
-            <td>${chip(f.level,"neutral")}</td>
-            <td><span class="mono" style="font-size:11.5px;color:var(--body)">${esc(f.scope)}</span></td>
-            <td class="r"><span class="find-money">${f.noMoney?"—":money0(f.micros)}</span></td>
-            <td class="r" style="width:110px">${f.noMoney?'<span class="qq" style="font-size:11px">resize only</span>':barCell(f.micros,max,f.sev==="critical"?"gold":"")}</td>
-            <td class="r mono qq">${f.frames||"—"}</td>
-            <td class="r"><span class="qq">›</span></td>
-          </tr>`).join("")}</tbody>
-      </table></div></div>
-      <div class="panel-f">
-        <span>Total at stake <span class="mono" style="color:var(--fg)">${money0(DB.totals.atStake)}</span> per month</span>
-        <span class="qq">·</span>
-        <span>Workspace spend this period <span class="mono">${money0(DB.totals.spend)}</span></span>
-        <span class="mla qq">cost.findings · rewritten after every seal</span>
-      </div>
+    <div class="stack g10">${F.map((f,i)=>{
+      const e=EV[f.id]||{}, w=e.who||{};
+      const ini=(w.op||"").split(" ").map(s=>s[0]).join("");
+      return `<article class="fnd" data-sev="${f.sev}">
+        <div class="rank">${i+1}</div>
+        <div>
+          <div class="t"><b>${esc(f.kind)}</b>${chip(f.level,"neutral")}${e.confidence?chip(e.confidence+" confidence",e.confidence==="high"?"allowed":"approval"):""}</div>
+          <div class="who">${w.op?`<span class="av">${esc(ini)}</span><a data-href="${esc(w.opHref)}" href="${esc(w.opHref)}">${esc(w.op)}</a><span class="qq">·</span>`:""}
+            <span class="mono">${esc(w.agent||f.scope)}</span></div>
+          <p class="why">${f.tells}</p>
+          <div class="meta">evidence ${f.frames?f.frames+" cited":"—"}${e.basis?" · "+esc(e.basis):""}${e.trend?" · "+esc(e.trend):""}</div>
+        </div>
+        <div class="amt">
+          <div class="v">${f.noMoney?"—":money0(f.micros)}</div>
+          <div class="s">${f.noMoney?"no money moves · resize only":"at stake per month · "+Math.round(f.micros/total*100)+"% of identified"}</div>
+          ${f.noMoney?"":`<div class="bar"><i style="width:${Math.round(f.micros/top*100)}%"></i></div>`}
+          <div class="acts"><button class="btn sm" data-find="${f.id}">Evidence</button><button class="btn sm" data-fix="${f.id}">Fix</button></div>
+        </div>
+      </article>`;}).join("")}
     </div>
+    <div class="note">Each saving is measured minus counterfactual over the runs it cites, at the price each call actually paid. Nothing here is an opinion: Evidence opens the runs, the people and the arithmetic behind every number, and Fix opens the change that removes it.
+      <span class="qq mono" style="display:block;margin-top:6px;font-size:11px">cost.findings · rewritten after every seal · total at stake ${money0(DB.totals.atStake)} per month</span></div>
 
     <div class="split">
       <div class="panel"><div class="panel-h"><div class="stack">
@@ -1460,6 +1700,131 @@ function viewWaterfall(){
       The witness failed on <span class="mono">${esc(r.repo)}@main</span> and passed on <span class="mono">${esc(r.pr)}</span> for the same
       normalized command, in a runner this agent could never see or reach. The agent was told one word: pass. That flip is what makes
       ${money0(r.total)} of this run proven spend rather than unverified.</div>
+  </div>`;
+}
+
+/* ==================== Spend › By tool ==================== */
+/* A tool's spend is the tokens of the turn that issued the call plus the turn that read its result, attributed
+   per frame. A turn with no call lands on the last row, so the column sums to workspace spend. */
+DB.tools = [
+  {t:"harness.bash@2.1",      srv:"harness",   calls:8841, runs:1912, spend:M(6204.18), perCall:M(0.70), perRun:M(3.25),  note:"result bodies average 4.1k tokens; 31% of calls re-run the same command"},
+  {t:"(no tool call)",        srv:"model",     calls:null, runs:3318, spend:M(4283.12), perCall:null,    perRun:M(1.29),  note:"reasoning and reply turns; not attributable to a tool"},
+  {t:"graph.search@1",        srv:"oxagen",    calls:9204, runs:2806, spend:M(2118.40), perCall:M(0.23), perRun:M(0.75),  note:"cheapest call on the belt; prefix cache hit 94%"},
+  {t:"repo.read_file@2.3",    srv:"harness",   calls:4120, runs:1604, spend:M(1642.77), perCall:M(0.40), perRun:M(1.02),  note:"read twice inside one run in 312 runs — finding fnd_9c3f"},
+  {t:"aws_billing.get_cost_and_usage@1",srv:"aws-billing",calls:2306,runs:67,spend:M(1402.31),perCall:M(0.61),perRun:M(20.93),note:"pages a month of line items through the context window on every run"},
+  {t:"linear.update_issue@3", srv:"linear",    calls:2148, runs:1206, spend:M(988.06),  perCall:M(0.46), perRun:M(0.82),  note:"triage; the turn after the call is usually the reply"},
+  {t:"github.create_pull_request@3",srv:"github",calls:1054,runs:571, spend:M(811.20),  perCall:M(0.77), perRun:M(1.42),  note:"diff bodies are the cost; 12% of calls retried after a 422"},
+  {t:"snowflake.run_query@2", srv:"snowflake", calls:239,  runs:78,   spend:M(466.92),  perCall:M(1.95), perRun:M(5.99),  note:"result sets returned unpaged; the most expensive call per use"},
+  {t:"slack.post_message@2",  srv:"slack",     calls:774,  runs:512,  spend:M(348.10),  perCall:M(0.45), perRun:M(0.68),  note:"—"},
+  {t:"github.merge_pull_request@4",srv:"github",calls:47,  runs:47,   spend:M(142.56),  perCall:M(3.03), perRun:M(3.03),  note:"the full diff is re-read before every merge"}
+];
+function viewTools(){
+  const rows=DB.tools, tools=rows.filter(r=>r.perCall!==null), total=sum(rows.map(r=>r.spend));
+  const mxC=Math.max(...rows.map(r=>r.spend)), mxA=Math.max(...tools.map(r=>r.perCall)), mxR=Math.max(...tools.map(r=>r.perRun));
+  const bar=(label,v,mx,text,cls,col)=>`<div class="stack g6" style="min-width:0">
+      <div class="row g8" style="font-size:11.5px"><span class="mono q" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(label)}</span>
+        <span class="mla mono" style="color:var(--fg);white-space:nowrap">${text}</span></div>
+      <div class="bar ${cls||""}"><i style="width:${Math.max(1,Math.round(v/mx*100))}%${col?";background:"+col:""}"></i></div></div>`;
+  const cum=[...rows].sort((a,b)=>b.spend-a.spend).map(r=>bar(r.t,r.spend,mxC,`${money0(r.spend)} <span class="qq">· ${pct(r.spend/total,0)}</span>`,"gold",r.perCall===null?"var(--st-neutral)":null)).join("");
+  const avg=[...tools].sort((a,b)=>b.perCall-a.perCall).map(r=>bar(r.t,r.perCall,mxA,`${money0(r.perCall)} <span class="qq">per call</span>`,"proven")).join("");
+  const run=[...tools].sort((a,b)=>b.perRun-a.perRun).map(r=>bar(r.t,r.perRun,mxR,`${money0(r.perRun)} <span class="qq">per run</span>`,"",`var(--st-approval)`)).join("");
+  return `
+  <div class="stack g16" style="margin-top:18px">
+    <div class="split">
+      <div class="panel"><div class="panel-h"><div class="stack"><h2>Cumulative · ${PERIOD}</h2><p class="sub">share of ${money0(total)}</p></div></div>
+        <div class="panel-b stack g12">${cum}</div></div>
+      <div class="panel"><div class="panel-h"><div class="stack"><h2>Average per call</h2><p class="sub">spend ÷ calls</p></div></div>
+        <div class="panel-b stack g12">${avg}</div></div>
+      <div class="panel"><div class="panel-h"><div class="stack"><h2>Average per run that used it</h2><p class="sub">spend ÷ runs</p></div></div>
+        <div class="panel-b stack g12">${run}</div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-h"><div class="stack"><h2>By tool</h2><p class="sub">attributed per frame · ${basis("gateway_observed")}</p></div></div>
+      <div class="panel-b flush"><div class="tw"><table>
+        <thead><tr><th>Tool</th><th>Server</th><th class="r">Calls</th><th class="r">Runs</th><th class="r">Cumulative</th><th class="r">Share</th><th class="r">Avg per call</th><th class="r">Avg per run</th><th>What the frames say</th></tr></thead>
+        <tbody>${rows.map(r=>{const hot=r.perCall!==null&&(r.perCall>=M(1.5)||r.perRun>=M(10));return `<tr>
+          <td class="mono strong" style="font-size:12px">${esc(r.t)}</td><td class="mono qq" style="font-size:11px">${esc(r.srv)}</td>
+          <td class="r mono qq">${r.calls===null?"—":int(r.calls)}</td><td class="r mono qq">${int(r.runs)}</td>
+          <td class="money">${money0(r.spend)}</td><td class="r mono qq">${pct(r.spend/total,0)}</td>
+          <td class="money">${r.perCall===null?'<span class="qq">—</span>':money0(r.perCall)}</td>
+          <td class="money"${hot?' style="color:var(--st-approval);font-weight:600"':""}>${money0(r.perRun)}</td>
+          <td class="q" style="font-size:12px;min-width:220px">${esc(r.note)}</td></tr>`;}).join("")}</tbody>
+      </table></div></div>
+      <div class="panel-f"><span class="q">A tool's spend is the turn that called it plus the turn that read its result, so a cheap-to-price tool with a large result body is an expensive tool. Registry prices are billed at zero here; this is what the model paid to use them.</span></div>
+    </div>
+  </div>`;
+}
+
+/* ==================== Spend › Wasted spend ==================== */
+/* Wasted is narrower than unproven: the frames show the tokens bought nothing. Every cause is a frame pattern. */
+DB.waste = {
+  total:M(4730.42), share:0.257, runsHit:412,
+  causes:[
+    {c:"unproven outcome",spend:M(2318.90),runs:141,why:"verdict failing, tampered or unsatisfied — the run ended and the task did not move"},
+    {c:"cache misses",spend:M(1204.35),runs:212,why:"system-context digest changed mid-conversation; every later turn re-read the prefix at full price"},
+    {c:"retry loops",spend:M(612.08),runs:38,why:"the same tool call repeated three or more times with the same arguments"},
+    {c:"context bloat",spend:M(412.77),runs:97,why:"tool list or tool results larger than the turn used; the belt was recomputed mid-run"},
+    {c:"idle while parked",spend:M(96.14),runs:19,why:"turns spent re-checking an approval that had not arrived"},
+    {c:"halted early",spend:M(86.18),runs:37,why:"a policy deny at turn 1 after the prompt was already paid for"}
+  ],
+  runs:[
+    {id:"run_9b02e7f1",agent:"acme.core.release-manager",op:"Marcus Bell",when:"2026-09-10 07:02Z",task:"Release 4.10.2 notes",cost:M(5.08),wasted:M(5.08),frames:203,steps:47,cache:0.74,model:"claude-opus-5",
+     badges:[["tampered","critical"],["no proof","failed"],["47 steps, 0 advanced","approval"]],
+     what:"Evidence chain broke at frame 00171: an evidence-ledger row was rewritten after seal. Nothing this run produced can be trusted, so the whole cost is unproven."},
+    {id:"run_6d4c11aa",agent:"acme.core.release-manager",op:"Marcus Bell",when:"2026-09-10 07:58Z",task:"Backport 4.10.3 to release",cost:M(3.42),wasted:M(2.10),frames:141,steps:33,cache:0.80,model:"claude-opus-5",
+     badges:[["verdict failing","failed"],["retry loop ×3","denied"]],
+     what:"Turns 4–6 repeated github.create_pull_request@3 with identical arguments after a 422; the backport never landed."},
+    {id:"run_8a19c4d2",agent:"acme.core.release-manager",op:"Marcus Bell",when:"2026-09-03 09:16Z",task:"Cut 4.9.4 release notes",cost:M(4.91),wasted:M(1.83),frames:186,steps:41,cache:0.31,model:"claude-opus-5",
+     badges:[["cache miss after prefix change","approval"],["finding fnd_9c41","neutral"]],
+     what:"Frames 00041 and 00042 are consecutive turns with an identical conversation prefix and a different system-context digest. Every turn after the steering publish re-read the prefix at full price."},
+    {id:"run_8f3a2c91",agent:"acme.core.stella-ci",op:"Marcus Bell",when:"2026-09-09 14:02Z",task:"Ratelimit window regression under burst",cost:M(6.4218),wasted:M(0.88),frames:171,steps:41,cache:0.79,model:"claude-opus-5",
+     badges:[["duplicate tool call","denied"],["proven","proven"]],
+     what:"repo.read_file@2.3 was called on the same file twice at turn 4, 38 seconds apart, with the content already in context. The run is proven; the second read still bought nothing."},
+    {id:"run_5e77b0c3",agent:"acme.core.triage",op:"Marcus Bell",when:"2026-09-10 08:51Z",task:"Label: flaky worker restart",cost:M(0.94),wasted:M(0.53),frames:38,steps:9,cache:0.64,model:"claude-haiku-4-5",
+     badges:[["unmoved","failed"],["productive ratio 0.44","approval"],["client_attested","neutral"]],
+     what:"Triage labelled the issue but the witness found the label already present. Five of nine steps changed nothing."},
+    {id:"run_7c12d0a4",agent:"acme.core.docs-writer",op:"Priya Natarajan",when:"2026-09-10 08:40Z",task:"Operator guide: kill switches",cost:M(1.36),wasted:M(0.38),frames:52,steps:11,cache:0.77,model:"claude-opus-5",
+     badges:[["idle while parked","approval"],["3 turns waiting","neutral"]],
+     what:"Paused by policy at frame 00094 pending approval. Three turns re-asked whether the approval had arrived; a wake-on-decision would have cost none."},
+    {id:"run_a3f0d9e2",agent:"acme.core.triage",op:"Marcus Bell",when:"2026-09-10 07:41Z",task:"Reproduce: checkout 500",cost:M(0.22),wasted:M(0.22),frames:14,steps:3,cache:0.12,model:"claude-haiku-4-5",
+     badges:[["halted turn 1","failed"],["cache 12%","approval"]],
+     what:"Policy denied the first tool call. The prompt, including a cold 14k-token context, was already paid for."}
+  ]
+};
+function viewWaste(){
+  const W=DB.waste, mx=Math.max(...W.causes.map(c=>c.spend));
+  return `
+  <div class="stack g16" style="margin-top:18px">
+    <div class="tiles">
+      <div class="tile"><span class="tile-k">Wasted · ${PERIOD}</span><span class="tile-v" style="color:var(--st-critical)">${money0(W.total)}</span><span class="tile-m">${basis("gateway_observed")}</span></div>
+      <div class="tile"><span class="tile-k">Share of spend</span><span class="tile-v">${pct(W.share,0)}</span><span class="tile-m">of ${money0(DB.totals.spend)} this period</span></div>
+      <div class="tile"><span class="tile-k">Runs with waste</span><span class="tile-v">${int(W.runsHit)}</span><span class="tile-m">of ${int(DB.totals.runs)} sealed runs</span></div>
+      <div class="tile"><span class="tile-k">Largest cause</span><span class="tile-v sm" style="font-family:inherit;font-weight:600">${esc(W.causes[0].c)}</span><span class="tile-m">${money0(W.causes[0].spend)} · ${W.causes[0].runs} runs</span></div>
+    </div>
+    <div class="panel">
+      <div class="panel-h"><div class="stack"><h2>By cause</h2><p class="sub">each cause is a frame pattern, not a guess</p></div></div>
+      <div class="panel-b stack g12">${W.causes.map(c=>`<div class="stack g6" style="min-width:0">
+        <div class="row g8" style="font-size:12px"><b style="color:var(--fg)">${esc(c.c)}</b><span class="mono qq" style="font-size:10.5px">${c.runs} runs</span>
+          <span class="mla mono" style="color:var(--fg)">${money0(c.spend)}</span></div>
+        <div class="meter crit"><i style="width:${Math.round(c.spend/mx*100)}%"></i></div>
+        <div class="q" style="font-size:11.5px">${esc(c.why)}</div></div>`).join("")}</div>
+    </div>
+    <div class="panel">
+      <div class="panel-h"><div class="stack"><h2>Runs that prove it</h2><p class="sub">worst first · badges name what was wrong</p></div></div>
+      <div class="panel-b stack g10">${W.runs.map(r=>{const frac=Math.min(1,r.wasted/r.cost), href="#/acme/core-platform/runs/"+r.id; return `
+        <div class="wrun">
+          <div class="t"><a class="mono" href="${href}" style="color:var(--accent-text)">${esc(r.id)}</a>
+            <span class="qq">${esc(r.agent)} · ${esc(r.op)} · ${esc(r.when)}</span>
+            <span class="mla mono" style="white-space:nowrap"><b style="color:var(--st-critical)">${money0(r.wasted)} wasted</b> <span class="qq">of ${money0(r.cost)}</span></span></div>
+          <div class="row g6 wrapr">${r.badges.map(b=>chip(b[0],b[1])).join("")}</div>
+          <div class="bar"><i style="width:${Math.round(frac*100)}%;background:var(--st-critical)"></i></div>
+          <p class="q" style="margin:0;font-size:12.5px"><b style="color:var(--fg)">${esc(r.task)}.</b> ${esc(r.what)}</p>
+          <div class="row g8 wrapr"><span class="mono qq" style="font-size:10.5px">${r.frames} frames · ${r.steps} steps · cache ${pct(r.cache,0)} · ${esc(r.model)}</span>
+            <button class="btn sm mla" data-href="${href}">Open the run</button>
+            <button class="btn sm" data-act="Frames opened">Show the frames</button></div>
+        </div>`;}).join("")}</div>
+      <div class="panel-f"><span class="q">Wasted is narrower than unproven. Unproven means no witness flipped; wasted means the frames show the tokens bought nothing — a repeated call, a cold prefix, a turn spent waiting, a chain that broke. Work accepted by a human is never counted here.</span></div>
+    </div>
   </div>`;
 }
 
@@ -1836,7 +2201,7 @@ function render(){
   else if(p==="billing"){ html = viewBilling()+billingRest(); }
   else {
     const body = {findings:viewFindings,attribution:viewAttribution,value:viewValue,
-      operators:viewOperators,agents:viewAgentSpend,waterfall:viewWaterfall,
+      operators:viewOperators,agents:viewAgentSpend,tools:viewTools,waste:viewWaste,
       reconciliation:viewRecon,budgets:viewBudgets}[ROUTE.tab]||viewFindings;
     html = spendHeader()+body();
   }
@@ -1868,51 +2233,141 @@ function closeAll(){
   lastFocus=null;
 }
 function openScrim(){ $("#scrim").dataset.open="1"; }
+function toast(msg){
+  let h=$("#toasts"); if(!h){ h=document.createElement("div"); h.id="toasts"; h.className="toasts"; h.setAttribute("role","status"); document.body.appendChild(h); }
+  const t=document.createElement("div"); t.className="toast"; t.innerHTML=`<span class="dot"></span><span>${esc(msg)}</span>`;
+  h.appendChild(t); setTimeout(()=>t.remove(),4200);
+}
 
-/* --- finding drawer --- */
+/* --- evidence drawer: the proof behind a finding, the people involved, and recent runs where the money went --- */
 function openFinding(id){
   const f=DB.findings.find(x=>x.id===id); if(!f) return;
-  lastFocus=document.activeElement;
+  const e=EV[f.id]; lastFocus=document.activeElement;
   const d=$("#drawer");
+  const w=e?e.who:{agent:f.scope}, ini=(w.op||"").split(" ").map(s=>s[0]).join("");
+  const runs=e?e.runs:[], wasted=sum(runs.map(r=>+r[4])), cost=sum(runs.map(r=>+r[3]));
+  const usd=n=>money0(M(+n));
   d.innerHTML=`
     <div class="drawer-h">
       <div class="stack" style="min-width:0">
-        <p class="eyebrow" style="margin-bottom:5px">Finding · ${esc(f.level)}</p>
+        <p class="eyebrow" style="margin-bottom:5px">Evidence · ${esc(f.level)}</p>
         <h2 id="drawerTitle">${esc(f.kind)}</h2>
-        <p class="sub"><span class="mono">${f.id}</span> · scope <span class="mono">${esc(f.scope)}</span></p>
+        <p class="sub"><span class="mono">${f.id}</span> · scope <span class="mono">${esc(f.scope)}</span>${e?` · basis <span class="mono">${esc(e.basis)}</span>`:""}</p>
       </div>
       <button class="xbtn mla" data-close aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     </div>
     <div class="drawer-b">
       <div class="tiles" style="grid-template-columns:1fr 1fr">
         <div class="tile"><span class="tile-k">At stake</span>
-          <span class="tile-v sm" style="color:${f.noMoney?"var(--muted)":"var(--accent-text)"}">${f.noMoney?"—":money0(f.micros)}</span>
-          <span class="tile-m">per month</span></div>
-        <div class="tile"><span class="tile-k">Exact</span>
-          <span class="tile-v sm" style="font-size:14px">${int(+f.exact)}</span>
-          <span class="tile-m">micro-USD, from the frames cited</span></div>
+          <span class="tile-v sm" style="color:${f.noMoney?"var(--muted)":"var(--fg)"}">${f.noMoney?"—":money0(f.micros)}</span>
+          <span class="tile-m">${f.noMoney?"no money moves":"per month · measured minus counterfactual"}</span></div>
+        <div class="tile"><span class="tile-k">Confidence</span>
+          <span class="tile-v sm" style="font-family:var(--font);text-transform:capitalize">${e?esc(e.confidence):"—"}</span>
+          <span class="tile-m">${e?esc(e.trend):""}</span></div>
+        <div class="tile"><span class="tile-k">Signal</span>
+          <span class="tile-v sm" style="font-size:13px">${e?esc(e.measured):"—"}</span>
+          <span class="tile-m">${e?esc(e.signal)+" · baseline "+esc(e.baseline):""}</span></div>
+        <div class="tile"><span class="tile-k">Evidence</span>
+          <span class="tile-v sm" style="font-size:13px">${f.frames?f.frames+" cited":"—"}</span>
+          <span class="tile-m">exact ${int(+f.exact)} micro-USD · every run sealed</span></div>
       </div>
-      <div class="stack g8"><h3>Detected from</h3><p class="q" style="font-size:12.5px">${esc(f.detect)}</p></div>
-      <div class="stack g8"><h3>What it tells the operator</h3><p class="q" style="font-size:12.5px">${f.tells}</p></div>
-      <div class="stack g8"><h3>The frames that prove it${f.frames?` <span class="qq mono" style="font-weight:400">${f.frames} cited</span>`:""}</h3>
-        <div class="panel"><div class="tw"><table>
-          <tbody>${f.evidence.map(e=>`<tr>
-            <td class="mono" style="font-size:11px;white-space:nowrap">${esc(e.f)}</td>
-            <td class="q" style="font-size:11.5px">${esc(e.note)}<div class="cellsub">${esc(e.run)}${e.turn!=="—"?" · turn "+e.turn:""}</div></td>
-            <td class="mono r" style="font-size:11px;white-space:nowrap;color:var(--fg)">${esc(e.d)}</td></tr>`).join("")}</tbody>
+      ${e?`
+      <div class="stack g8"><h3>${f.noMoney?"Recent periods":"Recent runs where money was wasted"}</h3>
+        <div class="panel" data-lt-skip><div class="tw"><table class="ev-runs">
+          <thead><tr><th>${f.noMoney?"Period":"Run"}</th><th>${f.noMoney?"Position":"Task"}</th><th>Started</th><th class="r">Cost</th><th class="r">Wasted</th><th>What was wasted</th></tr></thead>
+          <tbody>${runs.map(r=>`<tr ${f.noMoney?"":`class="clickable" data-href="#/acme/core-platform/run/${esc(r[0])}" tabindex="0" role="button"`}>
+            <td class="mono" style="font-size:11px;white-space:nowrap">${esc(r[0])}</td>
+            <td style="font-size:11.5px">${esc(r[1])}</td>
+            <td class="mono qq" style="font-size:10.5px;white-space:nowrap">${esc(r[2])}</td>
+            <td class="r mono" style="font-size:11.5px">${usd(r[3])}</td>
+            <td class="r mono" style="font-size:11.5px;color:var(--st-denied);font-weight:600">${usd(r[4])}</td>
+            <td class="qq" style="font-size:11px">${esc(r[5])}</td></tr>`).join("")}
+          <tr><td colspan="3" class="qq" style="font-size:11px">${runs.length} most recent${f.frames?" · "+f.frames+" cited in all":""}</td>
+            <td class="r mono" style="font-size:11.5px">${usd(cost.toFixed(2))}</td>
+            <td class="r mono" style="font-size:11.5px;color:var(--st-denied);font-weight:600">${usd(wasted.toFixed(2))}</td>
+            <td class="qq" style="font-size:11px">${cost?Math.round(wasted/cost*100)+"% of what these runs cost":""}</td></tr></tbody>
         </table></div></div>
-        <p class="qq" style="font-size:11px">Every explanation is a chain with links to frames, records and commits — not a summary.</p>
+        <p class="qq" style="font-size:11px">Every run above is a sealed record. Open one to read the frames the arithmetic came from.</p>
       </div>
+      <div class="stack g8"><h3>How we know</h3>
+        <ol class="ev-chain">${e.method.map(m=>`<li><span class="h">${esc(m[0])}</span><div>${esc(m[1])}</div></li>`).join("")}</ol>
+        <div class="note">Counterfactual: ${esc(e.counterfactual)}. The saving is the difference, priced at what each call paid.</div>
+      </div>
+      <div class="stack g8"><h3>Who is involved</h3>
+        <div class="stack g8">
+          <div class="ev-who"><span class="av">${esc(ini)}</span><div style="min-width:0">
+            <a data-href="${esc(w.opHref)}" href="${esc(w.opHref)}" style="font-weight:600;color:var(--fg)">${esc(w.op)}</a>
+            <div class="mono qq" style="font-size:11px">${esc(w.opRole)} · operator on every run above</div>
+            <div class="q" style="font-size:12px;margin-top:5px">${esc(w.note)}</div></div></div>
+          <div class="ev-who"><span class="av mono" style="border-radius:8px;font-size:10.5px">ag</span><div style="min-width:0">
+            <a data-href="${esc(w.agHref)}" href="${esc(w.agHref)}" class="mono" style="font-weight:600;color:var(--fg);font-size:12.5px">${esc(w.agent)}</a>
+            <div class="mono qq" style="font-size:11px">${esc((((DB.attr||{}).agent||{rows:[]}).rows.find(a=>a.n===w.agent)||{m:f.level+" level"}).m)}</div></div></div>
+        </div>
+      </div>`:`
+      <div class="stack g8"><h3>Detected from</h3><p class="q" style="font-size:12.5px">${esc(f.detect)}</p></div>
+      <div class="stack g8"><h3>What it tells the operator</h3><p class="q" style="font-size:12.5px">${f.tells}</p></div>`}
     </div>
     <div class="drawer-f">
-      ${f.actions.map(a=>`<button class="btn ${a.p?"":"ghost"}" data-act="${esc(a.t)}">${esc(a.t)}</button>`).join("")}
+      <button class="btn ghost" data-close>Close</button>
+      <button class="btn primary" data-fix="${f.id}">Fix</button>
     </div>`;
   d.hidden=false; requestAnimationFrame(()=>{d.dataset.open="1";openScrim();
     const b=d.querySelector("[data-close]"); if(b)b.focus();});
 }
 
+/* --- fix dialog: a Context PR or a help article, chosen by the finding kind --- */
+function fixSpec(id){
+  const f=DB.findings.find(x=>x.id===id)||DB.findings[0], x=FIX[f.kind], e=EV[f.id];
+  if(!x||x.shape==="budget") return DLG.budget();
+  const evLink=`<button class="linkbtn" data-find="${f.id}">${f.frames?f.frames+" frames cited":"the evidence"}</button>`;
+  if(x.shape==="pr"){
+    return {t:"Fix · Open a Context PR",wide:true,sub:`${f.kind} on ${f.scope} · ${money0(f.micros)} a month at stake`,
+      b:`<p class="eyebrow q" style="margin:0">Branch <span class="mono">${esc(x.branch)}</span> · one concern per PR · the agent reads this on its next run</p>
+        <pre class="code"><span class="c"># .oxagen/rules/${esc(x.lineage)}.toml</span>
+<span class="k">schema</span>       = <span class="s">"context-record/v0.1"</span>
+<span class="k">lineage_id</span>   = <span class="s">"${esc(x.lineage)}"</span>
+<span class="k">kind</span>         = <span class="s">"${esc(x.kind)}"</span>
+<span class="k">sharing_scope</span>= <span class="s">"workspace"</span>
+<span class="k">statement</span>    = <span class="s">"${esc(x.statement)}"</span>
+
+[<span class="k">steering</span>]
+<span class="k">strength</span> = <span class="s">"should"</span>
+
+[<span class="k">enforcement</span>]
+<span class="k">constraint_effect</span> = <span class="s">"${esc(x.effect)}"</span>
+<span class="k">blocking</span> = <span class="s">false</span>
+
+[<span class="k">evidence</span>]
+<span class="k">finding</span> = <span class="s">"${f.id}"</span>
+<span class="k">frames</span>  = <span class="s">"${f.frames} cited"</span>
+<span class="k">saving</span>  = <span class="s">"${money0(f.micros)} per month"</span></pre>
+        <div class="fix-two">
+          <div><p class="eyebrow q">Why a Context PR</p><p class="q" style="font-size:12.5px;margin:0">The waste is in how the agent behaves, not in its code: the brief says to confirm the window before asserting on it, so it re-reads the file. A steering record changes the behaviour without a deploy; it is reviewed like code, published on merge and delivered at the steering position of the next run. Supporting evidence: ${evLink}.</p></div>
+          <div><p class="eyebrow q">Checks that will run</p><div class="panel" data-lt-skip><div class="tw"><table>
+            <tbody>${["Schema","Lineage uniqueness","record_hash recomputation","Secret and PII scan","Conflict against active records","constraint_effect ∈ {require, forbid}"].map(c=>`<tr><td style="font-size:12px;padding:6px 10px">${esc(c)}</td><td class="r" style="padding:6px 10px">${chip("on push","neutral")}</td></tr>`).join("")}</tbody></table></div></div></div>
+        </div>
+        <div class="note">Merge is the publication. Until then the record steers nothing; after it, this tab shows the repeat reads disappearing on the next ${esc(f.scope)} run.</div>`,
+      foot:`<span class="q" style="font-size:12px;flex:1;min-width:24ch;align-self:center">Opens on <span class="mono">acme/platform</span> as ${esc(x.pr)} · team mode, a code-owner review is required.</span>
+        <button class="btn ghost" data-close>Cancel</button><button class="btn primary" data-close data-toast="Branch ${esc(x.branch)} pushed and ${esc(x.pr)} opened with ${f.id} as supporting evidence.">Open the pull request</button>`};
+  }
+  return {t:"Fix · "+x.title,wide:true,sub:`Help article · ${f.kind} · chosen by the finding kind`,
+    b:`<p class="eyebrow q" style="margin:0">Why this costs money</p><p class="q" style="font-size:13px;color:var(--body);margin:0">${esc(x.why)}</p>
+      <div class="fix-two"><div><div class="lab">What your agent does today · ${esc(x.before.lang)}</div><pre class="code">${x.before.code}</pre></div>
+        <div><div class="lab">The fix · ${esc(x.after.lang)}</div><pre class="code">${x.after.code}</pre></div></div>
+      <p class="eyebrow q" style="margin:0">How to apply it</p>
+      <ol class="ev-chain">${x.steps.map(s=>`<li><div>${esc(s)}</div></li>`).join("")}</ol>
+      <div class="tiles" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr))">
+        <div class="tile"><span class="tile-k">What you save</span><span class="tile-v sm">${money0(f.micros)}</span><span class="tile-m">per month on ${esc(f.scope)}</span></div>
+        <div class="tile"><span class="tile-k">Evidence</span><span class="tile-v sm" style="font-size:13px;font-family:var(--font)">${evLink}</span><span class="tile-m">${e?esc(e.confidence)+" confidence":""}</span></div>
+        <div class="tile"><span class="tile-k">Where the fix lives</span><span class="tile-v sm" style="font-size:13px;font-family:var(--font)">${f.level==="workspace"?"workspace config":"the agent's own code"}</span><span class="tile-m">Oxagen cannot change it for you; it can show you exactly where</span></div>
+      </div>`,
+    foot:`<span class="q" style="font-size:12px;flex:1;min-width:24ch;align-self:center">Oxagen records the change as a definition change when you apply it, so the saving is attributable on this tab.</span>
+      <button class="btn ghost" data-close>Close</button><button class="btn primary" data-close data-toast="${esc(x.done)}">${esc(x.action)}</button>`};
+}
+
 /* --- dialogs --- */
 const DLG = {
+  fix:(id)=>fixSpec(id),
   budget:()=>({t:"Set budget",b:`
     <p class="lede">Budgets live per organization, workspace, operator or agent, with a period and a hard or soft mode.</p>
     <dl class="kv">
@@ -1924,6 +2379,22 @@ const DLG = {
     </dl>
     <div class="note"><b>Changing a budget is a governed action.</b> It passes IAM, writes an audit record, and bills as one action.</div>`,
     ok:"Set budget"}),
+  report:()=>({t:"Export a spend report",b:`
+    <p class="lede">Everything on this page for the timeframe you pick — by operator, agent, tool, wasted spend, reconciliation and budgets — as CSV and a signed PDF, sent to <span class="mono">marcus@acme.example</span>.</p>
+    <div class="fld"><label for="rep-range">Timeframe</label>
+      <select id="rep-range" aria-label="Timeframe">
+        <option>This month · September 2026 (to date)</option><option>Last month · August 2026</option>
+        <option>Last 30 days</option><option>Last 90 days</option><option>Quarter to date · Q3 2026</option>
+        <option>Year to date · 2026</option><option>Custom range</option></select></div>
+    <div class="fld2">
+      <div class="fld"><label for="rep-from">From</label><input id="rep-from" type="date" value="2026-09-01"></div>
+      <div class="fld"><label for="rep-to">To</label><input id="rep-to" type="date" value="2026-09-11"></div></div>
+    <div class="fld"><label for="rep-inc">Include</label>
+      <select id="rep-inc" aria-label="Include"><option>Everything on this page</option><option>By operator and agent only</option>
+        <option>By tool only</option><option>Wasted spend only</option><option>Reconciliation and budgets only</option></select></div>
+    <div class="note">Every figure carries its basis: <span class="mono">gateway_observed</span>, <span class="mono">client_attested</span>
+      or <span class="mono">estimated</span>. The report is built from frames, so a long range takes a few minutes.</div>`,
+    ok:"Generate report",gold:true,toast:"The report is being generated and will be sent to your email momentarily"}),
   statement:()=>({t:"Export statement",b:`
     <p class="lede">A monthly statement per workspace: spend by operator, agent, model, provider key and task; proven against unproven; reconciliation status.</p>
     <dl class="kv">
@@ -1990,11 +2461,12 @@ const DLG = {
 function openDlg(kind,arg){
   const spec = (DLG[kind]||DLG.plan)(arg); lastFocus=document.activeElement;
   const d=$("#dlg");
-  d.innerHTML=`<div class="dlg-h"><h2>${esc(spec.t)}</h2>
+  d.classList.toggle("wide",!!spec.wide);
+  d.innerHTML=`<div class="dlg-h"><div class="stack" style="min-width:0"><h2>${esc(spec.t)}</h2>${spec.sub?`<p class="sub">${esc(spec.sub)}</p>`:""}</div>
       <button class="xbtn mla" data-close aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
     <div class="dlg-b">${spec.b}</div>
-    <div class="dlg-f"><button class="btn ghost" data-close>Cancel</button>
-      <button class="btn ${spec.gold?"primary":""}" ${spec.disabled?"disabled":""} data-close>${esc(spec.ok)}</button></div>`;
+    <div class="dlg-f">${spec.foot||`<button class="btn ghost" data-close>Cancel</button>
+      <button class="btn ${spec.gold?"primary":""}" ${spec.disabled?"disabled":""} data-close${spec.toast?` data-toast="${esc(spec.toast)}"`:""}>${esc(spec.ok)}</button>`}</div>`;
   d.hidden=false; requestAnimationFrame(()=>{d.dataset.open="1";openScrim();
     const b=d.querySelector("[data-close]"); if(b)b.focus();});
 }
@@ -2055,7 +2527,8 @@ const CMDS=[
   {t:"Go to Spend · Value",h:"#/acme/core-platform/spend/value",g:"page"},
   {t:"Go to Spend · Operators",h:"#/acme/core-platform/spend/operators",g:"page"},
   {t:"Go to Spend · Agents",h:"#/acme/core-platform/spend/agents",g:"page"},
-  {t:"Go to Spend · Run waterfall",h:"#/acme/core-platform/spend/waterfall",g:"page"},
+  {t:"Go to Spend · By tool",h:"#/acme/core-platform/spend/tools",g:"page"},
+  {t:"Go to Spend · Wasted spend",h:"#/acme/core-platform/spend/waste",g:"page"},
   {t:"Go to Spend · Reconciliation",h:"#/acme/core-platform/spend/reconciliation",g:"page"},
   {t:"Go to Spend · Budgets",h:"#/acme/core-platform/spend/budgets",g:"page"},
   {t:"Go to Billing",h:"#/acme/billing",g:"page"},
@@ -2063,6 +2536,7 @@ const CMDS=[
   {t:"Open finding · Tool-list bloat",f:"fnd_9c3d",g:"finding"},
   {t:"Open finding · Cache writes never read",f:"fnd_9c52",g:"finding"},
   {t:"Set a budget",d:"budget",g:"action"},
+  {t:"Export a spend report",d:"report",g:"action"},
   {t:"Export the monthly statement",d:"statement",g:"action"},
   {t:"Resolve reconciliation exception rec_2f81",d:"resolve",g:"action"},
   {t:"Switch display currency to EUR",c:"EUR",g:"display"},
@@ -2097,9 +2571,10 @@ function runCmd(i){
 /* ==================== wiring ==================== */
 document.addEventListener("click",e=>{
   const t=e.target;
-  const close=t.closest("[data-close]"); if(close){ closeAll(); return; }
+  const close=t.closest("[data-close]"); if(close){ closeAll(); if(close.dataset.toast) toast(close.dataset.toast); return; }
   const cmd=t.closest("[data-cmd]"); if(cmd){ runCmd(cmd.dataset.cmd); return; }
-  const find=t.closest("[data-find]"); if(find){ e.preventDefault(); openFinding(find.dataset.find); return; }
+  const find=t.closest("[data-find]"); if(find){ e.preventDefault(); const dg=$("#dlg"); dg.dataset.open="0"; dg.hidden=true; openFinding(find.dataset.find); return; }
+  const fix=t.closest("[data-fix]"); if(fix){ e.preventDefault(); openDlg("fix",fix.dataset.fix); return; }
   const dlg=t.closest("[data-dlg]"); if(dlg){ e.preventDefault(); openDlg(dlg.dataset.dlg,dlg.dataset.inv); return; }
   const href=t.closest("[data-href]"); if(href){ go(href.dataset.href); return; }
   const dim=t.closest("[data-dim]"); if(dim){ ATTR_DIM=dim.dataset.dim; render(); return; }
@@ -2141,4 +2616,168 @@ $("#mgTheme").addEventListener("click",e=>{ const b=e.target.closest("button"); 
 if(!location.hash) location.replace("#/acme/core-platform/spend/findings");
 ROUTE=parseHash();
 render();
+</script>
+
+<!-- list-controls: search · sort · column filters · rows per page · pager -->
+<style>
+/* List controls: search, column filters, rows per page, sortable headers, pager.
+   Colors derive from the page's own text color so the block reads correctly in
+   every mockup theme; only the accent leans on --gold. */
+.lt{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:9px 12px;border-bottom:1px solid var(--border,color-mix(in srgb,currentColor 16%,transparent));font-family:inherit;font-size:12.5px}
+.lt.free{border:1px solid var(--border,color-mix(in srgb,currentColor 16%,transparent));border-radius:10px;margin-bottom:10px}
+.lt .lt-q{flex:1 1 200px;min-width:140px;background:color-mix(in srgb,currentColor 5%,transparent);border:1px solid var(--border,color-mix(in srgb,currentColor 16%,transparent));border-radius:8px;padding:6px 10px;font-size:12.5px;color:inherit;outline:none;font-family:inherit;transition:border-color .12s}
+.lt .lt-q:focus{border-color:var(--gold,#D6962C)}
+.lt .lt-q::placeholder{color:inherit;opacity:.5}
+.lt select{appearance:auto;background:color-mix(in srgb,currentColor 5%,transparent);border:1px solid var(--border,color-mix(in srgb,currentColor 16%,transparent));border-radius:8px;padding:5px 8px;font-size:12px;color:inherit;outline:none;font-family:inherit;max-width:220px;transition:border-color .12s}
+.lt select:focus{border-color:var(--gold,#D6962C)}
+.lt .lt-rows{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--muted,inherit);white-space:nowrap;margin-left:auto}
+.lp{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 12px;font-size:11.5px;color:var(--muted,inherit);font-family:inherit}
+.lp.free{border:1px solid var(--border,color-mix(in srgb,currentColor 16%,transparent));border-radius:10px;margin-top:10px}
+.lp .lp-n{font-family:var(--mono,ui-monospace,monospace);font-variant-numeric:tabular-nums;opacity:.85}
+.lp .lp-pg{margin-left:auto;display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+.lp .lp-b{border:1px solid var(--border,color-mix(in srgb,currentColor 16%,transparent));background:color-mix(in srgb,currentColor 5%,transparent);color:inherit;border-radius:7px;padding:2px 8px;min-width:28px;font-size:12px;font-family:inherit;cursor:pointer;font-variant-numeric:tabular-nums;line-height:1.5;transition:border-color .12s}
+.lp .lp-b:hover{border-color:color-mix(in srgb,currentColor 35%,transparent)}
+.lp .lp-b[aria-current="page"]{border-color:var(--gold,#D6962C);color:var(--gold,#D6962C)}
+.lp .lp-b:disabled{opacity:.4;cursor:default}
+.lp .lp-pg .el{padding:0 4px;opacity:.6}
+th.sortable{cursor:pointer;user-select:none}
+th.sortable::after{content:"↕";margin-left:5px;opacity:.35;font-size:10px}
+th.sortable[aria-sort="ascending"]::after{content:"↑";color:var(--gold,#D6962C);opacity:1}
+th.sortable[aria-sort="descending"]::after{content:"↓";color:var(--gold,#D6962C);opacity:1}
+.lt-empty td{opacity:.6;text-align:center;padding:18px}
+@media (max-width:520px){.lt .lt-q{flex-basis:100%}.lt .lt-rows{margin-left:0}}
+</style>
+<script>
+/* ============================== List controls ============================== */
+/* Self-contained: every table with a thead gets a search box, sortable column
+   headers, a filter select for each column that is a small enumeration, a
+   rows-per-page select and a pager. Installs itself through a DOM observer so
+   it works with any render path; state is keyed by page + column signature so
+   a full re-render lands back on the same page, sort and query. */
+(function(){
+"use strict";
+if(window.__ltInstalled)return; window.__ltInstalled=true;
+var STORE={}, PER=[5,10,25,50,0], BUSY=false, TIMER=null;
+var FACET=/status|state|tier|kind|role|risk|severity|result|health|effect|mode|side|level|verdict|decision|origin|scope|period|basis|algorithm|trend|position|governance|two-factor|sso|replay|grade|outcome/i;
+function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function num(s){
+  s=String(s==null?"":s).trim();
+  if(!s||/^\d{4}-\d{2}/.test(s))return null;
+  var c=s.replace(/[$,%×]/g,""), m=c.match(/^[-+]?\d*\.?\d+(?:e[-+]?\d+)?/i);
+  if(!m)return null;
+  var n=parseFloat(m[0]), u=c.slice(m[0].length).match(/^\s*([kKMB])(?![A-Za-z])/);
+  if(u){ if(u[1]==="k"||u[1]==="K")n*=1e3; else if(u[1]==="M")n*=1e6; else n*=1e9; }
+  return n;
+}
+function cmp(a,b,isNum,dir){
+  if(isNum){var x=a.n,y=b.n; if(x==null&&y==null)return 0; if(x==null)return 1; if(y==null)return -1; if(x!==y)return (x-y)*dir;}
+  return a.t.localeCompare(b.t,undefined,{numeric:true,sensitivity:"base"})*dir;
+}
+function el(html){var d=document.createElement("div");d.innerHTML=html;return d.firstChild;}
+function pageCtx(){var h1=document.querySelector("main h1, .page h1, h1"); return location.hash+"|"+(h1?h1.textContent.trim().slice(0,40):"");}
+function state(sig,ord){var key=pageCtx()+"|"+sig+"#"+ord; return STORE[key]||(STORE[key]={q:"",sort:null,dir:1,per:10,page:1,f:{}});}
+
+function pager(st,total,onPage){
+  var per=st.per||total||1, pages=Math.max(1,Math.ceil(total/per));
+  if(st.page>pages)st.page=pages; if(st.page<1)st.page=1;
+  var from=total?((st.page-1)*per+1):0, to=Math.min(total,st.page*per);
+  var html='<div class="lp"><span class="lp-n">'+(total?from+'–'+to+' of '+total:'0 of 0')+'</span><span class="lp-pg">'+
+   '<button type="button" class="lp-b" data-p="prev" aria-label="Previous page"'+(st.page<=1?' disabled':'')+'>‹</button>';
+  var nums=[]; if(pages<=7){for(var i=1;i<=pages;i++)nums.push(i);} else {
+    nums=[1]; var lo=Math.max(2,st.page-1), hi=Math.min(pages-1,st.page+1);
+    if(lo>2)nums.push("…"); for(var j=lo;j<=hi;j++)nums.push(j); if(hi<pages-1)nums.push("…"); nums.push(pages);}
+  nums.forEach(function(p){html+= p==="…"?'<span class="el">…</span>':'<button type="button" class="lp-b" data-p="'+p+'"'+(p===st.page?' aria-current="page"':'')+'>'+p+'</button>';});
+  html+='<button type="button" class="lp-b" data-p="next" aria-label="Next page"'+(st.page>=pages?' disabled':'')+'>›</button></span></div>';
+  var lp=el(html);
+  lp.addEventListener("click",function(e){var b=e.target.closest("button[data-p]"); if(!b||b.disabled)return; e.stopPropagation(); var p=b.getAttribute("data-p");
+    st.page = p==="prev"?st.page-1 : p==="next"?st.page+1 : +p; onPage();});
+  return lp;
+}
+function bar(st,opts,apply){
+  var html='<div class="lt"><input class="lt-q" type="search" placeholder="'+esc(opts.ph)+'" aria-label="'+esc(opts.ph)+'" value="'+esc(st.q)+'">';
+  (opts.filters||[]).forEach(function(f){
+    html+='<select class="lt-f" data-k="'+esc(f.key)+'" aria-label="Filter by '+esc(f.label)+'"><option value="">All · '+esc(f.label)+'</option>'+
+      f.values.map(function(v){return '<option value="'+esc(v)+'"'+(st.f[f.key]===v?' selected':'')+'>'+esc(v)+'</option>';}).join("")+'</select>';});
+  html+='<label class="lt-rows">Rows<select class="lt-per">'+PER.map(function(p){return '<option value="'+p+'"'+(st.per===p?' selected':'')+'>'+(p||"All")+'</option>';}).join("")+'</select></label></div>';
+  var b=el(html);
+  b.addEventListener("click",function(e){e.stopPropagation();});
+  b.querySelector(".lt-q").addEventListener("input",function(e){st.q=e.target.value;st.page=1;apply();});
+  b.querySelectorAll(".lt-f").forEach(function(s){s.addEventListener("change",function(e){st.f[s.getAttribute("data-k")]=e.target.value;st.page=1;apply();});});
+  b.querySelector(".lt-per").addEventListener("change",function(e){st.per=+e.target.value;st.page=1;apply();});
+  return b;
+}
+/* A column earns a filter when it is a small enumeration: 2–8 distinct short
+   values across at least 4 rows, and not unique per row. At most three per list. */
+function facets(cols,vals,rows){
+  if(rows<4)return [];
+  var c=cols.filter(function(col){ if(!col.name||col.num)return false;
+    var set={},n=0,ok=true; vals.forEach(function(v){var t=v[col.i].t; if(!t)return; if(t.length>28)ok=false; if(!set[t]){set[t]=1;n++;}});
+    if(!ok||n<2||n>8||n>=rows)return false; col.values=Object.keys(set).sort(); return true;});
+  c.sort(function(a,b){var pa=FACET.test(a.name)?0:1,pb=FACET.test(b.name)?0:1; return pa-pb||a.values.length-b.values.length;});
+  return c.slice(0,3).map(function(col){return {key:String(col.i),label:col.name,values:col.values};});
+}
+function sigOf(table){return [].slice.call(table.tHead.rows[0].cells).map(function(c){return c.textContent.trim();}).join("/");}
+function enhance(table,ord){
+  var tbody=table.tBodies[0], rows=[].slice.call(tbody.rows);
+  var ths=[].slice.call(table.tHead.rows[0].cells);
+  var cols=ths.map(function(th,i){return {i:i,name:th.textContent.trim(),num:th.classList.contains("num")};});
+  var st=state(sigOf(table),ord);
+  var vals=rows.map(function(r){return cols.map(function(c){var cell=r.cells[c.i]; var t=cell?cell.textContent.replace(/\s+/g," ").trim():""; return {t:t,n:num(t)};});});
+  cols.forEach(function(c){ if(c.num)return; var k=0,tot=0; vals.forEach(function(v){if(v[c.i].t){tot++; if(v[c.i].n!=null)k++;}}); if(tot&&k/tot>=.6)c.num=true; });
+  var texts=rows.map(function(r){return r.textContent.replace(/\s+/g," ").toLowerCase();});
+  var fs=facets(cols,vals,rows.length);
+  var wrap=table.parentNode, host=wrap.parentNode, ph="Search this list";
+  if(!host||wrap===document.body){wrap=table;host=table.parentNode;}
+  /* A lone search box sitting directly above the table becomes the list's search. */
+  var prev=wrap.previousElementSibling;
+  if(prev&&!prev.matches("table,thead,tbody")){
+    var ins=prev.querySelectorAll("input,select,button,a,textarea");
+    var inp=prev.matches("input")?prev:prev.querySelector("input[placeholder^='Search']");
+    if(inp&&inp.placeholder&&/^Search/.test(inp.placeholder)&&ins.length<=1&&!prev.textContent.trim()){ph=inp.placeholder;prev.remove();}
+  }
+  var free=!/panel|card|box/.test(host.className||"");
+  var b=bar(st,{ph:ph,filters:fs},apply), lp=document.createElement("div");
+  if(free)b.classList.add("free");
+  host.insertBefore(b,wrap); host.insertBefore(lp,wrap.nextSibling);
+  ths.forEach(function(th,i){ if(!cols[i].name)return; th.classList.add("sortable"); th.tabIndex=0; th.setAttribute("role","button");
+    function tog(e){ if(e)e.stopPropagation(); if(st.sort===i){ if(st.dir===1)st.dir=-1; else {st.sort=null;st.dir=1;} } else {st.sort=i;st.dir=1;} st.page=1; apply(); }
+    th.addEventListener("click",tog); th.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();tog(e);}}); });
+  function apply(){
+    ths.forEach(function(th,i){ if(!cols[i].name)return; th.setAttribute("aria-sort",st.sort===i?(st.dir===1?"ascending":"descending"):"none"); });
+    var q=st.q.trim().toLowerCase();
+    var idx=rows.map(function(_,i){return i;}).filter(function(i){
+      if(q&&texts[i].indexOf(q)<0)return false;
+      for(var k in st.f){ if(st.f[k]&&vals[i][+k]&&vals[i][+k].t!==st.f[k])return false; } return true; });
+    if(st.sort!=null&&cols[st.sort]){var c=cols[st.sort]; idx.sort(function(a,b){return cmp(vals[a][c.i],vals[b][c.i],c.num,st.dir)||(a-b);});}
+    var total=idx.length, per=st.per||total||1, pages=Math.max(1,Math.ceil(total/per)); if(st.page>pages)st.page=pages;
+    var slice=st.per?idx.slice((st.page-1)*st.per,st.page*st.per):idx;
+    BUSY=true;
+    while(tbody.firstChild)tbody.removeChild(tbody.firstChild);
+    if(!slice.length){var tr=document.createElement("tr"),td=document.createElement("td");tr.className="lt-empty";td.colSpan=cols.length;td.textContent="No rows match.";tr.appendChild(td);tbody.appendChild(tr);}
+    slice.forEach(function(i){tbody.appendChild(rows[i]);});
+    var nlp=pager(st,total,apply); lp.replaceWith(nlp); lp=nlp; if(free)lp.classList.add("free");
+    BUSY=false;
+  }
+  apply();
+}
+function run(){
+  BUSY=true;
+  try{
+    var ords={};
+    [].slice.call(document.querySelectorAll("table")).forEach(function(t){
+      if(!t.tHead||!t.tHead.rows[0]||!t.tBodies[0]||t.closest("[data-lt-skip]"))return;
+      if([].slice.call(t.tHead.rows[0].cells).some(function(c){return c.colSpan>1;}))return;
+      var sig=sigOf(t), ord=ords[sig]||0; ords[sig]=ord+1;
+      if(t.getAttribute("data-lt"))return;
+      t.setAttribute("data-lt","1"); enhance(t,ord);
+    });
+  } finally { BUSY=false; }
+}
+new MutationObserver(function(muts){
+  if(BUSY)return;
+  for(var i=0;i<muts.length;i++){ if(muts[i].addedNodes.length){ clearTimeout(TIMER); TIMER=setTimeout(run,0); return; } }
+}).observe(document.documentElement,{childList:true,subtree:true});
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",run); else run();
+window.listify=run;
+})();
 </script>
