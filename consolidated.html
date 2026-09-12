@@ -1,7 +1,14 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Oxagen Mission Control</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap">
+</head>
+<body>
 <style>
 /* ─── Tokens. Oxagen house brand. Light is the bare :root; dark overrides. ─── */
 :root{
@@ -58,6 +65,7 @@
 }
 
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 body{margin:0;background:var(--ink);color:var(--body);font-family:var(--sans);
   font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
 h1,h2,h3{margin:0;color:var(--fg);font-weight:600;text-wrap:balance}
@@ -1049,3 +1057,5 @@ addEventListener("keydown", e => {
 
 route();
 </script>
+</body>
+</html>
