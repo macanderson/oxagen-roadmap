@@ -587,6 +587,68 @@ body[data-phone="1"] .drawer{position:absolute; width:100%; border-left:0}
 @media (max-width: 640px){
   #chrome{right:8px; bottom:8px; width:calc(100% - 16px); max-width:280px}
 }
+
+/* ---------- tool grammar (shared with mc.html) ----------
+   Three orthogonal axes, three visual grammars, never mixed:
+     category = what the tool ACTS ON   → icon badge, one hue per category (never gold, never a state hue)
+     hazard   = how bad a wrong call is → risk mark (circle · diamond · triangle · filled triangle) + side-effect glyph
+     gate     = what the belt decided   → badge; a dashed border means a person still stands in the way */
+:root{--tg-ok:#57A97C;--tg-appr:#5B93D6;--tg-deny:#C66A4A;--tg-crit:#D6455E;
+  --tg-read:#6FB1DA;--tg-query:#5FBFB0;--tg-record:#E08BA6;--tg-message:#E39A6E;--tg-file:#9FBE62;--tg-exec:#B48EE0;--tg-vcs:#8A96E8;--tg-infra:#6E9E8F;--tg-access:#A3B1C6;--tg-finance:#C97AD0}
+@media(prefers-color-scheme:light){:root:not([data-theme="dark"]){--tg-ok:#2F7D52;--tg-appr:#2E6BA8;--tg-deny:#9B4526;--tg-crit:#AE2540;
+  --tg-read:#1E6F99;--tg-query:#1E7A6E;--tg-record:#A63F62;--tg-message:#A8532A;--tg-file:#5A7A1C;--tg-exec:#6A46B5;--tg-vcs:#4553B0;--tg-infra:#2F6656;--tg-access:#4F6075;--tg-finance:#8B3E96}}
+:root[data-theme="light"]{--tg-ok:#2F7D52;--tg-appr:#2E6BA8;--tg-deny:#9B4526;--tg-crit:#AE2540;
+  --tg-read:#1E6F99;--tg-query:#1E7A6E;--tg-record:#A63F62;--tg-message:#A8532A;--tg-file:#5A7A1C;--tg-exec:#6A46B5;--tg-vcs:#4553B0;--tg-infra:#2F6656;--tg-access:#4F6075;--tg-finance:#8B3E96}
+.tg-read{--tc:var(--tg-read)} .tg-query{--tc:var(--tg-query)} .tg-record{--tc:var(--tg-record)} .tg-message{--tc:var(--tg-message)} .tg-file{--tc:var(--tg-file)}
+.tg-exec{--tc:var(--tg-exec)} .tg-vcs{--tc:var(--tg-vcs)} .tg-infra{--tc:var(--tg-infra)} .tg-access{--tc:var(--tg-access)} .tg-finance{--tc:var(--tg-finance)}
+.tg{display:inline-grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:10px;align-items:center;min-width:0;max-width:100%;text-align:left;vertical-align:middle;font-family:var(--font,inherit)}
+.tg .i{grid-row:1/3;width:28px;height:28px;border-radius:8px;display:grid;place-items:center;color:var(--tc);background:color-mix(in srgb,var(--tc) 14%,transparent);border:1px solid color-mix(in srgb,var(--tc) 34%,transparent)}
+.tg .i svg{width:15px;height:15px}
+.tg .l{font-weight:600;font-size:13px;color:var(--fg,inherit);line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.tg .a{font-family:var(--mono,ui-monospace,monospace);font-size:11px;color:var(--muted,#9B958A);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.tg .a .v{color:var(--dim,#6E6A62)}
+table .tg:not(.sm){min-width:220px}
+.tg.sm{column-gap:8px}.tg.sm .i{width:22px;height:22px;border-radius:6px}.tg.sm .i svg{width:12px;height:12px}.tg.sm .l{font-size:12.5px}.tg.sm .a{font-size:10.5px}
+.tg.lg{column-gap:12px}.tg.lg .i{width:42px;height:42px;border-radius:11px}.tg.lg .i svg{width:21px;height:21px}.tg.lg .l{font-size:18px;letter-spacing:-.015em}.tg.lg .a{font-size:12px}
+.tg.api .l{font-family:var(--mono,ui-monospace,monospace);font-weight:500;font-size:12.5px}.tg.api .a{font-family:var(--font,inherit);font-weight:500}
+.tg.lg.api .l{font-size:15px}
+.tg-cat{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:2px 8px 2px 6px;border-radius:6px;border:1px solid;white-space:nowrap;line-height:1.5;color:var(--tc);border-color:color-mix(in srgb,var(--tc) 45%,transparent);background:color-mix(in srgb,var(--tc) 12%,transparent)}
+.tg-cat svg{width:12px;height:12px;flex:none}
+.tg-hz{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;white-space:nowrap;line-height:1.5;letter-spacing:.02em}
+.tg-hz svg{width:14px;height:14px;flex:none}
+.tg-hz+.tg-hz{margin-left:10px}
+.tg-hz.r-low{color:var(--muted,#9B958A)} .tg-hz.r-medium{color:var(--tg-appr)} .tg-hz.r-high{color:var(--tg-deny)} .tg-hz.r-critical{color:var(--tg-crit)}
+.tg-hz.e-read{color:var(--muted,#9B958A)} .tg-hz.e-write{color:var(--tg-appr)} .tg-hz.e-irreversible{color:var(--tg-deny)}
+.tg-gt{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;letter-spacing:.02em;padding:2px 8px 2px 6px;border-radius:6px;border:1px solid;white-space:nowrap;line-height:1.5}
+.tg-gt svg{width:12px;height:12px;flex:none}
+.tg-gt.g-allow{color:var(--tg-ok);border-color:color-mix(in srgb,var(--tg-ok) 42%,transparent);background:color-mix(in srgb,var(--tg-ok) 11%,transparent)}
+.tg-gt.g-require_approval,.tg-gt.g-mandate{color:var(--tg-appr);border-style:dashed;border-color:color-mix(in srgb,var(--tg-appr) 65%,transparent);background:color-mix(in srgb,var(--tg-appr) 11%,transparent)}
+.tg-gt.g-deny{color:var(--tg-deny);border-color:color-mix(in srgb,var(--tg-deny) 42%,transparent);background:color-mix(in srgb,var(--tg-deny) 11%,transparent)}
+.tg-gt.g-killed{color:var(--tg-crit);border-color:color-mix(in srgb,var(--tg-crit) 65%,transparent);background:color-mix(in srgb,var(--tg-crit) 14%,transparent)}
+tr.tg-row-critical>td:first-child{box-shadow:inset 3px 0 0 var(--tg-crit)}
+tr.tg-row-high>td:first-child{box-shadow:inset 3px 0 0 color-mix(in srgb,var(--tg-deny) 65%,transparent)}
+tr.tg-grp td{background:var(--hl,rgba(127,127,127,.08));padding-top:8px;padding-bottom:8px;border-bottom:1px solid var(--border,rgba(127,127,127,.25))}
+tr.tg-grp .i{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:6px;vertical-align:middle;margin-right:9px;color:var(--tc);background:color-mix(in srgb,var(--tc) 14%,transparent);border:1px solid color-mix(in srgb,var(--tc) 34%,transparent)}
+tr.tg-grp .i svg{width:12px;height:12px}
+tr.tg-grp b{font-size:12.5px;margin-right:9px;color:var(--fg,inherit)}
+tr.tg-grp .s{font-size:11.5px;color:var(--muted,#9B958A)}
+.tg-seg{display:inline-flex;gap:2px;padding:2px;border:1px solid var(--border,rgba(127,127,127,.25));border-radius:8px;background:var(--void,transparent)}
+.tg-seg button,.tg-chips button{font:inherit;font-size:12px;font-weight:500;color:var(--muted,#9B958A);background:transparent;border:1px solid transparent;border-radius:6px;padding:3px 9px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;line-height:1.5}
+.tg-chips button{border-color:var(--border,rgba(127,127,127,.25))}
+.tg-seg button[aria-pressed="true"],.tg-chips button[aria-pressed="true"]{background:var(--hl,rgba(127,127,127,.08));border-color:var(--rule,rgba(127,127,127,.4));color:var(--fg,inherit)}
+.tg-chips{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.tg-chips button svg{width:12px;height:12px;color:var(--tc)}
+.tg-chips button .n{color:var(--dim,#6E6A62);font-variant-numeric:tabular-nums}
+.tg-leg{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
+.tg-leg .c{display:grid;grid-template-columns:auto 1fr;gap:12px;padding:12px;border:1px solid var(--border,rgba(127,127,127,.25));border-left:3px solid var(--tc);border-radius:10px;background:var(--void,transparent);min-width:0}
+.tg-leg .i{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;color:var(--tc);background:color-mix(in srgb,var(--tc) 14%,transparent);border:1px solid color-mix(in srgb,var(--tc) 32%,transparent)}
+.tg-leg .i svg{width:17px;height:17px}
+.tg-leg .l{font-weight:600;font-size:13px;color:var(--fg,inherit)} .tg-leg .s{font-size:12px;color:var(--muted,#9B958A);margin-top:2px} .tg-leg .eg{font-family:var(--mono,ui-monospace,monospace);font-size:10.5px;color:var(--dim,#6E6A62);margin-top:6px;word-break:break-word}
+.tg-axes{display:grid;gap:8px;font-size:12px;margin-top:14px}
+.tg-axes>div{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.tg-axes .k{min-width:96px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted,#9B958A);font-weight:600}
+.tg-axes .note{font-size:11.5px;color:var(--dim,#6E6A62)}
+@media(max-width:520px){.tg-leg{grid-template-columns:1fr}}
 </style>
 
 <div id="frame"></div>
@@ -621,6 +683,125 @@ body[data-phone="1"] .drawer{position:absolute; width:100%; border-left:0}
   </div>
 </div>
 
+<script>
+/* ---------- Tool grammar (shared with mc.html) ----------
+   TG.cell(id,{sz:"sm"|"lg",sub})  label + API name in a category-hued tile; TG.names="api" leads with the API name
+   TG.cat(cat)                     category badge          TG.hazard(risk,effect)   risk mark + side-effect glyph
+   TG.gate(g,note)                 allow · require_approval · deny · killed · mandate
+   TG.legend()                     the ten categories with examples, plus the risk / effect / gate scales
+   TG.chips(counts,sel,pick,total) category filter chips; `pick` is an onclick with %s where the category goes
+   TG.seg(items)                   segmented control: [[label,pressed,onclick],…]
+   A category says what a tool ACTS ON; it is orthogonal to hazard (how bad a wrong call is) and gate (what the belt decided). */
+var TG=(function(){
+ function h(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+ var ORDER=["read","query","record","message","file","exec","vcs","infra","access","finance"];
+ var CAT={
+  read:{l:"Read-only",s:"Observes and returns. Changes nothing anywhere.",eg:"github__get_file_contents · slack__get_thread · search_graph",
+    i:'<path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"/><circle cx="12" cy="12" r="3"/>'},
+  query:{l:"Data query",s:"Bulk read from a store. Read-only, but the result set is the exfiltration and the cost.",eg:"snowflake__run_query · aws_billing__get_cost_and_usage",
+    i:'<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/>'},
+  record:{l:"Record write",s:"Creates or updates a record in a system of work. Reversible by another write.",eg:"linear__update_issue · calendar__create_event · notion__update_page",
+    i:'<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h8M8 17h5"/>'},
+  message:{l:"Messaging & authoring",s:"Speaks to people on the organization’s behalf. A sent message cannot be unsent.",eg:"slack__post_message · slack__upload_file · gmail__send_message",
+    i:'<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1.1-4.2A8 8 0 1 1 21 12z"/><path d="M8 11h8M8 14h5"/>'},
+  file:{l:"File mutation",s:"Writes, edits, moves or deletes files in a workspace or a drive.",eg:"write__file · edit__file · drive__trash_file",
+    i:'<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 15l2 2 4-4"/>'},
+  exec:{l:"Code execution",s:"Runs a command or a program. Its effect is whatever the sandbox allows.",eg:"claude_code__Bash · bash__run · sandbox__run_python",
+    i:'<path d="m4 17 6-5-6-5M12 19h8"/>'},
+  vcs:{l:"Source control",s:"Changes code history: branches, pull requests, merges, releases, repositories.",eg:"github__create_pull_request · github__merge_pull_request · github__delete_repository",
+    i:'<circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="8" r="2.5"/><path d="M6 8.5v7M18 10.5c0 4-12 2-12 6"/>'},
+  infra:{l:"Infrastructure",s:"Deploys, scales, pauses or reconfigures a running system.",eg:"vercel__deploy_to_vercel · vercel__pause_project · k8s__scale_deployment",
+    i:'<rect x="3" y="4" width="18" height="6" rx="1.5"/><rect x="3" y="14" width="18" height="6" rx="1.5"/><path d="M7 7h.01M7 17h.01"/>'},
+  access:{l:"Access & identity",s:"Grants, shares, rotates or revokes access. Widens what every later call can reach.",eg:"drive__share_file · iam__rotate_key · oxagen__grant_role",
+    i:'<circle cx="8" cy="12" r="4"/><path d="M12 12h9M18 12v3M15 12v2"/>'},
+  finance:{l:"Financial control",s:"Moves funds or commits spend. Never callable without a mandate.",eg:"stripe__create_payment · stripe__create_refund · aws_billing__purchase_savings_plan",
+    i:'<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01M18 12h.01"/>'}
+ };
+ var META={
+  github__create_pull_request:["Create pull request","vcs"], github__merge_pull_request:["Merge pull request","vcs"],
+  github__delete_repository:["Delete repository","vcs"], github__create_release:["Create release","vcs"], github__push_files:["Push files","vcs"],
+  github__get_file_contents:["Get file contents","read"], github__list_pull_requests:["List pull requests","read"], github__get_pull_request:["Get pull request","read"],
+  stripe__create_payment:["Create payment","finance"], stripe__create_refund:["Create refund","finance"], stripe__create_payout:["Create payout","finance"],
+  aws_billing__purchase_savings_plan:["Purchase savings plan","finance"], aws_billing__get_cost_and_usage:["Get cost and usage","query"],
+  linear__update_issue:["Update issue","record"], linear__get_issue:["Get issue","read"], linear__create_issue:["Create issue","record"],
+  slack__post_message:["Post message","message"], slack__upload_file:["Upload file","message"],
+  slack__list_channels:["List channels","read"], slack__get_thread:["Get thread","read"],
+  snowflake__run_query:["Run SQL query","query"], claude_code__Bash:["Run shell command","exec"], bash__run:["Run shell command","exec"],
+  write__file:["Write file","file"], edit__file:["Edit file","file"], read__file:["Read file","read"],
+  search_graph:["Search the graph","read"], recall_context:["Recall context","read"]
+ };
+ function parts(id){var s=String(id||""),i=s.lastIndexOf("@");return i>0?{n:s.slice(0,i),v:s.slice(i+1)}:{n:s,v:""};}
+ function meta(id){
+  var p=parts(id), m=META[p.n];
+  if(m) return {n:p.n,v:p.v,l:m[0],cat:m[1]};
+  var local=p.n.split("__").pop(), verb=local.split("_")[0].toLowerCase(), cat="record";
+  if(/^(get|list|search|read|fetch|find|recall|describe|show)$/.test(verb)) cat="read";
+  else if(/^(query|select|aggregate|export)$/.test(verb)) cat="query";
+  else if(/^(write|edit|move|copy|trash|mkdir)$/.test(verb)) cat="file";
+  else if(/^(bash|run|exec|execute|eval)$/.test(verb)) cat="exec";
+  else if(/^(post|send|reply|forward|publish|upload)$/.test(verb)) cat="message";
+  else if(/^(pay|refund|purchase|charge|transfer|buy|payout)$/.test(verb)) cat="finance";
+  else if(/^(deploy|scale|pause|restart|provision)$/.test(verb)) cat="infra";
+  else if(/^(grant|share|rotate|revoke|invite)$/.test(verb)) cat="access";
+  else if(/^(merge|rebase|tag|release|push|fork)$/.test(verb)) cat="vcs";
+  return {n:p.n,v:p.v,l:local.replace(/_/g," ").replace(/^./,function(c){return c.toUpperCase();}),cat:cat};
+ }
+ var SV='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
+ var SV2='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
+ function svg(c){var d=CAT[c]||CAT.record;return SV+d.i+'</svg>';}
+ function cat(c){var d=CAT[c]||CAT.record;return '<span class="tg-cat tg-'+h(c)+'" title="'+h(d.s)+'">'+svg(c)+h(d.l)+'</span>';}
+ function cell(id,o){
+  o=o||{}; var m=meta(id), api=TG.names==="api", d=CAT[m.cat];
+  var apiHtml=h(m.n)+(m.v?'<span class="v">@'+h(m.v)+'</span>':''), sub=o.sub?' · '+h(o.sub):'';
+  return '<span class="tg tg-'+m.cat+(o.sz?' '+o.sz:'')+(api?' api':'')+'" title="'+h(m.n+(m.v?'@'+m.v:''))+' — '+h(m.l)+' · '+h(d.l)+'">'+
+   '<span class="i">'+svg(m.cat)+'</span>'+
+   (api?'<span class="l">'+apiHtml+'</span><span class="a">'+h(m.l)+sub+'</span>'
+       :'<span class="l">'+h(m.l)+'</span><span class="a">'+apiHtml+sub+'</span>')+'</span>';
+ }
+ function riskSvg(r){
+  if(r==="critical") return SV2+'<path d="M12 3 2 20h20L12 3z" fill="currentColor"/><path d="M12 10v4M12 17.5v.5" style="stroke:var(--ink,#10100F)"/></svg>';
+  if(r==="high") return SV2+'<path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4M12 17.5v.5"/></svg>';
+  if(r==="medium") return SV2+'<path d="M12 3l9 9-9 9-9-9z"/><path d="M12 12h.01"/></svg>';
+  return SV2+'<circle cx="12" cy="12" r="8"/><path d="M12 12h.01"/></svg>';
+ }
+ function effSvg(e){
+  if(e==="irreversible") return SV2+'<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
+  if(e==="write") return SV2+'<path d="M4 20h4L18 10l-4-4L4 16z"/><path d="M12 8l4 4"/></svg>';
+  return SV2+'<circle cx="12" cy="12" r="8"/><path d="M8 12h8"/></svg>';
+ }
+ function hazard(r,e){
+  return '<span class="tg-hz r-'+h(r)+'" title="risk '+h(r)+'">'+riskSvg(r)+'<span>'+h(r)+'</span></span>'+
+   (e?'<span class="tg-hz e-'+h(e)+'" title="side effect '+h(e)+'">'+effSvg(e)+'<span>'+h(e)+'</span></span>':'');
+ }
+ var GL={allow:"allowed",require_approval:"needs approval",deny:"denied",killed:"kill switch",mandate:"mandate + approval"};
+ function gateSvg(g){
+  var s='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
+  if(g==="allow") return s+'<path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+  if(g==="require_approval") return s+'<path d="M12 3l8 3.5v5c0 4.6-3.2 8.6-8 9.5-4.8-.9-8-4.9-8-9.5v-5z"/><path d="M12 8v4l2.5 1.5"/></svg>';
+  if(g==="deny") return s+'<circle cx="12" cy="12" r="8.5"/><path d="M6 6l12 12"/></svg>';
+  if(g==="killed") return s+'<path d="M12 3v9"/><path d="M6.3 6.3a8 8 0 1 0 11.4 0"/></svg>';
+  if(g==="mandate") return s+'<path d="M12 3v18M16.5 7.5c0-1.7-2-3-4.5-3S7.5 5.8 7.5 7.5s2 2.7 4.5 3.3 4.5 1.6 4.5 3.5-2 3.2-4.5 3.2-4.5-1.3-4.5-3"/></svg>';
+  return s+'<path d="M5 12h14"/></svg>';
+ }
+ function gate(g,note){g=({allowed:"allow",approval:"require_approval",denied:"deny"})[g]||g;return '<span class="tg-gt g-'+h(g)+'"'+(note?' title="'+h(note)+'"':'')+'>'+gateSvg(g)+h(GL[g]||g)+'</span>';}
+ function seg(items){return '<span class="tg-seg" role="group">'+items.map(function(it){return '<button type="button" aria-pressed="'+(!!it[1])+'" onclick="'+h(it[2])+'">'+h(it[0])+'</button>';}).join("")+'</span>';}
+ function chips(counts,sel,pick,total){
+  var out='<button type="button" aria-pressed="'+(!sel)+'" onclick="'+h(pick.replace("%s",""))+'">All <span class="n">'+total+'</span></button>';
+  ORDER.forEach(function(c){ if(!counts[c])return;
+   out+='<button type="button" class="tg-'+c+'" aria-pressed="'+(sel===c)+'" title="'+h(CAT[c].s)+'" onclick="'+h(pick.replace("%s",c))+'">'+svg(c)+h(CAT[c].l)+'<span class="n">'+counts[c]+'</span></button>';});
+  return '<div class="tg-chips">'+out+'</div>';
+ }
+ function legend(){
+  return '<div class="tg-leg">'+ORDER.map(function(c){var d=CAT[c];
+    return '<div class="c tg-'+c+'"><div class="i">'+svg(c)+'</div><div style="min-width:0"><div class="l">'+h(d.l)+'</div><div class="s">'+h(d.s)+'</div><div class="eg">'+h(d.eg)+'</div></div></div>';}).join("")+'</div>'+
+   '<div class="tg-axes">'+
+   '<div><span class="k">Risk</span>'+hazard("low")+hazard("medium")+hazard("high")+hazard("critical")+'</div>'+
+   '<div><span class="k">Side effect</span><span class="tg-hz e-read">'+effSvg("read")+'<span>read</span></span><span class="tg-hz e-write">'+effSvg("write")+'<span>write</span></span><span class="tg-hz e-irreversible">'+effSvg("irreversible")+'<span>irreversible</span></span></div>'+
+   '<div><span class="k">Gate</span>'+gate("allow")+gate("require_approval")+gate("mandate")+gate("deny")+gate("killed")+'<span class="note">dashed = a person still stands in the way</span></div></div>';
+ }
+ return {names:"label",ORDER:ORDER,CAT:CAT,META:META,h:h,meta:meta,svg:svg,cat:cat,cell:cell,riskSvg:riskSvg,effSvg:effSvg,hazard:hazard,gate:gate,seg:seg,chips:chips,legend:legend};
+})();
+</script>
 <script>
 "use strict";
 /* =========================================================================
@@ -1865,6 +2046,14 @@ const FRAMES = [
   [10,"14:02:19.733","model.response","stop=tool_use · output=1,406 · reasoning=1,120 · cost $0.0631"],
   [11,"14:02:19.740","tool_requested","github__get_commit@2 · risk=low · side_effect=read"]
 ];
+/* A tool_requested frame leads with the tool itself: label, API name, hazard. */
+function fbody(f){
+  if(f[2]!=="tool_requested") return f[3];
+  const parts=String(f[3]).split(" · "), kv={}, rest=[];
+  parts.slice(1).forEach(p=>{const m=/^(\w+)=(.+)$/.exec(p); if(m) kv[m[1]]=m[2]; else rest.push(p);});
+  return '<span style="display:inline-flex;align-items:center;gap:10px;flex-wrap:wrap;vertical-align:middle">'+TG.cell(parts[0],{sz:"sm"})
+    +(kv.risk?TG.hazard(kv.risk,kv.side_effect):"")+(kv.egress?'<span class="cap">egress '+kv.egress+'</span>':"")+rest.join(" · ")+'</span>';
+}
 function vRun(){
   const crumbs = `<a href="#/acme">${D.org.name}</a><span class="sep">/</span>
     <a href="#/acme/core-platform">${D.ws.name}</a><span class="sep">/</span>
@@ -1946,9 +2135,9 @@ function vRun(){
         <header><h3>Frames</h3><span class="push cap">showing ${FRAMES.length+extra.length} of ${D.run.frames+extra.length}</span></header>
         <div class="frames">
           ${extra.map(f=>`<div class="frame-row new"><span class="sq">${f[0]}</span><span class="ts">${f[1]}</span>
-            <span class="kd">${f[2]}</span><span class="bd">${f[3]}</span></div>`).join("")}
+            <span class="kd">${f[2]}</span><span class="bd">${fbody(f)}</span></div>`).join("")}
           ${FRAMES.map(f=>`<div class="frame-row"><span class="sq">${f[0]}</span><span class="ts">${f[1]}</span>
-            <span class="kd">${f[2]}</span><span class="bd">${f[3]}</span></div>`).join("")}
+            <span class="kd">${f[2]}</span><span class="bd">${fbody(f)}</span></div>`).join("")}
         </div>
         <div class="pad-s" style="border-top:1px solid var(--border)">
           <p class="cap">Every frame is hash-chained to its predecessor and its body is a content-addressed encrypted blob.

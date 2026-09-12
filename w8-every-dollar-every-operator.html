@@ -1,0 +1,2144 @@
+<title>Every Dollar, Every Operator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap">
+<style>
+/* ============================================================
+   Oxagen house system — dark-first. Tokens: /tokens/house-tokens.css
+   Gold is identity and at most one primary action per screen.
+   It never encodes a state. State hues below are separate.
+   ============================================================ */
+:root{
+  --ink:#10100F; --void:#0A0A09; --panel:#181715; --panel-2:#1D1C19;
+  --hl:#201F1C; --border:#292722; --rule:#34322D;
+  --fg:#F2EEE5; --body:#DDD8CD; --muted:#9B958A; --dim:#6E6A62;
+  --gold:#D6962C; --gold-bright:#F1C364; --gold-deep:#8B5E1A; --accent-text:#D6962C;
+  --gold-wash:rgba(214,150,44,.12); --gold-edge:rgba(214,150,44,.34);
+
+  /* semantic state — separate from gold, never gold */
+  --st-allowed:#5BA97C;  --st-allowed-wash:rgba(91,169,124,.14);
+  --st-proven:#4FB3A3;   --st-proven-wash:rgba(79,179,163,.14);
+  --st-approval:#6E9BD6; --st-approval-wash:rgba(110,155,214,.14);
+  --st-denied:#C4646F;   --st-denied-wash:rgba(196,100,111,.14);
+  --st-failed:#CF6A3C;   --st-failed-wash:rgba(207,106,60,.14);
+  --st-critical:#E0483F; --st-critical-wash:rgba(224,72,63,.15);
+  --st-neutral:#8B857A;  --st-neutral-wash:rgba(139,133,122,.13);
+
+  --shadow:0 1px 0 rgba(255,255,255,.03),0 14px 36px rgba(0,0,0,.46);
+  --shadow-sm:0 1px 0 rgba(255,255,255,.02),0 4px 14px rgba(0,0,0,.34);
+  --focus:#F1C364;
+  --sans:"Space Grotesk","Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+  --r-lg:14px; --r-md:12px; --r-sm:10px; --r-xs:6px;
+  --sidebar:232px; --topbar:56px;
+}
+@media (prefers-color-scheme:light){ :root:not([data-theme="dark"]){
+  --ink:#F2EEE5; --void:#E9E3D8; --panel:#F8F5EE; --panel-2:#FBF9F4;
+  --hl:#EFEAE0; --border:#D8CDBD; --rule:#C9BFAE;
+  --fg:#10100F; --body:#2A2823; --muted:#6B665C; --dim:#8C877C;
+  --accent-text:#8B5E1A; --gold-wash:rgba(139,94,26,.10); --gold-edge:rgba(139,94,26,.30);
+  --st-allowed:#2F7A52;  --st-allowed-wash:rgba(47,122,82,.12);
+  --st-proven:#20776B;   --st-proven-wash:rgba(32,119,107,.12);
+  --st-approval:#2E5C96; --st-approval-wash:rgba(46,92,150,.12);
+  --st-denied:#9B2F41;   --st-denied-wash:rgba(155,47,65,.11);
+  --st-failed:#A34418;   --st-failed-wash:rgba(163,68,24,.11);
+  --st-critical:#B01A12; --st-critical-wash:rgba(176,26,18,.12);
+  --st-neutral:#6B665C;  --st-neutral-wash:rgba(107,102,92,.11);
+  --shadow:0 1px 0 rgba(255,255,255,.7),0 14px 36px rgba(16,16,15,.09);
+  --shadow-sm:0 1px 0 rgba(255,255,255,.6),0 3px 10px rgba(16,16,15,.07);
+  --focus:#8B5E1A;
+}}
+:root[data-theme="light"]{
+  --ink:#F2EEE5; --void:#E9E3D8; --panel:#F8F5EE; --panel-2:#FBF9F4;
+  --hl:#EFEAE0; --border:#D8CDBD; --rule:#C9BFAE;
+  --fg:#10100F; --body:#2A2823; --muted:#6B665C; --dim:#8C877C;
+  --accent-text:#8B5E1A; --gold-wash:rgba(139,94,26,.10); --gold-edge:rgba(139,94,26,.30);
+  --st-allowed:#2F7A52;  --st-allowed-wash:rgba(47,122,82,.12);
+  --st-proven:#20776B;   --st-proven-wash:rgba(32,119,107,.12);
+  --st-approval:#2E5C96; --st-approval-wash:rgba(46,92,150,.12);
+  --st-denied:#9B2F41;   --st-denied-wash:rgba(155,47,65,.11);
+  --st-failed:#A34418;   --st-failed-wash:rgba(163,68,24,.11);
+  --st-critical:#B01A12; --st-critical-wash:rgba(176,26,18,.12);
+  --st-neutral:#6B665C;  --st-neutral-wash:rgba(107,102,92,.11);
+  --shadow:0 1px 0 rgba(255,255,255,.7),0 14px 36px rgba(16,16,15,.09);
+  --shadow-sm:0 1px 0 rgba(255,255,255,.6),0 3px 10px rgba(16,16,15,.07);
+  --focus:#8B5E1A;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--ink);color:var(--fg);font-family:var(--sans);
+  font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased;
+  font-weight:400;overflow-x:hidden}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:4px}
+button,input,select{font-family:inherit;font-size:inherit;color:inherit}
+button{cursor:pointer;background:none;border:0;padding:0}
+a{color:var(--accent-text)}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important}}
+</style>
+<style>
+/* ---------- app shell ---------- */
+#app{display:grid;grid-template-columns:var(--sidebar) 1fr;min-height:100vh}
+#app[data-assistant="open"]{grid-template-columns:var(--sidebar) 1fr 348px}
+
+/* sidebar */
+.side{background:var(--void);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
+.side-brand{padding:16px 18px 14px;border-bottom:1px solid var(--border)}
+.ox-lockup{height:19px;width:auto;display:block;color:var(--fg)}
+.orgsw{margin:12px 12px 4px;position:relative}
+.sw{width:100%;display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:var(--r-sm);
+  border:1px solid var(--border);background:var(--panel);text-align:left;transition:border-color .15s}
+.sw:hover{border-color:var(--rule)}
+.sw-mark{width:22px;height:22px;border-radius:var(--r-xs);background:var(--hl);border:1px solid var(--border);
+  display:grid;place-items:center;font-size:11px;font-weight:700;letter-spacing:.02em;color:var(--accent-text);flex:none}
+.sw-txt{min-width:0;flex:1}
+.sw-k{font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--dim);font-weight:600;line-height:1.3}
+.sw-v{font-size:12.5px;font-weight:500;color:var(--fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.35}
+.sw-car{color:var(--dim);flex:none}
+.navsec{padding:14px 12px 4px}
+.navsec-h{font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);
+  font-weight:600;padding:0 10px 7px}
+.nav a{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:var(--r-sm);
+  color:var(--muted);text-decoration:none;font-size:13px;font-weight:500;position:relative;transition:background .12s,color .12s}
+.nav a:hover{background:var(--hl);color:var(--fg)}
+.nav a[aria-current="page"]{background:var(--gold-wash);color:var(--gold-bright);font-weight:600}
+:root[data-theme="light"] .nav a[aria-current="page"],
+:root:not([data-theme="dark"]) .nav a[aria-current="page"]{color:var(--gold-deep)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .nav a[aria-current="page"]{color:var(--gold-bright)}}
+.nav a[aria-current="page"]::before{content:"";position:absolute;left:-12px;top:8px;bottom:8px;width:2px;
+  background:var(--gold);border-radius:0 2px 2px 0}
+.nav svg{width:15px;height:15px;flex:none;stroke:currentColor;fill:none;stroke-width:1.6;
+  stroke-linecap:round;stroke-linejoin:round;opacity:.9}
+.nav .cnt{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--dim);font-variant-numeric:tabular-nums}
+.side-foot{margin-top:auto;padding:12px;border-top:1px solid var(--border)}
+.who{display:flex;align-items:center;gap:9px;width:100%;padding:7px 8px;border-radius:var(--r-sm);transition:background .12s}
+.who:hover{background:var(--hl)}
+.av{width:26px;height:26px;border-radius:50%;flex:none;display:grid;place-items:center;
+  font-size:10.5px;font-weight:600;background:var(--hl);border:1px solid var(--border);color:var(--body)}
+.who-t{min-width:0;text-align:left}
+.who-n{font-size:12.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.who-r{font-size:10.5px;color:var(--dim);line-height:1.3}
+
+/* main column + top bar */
+.main{min-width:0;display:flex;flex-direction:column;background:var(--ink)}
+.top{height:var(--topbar);flex:none;position:sticky;top:0;z-index:40;display:flex;align-items:center;
+  gap:14px;padding:0 22px;border-bottom:1px solid var(--border);
+  background:color-mix(in srgb,var(--ink) 90%,transparent);backdrop-filter:blur(12px)}
+.crumb{display:flex;align-items:center;gap:7px;font-size:12.5px;min-width:0;flex-wrap:wrap}
+.crumb a{color:var(--muted);text-decoration:none}
+.crumb a:hover{color:var(--fg)}
+.crumb .sep{color:var(--dim)}
+.crumb .cur{color:var(--fg);font-weight:600}
+.top-r{margin-left:auto;display:flex;align-items:center;gap:8px}
+.kbtn{display:flex;align-items:center;gap:8px;padding:5px 9px 5px 10px;border-radius:8px;
+  border:1px solid var(--border);background:var(--panel);color:var(--muted);font-size:12px;transition:border-color .15s,color .15s}
+.kbtn:hover{border-color:var(--rule);color:var(--fg)}
+kbd{font-family:var(--mono);font-size:10px;padding:1px 4px;border-radius:4px;background:var(--hl);
+  border:1px solid var(--border);color:var(--dim)}
+.ibtn{width:30px;height:30px;border-radius:8px;border:1px solid var(--border);background:var(--panel);
+  display:grid;place-items:center;color:var(--muted);transition:border-color .15s,color .15s}
+.ibtn:hover{border-color:var(--rule);color:var(--fg)}
+.ibtn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.ibtn[aria-pressed="true"]{border-color:var(--gold-edge);color:var(--accent-text);background:var(--gold-wash)}
+
+.canvas{flex:1;min-width:0;padding:22px 24px 72px;max-width:1320px;width:100%}
+</style>
+<style>
+/* ---------- typography + primitives ---------- */
+.eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-text);font-weight:600;margin:0 0 8px}
+.eyebrow.q{color:var(--dim)}
+h1{font-size:26px;line-height:1.12;letter-spacing:-.018em;font-weight:700;margin:0;text-wrap:balance}
+h2{font-size:16.5px;line-height:1.2;letter-spacing:-.01em;font-weight:600;margin:0;text-wrap:balance}
+h3{font-size:13.5px;font-weight:600;margin:0;letter-spacing:-.005em}
+p{margin:0;color:var(--body)}
+.lede{font-size:14.5px;color:var(--body);max-width:70ch;line-height:1.6}
+.q{color:var(--muted)}
+.qq{color:var(--dim)}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.id{font-family:var(--mono);font-size:11.5px;color:var(--muted)}
+.stack{display:flex;flex-direction:column}
+.row{display:flex;align-items:center}
+.wrapr{flex-wrap:wrap}
+.g6{gap:6px}.g8{gap:8px}.g10{gap:10px}.g12{gap:12px}.g14{gap:14px}.g16{gap:16px}.g20{gap:20px}.g24{gap:24px}
+.mla{margin-left:auto}
+
+/* panels */
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--r-lg)}
+.panel-h{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.panel-b{padding:16px}
+.panel-b.flush{padding:0}
+.panel-f{padding:11px 16px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  font-size:12px;color:var(--muted)}
+.sub{font-size:12px;color:var(--muted);margin-top:2px;max-width:76ch}
+
+/* chips */
+.chip{display:inline-flex;align-items:center;gap:5px;padding:2px 7px;border-radius:999px;font-size:10.5px;
+  font-weight:600;letter-spacing:.03em;border:1px solid var(--border);background:var(--hl);color:var(--muted);white-space:nowrap}
+.chip .dot{width:5px;height:5px;border-radius:50%;background:currentColor;flex:none}
+.chip.allowed{color:var(--st-allowed);background:var(--st-allowed-wash);border-color:color-mix(in srgb,var(--st-allowed) 34%,transparent)}
+.chip.proven{color:var(--st-proven);background:var(--st-proven-wash);border-color:color-mix(in srgb,var(--st-proven) 34%,transparent)}
+.chip.approval{color:var(--st-approval);background:var(--st-approval-wash);border-color:color-mix(in srgb,var(--st-approval) 34%,transparent)}
+.chip.denied{color:var(--st-denied);background:var(--st-denied-wash);border-color:color-mix(in srgb,var(--st-denied) 34%,transparent)}
+.chip.failed{color:var(--st-failed);background:var(--st-failed-wash);border-color:color-mix(in srgb,var(--st-failed) 34%,transparent)}
+.chip.critical{color:var(--st-critical);background:var(--st-critical-wash);border-color:color-mix(in srgb,var(--st-critical) 36%,transparent)}
+.chip.neutral{color:var(--st-neutral);background:var(--st-neutral-wash);border-color:color-mix(in srgb,var(--st-neutral) 30%,transparent)}
+.chip.mono{font-family:var(--mono);letter-spacing:0;font-weight:500}
+.basis{font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:.01em;white-space:nowrap}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:7px 13px;border-radius:9px;border:1px solid var(--border);
+  background:var(--panel-2);color:var(--body);font-size:12.5px;font-weight:500;transition:border-color .15s,color .15s,background .15s;white-space:nowrap}
+.btn:hover{border-color:var(--rule);color:var(--fg);background:var(--hl)}
+.btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.btn.sm{padding:4px 9px;font-size:11.5px;border-radius:7px}
+/* exactly one gold action per screen */
+.btn.primary{background:var(--gold);border-color:var(--gold);color:#10100F;font-weight:600}
+.btn.primary:hover{background:var(--gold-bright);border-color:var(--gold-bright);color:#10100F}
+.btn.ghost{background:none;border-color:transparent;color:var(--muted)}
+.btn.ghost:hover{background:var(--hl);color:var(--fg);border-color:var(--border)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+
+/* segmented control */
+.seg{display:inline-flex;gap:2px;padding:2px;border-radius:9px;border:1px solid var(--border);background:var(--void);flex-wrap:wrap}
+.seg button{padding:4px 10px;border-radius:7px;font-size:11.5px;font-weight:500;color:var(--muted);transition:background .12s,color .12s}
+.seg button:hover{color:var(--fg)}
+.seg button[aria-pressed="true"]{background:var(--panel);color:var(--fg);box-shadow:var(--shadow-sm)}
+
+/* tabs */
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs a{padding:9px 12px;font-size:12.5px;font-weight:500;color:var(--muted);text-decoration:none;
+  border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:color .12s}
+.tabs a:hover{color:var(--fg)}
+.tabs a[aria-current="page"]{color:var(--fg);font-weight:600;border-bottom-color:var(--gold)}
+.tabs .cnt{font-family:var(--mono);font-size:10.5px;color:var(--dim);margin-left:5px}
+</style>
+<style>
+/* ---------- tiles (the figures are the point of this page) ---------- */
+.tiles{display:grid;gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;
+  grid-template-columns:repeat(auto-fit,minmax(178px,1fr))}
+.tile{background:var(--panel);padding:13px 15px 14px;display:flex;flex-direction:column;gap:3px;min-width:0}
+.tile-k{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:600}
+.tile-v{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:21px;font-weight:500;
+  letter-spacing:-.025em;color:var(--fg);line-height:1.15}
+.tile-v.sm{font-size:18px}
+.tile-m{font-size:11.5px;color:var(--muted);display:flex;align-items:center;gap:6px;flex-wrap:wrap;min-height:17px}
+.delta{font-family:var(--mono);font-size:11px;font-weight:600}
+.delta.dn{color:var(--st-failed)}.delta.up{color:var(--st-allowed)}
+
+/* ---------- tables ---------- */
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{text-align:left;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--dim);
+  font-weight:600;padding:9px 12px;border-bottom:1px solid var(--border);white-space:nowrap;background:var(--panel)}
+td{padding:10px 12px;border-bottom:1px solid var(--border);color:var(--body);vertical-align:middle}
+tbody tr:last-child td{border-bottom:0}
+tfoot td{border-bottom:0;border-top:1px solid var(--rule);color:var(--fg);font-weight:500}
+tbody tr.clickable{cursor:pointer;transition:background .1s}
+tbody tr.clickable:hover{background:var(--hl)}
+td.r,th.r{text-align:right;font-variant-numeric:tabular-nums}
+td.money{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right;color:var(--fg);white-space:nowrap;letter-spacing:-.01em}
+td.strong{color:var(--fg);font-weight:500}
+.cellsub{font-size:11px;color:var(--dim);margin-top:1px}
+.rank{font-family:var(--mono);font-size:11px;color:var(--dim);width:1%}
+
+/* bar inside a table cell */
+.bar{height:6px;border-radius:3px;background:var(--hl);overflow:hidden;min-width:60px}
+.bar>i{display:block;height:100%;border-radius:3px;background:var(--st-approval)}
+.bar.gold>i{background:var(--gold)}
+.bar.proven>i{background:var(--st-proven)}
+
+/* meters (budgets) */
+.meter{height:8px;border-radius:4px;background:var(--hl);overflow:hidden;position:relative;border:1px solid var(--border)}
+.meter>i{display:block;height:100%;background:var(--st-approval);transition:width .3s}
+.meter.warn>i{background:var(--st-failed)}
+.meter.crit>i{background:var(--st-critical)}
+.meter .notch{position:absolute;top:-2px;bottom:-2px;width:1px;background:var(--rule)}
+
+/* stacked value bar */
+.stack-bar{display:flex;height:34px;border-radius:var(--r-sm);overflow:hidden;border:1px solid var(--border)}
+.stack-bar>span{display:grid;place-items:center;font-family:var(--mono);font-size:10.5px;font-weight:600;
+  color:#10100F;min-width:0;overflow:hidden;white-space:nowrap;padding:0 4px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:9px;height:9px;border-radius:3px;flex:none}
+
+/* charts */
+.chart{width:100%;display:block;overflow:visible}
+.chart text{font-family:var(--mono);font-size:9.5px;fill:var(--dim)}
+.chart .glabel{font-family:var(--sans);font-size:10.5px;font-weight:600;fill:var(--muted)}
+.chart .grid{stroke:var(--border);stroke-width:1}
+.chartwrap{overflow-x:auto;padding:4px 2px 0}
+
+/* note / callout */
+.note{border:1px solid var(--border);border-left:2px solid var(--st-approval);background:var(--hl);
+  border-radius:var(--r-sm);padding:11px 13px;font-size:12.5px;color:var(--body)}
+.note.gold{border-left-color:var(--gold)}
+.note.warn{border-left-color:var(--st-failed)}
+.note.ok{border-left-color:var(--st-allowed)}
+.note b{color:var(--fg);font-weight:600}
+
+/* kv list */
+.kv{display:grid;grid-template-columns:auto 1fr;gap:7px 16px;font-size:12.5px;align-items:baseline}
+.kv dt{color:var(--dim);font-size:11px;letter-spacing:.06em;text-transform:uppercase;font-weight:600;white-space:nowrap}
+.kv dd{margin:0;color:var(--body);min-width:0;overflow-wrap:anywhere}
+</style>
+<style>
+/* ---------- findings ---------- */
+.lead-band{display:flex;gap:20px;align-items:center;flex-wrap:wrap;padding:16px 18px;
+  border:1px solid var(--gold-edge);background:linear-gradient(100deg,var(--gold-wash),transparent 62%);
+  border-radius:var(--r-lg)}
+.lead-n{font-family:var(--mono);font-size:30px;font-weight:600;letter-spacing:-.03em;color:var(--fg);line-height:1}
+.find-t td:first-child{width:1%}
+.find-money{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:14px;font-weight:500;
+  color:var(--fg);letter-spacing:-.015em;white-space:nowrap}
+
+/* drawer */
+.scrim{position:fixed;inset:0;background:rgba(10,10,9,.62);backdrop-filter:blur(2px);z-index:80;
+  opacity:0;pointer-events:none;transition:opacity .2s}
+.scrim[data-open="1"]{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(560px,100%);background:var(--panel);
+  border-left:1px solid var(--border);z-index:81;display:flex;flex-direction:column;
+  transform:translateX(100%);transition:transform .24s cubic-bezier(.32,.72,0,1);box-shadow:var(--shadow)}
+.drawer[data-open="1"]{transform:none}
+.drawer-h{padding:16px 18px;border-bottom:1px solid var(--border);display:flex;gap:12px;align-items:flex-start}
+.drawer-b{padding:18px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:18px}
+.drawer-f{padding:13px 18px;border-top:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;background:var(--void)}
+.xbtn{width:28px;height:28px;border-radius:7px;display:grid;place-items:center;color:var(--muted);flex:none}
+.xbtn:hover{background:var(--hl);color:var(--fg)}
+.xbtn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round}
+
+/* dialog */
+.dlg{position:fixed;z-index:82;top:50%;left:50%;transform:translate(-50%,-48%) scale(.98);
+  width:min(620px,calc(100vw - 32px));max-height:min(80vh,720px);background:var(--panel);
+  border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--shadow);
+  display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .16s,transform .16s}
+.dlg[data-open="1"]{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}
+.dlg-h{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;gap:12px;align-items:center}
+.dlg-b{padding:16px;overflow-y:auto;display:flex;flex-direction:column;gap:14px}
+.dlg-f{padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.cmdinput{width:100%;padding:11px 14px;border:0;border-bottom:1px solid var(--border);background:none;
+  font-size:14px;outline:none;color:var(--fg)}
+.cmdlist{max-height:340px;overflow-y:auto;padding:6px}
+.cmdrow{display:flex;align-items:center;gap:10px;width:100%;padding:8px 10px;border-radius:var(--r-sm);
+  text-align:left;font-size:12.5px;color:var(--body);text-decoration:none}
+.cmdrow:hover,.cmdrow:focus-visible{background:var(--hl);color:var(--fg)}
+.cmdrow .grp{font-family:var(--mono);font-size:10px;color:var(--dim);margin-left:auto}
+
+/* assistant rail */
+.asst{background:var(--void);border-left:1px solid var(--border);display:flex;flex-direction:column;
+  position:sticky;top:0;height:100vh;overflow:hidden}
+.asst-h{padding:13px 15px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px}
+.asst-b{flex:1;overflow-y:auto;padding:15px;display:flex;flex-direction:column;gap:14px}
+.msg{font-size:12.5px;line-height:1.55}
+.msg .who-l{font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--dim);font-weight:600;margin-bottom:5px}
+.msg.op .bubble{background:var(--hl);border:1px solid var(--border);border-radius:var(--r-sm);padding:9px 11px;color:var(--body)}
+.msg.ag .bubble{color:var(--body)}
+.receipt{border:1px solid var(--border);background:var(--panel);border-radius:var(--r-sm);padding:10px 11px;
+  font-family:var(--mono);font-size:10.5px;color:var(--muted);line-height:1.6;overflow-wrap:anywhere}
+.receipt b{color:var(--st-allowed);font-weight:600}
+.asst-f{padding:12px;border-top:1px solid var(--border)}
+.asst-in{width:100%;padding:9px 11px;border-radius:var(--r-sm);border:1px solid var(--border);
+  background:var(--panel);font-size:12.5px;outline:none}
+.asst-in:focus{border-color:var(--gold-edge)}
+
+/* states: empty / loading / error / denied */
+.state{display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;
+  padding:64px 24px;max-width:520px;margin:0 auto}
+.state-ico{width:46px;height:46px;border-radius:var(--r-md);display:grid;place-items:center;
+  border:1px solid var(--border);background:var(--panel);color:var(--muted)}
+.state-ico svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.state-ico.warn{color:var(--st-failed);border-color:color-mix(in srgb,var(--st-failed) 32%,transparent);background:var(--st-failed-wash)}
+.state-ico.deny{color:var(--st-denied);border-color:color-mix(in srgb,var(--st-denied) 32%,transparent);background:var(--st-denied-wash)}
+.state p{font-size:13px;color:var(--muted);max-width:56ch}
+.sk{background:linear-gradient(90deg,var(--hl) 25%,var(--panel-2) 50%,var(--hl) 75%);
+  background-size:240% 100%;animation:shim 1.5s linear infinite;border-radius:5px}
+@keyframes shim{to{background-position:-240% 0}}
+@media (prefers-reduced-motion:reduce){.sk{animation:none;background:var(--hl)}}
+</style>
+<style>
+/* ---------- mockup chrome — NOT product UI ---------- */
+#mock{position:fixed;right:14px;bottom:14px;z-index:95;font-family:var(--mono);font-size:10.5px;
+  background:#0A0A09;color:#9B958A;border:1px dashed #4A473F;border-radius:10px;
+  box-shadow:0 10px 30px rgba(0,0,0,.55);max-width:min(300px,calc(100vw - 28px))}
+#mock .mh{display:flex;align-items:center;gap:7px;padding:7px 10px;border-bottom:1px dashed #34322D;cursor:pointer;width:100%;text-align:left}
+#mock .mh b{color:#D6962C;font-weight:600;letter-spacing:.1em;font-size:9.5px}
+#mock .mb{padding:9px 10px 11px;display:flex;flex-direction:column;gap:9px}
+#mock[data-min="1"] .mb{display:none}
+#mock .mrow{display:flex;flex-direction:column;gap:4px}
+#mock .mk{color:#6E6A62;letter-spacing:.1em;font-size:9px;text-transform:uppercase}
+#mock .mg{display:flex;flex-wrap:wrap;gap:3px}
+#mock .mg button{padding:3px 7px;border-radius:5px;border:1px solid #34322D;background:#10100F;
+  color:#9B958A;font-family:inherit;font-size:10px;transition:all .12s}
+#mock .mg button:hover{border-color:#6E6A62;color:#F2EEE5}
+#mock .mg button[aria-pressed="true"]{background:#D6962C;border-color:#D6962C;color:#10100F;font-weight:600}
+#mock .mn{color:#4A473F;font-size:9px;line-height:1.45;border-top:1px dashed #34322D;padding-top:7px}
+
+/* phone preview frame */
+body[data-width="phone"]{background:var(--void);display:flex;justify-content:center;padding:22px 12px 96px}
+body[data-width="phone"] #app{width:400px;max-width:100%;min-height:760px;height:760px;overflow:hidden;
+  border:1px solid var(--rule);border-radius:20px;box-shadow:var(--shadow);position:relative}
+body[data-width="phone"] .main{overflow-y:auto}
+
+/* ---------- responsive ---------- */
+@media (max-width:1100px){
+  #app[data-assistant="open"]{grid-template-columns:var(--sidebar) 1fr}
+  #app[data-assistant="open"] .asst{position:fixed;top:0;right:0;bottom:0;width:min(348px,100%);z-index:70}
+}
+/* phone reflow — real, and what the phone preview renders */
+@media (max-width:760px){
+  :root{--topbar:52px}
+  #app,#app[data-assistant="open"]{grid-template-columns:1fr}
+  .side{position:fixed;top:0;bottom:0;left:0;width:250px;z-index:75;transform:translateX(-100%);
+    transition:transform .22s cubic-bezier(.32,.72,0,1)}
+  body[data-nav="open"] .side{transform:none}
+  .canvas{padding:16px 16px 80px}
+  .top{padding:0 14px;gap:10px}
+  .crumb .hide-s{display:none}
+  h1{font-size:21px}
+  .tiles{grid-template-columns:repeat(2,1fr)}
+  .tile-v{font-size:18px}
+  .lead-band{gap:12px}
+  .lead-n{font-size:24px}
+  .drawer{width:100%}
+  .asst{position:fixed;inset:0;width:100%;border-left:0}
+  .navtoggle{display:grid!important}
+}
+.navtoggle{display:none}
+/* container-driven reflow for the 400px preview frame */
+body[data-width="phone"] .side{position:absolute;transform:translateX(-100%)}
+body[data-width="phone"][data-nav="open"] .side{transform:none}
+body[data-width="phone"] .navtoggle{display:grid}
+body[data-width="phone"] #app,body[data-width="phone"] #app[data-assistant="open"]{grid-template-columns:1fr}
+body[data-width="phone"] .canvas{padding:16px 16px 40px}
+body[data-width="phone"] .tiles{grid-template-columns:repeat(2,1fr)}
+body[data-width="phone"] .tile-v{font-size:17px}
+body[data-width="phone"] h1{font-size:20px}
+body[data-width="phone"] .crumb .hide-s{display:none}
+body[data-width="phone"] .drawer,body[data-width="phone"] .scrim,body[data-width="phone"] .dlg{position:absolute}
+body[data-width="phone"] .asst{position:absolute;inset:0;width:100%;height:auto;border-left:0}
+.split{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));align-items:start}
+.split3{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));align-items:start}
+</style>
+
+<div id="app" data-assistant="closed">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="side" id="side">
+    <div class="side-brand"><svg class="ox-lockup" xmlns="http://www.w3.org/2000/svg" width="574.244" height="106.313" viewBox="0 0 574.244 106.313" role="img" aria-label="oxagen"><g transform="translate(0,0.000) scale(2.842952)"><path class="cells" d="M6.300 0.000L12.600 3.320L12.600 9.960L6.300 13.280L0.000 9.960L0.000 3.320ZM1.000 3.885L1.000 9.395L6.300 12.150L11.600 9.395L11.600 3.885L6.300 1.130Z M19.376 0.000L25.676 3.320L25.676 9.960L19.376 13.280L13.076 9.960L13.076 3.320ZM14.076 3.885L14.076 9.395L19.376 12.150L24.676 9.395L24.676 3.885L19.376 1.130Z M12.838 10.240L19.138 13.560L19.138 20.200L12.838 23.520L6.538 20.200L6.538 13.560ZM7.538 14.125L7.538 19.635L12.838 22.390L18.138 19.635L18.138 14.125L12.838 11.370Z M19.376 20.480L25.676 23.800L25.676 30.440L19.376 33.760L13.076 30.440L13.076 23.800ZM14.076 24.365L14.076 29.875L19.376 32.630L24.676 29.875L24.676 24.365L19.376 21.610Z" fill="currentColor"/><path class="accent" d="M25.914 10.240L32.214 13.560L32.214 20.200L25.914 23.520L19.614 20.200L19.614 13.560Z M6.300 20.480L12.600 23.800L12.600 30.440L6.300 33.760L0.000 30.440L0.000 23.800Z" fill="#D6962C"/></g><g transform="translate(120.376,13.067)"><path class="letters" d="M33.9083 68.758Q24.1657 68.758 16.4786 64.7737Q8.79142 60.7894 4.39571 53.2965Q0 45.8035 0 35.3862V33.3718Q0 22.9544 4.39571 15.4615Q8.79142 7.96854 16.4786 3.98427Q24.1657 0 33.9083 0Q43.6509 0 51.3381 3.98427Q59.0252 7.96854 63.4209 15.4615Q67.8166 22.9544 67.8166 33.3718V35.3862Q67.8166 45.8035 63.4209 53.2965Q59.0252 60.7894 51.3381 64.7737Q43.6509 68.758 33.9083 68.758ZM33.9083 55.3486Q42.1895 55.3486 47.4689 50.0198Q52.7484 44.691 52.7484 35.0142V33.7437Q52.7484 24.067 47.5233 18.7382Q42.2981 13.4094 33.9083 13.4094Q25.6502 13.4094 20.3592 18.7382Q15.0683 24.067 15.0683 33.7437V35.0142Q15.0683 44.691 20.3592 50.0198Q25.6502 55.3486 33.9083 55.3486Z M176.569 68.758Q169.637 68.758 164.119 66.3453Q158.601 63.9327 155.387 59.2935Q152.173 54.6542 152.173 48.0088Q152.173 41.3403 155.387 36.8558Q158.601 32.3712 164.27 30.1017Q169.94 27.8323 177.174 27.8323H196.047V23.8925Q196.047 18.7316 192.874 15.5274Q189.701 12.3232 182.99 12.3232Q176.411 12.3232 173.049 15.3842Q169.686 18.4452 168.627 23.3593L154.691 18.7315Q156.27 13.6133 159.748 9.39702Q163.225 5.18071 169.049 2.59035Q174.874 0 183.208 0Q195.972 0 203.326 6.42816Q210.681 12.8563 210.681 24.9392V50.4707Q210.681 54.4204 214.368 54.4204H219.795V66.9148H209.197Q204.464 66.9148 201.442 64.5334Q198.42 62.1521 198.42 58.1563V57.8864H196.126Q195.392 59.6967 193.399 62.2985Q191.406 64.9004 187.388 66.8292Q183.369 68.758 176.569 68.758ZM179.05 56.4348Q186.581 56.4348 191.314 52.1592Q196.047 47.8837 196.047 40.6031V39.2405H178.175Q173.175 39.2405 170.208 41.3881Q167.241 43.5358 167.241 47.5513Q167.241 51.5668 170.34 54.0008Q173.439 56.4348 179.05 56.4348Z M227.767 34.6423V32.6279Q227.767 22.3817 231.86 15.0863Q235.953 7.79081 242.768 3.8954Q249.582 0 257.706 0Q266.935 0 271.762 3.33256Q276.589 6.66512 278.81 10.4107H281.042V1.8432H295.801V79.33Q295.801 85.6989 292.104 89.4725Q288.408 93.2462 282.079 93.2462H238.369V80.0541H277.023Q280.779 80.0541 280.779 76.1043V57.2775H278.547Q277.161 59.5683 274.665 61.8904Q272.168 64.2125 268.057 65.7414Q263.946 67.2702 257.706 67.2702Q249.582 67.2702 242.756 63.3748Q235.93 59.4794 231.848 52.1724Q227.767 44.8655 227.767 34.6423ZM261.938 54.0781Q270.151 54.0781 275.573 48.8612Q280.996 43.6443 280.996 34.2704V32.9999Q280.996 23.4943 275.627 18.3432Q270.259 13.1921 261.938 13.1921Q253.749 13.1921 248.315 18.3432Q242.881 23.4943 242.881 32.9999V34.2704Q242.881 43.6443 248.315 48.8612Q253.749 54.0781 261.938 54.0781Z M344.764 68.758Q334.998 68.758 327.583 64.6108Q320.167 60.4636 316.031 52.9048Q311.896 45.346 311.896 35.1689V33.589Q311.896 23.3889 315.977 15.8416Q320.059 8.2944 327.397 4.1472Q334.735 0 344.385 0Q353.881 0 360.956 4.1867Q368.031 8.37341 371.981 15.8515Q375.931 23.3297 375.931 33.2895V38.6974H327.181Q327.468 46.3334 332.587 50.9496Q337.707 55.5658 345.198 55.5658Q352.522 55.5658 356.101 52.3534Q359.681 49.141 361.553 45.0629L373.985 51.4813Q372.119 55.0656 368.63 59.1042Q365.141 63.1428 359.394 65.9504Q353.648 68.758 344.764 68.758ZM327.313 27.2892H360.622Q360.095 20.7986 355.7 16.9954Q351.304 13.1921 344.277 13.1921Q337.055 13.1921 332.691 16.9954Q328.327 20.7986 327.313 27.2892Z M391.548 66.9148V1.8432H406.353V10.9769H408.585Q410.303 7.25429 414.832 3.99908Q419.361 0.743866 428.435 0.743866Q435.956 0.743866 441.695 4.12911Q447.434 7.51435 450.651 13.5903Q453.868 19.6663 453.868 27.9442V66.9148H438.8V29.1226Q438.8 21.1969 434.891 17.3492Q430.983 13.5015 423.9 13.5015Q415.872 13.5015 411.244 18.8237Q406.617 24.146 406.617 33.9445V66.9148Z" fill="currentColor"/><path class="accent" d="M73.9979 66.9148 98.2261 34.0696 74.3764 1.8432H91.9626L107.9 24.3499H110.131L126.068 1.8432H143.654L119.805 34.0696L144.033 66.9148H126.206L110.131 44.0065H107.9L91.8244 66.9148Z" fill="#D6962C"/></g></svg></div>
+
+    <div class="orgsw">
+      <button class="sw" id="orgSw" aria-haspopup="dialog">
+        <span class="sw-mark">AR</span>
+        <span class="sw-txt"><span class="sw-k">Organization</span><span class="sw-v">Acme Robotics</span></span>
+        <svg class="sw-car" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 4.75 6 2.5l2.5 2.25M3.5 7.25 6 9.5l2.5-2.25"/></svg>
+      </button>
+    </div>
+    <div class="orgsw" style="margin-top:6px">
+      <button class="sw" id="wsSw" aria-haspopup="dialog">
+        <span class="sw-mark" style="color:var(--st-approval)">CP</span>
+        <span class="sw-txt"><span class="sw-k">Workspace</span><span class="sw-v">core-platform</span></span>
+        <svg class="sw-car" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 4.75 6 2.5l2.5 2.25M3.5 7.25 6 9.5l2.5-2.25"/></svg>
+      </button>
+    </div>
+
+    <nav class="navsec nav" aria-label="Workspace">
+      <div class="navsec-h">Workspace</div>
+      <a href="#/acme/core-platform/fleet" data-nav="fleet">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l2 6 4-15 2 9h6"/></svg>Fleet<span class="cnt">14</span></a>
+      <a href="#/acme/core-platform/runs/run_8f3a2c91" data-nav="run">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>Run</a>
+      <a href="#/acme/core-platform/agents" data-nav="agents">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="7" width="16" height="12" rx="3"/><path d="M12 4v3M9 12h.01M15 12h.01M9.5 16h5"/></svg>Agents<span class="cnt">4</span></a>
+      <a href="#/acme/core-platform/tools" data-nav="tools">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 5.5a4 4 0 0 0 5 5L14 16l-4 4-3-3 4-4 3.5-7.5z"/></svg>Tools</a>
+      <a href="#/acme/core-platform/ontology" data-nav="ontology">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="2.4"/><circle cx="5" cy="18" r="2.4"/><circle cx="19" cy="18" r="2.4"/><path d="M10.6 7 6.4 15.8M13.4 7l4.2 8.8M7.4 18h9.2"/></svg>Ontology</a>
+      <a href="#/acme/core-platform/steering" data-nav="steering">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h10M4 18h7"/><circle cx="18" cy="14" r="3"/></svg>Steering<span class="cnt">3</span></a>
+      <a href="#/acme/core-platform/spend" data-nav="spend">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M16.5 7.5c0-1.7-2-2.5-4.5-2.5s-4.5.9-4.5 2.8S9.5 11 12 11.5s4.5 1 4.5 3-2 2.8-4.5 2.8-4.5-.8-4.5-2.5"/></svg>Spend<span class="cnt">9</span></a>
+    </nav>
+
+    <nav class="navsec nav" aria-label="Organization">
+      <div class="navsec-h">Organization</div>
+      <a href="#/acme/organization" data-nav="organization">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V7l7-3 7 3v13M9 20v-5h6v5M8 10h.01M12 10h.01M16 10h.01"/></svg>Organization</a>
+      <a href="#/acme/billing" data-nav="billing">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M3 10h18M6.5 14.5h3"/></svg>Billing</a>
+      <a href="#/acme/audit" data-nav="audit">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5 19 6v6c0 4-3 7-7 8.5C8 19 5 16 5 12V6l7-2.5z"/><path d="M9.5 12l1.8 1.8 3.4-3.6"/></svg>Audit</a>
+    </nav>
+
+    <div class="side-foot">
+      <button class="who" id="acctBtn" aria-haspopup="dialog">
+        <span class="av">MB</span>
+        <span class="who-t"><span class="who-n">Marcus Bell</span><span class="who-r" id="whoRole">Workspace owner · core-platform</span></span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <div class="main">
+    <header class="top">
+      <button class="ibtn navtoggle" id="navToggle" aria-label="Open navigation">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+      <nav class="crumb" id="crumb" aria-label="Breadcrumb"></nav>
+      <div class="top-r">
+        <button class="kbtn" id="cmdBtn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg><span class="hide-s">Search or run a command</span><kbd>⌘K</kbd></button>
+        <button class="ibtn" id="asstBtn" aria-pressed="false" aria-label="Toggle the assistant">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 1 1-3.2-6.4"/><path d="M12 8v4l3 2"/><circle cx="19" cy="5" r="2"/></svg></button>
+      </div>
+    </header>
+    <main class="canvas" id="canvas" tabindex="-1"></main>
+  </div>
+
+  <!-- ============ ASSISTANT RAIL ============ -->
+  <aside class="asst" id="asst" hidden aria-label="Oxagen assistant"></aside>
+</div>
+
+<div class="scrim" id="scrim" data-open="0"></div>
+<aside class="drawer" id="drawer" data-open="0" role="dialog" aria-modal="true" aria-labelledby="drawerTitle" hidden></aside>
+<div class="dlg" id="dlg" data-open="0" role="dialog" aria-modal="true" hidden></div>
+
+<!-- ===== mockup chrome — not product UI ===== -->
+<div id="mock" data-min="0">
+  <button class="mh" id="mockH" aria-expanded="true">
+    <b>MOCKUP</b><span>W8 · states</span>
+    <span style="margin-left:auto;color:#6E6A62" id="mockCar">▾</span>
+  </button>
+  <div class="mb">
+    <div class="mrow"><span class="mk">state</span><div class="mg" id="mgState">
+      <button data-state="loaded" aria-pressed="true">loaded</button>
+      <button data-state="empty" aria-pressed="false">empty</button>
+      <button data-state="loading" aria-pressed="false">loading</button>
+      <button data-state="error" aria-pressed="false">error</button>
+      <button data-state="denied" aria-pressed="false">denied</button>
+    </div></div>
+    <div class="mrow"><span class="mk">width</span><div class="mg" id="mgWidth">
+      <button data-width="desktop" aria-pressed="true">desktop</button>
+      <button data-width="phone" aria-pressed="false">phone 400px</button>
+    </div></div>
+    <div class="mrow"><span class="mk">theme</span><div class="mg" id="mgTheme">
+      <button data-theme="system" aria-pressed="true">system</button>
+      <button data-theme="dark" aria-pressed="false">dark</button>
+      <button data-theme="light" aria-pressed="false">light</button>
+    </div></div>
+    <div class="mn">Denied renders as Dana Okafor (billing role, finops) — no grant on core-platform.</div>
+  </div>
+</div>
+
+<script>
+/* ==========================================================================
+   Oxagen Mission Control — W8. Every dollar, every operator
+   Demo tenant: Acme Robotics (acme) · workspace core-platform
+   Money is integer micro-USD everywhere; cents are produced once, at render.
+   ========================================================================== */
+"use strict";
+
+const M = n => Math.round(n * 1e6);           // dollars -> micro-USD
+const PERIOD = "September 2026 · month to date (Sep 1 – Sep 11)";
+
+/* ---- display currency (§12.9 multicurrency; ledger stays USD) ---- */
+const FX = {
+  USD:{code:"USD",sym:"$",rate:1,        src:"ledger currency of record"},
+  EUR:{code:"EUR",sym:"€",rate:0.9143,   src:"ECB reference rate"},
+  GBP:{code:"GBP",sym:"£",rate:0.7826,   src:"ECB reference rate"},
+  JPY:{code:"JPY",sym:"¥",rate:148.22,   src:"ECB reference rate"}
+};
+const FX_AT = "2026-09-11T06:00:00Z";
+let CUR = "USD";
+
+const DB = {
+  org:{name:"Acme Robotics",slug:"acme",ns:"acme",displayCurrency:"USD",plan:"team",funding:"customer_key"},
+  ws:{name:"core-platform",mainRepo:"acme/platform",branch:"main",linked:["acme/billing","acme/mobile"]},
+
+  /* ---------------- workspace rollup, Sep MTD ---------------- */
+  totals:{
+    spend:M(18407.62), basis:"mixed",
+    proven:M(7913.28), accepted:M(3104.91),
+    unverified:M(4918.06), halted:M(1402.55), failed:M(1068.82),
+    runs:3318, provenRuns:1204, turns:24118, steps:186402,
+    modelCalls:142880, toolCalls:43522,
+    productive:0.61, cacheHit:0.6422, cacheDelta:-14.7,
+    atStake:M(4517.46)
+  },
+  tokens:[
+    {k:"input_uncached",       v:412880114, note:"prompt tokens processed fresh"},
+    {k:"cache_read",           v:741206338, note:"prompt tokens served from cache"},
+    {k:"cache_write_5m",       v:88412907,  note:"written to cache, 5-minute TTL"},
+    {k:"cache_write_1h",       v:12004556,  note:"written to cache, 1-hour TTL"},
+    {k:"output",               v:61338902,  note:"completion tokens excluding reasoning"},
+    {k:"reasoning",            v:18744215,  note:"thinking tokens, split when reported"},
+    {k:"server_tool_requests", v:8412,      note:"provider-side tool uses, priced per request"},
+    {k:"tool_definition_tokens",v:96118440, note:"tokens spent on the tool list in the prompt"},
+    {k:"context_frame_tokens", v:142880317, note:"context frames Oxagen injected"},
+    {k:"steering_tokens",      v:31204880,  note:"injected steering"},
+    {k:"unmapped",             v:1204118,   note:"class the price book does not know — priced at zero"}
+  ],
+
+  /* ---------------- findings, ranked by money at stake (§12.8) ---------------- */
+  findings:[
+    {id:"fnd_9c41",kind:"Cache misses after a stable prefix changed",level:"agent",
+     scope:"acme.core.release-manager",micros:M(1842.16),frames:4,sev:"critical",
+     detect:"System-context digest differs between consecutive turns while the conversation prefix is unchanged.",
+     tells:"Publishing steering record <code>str_release_gate</code> on 3 Sep rewrote the cached prefix for every run of this agent. Cache hit rate fell from 78.9% to 66.1% overnight and has not recovered. Republishing off-peak, or moving the volatile clause out of the cached prefix, restores it.",
+     evidence:[
+       {f:"frame 00041",run:"run_8a19c4d2",turn:2,note:"prefix digest sha256:3f9c…a114 — last turn before the publish",d:"78.9% hit"},
+       {f:"frame 00042",run:"run_8a19c4d2",turn:3,note:"prefix digest sha256:71ba…9e02 — changed, conversation prefix identical",d:"0.0% hit"},
+       {f:"frame 00118",run:"run_8b44f019",turn:1,note:"cold prefix re-written, 214,880 cache_write_5m tokens",d:"$0.8062"},
+       {f:"frame 00119",run:"run_8b44f019",turn:2,note:"same prefix re-written — never read inside the TTL",d:"$0.8062"}],
+     actions:[{t:"Open a Context PR to pin the prefix",p:1},{t:"Schedule publishes off-peak"},{t:"Dismiss with a reason"}],
+     exact:"1842164200"},
+    {id:"fnd_9c3d",kind:"Tool-list bloat",level:"agent",scope:"acme.core.triage",
+     micros:M(906.44),frames:6,sev:"failed",
+     detect:"tool_definition_tokens above the workspace median for the agent's grants.",
+     tells:"This agent carries 41 granted tool versions and spends 12,408 tokens per turn describing them, against a workspace median of 3,912. Eleven of the 41 have not been called in the last 500 runs.",
+     evidence:[
+       {f:"grant set",run:"—",turn:"—",note:"41 tool versions granted · 30 called in the last 500 runs",d:"11 idle"},
+       {f:"frame 00007",run:"run_8c02d771",turn:1,note:"tool_definition_tokens 12,408 · workspace median 3,912",d:"3.17×"},
+       {f:"idle tool",run:"—",turn:"—",note:"jira.issue.transition@2.1 — 0 calls in 500 runs",d:"812 tok"},
+       {f:"idle tool",run:"—",turn:"—",note:"pagerduty.incident.ack@1.4 — 0 calls in 500 runs",d:"640 tok"},
+       {f:"idle tool",run:"—",turn:"—",note:"s3.object.put@3.0 — 0 calls in 500 runs",d:"588 tok"},
+       {f:"idle tool",run:"—",turn:"—",note:"and 8 more idle grants",d:"4,204 tok"}],
+     actions:[{t:"Narrow the agent's grants",p:1},{t:"Turn on tool search for this belt"},{t:"Dismiss with a reason"}],
+     exact:"906441800"},
+    {id:"fnd_9c52",kind:"Cache writes never read",level:"agent",scope:"acme.core.docs-writer",
+     micros:M(612.77),frames:3,sev:"failed",
+     detect:"cache_write greater than zero on a run's last turn, or a write with no later read inside the TTL.",
+     tells:"178 of this agent's runs were a single turn long. Each one paid to write a 5-minute cache prefix that no later turn ever read. One-turn runs should not write cache at all.",
+     evidence:[
+       {f:"frame 00003",run:"run_8d71ba03",turn:1,note:"cache_write_5m 88,412 tokens on the run's only turn",d:"$0.3315"},
+       {f:"run seal",run:"run_8d71ba03",turn:"—",note:"sealed 41s after the write — TTL never reached a read",d:"wasted"},
+       {f:"pattern",run:"178 runs",turn:"—",note:"same shape across the month",d:"$612.77"}],
+     actions:[{t:"Disable cache writes for one-turn runs",p:1},{t:"Dismiss with a reason"}],
+     exact:"612773900"},
+    {id:"fnd_9c58",kind:"Retry storms",level:"workspace",scope:"provider key pk_bdrk_7f2a",
+     micros:M(408.19),frames:9,sev:"failed",
+     detect:"Consecutive provider errors with retries inside one turn.",
+     tells:"AWS Bedrock us-east-1 returned 529 on 9 turns between 06:12 and 06:41 UTC on 8 Sep. Each turn retried four times and paid for every attempt. This is the same key that carries the open reconciliation exception.",
+     evidence:[{f:"frame 00088",run:"run_8e40c112",turn:4,note:"529 ThrottlingException × 4 retries",d:"$45.35"},
+       {f:"frame 00091",run:"run_8e40c112",turn:5,note:"529 ThrottlingException × 4 retries",d:"$45.35"},
+       {f:"and 7 more",run:"7 runs",turn:"—",note:"same key, same 29-minute window",d:"$317.49"}],
+     actions:[{t:"Add a fallback route for this key",p:1},{t:"Open the key's health record"},{t:"Dismiss with a reason"}],
+     exact:"408193000"},
+    {id:"fnd_9c61",kind:"Duplicate tool calls",level:"agent",scope:"acme.core.stella-ci",
+     micros:M(276.03),frames:12,sev:"approval",
+     detect:"Same tool version and input digest called twice inside one run.",
+     tells:"<code>repo.read_file@2.3</code> was called on <code>services/ratelimit/window.ts</code> twice in 312 runs — once early, once after a model call that had the content in context. A steering record would stop it.",
+     evidence:[{f:"frame 00062",run:"run_8f3a2c91",turn:4,note:"repo.read_file@2.3 · input digest sha256:c41d…8e7",d:"first"},
+       {f:"frame 00071",run:"run_8f3a2c91",turn:4,note:"repo.read_file@2.3 · same digest, 38s later",d:"duplicate"},
+       {f:"and 10 more",run:"312 runs",turn:"—",note:"same pair shape",d:"$276.03"}],
+     actions:[{t:"Open a steering proposal",p:1},{t:"Open the run waterfall"},{t:"Dismiss with a reason"}],
+     exact:"276031400"},
+    {id:"fnd_9c6a",kind:"Unproductive tail",level:"agent",scope:"acme.core.triage",
+     micros:M(219.85),frames:5,sev:"neutral",
+     detect:"Steps after the last productive step exceed the workspace threshold.",
+     tells:"412 runs averaged 9.4 steps after their last step that produced a kept side effect. A stop rule at 4 idle steps would have ended them sooner without losing work.",
+     evidence:[{f:"frame 00140",run:"run_8c02d771",turn:9,note:"last kept side effect — github.issue.comment@1.2",d:"productive"},
+       {f:"frames 141–152",run:"run_8c02d771",turn:"9–11",note:"11 further steps, none kept",d:"$0.53"},
+       {f:"pattern",run:"412 runs",turn:"—",note:"mean tail 9.4 steps",d:"$219.85"}],
+     actions:[{t:"Set a stop rule for this agent",p:1},{t:"Dismiss with a reason"}],
+     exact:"219851200"},
+    {id:"fnd_9c70",kind:"Wrong tier",level:"agent",scope:"acme.core.docs-writer",
+     micros:M(154.40),frames:4,sev:"neutral",
+     detect:"A run whose steps were all classification-shaped, on a flagship model.",
+     tells:"88 runs used <code>claude-opus-5</code> for label-and-route work with a mean output of 41 tokens. Routing this agent's light tier to <code>claude-haiku-4-5-20251001</code> costs 8% of the same work.",
+     evidence:[{f:"frame 00012",run:"run_8d71ba03",turn:1,note:"claude-opus-5 · output 38 tokens · classification shape",d:"$0.041"},
+       {f:"pattern",run:"88 runs",turn:"—",note:"mean output 41 tokens",d:"$154.40"}],
+     actions:[{t:"Change the agent's model route",p:1},{t:"Dismiss with a reason"}],
+     exact:"154402700"},
+    {id:"fnd_9c77",kind:"Context bloat",level:"workspace",scope:"core-platform",
+     micros:M(97.62),frames:7,sev:"neutral",
+     detect:"context_frame_tokens above the budget norm with a low citation rate from context_use_feedback.",
+     tells:"Retrieval served a mean of 11,842 context-frame tokens per turn; 22% of served frames were cited. Lowering the context budget to 8,000 or tightening the retrieval kinds recovers the rest.",
+     evidence:[{f:"citation rate",run:"—",turn:"—",note:"22.4% of served context frames cited",d:"low"},
+       {f:"budget",run:"—",turn:"—",note:"mean 11,842 tokens served per turn against a norm of 8,000",d:"1.48×"}],
+     actions:[{t:"Lower the context budget",p:1},{t:"Dismiss with a reason"}],
+     exact:"97620400"},
+    {id:"fnd_9c7c",kind:"Budget headroom",level:"agent",scope:"acme.core.stella-ci",
+     micros:0,frames:0,sev:"neutral",noMoney:true,
+     detect:"An operator or agent consistently below or above budget.",
+     tells:"This agent has used between 18% and 24% of its $24,000.00 monthly soft budget for nine consecutive periods. Resizing it to $8,000.00 leaves headroom and makes the notify thresholds mean something.",
+     evidence:[{f:"9 periods",run:"—",turn:"—",note:"18%–24% of limit, Jan–Sep 2026",d:"headroom"}],
+     actions:[{t:"Resize the budget",p:1},{t:"Dismiss with a reason"}],
+     exact:"0"}
+  ]
+};
+</script>
+<script>
+/* ---------------- attribution (§12.7) ---------------- */
+DB.attr = {
+  operator:{label:"Operator",rows:[
+    {n:"Marcus Bell",m:"Workspace owner · 3 agents · 2,400 runs",v:M(12491.35),basis:"mixed",
+     flag:"$1,252.91 from 296 runs that arrived without an operator, attributed to the agent's owning operator and flagged",href:"#/acme/core-platform/spend/operators/marcus-bell"},
+    {n:"Priya Natarajan",m:"Organization owner · 2 agents · 918 runs",v:M(5916.27),basis:"gateway_observed",
+     href:"#/acme/core-platform/spend/operators/priya-natarajan"}]},
+  agent:{label:"Agent",rows:[
+    {n:"acme.core.release-manager",m:"Claude Code · gateway tier · 1,142 runs",v:M(8914.07),basis:"gateway_observed",href:"#/acme/core-platform/spend/agents/release-manager"},
+    {n:"acme.core.stella-ci",m:"Stella · gateway tier · 1,486 runs",v:M(5203.88),basis:"gateway_observed",href:"#/acme/core-platform/spend/agents/stella-ci"},
+    {n:"acme.core.triage",m:"Codex CLI · harness tier · 512 runs",v:M(2847.19),basis:"client_attested",href:"#/acme/core-platform/spend/agents/triage"},
+    {n:"acme.core.docs-writer",m:"Custom, SDK-wrapped · gateway tier · 178 runs",v:M(1442.48),basis:"gateway_observed",href:"#/acme/core-platform/spend/agents/docs-writer"}]},
+  model:{label:"Model",rows:[
+    {n:"claude-opus-5",m:"Anthropic · complex tier",v:M(11602.33),basis:"gateway_observed"},
+    {n:"claude-sonnet-5",m:"Anthropic · standard tier",v:M(4118.90),basis:"gateway_observed"},
+    {n:"z-ai/glm-latest",m:"OpenRouter · complex tier",v:M(1844.61),basis:"gateway_observed"},
+    {n:"claude-haiku-4-5-20251001",m:"AWS Bedrock us-east-1 · light tier",v:M(633.24),basis:"mixed"},
+    {n:"z-ai/glm-flash-latest",m:"OpenRouter · light tier",v:M(208.54),basis:"gateway_observed"}]},
+  key:{label:"Provider key",rows:[
+    {n:"pk_anth_3d91",m:"Anthropic · direct · funding source customer_key",v:M(15721.23),basis:"gateway_observed"},
+    {n:"pk_or_5c08",m:"OpenRouter · funding source customer_key",v:M(2053.15),basis:"gateway_observed"},
+    {n:"pk_bdrk_7f2a",m:"AWS Bedrock us-east-1 · 1 open exception",v:M(633.24),basis:"mixed",warn:true}]},
+  repository:{label:"Repository",rows:[
+    {n:"acme/platform",m:"main repo · production branch main",v:M(12884.17),basis:"mixed"},
+    {n:"acme/billing",m:"linked repo",v:M(3671.09),basis:"mixed"},
+    {n:"acme/mobile",m:"linked repo",v:M(1510.42),basis:"gateway_observed"},
+    {n:"— no repository",m:"runs with no repository on the task reference",v:M(341.94),basis:"client_attested"}]},
+  task:{label:"Task",rows:[
+    {n:"acme/platform#4182",m:"Ratelimit window regression under burst",v:M(2104.66),basis:"gateway_observed"},
+    {n:"acme/platform#4166",m:"Move billing webhooks behind the tool gateway",v:M(1918.30),basis:"gateway_observed"},
+    {n:"acme/billing#312",m:"Invoice PDF regeneration after a price correction",v:M(1402.88),basis:"mixed"},
+    {n:"acme/platform#4190",m:"Neo4j driver upgrade to 6.2",v:M(1188.51),basis:"gateway_observed"},
+    {n:"acme/mobile#77",m:"Offline queue flush loses the last frame",v:M(874.29),basis:"gateway_observed"},
+    {n:"214 other tasks",m:"each below 4% of workspace spend",v:M(10918.98),basis:"mixed"}]}
+};
+
+/* ---------------- operators (§12.9 operator view) ---------------- */
+DB.operators = {
+  "marcus-bell":{name:"Marcus Bell",initials:"MB",role:"Workspace owner · core-platform",email:"marcus.bell@acmerobotics.com",
+    spend:M(12491.35),runs:2400,proven:M(5802.44),accepted:M(2188.19),productive:0.64,provenRuns:842,
+    budget:{limit:M(16000),spent:M(12491.35),mode:"soft",period:"monthly",notify:[50,80,100],fired:[50,80]},
+    flagged:{micros:M(1252.91),runs:296},
+    agents:[{n:"acme.core.release-manager",v:M(7206.28),r:884,pr:412},
+            {n:"acme.core.stella-ci",v:M(3437.88),r:1104,pr:398},
+            {n:"acme.core.triage",v:M(1847.19),r:412,pr:32}],
+    models:[{n:"claude-opus-5",p:"Anthropic",v:M(8404.11)},{n:"claude-sonnet-5",p:"Anthropic",v:M(2613.09)},
+            {n:"z-ai/glm-latest",p:"OpenRouter",v:M(1024.88)},{n:"claude-haiku-4-5-20251001",p:"AWS Bedrock",v:M(351.10)},
+            {n:"z-ai/glm-flash-latest",p:"OpenRouter",v:M(98.17)}],
+    findings:["fnd_9c41","fnd_9c3d","fnd_9c61","fnd_9c6a"]},
+  "priya-natarajan":{name:"Priya Natarajan",initials:"PN",role:"Organization owner",email:"priya.natarajan@acmerobotics.com",
+    spend:M(5916.27),runs:918,proven:M(2110.84),accepted:M(916.72),productive:0.56,provenRuns:362,
+    budget:{limit:M(9000),spent:M(5916.27),mode:"soft",period:"monthly",notify:[50,80,100],fired:[50]},
+    agents:[{n:"acme.core.release-manager",v:M(1707.79),r:258,pr:98},
+            {n:"acme.core.stella-ci",v:M(1766.00),r:382,pr:214},
+            {n:"acme.core.docs-writer",v:M(1442.48),r:178,pr:24},
+            {n:"acme.core.triage",v:M(1000.00),r:100,pr:26}],
+    models:[{n:"claude-opus-5",p:"Anthropic",v:M(3198.22)},{n:"claude-sonnet-5",p:"Anthropic",v:M(1505.81)},
+            {n:"z-ai/glm-latest",p:"OpenRouter",v:M(819.73)},{n:"claude-haiku-4-5-20251001",p:"AWS Bedrock",v:M(282.14)},
+            {n:"z-ai/glm-flash-latest",p:"OpenRouter",v:M(110.37)}],
+    findings:["fnd_9c52","fnd_9c70","fnd_9c77"]}
+};
+
+/* ---------------- agent view (§12.9) ---------------- */
+DB.agents = {
+  "stella-ci":{key:"acme.core.stella-ci",harness:"Stella",tier:"gateway",grade:"A — full bodies",
+    owner:"Marcus Bell",def:".oxagen/agents/stella-ci.toml",commit:"a41c9f2",
+    spend:M(5203.88),runs:1486,proven:M(2894.16),provenRuns:612,productive:0.71,cacheHit:0.8118,
+    perProven:[{m:"Mar 2026",v:9.84},{m:"Apr 2026",v:8.72},{m:"May 2026",v:7.95},{m:"Jun 2026",v:6.41},
+               {m:"Jul 2026",v:5.88},{m:"Aug 2026",v:5.02},{m:"Sep 2026",v:4.73}],
+    verdicts:[{v:"flipped",n:612,c:"proven"},{v:"none",n:370,c:"neutral"},{v:"failing",n:188,c:"failed"},
+              {v:"unmoved",n:104,c:"neutral"},{v:"waived",n:96,c:"neutral"},{v:"unsatisfied",n:71,c:"failed"},
+              {v:"unverified",n:42,c:"neutral"},{v:"tampered",n:3,c:"critical"}],
+    tools:[{n:"repo.read_file@2.3",c:18442,pr:0,d:"read"},{n:"repo.search@2.3",c:9118,pr:0,d:"read"},
+           {n:"graph.query@1.6",c:5204,pr:0,d:"read"},{n:"ci.run_tests@4.1",c:1486,pr:M(412.88),d:"write"},
+           {n:"pkg.install@1.9",c:812,pr:0,d:"write"},{n:"github.pull_request.create@3.0",c:604,pr:0,d:"write"}],
+    decisions:{allow:34902,approve:618,deny:146},
+    operators:[{n:"Marcus Bell",v:M(3437.88),r:1104},{n:"Priya Natarajan",v:M(1766.00),r:382}]}
+};
+
+/* 30 days of cache hit rate, 13 Aug – 11 Sep. The publish on 3 Sep is the break. */
+DB.cacheTrend = {
+  start:"2026-08-13",
+  v:[78.4,79.1,78.8,77.9,78.6,79.4,78.2,77.6,78.9,79.2,78.1,77.4,78.7,79.0,78.3,77.8,78.5,79.3,78.0,77.2,78.9,
+     66.1,64.8,63.2,64.9,63.7,65.1,64.4,63.9,64.2],
+  markIndex:21, markLabel:"3 Sep · steering publish str_release_gate"
+};
+</script>
+<script>
+/* ---------------- run waterfall (§12.9) ---------------- */
+DB.run = {
+  id:"run_8f3a2c91",agent:"acme.core.stella-ci",operator:"Marcus Bell",
+  task:"acme/platform#4182",taskTitle:"Ratelimit window regression under burst",
+  repo:"acme/platform",pr:"acme/platform#4211",tier:"gateway",grade:"A — full bodies",
+  started:"2026-09-09 14:02:11Z",sealed:"2026-09-09 14:31:47Z",
+  turns:7,steps:41,modelCalls:28,toolCalls:13,total:M(6.4218),basis:"gateway_observed",
+  verdict:"flipped",oracle:"test_flip",proofFrame:118,productive:0.78,
+  t:[{n:1,c:0.3184,cache:0.0,  steps:4,note:"task read, code graph query"},
+     {n:2,c:0.9021,cache:71.4, steps:7,note:"window.ts read, hypothesis"},
+     {n:3,c:1.4406,cache:83.2, steps:9,note:"patch drafted, tests run"},
+     {n:4,c:0.8817,cache:86.0, steps:6,note:"duplicate read — fnd_9c61",find:"fnd_9c61"},
+     {n:5,c:1.2044,cache:84.1, steps:8,note:"burst reproduction, patch revised"},
+     {n:6,c:0.7512,cache:88.3, steps:4,note:"pull request opened"},
+     {n:7,c:0.9234,cache:90.1, steps:3,note:"witness verdict observed",proof:true}]
+};
+
+/* ---------------- reconciliation (§12.4) ---------------- */
+DB.recon = {
+  months:[
+    {m:"August 2026",provider:M(52118.44),matched:M(52118.44),variance:0,status:"matched",
+     pct:100.00,levels:{request_id:96.8,key_day:3.2,invoice_line:0.0},exceptions:0,
+     note:"Every provider dollar matched to a frame. Closed 2026-09-02."},
+    {m:"September 2026 · MTD",provider:M(18420.09),matched:M(18407.62),variance:M(12.47),status:"exception",
+     pct:99.93,levels:{request_id:91.4,key_day:8.5,invoice_line:0.0},exceptions:1,
+     note:"One open exception on the Bedrock key."}],
+  history:[{m:"Sep 2026 MTD",p:99.93},{m:"Aug 2026",p:100.00},{m:"Jul 2026",p:99.94},
+           {m:"Jun 2026",p:99.87},{m:"May 2026",p:99.71},{m:"Apr 2026",p:99.44}],
+  exception:{id:"rec_2f81",key:"pk_bdrk_7f2a",provider:"AWS Bedrock",region:"us-east-1",
+    level:"key_day",day:"2026-09-08",matched:M(84.16),provider_micros:M(96.63),variance:M(12.47),
+    status:"exception",opened:"2026-09-09 03:14Z",
+    cause:"Three provider usage lines carry no request id that resolves to a frame. The runs behind them came from acme.core.triage at the harness tier, so their model calls are client-attested and match only at level 2.",
+    lines:[{model:"claude-haiku-4-5-20251001",cls:"input_uncached",units:"2,418,904",v:M(6.05)},
+           {model:"claude-haiku-4-5-20251001",cls:"output",units:"118,442",v:M(4.74)},
+           {model:"claude-haiku-4-5-20251001",cls:"cache_read",units:"1,884,120",v:M(1.68)}],
+    frames:0}
+};
+
+/* ---------------- budgets (§12.5) ---------------- */
+DB.budgets = [
+  {scope:"org",name:"Acme Robotics",limit:M(80000),spent:M(26291.88),period:"monthly",mode:"soft",notify:[50,80,100],fired:[]},
+  {scope:"workspace",name:"core-platform",limit:M(40000),spent:M(18407.62),period:"monthly",mode:"hard",notify:[60,85,100],fired:[]},
+  {scope:"workspace",name:"finops",limit:M(12000),spent:M(7884.26),period:"monthly",mode:"hard",notify:[50,80,95],fired:[50]},
+  {scope:"operator",name:"Marcus Bell",limit:M(16000),spent:M(12491.35),period:"monthly",mode:"soft",notify:[50,80,100],fired:[50,80]},
+  {scope:"operator",name:"Priya Natarajan",limit:M(9000),spent:M(5916.27),period:"monthly",mode:"soft",notify:[50,80,100],fired:[50]},
+  {scope:"agent",name:"acme.core.release-manager",limit:M(12000),spent:M(8914.07),period:"monthly",mode:"hard",notify:[70,90,100],fired:[70]},
+  {scope:"agent",name:"acme.core.stella-ci",limit:M(24000),spent:M(5203.88),period:"monthly",mode:"soft",notify:[50,80,100],fired:[],finding:"fnd_9c7c"},
+  {scope:"agent",name:"acme.core.triage",limit:M(3000),spent:M(2847.19),period:"rolling 7 days",mode:"hard",notify:[60,85,95],fired:[60,85],near:true},
+  {scope:"agent",name:"acme.core.docs-writer",limit:M(2500),spent:M(1442.48),period:"monthly",mode:"hard",notify:[50,80,100],fired:[50]}
+];
+DB.breach = {agent:"acme.core.docs-writer",at:"2026-08-29 11:41:06Z",limit:M(2500),
+  run:"run_7c12d0a4",frame:"policy.decision frame 00094",outcome:"run paused by policy",
+  note:"A hard budget is enforced at the model proxy before the call. The breach is a policy.decision frame and, by policy, a pause."};
+
+/* ---------------- billing (§12.1) ---------------- */
+DB.billing = {
+  plan:"Team",cadence:"monthly",card:"Visa ···· 4242",stripeCustomer:"cus_QeR8x2Lm4K",
+  sub:"sub_1PxK4mLmB2q",periodStart:"2026-09-01",periodEnd:"2026-09-30",elapsed:11,days:30,
+  runs:4812, freeRuns:1000,
+  notCounted:[{n:"Halted before any model call",v:214},{n:"In-app agent runs",v:1188},{n:"Witness runs",v:3402}],
+  tiers:[{lo:1,hi:1000,price:0,label:"First 1,000 runs",runs:1000,micros:0},
+         {lo:1001,hi:10000,price:0.30,label:"Runs 1,001 – 10,000",runs:3812,micros:M(1143.60)},
+         {lo:10001,hi:100000,price:0.20,label:"Runs 10,001 – 100,000",runs:0,micros:0},
+         {lo:100001,hi:null,price:0.12,label:"Above 100,000",runs:0,micros:0}],
+  usage:M(1143.60), discountPct:20, discount:M(228.72), net:M(914.88),
+  discountEnds:"2027-03-14", firstRun:"2026-03-10", converted:"2026-03-14",
+  meters:[{n:"Governed actions",v:"184,206",sub:"this period · reported, not priced (ADR-052)",basis:"control-plane audit"},
+          {n:"Retained evidence",v:"41.8 GB",sub:"13 months included, then $0.10 per GB-month",basis:"archive segments"}],
+  platformTokens:{micros:0,note:"Funding source is customer_key — Oxagen buys no tokens on this organization's behalf."},
+  projection:{runs:13124,micros:M(3324.80),note:"at the current rate of 437.5 runs a day"},
+  annual:{list:M(39897.60),afterOnboarding:M(31918.08),afterPrepay:M(25534.46),
+          saveOnboarding:M(7979.52),savePrepay:M(6383.62)},
+  invoices:[
+    {id:"in_1PzQa4Lm",m:"August 2026",v:M(2918.44),runs:11394,status:"paid",on:"2026-09-01"},
+    {id:"in_1PwHb9Km",m:"July 2026",v:M(2644.10),runs:10480,status:"paid",on:"2026-08-01"},
+    {id:"in_1PtCd2Jn",m:"June 2026",v:M(1902.88),runs:7842,status:"paid",on:"2026-07-01"},
+    {id:"in_1PqRe7Hp",m:"May 2026",v:M(412.20),runs:2374,status:"paid",on:"2026-06-01"},
+    {id:"in_1PnSf1Gq",m:"April 2026",v:0,runs:864,status:"paid",on:"2026-05-01",free:true}]
+};
+</script>
+<script>
+/* ==================== helpers ==================== */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+/* money: micro-USD -> display currency, rounded to cents once, half-even */
+function money(micros,opts){
+  const o = opts||{}, f = FX[CUR];
+  const v = (micros/1e6)*f.rate;
+  const dp = (CUR==="JPY")?0:2;
+  const s = v.toLocaleString("en-US",{minimumFractionDigits:dp,maximumFractionDigits:dp});
+  return (o.bare?"":f.sym)+s+(o.code?" "+f.code:"");
+}
+const money0 = m => money(m,{});
+const mc = m => money(m,{code:true});               // with currency code
+const pct = (n,d) => (n*100).toFixed(d===undefined?1:d)+"%";
+const int = n => n.toLocaleString("en-US");
+const tok = n => n>=1e9 ? (n/1e9).toFixed(2)+"B" : n>=1e6 ? (n/1e6).toFixed(1)+"M" : int(n);
+
+function chip(text,cls){ return `<span class="chip ${cls||""}"><span class="dot"></span>${esc(text)}</span>`; }
+function basis(b){ return `<span class="basis" title="How this number was measured">${esc(b)}</span>`; }
+function barCell(v,max,cls){ const w=Math.max(1.2,(v/max)*100); return `<div class="bar ${cls||""}"><i style="width:${w.toFixed(2)}%"></i></div>`; }
+function sevOf(s){ return s||"neutral"; }
+const sum = a => a.reduce((x,y)=>x+y,0);
+
+/* the currency banner, shown whenever display currency is not the ledger's */
+function fxBanner(){
+  if(CUR==="USD") return "";
+  const f=FX[CUR];
+  return `<div class="note"><b>Displayed in ${f.code}.</b> The ledger of record is USD micro-USD; conversion is display only and is
+    never written back. Rate 1 USD = ${f.rate} ${f.code} · source <span class="mono">${esc(f.src)}</span> ·
+    effective <span class="mono">${FX_AT}</span> from <span class="mono">cost.fx_rates</span>.</div>`;
+}
+
+/* currency picker (product control — org display currency is USD) */
+function curPicker(){
+  return `<div class="seg" role="group" aria-label="Display currency">${
+    Object.keys(FX).map(k=>`<button data-cur="${k}" aria-pressed="${k===CUR}">${k}</button>`).join("")}</div>`;
+}
+
+/* ==================== router ==================== */
+const ROUTES = {
+  spend:["findings","attribution","value","operators","agents","waterfall","reconciliation","budgets"]
+};
+let STATE = "loaded";            // loaded | empty | loading | error | denied
+let ROUTE = {page:"spend",tab:"findings",sub:null};
+
+function parseHash(){
+  const h = (location.hash||"").replace(/^#\/?/,"").split("/").filter(Boolean);
+  // acme / core-platform / spend / <tab> / <sub>   |   acme / billing
+  if(h[1]==="billing") return {page:"billing"};
+  if(h[1]==="organization") return {page:"organization"};
+  if(h[1]==="audit") return {page:"audit"};
+  const p = h[2]||"spend";
+  if(p==="spend") return {page:"spend",tab:ROUTES.spend.includes(h[3])?h[3]:"findings",sub:h[4]||null};
+  return {page:p,tab:null,sub:h[3]||null};
+}
+function go(hash){ location.hash = hash; }
+
+window.addEventListener("hashchange",()=>{ ROUTE=parseHash(); render(); closeAll(); });
+
+/* ==================== page titles ==================== */
+const PAGE_TITLE = {spend:"Spend",billing:"Billing",fleet:"Fleet",run:"Run",agents:"Agents",
+  tools:"Tools",ontology:"Ontology",steering:"Steering",organization:"Organization",audit:"Audit",runs:"Run"};
+
+function crumbs(){
+  const r=ROUTE, out=[];
+  out.push(`<a href="#/acme/organization">Acme Robotics</a>`);
+  const orgPage = ["billing","organization","audit"].includes(r.page);
+  if(!orgPage){ out.push(`<span class="sep">/</span><a class="hide-s" href="#/acme/core-platform/fleet">core-platform</a>`); }
+  const t = PAGE_TITLE[r.page]||r.page;
+  out.push(`<span class="sep">/</span><span class="cur">${esc(t)}</span>`);
+  if(r.page==="spend" && r.tab && r.tab!=="findings"){
+    const lbl = {attribution:"Attribution",value:"Value",operators:"Operators",agents:"Agents",
+      waterfall:"Run waterfall",reconciliation:"Reconciliation",budgets:"Budgets"}[r.tab];
+    out.push(`<span class="sep">/</span><span class="cur hide-s">${esc(lbl)}</span>`);
+  }
+  return out.join("");
+}
+
+function setNav(){
+  document.querySelectorAll(".nav a").forEach(a=>{
+    const k=a.dataset.nav;
+    const on = (k===ROUTE.page) || (k==="run"&&ROUTE.page==="runs");
+    if(on) a.setAttribute("aria-current","page"); else a.removeAttribute("aria-current");
+  });
+  $("#crumb").innerHTML = crumbs();
+}
+</script>
+<script>
+/* ==================== charts (inline SVG, one scale each) ==================== */
+
+/* area+line over an index axis; optional vertical mark */
+function lineChart(vals,o){
+  o = Object.assign({w:820,h:190,pad:{t:14,r:16,b:26,l:40},min:null,max:null,
+    fmt:v=>v.toFixed(0),ticks:4,color:"var(--st-approval)",fill:true,xlab:[],mark:null,markLabel:""},o||{});
+  const {w,h,pad}=o, iw=w-pad.l-pad.r, ih=h-pad.t-pad.b;
+  const lo = o.min!==null?o.min:Math.min(...vals), hi = o.max!==null?o.max:Math.max(...vals);
+  const span = (hi-lo)||1;
+  const X = i => pad.l + (vals.length===1?iw/2:(i/(vals.length-1))*iw);
+  const Y = v => pad.t + ih - ((v-lo)/span)*ih;
+  const pts = vals.map((v,i)=>`${X(i).toFixed(2)},${Y(v).toFixed(2)}`);
+  const line = "M"+pts.join("L");
+  const area = `${line}L${X(vals.length-1).toFixed(2)},${(pad.t+ih).toFixed(2)}L${X(0).toFixed(2)},${(pad.t+ih).toFixed(2)}Z`;
+  let g="",tl="";
+  for(let i=0;i<=o.ticks;i++){
+    const v = lo + (span*i/o.ticks), y=Y(v);
+    g += `<line class="grid" x1="${pad.l}" y1="${y.toFixed(2)}" x2="${w-pad.r}" y2="${y.toFixed(2)}"/>`;
+    tl += `<text x="${pad.l-7}" y="${(y+3.2).toFixed(2)}" text-anchor="end">${esc(o.fmt(v))}</text>`;
+  }
+  let xt="";
+  o.xlab.forEach(([i,t])=>{ xt += `<text x="${X(i).toFixed(2)}" y="${h-8}" text-anchor="middle">${esc(t)}</text>`; });
+  let mk="";
+  if(o.mark!==null&&o.mark!==undefined){
+    const mx=X(o.mark);
+    mk = `<line x1="${mx.toFixed(2)}" y1="${pad.t-4}" x2="${mx.toFixed(2)}" y2="${pad.t+ih}"
+            stroke="var(--st-failed)" stroke-width="1.25" stroke-dasharray="3 3"/>
+          <circle cx="${mx.toFixed(2)}" cy="${Y(vals[o.mark]).toFixed(2)}" r="3.4" fill="var(--st-failed)" stroke="var(--panel)" stroke-width="1.5"/>`;
+  }
+  const last = vals.length-1;
+  const end = `<circle cx="${X(last).toFixed(2)}" cy="${Y(vals[last]).toFixed(2)}" r="3.6"
+      fill="${o.color}" stroke="var(--panel)" stroke-width="1.6"/>`;
+  const gid = "g"+Math.random().toString(36).slice(2,8);
+  return `<svg class="chart" viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="${esc(o.aria||"trend")}">
+    <defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="${o.color}" stop-opacity="0.26"/>
+      <stop offset="100%" stop-color="${o.color}" stop-opacity="0.02"/></linearGradient></defs>
+    ${g}${tl}
+    ${o.fill?`<path d="${area}" fill="url(#${gid})"/>`:""}
+    <path d="${line}" fill="none" stroke="${o.color}" stroke-width="1.9" stroke-linejoin="round" stroke-linecap="round"/>
+    ${mk}${end}${xt}</svg>`;
+}
+
+/* run waterfall: turn bars with a cumulative cost line */
+function waterfall(run){
+  const w=840,h=250,pad={t:18,r:52,b:52,l:52}, iw=w-pad.l-pad.r, ih=h-pad.t-pad.b;
+  const n=run.t.length, bw=Math.min(62,(iw/n)*0.6), gap=iw/n;
+  const maxTurn=Math.max(...run.t.map(t=>t.c)), total=run.t.reduce((a,b)=>a+b.c,0);
+  const X=i=>pad.l+gap*i+gap/2, Yb=v=>pad.t+ih-(v/maxTurn)*ih, Yc=v=>pad.t+ih-(v/total)*ih;
+  let g="",tl="";
+  for(let i=0;i<=4;i++){ const v=maxTurn*i/4,y=Yb(v);
+    g+=`<line class="grid" x1="${pad.l}" y1="${y.toFixed(2)}" x2="${w-pad.r}" y2="${y.toFixed(2)}"/>`;
+    tl+=`<text x="${pad.l-7}" y="${(y+3.2).toFixed(2)}" text-anchor="end">${money(M(v),{}).replace(/,/g,"")}</text>`; }
+  let bars="",labs="",cum=0;const cpts=[];
+  run.t.forEach((t,i)=>{
+    const x=X(i)-bw/2, y=Yb(t.c), bh=pad.t+ih-y;
+    const fill = t.proof? "var(--st-proven)" : t.find? "var(--st-failed)" : "var(--st-approval)";
+    bars+=`<rect x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${bw.toFixed(2)}" height="${Math.max(2,bh).toFixed(2)}"
+      rx="3" fill="${fill}" opacity="${t.proof||t.find?".95":".78"}"><title>Turn ${t.n} · ${money0(M(t.c))} · cache ${t.cache.toFixed(1)}%</title></rect>`;
+    labs+=`<text x="${X(i).toFixed(2)}" y="${(y-6).toFixed(2)}" text-anchor="middle" fill="var(--muted)">${t.cache.toFixed(0)}%</text>`;
+    labs+=`<text x="${X(i).toFixed(2)}" y="${h-32}" text-anchor="middle" class="glabel">T${t.n}</text>`;
+    labs+=`<text x="${X(i).toFixed(2)}" y="${h-18}" text-anchor="middle">${money(M(t.c),{}).replace(/,/g,"")}</text>`;
+    cum+=t.c; cpts.push(`${X(i).toFixed(2)},${Yc(cum).toFixed(2)}`);
+  });
+  const cline=`<path d="M${cpts.join("L")}" fill="none" stroke="var(--gold)" stroke-width="1.8"
+    stroke-dasharray="4 3" stroke-linejoin="round"/>`;
+  const cdots=cpts.map(p=>{const[a,b]=p.split(",");return `<circle cx="${a}" cy="${b}" r="2.6" fill="var(--gold)"/>`}).join("");
+  const rt=`<text x="${w-pad.r+8}" y="${(Yc(total)+3.2).toFixed(2)}" text-anchor="start" fill="var(--accent-text)">${money0(M(total))}</text>`;
+  return `<svg class="chart" viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid meet" role="img"
+    aria-label="Cost by turn with cumulative cost; turn 7 carries the proof frame">
+    ${g}${tl}${bars}${cline}${cdots}${labs}${rt}</svg>`;
+}
+
+/* horizontal proportion bar */
+function stackBar(parts){
+  const tot=sum(parts.map(p=>p.v))||1;
+  return `<div class="stack-bar">${parts.map(p=>{
+    const s=(p.v/tot)*100;
+    return `<span style="flex:${s} 0 0;background:${p.c};color:${p.fg||"#10100F"}" title="${esc(p.n)} — ${money0(p.v)}">${s>8?s.toFixed(1)+"%":""}</span>`;
+  }).join("")}</div>`;
+}
+function legend(parts){
+  return `<div class="legend">${parts.map(p=>`<span><i style="background:${p.c}"></i>${esc(p.n)} · <span class="mono m" data-micros="${p.v}"></span></span>`).join("")}</div>`;
+}
+</script>
+<script>
+/* ==================== Spend: header + tabs ==================== */
+function spendHeader(){
+  const t=DB.totals;
+  return `
+  <div class="stack g16">
+    <div class="row wrapr g16" style="align-items:flex-end">
+      <div class="stack" style="min-width:0">
+        <p class="eyebrow">Workspace · core-platform</p>
+        <h1>Spend</h1>
+        <p class="sub">${PERIOD} · every figure carries its basis · ledger in USD micro-USD</p>
+      </div>
+      <div class="row g8 wrapr mla">
+        ${curPicker()}
+        <button class="btn" data-dlg="statement"><svg viewBox="0 0 24 24"><path d="M12 3v12m0 0-4-4m4 4 4-4M4 19h16"/></svg>Export statement</button>
+      </div>
+    </div>
+    ${fxBanner()}
+    <div class="tiles">
+      <div class="tile"><span class="tile-k">Workspace spend</span>
+        <span class="tile-v">${money0(t.spend)}</span>
+        <span class="tile-m">${basis("mixed")} · ${int(t.runs)} runs</span></div>
+      <div class="tile"><span class="tile-k">Proven spend</span>
+        <span class="tile-v">${money0(t.proven)}</span>
+        <span class="tile-m">${chip(pct(t.proven/t.spend)+" of spend","proven")} ${int(t.provenRuns)} flipped</span></div>
+      <div class="tile"><span class="tile-k">Productive ratio</span>
+        <span class="tile-v">${t.productive.toFixed(2)}</span>
+        <span class="tile-m">share of steps that advanced the task</span></div>
+      <div class="tile"><span class="tile-k">Cache hit rate</span>
+        <span class="tile-v">${pct(t.cacheHit)}</span>
+        <span class="tile-m"><span class="delta dn">▼ ${Math.abs(t.cacheDelta)} pts</span> since 2 Sep</span></div>
+      <div class="tile"><span class="tile-k">At stake in findings</span>
+        <span class="tile-v" style="color:var(--accent-text)">${money0(t.atStake)}</span>
+        <span class="tile-m">per month across ${DB.findings.length} findings</span></div>
+    </div>
+    <nav class="tabs" aria-label="Spend views">${
+      [["findings","Findings",DB.findings.length],["attribution","Attribution",null],["value","Value",null],
+       ["operators","Operators",2],["agents","Agents",4],["waterfall","Run waterfall",null],
+       ["reconciliation","Reconciliation",1],["budgets","Budgets",DB.budgets.length]]
+      .map(([k,l,c])=>`<a href="#/acme/core-platform/spend/${k}" ${ROUTE.tab===k?'aria-current="page"':""}>${l}${c!==null?`<span class="cnt">${c}</span>`:""}</a>`).join("")}
+    </nav>
+  </div>`;
+}
+
+/* ==================== Spend › Findings ==================== */
+function viewFindings(){
+  const top3 = DB.findings.slice(0,3), t3 = sum(top3.map(f=>f.micros));
+  const max = Math.max(...DB.findings.map(f=>f.micros));
+  return `
+  <div class="stack g16" style="margin-top:18px">
+    <div class="lead-band">
+      <div class="stack" style="min-width:0;flex:1">
+        <p class="eyebrow" style="margin-bottom:4px">Where to optimize</p>
+        <div class="row g12 wrapr" style="align-items:baseline">
+          <span class="lead-n">${money0(t3)}</span>
+          <span class="q" style="font-size:13.5px">a month, from the top three findings alone</span>
+        </div>
+        <p class="sub">Each finding names the level it applies to and the frames that prove it. Findings are written by the
+          findings job after every seal, ranked by money at stake.</p>
+      </div>
+      <button class="btn primary" data-find="fnd_9c41">Act on the top finding
+        <svg viewBox="0 0 24 24"><path d="M5 12h13m0 0-5-5m5 5-5 5"/></svg></button>
+    </div>
+
+    <div class="panel">
+      <div class="panel-h">
+        <div class="stack"><h2>Findings, ranked by money at stake</h2>
+          <p class="sub">Estimated monthly saving from the frames each finding cites. Money at stake is an estimate and is labelled as one; the frames are the record.</p></div>
+      </div>
+      <div class="panel-b flush"><div class="tw"><table class="find-t">
+        <thead><tr><th class="rank">#</th><th>Finding</th><th>Level</th><th>Scope</th>
+          <th class="r">At stake / month</th><th class="r">Share</th><th class="r">Frames</th><th></th></tr></thead>
+        <tbody>${DB.findings.map((f,i)=>`
+          <tr class="clickable" data-find="${f.id}" tabindex="0" role="button" aria-label="Open finding ${esc(f.kind)}">
+            <td class="rank">${i+1}</td>
+            <td><div class="strong" style="color:var(--fg);font-weight:500">${esc(f.kind)}</div>
+                <div class="id">${f.id}</div></td>
+            <td>${chip(f.level,"neutral")}</td>
+            <td><span class="mono" style="font-size:11.5px;color:var(--body)">${esc(f.scope)}</span></td>
+            <td class="r"><span class="find-money">${f.noMoney?"—":money0(f.micros)}</span></td>
+            <td class="r" style="width:110px">${f.noMoney?'<span class="qq" style="font-size:11px">resize only</span>':barCell(f.micros,max,f.sev==="critical"?"gold":"")}</td>
+            <td class="r mono qq">${f.frames||"—"}</td>
+            <td class="r"><span class="qq">›</span></td>
+          </tr>`).join("")}</tbody>
+      </table></div></div>
+      <div class="panel-f">
+        <span>Total at stake <span class="mono" style="color:var(--fg)">${money0(DB.totals.atStake)}</span> per month</span>
+        <span class="qq">·</span>
+        <span>Workspace spend this period <span class="mono">${money0(DB.totals.spend)}</span></span>
+        <span class="mla qq">cost.findings · rewritten after every seal</span>
+      </div>
+    </div>
+
+    <div class="split">
+      <div class="panel"><div class="panel-h"><div class="stack">
+        <h2>Cache hit rate, 30 days</h2>
+        <p class="sub">${esc(DB.cacheTrend.markLabel)} — the break the top finding names.</p></div></div>
+        <div class="panel-b"><div class="chartwrap">${lineChart(DB.cacheTrend.v,{
+          min:60,max:82,ticks:4,fmt:v=>v.toFixed(0)+"%",color:"var(--st-approval)",
+          mark:DB.cacheTrend.markIndex,aria:"Cache hit rate fell from 78.9% to 66.1% on 3 September and has not recovered",
+          xlab:[[0,"13 Aug"],[9,"22 Aug"],[18,"31 Aug"],[21,"3 Sep"],[29,"11 Sep"]]})}</div>
+        </div>
+        <div class="panel-f"><span class="mono" style="color:var(--st-failed)">▼ 14.7 pts</span>
+          <span>78.9% on 2 Sep → 64.2% on 11 Sep</span></div>
+      </div>
+      <div class="panel"><div class="panel-h"><div class="stack">
+        <h2>Tokens by class</h2>
+        <p class="sub">Normalized once at the model proxy. Every downstream number derives from these fields and nothing else.</p></div></div>
+        <div class="panel-b flush"><div class="tw"><table>
+          <tbody>${DB.tokens.map(t=>`<tr><td class="mono" style="font-size:11.5px;color:${t.k==="unmapped"?"var(--st-failed)":"var(--body)"}">${t.k}</td>
+            <td class="cellsub" style="padding-top:10px">${esc(t.note)}</td>
+            <td class="money">${tok(t.v)}</td></tr>`).join("")}</tbody></table></div></div>
+        <div class="panel-f"><span>Cache hit rate = cache_read ÷ (input_uncached + cache_read) = <span class="mono" style="color:var(--fg)">64.2%</span></span></div>
+      </div>
+    </div>
+  </div>`;
+}
+</script>
+<script>
+let ATTR_DIM = "operator";
+/* ==================== Spend › Attribution ==================== */
+function viewAttribution(){
+  const d = DB.attr[ATTR_DIM], total = sum(d.rows.map(r=>r.v)), max=Math.max(...d.rows.map(r=>r.v));
+  return `
+  <div class="stack g16" style="margin-top:18px">
+    <div class="panel">
+      <div class="panel-h">
+        <div class="stack"><h2>Spend by ${esc(d.label.toLowerCase())}</h2>
+          <p class="sub">Attribution is a rollup along operator → agent → run → turn → step. Nothing is attributed to a level a frame cannot reach.</p></div>
+        <div class="mla"><div class="seg" role="group" aria-label="Attribution dimension">${
+          Object.keys(DB.attr).map(k=>`<button data-dim="${k}" aria-pressed="${k===ATTR_DIM}">${DB.attr[k].label}</button>`).join("")}</div></div>
+      </div>
+      <div class="panel-b flush"><div class="tw"><table>
+        <thead><tr><th>${esc(d.label)}</th><th class="r">Spend</th><th class="r" style="width:150px">Share</th><th class="r">%</th><th>Basis</th></tr></thead>
+        <tbody>${d.rows.map(r=>`<tr${r.href?' class="clickable" data-href="'+r.href+'" tabindex="0" role="button"':""}>
+          <td><div style="color:var(--fg);font-weight:500${/^acme\.|^pk_|^acme\//.test(r.n)||r.n.includes("/")?";font-family:var(--mono);font-size:12px":""}">${esc(r.n)}${r.warn?' '+chip("exception open","failed"):""}</div>
+              <div class="cellsub">${esc(r.m)}</div>
+              ${r.flag?`<div class="cellsub" style="color:var(--st-approval);margin-top:3px">⚑ ${esc(r.flag)}</div>`:""}</td>
+          <td class="money">${money0(r.v)}</td>
+          <td class="r">${barCell(r.v,max,ATTR_DIM==="operator"?"gold":"")}</td>
+          <td class="r mono qq">${pct(r.v/total)}</td>
+          <td>${basis(r.basis)}</td></tr>`).join("")}</tbody>
+        <tfoot><tr><td class="strong">Total</td><td class="money" style="font-weight:600">${money0(total)}</td>
+          <td></td><td class="r mono qq">100.0%</td><td>${basis("mixed")}</td></tr></tfoot>
+      </table></div></div>
+      <div class="panel-f"><span class="qq">cost.daily_totals · a derived index, rebuildable from frames</span>
+        <span class="mla">${ROUTE.tab==="attribution"&&(ATTR_DIM==="operator"||ATTR_DIM==="agent")?"Click a row to open its view":""}</span></div>
+    </div>
+
+    <div class="split3">
+      ${["model","key","repository"].map(k=>{
+        const dd=DB.attr[k], mx=Math.max(...dd.rows.map(r=>r.v)), tt=sum(dd.rows.map(r=>r.v));
+        return `<div class="panel"><div class="panel-h"><h2>By ${esc(dd.label.toLowerCase())}</h2></div>
+          <div class="panel-b stack g10">${dd.rows.map(r=>`
+            <div class="stack g6"><div class="row g8" style="font-size:12px">
+              <span class="mono" style="color:var(--body);font-size:11.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.n)}</span>
+              <span class="mla mono" style="color:var(--fg)">${money0(r.v)}</span></div>
+            ${barCell(r.v,mx,k==="key"?"proven":"")}</div>`).join("")}
+          </div><div class="panel-f"><span class="mla mono qq">${money0(tt)}</span></div></div>`;
+      }).join("")}
+    </div>
+  </div>`;
+}
+
+/* ==================== Spend › Value ==================== */
+function viewValue(){
+  const t=DB.totals;
+  const parts=[{n:"Proven",v:t.proven,c:"var(--st-proven)"},
+               {n:"Accepted",v:t.accepted,c:"var(--st-allowed)"},
+               {n:"Completed but unverified",v:t.unverified,c:"var(--st-neutral)"},
+               {n:"Cancelled or halted",v:t.halted,c:"var(--st-approval)"},
+               {n:"Failed",v:t.failed,c:"var(--st-failed)"}];
+  const unproven = t.unverified+t.halted+t.failed;
+  const agents = DB.attr.agent.rows;
+  const prod=[{n:"acme.core.stella-ci",v:0.71},{n:"acme.core.release-manager",v:0.66},
+              {n:"acme.core.docs-writer",v:0.52},{n:"acme.core.triage",v:0.41}];
+  return `
+  <div class="stack g16" style="margin-top:18px">
+    <div class="panel">
+      <div class="panel-h"><div class="stack"><h2>Proven, accepted, unproven</h2>
+        <p class="sub">Proven spend is spend on runs whose witness verdict is <span class="mono">flipped</span>. A run a human verified
+          without a witness is <em>accepted</em> and is never folded into proven. All of it is computed from frames; none of it from a model's opinion of itself.</p></div></div>
+      <div class="panel-b stack g14">
+        ${stackBar(parts)}
+        ${legend(parts)}
+        <div class="tw"><table>
+          <thead><tr><th>Class</th><th>What it means</th><th class="r">Spend</th><th class="r">Share</th><th class="r">Runs</th></tr></thead>
+          <tbody>
+            <tr><td>${chip("proven","proven")}</td><td class="q">Witness failed on the target branch and passed on the pull request.</td>
+              <td class="money">${money0(t.proven)}</td><td class="r mono qq">${pct(t.proven/t.spend)}</td><td class="r mono">1,204</td></tr>
+            <tr><td>${chip("accepted","allowed")}</td><td class="q">A human verified the outcome — an approval, a merged pull request, a closed task.</td>
+              <td class="money">${money0(t.accepted)}</td><td class="r mono qq">${pct(t.accepted/t.spend)}</td><td class="r mono">488</td></tr>
+            <tr><td>${chip("unverified","neutral")}</td><td class="q">Completed, nothing proved it either way.</td>
+              <td class="money">${money0(t.unverified)}</td><td class="r mono qq">${pct(t.unverified/t.spend)}</td><td class="r mono">1,102</td></tr>
+            <tr><td>${chip("halted","approval")}</td><td class="q">Cancelled by an operator, or halted by policy or a budget.</td>
+              <td class="money">${money0(t.halted)}</td><td class="r mono qq">${pct(t.halted/t.spend)}</td><td class="r mono">341</td></tr>
+            <tr><td>${chip("failed","failed")}</td><td class="q">The run ended in error.</td>
+              <td class="money">${money0(t.failed)}</td><td class="r mono qq">${pct(t.failed/t.spend)}</td><td class="r mono">183</td></tr>
+          </tbody>
+          <tfoot><tr><td class="strong">Unproven, total</td><td class="q">The three classes above proven and accepted.</td>
+            <td class="money" style="font-weight:600">${money0(unproven)}</td><td class="r mono qq">${pct(unproven/t.spend)}</td><td class="r mono">1,626</td></tr></tfoot>
+        </table></div>
+      </div>
+      <div class="panel-f"><span>${int(t.runs)} runs · ${int(t.steps)} steps · ${int(t.modelCalls)} model calls · ${int(t.toolCalls)} tool calls</span>
+        <span class="mla">${basis("mixed")}</span></div>
+    </div>
+
+    <div class="split">
+      <div class="panel"><div class="panel-h"><div class="stack"><h2>Productive ratio by agent</h2>
+        <p class="sub">The share of steps that advanced the task. Repeated identical tool calls, denials, retries after provider errors, and steps after a halt are unproductive by definition.</p></div></div>
+        <div class="panel-b stack g12">${prod.map(p=>`
+          <div class="stack g6"><div class="row g8" style="font-size:12px">
+            <span class="mono" style="color:var(--body);font-size:11.5px">${esc(p.n)}</span>
+            <span class="mla mono" style="color:var(--fg)">${p.v.toFixed(2)}</span></div>
+          <div class="bar proven"><i style="width:${(p.v*100).toFixed(1)}%"></i></div></div>`).join("")}
+        </div>
+        <div class="panel-f"><span>Workspace mean <span class="mono" style="color:var(--fg)">${t.productive.toFixed(2)}</span></span></div>
+      </div>
+      <div class="panel"><div class="panel-h"><div class="stack"><h2>Proven spend by agent</h2>
+        <p class="sub">What each agent's tokens bought that a witness could prove.</p></div></div>
+        <div class="panel-b flush"><div class="tw"><table>
+          <thead><tr><th>Agent</th><th class="r">Spend</th><th class="r">Proven</th><th class="r">Proven share</th></tr></thead>
+          <tbody>
+            <tr><td class="mono" style="font-size:11.5px">acme.core.stella-ci</td><td class="money">${money0(M(5203.88))}</td><td class="money" style="color:var(--st-proven)">${money0(M(2894.16))}</td><td class="r mono qq">55.6%</td></tr>
+            <tr><td class="mono" style="font-size:11.5px">acme.core.release-manager</td><td class="money">${money0(M(8914.07))}</td><td class="money" style="color:var(--st-proven)">${money0(M(4116.44))}</td><td class="r mono qq">46.2%</td></tr>
+            <tr><td class="mono" style="font-size:11.5px">acme.core.docs-writer</td><td class="money">${money0(M(1442.48))}</td><td class="money" style="color:var(--st-proven)">${money0(M(612.94))}</td><td class="r mono qq">42.5%</td></tr>
+            <tr><td class="mono" style="font-size:11.5px">acme.core.triage</td><td class="money">${money0(M(2847.19))}</td><td class="money" style="color:var(--st-proven)">${money0(M(289.74))}</td><td class="r mono qq">10.2%</td></tr>
+          </tbody></table></div></div>
+        <div class="panel-f"><span class="qq">acme.core.triage runs at the harness tier — most of its work carries no witness.</span></div>
+      </div>
+    </div>
+  </div>`;
+}
+</script>
+<script>
+/* ==================== Spend › Operators ==================== */
+function viewOperators(){
+  const slug = ROUTE.sub || "marcus-bell";
+  const o = DB.operators[slug] || DB.operators["marcus-bell"];
+  const maxA=Math.max(...o.agents.map(a=>a.v)), maxM=Math.max(...o.models.map(m=>m.v));
+  const bp=o.budget, use=bp.spent/bp.limit;
+  const mcls = use>=0.95?"crit":use>=0.8?"warn":"";
+  return `
+  <div class="stack g16" style="margin-top:18px">
+    <div class="row g8 wrapr">
+      <div class="seg" role="group" aria-label="Operator">${Object.keys(DB.operators).map(k=>
+        `<button data-op="${k}" aria-pressed="${k===slug}">${esc(DB.operators[k].name)}</button>`).join("")}</div>
+      <span class="qq mla" style="font-size:11.5px">The report a team lead reads.</span>
+    </div>
+
+    <div class="panel">
+      <div class="panel-h">
+        <span class="av" style="width:34px;height:34px;font-size:12px">${o.initials}</span>
+        <div class="stack" style="min-width:0"><h2>${esc(o.name)}</h2>
+          <p class="sub">${esc(o.role)} · <span class="mono">${esc(o.email)}</span></p></div>
+        <div class="mla row g8 wrapr">
+          <button class="btn sm" data-dlg="budget">Set budget</button>
+          <button class="btn sm" data-dlg="statement">Export</button></div>
+      </div>
+      <div class="panel-b flush">
+        <div class="tiles" style="border:0;border-radius:0;border-bottom:1px solid var(--border)">
+          <div class="tile"><span class="tile-k">Spend</span><span class="tile-v sm">${money0(o.spend)}</span>
+            <span class="tile-m">${int(o.runs)} runs · ${o.agents.length} agents</span></div>
+          <div class="tile"><span class="tile-k">Proven spend</span><span class="tile-v sm" style="color:var(--st-proven)">${money0(o.proven)}</span>
+            <span class="tile-m">${pct(o.proven/o.spend)} · ${int(o.provenRuns)} flipped</span></div>
+          <div class="tile"><span class="tile-k">Accepted spend</span><span class="tile-v sm">${money0(o.accepted)}</span>
+            <span class="tile-m">verified by a human, not a witness</span></div>
+          <div class="tile"><span class="tile-k">Productive ratio</span><span class="tile-v sm">${o.productive.toFixed(2)}</span>
+            <span class="tile-m">workspace mean ${DB.totals.productive.toFixed(2)}</span></div>
+          <div class="tile"><span class="tile-k">Budget position</span><span class="tile-v sm">${pct(use)}</span>
+            <span class="tile-m">${money0(bp.spent)} of ${money0(bp.limit)}</span></div>
+        </div>
+        <div class="panel-b stack g8" style="border-bottom:1px solid var(--border)">
+          <div class="row g10 wrapr" style="font-size:12px">
+            <span class="q">${esc(bp.period)} budget</span>${chip(bp.mode,bp.mode==="hard"?"denied":"neutral")}
+            <span class="mla mono">${money0(bp.limit-bp.spent)} left</span></div>
+          <div class="meter ${mcls}"><i style="width:${Math.min(100,use*100).toFixed(1)}%"></i>
+            ${bp.notify.map(n=>`<span class="notch" style="left:${n}%"></span>`).join("")}</div>
+          <div class="row g10 wrapr" style="font-size:11px">
+            <span class="qq">notify at ${bp.notify.join("%, ")}%</span>
+            ${bp.fired.length?`<span class="qq">·</span><span style="color:var(--st-approval)">notice sent at ${bp.fired.join("% and ")}%</span>`:""}
+            <span class="mla qq">a soft budget notifies; it does not stop a call</span></div>
+        </div>
+        ${o.flagged?`<div class="panel-b" style="border-bottom:1px solid var(--border)">
+          <div class="note"><b>${money0(o.flagged.micros)} across ${o.flagged.runs} runs arrived without an operator.</b>
+          Those runs are attributed to the agent's owning operator and flagged here — never dropped, never spread across operators.</div></div>`:""}
+      </div>
+    </div>
+
+    <div class="split">
+      <div class="panel"><div class="panel-h"><h2>Their agents</h2></div>
+        <div class="panel-b flush"><div class="tw"><table>
+          <thead><tr><th>Agent</th><th class="r">Spend</th><th class="r" style="width:110px">Share</th><th class="r">Runs</th><th class="r">Proven runs</th></tr></thead>
+          <tbody>${o.agents.map(a=>`<tr><td class="mono" style="font-size:11.5px">${esc(a.n)}</td>
+            <td class="money">${money0(a.v)}</td><td class="r">${barCell(a.v,maxA)}</td>
+            <td class="r mono qq">${int(a.r)}</td><td class="r mono" style="color:var(--st-proven)">${int(a.pr)}</td></tr>`).join("")}</tbody>
+        </table></div></div></div>
+      <div class="panel"><div class="panel-h"><h2>By model and provider</h2></div>
+        <div class="panel-b flush"><div class="tw"><table>
+          <thead><tr><th>Model</th><th>Provider</th><th class="r">Spend</th><th class="r" style="width:110px">Share</th></tr></thead>
+          <tbody>${o.models.map(m=>`<tr><td class="mono" style="font-size:11.5px">${esc(m.n)}</td>
+            <td class="qq" style="font-size:11.5px">${esc(m.p)}</td><td class="money">${money0(m.v)}</td>
+            <td class="r">${barCell(m.v,maxM,"proven")}</td></tr>`).join("")}</tbody>
+        </table></div></div></div>
+    </div>
+
+    <div class="panel"><div class="panel-h"><div class="stack"><h2>Their findings</h2>
+      <p class="sub">Ranked by money at stake, filtered to this operator's agents.</p></div></div>
+      <div class="panel-b flush"><div class="tw"><table>
+        <tbody>${o.findings.map(id=>{const f=DB.findings.find(x=>x.id===id);return `
+          <tr class="clickable" data-find="${f.id}" tabindex="0" role="button">
+            <td style="color:var(--fg);font-weight:500">${esc(f.kind)}<div class="id">${f.id}</div></td>
+            <td class="mono qq" style="font-size:11.5px">${esc(f.scope)}</td>
+            <td class="money">${f.noMoney?"—":money0(f.micros)}</td>
+            <td class="r qq">›</td></tr>`;}).join("")}</tbody>
+      </table></div></div></div>
+  </div>`;
+}
+
+/* ==================== Spend › Agent view ==================== */
+function viewAgentSpend(){
+  const a = DB.agents["stella-ci"];
+  const vals = a.perProven.map(p=>p.v);
+  const maxT = Math.max(...a.tools.map(t=>t.c)), totT = sum(a.tools.map(t=>t.c));
+  const maxV = Math.max(...a.verdicts.map(v=>v.n));
+  const d=a.decisions, dt=d.allow+d.approve+d.deny;
+  return `
+  <div class="stack g16" style="margin-top:18px">
+    ${ROUTE.sub && ROUTE.sub!=="stella-ci" ? `<div class="note warn"><b>Only acme.core.stella-ci is mocked in this flow.</b>
+      The agent view is the same report for any agent in the fleet.</div>`:""}
+    <div class="row g8 wrapr">
+      <div class="seg" role="group" aria-label="Agent">${DB.attr.agent.rows.map(r=>{
+        const s=r.n.split(".").pop();
+        return `<button data-ag="${s}" aria-pressed="${s==="stella-ci"}">${esc(s)}</button>`;}).join("")}</div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-h">
+        <div class="stack" style="min-width:0"><h2 class="mono" style="font-size:15px">${esc(a.key)}</h2>
+          <p class="sub">${esc(a.harness)} · operator ${esc(a.owner)} · definition <span class="mono">${esc(a.def)}</span> at <span class="mono">${a.commit}</span></p></div>
+        <div class="mla row g6 wrapr">${chip("enforcement tier · "+a.tier,"allowed")}${chip("replay grade "+a.grade,"neutral")}</div>
+      </div>
+      <div class="panel-b flush"><div class="tiles" style="border:0;border-radius:0">
+        <div class="tile"><span class="tile-k">Spend</span><span class="tile-v sm">${money0(a.spend)}</span><span class="tile-m">${int(a.runs)} runs</span></div>
+        <div class="tile"><span class="tile-k">Proven spend</span><span class="tile-v sm" style="color:var(--st-proven)">${money0(a.proven)}</span><span class="tile-m">${int(a.provenRuns)} flipped</span></div>
+        <div class="tile"><span class="tile-k">Spend per proven run</span><span class="tile-v sm">${money0(M(a.proven/1e6/a.provenRuns))}</span><span class="tile-m"><span class="delta up">▼ 5.8%</span> against August</span></div>
+        <div class="tile"><span class="tile-k">Productive ratio</span><span class="tile-v sm">${a.productive.toFixed(2)}</span><span class="tile-m">best in the workspace</span></div>
+        <div class="tile"><span class="tile-k">Cache hit rate</span><span class="tile-v sm">${pct(a.cacheHit)}</span><span class="tile-m">workspace ${pct(DB.totals.cacheHit)}</span></div>
+      </div></div>
+    </div>
+
+    <div class="split">
+      <div class="panel"><div class="panel-h"><div class="stack"><h2>Spend per proven run, 7 months</h2>
+        <p class="sub">Whether this agent is getting cheaper at producing verified work. It is: down 51.9% since March.</p></div></div>
+        <div class="panel-b"><div class="chartwrap">${lineChart(vals,{h:180,min:4,max:10,ticks:3,
+          fmt:v=>money(M(v),{}),color:"var(--st-proven)",aria:"Spend per proven run falls from $9.84 in March 2026 to $4.73 in September 2026",
+          xlab:a.perProven.map((p,i)=>[i,p.m.split(" ")[0]])})}</div></div>
+        <div class="panel-f"><span class="mono">${money0(M(9.84))} → ${money0(M(4.73))}</span><span class="qq">per proven run</span></div>
+      </div>
+      <div class="panel"><div class="panel-h"><div class="stack"><h2>Tool-call mix</h2>
+        <p class="sub">${int(totT)} tool calls this period. Only <span class="mono">ci.run_tests</span> carries a declared price.</p></div></div>
+        <div class="panel-b flush"><div class="tw"><table>
+          <thead><tr><th>Tool version</th><th class="r">Calls</th><th class="r" style="width:110px">Share</th><th class="r">Priced</th><th>Effect</th></tr></thead>
+          <tbody>${a.tools.map(t=>`<tr><td class="mono" style="font-size:11.5px">${esc(t.n)}</td>
+            <td class="r mono">${int(t.c)}</td><td class="r">${barCell(t.c,maxT)}</td>
+            <td class="money">${t.pr?money0(t.pr):'<span class="qq">—</span>'}</td>
+            <td>${chip(t.d,t.d==="read"?"neutral":"approval")}</td></tr>`).join("")}</tbody>
+        </table></div></div>
+        <div class="panel-f"><span>${chip(int(d.allow)+" allowed","allowed")}</span>
+          <span>${chip(int(d.approve)+" required approval","approval")}</span>
+          <span>${chip(int(d.deny)+" denied","denied")}</span>
+          <span class="mla qq">denials are free — they are not governed actions</span></div>
+      </div>
+    </div>
+
+    <div class="split">
+      <div class="panel"><div class="panel-h"><div class="stack"><h2>Verdicts</h2>
+        <p class="sub">The closed vocabulary. Only <span class="mono">flipped</span> marks a run proven.</p></div></div>
+        <div class="panel-b stack g10">${a.verdicts.map(v=>`
+          <div class="stack g6"><div class="row g8" style="font-size:12px">
+            ${chip(v.v,v.c)}<span class="mla mono" style="color:var(--fg)">${int(v.n)}</span>
+            <span class="mono qq" style="font-size:11px;width:46px;text-align:right">${pct(v.n/a.runs)}</span></div>
+          <div class="bar ${v.c==="proven"?"proven":""}"><i style="width:${((v.n/maxV)*100).toFixed(1)}%;${v.c==="critical"?"background:var(--st-critical)":v.c==="failed"?"background:var(--st-failed)":v.c==="neutral"?"background:var(--st-neutral)":""}"></i></div></div>`).join("")}
+        </div>
+        <div class="panel-f"><span class="qq">3 runs recorded <span class="mono" style="color:var(--st-critical)">tampered</span> — the pull request moved the ground under the witness.</span></div>
+      </div>
+      <div class="panel"><div class="panel-h"><h2>Across operators</h2></div>
+        <div class="panel-b flush"><div class="tw"><table>
+          <thead><tr><th>Operator</th><th class="r">Spend</th><th class="r">Runs</th><th class="r">Per run</th></tr></thead>
+          <tbody>${a.operators.map(op=>`<tr><td class="strong">${esc(op.n)}</td>
+            <td class="money">${money0(op.v)}</td><td class="r mono qq">${int(op.r)}</td>
+            <td class="money">${money0(Math.round(op.v/op.r))}</td></tr>`).join("")}</tbody></table></div></div>
+        <div class="panel-f"><span class="qq">One identity per agent, never per run. The operator is who the run was for.</span></div>
+      </div>
+    </div>
+  </div>`;
+}
+</script>
+<script>
+/* ==================== Spend › Run waterfall ==================== */
+function viewWaterfall(){
+  const r=DB.run; let cum=0;
+  return `
+  <div class="stack g16" style="margin-top:18px">
+    <div class="panel">
+      <div class="panel-h">
+        <div class="stack" style="min-width:0"><h2 class="mono" style="font-size:15px">${r.id}</h2>
+          <p class="sub"><span class="mono">${esc(r.agent)}</span> · operator ${esc(r.operator)} ·
+            task <a href="#/acme/core-platform/spend/waterfall">${esc(r.task)}</a> ${esc(r.taskTitle)}</p></div>
+        <div class="mla row g6 wrapr">${chip("enforcement tier · "+r.tier,"allowed")}${chip("verdict · "+r.verdict,"proven")}${chip("replay grade "+r.grade,"neutral")}</div>
+      </div>
+      <div class="panel-b flush"><div class="tiles" style="border:0;border-radius:0">
+        <div class="tile"><span class="tile-k">Run cost</span><span class="tile-v sm">${money0(r.total)}</span><span class="tile-m">${basis(r.basis)}</span></div>
+        <div class="tile"><span class="tile-k">Turns · steps</span><span class="tile-v sm">${r.turns} · ${r.steps}</span><span class="tile-m">${r.modelCalls} model calls, ${r.toolCalls} tool calls</span></div>
+        <div class="tile"><span class="tile-k">Verdict</span><span class="tile-v sm" style="color:var(--st-proven)">flipped</span><span class="tile-m">oracle <span class="mono">${r.oracle}</span></span></div>
+        <div class="tile"><span class="tile-k">Productive ratio</span><span class="tile-v sm">${r.productive.toFixed(2)}</span><span class="tile-m">32 of 41 steps kept</span></div>
+        <div class="tile"><span class="tile-k">Pull request</span><span class="tile-v sm" style="font-size:15px">${esc(r.pr.split("#")[1])}</span><span class="tile-m mono" style="font-size:11px">${esc(r.pr)}</span></div>
+      </div></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-h"><div class="stack"><h2>Cost by turn, accumulating</h2>
+        <p class="sub">Bars are the turn's cost against the left scale; the gold line is cost accumulating to
+          ${money0(r.total)}. The number above each bar is that turn's cache hit rate.</p></div></div>
+      <div class="panel-b"><div class="chartwrap">${waterfall(r)}</div>
+        <div class="legend" style="margin-top:10px">
+          <span><i style="background:var(--st-approval)"></i>turn cost</span>
+          <span><i style="background:var(--st-failed)"></i>turn carrying a finding</span>
+          <span><i style="background:var(--st-proven)"></i>turn carrying the proof frame</span>
+          <span><i style="background:var(--gold)"></i>cumulative cost</span>
+        </div>
+      </div>
+      <div class="panel-b flush" style="border-top:1px solid var(--border)"><div class="tw"><table>
+        <thead><tr><th>Turn</th><th>What happened</th><th class="r">Steps</th><th class="r">Cost</th><th class="r">Cumulative</th><th class="r">Cache</th><th>Pinned</th></tr></thead>
+        <tbody>${r.t.map(t=>{cum+=t.c;return `<tr${t.proof||t.find?' style="background:var(--hl)"':""}>
+          <td class="mono strong">T${t.n}</td><td class="q">${esc(t.note)}</td>
+          <td class="r mono qq">${t.steps}</td><td class="money">${money0(M(t.c))}</td>
+          <td class="money qq">${money0(M(cum))}</td><td class="r mono qq">${t.cache.toFixed(1)}%</td>
+          <td>${t.proof?chip("proof.observed · frame "+r.proofFrame,"proven"):t.find?`<button class="chip failed" data-find="${t.find}"><span class="dot"></span>${t.find}</button>`:'<span class="qq">—</span>'}</td></tr>`;}).join("")}</tbody>
+      </table></div></div>
+      <div class="panel-f"><span>Started <span class="mono">${r.started}</span></span><span class="qq">·</span>
+        <span>Sealed <span class="mono">${r.sealed}</span></span>
+        <span class="mla">${basis("gateway_observed — every frame carries a provider request id")}</span></div>
+    </div>
+
+    <div class="note ok"><b>The proof frame is turn 7, frame ${r.proofFrame}.</b>
+      The witness failed on <span class="mono">${esc(r.repo)}@main</span> and passed on <span class="mono">${esc(r.pr)}</span> for the same
+      normalized command, in a runner this agent could never see or reach. The agent was told one word: pass. That flip is what makes
+      ${money0(r.total)} of this run proven spend rather than unverified.</div>
+  </div>`;
+}
+
+/* ==================== Spend › Reconciliation ==================== */
+function viewRecon(){
+  const R=DB.recon, e=R.exception;
+  return `
+  <div class="stack g16" style="margin-top:18px">
+    <div class="split">${R.months.map(m=>`
+      <div class="panel" style="${m.status==="matched"?"border-color:color-mix(in srgb,var(--st-allowed) 34%,var(--border))":""}">
+        <div class="panel-h"><div class="stack"><h2>${esc(m.m)}</h2>
+          <p class="sub">${esc(m.note)}</p></div>
+          <span class="mla">${chip(m.status,m.status==="matched"?"allowed":"failed")}</span></div>
+        <div class="panel-b stack g12">
+          <div class="row g20 wrapr">
+            <div class="stack"><span class="tile-k">Provider statements</span><span class="mono" style="font-size:16px;color:var(--fg)">${money0(m.provider)}</span></div>
+            <div class="stack"><span class="tile-k">Matched to a frame</span><span class="mono" style="font-size:16px;color:var(--fg)">${money0(m.matched)}</span></div>
+            <div class="stack"><span class="tile-k">Variance</span><span class="mono" style="font-size:16px;color:${m.variance?"var(--st-failed)":"var(--st-allowed)"}">${m.variance?money0(m.variance):money0(0)}</span></div>
+          </div>
+          <div class="stack g6"><div class="row g8" style="font-size:11.5px"><span class="q">Share of provider spend matched to a frame</span>
+            <span class="mla mono" style="color:var(--fg)">${m.pct.toFixed(2)}%</span></div>
+            <div class="meter"><i style="width:${m.pct}%;background:${m.variance?"var(--st-failed)":"var(--st-allowed)"}"></i></div></div>
+          <div class="tw"><table><thead><tr><th>Match level</th><th class="q" style="text-transform:none;letter-spacing:0;font-size:11px">How it matched</th><th class="r">Share</th></tr></thead>
+            <tbody>
+              <tr><td class="mono" style="font-size:11.5px">request_id</td><td class="cellsub">Provider request id to a single frame</td><td class="r mono">${m.levels.request_id.toFixed(1)}%</td></tr>
+              <tr><td class="mono" style="font-size:11.5px">key_day</td><td class="cellsub">Key, model, day and token-class totals to the rollup</td><td class="r mono">${m.levels.key_day.toFixed(1)}%</td></tr>
+              <tr><td class="mono" style="font-size:11.5px">invoice_line</td><td class="cellsub">Invoice line to the monthly rollup</td><td class="r mono">${m.levels.invoice_line.toFixed(1)}%</td></tr>
+            </tbody></table></div>
+        </div>
+        <div class="panel-f"><span>${m.exceptions?`${m.exceptions} open exception`:"No open exceptions"}</span>
+          <span class="mla qq">cost.reconciliations</span></div>
+      </div>`).join("")}
+    </div>
+
+    <div class="panel" style="border-color:color-mix(in srgb,var(--st-failed) 32%,var(--border))">
+      <div class="panel-h"><div class="stack"><h2>Open exception <span class="mono" style="font-weight:400;color:var(--muted)">${e.id}</span></h2>
+        <p class="sub">Any variance above one cent per key-day opens an exception, with the unmatched frames or the unmatched provider lines attached.</p></div>
+        <div class="mla row g6 wrapr">${chip("exception","failed")}<button class="btn sm" data-dlg="resolve">Resolve with a note</button></div></div>
+      <div class="panel-b stack g14">
+        <dl class="kv">
+          <dt>Provider key</dt><dd><span class="mono">${e.key}</span> · ${esc(e.provider)} ${esc(e.region)}</dd>
+          <dt>Level</dt><dd><span class="mono">${e.level}</span> · ${e.day}</dd>
+          <dt>Matched</dt><dd class="mono">${money0(e.matched)}</dd>
+          <dt>Provider</dt><dd class="mono">${money0(e.provider_micros)}</dd>
+          <dt>Variance</dt><dd class="mono" style="color:var(--st-failed)">${money0(e.variance)}</dd>
+          <dt>Opened</dt><dd class="mono">${e.opened}</dd>
+        </dl>
+        <div class="note warn"><b>Cause.</b> ${esc(e.cause)}</div>
+        <div class="stack g8"><h3>Unmatched provider lines (${e.lines.length})</h3>
+          <div class="tw"><table><thead><tr><th>Model</th><th>Token class</th><th class="r">Units</th><th class="r">Provider</th></tr></thead>
+            <tbody>${e.lines.map(l=>`<tr><td class="mono" style="font-size:11.5px">${esc(l.model)}</td>
+              <td class="mono qq" style="font-size:11.5px">${esc(l.cls)}</td><td class="r mono">${esc(l.units)}</td>
+              <td class="money">${money0(l.v)}</td></tr>`).join("")}</tbody>
+            <tfoot><tr><td colspan="3" class="strong">Variance</td><td class="money" style="color:var(--st-failed)">${money0(e.variance)}</td></tr></tfoot></table></div>
+          <p class="sub">Unmatched frames: <span class="mono">${e.frames}</span> — nothing on Oxagen's side is missing; the provider lines carry no request id that resolves to a frame.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel"><div class="panel-h"><div class="stack"><h2>Matched to a frame, by month</h2>
+      <p class="sub">The target reported on this page: the share of provider spend matched to a frame, and the open variance in dollars.</p></div></div>
+      <div class="panel-b flush"><div class="tw"><table>
+        <thead><tr><th>Period</th><th class="r">Matched</th><th class="r" style="width:220px">&nbsp;</th><th>Status</th></tr></thead>
+        <tbody>${R.history.map(h=>`<tr><td class="strong">${esc(h.m)}</td>
+          <td class="r mono">${h.p.toFixed(2)}%</td>
+          <td><div class="meter"><i style="width:${h.p}%;background:${h.p>=100?"var(--st-allowed)":"var(--st-approval)"}"></i></div></td>
+          <td>${h.p>=100?chip("matched to the cent","allowed"):chip("variance","neutral")}</td></tr>`).join("")}</tbody>
+      </table></div></div>
+      <div class="panel-f"><span class="qq">Client-attested frames without a provider request id match only at level 2 and are labelled as such.</span></div>
+    </div>
+  </div>`;
+}
+</script>
+<script>
+/* ==================== Spend › Budgets ==================== */
+function viewBudgets(){
+  const b=DB.breach;
+  const grp = {org:"Organization",workspace:"Workspace",operator:"Operator",agent:"Agent"};
+  return `
+  <div class="stack g16" style="margin-top:18px">
+    <div class="panel">
+      <div class="panel-h"><div class="stack"><h2>Budgets at every level</h2>
+        <p class="sub">A hard budget is enforced at the model proxy before the call, and in the policy bundle for harness-tier runs.
+          A soft budget notifies and does not stop a call.</p></div>
+        <button class="btn sm mla" data-dlg="budget">Set budget</button></div>
+      <div class="panel-b flush"><div class="tw"><table>
+        <thead><tr><th>Scope</th><th>Name</th><th class="r">Limit</th><th class="r">Spent</th><th style="width:180px">Position</th><th class="r">Left</th><th>Period</th><th>Mode</th></tr></thead>
+        <tbody>${DB.budgets.map(x=>{
+          const u=x.spent/x.limit, cls=u>=0.9?"crit":u>=0.8?"warn":"";
+          return `<tr${x.near?' style="background:var(--hl)"':""}>
+            <td class="qq" style="font-size:11px;text-transform:uppercase;letter-spacing:.07em">${grp[x.scope]}</td>
+            <td class="strong"${/\./.test(x.name)?' style="font-family:var(--mono);font-size:11.5px"':""}>${esc(x.name)}
+              ${x.finding?` <button class="chip neutral" data-find="${x.finding}"><span class="dot"></span>headroom finding</button>`:""}</td>
+            <td class="money qq">${money0(x.limit)}</td>
+            <td class="money">${money0(x.spent)}</td>
+            <td><div class="meter ${cls}"><i style="width:${Math.min(100,u*100).toFixed(1)}%"></i>
+              ${x.notify.map(n=>`<span class="notch" style="left:${n}%"></span>`).join("")}</div>
+              <div class="cellsub">${pct(u)}${x.fired.length?` · notice at ${x.fired.join("%, ")}%`:""}</div></td>
+            <td class="money qq">${money0(x.limit-x.spent)}</td>
+            <td class="qq" style="font-size:11.5px">${esc(x.period)}</td>
+            <td>${chip(x.mode,x.mode==="hard"?"denied":"neutral")}</td></tr>`;}).join("")}</tbody>
+      </table></div></div>
+      <div class="panel-f"><span class="qq">Notches on each meter are the notify thresholds. billing.budgets · running counter updated by the recorder.</span></div>
+    </div>
+
+    <div class="split">
+      <div class="panel" style="border-color:color-mix(in srgb,var(--st-failed) 30%,var(--border))">
+        <div class="panel-h"><div class="stack"><h2>Near a hard limit</h2>
+          <p class="sub">One budget is inside its last notify threshold.</p></div></div>
+        <div class="panel-b stack g10">
+          <div class="row g8 wrapr"><span class="mono" style="color:var(--fg)">acme.core.triage</span>${chip("hard","denied")}
+            <span class="mla mono">${money0(M(2847.19))} of ${money0(M(3000))}</span></div>
+          <div class="meter crit"><i style="width:94.9%"></i><span class="notch" style="left:60%"></span><span class="notch" style="left:85%"></span><span class="notch" style="left:95%"></span></div>
+          <p class="sub">94.9% of a rolling 7-day hard budget. At 100% the model proxy refuses the next call, writes a
+            <span class="mono">policy.decision</span> frame, and by policy pauses the run. ${money0(M(152.81))} left.</p>
+        </div>
+        <div class="panel-f"><button class="btn sm" data-dlg="budget">Raise the limit</button><span class="qq mla">notice sent at 60% and 85%</span></div>
+      </div>
+      <div class="panel"><div class="panel-h"><div class="stack"><h2>Last breach</h2>
+        <p class="sub">What a hard budget actually does when it is reached.</p></div></div>
+        <div class="panel-b stack g12">
+          <dl class="kv">
+            <dt>Agent</dt><dd class="mono">${esc(b.agent)}</dd>
+            <dt>At</dt><dd class="mono">${b.at}</dd>
+            <dt>Limit</dt><dd class="mono">${money0(b.limit)} monthly, hard</dd>
+            <dt>Run</dt><dd class="mono">${b.run}</dd>
+            <dt>Recorded as</dt><dd class="mono">${esc(b.frame)}</dd>
+            <dt>Outcome</dt><dd>${chip(b.outcome,"approval")}</dd>
+          </dl>
+          <div class="note">${esc(b.note)}</div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ==================== Billing (org) ==================== */
+function viewBilling(){
+  const B=DB.billing;
+  const runPct = Math.min(100,(B.runs/13124)*100);
+  const freeShare = (B.freeRuns/B.runs)*100, paidShare = 100-freeShare;
+  return `
+  <div class="stack g16">
+    <div class="row wrapr g16" style="align-items:flex-end">
+      <div class="stack"><p class="eyebrow">Organization · Acme Robotics</p><h1>Billing</h1>
+        <p class="sub">What Oxagen charges. Customer token spend is on <a href="#/acme/core-platform/spend/findings">Spend</a> and is billed at zero.</p></div>
+      <div class="row g8 wrapr mla">${curPicker()}
+        <button class="btn" data-dlg="plan">Change plan</button></div>
+    </div>
+    ${fxBanner()}
+
+    <div class="split">
+      <div class="panel"><div class="panel-h"><div class="stack"><h2>Plan</h2>
+        <p class="sub">Monthly, by card, no minimum, cancel any time.</p></div>
+        <span class="mla">${chip("Team","allowed")}</span></div>
+        <div class="panel-b"><dl class="kv">
+          <dt>Plan</dt><dd>${esc(B.plan)} · ${esc(B.cadence)}</dd>
+          <dt>Period</dt><dd class="mono">${B.periodStart} → ${B.periodEnd} · day ${B.elapsed} of ${B.days}</dd>
+          <dt>Payment</dt><dd>${esc(B.card)}</dd>
+          <dt>Stripe</dt><dd class="mono" style="font-size:11.5px">${B.stripeCustomer} · ${B.sub}</dd>
+          <dt>Discount</dt><dd>${chip("onboarding · 20% off usage","proven")} <span class="qq">first run ${B.firstRun}, converted ${B.converted} — 4 days. Runs to ${B.discountEnds}.</span></dd>
+          <dt>Funding</dt><dd><span class="mono">customer_key</span> — ${esc(B.platformTokens.note)}</dd>
+        </dl></div>
+        <div class="panel-f"><span class="qq">Stripe holds plans, customers and invoices. Oxagen holds the meter.</span></div>
+      </div>
+
+      <div class="panel"><div class="panel-h"><div class="stack"><h2>This period</h2>
+        <p class="sub">A run counts when it is sealed with at least one model call.</p></div></div>
+        <div class="panel-b stack g14">
+          <div class="row g20 wrapr">
+            <div class="stack"><span class="tile-k">Billable runs</span><span class="mono" style="font-size:24px;color:var(--fg);letter-spacing:-.02em">${int(B.runs)}</span></div>
+            <div class="stack"><span class="tile-k">Charged so far</span><span class="mono" style="font-size:24px;color:var(--fg);letter-spacing:-.02em">${money0(B.net)}</span></div>
+            <div class="stack mla"><span class="tile-k">Projected</span><span class="mono" style="font-size:17px;color:var(--muted)">${money0(B.projection.micros)}</span>
+              <span class="qq" style="font-size:11px">${esc(B.projection.note)}</span></div>
+          </div>
+          <div class="stack g6">
+            <div class="stack-bar" style="height:26px">
+              <span style="flex:${freeShare} 0 0;background:var(--st-allowed);color:#10100F">1,000 free</span>
+              <span style="flex:${paidShare} 0 0;background:var(--gold);color:#10100F">${int(B.runs-B.freeRuns)} at $0.30</span>
+            </div>
+            <div class="row g8 qq" style="font-size:11px"><span>0</span><span class="mla">${int(B.runs)} runs · next tier at 10,000</span></div>
+          </div>
+          <div class="note ok"><b>The first 1,000 runs every month are free, with every governance feature on.</b>
+            Runs Oxagen halted before any model call, in-app agent runs and witness runs never count — the customer never pays for
+            Oxagen saying no, or for Oxagen proving work.</div>
+          <div class="tw"><table>
+            <thead><tr><th>Not counted this period</th><th class="r">Runs</th></tr></thead>
+            <tbody>${B.notCounted.map(n=>`<tr><td class="q">${esc(n.n)}</td><td class="r mono">${int(n.v)}</td></tr>`).join("")}</tbody>
+            <tfoot><tr><td class="strong">Free of charge</td><td class="r mono strong">${int(sum(B.notCounted.map(n=>n.v)))}</td></tr></tfoot>
+          </table></div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+</script>
+<script>
+/* Billing, continued — tiers, meters, invoices, the annual offer */
+function billingRest(){
+  const B=DB.billing, A=B.annual;
+  return `
+  <div class="stack g16" style="margin-top:16px">
+    <div class="panel">
+      <div class="panel-h"><div class="stack"><h2>This period against the tiers</h2>
+        <p class="sub">Cheaper per run as volume grows. Oxagen never marks up tokens.</p></div></div>
+      <div class="panel-b flush"><div class="tw"><table>
+        <thead><tr><th>Tier</th><th class="r">Price per run</th><th class="r">Runs this period</th><th style="width:200px">&nbsp;</th><th class="r">Charge</th></tr></thead>
+        <tbody>${B.tiers.map(t=>`<tr${t.runs?'':' style="opacity:.5"'}>
+          <td class="strong">${esc(t.label)}</td>
+          <td class="r mono">${t.price?money(M(t.price),{}):'<span style="color:var(--st-allowed)">free</span>'}</td>
+          <td class="r mono">${int(t.runs)}</td>
+          <td>${t.runs?`<div class="meter"><i style="width:${((t.runs/(t.hi?t.hi-t.lo+1:t.runs))*100).toFixed(1)}%;background:${t.price?"var(--gold)":"var(--st-allowed)"}"></i></div>`:""}</td>
+          <td class="money">${money0(t.micros)}</td></tr>`).join("")}</tbody>
+      </table></div></div>
+      <div class="panel-b stack g8" style="border-top:1px solid var(--border)">
+        <div class="row g10" style="font-size:12.5px"><span class="q">Usage this period</span><span class="mla mono" style="color:var(--fg)">${money0(B.usage)}</span></div>
+        <div class="row g10" style="font-size:12.5px"><span class="q">Onboarding discount, ${B.discountPct}% — converted within 7 days of the first run</span>
+          <span class="mla mono" style="color:var(--st-allowed)">− ${money0(B.discount)}</span></div>
+        <div class="row g10" style="font-size:14px;padding-top:8px;border-top:1px solid var(--border)">
+          <span style="color:var(--fg);font-weight:600">Charged so far</span>
+          <span class="mla mono" style="color:var(--fg);font-weight:600;font-size:16px">${mc(B.net)}</span></div>
+      </div>
+      <div class="panel-f"><span class="qq">Rounding to cents happens once, at the statement line, half-even. Everything above it is integer micro-USD.</span></div>
+    </div>
+
+    <div class="split">
+      ${B.meters.map(m=>`<div class="panel"><div class="panel-h"><div class="stack">
+        <h2>${esc(m.n)}</h2><p class="sub">${esc(m.sub)}</p></div></div>
+        <div class="panel-b"><div class="row g12" style="align-items:baseline">
+          <span class="mono" style="font-size:26px;color:var(--fg);letter-spacing:-.025em">${esc(m.v)}</span>
+          <span class="mla">${chip("reported, not priced","neutral")}</span></div>
+          <p class="sub" style="margin-top:8px">Source: <span class="mono">${esc(m.basis)}</span>. A secondary meter can be priced later without changing the model.</p></div>
+      </div>`).join("")}
+    </div>
+
+    <div class="panel" style="border-color:var(--gold-edge);background:linear-gradient(150deg,var(--gold-wash),transparent 55%)">
+      <div class="panel-h"><div class="stack"><h2>Prepay twelve months</h2>
+        <p class="sub">Annual prepayment takes a further 20% off, on top of the onboarding discount already running.</p></div></div>
+      <div class="panel-b stack g12">
+        <div class="tw"><table>
+          <tbody>
+            <tr><td class="q">Estimated annual usage at ${int(B.projection.runs)} runs a month</td><td class="money">${money0(A.list)}</td></tr>
+            <tr><td class="q">Onboarding discount, 20% — active to ${B.discountEnds}</td><td class="money" style="color:var(--st-allowed)">− ${money0(A.saveOnboarding)}</td></tr>
+            <tr><td class="q">Annual prepayment, a further 20%</td><td class="money" style="color:var(--st-allowed)">− ${money0(A.savePrepay)}</td></tr>
+          </tbody>
+          <tfoot><tr><td class="strong" style="font-size:14px">Billed once, today</td>
+            <td class="money" style="font-size:18px;font-weight:600;color:var(--fg)">${mc(A.afterPrepay)}</td></tr></tfoot>
+        </table></div>
+      </div>
+      <div class="panel-f" style="border-top-color:var(--gold-edge)">
+        <button class="btn primary" data-dlg="prepay">Prepay twelve months
+          <svg viewBox="0 0 24 24"><path d="M5 12h13m0 0-5-5m5 5-5 5"/></svg></button>
+        <span class="qq">Saves ${money0(A.saveOnboarding+A.savePrepay)} against list.</span>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-h"><div class="stack"><h2>Invoices</h2>
+        <p class="sub">Held by Stripe. Oxagen holds the meter that produced each line.</p></div></div>
+      <div class="panel-b flush"><div class="tw"><table>
+        <thead><tr><th>Period</th><th>Invoice</th><th class="r">Billable runs</th><th class="r">Total</th><th>Status</th><th class="r">Paid</th><th></th></tr></thead>
+        <tbody>${B.invoices.map(i=>`<tr class="clickable" data-dlg="invoice" data-inv="${i.id}" tabindex="0" role="button">
+          <td class="strong">${esc(i.m)}</td><td class="mono" style="font-size:11.5px;color:var(--muted)">${i.id}</td>
+          <td class="r mono qq">${int(i.runs)}</td><td class="money">${money0(i.v)}${i.free?' <span class="qq" style="font-size:10.5px">free tier</span>':""}</td>
+          <td>${chip(i.status,"allowed")}</td><td class="r mono qq">${i.on}</td>
+          <td class="r"><span class="qq">›</span></td></tr>`).join("")}</tbody>
+      </table></div></div>
+      <div class="panel-f"><span class="qq">There are no credits, no resellers, and no revenue dashboard. The Spend page is for the customer's money.</span></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-h"><div class="stack"><h2>Enterprise</h2>
+        <p class="sub">Committed use at 20 to 30 percent off the tiers, from ${money0(M(60000))} a year, invoiced annually.</p></div>
+        <button class="btn sm mla" data-dlg="enterprise">Talk to us</button></div>
+      <div class="panel-b"><div class="row g10 wrapr" style="font-size:12px">
+        ${["Dedicated data plane, or behind your firewall","SSO and SCIM","The hosted witness runner","Two-person mandates","Support with an SLA","Invoicing"]
+          .map(x=>`<span class="chip neutral"><span class="dot"></span>${esc(x)}</span>`).join("")}
+      </div></div>
+    </div>
+  </div>`;
+}
+</script>
+<script>
+/* ==================== states ==================== */
+const ICO = {
+  empty:`<svg viewBox="0 0 24 24"><path d="M4 7h16v12H4z"/><path d="M4 11h16M9 7V4h6v3"/></svg>`,
+  error:`<svg viewBox="0 0 24 24"><path d="M12 8v5M12 16.5v.01"/><path d="M10.3 3.9 2.6 17.4A2 2 0 0 0 4.3 20.4h15.4a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>`,
+  denied:`<svg viewBox="0 0 24 24"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V7.8a4 4 0 0 1 8 0v2.7M12 14.5v2.5"/></svg>`
+};
+function stateEmpty(page){
+  return `<div class="state">
+    <div class="state-ico">${ICO.empty}</div>
+    <h2>No sealed runs in this period</h2>
+    <p>${page==="billing"
+      ? "This organization has not billed a period yet. The first 1,000 runs each month are free, so the first invoice may well be $0.00."
+      : "Spend is computed from frames, and no run in core-platform has sealed between 1 and 11 September. Findings, attribution and reconciliation appear as soon as one does."}</p>
+    <div class="row g8 wrapr" style="justify-content:center">
+      <a class="btn" href="#/acme/core-platform/fleet">Open Fleet</a>
+      <button class="btn" data-dlg="period">Choose another period</button></div>
+    <p class="qq" style="font-size:11.5px">Runs that never reached a model call are free and are never counted here.</p>
+  </div>`;
+}
+function stateLoading(){
+  const bar=(w,h)=>`<div class="sk" style="width:${w};height:${h}"></div>`;
+  return `<div class="stack g16" aria-busy="true" aria-live="polite">
+    <div class="stack g8">${bar("120px","11px")}${bar("180px","26px")}${bar("340px","13px")}</div>
+    <div class="tiles">${[0,1,2,3,4].map(()=>`<div class="tile stack g8">${bar("70%","10px")}${bar("55%","22px")}${bar("85%","11px")}</div>`).join("")}</div>
+    <div class="panel"><div class="panel-h">${bar("220px","16px")}</div>
+      <div class="panel-b stack g12">${[0,1,2,3,4,5].map(()=>`<div class="row g12">${bar("34%","13px")}${bar("14%","13px")}${bar("22%","13px")}<div class="mla"></div>${bar("12%","13px")}</div>`).join("")}</div></div>
+    <span class="qq mono" style="font-size:11px">Reading cost.daily_totals · rollups are a derived index, rebuilt from frames on demand</span>
+  </div>`;
+}
+function stateError(){
+  return `<div class="state">
+    <div class="state-ico warn">${ICO.error}</div>
+    <h2>Spend rollups are rebuilding</h2>
+    <p><span class="mono">cost.daily_totals</span> is being rebuilt from frames after a price correction to
+      <span class="mono">pe_anth_opus5_in_0926</span>. Rollups are a derived index; the frames are the record, so nothing is lost —
+      the numbers are simply not addable yet.</p>
+    <div class="row g8 wrapr" style="justify-content:center">
+      <button class="btn" onclick="setState('loaded')">Try again</button>
+      <a class="btn" href="#/acme/core-platform/runs/run_8f3a2c91">Open a run instead</a></div>
+    <p class="qq mono" style="font-size:11px">rebuild_job job_4c81e0 · started 14:08:22Z · 61% · frames 1,842,006 of 3,018,441</p>
+  </div>`;
+}
+function stateDenied(page){
+  return `<div class="state">
+    <div class="state-ico deny">${ICO.denied}</div>
+    <h2>You cannot see ${page==="billing"?"this organization's billing":"core-platform spend"}</h2>
+    <p>You are signed in as <b>Dana Okafor</b> with the <span class="mono">billing</span> role on
+      <span class="mono">acme</span>, and <span class="mono">member</span> on the <span class="mono">finops</span> workspace only.
+      ${page==="billing"
+        ? "The billing role reads invoices for the organization, not the run meter behind them."
+        : "Reading another workspace's spend needs a grant on that workspace."}</p>
+    <div class="panel" style="text-align:left;width:100%;max-width:460px">
+      <div class="panel-b"><dl class="kv">
+        <dt>Decision</dt><dd>${chip("deny","denied")}</dd>
+        <dt>Rule</dt><dd class="mono" style="font-size:11.5px">ws_scope_required@v14</dd>
+        <dt>Needed</dt><dd class="mono" style="font-size:11.5px">${page==="billing"?"org:billing.meter.read":"workspace:core-platform · cost.read"}</dd>
+        <dt>Audited</dt><dd class="mono" style="font-size:11.5px">audit_events · iam.decision · 2026-09-11 14:22:07Z</dd>
+      </dl></div></div>
+    <div class="row g8 wrapr" style="justify-content:center">
+      <button class="btn" data-dlg="request">Request access from Priya Natarajan</button>
+      <a class="btn ghost" href="#/acme/finops/spend/findings">Go to finops</a></div>
+    <p class="qq" style="font-size:11.5px">IAM decides; everything else attributes. Every decision is audited, allowed or not.</p>
+  </div>`;
+}
+function statePlaceholder(page){
+  const owner={fleet:"W1 and W2",run:"W2 and W4",agents:"W6 and W9",tools:"W3 and W9",
+    ontology:"W7",steering:"W6",organization:"W10",audit:"W10",runs:"W4"}[page]||"another scenario";
+  return `<div class="state">
+    <div class="state-ico">${ICO.empty}</div>
+    <h2>${esc(PAGE_TITLE[page]||page)} is not mocked in this flow</h2>
+    <p>This mockup is <b>W8 — every dollar, every operator</b>: the Spend page and the Billing page.
+      ${esc(PAGE_TITLE[page]||page)} belongs to scenario ${esc(owner)}. The sidebar is here because the information
+      architecture is real: seven workspace pages, three organization pages, and no others.</p>
+    <div class="row g8 wrapr" style="justify-content:center">
+      <a class="btn" href="#/acme/core-platform/spend/findings">Go to Spend</a>
+      <a class="btn ghost" href="#/acme/billing">Go to Billing</a></div>
+  </div>`;
+}
+
+/* ==================== render ==================== */
+function render(){
+  setNav();
+  const c=$("#canvas"), p=ROUTE.page;
+  const isMocked = (p==="spend"||p==="billing");
+  let html;
+  if(!isMocked){ html = statePlaceholder(p); }
+  else if(STATE==="loading"){ html = stateLoading(); }
+  else if(STATE==="error"){ html = (p==="billing"?spendlessHeader("Billing"):"") + stateError(); }
+  else if(STATE==="denied"){ html = stateDenied(p); }
+  else if(STATE==="empty"){ html = (p==="billing"?spendlessHeader("Billing"):spendlessHeader("Spend")) + stateEmpty(p); }
+  else if(p==="billing"){ html = viewBilling()+billingRest(); }
+  else {
+    const body = {findings:viewFindings,attribution:viewAttribution,value:viewValue,
+      operators:viewOperators,agents:viewAgentSpend,waterfall:viewWaterfall,
+      reconciliation:viewRecon,budgets:viewBudgets}[ROUTE.tab]||viewFindings;
+    html = spendHeader()+body();
+  }
+  c.innerHTML = html;
+  c.querySelectorAll(".m[data-micros]").forEach(el=>{ el.textContent = money0(+el.dataset.micros); });
+  document.querySelectorAll(".who-n")[0].textContent = STATE==="denied"?"Dana Okafor":"Marcus Bell";
+  document.querySelectorAll(".av")[0].textContent = STATE==="denied"?"DO":"MB";
+  $("#whoRole").textContent = STATE==="denied"?"Billing role · finops":"Workspace owner · core-platform";
+  renderAssistant();
+  c.scrollTop=0;
+}
+function spendlessHeader(t){
+  return `<div class="stack" style="margin-bottom:4px"><p class="eyebrow">${t==="Billing"?"Organization · Acme Robotics":"Workspace · core-platform"}</p>
+    <h1>${esc(t)}</h1><p class="sub">${t==="Billing"?"September 2026":PERIOD}</p></div>`;
+}
+function setState(s){
+  STATE=s;
+  document.querySelectorAll("#mgState button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.state===s)));
+  render();
+}
+</script>
+<script>
+/* ==================== overlays ==================== */
+let lastFocus=null;
+function closeAll(){
+  ["#drawer","#dlg"].forEach(s=>{const e=$(s);e.dataset.open="0";setTimeout(()=>{if(e.dataset.open==="0")e.hidden=true;},240);});
+  $("#scrim").dataset.open="0";
+  if(lastFocus&&lastFocus.focus) lastFocus.focus();
+  lastFocus=null;
+}
+function openScrim(){ $("#scrim").dataset.open="1"; }
+
+/* --- finding drawer --- */
+function openFinding(id){
+  const f=DB.findings.find(x=>x.id===id); if(!f) return;
+  lastFocus=document.activeElement;
+  const d=$("#drawer");
+  d.innerHTML=`
+    <div class="drawer-h">
+      <div class="stack" style="min-width:0">
+        <p class="eyebrow" style="margin-bottom:5px">Finding · ${esc(f.level)}</p>
+        <h2 id="drawerTitle">${esc(f.kind)}</h2>
+        <p class="sub"><span class="mono">${f.id}</span> · scope <span class="mono">${esc(f.scope)}</span></p>
+      </div>
+      <button class="xbtn mla" data-close aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+    <div class="drawer-b">
+      <div class="tiles" style="grid-template-columns:1fr 1fr">
+        <div class="tile"><span class="tile-k">At stake</span>
+          <span class="tile-v sm" style="color:${f.noMoney?"var(--muted)":"var(--accent-text)"}">${f.noMoney?"—":money0(f.micros)}</span>
+          <span class="tile-m">per month</span></div>
+        <div class="tile"><span class="tile-k">Exact</span>
+          <span class="tile-v sm" style="font-size:14px">${int(+f.exact)}</span>
+          <span class="tile-m">micro-USD, from the frames cited</span></div>
+      </div>
+      <div class="stack g8"><h3>Detected from</h3><p class="q" style="font-size:12.5px">${esc(f.detect)}</p></div>
+      <div class="stack g8"><h3>What it tells the operator</h3><p class="q" style="font-size:12.5px">${f.tells}</p></div>
+      <div class="stack g8"><h3>The frames that prove it${f.frames?` <span class="qq mono" style="font-weight:400">${f.frames} cited</span>`:""}</h3>
+        <div class="panel"><div class="tw"><table>
+          <tbody>${f.evidence.map(e=>`<tr>
+            <td class="mono" style="font-size:11px;white-space:nowrap">${esc(e.f)}</td>
+            <td class="q" style="font-size:11.5px">${esc(e.note)}<div class="cellsub">${esc(e.run)}${e.turn!=="—"?" · turn "+e.turn:""}</div></td>
+            <td class="mono r" style="font-size:11px;white-space:nowrap;color:var(--fg)">${esc(e.d)}</td></tr>`).join("")}</tbody>
+        </table></div></div>
+        <p class="qq" style="font-size:11px">Every explanation is a chain with links to frames, records and commits — not a summary.</p>
+      </div>
+    </div>
+    <div class="drawer-f">
+      ${f.actions.map(a=>`<button class="btn ${a.p?"":"ghost"}" data-act="${esc(a.t)}">${esc(a.t)}</button>`).join("")}
+    </div>`;
+  d.hidden=false; requestAnimationFrame(()=>{d.dataset.open="1";openScrim();
+    const b=d.querySelector("[data-close]"); if(b)b.focus();});
+}
+
+/* --- dialogs --- */
+const DLG = {
+  budget:()=>({t:"Set budget",b:`
+    <p class="lede">Budgets live per organization, workspace, operator or agent, with a period and a hard or soft mode.</p>
+    <dl class="kv">
+      <dt>Scope</dt><dd><span class="mono">agent · acme.core.stella-ci</span></dd>
+      <dt>Current</dt><dd class="mono">${money0(M(24000))} monthly, soft — 21.7% used for nine periods</dd>
+      <dt>Proposed</dt><dd class="mono" style="color:var(--fg)">${money0(M(8000))} monthly, soft</dd>
+      <dt>Notify at</dt><dd class="mono">50%, 80%, 100%</dd>
+      <dt>Mode</dt><dd>${chip("soft — notifies, does not stop a call","neutral")}</dd>
+    </dl>
+    <div class="note"><b>Changing a budget is a governed action.</b> It passes IAM, writes an audit record, and bills as one action.</div>`,
+    ok:"Set budget"}),
+  statement:()=>({t:"Export statement",b:`
+    <p class="lede">A monthly statement per workspace: spend by operator, agent, model, provider key and task; proven against unproven; reconciliation status.</p>
+    <dl class="kv">
+      <dt>Scope</dt><dd>core-platform · September 2026 (month to date)</dd>
+      <dt>Spend</dt><dd class="mono">${mc(DB.totals.spend)}</dd>
+      <dt>Proven</dt><dd class="mono">${mc(DB.totals.proven)} · ${pct(DB.totals.proven/DB.totals.spend)}</dd>
+      <dt>Matched</dt><dd class="mono">99.93% to a frame · ${money0(M(12.47))} open variance</dd>
+      <dt>Format</dt><dd>CSV, and a signed PDF</dd>
+      <dt>Currency</dt><dd class="mono">${CUR}${CUR!=="USD"?` — converted for display at ${FX[CUR].rate}; the statement also carries USD of record`:""}</dd>
+    </dl>
+    <div class="note">Every number in the export carries its basis: <span class="mono">gateway_observed</span>,
+      <span class="mono">client_attested</span> or <span class="mono">estimated</span>. The same rollups are on the API and the MCP endpoint.</div>`,
+    ok:"Export CSV and PDF"}),
+  resolve:()=>({t:"Resolve exception rec_2f81",b:`
+    <p class="lede">A resolution records who decided and why. The variance stays on the record; resolving it does not erase it.</p>
+    <dl class="kv"><dt>Variance</dt><dd class="mono" style="color:var(--st-failed)">${money0(M(12.47))}</dd>
+      <dt>Key</dt><dd class="mono">pk_bdrk_7f2a · AWS Bedrock us-east-1</dd>
+      <dt>Resolution</dt><dd>Accept — client-attested frames from a harness-tier agent match only at level 2.</dd></dl>
+    <div class="note warn">Wrapping <span class="mono">acme.core.triage</span> at the gateway tier would give every model call a
+      provider request id and close this class of variance for good.</div>`,ok:"Resolve"}),
+  prepay:()=>({t:"Prepay twelve months",b:`
+    <p class="lede">One charge today, at ${money0(DB.billing.annual.afterPrepay)}, covering twelve months of usage at the current run rate.</p>
+    <dl class="kv">
+      <dt>Estimate</dt><dd class="mono">${money0(DB.billing.annual.list)} at ${int(DB.billing.projection.runs)} runs a month</dd>
+      <dt>Onboarding</dt><dd class="mono" style="color:var(--st-allowed)">− ${money0(DB.billing.annual.saveOnboarding)}</dd>
+      <dt>Prepayment</dt><dd class="mono" style="color:var(--st-allowed)">− ${money0(DB.billing.annual.savePrepay)}</dd>
+      <dt>Charged today</dt><dd class="mono" style="color:var(--fg);font-size:14px">${mc(DB.billing.annual.afterPrepay)}</dd>
+      <dt>Overage</dt><dd>Runs above the estimate bill monthly at the same tier prices.</dd>
+    </dl>`,ok:"Prepay "+mc(DB.billing.annual.afterPrepay),gold:true}),
+  plan:()=>({t:"Change plan",b:`
+    <p class="lede">Monthly, by card, no minimum below enterprise. Cancel any time; the free 1,000 runs never go away.</p>
+    <div class="stack g10">
+      <div class="panel"><div class="panel-b row g10"><div class="stack"><h3>Free</h3>
+        <p class="sub">1,000 runs a month, every governance feature on, 13 months of evidence.</p></div>
+        <span class="mla mono">${money0(0)}</span></div></div>
+      <div class="panel" style="border-color:var(--gold-edge)"><div class="panel-b row g10"><div class="stack">
+        <h3>Team ${chip("current","allowed")}</h3><p class="sub">Everything in Free, then $0.30 a run to 10,000, $0.20 to 100,000, $0.12 above.</p></div>
+        <span class="mla mono">${money0(DB.billing.projection.micros)}<span class="qq" style="font-size:11px">/mo est.</span></span></div></div>
+      <div class="panel"><div class="panel-b row g10"><div class="stack"><h3>Enterprise</h3>
+        <p class="sub">Committed use, 20–30% off the tiers, dedicated plane or behind your firewall, SSO, SLA.</p></div>
+        <span class="mla mono">from ${money0(M(60000))}<span class="qq" style="font-size:11px">/yr</span></span></div></div>
+    </div>`,ok:"Keep Team"}),
+  invoice:(inv)=>{const i=DB.billing.invoices.find(x=>x.id===inv)||DB.billing.invoices[0];
+    return {t:i.m,b:`<p class="lede">Invoice <span class="mono">${i.id}</span> · ${i.status} ${i.on}</p>
+      <dl class="kv"><dt>Billable runs</dt><dd class="mono">${int(i.runs)}</dd>
+        <dt>Total</dt><dd class="mono" style="color:var(--fg)">${mc(i.v)}</dd>
+        <dt>Governed actions</dt><dd class="mono">reported, not priced</dd>
+        <dt>Retained evidence</dt><dd class="mono">within the 13 months included</dd></dl>
+      ${i.free?`<div class="note ok"><b>Nothing to pay.</b> ${int(i.runs)} runs, all inside the free 1,000.</div>`:""}
+      <div class="note">Invoices live in Stripe. This dialog is a mockup, so the button below does not open one.</div>`,
+      ok:"View on Stripe",disabled:true};},
+  period:()=>({t:"Choose a period",b:`<p class="lede">Spend is reported by calendar month, and month to date for the open one.</p>
+    <div class="stack g6">${["September 2026 · month to date","August 2026","July 2026","June 2026","May 2026"]
+      .map((m,i)=>`<button class="cmdrow" ${i===0?'style="background:var(--hl)"':""}>${esc(m)}${i===0?'<span class="grp">current</span>':""}</button>`).join("")}</div>`,ok:"Apply"}),
+  request:()=>({t:"Request access",b:`<p class="lede">Ask an owner for a grant on core-platform. The request, the decision and the reason are all audited.</p>
+    <dl class="kv"><dt>Asking</dt><dd>Priya Natarajan · organization owner</dd>
+      <dt>For</dt><dd class="mono">workspace:core-platform · cost.read</dd>
+      <dt>Reason</dt><dd>Reconciling the September statement across both workspaces.</dd></dl>`,ok:"Send request"}),
+  enterprise:()=>({t:"Enterprise",b:`<p class="lede">From ${money0(M(60000))} a year, committed use at 20 to 30 percent off the tiers.</p>
+    <div class="stack g6">${["A dedicated data plane, or deployment behind your firewall","SSO and SCIM","The hosted witness runner",
+      "Two-person mandates for agents that move money","Support with an SLA","Invoicing rather than card"]
+      .map(x=>`<div class="cmdrow" style="cursor:default">${esc(x)}</div>`).join("")}</div>`,ok:"Request a call"})
+};
+function openDlg(kind,arg){
+  const spec = (DLG[kind]||DLG.plan)(arg); lastFocus=document.activeElement;
+  const d=$("#dlg");
+  d.innerHTML=`<div class="dlg-h"><h2>${esc(spec.t)}</h2>
+      <button class="xbtn mla" data-close aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="dlg-b">${spec.b}</div>
+    <div class="dlg-f"><button class="btn ghost" data-close>Cancel</button>
+      <button class="btn ${spec.gold?"primary":""}" ${spec.disabled?"disabled":""} data-close>${esc(spec.ok)}</button></div>`;
+  d.hidden=false; requestAnimationFrame(()=>{d.dataset.open="1";openScrim();
+    const b=d.querySelector("[data-close]"); if(b)b.focus();});
+}
+</script>
+<script>
+/* ==================== assistant rail ==================== */
+function renderAssistant(){
+  const a=$("#asst"); if($("#app").dataset.assistant!=="open"){ a.hidden=true; return; }
+  a.hidden=false;
+  a.innerHTML=`
+    <div class="asst-h">
+      <span class="sw-mark" style="width:20px;height:20px;font-size:9px">OX</span>
+      <div class="stack"><span style="font-size:12.5px;font-weight:600">Assistant</span>
+        <span class="qq" style="font-size:10.5px">every turn is a run of its own</span></div>
+      <button class="xbtn mla" id="asstClose" aria-label="Close the assistant"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+    <div class="asst-b">
+      <div class="msg op"><div class="who-l">Marcus Bell</div>
+        <div class="bubble">Why did cache hit rate drop on the 3rd?</div></div>
+      <div class="msg ag"><div class="who-l">Oxagen</div><div class="bubble">
+        Publishing the steering record <span class="mono">str_release_gate</span> at 09:14Z on 3 September rewrote the cached prefix
+        for every run of <span class="mono">acme.core.release-manager</span>. Frames <span class="mono">00041</span> and
+        <span class="mono">00042</span> of <span class="mono">run_8a19c4d2</span> are consecutive turns with an identical conversation
+        prefix and a different system-context digest, so the cache could not be reused.<br><br>
+        Hit rate fell from 78.9% to 66.1% and has stayed near 64%. That is
+        <span class="mono" style="color:var(--accent-text)">${money0(M(1842.16))}</span> a month —
+        finding <span class="mono">fnd_9c41</span>, the largest on the page.</div></div>
+      <div class="msg op"><div class="who-l">Marcus Bell</div>
+        <div class="bubble">Resize stella-ci's budget to $8,000 monthly.</div></div>
+      <div class="msg ag"><div class="who-l">Oxagen</div><div class="bubble">
+        Done. It had used between 18% and 24% of ${money0(M(24000))} for nine periods.</div>
+        <div class="receipt" style="margin-top:8px">
+          action &nbsp;<b>budget.set</b><br>
+          scope &nbsp;&nbsp;agent · acme.core.stella-ci<br>
+          from &nbsp;&nbsp;&nbsp;${money(M(24000),{code:true})} monthly soft<br>
+          to &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${money(M(8000),{code:true})} monthly soft<br>
+          iam &nbsp;&nbsp;&nbsp;&nbsp;allow · rule ws_owner_budget@v14<br>
+          audit &nbsp;&nbsp;audit_events 2026-09-11T14:24:51Z<br>
+          billed &nbsp;1 governed action
+        </div></div>
+      <div class="note" style="font-size:11.5px">The assistant acts through the same governed actions the screens use.
+        It holds no credentials, and its engine never calls a model or runs a tool.</div>
+    </div>
+    <div class="asst-f"><input class="asst-in" id="asstIn" placeholder="Ask about this page…" aria-label="Ask the assistant"></div>`;
+  const c=a.querySelector("#asstClose"); if(c) c.onclick=()=>toggleAsst(false);
+}
+function toggleAsst(on){
+  const app=$("#app"); const now = on===undefined ? app.dataset.assistant!=="open" : on;
+  app.dataset.assistant = now?"open":"closed";
+  $("#asstBtn").setAttribute("aria-pressed",String(now));
+  renderAssistant();
+}
+
+/* ==================== command menu ==================== */
+const CMDS=[
+  {t:"Go to Spend · Findings",h:"#/acme/core-platform/spend/findings",g:"page"},
+  {t:"Go to Spend · Attribution",h:"#/acme/core-platform/spend/attribution",g:"page"},
+  {t:"Go to Spend · Value",h:"#/acme/core-platform/spend/value",g:"page"},
+  {t:"Go to Spend · Operators",h:"#/acme/core-platform/spend/operators",g:"page"},
+  {t:"Go to Spend · Agents",h:"#/acme/core-platform/spend/agents",g:"page"},
+  {t:"Go to Spend · Run waterfall",h:"#/acme/core-platform/spend/waterfall",g:"page"},
+  {t:"Go to Spend · Reconciliation",h:"#/acme/core-platform/spend/reconciliation",g:"page"},
+  {t:"Go to Spend · Budgets",h:"#/acme/core-platform/spend/budgets",g:"page"},
+  {t:"Go to Billing",h:"#/acme/billing",g:"page"},
+  {t:"Open finding · Cache misses after a stable prefix changed",f:"fnd_9c41",g:"finding"},
+  {t:"Open finding · Tool-list bloat",f:"fnd_9c3d",g:"finding"},
+  {t:"Open finding · Cache writes never read",f:"fnd_9c52",g:"finding"},
+  {t:"Set a budget",d:"budget",g:"action"},
+  {t:"Export the monthly statement",d:"statement",g:"action"},
+  {t:"Resolve reconciliation exception rec_2f81",d:"resolve",g:"action"},
+  {t:"Switch display currency to EUR",c:"EUR",g:"display"},
+  {t:"Switch display currency to USD",c:"USD",g:"display"},
+  {t:"Ask the assistant",a:1,g:"assistant"}
+];
+function openCmd(){
+  lastFocus=document.activeElement; const d=$("#dlg");
+  d.innerHTML=`<div class="dlg-h" style="padding:0"><input class="cmdinput" id="cmdIn" placeholder="Search or run a command…" aria-label="Command menu"></div>
+    <div class="cmdlist" id="cmdList"></div>`;
+  d.hidden=false; requestAnimationFrame(()=>{d.dataset.open="1";openScrim();$("#cmdIn").focus();});
+  const paint=q=>{
+    const f=CMDS.filter(c=>c.t.toLowerCase().includes(q.toLowerCase()));
+    $("#cmdList").innerHTML = f.length? f.map((c,i)=>
+      `<button class="cmdrow" data-cmd="${CMDS.indexOf(c)}">${esc(c.t)}<span class="grp">${c.g}</span></button>`).join("")
+      : `<div class="cmdrow" style="cursor:default;color:var(--dim)">Nothing matches “${esc(q)}”.</div>`;
+  };
+  paint("");
+  $("#cmdIn").addEventListener("input",e=>paint(e.target.value));
+}
+function runCmd(i){
+  const c=CMDS[+i]; closeAll();
+  setTimeout(()=>{
+    if(c.h) go(c.h);
+    else if(c.f) openFinding(c.f);
+    else if(c.d) openDlg(c.d);
+    else if(c.c){ CUR=c.c; render(); }
+    else if(c.a) toggleAsst(true);
+  },180);
+}
+
+/* ==================== wiring ==================== */
+document.addEventListener("click",e=>{
+  const t=e.target;
+  const close=t.closest("[data-close]"); if(close){ closeAll(); return; }
+  const cmd=t.closest("[data-cmd]"); if(cmd){ runCmd(cmd.dataset.cmd); return; }
+  const find=t.closest("[data-find]"); if(find){ e.preventDefault(); openFinding(find.dataset.find); return; }
+  const dlg=t.closest("[data-dlg]"); if(dlg){ e.preventDefault(); openDlg(dlg.dataset.dlg,dlg.dataset.inv); return; }
+  const href=t.closest("[data-href]"); if(href){ go(href.dataset.href); return; }
+  const dim=t.closest("[data-dim]"); if(dim){ ATTR_DIM=dim.dataset.dim; render(); return; }
+  const op=t.closest("[data-op]"); if(op){ go("#/acme/core-platform/spend/operators/"+op.dataset.op); return; }
+  const ag=t.closest("[data-ag]"); if(ag){ go("#/acme/core-platform/spend/agents/"+ag.dataset.ag); return; }
+  const cur=t.closest("[data-cur]"); if(cur){ CUR=cur.dataset.cur; render(); return; }
+  const act=t.closest("[data-act]"); if(act){ act.textContent="✓ "+act.dataset.act; act.disabled=true; return; }
+  if(t.closest("#scrim")) closeAll();
+  if(t.closest("#orgSw")||t.closest("#wsSw")||t.closest("#acctBtn")){ e.preventDefault(); openDlg("plan"); }
+});
+document.addEventListener("keydown",e=>{
+  if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==="k"){ e.preventDefault(); openCmd(); return; }
+  if(e.key==="Escape"){ closeAll(); document.body.removeAttribute("data-nav"); return; }
+  if(e.key==="Enter"||e.key===" "){
+    const r=e.target.closest("tr.clickable,[role=button]");
+    if(r&&r.tagName!=="BUTTON"&&r.tagName!=="A"){ e.preventDefault(); r.click(); }
+  }
+});
+$("#cmdBtn").onclick=openCmd;
+$("#asstBtn").onclick=()=>toggleAsst();
+$("#navToggle").onclick=()=>{ const b=document.body;
+  b.hasAttribute("data-nav")?b.removeAttribute("data-nav"):b.setAttribute("data-nav","open"); };
+document.querySelectorAll(".nav a").forEach(a=>a.addEventListener("click",()=>document.body.removeAttribute("data-nav")));
+
+/* mockup chrome */
+$("#mockH").onclick=()=>{ const m=$("#mock"); const min=m.dataset.min==="1";
+  m.dataset.min=min?"0":"1"; $("#mockCar").textContent=min?"▾":"▸"; $("#mockH").setAttribute("aria-expanded",String(min)); };
+$("#mgState").addEventListener("click",e=>{ const b=e.target.closest("button"); if(b) setState(b.dataset.state); });
+$("#mgWidth").addEventListener("click",e=>{ const b=e.target.closest("button"); if(!b)return;
+  document.querySelectorAll("#mgWidth button").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));
+  if(b.dataset.width==="phone") document.body.dataset.width="phone"; else delete document.body.dataset.width; });
+$("#mgTheme").addEventListener("click",e=>{ const b=e.target.closest("button"); if(!b)return;
+  document.querySelectorAll("#mgTheme button").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));
+  const v=b.dataset.theme;
+  if(v==="system") document.documentElement.removeAttribute("data-theme");
+  else document.documentElement.setAttribute("data-theme",v); });
+
+/* boot — at rest on the flow's first screen */
+if(!location.hash) location.replace("#/acme/core-platform/spend/findings");
+ROUTE=parseHash();
+render();
+</script>

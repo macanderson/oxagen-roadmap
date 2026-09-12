@@ -1,0 +1,2582 @@
+<title>Stop It. Steer It.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap">
+<style>
+/* ============================================================
+   Oxagen house system. Dark-first: the bare :root carries the
+   dark palette; light overrides come in under both the media
+   query and the explicit [data-theme] stamp.
+   ============================================================ */
+:root{
+  --ink:#10100F; --void:#0A0A09; --panel:#181715; --hl:#201F1C;
+  --border:#292722; --rule:#34322D;
+  --fg:#F2EEE5; --body:#DDD8CD; --muted:#9B958A; --dim:#6E6A62;
+  --gold:#D6962C; --gold-bright:#F1C364; --gold-deep:#8B5E1A;
+  --accent-text:#D6962C;
+  --on-gold:#10100F;
+
+  /* Semantic state colours. Deliberately no gold in this set. */
+  --s-allowed:#5FA97F;   --s-allowed-bg:rgba(95,169,127,.13);
+  --s-approval:#6E9BD2;  --s-approval-bg:rgba(110,155,210,.14);
+  --s-denied:#C2705E;    --s-denied-bg:rgba(194,112,94,.14);
+  --s-failed:#D25548;    --s-failed-bg:rgba(210,85,72,.14);
+  --s-critical:#E1483A;  --s-critical-bg:rgba(225,72,58,.16);
+  --s-proven:#5FA97F;    --s-proven-bg:rgba(95,169,127,.13);
+  --s-neutral:#8D877C;   --s-neutral-bg:rgba(141,135,124,.12);
+
+  --shadow:0 1px 0 rgba(255,255,255,.03),0 18px 44px rgba(0,0,0,.5);
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --sans:"Space Grotesk","Helvetica Neue",Arial,sans-serif;
+  --r:12px; --r-sm:8px;
+  --sidebar:236px; --topbar:52px;
+}
+@media (prefers-color-scheme: light){ :root:not([data-theme="dark"]){
+  --ink:#F2EEE5; --void:#E9E3D8; --panel:#F8F5EE; --hl:#EFEAE0;
+  --border:#D8CDBD; --rule:#C9BFAE;
+  --fg:#10100F; --body:#2A2823; --muted:#6B665C; --dim:#8C877C;
+  --accent-text:#8B5E1A; --on-gold:#10100F;
+  --s-allowed:#357E57;   --s-allowed-bg:rgba(53,126,87,.12);
+  --s-approval:#2F6299;  --s-approval-bg:rgba(47,98,153,.12);
+  --s-denied:#9C4632;    --s-denied-bg:rgba(156,70,50,.12);
+  --s-failed:#A93225;    --s-failed-bg:rgba(169,50,37,.12);
+  --s-critical:#B32B1C;  --s-critical-bg:rgba(179,43,28,.14);
+  --s-proven:#357E57;    --s-proven-bg:rgba(53,126,87,.12);
+  --s-neutral:#6B665C;   --s-neutral-bg:rgba(107,102,92,.11);
+  --shadow:0 1px 0 rgba(255,255,255,.7),0 18px 44px rgba(16,16,15,.08);
+}}
+:root[data-theme="light"]{
+  --ink:#F2EEE5; --void:#E9E3D8; --panel:#F8F5EE; --hl:#EFEAE0;
+  --border:#D8CDBD; --rule:#C9BFAE;
+  --fg:#10100F; --body:#2A2823; --muted:#6B665C; --dim:#8C877C;
+  --accent-text:#8B5E1A; --on-gold:#10100F;
+  --s-allowed:#357E57;   --s-allowed-bg:rgba(53,126,87,.12);
+  --s-approval:#2F6299;  --s-approval-bg:rgba(47,98,153,.12);
+  --s-denied:#9C4632;    --s-denied-bg:rgba(156,70,50,.12);
+  --s-failed:#A93225;    --s-failed-bg:rgba(169,50,37,.12);
+  --s-critical:#B32B1C;  --s-critical-bg:rgba(179,43,28,.14);
+  --s-proven:#357E57;    --s-proven-bg:rgba(53,126,87,.12);
+  --s-neutral:#6B665C;   --s-neutral-bg:rgba(107,102,92,.11);
+  --shadow:0 1px 0 rgba(255,255,255,.7),0 18px 44px rgba(16,16,15,.08);
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; background:var(--ink); color:var(--fg);
+  font-family:var(--sans); font-size:14px; line-height:1.5;
+  -webkit-font-smoothing:antialiased; overflow:hidden;
+}
+button,input,textarea,select{font-family:inherit;font-size:inherit;color:inherit}
+button{cursor:pointer;background:none;border:0;padding:0}
+:focus-visible{outline:2px solid var(--accent-text);outline-offset:2px;border-radius:3px}
+.mono{font-family:var(--mono);font-size:.92em;letter-spacing:-.01em}
+.num{font-variant-numeric:tabular-nums}
+.eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-text);font-weight:600;margin:0}
+.eyebrow-q{font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--dim);font-weight:600}
+@media (prefers-reduced-motion: reduce){*{animation-duration:.001ms !important;transition-duration:.001ms !important}}
+
+/* ---------------- app shell ---------------- */
+#app{display:grid;grid-template-columns:var(--sidebar) 1fr;height:100vh;height:100dvh}
+
+.side{
+  background:var(--void);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;min-height:0;
+}
+.side-logo{padding:16px 18px 14px;border-bottom:1px solid var(--border)}
+.side-logo svg{height:19px;width:auto;display:block;color:var(--fg)}
+.switcher{
+  display:flex;align-items:center;gap:9px;width:100%;padding:9px 12px;
+  border:1px solid var(--border);border-radius:var(--r-sm);background:var(--panel);
+  text-align:left;transition:border-color .15s;
+}
+.switcher:hover{border-color:var(--rule)}
+.switcher .sw-mark{
+  width:22px;height:22px;border-radius:5px;background:var(--hl);border:1px solid var(--border);
+  display:grid;place-items:center;font-size:11px;font-weight:700;color:var(--accent-text);flex:0 0 auto;
+}
+.switcher .sw-t{min-width:0;flex:1}
+.switcher .sw-k{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);font-weight:600;line-height:1.3}
+.switcher .sw-v{font-size:13px;font-weight:500;color:var(--fg);line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.switcher .sw-c{color:var(--dim);flex:0 0 auto}
+.side-switchers{padding:14px 12px;display:flex;flex-direction:column;gap:8px;border-bottom:1px solid var(--border)}
+.side-nav{flex:1;overflow-y:auto;padding:14px 10px 10px;min-height:0}
+.nav-label{font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--dim);font-weight:600;padding:0 8px 8px}
+.nav-label.second{padding-top:20px}
+.nav-a{
+  display:flex;align-items:center;gap:10px;padding:7px 8px;border-radius:6px;
+  color:var(--muted);text-decoration:none;font-size:13.5px;font-weight:500;width:100%;
+  border-left:2px solid transparent;
+}
+.nav-a:hover{background:var(--hl);color:var(--fg)}
+.nav-a.on{background:var(--hl);color:var(--fg);border-left-color:var(--accent-text)}
+.nav-a .ni{width:15px;height:15px;flex:0 0 auto;opacity:.85}
+.nav-a .nct{
+  margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--dim);
+  background:var(--panel);border:1px solid var(--border);border-radius:20px;padding:0 6px;
+}
+.side-foot{border-top:1px solid var(--border);padding:10px 12px;display:flex;align-items:center;gap:9px}
+.avatar{width:26px;height:26px;border-radius:50%;background:var(--hl);border:1px solid var(--rule);
+  display:grid;place-items:center;font-size:10.5px;font-weight:600;color:var(--body);flex:0 0 auto}
+
+.main{display:flex;flex-direction:column;min-width:0;min-height:0;background:var(--ink)}
+.topbar{
+  height:var(--topbar);flex:0 0 auto;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:12px;padding:0 16px;background:var(--ink);
+}
+.crumbs{display:flex;align-items:center;gap:7px;font-size:13px;min-width:0;overflow:hidden}
+.crumbs a{color:var(--muted);text-decoration:none;white-space:nowrap}
+.crumbs a:hover{color:var(--fg)}
+.crumbs .sep{color:var(--dim)}
+.crumbs .cur{color:var(--fg);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tb-right{margin-left:auto;display:flex;align-items:center;gap:8px;flex:0 0 auto}
+.cmdk{
+  display:flex;align-items:center;gap:8px;padding:5px 10px;border:1px solid var(--border);
+  border-radius:7px;background:var(--panel);color:var(--muted);font-size:12.5px;min-width:190px;
+}
+.cmdk:hover{border-color:var(--rule);color:var(--body)}
+.cmdk kbd{
+  margin-left:auto;font-family:var(--mono);font-size:10.5px;border:1px solid var(--border);
+  border-radius:4px;padding:1px 5px;color:var(--dim);background:var(--ink);
+}
+.icon-btn{
+  width:30px;height:30px;border:1px solid var(--border);border-radius:7px;background:var(--panel);
+  display:grid;place-items:center;color:var(--muted);
+}
+.icon-btn:hover{color:var(--fg);border-color:var(--rule)}
+.icon-btn.on{color:var(--accent-text);border-color:var(--rule)}
+
+.scroll{flex:1;overflow:auto;min-height:0}
+.page{padding:22px 20px 90px;max-width:1560px}
+
+/* ---------------- primitives ---------------- */
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--r)}
+.btn{
+  display:inline-flex;align-items:center;gap:7px;padding:6px 11px;border-radius:7px;
+  border:1px solid var(--border);background:var(--panel);color:var(--body);
+  font-size:13px;font-weight:500;white-space:nowrap;transition:border-color .14s,color .14s;
+}
+.btn:hover:not(:disabled){color:var(--fg);border-color:var(--rule)}
+.btn:disabled{opacity:.38;cursor:not-allowed}
+.btn.gold{background:var(--gold);border-color:var(--gold);color:var(--on-gold);font-weight:600}
+.btn.gold:hover:not(:disabled){background:var(--gold-bright);border-color:var(--gold-bright);color:#10100F}
+.btn.sm{padding:4px 9px;font-size:12px}
+.btn svg{width:14px;height:14px}
+
+.pill{
+  display:inline-flex;align-items:center;gap:5px;padding:1.5px 7px;border-radius:20px;
+  font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:-.01em;
+  border:1px solid transparent;white-space:nowrap;
+}
+.pill .dot{width:5px;height:5px;border-radius:50%;background:currentColor;flex:0 0 auto}
+.p-allowed{color:var(--s-allowed);background:var(--s-allowed-bg);border-color:var(--s-allowed-bg)}
+.p-proven{color:var(--s-proven);background:var(--s-proven-bg);border-color:var(--s-proven-bg)}
+.p-approval{color:var(--s-approval);background:var(--s-approval-bg);border-color:var(--s-approval-bg)}
+.p-denied{color:var(--s-denied);background:var(--s-denied-bg);border-color:var(--s-denied-bg)}
+.p-failed{color:var(--s-failed);background:var(--s-failed-bg);border-color:var(--s-failed-bg)}
+.p-critical{color:var(--s-critical);background:var(--s-critical-bg);border-color:var(--s-critical-bg)}
+.p-neutral{color:var(--s-neutral);background:var(--s-neutral-bg);border-color:var(--s-neutral-bg)}
+.p-plain{color:var(--muted);background:var(--hl);border-color:var(--border)}
+
+.tier{font-family:var(--mono);font-size:11px;padding:1.5px 6px;border-radius:4px;border:1px solid var(--border);white-space:nowrap}
+.tier-gateway{color:var(--fg);background:var(--hl);border-color:var(--rule)}
+.tier-harness{color:var(--muted);background:var(--hl)}
+.tier-observe{color:var(--dim);background:transparent}
+
+.kv{display:flex;flex-direction:column;gap:2px}
+.kv dt{font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--dim);font-weight:600}
+.kv dd{margin:0;font-size:13px;color:var(--fg)}
+.basis{font-size:11px;color:var(--dim);font-family:var(--mono)}
+
+/* ---------------- page header ---------------- */
+.ph{display:flex;align-items:flex-start;gap:18px;flex-wrap:wrap;margin-bottom:16px}
+.ph h1{font-size:26px;line-height:1.1;letter-spacing:-.015em;font-weight:700;margin:2px 0 6px}
+.ph p{margin:0;color:var(--muted);font-size:13.5px;max-width:62ch}
+.ph-actions{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+.stats{display:flex;gap:0;flex-wrap:wrap;border:1px solid var(--border);border-radius:var(--r);
+  background:var(--panel);overflow:hidden;margin-bottom:16px}
+.stat{padding:11px 16px;border-right:1px solid var(--border);flex:1 1 auto;min-width:132px}
+.stat:last-child{border-right:0}
+.stat .sv{font-size:20px;font-weight:600;letter-spacing:-.02em;line-height:1.2;font-variant-numeric:tabular-nums}
+.stat .sk{font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--dim);font-weight:600;margin-top:2px}
+.stat .sb{font-size:10.5px;color:var(--dim);font-family:var(--mono);margin-top:3px}
+
+/* ---------------- filters ---------------- */
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.fsel{position:relative;display:inline-flex}
+.fsel select{
+  appearance:none;background:var(--panel);border:1px solid var(--border);border-radius:7px;
+  padding:6px 26px 6px 10px;font-size:12.5px;color:var(--body);cursor:pointer;
+}
+.fsel select:hover{border-color:var(--rule)}
+.fsel::after{content:"";position:absolute;right:9px;top:50%;width:6px;height:6px;
+  border-right:1.5px solid var(--dim);border-bottom:1.5px solid var(--dim);
+  transform:translateY(-70%) rotate(45deg);pointer-events:none}
+.fsearch{
+  display:flex;align-items:center;gap:7px;background:var(--panel);border:1px solid var(--border);
+  border-radius:7px;padding:0 10px;min-width:210px;flex:1 1 210px;max-width:320px;
+}
+.fsearch input{background:none;border:0;outline:none;padding:6px 0;font-size:12.5px;width:100%;color:var(--fg)}
+.fsearch input::placeholder{color:var(--dim)}
+.fclear{font-size:12px;color:var(--accent-text);font-weight:500;padding:6px 4px}
+.fcount{margin-left:auto;font-size:12px;color:var(--dim);font-family:var(--mono)}
+
+/* ---------------- fleet layout ---------------- */
+.fleet-wrap{display:grid;grid-template-columns:minmax(0,1fr) 52px;gap:14px;align-items:start}
+.fleet-wrap.rail-open{grid-template-columns:minmax(0,1fr) 336px}
+
+.tablebox{border:1px solid var(--border);border-radius:var(--r);background:var(--panel);overflow:hidden}
+.tscroll{overflow-x:auto}
+table.runs{width:100%;border-collapse:collapse;min-width:1080px}
+table.runs th{
+  text-align:left;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);
+  font-weight:600;padding:9px 12px;border-bottom:1px solid var(--border);background:var(--hl);
+  position:sticky;top:0;z-index:1;white-space:nowrap;
+}
+table.runs td{padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:middle;font-size:13px}
+table.runs tr:last-child td{border-bottom:0}
+table.runs tbody tr{cursor:pointer}
+table.runs tbody tr:hover{background:var(--hl)}
+table.runs tbody tr.sel{background:var(--hl);box-shadow:inset 2px 0 0 var(--accent-text)}
+.cell-run{display:flex;flex-direction:column;gap:1px;min-width:0}
+.cell-run .rid{font-family:var(--mono);font-size:12px;color:var(--fg)}
+.cell-run .task{font-size:11.5px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:230px}
+.agent-id{font-family:var(--mono);font-size:12px;color:var(--body)}
+.op{display:flex;align-items:center;gap:7px;white-space:nowrap}
+.op .avatar{width:20px;height:20px;font-size:9px}
+.step{display:flex;align-items:center;gap:7px;white-space:nowrap;font-size:12.5px;color:var(--body)}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--s-allowed);flex:0 0 auto;
+  box-shadow:0 0 0 0 var(--s-allowed-bg);animation:pulse 2.4s infinite}
+.live-dot.paused{background:var(--s-approval);animation:none}
+.live-dot.sealed{background:var(--dim);animation:none}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(95,169,127,.5)}70%{box-shadow:0 0 0 6px rgba(95,169,127,0)}100%{box-shadow:0 0 0 0 rgba(95,169,127,0)}}
+.rowacts{display:flex;gap:5px;justify-content:flex-end;white-space:nowrap}
+.money{font-variant-numeric:tabular-nums;font-family:var(--mono);font-size:12.5px;color:var(--fg)}
+
+/* ---------------- approvals rail ---------------- */
+.rail{border:1px solid var(--border);border-radius:var(--r);background:var(--panel);overflow:hidden;position:sticky;top:0}
+.rail.closed{width:52px}
+.rail-tab{
+  width:100%;display:flex;flex-direction:column;align-items:center;gap:10px;padding:14px 0;color:var(--muted);
+}
+.rail-tab:hover{color:var(--fg);background:var(--hl)}
+.rail-tab .vtxt{writing-mode:vertical-rl;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:600}
+.rail-tab .cnt{
+  font-family:var(--mono);font-size:11px;font-weight:600;color:var(--s-approval);
+  background:var(--s-approval-bg);border-radius:20px;padding:1px 6px;
+}
+.rail-head{display:flex;align-items:center;gap:8px;padding:11px 13px;border-bottom:1px solid var(--border);background:var(--hl)}
+.rail-head h2{margin:0;font-size:13px;font-weight:600}
+.rail-body{max-height:calc(100vh - 210px);overflow-y:auto}
+.appr{padding:12px 13px;border-bottom:1px solid var(--border)}
+.appr:last-child{border-bottom:0}
+.appr-top{display:flex;align-items:center;gap:7px;margin-bottom:7px;flex-wrap:wrap}
+.appr-amt{font-family:var(--mono);font-size:15px;font-weight:600;color:var(--fg);font-variant-numeric:tabular-nums}
+.chain{list-style:none;margin:0 0 9px;padding:0;border-left:1px solid var(--rule);display:flex;flex-direction:column;gap:5px}
+.chain li{padding-left:11px;position:relative;font-size:12px;color:var(--body);line-height:1.4}
+.chain li::before{content:"";position:absolute;left:-3.5px;top:6px;width:6px;height:6px;border-radius:50%;
+  background:var(--panel);border:1px solid var(--rule)}
+.chain li b{display:block;font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--dim);font-weight:600}
+.appr-acts{display:flex;gap:6px;align-items:center}
+.appr-acts .grow{flex:1}
+
+/* ---------------- run page ---------------- */
+.runhead{display:flex;flex-direction:column;gap:12px;margin-bottom:14px}
+.runhead .rh-top{display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap}
+.runhead h1{font-size:22px;margin:0 0 4px;letter-spacing:-.015em;font-weight:600;font-family:var(--mono)}
+.runmeta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;font-size:12.5px;color:var(--muted)}
+.runmeta .sep{color:var(--rule)}
+.coststrip{display:flex;flex-wrap:wrap;border:1px solid var(--border);border-radius:var(--r);background:var(--panel);overflow:hidden}
+.coststrip .cs{padding:9px 14px;border-right:1px solid var(--border);flex:1 1 auto;min-width:118px}
+.coststrip .cs:last-child{border-right:0}
+.coststrip .csv{font-size:15px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.coststrip .csk{font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--dim);font-weight:600;margin-top:1px}
+
+.controlbar{
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 12px;
+  border:1px solid var(--border);border-radius:var(--r);background:var(--panel);margin-bottom:14px;
+}
+.controlbar .status{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:500;padding-right:6px;
+  border-right:1px solid var(--border);margin-right:4px}
+.controlbar .spacer{flex:1}
+
+.run-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,440px);gap:14px;align-items:start}
+
+/* timeline */
+.tl{border:1px solid var(--border);border-radius:var(--r);background:var(--panel);overflow:hidden}
+.tl-head{display:flex;align-items:center;gap:9px;padding:10px 13px;border-bottom:1px solid var(--border);background:var(--hl)}
+.tl-head h2{margin:0;font-size:13px;font-weight:600}
+.tl-body{max-height:min(64vh,720px);overflow-y:auto;padding:4px 0}
+.fr{
+  display:grid;grid-template-columns:46px 18px 1fr auto;gap:9px;align-items:start;
+  padding:7px 13px 7px 10px;width:100%;text-align:left;border-left:2px solid transparent;
+}
+.fr:hover{background:var(--hl)}
+.fr.sel{background:var(--hl);border-left-color:var(--accent-text)}
+.fr.injected{background:var(--hl)}
+.fr .seq{font-family:var(--mono);font-size:11px;color:var(--dim);padding-top:2px;text-align:right;font-variant-numeric:tabular-nums}
+.fr .spine{display:flex;flex-direction:column;align-items:center;height:100%;padding-top:4px}
+.fr .node{width:7px;height:7px;border-radius:2px;border:1px solid var(--rule);background:var(--panel);flex:0 0 auto}
+.fr .node.model{background:var(--s-approval);border-color:var(--s-approval)}
+.fr .node.tool{background:var(--s-neutral);border-color:var(--s-neutral)}
+.fr .node.policy{background:var(--s-allowed);border-color:var(--s-allowed)}
+.fr .node.control{background:var(--gold);border-color:var(--gold);border-radius:50%}
+.fr .node.deny{background:var(--s-denied);border-color:var(--s-denied)}
+.fr .line{width:1px;flex:1;background:var(--border);margin-top:3px;min-height:6px}
+.fr .kind{font-family:var(--mono);font-size:11.5px;color:var(--fg);line-height:1.35}
+.fr .sum{font-size:12px;color:var(--muted);line-height:1.4;margin-top:1px;overflow-wrap:anywhere}
+.fr .t{font-family:var(--mono);font-size:10.5px;color:var(--dim);padding-top:2px;font-variant-numeric:tabular-nums}
+.fr-new{animation:slidein .34s ease-out}
+@keyframes slidein{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:none}}
+.tl-foot{padding:9px 13px;border-top:1px solid var(--border);font-size:12px;color:var(--dim);
+  display:flex;align-items:center;gap:8px;background:var(--hl)}
+
+/* inspector */
+.insp{border:1px solid var(--border);border-radius:var(--r);background:var(--panel);overflow:hidden;position:sticky;top:0}
+.insp-head{padding:11px 13px;border-bottom:1px solid var(--border);background:var(--hl)}
+.insp-head .ik{font-family:var(--mono);font-size:13px;color:var(--fg)}
+.insp-head .im{font-size:11.5px;color:var(--dim);font-family:var(--mono);margin-top:2px}
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--hl);overflow-x:auto}
+.tabs button{padding:8px 13px;font-size:12.5px;color:var(--muted);border-bottom:2px solid transparent;white-space:nowrap}
+.tabs button:hover{color:var(--fg)}
+.tabs button.on{color:var(--fg);border-bottom-color:var(--accent-text);font-weight:500}
+.insp-body{padding:13px;max-height:min(58vh,660px);overflow-y:auto}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:11px 14px}
+.sect{margin-top:15px}
+.sect:first-child{margin-top:0}
+.sect > h3{margin:0 0 8px;font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--dim);font-weight:600}
+pre.code{
+  margin:0;background:var(--ink);border:1px solid var(--border);border-radius:var(--r-sm);
+  padding:10px 11px;overflow-x:auto;font-family:var(--mono);font-size:11.5px;line-height:1.55;color:var(--body);
+}
+pre.code .k{color:var(--accent-text)}
+pre.code .s{color:var(--s-allowed)}
+.msg{border:1px solid var(--border);border-radius:var(--r-sm);padding:9px 11px;margin-bottom:8px;background:var(--ink)}
+.msg .role{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);font-weight:600;margin-bottom:4px}
+.msg .txt{font-size:12.5px;color:var(--body);line-height:1.5}
+.msg.inj{border-color:var(--gold);background:var(--hl);box-shadow:inset 3px 0 0 var(--gold)}
+.msg.inj .role{color:var(--accent-text)}
+.bars{display:flex;flex-direction:column;gap:6px}
+.bar{display:grid;grid-template-columns:120px 1fr 78px;gap:9px;align-items:center;font-size:12px}
+.bar .btrack{height:7px;border-radius:4px;background:var(--hl);overflow:hidden;border:1px solid var(--border)}
+.bar .bfill{height:100%;background:var(--s-neutral);border-radius:3px}
+.bar .bfill.a{background:var(--s-approval)}
+.bar .bfill.b{background:var(--s-allowed)}
+.bar .bfill.c{background:var(--s-neutral)}
+.bar .bfill.d{background:var(--rule)}
+.bar .bv{text-align:right;font-family:var(--mono);font-size:11.5px;color:var(--body);font-variant-numeric:tabular-nums}
+.bar .bl{color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ---------------- steer composer ---------------- */
+.steerbox{border:1px solid var(--border);border-radius:var(--r);background:var(--panel);margin-bottom:14px;overflow:hidden}
+.steerbox-head{display:flex;align-items:center;gap:8px;padding:10px 13px;border-bottom:1px solid var(--border);background:var(--hl)}
+.steerbox-head h2{margin:0;font-size:13px;font-weight:600}
+.steerbox-body{padding:12px 13px}
+textarea.steer{
+  width:100%;min-height:74px;resize:vertical;background:var(--ink);border:1px solid var(--border);
+  border-radius:var(--r-sm);padding:10px 11px;font-size:13px;line-height:1.5;color:var(--fg);outline:none;
+}
+textarea.steer:focus{border-color:var(--rule)}
+textarea.steer::placeholder{color:var(--dim)}
+.steer-foot{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:9px}
+.steer-note{font-size:11.5px;color:var(--dim);max-width:52ch;line-height:1.45}
+.steer-foot .grow{flex:1}
+
+/* ---------------- dialog ---------------- */
+.scrim{position:fixed;inset:0;background:rgba(10,10,9,.62);backdrop-filter:blur(2px);z-index:60;
+  display:grid;place-items:center;padding:20px;overflow:auto}
+.dlg{
+  width:min(720px,100%);background:var(--panel);border:1px solid var(--rule);border-radius:14px;
+  box-shadow:var(--shadow);overflow:hidden;max-height:calc(100vh - 40px);display:flex;flex-direction:column;
+}
+.dlg-head{display:flex;align-items:flex-start;gap:12px;padding:15px 17px;border-bottom:1px solid var(--border)}
+.dlg-head h2{margin:2px 0 3px;font-size:17px;font-weight:600;letter-spacing:-.01em}
+.dlg-head p{margin:0;font-size:12.5px;color:var(--muted);max-width:58ch}
+.dlg-body{padding:15px 17px;overflow-y:auto}
+.dlg-foot{padding:12px 17px;border-top:1px solid var(--border);display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:var(--hl)}
+.dlg-foot .grow{flex:1}
+
+.addr{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:11px}
+.addr button{
+  font-family:var(--mono);font-size:12px;padding:5px 10px;border-radius:20px;
+  border:1px solid var(--border);background:var(--ink);color:var(--muted);
+}
+.addr button:hover{color:var(--fg);border-color:var(--rule)}
+.addr button.on{color:var(--fg);border-color:var(--rule);background:var(--hl);font-weight:600}
+.addr button .n{color:var(--dim);font-weight:400}
+.grantcheck{
+  display:flex;align-items:flex-start;gap:9px;padding:9px 11px;border-radius:var(--r-sm);
+  border:1px solid var(--s-allowed-bg);background:var(--s-allowed-bg);margin-bottom:11px;font-size:12.5px;
+  color:var(--body);line-height:1.45;
+}
+.grantcheck.deny{border-color:var(--s-denied-bg);background:var(--s-denied-bg)}
+.grantcheck svg{width:15px;height:15px;flex:0 0 auto;margin-top:1px}
+.grantcheck .g-ok{color:var(--s-allowed)}
+.grantcheck .g-no{color:var(--s-denied)}
+.grantcheck b{display:block;font-weight:600;color:var(--fg);margin-bottom:1px}
+
+table.deliv{width:100%;border-collapse:collapse;font-size:12.5px}
+table.deliv th{text-align:left;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);
+  font-weight:600;padding:7px 10px;border-bottom:1px solid var(--border)}
+table.deliv td{padding:7px 10px;border-bottom:1px solid var(--border);vertical-align:top}
+table.deliv tr:last-child td{border-bottom:0}
+table.deliv .why{color:var(--muted);font-size:11.5px}
+.delivsum{display:flex;gap:14px;flex-wrap:wrap;padding:10px 12px;border:1px solid var(--border);
+  border-radius:var(--r-sm);background:var(--ink);margin-bottom:12px}
+.delivsum div{display:flex;flex-direction:column;gap:1px}
+.delivsum .v{font-size:17px;font-weight:600;font-variant-numeric:tabular-nums}
+.delivsum .k{font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--dim);font-weight:600}
+
+/* ---------------- alternate states ---------------- */
+.slab{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:11px;
+  padding:56px 24px;text-align:center;border:1px solid var(--border);border-radius:var(--r);
+  background:var(--panel);
+}
+.slab .glyph{width:38px;height:38px;color:var(--dim)}
+.slab h2{margin:0;font-size:18px;font-weight:600}
+.slab p{margin:0;color:var(--muted);font-size:13.5px;max-width:52ch;line-height:1.55}
+.slab .acts{display:flex;gap:8px;margin-top:5px;flex-wrap:wrap;justify-content:center}
+.slab.err{border-color:var(--s-failed-bg)}
+.slab.err .glyph{color:var(--s-failed)}
+.slab.deny .glyph{color:var(--s-denied)}
+.skel{background:linear-gradient(90deg,var(--hl) 8%,var(--border) 20%,var(--hl) 34%);
+  background-size:600px 100%;animation:shim 1.5s linear infinite;border-radius:5px;height:11px}
+@keyframes shim{0%{background-position:-300px 0}100%{background-position:300px 0}}
+.skel.w1{width:72%}.skel.w2{width:44%}.skel.w3{width:88%}.skel.w4{width:30%}
+.skelrow{display:grid;grid-template-columns:200px 1fr 90px 90px 80px;gap:14px;padding:11px 12px;
+  border-bottom:1px solid var(--border);align-items:center}
+
+/* ---------------- mockup chrome (NOT product UI) ---------------- */
+#chrome{
+  position:fixed;right:12px;bottom:12px;z-index:90;font-family:var(--mono);font-size:11px;
+  background:#0A0A09;border:1px dashed #4a4740;border-radius:8px;color:#9B958A;
+  box-shadow:0 12px 34px rgba(0,0,0,.55);max-width:calc(100vw - 24px);
+}
+#chrome .ch-head{display:flex;align-items:center;gap:8px;padding:6px 9px;border-bottom:1px dashed #33312c}
+#chrome .ch-head b{color:#D6962C;font-weight:600;letter-spacing:.08em;text-transform:uppercase;font-size:10px}
+#chrome .ch-head button{margin-left:auto;color:#6E6A62;font-family:inherit;font-size:11px}
+#chrome .ch-head button:hover{color:#F2EEE5}
+#chrome .ch-body{padding:7px 9px;display:flex;flex-wrap:wrap;gap:5px;max-width:430px}
+#chrome .ch-body button{
+  font-family:inherit;font-size:11px;padding:3px 8px;border-radius:5px;border:1px solid #33312c;
+  color:#9B958A;background:#10100F;
+}
+#chrome .ch-body button:hover{color:#F2EEE5;border-color:#4a4740}
+#chrome .ch-body button.on{color:#10100F;background:#D6962C;border-color:#D6962C;font-weight:600}
+#chrome .ch-note{padding:0 9px 7px;color:#55524b;font-size:10px;max-width:430px;line-height:1.4}
+#chrome.min .ch-body,#chrome.min .ch-note{display:none}
+
+/* ---------------- phone ---------------- */
+.mobile-only{display:none}
+.drawer-scrim{display:none}
+body.phone #app{grid-template-columns:1fr;max-width:400px;margin:0 auto;border-left:1px solid var(--border);border-right:1px solid var(--border)}
+body.phone{background:var(--void)}
+body.phone .side{
+  position:fixed;inset:0 auto 0 0;width:264px;z-index:70;transform:translateX(-100%);
+  transition:transform .2s ease-out;
+}
+body.phone .side.open{transform:none}
+body.phone .drawer-scrim.on{display:block;position:fixed;inset:0;background:rgba(10,10,9,.6);z-index:65}
+body.phone .mobile-only{display:inline-flex}
+body.phone .cmdk{min-width:0;width:34px;padding:5px;justify-content:center}
+body.phone .cmdk span,body.phone .cmdk kbd{display:none}
+body.phone .page{padding:14px 14px 110px}
+body.phone .fleet-wrap,body.phone .fleet-wrap.rail-open{grid-template-columns:minmax(0,1fr)}
+body.phone .rail.closed{width:auto}
+body.phone .rail-tab{flex-direction:row;padding:11px 13px;justify-content:flex-start}
+body.phone .rail-tab .vtxt{writing-mode:horizontal-tb}
+body.phone .run-cols{grid-template-columns:minmax(0,1fr)}
+body.phone .insp,body.phone .rail{position:static}
+body.phone .ph h1{font-size:21px}
+body.phone .stat{min-width:50%;border-right:0;border-bottom:1px solid var(--border)}
+body.phone .crumbs .hide-sm{display:none}
+body.phone #chrome{right:8px;bottom:8px;left:8px}
+body.phone #chrome .ch-body,body.phone #chrome .ch-note{max-width:none}
+body.phone .dlg{max-height:calc(100vh - 24px)}
+body.phone .grid2{grid-template-columns:1fr}
+
+@media (max-width: 1100px){
+  .run-cols{grid-template-columns:minmax(0,1fr)}
+  .insp{position:static}
+  .fleet-wrap.rail-open{grid-template-columns:minmax(0,1fr)}
+  .rail.closed{width:auto}
+  .rail-tab{flex-direction:row;padding:11px 13px;justify-content:flex-start}
+  .rail-tab .vtxt{writing-mode:horizontal-tb}
+}
+@media (max-width: 860px){
+  #app{grid-template-columns:1fr}
+  .side{position:fixed;inset:0 auto 0 0;width:264px;z-index:70;transform:translateX(-100%);transition:transform .2s ease-out}
+  .side.open{transform:none}
+  .drawer-scrim.on{display:block;position:fixed;inset:0;background:rgba(10,10,9,.6);z-index:65}
+  .mobile-only{display:inline-flex}
+  .crumbs .hide-sm{display:none}
+}
+
+/* ---------------- transcript and transport ---------------- */
+.tx{border:1px solid var(--border);border-radius:var(--r);background:var(--panel);overflow:hidden}
+
+.tp{display:flex;align-items:center;gap:8px;padding:9px 11px;border-bottom:1px solid var(--border);background:var(--hl);flex-wrap:wrap}
+.tp-btn{width:30px;height:30px;border:1px solid var(--border);border-radius:7px;background:var(--panel);
+  display:grid;place-items:center;color:var(--body);flex:0 0 auto}
+.tp-btn:hover:not(:disabled){color:var(--fg);border-color:var(--rule)}
+.tp-btn:disabled{opacity:.35;cursor:not-allowed}
+.tp-btn svg{width:13px;height:13px}
+.tp-btn.play{width:34px;height:34px;border-color:var(--rule)}
+.tp-scrub{flex:1 1 190px;min-width:130px;display:flex;align-items:center}
+input.scrub{width:100%;accent-color:var(--fg);height:4px;cursor:pointer}
+.tp-read{font-family:var(--mono);font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.tp-read b{color:var(--fg);font-weight:500}
+.seg{display:flex;border:1px solid var(--border);border-radius:7px;overflow:hidden;flex:0 0 auto}
+.seg button{padding:4px 8px;font-size:11px;color:var(--muted);border-right:1px solid var(--border);white-space:nowrap}
+.seg button:last-child{border-right:0}
+.seg button:hover{color:var(--fg)}
+.seg button.on{background:var(--panel);color:var(--fg);font-weight:600}
+.seg.speed button{font-family:var(--mono)}
+.livebadge{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10.5px;
+  letter-spacing:.1em;text-transform:uppercase;font-weight:600;padding:3px 8px;border-radius:20px;
+  color:var(--s-allowed);background:var(--s-allowed-bg);flex:0 0 auto}
+.livebadge.off{color:var(--dim);background:var(--hl);border:1px solid var(--border)}
+.tp-note{flex:1 1 100%;font-size:11px;color:var(--dim);line-height:1.45;margin:0}
+
+.tx-body{max-height:min(66vh,760px);overflow-y:auto}
+.tx-body details{display:block}
+.tx-body summary{list-style:none;cursor:pointer;user-select:none}
+.tx-body summary::-webkit-details-marker{display:none}
+.chev{color:var(--dim);font-size:8px;display:inline-block;width:10px;transition:transform .12s;flex:0 0 auto}
+details[open] > summary .chev{transform:rotate(90deg)}
+
+.turn > summary{padding:10px 13px;background:var(--hl);border-bottom:1px solid var(--border)}
+.turn > summary:hover{background:var(--panel)}
+.turnline{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.turnname{color:var(--fg);font-weight:600;font-size:13px}
+.turnname .bar{color:var(--accent-text)}
+.turnok{font-size:11px;letter-spacing:.06em;color:var(--s-allowed)}
+.turnok.run{color:var(--s-approval)}
+.chips{margin-left:auto;display:flex;gap:5px;flex-wrap:wrap}
+.chip{font-family:var(--mono);font-size:10.5px;color:var(--muted);background:var(--panel);
+  border:1px solid var(--border);padding:0 7px;border-radius:99px;line-height:1.8;white-space:nowrap}
+.chip.cost{color:var(--fg)}
+.chip.warn{color:var(--s-denied)}
+
+.role{display:grid;grid-template-columns:74px 1fr;padding:11px 13px 11px 0;border-bottom:1px solid var(--border)}
+.rolegut{text-align:right;padding-right:13px}
+.roletag{font-size:9.5px;font-weight:700;letter-spacing:.13em;padding:2px 7px;border-radius:4px;display:inline-block}
+.role.you .roletag{color:var(--on-gold);background:var(--s-approval)}
+.role.agent .roletag{color:var(--on-gold);background:var(--s-neutral)}
+.role .prose{max-width:70ch;color:var(--body);font-size:13px;line-height:1.6}
+.role.agent .prose{border-left:2px solid var(--border);padding-left:13px}
+
+.step{border-bottom:1px solid var(--border)}
+.step:last-child{border-bottom:0}
+.step > summary{padding:7px 13px 7px 0}
+.step > summary:hover{background:var(--hl)}
+.step.now > summary{background:var(--hl);box-shadow:inset 3px 0 0 var(--accent-text)}
+.step.future{opacity:.34}
+.stepgrid{display:grid;grid-template-columns:46px 30px 1fr;align-items:baseline}
+.stepgrid .t{color:var(--dim);font-size:10.5px;text-align:right;padding-right:9px;font-variant-numeric:tabular-nums;font-family:var(--mono)}
+.stepgrid .node{position:relative;text-align:center}
+.stepgrid .node::before{content:"";position:absolute;left:50%;top:-12px;bottom:-12px;width:1px;background:var(--border)}
+.dot{position:relative;z-index:1;display:inline-block;width:7px;height:7px;border-radius:50%;
+  background:var(--panel);border:2px solid var(--s-neutral)}
+.dot.model{border-color:var(--s-approval)}
+.dot.tool{border-color:var(--s-neutral)}
+.dot.policy{border-color:var(--s-allowed)}
+.dot.control{border-color:var(--gold);border-radius:2px}
+.dot.deny{border-color:var(--s-denied);background:var(--s-denied)}
+.digest{display:flex;gap:8px;align-items:baseline;min-width:0;flex-wrap:wrap;padding-right:13px}
+.dname{font-family:var(--mono);font-weight:600;font-size:12px;color:var(--fg)}
+.dname.model{color:var(--s-approval)}
+.dname.control{color:var(--accent-text)}
+.darg{font-family:var(--mono);font-size:11.5px;color:var(--muted);white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;max-width:46ch}
+.sbody{padding:2px 13px 11px 0}
+.sbody-inner{margin-left:76px;background:var(--ink);border:1px solid var(--border);border-radius:var(--r-sm);overflow:hidden}
+.fhead{display:flex;gap:8px;align-items:center;padding:6px 11px;border-bottom:1px solid var(--border);background:var(--hl)}
+.fhead .fk{font-family:var(--mono);font-size:11px;color:var(--fg)}
+.fhead .fs{font-family:var(--mono);font-size:10.5px;color:var(--dim);margin-left:auto}
+.fbody{padding:9px 11px}
+.fbody .msg{background:var(--panel)}
+.fbody pre.code{background:var(--panel)}
+.more > summary{color:var(--accent-text);font-size:11px;padding:5px 11px 9px}
+.more > summary:hover{text-decoration:underline}
+
+.tx-foot{padding:9px 13px;border-top:1px solid var(--border);font-size:12px;color:var(--dim);
+  display:flex;align-items:center;gap:8px;background:var(--hl);flex-wrap:wrap}
+body.phone .sbody-inner{margin-left:0}
+body.phone .role{grid-template-columns:1fr;padding-left:13px}
+body.phone .rolegut{text-align:left;padding:0 0 6px}
+body.phone .darg{max-width:26ch}
+@media (max-width:860px){ .sbody-inner{margin-left:0} }
+
+/* ---------- tool grammar (shared with mc.html) ----------
+   Three orthogonal axes, three visual grammars, never mixed:
+     category = what the tool ACTS ON   → icon badge, one hue per category (never gold, never a state hue)
+     hazard   = how bad a wrong call is → risk mark (circle · diamond · triangle · filled triangle) + side-effect glyph
+     gate     = what the belt decided   → badge; a dashed border means a person still stands in the way */
+:root{--tg-ok:#57A97C;--tg-appr:#5B93D6;--tg-deny:#C66A4A;--tg-crit:#D6455E;
+  --tg-read:#6FB1DA;--tg-query:#5FBFB0;--tg-record:#E08BA6;--tg-message:#E39A6E;--tg-file:#9FBE62;--tg-exec:#B48EE0;--tg-vcs:#8A96E8;--tg-infra:#6E9E8F;--tg-access:#A3B1C6;--tg-finance:#C97AD0}
+@media(prefers-color-scheme:light){:root:not([data-theme="dark"]){--tg-ok:#2F7D52;--tg-appr:#2E6BA8;--tg-deny:#9B4526;--tg-crit:#AE2540;
+  --tg-read:#1E6F99;--tg-query:#1E7A6E;--tg-record:#A63F62;--tg-message:#A8532A;--tg-file:#5A7A1C;--tg-exec:#6A46B5;--tg-vcs:#4553B0;--tg-infra:#2F6656;--tg-access:#4F6075;--tg-finance:#8B3E96}}
+:root[data-theme="light"]{--tg-ok:#2F7D52;--tg-appr:#2E6BA8;--tg-deny:#9B4526;--tg-crit:#AE2540;
+  --tg-read:#1E6F99;--tg-query:#1E7A6E;--tg-record:#A63F62;--tg-message:#A8532A;--tg-file:#5A7A1C;--tg-exec:#6A46B5;--tg-vcs:#4553B0;--tg-infra:#2F6656;--tg-access:#4F6075;--tg-finance:#8B3E96}
+.tg-read{--tc:var(--tg-read)} .tg-query{--tc:var(--tg-query)} .tg-record{--tc:var(--tg-record)} .tg-message{--tc:var(--tg-message)} .tg-file{--tc:var(--tg-file)}
+.tg-exec{--tc:var(--tg-exec)} .tg-vcs{--tc:var(--tg-vcs)} .tg-infra{--tc:var(--tg-infra)} .tg-access{--tc:var(--tg-access)} .tg-finance{--tc:var(--tg-finance)}
+.tg{display:inline-grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:10px;align-items:center;min-width:0;max-width:100%;text-align:left;vertical-align:middle;font-family:var(--font,inherit)}
+.tg .i{grid-row:1/3;width:28px;height:28px;border-radius:8px;display:grid;place-items:center;color:var(--tc);background:color-mix(in srgb,var(--tc) 14%,transparent);border:1px solid color-mix(in srgb,var(--tc) 34%,transparent)}
+.tg .i svg{width:15px;height:15px}
+.tg .l{font-weight:600;font-size:13px;color:var(--fg,inherit);line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.tg .a{font-family:var(--mono,ui-monospace,monospace);font-size:11px;color:var(--muted,#9B958A);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.tg .a .v{color:var(--dim,#6E6A62)}
+table .tg:not(.sm){min-width:220px}
+.tg.sm{column-gap:8px}.tg.sm .i{width:22px;height:22px;border-radius:6px}.tg.sm .i svg{width:12px;height:12px}.tg.sm .l{font-size:12.5px}.tg.sm .a{font-size:10.5px}
+.tg.lg{column-gap:12px}.tg.lg .i{width:42px;height:42px;border-radius:11px}.tg.lg .i svg{width:21px;height:21px}.tg.lg .l{font-size:18px;letter-spacing:-.015em}.tg.lg .a{font-size:12px}
+.tg.api .l{font-family:var(--mono,ui-monospace,monospace);font-weight:500;font-size:12.5px}.tg.api .a{font-family:var(--font,inherit);font-weight:500}
+.tg.lg.api .l{font-size:15px}
+.tg-cat{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:2px 8px 2px 6px;border-radius:6px;border:1px solid;white-space:nowrap;line-height:1.5;color:var(--tc);border-color:color-mix(in srgb,var(--tc) 45%,transparent);background:color-mix(in srgb,var(--tc) 12%,transparent)}
+.tg-cat svg{width:12px;height:12px;flex:none}
+.tg-hz{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;white-space:nowrap;line-height:1.5;letter-spacing:.02em}
+.tg-hz svg{width:14px;height:14px;flex:none}
+.tg-hz+.tg-hz{margin-left:10px}
+.tg-hz.r-low{color:var(--muted,#9B958A)} .tg-hz.r-medium{color:var(--tg-appr)} .tg-hz.r-high{color:var(--tg-deny)} .tg-hz.r-critical{color:var(--tg-crit)}
+.tg-hz.e-read{color:var(--muted,#9B958A)} .tg-hz.e-write{color:var(--tg-appr)} .tg-hz.e-irreversible{color:var(--tg-deny)}
+.tg-gt{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;letter-spacing:.02em;padding:2px 8px 2px 6px;border-radius:6px;border:1px solid;white-space:nowrap;line-height:1.5}
+.tg-gt svg{width:12px;height:12px;flex:none}
+.tg-gt.g-allow{color:var(--tg-ok);border-color:color-mix(in srgb,var(--tg-ok) 42%,transparent);background:color-mix(in srgb,var(--tg-ok) 11%,transparent)}
+.tg-gt.g-require_approval,.tg-gt.g-mandate{color:var(--tg-appr);border-style:dashed;border-color:color-mix(in srgb,var(--tg-appr) 65%,transparent);background:color-mix(in srgb,var(--tg-appr) 11%,transparent)}
+.tg-gt.g-deny{color:var(--tg-deny);border-color:color-mix(in srgb,var(--tg-deny) 42%,transparent);background:color-mix(in srgb,var(--tg-deny) 11%,transparent)}
+.tg-gt.g-killed{color:var(--tg-crit);border-color:color-mix(in srgb,var(--tg-crit) 65%,transparent);background:color-mix(in srgb,var(--tg-crit) 14%,transparent)}
+tr.tg-row-critical>td:first-child{box-shadow:inset 3px 0 0 var(--tg-crit)}
+tr.tg-row-high>td:first-child{box-shadow:inset 3px 0 0 color-mix(in srgb,var(--tg-deny) 65%,transparent)}
+tr.tg-grp td{background:var(--hl,rgba(127,127,127,.08));padding-top:8px;padding-bottom:8px;border-bottom:1px solid var(--border,rgba(127,127,127,.25))}
+tr.tg-grp .i{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:6px;vertical-align:middle;margin-right:9px;color:var(--tc);background:color-mix(in srgb,var(--tc) 14%,transparent);border:1px solid color-mix(in srgb,var(--tc) 34%,transparent)}
+tr.tg-grp .i svg{width:12px;height:12px}
+tr.tg-grp b{font-size:12.5px;margin-right:9px;color:var(--fg,inherit)}
+tr.tg-grp .s{font-size:11.5px;color:var(--muted,#9B958A)}
+.tg-seg{display:inline-flex;gap:2px;padding:2px;border:1px solid var(--border,rgba(127,127,127,.25));border-radius:8px;background:var(--void,transparent)}
+.tg-seg button,.tg-chips button{font:inherit;font-size:12px;font-weight:500;color:var(--muted,#9B958A);background:transparent;border:1px solid transparent;border-radius:6px;padding:3px 9px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;line-height:1.5}
+.tg-chips button{border-color:var(--border,rgba(127,127,127,.25))}
+.tg-seg button[aria-pressed="true"],.tg-chips button[aria-pressed="true"]{background:var(--hl,rgba(127,127,127,.08));border-color:var(--rule,rgba(127,127,127,.4));color:var(--fg,inherit)}
+.tg-chips{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.tg-chips button svg{width:12px;height:12px;color:var(--tc)}
+.tg-chips button .n{color:var(--dim,#6E6A62);font-variant-numeric:tabular-nums}
+.tg-leg{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
+.tg-leg .c{display:grid;grid-template-columns:auto 1fr;gap:12px;padding:12px;border:1px solid var(--border,rgba(127,127,127,.25));border-left:3px solid var(--tc);border-radius:10px;background:var(--void,transparent);min-width:0}
+.tg-leg .i{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;color:var(--tc);background:color-mix(in srgb,var(--tc) 14%,transparent);border:1px solid color-mix(in srgb,var(--tc) 32%,transparent)}
+.tg-leg .i svg{width:17px;height:17px}
+.tg-leg .l{font-weight:600;font-size:13px;color:var(--fg,inherit)} .tg-leg .s{font-size:12px;color:var(--muted,#9B958A);margin-top:2px} .tg-leg .eg{font-family:var(--mono,ui-monospace,monospace);font-size:10.5px;color:var(--dim,#6E6A62);margin-top:6px;word-break:break-word}
+.tg-axes{display:grid;gap:8px;font-size:12px;margin-top:14px}
+.tg-axes>div{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.tg-axes .k{min-width:96px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted,#9B958A);font-weight:600}
+.tg-axes .note{font-size:11.5px;color:var(--dim,#6E6A62)}
+@media(max-width:520px){.tg-leg{grid-template-columns:1fr}}
+</style>
+
+<div id="app">
+  <div class="drawer-scrim" id="drawerScrim" hidden></div>
+
+  <aside class="side" id="side" aria-label="Mission Control navigation">
+    <div class="side-logo">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 574.244 106.313" role="img" aria-label="Oxagen"><g transform="translate(0,0) scale(2.842952)"><path d="M6.300 0.000L12.600 3.320L12.600 9.960L6.300 13.280L0.000 9.960L0.000 3.320ZM1.000 3.885L1.000 9.395L6.300 12.150L11.600 9.395L11.600 3.885L6.300 1.130Z M19.376 0.000L25.676 3.320L25.676 9.960L19.376 13.280L13.076 9.960L13.076 3.320ZM14.076 3.885L14.076 9.395L19.376 12.150L24.676 9.395L24.676 3.885L19.376 1.130Z M12.838 10.240L19.138 13.560L19.138 20.200L12.838 23.520L6.538 20.200L6.538 13.560ZM7.538 14.125L7.538 19.635L12.838 22.390L18.138 19.635L18.138 14.125L12.838 11.370Z M19.376 20.480L25.676 23.800L25.676 30.440L19.376 33.760L13.076 30.440L13.076 23.800ZM14.076 24.365L14.076 29.875L19.376 32.630L24.676 29.875L24.676 24.365L19.376 21.610Z" fill="currentColor"/><path d="M25.914 10.240L32.214 13.560L32.214 20.200L25.914 23.520L19.614 20.200L19.614 13.560Z M6.300 20.480L12.600 23.800L12.600 30.440L6.300 33.760L0.000 30.440L0.000 23.800Z" fill="#D6962C"/></g><g transform="translate(120.376,13.067)"><path d="M33.9083 68.758Q24.1657 68.758 16.4786 64.7737Q8.79142 60.7894 4.39571 53.2965Q0 45.8035 0 35.3862V33.3718Q0 22.9544 4.39571 15.4615Q8.79142 7.96854 16.4786 3.98427Q24.1657 0 33.9083 0Q43.6509 0 51.3381 3.98427Q59.0252 7.96854 63.4209 15.4615Q67.8166 22.9544 67.8166 33.3718V35.3862Q67.8166 45.8035 63.4209 53.2965Q59.0252 60.7894 51.3381 64.7737Q43.6509 68.758 33.9083 68.758ZM33.9083 55.3486Q42.1895 55.3486 47.4689 50.0198Q52.7484 44.691 52.7484 35.0142V33.7437Q52.7484 24.067 47.5233 18.7382Q42.2981 13.4094 33.9083 13.4094Q25.6502 13.4094 20.3592 18.7382Q15.0683 24.067 15.0683 33.7437V35.0142Q15.0683 44.691 20.3592 50.0198Q25.6502 55.3486 33.9083 55.3486Z M176.569 68.758Q169.637 68.758 164.119 66.3453Q158.601 63.9327 155.387 59.2935Q152.173 54.6542 152.173 48.0088Q152.173 41.3403 155.387 36.8558Q158.601 32.3712 164.27 30.1017Q169.94 27.8323 177.174 27.8323H196.047V23.8925Q196.047 18.7316 192.874 15.5274Q189.701 12.3232 182.99 12.3232Q176.411 12.3232 173.049 15.3842Q169.686 18.4452 168.627 23.3593L154.691 18.7315Q156.27 13.6133 159.748 9.39702Q163.225 5.18071 169.049 2.59035Q174.874 0 183.208 0Q195.972 0 203.326 6.42816Q210.681 12.8563 210.681 24.9392V50.4707Q210.681 54.4204 214.368 54.4204H219.795V66.9148H209.197Q204.464 66.9148 201.442 64.5334Q198.42 62.1521 198.42 58.1563V57.8864H196.126Q195.392 59.6967 193.399 62.2985Q191.406 64.9004 187.388 66.8292Q183.369 68.758 176.569 68.758ZM179.05 56.4348Q186.581 56.4348 191.314 52.1592Q196.047 47.8837 196.047 40.6031V39.2405H178.175Q173.175 39.2405 170.208 41.3881Q167.241 43.5358 167.241 47.5513Q167.241 51.5668 170.34 54.0008Q173.439 56.4348 179.05 56.4348Z M227.767 34.6423V32.6279Q227.767 22.3817 231.86 15.0863Q235.953 7.79081 242.768 3.8954Q249.582 0 257.706 0Q266.935 0 271.762 3.33256Q276.589 6.66512 278.81 10.4107H281.042V1.8432H295.801V79.33Q295.801 85.6989 292.104 89.4725Q288.408 93.2462 282.079 93.2462H238.369V80.0541H277.023Q280.779 80.0541 280.779 76.1043V57.2775H278.547Q277.161 59.5683 274.665 61.8904Q272.168 64.2125 268.057 65.7414Q263.946 67.2702 257.706 67.2702Q249.582 67.2702 242.756 63.3748Q235.93 59.4794 231.848 52.1724Q227.767 44.8655 227.767 34.6423ZM261.938 54.0781Q270.151 54.0781 275.573 48.8612Q280.996 43.6443 280.996 34.2704V32.9999Q280.996 23.4943 275.627 18.3432Q270.259 13.1921 261.938 13.1921Q253.749 13.1921 248.315 18.3432Q242.881 23.4943 242.881 32.9999V34.2704Q242.881 43.6443 248.315 48.8612Q253.749 54.0781 261.938 54.0781Z M344.764 68.758Q334.998 68.758 327.583 64.6108Q320.167 60.4636 316.031 52.9048Q311.896 45.346 311.896 35.1689V33.589Q311.896 23.3889 315.977 15.8416Q320.059 8.2944 327.397 4.1472Q334.735 0 344.385 0Q353.881 0 360.956 4.1867Q368.031 8.37341 371.981 15.8515Q375.931 23.3297 375.931 33.2895V38.6974H327.181Q327.468 46.3334 332.587 50.9496Q337.707 55.5658 345.198 55.5658Q352.522 55.5658 356.101 52.3534Q359.681 49.141 361.553 45.0629L373.985 51.4813Q372.119 55.0656 368.63 59.1042Q365.141 63.1428 359.394 65.9504Q353.648 68.758 344.764 68.758ZM327.313 27.2892H360.622Q360.095 20.7986 355.7 16.9954Q351.304 13.1921 344.277 13.1921Q337.055 13.1921 332.691 16.9954Q328.327 20.7986 327.313 27.2892Z M391.548 66.9148V1.8432H406.353V10.9769H408.585Q410.303 7.25429 414.832 3.99908Q419.361 0.743866 428.435 0.743866Q435.956 0.743866 441.695 4.12911Q447.434 7.51435 450.651 13.5903Q453.868 19.6663 453.868 27.9442V66.9148H438.8V29.1226Q438.8 21.1969 434.891 17.3492Q430.983 13.5015 423.9 13.5015Q415.872 13.5015 411.244 18.8237Q406.617 24.146 406.617 33.9445V66.9148Z" fill="currentColor"/><path d="M73.9979 66.9148 98.2261 34.0696 74.3764 1.8432H91.9626L107.9 24.3499H110.131L126.068 1.8432H143.654L119.805 34.0696L144.033 66.9148H126.206L110.131 44.0065H107.9L91.8244 66.9148Z" fill="#D6962C"/></g></svg>
+    </div>
+
+    <div class="side-switchers">
+      <button class="switcher" type="button" id="orgSwitch" aria-haspopup="true">
+        <span class="sw-mark">AR</span>
+        <span class="sw-t"><span class="sw-k">Organization</span><span class="sw-v">Acme Robotics</span></span>
+        <svg class="sw-c" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 5l3-2.5L9 5M3 7l3 2.5L9 7" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      </button>
+      <button class="switcher" type="button" id="wsSwitch" aria-haspopup="true">
+        <span class="sw-mark">CP</span>
+        <span class="sw-t"><span class="sw-k">Workspace</span><span class="sw-v">core-platform</span></span>
+        <svg class="sw-c" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 5l3-2.5L9 5M3 7l3 2.5L9 7" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+
+    <nav class="side-nav" id="sideNav"></nav>
+
+    <div class="side-foot">
+      <span class="avatar">MB</span>
+      <span style="min-width:0">
+        <span style="display:block;font-size:12.5px;font-weight:500;color:var(--fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Marcus Bell</span>
+        <span style="display:block;font-size:11px;color:var(--dim)">Workspace owner</span>
+      </span>
+      <button class="icon-btn" id="acctBtn" title="Account" aria-label="Account" style="margin-left:auto">
+        <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="1.4" fill="currentColor"/><circle cx="3" cy="8" r="1.4" fill="currentColor"/><circle cx="13" cy="8" r="1.4" fill="currentColor"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="icon-btn mobile-only" id="menuBtn" aria-label="Open navigation">
+        <svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      </button>
+      <nav class="crumbs" id="crumbs" aria-label="Breadcrumb"></nav>
+      <div class="tb-right">
+        <button class="cmdk" id="cmdBtn"><svg width="12" height="12" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M10.6 10.6L14 14" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg><span>Search or run a command</span><kbd>⌘K</kbd></button>
+        <button class="icon-btn" id="themeBtn" title="Switch theme" aria-label="Switch theme">
+          <svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M13 9.4A5.6 5.6 0 0 1 6.6 3a5.6 5.6 0 1 0 6.4 6.4Z" fill="currentColor"/></svg>
+        </button>
+        <button class="icon-btn" id="asstBtn" title="Assistant" aria-label="Toggle assistant">
+          <svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 3.5h11v7h-6l-3.4 2.6V10.5H2.5Z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="scroll" id="scroll"><div class="page" id="page"></div></div>
+  </div>
+</div>
+
+<div id="modal"></div>
+
+<div id="chrome">
+  <div class="ch-head"><b>Mockup states</b><button type="button" id="chromeMin">hide</button></div>
+  <div class="ch-body" id="chromeBody"></div>
+  <div class="ch-note">Mockup chrome, not product UI. W2 · Stop it. Steer it.</div>
+</div>
+
+<script>
+/* ---------- Tool grammar (shared with mc.html) ----------
+   TG.cell(id,{sz:"sm"|"lg",sub})  label + API name in a category-hued tile; TG.names="api" leads with the API name
+   TG.cat(cat)                     category badge          TG.hazard(risk,effect)   risk mark + side-effect glyph
+   TG.gate(g,note)                 allow · require_approval · deny · killed · mandate
+   TG.legend()                     the ten categories with examples, plus the risk / effect / gate scales
+   TG.chips(counts,sel,pick,total) category filter chips; `pick` is an onclick with %s where the category goes
+   TG.seg(items)                   segmented control: [[label,pressed,onclick],…]
+   A category says what a tool ACTS ON; it is orthogonal to hazard (how bad a wrong call is) and gate (what the belt decided). */
+var TG=(function(){
+ function h(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+ var ORDER=["read","query","record","message","file","exec","vcs","infra","access","finance"];
+ var CAT={
+  read:{l:"Read-only",s:"Observes and returns. Changes nothing anywhere.",eg:"github__get_file_contents · slack__get_thread · search_graph",
+    i:'<path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"/><circle cx="12" cy="12" r="3"/>'},
+  query:{l:"Data query",s:"Bulk read from a store. Read-only, but the result set is the exfiltration and the cost.",eg:"snowflake__run_query · aws_billing__get_cost_and_usage",
+    i:'<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/>'},
+  record:{l:"Record write",s:"Creates or updates a record in a system of work. Reversible by another write.",eg:"linear__update_issue · calendar__create_event · notion__update_page",
+    i:'<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h8M8 17h5"/>'},
+  message:{l:"Messaging & authoring",s:"Speaks to people on the organization’s behalf. A sent message cannot be unsent.",eg:"slack__post_message · slack__upload_file · gmail__send_message",
+    i:'<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1.1-4.2A8 8 0 1 1 21 12z"/><path d="M8 11h8M8 14h5"/>'},
+  file:{l:"File mutation",s:"Writes, edits, moves or deletes files in a workspace or a drive.",eg:"write__file · edit__file · drive__trash_file",
+    i:'<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 15l2 2 4-4"/>'},
+  exec:{l:"Code execution",s:"Runs a command or a program. Its effect is whatever the sandbox allows.",eg:"claude_code__Bash · bash__run · sandbox__run_python",
+    i:'<path d="m4 17 6-5-6-5M12 19h8"/>'},
+  vcs:{l:"Source control",s:"Changes code history: branches, pull requests, merges, releases, repositories.",eg:"github__create_pull_request · github__merge_pull_request · github__delete_repository",
+    i:'<circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="8" r="2.5"/><path d="M6 8.5v7M18 10.5c0 4-12 2-12 6"/>'},
+  infra:{l:"Infrastructure",s:"Deploys, scales, pauses or reconfigures a running system.",eg:"vercel__deploy_to_vercel · vercel__pause_project · k8s__scale_deployment",
+    i:'<rect x="3" y="4" width="18" height="6" rx="1.5"/><rect x="3" y="14" width="18" height="6" rx="1.5"/><path d="M7 7h.01M7 17h.01"/>'},
+  access:{l:"Access & identity",s:"Grants, shares, rotates or revokes access. Widens what every later call can reach.",eg:"drive__share_file · iam__rotate_key · oxagen__grant_role",
+    i:'<circle cx="8" cy="12" r="4"/><path d="M12 12h9M18 12v3M15 12v2"/>'},
+  finance:{l:"Financial control",s:"Moves funds or commits spend. Never callable without a mandate.",eg:"stripe__create_payment · stripe__create_refund · aws_billing__purchase_savings_plan",
+    i:'<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01M18 12h.01"/>'}
+ };
+ var META={
+  github__create_pull_request:["Create pull request","vcs"], github__merge_pull_request:["Merge pull request","vcs"],
+  github__delete_repository:["Delete repository","vcs"], github__create_release:["Create release","vcs"], github__push_files:["Push files","vcs"],
+  github__get_file_contents:["Get file contents","read"], github__list_pull_requests:["List pull requests","read"], github__get_pull_request:["Get pull request","read"],
+  stripe__create_payment:["Create payment","finance"], stripe__create_refund:["Create refund","finance"], stripe__create_payout:["Create payout","finance"],
+  aws_billing__purchase_savings_plan:["Purchase savings plan","finance"], aws_billing__get_cost_and_usage:["Get cost and usage","query"],
+  linear__update_issue:["Update issue","record"], linear__get_issue:["Get issue","read"], linear__create_issue:["Create issue","record"],
+  slack__post_message:["Post message","message"], slack__upload_file:["Upload file","message"],
+  slack__list_channels:["List channels","read"], slack__get_thread:["Get thread","read"],
+  snowflake__run_query:["Run SQL query","query"], claude_code__Bash:["Run shell command","exec"], bash__run:["Run shell command","exec"],
+  write__file:["Write file","file"], edit__file:["Edit file","file"], read__file:["Read file","read"],
+  search_graph:["Search the graph","read"], recall_context:["Recall context","read"]
+ };
+ function parts(id){var s=String(id||""),i=s.lastIndexOf("@");return i>0?{n:s.slice(0,i),v:s.slice(i+1)}:{n:s,v:""};}
+ function meta(id){
+  var p=parts(id), m=META[p.n];
+  if(m) return {n:p.n,v:p.v,l:m[0],cat:m[1]};
+  var local=p.n.split("__").pop(), verb=local.split("_")[0].toLowerCase(), cat="record";
+  if(/^(get|list|search|read|fetch|find|recall|describe|show)$/.test(verb)) cat="read";
+  else if(/^(query|select|aggregate|export)$/.test(verb)) cat="query";
+  else if(/^(write|edit|move|copy|trash|mkdir)$/.test(verb)) cat="file";
+  else if(/^(bash|run|exec|execute|eval)$/.test(verb)) cat="exec";
+  else if(/^(post|send|reply|forward|publish|upload)$/.test(verb)) cat="message";
+  else if(/^(pay|refund|purchase|charge|transfer|buy|payout)$/.test(verb)) cat="finance";
+  else if(/^(deploy|scale|pause|restart|provision)$/.test(verb)) cat="infra";
+  else if(/^(grant|share|rotate|revoke|invite)$/.test(verb)) cat="access";
+  else if(/^(merge|rebase|tag|release|push|fork)$/.test(verb)) cat="vcs";
+  return {n:p.n,v:p.v,l:local.replace(/_/g," ").replace(/^./,function(c){return c.toUpperCase();}),cat:cat};
+ }
+ var SV='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
+ var SV2='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
+ function svg(c){var d=CAT[c]||CAT.record;return SV+d.i+'</svg>';}
+ function cat(c){var d=CAT[c]||CAT.record;return '<span class="tg-cat tg-'+h(c)+'" title="'+h(d.s)+'">'+svg(c)+h(d.l)+'</span>';}
+ function cell(id,o){
+  o=o||{}; var m=meta(id), api=TG.names==="api", d=CAT[m.cat];
+  var apiHtml=h(m.n)+(m.v?'<span class="v">@'+h(m.v)+'</span>':''), sub=o.sub?' · '+h(o.sub):'';
+  return '<span class="tg tg-'+m.cat+(o.sz?' '+o.sz:'')+(api?' api':'')+'" title="'+h(m.n+(m.v?'@'+m.v:''))+' — '+h(m.l)+' · '+h(d.l)+'">'+
+   '<span class="i">'+svg(m.cat)+'</span>'+
+   (api?'<span class="l">'+apiHtml+'</span><span class="a">'+h(m.l)+sub+'</span>'
+       :'<span class="l">'+h(m.l)+'</span><span class="a">'+apiHtml+sub+'</span>')+'</span>';
+ }
+ function riskSvg(r){
+  if(r==="critical") return SV2+'<path d="M12 3 2 20h20L12 3z" fill="currentColor"/><path d="M12 10v4M12 17.5v.5" style="stroke:var(--ink,#10100F)"/></svg>';
+  if(r==="high") return SV2+'<path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4M12 17.5v.5"/></svg>';
+  if(r==="medium") return SV2+'<path d="M12 3l9 9-9 9-9-9z"/><path d="M12 12h.01"/></svg>';
+  return SV2+'<circle cx="12" cy="12" r="8"/><path d="M12 12h.01"/></svg>';
+ }
+ function effSvg(e){
+  if(e==="irreversible") return SV2+'<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
+  if(e==="write") return SV2+'<path d="M4 20h4L18 10l-4-4L4 16z"/><path d="M12 8l4 4"/></svg>';
+  return SV2+'<circle cx="12" cy="12" r="8"/><path d="M8 12h8"/></svg>';
+ }
+ function hazard(r,e){
+  return '<span class="tg-hz r-'+h(r)+'" title="risk '+h(r)+'">'+riskSvg(r)+'<span>'+h(r)+'</span></span>'+
+   (e?'<span class="tg-hz e-'+h(e)+'" title="side effect '+h(e)+'">'+effSvg(e)+'<span>'+h(e)+'</span></span>':'');
+ }
+ var GL={allow:"allowed",require_approval:"needs approval",deny:"denied",killed:"kill switch",mandate:"mandate + approval"};
+ function gateSvg(g){
+  var s='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
+  if(g==="allow") return s+'<path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+  if(g==="require_approval") return s+'<path d="M12 3l8 3.5v5c0 4.6-3.2 8.6-8 9.5-4.8-.9-8-4.9-8-9.5v-5z"/><path d="M12 8v4l2.5 1.5"/></svg>';
+  if(g==="deny") return s+'<circle cx="12" cy="12" r="8.5"/><path d="M6 6l12 12"/></svg>';
+  if(g==="killed") return s+'<path d="M12 3v9"/><path d="M6.3 6.3a8 8 0 1 0 11.4 0"/></svg>';
+  if(g==="mandate") return s+'<path d="M12 3v18M16.5 7.5c0-1.7-2-3-4.5-3S7.5 5.8 7.5 7.5s2 2.7 4.5 3.3 4.5 1.6 4.5 3.5-2 3.2-4.5 3.2-4.5-1.3-4.5-3"/></svg>';
+  return s+'<path d="M5 12h14"/></svg>';
+ }
+ function gate(g,note){g=({allowed:"allow",approval:"require_approval",denied:"deny"})[g]||g;return '<span class="tg-gt g-'+h(g)+'"'+(note?' title="'+h(note)+'"':'')+'>'+gateSvg(g)+h(GL[g]||g)+'</span>';}
+ function seg(items){return '<span class="tg-seg" role="group">'+items.map(function(it){return '<button type="button" aria-pressed="'+(!!it[1])+'" onclick="'+h(it[2])+'">'+h(it[0])+'</button>';}).join("")+'</span>';}
+ function chips(counts,sel,pick,total){
+  var out='<button type="button" aria-pressed="'+(!sel)+'" onclick="'+h(pick.replace("%s",""))+'">All <span class="n">'+total+'</span></button>';
+  ORDER.forEach(function(c){ if(!counts[c])return;
+   out+='<button type="button" class="tg-'+c+'" aria-pressed="'+(sel===c)+'" title="'+h(CAT[c].s)+'" onclick="'+h(pick.replace("%s",c))+'">'+svg(c)+h(CAT[c].l)+'<span class="n">'+counts[c]+'</span></button>';});
+  return '<div class="tg-chips">'+out+'</div>';
+ }
+ function legend(){
+  return '<div class="tg-leg">'+ORDER.map(function(c){var d=CAT[c];
+    return '<div class="c tg-'+c+'"><div class="i">'+svg(c)+'</div><div style="min-width:0"><div class="l">'+h(d.l)+'</div><div class="s">'+h(d.s)+'</div><div class="eg">'+h(d.eg)+'</div></div></div>';}).join("")+'</div>'+
+   '<div class="tg-axes">'+
+   '<div><span class="k">Risk</span>'+hazard("low")+hazard("medium")+hazard("high")+hazard("critical")+'</div>'+
+   '<div><span class="k">Side effect</span><span class="tg-hz e-read">'+effSvg("read")+'<span>read</span></span><span class="tg-hz e-write">'+effSvg("write")+'<span>write</span></span><span class="tg-hz e-irreversible">'+effSvg("irreversible")+'<span>irreversible</span></span></div>'+
+   '<div><span class="k">Gate</span>'+gate("allow")+gate("require_approval")+gate("mandate")+gate("deny")+gate("killed")+'<span class="note">dashed = a person still stands in the way</span></div></div>';
+ }
+ return {names:"label",ORDER:ORDER,CAT:CAT,META:META,h:h,meta:meta,svg:svg,cat:cat,cell:cell,riskSvg:riskSvg,effSvg:effSvg,hazard:hazard,gate:gate,seg:seg,chips:chips,legend:legend};
+})();
+/* W2-local: this mockup names tools server:tool@ver */
+(function(m){m["stripe:pay_invoice"]=["Pay invoice","finance"];m["shell:run_command"]=["Run shell command","exec"];m["github:create_release"]=["Create release","vcs"];
+ m["github:list_pull_requests"]=["List pull requests","read"];m["github:list_check_runs"]=["List check runs","read"];m["github:create_branch"]=["Create branch","vcs"];
+ m["github:create_pull_request"]=["Create pull request","vcs"];m["github:list_commits"]=["List commits","read"];})(TG.META);
+</script>
+<script>
+"use strict";
+/* =========================================================================
+   Demo record. Acme Robotics, organization `acme`, workspace `core-platform`.
+   Every figure is the value a real rollup would carry, with its basis.
+   ========================================================================= */
+
+const OPS = {
+  priya:  { name:"Priya Natarajan", initials:"PN", role:"Organization owner" },
+  marcus: { name:"Marcus Bell",     initials:"MB", role:"Workspace owner · core-platform" },
+  dana:   { name:"Dana Okafor",     initials:"DO", role:"Billing · finops" }
+};
+
+const HERO = "run_01K6QX7M3E";
+
+const RUNS = [
+  { id:HERO, agent:"acme.core.release-manager", op:"marcus", harness:"Claude Code 2.1.4", tier:"gateway",
+    state:"running", step:"turn 5 · model call · claude-fable-5-1", cost:2.41, grade:"fork", verdict:"none",
+    task:"acme/platform#4182 — Cut the 2026.9.2 release candidate", repo:"acme/platform @ main", started:"14:02:58" },
+  { id:"run_01K6QX5J8A", agent:"acme.core.stella-ci", op:"marcus", harness:"Stella 0.9.14", tier:"gateway",
+    state:"running", step:"turn 3 · tool call · run_command", cost:4.02, grade:"retry", verdict:"flipped",
+    task:"acme/platform#4176 — Repair the flaky ingest test", repo:"acme/platform @ main", started:"14:11:20" },
+  { id:"run_01K6QX2B1Q", agent:"acme.core.triage", op:"priya", harness:"Codex CLI 0.42.1", tier:"gateway",
+    state:"running", step:"turn 11 · model call · gpt-5.2", cost:8.91, grade:"fork", verdict:"none",
+    task:"acme/platform#4190 — Triage 14 inbound issues", repo:"acme/platform @ main", started:"13:48:02" },
+  { id:"run_01K6QWZ4T7", agent:"acme.finops.invoice-bot", op:"dana", harness:"OpenAI Agents SDK 1.4.2", tier:"gateway",
+    state:"waiting", step:"turn 2 · approval · stripe:pay_invoice@3.0", cost:1.18, grade:"fork", verdict:"none",
+    task:"Vendor run — settle September invoices", repo:"acme/finops-agents @ main", started:"14:09:44" },
+  { id:"run_01K6QWY9H2", agent:"acme.core.docs-writer", op:"priya", harness:"Custom · SDK 1.0.0", tier:"harness",
+    state:"running", step:"turn 4 · tool call · append_record", cost:2.36, grade:"view", verdict:"none",
+    task:"acme/platform#4171 — Document the 2026.9 upgrade path", repo:"acme/platform @ main", started:"13:57:31" },
+  { id:"run_01K6QWX0M5", agent:"acme.core.dep-upgrader", op:"marcus", harness:"Claude Code 2.1.4", tier:"gateway",
+    state:"running", step:"turn 9 · model call · claude-fable-5-1", cost:19.84, grade:"fork", verdict:"failing",
+    task:"acme/platform#4165 — Upgrade to pnpm 10", repo:"acme/platform @ main", started:"13:31:12" },
+  { id:"run_01K6QWW6D3", agent:"acme.core.flake-hunter", op:"marcus", harness:"Stella 0.9.14", tier:"gateway",
+    state:"running", step:"turn 7 · tool call · search_code", cost:6.55, grade:"retry", verdict:"unmoved",
+    task:"acme/platform#4158 — Quarantine flaky suites", repo:"acme/platform @ main", started:"13:22:40" },
+  { id:"run_01K6QWV2R8", agent:"acme.finops.ledger-recon", op:"dana", harness:"OpenAI Agents SDK 1.4.2", tier:"gateway",
+    state:"running", step:"turn 1 · model call · gpt-5.2-mini", cost:0.74, grade:"fork", verdict:"none",
+    task:"Reconcile August provider invoices", repo:"acme/finops-agents @ main", started:"14:14:03" },
+  { id:"run_01K6QWT8K1", agent:"acme.core.mobile-release", op:"priya", harness:"Claude Code 2.1.4", tier:"gateway",
+    state:"paused", step:"paused by Priya Natarajan · 6m ago", cost:3.12, grade:"fork", verdict:"none",
+    task:"acme/mobile#902 — Ship 4.8.1 to TestFlight", repo:"acme/mobile @ main", started:"13:52:19" },
+  { id:"run_01K6QWS5F9", agent:"acme.core.sdk-codegen", op:"marcus", harness:"Claude Agent SDK 0.6.1", tier:"gateway",
+    state:"running", step:"turn 2 · model call · claude-fable-5-1", cost:5.60, grade:"fork", verdict:"none",
+    task:"acme/platform#4187 — Regenerate the TypeScript client", repo:"acme/platform @ main", started:"14:06:55" },
+  { id:"run_01K6QWR1C4", agent:"acme.core.migration-writer", op:"priya", harness:"Codex CLI 0.42.1", tier:"harness",
+    state:"running", step:"turn 5 · tool call · github:create_branch@2.1", cost:7.28, grade:"view", verdict:"unsatisfied",
+    task:"acme/billing#311 — Backfill the invoice_line index", repo:"acme/billing @ main", started:"13:40:08" },
+  { id:"run_01K6QWQ7B6", agent:"acme.finops.vendor-sync", op:"dana", harness:"Custom · Go SDK 1.0.0", tier:"observe",
+    state:"running", step:"turn 3 · attested telemetry only", cost:0.41, grade:"inspect", verdict:"unverified",
+    task:"Sync vendor master data", repo:"acme/finops-agents @ main", started:"14:01:17" },
+  { id:"run_01K6QW9X2N", agent:"acme.core.release-manager", op:"marcus", harness:"Claude Code 2.1.4", tier:"gateway",
+    state:"sealed", step:"sealed · 214 frames · 11 turns", cost:22.90, grade:"fork", verdict:"flipped",
+    task:"acme/platform#4149 — Cut the 2026.9.1 release", repo:"acme/platform @ main", started:"11:04:22" },
+  { id:"run_01K6QW6P0L", agent:"acme.core.triage", op:"priya", harness:"Codex CLI 0.42.1", tier:"gateway",
+    state:"sealed", step:"sealed · 88 frames · 5 turns", cost:3.77, grade:"fork", verdict:"waived",
+    task:"acme/platform#4144 — Label the inbound backlog", repo:"acme/platform @ main", started:"10:38:51" },
+  { id:"run_01K6QW3H8V", agent:"acme.core.stella-ci", op:"marcus", harness:"Stella 0.9.14", tier:"gateway",
+    state:"sealed", step:"sealed · 132 frames · witness_probe raised", cost:9.15, grade:"retry", verdict:"tampered",
+    task:"acme/platform#4131 — Make the payments suite green", repo:"acme/platform @ main", started:"09:52:10" },
+  { id:"run_01K6QW0D5S", agent:"acme.core.docs-writer", op:"priya", harness:"Custom · SDK 1.0.0", tier:"harness",
+    state:"sealed", step:"sealed · 41 frames · 3 turns", cost:1.05, grade:"view", verdict:"none",
+    task:"acme/platform#4128 — Rewrite the wrapper README", repo:"acme/platform @ main", started:"09:20:44" }
+];
+
+const APPROVALS = [
+  { id:"apr_01K6QWZ5B2", amount:"$4,820.00 USD", kind:"approval",
+    tool:"stripe:pay_invoice@3.0", run:"run_01K6QWZ4T7", agent:"acme.finops.invoice-bot",
+    asked:"Dana Okafor · finops", waited:"4m 12s",
+    rule:"grant finops/invoice-bot · require_approval on financial class over $1,000.00",
+    detail:"Northwind Components · invoice NW-2291 · mandate mnd_8Q4TVX, ceiling $10,000.00 per month, $5,180.00 remaining" },
+  { id:"apr_01K6QWX1C9", amount:"irreversible", kind:"approval",
+    tool:"shell:run_command@1.4", run:"run_01K6QWX0M5", agent:"acme.core.dep-upgrader",
+    asked:"Marcus Bell · core-platform", waited:"1m 38s",
+    rule:"policy pol_2026_09_04.3 · rule irreversible_publish · side-effect class irreversible",
+    detail:"npm publish @acme/platform-sdk@4.2.0 --tag latest · egress class third_party" },
+  { id:"apr_01K6QWR2D1", amount:"write", kind:"approval",
+    tool:"github:create_release@2.1", run:"run_01K6QWR1C4", agent:"acme.core.migration-writer",
+    asked:"Priya Natarajan · core-platform", waited:"22s",
+    rule:"grant core/migration-writer · require_approval on repository acme/billing",
+    detail:"Tag v2026.9.2-rc1 on acme/billing · production branch main" }
+];
+
+const FLEET_AGENTS = [
+  { slug:"@release-manager", id:"acme.core.release-manager", runs:2 },
+  { slug:"@stella-ci",       id:"acme.core.stella-ci",       runs:1 },
+  { slug:"@triage",          id:"acme.core.triage",          runs:1 },
+  { slug:"@docs-writer",     id:"acme.core.docs-writer",     runs:1 },
+  { slug:"@dep-upgrader",    id:"acme.core.dep-upgrader",    runs:1 },
+  { slug:"@flake-hunter",    id:"acme.core.flake-hunter",    runs:1 },
+  { slug:"@mobile-release",  id:"acme.core.mobile-release",  runs:1 },
+  { slug:"@sdk-codegen",     id:"acme.core.sdk-codegen",     runs:1 },
+  { slug:"@migration-writer",id:"acme.core.migration-writer",runs:1 }
+];
+
+/* ---- The hero run's frames. seq is dense from 0, hash-chained. ---- */
+const SYS_PROMPT = "You are acme.core.release-manager. Cut the 2026.9.2 release candidate for acme/platform from the production branch main. Open the release PR, do not tag, do not publish.";
+const STEERING_BLOCK = "Governed steering, workspace core-platform, policy version pol_2026_09_04.3:\n· Never force-push to a production branch.\n· Release PRs require a green witness before a tag is proposed.\n· Changelog entries cite the issue, not the commit.";
+
+function env(f, extra){
+  return Object.assign({
+    v:"oxagen.frame/1.0",
+    event_id:"01J9" + f.seq.toString().padStart(2,"0") + "MBELLRELMGR",
+    agent:{ agent_id:"acme.core.release-manager", fleet_id:"wrk_7Q2", runtime:"claude-code", wrapper_version:"1.0.0" },
+    run_id:HERO, attempt_id:"atmp_01K6QX7M3E1", seq:f.seq,
+    ts:"2026-09-11T" + f.t + "Z", kind:f.kind, fidelity:"gateway"
+  }, extra || {});
+}
+
+const FRAMES = [
+  { seq:0, kind:"agent_start", t:"14:02:58.104", node:"control",
+    sum:"Claude Code 2.1.4 · wrapper 1.0.0 · host mac-mbell-01 · enforcement tier gateway",
+    body:{ harness:"claude-code", harness_version:"2.1.4", wrapper_version:"1.0.0",
+      host:"mac-mbell-01", device_key:"dev_4KQZ81", bundle:"bdl_2026_09_11.7",
+      operator:"Marcus Bell", policy_version:"pol_2026_09_04.3", governance_mode:"enforce" } },
+  { seq:1, kind:"context.assembled", t:"14:02:58.442", node:"model",
+    sum:"7 context frames · 6,140 of 24,000 tokens · composition sha256:9ab2c4…",
+    body:{ budget_tokens:24000, used_tokens:6140, context_frames:7,
+      steering_digest:"sha256:4c1f7ab9…", composition_digest:"sha256:9ab2c4e1…",
+      frame_ids:["cf_ontology_release/3","cf_steering_release/11","cf_record_2f81","cf_record_9ac3","cf_codegraph_release_sh/2","cf_issue_4182","cf_record_bb17"] } },
+  { seq:2, kind:"turn_start", t:"14:02:58.510", node:"control",
+    sum:"Turn 1 · prompt from Marcus Bell",
+    body:{ turn:1, trigger:"operator_prompt", operator:"Marcus Bell", task_ref:"acme/platform#4182" } },
+  { seq:3, kind:"model.request", t:"14:02:58.688", node:"model",
+    sum:"anthropic · claude-fable-5-1 · 14 tools · 18,402 input tokens",
+    model:{ provider:"anthropic", model:"claude-fable-5-1", tools:14, input:18402,
+      messages:[
+        { role:"system (governed)", txt:SYS_PROMPT },
+        { role:"steering (volatile, after cache block)", txt:STEERING_BLOCK },
+        { role:"user", txt:"Cut the 2026.9.2 release candidate. Issue acme/platform#4182 has the scope." }
+      ] } },
+  { seq:4, kind:"model.response", t:"14:03:01.204", node:"model",
+    sum:"stop_reason tool_use · 1,102 output · $0.38 · gateway_observed",
+    usage:{ input_uncached:6402, cache_read:12000, cache_write_5m:0, output:1102, reasoning:0,
+      tool_definition_tokens:2318, context_frame_tokens:6140, steering_tokens:187,
+      cost:"$0.38", basis:"gateway_observed", latency:"2,516 ms", ttft:"412 ms",
+      req:"req_01K6QX7N4B", model:"claude-fable-5-1" } },
+  { seq:5, kind:"tool_requested", t:"14:03:01.260", node:"tool",
+    sum:"github:list_pull_requests@2.1 · repo acme/platform · state open",
+    tool:{ pattern:"github:list_pull_requests@2.1", side_effect:"read", risk:"low", egress:"third_party",
+      input:'{ "repo": "acme/platform", "state": "open", "base": "main" }' } },
+  { seq:6, kind:"policy_decision", t:"14:03:01.281", node:"policy",
+    sum:"allow · grant core/release-manager · side-effect read · no taint",
+    policy:{ outcome:"allow", rules:["grant core/release-manager → github:*@2.1 allow",
+      "resource_scope.repositories includes acme/platform",
+      "side_effect read under ceiling irreversible"],
+      policy_version:"pol_2026_09_04.3", taint:"none", deny_generation:412 } },
+  { seq:7, kind:"tool_call", t:"14:03:02.910", node:"tool",
+    sum:"34 open pull requests · 12.4 KB · output schema valid · 1,650 ms",
+    tool:{ pattern:"github:list_pull_requests@2.1", result:"ok", bytes:"12.4 KB", duration:"1,650 ms",
+      output_schema:"valid", receipt:"rcp_01K6QX7P2M", connection:"conn_github_acme (owner: Marcus Bell)" } },
+  { seq:8, kind:"turn_start", t:"14:03:03.004", node:"control",
+    sum:"Turn 2 · continued from turn 1", body:{ turn:2, trigger:"continuation" } },
+  { seq:9, kind:"model.request", t:"14:03:03.181", node:"model",
+    sum:"anthropic · claude-fable-5-1 · 14 tools · 21,916 input tokens",
+    model:{ provider:"anthropic", model:"claude-fable-5-1", tools:14, input:21916,
+      messages:[
+        { role:"system (governed)", txt:SYS_PROMPT },
+        { role:"steering (volatile, after cache block)", txt:STEERING_BLOCK },
+        { role:"assistant", txt:"I will list the open pull requests against main, then group the ones tagged release-scope." },
+        { role:"tool result · github:list_pull_requests@2.1", txt:"34 open pull requests. 11 carry the label release-scope." }
+      ] } },
+  { seq:10, kind:"model.response", t:"14:03:07.441", node:"model",
+    sum:"stop_reason tool_use · 1,806 output · $0.52 · gateway_observed",
+    usage:{ input_uncached:9916, cache_read:12000, cache_write_5m:0, output:1806, reasoning:0,
+      tool_definition_tokens:2318, context_frame_tokens:6140, steering_tokens:187,
+      cost:"$0.52", basis:"gateway_observed", latency:"4,260 ms", ttft:"388 ms",
+      req:"req_01K6QX7R9C", model:"claude-fable-5-1" } },
+  { seq:11, kind:"tool_requested", t:"14:03:07.503", node:"tool",
+    sum:"github:list_check_runs@2.1 · ref refs/heads/main",
+    tool:{ pattern:"github:list_check_runs@2.1", side_effect:"read", risk:"low", egress:"third_party",
+      input:'{ "repo": "acme/platform", "ref": "refs/heads/main" }' } },
+  { seq:12, kind:"policy_decision", t:"14:03:07.522", node:"policy",
+    sum:"allow · grant core/release-manager · side-effect read",
+    policy:{ outcome:"allow", rules:["grant core/release-manager → github:*@2.1 allow"],
+      policy_version:"pol_2026_09_04.3", taint:"none", deny_generation:412 } },
+  { seq:13, kind:"tool_call", t:"14:03:09.116", node:"tool",
+    sum:"18 checks on main · 2 failing (payments-e2e, ingest-flake) · 1,594 ms",
+    tool:{ pattern:"github:list_check_runs@2.1", result:"ok", bytes:"4.1 KB", duration:"1,594 ms",
+      output_schema:"valid", receipt:"rcp_01K6QX7S8D", connection:"conn_github_acme (owner: Marcus Bell)" } },
+  { seq:14, kind:"turn_start", t:"14:03:09.204", node:"control",
+    sum:"Turn 3 · continued from turn 2", body:{ turn:3, trigger:"continuation" } },
+  { seq:15, kind:"model.request", t:"14:03:09.390", node:"model",
+    sum:"anthropic · claude-fable-5-1 · 14 tools · 24,880 input tokens",
+    model:{ provider:"anthropic", model:"claude-fable-5-1", tools:14, input:24880,
+      messages:[
+        { role:"system (governed)", txt:SYS_PROMPT },
+        { role:"steering (volatile, after cache block)", txt:STEERING_BLOCK },
+        { role:"tool result · github:list_check_runs@2.1", txt:"18 checks. payments-e2e failing since 9f3c2ab. ingest-flake failing intermittently." }
+      ] } },
+  { seq:16, kind:"model.response", t:"14:03:14.902", node:"model",
+    sum:"stop_reason end_turn · 2,410 output · $0.71 · gateway_observed",
+    usage:{ input_uncached:12880, cache_read:12000, cache_write_5m:0, output:2410, reasoning:840,
+      tool_definition_tokens:2318, context_frame_tokens:6140, steering_tokens:187,
+      cost:"$0.71", basis:"gateway_observed", latency:"5,512 ms", ttft:"506 ms",
+      req:"req_01K6QX7V1E", model:"claude-fable-5-1" } },
+  { seq:17, kind:"record.appended", t:"14:03:15.066", node:"control",
+    sum:"observation · payments-e2e has failed on main since 9f3c2ab · evidence frame:run_01K6QX7M3E/13",
+    body:{ record_id:"rec_2f81c9", lineage_id:"lin_payments_e2e", kind:"observation",
+      record_hash:"sha256:2f81c9d4…", sharing_scope:"workspace",
+      evidence_links:["frame:run_01K6QX7M3E/13"], attested_by:"Oxagen (Ed25519, key oxa_att_3)" } },
+  { seq:18, kind:"turn_start", t:"14:03:15.140", node:"control",
+    sum:"Turn 4 · continued from turn 3", body:{ turn:4, trigger:"continuation" } },
+  { seq:19, kind:"model.request", t:"14:03:15.318", node:"model",
+    sum:"anthropic · claude-fable-5-1 · 14 tools · 27,344 input tokens",
+    model:{ provider:"anthropic", model:"claude-fable-5-1", tools:14, input:27344,
+      messages:[
+        { role:"system (governed)", txt:SYS_PROMPT },
+        { role:"steering (volatile, after cache block)", txt:STEERING_BLOCK },
+        { role:"assistant", txt:"Both failures predate the release scope. I will branch release/2026.9.2 from main and cherry-pick the 11 release-scope pull requests." }
+      ] } },
+  { seq:20, kind:"model.response", t:"14:03:19.771", node:"model",
+    sum:"stop_reason tool_use · 1,540 output · $0.49 · gateway_observed",
+    usage:{ input_uncached:15344, cache_read:12000, cache_write_5m:0, output:1540, reasoning:0,
+      tool_definition_tokens:2318, context_frame_tokens:6140, steering_tokens:187,
+      cost:"$0.49", basis:"gateway_observed", latency:"4,453 ms", ttft:"441 ms",
+      req:"req_01K6QX7W6F", model:"claude-fable-5-1" } },
+  { seq:21, kind:"tool_requested", t:"14:03:19.840", node:"tool",
+    sum:"github:create_branch@2.1 · release/2026.9.2 from main@9f3c2ab",
+    tool:{ pattern:"github:create_branch@2.1", side_effect:"write", risk:"medium", egress:"third_party",
+      input:'{ "repo": "acme/platform", "name": "release/2026.9.2", "from": "9f3c2ab" }' } },
+  { seq:22, kind:"policy_decision", t:"14:03:19.866", node:"policy",
+    sum:"allow · grant core/release-manager · side-effect write · not the production branch",
+    policy:{ outcome:"allow", rules:["grant core/release-manager → github:create_branch@2.1 allow",
+      "rule protect_production_branch: target is not main → pass",
+      "side_effect write under ceiling irreversible"],
+      policy_version:"pol_2026_09_04.3", taint:"none", deny_generation:412 } },
+  { seq:23, kind:"tool_call", t:"14:03:21.402", node:"tool",
+    sum:"branch release/2026.9.2 created at 9f3c2ab · 1,536 ms",
+    tool:{ pattern:"github:create_branch@2.1", result:"ok", bytes:"0.4 KB", duration:"1,536 ms",
+      output_schema:"valid", receipt:"rcp_01K6QX7X4G", connection:"conn_github_acme (owner: Marcus Bell)" } },
+  { seq:24, kind:"turn_start", t:"14:03:21.488", node:"control",
+    sum:"Turn 5 · continued from turn 4", body:{ turn:5, trigger:"continuation" } },
+  { seq:25, kind:"model.request", t:"14:03:21.660", node:"model",
+    sum:"anthropic · claude-fable-5-1 · 14 tools · 29,102 input tokens",
+    model:{ provider:"anthropic", model:"claude-fable-5-1", tools:14, input:29102,
+      messages:[
+        { role:"system (governed)", txt:SYS_PROMPT },
+        { role:"steering (volatile, after cache block)", txt:STEERING_BLOCK },
+        { role:"assistant", txt:"Branch is in place. Next: cherry-pick the 11 release-scope pull requests in merge order, then open the release pull request." }
+      ] } },
+  { seq:26, kind:"model.response", t:"14:03:26.115", node:"model", live:true,
+    sum:"streaming · 604 output so far · 1 of 14 tools considered",
+    usage:{ input_uncached:17102, cache_read:12000, cache_write_5m:0, output:604, reasoning:0,
+      tool_definition_tokens:2318, context_frame_tokens:6140, steering_tokens:187,
+      cost:"$0.31 so far", basis:"gateway_observed", latency:"in flight", ttft:"468 ms",
+      req:"req_01K6QX7Y2H", model:"claude-fable-5-1" } }
+];
+
+/* ---- Mass steer: addressing, the grant check, and the delivery report ---- */
+const ADDRESSES = {
+  "@agents": {
+    label:"@agents", note:"core-platform · 9 active runs",
+    grant:{ ok:true,
+      head:"You can @agents in core-platform.",
+      body:"Marcus Bell holds send_message with @agents at workspace scope (role core-platform/owner, grant gr_7T2PQ). 9 active runs are in scope; sealed runs and observe-tier runs have no seam to inject through. Agent senders do not hold @agents here." },
+    recipients:[
+      { agent:"acme.core.release-manager", run:"run_01K6QX7M3E", status:"applied", mode:"interrupt", when:"14:21:04.118",
+        why:"in-flight response stopped and billed; injected after the steering block at model call seq 33" },
+      { agent:"acme.core.stella-ci", run:"run_01K6QX5J8A", status:"applied", mode:"interrupt", when:"14:21:04.402",
+        why:"native control contract; injected at model call seq 96" },
+      { agent:"acme.core.dep-upgrader", run:"run_01K6QWX0M5", status:"applied", mode:"next_step", when:"14:21:05.006",
+        why:"degraded from interrupt: npm publish was in flight and an irreversible call is never abandoned; injected at model call seq 214" },
+      { agent:"acme.core.flake-hunter", run:"run_01K6QWW6D3", status:"applied", mode:"interrupt", when:"14:21:05.771",
+        why:"pending search_code call abandoned with reason interrupted; injected at model call seq 141" },
+      { agent:"acme.core.sdk-codegen", run:"run_01K6QWS5F9", status:"applied", mode:"interrupt", when:"14:21:06.240",
+        why:"injected at model call seq 38" },
+      { agent:"acme.core.docs-writer", run:"run_01K6QWY9H2", status:"applied", mode:"next_step", when:"14:21:07.093",
+        why:"degraded from interrupt: harness tier cannot stop an in-flight call; injected at the next prompt submit" },
+      { agent:"acme.core.mobile-release", run:"run_01K6QWT8K1", status:"queued", mode:"next_step", when:"—",
+        why:"run paused by Priya Natarajan; a paused run reaches no boundary, so this applies at the first model call after resume, or expires at 14:31:04" },
+      { agent:"acme.core.triage", run:"run_01K6QX2B1Q", status:"expired", mode:"—", when:"14:21:06.884",
+        why:"run sealed before its next model call; no boundary was ever reached" },
+      { agent:"acme.core.migration-writer", run:"run_01K6QWR1C4", status:"cancelled", mode:"—", when:"14:21:04.061",
+        why:"muted for this agent by Marcus Bell on 2026-09-09; suppressed before it was queued" }
+    ],
+    cost:"1,284 tokens injected across 6 runs · $0.04 · gateway_observed. Two runs resolved below the requested ceiling: one irreversible tool in flight, one harness-tier seam that cannot stop a call."
+  },
+  "@release-manager": {
+    label:"@release-manager", note:"1 agent",
+    grant:{ ok:true,
+      head:"You can message @release-manager.",
+      body:"Direct addressing needs only send_message at workspace scope. 1 live run and 1 sealed run match acme.core.release-manager." },
+    recipients:[
+      { agent:"acme.core.release-manager", run:"run_01K6QX7M3E", status:"applied", when:"14:21:04.118",
+        why:"injected after the steering block, before model call seq 33" },
+      { agent:"acme.core.release-manager", run:"run_01K6QW9X2N", status:"failed", mode:"—", when:"14:21:04.120",
+        why:"run sealed at 11:41:30 · a sealed run has no seam to inject through" }
+    ],
+    cost:"214 tokens injected across 1 run · $0.01 · gateway_observed"
+  },
+  "@finops": {
+    label:"@finops", note:"other workspace",
+    grant:{ ok:false,
+      head:"You cannot @agents into finops from core-platform.",
+      body:"Marcus Bell holds send_message @agents in core-platform only. finops is a separate governance partition; its @all sits with Priya Natarajan (organization owner) and Dana Okafor. Nothing was queued and no run was touched." },
+    recipients:[], cost:"no message queued · denials are free"
+  }
+};
+
+/* =========================================================================
+   Application state
+   ========================================================================= */
+const state = {
+  route: location.hash || "#/acme/core-platform",
+  view: "loaded",
+  railOpen: false,
+  runState: "running",     // running | paused | cancelled | revoked
+  frames: JSON.parse(JSON.stringify(FRAMES)),
+  selFrame: 26,
+  inspTab: "detail",
+  pos: 26, playing:false, speed:1, zoom:"steps", openSet:new Set(), following:true,
+  steerMode: "next_step",
+  pendingSteer: null,
+  steerText: "",
+  cost: 2.41,
+  filters: { operator:"all", agent:"all", tier:"all", verdict:"all", task:"all", q:"" },
+  addr: "@agents",
+  msgText: "",
+  delivery: null,
+  drawer: false,
+  toast: null
+};
+
+const $ = (s, r) => (r||document).querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const money = n => "$" + n.toFixed(2);
+
+function verdictClass(v){
+  if (v === "flipped") return "p-proven";
+  if (v === "failing" || v === "tampered") return "p-failed";
+  if (v === "unmoved" || v === "unsatisfied") return "p-denied";
+  if (v === "none") return "p-plain";
+  return "p-neutral";
+}
+function runStatePill(r){
+  if (r.state === "running") return '<span class="pill p-allowed"><span class="dot"></span>running</span>';
+  if (r.state === "paused")  return '<span class="pill p-approval"><span class="dot"></span>paused</span>';
+  if (r.state === "waiting") return '<span class="pill p-approval"><span class="dot"></span>approval</span>';
+  return '<span class="pill p-plain"><span class="dot"></span>sealed</span>';
+}
+function dotFor(r){
+  if (r.state === "sealed") return '<span class="live-dot sealed"></span>';
+  if (r.state === "paused" || r.state === "waiting") return '<span class="live-dot paused"></span>';
+  return '<span class="live-dot"></span>';
+}
+
+/* =========================================================================
+   Shell: the seven workspace pages and three organization pages
+   ========================================================================= */
+const ICONS = {
+  fleet:'<path d="M2 4.5h12M2 8h12M2 11.5h8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" fill="none"/>',
+  agents:'<circle cx="8" cy="5.4" r="2.5" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M3 13c0-2.5 2.2-4 5-4s5 1.5 5 4" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>',
+  tools:'<path d="M10.2 2.6a3.4 3.4 0 0 0-4 4.4L2.6 10.6l2.8 2.8 3.6-3.6a3.4 3.4 0 0 0 4.4-4l-2.1 2.1-1.7-1.7Z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>',
+  ontology:'<circle cx="4" cy="4" r="2" fill="none" stroke="currentColor" stroke-width="1.3"/><circle cx="12" cy="5" r="2" fill="none" stroke="currentColor" stroke-width="1.3"/><circle cx="7.5" cy="12" r="2" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M5.7 5 10 5.4M5.3 5.7 6.8 10M11 6.7 8.7 10.5" stroke="currentColor" stroke-width="1.1"/>',
+  steering:'<path d="M3 12V4l10 4-10 4Z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>',
+  spend:'<circle cx="8" cy="8" r="5.6" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M8 5v6M6.3 6.6h3.1M6.3 9.4h3.4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>',
+  org:'<path d="M3 13V4.5L8 2.5l5 2V13" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M6.2 13V9.4h3.6V13" fill="none" stroke="currentColor" stroke-width="1.2"/>',
+  billing:'<rect x="2.2" y="4" width="11.6" height="8" rx="1.6" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M2.2 6.8h11.6" stroke="currentColor" stroke-width="1.2"/>',
+  audit:'<path d="M8 2.2 13 4v4.2c0 3-2.1 4.8-5 5.6-2.9-.8-5-2.6-5-5.6V4Z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>'
+};
+const NAV_WS = [
+  { k:"fleet",    label:"Fleet",    href:"#/acme/core-platform", count:"12" },
+  { k:"agents",   label:"Agents",   href:"#/acme/core-platform/agents", count:"50" },
+  { k:"tools",    label:"Tools",    href:"#/acme/core-platform/tools" },
+  { k:"ontology", label:"Ontology", href:"#/acme/core-platform/ontology" },
+  { k:"steering", label:"Steering", href:"#/acme/core-platform/steering" },
+  { k:"spend",    label:"Spend",    href:"#/acme/core-platform/spend" },
+  { k:"runs",     label:"Run",      href:"#/acme/core-platform/runs/" + HERO, hidden:true }
+];
+const NAV_ORG = [
+  { k:"org",     label:"Organization", href:"#/acme" },
+  { k:"billing", label:"Billing",      href:"#/acme/billing" },
+  { k:"audit",   label:"Audit",        href:"#/acme/audit" }
+];
+
+function renderNav(){
+  const onRun = state.route.indexOf("/runs/") > -1;
+  const rows = NAV_WS.filter(n => !n.hidden).map(n => {
+    const on = (n.k === "fleet" && (state.route === "#/acme/core-platform" || onRun)) || state.route === n.href;
+    return '<a class="nav-a' + (on ? " on" : "") + '" href="' + n.href + '">' +
+      '<svg class="ni" viewBox="0 0 16 16" aria-hidden="true">' + ICONS[n.k] + '</svg>' + n.label +
+      (n.count ? '<span class="nct num">' + n.count + '</span>' : '') + '</a>';
+  }).join("");
+  const orgRows = NAV_ORG.map(n =>
+    '<a class="nav-a' + (state.route === n.href ? " on" : "") + '" href="' + n.href + '">' +
+    '<svg class="ni" viewBox="0 0 16 16" aria-hidden="true">' + ICONS[n.k] + '</svg>' + n.label + '</a>').join("");
+  $("#sideNav").innerHTML =
+    '<div class="nav-label">Workspace · core-platform</div>' + rows +
+    '<div class="nav-label second">Organization · acme</div>' + orgRows;
+}
+
+function renderCrumbs(){
+  const onRun = state.route.indexOf("/runs/") > -1;
+  let html = '<a href="#/acme">Acme Robotics</a><span class="sep">/</span>' +
+             '<a href="#/acme/core-platform" class="hide-sm">core-platform</a>';
+  if (onRun){
+    html += '<span class="sep">/</span><a href="#/acme/core-platform" class="hide-sm">Fleet</a>' +
+            '<span class="sep">/</span><span class="cur mono">' + HERO + '</span>';
+  } else {
+    html += '<span class="sep">/</span><span class="cur">Fleet</span>';
+  }
+  $("#crumbs").innerHTML = html;
+}
+
+/* =========================================================================
+   Alternate states
+   ========================================================================= */
+function slabLoading(kind){
+  const rows = Array.from({length:7}, () =>
+    '<div class="skelrow"><div class="skel w3"></div><div class="skel w1"></div>' +
+    '<div class="skel w4"></div><div class="skel w4"></div><div class="skel w2"></div></div>').join("");
+  return '<div class="tablebox" aria-busy="true" aria-live="polite">' +
+    '<div style="padding:11px 12px;border-bottom:1px solid var(--border);background:var(--hl);font-size:12px;color:var(--dim)" class="mono">' +
+    'reading ' + kind + ' from the ledger…</div>' + rows + '</div>';
+}
+function slabEmptyFleet(){
+  return '<div class="slab">' +
+    '<svg class="glyph" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h18M3 12h18M3 17h10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg>' +
+    '<h2>No runs yet in core-platform</h2>' +
+    '<p>Wrap a harness and the first run appears here the moment its first frame arrives. Nothing is simulated: the row is written from the frame.</p>' +
+    '<div class="acts"><button class="btn gold" type="button" data-toast="Installer link signed. One-time enrollment token embedded; it expires in 15 minutes.">Wrap Claude Code</button>' +
+    '<button class="btn" type="button" data-toast="Installer link signed for Codex CLI.">Wrap Codex</button>' +
+    '<a class="btn" href="#/acme/core-platform/agents">Register an agent</a></div></div>';
+}
+function slabError(what){
+  return '<div class="slab err">' +
+    '<svg class="glyph" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4 2.5 20h19L12 4Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M12 10v4.4M12 17.2v.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>' +
+    '<h2>' + what + ' could not be read</h2>' +
+    '<p>The control plane answered, the ledger did not. Frames are still being recorded and nothing has been lost — this screen is stale, not the run.</p>' +
+    '<p class="mono" style="font-size:11.5px;color:var(--dim)">graph_unavailable · org_acme · request req_01K6QXB4M2 · 14:22:09Z</p>' +
+    '<div class="acts"><button class="btn" type="button" data-act="retry">Try again</button>' +
+    '<button class="btn" type="button" data-toast="Copied: req_01K6QXB4M2">Copy request id</button>' +
+    '<a class="btn" href="#/acme/audit">Open Audit</a></div></div>';
+}
+function slabDenied(what){
+  return '<div class="slab deny">' +
+    '<svg class="glyph" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 10V7.5a4 4 0 0 1 8 0V10" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>' +
+    '<h2>You cannot see ' + what + '</h2>' +
+    '<p>Dana Okafor holds the billing role in finops. That role carries <span class="mono">get_spend</span> and <span class="mono">list_mandates</span> at organization scope, and no grant on core-platform runs. Deny wins over every other rule.</p>' +
+    '<p class="mono" style="font-size:11.5px;color:var(--dim)">denied · list_runs · policy pol_2026_09_04.3 · rule grant/finops-billing · deny_generation 412</p>' +
+    '<div class="acts"><button class="btn" type="button" data-toast="Request sent to Priya Natarajan (organization owner).">Request access</button>' +
+    '<a class="btn" href="#/acme">Open Organization</a></div></div>';
+}
+
+/* =========================================================================
+   Fleet
+   ========================================================================= */
+function filteredRuns(){
+  const f = state.filters, q = f.q.trim().toLowerCase();
+  return RUNS.filter(r => {
+    if (f.operator !== "all" && r.op !== f.operator) return false;
+    if (f.agent !== "all" && r.agent !== f.agent) return false;
+    if (f.tier !== "all" && r.tier !== f.tier) return false;
+    if (f.verdict !== "all" && r.verdict !== f.verdict) return false;
+    if (f.task === "live" && r.state === "sealed") return false;
+    if (f.task === "issues" && r.task.indexOf("#") === -1) return false;
+    if (q && (r.id + " " + r.agent + " " + r.task + " " + r.harness).toLowerCase().indexOf(q) === -1) return false;
+    return true;
+  });
+}
+
+function fleetFilters(n){
+  const f = state.filters;
+  const opt = (v, label, cur) => '<option value="' + v + '"' + (cur === v ? " selected" : "") + '>' + label + '</option>';
+  return '<div class="filters">' +
+    '<span class="fsel"><select id="fOperator" aria-label="Filter by operator">' +
+      opt("all","Every operator",f.operator) + opt("marcus","Marcus Bell",f.operator) +
+      opt("priya","Priya Natarajan",f.operator) + opt("dana","Dana Okafor",f.operator) + '</select></span>' +
+    '<span class="fsel"><select id="fAgent" aria-label="Filter by agent">' +
+      opt("all","Every agent",f.agent) +
+      FLEET_AGENTS.map(a => opt(a.id, a.id, f.agent)).join("") +
+      opt("acme.finops.invoice-bot","acme.finops.invoice-bot",f.agent) +
+      opt("acme.finops.ledger-recon","acme.finops.ledger-recon",f.agent) +
+      opt("acme.finops.vendor-sync","acme.finops.vendor-sync",f.agent) + '</select></span>' +
+    '<span class="fsel"><select id="fTier" aria-label="Filter by enforcement tier">' +
+      opt("all","Every tier",f.tier) + opt("gateway","gateway",f.tier) +
+      opt("harness","harness",f.tier) + opt("observe","observe",f.tier) + '</select></span>' +
+    '<span class="fsel"><select id="fVerdict" aria-label="Filter by verdict">' +
+      opt("all","Every verdict",f.verdict) + opt("flipped","flipped",f.verdict) +
+      opt("failing","failing",f.verdict) + opt("unmoved","unmoved",f.verdict) +
+      opt("unsatisfied","unsatisfied",f.verdict) + opt("tampered","tampered",f.verdict) +
+      opt("unverified","unverified",f.verdict) + opt("waived","waived",f.verdict) +
+      opt("none","none yet",f.verdict) + '</select></span>' +
+    '<span class="fsel"><select id="fTask" aria-label="Filter by task">' +
+      opt("all","Every task",f.task) + opt("live","Live runs only",f.task) +
+      opt("issues","Runs on an issue",f.task) + '</select></span>' +
+    '<span class="fsearch"><svg width="12" height="12" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M10.6 10.6 14 14" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>' +
+      '<input id="fQ" type="search" placeholder="Run id, agent, task" value="' + esc(f.q) + '"></span>' +
+    (isFiltered() ? '<button class="fclear" type="button" id="fClear">Clear filters</button>' : "") +
+    '<span class="fcount num">' + n + ' of ' + RUNS.length + ' runs</span>' +
+  '</div>';
+}
+function isFiltered(){
+  const f = state.filters;
+  return f.operator !== "all" || f.agent !== "all" || f.tier !== "all" || f.verdict !== "all" || f.task !== "all" || f.q !== "";
+}
+
+function runRow(r){
+  const o = OPS[r.op];
+  const acts = r.state === "sealed"
+    ? '<button class="btn sm" type="button" data-open="' + r.id + '">Open</button>'
+    : (r.state === "paused"
+        ? '<button class="btn sm" type="button" data-toast="resume dispatched to ' + r.id + ' · applied at the next boundary">Resume</button>' +
+          '<button class="btn sm" type="button" data-open="' + r.id + '">Open</button>'
+        : '<button class="btn sm" type="button" data-pause="' + r.id + '">Pause</button>' +
+          '<button class="btn sm" type="button" data-open="' + r.id + '">Open</button>');
+  return '<tr data-open="' + r.id + '" tabindex="0"' + (r.id === HERO ? ' class="sel"' : '') + '>' +
+    '<td><span class="cell-run"><span class="rid">' + r.id + '</span>' +
+      '<span class="task">' + esc(r.task) + '</span></span></td>' +
+    '<td><span class="agent-id">' + r.agent + '</span></td>' +
+    '<td><span class="op"><span class="avatar">' + o.initials + '</span>' + o.name + '</span></td>' +
+    '<td style="white-space:nowrap;color:var(--muted);font-size:12.5px">' + r.harness + '</td>' +
+    '<td><span class="tier tier-' + r.tier + '">' + r.tier + '</span></td>' +
+    '<td><span class="step">' + dotFor(r) + esc(r.step) + '</span></td>' +
+    '<td class="money">' + money(r.id === HERO ? state.cost : r.cost) + '</td>' +
+    '<td><span class="pill p-plain">' + r.grade + '</span></td>' +
+    '<td><span class="pill ' + verdictClass(r.verdict) + '">' + r.verdict + '</span></td>' +
+    '<td><span class="rowacts">' + acts + '</span></td>' +
+  '</tr>';
+}
+
+function approvalsRail(){
+  if (!state.railOpen){
+    return '<aside class="rail closed"><button class="rail-tab" type="button" id="railToggle" aria-expanded="false">' +
+      '<span class="cnt num">' + APPROVALS.length + '</span>' +
+      '<span class="vtxt">Approvals</span></button></aside>';
+  }
+  const items = APPROVALS.map(a =>
+    '<div class="appr">' +
+      '<div class="appr-top"><span class="appr-amt">' + a.amount + '</span>' +
+        '<span class="pill p-approval"><span class="dot"></span>waiting ' + a.waited + '</span></div>' +
+      '<ol class="chain">' +
+        '<li><b>Who asked</b>' + esc(a.asked) + '</li>' +
+        '<li><b>Which agent</b><span class="mono">' + a.agent + '</span> · <span class="mono">' + a.run + '</span></li>' +
+        '<li><b>Which action</b><span style="display:inline-flex;align-items:center;gap:10px;flex-wrap:wrap;margin:2px 0 4px">' + TG.cell(a.tool, {sz:"sm"}) + TG.cat(TG.meta(a.tool).cat) + TG.gate("require_approval") + '</span><br>' + esc(a.detail) + '</li>' +
+        '<li><b>Which rule</b>' + esc(a.rule) + '</li>' +
+      '</ol>' +
+      '<div class="appr-acts">' +
+        '<button class="btn sm" type="button" data-approve="' + a.id + '">Approve</button>' +
+        '<button class="btn sm" type="button" data-toast="Denied. The reason reaches the model as the permission decision reason.">Deny</button>' +
+        '<span class="grow"></span>' +
+        '<button class="btn sm" type="button" data-open="' + a.run + '">Open run</button>' +
+      '</div>' +
+    '</div>').join("");
+  return '<aside class="rail"><div class="rail-head">' +
+    '<h2>Approvals</h2><span class="pill p-approval num">' + APPROVALS.length + ' waiting</span>' +
+    '<button class="btn sm" type="button" id="railToggle" style="margin-left:auto" aria-expanded="true">Collapse</button></div>' +
+    '<div class="rail-body">' + items + '</div>' +
+    '<div class="tl-foot">Parked at the gateway. Default timeout 10 minutes, then the call is denied.</div></aside>';
+}
+
+function renderFleet(){
+  const rows = filteredRuns();
+  const live = RUNS.filter(r => r.state !== "sealed").length;
+  const head =
+    '<div class="ph"><div>' +
+      '<p class="eyebrow">Workspace · core-platform</p>' +
+      '<h1>Fleet</h1>' +
+      '<p>Every run in core-platform, live and recent, with what Oxagen could actually enforce on it. Pause, resume and cancel apply at the next boundary.</p>' +
+    '</div><div class="ph-actions">' +
+      '<button class="btn gold" type="button" id="massBtn">' +
+        '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 3.5h11v7h-6l-3.4 2.6V10.5H2.5Z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>' +
+        'Message the fleet</button>' +
+      '<button class="btn" type="button" data-toast="Exported 16 runs to a signed bundle with the offline verifier.">Export</button>' +
+    '</div></div>' +
+    '<div class="stats">' +
+      '<div class="stat"><div class="sv">50</div><div class="sk">Agents in the fleet</div><div class="sb">44 gateway · 4 harness · 2 observe</div></div>' +
+      '<div class="stat"><div class="sv num">' + live + '</div><div class="sk">Live runs</div><div class="sb">4 sealed in the last hour</div></div>' +
+      '<div class="stat"><div class="sv num">$402.86</div><div class="sk">Spent today</div><div class="sb">gateway_observed · USD</div></div>' +
+      '<div class="stat"><div class="sv num">81.4%</div><div class="sk">Cache hit rate</div><div class="sb">cache_read ÷ input, mixed fleet</div></div>' +
+      '<div class="stat"><div class="sv num">3</div><div class="sk">Approvals waiting</div><div class="sb">oldest 4m 12s</div></div>' +
+    '</div>';
+
+  const headNoActions = () => head.replace(/<div class="ph-actions">[\s\S]*?<\/div><\/div>/, "</div>");
+  if (state.view === "loading") return head + fleetFilters(0) + slabLoading("runs");
+  if (state.view === "error")   return head + fleetFilters(0) + slabError("The fleet");
+  if (state.view === "denied")  return head + slabDenied("core-platform runs");
+  if (state.view === "empty")   return headNoActions().replace(/<div class="sv num">\d+<\/div><div class="sk">Live runs<\/div><div class="sb">4 sealed in the last hour<\/div>/, '<div class="sv num">0</div><div class="sk">Live runs</div><div class="sb">nothing recorded yet</div>') + slabEmptyFleet();
+
+  const table = rows.length
+    ? '<div class="tablebox"><div class="tscroll"><table class="runs">' +
+        '<thead><tr><th>Run</th><th>Agent</th><th>Operator</th><th>Harness</th><th>Tier</th>' +
+        '<th>Current step</th><th>Cost so far</th><th>Replay</th><th>Verdict</th><th></th></tr></thead>' +
+        '<tbody>' + rows.map(runRow).join("") + '</tbody></table></div>' +
+        '<div class="tl-foot">Cost is gateway-observed to the cent where the tier allows it; observe-tier rows are client-attested and labelled.</div></div>'
+    : '<div class="slab"><svg class="glyph" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M15.4 15.4 21 21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>' +
+      '<h2>No runs match these filters</h2><p>Widen the operator, agent, tier or verdict filter to see the rest of the fleet.</p>' +
+      '<div class="acts"><button class="btn" type="button" id="fClear2">Clear filters</button></div></div>';
+
+  return head + fleetFilters(rows.length) +
+    '<div class="fleet-wrap' + (state.railOpen ? " rail-open" : "") + '">' + table + approvalsRail() + '</div>';
+}
+
+/* =========================================================================
+   Run · live
+   ========================================================================= */
+function inspectorBody(f){
+  if (state.inspTab === "envelope"){
+    const b = f.body || f.model || f.usage || f.tool || f.policy || f.steer || f.command;
+    const e = env(f, b ? { body:b } : {});
+    e.content = { digest:"sha256:" + (f.seq * 7919).toString(16).padStart(12,"0") + "e4b1", bytes_ref:"blob://org_acme/sha256/…", redactions:[] };
+    e.prev_hash = "sha256:" + ((f.seq - 1) * 104729).toString(16).padStart(12,"0") + "a7c2";
+    e.hash = "sha256:" + (f.seq * 104729).toString(16).padStart(12,"0") + "a7c2";
+    return '<pre class="code">' + esc(JSON.stringify(e, null, 2)) + '</pre>';
+  }
+  if (state.inspTab === "chain"){
+    return '<div class="sect"><h3>Chain</h3><dl class="grid2">' +
+      '<div class="kv"><dt>Sequence</dt><dd class="mono num">' + f.seq + ' · dense, no gaps</dd></div>' +
+      '<div class="kv"><dt>Fidelity</dt><dd class="mono">gateway · Oxagen-attested</dd></div>' +
+      '<div class="kv"><dt>prev_hash</dt><dd class="mono" style="overflow-wrap:anywhere">sha256:' + ((f.seq-1)*104729).toString(16).padStart(12,"0") + 'a7c2…</dd></div>' +
+      '<div class="kv"><dt>hash</dt><dd class="mono" style="overflow-wrap:anywhere">sha256:' + (f.seq*104729).toString(16).padStart(12,"0") + 'a7c2…</dd></div>' +
+      '</dl></div>' +
+      '<div class="sect"><h3>Checkpoint</h3><p style="margin:0;font-size:12.5px;color:var(--body);line-height:1.55">' +
+      'Frames 0–' + Math.min(24, state.frames.length - 1) + ' are inside checkpoint <span class="mono">ckpt_01K6QX7T3</span>, ' +
+      'signed by the host device key <span class="mono">dev_4KQZ81</span> and countersigned by Oxagen on ingest. ' +
+      'The run seals at stop; the Merkle root is computed then, not now.</p></div>' +
+      '<div class="sect"><h3>Verify</h3><div style="display:flex;gap:7px;flex-wrap:wrap">' +
+      '<button class="btn sm" type="button" data-toast="Chain intact: 27 frames, 0 gaps, 0 refused writes.">Recompute the chain</button>' +
+      '<button class="btn sm" type="button" data-toast="Export queued. The bundle carries segments, attestations, key ids and a verifier script.">Export this run</button>' +
+      '</div></div>';
+  }
+
+  // Detail tab, by kind
+  let out = "";
+  if (f.model){
+    out += '<div class="sect"><h3>Request</h3><dl class="grid2">' +
+      '<div class="kv"><dt>Provider</dt><dd class="mono">' + f.model.provider + '</dd></div>' +
+      '<div class="kv"><dt>Model</dt><dd class="mono">' + f.model.model + '</dd></div>' +
+      '<div class="kv"><dt>Toolbelt</dt><dd class="mono num">' + f.model.tools + ' tool versions</dd></div>' +
+      '<div class="kv"><dt>Input tokens</dt><dd class="mono num">' + f.model.input.toLocaleString() + '</dd></div>' +
+      '</dl></div>';
+    out += '<div class="sect"><h3>What the agent was told</h3>' +
+      f.model.messages.map(m => '<div class="msg' + (m.injected ? " inj" : "") + '">' +
+        '<div class="role">' + esc(m.role) + '</div><div class="txt">' + esc(m.txt).replace(/\n/g, "<br>") + '</div></div>').join("") +
+      '</div>';
+  }
+  if (f.usage){
+    const u = f.usage, tot = u.input_uncached + u.cache_read;
+    const hit = tot ? (u.cache_read / tot * 100).toFixed(1) : "0.0";
+    out += '<div class="sect"><h3>Usage by token class</h3><div class="bars">' +
+      bar("input_uncached", u.input_uncached, 30000, "a") +
+      bar("cache_read", u.cache_read, 30000, "b") +
+      bar("output", u.output, 30000, "c") +
+      bar("reasoning", u.reasoning, 30000, "d") +
+      '</div></div>' +
+      '<div class="sect"><h3>Prompt composition</h3><div class="bars">' +
+      bar("tool definitions", u.tool_definition_tokens, 30000, "d") +
+      bar("context frames", u.context_frame_tokens, 30000, "d") +
+      bar("steering", u.steering_tokens, 30000, "d") +
+      '</div></div>' +
+      '<div class="sect"><h3>Cost and provenance</h3><dl class="grid2">' +
+      '<div class="kv"><dt>Cost</dt><dd class="mono">' + u.cost + ' <span class="basis">USD</span></dd></div>' +
+      '<div class="kv"><dt>Cost basis</dt><dd class="mono">' + u.basis + '</dd></div>' +
+      '<div class="kv"><dt>Cache hit rate</dt><dd class="mono num">' + hit + '%</dd></div>' +
+      '<div class="kv"><dt>Time to first token</dt><dd class="mono">' + u.ttft + '</dd></div>' +
+      '<div class="kv"><dt>Latency</dt><dd class="mono">' + u.latency + '</dd></div>' +
+      '<div class="kv"><dt>Provider request</dt><dd class="mono">' + u.req + '</dd></div>' +
+      '</dl><p style="margin:9px 0 0;font-size:11.5px;color:var(--dim);line-height:1.5">' +
+      'Priced from price entries pe_ant_fable51_in, pe_ant_fable51_cr and pe_ant_fable51_out, effective 2026-08-01. ' +
+      'Reconciles by provider request id at level 1.</p></div>';
+  }
+  if (f.tool){
+    const t = f.tool;
+    out += '<div class="sect"><h3>Tool call</h3><dl class="grid2">' +
+      '<div class="kv"><dt>Tool version</dt><dd>' + TG.cell(t.pattern, {sz:"sm"}) + '</dd></div>' +
+      '<div class="kv"><dt>Category</dt><dd>' + TG.cat(TG.meta(t.pattern).cat) + '</dd></div>' +
+      (t.risk || t.side_effect ? '<div class="kv"><dt>Hazard</dt><dd>' + TG.hazard(t.risk || "low", t.side_effect) + '</dd></div>' : '') +
+      (t.egress ? '<div class="kv"><dt>Egress class</dt><dd class="mono">' + t.egress + '</dd></div>' : '') +
+      (t.result ? '<div class="kv"><dt>Result</dt><dd class="mono">' + t.result + ' · ' + t.bytes + '</dd></div>' : '') +
+      (t.duration ? '<div class="kv"><dt>Duration</dt><dd class="mono">' + t.duration + '</dd></div>' : '') +
+      (t.output_schema ? '<div class="kv"><dt>Output schema</dt><dd class="mono">' + t.output_schema + '</dd></div>' : '') +
+      (t.receipt ? '<div class="kv"><dt>Receipt</dt><dd class="mono">' + t.receipt + '</dd></div>' : '') +
+      '</dl>' +
+      (t.input ? '<div style="margin-top:10px"><pre class="code">' + esc(t.input) + '</pre></div>' : '') +
+      (t.connection ? '<p style="margin:9px 0 0;font-size:11.5px;color:var(--dim);line-height:1.5">Credential brokered per call from ' + esc(t.connection) + '. The agent never held it.</p>' : '') +
+      '</div>';
+  }
+  if (f.policy){
+    const p = f.policy;
+    out += '<div class="sect"><h3>Decision</h3>' +
+      '<div style="margin-bottom:10px"><span class="pill p-allowed"><span class="dot"></span>' + p.outcome + '</span></div>' +
+      '<ol class="chain">' + p.rules.map(r => '<li>' + esc(r) + '</li>').join("") + '</ol>' +
+      '<dl class="grid2" style="margin-top:10px">' +
+      '<div class="kv"><dt>Policy version</dt><dd class="mono">' + p.policy_version + '</dd></div>' +
+      '<div class="kv"><dt>Taint</dt><dd class="mono">' + p.taint + '</dd></div>' +
+      '<div class="kv"><dt>Deny generation</dt><dd class="mono num">' + p.deny_generation + '</dd></div>' +
+      '</dl><p style="margin:9px 0 0;font-size:11.5px;color:var(--dim);line-height:1.5">Deterministic, versioned, replayable. No model participates in this decision.</p></div>';
+  }
+  if (f.steer){
+    const st = f.steer;
+    out += '<div class="sect"><h3>Steer</h3><dl class="grid2">' +
+      '<div class="kv"><dt>Issuer</dt><dd>Marcus Bell · operator</dd></div>' +
+      '<div class="kv"><dt>Authority</dt><dd class="mono">operator · steering position</dd></div>' +
+      '<div class="kv"><dt>Requested mode</dt><dd class="mono">' + (st.requested_mode || "next_step") + '</dd></div>' +
+      '<div class="kv"><dt>Delivery mode</dt><dd class="mono">' + (st.delivery_mode || "next_step") + '</dd></div>' +
+      '<div class="kv"><dt>Interrupted</dt><dd class="mono">' + (st.interrupted ? "true" : "false") + '</dd></div>' +
+      '<div class="kv"><dt>Interrupted step</dt><dd class="mono">' +
+        (st.interrupted_step ? st.interrupted_step.kind + " @ seq " + st.interrupted_step.seq : "—") + '</dd></div>' +
+      '<div class="kv"><dt>Degraded reason</dt><dd class="mono">' + (st.degraded_reason || "—") + '</dd></div>' +
+      '<div class="kv"><dt>Status</dt><dd class="mono">' + (st.status || "queued") + '</dd></div>' +
+      '<div class="kv"><dt>Delivered at seq</dt><dd class="mono">' + (st.delivered_at_seq != null ? st.delivered_at_seq : "pending") + '</dd></div>' +
+      '<div class="kv"><dt>Text digest</dt><dd class="mono" style="overflow-wrap:anywhere">' + st.digest + '</dd></div>' +
+      '</dl><div class="msg" style="margin-top:10px"><div class="role">Steer text</div><div class="txt">' + esc(st.text) + '</div></div>' +
+      (st.degraded_reason
+        ? '<div class="grantcheck deny" style="margin:10px 0 0"><span class="g-no"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>' +
+          '<span><b>Interrupt degraded to next step.</b>An irreversible tool call was in flight and is never abandoned. The call completed; the steer rides the request after it.</span></div>'
+        : "") +
+      '<p style="margin:9px 0 0;font-size:11.5px;color:var(--dim);line-height:1.5">' +
+      'Governed action <span class="mono">dispatch_command</span>, audited. Oxagen never executes steering text; it enters the prompt as operator-authority context at the model request named above.</p></div>';
+  }
+  if (f.command){
+    out += '<div class="sect"><h3>Command</h3><dl class="grid2">' +
+      '<div class="kv"><dt>Command</dt><dd class="mono">' + f.command.cmd + '</dd></div>' +
+      '<div class="kv"><dt>Issuer</dt><dd>Marcus Bell · operator</dd></div>' +
+      '<div class="kv"><dt>Outcome</dt><dd class="mono">' + f.command.outcome + '</dd></div>' +
+      '<div class="kv"><dt>Guarantee</dt><dd>' + esc(f.command.guarantee) + '</dd></div>' +
+      '</dl><p style="margin:9px 0 0;font-size:11.5px;color:var(--dim);line-height:1.5">Governed action <span class="mono">dispatch_command</span> · row in control.commands · receipt ' + f.command.receipt + '</p></div>';
+  }
+  if (f.body && !f.model && !f.usage && !f.tool && !f.policy && !f.steer && !f.command){
+    out += '<div class="sect"><h3>Body</h3><pre class="code">' + esc(JSON.stringify(f.body, null, 2)) + '</pre></div>';
+  }
+  return out || '<p style="color:var(--muted);margin:0">No body recorded for this frame.</p>';
+}
+
+function bar(label, v, max, cls){
+  const pct = Math.max(1, Math.min(100, (v / max) * 100));
+  return '<div class="bar"><span class="bl">' + label + '</span>' +
+    '<span class="btrack"><span class="bfill ' + cls + '" style="width:' + pct.toFixed(1) + '%"></span></span>' +
+    '<span class="bv">' + v.toLocaleString() + '</span></div>';
+}
+
+const MODE_NOTE = {
+  next_step: "<b>Next step</b> — the current step runs to its terminal frame, then the steer rides the first model request after it. A tool call in flight finishes and the steer travels in the same request that carries its result. Nothing is discarded.",
+  interrupt: "<b>Interrupt</b> — the in-flight response is stopped and its partial output is recorded and billed; a pending tool call is abandoned and denied with reason <span class=\"mono\">interrupted</span>. An irreversible tool call in flight is never abandoned, so the steer degrades to next step and the frame says so. Interrupt redirects the run; it does not stop it — that is pause.",
+  turn_boundary: "<b>Turn boundary</b> — the steer waits for <span class=\"mono\">turn_end</span> and enters on the first model request of the next turn. Nothing is cut short, but it may wait."
+};
+
+function renderRun(){
+  const r = RUNS[0];
+  const o = OPS[r.op];
+  const head =
+    '<div class="runhead"><div class="rh-top"><div style="min-width:0">' +
+      '<p class="eyebrow">Run · live</p>' +
+      '<h1>' + HERO + '</h1>' +
+      '<div class="runmeta">' +
+        '<span class="mono">' + r.agent + '</span><span class="sep">·</span>' +
+        '<span>' + o.name + '</span><span class="sep">·</span>' +
+        '<span>' + r.harness + '</span><span class="sep">·</span>' +
+        '<span class="tier tier-gateway">gateway</span>' +
+        '<span class="pill p-plain">replay: fork</span>' +
+        '<span class="pill p-allowed"><span class="dot"></span>chain intact</span>' +
+      '</div>' +
+      '<p style="margin:7px 0 0;color:var(--muted);font-size:13px">' + esc(r.task) +
+        ' · <span class="mono">' + r.repo + '@9f3c2ab</span> · attempt 1 · started ' + r.started + '</p>' +
+    '</div><div class="ph-actions">' +
+      '<button class="btn" type="button" data-toast="Fork replay opens at frame 26 with the recorded context and tool cassette.">Fork replay</button>' +
+      '<button class="btn" type="button" data-toast="Export queued. Signed bundle with segments, attestations, key ids and a verifier script.">Export</button>' +
+    '</div></div>' +
+    '<div class="coststrip">' +
+      '<div class="cs"><div class="csv">' + money(state.cost) + '</div><div class="csk">Cost so far</div></div>' +
+      '<div class="cs"><div class="csv">' + money(Math.round((state.cost / 5) * 100) / 100).slice(1) + '</div><div class="csk">Cost per turn, avg</div></div>' +
+      '<div class="cs"><div class="csv num">82.4%</div><div class="csk">Cache hit rate</div></div>' +
+      '<div class="cs"><div class="csv num">' + state.frames.length + '</div><div class="csk">Frames</div></div>' +
+      '<div class="cs"><div class="csv num">5</div><div class="csk">Turns</div></div>' +
+      '<div class="cs"><div class="csv mono" style="font-size:12px">gateway_observed</div><div class="csk">Cost basis</div></div>' +
+    '</div></div>';
+
+  if (state.view === "loading") return head + slabLoading("frames");
+  if (state.view === "error")   return head + slabError("The frame timeline");
+  if (state.view === "denied")  return head + slabDenied("this run");
+  if (state.view === "empty"){
+    return head + '<div class="slab"><svg class="glyph" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 7.5V12l3 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>' +
+      '<h2>No frames yet</h2><p>The run token was issued and the host acknowledged it. The first frame lands when the harness makes its first model call — usually within a second.</p>' +
+      '<div class="acts"><button class="btn" type="button" data-toast="Cancelled before the first frame. Nothing was billed.">Cancel the run</button></div></div>';
+  }
+
+  const st = state.runState;
+  const statusPill =
+    st === "running"  ? '<span class="pill p-allowed"><span class="dot"></span>running</span>' :
+    st === "paused"   ? '<span class="pill p-approval"><span class="dot"></span>paused at the next boundary</span>' :
+    st === "cancelled"? '<span class="pill p-denied"><span class="dot"></span>cancelled</span>' :
+                        '<span class="pill p-critical"><span class="dot"></span>revoked</span>';
+
+  const controls =
+    '<div class="controlbar">' +
+      '<span class="status">' + statusPill + '</span>' +
+      '<button class="btn" type="button" id="btnPause" ' + (st !== "running" ? "disabled" : "") + '>' +
+        '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="4.6" y="3.4" width="2.4" height="9.2" fill="currentColor"/><rect x="9" y="3.4" width="2.4" height="9.2" fill="currentColor"/></svg>Pause</button>' +
+      '<button class="btn" type="button" id="btnResume" ' + (st !== "paused" ? "disabled" : "") + '>' +
+        '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.6 3.2 12.4 8l-7.8 4.8Z" fill="currentColor"/></svg>Resume</button>' +
+      '<button class="btn" type="button" id="btnCancel" ' + (st === "cancelled" || st === "revoked" ? "disabled" : "") + '>Cancel</button>' +
+      '<button class="btn" type="button" id="btnRevoke" ' + (st === "revoked" ? "disabled" : "") + '>Revoke agent</button>' +
+      '<span class="spacer"></span>' +
+      '<span style="font-size:11.5px;color:var(--dim);max-width:34ch;line-height:1.4">' +
+        'Pause returns a paused response on the next model request. Revoke kills the credential and every run token.</span>' +
+    '</div>';
+
+  const queued = state.pendingSteer
+    ? '<div class="grantcheck" style="margin-bottom:0"><span class="g-ok"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.4 6.4 11.8 13 5.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>' +
+      '<span><b>Steer queued at seq ' + state.pendingSteer.seq + '.</b>It is delivered at the next model call. Resume the run to see the frame that receives it.</span></div>'
+    : "";
+
+  const steer =
+    '<div class="steerbox"><div class="steerbox-head">' +
+      '<svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true" style="color:var(--accent-text)"><path d="M3 12V4l10 4-10 4Z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>' +
+      '<h2>Steer</h2>' +
+      '<span class="eyebrow-q" style="margin-left:auto">delivered at the next model call</span>' +
+    '</div><div class="steerbox-body">' +
+      '<label for="steerText" style="display:block;font-size:12px;color:var(--muted);margin-bottom:7px">' +
+        'Enters the prompt at the steering position with your authority, immediately after the cached system block. Recorded as a <span class="mono">control.steer</span> frame.</label>' +
+      '<textarea class="steer" id="steerText" placeholder="Stop cherry-picking. Branch from 9f3c2ab and take the eleven pull requests in merge order instead.">' + esc(state.steerText) + '</textarea>' +
+      '<div class="steer-foot">' +
+        '<span class="seg" role="group" aria-label="Delivery mode">' +
+          ['next_step','interrupt','turn_boundary'].map(function(m){
+            return '<button type="button" data-mode="' + m + '" class="' + (state.steerMode === m ? "on" : "") + '">' +
+              ({next_step:"Next step", interrupt:"Interrupt", turn_boundary:"Turn boundary"})[m] + '</button>';
+          }).join("") +
+        '</span>' +
+        '<button class="btn gold" type="button" id="btnSteer">Send steer</button>' +
+        '<span class="grow"></span>' +
+      '</div>' +
+      '<p class="steer-note" style="margin:9px 0 0;max-width:78ch">' + MODE_NOTE[state.steerMode] + '</p>' + (queued ? '<div style="margin-top:11px">' + queued + '</div>' : "") +
+    '</div></div>';
+
+  return head + controls + steer + renderTranscript();
+}
+
+/* =========================================================================
+   Mass steer: composer, grant check, delivery report
+   ========================================================================= */
+function renderModal(){
+  const m = $("#modal");
+  if (!state.modal){ m.innerHTML = ""; return; }
+
+  if (state.modal === "mass"){
+    const a = ADDRESSES[state.addr];
+    const btns = Object.keys(ADDRESSES).map(k =>
+      '<button type="button" data-addr="' + k + '" class="' + (state.addr === k ? "on" : "") + '">' +
+      ADDRESSES[k].label + ' <span class="n">' + ADDRESSES[k].note + '</span></button>').join("");
+    const check = '<div class="grantcheck' + (a.grant.ok ? "" : " deny") + '">' +
+      (a.grant.ok
+        ? '<span class="g-ok"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.4 6.4 11.8 13 5.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>'
+        : '<span class="g-no"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>') +
+      '<span><b>' + esc(a.grant.head) + '</b>' + esc(a.grant.body) + '</span></div>';
+
+    m.innerHTML =
+      '<div class="scrim"><div class="dlg" role="dialog" aria-modal="true" aria-labelledby="massTitle">' +
+        '<div class="dlg-head"><div>' +
+          '<p class="eyebrow">Governed action · send_message</p>' +
+          '<h2 id="massTitle">Message the fleet</h2>' +
+          '<p>Addressed messages are the operator steer command, generalized. Each one is delivered before the recipient&rsquo;s next model call, or recorded as undelivered with the reason.</p>' +
+        '</div><button class="icon-btn" type="button" data-close="1" aria-label="Close" style="margin-left:auto">' +
+          '<svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button></div>' +
+        '<div class="dlg-body">' +
+          '<p class="eyebrow-q" style="display:block;margin-bottom:7px">Address</p>' +
+          '<div class="addr">' + btns + '</div>' + check +
+          '<p class="eyebrow-q" style="display:block;margin-bottom:7px">Urgency ceiling</p>' +
+          '<div class="addr"><span class="seg" role="group" aria-label="Urgency ceiling">' +
+            ['next_step','interrupt','turn_boundary'].map(function(m){
+              return '<button type="button" data-mode="' + m + '" class="' + (state.steerMode === m ? "on" : "") + '">' +
+                ({next_step:"Next step", interrupt:"Interrupt", turn_boundary:"Turn boundary"})[m] + '</button>';
+            }).join("") + '</span></div>' +
+          '<p style="margin:-4px 0 11px;font-size:11.5px;color:var(--dim);line-height:1.55">' +
+            'A broadcast declares a ceiling, not an instruction. You cannot know the shape of nine runs, so each recipient&rsquo;s seam resolves the strongest boundary it can honour at or below this, and the delivery report names the mode each one actually got.</p>' +
+          '<label for="massText" class="eyebrow-q" style="display:block;margin-bottom:7px">Message</label>' +
+          '<textarea class="steer" id="massText" ' + (a.grant.ok ? "" : "disabled") +
+            ' placeholder="main is red on payments-e2e since 9f3c2ab. Do not open release PRs against it until the fix lands.">' + esc(state.msgText) + '</textarea>' +
+          '<p style="margin:9px 0 0;font-size:11.5px;color:var(--dim);line-height:1.55">' +
+            'Your message enters at the steering position with operator authority. An agent&rsquo;s message would enter as quoted evidence with the sender named, and any tool call whose arguments derive from it would be taint-marked.</p>' +
+        '</div>' +
+        '<div class="dlg-foot">' +
+          '<button class="btn gold" type="button" id="btnSend" ' + (a.grant.ok ? "" : "disabled") + '>Send to ' + a.label + '</button>' +
+          '<button class="btn" type="button" data-close="1">Cancel</button>' +
+          '<span class="grow"></span>' +
+          '<span class="mono" style="font-size:11px;color:var(--dim)">expires in 10m · rate limit 6/min</span>' +
+        '</div>' +
+      '</div></div>';
+    return;
+  }
+
+  if (state.modal === "delivery"){
+    const d = state.delivery;
+    const counts = { applied:0, queued:0, undelivered:0 };
+    d.recipients.forEach(r => { counts[r.status === "applied" ? "applied" : (r.status === "queued" ? "queued" : "undelivered")]++; });
+    const rows = d.recipients.map(r => {
+      const cls = r.status === "applied" ? "p-allowed" : (r.status === "queued" ? "p-approval" : "p-denied");
+      return '<tr><td><span class="mono">' + r.agent + '</span><br><span class="mono" style="color:var(--dim);font-size:11.5px">' + r.run + '</span></td>' +
+        '<td><span class="pill ' + cls + '"><span class="dot"></span>' + r.status + '</span></td>' +
+        '<td class="mono" style="white-space:nowrap;font-size:11.5px">' + (r.mode || "next_step") + '</td>' +
+        '<td class="mono num" style="white-space:nowrap">' + r.when + '</td>' +
+        '<td class="why">' + esc(r.why) + '</td></tr>';
+    }).join("");
+    m.innerHTML =
+      '<div class="scrim"><div class="dlg" role="dialog" aria-modal="true" aria-labelledby="delTitle" style="width:min(840px,100%)">' +
+        '<div class="dlg-head"><div>' +
+          '<p class="eyebrow">Delivery report · ' + d.label + '</p>' +
+          '<h2 id="delTitle">' + counts.applied + ' applied, ' + counts.queued + ' queued, ' + counts.undelivered + ' undelivered</h2>' +
+          '<p>Every status change is a frame, on your run and on the recipient&rsquo;s. <span class="mono">applied</span> is the only success status: it means the model request carrying the message was actually made, and it names the frame. <span class="mono">cancelled</span>, <span class="mono">expired</span> and <span class="mono">failed</span> group as undelivered.</p>' +
+        '</div><button class="icon-btn" type="button" data-close="1" aria-label="Close" style="margin-left:auto">' +
+          '<svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button></div>' +
+        '<div class="dlg-body">' +
+          '<div class="delivsum">' +
+            '<div><span class="v num" style="color:var(--s-allowed)">' + counts.applied + '</span><span class="k">Applied</span></div>' +
+            '<div><span class="v num" style="color:var(--s-approval)">' + counts.queued + '</span><span class="k">Queued</span></div>' +
+            '<div><span class="v num" style="color:var(--s-denied)">' + counts.undelivered + '</span><span class="k">Undelivered</span></div>' +
+            '<div><span class="v num">' + d.recipients.length + '</span><span class="k">Recipients</span></div>' +
+          '</div>' +
+          '<div class="msg" style="margin-bottom:12px"><div class="role">What was sent · digest sha256:71bcd3e0…</div>' +
+            '<div class="txt">' + esc(d.sent) + '</div></div>' +
+          '<div style="overflow-x:auto"><table class="deliv"><thead><tr><th>Agent and run</th><th>Status</th><th>Mode resolved</th><th>Time</th><th>Why</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+          '<p style="margin:11px 0 0;font-size:11.5px;color:var(--dim);line-height:1.55">' + esc(d.cost) + '</p>' +
+        '</div>' +
+        '<div class="dlg-foot">' +
+          '<a class="btn" href="#/acme/core-platform/runs/' + HERO + '" data-close="1">Open the run that received it</a>' +
+          '<button class="btn" type="button" data-close="1">Close</button>' +
+          '<span class="grow"></span>' +
+          '<span class="mono" style="font-size:11px;color:var(--dim)">list_messages · receipt rcp_01K6QXC1F4</span>' +
+        '</div>' +
+      '</div></div>';
+    return;
+  }
+
+  if (state.modal === "cmdk"){
+    const items = [
+      ["Pause every run by acme.core.release-manager", "dispatch_command · pause"],
+      ["Message the fleet with @all", "send_message"],
+      ["Open run " + HERO, "get_run"],
+      ["Filter the fleet to tier observe", "list_runs"],
+      ["Flip the kill switch on stripe:pay_invoice@3.0", "set_kill_switch"],
+      ["Export this workspace&rsquo;s runs", "export_run"]
+    ].map(i => '<button class="fr" type="button" style="grid-template-columns:1fr auto" data-toast="' + i[0].replace(/&rsquo;/g,"'") + ' — dispatched as a governed action.">' +
+      '<span><span class="kind" style="font-family:var(--sans);font-size:13px">' + i[0] + '</span></span>' +
+      '<span class="t">' + i[1] + '</span></button>').join("");
+    m.innerHTML =
+      '<div class="scrim" style="align-items:flex-start;padding-top:12vh"><div class="dlg" role="dialog" aria-modal="true" style="width:min(620px,100%)">' +
+        '<div class="dlg-head" style="padding:12px 15px"><svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true" style="color:var(--dim);margin-top:4px"><circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M10.6 10.6 14 14" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>' +
+        '<input id="cmdInput" placeholder="Search runs, agents, tools, or run a command" style="flex:1;background:none;border:0;outline:none;font-size:15px;color:var(--fg);padding:2px 0">' +
+        '<kbd style="font-family:var(--mono);font-size:10.5px;border:1px solid var(--border);border-radius:4px;padding:1px 5px;color:var(--dim)">esc</kbd></div>' +
+        '<div class="dlg-body" style="padding:6px 0">' + items + '</div>' +
+        '<div class="dlg-foot"><span class="mono" style="font-size:11px;color:var(--dim)">Every command here is the same governed action the screens call. search_tools backs this menu.</span></div>' +
+      '</div></div>';
+    const ci = $("#cmdInput"); if (ci) ci.focus();
+    return;
+  }
+
+  if (state.modal === "assistant"){
+    m.innerHTML =
+      '<div class="scrim" style="justify-items:end;padding:0"><div class="dlg" role="dialog" aria-modal="true" style="width:min(400px,100%);height:100vh;max-height:100vh;border-radius:0;border-right:0;border-top:0;border-bottom:0">' +
+        '<div class="dlg-head"><div><p class="eyebrow">In-app agent</p><h2 style="font-size:15px">Assistant</h2>' +
+        '<p style="font-size:12px">Every turn is a run of its own, recorded and metered like any other agent&rsquo;s.</p></div>' +
+        '<button class="icon-btn" type="button" data-close="1" aria-label="Close" style="margin-left:auto"><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button></div>' +
+        '<div class="dlg-body">' +
+          '<div class="msg"><div class="role">You</div><div class="txt">Which runs are still on the old release branch?</div></div>' +
+          '<div class="msg"><div class="role">Assistant · run run_01K6QXD2A8</div><div class="txt">Two: <span class="mono">run_01K6QWX0M5</span> (acme.core.dep-upgrader) and <span class="mono">run_01K6QWR1C4</span> (acme.core.migration-writer). Both branched before 9f3c2ab landed. I can pause both — that is <span class="mono">dispatch_command</span>, which you hold in core-platform.</div></div>' +
+          '<div class="msg" style="border-style:dashed"><div class="role">Receipt</div><div class="txt mono" style="font-size:11.5px">list_runs · 1 governed action · 2,180 tokens · $0.01 · z-ai/glm-latest via OpenRouter · funding source platform</div></div>' +
+        '</div>' +
+        '<div class="dlg-foot"><span class="mono" style="font-size:11px;color:var(--dim)">Engine: stella serve · healthy · holds no credentials and no authority</span></div>' +
+      '</div></div>';
+    return;
+  }
+
+  if (state.modal === "account"){
+    m.innerHTML =
+      '<div class="scrim"><div class="dlg" role="dialog" aria-modal="true" style="width:min(520px,100%)">' +
+        '<div class="dlg-head"><span class="avatar" style="width:40px;height:40px;font-size:14px">MB</span><div>' +
+        '<h2 style="font-size:16px">Marcus Bell</h2><p>mbell@acmerobotics.com · Workspace owner, core-platform · Member, finops</p></div>' +
+        '<button class="icon-btn" type="button" data-close="1" aria-label="Close" style="margin-left:auto"><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button></div>' +
+        '<div class="dlg-body"><dl class="grid2">' +
+        '<div class="kv"><dt>Display currency</dt><dd>USD</dd></div>' +
+        '<div class="kv"><dt>Locale</dt><dd class="mono">en-US</dd></div>' +
+        '<div class="kv"><dt>Agents you operate</dt><dd class="num">21 of 50</dd></div>' +
+        '<div class="kv"><dt>Spend today</dt><dd class="mono">$188.41 <span class="basis">gateway_observed</span></dd></div>' +
+        '<div class="kv"><dt>Mass addressing</dt><dd class="mono">@all in core-platform</dd></div>' +
+        '<div class="kv"><dt>Two-factor</dt><dd>Passkey · added 2026-06-14</dd></div>' +
+        '</dl></div>' +
+        '<div class="dlg-foot"><button class="btn" type="button" data-close="1">Close</button></div>' +
+      '</div></div>';
+    return;
+  }
+  m.innerHTML = "";
+}
+
+function toast(msg){
+  const el = document.createElement("div");
+  el.textContent = msg;
+  el.style.cssText = "position:fixed;left:50%;bottom:74px;transform:translateX(-50%);z-index:95;" +
+    "background:var(--panel);border:1px solid var(--rule);border-radius:9px;padding:10px 14px;" +
+    "font-size:12.5px;color:var(--fg);box-shadow:var(--shadow);max-width:min(560px,92vw);line-height:1.45";
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 3400);
+}
+
+/* =========================================================================
+   Live stream
+   ========================================================================= */
+let clock = { h:14, m:3, s:26, ms:115 };
+function tick(secs){
+  clock.ms += Math.round(secs * 1000);
+  while (clock.ms >= 1000){ clock.ms -= 1000; clock.s++; }
+  while (clock.s >= 60){ clock.s -= 60; clock.m++; }
+  while (clock.m >= 60){ clock.m -= 60; clock.h++; }
+  return String(clock.h).padStart(2,"0") + ":" + String(clock.m).padStart(2,"0") + ":" +
+         String(clock.s).padStart(2,"0") + "." + String(clock.ms).padStart(3,"0");
+}
+
+const LIVE_SCRIPT = [
+  s => ({ seq:s, kind:"tool_requested", node:"tool", cost:0,
+    sum:"github:create_pull_request@2.1 · release/2026.9.2 → main",
+    tool:{ pattern:"github:create_pull_request@2.1", side_effect:"write", risk:"medium", egress:"third_party",
+      input:'{ "repo": "acme/platform", "head": "release/2026.9.2", "base": "main",\n  "title": "Release 2026.9.2-rc1", "draft": true }' } }),
+  s => ({ seq:s, kind:"policy_decision", node:"policy", cost:0,
+    sum:"allow · grant core/release-manager · draft pull request, not a tag",
+    policy:{ outcome:"allow", rules:["grant core/release-manager → github:create_pull_request@2.1 allow",
+      "rule no_tag_without_witness: no tag requested → pass"],
+      policy_version:"pol_2026_09_04.3", taint:"none", deny_generation:412 } }),
+  s => ({ seq:s, kind:"tool_call", node:"tool", cost:0,
+    sum:"pull request acme/platform#4193 opened as draft · 1,840 ms",
+    tool:{ pattern:"github:create_pull_request@2.1", result:"ok", bytes:"1.8 KB", duration:"1,840 ms",
+      output_schema:"valid", receipt:"rcp_01K6QX81M9", connection:"conn_github_acme (owner: Marcus Bell)" } }),
+  s => ({ seq:s, kind:"turn_start", node:"control", cost:0,
+    sum:"Turn 6 · continued from turn 5", body:{ turn:6, trigger:"continuation" } }),
+  s => ({ seq:s, kind:"model.request", node:"model", cost:0,
+    sum:"anthropic · claude-fable-5-1 · 14 tools · 31,204 input tokens",
+    model:{ provider:"anthropic", model:"claude-fable-5-1", tools:14, input:31204,
+      messages:[
+        { role:"system (governed)", txt:SYS_PROMPT },
+        { role:"steering (volatile, after cache block)", txt:STEERING_BLOCK },
+        { role:"assistant", txt:"Draft pull request #4193 is open. I will now cherry-pick the eleven release-scope pull requests." }
+      ] } }),
+  s => ({ seq:s, kind:"model.response", node:"model", cost:0.44,
+    sum:"stop_reason tool_use · 1,318 output · $0.44 · gateway_observed",
+    usage:{ input_uncached:19204, cache_read:12000, cache_write_5m:0, output:1318, reasoning:0,
+      tool_definition_tokens:2318, context_frame_tokens:6140, steering_tokens:187,
+      cost:"$0.44", basis:"gateway_observed", latency:"3,904 ms", ttft:"455 ms",
+      req:"req_01K6QX82P1", model:"claude-fable-5-1" } }),
+  s => ({ seq:s, kind:"tool_requested", node:"tool", cost:0,
+    sum:"github:list_commits@2.1 · base main · since 9f3c2ab",
+    tool:{ pattern:"github:list_commits@2.1", side_effect:"read", risk:"low", egress:"third_party",
+      input:'{ "repo": "acme/platform", "sha": "main", "since": "9f3c2ab" }' } }),
+  s => ({ seq:s, kind:"policy_decision", node:"policy", cost:0,
+    sum:"allow · grant core/release-manager · side-effect read",
+    policy:{ outcome:"allow", rules:["grant core/release-manager → github:*@2.1 allow"],
+      policy_version:"pol_2026_09_04.3", taint:"none", deny_generation:412 } }),
+  s => ({ seq:s, kind:"tool_call", node:"tool", cost:0,
+    sum:"118 commits since 9f3c2ab · 11 carry release-scope · 1,204 ms",
+    tool:{ pattern:"github:list_commits@2.1", result:"ok", bytes:"22.6 KB", duration:"1,204 ms",
+      output_schema:"valid", receipt:"rcp_01K6QX83R4", connection:"conn_github_acme (owner: Marcus Bell)" } })
+];
+const IDX_MODEL_RESPONSE = 5;
+let cursor = 0;
+
+function injectedRequest(seq, steerText){
+  return { seq:seq, kind:"model.request", node:"model", injected:true, cost:0,
+    sum:"anthropic · claude-fable-5-1 · operator steer injected at the steering position · 31,388 input tokens",
+    model:{ provider:"anthropic", model:"claude-fable-5-1", tools:14, input:31388,
+      messages:[
+        { role:"system (governed)", txt:SYS_PROMPT },
+        { role:"steering (volatile, after cache block)", txt:STEERING_BLOCK },
+        { role:"operator steer · Marcus Bell · seq " + (seq - 2), txt:steerText, injected:true },
+        { role:"assistant", txt:"Draft pull request #4193 is open. I will now cherry-pick the eleven release-scope pull requests." }
+      ] } };
+}
+
+function appendFrame(f){
+  f.t = tick(1.2 + Math.random() * 2.4);
+  f.isNew = true;
+  state.frames.forEach(x => { x.isNew = false; });
+  state.frames.push(f);
+  if (f.cost) { state.cost = Math.round((state.cost + f.cost) * 100) / 100; }
+  if (state.following && !state.playing){ state.pos = f.seq; revealAt(f.seq); }
+  return f;
+}
+
+let streamTimer = null;
+function startStream(){
+  if (streamTimer) return;
+  streamTimer = setInterval(() => {
+    if (state.runState !== "running") return;
+    if (state.view !== "loaded") return;
+    const last = state.frames[state.frames.length - 1];
+    if (last && last.live){
+      last.live = false;
+      last.sum = "stop_reason tool_use · 1,204 output · $0.41 · gateway_observed";
+      last.usage.output = 1204; last.usage.cost = "$0.41"; last.usage.latency = "4,118 ms";
+      state.cost = Math.round((state.cost + 0.41) * 100) / 100;
+      render(); return;
+    }
+    const seq = state.frames.length;
+    if (state.pendingSteer){
+      const ps = state.pendingSteer;
+      const f = appendFrame(injectedRequest(seq, ps.text));
+      f.model.messages[2].role = "operator steer · Marcus Bell · seq " + ps.seq + " · mode " + ps.mode;
+      const sf = state.frames.filter(x => x.seq === ps.seq)[0];
+      if (sf && sf.steer){
+        sf.steer.status = "applied";
+        sf.steer.delivered_at_seq = f.seq;
+        sf.sum = "steer by Marcus Bell · mode " + ps.mode + " · status applied at seq " + f.seq;
+      }
+      state.pendingSteer = null;
+      cursor = IDX_MODEL_RESPONSE;
+      state.selFrame = f.seq;
+      state.inspTab = "detail";
+      render();
+      const el = document.querySelector('[data-frame="' + f.seq + '"]');
+      if (el) el.scrollIntoView({ block:"center", behavior: reduced() ? "auto" : "smooth" });
+      toast("Steer delivered. Frame " + f.seq + " is the model call that received it.");
+      return;
+    }
+    appendFrame(LIVE_SCRIPT[cursor](seq));
+    cursor = (cursor + 1) % LIVE_SCRIPT.length;
+    render();
+  }, 2600);
+}
+function reduced(){ return window.matchMedia("(prefers-reduced-motion: reduce)").matches; }
+
+
+/* =========================================================================
+   Transcript: run -> turn -> step -> frame, at three zoom levels
+   ========================================================================= */
+const TURN_PROSE = {
+  1: { you:"Cut the 2026.9.2 release candidate. Issue acme/platform#4182 has the scope.",
+       agent:"I will take the open pull requests against main first, then look at what is already red on the branch before I cut anything." },
+  3: { agent:"Both failures predate the release scope. payments-e2e has been red since 9f3c2ab and ingest-flake is intermittent; neither is caused by anything in the eleven release-scope pull requests, so cutting the branch is safe. I am recording the observation and moving on." }
+};
+
+function msOf(t){
+  const m = /^(\d+):(\d+):(\d+)\.(\d+)$/.exec(t);
+  if (!m) return 0;
+  return ((+m[1]) * 3600 + (+m[2]) * 60 + (+m[3])) * 1000 + (+m[4]);
+}
+function frameCost(f){
+  if (!f.usage || !f.usage.cost) return 0;
+  const n = parseFloat(String(f.usage.cost).replace(/[^0-9.]/g, ""));
+  return isNaN(n) ? 0 : n;
+}
+function costAt(seq){
+  let c = 0;
+  for (const f of state.frames){ if (f.seq > seq) break; c += frameCost(f); }
+  return Math.round(c * 100) / 100;
+}
+function elapsedAt(seq){
+  const f0 = state.frames[0];
+  const f = state.frames[Math.min(seq, state.frames.length - 1)];
+  return Math.max(0, msOf(f.t) - msOf(f0.t));
+}
+function fmtEl(ms){
+  const s2 = Math.floor(ms / 1000);
+  return Math.floor(s2 / 60) + ":" + String(s2 % 60).padStart(2, "0");
+}
+
+function buildTranscript(frames){
+  const groups = [];
+  let cur = { id:"g0", type:"pre", label:"Run start", frames:[] };
+  groups.push(cur);
+  frames.forEach(f => {
+    if (f.kind === "turn_start"){
+      cur = { id:"g" + groups.length, type:"turn", n:(f.body && f.body.turn) || 0, frames:[f] };
+      groups.push(cur);
+    } else { cur.frames.push(f); }
+  });
+  if (!groups[0].frames.length) groups.shift();
+  groups.forEach(g => { g.steps = buildSteps(g.frames, g.id); });
+  return groups;
+}
+function buildSteps(frames, gid){
+  const steps = []; let i = 0;
+  while (i < frames.length){
+    const f = frames[i];
+    if (f.kind === "model.request"){
+      const grp = [f];
+      if (frames[i+1] && frames[i+1].kind === "model.response"){ grp.push(frames[i+1]); i += 2; } else i += 1;
+      steps.push({ kind:"model", frames:grp }); continue;
+    }
+    if (f.kind === "tool_requested"){
+      const grp = [f]; let j = i + 1;
+      while (j < frames.length && (frames[j].kind === "policy_decision" || frames[j].kind === "tool_call")){
+        grp.push(frames[j]); j++;
+        if (grp[grp.length-1].kind === "tool_call") break;
+      }
+      steps.push({ kind:"tool", frames:grp }); i = j; continue;
+    }
+    steps.push({ kind:"event", frames:[f] }); i += 1;
+  }
+  steps.forEach((st, k) => { st.id = gid + "s" + k; });
+  return steps;
+}
+
+function stepDigest(st){
+  const a = st.frames[0], last = st.frames[st.frames.length - 1];
+  if (st.kind === "model"){
+    const resp = st.frames.filter(f => f.kind === "model.response")[0];
+    const inj = a.injected;
+    return {
+      node:"model", cls:"model",
+      name:(a.model && a.model.model) || "model call",
+      arg:(inj ? "operator steer injected at the steering position" : "stop " + (resp && resp.usage ? "tool_use" : "…")),
+      chips:[
+        resp && resp.usage ? resp.usage.latency : "in flight",
+        (a.model ? a.model.input.toLocaleString() + " in" : ""),
+        resp && resp.usage ? resp.usage.output.toLocaleString() + " out" : "",
+        resp && resp.usage ? resp.usage.cost : ""
+      ].filter(Boolean),
+      warn:inj
+    };
+  }
+  if (st.kind === "tool"){
+    const res = st.frames.filter(f => f.kind === "tool_call")[0];
+    const pol = st.frames.filter(f => f.kind === "policy_decision")[0];
+    return {
+      node:"tool", cls:"",
+      name:(a.tool ? a.tool.pattern.split(":").pop().split("@")[0] : "tool call"),
+      arg:(a.tool ? a.tool.pattern : ""),
+      chips:[
+        pol ? pol.policy.outcome : "",
+        res ? res.tool.duration : "pending",
+        res ? res.tool.bytes : "",
+        a.tool ? a.tool.side_effect : ""
+      ].filter(Boolean),
+      warn:false
+    };
+  }
+  const f = a;
+  const isControl = f.kind.indexOf("control.") === 0 || f.kind === "agent_start";
+  return {
+    node:isControl ? "control" : (f.kind === "policy_decision" ? "policy" : "tool"),
+    cls:isControl ? "control" : "",
+    name:f.kind, arg:f.sum, chips:[], warn:false
+  };
+}
+
+function frameDetail(f){
+  const keep = state.inspTab;
+  state.inspTab = "envelope"; const envHtml = inspectorBody(f);
+  state.inspTab = "chain";    const chainHtml = inspectorBody(f);
+  state.inspTab = keep;
+  return '<div class="fhead"><span class="fk">' + f.kind + '</span>' +
+    '<span class="fs">seq ' + f.seq + ' · ' + f.t + 'Z · fidelity gateway</span></div>' +
+    '<div class="fbody">' + inspectorBodyFor(f) + '</div>' +
+    '<details class="more"' + (state.openSet.has("env" + f.seq) ? " open" : "") + '>' +
+    '<summary data-toggle="env' + f.seq + '">envelope and chain</summary><div class="fbody" style="padding-top:0">' +
+      envHtml + '<div style="margin-top:12px">' + chainHtml + '</div>' +
+    '</div></details>';
+}
+function inspectorBodyFor(f){
+  const keep = state.inspTab; state.inspTab = "detail";
+  const out = inspectorBody(f);
+  state.inspTab = keep;
+  return out;
+}
+
+function renderTranscript(){
+  const groups = buildTranscript(state.frames);
+  const head = state.frames.length - 1;
+  const pos = Math.min(state.pos, head);
+
+  const body = groups.map(g => {
+    const gOpen = state.openSet.has(g.id);
+    const gFrames = g.frames;
+    const firstSeq = gFrames.length ? gFrames[0].seq : 0;
+    const lastSeq = gFrames.length ? gFrames[gFrames.length - 1].seq : 0;
+    const cost = Math.round((gFrames.reduce((a, f) => a + frameCost(f), 0)) * 100) / 100;
+    const dur = gFrames.length > 1 ? fmtEl(msOf(gFrames[gFrames.length-1].t) - msOf(gFrames[0].t)) : "0:00";
+    const done = lastSeq < head || state.runState !== "running";
+    const title = g.type === "turn"
+      ? '<span class="turnname"><span class="bar">▍</span>turn ' + g.n + '</span>' +
+        (done ? '<span class="turnok">done</span>' : '<span class="turnok run">running</span>')
+      : '<span class="turnname"><span class="bar">▍</span>' + g.label + '</span>';
+
+    const prose = g.type === "turn" && TURN_PROSE[g.n] ? TURN_PROSE[g.n] : null;
+    const roleYou = prose && prose.you
+      ? '<div class="role you"><div class="rolegut"><span class="roletag">YOU</span></div>' +
+        '<div class="prose">' + esc(prose.you) + '</div></div>' : "";
+    const roleAgent = prose && prose.agent
+      ? '<div class="role agent"><div class="rolegut"><span class="roletag">AGENT</span></div>' +
+        '<div class="prose">' + esc(prose.agent) + '</div></div>' : "";
+
+    const steps = g.steps.map(st => {
+      const sOpen = state.openSet.has(st.id);
+      const d = stepDigest(st);
+      const sFirst = st.frames[0], sLast = st.frames[st.frames.length - 1];
+      const isNow = pos >= sFirst.seq && pos <= sLast.seq;
+      const isFuture = sFirst.seq > pos;
+      return '<details class="step' + (isNow ? " now" : "") + (isFuture ? " future" : "") + '"' + (sOpen ? " open" : "") + '>' +
+        '<summary data-toggle="' + st.id + '"><div class="stepgrid">' +
+          '<span class="t">' + sFirst.t.slice(3,8) + '</span>' +
+          '<span class="node"><span class="dot ' + d.node + '"></span></span>' +
+          '<span class="digest"><span class="chev">▶</span>' +
+            (d.node === "tool" && d.arg.indexOf("@") > 0
+              ? TG.cell(d.arg, {sz:"sm"})
+              : '<span class="dname ' + d.cls + '">' + esc(d.name) + '</span><span class="darg">' + esc(d.arg) + '</span>') +
+            '<span class="chips">' +
+              (d.warn ? '<span class="chip cost" style="color:var(--accent-text)">steer injected</span>' : "") +
+              d.chips.map(c => c === "allow" || c === "deny" || c === "require_approval" ? TG.gate(c)
+                : c === "read" || c === "write" || c === "irreversible" ? '<span class="tg-hz e-' + c + '">' + TG.effSvg(c) + '<span>' + c + '</span></span>'
+                : '<span class="chip' + (String(c).indexOf("$") === 0 ? " cost" : "") + '">' + esc(c) + '</span>').join("") +
+            '</span>' +
+          '</span>' +
+        '</div></summary>' +
+        (sOpen ? '<div class="sbody"><div class="sbody-inner">' +
+          st.frames.map(frameDetail).join("") +
+        '</div></div>' : "") + '</details>';
+    }).join("");
+
+    return '<details class="turn"' + (gOpen ? " open" : "") + '>' +
+      '<summary data-toggle="' + g.id + '"><div class="turnline">' +
+        '<span class="chev">▶</span>' + title +
+        '<span class="chips">' +
+          '<span class="chip">' + g.steps.length + ' steps</span>' +
+          '<span class="chip">seq ' + firstSeq + '–' + lastSeq + '</span>' +
+          '<span class="chip">' + dur + '</span>' +
+          (cost ? '<span class="chip cost">$' + cost.toFixed(2) + '</span>' : "") +
+        '</span>' +
+      '</div></summary>' + roleYou + steps + roleAgent + '</details>';
+  }).join("");
+
+  return '<section class="tx">' + renderTransport() + '<div class="tx-body" id="txBody">' + body + '</div>' +
+    '<div class="tx-foot"><span class="live-dot' + (state.runState === "running" ? "" : " paused") + '"></span>' +
+    (state.runState === "running"
+      ? "Recording. Every frame is hash-chained to its predecessor as it arrives."
+      : "Recording held at the boundary. Nothing was dropped; the chain is continuous.") +
+    '</div></section>';
+}
+
+function renderTransport(){
+  const head = state.frames.length - 1;
+  const pos = Math.min(state.pos, head);
+  const following = state.following && state.runState === "running";
+  const sp = [1, 1.5, 2, 4].map(v =>
+    '<button type="button" data-speed="' + v + '" class="' + (state.speed === v ? "on" : "") + '">×' + v + '</button>').join("");
+  const zm = [["turns","Turns"],["steps","Steps"],["all","Everything"]].map(z =>
+    '<button type="button" data-zoom="' + z[0] + '" class="' + (state.zoom === z[0] ? "on" : "") + '">' + z[1] + '</button>').join("");
+
+  return '<div class="tp">' +
+    (following
+      ? '<span class="livebadge"><span class="live-dot"></span>live</span>'
+      : '<button class="livebadge off" type="button" id="tpFollow">go live</button>') +
+    '<button class="tp-btn" type="button" id="tpBack" ' + (pos <= 0 ? "disabled" : "") + ' aria-label="Step back">' +
+      '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M11.4 3.2 4.6 8l6.8 4.8Z" fill="currentColor"/><rect x="3.2" y="3.2" width="1.6" height="9.6" fill="currentColor"/></svg></button>' +
+    '<button class="tp-btn play" type="button" id="tpPlay" aria-label="' + (state.playing ? "Pause playback" : "Play") + '">' +
+      (state.playing
+        ? '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="4.6" y="3.4" width="2.4" height="9.2" fill="currentColor"/><rect x="9" y="3.4" width="2.4" height="9.2" fill="currentColor"/></svg>'
+        : '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.6 3.2 12.4 8l-7.8 4.8Z" fill="currentColor"/></svg>') + '</button>' +
+    '<button class="tp-btn" type="button" id="tpFwd" ' + (pos >= head ? "disabled" : "") + ' aria-label="Step forward">' +
+      '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.6 3.2 11.4 8l-6.8 4.8Z" fill="currentColor"/><rect x="11.2" y="3.2" width="1.6" height="9.6" fill="currentColor"/></svg></button>' +
+    '<span class="tp-scrub"><input class="scrub" id="tpScrub" type="range" min="0" max="' + head + '" value="' + pos + '" aria-label="Scrub to frame"></span>' +
+    '<span class="tp-read"><b>seq ' + pos + '</b> / ' + head + ' · ' + fmtEl(elapsedAt(pos)) + ' / ' + fmtEl(elapsedAt(head)) + ' · <b>' + money(costAt(pos)) + '</b></span>' +
+    '<span class="seg speed">' + sp + '</span>' +
+    '<span class="seg">' + zm + '</span>' +
+    '<p class="tp-note">Replay grade <span class="mono">fork</span>: this run can be inspected, viewed and forked. The transport moves the viewer, never the run — idle longer than 2s is compressed, and true elapsed time is shown beside the position.</p>' +
+  '</div>';
+}
+
+function seedZoom(){
+  const groups = buildTranscript(state.frames);
+  state.openSet = new Set();
+  if (state.zoom === "turns") return;
+  groups.forEach(g => {
+    state.openSet.add(g.id);
+    if (state.zoom === "all") g.steps.forEach(st => state.openSet.add(st.id));
+  });
+}
+function revealAt(seq){
+  const groups = buildTranscript(state.frames);
+  groups.forEach(g => {
+    g.steps.forEach(st => {
+      const a = st.frames[0], b = st.frames[st.frames.length - 1];
+      if (seq >= a.seq && seq <= b.seq){ state.openSet.add(g.id); state.openSet.add(st.id); }
+    });
+  });
+}
+
+let playTimer = null;
+function stopPlay(){ if (playTimer){ clearTimeout(playTimer); playTimer = null; } state.playing = false; }
+function stepPlay(){
+  const head = state.frames.length - 1;
+  if (state.pos >= head){
+    if (state.runState === "running"){ playTimer = setTimeout(stepPlay, 400); return; }
+    stopPlay(); render(); return;
+  }
+  state.pos += 1;
+  state.following = state.pos >= head;
+  revealAt(state.pos);
+  render();
+  const el = document.querySelector('.step.now');
+  if (el) el.scrollIntoView({ block:"nearest", behavior: reduced() ? "auto" : "smooth" });
+  const raw = Math.min(2000, Math.max(120, msOf(state.frames[state.pos].t) - msOf(state.frames[state.pos - 1].t)));
+  playTimer = setTimeout(stepPlay, raw / state.speed);
+}
+
+/* =========================================================================
+   Render and route
+   ========================================================================= */
+function render(){
+  const scroller = $("#scroll");
+  const keepMain = scroller ? scroller.scrollTop : 0;
+  const tl = $("#txBody");
+  const keepTl = tl ? tl.scrollTop : null;
+  const atBottom = tl ? (tl.scrollHeight - tl.scrollTop - tl.clientHeight < 60) : true;
+  const focusId = document.activeElement ? document.activeElement.id : null;
+  const selStart = (focusId === "steerText" || focusId === "massText") ? document.activeElement.selectionStart : null;
+
+  renderNav(); renderCrumbs();
+  const onRun = state.route.indexOf("/runs/") > -1;
+  $("#page").innerHTML = onRun ? renderRun() : renderFleet();
+  renderChrome();
+
+  if (scroller) scroller.scrollTop = keepMain;
+  const tl2 = $("#txBody");
+  if (tl2 && keepTl !== null) tl2.scrollTop = atBottom ? tl2.scrollHeight : keepTl;
+  if (focusId){
+    const el = document.getElementById(focusId);
+    if (el && el.focus){ el.focus({ preventScroll:true }); if (selStart !== null && el.setSelectionRange) el.setSelectionRange(selStart, selStart); }
+  }
+}
+
+function go(hash){ if (location.hash !== hash) location.hash = hash; else { state.route = hash; render(); } }
+
+window.addEventListener("hashchange", () => {
+  state.route = location.hash || "#/acme/core-platform";
+  const s = $("#scroll"); if (s) s.scrollTop = 0;
+  render();
+});
+
+/* Pages outside this flow keep the shell and say so plainly. */
+const OTHER = {
+  "#/acme/core-platform/agents": ["Agents", "Identity, run credential, roles, toolbelt, mandates, budgets and enrollment status for all 50 agents."],
+  "#/acme/core-platform/tools": ["Tools", "The registry, connections, mandates ledger, policy versions with simulation, kill switches and the assurance suite."],
+  "#/acme/core-platform/ontology": ["Ontology", "Model, Graph, Sources, Repositories and Versions — the workspace&rsquo;s model of its business."],
+  "#/acme/core-platform/steering": ["Steering", "Published records, proposals, open Context PRs, effect metrics and retirement candidates."],
+  "#/acme/core-platform/spend": ["Spend", "Findings ranked by money at stake, spend by operator and agent, proven spend, reconciliation and budgets."],
+  "#/acme": ["Organization", "People, roles, invitations, SSO, workspaces, model funding and routes, data plane and API keys."],
+  "#/acme/billing": ["Billing", "Governed-action usage, the retention meter, plan and invoices."],
+  "#/acme/audit": ["Audit", "Control-plane audit events, data plane, key rotation, legal holds and exports."]
+};
+function renderOther(){
+  const o = OTHER[state.route];
+  if (!o) return renderFleet();
+  return '<div class="ph"><div><p class="eyebrow">' +
+    (state.route.indexOf("core-platform") > -1 ? "Workspace · core-platform" : "Organization · acme") +
+    '</p><h1>' + o[0] + '</h1><p>' + o[1] + '</p></div></div>' +
+    '<div class="slab"><svg class="glyph" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>' +
+    '<h2>Outside this flow</h2><p>W2 mocks Fleet, Run in its live state, and fleet messaging. ' + o[0] +
+    ' is one of the ten Mission Control pages and is mocked in another scenario.</p>' +
+    '<div class="acts"><a class="btn gold" href="#/acme/core-platform">Back to Fleet</a></div></div>';
+}
+
+/* =========================================================================
+   Events
+   ========================================================================= */
+document.addEventListener("click", ev => {
+  const t = ev.target.closest("[data-toast],[data-open],[data-frame],[data-tab],[data-addr],[data-close],[data-pause],[data-approve],[data-act],[data-state],[data-chrome]");
+  if (!t) return;
+
+  if (t.hasAttribute("data-close")){
+    if (t.tagName === "A") { state.modal = null; renderModal(); return; }
+    ev.preventDefault(); if (ev.target.closest(".dlg") && !t.hasAttribute("data-close")) return;
+    state.modal = null; renderModal(); return;
+  }
+  if (t.dataset.open){ ev.preventDefault(); go("#/acme/core-platform/runs/" + HERO); return; }
+  if (t.dataset.pause){
+    toast("pause dispatched to " + t.dataset.pause + " · applied at the next boundary"); return;
+  }
+  if (t.dataset.approve){
+    toast("Approved. Single-use token minted, bound to the agent, run, exact action and a 10-minute expiry. Receipt written."); return;
+  }
+  if (t.dataset.frame){ state.selFrame = Number(t.dataset.frame); render(); return; }
+  if (t.dataset.tab){ state.inspTab = t.dataset.tab; render(); return; }
+  if (t.dataset.addr){ state.addr = t.dataset.addr; renderModal(); return; }
+  if (t.dataset.act === "retry"){ state.view = "loaded"; render(); toast("Ledger reachable. 27 frames read, chain intact."); return; }
+  if (t.dataset.state){ state.view = t.dataset.state; render(); return; }
+  if (t.dataset.toast){ toast(t.dataset.toast); return; }
+});
+
+/* transcript folds, zoom levels, playback speed, steer delivery mode */
+document.addEventListener("click", ev => {
+  const sum = ev.target.closest("summary[data-toggle]");
+  if (sum){
+    ev.preventDefault();
+    const id = sum.dataset.toggle;
+    if (state.openSet.has(id)) state.openSet.delete(id); else state.openSet.add(id);
+    render(); return;
+  }
+  const z = ev.target.closest("[data-zoom]");
+  if (z){ state.zoom = z.dataset.zoom; seedZoom(); render(); return; }
+  const sp = ev.target.closest("[data-speed]");
+  if (sp){ state.speed = Number(sp.dataset.speed); render(); return; }
+  const md = ev.target.closest("[data-mode]");
+  if (md){
+    state.steerMode = md.dataset.mode;
+    if (md.closest("#modal")) renderModal(); else render();
+    return;
+  }
+});
+
+/* transport */
+document.addEventListener("click", ev => {
+  const b = ev.target.closest("button");
+  if (!b || !b.id) return;
+  const head = state.frames.length - 1;
+  if (b.id === "tpPlay"){
+    if (state.playing){ stopPlay(); render(); }
+    else { state.playing = true; if (state.pos >= head && state.runState !== "running") state.pos = 0; stepPlay(); }
+    return;
+  }
+  if (b.id === "tpBack"){ stopPlay(); state.pos = Math.max(0, state.pos - 1); state.following = false; revealAt(state.pos); render(); return; }
+  if (b.id === "tpFwd"){ stopPlay(); state.pos = Math.min(head, state.pos + 1); state.following = state.pos >= head; revealAt(state.pos); render(); return; }
+  if (b.id === "tpFollow"){ stopPlay(); state.pos = head; state.following = true; revealAt(state.pos); render(); return; }
+});
+document.addEventListener("input", ev => {
+  if (ev.target.id !== "tpScrub") return;
+  stopPlay();
+  state.pos = Number(ev.target.value);
+  state.following = state.pos >= state.frames.length - 1;
+  revealAt(state.pos);
+  render();
+});
+
+document.addEventListener("click", ev => {
+  const sc = ev.target.closest(".scrim");
+  if (sc && ev.target === sc){ state.modal = null; renderModal(); }
+});
+
+document.addEventListener("click", ev => {
+  const id = ev.target.closest("button") && ev.target.closest("button").id;
+  if (!id) return;
+  if (id === "railToggle"){ state.railOpen = !state.railOpen; render(); return; }
+  if (id === "massBtn"){ state.modal = "mass"; state.addr = "@agents"; renderModal(); return; }
+  if (id === "cmdBtn"){ state.modal = "cmdk"; renderModal(); return; }
+  if (id === "asstBtn"){ state.modal = "assistant"; renderModal(); return; }
+  if (id === "acctBtn"){ state.modal = "account"; renderModal(); return; }
+  if (id === "orgSwitch"){ toast("Acme Robotics is the only organization on this account. Organization is the tenant and the hard isolation boundary."); return; }
+  if (id === "wsSwitch"){ toast("core-platform and finops. Switching changes the ontology, the steering set, the toolbelt and the budgets."); return; }
+  if (id === "menuBtn"){ $("#side").classList.add("open"); $("#drawerScrim").hidden = false; $("#drawerScrim").classList.add("on"); return; }
+  if (id === "themeBtn"){
+    const cur = document.documentElement.getAttribute("data-theme");
+    const sysDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const next = cur ? (cur === "dark" ? "light" : "dark") : (sysDark ? "light" : "dark");
+    document.documentElement.setAttribute("data-theme", next);
+    toast("Theme: " + next); return;
+  }
+  if (id === "fClear" || id === "fClear2"){
+    state.filters = { operator:"all", agent:"all", tier:"all", verdict:"all", task:"all", q:"" }; render(); return;
+  }
+  if (id === "chromeMin"){
+    const c = $("#chrome"); c.classList.toggle("min");
+    $("#chromeMin").textContent = c.classList.contains("min") ? "show" : "hide"; return;
+  }
+  if (id === "btnPause"){
+    state.runState = "paused";
+    appendFrame({ seq:state.frames.length, kind:"control.command", node:"control", cost:0,
+      sum:"pause · issued by Marcus Bell · delivered · the next model request returns a paused response",
+      command:{ cmd:"pause", outcome:"delivered", receipt:"rcp_01K6QX8A1B",
+        guarantee:"At the next boundary. The in-flight model call finishes and is billed." } });
+    state.selFrame = state.frames.length - 1;
+    render(); toast("Paused. The next model request returns a paused response; the tool gateway denies with a reason."); return;
+  }
+  if (id === "btnResume"){
+    state.runState = "running";
+    appendFrame({ seq:state.frames.length, kind:"control.command", node:"control", cost:0,
+      sum:"resume · issued by Marcus Bell · applied immediately",
+      command:{ cmd:"resume", outcome:"applied", receipt:"rcp_01K6QX8B7C",
+        guarantee:"Immediate. The paused response clears on the next request." } });
+    state.selFrame = state.frames.length - 1;
+    render();
+    toast(state.pendingSteer ? "Resumed. The queued steer lands on the next model call." : "Resumed.");
+    return;
+  }
+  if (id === "btnCancel"){
+    state.runState = "cancelled";
+    appendFrame({ seq:state.frames.length, kind:"control.command", node:"control", cost:0,
+      sum:"cancel · issued by Marcus Bell · run token revoked · process kill best effort",
+      command:{ cmd:"cancel", outcome:"applied", receipt:"rcp_01K6QX8C2D",
+        guarantee:"Soft cancel guaranteed. The collector sends SIGTERM where it owns the process; that part is best effort and recorded." } });
+    state.selFrame = state.frames.length - 1;
+    render(); toast("Cancelled. Every further request is refused and the run token is dead."); return;
+  }
+  if (id === "btnRevoke"){
+    state.runState = "revoked";
+    appendFrame({ seq:state.frames.length, kind:"control.command", node:"control", cost:0,
+      sum:"revoke · acme.core.release-manager · credential dead · every run token dead",
+      command:{ cmd:"revoke", outcome:"applied", receipt:"rcp_01K6QX8D9E",
+        guarantee:"Guaranteed while any seam is in path. If the hooks were stripped, this shows as hooks_removed on the host." } });
+    state.selFrame = state.frames.length - 1;
+    render(); toast("Agent revoked. The host is suspended in the bundle and denies even if the daemon is down."); return;
+  }
+  if (id === "btnSteer"){
+    const txt = (state.steerText || "").trim() ||
+      "Stop cherry-picking. Branch from 9f3c2ab and take the eleven pull requests in merge order instead.";
+    const requested = state.steerMode;
+    let mode = requested, interrupted = false, interruptedStep = null, degraded = null;
+    const last = state.frames[state.frames.length - 1];
+    if (requested === "interrupt"){
+      if (last && last.live){
+        last.live = false;
+        last.sum = "stopped by interrupt · 604 partial output tokens · $0.19 · billed";
+        last.usage.cost = "$0.19"; last.usage.latency = "stopped at 2,104 ms";
+        state.cost = Math.round((state.cost + 0.19) * 100) / 100;
+        interrupted = true; interruptedStep = { kind:"model.response", seq:last.seq };
+      } else if (last && last.tool && last.kind === "tool_requested" && last.tool.side_effect === "irreversible"){
+        degraded = "irreversible_tool_in_flight"; mode = "next_step";
+      } else if (last && last.kind === "tool_requested"){
+        interrupted = true; interruptedStep = { kind:"tool_requested", seq:last.seq };
+      }
+    }
+    const label = { next_step:"next step", interrupt:"interrupt", turn_boundary:"turn boundary" }[mode];
+    const f = appendFrame({ seq:state.frames.length, kind:"control.steer", node:"control", cost:0,
+      sum:"steer by Marcus Bell · mode " + mode + (interrupted ? " · cut the in-flight step short" : "") +
+          (degraded ? " · degraded from interrupt, irreversible tool in flight" : "") + " · status queued",
+      steer:{ text:txt, digest:"sha256:c71a9f2e4d80…", requested_mode:requested, delivery_mode:mode,
+        interrupted:interrupted, interrupted_step:interruptedStep, degraded_reason:degraded,
+        status:"queued", delivery:"queued · " + label + " · expires in 10m" } });
+    state.pendingSteer = { text:txt, seq:f.seq, mode:mode, interrupted:interrupted };
+    state.steerText = "";
+    state.selFrame = f.seq;
+    state.pos = f.seq; state.following = true;
+    revealAt(f.seq);
+    render();
+    toast(state.runState === "paused"
+      ? "Steer queued at seq " + f.seq + " (" + label + "). Resume the run to see the frame that receives it."
+      : (interrupted ? "Interrupted. The in-flight model call was stopped and billed; the steer lands on the next request."
+                     : "Steer queued at seq " + f.seq + ". It lands on the " + label + "."));
+    return;
+  }
+  if (id === "btnSend"){
+    const a = ADDRESSES[state.addr];
+    state.delivery = {
+      label:a.label,
+      sent:(state.msgText || "").trim() ||
+        "main is red on payments-e2e since 9f3c2ab. Do not open release PRs against it until the fix lands.",
+      recipients:a.recipients, cost:a.cost
+    };
+    state.msgText = "";
+    state.modal = "delivery";
+    renderModal();
+    return;
+  }
+});
+
+document.addEventListener("input", ev => {
+  const el = ev.target;
+  if (el.id === "steerText"){ state.steerText = el.value; return; }
+  if (el.id === "massText"){ state.msgText = el.value; return; }
+  if (el.id === "fQ"){ state.filters.q = el.value; render(); return; }
+});
+document.addEventListener("change", ev => {
+  const el = ev.target, map = { fOperator:"operator", fAgent:"agent", fTier:"tier", fVerdict:"verdict", fTask:"task" };
+  if (map[el.id]){ state.filters[map[el.id]] = el.value; render(); }
+});
+document.addEventListener("keydown", ev => {
+  if (ev.key === "Escape" && state.modal){ state.modal = null; renderModal(); }
+  if ((ev.metaKey || ev.ctrlKey) && ev.key.toLowerCase() === "k"){ ev.preventDefault(); state.modal = "cmdk"; renderModal(); }
+  if (ev.key === "Enter" && ev.target.closest && ev.target.closest("tr[data-open]")){
+    ev.preventDefault(); go("#/acme/core-platform/runs/" + HERO);
+  }
+});
+$("#drawerScrim").addEventListener("click", () => {
+  $("#side").classList.remove("open");
+  const s = $("#drawerScrim"); s.classList.remove("on"); s.hidden = true;
+});
+$("#sideNav").addEventListener("click", () => {
+  $("#side").classList.remove("open");
+  const s = $("#drawerScrim"); s.classList.remove("on"); s.hidden = true;
+});
+
+/* =========================================================================
+   Mockup chrome
+   ========================================================================= */
+const CHROME_STATES = [
+  ["loaded","loaded"], ["empty","empty"], ["loading","loading"], ["error","error"], ["denied","denied"]
+];
+function renderChrome(){
+  const onRun = state.route.indexOf("/runs/") > -1;
+  const states = CHROME_STATES.map(s =>
+    '<button type="button" data-state="' + s[0] + '" class="' + (state.view === s[0] ? "on" : "") + '">' + s[1] + '</button>').join("");
+  $("#chromeBody").innerHTML =
+    states +
+    '<button type="button" data-chrome="phone" id="chPhone" class="' + (document.body.classList.contains("phone") ? "on" : "") + '">phone 400</button>' +
+    '<button type="button" data-chrome="theme" id="chTheme">theme</button>' +
+    '<button type="button" data-chrome="reset" id="chReset">reset run</button>' +
+    '<button type="button" data-chrome="page" id="chPage">' + (onRun ? "→ fleet" : "→ run") + '</button>';
+}
+document.addEventListener("click", ev => {
+  const b = ev.target.closest("#chrome [data-chrome]");
+  if (!b) return;
+  const k = b.dataset.chrome;
+  if (k === "phone"){ document.body.classList.toggle("phone"); render(); return; }
+  if (k === "theme"){
+    const cur = document.documentElement.getAttribute("data-theme");
+    const sysDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    document.documentElement.setAttribute("data-theme", cur ? (cur === "dark" ? "light" : "dark") : (sysDark ? "light" : "dark"));
+    return;
+  }
+  if (k === "reset"){
+    state.frames = JSON.parse(JSON.stringify(FRAMES));
+    state.frames[state.frames.length - 1].live = true;
+    state.runState = "running"; state.pendingSteer = null; state.selFrame = 26;
+    state.cost = 2.41; cursor = 0; clock = { h:14, m:3, s:26, ms:115 };
+    state.pos = 26; state.following = true; state.playing = false; stopPlay();
+    seedZoom(); revealAt(state.pos);
+    render(); return;
+  }
+  if (k === "page"){ go(state.route.indexOf("/runs/") > -1 ? "#/acme/core-platform" : "#/acme/core-platform/runs/" + HERO); return; }
+});
+
+/* =========================================================================
+   Boot
+   ========================================================================= */
+const _renderFleet = renderFleet;
+renderFleet = function(){ return OTHER[state.route] ? renderOther() : _renderFleet(); };
+
+if (!location.hash) location.replace("#/acme/core-platform");
+state.route = location.hash || "#/acme/core-platform";
+seedZoom();
+revealAt(state.pos);
+render();
+startStream();
+</script>
+
