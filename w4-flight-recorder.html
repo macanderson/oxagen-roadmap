@@ -369,20 +369,42 @@ nav.pages a .sub{display:block;font-family:var(--mono);font-size:10.5px;color:va
 /* waterfall tab */
 .wf{padding:14px 24px 0}
 .wfchart{border:1px solid var(--border);border-radius:var(--r);background:var(--panel);padding:16px;overflow-x:auto}
-.wfrow{display:grid;grid-template-columns:150px minmax(340px,1fr) 96px;gap:14px;align-items:center;
-  padding:9px 0;border-bottom:1px solid var(--border)}
+.wfrow{display:grid;grid-template-columns:168px minmax(340px,1fr) 100px;gap:16px;align-items:center;
+  padding:13px 0;border-bottom:1px solid var(--border)}
 .wfrow:last-child{border-bottom:0}
-.wfrow .nm{font-size:12.5px;color:var(--fg);font-weight:500}
-.wfrow .nm small{display:block;font-family:var(--mono);font-size:10.5px;color:var(--dim);font-weight:400}
-.wftrack{position:relative;height:26px;background:var(--ink);border-radius:6px;border:1px solid var(--border);overflow:hidden}
+.wfrow .nm{font-size:12.5px;color:var(--fg);font-weight:500;display:flex;align-items:center;flex-wrap:wrap;gap:0 6px}
+.wfrow .nm small{display:block;flex-basis:100%;font-family:var(--mono);font-size:10.5px;color:var(--dim);font-weight:400;margin-top:2px}
+.wfinfo{width:15px;height:15px;flex:none;border-radius:50%;border:1px solid var(--border);background:var(--hl);
+  color:var(--dim);font:600 9.5px/1 var(--mono);display:grid;place-items:center;cursor:pointer;padding:0}
+.wfinfo:hover,.wfinfo:focus-visible,.wfinfo.on{color:var(--fg);border-color:var(--muted)}
+.wftrack{position:relative;height:30px;background:var(--ink);border-radius:6px;border:1px solid var(--border);overflow:hidden}
 .wfbar{position:absolute;top:0;bottom:0;background:color-mix(in srgb,var(--gold) 26%,transparent);
   border-left:2px solid var(--gold)}
 .wfbar .lbl{position:absolute;left:6px;top:50%;transform:translateY(-50%);font-family:var(--mono);
   font-size:10.5px;color:var(--fg);white-space:nowrap}
-.wfmark{position:absolute;top:0;bottom:0;width:2px;background:var(--st-proven);z-index:2}
+.wfmark{position:absolute;top:0;bottom:0;width:2px;background:var(--st-proven);z-index:2;border:0;padding:0;margin:0;cursor:pointer}
+.wfmark::before{content:"";position:absolute;top:0;bottom:0;left:-5px;right:-5px}
+.wfmark:hover,.wfmark:focus-visible{width:3px;box-shadow:0 0 0 5px color-mix(in srgb,var(--st-proven) 24%,transparent);outline:0}
 .wfmark.fnd{background:var(--st-denied)}
+.wfmark.fnd:hover,.wfmark.fnd:focus-visible{box-shadow:0 0 0 5px color-mix(in srgb,var(--st-denied) 24%,transparent)}
 .wfrow .amt{font-family:var(--mono);font-size:12px;text-align:right;font-variant-numeric:tabular-nums;color:var(--fg)}
 .wfrow .amt small{display:block;color:var(--dim);font-size:10.5px}
+
+/* lightweight anchored popovers, for the waterfall marks and turn info — more room
+   than a title="" tooltip, without the weight of the full-screen <dialog>. */
+.wfpop{position:absolute;z-index:60;width:264px;background:var(--panel);border:1px solid var(--border);
+  border-radius:var(--r);box-shadow:var(--shadow);animation:wfpopin .12s ease-out both}
+@keyframes wfpopin{0%{opacity:0;transform:translateY(-4px)}100%{opacity:1;transform:translateY(0)}}
+.wfpop .pop-h{position:relative;display:flex;align-items:center;gap:8px;padding:9px 26px 9px 11px;border-bottom:1px solid var(--border)}
+.wfpop .pop-h b{font-size:12px;color:var(--fg)}
+.wfpop .pop-b{padding:10px 11px;display:grid;gap:9px}
+.wfpop .pop-b .kv{font-size:11px;grid-template-columns:minmax(64px,auto) minmax(0,1fr)}
+.wfpop .pop-groups{display:grid;gap:5px}
+.wfpop .pop-grow{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.wfpop .pop-grow b{font-family:var(--mono);font-size:11px;color:var(--fg)}
+.wfpop .pop-close{position:absolute;top:6px;right:6px;width:18px;height:18px;border-radius:50%;border:0;
+  background:transparent;color:var(--dim);cursor:pointer;font-size:13px;line-height:1;display:grid;place-items:center}
+.wfpop .pop-close:hover{color:var(--fg);background:var(--hl)}
 
 /* generic grid */
 .g2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
@@ -772,8 +794,13 @@ var TG=(function(){
  function meta(id){
   var p=parts(id), m=META[p.n];
   if(m) return {n:p.n,v:p.v,l:m[0],cat:m[1]};
-  var local=p.n.split("__").pop(), verb=local.split("_")[0].toLowerCase(), cat="record";
-  if(/^(get|list|search|read|fetch|find|recall|describe|show)$/.test(verb)) cat="read";
+  var local=p.n.split("__").pop();
+  /* tool ids also arrive as "namespace.verb_noun" (repo.diff, shell.run); take the
+     segment after the last dot so the verb below sees "diff"/"run", not "repo.diff". */
+  var seg=local.indexOf(".")>=0 ? local.slice(local.lastIndexOf(".")+1) : local;
+  var verb=seg.split("_")[0].toLowerCase(), cat="record";
+  if(/pull_request|merge_request/.test(seg)) cat="vcs";
+  else if(/^(get|list|search|read|fetch|find|recall|describe|show|diff|compare)$/.test(verb)) cat="read";
   else if(/^(query|select|aggregate|export)$/.test(verb)) cat="query";
   else if(/^(write|edit|move|copy|trash|mkdir)$/.test(verb)) cat="file";
   else if(/^(bash|run|exec|execute|eval)$/.test(verb)) cat="exec";
@@ -1662,6 +1689,14 @@ function flipFacts(){
   return { proof, attempts, turnStart, turnEnd, stop, sealTs: Date.parse(RUN.sealed_at), runner,
            testKind: /\.test\.|test\//.test(cmd) ? "unit test" : "test", lead: turnEnd ? (turnEnd.ts - proof.ts)/1000 : null };
 }
+/* the oracle fail→pass likeness: a pulsing dot plus the inline "fail → pass" fx.
+   One builder so every verdict badge in the run — header, proof card, rail, waterfall —
+   renders the same animated component instead of a plain "flipped" label in some of them. */
+function flipFx(verdict){ return verdict === "flipped" ? '<span class="fx"><i>fail</i> → <em>pass</em></span>' : ""; }
+function flipChip(verdict, text, style){
+  return '<span class="chip proven' + (verdict === "flipped" ? " flip" : "") + '"' +
+    (style ? ' style="' + style + '"' : "") + '><span class="dot"></span>' + esc(text == null ? verdict : text) + flipFx(verdict) + "</span>";
+}
 function hms(ts){ return new Date(ts).toISOString().slice(11,23); }
 function lead(s){ s = Math.abs(s); const m = Math.floor(s/60), r = s - m*60; return (m ? m + "m " : "") + (m ? Math.round(r) : (r < 10 ? r.toFixed(1) : Math.round(r))) + "s"; }
 function frameBtn(seq){ return '<span class="fr" role="button" tabindex="0" data-frame="' + seq + '" onkeydown="if(event.key===\'Enter\')this.click()">frame ' + seq + "</span>"; }
@@ -1768,8 +1803,7 @@ function header(){
       '<div class="hbadges">' +
         chip("sealed", "neutral") +
         chip("tier \u00b7 " + RUN.enforcement_tier, "allowed") +
-        '<button class="chip proven' + (RUN.verdict === "flipped" ? " flip" : "") + '" data-dlg="proof" type="button" title="Open the frame that proves this run"><span class="dot"></span>proven \u00b7 ' + RUN.verdict +
-          (RUN.verdict === "flipped" ? '<span class="fx"><i>fail</i> \u2192 <em>pass</em></span>' : "") + "</button>" +
+        '<button class="chip proven' + (RUN.verdict === "flipped" ? " flip" : "") + '" data-dlg="proof" type="button" title="Open the frame that proves this run"><span class="dot"></span>proven \u00b7 ' + esc(RUN.verdict) + flipFx(RUN.verdict) + "</button>" +
         '<button class="chip" data-dlg="grade" type="button" title="How the replay grade is computed"><span class="dot"></span>replay grade \u00b7 ' + RUN.replay_grade + "</button>" +
         (arch ? chip("compacted", "neutral") : "") +
       "</div>" +
@@ -2298,7 +2332,7 @@ function pControl(f){
 function pProof(f){
   const w = RUN.witness;
   return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">' +
-    '<span class="chip proven" style="font-size:13px;padding:5px 11px"><span class="dot"></span>' + w.verdict + "</span>" +
+    flipChip(w.verdict, null, "font-size:13px;padding:5px 11px") +
     '<span class="muted" style="font-size:12.5px">failed on the target, passed on the pull request — this run is <b style="color:var(--fg)">proven</b></span></div>' +
   sec("The flip", '<div class="tbwrap"><table class="tb"><thead><tr><th>ran against</th><th>ref</th><th>commit</th><th>result</th></tr></thead><tbody>' +
     '<tr><td>merge base of the PR against its target</td><td class="m">' + esc(w.target_ref) + '</td><td class="m">' + esc(w.target_sha.slice(0,12)) + '…</td><td>' + chip("fail", "failed") + "</td></tr>" +
@@ -2439,7 +2473,7 @@ function rail(){
   '<section class="card"><div class="card-h"><h2>Proof</h2>' +
     (flipFacts() ? '<span class="chip">' + esc(flipFacts().testKind + " \u00b7 " + flipFacts().runner) + "</span>" +
       chip(flipFacts().attempts.length + " attempts \u00b7 green on " + flipFacts().attempts.length, "proven") : "") +
-    '<span class="sp"></span>' + chip(w.verdict, "proven") + "</div>" +
+    '<span class="sp"></span>' + flipChip(w.verdict) + "</div>" +
     '<div class="card-b">' + flipStage() +
     (flipFacts() ? '<div class="k" style="font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);font-weight:600;margin-top:12px">When it happened' +
        (flipFacts().lead != null ? ' \u00b7 <span style="color:var(--st-proven);letter-spacing:0;text-transform:none;font-family:var(--mono)">flip \u2192 turn end ' + lead(flipFacts().lead) + "</span>" : "") + "</div>" + flipRail() +
@@ -2494,6 +2528,36 @@ function rail(){
   "</div>";
 }
 
+function wfToolFrame(tool){ return FRAMES.find(f => f.kind === "tool_call" && f.payload.step.tool === tool); }
+function wfGroupTally(frames){
+  const t = {};
+  frames.forEach(f => { if(f.kind !== "tool_call") return; const c = TG.meta(f.payload.step.tool).cat; t[c] = (t[c]||0) + 1; });
+  return t;
+}
+function wfGroupsCard(){
+  const t = wfGroupTally(FRAMES), total = ROLL.toolCalls;
+  const rows = Object.keys(t).sort((a,b) => t[b]-t[a]).map(c =>
+    '<div class="pop-grow">' + TG.cat(c) + '<b>' + t[c] + '<span class="dim" style="font-weight:400"> · ' + pct(t[c]/total,0) + '</span></b></div>').join("");
+  return '<section class="card" style="margin:0"><div class="card-h"><h2>Tool calls by group</h2><span class="sp"></span>' +
+    '<span class="mono dim" style="font-size:10.5px">' + total + ' total</span></div><div class="card-b">' +
+    '<div class="pop-groups">' + rows + '</div>' +
+    '<p class="muted" style="font-size:11.5px;margin-top:11px">Grouped by what the tool acts on — the same taxonomy the toolbelt and every policy decision use, not by which server hosts it.</p></div></section>';
+}
+function wfDeliveryCard(){
+  const prF = wfToolFrame("github.open_pull_request"), diffF = wfToolFrame("repo.diff");
+  const pr = prF && prF.payload.step.out.output, diff = diffF && diffF.payload.step.out.output;
+  const grant = prF && prF.payload.step.pol.conds.find(c => c[0] === "credential grant");
+  const deniedFrame = FRAMES.find(f => f.kind === "policy.decision" && f.denied);
+  return '<section class="card" style="margin:0"><div class="card-h"><h2>Delivery &amp; governance</h2></div><div class="card-b">' +
+    kv([
+      pr ? ["Pull request", '<a href="' + esc(pr.url) + '" target="_blank" rel="noopener">acme/billing#' + pr.number + '</a> · ' + esc(pr.state) + " · " + frameBtn(prF.seq)] : null,
+      diff ? ["Diff", diff.files + " file" + (diff.files===1?"":"s") + ' · <span style="color:var(--st-proven)">+' + diff.added + '</span> <span style="color:var(--st-failed)">−' + diff.removed + '</span> · ' + frameBtn(diffF.seq)] : null,
+      pr ? ["Checks", esc(pr.checks) + " · as recorded at PR open, " + frameBtn(prF.seq)] : null,
+      ["Approval gates crossed", "0 this run · every third-party call cleared on policy rule alone"],
+      deniedFrame ? ["Denied", "1 call · " + frameBtn(deniedFrame.seq)] : null,
+      grant ? ["Credential grant issued", esc(grant[1]) + " · " + frameBtn(prF.seq)] : null
+    ]) + "</div></section>";
+}
 function waterfallTab(){
   const R = ROLL, t0 = R.turns[0].start, t1 = R.turns[R.turns.length-1].end, span = t1 - t0;
   const proofFrame = FRAMES.find(f => f.kind === "proof.observed");
@@ -2503,13 +2567,14 @@ function waterfallTab(){
     const from = acc; acc += t.cost;
     const marks = [];
     if(proofFrame && proofFrame.turn === t.n)
-      marks.push('<span class="wfmark" style="left:' + ((proofFrame.ts - t0)/span*100).toFixed(2) + '%" title="proof.observed · flipped"></span>');
+      marks.push('<button type="button" class="wfmark" style="left:' + ((proofFrame.ts - t0)/span*100).toFixed(2) + '%" data-wfpop="proof" aria-label="proof.observed · flipped"></button>');
     FINDINGS.forEach(fd => fd.frames.forEach(sq => {
       const fr = FRAMES[sq];
       if(fr && fr.turn === t.n)
-        marks.push('<span class="wfmark fnd" style="left:' + ((fr.ts - t0)/span*100).toFixed(2) + '%" title="' + esc(fd.title) + ' · frame ' + sq + '"></span>');
+        marks.push('<button type="button" class="wfmark fnd" style="left:' + ((fr.ts - t0)/span*100).toFixed(2) + '%" data-finding="' + fd.id + '" aria-label="' + esc(fd.title) + ' · frame ' + sq + '"></button>');
     }));
     return '<div class="wfrow"><div class="nm">Turn ' + t.n + " · " + esc(t.title) +
+      '<button type="button" class="wfinfo" data-wfpop="turn:' + t.n + '" aria-label="Tool calls by group for turn ' + t.n + '">i</button>' +
       "<small>" + t.steps + " steps · " + t.frames + " frames · cache hit " + pct(t.hit) + "</small></div>" +
       '<div class="wftrack"><span class="wfbar" style="left:' + left.toFixed(2) + "%;width:" + Math.max(width,2).toFixed(2) + '%">' +
       '<span class="lbl">' + usd(from) + " → " + usd(acc) + "</span></span>" + marks.join("") + "</div>" +
@@ -2524,7 +2589,7 @@ function waterfallTab(){
     '<h2 style="font-size:14px">Cost accumulating across the run</h2>' +
     '<span class="muted" style="font-size:12px">left to right in wall clock · ' + usd(R.total) + ' USD total</span>' +
     '<span class="sp" style="margin-left:auto"></span>' +
-    '<span class="muted" style="font-size:11.5px"><i style="display:inline-block;width:9px;height:9px;background:var(--st-proven);vertical-align:0;margin-right:5px"></i>proof</span>' +
+    flipChip(RUN.witness.verdict, "proof · flipped", "font-size:10.5px;padding:2px 7px") +
     '<span class="muted" style="font-size:11.5px"><i style="display:inline-block;width:9px;height:9px;background:var(--st-denied);vertical-align:0;margin-right:5px"></i>finding</span></div>' +
     rows + "</div>" +
     '<div class="g2" style="margin-top:14px">' +
@@ -2544,6 +2609,7 @@ function waterfallTab(){
         ["Spend per proven run", usd(R.total) + " · this agent's 30-day mean is $3.41, trending down"],
         ["Witness cost", usd(RUN.witness.cost_micros) + " · a run of its own, never billed to you"]
       ]) + "</div></section></div>" +
+    '<div class="g2" style="margin-top:14px">' + wfDeliveryCard() + wfGroupsCard() + "</div>" +
     '<p class="muted" style="font-size:11.5px;margin:12px 0 0">Every figure on this tab is a rollup over the frames in the timeline and is rebuildable from them. The frame is the record; the rollup is a derived index.</p></div>';
 }
 
@@ -2909,6 +2975,7 @@ function archiveNotice(){
 }
 
 function render(){
+  if(typeof closeWfPop === "function") closeWfPop();
   document.body.classList.toggle("phone", STATE.state === "phone");
   const page = $("#page");
   let html;
@@ -2954,6 +3021,62 @@ function renderAssistant(){
     '<div class="as-receipt">governed action · agent tool run.bisect@1.0.0<br>receipt rcpt_01JB7KF3P1 · decision allow<br>cost $0.0117 USD · model z-ai/glm-latest via OpenRouter</div></div>';
 }
 
+/* ---------------- waterfall popovers ---------------- */
+let wfPopEl = null, wfPopKey = null;
+function wfPopContent(key){
+  if(key === "proof"){
+    const w = RUN.witness, F = flipFacts(), proof = FRAMES.find(f => f.kind === "proof.observed");
+    return '<div class="pop-h">' + flipChip(w.verdict) + '<button type="button" class="pop-close" data-pop-close aria-label="Close">×</button></div>' +
+      '<div class="pop-b">' + kv([
+        ["Oracle", esc(w.oracle)],
+        F ? ["Test", esc(F.testKind) + " · " + esc(F.runner)] : null,
+        F ? ["Attempts", F.attempts.length + " of " + F.attempts.length + " · green"] : null,
+        ["Target", esc(w.target_ref) + " · fail"],
+        ["PR head", esc(w.pr_ref) + " · pass"]
+      ]) + (proof ? '<button class="btn sm" type="button" data-frame="' + proof.seq + '" style="margin-top:2px">Open the proof frame</button>' : "") + "</div>";
+  }
+  const m = /^turn:(\d+)$/.exec(key);
+  if(m){
+    const tn = parseInt(m[1], 10), t = ROLL.turns.find(x => x.n === tn);
+    const frames = FRAMES.filter(f => f.turn === tn);
+    const groups = wfGroupTally(frames);
+    const denied = frames.filter(f => f.kind === "policy.decision" && f.denied).length;
+    const groupRows = Object.keys(groups).sort((a,b) => groups[b]-groups[a])
+      .map(c => '<div class="pop-grow">' + TG.cat(c) + '<b>' + groups[c] + '</b></div>').join("");
+    return '<div class="pop-h"><b>Turn ' + tn + ' · ' + esc(t.title) + '</b><button type="button" class="pop-close" data-pop-close aria-label="Close">×</button></div>' +
+      '<div class="pop-b">' +
+      (groupRows ? '<div class="pop-groups">' + groupRows + '</div>' : '<p class="muted" style="font-size:11.5px">No tool calls in this turn.</p>') +
+      kv([["Frames", t.frames], denied ? ["Denied", denied + " call" + (denied===1?"":"s")] : null]) + "</div>";
+  }
+  return "";
+}
+function closeWfPop(){
+  if(!wfPopEl) return;
+  wfPopEl.remove(); wfPopEl = null; wfPopKey = null;
+  document.removeEventListener("click", onWfPopOutside, true);
+}
+function onWfPopOutside(e){
+  if(wfPopEl && !wfPopEl.contains(e.target) && !e.target.closest("[data-wfpop]")) closeWfPop();
+}
+function openWfPop(trigger, key){
+  const reopening = wfPopKey === key;
+  closeWfPop();
+  if(reopening) return;
+  const html = wfPopContent(key);
+  if(!html) return;
+  const el = document.createElement("div");
+  el.className = "wfpop"; el.setAttribute("role", "dialog"); el.innerHTML = html;
+  document.body.appendChild(el);
+  const r = trigger.getBoundingClientRect();
+  const top = window.scrollY + r.bottom + 8;
+  let left = window.scrollX + r.left;
+  const maxLeft = window.scrollX + document.documentElement.clientWidth - el.offsetWidth - 12;
+  if(left > maxLeft) left = Math.max(12, maxLeft);
+  el.style.top = top + "px"; el.style.left = left + "px";
+  wfPopEl = el; wfPopKey = key;
+  setTimeout(() => document.addEventListener("click", onWfPopOutside, true), 0);
+}
+
 /* ---------------- toast ---------------- */
 let toastT;
 function toast(msg){
@@ -2969,8 +3092,11 @@ function toast(msg){
 
 /* ---------------- events ---------------- */
 document.addEventListener("click", e => {
-  const t = e.target.closest("[data-frame],[data-tab],[data-itab],[data-dlg],[data-state],[data-filter],[data-turn-toggle],[data-turn],[data-finding],[data-close],[data-toast]");
+  const t = e.target.closest("[data-frame],[data-tab],[data-itab],[data-dlg],[data-state],[data-filter],[data-turn-toggle],[data-turn],[data-finding],[data-close],[data-toast],[data-wfpop],[data-pop-close]");
   if(!t) return;
+  if(t.hasAttribute("data-wfpop")){ e.stopPropagation(); return openWfPop(t, t.getAttribute("data-wfpop")); }
+  if(t.hasAttribute("data-pop-close")) return closeWfPop();
+  closeWfPop();
   if(t.hasAttribute("data-toast")){ toast(t.getAttribute("data-toast")); }
   if(t.hasAttribute("data-close")){ STATE.dialog = null; $("#dlg").close(); go({}, true); }
   if(t.hasAttribute("data-frame")){
@@ -3017,6 +3143,7 @@ $("#asstInput").addEventListener("keydown", e => {
 document.addEventListener("keydown", e => {
   if((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k"){ e.preventDefault(); return go({dialog:"cmdk"}); }
   if(e.target.matches("input, textarea")) return;
+  if(e.key === "Escape" && wfPopEl){ return closeWfPop(); }
   if(e.key === "Escape" && STATE.dialog){ STATE.dialog = null; $("#dlg").close(); return go({}, true); }
   if(STATE.tab !== "replay" || STATE.state === "loading" || STATE.state === "empty" ||
      STATE.state === "error" || STATE.state === "denied") return;
