@@ -123,6 +123,18 @@ run_mut "61 let the chrome open over the primary action" \
 run_mut "62 stop inerting what the drawer covers" \
   's/  \$\("#main"\)\.inert = true;\n(  \$\("\.navsec a"\)\.focus\(\);)/$1/'
 
+# ── the feedback items built after the audit closed ─────────────────────────
+run_mut "63 take the handler off the cost basis" \
+  's/<button class="rc-b" data-act="cost-basis">/<button class="rc-b" data-act="nope">/'
+run_mut "63b shrink the run total back to body size" \
+  's/\.rc-n\{font-size:38px/.rc-n{font-size:14px/'
+run_mut "64 open the prompt on page load" \
+  's/<details class="more"><summary>/<details class="more" open><summary>/'
+run_mut "65 break an operator subtotal by a cent" \
+  's/runs:704,  spend:4918\.02/runs:704,  spend:4918.03/'
+run_mut "66 stop marking the generated run name" \
+  's/<span class="gen" title="written by the classifier, not by a person">auto<\/span>//'
+
 echo
 echo "caught $caught · missed $missed · skipped $skipped"
 [ "$missed" -eq 0 ] && [ "$skipped" -eq 0 ]

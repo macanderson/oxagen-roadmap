@@ -337,6 +337,34 @@ dialog::backdrop{background:var(--scrim)}
    button that opened it. */
 .scrim{position:fixed;inset:0;background:var(--scrim);z-index:60;border:0;padding:0;width:100%}
 
+/* ─── The run's cost. The ask was a much larger total, logically placed and
+       close to the run name, with the basis a click away rather than inline. ─── */
+.runcost{display:flex;align-items:baseline;gap:12px;margin-top:12px;flex-wrap:wrap}
+.rc-n{font-size:38px;font-weight:700;color:var(--fg);letter-spacing:-.03em;line-height:1;
+  font-variant-numeric:tabular-nums}
+.rc-l{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:600}
+.rc-b{font-size:12.5px;color:var(--body);border-bottom:1px solid var(--rule-2);padding-bottom:1px}
+.rc-b:hover{color:var(--fg);border-bottom-color:var(--fg)}
+
+/* A name a model wrote is marked as one. */
+.gen{font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;
+  padding:1px 6px;border-radius:999px;background:var(--hl);color:var(--muted);
+  white-space:nowrap;margin-left:7px;vertical-align:1px}
+
+/* The prompt: inspectable, and not fully visible until asked for. */
+details.more{margin-top:14px;border-top:1px solid var(--rule);padding-top:12px}
+details.more summary{font-size:12.5px;color:var(--body);cursor:pointer;
+  list-style:none;display:flex;align-items:center;gap:7px}
+details.more summary::-webkit-details-marker{display:none}
+details.more summary::before{content:"";width:0;height:0;flex:none;
+  border-left:5px solid currentColor;border-top:4px solid transparent;
+  border-bottom:4px solid transparent;transition:transform .15s}
+details.more[open] summary::before{transform:rotate(90deg)}
+details.more summary:hover{color:var(--fg)}
+details.more pre{margin-top:10px;padding:12px 14px;background:var(--ink);
+  border:1px solid var(--rule);border-radius:var(--r-sm);overflow-x:auto;
+  font-family:var(--mono);font-size:12px;line-height:1.55;color:var(--body);white-space:pre-wrap}
+
 /* ─── Phone. Two containers, because two different widths are being asked about.
        `app` is the whole application frame — it decides whether the shell is a
        sidebar or a drawer. `canvas` is the width the page content actually gets,
@@ -467,6 +495,11 @@ body[data-w="phone"]{background:var(--panel-2)}
     role="combobox" aria-expanded="false" aria-controls="cmdList" aria-autocomplete="list">
   <ul id="cmdList" role="listbox" aria-label="Results"></ul>
   <div id="cmdNone" class="nohit" role="status" hidden></div>
+</dialog>
+
+<dialog id="basis" aria-label="Cost basis">
+  <div class="dlg-h"><h2 id="basisTitle">Cost basis</h2><button class="btn btn-sm" data-close="basis">Close</button></div>
+  <div class="dlg-b" id="basisBody"></div>
 </dialog>
 
 <dialog id="acct" aria-label="Account">
@@ -670,6 +703,21 @@ const RUNS = [
           ["T2","Stage the rollout",7,0.1960,0.0019]]}
 ];
 
+/* ─── Run names and summaries are written by the cheap classifier off the
+       first turn's frames, not typed by the operator — so they are marked as
+       generated rather than passed off as something a person wrote. ─── */
+const SUMMARY = {
+  run_01K5XQ7M4A:"Reproduced the drop, wrote the failing test, fixed the retry budget so an exhausted budget parks the delivery instead of discarding it, and opened acme/platform#482.",
+  run_01K6QW2A8C:"Loaded both August ledgers, diffed them line by line, and raised the single Bedrock line dated after the statement closed.",
+  run_01K6QW6H3D:"Read the Bedrock overage line and raised a payment for it. Cancelled at the call boundary by the class-wide moves_funds switch.",
+  run_01K6QW9R5F:"Collected the failing mobile specs, re-ran them in isolation, and quarantined the four that did not reproduce.",
+  run_01K6QXB2K7:"Assembled the 2026.9 changelog, ran the release checks, and opened acme/platform#503. Waiting on a person to merge it.",
+  run_01K6QXD4M9:"Matched September's open invoices to their purchase orders and raised one $18,420.00 payment against PO-4471. Waiting on a person.",
+  run_01K6QXF6N2:"Reproduced the deploy-test flake, traced it to a fixture shared across two suites, and is writing the regression test.",
+  run_01K6QXH8P4:"Measured the CI image and proposed removing a stale node_modules tree. Waiting on a person, because the path cannot be restored.",
+  run_01K6QXK9R6:"Read the Halvorsen deployment sites and is staging firmware 4.2 across the fleet it found."
+};
+
 const runCost   = r => r.turns.reduce((s, t) => s + t[3] + t[4], 0);
 const runFrames = r => r.turns.reduce((s, t) => s + t[2], 0);
 const cached    = r => r.inTok - r.freshTok;
@@ -698,6 +746,21 @@ const pct1  = (a,b) => (a / b * 100).toFixed(1) + "%";
 
 const topRecord = () => RECORDS.reduce((a, b) => a.cited >= b.cited ? a : b);
 
+/* The stable prefix is assembled by the context service and is identical for
+   every turn of the run, which is what makes it cacheable — so it is shown as
+   the prefix it is, with the turn appended. */
+const PROMPT = (r, t) => `<stable prefix — ${WS.records} records in force, cached>
+  You are ${r.agent}, running on ${r.harness} in the ${WS.name} workspace
+  of ${ORG.name}. Your toolbelt holds ${BELT[r.agent]} tools; it is the only
+  tool list you will be shown.
+
+  ${RECORDS.map(x => "· " + x.s).join("\n  ")}
+
+</stable prefix>
+<turn ${t.i} of ${r.turns.length}>
+  ${t.what}.
+</turn>`;
+
 const F = {
   start: (n, r) => ({n, t:"agent_start", d:`${r.agent} · ${r.harness}`, kv:[
     ["Run", r.id], ["Agent", r.agent], ["Harness", r.harness], ["Operator", r.op],
@@ -716,7 +779,10 @@ const F = {
     ["Model", "claude-fable-5-1"], ["Turn", `${t.i} of ${r.turns.length} · ${t.what}`],
     ["Tools offered", `${BELT[r.agent]} of ${REGISTRY.tools} · the belt, not the registry`],
     ["Sampling", "temperature 0 · max 8,192"],
-    ["Recorded", "in full · this request is replayable"]]}; },
+    ["Recorded", "in full · this request is replayable"]],
+    /* The prompt is the thing a sceptic most wants to read and the thing a
+       page can least afford to open with. It is here, and it is collapsed. */
+    more:{label:"The prompt, exactly as it was sent", body:PROMPT(r, t)}}; },
 
   res: (n, inT, fresh, outT, reason, cost) => ({n, t:"model.response",
     d:`${int(inT)} in · ${int(outT)} out · ${pct1(inT - fresh, inT)} cached`, cost:mon4(cost), kv:[
@@ -885,6 +951,15 @@ const AGENT = id => AGENTS.find(a => a.id === id);
 const MANDATE = {agent:"acme.core.invoice-bot", purpose:"Monthly infrastructure invoices, PO-4471",
   perCall:25000.00, approveAbove:10000.00, grantedBy:"Priya Natarajan, as org billing",
   validTo:"2026-12-31", authority:60000.00, settled:31280.00, reserved:18420.00};
+
+/* ─── Operators. Spend is tracked by person as well as by agent: a run is an
+       agent, a person and a prompt, so all three have to be answerable. The
+       three columns sum to the workspace figures they sit beside. ─── */
+const OPERATORS = [
+  {name:"Marcus Bell",     role:"workspace owner", runs:1842, spend:11204.88, proven:812},
+  {name:"Dana Okafor",     role:"operator",        runs:704,  spend:4918.02,  proven:246},
+  {name:"Priya Natarajan", role:"org billing",     runs:358,  spend:2284.72,  proven:146}
+];
 
 /* ─── Spend findings. Money at stake is recoverable waste, so it can never
        exceed what the thing it is scoped to actually spends. ─── */
@@ -1071,7 +1146,8 @@ PAGES.fleet = () => {
   ${panel("Runs", `${rows.length} of ${int(WS.runsMTD)} this month · newest first`, `<div class="scroll"><table>
     <thead><tr><th>Run</th><th>Agent</th><th>Operator</th><th>State</th><th>Now</th><th class="r">Cost</th></tr></thead>
     <tbody>${rows.map(r => `<tr data-go="#/run/${esc(r.id)}">
-      <td><b><a class="mono rowlink" href="#/run/${esc(r.id)}">${esc(r.id)}</a></b><span class="s">${esc(r.task)}</span></td>
+      <td><b><a class="mono rowlink" href="#/run/${esc(r.id)}">${esc(r.id)}</a></b><span class="s">${esc(r.task)}
+        <span class="gen" title="written by the classifier, not by a person">auto</span></span></td>
       <td class="mono" style="font-size:12px">${esc(r.agent)}<span class="s">${esc(r.harness)}</span></td>
       <td>${esc(r.op)}</td>
       <td>${st(r.state)}${r.verdict ? " " + st(r.verdict) : ""}</td>
@@ -1101,12 +1177,18 @@ PAGES.run = () => {
       ${st(r.state)} ${r.verdict ? st(r.verdict) : ""} ${st("tier gateway", "flat")}</h1>
     <p>${esc(r.agent)} · ${esc(r.harness)} · operator ${esc(r.op)} ·
       ${esc(r.started)}${r.ended ? " → " + esc(r.ended) : " · still running"}
-      ${r.issue ? `<br>Task <span class="mono">${esc(r.issue)}</span> — ${esc(r.subtitle)}` : `<br>${esc(r.task)}`}</p>
+      ${r.issue ? `<br>Task <span class="mono">${esc(r.issue)}</span>` : ""}</p>
+    <p style="margin-top:9px;color:var(--body);max-width:66ch">${esc(SUMMARY[r.id] ?? r.task)}
+      <span class="gen" title="written by the classifier, not by a person">auto summary</span></p>
+    <div class="runcost">
+      <span class="rc-n num">${money(runCost(r))}</span>
+      <span class="rc-l">${r.ended ? "run cost" : "cost so far"}</span>
+      <button class="rc-b" data-act="cost-basis">Where it went</button>
+    </div>
   </div><button class="btn btn-primary" data-act="fork">Fork replay</button></div>
 
   ${tiles([
-    [r.ended ? "Run cost" : "Run cost so far", money(runCost(r)),
-      `gateway observed · ${int(runFrames(r))} frames`],
+    ["Frames", int(runFrames(r)), r.ended ? `dense 0–${runFrames(r) - 1} · sealed` : "recorded so far"],
     ["Cache hit rate", pct1(cached(r), r.inTok),
       `${int(cached(r))} of ${int(r.inTok)} input tokens, across the run`],
     r.proof ? ["Proof", r.proof.verdict, r.proof.verdict === "flipped"
@@ -1140,7 +1222,8 @@ const runTimeline = r => {
     <div class="panel-b"><dl class="kv">${sel.kv.map(([k, v]) =>
       /* Identifiers are set in mono; prose is not. A space is the tell. */
       `<dt>${esc(k)}</dt><dd class="${!/\s/.test(v) && String(v).length < 48 ? "mono" : ""}">${esc(v)}</dd>`
-      ).join("")}</dl></div>
+      ).join("")}</dl>${sel.more ? `<details class="more"><summary>${
+        esc(sel.more.label)}</summary><pre>${esc(sel.more.body)}</pre></details>` : ""}</div>
   </section></div>`;
 };
 
@@ -1459,6 +1542,23 @@ PAGES.spend = () => {
         AGENT(f.scope) ? `<span class="s">of ${money(AGENT(f.scope).spend)} spent in 30 days</span>` : ""}</td>
       <td class="r num" style="color:var(--fg)">${money(f.at)}</td>
       <td class="r num sub">${f.frames}</td></tr>`).join("")}</tbody></table></div>`)}
+
+  ${panel("Spend by operator", `a run is an agent, a person and a prompt · ${esc(PERIOD.label)}`,
+    `<div class="scroll"><table>
+    <thead><tr><th>Operator</th><th>Role</th><th class="r">Runs</th><th class="r">Proven</th><th class="r">Spend</th><th class="r">Per run</th></tr></thead>
+    <tbody>${OPERATORS.map(o => `<tr>
+      <td><b>${esc(o.name)}</b></td>
+      <td class="sub" style="font-size:12.5px">${esc(o.role)}</td>
+      <td class="r num">${int(o.runs)}</td>
+      <td class="r num sub">${int(o.proven)} · ${pct1(o.proven, o.runs)}</td>
+      <td class="r num" style="color:var(--fg)">${money(o.spend)}</td>
+      <td class="r num sub">${money(o.spend / o.runs)}</td></tr>`).join("")}
+      <tr><td><b>All operators</b></td><td></td>
+        <td class="r num" style="color:var(--fg)">${int(OPERATORS.reduce((s, o) => s + o.runs, 0))}</td>
+        <td class="r num sub">${int(OPERATORS.reduce((s, o) => s + o.proven, 0))}</td>
+        <td class="r num" style="color:var(--fg);font-weight:600">${money(OPERATORS.reduce((s, o) => s + o.spend, 0))}</td>
+        <td></td></tr>
+    </tbody></table></div>`)}
 
   ${panel("Reconciliation", "August 2026", `<div class="panel-b"><dl class="kv">
     <dt>Provider statements</dt><dd class="num">${money(WS.augLedger + 4.12)}</dd>
@@ -1801,6 +1901,24 @@ function paintChrome(){
   $("#chromeFold").setAttribute("aria-expanded", String(S.chrome));
 }
 
+/* The basis belongs a click away from the total, not printed under it — but it
+   has to be the same arithmetic the Cost tab shows, so it reads the same turns. */
+function openBasis(r){
+  const model = r.turns.reduce((s, t) => s + t[3], 0);
+  const tools = r.turns.reduce((s, t) => s + t[4], 0);
+  $("#basisTitle").textContent = `Where the ${money(runCost(r))} went`;
+  $("#basisBody").innerHTML = `<dl class="kv">
+    <dt>Model calls</dt><dd class="num">${money(model)} · ${pct1(model, runCost(r))}</dd>
+    <dt>Tool calls</dt><dd class="num">${money(tools)} · ${pct1(tools, runCost(r))}</dd>
+    <dt>Turns</dt><dd>${r.turns.length}, across ${int(runFrames(r))} frames</dd>
+    <dt>Basis</dt><dd>gateway observed — metered from the provider's own receipts, not estimated</dd>
+    <dt>Ledger</dt><dd>kept in micro-USD; every figure here is rounded only for display</dd>
+  </dl>
+  <p class="sub" style="margin:14px 0 0;font-size:12.5px">Turn by turn, with the frame counts, is
+    on the run's Cost tab.</p>`;
+  $("#basis").showModal();
+}
+
 /* ───────────────────────── Phone drawer ───────────────────────── */
 function openNav(){
   document.body.dataset.nav = "open";
@@ -1856,6 +1974,7 @@ document.addEventListener("click", e => {
   }
   if(t.dataset.close){ $("#" + t.dataset.close).close(); return; }
   if(t.dataset.act === "retry"){ S.view = "loaded"; render(); return; }
+  if(t.dataset.act === "cost-basis"){ openBasis(theRun()); return; }
   if(t.dataset.act === "back-to-fleet"){ S.view = "loaded"; location.hash = "#/fleet"; return; }
 
   if(t.dataset.act === "approve" || t.dataset.act === "deny"){

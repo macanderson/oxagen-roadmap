@@ -90,6 +90,20 @@ run "the registry stops being ordered by consequence" \
 run "two versions claim to be active" \
   's/\["v13", "Split <span class=\\"mono\\">Site<\/span> into DeploymentSite and Depot", "PR #1098 · 2026-08-21 · Marcus Bell", false\]/["v13", "Split <span class=\\"mono\\">Site<\/span> into DeploymentSite and Depot", "PR #1098 · 2026-08-21 · Marcus Bell", true]/'
 
+# ── the feedback items built after the audit closed ─────────────────────────
+run "an operator subtotal drifts from the workspace spend" \
+  's/runs:704,  spend:4918\.02/runs:704,  spend:4918.03/'
+run "an operator run count drifts from the workspace run count" \
+  's/\{name:"Priya Natarajan", role:"org billing",     runs:358,/{name:"Priya Natarajan", role:"org billing",     runs:359,/'
+run "an operator proves more runs than they ran" \
+  's/runs:358,  spend:2284\.72,  proven:146/runs:358,  spend:2284.72,  proven:1460/'
+run "a run loses its classifier summary" \
+  's/  run_01K6QXK9R6:"Read the Halvorsen deployment sites and is staging firmware 4\.2 across the fleet it found\."//'
+run "a summary is written for a run that does not exist" \
+  's/const SUMMARY = \{/const SUMMARY = {\n  run_01K6QZZZZZ:"A summary for a run that is not in the table, which nothing would ever show.",/'
+run "the prompt stops carrying the records in force" \
+  's/  \$\{RECORDS\.map\(x => "· " \+ x\.s\)\.join\("\\n  "\)\}//'
+
 # ── the contrast guard, same contract ───────────────────────────────────────
 runc () {
   cp "$SRC" "$TMP/m.html"

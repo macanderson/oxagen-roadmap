@@ -27,7 +27,8 @@ try {
     ;globalThis.D = {ORG, WS, WS2, PERIOD, ORG_AGENTS, ORG_RUNS, BILLABLE, RUN_CHARGE, ARCHIVE,
       CHARGES, TOOLS, TOOL_CLASS, HAZARD, REGISTRY, TOOL, BELT, APPROVALS, RECEIPTS, RUNS, FRAMES_OF,
       framesOf, runCost, runFrames, cached, turnOf, AGENTS, AGENT, MANDATE, FINDINGS, RECORDS,
-      CONTEXT_PR, CLASSES, GROUPS, groupSum, ENTITIES, SOURCES, ONT, ONT_N, VERSIONS, SIM};`, ctx);
+      CONTEXT_PR, CLASSES, GROUPS, groupSum, ENTITIES, SOURCES, ONT, ONT_N, VERSIONS, SIM,
+      OPERATORS, SUMMARY, PROMPT};`, ctx);
 } catch(e){
   console.error('FATAL: the data block does not run standalone —', e.message);
   process.exit(2);
@@ -278,6 +279,44 @@ check('the registry is ordered least to most consequential',
 /* Billing is org-scope, so its graph line must count both workspaces. */
 check('the finops workspace contributes entities of its own',
   D.WS2.entities > 0);
+
+/* ── spend by operator has to reconcile to spend by workspace ── */
+const opRuns   = D.OPERATORS.reduce((s, o) => s + o.runs, 0);
+const opSpend  = D.OPERATORS.reduce((s, o) => s + o.spend, 0);
+const opProven = D.OPERATORS.reduce((s, o) => s + o.proven, 0);
+check('operator runs sum to the workspace run count',
+  opRuns === D.WS.runsMTD, `${opRuns} vs ${D.WS.runsMTD}`);
+check('operator spend sums to the workspace spend',
+  near(opSpend, D.WS.spendMTD), `${opSpend.toFixed(2)} vs ${D.WS.spendMTD}`);
+check('operator proven runs sum to the workspace proven runs',
+  opProven === D.WS.provenRuns, `${opProven} vs ${D.WS.provenRuns}`);
+for(const o of D.OPERATORS){
+  check(`${o.name}: proven runs do not exceed runs`, o.proven <= o.runs);
+  check(`${o.name}: spends something`, o.spend > 0);
+}
+check('every operator of a sampled run is in the operator table',
+  D.RUNS.every(r => D.OPERATORS.some(o => o.name === r.op)),
+  [...new Set(D.RUNS.map(r => r.op))].filter(n => !D.OPERATORS.some(o => o.name === n)).join(', '));
+
+/* ── a generated name needs a generated summary ── */
+for(const r of D.RUNS){
+  check(`${r.id}: has a classifier summary`,
+    typeof D.SUMMARY[r.id] === 'string' && D.SUMMARY[r.id].length > 40);
+  check(`${r.id}: its summary is not just its name`, D.SUMMARY[r.id] !== r.task);
+}
+check('no summary is written for a run that does not exist',
+  Object.keys(D.SUMMARY).every(id => D.RUNS.some(r => r.id === id)),
+  Object.keys(D.SUMMARY).filter(id => !D.RUNS.some(r => r.id === id)).join(', '));
+
+/* ── the prompt is real text, and carries the prefix it claims to ── */
+for(const r of D.RUNS) guarded(`${r.id}: its prompt builds`, () => {
+  const t = D.turnOf(r, 0);
+  const p = D.PROMPT(r, t);
+  check(`${r.id}: the prompt names the agent`, p.includes(r.agent));
+  check(`${r.id}: the prompt names the belt size`, p.includes(String(D.BELT[r.agent])));
+  check(`${r.id}: the prompt carries the records in force`,
+    D.RECORDS.every(x => p.includes(x.s)));
+});
 
 console.log(fails === 0
   ? `ALL PASS — ${checks} data invariants hold`

@@ -992,6 +992,101 @@ await step(62, async () => {
     `the drawer and the dock each inert what they cover, and release it on close (drawer ${JSON.stringify(drawer)}, dock ${JSON.stringify(dock)})`);
 });
 
+/* ═════════ Feedback items built after the audit closed ═════════ */
+
+/* ═══ 63 · the cost is a large total by the run name, basis one click away ═══ */
+await step(63, async () => {
+  await fresh('#/run/run_01K5XQ7M4A');
+  const head = await page.evaluate(() => {
+    const n = document.querySelector('.runcost .rc-n');
+    const h1 = document.querySelector('.head h1');
+    return {text: n?.textContent.trim(), size: n ? parseFloat(getComputedStyle(n).fontSize) : 0,
+      nearName: !!n && !!h1 && n.getBoundingClientRect().top - h1.getBoundingClientRect().bottom < 160};
+  });
+  is(63, head.text === '$4.87' && head.size >= 28 && head.nearName,
+    `the total is large and next to the run name (${JSON.stringify(head)})`);
+  /* And it is the same arithmetic the Cost tab shows. */
+  await page.click('[role="tab"][data-val="Cost"]'); await page.waitForTimeout(70);
+  const tab = await text('#panel-runTab .panel-h h2');
+  is(63, tab.includes(head.text), `the Cost tab names the same total (${tab})`);
+  await page.click('[role="tab"][data-val="Timeline"]'); await page.waitForTimeout(70);
+  /* Click the button a person sees, not the attribute that wires it up — a
+     handler taken off the button should fail this cleanly, not time out. */
+  await page.click('.runcost .rc-b'); await page.waitForTimeout(140);
+  const dlg = await page.evaluate(() => ({open: document.querySelector('#basis').open,
+    title: document.querySelector('#basisTitle').textContent,
+    body: document.querySelector('#basisBody').innerText.replace(/\s+/g, ' ')}));
+  is(63, dlg.open && dlg.title.includes('$4.87') && /Model calls/.test(dlg.body) && /gateway observed/.test(dlg.body),
+    `the basis opens on click rather than sitting under the number (${dlg.title})`);
+  /* The split has to add back up to the total it explains. */
+  const parts = [...dlg.body.matchAll(/\$([\d,]+\.\d\d)/g)].map(m => n_(m[1]));
+  is(63, parts.length >= 2 && Math.abs(parts[0] + parts[1] - 4.87) < 0.005,
+    `model plus tools equals the total (${parts.slice(0,2).join(' + ')})`);
+  await page.click('[data-close="basis"]'); await page.waitForTimeout(80);
+});
+
+/* ═══ 64 · the prompt is inspectable, and not open on load ═══ */
+await step(64, async () => {
+  await fresh('#/run/run_01K5XQ7M4A');
+  await page.click('[data-frame="12"]'); await page.waitForTimeout(80);
+  const shut = await page.evaluate(() => {
+    const d = document.querySelector('#panel-runTab details.more');
+    if(!d) return {present: false};
+    /* A closed <details> in Chromium uses content-visibility:hidden, so the
+       body keeps an offsetParent — measure the element instead, which is just
+       the summary line when shut. */
+    return {present: true, open: d.open,
+      h: Math.round(d.getBoundingClientRect().height),
+      shown: d.querySelector('pre').checkVisibility?.({contentVisibilityAuto: true}) ?? null};
+  });
+  is(64, shut.present && !shut.open && shut.h < 70 && shut.shown !== true,
+    `the prompt is there and closed when the page loads (${JSON.stringify(shut)})`);
+  await page.click('#panel-runTab details.more summary'); await page.waitForTimeout(120);
+  const open = await page.evaluate(() => {
+    const d = document.querySelector('#panel-runTab details.more');
+    return {open: d.open, body: d.querySelector('pre').innerText};
+  });
+  is(64, open.open && /stable prefix/.test(open.body) && /acme\.core\.release-manager/.test(open.body)
+      && /never merges to main/.test(open.body),
+    `and it opens to the real prefix, with the records in force in it (${open.body.length} chars)`);
+  /* A frame with no prompt must not grow an empty disclosure. */
+  await page.click('[data-frame="118"]'); await page.waitForTimeout(80);
+  const other = await page.locator('#panel-runTab details.more').count();
+  is(64, other === 0, 'a frame that carries no prompt shows no disclosure');
+});
+
+/* ═══ 65 · spend by operator reconciles to spend by workspace ═══ */
+await step(65, async () => {
+  await fresh('#/spend');
+  const tile = n_((await body()).match(/Spent \$([\d,]+\.\d\d)/i)?.[1]);
+  const rows = await page.evaluate(() => [...document.querySelectorAll('#view tbody tr')]
+    .filter(r => r.children.length === 6 && /operator|owner|billing/.test(r.children[1].textContent))
+    .map(r => Number(r.children[4].textContent.replace(/[$,]/g, ''))));
+  const sum = rows.reduce((s, v) => s + v, 0);
+  is(65, rows.length >= 3 && Math.abs(sum - tile) < 0.005,
+    `the operators sum to the workspace spend (${rows.length} operators, $${sum.toFixed(2)} vs $${tile})`);
+  const t = await body();
+  is(65, /Spend by operator/i.test(t) && /a run is an agent, a person and a prompt/.test(t),
+    'and the panel says what it is counting');
+});
+
+/* ═══ 66 · a name a model wrote is marked as one ═══ */
+await step(66, async () => {
+  await fresh('#/fleet');
+  const marked = await page.evaluate(() => {
+    const rows = [...document.querySelectorAll('#view tr[data-go]')];
+    return {rows: rows.length, withMark: rows.filter(r => r.querySelector('.gen')).length};
+  });
+  is(66, marked.rows > 1 && marked.withMark === marked.rows,
+    `every generated run name carries its marker (${marked.withMark} of ${marked.rows})`);
+  await go('#/run/run_01K5XQ7M4A');
+  const run = await page.evaluate(() => ({
+    summary: document.querySelector('.head-t p:nth-of-type(2)')?.innerText.replace(/\s+/g, ' ').trim() ?? '',
+    marked: !!document.querySelector('.head-t .gen')}));
+  is(66, run.marked && run.summary.length > 60 && /retry budget/.test(run.summary),
+    `the run page carries the generated summary, marked (${run.summary.slice(0, 60)}…)`);
+});
+
 /* ═══ the contrast guard runs as part of this one ═══ */
 await step(44, async () => {
   const { execFileSync } = await import('node:child_process');
