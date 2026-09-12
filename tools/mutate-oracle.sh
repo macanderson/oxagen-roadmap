@@ -136,8 +136,14 @@ run_mut "66 stop marking the generated run name" \
   's/<span class="gen" title="written by the classifier, not by a person">auto<\/span>//'
 
 # ── the tool grammar and the Agent IAM surface ──────────────────────────────
-run_mut "67 put the sidebar label back to just Agents" \
-  's/<\/svg>Agents &amp; IAM<\/a>/<\/svg>Agents<\/a>/'
+run_mut "67 put the sidebar label back to Agents & IAM" \
+  's/<\/svg>Agent IAM<\/a>/<\/svg>Agents &amp; IAM<\/a>/'
+run_mut "67 title the section Agents again" \
+  's/agents:"Agent IAM"/agents:"Agents"/'
+run_mut "67 call the list page Agents again" \
+  's/<h1>Identities<\/h1>/<h1>Agents<\/h1>/'
+run_mut "67 head the list column Agent again" \
+  's/<th>Identity<\/th><th>Harness<\/th>/<th>Agent<\/th><th>Harness<\/th>/'
 run_mut "68 send every agent row to the same agent" \
   's/<a class="rowlink" href="#\/agents\/\$\{esc\(a\.slug\)\}">/<a class="rowlink" href="#\/agents\/release-manager">/'
 run_mut "69 drop the invoking person from the intersection" \

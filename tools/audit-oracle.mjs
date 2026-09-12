@@ -102,7 +102,7 @@ await step(3, async () => {
 await step(4, async () => {
   await fresh('#/agents');
   const a = await body();
-  is(4, /Agents here 41/i.test(a) && /50 in the organization/i.test(a), 'Agents reports 41 here, 50 in the org');
+  is(4, /Identities here 41/i.test(a) && /50 in the organization/i.test(a), 'Agent IAM reports 41 identities here, 50 in the org');
   await go('#/organization');
   const o = await body();
   is(4, /core-platform[\s\S]{0,140}41/.test(o) && /finops[\s\S]{0,140}\b9\b/.test(o), 'Organization: 41 + 9 = 50');
@@ -1093,10 +1093,20 @@ await step(66, async () => {
 await step(67, async () => {
   await fresh('#/fleet');
   const label = await page.evaluate(() => document.querySelector('.navsec a[data-nav="agents"]').textContent.trim());
-  is(67, /IAM/.test(label) && /Agents/.test(label), `the nav names both the agents and the surface ("${label}")`);
-  const title = await page.evaluate(() => { location.hash = '#/agents'; return null; });
+  is(67, label === 'Agent IAM', `the sidebar names the section Agent IAM ("${label}")`);
+  await page.evaluate(() => { location.hash = '#/agents'; return null; });
   await page.waitForTimeout(90);
-  is(67, /IAM/.test(await page.title()), `and the document title carries it too ("${await page.title()}")`);
+  is(67, /^Agent IAM · /.test(await page.title()), `and the document title carries it too ("${await page.title()}")`);
+  /* The section is Agent IAM; what the page lists are identities. Read the crumb, the
+     heading and the column from the DOM separately, so no one string satisfies all three. */
+  const list = await page.evaluate(() => ({
+    crumb: document.querySelector('#crumbTail').textContent.trim(),
+    h1: document.querySelector('#view h1').textContent.trim(),
+    col: document.querySelector('#view table thead th').textContent.trim()
+  }));
+  is(67, list.crumb === 'Agent IAM', `the breadcrumb names the section ("${list.crumb}")`);
+  is(67, list.h1 === 'Identities', `the list page is titled Identities ("${list.h1}")`);
+  is(67, list.col === 'Identity', `and each row is an identity ("${list.col}")`);
 });
 
 /* ═══ 68 · an agent row opens that agent's access surface ═══ */

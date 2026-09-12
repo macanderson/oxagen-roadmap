@@ -489,7 +489,7 @@ body[data-w="phone"]{background:var(--panel-2)}
     <nav class="navsec" aria-label="Workspace">
       <h3>Workspace</h3>
       <a href="#/fleet" data-nav="fleet"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h3.5l2 5.5L12 5l2.5 8 1.5-3H21"/></svg>Fleet<span class="wait-n" id="navApprovals" aria-hidden="true"></span><span class="sr" id="navApprovalsSr"></span></a>
-      <a href="#/agents" data-nav="agents"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="7.5" width="16" height="11.5" rx="3"/><path d="M12 4.5v3M9.2 12.5h.01M14.8 12.5h.01M9.8 16h4.4"/></svg>Agents &amp; IAM</a>
+      <a href="#/agents" data-nav="agents"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="7.5" width="16" height="11.5" rx="3"/><path d="M12 4.5v3M9.2 12.5h.01M14.8 12.5h.01M9.8 16h4.4"/></svg>Agent IAM</a>
       <a href="#/tools" data-nav="tools"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.6 5.6a4 4 0 0 0 4.8 4.8L14 15.8 10.2 19.6 7 16.4l3.8-3.8 3.8-7z"/></svg>Tools</a>
       <a href="#/ontology" data-nav="ontology"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5.2" r="2.3"/><circle cx="5.2" cy="18" r="2.3"/><circle cx="18.8" cy="18" r="2.3"/><path d="M10.7 7.1 6.4 15.9M13.3 7.1l4.3 8.8M7.5 18h9"/></svg>Ontology</a>
       <a href="#/steering" data-nav="steering"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6.5h16M4 12h9M4 17.5h6"/><circle cx="17" cy="15.5" r="3"/></svg>Steering<span class="wait-n" id="navSteering" aria-hidden="true"></span><span class="sr" id="navSteeringSr"></span></a>
@@ -1623,21 +1623,21 @@ PAGES.agents = () => {
   return `
   <div class="head"><div class="head-t">
     <span class="eyebrow">Workspace · ${esc(WS.name)}</span>
-    <h1>Agents</h1>
+    <h1>Identities</h1>
     <p>Every agent holds an identity in Postgres and a definition in git. None of them holds a credential.
       What each one can do is its toolbelt, and the belt is the only tool list its model is ever shown.</p>
   </div><button class="btn btn-primary" data-act="wrap">Wrap an agent</button></div>
 
   ${tiles([
-    ["Agents here", int(WS.agents), `${int(ORG_AGENTS)} in the organization`],
-    ["Credentials held by agents", "0", "every secret sits in the broker"],
+    ["Identities here", int(WS.agents), `${int(ORG_AGENTS)} in the organization`],
+    ["Credentials held by identities", "0", "every secret sits in the broker"],
     ["Spend · last 30 days", money(WS.spend30d), "metered from model and tool receipts"]
   ])}
 
   ${panel("Fleet",
     `${AGENTS.length} of ${int(WS.agents)} · one of each state and tier · ${money(shown)} of ${money(WS.spend30d)}`,
     `<div class="scroll"><table>
-    <thead><tr><th>Agent</th><th>Harness</th><th>Status</th><th>Tier</th><th class="r">Belt</th><th class="r">Mandates</th><th class="r">Spend 30d</th></tr></thead>
+    <thead><tr><th>Identity</th><th>Harness</th><th>Status</th><th>Tier</th><th class="r">Belt</th><th class="r">Mandates</th><th class="r">Spend 30d</th></tr></thead>
     <tbody>${AGENTS.map(a => `<tr data-go="#/agents/${esc(a.slug)}">
       <td><b><a class="rowlink" href="#/agents/${esc(a.slug)}">${esc(a.n)}</a></b><span class="s mono">${esc(a.id)}</span></td>
       <td style="font-size:12.5px">${esc(a.h)}<span class="s mono">${esc(a.model)}</span></td>
@@ -1648,7 +1648,7 @@ PAGES.agents = () => {
       <td class="r num">${money(a.spend)}<span class="s">${int(a.runs30)} runs</span></td></tr>`).join("")}</tbody></table></div>
     <div class="panel-b" style="border-top:1px solid var(--rule)"><p class="sub" style="margin:0;font-size:12.5px">
       Tier is computed from what was actually routed, never from what the adapter could do on paper.
-      Open an agent for its identity, the roles it holds, and the belt its model is shown.</p></div>`)}
+      Open an identity for the roles it holds and the belt its model is shown.</p></div>`)}
 `;
 };
 
@@ -2144,7 +2144,7 @@ const S = {page:"fleet", runId:"run_01K5XQ7M4A", runTab:"Timeline", toolsTab:"Re
    there — dismissible was not enough when it opened over the button. */
 if(innerWidth < 700) S.chrome = false;
 
-const TITLE = {fleet:"Fleet", run:"Run", agents:"Agents & IAM", agent:"Agent", tools:"Tools",
+const TITLE = {fleet:"Fleet", run:"Run", agents:"Agent IAM", agent:"Agent", tools:"Tools",
   ontology:"Ontology", steering:"Steering", spend:"Spend", organization:"Organization",
   billing:"Billing", audit:"Audit"};
 
@@ -2163,7 +2163,7 @@ const SCOPE = {fleet:"ws", run:"ws", agents:"ws", agent:"ws", tools:"ws", ontolo
 const EMPTY = {
   fleet:   ["Nothing has run in " + WS.name + " yet", "The first run appears here the moment its first frame arrives.", "wrap", "Wrap an agent"],
   run:     ["This run has recorded no frames", "Frames appear as the agent works. A run with none has not started its first turn.", "back-to-fleet", "Back to Fleet"],
-  agents:  ["No agents in " + WS.name + " yet", "An agent is a definition in git and an identity in Postgres. Wrapping one takes a minute.", "wrap", "Wrap an agent"],
+  agents:  ["No identities in " + WS.name + " yet", "An agent is a definition in git and an identity in Postgres. Wrapping one takes a minute.", "wrap", "Wrap an agent"],
   agent:   ["This agent holds nothing yet", "No roles, no belt, no mandate. Grant it a role and the belt its model is shown follows from that.", "grant-role", "Grant a role"],
   tools:   ["No tools in the registry", "Tools arrive by importing an MCP server. Nothing can be called until one is.", "import", "Import from an MCP server"],
   ontology:["No model in force yet", "The ontology fills from connectors, not from runs. Connect a source and the classes it resolves appear here.", "connect", "Connect a source"],
