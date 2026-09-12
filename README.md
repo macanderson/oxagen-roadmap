@@ -45,6 +45,14 @@ meant to ship in the live app.
 | W10 | `w10-cio-console.html` | The CIO's Console | [artifact](https://claude.ai/code/artifact/403166f6-9216-4d23-86ac-bb3c2aa60b23) |
 | W11 | `w11-assistant-and-account.html` | The Assistant on Every Page, and the Account | [artifact](https://claude.ai/code/artifact/317226a1-c2ff-43ce-a439-4a54f8b8288b) |
 | W12 | `w12-coverage-audit.html` | Coverage Audit | [artifact](https://claude.ai/code/artifact/45c5e3f9-82f0-404e-ad69-b3279d84c649) |
+| W13 | `w13-in-the-loop.html` | In the Loop | not published yet |
+
+W13 was added after the W12 audit closed and carries capability the spec does not yet describe:
+skills, which ship **off** in every new workspace, a `search_skills` that answers from the
+workspace's config rather than the model's memory, and the interjection — Oxagen stopping the loop
+and putting a question to a person through the agent when a run starts in a repository nobody has
+bound. It is not in `mc.html` yet and not in the spec yet; `docs/w13-in-the-loop-scenario.md` has
+the walk, the cut-downs, and what still needs a decision.
 
 `mc.html` is published as [The Ten Pages](https://claude.ai/code/artifact/3fcf949a-c455-4efd-af36-1c2d1f13088e);
 `consolidated.html` as [Oxagen Mission Control](https://claude.ai/code/artifact/25a71da8-dc9d-49b6-b57d-9240da40310e).
@@ -55,3 +63,4 @@ meant to ship in the live app.
 - `docs/CONSOLIDATION.md` — how W1–W11 were folded into one design; which version of each shared thing won.
 - `docs/feedback-mockups.md` — review feedback on the set.
 - `docs/videos-mockup-narrated.md` — narrated walkthrough links.
+- `docs/w13-in-the-loop-scenario.md` — the W13 demo scenario: the six beats, the talk track, the audience cut-downs, and the two open decisions it leaves for the spec.
