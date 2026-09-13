@@ -1,0 +1,938 @@
+<title>Every View, Every Source</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap">
+<style>
+/* ── Tokens. Dark is the base, exactly as mc.html defines it, so this document
+   reads as part of the product. Light is redefined twice: once for the viewer
+   who never chose (prefers-color-scheme) and once for the explicit stamp. ── */
+:root{
+  --ink:#10100F; --void:#0A0A09; --panel:#181715; --hl:#201F1C; --border:#292722; --rule:#34322D;
+  --fg:#F2EEE5; --body:#DDD8CD; --muted:#9B958A; --dim:#6E6A62;
+  --gold:#D6962C; --gold-bright:#F1C364; --gold-deep:#8B5E1A; --accent-text:#D6962C;
+  --on-gold:#10100F;
+  --st-allowed:#57A97C; --st-approval:#5B93D6; --st-denied:#C66A4A;
+  --st-proven:#3FA2A2; --st-failed:#C0453C; --st-critical:#D6455E; --st-observe:#9B958A;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --font:"Space Grotesk","Helvetica Neue",Arial,sans-serif;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.4);
+  --step--1:.833rem; --step-0:1rem; --step-1:1.2rem; --step-2:1.44rem; --step-3:1.728rem; --step-4:2.074rem; --step-5:2.488rem;
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    --ink:#F2EEE5; --void:#E9E3D8; --panel:#F8F5EE; --hl:#EFEAE0; --border:#D8CDBD; --rule:#C9BFAE;
+    --fg:#10100F; --body:#2A2823; --muted:#6B665C; --dim:#8C877C;
+    --accent-text:#8B5E1A;
+    --st-allowed:#2F7D52; --st-approval:#2E6BA8; --st-denied:#9B4526;
+    --st-proven:#1F7676; --st-failed:#992F28; --st-critical:#AE2540; --st-observe:#6B665C;
+    --shadow-sm:0 1px 2px rgba(16,16,15,.06);
+  }
+}
+:root[data-theme="light"]{
+  --ink:#F2EEE5; --void:#E9E3D8; --panel:#F8F5EE; --hl:#EFEAE0; --border:#D8CDBD; --rule:#C9BFAE;
+  --fg:#10100F; --body:#2A2823; --muted:#6B665C; --dim:#8C877C;
+  --accent-text:#8B5E1A;
+  --st-allowed:#2F7D52; --st-approval:#2E6BA8; --st-denied:#9B4526;
+  --st-proven:#1F7676; --st-failed:#992F28; --st-critical:#AE2540; --st-observe:#6B665C;
+  --shadow-sm:0 1px 2px rgba(16,16,15,.06);
+}
+
+*{box-sizing:border-box}
+body{background:var(--ink); color:var(--body); font-family:var(--font); font-weight:400;
+  font-size:var(--step-0); line-height:1.55; -webkit-font-smoothing:antialiased;}
+.wrap{max-width:78rem; margin:0 auto; padding-inline:24px; padding-block:0 96px;}
+@media (max-width:700px){ .wrap{padding-inline:16px} }
+
+/* ── Sticky index ── */
+nav.idx{position:sticky; top:0; z-index:40; background:color-mix(in srgb, var(--ink) 94%, transparent);
+  backdrop-filter:blur(8px); border-bottom:1px solid var(--border);}
+nav.idx .in{max-width:78rem; margin:0 auto; padding:10px 24px; display:flex; gap:4px 18px; flex-wrap:wrap; align-items:baseline;}
+@media (max-width:700px){ nav.idx .in{padding:10px 16px} }
+nav.idx a{color:var(--muted); text-decoration:none; font-size:var(--step--1); font-weight:500;
+  letter-spacing:.01em; padding:2px 0; border-bottom:1px solid transparent;}
+nav.idx a:hover{color:var(--fg); border-bottom-color:var(--rule)}
+nav.idx a:focus-visible{outline:2px solid var(--gold); outline-offset:3px; border-radius:2px}
+nav.idx .mk{font-weight:600; color:var(--fg); margin-right:6px}
+nav.idx .mk i{color:var(--gold); font-style:normal}
+
+/* ── Masthead ── */
+header.mast{padding-block:56px 40px; border-bottom:1px solid var(--rule)}
+.eyebrow{font-size:var(--step--1); letter-spacing:.09em; text-transform:uppercase;
+  color:var(--muted); font-weight:600; margin:0 0 14px}
+h1{font-size:var(--step-5); line-height:1.08; font-weight:700; color:var(--fg); margin:0 0 18px;
+  letter-spacing:-.02em; text-wrap:balance; max-width:34ch}
+.lead{font-size:var(--step-1); line-height:1.5; color:var(--body); max-width:62ch; margin:0 0 8px}
+.sub{color:var(--muted); max-width:66ch; font-size:var(--step-0)}
+
+/* ── Sections ── */
+section{padding-block:48px; border-bottom:1px solid var(--border)}
+section:last-of-type{border-bottom:0}
+h2{font-size:var(--step-3); font-weight:600; color:var(--fg); margin:0 0 6px; letter-spacing:-.012em; text-wrap:balance}
+h3{font-size:var(--step-1); font-weight:600; color:var(--fg); margin:36px 0 10px; letter-spacing:-.005em}
+h4{font-size:var(--step-0); font-weight:600; color:var(--fg); margin:24px 0 8px}
+.dek{color:var(--muted); max-width:68ch; margin:0 0 24px; font-size:var(--step-0)}
+p{max-width:68ch}
+section > p, section > ul, section > ol{margin-block:0 14px}
+ul,ol{padding-left:20px} li{margin-bottom:7px; max-width:66ch}
+strong{color:var(--fg); font-weight:600}
+code,.m{font-family:var(--mono); font-size:.88em; color:var(--fg);
+  background:var(--hl); border:1px solid var(--border); border-radius:3px; padding:.08em .34em}
+.m.plain{background:none; border:0; padding:0; color:var(--body)}
+
+/* ── Counts strip ── */
+.counts{display:grid; grid-template-columns:repeat(auto-fit,minmax(9.5rem,1fr)); gap:1px;
+  background:var(--border); border:1px solid var(--border); margin:32px 0 0}
+.counts div{background:var(--ink); padding:14px 16px}
+.counts b{display:block; font-size:var(--step-3); font-weight:600; color:var(--fg);
+  font-variant-numeric:tabular-nums; line-height:1.1; letter-spacing:-.02em}
+.counts span{display:block; font-size:var(--step--1); color:var(--muted); margin-top:3px; line-height:1.35}
+
+/* ── Tables ── */
+.tw{overflow-x:auto; margin:18px 0 4px; border:1px solid var(--border); background:var(--panel)}
+table{border-collapse:collapse; width:100%; font-size:var(--step--1); min-width:0}
+th,td{text-align:left; padding:8px 12px; border-bottom:1px solid var(--border); vertical-align:top}
+thead th{background:var(--hl); color:var(--fg); font-weight:600; white-space:nowrap;
+  position:sticky; top:0; z-index:2; font-size:var(--step--1); letter-spacing:.01em}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover{background:var(--hl)}
+td.n,th.n{font-variant-numeric:tabular-nums; text-align:right; white-space:nowrap}
+td.c,th.c{text-align:center}
+caption{caption-side:bottom; color:var(--dim); font-size:var(--step--1); padding:8px 2px; text-align:left}
+.nowrap{white-space:nowrap}
+
+/* ── Marks: a shape and a word, so they survive greyscale ── */
+.mk{display:inline-flex; align-items:center; gap:6px; white-space:nowrap; font-size:var(--step--1)}
+.mk::before{content:""; width:8px; height:8px; flex:0 0 8px; background:currentColor}
+.mk.dia::before{transform:rotate(45deg); width:7px; height:7px; flex-basis:7px}
+.mk.cir::before{border-radius:50%; background:none; border:1.5px solid currentColor}
+.mk.tri::before{background:none; width:0; height:0; border-left:4.5px solid transparent;
+  border-right:4.5px solid transparent; border-bottom:8px solid currentColor}
+.mk.bar::before{width:8px; height:2px; flex-basis:8px}
+.derived{color:var(--st-allowed)} .fixture{color:var(--st-proven)}
+.literal{color:var(--st-observe)} .none{color:var(--st-critical)}
+.live{color:var(--st-allowed)} .schema{color:var(--st-approval)}
+.absent{color:var(--st-critical)} .partial{color:var(--st-denied)}
+.yes{color:var(--st-allowed); font-weight:600} .no{color:var(--st-denied); font-weight:600}
+td.c .yes,td.c .no{font-size:var(--step-0)}
+
+/* ── Legend ── */
+.legend{display:grid; grid-template-columns:repeat(auto-fit,minmax(16rem,1fr)); gap:14px 28px; margin:20px 0 0}
+.legend div{border-left:2px solid var(--rule); padding-left:12px}
+.legend .mk{margin-bottom:3px}
+.legend p{margin:0; font-size:var(--step--1); color:var(--muted); max-width:40ch}
+
+/* ── Callout: one per section at most ── */
+.note{border-left:2px solid var(--gold); padding:2px 0 2px 16px; margin:22px 0; max-width:66ch}
+.note b{color:var(--fg)}
+.note p{margin:0; color:var(--body)}
+
+/* ── Filter bar for the provenance table ── */
+.filters{display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin:20px 0 0}
+.filters input[type=search],.filters select{font-family:var(--font); font-size:var(--step--1);
+  background:var(--panel); color:var(--fg); border:1px solid var(--border); border-radius:3px;
+  padding:7px 10px; min-width:0}
+.filters input[type=search]{flex:1 1 15rem}
+.filters select{flex:0 0 auto}
+.filters input:focus-visible,.filters select:focus-visible{outline:2px solid var(--gold); outline-offset:1px}
+.filters .cnt{color:var(--muted); font-size:var(--step--1); font-variant-numeric:tabular-nums; margin-left:auto}
+@media (max-width:700px){ .filters .cnt{margin-left:0; width:100%} }
+#ptab td:nth-child(2){min-width:12rem}
+#ptab .expr{font-family:var(--mono); font-size:.82rem; color:var(--body); word-break:break-word}
+#ptab .src{color:var(--body)}
+#pempty{padding:20px 12px; color:var(--muted); font-size:var(--step--1)}
+
+/* ── Footer ── */
+footer{padding-block:40px 0; color:var(--dim); font-size:var(--step--1)}
+footer .m{color:var(--muted)}
+a{color:var(--accent-text)}
+a:focus-visible{outline:2px solid var(--gold); outline-offset:2px}
+@media (prefers-reduced-motion:reduce){ *{transition:none!important; animation:none!important} }
+</style>
+
+<nav class="idx"><div class="in">
+  <span class="mk">o<i>x</i>agen</span>
+  <a href="#files">The files</a>
+  <a href="#views">Master view list</a>
+  <a href="#states">State changes</a>
+  <a href="#provenance">Where every number comes from</a>
+  <a href="#unsourced">Numbers with no source</a>
+  <a href="#unbuilt">Unbuilt surface</a>
+</div></nav>
+
+<div class="wrap">
+
+<header class="mast">
+  <p class="eyebrow">Mission Control · provenance audit · 12 September 2026</p>
+  <h1>Every view, every source</h1>
+  <p class="lead">Fourteen mockups draw the ten pages of Mission Control. This traces each
+  view, each state it can be in, and each number on its face back to the thing that produces
+  it: the fixture in the mockup, the table or frame the specification names as its source of
+  truth, and whether that source exists in code today.</p>
+  <p class="sub">Three answers come out of it. Which surfaces are drawn but have nothing
+  behind them. Which numbers are typed into markup and cannot be restated. And which parts of
+  the specification have no surface at all. Twenty-five defects found along the way are fixed
+  on the same branch, and the last section says what they were and what was left alone.</p>
+
+  <div class="counts">
+    <div><b>28</b><span>routes handled in the consolidated mockup</span></div>
+    <div><b>53</b><span>tabs across eight tabbed pages</span></div>
+    <div><b>61</b><span>dialogs</span></div>
+    <div><b>5</b><span>page states the chrome offers</span></div>
+    <div><b>10</b><span>pages the specification keeps</span></div>
+    <div><b>70</b><span>page files in the app today</span></div>
+  </div>
+  <p class="sub" style="margin-top:14px">Line numbers in this document are pinned to
+  <span class="m">mc.html</span> at 8,411 lines, md5 <span class="m">f8c4a42b6168eac886e51ed59293c5ed</span>,
+  commit <span class="m">539fbc4</span>. The file is edited by parallel jobs, so a later
+  revision will move them.</p>
+</header>
+
+<section id="files">
+  <p class="eyebrow">One</p>
+  <h2>The fourteen files, and which one is the app</h2>
+  <p class="dek">Twelve single-flow mockups were built in parallel against the specification,
+  each drawing the whole app to show one scenario. Two files consolidate them. Only
+  <span class="m">mc.html</span> is the app screen for screen; it is the spine of everything
+  below.</p>
+
+  <div class="tw"><table>
+    <thead><tr><th>File</th><th>What it is</th><th class="n">Lines</th><th>Role here</th></tr></thead>
+    <tbody>
+      <tr><td><span class="m">mc.html</span></td><td>The Ten Pages. Every page with the strongest version of each component, plus onboarding.</td><td class="n">8,411</td><td><strong>Canonical.</strong> Every route, state and number traced below.</td></tr>
+      <tr><td><span class="m">consolidated.html</span></td><td>The earlier one-file consolidation of W1 to W11.</td><td class="n">1,051</td><td>Superseded by mc.html. Records which version of each shared component won.</td></tr>
+      <tr><td><span class="m">w1</span> Sixty Seconds to Governed</td><td>Sign up, wrap an agent, first run</td><td class="n">2,697</td><td>Auth and onboarding coverage</td></tr>
+      <tr><td><span class="m">w2</span> Stop It. Steer It.</td><td>Fleet, live run, steering</td><td class="n">2,745</td><td>Fleet column set won the consolidation</td></tr>
+      <tr><td><span class="m">w3</span> Money Asked, A Human Answered</td><td>Mandate-bound payment, approval chain</td><td class="n">2,424</td><td>Four-hop approval chain won</td></tr>
+      <tr><td><span class="m">w4</span> Oxagen Flight Recorder</td><td>Sealed run replayed frame by frame</td><td class="n">3,200</td><td>Run body won, reduced to two panes</td></tr>
+      <tr><td><span class="m">w5</span> Proven, Not Claimed</td><td>The witness flip</td><td class="n">2,540</td><td>Run header won</td></tr>
+      <tr><td><span class="m">w6</span> It learned, you approved, it changed</td><td>Record to Context PR to next run</td><td class="n">2,676</td><td>Steering page won</td></tr>
+      <tr><td><span class="m">w7</span> The shape of your business</td><td>Ontology map, plain-English questions</td><td class="n">2,489</td><td>Ontology map and top bar won</td></tr>
+      <tr><td><span class="m">w8</span> Every Dollar, Every Operator</td><td>Proven spend, findings, reconciliation</td><td class="n">2,783</td><td>Token base and Spend page won</td></tr>
+      <tr><td><span class="m">w9</span> The Toolbelt, Governed</td><td>Granted tools, policy simulation</td><td class="n">3,744</td><td>Agents page won</td></tr>
+      <tr><td><span class="m">w10</span> The CIO's Console</td><td>Who can do what, where data lives</td><td class="n">2,210</td><td>Organization and Audit pages won</td></tr>
+      <tr><td><span class="m">w11</span> The Assistant on Every Page</td><td>Assistant panel, account, command menu</td><td class="n">2,584</td><td>Breadcrumb switcher and assistant dock won</td></tr>
+      <tr><td><span class="m">w12</span> Coverage Audit</td><td>The audit that closed section 19</td><td class="n">419</td><td>Claims fifteen of fifteen coverage rows carry a verified link</td></tr>
+    </tbody>
+    <caption>Published artifact links for each file are in the repository README.</caption>
+  </table></div>
+
+  <div class="note"><p><b>What the earlier coverage audit measured, and did not.</b> W12 checked that
+  a mockup exists for every page and state in the specification, by reading each file for route
+  and state branches. It did not check where any displayed number comes from. Coverage of a
+  surface and provenance of its contents are different questions, and this document answers the
+  second one.</p></div>
+</section>
+
+<section id="views">
+  <p class="eyebrow">Two</p>
+  <h2>Master view list</h2>
+  <p class="dek">Every route the consolidated mockup handles, with the tabs, panels and dialogs
+  reachable from it, and which of the five page states are actually implemented for that page.
+  A tick means an explicit branch exists in the render function; a dash means switching the
+  chrome to that state leaves the page rendered as though nothing had happened.</p>
+
+  <h3>The ten product pages</h3>
+  <div class="tw"><table>
+    <thead><tr>
+      <th>Page</th><th>Route</th><th>Tabs</th><th class="n">Dialogs</th><th>Panels</th>
+      <th class="c">loaded</th><th class="c">empty</th><th class="c">loading</th><th class="c">error</th><th class="c">denied</th>
+    </tr></thead>
+    <tbody>
+      <tr><td><strong>Fleet</strong></td><td><span class="m">#/</span> · <span class="m">#/&lt;org&gt;/&lt;ws&gt;</span></td>
+        <td>none. Run filter: all · live · proven</td><td class="n">5</td><td>Approvals, assistant</td>
+        <td class="c"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td></tr>
+      <tr><td><strong>Run</strong></td><td><span class="m">#/&lt;org&gt;/&lt;ws&gt;/runs/&lt;run&gt;</span></td>
+        <td>transcript · player · proof · cost · policy · context · chain</td><td class="n">7</td><td>Approvals (player tab only), pause banner, two transports</td>
+        <td class="c"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td></tr>
+      <tr><td><strong>Agents</strong></td><td><span class="m">#/&lt;org&gt;/&lt;ws&gt;/agents</span></td>
+        <td>none</td><td class="n">3</td><td>assistant</td>
+        <td class="c"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td></tr>
+      <tr><td><strong>Tools</strong></td><td><span class="m">#/&lt;org&gt;/&lt;ws&gt;/tools/&lt;tab&gt;</span></td>
+        <td>registry · connections · mandates · policy · switches · auto-approvals · assurance</td><td class="n">11</td><td>Kill-switch banner, assistant</td>
+        <td class="c"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td></tr>
+      <tr><td><strong>Ontology</strong></td><td><span class="m">#/&lt;org&gt;/&lt;ws&gt;/ontology</span></td>
+        <td>model · graph · sources · repositories · versions</td><td class="n">3</td><td>assistant</td>
+        <td class="c"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td></tr>
+      <tr><td><strong>Steering</strong></td><td><span class="m">#/&lt;org&gt;/&lt;ws&gt;/steering</span></td>
+        <td>records · proposals · Context PRs · effect · retirement</td><td class="n">1</td><td>assistant</td>
+        <td class="c"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td></tr>
+      <tr><td><strong>Spend</strong></td><td><span class="m">#/&lt;org&gt;/&lt;ws&gt;/spend/&lt;tab&gt;/&lt;id&gt;</span></td>
+        <td>findings · by operator · by agent · by tool · wasted spend · reconciliation · budgets</td><td class="n">5</td><td>assistant</td>
+        <td class="c"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td></tr>
+      <tr><td><strong>Organization</strong></td><td><span class="m">#/&lt;org&gt;</span> · <span class="m">/api-keys</span> · <span class="m">/roles</span></td>
+        <td>people · roles · invitations · workspaces · model funding · data plane · API keys</td><td class="n">13</td><td>assistant</td>
+        <td class="c"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td></tr>
+      <tr><td><strong>Billing</strong></td><td><span class="m">#/&lt;org&gt;/billing</span></td>
+        <td>none</td><td class="n">1</td><td>assistant</td>
+        <td class="c"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td></tr>
+      <tr><td><strong>Audit</strong></td><td><span class="m">#/&lt;org&gt;/audit/&lt;tab&gt;</span></td>
+        <td>events · incidents · receipts · legal holds · exports · keys · assurance · retention</td><td class="n">11</td><td>assistant</td>
+        <td class="c"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Views that are not one of the ten pages</h3>
+  <p class="dek">Four more routes render real screens. Three of them are detail views the
+  specification folds into a parent page; one is the registration and onboarding machine. Their
+  state coverage is the weakest in the file.</p>
+  <div class="tw"><table>
+    <thead><tr>
+      <th>View</th><th>Route</th><th>Folds into</th>
+      <th class="c">loaded</th><th class="c">empty</th><th class="c">loading</th><th class="c">error</th><th class="c">denied</th>
+    </tr></thead>
+    <tbody>
+      <tr><td><strong>Agent detail</strong></td><td><span class="m">/agents/&lt;slug&gt;</span></td><td>Agents. Seven tabs of its own.</td>
+        <td class="c"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td></tr>
+      <tr><td><strong>Agent source editor</strong></td><td><span class="m">/agents/&lt;slug&gt;/source</span></td><td>Agents, definition tab</td>
+        <td class="c"><span class="yes">✓</span></td><td class="c"><span class="no">—</span></td><td class="c"><span class="no">—</span></td><td class="c"><span class="no">—</span></td><td class="c"><span class="no">—</span></td></tr>
+      <tr><td><strong>Mandate detail</strong></td><td><span class="m">/agents/&lt;slug&gt;/mandates/&lt;id&gt;</span></td><td>Agents, mandates tab</td>
+        <td class="c"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td></tr>
+      <tr><td><strong>Register an agent</strong></td><td><span class="m">/register/&lt;step&gt;</span></td><td>A gate, not a page</td>
+        <td class="c"><span class="yes">✓</span></td><td class="c"><span class="no">—</span></td><td class="c"><span class="yes">✓</span></td><td class="c">run step only</td><td class="c"><span class="yes">✓</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>The ten onboarding and sign-in screens</h3>
+  <p class="dek">All ten live under <span class="m">#/welcome</span> and are reachable from the
+  account dialog, the user menu and the command menu. The specification counts them as flows
+  rather than pages. None of them implements the empty state, and several carry neither an error
+  nor a denied branch.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Screen</th><th>Route</th><th class="c">error branch</th><th class="c">denied branch</th></tr></thead>
+    <tbody>
+      <tr><td>Sign up</td><td><span class="m">#/welcome</span></td><td class="c"><span class="yes">✓</span></td><td class="c"><span class="no">—</span></td></tr>
+      <tr><td>Verify email</td><td><span class="m">#/welcome/verify</span></td><td class="c"><span class="yes">✓</span></td><td class="c"><span class="no">—</span></td></tr>
+      <tr><td>Log in</td><td><span class="m">#/welcome/login</span></td><td class="c"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td></tr>
+      <tr><td>Two-factor</td><td><span class="m">#/welcome/two-factor</span></td><td class="c"><span class="yes">✓</span></td><td class="c"><span class="no">—</span></td></tr>
+      <tr><td>Forgot password</td><td><span class="m">#/welcome/forgot</span></td><td class="c"><span class="yes">✓</span></td><td class="c"><span class="no">—</span></td></tr>
+      <tr><td>Reset password</td><td><span class="m">#/welcome/reset</span></td><td class="c"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td></tr>
+      <tr><td>Accept invitation</td><td><span class="m">#/welcome/invite</span></td><td class="c"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td></tr>
+      <tr><td>Name the organization</td><td><span class="m">#/welcome/organization</span></td><td class="c"><span class="no">—</span></td><td class="c"><span class="yes">✓</span></td></tr>
+      <tr><td>Wrap an agent</td><td><span class="m">#/welcome/wrap</span></td><td class="c"><span class="no">—</span></td><td class="c"><span class="yes">✓</span></td></tr>
+      <tr><td>Start a run</td><td><span class="m">#/welcome/run</span></td><td class="c"><span class="no">—</span></td><td class="c"><span class="yes">✓</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Panels, and where they mount</h3>
+  <div class="tw"><table>
+    <thead><tr><th>Panel</th><th>States it has</th><th>Mounted on</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Assistant</strong></td><td>collapsed · open · engine down</td><td>Every page except register and welcome</td></tr>
+      <tr><td><strong>Approvals</strong></td><td>loaded · empty (workspace scope only)</td><td>Fleet, and Run inside the player tab only</td></tr>
+      <tr><td><strong>Pause banner</strong></td><td>pausing · paused</td><td>Run, above everything</td></tr>
+      <tr><td><strong>Kill-switch banner</strong></td><td>present · cleared</td><td>Tools</td></tr>
+      <tr><td><strong>Transcript transport</strong></td><td>paced · unpaced, four speeds</td><td>Run, transcript tab</td></tr>
+      <tr><td><strong>Frame player transport</strong></td><td>playing · paused, three speeds</td><td>Run, player tab</td></tr>
+      <tr><td><strong>Command menu</strong></td><td>open, four groups of commands</td><td>Global, ⌘K</td></tr>
+      <tr><td><strong>Notifications</strong></td><td>unread · all read</td><td>Global, top bar</td></tr>
+      <tr><td><strong>Account dialog</strong></td><td>profile · preferences · security · privacy · onboarding</td><td>Global, user menu</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="note"><p><b>The consolidation set a ceiling of five tabs per page. Six pages now
+  exceed it.</b> Run, Agent detail, Tools, Spend and Organization carry seven; Audit carries
+  eight. The rule was written because one flow had shipped an eight-tab Spend page, and the
+  consolidated design then trimmed it. The tab count has climbed back past the ceiling as each
+  page gained surface.</p></div>
+</section>
+
+<section id="states">
+  <p class="eyebrow">Three</p>
+  <h2>State changes</h2>
+  <p class="dek">Two different things are called state. The chrome in the corner switches a page
+  between five load conditions. Separately, twenty-three runtime transitions mutate the demo in
+  place: approvals resolve, runs pause, switches flip, transcripts play. The second group is
+  where the mockup behaves like an application rather than a picture of one.</p>
+
+  <h3>Load states, and how completely each is carried</h3>
+  <div class="tw"><table>
+    <thead><tr><th>State</th><th>What it replaces</th><th class="n">Pages with a branch</th><th>Not implemented on</th></tr></thead>
+    <tbody>
+      <tr><td><strong>loaded</strong></td><td>Nothing. The real page.</td><td class="n">all</td><td>—</td></tr>
+      <tr><td><strong>empty</strong></td><td>Page body, keeping the shell</td><td class="n">14 of 17</td><td>Agent source editor, register, all ten welcome screens</td></tr>
+      <tr><td><strong>loading</strong></td><td>Page body with skeletons</td><td class="n">16 of 17</td><td>Agent source editor</td></tr>
+      <tr><td><strong>error</strong></td><td>Page body, offers "Open an incident"</td><td class="n">15 of 17</td><td>Agent source editor, register name and wrap steps, four welcome screens</td></tr>
+      <tr><td><strong>denied</strong></td><td>Page body, offers "Request access"</td><td class="n">16 of 17</td><td>Agent source editor, four welcome screens</td></tr>
+      <tr><td><strong>phone</strong></td><td>Nothing. A CSS class at 400px.</td><td class="n">—</td><td>No page has a behavioural branch on it at all</td></tr>
+    </tbody>
+    <caption>The agent source editor carries no load-state branch of any kind: switching the
+    chrome leaves the editor fully rendered.</caption>
+  </table></div>
+
+  <h3>Runtime transitions</h3>
+  <p class="dek">What each control actually changes, and whether the change is recorded anywhere
+  the rest of the demo can see. The ones that write a frame or mutate a fixture are the ones
+  that behave like the product; the ones that only raise a toast are drawn, not wired.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Transition</th><th>What changes</th><th>Effect</th></tr></thead>
+    <tbody>
+      <tr><td>Approve or deny an approval</td><td>Approval status, approver, reason</td><td><span class="mk fixture">Writes state.</span> Denial with an empty reason is refused.</td></tr>
+      <tr><td>Approval countdown</td><td>Deadline text, patched in place each second</td><td><span class="mk fixture">Writes state.</span> On expiry the approval becomes expired and the page re-renders.</td></tr>
+      <tr><td>Pause a run</td><td>Run control status, then after 1.4s a <span class="m">control.pause</span> frame appended to the run</td><td><span class="mk fixture">Writes a frame.</span> The paused status then overrides the fixture status on Fleet, Run and the agent's run list.</td></tr>
+      <tr><td>Resume a run</td><td>Status, then a <span class="m">control.resume</span> frame after 1.2s</td><td><span class="mk fixture">Writes a frame.</span></td></tr>
+      <tr><td>Flip a kill switch</td><td>Switch, deny generation, who and why, banner; forces the switches tab</td><td><span class="mk fixture">Writes state.</span> Deny generation increments, as the specification requires.</td></tr>
+      <tr><td>Approve an observed tool schema</td><td>Schema origin, digest, the registry tab's badge count</td><td><span class="mk fixture">Writes state.</span> The pending count drops.</td></tr>
+      <tr><td>Commit an agent definition</td><td>Baseline source, pending branch, pull request, added and deleted line counts</td><td><span class="mk fixture">Writes state.</span> Mutates the branch fixture.</td></tr>
+      <tr><td>Edit agent source</td><td>The TOML text, through a real parse and serialise round trip</td><td><span class="mk fixture">Writes state.</span> Repaints in place without a re-render.</td></tr>
+      <tr><td>Register an agent</td><td>Poll log, then first-frame flag, then a countdown</td><td><span class="mk fixture">Writes state.</span> Completion pushes a new agent into the fixture and bumps the workspace count.</td></tr>
+      <tr><td>Mark notifications read</td><td>Unread flags on the notification fixture</td><td><span class="mk fixture">Writes state.</span> The bell's dot and badge clear.</td></tr>
+      <tr><td>Release a legal hold</td><td>The erasure fixture, plus a new audit event</td><td><span class="mk fixture">Writes state.</span></td></tr>
+      <tr><td>Verify an evidence bundle</td><td>Verified flag for that export</td><td><span class="mk fixture">Writes state.</span></td></tr>
+      <tr><td>Enable or disable an auto-approval rule</td><td>The rule fixture's on flag</td><td><span class="mk fixture">Writes state.</span></td></tr>
+      <tr><td>Unassign a role</td><td>The agent's role list</td><td><span class="mk fixture">Writes state.</span></td></tr>
+      <tr><td>Save an avatar</td><td>The agent or person fixture's avatar</td><td><span class="mk fixture">Writes state.</span></td></tr>
+      <tr><td>Transcript playback</td><td>Revealed row count, play state, speed</td><td><span class="mk derived">View only.</span> Reveals rows in place, deliberately avoiding a re-render.</td></tr>
+      <tr><td>Frame player scrub and play</td><td>Frame position, play state, speed</td><td><span class="mk derived">View only.</span> Full re-render per frame, with keyboard control.</td></tr>
+      <tr><td>Spend drill-down</td><td>Tab, drill target, hash</td><td><span class="mk derived">View only.</span></td></tr>
+      <tr><td>Steer a run or the fleet</td><td>Selection, interrupt choice, text</td><td><span class="mk none">Nothing is recorded.</span> Sending closes the dialog and raises a toast.</td></tr>
+      <tr><td>Cancel a run</td><td>—</td><td><span class="mk none">Nothing is recorded.</span> Toast only.</td></tr>
+      <tr><td>Pause from a Fleet row</td><td>—</td><td><span class="mk none">Nothing is recorded.</span> Only the Run page's pause is governed.</td></tr>
+      <tr><td>Simulate or activate a policy</td><td>—</td><td><span class="mk none">Nothing is recorded.</span> Simulate reports counts that are fixed text.</td></tr>
+      <tr><td>Fork, bisect, export a run</td><td>—</td><td><span class="mk none">Nothing is recorded.</span> Toast only.</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="note"><p><b>Fleet does not tick.</b> The only recurring timers in the file are the
+  one-second approval countdown and the registration poll. Fleet's live run count and spend
+  today are computed once per render from static fixtures and never advance, so a page whose
+  whole claim is watching fifty agents live is the one page with no live behaviour.</p></div>
+</section>
+
+<section id="provenance">
+  <p class="eyebrow">Four</p>
+  <h2>Where every number comes from</h2>
+  <p class="dek">One row per displayed figure. Three orthogonal axes, the same shape as the
+  mockups' own tool grammar: how the mockup produces the number, what the specification names as
+  its source of truth, and whether that source exists in code today. Filter by page, by either
+  axis, or search any label.</p>
+
+  <div class="legend">
+    <div><span class="mk dia derived">Derived</span><p>Computed in the mockup by a function over fixture records. A formula exists and can be checked.</p></div>
+    <div><span class="mk fixture">Fixture</span><p>Read from a field on a demo record. The field has a home in the target schema.</p></div>
+    <div><span class="mk cir literal">Markup literal</span><p>Typed into the template. No record, no field, nothing to recompute it from.</p></div>
+    <div><span class="mk live">Live</span><p>A table or endpoint exists today and carries real data.</p></div>
+    <div><span class="mk bar schema">Schema only</span><p>The table exists and nothing reads or writes it.</p></div>
+    <div><span class="mk tri absent">Absent</span><p>No table, no endpoint, no code.</p></div>
+  </div>
+
+  <div class="filters">
+    <label class="m plain" for="pq" style="position:absolute;left:-9999px">Search labels</label>
+    <input type="search" id="pq" placeholder="Search a label, a field, a table…">
+    <select id="ppage" aria-label="Filter by page"><option value="">All pages</option></select>
+    <select id="phow" aria-label="Filter by how the mockup produces it"><option value="">Any provenance</option>
+      <option value="derived">Derived</option><option value="fixture">Fixture</option><option value="literal">Markup literal</option></select>
+    <select id="pbuilt" aria-label="Filter by build status"><option value="">Any build status</option>
+      <option value="live">Live</option><option value="schema">Schema only</option><option value="absent">Absent</option></select>
+    <span class="cnt" id="pcnt"></span>
+  </div>
+
+  <div class="tw"><table id="ptab">
+    <thead><tr><th>Page · tab</th><th>Label as shown</th><th>How the mockup gets it</th><th>Source of truth</th><th>In code today</th></tr></thead>
+    <tbody id="pbody"></tbody>
+  </table></div>
+  <div id="pempty" hidden>No rows match those filters.</div>
+</section>
+
+<section id="unsourced">
+  <p class="eyebrow">Five</p>
+  <h2>Numbers with no source</h2>
+  <p class="dek">Figures typed into markup, and figures whose label claims a basis the mockup
+  cannot produce. These are the ones that will not survive contact with real data, because
+  nothing computes them.</p>
+
+  <div class="note"><p><b>Twenty-three of these are now fixed.</b> Everything described below
+  as a contradicting total, a stated-but-uncomputed formula, or a mismatched identity has been
+  made derived on this branch, so the number and the rows under it can no longer drift apart.
+  Rows carrying a <strong>FIXED on this branch</strong> note in the table above are the ones
+  that changed. The subsections below keep the original finding, because the reasoning is what
+  makes the next one recognisable. What stays open is listed at the end of each subsection.</p></div>
+  <h3>Totals that contradict the rows beneath them</h3>
+  <p class="dek">The worst class, because both numbers are on one screen and a reader can do the
+  arithmetic. Each of these is a tile or a header typed by hand above a table that disagrees
+  with it.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Where</th><th>It says</th><th class="n">Its own rows give</th><th>Consequence</th></tr></thead>
+    <tbody>
+      <tr><td>Tools, registry header</td><td>Eight servers, 3,182 tool versions</td><td class="n">206 tools, 263 versions</td><td>The same 3,182 is reasserted inside a kill-switch blast radius, so the error is load-bearing in two places.</td></tr>
+      <tr><td>Ontology, model tiles</td><td>Entities 176,879</td><td class="n">158,120</td><td>Two of the four tiles are typed and right, one is typed and wrong. Nothing tells them apart.</td></tr>
+      <tr><td>Audit, events tiles</td><td>12,418 events, 96 denied, 4,117 by a service principal, 212 by the in-app agent</td><td class="n">14 rows, 1 denial, 1 service actor, 0 assistant rows</td><td>Every figure in the stat row is typed, over a table that contradicts all four.</td></tr>
+      <tr><td>Ontology, repositories</td><td>Events in, ten kinds summing to 19,210</td><td class="n">10,686 from the per-repository strings</td><td>Same window, same three repositories, two answers that differ by 1.8 times.</td></tr>
+      <tr><td>Spend, wasted</td><td>Runs with waste, 412</td><td class="n">544 across the six causes</td><td>Overlap would explain it, and the copy says each cause is a frame pattern, not a guess.</td></tr>
+      <tr><td>Agents, list</td><td>Agents here 38, enrolled 38</td><td class="n">4 rows</td><td>The enrolled figure re-uses the agent count, so it claims every agent is enrolled.</td></tr>
+      <tr><td>Audit, receipts footer</td><td>N of 1,204 receipts</td><td class="n">4 receipts</td><td>Also the count of actions on one API key and the runs in one export, which are different quantities.</td></tr>
+      <tr><td>Steering, tab and chip</td><td>Records 7, then All 8</td><td class="n">8 records, 7 published</td><td>Two counts of one list, a few pixels apart.</td></tr>
+      <tr><td>Organization, budgets</td><td>Organization used $18,402.66</td><td class="n">$16,258.03 across both workspaces</td><td>There are only two workspaces, so $2,144.63 of organization spend belongs to no workspace.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Figures typed where the caption states a formula</h3>
+  <p class="dek">Each of these prints the formula beside a number that the formula did not
+  produce. The specification names the inputs and they exist in the fixtures.</p>
+  <ul>
+    <li><strong>Fleet cache hit rate, 81 per cent.</strong> The caption gives the formula as cache reads over uncached input plus cache reads. Every run carries a cache figure. None is aggregated.</li>
+    <li><strong>Agent detail cache hit rate, 78 per cent.</strong> Reads a cache field on the agent record or falls back to 0.78. Agent records have no cache field, so it is always the fallback.</li>
+    <li><strong>Audit median time to resolve, 2h 38m.</strong> The five resolved incidents carry opening and closing times. Their median is 1h 22m and their mean is 1h 3m.</li>
+    <li><strong>Policy simulation, about 37 a day and 96.8 per cent of calls.</strong> Both read as derived from the counts beside them, and both are strings that happen to match.</li>
+    <li><strong>Billing this period.</strong> The run count, the per-run price and the discount rate are all present, and the three amounts are stored. Nothing multiplies or subtracts.</li>
+    <li><strong>Run cost detail.</strong> One token breakdown with its cost in micro-USD is printed for every model response frame, including two whose own summaries give different token counts.</li>
+  </ul>
+
+  <h3>One quantity, two numbers</h3>
+  <div class="tw"><table>
+    <thead><tr><th>Quantity</th><th>One place says</th><th>The other says</th><th>Why they differ</th></tr></thead>
+    <tbody>
+      <tr><td>Mandate remaining authority</td><td>$1,265.40 on the mandate page</td><td>$1,115.40 in the receipt</td><td>The receipt's figure is typed and $150 short. The mandate bar itself switches between a stored figure and a computed one, which gives $3,715.40.</td></tr>
+      <tr><td>Cost of one run</td><td>$4.13, and the transcript's usage rows sum to exactly that</td><td>$1.3548 from the sixteen frame costs</td><td>Two cost ledgers for one run, one reconciled and one not.</td></tr>
+      <tr><td>Retention price</td><td>$0.04 a month for 41 GB on Audit</td><td>$0.10 per GB-month on Billing, so $4.10</td><td>Both typed. The size is 41.2 GB in three places and 41 GB in two others.</td></tr>
+      <tr><td>Data plane region</td><td>us-east-1 on Organization</td><td>us-west-2 in the account dialog</td><td>One reads the fixture, the other is typed.</td></tr>
+      <tr><td>Merkle root</td><td>Sixteen hex characters on the chain tab</td><td>Thirty-two in the compacted panel</td><td>Both typed, for the same run's seal.</td></tr>
+      <tr><td>Pull requests in one run</td><td>38 in the run summary</td><td>27 in the tool output, the steer, the lint, the compare and the release notes</td><td>Nothing produces 38.</td></tr>
+      <tr><td>Key-day variance</td><td>$241.18 on Spend, attributed to one agent</td><td>$0.83 in a notification, for a different provider</td><td>Same mechanism, two orders of magnitude apart, never reconciled. The agent named on Spend has $71.09 of total spend.</td></tr>
+      <tr><td>Oxagen's own assistant spend</td><td>$1,082.45 inside the customer's September spend</td><td>The same $1,082.45 as platform-cap consumption on Organization, while Billing says in-app agent runs are free</td><td>Three pages, one figure, three stories.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Claims of a basis with nothing behind them</h3>
+  <p class="dek">The specification's interaction rule is that every badge describing trust shows
+  the recorded value and nothing stronger, and every money figure shows its basis. These
+  assert a basis that no record supplies.</p>
+  <ul>
+    <li><strong>The no-gaps badge on the chain tab is unconditional.</strong> It shows whatever the run's replay grade, beside a completeness-gap line that degrades to a typed three.</li>
+    <li><strong>Chain position 27 of 31, verified.</strong> A fixture string. Nothing verifies, and the Verify button on an export reveals a pre-written transcript.</li>
+    <li><strong>gateway_observed as a basis chip</strong> is hard-coded on the Spend header, on every model row, on the tool table header and under Fleet's spend tile, including where one run in the same total is client-attested.</li>
+    <li><strong>Settled this period, from the ledger.</strong> Reads a stored figure; the ledger printed beside it is four hard-coded rows that add to it by hand.</li>
+    <li><strong>A Stripe charge for $18.00 with no receipt,</strong> presented at severity critical as money Oxagen did not govern, and repeated in five places. No record of it exists in any fixture.</li>
+    <li><strong>Rounded to cents once, half-even.</strong> The total is stored. No rounding happens.</li>
+    <li><strong>Blast radius on all ten kill switches</strong> is free prose asserting counts of tool versions, agents, mandates and runs in flight, reprinted as fact in the confirmation dialog and again in the banner after a flip.</li>
+    <li><strong>Fabricated digests.</strong> Frame hashes are arithmetic on the sequence number. A tool's schema digest on approval comes from the length of its name. Commit-draft telemetry, presented as usage from a named model at a named tier, is three formulas over the diff size.</li>
+  </ul>
+
+  <h3>Two measures that render as one number</h3>
+  <p class="dek">The subtlest class, and the one most likely to survive into production. Productive
+  ratio counts steps that advanced the task. Proven spend counts runs whose witness verdict
+  flipped. They are different measures, and the mockup shows them as the same figure.</p>
+  <ul>
+    <li>At organization level the productive ratio reads 43 per cent, and proven divided by spend is also 43.0 per cent.</li>
+    <li>On an operator drill-down, the productive ratio tile and the proven spend tile's sub-label both read 55 per cent, side by side in one row of four.</li>
+    <li>On Agent detail the proof rate is computed by multiplying the run count by the productive ratio, and labelled as runs flipped. That agent has no flipped run at all. Cost per proven flip and business value both inherit the error.</li>
+  </ul>
+  <div class="note"><p><b>This was the one to fix before the numbers became real, and it is
+  fixed.</b> The other defects were wrong values that a real query would replace. This one was a
+  wrong definition that a real query would have faithfully implemented, because the label and the
+  formula disagreed and only the label was visible. Agent records now carry a flipped-run count
+  of their own, the two agents with no proven spend carry zero, and the productive ratio has its
+  own row beside the proof rate.</p></div>
+
+  <h3>What stays open</h3>
+  <p class="dek">These were left alone deliberately. Each needs a decision rather than a
+  patch, and inventing a number would be worse than leaving the one that is there.</p>
+  <ul>
+    <li><strong>The fixture is five agents deep against a fifty-agent story.</strong> The workspace agent count is a real field and stays, but no 30-day figure can be derived from five records. Deepening the fixture is a content decision.</li>
+    <li><strong>Cross-cut spend contradicts itself by direction.</strong> Each entity's breakdown sums exactly to its own spend, yet the same dollar appears once as a named tool and once as unattributed when read the other way. Fixing this means rebuilding the spend fixture as one matrix rather than per-entity lists.</li>
+    <li><strong>The reconciliation variance is attributed to an agent whose total spend is a third of it,</strong> and a notification reports a different variance for the same mechanism. Which story is right is a product decision.</li>
+    <li><strong>Two of three invoices do not follow the page's own price list,</strong> and the retention price differs between two pages by a factor of a hundred. Both need someone to say which figure is correct.</li>
+    <li><strong>Frame-level detail panels print one record's values for every frame.</strong> Fixing this means giving each frame kind its own body in the fixture, which is a larger content pass.</li>
+    <li><strong>The run summary says 38 pull requests where everything else says 27.</strong> A one-word change, but it is demo narrative rather than a derivation, so it belongs with whoever owns the script.</li>
+  </ul>
+</section>
+
+<section id="unbuilt">
+  <p class="eyebrow">Six</p>
+  <h2>Unbuilt surface</h2>
+  <p class="dek">What the specification asks for, set against what exists in the monorepo today.
+  Three questions per row: is there a page, is there a data source, and is anything reading it.</p>
+  <h3>The ten pages against the app that exists</h3>
+  <div class="tw"><table>
+    <thead><tr><th>Target page</th><th>Page today</th><th>Data source</th><th>Anything reading it</th><th>The gap in one line</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Fleet</strong></td><td><span class="mk bar partial">Partial</span> A workspace spend and graph dashboard, plus an org metering cockpit</td><td><span class="mk bar schema">Schema only</span> run and run-event tables; external agent session tables</td><td><span class="mk tri absent">No</span></td><td>Nothing lists live agents or runs with their state, and the approvals queue has a table and a resolver but no inbox.</td></tr>
+      <tr><td><strong>Run</strong></td><td><span class="mk tri absent">None</span> The sessions route is a chat surface keyed by conversation</td><td><span class="mk bar schema">Schema only</span> digest-chained, seal-fenced run events</td><td><span class="mk tri absent">No</span></td><td>No run list, no frame timeline, no per-run rollup. The run-ledger package is declared as a dependency by two apps and imported by neither.</td></tr>
+      <tr><td><strong>Agents</strong></td><td><span class="mk live">Yes</span> Six pages: list, new, edit, environments, defaults, MCP</td><td><span class="mk live">Yes</span> agents and agent versions</td><td><span class="mk live">Yes</span></td><td>No credential or enrollment surface for first-party agents, and no per-agent spend attribution.</td></tr>
+      <tr><td><strong>Tools</strong></td><td><span class="mk live">Yes</span> Twelve pages across workbench, marketplace and governance</td><td><span class="mk live">Yes</span> tools, versions, MCP servers, consents, plugins</td><td><span class="mk live">Yes</span></td><td>No principal-to-tool grant with scope and expiry, and tool calls record no version, so an invocation cannot be tied to the schema that ran.</td></tr>
+      <tr><td><strong>Ontology</strong></td><td><span class="mk live">Yes</span> Seven pages across knowledge and GitHub settings</td><td><span class="mk live">Yes</span> schema registry, graph labels, ingestion</td><td><span class="mk live">Yes</span></td><td>Versions exist but no review flow over a proposed class change; recommendations produce suggestions with no proposal object.</td></tr>
+      <tr><td><strong>Steering</strong></td><td><span class="mk bar partial">Partial</span> A memory browser with a promotion queue; decay policy lives on another page</td><td><span class="mk live">Yes</span> context records, versions, promotions, citations</td><td><span class="mk live">Yes</span></td><td>No Context PR object: promotions are immediate accept or dismiss, with no diff, reviewer or merge state.</td></tr>
+      <tr><td><strong>Spend</strong></td><td><span class="mk bar partial">Partial</span> Three pages, none workspace-scoped and complete</td><td><span class="mk live">Yes</span> token usage, budgets, router outcomes</td><td><span class="mk live">Yes</span></td><td>The price book is hardcoded in a module with no table and no admin surface, so costs cannot be restated or reconciled.</td></tr>
+      <tr><td><strong>Organization</strong></td><td><span class="mk live">Yes</span> Nine pages</td><td><span class="mk live">Yes</span> org, workspace, IAM and auth tables</td><td><span class="mk live">Yes</span></td><td>No enterprise single sign-on. Auth is social OAuth with two-factor; the mockup shows an Okta SCIM badge.</td></tr>
+      <tr><td><strong>Billing</strong></td><td><span class="mk live">Yes</span> Subscription, invoices, usage</td><td><span class="mk live">Yes</span> twelve billing tables and Stripe webhooks</td><td><span class="mk live">Yes</span></td><td>No ledger tying metered usage back to invoice lines. The line-item table was dropped.</td></tr>
+      <tr><td><strong>Audit</strong></td><td><span class="mk live">Yes</span> Seven pages plus a signed export route</td><td><span class="mk live">Yes</span> partitioned security events with a coverage gate</td><td><span class="mk live">Yes</span></td><td>No legal-hold object, and no kill-switch surface: the emergency-deny tables have no reader, so the break-glass path is schema only.</td></tr>
+      <tr><td><strong>Account</strong> (a dialog)</td><td><span class="mk bar partial">Partial</span> Five pages with their own sidebar section</td><td><span class="mk live">Yes</span></td><td><span class="mk live">Yes</span></td><td>Needs collapsing into one dialog; the nav has a back-to-app escape hatch a dialog would make redundant.</td></tr>
+      <tr><td><strong>Auth flows</strong></td><td><span class="mk live">Yes</span> Six pages plus create-organization</td><td><span class="mk live">Yes</span></td><td><span class="mk live">Yes</span></td><td>Nothing material missing. Two callback routes, the CLI authorize consent screen and the GitHub post-install landing, are unmapped by the specification and need a home.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Five concepts on screen with no implementation at all</h3>
+  <p class="dek">Not partial, not schema-only. No table, no endpoint, no code anywhere in the
+  monorepo. Each one carries a page or a tab in the mockup.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Concept</th><th>Where it appears</th><th>Nearest thing that exists</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Mandates</strong></td><td>A Tools tab, an Agent tab, a detail page, a ledger, the approval chain, and every financial approval</td><td>Nothing. Zero matches in the repository.</td></tr>
+      <tr><td><strong>Receipts</strong></td><td>An Audit tab with a search, a dialog with six fact groups, and links from the assistant panel</td><td>Stripe payment receipts, which share only the name.</td></tr>
+      <tr><td><strong>Kill switches</strong></td><td>A Tools tab with ten switches, a confirmation dialog, a banner, and a deny-generation counter</td><td>Emergency-deny and deny-generation tables with no reader anywhere.</td></tr>
+      <tr><td><strong>Assurance results</strong></td><td>A Tools tab and an Audit tab, with ten cases and a release history</td><td>Eval tables in ClickHouse, for a different purpose.</td></tr>
+      <tr><td><strong>Legal holds</strong></td><td>An Audit tab, a place-hold dialog, a release dialog, and a blocked erasure</td><td>Retention policy versions, which configure retention but cannot hold it.</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="note"><p><b>The evidence ledger is built and unused.</b> Run, attempt, event, seal
+  and finalization tables implement a complete digest-chained, seal-fenced chain, and the package
+  that reads and writes them is a declared dependency of both the web app and the API with no
+  import site in either. Everything the interface shows about execution comes from an older
+  execution-step family and ClickHouse instead. The Run page is the one surface the specification
+  treats as the product's core claim, and the store it needs already exists.</p></div>
+
+  <h3>Surface with no specification, which is the inverse gap</h3>
+  <p class="dek">Three things are drawn, wired to fixtures, and load-bearing in the demo, while
+  the specification defines nothing behind them. These will be built because they are on screen,
+  unless someone decides otherwise.</p>
+  <ul>
+    <li><strong>A numeric agent trust score and spend score.</strong> Shown as pills on Fleet rows, approval cards, the Agents list, Agent detail and the mandate grant panel. Auto-approval rules gate on minimum trust and minimum spend thresholds. The specification's auto-approval conditions are a measure under a threshold, an allow list, mandate position, a standing approval, absence of taint, and business hours. No score appears anywhere in it, and the specification's own rule is that a badge describing trust shows a recorded value.</li>
+    <li><strong>An auto-approvals tab</strong> with three rules, an editor, a live qualifying-agent preview, and a claim of fifty-five historical auto-approvals. Auto-approval exists in the specification as a kind of policy rule, not as its own registry with its own scoring.</li>
+    <li><strong>A wasted-spend tab</strong> with six causes and a per-run waste share. The specification ranks findings by money at stake; it defines no waste total, no waste share and no per-cause breakdown.</li>
+  </ul>
+
+  <h3>States the chrome offers and no page implements</h3>
+  <ul>
+    <li><strong>The agent source editor has no load-state branch at all.</strong> Switching to empty, loading, error or denied leaves the editor fully rendered.</li>
+    <li><strong>The phone state is CSS only.</strong> No page, panel or dialog has a behavioural branch on it, so there is no one-thumb navigation anywhere, which is the third item of the review feedback on this set.</li>
+    <li><strong>Registration and all ten welcome screens have no empty state</strong>, and several carry neither an error nor a denied branch.</li>
+    <li><strong>The assistant's engine-down state is complete and unreachable.</strong> Nothing sets it; only the Retry button that clears it.</li>
+    <li><strong>Unknown routes render Fleet silently.</strong> There is no not-found state.</li>
+    <li><strong>The shared denied panel names a different person than the one signed in,</strong> on every page that can show it.</li>
+  </ul>
+
+  <h3>What this pass fixed</h3>
+  <p class="dek">Twenty-five defects, in three groups. Every change was driven in a headless
+  browser across the affected routes, with no script errors.</p>
+
+  <h4>Two functions were declared twice, so the later one won by hoisting</h4>
+  <ul>
+    <li><strong>The record kind badge was dead.</strong> A second function of the same name, written later for identity role kinds, took over the records page. Every Steering record and proposal card rendered a plain grey chip with a bare word, losing the six-kind icon badge and its tooltip that the statement-first card design is built around. The role version is now named for what it does, and all seven cards render their badges again.</li>
+    <li><strong>A timestamp parser lost its guard.</strong> Two parsers shared a name; the looser one won, so the proof tab's flip-timing calculation lost the null check protecting it against a malformed timestamp and would have printed a non-number. Each caller now gets the parser it was written against.</li>
+  </ul>
+  <p>No duplicate top-level function name remains. One command catches the whole class, and it
+  is worth running before any edit to this file, because everything lives in one script:</p>
+  <div class="tw"><table><tbody><tr><td><code>rg -o '^function ([A-Za-z_$][A-Za-z0-9_$]*)' mc.html -r '$1' | sort | uniq -d</code></td></tr></tbody></table></div>
+
+  <h4>Nine totals that contradicted their own rows now derive from them</h4>
+  <p class="dek">Each was a hand-typed figure above a table that disagreed. They cannot drift
+  again, because the header and the rows now read the same records.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Where</th><th>Was</th><th>Now</th></tr></thead>
+    <tbody>
+      <tr><td>Tools registry header and shown-count</td><td>3,182 tool versions</td><td>263, summed from the server rows</td></tr>
+      <tr><td>Ontology entity tile</td><td>176,879</td><td>158,120, summed from the class rows</td></tr>
+      <tr><td>Ontology relation and drift tiles</td><td>21 and 6, typed</td><td>Counted, with the drifting class names derived</td></tr>
+      <tr><td>Audit event strip, four tiles</td><td>12,418, 96, 4,117, 212</td><td>14, 1, 1 and 0, counted through the page's own actor classifier</td></tr>
+      <tr><td>Audit receipts footer</td><td>1,204</td><td>4, the receipt count</td></tr>
+      <tr><td>Agents enrolment tile</td><td>A second copy of the agent count</td><td>A separate workspace field, naming the shortfall</td></tr>
+      <tr><td>Agents mandate and incident tiles</td><td>Typed ones</td><td>Counted across the agent records, naming the agents</td></tr>
+      <tr><td>Steering records list</td><td>Tab said 7, chip said 8, list showed 8</td><td>All three say 7, matching the panel's own heading</td></tr>
+      <tr><td>Fleet spend tile</td><td>Called today, summed the filtered list</td><td>Named for what it sums, with every basis present shown</td></tr>
+    </tbody>
+  </table></div>
+
+  <h4>Fourteen figures that stated a formula now run it</h4>
+  <ul>
+    <li><strong>The proof rate is no longer the productive ratio.</strong> The single most consequential fix, for the reason given above.</li>
+    <li><strong>Both cache hit rates derive.</strong> Fleet spend-weights the runs it is showing; the agent strip reads its 30-day rollup. Each says plainly when nothing records the figure, instead of printing a constant.</li>
+    <li><strong>Spend per proven run derives from a flipped-run count</strong> on both the agent strip and the spend rollup, so it can never again equal spend per run.</li>
+    <li><strong>The oldest approval wait reads the same live clock the cards count down,</strong> rather than a frozen string copied from another workspace.</li>
+    <li><strong>Wasted spend share and approvals overturned</strong> derive, replacing two hard-coded percentages and an invented denominator.</li>
+    <li><strong>The denied panel names the person who is signed in.</strong> It was naming someone else while the top bar showed the real user. There is now one session accessor.</li>
+  </ul>
+</section>
+
+<footer>
+  <p>Sources: <span class="m">mc.html</span> at commit <span class="m">539fbc4</span>;
+  the Mission Control specification of 11 September 2026, sections 8, 9, 12 and 14 with
+  appendices A, B, E and F; and the <span class="m">oxagen</span> monorepo at its current head.
+  Every line reference was read rather than inferred.</p>
+</footer>
+
+</div>
+
+<script>
+/* Provenance rows. how: derived | fixture | literal. built: live | schema | absent. */
+var ROWS = [];
+function R(page,tab,label,how,expr,src,built,where,note){
+  ROWS.push({page:page,tab:tab,label:label,how:how,expr:expr,src:src,built:built,where:where,note:note});
+}
+
+/* ── Shell, present on every page ── */
+R("Shell","sidebar","Agents nav badge, 38","fixture","WS.agents (1277)","Count of iam.principals where kind is agent, in the workspace","live","agent.agents","Five agent records exist in the fixture and the table shows four rows.");
+R("Shell","sidebar","50 agents, shared plane","literal","literal 50 (3277)","Count of iam.principals; org.data_planes.mode","partial","agent.agents; no data_planes table","Typed into markup. The same 50 is asserted again on Agents and inside a kill-switch blast radius.");
+R("Shell","sidebar","Audit nav badge, 1","literal","literal 1 (3275)","Count of unresolved audit.audit_events at severity 10","live","security.security_events",null);
+R("Shell","sidebar","Fleet approvals badge","derived","pendingCount counts pending approvals (3248)","control.approvals where decision is null and expires_at is future","schema","agent.approval_requests, no list endpoint","Decays to zero as the demo clock expires the approval.");
+R("Shell","top bar","Notification unread dot","derived","notifUnread over NOTIFS (2128)","notification.notifications read state","live","notification.list",null);
+R("Shell","every table","Pager, 1 to 10 of 10","derived","ltPager counts rendered rows (8214)","Page count from the list endpoint","partial","Most list handlers return arrays, not pages","Injected into every table in the file by one post-render pass.");
+
+/* ── Fleet ── */
+R("Fleet","stats","Live runs","derived","RUNS filtered to status live, length (3384)","Run nodes with no Seal; cost.run_totals.sealed_at is null","schema","agent.agent_runs has no reader",null);
+R("Fleet","stats","of 38 agents in this workspace","fixture","w.agents (3394)","Count of iam.principals kind agent","live","agent.agents",null);
+R("Fleet","stats","Waiting on a human","derived","pendingCount (3395)","control.approvals still pending","schema","agent.approval_requests",null);
+R("Fleet","stats","oldest has waited 4m 12s of 10m","derived","max elapsed over pending approvals, off the live clock","Now minus the earliest control.approvals.requested_at, against expires_at","schema","agent.approval_requests","FIXED on this branch. Was a literal copied from another workspace and frozen while the card counted down. Now reads the same clock the cards do.");
+R("Fleet","stats","Spend today, $21.50","derived","sum over the runs currently listed (pFleet)","Sum of cost.run_totals.cost_micros for the day","partial","ClickHouse billing.token_usage sums cost_usd_micros","FIXED on this branch. Relabelled \"Spend, runs shown\": it always summed the filtered list, never the day, and the old label made the filter look like a bug.");
+R("Fleet","stats","gateway_observed, USD","derived","distinct basis values across the runs summed","cost.run_totals.cost_basis, per run","schema","No cost_basis column exists","FIXED on this branch. Was a hard-coded basis over a total that mixes two. Now renders every basis present, so the mixed case is visible.");
+R("Fleet","stats","Cache hit rate 81%","derived","spend-weighted over the runs shown (pFleet)","cache_read divided by input_uncached plus cache_read, section 12.6","partial","cached_tokens column exists; no rate is computed anywhere","FIXED on this branch. Was per(0.81), a constant under a caption stating the formula. Now derived from the same runs the tile sums, and says so when no run records it.");
+R("Fleet","table","Run id and task title","fixture","r.id, r.taskTitle (3368)","Run node id; FOR_TASK edge to an Issue or PullRequest","schema","agent.agent_runs",null);
+R("Fleet","table","Status badge","derived","statusBadge of runStatus (3371)","Run lifecycle from frames, with pause from control.commands","schema","agent.agent_runs",null);
+R("Fleet","table","Enforcement tier badge","fixture","tierBadge of r.tier (3372)","cost.run_totals.enforcement_tier, computed at seal","schema","No column exists",null);
+R("Fleet","table","Replay grade badge","fixture","gradeBadge of r.grade (3373)","cost.run_totals.replay_grade, computed from completeness gaps","absent",null,"Nothing computes a replay grade today.");
+R("Fleet","table","Verdict, N attempts","derived","verdictCell over flip.attempts.length (2484)","proof.observed frame; cost.run_totals.verdict","absent",null,"The witness runner is Series A work. Nothing produces a verdict today.");
+R("Fleet","table","Cost and basis","fixture","usd(r.cost) and r.basis (3375)","cost.run_totals","partial","billing.token_usage",null);
+R("Fleet","table","Frames","fixture","r.frames (3376)","Run node frame_count","schema","agent.agent_run_events",null);
+R("Fleet","table","Trust 842 and Spend 731 pills","fixture","scorePair reads SCORES (7346)","Nothing. No trust or spend score exists in the specification.","absent",null,"Invented in the mockup, and auto-approval rules gate on it. The specification's own rule is that a badge describing trust shows the recorded value; nothing records this one.");
+
+/* ── Approvals panel ── */
+R("Approvals","card","Headline amount, $2,450.00 USD","fixture","usd(a.amount), which does no formatting (2469)","A measure read from the call by the tool version's declared path, section 6.9","absent",null,"The same amount is typed in four places: the approval record, two rule texts, the mandate reserved field, and a hard-coded ledger row.");
+R("Approvals","card","Countdown, 5:48","derived","mmss of apLeft; seedApprovals parses the waited string (2312)","control.approvals.expires_at","schema","agent.approval_requests",null);
+R("Approvals","chain","N rules required approval","derived","rules filtered to approve (3455)","control.approvals.rule_ids","schema",null,null);
+R("Approvals","mandate bar","settled $1,284.60, 25.7%","derived","money(used) over money(perPeriod) (3449)","Sum of settle rows in tools.mandate_ledger over the mandate's per-period limit","absent",null,null);
+R("Approvals","mandate bar","remaining $1,265.40","fixture","m.remaining when a reservation shows, else perPeriod minus used (3442)","tools.mandate_ledger.balance_after","absent",null,"One label, two bases. The computed branch yields $3,715.40 for the same mandate.");
+R("Approvals","card","Amount in micro-USD, 2 450 000 000","derived","round of money(amount) times a million (3544)","Micro-USD integers are the stored form, section 12.3","absent",null,null);
+R("Approvals","card","Idempotency idk_c81f04ea","derived","a slice of the input digest (3543)","control.tool_calls.idempotency_key","absent",null,"Cut out of the digest string rather than recorded.");
+R("Approvals","card","Auto-approval eligibility line","derived","autoEligibility over the rules and the scores (7582)","Approval rule conditions: a measure under a threshold, an allow list, mandate position, taint, hours","absent",null,"The mockup gates on a trust score the specification does not define.");
+R("Approvals","toast","Mandate settled, $1,265.40 left","fixture","m.remaining (3564)","balance_after on the settle row","absent",null,"Approving moves nothing. The bar still shows the same reserved slice afterwards.");
+
+/* ── Run ── */
+R("Run","summary","Summary prose, 38 pull requests","literal","R.summary (1342)","Generated at the light tier and recorded on a frame","absent",null,"Every other surface in the same run says 27: the tool output, the steer, the lint, the compare, and the release notes.");
+R("Run","summary","generated, not the record pill","literal","literal (2369)","Model-generated prose is labelled and recorded on the frame","absent",null,null);
+R("Run","linked work","inferred, 97%","derived","round of the confidence field (4160)","Entity resolution confidence, section 11.2","partial","ingestion mappings exist, no per-edge confidence",null);
+R("Run","linked work","Per file, +84 -12","literal","a literal note and a computed diff stat side by side (4176)","file_io frames, or the pull request diff from GitHub events","partial","github webhook and repo handlers","Two figures for one quantity, one typed and one computed. Nothing makes them agree.");
+R("Run","instruments","Cost so far, $4.13","fixture","usd(R.cost)","A prefix sum over the cost records on frames up to this sequence, section 8.4","schema","No run cost rollup is read",null);
+R("Run","instruments","$0.59 per turn, turn 5 was the dearest","derived","runSeries divides the total by the turn count (3710)","cost.turn_totals","absent",null,null);
+R("Run","instruments","versus this agent's median run, $2.89","derived","spend30 divided by runs30 (3754)","cost.daily_totals by agent","partial","usage analytics aggregate","Labelled median, computes the mean.");
+R("Run","instruments","Cost bars per turn","derived","RUN_TURNS when the turn count matches, otherwise a seeded generator (3704)","cost.turn_totals","absent",null,"Invented for every run but one, from a generator seeded on the run id.");
+R("Run","instruments","cache hit 83%, saved about $2.09","derived","per(R.cache); total times cache average times 0.9 times 0.55 (3756)","Cache hit rate and cache write cost share, section 12.6","absent",null,"The saving rests on two invented coefficients.");
+R("Run","instruments","7 turns, 41 steps, 186 frames","fixture","R.turn, R.steps, R.frames (3758)","Turns and steps derived from frames; Run node frame_count","schema","agent.agent_run_events",null);
+R("Run","instruments","16 frames in view","derived","FRAMES.length (3757)","Frame nodes belonging to this run","schema",null,"One global sixteen-frame excerpt is rendered for every run, beside that run's real frame count in the same sentence.");
+R("Run","instruments","Productive ratio 71%, +13 points on 62%","fixture","per(R.ratio) and a delta against the agent (3763)","cost.run_totals.productive_ratio, section 12.8","absent",null,null);
+R("Run","instruments","12 steps did not move the task: 7 retries, 3 re-reads, 2 waits","derived","ceil of idle times .55, floor of idle times .3, remainder (3767)","The step grading ladder, or the deterministic rubric, section 12.8","absent",null,"The three-way split is invented.");
+R("Run","timeline","model calls 4, tool calls 2, governance 4, context 1","derived","frame kinds counted by class (3784)","Frame kinds, section 8.2","schema","agent.agent_run_events",null);
+R("Run","transcript","Burn, $0.00 of $4.13","derived","sum of usage cost rows (3902)","Prefix sum over model.response cost records","schema",null,"The seven usage rows sum to exactly 4.1300, matching the run. The sixteen frame costs sum to 1.3548. Two ledgers for one run.");
+R("Run","transcript","usage, in 3,368, cache 12,000, out 412","fixture","transcript usage meta (3931)","Normalized token classes on the cost record, section 12.6","partial","billing.token_usage carries these four columns",null);
+R("Run","player","model.response detail, input_uncached 3,368, cache_read 12,000, output 412, cost_micros 412,600","literal","hard-coded table cells (4189)","The cost record on that model.response frame, section 12.3","partial","billing.token_usage","Rendered for every model.response frame, including the two whose own summaries read 902 in and 688 out, and 264 in and 501 out.");
+R("Run","player","cache hit rate 78%, 12,000 of 15,368","derived","per of 12000 over 15368 (4205)","Section 12.6","partial",null,"Correct formula over two hard-coded operands.");
+R("Run","player","time to first token 640 ms, total 7.37 s, 0 retries","literal","hard-coded (4206)","Latency and provider retries on the cost record","absent",null,null);
+R("Run","player","Frame hash and prev_hash","derived","a hex string built from the sequence number (4250)","SHA-256 over prev_hash and the canonical envelope, section 8.3","schema","agent.agent_run_events is digest-chained but unread","Fabricated arithmetic on the sequence number, under the hash-chain rule.");
+R("Run","player","token_issued detail, TTL 5 minutes","literal","hard-coded (4236)","tools.credential_grants scope and expires_at","absent",null,null);
+R("Run","proof","flipped on attempt 3 of 3, 1m 18s before the agent ended turn 4","derived","attempt count and a timestamp difference (3526)","The proof.observed frame body, section 8.5","absent",null,null);
+R("Run","proof","Witness run cost $2.87 USD, billed at zero","literal","hard-coded (4822)","The witness run's own cost rollup, section 8.5","absent",null,"Shown on every run carrying a verdict, including a failing run whose own cost is $3.42.");
+R("Run","proof","Probe attempts 0","literal","literal (4796)","audit.audit_events of kind witness_probe","absent",null,null);
+R("Run","proof","Held-out witnesses, 2 of 5","fixture","the flip field, else a literal (4797)","The held-out share per workspace, section 8.5","absent",null,null);
+R("Run","cost","Waterfall, turns 1 to 7","literal","a local literal array with a hard-coded maximum (4826)","cost.turn_totals","absent",null,"A duplicate of the run-instrument series, identical for every run, ignoring that run's own cost and turn count.");
+R("Run","cost","Prompt composition: conversation 14,190, context 11,204, tools 2,118, steering 1,340","literal","a literal array over a literal total (4840)","The measured tool_definition, context_frame and steering token fields, section 12.6","partial",null,"Internally consistent, and the same four numbers are re-typed in five other places.");
+R("Run","cost","Effective input price, $1.88 per million","literal","literal (4845)","Cost of all input classes over input_uncached plus cache_read","absent",null,null);
+R("Run","policy","Policy rows, 6 ms and 7 ms","literal","two hard-coded rows (3674)","policy.decision frames; control.tool_calls.decision_rule_ids","partial","iam.authorization_decisions existed and was dropped","The tab count beside these rows is computed from frames. The rows are not.");
+R("Run","context","Composition band percentages","derived","each block's tokens over the window total (4328)","The context.assembled frame usage report","absent",null,null);
+R("Run","context","Frame budget, 11,204 of 18,000","derived","used over budget (4379)","context.assembled budget","absent",null,null);
+R("Run","context","Candidates scored 41, admitted 6, held 4, below the floor 31","fixture","context window fixture fields (4382)","Hybrid retrieval and reranking, section 11.5","absent",null,"Internally consistent, and re-typed as literals in the transcript recall row, the cost composition, and three narrative claims.");
+R("Run","chain","Frames 186, dense seq 0 to 185","derived","frame count and frame count minus one (4856)","Dense frame sequence with no gaps, section 8.3","schema","agent.agent_run_events enforces dense seq",null);
+R("Run","chain","no gaps badge","literal","unconditional literal (4855)","Seal completeness_gaps","schema",null,"Shown whatever the run's replay grade, beside a gap count that degrades to a literal three.");
+R("Run","chain","Checkpoints 7, telemetry_gap frames 0","literal","literals (4858)","Checkpoint nodes; telemetry_gap frames","schema",null,null);
+R("Run","chain","Merkle root, sha256:b41e07c9a2f5308d","literal","literal (4864)","Seal merkle_root, an RFC 6962 root over every frame hash","schema","agent_run_attempt_seals exists, unread","Sixteen hex characters here, thirty-two in the compacted panel. Both typed by hand.");
+
+/* ── Agents ── */
+R("Agents","stats","Agents here, 38","fixture","the workspace row agent count (pAgents)","Count of iam.principals kind agent","live","agent.agents","FIXED on this branch. The count is a legitimate workspace field, so it stays; the sub-label now says how many are actually listed and derives the org total.");
+R("Agents","stats","Enrolled, 38","fixture","the workspace row enrolled count","control.enrollments at status active","partial","tacho enrollment handlers","FIXED on this branch. Was a second copy of the agent count, which claimed every agent was enrolled. The workspace row now carries enrolment separately and the tile names the shortfall.");
+R("Agents","stats","Holding a mandate, 1","derived","agents carrying a mandate, counted (pAgents)","Count of tools.mandates at status active","absent",null,"FIXED on this branch. Was a literal that happened to match. Now counted, and it names the agents.");
+R("Agents","stats","Tamper incidents, 1","derived","incidents summed across agent records (pAgents)","audit.audit_events of kind hooks_removed and its siblings","live","security.security_events","FIXED on this branch. Was a literal that happened to match. Now summed.");
+R("Agents","table","Belt, 14","fixture","a.belt","Count of role grants resolving to tool versions","partial","iam.role_grants",null);
+R("Agents","table","Runs 30d 212, Spend 30d $612.48, Proven 30d $318.22","fixture","agent fixture fields","cost.daily_totals by agent, section 12.7","partial","usage analytics by principal","Proven spend needs a verdict, which nothing produces.");
+
+/* ── Agent detail ── */
+R("Agent","score","Trust score, 842","fixture","the scores fixture (7372)","Nothing in the specification","absent",null,"Unlisted agents fall back to 500 plus ratio times 400 minus incidents times 250.");
+R("Agent","score","Proof rate, 131 of 212 runs flipped, 62%","fixture","the agent row flipped30 count (scoreStrip)","Count of runs whose verdict is flipped, section 8.5","absent",null,"FIXED on this branch. Was the run count multiplied by the productive ratio and labelled as flipped runs. Agents now carry a flipped-run count, the two agents with no proven spend carry zero, and the productive ratio gets its own row so the two measures can no longer be read as one.");
+R("Agent","score","Cost per proven flip, $4.67","derived","spend divided by the flipped-run count (scoreStrip)","Spend per proven run, section 12.8","absent",null,"FIXED on this branch. Relabelled \"Spend per proven run\" and now divides by real flipped runs, so it no longer inherits the mislabelled count.");
+R("Agent","score","Cache hit rate, 78%","derived","the agent spend rollup, else its runs (agentCache)","Section 12.6","partial",null,"FIXED on this branch. Was always the 0.78 fallback because agent records carry no cache field. Now reads the 30-day rollup and says so when nothing records it.");
+R("Agent","score","Wasted spend share, 4%","derived","wasted over spend from the agent rollup","cost.findings estimated saving, section 12.8","absent",null,"FIXED on this branch. Was one of two hard-coded percentages chosen by a threshold on an unrelated ratio.");
+R("Agent","score","Trust delta, +12 or -8","literal","a ternary on the score band (7386)","A trend over cost.daily_totals","absent",null,null);
+R("Agent","score","Approvals overturned, 0 of 24","derived","denied over resolved approvals for this agent","control.approvals decisions for this agent","absent",null,"FIXED on this branch. The denominator was the run count divided by nine. Now counts real approvals, and says so when none have parked.");
+R("Agent","identity","principal id, credential prefix, 3 live now, device key","literal","hard-coded (4970)","iam.principals.public_id, iam.credentials prefix, control.enrollments.device_public_key","live","iam.principals, auth.api_keys",null);
+R("Agent","definition","Every definition field","derived","a real TOML parse of a seeded document (2779)","The agent definition file in the main repository, section 6.2","absent",null,"No repository-backed agent definition exists in code; agents are rows, not files.");
+R("Agent","definition","draft sha, 1a2b3c4","derived","an FNV hash of the draft text (2803)","definition_digest at the last merged commit","partial","agent.agent_versions",null);
+R("Agent","toolbelt","full belt, 14 tools, 2,118 definition tokens","fixture","a.belt and a literal (4992)","Role grants; tool_definition_tokens, section 12.6","partial","iam.role_grants","The table beneath it is a ten-row literal array, so fourteen never matches ten.");
+R("Agent","toolbelt","Schema digest per tool","derived","a hex string built from the call count (4952)","tools.tool_versions.schema_digest","live","agent.tool_versions","Fabricated from the thirty-day call count.");
+R("Agent","budgets","Per run, hard $2.00, highest run this month $1.36","fixture","budget and budgetUsed (5021)","billing.budgets limit_micros and spent_micros","live","billing.spend_budgets","That agent's live run is shown elsewhere costing $4.13 against a hard $2.00 cap, which a hard budget would have stopped.");
+R("Agent","findings","$41.77 at stake","fixture","usd of the saving field (5031)","cost.findings estimated saving in micro-USD, section 12.8","absent",null,"No findings job and no findings table exist.");
+R("Agent","enrollment","harness 2.9.4, macOS 15.6, first frame 2 March 2026","literal","hard-coded (5049)","control.enrollments fields","live","tacho.hosts and enrollment handlers",null);
+R("Agent source","editor","Commit draft, 402 tokens, $0.0002, 510 ms","derived","310 plus changes times 46 plus body length; tokens times 0.0000004; 420 plus changes times 90 (3135)","A real model call with its own cost record, section 12.3","absent",null,"Presented as telemetry from a named model at a named tier. All three numbers are formulas over the diff size.");
+R("Agent source","editor","New pull request number, 523","derived","523 plus the count of pending definitions (3198)","The number GitHub returns when the pull request opens, section 10.3","partial","github handlers can open a pull request",null);
+
+/* ── Mandate ── */
+R("Mandate","detail","Per call $250.00, per period $5,000.00, 50 calls per day","fixture","mandate fixture fields","tools.mandates.limits, section 6.9","absent",null,"No mandate table, no mandate code, anywhere in the monorepo.");
+R("Mandate","detail","Settled $1,284.60 this period, from the ledger","fixture","usd of the used field (5090)","Sum of settle rows in tools.mandate_ledger","absent",null,"The ledger printed beside it is four hard-coded rows that happen to add up to this figure.");
+R("Mandate","ledger","Reserve, settle and release rows","literal","hard-coded rows (5098)","tools.mandate_ledger, append-only, with balance_after","absent",null,null);
+R("Mandate","detail","Stripe charge for $18.00 has no receipt","literal","hard-coded (5117)","The reconciler matching settlements against the connection's own activity, section 6.9","absent",null,"Presented at severity critical, money moved that Oxagen did not govern, and stated twice. No record behind it anywhere in the fixtures.");
+
+/* ── Tools ── */
+R("Tools","registry","Eight servers, 3,182 tool versions","derived","server count and summed versions (srvCount, verCount)","Count of tools.tool_versions in the workspace","live","agent.tool_versions","FIXED on this branch. Was a literal over rows summing to 263. Both the header and the shown-count now derive, so they cannot drift again.");
+R("Tools","registry","15 of 3,182 shown","derived","the selection length, against the literal (5176)","Count","live","agent.tool_versions",null);
+R("Tools","registry","Server row: tools 41, versions 63, health","fixture","server fixture fields (5144)","tools.tool_servers, a count of tool_versions, last_import_at","live","mcp.mcp_servers, mcp.tool_snapshots",null);
+R("Tools","registry","Gate today","derived","kill switch, then financial tag, then irreversible effect (2666)","The compiled policy decision, section 6.12","absent",null,"One of the few genuinely derived governance displays in the file.");
+R("Tools","registry","Schema origin and digest","derived","origin and digest flip once a schema is approved (2562)","tools.tool_versions schema_origin and schema_digest","live","agent.tool_versions","Approving fabricates the new digest from the length of the tool name.");
+R("Tools","registry","On belts 6, calls 30d 1,284","fixture","tool fixture fields","Role grants; a count of control.tool_calls","partial","agent.agent_tool_calls records no tool version",null);
+R("Tools","registry","3,106 responses from 9 agents, 0 outliers discarded","fixture","two fixture fields and a literal (7124)","Observed schema inference before approval, section 6.4","absent",null,null);
+R("Tools","connections","Grants 30d, 8,142","fixture","connection fixture field","Count of tools.credential_grants","absent",null,"No credential broker and no grant table exist.");
+R("Tools","connections","Slack review is overdue, next review was 12 September, 311 grants","literal","hard-coded (5202)","tools.connections.review_at compared against now","partial","ingestion.source_connections","The status is a fixture string. No date is ever compared to a clock, so nothing becomes overdue on its own.");
+R("Tools","connections","Broker grant rows","literal","hard-coded (5207)","tools.credential_grants with scope and TTL","absent",null,null);
+R("Tools","policy","Rules 38, tests 42 of 42 pass","fixture","policy fixture fields (5240)","tools.policy_versions tests and test_result","absent",null,"The test result is a single string rendered inside a pass badge.");
+R("Tools","policy","41,882 calls, 214 now denied, 1,106 now need approval, 9 freed, 40,553 unchanged","fixture","simulation fixture (5246)","Replaying the new version against the workspace's last N days of tool calls, section 6.12","absent",null,"Internally consistent and entirely typed. The derived-looking captions, about 37 a day and 96.8 per cent, are hard-coded strings that happen to match.");
+R("Tools","policy","Re-run over 90 days, 3,418 calls would change","literal","a toast literal (5254)","A second simulation run","absent",null,null);
+R("Tools","switches","deny generation 118","derived","seeded at 118, incremented on each flip (5272)","The deny_generation counters on the organization and the workspace, section 6.11","schema","iam.authorization_deny_generations has no reader","The increment behaviour is right. The tables exist and nothing reads them.");
+R("Tools","switches","Blast radius: 7 tool versions, 2 agents, 2 mandates, 1 run in flight","literal","a prose field on the switch (6663)","A count of the grants, agents and in-flight runs the deny would stop","absent",null,"Free prose on all ten switches, reprinted as fact in the confirmation dialog and again in the banner after the flip.");
+R("Tools","auto-approvals","Rules on 2 of 3, auto-approved 55, held by a floor 9","derived","sums over the rule fixtures (7617)","Approvals whose resolver is a policy rule rather than a person, section 6.9","absent",null,"Claims fifty-five historical auto-approvals with no frames, receipts or runs behind them.");
+R("Tools","auto-approvals","Median wait saved, 3m 40s","literal","literal (7620)","Approval resolution times","absent",null,null);
+R("Tools","assurance","9 pass, 1 not applicable, 0 fail","fixture","assurance fixture counts (5279)","The adversarial tool-governance suite's published results, section 6.13","absent",null,"Eval tables exist in ClickHouse for a different purpose. There is no assurance concept in code.");
+/* ── Ontology ── */
+R("Ontology","model","Classes, 9","derived","CLASSES.length (5337)","Class nodes defined by the active OntologyVersion","partial","schema_registry.node_labels",null);
+R("Ontology","model","Entities, 176,879","derived","entity counts summed across the class rows (ontEntities)","Count of Entity nodes in the workspace","partial","Neo4j entity labels exist","FIXED on this branch. Was a literal 18,759 above the sum of its own rows. Relation types and drift now derive too, including the class names in the sub-label.");
+R("Ontology","model","Relation types, 21","literal","hard-coded (5339)","Count of RelationType nodes","partial",null,"Typed, and correct: the class rows do name 21 distinct relations. A reader cannot tell it apart from the entity tile, which is typed and wrong.");
+R("Ontology","model","Drift found, 6","literal","hard-coded (5340)","Declared tables compared against the live schema, section 11.7","absent",null,"Typed, and matches the sum of the per-class drift counts.");
+R("Ontology","model","Per class: entities, freshness, most cited, rules, proven runs","fixture","class fixture fields (5329)","Entity counts, sync recency, USED_CONTEXT edges, rules referencing the class, proven runs per class","partial","graph.stats gives node and edge counts only",null);
+R("Ontology","model","Embedding index recall 91%, citation rate 74%","fixture","per() over two fixture fractions (5348)","The per-workspace retrieval evaluation set built from context_use_feedback records, section 11.5","absent",null,"No retrieval evaluation exists. Voyage embeddings are not wired.");
+R("Ontology","graph","Cypher, EXPLAIN plan, 8,204 estimated rows, node budget 50,000","literal","hard-coded (5360)","The compiled query, its plan check and the injected budget, section 11.6","partial","ontology.query and graph.explore exist","No Cypher compiler, parser or injector exists.");
+R("Ontology","graph","Compiler confidence 0.86","literal","hard-coded (5371)","The compiler's own confidence, labelled as such","absent",null,"Printed as a raw decimal while every other ratio on the page goes through the percentage helper.");
+R("Ontology","graph","Answer, 14 nodes cited","literal","hard-coded in two places (5373)","The cited nodes returned as context frames","absent",null,"The three answer rows beneath list 13 tickets, not 14.");
+R("Ontology","sources","Source records 184,022, last sync, health, cursor","fixture","source fixture fields (5396)","SourceRecord nodes; sync cursor and health on the connector row","live","ingestion.source_connections and connector handlers",null);
+R("Ontology","sources","1,461 Customer entities from 2 sources","literal","hard-coded (5413)","DERIVED_FROM edges per entity","partial",null,"The count is right. Only one source produces Customer, so two sources is unsupported.");
+R("Ontology","repositories","Head, last indexed, issues imported, event health, symbols","fixture","repository fixture fields (5422)","wrk.repositories last_indexed_sha, indexing_status, issue backfill, event bookkeeping","live","ingestion.repository_bindings and github webhook",null);
+R("Ontology","repositories","Events in, ten event kinds over 30 days","literal","a literal array (5444)","Event nodes with delivery ids, section 11.4","live","github webhook records deliveries","These sum to 19,210. The per-repository event strings in the same tab sum to 10,686, for the same window and the same repositories.");
+R("Ontology","repositories","Data-layer findings table, confidence high and low","literal","hard-coded rows (5434)","READS and WRITES edges with confidence and evidence, section 11.7","absent",null,"The data layer of the code graph is Series A work.");
+R("Ontology","versions","Version, commit, merged, pull request, diff","fixture","version fixture fields (5458)","OntologyVersion nodes indexed from the ontology directory in git, section 11.8","partial","schema_registry.schema_versions, activated by API not by merge",null);
+R("Ontology","versions","as_of picker offering v16","literal","hard-coded (5489)","Prior versions stay queryable by as_of","partial",null,"Version sixteen exists in no fixture, under a panel headed prior versions stay queryable.");
+
+/* ── Steering ── */
+R("Steering","records","Records tab badge, 7","derived","published records counted (5509)","Record nodes at status published","partial","agent.context_records",null);
+R("Steering","records","All chip, 8","derived","published records counted, matching the tab","Count of records","partial",null,"FIXED on this branch. The panel is headed \"Published records\", so the list, the chips and the tab badge now all count published. The archived record still appears on Retirement.");
+R("Steering","records","Kind badge on every record card","derived","kindBadge over the six-kind map (3232)","Record kind from the protocol vocabulary, section 9","partial","agent.context_records has a kind column","Was rendering a plain grey chip: a second function of the same name, defined later for IAM role kinds, won by hoisting. Fixed on this branch.");
+R("Steering","records","rendered 212, cited 188, violated 3","fixture","one opaque prose string (3243)","context_use_feedback records counting rendered, cited and ignored frames, section 9.1","partial","agent.memory_citation handlers","Three counts inside one string that nothing parses, sums or checks.");
+R("Steering","proposals","Checks badge, 6 of 6 pass","derived","a string prefix test on the checks field (5550)","Oxagen check runs on the Context PR, section 10.3","absent",null,"The badge colour is chosen by testing whether the string starts with a particular number.");
+R("Steering","Context PRs","Tab badge, 2","literal","literal (5510)","Open pull requests on the main repository","absent",null,"Only one pull request is rendered.");
+R("Steering","effect","Effect table: rendered, cited, violated, proof rate before and after","literal","hard-coded rows (5593)","Effect measured per published record, with proof rate before and after publication, section 10.4","absent",null,"Re-types the record strings, adds a before-and-after proof rate that exists in no fixture, and covers four of the seven published records.");
+R("Steering","retirement","archived 2026-09-01","literal","hard-coded (5608)","Record status and the retiring Context PR","absent",null,"The record carries a publish date and an archived status. No archive date exists anywhere.");
+
+/* ── Spend ── */
+R("Spend","strip","Spend, $18,402.66","fixture","usd of the spend string (5630)","Sum of cost.run_totals, rolled up in cost.daily_totals","partial","ClickHouse billing.token_usage",null);
+R("Spend","strip","Proven spend, $7,914.03","fixture","usd of the proven string (5631)","Spend on runs whose witness verdict is flipped, section 12.8","absent",null,"Needs a verdict, which nothing produces.");
+R("Spend","strip","Productive ratio, 43%","derived","per of the ratio fixture (5633)","Share of steps that advanced the task, section 12.8","absent",null,"Numerically identical to proven divided by spend, which is a different measure. The page's own copy distinguishes them.");
+R("Spend","findings","Savings identified, $1,926.58","derived","sum over the nine finding savings (5639)","Sum of cost.findings estimated savings","absent",null,"Genuinely derived, from nine typed savings.");
+R("Spend","findings","10.5% of spend, about $23,119 a year","derived","total over spend; total times twelve (5649)","The same rollups","absent",null,"The annual figure drops the cents, so its formatting diverges from every other money figure on the page.");
+R("Spend","findings","Per-finding share of identified savings","derived","each saving over the total (5647)","Findings ranked by money at stake","absent",null,"The nine shares sum to 99 per cent after rounding.");
+R("Spend","findings","3 operators involved, 8 high confidence, 1 medium","derived","tallies over the evidence records (5651)","Findings carry the frames that prove them","absent",null,null);
+R("Spend","by operator","Agents, runs, spend, proven, productive ratio","fixture","operator fixture fields (5660)","cost.daily_totals by operator, section 12.7","partial","usage analytics group by principal",null);
+R("Spend","by operator","Potential savings, $840.95 from 6 findings","derived","sum of findings matched to this operator (5757)","Findings at operator level","absent",null,"Two findings attach to an operator who does not own that agent's spend, so savings and spend land on different people for the same agent.");
+R("Spend","by operator","Budget bar, 83% of $15,000.00","fixture","the pre-baked used fraction, not spend over budget (5663)","billing.budgets spent_micros over limit_micros","live","billing.spend_budgets","Reads a stored fraction rather than dividing the two figures shown beside it.");
+R("Spend","by agent","Spend per proven run, $2.27","derived","spend divided by flipped runs (perProvenRun)","Spend divided by runs whose verdict is flipped, section 12.8","absent",null,"FIXED on this branch. The stored figure equalled spend per run, which would mean every run proved. The rollup now carries a flipped count matching the agent records, and the rate is derived so it cannot drift back.");
+R("Spend","by agent","Trend badge, -8%","fixture","a sign test on the trend string (5673)","Trend over cost.daily_totals","partial","period-over-period deltas are computed on the org dashboard",null);
+R("Spend","by model","Model calls, spend, cache hit rate, basis","fixture","model fixture fields (5676)","cost.daily_totals by model and provider key","partial","billing.token_usage groups by model","The panel is titled by model and provider key and has no provider-key column. The one provider key in the whole mockup appears inside a notification body.");
+R("Spend","by tool","Cumulative, average per call, average per run","fixture","pre-computed fixture fields, bars scaled to the column maximum (5927)","cost.daily_totals by tool, from tool-call frames","partial","telemetry.tool_invocations",null);
+R("Spend","by tool","Share of $18,402.66","derived","each tool's spend over the eleven-row total (5946)","Tool-attributed spend","partial",null,"The total includes a no-tool-call row worth 23 per cent, so shares are of all spend while the drill-down calls the same denominator tool-attributed.");
+R("Spend","wasted","Wasted, $4,730.42, 26% of spend","fixture","usd and per of two fixture fields (5957)","Findings aggregated by cause, section 12.8","absent",null,"The share is consistent with the total. The six causes sum exactly to the total.");
+R("Spend","wasted","Runs with waste, 412 of 4,218","fixture","two fixture fields (5959)","Count of runs carrying a finding","absent",null,"The six cause rows beneath claim 544 runs between them, under copy saying each cause is a frame pattern, not a guess.");
+R("Spend","wasted","Per-run waste bar","derived","wasted over cost, clamped to one (5978)","Finding saving against run cost","absent",null,"Clamped, so a waste figure above the run cost would silently read as 100 per cent.");
+R("Spend","reconciliation","Provider spend matched to a frame, 99%","derived","per of the matched fixture (5689)","Share of provider spend matched to a frame, by month, section 12.4","absent",null,"Rounds 98.7 up to 99, while the level table beneath computes 98.69.");
+R("Spend","reconciliation","Open variance, $241.18 across 3 key-days","fixture","usd of the variance; the key-day count is literal (5690)","cost.reconciliations variance_micros per key-day","absent",null,"Attributed in the note entirely to one agent whose total spend is $71.09.");
+R("Spend","reconciliation","Three matching levels: by request id, by key-day, by invoice line","literal","hard-coded rows (5696)","cost.reconciliations at its three levels, section 12.4","absent",null,"Internally consistent. No reconciliation ledger exists in code.");
+R("Spend","budgets","Position bar and percentage","derived","used over limit, red above 0.8 (5712)","billing.budgets","live","billing.spend_budgets",null);
+R("Spend","drill","Spend by day sparkline, peak, daily average","derived","a generator seeded on the entity key, normalised so the points sum to the total (5783)","cost.daily_totals","partial","usage analytics returns a daily series","Thirty synthetic points behind no fixture. The average divides by thirty although the month is eleven days in.");
+R("Spend","drill","Cross-cut panels, share of the entity's spend","derived","each pair over the entity total (5804)","Rollups along the attribution hierarchy, section 12.7","partial",null,"Each entity's cross-cuts sum exactly to its own spend, but read from the other direction the same dollar appears once as a named tool and once as unattributed.");
+
+/* ── Organization ── */
+R("Organization","people","Name, email, role, workspaces, two-factor, SSO, last seen","fixture","member and person fixtures (6030)","org.org_users with auth.users; SSO from auth.accounts","partial","org.org_users, better-auth social OAuth","No SAML or OIDC enterprise single sign-on exists in code, and the page shows an Okta SCIM badge.");
+R("Organization","people","Status badge, active","fixture","the badge class is hard-coded green (6035)","org.org_users.status","live","org.org_users","A removed or invited member would still render green.");
+R("Organization","roles","Held by, N people, N agents, N keys","derived","matches members, agent role assignments and API key grants (7439)","iam.principal_role_assignments","live","iam.roles and role_grants",null);
+R("Organization","roles","4 agent roles and 1 service role","derived","counted by role kind (7456)","iam.roles.scope_kind","live","iam.roles","The singular word role is hard-coded, so the grammar breaks if the count changes.");
+R("Organization","workspaces","Governance badge, team","literal","hard-coded (6070)","wrk.workspaces.governance_mode","partial","workspace settings","The organization fixture carries a governance field that is never read.");
+R("Organization","funding","Model route table for the four tiers","literal","hard-coded rows (6060)","org.organizations.model_routes, section 4.5","live","org.model_credentials and workspace.routing_policy",null);
+R("Organization","funding","Cap $2,000.00 per month, $1,082.45 used","literal","hard-coded (6078)","assistant_spend_cap_micros against assistant usage","partial","model funding settings page exists","The same $1,082.45 is also charged into the customer's own September spend on the Spend page, which says it shows only the customer's money.");
+R("Organization","data plane","Binding, shared, us-east-1","fixture","the organization region field (6085)","org.data_planes mode and config","partial","org.data_plane handlers","The account dialog's privacy tab hard-codes the same plane as us-west-2.");
+R("Organization","API keys","Actions 30d, 1,204","fixture","key fixture field (6120)","Count of audit events or tool calls by that principal","live","auth.api_keys; audit events per actor",null);
+R("Organization","API keys","expires in 21 days","literal","hard-coded string (6121)","iam.credentials.expires_at compared to now","live","auth.api_keys has expiry","Twenty-one days is correct against the date beside it, and nothing computes it.");
+
+/* ── Billing ── */
+R("Billing","plan","Runs this period, 4,218, with 1,000 free and 3,218 billable","fixture","three fixture fields (6145)","billing.subscriptions runs_this_period and included_runs","live","billing.subscriptions","The billable figure is stored rather than subtracted, though it does equal the difference.");
+R("Billing","plan","Retained evidence, 41.2 GB, 13 months included","literal","hard-coded (6146)","billing.subscriptions.retained_gb","partial","billing tables exist","Three copies of 41.2 GB on this page; the Audit page says 41 GB in two more places.");
+R("Billing","this period","Runs 1,001 to 4,218, 3,218 at $0.30, $965.40","fixture","the tier string and amount, with the row label hard-coded (6153)","The per-run price book applied to the run meter, section 12.1","partial","pricing is hardcoded in a module, not a table","Nothing multiplies. The row label's upper bound is typed rather than read from the meter.");
+R("Billing","this period","Onboarding discount, -193.08","fixture","the discount fixture (6155)","The 20 per cent onboarding discount, section 12.1","absent",null,"Exactly 20 per cent of the line above, and nothing computes it. Rendered without a currency symbol.");
+R("Billing","this period","Total, $772.32, rounded to cents once, half-even","fixture","usd of the total (6156)","Half-even rounding applied once at the statement line, section 12.3","partial",null,"The arithmetic is right and stored. The half-even claim has nothing behind it.");
+R("Billing","invoices","Invoice runs and amounts","fixture","invoice fixtures (6164)","Stripe invoices","live","billing.invoices and Stripe webhooks","Applying the page's own price list to the run counts reproduces one of the three invoice amounts. The other two imply different run counts.");
+R("Billing","meters","Governed actions, 61,904","fixture","a meter string (6159)","Governed actions per run, reported as a secondary meter","partial",null,"The same figure is typed again as a number on the Spend reconciliation tab.");
+
+/* ── Audit ── */
+R("Audit","events","Events over 30 days, 12,418","derived","rows counted in the table beneath (auditEvents)","Count of audit.audit_events in the window","live","security.security_events","FIXED on this branch. All four tiles in this strip were literals contradicting the table. Each now counts the rows, through the same actor classifier the table uses.");
+R("Audit","events","Denied, 96","derived","rows whose result is a denial","Audit events of a denial kind","live","security.security_events","FIXED on this branch. Now counted.");
+R("Audit","events","By a service principal, 4,117","derived","rows classified as a service actor","Events grouped by actor principal kind","live","security.security_events","FIXED on this branch. Now counted through the page’s own actor classifier.");
+R("Audit","events","By the in-app agent, 212","derived","rows whose actor is the assistant","Events whose actor is the assistant's service principal","live",null,"FIXED on this branch. Now counted, and it reads zero, which is the truth about this fixture.");
+R("Audit","events","Actor kind sub-label under each actor","derived","pattern match on the actor string (6310)","audit.audit_events.actor_principal_id joined to iam.principals.kind","live","security_events joins org_users","Inferred from the shape of a name rather than read from a principal.");
+R("Audit","incidents","Open, 2, one critical","derived","counted over the incident fixtures (6376)","audit.audit_events of incident kinds with no resolved_at","live","security.security_events",null);
+R("Audit","incidents","Median time to resolve, 2h 38m across 5 resolved","literal","literal (6378)","Resolution times over resolved incidents","live",null,"The five resolved incidents give a median of 1h 22m and a mean of 1h 3m. Neither is the figure shown.");
+R("Audit","receipts","N of 1,204 receipts shown","derived","the receipt count","Count of receipt frames, section 6.10","absent",null,"FIXED on this branch. Was a literal over a four-record fixture.");
+R("Audit","receipts","Receipt authority group, $884.60 settled, $1,115.40 remaining","fixture","receipt fixture rows (6235)","The mandate ledger balance after the settle","absent",null,"The mandate's own fields give $1,265.40 remaining. The receipt is $150 short and hand-typed.");
+R("Audit","receipts","Chain position 27 of 31, verified","fixture","a fixture string (6237)","Frame hash and chain position, checked at read time","schema","agent_run_events is digest-chained but unread","Asserts verified as text. Nothing verifies.");
+R("Audit","holds","812 bodies in its scope is refused","literal","literal (6421)","audit.legal_holds pinning retention against the bodies in scope","absent",null,"No legal hold object exists in code.");
+R("Audit","exports","Verifier transcript, 962 of 962 signatures, gateway 941, harness 12, observe 9","literal","a literal block (6437)","Offline verification of the exported bundle against published key ids","absent",null,"The three tier counts do sum to 962. The Verify button reveals a pre-written transcript.");
+R("Audit","keys","Re-wrap progress, 61%, 866k of 1.42M objects","literal","a hard-coded width and caption (6459)","Key rotation progress over enveloped objects","partial","crypto envelope carries over","The same figures also sit inside the key fixture's own description.");
+R("Audit","assurance","Passed 9 of 10, failed 0, not applicable 1","fixture","assurance fixture counts (6476)","The adversarial suite's published results, section 6.13","absent",null,"The not-applicable count is stored rather than counted, though both give one.");
+R("Audit","retention","Cold storage cost, 41 GB, $0.04 per month","literal","literal (6495)","Retention priced per GB-month, section 12.1","partial",null,"The Billing price list charges $0.10 per GB-month, which would be $4.10 for the same 41 GB.");
+R("Audit","retention","Archive tiers, held today: 412k runs, 2.6M frames, 41 GB","fixture","fixture strings in numeric cells (6497)","Counts per retention tier","partial",null,"Prose inside columns marked numeric, so the table's own sorting cannot read them.");
+R("Audit","retention","GDPR erasure requests, 3 in the last 30 days","derived","the erasure fixture length (6509)","Erasure requests and their tombstones, section 13.5","partial","privacy export and erase handlers exist",null);
+
+/* ── Panels and dialogs ── */
+R("Assistant","panel","34 of the 52 tools were never called in 1,340 runs","literal","hard-coded (6631)","The tool-list bloat finding, section 12.8","absent",null,"Re-types a finding fixture's own wording. The only live binding in the whole panel is the receipt id.");
+R("Assistant","panel","Estimated saving from the frames it cites, $188.40","literal","hard-coded (6641)","The cited finding's estimated saving","absent",null,"The same figure exists as a finding fixture field, typed again here.");
+R("Assistant","panel","Engine down, stella serve returned 503","literal","hard-coded (6611)","Engine health, the one thing that reports the outage, section 18","absent",null,"A complete state with no control anywhere that sets it; only the Retry button, which clears it.");
+R("Account","profile","Name, email, roles, principal","literal","hard-coded values in the inputs (7300)","auth.users and the person's role assignments","live","account pages exist as five real pages","Invents an organization role that is not in the roles fixture, so no holder of it would ever be counted on the Organization page.");
+R("Account","preferences","Preview, 18,472.36 and $18,472.36 USD","literal","hard-coded (7255)","Locale and currency formatting of a real figure","absent",null,"A near-miss on the Spend total of 18,402.66, close enough to read as the same number.");
+R("Account","security","8 of 10 recovery codes unused","literal","hard-coded (7264)","Two-factor enrolment state","live","auth.two_factor","Typed again on the two-factor onboarding screen.");
+R("Account","privacy","Data plane, shared, us-west-2","literal","hard-coded (7287)","org.data_planes config","partial",null,"The Organization page reads us-east-1 from the fixture for the same plane.");
+R("Notifications","list","Unread count, 3","derived","counted over the notification fixtures (2128)","notification.notifications read state","live","notification.list and mark",null);
+R("Notifications","list","Money and counts inside notification bodies","fixture","prose fields (2113)","Each kind maps to a frame kind or an audit event","live","notification.notifications","None of these figures appears in any other fixture. One reports a key-day variance of $0.83 where the Spend page reports $241.18 for the same mechanism.");
+R("Command menu","Go","Every destination","literal","hrefs hard-coded to one workspace (7307)","The search tool over the belt and the workspace's entities","live","command.menu.search and suggest","Opened from the other workspace, these navigate away from it silently. The keyboard shortcuts are rendered but only the menu's own shortcut is bound.");
+R("Command menu","search","The search input","literal","no handler is attached (7330)","Belt and entity search","live","command.menu.search","Decorative. Typing filters nothing.");
+R("Onboarding","sign up","Password strength meter and three requirement ticks","derived","length over four, with three pattern tests (8011)","Client-side validation only","live","better-auth signup",null);
+R("Onboarding","verify","Resend countdown, 0:42","literal","literal (7811)","A real expiry on the verification record","live","auth.verifications has expires_at","Static. It never ticks.");
+R("Onboarding","wrap","Installer file, size and digest per platform","literal","a literal table keyed on the chosen platform (7812)","The signed installer the enrollment produces","live","enrollment handlers issue a bundle",null);
+R("Onboarding","run","Install log, seven lines with timings and a first frame","literal","a literal array revealed on a timer (7862)","Real enrollment and the first frames the host sends","live","tacho enrollment and event ingest","The reveal is paced by a poll that advances a counter, so the timings are fixed text.");
+R("Onboarding","run","Provisional until 25 September, 14 days","literal","literal (8144)","The repository binding's provisional window","partial","repository_bindings exist","Correct against the date beside it, and typed.");
+R("Every page","denied state","Signed in as Dana Okafor, org.billing","derived","the session user, through one accessor","The current principal and the role that was missing","live","session and role lookups exist","FIXED on this branch. The denied panel named a different person than the top bar on the same screen. Both now read one session accessor.");
+/* ROWS-SPLICE */
+
+(function(){
+  "use strict";
+  var HOW = {derived:["dia derived","Derived"], fixture:["fixture","Fixture"], literal:["cir literal","Markup literal"]};
+  var BUILT = {live:["live","Live"], schema:["bar schema","Schema only"], absent:["tri absent","Absent"], partial:["bar partial","Partial"]};
+  function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+  function mk(map,k){var e=map[k]; return e?'<span class="mk '+e[0]+'">'+e[1]+'</span>':esc(k);}
+  var body=document.getElementById("pbody"), empty=document.getElementById("pempty"),
+      cnt=document.getElementById("pcnt"), q=document.getElementById("pq"),
+      selP=document.getElementById("ppage"), selH=document.getElementById("phow"), selB=document.getElementById("pbuilt");
+  if(!body) return;
+
+  var pages=[]; ROWS.forEach(function(r){ if(pages.indexOf(r.page)<0) pages.push(r.page); });
+  pages.forEach(function(p){ var o=document.createElement("option"); o.value=p; o.textContent=p; selP.appendChild(o); });
+
+  function draw(){
+    var needle=(q.value||"").toLowerCase(), fp=selP.value, fh=selH.value, fb=selB.value, n=0, out=[];
+    ROWS.forEach(function(r){
+      if(fp && r.page!==fp) return;
+      if(fh && r.how!==fh) return;
+      if(fb && r.built!==fb) return;
+      if(needle){
+        var hay=(r.page+" "+(r.tab||"")+" "+r.label+" "+r.expr+" "+r.src+" "+(r.note||"")).toLowerCase();
+        if(hay.indexOf(needle)<0) return;
+      }
+      n++;
+      out.push('<tr><td class="nowrap"><strong>'+esc(r.page)+'</strong>'+(r.tab?'<br><span style="color:var(--muted)">'+esc(r.tab)+'</span>':'')+'</td>'
+        +'<td>'+esc(r.label)+(r.note?'<br><span style="color:var(--muted);font-size:.92em">'+esc(r.note)+'</span>':'')+'</td>'
+        +'<td>'+mk(HOW,r.how)+'<br><span class="expr">'+esc(r.expr)+'</span></td>'
+        +'<td class="src">'+esc(r.src)+'</td>'
+        +'<td>'+mk(BUILT,r.built)+(r.where?'<br><span class="expr">'+esc(r.where)+'</span>':'')+'</td></tr>');
+    });
+    body.innerHTML=out.join("");
+    empty.hidden = n>0;
+    cnt.textContent = n+" of "+ROWS.length+" data points";
+  }
+  [q,selP,selH,selB].forEach(function(el){ el.addEventListener("input",draw); el.addEventListener("change",draw); });
+  draw();
+})();
+</script>

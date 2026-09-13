@@ -161,6 +161,8 @@
      ones the page used to hardcode, including the reservation that matches the parked payment. */
   MANDATES.forEach(function(m){
     if(m.id==="mnd_7K2ETQ4"){
+      /* the base mc.html carries the seed mandate's own ledger (settled and released by the approval flow); keep it */
+      if(m.ledger) return;
       m.ledger=[
        {when:"08:40:19",call:"stripe__create_payment@4",amount:"2,450.00",state:"reserved",ext:"— awaiting approval",rcp:null},
        {when:"2026-09-04",call:"stripe__create_payment@4",amount:"884.60",state:"settled",ext:"pi_3QaL8f2Xk",rcp:"rcp_01K4X8…"},
@@ -554,7 +556,10 @@
   var ops=Object.keys(byOp).map(function(k){return byOp[k];}).sort(function(a,b){return b.spend-a.spend;});
   SPEND.byOperator=ops.map(function(o){var budget=Math.ceil(o.spend/rf(0.55,0.92)/500)*500;return {p:o.p,agents:o.agents,runs:o.runs,spend:mc(o.spend),proven:mc(o.proven),ratio:Math.round(o.proven/Math.max(1,o.spend)*100)/100,budget:mc(budget),used:Math.round(o.spend/budget*100)/100};});
   var top=AGENTS.slice().sort(function(a,b){return num$(b.spend30)-num$(a.spend30);});
-  SPEND.byAgent=top.map(function(a){var sp=num$(a.spend30),pv=num$(a.proven30);return {k:a.key,runs:a.runs30,spend:mc(sp),proven:mc(pv),perProven:pv>0?m2(sp/Math.max(1,a.runs30*a.ratio)):"—",trend:(rnd()<0.55?"+":"-")+ri(0,18)+"%"};});
+  /* A seed row can carry fields the page reads beyond these (stella-ci's flipped count feeds its
+     spend-per-proven-run history); rebuild the figures, keep what the seed row authored. */
+  var seedByAgent={}; (SPEND.byAgent||[]).forEach(function(x){seedByAgent[x.k]=x;});
+  SPEND.byAgent=top.map(function(a){var sp=num$(a.spend30),pv=num$(a.proven30);return Object.assign({},seedByAgent[a.key]||{},{k:a.key,runs:a.runs30,spend:mc(sp),proven:mc(pv),perProven:pv>0?m2(sp/Math.max(1,a.runs30*a.ratio)):"—",trend:(rnd()<0.55?"+":"-")+ri(0,18)+"%"});});
   var callsTot=Math.round(runsTot*31);
   SPEND.byModel=[{m:"claude-opus-5",calls:Math.round(callsTot*0.31),spend:mc(spendTot*0.62),cache:0.84},{m:"claude-sonnet-5",calls:Math.round(callsTot*0.33),spend:mc(spendTot*0.24),cache:0.81},
     {m:"claude-haiku-4-5",calls:Math.round(callsTot*0.34),spend:mc(spendTot*0.09),cache:0.76},{m:"z-ai/glm-latest (assistant)",calls:Math.round(callsTot*0.02),spend:mc(spendTot*0.05),cache:0.62}];

@@ -30,6 +30,8 @@ else:
         sys.exit('BASE IS MOVING: two reads of Specs/mockups/mc.html differ. Retry.')
     s = open(a).read()
 print('base bytes', len(s))
+if '(function volume(){' in s:
+    sys.exit('BASE ALREADY BUILT: it carries the volume block. mc.html on main is already renamed and scaled; edit it directly.')
 if 'function govCount' not in s:
     sys.exit('BASE INCOMPLETE: govCount missing — torn read. Retry.')
 
@@ -38,6 +40,7 @@ import re
 s = s.replace('Acme Robotics', 'Anderson Intelligence Corp.')
 s = s.replace('kek_acme_', 'kek_aintel_').replace('key_ox_acme_', 'key_ox_aintel_')
 s = s.replace('pk_acme_', 'pk_aintel_').replace('cus_acme', 'cus_aintel').replace('acme_prod', 'aintel_prod')
+s = s.replace('ACME-', 'AINTEL-').replace('linear:ACME/', 'linear:AINTEL/').replace('Acme ', 'Anderson Intelligence Corp. ')   # Linear keys; short-name copy
 s = s.replace('acme', 'a-intel')
 assert 'acme' not in s.lower(), 'rename left a trace'
 
@@ -49,8 +52,29 @@ i = s.index(anchor)
 s = s[:i] + vol + '\nseedApprovals();\n\n' + s[i:]
 
 # 4. the copy that quoted fixed organization totals now reads them off the data
+SKIPPED = []
+# Edits mc.html itself now carries, in its own form, after the W1-W11 parity work (PR #6): the
+# base derives these from records, so the old text is gone and nothing here should replace it.
+SUPERSEDED = [
+    '50 agents · \'+ORG.dataPlane',                     # sidebar footer sums WS agents
+    '<span class="s">50 across the organization</span>',  # Identities tiles derive from records
+    '<span class="k">Holding a mandate</span><span class="v">1</span>',
+    'Eight servers, 3,182 tool versions.',                # srvCount() / verCount()
+    ' of 3,182 shown</span>',
+    'return auditStats([["Events · 30 days","12,418"',   # counted from AUDIT
+    ' of 1,204 receipts shown.',                          # RECEIPTS.length
+    '<div class="note">12,418 events in the last 30 days,',  # AUDIT.length, like the tile
+    '<span class="k">Spend today</span>',                 # "Spend, runs shown"
+    'function pMandate(r){\n  var m=MANDATES[0];',        # route-resolved mandate
+    '<td><span class="b b-approval"><span class="d"></span>reserved</span></td><td class="dim">— awaiting approval</td>',  # ledger off the record
+]
 def rep(a_, b_, n=1):
+    # A base that already carries the edit is not drift: skip it, and say so. So is an edit on
+    # the SUPERSEDED list whose old text is gone. Anything else that does not match exactly n
+    # times still fails.
     global s
+    if s.count(a_) == 0 and (b_ in s or any(k in a_ for k in SUPERSEDED)):
+        SKIPPED.append(a_.strip().split('\n')[0][:70]); return
     assert s.count(a_) == n, (s.count(a_), a_[:80])
     s = s.replace(a_, b_)
 
@@ -178,4 +202,5 @@ rep("""    '<div class="dim" style="font-size:11.5px;margin-top:8px">Two concurr
     """    '<div class="dim" style="font-size:11.5px;margin-top:8px">Two concurrent calls cannot both fit under the same remaining limit \u2014 the reservation is taken before dispatch.</div></div>'+""")
 
 open(DST, 'w').write(s)
+for x in SKIPPED: print('already in base:', x)
 print('wrote', DST, len(s))
