@@ -60,8 +60,8 @@ rep('''<span class="s">50 across the organization</span>''',
     '''<span class="s">'+ic0(ORG.agents)+' across the organization</span>''')
 rep('''<div class="stat"><span class="k">Holding a mandate</span><span class="v">1</span><span class="s">a-intel.finops.invoice-bot · in FinOps</span></div>'+''',
     '''<div class="stat"><span class="k">Holding a mandate</span><span class="v">'+MANDATES.filter(function(m){return m.status==="active";}).length+'</span><span class="s">every one of them in FinOps</span></div>'+''')
-rep('''<div class="stat"><span class="k">Tamper incidents</span><span class="v" style="color:var(--st-critical)">1</span><span class="s">a-intel.core.triage · hooks_removed, 2026-09-02</span></div></div>'+''',
-    '''<div class="stat"><span class="k">Tamper incidents</span><span class="v" style="color:var(--st-critical)">'+AGENTS.reduce(function(n,a){return n+(a.incidents||0);},0)+'</span><span class="s">across '+AGENTS.filter(function(a){return a.incidents;}).length+' agents · hooks_removed or a moved fingerprint</span></div></div>'+''')
+# (Tamper incidents: main's agent page reads the count off the incident register now,
+#  so there is no hardcoded tile left to replace.)
 rep('''<p class="muted" style="margin:2px 0 0;font-size:12px">Eight servers, 3,182 tool versions. The registry is the catalog; a belt is what one agent may reach.</p>''',
     '''<p class="muted" style="margin:2px 0 0;font-size:12px">'+SERVERS.length+' servers, '+ic0(TOOLS.length)+' tool versions. The registry is the catalog; a belt is what one agent may reach.</p>''')
 rep(""" of 3,182 shown</span>""", """ of '+ic0(TOOLS.length)+' shown</span>""")

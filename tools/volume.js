@@ -496,6 +496,33 @@
       resolution:open?"Open. "+PEOPLE[WSX[r.ws].owner].name+" owns it; the next step is recorded on the incident when it happens.":"Resolved. "+pick(["The schema proposal was approved and the switch cleared.","The agent's definition was narrowed in a merged pull request.","The connection was reviewed and its scope narrowed.","The host was re-enrolled and the tier restored."]),
       status:open?"open":"resolved",owner:PEOPLE[WSX[r.ws].owner].name,due:open?dstr(TODAY+ri(2,20)*86400000):"",closedAt:open?"":stamp(Math.max(0,d-ri(1,6)),daySec(1)),closedBy:open?"":PEOPLE[WSX[r.ws].owner].name,runs:ri(0,14)});
   }
+  /* Tamper incidents are read off the register (agentTamper: a TAMPER_KINDS kind whose scope
+     starts with the agent key), so an agent's count and the register can never disagree. Give
+     every generated agent flagged with incidents that many register rows, then derive the count
+     back from the register rather than trusting the flag. Seed agents are left as authored. */
+  var TK=["hooks_removed","chain_break","unknown_tool","credential_probe","witness_probe","seq_conflict"];
+  var TK_DETAIL={
+    hooks_removed:"The host's harness settings lost the Oxagen hooks between two checkpoints. The collector halted the run at the next boundary and the agent's tier fell to observe until re-enrolment.",
+    chain_break:"A frame arrived whose previous-hash did not match the sealed frame before it. Every later frame on the run was marked unverifiable and the run sealed tampered.",
+    unknown_tool:"The agent called nine tool names that are not on its belt inside one turn. Each was denied before dispatch; the burst tripped the detector and paused the run.",
+    credential_probe:"The agent tried to read the credential grant behind a tool call instead of calling the tool. The broker refused, and the attempt is recorded as a security event.",
+    witness_probe:"The agent read the witness test's expected output before the witness ran. The verdict for the run was withheld and the run sealed unsatisfied.",
+    seq_conflict:"Two frames arrived with the same sequence number and different hashes. The second was rejected and the run sealed with a gap noted in its completeness record."};
+  var tkSeen=0;
+  madeAgents.forEach(function(a){
+    for(var q=0;q<(a.incidents||0);q++){
+      var kind=TK[(tkSeen++)%TK.length], d=ri(1,80), open=d<10&&rnd()<0.5;
+      INCIDENTS.push({id:"inc_01K"+ulid(6),sev:kind==="hooks_removed"||kind==="chain_break"?"critical":"warning",title:title(kind.replace(/_/g,"-"))+" on "+a.name,kind:kind,
+        at:stamp(d,daySec(d)),by:kind==="hooks_removed"?"collector":"gateway",scope:a.key+" · "+(kind==="hooks_removed"?"host mbp-"+pad(ri(2,40)):"run_01K"+ulid(12)),detail:TK_DETAIL[kind],
+        resolution:open?"Open. "+PEOPLE[a.operator].name+" owns it; the agent stays at observe tier until it closes.":"Resolved. The host was re-enrolled and the next run verified end to end.",
+        status:open?"open":"resolved",owner:PEOPLE[a.operator].name,due:open?dstr(TODAY+ri(2,14)*86400000):"",
+        closedAt:open?"":stamp(Math.max(0,d-ri(1,5)),daySec(1)),closedBy:open?"":PEOPLE[a.operator].name,runs:ri(1,6)});
+    }
+  });
+  var TAMPER=(typeof TAMPER_KINDS!=="undefined"&&TAMPER_KINDS)||{hooks_removed:1,chain_break:1,credential_probe:1,witness_tampered:1,unknown_tool:1,witness_probe:1,receipt_modified:1,seq_conflict:1};
+  madeAgents.forEach(function(a){
+    a.incidents=INCIDENTS.filter(function(i){return TAMPER[i.kind]&&String(i.scope).indexOf(a.key)===0;}).length;
+  });
   HOLDS.push({id:"hld_01K5Q2RT",matter:"Customer dispute — refunds, August",scope:"agent "+fin[1].key+" · runs 2026-08-01 to 2026-08-31",by:"Priya Natarajan",placed:"2026-09-02 10:15",released:"—",st:"active",note:"Blocks erasure and retention expiry for 212 runs while the dispute is open."},
     {id:"hld_01K4M7QA",matter:"Security review — prod-east access",scope:"workspace infra · all runs",by:PEOPLE[WSX.security.owner].name,placed:"2026-08-20 14:00",released:"—",st:"active",note:"Placed after the hooks_removed incident; released when the review closes."},
     {id:"hld_01K2Z9XD",matter:"SOC 2 evidence window",scope:"organization · all runs 2026-04-01 to 2026-06-30",by:"Priya Natarajan",placed:"2026-07-01 09:00",released:"2026-08-12 17:30",st:"released",note:"Auditor sampled 240 receipts; released after the report."});

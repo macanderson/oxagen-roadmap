@@ -57,6 +57,14 @@ carry the same thing namespaced as a `TG` object (`TG.cell`, `TG.cat`, `TG.hazar
 | Hazard | How bad is a wrong call? | Risk mark (circle · diamond · triangle · filled triangle for critical) plus a side-effect glyph (read · write · irreversible), in the state hues. |
 | Gate | What did the belt decide? | Badge: allowed, needs approval, mandate + approval, denied, kill switch. A dashed border means a person still stands in the way. |
 
+`consolidated.html` carries a deliberate subset of this, because it is one lean file and
+the full grammar would outweigh it: one identity (`name@schema-version`, the same string in
+the registry, in an approval, in a kill switch and in a `tool_requested` frame), a category
+word as a flat badge, a hazard mark on `irreversible` and `moves_funds`, and a gate badge.
+It has no label/API toggle, no category chips and no per-category hue — category there is a
+word and a glyph, never a colour. Earlier revisions of this section said consolidated.html
+displayed no tools; it displays them in five places, and did so before this note was written.
+
 The cell shows the human label first and the mono API name and version beneath it
 (`Create pull request` over `github__create_pull_request@3`); a Labels / API names toggle
 swaps them. Tool lists offer category chips with counts and a By category / Flat layout.
