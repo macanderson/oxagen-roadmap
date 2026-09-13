@@ -144,6 +144,7 @@ p{margin:0 0 10px;color:var(--body)}
 .g2{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
 .g3{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
 .g4{grid-template-columns:repeat(auto-fit,minmax(175px,1fr))}
+.recon-tiles .g3{grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}.recon-tiles .stat .v{font-size:17px}
 .split{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:14px;align-items:start}
 @media(max-width:1080px){.split{grid-template-columns:minmax(0,1fr)}}
 #viewport.phone .split{grid-template-columns:minmax(0,1fr)}
@@ -6635,13 +6636,8 @@ function pTools(){
      '</tbody></table></div>'+
      '<div class="panel-b"><div class="warn"><b>Slack review is overdue.</b> Its next review date was 2026-09-12 and it has issued 311 grants in 30 days. '+
      'Revoking the connection invalidates every grant it minted at the next use.</div></div></div>'+
-     '<div class="grid g2" style="margin-top:14px">'+
-     '<div class="panel"><div class="panel-h"><h3>What the broker minted, most recent first</h3></div><div class="tw"><table class="narrow">'+
-     '<thead><tr><th>Grant</th><th>Scope</th><th>TTL</th><th>Call</th></tr></thead><tbody>'+
-     '<tr><td class="mono" style="font-size:11px">cg_01K5RS8</td><td class="mono" style="font-size:11px">repos [acme/platform]</td><td>5m</td><td class="mono" style="font-size:11px">run_01K5RS7M… seq 6</td></tr>'+
-     '<tr><td class="mono" style="font-size:11px">cg_01K5RS4</td><td class="mono" style="font-size:11px">linear: issue:read</td><td>2m</td><td class="mono" style="font-size:11px">run_01K5RP2D… seq 4</td></tr>'+
-     '<tr><td class="mono" style="font-size:11px">cg_01K5RN9</td><td class="mono" style="font-size:11px">stripe restricted: payment_intents:write</td><td>10m</td><td class="mono" style="font-size:11px">run_01K5RN8F… seq 9</td></tr>'+
-     '</tbody></table></div></div>'+
+     grantsLog()+
+     '<div class="grid g2" style="margin-top:14px">'+brokerChooses()+
      '<div class="panel"><div class="panel-h"><h3>Financial connections carry extra rules</h3></div><div class="panel-b"><dl class="kv">'+
      '<dt>Named human owner</dt><dd>required, with a finance role — Dana Okafor</dd>'+
      '<dt>Mandate per agent</dt><dd>required for every agent that may use it</dd>'+
@@ -6675,18 +6671,7 @@ function pTools(){
        '<td>'+h(p.by)+'</td><td class="mono dim" style="font-size:11px">'+h(p.at)+'</td><td class="num">'+p.rules+'</td>'+
        '<td><span class="b b-allowed">'+h(p.tests)+'</span></td><td style="font-size:12px">'+h(p.note)+'</td></tr>';}).join("")+
      '</tbody></table></div></div>'+
-     '<div class="panel"><div class="panel-h"><h3>Simulation of <span class="mono">pol_v42</span> against this workspace’s real history</h3>'+
-     '<span class="b b-approval" style="margin-left:auto"><span class="d"></span>draft · not activated</span></div>'+
-     '<div class="panel-b"><p class="muted" style="margin-bottom:14px;font-size:12.5px">Replayed over the last '+SIM.days+' days of tool calls from the frames — '+SIM.calls.toLocaleString()+' calls. A CIO sees the effect of a control before it is switched on, on their own agents.</p>'+
-     '<div class="grid g4" style="margin-bottom:14px">'+
-      '<div class="stat"><span class="k">Would now be denied</span><span class="v" style="color:var(--st-denied)">'+SIM.nowDenied+'</span><span class="s">were allowed under pol_v41</span></div>'+
-      '<div class="stat"><span class="k">Would now need approval</span><span class="v" style="color:var(--st-approval)">'+SIM.nowApproval.toLocaleString()+'</span><span class="s">about 37 a day</span></div>'+
-      '<div class="stat"><span class="k">Were denied, would be allowed</span><span class="v">'+SIM.wasDeniedNowAllowed+'</span><span class="s">read calls on acme/mobile</span></div>'+
-      '<div class="stat"><span class="k">Unchanged</span><span class="v">'+SIM.unchanged.toLocaleString()+'</span><span class="s">96.8% of calls</span></div></div>'+
-     '<p class="eyebrow q">Agents affected</p><div class="row">'+SIM.agentsAffected.map(function(a){return '<span class="b b-q mono" style="font-size:11px">'+h(a)+'</span>';}).join("")+'</div>'+
-     '<div class="row" style="margin-top:16px"><button class="btn" onclick="openDialog(\'activate\')">Activate pol_v42</button>'+
-     '<button class="btn" onclick="act(\'Simulation re-run over 90 days. 3,418 calls would change.\')">Simulate over 90 days</button></div>'+
-     '<div class="note" style="margin-top:13px">Activation is a governed action with approval and, in regulated mode, a Context PR.</div></div></div></div>'+
+     simPanel()+'</div>'+
      '<div class="panel"><div class="panel-h"><h3>Conditions available to policy</h3></div><div class="panel-b">'+
      '<p class="muted" style="font-size:12px;margin-bottom:11px">All derived from the call and the record. None from prose.</p>'+
      '<div class="row">'+["tool version","risk","side effect","egress","financial class","amount by path","counterparty","repository","path prefix","recipient domain","taint and its sources","time window","rate","sequence","operator role","enforcement tier","budget position","mandate position"]
@@ -6735,6 +6720,168 @@ function pTools(){
    '<div class="acts"><button class="btn primary" onclick="openDialog(\'import\')">Import server</button>'+
    '<button class="btn danger" onclick="openDialog(\'switch\')">Flip a kill switch</button></div></div>'+(S.killBanner||"")+tabs+body;
 }
+
+/* ---------- Policy simulation, the calls behind each number (ported from W9 · the toolbelt, governed) ----------
+   A bucket's n is the SIM field it replaces, so the tile and the count the activate dialog quotes are one number.
+   items are a sample of the recorded calls in that bucket; the panel says "N shown of n" and never implies more. */
+SIM.buckets=[
+ {k:"deny",label:"Would now be denied",tone:"denied",n:SIM.nowDenied,rule:"taint.no_third_party_egress",v42:"deny",
+  why:"An argument derived from untrusted tool output may not reach a tool with third-party egress. Under pol_v41 only a tainted write was raised, to approval; a tainted read went through.",
+  items:[
+   {tool:"claude_code__WebFetch@2.1",agent:"acme.core.triage",run:"run_01K52Q7D3M",when:"2026-09-09 16:12",arg:"url ← linear__get_issue description (tainted)",v41:"allow",cost:"0.0011"},
+   {tool:"claude_code__WebFetch@2.1",agent:"acme.core.release-manager",run:"run_01K4ZR2B8T",when:"2026-09-06 11:03",arg:"url ← changelog link in a pull request comment (tainted)",v41:"allow",cost:"0.0009"},
+   {tool:"slack__get_thread@1",agent:"acme.core.triage",run:"run_01K4W9C1FQ",when:"2026-09-03 08:55",arg:"thread_ts ← github issue body (tainted)",v41:"allow",cost:"0.0004"},
+   {tool:"claude_code__WebFetch@2.1",agent:"acme.core.docs-writer",run:"run_01K4S6H0XE",when:"2026-08-29 14:41",arg:"url ← README link returned by github__get_file_contents (tainted)",v41:"allow",cost:"0.0010"}]},
+ {k:"approve",label:"Would now need approval",tone:"approval",n:SIM.nowApproval,rule:"irreversible.requires_approval",v42:"approve",
+  why:"Every irreversible tool call in core-platform routes to a human, not only a merge. Under pol_v41 these were allowed by the agent’s grant.",
+  items:[
+   {tool:"github__create_release@2",agent:"acme.core.release-manager",run:"run_01K53B8N2K",when:"2026-09-10 09:12",arg:"tag v4.10.2 on acme/platform",v41:"allow",cost:"0.0000"},
+   {tool:"github__delete_branch@1",agent:"acme.core.triage",run:"run_01K50T6H4P",when:"2026-09-08 07:44",arg:"branch triage/repro-4182 on acme/platform",v41:"allow",cost:"0.0000"},
+   {tool:"github__delete_branch@1",agent:"acme.core.release-manager",run:"run_01K4YQ3D1R",when:"2026-09-05 18:20",arg:"branch release/4.10.1 on acme/platform",v41:"allow",cost:"0.0000"},
+   {tool:"github__create_release@2",agent:"acme.core.release-manager",run:"run_01K4T8D3CW",when:"2026-08-30 18:05",arg:"tag v4.10.1 on acme/platform",v41:"allow",cost:"0.0000"}]},
+ {k:"allow",label:"Would now be allowed",tone:"allowed",n:SIM.wasDeniedNowAllowed,rule:"docs.read_repositories",v42:"allow",
+  why:"docs-writer may read acme/mobile as well as acme/platform. Under pol_v41 a read outside acme/platform was denied.",
+  items:[
+   {tool:"github__get_file_contents@2",agent:"acme.core.docs-writer",run:"run_01K51M4Q2D",when:"2026-09-09 10:20",arg:"path docs/offline-queue.md on acme/mobile",v41:"deny",cost:"0.0003"},
+   {tool:"github__get_file_contents@2",agent:"acme.core.docs-writer",run:"run_01K51M4Q2D",when:"2026-09-09 10:21",arg:"path CHANGELOG.md on acme/mobile",v41:"deny",cost:"0.0003"},
+   {tool:"github__get_commit@1",agent:"acme.core.docs-writer",run:"run_01K4X2P7LA",when:"2026-09-02 15:37",arg:"sha 7c21e0a on acme/mobile",v41:"deny",cost:"0.0002"}]}
+];
+/* The rules that moved between pol_v41 and pol_v42. added − removed must equal the difference in POLICIES[].rules. */
+SIM.rules=[
+ {id:"taint.no_third_party_egress",change:"changed",cedar:'<span class="k">forbid</span> (principal, action, resource)\n<span class="k">when</span> { context.taint.present &amp;&amp; resource.egress == <span class="s">"third_party"</span> };'},
+ {id:"irreversible.requires_approval",change:"added",cedar:'<span class="k">permit</span> (principal, action, resource)\n<span class="k">when</span> { resource.side_effect == <span class="s">"irreversible"</span> &amp;&amp; context.workspace == <span class="s">"core-platform"</span> }\n<span class="k">advice</span> <span class="s">"require_approval"</span>;'},
+ {id:"docs.read_repositories",change:"changed",cedar:'<span class="k">permit</span> (principal == Agent::<span class="s">"acme.core.docs-writer"</span>, action, resource)\n<span class="k">when</span> { resource.side_effect == <span class="s">"read"</span> &amp;&amp; resource.repository <span class="k">in</span> [<span class="s">"acme/platform"</span>, <span class="s">"acme/mobile"</span>] };'}
+];
+function simDec(d){var m={allow:["allowed","allow"],approve:["approval","needs approval"],deny:["denied","deny"]}[d];return '<span class="b b-'+m[0]+'"><span class="d"></span>'+m[1]+'</span>';}
+function simPanel(){
+  var B=SIM.buckets, open=null; B.forEach(function(b){if(b.k===S.simOpen) open=b;});
+  var pv=function(v){var r=null; POLICIES.forEach(function(p){if(p.v===v) r=p;}); return r;}, v41=pv("pol_v41"), v42=pv("pol_v42");
+  var added=SIM.rules.filter(function(r){return r.change==="added";}).length, removed=SIM.rules.filter(function(r){return r.change==="removed";}).length;
+  var tiles=B.map(function(b){var on=open===b;
+    return '<button type="button" class="stat sim-b" data-b="'+b.k+'" aria-pressed="'+on+'" onclick="S.simOpen=S.simOpen===\''+b.k+'\'?null:\''+b.k+'\';render()" '+
+     'style="text-align:left;cursor:pointer;width:100%;font:inherit;color:inherit'+(on?';border-color:var(--st-'+b.tone+');box-shadow:inset 0 0 0 1px var(--st-'+b.tone+')':'')+'">'+
+     '<span class="k">'+h(b.label)+'</span><span class="v" style="color:var(--st-'+b.tone+')">'+b.n.toLocaleString()+'</span>'+
+     '<span class="s">'+(b.n/SIM.calls*100).toFixed(2)+'% of calls · '+(b.n>=SIM.days?'about '+Math.round(b.n/SIM.days)+' a day':b.n+' in '+SIM.days+' days')+'</span></button>';}).join("");
+  var list;
+  if(open){
+    list='<div class="panel sim-open" data-b="'+open.k+'" style="margin-bottom:14px"><div class="panel-h"><div style="flex:1;min-width:0"><h3>'+h(open.label)+' · <span class="mono">'+h(open.rule)+'</span></h3>'+
+     '<p class="muted" style="margin:2px 0 0;font-size:12px">'+h(open.why)+'</p></div>'+
+     '<span class="b b-q sim-shown">'+open.items.length+' shown of '+open.n.toLocaleString()+'</span></div>'+
+     '<div class="tw"><table data-lt="1"><thead><tr><th>Tool version</th><th>Agent · run</th><th>Argument that decided it</th><th>pol_v41 → pol_v42</th><th class="num">Cost</th></tr></thead><tbody>'+
+     open.items.map(function(i){
+      return '<tr class="sim-item"><td style="min-width:17ch">'+toolCell(i.tool,{sz:"sm"})+'</td>'+
+       '<td><span class="mono" style="font-size:11px">'+h(i.agent.replace(/^acme\./,""))+'</span><div class="dim mono" style="font-size:10.5px">'+h(i.run)+' · '+h(i.when)+'Z</div></td>'+
+       '<td class="mono" style="font-size:11px;min-width:20ch">'+h(i.arg)+'</td><td style="white-space:nowrap">'+simDec(i.v41)+' <span class="dim">→</span> '+simDec(open.v42)+'</td>'+
+       '<td class="num">$'+h(i.cost)+'</td></tr>';}).join("")+
+     '</tbody></table></div><div class="panel-b" style="border-top:1px solid var(--border)"><div class="row">'+
+     '<span class="muted" style="font-size:12px">'+(open.n-open.items.length).toLocaleString()+' more in this bucket, each with its run and the frame it was decided at.</span>'+
+     '<button class="btn sm" style="margin-left:auto" onclick="act(\'Bucket exported: '+open.n.toLocaleString()+' calls as CSV with run and frame ids.\')">Export the bucket</button></div></div></div>';
+  } else {
+    list='<p class="muted" style="font-size:12.5px;margin:0 0 14px">Open a number to see the calls behind it: the tool, the agent, the run, the argument that decided it, and both decisions.</p>';
+  }
+  return '<div class="panel sim-panel"><div class="panel-h"><h3>Simulation of <span class="mono">pol_v42</span> against this workspace’s real history</h3>'+
+   '<span class="b b-approval" style="margin-left:auto"><span class="d"></span>draft · not activated</span></div>'+
+   '<div class="panel-b"><p class="muted" style="margin-bottom:14px;font-size:12.5px">Replayed over the last '+SIM.days+' days of tool calls from the frames — '+SIM.calls.toLocaleString()+' calls. No model participates: same call, same policy version, same answer.</p>'+
+   '<div class="grid g3" style="margin-bottom:12px">'+tiles+'</div>'+
+   '<p class="sim-same" style="font-size:12.5px;margin:0 0 14px"><b>'+SIM.unchanged.toLocaleString()+'</b> <span class="muted">calls, '+(SIM.unchanged/SIM.calls*100).toFixed(1)+'%, decide the same way under both versions. That is the number to read first.</span></p>'+
+   list+
+   '<p class="eyebrow q">The rules that moved · '+h(v41?v41.rules:"")+' → '+h(v42?v42.rules:"")+' rules</p>'+
+   '<div class="sim-rules" style="display:grid;gap:8px;margin-bottom:12px">'+SIM.rules.map(function(r){var b=B.filter(function(x){return x.rule===r.id;})[0];
+    return '<div><div class="row" style="margin-bottom:4px"><span class="mono" style="font-size:12px">'+h(r.id)+'</span><span class="b b-q">'+h(r.change)+'</span>'+
+     (b?'<span class="dim" style="font-size:11.5px">'+h(b.label.toLowerCase())+' · '+b.n.toLocaleString()+'</span>':'')+'</div><pre style="margin:0">'+r.cedar+'</pre></div>';}).join("")+'</div>'+
+   '<p class="muted" style="font-size:11.5px;margin:0 0 12px">'+added+' added · '+(SIM.rules.length-added-removed)+' changed · '+removed+' removed.</p>'+
+   '<p class="eyebrow q">Agents affected</p><div class="row">'+SIM.agentsAffected.map(function(a){return '<span class="b b-q mono" style="font-size:11px">'+h(a)+'</span>';}).join("")+'</div>'+
+   '<div class="row" style="margin-top:16px"><button class="btn" onclick="openDialog(\'activate\')">Activate pol_v42</button>'+
+   '<button class="btn" onclick="act(\'Simulation re-run over 90 days. 3,418 calls would change.\')">Simulate over 90 days</button></div>'+
+   '<div class="note" style="margin-top:13px">Activation is a governed action with approval and, in regulated mode, a Context PR.</div></div></div>';
+}
+
+/* ---------- Credential grants (W9): how the broker chooses, and what it minted ----------
+   The capability table reads CONNECTIONS[].downscope, so a new connection lands in the right row. */
+var BROKER_CAPS=[
+ ["token exchange","Token exchange or downscoping","a short-lived token scoped to the call’s resource and action"],
+ ["session policy","Session policies","a temporary session whose policy is the intersection of the connection and the call"],
+ ["installation token","Installation tokens","a token limited to the repositories the call names"],
+ ["restricted key","Restricted keys","a key limited to the tool’s actions and the call’s targets"],
+ ["none","None","the stored credential, used server-side by the gateway for this call only, never sent to the agent"]];
+var GRANTS=[
+ {id:"cg_01K5RS8",tool:"github__list_pull_requests@3",agent:"acme.core.release-manager",run:"run_01K5RS7M2E8FJ3QW",seq:6,conn:"con_01K2A7",scope:"repos [acme/platform]",ttl:"5m",at:"2026-09-11 09:14:09Z",state:"expired"},
+ {id:"cg_01K5RS4",tool:"linear__get_issue@2",agent:"acme.core.triage",run:"run_01K5RP2D6H4KLM8V",seq:4,conn:"con_01K2A8",scope:"issue:read",ttl:"2m",at:"2026-09-11 08:57:31Z",state:"expired"},
+ {id:null,tool:"stripe__create_payment@4",agent:"acme.finops.invoice-bot",run:"run_01K5RN8F3J2GHY6T",conn:"con_01K2A9",scope:"payment_intents:write · amount ≤ $2,450.00",ttl:"10m",at:"2026-09-11 08:40:19Z",state:"not minted",
+  note:"Parked for approval apr_01K5RN9T4. The broker mints only after a human answers."},
+ {id:"cg_01K4X7T1",rcp:"rcp_01K4X8M2E",conn:"con_01K2A9",scope:"payment_intents:write · customer cus_acme only",ttl:"10m",state:"settled"}];
+function grantsLog(){
+  var total=CONNECTIONS.reduce(function(s,c){return s+c.grants30;},0);
+  var rows=GRANTS.map(function(g){
+    var r=g.rcp?receiptById(g.rcp):null, tool=g.tool||(r&&r.tool), agent=g.agent||(r&&r.agent), run=g.run||(r&&r.runId), at=g.at||(r&&r.at.replace(/\.\d+Z$/,"Z"));
+    var c=null; CONNECTIONS.forEach(function(x){if(x.id===g.conn) c=x;});
+    var st=g.state==="settled"?'<span class="b b-allowed"><span class="d"></span>settled</span>':g.state==="expired"?'<span class="b b-q">expired</span>':'<span class="b b-approval"><span class="d"></span>'+h(g.state)+'</span>';
+    return '<tr class="grant-row"><td class="mono" style="font-size:11px">'+(g.id?h(g.id):'<span class="dim">—</span>')+'<div class="dim" style="font-size:10.5px">'+h(at||"")+'</div></td>'+
+     '<td>'+toolCell(tool,{sz:"sm"})+'</td>'+
+     '<td><span class="mono" style="font-size:11px">'+h(agent)+'</span><div class="dim mono" style="font-size:10.5px">'+h(run)+(g.seq?' · seq '+g.seq:'')+'</div></td>'+
+     '<td class="mono" style="font-size:11px">'+h(g.conn)+(c?'<div class="dim" style="font-size:10.5px;font-family:inherit">'+h(c.downscope)+'</div>':'')+'</td>'+
+     '<td class="mono" style="font-size:11px;min-width:22ch">'+h(g.scope)+(g.note?'<div class="dim" style="font-size:10.5px">'+h(g.note)+'</div>':'')+(g.rcp?'<div style="font-size:10.5px">receipt '+reconRcp(g.rcp)+'</div>':'')+'</td>'+
+     '<td class="mono">'+h(g.ttl)+'</td><td>'+st+'</td></tr>';}).join("");
+  return '<div class="panel" style="margin-top:14px"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Credential grants log</h3>'+
+   '<p class="muted" style="margin:2px 0 0;font-size:12px">'+total.toLocaleString()+' grants in 30 days across '+CONNECTIONS.length+' connections. Each one is recorded on its call’s frames and receipt.</p></div>'+
+   '<span class="b b-q grants-shown">'+GRANTS.length+' most recent shown</span></div>'+
+   '<div class="tw"><table data-lt="1"><thead><tr><th>Grant</th><th>Tool version</th><th>Agent · run</th><th>Connection</th><th>Scope</th><th>TTL</th><th>State</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
+   '<div class="panel-b"><p class="muted" style="margin:0;font-size:12px">TTL defaults to the call’s expected duration plus a margin, never more than one hour. The agent sees the result, never the credential.</p></div></div>';
+}
+function brokerChooses(){
+  return '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>How the broker chooses</h3>'+
+   '<p class="muted" style="margin:2px 0 0;font-size:12px">For each dispatched call, the narrowest credential the provider allows, in this order.</p></div></div>'+
+   '<div class="tw"><table data-lt="1"><thead><tr><th>Provider capability</th><th>What the broker mints</th><th>Here</th></tr></thead><tbody>'+
+   BROKER_CAPS.map(function(x){var cs=CONNECTIONS.filter(function(c){return c.downscope===x[0];});
+    return '<tr><td style="font-size:12px"><b>'+h(x[1])+'</b></td><td class="muted" style="font-size:12px">'+h(x[2])+'</td>'+
+     '<td class="mono" style="font-size:11px">'+(cs.length?cs.map(function(c){return h(c.servers);}).join(" · "):'<span class="dim">none</span>')+'</td></tr>';}).join("")+
+   '</tbody></table></div></div>';
+}
+
+/* ---------- Import, in three steps (W9): connect, review tools/list, classify and import ----------
+   The step is the dialog arg, so openDialog('import') always starts at Connect. */
+var IMPORT_TOOLS=[
+ {n:"create_page",d:"Create a page in a space.",risk:"medium",eff:"write",out:true,pick:true},
+ {n:"update_page",d:"Replace the body of an existing page.",risk:"medium",eff:"write",out:true,pick:true},
+ {n:"get_page",d:"Read a page by id, with its version.",risk:"low",eff:"read",out:true,pick:true},
+ {n:"search_pages",d:"Full-text search across spaces the token can read.",risk:"low",eff:"read",out:true,pick:true},
+ {n:"delete_page",d:"Move a page to the trash.",risk:"high",eff:"irreversible",out:false,pick:false},
+ {n:"add_comment",d:"Comment on a page.",risk:"low",eff:"write",out:true,pick:true},
+ {n:"list_spaces",d:"List spaces the token can read.",risk:"low",eff:"read",out:true,pick:true},
+ {n:"export_space",d:"Export a whole space as a zip to a signed URL.",risk:"high",eff:"read",out:false,pick:false}];
+function impPicked(){if(!S.impPick){S.impPick={};IMPORT_TOOLS.forEach(function(t){S.impPick[t.n]=t.pick;});}
+  return IMPORT_TOOLS.filter(function(t){return S.impPick[t.n];});}
+DLG_EXT.import=function(arg){
+  var step=arg===2||arg===3?arg:1;
+  if(step===1) S.impPick=null;
+  var picked=impPicked();
+  var steps='<div class="row imp-steps" style="gap:8px;margin-bottom:14px;font-size:12px">'+[[1,"Connect"],[2,"Review tools/list"],[3,"Classify and import"]].map(function(x){
+    return '<span class="b '+(x[0]===step?"b-approval":x[0]<step?"b-allowed":"b-q")+'"'+(x[0]===step?' aria-current="step"':'')+'>'+(x[0]<step?"✓":x[0])+' · '+x[1]+'</span>';}).join('<span class="dim">→</span>')+'</div>';
+  if(step===1) return {t:"Import tools from an MCP server",s:"The registry is the only source of tools an agent can see. Nothing reaches a belt until it is here.",w:false,
+   b:steps+'<div class="field"><label for="imp-url">Server URL</label><input id="imp-url" value="https://mcp.confluence.acme.internal/mcp"></div>'+
+    '<div class="field"><label for="imp-tr">Transport</label><select id="imp-tr"><option>streamable-http</option><option>sse</option><option>stdio</option></select></div>'+
+    '<div class="field"><label for="imp-conn">Connection</label><select id="imp-conn"><option>Create one after import</option>'+CONNECTIONS.map(function(c){return '<option>'+h(c.id+' · '+c.name)+'</option>';}).join("")+'</select></div>'+
+    '<div class="note">Oxagen calls <span class="mono">tools/list</span>, versions every tool it finds, and stores both schemas. Where a server declares no <span class="mono">outputSchema</span>, the gateway records observed outputs and files a registry proposal for an admin to approve.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="S.dlgArg=2;render()">Connect</button>'};
+  if(step===2) return {t:"Review tools/list",s:IMPORT_TOOLS.length+" tools returned by mcp.confluence.acme.internal · protocol 2025-06-18",w:true,
+   b:steps+IMPORT_TOOLS.map(function(t){
+     return '<label class="check imp-tool" style="margin-bottom:8px"><input type="checkbox"'+(S.impPick[t.n]?' checked':'')+' onchange="S.impPick[\''+t.n+'\']=this.checked;render()">'+
+      '<div class="grow">'+toolCell("confluence__"+t.n+"@1",{sz:"sm"})+'<div class="dim" style="font-size:11.5px;margin-top:3px">'+h(t.d)+'</div></div>'+
+      '<div class="row" style="flex:none;gap:5px">'+hazard(t.risk,t.eff)+(t.out?'<span class="b b-allowed">outputSchema</span>':'<span class="b b-approval">no outputSchema</span>')+'</div></label>';}).join("")+
+     '<div class="warn" style="margin-top:6px"><b>'+(IMPORT_TOOLS.length-IMPORT_TOOLS.filter(function(t){return t.pick;}).length)+' are unchecked by default.</b> <span class="mono">delete_page</span> and <span class="mono">export_space</span> are irreversible or bulk egress and declare no output schema. '+
+     'Importing them grants nothing, but they would land denied by workspace policy until someone decides otherwise.</div>',
+   f:'<span class="grow imp-count">'+picked.length+' of '+IMPORT_TOOLS.length+' selected</span><button class="btn" onclick="S.dlgArg=1;render()">Back</button>'+
+    '<button class="btn primary" onclick="S.dlgArg=3;render()"'+(picked.length?'':' disabled')+'>Classify</button>'};
+  var n0=verCount();
+  return {t:"Classify and import",s:"Risk, side effect, egress and financial class are what policy decides on.",w:true,
+   b:steps+'<div class="tw"><table data-lt="1"><thead><tr><th>Tool version</th><th>Hazard</th><th>Egress</th><th>Financial</th><th>Output schema</th></tr></thead><tbody>'+
+    picked.map(function(t){return '<tr class="imp-row"><td>'+toolCell("confluence__"+t.n+"@1",{sz:"sm"})+'</td><td>'+hazard(t.risk,t.eff)+'</td>'+
+     '<td><span class="b b-q">internal</span></td><td>'+finBadge("none")+'</td><td>'+(t.out?'<span class="b b-allowed">declared</span>':'<span class="b b-approval">observed</span>')+'</td></tr>';}).join("")+
+    '</tbody></table></div>'+
+    '<div class="note" style="margin-top:14px"><b>What import does not do.</b> It grants nothing. These '+picked.length+' versions take the registry from '+n0.toLocaleString()+' to '+(n0+picked.length).toLocaleString()+' tool versions and sit there, callable by nobody, until a role grant puts them on a belt.</div>',
+   f:'<span class="grow">Credential kind <span class="mono">api_key</span> · downscoping <span class="mono">none available</span></span><button class="btn" onclick="S.dlgArg=2;render()">Back</button>'+
+    '<button class="btn primary" onclick="closeDialog();act(\'Imported '+picked.length+' tool versions from confluence. They are in the registry and on no belt.\')">Import '+picked.length+' tools</button>'};
+};
 
 /* ============================== Ontology ============================== */
 function pOntology(){
@@ -7438,9 +7585,9 @@ function pSpend(){
        '<td><span class="b b-'+(a.trend.charAt(0)==="-"?"proven":"approval")+'">'+h(a.trend)+'</span></td></tr>';}).join("")+
      '</tbody></table></div><div class="panel-b"><div class="note">Two agents show no proven spend: <span class="mono">invoice-bot</span> does finance work no witness covers, and <span class="mono">docs-writer</span>’s output is accepted by a human, which is reported separately and never folded into proven.</div></div></div>'+
      '<div class="panel"><div class="panel-h"><h3>By model and provider key</h3></div><div class="tw"><table>'+
-     '<thead><tr><th>Model</th><th class="num">Model calls</th><th class="num">Spend</th><th class="num">Cache hit rate</th><th>Basis</th></tr></thead><tbody>'+
-     SPEND.byModel.map(function(m){
-      return '<tr><td class="tkey" style="font-size:12px">'+h(m.m)+'</td><td class="num">'+m.calls.toLocaleString()+'</td>'+
+     '<thead><tr><th>Model</th><th>Provider key</th><th class="num">Model calls</th><th class="num">Spend</th><th class="num">Cache hit rate</th><th>Basis</th></tr></thead><tbody>'+
+     SPEND.byModel.map(function(m){var k=spendKeyOf(m.m);
+      return '<tr><td class="tkey" style="font-size:12px">'+h(m.m)+'</td><td style="font-size:12px">'+(k?'<span class="mono">'+h(k.id)+'</span><div class="dim" style="font-size:11px">'+h(k.src.split(" · ")[0])+(n$(k.provider)===n$(m.spend)?' · statement matches':' · statement '+usd(k.provider))+'</div>':'<span class="dim">—</span>')+'</td><td class="num">'+m.calls.toLocaleString()+'</td>'+
        '<td class="num">'+usd(m.spend)+'</td><td class="num">'+per(m.cache)+'</td>'+
        '<td class="mono dim" style="font-size:11px">gateway_observed</td></tr>';}).join("")+
      '</tbody></table></div><div class="panel-b"><p class="muted" style="font-size:12px;margin:0">The assistant line is Oxagen’s own work, routed by tier through OpenRouter and billed back as assistant usage at vendor cost plus a published markup.</p></div></div>';
@@ -7449,24 +7596,7 @@ function pSpend(){
   } else if(t==="waste"){
     body=spendWaste();
   } else if(t==="reconciliation"){
-    body='<div class="grid g4" style="margin-bottom:16px">'+
-     '<div class="stat"><span class="k">Provider spend matched to a frame</span><span class="v">'+per(SPEND.matched)+'</span><span class="s">by month, the reported target</span></div>'+
-     '<div class="stat"><span class="k">Open variance</span><span class="v">'+usd(SPEND.variance)+'</span><span class="s">USD, across 3 key-days</span></div>'+
-     '<div class="stat"><span class="k">Exceptions</span><span class="v" style="color:var(--st-critical)">'+SPEND.exceptions+'</span><span class="s">severity critical</span></div>'+
-     '<div class="stat"><span class="k">Governed actions</span><span class="v">'+SPEND.actions.toLocaleString()+'</span><span class="s">reported, priced at zero</span></div></div>'+
-     '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Matching runs at three levels, best first</h3></div><div class="tw"><table>'+
-     '<thead><tr><th>Level</th><th>How</th><th class="num">Matched</th><th class="num">Provider</th><th class="num">Variance</th><th>Status</th></tr></thead><tbody>'+
-     '<tr><td class="mono">1</td><td>by provider request id to a single frame</td><td class="num">$17,904.22</td><td class="num">$17,904.22</td><td class="num">$0.00</td><td><span class="b b-allowed"><span class="d"></span>matched</span></td></tr>'+
-     '<tr><td class="mono">2</td><td>by key, model, day and token-class totals</td><td class="num">$257.26</td><td class="num">$498.44</td><td class="num" style="color:var(--st-denied)">$241.18</td><td><span class="b b-approval"><span class="d"></span>exception open</span></td></tr>'+
-     '<tr><td class="mono">3</td><td>by invoice line to the monthly rollup</td><td class="num">$18,161.48</td><td class="num">$18,402.66</td><td class="num">$241.18</td><td><span class="b b-approval"><span class="d"></span>pending invoice</span></td></tr>'+
-     '</tbody></table></div><div class="panel-b"><p class="muted" style="font-size:12px;margin:0">Client-attested frames have no provider request id and match only at level 2. The $241.18 is entirely from the '+
-     '<span class="mono">docs-writer</span> runs that arrived through harness telemetry, and is labelled as such rather than absorbed.</p></div></div>'+
-     '<div class="panel"><div class="panel-h"><h3>Exceptions</h3></div><div class="panel-b">'+
-     '<div class="warn"><b>Critical · exc_01K5RN2P.</b> An external transaction attributable to connection <span class="mono">con_01K2A9</span> has no receipt: '+
-     'Stripe charge <span class="mono">ch_3Qa8</span>, $18.00 USD, 2026-09-11 08:40Z. Money moved that Oxagen did not govern. '+
-     'This is not a variance — it is a governance gap, and it is severity critical for that reason.</div>'+
-     '<div class="row" style="margin-top:13px"><button class="btn" onclick="openDialog(\'incident\')">Open an incident</button>'+
-     '<button class="btn" onclick="act(\'Statement exported: CSV and a signed PDF.\')">Export statement</button></div></div></div>';
+    body=spendRecon();
   } else {
     body='<div class="panel"><div class="panel-h"><h3>Budgets</h3>'+
      '<button class="btn sm" style="margin-left:auto" onclick="openDialog(\'budget\')">Set a budget</button></div><div class="tw"><table>'+
@@ -7668,7 +7798,7 @@ function spendDrill(dr){
    '</div>'+(fs.length?'<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">A finding counts toward this '+kind+' when it is the subject, or when its evidence names it — the badge says which level it was found at. '+
    'Potential savings are measured minus counterfactual over the cited runs, at the price each call actually paid; Fix opens the change that removes it.</div></div>':'')+'</div>';
 
-  return head+hero+tiles+series+cuts+fnd;
+  return head+hero+tiles+series+(kind==="agent"?spendAgentHistory(E):"")+cuts+fnd;
 }
 
 /* Spend by tool — cumulative on the left, average per call on the right, the numbers underneath. */
@@ -7748,6 +7878,155 @@ function spendWaste(){
    '</div><div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">Wasted is narrower than unproven. Unproven means no witness flipped; wasted means the frames show the tokens bought nothing — a repeated call, a cold prefix, a turn spent waiting, a chain that broke. '+
    'Accepted-by-a-human work is never counted here.</div></div></div>';
   return strip+causes+runs;
+}
+
+/* ---------- Reconciliation by month (ported from W8 · every dollar, every operator) ----------
+   A month is its statement lines. Each line is one entry on a provider's statement: the amount the provider
+   billed, the part matched to a frame by provider request id (l1), the part matched by key, model, day and
+   token-class totals (l2), and, for money that moved, the receipt that must also exist. Every total,
+   variance, share and exception count on the tab is derived from these lines; nothing is stored twice. */
+SPEND.reconMonths=[
+ {id:"2026-08",m:"August 2026",state:"closed",closed:"2026-09-02",
+  lines:[
+   {id:"pk_9f21",src:"Anthropic · pk_9f21",model:"claude-opus-5",kind:"model",provider:"13,102.40",l1:"12,688.15",l2:"414.25"},
+   {id:"pk_bdrk_7f2a",src:"AWS Bedrock us-east-1 · pk_bdrk_7f2a",model:"claude-haiku-4-5",kind:"model",provider:"3,190.77",l1:"3,190.77",l2:"0.00"},
+   {id:"pk_or_5c08",src:"OpenRouter · pk_or_5c08",model:"z-ai/glm-latest (assistant)",kind:"model",provider:"1,011.38",l1:"1,011.38",l2:"0.00"},
+   {id:"pi_3PzQ1cV4n",src:"Stripe · con_01K2A9",what:"payment to vendor:aws · PO-4471",kind:"money",provider:"1,122.40",l1:"1,122.40",l2:"0.00",rcp:"rcp_01K3T4H8Q"},
+   {id:"pi_3PyH7dR2m",src:"Stripe · con_01K2A9",what:"payment to vendor:github · PO-4471",kind:"money",provider:"640.00",l1:"640.00",l2:"0.00",rcp:"rcp_01K3N2W5C"}]},
+ {id:"2026-09",m:"September 2026",state:"open",closed:null,
+  lines:[
+   {id:"pk_9f21",src:"Anthropic · pk_9f21",model:"claude-opus-5",kind:"model",provider:"13,918.02",l1:"13,419.58",l2:"257.26",
+    why:"Harness-tier runs from acme.core.triage and acme.core.docs-writer arrived with client-attested frames and no provider request id, so they match only on key-day totals. The provider’s September invoice line is pending."},
+   {id:"pk_bdrk_7f2a",src:"AWS Bedrock us-east-1 · pk_bdrk_7f2a",model:"claude-haiku-4-5",kind:"model",provider:"3,402.19",l1:"3,402.19",l2:"0.00"},
+   {id:"pk_or_5c08",src:"OpenRouter · pk_or_5c08",model:"z-ai/glm-latest (assistant)",kind:"model",provider:"1,082.45",l1:"1,082.45",l2:"0.00"},
+   {id:"pi_3QaL8f2Xk",src:"Stripe · con_01K2A9",what:"payment to vendor:aws · PO-4471",kind:"money",provider:"884.60",l1:"884.60",l2:"0.00",rcp:"rcp_01K4X8M2E"},
+   {id:"sp-0a4f91c",src:"AWS billing · con_01K2AA",what:"savings plan purchase · PO-4471",kind:"money",provider:"400.00",l1:"400.00",l2:"0.00",rcp:"rcp_01K4W2…"},
+   {id:"ch_3Qa8",src:"Stripe · con_01K2A9",what:"card charge · no counterparty recorded",kind:"money",provider:"18.00",l1:"0.00",l2:"0.00",rcp:null,
+    exc:"exc_01K5RN2P",at:"2026-09-11 08:40Z",
+    why:"No frame carries this charge id and no receipt names it, so it did not come through the tool gateway. The nearest frame is the parked stripe__create_payment@4 at 08:40:19, reserved for $2,450.00 and not dispatched; it does not account for this charge."}]}
+];
+/* The waste list named the wrong tool for the parked invoice-bot run: apr_01K5RN9T4 parks stripe__create_payment@4. */
+SPEND.wasteRunsList.forEach(function(w){ if(w.run==="run_01K5RN8F3J2GHY6T") w.what=w.what.replace("aws_billing__purchase_savings_plan","stripe__create_payment@4 ($2,450.00 to vendor:aws)"); });
+
+function reconLine(l){var p=n$(l.provider),m=n$(l.l1)+n$(l.l2);return {p:p,m:m,v:Math.round((p-m)*100)/100};}
+function reconTotals(M){
+  var t={p:0,m1:0,m2:0,mp:0,mr:0,exc:[],unmatched:[]};
+  M.lines.forEach(function(l){var r=reconLine(l); t.p+=r.p; t.m1+=n$(l.l1); t.m2+=n$(l.l2);
+    if(l.kind==="money"){t.mp+=r.p; if(l.rcp) t.mr+=r.p;}
+    if(r.v>0.005||(l.kind==="money"&&!l.rcp)) t.unmatched.push(l);
+    if(l.exc&&!l.resolved) t.exc.push(l);});
+  ["p","m1","m2","mp","mr"].forEach(function(k){t[k]=Math.round(t[k]*100)/100;});
+  t.m=Math.round((t.m1+t.m2)*100)/100; t.v=Math.round((t.p-t.m)*100)/100;
+  return t;
+}
+function reconRcp(id){var r=receiptById(id);
+  return r?'<a class="mono drill-lnk" href="#" onclick="event.preventDefault();openDialog(\'receipt\',\''+h(id)+'\')">'+h(id)+'</a>':'<span class="mono">'+h(id)+'</span>';}
+function reconMonthPanel(M){
+  var T=reconTotals(M), share=T.p?T.m/T.p:1, exact=T.v<0.005&&T.mr===T.mp;
+  var chip=exact?'<span class="b b-allowed"><span class="d"></span>matched to the cent</span>':
+    '<span class="b b-'+(T.exc.length?"critical":"approval")+'"><span class="d"></span>'+(M.state==="open"?"open · month to date":"closed with variance")+'</span>';
+  var levels=[
+   ["1","provider request id to a single frame",T.m1,Math.round((T.p-T.m1)*100)/100],
+   ["2","key, model, day and token-class totals",T.m2,T.v],
+   ["receipt","money that moved: charge id to a receipt",T.mr,Math.round((T.mp-T.mr)*100)/100]];
+  return '<div class="panel recon-m" data-month="'+h(M.id)+'"><div class="panel-h"><div style="flex:1;min-width:0"><h3>'+h(M.m)+'</h3>'+
+   '<p class="muted" style="margin:2px 0 0;font-size:12px">'+(M.closed?'Closed '+h(M.closed)+'. ':'Month to date. ')+M.lines.length+' statement lines, '+
+   (T.exc.length?T.exc.length+' open exception':'no open exception')+'.</p></div>'+chip+'</div>'+
+   '<div class="panel-b recon-tiles" style="border-bottom:1px solid var(--border)"><div class="grid g3">'+
+    tile("Provider statements",'<span class="recon-p">'+fmt$(T.p)+'</span>',M.lines.length+' lines · USD')+
+    tile("Matched to a frame",'<span class="recon-mt">'+fmt$(T.m)+'</span>',(share*100).toFixed(2)+'% of provider spend')+
+    tile("Variance",'<span class="recon-v">'+fmt$(T.v)+'</span>',T.v<0.005?'every dollar has a frame':'billed with no frame', T.v<0.005?"var(--st-allowed)":"var(--st-denied)")+
+   '</div></div>'+
+   '<div class="tw"><table data-lt="1"><thead><tr><th>Level</th><th>How it matched</th><th class="num">Matched</th><th class="num">Unmatched after</th></tr></thead><tbody>'+
+   levels.map(function(x){return '<tr><td class="mono">'+x[0]+'</td><td style="font-size:12px">'+x[1]+'</td><td class="num">'+fmt$(x[2])+'</td>'+
+    '<td class="num"'+(x[3]>0.005?' style="color:var(--st-denied)"':'')+'>'+fmt$(x[3])+'</td></tr>';}).join("")+
+   '</tbody></table></div>'+
+   '<div class="tw"><table data-lt="1" class="recon-lines"><thead><tr><th>Statement line</th><th class="num">Provider</th><th class="num">Frames</th><th>Receipt</th><th class="num">Variance</th></tr></thead><tbody>'+
+   M.lines.map(function(l){var r=reconLine(l), bad=r.v>0.005||(l.kind==="money"&&!l.rcp);
+    return '<tr data-line="'+h(l.id)+'"><td><span class="mono" style="font-size:11.5px">'+h(l.id)+'</span><div class="dim" style="font-size:11px">'+h(l.src)+' · '+h(l.model||l.what)+'</div></td>'+
+     '<td class="num">'+fmt$(r.p)+'</td><td class="num">'+fmt$(r.m)+'</td>'+
+     '<td style="font-size:11.5px">'+(l.kind!=="money"?'<span class="dim">frames only</span>':l.rcp?reconRcp(l.rcp):'<span class="b b-critical"><span class="d"></span>none</span>')+'</td>'+
+     '<td class="num"'+(bad?' style="color:var(--st-denied)"':'')+'>'+fmt$(r.v)+'</td></tr>';}).join("")+
+   '</tbody><tfoot><tr><td><b>Total</b></td><td class="num"><b>'+fmt$(T.p)+'</b></td><td class="num"><b>'+fmt$(T.m)+'</b></td>'+
+   '<td style="font-size:11.5px">'+fmt$(T.mr)+' of '+fmt$(T.mp)+'</td><td class="num"><b>'+fmt$(T.v)+'</b></td></tr></tfoot></table></div></div>';
+}
+function spendRecon(){
+  var sep=SPEND.reconMonths[SPEND.reconMonths.length-1], T=reconTotals(sep), inc=null, conn=null;
+  var ex=sep.lines.filter(function(l){return l.exc;})[0];
+  if(ex) INCIDENTS.forEach(function(i){if(i.id===ex.exc) inc=i;});
+  CONNECTIONS.forEach(function(c){if(c.id==="con_01K2A9") conn=c;});
+  var exPanel='';
+  if(ex){
+    var unmatched=T.unmatched.map(function(l){var r=reconLine(l);
+      return '<tr><td><span class="mono" style="font-size:11.5px">'+h(l.id)+'</span><div class="dim" style="font-size:11px">'+h(l.src)+'</div></td>'+
+       '<td>'+(l.exc?'<span class="b b-critical"><span class="d"></span>exception</span>':'<span class="b b-approval"><span class="d"></span>variance · level 2</span>')+'</td>'+
+       '<td class="num">'+fmt$(r.p)+'</td><td class="num">'+fmt$(r.m)+'</td><td class="num" style="color:var(--st-denied)">'+fmt$(r.v)+'</td>'+
+       '<td class="muted" style="font-size:12px;min-width:30ch">'+h(l.why||"")+'</td></tr>';}).join("");
+    exPanel='<div class="panel recon-exc" style="margin-top:14px"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Exception <span class="mono">'+h(ex.exc)+'</span> · '+h(sep.m)+'</h3>'+
+     '<p class="muted" style="margin:2px 0 0;font-size:12px">A provider line above one cent with no frame goes on the month’s unmatched list. Money that moved with no receipt is an exception, severity critical.</p></div>'+
+     '<div class="sp">'+(ex.resolved?'<span class="b b-q">resolved with a note</span>':'<span class="b b-critical"><span class="d"></span>open</span>')+
+     '<button class="btn sm" onclick="openDialog(\'reconresolve\',\''+h(ex.id)+'\')"'+(ex.resolved?' disabled':'')+'>Resolve with a note</button>'+
+     '<button class="btn sm" onclick="openDialog(\'incident\')">Open an incident</button></div></div>'+
+     '<div class="panel-b" style="border-bottom:1px solid var(--border)"><dl class="kv">'+
+     '<dt>Charge</dt><dd><span class="mono">'+h(ex.id)+'</span> · '+fmt$(n$(ex.provider))+' USD · '+h(ex.at)+'</dd>'+
+     '<dt>Connection</dt><dd><span class="mono">con_01K2A9</span>'+(conn?' · '+h(conn.name)+' · owner '+h(conn.owner):'')+'</dd>'+
+     '<dt>Frame</dt><dd>none</dd><dt>Receipt</dt><dd>none</dd>'+
+     (inc?'<dt>Incident</dt><dd><span class="mono">'+h(inc.id)+'</span> · '+h(inc.status)+' · owner '+h(inc.owner)+(inc.due?' · due '+h(inc.due):'')+'</dd>':'')+
+     (ex.resolved?'<dt>Resolution</dt><dd>'+h(ex.resolved.by)+' · '+h(ex.resolved.kind)+' — '+h(ex.resolved.note)+'</dd>':'')+
+     '</dl></div>'+
+     '<div class="panel-b" style="border-bottom:1px solid var(--border)"><div class="warn"><b>Cause.</b> '+h(ex.why)+' Money moved that Oxagen did not govern: a governance gap, not a variance.</div></div>'+
+     '<div class="panel-h"><h3>Unmatched provider lines · '+h(sep.m)+' ('+T.unmatched.length+')</h3></div>'+
+     '<div class="tw"><table data-lt="1" class="recon-unmatched"><thead><tr><th>Line</th><th>Kind</th><th class="num">Provider</th><th class="num">Frames</th><th class="num">Unmatched</th><th>Why</th></tr></thead><tbody>'+unmatched+'</tbody>'+
+     '<tfoot><tr><td colspan="4"><b>Variance</b></td><td class="num" style="color:var(--st-denied)"><b>'+fmt$(T.v)+'</b></td><td></td></tr></tfoot></table></div>'+
+     '<div class="panel-b"><div class="row"><button class="btn" onclick="act(\'Statement exported: CSV and a signed PDF.\')">Export statement</button></div>'+
+     '<div class="note" style="margin-top:12px">Resolving records who decided and why. The variance stays on the record, and a note here does not close the incident: its owner does.</div></div></div>';
+  }
+  return '<div class="grid g2">'+SPEND.reconMonths.map(reconMonthPanel).join("")+'</div>'+exPanel;
+}
+DLG_EXT.reconresolve=function(id){
+  var sep=SPEND.reconMonths[SPEND.reconMonths.length-1], l=sep.lines.filter(function(x){return x.id===id&&x.exc;})[0]||sep.lines.filter(function(x){return x.exc;})[0];
+  return {t:"Resolve "+l.exc+" with a note",s:"A resolution records who decided and why. The variance stays on the record; resolving does not erase it.",w:false,
+   b:'<dl class="kv"><dt>Line</dt><dd class="mono">'+h(l.id)+' · '+h(l.src)+'</dd><dt>Unmatched</dt><dd class="mono" style="color:var(--st-denied)">'+fmt$(reconLine(l).v)+' USD</dd>'+
+     '<dt>Month</dt><dd>'+h(sep.m)+'</dd></dl>'+
+     '<div class="field" style="margin-top:14px"><label for="rr-kind">Resolution</label><select id="rr-kind">'+
+      '<option>Accept as a charge made outside the gateway</option><option>Refund requested from the provider</option><option>Duplicate of a governed payment</option></select></div>'+
+     '<div class="field"><label for="rr-note">Note for the record</label><textarea id="rr-note" rows="3">Traced in the Stripe dashboard audit log to a manual charge on the restricted key. Key rotated; the incident stays with Dana Okafor.</textarea></div>'+
+     '<div class="note">This closes the line on the statement only. <span class="mono">'+h(l.exc)+'</span> stays open until its owner closes it.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="reconResolve(\''+h(l.id)+'\')">Resolve</button>'};
+};
+function reconResolve(id){
+  var sep=SPEND.reconMonths[SPEND.reconMonths.length-1], l=sep.lines.filter(function(x){return x.id===id;})[0];
+  var k=document.getElementById("rr-kind"), n=document.getElementById("rr-note");
+  if(l) l.resolved={by:"Marcus Bell",kind:k?k.value:"accepted",note:n?n.value:""};
+  closeDialog(); act("Line "+id+" resolved with a note. Its "+(l?fmt$(reconLine(l).v):"")+" variance stays on the record.");
+}
+/* The provider key a model bills through: the current month's model line for it, so By model and Reconciliation read one record. */
+function spendKeyOf(model){var sep=SPEND.reconMonths[SPEND.reconMonths.length-1], k=null;
+  sep.lines.forEach(function(l){if(l.kind==="model"&&l.model===model) k=l;}); return k;}
+
+/* Agent over time (W8 agent view): spend per proven run by month, and this month's verdicts. The current month is the
+   byAgent row itself; earlier months are history. Verdicts other than flipped are stored; flipped is the row's. */
+SPEND_DETAIL["agent:acme.core.stella-ci"].history=[
+ {m:"Mar 2026",spend:887.55,flipped:150},{m:"Apr 2026",spend:948.10,flipped:181},{m:"May 2026",spend:1012.30,flipped:212},
+ {m:"Jun 2026",spend:1088.40,flipped:283},{m:"Jul 2026",spend:1151.20,flipped:326},{m:"Aug 2026",spend:1200.76,flipped:399}];
+SPEND_DETAIL["agent:acme.core.stella-ci"].verdicts=[["failing",41,"failed"],["unmoved",22,"q"],["none",18,"q"],["waived",9,"q"],["unsatisfied",5,"failed"],["unverified",2,"q"],["tampered",0,"critical"]];
+function spendAgentHistory(E){
+  var d=E.d, r=E.row; if(!d.history) return '';
+  var pts=d.history.concat([{m:"Sep 2026",spend:n$(r.spend),flipped:r.flipped,cur:true}])
+    .map(function(x){return {m:x.m,v:x.flipped?x.spend/x.flipped:0,cur:x.cur,spend:x.spend,flipped:x.flipped};});
+  var mx=Math.max.apply(null,pts.map(function(p){return p.v;})), first=pts[0], last=pts[pts.length-1];
+  var vs=[["flipped",r.flipped,"proven"]].concat(d.verdicts||[]), vt=vs.reduce(function(s,v){return s+v[1];},0), vmx=Math.max.apply(null,vs.map(function(v){return v[1];}));
+  return '<div class="grid g2 agent-hist" style="margin-bottom:14px">'+
+   '<div class="panel"><div class="panel-h"><h3>Spend per proven run, by month</h3><span class="b b-proven" style="margin-left:auto">'+
+    Math.round((1-last.v/first.v)*100)+'% lower since '+h(first.m)+'</span></div><div class="panel-b" style="display:grid;gap:9px">'+
+   pts.map(function(p){return '<div class="meter"><div class="lab"><span'+(p.cur?' style="color:var(--fg);font-weight:600"':'')+'>'+h(p.m)+'</span>'+
+     '<b>'+fmt$(p.v)+' <span class="dim" style="font-weight:500">· '+fmt$(p.spend)+' ÷ '+p.flipped+'</span></b></div>'+
+     '<div class="bar"><i style="width:'+Math.max(1,Math.round(p.v/mx*100))+'%;background:var(--st-proven)"></i></div></div>';}).join("")+
+   '</div><div class="panel-b" style="border-top:1px solid var(--border)"><p class="muted" style="margin:0;font-size:12px">Spend ÷ runs whose witness verdict flipped. It falls as more runs prove on the first pass.</p></div></div>'+
+   '<div class="panel"><div class="panel-h"><h3>Verdicts · '+h(SPEND.month)+'</h3><span class="b b-q agent-vt" style="margin-left:auto">'+vt.toLocaleString()+' runs</span></div><div class="panel-b" style="display:grid;gap:9px">'+
+   vs.map(function(v){return '<div class="meter"><div class="lab"><span class="mono">'+h(v[0])+'</span><b>'+v[1].toLocaleString()+' <span class="dim" style="font-weight:500">· '+per(v[1]/vt)+'</span></b></div>'+
+     '<div class="bar"><i style="width:'+(v[1]?Math.max(1,Math.round(v[1]/vmx*100)):0)+'%;background:var(--st-'+(v[2]==="q"?"observe":v[2])+')"></i></div></div>';}).join("")+
+   '</div></div></div>';
 }
 
 /* ============================== Organization ============================== */
@@ -8925,10 +9204,80 @@ SCENARIOS["learned-approved-changed"]={title:"Learned, approved, changed", ws:"c
 
 /* ---- end W7 ---- */
 /* ---- W8 · every-dollar-every-operator ---- */
-
+SCENARIOS["every-dollar-every-operator"]={title:"Every dollar, every operator", ws:"core-platform",
+ blurb:"What the tokens bought, per operator, agent and run, and whether every provider dollar has a frame behind it.",
+ steps:[
+  {say:"September’s spend opens on what it bought. The findings are savings, each one measured minus counterfactual over the runs it cites.",
+   note:"Evidence opens the runs, the people and the arithmetic behind a number. Nothing on this tab is an opinion.",
+   route:function(o){return {page:"spend",org:o,ws:"core-platform"};},
+   setup:function(){S.tab.spend="findings";S.spendDrill=null;},
+   act:["Open the evidence for unpaged results","openDialog('evidence','fnd_01K5RTGH')"]},
+  {say:"Every run has exactly one operator. Marcus owns the triggers behind 2,986 runs this month, and this is everything they cost.",
+   note:"A run that arrived without an operator is attributed to the agent’s owning operator and flagged, never dropped and never spread.",
+   route:function(o){return {page:"spend",org:o,ws:"core-platform"};},
+   setup:function(){S.tab.spend="operator";S.spendDrill={kind:"operator",id:"marcus"};}},
+  {say:"One agent, over time. <span class=\"mono\">stella-ci</span>’s spend per proven run has fallen every month since March, and the verdicts say why.",
+   note:"Spend per proven run divides by runs whose witness verdict flipped, so it can never quietly equal spend per run.",
+   route:function(o){return {page:"spend",org:o,ws:"core-platform"};},
+   setup:function(){S.tab.spend="agent";S.spendDrill={kind:"agent",id:"acme.core.stella-ci"};}},
+  {say:"One run. The cost tab shows where each dollar of <span class=\"mono\">run_01K5RQ4B9C7XTN2P</span> went, turn by turn.",
+   note:"The run is the unit that is billed and the unit that is proven, so it is where spend and proof meet.",
+   route:function(o){return {page:"run",org:o,ws:"core-platform",id:"run_01K5RQ4B9C7XTN2P"};},
+   setup:function(){S.tab.run="cost";}},
+  {say:"Reconciliation by month. August matched to the cent at every level. September is open: an $18.00 Stripe charge, <span class=\"mono\">ch_3Qa8</span>, has no frame and no receipt.",
+   note:"A variance is a matching problem. Money that moved with no receipt is a governance gap, which is why it is an exception, severity critical.",
+   route:function(o){return {page:"spend",org:o,ws:"core-platform"};},
+   setup:function(){S.tab.spend="reconciliation";S.spendDrill=null;},
+   act:["Resolve with a note","openDialog('reconresolve','ch_3Qa8')"]},
+  {say:"Budgets. Hard ones are enforced at the model proxy before the call, not reported after it.",
+   note:"A breach is a policy.decision frame and, by policy, a pause.",
+   route:function(o){return {page:"spend",org:o,ws:"core-platform"};},
+   setup:function(){S.tab.spend="budgets";S.spendDrill=null;},
+   act:["Set a budget","openDialog('budget')"]},
+  {say:"Billing is Oxagen’s own revenue, kept apart from the customer’s spend: sealed runs with at least one model call, and nothing else.",
+   note:"Governed actions, witness runs and in-app agent runs are reported and free.",
+   route:function(o){return {page:"billing",org:o};},
+   act:["Change plan","openDialog('plan')"]}
+ ]};
 /* ---- end W8 ---- */
 /* ---- W9 · toolbelt-governed ---- */
-
+SCENARIOS["toolbelt-governed"]={title:"The toolbelt, governed", ws:"core-platform",
+ blurb:"What one agent may reach, the credential it never holds, and the policy change you can see before you switch it on.",
+ steps:[
+  {say:"Triage’s belt is searchable, not preloaded: 52 tools, and the agent finds the one it needs by asking.",
+   note:"Search runs over the belt, never the registry, so a tool outside the grant cannot be found, let alone called.",
+   route:function(o){return {page:"agent",org:o,ws:"core-platform",id:"triage",b:"toolbelt"};},
+   setup:function(){S.tab.agent="toolbelt";},
+   act:["Search the belt for “delete branch”","S.beltQuery='delete branch';S.beltRan=true;render()"]},
+  {say:"Its identity is a principal with an operator, an enforcement tier and a definition digest, not a shared key.",
+   note:"Every frame this agent writes carries this identity, which is what makes a receipt name it.",
+   route:function(o){return {page:"agent",org:o,ws:"core-platform",id:"triage",b:"identity"};},
+   setup:function(){S.tab.agent="identity";}},
+  {say:"Connections hold the customer’s credentials. No agent holds any of them: for each call the broker mints the narrowest one the provider allows.",
+   note:"The grants log shows it, including the Stripe grant that was not minted because the call is still parked for a human.",
+   route:function(o){return {page:"tools",org:o,ws:"core-platform"};},
+   setup:function(){S.tab.tools="connections";},
+   act:["Add a connection","openDialog('connection')"]},
+  {say:"The registry is the only source of tools. Three Slack output schemas were observed, not declared, and wait for an admin.",
+   note:"Until approval an output is validated only for size and type, and every run that used it says so.",
+   route:function(o){return {page:"tools",org:o,ws:"core-platform"};},
+   setup:function(){S.tab.tools="registry";},
+   act:["Review the observed schemas","openDialog('schema')"]},
+  {say:"Before <span class=\"mono\">pol_v42</span> is switched on, it is replayed over 41,882 real calls. Open a number and read the calls behind it.",
+   note:"Each bucket lists the tool, agent, run, the argument that decided it, and both decisions, beside the rule that moved.",
+   route:function(o){return {page:"tools",org:o,ws:"core-platform"};},
+   setup:function(){S.tab.tools="policy";S.simOpen="approve";},
+   act:["Activate pol_v42","openDialog('activate')"]},
+  {say:"Deny is available at every level, down to a class: every tool that moves funds, organization-wide, in one action.",
+   note:"A flip bumps the deny generation, and every affected run sees it at its next call boundary.",
+   route:function(o){return {page:"tools",org:o,ws:"core-platform"};},
+   setup:function(){S.tab.tools="switches";},
+   act:["Flip the moves_funds switch","openDialog('switch','ks_cls_funds')"]},
+  {say:"The guarantees are tested, not claimed. A case that cannot run on this plane is reported as not applicable, never as passed.",
+   note:"The suite and its version ship in the bundle a customer’s auditor receives.",
+   route:function(o){return {page:"tools",org:o,ws:"core-platform"};},
+   setup:function(){S.tab.tools="assurance";}}
+ ]};
 /* ---- end W9 ---- */
 /* ---- W10 · cio-console ---- */
 SCENARIOS["cio-console"]={title:"The CIO’s console", ws:"core-platform",
