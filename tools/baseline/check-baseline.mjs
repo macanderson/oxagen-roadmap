@@ -34,7 +34,7 @@ const ok = (cond, label, detail) => {
   if (!cond) failed++;
 };
 
-await page.goto("file://" + file + "#/acme/core-platform");
+await page.goto("file://" + file + "#/a-intel/core-platform");
 await page.waitForFunction(() => document.querySelector("#app")?.children.length > 0);
 
 // --- shell: Agent IAM naming, small approvals, flyout ---------------------------------
@@ -68,10 +68,10 @@ ok(fmt.tsec === 90, "tsec parses a frame clock", fmt);
 
 // --- scenarios ------------------------------------------------------------------------
 const scn = await page.evaluate(async () => {
-  location.hash = "#/acme/core-platform/scenarios/stop-it-steer-it/0";
+  location.hash = "#/a-intel/core-platform/scenarios/stop-it-steer-it/0";
   await new Promise(r => setTimeout(r, 60));
   const on = !!document.querySelector("[class*='scn-']");
-  location.hash = "#/acme/core-platform";
+  location.hash = "#/a-intel/core-platform";
   await new Promise(r => setTimeout(r, 60));
   return { on, offAfter: !document.querySelector("[class*='scn-']") };
 });
@@ -84,7 +84,7 @@ for (const run of runs) {
   const r = await page.evaluate(async ({ id, ws }) => {
     S.phone = false;
     S.tab.run = "player";
-    location.hash = "#/acme/" + (ws || "core-platform") + "/runs/" + id;
+    location.hash = "#/a-intel/" + (ws || "core-platform") + "/runs/" + id;
     await new Promise(res => setTimeout(res, 40));
     const R = RUNS.find(x => x.id === id), m = runMetrics(R);
     const tiles = [...document.querySelectorAll(".inst-grid .inst")];
@@ -140,7 +140,7 @@ if (shots) {
   for (const theme of ["light", "dark"]) for (const tab of ["player", "cost"]) {
     await page.evaluate(({ id, theme, tab }) => {
       S.theme = theme; document.documentElement.setAttribute("data-theme", theme);
-      S.tab.run = tab; location.hash = "#/acme/core-platform/runs/" + id; render();
+      S.tab.run = tab; location.hash = "#/a-intel/core-platform/runs/" + id; render();
       document.querySelectorAll("*").forEach(n => { if (n.scrollTop) n.scrollTop = 0; }); window.scrollTo(0, 0);
     }, { id: first.id, theme, tab });
     await page.waitForTimeout(80);

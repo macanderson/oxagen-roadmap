@@ -74,7 +74,7 @@ with. The default is visible rather than implied.
 *screens → "Turning it on, as a pull request"*.
 
 > "The switch in this dialog is the outcome. The control is the pull request. `.oxagen/skills.toml`
-> is a file in `acme/platform`, so the person who turned skills on is in the git history and on a
+> is a file in `a-intel/platform`, so the person who turned skills on is in the git history and on a
 > receipt, and the config a run resolved is a version you can go back and read."
 
 Note the line about runs already in flight: they finish without skills. A run resolves its config
@@ -92,7 +92,7 @@ Type nothing; the box already holds `cut the first release notes`. Press **Ask a
 
 Then the two withholdings, which are the point:
 
-- **`acme.invoice-reconciliation`** — published with `scope = workspace:finops`. It matched the
+- **`a-intel.invoice-reconciliation`** — published with `scope = workspace:finops`. It matched the
   query and was dropped *before ranking*.
 - **`oxagen.pdf-extract`** — the digest the marketplace served is not the digest Priya approved.
 
@@ -107,7 +107,7 @@ Try *"pay an invoice"* for an empty result with a reason — not an error, and n
 
 *screens → "The run, from three sides"*.
 
-> "A run just started in `acme/edge-proxy`. Nobody has bound that repository to a workspace. Skills
+> "A run just started in `a-intel/edge-proxy`. Nobody has bound that repository to a workspace. Skills
 > are on, so there is a config to resolve and nothing to resolve it against — and Oxagen is not
 > going to guess which one applies."
 
@@ -152,7 +152,7 @@ Then the rubric, where two of four axes disagree with the record:
 - *"Did you verify it, or did you assert it?"* — the agent gave itself **4**. The witness returned
   `failing` three minutes earlier. The agent never saw it; the airlock passes only the word.
 - *"Did you stay inside the scope you were given?"* — the agent gave itself **5**. It read
-  `acme/mobile` at turn 5, in scope for its belt and outside the scope the operator stated.
+  `a-intel/mobile` at turn 5, in scope for its belt and outside the scope the operator stated.
 
 > "That gap is the entire research value, and it is also exactly why this data is dangerous. So it
 > is fenced."
@@ -167,7 +167,7 @@ reviewers ask about.
 Five policy versions, each a pull request. End on the bottom row:
 
 > "core-platform was created on 2026-07-30 with skills off, and stayed off for three days until
-> Marcus opened `acme/platform#402`. The default is not a first-run nicety. It holds every time a
+> Marcus opened `a-intel/platform#402`. The default is not a first-run nicety. It holds every time a
 > workspace is made."
 
 ---
@@ -187,8 +187,8 @@ Five policy versions, each a pull request. End on the bottom row:
 
 | Screen | Route | States |
 |---|---|---|
-| Skills — off (the shipping default) | `#/acme/{ws}/skills` with `enabled=false` | loaded, phone |
-| Skills — Catalog | `#/acme/core-platform/skills/catalog` | loaded, empty, loading, error, denied, phone |
+| Skills — off (the shipping default) | `#/a-intel/{ws}/skills` with `enabled=false` | loaded, phone |
+| Skills — Catalog | `#/a-intel/core-platform/skills/catalog` | loaded, empty, loading, error, denied, phone |
 | Skills — Search (`search_skills` console) | `…/skills/search` | loaded (5 query shapes), phone |
 | Skills — In the loop | `…/skills/loop` | open interjection, answered, phone |
 | Skills — Reflection and quarantine | `…/skills/reflect` | loaded, phone |

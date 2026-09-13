@@ -1435,12 +1435,12 @@ button.edge:hover{color:var(--fg)}
    withheld. That line is the same cut ADR-043 made for agents, and this page keeps it.
    ========================================================================================== */
 
-var ORG = {slug:"acme", name:"Acme Robotics", currency:"USD", plan:"Team", dataPlane:"shared"};
+var ORG = {slug:"a-intel", name:"Anderson Intelligence Corp.", currency:"USD", plan:"Team", dataPlane:"shared"};
 
 var WS = [
-  {slug:"core-platform", name:"Core platform", main:"acme/platform", branch:"main",
-   linked:["acme/billing","acme/mobile"], agents:38, owner:"Marcus Bell", skills:true},
-  {slug:"finops", name:"FinOps", main:"acme/finops-agents", branch:"main",
+  {slug:"core-platform", name:"Core platform", main:"a-intel/platform", branch:"main",
+   linked:["a-intel/billing","a-intel/mobile"], agents:38, owner:"Marcus Bell", skills:true},
+  {slug:"finops", name:"FinOps", main:"a-intel/finops-agents", branch:"main",
    linked:[], agents:12, owner:"Dana Okafor", skills:false}
 ];
 
@@ -1452,39 +1452,39 @@ var PEOPLE = {
 
 /* ---- the catalogue. Every row is a file with a digest; nothing here is a model's opinion. ---- */
 var SKILLS = [
- {id:"acme.release-notes-from-prs", ver:"2.1.0", kind:"procedure",
-  src:"repo", srcLabel:"acme/platform", path:".oxagen/skills/release-notes-from-prs/SKILL.md",
+ {id:"a-intel.release-notes-from-prs", ver:"2.1.0", kind:"procedure",
+  src:"repo", srcLabel:"a-intel/platform", path:".oxagen/skills/release-notes-from-prs/SKILL.md",
   digest:"sha256:4b1e90c7ad38fe52", tokens:1840, tier:"allowed", state:"ok",
   st:"Groups merged pull requests into Features, Fixes and Breaking, and writes the draft to a release branch. Never publishes.",
   cited:186, runs:212, proofBefore:0.62, proofAfter:0.81, owner:"marcus", updated:"6 days ago"},
- {id:"acme.rollback-a-bad-release", ver:"1.4.2", kind:"constraint",
-  src:"repo", srcLabel:"acme/platform", path:".oxagen/skills/rollback-a-bad-release/SKILL.md",
+ {id:"a-intel.rollback-a-bad-release", ver:"1.4.2", kind:"constraint",
+  src:"repo", srcLabel:"a-intel/platform", path:".oxagen/skills/rollback-a-bad-release/SKILL.md",
   digest:"sha256:c02f7719be4a0d31", tokens:960, tier:"approval", state:"ok",
   st:"The order of operations for pulling a release back off the production branch, and the two things you must never do first.",
   cited:14, runs:14, proofBefore:0.40, proofAfter:0.86, owner:"marcus", updated:"3 weeks ago",
   note:"Loading it is allowed. Acting on it touches <span class=\"mono\">main</span>, so every governed action it names still parks."},
- {id:"acme.triage-a-flaky-test", ver:"3.0.1", kind:"procedure",
-  src:"registry", srcLabel:"acme org registry", path:"registry://acme/skills/triage-a-flaky-test@3.0.1",
+ {id:"a-intel.triage-a-flaky-test", ver:"3.0.1", kind:"procedure",
+  src:"registry", srcLabel:"a-intel org registry", path:"registry://a-intel/skills/triage-a-flaky-test@3.0.1",
   digest:"sha256:88d3c5e10f7b2a94", tokens:2210, tier:"allowed", state:"ok",
   st:"Reruns the case under seed control, bisects the commit range, and opens a proposal when it cannot reproduce.",
   cited:1104, runs:1340, proofBefore:0.19, proofAfter:0.34, owner:"priya", updated:"yesterday"},
- {id:"acme.postgres-safe-migration", ver:"1.2.0", kind:"constraint",
-  src:"linked", srcLabel:"acme/billing", path:".oxagen/skills/postgres-safe-migration/SKILL.md",
+ {id:"a-intel.postgres-safe-migration", ver:"1.2.0", kind:"constraint",
+  src:"linked", srcLabel:"a-intel/billing", path:".oxagen/skills/postgres-safe-migration/SKILL.md",
   digest:"sha256:1a7fe4b309cd8265", tokens:1320, tier:"approval", state:"ok", twoPerson:true,
   st:"Expand, backfill, contract — and never in one deploy. Names the four migrations that took production down in 2025.",
   cited:37, runs:41, proofBefore:0.55, proofAfter:0.92, owner:"dana", updated:"2 months ago"},
- {id:"acme.customer-escalation-writeup", ver:"1.1.0", kind:"procedure",
-  src:"repo", srcLabel:"acme/platform", path:".oxagen/skills/customer-escalation-writeup/SKILL.md",
+ {id:"a-intel.customer-escalation-writeup", ver:"1.1.0", kind:"procedure",
+  src:"repo", srcLabel:"a-intel/platform", path:".oxagen/skills/customer-escalation-writeup/SKILL.md",
   digest:"sha256:9e05b2c8417df6a0", tokens:740, tier:"allowed", state:"ok",
   st:"The shape of an escalation note: what broke, who it reached, what we did, what we owe them.",
   cited:52, runs:64, proofBefore:null, proofAfter:null, owner:"priya", updated:"5 days ago"},
- {id:"acme.codegraph-walk", ver:"2.2.0", kind:"procedure",
-  src:"registry", srcLabel:"acme org registry", path:"registry://acme/skills/codegraph-walk@2.2.0",
+ {id:"a-intel.codegraph-walk", ver:"2.2.0", kind:"procedure",
+  src:"registry", srcLabel:"a-intel org registry", path:"registry://a-intel/skills/codegraph-walk@2.2.0",
   digest:"sha256:6cb1039fa7e25d48", tokens:1580, tier:"allowed", state:"ok",
   st:"Walks the code graph from a symbol to its callers and its data-layer references before proposing a change.",
   cited:441, runs:530, proofBefore:0.48, proofAfter:0.71, owner:"marcus", updated:"9 days ago"},
- {id:"acme.invoice-reconciliation", ver:"1.0.0", kind:"procedure",
-  src:"registry", srcLabel:"acme org registry", path:"registry://acme/skills/invoice-reconciliation@1.0.0",
+ {id:"a-intel.invoice-reconciliation", ver:"1.0.0", kind:"procedure",
+  src:"registry", srcLabel:"a-intel org registry", path:"registry://a-intel/skills/invoice-reconciliation@1.0.0",
   digest:"sha256:03ae7c5921b4ef7d", tokens:2040, tier:"approval", state:"scope",
   st:"Matches a statement line to a purchase order and a receipt before anything is settled.",
   cited:0, runs:0, proofBefore:null, proofAfter:null, owner:"dana", updated:"a month ago",
@@ -1499,13 +1499,13 @@ var SKILLS = [
 
 /* ---- the config. This, and not the model, is what a search returns. ---- */
 var CFG = {
-  ver:"skl_v7", by:"marcus", when:"2026-09-10 11:42:07Z", pr:"acme/platform#523",
+  ver:"skl_v7", by:"marcus", when:"2026-09-10 11:42:07Z", pr:"a-intel/platform#523",
   file:".oxagen/skills.toml",
   sources:[
-   {k:"repo", label:"acme/platform · .oxagen/skills/", on:true, n:3, d:"The workspace's own main repo. Versioned with the code that the skills are about."},
-   {k:"linked", label:"acme/billing · .oxagen/skills/", on:true, n:1, d:"A linked repo. Its skills resolve here because core-platform binds it."},
-   {k:"linked2", label:"acme/mobile · .oxagen/skills/", on:false, n:0, d:"Linked, but skills are not drawn from it. Nothing in this repo reaches an agent."},
-   {k:"registry", label:"acme org registry", on:true, n:3, d:"Published across the organization. Scope on the skill still decides which workspaces see it."},
+   {k:"repo", label:"a-intel/platform · .oxagen/skills/", on:true, n:3, d:"The workspace's own main repo. Versioned with the code that the skills are about."},
+   {k:"linked", label:"a-intel/billing · .oxagen/skills/", on:true, n:1, d:"A linked repo. Its skills resolve here because core-platform binds it."},
+   {k:"linked2", label:"a-intel/mobile · .oxagen/skills/", on:false, n:0, d:"Linked, but skills are not drawn from it. Nothing in this repo reaches an agent."},
+   {k:"registry", label:"a-intel org registry", on:true, n:3, d:"Published across the organization. Scope on the skill still decides which workspaces see it."},
    {k:"market", label:"Oxagen marketplace", on:true, n:1, d:"Third-party. Every version is held until a person approves its digest."}
   ],
   search:{mode:"searchable", k:5, minScore:0.42, budget:6000},
@@ -1515,16 +1515,16 @@ var CFG = {
 
 /* ---- the run that walks into a repo nobody bound ---- */
 var RUN = {
-  id:"run_01K6QW3D5N7TYBA2", agent:"acme.core.release-manager", op:"marcus", ws:"core-platform",
+  id:"run_01K6QW3D5N7TYBA2", agent:"a-intel.core.release-manager", op:"marcus", ws:"core-platform",
   harness:"Claude Code", tier:"gateway", turn:1, cost:"0.18", grade:"full",
-  repo:"acme/edge-proxy", remote:"github.com/acme/edge-proxy", sha:"e7c41a9",
-  task:"acme/edge-proxy#1", taskTitle:"Cut the first release notes for edge-proxy"
+  repo:"a-intel/edge-proxy", remote:"github.com/a-intel/edge-proxy", sha:"e7c41a9",
+  task:"a-intel/edge-proxy#1", taskTitle:"Cut the first release notes for edge-proxy"
 };
 
 /* the frames, in order. `at` is the moment; `oob` marks a frame that is out of the agent's band. */
 var FRAMES = [
  {k:"run.started", c:"op", t:"09:14:02.118Z", d:"marcus · Claude Code on host mbp-marcus · harness reported a git remote"},
- {k:"repo.unknown", c:"gov", t:"09:14:02.140Z", d:"github.com/acme/edge-proxy resolves to no workspace in acme", hot:true},
+ {k:"repo.unknown", c:"gov", t:"09:14:02.140Z", d:"github.com/a-intel/edge-proxy resolves to no workspace in a-intel", hot:true},
  {k:"control.interject", c:"gov", t:"09:14:02.146Z", d:"skills.enabled = true and no config resolves · policy unbound = ask", hot:true},
  {k:"control.answer", c:"op", t:"09:17:38.902Z", d:"marcus answered · pending", pend:true},
  {k:"skills.resolved", c:"gov", t:"—", d:"waits on the answer", pend:true},
@@ -1535,18 +1535,18 @@ var FRAMES = [
 /* the frames after the answer, by path */
 var AFTER = {
  link:[
-  {k:"control.answer", c:"op", t:"09:17:38.902Z", d:"marcus · link acme/edge-proxy to core-platform as a linked repo"},
-  {k:"repo.bound", c:"gov", t:"09:17:39.004Z", d:"acme/edge-proxy · linked repo of core-platform · receipt rcp_01K6QW44"},
+  {k:"control.answer", c:"op", t:"09:17:38.902Z", d:"marcus · link a-intel/edge-proxy to core-platform as a linked repo"},
+  {k:"repo.bound", c:"gov", t:"09:17:39.004Z", d:"a-intel/edge-proxy · linked repo of core-platform · receipt rcp_01K6QW44"},
   {k:"skills.resolved", c:"gov", t:"09:17:39.011Z", d:"config skl_v7 · 7 skills in scope · 1 withheld"},
   {k:"skills.searched", c:"gov", t:"09:17:39.318Z", d:"“cut the first release notes” · 3 returned, 2 withheld", hot:true},
-  {k:"skills.loaded", c:"ctx", t:"09:17:39.402Z", d:"acme.release-notes-from-prs@2.1.0 · 1,840 tokens · $0.0055", hot:true},
+  {k:"skills.loaded", c:"ctx", t:"09:17:39.402Z", d:"a-intel.release-notes-from-prs@2.1.0 · 1,840 tokens · $0.0055", hot:true},
   {k:"context.assembled", c:"ctx", t:"09:17:39.410Z", d:"6 context frames · 9,204 tokens · 1 skill"},
   {k:"model.request", c:"model", t:"09:17:39.455Z", d:"turn 1 · claude-sonnet-5 · the skill is cited in the system position"}
  ],
  create:[
-  {k:"control.answer", c:"op", t:"09:17:38.902Z", d:"marcus · create workspace edge, bind acme/edge-proxy as its main repo"},
+  {k:"control.answer", c:"op", t:"09:17:38.902Z", d:"marcus · create workspace edge, bind a-intel/edge-proxy as its main repo"},
   {k:"workspace.created", c:"gov", t:"09:17:39.140Z", d:"edge · owner marcus · skills.enabled = false · receipt rcp_01K6QW45", hot:true},
-  {k:"repo.bound", c:"gov", t:"09:17:39.208Z", d:"acme/edge-proxy · main repo of edge · production branch main"},
+  {k:"repo.bound", c:"gov", t:"09:17:39.208Z", d:"a-intel/edge-proxy · main repo of edge · production branch main"},
   {k:"skills.resolved", c:"gov", t:"09:17:39.215Z", d:"skills are off in edge · 0 skills in scope · search_skills is not on the belt", hot:true},
   {k:"context.assembled", c:"ctx", t:"09:17:39.221Z", d:"4 context frames · 3,110 tokens · 0 skills"},
   {k:"model.request", c:"model", t:"09:17:39.266Z", d:"turn 1 · claude-sonnet-5 · the agent is told, in one line, that it has none"}
@@ -1556,17 +1556,17 @@ var AFTER = {
 /* ---- the search, as the gateway answers it ---- */
 var QUERIES = {
  "cut the first release notes":{
-   hits:[["acme.release-notes-from-prs",0.94],["acme.codegraph-walk",0.51],["acme.customer-escalation-writeup",0.44]],
-   held:["acme.invoice-reconciliation","oxagen.pdf-extract"]},
+   hits:[["a-intel.release-notes-from-prs",0.94],["a-intel.codegraph-walk",0.51],["a-intel.customer-escalation-writeup",0.44]],
+   held:["a-intel.invoice-reconciliation","oxagen.pdf-extract"]},
  "pay an invoice":{
    hits:[],
-   held:["acme.invoice-reconciliation"],
+   held:["a-intel.invoice-reconciliation"],
    none:"Nothing in this workspace's config answers that. The agent gets an empty result and a reason, not an error and not a guess."},
  "roll back the release":{
-   hits:[["acme.rollback-a-bad-release",0.91],["acme.release-notes-from-prs",0.47]],
+   hits:[["a-intel.rollback-a-bad-release",0.91],["a-intel.release-notes-from-prs",0.47]],
    held:["oxagen.pdf-extract"]},
  "migrate the billing schema":{
-   hits:[["acme.postgres-safe-migration",0.89],["acme.codegraph-walk",0.58]],
+   hits:[["a-intel.postgres-safe-migration",0.89],["a-intel.codegraph-walk",0.58]],
    held:["oxagen.pdf-extract"]},
  "extract tables from a pdf":{
    hits:[],
@@ -1576,7 +1576,7 @@ var QUERIES = {
 
 /* ---- the reflection, captured out of band and quarantined ---- */
 var REFLECT = {
- run:"run_01K5RS7M2E8FJ3QW", agent:"acme.core.release-manager", when:"2026-09-11 14:22:41Z",
+ run:"run_01K5RS7M2E8FJ3QW", agent:"a-intel.core.release-manager", when:"2026-09-11 14:22:41Z",
  rubric:"rfl_v3", why:"verdict = failing · rfl_v3 always samples a failing run",
  cost:"0.0141", tokens:2740, model:"claude-haiku-4-5",
  axes:[
@@ -1585,24 +1585,24 @@ var REFLECT = {
   {q:"Did you verify it, or did you assert it?", self:4, obs:1, obsLab:"witness: failing", gap:true,
    say:"I checked the note count against the merge list and it matched, so I was confident it was right."},
   {q:"Did you stay inside the scope you were given?", self:5, obs:2, obsLab:"1 out-of-scope call", gap:true,
-   say:"I worked only in acme/platform as instructed."},
+   say:"I worked only in a-intel/platform as instructed."},
   {q:"Was what it cost proportionate to what it produced?", self:3, obs:3, obsLab:"$4.13 · 0.62 ratio",
    say:"I re-read CHANGELOG.md more times than I needed to. A cached read would have done."}
  ],
  contra:[
   {ax:1, what:"The witness returned <span class=\"mono\">failing</span> on the pull request at 14:19:06Z, three minutes before this reflection. The agent never saw it — the airlock passes only the word.",
    ev:"frame 171 · proof.observed"},
-  {ax:2, what:"<span class=\"mono\">github__get_contents</span> read <span class=\"mono\">acme/mobile</span> at turn 5. In scope for the belt, outside the scope the operator stated in the task.",
+  {ax:2, what:"<span class=\"mono\">github__get_contents</span> read <span class=\"mono\">a-intel/mobile</span> at turn 5. In scope for the belt, outside the scope the operator stated in the task.",
    ev:"frame 96 · tool_call"}
  ]
 };
 
 var HIST = [
- {ver:"skl_v7", when:"2026-09-10", by:"marcus", pr:"acme/platform#523", d:"Marketplace added as a source, held-by-default. Search budget raised to 6,000 tokens."},
- {ver:"skl_v6", when:"2026-09-02", by:"priya", pr:"acme/platform#498", d:"Reflection turned on at a 20% sample with rubric rfl_v3, research-use only, 180-day retention."},
- {ver:"skl_v5", when:"2026-08-21", by:"priya", pr:"acme/platform#471", d:"acme/mobile dropped as a skill source after two skills in it went eleven weeks without an owner."},
- {ver:"skl_v4", when:"2026-08-14", by:"marcus", pr:"acme/platform#455", d:"Searchable belt replaced the pinned belt. Agents stopped carrying 7 skills they never cited."},
- {ver:"skl_v1", when:"2026-08-02", by:"marcus", pr:"acme/platform#402", d:"Skills turned on in core-platform. The workspace shipped with them off on 2026-07-30."}
+ {ver:"skl_v7", when:"2026-09-10", by:"marcus", pr:"a-intel/platform#523", d:"Marketplace added as a source, held-by-default. Search budget raised to 6,000 tokens."},
+ {ver:"skl_v6", when:"2026-09-02", by:"priya", pr:"a-intel/platform#498", d:"Reflection turned on at a 20% sample with rubric rfl_v3, research-use only, 180-day retention."},
+ {ver:"skl_v5", when:"2026-08-21", by:"priya", pr:"a-intel/platform#471", d:"a-intel/mobile dropped as a skill source after two skills in it went eleven weeks without an owner."},
+ {ver:"skl_v4", when:"2026-08-14", by:"marcus", pr:"a-intel/platform#455", d:"Searchable belt replaced the pinned belt. Agents stopped carrying 7 skills they never cited."},
+ {ver:"skl_v1", when:"2026-08-02", by:"marcus", pr:"a-intel/platform#402", d:"Skills turned on in core-platform. The workspace shipped with them off on 2026-07-30."}
 ];
 
 /* ============================== state ============================== */
@@ -1720,7 +1720,7 @@ function sidebar(r){
   var pend=S.answered?0:1;
   return '<aside class="side'+(S.side?" open":"")+'">'+
    '<div class="side-top"><div class="brandmark">'+LOGO+'</div>'+
-    '<button class="switcher" onclick="act(\'One organization in this mockup: Acme Robotics.\')" aria-label="Switch organization">'+
+    '<button class="switcher" onclick="act(\'One organization in this mockup: Anderson Intelligence Corp..\')" aria-label="Switch organization">'+
       '<span class="av">A</span><span class="tx"><b>'+h(ORG.name)+'</b><span>'+h(ORG.slug)+' · '+ORG.plan+'</span></span><span class="cv">▾</span></button>'+
     '<button class="switcher" onclick="swapWs()" aria-label="Switch workspace">'+
       '<span class="av ws">'+h(w.slug.slice(0,2))+'</span><span class="tx"><b>'+h(w.name)+'</b><span>'+h(w.main)+' · '+(wsSkills(w)?'skills on':'skills off')+'</span></span><span class="cv">▾</span></button>'+
@@ -1929,7 +1929,7 @@ function tSearch(w){
     '<div class="panel"><div class="panel-h"><h3>What decided this</h3></div><div class="panel-b">'+
      '<div class="kv">'+
       '<dt>Config</dt><dd><span class="mono">'+h(CFG.ver)+'</span> · merged as '+h(CFG.pr)+' by '+h(PEOPLE[CFG.by].name)+'</dd>'+
-      '<dt>Sources on</dt><dd>'+CFG.sources.filter(function(x){return x.on;}).length+' of '+CFG.sources.length+' · <span class="mono">acme/mobile</span> is linked but off</dd>'+
+      '<dt>Sources on</dt><dd>'+CFG.sources.filter(function(x){return x.on;}).length+' of '+CFG.sources.length+' · <span class="mono">a-intel/mobile</span> is linked but off</dd>'+
       '<dt>Belt mode</dt><dd><span class="mono">searchable</span> · nothing is carried until it is asked for</dd>'+
       '<dt>Cut-off</dt><dd>top <span class="mono">'+CFG.search.k+'</span>, minimum score <span class="mono">'+CFG.search.minScore+'</span></dd>'+
       '<dt>Load budget</dt><dd><span class="mono">'+CFG.search.budget.toLocaleString()+'</span> tokens a turn · a skill past the budget is refused, not truncated</dd>'+
@@ -2019,7 +2019,7 @@ function tVersions(w){
    }).join("")+'</div>'+
    '<div class="hint" style="margin-top:10px">The last line is the one that matters for this demo: '+
     '<b>core-platform was created on 2026-07-30 with skills off</b>, and stayed off for three days until Marcus opened '+
-    '<span class="mono">acme/platform#402</span>.</div>'+
+    '<span class="mono">a-intel/platform#402</span>.</div>'+
    '</div></div>';
 }
 function cfgFile(){
@@ -2027,9 +2027,9 @@ function cfgFile(){
   '<span class="c"># Every workspace is created with this file absent, which reads as false.</span>\n'+
   '<span class="k">enabled</span> = <span class="n">true</span>\n\n'+
   '[<span class="k">sources</span>]\n'+
-  '<span class="k">repo</span>      = <span class="s">".oxagen/skills/"</span>          <span class="c"># acme/platform</span>\n'+
-  '<span class="k">linked</span>    = [<span class="s">"acme/billing"</span>]          <span class="c"># acme/mobile is linked, and not a source</span>\n'+
-  '<span class="k">registry</span>  = <span class="s">"acme"</span>\n'+
+  '<span class="k">repo</span>      = <span class="s">".oxagen/skills/"</span>          <span class="c"># a-intel/platform</span>\n'+
+  '<span class="k">linked</span>    = [<span class="s">"a-intel/billing"</span>]          <span class="c"># a-intel/mobile is linked, and not a source</span>\n'+
+  '<span class="k">registry</span>  = <span class="s">"a-intel"</span>\n'+
   '<span class="k">market</span>    = <span class="s">"hold"</span>                   <span class="c"># every version waits for a person</span>\n\n'+
   '[<span class="k">search</span>]\n'+
   '<span class="k">mode</span>      = <span class="s">"searchable"</span>             <span class="c"># the belt carries a door, not a list</span>\n'+
@@ -2229,8 +2229,8 @@ function pRun(){
 
    (ans?
     '<div class="note" style="margin:12px 0"><b>Answered.</b> '+
-     (ans==="link"?'<span class="mono">acme/edge-proxy</span> is a linked repo of <b>core-platform</b>, the run resolved '+h(CFG.ver)+', and one skill is loaded.'
-                  :'The workspace <b>edge</b> exists, <span class="mono">acme/edge-proxy</span> is its main repo, and — because that is what a new workspace ships as — <b>skills are off in it</b>. The run carries none, and the agent was told so in one line.')+
+     (ans==="link"?'<span class="mono">a-intel/edge-proxy</span> is a linked repo of <b>core-platform</b>, the run resolved '+h(CFG.ver)+', and one skill is loaded.'
+                  :'The workspace <b>edge</b> exists, <span class="mono">a-intel/edge-proxy</span> is its main repo, and — because that is what a new workspace ships as — <b>skills are off in it</b>. The run carries none, and the agent was told so in one line.')+
      ' <button class="btn sm ghost" onclick="resetDemo()">Ask again</button></div>'
     :
     '<div class="note" style="margin:12px 0;border-color:color-mix(in srgb,var(--gold) 42%,transparent);background:color-mix(in srgb,var(--gold) 7%,var(--panel))">'+
@@ -2262,7 +2262,7 @@ function trAgent(ans){
     '<p style="color:var(--muted);font-size:12px">Two ways forward, and they are not the same:</p>'+
     (ans?'':'<div class="picks">'+
       pick("link","Link it to core-platform","Becomes a linked repo. Inherits "+CFG.ver+", the belt, the budget and the gateway tier of that workspace.")+
-      pick("create","Create a new workspace","Called edge, with acme/edge-proxy as its main repo. Ships with skills off, like every workspace does.")+
+      pick("create","Create a new workspace","Called edge, with a-intel/edge-proxy as its main repo. Ships with skills off, like every workspace does.")+
      '</div>'+
      '<div class="row" style="gap:7px;margin-top:9px"><button class="btn primary sm"'+(S.picked?'':' disabled')+' onclick="answer()">Send this answer</button>'+
       '<span class="mono dim" style="font-size:10.5px">'+(S.picked?'answers as '+h(PEOPLE[RUN.op].name):'pick one')+'</span></div>')+
@@ -2273,7 +2273,7 @@ function trAgent(ans){
       '<p>'+(ans==="link"?"Link it to core-platform.":"Make a new workspace. Call it edge.")+'</p></div>'+
      '<div class="msg agent"><div class="mh"><b>'+h(RUN.agent)+'</b><span class="chip">turn 1</span><span class="tm">09:17:39Z</span></div>'+
       (ans==="link"
-       ? '<p>Bound. I have <span class="mono">acme.release-notes-from-prs@2.1.0</span> and I am following it: group the merged pull requests, write the draft to a release branch, publish nothing.</p>'+
+       ? '<p>Bound. I have <span class="mono">a-intel.release-notes-from-prs@2.1.0</span> and I am following it: group the merged pull requests, write the draft to a release branch, publish nothing.</p>'+
          '<p style="color:var(--muted);font-size:12px">2 skills were withheld from my search. I am told the count and the reason class, not the names.</p>'
        : '<p>Working in <b>edge</b>. I have no skills in this workspace — skills are off here — so I will do this from the commit history directly and write the draft to a branch.</p>'+
          '<p style="color:var(--muted);font-size:12px">I will say so in the pull request, because a reviewer should know this was done without the release-notes procedure.</p>')+
@@ -2317,7 +2317,7 @@ function trOperator(ans){
       dl("rem","<b>Skills ship off.</b> 0 in scope, and <span class=\"mono\">search_skills</span> is not on the belt")+
       dl("rem","No belt, no budget, no price book until somebody sets them")+
       dl("add","Its own spend, its own audit, its own owner")+
-      dl("add","<span class=\"mono\">acme/edge-proxy</span> becomes its main repo, branch <span class=\"mono\">main</span>")+
+      dl("add","<span class=\"mono\">a-intel/edge-proxy</span> becomes its main repo, branch <span class=\"mono\">main</span>")+
       dl("same","This run continues either way — with a procedure, or without one")+
      '</div></div>'+
    '</div>'+
@@ -2334,20 +2334,20 @@ function dl(k,t){return '<div class="li"><span class="s '+k+'">'+(k==="add"?"+":
 function afterPanel(ans){
   if(ans==="link") return '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>The skill it loaded</h3>'+
     '<span class="mono dim" style="font-size:11px">1,840 tokens · $0.0055 · priced on the Spend page as context, not as output</span></div>'+
-   '<div class="panel-b">'+skillRow(skill("acme.release-notes-from-prs"))+
+   '<div class="panel-b">'+skillRow(skill("a-intel.release-notes-from-prs"))+
     '<div class="hint" style="margin-top:10px">The model call that follows cites it in the system position. A sealed replay of this run '+
     'resolves the same digest, so “what procedure was it following” has an answer a year from now.</div></div></div>';
 
   return '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>The workspace that was created</h3>'+
     badge("q","skills off")+'</div><div class="panel-b">'+
-   '<div class="cfg"><div class="cfg-h">acme/edge-proxy · .oxagen/workspace.toml <span class="grow"></span>committed by the gateway, 09:17:39Z</div><pre>'+
+   '<div class="cfg"><div class="cfg-h">a-intel/edge-proxy · .oxagen/workspace.toml <span class="grow"></span>committed by the gateway, 09:17:39Z</div><pre>'+
    '<span class="k">slug</span>    = <span class="s">"edge"</span>\n'+
    '<span class="k">name</span>    = <span class="s">"Edge"</span>\n'+
    '<span class="k">owner</span>   = <span class="s">"marcus"</span>\n'+
-   '<span class="k">main</span>    = <span class="s">"acme/edge-proxy"</span>\n'+
+   '<span class="k">main</span>    = <span class="s">"a-intel/edge-proxy"</span>\n'+
    '<span class="k">branch</span>  = <span class="s">"main"</span>\n\n'+
    '<span class="c"># No [skills] block. An absent block reads as false, and a workspace is</span>\n'+
-   '<span class="c"># created without one every time. Turning it on is acme/edge-proxy#2.</span>'+
+   '<span class="c"># created without one every time. Turning it on is a-intel/edge-proxy#2.</span>'+
    '</pre></div>'+
    '<div class="hint" style="margin-top:10px">This is the same file <b>core-platform</b> had on 2026-07-30. '+
    'It took a pull request and a named person to change it then, and it takes one now.</div>'+
@@ -2361,7 +2361,7 @@ function answer(){
   S.answered=S.picked;
   render();
   act(S.answered==="link"
-    ? "Answered. acme/edge-proxy is linked to core-platform; the run resolved skl_v7 and loaded one skill."
+    ? "Answered. a-intel/edge-proxy is linked to core-platform; the run resolved skl_v7 and loaded one skill."
     : "Answered. Workspace edge created — with skills off, which is what every workspace ships as.",
     S.answered==="link"?"allowed":"gold");
 }
@@ -2451,10 +2451,10 @@ function dialog(){
 }
 function skillBody(s){
   var m={
-   "acme.release-notes-from-prs":'<span class="c">---</span>\n<span class="k">name</span>: release-notes-from-prs\n<span class="k">scope</span>: workspace:core-platform\n<span class="c">---</span>\n\n<span class="k"># Cutting release notes</span>\n\n1. List the pull requests merged into <span class="s">main</span> since the last tag.\n2. Group them under <span class="s">Features</span>, <span class="s">Fixes</span>, <span class="s">Breaking</span>. A PR with no label goes to Fixes.\n3. Read CHANGELOG.md <span class="k">once</span>. It is 40k tokens; re-reading it is the single largest\n   waste in this task’s history.\n4. Write the draft to <span class="s">release/&lt;version&gt;-notes</span>. Open a PR.\n5. <span class="k">Never</span> publish the release. That is github__create_release, it needs approval,\n   and it is not yours to ask for.',
-   "acme.rollback-a-bad-release":'<span class="c">---</span>\n<span class="k">name</span>: rollback-a-bad-release\n<span class="k">scope</span>: workspace:core-platform\n<span class="c">---</span>\n\n<span class="k"># Pulling a release back</span>\n\n<span class="k">Do not</span> revert the merge commit first. <span class="k">Do not</span> force-push main. Both of those\nhave cost us a day each, on 2025-03-11 and on 2025-11-02.\n\n1. Flip the feature flag. This is the only step that is fast.\n2. Cut a revert PR against main and let the ladder run on it.\n3. Only once the witness flips, tag and deploy.',
-   "acme.postgres-safe-migration":'<span class="c">---</span>\n<span class="k">name</span>: postgres-safe-migration\n<span class="k">scope</span>: workspace:core-platform, workspace:finops\n<span class="c">---</span>\n\n<span class="k"># Expand, backfill, contract</span>\n\nNever in one deploy. The four outages in 2025 were all one deploy.\n\n1. <span class="k">Expand</span>: add the column, nullable, no default on a large table.\n2. <span class="k">Backfill</span>: in batches, off the request path, resumable.\n3. <span class="k">Contract</span>: drop the old column, in a later deploy, after a week of dual reads.',
-   "acme.invoice-reconciliation":'<span class="c">---</span>\n<span class="k">name</span>: invoice-reconciliation\n<span class="k">scope</span>: workspace:finops\n<span class="c">---</span>\n\n<span class="c"># You are reading this because you opened it from Mission Control.</span>\n<span class="c"># An agent in core-platform cannot: scope says finops, and scope is</span>\n<span class="c"># checked before ranking, not after.</span>\n\n<span class="k"># Matching a statement line</span>\n\n1. Find the purchase order. No PO, no payment.\n2. Find the receipt. Amounts must agree to the cent.\n3. Anything above the mandate parks. That is not your call to make.',
+   "a-intel.release-notes-from-prs":'<span class="c">---</span>\n<span class="k">name</span>: release-notes-from-prs\n<span class="k">scope</span>: workspace:core-platform\n<span class="c">---</span>\n\n<span class="k"># Cutting release notes</span>\n\n1. List the pull requests merged into <span class="s">main</span> since the last tag.\n2. Group them under <span class="s">Features</span>, <span class="s">Fixes</span>, <span class="s">Breaking</span>. A PR with no label goes to Fixes.\n3. Read CHANGELOG.md <span class="k">once</span>. It is 40k tokens; re-reading it is the single largest\n   waste in this task’s history.\n4. Write the draft to <span class="s">release/&lt;version&gt;-notes</span>. Open a PR.\n5. <span class="k">Never</span> publish the release. That is github__create_release, it needs approval,\n   and it is not yours to ask for.',
+   "a-intel.rollback-a-bad-release":'<span class="c">---</span>\n<span class="k">name</span>: rollback-a-bad-release\n<span class="k">scope</span>: workspace:core-platform\n<span class="c">---</span>\n\n<span class="k"># Pulling a release back</span>\n\n<span class="k">Do not</span> revert the merge commit first. <span class="k">Do not</span> force-push main. Both of those\nhave cost us a day each, on 2025-03-11 and on 2025-11-02.\n\n1. Flip the feature flag. This is the only step that is fast.\n2. Cut a revert PR against main and let the ladder run on it.\n3. Only once the witness flips, tag and deploy.',
+   "a-intel.postgres-safe-migration":'<span class="c">---</span>\n<span class="k">name</span>: postgres-safe-migration\n<span class="k">scope</span>: workspace:core-platform, workspace:finops\n<span class="c">---</span>\n\n<span class="k"># Expand, backfill, contract</span>\n\nNever in one deploy. The four outages in 2025 were all one deploy.\n\n1. <span class="k">Expand</span>: add the column, nullable, no default on a large table.\n2. <span class="k">Backfill</span>: in batches, off the request path, resumable.\n3. <span class="k">Contract</span>: drop the old column, in a later deploy, after a week of dual reads.',
+   "a-intel.invoice-reconciliation":'<span class="c">---</span>\n<span class="k">name</span>: invoice-reconciliation\n<span class="k">scope</span>: workspace:finops\n<span class="c">---</span>\n\n<span class="c"># You are reading this because you opened it from Mission Control.</span>\n<span class="c"># An agent in core-platform cannot: scope says finops, and scope is</span>\n<span class="c"># checked before ranking, not after.</span>\n\n<span class="k"># Matching a statement line</span>\n\n1. Find the purchase order. No PO, no payment.\n2. Find the receipt. Amounts must agree to the cent.\n3. Anything above the mandate parks. That is not your call to make.',
    "oxagen.pdf-extract":'<span class="c">---</span>\n<span class="k">name</span>: pdf-extract\n<span class="k">publisher</span>: oxagen-marketplace\n<span class="c">---</span>\n\n<span class="c"># Held. The body below is the 0.9.3 the marketplace served on 2026-09-09.</span>\n<span class="c"># The digest Priya approved on 2026-08-21 was sha256:b78e...0c14, and this</span>\n<span class="c"># one is sha256:f41c...593a. No agent has seen either.</span>\n\n<span class="k"># Extracting tables</span>\n\n1. Detect ruled regions. 2. Read cells left to right. 3. Return rows.'
   };
   return m[s.id]||'<span class="c">---</span>\n<span class="k">name</span>: '+h(s.id.split(".").pop())+'\n<span class="c">---</span>\n\n'+h(s.st);
@@ -2462,36 +2462,36 @@ function skillBody(s){
 function enableSkills(){
   closeDialog();S.on=true;S.ws="core-platform";S.tab.skills="catalog";
   go("#/"+ORG.slug+"/core-platform/skills/catalog");
-  act("acme/platform#523 opened and merged. skl_v7 is in effect; every agent in core-platform now holds search_skills.","allowed");
+  act("a-intel/platform#523 opened and merged. skl_v7 is in effect; every agent in core-platform now holds search_skills.","allowed");
 }
 
 /* ============================== screens index ============================== */
 var SCREENS=[
  ["The default",[
-  ["Skills, off — the state every workspace ships in","S.ws='finops';S.on=false;go('#/acme/finops/skills')","lock","finops"],
-  ["Turning it on, as a pull request","S.ws='core-platform';S.on=false;go('#/acme/core-platform/skills');setTimeout(function(){openDialog('enable');},0)","git","dialog"]
+  ["Skills, off — the state every workspace ships in","S.ws='finops';S.on=false;go('#/a-intel/finops/skills')","lock","finops"],
+  ["Turning it on, as a pull request","S.ws='core-platform';S.on=false;go('#/a-intel/core-platform/skills');setTimeout(function(){openDialog('enable');},0)","git","dialog"]
  ]],
  ["Search is the config",[
-  ["Catalog — what this workspace resolves to","S.ws='core-platform';S.on=true;go('#/acme/core-platform/skills/catalog')","skills","7 in scope"],
-  ["search_skills, answered as the agent","S.ws='core-platform';S.on=true;go('#/acme/core-platform/skills/search')","ask","console"],
-  ["Withheld by scope","S.ws='core-platform';S.on=true;S.q='pay an invoice';go('#/acme/core-platform/skills/search')","lock","empty result"],
-  ["Withheld on a digest","S.ws='core-platform';S.on=true;S.q='extract tables from a pdf';go('#/acme/core-platform/skills/search')","lock","unapproved"],
-  ["The config file and its history","S.ws='core-platform';S.on=true;go('#/acme/core-platform/skills/versions')","git","skl_v7"]
+  ["Catalog — what this workspace resolves to","S.ws='core-platform';S.on=true;go('#/a-intel/core-platform/skills/catalog')","skills","7 in scope"],
+  ["search_skills, answered as the agent","S.ws='core-platform';S.on=true;go('#/a-intel/core-platform/skills/search')","ask","console"],
+  ["Withheld by scope","S.ws='core-platform';S.on=true;S.q='pay an invoice';go('#/a-intel/core-platform/skills/search')","lock","empty result"],
+  ["Withheld on a digest","S.ws='core-platform';S.on=true;S.q='extract tables from a pdf';go('#/a-intel/core-platform/skills/search')","lock","unapproved"],
+  ["The config file and its history","S.ws='core-platform';S.on=true;go('#/a-intel/core-platform/skills/versions')","git","skl_v7"]
  ]],
  ["The seat in the loop",[
-  ["Fleet — a run waiting on a person","resetDemo();go('#/acme/core-platform/fleet')","fleet","1 interjection"],
-  ["The run, from three sides","resetDemo();go('#/acme/core-platform/runs/"+RUN.id+"')","ask","the wow"],
-  ["Answered: linked to core-platform","S.picked='link';S.answered='link';go('#/acme/core-platform/runs/"+RUN.id+"')","git","1 skill loaded"],
-  ["Answered: a new workspace, skills off","S.picked='create';S.answered='create';go('#/acme/core-platform/runs/"+RUN.id+"')","skills","0 skills"],
-  ["What the seat may and may not do","S.ws='core-platform';S.on=true;go('#/acme/core-platform/skills/loop')","cons","policy"]
+  ["Fleet — a run waiting on a person","resetDemo();go('#/a-intel/core-platform/fleet')","fleet","1 interjection"],
+  ["The run, from three sides","resetDemo();go('#/a-intel/core-platform/runs/"+RUN.id+"')","ask","the wow"],
+  ["Answered: linked to core-platform","S.picked='link';S.answered='link';go('#/a-intel/core-platform/runs/"+RUN.id+"')","git","1 skill loaded"],
+  ["Answered: a new workspace, skills off","S.picked='create';S.answered='create';go('#/a-intel/core-platform/runs/"+RUN.id+"')","skills","0 skills"],
+  ["What the seat may and may not do","S.ws='core-platform';S.on=true;go('#/a-intel/core-platform/skills/loop')","cons","policy"]
  ]],
  ["Reflection, fenced",[
-  ["The injected turn and the self-grade","S.ws='core-platform';S.on=true;go('#/acme/core-platform/skills/reflect')","mirror","rfl_v3"],
-  ["Quarantine — the five rules","S.ws='core-platform';S.on=true;go('#/acme/core-platform/skills/reflect');setTimeout(function(){var q=document.querySelector('.quar');if(q)q.scrollIntoView({block:'center'});},60)","lock","research only"]
+  ["The injected turn and the self-grade","S.ws='core-platform';S.on=true;go('#/a-intel/core-platform/skills/reflect')","mirror","rfl_v3"],
+  ["Quarantine — the five rules","S.ws='core-platform';S.on=true;go('#/a-intel/core-platform/skills/reflect');setTimeout(function(){var q=document.querySelector('.quar');if(q)q.scrollIntoView({block:'center'});},60)","lock","research only"]
  ]],
  ["States",[
   ["Loading","S.state='loading';render()","proc",""],
-  ["Empty — on, and nothing to resolve","S.ws='core-platform';S.on=true;S.state='empty';go('#/acme/core-platform/skills')","proc",""],
+  ["Empty — on, and nothing to resolve","S.ws='core-platform';S.on=true;S.state='empty';go('#/a-intel/core-platform/skills')","proc",""],
   ["Error","S.state='error';render()","proc",""],
   ["Permission denied","S.state='denied';render()","lock",""],
   ["Phone, 400px","S.state='loaded';S.phone=true;render()","proc",""]
@@ -2538,11 +2538,11 @@ document.querySelectorAll("#chrome [data-st]").forEach(function(b){
 el("cPhone").addEventListener("click",function(){S.phone=!S.phone;render();});
 el("cTheme").addEventListener("click",toggleTheme);
 el("cIndex").addEventListener("click",function(){openDialog("cmd");});
-el("cReset").addEventListener("click",function(){S.state="loaded";S.on=true;S.tab.skills="catalog";resetDemo();go("#/acme/core-platform/skills/catalog");});
+el("cReset").addEventListener("click",function(){S.state="loaded";S.on=true;S.tab.skills="catalog";resetDemo();go("#/a-intel/core-platform/skills/catalog");});
 document.addEventListener("keydown",function(e){
   if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==="k"){e.preventDefault();openDialog("cmd");}
   if(e.key==="Escape"&&S.dlg)closeDialog();
 });
-if(!location.hash)location.hash="#/acme/core-platform/skills/catalog";
+if(!location.hash)location.hash="#/a-intel/core-platform/skills/catalog";
 render();
 </script>

@@ -306,7 +306,7 @@ await step(21, async () => {
 /* ═══ 22 · a finding is scoped to something that spends ═══ */
 await step(22, async () => {
   await fresh('#/spend');
-  const scopes = [...(await body()).matchAll(/fnd_[0-9a-f]+ (acme\.[a-z.-]+|provider key \S+)/g)].map(m => m[1]);
+  const scopes = [...(await body()).matchAll(/fnd_[0-9a-f]+ (a-intel\.[a-z.-]+|provider key \S+)/g)].map(m => m[1]);
   await go('#/agents');
   const zero = await page.locator('#view table tbody tr').evaluateAll(r => r
     .filter(x => /\$0\.00/.test(x.children[5].textContent)).map(x => x.querySelector('.s.mono').textContent));
@@ -327,7 +327,7 @@ await step(24, async () => {
   await fresh('#/fleet');
   const agents = await page.locator('#view tr[data-go]').evaluateAll(r =>
     r.map(x => x.children[1].textContent.trim().split('\n')[0].trim()));
-  is(24, agents.every(a => a.startsWith('acme.core.')),
+  is(24, agents.every(a => a.startsWith('a-intel.core.')),
     `every run in core-platform belongs to a core-platform agent (${[...new Set(agents)].join(', ')})`);
   await setView('denied');
   is(24, !/Dana Okafor/.test(await body()), 'the denied persona is not an operator of this workspace');
@@ -340,7 +340,7 @@ await step(25, async () => {
   await page.click('#orgSw'); await page.waitForTimeout(70);
   is(25, (await text('#orgSw')).includes('Not in this mockup'), 'the org switcher answers with the stub message');
   await page.waitForTimeout(1600);
-  is(25, (await text('#orgSw')).includes('Acme Robotics'), 'and restores its own label, chevron and all');
+  is(25, (await text('#orgSw')).includes('Anderson Intelligence Corp.'), 'and restores its own label, chevron and all');
   await page.click('#wsSw'); await page.waitForTimeout(70);
   is(25, (await text('#wsSw')).includes('Not in this mockup'), 'the workspace switcher answers too');
   await page.waitForTimeout(1600);
@@ -1046,7 +1046,7 @@ await step(64, async () => {
     const d = document.querySelector('#panel-runTab details.more');
     return {open: d.open, body: d.querySelector('pre').innerText};
   });
-  is(64, open.open && /stable prefix/.test(open.body) && /acme\.core\.release-manager/.test(open.body)
+  is(64, open.open && /stable prefix/.test(open.body) && /a-intel\.core\.release-manager/.test(open.body)
       && /never merges to main/.test(open.body),
     `and it opens to the real prefix, with the records in force in it (${open.body.length} chars)`);
   /* A frame with no prompt must not grow an empty disclosure. */

@@ -42,7 +42,7 @@ for (const [wfile, id] of W) {
   await page.waitForTimeout(300);
   const meta = await page.evaluate(id => {
     const s = SCENARIOS[id];
-    return s ? { ws: s.ws, n: s.steps.length, acts: s.steps.map(x => x.act ? x.act[0] : null) } : null;
+    return s ? { slug: ORG.slug, ws: s.ws, n: s.steps.length, acts: s.steps.map(x => x.act ? x.act[0] : null) } : null;
   }, id);
   ok(meta, `${wfile}: SCENARIOS["${id}"] exists`);
   if (!meta) { await page.close(); continue; }
@@ -50,7 +50,7 @@ for (const [wfile, id] of W) {
   for (let i = 1; i <= meta.n; i++) {
     const tag = `${id} step ${i}/${meta.n}`;
     const before = errors.length;
-    await page.evaluate(h => { location.hash = h; }, `#/acme/${meta.ws}/scenarios/${id}/${i}`);
+    await page.evaluate(h => { location.hash = h; }, `#/${meta.slug}/${meta.ws}/scenarios/${id}/${i}`);
     await page.waitForTimeout(250);
     const st = await page.evaluate(() => {
       const rail = document.querySelector(".scn");
@@ -89,7 +89,7 @@ for (const [wfile, id] of W) {
     ok(errors.length === before, `${tag}: no page errors${errors.length > before ? " — " + errors.slice(before).join(" | ") : ""}`);
   }
   // phone and themes on step 1
-  await page.evaluate(h => { location.hash = h; }, `#/acme/${meta.ws}/scenarios/${id}/1`);
+  await page.evaluate(h => { location.hash = h; }, `#/${meta.slug}/${meta.ws}/scenarios/${id}/1`);
   await page.waitForTimeout(200);
   const phone = await page.evaluate(() => {
     S.phone = true; render();

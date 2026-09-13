@@ -132,8 +132,8 @@ for(const r of D.RUNS) guarded(`${r.id}: its frames build`, () => {
 });
 check('no two runs share an id', new Set(D.RUNS.map(r=>r.id)).size === D.RUNS.length);
 check('every run belongs to a core-platform agent',
-  D.RUNS.every(r => r.agent.startsWith('acme.core.')),
-  D.RUNS.filter(r => !r.agent.startsWith('acme.core.')).map(r=>r.agent).join(', '));
+  D.RUNS.every(r => r.agent.startsWith('a-intel.core.')),
+  D.RUNS.filter(r => !r.agent.startsWith('a-intel.core.')).map(r=>r.agent).join(', '));
 
 /* ── approvals point at real runs and real tools ── */
 for(const a of D.APPROVALS){

@@ -4,7 +4,7 @@ Every mockup is a single self-contained HTML file. Open it in a browser, or serv
 the folder (`python3 -m http.server`) and browse to it. Each file carries its own
 mockup chrome (states, phone width, theme) in the corner; that chrome is not product UI.
 
-The demo record is the same everywhere: Acme Robotics (`acme`), workspace
+The demo record is the same everywhere: Anderson Intelligence Corp. (`a-intel`), workspace
 `core-platform`, operator Marcus Bell.
 
 ## The showboat
@@ -33,7 +33,7 @@ meant to ship in the live app.
 
 **W1–W11 are generated from `mc.html`. Do not edit them.** Each one is `mc.html` byte for byte
 except its `<title>` and the hash it opens on: its guided scenario, a rail of four to eight
-steps over the real screens (`#/acme/<workspace>/scenarios/<id>/<step>`). A scenario owns no
+steps over the real screens (`#/a-intel/<workspace>/scenarios/<id>/<step>`). A scenario owns no
 screens, so a W file cannot drift from the design it demonstrates. To change what a W file
 shows, change `mc.html` (the page, or the flow's `SCENARIOS["id"]` entry) and rebuild:
 

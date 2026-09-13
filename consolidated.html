@@ -516,7 +516,7 @@ body[data-w="phone"]{background:var(--panel-2)}
       <button class="bar-btn navtoggle" id="navToggle" aria-label="Menu" aria-expanded="false" aria-controls="rail"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
 
       <nav class="crumb" aria-label="Breadcrumb">
-        <button class="chip-sw" id="orgSw" data-act="switch-org">Acme Robotics <span class="tag">acme</span>
+        <button class="chip-sw" id="orgSw" data-act="switch-org">Anderson Intelligence Corp. <span class="tag">a-intel</span>
           <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 4.7 6 2.4l2.5 2.3M3.5 7.3 6 9.6l2.5-2.3"/></svg></button>
         <span class="sep" aria-hidden="true">/</span>
         <button class="chip-sw" id="wsSw" data-act="switch-ws">core-platform
@@ -576,7 +576,7 @@ body[data-w="phone"]{background:var(--panel-2)}
   <div class="dlg-b">
     <dl class="kv">
       <dt>Name</dt><dd id="acctDlgName">Marcus Bell</dd>
-      <dt>Email</dt><dd class="mono" id="acctDlgEmail">marcus.bell@acmerobotics.com</dd>
+      <dt>Email</dt><dd class="mono" id="acctDlgEmail">marcus.bell@a-intelrobotics.com</dd>
       <dt>Org role</dt><dd id="acctDlgRole">member · workspace owner on core-platform</dd>
       <dt>Display currency</dt><dd>USD · set by the organization</dd>
       <dt>Two-factor</dt><dd><span class="st ok">hardware key</span></dd>
@@ -597,16 +597,16 @@ body[data-w="phone"]{background:var(--panel-2)}
 <script>
 "use strict";
 /* ═══════════════════════════════════════════════════════════════════════════
-   Canonical figures. Acme Robotics, one consistent customer.
+   Canonical figures. Anderson Intelligence Corp., one consistent customer.
 
    Every number rendered anywhere in this file is either in this block or
    derived from it in code. Nothing is typed twice — that is the only way a
    mockup with ten pages stays internally true after it is edited.
    ═══════════════════════════════════════════════════════════════════════════ */
-const ORG = {name:"Acme Robotics", ns:"acme", id:"org_7QK3M8VZ", members:34,
+const ORG = {name:"Anderson Intelligence Corp.", ns:"a-intel", id:"org_7QK3M8VZ", members:34,
   plan:"Enterprise, annual", currency:"USD"};
 
-const WS = {name:"core-platform", repo:"acme/platform", agents:41,
+const WS = {name:"core-platform", repo:"a-intel/platform", agents:41,
   runsMTD:2904, spendMTD:18407.62, provenSpend:7913.28, provenRuns:1204,
   spendToday:1204.71,
   augLedger:21879.91,                         /* August, reconciled — see Spend */
@@ -614,7 +614,7 @@ const WS = {name:"core-platform", repo:"acme/platform", agents:41,
   records:7, recordMix:"4 rule · 2 procedure · 1 constraint", proposals:2,
   incidents:1};
 
-const WS2 = {name:"finops", repo:"acme/finops-agents", agents:9, runsMTD:414, entities:12480};
+const WS2 = {name:"finops", repo:"a-intel/finops-agents", agents:9, runsMTD:414, entities:12480};
 
 /* A trailing 30 days ending 11 September is 19 August days plus 11 September
    days. A round number typed here instead was larger than the whole of August
@@ -745,13 +745,13 @@ const TOOL = id => TOOLS.find(t => t.id === id);
 /* ─── Approvals. Each is about a run, and resolving one moves that run. ─── */
 const APPROVALS = [
   {tool:"stripe__create_payment@4", args:null, run:"run_01K6QXD4M9",
-   agent:"acme.core.invoice-bot", op:"Dana Okafor",
+   agent:"a-intel.core.invoice-bot", op:"Dana Okafor",
    rule:"mandate.above_threshold", amount:18420.00, left:"5m 47s", risk:"critical", resolved:null},
-  {tool:"github__merge_pull_request@3", args:"acme/platform#503", run:"run_01K6QXB2K7",
-   agent:"acme.core.release-manager", op:"Marcus Bell",
+  {tool:"github__merge_pull_request@3", args:"a-intel/platform#503", run:"run_01K6QXB2K7",
+   agent:"a-intel.core.release-manager", op:"Marcus Bell",
    rule:"merge.requires_approval", amount:null, left:"9m 12s", risk:null, resolved:null},
   {tool:"bash@1", args:"rm -rf node_modules", run:"run_01K6QXH8P4",
-   agent:"acme.core.triage", op:"Marcus Bell",
+   agent:"a-intel.core.triage", op:"Marcus Bell",
    rule:"harness.irreversible_path", amount:null, left:"4m 03s", risk:null, resolved:null}
 ];
 /* ULID alphabet — no I, L, O or U. One receipt per decision, never reused. */
@@ -766,10 +766,10 @@ const mintReceipt = () => RECEIPTS[receiptN++] ?? ("rcp_01K6R4" + (RECEIPTS.leng
        are ULIDs, so their lexicographic order is their time order — sorting by
        id must reproduce sorting by `started`, and this list is in that order. ─── */
 const RUNS = [
-  {id:"run_01K5XQ7M4A", task:"Retry budget exhaustion drops webhooks", agent:"acme.core.release-manager",
+  {id:"run_01K5XQ7M4A", task:"Retry budget exhaustion drops webhooks", agent:"a-intel.core.release-manager",
    op:"Marcus Bell", harness:"Claude Code 2.1.4", state:"sealed", verdict:"flipped",
    step:"sealed 09:51:47Z", started:"2026-09-11 09:14:02Z", ended:"2026-09-11 09:51:47Z",
-   issue:"acme/platform#478",
+   issue:"a-intel/platform#478",
    subtitle:"Retry budget exhaustion silently drops webhook deliveries",
    inTok:1184902, freshTok:82943,
    turns:[["T1","Reproduce the drift",14,0.7994,0.0021],
@@ -780,10 +780,10 @@ const RUNS = [
      target:"main @ 9f2c41aeb7d3", targetResult:"FAIL", targetNote:"fingerprint d92a6f13b804",
      head:"refs/pull/482/head @ 4d7be053c91a", headResult:"PASS",
      verdict:"flipped", saw:"pass", grain:"L0"},
-   chain:{root:"9f2a41c7e0b83d…2f8c04", key:"att_acme_2026Q3_8c41",
+   chain:{root:"9f2a41c7e0b83d…2f8c04", key:"att_a-intel_2026Q3_8c41",
      from:"2026-07-01", to:"2027-01-01", grade:"full"}},
 
-  {id:"run_01K6QW2A8C", task:"Reconcile August provider invoices", agent:"acme.core.ledger-recon",
+  {id:"run_01K6QW2A8C", task:"Reconcile August provider invoices", agent:"a-intel.core.ledger-recon",
    op:"Dana Okafor", harness:"OpenAI Agents SDK 1.4.2", state:"sealed", verdict:"flipped",
    step:"sealed 10:39:28Z", started:"2026-09-11 10:21:07Z", ended:"2026-09-11 10:39:28Z",
    inTok:88402, freshTok:17498,
@@ -794,17 +794,17 @@ const RUNS = [
      target:"main @ a4f0182be6cd", targetResult:"FAIL", targetNote:"fingerprint 7b10ce4492af",
      head:"refs/pull/489/head @ e72a9c05fb31", headResult:"PASS",
      verdict:"flipped", saw:"pass", grain:"L0"},
-   chain:{root:"d41b7a90c2e856…18f3aa", key:"att_acme_2026Q3_8c41",
+   chain:{root:"d41b7a90c2e856…18f3aa", key:"att_a-intel_2026Q3_8c41",
      from:"2026-07-01", to:"2027-01-01", grade:"full"}},
 
-  {id:"run_01K6QW6H3D", task:"Settle the Bedrock overage line", agent:"acme.core.invoice-bot",
+  {id:"run_01K6QW6H3D", task:"Settle the Bedrock overage line", agent:"a-intel.core.invoice-bot",
    op:"Dana Okafor", harness:"OpenAI Agents SDK 1.4.2", state:"cancelled", verdict:null,
    step:"killed at turn 2 · class moves_funds", started:"2026-09-11 11:18:40Z", ended:"2026-09-11 11:22:07Z",
    inTok:22118, freshTok:6716,
    turns:[["T1","Read the overage line",6,0.1180,0.0006],
           ["T2","Raise the payment",3,0.0910,0.0004]]},
 
-  {id:"run_01K6QW9R5F", task:"Quarantine flaky specs in acme/mobile", agent:"acme.core.flake-hunter",
+  {id:"run_01K6QW9R5F", task:"Quarantine flaky specs in a-intel/mobile", agent:"a-intel.core.flake-hunter",
    op:"Marcus Bell", harness:"Stella 0.9.14", state:"sealed", verdict:"unmoved",
    step:"sealed 12:06:11Z", started:"2026-09-11 11:44:50Z", ended:"2026-09-11 12:06:11Z",
    inTok:296510, freshTok:42392,
@@ -815,10 +815,10 @@ const RUNS = [
      target:"main @ 71ce09b42a8f", targetResult:"PASS", targetNote:"the witness never failed here",
      head:"refs/pull/487/head @ 0b61d2e7ac95", headResult:"PASS",
      verdict:"unmoved", saw:"pass", grain:"L0"},
-   chain:{root:"3c81be04f7a19d…6b2e71", key:"att_acme_2026Q3_8c41",
+   chain:{root:"3c81be04f7a19d…6b2e71", key:"att_a-intel_2026Q3_8c41",
      from:"2026-07-01", to:"2027-01-01", grade:"full"}},
 
-  {id:"run_01K6QXB2K7", task:"Cut the 2026.9 release", agent:"acme.core.release-manager",
+  {id:"run_01K6QXB2K7", task:"Cut the 2026.9 release", agent:"a-intel.core.release-manager",
    op:"Marcus Bell", harness:"Claude Code 2.1.4", state:"parked", verdict:null,
    step:"waiting on merge approval", started:"2026-09-11 13:41:08Z", ended:null,
    inTok:618440, freshTok:58728,
@@ -826,7 +826,7 @@ const RUNS = [
           ["T2","Run the release checks",26,0.9940,0.0042],
           ["T3","Open the release PR and ask",27,1.1618,0.0062]]},
 
-  {id:"run_01K6QXD4M9", task:"Settle September vendor invoices", agent:"acme.core.invoice-bot",
+  {id:"run_01K6QXD4M9", task:"Settle September vendor invoices", agent:"a-intel.core.invoice-bot",
    op:"Dana Okafor", harness:"OpenAI Agents SDK 1.4.2", state:"parked", verdict:null,
    step:"waiting on approval", started:"2026-09-11 13:48:02Z", ended:null,
    inTok:128904, freshTok:17714,
@@ -834,7 +834,7 @@ const RUNS = [
           ["T2","Match them to purchase orders",8,0.2988,0.0031],
           ["T3","Raise the payment and ask",7,0.3240,0.0022]]},
 
-  {id:"run_01K6QXF6N2", task:"Repair the flaky deploy test", agent:"acme.core.stella-ci",
+  {id:"run_01K6QXF6N2", task:"Repair the flaky deploy test", agent:"a-intel.core.stella-ci",
    op:"Marcus Bell", harness:"Stella 0.9.14", state:"live", verdict:null,
    step:"turn 3 · tool call", started:"2026-09-11 13:52:19Z", ended:null,
    inTok:402118, freshTok:52276,
@@ -842,14 +842,14 @@ const RUNS = [
           ["T2","Isolate the shared fixture",12,0.3388,0.0024],
           ["T3","Write the regression test",11,0.3540,0.0022]]},
 
-  {id:"run_01K6QXH8P4", task:"Clear the stale node_modules on the CI image", agent:"acme.core.triage",
+  {id:"run_01K6QXH8P4", task:"Clear the stale node_modules on the CI image", agent:"a-intel.core.triage",
    op:"Marcus Bell", harness:"Codex CLI 0.42.1", state:"parked", verdict:null,
    step:"waiting on approval", started:"2026-09-11 13:55:31Z", ended:null,
    inTok:41220, freshTok:9040,
    turns:[["T1","Measure the image",6,0.1620,0.0008],
           ["T2","Propose the removal and ask",5,0.1460,0.0012]]},
 
-  {id:"run_01K6QXK9R6", task:"Roll firmware 4.2 to the Halvorsen fleet", agent:"acme.core.fleet-ops-bot",
+  {id:"run_01K6QXK9R6", task:"Roll firmware 4.2 to the Halvorsen fleet", agent:"a-intel.core.fleet-ops-bot",
    op:"Marcus Bell", harness:"Stella 0.9.14", state:"live", verdict:null,
    step:"turn 2 · tool call", started:"2026-09-11 13:58:44Z", ended:null,
    inTok:71004, freshTok:12784,
@@ -861,11 +861,11 @@ const RUNS = [
        first turn's frames, not typed by the operator — so they are marked as
        generated rather than passed off as something a person wrote. ─── */
 const SUMMARY = {
-  run_01K5XQ7M4A:"Reproduced the drop, wrote the failing test, fixed the retry budget so an exhausted budget parks the delivery instead of discarding it, and opened acme/platform#482.",
+  run_01K5XQ7M4A:"Reproduced the drop, wrote the failing test, fixed the retry budget so an exhausted budget parks the delivery instead of discarding it, and opened a-intel/platform#482.",
   run_01K6QW2A8C:"Loaded both August ledgers, diffed them line by line, and raised the single Bedrock line dated after the statement closed.",
   run_01K6QW6H3D:"Read the Bedrock overage line and raised a payment for it. Cancelled at the call boundary by the class-wide moves_funds switch.",
   run_01K6QW9R5F:"Collected the failing mobile specs, re-ran them in isolation, and quarantined the four that did not reproduce.",
-  run_01K6QXB2K7:"Assembled the 2026.9 changelog, ran the release checks, and opened acme/platform#503. Waiting on a person to merge it.",
+  run_01K6QXB2K7:"Assembled the 2026.9 changelog, ran the release checks, and opened a-intel/platform#503. Waiting on a person to merge it.",
   run_01K6QXD4M9:"Matched September's open invoices to their purchase orders and raised one $18,420.00 payment against PO-4471. Waiting on a person.",
   run_01K6QXF6N2:"Reproduced the deploy-test flake, traced it to a fixture shared across two suites, and is writing the regression test.",
   run_01K6QXH8P4:"Measured the CI image and proposed removing a stale node_modules tree. Waiting on a person, because the path cannot be restored.",
@@ -1053,7 +1053,7 @@ const FRAMES_OF = {
     F.ctx(6, WS.records, 6310),
     F.req(52, r),
     F.res(53, 214880, 20114, 4102, "tool_use", 0.2610),
-    F.toolReq(68, "github__merge_pull_request@3", "repo=acme/platform · pull=503"),
+    F.toolReq(68, "github__merge_pull_request@3", "repo=a-intel/platform · pull=503"),
     F.policy(69, "ask", "merge.requires_approval", "the run parks and a person is asked"),
     askOrDecision(runFrames(r) - 1, r, "Marcus Bell", "9m 12s", "merge.requires_approval")],
 
@@ -1117,7 +1117,7 @@ const ROLES = {
        NOT the five highest spenders, which the $0.00 row would make
        arithmetically impossible against a workspace total. ─── */
 const AGENTS = [
-  {n:"Stella CI", id:"acme.core.stella-ci", slug:"stella-ci", h:"Stella 0.9.14",
+  {n:"Stella CI", id:"a-intel.core.stella-ci", slug:"stella-ci", h:"Stella 0.9.14",
    st:"active", tier:"gateway", tierNative:"gateway", belt:"searchable", spend:1208.44,
    model:"z-ai/glm-latest", operator:"Marcus Bell", opRole:"workspace.owner",
    roles:["agent.repo.read","agent.issue.write","agent.shell"],
@@ -1125,7 +1125,7 @@ const AGENTS = [
    enrolled:true, host:"ci-runner-07", budgetRun:4.00, budgetDay:120.00, replay:"re-run",
    desc:"Runs the deterministic ladder on every pull request and authors the witnesses."},
 
-  {n:"Release manager", id:"acme.core.release-manager", slug:"release-manager", h:"Claude Code 2.1.4",
+  {n:"Release manager", id:"a-intel.core.release-manager", slug:"release-manager", h:"Claude Code 2.1.4",
    st:"active", tier:"gateway", tierNative:"harness", belt:"searchable", spend:412.78,
    model:"claude-fable-5-1", operator:"Marcus Bell", opRole:"workspace.owner",
    roles:["agent.repo.read","agent.repo.write"],
@@ -1133,7 +1133,7 @@ const AGENTS = [
    enrolled:true, host:"mbell-mbp-16", budgetRun:2.00, budgetDay:50.00, replay:"fork",
    desc:"Prepares the release notes and opens the release pull request. Never merges one."},
 
-  {n:"Invoice bot", id:"acme.core.invoice-bot", slug:"invoice-bot", h:"OpenAI Agents SDK 1.4.2",
+  {n:"Invoice bot", id:"a-intel.core.invoice-bot", slug:"invoice-bot", h:"OpenAI Agents SDK 1.4.2",
    st:"active", tier:"gateway", tierNative:"gateway", belt:"full", spend:143.09,
    model:"claude-fable-5-1", operator:"Dana Okafor", opRole:"org.billing",
    roles:["agent.repo.read","agent.finance.pay"],
@@ -1141,7 +1141,7 @@ const AGENTS = [
    enrolled:true, host:"finops-worker-02", budgetRun:1.50, budgetDay:40.00, replay:"re-run",
    desc:"Settles the monthly infrastructure invoices, inside one mandate and never outside it."},
 
-  {n:"Triage", id:"acme.core.triage", slug:"triage", h:"Codex CLI 0.42.1",
+  {n:"Triage", id:"a-intel.core.triage", slug:"triage", h:"Codex CLI 0.42.1",
    st:"active", tier:"gateway", tierNative:"harness", belt:"full", spend:96.20,
    model:"claude-fable-5-1", operator:"Marcus Bell", opRole:"workspace.owner",
    roles:["agent.repo.read","agent.issue.write","agent.shell"],
@@ -1149,7 +1149,7 @@ const AGENTS = [
    enrolled:true, host:"mbell-mbp-16", budgetRun:0.50, budgetDay:10.00, replay:"fork",
    desc:"Reads a failing build, reproduces it, and files what it finds."},
 
-  {n:"Docs writer", id:"acme.core.docs-writer", slug:"docs-writer", h:"Custom · SDK-wrapped",
+  {n:"Docs writer", id:"a-intel.core.docs-writer", slug:"docs-writer", h:"Custom · SDK-wrapped",
    st:"unenrolled", tier:"observe", tierNative:"observe", belt:"full", spend:0.00,
    model:"claude-fable-5-1", operator:"Marcus Bell", opRole:"workspace.owner",
    roles:[],
@@ -1166,43 +1166,43 @@ const agentBySlug = slug => AGENTS.find(a => a.slug === slug);
        and schema digest all come from the registry, so approving a schema in
        one place changes it everywhere. ─── */
 const BELTS = {
-  "acme.core.stella-ci":[
+  "a-intel.core.stella-ci":[
     {id:"repo.search@2",          dec:"allow",            rule:"grant:agent.repo.read #1"},
     {id:"linear__get_issue@2",    dec:"allow",            rule:"grant:agent.issue.write #1"},
     {id:"linear__update_issue@2", dec:"allow",            rule:"grant:agent.issue.write #2"},
     {id:"write__file@1",          dec:"allow",            rule:"grant:agent.shell #2"},
     {id:"bash@1",                 dec:"require_approval", rule:"grant:agent.shell #1 · pol_v41 R-14"}
   ],
-  "acme.core.release-manager":[
+  "a-intel.core.release-manager":[
     {id:"repo.search@2",                dec:"allow",            rule:"grant:agent.repo.read #1"},
     {id:"linear__get_issue@2",          dec:"allow",            rule:"grant:agent.repo.read #2"},
     {id:"github__merge_pull_request@3", dec:"require_approval", rule:"grant:agent.repo.write #2",
      note:"The record also forbids merging without a person. Both agree, and the stricter one is what runs."}
   ],
-  "acme.core.invoice-bot":[
+  "a-intel.core.invoice-bot":[
     {id:"repo.search@2",             dec:"allow",   rule:"grant:agent.repo.read #1"},
     {id:"stripe__create_payment@4",  dec:"mandate", rule:"grant:agent.finance.pay #1 · mnd_7Q2KX4"}
   ],
-  "acme.core.triage":[
+  "a-intel.core.triage":[
     {id:"repo.search@2",          dec:"allow",            rule:"grant:agent.repo.read #1"},
     {id:"linear__get_issue@2",    dec:"allow",            rule:"grant:agent.issue.write #1"},
     {id:"linear__update_issue@2", dec:"allow",            rule:"grant:agent.issue.write #2"},
     {id:"bash@1",                 dec:"require_approval", rule:"grant:agent.shell #1 · pol_v41 R-14"}
   ],
-  "acme.core.docs-writer":[],
+  "a-intel.core.docs-writer":[],
   /* Agents outside the five-row sample still run, so they still have belts. */
-  "acme.core.fleet-ops-bot":[
+  "a-intel.core.fleet-ops-bot":[
     {id:"repo.search@2",               dec:"allow",            rule:"grant:agent.repo.read #1"},
     {id:"snowflake__run_query@1",      dec:"allow",            rule:"grant:agent.fleet.read #1"},
     {id:"vercel__deploy_to_vercel@1",  dec:"require_approval", rule:"grant:agent.fleet.ship #1 · pol_v41 R-09"}
   ],
-  "acme.core.flake-hunter":[
+  "a-intel.core.flake-hunter":[
     {id:"repo.search@2",          dec:"allow",            rule:"grant:agent.repo.read #1"},
     {id:"linear__get_issue@2",    dec:"allow",            rule:"grant:agent.issue.write #1"},
     {id:"linear__update_issue@2", dec:"allow",            rule:"grant:agent.issue.write #2"},
     {id:"bash@1",                 dec:"require_approval", rule:"grant:agent.shell #1 · pol_v41 R-14"}
   ],
-  "acme.core.ledger-recon":[
+  "a-intel.core.ledger-recon":[
     {id:"repo.search@2",          dec:"allow", rule:"grant:agent.repo.read #1"},
     {id:"snowflake__run_query@1", dec:"allow", rule:"grant:agent.ledger.read #1"}
   ]
@@ -1222,7 +1222,7 @@ function outsideOf(a){
       : t.dec === "deny" ? "Denied for every agent by the workspace policy."
       : "No grant on this agent's roles reaches this version."}));
 }
-const MANDATE = {agent:"acme.core.invoice-bot", purpose:"Monthly infrastructure invoices, PO-4471",
+const MANDATE = {agent:"a-intel.core.invoice-bot", purpose:"Monthly infrastructure invoices, PO-4471",
   perCall:25000.00, approveAbove:10000.00, grantedBy:"Priya Natarajan, as org billing",
   validTo:"2026-12-31", authority:60000.00, settled:31280.00, reserved:18420.00};
 
@@ -1238,17 +1238,17 @@ const OPERATORS = [
 /* ─── Spend findings. Money at stake is recoverable waste, so it can never
        exceed what the thing it is scoped to actually spends. ─── */
 const FINDINGS = [
-  {n:"Cache writes never read back",               id:"fnd_9c52", scope:"acme.core.stella-ci",       at:555.19, frames:3},
+  {n:"Cache writes never read back",               id:"fnd_9c52", scope:"a-intel.core.stella-ci",       at:555.19, frames:3},
   {n:"Retry storms against one provider key",      id:"fnd_9c58", scope:"provider key pk_bdrk_7f2a", at:441.87, frames:5},
-  {n:"Cache misses after a stable prefix changed", id:"fnd_9c41", scope:"acme.core.release-manager", at:291.44, frames:4},
-  {n:"Tool-list bloat on every model call",        id:"fnd_9c3d", scope:"acme.core.triage",          at:64.18,  frames:6}
+  {n:"Cache misses after a stable prefix changed", id:"fnd_9c41", scope:"a-intel.core.release-manager", at:291.44, frames:4},
+  {n:"Tool-list bloat on every model call",        id:"fnd_9c3d", scope:"a-intel.core.triage",          at:64.18,  frames:6}
 ];
 
 /* ─── Steering. The six record kinds are rule, constraint, procedure, fact,
        memory and preference. `directive` and `knowledge` were invented and
        removed; nothing here may use them. ─── */
 const RECORDS = [
-  {s:"An agent never merges to main on acme/platform without a person's approval. Open the pull request, request review, and stop.",
+  {s:"An agent never merges to main on a-intel/platform without a person's approval. Open the pull request, request review, and stop.",
    id:"ctx.core.release-pr-never-merged-by-agent", kind:"rule", before:84.1, after:91.6, cited:96, violated:0},
   {s:"Schema changes ship expand-then-contract: add the column, backfill, switch readers, drop later.",
    id:"ctx.core.migration-expand-contract", kind:"procedure", before:72.4, after:88.0, cited:143, violated:2},
@@ -1277,9 +1277,9 @@ const groupSum = g => CLASSES.filter(c => c.g === g).reduce((s, c) => s + c.c, 0
 const ENTITIES = CLASSES.reduce((s, c) => s + c.c, 0);
 /* Each connector owns whole class groups, so no entity is counted twice. */
 const SOURCES = [
-  {n:"GitHub", s:"acme/platform + 2 linked", health:"syncing", cursor:"commit e91b2d7", groups:["github"]},
-  {n:"Linear", s:"acme workspace", health:"syncing", cursor:"2026-09-11T09:30Z", groups:["linear"]},
-  {n:"Postgres", s:"acme production replica", health:"degraded", cursor:"lsn 0/3A2F1C8", groups:["sales_crm","fleet_ops"]}
+  {n:"GitHub", s:"a-intel/platform + 2 linked", health:"syncing", cursor:"commit e91b2d7", groups:["github"]},
+  {n:"Linear", s:"a-intel workspace", health:"syncing", cursor:"2026-09-11T09:30Z", groups:["linear"]},
+  {n:"Postgres", s:"a-intel production replica", health:"degraded", cursor:"lsn 0/3A2F1C8", groups:["sales_crm","fleet_ops"]}
 ];
 const ONT = {version:"v14", pr:1142, proposed:1};
 const ONT_N = Number(ONT.version.slice(1));
@@ -1833,9 +1833,9 @@ PAGES.tools = () => {
       `<div class="scroll"><table>
       <thead><tr><th>Connection</th><th>Owner</th><th>Downscoped by</th><th>Review due</th></tr></thead>
       <tbody>
-        <tr><td><b>GitHub · acme</b><span class="s">installation 48210221</span></td><td>Marcus Bell</td><td>fine-grained token, per call</td><td>2026-12-01</td></tr>
-        <tr><td><b>Stripe · acme live</b><span class="s">restricted key</span></td><td>Priya Natarajan</td><td>single-use token, per call</td><td>2026-10-15</td></tr>
-        <tr><td><b>Linear · acme</b><span class="s">OAuth app</span></td><td>Marcus Bell</td><td>read scope only</td><td>2027-02-01</td></tr>
+        <tr><td><b>GitHub · a-intel</b><span class="s">installation 48210221</span></td><td>Marcus Bell</td><td>fine-grained token, per call</td><td>2026-12-01</td></tr>
+        <tr><td><b>Stripe · a-intel live</b><span class="s">restricted key</span></td><td>Priya Natarajan</td><td>single-use token, per call</td><td>2026-10-15</td></tr>
+        <tr><td><b>Linear · a-intel</b><span class="s">OAuth app</span></td><td>Marcus Bell</td><td>read scope only</td><td>2027-02-01</td></tr>
       </tbody></table></div>
       <div class="panel-b" style="border-top:1px solid var(--rule)"><p class="sub" style="margin:0;font-size:12.5px">
         Three external servers hold a credential. The other ${REGISTRY.servers - REGISTRY.external} —
@@ -1858,7 +1858,7 @@ PAGES.tools = () => {
       <thead><tr><th>Switch</th><th>Scope</th><th>State</th></tr></thead>
       <tbody>
         <tr><td><b>Every <span class="mono">moves_funds</span> tool</b><span class="s">class-wide</span><div style="margin-top:5px">${catBadge("finance")}</div></td><td>organization</td><td>${st("armed, off", "flat")}</td></tr>
-        <tr><td><b>acme.core.triage</b><span class="s">one agent</span></td><td>${esc(WS.name)}</td><td>${st("armed, off", "flat")}</td></tr>
+        <tr><td><b>a-intel.core.triage</b><span class="s">one agent</span></td><td>${esc(WS.name)}</td><td>${st("armed, off", "flat")}</td></tr>
         <tr><td><b>stripe server</b><span class="s">one server</span><div style="margin-top:5px">${catBadge("finance")}</div></td><td>organization</td><td>${st("armed, off", "flat")}</td></tr>
       </tbody></table></div>`);
 
@@ -2071,7 +2071,7 @@ PAGES.organization = () => `
     <thead><tr><th>Store</th><th>Mode</th><th>State</th><th>Rotated</th></tr></thead>
     <tbody>
       <tr><td><b>Postgres</b><span class="s">control plane and ledger</span></td><td>dedicated</td><td>${st("active")}</td><td>2026-07-01</td></tr>
-      <tr><td><b>Neo4j</b><span class="s">org_acme · one subgraph per workspace</span></td><td>dedicated</td><td>${st("active")}</td><td>2026-07-01</td></tr>
+      <tr><td><b>Neo4j</b><span class="s">org_a-intel · one subgraph per workspace</span></td><td>dedicated</td><td>${st("active")}</td><td>2026-07-01</td></tr>
       <tr><td><b>Objects</b><span class="s">frame archive segments</span></td><td>shared</td><td>${st("active")}</td><td>2026-07-01</td></tr>
     </tbody></table></div>`)}
 
@@ -2179,9 +2179,9 @@ const EMPTY = {
    saying you have no grant is the shell telling a lie. */
 const VIEWER = {
   loaded: {name:"Marcus Bell", initials:"MB", role:"Workspace owner",
-    email:"marcus.bell@acmerobotics.com", org:"member · workspace owner on " + WS.name},
+    email:"marcus.bell@a-intelrobotics.com", org:"member · workspace owner on " + WS.name},
   denied: {name:"Sam Okonkwo", initials:"SO", role:"Observer on " + WS2.name,
-    email:"sam.okonkwo@acmerobotics.com", org:"member · observer on " + WS2.name}
+    email:"sam.okonkwo@a-intelrobotics.com", org:"member · observer on " + WS2.name}
 };
 
 const VIEWS = {
@@ -2312,8 +2312,8 @@ addEventListener("hashchange", route);
 const ASST = [
   {you:"Grant linear__get_issue to triage and cap it at $5 a run.",
    it: () => "Done. Two governed actions, both with receipts.",
-   did:[["tool.grant", "linear__get_issue@2 → acme.core.triage · read scope", "rcp_01K6R41A"],
-        ["budget.set", "acme.core.triage · $5.00 a run, hard", "rcp_01K6R41B"]]},
+   did:[["tool.grant", "linear__get_issue@2 → a-intel.core.triage · read scope", "rcp_01K6R41A"],
+        ["budget.set", "a-intel.core.triage · $5.00 a run, hard", "rcp_01K6R41B"]]},
   {you:"Why did invoice-bot stop at 13:48?",
    /* Reads the approval rather than asserting a state, so it cannot keep
       insisting the call is parked after you have approved it. */

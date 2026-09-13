@@ -1,6 +1,9 @@
-# Guards for consolidated.html
+# Guards for consolidated.html, and the mc.html dataset transform
 
-Five scripts. They exist because three independent audits found 80 defects in
+The first five scripts guard `consolidated.html`; the last section covers the two files
+that build `mc.html`'s business-scale dataset.
+
+Five guard scripts. They exist because three independent audits found 80 defects in
 `consolidated.html`, and most of them were the kind that come straight back: a
 figure typed on two pages, a control with no handler, a colour that fails
 contrast, a table only a mouse can use. Fixing those is cheap. Keeping them
@@ -122,3 +125,30 @@ every piece of state it relies on. Scenario routes skip `route()`'s own tab pars
 `setup`. Dialogs go in `DLG_EXT` beside the code they belong to; frames for a run go in
 `FRAMES_BY_RUN`, and a run without authored frames gets `framesFromRun(R)`, which is exactly
 `R.frames` long. Authored lists may carry sparse seqs, so read a run's list by position.
+
+## The mc.html dataset: `build.py` and `volume.js`
+
+These two are not guards. They produce the shipped `mc.html` from a base copy of it: the
+demo tenant renamed to Anderson Intelligence Corp. (`a-intel`), and a seeded, deterministic
+dataset that grows the organization around the hand-written story (nine workspaces,
+274 agents, 700-odd tool versions, 1,163 runs shown of about 116,000 in thirty days).
+
+```sh
+git show origin/main:mc.html > /tmp/base.html
+python3 tools/build.py /tmp/base.html mc.html
+```
+
+`mc.html` changes several times an hour while mockup work is in flight, and this change
+rewrites most of it, so it is kept as a transform instead of being merged by hand. Every edit
+asserts it matched exactly once, so a drifted base fails loudly rather than half-applying,
+and the script refuses a base that is missing `govCount`, which is what a torn read looks
+like. `volume.js` is spliced in verbatim after every seed array is declared.
+
+Two traps it already hit. Money is stored as display strings and the page divides them with
+`parseFloat`, which stops at a thousands separator, so stored amounts stay comma-free and the
+separator is added where they are shown. And a count the page derives from another record,
+such as an agent's tamper incidents from the incident register, must be derived the same way
+in the dataset, or the two pages disagree.
+
+`build.py` is the one file in the repo that still contains the old tenant name, because it
+is the file that replaces it.

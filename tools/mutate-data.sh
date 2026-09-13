@@ -52,7 +52,7 @@ run "a retired record kind returns" \
 run "a frame index lands past the seal" \
   's/F\.stop\(runFrames\(r\) - 1, r\)/F.stop(runFrames(r), r)/'
 run "a finding scoped to an agent that spent nothing" \
-  's/scope:"acme\.core\.stella-ci",       at:555\.19/scope:"acme.core.docs-writer",     at:555.19/'
+  's/scope:"a-intel\.core\.stella-ci",       at:555\.19/scope:"a-intel.core.docs-writer",     at:555.19/'
 run "an approval points at a run that is not parked" \
   's/run:"run_01K6QXD4M9"/run:"run_01K6QXF6N2"/'
 run "the proposed record is already published" \
@@ -72,7 +72,7 @@ run "a live run is given an end time" \
 
 # ── invariants added after the independent re-audits ────────────────────────
 run "a finding claims more than its agent spends" \
-  's/scope:"acme\.core\.release-manager", at:291\.44/scope:"acme.core.release-manager", at:1842.16/'
+  's/scope:"a-intel\.core\.release-manager", at:291\.44/scope:"a-intel.core.release-manager", at:1842.16/'
 run "the 30-day window exceeds the months it spans" \
   's/WS\.spend30d = Math\.round\(\(19 \/ 31 \* WS\.augLedger \+ WS\.spendMTD\) \* 100\) \/ 100;/WS.spend30d = 50188.34;/'
 run "the agent sample is relabelled as the top five" \
@@ -106,9 +106,9 @@ run "the prompt stops carrying the records in force" \
 
 # ── the Agent IAM model ─────────────────────────────────────────────────────
 run "a belt is looser than the registry allows" \
-  's/\{id:"bash\@1",                 dec:"require_approval", rule:"grant:agent\.shell #1 · pol_v41 R-14"\}\n  \],\n  "acme\.core\.release-manager"/{id:"bash\@1",                 dec:"allow", rule:"grant:agent.shell #1 · pol_v41 R-14"}\n  ],\n  "acme.core.release-manager"/'
+  's/\{id:"bash\@1",                 dec:"require_approval", rule:"grant:agent\.shell #1 · pol_v41 R-14"\}\n  \],\n  "a-intel\.core\.release-manager"/{id:"bash\@1",                 dec:"allow", rule:"grant:agent.shell #1 · pol_v41 R-14"}\n  ],\n  "a-intel.core.release-manager"/'
 run "a financial tool lands on an unmandated belt" \
-  's/    \{id:"repo\.search\@2",          dec:"allow",            rule:"grant:agent\.repo\.read #1"\},\n    \{id:"linear__get_issue\@2",    dec:"allow",            rule:"grant:agent\.issue\.write #1"\},\n    \{id:"linear__update_issue\@2", dec:"allow",            rule:"grant:agent\.issue\.write #2"\},\n    \{id:"bash\@1",                 dec:"require_approval", rule:"grant:agent\.shell #1 · pol_v41 R-14"\}\n  \],\n  "acme\.core\.docs-writer"/    {id:"stripe__create_payment\@4", dec:"mandate", rule:"grant:none"}\n  ],\n  "acme.core.docs-writer"/'
+  's/    \{id:"repo\.search\@2",          dec:"allow",            rule:"grant:agent\.repo\.read #1"\},\n    \{id:"linear__get_issue\@2",    dec:"allow",            rule:"grant:agent\.issue\.write #1"\},\n    \{id:"linear__update_issue\@2", dec:"allow",            rule:"grant:agent\.issue\.write #2"\},\n    \{id:"bash\@1",                 dec:"require_approval", rule:"grant:agent\.shell #1 · pol_v41 R-14"\}\n  \],\n  "a-intel\.core\.docs-writer"/    {id:"stripe__create_payment\@4", dec:"mandate", rule:"grant:none"}\n  ],\n  "a-intel.core.docs-writer"/'
 run "an agent holds a role that does not exist" \
   's/roles:\["agent\.repo\.read","agent\.repo\.write"\],/roles:["agent.repo.read","agent.repo.admin"],/'
 run "an agent is invoked by an agent role rather than a person" \

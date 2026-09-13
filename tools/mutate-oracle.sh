@@ -96,7 +96,7 @@ run_mut "47 let the re-render eat the focus" \
 run_mut "48 let the phone simulator leak its overlays" \
   's/body\[data-w="phone"\] \.rail,\nbody\[data-w="phone"\] \.asst,\nbody\[data-w="phone"\] \.scrim\{position:absolute\}//'
 run_mut "49 scope a finding above what its agent spends" \
-  's/scope:"acme\.core\.release-manager", at:291\.44/scope:"acme.core.release-manager", at:1842.16/'
+  's/scope:"a-intel\.core\.release-manager", at:291\.44/scope:"a-intel.core.release-manager", at:1842.16/'
 run_mut "50 type the turn label instead of deriving it" \
   's/d:`claude-fable-5-1 · turn \$\{t\.i\} · \$\{t\.what\.toLowerCase\(\)\}`/d:`claude-fable-5-1 · turn 3 · \${t.what.toLowerCase()}`/'
 run_mut "51 break the ULID ordering" \
@@ -149,7 +149,7 @@ run_mut "68 send every agent row to the same agent" \
 run_mut "69 drop the invoking person from the intersection" \
   's/\.concat\(\[\[a\.operator, "the person invoking it · " \+ a\.opRole\]\]\)/.concat([])/'
 run_mut "70 give an agent a belt it holds no role for" \
-  's/  "acme\.core\.docs-writer":\[\],/  "acme.core.docs-writer":[{id:"repo.search\@2", dec:"allow", rule:"grant:none"}],/'
+  's/  "a-intel\.core\.docs-writer":\[\],/  "a-intel.core.docs-writer":[{id:"repo.search\@2", dec:"allow", rule:"grant:none"}],/'
 run_mut "71 lose a tool from both the belt and the hidden list" \
   's/return TOOLS\.filter\(t => !on\.has\(t\.id\)\)\.map\(t => \(\{\.\.\.t,/return TOOLS.filter(t => !on.has(t.id)).slice(1).map(t => ({...t,/'
 run_mut "72 shorten the denial so it stops showing its reasoning" \

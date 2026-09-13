@@ -5,12 +5,12 @@
    the Cost tab publishes, and everything else is seeded from the run id so the
    numbers do not move between renders. */
 var TOOLPOOL={
- "acme.core.release-manager":[["github__list_pull_requests@3",5],["github__get_file_contents@2",4],["recall_context@1",3],
+ "a-intel.core.release-manager":[["github__list_pull_requests@3",5],["github__get_file_contents@2",4],["recall_context@1",3],
    ["search_graph@1",2],["edit__file@1",3],["write__file@1",2],["bash__run@1",2],["linear__get_issue@1",1],["github__create_release@2",1]],
- "acme.core.stella-ci":[["bash__run@1",7],["github__get_file_contents@2",3],["search_graph@1",2],["write__file@1",1],["linear__get_issue@1",1]],
- "acme.core.triage":[["linear__get_issue@1",4],["search_graph@1",4],["github__get_file_contents@2",3],["recall_context@1",2],["linear__update_issue@2",2]],
- "acme.finops.invoice-bot":[["aws_billing__get_cost_and_usage@1",4],["recall_context@1",2],["stripe__create_payment@5",1],["slack__post_message@2",1]],
- "acme.core.docs-writer":[["github__get_file_contents@2",4],["recall_context@1",3],["edit__file@1",3],["write__file@1",2],["search_graph@1",1]]
+ "a-intel.core.stella-ci":[["bash__run@1",7],["github__get_file_contents@2",3],["search_graph@1",2],["write__file@1",1],["linear__get_issue@1",1]],
+ "a-intel.core.triage":[["linear__get_issue@1",4],["search_graph@1",4],["github__get_file_contents@2",3],["recall_context@1",2],["linear__update_issue@2",2]],
+ "a-intel.finops.invoice-bot":[["aws_billing__get_cost_and_usage@1",4],["recall_context@1",2],["stripe__create_payment@5",1],["slack__post_message@2",1]],
+ "a-intel.core.docs-writer":[["github__get_file_contents@2",4],["recall_context@1",3],["edit__file@1",3],["write__file@1",2],["search_graph@1",1]]
 };
 /* cost of one run, split across the token classes at the published effective prices */
 var PRICE={inEff:1.88e-6, out:75e-6, outLight:5e-6};
@@ -33,7 +33,7 @@ function runMetrics(R){
   var promptTok=Math.round(words*1.35), sysTok=2118+1340;
 
   /* --- tool calls: drawn from the agent's belt, batched, some run in parallel --- */
-  var pool=TOOLPOOL[R.agent]||TOOLPOOL["acme.core.release-manager"], bag=[];
+  var pool=TOOLPOOL[R.agent]||TOOLPOOL["a-intel.core.release-manager"], bag=[];
   pool.forEach(function(p){for(var k=0;k<p[1];k++)bag.push(p[0]);});
   var calls=[],n=s.toolN;
   for(i=0;i<n;i++){var id=bag[Math.floor(rnd()*bag.length)];
