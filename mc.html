@@ -5211,8 +5211,8 @@ function frList(R){return FRAMES_BY_RUN[R.id]||FRAMES;}
 function frNum(sum,label){var m=new RegExp(label+" ([\\d,]+)").exec(sum||"");return m?+m[1].replace(/,/g,""):0;}
 function frCallOf(f,R){
   if(f.call)return f.call;
-  var L=frList(R),i,m;
-  for(i=f.seq;i>=0&&i>f.seq-6;i--){m=L[i]&&/^([a-z_]+__[a-z_]+@\d+)/.exec(L[i].sum);if(m&&L[i].kind==="tool_requested")return {id:m[1],cat:toolMeta(m[1]).cat,ms:Math.max(0,fpMs((L[f.seq+0]||{}).t)-fpMs(L[i].t)),err:false};}
+  var L=frList(R),i,m,at=L.indexOf(f); if(at<0)at=f.seq;   /* by position: authored lists can carry sparse seqs */
+  for(i=at;i>=0&&i>at-6;i--){m=L[i]&&/^([a-z_]+__[a-z_]+@\d+)/.exec(L[i].sum);if(m&&L[i].kind==="tool_requested")return {id:m[1],cat:toolMeta(m[1]).cat,ms:Math.max(0,fpMs(f.t)-fpMs(L[i].t)),err:false};}
   return null;
 }
 function frIO(f,R){var c=frCallOf(f,R);return f.io||(c?frToolIO(R,c.id,R.id+":"+c.id+":"+f.seq,c.err):null);}
@@ -5293,7 +5293,7 @@ function fdToolReq(f,R){
   var c=frCallOf(f,R),io=frIO(f,R); if(!c)return null;
   var cat=toolMeta(c.id).cat,A=f.apr?APPROVALS.filter(function(a){return a.id===f.apr;})[0]:null;
   var input=A&&A.amount?{amount:A.amount,currency:A.currency,counterparty:A.counterparty,mandate:A.mandate}:io.input;
-  var L=frList(R),nx=L[f.seq+1];
+  var L=frList(R),at=L.indexOf(f),nx=L[(at<0?f.seq:at)+1];
   return frKv([["Tool version",'<span class="mono">'+h(c.id)+'</span>'],["Family",h(TCAT[cat]?TCAT[cat].l:cat)],
     ["Schema digest",'<span class="mono">'+frDig("schema"+c.id)+'</span>'],["Canonical input digest",'<span class="mono">'+h(f.dig||frDig(R.id+f.seq+"in"))+'</span>'],
     ["Input validation",'<span style="color:var(--st-allowed)">valid against the registered input schema</span>'],
@@ -5366,8 +5366,9 @@ function fdProof(f,R){
    '<div class="row" style="margin-top:12px"><button class="btn sm" onclick="S.tab.run=\'proof\';render()">Open the proof</button></div>';
 }
 function fdCheckpoint(f,R){
-  var L=frList(R),from=f.from!=null?f.from:0;
-  if(f.from==null)for(var i=f.seq-1;i>=0;i--)if(L[i].kind==="checkpoint"){from=i+1;break;}
+  /* Walk by position, not seq: an authored list (the witness run's) carries sparse seqs, so L[seq] is not this frame. */
+  var L=frList(R),from=f.from!=null?f.from:0,at=L.indexOf(f);
+  if(f.from==null)for(var i=(at<0?L.length:at)-1;i>=0;i--)if(L[i].kind==="checkpoint"){from=L[i].seq+1;break;}
   return frKv([["Covers","frames "+from+"–"+f.seq+" · every 20 frames or 60 seconds, whichever comes first"],["Producer","host device key · ed25519"],
     ["Producer signature",'<span class="mono">ed25519:'+frHex(R.id+"cp"+f.seq,14)+'…</span>'],["Countersigned by Oxagen",'<span style="color:var(--st-allowed)">yes, at ingest</span>'],
     ["Chain head",'<span class="mono">'+h(f.head||frDig(R.id+f.seq+"head"))+'</span>']])+
