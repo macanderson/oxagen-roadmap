@@ -749,6 +749,20 @@ a.inv-i:hover{border-color:var(--rule);text-decoration:none}
 .scn-card p{margin:0;font-size:12.5px;color:var(--muted)}
 @media(max-width:640px){.scn-ct{margin-left:0}.scn-dots{margin-left:0}}
 #viewport.phone .scn-ct,#viewport.phone .scn-dots{margin-left:0}
+/* The onboarding screens have no shell, so the rail floats beside the centred 772px column
+   when there is room for it, and sits above the screen, in flow, when there is not. */
+.scn-float{padding:14px 20px 0;background:var(--ink)}
+.scn-float .scn{margin:0 auto;max-width:772px}
+@media(min-width:1400px){#viewport:not(.phone) .scn-float{position:fixed;top:70px;right:14px;width:288px;z-index:60;padding:0;background:none;max-height:calc(100vh - 150px);overflow:auto}
+ #viewport:not(.phone) .scn-float .scn{box-shadow:var(--shadow);background:color-mix(in srgb,var(--gold) 5%,var(--panel))}
+ #viewport:not(.phone) .scn-float .scn-say{font-size:13.5px}}
+.ob-inst-steps{display:grid;gap:7px;font-size:12.5px}
+.ob-inst-steps div{display:flex;gap:10px;align-items:baseline;color:var(--dim)}
+.ob-inst-steps div.done{color:var(--muted)}
+.ob-inst-steps div.now{color:var(--fg)}
+.ob-inst-steps .mk{width:12px;flex:none;font-family:var(--mono);color:inherit}
+.ob-inst-steps div.done .mk{color:var(--st-allowed)}
+.switcher .tx span.b{display:inline-flex;font-size:9.5px;padding:0 5px;margin-right:3px;vertical-align:1px}
 
 /* ---- small approval card ------------------------------------------------
    The same anatomy as the full card below (eyebrow, amount or tool, agent,
@@ -3650,7 +3664,7 @@ function sidebar(r){
     '<button class="switcher" onclick="openDialog(\'org-switch\')" aria-label="Switch organization">'+
       '<span class="av">A</span><span class="tx"><b>'+h(ORG.name)+'</b><span>'+h(ORG.slug)+' · '+ORG.plan+'</span></span><span class="cv">▾</span></button>'+
     '<button class="switcher" onclick="openDialog(\'ws-switch\')" aria-label="Switch workspace">'+
-      '<span class="av ws">'+h(w.slug.slice(0,2))+'</span><span class="tx"><b>'+h(w.name)+'</b><span>'+h(w.main)+' · '+h(w.branch)+'</span></span><span class="cv">▾</span></button>'+
+      '<span class="av ws">'+h(w.slug.slice(0,2))+'</span><span class="tx"><b>'+h(w.name)+'</b><span>'+(w.provisional?'<span class="b b-denied">provisional</span> until '+h(w.provisional.until):h(w.main)+' · '+h(w.branch))+'</span></span><span class="cv">▾</span></button>'+
    '</div><nav>'+
    '<div class="navlabel">Workspace</div>'+
    item("fleet","Fleet",base,pendingCount(w.slug),true)+
@@ -3755,7 +3769,10 @@ function pFleet(){
     '<button class="btn primary" onclick="regStart()">Register Agent</button>'+
     '<button class="btn" onclick="go(\'#/'+ORG.slug+'/'+w.slug+'/agents\')">Open Agents</button>');
 
-  var list=RUNS.filter(function(r){return r.ws===w.slug;});
+  /* First-run Fleet (W1): straight after onboarding the workspace holds one run, the smoke session,
+     so the page shows that run alone and every tile below reads off it. S.firstRun is cleared to see the seeded fleet. */
+  var fr=obFirstRun(w);
+  var list=fr?[fr]:RUNS.filter(function(r){return r.ws===w.slug;});
   if(S.runFilter==="live") list=list.filter(function(r){return r.status==="live"||r.status==="parked";});
   if(S.runFilter==="proven") list=list.filter(function(r){return r.verdict==="flipped";});
 
@@ -3789,7 +3806,8 @@ function pFleet(){
   list.forEach(function(r){ if(typeof r.cache==="number"){var c=parseFloat(r.cost)||0;cNum+=r.cache*c;cDen+=c;} });
   var cacheRate=cDen?cNum/cDen:null;
   /* Oldest wait comes off the same live clock the approval cards count down. */
-  var pend=APPROVALS.filter(function(a){return a.ws===w.slug&&apState(a.id).status==="pending";});
+  var pend=APPROVALS.filter(function(a){return (fr?a.run===fr.id:a.ws===w.slug)&&apState(a.id).status==="pending";});
+  var agentsShown=fr?list.reduce(function(k,r){if(k.indexOf(r.agent)<0)k.push(r.agent);return k;},[]).length:w.agents;
   var oldest=0; pend.forEach(function(a){var e=600-apLeft(a.id); if(e>oldest)oldest=e;});
   var waitLabel=pend.length?'oldest has waited '+mmss(oldest)+' of 10m':'nothing is parked';
 
@@ -3798,14 +3816,15 @@ function pFleet(){
    '<h1>Fleet</h1><p>Every run in this workspace, live and recent. Runs are not started here — agents start them, and this is where you stop, steer, or open one.</p></div>'+
    '<div class="acts"><button class="btn" onclick="openSteerFleet()">Steer</button>'+
    '<button class="btn" onclick="regStart()">Register Agent</button></div></div>'+
+  obFleetBanners(w,fr)+
 
   '<div class="grid g4" style="margin-bottom:16px">'+
-   '<div class="stat"><span class="k">Live runs</span><span class="v">'+live+'</span><span class="s">of '+w.agents+' agents in this workspace</span></div>'+
-   '<div class="stat"><span class="k">Waiting on a human</span><span class="v" style="color:var(--st-approval)">'+pendingCount(w.slug)+'</span><span class="s">'+waitLabel+'</span></div>'+
+   '<div class="stat"><span class="k">Live runs</span><span class="v">'+live+'</span><span class="s">of '+agentsShown+' agent'+(agentsShown===1?'':'s')+' in this workspace</span></div>'+
+   '<div class="stat"><span class="k">Waiting on a human</span><span class="v" style="color:var(--st-approval)">'+pend.length+'</span><span class="s">'+waitLabel+'</span></div>'+
    '<div class="stat"><span class="k">Spend, runs shown</span><span class="v">'+usd(spendShown)+'</span><span class="s">'+basisLabel+' · '+ORG.currency+'</span></div>'+
    '<div class="stat"><span class="k">Cache hit rate</span><span class="v">'+(cacheRate==null?'<span class="dim">—</span>':per(cacheRate))+'</span><span class="s">'+(cacheRate==null?'no run shown records it':'cache_read ÷ (input_uncached + cache_read)')+'</span></div></div>'+
 
-  approvalsPanel(w.slug)+'<div style="height:14px"></div>'+
+  (fr?obOfferCard(fr):'')+approvalsPanel(w.slug,fr?fr.id:undefined)+'<div style="height:14px"></div>'+
    '<div class="panel"><div class="panel-h"><h3>Runs</h3>'+
     '<div class="sp">'+
      ['all','live','proven'].map(function(f){return '<button class="btn sm'+(S.runFilter===f?' sel':'')+'" onclick="S.runFilter=\''+f+'\';render()">'+f+'</button>';}).join("")+
@@ -7989,6 +8008,44 @@ var SCENARIOS={
 /* One slot per flow. tools/build-w.mjs boots each w*.html into the scenario named here and
    reads its ws from the entry, so each entry starts SCENARIOS["id"]={title:"…", ws:"…", …}. */
 /* ---- W1 · sixty-seconds-to-governed ---- */
+/* Steps 1–5 are the onboarding screens (no shell; the rail floats beside them), step 6 is first-run Fleet.
+   The scenario writes a smoke run, perhaps an agent and a provisional flag; obScnLeft() in render() takes
+   them back out once the route leaves the scenario, so the rest of the demo is the seeded app. */
+/* the day of the first run, and the windows it opens: provisional without a main repo, and the onboarding offer */
+var OB_DAY=Date.UTC(2026,8,11), OB_PROVISIONAL_DAYS=14, OB_OFFER_DAYS=7;
+SCENARIOS["sixty-seconds-to-governed"]={title:"Sixty seconds to governed", ws:"core-platform",
+ blurb:"A new operator signs up, wraps an agent, and lands on Fleet looking at its first run. Mission Control does not open until that run's first frame arrives.",
+ steps:[
+  {say:"A new operator signs up with SSO, or with an email and a password of at least 12 characters, one symbol and one digit.",
+   note:"Every organization gets its first "+BILLING.runsIncluded.toLocaleString("en-US")+" runs a month free, with every governance feature on.",
+   route:function(o){return {page:"welcome",step:"signup",org:o,ws:"core-platform"};},
+   setup:function(){obScnArm();obScnUndo();S.ob.pwShown=false;},
+   act:["Continue with GitHub","obGo('organization')"]},
+  {say:"Name the organization. It is the tenant: its own graph database, its own encryption key, its billing account.",
+   note:"The namespace is immutable, because every agent key starts with it: <span class=\"mono\">"+ORG.slug+".&lt;workspace&gt;.&lt;agent&gt;</span>.",
+   route:function(o){return {page:"welcome",step:"organization",org:o,ws:"core-platform"};},
+   setup:function(){obScnArm();if(!S.reg||S.reg.mode!=="onboard"){regClear();S.reg=obNew();}},
+   act:["Continue","regNav('wrap')"]},
+  {say:"Wrap an agent. For Claude Code and Codex CLI it is a one-click installer with a one-time enrollment token inside, so nothing is copied or pasted.",
+   note:"An SDK agent is five lines in its own process instead. The enrollment token works once and expires in 30 minutes.",
+   route:function(o){return {page:"welcome",step:"wrap",org:o,ws:"core-platform"};},
+   setup:function(){obScnArm();if(!S.reg||S.reg.mode!=="onboard"){regClear();S.reg=obNew();}S.reg.tab="cc";},
+   act:["Show the SDK tab","S.reg.tab='sdk';render()"]},
+  {say:"Mission Control stays locked until the first frame arrives. The installer's smoke session sends it, so the install test and the unlock are one event.",
+   note:"Nothing is written before that frame: no agent, no run, no Context PR. When it lands, Mission Control unlocks here and the scenario stays on this step.",
+   route:function(o){return {page:"welcome",step:"run",org:o,ws:"core-platform"};},
+   setup:function(){obScnArm();if(!S.reg||S.reg.mode!=="onboard"){regClear();S.reg=obNew();}}},
+  {say:"The installer read the git remote, so binding the main repo is one click: the GitHub App, Context PRs, checks and the code graph.",
+   note:"Skip for now and the workspace stays provisional for "+OB_PROVISIONAL_DAYS+" days. Runs record and spend counts; steering, context records and agent definitions stay off.",
+   route:function(o){return {page:"welcome",step:"run",org:o,ws:"core-platform"};},
+   setup:function(){obScnArm();if(!S.reg||S.reg.mode!=="onboard"){regClear();S.reg=obNew();}S.reg.repo=null;obScnUnprov();},
+   act:["Bind the main repo","obBind()"]},
+  {say:"Fleet opens on the run the installer started and nothing else. There is one row, and every tile reads off it.",
+   note:"The onboarding offer sits beside what that run cost. Oxagen billed nothing for it, because it is inside the free monthly runs.",
+   route:function(o){return {page:"fleet",org:o,ws:"core-platform"};},
+   setup:function(){obScnArm();if(!S.reg||S.reg.mode!=="onboard"){regClear();S.reg=obNew();}var run=obUnlock();regClear();S.firstRun=run.id;S.runFilter="all";S.obOfferOff=false;},
+   act:["Dismiss the offer","S.obOfferOff=true;render()"]}
+ ]};
 
 /* ---- end W1 ---- */
 /* ---- W4 · flight-recorder ---- */
@@ -9101,6 +9158,9 @@ function wsArchiveDlg(){
 var REG_TABS=[{id:"cc",n:"Claude Code",s:"one click · gateway"},{id:"codex",n:"Codex CLI",s:"one click · gateway"},{id:"sdk",n:"SDK agent",s:"five lines · gateway"}];
 var REG_TOKEN="oxe_1time_7QK4M2NV9XR3T8ZP";
 var REG_HOST="mbell-mbp.local";
+var REG_PKG={macos:{f:"Oxagen-Agent-2.4.0.pkg",s:"14.2 MB",note:"notarized · Developer ID",sha:"sha256:3f9c71d2…b40a"},
+    windows:{f:"Oxagen-Agent-2.4.0.msi",s:"16.8 MB",note:"signed · EV certificate",sha:"sha256:7a21ce55…19f3"},
+    linux:{f:"oxagen-agent_2.4.0_amd64.deb",s:"12.9 MB",note:"deb, rpm and curl script",sha:"sha256:c40b8e19…62dd"}};
 var REG_HARNESS={"claude-code":"Claude Code","codex-cli":"Codex CLI",stella:"Stella","claude-agent-sdk":"Claude Agent SDK",custom:"Custom"};
 S.reg=null; S.regN=0;
 function regTabFor(harness){return harness==="claude-code"?"cc":harness==="codex-cli"?"codex":"sdk";}
@@ -9122,10 +9182,11 @@ function regCancel(){
   go('#/'+ORG.slug+'/'+ws().slug);
   act(wasLive?'Registration cancelled. The enrollment was revoked and the smoke run discarded.':'Registration cancelled. Nothing was installed and nothing was written.');
 }
-function regFinish(){
-  if(!S.reg) return;
-  var r=S.reg, key=regKey(), w=ws(), ob=r.mode==="onboard";
-  regClear();
+/* The first frame unlocks: the agent (when it is new) and its smoke run are written once per flow. */
+function obUnlock(){
+  if(!S.reg) return null;
+  var r=S.reg, key=regKey(), w=ws();
+  if(r.runId){for(var i=0;i<RUNS.length;i++){if(RUNS[i].id===r.runId)return RUNS[i];}}
   if(!agent(key)){
     AGENTS.push({key:key,name:regSlug().replace(/-/g," ").replace(/^./,function(c){return c.toUpperCase();}),harness:r.harness,harnessLabel:REG_HARNESS[r.harness]||r.harness,
       ws:w.slug,operator:"marcus",status:"enrolled",tier:"gateway",tierNative:"harness",belt:0,beltMode:"full",runs30:1,spend30:"0.02",proven30:"0.00",ratio:0,
@@ -9135,11 +9196,31 @@ function regFinish(){
       enrolled:true,budgetDay:"20.00",usedDay:"0.02",replay:"fork",cred:"oxa_live_"+regSlug().slice(0,4)+"…0001",
       issued:"just now",lastUsed:"just now",tokens:1,devKey:"ed25519:new…host",firstFrame:"just now",collector:"1.6.2"});
     w.agents=(w.agents||0)+1;
+    if(S.obScn) S.obScn.agents.push({key:key,ws:w.slug});
   }
   S.regN++;
-  RUNS.unshift({id:"run_01K5RV2N8QH4TZ"+("0"+S.regN).slice(-2)+"X",agent:key,op:"marcus",ws:w.slug,status:"live",turn:1,steps:2,frames:2,cost:"0.02",basis:"gateway_observed",tier:"gateway",
-    grade:"full",verdict:null,task:"smoke",taskTitle:"Installer smoke session",started:"14:02:11",model:r.tier==="light"?"claude-haiku-4-5":"claude-opus-5",cache:0,provenSpend:"0.00",ratio:0,sealed:null});
+  var run={id:"run_01K5RV2N8QH4TZ"+("0"+S.regN).slice(-2)+"X",agent:key,op:"marcus",ws:w.slug,status:"live",turn:1,steps:2,frames:2,cost:"0.02",basis:"gateway_observed",tier:"gateway",
+    grade:"full",verdict:null,task:"smoke",taskTitle:"Installer smoke session",started:"14:02:11",model:r.tier==="light"?"claude-haiku-4-5":"claude-opus-5",cache:0,provenSpend:"0.00",ratio:0,sealed:null};
+  RUNS.unshift(run); r.runId=run.id;
+  if(S.obScn) S.obScn.runs.push(run.id);
+  return run;
+}
+function regFinish(){
+  if(!S.reg) return;
+  var r=S.reg, key=regKey(), w=ws(), ob=r.mode==="onboard";
+  regClear();
+  /* Under a scenario the frame unlocks in place: navigating would drop the rail. Pressing the
+     button once it is unlocked moves to the scenario's Fleet step instead. */
+  if(ob&&S.scn){
+    var had=!!r.runId, run=obUnlock();
+    if(had){var fs=obScnStepOf("fleet"); if(fs){scnGo(scnHref(S.scn.id,fs));return;}}
+    render();
+    act('First frame received from '+key+'. Mission Control is unlocked; '+run.id+' is live.','gold');
+    return;
+  }
+  var run2=obUnlock();
   S.reg=null; S.runFilter="all";
+  if(ob) S.firstRun=run2.id;
   go('#/'+ORG.slug+'/'+w.slug);
   act(ob?'Welcome to Mission Control. First frame received from '+key+' — its run is live on Fleet, and the organization is out of the gate.'
         :key+' registered — first frame received. Its smoke run is live on Fleet.','gold');
@@ -9187,9 +9268,7 @@ function regName(){
 function regWrap(){
   var r=S.reg, key=regKey();
   var osName={macos:"macOS",windows:"Windows",linux:"Linux"};
-  var osFile={macos:{f:"Oxagen-Agent-2.4.0.pkg",s:"14.2 MB",note:"notarized · Developer ID",sha:"sha256:3f9c71d2…b40a"},
-    windows:{f:"Oxagen-Agent-2.4.0.msi",s:"16.8 MB",note:"signed · EV certificate",sha:"sha256:7a21ce55…19f3"},
-    linux:{f:"oxagen-agent_2.4.0_amd64.deb",s:"12.9 MB",note:"deb, rpm and curl script",sha:"sha256:c40b8e19…62dd"}}[r.os];
+  var osFile=REG_PKG[r.os];
   function osTabs(){return '<div class="reg-os" role="tablist" aria-label="Operating system">'+["macos","windows","linux"].map(function(o){
     return '<button type="button" role="tab" aria-selected="'+(r.os===o)+'" onclick="S.reg.os=\''+o+'\';render()">'+osName[o]+'</button>';}).join("")+'</div>';}
   function tok(){return '<div class="reg-tok">one-time enrollment token embedded<br><b>'+REG_TOKEN+'</b><br><span class="dim">expires in 30 min · single use</span></div>';}
@@ -9238,7 +9317,7 @@ function regWrap(){
    '<div class="sp"><span class="reg-cap">Nothing completes until a frame arrives.</span><button class="btn" onclick="regInstall(null)">I have already installed it — continue</button></div></div>';
 }
 function regLines(){
-  var t=S.reg.tab, hooks, base;
+  var t=S.reg?S.reg.tab:"cc", hooks, base;
   if(t==="codex"){hooks="~/.codex/config.toml written · notify hook → collector";base="OPENAI_BASE_URL set · https://proxy.oxagen.com/v1";}
   else if(t==="sdk"){hooks="oxagen.agent.wrap() attached · frame emitter, checkpoint gate";base="OXAGEN_AGENT_TOKEN accepted · run token minted";}
   else {hooks="hooks written · ~/.claude/settings.json · 7 events";base="ANTHROPIC_BASE_URL set · https://proxy.oxagen.com/v1";}
@@ -9275,7 +9354,7 @@ function regRun(){
      '<div class="row" style="margin-top:12px">'+tierBadge("gateway")+'<span class="b b-q">replay grade: full</span><span class="b b-q">chain intact</span></div>'+
      '<p class="muted" style="font-size:12.5px;margin:12px 0 0">Enforcement tier is computed from what was actually routed, not from what the adapter can do on paper. Both seams answered, so this run is <b>gateway</b>.</p></div></div>';
     foot='<div class="reg-foot">'+regCancelBtn()+''+
-     '<div class="sp"><span class="reg-cap" id="regAuto">Opening automatically…</span><button class="btn primary" onclick="regFinish()">'+(ob?"Open Mission Control":"Open in Fleet")+'</button></div></div>';
+     '<div class="sp"><span class="reg-cap" id="regAuto">'+(r.runId?'Unlocked · <span class="mono">'+h(r.runId)+'</span> is live':'Opening automatically…')+'</span><button class="btn primary" onclick="regFinish()">'+(ob?"Open Mission Control":"Open in Fleet")+'</button></div></div>';
   } else {
     body='<div class="reg-card"><div class="ch"><span class="reg-spin"></span><h3>Waiting for the first frame</h3><span class="sp">polling · 1s</span></div>'+
      '<div class="cb"><div class="row" style="margin-bottom:12px"><span class="b b-q mono">'+h(key)+'</span><span class="b b-q">'+h(hl)+'</span><span class="b b-q">host '+REG_HOST+'</span></div>'+
@@ -9283,7 +9362,7 @@ function regRun(){
      '<div><span class="t">&nbsp;</span><span class="dim">waiting…</span></div></div>'+
      '<p class="muted" style="font-size:12.5px;margin:12px 0 0">Start '+h(hl)+' in any repository on <span class="mono">'+REG_HOST+'</span>. The installer already ran a one-turn smoke session; if it is still in flight this flips on its own.</p></div></div>';
     foot='<div class="reg-foot">'+regCancelBtn()+'<button class="btn" onclick="regNav(\'wrap\')">Back</button>'+
-     '<div class="sp"><span class="reg-cap">There is no Done button — the frame is the completion.</span></div></div>';
+     '<div class="sp">'+(ob&&!S.scn?'<button class="btn ghost" onclick="obGo(\'installer\')">Open the installer</button>':'')+'<span class="reg-cap">There is no Done button — the frame is the completion.</span></div></div>';
   }
   return head+body+(ob?obRepoPanel():"")+foot;
 }
@@ -9309,7 +9388,7 @@ function regSchedule(step){
       render(); regLater(tick,780);
     },520);
   }
-  if(g.first&&!g.countdown){
+  if(g.first&&!g.countdown&&!g.runId){
     g.countdown=true;
     var n=6, t=setInterval(function(){
       var e=el("regAuto");
@@ -9337,7 +9416,8 @@ var OB_ALT=[
  {id:"login",lab:"Log in",sub:"Returning operator, then two-factor"},
  {id:"forgot",lab:"Forgot password",sub:"Reset link, good for sixty minutes"},
  {id:"reset",lab:"Set a new password",sub:"Logs out every other device"},
- {id:"invite",lab:"Accept an invitation",sub:"Joining an organization someone else created"}];
+ {id:"invite",lab:"Accept an invitation",sub:"Joining an organization someone else created"},
+ {id:"installer",lab:"The installer",sub:"The signed package's own screens: download, install, connected"}];
 var OB_GATE={organization:1,wrap:1,run:1};
 var OB_ICON={
  google:'<svg width="15" height="15" viewBox="0 0 18 18" aria-hidden="true"><path fill="#4285F4" d="M17.6 9.2c0-.6-.05-1.2-.16-1.8H9v3.4h4.8a4.1 4.1 0 0 1-1.8 2.7v2.2h2.9c1.7-1.6 2.7-3.9 2.7-6.5z"/><path fill="#34A853" d="M9 18c2.4 0 4.5-.8 6-2.2l-2.9-2.2c-.8.5-1.8.9-3.1.9-2.4 0-4.4-1.6-5.1-3.8H.9v2.3A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.9 10.7a5.4 5.4 0 0 1 0-3.4V5H.9a9 9 0 0 0 0 8z"/><path fill="#EA4335" d="M9 3.6c1.3 0 2.5.5 3.4 1.3l2.6-2.6A9 9 0 0 0 .9 5l3 2.3C4.6 5.2 6.6 3.6 9 3.6z"/></svg>',
@@ -9347,7 +9427,11 @@ var OB_ICON={
 S.ob={pwShown:false,pw:"Rq7!mesa-lattice",forgotSent:false};
 
 function obNew(){var r=regNew();r.mode="onboard";r.slug="release-manager";r.repo=null;return r;}
-function obHash(step){return "#/welcome"+(step&&step!=="signup"?"/"+step:"");}
+function obHash(step){
+  /* inside a scenario, a screen the scenario has a step for is reached through that step, so the rail stays */
+  var k=S.scn&&obScnStepOf("welcome",step||"signup");
+  return k?scnHref(S.scn.id,k):"#/welcome"+(step&&step!=="signup"?"/"+step:"");
+}
 function obGo(step){
   S.dlg=null;S.dlgArg=null;S.layer=null;
   if(OB_GATE[step]&&!(S.reg&&S.reg.mode==="onboard")){regClear();S.reg=obNew();}
@@ -9355,8 +9439,129 @@ function obGo(step){
 }
 function obExit(){regClear();S.reg=null;go('#/'+ORG.slug+'/'+ws().slug);act('Onboarding demo closed. Nothing was written.');}
 function obSignedIn(){regClear();S.reg=null;go('#/'+ORG.slug+'/'+ws().slug);act('Signed in as '+PEOPLE.marcus.name+'. The session is recorded like any other governed action.');}
-function obBind(){if(S.reg)S.reg.repo="bound";render();act('GitHub App installed on '+ws().main+'. Main repo bound — Context PRs, checks and the code graph are on.');}
-function obSkip(){if(S.reg)S.reg.repo="skipped";render();}
+function obBind(){if(S.reg)S.reg.repo="bound";delete ws().provisional;render();act('GitHub App installed on '+ws().main+'. Main repo bound — Context PRs, checks and the code graph are on.');}
+function obSkip(){
+  var w=ws(); if(S.reg)S.reg.repo="skipped";
+  if(!w.provisional){w.provisional={since:obDate(0),until:obDate(OB_PROVISIONAL_DAYS)}; if(S.obScn)S.obScn.prov.push(w.slug);}
+  render();
+}
+
+/* ---- dates the onboarding counts from (OB_DAY and its windows are declared in the W1 scenario slot) ---- */
+function obDate(n){var d=new Date(OB_DAY+n*864e5);return d.getUTCDate()+" "+["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][d.getUTCMonth()]+" "+d.getUTCFullYear();}
+
+/* ---- first-run Fleet: S.firstRun is the smoke run's id (or true: the workspace's newest smoke run) ---- */
+S.firstRun=null; S.obOfferOff=false;
+function obFirstRun(w){
+  if(!S.firstRun) return null;
+  for(var i=0;i<RUNS.length;i++){var r=RUNS[i]; if(r.ws===w.slug&&(S.firstRun===true?r.task==="smoke":r.id===S.firstRun)) return r;}
+  return null;
+}
+function obFleetBanners(w,fr){
+  var out="";
+  if(w.provisional) out+='<div class="banner" style="margin-bottom:14px"><span class="b b-denied" style="flex:none">provisional</span>'+
+   '<div class="grow"><b>'+h(w.name)+' is provisional until '+h(w.provisional.until)+'.</b>Runs record and spend counts. Steering, context records and agent definitions stay off until a main repo is bound, because there is nowhere to publish them to.</div>'+
+   '<button class="btn sm" onclick="obBind()">Bind '+h(w.main)+'</button></div>';
+  if(fr) out+='<div class="banner" style="margin-bottom:14px"><span class="b b-q" style="flex:none">first run</span>'+
+   '<div class="grow"><b>One run so far.</b>This workspace has recorded the installer’s smoke session, <span class="mono">'+h(fr.id)+'</span> from <span class="mono">'+h(fr.agent)+'</span>, and nothing else. The tiles below read off that run.</div>'+
+   '<button class="btn sm" onclick="S.firstRun=null;render()">Show the seeded fleet</button></div>';
+  return out;
+}
+/* The offer BILLING records as converted, shown before conversion, beside what the first run cost and what Oxagen billed for it. */
+function obOfferCard(fr){
+  if(S.obOfferOff) return "";
+  var m=/(\d+% off usage for \d+ months)/.exec(BILLING.discount), deal=m?m[1]:"the onboarding discount";
+  var price=parseFloat((/\$([\d.]+)/.exec(BILLING.tier2)||[0,"0"])[1]);
+  var billable=Math.max(0,1-BILLING.runsIncluded), billed=billable*price;
+  return '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Onboarding offer</h3>'+
+   '<button class="btn sm ghost" style="margin-left:auto" onclick="S.obOfferOff=true;render()" aria-label="Dismiss the onboarding offer">Not now</button></div>'+
+   '<div class="panel-b"><p style="margin:0 0 6px;font-size:13.5px"><b>Convert by '+h(obDate(OB_OFFER_DAYS))+' for '+h(deal)+'.</b></p>'+
+   '<p class="muted" style="margin:0 0 10px;font-size:12.5px">That is '+OB_OFFER_DAYS+' days from your first run. <span class="mono">'+h(fr.id)+'</span> cost <b>'+usd(fr.cost)+'</b> '+ORG.currency+', <span class="basis">'+h(fr.basis)+'</span>. Oxagen billed <b>'+usd(fmt2(billed))+'</b> for it: the first '+BILLING.runsIncluded.toLocaleString("en-US")+' runs each month are free, and Oxagen never marks up tokens.</p>'+
+   '<button class="btn sm" onclick="go(\'#/'+ORG.slug+'/billing\')">See plans</button></div></div>';
+}
+
+/* ---- the scenario's own bookkeeping: what it wrote, so leaving it puts the seeded app back ---- */
+var OB_SCN="sixty-seconds-to-governed";
+S.obScn=null;
+function obScnArm(){if(!S.obScn)S.obScn={runs:[],agents:[],prov:[]};}
+function obScnStepOf(page,step){
+  var s=S.scn&&SCENARIOS[S.scn.id]; if(!s) return 0;
+  function hit(st){var rr=st.route(ORG.slug);return rr.page===page&&(!step||rr.step===step);}
+  if(hit(s.steps[S.scn.step-1])) return S.scn.step;
+  for(var k=0;k<s.steps.length;k++){if(hit(s.steps[k]))return k+1;}
+  return 0;
+}
+function obScnUnprov(){if(!S.obScn)return;S.obScn.prov.forEach(function(slug){WS.forEach(function(w){if(w.slug===slug)delete w.provisional;});});S.obScn.prov=[];}
+/* Called from render(): once the route is no longer this scenario, undo what it wrote. */
+function obScnLeft(){
+  var o=S.obScn; if(!o||(S.scn&&S.scn.id===OB_SCN)) return;
+  obScnUndo(); S.obScn=null;
+}
+/* Takes back every write the scenario made and the onboarding state with it. Step 1 calls it too:
+   before sign-up nothing exists, so walking the scenario twice never leaves two smoke runs. */
+function obScnUndo(){
+  var o=S.obScn; if(!o) return;
+  S.firstRun=null; S.obOfferOff=false;
+  if(S.reg&&S.reg.mode==="onboard"){regClear();S.reg=null;}
+  for(var i=RUNS.length-1;i>=0;i--){if(o.runs.indexOf(RUNS[i].id)>=0)RUNS.splice(i,1);}
+  o.agents.forEach(function(x){
+    for(var j=AGENTS.length-1;j>=0;j--){if(AGENTS[j].key===x.key)AGENTS.splice(j,1);}
+    WS.forEach(function(w){if(w.slug===x.ws)w.agents--;});
+  });
+  obScnUnprov();
+  o.runs=[]; o.agents=[];
+}
+/* The onboarding screens have no shell to hold the rail, so it is placed beside them. */
+function scnRailFloat(){var x=scnRail();return x?'<div class="scn-float">'+x+'</div>':"";}
+
+/* ---- the installer's own screens: download, installing, connected ---- */
+var OB_INSTALL=["Install the oxagend collector to /usr/local/bin","Install the oxagen-hook binary","Register a login item (launchd: com.oxagen.oxagend)",
+ "Write Claude Code hooks to ~/.claude/settings.json","Set ANTHROPIC_BASE_URL to the model proxy","Register the Oxagen MCP endpoint as a tool server",
+ "Enroll this host with an Ed25519 device key","Run a one-turn smoke session"];
+function obInstallStop(){if(S.ob.instT){clearTimeout(S.ob.instT);S.ob.instT=null;}}
+function obInstallScreen(n){obInstallStop();S.ob.inst=n;S.ob.instDone=n===2?OB_INSTALL.length:0;render();}
+function obInstall(){
+  obInstallStop(); S.ob.inst=1; S.ob.instDone=0; render();
+  S.ob.instT=setTimeout(function tick(){
+    var rr=route(); if(rr.page!=="welcome"||rr.step!=="installer"){S.ob.instT=null;return;}
+    S.ob.instDone++;
+    if(S.ob.instDone>=OB_INSTALL.length){S.ob.inst=2;S.ob.instT=null;render();return;}
+    render(); S.ob.instT=setTimeout(tick,380);
+  },380);
+}
+function obInstaller(){
+  var st=S.ob.inst||0, pkg=REG_PKG.macos, w=ws(), key=ORG.slug+"."+w.slug.split("-")[0]+"."+obNew().slug;
+  var body;
+  function shell(inner){
+    return obShell('<div class="reg-card" style="margin-top:0"><div class="ch"><h3>Oxagen Agent Installer</h3><span class="sp">'+h(pkg.f)+'</span></div><div class="cb">'+inner+'</div></div>'+
+     (S.state==="error"?'':'<div class="row" style="justify-content:center;margin-top:14px;flex-wrap:wrap"><span class="dim" style="font-size:12px">Installer screen</span>'+
+      ["Download","Installing","Connected"].map(function(l,i){return '<button class="btn sm'+(st===i?' sel':' ghost')+'" aria-pressed="'+(st===i)+'" onclick="obInstallScreen('+i+')">'+l+'</button>';}).join("")+'</div>'),true);
+  }
+  if(S.state==="error") return shell('<h2 style="font-size:19px;margin:0 0 8px">Enrollment token rejected</h2>'+
+   '<p class="muted" style="font-size:13px;margin:0 0 8px">The token <span class="mono">'+h(REG_TOKEN)+'</span> has already been used, at 13:58 on '+h(obDate(0))+' by host <span class="mono">mbp-marcus</span>. Enrollment tokens are single use.</p>'+
+   '<p class="muted" style="font-size:13px;margin:0 0 14px">Nothing was installed. Generate a fresh token from the wrap step and run the installer again.</p>'+
+   '<button class="btn" onclick="obGo(\'wrap\')">Back to wrap an agent</button>');
+  if(st===0) body='<h2 style="font-size:19px;margin:0 0 6px">Install the Oxagen agent</h2>'+
+   '<p class="muted" style="font-size:13px;margin:0 0 14px">One signed package installs the collector, the hook binary and a login item, then enrolls this host to <b>'+h(ORG.name)+' / '+h(w.name)+'</b>. The one-time enrollment token is embedded, so there is nothing to paste.</p>'+
+   kvl([["Package",'<span class="mono">'+h(pkg.f)+'</span>'],["Size",h(pkg.s)],["Signature",h(pkg.note)],["Checksum",'<span class="mono">'+h(pkg.sha)+'</span>'],["Token",'<span class="mono">'+h(REG_TOKEN)+'</span>']])+
+   '<div class="row" style="margin-top:16px"><button class="btn primary" onclick="obInstall()">Install</button><button class="btn" onclick="obGo(\'wrap\')">Cancel</button></div>'+
+   '<p class="dim" style="font-size:12px;margin:12px 0 0">Installs to your user account only. No sudo, no kernel extension, and nothing leaves the host except frames.</p>';
+  else if(st===1){
+    var done=S.ob.instDone||0, n=OB_INSTALL.length;
+    body='<h2 style="font-size:19px;margin:0 0 4px">Installing</h2><p class="dim" style="font-size:12px;margin:0 0 12px">Step '+Math.min(done+1,n)+' of '+n+'</p>'+
+     '<div class="bar" style="margin-bottom:14px"><i style="width:'+Math.round(done/n*100)+'%"></i></div>'+
+     '<div class="ob-inst-steps">'+OB_INSTALL.map(function(x,i){return '<div class="'+(i<done?'done':i===done?'now':'')+'"><span class="mk">'+(i<done?'✓':i===done?'›':'·')+'</span><span>'+h(x)+'</span></div>';}).join("")+'</div>';
+  } else {
+    var fr=regLines().filter(function(l){return l.hit;})[0], dev=regLines()[0].x.replace(/^host enrolled · /,"");
+    body='<div class="row" style="margin-bottom:10px"><span class="reg-ok"><span class="dot"></span>connected</span><span class="mono dim" style="margin-left:auto;font-size:11.5px">'+h(fr.t)+'</span></div>'+
+     '<h2 style="font-size:19px;margin:0 0 6px">Connected to '+h(ORG.name)+'</h2>'+
+     '<p class="muted" style="font-size:13px;margin:0 0 12px">The smoke session produced its first frame and Oxagen countersigned it. <span class="mono">'+h(key)+'</span> is wrapped at <b>gateway</b> tier.</p>'+
+     '<div class="reg-frames"><div><span class="sq">0</span><span class="ts">'+h(fr.t)+'</span><span class="kd">agent_start</span><span class="bd">'+h(dev)+' · countersigned on ingest</span></div></div>'+
+     '<p class="muted" style="font-size:12.5px;margin:12px 0 6px">Roll back at any time. This removes the hooks, the login item and the base URL, and restores your previous settings file:</p>'+
+     '<pre style="margin:0">oxagen agent unenroll --host '+h(REG_HOST)+' --restore</pre>'+
+     '<div class="row" style="margin-top:14px"><button class="btn primary" onclick="obGo(\'run\')">Back to Oxagen</button><span class="dim" style="font-size:12px">Mission Control is already unlocking in your browser.</span></div>';
+  }
+  return shell(body);
+}
 
 /* the account dialog's Onboarding tab: the path, and the screens beside it */
 function obAccountTab(){
@@ -9410,7 +9615,7 @@ function obCodeBack(e,inp){if(e.key==="Backspace"&&!inp.value&&inp.previousEleme
 function obSignup(){
   var err=S.state==="error", me=PEOPLE.marcus;
   return obShell('<div class="ob-h"><p class="eyebrow">Create your account</p><h1>Govern the agents you already run.</h1>'+
-   '<p class="ob-lead">Wrap Claude Code, Codex CLI, Stella or an SDK agent. Every organization gets its first 1,000 runs a month free, with every governance feature on.</p></div>'+
+   '<p class="ob-lead">Wrap Claude Code, Codex CLI, Stella or an SDK agent. Every organization gets its first '+BILLING.runsIncluded.toLocaleString("en-US")+' runs a month free, with every governance feature on.</p></div>'+
    '<div class="ob-panel">'+(err?obErr('<b>That email is already registered.</b> Log in instead, or reset your password.'):'')+
    obSso("organization")+'<div class="ob-or">or</div>'+
    '<form class="ob-form" onsubmit="event.preventDefault();obGo(\'verify\')">'+
@@ -9421,7 +9626,7 @@ function obSignup(){
    obPrimary("Create account","Creating account…")+
    '<p class="hint" style="margin:0;font-size:11.5px;color:var(--dim);line-height:1.45">By creating an account you agree to the Oxagen terms and privacy notice. Oxagen never stores your model provider keys in plain text, and never returns them once saved.</p></form></div>'+
    '<p class="ob-foot">Already have an account? <a href="#/welcome/login">Log in</a></p>'+
-   '<div class="ob-tags"><span class="b b-q">1,000 runs free / month</span><span class="b b-q">no token markup</span><span class="b b-q">SOC 2 evidence built in</span></div>');
+   '<div class="ob-tags"><span class="b b-q">'+BILLING.runsIncluded.toLocaleString("en-US")+' runs free / month</span><span class="b b-q">no token markup</span><span class="b b-q">SOC 2 evidence built in</span></div>');
 }
 function obVerify(){
   var err=S.state==="error", me=PEOPLE.marcus;
@@ -9525,14 +9730,14 @@ function obRepoPanel(){
    '<div class="row" style="margin-bottom:10px"><span class="b b-q mono">'+h(w.main)+'</span><span class="b b-q">production branch: '+h(w.branch)+'</span><span class="b b-allowed"><span class="d"></span>GitHub App installed</span></div>'+
    '<p class="muted" style="font-size:12.5px;margin:0">Steering, context records and agent definitions will live in <span class="mono">'+h(w.main)+'</span> under <span class="mono">.oxagen/</span>, published through Context PRs. Linked repos can be added later from Ontology → Repositories.</p></div></div>';
   if(r.repo==="skipped") return '<div class="reg-card ob-repo"><div class="ch"><span class="b b-denied">provisional</span><h3>No main repo bound</h3></div><div class="cb">'+
-   '<p class="muted" style="font-size:12.5px;margin:0 0 10px"><b>'+h(w.slug)+' is provisional until 25 Sep 2026</b> (14 days). Runs record and spend counts. Steering, context records, and agent definitions stay off until a main repo is bound.</p>'+
+   '<p class="muted" style="font-size:12.5px;margin:0 0 10px"><b>'+h(w.slug)+' is provisional until '+h(w.provisional?w.provisional.until:obDate(OB_PROVISIONAL_DAYS))+'</b> ('+OB_PROVISIONAL_DAYS+' days). Runs record and spend counts. Steering, context records, and agent definitions stay off until a main repo is bound.</p>'+
    '<button class="btn sm" onclick="obBind()">Bind '+h(w.main)+' now</button></div></div>';
   return '<div class="reg-card ob-repo"><div class="ch"><h3>Repository detected</h3><span class="sp">reported by the installer</span></div><div class="cb">'+
    '<div class="row" style="margin-bottom:6px"><span class="b b-q mono">git@github.com:'+h(w.main)+'.git</span></div>'+
    '<p class="muted" style="font-size:12.5px;margin:0 0 12px">Read from the git remote of <span class="mono">~/src/platform</span>, the directory the installer ran in. Production branch <span class="mono">'+h(w.branch)+'</span>.</p>'+
    '<button class="btn'+(r.first?"":" primary")+'" onclick="obBind()">'+OB_ICON.github+'<span>Bind '+h(w.main)+' as the main repo</span></button>'+
    '<p class="muted" style="font-size:12.5px;margin:12px 0 0">One click installs the GitHub App on <span class="mono">'+h(w.main)+'</span>: repo binding, Context PRs, checks, merge handling and the code graph.</p>'+
-   '<div class="hr"></div><p class="muted" style="font-size:12.5px;margin:0"><button type="button" class="ob-link" style="color:var(--muted)" onclick="obSkip()">Skip for now</button> — '+h(w.slug)+' stays <b>provisional for 14 days</b>. Runs record and spend counts, but steering, context records and agent definitions stay off until a main repo is bound.</p></div></div>';
+   '<div class="hr"></div><p class="muted" style="font-size:12.5px;margin:0"><button type="button" class="ob-link" style="color:var(--muted)" onclick="obSkip()">Skip for now</button> — '+h(w.slug)+' stays <b>provisional for '+OB_PROVISIONAL_DAYS+' days</b>. Runs record and spend counts, but steering, context records and agent definitions stay off until a main repo is bound.</p></div></div>';
 }
 function pWelcome(r){
   var step=r.step||"signup";
@@ -9542,6 +9747,7 @@ function pWelcome(r){
     if(S.state==="denied") return regShell(step,deniedState("onboarding","org.create for "+PEOPLE.marcus.email));
     return regShell(step,step==="organization"?obOrg():step==="wrap"?regWrap():regRun());
   }
+  if(step==="installer") return obInstaller();
   if(step==="verify") return obVerify();
   if(step==="login") return obLogin();
   if(step==="two-factor") return obTwoFactor();
@@ -9727,6 +9933,7 @@ function listify(){
 
 function render(){
   var r=route();
+  obScnLeft();
   var page="";
   if(r.page==="fleet")page=pFleet();
   else if(r.page==="run")page=pRun(r);
@@ -9745,7 +9952,7 @@ function render(){
   else if(r.page==="register"||r.page==="welcome")page="";
   else page=pFleet();
 
-  el("app").innerHTML=r.page==="register"?pRegister(r):r.page==="welcome"?pWelcome(r):'<div class="app">'+sidebar(r)+'<div class="main">'+topbar(r)+
+  el("app").innerHTML=r.page==="register"?pRegister(r):r.page==="welcome"?scnRailFloat()+pWelcome(r):'<div class="app">'+sidebar(r)+'<div class="main">'+topbar(r)+
     '<main class="page" id="pg">'+scnRail()+page+'</main></div></div>';
   if(r.page==="register")regSchedule(regStepOf(r));
   else if(r.page==="welcome")regSchedule(r.step);
