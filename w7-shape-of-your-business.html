@@ -8875,7 +8875,7 @@ function pSpend(){
    .map(function(x){return '<button class="tab" role="tab" aria-selected="'+(t===x[0])+'" onclick="spendGo(\''+x[0]+'\')">'+x[1]+(x[2]?'<span class="n">'+x[2]+'</span>':'')+'</button>';}).join("")+'</div>';
 
   var strip='<div class="grid g4" style="margin-bottom:16px">'+
-   '<div class="stat"><span class="k">Spend · '+h(SPEND.month)+'</span><span class="v">'+usd(SPEND.spend)+'</span><span class="s"><span class="basis">gateway_observed</span> · USD</span></div>'+
+   '<div class="stat"><span class="k">Spend · '+h(SPEND.month)+'</span><span class="v">'+usd(fmt2(spendMonthTotal()))+'</span><span class="s"><span class="basis">gateway_observed</span> · USD · agents, the assistant and Oxagen’s model routes</span></div>'+
    '<div class="stat"><span class="k">Proven spend</span><span class="v" style="color:var(--st-proven)">'+usd(SPEND.proven)+'</span><span class="s">runs whose verdict is <span class="mono">flipped</span></span></div>'+
    '<div class="stat"><span class="k">Accepted, not proven</span><span class="v">'+usd(SPEND.accepted)+'</span><span class="s">a human verified it · never folded into proven</span></div>'+
    '<div class="stat"><span class="k">Productive ratio</span><span class="v">'+per(SPEND.ratio)+'</span><span class="s">steps that advanced the task</span></div></div>';
@@ -8885,7 +8885,7 @@ function pSpend(){
     body=spendDrill(drill);
   } else if(t==="findings"){
     var total=FINDINGS.reduce(function(s,f){return s+parseFloat(f.save);},0);
-    var spendN=parseFloat(String(SPEND.spend).replace(/,/g,""));
+    var spendN=spendMonthTotal();
     var top=Math.max.apply(null,FINDINGS.map(function(f){return parseFloat(f.save);}));
     var opsN={}; FINDINGS.forEach(function(f){var e=EVIDENCE[f.id]; if(e) opsN[e.who.operator]=1;});
     var conf=FINDINGS.reduce(function(a,f){var e=EVIDENCE[f.id]; if(e) a[e.confidence]=(a[e.confidence]||0)+1; return a;},{});
@@ -8898,7 +8898,7 @@ function pSpend(){
       (tail.length?'<span><i style="opacity:.22"></i>'+tail.length+' smaller findings <span class="mono">'+Math.round(tail.reduce(function(s,f){return s+parseFloat(f.save);},0)/total*100)+'%</span></span>':'');
     body='<div class="sv-hero">'+
      '<div><p class="eyebrow">Savings identified · '+h(SPEND.month)+'</p><div class="sv-amt">'+fmt$(total)+'</div>'+
-     '<div class="sv-sub">'+(total/spendN*100).toFixed(1)+'% of '+usd(SPEND.spend)+' spent this month · about '+usd(Math.round(total*12).toLocaleString())+' a year at this run rate</div></div>'+
+     '<div class="sv-sub">'+(total/spendN*100).toFixed(1)+'% of '+usd(fmt2(spendMonthTotal()))+' spent this month · about '+usd(Math.round(total*12).toLocaleString())+' a year at this run rate</div></div>'+
      '<div><div class="sv-strip" role="img" aria-label="Share of identified savings by finding">'+strip+'</div><div class="sv-legend">'+legend+'</div>'+
      '<div class="sv-facts"><span><b>'+FINDINGS.length+'</b> findings</span><span><b>'+Object.keys(opsN).length+'</b> operators involved</span>'+
      '<span><b>'+(conf.high||0)+'</b> high confidence · <b>'+(conf.medium||0)+'</b> medium</span><span>every one opens to its evidence</span></div></div></div>'+
@@ -8927,11 +8927,12 @@ function pSpend(){
      '</tbody></table></div><div class="panel-b"><div class="note">'+SPEND.byAgent.filter(function(x){return n$(x.proven)===0;}).length+' agents show no proven spend: finance work no witness covers, and output accepted by a human, which is reported separately and never folded into proven.</div></div></div>'+
      '<div class="panel"><div class="panel-h"><h3>By model and provider key</h3></div><div class="tw"><table>'+
      '<thead><tr><th>Model</th><th>Provider key</th><th class="num">Model calls</th><th class="num">Spend</th><th class="num">Cache hit rate</th><th>Basis</th></tr></thead><tbody>'+
-     SPEND.byModel.map(function(m){var k=spendKeyOf(m.m);
-      return '<tr><td class="tkey" style="font-size:12px">'+h(m.m)+'</td><td style="font-size:12px">'+(k?'<span class="mono">'+h(k.id)+'</span><div class="dim" style="font-size:11px">'+h(k.src.split(" · ")[0])+(n$(k.provider)===n$(m.spend)?' · statement matches':' · statement '+usd(k.provider))+'</div>':'<span class="dim">—</span>')+'</td><td class="num">'+m.calls.toLocaleString()+'</td>'+
-       '<td class="num">'+usd(m.spend)+'</td><td class="num">'+per(m.cache)+'</td>'+
+     spendModelRows().map(function(m){var k=spendKeyOf(m.m,m.tier);
+      return '<tr'+(m.route?' data-route="'+h(m.tier)+'"':'')+'><td class="tkey" style="font-size:12px">'+h(m.m)+(m.route?'<div class="dim" style="font-size:11px">Oxagen’s own work · '+h(m.provider)+'</div>':'')+'</td><td style="font-size:12px">'+(k?'<span class="mono">'+h(k.id)+'</span><div class="dim" style="font-size:11px">'+h(k.src.split(" · ")[0])+(n$(k.provider)===n$(m.spend)?' · statement matches':' · statement '+usd(k.provider))+'</div>':'<span class="dim">—</span>')+'</td><td class="num">'+(m.route?orgUseCount(m):m.calls.toLocaleString())+'</td>'+
+       '<td class="num">'+usd(m.spend)+'</td><td class="num">'+(m.cache==null?'<span class="dim">—</span>':per(m.cache))+'</td>'+
        '<td class="mono dim" style="font-size:11px">gateway_observed</td></tr>';}).join("")+
-     '</tbody></table></div><div class="panel-b"><p class="muted" style="font-size:12px;margin:0">The assistant line is Oxagen’s own work, routed by tier through OpenRouter and billed back as assistant usage at vendor cost plus a published markup.</p></div></div>';
+     '<tr><td colspan="3"><b>Total</b> <span class="dim" style="font-size:11.5px">· the month’s spend</span></td><td class="num" id="spendModelTotal"><b>'+usd(fmt2(spendMonthTotal()))+'</b></td><td></td><td></td></tr>'+
+     '</tbody></table></div><div class="panel-b"><p class="muted" style="font-size:12px;margin:0">The assistant line and the light, embed and rerank rows are Oxagen’s own work, routed by tier and billed back at vendor cost plus a published markup; they count toward the organization’s funding cap and are set under <a href="#/'+ORG.slug+'">Organization → Model routes</a>.</p></div></div>';
   } else if(t==="tool"){
     body=spendByTool();
   } else if(t==="waste"){
@@ -9047,7 +9048,7 @@ function xcut(title,pairs,kind,total){
      '<div class="bar"><i style="width:'+Math.max(1,Math.round(p[1]/mx*100))+'%;background:var(--st-observe)"></i></div></div>';}).join("")+'</div></div>';
 }
 function spendDrill(dr){
-  var E=spendEntity(dr.kind,dr.id), r=E.row, d=E.d, kind=E.kind, spend=E.spend, monthN=n$(SPEND.spend);
+  var E=spendEntity(dr.kind,dr.id), r=E.row, d=E.d, kind=E.kind, spend=E.spend, monthN=spendMonthTotal();
   var fs=findingsFor(kind,E.id).slice().sort(function(a,b){return n$(b.save)-n$(a.save);});
   var save=fs.reduce(function(s,f){return s+n$(f.save);},0), top=fs.length?n$(fs[0].save):1;
   var kindLabel={operator:"Operator",agent:"Agent",tool:"Tool"}[kind], listLabel={operator:"By operator",agent:"By agent",tool:"By tool"}[kind];
@@ -9190,7 +9191,7 @@ function spendWaste(){
   var mx=Math.max.apply(null,SPEND.wasteByCause.map(function(c){return parseFloat(c.spend.replace(/,/g,""));}));
   var strip='<div class="grid g4" style="margin-bottom:16px">'+
    '<div class="stat"><span class="k">Wasted · '+h(SPEND.month)+'</span><span class="v" style="color:var(--st-critical)">'+usd(SPEND.wasteTotal)+'</span><span class="s"><span class="basis">gateway_observed</span> · USD</span></div>'+
-   '<div class="stat"><span class="k">Share of spend</span><span class="v">'+per(SPEND.wasteShare)+'</span><span class="s">of '+usd(SPEND.spend)+' this month</span></div>'+
+   '<div class="stat"><span class="k">Share of spend</span><span class="v">'+per(SPEND.wasteShare)+'</span><span class="s">of '+usd(fmt2(spendMonthTotal()))+' this month</span></div>'+
    '<div class="stat"><span class="k">Runs with waste</span><span class="v">'+SPEND.wasteRuns+'</span><span class="s">of '+SPEND.runs.toLocaleString()+' sealed runs</span></div>'+
    '<div class="stat"><span class="k">Largest cause</span><span class="v" style="font-size:17px;padding-top:4px">'+h(SPEND.wasteByCause[0].c)+'</span><span class="s">'+usd(SPEND.wasteByCause[0].spend)+' · '+SPEND.wasteByCause[0].runs+' runs</span></div></div>';
   var causes='<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>By cause</h3><span class="b b-q" style="margin-left:auto">each cause is a frame pattern, not a guess</span></div>'+
@@ -9232,6 +9233,9 @@ SPEND.reconMonths=[
    {id:"pk_9f21",src:"Anthropic · pk_9f21",model:"claude-opus-5",kind:"model",provider:"13,102.40",l1:"12,688.15",l2:"414.25"},
    {id:"pk_bdrk_7f2a",src:"AWS Bedrock us-east-1 · pk_bdrk_7f2a",model:"claude-haiku-4-5",kind:"model",provider:"3,190.77",l1:"3,190.77",l2:"0.00"},
    {id:"pk_or_5c08",src:"OpenRouter · pk_or_5c08",model:"z-ai/glm-latest (assistant)",kind:"model",provider:"1,011.38",l1:"1,011.38",l2:"0.00"},
+   {id:"pk_or_5c08",src:"OpenRouter · pk_or_5c08",model:"z-ai/glm-flash-latest",tier:"light",kind:"model",provider:"35.80",l1:"35.80",l2:"0.00"},
+   {id:"pk_vo_2e11",src:"Voyage AI · pk_vo_2e11",model:"voyage-4, voyage-code-3, voyage-context-3",tier:"embed",kind:"model",provider:"25.10",l1:"25.10",l2:"0.00"},
+   {id:"pk_vo_2e11",src:"Voyage AI · pk_vo_2e11",model:"rerank-2.5",tier:"rerank",kind:"model",provider:"8.72",l1:"8.72",l2:"0.00"},
    {id:"pi_3PzQ1cV4n",src:"Stripe · con_01K2A9",what:"payment to vendor:aws · PO-4471",kind:"money",provider:"1,122.40",l1:"1,122.40",l2:"0.00",rcp:"rcp_01K3T4H8Q"},
    {id:"pi_3PyH7dR2m",src:"Stripe · con_01K2A9",what:"payment to vendor:github · PO-4471",kind:"money",provider:"640.00",l1:"640.00",l2:"0.00",rcp:"rcp_01K3N2W5C"}]},
  {id:"2026-09",m:"September 2026",state:"open",closed:null,
@@ -9240,6 +9244,9 @@ SPEND.reconMonths=[
     why:"Harness-tier runs from a-intel.core.triage and a-intel.core.docs-writer arrived with client-attested frames and no provider request id, so they match only on key-day totals. The provider’s September invoice line is pending."},
    {id:"pk_bdrk_7f2a",src:"AWS Bedrock us-east-1 · pk_bdrk_7f2a",model:"claude-haiku-4-5",kind:"model",provider:"3,402.19",l1:"3,402.19",l2:"0.00"},
    {id:"pk_or_5c08",src:"OpenRouter · pk_or_5c08",model:"z-ai/glm-latest (assistant)",kind:"model",provider:"1,082.45",l1:"1,082.45",l2:"0.00"},
+   {id:"pk_or_5c08",src:"OpenRouter · pk_or_5c08",model:"z-ai/glm-flash-latest",tier:"light",kind:"model",provider:"38.12",l1:"38.12",l2:"0.00"},
+   {id:"pk_vo_2e11",src:"Voyage AI · pk_vo_2e11",model:"voyage-4, voyage-code-3, voyage-context-3",tier:"embed",kind:"model",provider:"27.44",l1:"27.44",l2:"0.00"},
+   {id:"pk_vo_2e11",src:"Voyage AI · pk_vo_2e11",model:"rerank-2.5",tier:"rerank",kind:"model",provider:"9.36",l1:"9.36",l2:"0.00"},
    {id:"pi_3QaL8f2Xk",src:"Stripe · con_01K2A9",what:"payment to vendor:aws · PO-4471",kind:"money",provider:"884.60",l1:"884.60",l2:"0.00",rcp:"rcp_01K4X8M2E"},
    {id:"sp-0a4f91c",src:"AWS billing · con_01K2AA",what:"savings plan purchase · PO-4471",kind:"money",provider:"400.00",l1:"400.00",l2:"0.00",rcp:"rcp_01K4W2…"},
    {id:"ch_3Qa8",src:"Stripe · con_01K2A9",what:"card charge · no counterparty recorded",kind:"money",provider:"18.00",l1:"0.00",l2:"0.00",rcp:null,
@@ -9342,8 +9349,8 @@ function reconResolve(id){
   closeDialog(); act("Line "+id+" resolved with a note. Its "+(l?fmt$(reconLine(l).v):"")+" variance stays on the record.");
 }
 /* The provider key a model bills through: the current month's model line for it, so By model and Reconciliation read one record. */
-function spendKeyOf(model){var sep=SPEND.reconMonths[SPEND.reconMonths.length-1], k=null;
-  sep.lines.forEach(function(l){if(l.kind==="model"&&l.model===model) k=l;}); return k;}
+function spendKeyOf(model,tier){var sep=SPEND.reconMonths[SPEND.reconMonths.length-1], k=null;
+  sep.lines.forEach(function(l){if(l.kind==="model"&&(tier?l.tier===tier:l.model===model)) k=l;}); return k;}
 
 /* Agent over time (W8 agent view): spend per proven run by month, and this month's verdicts. The current month is the
    byAgent row itself; earlier months are history. Verdicts other than flipped are stored; flipped is the row's. */
@@ -9447,7 +9454,7 @@ function pOrganization(){
      '<div class="field"><label>Source</label><select aria-label="Funding source"><option>platform — Oxagen pays, billed back at vendor cost plus a published markup</option><option>customer_key — your own OpenRouter or vendor key</option></select>'+
      '<div class="hint">A new organization starts on <span class="mono">platform</span>, capped per organization. A customer key may point at OpenRouter or directly at a vendor.</div></div>'+
      '<dl class="kv"><dt>Current</dt><dd><span class="b b-allowed"><span class="d"></span>platform</span></dd>'+
-     '<dt>Cap</dt><dd>$2,000.00 USD per month · <span id="orgCapUsed">'+usd(fmt2(orgRoutesTotal()))+'</span> used in '+h(SPEND.month)+', the total of the routes</dd>'+
+     '<dt>Cap</dt><dd>$2,000.00 USD per month · <span id="orgCapUsed">'+usd(fmt2(orgRoutesTotal()))+'</span> used in '+h(SPEND.month)+', the total of the routes · the same lines are on Spend, By model</dd>'+
      '<dt>Key storage</dt><dd>enveloped, tested before save, never returned, every read audited</dd>'+
      '<dt>No call reads the environment</dt><dd>keys and routes come from the model layer’s resolver; a path that bypasses it is a defect</dd></dl>'+
      '<button class="btn" style="margin-top:12px" onclick="openDialog(\'funding\')">Change funding source</button></div></div></div>';
@@ -9512,7 +9519,9 @@ function orgMemberWs(m){return m.ws==="all"?WS.slice():WS.filter(function(w){ret
 function orgLatestSeen(){var best=null;MEMBERS.forEach(function(m){if(!best||m.last>best.last)best=m;});return best;}
 
 /* Model routes for Oxagen's own work. Month-to-date use comes from Spend where Spend carries the model
-   (the complex tier is the assistant line); the other tiers carry their own gateway_observed rows. */
+   (the complex tier is the assistant line); the other tiers carry their own gateway_observed rows here,
+   and Spend reads them back through orgRoutesOffSpend(), so its month total and By model table carry
+   every tier Funding counts. */
 var ORG_ROUTES=[
  {tier:"complex",use:"in-app agent turns, reflection, promotion rationale, ontology diff explanation, Context PR bodies",
   provider:"OpenRouter",route:"z-ai/glm-latest",resolves:"GLM 5.3 · 1.3M context",fallback:"z-ai/glm-4.7",spendModel:"z-ai/glm-latest (assistant)",
@@ -9535,6 +9544,17 @@ function orgRouteUse(r){
 }
 function orgRoutesTotal(){return ORG_ROUTES.reduce(function(s,r){return s+orgRouteUse(r).cost;},0);}
 function orgUseCount(u){return u.unit==="tokens"?(u.calls/1e6).toFixed(2)+"M tok":u.calls.toLocaleString("en-US");}
+/* Oxagen's own routes that Spend has no model line for (light, embed, rerank), as Spend rows. One record,
+   ORG_ROUTES: Spend's month total, its By model table and Funding's "used" all read it, so the two pages
+   cannot report a different September. */
+function orgRoutesOffSpend(){
+  return ORG_ROUTES.filter(function(r){return !r.spendModel;}).map(function(r){var u=orgRouteUse(r);
+    return {m:r.route+" ("+r.tier+")",tier:r.tier,provider:r.provider,calls:u.calls,unit:u.unit,spend:fmt2(u.cost),cache:null,route:true};});
+}
+function orgRoutesOffSpendTotal(){return orgRoutesOffSpend().reduce(function(t,x){return t+n$(x.spend);},0);}
+/* the month's spend: the agents and the assistant line (SPEND.spend) plus Oxagen's other model routes */
+function spendMonthTotal(){return n$(SPEND.spend)+orgRoutesOffSpendTotal();}
+function spendModelRows(){return SPEND.byModel.concat(orgRoutesOffSpend());}
 
 function orgRoutesPanel(){
   var total=orgRoutesTotal();
