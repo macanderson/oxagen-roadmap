@@ -1,10 +1,10 @@
 # Mission Control design baseline
 
 Every lane that builds from "the mockup" builds from **one** `mc.html`: the newest
-`mc-baseline-*` tag in this repo, currently **`mc-baseline-w3`**.
+`mc-baseline-*` tag in this repo, currently **`mc-baseline-w4`**.
 
 ```sh
-git show mc-baseline-w3:mc.html > /tmp/mc.html
+git show mc-baseline-w4:mc.html > /tmp/mc.html
 ```
 
 A baseline tag is never moved. To change the baseline: land the change on `main`, run the
@@ -14,7 +14,15 @@ then point this file and the plan (`docs/2026-09-12-mission-control-app-implemen
 inputs row, W1, the L1 seed, the §7 lane prompt) at it. `git fetch --tags` first: another
 session may already have cut it.
 
-## mc-baseline-w3 (2026-09-13)
+## mc-baseline-w4 (2026-09-13)
+
+`main` after PR #14: everything in w3 below, plus
+
+| Decision | Came from | What to build |
+|---|---|---|
+| The in-app agent's turns are recorded but are not the tenant's runs | Issue #11, PR #14 | The in-app agent (`oxagen.assistant`) is Oxagen's; the customer talks to it but never owns or manages it. Its turns are runs (frames, receipts, free) kept in `ASST_RUNS`, never in `RUNS`, so Fleet, agent pages, "Spend, runs shown", bisect and the story generator never list, count or sum them. `run(id)` resolves both indexes, which is how a receipt or a turn bar still opens the Run page. In the app: the run index the tenant's pages read excludes the in-app agent's runs at the query, and the run route resolves by id regardless. `check-baseline.mjs` asserts all four from the DOM. |
+
+## mc-baseline-w3 (2026-09-13, superseded)
 
 `main` @ ddf12ef, after PR #12: everything in w2 below, plus
 
