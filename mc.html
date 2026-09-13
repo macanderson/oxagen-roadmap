@@ -2196,7 +2196,13 @@ var MANDATES = [
   tools:"stripe__create_payment@*, aws_billing__purchase_savings_plan@2",
   approvalAbove:"100.00", alwaysFor:"moves_funds", approvers:"role:org.billing",
   purpose:"monthly infrastructure invoices, PO-4471",
-  from:"2026-09-01", to:"2026-12-31", twoPerson:true, second:"Priya Natarajan", status:"active"}
+  from:"2026-09-01", to:"2026-12-31", twoPerson:true, second:"Priya Natarajan", status:"active",
+  /* The mandate's own ledger; the page used to hardcode these four rows. The reservation matches the parked payment. */
+  ledger:[
+   {when:"08:40:19",call:"stripe__create_payment@4",amount:"2,450.00",state:"reserved",ext:"\u2014 awaiting approval",rcp:null},
+   {when:"2026-09-04",call:"stripe__create_payment@4",amount:"884.60",state:"settled",ext:"pi_3QaL8f2Xk",rcp:"rcp_01K4X8\u2026"},
+   {when:"2026-09-02",call:"aws_billing__purchase_savings_plan@2",amount:"400.00",state:"settled",ext:"sp-0a4f91c",rcp:"rcp_01K4W2\u2026"},
+   {when:"2026-09-01",call:"stripe__create_payment@4",amount:"0.00",state:"released",ext:"dispatch failed \u00b7 released",rcp:"rcp_01K4V7\u2026"}]}
 ];
 
 var POLICIES = [
@@ -6232,7 +6238,10 @@ function aIncidents(a,r){
 }
 
 function pMandate(r){
-  var m=MANDATES[0];
+  /* Resolve the mandate the route names. This read MANDATES[0] unconditionally, which is
+     invisible while the demo has one mandate and wrong the moment it has more. */
+  var m=null; for(var mi=0;mi<MANDATES.length;mi++){if(MANDATES[mi].id===(r&&r.mid))m=MANDATES[mi];}
+  if(!m)m=MANDATES[0];
   if(S.state==="loading") return skeleton();
   if(S.state==="error") return errorState("This mandate","503 mandate_ledger_unavailable");
   if(S.state==="denied") return deniedState("this mandate","org.billing — mandates are readable only by a finance role");
@@ -6241,8 +6250,9 @@ function pMandate(r){
   var onM=APPROVALS.filter(function(x){return x.mandate===m.id;})[0];
   var showRes=!onM||apState(onM.id).status==="pending"||apState(onM.id).status==="approved";
   return '<div class="phead"><div class="t"><p class="eyebrow">Mandate</p><h1 class="mono" style="font-size:20px">'+h(m.id)+'</h1>'+
-   '<div class="row" style="margin-top:8px"><span class="b b-allowed"><span class="d"></span>'+h(m.status)+'</span>'+
-   '<span class="b b-approval"><span class="d"></span>two-person</span><span class="b b-q">'+h(m.currency)+'</span></div>'+
+   '<div class="row" style="margin-top:8px"><span class="b b-'+(m.status==="active"?"allowed":m.status==="expired"?"q":"denied")+'"><span class="d"></span>'+h(m.status)+'</span>'+
+   (m.twoPerson?'<span class="b b-approval"><span class="d"></span>two-person</span>':'<span class="b b-q">single approver</span>')+
+   '<span class="b b-q">'+h(m.currency)+'</span></div>'+
    '<p style="margin-top:8px">'+h(m.purpose)+'</p></div>'+
    '<div class="acts"><button class="btn" onclick="openDialog(\'mandate\')">Change limits</button>'+
    '<button class="btn danger" onclick="act(\'Mandate revoked. In-flight calls that have not dispatched end now.\')">Revoke</button></div></div>'+
@@ -6255,16 +6265,15 @@ function pMandate(r){
     '<span class="b b-q" style="margin-left:auto">reservations at decision time · settlements at receipt time</span></div>'+
     '<div class="panel-b" style="border-bottom:1px solid var(--border)">'+
     mandateBar(m,showRes)+
-    '<div class="dim" style="font-size:11.5px;margin-top:8px">Two concurrent calls cannot both fit under the same remaining limit — the reservation is taken before dispatch.</div></div></div>'+
+    '<div class="dim" style="font-size:11.5px;margin-top:8px">Two concurrent calls cannot both fit under the same remaining limit — the reservation is taken before dispatch.</div></div>'+
     '<div class="tw"><table><thead><tr><th>When</th><th>Call</th><th class="num">Amount</th><th>State</th><th>External id</th><th>Receipt</th></tr></thead><tbody>'+
-    '<tr><td class="mono" style="font-size:11.5px">08:40:19</td><td class="mono" style="font-size:11.5px">stripe__create_payment@4</td><td class="num">$2,450.00</td>'+
-     '<td><span class="b b-approval"><span class="d"></span>reserved</span></td><td class="dim">— awaiting approval</td><td class="dim">—</td></tr>'+
-    '<tr><td class="mono" style="font-size:11.5px">2026-09-04</td><td class="mono" style="font-size:11.5px">stripe__create_payment@4</td><td class="num">$884.60</td>'+
-     '<td><span class="b b-allowed"><span class="d"></span>settled</span></td><td class="mono" style="font-size:11.5px">pi_3QaL8f2Xk</td><td><a href="#">rcp_01K4X8…</a></td></tr>'+
-    '<tr><td class="mono" style="font-size:11.5px">2026-09-02</td><td class="mono" style="font-size:11.5px">aws_billing__purchase_savings_plan@2</td><td class="num">$400.00</td>'+
-     '<td><span class="b b-allowed"><span class="d"></span>settled</span></td><td class="mono" style="font-size:11.5px">sp-0a4f91c</td><td><a href="#">rcp_01K4W2…</a></td></tr>'+
-    '<tr><td class="mono" style="font-size:11.5px">2026-09-01</td><td class="mono" style="font-size:11.5px">stripe__create_payment@4</td><td class="num">$0.00</td>'+
-     '<td><span class="b b-denied"><span class="d"></span>released</span></td><td class="dim">dispatch failed · released</td><td><a href="#">rcp_01K4V7…</a></td></tr>'+
+    (m.ledger||[]).map(function(x){
+      var sb={settled:"allowed",reserved:"approval",released:"denied"}[x.state]||"q";
+      return '<tr><td class="mono" style="font-size:11.5px">'+h(x.when)+'</td>'+
+       '<td class="mono" style="font-size:11.5px">'+h(x.call)+'</td><td class="num">'+usd(x.amount)+'</td>'+
+       '<td><span class="b b-'+sb+'"><span class="d"></span>'+h(x.state)+'</span></td>'+
+       '<td class="'+(x.ext.indexOf("\u2014")===0||/failed/.test(x.ext)?"dim":"mono")+'" style="font-size:11.5px">'+h(x.ext)+'</td>'+
+       '<td>'+(x.rcp?'<a href="#">'+h(x.rcp)+'</a>':'<span class="dim">\u2014</span>')+'</td></tr>';}).join("")+
     '</tbody></table></div></div>'+
    '<div><div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>The grant</h3></div><div class="panel-b"><dl class="kv">'+
     '<dt>Agent</dt><dd><span class="mono">'+h(m.agent)+'</span> '+scorePair(m.agent,true)+'</dd>'+
@@ -6276,8 +6285,11 @@ function pMandate(r){
     '<dt>Approval</dt><dd>above '+usd(m.approvalAbove)+', always for <span class="mono">'+h(m.alwaysFor)+'</span>, approvers <span class="mono">'+h(m.approvers)+'</span></dd>'+
     '<dt>Valid</dt><dd>'+h(m.from)+' → '+h(m.to)+'</dd></dl></div></div>'+
     '<div class="panel"><div class="panel-h"><h3>Reconciliation</h3></div><div class="panel-b">'+
-    '<div class="warn"><b>One exception, severity critical.</b> Stripe charge <span class="mono">ch_3Qa8</span> for $18.00 USD is attributable to <span class="mono">con_01K2A9</span> and has no receipt. Money moved that Oxagen did not govern.</div>'+
-    '<button class="btn" style="margin-top:12px" onclick="go(\'#/'+ORG.slug+'/audit/incidents\')">Open on Audit</button></div></div></div></div>';
+    (m.id!=="mnd_7K2ETQ4"
+      ? '<div class="note">Every draw on this mandate reconciles: each settlement has a receipt and each receipt has a frame. Nothing is outstanding for September.</div>'
+      : '<div class="warn"><b>One exception, severity critical.</b> Stripe charge <span class="mono">ch_3Qa8</span> for $18.00 USD is attributable to <span class="mono">con_01K2A9</span> and has no receipt. Money moved that Oxagen did not govern.</div>'+
+        '<button class="btn" style="margin-top:12px" onclick="go(\'#/'+ORG.slug+'/audit/incidents\')">Open on Audit</button>')+
+    '</div></div></div></div>';
 }
 
 /* ============================== Tools ============================== */
@@ -8053,7 +8065,7 @@ function evidenceDlg(){
      '<div class="stat"><span class="k">Confidence</span><span class="v" style="text-transform:capitalize">'+h(e.confidence)+'</span><span class="s">'+h(e.trend)+'</span></div>'+
      '<div class="stat"><span class="k">Signal</span><span class="v" style="font-size:15px">'+h(e.measured)+'</span><span class="s">'+h(e.signal)+' · baseline '+h(e.baseline)+'</span></div>'+
      '<div class="stat"><span class="k">Evidence</span><span class="v" style="font-size:15px">'+h(f.frames)+'</span><span class="s"><span class="basis">'+h(e.basis)+'</span> · every run sealed</span></div></div>'+
-     '<p class="eyebrow q">Recent runs where money was wasted</p><div class="tw" style="margin-bottom:16px"><table class="narrow"><thead><tr><th>Run</th><th>Task</th><th>Started</th><th class="num">Cost</th><th class="num">Wasted</th><th>What was wasted</th></tr></thead><tbody>'+
+     '<p class="eyebrow q">Recent runs where money was wasted</p><div class="tw" style="margin-bottom:16px"><table class="narrow" data-lt="off"><thead><tr><th>Run</th><th>Task</th><th>Started</th><th class="num">Cost</th><th class="num">Wasted</th><th>What was wasted</th></tr></thead><tbody>'+
      e.runs.map(function(r){return '<tr class="click" onclick="closeDialog();go(\'#/'+ORG.slug+'/'+S.ws+'/runs/'+h(r[0])+'\')">'+
       '<td class="mono" style="font-size:11px">'+h(r[0])+'</td><td style="font-size:12px">'+h(r[1])+'</td><td class="mono dim" style="font-size:11px;white-space:nowrap">'+h(r[2])+'</td>'+
       '<td class="num">'+usd(r[3])+'</td><td class="num" style="color:var(--st-denied);font-weight:600">'+usd(r[4])+'</td><td class="dim" style="font-size:11.5px">'+h(r[5])+'</td></tr>';}).join("")+
