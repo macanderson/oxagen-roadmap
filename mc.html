@@ -2493,7 +2493,7 @@ var NOTIFS = [
   body:"No approver resolved apr_01K5YQ9T2B within 10 minutes. $184.20 USD to vendor:aws was never dispatched; mandate mnd_4471 released the reservation."},
  {kind:"context_pr.opened", tone:"gold", unread:false, t:"13:02",
   title:"Context PR opened · acme/platform#519",
-  body:"The promoter proposed a rule on lineage ctx.release.no-reread-changelog:\u201cDo not re-read CHANGELOG.md more than once in a run; cache the first read.\u201d Supported by 682 duplicate tool calls across 212 runs of acme.core.release-manager."},
+  body:"The promoter proposed a rule on lineage ctx.release.no-reread-changelog: \u201cDo not re-read CHANGELOG.md more than once in a run; cache the first read.\u201d Supported by 682 duplicate tool calls across 212 runs of acme.core.release-manager."},
  {kind:"run.proven", tone:"allowed", unread:false, t:"15:09",
   title:"Run proven · run_01K5YX2D6R",
   body:"Witness wit_01K5YX51 flipped: failing on main at 9c41ab0, passing on refs/pull/1887/head at 3d8f77e. Oracle test_flip, disclosure grain L0."},
@@ -3760,7 +3760,7 @@ function sidebar(r){
    '<button class="asst-launch" onclick="asstToggle()" aria-controls="asst" aria-expanded="'+(S.asst?"true":"false")+'">'+
     '<span class="asst-g">'+icon("assistant")+'</span>'+
     '<span class="tx"><b>Assistant</b>'+
-     (S.asstEngine==="down"?'<span class="down">engine down</span>':'<span>glm-flash · ready</span>')+'</span>'+
+     (S.asstEngine==="down"?'<span class="down">engine down</span>':'<span>glm-latest · ready</span>')+'</span>'+
     '<span class="cv">'+"<svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.9\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M9 6l6 6-6 6\"/></svg>"+'</span></button>'+
    '<div class="row" style="justify-content:space-between;padding:0 4px"><span class="mono dim" style="font-size:10.5px">'+orgAgents+(orgAgents===1?' agent':' agents')+' · '+ORG.dataPlane+' plane</span>'+
    '<span class="b b-allowed" style="font-size:10px"><span class="d"></span>gateway</span></div></div></aside>';
