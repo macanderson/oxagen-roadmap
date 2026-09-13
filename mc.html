@@ -2454,8 +2454,8 @@ var NOTIFS = [
   title:"Approval expired · stripe__create_payment@4",
   body:"No approver resolved apr_01K5YQ9T2B within 10 minutes. $184.20 USD to vendor:aws was never dispatched; mandate mnd_4471 released the reservation."},
  {kind:"context_pr.opened", tone:"gold", unread:false, t:"13:02",
-  title:"Context PR opened · acme/platform#1892",
-  body:"The promoter proposed a rule on lineage lin_7fa2: \u201cDo not re-read CHANGELOG.md after the first read in a run.\u201d Supported by 14 runs across 3 agents."},
+  title:"Context PR opened · acme/platform#519",
+  body:"The promoter proposed a rule on lineage ctx.release.no-reread-changelog:\u201cDo not re-read CHANGELOG.md more than once in a run; cache the first read.\u201d Supported by 682 duplicate tool calls across 212 runs of acme.core.release-manager."},
  {kind:"run.proven", tone:"allowed", unread:false, t:"15:09",
   title:"Run proven · run_01K5YX2D6R",
   body:"Witness wit_01K5YX51 flipped: failing on main at 9c41ab0, passing on refs/pull/1887/head at 3d8f77e. Oracle test_flip, disclosure grain L0."},
@@ -5134,7 +5134,7 @@ function contextTab(R){
   stack += '<div class="ctxg">Appended later<span class="n">+22 tok</span></div>'+
    '<button class="ctxi" aria-current="'+(sel==="steer"?'true':'false')+'" onclick="S.ctxSel=\'steer\';render()">'+
    '<span class="sw" style="background:var(--st-approval)"></span>'+
-   '<span class="nm">control.steer · seq 11</span><span class="tk">22</span></button>';
+   '<span class="nm">control.steer · seq 10</span><span class="tk">22</span></button>';
 
   stack += '<div class="ctxg">Retrieved, kept out<span class="n">'+CTXX.length+'</span></div>'+
    CTXX.map(function(x){
@@ -10389,9 +10389,9 @@ function dialog(){
      '<tr><td style="font-size:12px">stripe__create_payment@4 with no mandate must be denied</td><td><span class="b b-allowed"><span class="d"></span>pass</span></td></tr>'+
      '</tbody></table></div></div>'+
      '<div class="note">Before a version is activated, Oxagen replays it against the last 30 days of this workspace’s real tool calls and reports what would have changed.</div>',
-     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn" onclick="closeDialog();act(\'Simulated: 214 calls would now be denied, 1,106 would now need approval.\')">Simulate</button><button class="btn primary" onclick="closeDialog();openDialog(\'activate\')">Activate</button>'},
+     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn" onclick="closeDialog();act(\'Simulated: '+SIM.nowDenied.toLocaleString("en-US")+' calls would now be denied, '+SIM.nowApproval.toLocaleString("en-US")+' would now need approval.\')">Simulate</button><button class="btn primary" onclick="closeDialog();openDialog(\'activate\')">Activate</button>'},
    activate:{t:"Activate pol_v42",w:false,b:
-     '<div class="warn"><b>1,106 calls would now need approval</b> — about 37 a day across three agents. 214 calls that were allowed under <span class="mono">pol_v41</span> would be denied.</div>'+
+     '<div class="warn"><b>'+SIM.nowApproval.toLocaleString("en-US")+' calls would now need approval</b> — about '+Math.round(SIM.nowApproval/SIM.days)+' a day across '+SIM.agentsAffected.length+' agents. '+SIM.nowDenied.toLocaleString("en-US")+' calls that were allowed under <span class="mono">pol_v41</span> would be denied.</div>'+
      '<div class="field" style="margin-top:14px"><label>Reason for the record</label><textarea rows="2" aria-label="Reason">Q3 control: a human sees every irreversible action in core-platform.</textarea></div>'+
      '<div class="note">Activation is a governed action with approval. In regulated mode it is a Context PR instead.</div>',
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'pol_v42 active. Every decision from now cites it; pol_v41 is superseded, not deleted.\')">Activate</button>'},
