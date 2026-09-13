@@ -9,11 +9,14 @@
   --on-gold:#10100F;
   --shadow:0 1px 0 rgba(255,255,255,.03),0 18px 44px rgba(0,0,0,.5);
   --shadow-sm:0 1px 0 rgba(255,255,255,.03),0 6px 18px rgba(0,0,0,.34);
-  /* semantic state colours — separate from gold, never gold */
-  --st-allow:#5BA97C;   /* allowed, settled, valid, proven, verified */
-  --st-hold:#7E9BEC;    /* needs approval, parked, reserved, pending */
-  --st-deny:#D75A4C;    /* denied, failed, critical, exception */
+  /* Semantic state colours, separate from gold, never gold. The canonical set
+     is the one mc.html carries; the older four names are aliases onto it. */
+  --st-allowed:#57A97C; --st-approval:#5B93D6; --st-denied:#C66A4A;
+  --st-proven:#3FA2A2; --st-failed:#C0453C; --st-critical:#D6455E; --st-observe:#9B958A;
   --st-taint:#B98BE0;   /* tainted, untrusted, unverified */
+  --st-allow:var(--st-allowed);
+  --st-hold:var(--st-approval);
+  --st-deny:var(--st-denied);
   --focus:#F1C364;
   --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
 }
@@ -22,7 +25,10 @@
   --fg:#10100F;--body:#2A2823;--muted:#6B665C;--dim:#8C877C;--accent-text:#8B5E1A;
   --shadow:0 1px 0 rgba(255,255,255,.7),0 18px 44px rgba(16,16,15,.08);
   --shadow-sm:0 1px 0 rgba(255,255,255,.7),0 6px 18px rgba(16,16,15,.07);
-  --st-allow:#2E7048;--st-hold:#3C58B5;--st-deny:#A8382C;--st-taint:#6E43A8;
+  --st-allowed:#2F7D52; --st-approval:#2E6BA8; --st-denied:#9B4526;
+  --st-proven:#1F7676; --st-failed:#992F28; --st-critical:#AE2540; --st-observe:#6B665C;
+  --st-taint:#6E43A8;
+  --st-allow:var(--st-allowed); --st-hold:var(--st-approval); --st-deny:var(--st-denied);
   --focus:#8B5E1A;
 }}
 :root[data-theme="light"]{
@@ -30,7 +36,10 @@
   --fg:#10100F;--body:#2A2823;--muted:#6B665C;--dim:#8C877C;--accent-text:#8B5E1A;
   --shadow:0 1px 0 rgba(255,255,255,.7),0 18px 44px rgba(16,16,15,.08);
   --shadow-sm:0 1px 0 rgba(255,255,255,.7),0 6px 18px rgba(16,16,15,.07);
-  --st-allow:#2E7048;--st-hold:#3C58B5;--st-deny:#A8382C;--st-taint:#6E43A8;
+  --st-allowed:#2F7D52; --st-approval:#2E6BA8; --st-denied:#9B4526;
+  --st-proven:#1F7676; --st-failed:#992F28; --st-critical:#AE2540; --st-observe:#6B665C;
+  --st-taint:#6E43A8;
+  --st-allow:var(--st-allowed); --st-hold:var(--st-approval); --st-deny:var(--st-denied);
   --focus:#8B5E1A;
 }
 
@@ -292,7 +301,46 @@ dialog::backdrop{background:rgba(10,10,9,.72);backdrop-filter:blur(3px)}
 input.cmdinput{width:100%;padding:15px 20px;background:transparent;border:0;border-bottom:1px solid var(--border);font-size:15px;outline:0}
 
 /* assistant */
-.assist{width:330px;border-left:1px solid var(--border);background:var(--void);display:flex;flex-direction:column;min-width:0}
+/* ---- small approval card ------------------------------------------------
+   The full card keeps every detail; this is the same reading order at a size
+   that reads as a row in a list. An approval is urgent, which is not the same
+   as being the subject of the page, so lists use this and the full card is
+   reached with Details. Matches .apsm in mc.html. */
+.apsm{border:1px solid color-mix(in srgb,var(--st-approval) 34%,var(--border));border-radius:10px;background:var(--ink);
+  padding:10px 11px;display:grid;gap:8px;min-width:0}
+.apsm.crit{border-color:color-mix(in srgb,var(--st-critical) 40%,var(--border))}
+.apsm.done{border-color:var(--border);opacity:.72}
+.apsm-h{display:flex;gap:9px;align-items:center;min-width:0}
+.apsm-h .g{width:26px;height:26px;border-radius:8px;flex:none;display:grid;place-items:center;
+  color:var(--st-critical);background:color-mix(in srgb,var(--st-critical) 13%,transparent);font-size:12px}
+.apsm-h .tt{min-width:0;flex:1}
+.apsm-h .tt b{display:block;font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.apsm-h .tt span{display:block;font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.apsm-clk{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--st-approval);font-variant-numeric:tabular-nums;flex:none}
+.apsm-clk.warn{color:var(--st-critical)}
+.apsm-clk.done{color:var(--dim);font-weight:500}
+.apsm-m{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.apsm-t{display:grid;gap:2px;font-size:11.5px;color:var(--muted);font-family:var(--mono)}
+.apsm-t i{font-style:normal;color:var(--body)}
+.apsm-a{display:flex;gap:6px;flex-wrap:wrap}
+.apsm-a .btn{flex:0 1 auto;justify-content:center;min-width:92px}
+@media(max-width:560px){.apsm-a .btn{flex:1 1 auto}}
+
+/* ---- the in-app agent is a bottom dock, not a side panel ----------------
+   One reach away on every page, and the subject of none of them. */
+.assist{position:fixed;left:0;right:0;bottom:0;width:auto;border-left:0;border-top:1px solid var(--border);
+  background:var(--void);display:flex;flex-direction:column;min-width:0;z-index:60;
+  box-shadow:var(--shadow);padding-bottom:env(safe-area-inset-bottom)}
+.assist>*{max-width:1500px;margin:0 auto;width:100%}
+.assist .adock{display:flex;gap:9px;align-items:center;padding:9px 14px;min-height:56px}
+.assist .adock .g{width:28px;height:28px;border-radius:9px;flex:none;display:grid;place-items:center;
+  background:var(--gold);color:var(--on-gold);font-size:13px}
+.assist .adock .open{flex:1;min-width:0;border:1px solid var(--border);border-radius:9px;background:var(--panel);
+  padding:7px 11px;font-size:13px;color:var(--muted);display:flex;gap:8px;align-items:center;text-align:left;cursor:pointer}
+.assist .adock .open>span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.assist .adock .k{font-family:var(--mono);font-size:10px;border:1px solid var(--border);border-radius:5px;padding:0 5px;color:var(--dim);flex:none}
+.assist .ab{max-height:48vh}
+.main{padding-bottom:76px}
 .assist .ah{padding:13px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px}
 .assist .ab{padding:16px;overflow-y:auto;flex:1;display:grid;gap:12px;align-content:start}
 .msg{border-radius:10px;padding:10px 12px;font-size:12.5px;line-height:1.6}
@@ -341,7 +389,7 @@ input.cmdinput{width:100%;padding:15px 20px;background:transparent;border:0;bord
   .chain4{grid-template-columns:1fr 1fr}
   .hop:nth-child(2)::after{content:none}
   .hop:nth-child(1),.hop:nth-child(2){border-bottom:1px solid var(--border)}
-  .assist{display:none}
+  /* the agent is a bottom dock now, so it stays at every width */
 }
 @container shell (max-width: 860px){
   .shell{grid-template-columns:1fr}
@@ -1015,7 +1063,18 @@ function topbar(r){
 }
 
 function assistantPanel(r){
-  if(!S.assistant) return "";
+  const bar = '<div class="adock">'+
+    '<span class="g">\u25c6</span>'+
+    '<button class="open" type="button" data-act="assist" aria-expanded="'+(S.assistant?'true':'false')+'">'+
+      '<span>'+(S.assistant?'Ask about this run, or change something':'Ask Oxagen about this workspace')+'</span>'+
+      '<span class="k">glm-flash</span></button>'+
+    '<button class="xbtn" data-act="assist" aria-label="'+(S.assistant?'Collapse':'Expand')+'">'+(S.assistant?'\u2304':'\u2303')+'</button>'+
+  '</div>';
+  if(!S.assistant) return '<aside class="assist">'+bar+'</aside>';
+  return '<aside class="assist">'+assistantSheet(r)+bar+'</aside>';
+}
+/* the sheet is the old panel body, minus its own <aside> wrapper */
+function assistantSheet(r){
   const msgs = r.page==="run"||r.page==="fleet" ? [
     {r:"u",t:"Why is this payment waiting?"},
     {r:"a",t:"Three rules fired on <span class=\"mono\">stripe__create_payment@4</span> at frame&nbsp;156. The mandate requires approval for every <span class=\"mono\">moves_funds</span> call; $18,420.00 USD is above its $10,000.00 approval threshold; and two arguments derive from untrusted tool output, which raises a financial call to approval on its own. Any one of the three would have parked it.",
@@ -1027,13 +1086,12 @@ function assistantPanel(r){
     {r:"a",t:"I can answer questions over this workspace's runs, frames, records and spend, and change configuration through the same governed actions the screens use. Every turn is a run of its own, recorded and metered.",
       s:"engine stella serve · in-app agent acme.finops.assistant"}
   ];
-  return '<aside class="assist">'+
+  return ''+
     '<div class="ah"><span style="color:var(--accent-text)">◆</span><b style="font-size:13px">Assistant</b>'+
       '<span class="badge b-quiet mono" style="margin-left:auto">engine up</span>'+
       '<button class="xbtn" data-act="assist" aria-label="Close assistant">✕</button></div>'+
     '<div class="ab">'+msgs.map(m=>'<div class="msg '+m.r+'">'+m.t+(m.s?'<div class="src">'+esc(m.s)+'</div>':'')+'</div>').join("")+'</div>'+
-    '<div class="af"><input placeholder="Ask about this run, or change something…" aria-label="Ask the assistant"></div>'+
-  '</aside>';
+    '<div class="af"><input placeholder="Ask about this run, or change something…" aria-label="Ask the assistant"></div>';
 }
 </script>
 
@@ -1137,6 +1195,33 @@ function decisionBox(where){
 }
 
 /* the full approval card */
+/* Details expands the full card in place, the same pattern mc.html uses. */
+function apOpen(where){ if(!S.apOpen) S.apOpen={}; return !!S.apOpen[where]; }
+function apToggle(where){ if(!S.apOpen) S.apOpen={}; S.apOpen[where]=!S.apOpen[where]; render(); }
+function approvalCardSm(where){
+  const done = S.approval!=="pending";
+  const sec = left();
+  const clk = done ? '<span class="apsm-clk done">\u2014</span>'
+    : '<span class="apsm-clk'+(sec<120?' warn':'')+'" data-countdown>'+mmss(sec)+'</span>';
+  const acts = done
+   ? '<div class="apsm-a"><span class="badge '+(S.approval==="approved"?'b-allow':'b-deny')+'"><span class="d"></span>'+esc(S.approval)+'</span></div>'
+   : '<div class="apsm-a">'+
+      '<button class="btn primary sm" type="button" data-act="approve">Approve</button>'+
+      '<button class="btn danger sm" type="button" data-act="deny">Deny</button>'+
+      '<button class="btn sm" type="button" onclick="apToggle(\''+where+'\')" aria-expanded="'+(apOpen(where)?'true':'false')+'">'+
+       (apOpen(where)?'Hide details':'Details')+'</button></div>';
+  return '<div class="apsm crit'+(done?' done':'')+'">'+
+   '<div class="apsm-h"><span class="g">\u25c6</span>'+
+    '<span class="tt"><b>'+CALL.amount+' '+CALL.currency+'</b>'+
+     '<span>'+esc(RUN.agent)+' \u00b7 '+esc(RUN.task.title)+'</span></span>'+clk+'</div>'+
+   '<div class="apsm-m">'+TG.hazard(CALL.risk,CALL.side)+
+    '<span class="badge b-deny mono">'+CALL.effect+'</span>'+
+    '<span class="badge b-taint"><span class="d"></span>tainted</span></div>'+
+   '<div class="apsm-t"><div>Tool <i>'+esc(CALL.tool)+'</i></div>'+
+    '<div>To <i>'+esc(CALL.counterparty)+'</i></div>'+
+    (done?'':'<div>Times out in <i>10m</i>, then the call ends</div>')+'</div>'+
+   acts+'</div>';
+}
 function approvalCard(where){
   const done = S.approval!=="pending";
   const sec = left();
@@ -1269,7 +1354,8 @@ function pageFleet(r){
       (q.length===0 && !starDone ? '<div class="state" style="padding:40px 20px"><div class="ic">◌</div><h3>Nothing parked</h3><p>No call is waiting on a person.</p></div>' : '')+
       q.map(a=>{
         const open = S.qopen===a.id;
-        if(a.star && open) return '<div style="padding:14px 16px;border-bottom:1px solid var(--border)">'+approvalCard("fleet")+'</div>';
+        if(a.star && open) return '<div style="padding:14px 16px;border-bottom:1px solid var(--border);display:grid;gap:10px">'+
+          approvalCardSm("fleet")+(apOpen("fleet")?approvalCard("fleet"):'')+'</div>';
         return '<div class="qrow" data-act="qtoggle" data-id="'+a.id+'" tabindex="0" role="button" aria-expanded="'+open+'">'+
           '<span style="flex:none">'+TG.cell(a.tool,{sz:"sm"})+'</span>'+
           '<div style="min-width:0"><div class="qa" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">'+TG.hazard(a.risk)+TG.cat(TG.meta(a.tool).cat)+'</div>'+
@@ -1525,7 +1611,8 @@ function pageRun(r){
   }
 
   return head + '<div class="stack">' + strip +
-    '<section>' + stripLabel + approvalCard("run") + '</section>' +
+    '<section style="display:grid;gap:10px">' + stripLabel + approvalCardSm("run") +
+      (apOpen("run")?approvalCard("run"):'') + '</section>' +
     tabBar + body + '</div>';
 }
 </script>
