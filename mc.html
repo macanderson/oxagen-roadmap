@@ -7966,7 +7966,9 @@ var SCENARIOS={
   ]}
 };
 function scnHref(id,step){var s=SCENARIOS[id];return "#/"+ORG.slug+"/"+s.ws+"/scenarios/"+id+"/"+step;}
-function scnExit(){var s=SCENARIOS[S.scn.id];S.scn=null;go("#/"+ORG.slug+"/"+s.ws);}
+/* A step's act can open a dialog; moving to another step or leaving closes it, so the next step is not read under it. */
+function scnGo(hash){S.dlg=null;S.dlgArg=null;go(hash);}
+function scnExit(){var s=SCENARIOS[S.scn.id];S.scn=null;scnGo("#/"+ORG.slug+"/"+s.ws);}
 function scnRail(){
   if(!S.scn) return "";
   var s=SCENARIOS[S.scn.id]; if(!s) return "";
@@ -7978,9 +7980,9 @@ function scnRail(){
    '<p class="scn-say">'+st.say+'</p>'+
    (st.note?'<p class="scn-note">'+st.note+'</p>':'')+
    '<div class="scn-f">'+
-    (i>1?'<button class="btn sm" onclick="go(\''+scnHref(S.scn.id,i-1)+'\')">Back</button>':
+    (i>1?'<button class="btn sm" onclick="scnGo(\''+scnHref(S.scn.id,i-1)+'\')">Back</button>':
          '<button class="btn sm" disabled>Back</button>')+
-    (i<n?'<button class="btn primary sm" onclick="go(\''+scnHref(S.scn.id,i+1)+'\')">Next</button>':
+    (i<n?'<button class="btn primary sm" onclick="scnGo(\''+scnHref(S.scn.id,i+1)+'\')">Next</button>':
          '<button class="btn primary sm" onclick="scnExit()">Finish</button>')+
     (st.act?'<button class="btn sm ghost" onclick="'+st.act[1]+'">'+h(st.act[0])+'</button>':'')+
     '<button class="btn sm ghost" onclick="scnExit()">Leave</button>'+
@@ -7990,7 +7992,7 @@ function scnRail(){
 function pScenarios(){
   var ids=Object.keys(SCENARIOS);
   return '<p class="eyebrow">Workspace \u00b7 '+h(ws().name)+'</p><h1>Scenarios</h1>'+
-   '<p class="lede">Two demos, each one a walk through the real screens. A scenario owns no screens of its own, so it cannot drift away from the product it is demonstrating.</p>'+
+   '<p class="lede">'+ids.length+' demos, each one a walk through the real screens. A scenario owns no screens of its own, so it cannot drift away from the product it is demonstrating.</p>'+
    '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px">'+ids.map(function(id){var s=SCENARIOS[id];
      return '<div class="scn-card"><b>'+h(s.title)+'</b><p>'+h(s.blurb)+'</p>'+
       '<p class="mono dim" style="font-size:11px;margin:0">'+s.steps.length+' steps \u00b7 workspace '+h(s.ws)+'</p>'+
