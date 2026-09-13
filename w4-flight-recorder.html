@@ -2736,7 +2736,16 @@ function perProvenRun(row){
   return usd(fmt2(sp/f));
 }
 function agent(k){for(var i=0;i<AGENTS.length;i++){if(AGENTS[i].key===k)return AGENTS[i];}return null;}
-function run(id){for(var i=0;i<RUNS.length;i++){if(RUNS[i].id===id)return RUNS[i];}return null;}
+/* The in-app agent is Oxagen's, not one of the tenant's agents, so its turns are kept out of RUNS:
+   nothing that lists, counts or sums the workspace's runs (Fleet, agent pages, bisect, the story
+   generator) ever sees them. They stay recorded, and run(id) still resolves them, so a receipt or
+   a turn bar opens the Run page by id like any other deep link. Filled by asstRunOnce(). */
+var ASST_RUNS=[];
+function run(id){
+  for(var i=0;i<RUNS.length;i++){if(RUNS[i].id===id)return RUNS[i];}
+  for(var j=0;j<ASST_RUNS.length;j++){if(ASST_RUNS[j].id===id)return ASST_RUNS[j];}
+  return null;
+}
 
 /* ===================== avatars ===================== */
 /* One record shape for people and agents, stored on the record itself:
@@ -10240,26 +10249,28 @@ var ASST_KEY="oxagen.assistant";
 
 /* ---- the in-app agent's own records ----
    Every turn is a run of its own: recorded, metered, gateway tier, and free (Billing: "Runs of the
-   in-app agent" are free). billed stays 0.00 while cost is what the model proxy observed. */
+   in-app agent" are free). billed stays 0.00 while cost is what the model proxy observed. The agent
+   is operated by Oxagen; the customer talks to it but never owns or manages it, so these runs live
+   in ASST_RUNS (see run(id)) and never appear on Fleet, an agent page, or in "Spend, runs shown". */
 function asstRun(o){
   return Object.assign({agent:ASST_KEY, status:"sealed", basis:"gateway_observed", tier:"gateway", grade:"full",
     verdict:"waived", model:"z-ai/glm-latest", provenSpend:"0.00", ratio:0, free:true, billed:"0.00",
     gen:{model:"claude-haiku-4-5",when:"at seal "+o.sealed,frames:o.frames}}, o);
 }
-function asstRunOnce(o){if(!run(o.id))RUNS.push(asstRun(o));return run(o.id);}
-RUNS.push(asstRun({id:"run_01K5RT9X4M2", op:"marcus", ws:"core-platform", turn:1, steps:4, frames:4, cost:"0.0388",
+function asstRunOnce(o){if(!run(o.id))ASST_RUNS.push(asstRun(o));return run(o.id);}
+ASST_RUNS.push(asstRun({id:"run_01K5RT9X4M2", op:"marcus", ws:"core-platform", turn:1, steps:4, frames:4, cost:"0.0388",
   cache:0.71, task:"a-intel/platform#521", taskTitle:"Assistant turn · narrow triage's belt",
   summary:"Read finding fnd_01K5RT2A and the triage belt, then opened a-intel/platform#521 narrowing the belt in .oxagen/agents/triage.toml. One governed write, receipt rcp_01K5RTB4Q; the merge is left to a code owner.",
   touched:["a-intel/platform#521",".oxagen/agents/triage.toml"], started:"09:30:52", sealed:"09:31:19"}));
-RUNS.push(asstRun({id:"run_01K5RTF6W9", op:"marcus", ws:"core-platform", turn:1, steps:5, frames:9, cost:"0.0214",
+ASST_RUNS.push(asstRun({id:"run_01K5RTF6W9", op:"marcus", ws:"core-platform", turn:1, steps:5, frames:9, cost:"0.0214",
   cache:0.83, task:"a-intel/platform#521", taskTitle:"Assistant turn · grant and cap triage",
   summary:"Granted linear__get_issue@2 to a-intel.core.triage and set a $5.00 hard per-run budget, both on a-intel/platform#521. Two governed writes, receipts rcp_01K5RTG2K and rcp_01K5RTG5M.",
   touched:["a-intel/platform#521","linear__get_issue@2","budget.per_run_micros"], started:"09:33:40", sealed:"09:33:58"}));
-RUNS.push(asstRun({id:"run_01K5RV3C8N", op:"priya", ws:"finops", turn:1, steps:9, frames:21, cost:"0.0627",
+ASST_RUNS.push(asstRun({id:"run_01K5RV3C8N", op:"priya", ws:"finops", turn:1, steps:9, frames:21, cost:"0.0627",
   cache:0.80, task:"apr_01K5RN9T4", taskTitle:"Assistant turn · explain the invoice-bot park",
   summary:"Read run_01K5RN8F3J2GHY6T, approval apr_01K5RN9T4 and mandate mnd_7K2ETQ4 and explained the park. Reads only; nothing was written.",
   touched:["run_01K5RN8F3J2GHY6T","apr_01K5RN9T4","mnd_7K2ETQ4"], started:"09:34:12", sealed:"09:34:31"}));
-RUNS.push(asstRun({id:"run_01K3F8Q1AA", op:"priya", ws:"core-platform", turn:4, steps:14, frames:52, cost:"0.0501",
+ASST_RUNS.push(asstRun({id:"run_01K3F8Q1AA", op:"priya", ws:"core-platform", turn:4, steps:14, frames:52, cost:"0.0501",
   cache:0.44, task:"onboarding", taskTitle:"Assistant turn · first run onboarding",
   summary:"Created the Anderson Intelligence Corp. organization and the core-platform workspace through create_org and create_workspace, then waited for the first frame from a wrapped agent.",
   touched:["a-intel","core-platform"], started:"2026-08-26 09:13:02", sealed:"2026-08-26 09:21:50"}));
@@ -10411,7 +10422,7 @@ var ASST_CONVOS={
     {p:'That points the harness’s base URL at the model proxy and its MCP client at this workspace’s tool gateway. Both seams are what earn a run <b>gateway</b> tier. Nothing about the tier is claimed; it is computed from what actually routed.'}]},
    {role:"ox", t:"09:21", run:"run_01K3F8Q1AA", blocks:[
     {status:{tone:"allowed", text:"First frame received. Mission Control is open."}},
-    {p:'Turns like this one are runs of the in-app agent, recorded like any other run and never billed.'}]}
+    {p:'Turns like this one are runs of the in-app agent: recorded like any other run, never billed, and not listed in Fleet. The in-app agent is Oxagen’s, not one of your agents.'}]}
   ];
  }}
 };
@@ -10459,7 +10470,7 @@ var ASST_REPLIES={
    task:"core-platform", taskTitle:"Assistant turn · read the fleet", summary:"Read list_runs and get_run to answer a question. Reads only; nothing was written.",
    touched:["core-platform"], started:"09:38:01", sealed:"09:38:09"},
   blocks:function(){
-   var w=S.ws, rs=RUNS.filter(function(r){var s=runStatus(r);return r.ws===w&&r.agent!==ASST_KEY&&(s==="live"||s==="parked");});
+   var w=S.ws, rs=RUNS.filter(function(r){var s=runStatus(r);return r.ws===w&&(s==="live"||s==="parked");});
    var top=rs.slice().sort(function(a,b){return parseFloat(b.cost)-parseFloat(a.cost);})[0];
    return [
    top?{p:'Of the '+rs.length+' live or parked run'+(rs.length===1?'':'s')+' in <b>'+h(w)+'</b>, '+asstRunLink(top.id)+' is the most expensive at <b>'+usd(top.cost)+'</b>: <code>'+h(top.agent)+'</code>, turn '+top.turn+', '+top.steps+' steps, operator '+h(PEOPLE[top.op].name)+', on '+h(top.task)+'.'}
@@ -11090,7 +11101,7 @@ SCENARIOS["assistant-and-account"]={title:"The assistant, and whose account it i
    setup:function(){S.asst=true;S.asstEngine="up";S.asstConvo="why";},
    act:["Add org owners as approvers","asstReply('approvers')"]},
   {say:"Marcus asked it to narrow triage’s belt, then to grant a tool and cap a run. Each change is an action card with the decision, the rule and a receipt.",
-   note:"The turn bar under each reply is the run that turn opened: tokens, cache, cost, gateway tier, and billed $0.00, because in-app agent runs are free.",
+   note:"The turn bar under each reply is the run that turn opened: tokens, cache, cost, gateway tier, and billed $0.00, because in-app agent runs are free. It opens by id from here or from a receipt; it is not in Fleet, because the in-app agent is Oxagen’s and not one of your agents.",
    route:function(o){return {page:"fleet",org:o,ws:"core-platform"};},
    setup:function(){S.asst=true;S.asstEngine="up";S.asstConvo="grant";},
    act:["Open receipt rcp_01K5RTB4Q","openDialog('receipt','rcp_01K5RTB4Q')"]},
@@ -13674,7 +13685,7 @@ document.addEventListener("click",function(e){
     if(k==="repo")return pick(wsRepos);
     return pick(FILL[k]||["—"]);});}
   var TOUCH=["src/{x}.ts","packages/{x}/index.ts","docs/{x}.md","migrations/{n}_{x}.sql","infra/{x}.tf","models/{x}.sql","app/{x}.tsx"];
-  var runIds={}; RUNS.forEach(function(r){runIds[r.id]=1;});
+  var runIds={}; RUNS.concat(ASST_RUNS).forEach(function(r){runIds[r.id]=1;}); /* a generated id must not shadow an assistant run either */
   var genRuns=[];
   WS.forEach(function(w){
     var ag=perWsAgents[w.slug], n=Math.round(w.agents*4.2), pre=WSX[w.slug].pre, byW=ag.map(function(a){return [a,Math.max(1,a.runs30)];});

@@ -77,6 +77,32 @@ const scn = await page.evaluate(async () => {
 });
 ok(scn.on && scn.offAfter, "scenario rail shows on a scenario route and is gone after leaving", scn);
 
+// --- the in-app agent's turns are recorded but not the tenant's runs (issue #11) --------
+// Fleet's rows and its "Spend, runs shown" tile are read from the DOM, ASST_RUNS from the data,
+// so the three can disagree. Each assistant run must still open by id, as a receipt would open it.
+const asst = await page.evaluate(async () => {
+  const out = { seeded: ASST_RUNS.length, inRuns: RUNS.filter(r => r.agent === ASST_KEY).map(r => r.id), listed: [], tiles: [] };
+  for (const ws of [...new Set(ASST_RUNS.map(r => r.ws))]) {
+    S.runFilter = null; location.hash = "#/a-intel/" + ws;
+    await new Promise(r => setTimeout(r, 60));
+    // the list controls page the table at 10 rows; the tile sums every run listed, so show them all
+    const per = document.querySelector(".lt-per");
+    if (per) { per.value = "0"; per.dispatchEvent(new Event("change", { bubbles: true })); }
+    const rows = [...document.querySelectorAll(".tw tbody tr")].filter(tr => tr.querySelector(".tid"));
+    rows.forEach(tr => { if (tr.querySelector(".tkey")?.textContent === ASST_KEY) out.listed.push(ws + " " + tr.querySelector(".tid").textContent); });
+    const tile = [...document.querySelectorAll(".stat")].find(t => t.querySelector(".k")?.textContent === "Spend, runs shown");
+    const sum = rows.reduce((a, tr) => a + parseFloat(tr.querySelector("td.num").textContent.replace(/[^0-9.]/g, "")), 0);
+    out.tiles.push({ ws, rows: rows.length, tile: tile ? parseFloat(tile.querySelector(".v").textContent.replace(/[^0-9.]/g, "")) : null, sum: +sum.toFixed(2) });
+  }
+  out.opens = ASST_RUNS.map(r => run(r.id) === r && !!r.summary);
+  location.hash = "#/a-intel/core-platform"; await new Promise(r => setTimeout(r, 60));
+  return out;
+});
+ok(asst.seeded > 0 && asst.inRuns.length === 0, "no run of the in-app agent is in RUNS (" + asst.seeded + " live in ASST_RUNS)", asst.inRuns);
+ok(asst.listed.length === 0, "Fleet lists no run of the in-app agent", asst.listed);
+ok(asst.tiles.length > 0 && asst.tiles.every(t => t.rows > 0 && t.tile !== null && Math.abs(t.tile - t.sum) < 0.006), "Fleet's spend tile equals the sum of the rows shown", asst.tiles);
+ok(asst.opens.length === asst.seeded && asst.opens.every(Boolean), "every assistant run still resolves by id for receipts and turn bars", asst.opens);
+
 // --- governance: a run's tool calls are calls its agent's belt could make -------------
 // Two independent records: the calls runMetrics shows (drawn from TOOLPOOL, or recorded frames)
 // against AGENT_BELTS + the BELT decision + the TOOLS registry.
@@ -96,7 +122,7 @@ ok(gov.pool.length === 0, "every TOOLPOOL tool is on its agent's belt, registere
 ok(gov.checked > 0 && gov.runs.length === 0, "every run's tool calls are ones its agent's belt could make (" + gov.checked + " runs)", gov.runs);
 
 // --- every run page: six instruments, prompt, calls panel, and the numbers agree ------
-const runs = await page.evaluate(() => RUNS.map(r => ({ id: r.id, ws: r.ws })));
+const runs = await page.evaluate(() => RUNS.concat(ASST_RUNS).map(r => ({ id: r.id, ws: r.ws })));
 ok(runs.length > 0, "RUNS is not empty", runs.length);
 for (const run of runs) {
   const r = await page.evaluate(async ({ id, ws }) => {
@@ -104,7 +130,7 @@ for (const run of runs) {
     S.tab.run = "player";
     location.hash = "#/a-intel/" + (ws || "core-platform") + "/runs/" + id;
     await new Promise(res => setTimeout(res, 40));
-    const R = RUNS.find(x => x.id === id), m = runMetrics(R);
+    const R = run(id), m = runMetrics(R);
     const tiles = [...document.querySelectorAll(".inst-grid .inst")];
     const tileText = k => tiles.find(t => t.querySelector(".k")?.textContent === k)?.querySelector(".iv")?.textContent || "";
     const light = /haiku|flash|light/i.test(R.model || "");
