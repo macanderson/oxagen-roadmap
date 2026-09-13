@@ -6498,6 +6498,463 @@ function pTools(){
 }
 
 /* ============================== Ontology ============================== */
+/* The class map, as_of and the ask box (W7). The ontology literals above are extended here by
+   statement: a schema and a map position per class, the class-to-class edges (ONTREL), the pol_v41
+   rules that name a class (ONTRULES), and what each merged version lacked (absent) and held (scale).
+   Every count on the page is read from these, so the map, the tiles and the side panel cannot disagree. */
+S.ontAsOf=null; S.ontSel=null; S.ontView="map"; S.ontQ="q1"; S.ontHop2=false;
+(function(){
+  var css=
+   '.ont-mapw{overflow-x:auto;max-width:100%;border:1px solid var(--border);border-radius:10px;background:var(--void)}'+
+   '.ont-map{display:block;width:100%;min-width:720px;height:auto}'+
+   '.ont-map .ob{fill:none;stroke:var(--border);stroke-dasharray:4 4}'+
+   '.ont-map .ol{fill:var(--dim);font:600 10px var(--mono);letter-spacing:.06em}'+
+   '.ont-map path.oe{stroke:var(--rule);stroke-width:1.4;fill:none;transition:opacity .12s}'+
+   '.ont-map path.oe.lit{stroke:var(--fg);stroke-width:2}'+
+   '.ont-map marker path{fill:var(--muted)}'+
+   '.ont-map .dim{opacity:.22}'+
+   '.ont-map .on{cursor:pointer;transition:opacity .12s}'+
+   '.ont-map .on:focus{outline:none}'+
+   '.ont-map .on rect.nb{fill:var(--panel);stroke:var(--rule);stroke-width:1.2}'+
+   '.ont-map .on:hover rect.nb{stroke:var(--muted)}'+
+   '.ont-map .on.sel rect.nb{stroke:var(--fg);stroke-width:2}'+
+   '.ont-map .on:focus-visible rect.nb{stroke:var(--st-approval);stroke-width:2.4}'+
+   '.ont-map .nm{fill:var(--fg);font:600 13px var(--font)}'+
+   '.ont-map .ct{fill:var(--muted);font:11px var(--mono)}'+
+   '.ont-map .el{display:none;pointer-events:none}.ont-map .el.lit{display:inline}'+
+   '.ont-map .el rect{fill:var(--ink);stroke:var(--border)}.ont-map .el text{fill:var(--fg);font:10px var(--mono)}'+
+   '.ont-side{border:1px solid var(--border);border-radius:10px;padding:13px 14px;background:var(--panel);min-width:0}'+
+   '.ont-side h3{margin:0;font-size:15px}'+
+   '.ont-side ul{list-style:none;margin:0;padding:0;display:grid;gap:6px;font-size:12px}'+
+   '.ont-side li .mono{font-size:10.5px;color:var(--dim)}'+
+   '.ont-asof{background:var(--ink);border:1px solid var(--border);border-radius:7px;padding:4px 8px;font-size:12px;color:var(--fg);font-family:var(--mono);max-width:100%}'+
+   '.ont-bad{display:inline-block;width:100%;background:color-mix(in srgb,var(--st-denied) 20%,transparent)}'+
+   '.ont-frame{border:1px solid var(--border);border-radius:9px;padding:9px 11px;display:grid;gap:5px;font-size:12px;background:var(--ink)}'+
+   '.ont-frame .fm{display:flex;flex-wrap:wrap;gap:4px 12px;font-family:var(--mono);font-size:10.5px;color:var(--dim)}'+
+   '.ont-meter{height:7px;border-radius:4px;background:var(--hl);overflow:hidden;border:1px solid var(--border)}'+
+   '.ont-meter i{display:block;height:100%;background:var(--st-allowed)}.ont-meter i.over{background:var(--st-denied)}.ont-meter i.wait{background:var(--st-approval)}';
+  var st=document.createElement("style"); st.textContent=css; document.head.appendChild(st);
+})();
+
+var ONT_W=150, ONT_H=50;
+var ONTSCHEMAS={github:"github · builtin",data_layer:"data_layer · code graph",sales_crm:"sales_crm · acme_prod",fleet_ops:"fleet_ops · acme_prod, Linear"};
+var ONTLAYOUT={Repository:["github",95,72],PullRequest:["github",295,72],Issue:["github",295,192],Symbol:["github",95,192],
+ Table:["data_layer",95,352],Customer:["sales_crm",545,72],Contract:["sales_crm",795,72],Ticket:["fleet_ops",545,262],Device:["fleet_ops",795,262]};
+var ONTPROPS={
+ Repository:[["full_name","string · natural key"],["production_branch","string"],["role","enum main|linked"],["issues_enabled","bool"]],
+ PullRequest:[["number","int · natural key"],["state","enum"],["base_branch","string"],["merged_at","datetime"]],
+ Issue:[["number","int · natural key"],["title","string"],["state","enum"],["labels","string[]"]],
+ Symbol:[["qualified_name","string · natural key"],["kind","enum"],["signature","string"],["file","path"]],
+ Customer:[["billing_email","string · natural key"],["name","string"],["region","enum"],["health_score","float"],["csm","principal"]],
+ Contract:[["contract_number","string · natural key"],["tier","enum"],["starts_at","date"],["ends_at","date"],["acv_usd","money"]],
+ Device:[["serial","string · natural key"],["model","enum"],["firmware","version"],["shipped_at","date"]],
+ Ticket:[["key","string · natural key"],["status","enum"],["priority","enum"],["opened_at","datetime"]],
+ Table:[["schema+name","string · natural key"],["row_estimate","int"],["data_class","enum pii|financial|regulated|none"]]
+};
+CLASSES.forEach(function(c){var l=ONTLAYOUT[c.n]||["github",95,72]; c.schema=l[0]; c.x=l[1]; c.y=l[2]; c.props=ONTPROPS[c.n]||[];});
+/* Class-to-class relation types. A relation in a class's rel list that is not here points at
+   something the map does not draw as a class (a branch, a file, a person). */
+var ONTREL=[
+ {a:"Repository",b:"PullRequest",n:"HAS_PULL_REQUEST",card:"1:n"},
+ {a:"PullRequest",b:"Issue",n:"CLOSES_ISSUE",card:"n:n"},
+ {a:"Symbol",b:"Table",n:"READS",card:"n:n"},
+ {a:"Symbol",b:"Table",n:"WRITES",card:"n:n"},
+ {a:"Customer",b:"Contract",n:"SIGNED_CONTRACT",card:"1:n"},
+ {a:"Contract",b:"Customer",n:"BILLS_TO",card:"n:1"},
+ {a:"Customer",b:"Device",n:"OWNS_DEVICE",card:"1:n"},
+ {a:"Customer",b:"Ticket",n:"RAISED_TICKET",card:"1:n"},
+ {a:"Ticket",b:"Device",n:"ABOUT_DEVICE",card:"n:1"}
+];
+/* The pol_v41 rules whose subject is a class. A rule can name more than one. */
+var ONTRULES=[
+ {id:"rg_0101",t:"Change a repository's production branch → org owner + approval",cls:["Repository"]},
+ {id:"rg_0102",t:"Delete or archive a repository → denied",cls:["Repository"]},
+ {id:"rg_0103",t:"Push to the production branch → witness required",cls:["Repository"]},
+ {id:"rg_0104",t:"Open a pull request on a linked repository → allowed",cls:["Repository","PullRequest"]},
+ {id:"rg_0105",t:"Merge a pull request → approval + witness flip",cls:["PullRequest"]},
+ {id:"rg_0106",t:"Force-push a pull request branch → denied",cls:["PullRequest"]},
+ {id:"rg_0107",t:"Close an issue from a pull request → allowed on merge only",cls:["PullRequest","Issue"]},
+ {id:"rg_0108",t:"Approve your own pull request → denied",cls:["PullRequest"]},
+ {id:"rg_0109",t:"Pull request that alters a financial table → approval",cls:["PullRequest","Table"]},
+ {id:"rg_0110",t:"Comment on an issue → allowed; close it → approval",cls:["Issue"]},
+ {id:"rg_0111",t:"Issue that names a customer → PII redacted before embedding",cls:["Issue","Customer"]},
+ {id:"rg_0112",t:"Call whose resolved effect writes a financial table → approval",cls:["Symbol","Table"]},
+ {id:"rg_0113",t:"Hand-edit a generated symbol → denied",cls:["Symbol"]},
+ {id:"rg_0114",t:"Write to customers.billing_email → approval",cls:["Customer"]},
+ {id:"rg_0115",t:"Delete a customer → denied",cls:["Customer"]},
+ {id:"rg_0116",t:"Customer region is never embedded",cls:["Customer"]},
+ {id:"rg_0117",t:"Join a contract's financial columns to a customer → approval",cls:["Contract","Customer"]},
+ {id:"rg_0118",t:"Mutate a contract → mandate required",cls:["Contract"]},
+ {id:"rg_0119",t:"Write a contract tier → denied to agents",cls:["Contract"]},
+ {id:"rg_0120",t:"Read acv_usd → allowed; write it → denied",cls:["Contract"]},
+ {id:"rg_0121",t:"Export contracts → receipt",cls:["Contract"]},
+ {id:"rg_0122",t:"Change a renewal date → approval",cls:["Contract"]},
+ {id:"rg_0123",t:"Contract rows written outside the ledger sync → denied",cls:["Contract","Table"]},
+ {id:"rg_0124",t:"Fleet command to a device → approval",cls:["Device"]},
+ {id:"rg_0125",t:"Ticket about a device with an open critical → escalate to a person",cls:["Ticket","Device"]},
+ {id:"rg_0126",t:"Write to a table classed financial → mandate",cls:["Table"]},
+ {id:"rg_0127",t:"Truncate a table → denied",cls:["Table"]},
+ {id:"rg_0128",t:"DDL outside a migration → denied",cls:["Table"]},
+ {id:"rg_0129",t:"Table nothing references → finding",cls:["Table"]},
+ {id:"rg_0130",t:"Read a table classed PII → receipt",cls:["Table"]}
+];
+/* What each version lacked and how much of today's graph it held. v16 predates Device, Ticket (v17) and Table (v18). */
+ONTVERSIONS.forEach(function(v){ v.absent=v.v==="v17"?["Table"]:[]; v.scale=v.v==="v17"?0.93:1; });
+ONTVERSIONS.push({v:"v16",state:"superseded",commit:"2c7d9a1",at:"2026-07-14 16:03",by:"Priya Natarajan",pr:"acme/platform#402",
+ diff:"+2 classes (Customer, Contract) from acme_prod, +2 relations",absent:["Device","Ticket","Table"],scale:0.71});
+/* Linear also feeds Customer: the account record carries health and CSM. */
+SOURCES.forEach(function(s){ if(s.kind==="linear"&&s.entities.indexOf("Customer")<0) s.entities+=", Customer"; });
+/* Repositories: GitHub's default branch, and issue import progress where import is enabled. */
+REPOS.forEach(function(r){
+  r.defaultBranch="main";
+  r.imp=r.n==="acme/platform"?{done:3907,total:3907}:r.n==="acme/billing"?{done:812,total:1204}:null;
+  r.confirmed=r.n==="acme/mobile"?"Marcus Bell · 2026-07-02":r.n==="acme/billing"?"Priya Natarajan · 2026-07-14":"Marcus Bell · 2026-06-18";
+});
+var ONTDRIFT=[
+ {obj:"public.invoices",repo:"acme/platform",decl:"Drizzle · db/schema/invoices.ts:12",conf:"high",
+  finding:'code references <span class="mono">tax_rate_id</span>, the live database has no such column',fix:"Apply the migration that adds it, or drop the field from the model."},
+ {obj:"public.devices",repo:"acme/platform",decl:"migrations/0044_devices.sql",conf:"high",
+  finding:'migration 0044 is not applied to <span class="mono">acme_prod</span>',fix:"Apply migration 0044 to acme_prod, or revert it on main."},
+ {obj:"s3://acme-exports",repo:"acme/platform",decl:"Terraform · infra/storage.tf:34",conf:"medium",
+  finding:"observed access from run_01K5RM1A with no static edge",fix:"Offer the observed edge to the ontology as a proposal."},
+ {obj:"public.legacy_sessions",repo:"acme/mobile",decl:"schema.sql:881",conf:"low",
+  finding:"table exists and nothing in the repository references it",fix:"Candidate for removal. Open an issue rather than a drop."}
+];
+var ONT_MATCH=0.82, ONT_PAIRS=7, ONT_BUDGET=50000;
+/* One entity, walked back to the rows that made it and out to its typed neighbours. Paths are relation
+   names; the class at each hop is read off ONTREL, so a path the ontology does not have cannot render. */
+var ONTENT={id:"ent_01K2X7M4",cls:"Customer",name:"Northwind Logistics",
+ records:[
+  {src:"postgres:acme_prod.customers#4471",digest:"sha256:d40c…8b17",sync:"2026-09-11T07:29:04Z",fields:"name, billing_email, region",run:"syn_9f18"},
+  {src:"linear:ACME/customer/NWL",digest:"sha256:41ab…2d90",sync:"2026-09-11T07:58:12Z",fields:"health_score, csm",run:"syn_9f20"},
+  {src:"github:acme/platform#issue/2211",digest:"sha256:c70d…4a13",sync:"2026-09-11T08:09:40Z",fields:"mention · “Northwind” matched in the issue body",run:"evt_8f21c04e"}],
+ hop1:[{p:["SIGNED_CONTRACT"],name:"CT-2024-0188",sub:"enterprise · ends 2026-10-24"},
+  {p:["OWNS_DEVICE"],name:"212 devices",sub:"NWL-RX-0301 … NWL-RX-0512"},
+  {p:["RAISED_TICKET"],name:"7 tickets",sub:"2 open"}],
+ hop2:[{p:["RAISED_TICKET","ABOUT_DEVICE"],name:"NWL-RX-0442",sub:"RX-4 · shipped 2026-07-19 · named by 3 tickets"},
+  {p:["OWNS_DEVICE","ABOUT_DEVICE"],name:"ACME-8812, ACME-8840",sub:"open tickets about devices Northwind owns"}]};
+var ONTQ=[
+ {id:"q1",label:"Enterprise tickets on new devices",verdict:"ran",
+  q:"Which customers on an enterprise contract raised a ticket about a device that shipped in the last quarter?",
+  labels:["Customer","Contract","Ticket","Device"],
+  cypher:["MATCH (c:Customer)-[:SIGNED_CONTRACT]->(k:Contract)","WHERE k.tier = 'enterprise'",
+   "MATCH (c)-[:RAISED_TICKET]->(t:Ticket)-[:ABOUT_DEVICE]->(d:Device)","WHERE d.shipped_at >= date('2026-07-01')"],
+  injected:"  AND c.ws = $ws AND k.ws = $ws AND t.ws = $ws AND d.ws = $ws",
+  tail:["RETURN c.name, k.tier, count(t) AS tickets","ORDER BY tickets DESC LIMIT 50"],
+  plan:{est:8204,ms:214},conf:0.86,cost:"0.0041",basis:"price book v22 · 3,180 input + 412 output tokens",
+  rows:[["Northwind Logistics","enterprise",7,"ent_01K2X7M4 ← acme_prod.customers#4471"],
+   ["Helio Freight","enterprise",4,"ent_01K2X8Q1 ← acme_prod.customers#5102"],
+   ["Bastion Mining","enterprise",2,"ent_01K2X9R7 ← acme_prod.customers#5518"]],
+  frames:[
+   {kind:"fact",label:"Customer",title:"Northwind Logistics",id:"ent_01K2X7M4",body:"Customer · NA-EAST · health 0.62 · CSM Dana Okafor",
+    src:"postgres:acme_prod.customers#4471",digest:"sha256:d40c…8b17",tokens:118,from:"2026-09-11T07:29Z"},
+   {kind:"fact",label:"Contract",title:"CT-2024-0188",id:"ent_01K2XA02",body:"Contract · tier enterprise · starts 2024-10-24 · ends 2026-10-24",
+    src:"postgres:acme_prod.contracts#1188",digest:"sha256:7b01…9c55",tokens:96,from:"2026-09-11T07:29Z"},
+   {kind:"fact",label:"Ticket",title:"ACME-8812 · arm calibration loop",id:"ent_01K2XB7T",body:"Ticket · open · priority urgent · about NWL-RX-0442",
+    src:"linear:ACME/ticket/8812",digest:"sha256:aa41…6e02",tokens:141,from:"2026-09-08T14:02Z"},
+   {kind:"fact",label:"Device",title:"NWL-RX-0442",id:"ent_01K2XC4D",body:"Device · RX-4 · firmware 4.2.1 · shipped 2026-07-19",
+    src:"postgres:acme_prod.devices#22107",digest:"sha256:3c9e…41d0",tokens:88,from:"2026-09-11T07:29Z"},
+   {kind:"graph",label:"subgraph",title:"3 customers → their tickets → devices",id:"",body:"SIGNED_CONTRACT, RAISED_TICKET, ABOUT_DEVICE · hop budget 3, used 2",
+    src:"graph:core-platform",digest:"sha256:31c8…de71",tokens:204,from:"2026-09-11T07:29Z"}]},
+ {id:"q2",label:"A question that writes",verdict:"write",
+  q:"Delete the tickets we closed as duplicates last quarter",
+  labels:["Ticket"],
+  reason:"Write clause refused at parse",
+  detail:"The compiler produced a DETACH DELETE. query_graph accepts MATCH, OPTIONAL MATCH, WHERE, WITH, RETURN, ORDER BY, SKIP, LIMIT and UNWIND, and nothing else reaches the database. The parser refused it before the graph service was called.",
+  cypher:["MATCH (t:Ticket)","WHERE t.closed_reason = 'duplicate' AND t.closed_at >= date('2026-04-01')","DETACH DELETE t"],bad:2,
+  cost:"0.0028",basis:"price book v22 · 2,104 input + 96 output tokens · compile only, nothing executed",
+  next:"Deleting entities is not a question. Retire them from Sources, which is a governed action with a receipt."},
+ {id:"q3",label:"A question past budget",verdict:"budget",
+  q:"For every symbol in every repository, list every table it has ever read",
+  labels:["Symbol","Table"],
+  reason:"Plan exceeds the node budget",
+  cypher:["MATCH (s:Symbol)-[r:READS]->(t:Table)","WHERE r.valid_from IS NOT NULL","RETURN s.qualified_name, collect(DISTINCT t.name) AS tables"],
+  plan:{est:4182900,ms:31},
+  cost:"0.0033",basis:"price book v22 · 2,480 input + 142 output tokens · plan only, nothing executed",
+  next:"Narrow it: name a repository, a package, or an as_of window. Scoped to acme/billing the estimate is 41,200 rows."}
+];
+
+function ontActive(){for(var i=0;i<ONTVERSIONS.length;i++){if(ONTVERSIONS[i].state==="active")return ONTVERSIONS[i];}return ONTVERSIONS[0];}
+function ontVer(){for(var i=0;i<ONTVERSIONS.length;i++){if(ONTVERSIONS[i].v===S.ontAsOf)return ONTVERSIONS[i];}return ontActive();}
+function ontPast(){return ontVer().state!=="active";}
+function ontNum(v){return parseInt(String(v.v).slice(1),10)||0;}
+function ontMerged(){return ONTVERSIONS.filter(function(v){return v.state==="active"||v.state==="superseded";}).sort(function(a,b){return ontNum(b)-ontNum(a);});}
+function ontVisible(){var ab=ontVer().absent||[]; return CLASSES.filter(function(c){return ab.indexOf(c.n)<0;});}
+function ontCount(c){return Math.round((c.ents||0)*(ontVer().scale||1));}
+function ontRelsVisible(){var on={}; ontVisible().forEach(function(c){on[c.n]=1;}); return ONTREL.filter(function(r){return on[r.a]&&on[r.b];});}
+function ontRelsOf(n){return ontRelsVisible().filter(function(r){return r.a===n||r.b===n;});}
+function ontRulesOf(n){return ONTRULES.filter(function(r){return r.cls.indexOf(n)>=0;});}
+function ontSourcesOf(n){return SOURCES.filter(function(s){return String(s.entities).split(",").map(function(x){return x.trim();}).indexOf(n)>=0;});}
+function ontStale(n){return ontSourcesOf(n).some(function(s){return s.health!=="ok";});}
+function ontRelTypesIn(list){var seen={},out=[]; list.forEach(function(c){String(c.rel||"").split(",").forEach(function(r){r=r.trim(); if(r&&!seen[r]){seen[r]=1;out.push(r);}});}); return out;}
+function ontPolicy(){for(var i=0;i<POLICIES.length;i++){if(POLICIES[i].state==="active")return POLICIES[i].v;}return "";}
+function ontSetAsOf(v){
+  S.ontAsOf=(!v||v===ontActive().v)?null:v;
+  if(S.ontSel&&(ontVer().absent||[]).indexOf(S.ontSel)>=0) S.ontSel=null;
+  render();
+}
+/* The date picker answers with the version that was in force on that day. */
+function ontAsOfDate(d){
+  var m=ontMerged(), pick=m[m.length-1];
+  for(var i=m.length-1;i>=0;i--){ if(m[i].at.slice(0,10)<=d) pick=m[i]; }
+  ontSetAsOf(pick.v);
+}
+function ontPick(n){
+  var prev=S.ontSel; S.ontSel=(n&&n!==S.ontSel)?n:null; render();
+  var f=n||prev, g=f&&document.querySelector('.ont-map [data-cls="'+f+'"]');
+  if(g&&g.focus) g.focus({preventScroll:true});
+}
+function ontKey(e,n){
+  if(e.key==="Enter"||e.key===" "){e.preventDefault();ontPick(n);}
+  else if(e.key==="Escape"&&S.ontSel){e.preventDefault();e.stopPropagation();ontPick(null);}
+}
+/* Hover and focus light a class's edges without a render, so the pointer never loses its place. */
+function ontHi(n){
+  var m=document.querySelector(".ont-map"); if(!m) return;
+  n=n||S.ontSel||null; var near={};
+  m.querySelectorAll("[data-e]").forEach(function(e){
+    var a=e.getAttribute("data-a"), b=e.getAttribute("data-b"), t=!!n&&(a===n||b===n);
+    if(t&&e.tagName.toLowerCase()==="path"){near[a]=1;near[b]=1;}
+    e.classList.toggle("lit",t); e.classList.toggle("dim",!!n&&!t);
+  });
+  m.querySelectorAll("[data-cls]").forEach(function(g){var k=g.getAttribute("data-cls"); g.classList.toggle("dim",!!n&&k!==n&&!near[k]);});
+}
+function ontPicker(){
+  var cur=ontVer().v;
+  return '<select class="ont-asof" aria-label="as_of: ontology version" onchange="ontSetAsOf(this.value)">'+
+   ontMerged().map(function(v){return '<option value="'+h(v.v)+'"'+(v.v===cur?' selected':'')+'>'+
+    (v.state==="active"?'as_of now · '+h(v.v):'as_of '+h(v.at.slice(0,10))+' · '+h(v.v))+'</option>';}).join("")+'</select>';
+}
+function ontBanner(){
+  if(!ontPast()) return "";
+  var v=ontVer(), a=ontActive(), n=(v.absent||[]).length;
+  return '<div class="banner" role="status" data-ont-banner style="margin-bottom:14px"><span class="b b-approval"><span class="d"></span>as_of '+h(v.at.slice(0,10))+'</span>'+
+   '<span class="grow"><b>You are looking at ontology '+h(v.v)+' at '+h(v.commit)+', merged in '+h(v.pr)+'</b>'+
+   (n?n+' class'+(n===1?' that exists':'es that exist')+' in '+h(a.v)+' did not exist yet ('+h(v.absent.join(", "))+'); ':'')+
+   'entity counts are what the graph held then.</span>'+
+   '<button class="btn sm" onclick="ontSetAsOf(null)">Back to now</button></div>';
+}
+
+function ontAnchor(a,b){
+  var dx=b.x-a.x, dy=b.y-a.y, hw=ONT_W/2+5, hh=ONT_H/2+5;
+  var sx=dx?Math.abs(hw/dx):Infinity, sy=dy?Math.abs(hh/dy):Infinity, s=Math.min(sx,sy);
+  return {x:a.x+dx*s,y:a.y+dy*s};
+}
+function ontMap(vis){
+  var by={}; vis.forEach(function(c){by[c.n]=c;});
+  var rels=ontRelsVisible(), sel=S.ontSel&&by[S.ontSel]?S.ontSel:null, near={};
+  rels.forEach(function(r){ if(sel&&(r.a===sel||r.b===sel)){near[r.a]=1;near[r.b]=1;} });
+  var boxes=Object.keys(ONTSCHEMAS).map(function(sc){
+    var ns=vis.filter(function(c){return c.schema===sc;}); if(!ns.length) return "";
+    var xs=ns.map(function(c){return c.x;}), ys=ns.map(function(c){return c.y;}), pad=16;
+    var x1=Math.min.apply(null,xs)-ONT_W/2-pad, x2=Math.max.apply(null,xs)+ONT_W/2+pad;
+    var y1=Math.min.apply(null,ys)-ONT_H/2-pad-14, y2=Math.max.apply(null,ys)+ONT_H/2+pad;
+    return '<rect class="ob" x="'+x1+'" y="'+y1+'" width="'+(x2-x1)+'" height="'+(y2-y1)+'" rx="12"/>'+
+     '<text class="ol" x="'+(x1+11)+'" y="'+(y1+16)+'">'+h(ONTSCHEMAS[sc])+'</text>';
+  }).join("");
+  var pairN={}, pairI={};
+  rels.forEach(function(r){var k=[r.a,r.b].sort().join("|"); pairN[k]=(pairN[k]||0)+1;});
+  var edges="", labels="";
+  rels.forEach(function(r){
+    var k=[r.a,r.b].sort().join("|"), i=pairI[k]=(pairI[k]===undefined?0:pairI[k]+1), n=pairN[k];
+    var p=by[k.split("|")[0]], q=by[k.split("|")[1]], dx=q.x-p.x, dy=q.y-p.y, len=Math.sqrt(dx*dx+dy*dy)||1;
+    var off=(i-(n-1)/2)*12, nx=-dy/len*off, ny=dx/len*off;
+    var A=by[r.a], B=by[r.b], a={x:A.x+nx,y:A.y+ny}, b={x:B.x+nx,y:B.y+ny};
+    var p1=ontAnchor(a,b), p2=ontAnchor(b,a), lit=!!sel&&(r.a===sel||r.b===sel), dim=!!sel&&!lit;
+    var attrs=' data-e="'+h(r.n)+'" data-a="'+h(r.a)+'" data-b="'+h(r.b)+'"';
+    edges+='<path class="oe'+(lit?' lit':'')+(dim?' dim':'')+'"'+attrs+' marker-end="url(#ont-arr)" d="M'+p1.x.toFixed(1)+' '+p1.y.toFixed(1)+' L'+p2.x.toFixed(1)+' '+p2.y.toFixed(1)+'"/>';
+    /* Parallel labels stack across a mostly horizontal edge and spread along a mostly vertical one. */
+    var flat=Math.abs(p2.x-p1.x)>Math.abs(p2.y-p1.y), t=(n>1&&!flat)?0.32+0.36*i/(n-1):0.5;
+    var mx=p1.x+(p2.x-p1.x)*t, my=p1.y+(p2.y-p1.y)*t+((n>1&&flat)?ny*1.6:0), w=r.n.length*6.3+12;
+    labels+='<g class="el'+(lit?' lit':'')+'"'+attrs+'><rect x="'+(mx-w/2).toFixed(1)+'" y="'+(my-8).toFixed(1)+'" width="'+w.toFixed(1)+'" height="16" rx="4"/>'+
+     '<text x="'+mx.toFixed(1)+'" y="'+(my+3.5).toFixed(1)+'" text-anchor="middle">'+h(r.n)+'</text></g>';
+  });
+  var nodes=vis.map(function(c){
+    var x=c.x-ONT_W/2, y=c.y-ONT_H/2, isSel=c.n===sel, dim=!!sel&&!isSel&&!near[c.n], stale=ontStale(c.n);
+    var kinds=[]; ontSourcesOf(c.n).forEach(function(s){if(kinds.indexOf(s.kind)<0)kinds.push(s.kind);});
+    var pips=kinds.map(function(k,i){return '<rect x="'+(x+ONT_W-16-i*11)+'" y="'+(y+ONT_H-15)+'" width="8" height="8" rx="2" fill="var(--dim)"><title>'+h(k)+'</title></rect>';}).join("");
+    var nRel=ontRelsOf(c.n).length, cnt=ontCount(c);
+    return '<g class="on'+(isSel?' sel':'')+(dim?' dim':'')+'" data-cls="'+h(c.n)+'" tabindex="0" role="button" aria-pressed="'+isSel+'"'+
+     ' aria-label="'+h(c.n)+', '+cnt.toLocaleString()+' entities, '+nRel+' relation'+(nRel===1?'':'s')+' on the map'+(stale?', stale':'')+'"'+
+     ' onclick="ontPick(\''+h(c.n)+'\')" onkeydown="ontKey(event,\''+h(c.n)+'\')" onmouseenter="ontHi(\''+h(c.n)+'\')" onmouseleave="ontHi()" onfocus="ontHi(\''+h(c.n)+'\')" onblur="ontHi()">'+
+     '<rect class="nb" x="'+x+'" y="'+y+'" width="'+ONT_W+'" height="'+ONT_H+'" rx="9"/>'+
+     '<circle cx="'+(x+13)+'" cy="'+(y+16)+'" r="3.6" fill="var('+(ontPast()?'--dim':stale?'--st-approval':'--st-allowed')+')"><title>'+(ontPast()?'as held at '+h(ontVer().v):stale?'a source feeding it is degraded · fresh '+h(c.fresh):'fresh '+h(c.fresh))+'</title></circle>'+
+     '<text class="nm" x="'+(x+24)+'" y="'+(y+20)+'">'+h(c.n)+'</text>'+
+     '<text class="ct" x="'+(x+13)+'" y="'+(y+39)+'">'+cnt.toLocaleString()+' entities</text>'+pips+'</g>';
+  }).join("");
+  return '<svg class="ont-map" viewBox="0 0 900 420" role="group" aria-label="Class map for '+h(ws().name)+' at ontology '+h(ontVer().v)+': '+vis.length+' classes, '+rels.length+' relations">'+
+   '<defs><marker id="ont-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1L9 5L0 9z"/></marker></defs>'+
+   boxes+edges+nodes+labels+'</svg>';
+}
+function ontSide(vis){
+  var c=null; vis.forEach(function(x){if(x.n===S.ontSel)c=x;});
+  if(!c){
+    var top=vis.slice().sort(function(a,b){return b.cited-a.cited;}).slice(0,3), dr=vis.filter(function(x){return x.drift;});
+    return '<aside class="ont-side" aria-label="Class detail"><h3>Consequence</h3>'+
+     '<p class="muted" style="font-size:12.5px;margin:8px 0 12px">Hover or focus a class to light its relations. Select one, by click or Enter, to read its properties, its relations, and the rules that name it.</p>'+
+     '<p class="eyebrow q">Most cited by agents</p><dl class="kv">'+top.map(function(x){return '<dt>'+h(x.n)+'</dt><dd class="mono">'+x.cited.toLocaleString()+' retrievals</dd>';}).join("")+'</dl>'+
+     '<div class="hr"></div><p class="eyebrow q">Drift found</p>'+
+     (dr.length?'<dl class="kv">'+dr.map(function(x){return '<dt>'+h(x.n)+'</dt><dd>'+x.drift+'</dd>';}).join("")+'</dl>':'<p class="dim" style="margin:0;font-size:12px">none</p>')+
+     '</aside>';
+  }
+  var rels=ontRelsOf(c.n), rules=ontRulesOf(c.n), srcs=ontSourcesOf(c.n), stale=ontStale(c.n);
+  var outside=String(c.rel||"").split(",").map(function(x){return x.trim();}).filter(function(x){
+    return x&&!ONTREL.some(function(r){return r.n===x&&(r.a===c.n||r.b===c.n);});});
+  return '<aside class="ont-side" aria-label="Class detail: '+h(c.n)+'" data-ont-side="'+h(c.n)+'">'+
+   '<div class="row" style="align-items:flex-start"><div style="min-width:0"><h3>'+h(c.n)+'</h3>'+
+    '<div class="mono dim" style="font-size:11px;margin-top:3px">'+h(ONTSCHEMAS[c.schema]||c.schema)+'</div></div>'+
+    '<button class="btn sm ghost" style="margin-left:auto" aria-label="Close the class detail" onclick="ontPick(null)">Close</button></div>'+
+   '<dl class="kv" style="margin-top:11px">'+
+    '<dt>Entities</dt><dd class="mono">'+ontCount(c).toLocaleString()+(ontPast()?' <span class="dim">at '+h(ontVer().v)+'</span>':'')+'</dd>'+
+    '<dt>Freshness</dt><dd>'+(ontPast()?'<span class="dim">as held at '+h(ontVer().at.slice(0,10))+'</span>':
+      '<span class="b b-'+(stale?'approval':'allowed')+'"><span class="d"></span>'+(stale?'stale':'fresh')+' · '+h(c.fresh)+'</span>')+'</dd>'+
+    '<dt>Sources</dt><dd style="font-size:12px">'+srcs.map(function(s){return h(s.n)+(s.health!=="ok"?' <span class="b b-approval">'+h(s.health)+'</span>':'');}).join("<br>")+'</dd>'+
+    '<dt>Cited by</dt><dd>'+c.cited.toLocaleString()+' agent retrievals</dd>'+
+    '<dt>Proven runs</dt><dd>'+c.proven+'</dd>'+
+    '<dt>Drift</dt><dd>'+(c.drift?'<span class="b b-critical"><span class="d"></span>'+c.drift+'</span>':'<span class="dim">none</span>')+'</dd></dl>'+
+   '<div class="hr"></div><p class="eyebrow q">Properties · '+c.props.length+'</p>'+
+   '<dl class="kv" style="font-size:11.5px">'+c.props.map(function(p){return '<dt class="mono">'+h(p[0])+'</dt><dd class="mono dim">'+h(p[1])+'</dd>';}).join("")+'</dl>'+
+   '<div class="hr"></div><p class="eyebrow q">Relations on the map · <span data-ont-relcount>'+rels.length+'</span></p>'+
+   (rels.length?'<ul>'+rels.map(function(r){var out=r.a===c.n, other=out?r.b:r.a;
+     return '<li><span class="mono" style="color:var(--fg);font-size:11px">'+h(r.n)+'</span> '+(out?'→':'←')+' '+
+      '<button class="btn sm ghost" style="padding:1px 6px" onclick="ontPick(\''+h(other)+'\')">'+h(other)+'</button> <span class="mono">'+h(r.card)+'</span></li>';}).join("")+'</ul>'
+    :'<p class="dim" style="margin:0;font-size:12px">None at '+h(ontVer().v)+'.</p>')+
+   (outside.length?'<p class="dim" style="font-size:11.5px;margin:8px 0 0">Also relates to things the map does not draw as classes: <span class="mono">'+h(outside.join(", "))+'</span></p>':'')+
+   '<div class="hr"></div><p class="eyebrow q">Rules that name it · '+h(ontPolicy())+' · <span data-ont-rulecount>'+rules.length+'</span></p>'+
+   (rules.length?'<ul data-ont-rules>'+rules.map(function(r){return '<li><span class="mono">'+h(r.id)+'</span><br>'+h(r.t)+'</li>';}).join("")+'</ul>'
+    :'<p class="dim" style="margin:0;font-size:12px">No rule names it; the workspace default governs it.</p>')+
+   '<div class="row" style="margin-top:13px"><button class="btn sm" onclick="S.tab.ontology=\'graph\';render()">Explore instances</button>'+
+   '<button class="btn sm" onclick="openDialog(\'ontprop\')">Propose a change</button></div></aside>';
+}
+
+function ontCy(lines,bad){
+  return lines.map(function(ln,i){
+    var s=h(ln).replace(/'([^']*)'/g,'<span class="s">\'$1\'</span>')
+     .replace(/\b(OPTIONAL MATCH|MATCH|WHERE|WITH|RETURN|ORDER BY|SKIP|LIMIT|UNWIND|AND|AS|DESC|DISTINCT|DETACH DELETE|IS NOT NULL)\b/g,'<span class="k">$1</span>');
+    return bad!=null&&i===bad?'<span class="ont-bad">'+s+'</span>':s;
+  }).join("\n");
+}
+function ontQ(){for(var i=0;i<ONTQ.length;i++){if(ONTQ[i].id===S.ontQ)return ONTQ[i];}return ONTQ[0];}
+/* A question is compiled against the ontology in force at as_of: a label that version lacks refuses it. */
+function ontVerdict(q){
+  var ab=ontVer().absent||[], miss=q.labels.filter(function(l){return ab.indexOf(l)>=0;});
+  if(miss.length) return {v:"labels",miss:miss};
+  return {v:q.verdict};
+}
+function ontAsk(){
+  var q=ontQ(), vd=ontVerdict(q);
+  if(vd.v==="ran") act('Compiled, parsed, scoped and EXPLAINed within the node budget. '+q.rows.length+' rows, '+q.frames.length+' context frames cited.');
+  else act('Refused before it reached the database: '+(vd.v==="labels"?'ontology '+ontVer().v+' has no '+vd.miss.join(" or ")+' class.':q.reason.toLowerCase()+'.'));
+}
+function ontAnswer(){
+  var q=ontQ(), vd=ontVerdict(q), v=ontVer();
+  var picks='<div class="seg" role="group" aria-label="Recorded questions" style="flex-wrap:wrap">'+ONTQ.map(function(x){
+    return '<button class="btn sm" aria-pressed="'+(x.id===q.id)+'" onclick="S.ontQ=\''+x.id+'\';render()">'+h(x.label)+'</button>';}).join("")+'</div>';
+  var ask='<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Ask in plain English</h3>'+
+   '<span class="b b-q" style="margin-left:auto">query_graph · read-only role · recorded as frames</span></div><div class="panel-b">'+
+   picks+
+   '<div class="field" style="margin:12px 0"><input value="'+h(q.q)+'" aria-label="Ask the graph" readonly></div>'+
+   '<div class="row"><button class="btn" onclick="ontAsk()">Ask</button>'+
+   '<span class="mono dim" style="font-size:11px">as_of '+(ontPast()?h(v.at.slice(0,10))+' · '+h(v.v):'now')+' · hops ≤ 3 · nodes ≤ '+ONT_BUDGET.toLocaleString()+'</span></div>';
+  var kvBase='<dt>Compiler</dt><dd class="mono" style="font-size:11px">complex tier · via OpenRouter</dd>'+
+   '<dt>Ontology version</dt><dd class="mono">'+h(v.v)+' @ '+h(v.commit)+'</dd>';
+  if(vd.v==="ran"){
+    var tok=q.frames.reduce(function(n,f){return n+f.tokens;},0), pct=Math.min(100,q.plan.est/ONT_BUDGET*100);
+    return ask+'<div class="hr"></div><p class="eyebrow q">The Cypher it produced — parsed, never trusted as written</p>'+
+     '<pre>'+ontCy(q.cypher)+'\n<span class="c">// injected by the graph service, never left to the model:</span>\n'+h(q.injected).replace(/\bAND\b/g,'<span class="k">AND</span>')+'\n'+ontCy(q.tail)+'</pre>'+
+     '<dl class="kv" style="margin-top:13px"><dt>Accepted clauses only</dt><dd class="mono" style="font-size:11px">MATCH, OPTIONAL MATCH, WHERE, WITH, RETURN, ORDER BY, SKIP, LIMIT, UNWIND</dd>'+
+     '<dt>EXPLAIN plan</dt><dd>'+q.plan.est.toLocaleString()+' estimated rows of '+ONT_BUDGET.toLocaleString()+' · accepted in '+q.plan.ms+' ms<div class="ont-meter" style="margin-top:5px"><i style="width:'+pct.toFixed(1)+'%"></i></div></dd>'+
+     kvBase+'<dt>Compiler confidence</dt><dd>'+q.conf+' — <span class="dim">the compiler’s, labelled as such</span></dd>'+
+     '<dt>Cost</dt><dd class="mono">'+usd(q.cost)+' <span class="dim" style="font-size:11px">'+h(q.basis)+'</span></dd></dl></div></div>'+
+     '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Answer · '+q.rows.length+' rows</h3><span class="b b-allowed" style="margin-left:auto"><span class="d"></span>ran on a read-only role</span></div>'+
+     '<div class="tw"><table data-lt="off"><thead><tr><th>Customer</th><th>Contract tier</th><th class="num">Tickets</th><th>Cited node</th></tr></thead><tbody>'+
+     q.rows.map(function(r){return '<tr><td>'+h(r[0])+'</td><td>'+h(r[1])+'</td><td class="num">'+r[2]+'</td><td class="mono dim" style="font-size:11px">'+h(r[3])+'</td></tr>';}).join("")+
+     '</tbody></table></div></div>'+
+     '<div class="panel" data-ont-frames><div class="panel-h"><h3>Cited context frames · '+q.frames.length+'</h3><span class="mono dim" style="margin-left:auto;font-size:11px">'+tok.toLocaleString()+' tokens</span></div>'+
+     '<div class="panel-b" style="display:grid;gap:9px">'+q.frames.map(function(f){
+       return '<div class="ont-frame" data-ont-frame data-src="'+h(f.src)+'" data-from="'+h(f.from)+'" data-tokens="'+f.tokens+'"><div class="row" style="gap:6px"><span class="b b-q">'+h(f.kind)+'</span><span class="b b-q">'+h(f.label)+'</span><b>'+h(f.title)+'</b>'+
+        (f.id?'<span class="mono dim" style="font-size:10.5px;margin-left:auto">'+h(f.id)+'</span>':'')+'</div>'+
+        '<div style="color:var(--body)">'+h(f.body)+'</div>'+
+        '<div class="fm"><span>'+h(f.src)+'</span><span>'+h(f.digest)+'</span><span>'+f.tokens+' tokens</span><span>valid_from '+h(f.from)+'</span></div></div>';}).join("")+
+     '<div class="note">The same frames a wrapped agent would receive, each recorded in this question’s run. Frames built from <span class="mono">acme_prod</span> carry that connector’s cursor as their valid_from.</div></div></div>';
+  }
+  var reason=vd.v==="labels"?'Labels not in ontology '+v.v:q.reason;
+  var detail=vd.v==="labels"?'The compiler grounds every label against the ontology in force at as_of. Ontology '+v.v+' has no '+vd.miss.join(" or ")+' class, so the question cannot be compiled against it.':
+   vd.v==="budget"?'EXPLAIN estimated '+q.plan.est.toLocaleString()+' rows against this role’s node budget of '+ONT_BUDGET.toLocaleString()+'. It was refused before it ran; the budget is a resource-scope setting on your role, not a timeout.':q.detail;
+  var next=vd.v==="labels"?'Go back to now, or ask about the classes '+v.v+' had.':q.next;
+  return ask+'</div></div>'+
+   '<div class="panel" data-ont-refusal="'+h(vd.v)+'" style="border-color:color-mix(in srgb,var(--st-denied) 45%,var(--border))"><div class="panel-h">'+
+   '<span class="b b-denied"><span class="d"></span>refused</span><h3>'+h(reason)+'</h3>'+
+   '<span class="mono dim" style="margin-left:auto;font-size:11px">nothing reached the database</span></div><div class="panel-b">'+
+   '<p style="margin:0 0 12px;font-size:13px;color:var(--body);max-width:74ch">'+h(detail)+'</p>'+
+   '<p class="eyebrow q">What the compiler produced'+(vd.v==="write"?' — the marked clause is why it stopped':'')+'</p>'+
+   '<pre>'+ontCy(q.cypher,vd.v==="write"?q.bad:null)+'</pre>'+
+   '<dl class="kv" style="margin-top:13px">'+
+   (vd.v==="budget"?'<dt>EXPLAIN estimate</dt><dd class="mono" style="color:var(--st-denied)">'+q.plan.est.toLocaleString()+' rows · '+(q.plan.est/ONT_BUDGET).toFixed(1)+'× the budget'+
+     '<div class="ont-meter" style="margin-top:5px"><i class="over" style="width:100%"></i></div></dd>'+
+     '<dt>Node budget on your role</dt><dd class="mono">'+ONT_BUDGET.toLocaleString()+'</dd><dt>Planned in</dt><dd class="mono">'+q.plan.ms+' ms</dd>':'')+
+   kvBase+'<dt>Cost of the attempt</dt><dd class="mono">'+usd(q.cost)+' <span class="dim" style="font-size:11px">'+h(q.basis)+'</span></dd></dl>'+
+   '<div class="note" style="margin-top:13px"><b style="color:var(--fg)">What to do instead.</b> '+h(next)+'</div></div></div>';
+}
+function ontWalk(from,path){
+  var cur=from, arrows=[], on={}; ontVisible().forEach(function(c){on[c.n]=1;});
+  for(var i=0;i<path.length;i++){
+    var r=null; ONTREL.forEach(function(x){ if(!r&&x.n===path[i]&&(x.a===cur||x.b===cur)) r=x; });
+    if(!r) return null;
+    var out=r.a===cur; cur=out?r.b:r.a; if(!on[cur]) return null; arrows.push((out?'→ ':'← ')+r.n);
+  }
+  return {cls:cur,path:arrows.join(" ")};
+}
+function ontExplore(){
+  var e=ONTENT, rows=e.hop1.concat(S.ontHop2?e.hop2:[]).map(function(n){var w=ontWalk(e.cls,n.p); return w?{w:w,n:n,hop:n.p.length}:null;}).filter(Boolean);
+  var v=ontVer();
+  return '<div class="panel"><div class="panel-h"><h3>Explore instances</h3></div><div class="panel-b">'+
+   '<div class="field" style="margin:0"><input placeholder="Search entities, records, runs" aria-label="Search the graph"></div>'+
+   '<div class="row" style="margin-top:11px">'+ontVisible().map(function(c){return '<span class="b b-q">'+h(c.n)+'</span>';}).join("")+'</div>'+
+   '<div class="hr"></div><div class="row" style="gap:6px"><span class="b b-q">'+h(e.cls)+'</span><b>'+h(e.name)+'</b><span class="mono dim" style="font-size:10.5px">'+h(e.id)+'</span></div>'+
+   '<p class="eyebrow q" style="margin:11px 0 6px">Typed neighbours · hop '+(S.ontHop2?2:1)+' of 3 · <span data-ont-nb>'+rows.length+'</span> edges</p>'+
+   '<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Path</th><th>Class</th><th>Node</th></tr></thead><tbody>'+
+   rows.map(function(x){return '<tr><td class="mono" style="font-size:10.5px">'+h(x.w.path)+'</td><td class="mono dim" style="font-size:11px">'+h(x.w.cls)+'</td>'+
+    '<td style="font-size:12px"><b>'+h(x.n.name)+'</b><div class="dim" style="font-size:11px">'+h(x.n.sub)+'</div></td></tr>';}).join("")+
+   '</tbody></table></div>'+
+   '<div class="row" style="margin-top:10px"><button class="btn sm" aria-pressed="'+S.ontHop2+'" onclick="S.ontHop2=!S.ontHop2;render()">'+(S.ontHop2?'Collapse to hop 1':'Expand to hop 2')+'</button>'+
+   '<span class="mono dim" style="font-size:10.5px">expand_graph · relation types in '+h(v.v)+' only</span></div>'+
+   '<div class="hr"></div><p class="eyebrow q">as_of</p>'+
+   '<div class="field" style="margin:0"><input type="date" value="'+h(ontPast()?v.at.slice(0,10):"2026-09-11")+'" max="2026-09-11" aria-label="as of date" onchange="if(this.value)ontAsOfDate(this.value)"></div>'+
+   '<p class="dim" style="font-size:11.5px;margin:7px 0 0">Answers with the version in force that day: '+h(v.v)+'.</p></div></div>';
+}
+
+DLG_EXT.ontresolve=function(){
+  return {t:"Resolve entities",s:"1 of "+ONT_PAIRS+" candidate pairs below the match threshold",w:false,
+   b:'<p class="muted" style="margin:0 0 12px;font-size:12.5px">Two entities resolved to separate nodes below the confidence threshold. Merging keeps both source records and both provenance chains; nothing is discarded.</p>'+
+    '<div class="grid g2" style="gap:10px;margin-bottom:12px">'+
+    '<div class="stat"><span class="k">Survivor</span><span class="v" style="font-size:14px">'+h(ONTENT.name)+'</span><span class="s mono">'+h(ONTENT.id)+' · '+ONTENT.records.length+' source records</span></div>'+
+    '<div class="stat"><span class="k">Candidate</span><span class="v" style="font-size:14px">Northwind Logistics Inc.</span><span class="s mono">ent_01K2Y3P9 · 1 source record</span></div></div>'+
+    '<dl class="kv"><dt>Match confidence</dt><dd>0.79 <span class="dim">/ threshold '+ONT_MATCH+' — below, so it did not merge on its own</span></dd>'+
+    '<dt>Matched on</dt><dd class="mono" style="font-size:11px">name trigram + region; billing_email differs</dd>'+
+    '<dt>After the merge</dt><dd>'+(ONTENT.records.length+1)+' source records on the survivor</dd></dl>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Merged into '+ONTENT.id+'. '+(ONTENT.records.length+1)+' source records now on the survivor; a governed action with a receipt.\')">Merge entities</button>'};
+};
+DLG_EXT.ontbranch=function(repo){
+  var r=REPOS.filter(function(x){return x.n===repo;})[0]||REPOS[0];
+  return {t:"Set the production branch",s:r.n+" · GitHub’s default is "+r.defaultBranch,w:false,
+   b:'<p class="muted" style="margin:0 0 12px;font-size:12.5px">The production branch is the only branch whose commits update the code graph. Changing it re-indexes from that branch’s head.</p>'+
+    '<div class="field"><label>Production branch</label><select aria-label="Production branch">'+
+    ["main","release","production"].map(function(b){return '<option'+(b===r.branch?' selected':'')+'>'+b+(b===r.defaultBranch?' — GitHub’s default':'')+'</option>';}).join("")+'</select></div>'+
+    '<dl class="kv"><dt>Current binding</dt><dd class="mono">'+h(r.branch)+' · confirmed by '+h(r.confirmed)+'</dd><dt>Effect</dt><dd>full re-index · idempotent</dd></dl>'+
+    '<div class="note" style="margin-top:12px">Re-indexing archives symbols the full pass does not see, with the current commit as valid_to. Nothing is deleted; history stays queryable as_of.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Production branch for '+h(r.n)+' confirmed. Full re-index queued.\')">Confirm branch</button>'};
+};
+DLG_EXT.ontindex=function(name){
+  var i=INDEXES.filter(function(x){return x.n===name;})[0]||INDEXES[0];
+  return {t:"Upgrade an embedding index",s:i.n+" · "+i.state,w:false,
+   b:'<p class="muted" style="margin:0 0 12px;font-size:12.5px">A model upgrade is a migration, never a swap. The new index is built alongside and backfilled; retrieval cuts over only when the evaluation set is at least as good. A query never spans two models.</p>'+
+    '<dl class="kv"><dt>Index</dt><dd class="mono">'+h(i.n)+' · '+i.dims+' dims</dd><dt>Nodes to backfill</dt><dd class="mono">'+i.nodes.toLocaleString()+'</dd>'+
+    '<dt>Recall @ 10 today</dt><dd>'+per(i.recall)+'</dd><dt>Citation rate today</dt><dd>'+per(i.cite)+'</dd>'+
+    '<dt>Cut over when</dt><dd>recall @ 10 ≥ '+per(i.recall)+' on 412 (query, cited frames) pairs</dd></dl>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Building '+h(i.n)+' alongside. Cutover gated on the retrieval evaluation set.\')">Build alongside</button>'};
+};
+
 function pOntology(){
   var w=ws(), t=tab("ontology","model");
   if(S.state==="loading") return skeleton();
@@ -6508,81 +6965,68 @@ function pOntology(){
     '<button class="btn primary" onclick="openDialog(\'source\')">Add a source</button>'+
     '<button class="btn" onclick="openDialog(\'linkrepo\')">Link a repository</button>');
 
+  var vis=ontVisible(), ver=ontVer(), past=ontPast();
   var tabs='<div class="tabs" role="tablist">'+
-   [["model","Model",CLASSES.length],["graph","Graph"],["sources","Sources",SOURCES.length],
+   [["model","Model",vis.length],["graph","Graph"],["sources","Sources",SOURCES.length],
     ["repositories","Repositories",REPOS.length],["versions","Versions",ONTVERSIONS.length]]
    .map(function(x){return '<button class="tab" role="tab" aria-selected="'+(t===x[0])+'" onclick="S.tab.ontology=\''+x[0]+'\';render()">'+x[1]+(x[2]?'<span class="n">'+x[2]+'</span>':'')+'</button>';}).join("")+'</div>';
 
   var body="";
   if(t==="model"){
-    var cards=CLASSES.map(function(c){
+    var drift=vis.reduce(function(n,c){return n+(c.drift||0);},0), driftCls=vis.filter(function(c){return c.drift;}).map(function(c){return c.n;});
+    var ents=vis.reduce(function(n,c){return n+ontCount(c);},0);
+    var cards=vis.map(function(c){
       return '<div class="panel" style="padding:0"><div class="panel-b">'+
        '<div class="row" style="margin-bottom:8px"><b style="font-size:14px">'+h(c.n)+'</b>'+
        (c.builtin?'<span class="b b-q" style="font-size:10px">builtin</span>':'')+
        (c.drift?'<span class="b b-critical" style="margin-left:auto;font-size:10px"><span class="d"></span>'+c.drift+' drift</span>':'<span class="b b-allowed" style="margin-left:auto;font-size:10px"><span class="d"></span>clean</span>')+'</div>'+
-       '<div style="font-size:21px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.02em">'+c.ents.toLocaleString()+'</div>'+
-       '<div class="dim" style="font-size:11px;margin-bottom:9px">entities · fresh '+h(c.fresh)+'</div>'+
+       '<div style="font-size:21px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.02em">'+ontCount(c).toLocaleString()+'</div>'+
+       '<div class="dim" style="font-size:11px;margin-bottom:9px">entities · '+(past?'as held at '+h(ver.v):'fresh '+h(c.fresh))+'</div>'+
        '<dl class="kv" style="font-size:11.5px;gap:4px 10px">'+
        '<dt>Sources</dt><dd>'+h(c.src)+'</dd>'+
        '<dt>Most cited by</dt><dd>'+c.cited.toLocaleString()+' agent retrievals</dd>'+
-       '<dt>Rules referencing</dt><dd>'+c.rules+'</dd>'+
+       '<dt>Rules referencing</dt><dd>'+ontRulesOf(c.n).length+'</dd>'+
        '<dt>Proven runs</dt><dd>'+c.proven+'</dd>'+
-       '<dt>Relations</dt><dd class="mono" style="font-size:10.5px">'+h(c.rel)+'</dd></dl></div></div>';}).join("");
+       '<dt>Relations</dt><dd class="mono" style="font-size:10.5px">'+h(c.rel)+'</dd></dl>'+
+       '<button class="btn sm" style="margin-top:10px" onclick="S.ontView=\'map\';ontPick(\''+h(c.n)+'\')">Show on the map</button></div></div>';}).join("");
+    var map=S.ontView!=="cards";
     body='<div class="grid g4" style="margin-bottom:16px">'+
-     '<div class="stat"><span class="k">Classes</span><span class="v">'+CLASSES.length+'</span><span class="s">active version v18</span></div>'+
-     '<div class="stat"><span class="k">Entities</span><span class="v">'+ontEntities().toLocaleString()+'</span><span class="s">instances never go to git</span></div>'+
-     '<div class="stat"><span class="k">Relation types</span><span class="v">'+ontRelTypes().length+'</span><span class="s">one file per class and relation</span></div>'+
-     '<div class="stat"><span class="k">Drift found</span><span class="v">'+ontDrift()+'</span><span class="s">'+(ontDriftClasses().length?'across '+ontDriftClasses().join(', '):'none found')+'</span></div></div>'+
+     '<div class="stat"><span class="k">Classes</span><span class="v" data-ont-tile-classes>'+vis.length+'</span><span class="s">'+(past?'as_of '+h(ver.v)+' · active is '+h(ontActive().v):'active version '+h(ver.v))+'</span></div>'+
+     '<div class="stat"><span class="k">Entities</span><span class="v">'+ents.toLocaleString()+'</span><span class="s">'+(past?'what the graph held then':'instances never go to git')+'</span></div>'+
+     '<div class="stat"><span class="k">Relation types</span><span class="v">'+ontRelTypesIn(vis).length+'</span><span class="s">'+ontRelsVisible().length+' drawn between classes</span></div>'+
+     '<div class="stat"><span class="k">Drift found</span><span class="v">'+drift+'</span><span class="s">'+(driftCls.length?'across '+h(driftCls.join(', ')):'none found')+'</span></div></div>'+
      '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>The live map</h3>'+
-     '<div class="sp"><span class="b b-q">consequence shown on every class</span>'+
-     '<button class="btn sm" onclick="openDialog(\'ontprop\')">Open a proposal</button></div></div>'+
-     '<div class="panel-b"><div class="grid g3">'+cards+'</div></div></div>'+
+     '<div class="sp"><div class="seg" role="group" aria-label="Map or cards">'+
+      '<button class="btn sm" aria-pressed="'+map+'" onclick="S.ontView=\'map\';render()">Map</button>'+
+      '<button class="btn sm" aria-pressed="'+(!map)+'" onclick="S.ontView=\'cards\';render()">Cards</button></div>'+
+     ontPicker()+'<button class="btn sm" onclick="openDialog(\'ontprop\')">Open a proposal</button></div></div>'+
+     '<div class="panel-b">'+(map?
+      '<div class="split"><div style="min-width:0"><div class="ont-mapw">'+ontMap(vis)+'</div>'+
+      '<div class="row dim" style="font-size:11.5px;margin-top:9px;gap:6px 14px">'+
+       '<span class="row" style="gap:5px"><svg width="8" height="8" aria-hidden="true"><circle cx="4" cy="4" r="3.6" fill="var(--st-allowed)"/></svg>every source feeding it healthy</span>'+
+       '<span class="row" style="gap:5px"><svg width="8" height="8" aria-hidden="true"><circle cx="4" cy="4" r="3.6" fill="var(--st-approval)"/></svg>a source is degraded</span>'+
+       '<span>one pip per source kind</span><span>dashed box · schema</span>'+
+       '<span class="mono" style="margin-left:auto">'+vis.length+' classes · '+ontRelsVisible().length+' relations · '+h(ver.v)+'</span></div></div>'+
+      ontSide(vis)+'</div>'
+      :'<div class="grid g3">'+cards+'</div>')+'</div></div>'+
      '<div class="panel"><div class="panel-h"><h3>Embedding indexes</h3></div><div class="tw"><table>'+
      '<thead><tr><th>Index</th><th class="num">Dims</th><th class="num">Nodes</th><th class="num">Recall @ 10</th><th class="num">Citation rate</th><th>State</th><th></th></tr></thead><tbody>'+
      INDEXES.map(function(i){return '<tr><td class="tkey" style="font-size:12px">'+h(i.n)+'</td><td class="num">'+i.dims+'</td>'+
       '<td class="num">'+i.nodes.toLocaleString()+'</td><td class="num">'+per(i.recall)+'</td><td class="num">'+per(i.cite)+'</td>'+
       '<td><span class="b b-'+(i.state==="current"?"allowed":"approval")+'"><span class="d"></span>'+h(i.state)+'</span></td>'+
-      '<td>'+(i.state!=="current"?'<button class="btn sm" onclick="act(\'Upgrade gated on the retrieval evaluation set: 412 (query, cited frames) pairs.\')">Upgrade</button>':'')+'</td></tr>';}).join("")+
+      '<td>'+(i.state!=="current"?'<button class="btn sm" onclick="openDialog(\'ontindex\',\''+h(i.n)+'\')">Upgrade</button>':'')+'</td></tr>';}).join("")+
      '</tbody></table></div><div class="panel-b"><div class="note">Quality is measured, not assumed. Recall and citation rate come from every run’s <span class="mono">context_use_feedback</span> records; model, chunking, and reranker changes are gated on that set.</div></div></div>';
   } else if(t==="graph"){
-    body='<div class="split"><div>'+
-     '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Ask in plain English</h3>'+
-     '<span class="b b-q" style="margin-left:auto">query_graph · read-only role · recorded as frames</span></div>'+
-     '<div class="panel-b">'+
-      '<div class="field" style="margin-bottom:12px"><input value="Which customers on an enterprise contract raised a ticket about a device that shipped in the last quarter?" aria-label="Ask the graph"></div>'+
-      '<button class="btn" onclick="act(\'Compiled, parsed, injected, and EXPLAINed within the node budget. 14 nodes cited.\')">Ask</button>'+
-      '<div class="hr"></div><p class="eyebrow q">The Cypher it produced — parsed, never trusted as written</p>'+
-      '<pre><span class="k">MATCH</span> (c:Customer)-[:SIGNED_CONTRACT]-&gt;(k:Contract)\n'+
-      '<span class="k">WHERE</span> k.tier = <span class="s">\'enterprise\'</span>\n'+
-      '<span class="k">MATCH</span> (c)-[:RAISED_TICKET]-&gt;(t:Ticket)-[:ABOUT_DEVICE]-&gt;(d:Device)\n'+
-      '<span class="k">WHERE</span> d.shipped_at &gt;= date(<span class="s">\'2026-07-01\'</span>)\n'+
-      '<span class="c">// injected by the graph service, never left to the model:</span>\n'+
-      '  <span class="k">AND</span> c.ws = $ws <span class="k">AND</span> t.ws = $ws <span class="k">AND</span> d.ws = $ws\n'+
-      '<span class="k">RETURN</span> c.name, k.tier, count(t) <span class="k">AS</span> tickets\n'+
-      '<span class="k">ORDER BY</span> tickets <span class="k">DESC</span> <span class="k">LIMIT</span> 50</pre>'+
-      '<dl class="kv" style="margin-top:13px"><dt>Accepted clauses only</dt><dd class="mono" style="font-size:11px">MATCH, OPTIONAL MATCH, WHERE, WITH, RETURN, ORDER BY, SKIP, LIMIT, UNWIND</dd>'+
-      '<dt>EXPLAIN plan</dt><dd>8,204 estimated rows · node budget 50,000 · accepted</dd>'+
-      '<dt>Ontology version</dt><dd class="mono">v18 @ d91f30c</dd>'+
-      '<dt>Compiler confidence</dt><dd>0.86 — <span class="dim">the compiler’s, labelled as such</span></dd>'+
-      '<dt>Recorded as</dt><dd class="mono">question digest, Cypher digest, result digest — three frames</dd></dl></div></div>'+
-     '<div class="panel"><div class="panel-h"><h3>Answer · 14 nodes cited</h3></div><div class="tw"><table>'+
-     '<thead><tr><th>Customer</th><th>Contract tier</th><th class="num">Tickets</th><th>Cited node</th></tr></thead><tbody>'+
-     '<tr><td>Northwind Logistics</td><td>enterprise</td><td class="num">7</td><td class="mono dim" style="font-size:11px">ent_01K2X7M4 ← acme_prod.customers#4471</td></tr>'+
-     '<tr><td>Helio Freight</td><td>enterprise</td><td class="num">4</td><td class="mono dim" style="font-size:11px">ent_01K2X8Q1 ← acme_prod.customers#5102</td></tr>'+
-     '<tr><td>Bastion Mining</td><td>enterprise</td><td class="num">2</td><td class="mono dim" style="font-size:11px">ent_01K2X9R7 ← acme_prod.customers#5518</td></tr>'+
-     '</tbody></table></div></div></div>'+
+    body='<div class="split"><div style="min-width:0">'+ontAnswer()+'</div>'+
      '<div><div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>The four ways to ask</h3></div><div class="panel-b">'+
      '<ul class="chain"><li class="on"><span class="h">get_ontology</span><div>The shape before anything else. A planning model reads it the way it reads a schema.</div></li>'+
      '<li class="on"><span class="h">search_graph</span><div>Hybrid: vector + BM25, fused by reciprocal rank, reranked, cited.</div></li>'+
      '<li class="on"><span class="h">expand_graph</span><div>Typed traversal from seeds to a hop budget. No query generated.</div></li>'+
      '<li class="on"><span class="h">query_graph</span><div>Natural language compiled to Cypher, then parsed and injected.</div></li></ul>'+
      '<div class="note" style="margin-top:12px"><span class="mono">as_of</span> applies to all four. “What did we know about this account in June” is a query, not an export.</div></div></div>'+
-     '<div class="panel"><div class="panel-h"><h3>Explore instances</h3></div><div class="panel-b">'+
-     '<div class="field" style="margin:0"><input placeholder="Search entities, records, runs" aria-label="Search the graph"></div>'+
-     '<div class="row" style="margin-top:11px">'+CLASSES.slice(0,6).map(function(c){return '<span class="b b-q">'+h(c.n)+'</span>';}).join("")+'</div>'+
-     '<div class="hr"></div><p class="eyebrow q">as_of</p>'+
-     '<div class="field" style="margin:0"><input type="date" value="2026-09-11" aria-label="as of date"></div></div></div></div></div>';
+     ontExplore()+'</div></div>';
   } else if(t==="sources"){
+    var cust=CLASSES.filter(function(c){return c.n===ONTENT.cls;})[0];
     body='<div class="panel"><div class="panel-h"><h3>Sources</h3>'+
      '<button class="btn sm" style="margin-left:auto" onclick="openDialog(\'source\')">Add a source</button></div>'+
      '<div class="tw"><table><thead><tr><th>Source</th><th>Kind</th><th class="num">Source records</th><th>Last sync</th><th>Health</th><th>Cursor</th><th>Entities produced</th><th></th></tr></thead><tbody>'+
@@ -6597,64 +7041,74 @@ function pOntology(){
      '<div class="panel-b"><div class="warn"><b>The Postgres connector is degraded.</b> <span class="mono">acme_prod</span> answered 3 of the last 5 polls; the cursor has not moved past <span class="mono">2026-09-11T07:29Z</span>. '+
      'Customer, Contract, and Device entities are stale by 41 minutes and every context frame built from them carries that <span class="mono">valid_from</span>.</div></div></div>'+
      '<div class="grid g2" style="margin-top:14px">'+
-     '<div class="panel"><div class="panel-h"><h3>Entity provenance</h3></div><div class="panel-b">'+
-     '<p class="muted" style="font-size:12.5px">Every resolved entity is linked to the source records it came from. Nothing is materialized without provenance.</p>'+
-     '<pre>(:Entity:Customer {id: <span class="s">"ent_01K2X7M4"</span>})\n  -[:DERIVED_FROM]-&gt; (:SourceRecord {\n'+
-     '      connector: <span class="s">"postgres"</span>,\n      external_id: <span class="s">"acme_prod.customers#4471"</span>,\n'+
-     '      digest: <span class="s">"sha256:d40c…8b17"</span>,\n      sync_time: <span class="s">"2026-09-11T07:29:04Z"</span> })</pre></div></div>'+
+     '<div class="panel"><div class="panel-h"><h3>Entity provenance</h3><span class="b b-q" style="margin-left:auto">'+h(ONTENT.cls)+'</span></div><div class="panel-b">'+
+     '<p class="muted" style="font-size:12.5px;margin-top:0">Every resolved entity is linked to the source records it came from. Nothing is materialized without provenance; each property came from exactly one of these.</p>'+
+     '<p class="eyebrow q">'+h(ONTENT.name)+' · DERIVED_FROM · <span data-ont-records>'+ONTENT.records.length+'</span> source records</p>'+
+     '<pre>(:Entity:'+h(ONTENT.cls)+' {id: <span class="s">"'+h(ONTENT.id)+'"</span>})'+ONTENT.records.map(function(r){
+       return '\n  -[:DERIVED_FROM]-&gt; (:SourceRecord {\n      connector: <span class="s">"'+h(r.src.split(":")[0])+'"</span>,\n      external_id: <span class="s">"'+h(r.src.slice(r.src.indexOf(":")+1))+'"</span>,\n'+
+        '      digest: <span class="s">"'+h(r.digest)+'"</span>,\n      sync_time: <span class="s">"'+h(r.sync)+'"</span> })  <span class="c">// '+h(r.fields)+' · '+h(r.run)+'</span>';}).join("")+'</pre></div></div>'+
      '<div class="panel"><div class="panel-h"><h3>Resolution</h3></div><div class="panel-b"><dl class="kv">'+
      '<dt>Natural keys</dt><dd>email, URL, external id</dd>'+
-     '<dt>Model-assisted match</dt><dd>confidence threshold 0.82 — a workspace setting</dd>'+
-     '<dt>Resolved across sources</dt><dd>1,461 Customer entities from 2 sources</dd>'+
-     '<dt>Awaiting a human</dt><dd>7 candidate pairs below threshold</dd></dl>'+
-     '<button class="btn sm" style="margin-top:12px" onclick="act(\'7 candidate pairs opened for resolution.\')">Resolve entities</button></div></div></div>';
+     '<dt>Model-assisted match</dt><dd>confidence threshold '+ONT_MATCH+' — a workspace setting</dd>'+
+     '<dt>Resolved across sources</dt><dd>'+(cust?cust.ents.toLocaleString():"0")+' '+h(ONTENT.cls)+' entities from '+ontSourcesOf(ONTENT.cls).length+' sources</dd>'+
+     '<dt>Awaiting a human</dt><dd>'+ONT_PAIRS+' candidate pairs below threshold</dd></dl>'+
+     '<button class="btn sm" style="margin-top:12px" onclick="openDialog(\'ontresolve\')">Resolve entities</button></div></div></div>';
   } else if(t==="repositories"){
     body='<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Repositories</h3>'+
      '<button class="btn sm" style="margin-left:auto" onclick="openDialog(\'linkrepo\')">Link a repository</button></div>'+
      '<div class="tw"><table><thead><tr><th>Repository</th><th>Role</th><th>Production branch</th><th>Head</th><th>Indexed</th><th>Issues</th><th>Event health</th><th class="num">Symbols</th><th>Data-layer drift</th></tr></thead><tbody>'+
      REPOS.map(function(r){
+      var nd=ONTDRIFT.filter(function(d){return d.repo===r.n;}).length, off=r.branch!==r.defaultBranch;
+      var pct=r.imp?Math.round(r.imp.done/r.imp.total*100):0, importing=r.imp&&r.imp.done<r.imp.total;
       return '<tr><td class="tkey">'+h(r.n)+'</td>'+
        '<td>'+(r.role==="main"?'<span class="b b-proven"><span class="d"></span>main</span>':'<span class="b b-q">linked</span>')+'</td>'+
-       '<td class="mono">'+h(r.branch)+'</td><td class="mono dim">'+h(r.head)+'</td><td>'+h(r.indexed)+'</td>'+
-       '<td class="dim" style="font-size:11.5px">'+h(r.issues)+'</td>'+
+       '<td><span class="mono">'+h(r.branch)+'</span>'+(off?' <span class="b b-approval" data-ont-offdefault><span class="d"></span>not GitHub’s default</span>':'')+
+        '<div class="dim" style="font-size:11px">confirmed by '+h(r.confirmed)+'</div>'+
+        '<button class="btn sm ghost" style="margin-top:4px" aria-label="Set the production branch for '+h(r.n)+'" onclick="openDialog(\'ontbranch\',\''+h(r.n)+'\')">Change</button></td>'+
+       '<td class="mono dim">'+h(r.head)+'</td><td>'+h(r.indexed)+'</td>'+
+       '<td style="font-size:11.5px;min-width:130px">'+(r.imp?'<span class="mono">'+r.imp.done.toLocaleString()+' of '+r.imp.total.toLocaleString()+'</span> '+
+         (importing?'<span class="b b-approval"><span class="d"></span>importing '+pct+'%</span>':'<span class="dim">imported</span>')+
+         '<div class="ont-meter" style="margin-top:5px"><i class="'+(importing?'wait':'')+'" style="width:'+pct+'%"></i></div>'+
+         '<div class="dim" style="font-size:10.5px;margin-top:3px">'+(importing?'resumable · rate-limit aware':'events keep them current')+'</div>'
+        :'<span class="dim">disabled</span>')+'</td>'+
        '<td class="dim" style="font-size:11.5px">'+h(r.events)+'</td>'+
        '<td class="num">'+r.symbols.toLocaleString()+'</td>'+
-       '<td>'+(r.drift==="none"?'<span class="b b-allowed"><span class="d"></span>none</span>':'<span class="b b-critical"><span class="d"></span>'+h(r.drift)+'</span>')+'</td></tr>';}).join("")+
+       '<td>'+(!nd?'<span class="b b-allowed"><span class="d"></span>none</span>':'<span class="b b-critical"><span class="d"></span>'+nd+' finding'+(nd===1?'':'s')+'</span>')+'</td></tr>';}).join("")+
      '</tbody></table></div>'+
-     '<div class="panel-b"><div class="note">Only the production branch updates the code graph. Commits to other branches are recorded as commits; pull requests from feature branches are entities with their diff metadata, and nothing more.</div></div></div>'+
-     '<div class="grid g2">'+
-     '<div class="panel"><div class="panel-h"><h3>The data layer</h3>'+
-     '<span class="b b-critical" style="margin-left:auto"><span class="d"></span>4 findings</span></div><div class="tw"><table class="narrow">'+
+     '<div class="panel-b"><div class="note">Only the production branch updates the code graph. When it is not GitHub’s default the page says so, and the binding never moves on its own. Commits to other branches are recorded as commits; pull requests from feature branches are entities with their diff metadata, and nothing more.</div></div></div>'+
+     '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>The data layer</h3>'+
+     '<span class="b b-critical" style="margin-left:auto"><span class="d"></span>'+ONTDRIFT.length+' findings</span></div><div class="tw"><table class="narrow">'+
      '<thead><tr><th>Object</th><th>Declared by</th><th>Confidence</th><th>Finding</th></tr></thead><tbody>'+
-     '<tr><td class="mono" style="font-size:11.5px">public.invoices</td><td class="mono" style="font-size:11px">Drizzle · db/schema/invoices.ts:12</td><td><span class="b b-allowed">high</span></td>'+
-      '<td style="font-size:11.5px">code references <span class="mono">tax_rate_id</span>, the live database has no such column</td></tr>'+
-     '<tr><td class="mono" style="font-size:11.5px">public.devices</td><td class="mono" style="font-size:11px">migrations/0044_devices.sql</td><td><span class="b b-allowed">high</span></td>'+
-      '<td style="font-size:11.5px">migration 0044 is not applied to <span class="mono">acme_prod</span></td></tr>'+
-     '<tr><td class="mono" style="font-size:11.5px">public.legacy_sessions</td><td class="mono" style="font-size:11px">schema.sql:881</td><td><span class="b b-q">low</span></td>'+
-      '<td style="font-size:11.5px">table exists and nothing in the repository references it</td></tr>'+
-     '<tr><td class="mono" style="font-size:11.5px">s3://acme-exports</td><td class="mono" style="font-size:11px">Terraform · infra/storage.tf:34</td><td><span class="b b-approval">medium</span></td>'+
-      '<td style="font-size:11.5px">observed access from run_01K5RM1A with no static edge</td></tr>'+
+     ONTDRIFT.map(function(d){var cf={high:"allowed",medium:"approval",low:"q"}[d.conf]||"q";
+      return '<tr><td class="mono" style="font-size:11.5px">'+h(d.obj)+'<div class="dim" style="font-size:10.5px">'+h(d.repo)+'</div></td><td class="mono" style="font-size:11px">'+h(d.decl)+'</td>'+
+       '<td><span class="b b-'+cf+'">'+h(d.conf)+'</span></td>'+
+       '<td style="font-size:11.5px">'+d.finding+'<div class="dim" style="margin-top:4px"><b style="color:var(--body)">Fix:</b> '+h(d.fix)+'</div>'+
+       '<button class="btn sm ghost" style="margin-top:5px" onclick="openDialog(\'ontprop\')">Open a proposal</button></td></tr>';}).join("")+
      '</tbody></table></div><div class="panel-b"><p class="muted" style="font-size:12px;margin:0">'+
      'This is what lets policy say what no allowlist can: route to approval any tool call whose resolved effect is a write to a table classed financial, PII, or regulated — whichever code path performs it.</p></div></div>'+
-     '<div class="panel"><div class="panel-h"><h3>Events in</h3></div><div class="tw"><table class="narrow">'+
+     '<div class="grid g2"><div class="panel"><div class="panel-h"><h3>Events in</h3></div><div class="tw"><table class="narrow">'+
      '<thead><tr><th>Event</th><th class="num">30d</th><th>Health</th></tr></thead><tbody>'+
      [["push",1204,"ok"],["pull_request",3180,"ok"],["pull_request_review",2044,"ok"],["issues",1908,"ok"],
       ["issue_comment",2810,"ok"],["check_suite",4012,"ok"],["workflow_run",4012,"ok"],["release",38,"ok"],
       ["repository",2,"prompted the owner"],["installation",0,"ok"]]
      .map(function(e){return '<tr><td class="mono" style="font-size:11.5px">'+h(e[0])+'</td><td class="num">'+e[1].toLocaleString()+'</td>'+
-      '<td><span class="b b-'+(e[2]==="ok"?"allowed":"approval")+'"><span class="d"></span>'+h(e[2])+'</span></td></tr>';}).join("")+
+      '<td><span class="b b-'+(e[2]==="ok"?"allowed":"approval")+'"><span class="d"></span>'+h(e[2])+'</span></td>'+'</tr>';}).join("")+
      '</tbody></table></div><div class="panel-b"><div class="note">No polling and no cron. A missed delivery is detected from the events themselves: every push carries the previous head, and a mismatch fetches the compare range before the new push is processed.</div></div></div></div>';
   } else {
+    var ordered=ONTVERSIONS.slice().sort(function(a,b){return ontNum(b)-ontNum(a);});
     body='<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Versions — the git history of <span class="mono">.oxagen/ontology/</span></h3>'+
      '<div class="sp"><span class="b b-q">merge is activation · nothing activates any other way</span>'+
      '<button class="btn sm" onclick="openDialog(\'ontprop\')">Open a proposal</button></div></div>'+
-     '<div class="tw"><table><thead><tr><th>Version</th><th>State</th><th>Commit</th><th>Merged</th><th>By</th><th>Pull request</th><th>Diff against the pinned version</th></tr></thead><tbody>'+
-     ONTVERSIONS.map(function(v){
-      var sm={active:"proven","superseded":"q"};
-      return '<tr><td class="mono"><b>'+h(v.v)+'</b></td>'+
+     '<div class="tw"><table><thead><tr><th>Version</th><th>State</th><th>Commit</th><th>Merged</th><th>By</th><th>Pull request</th><th>Diff against the pinned version</th><th class="num">Classes</th><th></th></tr></thead><tbody>'+
+     ordered.map(function(v){
+      var sm={active:"proven","superseded":"q"}, merged=v.state==="active"||v.state==="superseded", viewing=merged&&v.v===ver.v;
+      return '<tr><td class="mono"><b>'+h(v.v)+'</b>'+(viewing&&past?' <span class="b b-approval" data-ont-viewing><span class="d"></span>viewing</span>':'')+'</td>'+
        '<td><span class="b b-'+(sm[v.state]||"approval")+'"><span class="d"></span>'+h(v.state)+'</span></td>'+
        '<td class="mono dim">'+h(v.commit)+'</td><td class="mono dim" style="font-size:11px">'+h(v.at)+'</td><td>'+h(v.by)+'</td>'+
-       '<td><a href="#">'+h(v.pr)+'</a></td><td style="font-size:12px">'+h(v.diff)+'</td></tr>';}).join("")+
+       '<td><a href="#" onclick="event.preventDefault()">'+h(v.pr)+'</a></td><td style="font-size:12px">'+h(v.diff)+'</td>'+
+       '<td class="num">'+(merged?CLASSES.length-(v.absent||[]).length:'—')+'</td>'+
+       '<td>'+(merged?(viewing?'<button class="btn sm" onclick="S.tab.ontology=\'model\';render()">Open the map</button>':
+         '<button class="btn sm" onclick="S.tab.ontology=\'model\';ontSetAsOf(\''+h(v.v)+'\')">View the map</button>'):'')+'</td></tr>';}).join("")+
      '</tbody></table></div></div>'+
      '<div class="split"><div class="panel"><div class="panel-h"><h3>Open proposal · <span class="mono">acme/platform#517</span></h3>'+
      '<span class="b b-approval" style="margin-left:auto"><span class="d"></span>checks running</span></div><div class="panel-b">'+
@@ -6680,14 +7134,13 @@ function pOntology(){
      .map(function(c){return '<tr><td style="font-size:12.5px">'+h(c[0])+'</td><td>'+
       (c[1]==="pass"?'<span class="b b-allowed"><span class="d"></span>pass</span>':'<span class="b b-approval"><span class="d"></span>running</span>')+'</td></tr>';}).join("")+
      '</tbody></table></div>'+
-     '<div class="hr"></div><p class="eyebrow q">as_of picker</p>'+
-     '<div class="field" style="margin:0"><select aria-label="Ontology version"><option>v18 · active · 2026-09-09</option><option>v17 · 2026-08-22</option><option>v16 · 2026-07-14</option></select></div>'+
-     '<p class="dim" style="font-size:11.5px;margin-top:9px">Prior versions stay queryable. The graph keeps every version indexed by digest.</p></div></div></div>';
+     '<div class="hr"></div><p class="eyebrow q">as_of picker</p>'+ontPicker()+
+     '<p class="dim" style="font-size:11.5px;margin-top:9px">Prior versions stay queryable, and the Model map redraws as it stood. The graph keeps every version indexed by digest.</p></div></div></div>';
   }
   return '<div class="phead"><div class="t"><p class="eyebrow">Workspace · '+h(w.name)+'</p><h1>Ontology</h1>'+
    '<p>This workspace’s model of its business. Every version is a commit in <span class="mono">.oxagen/ontology/</span> on '+h(w.main)+'; merge is activation, and nothing activates any other way.</p></div>'+
    '<div class="acts"><button class="btn" onclick="act(\'Full re-index of the production branch head queued. Idempotent.\')">Sync now</button>'+
-   '<button class="btn primary" onclick="openDialog(\'ontprop\')">Open a proposal</button></div></div>'+tabs+body;
+   '<button class="btn primary" onclick="openDialog(\'ontprop\')">Open a proposal</button></div></div>'+ontBanner()+tabs+body;
 }
 
 /* ============================== Steering ============================== */
@@ -8001,6 +8454,40 @@ var SCENARIOS={
 
 /* ---- end W6 ---- */
 /* ---- W7 · shape-of-your-business ---- */
+SCENARIOS["shape-of-your-business"]={title:"The shape of your business", ws:"core-platform",
+ blurb:"What kinds of things exist at Acme Robotics, how many of each the graph holds, where each came from, and which version of that model is in force.",
+ steps:[
+  {say:"This is Acme Robotics’ model of its business: "+CLASSES.length+" classes in "+Object.keys(ONTSCHEMAS).length+" schemas, with the relations between them drawn. Customer is selected, so its edges are lit and the panel names the rules that reference it.",
+   note:"Counts are the graph’s, live. Customer shows stale because the Postgres source feeding it is degraded. Hover any class to light its edges; Tab and Enter do the same by keyboard.",
+   route:function(o){return {page:"ontology",org:o,ws:"core-platform"};},
+   setup:function(){S.tab.ontology="model";S.ontView="map";S.ontAsOf=null;S.ontSel="Customer";},
+   act:["Select Contract","ontPick('Contract')"]},
+  {say:"Ask in plain English. The compiler writes Cypher, the parser accepts read clauses only, and the graph service adds the workspace predicate itself, so the model never gets the chance to leave it out.",
+   note:"The answer cites its context frames with digest, tokens and valid_from. Frames built from acme_prod carry that connector’s stuck cursor as their valid_from.",
+   route:function(o){return {page:"ontology",org:o,ws:"core-platform"};},
+   setup:function(){S.tab.ontology="graph";S.ontQ="q1";S.ontAsOf=null;S.ontHop2=false;},
+   act:["Expand to hop 2","S.ontHop2=true;render()"]},
+  {say:"A question that writes is refused at parse. The compiler produced a <span class=\"mono\">DETACH DELETE</span>; nothing reached the database.",
+   note:"Questions are untrusted text. The attempt still cost a compile, and the refusal says what it cost. The third question is refused on its EXPLAIN plan instead.",
+   route:function(o){return {page:"ontology",org:o,ws:"core-platform"};},
+   setup:function(){S.tab.ontology="graph";S.ontQ="q2";S.ontAsOf=null;},
+   act:["Ask the one past budget","S.ontQ='q3';render()"]},
+  {say:"Sources. The Postgres connector is degraded: its cursor has not moved past 07:29Z, and every Customer, Contract and Device frame says so.",
+   note:"Adding a source profiles it deterministically first. A model names what the profiler saw afterwards and never invents a class.",
+   route:function(o){return {page:"ontology",org:o,ws:"core-platform"};},
+   setup:function(){S.tab.ontology="sources";S.ontAsOf=null;},
+   act:["Add a source","openDialog('source')"]},
+  {say:"Repositories. acme/mobile ships from <span class=\"mono\">release</span>, not GitHub’s default, and the page says so rather than guessing. acme/billing is still importing its issues.",
+   note:"Linking confirms the production branch, subscribes to events, imports issues, then builds the code graph, each with its own status.",
+   route:function(o){return {page:"ontology",org:o,ws:"core-platform"};},
+   setup:function(){S.tab.ontology="repositories";S.ontAsOf=null;},
+   act:["Link a repository","openDialog('linkrepo')"]},
+  {say:"Versions are commits. An older as_of redraws the model as it stood: v16 predates "+ONTVERSIONS.filter(function(v){return v.v==="v16";})[0].absent.join(", ")+", and its counts are what the graph held then.",
+   note:"Merge is activation. A change is a pull request with checks, and nothing activates any other way.",
+   route:function(o){return {page:"ontology",org:o,ws:"core-platform"};},
+   setup:function(){S.tab.ontology="versions";S.ontAsOf="v16";S.ontSel=null;},
+   act:["Open a proposal","openDialog('ontprop')"]}
+ ]};
 
 /* ---- end W7 ---- */
 /* ---- W8 · every-dollar-every-operator ---- */
