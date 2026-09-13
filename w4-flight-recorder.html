@@ -1266,15 +1266,47 @@ button.edge:hover{color:var(--fg)}
 .lw-note{font-size:11px;color:var(--dim);margin:0 0 12px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 
 /* ---- agent scores: trust and spend, 0–1000, traffic-lit by band ---- */
-.sc{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:2px 7px 2px 6px;border-radius:6px;border:1px solid;white-space:nowrap;line-height:1.5;font-variant-numeric:tabular-nums}
-.sc i{width:7px;height:7px;border-radius:50%;background:currentColor;flex:none;box-shadow:0 0 0 2px color-mix(in srgb,currentColor 22%,transparent)}
-.sc b{font-family:var(--mono);font-weight:700}
+/* A score reads as a label and a number, nothing more. The number is the page's own text colour
+   unless the agent sits in a tail of the whole Oxagen population (scoreBand): top decile green,
+   below the tenth percentile amber, below the fifth red. Eight in ten agents carry no colour at all,
+   so a coloured number is the exception a reader's eye is meant to catch. Never a filled pill. */
+.sc{display:inline-flex;align-items:baseline;gap:4px;font-size:11px;font-weight:500;color:var(--dim);white-space:nowrap;line-height:1.5;font-variant-numeric:tabular-nums}
+.sc b{font-family:var(--mono);font-weight:700;font-size:12px;color:var(--scc,var(--fg))}
+.sc i{display:none;width:6px;height:6px;border-radius:50%;background:var(--scc);align-self:center;flex:none;box-shadow:0 0 0 2px color-mix(in srgb,var(--scc) 22%,transparent)}
+.sc-top i,.sc-warn i,.sc-low i{display:inline-block}
 .sc em{font-style:normal;font-weight:500;opacity:.7;font-size:10px}
-.sc.sm{font-size:10px;padding:0 5px 0 4px;gap:4px}
-.sc-good{color:var(--st-allowed);border-color:color-mix(in srgb,var(--st-allowed) 42%,transparent);background:color-mix(in srgb,var(--st-allowed) 11%,transparent)}
-.sc-avg{color:var(--gold);border-color:color-mix(in srgb,var(--gold) 45%,transparent);background:color-mix(in srgb,var(--gold) 12%,transparent)}
-.sc-bad{color:var(--st-failed);border-color:color-mix(in srgb,var(--st-failed) 42%,transparent);background:color-mix(in srgb,var(--st-failed) 11%,transparent)}
-.scs{display:inline-flex;gap:5px;flex-wrap:wrap;align-items:center}
+.sc.sm{font-size:10.5px;gap:3px} .sc.sm b{font-size:11.5px}
+.sc-top{--scc:var(--st-allowed)}
+.sc-warn{--scc:var(--gold)}
+.sc-low{--scc:var(--st-failed)}
+.scs{display:inline-flex;gap:12px;flex-wrap:nowrap;align-items:baseline}
+/* The agent card: the one way an agent identity is drawn, anywhere. Avatar, identity and the two
+   scores sit on one line in every layout; the identity block is the only part allowed to give way
+   (it ellipsises), the scores are flex:none, so they can never drop under the name however narrow
+   the host gets. Three layouts on one markup (agentCard()):
+     list     — a row among other agents: a table cell, a picker, a drill-down
+     compact  — one agent on a record that is about something else: a run, an approval, a mandate;
+                bordered so it reads as a card, and a link to the agent
+     detail   — the agent's own record: the key is the page title, the scores are the page's numbers */
+.agc{display:flex;align-items:center;gap:10px;flex-wrap:nowrap;min-width:0;color:inherit;text-decoration:none}
+.agc .agid{min-width:0;max-width:240px;display:flex;flex-direction:column;line-height:1.3}
+.agc .agid>*{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.agc .agid .sub{font-size:11.5px;color:var(--dim)}
+.agc>.scs{flex:none;margin-left:auto;padding-left:6px}
+.agc-compact{display:inline-flex;max-width:100%;padding:5px 11px 5px 6px;border:1px solid var(--border);border-radius:10px;background:var(--ink)}
+.agc-compact .agid{max-width:280px}
+a.agc-compact:hover{background:var(--hl)}
+.agc-compact>.scs{margin-left:4px}
+.agc-detail{gap:16px}
+.agc-detail .agid{max-width:none}
+.agc-detail .agid .tkey{font-size:20px;font-weight:600;line-height:1.2;color:var(--fg)}
+.agc-detail .agid .sub{font-size:12px;color:var(--muted)}
+.agc-detail>.scs{gap:18px;margin-left:0;padding-left:14px;align-self:center}
+.agc-detail .sc{font-size:12px} .agc-detail .sc b{font-size:20px} .agc-detail .sc i{width:8px;height:8px}
+#viewport.phone .agc-detail{flex-wrap:wrap} #viewport.phone .agc-detail>.scs{margin-left:0;padding-left:0;flex-basis:100%}
+/* Quirks mode: without a doctype, Chrome's UA sheet gives table a colour of its own instead of the
+   body's, so in dark mode every unclassed cell was black on black. Inherit it back. */
+table{color:inherit}
 .steer-list .check>.scs{flex:none;margin-left:6px}
 .scm{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:13px 15px}
 .scm-h{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:10px}
@@ -1282,9 +1314,10 @@ button.edge:hover{color:var(--fg)}
 .scm-h .dim{margin-left:auto;font-family:var(--mono);font-size:10.5px}
 .scm-bar{position:relative;height:8px;border-radius:5px;overflow:visible;display:flex;gap:2px}
 .scm-bar .z{height:100%;border-radius:3px;opacity:.5}
-.scm-bar .z.bad{flex:0 0 40%;background:var(--st-failed)}
-.scm-bar .z.avg{flex:0 0 30%;background:var(--gold)}
-.scm-bar .z.good{flex:1;background:var(--st-allowed)}
+.scm-bar .z.z-low{background:var(--st-failed)}
+.scm-bar .z.z-warn{background:var(--gold)}
+.scm-bar .z.z-mid{flex:1;background:var(--border);opacity:1}
+.scm-bar .z.z-top{background:var(--st-allowed)}
 .scm-bar .mk{position:absolute;top:-4px;width:3px;height:16px;border-radius:2px;background:var(--fg);transform:translateX(-50%);box-shadow:0 0 0 2px var(--panel)}
 .scm-lg{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--dim);margin-top:6px}
 .scm .kv{margin-top:10px;font-size:12px}
@@ -2781,7 +2814,7 @@ function avDescribe(av){
 function involved(R){
   var a=agent(R.agent), p=PEOPLE[R.op];
   return '<div class="inv">'+
-   (a?'<a class="inv-i" href="'+agentUrl(a)+'">'+agentAv(a,30)+'<span class="tx"><b>'+h(a.name)+'</b><span>'+h(a.key)+'</span></span></a>':'')+
+   (a?agentCard(a,{layout:"compact",sub:h(a.name)+' \u00b7 '+h(a.harnessLabel)}):'')+
    '<span class="inv-arrow">on behalf of →</span>'+
    (p?'<span class="inv-i">'+personAv(R.op,30)+'<span class="tx"><b>'+h(p.name)+'</b><span>operator · '+h(p.role)+'</span></span></span>':'')+'</div>';
 }
@@ -3872,7 +3905,7 @@ function pFleet(){
     var a=agent(r.agent);
     return '<tr class="click'+(r.verdict==="flipped"?' flipped':'')+'" onclick="go(\'#/'+ORG.slug+'/'+w.slug+'/runs/'+r.id+'\')">'+
      '<td><span class="tid">'+h(r.id)+'</span><div class="dim" style="font-size:11.5px">'+h(r.taskTitle)+'</div></td>'+
-     '<td><div class="row" style="gap:9px;flex-wrap:nowrap">'+agentAv(a,26)+'<div style="min-width:0"><span class="tkey">'+h(r.agent)+'</span><div class="dim" style="font-size:11.5px">'+h(a?a.harnessLabel:"")+'</div>'+(a?scorePair(a,true):'')+'</div></div></td>'+
+     '<td>'+agentCard(a,{key:r.agent})+'</td>'+
      '<td><span class="row" style="gap:7px;flex-wrap:nowrap;white-space:nowrap">'+personAv(r.op,22)+h(PEOPLE[r.op].name)+'</span></td>'+
      '<td>'+statusBadge(runStatus(r))+'</td>'+
      '<td>'+tierBadge(r.tier)+'</td>'+
@@ -4070,7 +4103,7 @@ function approvalCard(a){
    '<div class="aphead"><div style="min-width:0">'+
     '<p class="eyebrow" style="margin-bottom:6px">'+(done?'Approval '+h(st.status):'Approval required')+' · governed action</p>'+
     (a.amount?'<div class="amt">'+usd(a.amount)+'<span class="cur">'+h(a.currency)+'</span></div>':'<div class="amt" style="font-size:17px">'+h(a.tool)+'</div>')+
-    '<div class="row" style="margin-top:6px;gap:7px"><span class="mono" style="font-size:11.5px">'+h(a.agent)+'</span>'+scorePair(a.agent,true)+'</div>'+
+    '<div class="row" style="margin-top:6px;gap:7px">'+agentCard(a.agent,{layout:"compact",key:a.agent})+'</div>'+
     '<div class="muted" style="font-size:12.5px;margin-top:4px">'+(a.amount?'<span class="mono">'+h(a.tool)+'</span> → ':'')+'<span class="mono">'+h(a.counterparty)+'</span>'+
      (r?'<br>task <span class="mono">'+h(r.task)+'</span> '+h(r.taskTitle):'')+'</div>'+
     '<div class="row" style="margin-top:9px">'+riskBadge(a.risk)+
@@ -4225,9 +4258,9 @@ function pRun(r){
   var compacted=R.status==="compacted";
   var fr=FRAMES[Math.min(S.frame,FRAMES.length-1)], rs=runStatus(R);
 
-  var head='<div class="phead"><div class="t"><p class="eyebrow">Run · '+h(R.agent)+'</p>'+
+  var head='<div class="phead"><div class="t"><p class="eyebrow">Run</p>'+
    '<h1 class="mono" style="font-size:19px">'+h(R.id)+'</h1>'+
-   '<div class="row" style="margin-top:8px">'+statusBadge(rs)+tierBadge(R.tier)+gradeBadge(R.grade)+verdictBadge(R.verdict,R)+(a?scorePair(a,true):'')+
+   '<div class="row" style="margin-top:8px">'+agentCard(a||R.agent,{layout:"compact",key:R.agent})+statusBadge(rs)+tierBadge(R.tier)+gradeBadge(R.grade)+verdictBadge(R.verdict,R)+
    '<span class="b b-q">task '+h(R.task)+'</span></div>'+
    '<p style="margin-top:8px">'+h(R.taskTitle)+' · started '+h(R.started)+(R.sealed?' · sealed '+h(R.sealed):'')+'</p></div>'+
    '<div class="acts">'+
@@ -6648,8 +6681,7 @@ function pAgents(){
   var list=AGENTS.filter(function(a){return a.ws===w.slug;});
   var rows=list.map(function(a){
     return '<tr class="click" onclick="go(\'#/'+ORG.slug+'/'+w.slug+'/agents/'+a.key.split(".").pop()+'\')">'+
-     '<td><div class="row" style="gap:9px;flex-wrap:nowrap">'+agentAv(a,28)+'<div style="min-width:0"><span class="tkey">'+h(a.key)+'</span><div class="dim" style="font-size:11.5px">'+h(a.desc)+'</div></div></div></td>'+
-     '<td>'+scorePair(a,true)+'</td>'+
+     '<td>'+agentCard(a,{sub:h(a.desc)})+'</td>'+
      '<td>'+h(a.harnessLabel)+'<div class="dim mono" style="font-size:10.5px">'+h(a.harness)+'</div></td>'+
      '<td><span class="row" style="gap:7px;flex-wrap:nowrap;white-space:nowrap">'+personAv(a.operator,22)+h(PEOPLE[a.operator].name)+'</span></td>'+
      '<td><span class="b b-allowed"><span class="d"></span>'+h(a.status)+'</span></td>'+
@@ -6683,7 +6715,7 @@ function pAgents(){
    })()+'</div>'+
    '<div class="panel"><div class="panel-h"><h3>Registered in '+h(w.name)+'</h3>'+
    '<span class="mono dim" style="margin-left:auto;font-size:11px">.oxagen/agents/ @ '+h(list[0]?list[0].commit:"")+'</span></div>'+
-   '<div class="tw"><table><thead><tr><th>Identity</th><th>Trust · Spend</th><th>Harness</th><th>Operator</th><th>Status</th><th>Tier</th>'+
+   '<div class="tw"><table><thead><tr><th>Identity · trust · spend</th><th>Harness</th><th>Operator</th><th>Status</th><th>Tier</th>'+
    '<th class="num">Belt</th><th class="num">Runs 30d</th><th class="num">Spend 30d</th><th class="num">Proven 30d</th><th>Mandates</th><th>Incidents</th><th></th>'+
    '</tr></thead><tbody>'+rows+'</tbody></table></div></div>';
 }
@@ -6921,15 +6953,15 @@ function pAgent(r){
   var body=({identity:aIdentity,toolbelt:aToolbelt,mandates:aMandates,budgets:aBudgets,runs:aRuns,
     enrollment:aEnrollment,incidents:aIncidents,definition:defForm})[t]||aIdentity;
 
-  return '<div class="phead">'+agentAv(a,60)+'<div class="t">'+
-   '<p class="eyebrow">Agent · '+h(a.harnessLabel)+'</p>'+
-   '<h1 class="mono" style="font-size:20px">'+h(a.key)+'</h1>'+
-   '<div class="row" style="margin-top:8px">'+
+  return '<div class="phead"><div class="t">'+
+   '<p class="eyebrow">Agent</p>'+
+   '<h1 class="mono" style="font-size:20px;margin:0">'+agentCard(a,{layout:"detail"})+'</h1>'+
+   '<div class="row" style="margin-top:10px">'+
     '<span class="b b-allowed"><span class="d"></span>'+h(a.status)+'</span>'+
     tierBadge(a.tier)+'<span class="dim" style="font-size:10.5px">model + tools</span>'+
     tierBadge(a.tierNative)+'<span class="dim" style="font-size:10.5px">native</span>'+
     '<span class="b b-q">replay '+h(a.replay||"render")+'</span>'+
-    '<span class="b b-q">operator '+h(PEOPLE[a.operator].name)+'</span>'+scorePair(a)+'</div>'+
+    '<span class="b b-q">operator '+h(PEOPLE[a.operator].name)+'</span></div>'+
    '<p style="margin-top:8px">'+h(a.desc)+'</p></div>'+
    '<div class="acts">'+
     '<button class="btn" onclick="openAvatar(\'agent:'+a.key+'\')">Edit avatar</button>'+
@@ -7425,7 +7457,7 @@ function pMandate(r){
          x.rcp?'<span class="mono dim" style="font-size:11.5px">'+h(x.rcp)+'</span>':'<span class="dim">\u2014</span>')+'</td></tr>';}).join("")+
     '</tbody></table></div></div>'+
    '<div><div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>The grant</h3></div><div class="panel-b"><dl class="kv">'+
-    '<dt>Agent</dt><dd><span class="mono">'+h(m.agent)+'</span> '+scorePair(m.agent,true)+'</dd>'+
+    '<dt>Agent</dt><dd>'+agentCard(m.agent,{layout:"compact",key:m.agent})+'</dd>'+
     '<dt>Granted by</dt><dd>'+h(m.by)+' · <span class="mono">'+h(m.roleAt)+'</span> at grant</dd>'+
     '<dt>Second approver</dt><dd>'+h(m.second)+'</dd>'+
     '<dt>Effect</dt><dd class="mono">'+h(m.effect)+'</dd>'+
@@ -8927,9 +8959,9 @@ function pSpend(){
      '<div class="note">Every run has exactly one operator, even when a schedule or a webhook started it: the operator is the person who owns that trigger. A run that arrived without one is attributed to the agent’s owning operator and flagged — never dropped, never spread.</div></div></div>';
   } else if(t==="agent"){
     body='<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>By agent</h3><span class="dim mono" style="margin-left:auto;font-size:11px">open a row for every metric and its findings</span></div><div class="tw"><table>'+
-     '<thead><tr><th>Agent</th><th>Trust · Spend</th><th class="num">Runs</th><th class="num">Spend</th><th class="num">Proven spend</th><th class="num">Spend per proven run</th><th class="num">Potential savings</th><th>Trend</th></tr></thead><tbody>'+
+     '<thead><tr><th>Agent · trust · spend</th><th class="num">Runs</th><th class="num">Spend</th><th class="num">Proven spend</th><th class="num">Spend per proven run</th><th class="num">Potential savings</th><th>Trend</th></tr></thead><tbody>'+
      SPEND.byAgent.map(function(a){
-      return '<tr'+drillRow("agent",a.k)+'><td class="tkey" style="font-size:12px">'+drillName("agent",a.k)+'</td><td>'+scorePair(a.k,true)+'</td><td class="num">'+a.runs.toLocaleString()+'</td>'+
+      return '<tr'+drillRow("agent",a.k)+'><td>'+agentCard(a.k,{key:a.k})+'</td><td class="num">'+a.runs.toLocaleString()+'</td>'+
        '<td class="num">'+usd(a.spend)+'</td><td class="num">'+usd(a.proven)+'</td>'+
        '<td class="num">'+perProvenRun(a)+'</td>'+savingsCell("agent",a.k)+
        '<td><span class="b b-'+(a.trend.charAt(0)==="-"?"proven":"approval")+'">'+h(a.trend)+'</span></td></tr>';}).join("")+
@@ -11229,9 +11261,8 @@ function steerFleetBody(){
   var list=fleetAgents(), n=steerCount();
   var rows=list.map(function(x){ var a=x.a, r=x.r, on=!!(S.steerSel&&S.steerSel[a.key]);
     return '<label class="check"><input type="checkbox"'+(on?' checked':'')+' onchange="steerToggleSel(\''+a.key+'\',this.checked)" aria-label="'+h(a.key)+'">'+
-     '<div class="grow"><div class="n">'+h(a.key)+'</div><div class="d">'+
-      (r?'<span class="mono">'+h(r.id)+'</span> · turn '+r.turn+' · '+h(r.taskTitle):'no run in flight · reads this at its next model call')+'</div></div>'+
-     scorePair(a,true)+(r?statusBadge(runStatus(r)):'<span class="b b-q"><span class="d"></span>idle</span>')+'</label>';}).join("");
+     '<div class="grow" style="min-width:0">'+agentCard(a,{sub:(r?'<span class="mono">'+h(r.id)+'</span> \u00b7 turn '+r.turn+' \u00b7 '+h(r.taskTitle):'no run in flight \u00b7 reads this at its next model call')})+'</div>'+
+     (r?statusBadge(runStatus(r)):'<span class="b b-q"><span class="d"></span>idle</span>')+'</label>';}).join("");
   return '<div class="field"><div class="row" style="justify-content:space-between;margin-bottom:6px"><label style="margin:0">Agents · '+n+' of '+list.length+' selected</label>'+
     '<span class="row" style="gap:6px"><button class="btn sm ghost" onclick="steerSelAll(true)">All</button><button class="btn sm ghost" onclick="steerSelAll(false)">None</button></span></div>'+
     '<div class="steer-list">'+rows+'</div>'+
@@ -11505,10 +11536,9 @@ function evidenceDlg(){
      '<div class="ev-who">'+avatarHtml(p.avatar,38,"person")+'<div style="min-width:0"><b style="font-size:13px">'+h(p.name)+'</b>'+
      '<div class="mono dim" style="font-size:11px">'+h(p.role)+' · operator on every run below</div>'+
      '<div style="font-size:12px;color:var(--muted);margin-top:5px">'+h(e.who.note)+'</div></div></div>'+
-     '<div class="ev-who">'+(a?agentAv(a,38):'<span class="avat" style="border-radius:9px;font-family:var(--mono);font-size:11px">ag</span>')+'<div style="min-width:0"><b class="mono" style="font-size:12.5px">'+h(e.who.agent)+'</b>'+
-     (a?'<div class="mono dim" style="font-size:11px">'+h(a.harnessLabel)+' · belt '+a.belt+' · '+a.runs30.toLocaleString()+' runs 30d · '+usd(a.spend30)+' spend</div>':'<div class="mono dim" style="font-size:11px">'+h(f.level)+' level</div>')+
-     (a?'<a href="#/'+ORG.slug+'/'+a.ws+'/agents/'+h(a.key)+'" style="font-size:12px;display:inline-block;margin-top:5px" onclick="closeDialog()">Open the agent →</a>':'')+
-     '</div></div></div></div></div>',
+     (a?agentCard(a,{layout:"compact",onclick:"closeDialog()",sub:h(a.harnessLabel)+' \u00b7 belt '+a.belt+' \u00b7 '+a.runs30.toLocaleString()+' runs 30d \u00b7 '+usd(a.spend30)+' spend'}):
+       '<div class="ev-who"><span class="avat" style="border-radius:9px;font-family:var(--mono);font-size:11px">ag</span><div style="min-width:0"><b class="mono" style="font-size:12.5px">'+h(e.who.agent)+'</b><div class="mono dim" style="font-size:11px">'+h(f.level)+' level</div></div></div>')+
+     '</div></div></div></div>',
    f:'<span class="grow">Every run above is a sealed record. Open one to read the frames the arithmetic came from.</span>'+
      '<button class="btn" onclick="closeDialog()">Close</button><button class="btn primary" onclick="openDialog(\'fix\',\''+h(f.id)+'\')">Fix</button>'};
 }
@@ -12113,9 +12143,40 @@ var SCORES={
  "a-intel.core.docs-writer":{trust:687,spend:522},
  "a-intel.finops.invoice-bot":{trust:764,spend:388}
 };
-var SCORE_LABEL={good:"good",avg:"average",bad:"poor"};
+/* Every customer's agents, not only this tenant's. Oxagen publishes a nightly rollup to every
+   organization: how many organizations and agents were scored, and a sorted, anonymised score
+   sample per kind — never a row, because a tenant never sees another tenant's agents. The bands a
+   score is coloured by are percentiles of that population plus this tenant's own agents, so a
+   colour means where the agent stands among every agent running on Oxagen, not against a number
+   someone typed. volume() fills the sample; PLATFORM.asOf is the rollup's own stamp. */
+var PLATFORM={asOf:"2026-09-11 02:10 UTC",orgs:0,agents:0,trust:[],spend:[]};
+var SCORE_LABEL={top:"top decile",mid:"in range",warn:"warning",low:"critical"};
+/* The cut points. Green is the 90th percentile and up; the tenth to the ninetieth is in range and
+   carries no colour, which is eight agents in ten by construction; below the tenth is a warning and
+   below the fifth critical, amber before red. Nearest-rank percentiles over the sorted population,
+   memoised for one render and dropped at the next, so registering an agent or a score moving
+   shifts the cuts on the very next paint. */
+var _cuts=null;
+function scoreKind(kind){return /trust/i.test(kind)?"trust":"spend";}
+function scorePop(k){
+  var own=AGENTS.map(function(a){var x=agentScores(a);return x?x[k]:null;}).filter(function(v){return v!=null;});
+  return own.concat(PLATFORM[k]).sort(function(a,b){return a-b;});
+}
+function pctl(sorted,p){ if(!sorted.length) return 0; return sorted[Math.max(0,Math.ceil(p*sorted.length)-1)]; }
+function scoreCuts(kind){
+  var k=scoreKind(kind);
+  if(!_cuts) _cuts={};
+  if(!_cuts[k]){
+    var pop=scorePop(k);
+    _cuts[k]={p5:pctl(pop,0.05),p10:pctl(pop,0.10),p50:pctl(pop,0.50),p90:pctl(pop,0.90),n:pop.length,orgs:PLATFORM.orgs+1};
+  }
+  return _cuts[k];
+}
 function clamp1k(v){return Math.max(0,Math.min(1000,Math.round(v)));}
-function scoreBand(v){return v>=700?"good":v>=400?"avg":"bad";}
+function scoreBand(v,kind){
+  var c=scoreCuts(kind||"trust");
+  return v>=c.p90?"top":v<c.p5?"low":v<c.p10?"warn":"mid";
+}
 function agentScores(a){
   if(typeof a==="string")a=agent(a);
   if(!a) return null;
@@ -12124,18 +12185,35 @@ function agentScores(a){
   return {trust:clamp1k(500+(a.ratio||0)*400-tamperCount(a)*250),spend:clamp1k((a.ratio||0)*600+300)};
 }
 function scorePill(kind,v,sm,prov){
-  var b=scoreBand(v);
-  return '<span class="sc sc-'+b+(sm?' sm':'')+'" title="'+kind+' score '+v+' of 1000 · '+SCORE_LABEL[b]+(prov?' · provisional until 20 runs':'')+'"><i></i>'+kind+' <b>'+v+'</b>'+(prov?'<em>prov.</em>':'')+'</span>';
+  var b=scoreBand(v,kind), c=scoreCuts(kind);
+  var where=b==="top"?"at or above the 90th percentile ("+c.p90+")":b==="low"?"below the 5th percentile ("+c.p5+")":b==="warn"?"below the 10th percentile ("+c.p10+")":"between the 10th and 90th percentile ("+c.p10+"\u2013"+c.p90+")";
+  return '<span class="sc sc-'+b+(sm?' sm':'')+'" title="'+kind+' score '+v+' of 1000 \u00b7 '+SCORE_LABEL[b]+' \u00b7 '+where+' of '+c.n.toLocaleString()+' agents across '+c.orgs+' organizations on Oxagen'+(prov?' \u00b7 provisional until 20 runs':'')+'"><i></i>'+kind+' <b>'+v+'</b>'+(prov?'<em>prov.</em>':'')+'</span>';
+}
+/* The agent card. a is an agent record or key; o.layout is "list" (default), "compact" or "detail";
+   o.sub replaces the second line (harness by default; compact adds the 30-day figures); o.link
+   wraps it in a link to the agent (compact defaults to linked, list and detail to not). One
+   markup, one CSS family, so an agent looks the same in a table, on a run, and on its own page. */
+function agentCard(a,o){
+  if(typeof a==="string")a=agent(a);
+  o=o||{}; var lay=o.layout||"list";
+  if(!a) return '<span class="agc agc-'+lay+'"><span class="agid"><span class="tkey">'+h(o.key||"")+'</span></span></span>';
+  var sz=o.sz||(lay==="detail"?60:lay==="compact"?30:26);
+  var sub=o.sub!=null?o.sub:lay==="compact"?h(a.harnessLabel)+' \u00b7 '+(a.runs30||0).toLocaleString()+' runs 30d \u00b7 '+usd(a.spend30):h(a.harnessLabel);
+  var link=o.link!=null?o.link:lay==="compact";
+  var inner=agentAv(a,sz)+'<span class="agid" title="'+h(a.key)+'"><span class="tkey">'+h(a.key)+'</span>'+(sub?'<span class="sub">'+sub+'</span>':'')+'</span>'+scorePair(a,lay!=="detail");
+  return link?'<a class="agc agc-'+lay+'" href="'+agentUrl(a)+'"'+(o.onclick?' onclick="'+o.onclick+'"':'')+'>'+inner+'</a>':'<span class="agc agc-'+lay+'">'+inner+'</span>';
 }
 function scorePair(a,sm){
   var s=agentScores(a); if(!s) return '';
   return '<span class="scs">'+scorePill("Trust",s.trust,sm,s.prov)+scorePill("Spend",s.spend,sm,s.prov)+'</span>';
 }
 function scoreMeter(kind,v,inputs,what){
-  return '<div class="scm"><div class="scm-h"><span class="k">'+kind+' score</span>'+scorePill(kind,v)+'<span class="dim">0–1000 · recomputed nightly from frames</span></div>'+
-   '<div class="scm-bar"><i class="z bad"></i><i class="z avg"></i><i class="z good"></i><span class="mk" style="left:'+(v/10)+'%"></span></div>'+
-   '<div class="scm-lg"><span>poor &lt; 400</span><span>average 400–699</span><span>good ≥ 700</span></div>'+
+  var c=scoreCuts(kind), w=function(a,b){return 'style="flex:0 0 '+((b-a)/10).toFixed(1)+'%"';};
+  return '<div class="scm"><div class="scm-h"><span class="k">'+kind+' score</span>'+scorePill(kind,v)+'<span class="dim">0\u20131000 \u00b7 recomputed nightly from frames</span></div>'+
+   '<div class="scm-bar"><i class="z z-low" '+w(0,c.p5)+'></i><i class="z z-warn" '+w(c.p5,c.p10)+'></i><i class="z z-mid"></i><i class="z z-top" '+w(c.p90,1000)+'></i><span class="mk" style="left:'+(v/10)+'%"></span></div>'+
+   '<div class="scm-lg"><span>critical &lt; '+c.p5+'</span><span>warning &lt; '+c.p10+'</span><span>in range</span><span>top decile \u2265 '+c.p90+'</span></div>'+
    '<p class="muted" style="font-size:12px;margin:10px 0 0">'+what+'</p>'+
+   '<p class="dim" style="font-size:11px;margin:6px 0 0">Bands are percentiles of every scored agent on Oxagen: '+c.n.toLocaleString()+' agents across '+c.orgs+' organizations, rollup '+h(PLATFORM.asOf)+'. This organization\u2019s agents are in the population; the rest is anonymised. Eight agents in ten sit in range and carry no colour.</p>'+
    '<dl class="kv">'+inputs.map(function(x){return '<dt>'+h(x[0])+'</dt><dd>'+x[1]+(x[2]?' <span class="'+(x[2]>0?'up':'dn')+'">'+(x[2]>0?'+':'')+x[2]+'</span>':'')+'</dd>';}).join("")+'</dl></div>';
 }
 /* The 30-day rollup for one agent, which is what the score strip's window is. Prefer the
@@ -12168,7 +12246,7 @@ function scoreStrip(a){
   var runs=a.runs30||0, flips=(a.flipped30==null?0:a.flipped30);
   return '<div class="grid g2" style="margin-bottom:16px">'+
    scoreMeter("Trust",s.trust,[
-     ["Proof rate",runs?flips+' of '+runs+' runs flipped · '+per(flips/runs):'no runs in 30 days',s.trust>=700?12:-8],
+     ["Proof rate",runs?flips+' of '+runs+' runs flipped · '+per(flips/runs):'no runs in 30 days',s.trust>=scoreCuts('trust').p50?12:-8],
      ["Productive ratio",per(a.ratio||0)+' of steps advanced the task'],
      ["Policy denials 30d",a.incidents?'6 · 1 escalated':'2 · none escalated'],
      ["Tamper incidents",a.incidents?'<span class="dn">'+a.incidents+' · hooks_removed</span>':'0'],
@@ -12181,7 +12259,7 @@ function scoreStrip(a){
      ["Chain integrity","intact on every sealed run"]],
      s.prov?'Provisional: fewer than 20 runs. It starts at 500 and moves with evidence.':'What it did against what it was allowed to do, weighted by how much of it a witness proved.')+
    scoreMeter("Spend",s.spend,[
-     ["Spend per proven run",flips?usd((parseFloat(String(a.spend30).replace(/,/g,""))/flips).toFixed(2)):'no proven run yet',s.spend>=700?9:-11],
+     ["Spend per proven run",flips?usd((parseFloat(String(a.spend30).replace(/,/g,""))/flips).toFixed(2)):'no proven run yet',s.spend>=scoreCuts('spend').p50?9:-11],
      ["Proven ÷ spend 30d",usd(a.proven30)+' ÷ '+usd(a.spend30)+' · '+per(money(a.proven30)/Math.max(1e-9,money(a.spend30)))],
      ["Cache hit rate",agentCache(a)==null?'not recorded on this agent':per(agentCache(a))],
      ["Wasted spend share",agentWasteShare(a)==null?'not computed for this agent':per(agentWasteShare(a))+' of '+usd(a.spend30)],
@@ -12449,7 +12527,7 @@ function ruleEditDlg(){
    '<div class="field"><label>Applies to</label><select id="ruleTool" aria-label="Tool pattern" onchange="S.ruleEdit.tool=this.value">'+RULE_TOOLS.map(function(t){return '<option'+(d.tool===t?' selected':'')+'>'+h(t)+'</option>';}).join("")+'</select>'+
     '<div class="hint">A tool version pattern. The rule only matters where the gate is <span class="mono">require_approval</span>; a deny stays a deny.</div></div>'+
    '<div class="field"><label>Minimum trust score</label><div class="rng"><input id="ruleTrust" type="range" min="0" max="1000" step="10" value="'+d.minTrust+'" aria-label="Minimum trust" oninput="ruleLive()"><input id="ruleTrustN" type="number" min="0" max="1000" value="'+d.minTrust+'" aria-label="Minimum trust value" oninput="ruleLive()"></div>'+
-    '<div class="rng-prev">'+scorePill("Trust ≥",d.minTrust,false).replace('<span class="sc','<span id="ruleTrustPill" class="sc')+'<span>Below 700 you are trusting an average agent. Most customers start at 750.</span></div></div>'+
+    '<div class="rng-prev">'+scorePill("Trust ≥",d.minTrust,false).replace('<span class="sc','<span id="ruleTrustPill" class="sc')+'<span>'+(function(){var c=scoreCuts('Trust');return 'Below '+c.p90+' you are trusting an agent outside the top decile of every agent on Oxagen; below '+c.p50+' one in the bottom half. The floor is compared against '+c.n.toLocaleString()+' agents across '+c.orgs+' organizations, recomputed nightly.';})()+'</span></div></div>'+
    '<div class="field"><label class="check" style="margin:0 0 8px;padding:8px 11px"><input id="ruleSpendOn" type="checkbox"'+(d.minSpend!=null?' checked':'')+' onchange="ruleLive()" style="width:auto"><span class="grow"><span class="n" style="font-family:var(--font)">Also require a spend score</span><span class="d">Keeps an agent that burns tokens for little proven value on the human gate even when it behaves.</span></span></label>'+
     '<div class="rng"><input id="ruleSpend" type="range" min="0" max="1000" step="10" value="'+(d.minSpend==null?400:d.minSpend)+'" aria-label="Minimum spend"'+(d.minSpend==null?' disabled':'')+' oninput="ruleLive()"><input id="ruleSpendN" type="number" min="0" max="1000" value="'+(d.minSpend==null?400:d.minSpend)+'" aria-label="Minimum spend value"'+(d.minSpend==null?' disabled':'')+' oninput="ruleLive()"></div>'+
     '<div class="rng-prev">'+(d.minSpend==null?'<span id="ruleSpendPill" class="dim" style="font-size:12px">no spend floor</span>':scorePill("Spend ≥",d.minSpend,false).replace('<span class="sc','<span id="ruleSpendPill" class="sc'))+'</div></div>'+
@@ -13299,7 +13377,7 @@ function listify(){
 }
 
 function render(){
-  var r=route();
+  var r=route(); _cuts=null;
   obScnLeft();
   var page="";
   if(r.page==="fleet")page=pFleet();
@@ -13504,6 +13582,30 @@ document.addEventListener("click",function(e){
     w.agents=have+n;
   });
   madeAgents.forEach(function(a){AGENTS.push(a);});
+  /* The nightly platform rollup: the other organizations running on Oxagen, each with its own fleet,
+     scored by the same formula agentScores() applies here, then reduced to counts and a sorted score
+     sample per kind. Orgs are sized on the same long tail as everything else (most small, a few
+     large), and each has its own quality, so the population is not one tenant copied thirty times. */
+  (function(){
+    /* its own seeded stream, so adding the rollup moved nothing generated after it */
+    var ps=0x0C7A6E;
+    function prnd(){ps|=0;ps=ps+0x6D2B79F5|0;var t=Math.imul(ps^ps>>>15,1|ps);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;}
+    function pri(a,b){return a+Math.floor(prnd()*(b-a+1));}
+    function prf(a,b){return a+prnd()*(b-a);}
+    function pskew(lo,hi,k){return lo+(hi-lo)*Math.pow(prnd(),k);}
+    var orgs=pri(31,44), tr=[], sp=[];
+    for(var o=0;o<orgs;o++){
+      var fleet=Math.round(pskew(4,520,2.4)), lo=prf(0.02,0.35), hi=prf(0.55,0.95);
+      for(var i=0;i<fleet;i++){
+        var u=prnd(), ratio=Math.round(prf(lo,hi)*100)/100, runs=Math.round(pskew(0,900,2.2)), tamper=u<0.95?0:u<0.99?1:2;
+        if(runs<=1){tr.push(500);sp.push(500);continue;}
+        tr.push(Math.max(0,Math.min(1000,Math.round(500+ratio*400-tamper*250))));
+        sp.push(Math.max(0,Math.min(1000,Math.round(ratio*600+300))));
+      }
+    }
+    tr.sort(function(a,b){return a-b;}); sp.sort(function(a,b){return a-b;});
+    PLATFORM.orgs=orgs; PLATFORM.agents=tr.length; PLATFORM.trust=tr; PLATFORM.spend=sp;
+  })();
   /* two more finops agents hold mandates, so the ledger has more than one line */
   var fin=perWsAgents.finops.filter(function(a){return a.key!=="a-intel.finops.invoice-bot";});
   fin[0].mandates=["mnd_3R8WQ1"]; fin[1].mandates=["mnd_9C4LZ7"];
