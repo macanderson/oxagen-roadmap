@@ -3830,7 +3830,7 @@ function pFleet(){
      '<td class="num">'+r.frames+'</td>'+
      '<td class="mono dim" style="font-size:11px">'+h(r.started)+'</td>'+
      '<td onclick="event.stopPropagation()">'+
-       (r.status==="live"?'<button class="btn sm" onclick="act(\'Paused '+r.id+' at the next boundary.\')">Pause</button>':
+       (r.status==="live"?'<button class="btn sm" onclick="openDialog(\'pause\',\''+r.id+'\')">Pause</button>':
         r.status==="parked"?'<button class="btn sm" onclick="go(\'#/'+ORG.slug+'/'+w.slug+'/runs/'+r.id+'\')">Resolve</button>':
         '<button class="btn sm" onclick="act(\'Export bundle queued for '+r.id+'.\')">Export</button>')+'</td></tr>';
   }).join("");
@@ -3960,13 +3960,17 @@ function taintBlock(a){
 /* footer: pending → the two decisions (they open the existing dialogs); resolved → what happened */
 function decisionFoot(a){
   var st=apState(a.id), m=mandateFor(a), runHref="#/"+ORG.slug+"/"+a.ws+"/runs/"+a.run;
-  var open='<span class="r"><button class="btn ghost sm" onclick="go(\''+runHref+'\')">Open run</button></span>';
+  /* a resolved approval has a receipt; the footer opens it beside the run */
+  var rcpBtn=st.rcp&&receiptById(st.rcp)?'<button class="btn ghost sm" onclick="openDialog(\'receipt\',\''+h(st.rcp)+'\')">Open receipt</button>':'';
+  var open='<span class="r">'+rcpBtn+'<button class="btn ghost sm" onclick="go(\''+runHref+'\')">Open run</button></span>';
+  var rel=st.released?'reservation of '+usd(fmt2(st.released))+' released to '+h(m?m.id:'the mandate')+', ':'';
   if(st.status==="approved") return '<div class="apfoot"><span class="b b-allowed"><span class="d"></span>approved</span>'+
-   '<span class="muted" style="font-size:12.5px">by '+h(st.by)+' · single-use token bound to <span class="mono">'+h(a.digest)+'</span> minted and consumed · call dispatched</span>'+open+'</div>';
+   '<span class="muted" style="font-size:12.5px">by '+h(st.by)+' · single-use token bound to <span class="mono">'+h(a.digest)+'</span> minted and consumed · call dispatched'+
+   (st.ext?' · <span class="mono">'+h(st.ext)+'</span>':'')+'</span>'+open+'</div>';
   if(st.status==="denied") return '<div class="apfoot"><span class="b b-denied"><span class="d"></span>denied</span>'+
-   '<span class="muted" style="font-size:12.5px">by '+h(st.by)+' — “'+h(st.reason||"no reason given")+'” · '+(m?'reservation of '+usd(m.reserved)+' released, ':'')+'nothing dispatched</span>'+open+'</div>';
+   '<span class="muted" style="font-size:12.5px">by '+h(st.by)+' — “'+h(st.reason||"no reason given")+'” · '+rel+'nothing dispatched</span>'+open+'</div>';
   if(st.status==="expired") return '<div class="apfoot"><span class="b b-denied"><span class="d"></span>expired</span>'+
-   '<span class="muted" style="font-size:12.5px">no human resolved it inside '+h(a.timeout)+' · the reason “approval timeout” reached the model as the permission decision · '+(m?'reservation released, ':'')+'nothing dispatched</span>'+open+'</div>';
+   '<span class="muted" style="font-size:12.5px">no human resolved it inside '+h(a.timeout)+' · the reason “approval timeout” reached the model as the permission decision · '+rel+'nothing dispatched</span>'+open+'</div>';
   return '<div class="apfoot"><span class="muted" style="font-size:11.5px;flex:1;min-width:220px">Approving mints a single-use token bound to this exact call digest. Denying '+(m?'releases '+usd(m.reserved)+' back to the mandate and ':'')+'ends the call; the reason reaches the model.</span>'+
    '<span class="r"><button class="btn ghost sm" onclick="go(\''+runHref+'\')">Open run</button>'+
    '<button class="btn danger" onclick="openDialog(\'deny\',\''+a.id+'\')">Deny</button>'+
@@ -4059,15 +4063,74 @@ function resolveApproval(id,status){
   var a=approvalById(id)||APPROVALS[0];
   var st=apState(a.id), m=mandateFor(a);
   var ta=document.querySelector("#layer textarea"), reason=ta?ta.value.trim():"";
+  if(st.status!=="pending"){ closeDialog(); toast("Already "+st.status+(st.by&&st.by!=="—"?" by "+st.by:"")+". A decision is written once.","approval"); return; }
   if(status==="denied"&&!reason){ if(ta)ta.focus(); toast("A denial needs a reason — it reaches the model as the permission decision reason.","denied"); return; }
-  st.status=status; st.by="Marcus Bell"; st.reason=reason;
+  approvalSettle(a,status,"Marcus Bell",reason);
   closeDialog();
   if(status==="approved"){
     toast("Token apt_"+a.digest.slice(7,15)+" minted — single-use, bound to the call digest, this agent, this run, and a 60-second expiry. Credential brokered, "+a.tool+" dispatched.","allowed");
-    setTimeout(function(){toast("Receipt written, signed and chained on "+a.run+". "+(m?"Mandate settled: "+usd(m.remaining)+" left this period.":"The token was consumed on dispatch; the agent never held it."),"allowed");},1300);
+    setTimeout(function(){toast("Receipt "+st.rcp+" written, signed and chained at frame "+st.rcpSeq+" on "+a.run+". "+(m?"Mandate settled: "+usd(m.remaining)+" left this period.":"The token was consumed on dispatch; the agent never held it."),"allowed");},1300);
   } else {
-    toast("Denied. Nothing dispatched, no credential minted"+(m?", "+usd(m.reserved)+" released back to the mandate":"")+". Your reason reaches the model as the permission decision reason.","denied");
+    toast("Denied. Nothing dispatched, no credential minted"+(st.released?", "+usd(fmt2(st.released))+" released back to the mandate":"")+". Your reason reaches the model as the permission decision reason.","denied");
   }
+}
+/* ---- a decision writes (ported from W3 money-asked) ----
+   Approve, deny and expiry each append frames to the approval's own run, write a receipt, and move the
+   mandate: approve turns the reservation into a settlement (used grows, remaining does not move); deny and
+   expiry release it (remaining grows). Either way used + reserved + remaining stays equal to the period limit.
+   The receipt id shares the approval's suffix, so an approval that already has a receipt is not written twice. */
+var APR_EFFECT={"apr_01K5RN9T4":"pi_3QbN4t7Ra","apr_01K5RS3K7":"acme/platform release v4.11.0 · draft","apr_01K5RH8M2":"exit 0"};
+function approvalSettle(a,status,by,reason){
+  var st=apState(a.id); if(st.settled) return st;
+  st.status=status; st.by=by; st.reason=reason||""; st.settled=true;
+  var ok=status==="approved", R=run(a.run), L=R?runFrames(R):null, m=mandateFor(a), at=nowT(), dg=a.digest.slice(7,15);
+  st.at=at; st.rcp="rcp_"+a.id.slice(4); st.ext=ok?(APR_EFFECT[a.id]||"dispatched"):null; st.cg=ok?"cg_"+dg.slice(0,7).toUpperCase():null;
+  var res=m&&a.amount?Math.min(money(a.amount),money(m.reserved)):0;
+  st.released=ok?0:res;
+  if(L){
+    var fr=function(kind,sum,x){var f=Object.assign({seq:L.length,kind:kind,tier:a.tier,cost:null,t:at,apr:a.id,sum:sum},x||{});L.push(f);return f;};
+    fr("approval_decision",ok?"approved by "+by+" · "+(reason?"“"+reason+"”":"no reason given")
+      :status==="expired"?"expired after "+a.timeout+" · no human resolved it · the reason “approval timeout” reaches the model"
+      :"denied by "+by+" · “"+reason+"” reaches the model as the permission decision reason",{by:by,decision:status,reason:st.reason});
+    if(ok){
+      fr("token_issued","apt_"+dg+" · single-use · bound to call digest "+a.digest+", this agent and this run · TTL 60 s",{token:"apt_"+dg});
+      fr("tool_call","dispatched "+a.tool+" · credential grant "+st.cg+" · idempotency idk_"+dg+" · "+st.ext+" · succeeded",{rcp:st.rcp,ext:st.ext,cg:st.cg});
+    } else {
+      fr("tool_call","not dispatched · no credential minted"+(res?" · reservation of "+usd(fmt2(res))+" released to "+m.id:""),{rcp:st.rcp});
+    }
+    st.rcpSeq=fr("receipt",st.rcp+" · "+(ok?"signed, chained at position "+L.length:"decision "+status+" · no external effect")+" · tier "+a.tier,{rcp:st.rcp}).seq;
+  }
+  if(res){
+    if(ok) m.used=fmt2(money(m.used)+res); else m.remaining=fmt2(money(m.remaining)+res);
+    m.reserved=fmt2(money(m.reserved)-res);
+    (m.ledger||[]).forEach(function(x){
+      if(x.state!=="reserved"||money(x.amount)!==money(a.amount)) return;
+      x.state=ok?"settled":"released"; x.when=at.slice(0,8); x.rcp=st.rcp;
+      x.ext=ok?st.ext:status+" · "+usd(a.amount)+" released"; if(!ok) x.amount="0.00";
+    });
+  }
+  if(!receiptById(st.rcp)) RECEIPTS.push(approvalReceipt(a,st,R,m,L));
+  return st;
+}
+function approvalReceipt(a,st,R,m,L){
+  var ok=st.status==="approved", ag=agent(a.agent)||{}, op=PEOPLE[a.op]||{name:a.op,role:""}, dg=a.digest.slice(7,15), when="2026-09-11 "+st.at+"Z";
+  var fired=(a.rules||[]).filter(function(x){return x.v==="approve";}).map(function(x){return x.id;}).join(" · ")||a.rule;
+  return {id:st.rcp,at:when,agent:a.agent,operator:op.name,tool:a.tool,decision:ok?"approve":"deny",tier:a.tier,apr:a.id,
+   effect:ok?st.ext:"none — "+st.status+" before dispatch",amount:a.amount?"$"+a.amount+" "+a.currency:"—",ws:a.ws,runId:a.run,
+   who:[["Operator",op.name+" · "+op.role],["Agent",a.agent+(ag.principal?" · "+ag.principal:""),1],["Run · turn · step",a.run+(R?" · "+R.turn+" · "+R.steps:""),1],["Task",R?R.task+" · "+R.taskTitle:"—"]],
+   what:[["Tool version",a.tool,1],["Input digest",a.digest,1]]
+     .concat(a.amount?[["Amount",Math.round(money(a.amount)*1e6).toLocaleString("en-US")+" micro-"+a.currency+" → $"+a.amount+" "+a.currency]]:[])
+     .concat([["Counterparty",a.counterparty,1]]),
+   authority:[["Decision",ok?"approve → approved, then allow on token":"approve → "+st.status+", not dispatched"],["Policy version",a.policy+" (signed)",1],["Rules fired",fired,1],
+     ["Mandate",m?m.id+" · $"+a.amount+" reserved, then "+(ok?"settled":"released")+" · $"+m.remaining+" remaining this period":"not required"],
+     [ok?"Approval token":"Approval",ok?"apt_"+dg+" · single-use · bound to the call digest · approver "+st.by:st.status+(st.by&&st.by!=="—"?" by "+st.by:"")],
+     ["Approver reason",st.reason?"“"+st.reason+"”":"none given"],
+     ["Taint sources",a.taint&&a.taint.length?a.taint.map(function(t){return "frame "+t.frame+" · "+t.tool+" · "+t.path;}).join("; "):"none"]],
+   credential:ok?[["Credential grant",st.cg,1],["Minted",m?"restricted key · payment_intents:write · counterparty "+a.counterparty+" only":"scoped to "+a.counterparty],["TTL","60 seconds, bound to the call id"],["Agent saw","the result. Never the credential."]]
+     :[["Credential grant","none — nothing was minted"],["Agent saw","the decision and its reason"]],
+   effectRows:ok?[["Dispatched",when],["External effect id",st.ext,1],["Idempotency key","idk_"+dg+" · no duplicate suppressed",1]]
+     :[["Dispatched","never"],["External effect id","none"]],
+   integrity:[["Receipt frame",(L?"seq "+st.rcpSeq+" on ":"")+a.run,1],["Gateway signature","ed25519 · "+ORG.attester+" · verified",1],["Enforcement tier",a.tier]]};
 }
 /* countdown — patches the clocks in place; a full render would wipe an open dialog's textarea */
 function tick(){
@@ -4076,7 +4139,7 @@ function tick(){
     var st=apState(a.id); if(st.status!=="pending") return;
     var sec=apLeft(a.id), e=document.querySelector('[data-countdown="'+a.id+'"]');
     if(e){e.textContent=mmss(sec);e.classList.toggle("warn",sec<120);}
-    if(sec<=0){st.status="expired";st.by="—";expired=true;
+    if(sec<=0){approvalSettle(a,"expired","—","approval timeout");expired=true;
       toast("Approval expired after "+a.timeout+" — "+a.tool+" ended and "+(mandateFor(a)?"the reservation was released. ":"nothing was dispatched. ")+"The reason “approval timeout” reached the model.","denied");}
   });
   if(expired) render();
@@ -6508,8 +6571,8 @@ function pMandate(r){
   if(S.state==="denied") return deniedState("this mandate","org.billing — mandates are readable only by a finance role");
   if(S.state==="empty") return emptyState("This mandate has never been drawn on",
     "It is active and its ledger is empty. Remaining authority equals the full period limit.","");
-  var onM=APPROVALS.filter(function(x){return x.mandate===m.id;})[0];
-  var showRes=!onM||apState(onM.id).status==="pending"||apState(onM.id).status==="approved";
+  /* the bar shows a reservation only while one is held; a decision settles or releases it */
+  var showRes=money(m.reserved)>0;
   return '<div class="phead"><div class="t"><p class="eyebrow">Mandate</p><h1 class="mono" style="font-size:20px">'+h(m.id)+'</h1>'+
    '<div class="row" style="margin-top:8px"><span class="b b-'+(m.status==="active"?"allowed":m.status==="expired"?"q":"denied")+'"><span class="d"></span>'+h(m.status)+'</span>'+
    (m.twoPerson?'<span class="b b-approval"><span class="d"></span>two-person</span>':'<span class="b b-q">single approver</span>')+
@@ -6534,7 +6597,8 @@ function pMandate(r){
        '<td class="mono" style="font-size:11.5px">'+h(x.call)+'</td><td class="num">'+usd(x.amount)+'</td>'+
        '<td><span class="b b-'+sb+'"><span class="d"></span>'+h(x.state)+'</span></td>'+
        '<td class="'+(x.ext.indexOf("\u2014")===0||/failed/.test(x.ext)?"dim":"mono")+'" style="font-size:11.5px">'+h(x.ext)+'</td>'+
-       '<td>'+(x.rcp?'<a href="#">'+h(x.rcp)+'</a>':'<span class="dim">\u2014</span>')+'</td></tr>';}).join("")+
+       '<td>'+(x.rcp&&receiptById(x.rcp)?'<a class="mono" style="font-size:11.5px" href="#" onclick="event.preventDefault();openDialog(\'receipt\',\''+h(x.rcp)+'\')">'+h(x.rcp)+'</a>':
+         x.rcp?'<span class="mono dim" style="font-size:11.5px">'+h(x.rcp)+'</span>':'<span class="dim">\u2014</span>')+'</td></tr>';}).join("")+
     '</tbody></table></div></div>'+
    '<div><div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>The grant</h3></div><div class="panel-b"><dl class="kv">'+
     '<dt>Agent</dt><dd><span class="mono">'+h(m.agent)+'</span> '+scorePair(m.agent,true)+'</dd>'+
@@ -9035,20 +9099,37 @@ var SCENARIOS={
    {say:"Release manager is cutting 4.11.0 right now, and nobody has told it the mobile repo is out of scope this cycle.",
     note:"One live run. Runs are not started from Fleet; agents start them, and this is where you stop, steer, or open one.",
     route:function(o){return {page:"fleet",org:o,ws:"core-platform"};}},
-   {say:"Open the run. It is on turn 4 at gateway tier, and the next call it wants is a release against acme/platform.",
+   {say:"Open the run. It is on turn 7 at gateway tier, and the next call it wants is a release against acme/platform.",
     note:"Gateway tier means every tool call was served through Oxagen, so this is enforcement and not attestation.",
-    route:function(o){return {page:"run",org:o,ws:"core-platform",id:"run_01K5RS7M2E8FJ3QW"};}},
-   {say:"Steer it. At the boundary the agent finishes the turn it is on; interrupt cuts the in-flight tool call and records the cancellation.",
-    note:"That is the whole difference, and it is the reason the two are separate controls rather than one button.",
-    route:function(o){return {page:"steering",org:o,ws:"core-platform"};},
-    act:["Open the steer dialog","openSteer()"]},
-   {say:"Oxagen never executes steering as an instruction. It enters the run as evidence at the steering position, carrying your authority.",
-    note:"Recorded per run as a control.steer frame attributed to you, preceded by control.interrupt when you cut a call.",
-    route:function(o){return {page:"steering",org:o,ws:"core-platform"};},
-    act:["Steer the whole fleet","openSteerFleet()"]},
-   {say:"The delivery report says who read it and when. The agent's next model call is where it takes effect, not the moment you pressed send.",
+    route:function(o){return {page:"run",org:o,ws:"core-platform",id:"run_01K5RS7M2E8FJ3QW"};},
+    setup:function(){S.tab.run="transcript";}},
+   {say:"Stopping is the first grant. Pause takes effect at the next boundary: the call in flight completes, nothing new dispatches, and the run keeps its token.",
+    note:"Recorded as a <span class=\"mono\">control.pause</span> frame under <span class=\"mono\">run.pause</span>. Pause is not cancel; the run resumes where it stopped.",
+    route:function(o){return {page:"run",org:o,ws:"core-platform",id:"run_01K5RS7M2E8FJ3QW"};},
+    setup:function(){S.tab.run="transcript";},
+    act:["Pause the run","openDialog('pause','run_01K5RS7M2E8FJ3QW')"]},
+   {say:"Steering is the second grant. At the boundary the agent finishes the turn it is on; interrupt cuts the in-flight call and records the cancellation.",
+    note:"Oxagen never executes steering as an instruction. It enters the run as evidence at the steering position, carrying your authority.",
+    route:function(o){return {page:"run",org:o,ws:"core-platform",id:"run_01K5RS7M2E8FJ3QW"};},
+    setup:function(){S.tab.run="transcript";},
+    act:["Steer this run","openSteer('run_01K5RS7M2E8FJ3QW')"]},
+   {say:"Sending writes a <span class=\"mono\">control.steer</span> frame on this run, queued. The next <span class=\"mono\">model.request</span> carries it, and only then is it applied.",
+    note:"A paused run reaches no boundary, so a steer sent while paused stays queued until you resume it.",
+    route:function(o){return {page:"run",org:o,ws:"core-platform",id:"run_01K5RS7M2E8FJ3QW"};},
+    setup:function(){steerSelectLatest("run_01K5RS7M2E8FJ3QW");},
+    act:["Open the model call that carried it","steerShowCarrier('run_01K5RS7M2E8FJ3QW')"]},
+   {say:"On the Context tab the steer is appended after the cached prefix: 22 tokens, instead of rewriting a 12,000-token block that is already cached.",
+    note:"That is why steering arrives at a boundary rather than mid-turn.",
+    route:function(o){return {page:"run",org:o,ws:"core-platform",id:"run_01K5RS7M2E8FJ3QW"};},
+    setup:function(){S.tab.run="context";S.ctxSel="steer";}},
+   {say:"The same steer can go to every agent in the workspace at once. Each one is chosen, and steering the fleet is a grant you hold by role.",
     note:"An agent with no run in flight reads it at its next run, so a fleet steer is never silently dropped.",
-    route:function(o){return {page:"run",org:o,ws:"core-platform",id:"run_01K5RS7M2E8FJ3QW"};}}
+    route:function(o){return {page:"fleet",org:o,ws:"core-platform"};},
+    act:["Steer the whole fleet","openSteerFleet()"]},
+   {say:"The delivery report says who read it and when. Applied means the model call carrying it was made; queued, expired, cancelled and failed each say why.",
+    note:"The header counts the rows under it. A run's row follows its own <span class=\"mono\">control.steer</span> frame, so it moves to applied while the report is open.",
+    route:function(o){return {page:"fleet",org:o,ws:"core-platform"};},
+    act:["Open the delivery report","openDialog('deliveryreport')"]}
   ]},
  "money-asked":{
   title:"Money asked, a human answered", ws:"finops",
@@ -9056,7 +9137,12 @@ var SCENARIOS={
   steps:[
    {say:"An invoice bot wants to move $2,450.00 to vendor:aws. The call is parked, not failed, and not quietly allowed.",
     note:"A denial would end the call and cost nothing. Parking it is the expensive, correct thing to do when a human should decide.",
-    route:function(o){return {page:"fleet",org:o,ws:"finops"};}},
+    route:function(o){return {page:"fleet",org:o,ws:"finops"};},
+    setup:function(){S.apOpen["apr_01K5RN9T4"]=false;}},
+   {say:"The run shows how it parked. Frame 6 read the invoice as untrusted third-party output, frame 9 asked to pay that amount, and frame 10 is the decision that parked it.",
+    note:"The approval card under the frames is the same card Fleet shows, on the same clock.",
+    route:function(o){return {page:"run",org:o,ws:"finops",id:"run_01K5RN8F3J2GHY6T"};},
+    setup:function(){S.tab.run="player";S.frame=10;S.apOpen["apr_01K5RN9T4"]=false;}},
    {say:"The mandate is what parked it: approval above $100.00, and a per-call ceiling of $250.00 that routes the excess to a human instead of refusing it.",
     note:"Read the rules that fired. Every one of them is a line somebody wrote, not a model's opinion.",
     route:function(o){return {page:"fleet",org:o,ws:"finops"};},
@@ -9071,10 +9157,19 @@ var SCENARIOS={
     route:function(o){return {page:"fleet",org:o,ws:"finops"};},
     setup:function(){S.apOpen["apr_01K5RN9T4"]=true;},
     act:["Approve it","openDialog('approve','apr_01K5RN9T4')"]},
+   {say:"The ledger moved at the decision. The $2,450.00 reservation is now a settlement with an external id and a receipt, and settled, reserved and remaining still add up to the period limit.",
+    note:"Reservations are taken at decision time and settlements at receipt time, so two concurrent calls cannot both fit under the same remaining limit. If nobody answered at the last step, arriving here records Marcus Bell's approval.",
+    route:function(o){return {page:"mandate",org:o,ws:"finops",id:"invoice-bot",mid:"mnd_7K2ETQ4"};},
+    setup:function(){var a=approvalById("apr_01K5RN9T4");if(apState(a.id).status==="pending")approvalSettle(a,"approved","Marcus Bell","AWS line on PO-4471 checked against the September statement.");}},
+   {say:"Tools, Mandates ledger, is the page the CFO's office reads: every mandate with what is settled, reserved and remaining, from the same record the card and the ledger read.",
+    note:"One record, three readers. None of them keeps its own total.",
+    route:function(o){return {page:"tools",org:o,ws:"finops"};},
+    setup:function(){S.tab.tools="mandates";}},
    {say:"The receipt names the human, the rule that fired, and the money. That record is the product.",
     note:"Same trail whether a person did it or the in-app agent did it for them, which is what makes the audit log answerable.",
     route:function(o){return {page:"audit",org:o};},
-    setup:function(){S.tab.audit="receipts";}}
+    setup:function(){S.tab.audit="receipts";},
+    act:["Open the receipt","openDialog('receipt',apState('apr_01K5RN9T4').rcp||'rcp_01K5RN9T4')"]}
   ]}
 };
 /* One slot per flow. tools/build-w.mjs boots each w*.html into the scenario named here and
@@ -9362,7 +9457,8 @@ function pScenarios(){
 S.steerSel=null; S.steerInt=false; S.steerText=null;
 function fleetAgents(){ var w=ws(); return AGENTS.filter(function(a){return a.ws===w.slug;}).map(function(a){
   var r=null; RUNS.forEach(function(x){ if(x.agent===a.key&&(x.status==="live"||x.status==="parked")) r=x; }); return {a:a,r:r}; }); }
-function openSteer(){ S.steerInt=false; S.steerText=null; openDialog('steer'); }
+/* The run a single steer lands on: the one named, else the run the page last rendered. */
+function openSteer(id){ S.steerInt=false; S.steerText=null; openDialog('steer',id||S.frameRun||RUNS[0].id); }
 function openSteerFleet(){ S.steerInt=false; S.steerText=null; S.steerSel={}; fleetAgents().forEach(function(x){S.steerSel[x.a.key]=true;}); openDialog('steerfleet'); }
 function steerKeep(){ var t=document.getElementById('steer-text'); if(t) S.steerText=t.value; }
 function steerToggleInt(){ steerKeep(); S.steerInt=!S.steerInt; render(); }
@@ -9396,7 +9492,7 @@ function steerFleetBody(){
     '<span class="row" style="gap:6px"><button class="btn sm ghost" onclick="steerSelAll(true)">All</button><button class="btn sm ghost" onclick="steerSelAll(false)">None</button></span></div>'+
     '<div class="steer-list">'+rows+'</div>'+
     '<div class="hint">Every agent in '+h(ws().name)+', selected by default. Steering the fleet is a grant you hold by role, not a default.</div></div>'+
-   steerTextField("Skip the mobile repo this cycle; 4.11.0 is platform only.",3)+steerModeField()+
+   steerTextField(STEER_DEFAULT,3)+steerModeField()+
    '<div class="note">Oxagen never executes steering as an instruction — it enters as evidence at the steering position with operator authority.</div>';
 }
 function steerFoot(fleet){
@@ -9405,12 +9501,239 @@ function steerFoot(fleet){
    '<button class="btn" onclick="closeDialog()">Cancel</button>'+
    '<button class="btn primary"'+(fleet&&!n?' disabled':'')+' onclick="steerSend('+(fleet?'true':'false')+')">'+(on?'Interrupt and send':'Send at the boundary')+'</button>';
 }
-function steerSend(fleet){
-  var n=fleet?steerCount():1, l=fleet?steerLive():1, on=S.steerInt, who=fleet?(n+' agent'+(n===1?'':'s')):'this run';
-  closeDialog();
-  act(on?(fleet?l+' of '+n+' agents':'This run')+' interrupted. Turns cut, in-flight calls cancelled and recorded; the steer is next in each context'+(fleet&&l<n?', and waits for the rest at their next run.':'.')
-       :'Steer queued for '+who+'. Delivered before the next model call, or recorded as undelivered.');
+/* ---- steering writes frames (ported from W2 stop-it-steer-it) ----
+   A steer is a control.steer frame on the run it addresses, queued until that run's next model call.
+   The model.request that carries it is appended when the boundary is reached, and the steer flips to
+   applied. A paused run reaches no boundary, and a run parked on an approval makes no model call until the
+   decision, so both keep the steer queued; a steer nobody reads inside the delivery window expires.
+   Per-run delivery state lives on S.runCtl.steer[runId], beside the pause state, never on the seed RUNS. */
+var STEER_DEFAULT="Skip the mobile repo this cycle; 4.11.0 is platform only.", STEER_BY="Marcus Bell", STEER_TTL=600000;
+/* the steer's text at about four characters a token, plus the seven-token control envelope (22 for the default) */
+function steerTok(text){ return Math.ceil(String(text).length/4)+7; }
+function steerDigest(s){ var a=5381,b=52711; for(var i=0;i<s.length;i++){var c=s.charCodeAt(i);a=((a*33)^c)>>>0;b=((b*31)^c)>>>0;}
+  return "sha256:"+("0000000"+a.toString(16)).slice(-8)+("0000000"+b.toString(16)).slice(-8); }
+function steerCtl(){ return S.runCtl.steer||(S.runCtl.steer={}); }
+function steerClockAdd(t,ms){ var m=/^(\d+):(\d+):(\d+)/.exec(t||""); if(!m) return "—";
+  var s=(+m[1]*3600+ +m[2]*60+ +m[3]+Math.round(ms/1000))%86400; function p(n){return (n<10?"0":"")+n;}
+  return p(Math.floor(s/3600))+":"+p(Math.floor(s/60)%60)+":"+p(s%60); }
+function steerPendingApproval(runId){ return APPROVALS.filter(function(a){return a.run===runId&&apState(a.id).status==="pending";})[0]||null; }
+/* the boundary a queued steer waits for: a live run's next model call, or a parked run's first call after its decision */
+function steerCanApply(R){ var rs=runStatus(R); return rs==="live"||(rs==="parked"&&!steerPendingApproval(R.id)); }
+function steerWrite(R,text,mode){
+  var L=runFrames(R), at=nowT(), tok=steerTok(text);
+  if(mode==="interrupt") L.push({seq:L.length,kind:"control.interrupt",tier:R.tier,cost:null,t:at,by:STEER_BY,
+    sum:STEER_BY+" · turn cut after seq "+(L.length-1)+" · the in-flight response is stopped and billed, and the cancellation is recorded"});
+  var f={seq:L.length,kind:"control.steer",tier:R.tier,cost:null,t:at,by:STEER_BY,text:text,mode:mode,tokens:tok,status:"queued",dig:steerDigest(text),
+    sum:STEER_BY+" · “"+text+"” · "+tok+" tok · "+mode+" · queued for the next model call"};
+  L.push(f);
+  steerCtl()[R.id]={status:"queued",seq:f.seq,req:null,mode:mode,tokens:tok,at:at,queuedAt:Date.now()};
+  steerWatch(R);
+  return f;
 }
+function steerWatch(R){
+  setTimeout(function next(){
+    var c=steerCtl()[R.id]; if(!c||c.status!=="queued") return;
+    if(Date.now()-c.queuedAt>STEER_TTL){ steerExpire(R,c); return; }
+    if(!steerCanApply(R)){ setTimeout(next,700); return; }
+    steerApply(R,c);
+  },1500);
+}
+function steerQueued(R){ return runFrames(R).filter(function(f){return f.kind==="control.steer"&&f.status==="queued";}); }
+/* a render wipes a dialog's half-typed text, so a background delivery repaints only when no other dialog is open */
+function steerRepaint(){ if(!S.dlg||S.dlg==="deliveryreport") render(); }
+function steerApply(R,c){
+  var L=runFrames(R), q=steerQueued(R), at=nowT();
+  if(!q.length){ c.status="applied"; return; }
+  var tok=q.reduce(function(s,f){return s+f.tokens;},0), seqs=q.map(function(f){return f.seq;});
+  var req={seq:L.length,kind:"model.request",tier:R.tier,cost:null,t:at,carries:seqs,
+    sum:"anthropic · "+R.model+" · steering block carries control.steer seq "+seqs.join(", ")+" immediately after the cached system block · +"+tok+" tok"};
+  L.push(req);
+  q.forEach(function(f){ f.status="applied"; f.appliedAt=req.seq; f.sum=f.by+" · “"+f.text+"” · "+f.tokens+" tok · "+f.mode+" · applied at model.request seq "+req.seq; });
+  c.status="applied"; c.req=req.seq; c.appliedT=at;
+  toast("Steer applied on "+R.id+". Frame "+req.seq+" is the model call that carried it.","allowed");
+  steerRepaint();
+}
+function steerExpire(R,c){
+  c.status="expired";
+  steerQueued(R).forEach(function(f){ f.status="expired"; f.sum=f.by+" · “"+f.text+"” · expired · no model call boundary inside the 10-minute delivery window"; });
+  steerRepaint();
+}
+/* Scenario control: show this run's latest steer frame on the player. */
+function steerSelectLatest(id){
+  var L=runFrames(run(id)||RUNS[0]); S.tab.run="player";
+  for(var i=L.length-1;i>=0;i--){ if(L[i].kind==="control.steer"){ S.frame=i; return; } }
+}
+/* Scenario control: open the model call that carried this run's latest steer, or say why there is none yet. */
+function steerShowCarrier(id){
+  var R=run(id)||RUNS[0], L=runFrames(R), f=null;
+  for(var i=L.length-1;i>=0;i--){ if(L[i].kind==="control.steer"){ f=L[i]; break; } }
+  if(!f){ toast("No steer on "+R.id+" yet. Send one from Steer.","approval"); return; }
+  if(f.status!=="applied"){ toast("Still "+f.status+". "+(runStatus(R)==="paused"?"A paused run reaches no boundary; resume it and the next model call carries the steer.":"It is delivered at the next model call."),"approval"); return; }
+  S.tab.run="player"; S.frame=f.appliedAt; render();
+}
+function steerSend(fleet){
+  steerKeep();
+  var text=String(S.steerText==null?STEER_DEFAULT:S.steerText).trim(), mode=S.steerInt?"interrupt":"boundary";
+  if(!text){ var ta=el("steer-text"); if(ta) ta.focus(); toast("A steer needs text. It is what the agent reads.","denied"); return; }
+  if(!fleet){
+    var R=run(S.dlgArg)||run(S.frameRun)||RUNS[0], rs=runStatus(R);
+    var f=steerWrite(R,text,mode);
+    S.tab.run="player"; S.frame=f.seq;
+    closeDialog();
+    act(rs==="paused"||rs==="pausing"
+      ?"Steer queued at seq "+f.seq+". "+R.id+" is paused and reaches no boundary; the first model call after resume carries it."
+      :"Steer queued at seq "+f.seq+". It is applied at "+R.id+"’s next model call, and that frame is recorded beside it.");
+    return;
+  }
+  var rep={at:nowT(),ms:Date.now(),text:text,mode:mode,dig:steerDigest(text),tokens:steerTok(text),ws:ws().slug,to:[]};
+  steerPicked().forEach(function(x){
+    var a=x.a, r=x.r, t={agent:a.key,run:r?r.id:null};
+    var ks=SWITCHES.filter(function(s){return s.on&&((s.lvl==="Agent"&&s.target===a.key)||(s.lvl==="Workspace"&&s.target===a.ws)||s.lvl==="Organization"||
+      (s.lvl==="Operator’s agents"&&PEOPLE[a.operator]&&s.target===PEOPLE[a.operator].name));})[0];
+    var mute=STEER_MUTES.filter(function(u){return u.agent===a.key;})[0];
+    if(ks){ t.kind="cancelled"; t.why="kill switch "+ks.id+" ("+ks.lvl.toLowerCase()+" · "+ks.target+") is armed; suppressed before it was queued"; }
+    else if(mute){ t.kind="cancelled"; t.why="steering muted for this agent by "+mute.by+" on "+mute.at+" · "+mute.why+"; suppressed before it was queued"; }
+    else if(a.enrolled===false||(r&&r.tier==="observe")){ t.kind="failed"; t.why=r&&r.tier==="observe"?"an observe-tier run has no seam to inject through":"the agent is not enrolled, so there is no seam to deliver through"; }
+    else if(r){
+      t.kind="run"; t.degraded=mode==="interrupt"&&r.tier!=="gateway"; t.mode=t.degraded?"boundary":mode;
+      t.seq=steerWrite(r,text,t.mode).seq;
+    } else { t.kind="idle"; }
+    rep.to.push(t);
+  });
+  S.steerReport=rep;
+  openDialog("deliveryreport");
+}
+/* A mute is a steering record: the agent's owner chose a channel other than steering for it. */
+var STEER_MUTES=[{agent:"acme.core.docs-writer",by:"Priya Natarajan",at:"2026-09-09",why:"the operator guide changes only through Context PRs"}];
+/* Each recipient's row, read live: a run's row follows its control.steer frame, an idle agent's follows the clock. */
+function steerRows(rep){
+  var exp=steerClockAdd(rep.at,STEER_TTL), late=Date.now()-rep.ms>STEER_TTL;
+  return rep.to.map(function(t){
+    if(t.kind==="cancelled"||t.kind==="failed") return {agent:t.agent,run:t.run,status:t.kind,mode:"—",when:rep.at.slice(0,8),why:t.why};
+    if(t.kind==="idle") return late
+      ?{agent:t.agent,run:null,status:"expired",mode:"next run",when:exp,why:"no run started inside the 10-minute delivery window"}
+      :{agent:t.agent,run:null,status:"queued",mode:"next run",when:"—",why:"no run in flight; reads this at its next run, or expires at "+exp};
+    var R=run(t.run), L=runFrames(R), f=L[t.seq]||{status:"queued"}, deg=t.degraded?"degraded from interrupt: "+R.tier+" tier cannot stop an in-flight call; ":"";
+    if(f.status==="applied") return {agent:t.agent,run:t.run,status:"applied",mode:t.mode,when:L[f.appliedAt].t.slice(0,12),frame:f.appliedAt,tokens:f.tokens,
+      why:deg+(t.mode==="interrupt"?"in-flight response stopped and billed; ":"")+"injected after the steering block at model.request seq "+f.appliedAt};
+    if(f.status==="expired") return {agent:t.agent,run:t.run,status:"expired",mode:t.mode,when:exp,why:"the run reached no model call boundary inside the 10-minute delivery window"};
+    var rs=runStatus(R), apr=steerPendingApproval(R.id), c=S.runCtl[R.id];
+    return {agent:t.agent,run:t.run,status:"queued",mode:t.mode,when:"—",
+      why:deg+(rs==="paused"||rs==="pausing"?"run paused by "+(c&&c.by||"an operator")+"; a paused run reaches no boundary, so this applies at the first model call after resume, or expires at "+exp
+        :rs==="parked"&&apr?"run parked on "+apr.id+"; its next model call follows that decision, or this expires at "+exp
+        :"control.steer seq "+t.seq+" written; waiting for the next model call boundary")};
+  });
+}
+DLG_EXT.deliveryreport=function(){
+  var rep=S.steerReport;
+  if(!rep) return {t:"Delivery report",s:"nothing sent yet",w:false,
+    b:'<p class="muted" style="margin:0">No fleet steer has been sent in this session. A report is written the moment one is, with a row for every agent it addressed.</p>',
+    f:'<button class="btn" onclick="closeDialog()">Close</button><button class="btn primary" onclick="openSteerFleet()">Steer the fleet</button>'};
+  var rows=steerRows(rep), n={applied:0,queued:0,undelivered:0}, tok=0, runsHit=0, first=null;
+  rows.forEach(function(r){
+    if(r.status==="applied"){ n.applied++; tok+=r.tokens; runsHit++; if(!first) first=r; }
+    else if(r.status==="queued") n.queued++; else n.undelivered++;
+  });
+  var cls={applied:"b-allowed",queued:"b-approval",expired:"b-denied",cancelled:"b-denied",failed:"b-denied"};
+  var trs=rows.map(function(r){
+    return '<tr><td><span class="mono" style="font-size:12px">'+h(r.agent)+'</span><div class="mono dim" style="font-size:11px">'+(r.run?h(r.run):'no run in flight')+'</div></td>'+
+     '<td><span class="b '+cls[r.status]+'"><span class="d"></span>'+h(r.status)+'</span></td>'+
+     '<td class="mono" style="font-size:11.5px;white-space:nowrap">'+h(r.mode)+'</td>'+
+     '<td class="mono num" style="font-size:11.5px;white-space:nowrap">'+h(r.when)+'</td>'+
+     '<td style="font-size:12px;color:var(--body);min-width:220px">'+h(r.why)+
+      (r.frame!=null?' <button class="btn sm ghost" onclick="closeDialog();S.tab.run=\'player\';S.frame='+r.frame+';go(\'#/'+ORG.slug+'/'+h(rep.ws)+'/runs/'+h(r.run)+'\')">Open frame '+r.frame+'</button>':'')+'</td></tr>';
+  }).join("");
+  return {t:n.applied+" applied, "+n.queued+" queued, "+n.undelivered+" undelivered",
+   s:"Delivery report · "+rows.length+" recipient"+(rows.length===1?"":"s")+" · sent "+rep.at.slice(0,8)+" · "+(rep.mode==="interrupt"?"interrupt requested":"at the boundary"),w:true,
+   b:'<p class="muted" style="font-size:12.5px;margin:0 0 12px">Every status change is a frame on the recipient’s run. <span class="mono">applied</span> is the only success status: the model request carrying the steer was made, and the row names that frame. '+
+     '<span class="mono">expired</span>, <span class="mono">cancelled</span> and <span class="mono">failed</span> count as undelivered.</p>'+
+    '<div class="grid g3" style="margin-bottom:14px">'+
+     '<div class="stat"><span class="k">Applied</span><span class="v" style="color:var(--st-allowed)">'+n.applied+'</span><span class="s">a model call carried it</span></div>'+
+     '<div class="stat"><span class="k">Queued</span><span class="v" style="color:var(--st-approval)">'+n.queued+'</span><span class="s">waiting for a boundary or a run</span></div>'+
+     '<div class="stat"><span class="k">Undelivered</span><span class="v" style="color:var(--st-denied)">'+n.undelivered+'</span><span class="s">expired, cancelled or failed</span></div></div>'+
+    '<div class="note" style="margin-bottom:12px"><span class="mono dim" style="font-size:11px">what was sent · '+h(rep.dig)+' · '+rep.tokens+' tok</span><br>“'+h(rep.text)+'”</div>'+
+    '<div class="tw"><table><thead><tr><th>Agent and run</th><th>Status</th><th>Mode used</th><th class="num">Time</th><th>Why</th></tr></thead><tbody>'+trs+'</tbody></table></div>'+
+    '<p class="dim" style="font-size:11.5px;margin:10px 0 0">'+(runsHit?tok+' tokens injected across '+runsHit+' run'+(runsHit===1?'':'s')+' · gateway_observed':'Nothing injected yet; queued rows update here as each boundary is reached.')+'</p>',
+   f:'<span class="grow"></span><button class="btn" onclick="closeDialog()">Close</button>'+
+    (first?'<button class="btn primary" onclick="closeDialog();S.tab.run=\'player\';S.frame='+first.frame+';go(\'#/'+ORG.slug+'/'+h(rep.ws)+'/runs/'+h(first.run)+'\')">Open the run that received it</button>':'')};
+};
+
+/* ---- governed-writes data (W2 · W3): statements, not edits to the shared literals ---- */
+(function(){
+  /* The seeded steer on the release run carries the fields a sent one does, so both read the same way. */
+  var L=FRAMES_BY_RUN["run_01K5RS7M2E8FJ3QW"];
+  if(L[10]&&L[10].kind==="control.steer") Object.assign(L[10],{by:"Marcus Bell",text:STEER_DEFAULT,mode:"boundary",tokens:steerTok(STEER_DEFAULT),status:"applied",appliedAt:11,dig:"sha256:8e10c4b7d290fa35"});
+  if(L[11]&&L[11].kind==="model.request") L[11].carries=[10];
+
+  /* The invoice bot's parked payment. Amounts and limits are read from the approval and its mandate, so the
+     frames cannot disagree with the card, the mandate page, or the receipt that a decision writes. */
+  var a=approvalById("apr_01K5RN9T4"), m=mandateFor(a), R=run(a.run), ag=agent(a.agent);
+  var amt=usd(a.amount)+" "+a.currency;
+  a.tainted=true;
+  a.taint=[{frame:6,tool:"aws_billing__get_invoice@3",path:"$.amount",note:"the amount was read from the vendor’s invoice, which is third-party output"}];
+  a.rules.push({id:"pol_v41.taint.write",v:"approve",text:"Argument $.amount derives from untrusted tool output (frame 6, aws_billing__get_invoice@3). Taint on a write raises the decision to approval and never auto-approves."});
+  FRAMES_BY_RUN[R.id]=[
+   {seq:0,kind:"agent_start",tier:R.tier,cost:null,t:"08:40:19.204",
+    sum:a.agent+" · "+ag.harnessLabel+" "+ag.harnessV+" on "+ag.host+" · run token 15m · tier "+R.tier+" · task "+R.task},
+   {seq:1,kind:"context.assembled",tier:R.tier,cost:null,t:"08:40:19.391",
+    sum:"budget 4,000 tok · 3 context frames · steering 412 tok · mandate "+m.id+" attached · composition digest sha256:2b71…c9e0"},
+   {seq:2,kind:"model.request",tier:R.tier,cost:null,t:"08:40:19.470",
+    sum:"anthropic · "+R.model+" · "+ag.belt+" tool definitions · 3 context frames"},
+   {seq:3,kind:"model.response",tier:R.tier,cost:"0.3180",t:"08:40:24.902",
+    sum:"stop_reason tool_use · in 1,284 · cache_read 11,904 · out 218 · req_01JQ8A2C"},
+   {seq:4,kind:"tool_requested",tier:R.tier,cost:null,t:"08:40:24.951",
+    sum:"aws_billing__get_invoice@3 · invoice AWS-2026-09-INV-88134 · input digest sha256:e31f…0c9a · schema ok"},
+   {seq:5,kind:"policy_decision",tier:R.tier,cost:null,t:"08:40:24.955",
+    sum:"allow · "+a.policy+" · rule tools.read.allow (read on aws_billing) · untainted · 3 ms"},
+   {seq:6,kind:"tool_call",tier:R.tier,cost:null,t:"08:40:25.367",taint:true,
+    sum:"200 · AWS line on "+R.task+" due now, "+amt+" to "+a.counterparty+" · output schema ok · marked untrusted (third_party)"},
+   {seq:7,kind:"model.request",tier:R.tier,cost:null,t:"09:30:58.114",
+    sum:"anthropic · "+R.model+" · turn "+R.turn+" · invoice body quoted as evidence, with its provenance"},
+   {seq:8,kind:"model.response",tier:R.tier,cost:"0.4412",t:"09:31:08.260",
+    sum:"stop_reason tool_use · in 1,902 · cache_read 12,880 · out 246 · req_01JQ8C7F"},
+   {seq:9,kind:"tool_requested",tier:R.tier,cost:null,t:"09:31:08.301",apr:a.id,
+    sum:a.tool+" · "+amt+" → "+a.counterparty+" · input digest "+a.digest+" · schema ok"},
+   {seq:10,kind:"policy_decision",tier:R.tier,cost:null,t:"09:31:08.306",apr:a.id,mandate:m.id,amount:a.amount,rules:a.rules.map(function(x){return x.id;}),
+    sum:"approve · "+a.policy+" · mandate "+m.id+" · approval above "+usd(m.approvalAbove)+" · per-call ceiling "+usd(m.perCall)+" · tainted ("+a.taint.length+" source) · "+usd(a.amount)+" reserved"},
+   {seq:11,kind:"approval_request",tier:R.tier,cost:null,t:"09:31:08.312",apr:a.id,
+    sum:a.id+" · parked · timeout "+a.timeout+" · approvers "+m.approvers+" · "+(PEOPLE[a.op]||{name:a.op}).name+" excluded by fin.no_self_approval"}
+  ];
+  /* The reservation is taken at decision time (frame 10), not when the run started. */
+  var res=(m.ledger||[]).filter(function(x){return x.state==="reserved";})[0];
+  if(res) res.when=FRAMES_BY_RUN[R.id][10].t.slice(0,8);
+
+  /* The ledger named receipts by truncated ids that matched nothing. Full ids, each one a receipt. */
+  var ids={"rcp_01K4X8…":"rcp_01K4X8M2E","rcp_01K4W2…":"rcp_01K4W2P7R","rcp_01K4V7…":"rcp_01K4V7D3N"};
+  (m.ledger||[]).forEach(function(x){ if(ids[x.rcp]) x.rcp=ids[x.rcp]; });
+  /* rcp_01K4X8M2E carried the parked call's input digest and idempotency key, which would suppress the new
+     payment as a duplicate; and its remaining figure was not what the ledger leaves after its two settlements. */
+  var old=receiptById("rcp_01K4X8M2E");
+  if(old){
+    old.what.forEach(function(r){ if(r[0]==="Input digest") r[1]="sha256:5d7a20c1e94bf368"; });
+    old.effectRows.forEach(function(r){ if(r[0]==="Idempotency key") r[1]="idk_5d7a20c1 · no duplicate suppressed"; });
+    old.authority.forEach(function(r){ if(r[0]==="Mandate") r[1]=m.id+" · $884.60 reserved, then settled · $"+fmt2(money(m.perPeriod)-400-884.60)+" remaining this month"; });
+  }
+  var rc=function(id,at,tool,effect,amount,runId,rules,mandate,token,reason,cred,eff){
+    return {id:id,at:at,agent:a.agent,operator:"Dana Okafor",tool:tool,decision:"approve",tier:"gateway",effect:effect,amount:amount,ws:"finops",runId:runId,
+     who:[["Operator","Dana Okafor · usr_01K2A9DQ · org.billing"],["Agent",a.agent+" · "+ag.principal,1],["Run",runId,1],["Task",R.task+" · "+m.purpose]],
+     what:[["Tool version",tool,1],["Amount",amount],["Counterparty","vendor:aws",1]],
+     authority:[["Decision","approve → approved, then allow on token"],["Policy version","pol_v41 (signed)",1],["Rules fired",rules,1],["Mandate",mandate,1],["Approval token",token,1],["Approver reason",reason],["Taint sources","none"]],
+     credential:cred,effectRows:eff,
+     integrity:[["Gateway signature","ed25519 · "+ORG.attester+" · verified",1],["Enforcement tier","gateway — Oxagen carried the credential"]]};
+  };
+  RECEIPTS.push(
+   rc("rcp_01K4W2P7R","2026-09-02 07:12:09.331Z","aws_billing__purchase_savings_plan@2","sp-0a4f91c","$400.00 USD","run_01K4W2N6Q8",
+    m.id+".approval.above_micros",m.id+" · $400.00 reserved, then settled · $"+fmt2(money(m.perPeriod)-400)+" remaining this month","apt_01K4W2L9 · single-use · approver Priya Natarajan",
+    "“One-year compute savings plan, quoted on PO-4471.”",
+    [["Credential grant","cg_01K4W2M3",1],["Minted","AWS STS session · savingsplans:CreateSavingsPlan only"],["TTL","10 minutes, bound to the call id"],["Agent saw","the result. Never the key."]],
+    [["Dispatched","2026-09-02 07:12:09.331Z · savingsplans.amazonaws.com"],["Output validation","pass"],["External effect id","sp-0a4f91c",1]]),
+   rc("rcp_01K4V7D3N","2026-09-01 06:48:52.017Z","stripe__create_payment@4","none — dispatch failed, reservation released","$0.00 USD","run_01K4V7B2K5",
+    m.id+".approval.always_for",m.id+" · reservation released on dispatch failure · $0.00 settled · $"+m.perPeriod+" remaining this month","apt_01K4V7A1 · single-use · approver Priya Natarajan",
+    "“First September run; amount checked against the statement.”",
+    [["Credential grant","cg_01K4V7C8",1],["Minted","restricted key · payment_intents:write"],["TTL","10 minutes, bound to the call id"],["Agent saw","the error. Never the key."]],
+    [["Dispatched","2026-09-01 06:48:52.017Z · api.stripe.com"],["Provider response","503 · not retried; the idempotency key was not reused"],["External effect id","none"]])
+  );
+})();
 
 /* ---- Spend finding dialogs: Evidence and Fix. Both are guarded on S.dlg because the D map is built eagerly. ---- */
 function findingById(id){for(var i=0;i<FINDINGS.length;i++){if(FINDINGS[i].id===id)return FINDINGS[i];}return null;}
