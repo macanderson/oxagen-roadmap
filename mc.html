@@ -403,6 +403,41 @@ code{font-family:var(--mono);font-size:.9em;background:var(--hl);padding:.12em .
 /* attempts ladder */
 tbody tr.att-pass td{background:color-mix(in srgb,var(--st-proven) 9%,transparent)}
 tbody tr.att-pass td:first-child{box-shadow:inset 3px 0 0 var(--st-proven)}
+/* W5 · a tampered head on the flip stage, the pass/fail airlock, the witness ladder */
+.flip-box.crit{border-color:color-mix(in srgb,var(--st-critical) 55%,transparent)}
+.flip-box.crit .w{color:var(--st-critical);font-size:30px}
+.flip-rail .pt.excluded::before{border-color:var(--st-critical)}
+.flip-rail .pt.excluded b{color:var(--st-critical)}
+.airlock{display:grid;grid-template-columns:minmax(0,1fr) 78px minmax(0,1fr);align-items:stretch}
+.chamber{padding:16px;display:grid;gap:12px;align-content:start;min-width:0}
+.chamber.sealed{background:var(--void)}
+.membrane{position:relative;display:grid;place-items:center;min-height:120px;border-left:1px dashed var(--rule);border-right:1px dashed var(--rule);background:repeating-linear-gradient(-45deg,transparent 0 5px,var(--hl) 5px 6px)}
+.membrane .grain{background:var(--panel);border:1px solid var(--st-proven);color:var(--st-proven);border-radius:999px;padding:3px 9px;font-family:var(--mono);font-size:11px;font-weight:700}
+.membrane .grain.bad{border-color:var(--st-failed);color:var(--st-failed)}
+.membrane .ml{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);white-space:nowrap;font-weight:600}
+.redact{display:grid;gap:7px;font-family:var(--mono);font-size:12px}
+.redact .rr{display:grid;grid-template-columns:minmax(72px,auto) minmax(0,1fr);gap:12px;align-items:baseline}
+.redact .rk{color:var(--dim)}
+.redact .rv{color:var(--fg);overflow-wrap:anywhere}
+.redact .rv.x{color:var(--rule);letter-spacing:.08em;user-select:none;overflow:hidden;white-space:nowrap}
+.oneword{border:1px solid var(--border);background:var(--panel);border-radius:10px;padding:20px 16px;display:grid;place-items:center;gap:8px}
+.oneword .w{font-family:var(--mono);font-size:34px;font-weight:700;color:var(--st-proven);line-height:1}
+.oneword .w.bad{color:var(--st-failed)}
+.oneword .c{font-size:11.5px;color:var(--dim);font-family:var(--mono)}
+pre .bad{color:var(--st-failed)}
+@media(max-width:760px){.airlock{grid-template-columns:minmax(0,1fr)}.membrane{min-height:64px;border:0;border-top:1px dashed var(--rule);border-bottom:1px dashed var(--rule)}}
+#viewport.phone .airlock{grid-template-columns:minmax(0,1fr)}
+#viewport.phone .membrane{min-height:64px;border:0;border-top:1px dashed var(--rule);border-bottom:1px dashed var(--rule)}
+.ladder{list-style:none;margin:0;padding:0;display:grid}
+.ladder li{display:grid;grid-template-columns:26px minmax(0,1fr) auto;gap:12px;align-items:start;padding:12px 16px;border-bottom:1px solid var(--border)}
+.ladder li:last-child{border-bottom:0}
+.ladder .sn{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-family:var(--mono);font-size:11px;font-weight:700;border:1px solid color-mix(in srgb,var(--st-proven) 45%,transparent);color:var(--st-proven);background:color-mix(in srgb,var(--st-proven) 11%,transparent)}
+.ladder .st{display:grid;gap:3px;min-width:0}
+.ladder .st b{font-size:13px;font-weight:600;color:var(--fg)}
+.ladder .st span{font-size:12px;color:var(--muted);line-height:1.5}
+.ladder .st .mono{font-size:11.5px;color:var(--body);overflow-wrap:anywhere}
+#viewport.phone .ladder li{grid-template-columns:26px minmax(0,1fr)}
+#viewport.phone .ladder li>.b{grid-column:2;justify-self:start}
 /* proven rows in any runs list */
 tbody tr.flipped td:first-child{box-shadow:inset 3px 0 0 var(--st-proven)}
 tbody tr.flipped{background:linear-gradient(90deg,color-mix(in srgb,var(--st-proven) 8%,transparent),transparent 58%)}
@@ -1652,7 +1687,7 @@ var RUNS = [
  {id:"run_01K5RG6H1L4OIU9Y", agent:"acme.core.release-manager", op:"marcus", ws:"core-platform",
   status:"sealed", turn:9, steps:47, frames:203, cost:"5.08", basis:"gateway_observed", tier:"gateway",
   grade:"full", verdict:"tampered", task:"acme/platform#469", taskTitle:"Release 4.10.2 notes",
-  summary:"Produced the 4.10.2 release notes and opened pull request #469, but 14 frames between seq 88 and 102 fail chain verification, so the record cannot vouch for what the agent did in that window. The notes should be re-derived by a clean run before anyone relies on them.",
+  summary:"Produced the 4.10.2 release notes and opened pull request #469, and the pull request also added an exclude to vitest.config.ts that matched the witness’s path. The witness fingerprint moved between authoring and the run, so the head result was excluded and the verdict is tampered, not failing: nothing is credited until a clean run re-derives the notes.",
   touched:["acme/platform#469","frames 88–102 · unverifiable"], gen:{"model":"claude-haiku-4-5","when":"at seal 07:38:12","frames":203},
   started:"07:02:38", model:"claude-opus-5", cache:0.74, provenSpend:"0.00", ratio:0.58, sealed:"07:38:12"},
  {id:"run_01K5RF2J7M3EDC5F", agent:"acme.finops.invoice-bot", op:"dana", ws:"finops",
@@ -2838,7 +2873,7 @@ function flipBox(cls,k,n,word,ref,rows){
 }
 function flipStage(R){
   var f=R.flip, v=R.verdict, flipped=v==="flipped";
-  var tRes=(v==="flipped"||v==="failing")?"fail":"pass", pRes=flipped?"pass":"fail";
+  var tamp=v==="tampered", tRes=(v==="flipped"||v==="failing"||tamp)?"fail":"pass", pRes=flipped?"pass":tamp?"excluded":"fail";
   var tRef=f?f.targetRef+" @ "+f.targetSha:"main @ a4c91e2", pRef=f?prNum(f)+" @ "+f.prSha:"#482 @ f70b3d9";
   var first=f?f.attempts[0]:null, last=f?f.attempts[f.attempts.length-1]:null, n=f?f.attempts.length:0;
   var L=first?[["attempt","1 of "+n],["at",h(first.at)],["took",dur(first.ms/1000)],["exit",first.exit],["recorded",frameBtn(first.seq,"frame "+first.seq)]]
@@ -2846,7 +2881,7 @@ function flipStage(R){
   var Rr=f?(flipped?[["attempt",n+" of "+n],["at",h(last.at)],["took",dur(last.ms/1000)],["exit",last.exit],["recorded",frameBtn(last.seq,"frame "+last.seq)]]
                    :[["attempts",n+", all "+last.result],["last at",h(last.at)],["exit",last.exit],["recorded",frameBtn(last.seq,"frame "+last.seq)]])
            :[["result","from the witness runner on the head"]];
-  var rightCls=flipped?"pass":(pRes==="pass"?"pass":"fail miss");
+  var rightCls=flipped?"pass":tamp?"crit":(pRes==="pass"?"pass":"fail miss");
   return '<div class="flip-stage'+(flipped?' on':'')+'">'+
    flipBox(tRes==="fail"?"fail":"pass","Before · on the target",f?f.oracle:"test_flip",tRes.toUpperCase(),tRef,L)+
    '<div class="flip-arrow'+(flipped?' on':'')+'" aria-hidden="true"><svg viewBox="0 0 44 44"><path class="ln" d="M3 22h30" fill="none" stroke="currentColor" stroke-width="2"/>'+
@@ -4070,7 +4105,7 @@ function pRun(r){
     "Oxagen minted a run token and the agent has not made its first model call. Nothing is wrong; a run with no frames has cost nothing and is not billable.",
     '<button class="btn" onclick="go(\'#/'+ORG.slug+'/'+S.ws+'\')">Back to Fleet</button>');
 
-  var a=agent(R.agent), t=tab("run","transcript"), govN=govCount();
+  var a=agent(R.agent), t=runTabKey(R), govN=govCount();
   var compacted=R.status==="compacted";
   var fr=FRAMES[Math.min(S.frame,FRAMES.length-1)], rs=runStatus(R);
 
@@ -4449,7 +4484,21 @@ function runTimeline(R){
    '<div class="rt-foot"><span class="grow">Every tick is a frame; the taller ones need a person. Click one to open it in the Player; hover for the record.</span>'+
    '<span>'+bounds.length+' turn'+(bounds.length===1?'':'s')+' in view</span></div></div></div>';
 }
+/* The Run page's tab for this run. A witness run has four tabs: its ladder, its frames, its cost and its chain.
+   proofTab draws the ladder for a witness run, so the ladder answers as "proof" and pRun needs no branch of its own. */
+function runTabKey(R){
+  var t=tab("run","transcript");
+  if(R&&R.witnessFor) return (t==="player"||t==="cost"||t==="chain")?t:"proof";
+  return t==="ladder"?"proof":t;
+}
 function runTabs(R,t){
+  if(R.witnessFor){
+    var P=run(R.witnessFor);
+    var wt=[["ladder","Ladder",P&&P.verdict?P.verdict:"",P&&P.verdict?'<span class="st '+(P.verdict==="flipped"?"ok":"bad")+'"></span>':""],
+      ["player","Frames",R.frames,""],["cost","Cost",usd(R.cost),""],["chain","Chain and seal",R.sealed?"sealed":"live",""]];
+    return '<div class="tabs" role="tablist">'+wt.map(function(x,i){var on=x[0]==="ladder"?t==="proof":t===x[0];
+      return '<button class="tab" role="tab" aria-selected="'+on+'" title="'+(i+1)+'" onclick="S.tab.run=\''+x[0]+'\';render()">'+x[1]+(x[2]!==""?'<span class="n'+(x[0]==="cost"?" money":"")+'">'+h(String(x[2]))+'</span>':'')+x[3]+'</button>';}).join("")+'</div>';
+  }
   var gov=govCount(),parked=0;FRAMES.forEach(function(f){if(f.kind==="policy_decision"&&/approve/.test(f.sum))parked++;});
   var ctxN=0;FRAMES.forEach(function(f){var m=/(\d+) context frames/.exec(f.sum);if(m)ctxN=Math.max(ctxN,+m[1]);});
   var tabs=[["transcript","Transcript",txEntries(R).length,""],["player",gov?"Governed actions":"Player",gov||R.frames,parked?'<span class="st" title="a call is parked for approval"></span>':""],
@@ -4543,7 +4592,7 @@ function txEntries(R){
         res:{ms:a.ms,err:a.result!=="pass",body:(a.result==="pass"?"ok · ":"error: ")+a.note+"\nexit "+a.exit}});
     });
     t+=3;
-    e.push({t:t,kind:"proof",title:"witness "+R.flip.witness+" · flipped at attempt "+R.flip.attempts.length,body:"fingerprint "+R.flip.fingerprint+" · "+R.flip.heldOut+" held out · sealed "+R.flip.sealedAt});
+    e.push({t:t,kind:"proof",title:"witness "+R.flip.witness+" · "+(R.verdict==="flipped"?"flipped at attempt "+R.flip.attempts.length:R.verdict+" after "+R.flip.attempts.length+" attempt"+(R.flip.attempts.length===1?"":"s")),body:"fingerprint "+R.flip.fingerprint+" · "+R.flip.heldOut+" held out · sealed "+R.flip.sealedAt});
   }
   if(R.summary){t+=4;e.push({t:t,kind:"text",body:R.summary});}
   t+=0.2;e.push({t:t,kind:"usage",meta:{model:R.model,tin:null,cache:null,tout:null,cost:parseFloat(R.cost)||0,req:"rollup · "+R.frames+" frames"}});
@@ -5411,6 +5460,7 @@ function ctxDetail(){
 }
 
 function proofTab(R){
+  if(R.witnessFor) return ladderTab(R);
   if(!R.verdict){
     return '<div class="panel pad"><p class="eyebrow q">No verdict yet</p>'+
      '<p>The witness for <span class="mono">'+h(R.task)+'</span> has been authored and proven to fail on the pristine target. It runs on the pull request head when this run opens one.</p>'+
@@ -5426,12 +5476,18 @@ function proofTab(R){
     tampered:["critical","The witness's filesystem fingerprint moved during the run. The ground under the oracle was changed, so nothing is credited."],
     unverified:["q","The runner could not reach a conclusion. No model resolved it; unverified is the honest answer."],
     waived:["q","Policy waived proof for this class of change. Nothing was tried and nothing is claimed."]}[R.verdict];
-  var f=R.flip, flipped=R.verdict==="flipped", n=f?f.attempts.length:0, lead=f?flipLead(f):null;
+  var f=R.flip, flipped=R.verdict==="flipped", tampered=R.verdict==="tampered", n=f?f.attempts.length:0, lead=f?flipLead(f):null;
   var wit=f?f.witness:"wit_01K5RQ8M4", tSha=f?f.targetSha:"a4c91e2", tRef=f?f.targetRef:"main", pRef=f?f.prRef:"refs/pull/482/head", pSha=f?f.prSha:"f70b3d9", dig=f?f.cmdDigest:"sha256:71bd…0c4e";
+  var W=proofWitnessRun(R), T=f&&f.tamper;
+  var tamperBox=T?'<div class="warn tamper-box" style="margin-top:14px"><b>Tamper exclusion broken.</b> '+
+     '<span class="mono">'+h(T.file)+'</span> changed between authoring and the run: '+h(T.change)+'. '+
+     'The witness fingerprint taken at authoring (<span class="mono">'+h(proofShort(T.fingerprintAuthored))+'</span>) does not match the one taken at run '+
+     '(<span class="mono">'+h(proofShort(T.fingerprintAtRun))+'</span>), so the head result is <b>excluded</b> and the verdict is <b>tampered</b>, not <b>failing</b> and not <b>flipped</b>. '+
+     'Detected '+h(T.detectedAt)+' · '+frameBtn(T.detectedSeq,"frame "+T.detectedSeq)+'.</div>':'';
   var stage='<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>The flip</h3>'+
     '<div class="sp">'+(f?'<span class="b b-q mono">'+h(f.oracle)+'</span><span class="b b-q">'+h(f.testKind)+' · '+h(f.runner)+'</span>'+
-    '<span class="b '+(flipped?'b-proven':'b-failed')+'"><span class="d"></span>'+n+' attempt'+(n===1?'':'s')+(flipped?' · flipped on '+n:' · never flipped')+'</span>':'')+'</div></div>'+
-    '<div class="panel-b">'+flipStage(R)+
+    '<span class="b '+(flipped?'b-proven':tampered?'b-critical':'b-failed')+'"><span class="d"></span>'+n+' attempt'+(n===1?'':'s')+(flipped?' · flipped on '+n:' · never flipped')+'</span>':'')+'</div></div>'+
+    '<div class="panel-b">'+flipStage(R)+tamperBox+
     (f?'<div class="hr"></div><div class="row" style="justify-content:space-between;flex-wrap:wrap;gap:8px"><span class="dim" style="font-size:12px">Same normalized command on both sides · <span class="mono">'+h(f.cmd)+'</span></span>'+
        '<span class="mono dim" style="font-size:11px">'+h(dig)+'</span></div>':'')+'</div></div>';
   var rail=f?'<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>When it happened</h3>'+
@@ -5441,11 +5497,13 @@ function proofTab(R){
   var ladder=f?'<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Attempts</h3><span class="mono dim" style="margin-left:auto;font-size:11px">'+n+' run'+(n===1?'':'s')+' of the witness command in turn '+f.turn+'</span></div>'+
     '<div class="tw"><table><thead><tr><th>#</th><th>Result</th><th>At</th><th class="num">Took</th><th class="num">Exit</th><th>Frame</th><th>What the runner saw</th></tr></thead><tbody>'+
     f.attempts.map(function(a){return '<tr class="'+(a.result==="pass"?"att-pass":"")+'"><td class="mono">'+a.n+'</td>'+
-     '<td><span class="b '+(a.result==="pass"?"b-proven":"b-failed")+'"><span class="d"></span>'+a.result+(a.result==="pass"?" · flip":"")+'</span></td>'+
-     '<td class="mono" style="font-size:11px">'+h(a.at)+'</td><td class="num mono">'+dur(a.ms/1000)+'</td><td class="num mono">'+a.exit+'</td>'+
+     '<td><span class="b '+(a.result==="pass"?"b-proven":a.result==="excluded"?"b-critical":"b-failed")+'"><span class="d"></span>'+a.result+(a.result==="pass"?" · flip":"")+'</span></td>'+
+     '<td class="mono" style="font-size:11px">'+h(a.at)+'</td><td class="num mono">'+dur(a.ms/1000)+'</td><td class="num mono">'+h(a.exit)+'</td>'+
      '<td>'+frameBtn(a.seq,"frame "+a.seq)+'</td><td class="dim" style="font-size:12px">'+h(a.note)+'</td></tr>';}).join("")+
     '</tbody></table></div></div>':'';
-  var prov='<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Provenance</h3><span class="b b-q" style="margin-left:auto">'+(f&&f.fingerprint==="held"?'<span class="d" style="background:var(--st-proven)"></span>fingerprint held':R.verdict==="tampered"?'<span class="d" style="background:var(--st-critical)"></span>fingerprint broken':'')+'</span></div><div class="panel-b"><dl class="kv">'+
+  /* probe attempts are counted off this run's frames; the guarantee behind the zero is the assurance case that tries it */
+  var probes=FRAMES.filter(function(x){return /witness_probe/.test(x.sum||"");}).length, pc=proofProbeCase();
+  var prov='<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Provenance</h3><span class="b b-q" style="margin-left:auto">'+(f&&f.fingerprint==="held"?'<span class="d" style="background:var(--st-proven)"></span>fingerprint held':tampered?'<span class="d" style="background:var(--st-critical)"></span>fingerprint broken':'')+'</span></div><div class="panel-b"><dl class="kv">'+
     '<dt>Witness</dt><dd class="mono">'+h(wit)+' · oracle '+h(f?f.oracle:"test_flip")+'</dd>'+
     (f?'<dt>Test</dt><dd>'+h(f.testKind)+' · <span class="mono">'+h(f.runner)+'</span></dd>':'')+
     '<dt>Before → after</dt><dd class="mono">'+h(tRef)+' @ '+h(tSha)+' → '+h(pRef)+' @ '+h(pSha)+'</dd>'+
@@ -5454,34 +5512,198 @@ function proofTab(R){
     (f?'<dt>Sealed</dt><dd>'+frameBtn(f.sealSeq,"frame "+f.sealSeq)+' · '+h(f.sealedAt)+' · segment <span class="mono">'+h(f.segment)+'</span></dd>':'')+
     '<dt>The worker saw</dt><dd>the word <span class="mono">'+(flipped?"pass":"fail")+'</span>. No test name, no assertion, no values, no path.</dd>'+
     '<dt>Witness stored in</dt><dd>the witness runner — not in the repo, not in the PR, not on any tool this agent can reach</dd>'+
-    '<dt>Probe attempts</dt><dd>0 · a tool call resolving to witness storage is denied and raises <span class="mono">witness_probe</span></dd>'+
+    '<dt>Probe attempts</dt><dd>'+probes+' on this run · a tool call resolving to witness storage is denied and raises <span class="mono">witness_probe</span>'+
+     (pc?' · tested by the assurance case “'+h(pc.c)+'”, <span class="mono">'+h(pc.r)+'</span> in '+h(ASSURANCE.version):'')+'</dd>'+
     '<dt>Held-out witnesses</dt><dd>'+h(f?f.heldOut:"2 of 5")+' on this task, never reported to the worker at all</dd></dl>'+
     '<div class="row" style="margin-top:14px">'+(f&&f.flippedAt?'<button class="btn sm" onclick="S.tab.run=\'player\';S.frame='+f.flipSeq+';render()">Open the flip frame</button>':'')+
     '<button class="btn sm" onclick="S.tab.run=\'chain\';render()">Chain and seal</button>'+
     '<button class="btn sm" onclick="act(\'Verifier script and key ids downloaded. Re-derives the flip from the segment, offline.\')">Verify offline</button></div></div></div>';
-  return stage+rail+'<div class="split"><div><div class="panel"><div class="panel-h"><h3>Verdict</h3>'+verdictBadge(R.verdict,R)+'</div>'+
+  var wcard=W?'<div class="panel" id="witness-run-card"><div class="panel-h"><h3>Witness run</h3></div><div class="panel-b"><dl class="kv">'+
+    '<dt>Run</dt><dd><a class="mono" href="#/'+ORG.slug+'/'+W.ws+'/runs/'+W.id+'" onclick="S.tab.run=\'ladder\'">'+h(W.id)+'</a></dd>'+
+    '<dt>Agent</dt><dd class="mono">'+h(W.agent)+' · service principal</dd>'+
+    '<dt>Operator</dt><dd>'+h(PEOPLE[W.op]?PEOPLE[W.op].name:W.op)+(W.op===R.op?' — the worker’s operator':'')+'</dd>'+
+    '<dt>Cost</dt><dd>'+usd(W.cost)+' USD · recorded on that run and billed at zero; witness runs are free</dd></dl></div></div>'
+   :f&&f.witnessRun?'<div class="panel" id="witness-run-card"><div class="panel-h"><h3>Witness run</h3></div><div class="panel-b"><dl class="kv">'+
+    '<dt>Run</dt><dd class="mono">'+h(f.witnessRun)+'</dd><dt>Listed here</dt><dd>no · it is older than the runs this workspace shows</dd></dl></div></div>':'';
+  return stage+rail+proofAirlock(R)+'<div class="split"><div><div class="panel"><div class="panel-h"><h3>Verdict</h3>'+verdictBadge(R.verdict,R)+'</div>'+
    '<div class="panel-b"><p style="font-size:15px;color:var(--fg);margin-bottom:16px">'+h(vd[1])+'</p>'+
-   '<pre>{\n  <span class="k">"kind"</span>: <span class="s">"proof.observed"</span>,\n  <span class="k">"body"</span>: {\n'+
-   '    <span class="k">"witness_id"</span>: <span class="s">"'+h(wit)+'"</span>, <span class="k">"oracle"</span>: <span class="s">"'+h(f?f.oracle:"test_flip")+'"</span>,\n'+
-   (f?'    <span class="k">"test_kind"</span>: <span class="s">"'+h(f.testKind)+'"</span>, <span class="k">"runner"</span>: <span class="s">"'+h(f.runner)+'"</span>,\n':'')+
-   '    <span class="k">"target_ref"</span>: <span class="s">"'+h(tRef)+'"</span>, <span class="k">"target_sha"</span>: <span class="s">"'+h(tSha)+'"</span>,\n'+
-   '    <span class="k">"pr_ref"</span>: <span class="s">"'+h(pRef)+'"</span>, <span class="k">"pr_sha"</span>: <span class="s">"'+h(pSha)+'"</span>,\n'+
-   '    <span class="k">"command_normalized_digest"</span>: <span class="s">"'+h(dig)+'"</span>,\n'+
-   '    <span class="k">"target_result"</span>: <span class="s">"'+(R.verdict==="flipped"||R.verdict==="failing"?"fail":"pass")+'"</span>, '+
-   '<span class="k">"pr_result"</span>: <span class="s">"'+(R.verdict==="flipped"?"pass":"fail")+'"</span>,\n'+
-   (f?'    <span class="k">"attempts"</span>: '+n+', <span class="k">"flip_attempt"</span>: '+(flipped?n:'null')+', <span class="k">"flip_frame_seq"</span>: '+(f.flipSeq==null?'null':f.flipSeq)+', <span class="k">"turn_end_frame_seq"</span>: '+f.turnEndSeq+',\n':'')+
-   '    <span class="k">"verdict"</span>: <span class="s">"'+h(R.verdict)+'"</span>,\n'+
-   '    <span class="k">"tamper_exclusion"</span>: <span class="s">"'+(R.verdict==="tampered"?"broken":"held")+'"</span>, <span class="k">"disclosure_grain"</span>: <span class="s">"L0"</span>,\n'+
-   '    <span class="k">"witness_run_id"</span>: <span class="s">"run_01K5RQ4B9C7XTN2P"</span>\n  }\n}</pre>'+
+   proofJson(R)+
    '<div class="note" style="margin-top:14px">The verdict is never a model call. The witness <b>author</b> is a complex-tier model call because it creates the oracle; the verdict is the runner’s.</div>'+
    '</div></div>'+ladder+'</div>'+
-   '<div>'+prov+
-    '<div class="panel"><div class="panel-h"><h3>Witness run</h3></div><div class="panel-b"><dl class="kv">'+
-    '<dt>Run</dt><dd><a class="mono" href="#/'+ORG.slug+'/core-platform/runs/run_01K5RQ4B9C7XTN2P">run_01K5RQ4B9C7XTN2P</a></dd>'+
-    '<dt>Agent</dt><dd class="mono">witness-runner (service principal)</dd>'+
-    '<dt>Operator</dt><dd>Marcus Bell — the worker’s operator</dd>'+
-    '<dt>Cost</dt><dd>$2.87 USD · billed at zero; the customer never pays for Oxagen proving work</dd></dl></div></div></div></div>';
+   '<div>'+prov+wcard+'</div></div>';
 }
+/* The seq and time of the proof frame: the flip when there was one, otherwise the last attempt. */
+function proofSeq(f){var a=f.attempts[f.attempts.length-1];return f.flipSeq!=null?f.flipSeq:(a?a.seq:f.sealSeq);}
+function proofShort(d){d=String(d||"");return d.length>26?d.slice(0,19)+"…"+d.slice(-4):d;}
+function proofWitnessRun(R){for(var i=0;i<RUNS.length;i++){if(RUNS[i].witnessFor===R.id)return RUNS[i];}return null;}
+function proofProbeCase(){for(var i=0;i<ASSURANCE.cases.length;i++){if(ASSURANCE.cases[i].key==="witness_probe")return ASSURANCE.cases[i];}return null;}
+/* the proof.observed envelope: body fields the record carries, then the content digest and the chain link */
+function proofJson(R){
+  var f=R.flip, v=R.verdict, K=function(k){return '<span class="k">"'+k+'"</span>: ';}, S_=function(s){return '<span class="s">"'+h(s)+'"</span>';};
+  var tRes=(v==="flipped"||v==="failing"||v==="tampered")?"fail":"pass", pRes=v==="flipped"?"pass":v==="tampered"?"excluded":"fail";
+  var wit=f?f.witness:"wit_01K5RQ8M4", W=proofWitnessRun(R), wrun=W?W.id:f&&f.witnessRun?f.witnessRun:null;
+  var L=[];
+  L.push(K("witness_id")+S_(wit)+', '+K("oracle")+S_(f?f.oracle:"test_flip"));
+  if(f) L.push(K("test_kind")+S_(f.testKind)+', '+K("runner")+S_(f.runner));
+  L.push(K("target_ref")+S_(f?f.targetRef:"main")+', '+K("target_sha")+S_(f?f.targetSha:"a4c91e2"));
+  L.push(K("pr_ref")+S_(f?f.prRef:"refs/pull/482/head")+', '+K("pr_sha")+S_(f?f.prSha:"f70b3d9"));
+  L.push(K("command_normalized_digest")+S_(f?f.cmdDigest:"sha256:71bd…0c4e"));
+  L.push(K("target_result")+S_(tRes)+', '+K("pr_result")+S_(pRes));
+  if(f) L.push(K("attempts")+f.attempts.length+', '+K("flip_attempt")+(v==="flipped"?f.attempts.length:'null')+', '+K("flip_frame_seq")+(f.flipSeq==null?'null':f.flipSeq)+', '+K("turn_end_frame_seq")+f.turnEndSeq);
+  L.push(K("verdict")+S_(v));
+  if(f&&f.failFingerprint) L.push(K("fail_fingerprint")+S_(f.failFingerprint));
+  if(f&&f.failFingerprint) L.push(K("pass_output_digest")+(f.passDigest?S_(f.passDigest):'null'));
+  L.push(K("tamper_exclusion")+S_(v==="tampered"?"broken":"held")+', '+K("disclosure_grain")+S_(f&&f.grain||"L0"));
+  L.push(K("witness_run_id")+(wrun?S_(wrun):'null'));
+  if(f&&f.attest) L.push(K("runner_attestation")+'{ '+K("key_id")+S_(f.attest.keyId)+',\n      '+K("signature")+S_(f.attest.signature)+' }');
+  var head='{\n  '+K("kind")+S_("proof.observed")+','+(f?'\n  '+K("seq")+'<span class="proof-seq">'+proofSeq(f)+'</span>,':'')+'\n  '+K("body")+'{\n    '+L.join(',\n    ')+'\n  }';
+  var tail=f&&f.hash?',\n  '+K("content")+'{ '+K("digest")+S_(f.contentDigest)+', '+K("redactions")+'[] },\n  '+K("prev_hash")+S_(f.prevHash)+',\n  '+K("hash")+S_(f.hash):'';
+  return '<pre class="proof-json">'+head+tail+'\n}</pre>';
+}
+/* The pass/fail airlock. Left, what the witness runner knew, sealed; right, the whole tool result the
+   agent received and the prompt it landed in. The frames are the ones after the proof frame. */
+function proofAirlock(R){
+  var f=R.flip; if(!f) return '';
+  var word=R.verdict==="flipped"?"pass":"fail", bad=word!=="pass", N=proofSeq(f), W=proofWitnessRun(R), g=f.grain||"L0";
+  var row=function(k,v,x){return '<div class="rr"><span class="rk">'+k+'</span><span class="rv'+(x?' x':'')+'">'+v+'</span></div>';};
+  var bar=function(n){return new Array(n+1).join("█");};
+  var cls=bad?'bad':'s';
+  return '<div class="panel" id="airlock" style="margin-bottom:14px"><div class="panel-h"><h3>The pass / fail airlock</h3>'+
+   '<span class="b b-approval mono">disclosure grain '+h(g)+'</span>'+
+   '<span class="mono dim" style="margin-left:auto;font-size:11px">frame '+N+' recorded · frame '+(N+1)+' delivered</span></div>'+
+   '<div class="airlock"><div class="chamber sealed"><p class="eyebrow q" style="margin:0">What the witness runner knew</p>'+
+    '<div class="redact">'+row("witness",bar(16),1)+row("test id",bar(22),1)+row("assertion",bar(28),1)+row("expected",bar(10),1)+row("actual",bar(16),1)+row("path",bar(20),1)+row("verdict",h(R.verdict))+'</div>'+
+    '<p class="dim" style="font-size:12px;margin:0">Authored, stored and run inside the witness runner. Not in the repository, not in the pull request, not in any context frame, not reachable from the toolbelt.'+
+    (W?' Recorded in full on <a class="mono" href="#/'+ORG.slug+'/'+W.ws+'/runs/'+W.id+'" onclick="S.tab.run=\'ladder\'">'+h(W.id)+'</a>.':'')+'</p></div>'+
+   '<div class="membrane" aria-hidden="true"><span class="grain'+(bad?' bad':'')+'">'+word+'</span><span class="ml">'+h(g)+' · one word</span></div>'+
+   '<div class="chamber"><p class="eyebrow q" style="margin:0">What the agent received</p>'+
+    '<div class="oneword"><span class="w'+(bad?' bad':'')+'" id="airlock-word">'+word+'</span><span class="c">'+word.length+' characters · the whole tool result</span></div>'+
+    '<pre><span class="c">// frame '+(N+1)+' · tool_call · oxagen.verify@1</span>\n{ <span class="k">"result"</span>: <span class="'+cls+'">"'+word+'"</span> }\n\n'+
+    '<span class="c">// frame '+(N+2)+' · model.request · messages[-1]</span>\n{ <span class="k">"role"</span>: <span class="s">"user"</span>,\n  <span class="k">"content"</span>: [ { <span class="k">"type"</span>: <span class="s">"tool_result"</span>,\n    <span class="k">"content"</span>: <span class="'+cls+'">"'+word+'"</span> } ] }</pre>'+
+    '<p class="dim" style="font-size:12px;margin:0">No test name, no assertion, no expected or actual value, no reproduction, no path. Raising the grain above <span class="mono">L0</span> is a policy decision a person makes, recorded as a security event.</p></div></div></div>';
+}
+/* ---- the witness run: a run of the witness runner service principal. Its Ladder tab reads the
+   worker's flip record, so the two runs cannot tell different stories about the same proof. ---- */
+function ladderTab(R){
+  var P=run(R.witnessFor), f=P&&P.flip, L=R.ladder||{};
+  if(!f) return '<div class="panel pad"><p class="eyebrow q">No ladder</p><p>The run this witness was for is not on record here.</p></div>';
+  var atts=f.attempts, last=atts[atts.length-1], flipped=P.verdict==="flipped", k=atts.length, word=flipped?"pass":"fail";
+  var op=PEOPLE[R.op], opName=op?op.name:R.op, total=parseFloat(R.cost), both=parseFloat(P.cost)+total;
+  var span=tsec(R.sealed)-tsec(R.started);
+  var badge=function(c,t){return '<span class="b '+c+'"><span class="d"></span>'+h(t)+'</span>';};
+  var steps=[
+   ["Author the witness","Read task "+h(P.task)+" and its acceptance criteria, the <span class=\"mono\">"+h(f.targetRef)+"</span> code graph and the workspace’s steering. Produced a command, an oracle kind and an expected fail mode. This is the one model call the plane makes: the author is a model call; the verdict never is.",
+     h(f.witness)+" · "+h(f.oracle)+" · "+h(R.model)+", complex tier",'<span class="b b-q mono">$'+h(L.authorCost)+'</span>'],
+   ["Fingerprint for tamper exclusion","The witness’s filesystem identity is captured before the ladder runs, so a pull request that edits the test harness, adds a skip, or excludes the witness’s path is detected.",
+     h(f.fingerprintAuthored),badge("b-allowed","armed")],
+   ["Prove it fails on the pristine target","<span class=\"mono\">"+h(f.targetRef)+"</span> at <span class=\"mono\">"+h(f.targetSha)+"</span>. A witness that does not fail here is discarded and re-authored, and is never charged to the worker.",
+     "fail · fingerprint "+h(proofShort(f.failFingerprint)),badge("b-failed","fail")],
+   ["Run on the pull request head","<span class=\"mono\">"+h(f.prRef)+"</span> at <span class=\"mono\">"+h(f.prSha)+"</span>, same environment, same normalized command, once per verify call from the worker: "+k+" run"+(k===1?"":"s")+", "+atts.map(function(a){return a.result;}).join(", ")+".",
+     (f.passDigest?"pass · output digest "+h(proofShort(f.passDigest)):last.result)+" · last at "+h(last.at),badge(flipped?"b-proven":"b-failed",last.result)],
+   ["Re-fingerprint and rule on tampering","The identity captured at step 2 still matches. Tamper exclusion "+(f.fingerprint==="held"?"held, so the flip is admissible.":"broke, so no head result is admissible."),
+     "",badge(f.fingerprint==="held"?"b-allowed":"b-critical",f.fingerprint)],
+   ["Scrub the brief to grain "+h(f.grain||"L0"),"Everything but the verdict is removed before anything leaves this plane. The scrubber degrades a brief by one grain rather than emit one carrying a test identifier, a literal value or a witness path, and the brief is stored beside the sealed material it was redacted from.",
+     "emitted: "+word+" · "+word.length+" characters",badge("b-approval",f.grain||"L0")],
+   ["Stamp the worker’s run","The verdict lands on <a class=\"mono\" href=\"#/"+ORG.slug+"/"+P.ws+"/runs/"+P.id+"\" onclick=\"S.tab.run='proof'\">"+h(P.id)+"</a> as <span class=\"mono\">proof.observed</span> at seq <span class=\"ladder-stamp\">"+proofSeq(f)+"</span>, with this runner’s attestation <span class=\"mono\">"+h(f.attest?f.attest.keyId:"")+"</span> embedded, so the proof verifies offline without trusting the worker’s harness.",
+     "",badge(flipped?"b-proven":"b-failed",P.verdict)]
+  ];
+  return '<div class="callout" style="margin-bottom:14px">This is a run like any other: its own frames, its own seal, its own cost, replayable, and attributed to <b>'+h(opName)+'</b>, the worker’s operator, so the price of proof is never hidden. '+
+   'Its principal is <span class="mono">'+h(R.agent)+'</span>, which Oxagen hosts; it is not one of this workspace’s registered identities.</div>'+
+   '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Deterministic-first ladder</h3>'+verdictBadge(P.verdict,P)+
+    '<span class="mono dim" style="margin-left:auto;font-size:11px">'+dur(span)+' end to end · '+h(R.started)+' → '+h(R.sealed)+'</span></div>'+
+   '<ol class="ladder">'+steps.map(function(s,i){return '<li><span class="sn">'+(i+1)+'</span><span class="st"><b>'+s[0]+'</b><span>'+s[1]+'</span>'+(s[2]?'<span class="mono">'+s[2]+'</span>':'')+'</span>'+s[3]+'</li>';}).join("")+'</ol></div>'+
+   '<div class="grid g2"><div class="panel"><div class="panel-h"><h3>Isolation</h3></div><div class="panel-b"><dl class="kv">'+
+    '<dt>Plane</dt><dd>'+h(L.plane)+'</dd><dt>Harness</dt><dd class="mono">'+h(L.harness)+'</dd>'+
+    '<dt>Credentials</dt><dd>its own; the worker’s run token is not accepted here</dd>'+
+    '<dt>Network to worker</dt><dd>none</dd><dt>Filesystem to worker</dt><dd>none</dd><dt>Model access</dt><dd>the author call only</dd></dl></div></div>'+
+   '<div class="panel" id="ladder-cost"><div class="panel-h"><h3>Cost of proof</h3></div><div class="panel-b"><dl class="kv">'+
+    '<dt>Author call</dt><dd>$'+h(L.authorCost)+' · '+tokn(L.authorIn)+' in / '+tokn(L.authorOut)+' out</dd>'+
+    '<dt>Ladder compute</dt><dd>$'+h(L.computeCost)+' · '+L.envs+' environments, '+L.computeSec+' s</dd>'+
+    '<dt>Total</dt><dd><b class="ladder-total" style="color:var(--fg)">'+usd(R.cost)+'</b> USD · <span class="basis">'+h(R.basis)+'</span> · billed at zero</dd>'+
+    '<dt>Attributed to</dt><dd>'+h(opName)+', not the witness runner</dd>'+
+    '<dt>Share of the proven work</dt><dd>'+pct(total,both)+' of $'+both.toFixed(2)+' spent to prove '+h(prNum(f))+'</dd></dl></div></div></div>';
+}
+
+/* ---- W5 · proof records. The witness run belongs to the witness runner, a service principal Oxagen
+   hosts. It is not pushed to AGENTS: WS.agents counts the identities a workspace registered, and a
+   workspace cannot register, steer or deregister the runner. agent() returns null for it, and every
+   Run page reader already allows that. ---- */
+RUNS.push({id:"run_01K5RQ5W7T2HVN9K", agent:"acme.core.witness-runner", op:"marcus", ws:"core-platform",
+  status:"sealed", turn:1, steps:7, frames:64, cost:"0.61", basis:"gateway_observed", tier:"gateway",
+  grade:"full", verdict:null, task:"acme/platform#482", taskTitle:"Witness ladder: release notes contract",
+  summary:"Authored witness wit_01K5RQ8M4 for the release-notes contract, proved it fails on main at a4c91e2, and ran it on the head of pull request #482 each time the worker asked. The third run passed, the fingerprint held, and the verdict left this plane as the single word pass, stamped onto run_01K5RQ4B9C7XTN2P.",
+  touched:["wit_01K5RQ8M4","run_01K5RQ4B9C7XTN2P · proof.observed","acme/platform · read only"], gen:{"model":"claude-haiku-4-5","when":"at seal 09:09:36","frames":64},
+  started:"09:03:12", model:"claude-opus-5", cache:0, provenSpend:"0.00", ratio:1, sealed:"09:09:36",
+  witnessFor:"run_01K5RQ4B9C7XTN2P",
+  ladder:{harness:"Oxagen witness runner 1.6.2", plane:"ephemeral, one per witness run · inside the customer’s plane where one is dedicated",
+   authorCost:"0.4420", computeCost:"0.1680", authorIn:9640, authorOut:3982, computeSec:68, envs:2}});
+RUNGRAPH["run_01K5RQ5W7T2HVN9K"]={
+  repos:[{name:"acme/platform", ref:"a4c91e2 main · f70b3d9 refs/pull/482/head", note:"checked out read-only in two environments; nothing written", edge:"observed", fr:[14,31]}],
+  issues:[{ref:"acme/platform#482", title:"Cut 4.11.0 release notes", rel:"the witness was authored from this task", edge:"stated"}],
+  artifacts:[{kind:"witness", ref:"wit_01K5RQ8M4", title:"authored, fingerprinted, fail on main, pass on the head", state:"sealed", edge:"observed", fr:[3,19,57]}],
+  files:[]};
+FRAMES_BY_RUN["run_01K5RQ5W7T2HVN9K"]=[
+ {seq:0,kind:"agent_start",tier:"gateway",cost:null,t:"09:03:12.004",sum:"Oxagen witness runner 1.6.2 · ephemeral plane · own credentials · no network or filesystem path to the worker"},
+ {seq:1,kind:"context.assembled",tier:"gateway",cost:null,t:"09:03:12.610",sum:"task acme/platform#482 and its acceptance criteria · main code graph · workspace steering · 9,640 tok"},
+ {seq:2,kind:"model.request",tier:"gateway",cost:null,t:"09:03:12.702",sum:"author call · claude-opus-5 · complex tier · the only model access this plane has"},
+ {seq:3,kind:"model.response",tier:"gateway",cost:"0.4420",t:"09:03:29.915",sum:"witness wit_01K5RQ8M4 · oracle test_flip · expected fail mode declared · in 9,640 · out 3,982",usage:{input_uncached:9640,cache_read:0,output:3982}},
+ {seq:6,kind:"witness.fingerprint",tier:"gateway",cost:null,t:"09:03:30.380",sum:"filesystem identity captured · sha256:af10…201b · tamper exclusion armed"},
+ {seq:14,kind:"witness.run",tier:"gateway",cost:null,t:"09:03:31.020",sum:"pristine target · main @ a4c91e2 · the witness must fail here"},
+ {seq:19,kind:"proof.observed",tier:"gateway",cost:null,t:"09:03:55.431",sum:"target result fail · fail fingerprint sha256:d92a…0c14 · witness admitted"},
+ {seq:31,kind:"witness.run",tier:"gateway",cost:null,t:"09:07:37.722",sum:"refs/pull/482/head @ f70b3d9 · run 1 · same normalized command"},
+ {seq:33,kind:"proof.observed",tier:"gateway",cost:null,t:"09:07:41.902",sum:"PR result fail · the worker is told: fail"},
+ {seq:44,kind:"witness.run",tier:"gateway",cost:null,t:"09:08:43.288",sum:"refs/pull/482/head @ f70b3d9 · run 2"},
+ {seq:46,kind:"proof.observed",tier:"gateway",cost:null,t:"09:08:47.310",sum:"PR result fail · the worker is told: fail"},
+ {seq:55,kind:"witness.run",tier:"gateway",cost:null,t:"09:09:29.457",sum:"refs/pull/482/head @ f70b3d9 · run 3"},
+ {seq:57,kind:"proof.observed",tier:"gateway",cost:null,t:"09:09:33.201",sum:"PR result pass · output digest sha256:36ce…f2b3"},
+ {seq:59,kind:"witness.fingerprint",tier:"gateway",cost:null,t:"09:09:33.260",sum:"re-fingerprint · tamper exclusion held"},
+ {seq:60,kind:"witness.scrub",tier:"gateway",cost:null,t:"09:09:33.330",sum:"brief scrubbed to L0 · emitted 4 characters: pass"},
+ {seq:61,kind:"witness.stamp",tier:"gateway",cost:null,t:"09:09:33.418",sum:"proof.observed stamped onto run_01K5RQ4B9C7XTN2P at seq 71 · runner attestation embedded"},
+ {seq:62,kind:"agent_stop",tier:"gateway",cost:null,t:"09:09:35.880",sum:"outcome completed · plane destroyed"},
+ {seq:63,kind:"checkpoint",tier:"gateway",cost:null,t:"09:09:36.004",sum:"seal · merkle sha256:7f0a…9145 · countersigned on ingest"}];
+/* the flipped run's proof frame, in full */
+(function(){
+  var f=run("run_01K5RQ4B9C7XTN2P").flip;
+  f.grain="L0"; f.witnessRun="run_01K5RQ5W7T2HVN9K";
+  f.fingerprintAuthored="sha256:af10c39e82b7d5460c1fa7e39025b8d47613ce0a9f28b5d061ac74e3f985201b";
+  f.failFingerprint="sha256:d92a6f13b804c7e5a1fd20983c64be7710da5f82e93b1c6047ad8e2f5b930c14";
+  f.passDigest="sha256:36ce8a04d71f9b2530ae64c8917fd3b0e25a7c61048df39b2ce7150a8d64f2b3";
+  f.attest={keyId:"kms:acme/witness-runner/attest/ed25519/v3",signature:"MEUCIQC3k1vR9pW0sT4yHn6bQ2dXfLm8uJ7aZgN5cE1oPxY0AiBd2Rj9FqK6lT8mHs3vCw7nUxYpZ4bG1dA0eNkQj5rMhg=="};
+  f.contentDigest="sha256:5ea19c73b0d248f61ca307e94fb582d06731ae4c9820df5b13e6a7048cf29b5d";
+  f.prevHash="sha256:0c4d719ea36f8b25107cd94ba2f8e63057d1ac4e9b2036fd581ea47c93b6208f";
+  f.hash="sha256:b7e0243f915ac68d0b3e57fa24c91d806e5b3729af1c0d48e962735bac081f6a";
+})();
+/* the tampered run: the pull request moved the ground under the witness, so the head was excluded */
+(function(){
+  var R=run("run_01K5RG6H1L4OIU9Y");
+  R.touched=["acme/platform#469","vitest.config.ts · +1 −0","wit_01K5RG2T7 · excluded"];
+  R.flip={oracle:"test_flip", testKind:"contract test", runner:"vitest 3.2", cmd:"pnpm vitest run packages/release/notes.contract.test.ts",
+   cmdDigest:"sha256:71bd…0c4e", witness:"wit_01K5RG2T7", targetRef:"main", targetSha:"7d31f0a", prRef:"refs/pull/469/head", prSha:"b58e2c4",
+   turn:9, turnStart:"07:31:05.220", turnStartSeq:180, flippedAt:null, flipSeq:null, turnEnd:"07:37:40.114", turnEndSeq:199,
+   sealedAt:"07:38:12.480", sealSeq:202, fingerprint:"broken", segment:"seg_01K5RG6H1L4OIU9Y", heldOut:"1 of 3", grain:"L0", witnessRun:"run_01K5RG4M8T2QWX7B",
+   attempts:[{n:1,result:"excluded",at:"07:34:18.903",seq:188,ms:2210,exit:"—",note:"tamper exclusion broke before the head ran · nothing credited · the worker was told: fail"}],
+   tamper:{file:"vitest.config.ts", change:"+1 −0 · test.exclude gained \"**/release/**/*.contract.test.ts\", which matches the witness’s path",
+    fingerprintAuthored:"sha256:c47d20e9a1f38b6250de7c19b4a8f03e6d21957cb0e4a3f81d6629b57e0c3a18",
+    fingerprintAtRun:"sha256:53e7b81f0da24c96b0f8e1537ac4d6920b85fe31c7a0d649f2e38b015c7da4e6", detectedAt:"07:34:16.551", detectedSeq:187},
+   fingerprintAuthored:"sha256:c47d20e9a1f38b6250de7c19b4a8f03e6d21957cb0e4a3f81d6629b57e0c3a18",
+   failFingerprint:"sha256:8c1e05af73d2946b0fe5ab3178c204de91735fa6b0e82d41c539706ab1de2f83", passDigest:null,
+   attest:{keyId:"kms:acme/witness-runner/attest/ed25519/v3",signature:"MEQCIFq7pR2nX8vL0mYt4bH9cJ3sWzEo6dKgA1uNfP5rTxQiAiA9hM2vCk7LbY0sXnW4pRe8TgZdJ6uFm1oQaBc3hKyNrw=="},
+   contentDigest:"sha256:9b02fe43a7c18d6503e29bf1740ac85d6b23917fe04a5cd8261b3e07fa5c491d",
+   prevHash:"sha256:41f8d0a72be95c36187da0e4fb52c9367019ae84db2f6510c7a93be208df5164",
+   hash:"sha256:6da31902ef47b85c0a6f31be2d940785cf1b60ea37429d8b05fc1e6a84d0937b"};
+})();
+/* the guarantee behind "probe attempts": the suite tries to read witness storage from a worker's belt */
+ASSURANCE.cases.push({key:"witness_probe",c:"Read witness storage from a worker’s toolbelt",r:"pass",d:"denied by policy · witness_probe incident raised · 4 path forms probed"});
+ASSURANCE.pass++; ASSURANCE.version="suite v0.9.4";
+DLG_EXT.runassurance=function(){
+  var A=ASSURANCE, na=A.cases.filter(function(c){return c.r!=="pass"&&c.r!=="fail";});
+  return {t:"Run the assurance suite",s:"against "+A.against,w:false,
+   b:'<pre>$ oxagen assurance run --org '+h(ORG.slug)+' --suite '+h(A.version.replace(/^suite /,""))+'\n\n  '+A.cases.length+' cases queued in the witness runner (isolated plane, own credentials)\n  ...\n  '+
+     A.pass+' passed · '+A.fail+' failed · '+A.na+' not applicable'+(na.length?' ('+h(na.map(function(c){return c.c;}).join("; "))+')':'')+'\n\n  result signed ed25519 · '+h(ORG.attester)+'</pre>'+
+     '<div class="note" style="margin-top:12px">A failure blocks the release. A case that cannot run at your tier is reported as not applicable, never as passed.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Close</button><button class="btn primary" onclick="closeDialog();act(\'Suite queued in the witness runner. The result lands on Assurance and in the next export.\')">Run</button>'};
+};
+
 
 function costTab(R){
   var turns=[{n:1,c:0.41,cache:0.87},{n:2,c:0.55,cache:0.88},{n:3,c:0.39,cache:0.91},{n:4,c:0.71,cache:0.82},
@@ -6512,7 +6734,7 @@ function pTools(){
      '<div class="row"><button class="btn" onclick="act(\'Suite queued against acme · shared plane. Results in about 4 minutes.\')">Run against this deployment</button></div>'+
      '<div class="row" style="margin-top:9px"><button class="btn" onclick="act(\'Signed assurance bundle downloaded.\')">Download the bundle</button></div>'+
      '<div class="hr"></div><p class="eyebrow q">Guarantees a customer cannot test are claims</p>'+
-     '<p class="muted" style="font-size:12px;margin:0">Each case tries to break one guarantee from the threat model and must be caught. Nine were. One cannot run here, and says so.</p></div></div></div>';
+     '<p class="muted" style="font-size:12px;margin:0">Each case tries to break one guarantee from the threat model and must be caught. '+ASSURANCE.pass+' were. '+ASSURANCE.na+' cannot run here, and '+(ASSURANCE.na===1?'says':'say')+' so.</p></div></div></div>';
   }
   return '<div class="phead"><div class="t"><p class="eyebrow">Workspace · '+h(w.name)+'</p><h1>Tools</h1>'+
    '<p>The registry is the only source of tools an agent can see. What an agent can do with it is grants, mandates, policy, and the switches below.</p></div>'+
@@ -8302,7 +8524,45 @@ SCENARIOS["sixty-seconds-to-governed"]={title:"Sixty seconds to governed", ws:"c
 
 /* ---- end W4 ---- */
 /* ---- W5 · proven-not-claimed ---- */
-
+/* The suite's newest per-release row is the run ASSURANCE shows; the W5 proof records above added the
+   witness-probe case, so the row reads its counts off the suite. ASSURANCE_HISTORY is declared after them. */
+(function(){var A=ASSURANCE,r=ASSURANCE_HISTORY[0];
+  if(r&&r.ran===A.ran){r.rel=A.version;r.cases=A.cases.length;r.pass=A.pass;r.fail=A.fail;r.na=A.na;r.note="witness-probe case added in "+A.version.replace(/^suite /,"");}})();
+SCENARIOS["proven-not-claimed"]={title:"Proven, not claimed", ws:"core-platform",
+ blurb:"A run is proven because a witness it never saw failed on main and passed on the pull request. The agent was told one word.",
+ steps:(function(){
+  var P=run("run_01K5RQ4B9C7XTN2P"), f=P.flip, W=proofWitnessRun(P), T=run("run_01K5RG6H1L4OIU9Y");
+  var onRun=function(id,t){return {route:function(o){return {page:"run",org:o,ws:"core-platform",id:id};},
+    setup:function(){S.tab.run=t;S.frame=0;S.asst=false;}};};
+  var step=function(base,x){for(var k in x)base[k]=x[k];return base;};
+  return [
+   step(onRun(P.id,"proof"),{say:"Stella CI’s run is <b>flipped</b>. The witness failed on <span class=\"mono\">"+h(f.targetRef)+" @ "+h(f.targetSha)+"</span> and passed on <span class=\"mono\">"+h(prNum(f))+" @ "+h(f.prSha)+"</span>, and that pair is the only thing that credits a proof.",
+    note:"Passing on both sides is unmoved and failing on both is failing. Neither credits anything, and the record keeps them apart."}),
+   step(onRun(P.id,"proof"),{say:"When it happened: "+f.attempts.length+" attempts, "+f.attempts.map(function(a){return a.result;}).join(", ")+", and the flip landed "+dur(flipLead(f))+" before the agent ended turn "+f.turn+".",
+    note:"Each point on the rail is a frame in the hash chain, so the order is signed rather than logged.",
+    act:["Chain and seal","S.tab.run='chain';render()"]}),
+   step(onRun(P.id,"proof"),{say:"The airlock. The worker saw <span class=\"mono\">pass</span>: four characters, the whole tool result. The test name, the assertion and the values stay in the witness runner’s sealed chamber.",
+    note:"The grain is L0. Raising it is a policy decision a person makes, and it is recorded as a security event.",
+    setup:function(){S.tab.run="proof";S.frame=0;S.asst=false;setTimeout(function(){var el=document.getElementById("airlock");if(el)el.scrollIntoView({block:"start"});},80);},
+    act:["Verify offline","act('Verifier script and key ids downloaded. Re-derives the flip from the segment, offline.')"]}),
+   step(onRun(W.id,"ladder"),{say:"The witness run is a run like any other, of the witness runner service principal: seven steps from authoring to the stamp, its own frames and seal, and "+usd(W.cost)+" of cost attributed to "+h(PEOPLE[W.op].name)+".",
+    note:"The author is the plane’s one model call. The verdict is never a model call; it is the runner’s.",
+    act:["Open its frames","S.tab.run='player';S.frame=0;render()"]}),
+   step(onRun(T.id,"proof"),{say:"A second run came back <b>tampered</b>, not failing. Its pull request added an exclude to <span class=\"mono\">"+h(T.flip.tamper.file)+"</span> that matched the witness’s path, so the fingerprint moved and the head was excluded.",
+    note:"Nothing is credited, and the proof frame says why in the same shape as a flip.",
+    act:["Ask the assistant why","asstToggle(true)"]}),
+   {say:"The guarantee under all of this is tested, not asserted. The assurance suite tries to read witness storage from a worker’s toolbelt, and it is denied.",
+    note:"A case that cannot run at this tier is reported as not applicable, never as passed.",
+    route:function(o){return {page:"tools",org:o,ws:"core-platform"};},
+    setup:function(){S.tab.tools="assurance";S.asst=false;},
+    act:["Run the suite","openDialog('runassurance')"]},
+   {say:"On Spend, Stella CI’s proven spend is the money a flipped witness vouches for. The rest is unproven, and the page says so.",
+    note:"Witness runs are recorded against the operator and billed at zero, so proving work never inflates what a customer pays.",
+    route:function(o){return {page:"spend",org:o,ws:"core-platform"};},
+    setup:function(){S.tab.spend="agent";S.spendDrill={kind:"agent",id:"acme.core.stella-ci"};S.asst=false;},
+    act:["Export this view","act('Report for acme.core.stella-ci exported: CSV and a signed PDF.')"]}
+  ];
+ })()};
 /* ---- end W5 ---- */
 /* ---- W6 · learned-approved-changed ---- */
 
