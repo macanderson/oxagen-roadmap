@@ -1,13 +1,28 @@
 # Mission Control design baseline
 
-Every lane that builds from "the mockup" builds from **one** `mc.html`: the tag
-`mc-baseline-w2` in this repo.
+Every lane that builds from "the mockup" builds from **one** `mc.html`: the newest
+`mc-baseline-*` tag in this repo, currently **`mc-baseline-w3`**.
 
 ```sh
-git show mc-baseline-w2:mc.html > /tmp/mc.html
+git show mc-baseline-w3:mc.html > /tmp/mc.html
 ```
 
-## mc-baseline-w2 (2026-09-13)
+A baseline tag is never moved. To change the baseline: land the change on `main`, run the
+three guards (`node tools/build-w.mjs --check`, `node tools/check-scenarios.mjs`,
+`node tools/baseline/check-baseline.mjs mc.html`) on that commit, cut the next tag on it,
+then point this file and the plan (`docs/2026-09-12-mission-control-app-implementation-plan.md`:
+inputs row, W1, the L1 seed, the §7 lane prompt) at it. `git fetch --tags` first: another
+session may already have cut it.
+
+## mc-baseline-w3 (2026-09-13)
+
+`main` @ ddf12ef, after PR #12: everything in w2 below, plus
+
+| Decision | Came from | What to build |
+|---|---|---|
+| A run only calls tools its agent's belt can make | PR #12 | The Run page's calls (and the fixture seed's) are a subset of `AGENT_BELTS[agent]` at `TOOLS` versions, never a tool the belt denies. In w2, `TOOLPOOL` gave release-manager `edit__file@1`/`write__file@1`, invoice-bot `slack__post_message@2` and stella-ci `linear__get_issue@1`, none of them on those belts, plus three versions the registry does not have. `check-baseline.mjs` now asserts it for every pool entry and every run. |
+
+## mc-baseline-w2 (2026-09-13, superseded)
 
 `main` after PRs #3–#8: everything in w1 below, plus
 
@@ -18,12 +33,6 @@ git show mc-baseline-w2:mc.html > /tmp/mc.html
 | Frames and context belong to a run; recorded frames are immutable | PR #6 | `FRAMES_BY_RUN`/`runFrames(R)`, `runContext(R)`; a published steering bundle reaches the next model call only |
 | Tenant is Anderson Intelligence Corp. (`a-intel`) at business scale | PR #5, re-applied in PR #6 | Seed rows render first; 274 agents, 1,168 runs shown |
 | One story clock: 2026-09-11 09:31:30 UTC, running from load | PR #8 | `nowT()`/`storyMs()` stamp anything a control writes |
-
-## On main since mc-baseline-w2 (include in the next tag)
-
-| Decision | Came from | What to build |
-|---|---|---|
-| A run only calls tools its agent's belt can make | `belt-true-toolpool` | The Run page's calls (and the fixture seed's) are a subset of `AGENT_BELTS[agent]` at `TOOLS` versions, never a tool the belt denies. In w2, `TOOLPOOL` gave release-manager `edit__file@1`/`write__file@1`, invoice-bot `slack__post_message@2` and stella-ci `linear__get_issue@1`, none of them on those belts, plus three versions the registry does not have. `check-baseline.mjs` now asserts it for every pool entry and every run. |
 
 ## mc-baseline-w1
 
