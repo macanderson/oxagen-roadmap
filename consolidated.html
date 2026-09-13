@@ -224,6 +224,37 @@ td .s{display:block;color:var(--muted);font-size:11.5px;margin-top:2px}
 .r{text-align:right}
 tr[data-go]{cursor:pointer}
 td a.rowlink{border-bottom:1px solid var(--rule-2)}
+/* The agent card: the one way an agent identity is drawn (agentCard()). Avatar, key, a second line
+   and the two scores on one line in every layout; the identity block ellipsises, the scores are
+   flex:none, so they never drop under the name. list is a row among other agents; compact is one
+   agent on a record about something else, bordered and linked; detail is the agent's own page. */
+.agc{display:flex;align-items:center;gap:10px;flex-wrap:nowrap;min-width:0;color:inherit;text-decoration:none}
+.agc .agav{width:26px;height:26px;flex:none;border-radius:7px;background:var(--fg);color:var(--ink);display:grid;place-items:center;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.04em}
+.agc .agid{min-width:0;max-width:240px;display:flex;flex-direction:column;line-height:1.3}
+.agc .agid>*{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.agc .agid .key{font-family:var(--mono);font-size:12px;color:var(--fg);margin-top:0}
+.agc .agid .sub{font-size:11.5px;color:var(--muted);font-family:var(--sans);font-weight:400}
+.agc .sc{font-family:var(--sans)}
+.agc>.scs{flex:none;margin-left:auto;padding-left:6px}
+td a.agc{border-bottom:0}
+.scs{display:inline-flex;gap:12px;flex-wrap:nowrap;align-items:baseline}
+/* A score is a label and a number. The number is the page's ink unless the agent sits in a tail of
+   the whole Oxagen population: top decile green, below the tenth percentile amber, below the fifth
+   red. Eight in ten carry no colour, so a coloured number is the exception. Never a filled pill. */
+.sc{display:inline-flex;align-items:baseline;gap:4px;font-size:11px;font-weight:500;color:var(--muted);white-space:nowrap;line-height:1.5;font-variant-numeric:tabular-nums}
+.sc b{font-family:var(--mono);font-weight:700;font-size:12px;color:var(--scc,var(--fg))}
+.sc i{display:none;width:6px;height:6px;border-radius:50%;background:var(--scc);align-self:center;flex:none}
+.sc-top i,.sc-warn i,.sc-low i{display:inline-block}
+.sc em{font-style:normal;font-weight:500;opacity:.7;font-size:10px}
+.sc-top{--scc:var(--ok)} .sc-warn{--scc:var(--gold)} .sc-low{--scc:var(--crit)}
+.agc-compact{display:inline-flex;max-width:100%;padding:5px 11px 5px 6px;border:1px solid var(--rule);border-radius:10px;background:var(--panel);vertical-align:middle}
+.agc-compact .agav{width:30px;height:30px;font-size:11px}
+.agc-compact .agid{max-width:280px} a.agc-compact:hover{background:var(--hl)} .agc-compact>.scs{margin-left:4px}
+.agc-detail{gap:16px} .agc-detail .agav{width:56px;height:56px;border-radius:12px;font-size:18px}
+.agc-detail .agid{max-width:none} .agc-detail .agid .key{font-size:22px;font-weight:600;line-height:1.2}
+.agc-detail .agid .sub{font-size:12.5px}
+.agc-detail>.scs{gap:18px;margin-left:0;padding-left:14px;align-self:center}
+.agc-detail .sc{font-size:12px} .agc-detail .sc b{font-size:20px} .agc-detail .sc i{width:8px;height:8px}
 
 /* State reads as form as well as colour: a dot plus a word. */
 .st{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:999px;
@@ -1160,6 +1191,74 @@ const AGENTS = [
 const AGENT = id => AGENTS.find(a => a.id === id);
 const agentBySlug = slug => AGENTS.find(a => a.slug === slug);
 
+/* Two scores per agent, 0–1000, recomputed nightly from frames: trust (does it do what it is
+   allowed to, provably) and spend (does what it costs buy proven value). The same figures mc.html
+   carries for these five agents. */
+const SCORES = {
+  "a-intel.core.release-manager":{trust:842,spend:731},
+  "a-intel.core.stella-ci":{trust:911,spend:868},
+  "a-intel.core.triage":{trust:312,spend:454},
+  "a-intel.core.docs-writer":{trust:687,spend:522},
+  "a-intel.core.invoice-bot":{trust:764,spend:388}
+};
+/* Every customer's agents, not only this tenant's: the nightly rollup Oxagen publishes to every
+   organization — org and agent counts and a sorted, anonymised score sample per kind, never a row.
+   Seeded, so it is the same on every load. */
+const PLATFORM = (() => {
+  let seed = 0x0C7A6E;
+  const rnd = () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+  const rf = (a, b) => a + rnd() * (b - a), skew = (lo, hi, k) => lo + (hi - lo) * Math.pow(rnd(), k);
+  const orgs = 31 + Math.floor(rnd() * 14), trust = [], spend = [];
+  for (let o = 0; o < orgs; o++) {
+    const fleet = Math.round(skew(4, 520, 2.4)), lo = rf(0.02, 0.35), hi = rf(0.55, 0.95);
+    for (let i = 0; i < fleet; i++) {
+      const u = rnd(), ratio = Math.round(rf(lo, hi) * 100) / 100, runs = Math.round(skew(0, 900, 2.2)), tamper = u < 0.95 ? 0 : u < 0.99 ? 1 : 2;
+      if (runs <= 1) { trust.push(500); spend.push(500); continue; }
+      trust.push(Math.max(0, Math.min(1000, Math.round(500 + ratio * 400 - tamper * 250))));
+      spend.push(Math.max(0, Math.min(1000, Math.round(ratio * 600 + 300))));
+    }
+  }
+  trust.sort((a, b) => a - b); spend.sort((a, b) => a - b);
+  return { asOf: "2026-09-11 02:10 UTC", orgs, agents: trust.length, trust, spend };
+})();
+const SCORE_LABEL = { top: "top decile", mid: "in range", warn: "warning", low: "critical" };
+const agentScores = a => SCORES[a.id] ?? { trust: 500, spend: 500, prov: true };
+/* The cut points: green at or above the 90th percentile, no colour from the 10th to the 90th (eight
+   agents in ten by construction), amber below the 10th, red below the 5th. Nearest-rank percentiles
+   over this tenant's agents plus the platform sample, memoised for one render. */
+let _cuts = null;
+const scoreKind = k => /trust/i.test(k) ? "trust" : "spend";
+const pctl = (sorted, p) => sorted.length ? sorted[Math.max(0, Math.ceil(p * sorted.length) - 1)] : 0;
+function scoreCuts(kind){
+  const k = scoreKind(kind);
+  _cuts ??= {};
+  if (!_cuts[k]) {
+    const pop = AGENTS.map(a => agentScores(a)[k]).concat(PLATFORM[k]).sort((a, b) => a - b);
+    _cuts[k] = { p5: pctl(pop, .05), p10: pctl(pop, .10), p50: pctl(pop, .50), p90: pctl(pop, .90), n: pop.length, orgs: PLATFORM.orgs + 1 };
+  }
+  return _cuts[k];
+}
+function scoreBand(v, kind){ const c = scoreCuts(kind); return v >= c.p90 ? "top" : v < c.p5 ? "low" : v < c.p10 ? "warn" : "mid"; }
+function scorePill(kind, v, sm, prov){
+  const b = scoreBand(v, kind), c = scoreCuts(kind);
+  const where = b === "top" ? `at or above the 90th percentile (${c.p90})` : b === "low" ? `below the 5th percentile (${c.p5})` : b === "warn" ? `below the 10th percentile (${c.p10})` : `between the 10th and 90th percentile (${c.p10}–${c.p90})`;
+  return `<span class="sc sc-${b}${sm ? " sm" : ""}" title="${kind} score ${v} of 1000 · ${SCORE_LABEL[b]} · ${where} of ${c.n.toLocaleString()} agents across ${c.orgs} organizations on Oxagen${prov ? " · provisional until 20 runs" : ""}"><i></i>${kind} <b>${v}</b>${prov ? "<em>prov.</em>" : ""}</span>`;
+}
+function scorePair(a, sm){ const x = agentScores(a); return `<span class="scs">${scorePill("Trust", x.trust, sm, x.prov)}${scorePill("Spend", x.spend, sm, x.prov)}</span>`; }
+/* The agent card. a is an agent record or id; o.layout is "list" (default), "compact" or "detail";
+   o.sub replaces the second line (the harness by default); o.link wraps it in a link to the agent
+   (compact defaults to linked); o.cls adds classes to the root. One markup, one CSS family. */
+function agentCard(a, o = {}){
+  if (typeof a === "string") a = AGENT(a) ?? { id: a, n: a.split(".").pop(), h: "", slug: null, unknown: true };
+  const lay = o.layout ?? "list";
+  const sub = o.sub ?? esc(a.h ?? "");
+  const link = (o.link ?? lay === "compact") && a.slug;
+  const initials = esc(String(a.n).split(/[\s-]+/).map(w => w[0]).join("").slice(0, 2).toUpperCase());
+  const inner = `<span class="agav" aria-hidden="true">${initials}</span><span class="agid" title="${esc(a.id)}"><span class="key s mono">${esc(a.id)}</span>${sub ? `<span class="sub">${sub}</span>` : ""}</span>${a.unknown ? "" : scorePair(a, lay !== "detail")}`;
+  const cls = `agc agc-${lay}${o.cls ? " " + o.cls : ""}`;
+  return link ? `<a class="${cls}" href="#/agents/${esc(a.slug)}">${inner}</a>` : `<span class="${cls}">${inner}</span>`;
+}
+
 /* ─── The belt: the tool versions an agent's model is actually shown, with the
        decision its own grants produced and the rule that produced it. Tool
        facts are NOT repeated here — risk, side effect, egress, financial class
@@ -1442,7 +1541,7 @@ PAGES.fleet = () => {
         ${toolCell(a.tool)}
         ${a.args ? `<span class="toolargs">${esc(a.args)}</span>` : ""}
         <div class="sub" style="font-size:12px;margin-top:5px">
-          ${esc(a.agent)} · operator ${esc(a.op)} ·
+          ${agentCard(a.agent, {layout: "compact"})} operator ${esc(a.op)} ·
           <a class="mono" href="#/run/${esc(a.run)}" style="border-bottom:1px solid var(--rule-2)">${esc(a.run)}</a> ·
           rule <span class="mono">${esc(a.rule)}</span></div>
         <div style="display:flex;gap:6px;margin-top:7px;flex-wrap:wrap;align-items:center">
@@ -1470,7 +1569,7 @@ PAGES.fleet = () => {
     <tbody>${rows.map(r => `<tr data-go="#/run/${esc(r.id)}">
       <td><b><a class="mono rowlink" href="#/run/${esc(r.id)}">${esc(r.id)}</a></b><span class="s">${esc(r.task)}
         <span class="gen" title="written by the classifier, not by a person">auto</span></span></td>
-      <td class="mono" style="font-size:12px">${esc(r.agent)}<span class="s">${esc(r.harness)}</span></td>
+      <td>${agentCard(r.agent, {sub: esc(r.harness)})}</td>
       <td>${esc(r.op)}</td>
       <td>${st(r.state)}${r.verdict ? " " + st(r.verdict) : ""}</td>
       <td class="sub" style="font-size:12.5px">${esc(r.step)}</td>
@@ -1496,8 +1595,9 @@ PAGES.run = () => {
   return `
   <div class="head"><div class="head-t">
     <h1 class="mono" style="font-size:22px">${esc(r.id)}
-      ${st(r.state)} ${r.verdict ? st(r.verdict) : ""} ${st("tier gateway", "flat")}</h1>
-    <p>${esc(r.agent)} · ${esc(r.harness)} · operator ${esc(r.op)} ·
+      ${st(r.state)} ${r.verdict ? st(r.verdict) : ""} ${st("tier gateway", "flat")}
+      ${agentCard(r.agent, {layout: "compact", sub: esc(r.harness)})}</h1>
+    <p>operator ${esc(r.op)} ·
       ${esc(r.started)}${r.ended ? " → " + esc(r.ended) : " · still running"}
       ${r.issue ? `<br>Task <span class="mono">${esc(r.issue)}</span>` : ""}</p>
     <p style="margin-top:9px;color:var(--body);max-width:66ch">${esc(SUMMARY[r.id] ?? r.task)}
@@ -1639,7 +1739,7 @@ PAGES.agents = () => {
     `<div class="scroll"><table>
     <thead><tr><th>Identity</th><th>Harness</th><th>Status</th><th>Tier</th><th class="r">Belt</th><th class="r">Mandates</th><th class="r">Spend 30d</th></tr></thead>
     <tbody>${AGENTS.map(a => `<tr data-go="#/agents/${esc(a.slug)}">
-      <td><b><a class="rowlink" href="#/agents/${esc(a.slug)}">${esc(a.n)}</a></b><span class="s mono">${esc(a.id)}</span></td>
+      <td>${agentCard(a, {link: true, cls: "rowlink", sub: esc(a.n)})}</td>
       <td style="font-size:12.5px">${esc(a.h)}<span class="s mono">${esc(a.model)}</span></td>
       <td>${st(a.st)}</td>
       <td>${tierBadge(a.tier)}</td>
@@ -1666,8 +1766,8 @@ PAGES.agent = () => {
   const body = {Identity: aIdentity, Toolbelt: aToolbelt, Mandate: aMandate}[active](a);
   return `
   <div class="phead"><div class="t">
-    <span class="eyebrow">Agent · ${esc(a.h)}</span>
-    <h1>${esc(a.id)}</h1>
+    <span class="eyebrow">Agent</span>
+    <h1 style="margin:0">${agentCard(a, {layout: "detail"})}</h1>
     <div class="badges">
       ${st(a.st)} ${tierBadge(a.tier)} <span class="sub" style="font-size:10.5px">model + tools</span>
       ${tierBadge(a.tierNative)} <span class="sub" style="font-size:10.5px">harness-native</span>
@@ -2227,6 +2327,7 @@ function focusKey(el){
 }
 
 function render(){
+  _cuts = null;
   const v = $("#view");
   const key = focusKey(document.activeElement);
   v.innerHTML = S.view === "loaded" ? PAGES[S.page]() : VIEWS[S.view]();
