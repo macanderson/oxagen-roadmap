@@ -4,13 +4,15 @@
    steps are the run's own; tokens are derived from cost at the effective price
    the Cost tab publishes, and everything else is seeded from the run id so the
    numbers do not move between renders. */
+/* every id is on that agent's AGENT_BELTS at the registry's version, and none is denied there:
+   the Run page must not show a call the agent's belt could not make */
 var TOOLPOOL={
- "a-intel.core.release-manager":[["github__list_pull_requests@3",5],["github__get_file_contents@2",4],["recall_context@1",3],
-   ["search_graph@1",2],["edit__file@1",3],["write__file@1",2],["bash__run@1",2],["linear__get_issue@1",1],["github__create_release@2",1]],
- "a-intel.core.stella-ci":[["bash__run@1",7],["github__get_file_contents@2",3],["search_graph@1",2],["write__file@1",1],["linear__get_issue@1",1]],
- "a-intel.core.triage":[["linear__get_issue@1",4],["search_graph@1",4],["github__get_file_contents@2",3],["recall_context@1",2],["linear__update_issue@2",2]],
- "a-intel.finops.invoice-bot":[["aws_billing__get_cost_and_usage@1",4],["recall_context@1",2],["stripe__create_payment@5",1],["slack__post_message@2",1]],
- "a-intel.core.docs-writer":[["github__get_file_contents@2",4],["recall_context@1",3],["edit__file@1",3],["write__file@1",2],["search_graph@1",1]]
+ "a-intel.core.release-manager":[["github__list_pull_requests@2",5],["github__get_file_contents@2",4],["recall_context@2",3],
+   ["search_graph@1",2],["github__get_commit@1",3],["github__create_pull_request@3",2],["claude_code__Bash@2.1",2],["linear__get_issue@2",1],["github__create_release@2",1]],
+ "a-intel.core.stella-ci":[["claude_code__Bash@2.1",7],["github__get_file_contents@2",3],["search_graph@1",2],["append_record@2",1],["github__get_commit@1",1]],
+ "a-intel.core.triage":[["linear__get_issue@2",4],["search_graph@1",4],["github__get_file_contents@2",3],["recall_context@2",2],["linear__update_issue@3",2]],
+ "a-intel.finops.invoice-bot":[["aws_billing__get_cost_and_usage@1",4],["recall_context@2",2],["stripe__create_payment@5",1],["send_message@1",1]],
+ "a-intel.core.docs-writer":[["github__get_file_contents@2",4],["recall_context@2",3],["claude_code__Edit@2.1",5],["search_graph@1",1]]
 };
 /* cost of one run, split across the token classes at the published effective prices */
 var PRICE={inEff:1.88e-6, out:75e-6, outLight:5e-6};
