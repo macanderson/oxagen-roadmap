@@ -7950,7 +7950,7 @@ function auditRetention(){
    '<div class="panel-b">'+auditFacts([["Body retention","7 years from the seal — organizations may set longer, never shorter than a hold"],
      ["Hot window","13 months, then frame nodes are compacted into the segment. Bodies are never moved."],
      ["Replay of a compacted run","reads the segment, not the graph. Same bytes, same grade."],
-     ["Workspace opt-down","core-platform content_exact · finops content_exact",1],
+     ["Workspace opt-down",WS.map(function(w){return w.slug+" "+(w.retention||"content_exact");}).join(" · "),1],
      ["Cold storage cost","41 GB · $0.04 per month. The graph, not the archive, is what needs a window."]])+'</div></div>'+
    '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Archive tiers</h3><span style="margin-left:auto">'+auditStore("three stores, one policy")+'</span></div>'+
    '<div class="tw"><table><thead><tr><th>Tier</th><th>Where</th><th>What it holds</th><th>Retention</th><th class="num">Held today</th></tr></thead><tbody>'+tiers+'</tbody></table></div></div>'+
