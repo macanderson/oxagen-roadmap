@@ -5282,7 +5282,8 @@ function fdRequest(f,R){
   /* the run's window is the first request; a later one keeps the window's fixed blocks (steering read from the same place) */
   var W=runContext(R), rq=f.rq;
   if(!W.none&&W.req===f) rq={tok:W.total,comp:W.comp,ctxN:W.rows?W.rows.length:rq?rq.ctxN:0};
-  else if(!rq){var tot=nextR?frNum(nextR.sum,"in")+frNum(nextR.sum,"cache_read"):(W.none?0:W.total),sy=W.none?FR_SYS:W.system,sg=W.none?FR_STEER:W.steering,tl=W.none?FR_TOOLS:W.tools;
+  else if(!rq){var bd=f.steeringTok!=null&&!W.none?f.steeringTok-W.steering:0;   /* stamped when sent, so an un-merge cannot rewrite it */
+    var tot=nextR?frNum(nextR.sum,"in")+frNum(nextR.sum,"cache_read"):(W.none?0:W.total+bd),sy=W.none?FR_SYS:W.system,sg=W.none?FR_STEER:W.steering+bd,tl=W.none?FR_TOOLS:W.tools;
     rq={tok:tot,comp:frReqComp(tot,{system:sy,steering:sg,tools:tl,ctx:W.none?null:W.ctx}),ctxN:W.rows?W.rows.length:0};}
   var cp=rq.comp,a=agent(R.agent),quote=steer?(/“([^”]*)”/.exec(steer.sum)||[])[1]:null;
   var msg=function(role,label,tok,text,hl){return '<div style="border:1px solid '+(hl?'var(--st-proven)':'var(--border)')+';border-left:3px solid '+(hl?'var(--st-proven)':'var(--rule)')+';border-radius:8px;padding:8px 11px;margin-bottom:7px;background:'+(hl?'var(--hl)':'var(--ink)')+'">'+
@@ -5297,7 +5298,7 @@ function fdRequest(f,R){
    frSec("Prompt composition",frBar([["system",cp.system,"var(--dim)"],["steering",cp.steering,"var(--k-rule)"],["tool definitions",cp.tools,"var(--st-approval)"],["context frames",cp.ctx,"var(--st-proven)"],["conversation",cp.conv,"var(--st-allowed)"]],rq.tok),tokn(rq.tok)+" tokens measured by Oxagen")+
    frSec("Message stack",
     msg("system","agent definition · .oxagen/agents/"+h(String(R.agent).split(".").pop())+".yaml",cp.system,"You are "+h(R.agent)+(a?", operated by "+h(PEOPLE[a.operator]?PEOPLE[a.operator].name:a.operator):"")+". Work only inside the grants on your belt.")+
-    msg("steering","steering.compiled · pol_v41",cp.steering,"The workspace’s published steering records, compiled once and served from cache.")+
+    msg("steering","steering.compiled · "+(f.bundle!=null?"bundle v"+f.bundle+" · ":"")+"pol_v41",cp.steering,"The workspace’s published steering records, compiled once and served from cache.")+
     (steer?msg("steering","control.steer · frame "+steer.seq+" · operator authority",+((/(\d+) tok/.exec(steer.sum)||[0,0])[1]),h(quote||steer.sum),true):"")+
     msg("context",rq.ctxN+" context frames",cp.ctx,"Laid in by the model proxy, cited by content digest.")+
     msg("conversation","turn "+(f.turn||1)+" so far",cp.conv,"Prior turns and tool results, served from the recording."),
@@ -5481,12 +5482,13 @@ function frameDetail(f){
 /* ===================== the context window shown to the agent ===================== */
 /* One request, accounted to the token. CTXW, CTXB, CTXF and CTXX are run_01K5RS7M2E8FJ3QW's first
    model.request (seq 2), the one run whose retrieval is authored in full. The parts sum to the total,
-   and the steering band is read from the compiled bundle, so a merge on the Steering page moves the
-   band, the total and the new tokens together. At bundle v41:
+   and the steering band is the bundle version that request recorded (v41). Recorded frames are
+   immutable: a Context PR merged later compiles a new version that reaches the run's next model call. At v41:
    210 + 1,340 + 2,118 + 11,204 + 496 = 15,368 = cache_read 12,000 + new 3,368.
    Every other run's window is read from its own frames by runContext(R). */
 var CTX_RUN="run_01K5RS7M2E8FJ3QW";
 var CTXW = {req:"model.request · seq 2 · 09:14:02.402", cached:12000,
+  get bundle(){return FRAMES_BY_RUN[CTX_RUN][2].bundle;},
   get total(){return CTXB.reduce(function(a,b){return a+b.tok;},0);},
   get fresh(){return this.total-this.cached;},
   digest:"sha256:44c19e02f7b3a158", budget:18000, used:11204, headroom:6796,
@@ -5494,7 +5496,7 @@ var CTXW = {req:"model.request · seq 2 · 09:14:02.402", cached:12000,
 
 var CTXB = [
  {id:"identity", ix:1, name:"system.identity",    tok:210,   col:"var(--dim)",         cache:"read"},
- {id:"steering", ix:2, name:"steering.compiled",  get tok(){return stgBundle().tok;}, col:"var(--gold)", cache:"read"},
+ {id:"steering", ix:2, name:"steering.compiled",  get tok(){return stgBundle(CTXW.bundle).tok;}, col:"var(--gold)", cache:"read"},
  {id:"tools",    ix:3, name:"tools.definitions",  tok:2118,  col:"var(--st-approval)", cache:"read"},
  {id:"frames",   ix:4, name:"context.frames",     tok:11204, col:"var(--st-proven)",   cache:"mixed"},
  {id:"task",     ix:5, name:"task.brief",         tok:496,   col:"var(--st-allowed)",  cache:"new"}
@@ -5538,6 +5540,7 @@ function ctxOut(id){for(var i=0;i<CTXX.length;i++){if(CTXX[i].id===id)return CTX
    tokens on seq 2, the new and cached input on seq 3 and on the transcript's usage row for it. They read
    the window, so a steering merge cannot leave a frame restating the old total. */
 (function(){
+  FRAMES_BY_RUN[CTX_RUN].forEach(function(f){if(f.kind==="model.request")f.bundle=41;});
   var L=FRAMES_BY_RUN[CTX_RUN], rq=L[2], rs=L[3], use=(TRANSCRIPTS[CTX_RUN]||[]).filter(function(e){return e.kind==="usage"&&e.fr===3;})[0];
   if(rq&&rq.kind==="model.request") Object.defineProperty(rq,"sum",{enumerable:true,configurable:true,
     get:function(){return "anthropic · claude-opus-5 · 14 tool definitions ("+tokn(CTXB[2].tok)+" tok) · steering "+tokn(CTXB[1].tok)+" tok · "+CTXF.length+" context frames";}});
@@ -5578,7 +5581,7 @@ function runContext(R){
   for(i=0;i<L.length;i++){if(L[i].kind==="model.request"){at=i;break;}}
   var steers=L.filter(function(f){return f.kind==="control.steer";}), steerTok=0;
   steers.forEach(function(f){steerTok+=ctxSteerTok(f);});
-  var W={run:R.id,list:L,steers:steers,steerTok:steerTok,authored:R.id===CTX_RUN};
+  var W={run:R.id,list:L,steers:steers,steerTok:steerTok,authored:R.id===CTX_RUN,bundle:R.id===CTX_RUN?CTXW.bundle:null};
   if(at<0){W.none="no model.request";return W;}
   var f=L[at], ca=null, resp=null;
   for(i=at-1;i>=0;i--){if(L[i].kind==="context.assembled"){ca=L[i];break;}}
@@ -5831,22 +5834,24 @@ function ctxDetail(R,W,sel){
   if(sel==="steering"){
     /* Derived from STEER_BUNDLE, so a merge on the Steering page shows up here: the version, the rule
        flagged new, and the block's tokens, which equal the steering.compiled band in CTXB. */
-    var sb=stgBundle(), nw=sb.rules.filter(function(r){return r.isNew;}), nwTok=0;
-    nw.forEach(function(r){nwTok+=r.tok;});
+    /* The block is what seq 2 recorded: bundle CTXW.bundle, verbatim. A version published since then has not
+       reached this window; it is shown as pending, with the tokens it adds at the run's next model call. */
+    var sb=stgBundle(CTXW.bundle), live=stgBundle(), nw=live.v>sb.v?live.rules.filter(function(r){return r.since>sb.v;}):[], nwTok=live.tok-sb.tok;
     var pre='<span class="c"># org → workspace → agent · narrowest scope wins</span>\n\n'+sb.rules.map(function(r){
       var ln=stgWrap(r.st,52), f=(r.force+"       ").slice(0,7);
       return '<span class="k">'+h(f)+'</span>'+ln.map(h).join('\n       ')+'\n'+
-       '       <span class="c">['+h(r.id)+' · '+h(r.scope)+']</span>'+(r.isNew?' <span class="s" data-new-rule="'+h(r.id)+'">new in bundle v'+sb.v+'</span>':'');
+       '       <span class="c">['+h(r.id)+' · '+h(r.scope)+']</span>';
     }).join('\n\n');
-    return ctxHd('Block 2 · <span class="mono">steering.compiled</span>', tokBadge(sb.tok)+cacheBadge(nw.length?"mixed":"read"))+
+    return ctxHd('Block 2 · <span class="mono">steering.compiled</span> · bundle v'+sb.v, tokBadge(sb.tok)+cacheBadge("read"))+
      ctxBody(
       '<p>'+sb.rules.length+' rules, compiled from three scopes into one block. The model sees the result of the merge, never the merge itself.</p>'+
-      (nw.length?'<div class="callout" style="margin:11px 0">'+nw.map(function(r){return '<span class="mono">'+h(r.id)+'</span>';}).join(", ")+
-        ' is new in bundle v'+sb.v+'. It published when '+h(CTXPR.pr)+' merged'+(S.ctxpr.mergedAt?' at '+h(S.ctxpr.mergedAt):'')+
-        ', and this run read it on its next model call. Steering tokens per turn moved '+tokn(sb.tok-nwTok)+' → '+tokn(sb.tok)+'; the prefix before it stayed cached, so the '+nwTok+' new tokens are billed as fresh input.</div>':'')+
+      (nw.length?'<div class="callout" style="margin:11px 0" data-next-bundle="'+live.v+'" data-next-delta="'+nwTok+'">'+nw.map(function(r){
+         return '<span class="mono" data-new-rule="'+h(r.id)+'">'+h(r.id)+'</span> <span class="b b-proven">new</span> · published in bundle v'+live.v+' · reaches this run at its next model call';}).join("<br>")+
+        '<div style="margin-top:6px">'+h(CTXPR.pr)+' merged'+(S.ctxpr.mergedAt?' at '+h(S.ctxpr.mergedAt):'')+', after this request was sent. The window below is what the model read and does not change. '+
+        'The next call’s steering block is '+tokn(sb.tok)+' → '+tokn(live.tok)+' tokens, <b>+'+tokn(nwTok)+'</b>; the prefix before the new rule stays cached, so those tokens are billed as fresh input.</div></div>':'')+
       '<div data-bundle-readout="'+sb.v+'">'+readout("bundle v"+sb.v+" · verbatim",sb.rules.length+" rules",'<pre>'+pre+'</pre>')+'</div>'+
       '<dl class="kv"><dt>Sources merged</dt><dd>3 · org, workspace core-platform, agent</dd>'+
-      '<dt>Tokens per turn</dt><dd class="num">'+(nw.length?tokn(sb.tok-nwTok)+' → <b>'+tokn(sb.tok)+'</b> · +'+nwTok+' from the new record':tokn(sb.tok))+'</dd>'+
+      '<dt>Tokens per turn</dt><dd class="num">'+tokn(sb.tok)+(nw.length?' · <b>'+tokn(live.tok)+'</b> from the next call · +'+nwTok+' from the new record':'')+'</dd>'+
       '<dt>Shadowed at compile</dt><dd class="mono">ctx.release.notes-format-legacy (org) — lost to the workspace rule</dd>'+
       '<dt>Digest</dt><dd class="mono">'+h(sb.digest)+'</dd>'+
       '<dt>Chained into</dt><dd class="mono">run.start · seq 0</dd></dl>'+
@@ -8407,11 +8412,15 @@ var STEER_BUNDLE={v:41, header:130,
   {id:"ctx.release.milestone-4-11",force:"info",scope:"agent",tok:196,st:"The 4.11 milestone closed 2026-09-09. Anything merged after that ships in 4.12."}
  ]};
 function stgRecord(id){for(var i=0;i<RECORDS.length;i++){if(RECORDS[i].id===id)return RECORDS[i];}return null;}
-function stgBundle(){
-  var rules=STEER_BUNDLE.rules.map(function(x){var r=stgRecord(x.id)||{};
-    return {id:x.id,tok:x.tok,isNew:!!x.isNew,force:r.force||x.force,st:r.st||x.st,scope:r.scope||x.scope};});
+/* stgBundle(v) is the bundle as compiled at version v; with no argument, the bundle in force now. A rule
+   carries `since`, the version that first compiled it; the seeded rules predate v41. A recorded
+   model.request names the version it was sent with, so a later merge never changes what it carried. */
+function stgBundle(v){
+  var at=v==null?STEER_BUNDLE.v:v;
+  var rules=STEER_BUNDLE.rules.filter(function(x){return (x.since||0)<=at;}).map(function(x){var r=stgRecord(x.id)||{};
+    return {id:x.id,tok:x.tok,isNew:!!x.isNew&&x.since===at,since:x.since||0,force:r.force||x.force,st:r.st||x.st,scope:r.scope||x.scope};});
   var tok=STEER_BUNDLE.header; rules.forEach(function(r){tok+=r.tok;});
-  return {v:STEER_BUNDLE.v,digest:STEER_BUNDLE.digest[STEER_BUNDLE.v],rules:rules,tok:tok};
+  return {v:at,digest:STEER_BUNDLE.digest[at],rules:rules,tok:tok};
 }
 function stgWrap(s,w){
   var out=[],line="";
@@ -8492,15 +8501,15 @@ function ctxprStop(){S.ctxpr.timers.forEach(clearTimeout);S.ctxpr.timers=[];}
 function ctxprPublish(on){
   var rec=CTXPR.record, i=RECORDS.indexOf(rec);
   if(on===(i>=0)) return;
-  /* CTXB's steering band reads stgBundle(), and CTXW's total and fresh tokens sum the bands, so publishing the rule moves all three */
+  /* Publishing compiles a new bundle version. Recorded requests keep the version they were sent with
+     (CTXB's steering band reads the one on seq 2), so nothing already recorded moves; the next model call reads it. */
   if(on){
-    RECORDS.push(rec); STEER_BUNDLE.rules.push(CTXPR.rule); STEER_BUNDLE.v++;
+    RECORDS.push(rec); STEER_BUNDLE.rules.push(CTXPR.rule); STEER_BUNDLE.v++; CTXPR.rule.since=STEER_BUNDLE.v;
     auditEvent("steering_published",me().name,rec.id+" · "+CTXPR.pr+" merged as "+rec.commit+" · bundle v"+(STEER_BUNDLE.v-1)+" → v"+STEER_BUNDLE.v,"info",CTXPR.evt);
   } else {
     RECORDS.splice(i,1); STEER_BUNDLE.rules.splice(STEER_BUNDLE.rules.indexOf(CTXPR.rule),1); STEER_BUNDLE.v--;
     for(var k=AUDIT.length-1;k>=0;k--){if(AUDIT[k].ref===CTXPR.evt)AUDIT.splice(k,1);}
   }
-  CTXW.digest=STEER_BUNDLE.digest[STEER_BUNDLE.v];
 }
 /* none · opened · checking · passed · merged */
 function ctxprSet(st){
@@ -10892,8 +10901,8 @@ SCENARIOS["learned-approved-changed"]={title:"Learned, approved, changed", ws:"c
    note:"An effect is measured, not assumed. A record that stops earning its tokens becomes a retirement candidate.",
    route:function(o){return {page:"steering",org:o,ws:"core-platform"};},
    setup:function(){if(S.ctxpr.st!=="merged")ctxprSet("merged");S.tab.steering="effect";S.prpSel=null;}},
-  {say:"Here it is in the window. Release manager's next model call carried the new rule in the compiled steering block, on the bumped bundle.",
-   note:"The tokens it costs are counted in the band and in the request total, so the window still sums.",
+  {say:"Here it is on the run. The window release manager already sent stays as it was recorded, on bundle v41; the new rule is published in bundle v42 and reaches the run at its next model call.",
+   note:"Recorded frames never change. The readout says what the next call adds: the new rule's tokens, billed as fresh input.",
    route:function(o){return {page:"run",org:o,ws:"core-platform",id:"run_01K5RS7M2E8FJ3QW"};},
    setup:function(){if(S.ctxpr.st!=="merged")ctxprSet("merged");S.tab.run="context";S.ctxSel="steering";}},
   {say:"An agent's own definition is a file too: <span class=\"mono\">.oxagen/agents/docs-writer.toml</span>. Changing it is a pull request with checks, merged by a person, the same way the rule was.",
@@ -11222,7 +11231,7 @@ function steerApply(R,c){
   var L=runFrames(R), q=steerQueued(R), at=nowT();
   if(!q.length){ c.status="applied"; return; }
   var tok=q.reduce(function(s,f){return s+f.tokens;},0), seqs=q.map(function(f){return f.seq;});
-  var req={seq:L.length,kind:"model.request",tier:R.tier,cost:null,t:at,carries:seqs,
+  var req={seq:L.length,kind:"model.request",tier:R.tier,cost:null,t:at,carries:seqs,bundle:STEER_BUNDLE.v,steeringTok:stgBundle().tok,
     sum:"anthropic · "+R.model+" · steering block carries control.steer seq "+seqs.join(", ")+" immediately after the cached system block · +"+tok+" tok"};
   L.push(req);
   q.forEach(function(f){ f.status="applied"; f.appliedAt=req.seq; f.sum=f.by+" · “"+f.text+"” · "+f.tokens+" tok · "+f.mode+" · applied at model.request seq "+req.seq; });
