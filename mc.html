@@ -1754,6 +1754,20 @@ var FRAMES = [
   sum:"apr_01K5RS3K7 · notified Mission Control, Slack #releases, marcus@acme.example"}
 ];
 
+/* Frames belong to a run. FRAMES above is the live release-manager run's list; pRun points the
+   global FRAMES at the run it is rendering, so every Run-page reader and every frame a control
+   appends (pause, steer, approval) lands on that run and no other. Add a run's authored frames
+   with FRAMES_BY_RUN["run_…"]=[…]; a run with none gets framesFromRun(R). */
+var FRAMES_BY_RUN={"run_01K5RS7M2E8FJ3QW":FRAMES};
+function runFrames(R){
+  var id=R&&R.id||"run_01K5RS7M2E8FJ3QW";
+  if(!FRAMES_BY_RUN[id]) FRAMES_BY_RUN[id]=framesFromRun(R);
+  return FRAMES_BY_RUN[id];
+}
+function framesFromRun(R){
+  return FRAMES_BY_RUN["run_01K5RS7M2E8FJ3QW"].map(function(f){return Object.assign({},f);});
+}
+
 /* ===================== transcript seeds ===================== */
 /* The transcript is the model-visible projection of a run's frames: the prompt, the agent's prose,
    its tool calls with their outputs, and the usage each model step burned. Times are seconds from
@@ -4023,6 +4037,8 @@ function toast(msg,tone){
 /* ============================== Run ============================== */
 function pRun(r){
   var R=run(r.id)||RUNS[0];
+  FRAMES=runFrames(R);
+  if(S.frameRun!==R.id){S.frameRun=R.id;S.frame=Math.min(S.frame||0,FRAMES.length-1);}
   if(S.state==="loading") return skeleton();
   if(S.state==="error") return errorState("This run","502 frame_store_unreachable");
   if(S.state==="denied") return deniedState("this run","run.read on core-platform");
@@ -7969,6 +7985,35 @@ var SCENARIOS={
     setup:function(){S.tab.audit="receipts";}}
   ]}
 };
+/* One slot per flow. tools/build-w.mjs boots each w*.html into the scenario named here and
+   reads its ws from the entry, so each entry starts SCENARIOS["id"]={title:"…", ws:"…", …}. */
+/* ---- W1 · sixty-seconds-to-governed ---- */
+
+/* ---- end W1 ---- */
+/* ---- W4 · flight-recorder ---- */
+
+/* ---- end W4 ---- */
+/* ---- W5 · proven-not-claimed ---- */
+
+/* ---- end W5 ---- */
+/* ---- W6 · learned-approved-changed ---- */
+
+/* ---- end W6 ---- */
+/* ---- W7 · shape-of-your-business ---- */
+
+/* ---- end W7 ---- */
+/* ---- W8 · every-dollar-every-operator ---- */
+
+/* ---- end W8 ---- */
+/* ---- W9 · toolbelt-governed ---- */
+
+/* ---- end W9 ---- */
+/* ---- W10 · cio-console ---- */
+
+/* ---- end W10 ---- */
+/* ---- W11 · assistant-and-account ---- */
+
+/* ---- end W11 ---- */
 function scnHref(id,step){var s=SCENARIOS[id];return "#/"+ORG.slug+"/"+s.ws+"/scenarios/"+id+"/"+step;}
 /* A step's act can open a dialog; moving to another step or leaving closes it, so the next step is not read under it. */
 function scnGo(hash){S.dlg=null;S.dlgArg=null;go(hash);}
