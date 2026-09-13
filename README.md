@@ -78,7 +78,12 @@ the walk, the cut-downs, and what still needs a decision.
 ## Docs
 
 - `docs/2026-09-11-oxagen-mission-control-spec.md` — the product and technical specification the mockups render: vocabulary, architecture, the ten pages (§14, App. F), target tables (App. A) and the demo scenarios (§19).
-- `docs/2026-09-12-mission-control-app-implementation-plan.md` — how the ten pages become the new Next.js `apps/app` in the oxagen monorepo: wireframe review, page-to-data mapping, toolchain, code, and parallel build batches.
+- `docs/2026-09-12-mission-control-app-implementation-plan.md` — how the ten pages become the new Next.js `apps/app` in the oxagen monorepo: wireframe review, page-to-data mapping, toolchain, code, and parallel build batches. `docs/2026-09-12-mission-control-app-implementation-plan.html` is the same plan rendered as a page (the `mc-baseline-w3` revision); the `.md` is the source.
+- `docs/2026-09-13-oxagen-desktop-spec.html` — the Oxagen Desktop spec (rev 1): the installer app that wraps Claude Code and Codex under Tacho and enrolls a machine against a workspace. Published as [Oxagen Desktop](https://claude.ai/code/artifact/41070634-87a0-4537-b663-031b6b86297e).
+
+The spec, the plan and the desktop spec are also carried in the oxagen monorepo under
+`docs/specs/mission-control/` (`spec.md`, `plan.md`, `plan.html`) and `docs/specs/oxagen-desktop/`;
+when one copy changes, change the other.
 - `docs/2026-09-11-oxagen-demo-mockup-prompts.md` — the brief and the one-prompt-per-flow list that produced W1–W12.
 - `docs/CONSOLIDATION.md` — how W1–W11 were folded into one design; which version of each shared thing won.
 - `docs/feedback-mockups.md` — review feedback on the set.
