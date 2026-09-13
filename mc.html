@@ -1479,6 +1479,7 @@ pre .dn{color:var(--st-denied)}
 
 <script>
 "use strict";
+var DLG_EXT={};   /* lazily built dialogs, registered beside their code; see dialog() */
 /* ============================== demo record ============================== */
 var ORG = {slug:"acme", name:"Acme Robotics", currency:"USD", plan:"Team", dataPlane:"shared",
   attester:"key_ox_acme_2026Q3", region:"us-east-1", governance:"team"};
@@ -8175,6 +8176,9 @@ function fixDlg(){
      '<button class="btn" onclick="closeDialog()">Close</button><button class="btn primary" onclick="closeDialog();act(\''+h(x.done).replace(/'/g,"\\'")+'\')">'+h(x.action)+'</button>'};
 }
 
+/* Dialogs registered beside the code they belong to: DLG_EXT.kind=function(arg){return {t,s,w,b,f};}.
+   Built only when opened, unlike D below, which evaluates every body on every render. A kind here wins over D.
+   DLG_EXT itself is declared at the top of the script, so a registration anywhere in the file runs after it. */
 function dialog(){
   if(!S.dlg) return '';
   var k=S.dlg;
@@ -8431,7 +8435,7 @@ function dialog(){
      '<div class="note">Bisect is offered between any two runs of the same task. Re-run is Stella only, because only Stella’s own deterministic ladder can run the task again.</div>',
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Bisect started. The first divergent frame is seq 23: the steering digest differs.\')">Bisect</button>'}
   };
-  var d=D[k];
+  var d=DLG_EXT[k]?DLG_EXT[k](S.dlgArg):D[k];
   if(!d) return '';
   return '<div class="scrim" onclick="if(event.target===this)closeDialog()">'+
    '<div class="dlg'+(d.w?" wide":"")+'" role="dialog" aria-modal="true" aria-label="'+h(d.t)+'">'+
