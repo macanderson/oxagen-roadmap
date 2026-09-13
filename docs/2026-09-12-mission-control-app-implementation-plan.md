@@ -104,7 +104,7 @@ Status comes from table and contract names in the repo. **Batch 3 lanes must con
 | Agents · credentials | identity tab | `iam.credentials` | `auth.api_keys` (hosts), `mcp.credentials` | 🟡 |
 | Agents · mandates | `MANDATES` | `tools.mandates`, `mandate_ledger` | none | ❌ |
 | Agents · budgets | `budget`, `budgetUsed` | `billing.budgets` | `billing.spend_budgets`, `workspace_budget_policy` | ✅ |
-| Agents · trust / spend scores | `SCORES` | none in spec | none | ❌ G11 |
+| Agents · trust / spend scores | `SCORES`, `PLATFORM`, `scoreCuts()` | none in spec | none | ❌ G11 |
 | Agents · incidents | `incidents` | `audit.audit_events` incident kinds | `tacho.incidents` | ✅ |
 | **Tools** · servers | `SERVERS` | `tools.tool_servers` | `mcp.mcp_servers`, `mcp.registries` | ✅ |
 | Tools · tool versions + classification | `TOOLS` | `tools.tool_versions` | `agent.tools`/`tool_versions`, `mcp.tool_snapshots` | 🟡 risk/side-effect/consequence tags/measures to verify |
@@ -180,7 +180,7 @@ Status comes from table and contract names in the repo. **Batch 3 lanes must con
 | G8 | `audit.audit_events` in Postgres, `legal_holds`, `archive_segments` | Audit › holds, exports, receipts | M5 |
 | G9 | `control.commands` `steer` with delivery mode for ledger runs | Run › steer on non-tacho runs | M1/M2 |
 | G10 | `USED_CONTEXT` edges from context assembly | Run › context | M3/M4 |
-| G11 | Agent trust/spend scores (spec decision first) | Agents scores, auto-approval eligibility | — |
+| G11 | Agent trust/spend scores. Decided in the mockup (2026-09-13): the score is the agent's own (0–1000, nightly from frames); its colour is its percentile among every scored agent on Oxagen — the tenant's agents plus a nightly platform rollup (`PLATFORM`: org and agent counts and an anonymised sorted score sample per kind). Green at or above p90, no colour p10–p90 (eight in ten by construction), amber below p10, red below p5; cuts recomputed per render (`scoreCuts()`). Needs a `score_distribution` rollup the platform publishes to every org. An agent identity is drawn only by `agentCard()` in three layouts: `list` (rows), `compact` (one agent on someone else's record), `detail` (the agent's page). | Agents scores, auto-approval eligibility | — |
 | G12 | Auto-approval rules store (spec decision first) | Tools › auto | M2 |
 | G13 | Per-run billing allowance (§12.1) | Billing meters | M2 |
 | G14 | `light`-tier run namer/summariser | Run name + summary (feedback 4) | M1 |

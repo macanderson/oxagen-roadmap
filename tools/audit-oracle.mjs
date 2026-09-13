@@ -326,7 +326,7 @@ await step(23, async () => {
 await step(24, async () => {
   await fresh('#/fleet');
   const agents = await page.locator('#view tr[data-go]').evaluateAll(r =>
-    r.map(x => x.children[1].textContent.trim().split('\n')[0].trim()));
+    r.map(x => (x.children[1].querySelector('.key') || x.children[1]).textContent.trim().split('\n')[0].trim()));
   is(24, agents.every(a => a.startsWith('a-intel.core.')),
     `every run in core-platform belongs to a core-platform agent (${[...new Set(agents)].join(', ')})`);
   await setView('denied');
@@ -1127,7 +1127,7 @@ await step(68, async () => {
   const miss = [];
   for(const row of rows){
     await go(row.href);
-    const h1 = await text('.phead h1');
+    const h1 = await text('.phead h1 .key');
     if(h1 !== row.key) miss.push([row.key, row.href, h1]);
   }
   is(68, miss.length === 0, `each opens the principal its own row names`
