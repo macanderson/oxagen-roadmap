@@ -4,7 +4,7 @@
 |---|---|
 | **Date** | 2026-09-12 |
 | **Builds** | a new `apps/app` (`@oxagen/app`) in `~/Projects/oxagen`; today's app moves to `apps/app_deprecated` (`@oxagen/app-deprecated`) |
-| **Inputs** | `2026-09-11-oxagen-mission-control-spec.md` (§3, §4, §14, §15, §19, App. A, B, F) · mockups `~/Documents/Oxagen/Mockups` (`mc.html` @ `main` 1b0634c, W1–W12) · `docs/feedback-mockups.md` · the repo at `origin/main` |
+| **Inputs** | `2026-09-11-oxagen-mission-control-spec.md` (§3, §4, §14, §15, §19, App. A, B, F) · mockups `~/Documents/Oxagen/Mockups` (`mc.html` @ tag `mc-baseline-w1`, W1–W12) · `docs/feedback-mockups.md` · the repo at `origin/main` |
 | **Optimised for** | parallel agents: every lane owns a disjoint set of paths, and every batch lists what it waits on |
 
 ---
@@ -62,12 +62,12 @@
 
 | # | Finding | Impact | Resolution in this plan |
 |---|---|---|---|
-| W1 | **The design baseline is split across branches.** `main` @ 1b0634c has the Agent IAM surface. `approvalCardSm` (small approvals) is only on `small-approvals-bottom-dock-scenarios`, `worktree-agent-iam-w9`, `worktree-assistant-sidebar-flyout` and `ship-src-side-by-side`. The assistant flyout (`asstToggle`/`asstMount`) is only on `worktree-assistant-sidebar-flyout` (locked). `runMetrics(R)` exists only in the `Specs/mockups/mc.html` scratch copy. | Twenty lanes reading "the mockup" would build three different apps. | **Baseline = `main` @ 1b0634c + small approval card + sidebar flyout + `runMetrics` instruments.** Every lane prompt names this. Where the branches disagree, the lane follows the later decision (small approvals, flyout) and records it in its PR. |
+| W1 | **The design baseline was split across branches** (resolved). Agent IAM was on `main` (54f9107; the 1b0634c first named here is an unmerged `worktree-audit-fix` commit). `approvalCardSm` and the flyout were on `small-approvals-bottom-dock-scenarios` (3f345d5, which merged the flyout as PR #1). `runMetrics(R)` was only in the `Specs/mockups/mc.html` scratch copy. | Twenty lanes reading "the mockup" would build three different apps. | **Baseline = tag `mc-baseline-w1`: one `mc.html` with Agent IAM + small approval card + sidebar flyout + `runMetrics` instruments.** Read it with `git show mc-baseline-w1:mc.html`; `tools/baseline/README.md` records what each decision came from, and `tools/baseline/check-baseline.mjs` checks it in a browser. Every lane prompt names the tag, never a branch or the Specs scratch. Where a W file or an older branch disagrees, the baseline wins (w2 and w3 still carry the bottom dock). |
 | W2 | **`docs/feedback-mockups.md` items are in no mockup:** (1) approvals render first and collapse when empty; (2) the onboarding content floats right; (3) one-thumb mobile navigation; (4) LLM-generated run name and summary, plus a file-diff card under approvals; (5) run cost large, near the run name, basis in a dialog; (6) prompt shown inspectable but collapsed; (7) run outputs (PRs, files, media) as the story; (8) spend by operator, agent and run on Fleet. | These change the Run and Fleet pages. | In scope: 1, 2, 5, 6, 8 (clear enough to build). 4's UI is in scope; the classifier that writes `run.name`/`run.summary` is a backend gap (G14). **3 and 7 need a design decision.** Their lanes build behind a component seam (`<MobileNav>`, `<RunOutputs>`) with a plain first version, so the design can drop in later. |
 | W3 | **Vocabulary drifts from the spec.** Replay grade: mockup `full/partial/digest/ledger` vs spec `inspect/view/fork/retry`. Egress: `third_party/internal/none` vs `local/org_tenant/third_party`. Schema origin: `observed` vs `observed_proposed/observed_approved`. Financial: `fin: moves_funds/commits_spend` vs `consequence_tags text[]`. Agent status `enrolled` vs `unenrolled/active/suspended/retired`. Verdict `null` vs `none`. Record kinds: 6 in the mockup (from Stella's `RecordKind`) vs "twelve kinds" in spec §3. | Types built from the mockup would diverge from the target schema on day one. | **View-model enums follow the spec (App. A).** The fixture adapter maps mockup values once, in one file. Record kinds: use the six real kinds; flag the spec's "twelve" as a spec defect to fix. |
 | W4 | **Fixture data has integrity defects.** `EVIDENCE` references agent `acme.finops.cost-reporter`, which is not in `AGENTS`. `FIX["Refetching a stable list"]` carries the cache-write finding's text. Several `NOTIFS`/`INCIDENTS`/`RECEIPTS` run ids are not in `RUNS`. `FRAMES` is one list shared by every run. The Mandate page always renders `MANDATES[0]`. | Ported naively, links 404 and every run shows the same frames. | The fixture adapter validates referential integrity in a unit test that **fails on a dangling id** (mutation-test it by deleting one agent). Frames are keyed by run. |
 | W5 | **Data is hard-coded in the mockup's markup:** the agent toolbelt rows, the mandate ledger rows, Steering's effect and retirement rows, the funding routes table, the assistant transcript. | No collection to type from. | Types come from spec App. A (`iam.role_grants`, `tools.mandate_ledger`, `org.organizations.model_routes`) instead. |
-| W6 | **`kindBadge` is declared twice** (lines 3232 and 7450 on `main`). The later role badge silently replaces the record-kind icon badge on Steering. | A defect in the mockup, not intent. | The React components are `RecordKindBadge` and `PrincipalKindBadge`, module-scoped, so the collision cannot recur. Steering uses the icon badge. |
+| W6 | **`kindBadge` was declared twice** in `mc.html`; the later role badge silently replaced the record-kind icon badge on Steering. The baseline renames the role one `roleKindBadge`, and `tsec` had the same collision (fixed by deleting the loose parser). | A defect in the mockup, not intent. | The React components are `RecordKindBadge` and `PrincipalKindBadge`, module-scoped, so the collision cannot recur. Steering uses the icon badge. |
 | W7 | **Features in the mockup with no spec table:** agent trust/spend `SCORES`, auto-approval rules `AUTORULES` (Tools › auto), the Org › roles editor with `PERMS`. | Planned, but with no store. | Built UI-first behind `NotBacked`. SCORES and AUTORULES are gaps G11/G12; they need a spec decision on whether they are columns on `iam.role_grants.conditions` or new tables. |
 | W8 | **About 60 write interactions are toast-only in the mockup.** | They have no payload contract. | §3 maps each write to an existing capability or to a gap. |
 | W9 | **The assistant's "engine down" state is unreachable** (nothing sets `S.asstEngine="down"`). | Spec §18 requires every screen to work with the engine down. | The flyout reads engine health from the port; e2e covers the down state. |
@@ -603,7 +603,7 @@ export const liveRuns: RunReadPort = {
 ```ts
 // src/data/adapters/fixture/integrity.test.ts
 import { describe, expect, it } from "vitest";
-import { seed } from "./seed"; // ported from mc.html @ main 1b0634c, mapped to spec vocabulary
+import { seed } from "./seed"; // ported from mc.html @ mc-baseline-w1, mapped to spec vocabulary
 
 describe("fixture referential integrity", () => {
   const agentKeys = new Set(seed.agents.map((a) => a.key));
@@ -1029,7 +1029,7 @@ flowchart LR
 
 | Lane | Owns | Delivers | Waits on |
 |---|---|---|---|
-| **L1 contracts + ports + fixture** | `src/data/**` | All view-model schemas (§4.5) for the ten pages, every port interface, the fixture seed ported from `mc.html` @ 1b0634c with W3's vocabulary mapping, the integrity test (W4), and the `mc_state` state switch for dev/e2e | B0 |
+| **L1 contracts + ports + fixture** | `src/data/**` | All view-model schemas (§4.5) for the ten pages, every port interface, the fixture seed ported from `mc.html` @ `mc-baseline-w1` with W3's vocabulary mapping, the integrity test (W4), and the `mc_state` state switch for dev/e2e | B0 |
 | **L2 ui primitives** | `src/ui/**`, `.storybook/**` | `Money` (large-figure variant + basis dialog, feedback 5), `TierBadge`, `GradeBadge`, `VerdictBadge`, `StatusBadge`, `RiskBadge`, `EffectBadge`, `Gate`, `Hazard`, `ToolCell`, `RecordKindBadge`, `PrincipalKindBadge`, `Avatar` (initials/icon/photo × solid/soft/line), `PageState` + `Skeleton/Empty/Error/Denied/NotRecordedYet`, `DataTable` (search, sort, facet, rows per page, pager: the `listify()` behaviour as a component, opt-out by omission), `RouteTabs`, `FormDialog` (Base UI + `useActionState`), `Sparkline`, `Tile`, `Meter`. House tokens only, Lucide only. Charts: identity is an icon, magnitude is one hue (the tool-family and record-kind tokens fail colour-vision checks as series colours). Stories with a11y addon. | B0 enums |
 | **L3 shell** | `src/app/[org]/layout.tsx`, `src/app/[org]/[ws]/layout.tsx`, `src/features/shell/**` | Sidebar, top bar, org/ws switchers, ⌘K command menu, notifications, Account dialog (profile, preferences, security, privacy), assistant flyout host with the engine-down state (W9), `<MobileNav>` seam with a plain bottom bar (feedback 3 pending design), theme (light/dark/system via `data-theme`) | B0 |
 | **L4 server seams** | `src/server/**`, `src/app/api/mc/**`, `src/ui/hooks/**` | `session`, `requireViewer`, tenancy lookups ported from `resolve-org.ts` (incl. slug-history redirects, MFA gate), `invokeTool` (§4.6), cache tags, SSE route + `useFrames` + `useFleetLive` (§4.9) | B0 |
@@ -1044,7 +1044,7 @@ Each lane owns `src/app/<route>/**`, `src/features/<page>/**`, `messages/<page>.
 | P1 | **Fleet** + approvals panel | runs table (filter all/live/proven), small approval card with four-hop chain, countdown, approve/deny dialog UI, operator/agent/run spend (feedback 8), fleet steer dialog | Owns `ApprovalsPanel`, exported for P2b's strip |
 | P2a | **Run**: header + transcript + transport | run name + large cost (feedback 5), collapsed inspectable prompt (feedback 6), transcript at three zoom levels, transport (scrub/step/play/pause, ×1–×4 per spec; mockup's ×6 dropped), pause/resume/steer banner states, frame detail | Uses `useFrames` |
 | P2b | **Run**: side panels | approvals strip (from P1), file-diff card under approvals (feedback 4), `<RunOutputs>` seam (feedback 7), tabs proof/cost/policy/context/chain, `runMetrics` instruments, compacted/sealed variants | |
-| P3 | **Agents** (section "Agent IAM", list page "Identities" on mockup `main`) | list; detail tabs identity/definition/toolbelt/mandates/budgets/runs/enrollment; source editor + commit dialog; mandate detail (real `[mandate]` param, W4); register entry point | Editor is a client island |
+| P3 | **Agents** (section "Agent IAM", list page "Identities" in the baseline) | list; detail tabs identity/definition/toolbelt/mandates/budgets/runs/enrollment; source editor + commit dialog; mandate detail (real `[mandate]` param, W4); register entry point | Editor is a client island |
 | P4 | **Tools** | tabs registry/connections/mandates/policy/switches/auto/assurance; kill-switch dialog with blast-radius text; observed-schema approval; policy draft + simulation view | |
 | P5 | **Ontology** | tabs model/graph/sources/repositories/versions; embedding indexes list; ask-the-graph with Cypher + citations | Graph canvas behind a dynamic import |
 | P6 | **Steering** | tabs records/proposals/prs/effect/retirement; `RecordKindBadge` (W6); Context PR dialog | |
@@ -1135,8 +1135,9 @@ on branch app-rebuild/<N>-<id>, PR target app-rebuild.
 Read first:
 - ~/Documents/Oxagen/Specs/2026-09-12-mission-control-app-implementation-plan.md (§0, §4, and your row in §5)
 - spec ~/Documents/Oxagen/Specs/2026-09-11-oxagen-mission-control-spec.md §3 vocabulary, §14, §19 row for <page>
-- mockup baseline: ~/Documents/Oxagen/Mockups mc.html at commit 1b0634c, plus approvalCardSm
-  (branch small-approvals-bottom-dock-scenarios) and the assistant flyout (branch worktree-assistant-sidebar-flyout)
+- mockup baseline: `git -C ~/Documents/Oxagen/Mockups show mc-baseline-w1:mc.html` (tag). It already carries
+  Agent IAM, the small approval card, the sidebar flyout and the runMetrics instruments; read no other
+  branch and not Specs/mockups. Decisions and their sources: tools/baseline/README.md at the same tag.
 
 You own ONLY: <paths>. Do not edit any other path; if you need a shared primitive, build it
 locally in your feature folder and note it under "promote" in the PR body.
