@@ -3054,6 +3054,7 @@ function deniedState(what,need){
 /* -------- routing -------- */
 function route(){
   S.scn=null;                      /* self healing: any non scenario route drops the rail */
+  var scnRan=S.scnRan; S.scnRan=null; /* and forgets which step it set up, so returning sets it up again */
   var hs=location.hash.replace(/^#\/?/,"");
   var p=hs?hs.split("/"):[];
   if(!p.length) return {page:"fleet",org:ORG.slug,ws:S.ws};
@@ -3075,8 +3076,11 @@ function route(){
     if(sc){
       var stp=parseInt(p[4]||"1",10); if(!(stp>=1)) stp=1; if(stp>sc.steps.length) stp=sc.steps.length;
       S.scn={id:sid,step:stp};
-      var st=sc.steps[stp-1];
-      if(st.setup) st.setup();
+      var st=sc.steps[stp-1], key=sid+"/"+stp;
+      /* route() runs on every render, so setup runs only on arriving at a step. Otherwise a click
+         inside the step (a tab, an act that collapses what setup opened) snaps straight back. */
+      if(st.setup&&scnRan!==key) st.setup();
+      S.scnRan=key;
       return st.route(org);
     }
     return {page:"scenarios",org:org,ws:w};
