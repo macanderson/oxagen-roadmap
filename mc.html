@@ -3653,6 +3653,10 @@ function pendingCount(w){var c=0;for(var i=0;i<APPROVALS.length;i++){if(APPROVAL
 
 function sidebar(r){
   var w=ws(), cur=PAGES[r.page]||"";
+  /* On first-run Fleet the organization is the one smoke run, so the counts here read off it too. */
+  var fr=obFirstRun(w);
+  var waiting=fr?APPROVALS.filter(function(a){return a.run===fr.id&&apState(a.id).status==="pending";}).length:pendingCount(w.slug);
+  var orgAgents=fr?1:WS.reduce(function(n,x){return n+(x.agents||0);},0);
   function item(id,label,href,count,hot){
     return '<button class="navitem" '+(cur===label?'aria-current="page"':'')+' onclick="go(\''+href+'\')">'+
       '<span class="ic">'+icon(id)+'</span>'+label+
@@ -3667,24 +3671,24 @@ function sidebar(r){
       '<span class="av ws">'+h(w.slug.slice(0,2))+'</span><span class="tx"><b>'+h(w.name)+'</b><span>'+(w.provisional?'<span class="b b-denied">provisional</span> until '+h(w.provisional.until):h(w.main)+' · '+h(w.branch))+'</span></span><span class="cv">▾</span></button>'+
    '</div><nav>'+
    '<div class="navlabel">Workspace</div>'+
-   item("fleet","Fleet",base,pendingCount(w.slug),true)+
-   item("agents","Agent IAM",base+"/agents",w.agents)+
+   item("fleet","Fleet",base,waiting,true)+
+   item("agents","Agent IAM",base+"/agents",fr?1:w.agents)+
    item("tools","Tools",base+"/tools")+
    item("ontology","Ontology",base+"/ontology")+
-   item("steering","Steering",base+"/steering",PROPOSALS.length)+
+   item("steering","Steering",base+"/steering",fr?0:PROPOSALS.length)+
    item("spend","Spend",base+"/spend")+
    item("scenarios","Scenarios",base+"/scenarios")+
    '<div class="navlabel">Organization</div>'+
    item("organization","Organization","#/"+ORG.slug)+
    item("billing","Billing","#/"+ORG.slug+"/billing")+
-   item("audit","Audit","#/"+ORG.slug+"/audit",1,true)+
+   item("audit","Audit","#/"+ORG.slug+"/audit",fr?0:INCIDENTS.filter(function(i){return i.status==="open"&&i.sev==="critical";}).length,true)+
    '</nav><div class="side-foot">'+
    '<button class="asst-launch" onclick="asstToggle()" aria-controls="asst" aria-expanded="'+(S.asst?"true":"false")+'">'+
     '<span class="asst-g">'+icon("assistant")+'</span>'+
     '<span class="tx"><b>Assistant</b>'+
      (S.asstEngine==="down"?'<span class="down">engine down</span>':'<span>glm-flash · ready</span>')+'</span>'+
     '<span class="cv">'+"<svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.9\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M9 6l6 6-6 6\"/></svg>"+'</span></button>'+
-   '<div class="row" style="justify-content:space-between;padding:0 4px"><span class="mono dim" style="font-size:10.5px">50 agents · '+ORG.dataPlane+' plane</span>'+
+   '<div class="row" style="justify-content:space-between;padding:0 4px"><span class="mono dim" style="font-size:10.5px">'+orgAgents+(orgAgents===1?' agent':' agents')+' · '+ORG.dataPlane+' plane</span>'+
    '<span class="b b-allowed" style="font-size:10px"><span class="d"></span>gateway</span></div></div></aside>';
 }
 
