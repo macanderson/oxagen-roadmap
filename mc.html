@@ -4361,9 +4361,36 @@ var TOOLPOOL={
 /* cost of one run, split across the token classes at the published effective prices */
 var PRICE={inEff:1.88e-6, out:75e-6, outLight:5e-6};
 function rngOf(seed){var x=seed>>>0;return function(){x=(x*1664525+1013904223)>>>0;return x/4294967296;};}
+/* A run whose authored frames reach its last frame is its own clock: wall clock is the last frame's time
+   less the first's, and the tool calls are the call frames on it, each timed from the frames around it.
+   A list that stops short of the run (a live or parked run's first frames) is a window onto a longer
+   run, so its counts would undercount; those runs keep the seeded derivation. Synthesized lists are
+   built from runMetrics and never read back here. */
+var FR_CALL_KINDS=/^(tool_call|tool_result|witness\.run)$/;
+function runFrameClock(R){
+  var L=FRAMES_BY_RUN[R.id];
+  if(!L||!L.length||L[0].run!=null) return null;
+  var last=L[L.length-1];
+  if(!(last.seq>=(R.frames|0)-1)) return null;
+  var ts=L.map(function(f){return tsec(f.t);});
+  if(ts.some(function(x){return x==null;})) return null;
+  var ms=function(a,b){return Math.max(0,Math.round((ts[b]-ts[a])*1000));};
+  var calls=[],modelMs=0,modelN=0,waitMs=0,parked=0,i,j;
+  for(i=0;i<L.length;i++){var f=L[i];
+    if(f.kind==="model.response"){modelN++;for(j=i-1;j>=0&&!/^model\./.test(L[j].kind);j--){}modelMs+=ms(j>=0&&L[j].kind==="model.request"?j:Math.max(0,i-1),i);}
+    else if(FR_CALL_KINDS.test(f.kind)){
+      var start=f.kind==="witness.run", id=start?"witness__run@1":null;
+      for(j=i;!id&&j>=0&&j>i-6;j--){var mm=/^([a-z_]+__[a-z_]+@\d+)/.exec(L[j].sum||"");if(mm)id=mm[1];}
+      id=id||"tool__call@1";
+      calls.push({id:id,cat:toolMeta(id).cat,ms:start?(i+1<L.length?ms(i,i+1):0):(i>0?ms(i-1,i):0),err:/^(failed|[45]\d\d)\b/.test(f.sum||""),seq:f.seq});}
+    else if(f.kind==="approval_request"&&i+1<L.length){waitMs+=ms(i,i+1);}
+    if(f.kind==="policy_decision"&&/^approve/.test(f.sum||""))parked++;
+  }
+  return {calls:calls,modelMs:modelMs,modelN:modelN,waitMs:waitMs,parked:parked,wall:ms(0,L.length-1)};
+}
 function runMetrics(R){
-  if(R._m&&R._m.v===3)return R._m;
-  var s=runSeries(R), seed=11, i;
+  if(R._m&&R._m.v===4)return R._m;
+  var s=runSeries(R), seed=11, i, fc=runFrameClock(R), modelN=fc?fc.modelN:s.modelN;
   for(i=0;i<R.id.length;i++)seed=(seed*31+R.id.charCodeAt(i))>>>0;
   var rnd=rngOf(seed), cost=parseFloat(R.cost)||0, light=/haiku|flash|light/i.test(R.model||"");
 
@@ -4372,22 +4399,24 @@ function runMetrics(R){
   var tokIn=Math.round(cost/3/PRICE.inEff), tokOut=Math.round(cost*2/3/outPrice);
   var cacheRead=Math.round(tokIn*(R.cache||0)), fresh=tokIn-cacheRead, cacheWrite=0;
   var reasoning=Math.round(tokOut*(light?0.05:0.34));
-  var perCall=Math.round(tokIn/Math.max(1,s.modelN));
+  var perCall=Math.round(tokIn/Math.max(1,modelN));
 
   /* --- the prompt: what the operator wrote, and what it became --- */
   var words=String(R.taskTitle||"").split(/\s+/).filter(Boolean).length+18;
-  var promptTok=Math.round(words*1.35), sysTok=2118+1340;
+  var promptTok=Math.round(words*1.35);
 
   /* --- tool calls: drawn from the agent's belt, batched, some run in parallel --- */
   var pool=TOOLPOOL[R.agent]||TOOLPOOL["acme.core.release-manager"], bag=[];
   pool.forEach(function(p){for(var k=0;k<p[1];k++)bag.push(p[0]);});
-  var calls=[],n=s.toolN;
+  var calls=[],n=s.toolN,batches=[],b=0;
+  if(fc){calls=fc.calls;batches=calls.map(function(c){return [c];});}   /* timed one after another on the record */
+  else{
   for(i=0;i<n;i++){var id=bag[Math.floor(rnd()*bag.length)];
     calls.push({id:id,cat:toolMeta(id).cat,ms:Math.round(180+rnd()*2600),err:rnd()<0.055});}
   /* batches: a model call may ask for more than one tool and the gateway runs them together */
-  var batches=[],b=0;
   while(b<calls.length){var want=rnd(),k=want>0.88?3:want>0.66?2:1;k=Math.min(k,calls.length-b);
     batches.push(calls.slice(b,b+k));b+=k;}
+  }
   var par=batches.filter(function(x){return x.length>1;}).length;
   var maxPar=batches.reduce(function(a,x){return Math.max(a,x.length);},0);
   var fan=calls.length/Math.max(1,batches.length);
@@ -4410,17 +4439,21 @@ function runMetrics(R){
   var savedMs=used*Math.round(240+rnd()*300);
 
   /* --- wall clock --- */
-  var modelMs=0;for(i=0;i<s.modelN;i++)modelMs+=Math.round(3400+rnd()*7200);
-  var parked=0;FRAMES.forEach(function(f){if(f.kind==="policy_decision"&&/approve/.test(f.sum))parked++;});
-  var waitMs=parked?parked*600000:0, overMs=Math.round(s.modelN*240+calls.length*90);
-  var wall=modelMs+toolMs+waitMs+overMs;
+  var modelMs=0,parked=0,waitMs,overMs,wall;
+  if(fc){modelMs=fc.modelMs;parked=fc.parked;waitMs=fc.waitMs;wall=fc.wall;overMs=Math.max(0,wall-modelMs-toolMs-waitMs);}
+  else{
+  for(i=0;i<s.modelN;i++)modelMs+=Math.round(3400+rnd()*7200);
+  FRAMES.forEach(function(f){if(f.kind==="policy_decision"&&/approve/.test(f.sum))parked++;});
+  waitMs=parked?parked*600000:0; overMs=Math.round(s.modelN*240+calls.length*90);
+  wall=modelMs+toolMs+waitMs+overMs;
+  }
 
   /* --- diffstat, straight off the files the harness reported --- */
   var g=runGraphOf(R),add=0,del=0,fileRows=(g.files||[]).map(function(f){
     var st=diffStat(txDiffRows(f.before,f.after));add+=st.add;del+=st.del;return {path:f.path,add:st.add,del:st.del};});
 
-  return R._m={v:3,tokIn:tokIn,tokOut:tokOut,cacheRead:cacheRead,fresh:fresh,cacheWrite:cacheWrite,reasoning:reasoning,
-    perCall:perCall,promptTok:promptTok,sysTok:sysTok,tokTotal:tokIn+tokOut,
+  return R._m={v:4,fromFrames:!!fc,modelN:modelN,tokIn:tokIn,tokOut:tokOut,cacheRead:cacheRead,fresh:fresh,cacheWrite:cacheWrite,reasoning:reasoning,
+    perCall:perCall,promptTok:promptTok,tokTotal:tokIn+tokOut,
     calls:calls,batches:batches,par:par,maxPar:maxPar,fan:fan,hist:hist,errs:errs,families:families,
     toolMs:toolMs,serialMs:serialMs,modelMs:modelMs,waitMs:waitMs,overMs:overMs,wall:wall,parked:parked,
     started:started,used:used,discarded:discarded,savedMs:savedMs,eligible:eligible,
@@ -4486,8 +4519,8 @@ function runInstruments(R){
     R.turn+'<small>turns</small><span class="sep">·</span>'+R.steps+'<small>steps</small><span class="sep">·</span>'+R.frames+'<small>frames</small>',
     'A step is one model call or one tool call; a frame is one recorded event.',
     '<div class="cols">'+stepCols+'<span class="base"></span></div><div class="ax"><span>turn 1</span><span>turn '+s.n+'</span></div>'+
-    stackLeg([["model calls",s.modelN,"fk-model",s.modelN],["tool calls",s.toolN,"fk-tool",s.toolN]]),
-    '<b>'+m.fan.toFixed(1)+'</b> tools per batch · <b>'+(s.toolN/Math.max(1,s.modelN)).toFixed(2)+'</b> tool calls per model call');
+    stackLeg([["model calls",m.modelN,"fk-model",m.modelN],["tool calls",m.calls.length,"fk-tool",m.calls.length]]),
+    '<b>'+m.fan.toFixed(1)+'</b> tools per batch · <b>'+(m.calls.length/Math.max(1,m.modelN)).toFixed(2)+'</b> tool calls per model call');
 
   /* 5 · tool calls by family — magnitude in one hue, identity in the icon and the label */
   var fmx=m.families.length?m.families[0].n:1;
@@ -4516,16 +4549,22 @@ function runInstruments(R){
 
 /* ---- the prompt: what the operator wrote, and what reached the model ---- */
 function promptRow(R){
-  var m=runMetrics(R),op=PEOPLE[R.op],win=m.perCall;
-  var parts=[["operator’s words",m.promptTok],["tools and steering",m.sysTok],["context and conversation",Math.max(0,win-m.promptTok-m.sysTok)]];
-  return '<div class="panel pr-row"><div class="panel-h"><h3>The prompt</h3>'+
+  /* the window is runContext's: the same request, total and blocks the Context tab accounts for */
+  var m=runMetrics(R),op=PEOPLE[R.op],W=runContext(R);
+  var head='<div class="panel pr-row"><div class="panel-h"><h3>The prompt</h3>';
+  var said='<div class="pr-text"><p class="eyebrow q">Written by '+h(op?op.name:R.op)+'</p><p class="q">“'+h(R.taskTitle)+(R.task?'. Task '+h(R.task)+'.':'')+'”</p></div>';
+  if(W.none) return head+'<span class="mono dim" style="font-size:11px">'+tokn(m.promptTok)+' tok written</span></div>'+
+   '<div class="panel-b pr-b">'+said+'<div class="pr-exp"><p class="eyebrow q">What reached the model on the first call</p>'+
+   '<p class="muted" style="font-size:11.5px;margin:0">'+(W.none==="no model.request"?'No model.request frame is in view for this run, so the window is not shown.':'The first model.request has no response reporting its input, so the window is not shown.')+'</p></div></div></div>';
+  var win=W.total,ts=W.tools+W.steering,words=Math.min(m.promptTok,Math.max(0,win-ts));
+  var parts=[["operator’s words",words],["tools and steering",ts],["system, context, brief",win-words-ts]];
+  return head+
    '<span class="mono dim" style="font-size:11px">'+tokn(m.promptTok)+' tok written · '+tokn(win)+' tok sent</span>'+
-   '<button class="btn sm" style="margin-left:auto" onclick="S.tab.run=\'context\';render()">Open the window</button></div>'+
-   '<div class="panel-b pr-b">'+
-    '<div class="pr-text"><p class="eyebrow q">Written by '+h(op?op.name:R.op)+'</p><p class="q">“'+h(R.taskTitle)+(R.task?'. Task '+h(R.task)+'.':'')+'”</p></div>'+
-    '<div class="pr-exp"><p class="eyebrow q">What reached the model on the last call</p>'+
-     '<div class="pr-bars">'+parts.map(function(p,i){return '<div class="pr-bar"'+tipAttr(p[0]+" · "+tokn(p[1])+" tok · "+pct(p[1],win))+'><span class="l">'+p[0]+'</span><span class="t"><i style="width:'+Math.round(p[1]/win*100)+'%;opacity:'+(1-i*0.28)+'"></i></span><span class="v">'+tokn(p[1])+'</span></div>';}).join("")+'</div>'+
-     '<p class="muted" style="font-size:11.5px;margin:8px 0 0">One sentence expanded to '+tokn(win)+' tokens; '+per(R.cache)+' of it came from cache, so it was paid for once.</p></div>'+
+   (R.witnessFor?'</div>':'<button class="btn sm" style="margin-left:auto" onclick="S.tab.run=\'context\';render()">Open the window</button></div>')+
+   '<div class="panel-b pr-b">'+said+
+    '<div class="pr-exp" data-pr-win="'+win+'" data-pr-ts="'+ts+'"><p class="eyebrow q">What reached the model on the first call · model.request seq '+W.req.seq+'</p>'+
+     '<div class="pr-bars">'+parts.map(function(p,i){return '<div class="pr-bar"'+tipAttr(p[0]+" · "+tokn(p[1])+" tok · "+pct(p[1],win))+'><span class="l">'+p[0]+'</span><span class="t"><i style="width:'+Math.round(p[1]/Math.max(1,win)*100)+'%;opacity:'+(1-i*0.28)+'"></i></span><span class="v">'+tokn(p[1])+'</span></div>';}).join("")+'</div>'+
+     '<p class="muted" style="font-size:11.5px;margin:8px 0 0">One sentence expanded to '+tokn(win)+' tokens; '+pct(W.cached,win)+' of it came from cache, so it was paid for once.</p></div>'+
    '</div></div>';
 }
 
@@ -5130,9 +5169,8 @@ function framesFromRunSynth(R){
     if(o.kind==="model.response"){var c2=((o.units||0)+(o.extraU||0))/1e4,tin=Math.round(c2/3/PRICE.inEff),cache=s.cache[Math.max(0,o.turn-1)]||R.cache||0;
       var cr=Math.round(tin*cache),tout=Math.round(c2*2/3/outPrice),rsn=Math.round(tout*(light?0.05:0.34));
       o.cost=c2.toFixed(4);o.u={inU:tin-cr,cr:cr,cw:0,out:tout-rsn,rsn:rsn};nextU=o.u;}
-    else if(o.kind==="model.request"){var tot=nextU?nextU.inU+nextU.cr:12000,fixed=FR_SYS+FR_STEER+FR_TOOLS,room=Math.max(0,tot-fixed);
-      var ctx=Math.min(Math.round(FR_BUDGET*0.62),Math.round(room*0.6)),sc=tot<fixed?tot/fixed:1;
-      o.rq={tok:tot,comp:{system:Math.round(FR_SYS*sc),steering:Math.round(FR_STEER*sc),tools:Math.round(FR_TOOLS*sc),ctx:ctx,conv:Math.max(0,tot-Math.round(fixed*sc)-ctx)},ctxN:ctxRows.length};nextRq=o.rq;}
+    else if(o.kind==="model.request"){var tot=nextU?nextU.inU+nextU.cr:12000;
+      o.rq={tok:tot,comp:frReqComp(tot),ctxN:ctxRows.length};nextRq=o.rq;}
     else if(o.kind==="context.assembled"){var used=nextRq?nextRq.comp.ctx:Math.round(FR_BUDGET*0.5);o.ctx={budget:FR_BUDGET,used:used,rows:frCtxSplit(ctxRows,used,R.id+q)};}
     else if(o.kind==="tool_call"||o.kind==="tool_requested"||o.kind==="token_issued"||o.kind==="policy_decision")nextCall=o.call||nextCall;
   }
@@ -5241,9 +5279,11 @@ function fdRequest(f,R){
   for(i=f.seq+1;i<L.length;i++)if(L[i].kind==="model.response"){nextR=L[i];break;}
   for(i=f.seq-1;i>=0;i--){if(L[i].kind==="model.request"){prevReq=i;break;}}
   for(i=Math.max(0,prevReq+1);i<f.seq;i++)if(L[i].kind==="control.steer")steer=L[i];
-  var rq=f.rq;
-  if(!rq){var tot=nextR?frNum(nextR.sum,"in")+frNum(nextR.sum,"cache_read"):15368,fixed=FR_SYS+FR_STEER+FR_TOOLS,ctx=Math.min(CTXW.used,Math.max(0,tot-fixed));
-    rq={tok:tot,comp:{system:FR_SYS,steering:FR_STEER,tools:FR_TOOLS,ctx:ctx,conv:Math.max(0,tot-fixed-ctx)},ctxN:CTXF.length};}
+  /* the run's window is the first request; a later one keeps the window's fixed blocks (steering read from the same place) */
+  var W=runContext(R), rq=f.rq;
+  if(!W.none&&W.req===f) rq={tok:W.total,comp:W.comp,ctxN:W.rows?W.rows.length:rq?rq.ctxN:0};
+  else if(!rq){var tot=nextR?frNum(nextR.sum,"in")+frNum(nextR.sum,"cache_read"):(W.none?0:W.total),sy=W.none?FR_SYS:W.system,sg=W.none?FR_STEER:W.steering,tl=W.none?FR_TOOLS:W.tools;
+    rq={tok:tot,comp:frReqComp(tot,{system:sy,steering:sg,tools:tl,ctx:W.none?null:W.ctx}),ctxN:W.rows?W.rows.length:0};}
   var cp=rq.comp,a=agent(R.agent),quote=steer?(/“([^”]*)”/.exec(steer.sum)||[])[1]:null;
   var msg=function(role,label,tok,text,hl){return '<div style="border:1px solid '+(hl?'var(--st-proven)':'var(--border)')+';border-left:3px solid '+(hl?'var(--st-proven)':'var(--rule)')+';border-radius:8px;padding:8px 11px;margin-bottom:7px;background:'+(hl?'var(--hl)':'var(--ink)')+'">'+
     '<div class="row" style="gap:8px;font-size:11px"><b class="mono" style="color:var(--fg)">'+role+'</b><span class="mono dim" style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+label+'</span><span class="mono dim" style="margin-left:auto">'+tokn(tok)+' tok</span></div>'+
@@ -5276,8 +5316,9 @@ function fdResponse(f,R){
      rows.map(function(r,k){return '<tr><td class="mono">'+r[0]+'</td><td class="num">'+tokn(r[1])+'</td><td class="num dim">'+(r[2]*1e6).toFixed(2)+'</td><td class="num">'+(r[1]?parts[k].toFixed(4):'—')+'</td></tr>';}).join("")+
      '<tr><td><b>total</b></td><td class="num"><b>'+tokn(tin+u.out+u.rsn)+'</b></td><td></td><td class="num"><b>$'+f.cost+'</b></td></tr></tbody></table></div>';
   } else {
-    body='<div class="tw"><table class="narrow" data-lt="off"><tbody>'+[["input_uncached",u.inU],["cache_read",u.cr],["cache_write_5m",0],["output",u.out],["reasoning",0],["tool_definition_tokens",FR_TOOLS],["steering_tokens",FR_STEER]]
-     .map(function(r){return '<tr><td class="mono">'+r[0]+'</td><td class="num">'+tokn(r[1])+'</td></tr>';}).join("")+'</tbody></table></div>';
+    var W=runContext(R);
+    body='<div class="tw"><table class="narrow" data-lt="off"><tbody>'+[["input_uncached",u.inU],["cache_read",u.cr],["cache_write_5m",0],["output",u.out],["reasoning",0],W.none?null:["tool_definition_tokens",W.tools],W.none?null:["steering_tokens",W.steering]]
+     .filter(Boolean).map(function(r){return '<tr><td class="mono">'+r[0]+'</td><td class="num">'+tokn(r[1])+'</td></tr>';}).join("")+'</tbody></table></div>';
   }
   return frKv([["Stop reason",'<b style="color:var(--fg)">'+h(f.stop||(/stop_reason (\w+)/.exec(f.sum)||[])[1]||"—")+'</b>'],
     ["Latency",(f.ms?tokn(f.ms)+" ms total · "+tokn(f.ttft)+" ms to first token":"640 ms to first token · total 7.37 s")+" · 0 retries"],
@@ -5438,16 +5479,22 @@ function frameDetail(f){
 }
 
 /* ===================== the context window shown to the agent ===================== */
-/* One request, accounted to the token. The parts sum to the request total:
-   210 + 1,340 + 2,118 + 11,204 + 496 = 15,368 = cache_read 12,000 + new 3,368. */
-
-var CTXW = {req:"model.request · seq 2 · 09:14:02.402", total:15368, cached:12000, fresh:3368,
+/* One request, accounted to the token. CTXW, CTXB, CTXF and CTXX are run_01K5RS7M2E8FJ3QW's first
+   model.request (seq 2), the one run whose retrieval is authored in full. The parts sum to the total,
+   and the steering band is read from the compiled bundle, so a merge on the Steering page moves the
+   band, the total and the new tokens together. At bundle v41:
+   210 + 1,340 + 2,118 + 11,204 + 496 = 15,368 = cache_read 12,000 + new 3,368.
+   Every other run's window is read from its own frames by runContext(R). */
+var CTX_RUN="run_01K5RS7M2E8FJ3QW";
+var CTXW = {req:"model.request · seq 2 · 09:14:02.402", cached:12000,
+  get total(){return CTXB.reduce(function(a,b){return a+b.tok;},0);},
+  get fresh(){return this.total-this.cached;},
   digest:"sha256:44c19e02f7b3a158", budget:18000, used:11204, headroom:6796,
   scored:41, admitted:6, held:4, floor:31};
 
 var CTXB = [
  {id:"identity", ix:1, name:"system.identity",    tok:210,   col:"var(--dim)",         cache:"read"},
- {id:"steering", ix:2, name:"steering.compiled",  tok:1340,  col:"var(--gold)",        cache:"read"},
+ {id:"steering", ix:2, name:"steering.compiled",  get tok(){return stgBundle().tok;}, col:"var(--gold)", cache:"read"},
  {id:"tools",    ix:3, name:"tools.definitions",  tok:2118,  col:"var(--st-approval)", cache:"read"},
  {id:"frames",   ix:4, name:"context.frames",     tok:11204, col:"var(--st-proven)",   cache:"mixed"},
  {id:"task",     ix:5, name:"task.brief",         tok:496,   col:"var(--st-allowed)",  cache:"new"}
@@ -5487,7 +5534,87 @@ function ctxKindCol(k){
 }
 function ctxFrame(id){for(var i=0;i<CTXF.length;i++){if(CTXF[i].id===id)return CTXF[i];}return null;}
 function ctxOut(id){for(var i=0;i<CTXX.length;i++){if(CTXX[i].id===id)return CTXX[i];}return null;}
+/* The authored run's first request and its response state figures the window owns: the steering and tool
+   tokens on seq 2, the new and cached input on seq 3 and on the transcript's usage row for it. They read
+   the window, so a steering merge cannot leave a frame restating the old total. */
+(function(){
+  var L=FRAMES_BY_RUN[CTX_RUN], rq=L[2], rs=L[3], use=(TRANSCRIPTS[CTX_RUN]||[]).filter(function(e){return e.kind==="usage"&&e.fr===3;})[0];
+  if(rq&&rq.kind==="model.request") Object.defineProperty(rq,"sum",{enumerable:true,configurable:true,
+    get:function(){return "anthropic · claude-opus-5 · 14 tool definitions ("+tokn(CTXB[2].tok)+" tok) · steering "+tokn(CTXB[1].tok)+" tok · "+CTXF.length+" context frames";}});
+  if(rs&&rs.kind==="model.response") Object.defineProperty(rs,"sum",{enumerable:true,configurable:true,
+    get:function(){return "stop_reason tool_use · in "+tokn(CTXW.fresh)+" · cache_read "+tokn(CTXW.cached)+" · out 412 · req_01JQ7F2K";}});
+  if(use) Object.defineProperty(use.meta,"tin",{enumerable:true,configurable:true,get:function(){return CTXW.fresh;}});
+})();
 function tokn(n){return n.toLocaleString();}
+
+/* A request's composition when a frame does not state it block by block: system, steering and tool
+   definitions at the gateway's figures (scaled down to fit a request smaller than they are), context
+   frames up to 62% of the budget or 60% of what is left, the conversation after that. `k` carries the
+   blocks a frame does state. The five parts always sum to tot. framesFromRunSynth sizes every
+   synthesized request with it, and runContext uses it for an authored request that names only some blocks. */
+function frReqComp(tot,k){
+  k=k||{};
+  var sys=k.system!=null?k.system:FR_SYS, st=k.steering!=null?k.steering:FR_STEER, tl=k.tools!=null?k.tools:FR_TOOLS;
+  var fixed=sys+st+tl, fit=Math.min(tot,fixed), sc=fixed?fit/fixed:1;
+  sys=Math.round(sys*sc); st=Math.round(st*sc); tl=fit-sys-st;
+  var room=Math.max(0,tot-fit), budget=k.budget||FR_BUDGET;
+  var ctx=k.ctx!=null?Math.min(k.ctx,room):Math.min(Math.round(budget*0.62),Math.round(room*0.6));
+  return {system:sys,steering:st,tools:tl,ctx:ctx,conv:room-ctx};
+}
+function ctxStated(sum,re){var m=re.exec(sum||"");return m?+m[1].replace(/,/g,""):null;}
+function ctxSteerTok(f){return f.tokens!=null?f.tokens:(ctxStated(f.sum,/(\d[\d,]*) tok/)||0);}
+/* The context window of a run: its first model.request, block by block, read from the run's own frames.
+   - the authored run (CTX_RUN) reads CTXB, whose steering band is the compiled bundle;
+   - a request that carries its composition (rq) is read as recorded;
+   - an authored request without one takes its total from the response it got (input + cache_read),
+     the blocks a frame states (steering and budget on context.assembled, tool tokens or count on the
+     request), and frReqComp for the rest.
+   total always equals the sum of the blocks and the first request's prompt tokens, so the Context tab,
+   the model.request inspector and the prompt panel under the instruments cannot disagree.
+   Steers are every control.steer frame on the run: they are appended to a later request, never part
+   of this window's total. */
+function runContext(R){
+  var L=runFrames(R), i, at=-1;
+  for(i=0;i<L.length;i++){if(L[i].kind==="model.request"){at=i;break;}}
+  var steers=L.filter(function(f){return f.kind==="control.steer";}), steerTok=0;
+  steers.forEach(function(f){steerTok+=ctxSteerTok(f);});
+  var W={run:R.id,list:L,steers:steers,steerTok:steerTok,authored:R.id===CTX_RUN};
+  if(at<0){W.none="no model.request";return W;}
+  var f=L[at], ca=null, resp=null;
+  for(i=at-1;i>=0;i--){if(L[i].kind==="context.assembled"){ca=L[i];break;}}
+  for(i=at+1;i<L.length;i++){if(L[i].kind==="model.request")break;if(L[i].kind==="model.response"){resp=L[i];break;}}
+  var comp, total, cached=0, u=resp&&(resp.u||resp.usage), budget=null, rows=null, derived=false;
+  if(u) cached=u.cr!=null?u.cr:(u.cache_read||0);
+  else if(resp) cached=frNum(resp.sum,"cache_read");
+  if(W.authored){
+    comp={}; CTXB.forEach(function(b){comp[b.id]=b.tok;});
+    comp={system:comp.identity,steering:comp.steering,tools:comp.tools,ctx:comp.frames,conv:comp.task};
+    total=CTXW.total; cached=CTXW.cached; budget=CTXW.budget; rows=CTXF;
+  } else if(f.rq){
+    comp=f.rq.comp; total=f.rq.tok;
+    if(ca&&ca.ctx){budget=ca.ctx.budget;rows=ca.ctx.rows;}
+  } else {
+    total=u?(u.inU!=null?u.inU+u.cr:(u.input_uncached||0)+(u.cache_read||0)):resp?frNum(resp.sum,"in")+frNum(resp.sum,"cache_read"):0;
+    if(!total){W.none="no token figures";W.req=f;W.at=at;return W;}
+    var nTools=ctxStated(f.sum,/(\d+) tool definitions/), tTools=ctxStated(f.sum,/tool definitions \((\d[\d,]*) tok\)/);
+    budget=ctxStated(ca&&ca.sum,/budget (\d[\d,]*) tok/);
+    comp=frReqComp(total,{steering:ctxStated(ca&&ca.sum,/steering (\d[\d,]*) tok/),
+      tools:tTools!=null?tTools:nTools!=null?Math.round(FR_TOOLS*nTools/14):null,
+      ctx:ctxStated(ca&&ca.sum,/usage (\d[\d,]*) tok/),budget:budget});
+    derived=true;
+  }
+  budget=budget||FR_BUDGET; cached=Math.min(cached,total);
+  var spec=[["identity","system.identity",comp.system,"var(--dim)"],["steering","steering.compiled",comp.steering,"var(--gold)"],
+    ["tools","tools.definitions",comp.tools,"var(--st-approval)"],["frames","context.frames",comp.ctx,"var(--st-proven)"],
+    ["task",at===0||!L.slice(0,at).some(function(x){return x.kind==="model.response";})?"task.brief":"conversation",comp.conv,"var(--st-allowed)"]];
+  /* caching is prefix-based: a block wholly inside the cached prefix was read, one it crosses is mixed */
+  var cum=0;
+  W.blocks=spec.map(function(s,k){var from=cum;cum+=s[2];
+    return {id:s[0],ix:k+1,name:s[1],tok:s[2],col:s[3],cache:cum<=cached?"read":from>=cached?"new":"mixed"};});
+  Object.assign(W,{req:f,at:at,resp:resp,ca:ca,comp:comp,total:total,cached:cached,fresh:total-cached,budget:budget,rows:rows,derived:derived,
+    system:comp.system,steering:comp.steering,tools:comp.tools,ctx:comp.ctx,conv:comp.conv});
+  return W;
+}
 
 /* a labelled slab of what the model literally read */
 function readout(title, right, inner){
@@ -5503,78 +5630,168 @@ function citedBadge(f){
 
 /* ------------------------------ the tab ------------------------------ */
 function contextTab(R){
-  var sel = S.ctxSel || "frames";
+  var W = runContext(R);
+  if(W.none){
+    return '<div class="panel pad" data-ctx-none="'+h(W.none)+'"><p class="eyebrow q">No window on record</p>'+
+     '<p>'+(W.none==="no model.request"
+       ? 'The frames in view for <span class="mono">'+h(R.id)+'</span> carry no <span class="mono">model.request</span>, so there is no request to account for block by block.'
+       : 'The first <span class="mono">model.request</span> on <span class="mono">'+h(R.id)+'</span> is not followed by a response that reports its input, so its window has no total to split.')+'</p>'+
+     (W.steers.length?'<p class="muted">'+W.steers.length+' control.steer frame'+(W.steers.length===1?'':'s')+' on this run, '+tokn(W.steerTok)+' tok.</p>':'')+'</div>';
+  }
+  var own = W.authored, sel = ctxSelOf(W);
+  var blocks = W.blocks.filter(function(b){return b.tok>0;});
 
-  var bar = CTXB.map(function(b){
-    var on = (sel===b.id) || (b.id==="frames" && (ctxFrame(sel)!==null));
+  var bar = blocks.map(function(b){
+    var on = (sel===b.id) || (b.id==="frames" && own && (ctxFrame(sel)!==null));
     return '<button style="flex:'+b.tok+';background:'+b.col+'" aria-current="'+(on?'true':'false')+'" '+
      'title="'+h(b.name)+' · '+tokn(b.tok)+' tok" onclick="S.ctxSel=\''+b.id+'\';render()">'+
-     (b.tok>1200?'<span class="lb">'+Math.round(b.tok/CTXW.total*100)+'%</span>':'')+'</button>';
+     (b.tok/W.total>0.08?'<span class="lb">'+Math.round(b.tok/W.total*100)+'%</span>':'')+'</button>';
   }).join("");
 
-  var legend = CTXB.map(function(b){
-    return '<span><i style="background:'+b.col+'"></i>'+h(b.name.split(".")[1])+' <b>'+tokn(b.tok)+'</b></span>';
+  var legend = W.blocks.map(function(b){
+    return '<span><i style="background:'+b.col+'"></i>'+h(b.name.split(".").pop())+' <b>'+tokn(b.tok)+'</b></span>';
   }).join("");
 
   var top = '<div class="panel" style="margin-bottom:14px">'+
    '<div class="panel-h"><h3>The window, as it was sent</h3>'+
-    '<div class="sp"><span class="b b-q mono">'+h(CTXW.req)+'</span>'+
-    '<span class="b b-q">'+tokn(CTXW.total)+' tok in</span></div></div>'+
+    '<div class="sp"><span class="b b-q mono" data-ctx-req="'+W.req.seq+'">model.request · seq '+W.req.seq+' · '+h(W.req.t)+'</span>'+
+    '<span class="b b-q" data-ctx-total="'+W.total+'">'+tokn(W.total)+' tok in</span></div></div>'+
    '<div class="panel-b"><div class="compbar">'+bar+'</div><div class="legend">'+legend+'</div>'+
-   '<div class="note" style="margin-top:13px">This is the whole of what the model received. Five blocks, in this order, and '+
-   'nothing else — no ambient file, no hidden preamble, no tool it was not handed. '+
-   tokn(CTXW.cached)+' tokens came from cache and '+tokn(CTXW.fresh)+' were new. '+
+   '<div class="note" style="margin-top:13px">'+(own?'This is the whole of what the model received. ':'This run’s first model request, read from its frames. ')+
+   'Five blocks, in this order, and nothing else — no ambient file, no hidden preamble, no tool it was not handed. '+
+   tokn(W.cached)+' tokens came from cache and '+tokn(W.fresh)+' were new. '+
+   (W.derived?'The response records the total; where no frame states a block, the split follows the gateway’s composition rule. ':'')+
    'Click a band, or walk the window on the right.</div></div></div>';
 
   /* -------- the window, as a two-level tree -------- */
   var stack = "";
-  CTXB.forEach(function(b){
+  W.blocks.forEach(function(b){
     stack += '<button class="ctxi" aria-current="'+(sel===b.id?'true':'false')+'" onclick="S.ctxSel=\''+b.id+'\';render()">'+
      '<span class="sw" style="background:'+b.col+'"></span>'+
      '<span class="nm">'+h(b.name)+'</span><span class="tk">'+tokn(b.tok)+'</span></button>';
-    if(b.id==="frames"){
-      stack += CTXF.map(function(f){
-        return '<button class="ctxi sub" aria-current="'+(sel===f.id?'true':'false')+'" onclick="S.ctxSel=\''+f.id+'\';render()">'+
-         '<span class="sw" style="background:'+ctxKindCol(f.kind)+(f.cited==null?';opacity:.4':'')+'"></span>'+
+    if(b.id==="frames"&&W.rows){
+      stack += W.rows.map(function(f,k){
+        var id = own ? f.id : "frames";
+        return '<button class="ctxi sub" aria-current="'+(own&&sel===f.id?'true':'false')+'" onclick="S.ctxSel=\''+id+'\';render()">'+
+         '<span class="sw" style="background:'+ctxKindCol(f.kind)+(own&&f.cited==null?';opacity:.4':'')+'"></span>'+
          '<span class="nm">'+h(f.label)+'</span><span class="tk">'+tokn(f.tok)+'</span></button>';
       }).join("");
     }
   });
 
-  stack += '<div class="ctxg">Appended later<span class="n">+22 tok</span></div>'+
-   '<button class="ctxi" aria-current="'+(sel==="steer"?'true':'false')+'" onclick="S.ctxSel=\'steer\';render()">'+
-   '<span class="sw" style="background:var(--st-approval)"></span>'+
-   '<span class="nm">control.steer · seq 10</span><span class="tk">22</span></button>';
+  if(W.steers.length){
+    stack += '<div class="ctxg">Appended later<span class="n" data-ctx-steer-tok="'+W.steerTok+'">+'+tokn(W.steerTok)+' tok</span></div>'+
+     W.steers.map(function(f){
+       var id = 'steer@'+W.list.indexOf(f);
+       return '<button class="ctxi" data-ctx-steer="'+f.seq+'" aria-current="'+(sel===id?'true':'false')+'" onclick="S.ctxSel=\''+id+'\';render()">'+
+        '<span class="sw" style="background:var(--st-approval)"></span>'+
+        '<span class="nm">control.steer · seq '+f.seq+'</span><span class="tk">'+tokn(ctxSteerTok(f))+'</span></button>';
+     }).join("");
+  }
 
-  stack += '<div class="ctxg">Retrieved, kept out<span class="n">'+CTXX.length+'</span></div>'+
-   CTXX.map(function(x){
-     return '<button class="ctxi off" aria-current="'+(sel===x.id?'true':'false')+'" onclick="S.ctxSel=\''+x.id+'\';render()">'+
-      '<span class="sw" style="background:var(--border)"></span>'+
-      '<span class="nm">'+h(x.label)+'</span><span class="tk">'+tokn(x.tok)+'</span></button>';
-   }).join("");
+  if(own){
+    stack += '<div class="ctxg">Retrieved, kept out<span class="n">'+CTXX.length+'</span></div>'+
+     CTXX.map(function(x){
+       return '<button class="ctxi off" aria-current="'+(sel===x.id?'true':'false')+'" onclick="S.ctxSel=\''+x.id+'\';render()">'+
+        '<span class="sw" style="background:var(--border)"></span>'+
+        '<span class="nm">'+h(x.label)+'</span><span class="tk">'+tokn(x.tok)+'</span></button>';
+     }).join("");
+  }
 
   var stackPanel = '<div class="panel" style="margin-bottom:14px">'+
    '<div class="panel-h"><h3>Walk the window</h3>'+
    '<span class="b b-q" style="margin-left:auto">top to bottom</span></div>'+
    '<div class="stack">'+stack+'</div></div>';
 
-  var pct = Math.round(CTXW.used/CTXW.budget*100);
-  var budgetPanel = '<div class="panel"><div class="panel-h"><h3>Retrieval, in numbers</h3></div><div class="panel-b">'+
-   '<div class="meter"><div class="lab">Frame budget used<b>'+tokn(CTXW.used)+' / '+tokn(CTXW.budget)+'</b></div>'+
-   '<div class="bar"><i style="width:'+pct+'%;background:var(--st-proven)"></i></div></div>'+
-   '<dl class="kv" style="margin-top:13px">'+
-   '<dt>Candidates scored</dt><dd class="num">'+CTXW.scored+'</dd>'+
-   '<dt>Admitted</dt><dd class="num">'+CTXW.admitted+' · '+tokn(CTXW.used)+' tok</dd>'+
-   '<dt>Held back</dt><dd class="num">'+CTXW.held+' · 2 capped, 2 withheld</dd>'+
-   '<dt>Below the floor</dt><dd class="num">'+CTXW.floor+' · score &lt; 0.60</dd>'+
-   '<dt>Headroom left</dt><dd class="num">'+tokn(CTXW.headroom)+' tok</dd>'+
-   '<dt>Composition digest</dt><dd class="mono">'+h(CTXW.digest)+'</dd></dl>'+
-   '<div class="note" style="margin-top:12px">The budget was not what bound this turn — '+tokn(CTXW.headroom)+
-   ' tokens went unused. The score floor and the one-chunk-per-document cap did the cutting. '+
-   'The assembler does not fill headroom for its own sake.</div></div></div>';
+  var budgetPanel;
+  if(own){
+    var upct = Math.round(CTXW.used/CTXW.budget*100);
+    budgetPanel = '<div class="panel"><div class="panel-h"><h3>Retrieval, in numbers</h3></div><div class="panel-b">'+
+     '<div class="meter"><div class="lab">Frame budget used<b>'+tokn(CTXW.used)+' / '+tokn(CTXW.budget)+'</b></div>'+
+     '<div class="bar"><i style="width:'+upct+'%;background:var(--st-proven)"></i></div></div>'+
+     '<dl class="kv" style="margin-top:13px">'+
+     '<dt>Candidates scored</dt><dd class="num">'+CTXW.scored+'</dd>'+
+     '<dt>Admitted</dt><dd class="num">'+CTXW.admitted+' · '+tokn(CTXW.used)+' tok</dd>'+
+     '<dt>Held back</dt><dd class="num">'+CTXW.held+' · 2 capped, 2 withheld</dd>'+
+     '<dt>Below the floor</dt><dd class="num">'+CTXW.floor+' · score &lt; 0.60</dd>'+
+     '<dt>Headroom left</dt><dd class="num">'+tokn(CTXW.headroom)+' tok</dd>'+
+     '<dt>Composition digest</dt><dd class="mono">'+h(CTXW.digest)+'</dd></dl>'+
+     '<div class="note" style="margin-top:12px">The budget was not what bound this turn — '+tokn(CTXW.headroom)+
+     ' tokens went unused. The score floor and the one-chunk-per-document cap did the cutting. '+
+     'The assembler does not fill headroom for its own sake.</div></div></div>';
+  } else {
+    var used = W.ctx, bpct = Math.min(100,Math.round(used/Math.max(1,W.budget)*100)), dig = W.ca?(/sha256:\S+/.exec(W.ca.sum)||[])[0]:null;
+    budgetPanel = '<div class="panel"><div class="panel-h"><h3>Retrieval, in numbers</h3></div><div class="panel-b">'+
+     '<div class="meter"><div class="lab">Frame budget used<b>'+tokn(used)+' / '+tokn(W.budget)+'</b></div>'+
+     '<div class="bar"><i style="width:'+bpct+'%;background:var(--st-proven)"></i></div></div>'+
+     '<dl class="kv" style="margin-top:13px">'+
+     '<dt>Admitted</dt><dd class="num">'+(W.rows?W.rows.length+' · '+tokn(used)+' tok':'not itemised in the frames')+'</dd>'+
+     '<dt>Headroom left</dt><dd class="num">'+tokn(Math.max(0,W.budget-used))+' tok</dd>'+
+     '<dt>Assembled at</dt><dd>'+(W.ca?'<span class="mono">context.assembled · seq '+W.ca.seq+'</span>':'no context.assembled frame precedes this request')+'</dd>'+
+     (dig?'<dt>Composition digest</dt><dd class="mono">'+h(dig)+'</dd>':'')+'</dl></div></div>';
+  }
 
-  return top + '<div class="split"><div class="panel">'+ctxDetail()+'</div>'+
+  return top + '<div class="split"><div class="panel">'+(own?ctxDetail(R,W,sel):ctxDetailRun(R,W,sel))+'</div>'+
    '<div>'+stackPanel+budgetPanel+'</div></div>';
+}
+/* the selection, if this run's window has it; otherwise the frames block. "steer" is the run's first steer. */
+function ctxSelOf(W){
+  var sel = S.ctxSel || "frames", i;
+  if(sel==="steer"){ if(!W.steers.length) return "frames"; return "steer@"+W.list.indexOf(W.steers[0]); }
+  if(/^steer@\d+$/.test(sel)){ i=+sel.slice(6); return W.list[i]&&W.list[i].kind==="control.steer"?sel:"frames"; }
+  if(W.blocks.some(function(b){return b.id===sel;})) return sel;
+  if(W.authored&&(ctxFrame(sel)||ctxOut(sel))) return sel;
+  return "frames";
+}
+/* one appended steer, read from its control.steer frame and the model.request that carried it */
+function ctxSteerDetail(R,W,sel){
+  var ix=+sel.slice(6), f=W.list[ix], L=W.list, tok=ctxSteerTok(f), carrier=null, i;
+  if(f.appliedAt!=null){ for(i=0;i<L.length;i++){ if(L[i].seq===f.appliedAt&&L[i].kind==="model.request"){ carrier=L[i]; break; } } }
+  else if(f.status!=="queued"&&f.status!=="expired"){ for(i=ix+1;i<L.length;i++){ if(L[i].kind==="model.request"){ carrier=L[i]; break; } } }
+  var quote=f.text||(/“([^”]*)”/.exec(f.sum)||[])[1]||f.sum, by=f.by||String(f.sum).split(" · ")[0];
+  var t0=L[0]?tsec(L[0].t):null, t1=tsec(f.t), into=t0!=null&&t1!=null?t1-t0:null, sane=into!=null&&into>=0&&into<43200;
+  var repeats=W.authored&&quote===STEER_DEFAULT;
+  return ctxHd('Appended · <span class="mono">control.steer</span> · seq '+f.seq, tokBadge(tok)+cacheBadge("new"))+
+   ctxBody(
+    '<p>Sent by the operator at '+h(f.t)+(sane?', '+Math.round(into)+' seconds into the run,':'')+' and '+
+     (carrier?'delivered at the next boundary, as frame '+carrier.seq+'.':f.status==="expired"?'expired before any model call boundary.':'queued for the next model call boundary.')+'</p>'+
+    readout("appended after the cached prefix",carrier?"seq "+carrier.seq+" · "+h(carrier.t):h(f.status||"queued"),
+     '<div class="rb">“'+h(quote)+'”</div>')+
+    '<dl class="kv"><dt>Issuer</dt><dd>'+h(by)+' · operator authority</dd>'+
+    '<dt>Placed</dt><dd>immediately after the cached system block, before the task brief</dd>'+
+    '<dt>Digest</dt><dd class="mono">'+h(f.dig||"sha256:pending")+'</dd>'+
+    '<dt>Cost of delivering it</dt><dd class="num">'+tokn(tok)+' tok</dd></dl>'+
+    '<div class="note" style="margin-top:12px">Appended, never merged into an earlier block. Rewriting a block that is already '+
+    'cached would throw away the whole '+tokn(W.cached)+'-token prefix; appending costs '+tokn(tok)+' tokens. That is why steering arrives at a boundary '+
+    'rather than mid-turn.</div>'+
+    (repeats?'<div class="warn" style="margin-top:13px"><b>Already governed.</b> This steer restates '+
+    '<span class="mono">ctx.release.platform-only</span>, a <span class="mono">never</span> rule the agent has held since block 2. '+
+    'The operator could not see that from the run page, so they spent a turn saying it again. Surfacing the active rules where '+
+    'steering is composed would have saved the round trip.</div>':'')+
+    '<div class="row" style="margin-top:13px">'+(repeats?'<button class="btn sm" onclick="S.ctxSel=\'steering\';render()">Show the rule it repeats</button>':'')+
+    '<button class="btn sm" onclick="S.tab.run=\'player\';S.frame='+ix+';render()">Open frame '+f.seq+'</button></div>');
+}
+/* the detail panel for a run whose retrieval is not authored: every figure is the window's */
+function ctxDetailRun(R,W,sel){
+  if(/^steer@/.test(sel)) return ctxSteerDetail(R,W,sel);
+  var b=W.blocks.filter(function(x){return x.id===sel;})[0]||W.blocks[3];
+  var src=W.derived?'split by the composition rule · total from '+(W.resp?'model.response · seq '+W.resp.seq:'the request'):'recorded on model.request · seq '+W.req.seq;
+  var what={identity:'Who the agent is acting as, and how far that reaches. Oxagen writes this block; the agent author cannot.',
+    steering:'The workspace’s published steering records, compiled into one block and served from cache. The model sees the result of the merge, never the merge itself.',
+    tools:'The tool definitions on the belt. This is the only tool list the model is shown, and every one of them costs window.',
+    frames:'What the gateway laid into the window from the knowledge graph for this request.',
+    task:W.blocks[4].name==="task.brief"?'The task as the operator wrote it, with the brief the harness wraps around it.':'Prior turns and tool results, served from the recording.'}[b.id];
+  var inner='<p>'+what+'</p>'+
+   '<dl class="kv"><dt>Tokens</dt><dd class="num">'+tokn(b.tok)+' · '+pct(b.tok,W.total)+' of '+tokn(W.total)+'</dd>'+
+   '<dt>Cache</dt><dd>'+{read:'inside the cached prefix of '+tokn(W.cached)+' tokens',mixed:'the cache breakpoint at token '+tokn(W.cached)+' falls inside this block','new':'after the cached prefix · billed as fresh input'}[b.cache]+'</dd>'+
+   '<dt>Source</dt><dd class="mono">'+h(src)+'</dd></dl>';
+  if(b.id==="frames"){
+    inner+=W.rows&&W.rows.length?'<div class="tw" style="margin-top:12px"><table class="narrow"><thead><tr><th>Kind</th><th>Frame</th><th class="num">Tok</th></tr></thead><tbody>'+
+      W.rows.map(function(f){return '<tr><td><span class="b b-q" style="color:'+ctxKindCol(f.kind)+'">'+h(f.kind)+'</span></td><td class="mono" style="font-size:11.5px">'+h(f.label)+'</td><td class="num">'+tokn(f.tok)+'</td></tr>';}).join("")+
+      '<tr><td colspan="2"><b>total</b></td><td class="num"><b>'+tokn(W.rows.reduce(function(a,f){return a+f.tok;},0))+'</b></td></tr></tbody></table></div>'
+     :'<div class="note" style="margin-top:12px">'+(W.ca?'<span class="mono">context.assembled · seq '+W.ca.seq+'</span> does not itemise the frames it served.':'No context.assembled frame precedes this request.')+'</div>';
+  }
+  return ctxHd('Block '+b.ix+' · <span class="mono">'+h(b.name)+'</span>', tokBadge(b.tok)+cacheBadge(b.cache))+ctxBody(inner);
 }
 
 /* ------------------------- the detail panel ------------------------- */
@@ -5589,8 +5806,8 @@ function cacheBadge(kind){
   return '<span class="b '+m[kind][0]+'"><span class="d"></span>'+m[kind][1]+'</span>';
 }
 
-function ctxDetail(){
-  var sel = S.ctxSel || "frames";
+function ctxDetail(R,W,sel){
+  if(/^steer@/.test(sel)) return ctxSteerDetail(R,W,sel);
 
   if(sel==="identity"){
     return ctxHd('Block 1 · <span class="mono">system.identity</span>', tokBadge(210)+cacheBadge("read"))+
@@ -5682,7 +5899,10 @@ function ctxDetail(){
        '<td class="num">'+tokn(f.tok)+'</td><td class="num">'+f.score.toFixed(2)+'</td>'+
        '<td>'+(f.cited!=null?'<span class="b b-allowed">frame '+f.cited+'</span>':'<span class="b b-q">no</span>')+'</td></tr>';
     }).join("");
-    return ctxHd('Block 4 · <span class="mono">context.frames</span>', tokBadge(11204)+cacheBadge("mixed"))+
+    /* where the prefix breaks, from the blocks above this one and the frames in order */
+    var above=W.system+W.steering+W.tools, into=W.cached-above, run0=0, brk=null;
+    CTXF.forEach(function(f,k){if(brk==null&&run0+f.tok>into)brk={ix:k+1,at:into-run0};run0+=f.tok;});
+    return ctxHd('Block 4 · <span class="mono">context.frames</span>', tokBadge(W.ctx)+cacheBadge("mixed"))+
      ctxBody(
       '<p>Six frames pulled from the knowledge graph for this turn — three quarters of the window. '+
       'Pick a row to read what the model actually got, and why it was there.</p>'+
@@ -5690,9 +5910,9 @@ function ctxDetail(){
       rows+'</tbody></table></div>'+
       '<div class="hr"></div>'+
       '<p class="eyebrow q">Where the cache stops</p>'+
-      '<p>The cached prefix is 12,000 tokens: blocks 1 to 3 (3,668) and then 8,332 tokens into this one. '+
-      'Caching is prefix-based, so it stops at a token, not at a frame edge — the breakpoint for this request sits '+
-      '<b>706 tokens inside frame 5</b>.</p>'+
+      '<p>The cached prefix is '+tokn(W.cached)+' tokens: blocks 1 to 3 ('+tokn(above)+') and then '+tokn(into)+' tokens into this one. '+
+      'Caching is prefix-based, so it stops at a token, not at a frame edge'+(brk?' — the breakpoint for this request sits '+
+      '<b>'+tokn(brk.at)+' tokens inside frame '+brk.ix+'</b>':'')+'.</p>'+
       '<div class="note">Frame order is a cost decision. Stable frames first pushes the boundary further down the window; '+
       'a volatile frame near the top invalidates everything under it. This run reorders by volatility, not by score.</div>'+
       '<div class="hr"></div>'+
@@ -5849,27 +6069,6 @@ function ctxDetail(){
       '<div class="note" style="margin-top:12px">Quoted as evidence, not executed. If the brief asked for something the steering '+
       'in block 2 forbids, the steering still wins and the call is refused at the gateway — the brief cannot raise the operator’s '+
       'own authority, and an operator cannot write themselves a wider one.</div>');
-  }
-
-  if(sel==="steer"){
-    return ctxHd('Appended · <span class="mono">control.steer</span>', tokBadge(22)+cacheBadge("new"))+
-     ctxBody(
-      '<p>Sent by the operator 42 seconds into the run and delivered at the next boundary, as frame 11.</p>'+
-      readout("appended after the cached prefix","seq 11 · 09:14:44.210",
-       '<div class="rb">“Skip the mobile repo this cycle; 4.11.0 is platform only.”</div>')+
-      '<dl class="kv"><dt>Issuer</dt><dd>Marcus Bell · operator authority</dd>'+
-      '<dt>Placed</dt><dd>immediately after the cached system block, before the task brief</dd>'+
-      '<dt>Digest</dt><dd class="mono">sha256:8e10c4b7d290fa35</dd>'+
-      '<dt>Cost of delivering it</dt><dd class="num">22 tok</dd></dl>'+
-      '<div class="note" style="margin-top:12px">Appended, never merged into an earlier block. Rewriting a block that is already '+
-      'cached would throw away the whole 12,000-token prefix; appending costs 22 tokens. That is why steering arrives at a boundary '+
-      'rather than mid-turn.</div>'+
-      '<div class="warn" style="margin-top:13px"><b>Already governed.</b> This steer restates '+
-      '<span class="mono">ctx.release.platform-only</span>, a <span class="mono">never</span> rule the agent has held since block 2. '+
-      'The operator could not see that from the run page, so they spent a turn saying it again. Surfacing the active rules where '+
-      'steering is composed would have saved the round trip.</div>'+
-      '<div class="row" style="margin-top:13px"><button class="btn sm" onclick="S.ctxSel=\'steering\';render()">Show the rule it repeats</button>'+
-      '<button class="btn sm" onclick="S.tab.run=\'player\';S.frame=10;render()">Open frame 10</button></div>');
   }
 
   var x = ctxOut(sel);
@@ -6253,8 +6452,9 @@ function costTab(R){
   var sofar=cls.reduce(function(a,x){return a+x[2];},0);cls.push(["reasoning",m.reasoning,Math.max(0,total-sofar)]);
   var clsRows=cls.map(function(x){return '<tr><td class="mono">'+x[0]+'</td><td class="num">'+tokn(x[1])+'</td><td class="num">'+(x[1]?'$'+x[2].toFixed(4):'—')+'</td><td class="num dim">'+(total?(x[2]/total*100).toFixed(1):'0.0')+'%</td></tr>';}).join("")+
     '<tr><td><b>total</b></td><td class="num"><b>'+tokn(m.tokTotal)+'</b></td><td class="num"><b>'+usd(R.cost)+'</b></td><td class="num dim">100.0%</td></tr>';
-  var fixed=FR_SYS+FR_STEER+FR_TOOLS,ctx=Math.min(Math.round(FR_BUDGET*0.62),Math.round(Math.max(0,m.perCall-fixed)*0.6)),conv=Math.max(0,m.perCall-fixed-ctx);
-  var comp=[["Conversation",conv,"var(--st-allowed)"],["Context frames",ctx,"var(--st-proven)"],["Tool definitions",FR_TOOLS,"var(--st-approval)"],["Steering",FR_STEER,"var(--k-rule)"],["System",FR_SYS,"var(--dim)"]];
+  /* the mean request carries the run's window's system, steering and tool blocks; the rest splits by the composition rule */
+  var CW=runContext(R),mc=frReqComp(m.perCall,CW.none?{}:{system:CW.system,steering:CW.steering,tools:CW.tools});
+  var comp=[["Conversation",mc.conv,"var(--st-allowed)"],["Context frames",mc.ctx,"var(--st-proven)"],["Tool definitions",mc.tools,"var(--st-approval)"],["Steering",mc.steering,"var(--k-rule)"],["System",mc.system,"var(--dim)"]];
   var legend='<div class="row" style="gap:14px;margin-top:10px;font-size:11.5px;color:var(--muted)">'+
     [["var(--st-approval)","turn cost"],["var(--st-proven)","turn carrying the flip"],["var(--st-denied)","turn carrying a finding"]].map(function(x){return '<span><i style="display:inline-block;width:9px;height:9px;border-radius:2px;background:'+x[0]+';margin-right:5px"></i>'+x[1]+'</span>';}).join("")+
     '<span><i style="display:inline-block;width:14px;border-top:2px dashed var(--fg);margin-right:5px;vertical-align:middle"></i>cost so far</span></div>';
@@ -8292,9 +8492,7 @@ function ctxprStop(){S.ctxpr.timers.forEach(clearTimeout);S.ctxpr.timers=[];}
 function ctxprPublish(on){
   var rec=CTXPR.record, i=RECORDS.indexOf(rec);
   if(on===(i>=0)) return;
-  var d=on?rec.tok:-rec.tok;
-  CTXB.forEach(function(b){if(b.id==="steering")b.tok+=d;});
-  CTXW.total+=d; CTXW.fresh+=d;
+  /* CTXB's steering band reads stgBundle(), and CTXW's total and fresh tokens sum the bands, so publishing the rule moves all three */
   if(on){
     RECORDS.push(rec); STEER_BUNDLE.rules.push(CTXPR.rule); STEER_BUNDLE.v++;
     auditEvent("steering_published",me().name,rec.id+" · "+CTXPR.pr+" merged as "+rec.commit+" · bundle v"+(STEER_BUNDLE.v-1)+" → v"+STEER_BUNDLE.v,"info",CTXPR.evt);
@@ -10607,8 +10805,8 @@ SCENARIOS["flight-recorder"]={title:"The flight recorder", ws:"core-platform",
    route:function(o){return {page:"run",org:o,ws:"core-platform",id:"run_01K5RQ4B9C7XTN2P"};},
    setup:function(){S.tab.run="player";S.frame=3;S.frameRun="run_01K5RQ4B9C7XTN2P";S.fp.playing=false;},
    act:["Open the flip frame","S.tab.run='player';S.frame=71;render()"]},
-  {say:"The Context tab accounts for one request to the token: five blocks that add up to 15,368 tokens, 12,000 of them read from cache.",
-   note:"The frames that were admitted and the candidates kept out sit side by side, so a bloated window shows before it gets expensive.",
+  {say:"The Context tab accounts for the run’s first request to the token: five blocks that add up to the input its response reports, and the part of it read from cache.",
+   note:"The context frames that were admitted sit under their block with their tokens, so a bloated window shows before it gets expensive.",
    route:function(o){return {page:"run",org:o,ws:"core-platform",id:"run_01K5RQ4B9C7XTN2P"};},
    setup:function(){S.tab.run="context";}},
   {say:"The waterfall: one bar per turn, the dashed line is the money accumulating to $2.87, and the flip is marked where it landed inside turn 4.",
