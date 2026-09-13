@@ -9,7 +9,7 @@ git show mc-baseline-w2:mc.html > /tmp/mc.html
 
 ## mc-baseline-w2 (2026-09-13)
 
-`main` after PRs #3–#7: everything in w1 below, plus
+`main` after PRs #3–#8: everything in w1 below, plus
 
 | Decision | Came from | What to build |
 |---|---|---|
@@ -17,7 +17,7 @@ git show mc-baseline-w2:mc.html > /tmp/mc.html
 | Everything each W file showed that mc.html lacked is in mc.html | PR #6 (nine port lanes) | The per-flow list is in PR #6's description |
 | Frames and context belong to a run; recorded frames are immutable | PR #6 | `FRAMES_BY_RUN`/`runFrames(R)`, `runContext(R)`; a published steering bundle reaches the next model call only |
 | Tenant is Anderson Intelligence Corp. (`a-intel`) at business scale | PR #5, re-applied in PR #6 | Seed rows render first; 274 agents, 1,168 runs shown |
-| One story clock: 2026-09-11 09:31:30 UTC, running from load | PR #7 | `nowT()`/`storyMs()` stamp anything a control writes |
+| One story clock: 2026-09-11 09:31:30 UTC, running from load | PR #8 | `nowT()`/`storyMs()` stamp anything a control writes |
 
 ## mc-baseline-w1
 
