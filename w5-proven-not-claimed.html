@@ -1674,17 +1674,17 @@ var RUNS = [
   started:"09:14:02", model:"claude-opus-5", cache:0.83, provenSpend:"0.00", ratio:0.71, sealed:null},
  {id:"run_01K5RQ4B9C7XTN2P", agent:"a-intel.core.stella-ci", op:"marcus", ws:"core-platform",
   status:"sealed", turn:4, steps:23, frames:97, cost:"2.87", basis:"gateway_observed", tier:"gateway",
-  grade:"full", verdict:"flipped", task:"a-intel/platform#482", taskTitle:"Witness: release notes contract",
-  summary:"Witnessed the release-notes contract flip from failing to passing on pull request #482. The first attempt failed all three assertions on a pristine tree, the second failed on heading order, and the third passed 3 of 3. Nothing was written to the repository; the run only executed the test and sealed the witness.",
-  touched:["a-intel/platform#482","packages/release/notes.contract.test.ts","wit_01K5RQ8M4"], gen:{"model":"claude-haiku-4-5","when":"at seal 09:11:18","frames":97},
+  grade:"full", verdict:"flipped", task:"a-intel/platform#482", taskTitle:"Bring #482 up to the release-notes contract",
+  summary:"Brought pull request #482 up to the release-notes contract and asked Oxagen to verify it three times. The first two answers were fail and the third was pass, and each answer was that one word. The witness, its assertions and its output never entered this run: the witness runner authored and ran it on run_01K5RQ5W7T2HVN9K and stamped the verdict here.",
+  touched:["a-intel/platform#482","refs/pull/482/head · 2 pushes, main untouched","wit_01K5RQ8M4 · verdicts only"], gen:{"model":"claude-haiku-4-5","when":"at seal 09:11:18","frames":97},
   started:"09:02:40", model:"claude-opus-5", cache:0.91, provenSpend:"2.87", ratio:0.88, sealed:"09:11:18",
   flip:{oracle:"test_flip", testKind:"contract test", runner:"vitest 3.2", cmd:"pnpm vitest run packages/release/notes.contract.test.ts",
    cmdDigest:"sha256:71bd…0c4e", witness:"wit_01K5RQ8M4", targetRef:"main", targetSha:"a4c91e2", prRef:"refs/pull/482/head", prSha:"f70b3d9",
    turn:4, turnStart:"09:07:02.140", turnStartSeq:58, flippedAt:"09:09:33.418", flipSeq:71, turnEnd:"09:10:51.007", turnEndSeq:89,
    sealedAt:"09:11:18.226", sealSeq:97, fingerprint:"held", segment:"seg_01K5RQ4B9C7XTN2P", heldOut:"2 of 5",
-   attempts:[{n:1,result:"fail",at:"09:07:41.902",seq:62,ms:4180,exit:1,note:"3 of 3 assertions failed · pristine tree"},
-             {n:2,result:"fail",at:"09:08:47.310",seq:66,ms:4022,exit:1,note:"1 of 3 assertions failed · heading order"},
-             {n:3,result:"pass",at:"09:09:33.418",seq:71,ms:3961,exit:0,note:"3 of 3 assertions passed"}]}},
+   attempts:[{n:1,result:"fail",at:"09:07:41.902",seq:62,ms:4180,exit:1,note:"3 of 3 assertions failed · pristine tree · the worker was told: fail"},
+             {n:2,result:"fail",at:"09:08:47.310",seq:66,ms:4022,exit:1,note:"1 of 3 assertions failed · heading order · the worker was told: fail"},
+             {n:3,result:"pass",at:"09:09:33.418",seq:71,ms:3961,exit:0,note:"3 of 3 assertions passed · the worker was told: pass"}]}},
  {id:"run_01K5RP2D6H4KLM8V", agent:"a-intel.core.triage", op:"marcus", ws:"core-platform",
   status:"sealed", turn:2, steps:9, frames:38, cost:"0.94", basis:"gateway_observed", tier:"gateway",
   grade:"full", verdict:"unmoved", task:"a-intel/platform#511", taskTitle:"Label: flaky worker restart",
@@ -1951,9 +1951,9 @@ var RUNGRAPH = {
   files:[{path:"release/4.11.0-notes.md", before:"", after:NOTES_V2, note:"new file · 2 writes"}]
  },
  "run_01K5RQ4B9C7XTN2P": {
-  repos:[{name:"a-intel/platform", ref:"f70b3d9 · refs/pull/482/head vs a4c91e2 main", note:"checked out read-only; nothing written", edge:"observed", fr:[58,71]}],
-  issues:[{ref:"a-intel/platform#482", title:"Cut 4.11.0 release notes", rel:"witnesses the contract on this pull request", edge:"stated"}],
-  artifacts:[{kind:"witness", ref:"wit_01K5RQ8M4", title:"notes.contract.test.ts · fail, fail, pass", state:"sealed", edge:"observed", fr:[62,66,71]}],
+  repos:[{name:"a-intel/platform", ref:"refs/pull/482/head · 2b8e1c7 → f70b3d9 · vs a4c91e2 main", note:"two pushes to the pull request head; main untouched", edge:"observed", fr:[58,71]}],
+  issues:[{ref:"a-intel/platform#482", title:"Cut 4.11.0 release notes", rel:"task · brought up to the release-notes contract", edge:"stated"}],
+  artifacts:[{kind:"witness", ref:"wit_01K5RQ8M4", title:"fail, fail, pass · authored and run on run_01K5RQ5W7T2HVN9K; this run received the verdicts only", state:"sealed", edge:"observed", fr:[62,66,71]}],
   files:[]
  },
  "run_01K5RP2D6H4KLM8V": {
@@ -2275,7 +2275,9 @@ var TOOLS = [
  {n:"load_tools",v:"1",s:"oxagen",risk:"low",eff:"read",eg:"none",fin:"none",
   origin:"declared",dig:"sha256:b52c09…",price:"0.00",cred:"none",belts:9,calls30:1990},
  {n:"search_graph",v:"1",s:"oxagen",risk:"low",eff:"read",eg:"none",fin:"none",
-  origin:"declared",dig:"sha256:04ae19…",price:"0.00",cred:"none",belts:31,calls30:12904}
+  origin:"declared",dig:"sha256:04ae19…",price:"0.00",cred:"none",belts:31,calls30:12904},
+ {n:"verify",v:"1",s:"oxagen",risk:"low",eff:"read",eg:"none",fin:"none",
+  origin:"declared",dig:"sha256:5d2e91…",price:"0.00",cred:"none",belts:31,calls30:2104}
 ];
 
 var CONNECTIONS = [
@@ -3015,6 +3017,7 @@ var TOOLMETA={
  stripe__create_payment:["Create payment","finance"], stripe__create_refund:["Create refund","finance"],
  aws_billing__purchase_savings_plan:["Purchase savings plan","finance"], aws_billing__get_cost_and_usage:["Get cost and usage","query"],
  linear__update_issue:["Update issue","record"], linear__get_issue:["Get issue","read"],
+ verify:["Verify","read"],
  slack__post_message:["Post message","message"], slack__upload_file:["Upload file","message"],
  slack__list_channels:["List channels","read"], slack__get_thread:["Get thread","read"],
  snowflake__run_query:["Run SQL query","query"], claude_code__Bash:["Run shell command","exec"], bash__run:["Run shell command","exec"],
@@ -4729,15 +4732,22 @@ function txEntries(R){
   if(TRANSCRIPTS[R.id])return TRANSCRIPTS[R.id];
   var e=[{t:0,kind:"prompt",body:R.taskTitle+(R.task?"\n\nTask "+R.task+".":""),meta:{task:R.task,by:PEOPLE[R.op]?PEOPLE[R.op].name:""}}];
   var t=2;
+  /* the worker never runs the witness and never sees it: each verify call returns one word, pass or
+     fail, at the disclosure grain, and the command, the assertions and the output stay on the witness
+     run. So the worker fixes its work, not the oracle. */
   if(R.flip&&R.flip.attempts){
-    e.push({t:t,kind:"text",body:"Running the "+R.flip.testKind+" against "+R.flip.prRef+" with "+R.flip.runner+"."});
-    R.flip.attempts.forEach(function(a){
+    var f=R.flip, W=proofWitnessRun(R), wr=W?W.id:f.witnessRun, k=f.attempts.length;
+    e.push({t:t,kind:"text",body:"Asking Oxagen to verify "+f.prRef+". The witness stays in the witness runner; this run is told pass or fail and nothing else."});
+    f.attempts.forEach(function(a,i){
+      var word=a.result==="pass"?"pass":"fail";
       t+=6+a.ms/1000;
-      e.push({t:t,kind:"tool",title:"Bash",cls:"verify",arg:R.flip.cmd,raw:'{"command":"'+R.flip.cmd+'"}',fr:a.seq,
-        res:{ms:a.ms,err:a.result!=="pass",body:(a.result==="pass"?"ok · ":"error: ")+a.note+"\nexit "+a.exit}});
+      e.push({t:t,kind:"tool",title:"verify",cls:"verify",arg:f.prRef+(a.n>1?" · again":""),raw:'{"ref":"'+f.prRef+'"}',fr:a.seq,
+        res:{ms:a.ms,err:word!=="pass",body:word}});
+      if(word!=="pass"&&i<k-1){t+=9;e.push({t:t,kind:"text",body:"fail, and nothing else. Re-reading the task and the steering, revising, and asking again."});}
     });
     t+=3;
-    e.push({t:t,kind:"proof",title:"witness "+R.flip.witness+" · "+(R.verdict==="flipped"?"flipped at attempt "+R.flip.attempts.length:R.verdict+" after "+R.flip.attempts.length+" attempt"+(R.flip.attempts.length===1?"":"s")),body:"fingerprint "+R.flip.fingerprint+" · "+R.flip.heldOut+" held out · sealed "+R.flip.sealedAt});
+    e.push({t:t,kind:"proof",title:"proof.observed · witness "+f.witness+" · "+(R.verdict==="flipped"?"flipped at attempt "+k:R.verdict+" after "+k+" attempt"+(k===1?"":"s")),
+      body:"recorded by the gateway, never shown to the model · fingerprint "+f.fingerprint+" · "+f.heldOut+" held out · sealed "+f.sealedAt+(wr?" · witnessed on "+wr:"")});
   }
   if(R.summary){t+=4;e.push({t:t,kind:"text",body:R.summary});}
   t+=0.2;e.push({t:t,kind:"usage",meta:{model:R.model,tin:null,cache:null,tout:null,cost:parseFloat(R.cost)||0,req:"rollup · "+R.frames+" frames"}});
@@ -5209,7 +5219,7 @@ function framesFromRunSynth(R){
      case "token_issued": fr.grant="cg_"+frHex(key+"cg",6).toUpperCase();fr.sum="credential grant "+fr.grant+" · "+toolParts(call.id).n.split("__")[0]+" connection · scoped to this call · TTL 5m";break;
      case "tool_call": fr.cost="0.0000";fr.dig=frDig(key+"out");
       fr.sum=(call.err?"failed · ":"ok · ")+msDur(call.ms)+" · output schema "+(call.err?"not reached":"ok")+(fr.io.red.length?" · "+fr.io.red.length+" field redacted":"")+" · response digest "+fr.dig;lastTool.push(q);break;
-     case "proof.observed": var at2=o2.att;fr.att=at2;fr.sum="attempt "+at2.n+" of "+f.attempts.length+" · "+at2.result+" · exit "+at2.exit+" · "+at2.note+" · witness "+f.witness;break;
+     case "proof.observed": var at2=o2.att;fr.att=at2;fr.sum="attempt "+at2.n+" of "+f.attempts.length+" · pr_result "+at2.result+" · witness "+f.witness+" · runner attestation embedded · delivered at seq "+(q+1)+" as one word: "+(at2.result==="pass"?"pass":"fail");break;
      case "checkpoint": fr.from=cpPrev;fr.head=frDig(key+"head");fr.sum="chain head "+fr.head+" · frames "+cpPrev+"–"+q+" · host device key, countersigned at ingest";cpPrev=q+1;break;
      case "record.appended": fr.rec={id:"rec_"+frHex(key+"rec",8).toUpperCase(),text:sentences.length?sentences[recN%sentences.length]:R.taskTitle,sources:lastTool.slice(-2)};recN++;
       fr.sum=fr.rec.id+" · note · "+fr.rec.text.slice(0,72)+(fr.rec.text.length>72?"…":"");break;
@@ -6258,7 +6268,7 @@ function proofAirlock(R){
    '<div class="membrane" aria-hidden="true"><span class="grain'+(bad?' bad':'')+'">'+word+'</span><span class="ml">'+h(g)+' · one word</span></div>'+
    '<div class="chamber"><p class="eyebrow q" style="margin:0">What the agent received</p>'+
     '<div class="oneword"><span class="w'+(bad?' bad':'')+'" id="airlock-word">'+word+'</span><span class="c">'+word.length+' characters · the whole tool result</span></div>'+
-    '<pre><span class="c">// frame '+(N+1)+' · tool_call · oxagen.verify@1</span>\n{ <span class="k">"result"</span>: <span class="'+cls+'">"'+word+'"</span> }\n\n'+
+    '<pre><span class="c">// frame '+(N+1)+' · tool_call · verify@1 · oxagen</span>\n{ <span class="k">"result"</span>: <span class="'+cls+'">"'+word+'"</span> }\n\n'+
     '<span class="c">// frame '+(N+2)+' · model.request · messages[-1]</span>\n{ <span class="k">"role"</span>: <span class="s">"user"</span>,\n  <span class="k">"content"</span>: [ { <span class="k">"type"</span>: <span class="s">"tool_result"</span>,\n    <span class="k">"content"</span>: <span class="'+cls+'">"'+word+'"</span> } ] }</pre>'+
     '<p class="dim" style="font-size:12px;margin:0">No test name, no assertion, no expected or actual value, no reproduction, no path. Raising the grain above <span class="mono">L0</span> is a policy decision a person makes, recorded as a security event.</p></div></div></div>';
 }
@@ -6330,11 +6340,11 @@ FRAMES_BY_RUN["run_01K5RQ5W7T2HVN9K"]=[
  {seq:6,kind:"witness.fingerprint",tier:"gateway",cost:null,t:"09:03:30.380",sum:"filesystem identity captured · sha256:af10…201b · tamper exclusion armed"},
  {seq:14,kind:"witness.run",tier:"gateway",cost:null,t:"09:03:31.020",sum:"pristine target · main @ a4c91e2 · the witness must fail here"},
  {seq:19,kind:"proof.observed",tier:"gateway",cost:null,t:"09:03:55.431",sum:"target result fail · fail fingerprint sha256:d92a…0c14 · witness admitted"},
- {seq:31,kind:"witness.run",tier:"gateway",cost:null,t:"09:07:37.722",sum:"refs/pull/482/head @ f70b3d9 · run 1 · same normalized command"},
+ {seq:31,kind:"witness.run",tier:"gateway",cost:null,t:"09:07:37.722",sum:"refs/pull/482/head @ 2b8e1c7 · run 1 · same normalized command · the worker asked"},
  {seq:33,kind:"proof.observed",tier:"gateway",cost:null,t:"09:07:41.902",sum:"PR result fail · the worker is told: fail"},
- {seq:44,kind:"witness.run",tier:"gateway",cost:null,t:"09:08:43.288",sum:"refs/pull/482/head @ f70b3d9 · run 2"},
+ {seq:44,kind:"witness.run",tier:"gateway",cost:null,t:"09:08:43.288",sum:"refs/pull/482/head @ 9d04a3e · run 2 · the head moved: the worker pushed and asked again"},
  {seq:46,kind:"proof.observed",tier:"gateway",cost:null,t:"09:08:47.310",sum:"PR result fail · the worker is told: fail"},
- {seq:55,kind:"witness.run",tier:"gateway",cost:null,t:"09:09:29.457",sum:"refs/pull/482/head @ f70b3d9 · run 3"},
+ {seq:55,kind:"witness.run",tier:"gateway",cost:null,t:"09:09:29.457",sum:"refs/pull/482/head @ f70b3d9 · run 3 · the head moved again"},
  {seq:57,kind:"proof.observed",tier:"gateway",cost:null,t:"09:09:33.201",sum:"PR result pass · output digest sha256:36ce…f2b3"},
  {seq:59,kind:"witness.fingerprint",tier:"gateway",cost:null,t:"09:09:33.260",sum:"re-fingerprint · tamper exclusion held"},
  {seq:60,kind:"witness.scrub",tier:"gateway",cost:null,t:"09:09:33.330",sum:"brief scrubbed to L0 · emitted 4 characters: pass"},
@@ -6725,6 +6735,8 @@ var BELT=[
   dec:"allow",rule:"grant:agent.repo.write #11",scope:"repo: a-intel/platform"},
  {id:"send_message@1",d:"Message another agent in this workspace, or a run.",
   dec:"allow",rule:"agent tool default",scope:"@agent only — @all is not granted"},
+ {id:"verify@1",d:"Ask the witness runner for a verdict on the pull request head. The whole result is one word, pass or fail.",
+  dec:"allow",rule:"agent tool default",scope:"grain L0 · this task’s witnesses · never the witness itself"},
  {id:"claude_code__Bash@2.1",d:"Run a shell command in the host's working directory.",
   dec:"allow",rule:"grant:agent.repo.write #9 (harness tier)",
   scope:"deny: curl, ssh, aws, gh auth · cwd under a-intel/platform"},
@@ -6751,10 +6763,10 @@ var AGENT_BELTS={
  "a-intel.core.release-manager":["github__create_pull_request@3","github__create_issue_comment@2",
   "github__merge_pull_request@4","github__create_release@2","github__list_pull_requests@2",
   "github__get_commit@1","github__get_file_contents@2","github__delete_branch@1","linear__get_issue@2",
-  "search_graph@1","expand_graph@1","recall_context@2","open_context_pr@1","claude_code__Bash@2.1"],
+  "search_graph@1","expand_graph@1","recall_context@2","open_context_pr@1","claude_code__Bash@2.1","verify@1"],
  "a-intel.core.stella-ci":["github__get_file_contents@2","github__get_commit@1","github__list_pull_requests@2",
   "github__create_issue_comment@2","search_graph@1","recall_context@2","append_record@2",
-  "claude_code__Bash@2.1","send_message@1"],
+  "claude_code__Bash@2.1","send_message@1","verify@1"],
  "a-intel.core.triage":["github__create_issue_comment@2","github__get_file_contents@2","github__get_commit@1",
   "github__list_pull_requests@2","github__create_pull_request@3","github__merge_pull_request@4",
   "github__delete_branch@1","linear__get_issue@2","linear__update_issue@3","slack__post_message@2",
@@ -10820,8 +10832,8 @@ SCENARIOS["sixty-seconds-to-governed"]={title:"Sixty seconds to governed", ws:"c
 SCENARIOS["flight-recorder"]={title:"The flight recorder", ws:"core-platform",
  blurb:"A sealed run read back frame by frame: what the model was shown, what each turn cost, and where two runs part ways.",
  steps:[
-  {say:"stella-ci witnessed the release-notes contract flip on #482 and sealed <span class=\"mono\">run_01K5RQ4B9C7XTN2P</span> at 09:11:18. Everything on this page is read back from its 97 frames.",
-   note:"The transcript is the model-visible projection of those frames. Each witness attempt in it links to the frame the gateway wrote.",
+  {say:"stella-ci brought #482 up to the release-notes contract, was told <span class=\"mono\">pass</span> on its third verify call, and sealed <span class=\"mono\">run_01K5RQ4B9C7XTN2P</span> at 09:11:18. Everything on this page is read back from its 97 frames.",
+   note:"The transcript is the model-visible projection of those frames. Each verify call in it links to the proof frame the gateway wrote, and the one word in it is all the model received.",
    route:function(o){return {page:"run",org:o,ws:"core-platform",id:"run_01K5RQ4B9C7XTN2P"};},
    setup:function(){S.tab.run="transcript";S.frame=0;S.bis=null;}},
   {say:"Frame 3 is the run’s first model response. Its usage is split by token class and priced, and its cost record is one of the numbers the Cost tab adds up.",
