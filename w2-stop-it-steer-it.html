@@ -684,7 +684,7 @@ tr.tg-grp .s{font-size:11.5px;color:var(--muted,#9B958A)}
     <div class="side-switchers">
       <button class="switcher" type="button" id="orgSwitch" aria-haspopup="true">
         <span class="sw-mark">AR</span>
-        <span class="sw-t"><span class="sw-k">Organization</span><span class="sw-v">Acme Robotics</span></span>
+        <span class="sw-t"><span class="sw-k">Organization</span><span class="sw-v">Anderson Intelligence Corp.</span></span>
         <svg class="sw-c" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 5l3-2.5L9 5M3 7l3 2.5L9 7" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
       </button>
       <button class="switcher" type="button" id="wsSwitch" aria-haspopup="true">
@@ -863,7 +863,7 @@ var TG=(function(){
 <script>
 "use strict";
 /* =========================================================================
-   Demo record. Acme Robotics, organization `acme`, workspace `core-platform`.
+   Demo record. Anderson Intelligence Corp., organization `a-intel`, workspace `core-platform`.
    Every figure is the value a real rollup would carry, with its basis.
    ========================================================================= */
 
@@ -876,95 +876,95 @@ const OPS = {
 const HERO = "run_01K6QX7M3E";
 
 const RUNS = [
-  { id:HERO, agent:"acme.core.release-manager", op:"marcus", harness:"Claude Code 2.1.4", tier:"gateway",
+  { id:HERO, agent:"a-intel.core.release-manager", op:"marcus", harness:"Claude Code 2.1.4", tier:"gateway",
     state:"running", step:"turn 5 · model call · claude-fable-5-1", cost:2.41, grade:"fork", verdict:"none",
-    task:"acme/platform#4182 — Cut the 2026.9.2 release candidate", repo:"acme/platform @ main", started:"14:02:58" },
-  { id:"run_01K6QX5J8A", agent:"acme.core.stella-ci", op:"marcus", harness:"Stella 0.9.14", tier:"gateway",
+    task:"a-intel/platform#4182 — Cut the 2026.9.2 release candidate", repo:"a-intel/platform @ main", started:"14:02:58" },
+  { id:"run_01K6QX5J8A", agent:"a-intel.core.stella-ci", op:"marcus", harness:"Stella 0.9.14", tier:"gateway",
     state:"running", step:"turn 3 · tool call · run_command", cost:4.02, grade:"retry", verdict:"flipped",
-    task:"acme/platform#4176 — Repair the flaky ingest test", repo:"acme/platform @ main", started:"14:11:20" },
-  { id:"run_01K6QX2B1Q", agent:"acme.core.triage", op:"priya", harness:"Codex CLI 0.42.1", tier:"gateway",
+    task:"a-intel/platform#4176 — Repair the flaky ingest test", repo:"a-intel/platform @ main", started:"14:11:20" },
+  { id:"run_01K6QX2B1Q", agent:"a-intel.core.triage", op:"priya", harness:"Codex CLI 0.42.1", tier:"gateway",
     state:"running", step:"turn 11 · model call · gpt-5.2", cost:8.91, grade:"fork", verdict:"none",
-    task:"acme/platform#4190 — Triage 14 inbound issues", repo:"acme/platform @ main", started:"13:48:02" },
-  { id:"run_01K6QWZ4T7", agent:"acme.finops.invoice-bot", op:"dana", harness:"OpenAI Agents SDK 1.4.2", tier:"gateway",
+    task:"a-intel/platform#4190 — Triage 14 inbound issues", repo:"a-intel/platform @ main", started:"13:48:02" },
+  { id:"run_01K6QWZ4T7", agent:"a-intel.finops.invoice-bot", op:"dana", harness:"OpenAI Agents SDK 1.4.2", tier:"gateway",
     state:"waiting", step:"turn 2 · approval · stripe:pay_invoice@3.0", cost:1.18, grade:"fork", verdict:"none",
-    task:"Vendor run — settle September invoices", repo:"acme/finops-agents @ main", started:"14:09:44" },
-  { id:"run_01K6QWY9H2", agent:"acme.core.docs-writer", op:"priya", harness:"Custom · SDK 1.0.0", tier:"harness",
+    task:"Vendor run — settle September invoices", repo:"a-intel/finops-agents @ main", started:"14:09:44" },
+  { id:"run_01K6QWY9H2", agent:"a-intel.core.docs-writer", op:"priya", harness:"Custom · SDK 1.0.0", tier:"harness",
     state:"running", step:"turn 4 · tool call · append_record", cost:2.36, grade:"view", verdict:"none",
-    task:"acme/platform#4171 — Document the 2026.9 upgrade path", repo:"acme/platform @ main", started:"13:57:31" },
-  { id:"run_01K6QWX0M5", agent:"acme.core.dep-upgrader", op:"marcus", harness:"Claude Code 2.1.4", tier:"gateway",
+    task:"a-intel/platform#4171 — Document the 2026.9 upgrade path", repo:"a-intel/platform @ main", started:"13:57:31" },
+  { id:"run_01K6QWX0M5", agent:"a-intel.core.dep-upgrader", op:"marcus", harness:"Claude Code 2.1.4", tier:"gateway",
     state:"running", step:"turn 9 · model call · claude-fable-5-1", cost:19.84, grade:"fork", verdict:"failing",
-    task:"acme/platform#4165 — Upgrade to pnpm 10", repo:"acme/platform @ main", started:"13:31:12" },
-  { id:"run_01K6QWW6D3", agent:"acme.core.flake-hunter", op:"marcus", harness:"Stella 0.9.14", tier:"gateway",
+    task:"a-intel/platform#4165 — Upgrade to pnpm 10", repo:"a-intel/platform @ main", started:"13:31:12" },
+  { id:"run_01K6QWW6D3", agent:"a-intel.core.flake-hunter", op:"marcus", harness:"Stella 0.9.14", tier:"gateway",
     state:"running", step:"turn 7 · tool call · search_code", cost:6.55, grade:"retry", verdict:"unmoved",
-    task:"acme/platform#4158 — Quarantine flaky suites", repo:"acme/platform @ main", started:"13:22:40" },
-  { id:"run_01K6QWV2R8", agent:"acme.finops.ledger-recon", op:"dana", harness:"OpenAI Agents SDK 1.4.2", tier:"gateway",
+    task:"a-intel/platform#4158 — Quarantine flaky suites", repo:"a-intel/platform @ main", started:"13:22:40" },
+  { id:"run_01K6QWV2R8", agent:"a-intel.finops.ledger-recon", op:"dana", harness:"OpenAI Agents SDK 1.4.2", tier:"gateway",
     state:"running", step:"turn 1 · model call · gpt-5.2-mini", cost:0.74, grade:"fork", verdict:"none",
-    task:"Reconcile August provider invoices", repo:"acme/finops-agents @ main", started:"14:14:03" },
-  { id:"run_01K6QWT8K1", agent:"acme.core.mobile-release", op:"priya", harness:"Claude Code 2.1.4", tier:"gateway",
+    task:"Reconcile August provider invoices", repo:"a-intel/finops-agents @ main", started:"14:14:03" },
+  { id:"run_01K6QWT8K1", agent:"a-intel.core.mobile-release", op:"priya", harness:"Claude Code 2.1.4", tier:"gateway",
     state:"paused", step:"paused by Priya Natarajan · 6m ago", cost:3.12, grade:"fork", verdict:"none",
-    task:"acme/mobile#902 — Ship 4.8.1 to TestFlight", repo:"acme/mobile @ main", started:"13:52:19" },
-  { id:"run_01K6QWS5F9", agent:"acme.core.sdk-codegen", op:"marcus", harness:"Claude Agent SDK 0.6.1", tier:"gateway",
+    task:"a-intel/mobile#902 — Ship 4.8.1 to TestFlight", repo:"a-intel/mobile @ main", started:"13:52:19" },
+  { id:"run_01K6QWS5F9", agent:"a-intel.core.sdk-codegen", op:"marcus", harness:"Claude Agent SDK 0.6.1", tier:"gateway",
     state:"running", step:"turn 2 · model call · claude-fable-5-1", cost:5.60, grade:"fork", verdict:"none",
-    task:"acme/platform#4187 — Regenerate the TypeScript client", repo:"acme/platform @ main", started:"14:06:55" },
-  { id:"run_01K6QWR1C4", agent:"acme.core.migration-writer", op:"priya", harness:"Codex CLI 0.42.1", tier:"harness",
+    task:"a-intel/platform#4187 — Regenerate the TypeScript client", repo:"a-intel/platform @ main", started:"14:06:55" },
+  { id:"run_01K6QWR1C4", agent:"a-intel.core.migration-writer", op:"priya", harness:"Codex CLI 0.42.1", tier:"harness",
     state:"running", step:"turn 5 · tool call · github:create_branch@2.1", cost:7.28, grade:"view", verdict:"unsatisfied",
-    task:"acme/billing#311 — Backfill the invoice_line index", repo:"acme/billing @ main", started:"13:40:08" },
-  { id:"run_01K6QWQ7B6", agent:"acme.finops.vendor-sync", op:"dana", harness:"Custom · Go SDK 1.0.0", tier:"observe",
+    task:"a-intel/billing#311 — Backfill the invoice_line index", repo:"a-intel/billing @ main", started:"13:40:08" },
+  { id:"run_01K6QWQ7B6", agent:"a-intel.finops.vendor-sync", op:"dana", harness:"Custom · Go SDK 1.0.0", tier:"observe",
     state:"running", step:"turn 3 · attested telemetry only", cost:0.41, grade:"inspect", verdict:"unverified",
-    task:"Sync vendor master data", repo:"acme/finops-agents @ main", started:"14:01:17" },
-  { id:"run_01K6QW9X2N", agent:"acme.core.release-manager", op:"marcus", harness:"Claude Code 2.1.4", tier:"gateway",
+    task:"Sync vendor master data", repo:"a-intel/finops-agents @ main", started:"14:01:17" },
+  { id:"run_01K6QW9X2N", agent:"a-intel.core.release-manager", op:"marcus", harness:"Claude Code 2.1.4", tier:"gateway",
     state:"sealed", step:"sealed · 214 frames · 11 turns", cost:22.90, grade:"fork", verdict:"flipped",
-    task:"acme/platform#4149 — Cut the 2026.9.1 release", repo:"acme/platform @ main", started:"11:04:22" },
-  { id:"run_01K6QW6P0L", agent:"acme.core.triage", op:"priya", harness:"Codex CLI 0.42.1", tier:"gateway",
+    task:"a-intel/platform#4149 — Cut the 2026.9.1 release", repo:"a-intel/platform @ main", started:"11:04:22" },
+  { id:"run_01K6QW6P0L", agent:"a-intel.core.triage", op:"priya", harness:"Codex CLI 0.42.1", tier:"gateway",
     state:"sealed", step:"sealed · 88 frames · 5 turns", cost:3.77, grade:"fork", verdict:"waived",
-    task:"acme/platform#4144 — Label the inbound backlog", repo:"acme/platform @ main", started:"10:38:51" },
-  { id:"run_01K6QW3H8V", agent:"acme.core.stella-ci", op:"marcus", harness:"Stella 0.9.14", tier:"gateway",
+    task:"a-intel/platform#4144 — Label the inbound backlog", repo:"a-intel/platform @ main", started:"10:38:51" },
+  { id:"run_01K6QW3H8V", agent:"a-intel.core.stella-ci", op:"marcus", harness:"Stella 0.9.14", tier:"gateway",
     state:"sealed", step:"sealed · 132 frames · witness_probe raised", cost:9.15, grade:"retry", verdict:"tampered",
-    task:"acme/platform#4131 — Make the payments suite green", repo:"acme/platform @ main", started:"09:52:10" },
-  { id:"run_01K6QW0D5S", agent:"acme.core.docs-writer", op:"priya", harness:"Custom · SDK 1.0.0", tier:"harness",
+    task:"a-intel/platform#4131 — Make the payments suite green", repo:"a-intel/platform @ main", started:"09:52:10" },
+  { id:"run_01K6QW0D5S", agent:"a-intel.core.docs-writer", op:"priya", harness:"Custom · SDK 1.0.0", tier:"harness",
     state:"sealed", step:"sealed · 41 frames · 3 turns", cost:1.05, grade:"view", verdict:"none",
-    task:"acme/platform#4128 — Rewrite the wrapper README", repo:"acme/platform @ main", started:"09:20:44" }
+    task:"a-intel/platform#4128 — Rewrite the wrapper README", repo:"a-intel/platform @ main", started:"09:20:44" }
 ];
 
 const APPROVALS = [
   { id:"apr_01K6QWZ5B2", amount:"$4,820.00 USD", kind:"approval",
-    tool:"stripe:pay_invoice@3.0", run:"run_01K6QWZ4T7", agent:"acme.finops.invoice-bot",
+    tool:"stripe:pay_invoice@3.0", run:"run_01K6QWZ4T7", agent:"a-intel.finops.invoice-bot",
     asked:"Dana Okafor · finops", waited:"4m 12s",
     rule:"grant finops/invoice-bot · require_approval on financial class over $1,000.00",
     detail:"Northwind Components · invoice NW-2291 · mandate mnd_8Q4TVX, ceiling $10,000.00 per month, $5,180.00 remaining" },
   { id:"apr_01K6QWX1C9", amount:"irreversible", kind:"approval",
-    tool:"shell:run_command@1.4", run:"run_01K6QWX0M5", agent:"acme.core.dep-upgrader",
+    tool:"shell:run_command@1.4", run:"run_01K6QWX0M5", agent:"a-intel.core.dep-upgrader",
     asked:"Marcus Bell · core-platform", waited:"1m 38s",
     rule:"policy pol_2026_09_04.3 · rule irreversible_publish · side-effect class irreversible",
-    detail:"npm publish @acme/platform-sdk@4.2.0 --tag latest · egress class third_party" },
+    detail:"npm publish @a-intel/platform-sdk@4.2.0 --tag latest · egress class third_party" },
   { id:"apr_01K6QWR2D1", amount:"write", kind:"approval",
-    tool:"github:create_release@2.1", run:"run_01K6QWR1C4", agent:"acme.core.migration-writer",
+    tool:"github:create_release@2.1", run:"run_01K6QWR1C4", agent:"a-intel.core.migration-writer",
     asked:"Priya Natarajan · core-platform", waited:"22s",
-    rule:"grant core/migration-writer · require_approval on repository acme/billing",
-    detail:"Tag v2026.9.2-rc1 on acme/billing · production branch main" }
+    rule:"grant core/migration-writer · require_approval on repository a-intel/billing",
+    detail:"Tag v2026.9.2-rc1 on a-intel/billing · production branch main" }
 ];
 
 const FLEET_AGENTS = [
-  { slug:"@release-manager", id:"acme.core.release-manager", runs:2 },
-  { slug:"@stella-ci",       id:"acme.core.stella-ci",       runs:1 },
-  { slug:"@triage",          id:"acme.core.triage",          runs:1 },
-  { slug:"@docs-writer",     id:"acme.core.docs-writer",     runs:1 },
-  { slug:"@dep-upgrader",    id:"acme.core.dep-upgrader",    runs:1 },
-  { slug:"@flake-hunter",    id:"acme.core.flake-hunter",    runs:1 },
-  { slug:"@mobile-release",  id:"acme.core.mobile-release",  runs:1 },
-  { slug:"@sdk-codegen",     id:"acme.core.sdk-codegen",     runs:1 },
-  { slug:"@migration-writer",id:"acme.core.migration-writer",runs:1 }
+  { slug:"@release-manager", id:"a-intel.core.release-manager", runs:2 },
+  { slug:"@stella-ci",       id:"a-intel.core.stella-ci",       runs:1 },
+  { slug:"@triage",          id:"a-intel.core.triage",          runs:1 },
+  { slug:"@docs-writer",     id:"a-intel.core.docs-writer",     runs:1 },
+  { slug:"@dep-upgrader",    id:"a-intel.core.dep-upgrader",    runs:1 },
+  { slug:"@flake-hunter",    id:"a-intel.core.flake-hunter",    runs:1 },
+  { slug:"@mobile-release",  id:"a-intel.core.mobile-release",  runs:1 },
+  { slug:"@sdk-codegen",     id:"a-intel.core.sdk-codegen",     runs:1 },
+  { slug:"@migration-writer",id:"a-intel.core.migration-writer",runs:1 }
 ];
 
 /* ---- The hero run's frames. seq is dense from 0, hash-chained. ---- */
-const SYS_PROMPT = "You are acme.core.release-manager. Cut the 2026.9.2 release candidate for acme/platform from the production branch main. Open the release PR, do not tag, do not publish.";
+const SYS_PROMPT = "You are a-intel.core.release-manager. Cut the 2026.9.2 release candidate for a-intel/platform from the production branch main. Open the release PR, do not tag, do not publish.";
 const STEERING_BLOCK = "Governed steering, workspace core-platform, policy version pol_2026_09_04.3:\n· Never force-push to a production branch.\n· Release PRs require a green witness before a tag is proposed.\n· Changelog entries cite the issue, not the commit.";
 
 function env(f, extra){
   return Object.assign({
     v:"oxagen.frame/1.0",
     event_id:"01J9" + f.seq.toString().padStart(2,"0") + "MBELLRELMGR",
-    agent:{ agent_id:"acme.core.release-manager", fleet_id:"wrk_7Q2", runtime:"claude-code", wrapper_version:"1.0.0" },
+    agent:{ agent_id:"a-intel.core.release-manager", fleet_id:"wrk_7Q2", runtime:"claude-code", wrapper_version:"1.0.0" },
     run_id:HERO, attempt_id:"atmp_01K6QX7M3E1", seq:f.seq,
     ts:"2026-09-11T" + f.t + "Z", kind:f.kind, fidelity:"gateway"
   }, extra || {});
@@ -983,14 +983,14 @@ const FRAMES = [
       frame_ids:["cf_ontology_release/3","cf_steering_release/11","cf_record_2f81","cf_record_9ac3","cf_codegraph_release_sh/2","cf_issue_4182","cf_record_bb17"] } },
   { seq:2, kind:"turn_start", t:"14:02:58.510", node:"control",
     sum:"Turn 1 · prompt from Marcus Bell",
-    body:{ turn:1, trigger:"operator_prompt", operator:"Marcus Bell", task_ref:"acme/platform#4182" } },
+    body:{ turn:1, trigger:"operator_prompt", operator:"Marcus Bell", task_ref:"a-intel/platform#4182" } },
   { seq:3, kind:"model.request", t:"14:02:58.688", node:"model",
     sum:"anthropic · claude-fable-5-1 · 14 tools · 18,402 input tokens",
     model:{ provider:"anthropic", model:"claude-fable-5-1", tools:14, input:18402,
       messages:[
         { role:"system (governed)", txt:SYS_PROMPT },
         { role:"steering (volatile, after cache block)", txt:STEERING_BLOCK },
-        { role:"user", txt:"Cut the 2026.9.2 release candidate. Issue acme/platform#4182 has the scope." }
+        { role:"user", txt:"Cut the 2026.9.2 release candidate. Issue a-intel/platform#4182 has the scope." }
       ] } },
   { seq:4, kind:"model.response", t:"14:03:01.204", node:"model",
     sum:"stop_reason tool_use · 1,102 output · $0.38 · gateway_observed",
@@ -999,19 +999,19 @@ const FRAMES = [
       cost:"$0.38", basis:"gateway_observed", latency:"2,516 ms", ttft:"412 ms",
       req:"req_01K6QX7N4B", model:"claude-fable-5-1" } },
   { seq:5, kind:"tool_requested", t:"14:03:01.260", node:"tool",
-    sum:"github:list_pull_requests@2.1 · repo acme/platform · state open",
+    sum:"github:list_pull_requests@2.1 · repo a-intel/platform · state open",
     tool:{ pattern:"github:list_pull_requests@2.1", side_effect:"read", risk:"low", egress:"third_party",
-      input:'{ "repo": "acme/platform", "state": "open", "base": "main" }' } },
+      input:'{ "repo": "a-intel/platform", "state": "open", "base": "main" }' } },
   { seq:6, kind:"policy_decision", t:"14:03:01.281", node:"policy",
     sum:"allow · grant core/release-manager · side-effect read · no taint",
     policy:{ outcome:"allow", rules:["grant core/release-manager → github:*@2.1 allow",
-      "resource_scope.repositories includes acme/platform",
+      "resource_scope.repositories includes a-intel/platform",
       "side_effect read under ceiling irreversible"],
       policy_version:"pol_2026_09_04.3", taint:"none", deny_generation:412 } },
   { seq:7, kind:"tool_call", t:"14:03:02.910", node:"tool",
     sum:"34 open pull requests · 12.4 KB · output schema valid · 1,650 ms",
     tool:{ pattern:"github:list_pull_requests@2.1", result:"ok", bytes:"12.4 KB", duration:"1,650 ms",
-      output_schema:"valid", receipt:"rcp_01K6QX7P2M", connection:"conn_github_acme (owner: Marcus Bell)" } },
+      output_schema:"valid", receipt:"rcp_01K6QX7P2M", connection:"conn_github_a-intel (owner: Marcus Bell)" } },
   { seq:8, kind:"turn_start", t:"14:03:03.004", node:"control",
     sum:"Turn 2 · continued from turn 1", body:{ turn:2, trigger:"continuation" } },
   { seq:9, kind:"model.request", t:"14:03:03.181", node:"model",
@@ -1032,7 +1032,7 @@ const FRAMES = [
   { seq:11, kind:"tool_requested", t:"14:03:07.503", node:"tool",
     sum:"github:list_check_runs@2.1 · ref refs/heads/main",
     tool:{ pattern:"github:list_check_runs@2.1", side_effect:"read", risk:"low", egress:"third_party",
-      input:'{ "repo": "acme/platform", "ref": "refs/heads/main" }' } },
+      input:'{ "repo": "a-intel/platform", "ref": "refs/heads/main" }' } },
   { seq:12, kind:"policy_decision", t:"14:03:07.522", node:"policy",
     sum:"allow · grant core/release-manager · side-effect read",
     policy:{ outcome:"allow", rules:["grant core/release-manager → github:*@2.1 allow"],
@@ -1040,7 +1040,7 @@ const FRAMES = [
   { seq:13, kind:"tool_call", t:"14:03:09.116", node:"tool",
     sum:"18 checks on main · 2 failing (payments-e2e, ingest-flake) · 1,594 ms",
     tool:{ pattern:"github:list_check_runs@2.1", result:"ok", bytes:"4.1 KB", duration:"1,594 ms",
-      output_schema:"valid", receipt:"rcp_01K6QX7S8D", connection:"conn_github_acme (owner: Marcus Bell)" } },
+      output_schema:"valid", receipt:"rcp_01K6QX7S8D", connection:"conn_github_a-intel (owner: Marcus Bell)" } },
   { seq:14, kind:"turn_start", t:"14:03:09.204", node:"control",
     sum:"Turn 3 · continued from turn 2", body:{ turn:3, trigger:"continuation" } },
   { seq:15, kind:"model.request", t:"14:03:09.390", node:"model",
@@ -1081,7 +1081,7 @@ const FRAMES = [
   { seq:21, kind:"tool_requested", t:"14:03:19.840", node:"tool",
     sum:"github:create_branch@2.1 · release/2026.9.2 from main@9f3c2ab",
     tool:{ pattern:"github:create_branch@2.1", side_effect:"write", risk:"medium", egress:"third_party",
-      input:'{ "repo": "acme/platform", "name": "release/2026.9.2", "from": "9f3c2ab" }' } },
+      input:'{ "repo": "a-intel/platform", "name": "release/2026.9.2", "from": "9f3c2ab" }' } },
   { seq:22, kind:"policy_decision", t:"14:03:19.866", node:"policy",
     sum:"allow · grant core/release-manager · side-effect write · not the production branch",
     policy:{ outcome:"allow", rules:["grant core/release-manager → github:create_branch@2.1 allow",
@@ -1091,7 +1091,7 @@ const FRAMES = [
   { seq:23, kind:"tool_call", t:"14:03:21.402", node:"tool",
     sum:"branch release/2026.9.2 created at 9f3c2ab · 1,536 ms",
     tool:{ pattern:"github:create_branch@2.1", result:"ok", bytes:"0.4 KB", duration:"1,536 ms",
-      output_schema:"valid", receipt:"rcp_01K6QX7X4G", connection:"conn_github_acme (owner: Marcus Bell)" } },
+      output_schema:"valid", receipt:"rcp_01K6QX7X4G", connection:"conn_github_a-intel (owner: Marcus Bell)" } },
   { seq:24, kind:"turn_start", t:"14:03:21.488", node:"control",
     sum:"Turn 5 · continued from turn 4", body:{ turn:5, trigger:"continuation" } },
   { seq:25, kind:"model.request", t:"14:03:21.660", node:"model",
@@ -1118,23 +1118,23 @@ const ADDRESSES = {
       head:"You can @agents in core-platform.",
       body:"Marcus Bell holds send_message with @agents at workspace scope (role core-platform/owner, grant gr_7T2PQ). 9 active runs are in scope; sealed runs and observe-tier runs have no seam to inject through. Agent senders do not hold @agents here." },
     recipients:[
-      { agent:"acme.core.release-manager", run:"run_01K6QX7M3E", status:"applied", mode:"interrupt", when:"14:21:04.118",
+      { agent:"a-intel.core.release-manager", run:"run_01K6QX7M3E", status:"applied", mode:"interrupt", when:"14:21:04.118",
         why:"in-flight response stopped and billed; injected after the steering block at model call seq 33" },
-      { agent:"acme.core.stella-ci", run:"run_01K6QX5J8A", status:"applied", mode:"interrupt", when:"14:21:04.402",
+      { agent:"a-intel.core.stella-ci", run:"run_01K6QX5J8A", status:"applied", mode:"interrupt", when:"14:21:04.402",
         why:"native control contract; injected at model call seq 96" },
-      { agent:"acme.core.dep-upgrader", run:"run_01K6QWX0M5", status:"applied", mode:"next_step", when:"14:21:05.006",
+      { agent:"a-intel.core.dep-upgrader", run:"run_01K6QWX0M5", status:"applied", mode:"next_step", when:"14:21:05.006",
         why:"degraded from interrupt: npm publish was in flight and an irreversible call is never abandoned; injected at model call seq 214" },
-      { agent:"acme.core.flake-hunter", run:"run_01K6QWW6D3", status:"applied", mode:"interrupt", when:"14:21:05.771",
+      { agent:"a-intel.core.flake-hunter", run:"run_01K6QWW6D3", status:"applied", mode:"interrupt", when:"14:21:05.771",
         why:"pending search_code call abandoned with reason interrupted; injected at model call seq 141" },
-      { agent:"acme.core.sdk-codegen", run:"run_01K6QWS5F9", status:"applied", mode:"interrupt", when:"14:21:06.240",
+      { agent:"a-intel.core.sdk-codegen", run:"run_01K6QWS5F9", status:"applied", mode:"interrupt", when:"14:21:06.240",
         why:"injected at model call seq 38" },
-      { agent:"acme.core.docs-writer", run:"run_01K6QWY9H2", status:"applied", mode:"next_step", when:"14:21:07.093",
+      { agent:"a-intel.core.docs-writer", run:"run_01K6QWY9H2", status:"applied", mode:"next_step", when:"14:21:07.093",
         why:"degraded from interrupt: harness tier cannot stop an in-flight call; injected at the next prompt submit" },
-      { agent:"acme.core.mobile-release", run:"run_01K6QWT8K1", status:"queued", mode:"next_step", when:"—",
+      { agent:"a-intel.core.mobile-release", run:"run_01K6QWT8K1", status:"queued", mode:"next_step", when:"—",
         why:"run paused by Priya Natarajan; a paused run reaches no boundary, so this applies at the first model call after resume, or expires at 14:31:04" },
-      { agent:"acme.core.triage", run:"run_01K6QX2B1Q", status:"expired", mode:"—", when:"14:21:06.884",
+      { agent:"a-intel.core.triage", run:"run_01K6QX2B1Q", status:"expired", mode:"—", when:"14:21:06.884",
         why:"run sealed before its next model call; no boundary was ever reached" },
-      { agent:"acme.core.migration-writer", run:"run_01K6QWR1C4", status:"cancelled", mode:"—", when:"14:21:04.061",
+      { agent:"a-intel.core.migration-writer", run:"run_01K6QWR1C4", status:"cancelled", mode:"—", when:"14:21:04.061",
         why:"muted for this agent by Marcus Bell on 2026-09-09; suppressed before it was queued" }
     ],
     cost:"1,284 tokens injected across 6 runs · $0.04 · gateway_observed. Two runs resolved below the requested ceiling: one irreversible tool in flight, one harness-tier seam that cannot stop a call."
@@ -1143,11 +1143,11 @@ const ADDRESSES = {
     label:"@release-manager", note:"1 agent",
     grant:{ ok:true,
       head:"You can message @release-manager.",
-      body:"Direct addressing needs only send_message at workspace scope. 1 live run and 1 sealed run match acme.core.release-manager." },
+      body:"Direct addressing needs only send_message at workspace scope. 1 live run and 1 sealed run match a-intel.core.release-manager." },
     recipients:[
-      { agent:"acme.core.release-manager", run:"run_01K6QX7M3E", status:"applied", when:"14:21:04.118",
+      { agent:"a-intel.core.release-manager", run:"run_01K6QX7M3E", status:"applied", when:"14:21:04.118",
         why:"injected after the steering block, before model call seq 33" },
-      { agent:"acme.core.release-manager", run:"run_01K6QW9X2N", status:"failed", mode:"—", when:"14:21:04.120",
+      { agent:"a-intel.core.release-manager", run:"run_01K6QW9X2N", status:"failed", mode:"—", when:"14:21:04.120",
         why:"run sealed at 11:41:30 · a sealed run has no seam to inject through" }
     ],
     cost:"214 tokens injected across 1 run · $0.01 · gateway_observed"
@@ -1165,7 +1165,7 @@ const ADDRESSES = {
    Application state
    ========================================================================= */
 const state = {
-  route: location.hash || "#/acme/core-platform",
+  route: location.hash || "#/a-intel/core-platform",
   view: "loaded",
   railOpen: false,
   runState: "running",     // running | paused | cancelled | revoked
@@ -1223,24 +1223,24 @@ const ICONS = {
   audit:'<path d="M8 2.2 13 4v4.2c0 3-2.1 4.8-5 5.6-2.9-.8-5-2.6-5-5.6V4Z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>'
 };
 const NAV_WS = [
-  { k:"fleet",    label:"Fleet",    href:"#/acme/core-platform", count:"12" },
-  { k:"agents",   label:"Agents",   href:"#/acme/core-platform/agents", count:"50" },
-  { k:"tools",    label:"Tools",    href:"#/acme/core-platform/tools" },
-  { k:"ontology", label:"Ontology", href:"#/acme/core-platform/ontology" },
-  { k:"steering", label:"Steering", href:"#/acme/core-platform/steering" },
-  { k:"spend",    label:"Spend",    href:"#/acme/core-platform/spend" },
-  { k:"runs",     label:"Run",      href:"#/acme/core-platform/runs/" + HERO, hidden:true }
+  { k:"fleet",    label:"Fleet",    href:"#/a-intel/core-platform", count:"12" },
+  { k:"agents",   label:"Agents",   href:"#/a-intel/core-platform/agents", count:"50" },
+  { k:"tools",    label:"Tools",    href:"#/a-intel/core-platform/tools" },
+  { k:"ontology", label:"Ontology", href:"#/a-intel/core-platform/ontology" },
+  { k:"steering", label:"Steering", href:"#/a-intel/core-platform/steering" },
+  { k:"spend",    label:"Spend",    href:"#/a-intel/core-platform/spend" },
+  { k:"runs",     label:"Run",      href:"#/a-intel/core-platform/runs/" + HERO, hidden:true }
 ];
 const NAV_ORG = [
-  { k:"org",     label:"Organization", href:"#/acme" },
-  { k:"billing", label:"Billing",      href:"#/acme/billing" },
-  { k:"audit",   label:"Audit",        href:"#/acme/audit" }
+  { k:"org",     label:"Organization", href:"#/a-intel" },
+  { k:"billing", label:"Billing",      href:"#/a-intel/billing" },
+  { k:"audit",   label:"Audit",        href:"#/a-intel/audit" }
 ];
 
 function renderNav(){
   const onRun = state.route.indexOf("/runs/") > -1;
   const rows = NAV_WS.filter(n => !n.hidden).map(n => {
-    const on = (n.k === "fleet" && (state.route === "#/acme/core-platform" || onRun)) || state.route === n.href;
+    const on = (n.k === "fleet" && (state.route === "#/a-intel/core-platform" || onRun)) || state.route === n.href;
     return '<a class="nav-a' + (on ? " on" : "") + '" href="' + n.href + '">' +
       '<svg class="ni" viewBox="0 0 16 16" aria-hidden="true">' + ICONS[n.k] + '</svg>' + n.label +
       (n.count ? '<span class="nct num">' + n.count + '</span>' : '') + '</a>';
@@ -1250,15 +1250,15 @@ function renderNav(){
     '<svg class="ni" viewBox="0 0 16 16" aria-hidden="true">' + ICONS[n.k] + '</svg>' + n.label + '</a>').join("");
   $("#sideNav").innerHTML =
     '<div class="nav-label">Workspace · core-platform</div>' + rows +
-    '<div class="nav-label second">Organization · acme</div>' + orgRows;
+    '<div class="nav-label second">Organization · a-intel</div>' + orgRows;
 }
 
 function renderCrumbs(){
   const onRun = state.route.indexOf("/runs/") > -1;
-  let html = '<a href="#/acme">Acme Robotics</a><span class="sep">/</span>' +
-             '<a href="#/acme/core-platform" class="hide-sm">core-platform</a>';
+  let html = '<a href="#/a-intel">Anderson Intelligence Corp.</a><span class="sep">/</span>' +
+             '<a href="#/a-intel/core-platform" class="hide-sm">core-platform</a>';
   if (onRun){
-    html += '<span class="sep">/</span><a href="#/acme/core-platform" class="hide-sm">Fleet</a>' +
+    html += '<span class="sep">/</span><a href="#/a-intel/core-platform" class="hide-sm">Fleet</a>' +
             '<span class="sep">/</span><span class="cur mono">' + HERO + '</span>';
   } else {
     html += '<span class="sep">/</span><span class="cur">Fleet</span>';
@@ -1284,17 +1284,17 @@ function slabEmptyFleet(){
     '<p>Wrap a harness and the first run appears here the moment its first frame arrives. Nothing is simulated: the row is written from the frame.</p>' +
     '<div class="acts"><button class="btn gold" type="button" data-toast="Installer link signed. One-time enrollment token embedded; it expires in 15 minutes.">Wrap Claude Code</button>' +
     '<button class="btn" type="button" data-toast="Installer link signed for Codex CLI.">Wrap Codex</button>' +
-    '<a class="btn" href="#/acme/core-platform/agents">Register an agent</a></div></div>';
+    '<a class="btn" href="#/a-intel/core-platform/agents">Register an agent</a></div></div>';
 }
 function slabError(what){
   return '<div class="slab err">' +
     '<svg class="glyph" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4 2.5 20h19L12 4Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M12 10v4.4M12 17.2v.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>' +
     '<h2>' + what + ' could not be read</h2>' +
     '<p>The control plane answered, the ledger did not. Frames are still being recorded and nothing has been lost — this screen is stale, not the run.</p>' +
-    '<p class="mono" style="font-size:11.5px;color:var(--dim)">graph_unavailable · org_acme · request req_01K6QXB4M2 · 14:22:09Z</p>' +
+    '<p class="mono" style="font-size:11.5px;color:var(--dim)">graph_unavailable · org_a-intel · request req_01K6QXB4M2 · 14:22:09Z</p>' +
     '<div class="acts"><button class="btn" type="button" data-act="retry">Try again</button>' +
     '<button class="btn" type="button" data-toast="Copied: req_01K6QXB4M2">Copy request id</button>' +
-    '<a class="btn" href="#/acme/audit">Open Audit</a></div></div>';
+    '<a class="btn" href="#/a-intel/audit">Open Audit</a></div></div>';
 }
 function slabDenied(what){
   return '<div class="slab deny">' +
@@ -1303,7 +1303,7 @@ function slabDenied(what){
     '<p>Dana Okafor holds the billing role in finops. That role carries <span class="mono">get_spend</span> and <span class="mono">list_mandates</span> at organization scope, and no grant on core-platform runs. Deny wins over every other rule.</p>' +
     '<p class="mono" style="font-size:11.5px;color:var(--dim)">denied · list_runs · policy pol_2026_09_04.3 · rule grant/finops-billing · deny_generation 412</p>' +
     '<div class="acts"><button class="btn" type="button" data-toast="Request sent to Priya Natarajan (organization owner).">Request access</button>' +
-    '<a class="btn" href="#/acme">Open Organization</a></div></div>';
+    '<a class="btn" href="#/a-intel">Open Organization</a></div></div>';
 }
 
 /* =========================================================================
@@ -1333,9 +1333,9 @@ function fleetFilters(n){
     '<span class="fsel"><select id="fAgent" aria-label="Filter by agent">' +
       opt("all","Every agent",f.agent) +
       FLEET_AGENTS.map(a => opt(a.id, a.id, f.agent)).join("") +
-      opt("acme.finops.invoice-bot","acme.finops.invoice-bot",f.agent) +
-      opt("acme.finops.ledger-recon","acme.finops.ledger-recon",f.agent) +
-      opt("acme.finops.vendor-sync","acme.finops.vendor-sync",f.agent) + '</select></span>' +
+      opt("a-intel.finops.invoice-bot","a-intel.finops.invoice-bot",f.agent) +
+      opt("a-intel.finops.ledger-recon","a-intel.finops.ledger-recon",f.agent) +
+      opt("a-intel.finops.vendor-sync","a-intel.finops.vendor-sync",f.agent) + '</select></span>' +
     '<span class="fsel"><select id="fTier" aria-label="Filter by enforcement tier">' +
       opt("all","Every tier",f.tier) + opt("gateway","gateway",f.tier) +
       opt("harness","harness",f.tier) + opt("observe","observe",f.tier) + '</select></span>' +
@@ -1462,7 +1462,7 @@ function inspectorBody(f){
   if (state.inspTab === "envelope"){
     const b = f.body || f.model || f.usage || f.tool || f.policy || f.steer || f.command;
     const e = env(f, b ? { body:b } : {});
-    e.content = { digest:"sha256:" + (f.seq * 7919).toString(16).padStart(12,"0") + "e4b1", bytes_ref:"blob://org_acme/sha256/…", redactions:[] };
+    e.content = { digest:"sha256:" + (f.seq * 7919).toString(16).padStart(12,"0") + "e4b1", bytes_ref:"blob://org_a-intel/sha256/…", redactions:[] };
     e.prev_hash = "sha256:" + ((f.seq - 1) * 104729).toString(16).padStart(12,"0") + "a7c2";
     e.hash = "sha256:" + (f.seq * 104729).toString(16).padStart(12,"0") + "a7c2";
     return '<pre class="code">' + esc(JSON.stringify(e, null, 2)) + '</pre>';
@@ -1775,7 +1775,7 @@ function renderModal(){
           '<p style="margin:11px 0 0;font-size:11.5px;color:var(--dim);line-height:1.55">' + esc(d.cost) + '</p>' +
         '</div>' +
         '<div class="dlg-foot">' +
-          '<a class="btn" href="#/acme/core-platform/runs/' + HERO + '" data-close="1">Open the run that received it</a>' +
+          '<a class="btn" href="#/a-intel/core-platform/runs/' + HERO + '" data-close="1">Open the run that received it</a>' +
           '<button class="btn" type="button" data-close="1">Close</button>' +
           '<span class="grow"></span>' +
           '<span class="mono" style="font-size:11px;color:var(--dim)">list_messages · receipt rcp_01K6QXC1F4</span>' +
@@ -1786,7 +1786,7 @@ function renderModal(){
 
   if (state.modal === "cmdk"){
     const items = [
-      ["Pause every run by acme.core.release-manager", "dispatch_command · pause"],
+      ["Pause every run by a-intel.core.release-manager", "dispatch_command · pause"],
       ["Message the fleet with @all", "send_message"],
       ["Open run " + HERO, "get_run"],
       ["Filter the fleet to tier observe", "list_runs"],
@@ -1815,7 +1815,7 @@ function renderModal(){
         '<button class="icon-btn" type="button" data-close="1" aria-label="Close" style="margin-left:auto"><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button></div>' +
         '<div class="dlg-body">' +
           '<div class="msg"><div class="role">You</div><div class="txt">Which runs are still on the old release branch?</div></div>' +
-          '<div class="msg"><div class="role">Assistant · run run_01K6QXD2A8</div><div class="txt">Two: <span class="mono">run_01K6QWX0M5</span> (acme.core.dep-upgrader) and <span class="mono">run_01K6QWR1C4</span> (acme.core.migration-writer). Both branched before 9f3c2ab landed. I can pause both — that is <span class="mono">dispatch_command</span>, which you hold in core-platform.</div></div>' +
+          '<div class="msg"><div class="role">Assistant · run run_01K6QXD2A8</div><div class="txt">Two: <span class="mono">run_01K6QWX0M5</span> (a-intel.core.dep-upgrader) and <span class="mono">run_01K6QWR1C4</span> (a-intel.core.migration-writer). Both branched before 9f3c2ab landed. I can pause both — that is <span class="mono">dispatch_command</span>, which you hold in core-platform.</div></div>' +
           '<div class="msg" style="border-style:dashed"><div class="role">Receipt</div><div class="txt mono" style="font-size:11.5px">list_runs · 1 governed action · 2,180 tokens · $0.01 · z-ai/glm-latest via OpenRouter · funding source platform</div></div>' +
         '</div>' +
         '<div class="dlg-foot"><span class="mono" style="font-size:11px;color:var(--dim)">Engine: stella serve · healthy · holds no credentials and no authority</span></div>' +
@@ -1827,7 +1827,7 @@ function renderModal(){
     m.innerHTML =
       '<div class="scrim"><div class="dlg" role="dialog" aria-modal="true" style="width:min(520px,100%)">' +
         '<div class="dlg-head"><span class="avatar" style="width:40px;height:40px;font-size:14px">MB</span><div>' +
-        '<h2 style="font-size:16px">Marcus Bell</h2><p>mbell@acmerobotics.com · Workspace owner, core-platform · Member, finops</p></div>' +
+        '<h2 style="font-size:16px">Marcus Bell</h2><p>mbell@a-intelrobotics.com · Workspace owner, core-platform · Member, finops</p></div>' +
         '<button class="icon-btn" type="button" data-close="1" aria-label="Close" style="margin-left:auto"><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button></div>' +
         '<div class="dlg-body"><dl class="grid2">' +
         '<div class="kv"><dt>Display currency</dt><dd>USD</dd></div>' +
@@ -1871,16 +1871,16 @@ const LIVE_SCRIPT = [
   s => ({ seq:s, kind:"tool_requested", node:"tool", cost:0,
     sum:"github:create_pull_request@2.1 · release/2026.9.2 → main",
     tool:{ pattern:"github:create_pull_request@2.1", side_effect:"write", risk:"medium", egress:"third_party",
-      input:'{ "repo": "acme/platform", "head": "release/2026.9.2", "base": "main",\n  "title": "Release 2026.9.2-rc1", "draft": true }' } }),
+      input:'{ "repo": "a-intel/platform", "head": "release/2026.9.2", "base": "main",\n  "title": "Release 2026.9.2-rc1", "draft": true }' } }),
   s => ({ seq:s, kind:"policy_decision", node:"policy", cost:0,
     sum:"allow · grant core/release-manager · draft pull request, not a tag",
     policy:{ outcome:"allow", rules:["grant core/release-manager → github:create_pull_request@2.1 allow",
       "rule no_tag_without_witness: no tag requested → pass"],
       policy_version:"pol_2026_09_04.3", taint:"none", deny_generation:412 } }),
   s => ({ seq:s, kind:"tool_call", node:"tool", cost:0,
-    sum:"pull request acme/platform#4193 opened as draft · 1,840 ms",
+    sum:"pull request a-intel/platform#4193 opened as draft · 1,840 ms",
     tool:{ pattern:"github:create_pull_request@2.1", result:"ok", bytes:"1.8 KB", duration:"1,840 ms",
-      output_schema:"valid", receipt:"rcp_01K6QX81M9", connection:"conn_github_acme (owner: Marcus Bell)" } }),
+      output_schema:"valid", receipt:"rcp_01K6QX81M9", connection:"conn_github_a-intel (owner: Marcus Bell)" } }),
   s => ({ seq:s, kind:"turn_start", node:"control", cost:0,
     sum:"Turn 6 · continued from turn 5", body:{ turn:6, trigger:"continuation" } }),
   s => ({ seq:s, kind:"model.request", node:"model", cost:0,
@@ -1900,7 +1900,7 @@ const LIVE_SCRIPT = [
   s => ({ seq:s, kind:"tool_requested", node:"tool", cost:0,
     sum:"github:list_commits@2.1 · base main · since 9f3c2ab",
     tool:{ pattern:"github:list_commits@2.1", side_effect:"read", risk:"low", egress:"third_party",
-      input:'{ "repo": "acme/platform", "sha": "main", "since": "9f3c2ab" }' } }),
+      input:'{ "repo": "a-intel/platform", "sha": "main", "since": "9f3c2ab" }' } }),
   s => ({ seq:s, kind:"policy_decision", node:"policy", cost:0,
     sum:"allow · grant core/release-manager · side-effect read",
     policy:{ outcome:"allow", rules:["grant core/release-manager → github:*@2.1 allow"],
@@ -1908,7 +1908,7 @@ const LIVE_SCRIPT = [
   s => ({ seq:s, kind:"tool_call", node:"tool", cost:0,
     sum:"118 commits since 9f3c2ab · 11 carry release-scope · 1,204 ms",
     tool:{ pattern:"github:list_commits@2.1", result:"ok", bytes:"22.6 KB", duration:"1,204 ms",
-      output_schema:"valid", receipt:"rcp_01K6QX83R4", connection:"conn_github_acme (owner: Marcus Bell)" } })
+      output_schema:"valid", receipt:"rcp_01K6QX83R4", connection:"conn_github_a-intel (owner: Marcus Bell)" } })
 ];
 const IDX_MODEL_RESPONSE = 5;
 let cursor = 0;
@@ -1982,7 +1982,7 @@ function reduced(){ return window.matchMedia("(prefers-reduced-motion: reduce)")
    Transcript: run -> turn -> step -> frame, at three zoom levels
    ========================================================================= */
 const TURN_PROSE = {
-  1: { you:"Cut the 2026.9.2 release candidate. Issue acme/platform#4182 has the scope.",
+  1: { you:"Cut the 2026.9.2 release candidate. Issue a-intel/platform#4182 has the scope.",
        agent:"I will take the open pull requests against main first, then look at what is already red on the branch before I cut anything." },
   3: { agent:"Both failures predate the release scope. payments-e2e has been red since 9f3c2ab and ingest-flake is intermittent; neither is caused by anything in the eleven release-scope pull requests, so cutting the branch is safe. I am recording the observation and moving on." }
 };
@@ -2280,32 +2280,32 @@ function render(){
 function go(hash){ if (location.hash !== hash) location.hash = hash; else { state.route = hash; render(); } }
 
 window.addEventListener("hashchange", () => {
-  state.route = location.hash || "#/acme/core-platform";
+  state.route = location.hash || "#/a-intel/core-platform";
   const s = $("#scroll"); if (s) s.scrollTop = 0;
   render();
 });
 
 /* Pages outside this flow keep the shell and say so plainly. */
 const OTHER = {
-  "#/acme/core-platform/agents": ["Agents", "Identity, run credential, roles, toolbelt, mandates, budgets and enrollment status for all 50 agents."],
-  "#/acme/core-platform/tools": ["Tools", "The registry, connections, mandates ledger, policy versions with simulation, kill switches and the assurance suite."],
-  "#/acme/core-platform/ontology": ["Ontology", "Model, Graph, Sources, Repositories and Versions — the workspace&rsquo;s model of its business."],
-  "#/acme/core-platform/steering": ["Steering", "Published records, proposals, open Context PRs, effect metrics and retirement candidates."],
-  "#/acme/core-platform/spend": ["Spend", "Findings ranked by money at stake, spend by operator and agent, proven spend, reconciliation and budgets."],
-  "#/acme": ["Organization", "People, roles, invitations, SSO, workspaces, model funding and routes, data plane and API keys."],
-  "#/acme/billing": ["Billing", "Governed-action usage, the retention meter, plan and invoices."],
-  "#/acme/audit": ["Audit", "Control-plane audit events, data plane, key rotation, legal holds and exports."]
+  "#/a-intel/core-platform/agents": ["Agents", "Identity, run credential, roles, toolbelt, mandates, budgets and enrollment status for all 50 agents."],
+  "#/a-intel/core-platform/tools": ["Tools", "The registry, connections, mandates ledger, policy versions with simulation, kill switches and the assurance suite."],
+  "#/a-intel/core-platform/ontology": ["Ontology", "Model, Graph, Sources, Repositories and Versions — the workspace&rsquo;s model of its business."],
+  "#/a-intel/core-platform/steering": ["Steering", "Published records, proposals, open Context PRs, effect metrics and retirement candidates."],
+  "#/a-intel/core-platform/spend": ["Spend", "Findings ranked by money at stake, spend by operator and agent, proven spend, reconciliation and budgets."],
+  "#/a-intel": ["Organization", "People, roles, invitations, SSO, workspaces, model funding and routes, data plane and API keys."],
+  "#/a-intel/billing": ["Billing", "Governed-action usage, the retention meter, plan and invoices."],
+  "#/a-intel/audit": ["Audit", "Control-plane audit events, data plane, key rotation, legal holds and exports."]
 };
 function renderOther(){
   const o = OTHER[state.route];
   if (!o) return renderFleet();
   return '<div class="ph"><div><p class="eyebrow">' +
-    (state.route.indexOf("core-platform") > -1 ? "Workspace · core-platform" : "Organization · acme") +
+    (state.route.indexOf("core-platform") > -1 ? "Workspace · core-platform" : "Organization · a-intel") +
     '</p><h1>' + o[0] + '</h1><p>' + o[1] + '</p></div></div>' +
     '<div class="slab"><svg class="glyph" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>' +
     '<h2>Outside this flow</h2><p>W2 mocks Fleet, Run in its live state, and fleet messaging. ' + o[0] +
     ' is one of the ten Mission Control pages and is mocked in another scenario.</p>' +
-    '<div class="acts"><a class="btn gold" href="#/acme/core-platform">Back to Fleet</a></div></div>';
+    '<div class="acts"><a class="btn gold" href="#/a-intel/core-platform">Back to Fleet</a></div></div>';
 }
 
 /* =========================================================================
@@ -2320,7 +2320,7 @@ document.addEventListener("click", ev => {
     ev.preventDefault(); if (ev.target.closest(".dlg") && !t.hasAttribute("data-close")) return;
     state.modal = null; renderModal(); return;
   }
-  if (t.dataset.open){ ev.preventDefault(); go("#/acme/core-platform/runs/" + HERO); return; }
+  if (t.dataset.open){ ev.preventDefault(); go("#/a-intel/core-platform/runs/" + HERO); return; }
   if (t.dataset.pause){
     toast("pause dispatched to " + t.dataset.pause + " · applied at the next boundary"); return;
   }
@@ -2392,7 +2392,7 @@ document.addEventListener("click", ev => {
   if (id === "cmdBtn"){ state.modal = "cmdk"; renderModal(); return; }
   if (id === "asstBtn"){ state.modal = "assistant"; renderModal(); return; }
   if (id === "acctBtn"){ state.modal = "account"; renderModal(); return; }
-  if (id === "orgSwitch"){ toast("Acme Robotics is the only organization on this account. Organization is the tenant and the hard isolation boundary."); return; }
+  if (id === "orgSwitch"){ toast("Anderson Intelligence Corp. is the only organization on this account. Organization is the tenant and the hard isolation boundary."); return; }
   if (id === "wsSwitch"){ toast("core-platform and finops. Switching changes the ontology, the steering set, the toolbelt and the budgets."); return; }
   if (id === "menuBtn"){ $("#side").classList.add("open"); $("#drawerScrim").hidden = false; $("#drawerScrim").classList.add("on"); return; }
   if (id === "themeBtn"){
@@ -2441,7 +2441,7 @@ document.addEventListener("click", ev => {
   if (id === "btnRevoke"){
     state.runState = "revoked";
     appendFrame({ seq:state.frames.length, kind:"control.command", node:"control", cost:0,
-      sum:"revoke · acme.core.release-manager · credential dead · every run token dead",
+      sum:"revoke · a-intel.core.release-manager · credential dead · every run token dead",
       command:{ cmd:"revoke", outcome:"applied", receipt:"rcp_01K6QX8D9E",
         guarantee:"Guaranteed while any seam is in path. If the hooks were stripped, this shows as hooks_removed on the host." } });
     state.selFrame = state.frames.length - 1;
@@ -2514,7 +2514,7 @@ document.addEventListener("keydown", ev => {
   if (ev.key === "Escape" && state.modal){ state.modal = null; renderModal(); }
   if ((ev.metaKey || ev.ctrlKey) && ev.key.toLowerCase() === "k"){ ev.preventDefault(); state.modal = "cmdk"; renderModal(); }
   if (ev.key === "Enter" && ev.target.closest && ev.target.closest("tr[data-open]")){
-    ev.preventDefault(); go("#/acme/core-platform/runs/" + HERO);
+    ev.preventDefault(); go("#/a-intel/core-platform/runs/" + HERO);
   }
 });
 $("#drawerScrim").addEventListener("click", () => {
@@ -2563,7 +2563,7 @@ document.addEventListener("click", ev => {
     seedZoom(); revealAt(state.pos);
     render(); return;
   }
-  if (k === "page"){ go(state.route.indexOf("/runs/") > -1 ? "#/acme/core-platform" : "#/acme/core-platform/runs/" + HERO); return; }
+  if (k === "page"){ go(state.route.indexOf("/runs/") > -1 ? "#/a-intel/core-platform" : "#/a-intel/core-platform/runs/" + HERO); return; }
 });
 
 /* =========================================================================
@@ -2572,8 +2572,8 @@ document.addEventListener("click", ev => {
 const _renderFleet = renderFleet;
 renderFleet = function(){ return OTHER[state.route] ? renderOther() : _renderFleet(); };
 
-if (!location.hash) location.replace("#/acme/core-platform");
-state.route = location.hash || "#/acme/core-platform";
+if (!location.hash) location.replace("#/a-intel/core-platform");
+state.route = location.hash || "#/a-intel/core-platform";
 seedZoom();
 revealAt(state.pos);
 render();

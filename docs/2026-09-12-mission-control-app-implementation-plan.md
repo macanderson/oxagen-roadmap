@@ -17,7 +17,7 @@
 | 2 | Build on an integration branch `app-rebuild`. Batch PRs target it; one cutover PR (Batch 5) lands it on `main`. | Deploy runs from `main`. Landing the swap early would put a half-built app on `app.oxagen.sh`. The branch is the only thing that keeps "no deploy change" and "no production regression" both true. |
 | 3 | Every read goes through a **port** (`src/data/ports.ts`) with two adapters: `fixture` (the mockup's data, typed and integrity-checked) and `live` (today's tables through the kernel, run-ledger, tacho, ClickHouse). A port method with no backing store returns `NotBacked` and the page renders an honest "not recorded yet" state. | Of the 68 page-data slices mapped in §3, 22 have no store today, 27 are partial and only 19 are fully backed. Pages must not wait for M2–M6, and production must never show fixture data or a number stronger than what was recorded (spec §14 interaction rules). |
 | 4 | Every write is a server action that calls kernel `invoke()` through **one seam** (`src/server/invoke.ts`), which parses the contract's output schema. | Spec §14.1: one agent tool contract drives API, MCP, CLI and UI. The ui-parity gate already checks this. Today's `invokeOrgCapability` casts `as Promise<T>`; the new seam validates instead. |
-| 5 | Tabs are URL segments through optional catch-alls (`tools/[[...tab]]`); the default tab renders in place and never redirects. | Deep links in the mockups (`#/acme/core-platform/tools/connections`). Under `cacheComponents`, a bare parent `redirect()` after `await params` 500s. |
+| 5 | Tabs are URL segments through optional catch-alls (`tools/[[...tab]]`); the default tab renders in place and never redirects. | Deep links in the mockups (`#/a-intel/core-platform/tools/connections`). Under `cacheComponents`, a bare parent `redirect()` after `await params` 500s. |
 | 6 | Pages are Server Components. Client islands only for the transport (player), approval countdown, dialogs, the command menu, the assistant flyout and list controls. Live data arrives over one SSE route with a `run_seq` cursor. | The run ledger already exposes `readAttemptEventsSince(runId, afterRunSeq, limit)`, a resumable cursor that maps directly onto `Last-Event-ID`. |
 | 7 | All interface prose lives in `messages/en.json` (ICU) via `next-intl`, without locale routing. | Spec §15 "Language": no hard-coded prose, ICU MessageFormat, English source, RTL-ready. Today's app has no catalog, so doing it from line one is cheaper than retrofitting. |
 | 8 | Money on the wire is `{ micros: string, currency, basis }`. Formatting happens only in `<Money>`. | Spec App. A: money is bigint micro-USD. The mockup stores `"2,450.00"`-style strings, which silently zero under `parseFloat`. |
@@ -54,7 +54,7 @@
 ### 2.1 What is ready to build from
 
 - **Coverage is complete.** Spec §19 lists every page, panel, dialog and flow with the states each needs (loaded, empty, loading, error, denied, phone), and every row links to a mockup.
-- **One demo record everywhere** (Acme Robotics / `core-platform` / Marcus Bell). It becomes the fixture adapter's seed.
+- **One demo record everywhere** (Anderson Intelligence Corp. / `core-platform` / Marcus Bell). It becomes the fixture adapter's seed.
 - **Errors are specified.** Each page has a named error code (Fleet `503 run_index_unavailable`, Run `502 frame_store_unreachable`, Agents `503 iam_principals_unavailable`, Mandate `503 mandate_ledger_unavailable`, Tools `503 tool_registry_unavailable`, Ontology `504 graph_read_timeout`, Steering `503 record_index_unavailable`, Spend `504 rollup_rebuild_in_progress`, Organization `503 control_plane_unavailable`, Billing `502 stripe_unreachable`, Audit `503 audit_store_unavailable`). Each also has a named denied permission. These become the `PageState` contract (§4.8).
 - **Interaction rules are stated once.** Trust badges show the recorded value and nothing stronger; money shows its basis; explanations are chains of links.
 
@@ -65,7 +65,7 @@
 | W1 | **The design baseline is split across branches.** `main` @ 1b0634c has the Agent IAM surface. `approvalCardSm` (small approvals) is only on `small-approvals-bottom-dock-scenarios`, `worktree-agent-iam-w9`, `worktree-assistant-sidebar-flyout` and `ship-src-side-by-side`. The assistant flyout (`asstToggle`/`asstMount`) is only on `worktree-assistant-sidebar-flyout` (locked). `runMetrics(R)` exists only in the `Specs/mockups/mc.html` scratch copy. | Twenty lanes reading "the mockup" would build three different apps. | **Baseline = `main` @ 1b0634c + small approval card + sidebar flyout + `runMetrics` instruments.** Every lane prompt names this. Where the branches disagree, the lane follows the later decision (small approvals, flyout) and records it in its PR. |
 | W2 | **`docs/feedback-mockups.md` items are in no mockup:** (1) approvals render first and collapse when empty; (2) the onboarding content floats right; (3) one-thumb mobile navigation; (4) LLM-generated run name and summary, plus a file-diff card under approvals; (5) run cost large, near the run name, basis in a dialog; (6) prompt shown inspectable but collapsed; (7) run outputs (PRs, files, media) as the story; (8) spend by operator, agent and run on Fleet. | These change the Run and Fleet pages. | In scope: 1, 2, 5, 6, 8 (clear enough to build). 4's UI is in scope; the classifier that writes `run.name`/`run.summary` is a backend gap (G14). **3 and 7 need a design decision.** Their lanes build behind a component seam (`<MobileNav>`, `<RunOutputs>`) with a plain first version, so the design can drop in later. |
 | W3 | **Vocabulary drifts from the spec.** Replay grade: mockup `full/partial/digest/ledger` vs spec `inspect/view/fork/retry`. Egress: `third_party/internal/none` vs `local/org_tenant/third_party`. Schema origin: `observed` vs `observed_proposed/observed_approved`. Financial: `fin: moves_funds/commits_spend` vs `consequence_tags text[]`. Agent status `enrolled` vs `unenrolled/active/suspended/retired`. Verdict `null` vs `none`. Record kinds: 6 in the mockup (from Stella's `RecordKind`) vs "twelve kinds" in spec §3. | Types built from the mockup would diverge from the target schema on day one. | **View-model enums follow the spec (App. A).** The fixture adapter maps mockup values once, in one file. Record kinds: use the six real kinds; flag the spec's "twelve" as a spec defect to fix. |
-| W4 | **Fixture data has integrity defects.** `EVIDENCE` references agent `acme.finops.cost-reporter`, which is not in `AGENTS`. `FIX["Refetching a stable list"]` carries the cache-write finding's text. Several `NOTIFS`/`INCIDENTS`/`RECEIPTS` run ids are not in `RUNS`. `FRAMES` is one list shared by every run. The Mandate page always renders `MANDATES[0]`. | Ported naively, links 404 and every run shows the same frames. | The fixture adapter validates referential integrity in a unit test that **fails on a dangling id** (mutation-test it by deleting one agent). Frames are keyed by run. |
+| W4 | **Fixture data has integrity defects.** `EVIDENCE` references agent `a-intel.finops.cost-reporter`, which is not in `AGENTS`. `FIX["Refetching a stable list"]` carries the cache-write finding's text. Several `NOTIFS`/`INCIDENTS`/`RECEIPTS` run ids are not in `RUNS`. `FRAMES` is one list shared by every run. The Mandate page always renders `MANDATES[0]`. | Ported naively, links 404 and every run shows the same frames. | The fixture adapter validates referential integrity in a unit test that **fails on a dangling id** (mutation-test it by deleting one agent). Frames are keyed by run. |
 | W5 | **Data is hard-coded in the mockup's markup:** the agent toolbelt rows, the mandate ledger rows, Steering's effect and retirement rows, the funding routes table, the assistant transcript. | No collection to type from. | Types come from spec App. A (`iam.role_grants`, `tools.mandate_ledger`, `org.organizations.model_routes`) instead. |
 | W6 | **`kindBadge` is declared twice** (lines 3232 and 7450 on `main`). The later role badge silently replaces the record-kind icon badge on Steering. | A defect in the mockup, not intent. | The React components are `RecordKindBadge` and `PrincipalKindBadge`, module-scoped, so the collision cannot recur. Steering uses the icon badge. |
 | W7 | **Features in the mockup with no spec table:** agent trust/spend `SCORES`, auto-approval rules `AUTORULES` (Tools › auto), the Org › roles editor with `PERMS`. | Planned, but with no store. | Built UI-first behind `NotBacked`. SCORES and AUTORULES are gaps G11/G12; they need a spec decision on whether they are columns on `iam.role_grants.conditions` or new tables. |
@@ -948,14 +948,14 @@ import { expect, test } from "@playwright/test";
 for (const state of ["loaded", "empty", "loading", "error", "denied"] as const) {
   test(`fleet · ${state}`, async ({ page, context }) => {
     await context.addCookies([{ name: "mc_state", value: state, url: "http://localhost:3000" }]);
-    await page.goto("/acme/core-platform");
+    await page.goto("/a-intel/core-platform");
     await expect(page.getByTestId(`page-state-${state}`)).toBeVisible();
     expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
   });
 }
 
 test("fleet → run navigation is instant (shell prefetched)", async ({ page }) => {
-  await page.goto("/acme/core-platform");
+  await page.goto("/a-intel/core-platform");
   await instant(page, async () => {
     await page.getByRole("link", { name: /run_01/ }).first().click();
     await expect(page.getByTestId("run-header-skeleton")).toBeVisible();
@@ -964,7 +964,7 @@ test("fleet → run navigation is instant (shell prefetched)", async ({ page }) 
 
 test("fleet · phone", async ({ page }) => {
   await page.setViewportSize({ width: 400, height: 860 });
-  await page.goto("/acme/core-platform");
+  await page.goto("/a-intel/core-platform");
   await expect(page.getByRole("region", { name: "Approvals" })).toBeInViewport(); // feedback 1: first
 });
 ```

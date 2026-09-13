@@ -679,7 +679,7 @@ tr.tg-grp .s{font-size:11.5px;color:var(--muted,#9B958A)}
         <button type="button" data-v="light">light</button>
       </div>
     </div>
-    <div class="note">W1 — sixty seconds to governed. Acme Robotics demo data. This panel is not part of the product.</div>
+    <div class="note">W1 — sixty seconds to governed. Anderson Intelligence Corp. demo data. This panel is not part of the product.</div>
   </div>
 </div>
 
@@ -850,20 +850,20 @@ const I = {
   down:'<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M8 2.4v8.4M4.6 7.6 8 11l3.4-3.4M2.8 13.4h10.4"/></svg>'
 };
 
-/* ---------- demo data: Acme Robotics ------------------------------------ */
+/* ---------- demo data: Anderson Intelligence Corp. ------------------------------------ */
 const D = {
-  org:{name:"Acme Robotics", slug:"acme", ns:"acme", currency:"USD"},
-  ws:{name:"core-platform", ns:"core", mainRepo:"acme/platform", branch:"main",
-      linked:["acme/billing","acme/mobile"], mode:"team"},
-  operator:{name:"Marcus Bell", email:"marcus.bell@acmerobotics.com", initials:"MB", role:"workspace owner, core-platform"},
+  org:{name:"Anderson Intelligence Corp.", slug:"a-intel", ns:"a-intel", currency:"USD"},
+  ws:{name:"core-platform", ns:"core", mainRepo:"a-intel/platform", branch:"main",
+      linked:["a-intel/billing","a-intel/mobile"], mode:"team"},
+  operator:{name:"Marcus Bell", email:"marcus.bell@a-intelrobotics.com", initials:"MB", role:"workspace owner, core-platform"},
   inviter:{name:"Priya Natarajan", initials:"PN", role:"org owner"},
-  other:{name:"Dana Okafor", email:"dana.okafor@acmerobotics.com", initials:"DO", role:"billing, finops"},
-  agent:{key:"acme.core.release-manager", name:"Release manager", harness:"Claude Code 2.1.14",
+  other:{name:"Dana Okafor", email:"dana.okafor@a-intelrobotics.com", initials:"DO", role:"billing, finops"},
+  agent:{key:"a-intel.core.release-manager", name:"Release manager", harness:"Claude Code 2.1.14",
          host:"mbp-marcus", device:"ed25519:9f2c4b71…a08e"},
   enrollToken:"enr_8Qv2LkT9dR4pXm1sBw6j",
-  repo:{remote:"git@github.com:acme/platform.git", dir:"~/src/platform", branch:"main"},
+  repo:{remote:"git@github.com:a-intel/platform.git", dir:"~/src/platform", branch:"main"},
   run:{
-    id:"run_01JQ8F3K2MZ4YB7VQ", attempt:1, task:"acme/platform#4821 — cut 2026.9.2 release notes",
+    id:"run_01JQ8F3K2MZ4YB7VQ", attempt:1, task:"a-intel/platform#4821 — cut 2026.9.2 release notes",
     started:"14:02:11", model:"claude-opus-5", concrete:"claude-opus-5-20260812",
     provider:"anthropic", frames:47, turns:2, modelCalls:9, toolCalls:6,
     cost:0.285860, tier:"gateway", grade:"full",
@@ -930,16 +930,16 @@ const ROUTES = [
   {id:"ob2",        hash:"#/new-organization/wrap",    label:"Onboarding 2 — wrap an agent",         states:["loaded","loading","error"]},
   {id:"ob3",        hash:"#/new-organization/run",     label:"Onboarding 3 — start a run",           states:["loaded","loading","error"]},
   {id:"installer",  hash:"#/installer",                label:"Installer (macOS)",    states:["loaded","loading","error"]},
-  {id:"fleet",      hash:"#/acme/core-platform",       label:"Fleet — first run",    states:["loaded","empty","loading","error","denied"]},
-  {id:"run",        hash:"#/acme/core-platform/runs/run_01JQ8F3K2MZ4YB7VQ", label:"Run — live", states:["loaded","loading","error","denied"]},
-  {id:"other",      hash:"#/acme/core-platform/agents",label:"Agents (not in W1)",   states:["loaded"]}
+  {id:"fleet",      hash:"#/a-intel/core-platform",       label:"Fleet — first run",    states:["loaded","empty","loading","error","denied"]},
+  {id:"run",        hash:"#/a-intel/core-platform/runs/run_01JQ8F3K2MZ4YB7VQ", label:"Run — live", states:["loaded","loading","error","denied"]},
+  {id:"other",      hash:"#/a-intel/core-platform/agents",label:"Agents (not in W1)",   states:["loaded"]}
 ];
 const routeFor = h => {
   h = h || location.hash || "#/signup";
-  if (/^#\/acme\/core-platform\/runs\//.test(h)) return ROUTES.find(r=>r.id==="run");
-  if (/^#\/acme\/core-platform\/(agents|tools|ontology|steering|spend)/.test(h)) return ROUTES.find(r=>r.id==="other");
-  if (/^#\/acme\/(billing|audit|settings)/.test(h)) return ROUTES.find(r=>r.id==="other");
-  if (h === "#/acme") return ROUTES.find(r=>r.id==="other");
+  if (/^#\/a-intel\/core-platform\/runs\//.test(h)) return ROUTES.find(r=>r.id==="run");
+  if (/^#\/a-intel\/core-platform\/(agents|tools|ontology|steering|spend)/.test(h)) return ROUTES.find(r=>r.id==="other");
+  if (/^#\/a-intel\/(billing|audit|settings)/.test(h)) return ROUTES.find(r=>r.id==="other");
+  if (h === "#/a-intel") return ROUTES.find(r=>r.id==="other");
   return ROUTES.find(r => r.hash === h) || ROUTES[0];
 };
 const go = h => { location.hash = h; };
@@ -1229,7 +1229,7 @@ function vInvite(){
       <p class="hint">As workspace owner you can register agents, grant tools, set budgets, and approve parked calls in
         ${D.ws.name}. You cannot change organization billing or the data plane.</p>
       <div class="row g9">
-        <button type="button" class="btn gold" data-nav="#/acme/core-platform">
+        <button type="button" class="btn gold" data-nav="#/a-intel/core-platform">
           ${st==="loading"?`<span class="spin"></span><span>Accepting…</span>`:"Accept invitation"}</button>
         <button type="button" class="btn ghost" data-noop>Decline</button>
       </div>
@@ -1274,7 +1274,7 @@ function vOb1(){
         <p class="lead" style="margin-top:10px">The organization is the tenant: it owns its own graph database, its own
           encryption key, its billing account, and the namespace that appears in every agent key.</p>
       </div>
-      ${err ? `<div class="errline">${I.warn}<span><b>That namespace is taken.</b> <span class="mono">acme</span> belongs to another
+      ${err ? `<div class="errline">${I.warn}<span><b>That namespace is taken.</b> <span class="mono">a-intel</span> belongs to another
         organization. Pick a different 2–6 character namespace.</span></div>` : ""}
       <form class="stack g14" data-submit="ob2">
         <div class="field">
@@ -1284,14 +1284,14 @@ function vOb1(){
         <div class="row g16 wrapx" style="gap:16px">
           <div class="field" style="flex:1;min-width:190px">
             <label class="lab" for="org-url">Address</label>
-            <input class="input mono" id="org-url" value="oxagen.com/acme" readonly>
+            <input class="input mono" id="org-url" value="oxagen.com/a-intel" readonly>
             <span class="hint">Derived from the name. You can change it later.</span>
           </div>
           <div class="field" style="flex:1;min-width:190px">
             <label class="lab" for="org-ns">Namespace</label>
-            <input class="input mono${err?" err":""}" id="org-ns" value="acme" maxlength="6">
+            <input class="input mono${err?" err":""}" id="org-ns" value="a-intel" maxlength="6">
             <span class="hint">2–6 characters, <b>immutable</b>. Every agent key starts with it:
-              <span class="mono">acme.&lt;workspace&gt;.&lt;agent&gt;</span></span>
+              <span class="mono">a-intel.&lt;workspace&gt;.&lt;agent&gt;</span></span>
           </div>
         </div>
         <hr class="rule">
@@ -1314,7 +1314,7 @@ function vOb1(){
         </div>
         <div class="row g10">
           <button type="submit" class="btn gold lg">${st==="loading"?`<span class="spin"></span><span>Creating…</span>`:"Continue"}</button>
-          <span class="cap">Creates <span class="mono">org_acme</span> and its graph database.</span>
+          <span class="cap">Creates <span class="mono">org_a-intel</span> and its graph database.</span>
         </div>
       </form>
     </div>`);
@@ -1343,26 +1343,26 @@ function vOb2(){
   const sdk = {
     ts:{lab:"TypeScript", install:'<span class="c">$</span> npm i @oxagen/sdk',
         installPlain:"npm i @oxagen/sdk",
-        plain:'import { oxagen } from "@oxagen/sdk";\nconst agent = oxagen.agent.wrap({\n  key: "acme.core.docs-writer",\n  token: process.env.OXAGEN_AGENT_TOKEN,\n});', code:
+        plain:'import { oxagen } from "@oxagen/sdk";\nconst agent = oxagen.agent.wrap({\n  key: "a-intel.core.docs-writer",\n  token: process.env.OXAGEN_AGENT_TOKEN,\n});', code:
 `<span class="k">import</span> { oxagen } <span class="k">from</span> <span class="s">"@oxagen/sdk"</span>;
 <span class="k">const</span> agent = oxagen.agent.wrap({
-  key: <span class="s">"acme.core.docs-writer"</span>,
+  key: <span class="s">"a-intel.core.docs-writer"</span>,
   token: process.env.OXAGEN_AGENT_TOKEN,
 });`},
     py:{lab:"Python", install:'<span class="c">$</span> pip install oxagen',
         installPlain:"pip install oxagen",
-        plain:'from oxagen import oxagen\nagent = oxagen.agent.wrap(\n    key="acme.core.docs-writer",\n    token=os.environ["OXAGEN_AGENT_TOKEN"],\n)', code:
+        plain:'from oxagen import oxagen\nagent = oxagen.agent.wrap(\n    key="a-intel.core.docs-writer",\n    token=os.environ["OXAGEN_AGENT_TOKEN"],\n)', code:
 `<span class="k">from</span> oxagen <span class="k">import</span> oxagen
 agent = oxagen.agent.wrap(
-    key=<span class="s">"acme.core.docs-writer"</span>,
+    key=<span class="s">"a-intel.core.docs-writer"</span>,
     token=os.environ[<span class="s">"OXAGEN_AGENT_TOKEN"</span>],
 )`},
     go:{lab:"Go", install:'<span class="c">$</span> go get github.com/oxagen/oxagen-go',
         installPlain:"go get github.com/oxagen/oxagen-go",
-        plain:'import "github.com/oxagen/oxagen-go"\nagent := oxagen.Agent.Wrap(oxagen.WrapOptions{\n    Key:   "acme.core.docs-writer",\n    Token: os.Getenv("OXAGEN_AGENT_TOKEN"),\n})', code:
+        plain:'import "github.com/oxagen/oxagen-go"\nagent := oxagen.Agent.Wrap(oxagen.WrapOptions{\n    Key:   "a-intel.core.docs-writer",\n    Token: os.Getenv("OXAGEN_AGENT_TOKEN"),\n})', code:
 `<span class="k">import</span> <span class="s">"github.com/oxagen/oxagen-go"</span>
 agent := oxagen.Agent.Wrap(oxagen.WrapOptions{
-    Key:   <span class="s">"acme.core.docs-writer"</span>,
+    Key:   <span class="s">"a-intel.core.docs-writer"</span>,
     Token: os.Getenv(<span class="s">"OXAGEN_AGENT_TOKEN"</span>),
 })`}
   }[S.sdkLang];
@@ -1599,7 +1599,7 @@ function vOb3(){
         </div>
         <button type="button" class="btn ${S.firstFrame?"":"gold"}" data-bind>
           ${I.github}<span>Bind ${D.ws.mainRepo} as the main repo</span></button>
-        <p class="cap">One click installs the GitHub App on <span class="mono">acme/platform</span>: repo binding,
+        <p class="cap">One click installs the GitHub App on <span class="mono">a-intel/platform</span>: repo binding,
           Context PRs, checks, merge handling and the code graph.</p>
         <hr class="rule">
         <p class="cap"><button type="button" class="linkbtn q" data-skip>Skip for now</button> —
@@ -1727,18 +1727,18 @@ function vInstaller(){
    APP SHELL
    ========================================================================= */
 const NAV_WS = [
-  {id:"fleet",    lab:"Fleet",    href:"#/acme/core-platform",           ic:I.fleet,    tail:"1"},
-  {id:"run",      lab:"Run",      href:"#/acme/core-platform/runs/"+D.run.id, ic:I.run, tail:"live"},
-  {id:"agents",   lab:"Agents",   href:"#/acme/core-platform/agents",    ic:I.agents,   tail:"1"},
-  {id:"tools",    lab:"Tools",    href:"#/acme/core-platform/tools",     ic:I.tools,    tail:""},
-  {id:"ontology", lab:"Ontology", href:"#/acme/core-platform/ontology",  ic:I.ontology, tail:""},
-  {id:"steering", lab:"Steering", href:"#/acme/core-platform/steering",  ic:I.steering, tail:""},
-  {id:"spend",    lab:"Spend",    href:"#/acme/core-platform/spend",     ic:I.spend,    tail:""}
+  {id:"fleet",    lab:"Fleet",    href:"#/a-intel/core-platform",           ic:I.fleet,    tail:"1"},
+  {id:"run",      lab:"Run",      href:"#/a-intel/core-platform/runs/"+D.run.id, ic:I.run, tail:"live"},
+  {id:"agents",   lab:"Agents",   href:"#/a-intel/core-platform/agents",    ic:I.agents,   tail:"1"},
+  {id:"tools",    lab:"Tools",    href:"#/a-intel/core-platform/tools",     ic:I.tools,    tail:""},
+  {id:"ontology", lab:"Ontology", href:"#/a-intel/core-platform/ontology",  ic:I.ontology, tail:""},
+  {id:"steering", lab:"Steering", href:"#/a-intel/core-platform/steering",  ic:I.steering, tail:""},
+  {id:"spend",    lab:"Spend",    href:"#/a-intel/core-platform/spend",     ic:I.spend,    tail:""}
 ];
 const NAV_ORG = [
-  {id:"organization", lab:"Organization", href:"#/acme",         ic:I.org},
-  {id:"billing",      lab:"Billing",      href:"#/acme/billing", ic:I.billing},
-  {id:"audit",        lab:"Audit",        href:"#/acme/audit",   ic:I.audit}
+  {id:"organization", lab:"Organization", href:"#/a-intel",         ic:I.org},
+  {id:"billing",      lab:"Billing",      href:"#/a-intel/billing", ic:I.billing},
+  {id:"audit",        lab:"Audit",        href:"#/a-intel/audit",   ic:I.audit}
 ];
 const WHICH_FLOW = {
   agents:"W9 — the toolbelt, governed", tools:"W9 — the toolbelt, governed",
@@ -1832,8 +1832,8 @@ function assistantDrawer(){
 
 /* ---------- Fleet -------------------------------------------------------- */
 function vFleet(){
-  const crumbs = `<a href="#/acme">${D.org.name}</a><span class="sep">/</span>
-    <a href="#/acme/core-platform">${D.ws.name}</a><span class="sep">/</span><b>Fleet</b>`;
+  const crumbs = `<a href="#/a-intel">${D.org.name}</a><span class="sep">/</span>
+    <a href="#/a-intel/core-platform">${D.ws.name}</a><span class="sep">/</span><b>Fleet</b>`;
   const st = S.state;
 
   if (st === "denied") return appShell("fleet", crumbs, `
@@ -1845,7 +1845,7 @@ function vFleet(){
       <p class="cap">Ask ${D.operator.name} (workspace owner) for a <span class="mono">viewer</span>,
         <span class="mono">member</span> or <span class="mono">owner</span> role.</p>
       <div class="row g8 wrapx" style="justify-content:center">
-        <a class="btn" href="#/acme/billing">Go to Billing</a>
+        <a class="btn" href="#/a-intel/billing">Go to Billing</a>
         <button type="button" class="btn ghost" data-noop>Request access</button>
       </div>
       <p class="cap dim mono">principal prn_dana_okafor · decision deny · policy pol_v1 · audited</p>
@@ -1855,9 +1855,9 @@ function vFleet(){
     <div class="statepane err">
       <div class="glyph">${I.warn}</div>
       <h2>Fleet could not load</h2>
-      <p class="cap">The graph service for <span class="mono">org_acme</span> did not answer in 8.0 s. Your runs are still
+      <p class="cap">The graph service for <span class="mono">org_a-intel</span> did not answer in 8.0 s. Your runs are still
         recording — the recorder writes to a queue that does not depend on this read path — so nothing is lost.</p>
-      <p class="cap mono dim">request req_01JQ8F7NX2VB4C · graph org_acme · 3 retries</p>
+      <p class="cap mono dim">request req_01JQ8F7NX2VB4C · graph org_a-intel · 3 retries</p>
       <button type="button" class="btn" data-retry>Retry</button>
     </div>`);
 
@@ -1947,11 +1947,11 @@ function vFleet(){
               <th>Tier</th><th>Grade</th><th class="num">Frames</th><th class="num">Cost</th><th>Status</th><th></th>
             </tr></thead>
             <tbody>
-              <tr class="clickable" data-nav="#/acme/core-platform/runs/${D.run.id}">
+              <tr class="clickable" data-nav="#/a-intel/core-platform/runs/${D.run.id}">
                 <td class="mono">${D.run.id.slice(0,14)}…</td>
                 <td><span class="mono f12">${D.agent.key}</span><br><span class="dim f12">${D.agent.harness}</span></td>
                 <td>${D.operator.name}</td>
-                <td class="f12"><span class="mono">acme/platform#4821</span><br><span class="dim">cut 2026.9.2 release notes</span></td>
+                <td class="f12"><span class="mono">a-intel/platform#4821</span><br><span class="dim">cut 2026.9.2 release notes</span></td>
                 <td class="mono">${D.run.started}</td>
                 <td>${tierChip("gateway")}</td>
                 <td>${chip("full","allow")}</td>
@@ -1969,7 +1969,7 @@ function vFleet(){
           <div class="pad-s row g10 wrapx" style="border-top:1px solid var(--border)">
             <span class="cap">Cost is metered at the model proxy against price book
               <span class="mono">${D.priceBook}</span>, to the micro-dollar.</span>
-            <a class="push f13" href="#/acme/core-platform/runs/${D.run.id}">Open the run →</a>
+            <a class="push f13" href="#/a-intel/core-platform/runs/${D.run.id}">Open the run →</a>
           </div>
         </div>
         ${paused ? `<div class="banner"><span class="ib">${I.info}</span>
@@ -1998,7 +1998,7 @@ function fleetRail(empty){
                  <p class="cap">Convert by <b>${D.dates.offerEnds}</b> (7 days from your first run) for 20% off usage for
                    12 months. Prepay annually for a further 20%.</p>`}
       <div class="row g8 wrapx">
-        <a class="btn gold sm" href="#/acme/billing">See plans</a>
+        <a class="btn gold sm" href="#/a-intel/billing">See plans</a>
         <button type="button" class="btn ghost sm" data-dismiss>Not now</button>
       </div>
     </div>`;
@@ -2055,16 +2055,16 @@ function fbody(f){
     +(kv.risk?TG.hazard(kv.risk,kv.side_effect):"")+(kv.egress?'<span class="cap">egress '+kv.egress+'</span>':"")+rest.join(" · ")+'</span>';
 }
 function vRun(){
-  const crumbs = `<a href="#/acme">${D.org.name}</a><span class="sep">/</span>
-    <a href="#/acme/core-platform">${D.ws.name}</a><span class="sep">/</span>
-    <a href="#/acme/core-platform">Fleet</a><span class="sep">/</span><b class="mono">${D.run.id.slice(0,14)}…</b>`;
+  const crumbs = `<a href="#/a-intel">${D.org.name}</a><span class="sep">/</span>
+    <a href="#/a-intel/core-platform">${D.ws.name}</a><span class="sep">/</span>
+    <a href="#/a-intel/core-platform">Fleet</a><span class="sep">/</span><b class="mono">${D.run.id.slice(0,14)}…</b>`;
   const st = S.state;
   if (st === "denied") return appShell("run", crumbs, `
     <div class="statepane den"><div class="glyph">${I.lock}</div>
       <h2>You cannot open this run</h2>
       <p class="cap">Runs belong to a workspace. Your role in ${D.org.name} is <b>billing</b>, which carries no role in
         <span class="mono">${D.ws.name}</span>. The decision was audited as a governed action.</p>
-      <a class="btn" href="#/acme/billing">Go to Billing</a></div>`);
+      <a class="btn" href="#/a-intel/billing">Go to Billing</a></div>`);
   if (st === "error") return appShell("run", crumbs, `
     <div class="statepane err"><div class="glyph">${I.warn}</div>
       <h2>Frame bodies are unavailable</h2>
@@ -2102,7 +2102,7 @@ function vRun(){
           ${chip("oxagen-attested","allow")}
         </div>
         <p class="cap">${D.agent.key} · ${D.agent.harness} · operator ${D.operator.name} ·
-          task <span class="mono">acme/platform#4821</span> · started ${D.run.started}</p>
+          task <span class="mono">a-intel/platform#4821</span> · started ${D.run.started}</p>
       </div>
       <div class="row g8 wrapx push">
         <button type="button" class="btn" data-pause>${paused?I.play:I.pause}<span>${paused?"Resume":"Pause"}</span></button>
@@ -2181,8 +2181,8 @@ function vOther(){
   const id = (h.match(/\/(agents|tools|ontology|steering|spend|billing|audit)/) || [,"organization"])[1];
   const lab = {agents:"Agents",tools:"Tools",ontology:"Ontology",steering:"Steering",spend:"Spend",
                billing:"Billing",audit:"Audit",organization:"Organization"}[id];
-  const crumbs = `<a href="#/acme">${D.org.name}</a><span class="sep">/</span>
-    ${["billing","audit","organization"].includes(id)?"":`<a href="#/acme/core-platform">${D.ws.name}</a><span class="sep">/</span>`}<b>${lab}</b>`;
+  const crumbs = `<a href="#/a-intel">${D.org.name}</a><span class="sep">/</span>
+    ${["billing","audit","organization"].includes(id)?"":`<a href="#/a-intel/core-platform">${D.ws.name}</a><span class="sep">/</span>`}<b>${lab}</b>`;
   return appShell(id, crumbs, `
     <div class="pagehead"><div><p class="eyebrow q">${["billing","audit","organization"].includes(id)?"Organization":"Workspace"}</p>
       <h1>${lab}</h1></div></div>
@@ -2204,15 +2204,15 @@ function dialog(){
       <header>${I.search}<input class="input" id="cmd-input" placeholder="Search runs, agents, tools, or type a command…"
         style="border:0;background:transparent;padding:0;font-size:15px" autofocus></header>
       <div class="cmdlist">
-        ${[["Open Fleet","#/acme/core-platform","G then F"],
-           ["Open the live run","#/acme/core-platform/runs/"+D.run.id,"G then R"],
-           ["Agents","#/acme/core-platform/agents","G then A"],
-           ["Tools","#/acme/core-platform/tools","G then T"],
-           ["Ontology","#/acme/core-platform/ontology","G then O"],
-           ["Steering","#/acme/core-platform/steering","G then S"],
-           ["Spend","#/acme/core-platform/spend","G then $"],
-           ["Billing","#/acme/billing",""],
-           ["Audit","#/acme/audit",""],
+        ${[["Open Fleet","#/a-intel/core-platform","G then F"],
+           ["Open the live run","#/a-intel/core-platform/runs/"+D.run.id,"G then R"],
+           ["Agents","#/a-intel/core-platform/agents","G then A"],
+           ["Tools","#/a-intel/core-platform/tools","G then T"],
+           ["Ontology","#/a-intel/core-platform/ontology","G then O"],
+           ["Steering","#/a-intel/core-platform/steering","G then S"],
+           ["Spend","#/a-intel/core-platform/spend","G then $"],
+           ["Billing","#/a-intel/billing",""],
+           ["Audit","#/a-intel/audit",""],
            ["Wrap another agent","#/new-organization/wrap",""],
            ["Open the installer","#/installer",""]].map(([l,h,g])=>
           `<button type="button" class="cmditem" data-nav="${h}">${l}<span class="g">${g}</span></button>`).join("")}
@@ -2272,9 +2272,9 @@ function dialog(){
       <div class="dlg" style="max-width:420px" role="dialog" aria-modal="true" aria-label="${org?"Switch organization":"Switch workspace"}">
         <header><h3>${org?"Organizations":"Workspaces in "+D.org.name}</h3></header>
         <div class="cmdlist">
-          ${(org ? [["Acme Robotics","org · acme · 1 workspace",true]]
-                 : [["core-platform","main repo acme/platform · 1 agent",true],
-                    ["finops","main repo acme/finops-agents · 0 agents",false]]).map(([n,s,cur])=>
+          ${(org ? [["Anderson Intelligence Corp.","org · a-intel · 1 workspace",true]]
+                 : [["core-platform","main repo a-intel/platform · 1 agent",true],
+                    ["finops","main repo a-intel/finops-agents · 0 agents",false]]).map(([n,s,cur])=>
             `<button type="button" class="cmditem" data-close>
               <span class="av" style="width:22px;height:22px;border-radius:var(--r-xs);background:var(--hl);border:1px solid var(--border);display:grid;place-items:center;font-size:10px;font-family:var(--mono);color:var(--accent-text)">${n.slice(0,2).toUpperCase()}</span>
               <span class="stack" style="gap:1px"><b style="font-size:13px">${n}</b><span class="cap dim">${s}</span></span>
@@ -2339,7 +2339,7 @@ function wire(r){
     const map = {verify:"#/verify", ob1:"#/new-organization", ob2:"#/new-organization/wrap",
                  twofactor:"#/two-factor", login:"#/login"};
     S.state = "loading"; render();
-    later(()=>{ S.state = "loaded"; go(map[t] || "#/acme/core-platform"); }, 620);
+    later(()=>{ S.state = "loaded"; go(map[t] || "#/a-intel/core-platform"); }, 620);
   }));
   root.querySelectorAll("[data-pwtoggle]").forEach(b=>b.addEventListener("click",()=>{ S.pwShown = !S.pwShown; render(); }));
   root.querySelectorAll("[data-os]").forEach(b=>b.addEventListener("click",()=>{ S.os = b.dataset.os; render(); }));
@@ -2371,7 +2371,7 @@ function wire(r){
     S.repoBound = true; S.repoSkipped = false; render();
   }));
   root.querySelectorAll("[data-skip]").forEach(b=>b.addEventListener("click",()=>{ S.repoSkipped = true; render(); }));
-  root.querySelectorAll("[data-unlock]").forEach(b=>b.addEventListener("click",()=>{ S.unlocked = true; go("#/acme/core-platform"); }));
+  root.querySelectorAll("[data-unlock]").forEach(b=>b.addEventListener("click",()=>{ S.unlocked = true; go("#/a-intel/core-platform"); }));
 
   /* installer */
   root.querySelectorAll("[data-install]").forEach(b=>b.addEventListener("click",()=>{
@@ -2457,7 +2457,7 @@ function startUnlockCountdown(){
     const el = note();
     if (!el){ clearInterval(t); return; }
     n--;
-    if (n <= 0){ clearInterval(t); S.unlocked = true; go("#/acme/core-platform"); return; }
+    if (n <= 0){ clearInterval(t); S.unlocked = true; go("#/a-intel/core-platform"); return; }
     el.textContent = "Opening automatically in " + n + "…";
   }, 1000);
   timers.push(t);
@@ -2512,7 +2512,7 @@ document.getElementById("cTheme").addEventListener("click", e=>{
 addEventListener("keydown", e=>{
   if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k"){
     e.preventDefault();
-    if (/^#\/acme/.test(location.hash)){ S.cmdOpen = !S.cmdOpen; S.dlg = null; render(); }
+    if (/^#\/a-intel/.test(location.hash)){ S.cmdOpen = !S.cmdOpen; S.dlg = null; render(); }
   }
   if (e.key === "Escape" && (S.cmdOpen || S.dlg)){ S.cmdOpen = false; S.dlg = null; render(); }
 });

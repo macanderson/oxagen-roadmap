@@ -479,9 +479,9 @@ tr.tg-grp .s{font-size:11.5px;color:var(--muted,#9B958A)}
     </div>
 
     <div class="switcher">
-      <button class="sw" onclick="toast('Organization switcher — Acme Robotics is the only organization on this account.')">
+      <button class="sw" onclick="toast('Organization switcher — Anderson Intelligence Corp. is the only organization on this account.')">
         <span class="sw-av org">AR</span>
-        <span class="sw-t"><span class="sw-k">Organization</span><span class="sw-v">Acme Robotics</span></span>
+        <span class="sw-t"><span class="sw-k">Organization</span><span class="sw-v">Anderson Intelligence Corp.</span></span>
         <svg class="sw-c ni" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 6.5 8 3.5l3 3M5 9.5l3 3 3-3"/></svg>
       </button>
       <button class="sw" onclick="toast('Workspace switcher — core-platform and finops. This flow stays in core-platform.')">
@@ -496,7 +496,7 @@ tr.tg-grp .s{font-size:11.5px;color:var(--muted,#9B958A)}
     <div class="side-foot">
       <div class="ln"><span>bundle</span><b id="sf-bundle">bundle_v214</b></div>
       <div class="ln"><span>governance</span><b>team</b></div>
-      <div class="ln"><span>main repo</span><b>acme/platform</b></div>
+      <div class="ln"><span>main repo</span><b>a-intel/platform</b></div>
     </div>
   </aside>
 
@@ -672,13 +672,13 @@ var TG=(function(){
 "use strict";
 
 /* ══════════════════════════════════════════════════════════════════════
-   Demo corpus — Acme Robotics / core-platform.
+   Demo corpus — Anderson Intelligence Corp. / core-platform.
    Every value here is content, not placeholder. Money is USD to the cent.
    ══════════════════════════════════════════════════════════════════════ */
 
-const ORG = { slug:"acme", name:"Acme Robotics", currency:"USD" };
-const WS  = { slug:"core-platform", mainRepo:"acme/platform", prodBranch:"main",
-              linked:["acme/billing","acme/mobile"], governance:"team", fleet:50 };
+const ORG = { slug:"a-intel", name:"Anderson Intelligence Corp.", currency:"USD" };
+const WS  = { slug:"core-platform", mainRepo:"a-intel/platform", prodBranch:"main",
+              linked:["a-intel/billing","a-intel/mobile"], governance:"team", fleet:50 };
 
 const PEOPLE = {
   marcus:{ name:"Marcus Bell", init:"MB", role:"workspace owner, core-platform" },
@@ -689,40 +689,40 @@ const PEOPLE = {
 /* ── published steering records ─────────────────────────────────────── */
 const PUBLISHED = [
   { lin:"ctx.core.release-pr-never-merged-by-agent", kind:"directive", sub:"forbid", authority:"must",
-    stmt:"An agent never merges a pull request on acme/platform. Open it, request review, and stop.",
+    stmt:"An agent never merges a pull request on a-intel/platform. Open it, request review, and stop.",
     scope:"workspace · core-platform", file:".oxagen/rules/ctx.core.release-pr-never-merged-by-agent.toml",
-    pub:"2026-06-02", by:"Marcus Bell", pr:"acme/platform#188", commit:"7a19d3c",
+    pub:"2026-06-02", by:"Marcus Bell", pr:"a-intel/platform#188", commit:"7a19d3c",
     rendered:1204, cited:96, violated:0, before:84.1, after:91.6 },
   { lin:"ctx.core.migration-expand-contract", kind:"directive", sub:"require", authority:"must",
     stmt:"Schema changes ship expand-then-contract: add the column, backfill, switch readers, drop in a later release. Never drop a column in the same pull request that stops reading it.",
     scope:"workspace · core-platform", file:".oxagen/rules/ctx.core.migration-expand-contract.toml",
-    pub:"2026-06-19", by:"Priya Natarajan", pr:"acme/platform#221", commit:"b04e77f",
+    pub:"2026-06-19", by:"Priya Natarajan", pr:"a-intel/platform#221", commit:"b04e77f",
     rendered:612, cited:143, violated:2, before:72.4, after:88.0 },
   { lin:"ctx.core.no-secrets-in-workflow-inputs", kind:"directive", sub:"forbid", authority:"must",
     stmt:"Never pass a secret through a workflow_dispatch input. Read it from the environment the job already has.",
     scope:"workspace · core-platform", file:".oxagen/rules/ctx.core.no-secrets-in-workflow-inputs.toml",
-    pub:"2026-07-04", by:"Marcus Bell", pr:"acme/platform#254", commit:"e6c22a9",
+    pub:"2026-07-04", by:"Marcus Bell", pr:"a-intel/platform#254", commit:"e6c22a9",
     rendered:921, cited:34, violated:0, before:88.2, after:88.9 },
   { lin:"ctx.core.changelog-keepachangelog", kind:"knowledge", sub:"decision", authority:"should",
     stmt:"Release notes follow Keep a Changelog 1.1.0 with the four headings this repository already uses: Added, Changed, Fixed, Removed.",
     scope:"workspace · core-platform", file:".oxagen/rules/ctx.core.changelog-keepachangelog.toml",
-    pub:"2026-07-21", by:"Marcus Bell", pr:"acme/platform#288", commit:"11ff58d",
+    pub:"2026-07-21", by:"Marcus Bell", pr:"a-intel/platform#288", commit:"11ff58d",
     rendered:388, cited:301, violated:1, before:79.8, after:83.2 },
   { lin:"ctx.billing.currency-minor-units", kind:"knowledge", sub:"fact", authority:"info",
-    stmt:"acme/billing stores every amount in minor units as an integer with an ISO 4217 code beside it. There is no floating-point money anywhere in that repository.",
-    scope:"repository · acme/billing", file:".oxagen/rules/ctx.billing.currency-minor-units.toml",
-    pub:"2026-08-05", by:"Dana Okafor", pr:"acme/billing#96", commit:"3d81c40",
+    stmt:"a-intel/billing stores every amount in minor units as an integer with an ISO 4217 code beside it. There is no floating-point money anywhere in that repository.",
+    scope:"repository · a-intel/billing", file:".oxagen/rules/ctx.billing.currency-minor-units.toml",
+    pub:"2026-08-05", by:"Dana Okafor", pr:"a-intel/billing#96", commit:"3d81c40",
     rendered:274, cited:208, violated:0, before:81.0, after:86.7 },
   { lin:"ctx.core.test-file-naming", kind:"directive", sub:"require", authority:"should",
     stmt:"Name test files <subject>.test.ts beside the subject they cover.",
     scope:"workspace · core-platform", file:".oxagen/rules/ctx.core.test-file-naming.toml",
-    pub:"2026-05-14", by:"Marcus Bell", pr:"acme/platform#160", commit:"9ba0e12",
+    pub:"2026-05-14", by:"Marcus Bell", pr:"a-intel/platform#160", commit:"9ba0e12",
     rendered:1188, cited:0, violated:0, before:86.5, after:86.4, retire:true,
     retireWhy:"Rendered 1,188 times in 90 days and cited in none of them. The repository's eslint rule already fails the build on a misnamed test file, so the record costs 41 steering tokens a turn and changes nothing." },
   { lin:"ctx.mobile.detox-retry-once", kind:"directive", sub:"require", authority:"should",
-    stmt:"Retry a failed Detox suite once before reporting a failure on acme/mobile.",
-    scope:"repository · acme/mobile", file:".oxagen/rules/ctx.mobile.detox-retry-once.toml",
-    pub:"2026-07-30", by:"Marcus Bell", pr:"acme/mobile#77", commit:"c5720ab",
+    stmt:"Retry a failed Detox suite once before reporting a failure on a-intel/mobile.",
+    scope:"repository · a-intel/mobile", file:".oxagen/rules/ctx.mobile.detox-retry-once.toml",
+    pub:"2026-07-30", by:"Marcus Bell", pr:"a-intel/mobile#77", commit:"c5720ab",
     rendered:96, cited:3, violated:11, before:64.2, after:61.8, retire:true,
     retireWhy:"Violated 11 times against 3 citations, and the proof rate fell 2.4 points after publication. The proposal ctx.core.no-retry-on-nondeterminism contradicts it directly." },
 ];
@@ -733,21 +733,21 @@ const PROPOSALS = [
     id:"prop_01K52C4M8T", lin:"ctx.core.openapi-regen-on-route-change", hero:true, status:"ready",
     kind:"directive", sub:"require", authority:"must",
     stmt:"When a file under apps/api/src/routes/ changes, run pnpm openapi:generate and commit the regenerated packages/contracts/openapi.json in the same pull request.",
-    scopeAsked:"workspace · core-platform", target:"acme/platform",
+    scopeAsked:"workspace · core-platform", target:"a-intel/platform",
     runs:4, agents:2, confidence:0.91, floor:0.70, needRuns:3, needAgents:2,
     contradiction:null, opened:"2026-09-11 09:48:12 UTC",
-    rationale:"Four runs on acme/platform changed a route handler and left packages/contracts/openapi.json stale. In three of them the contract-drift witness failed on the pull request and passed on main, and a person regenerated the file by hand before the release could go out. The generate step already exists in package.json and takes 4 s. Stating it as a requirement removes the whole class of failure rather than catching it one pull request at a time.",
+    rationale:"Four runs on a-intel/platform changed a route handler and left packages/contracts/openapi.json stale. In three of them the contract-drift witness failed on the pull request and passed on main, and a person regenerated the file by hand before the release could go out. The generate step already exists in package.json and takes 4 s. Stating it as a requirement removes the whole class of failure rather than catching it one pull request at a time.",
     support:[
-      { rec:"rec_01K3ZP9M2A", kind:"observation", run:"run_01K3ZP7QW2", agent:"acme.core.release-manager",
+      { rec:"rec_01K3ZP9M2A", kind:"observation", run:"run_01K3ZP7QW2", agent:"a-intel.core.release-manager",
         op:"Marcus Bell", date:"2026-08-24", frame:"frame:run_01K3ZP7QW2/482", verdict:"failing",
         line:"Witness contract-drift failed on the pull request; openapi.json was 3 routes behind." },
-      { rec:"rec_01K44M4C7H", kind:"observation", run:"run_01K44M1XKD", agent:"acme.core.release-manager",
+      { rec:"rec_01K44M4C7H", kind:"observation", run:"run_01K44M1XKD", agent:"a-intel.core.release-manager",
         op:"Marcus Bell", date:"2026-08-29", frame:"frame:run_01K44M1XKD/311", verdict:"failing",
         line:"Same witness, same file. The operator regenerated by hand and re-ran." },
-      { rec:"rec_01K4B8V1QE", kind:"memory", run:"run_01K4B8T5NV", agent:"acme.core.triage",
+      { rec:"rec_01K4B8V1QE", kind:"memory", run:"run_01K4B8T5NV", agent:"a-intel.core.triage",
         op:"Priya Natarajan", date:"2026-09-02", frame:"frame:run_01K4B8T5NV/96", verdict:"unmoved",
         line:"Agent asked to remember: route edits need the contract regenerated." },
-      { rec:"rec_01K4RCB3TT", kind:"observation", run:"run_01K4RC9ZH1", agent:"acme.core.release-manager",
+      { rec:"rec_01K4RCB3TT", kind:"observation", run:"run_01K4RC9ZH1", agent:"a-intel.core.release-manager",
         op:"Marcus Bell", date:"2026-09-08", frame:"frame:run_01K4RC9ZH1/540", verdict:"failing",
         line:"Third contract-drift failure in sixteen days; release 2026.9.1 slipped by 2 h 10 m." },
     ],
@@ -761,7 +761,7 @@ const PROPOSALS = [
     id:"prop_01K51X0J4E", lin:"ctx.core.pin-actions-by-sha", status:"ready",
     kind:"directive", sub:"require", authority:"must",
     stmt:"Pin every GitHub Action to a full commit sha, never to a tag or a branch.",
-    scopeAsked:"workspace · core-platform", target:"acme/platform",
+    scopeAsked:"workspace · core-platform", target:"a-intel/platform",
     runs:5, agents:3, confidence:0.88, floor:0.70, needRuns:3, needAgents:2, contradiction:null,
     opened:"2026-09-10 16:02:44 UTC",
     rationale:"Five runs across three agents edited a workflow file and reached for a tag. Two of them pulled a moving v4 that had changed under the repository since the last release. Supply-chain review already asks for this in the contributing guide; nothing delivers it to an agent at run time.",
@@ -771,7 +771,7 @@ const PROPOSALS = [
     id:"prop_01K4ZH6P1R", lin:"ctx.core.linear-issue-on-revert", status:"gathering",
     kind:"directive", sub:"require", authority:"should",
     stmt:"Open a Linear issue whenever you revert a commit on main, and link the issue in the revert body.",
-    scopeAsked:"workspace · core-platform", target:"acme/platform",
+    scopeAsked:"workspace · core-platform", target:"a-intel/platform",
     runs:2, agents:1, confidence:0.63, floor:0.70, needRuns:3, needAgents:2, contradiction:null,
     opened:"2026-09-06 11:19:35 UTC",
     rationale:"Two reverts on main in August carried no issue and no follow-up. Support is below the workspace threshold: this needs one more run and one more agent before the promoter will open a Context PR.",
@@ -794,7 +794,7 @@ const PR_CHECKS = [
     ok:"No secret or PII match in statement, rationale, or truth probes. 0 findings.",
     run:"Scanning statement, rationale and probes…" },
   { name:"oxagen/probes",    ms:7600, dur:"2.2s",
-    ok:"Truth probe openapi-fresh ran on 3 commits of acme/platform: 3 pass, 0 fail.",
+    ok:"Truth probe openapi-fresh ran on 3 commits of a-intel/platform: 3 pass, 0 fail.",
     run:"Running truth probe openapi-fresh on 3 commits…" },
 ];
 
@@ -829,13 +829,13 @@ pull request.
 """
 
 [scope]
-organization_id = "org_acme"
+organization_id = "org_a-intel"
 workspace_id    = "ws_core_platform"
 sharing_scope   = "workspace"
 
 [steering]
 authority  = "must"
-applies_to = ["repository:acme/platform"]
+applies_to = ["repository:a-intel/platform"]
 phase      = ["plan", "implement", "review"]
 
 [enforcement]
@@ -876,10 +876,10 @@ Authority \`must\`. Constraint effect \`require\`; it grants nothing.
 ### Why
 | Run | Agent | Date | Witness | Frame |
 |---|---|---|---|---|
-| run_01K3ZP7QW2 | acme.core.release-manager | 2026-08-24 | contract-drift \`failing\` | 482 |
-| run_01K44M1XKD | acme.core.release-manager | 2026-08-29 | contract-drift \`failing\` | 311 |
-| run_01K4B8T5NV | acme.core.triage | 2026-09-02 | \`unmoved\` | 96 |
-| run_01K4RC9ZH1 | acme.core.release-manager | 2026-09-08 | contract-drift \`failing\` | 540 |
+| run_01K3ZP7QW2 | a-intel.core.release-manager | 2026-08-24 | contract-drift \`failing\` | 482 |
+| run_01K44M1XKD | a-intel.core.release-manager | 2026-08-29 | contract-drift \`failing\` | 311 |
+| run_01K4B8T5NV | a-intel.core.triage | 2026-09-02 | \`unmoved\` | 96 |
+| run_01K4RC9ZH1 | a-intel.core.release-manager | 2026-09-08 | contract-drift \`failing\` | 540 |
 
 Release 2026.9.1 slipped 2 h 10 m on the last of these.
 
@@ -934,29 +934,29 @@ and stop; a person merges it.`;
 
 /* ── agents in core-platform ────────────────────────────────────────── */
 const AGENTS = [
-  { key:"acme.core.release-manager", name:"Release manager", harness:"Claude Code", status:"enrolled",
+  { key:"a-intel.core.release-manager", name:"Release manager", harness:"Claude Code", status:"enrolled",
     tier:"gateway", runs:218, spend:412.66, op:"Marcus Bell", tools:18, mandate:null,
     digest:"sha256:5b31ac7e…" },
-  { key:"acme.core.stella-ci", name:"CI reviewer", harness:"Stella", status:"enrolled",
+  { key:"a-intel.core.stella-ci", name:"CI reviewer", harness:"Stella", status:"enrolled",
     tier:"gateway", runs:1904, spend:98.14, op:"Marcus Bell", tools:11, mandate:null,
     digest:"sha256:d0a4e219…" },
-  { key:"acme.core.triage", name:"Issue triage", harness:"Codex CLI", status:"enrolled",
+  { key:"a-intel.core.triage", name:"Issue triage", harness:"Codex CLI", status:"enrolled",
     tier:"gateway · harness", runs:641, spend:74.09, op:"Priya Natarajan", tools:9, mandate:null,
     digest:"sha256:7c6fb188…" },
 ];
 
 const DOCS_WRITER = {
-  key:"acme.core.docs-writer", name:"Docs writer", harness:"Claude Agent SDK (custom, SDK-wrapped)",
+  key:"a-intel.core.docs-writer", name:"Docs writer", harness:"Claude Agent SDK (custom, SDK-wrapped)",
   op:"Marcus Bell", tools:4, budget:"1.50", digest:"sha256:71ad3e0c…",
 };
 
 /* ── the next run: new steering visible in model.request ────────────── */
 const RUN = {
-  id:"run_01K52JN4D8", agent:"acme.core.release-manager", op:"Marcus Bell", opInit:"MB",
+  id:"run_01K52JN4D8", agent:"a-intel.core.release-manager", op:"Marcus Bell", opInit:"MB",
   started:"2026-09-11 14:36:52 UTC", tier:"gateway", grade:"fork replay",
-  task:"acme/platform#3391 — Release 2026.9.2", bundle:"bundle_v215",
+  task:"a-intel/platform#3391 — Release 2026.9.2", bundle:"bundle_v215",
   harness:"Claude Code 2.14.3", model:"claude-opus-5", cost:"0.4812", frames:14,
-  repo:"acme/platform", base:"4c1f9ab",
+  repo:"a-intel/platform", base:"4c1f9ab",
 };
 
 const FRAMES = [
@@ -966,7 +966,7 @@ const FRAMES = [
   { seq:3,  kind:"context.assembled",sum:"budget 6,000 · 5 context frames · 4,182 tokens · composition digest sha256:a71b…" },
   { seq:4,  kind:"model.request",    sum:"claude-opus-5 · 4 steering records injected · 1 published 15 m ago", hot:true },
   { seq:5,  kind:"model.response",   sum:"stop_reason tool_use · 612 output tokens · $0.0914 USD" },
-  { seq:6,  kind:"tool_requested",   sum:"github__get_pull_request_files@3 · acme/platform#3391" },
+  { seq:6,  kind:"tool_requested",   sum:"github__get_pull_request_files@3 · a-intel/platform#3391" },
   { seq:7,  kind:"tool_call",        sum:"allowed · 14 files · 2 under apps/api/src/routes/", state:"allowed" },
   { seq:8,  kind:"model.request",    sum:"claude-opus-5 · same steering block · cache_read 22,104" },
   { seq:9,  kind:"model.response",   sum:"stop_reason tool_use · 341 output tokens · $0.0688 USD" },
@@ -986,7 +986,7 @@ const STEER_BLOCK = [
 
 const STEER_TEXT = `<steering bundle="bundle_v215" workspace="core-platform" authority-order="must,should">
   <record lineage="ctx.core.release-pr-never-merged-by-agent" authority="must">
-    An agent never merges a pull request on acme/platform. Open it, request
+    An agent never merges a pull request on a-intel/platform. Open it, request
     review, and stop.
   </record>
   <record lineage="ctx.core.migration-expand-contract" authority="must">
@@ -1081,23 +1081,23 @@ const RETIRE_DIFF = [
 function prList(){
   const rows = [];
   if (S.pr !== "none") rows.push({
-    num:412, repo:"acme/platform", branch:"context/ctx.core.openapi-regen-on-route-change",
+    num:412, repo:"a-intel/platform", branch:"context/ctx.core.openapi-regen-on-route-change",
     title:"Require a regenerated OpenAPI contract when a route changes",
     kind:"steering", opened:"2026-09-11 14:06 UTC", by:"Oxagen promoter",
     state: S.pr === "merged" ? "merged" : (S.pr === "passed" ? "passed" : "checking"),
   });
   if (S.agentPr !== "none") rows.push({
-    num:413, repo:"acme/platform", branch:"agents/docs-writer",
-    title:"Add agent acme.core.docs-writer",
+    num:413, repo:"a-intel/platform", branch:"agents/docs-writer",
+    title:"Add agent a-intel.core.docs-writer",
     kind:"agent", opened:"2026-09-11 14:31 UTC", by:"Marcus Bell",
     state: S.agentPr === "merged" ? "merged" : (S.agentPr === "passed" ? "passed" : "checking"),
   });
   rows.push({
-    num:409, repo:"acme/mobile", branch:"context/ctx.mobile.snapshot-baseline",
-    title:"Record the snapshot baseline convention for acme/mobile",
+    num:409, repo:"a-intel/mobile", branch:"context/ctx.mobile.snapshot-baseline",
+    title:"Record the snapshot baseline convention for a-intel/mobile",
     kind:"steering", opened:"2026-09-09 10:14 UTC", by:"Oxagen promoter", state:"review",
   },{
-    num:407, repo:"acme/platform", branch:"context/ctx.core.test-file-naming",
+    num:407, repo:"a-intel/platform", branch:"context/ctx.core.test-file-naming",
     title:"Retire ctx.core.test-file-naming",
     kind:"retirement", opened:"2026-09-08 17:40 UTC", by:"Marcus Bell", state:"review",
   });
@@ -1110,7 +1110,7 @@ function publishedRecords(){
     const p = PROPOSALS[0];
     list.unshift({ lin:p.lin, kind:p.kind, sub:p.sub, authority:p.authority, stmt:p.stmt,
       scope:"workspace · core-platform", file:".oxagen/rules/"+p.lin+".toml",
-      pub:"2026-09-11", by:"Marcus Bell", pr:"acme/platform#412", commit:"4c1f9ab",
+      pub:"2026-09-11", by:"Marcus Bell", pr:"a-intel/platform#412", commit:"4c1f9ab",
       rendered:7, cited:5, violated:0, before:61.9, after:null, fresh:true });
   }
   return list;
@@ -1119,7 +1119,7 @@ function publishedRecords(){
 /* ══════════════════════════════════════════════════════════════════════
    Chrome: nav, breadcrumbs, theme, toast
    ══════════════════════════════════════════════════════════════════════ */
-const BASE = "#/acme/core-platform";
+const BASE = "#/a-intel/core-platform";
 const NAV = [
   { h:"Workspace" },
   { t:"Fleet",     i:"fleet",    r:BASE,               n:"12 live" },
@@ -1130,9 +1130,9 @@ const NAV = [
   { t:"Steering",  i:"steering", r:BASE+"/steering" },
   { t:"Spend",     i:"spend",    r:BASE+"/spend" },
   { h:"Organization" },
-  { t:"Organization", i:"org",     r:"#/acme" },
-  { t:"Billing",      i:"billing", r:"#/acme/billing" },
-  { t:"Audit",        i:"audit",   r:"#/acme/audit" },
+  { t:"Organization", i:"org",     r:"#/a-intel" },
+  { t:"Billing",      i:"billing", r:"#/a-intel/billing" },
+  { t:"Audit",        i:"audit",   r:"#/a-intel/audit" },
 ];
 
 function renderNav(){
@@ -1182,7 +1182,7 @@ function toast(msg){
    ══════════════════════════════════════════════════════════════════════ */
 function route(){
   const p = (location.hash || BASE+"/steering").replace(/^#\/?/, "").split("/").filter(Boolean);
-  // acme / core-platform / <page> / ...
+  // a-intel / core-platform / <page> / ...
   const page = p[2] || "fleet";
   const a = p[3], b = p[4];
   window.scrollTo(0,0);
@@ -1210,7 +1210,7 @@ function skeleton(){
         <div class="sk" style="width:80%;height:17px;margin-top:8px"></div></div>`).join("")}
     </div></div>
     <p class="mono" style="color:var(--dim);margin-top:14px;font-size:11.5px">
-      Loading published records from the graph, verified against acme/platform@main…</p>`;
+      Loading published records from the graph, verified against a-intel/platform@main…</p>`;
 }
 
 let DENY_CTX = { subj:"steering:read", page:"steering", noun:"steering in core-platform",
@@ -1229,7 +1229,7 @@ function blankState(kind, ctx){
        from a stale index while this is true.</p>
     <div class="hop" style="margin-bottom:17px">
       <dt>error</dt><dd><b>graph_unavailable</b></dd>
-      <dt>store</dt><dd>neo4j · org_acme · read replica 2</dd>
+      <dt>store</dt><dd>neo4j · org_a-intel · read replica 2</dd>
       <dt>request</dt><dd>req_01K52JQ7F3M0</dd>
       <dt>at</dt><dd>2026-09-11 14:41:07 UTC</dd>
       <dt>effect</dt><dd>Runs continue on <b>bundle_v${S.pr==="merged"?"215":"214"}</b>, which is already signed and cached.</dd>
@@ -1244,7 +1244,7 @@ function blankState(kind, ctx){
     <dl class="hop">
       <dt>principal</dt><dd><b>Dana Okafor</b> · human · prn_01J8YQ4K2X</dd>
       <dt>asked for</dt><dd>${h(DENY_CTX.subj)} · ws_core_platform</dd>
-      <dt>roles held</dt><dd>billing@finops, member@acme</dd>
+      <dt>roles held</dt><dd>billing@finops, member@a-intel</dd>
       <dt>grant</dt><dd>no role_grant matches subject <b>${h(DENY_CTX.subj)}</b> at this scope</dd>
       <dt>resolver</dt><dd>agent tool default = <b>deny</b> (no org-owner override)</dd>
       <dt>policy</dt><dd>policy_v88 · deny_generation 41</dd>
@@ -1283,7 +1283,7 @@ function renderSteering(tab, arg){
   tab = tab || "published";
   DENY_CTX = { subj:"steering:read", page:"steering", noun:"steering in core-platform",
     line:"Steering records are workspace-scoped, and no grant reaches this workspace." };
-  crumbs([{t:"Acme Robotics",r:"#/acme"},{t:"core-platform",r:BASE},{t:"Steering",r:BASE+"/steering"}]
+  crumbs([{t:"Anderson Intelligence Corp.",r:"#/a-intel"},{t:"core-platform",r:BASE},{t:"Steering",r:BASE+"/steering"}]
     .concat(tab==="published"?[]:[{t:{proposals:"Proposals",prs:"Context PRs",retirement:"Retirement"}[tab]}])
     .concat(arg?[{t:arg}]:[]));
 
@@ -1293,7 +1293,7 @@ function renderSteering(tab, arg){
   const head = `
     <div class="phead">
       <div>
-        <p class="eyebrow">Workspace steering · acme/platform</p>
+        <p class="eyebrow">Workspace steering · a-intel/platform</p>
         <h1>Steering</h1>
         <p class="sub">Published records reach every run in this workspace as compiled steering in the
           signed bundle and as a volatile message on each model call. Git decides what is in force;
@@ -1313,9 +1313,9 @@ function renderSteering(tab, arg){
   else body = tabRetirement();
 
   const emptyCtx = {
-    published:{ t:"No published steering yet", p:"Nothing steers a run in core-platform. Records arrive here when a Context PR merges on <code>acme/platform</code>. The promoter opens one as soon as a candidate crosses this workspace's thresholds: 3 runs, 2 agents, confidence 0.70.", a:"Write a record", n:"0 records · bundle_v212 carries an empty context.system block" },
+    published:{ t:"No published steering yet", p:"Nothing steers a run in core-platform. Records arrive here when a Context PR merges on <code>a-intel/platform</code>. The promoter opens one as soon as a candidate crosses this workspace's thresholds: 3 runs, 2 agents, confidence 0.70.", a:"Write a record", n:"0 records · bundle_v212 carries an empty context.system block" },
     proposals:{ t:"No proposals on the table", p:"The promoter aggregates observations and memories after each run seals. When support crosses 3 runs across 2 agents with confidence above 0.70 and nothing active contradicts it, a proposal appears here.", n:"Last aggregation 2026-09-11 14:02 UTC · 0 candidates above threshold" },
-    prs:{ t:"No open Context PRs", p:"Every change to steering in this workspace is a pull request on <code>acme/platform</code> with the Oxagen checks attached. There are none open right now.", n:"4 merged in the last 30 days" },
+    prs:{ t:"No open Context PRs", p:"Every change to steering in this workspace is a pull request on <code>a-intel/platform</code> with the Oxagen checks attached. There are none open right now.", n:"4 merged in the last 30 days" },
     retirement:{ t:"Nothing is a retirement candidate", p:"A record becomes a candidate when it has been rendered for a full window without being cited, or when the proof rate fell after it was published. Every record in force is currently earning its tokens.", n:"7 records measured over 90 days" },
   }[tab];
 
@@ -1363,7 +1363,7 @@ function tabPublished(){
   const banner = S.pr === "merged" ? `
     <div class="call" style="margin-bottom:16px">${ic("spark")}
       <div class="tx"><b>ctx.core.openapi-regen-on-route-change is in force.</b>
-        Merged into <code>acme/platform@4c1f9ab</code> at 14:21:06 UTC, re-indexed from the merged commit,
+        Merged into <code>a-intel/platform@4c1f9ab</code> at 14:21:06 UTC, re-indexed from the merged commit,
         bundle bumped <span class="mono">bundle_v214 → bundle_v215</span>. Seven runs have started since,
         and the first of them shows it in the prompt.
         <a href="${BASE}/runs/${RUN.id}/4" style="color:var(--accent-text);font-weight:600">
@@ -1388,7 +1388,7 @@ function tabPublished(){
     </div></div>
   </div>
   <div class="panel"><div class="ph"><h3>Published records</h3><span class="sp"></span>
-    <span class="note">indexed from acme/platform@${S.pr==="merged"?"4c1f9ab":"e91b2d7"} · verified</span></div>
+    <span class="note">indexed from a-intel/platform@${S.pr==="merged"?"4c1f9ab":"e91b2d7"} · verified</span></div>
     <div class="tw"><table>
       <thead><tr><th>Statement</th><th>Kind</th><th>Scope</th><th>Effect · 90 days</th><th>Proof rate before → after</th></tr></thead>
       <tbody>${rows}</tbody></table></div>
@@ -1440,14 +1440,14 @@ function tabProposals(){
 
   return `<div class="note-i" style="margin-bottom:16px">
       A proposal steers nothing. It lives in <b>.oxagen/proposals/</b> and in the graph until a person merges a
-      Context PR on <b>acme/platform</b>. An agent may propose a directive; only a merge publishes one.
+      Context PR on <b>a-intel/platform</b>. An agent may propose a directive; only a merge publishes one.
     </div>` + list;
 }
 
 /* ── proposal detail ────────────────────────────────────────────────── */
 function renderProposal(id){
   const p = PROPOSALS.find(x => x.id === id) || PROPOSALS[0];
-  crumbs([{t:"Acme Robotics",r:"#/acme"},{t:"core-platform",r:BASE},
+  crumbs([{t:"Anderson Intelligence Corp.",r:"#/a-intel"},{t:"core-platform",r:BASE},
           {t:"Steering",r:BASE+"/steering"},{t:"Proposals",r:BASE+"/steering/proposals"},{t:p.lin}]);
 
   const support = p.support.length ? p.support.map(s => `<tr class="click" onclick="toast('Opens run ${s.run} at ${s.frame} — outside this flow.')">
@@ -1529,7 +1529,7 @@ function renderProposal(id){
       </div>
       <div class="panel"><div class="ph"><h3>If it publishes</h3></div><div class="pb">
         <dl class="kv">
-          <dt>reaches</dt><dd>every run in <b>core-platform</b> on acme/platform</dd>
+          <dt>reaches</dt><dd>every run in <b>core-platform</b> on a-intel/platform</dd>
           <dt>as</dt><dd>compiled steering in the bundle, a volatile message on each model call, and a <b>fact</b> context frame</dd>
           <dt>costs</dt><dd><b>59 steering tokens</b> a turn, measured on every model call</dd>
           <dt>measured by</dt><dd>rendered, cited, violated, and proof rate before and after</dd>
@@ -1596,7 +1596,7 @@ function tabRetirement(){
         <div style="flex:0 0 auto;display:flex;gap:8px">
           ${r.lin === "ctx.core.test-file-naming"
             ? `<a class="btn sm" href="${BASE}/steering/prs/407">${ic("pr")}Retirement PR #407 open</a>`
-            : `<button class="btn sm" onclick="toast('Opens a Context PR on acme/mobile setting status = archived on ${h(r.lin)}. Outside this flow.')">${ic("retire")}Open retirement PR</button>`}
+            : `<button class="btn sm" onclick="toast('Opens a Context PR on a-intel/mobile setting status = archived on ${h(r.lin)}. Outside this flow.')">${ic("retire")}Open retirement PR</button>`}
         </div>
       </div>
       <div class="effect" style="margin-top:14px;padding-top:13px;border-top:1px solid var(--border)">
@@ -1624,7 +1624,7 @@ function openContextPR(){
   S.checks = PR_CHECKS.map(c => ({ ...c, state:"queued" }));
   location.hash = BASE + "/steering/prs/412";
   runChecks("pr");
-  toast("Branch context/ctx.core.openapi-regen-on-route-change pushed. Pull request acme/platform#412 opened.");
+  toast("Branch context/ctx.core.openapi-regen-on-route-change pushed. Pull request a-intel/platform#412 opened.");
 }
 
 function runChecks(which){
@@ -1652,7 +1652,7 @@ function mergePR(){
 function mergeAgentPR(){
   S.agentPr = "merged";
   route();
-  toast("Merged. Principal created for acme.core.docs-writer. Status: unenrolled until credentials are issued.");
+  toast("Merged. Principal created for a-intel.core.docs-writer. Status: unenrolled until credentials are issued.");
 }
 
 function checkRow(c){
@@ -1676,15 +1676,15 @@ function diffLines(text){
 }
 
 function renderPR(num){
-  crumbs([{t:"Acme Robotics",r:"#/acme"},{t:"core-platform",r:BASE},{t:"Steering",r:BASE+"/steering"},
+  crumbs([{t:"Anderson Intelligence Corp.",r:"#/a-intel"},{t:"core-platform",r:BASE},{t:"Steering",r:BASE+"/steering"},
           {t:"Context PRs",r:BASE+"/steering/prs"},{t:"#"+num}]);
 
   if (num === "413") return renderAgentPR();
 
-  const stat = { "409":{repo:"acme/mobile", branch:"context/ctx.mobile.snapshot-baseline",
-      title:"Record the snapshot baseline convention for acme/mobile", by:"Oxagen promoter",
+  const stat = { "409":{repo:"a-intel/mobile", branch:"context/ctx.mobile.snapshot-baseline",
+      title:"Record the snapshot baseline convention for a-intel/mobile", by:"Oxagen promoter",
       opened:"2026-09-09 10:14 UTC", base:"main · 8d40c11", kind:"steering" },
-    "407":{repo:"acme/platform", branch:"context/ctx.core.test-file-naming",
+    "407":{repo:"a-intel/platform", branch:"context/ctx.core.test-file-naming",
       title:"Retire ctx.core.test-file-naming", by:"Marcus Bell",
       opened:"2026-09-08 17:40 UTC", base:"main · e91b2d7", kind:"retirement" } }[num];
 
@@ -1720,7 +1720,7 @@ function renderPR(num){
           <span class="sp"></span><span class="note">base main · e91b2d7</span></div>
         <div class="pb">
           <dl class="kv">
-            <dt>repository</dt><dd><b>acme/platform</b> — main repo of core-platform</dd>
+            <dt>repository</dt><dd><b>a-intel/platform</b> — main repo of core-platform</dd>
             <dt>head</dt><dd>4c1f9ab · 1 commit · 1 file changed, 47 insertions</dd>
             <dt>author</dt><dd>Oxagen promoter (service principal svc_promoter)</dd>
             <dt>one concern</dt><dd>1 record, 1 lineage — the checks refuse a second</dd>
@@ -1765,7 +1765,7 @@ function renderPR(num){
           <dt>lineage_id</dt><dd>${h(p.lin)}</dd>
           <dt>from → to</dt><dd>proposed <span style="color:var(--dim)">→</span> <b>published</b></dd>
           <dt>approver</dt><dd><b>Marcus Bell</b> · workspace owner, core-platform</dd>
-          <dt>pr_url</dt><dd>github.com/acme/platform/pull/412</dd>
+          <dt>pr_url</dt><dd>github.com/a-intel/platform/pull/412</dd>
           <dt>commit_sha</dt><dd>4c1f9ab</dd>
           <dt>merged_at</dt><dd>2026-09-11 14:21:06 UTC</dd>
           <dt>re-indexed</dt><dd>from the merged commit · record_hash verified against the file</dd>
@@ -1791,7 +1791,7 @@ function renderPR(num){
 
   $("#view").innerHTML = `
     <div class="phead"><div>
-      <p class="eyebrow">Context PR · acme/platform#412</p>
+      <p class="eyebrow">Context PR · a-intel/platform#412</p>
       <h1>${h(p.hero ? "Require a regenerated OpenAPI contract when a route changes" : p.lin)}</h1>
       <p class="sub">One concern, one record file, five checks. Opened by the promoter from four runs;
         merged by a person.</p>
@@ -1809,12 +1809,12 @@ lineage_id = "ctx.mobile.snapshot-baseline"
 kind = "knowledge"
 status = "active"
 statement = """
-Snapshot baselines for acme/mobile live in e2e/__snapshots__/ and are
+Snapshot baselines for a-intel/mobile live in e2e/__snapshots__/ and are
 regenerated only on a release branch, never on a feature branch.
 """
 
 [scope]
-repository_id = "repo_acme_mobile"
+repository_id = "repo_a-intel_mobile"
 sharing_scope = "repository"
 
 [steering]
@@ -1829,7 +1829,7 @@ record_hash = "sha256:41d0be7c9a2f…"`);
         <div class="ph">${ic("branch")}<h3 class="mono" style="font-weight:500;font-size:12.5px">${h(m.branch)}</h3>
           <span class="sp"></span><span class="note">base ${h(m.base)}</span></div>
         <div class="pb"><dl class="kv">
-          <dt>repository</dt><dd><b>${h(m.repo)}</b>${m.repo==="acme/mobile"?" — linked repo; repository-scoped records live here":" — main repo"}</dd>
+          <dt>repository</dt><dd><b>${h(m.repo)}</b>${m.repo==="a-intel/mobile"?" — linked repo; repository-scoped records live here":" — main repo"}</dd>
           <dt>author</dt><dd>${h(m.by)}</dd>
           <dt>opened</dt><dd>${h(m.opened)}</dd>
           <dt>kind</dt><dd>${isRetire?"retirement — status set to archived in place, file never deleted":"new record"}</dd>
@@ -1850,7 +1850,7 @@ record_hash = "sha256:41d0be7c9a2f…"`);
         <div class="mergebar">
           <div style="flex:1"><div class="ttl">Awaiting code-owner review</div>
             <div class="ds">Governance <b>team</b>. Requested from Marcus Bell ${isRetire?"3 days":"2 days"} ago.</div></div>
-          <button class="btn" onclick="toast('Reviewing #${num} is outside this flow — W6 follows acme/platform#412 end to end.')">${ic("arrow")}Review</button>
+          <button class="btn" onclick="toast('Reviewing #${num} is outside this flow — W6 follows a-intel/platform#412 end to end.')">${ic("arrow")}Review</button>
         </div>
       </div>
     </div>
@@ -1859,7 +1859,7 @@ record_hash = "sha256:41d0be7c9a2f…"`);
   $("#view").innerHTML = `
     <div class="phead"><div>
       <p class="eyebrow">Context PR · ${h(m.repo)}#${num}</p><h1>${h(m.title)}</h1>
-      <p class="sub">${isRetire?"A retirement is a Context PR like any other: it sets status to archived in place.":"A repository-scoped record. It steers only runs bound to acme/mobile, and it may narrow what workspace records allow, never widen it."}</p>
+      <p class="sub">${isRetire?"A retirement is a Context PR like any other: it sets status to archived in place.":"A repository-scoped record. It steers only runs bound to a-intel/mobile, and it may narrow what workspace records allow, never widen it."}</p>
     </div><div class="phead-a"><a class="btn" href="${BASE}/steering/prs">${ic("arrow")}All Context PRs</a></div></div>`
     + wrapState(body, {t:"That pull request is gone",p:"It was closed or the branch was deleted."});
 }
@@ -1889,7 +1889,7 @@ function renderAgentPR(){
         <h3 class="mono" style="font-weight:500;font-size:12.5px">agents/docs-writer</h3>
         <span class="sp"></span><span class="note">base main · ${S.pr==="merged"?"4c1f9ab":"e91b2d7"}</span></div>
         <div class="pb"><dl class="kv">
-          <dt>repository</dt><dd><b>acme/platform</b> — main repo of core-platform</dd>
+          <dt>repository</dt><dd><b>a-intel/platform</b> — main repo of core-platform</dd>
           <dt>changed</dt><dd>2 files · the canonical definition and the harness file generated beside it</dd>
           <dt>author</dt><dd><b>Marcus Bell</b> — created in Mission Control, committed by Oxagen</dd>
           <dt>rule</dt><dd>the canonical file is the only one a person or an agent edits; a pull request that
@@ -1924,22 +1924,22 @@ function renderAgentPR(){
       </div>
       <div class="panel"><div class="ph"><h3>${merged?"What the merge did":"What merge will do"}</h3></div><div class="pb">
         <dl class="kv">
-          <dt>1</dt><dd>create principal <b>prn_01K52K0M7D</b>, agent key <b>acme.core.docs-writer</b>, immutable</dd>
+          <dt>1</dt><dd>create principal <b>prn_01K52K0M7D</b>, agent key <b>a-intel.core.docs-writer</b>, immutable</dd>
           <dt>2</dt><dd>record <b>definition_digest</b> sha256:71ad3e0c… — the version every run of this agent reports</dd>
           <dt>3</dt><dd>materialize the toolbelt from the definition ∩ grants ∩ the delegation ceiling</dd>
           <dt>4</dt><dd>set status <b>unenrolled</b> — identity exists, no credential has been issued</dd>
-          <dt>5</dt><dd>the next time Marcus opens Claude Code in acme/platform, the agent is there</dd>
+          <dt>5</dt><dd>the next time Marcus opens Claude Code in a-intel/platform, the agent is there</dd>
         </dl>
         ${merged?`<a class="btn gold" style="width:100%;justify-content:center;margin-top:14px"
-          href="${BASE}/agents/docs-writer">${ic("agents")}Open acme.core.docs-writer</a>`:""}
+          href="${BASE}/agents/docs-writer">${ic("agents")}Open a-intel.core.docs-writer</a>`:""}
       </div></div>
     </div>
   </div>`;
 
   $("#view").innerHTML = `
     <div class="phead"><div>
-      <p class="eyebrow">Context PR · acme/platform#413</p>
-      <h1>Add agent acme.core.docs-writer</h1>
+      <p class="eyebrow">Context PR · a-intel/platform#413</p>
+      <h1>Add agent a-intel.core.docs-writer</h1>
       <p class="sub">An agent has two halves. Its identity lives in Postgres and must be revocable in one second.
         Its definition is a file in the main repo. Creating one in Mission Control does not write Postgres first —
         it opens a pull request.</p>
@@ -1951,14 +1951,14 @@ function openAgentDialog(){
   overlay(`<div class="dlg wide" role="dialog" aria-modal="true" aria-label="New agent">
     <div class="dlg-h">
       <div style="flex:1"><h3>New agent in core-platform</h3>
-        <div class="s">This opens a Context PR on <b>acme/platform</b>. Nothing is created until it merges.</div></div>
+        <div class="s">This opens a Context PR on <b>a-intel/platform</b>. Nothing is created until it merges.</div></div>
       <button class="tbtn" onclick="closeOverlay()" aria-label="Close">${ic("x")}</button>
     </div>
     <div class="dlg-b">
       <div class="grid2">
         <div class="field"><label>Slug — becomes the file name and the agent key</label>
           <input class="inp" value="docs-writer" readonly>
-          <div class="hint">Agent key <code>acme.core.docs-writer</code>, immutable once merged.</div></div>
+          <div class="hint">Agent key <code>a-intel.core.docs-writer</code>, immutable once merged.</div></div>
         <div class="field"><label>Name</label><input class="inp" style="font-family:var(--font)" value="Docs writer" readonly></div>
       </div>
       <div class="field"><label>Description</label>
@@ -2009,7 +2009,7 @@ function submitAgent(){
   S.agentChecks = AGENT_CHECKS.map(c => ({ ...c, state:"queued" }));
   location.hash = BASE + "/steering/prs/413";
   runChecks("agent");
-  toast("Branch agents/docs-writer pushed with 2 files. Pull request acme/platform#413 opened.");
+  toast("Branch agents/docs-writer pushed with 2 files. Pull request a-intel/platform#413 opened.");
 }
 </script>
 
@@ -2023,7 +2023,7 @@ function renderAgents(arg){
   DENY_CTX = { subj:"agent:read", page:"agents", noun:"agents in core-platform",
     line:"Agent identity is workspace-scoped, and no grant reaches this workspace." };
   if (arg === "docs-writer") return renderDocsWriter();
-  crumbs([{t:"Acme Robotics",r:"#/acme"},{t:"core-platform",r:BASE},{t:"Agents"}]);
+  crumbs([{t:"Anderson Intelligence Corp.",r:"#/a-intel"},{t:"core-platform",r:BASE},{t:"Agents"}]);
 
   const dw = S.agentPr === "none" ? null : {
     key:DOCS_WRITER.key, name:DOCS_WRITER.name, harness:DOCS_WRITER.harness,
@@ -2043,7 +2043,7 @@ function renderAgents(arg){
         <div class="t2">${h(a.name)} · operator ${h(a.op)}</div></td>
       <td class="mono" style="font-size:11.5px;color:var(--muted)">${h(a.harness)}</td>
       <td><span class="b ${st} dot">${h(a.status)}</span>
-        ${a.status==="pending merge"?`<div class="t2 mono" style="font-size:11px">acme/platform#413</div>`:""}
+        ${a.status==="pending merge"?`<div class="t2 mono" style="font-size:11px">a-intel/platform#413</div>`:""}
         ${a.status==="unenrolled"?`<div class="t2" style="font-size:11px">identity exists · no credential issued</div>`:""}</td>
       <td class="mono" style="font-size:11.5px;color:var(--muted)">${h(a.tier)}</td>
       <td class="num">${a.tools}</td>
@@ -2055,12 +2055,12 @@ function renderAgents(arg){
 
   const body = `
   ${S.agentPr === "merged" ? `<div class="call" style="margin-bottom:16px">${ic("agents")}<div class="tx">
-      <b>acme.core.docs-writer exists and is unenrolled.</b> The merge of acme/platform#413 created the principal,
+      <b>a-intel.core.docs-writer exists and is unenrolled.</b> The merge of a-intel/platform#413 created the principal,
       the roles the definition asked for and the toolbelt. It stays <span class="mono">unenrolled</span> until a
       credential is issued — an identity with no way to run.
       <a href="${BASE}/agents/docs-writer" style="color:var(--accent-text);font-weight:600">Open it ${ic("arrow","ni")}</a></div></div>`
     : S.agentPr !== "none" ? `<div class="call" style="margin-bottom:16px">${ic("pr")}<div class="tx">
-      <b>acme.core.docs-writer is not created yet.</b> Its definition is waiting in acme/platform#413.
+      <b>a-intel.core.docs-writer is not created yet.</b> Its definition is waiting in a-intel/platform#413.
       Nothing was written to Postgres.
       <a href="${BASE}/steering/prs/413" style="color:var(--accent-text);font-weight:600">Open the pull request ${ic("arrow","ni")}</a></div></div>` : ""}
 
@@ -2090,22 +2090,22 @@ function renderAgents(arg){
 }
 
 function renderDocsWriter(){
-  DENY_CTX = { subj:"agent:read", page:"agents", noun:"acme.core.docs-writer",
+  DENY_CTX = { subj:"agent:read", page:"agents", noun:"a-intel.core.docs-writer",
     line:"Agent identity is workspace-scoped, and no grant reaches core-platform." };
-  crumbs([{t:"Acme Robotics",r:"#/acme"},{t:"core-platform",r:BASE},{t:"Agents",r:BASE+"/agents"},{t:"acme.core.docs-writer"}]);
+  crumbs([{t:"Anderson Intelligence Corp.",r:"#/a-intel"},{t:"core-platform",r:BASE},{t:"Agents",r:BASE+"/agents"},{t:"a-intel.core.docs-writer"}]);
   const body = `
   <div class="split">
     <div>
       <div class="panel"><div class="ph"><h3>Identity</h3><span class="sp"></span>
         <span class="b approval dot lg">unenrolled</span></div>
         <div class="pb"><dl class="kv">
-          <dt>agent_key</dt><dd><b>acme.core.docs-writer</b> — immutable</dd>
+          <dt>agent_key</dt><dd><b>a-intel.core.docs-writer</b> — immutable</dd>
           <dt>principal_id</dt><dd>prn_01K52K0M7D · kind agent</dd>
           <dt>workspace</dt><dd>ws_core_platform</dd>
           <dt>harness</dt><dd>claude-agent-sdk · wrapped with <b>oxagen.agent.wrap({})</b></dd>
           <dt>operator</dt><dd><b>Marcus Bell</b> — accountable for every run</dd>
           <dt>credential</dt><dd><b>none issued</b> — the agent cannot start a run</dd>
-          <dt>created by</dt><dd>merge of acme/platform#413 at 2026-09-11 14:44:18 UTC</dd>
+          <dt>created by</dt><dd>merge of a-intel/platform#413 at 2026-09-11 14:44:18 UTC</dd>
           <dt>definition</dt><dd>.oxagen/agents/docs-writer.toml @ 9e2b7f4</dd>
           <dt>definition_digest</dt><dd>sha256:71ad3e0c9b4f2265d81a03ce7fb5904e18cc22d7a6390bbf4e0d1c8a75326fd1</dd>
         </dl></div>
@@ -2151,11 +2151,11 @@ function renderDocsWriter(){
 
   $("#view").innerHTML = `
     <div class="phead"><div>
-      <p class="eyebrow">Agent · created by merge</p><h1>acme.core.docs-writer</h1>
+      <p class="eyebrow">Agent · created by merge</p><h1>a-intel.core.docs-writer</h1>
       <p class="sub">Docs writer. Defined in the main repo, identified in the control plane, and not yet able to run.</p>
     </div><div class="phead-a"><a class="btn" href="${BASE}/agents">${ic("arrow")}Agents</a>
       <a class="btn" href="${BASE}/steering/prs/413">${ic("pr")}#413</a></div></div>`
-    + wrapState(body, {t:"No agent here", p:"acme.core.docs-writer does not exist. Its definition has not merged."});
+    + wrapState(body, {t:"No agent here", p:"a-intel.core.docs-writer does not exist. Its definition has not merged."});
 }
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -2165,7 +2165,7 @@ function renderRun(sel){
   DENY_CTX = { subj:"run:read", page:"run", noun:"run_01K52JN4D8",
     line:"A run is readable by its operator and by anyone holding run:read in its workspace." };
   const seq = Number(sel ?? 4);
-  crumbs([{t:"Acme Robotics",r:"#/acme"},{t:"core-platform",r:BASE},{t:"Fleet",r:BASE},{t:RUN.id}]);
+  crumbs([{t:"Anderson Intelligence Corp.",r:"#/a-intel"},{t:"core-platform",r:BASE},{t:"Fleet",r:BASE},{t:RUN.id}]);
   const live = S.pr === "merged";
 
   const frameList = FRAMES.map(f => `
@@ -2198,9 +2198,9 @@ function renderRun(sel){
   ${live ? `<div class="call" style="margin-bottom:16px">${ic("spark")}<div class="tx">
     <b>Frame 4 carries a record that did not exist an hour ago.</b> The steering block on this run's first model
     call has four records where <span class="mono">bundle_v214</span> had three. The fourth arrived when
-    Marcus Bell merged acme/platform#412 at 14:21:06 UTC, fifteen minutes before this run started.</div></div>`
+    Marcus Bell merged a-intel/platform#412 at 14:21:06 UTC, fifteen minutes before this run started.</div></div>`
    : `<div class="note-i" style="margin-bottom:16px">This run is on <b>bundle_v214</b>. Merge
-      <a href="${BASE}/steering/prs/412" style="color:var(--accent-text)">acme/platform#412</a> and come back:
+      <a href="${BASE}/steering/prs/412" style="color:var(--accent-text)">a-intel/platform#412</a> and come back:
       the steering block on frame 4 gains a record.</div>`}
 
   <div class="split rev">
@@ -2264,7 +2264,7 @@ function frame4(live){
         <p class="eyebrow">Context frames · 5 · 4,182 tokens</p>
         <dl class="kv">
           <dt>cf_openapi_conventions</dt><dd>fact · from record ctx.core.openapi-regen-on-route-change · valid_from 14:21:06 UTC · 412 tok</dd>
-          <dt>cf_release_checklist</dt><dd>knowledge · acme/platform@4c1f9ab · 980 tok</dd>
+          <dt>cf_release_checklist</dt><dd>knowledge · a-intel/platform@4c1f9ab · 980 tok</dd>
           <dt>cf_changelog_headings</dt><dd>fact · from record ctx.core.changelog-keepachangelog · 244 tok</dd>
           <dt>cf_pr_3391_body</dt><dd>evidence · github__get_issue@2 output digest sha256:b7e0… · 1,806 tok</dd>
           <dt>cf_last_release</dt><dd>memory · run_01K4RC9ZH1 · 740 tok</dd>
@@ -2297,8 +2297,8 @@ function frameOther(seq){
   const bodies = {
     0:[["bundle","bundle_v215 · signed 14:21:09 UTC"],["enforcement tier","gateway — model proxy and tool gateway both routed"],
        ["toolbelt","18 tool versions · full belt (limit 40 tools / 12k tokens)"],["agent version","definition_digest sha256:5b31ac7e…"],
-       ["authorization snapshot","authz_01K52JN4F2 · policy_v88 · deny_generation 41"],["repository","acme/platform @ 4c1f9ab"]],
-    1:[["producer","host device key ed25519:9f13c0…"],["countersigned","Oxagen attester key ak_acme_03 at ingest"],
+       ["authorization snapshot","authz_01K52JN4F2 · policy_v88 · deny_generation 41"],["repository","a-intel/platform @ 4c1f9ab"]],
+    1:[["producer","host device key ed25519:9f13c0…"],["countersigned","Oxagen attester key ak_a-intel_03 at ingest"],
        ["covers","frames 0–1"],["note","Oxagen attests receipt and chain integrity, not the truth of client-attested content."]],
     2:[["issuer","Marcus Bell · operator"],["prompt","cut release 2026.9.2"],["turn","1 of 1"]],
     3:[["budget","6,000 tokens"],["used","4,182 tokens across 5 context frames"],
@@ -2318,7 +2318,7 @@ function frameOther(seq){
         ["why it ran","the agent read ctx.core.openapi-regen-on-route-change in the steering block at frame 4"],
         ["receipt","rcp_01K52JP4C0 · client-attested, countersigned"]],
     12:[["model","claude-opus-5"],["cache_read","26,980"]],
-    13:[["stop_reason","end_turn"],["output","1,024 tokens"],["result","release notes and the regenerated contract in one pull request: acme/platform#3392"],
+    13:[["stop_reason","end_turn"],["output","1,024 tokens"],["result","release notes and the regenerated contract in one pull request: a-intel/platform#3392"],
         ["cost","$0.1402 USD"]],
   }[seq] || [["kind",f.kind]];
 
@@ -2349,7 +2349,7 @@ const STUB = {
 };
 function renderStub(page){
   const [t,d,w] = STUB[page] || ["Fleet", STUB.fleet[1], "W1, W2"];
-  crumbs([{t:"Acme Robotics",r:"#/acme"},{t:"core-platform",r:BASE},{t}]);
+  crumbs([{t:"Anderson Intelligence Corp.",r:"#/a-intel"},{t:"core-platform",r:BASE},{t}]);
   $("#view").innerHTML = `<div class="phead"><div><p class="eyebrow">Workspace</p><h1>${h(t)}</h1>
     <p class="sub">${h(d)}</p></div></div>
     <div class="blank"><div class="ic">${ic("arrow")}</div>
@@ -2361,8 +2361,8 @@ function renderStub(page){
 function renderOrgStub(which){
   const t = which === "billing" ? "Billing" : which === "audit" ? "Audit" : "Organization";
   const w = which === "billing" ? "W8" : "W10";
-  crumbs([{t:"Acme Robotics",r:"#/acme"},{t}]);
-  $("#view").innerHTML = `<div class="phead"><div><p class="eyebrow">Organization · acme</p><h1>${h(t)}</h1></div></div>
+  crumbs([{t:"Anderson Intelligence Corp.",r:"#/a-intel"},{t}]);
+  $("#view").innerHTML = `<div class="phead"><div><p class="eyebrow">Organization · a-intel</p><h1>${h(t)}</h1></div></div>
     <div class="blank"><div class="ic">${ic("arrow")}</div><h3>Mocked in another flow</h3>
       <p>Organization-scope pages are covered by scenario <b>${h(w)}</b>.</p>
       <a class="btn gold" href="${BASE}/steering">${ic("steering")}Back to Steering</a></div>`;
@@ -2397,8 +2397,8 @@ const CMDS = [
   { g:"Actions", t:"New agent in core-platform", s:"run",
     a:() => { closeOverlay(); if (S.agentPr === "none") openAgentDialog(); else location.hash = BASE+"/steering/prs/413"; }, i:"plus" },
   { g:"Runs", t:"run_01K52JN4D8 — Release 2026.9.2", s:"go", r:BASE+"/runs/"+RUN.id+"/4", i:"run" },
-  { g:"Agents", t:"acme.core.release-manager", s:"go", r:BASE+"/agents", i:"agents" },
-  { g:"Agents", t:"acme.core.docs-writer", s:"go", r:BASE+"/agents/docs-writer", i:"agents" },
+  { g:"Agents", t:"a-intel.core.release-manager", s:"go", r:BASE+"/agents", i:"agents" },
+  { g:"Agents", t:"a-intel.core.docs-writer", s:"go", r:BASE+"/agents/docs-writer", i:"agents" },
   { g:"Ask the assistant", t:"Why did this rule change?", s:"ask",
     a:() => { closeOverlay(); S.asst = true; renderAsst(); }, i:"spark" },
 ];
@@ -2452,12 +2452,12 @@ function renderAsst(){
       <div class="msg a"><div class="who">Oxagen</div>
         <p>${merged
           ? `<b>ctx.core.openapi-regen-on-route-change</b> was published 15 minutes ago. The promoter raised it after
-             four runs on <b>acme/platform</b> left <code>packages/contracts/openapi.json</code> stale; three of them
+             four runs on <b>a-intel/platform</b> left <code>packages/contracts/openapi.json</code> stale; three of them
              failed the <b>contract-drift</b> witness on the pull request and passed on <code>main</code>.`
           : `Nothing has changed yet. The promoter has a proposal ready —
              <b>ctx.core.openapi-regen-on-route-change</b>, from four runs across two agents — and it steers nothing
-             until a Context PR merges on <b>acme/platform</b>.`}</p>
-        <p>Marcus Bell merged <b>acme/platform#412</b>${merged?` at 14:21:06 UTC`:``}. ${merged
+             until a Context PR merges on <b>a-intel/platform</b>.`}</p>
+        <p>Marcus Bell merged <b>a-intel/platform#412</b>${merged?` at 14:21:06 UTC`:``}. ${merged
           ? `That wrote a <code>promotion_event</code>, re-indexed the record from the merged commit and bumped the
              bundle to <b>bundle_v215</b>.` : `Five checks are attached: schema, hash, conflicts, secrets, probes.`}</p>
         <p>I cannot publish a directive. Only a merge can.</p>

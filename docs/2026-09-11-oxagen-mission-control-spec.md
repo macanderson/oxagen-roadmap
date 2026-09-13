@@ -490,7 +490,7 @@ Three things that are easy to confuse are kept apart, in the code and in the int
 
 ```json
 {
-  "mandate_id": "mnd_…", "agent": "acme.finops.invoice-bot", "granted_by": "usr_…", "role_at_grant": "org.billing",
+  "mandate_id": "mnd_…", "agent": "a-intel.finops.invoice-bot", "granted_by": "usr_…", "role_at_grant": "org.billing",
   "consequence_tags": ["moves_money"],
   "limits": {
     "amount": { "per_call": 250000000, "per_period": 2000000000, "currency": "USD", "period": "monthly" },
@@ -2048,7 +2048,7 @@ Every organization has its own database (§5.3). Every node and relationship car
 {
   "v": "oxagen.frame/1.0",
   "event_id": "01J9…",
-  "agent": { "agent_id": "acme.core.stella-ci", "fleet_id": "wrk_…", "runtime": "stella", "wrapper_version": "1.0.0" },
+  "agent": { "agent_id": "a-intel.core.stella-ci", "fleet_id": "wrk_…", "runtime": "stella", "wrapper_version": "1.0.0" },
   "run_id": "run_…", "attempt_id": "arat_…", "seq": 42,
   "ts": "2026-09-11T14:03:22.118Z",
   "kind": "model.response",
@@ -2089,7 +2089,7 @@ Every organization has its own database (§5.3). Every node and relationship car
   "role": "agent.contributor",
   "grants": [
     { "subject_kind": "tool", "subject": "github:*@*", "effect": "allow",
-      "resource_scope": { "side_effects": ["read", "write"], "repositories": ["acme/platform"] } },
+      "resource_scope": { "side_effects": ["read", "write"], "repositories": ["a-intel/platform"] } },
     { "subject_kind": "tool", "subject": "github:merge_pull_request@*", "effect": "require_approval" },
     { "subject_kind": "tool", "subject": "github:delete_*@*", "effect": "deny" },
     { "subject_kind": "capability", "subject": "recall_context", "effect": "allow",
