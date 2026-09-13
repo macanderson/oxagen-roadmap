@@ -13,6 +13,7 @@
   --fk-model:#3987E5; --fk-tool:#D95926; --fk-gov:#199E70; --fk-ctx:#9085E9; --fk-op:#D55181; --k-constraint:#D677B5; --k-procedure:#A6B95E; --k-fact:#5CB5D6; --k-memory:#94A3C2; --k-preference:#D08FA0;
   --shadow:0 1px 0 rgba(255,255,255,.03),0 18px 44px rgba(0,0,0,.5);
   --shadow-sm:0 1px 2px rgba(0,0,0,.4);
+  --side-w:236px;
   --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
   --font:"Space Grotesk","Helvetica Neue",Arial,sans-serif;
 }
@@ -62,11 +63,11 @@ p{margin:0 0 10px;color:var(--body)}
 /* ---------- app frame ---------- */
 #viewport{min-height:100vh;background:var(--ink)}
 #viewport.phone{max-width:400px;margin:0 auto;border-left:1px solid var(--rule);border-right:1px solid var(--rule);min-height:100vh}
-.app{display:grid;grid-template-columns:236px 1fr;min-height:100vh}
+.app{display:grid;grid-template-columns:var(--side-w) 1fr;min-height:100vh}
 #viewport.phone .app{grid-template-columns:minmax(0,1fr)}
 
 /* ---------- sidebar ---------- */
-.side{background:var(--void);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
+.side{background:var(--void);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;z-index:55}
 #viewport.phone .side{display:none}
 #viewport.phone .side.open{display:flex;position:fixed;z-index:80;width:250px;height:100vh;box-shadow:var(--shadow)}
 .side-top{padding:16px 14px 12px;border-bottom:1px solid var(--border)}
@@ -411,25 +412,52 @@ tbody tr.click.flipped:hover{background:linear-gradient(90deg,color-mix(in srgb,
 .b-flip .fx i{font-style:normal;color:var(--st-failed)}.b-flip .fx em{font-style:normal;color:var(--st-proven)}
 .flipsub{font-family:var(--mono);font-size:10.5px;color:var(--dim);margin-top:3px;white-space:nowrap}
 
-/* ---------- assistant: a bottom dock, not a side panel ----------
-   The in-app agent is one reach away on every page. The bottom edge is the
-   thumb's edge on a phone and a persistent bar on a desktop, and the dock is
-   never the subject of the page it sits under. .page already reserves 80px of
-   bottom padding, which clears the 56px bar. */
-.asst{position:fixed;left:0;right:0;bottom:0;top:auto;width:auto;background:var(--void);border-top:1px solid var(--border);
-  z-index:60;display:flex;flex-direction:column;box-shadow:var(--shadow);padding-bottom:env(safe-area-inset-bottom)}
-#viewport.phone .asst{width:100%;max-width:400px;left:50%;right:auto;transform:translateX(-50%);
-  border-left:1px solid var(--rule);border-right:1px solid var(--rule)}
-.asst-in{max-width:1500px;margin:0 auto;width:100%}
-.asst-bar{display:flex;gap:9px;align-items:center;padding:9px 14px;min-height:56px}
+/* ---------- assistant: a flyout from the sidebar ----------
+   The in-app agent belongs to the workspace rail, so it leaves from there.
+   The launcher sits at the foot of the sidebar and the panel slides out of
+   the rail's right edge, tucked fully behind it when closed (.side paints at
+   z-index 55, the panel at 50). It overlays the page instead of reflowing it:
+   an operator opens the agent to ask about what is already on screen, so the
+   screen must not move underneath them.
+   The host div (#asst, next to #layer) is permanent and render() only rewrites
+   its contents when the engine state changes - that is what lets the CSS
+   transition survive a re-render, and what keeps a half-typed message alive. */
+.asst{position:fixed;top:0;bottom:0;left:var(--side-w);width:min(430px,calc(100vw - var(--side-w) - 56px));
+  background:var(--panel);border-right:1px solid var(--border);z-index:50;display:flex;flex-direction:column;
+  box-shadow:18px 0 44px rgba(0,0,0,.44);padding-bottom:env(safe-area-inset-bottom);
+  translate:-100% 0;opacity:0;visibility:hidden;
+  transition:translate .34s cubic-bezier(.32,.72,0,1),opacity .18s ease,visibility 0s .34s}
+.asst.open{translate:0 0;opacity:1;visibility:visible;
+  transition:translate .34s cubic-bezier(.32,.72,0,1),opacity .18s ease,visibility 0s 0s}
+/* on a phone the rail is itself a left drawer, so the panel flies in over the
+   whole column; translate composes with the centring transform, not over it */
+.asst.phone{left:50%;width:100%;max-width:400px;transform:translateX(-50%);
+  border-left:1px solid var(--rule);border-right:1px solid var(--rule);box-shadow:var(--shadow)}
+@media(prefers-reduced-motion:reduce){
+  .asst{translate:0 0;transition:opacity .12s ease,visibility 0s .12s}
+  .asst.open{translate:0 0;transition:opacity .12s ease,visibility 0s 0s}
+}
+/* the launcher at the foot of the rail - the point the panel flies out of */
+.asst-launch{width:100%;display:flex;align-items:center;gap:9px;padding:7px 9px;margin-bottom:9px;
+  border:1px solid var(--border);border-radius:10px;background:var(--panel);color:var(--muted);
+  text-align:left;transition:border-color .15s,color .15s}
+.asst-launch:hover{border-color:var(--rule);color:var(--fg)}
+.asst-launch[aria-expanded="true"]{border-color:var(--gold)}
+.asst-launch .tx{min-width:0;flex:1}
+.asst-launch .tx b{display:block;font-size:12.5px;font-weight:600;color:var(--fg)}
+.asst-launch .tx span{display:block;font-size:10.5px;color:var(--dim);font-family:var(--mono);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.asst-launch .tx span.down{color:var(--st-failed)}
+.asst-launch .cv{flex:none;color:var(--dim);display:grid;place-items:center;
+  transition:transform .3s cubic-bezier(.32,.72,0,1)}
+.asst-launch[aria-expanded="true"] .cv{transform:rotate(180deg);color:var(--gold)}
+@media(prefers-reduced-motion:reduce){.asst-launch .cv{transition:none}}
 .asst-g{width:28px;height:28px;border-radius:9px;flex:none;display:grid;place-items:center;background:var(--gold);color:var(--on-gold)}
-.asst-open{flex:1;min-width:0;border:1px solid var(--border);border-radius:9px;background:var(--panel);padding:7px 11px;
-  font-size:13px;color:var(--muted);display:flex;gap:8px;align-items:center;text-align:left;cursor:pointer}
-.asst-open>span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.asst-launch .asst-g{width:24px;height:24px;border-radius:7px}
 .asst-k{font-family:var(--mono);font-size:10px;border:1px solid var(--border);border-radius:5px;padding:0 5px;color:var(--dim);flex:none}
-.asst-h{padding:12px 15px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
-.asst-b{max-height:50vh;overflow-y:auto;padding:15px}
-.asst-f{border-top:1px solid var(--border);padding:11px 13px}
+.asst-h{padding:12px 15px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex:none}
+.asst-b{flex:1;min-height:0;overflow-y:auto;padding:15px}
+.asst-f{border-top:1px solid var(--border);padding:11px 13px;flex:none}
 .asst-f .box{background:var(--ink);border:1px solid var(--border);border-radius:10px;padding:9px 11px;display:flex;gap:9px;align-items:flex-end}
 .asst-f textarea{flex:1;background:none;border:0;resize:none;outline:none;font-size:13px;line-height:1.5;min-height:38px;color:var(--fg)}
 .msg{margin-bottom:16px;font-size:13px;line-height:1.6}
@@ -635,7 +663,7 @@ a.inv-i:hover{border-color:var(--rule);text-decoration:none}
 
 /* ---------- mockup chrome (never product UI) ---------- */
 /* sits above the in-app agent dock, which owns the bottom edge */
-#chrome{position:fixed;right:12px;bottom:68px;z-index:200;font-family:var(--mono);font-size:11px}
+#chrome{position:fixed;right:12px;bottom:12px;z-index:200;font-family:var(--mono);font-size:11px}
 #chrome .cbar{background:#0A0A09;border:1px solid #34322D;border-radius:10px;padding:7px;display:flex;gap:5px;align-items:center;box-shadow:0 8px 30px rgba(0,0,0,.6);flex-wrap:wrap;max-width:min(92vw,660px);color:#9B958A}
 #chrome .lab{color:#6E6A62;letter-spacing:.08em;text-transform:uppercase;font-size:9.5px;padding:0 3px}
 #chrome button{background:#181715;border:1px solid #292722;color:#9B958A;border-radius:6px;padding:3px 8px;font-family:inherit;font-size:11px}
@@ -1317,6 +1345,7 @@ button.edge:hover{color:var(--fg)}
 
 <div id="viewport"><div id="app"></div></div>
 <div id="layer"></div>
+<div id="asst" class="asst" role="complementary" aria-label="In-app agent" aria-hidden="true" inert></div>
 <div id="toast" role="status" aria-live="polite"></div>
 <div id="chrome">
   <div class="cbar">
@@ -3361,6 +3390,11 @@ function sidebar(r){
    item("billing","Billing","#/"+ORG.slug+"/billing")+
    item("audit","Audit","#/"+ORG.slug+"/audit",1,true)+
    '</nav><div class="side-foot">'+
+   '<button class="asst-launch" onclick="asstToggle()" aria-controls="asst" aria-expanded="'+(S.asst?"true":"false")+'">'+
+    '<span class="asst-g">'+icon("assistant")+'</span>'+
+    '<span class="tx"><b>Assistant</b>'+
+     (S.asstEngine==="down"?'<span class="down">engine down</span>':'<span>glm-flash · ready</span>')+'</span>'+
+    '<span class="cv">'+"<svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.9\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M9 6l6 6-6 6\"/></svg>"+'</span></button>'+
    '<div class="row" style="justify-content:space-between;padding:0 4px"><span class="mono dim" style="font-size:10.5px">50 agents · '+ORG.dataPlane+' plane</span>'+
    '<span class="b b-allowed" style="font-size:10px"><span class="d"></span>gateway</span></div></div></aside>';
 }
@@ -3401,7 +3435,7 @@ function topbar(r){
    '<button class="iconbtn" onclick="openDialog(\'notifs\')" aria-label="Notifications, '+notifUnread()+' unread">'+
      '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 8-3 8h18s-3-1-3-8"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>'+
      (notifUnread()?'<span class="dot"></span>':'')+'</button>'+
-   '<button class="iconbtn" onclick="S.asst=!S.asst;render()" aria-pressed="'+(S.asst?"true":"false")+'" aria-label="Assistant">'+
+   '<button class="iconbtn" onclick="asstToggle()" aria-pressed="'+(S.asst?"true":"false")+'" aria-label="Assistant">'+
      '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3l1.8 4.7L18.5 9.5 13.8 11.3 12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M18.5 16.5 19.4 19l2.5.9-2.5.9-.9 2.5-.9-2.5-2.5-.9 2.5-.9z"/></svg></button>'+
    '<div class="rel"><button class="iconbtn" onclick="toggleLayer(\'user\')" aria-label="Account" style="padding:0;border-radius:50%;overflow:hidden">'+personAv("marcus",30)+'</button>'+
      (S.layer==="user"?userMenu():'')+'</div>'+
@@ -3841,7 +3875,7 @@ function runSeries(R){
   return {n:n,cost:cost,cache:cache,steps:steps,model:model,tool:tool,adv:adv,idle:idle,peak:peak,cacheAvg:cacheAvg,
     saved:total*cacheAvg*0.9*0.55, perTurn:total/n, modelN:model.reduce(function(a,b){return a+b;},0), toolN:tool.reduce(function(a,b){return a+b;},0)};
 }
-function tsec(t){var p=String(t).split(":");return (+p[0])*3600+(+p[1])*60+parseFloat(p[2]||0);}
+function frameSec(t){var p=String(t).split(":");return (+p[0])*3600+(+p[1])*60+parseFloat(p[2]||0);}
 /* hover layer: one tooltip node, text only, same content on focus */
 function tipAttr(s){return ' data-tip="'+h(s)+'" onmouseenter="rtTip(this,event)" onmousemove="rtTip(this,event)" onmouseleave="rtTipHide()" onfocus="rtTip(this)" onblur="rtTipHide()"';}
 function rtTip(node,ev){
@@ -3891,8 +3925,8 @@ function runInstruments(R){
   '</div>';
 }
 function runTimeline(R){
-  var fr=FRAMES,t0=tsec(fr[0].t),t1=tsec(fr[fr.length-1].t),span=Math.max(1,t1-t0),i;
-  var xs=fr.map(function(f){return (tsec(f.t)-t0)/span*100;});
+  var fr=FRAMES,t0=frameSec(fr[0].t),t1=frameSec(fr[fr.length-1].t),span=Math.max(1,t1-t0),i;
+  var xs=fr.map(function(f){return (frameSec(f.t)-t0)/span*100;});
   for(i=1;i<xs.length;i++)if(xs[i]<xs[i-1]+1.7)xs[i]=xs[i-1]+1.7;
   var last=xs[xs.length-1];if(last>97)xs=xs.map(function(x){return x/last*97;});
   var bounds=[];fr.forEach(function(f,i){if(f.kind==="agent_start"||f.kind==="control.steer")bounds.push(i);});if(bounds[0]!==0)bounds.unshift(0);
@@ -6729,27 +6763,33 @@ function placeHold(){
 }
 
 /* ============================== assistant ============================== */
-/* The dock is on every page. The bar is always there; the sheet opens above
-   it. Nothing else moves, because .page already reserves the bottom padding. */
-function assistant(){
-  return '<aside class="asst" role="complementary" aria-label="In-app agent">'+
-   (S.asst?'<div class="asst-in">'+asstSheet()+'</div>':'')+
-   '<div class="asst-in asst-bar">'+
-    '<span class="asst-g">'+icon("assistant")+'</span>'+
-    '<button class="asst-open" onclick="S.asst=!S.asst;render()" aria-expanded="'+(S.asst?"true":"false")+'">'+
-     '<span>'+(S.asst?"Ask about a run, or change something":"Ask Oxagen about this workspace")+'</span>'+
-     '<span class="asst-k">'+(S.asstEngine==="down"?"engine down":"glm-flash")+'</span></button>'+
-    '<button class="iconbtn" onclick="S.asst=!S.asst;render()" aria-label="'+(S.asst?"Collapse":"Expand")+'">'+
-     (S.asst?'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M5 9l7 7 7-7"/></svg>'
-            :'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M5 15l7-7 7 7"/></svg>')+'</button>'+
-   '</div></aside>';
+/* The panel lives in #asst, a host that render() never replaces. That is
+   deliberate: a CSS transition cannot run on an element that is rebuilt from
+   an innerHTML string, and an operator's half-typed message cannot survive one
+   either. So the class is toggled on the host and the sheet inside it is only
+   rebuilt when the thing it renders (the engine state) actually changes. */
+function asstToggle(v){
+  S.asst = (v===undefined) ? !S.asst : !!v;
+  render();
+  if(S.asst){var t=document.querySelector("#asst textarea:not([disabled])");if(t)t.focus();}
+}
+function asstMount(){
+  var host=el("asst");
+  if(host.getAttribute("data-sig")!==S.asstEngine){
+    host.setAttribute("data-sig",S.asstEngine);
+    host.innerHTML=asstSheet();
+  }
+  host.className="asst"+(S.phone?" phone":"")+(S.asst?" open":"");
+  host.setAttribute("aria-hidden",S.asst?"false":"true");
+  /* inert keeps the closed panel out of the tab order even mid-transition */
+  if(S.asst)host.removeAttribute("inert"); else host.setAttribute("inert","");
 }
 function asstSheet(){
   if(S.asstEngine==="down"){
     return ''+
      '<div class="asst-h"><b style="font-size:13.5px">Assistant</b>'+
      '<span class="b b-failed" style="margin-left:auto"><span class="d"></span>engine down</span>'+
-     '<button class="iconbtn" onclick="S.asst=false;render()" aria-label="Collapse">×</button></div>'+
+     '<button class="iconbtn" onclick="asstToggle(false)" aria-label="Close the assistant">×</button></div>'+
      '<div class="asst-b"><div class="state-wrap" style="padding:30px 6px">'+
      '<div class="ico" style="color:var(--st-failed);border-color:color-mix(in srgb,var(--st-failed) 40%,transparent)">'+
      '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 8v5M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg></div>'+
@@ -6762,7 +6802,7 @@ function asstSheet(){
   return ''+
    '<div class="asst-h"><b style="font-size:13.5px">Assistant</b>'+
    '<span class="b b-q" style="margin-left:auto">every turn is a run of its own</span>'+
-   '<button class="iconbtn" onclick="S.asst=false;render()" aria-label="Close">×</button></div>'+
+   '<button class="iconbtn" onclick="asstToggle(false)" aria-label="Close the assistant">×</button></div>'+
    '<div class="asst-b">'+
    '<div class="msg op"><div class="who">Marcus Bell</div><div class="bub">Triage is burning money on tool definitions. Narrow its belt to what it actually used in the last 30 days, and tell me what you changed.</div></div>'+
    '<div class="msg"><div class="who">Assistant <span class="b b-q" style="font-size:9.5px">run_01K5RT9X4M2 · free</span></div><div class="bub">'+
@@ -7672,7 +7712,7 @@ function permChips(perms,max){
   return shown.map(function(p){return '<span class="b b-q" style="margin:0 3px 3px 0;font-family:var(--mono);font-weight:500">'+h(p)+'</span>';}).join("")+
    (perms.length>shown.length?'<span class="dim" style="font-size:11px">+'+(perms.length-shown.length)+' more</span>':'');
 }
-function kindBadge(k){return '<span class="b '+(k==="agent"?"b-proven":k==="service"?"b-approval":"b-q")+'">'+h(k)+'</span>';}
+function roleKindBadge(k){return '<span class="b '+(k==="agent"?"b-proven":k==="service"?"b-approval":"b-q")+'">'+h(k)+'</span>';}
 function rolesInUsePanel(){
   var list=ROLES.filter(function(r){return r.kind==="human";});
   return '<div class="panel"><div class="panel-h"><h3>Roles in use</h3><button class="btn sm" style="margin-left:auto" onclick="orgTab(\'roles\')">Manage roles</button></div><div class="tw"><table class="narrow"><tbody>'+
@@ -7685,7 +7725,7 @@ function rolesBody(){
   var rows=list.map(function(r){
     var n=roleAssignees(r.id), locked=r.builtin, busy=n.total>0;
     return '<tr class="click" onclick="roleOpen(\''+r.id+'\')"><td><span class="tkey">'+h(r.id)+'</span><div class="dim" style="font-size:11.5px">'+h(r.desc)+'</div></td>'+
-     '<td>'+kindBadge(r.kind)+'</td><td class="mono" style="font-size:11.5px">'+h(r.scope)+'</td>'+
+     '<td>'+roleKindBadge(r.kind)+'</td><td class="mono" style="font-size:11.5px">'+h(r.scope)+'</td>'+
      '<td style="max-width:30ch">'+permChips(r.perms)+'</td>'+
      '<td style="font-size:12px;white-space:nowrap">'+(n.total?[n.people?n.people+' people':'',n.agents?n.agents+' agent'+(n.agents>1?'s':''):'',n.svc?n.svc+' key'+(n.svc>1?'s':''):''].filter(Boolean).join(' · '):'<span class="dim">nobody</span>')+'</td>'+
      '<td style="font-size:11.5px">'+(locked?'<span class="b b-q">built-in</span>':'<span class="dim">'+h(r.by)+' · '+h(r.at)+'</span>')+'</td>'+
@@ -8593,7 +8633,7 @@ function render(){
   else page=pFleet();
 
   el("app").innerHTML=r.page==="register"?pRegister(r):r.page==="welcome"?pWelcome(r):'<div class="app">'+sidebar(r)+'<div class="main">'+topbar(r)+
-    '<main class="page" id="pg">'+scnRail()+page+'</main></div></div>'+assistant();
+    '<main class="page" id="pg">'+scnRail()+page+'</main></div></div>';
   if(r.page==="register")regSchedule(regStepOf(r));
   else if(r.page==="welcome")regSchedule(r.step);
   el("layer").innerHTML=dialog();
@@ -8603,6 +8643,7 @@ function render(){
   vp.className=S.phone?"phone":"";
   el("layer").className=S.phone?"phone":"";
   el("toast").className=S.phone?"phone":"";
+  asstMount();
   document.querySelectorAll("#chrome [data-st]").forEach(function(b){
     b.setAttribute("aria-pressed",b.getAttribute("data-st")===S.state?"true":"false");});
   el("cPhone").setAttribute("aria-pressed",S.phone?"true":"false");
@@ -8625,7 +8666,7 @@ el("cIndex").addEventListener("click",function(){openDialog("cmd");});
 el("cReset").addEventListener("click",function(){seedApprovals();S.dlg=null;S.dlgArg=null;render();toast("Approvals reset — every parked call is pending again with a fresh clock.","gold");});
 document.addEventListener("keydown",function(e){
   if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==="k"){e.preventDefault();openDialog("cmd");}
-  if(e.key==="Escape"){if(S.dlg)closeDialog();else if(S.layer){S.layer=null;render();}else{var rp=route();if(rp.page==="register")regCancel();else if(rp.page==="welcome"&&S.reg&&S.reg.mode==="onboard")obExit();}}
+  if(e.key==="Escape"){if(S.dlg)closeDialog();else if(S.layer){S.layer=null;render();}else if(S.asst){asstToggle(false);}else{var rp=route();if(rp.page==="register")regCancel();else if(rp.page==="welcome"&&S.reg&&S.reg.mode==="onboard")obExit();}}
 });
 document.addEventListener("click",function(e){
   if(S.layer&&!e.target.closest(".rel"))
