@@ -1854,7 +1854,8 @@ function runFrames(R){
   return FRAMES_BY_RUN[id];
 }
 function framesFromRun(R){
-  return FRAMES_BY_RUN["run_01K5RS7M2E8FJ3QW"].map(function(f){return Object.assign({},f);});
+  if(!R||!R.id) return FRAMES_BY_RUN["run_01K5RS7M2E8FJ3QW"].map(function(f){return Object.assign({},f);});
+  return framesFromRunSynth(R);   /* seq = index, exactly R.frames long; see the frame inspector region */
 }
 
 /* ===================== transcript seeds ===================== */
@@ -4225,9 +4226,9 @@ function pRun(r){
       '<button class="btn" onclick="openSteer()">Steer</button>'+
       '<button class="btn danger" onclick="act(\'Cancel issued. Run token revoked; process kill is best effort and recorded.\')">Cancel</button>':
      rs==="resuming"?'<button class="btn" disabled>▶ Resuming…</button>':
-      '<button class="btn" onclick="act(\'Fork replay started from frame '+S.frame+' with tool results served from the recording.\')">Fork replay</button>'+
-      '<button class="btn" onclick="openDialog(\'bisect\')">Bisect</button>')+
-    '<button class="btn" onclick="act(\'Signed bundle queued: segments, attestations, key ids and a verifier script.\')">Export</button>'+
+      '<button class="btn" onclick="openDialog(\'forkreplay\')" title="fork a new attempt from frame '+S.frame+'">Fork replay</button>'+
+      '<button class="btn" onclick="S.bis=null;openDialog(\'bisect\')">Bisect</button>')+
+    '<button class="btn" onclick="openDialog(\'runexport\')">Export</button>'+
    '</div></div>';
 
   var strip=runInstruments(R)+promptRow(R)+runTimeline(R);
@@ -4235,7 +4236,7 @@ function pRun(r){
   var tabs=runTabs(R,t);
 
   var bodyHtml="";
-  if(compacted&&t==="player"){
+  if(compacted&&t==="player"&&!S.seg[R.id]){
     bodyHtml='<div class="warn" style="margin-bottom:14px"><b>Compacted.</b> Frame nodes for this run left the graph after the thirteen-month hot window. '+
      'Render replay reads the archive segment, which is the same bytes the graph indexed, written once at seal. Nothing was moved and nothing was recomputed.</div>'+
      '<div class="panel"><div class="panel-h"><h3>Archive segment</h3><span class="b b-q" style="margin-left:auto">read from object storage</span></div>'+
@@ -4245,7 +4246,7 @@ function pRun(r){
      '<dt>Attestation</dt><dd class="mono">ed25519 · '+h(ORG.attester)+' · valid 2025-01-01 → 2026-12-31</dd>'+
      '<dt>Retained until</dt><dd>2032-07-02 · object lock, compliance mode</dd>'+
      '<dt>What remains in the graph</dt><dd>the run node, frame_count 118, merkle_root, segment_ref, and the rollups</dd>'+
-     '</dl><div class="row" style="margin-top:14px"><button class="btn primary" onclick="act(\'Segment fetched. Rendering 118 frames from the archive.\')">Render from the segment</button>'+
+     '</dl><div class="row" style="margin-top:14px"><button class="btn primary" onclick="S.seg[\''+R.id+'\']=true;render();act(\'Segment fetched. Rendering '+R.frames+' frames from the archive.\')">Render from the segment</button>'+
      '<button class="btn" onclick="act(\'Verifier script and key ids downloaded.\')">Verify offline</button></div></div></div>';
   } else if(t==="transcript"){
     bodyHtml=transcriptTab(R,compacted);
@@ -4568,11 +4569,11 @@ function runTimeline(R){
   var xs=fr.map(function(f){return (frameSec(f.t)-t0)/span*100;});
   for(i=1;i<xs.length;i++)if(xs[i]<xs[i-1]+1.7)xs[i]=xs[i-1]+1.7;
   var last=xs[xs.length-1];if(last>97)xs=xs.map(function(x){return x/last*97;});
-  var bounds=[];fr.forEach(function(f,i){if(f.kind==="agent_start"||f.kind==="control.steer")bounds.push(i);});if(bounds[0]!==0)bounds.unshift(0);
+  var bounds=[];fr.forEach(function(f,i){if(f.kind==="agent_start"||f.kind==="control.steer"||f.kind==="turn_start")bounds.push(i);});if(bounds[0]!==0)bounds.unshift(0);
   var bands=bounds.map(function(b,k){var l=Math.max(0,xs[b]-1.2),r=k+1<bounds.length?xs[bounds[k+1]]-1.2:100;
     return '<div class="rt-band'+(k%2?" alt":"")+'" style="left:'+l.toFixed(2)+'%;width:'+(r-l).toFixed(2)+'%"></div>';}).join("");
   var turns=bounds.map(function(b,k){var l=Math.max(0,xs[b]-1.2),r=k+1<bounds.length?xs[bounds[k+1]]-1.2:100,w=r-l;
-    return '<span style="left:'+l.toFixed(2)+'%;width:'+w.toFixed(2)+'%">'+(w<14?'t'+(k+1):'turn '+(k+1)+(k?' · after steer':''))+'</span>';}).join("");
+    return '<span style="left:'+l.toFixed(2)+'%;width:'+w.toFixed(2)+'%">'+(w<14?'t'+(k+1):'turn '+(k+1)+(k&&fr[b].kind==='control.steer'?' · after steer':''))+'</span>';}).join("");
   var marks="",parkedAt=-2,ticks=fr.map(function(f,i){
     var k=fkOf(f.kind),tall=k==="op"||f.kind==="approval_request"||(f.kind==="policy_decision"&&/approve/.test(f.sum)),on=i===S.frame&&S.tab.run==="player";
     if(f.kind==="control.steer")marks+='<span class="rt-mark" style="left:'+xs[i].toFixed(2)+'%">steer</span>';
@@ -4928,6 +4929,7 @@ function fpBar(R){
    '<div class="fp-scrub"><input class="fp-range" type="range" min="0" max="'+(n-1)+'" value="'+i+'" aria-label="Frame" oninput="fpSeek(+this.value,true)">'+
     '<div class="fp-ticks">'+ticks+'</div></div>'+
    '<span class="fp-cnt"><b>'+(i+1)+'</b> / '+n+' · seq '+f.seq+' · '+h(f.t)+'</span>'+
+   '<span class="fp-cnt fp-spent"'+tipAttr("model spend recorded on frames 0–"+f.seq+" of this run")+'><b>$'+FRAMES.slice(0,i+1).reduce(function(a,x){return a+(parseFloat(x.cost)||0);},0).toFixed(2)+'</b> of '+usd(R.cost)+' by here</span>'+
    '<span class="seg" style="margin-left:4px">'+FP_SPEEDS.map(function(s){return '<button class="btn sm" aria-pressed="'+(S.fp.speed===s)+'" onclick="fpSpeed('+s+')">'+s+'×</button>';}).join("")+'</span>'+
    '<span class="fp-keys"><kbd>←</kbd><kbd>→</kbd> step <kbd>space</kbd> play <kbd>home</kbd><kbd>end</kbd></span></div>';
 }
@@ -4994,38 +4996,417 @@ function linkedWork(R){
    '<div class="lw">'+panel("Repositories",repos,"no repository was touched")+panel("Issues and tasks",issues,"no issue is linked")+panel("Pull requests and artifacts",arts,"nothing was produced yet")+'</div>'+files+'</section>';
 }
 
+/* ===================== Frames of a run, synthesized from its record =====================
+   A run with no authored frames gets a frame list built from what the run record states: turns,
+   steps split per turn by runSeries(R), tool calls in the order runMetrics(R) drew them, cost split
+   per turn and then per model call, and the witness attempts pinned at the seqs the flip names.
+   Seq equals index, so frameBtn(seq) lands on the frame it names. The list is exactly R.frames long
+   (seq 0 … R.frames−1); the seal is the envelope after the last frame, signed over all of them. */
+S.bis=null; S.seg={};
+function frHex(s,n){
+  var out="",x=2166136261>>>0,i,k=0;s=String(s);
+  while(out.length<n){for(i=0;i<s.length;i++){x^=s.charCodeAt(i);x=Math.imul(x,16777619)>>>0;}x^=++k;x=Math.imul(x,16777619)>>>0;out+=("0000000"+x.toString(16)).slice(-8);}
+  return out.slice(0,n);
+}
+function frDig(s){var x=frHex(s,32);return "sha256:"+x.slice(0,4)+"…"+x.slice(-4);}
+function frClock(sec){var ms=Math.max(0,Math.round(sec*1000)),hh=Math.floor(ms/3600000)%24,mm=Math.floor(ms/60000)%60,ss=Math.floor(ms/1000)%60,r=ms%1000;
+  function p(v,n){v=String(v);while(v.length<n)v="0"+v;return v;}return p(hh,2)+":"+p(mm,2)+":"+p(ss,2)+"."+p(r,3);}
+function frRepo(R){var m=String(R.task||"").match(/^([\w.-]+\/[\w.-]+)#/);return m?m[1]:"acme/platform";}
+function frPath(R){var p=(R.touched||[]).map(function(t){return String(t).split(" · ")[0];}).filter(function(t){return /\//.test(t)&&/\.\w+$/.test(t)&&!/#/.test(t);});return p[0]||"CHANGELOG.md";}
+function frProvider(m){return /claude/.test(m||"")?"anthropic":/gpt|^o\d/.test(m||"")?"openai":/gemini/.test(m||"")?"google":"provider";}
+function frSeed(s){var x=13,i;s=String(s);for(i=0;i<s.length;i++)x=(x*31+s.charCodeAt(i))>>>0;return x;}
+var FR_CRED=/^(github|linear|stripe|aws_billing|slack)__/;
+var FR_SYS=210, FR_STEER=1340, FR_TOOLS=2118, FR_BUDGET=18000;
+
+/* validated input and output of one tool call, shaped by the tool and the run it served */
+function frToolIO(R,tool,key,err){
+  var n=toolParts(tool).n, repo=frRepo(R), path=frPath(R), rnd=rngOf(frSeed(key)), io={input:{},output:{},red:[]};
+  var tag=(String(R.taskTitle||"").match(/\d+\.\d+\.\d+/)||[""])[0];
+  var labels=((R.touched||[]).filter(function(t){return /^labels · /.test(t);})[0]||"").replace(/^labels · /,"").split(/,\s*/).filter(Boolean);
+  if(n==="github__list_pull_requests"){io.input={repo:repo,state:"closed",base:"main",per_page:50};io.output={status:200,pull_requests:Math.round(8+rnd()*30)};}
+  else if(n==="github__get_file_contents"){io.input={repo:repo,path:path,ref:"main"};io.output={status:200,path:path,bytes:Math.round(900+rnd()*14000),sha:frHex(key+"f",7)};}
+  else if(n==="github__create_release"){io.input={repo:repo,tag:tag?"v"+tag:"next",target:"main",draft:false};io.output={status:201,release_id:Math.round(1e8+rnd()*9e8)};}
+  else if(n==="recall_context"){io.input={query:R.taskTitle,k:6};io.output={frames:Math.round(3+rnd()*4),tokens:Math.round(4000+rnd()*8000)};}
+  else if(n==="search_graph"){io.input={q:R.taskTitle,limit:20};io.output={nodes:Math.round(4+rnd()*16),edges:Math.round(6+rnd()*40)};}
+  else if(n==="edit__file"){io.input={path:path,old_digest:frDig(key+"o"),new_digest:frDig(key+"n")};io.output={ok:true,lines_changed:Math.round(2+rnd()*40)};}
+  else if(n==="write__file"){io.input={path:path,bytes:Math.round(400+rnd()*6000)};io.output={ok:true,digest:frDig(key+"w")};}
+  else if(n==="bash__run"){io.input={cmd:R.flip?R.flip.cmd:"git status --porcelain",cwd:"/work/"+repo.split("/").pop()};io.output={exit:0,stdout_bytes:Math.round(200+rnd()*9000),stdout_digest:frDig(key+"so")};}
+  else if(n==="linear__get_issue"){io.input={id:R.task};io.output={state:"In Progress",labels:Math.round(1+rnd()*3),creator:{email:"[redacted]"}};io.red=[{path:"$.creator.email",reason:"pii.email"}];}
+  else if(n==="linear__update_issue"){io.input={id:R.task,labels_add:labels.length?labels:["triaged"]};io.output={ok:true};}
+  else if(n==="aws_billing__get_cost_and_usage"){io.input={granularity:"MONTHLY",period:"2026-09",group_by:"SERVICE"};io.output={groups:Math.round(6+rnd()*20),account_id:"[redacted]"};io.red=[{path:"$.account_id",reason:"account.identifier"}];}
+  else if(n==="stripe__create_payment"){io.input={amount:"2,450.00",currency:"USD",counterparty:"vendor:aws"};io.output={status:"parked"};}
+  else if(n==="slack__post_message"){io.input={channel:"#finops",text_digest:frDig(key+"t")};io.output={ok:true,user:{email:"[redacted]"}};io.red=[{path:"$.user.email",reason:"pii.email"}];}
+  else {io.input={repo:repo};io.output={ok:true};}
+  if(err){io.output=n==="bash__run"?{exit:1,stderr_digest:frDig(key+"se")}:{status:502,error:"upstream bad_gateway"};io.red=[];}
+  io.red.forEach(function(r){r.digest=frDig(key+r.path);});
+  return io;
+}
+
+function framesFromRunSynth(R){
+  var N=Math.max(4,R.frames|0), s=runSeries(R), T=s.n, f=R.flip, q, t, j;
+  var rnd=rngOf(frSeed(R.id)), light=/haiku|flash|light/i.test(R.model||""), outPrice=light?PRICE.outLight:PRICE.out;
+  var terminal=/^(sealed|compacted|halted)$/.test(R.status);
+  var apr=APPROVALS.filter(function(a){return a.run===R.id;})[0]||null;
+  var slot=new Array(N);
+  function put(p,o){if(p>=0&&p<N&&!slot[p])slot[p]=o;}
+  slot[0]={kind:"agent_start",turn:1};
+  var tail=[];
+  if(apr){tail.push({kind:"tool_requested",call:{id:apr.tool,cat:toolMeta(apr.tool).cat,ms:0,err:false},apr:apr.id});
+    tail.push({kind:"policy_decision",call:{id:apr.tool},apr:apr.id});tail.push({kind:"approval_request",apr:apr.id});}
+  if(R.status==="halted")tail.push({kind:"error"});
+  if(terminal)tail.push({kind:"agent_stop"});
+  tail.forEach(function(o,k){o.turn=T;slot[N-tail.length+k]=o;});
+  var lastFree=N-1-tail.length, ranges=[], postA=-1;
+  function split(a,b,t0,t1){
+    if(t1<t0)return; var tot=0,acc=0,cur=a,len=b-a+1;
+    for(t=t0;t<=t1;t++)tot+=s.steps[t-1];
+    for(t=t0;t<=t1;t++){acc+=s.steps[t-1];var end=t===t1?b:a+Math.round(len*acc/tot)-1;end=Math.max(cur,end);ranges[t]=[cur,end];cur=end+1;}
+  }
+  var flipOk=f&&f.turn>=1&&f.turn<=T&&f.turnStartSeq!=null&&f.turnEndSeq!=null&&f.turnEndSeq<=lastFree&&f.turnStartSeq>f.turn-1;
+  if(flipOk){
+    split(1,f.turnStartSeq-1,1,f.turn-1);
+    ranges[f.turn]=[f.turnStartSeq,f.turnEndSeq];
+    if(f.turn<T)split(f.turnEndSeq+1,lastFree,f.turn+1,T);else if(f.turnEndSeq<lastFree)postA=f.turnEndSeq+1;
+    f.attempts.forEach(function(a){if(a.seq>f.turnStartSeq&&a.seq<f.turnEndSeq)put(a.seq,{kind:"proof.observed",att:a,turn:f.turn});});
+  } else split(1,lastFree,1,T);
+  for(t=1;t<=T;t++){var rg=ranges[t];if(!rg)continue;
+    if(t>1||(flipOk&&f.turn===t))put(rg[0],{kind:"turn_start",turn:t});
+    if(rg[1]>rg[0]&&(terminal||t<T))put(rg[1],{kind:"turn_end",turn:t});}
+  /* a checkpoint every 20 frames, on the first free seq at or after the mark */
+  for(q=20;q<=lastFree;q+=20){for(j=q;j<=lastFree&&j<q+20&&slot[j];j++){}if(j<=lastFree&&j<q+20)slot[j]={kind:"checkpoint"};}
+
+  var m=runMetrics(R), calls=m.calls, ci=0;
+  for(t=1;t<=T;t++){
+    var r=ranges[t]; if(!r)continue;
+    var free=[]; for(q=r[0];q<=r[1];q++){if(!slot[q])free.push(q);else if(slot[q].turn==null)slot[q].turn=t;}
+    var nm=s.model[t-1], nt=Math.min(s.tool[t-1],calls.length-ci), tc=calls.slice(ci,ci+nt); ci+=nt;
+    var plan=[],a2=nm,b2=nt; while(a2||b2){if(a2){plan.push("M");a2--;}if(b2){plan.push("T");b2--;}}
+    if(plan[plan.length-1]==="T"){var lm=plan.lastIndexOf("M");if(lm>=0){plan.splice(lm,1);plan.push("M");}}
+    var extra=free.length-(1+nm*2+nt*3);
+    var credN=Math.min(tc.filter(function(c){return FR_CRED.test(c.id);}).length,Math.max(0,extra));extra-=credN;
+    var ctxN=Math.min(Math.max(0,nm-1),Math.max(0,extra));extra-=ctxN;
+    var L=[{kind:"context.assembled"}],tk=0,first=true;
+    plan.forEach(function(p){
+      if(p==="M"){if(!first&&ctxN>0){L.push({kind:"context.assembled"});ctxN--;}first=false;L.push({kind:"model.request"});L.push({kind:"model.response"});}
+      else{var c=tc[tk++];L.push({kind:"tool_requested",call:c});L.push({kind:"policy_decision",call:c});
+        if(FR_CRED.test(c.id)&&credN>0){L.push({kind:"token_issued",call:c});credN--;}L.push({kind:"tool_call",call:c});}
+    });
+    /* whatever room is left is the agent writing to the record, spread after its tool results */
+    var afterTool=[];L.forEach(function(x,k){if(x.kind==="tool_call")afterTool.push(k);});
+    for(j=0;j<extra;j++){var at=afterTool.length?afterTool[Math.floor(j*afterTool.length/Math.max(1,extra))]+1+j:L.length;L.splice(Math.min(at,L.length),0,{kind:"record.appended"});}
+    /* a run too short for its stated steps gives up its turn_end marker, then the opening assembly, before a step */
+    if(L.length>free.length&&r[1]>r[0]&&slot[r[1]].kind==="turn_end"){slot[r[1]]=null;free.push(r[1]);}
+    if(L.length>free.length&&L[0].kind==="context.assembled")L.shift();
+    if(L.length>free.length){L=L.slice(0,free.length);while(L.length&&L[L.length-1].kind!=="model.response"&&L.some(function(x){return x.kind==="model.response";}))L.pop();}
+    L.forEach(function(x,k){x.turn=t;slot[free[k]]=x;});
+    for(j=L.length;j<free.length;j++)slot[free[j]]={kind:"record.appended",turn:t};
+  }
+  for(q=1;q<N;q++){if(!slot[q])slot[q]={kind:q%20===0?"checkpoint":"record.appended",turn:T};if(slot[q].turn==null)slot[q].turn=q>=postA&&postA>0?T:1;}
+  /* a checkpoint's turn is the turn around it */
+  for(q=1;q<N;q++)if(slot[q].kind==="checkpoint"){for(j=q-1;j>=0;j--)if(slot[j].kind!=="checkpoint"){slot[q].turn=slot[j].turn;break;}}
+
+  /* cost: each turn's share of R.cost, rounded to 1/10,000 cumulatively so the frames sum to the run */
+  var units=[],cum=0,prev=0;for(t=0;t<T;t++){cum+=s.cost[t];var u=Math.round(cum*1e4);units.push(u-prev);prev=u;}
+  for(t=1;t<=T;t++){
+    var rs=[];for(q=0;q<N;q++)if(slot[q].kind==="model.response"&&slot[q].turn===t)rs.push(slot[q]);
+    if(!rs.length){for(q=N-1;q>=0;q--)if(slot[q].kind==="model.response"&&slot[q].turn<t){slot[q].extraU=(slot[q].extraU||0)+units[t-1];break;}continue;}
+    var w=rs.map(function(){return 0.55+rnd()*0.9;}),ws=w.reduce(function(a,b){return a+b;},0),left=units[t-1];
+    rs.forEach(function(x,k){var uu=k===rs.length-1?left:Math.round(units[t-1]*w[k]/ws);left-=uu;x.units=uu;});
+  }
+  var start=tsec(R.started)||0,end;
+  if(apr&&!terminal)end=tsec(apr.parkedAt.replace(/Z$/,""));
+  else if(terminal)end=f&&f.sealedAt?tsec(f.sealedAt)-1.2:(tsec(R.sealed)||start+N*2.4)-0.6;
+  if(end==null||end<=start)end=start+N*2.4;
+  var anc={0:start};anc[N-1]=end;
+  if(flipOk){anc[f.turnStartSeq]=tsec(f.turnStart);anc[f.turnEndSeq]=tsec(f.turnEnd);f.attempts.forEach(function(a){if(slot[a.seq]&&slot[a.seq].kind==="proof.observed")anc[a.seq]=tsec(a.at);});}
+  var ak=Object.keys(anc).map(Number).sort(function(a,b){return a-b;}),ts=new Array(N);
+  function wt(o){return o.kind==="model.response"?5+rnd()*6:o.kind==="tool_call"?(o.call?o.call.ms/1000:1):o.kind==="proof.observed"?o.att.ms/1000:o.kind==="context.assembled"?0.3:0.08;}
+  for(j=0;j<ak.length;j++){var a0=ak[j];ts[a0]=anc[a0];if(j+1>=ak.length)break;var b0=ak[j+1],W=0,ww=[];
+    for(q=a0+1;q<=b0;q++){ww[q]=wt(slot[q]);W+=ww[q];}var acc2=0;for(q=a0+1;q<b0;q++){acc2+=ww[q];ts[q]=anc[a0]+(anc[b0]-anc[a0])*acc2/W;}}
+
+  /* pass two, backwards: a request is sized by the response it gets, context by the request it feeds */
+  var repo=frRepo(R), nextU=null, nextRq=null, nextCall=null, ctxRows=frCtxRows(R);
+  for(q=N-1;q>=0;q--){var o=slot[q];
+    if(o.kind==="model.response"){var c2=((o.units||0)+(o.extraU||0))/1e4,tin=Math.round(c2/3/PRICE.inEff),cache=s.cache[Math.max(0,o.turn-1)]||R.cache||0;
+      var cr=Math.round(tin*cache),tout=Math.round(c2*2/3/outPrice),rsn=Math.round(tout*(light?0.05:0.34));
+      o.cost=c2.toFixed(4);o.u={inU:tin-cr,cr:cr,cw:0,out:tout-rsn,rsn:rsn};nextU=o.u;}
+    else if(o.kind==="model.request"){var tot=nextU?nextU.inU+nextU.cr:12000,fixed=FR_SYS+FR_STEER+FR_TOOLS,room=Math.max(0,tot-fixed);
+      var ctx=Math.min(Math.round(FR_BUDGET*0.62),Math.round(room*0.6)),sc=tot<fixed?tot/fixed:1;
+      o.rq={tok:tot,comp:{system:Math.round(FR_SYS*sc),steering:Math.round(FR_STEER*sc),tools:Math.round(FR_TOOLS*sc),ctx:ctx,conv:Math.max(0,tot-Math.round(fixed*sc)-ctx)},ctxN:ctxRows.length};nextRq=o.rq;}
+    else if(o.kind==="context.assembled"){var used=nextRq?nextRq.comp.ctx:Math.round(FR_BUDGET*0.5);o.ctx={budget:FR_BUDGET,used:used,rows:frCtxSplit(ctxRows,used,R.id+q)};}
+    else if(o.kind==="tool_call"||o.kind==="tool_requested"||o.kind==="token_issued"||o.kind==="policy_decision")nextCall=o.call||nextCall;
+  }
+
+  /* pass three, forwards: stop reasons, sums, digests */
+  var out=[],turnCost={},sentences=(String(R.summary||"").match(/[^.]+(\.\d[^.]*)*\.(\s|$)/g)||[]).map(function(x){return x.trim();}),recN=0,lastTool=[],cpPrev=0;
+  var ag=agent(R.agent), prov=frProvider(R.model), tierOf=R.tier||"gateway";
+  for(q=0;q<N;q++){var o2=slot[q],fr={seq:q,kind:o2.kind,tier:tierOf,cost:null,t:frClock(ts[q]!=null?ts[q]:start),sum:"",run:R.id,turn:o2.turn};
+    var key=R.id+":"+q, call=o2.call;
+    if(call){fr.call=call;fr.io=frToolIO(R,call.id,R.id+":"+call.id+":"+q,call.err);}
+    if(o2.apr){fr.apr=o2.apr;}
+    switch(o2.kind){
+     case "agent_start": fr.sum=R.agent+" · "+(ag?ag.harnessLabel:"harness")+" · run token 15m · policy pol_v41 · operator "+(PEOPLE[R.op]?PEOPLE[R.op].name:R.op);break;
+     case "context.assembled": fr.ctx=o2.ctx;fr.sum="budget "+tokn(o2.ctx.budget)+" tok · "+o2.ctx.rows.length+" context frames · usage "+tokn(o2.ctx.used)+" tok · composition digest "+frDig(key+"ctx");break;
+     case "model.request": fr.rq=o2.rq;fr.sum=prov+" · "+R.model+" · 14 tool definitions ("+tokn(o2.rq.comp.tools)+" tok) · steering "+tokn(o2.rq.comp.steering)+" tok · "+o2.rq.ctxN+" context frames";break;
+     case "model.response":
+      fr.cost=o2.cost;fr.u=o2.u;fr.req="req_"+frHex(key+"req",8).toUpperCase();fr.ms=Math.round(3400+rnd()*7200);fr.ttft=Math.round(380+rnd()*900);
+      for(j=q+1;j<N&&/^(context\.assembled|checkpoint|record\.appended|proof\.observed)$/.test(slot[j].kind);j++){}
+      fr.stop=j<N&&slot[j].kind==="tool_requested"?"tool_use":"end_turn";
+      fr.sum="stop_reason "+fr.stop+" · in "+tokn(o2.u.inU)+" · cache_read "+tokn(o2.u.cr)+" · out "+tokn(o2.u.out+o2.u.rsn)+" · "+fr.req;
+      turnCost[o2.turn]=(turnCost[o2.turn]||0)+o2.units+(o2.extraU||0);break;
+     case "tool_requested": fr.dig=frDig(key+"in");fr.sum=call.id+" · input digest "+fr.dig+" · schema ok"+(o2.apr?" · parks on "+o2.apr:"");break;
+     case "policy_decision":
+      if(o2.apr){var A=APPROVALS.filter(function(a){return a.id===o2.apr;})[0];fr.pol={outcome:"approve",rule:A.rule,ms:7};fr.sum="approve · "+A.policy+" · "+A.rule+" · parked "+A.timeout;}
+      else{var cat=toolMeta(call.id).cat,rd=cat==="read"||cat==="query";fr.pol={outcome:"allow",rule:rd?"rg_0088":"rg_0091",why:rd?"read on "+repo:"write under the belt",ms:Math.round(4+rnd()*6)};
+        fr.sum="allow · pol_v41 · rule "+fr.pol.rule+" ("+fr.pol.why+") · untainted · "+fr.pol.ms+" ms";}
+      break;
+     case "token_issued": fr.grant="cg_"+frHex(key+"cg",6).toUpperCase();fr.sum="credential grant "+fr.grant+" · "+toolParts(call.id).n.split("__")[0]+" connection · scoped to this call · TTL 5m";break;
+     case "tool_call": fr.cost="0.0000";fr.dig=frDig(key+"out");
+      fr.sum=(call.err?"failed · ":"ok · ")+msDur(call.ms)+" · output schema "+(call.err?"not reached":"ok")+(fr.io.red.length?" · "+fr.io.red.length+" field redacted":"")+" · response digest "+fr.dig;lastTool.push(q);break;
+     case "proof.observed": var at2=o2.att;fr.att=at2;fr.sum="attempt "+at2.n+" of "+f.attempts.length+" · "+at2.result+" · exit "+at2.exit+" · "+at2.note+" · witness "+f.witness;break;
+     case "checkpoint": fr.from=cpPrev;fr.head=frDig(key+"head");fr.sum="chain head "+fr.head+" · frames "+cpPrev+"–"+q+" · host device key, countersigned at ingest";cpPrev=q+1;break;
+     case "record.appended": fr.rec={id:"rec_"+frHex(key+"rec",8).toUpperCase(),text:sentences.length?sentences[recN%sentences.length]:R.taskTitle,sources:lastTool.slice(-2)};recN++;
+      fr.sum=fr.rec.id+" · note · "+fr.rec.text.slice(0,72)+(fr.rec.text.length>72?"…":"");break;
+     case "turn_start": fr.sum="turn "+o2.turn+" of "+T+" · "+s.steps[o2.turn-1]+" steps follow";break;
+     case "turn_end": fr.sum="turn "+o2.turn+" ended · "+s.steps[o2.turn-1]+" steps · $"+s.cost[o2.turn-1].toFixed(2)+" · cache "+per(s.cache[o2.turn-1]);break;
+     case "approval_request": var A2=APPROVALS.filter(function(a){return a.id===o2.apr;})[0];fr.sum=A2.id+" · "+A2.tool+" · parked "+A2.parkedAt+" · "+A2.approvers.split(" — ")[0];break;
+     case "error": fr.err={code:"run_token_revoked",source:"gateway",outcome:"halted"};fr.sum="run_token_revoked · kill switch hooks_removed · nothing dispatched after this frame";break;
+     case "agent_stop": fr.sum="outcome "+R.status+(R.verdict?" · verdict "+R.verdict:"")+" · "+N+" frames · $"+R.cost+" · the seal envelope follows as seq "+N;break;
+    }
+    out.push(fr);
+  }
+  var prevF=FRAMES;FRAMES=out;delete R._m;runMetrics(R);FRAMES=prevF;
+  return out;
+}
+/* what the gateway laid into the window: the run's own linked work, as context frames */
+function frCtxRows(R){
+  var g=runGraphOf(R),rows=[];
+  g.repos.forEach(function(x){rows.push({kind:"fact",label:"Repository "+x.name});});
+  g.issues.forEach(function(x){rows.push({kind:"fact",label:x.ref+" · "+x.title});});
+  (R.touched||[]).forEach(function(x){if(rows.some(function(r){return r.label.indexOf(x)===0||r.label==="Repository "+x;}))return;rows.push({kind:/\.\w+$/.test(x)?"doc":/^wit_|^seg_/.test(x)?"episode":"memory",label:x});});
+  if(!rows.length)rows.push({kind:"memory",label:R.taskTitle});
+  return rows.slice(0,6);
+}
+function frCtxSplit(rows,used,key){
+  var rnd=rngOf(frSeed(key)),w=rows.map(function(){return 0.5+rnd();}),ws=w.reduce(function(a,b){return a+b;},0),left=used;
+  return rows.map(function(r,k){var tk=k===rows.length-1?left:Math.round(used*w[k]/ws);left-=tk;
+    return {kind:r.kind,label:r.label,tok:tk,node:"nd_"+r.kind+"_"+frHex(key+r.label,6).toUpperCase(),dig:frDig(key+r.label)};});
+}
+
+/* ===================== Frame inspector, by kind ===================== */
+function frKv(rows){return '<dl class="kv">'+rows.filter(Boolean).map(function(r){return '<dt>'+r[0]+'</dt><dd>'+r[1]+'</dd>';}).join("")+'</dl>';}
+function frSec(title,inner,right){return '<div style="margin-top:16px"><div class="row" style="justify-content:space-between;gap:8px;margin-bottom:8px"><p class="eyebrow q" style="margin:0">'+title+'</p>'+(right?'<span class="dim" style="font-size:11px">'+right+'</span>':'')+'</div>'+inner+'</div>';}
+function frJson(o,ind){
+  ind=ind||"";var pad=ind+"  ";
+  if(o===null)return 'null';
+  if(Array.isArray(o))return "["+o.map(function(x){return frJson(x,pad);}).join(", ")+"]";
+  if(typeof o==="object"){var ks=Object.keys(o).filter(function(k){return o[k]!==undefined;});if(!ks.length)return "{}";
+    return "{\n"+ks.map(function(k){return pad+'<span class="k">"'+h(k)+'"</span>: '+frJson(o[k],pad);}).join(",\n")+"\n"+ind+"}";}
+  if(typeof o==="string")return '<span class="s">"'+h(o)+'"</span>';
+  return h(String(o));
+}
+function frPre(o){return '<pre style="white-space:pre-wrap;word-break:break-word">'+frJson(o)+'</pre>';}
+function frRunOf(f){return run(f.run)||run(S.frameRun)||RUNS[0];}
+function frList(R){return FRAMES_BY_RUN[R.id]||FRAMES;}
+function frNum(sum,label){var m=new RegExp(label+" ([\\d,]+)").exec(sum||"");return m?+m[1].replace(/,/g,""):0;}
+function frCallOf(f,R){
+  if(f.call)return f.call;
+  var L=frList(R),i,m;
+  for(i=f.seq;i>=0&&i>f.seq-6;i--){m=L[i]&&/^([a-z_]+__[a-z_]+@\d+)/.exec(L[i].sum);if(m&&L[i].kind==="tool_requested")return {id:m[1],cat:toolMeta(m[1]).cat,ms:Math.max(0,fpMs((L[f.seq+0]||{}).t)-fpMs(L[i].t)),err:false};}
+  return null;
+}
+function frIO(f,R){var c=frCallOf(f,R);return f.io||(c?frToolIO(R,c.id,R.id+":"+c.id+":"+f.seq,c.err):null);}
+function frBar(parts,total){
+  return '<div style="display:flex;height:12px;border-radius:6px;overflow:hidden;border:1px solid var(--border)">'+parts.filter(function(p){return p[1]>0;}).map(function(p){
+    return '<i style="flex:'+p[1]+' 1 0;background:'+p[2]+'"'+tipAttr(p[0]+" · "+tokn(p[1])+" tok · "+pct(p[1],total))+'></i>';}).join("")+'</div>'+
+   '<div class="row" style="gap:12px;margin-top:7px;font-size:11.5px;color:var(--muted)">'+parts.filter(function(p){return p[1]>0;}).map(function(p){
+    return '<span><i style="display:inline-block;width:8px;height:8px;border-radius:2px;background:'+p[2]+';margin-right:5px"></i>'+p[0]+' <b style="color:var(--fg)">'+tokn(p[1])+'</b></span>';}).join("")+'</div>';
+}
+
+function fdContext(f,R){
+  var authored=!f.ctx&&R.id==="run_01K5RS7M2E8FJ3QW";
+  var c=f.ctx||{budget:CTXW.budget,used:CTXW.used,rows:CTXF.map(function(x){return {kind:x.kind,label:x.label,tok:x.tok,node:x.node,dig:"",cited:x.cited};})};
+  var sum=c.rows.reduce(function(a,x){return a+x.tok;},0);
+  return frKv([["Budget",tokn(c.budget)+" tokens"],["Used",tokn(c.used)+" tokens · "+pct(c.used,c.budget)+" of budget · "+tokn(c.budget-c.used)+" headroom"],
+    ["Context frames",c.rows.length+" · counted as context_frame_tokens"],["Assembled by","model proxy · "+h(R.tier)]])+
+   frSec("Context frames served",'<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Frame</th><th>Kind</th><th>Evidence</th><th class="num">Tokens</th><th>Use</th></tr></thead><tbody>'+
+    c.rows.map(function(x){return '<tr><td class="mono" style="font-size:11px">'+h(x.node)+'</td><td class="mono">'+h(x.kind)+'</td><td>'+h(x.label)+(x.dig?'<div class="dim mono" style="font-size:10.5px">'+h(x.dig)+'</div>':'')+'</td>'+
+     '<td class="num">'+tokn(x.tok)+'</td><td>'+(x.cited!=null?frameBtn(x.cited,"cited at frame "+x.cited):x.cited===null?'<span class="b b-q">never cited</span>':'<span class="dim">served</span>')+'</td></tr>';}).join("")+
+    '<tr><td colspan="3"><b>total</b></td><td class="num"><b>'+tokn(sum)+'</b></td><td></td></tr></tbody></table></div>',"identified by provider, frame id and content digest")+
+   (authored?'<div class="row" style="margin-top:12px"><button class="btn sm" onclick="S.tab.run=\'context\';render()">Open the Context tab</button></div>':'')+
+   '<div class="note" style="margin-top:12px">After the seal the reflector writes one <span class="mono">context_use_feedback</span> record per frame served here, marking it cited, rendered or ignored. A low citation rate on a large budget is the context bloat finding.</div>';
+}
+function fdRequest(f,R){
+  var L=frList(R),i,nextR=null,prevReq=-1,steer=null;
+  for(i=f.seq+1;i<L.length;i++)if(L[i].kind==="model.response"){nextR=L[i];break;}
+  for(i=f.seq-1;i>=0;i--){if(L[i].kind==="model.request"){prevReq=i;break;}}
+  for(i=Math.max(0,prevReq+1);i<f.seq;i++)if(L[i].kind==="control.steer")steer=L[i];
+  var rq=f.rq;
+  if(!rq){var tot=nextR?frNum(nextR.sum,"in")+frNum(nextR.sum,"cache_read"):15368,fixed=FR_SYS+FR_STEER+FR_TOOLS,ctx=Math.min(CTXW.used,Math.max(0,tot-fixed));
+    rq={tok:tot,comp:{system:FR_SYS,steering:FR_STEER,tools:FR_TOOLS,ctx:ctx,conv:Math.max(0,tot-fixed-ctx)},ctxN:CTXF.length};}
+  var cp=rq.comp,a=agent(R.agent),quote=steer?(/“([^”]*)”/.exec(steer.sum)||[])[1]:null;
+  var msg=function(role,label,tok,text,hl){return '<div style="border:1px solid '+(hl?'var(--st-proven)':'var(--border)')+';border-left:3px solid '+(hl?'var(--st-proven)':'var(--rule)')+';border-radius:8px;padding:8px 11px;margin-bottom:7px;background:'+(hl?'var(--hl)':'var(--ink)')+'">'+
+    '<div class="row" style="gap:8px;font-size:11px"><b class="mono" style="color:var(--fg)">'+role+'</b><span class="mono dim" style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+label+'</span><span class="mono dim" style="margin-left:auto">'+tokn(tok)+' tok</span></div>'+
+    '<div style="font-size:12.5px;margin-top:4px;white-space:pre-wrap">'+text+'</div></div>';};
+  return frKv([["Provider · model",frProvider(R.model)+' · <b style="color:var(--fg)">'+h(R.model)+'</b>'],
+    ["Parameters","max_tokens 8192 · temperature 1.0 · stream true"],
+    ["Tools offered","14 tools · "+tokn(cp.tools)+" tool_definition_tokens"],
+    ["Context frames",rq.ctxN+" · "+tokn(cp.ctx)+" context_frame_tokens"],
+    ["Prompt tokens",tokn(rq.tok)+(nextR?" · answered at "+frameBtn(nextR.seq,"frame "+nextR.seq):"")],
+    steer?["Carries",'<span class="b b-proven"><span class="d"></span>control.steer</span> from '+frameBtn(steer.seq,"frame "+steer.seq)]:null])+
+   frSec("Prompt composition",frBar([["system",cp.system,"var(--dim)"],["steering",cp.steering,"var(--k-rule)"],["tool definitions",cp.tools,"var(--st-approval)"],["context frames",cp.ctx,"var(--st-proven)"],["conversation",cp.conv,"var(--st-allowed)"]],rq.tok),tokn(rq.tok)+" tokens measured by Oxagen")+
+   frSec("Message stack",
+    msg("system","agent definition · .oxagen/agents/"+h(String(R.agent).split(".").pop())+".yaml",cp.system,"You are "+h(R.agent)+(a?", operated by "+h(PEOPLE[a.operator]?PEOPLE[a.operator].name:a.operator):"")+". Work only inside the grants on your belt.")+
+    msg("steering","steering.compiled · pol_v41",cp.steering,"The workspace’s published steering records, compiled once and served from cache.")+
+    (steer?msg("steering","control.steer · frame "+steer.seq+" · operator authority",+((/(\d+) tok/.exec(steer.sum)||[0,0])[1]),h(quote||steer.sum),true):"")+
+    msg("context",rq.ctxN+" context frames",cp.ctx,"Laid in by the model proxy, cited by content digest.")+
+    msg("conversation","turn "+(f.turn||1)+" so far",cp.conv,"Prior turns and tool results, served from the recording."),
+    steer?"the operator’s steer is highlighted":"no operator steer since the last request");
+}
+function fdResponse(f,R){
+  var light=/haiku|flash|light/i.test(R.model||""),c=parseFloat(f.cost)||0,u=f.u;
+  if(!u)u={inU:frNum(f.sum,"in"),cr:frNum(f.sum,"cache_read"),cw:0,out:frNum(f.sum,"out"),rsn:0};
+  var tin=u.inU+u.cr,hit=tin?u.cr/tin:0,req=f.req||(/req_\w+/.exec(f.sum)||["—"])[0];
+  var body;
+  if(f.u){
+    var inCost=c/3,pu=inCost/Math.max(1,u.inU+0.1*u.cr),op=light?PRICE.outLight:PRICE.out;
+    var rows=[["input_uncached",u.inU,pu],["cache_read",u.cr,pu*0.1],["cache_write_5m",0,pu*1.25],["output",u.out,op],["reasoning",u.rsn,op]];
+    var parts=rows.map(function(r){return r[1]*r[2];}),acc=0;parts.forEach(function(p,k){if(k<parts.length-1)acc+=p;});parts[parts.length-1]=Math.max(0,c-acc);
+    body='<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Class</th><th class="num">Tokens</th><th class="num">USD / M</th><th class="num">Cost USD</th></tr></thead><tbody>'+
+     rows.map(function(r,k){return '<tr><td class="mono">'+r[0]+'</td><td class="num">'+tokn(r[1])+'</td><td class="num dim">'+(r[2]*1e6).toFixed(2)+'</td><td class="num">'+(r[1]?parts[k].toFixed(4):'—')+'</td></tr>';}).join("")+
+     '<tr><td><b>total</b></td><td class="num"><b>'+tokn(tin+u.out+u.rsn)+'</b></td><td></td><td class="num"><b>$'+f.cost+'</b></td></tr></tbody></table></div>';
+  } else {
+    body='<div class="tw"><table class="narrow" data-lt="off"><tbody>'+[["input_uncached",u.inU],["cache_read",u.cr],["cache_write_5m",0],["output",u.out],["reasoning",0],["tool_definition_tokens",FR_TOOLS],["steering_tokens",FR_STEER]]
+     .map(function(r){return '<tr><td class="mono">'+r[0]+'</td><td class="num">'+tokn(r[1])+'</td></tr>';}).join("")+'</tbody></table></div>';
+  }
+  return frKv([["Stop reason",'<b style="color:var(--fg)">'+h(f.stop||(/stop_reason (\w+)/.exec(f.sum)||[])[1]||"—")+'</b>'],
+    ["Latency",(f.ms?tokn(f.ms)+" ms total · "+tokn(f.ttft)+" ms to first token":"640 ms to first token · total 7.37 s")+" · 0 retries"],
+    ["Provider request",'<span class="mono">'+h(req)+'</span>'],["Concrete model",'<span class="mono">'+h(R.model)+'</span>']])+
+   frSec("Usage by token class",body,f.u?"input at the published effective price, split by class; output at list":"as the provider reported it")+
+   frSec("Cost record",frPre({usage:{input:u.inU,cache_read:u.cr,cache_write_5m:u.cw,output:u.out,reasoning:u.rsn},cost_micros:Math.round(c*1e6),currency:"USD",cost_basis:R.basis,provider_request_id:req}))+
+   frSec("Derived",frKv([["Cache hit rate",'<b style="color:var(--fg)">'+per(hit)+'</b> · '+tokn(u.cr)+' of '+tokn(tin)+' input tokens'],
+    ["Effective input price",tin?"$"+(c/3/tin*1e6).toFixed(2)+" per million across input classes":"—"],
+    ["Cache write cost share","0% · nothing written"],
+    f.turn?["Turn",'turn '+f.turn+' · this call is '+pct(c,runSeries(R).cost[f.turn-1]||c)+' of the turn’s spend']:null]));
+}
+function fdToolReq(f,R){
+  var c=frCallOf(f,R),io=frIO(f,R); if(!c)return null;
+  var cat=toolMeta(c.id).cat,A=f.apr?APPROVALS.filter(function(a){return a.id===f.apr;})[0]:null;
+  var input=A&&A.amount?{amount:A.amount,currency:A.currency,counterparty:A.counterparty,mandate:A.mandate}:io.input;
+  var L=frList(R),nx=L[f.seq+1];
+  return frKv([["Tool version",'<span class="mono">'+h(c.id)+'</span>'],["Family",h(TCAT[cat]?TCAT[cat].l:cat)],
+    ["Schema digest",'<span class="mono">'+frDig("schema"+c.id)+'</span>'],["Canonical input digest",'<span class="mono">'+h(f.dig||frDig(R.id+f.seq+"in"))+'</span>'],
+    ["Input validation",'<span style="color:var(--st-allowed)">valid against the registered input schema</span>'],
+    ["Taint sources",A&&A.tainted?'<span style="color:var(--st-denied)">'+h((A.taint||[]).map(function(x){return x.path+" from frame "+x.frame;}).join(", "))+'</span>':"none · no argument was copied from a prior tool output"],
+    A?["Hazard",riskBadge(A.risk)+' '+effBadge(A.side)+' <span class="dim">egress '+h(A.egress)+'</span>']:null])+
+   frSec("Validated input",readout("canonical input","exactly what the gateway will dispatch",frPre(input)))+
+   '<div class="note" style="margin-top:12px">Nothing has been dispatched yet. The next frame'+(nx?' ('+frameBtn(nx.seq,"frame "+nx.seq)+')':'')+' is the policy decision that says whether it ever is: same call, same policy version, same answer, no model in the path.</div>';
+}
+function fdToolCall(f,R){
+  var c=frCallOf(f,R),io=frIO(f,R); if(!c)return null;
+  var err=c.err;
+  return frKv([["Outcome",err?'<span style="color:var(--st-denied)">failed · '+h(io.output.error||("exit "+io.output.exit))+'</span>':'<span style="color:var(--st-allowed)">ok</span>'],
+    ["Tool",'<span class="mono">'+h(c.id)+'</span>'],["Duration",c.ms?msDur(c.ms):"—"],
+    ["Output validation",err?"not reached · the call failed before a body came back":'<span style="color:var(--st-allowed)">valid against the registered output schema</span>'],
+    ["Response digest",'<span class="mono">'+h(f.dig||frDig(R.id+f.seq+"out"))+'</span>'],
+    ["Declared price","none · the tool costs the run nothing beyond the tokens it returns"]])+
+   frSec("Validated output",readout("output",io.red.length?io.red.length+" field redacted before write":"no redactions",frPre(io.output)))+
+   (io.red.length?frSec("Redactions",'<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Path</th><th>Reason</th><th>Digest of what was removed</th></tr></thead><tbody>'+
+     io.red.map(function(r){return '<tr><td class="mono">'+h(r.path)+'</td><td class="mono">'+h(r.reason)+'</td><td class="mono dim">'+h(r.digest)+'</td></tr>';}).join("")+'</tbody></table></div>'+
+     '<div class="note" style="margin-top:10px">Redaction ran before the bytes were written. The digest lets an auditor confirm what was removed without recovering it.</div>'):'');
+}
+function fdPolicy(f,R){
+  var A=f.apr?APPROVALS.filter(function(a){return a.id===f.apr;})[0]:null;
+  var approve=A||(f.pol?f.pol.outcome==="approve":f.sum.indexOf("approve")===0);
+  var rule=A?(A.rules[0]||{}).id:f.pol?f.pol.rule:(approve?"rg_0093":"rg_0088"),c=frCallOf(f,R);
+  var conds=A?A.rules.map(function(x){return [x.id,x.text,x.v];}):
+    [["tool on the belt",c?c.id:"—","pass"],["delegation ceiling","agent ∩ operator","held"],["taint","no argument from untrusted output","pass"],["kill switches","none armed for this tool","pass"]];
+  return '<div class="row" style="gap:10px;margin-bottom:12px"><span class="b '+(approve?'b-approval':'b-allowed')+'"><span class="d"></span>'+(approve?'approve':'allow')+'</span>'+
+    '<span class="dim" style="font-size:12px;margin-left:auto">decided in '+(f.pol?f.pol.ms:6)+' ms</span></div>'+
+   frSec("Conditions evaluated",'<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Condition</th><th>Value</th><th>Result</th></tr></thead><tbody>'+
+    conds.map(function(x){var v=x[2],cls=/^(pass|held|allow)$/.test(v)?"b-allowed":v==="approve"?"b-approval":v==="constrain"?"b-q":"b-denied";
+     return '<tr><td class="mono" style="font-size:11.5px">'+h(x[0])+'</td><td style="font-size:12px">'+h(x[1])+'</td><td><span class="b '+cls+'"><span class="d"></span>'+h(v)+'</span></td></tr>';}).join("")+
+    '</tbody></table></div>',"derived from the call and the record, none from prose")+
+   frSec("Decision",frPre({outcome:approve?"approve":"allow",policy_version:A?A.policy:"pol_v41",rules_fired:[rule],delegation_ceiling:"agent ∩ operator — held",
+     taint:{marked:!!(A&&A.tainted),sources:A&&A.taint?A.taint.map(function(x){return x.path;}):[]},kill_switches:"none armed for this tool",enforcement_tier:R.tier}));
+}
+function fdApproval(f,R){
+  var id=f.apr||(/apr_\w+/.exec(f.sum)||[])[0],A=APPROVALS.filter(function(a){return a.id===id;})[0];
+  if(!A)return null;
+  var ap=apState(id);
+  var facts=frKv([["Approval",'<span class="mono">'+h(A.id)+'</span>'],["Call",'<span class="mono">'+h(A.tool)+'</span> · '+riskBadge(A.risk)],
+    ["Rule",h(A.rule)],A.amount?["Amount",usd(A.amount)+" "+h(A.currency)+" · "+h(A.counterparty)]:null,["Approvers",h(A.approvers)],["Waited",h(A.waited)+" of "+h(A.timeout)]]);
+  if(A.waited==="expired")return '<div class="warn"><b>Expired.</b> Nobody answered inside '+h(A.timeout)+'. The call ended and the reason reached the model as the permission decision; nothing dispatched.</div>'+facts;
+  if(ap.status!=="pending")return '<div class="note">Resolved — <b>'+h(ap.status)+'</b>'+(ap.by&&ap.by!=="—"?' by '+h(ap.by):'')+'. The decision is a frame of its own.</div>'+facts;
+  return '<div class="warn"><b>Parked.</b> The call is held for up to '+h(A.timeout)+'. The model is shown a wait with a reason, not a failure. '+
+   'On resolution the gateway mints a single-use approval token bound to this exact call digest.</div>'+facts+
+   '<div class="row" style="margin-top:13px"><button class="btn" onclick="openDialog(\'approve\',\''+A.id+'\')">Approve</button>'+
+   '<button class="btn danger" onclick="openDialog(\'deny\',\''+A.id+'\')">Deny</button></div>';
+}
+function fdRecord(f,R){
+  var r=f.rec||{id:"rec_"+frHex(R.id+f.seq,8).toUpperCase(),text:f.sum,sources:[]};
+  return frKv([["Record id",'<b class="mono" style="color:var(--fg)">'+h(r.id)+'</b>'],["Lineage",'<span class="mono">lin_'+frHex(R.agent,6)+'</span> · a correction is a new record on this lineage'],
+    ["Kind","note"],["Record hash",'<span class="mono">'+frDig(r.id)+'</span>'],["Sharing scope","workspace · "+h(R.ws)],["Retention","7 years from the seal"]])+
+   frSec("Body",'<div class="callout">'+h(r.text)+'</div>')+
+   frSec("Provenance",r.sources.length?'<div class="row" style="gap:8px">'+r.sources.map(function(s){return frameBtn(s,"frame "+s+" · tool_call");}).join("")+'</div>':'<span class="dim">no tool result cited</span>',"every learned thing walks back to the frame that taught it");
+}
+function fdProof(f,R){
+  var F=R.flip,a=f.att; if(!F||!a)return null;
+  var isFlip=F.flipSeq===f.seq,n=F.attempts.length;
+  return '<div class="row" style="gap:10px;margin-bottom:12px">'+(isFlip?verdictBadge(R.verdict,R):'<span class="b '+(a.result==="pass"?"b-proven":"b-failed")+'"><span class="d"></span>attempt '+a.n+' · '+a.result+'</span>')+
+    '<span class="dim" style="font-size:12.5px">'+(isFlip?'failed on the target, passed on the pull request head — the flip':'the witness still fails on the pull request head')+'</span></div>'+
+   frSec("The two sides",'<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Ran against</th><th>Ref</th><th>Commit</th><th>Result</th></tr></thead><tbody>'+
+    '<tr><td>target</td><td class="mono">'+h(F.targetRef)+'</td><td class="mono">'+h(F.targetSha)+'</td><td><span class="b b-failed"><span class="d"></span>fail</span></td></tr>'+
+    '<tr><td>pull request head</td><td class="mono">'+h(F.prRef)+'</td><td class="mono">'+h(F.prSha)+'</td><td><span class="b '+(a.result==="pass"?"b-proven":"b-failed")+'"><span class="d"></span>'+a.result+'</span></td></tr></tbody></table></div>')+
+   frSec("Attempt",frKv([["Attempt",a.n+" of "+n+" in turn "+F.turn],["Command",'<span class="mono">'+h(F.cmd)+'</span>'],["Runner",h(F.runner)+" · "+h(F.testKind)],
+    ["Took",dur(a.ms/1000)+" · exit "+a.exit],["The runner saw",h(a.note)],["The worker was told",'the word <span class="mono">'+(a.result==="pass"?"pass":"fail")+'</span> and nothing else']]))+
+   frSec("Frame body",frPre({kind:"proof.observed",body:{witness_id:F.witness,oracle:F.oracle,test_kind:F.testKind,runner:F.runner,target_ref:F.targetRef,target_sha:F.targetSha,
+     pr_ref:F.prRef,pr_sha:F.prSha,command_normalized_digest:F.cmdDigest,target_result:"fail",pr_result:a.result,attempts:n,attempt:a.n,flip_attempt:isFlip?a.n:null,
+     flip_frame_seq:F.flipSeq,turn_end_frame_seq:F.turnEndSeq,verdict:isFlip?R.verdict:"not yet",tamper_exclusion:R.verdict==="tampered"?"broken":"held",disclosure_grain:"L0",witness_run_id:R.id}}),"signed into the chain with everything else at seal")+
+   '<div class="row" style="margin-top:12px"><button class="btn sm" onclick="S.tab.run=\'proof\';render()">Open the proof</button></div>';
+}
+function fdCheckpoint(f,R){
+  var L=frList(R),from=f.from!=null?f.from:0;
+  if(f.from==null)for(var i=f.seq-1;i>=0;i--)if(L[i].kind==="checkpoint"){from=i+1;break;}
+  return frKv([["Covers","frames "+from+"–"+f.seq+" · every 20 frames or 60 seconds, whichever comes first"],["Producer","host device key · ed25519"],
+    ["Producer signature",'<span class="mono">ed25519:'+frHex(R.id+"cp"+f.seq,14)+'…</span>'],["Countersigned by Oxagen",'<span style="color:var(--st-allowed)">yes, at ingest</span>'],
+    ["Chain head",'<span class="mono">'+h(f.head||frDig(R.id+f.seq+"head"))+'</span>']])+
+   '<div class="note" style="margin-top:12px">A checkpoint pins the chain mid-run so a crash or a network drop cannot cost the frames already recorded. Oxagen attests receipt and chain integrity here, not the truth of a client-attested body.</div>';
+}
+function fdError(f,R){
+  var e=f.err||{code:"error",source:"gateway",outcome:R.status};
+  return '<div class="row" style="gap:10px;margin-bottom:12px"><span class="b b-failed"><span class="d"></span>'+h(e.code)+'</span><span class="dim" style="font-size:12.5px">'+h(e.outcome)+'</span></div>'+
+   frKv([["Source",h(e.source)],["Cause",R.status==="halted"?"kill switch hooks_removed revoked the run token":"—"],["Billed",'<span style="color:var(--st-allowed)">no</span>'],
+    ["After this frame","nothing dispatched; the remaining frames close the run"]]);
+}
+function fdTurn(f,R){
+  var s=runSeries(R),t=f.turn||1,L=frList(R),fs=L.filter(function(x){return x.turn===t;}),start=f.kind==="turn_start";
+  return frKv([["Turn",t+" of "+s.n],["Frames",fs.length?fs.length+" · seq "+fs[0].seq+"–"+fs[fs.length-1].seq:"—"],["Steps",s.steps[t-1]+" · "+s.model[t-1]+" model calls, "+s.tool[t-1]+" tool calls"],
+    ["Turn spend","$"+s.cost[t-1].toFixed(2)+" USD"],["Cache hit rate",per(s.cache[t-1])]])+
+   '<div class="note" style="margin-top:12px">'+(start?'One prompt, a schedule or a resumed context, through to the agent stopping. ':'')+'Turns are derived from these frames and materialized in the rollups; the Cost tab draws them.</div>';
+}
+function fdAgent(f,R){
+  var a=agent(R.agent);
+  if(f.kind==="agent_start")return frKv([["Run",'<b class="mono" style="color:var(--fg)">'+h(R.id)+'</b>'],["Agent",'<span class="mono">'+h(R.agent)+'</span>'+(a?' · '+h(a.harnessLabel):'')],
+    ["Operator",h(PEOPLE[R.op]?PEOPLE[R.op].name:R.op)+" · initiating principal"],["Workspace",h(R.ws)],["Task",h(R.task)+" · "+h(R.taskTitle)],
+    ["Policy version","pol_v41"],["Enforcement tier",tierBadge(R.tier)]])+
+   '<div class="note" style="margin-top:12px">Everything above is built by server code, never by the agent. It cannot name its own operator or choose its own tier.</div>';
+  return frKv([["Outcome",'<b style="color:var(--fg)">'+h(R.status)+'</b>'+(R.verdict?' · '+verdictBadge(R.verdict,R):'')],["Turns",R.turn],["Steps",R.steps],["Frames",R.frames+" · seq 0–"+(R.frames-1)],
+    ["Total spend",usd(R.cost)+" USD · "+h(R.basis)],["Sealed",R.sealed?h(R.sealed)+" · the seal envelope follows as seq "+R.frames:"not sealed"]])+
+   '<div class="row" style="margin-top:12px"><button class="btn sm" onclick="S.tab.run=\'chain\';render()">Chain and seal</button></div>';
+}
+function fdToken(f,R){
+  var c=frCallOf(f,R),vendor=c?toolParts(c.id).n.split("__")[0]:"github";
+  return frKv([["Credential grant",'<span class="mono">'+h(f.grant||"cg_01K5RS8")+'</span>'],["Connection",h(vendor)+" · brokered by the gateway"],
+    ["Minted",c?'a token scoped to <span class="mono">'+h(c.id)+'</span> and this call id':'installation token limited to <span class="mono">acme/platform</span>'],
+    ["TTL","5 minutes, bound to call id"],["Seen by the agent",'<b style="color:var(--st-allowed)">never</b> — the agent holds one run token, good for talking to Oxagen and nothing else']]);
+}
+var FD_KIND={"context.assembled":fdContext,"model.request":fdRequest,"model.response":fdResponse,tool_requested:fdToolReq,tool_call:fdToolCall,
+  policy_decision:fdPolicy,approval_request:fdApproval,"record.appended":fdRecord,"proof.observed":fdProof,checkpoint:fdCheckpoint,error:fdError,
+  turn_start:fdTurn,turn_end:fdTurn,agent_start:fdAgent,agent_stop:fdAgent,token_issued:fdToken};
+
 function frameDetail(f){
-  if(f.kind==="model.response"){
-    return '<div class="grid g2">'+
-     '<div><p class="eyebrow q">Usage by token class</p><div class="tw"><table class="narrow"><tbody>'+
-      '<tr><td>input_uncached</td><td class="num">3,368</td></tr>'+
-      '<tr><td>cache_read</td><td class="num">12,000</td></tr>'+
-      '<tr><td>cache_write_5m</td><td class="num">0</td></tr>'+
-      '<tr><td>output</td><td class="num">412</td></tr>'+
-      '<tr><td>reasoning</td><td class="num">0</td></tr>'+
-      '<tr><td>tool_definition_tokens</td><td class="num">2,118</td></tr>'+
-      '<tr><td>context_frame_tokens</td><td class="num">11,204</td></tr>'+
-      '<tr><td>steering_tokens</td><td class="num">1,340</td></tr></tbody></table></div></div>'+
-     '<div><p class="eyebrow q">Cost record</p><dl class="kv">'+
-      '<dt>cost_micros</dt><dd class="mono num">412,600</dd>'+
-      '<dt>cost</dt><dd><b>$0.4126</b> USD</dd>'+
-      '<dt>cost_basis</dt><dd class="mono">gateway_observed</dd>'+
-      '<dt>price entries</dt><dd class="mono" style="font-size:11px">pe_op5_in, pe_op5_out, pe_op5_cacheread</dd>'+
-      '<dt>concrete model</dt><dd class="mono">claude-opus-5-20260814</dd>'+
-      '<dt>provider request</dt><dd class="mono">req_01JQ7F2K</dd>'+
-      '<dt>provider key</dt><dd class="mono">pk_acme_anthropic_prod</dd>'+
-      '<dt>cache hit rate</dt><dd>'+per(12000/15368)+' · 12,000 of 15,368 input tokens</dd>'+
-      '<dt>time to first token</dt><dd>640 ms · total 7.37 s · 0 retries</dd></dl></div></div>';
-  }
-  if(f.kind==="policy_decision"){
-    return '<pre>{\n  <span class="k">"outcome"</span>: <span class="s">"'+(f.sum.indexOf("approve")===0?"approve":"allow")+'"</span>,\n'+
-     '  <span class="k">"policy_version"</span>: <span class="s">"pol_v41"</span>,\n'+
-     '  <span class="k">"rules_fired"</span>: [<span class="s">"'+(f.sum.indexOf("approve")===0?"rg_0093":"rg_0088")+'"</span>],\n'+
-     '  <span class="k">"delegation_ceiling"</span>: <span class="s">"agent ∩ operator — held"</span>,\n'+
-     '  <span class="k">"taint"</span>: { <span class="k">"marked"</span>: false, <span class="k">"sources"</span>: [] },\n'+
-     '  <span class="k">"kill_switches"</span>: <span class="s">"none armed for this tool"</span>,\n'+
-     '  <span class="k">"enforcement_tier"</span>: <span class="s">"gateway"</span>\n}</pre>';
-  }
+  var R=frRunOf(f);
   if(f.kind==="control.pause"||f.kind==="control.resume"){
     var paused=f.kind==="control.pause";
     return '<div class="panel" style="background:var(--ink)"><div class="panel-b">'+
@@ -5036,33 +5417,23 @@ function frameDetail(f){
      '<dt>Digest</dt><dd class="mono">'+h(f.dig||"sha256:pending")+'</dd></div></div></div>';
   }
   if(f.kind==="control.steer"){
+    var L=frList(R),carried=null,quote=(/“([^”]*)”/.exec(f.sum)||[])[1]||f.text||f.sum;
+    for(var i=f.seq+1;i<L.length;i++)if(L[i].kind==="model.request"){carried=L[i];break;}
     return '<div class="panel" style="background:var(--ink)"><div class="panel-b">'+
      '<p class="eyebrow q">Delivered at the next boundary, attributed to the operator</p>'+
-     '<p style="margin:0;color:var(--fg)">“Skip the mobile repo this cycle; 4.11.0 is platform only.”</p>'+
-     '<div class="kv" style="margin-top:12px"><dt>Issuer</dt><dd>Marcus Bell · operator authority</dd>'+
-     '<dt>Injected into</dt><dd class="mono">model.request seq 11, immediately after the cached system block</dd>'+
-     '<dt>Digest</dt><dd class="mono">sha256:8e10c4b7d290fa35</dd></div>'+
+     '<p style="margin:0;color:var(--fg)">“'+h(quote)+'”</p>'+
+     '<div class="kv" style="margin-top:12px"><dt>Issuer</dt><dd>'+h(String(f.sum).split(" · ")[0])+' · operator authority</dd>'+
+     '<dt>Injected into</dt><dd>'+(carried?frameBtn(carried.seq,"model.request · frame "+carried.seq)+', immediately after the cached system block':'the next model request')+'</dd>'+
+     '<dt>Digest</dt><dd class="mono">'+h(f.dig||frDig(R.id+f.seq+"steer"))+'</dd></div>'+
      '<div class="note" style="margin-top:12px">Steering is evidence, quoted and cited. Oxagen never executes it as an instruction; whether the harness treats it as one is the harness’s contract.</div></div></div>';
   }
-  if(f.kind==="token_issued"){
-    return '<dl class="kv"><dt>Credential grant</dt><dd class="mono">cg_01K5RS8</dd>'+
-     '<dt>Connection</dt><dd class="mono">con_01K2A7 · GitHub App installation</dd>'+
-     '<dt>Minted</dt><dd>installation token limited to <span class="mono">acme/platform</span></dd>'+
-     '<dt>TTL</dt><dd>5 minutes, bound to call id</dd>'+
-     '<dt>Seen by the agent</dt><dd><b style="color:var(--st-allowed)">never</b> — the agent holds one run token, good for talking to Oxagen and nothing else</dd></dl>';
-  }
-  if(f.kind==="approval_request"){
-    var ap=apState("apr_01K5RS3K7");
-    if(ap.status!=="pending") return '<div class="note">Resolved — <b>'+h(ap.status)+'</b>'+(ap.by&&ap.by!=="—"?' by '+h(ap.by):'')+'. The approval card below shows what happened; the decision is a frame of its own.</div>';
-    return '<div class="warn"><b>Parked.</b> The call is held for up to ten minutes. The model is shown a wait with a reason, not a failure. '+
-     'On resolution the gateway mints a single-use approval token bound to this exact call digest.</div>'+
-     '<div class="row" style="margin-top:13px"><button class="btn" onclick="openDialog(\'approve\',\'apr_01K5RS3K7\')">Approve</button>'+
-     '<button class="btn danger" onclick="openDialog(\'deny\',\'apr_01K5RS3K7\')">Deny</button></div>';
-  }
-  return '<dl class="kv"><dt>Frame hash</dt><dd class="mono">sha256:'+(7331+f.seq*977).toString(16)+'e9c4a1b07f2d</dd>'+
+  var body=FD_KIND[f.kind]?FD_KIND[f.kind](f,R):null;
+  var digestOnly=R.grade==="digest"?'<div class="note" style="margin-bottom:12px">Client-attested at '+h(R.tier)+' tier with replay grade <b>digest</b>: the producer sent digests, not bodies. What follows is the envelope Oxagen countersigned; the content is as the harness reported it.</div>':'';
+  return digestOnly+(body!=null?body:
+   '<dl class="kv"><dt>Frame hash</dt><dd class="mono">sha256:'+(7331+f.seq*977).toString(16)+'e9c4a1b07f2d</dd>'+
    '<dt>prev_hash</dt><dd class="mono">sha256:'+(7331+(f.seq-1)*977).toString(16)+'e9c4a1b07f2d</dd>'+
    '<dt>Body</dt><dd>content-addressed, encrypted, retained 7 years</dd>'+
-   '<dt>Attested by</dt><dd>'+(f.tier==="gateway"?"Oxagen (gateway-observed)":"the producer, countersigned by Oxagen at ingest")+'</dd></dl>';
+   '<dt>Attested by</dt><dd>'+(f.tier==="gateway"?"Oxagen (gateway-observed)":"the producer, countersigned by Oxagen at ingest")+'</dd></dl>');
 }
 
 /* ===================== the context window shown to the agent ===================== */
@@ -5801,54 +6172,234 @@ DLG_EXT.runassurance=function(){
 };
 
 
+/* ---- Cost tab: the run waterfall. Every figure is runSeries(R)/runMetrics(R) or a count over the run's frames. ---- */
+/* frames per turn: counted off frames that carry their turn; a run whose frames do not is apportioned by steps */
+function wfTurnFrames(R,s){
+  var L=runFrames(R),c=[],i,counted=L.length&&L.every(function(f){return f.turn!=null;});
+  for(i=0;i<s.n;i++)c.push(0);
+  if(counted){L.forEach(function(f){c[Math.max(0,Math.min(s.n-1,f.turn-1))]++;});return {n:c,counted:true,ranges:wfRanges(L,s.n)};}
+  var acc=0,prev=0;for(i=0;i<s.n;i++){acc+=s.steps[i];var u=Math.round((R.frames||0)*acc/Math.max(1,R.steps||1));c[i]=u-prev;prev=u;}
+  return {n:c,counted:false,ranges:[]};
+}
+function wfRanges(L,n){var r=[];L.forEach(function(f){var k=f.turn-1;if(k<0||k>=n)return;if(!r[k])r[k]=[f.seq,f.seq];else{r[k][0]=Math.min(r[k][0],f.seq);r[k][1]=Math.max(r[k][1],f.seq);}});return r;}
+/* findings from the Spend page that name this run's agent, operator, workspace or one of its tools,
+   each pinned to the turn its own pattern points at */
+function wfFindings(R,s){
+  var m=runMetrics(R),out=[],person=PEOPLE[R.op]?PEOPLE[R.op].name:"",day=(String(R.started).match(/^\d{4}-\d{2}-\d{2}/)||["2026-09-12"])[0];
+  var lowCache=0;s.cache.forEach(function(c,i){if(c<s.cache[lowCache])lowCache=i;});
+  var mostTool=0;s.tool.forEach(function(c,i){if(c>s.tool[mostTool])mostTool=i;});
+  FINDINGS.forEach(function(fd){
+    var since=(String(fd.window).match(/since (\d{4}-\d{2}-\d{2})/)||[])[1];
+    if(since&&day<since)return;
+    var hit=fd.level==="agent"&&fd.subject===R.agent||fd.level==="operator"&&fd.subject===person||fd.level==="workspace"&&fd.subject===R.ws||
+      fd.level==="tool"&&m.calls.some(function(c){return toolParts(c.id).n===fd.subject;});
+    if(!hit)return;
+    var turn,why;
+    if(/cache/i.test(fd.kind)){turn=lowCache;why="the turn with the lowest cache hit rate";}
+    else if(/tail/i.test(fd.kind)){turn=s.n-1;why="the last turn";}
+    else if(fd.level==="tool"||/tool call/i.test(fd.kind)){turn=mostTool;why="the turn with the most tool calls";}
+    else {turn=s.peak;why="the dearest turn";}
+    out.push({fd:fd,turn:turn,why:why});
+  });
+  return out;
+}
+function wfChart(R,s,tf,finds){
+  var W=760,H=264,pl=56,pr=64,pt=36,pb=44,iw=W-pl-pr,ih=H-pt-pb,n=s.n,total=parseFloat(R.cost)||0;
+  var mx=Math.max.apply(null,s.cost)||1,gap=iw/n,bw=Math.min(64,gap*0.62),f=R.flip,i;
+  var X=function(k){return pl+gap*k+gap/2;},Yb=function(v){return pt+ih-v/mx*ih;},Yc=function(v){return pt+ih-(total?v/total:0)*ih;};
+  var g="",bars="",labs="",pts=[pl+","+Yc(0).toFixed(1)],cum=0,marks="";
+  for(i=0;i<=4;i++){var v=mx*i/4,y=Yb(v);g+='<line x1="'+pl+'" y1="'+y.toFixed(1)+'" x2="'+(W-pr)+'" y2="'+y.toFixed(1)+'" stroke="var(--border)" stroke-width="1"/>'+
+    '<text x="'+(pl-8)+'" y="'+(y+3.5).toFixed(1)+'" text-anchor="end" fill="var(--dim)" font-size="10.5">$'+v.toFixed(2)+'</text>';}
+  for(i=0;i<n;i++){
+    var c=s.cost[i],x=X(i)-bw/2,y2=Yb(c),bh=Math.max(2,pt+ih-y2),flipHere=f&&f.flipSeq!=null&&f.turn===i+1,fnd=finds.filter(function(x){return x.turn===i;});
+    var fill=flipHere?"var(--st-proven)":fnd.length?"var(--st-denied)":"var(--st-approval)";
+    bars+='<rect class="wf-bar" data-turn="'+(i+1)+'" data-c="'+c+'" x="'+x.toFixed(1)+'" y="'+y2.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+bh.toFixed(1)+'" rx="3" fill="'+fill+'" opacity="'+(flipHere||fnd.length?".95":".8")+'">'+
+      '<title>Turn '+(i+1)+' · $'+c.toFixed(2)+' · cache '+per(s.cache[i])+' · '+s.steps[i]+' steps · '+tf.n[i]+' frames</title></rect>';
+    labs+='<text x="'+X(i).toFixed(1)+'" y="'+(y2-6).toFixed(1)+'" text-anchor="middle" fill="var(--fg)" font-size="10.5">$'+c.toFixed(2)+'</text>'+
+      '<text x="'+X(i).toFixed(1)+'" y="'+(pt+ih+16)+'" text-anchor="middle" fill="var(--muted)" font-size="11">T'+(i+1)+'</text>'+
+      '<text x="'+X(i).toFixed(1)+'" y="'+(pt+ih+30)+'" text-anchor="middle" fill="var(--dim)" font-size="10">'+per(s.cache[i])+' cache</text>';
+    cum+=c;pts.push((X(i)+bw/2).toFixed(1)+","+Yc(cum).toFixed(1));
+    fnd.forEach(function(x,k){var cx=X(i)+bw/2-6-k*12,cy=y2-18;
+      marks+='<g style="cursor:pointer" onclick="openDialog(\'evidence\',\''+h(x.fd.id)+'\')"><title>'+h(x.fd.kind)+' · '+h(x.fd.id)+' · pinned to '+h(x.why)+'</title>'+
+        '<path d="M'+cx+' '+(cy-5)+'L'+(cx+5)+' '+cy+'L'+cx+' '+(cy+5)+'L'+(cx-5)+' '+cy+'Z" fill="var(--st-denied)"/></g>';});
+    if(flipHere){var rg=tf.ranges[i],fr=rg&&rg[1]>rg[0]?(f.flipSeq-rg[0])/(rg[1]-rg[0]):0.5,fx=x+bw*Math.max(0,Math.min(1,fr));
+      marks+='<g style="cursor:pointer" onclick="S.tab.run=\'player\';S.frame='+f.flipSeq+';render()"><title>Witness flipped · proof.observed · frame '+f.flipSeq+'</title>'+
+        '<line x1="'+fx.toFixed(1)+'" y1="'+(pt-20)+'" x2="'+fx.toFixed(1)+'" y2="'+Math.max(pt-20,y2-20).toFixed(1)+'" stroke="var(--st-proven)" stroke-width="1.6" stroke-dasharray="3 2"/>'+
+        '<line x1="'+fx.toFixed(1)+'" y1="'+y2.toFixed(1)+'" x2="'+fx.toFixed(1)+'" y2="'+(pt+ih)+'" stroke="var(--st-proven)" stroke-width="1.6" stroke-dasharray="3 2"/>'+
+        '<circle cx="'+fx.toFixed(1)+'" cy="'+(pt-24)+'" r="4" fill="var(--st-proven)"/>'+
+        '<text x="'+(fx>W/2?fx-8:fx+8).toFixed(1)+'" y="'+(pt-20)+'" text-anchor="'+(fx>W/2?'end':'start')+'" fill="var(--st-proven)" font-size="10.5">flip · frame '+f.flipSeq+'</text></g>';}
+  }
+  var line='<path d="M'+pts.join("L")+'" fill="none" stroke="var(--fg)" stroke-width="1.6" stroke-dasharray="4 3" stroke-linejoin="round" opacity=".75"/>'+
+    pts.slice(1).map(function(p){var a=p.split(",");return '<circle cx="'+a[0]+'" cy="'+a[1]+'" r="2.6" fill="var(--fg)"/>';}).join("")+
+    '<text x="'+(W-pr+8)+'" y="'+(Yc(total)+3.5).toFixed(1)+'" fill="var(--fg)" font-size="11" font-weight="600">'+usd(R.cost)+'</text>'+
+    '<text x="'+(W-pr+8)+'" y="'+(Yc(total)+16).toFixed(1)+'" fill="var(--dim)" font-size="10">total</text>';
+  return '<svg class="wf-svg" viewBox="0 0 '+W+' '+H+'" style="width:100%;min-width:520px;height:auto;display:block" role="img" aria-label="Cost by turn, accumulating to '+h(usd(R.cost))+'">'+g+
+   '<line x1="'+pl+'" y1="'+(pt+ih)+'" x2="'+(W-pr)+'" y2="'+(pt+ih)+'" stroke="var(--rule)"/>'+bars+line+labs+marks+'</svg>';
+}
 function costTab(R){
-  var turns=[{n:1,c:0.41,cache:0.87},{n:2,c:0.55,cache:0.88},{n:3,c:0.39,cache:0.91},{n:4,c:0.71,cache:0.82},
-             {n:5,c:0.88,cache:0.74},{n:6,c:0.64,cache:0.79},{n:7,c:0.55,cache:0.83}];
-  var mx=0.88, cum=0;
-  var bars=turns.map(function(t){cum+=t.c;
-    return '<div style="display:grid;gap:5px"><div class="lab" style="display:flex;font-size:11.5px;color:var(--muted)">Turn '+t.n+
-     '<b style="margin-left:auto;color:var(--fg);font-variant-numeric:tabular-nums">$'+t.c.toFixed(2)+'</b></div>'+
-     '<div class="bar" style="height:18px"><i style="width:'+Math.round(t.c/mx*100)+'%;background:var(--gold)"></i></div>'+
-     '<div class="dim mono" style="font-size:10.5px">cache '+per(t.cache)+' · running total $'+cum.toFixed(2)+'</div></div>';
-  }).join("");
-  return '<div class="split"><div class="panel"><div class="panel-h"><h3>Run waterfall</h3>'+
-   '<span class="b b-q" style="margin-left:auto">cost accumulates left to right</span></div>'+
-   '<div class="panel-b" style="display:grid;gap:13px">'+bars+
-   '<div class="note">The proof frame is pinned at turn 4. One finding is pinned to turn 5: the tool list grew by 1,900 tokens when the belt was recomputed mid-run after a deny-generation bump.</div></div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>Prompt composition</h3></div><div class="panel-b" style="display:grid;gap:11px">'+
-   [["Conversation",14190,"var(--st-observe)"],["Context frames",11204,"var(--st-proven)"],["Tool definitions",2118,"var(--st-approval)"],["Steering",1340,"var(--gold)"]]
-   .map(function(x){var tot=28852;
-    return '<div class="meter"><div class="lab">'+x[0]+'<b>'+x[1].toLocaleString()+' tok</b></div>'+
-      '<div class="bar"><i style="width:'+Math.round(x[1]/tot*100)+'%;background:'+x[2]+'"></i></div></div>';}).join("")+
-   '<div class="hr"></div><dl class="kv">'+
-   '<dt>Effective input price</dt><dd>$1.88 per million across all input classes</dd>'+
-   '<dt>Cache write cost share</dt><dd>0.0% — nothing written this run</dd>'+
-   '<dt>Proven spend</dt><dd>'+usd(R.provenSpend)+' USD</dd>'+
-   '<dt>Productive ratio</dt><dd>'+per(R.ratio)+'</dd></dl></div></div>';
+  var s=runSeries(R),m=runMetrics(R),total=parseFloat(R.cost)||0,tf=wfTurnFrames(R,s),finds=wfFindings(R,s),f=R.flip;
+  var light=/haiku|flash|light/i.test(R.model||""),op=light?PRICE.outLight:PRICE.out,cum=0;
+  var rows=s.cost.map(function(c,i){var from=cum;cum+=c;var fnd=finds.filter(function(x){return x.turn===i;}),flipHere=f&&f.flipSeq!=null&&f.turn===i+1;
+    return '<tr'+(flipHere||fnd.length?' style="background:var(--hl)"':'')+'><td class="mono">T'+(i+1)+'</td><td class="num">'+s.steps[i]+'</td><td class="num">'+tf.n[i]+'</td><td class="num">'+per(s.cache[i])+'</td>'+
+     '<td class="num wf-cost">$'+c.toFixed(2)+'</td><td class="num dim">$'+from.toFixed(2)+' → $'+cum.toFixed(2)+'</td><td>'+
+     (flipHere?frameBtn(f.flipSeq,"proof.observed · frame "+f.flipSeq)+(fnd.length?' · ':''):'')+
+     (fnd.length?fnd.map(function(x){return '<button class="b b-denied" style="cursor:pointer" onclick="openDialog(\'evidence\',\''+h(x.fd.id)+'\')"'+tipAttr("pinned to "+x.why)+'><span class="d"></span>'+h(x.fd.kind)+'</button>';}).join(" "):flipHere?'':'<span class="dim">—</span>')+'</td></tr>';}).join("");
+  var stepSum=s.steps.reduce(function(a,b){return a+b;},0),frameSum=tf.n.reduce(function(a,b){return a+b;},0);
+  var foot='<tr class="wf-total"><td><b>total</b></td><td class="num"><b>'+stepSum+'</b></td><td class="num"><b>'+frameSum+'</b></td><td class="num">'+per(s.cacheAvg)+'</td><td class="num"><b class="wf-sum">$'+cum.toFixed(2)+'</b></td><td class="num dim">of '+usd(R.cost)+' recorded</td><td></td></tr>';
+  /* spend by token class: input at the effective price split by class, output at list */
+  var inCost=total/3,pu=inCost/Math.max(1,m.fresh+0.1*m.cacheRead),outVis=m.tokOut-m.reasoning;
+  var cls=[["input_uncached",m.fresh,m.fresh*pu],["cache_read",m.cacheRead,m.cacheRead*pu*0.1],["cache_write_5m",m.cacheWrite,0],["output",outVis,outVis*op]];
+  var sofar=cls.reduce(function(a,x){return a+x[2];},0);cls.push(["reasoning",m.reasoning,Math.max(0,total-sofar)]);
+  var clsRows=cls.map(function(x){return '<tr><td class="mono">'+x[0]+'</td><td class="num">'+tokn(x[1])+'</td><td class="num">'+(x[1]?'$'+x[2].toFixed(4):'—')+'</td><td class="num dim">'+(total?(x[2]/total*100).toFixed(1):'0.0')+'%</td></tr>';}).join("")+
+    '<tr><td><b>total</b></td><td class="num"><b>'+tokn(m.tokTotal)+'</b></td><td class="num"><b>'+usd(R.cost)+'</b></td><td class="num dim">100.0%</td></tr>';
+  var fixed=FR_SYS+FR_STEER+FR_TOOLS,ctx=Math.min(Math.round(FR_BUDGET*0.62),Math.round(Math.max(0,m.perCall-fixed)*0.6)),conv=Math.max(0,m.perCall-fixed-ctx);
+  var comp=[["Conversation",conv,"var(--st-allowed)"],["Context frames",ctx,"var(--st-proven)"],["Tool definitions",FR_TOOLS,"var(--st-approval)"],["Steering",FR_STEER,"var(--k-rule)"],["System",FR_SYS,"var(--dim)"]];
+  var legend='<div class="row" style="gap:14px;margin-top:10px;font-size:11.5px;color:var(--muted)">'+
+    [["var(--st-approval)","turn cost"],["var(--st-proven)","turn carrying the flip"],["var(--st-denied)","turn carrying a finding"]].map(function(x){return '<span><i style="display:inline-block;width:9px;height:9px;border-radius:2px;background:'+x[0]+';margin-right:5px"></i>'+x[1]+'</span>';}).join("")+
+    '<span><i style="display:inline-block;width:14px;border-top:2px dashed var(--fg);margin-right:5px;vertical-align:middle"></i>cost so far</span></div>';
+  return '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Run waterfall</h3>'+
+    '<div class="sp" style="margin-left:auto;display:flex;gap:6px;align-items:center;flex-wrap:wrap">'+verdictBadge(R.verdict,R)+
+     (finds.length?'<span class="b b-denied"><span class="d"></span>'+finds.length+' finding'+(finds.length===1?'':'s')+'</span>':'')+
+     '<span class="b b-q">'+s.n+' turn'+(s.n===1?'':'s')+' · '+usd(R.cost)+' '+h(R.basis)+'</span></div></div>'+
+    '<div class="panel-b"><div style="overflow-x:auto">'+wfChart(R,s,tf,finds)+'</div>'+legend+
+    '<p class="muted" style="font-size:11.5px;margin:10px 0 0">Bar height is the turn’s cost on the left scale; the dashed line is cost accumulating to '+usd(R.cost)+'. '+
+     (f&&f.flipSeq!=null?'The flip is marked where it landed inside turn '+f.turn+'. ':'')+(finds.length?'Diamonds are Spend findings that name this run, pinned to the turn their pattern points at. ':'')+'Each mark opens.</p></div>'+
+    '<div class="tw"><table class="wf-table" data-lt="off"><thead><tr><th>Turn</th><th class="num">Steps</th><th class="num">Frames</th><th class="num">Cache hit</th><th class="num">Cost</th><th class="num">Running total</th><th>Pinned</th></tr></thead>'+
+     '<tbody>'+rows+foot+'</tbody></table></div>'+
+    (tf.counted?'':'<div class="panel-b" style="font-size:11.5px"><span class="dim">Frames per turn are apportioned by steps: this run’s frames in view do not carry their turn.</span></div>')+'</div>'+
+   '<div class="grid g2"><div class="panel"><div class="panel-h"><h3>Spend by token class</h3><span class="mono dim" style="margin-left:auto;font-size:11px">'+tokn(m.tokTotal)+' tokens</span></div>'+
+    '<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Class</th><th class="num">Tokens</th><th class="num">Cost</th><th class="num">Share</th></tr></thead><tbody>'+clsRows+'</tbody></table></div>'+
+    '<div class="panel-b"><div class="note">Input is a third of the money and priced at the effective rate across its classes, a cache read at a tenth of an uncached token; output and reasoning are priced at '+(light?'the light-tier':'the flagship')+' list rate.</div></div></div>'+
+   '<div class="panel"><div class="panel-h"><h3>Prompt composition</h3><span class="mono dim" style="margin-left:auto;font-size:11px">mean request · '+tokn(m.perCall)+' tok</span></div><div class="panel-b" style="display:grid;gap:11px">'+
+    comp.map(function(x){return '<div class="meter"><div class="lab">'+x[0]+'<b>'+tokn(x[1])+' tok</b></div><div class="bar"><i style="width:'+Math.round(x[1]/Math.max(1,m.perCall)*100)+'%;background:'+x[2]+'"></i></div></div>';}).join("")+
+    '<div class="hr"></div><dl class="kv">'+
+    '<dt>Effective input price</dt><dd>$1.88 per million across all input classes</dd>'+
+    '<dt>Cache write cost share</dt><dd>'+(m.cacheWrite?pct(m.cacheWrite,m.tokIn):'0.0% — nothing written this run')+'</dd>'+
+    '<dt>Proven spend</dt><dd>'+usd(R.provenSpend)+' USD</dd>'+
+    '<dt>Productive ratio</dt><dd>'+per(R.ratio)+' · '+s.adv+' of '+R.steps+' steps advanced the task</dd></dl></div></div></div>';
 }
 
+/* ---- Chain and seal: dense seq, checkpoints off the frames, the replay-grade ladder ---- */
+var GRADE_LADDER=[["full","every body recorded","render, fork replay, bisect, export"],["partial","some bodies missing, recorded as gaps","render with the gaps shown; no fork past a gap"],
+  ["digest","digests only, producer-signed","verify the chain and the seal; no render of content"],["ledger","frames archived to the segment","render from the archive segment, then as full"]];
 function chainTab(R){
-  var sealed=R.status!=="live"&&R.status!=="parked";
+  var sealed=R.status!=="live"&&R.status!=="parked",L=runFrames(R),cps=L.filter(function(f){return f.kind==="checkpoint";});
+  var cpN=L.length>=R.frames?cps.length:Math.floor((R.frames||0)/20),root=R.id==="run_01K4QJ9E4T6YUI1O"?"sha256:b41e07c9a2f5308d6e14bb90c7f2a331":"sha256:"+frHex(R.id+"merkle",32);
+  var cpRows=cps.map(function(f){return '<tr><td>'+frameBtn(f.seq,"frame "+f.seq)+'</td><td class="num mono">'+(f.from!=null?f.from:"—")+'–'+f.seq+'</td><td class="mono" style="font-size:11px">'+h(f.head||frDig(R.id+f.seq+"head"))+'</td><td><span class="b b-allowed"><span class="d"></span>countersigned</span></td></tr>';}).join("");
+  var ladder=GRADE_LADDER.map(function(g){var on=g[0]===R.grade;
+    return '<tr'+(on?' style="background:var(--hl)"':'')+'><td>'+(on?'<span class="b b-proven"><span class="d"></span>'+g[0]+'</span>':'<span class="mono dim">'+g[0]+'</span>')+'</td><td style="font-size:12px">'+g[1]+'</td><td style="font-size:12px">'+g[2]+'</td></tr>';}).join("");
   return '<div class="grid g2">'+
    '<div class="panel"><div class="panel-h"><h3>Hash chain</h3>'+
-    '<span class="b b-allowed" style="margin-left:auto"><span class="d"></span>no gaps</span></div><div class="panel-b">'+
-    '<dl class="kv"><dt>Frames</dt><dd class="num">'+R.frames+' · dense seq 0 … '+(R.frames-1)+'</dd>'+
+    '<span class="b b-allowed" style="margin-left:auto"><span class="d"></span>'+(R.verdict==="tampered"?'verified with a broken window':'no gaps')+'</span></div><div class="panel-b">'+
+    '<dl class="kv"><dt>Frames</dt><dd class="num">'+R.frames+' · dense seq 0 … '+(R.frames-1)+(sealed?' · the seal is envelope '+R.frames:'')+'</dd>'+
     '<dt>Rule</dt><dd class="mono" style="font-size:11.5px">hash = SHA256(prev_hash ‖ canonical(envelope))</dd>'+
     '<dt>telemetry_gap frames</dt><dd>0 — a gap is recorded, never repaired</dd>'+
-    '<dt>Checkpoints</dt><dd>7 · signed by the host device key, countersigned by Oxagen at ingest</dd>'+
-    '<dt>Completeness gaps</dt><dd>'+(R.grade==="full"?"none — replay grade is full":"bodies missing on 3 frames — replay grade lowered")+'</dd></dl>'+
+    '<dt>Checkpoints</dt><dd>'+cpN+' · every 20 frames · signed by the host device key, countersigned by Oxagen at ingest</dd>'+
+    '<dt>Completeness gaps</dt><dd>'+(R.grade==="full"?"none — replay grade is full":R.grade==="partial"?"bodies missing on some frames — replay grade lowered":R.grade==="digest"?"bodies not sent — digests only":"none — frames are in the archive segment")+'</dd></dl>'+
     '<div class="note" style="margin-top:13px">Gateway-observed frames are Oxagen-attested. Client-attested frames are producer-signed and countersigned at ingest: Oxagen attests receipt and chain integrity, not the truth of the content.</div></div></div>'+
    '<div class="panel"><div class="panel-h"><h3>Seal and attestation</h3>'+(sealed?'<span class="b b-allowed" style="margin-left:auto"><span class="d"></span>sealed</span>':'<span class="b b-q" style="margin-left:auto">not sealed — run is still open</span>')+'</div>'+
     '<div class="panel-b">'+(sealed?'<dl class="kv">'+
-    '<dt>Merkle root</dt><dd class="mono">sha256:b41e07c9a2f5308d</dd>'+
-    '<dt>Archive segment</dt><dd class="mono">seg_'+h(R.id)+'.ndjson.zst</dd>'+
+    '<dt>Merkle root</dt><dd class="mono" style="word-break:break-all">'+root+'</dd>'+
+    '<dt>Over</dt><dd>frames 0 … '+(R.frames-1)+(R.flip&&R.flip.sealSeq!=null?' · sealed at '+h(R.flip.sealedAt)+' as envelope '+R.flip.sealSeq:R.sealed?' · sealed '+h(R.sealed):'')+'</dd>'+
+    '<dt>Archive segment</dt><dd class="mono">seg_'+h(R.id.replace(/^run_/,""))+'.ndjson.zst</dd>'+
     '<dt>Signature</dt><dd class="mono">ed25519 · '+h(ORG.attester)+'</dd>'+
     '<dt>Signs over</dt><dd class="mono" style="font-size:11.5px">run_id, attempt_id, frame_count, merkle_root, archive_segment_digest, enforcement_tier, completeness_gaps</dd>'+
     '<dt>Enforcement tier</dt><dd>'+tierBadge(R.tier)+' — computed from what was observed, not from what the adapter could do on paper</dd>'+
-    '<dt>Verify offline</dt><dd><button class="btn sm" onclick="act(\'Bundle downloaded: segments, attestations, key ids, verifier script.\')">Download the bundle</button></dd></dl>':
+    '<dt>Verify offline</dt><dd><button class="btn sm" onclick="openDialog(\'runexport\')">Export the bundle</button></dd></dl>':
     '<p class="muted">The seal is computed at run end, for every terminal outcome. Until then the chain is verifiable frame by frame but there is no Merkle root and no attestation.</p>')+
-    '</div></div></div>';
+    '</div></div>'+
+   '<div class="panel"><div class="panel-h"><h3>Replay grade</h3><span class="b b-q" style="margin-left:auto">'+h(R.grade)+'</span></div>'+
+    '<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Grade</th><th>What was recorded</th><th>What it allows</th></tr></thead><tbody>'+ladder+'</tbody></table></div>'+
+    '<div class="panel-b"><div class="note">The grade is computed at seal from what the chain holds, never raised afterwards. Bisect and fork replay read the same frames the player shows.</div>'+
+    '<div class="row" style="margin-top:12px">'+(sealed?'<button class="btn sm" onclick="S.bis=null;openDialog(\'bisect\')">Bisect against another run</button>':'')+'<button class="btn sm" onclick="openDialog(\'forkreplay\')">Fork replay from frame '+Math.min(S.frame||0,L.length-1)+'</button></div></div></div>'+
+   '<div class="panel"><div class="panel-h"><h3>Checkpoints</h3><span class="mono dim" style="margin-left:auto;font-size:11px">'+cps.length+' in view · '+cpN+' in the run</span></div>'+
+    (cps.length?'<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Frame</th><th class="num">Covers</th><th>Chain head</th><th>Signature</th></tr></thead><tbody>'+cpRows+'</tbody></table></div>':
+     '<div class="panel-b muted" style="font-size:12.5px">No checkpoint frame is in view; the recorder writes one every 20 frames.</div>')+'</div>'+
+   '</div>';
 }
+
+/* ---- Fork replay, Bisect and Export: dialogs registered beside the run page ---- */
+DLG_EXT.forkreplay=function(){
+  var R=run(S.frameRun)||RUNS[0],L=runFrames(R),i=Math.min(S.frame||0,L.length-1),f=L[i],after=L.slice(i+1);
+  var toolsAfter=after.filter(function(x){return x.kind==="tool_call";}).length,modelsAfter=after.filter(function(x){return x.kind==="model.response";});
+  var est=modelsAfter.reduce(function(a,x){return a+(parseFloat(x.cost)||0);},0),first=modelsAfter[0],unseen=Math.max(0,(R.frames||0)-L.length);
+  var spent=L.slice(0,i+1).reduce(function(a,x){return a+(parseFloat(x.cost)||0);},0);
+  var tag=function(cls,t){return '<span class="b '+cls+'" style="flex:none;min-width:128px;justify-content:center">'+t+'</span>';};
+  var row=function(tg,tx){return '<div class="row" style="gap:12px;align-items:flex-start;flex-wrap:nowrap;margin-bottom:10px">'+tg+'<div style="font-size:12.5px;min-width:0">'+tx+'</div></div>';};
+  var blocked=R.grade==="digest"||R.grade==="partial"||(R.status==="compacted"&&!S.seg[R.id]);
+  return {t:"Fork replay from frame "+f.seq,s:"A new attempt on the same run, linked to this one. It never overwrites what is sealed.",w:true,
+   b:(blocked?'<div class="warn" style="margin-bottom:14px"><b>Not from this grade.</b> '+(R.status==="compacted"?'Render the archive segment first; a fork reads the same bytes.':'Replay grade '+h(R.grade)+' has no bodies to replay from. Only a full-grade run forks.')+'</div>':'')+
+    frSec("Where it forks",frKv([["Fork point","frame "+f.seq+" · <span class=\"mono\">"+h(f.kind)+"</span> · "+h(f.t)],["New attempt",'<span class="mono">att_'+frHex(R.id+f.seq,8).toUpperCase()+'</span> linked to '+h(R.id)],
+     ["Recorded context","the exact context frames and steering frame "+f.seq+" saw, by content digest"],["Policy version","pol_v41 · the version the recording ran under"]]))+
+    frSec("What is replayed, what runs live",
+     row(tag("b-q","from the recording"),'<b>Frames 0–'+f.seq+'</b> replay exactly as recorded. No model is called and no tool is dispatched for any of them.')+
+     row(tag("b-allowed","runs live"),'<b>The next model call</b>'+(first?' (recorded at '+frameBtn(first.seq,"frame "+first.seq)+')':'')+' is made for real against <span class="mono">'+h(R.model)+'</span> with the recorded prompt. It costs money and the answer may differ — that is the point of a fork.')+
+     row(tag("b-proven","from the cassette"),'<b>'+toolsAfter+' tool call'+(toolsAfter===1?'':'s')+' after this frame</b> are served from the recording when the canonical input digest matches, byte for byte. Nothing reaches a real tool server.')+
+     row(tag("b-denied","denied"),'<b>A tool call whose input digest differs</b> has no cassette entry. It is denied, not dispatched: a fork cannot open a pull request, move money, or write to a repository.'))+
+    frSec("Cost and record",frKv([["Spent by this frame","$"+spent.toFixed(2)+" of "+usd(R.cost)+" · not spent again"],
+     ["Estimated spend",first?"about $"+(parseFloat(first.cost)||0).toFixed(2)+" for the first live call; $"+est.toFixed(2)+" if the fork runs to the end":"no model call follows this frame in view"],
+     unseen?["Not in view",unseen+" recorded frames after the last one shown; the estimate covers only frames in view"]:null,
+     ["Billed as","a run, on the same operator and agent"],["Recorded as","its own frames, its own chain, its own seal"],
+     ["This run",'<span style="color:var(--st-allowed)">unchanged — sealed runs are immutable</span>']])),
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><span class="grow"></span>'+
+    '<button class="btn primary"'+(blocked?' disabled':'')+' onclick="closeDialog();act(\'Fork replay started from frame '+f.seq+' as a new attempt linked to '+R.id+'. Tool results after it are served from the cassette.\')">Start fork replay</button>'};
+};
+/* bisect compares on what a frame did, not when: its kind and the call's identity */
+function bisKey(f,R){
+  var c=f.call?f.call.id:(/^([a-z_]+__[a-z_]+@\d+)/.exec(f.sum||"")||[])[1]||"";
+  if(f.kind==="model.request"||f.kind==="model.response")c=R.model;
+  if(f.kind==="policy_decision")c+=" "+(f.pol?f.pol.outcome:String(f.sum).split(" ")[0]);
+  if(f.kind==="proof.observed")c=f.att?f.att.result:"";
+  if(f.kind==="context.assembled")c=f.ctx?f.ctx.rows.length+" frames":((/(\d+) context frames/.exec(f.sum)||[])[1]||"")+" frames";
+  return f.kind+"|"+c;
+}
+function bisWhat(f,R){if(!f)return "no frame";var k=bisKey(f,R).split("|");return k[0]+(k[1]?" · "+k[1]:"");}
+function bisOpts(cur){
+  var R=run(cur)||RUNS[0];
+  return RUNS.slice().sort(function(a,b){var sa=(a.task===R.task?0:a.agent===R.agent?1:2),sb=(b.task===R.task?0:b.agent===R.agent?1:2);return sa-sb;});
+}
+function bisRun(){var a=el("bis-a"),b=el("bis-b");S.bis={a:a?a.value:S.frameRun,b:b?b.value:null,done:true};render();}
+DLG_EXT.bisect=function(){
+  var cur=S.frameRun||RUNS[0].id,st=S.bis||{},aId=st.a||cur,opts=bisOpts(cur),bDef=(opts.filter(function(r){return r.id!==aId;})[0]||{}).id,bId=st.b||bDef;
+  var A=run(aId),B=run(bId);
+  var label=function(r){return r.id+" · "+r.agent.split(".").pop()+" · "+(r.verdict||r.status)+" · $"+r.cost+(r.task===run(cur).task?" · same task":"");};
+  var sel=function(id,val){return '<select id="'+id+'" aria-label="'+(id==="bis-a"?"Run A":"Run B")+'">'+opts.map(function(r){return '<option value="'+r.id+'"'+(r.id===val?' selected':'')+'>'+h(label(r))+'</option>';}).join("")+'</select>';};
+  if(!st.done||!A||!B){
+    return {t:"Bisect between two runs",s:"Aligns two runs frame by frame and finds the first frame where they did something different.",w:false,
+     b:'<div class="field"><label>Run A</label>'+sel("bis-a",aId)+'</div><div class="field"><label>Run B</label>'+sel("bis-b",bId)+'</div>'+
+      '<div class="note">Runs of the same task are listed first, then runs of the same agent. Frames are compared on what they did — the kind, the tool and version, the model, the policy outcome — not on times or digests, which always differ.</div>',
+     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="bisRun()">Bisect</button>'};
+  }
+  var LA=runFrames(A),LB=runFrames(B),n=Math.max(LA.length,LB.length),d=-1,i;
+  if(A.id!==B.id)for(i=0;i<n;i++){if(!LA[i]||!LB[i]||bisKey(LA[i],A)!==bisKey(LB[i],B)){d=i;break;}}
+  var lo=Math.max(0,(d<0?0:d)-4),hi=Math.min(n-1,(d<0?0:d)+4);
+  var side=function(L,R){var rows="";for(var k=lo;k<=hi;k++){var f=L[k],on=k===d,after=d>=0&&k>d;
+    rows+='<div class="bis-row" style="display:flex;gap:10px;align-items:baseline;padding:5px 9px;border-left:2px solid '+(on?'var(--st-denied)':'transparent')+';background:'+(on?'var(--hl)':'transparent')+';font-size:12px;'+(after?'color:var(--muted)':'')+'"'+(on?' data-diff="1"':'')+'>'+
+      '<span class="mono dim" style="width:26px;text-align:right;flex:none">'+k+'</span><span class="mono" style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+h(bisWhat(f,R))+'</span></div>';}
+    return rows;};
+  var head=function(r,L,tagL){return '<div style="padding:8px 9px;border-bottom:1px solid var(--border)"><b>'+tagL+' · <span class="mono">'+h(r.id)+'</span></b><div class="dim" style="font-size:11.5px">'+h(r.agent)+' · '+(L.length<r.frames?L.length+' of '+r.frames+' frames in view':L.length+' frames')+' · '+usd(r.cost)+' · '+h(r.verdict||r.status)+'</div></div>';};
+  var same=A.id===B.id,fa=LA[d],fb=LB[d];
+  return {t:"Bisect · "+A.id.slice(-6)+" against "+B.id.slice(-6),s:same?"The same run on both sides has nothing to bisect.":d<0?"No frame differs on what it did.":"First differing frame · seq "+d,w:true,
+   b:(same?'<div class="warn">Choose two different runs.</div>':
+    '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px">'+
+     '<div class="panel" style="margin:0">'+head(A,LA,"A")+'<div class="bis-side" style="padding:4px 0">'+side(LA,A)+'</div></div>'+
+     '<div class="panel" style="margin:0">'+head(B,LB,"B")+'<div class="bis-side" style="padding:4px 0">'+side(LB,B)+'</div></div></div>'+
+    (d>=0?frSec("First differing frame · "+d,'<div class="grid g2" style="gap:12px"><div class="callout"><b>A</b> · '+h(bisWhat(fa,A))+(fa?'<div class="dim mono" style="font-size:11px;margin-top:4px">'+h(fa.sum)+'</div>':'')+'</div>'+
+      '<div class="callout"><b>B</b> · '+h(bisWhat(fb,B))+(fb?'<div class="dim mono" style="font-size:11px;margin-top:4px">'+h(fb.sum)+'</div>':'')+'</div></div>'+
+      '<div class="note" style="margin-top:12px">'+(d===0?'The runs part at their first frame.':d===1?'Frame 0 did the same thing on both sides.':'Frames 0–'+(d-1)+' did the same thing on both sides.')+' Everything after frame '+d+' is downstream of this difference; the two runs cost '+usd(A.cost)+' and '+usd(B.cost)+'.</div>',"aligned by seq"):
+     '<div class="note" style="margin-top:12px">The runs match on every frame in view.</div>')),
+   f:'<button class="btn" onclick="S.bis.done=false;render()">Choose again</button><span class="grow"></span>'+
+    (d>=0&&!same?'<button class="btn primary" onclick="S.bis=null;closeDialog();S.tab.run=\'player\';S.frame='+d+';go(\'#/'+ORG.slug+'/'+A.ws+'/runs/'+A.id+'\');render()">Open frame '+d+' in run A</button>':'<button class="btn" onclick="closeDialog()">Close</button>')};
+};
+DLG_EXT.runexport=function(){
+  var R=run(S.frameRun)||RUNS[0],sealed=R.status!=="live"&&R.status!=="parked";
+  return {t:"Export this run",s:"segment, attestation, key ids and the verifier",w:false,
+   b:'<div class="field"><label>Scope</label><select id="ex-scope" aria-label="Scope"><option>run '+h(R.id)+' · '+R.frames+' frames'+(sealed?' and the seal':'')+'</option><option>task '+h(R.task)+' · every run</option><option>agent '+h(R.agent)+' · all runs</option></select></div>'+
+    '<div class="field"><label>Format</label><select aria-label="Format"><option>Signed bundle (segment + verifier)</option><option>Frames as NDJSON</option><option>Receipts as CSV</option></select></div>'+
+    frKv([["Segment",'<span class="mono">seg_'+h(R.id.replace(/^run_/,""))+'.ndjson.zst</span> · '+R.frames+' frame envelopes'],["Replay grade",h(R.grade)],["Seal",sealed?"included · verifies offline":"not yet — the run is open, so the bundle carries checkpoints only"]])+
+    '<div class="callout" style="margin-top:12px">Runs as <span class="mono">export_data</span> — a governed action with third-party egress. Bodies for erased subjects are not in the bundle; their digests are, so the chain still verifies.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="queueExport()">Build bundle</button>'};
+};
 
 /* ============================== Agents ============================== */
 function pAgents(){
@@ -10043,7 +10594,37 @@ SCENARIOS["sixty-seconds-to-governed"]={title:"Sixty seconds to governed", ws:"c
 
 /* ---- end W1 ---- */
 /* ---- W4 · flight-recorder ---- */
-
+SCENARIOS["flight-recorder"]={title:"The flight recorder", ws:"core-platform",
+ blurb:"A sealed run read back frame by frame: what the model was shown, what each turn cost, and where two runs part ways.",
+ steps:[
+  {say:"stella-ci witnessed the release-notes contract flip on #482 and sealed <span class=\"mono\">run_01K5RQ4B9C7XTN2P</span> at 09:11:18. Everything on this page is read back from its 97 frames.",
+   note:"The transcript is the model-visible projection of those frames. Each witness attempt in it links to the frame the gateway wrote.",
+   route:function(o){return {page:"run",org:o,ws:"core-platform",id:"run_01K5RQ4B9C7XTN2P"};},
+   setup:function(){S.tab.run="transcript";S.frame=0;S.bis=null;}},
+  {say:"Frame 3 is the run’s first model response. Its usage is split by token class and priced, and its cost record is one of the numbers the Cost tab adds up.",
+   note:"Step with the arrow keys. The scrubber says how much of the run’s spend had gone by each frame.",
+   route:function(o){return {page:"run",org:o,ws:"core-platform",id:"run_01K5RQ4B9C7XTN2P"};},
+   setup:function(){S.tab.run="player";S.frame=3;S.frameRun="run_01K5RQ4B9C7XTN2P";S.fp.playing=false;},
+   act:["Open the flip frame","S.tab.run='player';S.frame=71;render()"]},
+  {say:"The Context tab accounts for one request to the token: five blocks that add up to 15,368 tokens, 12,000 of them read from cache.",
+   note:"The frames that were admitted and the candidates kept out sit side by side, so a bloated window shows before it gets expensive.",
+   route:function(o){return {page:"run",org:o,ws:"core-platform",id:"run_01K5RQ4B9C7XTN2P"};},
+   setup:function(){S.tab.run="context";}},
+  {say:"The waterfall: one bar per turn, the dashed line is the money accumulating to $2.87, and the flip is marked where it landed inside turn 4.",
+   note:"The table under it adds the same turns up to the recorded cost. A Spend finding that names this workspace is pinned to the turn its pattern points at.",
+   route:function(o){return {page:"run",org:o,ws:"core-platform",id:"run_01K5RQ4B9C7XTN2P"};},
+   setup:function(){S.tab.run="cost";}},
+  {say:"Chain and seal: 97 frames in a dense sequence, sealed as envelope 97. Bisect lines this run up against another and finds the first frame where they did different things.",
+   note:"Runs of the same task are offered first. Frames are compared on what they did, not on times or digests.",
+   route:function(o){return {page:"run",org:o,ws:"core-platform",id:"run_01K5RQ4B9C7XTN2P"};},
+   setup:function(){S.tab.run="chain";S.bis=null;},
+   act:["Bisect against another run","S.bis=null;openDialog('bisect')"]},
+  {say:"A witness run sealed in July 2025 has left the graph. Its 118 frames are still in the archive segment, written once at seal, and render replay reads them back.",
+   note:"Nothing was moved and nothing was recomputed: the segment holds the same bytes the graph indexed.",
+   route:function(o){return {page:"run",org:o,ws:"core-platform",id:"run_01K4QJ9E4T6YUI1O"};},
+   setup:function(){S.tab.run="player";S.frame=0;S.seg["run_01K4QJ9E4T6YUI1O"]=false;},
+   act:["Render from the segment","S.seg['run_01K4QJ9E4T6YUI1O']=true;render()"]}
+ ]};
 /* ---- end W4 ---- */
 /* ---- W5 · proven-not-claimed ---- */
 /* The suite's newest per-release row is the run ASSURANCE shows; the W5 proof records above added the
