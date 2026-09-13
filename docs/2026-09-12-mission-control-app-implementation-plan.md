@@ -1133,8 +1133,10 @@ You are lane <ID> of batch <N> building the new Mission Control app at ~/Project
 on branch app-rebuild/<N>-<id>, PR target app-rebuild.
 
 Read first:
-- ~/Documents/Oxagen/Specs/2026-09-12-mission-control-app-implementation-plan.md (§0, §4, and your row in §5)
-- spec ~/Documents/Oxagen/Specs/2026-09-11-oxagen-mission-control-spec.md §3 vocabulary, §14, §19 row for <page>
+- plan: `git -C ~/Documents/Oxagen/Mockups show origin/main:docs/2026-09-12-mission-control-app-implementation-plan.md`
+  (§0, §4, and your row in §5)
+- spec: `git -C ~/Documents/Oxagen/Mockups show origin/main:docs/2026-09-11-oxagen-mission-control-spec.md`
+  (§3 vocabulary, §14, §19 row for <page>). These docs/ copies are canonical, not ~/Documents/Oxagen/Specs.
 - mockup baseline: `git -C ~/Documents/Oxagen/Mockups show mc-baseline-w1:mc.html` (tag). It already carries
   Agent IAM, the small approval card, the sidebar flyout and the runMetrics instruments; read no other
   branch and not Specs/mockups. Decisions and their sources: tools/baseline/README.md at the same tag.
