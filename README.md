@@ -51,6 +51,8 @@ meant to ship in the live app.
 
 ## Docs
 
+- `docs/2026-09-11-oxagen-mission-control-spec.md` — the product and technical specification the mockups render: vocabulary, architecture, the ten pages (§14, App. F), target tables (App. A) and the demo scenarios (§19).
+- `docs/2026-09-12-mission-control-app-implementation-plan.md` — how the ten pages become the new Next.js `apps/app` in the oxagen monorepo: wireframe review, page-to-data mapping, toolchain, code, and parallel build batches.
 - `docs/2026-09-11-oxagen-demo-mockup-prompts.md` — the brief and the one-prompt-per-flow list that produced W1–W12.
 - `docs/CONSOLIDATION.md` — how W1–W11 were folded into one design; which version of each shared thing won.
 - `docs/feedback-mockups.md` — review feedback on the set.
