@@ -73,10 +73,13 @@ for (const [wfile, id] of W) {
       ok(clicked, `${tag}: act button "${label}" is in the rail`);
       if (shots) await page.screenshot({ path: path.join(shots, `${id}-${i}-act.png`) });
       if (i < meta.n) {
-        await page.evaluate(() => {
+        // An act can be the product's own forward control (onboarding's Continue), which moves
+        // the scenario on by itself; only press Next if the act left us on this step.
+        await page.evaluate(i => {
+          if (S.scn && S.scn.step !== i) return;
           const b = [...document.querySelectorAll(".scn .scn-f button")].find(x => x.textContent.trim() === "Next");
           if (b) b.click();
-        });
+        }, i);
         await page.waitForTimeout(250);
         const after = await page.evaluate(() => ({ dlg: S.dlg, step: S.scn && S.scn.step }));
         ok(after.step === i + 1, `${tag}: Next after the act lands on step ${i + 1} (on ${after.step})`);
