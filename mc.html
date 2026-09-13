@@ -7214,17 +7214,17 @@ function pOrganization(){
 
   var body="";
   if(t==="people"){
-    body='<div class="panel"><div class="panel-h"><h3>People</h3>'+
-     '<div class="sp"><span class="b b-q">SSO · Okta · SCIM on</span>'+
+    body=orgIdentityPanels()+'<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>People</h3>'+
+     '<div class="sp"><span class="b b-q" data-sso-badge>'+h(orgSsoBadge())+'</span>'+
      '<button class="btn sm" onclick="openDialog(\'invite\')">Invite</button></div></div><div class="tw"><table>'+
      '<thead><tr><th>Person</th><th>Role</th><th>Workspaces</th><th>Two-factor</th><th>SSO</th><th>Last seen</th><th>Status</th><th></th></tr></thead><tbody>'+
      MEMBERS.map(function(m){var p=PEOPLE[m.p];
       return '<tr><td><b>'+h(p.name)+'</b><div class="dim mono" style="font-size:11px">'+h(p.email)+'</div></td>'+
        '<td class="mono" style="font-size:11.5px">'+h(p.role)+'</td>'+
-       '<td>'+h(m.ws)+'</td><td>'+h(m.mfa)+'</td><td>'+h(m.sso)+'</td>'+
+       '<td>'+h(m.ws)+'</td><td>'+h(m.mfa)+'</td><td>'+h(m.sso)+' · '+(m.src==="scim"?"SCIM":"manual")+'</td>'+
        '<td class="mono dim" style="font-size:11px">'+h(m.last)+'</td>'+
        '<td><span class="b b-allowed"><span class="d"></span>'+h(m.status)+'</span></td>'+
-       '<td class="rowacts"><button class="btn sm" onclick="openDialog(\'role\')">Change role</button><button class="btn sm danger" onclick="openDialog(\'removemember\',\''+m.p+'\')">Remove</button></td></tr>';}).join("")+
+       '<td class="rowacts"><button class="btn sm" onclick="openDialog(\'member\',\''+m.p+'\')">Open</button><button class="btn sm" onclick="openDialog(\'role\',\''+m.p+'\')">Change role</button><button class="btn sm danger" onclick="openDialog(\'removemember\',\''+m.p+'\')">Remove</button></td></tr>';}).join("")+
      '</tbody></table></div><div class="panel-b">'+
      '<div class="note">Changing a role is a governed action. It passes IAM, writes an audit record, and bills as one action — the same path the in-app agent takes when it does it for you.</div></div></div>'+
      '<div class="grid g2" style="margin-top:14px">'+
@@ -7251,52 +7251,22 @@ function pOrganization(){
       '<td class="tkey" style="font-size:12px">'+h(w.main)+'</td><td class="mono">'+h(w.branch)+'</td>'+
       '<td class="mono dim" style="font-size:11.5px">'+(w.linked.length?h(w.linked.join(", ")):"—")+'</td>'+
       '<td class="num">'+w.agents+'</td><td>'+h(w.owner)+'</td>'+
-      '<td><span class="b b-q">team</span></td>'+
+      '<td><span class="b b-q">team</span><div class="dim mono" style="font-size:11px">'+h(w.retention)+' · ns '+h(w.ns)+'</div></td>'+
       '<td class="rowacts"><button class="btn sm" onclick="S.ws=\''+w.slug+'\';go(\'#/'+ORG.slug+'/'+w.slug+'\')">Open</button><button class="btn sm" onclick="openDialog(\'editws\',\''+w.slug+'\')">Edit</button><button class="btn sm danger" onclick="openDialog(\'archivews\',\''+w.slug+'\')">Archive</button></td></tr>';}).join("")+
      '</tbody></table></div><div class="panel-b">'+
      '<div class="note">Changing which repository is main is an org-owner action with approval, recorded as a security event. A repository may be linked to more than one workspace; it is main for at most one.</div></div></div>';
   } else if(t==="funding"){
-    body='<div class="split"><div class="panel"><div class="panel-h"><h3>Model routes — Oxagen’s own work only</h3>'+
-     '<span class="b b-q" style="margin-left:auto">customer agents pass through the model proxy with their own keys</span></div><div class="tw"><table>'+
-     '<thead><tr><th>Tier</th><th>Used for</th><th>Route</th><th>Resolves to</th><th>Fallback</th></tr></thead><tbody>'+
-     '<tr><td class="mono">complex</td><td class="dim" style="font-size:11.5px">in-app agent turns, reflection, promotion rationale, ontology diff explanation, Context PR bodies</td>'+
-      '<td class="mono" style="font-size:11.5px">z-ai/glm-latest</td><td class="mono" style="font-size:11.5px">GLM 5.3 · 1.3M context</td><td class="mono dim" style="font-size:11px">z-ai/glm-4.7</td></tr>'+
-     '<tr><td class="mono">light</td><td class="dim" style="font-size:11.5px">classification, labeling, entity and property naming, redaction hints, approval summaries, reranking</td>'+
-      '<td class="mono" style="font-size:11.5px">z-ai/glm-flash-latest</td><td class="mono" style="font-size:11.5px">GLM 5.3 Flash</td><td class="dim">—</td></tr>'+
-     '<tr><td class="mono">embed</td><td class="dim" style="font-size:11.5px">embeddings for entities, records, documents, issues, code</td>'+
-      '<td class="mono" style="font-size:11.5px">Voyage AI, direct</td><td class="mono" style="font-size:11.5px">voyage-4, voyage-code-3, voyage-context-3</td><td class="dim">—</td></tr>'+
-     '<tr><td class="mono">rerank</td><td class="dim" style="font-size:11.5px">reordering hybrid retrieval candidates</td>'+
-      '<td class="mono" style="font-size:11.5px">Voyage AI</td><td class="mono" style="font-size:11.5px">rerank-2.5</td><td class="dim">—</td></tr>'+
-     '</tbody></table></div><div class="panel-b">'+
-     '<div class="note">Tiers point at rolling aliases so “latest” stays current without a deploy. Every <span class="mono">model.response</span> frame records the concrete model id the provider returned, and the cost record prices <i>that</i> id — so a replay names the exact model and a reconciliation never matches an alias.</div></div></div>'+
+    body=orgRoutesPanel()+'<div class="split" style="margin-top:14px">'+orgFirewallRoutesPanel()+
      '<div class="panel"><div class="panel-h"><h3>Funding source</h3></div><div class="panel-b">'+
      '<div class="field"><label>Source</label><select aria-label="Funding source"><option>platform — Oxagen pays, billed back at vendor cost plus a published markup</option><option>customer_key — your own OpenRouter or vendor key</option></select>'+
      '<div class="hint">A new organization starts on <span class="mono">platform</span>, capped per organization. A customer key may point at OpenRouter or directly at a vendor.</div></div>'+
      '<dl class="kv"><dt>Current</dt><dd><span class="b b-allowed"><span class="d"></span>platform</span></dd>'+
-     '<dt>Cap</dt><dd>$2,000.00 USD per month · $1,082.45 used</dd>'+
+     '<dt>Cap</dt><dd>$2,000.00 USD per month · <span id="orgCapUsed">'+usd(fmt2(orgRoutesTotal()))+'</span> used in '+h(SPEND.month)+', the total of the routes</dd>'+
      '<dt>Key storage</dt><dd>enveloped, tested before save, never returned, every read audited</dd>'+
      '<dt>No call reads the environment</dt><dd>keys and routes come from the model layer’s resolver; a path that bypasses it is a defect</dd></dl>'+
      '<button class="btn" style="margin-top:12px" onclick="openDialog(\'funding\')">Change funding source</button></div></div></div>';
   } else if(t==="plane"){
-    body='<div class="split"><div class="panel"><div class="panel-h"><h3>Data plane</h3>'+
-     '<span class="b b-q" style="margin-left:auto">shared by default · dedicated where the firewall is the boundary</span></div><div class="panel-b"><dl class="kv">'+
-     '<dt>Binding</dt><dd><span class="b b-allowed"><span class="d"></span>shared</span> · '+h(ORG.region)+'</dd>'+
-     '<dt>Neo4j</dt><dd>one database per organization · <span class="mono">acme</span></dd>'+
-     '<dt>Postgres</dt><dd>partitioned by <span class="mono">org_id</span> · row-level policies enforced</dd>'+
-     '<dt>Object storage</dt><dd>object lock, compliance mode · per-organization key-encryption key</dd>'+
-     '<dt>Key-encryption key</dt><dd class="mono">kek_acme_2026Q3 · rotated 2026-09-10</dd>'+
-     '<dt>Attester key</dt><dd class="mono">'+h(ORG.attester)+' · published so a customer can verify an export offline</dd>'+
-     '<dt>Witness runner</dt><dd>Oxagen-hosted · on a dedicated plane it runs inside the customer’s plane</dd></dl>'+
-     '<div class="row" style="margin-top:14px"><button class="btn" onclick="openDialog(\'plane\')">Request a dedicated plane</button>'+
-     '<button class="btn" onclick="act(\'Key rotation scheduled. A rotation is a governed action and a security event.\')">Rotate keys</button></div></div></div>'+
-     '<div class="panel"><div class="panel-h"><h3>Retention</h3></div><div class="panel-b"><dl class="kv">'+
-     '<dt>Frame bodies</dt><dd>7 years from the seal · encrypted, content-addressed</dd>'+
-     '<dt>Run ledger</dt><dd>forever</dd>'+
-     '<dt>Frame nodes in the graph</dt><dd>13-month hot window, then compacted into the segment</dd>'+
-     '<dt>Control-plane audit</dt><dd>7 years</dd>'+
-     '<dt><span class="mono">digest_only</span> mode</dt><dd><b>off</b> — it is an opt-down, recorded as a completeness gap, and it lowers the replay grade</dd>'+
-     '<dt>Erasure</dt><dd>crypto-shredding: the per-subject data key is destroyed and a tombstone frame keeps the chain verifiable</dd></dl>'+
-     '<div class="note" style="margin-top:12px">Replay without bodies is a timeline, not a replay. The explanation promise depends on bodies, so keeping them is the default.</div></div></div></div>';
+    body=orgPlaneBody();
   } else {
     var KST={ok:["b-allowed","active"],expiring:["b-approval","expires in 21 days"],unused:["b-q","never used"]};
     body='<div class="panel"><div class="panel-h"><h3>API keys</h3>'+
@@ -7325,6 +7295,282 @@ function pOrganization(){
    '<div class="acts"><button class="btn" onclick="openDialog(\'invite\')">Invite</button>'+
    '<button class="btn primary" onclick="openDialog(\'newws\')">Create a workspace</button></div></div>'+tabs+body;
 }
+
+/* ---- Organization records (W10 · cio-console port). Identity, routes and workspace settings the tabs read.
+   Added as statements beside the page, so the shared literals at the top of the script stay untouched. ---- */
+var ORG_SSO={provider:"Okta",protocol:"SAML 2.0",enforced:true,
+  metadata:"https://acme.okta.example/app/exk41…/sso/saml/metadata",
+  certExpires:"2027-04-18",certFp:"SHA-256 4C:11:…:9A",session:"8 hours, then re-assert"};
+var ORG_SCIM={protocol:"SCIM 2.0 · push from Okta",status:"syncing",lastSync:"2026-09-11 09:30",
+  token:{tail:"8f21",rotated:"2026-07-01"},   /* only the tail is kept here: the token is never returned */
+  map:[
+   {group:"acme-owners",role:"org.owner"},
+   {group:"acme-eng-leads",role:"workspace.owner",ws:"core-platform"},
+   {group:"acme-finance",role:"org.billing"},
+   {group:"acme-grc",role:"org.auditor"},
+   {group:"acme-all",role:"workspace.member"}]};
+/* who came from the directory, through which group, and who is exempt from SSO */
+(function(){
+  var src={priya:["scim","acme-owners",true],marcus:["scim","acme-eng-leads",true],dana:["scim","acme-finance",false]};
+  MEMBERS.forEach(function(m){var x=src[m.p]||["manual",null,false];m.src=x[0];m.group=x[1];m.breakGlass=x[2];});
+  WS.forEach(function(w){
+    if(!w.ns) w.ns=w.slug.split("-")[0];            /* the same segment regKey() puts in every agent key */
+    if(!w.retention) w.retention="content_exact";
+    if(!w.budgetDay) w.budgetDay="20.00";           /* what a newly registered agent starts with */
+  });
+})();
+function orgSsoBadge(){return "SSO · "+ORG_SSO.provider+" · SCIM "+(ORG_SCIM.status==="syncing"?"on":"off");}
+function orgScimRole(x){return x.role+(x.ws?" · "+x.ws:"");}
+function orgMember(p){for(var i=0;i<MEMBERS.length;i++){if(MEMBERS[i].p===p)return MEMBERS[i];}return null;}
+function orgMemberWs(m){return m.ws==="all"?WS.slice():WS.filter(function(w){return w.slug===m.ws;});}
+function orgLatestSeen(){var best=null;MEMBERS.forEach(function(m){if(!best||m.last>best.last)best=m;});return best;}
+
+/* Model routes for Oxagen's own work. Month-to-date use comes from Spend where Spend carries the model
+   (the complex tier is the assistant line); the other tiers carry their own gateway_observed rows. */
+var ORG_ROUTES=[
+ {tier:"complex",use:"in-app agent turns, reflection, promotion rationale, ontology diff explanation, Context PR bodies",
+  provider:"OpenRouter",route:"z-ai/glm-latest",resolves:"GLM 5.3 · 1.3M context",fallback:"z-ai/glm-4.7",spendModel:"z-ai/glm-latest (assistant)",
+  fw:{endpoint:"https://models.acme.internal/v1",dialect:"Anthropic Messages-compatible",served:"llama-4-405b-instruct (self-served)"}},
+ {tier:"light",use:"classification, labeling, entity and property naming, redaction hints, approval summaries, reranking",
+  provider:"OpenRouter",route:"z-ai/glm-flash-latest",resolves:"GLM 5.3 Flash",fallback:"",calls:14380,unit:"calls",cost:"38.12",
+  fw:{endpoint:"https://models.acme.internal/v1",dialect:"OpenAI Chat Completions-compatible",served:"qwen3-32b-instruct (self-served)"}},
+ {tier:"embed",use:"embeddings for entities, records, documents, issues, code",
+  provider:"Voyage AI (direct)",route:"voyage-4 · voyage-code-3 · voyage-context-3",resolves:"1024-dim per family",fallback:"",calls:2610000,unit:"tokens",cost:"27.44",
+  fw:{endpoint:"https://embed.acme.internal",dialect:"one model per index",served:"bge-m3 (1024-dim)"}},
+ {tier:"rerank",use:"reordering hybrid retrieval candidates",
+  provider:"Voyage AI (direct)",route:"rerank-2.5",resolves:"rerank-2.5",fallback:"",calls:31206,unit:"calls",cost:"9.36",
+  fw:{endpoint:"https://embed.acme.internal",dialect:"—",served:"bge-reranker-v2-m3"}}
+];
+var ORG_ROUTE_PROVIDERS=["OpenRouter","Anthropic (direct)","OpenAI (direct)","Voyage AI (direct)","In-firewall endpoint"];
+function orgRouteUse(r){
+  if(r.spendModel){var m=null;SPEND.byModel.forEach(function(x){if(x.m===r.spendModel)m=x;});
+    if(m) return {calls:m.calls,unit:"calls",cost:money(m.spend)};}
+  return {calls:r.calls||0,unit:r.unit||"calls",cost:money(r.cost||0)};
+}
+function orgRoutesTotal(){return ORG_ROUTES.reduce(function(s,r){return s+orgRouteUse(r).cost;},0);}
+function orgUseCount(u){return u.unit==="tokens"?(u.calls/1e6).toFixed(2)+"M tok":u.calls.toLocaleString("en-US");}
+
+function orgRoutesPanel(){
+  var total=orgRoutesTotal();
+  return '<div class="panel"><div class="panel-h"><h3>Model routes — Oxagen’s own work only</h3>'+
+   '<div class="sp"><span class="b b-q">customer agents pass through the model proxy with their own keys</span></div></div><div class="tw"><table data-lt="off">'+
+   '<thead><tr><th>Tier</th><th>Provider</th><th>Route</th><th>Fallback</th><th class="num">Use · '+h(SPEND.month)+'</th><th class="num">Cost · '+h(SPEND.month)+'</th><th></th></tr></thead><tbody>'+
+   ORG_ROUTES.map(function(r,i){var u=orgRouteUse(r);
+    return '<tr data-route="'+h(r.tier)+'" data-cost="'+u.cost.toFixed(2)+'"><td><span class="mono">'+h(r.tier)+'</span><div class="dim" style="font-size:11px;max-width:34ch">'+h(r.use)+'</div></td>'+
+     '<td style="font-size:12px">'+h(r.provider)+'</td>'+
+     '<td class="mono" style="font-size:11.5px">'+h(r.route)+'<div class="dim" style="font-size:11px">resolves to '+h(r.resolves)+'</div></td>'+
+     '<td class="mono dim" style="font-size:11px">'+(r.fallback?h(r.fallback):'—')+'</td>'+
+     '<td class="num">'+orgUseCount(u)+'</td><td class="num">'+usd(fmt2(u.cost))+'</td>'+
+     '<td class="rowacts"><button class="btn sm" onclick="openDialog(\'editroute\','+i+')">Edit</button></td></tr>';}).join("")+
+   '<tr><td colspan="5"><b>Total</b> <span class="dim" style="font-size:11.5px">· basis gateway_observed · '+h(ORG.currency)+'</span></td><td class="num" id="orgRoutesTotal"><b>'+usd(fmt2(total))+'</b></td><td></td></tr>'+
+   '</tbody></table></div><div class="panel-b">'+
+   '<div class="note">Tiers point at rolling aliases so “latest” stays current without a deploy. Every <span class="mono">model.response</span> frame records the concrete model id the provider returned, and the cost record prices <i>that</i> id — so a replay names the exact model and a reconciliation never matches an alias. The complex row is the assistant line on Spend.</div></div></div>';
+}
+function orgFirewallRoutesPanel(){
+  return '<div class="panel"><div class="panel-h"><h3>In-firewall routes</h3>'+
+   '<div class="sp"><span class="b b-q">preview · behind-the-firewall deployment</span><span class="b b-q">air-gapped mode</span></div></div>'+
+   '<div class="panel-b" style="padding-bottom:0"><p class="muted" style="font-size:12.5px;margin:0">What each tier resolves to when the deployment runs inside your network. '+h(ORG.name)+' is on the <b>'+h(ORG.dataPlane)+'</b> plane, so none of these is in effect today.</p></div>'+
+   '<div class="tw"><table data-lt="off"><thead><tr><th>Tier</th><th>Endpoint</th><th>Dialect</th><th>Model served inside the network</th><th></th></tr></thead><tbody>'+
+   ORG_ROUTES.map(function(r,i){return '<tr data-fwroute="'+h(r.tier)+'"><td class="mono">'+h(r.tier)+'</td><td class="mono" style="font-size:11.5px">'+h(r.fw.endpoint)+'</td>'+
+    '<td style="font-size:12px">'+h(r.fw.dialect)+'</td><td class="mono" style="font-size:11.5px">'+h(r.fw.served)+'</td>'+
+    '<td class="rowacts"><button class="btn sm" onclick="openDialog(\'editroute\',\'fw:'+i+'\')">Edit</button></td></tr>';}).join("")+
+   '</tbody></table></div><div class="panel-b">'+
+   '<div class="note">Air-gapped is a supported mode, not a degraded one. Embeddings default to Voyage’s API in the cloud and to a self-served model here; one model per index makes that a per-deployment choice, never a mixed state. Changing an embedding route rebuilds the index rather than mixing two spaces.</div></div></div>';
+}
+DLG_EXT.editroute=function(arg){
+  var fw=typeof arg==="string"&&arg.indexOf("fw:")===0, i=parseInt(fw?arg.slice(3):arg,10), r=ORG_ROUTES[i];
+  if(!r) return {t:"Edit a route",w:false,b:'<div class="note">No route selected.</div>',f:'<button class="btn" onclick="closeDialog()">Close</button>'};
+  var prov=fw?"In-firewall endpoint":r.provider;
+  var opts=ORG_ROUTE_PROVIDERS.map(function(p){var inFw=p==="In-firewall endpoint";
+    return '<option'+(p===prov?' selected':'')+((inFw&&!fw)||(!inFw&&fw)?' disabled':'')+'>'+h(p)+(inFw&&!fw?' — behind the firewall only':'')+'</option>';}).join("");
+  return {t:"Edit the "+r.tier+" route",s:fw?"in-firewall route · preview until a behind-the-firewall deployment exists":"organization setting · platform default",w:false,
+   b:'<div class="field"><label for="rtProv">Provider</label><select id="rtProv">'+opts+'</select>'+
+     '<div class="hint">OpenRouter, a vendor directly, or an endpoint inside your network. The last is offered only on a behind-the-firewall deployment; '+h(ORG.name)+' is on '+h(ORG.dataPlane)+'.</div></div>'+
+     (fw?'<div class="field"><label for="rtEnd">Endpoint</label><input id="rtEnd" value="'+h(r.fw.endpoint)+'"></div>'+
+        '<div class="field"><label for="rtServed">Model served inside the network</label><input id="rtServed" value="'+h(r.fw.served)+'"></div>'
+       :'<div class="field"><label for="rtRoute">Route</label><input id="rtRoute" value="'+h(r.route)+'"></div>'+
+        '<div class="field"><label for="rtFb">Fallback on a provider error</label><input id="rtFb" value="'+h(r.fallback)+'" placeholder="none"></div>')+
+     '<div class="note">Configure the alias, record the concrete model. Every fallback is a frame, so a run shows exactly which model answered and why.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="orgRouteSave(\''+h(String(arg))+'\')">Save route</button>'};
+};
+function orgRouteSave(arg){
+  var fw=arg.indexOf("fw:")===0, r=ORG_ROUTES[parseInt(fw?arg.slice(3):arg,10)]; if(!r){closeDialog();return;}
+  function v(id){var n=el(id);return n?n.value.trim():null;}
+  if(fw){if(v("rtEnd"))r.fw.endpoint=v("rtEnd");if(v("rtServed"))r.fw.served=v("rtServed");}
+  else{var p=el("rtProv");if(p&&p.value.indexOf("In-firewall")<0)r.provider=p.value;if(v("rtRoute"))r.route=v("rtRoute");if(v("rtFb")!==null)r.fallback=v("rtFb");}
+  closeDialog();act("The "+r.tier+" route was saved. Recorded as a control-plane event; it applies at the next model call.");
+}
+
+/* Data plane: one binding, three deployment modes. The org is on ORG.dataPlane; the other two render as previews. */
+S.planeView=null;
+var PLANE_MODES=[
+ ["shared","Shared","Tenant data on Oxagen’s shared plane, isolated by row-level security with no bypass setting, plus one Neo4j database per organization."],
+ ["dedicated","Dedicated","Your own Postgres cluster, Neo4j instance and object-storage bucket. Identity, IAM, billing and the price book stay on the shared plane."],
+ ["firewall","Behind the firewall","The same containers, as a signed bundle you run. Outbound only, and optional. Fully air-gapped is supported, not degraded."]];
+var FW_OUTBOUND=[
+ ["GitHub Enterprise Server · github.acme.internal","repo binding, Context PRs, checks, code graph","in use","allowed"],
+ ["Model providers","none — every tier resolves inside the network","not used","q"],
+ ["Voyage AI","none — embeddings served in-firewall","not used","q"],
+ ["Signed usage report · meter.oxagen.com","licence metering: run counts and retained GB, no content","weekly","allowed"],
+ ["Everything else","nothing inbound is required","blocked at the perimeter","q"]];
+function planeDetail(v){
+  if(v==="shared") return '<dl class="kv">'+
+   '<dt>Binding</dt><dd><span class="b b-allowed"><span class="d"></span>shared</span> · '+h(ORG.region)+'</dd>'+
+   '<dt>Neo4j</dt><dd>one database per organization · <span class="mono">'+h(ORG.slug)+'</span></dd>'+
+   '<dt>Postgres</dt><dd>partitioned by <span class="mono">org_id</span> · row-level policies enforced</dd>'+
+   '<dt>Object storage</dt><dd>object lock, compliance mode · per-organization key-encryption key</dd>'+
+   '<dt>Key-encryption key</dt><dd class="mono">kek_acme_2026Q3 · rotated 2026-09-10</dd>'+
+   '<dt>Attester key</dt><dd class="mono">'+h(ORG.attester)+' · published so a customer can verify an export offline</dd>'+
+   '<dt>Witness runner</dt><dd>Oxagen-hosted · on a dedicated plane it runs inside the customer’s plane</dd></dl>';
+  if(v==="dedicated") return '<dl class="kv">'+
+   '<dt>Postgres — tenant data</dt><dd>a dedicated cluster in your region, the same schema and the same row-level policies</dd>'+
+   '<dt>Postgres — identity, IAM, billing, price book</dt><dd>stay on the shared plane by design</dd>'+
+   '<dt>Neo4j</dt><dd>database <span class="mono">'+h(ORG.slug)+'</span> on a dedicated instance · one database per organization</dd>'+
+   '<dt>Object storage</dt><dd>your own bucket · object lock in compliance mode · write-once</dd>'+
+   '<dt>Key-encryption key</dt><dd>in your KMS, referenced by ARN; Oxagen never holds the key material</dd>'+
+   '<dt>Witness runner</dt><dd>inside your plane</dd>'+
+   '<dt>Resolver</dt><dd>the only place a connection string is read. A call path that bypasses it is a defect, and CI fails on it.</dd></dl>';
+  return '<dl class="kv">'+
+   '<dt>Deployment</dt><dd>Kubernetes, customer-operated · Helm chart</dd>'+
+   '<dt>Bundle version</dt><dd class="mono">oxagen/1.4.2</dd>'+
+   '<dt>Bundle signature</dt><dd><span class="mono">cosign · sha256:7f31c0…9b42</span> · verified against Oxagen release key <span class="mono">rel-2026-03</span>, the key an evidence bundle is checked against</dd>'+
+   '<dt>Containers</dt><dd>gateway · services · Mission Control · Stella engine · witness runner · Postgres · Neo4j Enterprise · S3-compatible object storage with object lock</dd>'+
+   '<dt>Air-gapped mode</dt><dd><span class="b b-approval"><span class="d"></span>on</span> — model routes point inside the network (see In-firewall routes on Model funding and routes)</dd>'+
+   '<dt>Licence</dt><dd>per organization, annual, invoiced. Stripe is not involved behind a firewall.</dd>'+
+   '<dt>Next bundle</dt><dd><span class="mono">oxagen/1.4.3</span> available · applied on your schedule, never pushed</dd></dl>'+
+   '<p class="eyebrow" style="margin:16px 0 8px">Outbound connections in use</p>'+
+   '<div class="tw"><table data-lt="off"><thead><tr><th>Destination</th><th>Why</th><th>State</th></tr></thead><tbody>'+
+   FW_OUTBOUND.map(function(o){return '<tr><td style="font-size:12.5px"><b>'+h(o[0])+'</b></td><td class="dim" style="font-size:12px">'+h(o[1])+'</td>'+
+    '<td><span class="b b-'+o[3]+'"><span class="d"></span>'+h(o[2])+'</span></td></tr>';}).join("")+'</tbody></table></div>'+
+   '<p class="muted" style="font-size:12.5px;margin:12px 0 0">Everything the cloud enforces, the appliance enforces — including the witness runner and the assurance suite, which you run against your own deployment and hand to your auditor.</p>';
+}
+function orgPlaneBody(){
+  var v=S.planeView||ORG.dataPlane, cur=v===ORG.dataPlane, mode=PLANE_MODES.filter(function(x){return x[0]===v;})[0]||PLANE_MODES[0];
+  return '<div class="split"><div class="panel"><div class="panel-h"><h3>Data plane</h3>'+
+   '<div class="sp"><span class="b b-allowed"><span class="d"></span>'+h(ORG.name)+' is on '+h(ORG.dataPlane)+'</span></div></div><div class="panel-b">'+
+   '<div class="seg" role="group" aria-label="Deployment mode">'+PLANE_MODES.map(function(x){
+     return '<button class="btn sm" aria-pressed="'+(x[0]===v)+'" onclick="S.planeView=\''+x[0]+'\';render()">'+h(x[1])+(x[0]===ORG.dataPlane?' · current':'')+'</button>';}).join("")+'</div>'+
+   '<p class="muted" style="font-size:12.5px;margin:12px 0">'+h(mode[2])+'</p>'+
+   (cur?'':'<div class="note" style="margin-bottom:12px" data-plane-preview="'+h(v)+'"><b>Preview.</b> This is what the page shows on a '+h(mode[1].toLowerCase())+' deployment. Modes, not forks: every store is resolved per organization, so moving is a deployment change, never a different product. Nothing below is in effect for '+h(ORG.name)+'.</div>')+
+   planeDetail(v)+
+   '<div class="row" style="margin-top:14px"><button class="btn" onclick="openDialog(\'plane\')">Request a change of plane</button>'+
+   '<button class="btn" onclick="act(\'Key rotation scheduled. A rotation is a governed action and a security event.\')">Rotate keys</button></div></div></div>'+
+   '<div class="panel"><div class="panel-h"><h3>Retention</h3></div><div class="panel-b"><dl class="kv">'+
+   '<dt>Frame bodies</dt><dd>7 years from the seal · encrypted, content-addressed</dd>'+
+   '<dt>Run ledger</dt><dd>forever</dd>'+
+   '<dt>Frame nodes in the graph</dt><dd>13-month hot window, then compacted into the segment</dd>'+
+   '<dt>Control-plane audit</dt><dd>7 years</dd>'+
+   '<dt><span class="mono">digest_only</span> mode</dt><dd>'+orgDigestOnly()+'</dd>'+
+   '<dt>Erasure</dt><dd>crypto-shredding: the per-subject data key is destroyed and a tombstone frame keeps the chain verifiable</dd></dl>'+
+   '<div class="note" style="margin-top:12px">Replay without bodies is a timeline, not a replay. The explanation promise depends on bodies, so keeping them is the default.</div></div></div></div>'+
+   '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Graph isolation</h3><div class="sp"><span class="b b-q">neo4j · '+h(ORG.slug)+'</span></div></div><div class="panel-b"><dl class="kv">'+
+   '<dt>Database</dt><dd><span class="mono">'+h(ORG.slug)+'</span> — the tenant boundary is the database, not a WHERE clause</dd>'+
+   '<dt>Workspace scoping</dt><dd>every node and relationship carries <span class="mono">ws</span> ('+WS.map(function(w){return '<span class="mono">'+h(w.slug)+'</span>';}).join(", ")+'), set by the graph service, the only writer</dd>'+
+   '<dt>Cross-tenant reads</dt><dd>impossible without a composite database. Oxagen never creates one.</dd>'+
+   '<dt>Platform catalogs</dt><dd>price books, tool schemas and connector definitions live in Postgres, never in the graph</dd>'+
+   '<dt>Startup guard</dt><dd>the app role may not be a superuser, may not hold <span class="mono">BYPASSRLS</span>, and row-level security may not be off, or the plane refuses to boot</dd></dl></div></div>';
+}
+function orgDigestOnly(){
+  var off=WS.filter(function(w){return w.retention==="digest_only";});
+  return off.length?'<b>on</b> in '+off.map(function(w){return h(w.slug);}).join(", ")+' — recorded as a completeness gap on every run there, and it lowers the replay grade'
+   :'<b>off</b> in every workspace — it is an opt-down, recorded as a completeness gap, and it lowers the replay grade';
+}
+
+DLG_EXT.plane=function(){
+  var v=S.planeView&&S.planeView!=="shared"?S.planeView:"dedicated";
+  return {t:"Request a change of data plane",s:ORG.name+" is on "+ORG.dataPlane,w:false,
+   b:'<div class="note" style="margin-bottom:14px">Per-organization data planes make every store switchable, so a dedicated plane — and behind-the-firewall deployment — is a deployment mode, not a fork.</div>'+
+    '<div class="field"><label for="planeMode">Mode</label><select id="planeMode">'+
+     [["dedicated","dedicated · Oxagen cloud"],["firewall","behind your firewall · signed Helm bundle"],["airgap","air-gapped · in-firewall models"]].map(function(x){return '<option'+(x[0]===v?' selected':'')+'>'+h(x[1])+'</option>';}).join("")+'</select></div>'+
+    '<div class="field"><label for="planeRegion">Region</label><select id="planeRegion">'+["us-east-1","eu-west-1","ap-southeast-2"].map(function(r){return '<option'+(r===ORG.region?' selected':'')+'>'+r+'</option>';}).join("")+'</select></div>'+
+    '<dl class="kv"><dt>Included</dt><dd>the witness runner inside your plane, SSO and SCIM, two-person mandates, the assurance suite you run yourself</dd>'+
+    '<dt>Plan</dt><dd>Enterprise, annual, invoiced · from $60,000 per year</dd></dl>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Request sent. An owner signs the annual agreement before anything moves.\')">Request it</button>'};
+};
+
+/* People: SSO and SCIM first, because they decide who is on the table below them. */
+function orgIdentityPanels(){
+  var scim=MEMBERS.filter(function(m){return m.src==="scim";}), bg=MEMBERS.filter(function(m){return m.breakGlass;}), last=orgLatestSeen();
+  return '<div class="grid g2">'+
+   '<div class="panel" data-sso><div class="panel-h"><h3>Single sign-on</h3><div class="sp"><span class="b b-q">postgres · shared plane</span><button class="btn sm" onclick="openDialog(\'sso\')">Edit</button></div></div><div class="panel-b"><dl class="kv">'+
+    '<dt>Provider</dt><dd>'+h(ORG_SSO.provider)+' · '+h(ORG_SSO.protocol)+'</dd>'+
+    '<dt>Status</dt><dd>'+(ORG_SSO.enforced?'<span class="b b-allowed"><span class="d"></span>enforced for all members</span>':'<span class="b b-approval"><span class="d"></span>optional</span>')+'</dd>'+
+    '<dt>Entity id</dt><dd class="mono">https://oxagen.com/sso/'+h(ORG.slug)+'</dd>'+
+    '<dt>Metadata</dt><dd class="mono" style="font-size:11.5px">'+h(ORG_SSO.metadata)+'</dd>'+
+    '<dt>Signing certificate</dt><dd>expires '+h(ORG_SSO.certExpires)+' · <span class="mono">'+h(ORG_SSO.certFp)+'</span></dd>'+
+    '<dt>Break-glass</dt><dd data-breakglass="'+bg.length+'">'+bg.length+' account'+(bg.length===1?'':'s')+' exempt — '+bg.map(function(m){return h(PEOPLE[m.p].name);}).join(", ")+'. Each sign-in is a control-plane event.</dd>'+
+    (last?'<dt>Last sign-in</dt><dd>'+h(last.last)+' · '+h(PEOPLE[last.p].name)+' · accepted</dd>':'')+
+   '</dl></div></div>'+
+   '<div class="panel" data-scim><div class="panel-h"><h3>SCIM provisioning</h3><div class="sp"><span class="b b-q">postgres · shared plane</span><button class="btn sm" onclick="openDialog(\'scim\')">Edit mappings</button></div></div><div class="panel-b"><dl class="kv">'+
+    '<dt>Protocol</dt><dd>'+h(ORG_SCIM.protocol)+'</dd>'+
+    '<dt>Status</dt><dd><span class="b b-allowed"><span class="d"></span>'+h(ORG_SCIM.status)+'</span> · last sync '+h(ORG_SCIM.lastSync)+'</dd>'+
+    '<dt>Endpoint</dt><dd class="mono" style="font-size:11.5px">https://api.oxagen.com/scim/v2/'+h(ORG.slug)+'</dd>'+
+    '<dt>Token</dt><dd><span class="mono">scim_…'+h(ORG_SCIM.token.tail)+'</span> · rotated '+h(ORG_SCIM.token.rotated)+' · never returned</dd>'+
+    '<dt>In scope</dt><dd>'+scim.length+' of '+MEMBERS.length+' members from the directory · '+(MEMBERS.length-scim.length)+' manual</dd>'+
+    '<dt>Group → role</dt><dd data-scim-count="'+ORG_SCIM.map.length+'">'+ORG_SCIM.map.length+' mappings'+
+     '<table class="narrow" style="margin-top:6px"><tbody>'+ORG_SCIM.map.map(function(x){return '<tr data-scim-row><td class="mono" style="font-size:11.5px;padding:3px 10px 3px 0">'+h(x.group)+'</td><td class="mono" style="font-size:11.5px;padding:3px 0">→ '+h(orgScimRole(x))+'</td></tr>';}).join("")+'</tbody></table></dd>'+
+    '<dt>Deprovision</dt><dd>removing a user from the group suspends the principal in under a minute; their agents’ run tokens die at the next call</dd>'+
+   '</dl></div></div></div>';
+}
+DLG_EXT.sso=function(){
+  var bg=MEMBERS.filter(function(m){return m.breakGlass;});
+  return {t:"Single sign-on",s:ORG_SSO.provider+" · "+ORG_SSO.protocol,w:false,
+   b:'<p class="muted" style="font-size:12.5px;margin:0 0 12px">Changing identity configuration is a governed action: it is approved, recorded, and in a regulated workspace it is a Context PR on the main repo.</p>'+
+    '<dl class="kv"><dt>Enforcement</dt><dd>all members except '+bg.length+' break-glass account'+(bg.length===1?'':'s')+'</dd>'+
+    '<dt>Just-in-time provisioning</dt><dd>off — SCIM is the writer</dd>'+
+    '<dt>Session lifetime</dt><dd>'+h(ORG_SSO.session)+'</dd>'+
+    '<dt>Signing certificate</dt><dd>expires '+h(ORG_SSO.certExpires)+'. Upload the next one before then; both are accepted during the overlap.</dd></dl>'+
+    '<div class="field" style="margin-top:14px"><label for="ssoMeta">Metadata URL</label><input id="ssoMeta" value="'+h(ORG_SSO.metadata)+'"></div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Sent for approval. The SSO change is recorded as a security event.\')">Request the change</button>'};
+};
+DLG_EXT.scim=function(){
+  var roles=ROLES.filter(function(r){return r.kind==="human";});
+  return {t:"SCIM mappings",s:"group to role · "+ORG_SCIM.map.length+" mappings",w:false,
+   b:'<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Directory group</th><th>Role</th></tr></thead><tbody>'+
+    ORG_SCIM.map.map(function(x,i){return '<tr><td class="mono" style="font-size:12px">'+h(x.group)+'</td><td><select id="scimRole'+i+'" aria-label="Role for '+h(x.group)+'">'+
+     roles.map(function(r){return '<option'+(r.id===x.role?' selected':'')+'>'+h(r.id)+'</option>';}).join("")+'</select>'+(x.ws?'<span class="dim mono" style="font-size:11px"> · '+h(x.ws)+'</span>':'')+'</td></tr>';}).join("")+
+    '</tbody></table></div>'+
+    '<div class="note" style="margin-top:12px">Unmapped groups are ignored — a group with no mapping grants nothing. A role changed by hand on a directory member is overwritten at the next sync, so change the mapping instead.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="orgScimSave()">Save mappings</button>'};
+};
+function orgScimSave(){
+  var n=0;ORG_SCIM.map.forEach(function(x,i){var s=el("scimRole"+i);if(s&&s.value!==x.role){x.role=s.value;n++;}});
+  closeDialog();act(n?n+" mapping"+(n===1?"":"s")+" changed. Applied at the next sync and recorded as a control-plane event.":"No mapping changed.");
+}
+/* Change role, for the person the row names. It used to name Dana Okafor on every row. */
+DLG_EXT.role=function(p){
+  var who=PEOPLE[p]?p:"dana", pp=PEOPLE[who], m=orgMember(who), cur=pp.role.split(" · ")[0];
+  return {t:"Change role",s:pp.email,w:false,
+   b:'<div class="field"><label>Person</label><input value="'+h(pp.name)+'" disabled aria-label="Person"></div>'+
+    '<div class="field"><label for="roleSel">Role</label><select id="roleSel">'+ROLES.filter(function(r){return r.kind==="human";}).map(function(r){return '<option'+(r.id===cur?' selected':'')+'>'+h(r.id)+'</option>';}).join("")+'</select>'+
+    (m&&m.src==="scim"?'<div class="hint">'+h(pp.name)+' comes from SCIM through <span class="mono">'+h(m.group||"")+'</span>. A change here lasts until the next sync; change the mapping to make it stick.</div>':'')+'</div>'+
+    '<div class="note">A grant is a governed action, not a settings change. It writes an audit record and bills as one action. It does not widen what their agents may do: an agent’s effective permission is its own grants intersected with the operator’s.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Role changed. Recorded in the audit record with your name on it.\')">Change it</button>'};
+};
+DLG_EXT.member=function(p){
+  var m=orgMember(p), who=PEOPLE[p];
+  if(!m||!who) return {t:"Member",w:false,b:'<div class="note">No member selected.</div>',f:'<button class="btn" onclick="closeDialog()">Close</button>'};
+  var ags=AGENTS.filter(function(a){return a.operator===p;});
+  var granted=MANDATES.filter(function(x){return x.by===who.name;});
+  var held=[];ags.forEach(function(a){(a.mandates||[]).forEach(function(id){held.push(id+" · "+a.key);});});
+  var base=who.role.split(" · ")[0];
+  return {t:who.name,s:who.email,w:true,
+   b:'<dl class="kv"><dt>Org role</dt><dd class="mono">'+h(who.role)+'</dd>'+
+    '<dt>Source</dt><dd>'+(m.src==="scim"?'SCIM from '+h(ORG_SSO.provider)+(m.group?' · group <span class="mono">'+h(m.group)+'</span>':'')+' — a role changed here is overwritten at the next sync unless the group mapping changes':'created manually — no directory group owns this role')+'</dd>'+
+    '<dt>Two-factor</dt><dd>'+h(m.mfa)+'</dd><dt>Last seen</dt><dd class="mono">'+h(m.last)+'</dd>'+
+    (m.breakGlass?'<dt>Break-glass</dt><dd>exempt from SSO; each sign-in is a control-plane event</dd>':'')+'</dl>'+
+    '<p class="eyebrow" style="margin:16px 0 8px">Role per workspace</p>'+
+    '<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Workspace</th><th>Role</th></tr></thead><tbody>'+
+     orgMemberWs(m).map(function(w){return '<tr><td class="mono" style="font-size:12px">'+h(w.slug)+'</td><td class="mono" style="font-size:12px">'+h(base)+(m.ws==="all"?' <span class="dim">· every workspace</span>':'')+'</td></tr>';}).join("")+
+    '</tbody></table></div>'+
+    '<p class="eyebrow" style="margin:16px 0 8px">Agents they operate · <span data-member-agents="'+ags.length+'">'+ags.length+'</span></p>'+
+    (ags.length?'<div class="tw"><table class="narrow"><tbody>'+ags.map(function(a){return '<tr data-member-agent><td class="tkey" style="font-size:12px">'+h(a.key)+'</td><td class="mono dim" style="font-size:11.5px">'+h(a.ws)+'</td><td class="num">'+a.runs30.toLocaleString("en-US")+' runs · 30 d</td></tr>';}).join("")+'</tbody></table></div>'
+     :'<p class="muted" style="font-size:12.5px;margin:0">None. An agent’s effective permission is its grants intersected with its operator’s, so this person narrows nothing today.</p>')+
+    '<p class="eyebrow" style="margin:16px 0 8px">Mandates</p>'+
+    '<dl class="kv"><dt>Granted</dt><dd>'+(granted.length?granted.map(function(x){return '<span class="mono">'+h(x.id)+'</span> to <span class="mono">'+h(x.agent)+'</span> · '+h(x.status);}).join("<br>"):'none')+'</dd>'+
+    '<dt>Held by their agents</dt><dd>'+(held.length?held.map(function(s){return '<span class="mono">'+h(s)+'</span>';}).join("<br>"):'none')+'</dd></dl>',
+   f:'<button class="btn" onclick="closeDialog()">Close</button><button class="btn" onclick="openDialog(\'role\',\''+h(p)+'\')">Change role</button>'};
+};
 
 /* ============================== Billing ============================== */
 function pBilling(){
@@ -8010,7 +8256,45 @@ var SCENARIOS={
 
 /* ---- end W9 ---- */
 /* ---- W10 · cio-console ---- */
-
+SCENARIOS["cio-console"]={title:"The CIO’s console", ws:"core-platform",
+ blurb:"Organization and Audit from the chair that answers for both: who can sign in, where the data lives, what the models cost, and what can be proven.",
+ steps:[
+  {say:"Who can sign in is decided upstream. Okta enforces single sign-on for every member but the break-glass accounts, and SCIM writes this table from group mappings.",
+   note:"Changing a role here is a governed action, and it never widens an agent: effective permission is the agent’s grants intersected with its operator’s. That is the delegation ceiling below the table.",
+   route:function(o){return {page:"organization",org:o};},
+   setup:function(){S.tab.organization="people";S.planeView=null;S.rq="";},
+   act:["Change a role","openDialog('role')"]},
+  {say:"A workspace is a governance partition with exactly one main repo, bound at creation. Its namespace is immutable because it is part of every agent key.",
+   note:"Retention mode is per workspace. <span class=\"mono\">content_exact</span> is the default; <span class=\"mono\">digest_only</span> is an opt-down recorded as a completeness gap.",
+   route:function(o){return {page:"organization",org:o};},
+   setup:function(){S.tab.organization="workspaces";S.planeView=null;S.rq="";},
+   act:["Create a workspace","openDialog('newws')"]},
+  {say:"Oxagen’s own model calls run on routes by tier. Each row carries this month’s use and cost, and the total is what the platform cap has used.",
+   note:"In-firewall routes sit below: what each tier resolves to on a deployment inside your network. Acme is on the shared plane, so they are a preview, not in effect.",
+   route:function(o){return {page:"organization",org:o};},
+   setup:function(){S.tab.organization="funding";S.planeView=null;S.rq="";},
+   act:["Change the funding source","openDialog('funding')"]},
+  {say:"Shared, dedicated and behind the firewall are deployment modes, not forks. This is the behind-the-firewall preview: a signed bundle verified against release key rel-2026-03, air-gapped, with its outbound connections listed.",
+   note:"Acme stays on shared. The startup guard is the same in every mode: no superuser, no BYPASSRLS, or the plane refuses to boot.",
+   route:function(o){return {page:"organization",org:o};},
+   setup:function(){S.tab.organization="plane";S.planeView="firewall";S.rq="";},
+   act:["Request a change of plane","openDialog('plane')"]},
+  {say:"One critical incident: a Stripe charge with no receipt. Money moved that Oxagen did not govern, and the reconciler caught it as exc_01K5RN2P.",
+   note:"An incident is a chain of records, not a summary. Open it to read the frames and the connection it points at.",
+   route:function(o){return {page:"audit",org:o};},
+   setup:function(){S.tab.audit="incidents";S.planeView=null;S.rq="";},
+   act:["Open the incident","openDialog('incidentview','exc_01K5RN2P')"]},
+  {say:"Every governed call has a receipt, searchable by tool, agent or external effect id. Search for stripe and open the payment Dana’s invoice bot made on 2026-09-04.",
+   note:"The receipt names who, what, under which authority, with which credential, and what it changed.",
+   route:function(o){return {page:"audit",org:o};},
+   setup:function(){S.tab.audit="receipts";S.planeView=null;S.rq="stripe";},
+   act:["Open the receipt","openDialog('receipt','rcp_01K4X8M2E')"]},
+  {say:"An evidence bundle is for the auditor, who should not have to trust Oxagen. Verify exp_01K4Q7M1 and the check runs against the release key, offline.",
+   note:"Merkle roots recomputed, seal attestations verified, no gaps in the chain. An erased subject shows as a tombstone, and the chain still verifies.",
+   route:function(o){return {page:"audit",org:o};},
+   setup:function(){S.tab.audit="exports";S.planeView=null;S.rq="";S.verified=S.verified||{};S.verified["exp_01K4Q7M1"]=false;},
+   act:["Verify the bundle","S.verified['exp_01K4Q7M1']=true;render()"]}
+ ]};
 /* ---- end W10 ---- */
 /* ---- W11 · assistant-and-account ---- */
 
@@ -8297,18 +8581,16 @@ function dialog(){
      '<div class="field"><label>Role</label><select aria-label="Role"><option>workspace.member · core-platform</option><option>workspace.owner · core-platform</option><option>org.auditor</option><option>org.billing</option><option>org.owner</option></select></div>'+
      '<div class="note">SSO is on through Okta with SCIM, so this invitation is for a person outside the directory. Directory members appear here automatically.</div>',
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Invitation sent. It expires in 7 days.\')">Send the invitation</button>'},
-   role:{t:"Change role",w:false,b:
-     '<div class="field"><label>Person</label><input value="Dana Okafor" disabled aria-label="Person"></div>'+
-     '<div class="field"><label>Role</label><select aria-label="Role"><option>org.billing · finops</option><option>org.auditor</option><option>workspace.member · finops</option></select></div>'+
-     '<div class="note">A grant is a governed action, not a settings change. It writes an audit record and bills as one action.</div>',
-     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Role changed. Recorded in the audit record with your name on it.\')">Change it</button>'},
    newws:{t:"Create a workspace",w:false,b:
      '<div class="field"><label>Name</label><input value="Data platform" aria-label="Name"></div>'+
+     '<div class="field"><label>Namespace</label><input value="data" maxlength="6" aria-label="Namespace"><div class="hint">2–6 characters, immutable, and part of every agent key in the workspace: <span class="mono">'+h(ORG.slug)+'.data.&lt;agent&gt;</span>.</div></div>'+
      '<div class="field"><label>Main repository</label><select aria-label="Main repository"><option>acme/data-platform</option><option>acme/warehouse</option></select>'+
      '<div class="hint">Required at creation. A workspace without a main repo cannot exist.</div></div>'+
      '<div class="field"><label>Production branch</label><select aria-label="Production branch"><option>main — GitHub’s default, suggested</option><option>release</option><option>production</option></select>'+
      '<div class="hint">The only branch whose commits update the code graph. If GitHub’s default changes later you are prompted; the binding never moves on its own.</div></div>'+
-     '<div class="field"><label>Governance mode</label><select aria-label="Governance mode"><option>team — a code-owner review is required</option><option>solo — the author may merge</option><option>regulated — a named approver and a ledger entry</option></select></div>',
+     '<div class="field"><label>Governance mode</label><select aria-label="Governance mode"><option>team — a code-owner review is required</option><option>solo — the author may merge</option><option>regulated — a named approver and a ledger entry</option></select></div>'+
+     '<div class="field"><label>Retention mode</label><select aria-label="Retention mode"><option>content_exact — keep prompts and tool bodies in full</option><option>digest_only — digests only, lowers the replay grade</option></select></div>'+
+     '<div class="note">Until the GitHub App binds the main repo the workspace is provisional for 14 days: runs record and spend counts, but steering, records and agent definitions stay off.</div>',
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Workspace created. Installing the GitHub App on acme/data-platform.\')">Create</button>'},
    linkrepo:{t:"Link a repository",w:false,b:
      '<div class="field"><label>Repository</label><select aria-label="Repository"><option>acme/telemetry</option><option>acme/edge-firmware</option></select></div>'+
@@ -8357,13 +8639,6 @@ function dialog(){
      '<div class="field"><label>Key</label><input value="sk-or-v1-••••••••••••••••" aria-label="Key" type="password"></div>'+
      '<div class="note">Stored enveloped, tested before save, never returned, every read audited. On a customer key your tokens are reported and billed at zero.</div>',
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Key tested against z-ai/glm-flash-latest and stored. Nothing was returned.\')">Test and save</button>'},
-   plane:{t:"Request a dedicated data plane",w:false,b:
-     '<div class="note" style="margin-bottom:14px">Per-organization data planes make every store switchable, so a dedicated plane — and behind-the-firewall deployment — is a deployment mode, not a fork.</div>'+
-     '<div class="field"><label>Mode</label><select aria-label="Mode"><option>dedicated · Oxagen cloud</option><option>behind your firewall · signed Helm bundle</option><option>air-gapped · in-firewall models</option></select></div>'+
-     '<div class="field"><label>Region</label><select aria-label="Region"><option>us-east-1</option><option>eu-west-1</option><option>ap-southeast-2</option></select></div>'+
-     '<dl class="kv"><dt>Included</dt><dd>the witness runner inside your plane, SSO and SCIM, two-person mandates, the assurance suite you run yourself</dd>'+
-     '<dt>Plan</dt><dd>Enterprise, annual, invoiced · from $60,000 per year</dd></dl>',
-     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Request sent. An owner signs the annual agreement before anything moves.\')">Request it</button>'},
    apikey:{t:"Create an API key",w:false,b:
      '<p class="muted" style="font-size:12.5px;margin:0 0 12px">Shown once, at creation, and never again.</p>'+
      '<div class="field"><label>Name</label><input placeholder="What is it for" aria-label="Name"></div>'+
@@ -9075,13 +9350,19 @@ function memberDelDlg(){
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn danger"'+(owns?' disabled':'')+' onclick="memberRemove(\''+h(S.dlgArg)+'\')">Remove</button>'};
 }
 function wsById(slug){for(var i=0;i<WS.length;i++){if(WS[i].slug===slug)return WS[i];}return null;}
-function wsSave(){var w=wsById(S.dlgArg);if(!w)return;var n=el("wsName"),b=el("wsBranch");if(n&&n.value.trim())w.name=n.value.trim();if(b)w.branch=b.value;closeDialog();act("Workspace "+w.name+" updated. Recorded as a security event.");}
+function wsSave(){var w=wsById(S.dlgArg);if(!w)return;var n=el("wsName"),b=el("wsBranch"),r=el("wsRet");if(n&&n.value.trim())w.name=n.value.trim();if(b)w.branch=b.value;if(r)w.retention=r.value;closeDialog();act("Workspace "+w.name+" updated. Recorded as a security event"+(w.retention==="digest_only"?"; digest_only is recorded as a completeness gap on every run.":"."));}
 function wsEditDlg(){
   var w=S.dlg==="editws"?wsById(S.dlgArg):null; if(!w) return {t:"Edit workspace",w:false,b:"",f:""};
   return {t:"Edit workspace",s:w.slug,w:false,b:'<div class="field"><label>Name</label><input id="wsName" value="'+h(w.name)+'" aria-label="Name"></div>'+
    '<div class="field"><label>Main repository</label><input value="'+h(w.main)+'" readonly aria-label="Main repository"><div class="hint">Changing main is an org-owner action with approval — start it from the repository row on Ontology.</div></div>'+
    '<div class="field"><label>Production branch</label><select id="wsBranch" aria-label="Production branch">'+["main","release","production"].map(function(x){return '<option'+(w.branch===x?' selected':'')+'>'+x+'</option>';}).join("")+'</select></div>'+
-   '<div class="field"><label>Governance mode</label><select aria-label="Governance mode"><option>team — one code-owner review</option><option>solo — merge on green checks</option><option>regulated — two reviews and a promotion ledger</option></select></div>',
+   '<div class="field"><label>Governance mode</label><select aria-label="Governance mode"><option>team — one code-owner review</option><option>solo — merge on green checks</option><option>regulated — two reviews and a promotion ledger</option></select></div>'+
+   '<div class="field"><label>Namespace</label><input value="'+h(w.ns||w.slug.split("-")[0])+'" disabled aria-label="Namespace"><div class="hint">Immutable. It is in every agent key here: <span class="mono">'+h(ORG.slug+"."+(w.ns||w.slug.split("-")[0]))+'.&lt;agent&gt;</span>.</div></div>'+
+   '<div class="field"><label for="wsRet">Retention mode</label><select id="wsRet">'+[["content_exact","keep prompts and tool bodies in full"],["digest_only","digests only, lowers the replay grade"]].map(function(x){return '<option value="'+x[0]+'"'+((w.retention||"content_exact")===x[0]?' selected':'')+'>'+x[0]+' — '+x[1]+'</option>';}).join("")+'</select>'+
+   '<div class="hint"><span class="mono">digest_only</span> is an opt-down: recorded as a completeness gap on every run, because a replay without bodies is a timeline, not a replay.</div></div>'+
+   '<dl class="kv"><dt>Toolbelt limit</dt><dd>'+FULL_BELT_LIMIT+' tools, then the belt is sent searchable</dd>'+
+   '<dt>Default budget</dt><dd>'+usd(w.budgetDay||"20.00")+' per day per agent · hard · a new agent starts here</dd>'+
+   '<dt>Agents</dt><dd>'+AGENTS.filter(function(a){return a.ws===w.slug;}).length+' registered · '+AGENTS.filter(function(a){return a.ws===w.slug&&(a.mandates||[]).length;}).length+' hold a mandate</dd></dl>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="wsSave()">Save</button>'};
 }
 function wsArchive(slug){var i=-1;WS.forEach(function(w,ix){if(w.slug===slug)i=ix;});if(i<0)return;var w=WS[i];WS.splice(i,1);if(S.ws===slug)S.ws=WS[0]?WS[0].slug:S.ws;closeDialog();act("Workspace "+w.name+" archived. Runs and frames stay readable; nothing new can start there.");}
