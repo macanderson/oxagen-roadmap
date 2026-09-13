@@ -98,3 +98,27 @@ happened.
 Every handler that calls `render()` replaces `#view.innerHTML` and destroys
 whatever was focused. Test any keyboard interaction **twice in a row**: these
 bugs work exactly once.
+
+# Guards for mc.html and the W files
+
+W1–W11 are generated from `mc.html` (see the README). Three checks keep that true:
+
+```sh
+node tools/build-w.mjs --check              # every w1–w11 file is exactly mc.html + its title + its boot hash
+node tools/check-scenarios.mjs [--only id]   # walks every scenario step in Chromium
+node tools/baseline/check-baseline.mjs mc.html
+```
+
+`check-scenarios.mjs` opens each W flow's scenario and, per step, asserts the rail is on screen
+and on that step, the page under it rendered, the step's act runs, Next closes any dialog the act
+opened and lands on the following step, and no page error fired; then phone mode has no
+horizontal overflow and both themes render. An act may be the product's own forward control
+(onboarding's Continue), in which case it moves the scenario on and Next is not pressed.
+
+Writing a scenario: `SCENARIOS["id"]={title:"…", ws:"…", blurb:"…", steps:[…]}` in the flow's slot,
+`title` then `ws` first because `build-w.mjs` reads `ws` by pattern. `route()` runs on every
+render, but a step's `setup` runs once on arriving at it, and nothing undoes it, so each step sets
+every piece of state it relies on. Scenario routes skip `route()`'s own tab parsing: set tabs in
+`setup`. Dialogs go in `DLG_EXT` beside the code they belong to; frames for a run go in
+`FRAMES_BY_RUN`, and a run without authored frames gets `framesFromRun(R)`, which is exactly
+`R.frames` long. Authored lists may carry sparse seqs, so read a run's list by position.

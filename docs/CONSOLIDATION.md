@@ -70,3 +70,15 @@ The cell shows the human label first and the mono API name and version beneath i
 swaps them. Tool lists offer category chips with counts and a By category / Flat layout.
 Category is a registry attribute, not a policy: a rule may reference it, but only risk,
 side effect, financial effect and egress carry a decision by themselves.
+
+## One source (2026-09-12)
+
+`mc.html` is the design. W1–W11 used to be eleven hand-drawn apps that each disagreed with it
+somewhere (the bottom dock, approval size, the Agents naming, a run page that showed one run's
+frames for every run). Everything each W file showed that `mc.html` lacked was ported into
+`mc.html`, each flow became a `SCENARIOS` entry, and the W files are now generated from it by
+`tools/build-w.mjs`. Where a W file and `mc.html` disagreed on a decision already recorded in
+`tools/baseline/README.md`, the baseline won and nothing was ported. Superseded and not ported:
+W1's right-side assistant drawer, W2's three delivery modes and @-addressing, W3's run strip,
+W5's own spend day view claims that contradict runMetrics, W6's "create an agent opens a PR",
+W7's page-local assistant, W8's display-currency switch, W11's right rail.

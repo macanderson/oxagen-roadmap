@@ -11,7 +11,7 @@ The demo record is the same everywhere: Acme Robotics (`acme`), workspace
 
 | File | What it is |
 |---|---|
-| `mc.html` | **The Ten Pages.** The full end-to-end demo: every page of Mission Control with the strongest version of each component from W1–W11, plus the onboarding flow. Start here. |
+| `mc.html` | **The Ten Pages.** The final design: every page of Mission Control, everything W1–W11 showed ported into it, the onboarding flow, and the eleven W flows as guided scenarios. The single source for the app build and for w1–w11. Start here. |
 | `consolidated.html` | The simple one-file consolidation of W1–W11 (see `docs/CONSOLIDATION.md` for what won and why). |
 
 ### Onboarding inside `mc.html`
@@ -30,6 +30,24 @@ Nothing on these screens writes anything; it is clickable demo chrome and is not
 meant to ship in the live app.
 
 ## One flow per file (W1–W12)
+
+**W1–W11 are generated from `mc.html`. Do not edit them.** Each one is `mc.html` byte for byte
+except its `<title>` and the hash it opens on: its guided scenario, a rail of four to eight
+steps over the real screens (`#/acme/<workspace>/scenarios/<id>/<step>`). A scenario owns no
+screens, so a W file cannot drift from the design it demonstrates. To change what a W file
+shows, change `mc.html` (the page, or the flow's `SCENARIOS["id"]` entry) and rebuild:
+
+```sh
+node tools/build-w.mjs            # regenerate w1–w11 from mc.html
+node tools/build-w.mjs --check    # exit 1 if any W file is not exactly what mc.html produces
+node tools/check-scenarios.mjs    # walk every step of every scenario in Chromium
+node tools/baseline/check-baseline.mjs mc.html
+```
+
+Every scenario is also reachable inside `mc.html` from **Scenarios** in the sidebar.
+The published artifact links below are the hand-drawn originals, kept for history; the
+originals themselves are in git before the commit that first regenerated the files.
+W12 (a coverage audit) and W13 (not yet in `mc.html`) are still hand-written.
 
 | # | File | Title | Published |
 |---|---|---|---|
