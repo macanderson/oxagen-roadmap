@@ -1,11 +1,25 @@
 # Mission Control design baseline
 
 Every lane that builds from "the mockup" builds from **one** `mc.html`: the tag
-`mc-baseline-w1` in this repo.
+`mc-baseline-w2` in this repo.
 
 ```sh
-git show mc-baseline-w1:mc.html > /tmp/mc.html
+git show mc-baseline-w2:mc.html > /tmp/mc.html
 ```
+
+## mc-baseline-w2 (2026-09-13)
+
+`main` after PRs #3–#7: everything in w1 below, plus
+
+| Decision | Came from | What to build |
+|---|---|---|
+| W1–W11 are guided scenarios over the real pages, not separate designs | PR #6 | Walk your page's scenario (`Scenarios` in the sidebar) before building it; `tools/check-scenarios.mjs` walks them all |
+| Everything each W file showed that mc.html lacked is in mc.html | PR #6 (nine port lanes) | The per-flow list is in PR #6's description |
+| Frames and context belong to a run; recorded frames are immutable | PR #6 | `FRAMES_BY_RUN`/`runFrames(R)`, `runContext(R)`; a published steering bundle reaches the next model call only |
+| Tenant is Anderson Intelligence Corp. (`a-intel`) at business scale | PR #5, re-applied in PR #6 | Seed rows render first; 274 agents, 1,168 runs shown |
+| One story clock: 2026-09-11 09:31:30 UTC, running from load | PR #7 | `nowT()`/`storyMs()` stamp anything a control writes |
+
+## mc-baseline-w1
 
 It is `main` @ 54f9107 (Agent IAM, Identities) with:
 
