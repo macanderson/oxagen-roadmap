@@ -467,6 +467,44 @@ tbody tr.click.flipped:hover{background:linear-gradient(90deg,color-mix(in srgb,
 .act-card{background:var(--ink);border:1px solid var(--border);border-radius:10px;padding:11px 13px;margin:9px 0;font-size:12.5px}
 .act-card .t{display:flex;align-items:center;gap:8px;margin-bottom:7px}
 .act-card .t code{font-size:11.5px}
+/* assistant (from W11): act-card decision variants, turn bar, four-hop chain, tabs, context pin, suggestions */
+.act-card.act-parked{border-color:color-mix(in srgb,var(--st-approval) 45%,var(--border))}
+.act-card .act-l{display:grid;gap:5px;font-size:12px;color:var(--muted);line-height:1.5}
+.act-card .act-l b{color:var(--body);font-weight:600}
+.act-card .act-f{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center;margin-top:9px;padding-top:8px;border-top:1px solid var(--border);font-size:11px;color:var(--dim)}
+.act-card .act-f .b{white-space:normal}
+.turnbar{display:flex;flex-wrap:wrap;align-items:center;gap:3px 6px;margin-top:10px;padding:6px 9px;border:1px dashed var(--rule);border-radius:8px;font-family:var(--mono);font-size:10.5px;color:var(--dim)}
+.turnbar i{font-style:normal;color:var(--rule)}
+.turnbar.tb-status{border:0;padding:0;margin:9px 0}
+.turnbar.tb-status .b{white-space:normal;font-family:var(--font)}
+.ahops{border-left:2px solid var(--rule);margin:9px 0 9px 5px}
+.ahop{display:grid;grid-template-columns:78px 1fr;gap:9px;padding:5px 0 5px 12px;position:relative}
+.ahop::before{content:"";position:absolute;left:-6px;top:10px;width:8px;height:8px;border-radius:50%;background:var(--panel);border:2px solid var(--rule)}
+.ahop.hot::before{border-color:var(--st-approval);background:var(--st-approval)}
+.ahop .hk{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);font-weight:600;padding-top:2px}
+.ahop .hk.tlk{letter-spacing:0;text-transform:none;font-weight:500}
+.ahop .hv{font-size:12px;color:var(--body);min-width:0;overflow-wrap:anywhere}
+.asst.phone .ahop{grid-template-columns:1fr;gap:1px}
+.asst-ctx{display:flex;align-items:center;gap:7px;padding:7px 15px;border-bottom:1px solid var(--border);font-size:11px;color:var(--dim);flex:none}
+.asst-ctx .pin{font-family:var(--mono);font-size:10.5px;color:var(--fg)}
+.asst-tabs{display:flex;gap:4px;padding:7px 11px;border-bottom:1px solid var(--border);overflow-x:auto;flex:none}
+.asst-tabs button{border:1px solid transparent;background:none;color:var(--muted);font-size:11.5px;padding:4px 9px;border-radius:7px;white-space:nowrap}
+.asst-tabs button:hover{background:var(--hl);color:var(--fg)}
+.asst-tabs button[aria-selected="true"]{background:var(--hl);color:var(--fg);border-color:var(--border)}
+.asst-sugg{display:grid;gap:6px;margin-top:4px}
+.asst-sugg .k{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:600}
+.asst-sugg button{text-align:left;border:1px solid var(--border);background:none;color:var(--muted);font-size:12px;padding:7px 10px;border-radius:8px}
+.asst-sugg button:hover{background:var(--hl);color:var(--fg);border-color:var(--rule)}
+.asst-sugg .q{font-family:var(--mono);font-size:10px;color:var(--dim);margin-right:7px}
+.asst-down{padding:6px 2px;font-size:12.5px;color:var(--muted)}
+.asst-down p{margin:0 0 10px}
+.cmd-g .c{font-family:var(--mono);letter-spacing:0;text-transform:none;font-weight:500;margin-left:8px}
+.cmd-i .ds{font-size:11.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:1}
+.cmd-i .tcw{flex:0 1 auto;min-width:0}
+.cmd-i .r{display:flex;align-items:center;gap:6px;flex:none}
+.cmd-empty{padding:26px 16px;text-align:center;font-size:13px}
+.cmd-empty p{color:var(--muted);font-size:12.5px;max-width:52ch;margin:8px auto 0}
+.cmd-foot{border-top:1px solid var(--border);border-bottom:0;font-size:11.5px;color:var(--dim);flex-wrap:wrap}
 
 /* ---------- spend findings: savings hero, ranked cards, evidence and fix dialogs ---------- */
 .sv-hero{display:grid;grid-template-columns:minmax(220px,1fr) minmax(0,1.5fr);gap:18px 30px;align-items:end;padding:18px 20px;background:var(--panel);border:1px solid var(--border);border-radius:12px;margin-bottom:14px}
@@ -7813,67 +7851,403 @@ function placeHold(){
    deliberate: a CSS transition cannot run on an element that is rebuilt from
    an innerHTML string, and an operator's half-typed message cannot survive one
    either. So the class is toggled on the host and the sheet inside it is only
-   rebuilt when the thing it renders (the engine state) actually changes. */
+   rebuilt when something it renders changes (engine, conversation, page, a
+   reply, the approval it explains), and a rebuild carries the draft across. */
+S.asstConvo="grant"; S.asstReplies=[]; S.asstPending=null;
+var ASST_KEY="oxagen.assistant";
+
+/* ---- the in-app agent's own records ----
+   Every turn is a run of its own: recorded, metered, gateway tier, and free (Billing: "Runs of the
+   in-app agent" are free). billed stays 0.00 while cost is what the model proxy observed. */
+function asstRun(o){
+  return Object.assign({agent:ASST_KEY, status:"sealed", basis:"gateway_observed", tier:"gateway", grade:"full",
+    verdict:"waived", model:"z-ai/glm-latest", provenSpend:"0.00", ratio:0, free:true, billed:"0.00",
+    gen:{model:"claude-haiku-4-5",when:"at seal "+o.sealed,frames:o.frames}}, o);
+}
+function asstRunOnce(o){if(!run(o.id))RUNS.push(asstRun(o));return run(o.id);}
+RUNS.push(asstRun({id:"run_01K5RT9X4M2", op:"marcus", ws:"core-platform", turn:1, steps:4, frames:4, cost:"0.0388",
+  cache:0.71, task:"acme/platform#521", taskTitle:"Assistant turn · narrow triage's belt",
+  summary:"Read finding fnd_01K5RT2A and the triage belt, then opened acme/platform#521 narrowing the belt in .oxagen/agents/triage.toml. One governed write, receipt rcp_01K5RTB4Q; the merge is left to a code owner.",
+  touched:["acme/platform#521",".oxagen/agents/triage.toml"], started:"09:30:52", sealed:"09:31:19"}));
+RUNS.push(asstRun({id:"run_01K5RTF6W9", op:"marcus", ws:"core-platform", turn:1, steps:5, frames:9, cost:"0.0214",
+  cache:0.83, task:"acme/platform#521", taskTitle:"Assistant turn · grant and cap triage",
+  summary:"Granted linear__get_issue@2 to acme.core.triage and set a $5.00 hard per-run budget, both on acme/platform#521. Two governed writes, receipts rcp_01K5RTG2K and rcp_01K5RTG5M.",
+  touched:["acme/platform#521","linear__get_issue@2","budget.per_run_micros"], started:"09:33:40", sealed:"09:33:58"}));
+RUNS.push(asstRun({id:"run_01K5RV3C8N", op:"priya", ws:"finops", turn:1, steps:9, frames:21, cost:"0.0627",
+  cache:0.80, task:"apr_01K5RN9T4", taskTitle:"Assistant turn · explain the invoice-bot park",
+  summary:"Read run_01K5RN8F3J2GHY6T, approval apr_01K5RN9T4 and mandate mnd_7K2ETQ4 and explained the park. Reads only; nothing was written.",
+  touched:["run_01K5RN8F3J2GHY6T","apr_01K5RN9T4","mnd_7K2ETQ4"], started:"09:34:12", sealed:"09:34:31"}));
+RUNS.push(asstRun({id:"run_01K3F8Q1AA", op:"priya", ws:"core-platform", turn:4, steps:14, frames:52, cost:"0.0501",
+  cache:0.44, task:"onboarding", taskTitle:"Assistant turn · first run onboarding",
+  summary:"Created the Acme Robotics organization and the core-platform workspace through create_org and create_workspace, then waited for the first frame from a wrapped agent.",
+  touched:["acme","core-platform"], started:"2026-08-26 09:13:02", sealed:"2026-08-26 09:21:50"}));
+/* The four frames receipt rcp_01K5RTB4Q counts ("chain position 3 of 4"). */
+FRAMES_BY_RUN["run_01K5RT9X4M2"]=[
+ {seq:0,kind:"agent_start",tier:"gateway",cost:null,t:"09:30:52.204",sum:"oxagen.assistant · in-app agent · operator Marcus Bell · run token 15m · no provider credential held"},
+ {seq:1,kind:"model.response",tier:"gateway",cost:"0.0388",t:"09:31:16.910",sum:"z-ai/glm-latest · stop_reason tool_use · after list_findings, get_agent_belt"},
+ {seq:2,kind:"tool_result",tier:"gateway",cost:null,t:"09:31:18.044",rcp:"rcp_01K5RTB4Q",sum:"github__create_pull_request@3 · allow · pol_v41 rule rg_0041 · acme/platform#521 · receipt rcp_01K5RTB4Q"},
+ {seq:3,kind:"agent_stop",tier:"gateway",cost:null,t:"09:31:19.402",sum:"end_turn · 1 governed write · billed 0.00 · in-app agent runs are free"}
+];
+
+/* Receipts for the assistant's control-plane writes. Same groups the gateway writes for any call. */
+function asstReceipt(o){
+  var P=PEOPLE[o.op];
+  return {id:o.id,at:o.at,agent:ASST_KEY,operator:P.name,tool:o.tool,decision:"allow",tier:"gateway",
+   effect:o.effect,amount:"—",ws:o.ws,runId:o.runId,
+   who:[["Operator",P.name+" · "+P.role],["Agent","oxagen.assistant · in-app agent · prn_01K0A1",1],["Run · turn · step",o.runId+" · "+o.turn+" · "+o.step,1],["Task",o.task]],
+   what:[["Tool version",o.tool,1],["Input digest",o.digest,1]].concat(o.what),
+   authority:[["Decision","allow"],["Policy version",o.policy+" (signed)",1],["Rules fired",o.rule,1],["Grants used",o.grants,1],
+    ["Delegation ceiling","held — the assistant acts with "+P.name+"’s authority, never more"],["Mandate","not required — financial.effect none"],
+    ["Approval","not required"],["Taint sources","none"]],
+   credential:[["Credential grant","none — a control-plane call carries no provider credential"],["Agent saw","the result"]],
+   effectRows:[["Dispatched",o.at+" · control plane"],["Output validation","pass"],["External effect id",o.effect,1]],
+   integrity:[["Frame hash",o.hash,1],["Chain position",o.chain+" · verified"],["Gateway signature","ed25519 · "+ORG.attester+" · verified",1],
+    ["Enforcement tier","gateway — billed as one governed action"]]};
+}
+function asstReceiptOnce(o){if(!receiptById(o.id))RECEIPTS.push(asstReceipt(o));return receiptById(o.id);}
+RECEIPTS.push(asstReceipt({id:"rcp_01K5RTG2K",at:"2026-09-11 09:33:51.310Z",op:"marcus",ws:"core-platform",runId:"run_01K5RTF6W9",turn:1,step:2,
+  tool:"set_role_grants@1",effect:"acme/platform#521 · grant linear__get_issue@2",task:"grant linear__get_issue to triage and cap it at $5 a run",
+  digest:"sha256:3e91a0c47b2d58f1",policy:"pol_v41",rule:"workspace.owner · tool.grant",grants:"role workspace.owner → tool.grant on core-platform",
+  what:[["Agent","acme.core.triage",1],["Grant","linear__get_issue@2 · effect allow",1]],hash:"sha256:9d20e7b14c6a3f85",chain:"4 of 9"}));
+RECEIPTS.push(asstReceipt({id:"rcp_01K5RTG5M",at:"2026-09-11 09:33:54.772Z",op:"marcus",ws:"core-platform",runId:"run_01K5RTF6W9",turn:1,step:3,
+  tool:"set_budget@1",effect:"acme/platform#521 · per_run_micros 5000000",task:"grant linear__get_issue to triage and cap it at $5 a run",
+  digest:"sha256:b8047c2e19d3a6f0",policy:"pol_v41",rule:"workspace.owner · budget.set",grants:"role workspace.owner → budget.set on core-platform",
+  what:[["Scope","agent · acme.core.triage",1],["Budget","$5.00 USD per run · mode hard"]],hash:"sha256:51ce0a9b7d24e3f6",chain:"6 of 9"}));
+RECEIPTS.push(asstReceipt({id:"rcp_01K3F8Q4C",at:"2026-08-26 09:14:21.118Z",op:"priya",ws:"core-platform",runId:"run_01K3F8Q1AA",turn:2,step:1,
+  tool:"create_org@1",effect:"org acme",task:"onboard Acme Robotics",
+  digest:"sha256:0c7e19b2a45d83f6",policy:"pol_v1",rule:"org.create_first",grants:"first signup → org.owner",
+  what:[["Organization","Acme Robotics · slug acme · namespace acme",1]],hash:"sha256:7a3f02c9e1b4d586",chain:"9 of 52"}));
+RECEIPTS.push(asstReceipt({id:"rcp_01K3F8Q5D",at:"2026-08-26 09:14:23.540Z",op:"priya",ws:"core-platform",runId:"run_01K3F8Q1AA",turn:2,step:2,
+  tool:"create_workspace@1",effect:"workspace core-platform",task:"onboard Acme Robotics",
+  digest:"sha256:e4b1d8207c93a5f2",policy:"pol_v1",rule:"workspace.org_owner_override",grants:"role org.owner → org.*",
+  what:[["Workspace","core-platform · namespace core · governance team",1],["Main repo","acme/platform @ main",1]],hash:"sha256:c09e4d71b83a2f65",chain:"12 of 52"}));
+
+/* ---- reading records ---- */
+function asstFinding(id){for(var i=0;i<FINDINGS.length;i++){if(FINDINGS[i].id===id)return FINDINGS[i];}return null;}
+function asstMandate(id){for(var i=0;i<MANDATES.length;i++){if(MANDATES[i].id===id)return MANDATES[i];}return null;}
+function asstPerms(pk){var r=roleById(String(PEOPLE[pk].role).split(" ")[0]);return r?r.perms:[];}
+function asstHolds(pk,perm){var p=asstPerms(pk);return p.indexOf(perm)>=0||p.indexOf("org.*")>=0;}
+function asstRunLink(id){var R=run(id);return '<a class="mono" href="#/'+ORG.slug+'/'+(R?R.ws:S.ws)+'/runs/'+id+'" onclick="asstToggle(false)">'+h(id)+'</a>';}
+function asstRcpLink(id){return receiptById(id)?'<a class="mono" href="#" onclick="openDialog(\'receipt\',\''+id+'\');return false">'+h(id)+'</a>':'<span class="mono">'+h(id)+'</span>';}
+function asstAddMin(t,m){var p=String(t).replace(/Z$/,"").split(":");var tot=(+p[0])*60+(+p[1])+m;
+  function z(n){return (n<10?"0":"")+n;}return z(Math.floor(tot/60)%24)+":"+z(tot%60)+":"+p[2]+"Z";}
+function asstTriage(){
+  var G=agent("acme.core.triage"), f=asstFinding("fnd_01K5RT2A"), m=/(\d+) of the (\d+) tools/.exec(f?f.why:"")||[0,0,G.belt];
+  return {G:G, f:f, unused:+m[1], total:+m[2], kept:(+m[2])-(+m[1])};
+}
+
+/* ---- the three conversations: built from the records at render time, so a number here is the record's ---- */
+var ASST_CONVOS={
+ grant:{label:"Grant a tool, cap a run", op:"marcus", ws:"core-platform", msgs:function(){
+  var T=asstTriage(), G=T.G, tool=toolById("linear__get_issue@2"), r1=receiptById("rcp_01K5RTB4Q");
+  var cap=5, highest=G.budgetUsed, over=G.belt>FULL_BELT_LIMIT;
+  return [
+   {role:"op", who:"marcus", t:"09:30", text:"Triage is burning money on tool definitions. Narrow its belt to what it actually used in the last 30 days, and tell me what you changed."},
+   {role:"ox", t:"09:31", run:"run_01K5RT9X4M2", blocks:[
+    {p:'I read the finding and the belt. '+T.unused+' of the '+T.total+' tools on <span class="mono">'+h(G.key)+'</span> were never called in '+G.runs30.toLocaleString()+' runs. '+
+       'Narrowing the belt is a change to the agent definition, so it is a Context PR, not a write to Postgres. I opened one.'},
+    {card:{tool:r1.tool, step:"step 3", decision:"allow", policy:"pol_v41", rules:["rg_0041"], receipt:r1.id, lines:[
+      'Pull request <b>'+h(r1.effect)+'</b> on <span class="mono">.oxagen/agents/triage.toml</span>.',
+      'Tools narrowed <b>'+T.total+' → '+T.kept+'</b>. Nothing else in the definition changes.']}},
+    {p:'Estimated saving from the frames the finding cites: <b>'+usd(T.f.save)+'</b> USD over the '+h(T.f.window)+'. '+
+       'A code-owner review is required in <span class="mono">'+h(ORG.governance)+'</span> mode, so it is yours to merge.'}]},
+   {role:"op", who:"marcus", t:"09:33", text:'grant <code>linear__get_issue</code> to triage and cap it at $5 a run'},
+   {role:"ox", t:"09:33", run:"run_01K5RTF6W9", blocks:[
+    {p:'Two changes to <code>'+h(G.key)+'</code>, both governed actions under your grants. Your '+h(String(PEOPLE.marcus.role).split(" ")[0])+' role '+
+       (asstHolds("marcus","tool.grant")&&asstHolds("marcus","budget.set")?'carries <span class="mono">tool.grant</span> and <span class="mono">budget.set</span>':'does not carry both permissions')+
+       ', and triage’s effective permission is still its own grants intersected with yours.'},
+    {card:{tool:"set_role_grants@1", step:"step 2", decision:"allow", policy:"pol_v41", rules:["workspace.owner · tool.grant"], receipt:"rcp_01K5RTG2K", lines:[
+      'Granted <b>linear__get_issue@2</b> to <b>'+h(G.key)+'</b> with effect <b>allow</b>, named by version.',
+      'Registry: risk <b>'+h(tool.risk)+'</b> · side effect <b>'+h(tool.eff)+'</b> · egress <b>'+h(tool.eg)+'</b> · credential '+h(tool.cred)+'. triage holds no Linear credential; the broker mints one per call.',
+      'It was on the belt through the wrap-time server grant, which '+h(r1.effect)+' narrows. A grant that names the version survives the narrowing.']}},
+    {card:{tool:"set_budget@1", step:"step 3", decision:"allow", policy:"pol_v41", rules:["workspace.owner · budget.set"], receipt:"rcp_01K5RTG5M", lines:[
+      'Scope <b>agent</b> · <b>'+h(G.key)+'</b> · <b>'+usd(fmt2(cap))+' USD per run</b> · mode <b>hard</b>.',
+      'Written as <span class="mono">per_run_micros = '+(cap*1e6)+'</span> on '+h(r1.effect)+'. It is live when that merges; until then the proxy enforces '+usd(G.budget)+'.',
+      'A hard budget is enforced at the model proxy <i>before</i> the call, so triage is stopped at the boundary. It is not asked to stop.']}},
+    {p:'<b>Two things worth knowing.</b>'},
+    {p:usd(fmt2(cap))+' raises triage’s cap; it does not lower it. The definition says <b>'+usd(G.budget)+'</b> a run today and its highest run this month was <b>'+usd(highest.toFixed(2))+'</b>, '+
+       'so at '+usd(fmt2(cap))+' the cap would never have bound. Tell me the number you meant and I will change it on the same pull request.'},
+    {p:'The belt is <b>'+G.belt+'</b> tools, '+(over?'over':'under')+' this workspace’s full-belt limit of '+FULL_BELT_LIMIT+', so triage’s runs '+
+       (over?'get <code>search_tools</code> and <code>load_tools</code> instead of '+G.belt+' definitions':'carry every definition')+'. '+
+       'After the narrowing merges it is '+T.kept+', '+(T.kept>FULL_BELT_LIMIT?'still over':'under')+' the limit. A search never returns a tool outside the belt, so nothing new becomes reachable.'},
+    {status:{tone:"allowed", text:"Both changes ride "+r1.effect+". A code owner reviews them at merge."}}]}
+  ];
+ }},
+ why:{label:"Explain a run", op:"priya", ws:"finops", msgs:function(){
+  var A=approvalById("apr_01K5RN9T4"), R=run(A.run), G=agent(R.agent), M=asstMandate(A.mandate), st=apState(A.id);
+  var mins=parseInt(A.timeout,10)||10, at=A.parkedAt.slice(0,5);
+  var led=null; (M.ledger||[]).forEach(function(l){if(l.state==="reserved"&&l.amount===A.amount)led=l;});
+  var fired=A.rules.filter(function(x){return x.v==="approve";}).map(function(x){return x.id;});
+  var asker=PEOPLE.priya.name, eligible=A.approvers.split("·")[0].indexOf(asker)>=0;
+  var now=st.status==="pending"
+    ? [["now","<b>still parked</b> · "+mmss(apLeft(A.id))+" of "+h(A.timeout)+" left when I answered · no approver has answered"]]
+    : [["decided","<code>approval_decision</code> — <b>"+h(st.status)+"</b>"+(st.by&&st.by!=="—"?" by "+h(st.by):"")+(st.reason?" · “"+h(st.reason)+"”":"")]];
+  return [
+   {role:"op", who:"priya", t:"09:34", text:"why did invoice-bot stop at "+at},
+   {role:"ox", t:"09:34", run:"run_01K5RV3C8N", blocks:[
+    {p:'<b>It did not stop. It parked.</b> At <b>'+h(A.parkedAt)+'</b> <code>'+h(G.key)+'</code> called <code>'+h(A.tool)+'</code> for <b>'+usd(A.amount)+' '+h(A.currency)+'</b> to <code>'+h(A.counterparty)+'</code>, and the tool gateway held the call for a human on turn '+R.turn+'.'},
+    {chain:[
+      ["who asked",'<b>'+h(PEOPLE[R.op].name)+'</b> — run opened '+h(R.started)+' for '+h(R.task)+' · '+h(R.taskTitle)+'. The operator is the person behind the run.'],
+      ["which agent",'<code>'+h(G.key)+'</code> · '+h(G.harnessLabel)+' · tier <b>'+h(R.tier)+'</b> · run '+asstRunLink(R.id)],
+      ["which action",'<code>'+h(A.tool)+'</code> · <b>'+usd(A.amount)+' '+h(A.currency)+'</b> · counterparty <code>'+h(A.counterparty)+'</code> · input digest <code>'+h(A.digest)+'</code> · <b>'+(A.tainted?'tainted':'not tainted')+'</b>'],
+      ["which rule",h(A.rule)+' · policy <b>'+h(A.policy)+'</b> · fired '+fired.map(function(x){return '<code>'+h(x)+'</code>';}).join(", ")]
+     ], hot:3},
+    {p:'<b>Then it waits, which is the actual answer.</b> The request went to '+h(A.approvers)+'.'+(eligible?' You are one of them.':'')},
+    {tl:[
+      [A.parkedAt,'<code>policy.decision</code> — outcome <b>approve</b>'],
+      [A.parkedAt,'<code>approval_request</code> — '+h(A.id)+', expires '+asstAddMin(A.parkedAt,mins)+', notified Mission Control and the approvers']
+     ].concat(now)},
+    {p:'<b>Money has not moved.</b> The mandate ledger holds the amount as a reservation. Approve it and it settles; deny it or let it expire and the reservation is released.'},
+    {kv:[
+      ["mandate",h(M.id)+' · '+h(M.status)+(M.twoPerson?' · two-person':'')],
+      ["period",h(M.period)+' · settled '+usd(M.used)+' · reserved '+usd(M.reserved)+' · remaining '+usd(M.remaining)+' of '+usd(M.perPeriod)],
+      ["this call",led?'reserved '+usd(led.amount)+' at '+h(led.when)+' · '+h(led.ext):'no ledger row'],
+      ["run cost",usd(R.cost)+' '+h(ORG.currency)+' · '+h(R.basis)]]},
+    {p:'Two ways to make the next one resolve sooner. The first I can do now. The second I can open but not finish.'},
+    {buttons:[["Raise the approval window to 60 minutes","timeout",true],["Add org owners as approvers on "+M.id,"approvers"]]}]}
+  ];
+ }},
+ onboarding:{label:"Onboarding", op:"priya", ws:"core-platform", archived:"2026-08-26", msgs:function(){
+  return [
+   {role:"ox", t:"09:13", blocks:[
+    {p:'I’m the Oxagen assistant. I onboard an organization, change its configuration through the same governed actions the screens use, and explain any run afterwards. My engine is <code>stella serve</code> in its own container. It holds no credentials and no authority, and every tool call it wants comes back here to be decided.'},
+    {p:'Three steps, then the app opens. <b>Oxagen does not open until an agent has talked to it</b>, because a mission control with nothing to control is a settings page.'},
+    {p:'First: what should this organization be called?'}]},
+   {role:"op", who:"priya", t:"09:14", text:ORG.name},
+   {role:"ox", t:"09:14", blocks:[
+    {card:{tool:"create_org@1", step:"step 1", decision:"allow", policy:"pol_v1", rules:["org.create_first"], receipt:"rcp_01K3F8Q4C", lines:[
+      'Organization <b>'+h(ORG.name)+'</b> · slug <code>'+h(ORG.slug)+'</code> · namespace <code>'+h(ORG.slug)+'</code>.',
+      'The namespace is <b>immutable</b>: it is inside every agent key, so <code>acme.core.release-manager</code> reads the same in five years.']}},
+    {card:{tool:"create_workspace@1", step:"step 2", decision:"allow", policy:"pol_v1", rules:["workspace.org_owner_override"], receipt:"rcp_01K3F8Q5D", lines:[
+      'Workspace <b>'+h(WS[0].slug)+'</b> · governance mode <b>'+h(ORG.governance)+'</b> · main repo <b>'+h(WS[0].main)+'</b> @ <code>'+h(WS[0].branch)+'</code>.',
+      'Every workspace has exactly one main repo. It is where steering, agent definitions and the ontology live in source control.']}},
+    {p:'Now wrap an agent. One click installs the collector and the hook, or five lines wrap an SDK agent.'},
+    {buttons:[["Wrap Claude Code","noop",true],["Wrap Codex","noop"],["Show the SDK snippet","noop"]]}]},
+   {role:"op", who:"priya", t:"09:16", text:"Show the SDK snippet."},
+   {role:"ox", t:"09:16", blocks:[
+    {code:'<span class="c">// one package, one call, any harness</span>\n<span class="k">import</span> { oxagen } <span class="k">from</span> <span class="s">"@oxagen/sdk"</span>;\n\n<span class="k">await</span> oxagen.agent.wrap({\n  agentKey: <span class="s">"acme.core.release-manager"</span>,\n  credential: process.env.OXAGEN_AGENT_CREDENTIAL,\n});'},
+    {p:'That points the harness’s base URL at the model proxy and its MCP client at this workspace’s tool gateway. Both seams are what earn a run <b>gateway</b> tier. Nothing about the tier is claimed; it is computed from what actually routed.'}]},
+   {role:"ox", t:"09:21", run:"run_01K3F8Q1AA", blocks:[
+    {status:{tone:"allowed", text:"First frame received. Mission Control is open."}},
+    {p:'Turns like this one are runs of the in-app agent, recorded like any other run and never billed.'}]}
+  ];
+ }}
+};
+
+/* replies the in-reply buttons and typed input produce: the same governed-action shape, appended live */
+var ASST_REPLIES={
+ timeout:{t:"09:35", run:{id:"run_01K5RV8D2Q", op:"priya", ws:"finops", turn:1, steps:4, frames:9, cost:"0.0149", cache:0.86,
+   task:"finops", taskTitle:"Assistant turn · approval window", summary:"Raised the finops approval timeout from 10 to 60 minutes. One governed write.",
+   touched:["finops"], started:"09:35:02", sealed:"09:35:14"},
+  receipt:{id:"rcp_01K5RV8F4",at:"2026-09-11 09:35:11.604Z",op:"priya",ws:"finops",runId:"run_01K5RV8D2Q",turn:1,step:2,
+   tool:"update_workspace@2",effect:"workspace finops · approval timeout 60m",task:"raise the approval window to 60 minutes",
+   digest:"sha256:6a0d93e1c7b24f58",policy:"pol_v41",rule:"org.owner · org.*",grants:"role org.owner → org.*",
+   what:[["Workspace","finops",1],["Approval timeout","10 minutes → 60 minutes"]],hash:"sha256:2fb81c07e94d6a35",chain:"5 of 9"},
+  blocks:function(){var A=approvalById("apr_01K5RN9T4");return [
+   {card:{tool:"update_workspace@2", step:"step 2", decision:"allow", policy:"pol_v41", rules:["org.owner · org.*"], receipt:"rcp_01K5RV8F4", lines:[
+     'Workspace <b>finops</b> · approval timeout <b>'+(parseInt(A.timeout,10)||10)+' minutes → 60 minutes</b>.',
+     'It applies to calls parked after the next bundle refresh. '+h(A.id)+' keeps the '+h(A.timeout)+' clock it was issued with; a decision never changes under a waiting approver.']}},
+   {p:'A parked financial call now waits an hour, which covers a meeting. It does not cover a weekend, and I would not raise it further: a call parked longer than the run that made it is a call nobody remembers approving.'}];}},
+ approvers:{t:"09:36", run:{id:"run_01K5RV9K7B", op:"priya", ws:"finops", turn:1, steps:3, frames:7, cost:"0.0181", cache:0.87,
+   task:"mnd_7K2ETQ4", taskTitle:"Assistant turn · widen mandate approvers", summary:"Opened a revision of mnd_7K2ETQ4 adding role:org.owner as approvers. Parked for the mandate's second person; nothing written.",
+   touched:["mnd_7K2ETQ4"], started:"09:36:20", sealed:"09:36:29"},
+  blocks:function(){var M=asstMandate("mnd_7K2ETQ4"), other=M.second===PEOPLE.priya.name?M.by:M.second;return [
+   {p:'I opened it. I cannot finish it, and that is the mandate working.'},
+   {card:{tool:"grant_mandate@1", step:"step 1", decision:"approve", policy:"pol_v41", rules:["mandate.two_person_change"], receipt:null,
+     parked:"parked · waiting on "+other+" · no receipt yet", lines:[
+     'Revision of <b>'+h(M.id)+'</b>: approvers <code>'+h(M.approvers)+'</code> → <code>'+h(M.approvers)+', role:org.owner</code>. Nothing else changes: '+usd(M.perCall)+' per call, '+usd(M.perPeriod)+' '+h(M.period)+', counterparties '+h(M.allow)+' and the '+usd(M.approvalAbove)+' threshold are untouched.',
+     '<b>'+h(M.id)+' carries <code>two_person: true</code></b>, so a change to it needs a second human. You granted nothing to yourself; the widening went to the other named person on the mandate.',
+     'No receipt yet. A receipt is written when the call is decided and dispatched, and this one is parked.']}},
+   {p:'If '+h(other)+' approves, it takes effect at the next bundle refresh. If it expires, the mandate stays exactly as it is, which is the safe direction for a change that widens who can move money.'}];}},
+ pause:{t:"09:37", run:{id:"run_01K5RVB3M6", op:"marcus", ws:"core-platform", turn:1, steps:3, frames:7, cost:"0.0052", cache:0.82,
+   task:"core-platform", taskTitle:"Assistant turn · pause an operator's fleet", summary:"Opened dispatch_command pause for every agent Marcus Bell operates. Fleet scope needs approval; parked, nothing dispatched.",
+   touched:["core-platform"], started:"09:37:05", sealed:"09:37:12"},
+  blocks:function(){
+   var mine=AGENTS.filter(function(a){return a.operator==="marcus";}), keys=mine.map(function(a){return a.key;});
+   var live=RUNS.filter(function(r){var s=runStatus(r);return keys.indexOf(r.agent)>=0&&(s==="live"||s==="parked");}).length;
+   return [
+   {p:'I opened it and stopped where my authority stops.'},
+   {card:{tool:"dispatch_command@1", step:"step 1", decision:"approve", policy:"pol_v41", rules:["command.fleet_scope_requires_approval"], receipt:null,
+     parked:"parked · waiting on another workspace owner · no receipt yet", lines:[
+     'Command <b>pause</b>, target <b>operator’s agents</b>, <b>'+h(PEOPLE.marcus.name)+'</b>: '+mine.length+' agent'+(mine.length===1?'':'s')+', '+live+' with a live or parked run.',
+     'A fleet-scope command from the assistant principal is <code>require_approval</code> on this workspace’s policy. I hold agent tool contracts and nothing else; I have no standing authority to halt anyone’s fleet.',
+     'If approved, each run is denied at its <b>next call boundary</b> and the pause shows on every affected run as a <code>policy.decision</code> frame. Work already dispatched finishes; nothing new starts.']}},
+   {p:'A pause is cooperative at the boundary. If you want it to hold regardless of what the harness does, the command is <b>revoke</b>: it kills the agent credential and every run token with it.'}];}},
+ read:{t:"09:38", run:{id:"run_01K5RVC9P1", op:"marcus", ws:"core-platform", turn:1, steps:3, frames:6, cost:"0.0094", cache:0.85,
+   task:"core-platform", taskTitle:"Assistant turn · read the fleet", summary:"Read list_runs and get_run to answer a question. Reads only; nothing was written.",
+   touched:["core-platform"], started:"09:38:01", sealed:"09:38:09"},
+  blocks:function(){
+   var w=S.ws, rs=RUNS.filter(function(r){var s=runStatus(r);return r.ws===w&&r.agent!==ASST_KEY&&(s==="live"||s==="parked");});
+   var top=rs.slice().sort(function(a,b){return parseFloat(b.cost)-parseFloat(a.cost);})[0];
+   return [
+   top?{p:'Of the '+rs.length+' live or parked run'+(rs.length===1?'':'s')+' in <b>'+h(w)+'</b>, '+asstRunLink(top.id)+' is the most expensive at <b>'+usd(top.cost)+'</b>: <code>'+h(top.agent)+'</code>, turn '+top.turn+', '+top.steps+' steps, operator '+h(PEOPLE[top.op].name)+', on '+h(top.task)+'.'}
+      :{p:'Nothing is live or parked in <b>'+h(w)+'</b> right now.'},
+   {p:'I read two things to answer this and wrote nothing: <code>list_runs</code> and <code>get_run</code>. Reads are governed calls too; they are frames on this turn’s run, they just change nothing.'}];}}
+};
+
+/* per-page suggestions: the panel knows where it is standing */
+var ASST_SUGGEST={
+ fleet:[["cost","Which live run is costing the most, and why?"],["halt","Pause every agent I operate until the release lands"],["explain","why did invoice-bot stop at 09:31"]],
+ run:[["explain","why did invoice-bot stop at 09:31"],["cost","Where did the money on this run go?"],["export","Export this run as a signed bundle with its verifier"]],
+ agents:[["grant","grant linear__get_issue to triage and cap it at $5 a run"],["belt","Which tools has release-manager not called in 30 days?"],["wrap","Wrap Claude Code on a second machine"]],
+ tools:[["policy","Simulate the draft policy against the last 14 days"],["mandate","Who can move money in this organization, and up to what?"],["kill","Kill every moves_funds tool across acme right now"]],
+ spend:[["findings","Act on the top finding and tell me what it saves"],["budget","grant linear__get_issue to triage and cap it at $5 a run"],["cost","Which live run is costing the most, and why?"]],
+ audit:[["receipts","Show me every receipt the assistant wrote this week"],["hold","Place a legal hold on every invoice-bot run"],["explain","why did invoice-bot stop at 09:31"]]
+};
+ASST_SUGGEST.agent=ASST_SUGGEST.mandate=ASST_SUGGEST.agents;
+function asstClassify(t){
+  var s=String(t).toLowerCase();
+  if(/grant|linear|cap it|budget|\$5/.test(s)) return {convo:"grant"};
+  if(/invoice-bot|why did|parked|stop at/.test(s)) return {convo:"why"};
+  if(/pause|halt|cancel|revoke|kill|wrap|invite|erase|export|hold|sync|open a/.test(s)) return {reply:"pause"};
+  return {reply:"read"};
+}
+
+/* ---- rendering ---- */
+function asstCard(g){
+  var dec=g.decision==="allow"?'<span class="b b-allowed"><span class="d"></span>allow</span>'
+    :'<span class="b b-approval"><span class="d"></span>approve · routed to a human</span>';
+  return '<div class="act-card '+(g.receipt?'act-allow':'act-parked')+'"><div class="t">'+dec+'<code>'+h(g.tool)+'</code>'+
+   '<span class="mono dim" style="margin-left:auto;font-size:10.5px">'+h(g.step)+'</span></div>'+
+   '<div class="act-l">'+g.lines.map(function(l){return '<div>'+l+'</div>';}).join("")+'</div>'+
+   '<div class="act-f"><span>policy '+h(g.policy)+'</span><span>rule '+h(g.rules.join(", "))+'</span>'+
+   (g.receipt?'<span>receipt '+asstRcpLink(g.receipt)+'</span>':'<span class="b b-approval">'+h(g.parked||"no receipt yet")+'</span>')+'</div></div>';
+}
+/* The turn bar reads the run record, and the token figures come off runMetrics — the same derivation
+   the Run page's instruments use — on a copy, so this never primes the page's cache with our FRAMES. */
+function asstTurnbar(id){
+  var R=run(id); if(!R) return '';
+  var m=runMetrics(Object.assign({},R,{_m:null})), n=RECEIPTS.filter(function(x){return x.runId===id;}).length;
+  return '<div class="turnbar" data-run="'+h(id)+'" data-cost="'+h(R.cost)+'"><span>this turn is a run</span><i>·</i>'+asstRunLink(id)+'<i>·</i>'+
+   '<span>'+R.turn+' turn'+(R.turn>1?'s':'')+', '+R.steps+' steps</span><i>·</i>'+
+   '<span>'+n+' governed write'+(n===1?'':'s')+'</span><i>·</i>'+
+   '<span>'+h(R.model)+' · '+m.tokIn.toLocaleString()+' in / '+m.tokOut.toLocaleString()+' out · cache '+(R.cache||0).toFixed(2)+'</span><i>·</i>'+
+   '<span class="tb-cost">'+usd(R.cost)+'</span><i>·</i>'+tierBadge(R.tier)+'<i>·</i>'+
+   '<span>'+(R.free?'free · billed '+usd(R.billed):'billed')+'</span></div>';
+}
+function asstBlock(b,live){
+  if(b.p) return '<p>'+b.p+'</p>';
+  if(b.code) return '<pre>'+b.code+'</pre>';
+  if(b.card) return asstCard(b.card);
+  if(b.kv) return kvl(b.kv);
+  if(b.chain) return '<div class="ahops">'+b.chain.map(function(x,i){
+    return '<div class="ahop'+(i===b.hot?' hot':'')+'"><div class="hk">'+x[0]+'</div><div class="hv">'+x[1]+'</div></div>';}).join("")+'</div>';
+  if(b.tl) return '<div class="ahops">'+b.tl.map(function(x){
+    return '<div class="ahop"><div class="hk mono tlk">'+h(x[0])+'</div><div class="hv">'+x[1]+'</div></div>';}).join("")+'</div>';
+  if(b.status) return '<div class="turnbar tb-status '+h(b.status.tone)+'"><span class="b b-'+h(b.status.tone)+'"><span class="d"></span>'+h(b.status.text)+'</span></div>';
+  if(b.buttons) return '<div class="row" style="gap:7px;flex-wrap:wrap;margin-top:4px">'+b.buttons.map(function(x){
+    var done=S.asstReplies.some(function(r){return r.convo===S.asstConvo&&r.key===x[1];});
+    return '<button class="btn sm'+(x[2]?' primary':'')+'"'+(!live||x[1]==="noop"||done?' disabled':' onclick="asstReply(\''+x[1]+'\')"')+'>'+h(x[0])+'</button>';}).join("")+'</div>';
+  return '';
+}
+function asstMsg(m,live){
+  if(m.role==="op"){
+    var p=PEOPLE[m.who];
+    return '<div class="msg op"><div class="who">'+personAv(m.who,16)+h(p.name)+'<span class="mono" style="margin-left:auto;letter-spacing:0">'+h(m.t)+'</span></div><div class="bub">'+m.text+'</div></div>';
+  }
+  return '<div class="msg"><div class="who">Assistant<span class="mono" style="margin-left:auto;letter-spacing:0">'+h(m.t)+'</span></div><div class="bub">'+
+   m.blocks.map(function(b){return asstBlock(b,live);}).join("")+(m.run?asstTurnbar(m.run):'')+'</div></div>';
+}
+function asstEngineIncident(){
+  var id="inc_01K5RVE1S8", i=incidentById(id);
+  if(!i){INCIDENTS.unshift({id:id,sev:"warning",title:"Assistant engine unreachable",kind:"engine_unreachable",at:"2026-09-11 09:40",by:"control plane",
+    scope:"stella serve · engine.oxagen.internal:8080",
+    detail:"stella serve returned engine_unreachable after 3 attempts, connect timeout 2000 ms. The engine is a required service with no in-process fallback, so the assistant panel is out and says so.",
+    resolution:"Open. The gateway, recording, approvals and budgets do not depend on the engine and are unaffected.",
+    status:"open",owner:"Priya Natarajan",due:"2026-09-11",closedAt:"",closedBy:"",runs:0}); i=INCIDENTS[0];}
+  return i;
+}
+function asstRetry(){
+  var i=incidentById("inc_01K5RVE1S8");
+  if(i&&i.status==="open"){i.status="resolved";i.closedAt="2026-09-11 "+auditNow().slice(0,5);i.closedBy="control plane (engine healthy)";
+    i.resolution="The engine answered its health check on retry. No run was affected; nothing fell back to an in-process loop while it was out.";}
+  S.asstEngine="up"; render(); act("Engine healthy. The incident closed with the time it recovered.");
+}
+function asstCtx(){
+  var r=route(), orgPage=r.page==="organization"||r.page==="billing"||r.page==="audit";
+  return '<div class="asst-ctx"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="8" cy="8" r="2.2"/><circle cx="8" cy="8" r="5.8"/></svg>'+
+   '<span>Looking at</span><span class="pin">'+h(PAGES[r.page]||r.page)+' · '+h(orgPage?ORG.slug:(r.ws||S.ws))+'</span>'+
+   '<span class="mono dim" style="margin-left:auto">'+(ASST_CONVOS[S.asstConvo].archived?'archived · '+ASST_CONVOS[S.asstConvo].archived:'live')+'</span></div>';
+}
+function asstSheet(){
+  var head='<div class="asst-h"><b style="font-size:13.5px">Assistant</b>'+
+   (S.asstEngine==="down"?'<span class="b b-failed" style="margin-left:auto"><span class="d"></span>engine down</span>'
+    :'<span class="b b-q" style="margin-left:auto">every turn is a run of its own</span>')+
+   '<button class="iconbtn" onclick="asstToggle(false)" aria-label="Close the assistant">×</button></div>';
+  if(S.asstEngine==="down"){
+    var inc=asstEngineIncident();
+    return head+
+     '<div class="asst-b"><div class="asst-down">'+
+     '<h2 style="font-size:15px;margin:0 0 8px">The assistant is unavailable</h2>'+
+     '<p><code>stella serve</code> at <code>engine.oxagen.internal:8080</code> returned <b class="mono">engine_unreachable</b> after 3 attempts, connect timeout 2000 ms.</p>'+
+     '<p>The engine is a required service. <b>Nothing falls back to an in-process loop</b>, so the assistant will not answer from a path that could not be recorded as a run.</p>'+
+     '<p>Everything else is unaffected: the gateway, recording, approvals, budgets and every page work with the engine down. Only this panel is out.</p>'+
+     '<p class="mono dim" style="font-size:11px">incident '+h(inc.id)+' · '+h(inc.sev)+' · detected by '+h(inc.by)+' · opened '+h(inc.at)+' · '+inc.runs+' runs affected</p>'+
+     '<div class="row" style="gap:8px"><button class="btn primary sm" onclick="asstRetry()">Retry now</button>'+
+     '<button class="btn sm" onclick="openDialog(\'incidentview\',\''+inc.id+'\')">Open the incident</button></div></div></div>'+
+     '<div class="asst-f"><div class="box"><textarea placeholder="Unavailable while the engine is down" disabled aria-label="Message"></textarea></div></div>';
+  }
+  var c=ASST_CONVOS[S.asstConvo], r=route(), sug=ASST_SUGGEST[r.page]||ASST_SUGGEST.fleet;
+  var tabs='<div class="asst-tabs" role="tablist">'+Object.keys(ASST_CONVOS).map(function(k){
+    return '<button role="tab" aria-selected="'+(k===S.asstConvo)+'" onclick="asstConvo(\''+k+'\')">'+h(ASST_CONVOS[k].label)+(ASST_CONVOS[k].archived?' ·':'')+'</button>';}).join("")+'</div>';
+  var body=c.msgs().map(function(m){return asstMsg(m,!c.archived);}).join("")+
+   S.asstReplies.filter(function(x){return x.convo===S.asstConvo;}).map(function(x){var R=ASST_REPLIES[x.key];
+     return (x.text?asstMsg({role:"op",who:c.op,t:R.t,text:h(x.text)},true):'')+asstMsg({role:"ox",t:R.t,run:R.run.id,blocks:R.blocks()},true);}).join("")+
+   (S.asstPending&&S.asstPending.convo===S.asstConvo?'<div class="msg"><div class="who">Assistant</div><div class="bub dim">Working. This turn is opening a run of the in-app agent…</div></div>':'')+
+   (c.archived?'':'<div class="asst-sugg"><div class="k">Ask about '+h(PAGES[r.page]||r.page)+'</div>'+sug.map(function(s){
+     return '<button onclick="asstAsk(this.getAttribute(\'data-q\'))" data-q="'+h(s[1])+'"><span class="q">'+h(s[0])+'</span>'+h(s[1])+'</button>';}).join("")+'</div>');
+  return head+asstCtx()+tabs+'<div class="asst-b">'+body+'</div>'+
+   '<div class="asst-f"><div class="box">'+
+   '<textarea placeholder="Ask about a run, or change something" aria-label="Message the assistant" onkeydown="if(event.key===\'Enter\'&&!event.shiftKey){event.preventDefault();asstSend();}"></textarea>'+
+   '<button class="btn primary sm" onclick="asstSend()">Send</button></div>'+
+   '<p class="dim" style="font-size:11px;margin:8px 0 0">The assistant acts through the same governed actions these screens use. It holds no authority and no credentials.</p></div>';
+}
+
+/* ---- interaction ---- */
 function asstToggle(v){
   S.asst = (v===undefined) ? !S.asst : !!v;
   render();
   if(S.asst){var t=document.querySelector("#asst textarea:not([disabled])");if(t)t.focus();}
 }
+function asstConvo(k){S.asstConvo=k;render();var b=document.querySelector("#asst .asst-b");if(b)b.scrollTop=0;}
+function asstScrollEnd(){var b=document.querySelector("#asst .asst-b");if(b)b.scrollTop=b.scrollHeight;}
+function asstReply(key,text){
+  var convo=S.asstConvo;
+  if(S.asstPending||S.asstReplies.some(function(x){return x.convo===convo&&x.key===key;})) return;
+  S.asstPending={convo:convo,key:key}; render(); asstScrollEnd();
+  setTimeout(function(){
+    var R=ASST_REPLIES[key]; asstRunOnce(R.run); if(R.receipt) asstReceiptOnce(R.receipt);
+    S.asstReplies.push({convo:convo,key:key,text:text||""}); S.asstPending=null; render(); asstScrollEnd();
+  },700);
+}
+function asstAsk(text){
+  var c=asstClassify(text);
+  if(ASST_CONVOS[S.asstConvo].archived&&!c.convo) S.asstConvo="grant";
+  if(c.convo){asstConvo(c.convo);return;}
+  asstReply(c.reply,text);
+}
+function asstSend(){
+  var t=document.querySelector("#asst textarea:not([disabled])"), v=t?t.value.trim():"";
+  if(!v) return; t.value=""; asstAsk(v);
+}
+function asstSig(){
+  var r=route(), a=S.ap&&S.ap["apr_01K5RN9T4"];
+  return [S.asstEngine,S.asstConvo,r.page,r.ws||"",S.asstReplies.length,S.asstPending?S.asstPending.key:"",a?a.status:""].join("|");
+}
 function asstMount(){
-  var host=el("asst");
-  if(host.getAttribute("data-sig")!==S.asstEngine){
-    host.setAttribute("data-sig",S.asstEngine);
+  var host=el("asst"), sig=asstSig();
+  if(host.getAttribute("data-sig")!==sig){
+    var ta=host.querySelector("textarea"), keep=ta?ta.value:"", had=ta&&document.activeElement===ta;
+    var b=host.querySelector(".asst-b"), sc=b?b.scrollTop:0, same=host.getAttribute("data-convo")===S.asstConvo;
+    host.setAttribute("data-sig",sig); host.setAttribute("data-convo",S.asstConvo);
     host.innerHTML=asstSheet();
+    ta=host.querySelector("textarea:not([disabled])"); if(ta&&keep){ta.value=keep;} if(ta&&had)ta.focus();
+    b=host.querySelector(".asst-b"); if(b&&same)b.scrollTop=sc;
   }
   host.className="asst"+(S.phone?" phone":"")+(S.asst?" open":"");
   host.setAttribute("aria-hidden",S.asst?"false":"true");
   /* inert keeps the closed panel out of the tab order even mid-transition */
   if(S.asst)host.removeAttribute("inert"); else host.setAttribute("inert","");
-}
-function asstSheet(){
-  if(S.asstEngine==="down"){
-    return ''+
-     '<div class="asst-h"><b style="font-size:13.5px">Assistant</b>'+
-     '<span class="b b-failed" style="margin-left:auto"><span class="d"></span>engine down</span>'+
-     '<button class="iconbtn" onclick="asstToggle(false)" aria-label="Close the assistant">×</button></div>'+
-     '<div class="asst-b"><div class="state-wrap" style="padding:30px 6px">'+
-     '<div class="ico" style="color:var(--st-failed);border-color:color-mix(in srgb,var(--st-failed) 40%,transparent)">'+
-     '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 8v5M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg></div>'+
-     '<h2 style="font-size:15px">The Stella engine is not answering</h2>'+
-     '<p style="font-size:12.5px"><code>stella serve</code> returned <code>503</code> from the engine container. The engine is a required service; nothing falls back to an in-process loop, so the assistant says so by name rather than degrading quietly.</p>'+
-     '<div class="acts"><button class="btn sm" onclick="S.asstEngine=\'up\';render()">Retry</button></div>'+
-     '<p class="mono dim" style="font-size:11px;margin-top:14px">engine 0.31.4 · last healthy 09:02:11Z</p></div></div>'+
-     '<div class="asst-f"><div class="box"><textarea placeholder="Unavailable while the engine is down" disabled aria-label="Message"></textarea></div></div>';
-  }
-  return ''+
-   '<div class="asst-h"><b style="font-size:13.5px">Assistant</b>'+
-   '<span class="b b-q" style="margin-left:auto">every turn is a run of its own</span>'+
-   '<button class="iconbtn" onclick="asstToggle(false)" aria-label="Close the assistant">×</button></div>'+
-   '<div class="asst-b">'+
-   '<div class="msg op"><div class="who">Marcus Bell</div><div class="bub">Triage is burning money on tool definitions. Narrow its belt to what it actually used in the last 30 days, and tell me what you changed.</div></div>'+
-   '<div class="msg"><div class="who">Assistant <span class="b b-q" style="font-size:9.5px">run_01K5RT9X4M2 · free</span></div><div class="bub">'+
-   '<p style="margin:0 0 10px">I read the finding and the belt. 34 of the 52 tools on <span class="mono">acme.core.triage</span> were never called in 1,340 runs. '+
-   'Narrowing the belt is a change to the agent definition, so it is a Context PR, not a write to Postgres. I opened one.</p>'+
-   '<div class="act-card"><div class="t"><span class="b b-allowed"><span class="d"></span>action</span><code>open_context_pr</code></div>'+
-   '<dl class="kv" style="font-size:11.5px"><dt>Pull request</dt><dd><a href="#">acme/platform#521</a></dd>'+
-   '<dt>File</dt><dd class="mono" style="font-size:11px">.oxagen/agents/triage.toml</dd>'+
-   '<dt>Change</dt><dd>tools narrowed 52 → 18</dd>'+
-   '<dt>Decision</dt><dd>allow · <span class="mono">pol_v41</span> · rule <span class="mono">rg_0041</span></dd>'+
-   '<dt>Receipt</dt><dd><a class="mono" href="#/'+ORG.slug+'/audit/receipts" onclick="openDialog(\'receipt\',\'rcp_01K5RTB4Q\')">rcp_01K5RTB4Q</a></dd>'+
-   '<dt>Billed as</dt><dd>one governed action</dd></dl></div>'+
-   '<p style="margin:10px 0 0">Estimated saving from the frames it cites: <b>$188.40</b> USD over 30 days. '+
-   'A code-owner review is required in <span class="mono">team</span> mode, so it is yours to merge.</p></div></div>'+
-   '<div class="msg op"><div class="who">Marcus Bell</div><div class="bub">Why did run_01K5RG6H1L4OIU9Y come back tampered?</div></div>'+
-   '<div class="msg"><div class="who">Assistant</div><div class="bub">'+
-   '<p style="margin:0 0 9px">The witness’s filesystem fingerprint was taken when it was proven to fail on the pristine target. '+
-   'On the pull request head that fingerprint had moved: <span class="mono">vitest.config.ts</span> gained an exclude that matched the witness’s path.</p>'+
-   '<p style="margin:0">So the ground under the oracle changed, and nothing is credited. The verdict is <span class="mono">tampered</span>, not <span class="mono">failing</span> — the two mean different things and the record keeps them apart. '+
-   '<a href="#/'+ORG.slug+'/core-platform/runs/run_01K5RG6H1L4OIU9Y">Open the proof frame →</a></p></div></div>'+
-   '</div>'+
-   '<div class="asst-f"><div class="box">'+
-   '<textarea placeholder="Ask about a run, or change something" aria-label="Message the assistant"></textarea>'+
-   '<button class="btn primary sm" onclick="act(\'Turn posted. It opens a run of the in-app agent, recorded and metered like any other.\')">Send</button></div>'+
-   '<p class="dim" style="font-size:11px;margin:8px 0 0">The assistant acts through the same governed actions these screens use. It holds no authority and no credentials.</p></div>';
 }
 
 /* ============================== dialogs ============================== */
@@ -8013,7 +8387,43 @@ var SCENARIOS={
 
 /* ---- end W10 ---- */
 /* ---- W11 · assistant-and-account ---- */
-
+SCENARIOS["assistant-and-account"]={title:"The assistant, and whose account it is", ws:"core-platform",
+ blurb:"The in-app agent explains a park, changes configuration through governed actions, and stops where its authority stops. Every turn is a run of its own.",
+ steps:[
+  {say:"Priya asks why invoice-bot stopped. It did not stop: the <b>$2,450.00</b> payment parked on <span class=\"mono\">apr_01K5RN9T4</span>, and the assistant walks the chain from who asked to which rule.",
+   note:"Every figure in the reply is read off the run, the approval and mandate mnd_7K2ETQ4. Widening the approvers is the part it can open and cannot finish.",
+   route:function(o){return {page:"fleet",org:o,ws:"finops"};},
+   setup:function(){S.asst=true;S.asstEngine="up";S.asstConvo="why";},
+   act:["Add org owners as approvers","asstReply('approvers')"]},
+  {say:"Marcus asked it to narrow triage’s belt, then to grant a tool and cap a run. Each change is an action card with the decision, the rule and a receipt.",
+   note:"The turn bar under each reply is the run that turn opened: tokens, cache, cost, gateway tier, and billed $0.00, because in-app agent runs are free.",
+   route:function(o){return {page:"fleet",org:o,ws:"core-platform"};},
+   setup:function(){S.asst=true;S.asstEngine="up";S.asstConvo="grant";},
+   act:["Open receipt rcp_01K5RTB4Q","openDialog('receipt','rcp_01K5RTB4Q')"]},
+  {say:"The same receipts sit in the audit record, filtered to <span class=\"mono\">oxagen.assistant</span>. Nothing the assistant did is kept anywhere else.",
+   note:"A receipt from an assistant turn opens its run, the same as a receipt from any agent.",
+   route:function(o){return {page:"audit",org:o};},
+   setup:function(){S.asst=false;S.asstEngine="up";S.tab.audit="receipts";S.rq="oxagen.assistant";}},
+  {say:"When the engine is down, the panel says so by name: <span class=\"mono\">engine_unreachable</span> after 3 attempts, with an incident. It does not answer from a path that could not be recorded.",
+   note:"Everything else is unaffected: the gateway, recording, approvals and budgets do not depend on the engine.",
+   route:function(o){return {page:"fleet",org:o,ws:"core-platform"};},
+   setup:function(){S.asst=true;S.asstEngine="down";},
+   act:["Retry now","asstRetry()"]},
+  {say:"The account is the person behind every turn. Security shows how Marcus signs in and which sessions hold his authority.",
+   note:"The assistant acts with the signed-in operator’s authority, never more, so this is also the ceiling on what it can do.",
+   route:function(o){return {page:"fleet",org:o,ws:"core-platform"};},
+   setup:function(){S.asst=false;S.asstEngine="up";},
+   act:["Open account security","openDialog('account','security')"]},
+  {say:"Notifications map to frame kinds and audit events, never to something invented for a bell.",
+   route:function(o){return {page:"fleet",org:o,ws:"core-platform"};},
+   setup:function(){S.asst=false;S.asstEngine="up";},
+   act:["Open notifications","openDialog('notifs')"]},
+  {say:"The command menu is <span class=\"mono\">search_tools</span>. Search “run” and it returns the actions, the assistant tools inside your grants, and the belt tools with their hazards. Nothing outside the belt.",
+   note:"Try a tool that is not on the belt, such as delete repository: nothing matches, which is also what stops a prompt injection from naming it.",
+   route:function(o){return {page:"fleet",org:o,ws:"core-platform"};},
+   setup:function(){S.asst=false;S.asstEngine="up";S.cmdq="run";S.cmdSel=0;S.cmdCaret=null;},
+   act:["Open the command menu","openDialog('cmd')"]}
+ ]};
 /* ---- end W11 ---- */
 function scnHref(id,step){var s=SCENARIOS[id];return "#/"+ORG.slug+"/"+s.ws+"/scenarios/"+id+"/"+step;}
 /* A step's act can open a dialog; moving to another step or leaving closes it, so the next step is not read under it. */
@@ -8648,6 +9058,9 @@ function accountBody(){
 }
 
 /* ============================== command menu ============================== */
+/* The command menu is search_tools. It filters live on S.cmdq and can only return what the operator
+   could reach: navigation and actions, the in-app agent's tools intersected with the operator's
+   grants, and the members of this workspace's belt, each with the hazard the model is shown. */
 var CMDS=[
  {g:"Go",i:[["Fleet","#/acme/core-platform","⌘ 1"],["Agent IAM","#/acme/core-platform/agents","⌘ 2"],
    ["Tools","#/acme/core-platform/tools","⌘ 3"],["Ontology","#/acme/core-platform/ontology","⌘ 4"],
@@ -8664,21 +9077,70 @@ var CMDS=[
  {g:"Ask the graph",i:[["Which customers on an enterprise contract raised a ticket this quarter?",null],
    ["What does releaseNotes() call?",null],["Which tables does acme.core.triage write?",null]]}
 ];
+/* the in-app agent's tool contracts: [name, what it changes, risk, side effect, the permission it needs] */
+var ASST_TOOLS=[
+ ["set_role_grants","a role's grants and resource scopes","medium","write","tool.grant"],
+ ["set_budget","a spend budget at any level","low","write","budget.set"],
+ ["dispatch_command","pause, resume, steer or cancel a run","high","write","run.pause"],
+ ["simulate_policy","replay a policy version over recorded calls","low","read","policy.simulate"],
+ ["set_kill_switch","deny at any level, at the next call boundary","critical","irreversible","switch.flip"],
+ ["export_run","a signed bundle with its verifier","low","read","export.create"],
+ ["grant_mandate","financial authority to one agent","critical","irreversible","mandate.grant"]
+];
+S.cmdq=""; S.cmdSel=0; S.cmdCaret=null;
+var CMD_OP="marcus";   /* the signed-in operator the account dialog shows */
+function cmdWords(){return String(S.cmdq||"").trim().toLowerCase().split(/\s+/).filter(Boolean);}
+/* same rule as the belt search: every word must appear, API names split on their separators */
+function cmdHit(s){var y=String(s).toLowerCase().replace(/[_@.]+/g," "),w=cmdWords();return w.every(function(x){return y.indexOf(x)>=0;});}
+function cmdBeltHits(){return BELT.filter(function(b){return !b.meta;}).map(beltMember).filter(function(x){return cmdHit(x.n+" "+x.d+" "+x.s);});}
+function cmdAgentTools(){return ASST_TOOLS.filter(function(t){return asstHolds(CMD_OP,t[4]);});}
+function cmdFocus(){
+  var i=el("cmdq"); if(!i||S.dlg!=="cmd") return;
+  if(document.activeElement!==i){i.focus();var p=S.cmdCaret==null?i.value.length:Math.min(S.cmdCaret,i.value.length);i.setSelectionRange(p,p);}
+}
+function cmdInput(inp){S.cmdq=inp.value;S.cmdCaret=inp.selectionStart;S.cmdSel=0;render();cmdFocus();}
+function cmdKey(e){
+  var items=document.querySelectorAll("#layer .cmd-i");
+  if(e.key==="ArrowDown"||e.key==="ArrowUp"){
+    e.preventDefault(); if(!items.length) return;
+    S.cmdSel=(S.cmdSel+(e.key==="ArrowDown"?1:-1)+items.length)%items.length;
+    items.forEach(function(b,i){b.classList.toggle("on",i===S.cmdSel);});
+    items[S.cmdSel].scrollIntoView({block:"nearest"});
+  } else if(e.key==="Enter"){
+    e.preventDefault(); if(items[S.cmdSel]) items[S.cmdSel].click();
+  }
+}
+function cmdAskAssistant(name){closeDialog();asstToggle(true);var t=document.querySelector("#asst textarea:not([disabled])");if(t){t.value="Use "+name+" to ";t.focus();}}
 function cmdMenu(){
-  var body=CMDS.map(function(gr){
-    return '<div class="cmd-g">'+h(gr.g)+'</div>'+gr.i.map(function(it,ix){
+  var n=0;
+  function item(onclick,inner,cls){var on=n===S.cmdSel;n++;return '<button class="cmd-i'+(cls?' '+cls:'')+(on?' on':'')+'" onclick="S.cmdq=\'\';S.cmdSel=0;'+onclick+'">'+inner+'</button>';}
+  function grp(label,note,rows,key){return rows.length?'<div class="cmd-g" data-g="'+key+'">'+h(label)+(note?'<span class="c">'+h(note)+'</span>':'')+'</div>'+rows.join(""):'';}
+  var nav=CMDS.map(function(gr){
+    var rows=gr.i.filter(function(it){return cmdHit(it[0]);}).map(function(it){
       var onclick=it[1]&&it[1][0]==="!"?'closeDialog();'+it[1].slice(1):it[1]?'closeDialog();go(\''+it[1]+'\')':'closeDialog();act(\''+h(it[0]).replace(/'/g,"")+' — recorded as a governed action with a receipt.\')';
-      return '<button class="cmd-i'+(gr.g==="Go"&&ix===0?" on":"")+'" onclick="'+onclick+'">'+
-       '<span>'+h(it[0])+'</span>'+(it[2]?'<span class="r">'+h(it[2])+'</span>':'')+'</button>';}).join("");
+      return item(onclick,'<span>'+h(it[0])+'</span>'+(it[2]?'<span class="r">'+h(it[2])+'</span>':''));});
+    return grp(gr.g,"",rows,"nav");
   }).join("");
-  return '<div class="scrim" onclick="if(event.target===this)closeDialog()">'+
+  var granted=cmdAgentTools();
+  var at=granted.filter(function(t){return cmdHit(t[0]+" "+t[1]);}).map(function(t){
+    return item('cmdAskAssistant(\''+t[0]+'\')','<span class="mono" style="font-size:12px;color:var(--fg)">'+h(t[0])+'</span><span class="ds">'+h(t[1])+'</span><span class="r">'+hazard(t[2],t[3])+'</span>');});
+  var belt=cmdBeltHits().map(function(x){
+    return item('closeDialog();openDialog(\'tool\',\''+h(x.id)+'\')','<span class="tcw">'+toolCell(x.id,{sz:"sm"})+'</span><span class="ds">'+h(x.d)+'</span><span class="r">'+hazard(x.risk,x.eff)+gate(x.dec)+'</span>',"belt");});
+  var body=nav+
+   grp("Agent tools","your grants ∩ the assistant’s belt · "+granted.length+" of "+ASST_TOOLS.length,at,"agent")+
+   grp("Tools on the belt","risk and side effect, the same trailer the model sees",belt,"belt");
+  if(!n) body='<div class="cmd-empty"><b>Nothing on your belt matches “'+h(S.cmdq)+'”.</b>'+
+   '<p>A search never returns a tool outside the belt. What you cannot call, you cannot find, which is also what stops a prompt injection from naming one.</p></div>';
+  if(S.cmdSel>=n) S.cmdSel=0;
+  setTimeout(cmdFocus,0);
+  return '<div class="scrim" onclick="if(event.target===this){S.cmdq=\'\';closeDialog();}">'+
    '<div class="cmd" role="dialog" aria-modal="true" aria-label="Command menu">'+
    '<div class="cmd-in"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>'+
-   '<input autofocus placeholder="Search runs, agents, tools, records — or run an action" aria-label="Command menu"></div>'+
+   '<input id="cmdq" value="'+h(S.cmdq)+'" placeholder="Search runs, agents, tools, records — or run an action" aria-label="Command menu" autocomplete="off" oninput="cmdInput(this)" onkeydown="cmdKey(event)"></div>'+
    '<div class="cmd-l">'+body+'</div>'+
-   '<div class="cmd-in" style="border-top:1px solid var(--border);border-bottom:0;font-size:11.5px;color:var(--dim)">'+
+   '<div class="cmd-in cmd-foot">'+
    '<span class="mono">⇅</span> move <span class="mono">↩</span> open <span class="mono">esc</span> close'+
-   '<span style="margin-left:auto" class="mono">every action here is the same contract the screens use</span></div></div></div>';
+   '<span style="margin-left:auto"><span class="mono">search_tools</span> · this search is itself a governed call, recorded as a frame</span></div></div></div>';
 }
 
 
