@@ -77,6 +77,24 @@ const scn = await page.evaluate(async () => {
 });
 ok(scn.on && scn.offAfter, "scenario rail shows on a scenario route and is gone after leaving", scn);
 
+// --- governance: a run's tool calls are calls its agent's belt could make -------------
+// Two independent records: the calls runMetrics shows (drawn from TOOLPOOL, or recorded frames)
+// against AGENT_BELTS + the BELT decision + the TOOLS registry.
+const gov = await page.evaluate(() => {
+  const bad = (agent, id) => {
+    const why = [];
+    if (!(AGENT_BELTS[agent] || []).includes(id)) why.push("not on belt");
+    if (!toolById(id)) why.push("not in TOOLS");
+    if ((beltById(id) || {}).dec === "deny") why.push("denied");
+    return why.length ? agent + " " + id + ": " + why.join(", ") : null;
+  };
+  const pool = Object.entries(TOOLPOOL).flatMap(([a, xs]) => xs.map(x => bad(a, x[0]))).filter(Boolean);
+  const runs = RUNS.filter(R => AGENT_BELTS[R.agent]).flatMap(R => [...new Set(runMetrics(R).calls.map(c => c.id))].map(id => bad(R.agent, id))).filter(Boolean);
+  return { pool, runs: [...new Set(runs)], checked: RUNS.filter(R => AGENT_BELTS[R.agent]).length };
+});
+ok(gov.pool.length === 0, "every TOOLPOOL tool is on its agent's belt, registered, and not denied", gov.pool);
+ok(gov.checked > 0 && gov.runs.length === 0, "every run's tool calls are ones its agent's belt could make (" + gov.checked + " runs)", gov.runs);
+
 // --- every run page: six instruments, prompt, calls panel, and the numbers agree ------
 const runs = await page.evaluate(() => RUNS.map(r => ({ id: r.id, ws: r.ws })));
 ok(runs.length > 0, "RUNS is not empty", runs.length);

@@ -19,6 +19,12 @@ git show mc-baseline-w2:mc.html > /tmp/mc.html
 | Tenant is Anderson Intelligence Corp. (`a-intel`) at business scale | PR #5, re-applied in PR #6 | Seed rows render first; 274 agents, 1,168 runs shown |
 | One story clock: 2026-09-11 09:31:30 UTC, running from load | PR #8 | `nowT()`/`storyMs()` stamp anything a control writes |
 
+## On main since mc-baseline-w2 (include in the next tag)
+
+| Decision | Came from | What to build |
+|---|---|---|
+| A run only calls tools its agent's belt can make | `belt-true-toolpool` | The Run page's calls (and the fixture seed's) are a subset of `AGENT_BELTS[agent]` at `TOOLS` versions, never a tool the belt denies. In w2, `TOOLPOOL` gave release-manager `edit__file@1`/`write__file@1`, invoice-bot `slack__post_message@2` and stella-ci `linear__get_issue@1`, none of them on those belts, plus three versions the registry does not have. `check-baseline.mjs` now asserts it for every pool entry and every run. |
+
 ## mc-baseline-w1
 
 It is `main` @ 54f9107 (Agent IAM, Identities) with:
