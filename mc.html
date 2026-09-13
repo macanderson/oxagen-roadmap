@@ -3628,7 +3628,7 @@ function recordCard(r,x){
    '<div class="r-top">'+kindBadge(r.kind)+
    (r.force?'<span class="b b-q" title="steering force">'+h(r.force)+'</span>':'')+
    (r.ce?'<span class="b b-'+(r.ce==="forbid"?"denied":"approval")+'" title="constraint effect">'+h(r.ce)+'</span>':'')+
-   '<span class="sp">'+(x.right!=null?x.right:(arch?'<span class="b b-q">archived</span>':'<span class="b b-allowed"><span class="d"></span>published</span>'))+'</span></div>'+
+   '<span class="sp">'+(r.isNew&&x.right==null?'<span class="b b-proven" title="published by the last merge">new · bundle v'+STEER_BUNDLE.v+'</span> ':'')+(x.right!=null?x.right:(arch?'<span class="b b-q">archived</span>':'<span class="b b-allowed"><span class="d"></span>published</span>'))+'</span></div>'+
    '<p class="r-st">'+h(r.st)+'</p>'+
    '<div class="r-meta">'+(x.meta||'')+'<span><b>'+h(r.scope)+'</b></span>'+
    (r.effect?'<span>'+h(r.effect)+'</span>':'')+
@@ -5066,32 +5066,26 @@ function ctxDetail(){
   }
 
   if(sel==="steering"){
-    return ctxHd('Block 2 · <span class="mono">steering.compiled</span>', tokBadge(1340)+cacheBadge("read"))+
+    /* Derived from STEER_BUNDLE, so a merge on the Steering page shows up here: the version, the rule
+       flagged new, and the block's tokens, which equal the steering.compiled band in CTXB. */
+    var sb=stgBundle(), nw=sb.rules.filter(function(r){return r.isNew;}), nwTok=0;
+    nw.forEach(function(r){nwTok+=r.tok;});
+    var pre='<span class="c"># org → workspace → agent · narrowest scope wins</span>\n\n'+sb.rules.map(function(r){
+      var ln=stgWrap(r.st,52), f=(r.force+"       ").slice(0,7);
+      return '<span class="k">'+h(f)+'</span>'+ln.map(h).join('\n       ')+'\n'+
+       '       <span class="c">['+h(r.id)+' · '+h(r.scope)+']</span>'+(r.isNew?' <span class="s" data-new-rule="'+h(r.id)+'">new in bundle v'+sb.v+'</span>':'');
+    }).join('\n\n');
+    return ctxHd('Block 2 · <span class="mono">steering.compiled</span>', tokBadge(sb.tok)+cacheBadge(nw.length?"mixed":"read"))+
      ctxBody(
-      '<p>Six rules, compiled from three scopes into one block. The model sees the result of the merge, never the merge itself.</p>'+
-      readout("bundle v41 · verbatim","6 rules",'<pre>'+
-       '<span class="c"># org → workspace → agent · narrowest scope wins</span>\n\n'+
-       '<span class="k">must</span>   Release notes group changes by surface, not by author.\n'+
-       '       Every entry links its pull request.\n'+
-       '       <span class="c">[ctx.release.notes-format · workspace]</span>\n\n'+
-       '<span class="k">must</span>   The release manager opens the release pull request.\n'+
-       '       A person merges it. Never self-merge.\n'+
-       '       <span class="c">[ctx.release.never-merge · org]</span>\n\n'+
-       '<span class="k">never</span>  Touch acme/mobile during a platform release.\n'+
-       '       <span class="c">[ctx.release.platform-only · workspace]</span>\n\n'+
-       '<span class="k">must</span>   Version bumps follow semver against the last tag on\n'+
-       '       the release branch.\n'+
-       '       <span class="c">[ctx.release.semver · org]</span>\n\n'+
-       '<span class="k">info</span>   CHANGELOG.md is the only changelog; docs/releases is\n'+
-       '       generated from it at build.\n'+
-       '       <span class="c">[ctx.platform.changelog-once · org]</span>\n\n'+
-       '<span class="k">info</span>   The 4.11 milestone closed 2026-09-09. Anything merged\n'+
-       '       after that ships in 4.12.\n'+
-       '       <span class="c">[ctx.release.milestone-4-11 · agent]</span>'+
-       '</pre>')+
+      '<p>'+sb.rules.length+' rules, compiled from three scopes into one block. The model sees the result of the merge, never the merge itself.</p>'+
+      (nw.length?'<div class="callout" style="margin:11px 0">'+nw.map(function(r){return '<span class="mono">'+h(r.id)+'</span>';}).join(", ")+
+        ' is new in bundle v'+sb.v+'. It published when '+h(CTXPR.pr)+' merged'+(S.ctxpr.mergedAt?' at '+h(S.ctxpr.mergedAt):'')+
+        ', and this run read it on its next model call. Steering tokens per turn moved '+tokn(sb.tok-nwTok)+' → '+tokn(sb.tok)+'; the prefix before it stayed cached, so the '+nwTok+' new tokens are billed as fresh input.</div>':'')+
+      '<div data-bundle-readout="'+sb.v+'">'+readout("bundle v"+sb.v+" · verbatim",sb.rules.length+" rules",'<pre>'+pre+'</pre>')+'</div>'+
       '<dl class="kv"><dt>Sources merged</dt><dd>3 · org, workspace core-platform, agent</dd>'+
+      '<dt>Tokens per turn</dt><dd class="num">'+(nw.length?tokn(sb.tok-nwTok)+' → <b>'+tokn(sb.tok)+'</b> · +'+nwTok+' from the new record':tokn(sb.tok))+'</dd>'+
       '<dt>Shadowed at compile</dt><dd class="mono">ctx.release.notes-format-legacy (org) — lost to the workspace rule</dd>'+
-      '<dt>Digest</dt><dd class="mono">sha256:44c19e02f7b3a158</dd>'+
+      '<dt>Digest</dt><dd class="mono">'+h(sb.digest)+'</dd>'+
       '<dt>Chained into</dt><dd class="mono">run.start · seq 0</dd></dl>'+
       '<div class="note" style="margin-top:12px">Conflicts resolve when the bundle compiles, not when the model reads. '+
       'The model is never shown two rules that disagree and left to pick. One rule was shadowed here; the losing rule is '+
@@ -6691,6 +6685,347 @@ function pOntology(){
 }
 
 /* ============================== Steering ============================== */
+/* One concern carried from proposal to publication, all of it derived:
+   - PRP_SUPPORT holds the supporting-run rows behind each proposal; every count a proposal shows
+     (runs, agents, duplicate calls, the baseline proof rate) is computed from those rows.
+   - CTXPR is the Context PR for prp_01K5RU4A. Its six checks run one at a time; merging publishes
+     CTXPR.record: RECORDS gains it, STEER_BUNDLE gains its rule and bumps its version, and the
+     steering band in CTXB and the window total in CTXW grow by the record's tokens, so the context
+     tab still sums. Every transition goes through ctxprSet, which makes each state exact to land on
+     and exact to leave, so a scenario step can set the state it needs without replaying the demo. */
+
+/* The compiled steering block a core-platform release run receives. A rule whose record is in RECORDS
+   takes its force, statement and scope from the record; the org- and agent-scoped rules carry their own.
+   Rule tokens plus the compile header equal the steering.compiled band in CTXB. */
+var STEER_BUNDLE={v:41, header:130,
+ digest:{41:"sha256:44c19e02f7b3a158",42:"sha256:b7d05a31c9e2f644"},
+ rules:[
+  {id:"ctx.release.notes-format",tok:214},
+  {id:"ctx.release.never-merge",tok:188},
+  {id:"ctx.release.platform-only",force:"must",scope:"agent",tok:176,st:"Never touch acme/mobile during a platform release."},
+  {id:"ctx.release.semver",force:"must",scope:"org",tok:205,st:"Version bumps follow semver against the last tag on the release branch."},
+  {id:"ctx.platform.changelog-once",tok:231},
+  {id:"ctx.release.milestone-4-11",force:"info",scope:"agent",tok:196,st:"The 4.11 milestone closed 2026-09-09. Anything merged after that ships in 4.12."}
+ ]};
+function stgRecord(id){for(var i=0;i<RECORDS.length;i++){if(RECORDS[i].id===id)return RECORDS[i];}return null;}
+function stgBundle(){
+  var rules=STEER_BUNDLE.rules.map(function(x){var r=stgRecord(x.id)||{};
+    return {id:x.id,tok:x.tok,isNew:!!x.isNew,force:r.force||x.force,st:r.st||x.st,scope:r.scope||x.scope};});
+  var tok=STEER_BUNDLE.header; rules.forEach(function(r){tok+=r.tok;});
+  return {v:STEER_BUNDLE.v,digest:STEER_BUNDLE.digest[STEER_BUNDLE.v],rules:rules,tok:tok};
+}
+function stgWrap(s,w){
+  var out=[],line="";
+  String(s).split(" ").forEach(function(wd){if(line&&(line+" "+wd).length>w){out.push(line);line=wd;}else line=line?line+" "+wd:wd;});
+  if(line)out.push(line); return out;
+}
+
+/* Supporting runs. prp_01K5RU4A starts with the three sealed runs the finding fnd_01K5RT6C names, then the
+   rest of its thirty-day window; `dups` is repeat reads beyond the first. The live run is not here: the
+   promoter only aggregates sealed runs. */
+var PRP_SUPPORT=(function(){
+  var A="0123456789ABCDEFGHJKMNPQRSTVWXYZ";
+  function gen(seed,n){var s="",x=seed>>>0;for(var i=0;i<n;i++){x=(Math.imul(x,1664525)+1013904223)>>>0;s+=A[x>>>27];}return s;}
+  function day(back){return new Date(Date.UTC(2026,8,10)-back*864e5).toISOString().slice(0,10);}
+  var a=[["run_01K5RD4N7T6UVY5C","2026-09-09",31,3,"proven"],["run_01K5R94P1V8WXZ7D","2026-09-06",27,2,"proven"],
+         ["run_01K5R52Q3X9YAB9E","2026-09-02",44,3,"failing"]].map(function(x,i){
+    return {run:x[0],date:x[1],frame:x[2],dups:x[3],verdict:x[4],agent:"acme.core.release-manager",rec:"rec_01K5"+gen(900+i,12)};});
+  for(var i=0;i<209;i++){
+    a.push({run:"run_01K5"+gen(1000+i,12),date:day(9+Math.floor(i*21/209)),frame:18+(i*37)%120,
+     dups:((i*47)%209)<47?4:3, verdict:i%9===4?"failing":i%4===1?"unmoved":"proven",
+     agent:"acme.core.release-manager",rec:"rec_01K5"+gen(5000+i,12)});
+  }
+  var b=[{run:"run_01K5RH3G8K5PAS7D",date:"2026-09-10",frame:52,verdict:"unsatisfied",agent:"acme.core.triage",rec:"rec_01K5"+gen(7000,12)}];
+  for(var j=1;j<14;j++) b.push({run:"run_01K5"+gen(7100+j,12),date:day(1+j*2),frame:20+(j*29)%80,verdict:"unsatisfied",agent:"acme.core.triage",rec:"rec_01K5"+gen(7200+j,12)});
+  var c=[["acme.core.stella-ci","2026-09-08",63],["acme.core.release-manager","2026-09-04",88],["acme.core.stella-ci","2026-08-29",41]].map(function(x,k){
+    return {run:"run_01K5"+gen(8000+k,12),date:x[1],frame:x[2],verdict:"failing",agent:x[0],rec:"fnd_01K5"+gen(8100+k,8)};});
+  return {"prp_01K5RU4A":a,"prp_01K5RU7B":b,"prp_01K5RU9C":c};
+})();
+/* Thresholds are the workspace's promoter settings; a person's proposal is not held to them. */
+var PRP_META={
+ "prp_01K5RU4A":{needRuns:20,needAgents:1,floor:0.70,confidence:0.97,tok:46,recKind:"observation · repeat read",
+  support:function(s){return tokn(s.dups)+" duplicate tool calls across "+s.runs+" runs";},
+  rationale:function(s){return "acme.core.release-manager called github__get_file_contents@2 on CHANGELOG.md with an identical input digest "+
+   tokn(s.dups)+" times beyond the first read, across "+s.runs+" sealed runs: "+(s.dups/s.runs).toFixed(1)+" repeat reads a run. "+
+   "Every repeat returned the response digest of the first read, so nothing was learned by reading again, and each one put the 2,900-token file back into the window. "+
+   "The brief tells the agent to confirm the changelog before each section. A rule that says to cache the first read changes that behaviour without editing the brief.";},
+  measure:function(s){return (s.dups/s.runs).toFixed(1)+" repeat reads a run · "+tokn(s.dups*2900)+" tokens re-entered the window over these "+s.runs+" runs";}},
+ "prp_01K5RU7B":{needRuns:20,needAgents:2,floor:0.70,confidence:0.64,tok:38,recKind:"reflection · unsatisfied",
+  support:function(s){return s.runs+" unsatisfied runs in 30 days";},
+  rationale:function(s){return "The reflector marked "+s.runs+" triage runs unsatisfied in thirty days. In each, the agent labelled an issue it had not reproduced and a person relabelled it. "+
+   "Support is one agent so far; the workspace asks for "+this.needAgents+" before the promoter opens a Context PR.";},
+  measure:function(s){return "relabels by a person on "+s.runs+" of "+s.runs+" runs";}},
+ "prp_01K5RU9C":{person:true,confidence:null,tok:29,recKind:"finding · data-layer drift",
+  support:function(s){return s.runs+" data-layer drift findings";},
+  rationale:function(s){return "Marcus Bell raised this from "+s.runs+" drift findings across "+s.agents+" agents, each a migration renumbered after merge. "+
+   "A person's proposal is not held to the promoter's thresholds; the checks still apply.";},
+  measure:function(s){return s.runs+" drift findings in 30 days";}}
+};
+function prpStats(id){
+  var rows=PRP_SUPPORT[id]||[], m=PRP_META[id]||{}, ag={}, dups=0, proven=0;
+  rows.forEach(function(r){ag[r.agent]=1;dups+=r.dups||0;if(r.verdict==="proven")proven++;});
+  var s={rows:rows,runs:rows.length,agents:Object.keys(ag).length,dups:dups,proven:proven,
+   proof:rows.length?proven/rows.length:null,meta:m};
+  s.met=!!m.person||(s.runs>=m.needRuns&&s.agents>=m.needAgents&&m.confidence>=m.floor);
+  return s;
+}
+function prpById(id){for(var i=0;i<PROPOSALS.length;i++){if(PROPOSALS[i].id===id)return PROPOSALS[i];}return null;}
+
+/* The Context PR for prp_01K5RU4A, and the record it publishes. */
+var CTXPR={prp:"prp_01K5RU4A", pr:"acme/platform#519", branch:"context/ctx.release.no-reread-changelog",
+ base:"a4c91e2", head:"7d2e91a", promo:"rec_01K5RW2P7QH4", evt:"evt_01K5RW2Q8", hash:"sha256:9a41c0e7bd238f45",
+ checks:[
+  {n:"Schema",ms:900,ok:"context-record/v0.1 valid · 1 file, 1 record, 1 lineage"},
+  {n:"Lineage uniqueness",ms:700,ok:"no published record holds ctx.release.no-reread-changelog; this proposal is its only holder"},
+  {n:"record_hash recomputation",ms:600,ok:"recomputed over the canonical bytes · sha256:9a41c0e7bd238f45 matches the file"},
+  {n:"Secret and PII scan",ms:900,ok:"statement, rationale and evidence scanned · 0 findings"},
+  {n:"Conflict against active records",ms:1000,ok:function(){return RECORDS.filter(function(r){return r.status==="published"&&r.id!==CTXPR.record.id;}).length+" published records checked · no require on CHANGELOG.md reads";}},
+  {n:"constraint_effect ∈ {require, forbid}",ms:500,ok:"constraint_effect = forbid · grants nothing"}
+ ],
+ record:{id:"ctx.release.no-reread-changelog",kind:"rule",force:"should",ce:"forbid",scope:"workspace",status:"published",isNew:true,tok:46,
+  st:"Do not re-read CHANGELOG.md more than once in a run; cache the first read.",
+  effect:"rendered 1 · cited 0 · violated 0", commit:"7d2e91a", pub:"2026-09-11"}};
+CTXPR.rule={id:CTXPR.record.id,tok:CTXPR.record.tok,isNew:true};
+S.ctxpr={st:"passed",done:CTXPR.checks.length,timers:[],mergedAt:null};
+S.prpSel=null; S.retirePR={};
+
+function ctxprStop(){S.ctxpr.timers.forEach(clearTimeout);S.ctxpr.timers=[];}
+function ctxprPublish(on){
+  var rec=CTXPR.record, i=RECORDS.indexOf(rec);
+  if(on===(i>=0)) return;
+  var d=on?rec.tok:-rec.tok;
+  CTXB.forEach(function(b){if(b.id==="steering")b.tok+=d;});
+  CTXW.total+=d; CTXW.fresh+=d;
+  if(on){
+    RECORDS.push(rec); STEER_BUNDLE.rules.push(CTXPR.rule); STEER_BUNDLE.v++;
+    auditEvent("steering_published",me().name,rec.id+" · "+CTXPR.pr+" merged as "+rec.commit+" · bundle v"+(STEER_BUNDLE.v-1)+" → v"+STEER_BUNDLE.v,"info",CTXPR.evt);
+  } else {
+    RECORDS.splice(i,1); STEER_BUNDLE.rules.splice(STEER_BUNDLE.rules.indexOf(CTXPR.rule),1); STEER_BUNDLE.v--;
+    for(var k=AUDIT.length-1;k>=0;k--){if(AUDIT[k].ref===CTXPR.evt)AUDIT.splice(k,1);}
+  }
+  CTXW.digest=STEER_BUNDLE.digest[STEER_BUNDLE.v];
+}
+/* none · opened · checking · passed · merged */
+function ctxprSet(st){
+  var c=S.ctxpr; ctxprStop();
+  c.st=st; c.done=(st==="passed"||st==="merged")?CTXPR.checks.length:0;
+  /* the record's own clock, not the viewer's: the run it reaches is on 2026-09-11 */
+  c.mergedAt=st==="merged"?CTXPR.record.pub+" 09:16:40 UTC":null;
+  ctxprPublish(st==="merged");
+}
+function ctxprPaint(){ if(route().page==="steering") render(); }
+/* The checks, one at a time, in regSchedule's idiom: timers live on the state they drive and die with it. */
+function ctxprRun(){
+  ctxprSet("opened");
+  var c=S.ctxpr;
+  function later(fn,ms){c.timers.push(setTimeout(fn,ms));}
+  function next(){
+    c.st="checking"; ctxprPaint();
+    later(function(){
+      c.done++;
+      if(c.done>=CTXPR.checks.length){c.st="passed";ctxprPaint();return;}
+      next();
+    },CTXPR.checks[c.done].ms);
+  }
+  later(next,450);
+}
+function ctxprOpen(){
+  S.dlg=null; S.dlgArg=null; S.prpSel=null; S.tab.steering="prs";
+  if(S.ctxpr.st!=="none"){ if(route().page!=="steering") go('#/'+ORG.slug+'/'+S.ws+'/steering'); else render(); return; }
+  ctxprRun();
+  if(route().page!=="steering") go('#/'+ORG.slug+'/'+S.ws+'/steering'); else render();
+  act("Branch "+CTXPR.branch+" pushed and "+CTXPR.pr+" opened. "+CTXPR.checks.length+" checks queued.");
+}
+function ctxprMerge(){
+  if(S.ctxpr.st!=="passed"){act(S.ctxpr.st==="merged"?CTXPR.pr+" is already merged.":"Merge is blocked until all "+CTXPR.checks.length+" checks pass.");return;}
+  ctxprSet("merged"); S.tab.steering="prs"; render();
+  act("Merged "+CTXPR.pr+". promotion_event written, bundle v"+(STEER_BUNDLE.v-1)+" → v"+STEER_BUNDLE.v+" signed, steering_published audited.");
+}
+function ctxprLabel(){
+  var c=S.ctxpr, n=CTXPR.checks.length;
+  return c.st==="merged"?["proven","merged"]:c.st==="passed"?["allowed",n+" / "+n+" checks pass"]:
+   c.st==="checking"?["approval",c.done+" / "+n+" checks · running"]:c.st==="opened"?["approval","0 / "+n+" checks · queued"]:["q","not opened"];
+}
+function ctxprCheckOk(c){return typeof c.ok==="function"?c.ok():c.ok;}
+
+DLG_EXT.ctxpr=function(arg){
+  var p=prpById(arg||CTXPR.prp)||prpById(CTXPR.prp), s=prpStats(p.id), open=p.id===CTXPR.prp&&S.ctxpr.st!=="none";
+  var mine=p.id===CTXPR.prp;
+  return {t:"Open a Context PR",s:p.lineage+" · "+p.id,w:true,b:
+   (open?'<div class="callout" style="margin-bottom:14px"><span class="mono">'+h(CTXPR.pr)+'</span> is already open for this concern. One concern, one pull request.</div>':'')+
+   '<div class="field"><label>Concern</label><input value="'+h(p.st)+'" aria-label="Concern"><div class="hint">One concern per pull request.</div></div>'+
+   '<div class="field"><label>Kind</label><select aria-label="Kind"><option>'+h(p.kind)+' — as the promoter proposed it</option><option>rule — a directive that steers behaviour</option><option>constraint — a hard boundary, require or forbid</option><option>procedure — steps, in order</option><option>fact — a checkable claim</option><option>memory — a durable recollection</option><option>preference — soft, often unfalsifiable</option></select></div>'+
+   '<div class="field"><label>Scope</label><select aria-label="Scope"><option>workspace — opens on acme/platform</option><option>repository — opens on the linked repo itself</option></select>'+
+   '<div class="hint">The promoter picks the scope from where the evidence came.</div></div>'+
+   '<div class="field"><label>Constraint effect</label><select aria-label="Constraint effect"><option>forbid</option><option>require</option></select>'+
+   '<div class="hint">A record can never grant authority. These are the only two values.</div></div>'+
+   '<div class="field"><label>Supporting evidence</label><input value="'+h(s.meta.support(s)+(mine?" · fnd_01K5RT6C":""))+'" aria-label="Evidence"></div>'+
+   '<div class="note">Merge is the publication. The '+CTXPR.checks.length+' checks run the same rules as <span class="mono">stella context validate</span>: '+
+   h(CTXPR.checks.map(function(c){return c.n;}).join(", "))+'.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
+    (open?'<button class="btn primary" onclick="ctxprOpen()">Go to '+h(CTXPR.pr)+'</button>':
+     mine?'<button class="btn primary" onclick="ctxprOpen()">Open the pull request</button>':
+     '<button class="btn primary" onclick="closeDialog();act(\'Branch context/'+h(p.lineage)+' pushed and a Context PR opened on acme/platform.\')">Open the pull request</button>')};
+};
+
+/* Retirement: measured, then a Context PR that archives in place. */
+var STEER_EFFECT={
+ "ctx.release.notes-format":{before:0.41,after:0.58,verdict:"keep"},
+ "ctx.release.never-merge":{before:null,after:null,verdict:"keep"},
+ "ctx.mobile.no-codegen":{before:0.30,after:0.33,verdict:"keep"},
+ "ctx.platform.changelog-once":{before:0.44,after:0.45,verdict:"watch",
+  why:"The same fact reaches every release run twice: compiled here, and again as the memory frame ctx.platform.changelog-once in the context window, which is never cited. Its proof rate moved by one point."}
+};
+var STEER_ARCHIVED_WHY={"ctx.platform.retry-budget":"Superseded by the hard budget on the agent definition. Nothing has rendered it in 90 days."};
+function stgEff(r){var m=/rendered (\d+) · cited (\d+) · violated (\d+)/.exec(r.effect||"")||[0,0,0,0];return {rendered:+m[1],cited:+m[2],violated:+m[3]};}
+function stgRetireCands(){return RECORDS.filter(function(r){var e=STEER_EFFECT[r.id];return r.status==="published"&&e&&e.verdict==="watch";});}
+function stgRetire(id){
+  S.retirePR[id]="acme/platform#523"; closeDialog();
+  act("Branch context/retire-"+id+" pushed and acme/platform#523 opened. It sets status = \"archived\"; merge retires it.");
+}
+DLG_EXT.ctxretire=function(id){
+  var r=stgRecord(id)||RECORDS[0], e=STEER_EFFECT[r.id]||{}, x=stgEff(r), d=e.after!=null?Math.round((e.after-e.before)*100):null;
+  return {t:"Open a retirement PR",s:r.id,w:true,b:
+   '<p class="eyebrow q">Branch <span class="mono">context/retire-'+h(r.id)+'</span> · one concern per PR</p>'+
+   '<pre><span class="c"># .oxagen/rules/'+h(r.id)+'.toml</span>\n'+
+   '<span class="c">-</span> <span class="k">status</span> = <span class="s">"active"</span>\n'+
+   '<span class="k">+</span> <span class="k">status</span> = <span class="s">"archived"</span></pre>'+
+   '<dl class="kv" style="margin-top:12px"><dt>Rendered · cited</dt><dd class="num">'+tokn(x.rendered)+' · '+tokn(x.cited)+'</dd>'+
+   '<dt>Proof rate</dt><dd class="num">'+(d==null?'not measured':e.before.toFixed(2)+' → '+e.after.toFixed(2)+' · '+(d>0?'+':'')+d+' point'+(Math.abs(d)===1?'':'s'))+'</dd>'+
+   '<dt>Why</dt><dd>'+h(e.why||"")+'</dd></dl>'+
+   '<div class="note" style="margin-top:12px">The file stays. Archiving keeps the lineage and its history; the next bundle compiles without it.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="stgRetire(\''+h(r.id)+'\')">Open the retirement PR</button>'};
+};
+
+/* ---- proposal detail ---- */
+function prpBadge(p){
+  if(p.id!==CTXPR.prp) return '<span class="b b-'+(p.state==="candidate"?"q":"approval")+'"><span class="d"></span>'+h(p.state)+'</span>'+
+    (p.checks==="—"?'':'<span class="b b-'+(p.checks.indexOf("6 / 6")===0?"allowed":"approval")+'">'+h(p.checks)+'</span>');
+  var c=S.ctxpr, l=ctxprLabel();
+  if(c.st==="none") return '<span class="b b-approval"><span class="d"></span>ready for a Context PR</span>';
+  if(c.st==="merged") return '<span class="b b-proven"><span class="d"></span>published</span>';
+  return '<span class="b b-approval"><span class="d"></span>open Context PR</span><span class="b b-'+l[0]+'">'+h(l[1])+'</span>';
+}
+function prpDetail(p){
+  var s=prpStats(p.id), m=s.meta, mine=p.id===CTXPR.prp, c=S.ctxpr;
+  var vcls={proven:"proven",failing:"failed",unmoved:"q",unsatisfied:"approval"};
+  var rows=s.rows.map(function(r){
+    return '<tr><td><span class="mono" style="font-size:12px">'+h(r.run)+'</span><div class="dim" style="font-size:11.5px">'+h(r.agent)+' · '+h(r.date)+'</div></td>'+
+     '<td class="mono num" style="font-size:12px">seq '+r.frame+'</td>'+
+     '<td><span class="b b-'+(vcls[r.verdict]||"q")+'"><span class="d"></span>'+h(r.verdict)+'</span></td>'+
+     '<td><span class="mono" style="font-size:11.5px">'+h(r.rec)+'</span><div class="dim" style="font-size:11.5px">'+h(m.recKind)+(r.dups?' ×'+r.dups:'')+'</div></td></tr>';
+  }).join("");
+  function tile(k,v,need,ok,sub){
+    return '<div class="stat"><span class="k">'+k+'</span><span class="v" style="color:var(--st-'+(ok?"allowed":"approval")+')">'+v+
+     (need!=null?'<small>/ '+need+'</small>':'')+'</span><span class="s">'+sub+'</span></div>';
+  }
+  var tiles=m.person
+   ? tile("Supporting runs",s.runs,null,true,"proposed by a person · no threshold")+tile("Distinct agents",s.agents,null,true,"from the rows below")+tile("Checks","apply",null,true,"the same six as any record")
+   : tile("Supporting runs",s.runs,m.needRuns,s.runs>=m.needRuns,"sealed runs, from the rows below")+
+     tile("Distinct agents",s.agents,m.needAgents,s.agents>=m.needAgents,"the workspace asks for "+m.needAgents)+
+     tile("Confidence",m.confidence.toFixed(2),m.floor.toFixed(2),m.confidence>=m.floor,"floor set in governance.toml");
+  var canOpen=mine&&c.st==="none"&&s.met;
+  var action=mine&&c.st!=="none"
+   ? '<button class="btn" onclick="S.prpSel=null;S.tab.steering=\'prs\';render()">'+(c.st==="merged"?"Merged in ":"Open ")+h(CTXPR.pr)+'</button>'
+   : canOpen ? '<button class="btn primary" onclick="openDialog(\'ctxpr\',\''+h(p.id)+'\')">Open a Context PR</button>'
+   : !mine&&p.pr!=="—" ? '<span class="mono" style="font-size:12px">'+h(p.pr)+' · '+h(p.checks)+'</span>'
+   : '<button class="btn" disabled>Open a Context PR</button><p class="dim" style="font-size:11.5px;margin:8px 0 0">Blocked: support is '+s.runs+' runs across '+s.agents+' agent'+(s.agents===1?'':'s')+
+     ' at confidence '+m.confidence.toFixed(2)+'. This workspace asks for '+m.needRuns+' runs, '+m.needAgents+' agents and '+m.floor.toFixed(2)+'.</p>';
+  return '<div class="row" style="margin-bottom:12px;gap:10px;flex-wrap:wrap"><button class="btn sm" onclick="S.prpSel=null;render()">All proposals</button>'+
+    '<span class="mono" style="font-size:12.5px">'+h(p.lineage)+'</span><span class="sp" style="margin-left:auto;display:flex;gap:6px;flex-wrap:wrap">'+prpBadge(p)+'</span></div>'+
+   '<div class="grid g3" style="margin-bottom:14px" data-prp-tiles>'+tiles+'</div>'+
+   '<div class="split"><div>'+
+    '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Proposed record</h3><span class="b b-q mono" style="margin-left:auto">'+h(p.id)+'</span></div>'+
+     '<div class="recs" data-lt="1">'+recordCard({kind:p.kind,force:p.force,st:p.st,scope:"workspace",id:p.lineage},{right:'<span class="b b-q">steers nothing yet</span>',meta:'<span>from <b>'+h(p.from)+'</b></span>'})+'</div></div>'+
+    '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Why the promoter raised it</h3></div><div class="panel-b"><p style="margin:0;font-size:13px;line-height:1.6;color:var(--body)">'+h(m.rationale(s))+'</p></div></div>'+
+    '<div class="panel"><div class="panel-h"><h3>Supporting runs</h3><span class="b b-q" style="margin-left:auto" data-prp-support>'+h(m.support(s))+'</span></div>'+
+     '<div class="tw"><table><thead><tr><th>Run</th><th>Frame</th><th>Verdict</th><th>Record</th></tr></thead><tbody data-prp-rows="'+s.runs+'">'+rows+'</tbody></table></div>'+
+    '</div></div>'+
+   '<div><div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Context PR</h3></div><div class="panel-b">'+
+     '<dl class="kv" style="margin-bottom:13px"><dt>Target</dt><dd class="mono">acme/platform</dd><dt>Branch</dt><dd class="mono">context/'+h(p.lineage)+'</dd>'+
+     '<dt>File</dt><dd class="mono">.oxagen/rules/'+h(p.lineage)+'.toml</dd><dt>Governance</dt><dd>team · a code-owner review is required</dd></dl>'+action+'</div></div>'+
+    '<div class="panel"><div class="panel-h"><h3>If it publishes</h3></div><div class="panel-b"><dl class="kv">'+
+     '<dt>Reaches</dt><dd>every run in <b>core-platform</b> on acme/platform, from its next model call</dd>'+
+     '<dt>As</dt><dd>compiled steering in bundle v'+(STEER_BUNDLE.v+(mine&&c.st==="merged"?0:1))+', <span class="mono">'+h(p.force)+'</span> in the stable prefix</dd>'+
+     '<dt>Costs</dt><dd class="num"><b>'+m.tok+' steering tokens</b> a turn · '+tokn(stgBundle().tok-(mine&&c.st==="merged"?m.tok:0))+' → '+tokn(stgBundle().tok+(mine&&c.st==="merged"?0:m.tok))+'</dd>'+
+     '<dt>Baseline</dt><dd>'+h(m.measure(s))+(s.proof!=null&&s.dups?' · proof rate '+s.proof.toFixed(2):'')+'</dd>'+
+     '<dt>Measured by</dt><dd>rendered, cited, violated, and proof rate before and after, on the Effect tab</dd></dl></div></div></div></div>';
+}
+
+/* ---- the Context PR, as a state machine ---- */
+function ctxprTab(){
+  var c=S.ctxpr, n=CTXPR.checks.length, l=ctxprLabel(), merged=c.st==="merged", passed=c.st==="passed"||merged;
+  var p=prpById(CTXPR.prp), s=prpStats(CTXPR.prp), sb=stgBundle();
+  var list=[];
+  if(c.st!=="none") list.push([CTXPR.pr,p.st,CTXPR.branch,"steering",'<span class="b b-'+l[0]+'"><span class="d"></span>'+h(l[1])+'</span>']);
+  PROPOSALS.forEach(function(q){if(q.id!==CTXPR.prp&&q.pr!=="—")list.push([q.pr,q.st,"context/"+q.lineage,"steering",'<span class="b b-approval"><span class="d"></span>'+h(q.checks)+'</span>']);});
+  Object.keys(S.retirePR).forEach(function(id){list.push([S.retirePR[id],"Retire "+id,"context/retire-"+id,"retirement",'<span class="b b-approval"><span class="d"></span>awaiting code-owner review</span>']);});
+  var table='<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Open and recent Context PRs</h3><span class="b b-q" style="margin-left:auto">governance: team · code-owner review required</span></div>'+
+   '<div class="tw"><table><thead><tr><th>Pull request</th><th>Branch</th><th>Kind</th><th>State</th></tr></thead><tbody>'+
+   list.map(function(x){return '<tr><td><span class="mono" style="font-size:12px">'+h(x[0])+'</span><div class="dim" style="font-size:11.5px">'+h(x[1])+'</div></td>'+
+    '<td class="mono" style="font-size:11.5px">'+h(x[2])+'</td><td><span class="b b-q">'+h(x[3])+'</span></td><td>'+x[4]+'</td></tr>';}).join("")+
+   '</tbody></table></div></div>';
+  if(c.st==="none") return table+'<div class="panel"><div class="panel-b"><p style="margin:0 0 12px;font-size:13px">'+h(CTXPR.prp)+' is ready and has no Context PR yet. It steers nothing until one merges.</p>'+
+   '<button class="btn primary" onclick="openDialog(\'ctxpr\',\''+CTXPR.prp+'\')">Open a Context PR</button></div></div>';
+
+  var checks=CTXPR.checks.map(function(k,i){
+    var st=i<c.done?"pass":(c.st==="checking"&&i===c.done)?"running":"queued";
+    return '<tr data-check="'+st+'"><td style="font-size:12.5px">'+h(k.n)+'<div class="dim" style="font-size:11.5px">'+(st==="pass"?h(ctxprCheckOk(k)):st==="running"?'running…':'queued')+'</div></td>'+
+     '<td style="text-align:right">'+(st==="pass"?'<span class="b b-allowed"><span class="d"></span>pass</span>':st==="running"?'<span class="reg-spin" aria-label="running"></span>':'<span class="b b-q">queued</span>')+'</td></tr>';
+  }).join("");
+  var mergebar=merged
+   ? '<div class="panel-b" style="border-top:1px solid var(--border)"><b style="color:var(--st-proven)">Merged by '+h(me().name)+'</b><div class="dim" style="font-size:12px">'+h(c.mergedAt)+' · squashed into main as '+h(CTXPR.record.commit)+'</div></div>'
+   : '<div class="panel-b row" style="border-top:1px solid var(--border);gap:12px;flex-wrap:wrap"><div style="flex:1;min-width:200px;font-size:12.5px">'+
+     (passed?'<b>'+n+' checks passed.</b> <span class="muted">Governance team: '+h(me().name)+' owns <span class="mono">.oxagen/rules/</span>.</span>'
+            :'<b>Checks are running.</b> <span class="muted">Merge is blocked until all '+n+' report.</span>')+'</div>'+
+     '<button class="btn'+(passed?' primary':'')+'" '+(passed?'':'disabled ')+'onclick="ctxprMerge()">Merge pull request</button></div>';
+  var body=[
+   '## '+p.st, '',
+   'Promoted by the Oxagen promoter from **'+s.runs+' runs across '+s.agents+' agent'+(s.agents===1?'':'s')+'**,',
+   'confidence '+s.meta.confidence.toFixed(2)+' against a workspace floor of '+s.meta.floor.toFixed(2)+'.', '',
+   '### What this asks for',
+   'Strength `'+p.force+'`. Constraint effect `forbid`; it grants nothing.', '',
+   '### Why', s.meta.support(s)+' · finding fnd_01K5RT6C', '',
+   '| Run | Date | Frame | Verdict | Repeat reads |','|---|---|---|---|---|'
+  ].concat(s.rows.slice(0,3).map(function(r){return '| '+r.run+' | '+r.date+' | '+r.frame+' | `'+r.verdict+'` | '+r.dups+' |';}))
+   .concat(['', '### Effect to watch', s.meta.measure(s)+'.', 'Adds '+s.meta.tok+' steering tokens a turn.', '', '---',
+    'Opened by Oxagen · workspace `core-platform` · governance `team`']).join('\n');
+  var promo=merged
+   ? '<div class="panel" style="margin-bottom:14px" data-promo-bundle="'+sb.v+'"><div class="panel-h"><h3>promotion_event</h3><span class="b b-q" style="margin-left:auto">written by the promoter, never by an agent</span></div><div class="panel-b"><dl class="kv code">'+
+     '<dt>record_id</dt><dd>'+h(CTXPR.promo)+'</dd><dt>lineage_id</dt><dd>'+h(CTXPR.record.id)+'</dd>'+
+     '<dt>from → to</dt><dd>proposed → <b>published</b></dd><dt>approver</dt><dd>'+h(me().name)+' · '+h(me().role)+'</dd>'+
+     '<dt>pr_url</dt><dd>github.com/acme/platform/pull/519</dd><dt>commit_sha</dt><dd>'+h(CTXPR.record.commit)+'</dd><dt>merged_at</dt><dd>'+h(c.mergedAt)+'</dd>'+
+     '<dt>re-indexed</dt><dd>from the merged commit · '+h(CTXPR.hash)+' verified</dd>'+
+     '<dt>bundle</dt><dd>v'+(sb.v-1)+' → <b>v'+sb.v+'</b> · '+h(sb.digest)+'</dd>'+
+     '<dt>tokens per turn</dt><dd>'+tokn(sb.tok-CTXPR.record.tok)+' → '+tokn(sb.tok)+'</dd>'+
+     '<dt>audit</dt><dd>steering_published · '+h(CTXPR.evt)+'</dd>'+
+     '<dt>ledger</dt><dd>promotions.jsonl not written · regulated mode only; this workspace is team</dd></dl>'+
+     '<div class="row" style="margin-top:13px;gap:8px;flex-wrap:wrap"><button class="btn" onclick="S.tab.run=\'context\';S.ctxSel=\'steering\';go(\'#/'+ORG.slug+'/'+S.ws+'/runs/run_01K5RS7M2E8FJ3QW\')">See it in run_01K5RS7M2E8FJ3QW</button>'+
+     '<button class="btn" onclick="go(\'#/'+ORG.slug+'/audit/events\')">Audit log</button></div></div></div>'
+   : '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>What merge will do</h3></div><div class="panel-b"><dl class="kv">'+
+     '<dt>1</dt><dd>write a promotion_event with the approver, the pull request and the commit</dd>'+
+     '<dt>2</dt><dd>re-index the record from the merged commit; a hash mismatch blocks delivery</dd>'+
+     '<dt>3</dt><dd>bump the bundle v'+sb.v+' → v'+(sb.v+1)+' and re-sign it · '+tokn(sb.tok)+' → '+tokn(sb.tok+CTXPR.record.tok)+' steering tokens a turn</dd>'+
+     '<dt>4</dt><dd>emit steering_published to the audit log</dd>'+
+     '<dt>5</dt><dd>deliver it on the next model call of every run in core-platform</dd></dl></div></div>';
+  return table+'<div class="split"><div>'+
+   '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Context PR · <span class="mono">'+h(CTXPR.pr)+'</span></h3>'+
+    '<span class="b b-'+l[0]+'" style="margin-left:auto" data-ctxpr-state="'+c.st+'"><span class="d"></span>'+h(l[1])+'</span></div><div class="panel-b">'+
+    '<p class="eyebrow q">Branch <span class="mono">'+h(CTXPR.branch)+'</span> · base main · '+h(CTXPR.base)+' · one concern per PR</p>'+
+    '<pre><span class="c"># .oxagen/rules/'+h(CTXPR.record.id)+'.toml</span>\n'+
+    '<span class="k">schema</span>       = <span class="s">"context-record/v0.1"</span>\n'+
+    '<span class="k">lineage_id</span>   = <span class="s">"'+h(CTXPR.record.id)+'"</span>\n'+
+    '<span class="k">kind</span>         = <span class="s">"'+h(CTXPR.record.kind)+'"</span>\n'+
+    '<span class="k">sharing_scope</span>= <span class="s">"workspace"</span>\n'+
+    '<span class="k">statement</span>    = <span class="s">"'+h(CTXPR.record.st)+'"</span>\n\n'+
+    '[<span class="k">steering</span>]\n<span class="k">strength</span> = <span class="s">"'+h(CTXPR.record.force)+'"</span>\n\n'+
+    '[<span class="k">enforcement</span>]\n<span class="k">constraint_effect</span> = <span class="s">"'+h(CTXPR.record.ce)+'"</span>\n<span class="k">blocking</span> = <span class="s">false</span>\n\n'+
+    '<span class="k">record_hash</span>  = <span class="s">"'+h(CTXPR.hash)+'"</span></pre></div></div>'+
+   '<div class="panel"><div class="panel-h"><h3>Pull request body</h3><span class="b b-q" style="margin-left:auto">written by the promoter</span></div><div class="panel-b"><pre>'+h(body)+'</pre></div></div></div>'+
+   '<div><div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Checks</h3><span class="muted" style="font-size:12px">the same rules as <span class="mono">stella context validate</span></span></div>'+
+    '<div class="tw"><table class="narrow"><tbody data-checks-done="'+c.done+'">'+checks+'</tbody></table></div>'+mergebar+'</div>'+promo+'</div></div>';
+}
+
 function pSteering(){
   var w=ws(), t=tab("steering","records");
   if(S.state==="loading") return skeleton();
@@ -6700,11 +7035,15 @@ function pSteering(){
     "Published records live in <span class=\"mono\">.oxagen/rules/</span> on "+h(w.main)+". A record becomes published by being merged, never by being saved here.",
     '<button class="btn primary" onclick="openDialog(\'ctxpr\')">Open a Context PR</button>');
 
+  var cands=stgRetireCands(), archived=RECORDS.filter(function(r){return r.status==="archived";});
+  var openPRs=(S.ctxpr.st!=="none"&&S.ctxpr.st!=="merged"?1:0)+PROPOSALS.filter(function(q){return q.id!==CTXPR.prp&&q.pr!=="—";}).length+Object.keys(S.retirePR).length;
   var tabs='<div class="tabs" role="tablist">'+
    [["records","Records",RECORDS.filter(function(r){return r.status==="published";}).length],
-    ["proposals","Proposals",PROPOSALS.length],["prs","Context PRs",2],["effect","Effect"],["retirement","Retirement",1]]
+    ["proposals","Proposals",PROPOSALS.length],["prs","Context PRs",openPRs],["effect","Effect"],["retirement","Retirement",cands.length+archived.length]]
    .map(function(x){return '<button class="tab" role="tab" aria-selected="'+(t===x[0])+'" onclick="S.tab.steering=\''+x[0]+'\';render()">'+x[1]+(x[2]?'<span class="n">'+x[2]+'</span>':'')+'</button>';}).join("")+'</div>';
 
+  /* the page header gives up the gold when the tab below holds the one primary action */
+  var tabPrimary=(t==="prs"&&(S.ctxpr.st==="passed"||S.ctxpr.st==="none"))||(t==="proposals"&&S.prpSel===CTXPR.prp&&S.ctxpr.st==="none");
   var body="";
   if(t==="records"){
     /* The panel is headed "Published records" and the tab badge counts published, so the
@@ -6726,6 +7065,7 @@ function pSteering(){
      '  rules/\n    governance.toml          <span class="c"># mode = team</span>\n'+
      '    promotions.jsonl         <span class="c"># hash-chained ledger (regulated mode)</span>\n'+
      '    ctx.release.notes-format.toml\n    ctx.release.never-merge.toml\n    ctx.platform.changelog-once.toml\n'+
+     (stgRecord(CTXPR.record.id)?'    '+h(CTXPR.record.id)+'.toml  <span class="c"># merged in '+h(CTXPR.pr)+'</span>\n':'')+
      '  proposals/*.toml           <span class="c"># candidates; steer nothing</span>\n'+
      '  agents/&lt;slug&gt;.toml         <span class="c"># one per agent</span>\n'+
      '  ontology/                  <span class="c"># one file per class and relation</span></pre>'+
@@ -6735,78 +7075,59 @@ function pSteering(){
      '<li class="on"><span class="h">Turn injection</span><div>The model proxy’s volatile steering message, immediately after the cached system block.</div></li>'+
      '<li class="on"><span class="h">Context frames</span><div>As <span class="mono">fact</span> and <span class="mono">memory</span> frames with provenance to the record and the commit, <span class="mono">valid_from</span> set to the merge time.</div></li></ul></div></div></div>';
   } else if(t==="proposals"){
-    body='<div class="panel"><div class="panel-h"><h3>Proposals — candidates that steer nothing</h3>'+
+    var sel=S.prpSel&&prpById(S.prpSel);
+    body=sel?prpDetail(sel):'<div class="panel"><div class="panel-h"><h3>Proposals — candidates that steer nothing</h3>'+
      '<button class="btn sm" style="margin-left:auto" onclick="openDialog(\'ctxpr\')">Open a Context PR</button></div>'+
      '<div class="recs">'+
      PROPOSALS.map(function(p){
-      var open=p.state!=="candidate";
+      var s=prpStats(p.id);
       return recordCard({kind:p.kind,force:p.force,st:p.st,scope:"workspace",id:p.lineage},{
-       right:'<span class="b b-'+(open?"approval":"q")+'"><span class="d"></span>'+h(p.state)+'</span>'+
-        (p.checks==="—"?'':'<span class="b b-'+(p.checks.indexOf("6 / 6")===0?"allowed":"approval")+'">'+h(p.checks)+'</span>')+
-        (open?'<a href="#" class="mono" style="font-size:11.5px">'+h(p.pr)+'</a>':'<button class="btn sm" onclick="openDialog(\'ctxpr\')">Promote</button>'),
-       meta:'<span>from <b>'+h(p.from)+'</b></span><span>'+h(p.support)+'</span><span class="mono">'+h(p.id)+'</span>'});}).join("")+
+       right:prpBadge(p)+'<button class="btn sm" onclick="S.prpSel=\''+h(p.id)+'\';render()">Review</button>',
+       meta:'<span>from <b>'+h(p.from)+'</b></span><span>'+h(s.meta.support?s.meta.support(s):p.support)+'</span><span class="mono">'+h(p.id)+'</span>'});}).join("")+
      '</div></div>';
   } else if(t==="prs"){
-    body='<div class="split"><div class="panel"><div class="panel-h"><h3>Context PR · <span class="mono">acme/platform#519</span></h3>'+
-     '<span class="b b-allowed" style="margin-left:auto"><span class="d"></span>6 / 6 checks pass</span></div><div class="panel-b">'+
-     '<p class="eyebrow q">Branch <span class="mono">context/ctx.release.no-reread-changelog</span> · one concern per PR</p>'+
-     '<pre><span class="c"># .oxagen/rules/ctx.release.no-reread-changelog.toml</span>\n'+
-     '<span class="k">schema</span>       = <span class="s">"context-record/v0.1"</span>\n'+
-     '<span class="k">lineage_id</span>   = <span class="s">"ctx.release.no-reread-changelog"</span>\n'+
-     '<span class="k">kind</span>         = <span class="s">"rule"</span>\n'+
-     '<span class="k">sharing_scope</span>= <span class="s">"workspace"</span>\n'+
-     '<span class="k">statement</span>    = <span class="s">"Do not re-read CHANGELOG.md more than once in a run; cache the first read."</span>\n\n'+
-     '[<span class="k">steering</span>]\n<span class="k">strength</span> = <span class="s">"should"</span>\n\n'+
-     '[<span class="k">enforcement</span>]\n<span class="k">constraint_effect</span> = <span class="s">"forbid"</span>\n<span class="k">blocking</span> = <span class="s">false</span>\n\n'+
-     '<span class="k">record_hash</span>  = <span class="s">"sha256:9a41c0e7bd238f45"</span></pre>'+
-     '<div class="hr"></div><p class="eyebrow q">Checks, the same rules as <span class="mono">stella context validate</span></p>'+
-     '<div class="tw"><table class="narrow"><tbody>'+
-     [["Schema","pass"],["Lineage uniqueness","pass"],["record_hash recomputation","pass"],
-      ["Secret and PII scan","pass"],["Conflict against active records","pass"],["constraint_effect ∈ {require, forbid}","pass"]]
-     .map(function(c){return '<tr><td style="font-size:12.5px">'+h(c[0])+'</td><td><span class="b b-allowed"><span class="d"></span>pass</span></td></tr>';}).join("")+
-     '</tbody></table></div></div></div>'+
-     '<div><div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Lifecycle</h3></div><div class="panel-b">'+
-     '<ul class="chain">'+
-     '<li class="on"><span class="h">proposal (graph)</span><div class="dim" style="font-size:11.5px">prp_01K5RU4A · from the findings job</div></li>'+
-     '<li class="on"><span class="h">Context PR (GitHub)</span><div class="dim" style="font-size:11.5px">acme/platform#519</div></li>'+
-     '<li class="on"><span class="h">checks</span><div class="dim" style="font-size:11.5px">6 of 6 pass</div></li>'+
-     '<li class="on"><span class="h">review per mode</span><div class="dim" style="font-size:11.5px">team — a code-owner review is required</div></li>'+
-     '<li><span class="h">merge</span><div class="dim" style="font-size:11.5px">promotion_event, re-index, bundle bump</div></li>'+
-     '<li><span class="h">published (index)</span><div class="dim" style="font-size:11.5px">verified against the merged commit</div></li>'+
-     '<li><span class="h">delivered (bundle, frames)</span><div class="dim" style="font-size:11.5px">reaches the next run</div></li></ul></div></div>'+
-     '<div class="panel"><div class="panel-h"><h3>Review</h3></div><div class="panel-b"><dl class="kv">'+
-     '<dt>Governance mode</dt><dd class="mono">team</dd>'+
-     '<dt>Required</dt><dd>one code-owner review</dd>'+
-     '<dt>Reviewer</dt><dd>Marcus Bell · <span class="dim">requested 2h ago</span></dd>'+
-     '<dt>Promotion ledger</dt><dd>appended only in regulated mode</dd></dl>'+
-     '<div class="row" style="margin-top:13px"><button class="btn" onclick="act(\'Review submitted on acme/platform#519. Merge is the publication.\')">Approve on GitHub</button></div>'+
-     '<div class="note" style="margin-top:12px">Enforcement grants are only honored when they appear in the promotion ledger, never from a private local approval.</div></div></div></div>';
+    body=ctxprTab();
   } else if(t==="effect"){
+    var eff=RECORDS.filter(function(r){return r.status==="published"&&(STEER_EFFECT[r.id]||r.isNew);});
+    var base=prpStats(CTXPR.prp);
     body='<div class="panel"><div class="panel-h"><h3>Effect — measured, per published record</h3></div><div class="tw"><table>'+
      '<thead><tr><th>Lineage</th><th class="num">Runs that rendered it</th><th class="num">Cited</th><th class="num">Violated</th><th class="num">Proof rate before</th><th class="num">After</th><th>Verdict on the record</th></tr></thead><tbody>'+
-     '<tr><td class="tkey" style="font-size:12px">'+kindGlyph("rule")+'ctx.release.notes-format</td><td class="num">212</td><td class="num">188</td><td class="num">3</td>'+
-      '<td class="num">0.41</td><td class="num" style="color:var(--st-proven)">0.58</td><td><span class="b b-allowed"><span class="d"></span>keep</span></td></tr>'+
-     '<tr><td class="tkey" style="font-size:12px">'+kindGlyph("constraint")+'ctx.release.never-merge</td><td class="num">212</td><td class="num">212</td><td class="num">0</td>'+
-      '<td class="num">—</td><td class="num">—</td><td><span class="b b-allowed"><span class="d"></span>keep</span></td></tr>'+
-     '<tr><td class="tkey" style="font-size:12px">'+kindGlyph("constraint")+'ctx.mobile.no-codegen</td><td class="num">84</td><td class="num">71</td><td class="num">1</td>'+
-      '<td class="num">0.30</td><td class="num">0.33</td><td><span class="b b-allowed"><span class="d"></span>keep</span></td></tr>'+
-     '<tr><td class="tkey" style="font-size:12px">'+kindGlyph("fact")+'ctx.platform.changelog-once</td><td class="num">212</td><td class="num">96</td><td class="num">0</td>'+
-      '<td class="num">0.44</td><td class="num">0.45</td><td><span class="b b-approval"><span class="d"></span>watch</span></td></tr>'+
-     '</tbody></table></div><div class="panel-b"><div class="note">Publishing <span class="mono">ctx.release.notes-format</span> on 2026-09-04 also changed the system-context digest mid-conversation on 212 runs, which is the cache-miss finding on the Spend page. An effect is not always the one you intended.</div></div></div>';
-  } else {
-    body='<div class="panel"><div class="panel-h"><h3>Retirement candidates</h3>'+
-     '<span class="b b-q" style="margin-left:auto">records with no effect after the window</span></div><div class="tw"><table>'+
-     '<thead><tr><th>Lineage</th><th>Published</th><th class="num">Rendered</th><th class="num">Cited</th><th>Why it is a candidate</th><th></th></tr></thead><tbody>'+
-     '<tr><td class="tkey" style="font-size:12px">'+kindGlyph("rule")+'ctx.platform.retry-budget</td><td>2026-03-11</td><td class="num">0</td><td class="num">0</td>'+
-      '<td style="font-size:12px">Superseded by the hard budget on the agent definition. Nothing has rendered it in 90 days.</td>'+
-      '<td><span class="b b-q">archived 2026-09-01</span></td></tr>'+
+     eff.map(function(r){
+      var x=stgEff(r), e=STEER_EFFECT[r.id]||{before:base.proof,after:null,verdict:"measuring"};
+      var up=e.after!=null&&e.after-e.before>=0.05;
+      return '<tr'+(r.isNew?' data-new-record="'+h(r.id)+'"':'')+'><td class="tkey" style="font-size:12px">'+kindGlyph(r.kind)+h(r.id)+
+       (r.isNew?' <span class="b b-proven">new · bundle v'+STEER_BUNDLE.v+'</span>':'')+'</td>'+
+       '<td class="num">'+tokn(x.rendered)+'</td><td class="num">'+tokn(x.cited)+'</td><td class="num">'+tokn(x.violated)+'</td>'+
+       '<td class="num">'+(e.before==null?'—':e.before.toFixed(2))+'</td>'+
+       '<td class="num"'+(up?' style="color:var(--st-proven)"':'')+'>'+(e.after!=null?e.after.toFixed(2):r.isNew?'<span class="muted">'+x.rendered+' of 30 runs</span>':'—')+'</td>'+
+       '<td><span class="b b-'+(e.verdict==="keep"?"allowed":e.verdict==="watch"?"approval":"q")+'"><span class="d"></span>'+h(e.verdict)+'</span></td></tr>';
+     }).join("")+
      '</tbody></table></div><div class="panel-b">'+
-     '<div class="note">Retirement is a Context PR that sets <span class="mono">status = "archived"</span> in place. Files are never deleted.</div>'+
-     '<div class="row" style="margin-top:13px"><button class="btn" onclick="openDialog(\'ctxpr\')">Open a retirement PR</button></div></div></div>';
+     (stgRecord(CTXPR.record.id)?'<div class="note" style="margin-bottom:10px"><span class="mono">'+h(CTXPR.record.id)+'</span> published with bundle v'+STEER_BUNDLE.v+'. Its before is the proof rate of the '+base.runs+' supporting runs; its after fills in at 30 rendered runs. The number to watch alongside it is '+h(base.meta.measure(base))+'.</div>':'')+
+     '<div class="note">Publishing <span class="mono">ctx.release.notes-format</span> on 2026-09-04 also changed the system-context digest mid-conversation on 212 runs, which is the cache-miss finding on the Spend page. An effect is not always the one you intended.</div></div></div>';
+  } else {
+    body='<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Retirement candidates</h3>'+
+     '<span class="b b-q" style="margin-left:auto">rendered, and not earning its tokens</span></div><div class="tw"><table>'+
+     '<thead><tr><th>Lineage</th><th class="num">Rendered</th><th class="num">Cited</th><th class="num">Proof before</th><th class="num">After</th><th class="num">Delta</th><th></th></tr></thead><tbody>'+
+     (cands.length?cands.map(function(r){
+      var x=stgEff(r), e=STEER_EFFECT[r.id], d=Math.round((e.after-e.before)*100), pr=S.retirePR[r.id];
+      return '<tr><td class="tkey" style="font-size:12px">'+kindGlyph(r.kind)+h(r.id)+'<div class="dim" style="font-size:11.5px;white-space:normal;max-width:360px">'+h(e.why)+'</div></td>'+
+       '<td class="num">'+tokn(x.rendered)+'</td><td class="num">'+tokn(x.cited)+'</td><td class="num">'+e.before.toFixed(2)+'</td><td class="num">'+e.after.toFixed(2)+'</td>'+
+       '<td class="num" data-delta="'+d+'">'+(d>0?'+':'')+d+' pt</td>'+
+       '<td>'+(pr?'<span class="b b-approval"><span class="d"></span>'+h(pr)+' open</span>':'<button class="btn sm" onclick="openDialog(\'ctxretire\',\''+h(r.id)+'\')">Open a retirement PR</button>')+'</td></tr>';
+     }).join(""):'<tr><td colspan="7" class="dim">No published record is on watch.</td></tr>')+
+     '</tbody></table></div></div>'+
+     '<div class="panel"><div class="panel-h"><h3>Archived</h3></div><div class="tw"><table>'+
+     '<thead><tr><th>Lineage</th><th>Published</th><th class="num">Rendered</th><th class="num">Cited</th><th>Why it was retired</th></tr></thead><tbody>'+
+     archived.map(function(r){var x=stgEff(r);
+      return '<tr><td class="tkey" style="font-size:12px">'+kindGlyph(r.kind)+h(r.id)+'</td><td>'+h(r.pub)+'</td><td class="num">'+x.rendered+'</td><td class="num">'+x.cited+'</td>'+
+       '<td style="font-size:12px">'+h(STEER_ARCHIVED_WHY[r.id]||"")+'</td></tr>';}).join("")+
+     '</tbody></table></div><div class="panel-b">'+
+     '<div class="note">Retirement is a Context PR that sets <span class="mono">status = "archived"</span> in place. Files are never deleted.</div></div></div>';
   }
   return '<div class="phead"><div class="t"><p class="eyebrow">Workspace · '+h(w.name)+'</p><h1>Steering</h1>'+
    '<p>People trust pull requests. The things that steer agents are authored in '+h(w.main)+', proposed as pull requests, and published on merge.</p></div>'+
-   '<div class="acts"><button class="btn primary" onclick="openDialog(\'ctxpr\')">Open a Context PR</button></div></div>'+tabs+body;
+   '<div class="acts"><button class="btn'+(tabPrimary?'':' primary')+'" onclick="openDialog(\'ctxpr\')">Open a Context PR</button></div></div>'+tabs+body;
 }
 
 /* ============================== Spend ============================== */
@@ -7998,7 +8319,40 @@ var SCENARIOS={
 
 /* ---- end W5 ---- */
 /* ---- W6 · learned-approved-changed ---- */
-
+SCENARIOS["learned-approved-changed"]={title:"Learned, approved, changed", ws:"core-platform",
+ blurb:"The promoter learns a rule from runs, a person merges it as a pull request, and the next model call carries it.",
+ steps:[
+  {say:"These are the records that steer core-platform. Each one is a file in <span class=\"mono\">.oxagen/rules/</span> on acme/platform, and each was published by a merge.",
+   note:"Nothing on this page was saved into Oxagen. The graph indexes what git says is in force.",
+   route:function(o){return {page:"steering",org:o,ws:"core-platform"};},
+   setup:function(){ctxprSet("none");S.tab.steering="records";S.recKind="";S.prpSel=null;}},
+  {say:"The promoter noticed release runs re-reading CHANGELOG.md and proposed a rule. Every count on this page comes from the supporting runs listed under it.",
+   note:"A proposal steers nothing. It clears the workspace's thresholds for runs, agents and confidence before a Context PR can open.",
+   route:function(o){return {page:"steering",org:o,ws:"core-platform"};},
+   setup:function(){ctxprSet("none");S.tab.steering="proposals";S.prpSel="prp_01K5RU4A";}},
+  {say:"Open the Context PR. Oxagen pushes one branch with one record file and opens the pull request on the repository your team already reviews.",
+   note:"One concern per pull request. The checks refuse a second record on the same branch.",
+   route:function(o){return {page:"steering",org:o,ws:"core-platform"};},
+   setup:function(){ctxprSet("none");S.tab.steering="proposals";S.prpSel="prp_01K5RU4A";},
+   act:["Open the Context PR","openDialog('ctxpr','prp_01K5RU4A')"]},
+  {say:"The checks run one at a time: the same rules as <span class=\"mono\">stella context validate</span>. Merge stays blocked until all of them pass, and the merge is the publication.",
+   note:"In team mode a code-owner merges. In regulated mode the merge also appends to the hash-chained promotions ledger.",
+   route:function(o){return {page:"steering",org:o,ws:"core-platform"};},
+   setup:function(){S.tab.steering="prs";S.prpSel=null;if(S.ctxpr.st==="none"||S.ctxpr.st==="merged")ctxprRun();},
+   act:["Merge the pull request","ctxprMerge()"]},
+  {say:"The record is published. Its effect row starts with the proof rate of the runs that taught it, and fills in as runs render it.",
+   note:"An effect is measured, not assumed. A record that stops earning its tokens becomes a retirement candidate.",
+   route:function(o){return {page:"steering",org:o,ws:"core-platform"};},
+   setup:function(){if(S.ctxpr.st!=="merged")ctxprSet("merged");S.tab.steering="effect";S.prpSel=null;}},
+  {say:"Here it is in the window. Release manager's next model call carried the new rule in the compiled steering block, on the bumped bundle.",
+   note:"The tokens it costs are counted in the band and in the request total, so the window still sums.",
+   route:function(o){return {page:"run",org:o,ws:"core-platform",id:"run_01K5RS7M2E8FJ3QW"};},
+   setup:function(){if(S.ctxpr.st!=="merged")ctxprSet("merged");S.tab.run="context";S.ctxSel="steering";}},
+  {say:"An agent's own definition is a file too: <span class=\"mono\">.oxagen/agents/docs-writer.toml</span>. Changing it is a pull request with checks, merged by a person, the same way the rule was.",
+   note:"Steering records say how to behave. The definition says what the agent is and what it may hold.",
+   route:function(o){return {page:"agent",org:o,ws:"core-platform",id:"docs-writer",b:"definition"};},
+   setup:function(){S.tab.agent="definition";}}
+ ]};
 /* ---- end W6 ---- */
 /* ---- W7 · shape-of-your-business ---- */
 
