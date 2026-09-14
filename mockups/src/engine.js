@@ -46,6 +46,7 @@ var NOTIFS=FIXTURES.NOTIFS;
 var SPEND=FIXTURES.SPEND;
 var SPEND_DETAIL=FIXTURES.SPEND_DETAIL;
 var BILLING=FIXTURES.BILLING;
+var DOD=FIXTURES.DOD;
 
 /* Frames belong to a run. FRAMES above is the live release-manager run's list; pRun points the
    global FRAMES at the run it is rendering, so every Run-page reader and every frame a control
@@ -580,6 +581,8 @@ function applyHashTab(){
   if(p.length>=4&&p[2]!=="runs"&&p[2]!=="agents") S.tab[p[2]]=p[3];
   /* an agent tab is p[4], not p[3]: /:org/:ws/agents/:slug/:tab */
   if(p[2]==="agents"&&p.length>=5&&IAM_TAB_KEYS[p[4]]) S.tab.agent=p[4];
+  /* a run tab is p[4] too: /:org/:ws/runs/:id/:tab */
+  if(p[2]==="runs"&&p.length>=5&&/^(transcript|player|proof|dod|cost|policy|context|chain|ladder)$/.test(p[4])) S.tab.run=p[4];
 }
 window.addEventListener("hashchange",function(){S.side=false;fpStop();applyHashTab();render();});
 
@@ -1211,6 +1214,187 @@ function userMenu(){
 }
 
 /* ============================== Fleet ============================== */
+/* ============================== definition of done ============================== */
+/* A run cannot finish until its dod says so. The set is drafted from the prompt (or hand-written),
+   locked by digest before the agent moves, and run at every Stop. decide(evidence) is pure: the
+   harness and the cloud run the same function on the same evidence and get the same bytes. Three
+   verdicts, eight closed reasons. State is carried by shape, not colour: double border HELD, dashed
+   PENDING, single BROKEN; a locked set on a live run is dotted. Authored sets are in fixtures/dod.json;
+   every other run gets one derived from its record, so the fleet reads the same story at volume. */
+var DOD_REASONS={
+  CHECK_FAILED:"a check in the locked set did not pass",
+  TOOL_DENIED:"the agent called a tool the set forbids",
+  BUDGET_EXCEEDED:"cost, time, or tool-call budget exceeded",
+  ATTEMPTS_EXHAUSTED:"the agent tried to finish more times than the set allows",
+  LOCK_MISMATCH:"the dod file on disk does not match the locked digest",
+  EVIDENCE_INVALID:"evidence did not validate or its digests do not chain",
+  HUMAN_PENDING:"every executable check passed; a human signature is outstanding",
+  HARNESS_ERROR:"the harness could not run a check; never treated as a pass"};
+var DOD_KIND={run:"the command exits 0 inside the timeout, credentials scrubbed",file:"the path exists, contains the string, or matches the digest",
+  diff:"every changed file matches an allow glob and no deny glob",tools:"no tool call matched a deny pattern; enforced live by the PreToolUse hook",
+  budget:"cost, tool calls and minutes stay under the limits; stop_attempts caps how often the Stop hook may block",
+  human:"a named person signs it after the run; it never blocks the agent, it withholds the certificate"};
+S.dodSigned={};   /* human checks signed in this session, by run id */
+function dodDigest(seed){var r=rngOf(seed),o="sha256:";for(var i=0;i<4;i++)o+=("0000"+Math.floor(r()*65536).toString(16)).slice(-4);return o.slice(0,15)+"…"+o.slice(-4);}
+function dodSynth(R){
+  var seed=0;for(var i=0;i<R.id.length;i++)seed=(seed*31+R.id.charCodeAt(i))>>>0;
+  var r=rngOf(seed), cost=parseFloat(R.cost)||0, live=R.status==="live"||R.status==="parked"||R.status==="paused";
+  var pkg=(R.ws||"core").replace(/-.*/,""), task=String(R.task||"").replace(/^.*#/,"#");
+  var checks=[
+   {id:"unit",kind:"run",spec:"pnpm --filter @a-intel/"+pkg+" test:unit",ok:true,evidence:dodDigest(seed+1)},
+   {id:"scope",kind:"diff",spec:"allow "+(R.ws||"core")+"/** · deny **/.env*, packages/database/migrations/**",ok:true,evidence:dodDigest(seed+2)},
+   {id:"no-secrets",kind:"tools",spec:"deny Read(**/.env*), Bash(curl *)",ok:true,evidence:dodDigest(seed+3)},
+   {id:"budget",kind:"budget",spec:"usd "+(Math.ceil(cost*1.6)||2)+".00 · tool_calls 120 · minutes 30 · stop_attempts 3",ok:true}];
+  if(R.verdict!=null&&R.verdict!=="waived"&&R.verdict!=="unverified") checks.splice(1,0,{id:"witness",kind:"run",spec:"oxagen witness verify --task "+(R.task||"")+" (exit 0 only on a flip)",ok:R.verdict==="flipped",evidence:dodDigest(seed+4)});
+  if(R.verdict==="waived") checks.push({id:"reviewer",kind:"human",spec:"A named reviewer accepts the output",ok:null});
+  var usage={usd:cost,toolCalls:Math.round((R.steps||8)*0.6),minutes:Math.max(2,Math.round((R.frames||20)/9)),stopAttempts:live?0:1};
+  var budget={usd:Math.ceil(cost*1.6)||2,tool_calls:120,minutes:30,stop_attempts:3};
+  var d={locked:dodDigest(seed+9).replace("…","0f3a"),lockedAt:R.started?String(R.started).slice(-5)+":00":"",drafted:"z-ai/glm-latest (Oxagen)",
+    checks:checks,hidden:r()<0.6?1:0,usage:usage,budget:budget,stops:[],verdict:null,reasons:[],failed:[],synth:true};
+  if(live) return d;
+  var v=R.verdict, reasons=[], failed=[];
+  if(v==="flipped"||(v==null&&R.status==="sealed")){d.verdict="HELD";}
+  else if(v==="waived"){d.verdict="PENDING";reasons=["HUMAN_PENDING"];failed=["reviewer"];}
+  else if(v==="unverified"){d.verdict="BROKEN";reasons=["HARNESS_ERROR"];failed=["unit"];checks[0].ok=null;checks[0].error=true;}
+  else if(R.status==="halted"){d.verdict="BROKEN";reasons=["TOOL_DENIED"];failed=["no-secrets"];checks.forEach(function(c){if(c.id==="no-secrets")c.ok=false;});d.denials=["Bash(curl …)"];}
+  else if(v==="tampered"){d.verdict="BROKEN";reasons=["CHECK_FAILED"];failed=["witness","h-config-untouched"];d.hidden=1;d.hiddenChecks=[{id:"h-config-untouched",kind:"file",spec:"test config sha256 unchanged from the target",ok:false,evidence:dodDigest(seed+5)}];}
+  else if(v==="failing"||v==="unmoved"||v==="unsatisfied"){d.verdict="BROKEN";reasons=["CHECK_FAILED"];failed=["witness"];
+    if(r()<0.5){reasons.push("ATTEMPTS_EXHAUSTED");usage.stopAttempts=3;}
+    else if(r()<0.25){reasons=["BUDGET_EXCEEDED"];failed=[];usage.usd=budget.usd+0.42;checks.forEach(function(c){if(c.id==="budget")c.ok=false;});}}
+  else {d.verdict="HELD";}
+  if(d.verdict==="HELD"&&r()<0.06){d.verdict="BROKEN";reasons=["LOCK_MISMATCH"];failed=[];}
+  else if(d.verdict==="HELD"&&r()<0.04){d.verdict="BROKEN";reasons=["EVIDENCE_INVALID"];failed=[];}
+  d.reasons=reasons;d.failed=failed;
+  var last={n:usage.stopAttempts||1,at:R.sealed?String(R.sealed).slice(-5):"",verdict:d.verdict,reasons:reasons,failed:failed};
+  for(var k=1;k<last.n;k++)d.stops.push({n:k,at:"",verdict:"BROKEN",reasons:["CHECK_FAILED"],failed:failed.length?failed:["unit"]});
+  d.stops.push(last);
+  d.cert={id:"dodc_01K"+R.id.slice(-8),attempt:"arat_01K"+R.id.slice(-8),streamDigest:dodDigest(seed+6),issuedAt:(R.sealed||"")+"Z",signature:"ed25519:MEUCIQ"+dodDigest(seed+7).slice(7,11)+"…"+dodDigest(seed+8).slice(-4),signer:ORG.attester,metered:d.verdict==="HELD"?"dod.held":null};
+  return d;
+}
+function dodOf(R){
+  if(!R) return null;
+  if(!R._dod){var a=DOD[R.id];R._dod=a?JSON.parse(JSON.stringify(a)):dodSynth(R);}
+  var d=R._dod; d.reasons=d.reasons||[]; d.failed=d.failed||[]; d.stops=d.stops||[];
+  /* a signature given in this session settles a PENDING run to HELD, the same way `oxagen dod sign` does */
+  if(d.verdict==="PENDING"&&S.dodSigned[R.id]&&!d._signed){
+    d._signed=true;d.verdict="HELD";d.reasons=[];d.failed=[];d.settledBy="signature";
+    d.checks.forEach(function(c){if(c.kind==="human"){c.ok=true;c.signed=S.dodSigned[R.id];}});
+    d.stops.push({n:d.stops.length+1,at:S.dodSigned[R.id].at.slice(11,16),verdict:"HELD",reasons:[],failed:[],note:"Signed by "+S.dodSigned[R.id].by+". The certificate is issued and the run is metered as dod.held."});
+    if(d.cert){d.cert.metered="dod.held";d.cert.issuedAt=S.dodSigned[R.id].at;}
+  }
+  return d;
+}
+function dodVerdict(R){var d=dodOf(R);return d?d.verdict:null;}
+function dodWord(v){return v==="HELD"?"held":v==="PENDING"?"pending":v==="BROKEN"?"broken":"locked";}
+function dodBadge(R,opts){
+  var d=dodOf(R); if(!d) return '';
+  var v=d.verdict, cls=v==="HELD"?"dod-held":v==="PENDING"?"dod-pending":v==="BROKEN"?"dod-broken":"dod-locked";
+  var sub=opts&&opts.sub?'<div class="flipsub">'+(v==="HELD"?d.cert.id:v==="PENDING"?'signature outstanding':v==="BROKEN"?h(d.reasons.join(", ").toLowerCase().replace(/_/g," ")):d.checks.length+' checks locked'+(d.stops.length?' · blocked once':''))+'</div>':'';
+  return '<span class="b dod '+cls+'" title="definition of done: '+dodWord(v)+'"><span class="dg">'+(v==="HELD"?"✓":v==="PENDING"?"…":v==="BROKEN"?"✗":"⚿")+'</span>done · '+dodWord(v)+'</span>'+sub;
+}
+function dodCheckResult(c){
+  if(c.error) return '<span class="b b-failed"><span class="d"></span>harness error</span>';
+  if(c.kind==="human") return c.ok?'<span class="b b-proven"><span class="d"></span>signed</span>':'<span class="b b-approval"><span class="d"></span>awaiting signature</span>';
+  if(c.ok===true) return '<span class="b b-allowed"><span class="d"></span>pass</span>';
+  if(c.ok===false) return '<span class="b b-failed"><span class="d"></span>fail</span>';
+  return '<span class="b b-q">runs at Stop</span>';
+}
+function dodYaml(R){
+  var d=dodOf(R), L=["dod: 1","task: "+(R.taskTitle||R.task),"run: "+R.id,"locked: "+d.locked,"","checks:"];
+  d.checks.forEach(function(c){
+    L.push("  - id: "+c.id);
+    if(c.kind==="run")L.push("    run: "+c.spec);
+    else if(c.kind==="file"){var m=/^(\S+) contains (.*)$/.exec(c.spec);L.push("    file:");L.push("      path: "+(m?m[1]:c.spec));if(m)L.push("      contains: "+m[2]);}
+    else if(c.kind==="diff"){var p=c.spec.split(" · ");L.push("    diff:");L.push("      allow: ["+p[0].replace(/^allow /,"")+"]");if(p[1])L.push("      deny:  ["+p[1].replace(/^deny /,"")+"]");}
+    else if(c.kind==="tools")L.push("    tools:\n      deny: ["+c.spec.replace(/^deny /,"").split(", ").map(function(x){return '"'+x+'"';}).join(", ")+"]");
+    else if(c.kind==="budget")L.push("    budget: { "+c.spec.split(" · ").map(function(x){var q=x.split(" ");return q[0]+": "+q[1];}).join(", ")+" }");
+    else if(c.kind==="human")L.push("    human: "+c.spec);
+    L.push("");
+  });
+  return L.join("\n").replace(/\n$/,"");
+}
+function dodBar(label,used,limit,fmt){
+  var pct=limit?Math.min(100,Math.round(used/limit*100)):0, over=limit&&used>limit;
+  return '<div class="dod-bar"><div class="row" style="justify-content:space-between;font-size:11.5px"><span class="muted">'+h(label)+'</span><span class="mono'+(over?'" style="color:var(--st-failed)':'')+'">'+fmt(used)+' <span class="dim">of '+fmt(limit)+'</span></span></div>'+
+   '<div class="mbar" style="height:8px;margin-top:4px"><i class="'+(over?'over':'used')+'" style="width:'+pct+'%"></i></div></div>';
+}
+function dodTab(R){
+  var d=dodOf(R), v=d.verdict, live=!v;
+  var checks=d.checks.concat(d.hiddenChecks||[]).map(function(c){
+    var hidden=(d.hiddenChecks||[]).indexOf(c)>=0;
+    return '<tr'+(d.failed.indexOf(c.id)>=0?' class="dod-fail"':'')+'><td class="mono" style="font-size:12px">'+h(c.id)+(hidden?' <span class="b b-q" style="font-size:10px">hidden</span>':'')+'</td>'+
+     '<td><span class="b b-q mono" style="font-size:10.5px" title="'+h(DOD_KIND[c.kind]||"")+'">'+h(c.kind)+'</span></td>'+
+     '<td class="mono" style="font-size:11.5px;max-width:42ch;white-space:normal">'+h(c.spec)+'</td>'+
+     '<td>'+dodCheckResult(c)+(c.signed?'<div class="t-sub" style="font-size:11px">'+h(c.signed.by)+' · '+h(c.signed.at)+'</div>':'')+'</td>'+
+     '<td class="mono dim" style="font-size:11px">'+h(c.evidence||"—")+'</td></tr>';}).join("");
+  var reasons=d.reasons.length?'<ul class="dod-reasons">'+d.reasons.map(function(k){return '<li><b class="mono">'+h(k)+'</b><span>'+h(DOD_REASONS[k]||"")+'</span></li>';}).join("")+'</ul>':'';
+  var stops=d.stops.length?d.stops.map(function(s){
+    return '<li class="on"><span class="h">'+(s.at?h(s.at)+' · ':'')+'stop '+s.n+' · '+h(dodWord(s.verdict))+'</span><div>'+
+     (s.verdict==="BROKEN"?(s.reasons.indexOf("ATTEMPTS_EXHAUSTED")>=0?'Attempts exhausted: the evidence was submitted as BROKEN and the run ended. ':'Blocked. The agent was handed the failing ids and kept going. ')+'<span class="mono">'+h(s.failed.join(", "))+'</span>'
+      :s.verdict==="PENDING"?'Every executable check passed; the certificate waits for a signature.':'Every check passed. Evidence submitted; the cloud re-decided, bound the outcome to the sealed attempt and signed.')+
+     (s.note?'<div class="dim" style="font-size:11.5px;margin-top:3px">'+h(s.note)+'</div>':'')+'</div></li>';}).join("")
+   :'<li class="on"><span class="h">no stop yet</span><div>The agent has not tried to finish. When it does, the Stop hook runs every check, hidden ones included, and decide() answers.</div></li>';
+  var human=d.checks.filter(function(c){return c.kind==="human"&&!c.ok;});
+  var head='<div class="dod-verdict '+(v?v.toLowerCase():"locked")+'">'+
+   '<div><p class="eyebrow q" style="margin:0 0 4px">Definition of done'+(live?' · locked, running':'')+'</p>'+
+   '<div class="w">'+(v?v:"LOCKED")+'</div>'+
+   '<p class="muted" style="margin:6px 0 0;font-size:12.5px">'+(v==="HELD"?'Every executable check passed, no tool was denied, the budget held and no human check is outstanding. Signed and metered as <span class="mono">dod.held</span>.'
+     :v==="PENDING"?'Every executable check passed. '+human.length+' human check'+(human.length===1?'':'s')+' waiting for a signature; the certificate is withheld, the run is not.'
+     :v==="BROKEN"?'The certificate records which checks failed. Not metered.'
+     :d.checks.length+' checks locked by digest at '+h(d.lockedAt)+' before the agent moved. The agent can read the file and cannot change it.')+'</p>'+reasons+'</div>'+
+   '<div class="dod-cert">'+(d.cert?'<dl class="kv">'+
+     '<dt>Certificate</dt><dd class="mono">'+h(d.cert.id)+'</dd>'+
+     '<dt>Bound to</dt><dd class="mono">'+h(d.cert.attempt)+' · stream '+h(d.cert.streamDigest)+'</dd>'+
+     '<dt>Lock</dt><dd class="mono">'+h(d.locked)+'</dd>'+
+     '<dt>Issued</dt><dd class="mono">'+h(d.cert.issuedAt)+'</dd>'+
+     '<dt>Signature</dt><dd class="mono">'+h(d.cert.signature)+' · '+h(d.cert.signer)+'</dd>'+
+     '<dt>Metered</dt><dd>'+(d.cert.metered?'<span class="mono">'+h(d.cert.metered)+'</span> · one governed action':'<span class="dim">not metered</span>')+'</dd></dl>'
+    :'<dl class="kv"><dt>Lock</dt><dd class="mono">'+h(d.locked)+'</dd><dt>Written to</dt><dd class="mono">.oxagen/dod/'+h(R.id)+'.yaml</dd><dt>Drafted by</dt><dd>'+h(d.drafted)+' · never the model running the task</dd><dt>Hidden checks</dt><dd>'+d.hidden+' held back by the cloud, run at Stop</dd></dl>')+
+   '<div class="row" style="margin-top:12px;gap:8px;flex-wrap:wrap"><button class="btn sm" onclick="openDialog(\'dodfile\',\''+h(R.id)+'\')">View the locked file</button>'+
+    (d.cert?'<button class="btn sm" onclick="act(\'Certificate '+h(d.cert.id)+' and decide() downloaded. Recompute the verdict from the evidence, offline.\')">Verify offline</button>':'')+
+    (human.length&&v==="PENDING"?'<button class="btn sm primary" onclick="openDialog(\'dodsign\',\''+h(R.id)+'\')">Sign '+h(human[0].id)+'</button>':'')+'</div></div></div>';
+  return head+
+   '<div class="split" style="margin-top:14px"><div class="panel"><div class="panel-h"><h3>Checks</h3><span class="muted" style="font-size:12.5px">'+d.checks.length+' in the file'+(d.hidden?' · '+d.hidden+' hidden':'')+'</span>'+
+    '<div class="sp"><span class="b b-q">six kinds, nothing else</span></div></div>'+
+    '<div class="tw"><table><thead><tr><th>Check</th><th>Kind</th><th>Passes when</th><th>Result</th><th>Evidence</th></tr></thead><tbody>'+checks+'</tbody></table></div>'+
+    '<div class="panel-b"><div class="note">Hidden checks never appear in the file. The Stop hook fetches them from the cloud and runs them beside the visible ones, so an agent that games the visible set meets the hidden one.</div></div></div>'+
+   '<div><div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Budget</h3><span class="b b-q" style="margin-left:auto">from the tool log</span></div><div class="panel-b" style="display:grid;gap:10px">'+
+    dodBar("Cost",d.usage.usd,d.budget.usd,function(x){return "$"+(+x).toFixed(2);})+
+    dodBar("Tool calls",d.usage.toolCalls,d.budget.tool_calls,function(x){return String(x);})+
+    dodBar("Minutes",d.usage.minutes,d.budget.minutes,function(x){return String(x);})+
+    dodBar("Stop attempts",d.usage.stopAttempts,d.budget.stop_attempts,function(x){return String(x);})+
+    (d.denials&&d.denials.length?'<div class="warn" style="margin:0"><b>'+d.denials.length+' tool call'+(d.denials.length===1?'':'s')+' refused</b> by the PreToolUse hook: <span class="mono">'+h(d.denials.join(", "))+'</span></div>':'')+
+   '</div></div>'+
+   '<div class="panel"><div class="panel-h"><h3>Stops</h3><span class="muted" style="font-size:12.5px">decide() at every Stop</span></div><div class="panel-b"><ul class="chain">'+stops+'</ul></div></div></div></div>';
+}
+DLG_EXT.dodfile=function(id){
+  var R=run(id)||RUNS[0], d=dodOf(R);
+  return {t:"The locked dod file",s:".oxagen/dod/"+R.id+".yaml",w:true,
+   b:'<pre>'+h(dodYaml(R))+'</pre>'+
+    '<div class="note" style="margin-top:12px">Locked at '+h(d.lockedAt)+' by <span class="mono">'+h(d.locked)+'</span>: RFC 8785 canonical JSON of the set with <span class="mono">locked</span> removed, then sha256. The agent may read this file and never edit it; an edit is <span class="mono">LOCK_MISMATCH</span> at the next Stop.'+(d.hidden?' '+d.hidden+' hidden check'+(d.hidden===1?'':'s')+' stayed in the cloud and never appear here.':'')+'</div>',
+   f:'<button class="btn" onclick="closeDialog()">Close</button>'};
+};
+DLG_EXT.dodsign=function(id){
+  var R=run(id)||RUNS[0], d=dodOf(R), c=d.checks.filter(function(x){return x.kind==="human"&&!x.ok;})[0];
+  if(!c) return {t:"Nothing to sign",w:false,b:'<div class="note">No human check is outstanding on this run.</div>',f:'<button class="btn" onclick="closeDialog()">Close</button>'};
+  return {t:"Sign a human check",s:R.id+" · "+c.id,w:false,
+   b:'<div class="field"><label>The check</label><input value="'+h(c.spec)+'" disabled aria-label="Check"></div>'+
+    '<div class="field"><label>Signing as</label><input value="'+h(me().name)+' · '+h(me().email)+'" disabled aria-label="Signer"></div>'+
+    '<div class="field"><label>Note for the certificate</label><textarea rows="2" aria-label="Note">Read it once. It says what the change does.</textarea></div>'+
+    '<div class="note">A signature never changes the evidence. It is added to it, decide() runs again, and PENDING becomes HELD. Runs as <span class="mono">oxagen dod sign '+h(R.id)+' '+h(c.id)+'</span>: a governed action with a receipt.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="dodSign(\''+h(R.id)+'\')">Sign it</button>'};
+};
+function dodSign(id){
+  var d=new Date(), p=function(n){return (n<10?"0":"")+n;};
+  S.dodSigned[id]={by:me().name,at:"2026-09-11 "+p(d.getUTCHours())+":"+p(d.getUTCMinutes())+":"+p(d.getUTCSeconds())+"Z",signature:"ed25519:MEUCIQ"+Math.random().toString(16).slice(2,6)+"…"+Math.random().toString(16).slice(2,6)};
+  var R=run(id); if(R&&R._dod)R._dod._signed=false;
+  auditEvent("dod.signed",me().name,id+" · human check signed · PENDING → HELD","info",id);
+  closeDialog(); act("Signed. decide() re-ran with the signature: HELD. Certificate issued and metered as dod.held.");
+}
+/* Fleet reads these so its tiles and the table agree. */
+function dodPendingIn(list){return list.filter(function(r){return dodVerdict(r)==="PENDING";});}
+function dodHeldIn(list){return list.filter(function(r){return dodVerdict(r)==="HELD";});}
+
 function pFleet(){
   var w=ws();
   if(S.state==="loading") return skeleton();
@@ -1227,6 +1411,7 @@ function pFleet(){
   var list=fr?[fr]:RUNS.filter(function(r){return r.ws===w.slug;});
   if(S.runFilter==="live") list=list.filter(function(r){return r.status==="live"||r.status==="parked";});
   if(S.runFilter==="proven") list=list.filter(function(r){return r.verdict==="flipped";});
+  if(S.runFilter==="held") list=list.filter(function(r){return dodVerdict(r)==="HELD";});
 
   var rows=list.map(function(r){
     var a=agent(r.agent);
@@ -1238,6 +1423,7 @@ function pFleet(){
      '<td>'+tierBadge(r.tier)+'</td>'+
      '<td>'+gradeBadge(r.grade)+'</td>'+
      '<td>'+verdictCell(r)+'</td>'+
+     '<td>'+dodBadge(r,{sub:true})+'</td>'+
      '<td class="num">'+usd(r.cost)+'<div class="dim mono" style="font-size:10px">'+h(r.basis)+'</div></td>'+
      '<td class="num">'+r.frames+'</td>'+
      '<td class="mono dim" style="font-size:11px">'+h(r.started)+'</td>'+
@@ -1261,7 +1447,9 @@ function pFleet(){
   var pend=APPROVALS.filter(function(a){return (fr?a.run===fr.id:a.ws===w.slug)&&apState(a.id).status==="pending";});
   var agentsShown=fr?list.reduce(function(k,r){if(k.indexOf(r.agent)<0)k.push(r.agent);return k;},[]).length:w.agents;
   var oldest=0; pend.forEach(function(a){var e=600-apLeft(a.id); if(e>oldest)oldest=e;});
-  var waitLabel=pend.length?'oldest has waited '+mmss(oldest)+' of 10m':'nothing is parked';
+  var sigs=dodPendingIn(list);
+  var waitLabel=(pend.length?'oldest approval has waited '+mmss(oldest)+' of 10m':'nothing is parked')+(sigs.length?' · '+sigs.length+' signature'+(sigs.length===1?'':'s')+' outstanding':'');
+  var sealedShown=list.filter(function(r){return r.status!=="live"&&r.status!=="parked"&&r.status!=="paused";}), heldShown=dodHeldIn(sealedShown);
 
   return ''+
   '<div class="phead"><div class="t"><p class="eyebrow">Workspace · '+h(w.name)+'</p>'+
@@ -1272,16 +1460,16 @@ function pFleet(){
 
   '<div class="grid g4" style="margin-bottom:16px">'+
    '<div class="stat"><span class="k">Live runs</span><span class="v">'+live+'</span><span class="s">of '+agentsShown+' agent'+(agentsShown===1?'':'s')+' in this workspace</span></div>'+
-   '<div class="stat"><span class="k">Waiting on a human</span><span class="v" style="color:var(--st-approval)">'+pend.length+'</span><span class="s">'+waitLabel+'</span></div>'+
+   '<div class="stat"><span class="k">Waiting on a human</span><span class="v" style="color:var(--st-approval)">'+(pend.length+sigs.length)+'</span><span class="s">'+waitLabel+'</span></div>'+
    '<div class="stat"><span class="k">Spend, runs shown</span><span class="v">'+usd(spendShown)+'</span><span class="s">'+basisLabel+' · '+ORG.currency+'</span></div>'+
-   '<div class="stat"><span class="k">Cache hit rate</span><span class="v">'+(cacheRate==null?'<span class="dim">—</span>':per(cacheRate))+'</span><span class="s">'+(cacheRate==null?'no run shown records it':'cache_read ÷ (input_uncached + cache_read)')+'</span></div></div>'+
+   '<div class="stat"><span class="k">Definition of done held</span><span class="v" style="color:var(--st-proven)">'+heldShown.length+'<small>of '+sealedShown.length+'</small></span><span class="s">'+(sealedShown.length?'sealed runs shown whose checks held · cache hit '+(cacheRate==null?'—':per(cacheRate)):'no sealed run shown yet')+'</span></div></div>'+
 
   (fr?obOfferCard(fr):'')+approvalsPanel(w.slug,fr?fr.id:undefined)+'<div style="height:14px"></div>'+
    '<div class="panel"><div class="panel-h"><h3>Runs</h3>'+
     '<div class="sp">'+
-     ['all','live','proven'].map(function(f){return '<button class="btn sm'+(S.runFilter===f?' sel':'')+'" onclick="S.runFilter=\''+f+'\';render()">'+f+'</button>';}).join("")+
+     ['all','live','held','proven'].map(function(f){return '<button class="btn sm'+(S.runFilter===f?' sel':'')+'" onclick="S.runFilter=\''+f+'\';render()">'+f+'</button>';}).join("")+
     '</div></div>'+
-    '<div class="tw"><table><thead><tr><th>Run</th><th>Agent</th><th>Operator</th><th>Status</th><th>Tier</th><th>Replay</th><th>Verdict</th>'+
+    '<div class="tw"><table><thead><tr><th>Run</th><th>Agent</th><th>Operator</th><th>Status</th><th>Tier</th><th>Replay</th><th>Verdict</th><th>Done</th>'+
     '<th class="num">Cost</th><th class="num">Frames</th><th>Started</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div></div>';
 }
 
@@ -1587,7 +1775,7 @@ function pRun(r){
 
   var head='<div class="phead"><div class="t"><p class="eyebrow">Run</p>'+
    '<h1 class="mono" style="font-size:19px">'+h(R.id)+'</h1>'+
-   '<div class="row" style="margin-top:8px">'+agentCard(a||R.agent,{layout:"compact",key:R.agent})+statusBadge(rs)+tierBadge(R.tier)+gradeBadge(R.grade)+verdictBadge(R.verdict,R)+
+   '<div class="row" style="margin-top:8px">'+agentCard(a||R.agent,{layout:"compact",key:R.agent})+statusBadge(rs)+tierBadge(R.tier)+gradeBadge(R.grade)+verdictBadge(R.verdict,R)+dodBadge(R)+
    '<span class="b b-q">task '+h(R.task)+'</span></div>'+
    '<p style="margin-top:8px">'+h(R.taskTitle)+' · started '+h(R.started)+(R.sealed?' · sealed '+h(R.sealed):'')+'</p></div>'+
    '<div class="acts">'+
@@ -1648,6 +1836,8 @@ function pRun(r){
      '</div></div><div style="margin-top:14px">'+approvalsPanel(R.ws,R.id)+'</div>';
   } else if(t==="proof"){
     bodyHtml=proofTab(R);
+  } else if(t==="dod"){
+    bodyHtml=dodTab(R);
   } else if(t==="cost"){
     bodyHtml=callsPanel(R)+costTab(R);
   } else if(t==="policy"){
@@ -2020,6 +2210,7 @@ function runTabs(R,t){
   var ctxN=0;FRAMES.forEach(function(f){var m=/(\d+) context frames/.exec(f.sum);if(m)ctxN=Math.max(ctxN,+m[1]);});
   var tabs=[["transcript","Transcript",txEntries(R).length,""],["player",gov?"Governed actions":"Player",gov||R.frames,parked?'<span class="st" title="a call is parked for approval"></span>':""],
    ["proof","Proof",R.verdict?R.verdict:"",R.verdict?'<span class="st '+(R.verdict==="flipped"||R.verdict==="waived"?"ok":"bad")+'"></span>':""],
+   ["dod","Done",dodWord(dodVerdict(R)),dodVerdict(R)?'<span class="st '+(dodVerdict(R)==="HELD"?"ok":dodVerdict(R)==="PENDING"?"wait":"bad")+'"></span>':""],
    ["cost","Cost",usd(R.cost),""],["policy","Policy",gov,parked?'<span class="st" title="'+parked+' parked"></span>':""],
    ["context","Context",ctxN||"",""],["chain","Chain and seal",R.sealed?"sealed":"live",""]];
   return '<div class="tabs" role="tablist">'+tabs.map(function(x,i){return '<button class="tab" role="tab" aria-selected="'+(t===x[0])+'" title="'+(i+1)+'" onclick="S.tab.run=\''+x[0]+'\';render()">'+x[1]+(x[2]!==""&&x[2]!=null?'<span class="n'+(x[0]==="cost"?" money":"")+'">'+h(String(x[2]))+'</span>':'')+x[3]+'</button>';}).join("")+'</div>';
@@ -5418,7 +5609,7 @@ function pSpend(){
 
   var strip='<div class="grid g4" style="margin-bottom:16px">'+
    '<div class="stat"><span class="k">Spend · '+h(SPEND.month)+'</span><span class="v">'+usd(fmt2(spendMonthTotal()))+'</span><span class="s"><span class="basis">gateway_observed</span> · USD · agents and Oxagen’s model routes</span></div>'+
-   '<div class="stat"><span class="k">Proven spend</span><span class="v" style="color:var(--st-proven)">'+usd(SPEND.proven)+'</span><span class="s">runs whose verdict is <span class="mono">flipped</span></span></div>'+
+   '<div class="stat"><span class="k">Proven spend</span><span class="v" style="color:var(--st-proven)">'+usd(SPEND.proven)+'</span><span class="s">runs whose definition of done <span class="mono">held</span></span></div>'+
    '<div class="stat"><span class="k">Accepted, not proven</span><span class="v">'+usd(SPEND.accepted)+'</span><span class="s">a human verified it · never folded into proven</span></div>'+
    '<div class="stat"><span class="k">Productive ratio</span><span class="v">'+per(SPEND.ratio)+'</span><span class="s">steps that advanced the task</span></div></div>';
 
@@ -6147,7 +6338,7 @@ function pBilling(){
   if(S.state==="error") return errorState("Billing","502 stripe_unreachable");
   if(S.state==="denied") return deniedState("billing","org.billing — plan and invoices are readable only by a finance role");
   if(S.state==="empty") return emptyState("Nothing billable yet",
-    "Every organization gets its first 1,000 runs each month free, with every governance feature on. A run counts when it is sealed with at least one model call.",
+    "You pay when the work is verified: a run whose definition of done held. The free tier has every governance feature on, unlimited runs, thirty days of evidence and three seats.",
     '<button class="btn" onclick="go(\'#/'+ORG.slug+'/'+S.ws+'\')">Back to Fleet</button>');
 
   return '<div class="phead"><div class="t"><p class="eyebrow">Organization</p><h1>Billing</h1>'+
@@ -6155,15 +6346,15 @@ function pBilling(){
    '<div class="acts"><button class="btn" onclick="openDialog(\'plan\')">Change plan</button></div></div>'+
    '<div class="grid g4" style="margin-bottom:16px">'+
    '<div class="stat"><span class="k">Plan</span><span class="v" style="font-size:19px">'+h(BILLING.plan)+'</span><span class="s">monthly, cancel any time</span></div>'+
-   '<div class="stat"><span class="k">Runs this period</span><span class="v">'+BILLING.runsUsed.toLocaleString()+'</span><span class="s">'+BILLING.runsIncluded.toLocaleString()+' free · '+BILLING.billable.toLocaleString()+' billable</span></div>'+
+   '<div class="stat"><span class="k">Proven runs this period</span><span class="v" style="color:var(--st-proven)">'+BILLING.billable.toLocaleString()+'</span><span class="s">definition of done held · of '+BILLING.runsUsed.toLocaleString()+' sealed runs</span></div>'+
    '<div class="stat"><span class="k">Retained evidence</span><span class="v" style="font-size:19px">41.2 GB</span><span class="s">13 months included</span></div>'+
    '<div class="stat"><span class="k">Due '+h(BILLING.next)+'</span><span class="v">'+usd(BILLING.total)+'</span><span class="s">USD · after the onboarding discount</span></div></div>'+
    '<div class="split"><div>'+
    '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>This period</h3>'+
     '<span class="b b-q" style="margin-left:auto">Stripe holds the plan and the invoice · Oxagen holds the meter</span></div><div class="tw"><table>'+
     '<thead><tr><th>Line</th><th>Basis</th><th class="num">Amount</th></tr></thead><tbody>'+
-    '<tr><td>Runs 1 – 1,000</td><td class="dim">free tier, every governance feature on</td><td class="num">$0.00</td></tr>'+
-    '<tr><td>Runs 1,001 – 4,218</td><td class="dim">'+h(BILLING.tier2)+'</td><td class="num">'+usd(BILLING.amount)+'</td></tr>'+
+    '<tr><td>Proven runs 1 – '+BILLING.billable.toLocaleString()+'</td><td class="dim">'+h(BILLING.tier2)+'</td><td class="num">'+usd(BILLING.amount)+'</td></tr>'+
+    '<tr><td>Pending runs</td><td class="dim">'+h(BILLING.pendingNote||"metered when signed")+'</td><td class="num">$0.00</td></tr>'+
     '<tr><td>Evidence retention</td><td class="dim">'+h(BILLING.retention)+'</td><td class="num">$0.00</td></tr>'+
     '<tr><td>Onboarding discount</td><td class="dim">'+h(BILLING.discount)+'</td><td class="num" style="color:var(--st-proven)">'+h(BILLING.discountAmount)+'</td></tr>'+
     '<tr><td><b>Total</b></td><td class="dim">rounded to cents once, half-even</td><td class="num"><b>'+usd(BILLING.total)+' USD</b></td></tr>'+
@@ -6172,24 +6363,25 @@ function pBilling(){
     '<thead><tr><th>Meter</th><th class="num">This period</th><th>Note</th></tr></thead><tbody>'+
     BILLING.meters.map(function(m){return '<tr><td>'+h(m.m)+'</td><td class="num">'+h(m.v)+'</td>'+
      '<td class="dim" style="font-size:11.5px">'+h(m.note)+'</td></tr>';}).join("")+
-    '</tbody></table></div><div class="panel-b"><div class="note">The customer never pays for Oxagen saying no, or for Oxagen proving work. Proven runs carry no surcharge — they are the asset.</div></div></div>'+
+    '</tbody></table></div><div class="panel-b"><div class="note">One priced meter: the proven run, the run whose definition of done held and whose certificate Oxagen signed. Runs, governed actions and retained evidence are reported so the price can move later without rewriting the meter.</div></div></div>'+
    '<div class="panel"><div class="panel-h"><h3>Invoices</h3></div><div class="tw"><table>'+
-    '<thead><tr><th>Invoice</th><th>Period</th><th class="num">Runs</th><th class="num">Amount</th><th>Status</th><th>Paid</th><th></th></tr></thead><tbody>'+
+    '<thead><tr><th>Invoice</th><th>Period</th><th class="num">Proven runs</th><th class="num">Amount</th><th>Status</th><th>Paid</th><th></th></tr></thead><tbody>'+
     BILLING.invoices.map(function(i){return '<tr><td class="mono">'+h(i.n)+'</td><td>'+h(i.p)+'</td>'+
      '<td class="num">'+i.runs.toLocaleString()+'</td><td class="num">'+usd(i.amt)+'</td>'+
      '<td><span class="b b-allowed"><span class="d"></span>'+h(i.st)+'</span></td><td>'+h(i.d)+'</td>'+
      '<td><a href="#">Open in Stripe ↗</a></td></tr>';}).join("")+
     '</tbody></table></div></div></div>'+
    '<div><div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>The price list</h3></div><div class="tw"><table class="narrow"><tbody>'+
-    [["First 1,000 runs each month","free"],["Runs 1,001 – 10,000","$0.30 per run"],["Runs 10,001 – 100,000","$0.20 per run"],
-     ["Above 100,000","$0.12 per run"],["Evidence retention","13 months included, then $0.10 per GB-month"],
+    [["Free","every governance feature, unlimited runs, 30 days of evidence, 3 seats"],["Proven runs 1 – 10,000 a month","$0.30 per proven run"],["Proven runs 10,001 – 100,000","$0.20 per proven run"],
+     ["Above 100,000","$0.15 per proven run"],["Evidence retention","13 months included on paid plans, then $0.10 per GB-month"],
      ["Tokens Oxagen buys for you","at cost, no markup, capped"],["Enterprise, annual","from $60,000 per year"]]
     .map(function(p){return '<tr><td style="font-size:12.5px">'+h(p[0])+'</td><td class="num mono" style="font-size:11.5px">'+h(p[1])+'</td></tr>';}).join("")+
-    '</tbody></table></div><div class="panel-b"><p class="muted" style="font-size:12px;margin:0">No credits, no resellers, and no revenue dashboard. The free tier is the whole product limited by volume and retention, never by features.</p></div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>What counts as a run</h3></div><div class="panel-b">'+
-    '<ul class="chain"><li class="on"><span class="h">Counts</span><div>A sealed run with at least one model call.</div></li>'+
-    '<li class="on"><span class="h">Free</span><div>Runs Oxagen halted before any model call.</div></li>'+
-    '<li class="on"><span class="h">Free</span><div>Witness runs.</div></li></ul></div></div></div></div>';
+    '</tbody></table></div><div class="panel-b"><p class="muted" style="font-size:12px;margin:0">No credits, no resellers, and no revenue dashboard. The free tier is the whole product, limited by retention and seats, never by features or volume. Upgrading is a governance decision, not a volume accident.</p></div></div>'+
+   '<div class="panel"><div class="panel-h"><h3>What counts</h3></div><div class="panel-b">'+
+    '<ul class="chain"><li class="on"><span class="h">Priced</span><div>A proven run: sealed, its definition of done held, its certificate signed by the org key. Metered as <span class="mono">dod.held</span>.</div></li>'+
+    '<li class="on"><span class="h">Pending</span><div>Executable checks passed, a human signature outstanding. Metered the day it is signed.</div></li>'+
+    '<li class="on"><span class="h">Reported</span><div>Sealed runs, governed actions, retained evidence: secondary meters, never priced.</div></li>'+
+    '<li class="on"><span class="h">Free</span><div>Broken runs, runs Oxagen halted, witness runs. You never pay for Oxagen saying no.</div></li></ul></div></div></div></div>';
 }
 
 /* ============================== Audit ============================== */
@@ -6929,6 +7121,38 @@ SCENARIOS["the-account"]={title:"Whose account it is", ws:"core-platform",
    act:["Open the command menu","openDialog('cmd')"]}
  ]};
 /* ---- end W11 ---- */
+/* ---- W14 · done-means-done ---- */
+SCENARIOS["done-means-done"]={title:"Done means done", ws:"core-platform",
+ blurb:"An agent cannot finish until its definition of done says so: a locked set of mechanical checks, run at every Stop, signed into a certificate when they hold. That certificate is the thing you pay for.",
+ steps:[
+  {say:"Every run carries a definition of done. The Done column says whether its checks held, are waiting on a signature, or broke; the tile counts the sealed runs whose checks held.",
+   note:"A run that is still working shows the set as locked. Nothing here is a model's opinion: each verdict is decide() over evidence.",
+   route:function(o){return {page:"fleet",org:o,ws:"core-platform"};},
+   setup:function(){S.runFilter="all";S.firstRun=false;}},
+  {say:"Before release-manager moved, Oxagen drafted seven checks from the prompt and locked them by digest. The agent can read the file and cannot change it. It has tried to finish once and was blocked: the notes had no Breaking section yet.",
+   note:"The Stop hook hands the agent the failing ids and it keeps going. Three stops are allowed, then the run ends honestly.",
+   route:function(o){return {page:"run",org:o,ws:"core-platform",id:"run_01K5RS7M2E8FJ3QW"};},
+   setup:function(){S.tab.run="dod";},
+   act:["View the locked file","openDialog('dodfile','run_01K5RS7M2E8FJ3QW')"]},
+  {say:"Stella CI’s run held. Stop 1 was blocked on the contract test; stop 2 passed every check, the hidden one with them. The cloud re-ran decide() on the same evidence, bound the outcome to the sealed attempt, and signed.",
+   note:"Anyone with the evidence and decide() can recompute the verdict. That is the whole determinism claim, and it is testable.",
+   route:function(o){return {page:"run",org:o,ws:"core-platform",id:"run_01K5RQ4B9C7XTN2P"};},
+   setup:function(){S.tab.run="dod";},
+   act:["Verify offline","act('Certificate dodc_01K5RQ4C7M and decide() downloaded. Recompute the verdict from the evidence, offline.')"]},
+  {say:"This run gamed the visible set: the tests passed because the agent excluded the witness’s path in the test config. A hidden check the agent never saw compared that file to the target and failed it.",
+   note:"Hidden checks are kept in the cloud at lock time and sent to the harness only from the Stop hook. They never appear in the file.",
+   route:function(o){return {page:"run",org:o,ws:"core-platform",id:"run_01K5RG6H1L4OIU9Y"};},
+   setup:function(){S.tab.run="dod";}},
+  {say:"A human check never blocks the agent; it withholds the certificate. Docs-writer’s run passed every executable check and waits for Priya to read the page. Sign it and PENDING becomes HELD.",
+   note:"The signature is added to the evidence and decide() runs again. Runs as oxagen dod sign, a governed action with a receipt.",
+   route:function(o){return {page:"run",org:o,ws:"core-platform",id:"run_01K5RM1A5Z9QWE4R"};},
+   setup:function(){S.tab.run="dod";},
+   act:["Sign the editor check","openDialog('dodsign','run_01K5RM1A5Z9QWE4R')"]},
+  {say:"Billing prices one thing: the proven run, the run whose definition of done held. Runs, governed actions and retained evidence are reported beside it so the price can move later without rewriting the meter.",
+   note:"You never pay for Oxagen saying no, and a broken run costs nothing.",
+   route:function(o){return {page:"billing",org:o};}}
+ ]};
+/* ---- end W14 ---- */
 function scnHref(id,step){var s=SCENARIOS[id];return "#/"+ORG.slug+"/"+s.ws+"/scenarios/"+id+"/"+step;}
 /* A step's act can open a dialog; moving to another step or leaving closes it, so the next step is not read under it. */
 function scnGo(hash){S.dlg=null;S.dlgArg=null;go(hash);}
@@ -9632,7 +9856,7 @@ document.addEventListener("click",function(e){
   RECEIPTS.sort(function(a,b){return a.at<b.at?1:a.at>b.at?-1:0;});
 
   /* ---------- audit ---------- */
-  var EV=[["approval.requested",10,"agent"],["approval.resolved",9,"human"],["run.proven",11,"agent"],["run.sealed",14,"agent"],["run.halted",4,"agent"],["tool_call.denied",6,"agent"],
+  var EV=[["approval.requested",10,"agent"],["approval.resolved",9,"human"],["run.proven",11,"agent"],["dod.settled",13,"agent"],["dod.signed",2,"human"],["run.sealed",14,"agent"],["run.halted",4,"agent"],["tool_call.denied",6,"agent"],
     ["budget.breached",2,"agent"],["agent.registered",3,"human"],["agent.deregistered",1,"human"],["role.assigned",3,"human"],["role.revoked",1,"human"],["api_key.created",1,"human"],["api_key.revoked",1,"human"],
     ["invitation.sent",2,"human"],["invitation.accepted",2,"human"],["connection.reviewed",2,"human"],["credential.granted",8,"service"],["export.created",2,"human"],["export.downloaded",1,"human"],
     ["steering_published",3,"human"],["context_pr.opened",3,"service"],["kill_switch.flipped",1,"human"],["kill_switch.cleared",1,"human"],
@@ -9667,6 +9891,8 @@ document.addEventListener("click",function(e){
       case "context_pr.opened": return pick(REPOS).n+"#"+ri(300,1900)+" · proposed by the promoter · "+ri(3,40)+" runs in support";
       case "kill_switch.flipped": return pick(["tool version "+t.n+"@"+t.v,"agent "+r.agent,"tool server kubernetes"])+" · "+pick(["schema regression","runaway retries","operator request"]);
       case "kill_switch.cleared": return "tool server kubernetes · schema approved";
+      case "dod.settled": return r.id+" · "+pick(["HELD","HELD","HELD","BROKEN · CHECK_FAILED","PENDING · HUMAN_PENDING","BROKEN · ATTEMPTS_EXHAUSTED"])+" · dodc_01K"+ulid(6);
+      case "dod.signed": return r.id+" · human check signed · PENDING → HELD";
       case "schema.proposed": return t.n+"@"+t.v+" · output schema observed, not declared";
       case "schema.approved": return t.n+"@"+t.v+" · proposal accepted by "+p;
       case "session.signed_in": return pick(["password","Google","GitHub"])+" · "+pick(["macOS · Chrome","macOS · Safari","Windows · Edge","iOS · app"])+" · MFA "+pick(["passkey","TOTP"]);

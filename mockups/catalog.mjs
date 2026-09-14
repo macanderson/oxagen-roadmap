@@ -61,6 +61,7 @@ export const SCENARIOS = [
   { n: 9,  id: "toolbelt-governed",           ws: "core-platform", title: "The Toolbelt, Governed" },
   { n: 10, id: "cio-console",                 ws: "core-platform", title: "The CIO's Console" },
   { n: 11, id: "the-account",                 ws: "core-platform", title: "The Account" },
+  { n: 14, id: "done-means-done",             ws: "core-platform", title: "Done Means Done" },
 ];
 
 export const STATE_WORD = { loaded: "loaded", empty: "empty", loading: "loading", error: "error", denied: "access denied" };

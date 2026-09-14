@@ -1619,3 +1619,26 @@ pre .dn{color:var(--st-denied)}
 .lw-files .dbar{display:inline-flex;gap:1px;width:60px;height:7px}
 .lw-files .dbar i{display:block;height:100%;border-radius:1px}
 .lw-files .dbar i.a{background:var(--st-allowed)} .lw-files .dbar i.d{background:var(--st-denied)}
+
+/* -------- definition of done: state by shape (double / dashed / single / dotted), hue second -------- */
+.b.dod{gap:6px;padding-left:6px}
+.b.dod .dg{font-family:var(--mono);font-size:10px;line-height:1}
+.b.dod-held{color:var(--st-proven);border:3px double color-mix(in srgb,var(--st-proven) 60%,transparent);background:color-mix(in srgb,var(--st-proven) 10%,transparent)}
+.b.dod-pending{color:var(--st-approval);border:1px dashed color-mix(in srgb,var(--st-approval) 70%,transparent);background:color-mix(in srgb,var(--st-approval) 9%,transparent)}
+.b.dod-broken{color:var(--st-failed);border:1px solid color-mix(in srgb,var(--st-failed) 55%,transparent);background:color-mix(in srgb,var(--st-failed) 9%,transparent)}
+.b.dod-locked{color:var(--muted);border:1px dotted var(--rule);background:var(--hl)}
+.tab .st.wait{background:var(--st-approval)}
+.dod-verdict{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:18px;padding:18px 20px;border-radius:14px;background:var(--panel);border:1px solid var(--border)}
+.dod-verdict .w{font-family:var(--mono);font-size:30px;font-weight:700;letter-spacing:.06em;line-height:1;padding:10px 14px;display:inline-block;border-radius:10px}
+.dod-verdict.held .w{color:var(--st-proven);border:4px double color-mix(in srgb,var(--st-proven) 60%,transparent)}
+.dod-verdict.pending .w{color:var(--st-approval);border:2px dashed color-mix(in srgb,var(--st-approval) 70%,transparent)}
+.dod-verdict.broken .w{color:var(--st-failed);border:2px solid color-mix(in srgb,var(--st-failed) 55%,transparent)}
+.dod-verdict.locked .w{color:var(--muted);border:2px dotted var(--rule)}
+.dod-cert .kv{font-size:12px}
+.dod-reasons{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:5px}
+.dod-reasons li{display:grid;grid-template-columns:auto 1fr;gap:10px;font-size:12px;align-items:baseline}
+.dod-reasons li b{color:var(--st-failed);font-weight:600;font-size:11px}
+.dod-reasons li span{color:var(--muted)}
+.dod-bar .mbar i.over{background:var(--st-failed)}
+tr.dod-fail td{background:color-mix(in srgb,var(--st-failed) 6%,transparent)}
+#viewport.phone .dod-verdict{grid-template-columns:1fr}
