@@ -13,7 +13,7 @@ against its design. The design is the spec. Be exact and adversarial; “close e
 ## Inputs
 
 1. `pages/index.html` — every page in every state, desktop and mobile; each row links the page’s spec (`<page>.md`) and its audit prompt (`<page>.audit-prompt.md`).
-2. `consolidated-loaded.html` (the whole design, desktop) and `consolidated-loaded-mobile.html` (the whole design, mobile). Open them and navigate; everything on them is the design.
+2. `mockups/missioncontrol.html?product=1&state=loaded&mobile=0` (the whole design, desktop) and `…&mobile=1` (the whole design, mobile), or the Product stories in Storybook. Open them and navigate; everything on them is the design.
 3. `docs/2026-09-11-oxagen-mission-control-spec.md` §14 (Mission Control), §14.1 (surfaces), Appendix F (the pages that survive), Appendix A (target tables).
 4. `docs/2026-09-12-mission-control-app-implementation-plan.md` §3 (data mapping), §4.8 (page states), §4.10 (tabs as segments), §4.11 (session gate and Appendix F redirects).
 
@@ -27,19 +27,19 @@ Record PASS / FAIL / N/A per check with evidence (file:line, selector + text, or
 3. Run every per-page audit prompt (`<page>.audit-prompt.md`) and attach each report. This audit is FAIL if any of them is.
 
 ### B. Shell (desktop)
-4. Sidebar: organization switcher and workspace switcher at the top; Workspace nav Fleet · Agent IAM · Tools · Steering · Spend; Organization nav Organization · Billing · Audit; the Assistant launcher with engine status; the footer line (agent count · data plane · tier badge). No Scenarios item, no onboarding-demo entry anywhere.
+4. Sidebar: organization switcher and workspace switcher at the top; Workspace nav Fleet · Agent IAM · Tools · Steering · Spend; Organization nav Organization · Billing · Audit; the footer line (agent count · data plane · tier badge). No Scenarios item, no onboarding-demo entry anywhere.
 5. Nav counts appear only where something waits on a person: Fleet (approvals pending), Steering (proposals), Audit (open critical incidents). Any other count is a FAIL.
-6. Top bar: breadcrumbs ending on the current page; ⌘K opens search-or-run and lists every page and action; notifications with an unread dot and a list where every kind maps to a frame kind or audit event; the Assistant toggle; the account avatar → Account, Preferences, Security and sessions, Privacy and data, Switch theme, Sign out.
-7. The assistant dock opens on every page, shows the governed actions it took with receipt links, and its turns are never listed as the tenant’s runs.
+6. Top bar: breadcrumbs ending on the current page; ⌘K opens search-or-run and lists every page and action; notifications with an unread dot and a list where every kind maps to a frame kind or audit event; the account avatar → Account, Preferences, Security and sessions, Privacy and data, Switch theme, Sign out.
+7. There is no assistant panel; every question about the fleet is a page, and every configuration change is a dialog that runs a governed action.
 8. Theme: light, dark and system all render with the token palette; no colour is defined only inside a media or `[data-theme]` block.
 
 ### C. Shell (mobile — 390 × 844, touch)
 9. A fixed five-slot thumb bar: Fleet · Agents · Tools · Spend · More; counts as in B5 (Fleet, and More carrying Audit’s); the active slot is marked; every slot ≥ 44 px tall and inside the bottom quarter of the screen.
-10. More is a bottom sheet listing Steering, Organization, Billing, Audit, Assistant, Search, Notifications, Account, Switch organization, Switch workspace — the whole app reachable with one thumb.
+10. More is a bottom sheet listing Steering, Organization, Billing, Audit, Search, Notifications, Account, Switch organization, Switch workspace — the whole app reachable with one thumb.
 11. The hamburger opens the full sidebar as a drawer over a scrim; tapping the scrim closes it.
 12. Every dialog rises from the bottom edge as a sheet with a drag handle, a scrolling body and full-width footer buttons, the primary under the thumb.
 13. Every list table renders as a stack of cards with each cell labelled by its column header; no page scrolls sideways at any width down to 360 px.
-14. Inputs are 16 px (no focus zoom on iOS); tabs scroll horizontally with snap; the top bar shows only the current crumb, the search glyph, notifications, assistant and avatar; safe-area insets are respected top and bottom.
+14. Inputs are 16 px (no focus zoom on iOS); tabs scroll horizontally with snap; the top bar shows only the current crumb, the search glyph, notifications and avatar; safe-area insets are respected top and bottom.
 15. Resizing across the breakpoint re-lays the shell without a reload and without losing page state.
 
 ### D. Auth flows as sequences

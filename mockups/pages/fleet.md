@@ -5,14 +5,14 @@
 | Route | `#/a-intel/core-platform` |
 | Scope | workspace |
 | Spec | §14 Mission Control; Appendix F page 1 |
-| Design | `mc.html` → `pFleet()` (the single source; `consolidated.html` is the product build of it) |
+| Design | `mockups/src/engine.js` → `pFleet()`, built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded · empty · loading · error · access denied |
-| Files | `fleet-loaded.html` / `fleet-loaded-mobile.html`, `fleet-empty.html` / `fleet-empty-mobile.html`, `fleet-loading.html` / `fleet-loading-mobile.html`, `fleet-error.html` / `fleet-error-mobile.html`, `fleet-denied.html` / `fleet-denied-mobile.html` |
+| Storybook | `Mission Control / … / fleet`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
 | Audit | `fleet.audit-prompt.md` |
 
 ## Job
 
-Every run in the workspace, live and recent, with its enforcement tier, replay grade, verdict, cost so far and frames; the approvals queue as a panel, because an approval is always about a run. Runs are not started here — agents start them; this is where an operator stops, steers, or opens one.
+Every run in the workspace, live and recent, with its enforcement tier, replay grade, verdict, definition-of-done state, cost so far and frames; the approvals queue as a panel, because an approval is always about a run. Runs are not started here — agents start them; this is where an operator stops, steers, or opens one.
 
 ## What is on the page
 
@@ -21,21 +21,21 @@ Actions: **Steer** (opens the steer dialog: a message delivered into the loop of
 
 **Summary tiles** (one number and one basis line each):
 - **Live runs** — count of live runs · “of N agents in this workspace”
-- **Waiting on a human** — pending approvals · “oldest has waited m:ss of 10m” — the clock is live, from the approval’s deadline
+- **Waiting on a human** — pending approvals plus outstanding dod signatures · “oldest approval has waited m:ss of 10m · N signatures outstanding” — the clock is live, from the approval’s deadline
 - **Spend, runs shown** — sum of cost over the rows listed · basis line `gateway_observed + client_attested · USD`
-- **Cache hit rate** — `cache_read ÷ (input_uncached + cache_read)`
+- **Definition of done held** — held / sealed runs shown · “sealed runs shown whose checks held · cache hit N%”
 
 - **Approvals** panel — badge “N parked”. One card per pending approval: tool version (`github__create_release@2`), agent · task, parked-at time, hazard/side-effect/tier chips, counterparty, timeout (“Times out in 10m, then the call ends”), **Approve** (gold; opens the approve dialog), **Deny** (opens the deny dialog), **Details** (the four-hop chain: who asked, which agent, which action, which rule). Resolution state lives on `S.ap`; the seed `APPROVALS` is never mutated.
-- **Runs** table — columns: Run · Agent · Operator · Status · Tier · Replay · Verdict · Cost · Frames · Started. Row filter chips: all · live · proven. Per-row: **Pause** (live runs; opens the pause dialog), **Export**. Clicking a row opens the Run page. List controls: search, sortable columns, facet filters (Tier, Replay, Status), rows-per-page (5/10/25/50/All), pager.
+- **Runs** table — columns: Run · Agent · Operator · Status · Tier · Replay · Verdict · Done (the dod badge by shape: double held, dashed pending, single broken, dotted locked; under it the certificate id, “signature outstanding”, the reason, or “N checks locked”) · Cost · Frames · Started. Row filter chips: all · live · held · proven. Per-row: **Pause** (live runs; opens the pause dialog), **Export**. Clicking a row opens the Run page. List controls: search, sortable columns, facet filters (Tier, Replay, Status), rows-per-page (5/10/25/50/All), pager.
 - First-run banners (onboarding only): *provisional* workspace until a main repo is bound (**Bind <repo>**), *first run* (“one run so far”, **Show the seeded fleet**), and the onboarding offer card (**See plans**, **Not now**).
 
 **Dialogs this page opens:** `steer`, `pause`, `approve`, `deny`, `approval details (four-hop chain)`, `request-access (from denied)`, `incident (from error)`.
 
-**Shell.** Sidebar (organization switcher, workspace switcher, Workspace nav: Fleet · Agent IAM · Tools · Steering · Spend; Organization nav: Organization · Billing · Audit; Assistant launcher; agent count · data plane · tier badge), top bar (breadcrumbs, ⌘K search-or-run, notifications with unread dot, Assistant toggle, account avatar → user menu: Account, Preferences, Security and sessions, Privacy and data, Switch theme, Sign out).
+**Shell.** Sidebar (organization switcher, workspace switcher, Workspace nav: Fleet · Agent IAM · Tools · Steering · Spend; Organization nav: Organization · Billing · Audit; agent count · data plane · tier badge), top bar (breadcrumbs, ⌘K search-or-run, notifications with unread dot, account avatar → user menu: Account, Preferences, Security and sessions, Privacy and data, Switch theme, Sign out).
 
 ## Data sources
 
-Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBacked` in production). From `docs/2026-09-12-mission-control-app-implementation-plan.md` §3; the *mockup collection* column names the constant in `mc.html` that the design renders from.
+Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBacked` in production). From `docs/implementation-plan.md` §3; the *mockup collection* column names the file in `mockups/fixtures/` (as `FIXTURES.<NAME>`) or the constant in `mockups/src/engine.js` that the design renders from.
 
 | Element | Mockup collection | Target store (spec) | Backing today (repo) | Status |
 |---|---|---|---|---|
@@ -63,7 +63,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 
 ## Mobile
 
-Top bar collapses to hamburger · current crumb · search glyph · notifications · assistant · avatar. A fixed five-slot thumb bar replaces the sidebar: **Fleet** (count = approvals waiting), **Agents**, **Tools**, **Spend**, **More** (count = open critical incidents). **More** is a bottom sheet listing Steering, Organization, Billing, Audit, Assistant, Search, Notifications, Account, Switch organization, Switch workspace. The hamburger opens the full sidebar as a drawer over a scrim. Every dialog rises from the bottom edge as a sheet with a drag handle and full-width footer buttons; every list table becomes a stack of cards, each cell labelled with its column header; touch targets are ≥ 44 px; inputs are 16 px; nothing scrolls sideways.
+Top bar collapses to hamburger · current crumb · search glyph · notifications · avatar. A fixed five-slot thumb bar replaces the sidebar: **Fleet** (count = approvals waiting), **Agents**, **Tools**, **Spend**, **More** (count = open critical incidents). **More** is a bottom sheet listing Steering, Organization, Billing, Audit, Search, Notifications, Account, Switch organization, Switch workspace. The hamburger opens the full sidebar as a drawer over a scrim. Every dialog rises from the bottom edge as a sheet with a drag handle and full-width footer buttons; every list table becomes a stack of cards, each cell labelled with its column header; touch targets are ≥ 44 px; inputs are 16 px; nothing scrolls sideways.
 
 ## Permissions
 
@@ -77,6 +77,7 @@ Top bar collapses to hamburger · current crumb · search glyph · notifications
 - G7 verdict
 - G9 steer with delivery mode on ledger runs
 - G1 mandate hop of the approval chain
+- G15 the definition of done (`dod-spec.md`): sets and certificates
 
 ## Rules every build of this page must keep
 

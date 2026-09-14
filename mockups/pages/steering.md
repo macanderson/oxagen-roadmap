@@ -5,40 +5,37 @@
 | Route | `#/a-intel/core-platform/steering[/<tab>]` |
 | Scope | workspace |
 | Spec | §14 Mission Control; Appendix F page 6 |
-| Design | `mc.html` → `pSteering()` (the single source; `consolidated.html` is the product build of it) |
+| Design | `mockups/src/engine.js` → `pSteering()`, built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded · empty · loading · error · access denied |
-| Files | `steering-loaded.html` / `steering-loaded-mobile.html`, `steering-empty.html` / `steering-empty-mobile.html`, `steering-loading.html` / `steering-loading-mobile.html`, `steering-error.html` / `steering-error-mobile.html`, `steering-denied.html` / `steering-denied-mobile.html` |
+| Storybook | `Mission Control / … / steering`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
 | Audit | `steering.audit-prompt.md` |
 
 ## Job
 
-Published context records, proposals, open Context PRs, effect metrics per record, and retirement candidates. A record becomes published by being merged, never by being saved here.
+Published context records, proposals, and open Context PRs. A record becomes published by being merged, never by being saved here.
 
 ## What is on the page
 
 **Header** — eyebrow “Workspace · <workspace name>”, h1 “Steering”.
 Actions: **Open a Context PR** (gold; opens the ctxpr dialog)
 
-- **Tabs**: Records (N) · Proposals (N) · Context PRs (N) · Effect · Retirement (N).
+- **Tabs**: Records (N) · Proposals (N) · Context PRs (N).
 - **Records** — Published records as cards grouped by kind (chips: All · rule · constraint · procedure · fact · memory · preference; the six kinds of `context-record/v0.1`, icon + hue per kind, the statement always the headline); search, sort, pager. On disk: the `.oxagen/` tree (Stella symlinks into it). Delivery — three ways, all recorded.
 - **Proposals** — candidates that steer nothing until merged: each with its evidence and **Review**.
 - **Context PRs** — Pull request · Branch · Kind · State; the selected PR: body, Checks, What merge will do; **Merge pull request**.
-- **Effect** — measured per published record: Lineage · Runs that rendered it · Cited · Violated · Proof rate before · After · Verdict on the record.
-- **Retirement** — candidates: Lineage · Rendered · Cited · Proof before · After · Delta (**Open a retirement PR** → ctxretire dialog); Archived: Lineage · Published · Rendered · Cited · Why it was retired.
 
-**Dialogs this page opens:** `ctxpr`, `ctxretire`, `review (proposal)`.
+**Dialogs this page opens:** `ctxpr`, `review (proposal)`.
 
-**Shell.** Sidebar (organization switcher, workspace switcher, Workspace nav: Fleet · Agent IAM · Tools · Steering · Spend; Organization nav: Organization · Billing · Audit; Assistant launcher; agent count · data plane · tier badge), top bar (breadcrumbs, ⌘K search-or-run, notifications with unread dot, Assistant toggle, account avatar → user menu: Account, Preferences, Security and sessions, Privacy and data, Switch theme, Sign out).
+**Shell.** Sidebar (organization switcher, workspace switcher, Workspace nav: Fleet · Agent IAM · Tools · Steering · Spend; Organization nav: Organization · Billing · Audit; agent count · data plane · tier badge), top bar (breadcrumbs, ⌘K search-or-run, notifications with unread dot, account avatar → user menu: Account, Preferences, Security and sessions, Privacy and data, Switch theme, Sign out).
 
 ## Data sources
 
-Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBacked` in production). From `docs/2026-09-12-mission-control-app-implementation-plan.md` §3; the *mockup collection* column names the constant in `mc.html` that the design renders from.
+Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBacked` in production). From `docs/implementation-plan.md` §3; the *mockup collection* column names the file in `mockups/fixtures/` (as `FIXTURES.<NAME>`) or the constant in `mockups/src/engine.js` that the design renders from.
 
 | Element | Mockup collection | Target store (spec) | Backing today (repo) | Status |
 |---|---|---|---|---|
 | Records | `RECORDS` | `:Record` + git `.oxagen/rules/` | `agent.context_records`, `context_record_versions`; `context.record.*` | ✅ |
 | Proposals, Context PRs | `PROPOSALS` | `PROPOSES`, `PROMOTED_BY` | `agent.context_promotions`; `agent.memory_promotion.*` | 🟡 |
-| Effect, retirement | hard-coded | effect metrics (M3) | none | ❌ |
 
 ## Functionality
 
@@ -56,7 +53,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 
 ## Mobile
 
-Top bar collapses to hamburger · current crumb · search glyph · notifications · assistant · avatar. A fixed five-slot thumb bar replaces the sidebar: **Fleet** (count = approvals waiting), **Agents**, **Tools**, **Spend**, **More** (count = open critical incidents). **More** is a bottom sheet listing Steering, Organization, Billing, Audit, Assistant, Search, Notifications, Account, Switch organization, Switch workspace. The hamburger opens the full sidebar as a drawer over a scrim. Every dialog rises from the bottom edge as a sheet with a drag handle and full-width footer buttons; every list table becomes a stack of cards, each cell labelled with its column header; touch targets are ≥ 44 px; inputs are 16 px; nothing scrolls sideways.
+Top bar collapses to hamburger · current crumb · search glyph · notifications · avatar. A fixed five-slot thumb bar replaces the sidebar: **Fleet** (count = approvals waiting), **Agents**, **Tools**, **Spend**, **More** (count = open critical incidents). **More** is a bottom sheet listing Steering, Organization, Billing, Audit, Search, Notifications, Account, Switch organization, Switch workspace. The hamburger opens the full sidebar as a drawer over a scrim. Every dialog rises from the bottom edge as a sheet with a drag handle and full-width footer buttons; every list table becomes a stack of cards, each cell labelled with its column header; touch targets are ≥ 44 px; inputs are 16 px; nothing scrolls sideways.
 
 ## Permissions
 
@@ -65,7 +62,6 @@ Top bar collapses to hamburger · current crumb · search glyph · notifications
 
 ## Backend gaps this page depends on
 
-- effect metrics and retirement (M3)
 - Context PR state from GitHub
 
 ## Rules every build of this page must keep

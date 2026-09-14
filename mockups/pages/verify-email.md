@@ -5,9 +5,9 @@
 | Route | `#/welcome/verify` |
 | Scope | auth |
 | Spec | §14 Mission Control; Appendix F sign-in flows |
-| Design | `mc.html` → `obVerify()` (the single source; `consolidated.html` is the product build of it) |
+| Design | `mockups/src/engine.js` → `obVerify()`, built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded · loading · error |
-| Files | `verify-email-loaded.html` / `verify-email-loaded-mobile.html`, `verify-email-loading.html` / `verify-email-loading-mobile.html`, `verify-email-error.html` / `verify-email-error-mobile.html` |
+| Storybook | `Mission Control / … / verify-email`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
 | Audit | `verify-email.audit-prompt.md` |
 
 ## Job
@@ -26,7 +26,7 @@ Actions: **Verify email** (gold, full width)
 
 ## Data sources
 
-Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBacked` in production). From `docs/2026-09-12-mission-control-app-implementation-plan.md` §3; the *mockup collection* column names the constant in `mc.html` that the design renders from.
+Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBacked` in production). From `docs/implementation-plan.md` §3; the *mockup collection* column names the file in `mockups/fixtures/` (as `FIXTURES.<NAME>`) or the constant in `mockups/src/engine.js` that the design renders from.
 
 | Element | Mockup collection | Target store (spec) | Backing today (repo) | Status |
 |---|---|---|---|---|

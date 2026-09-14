@@ -1,4 +1,4 @@
-# Oxagen Mission Control — Product and Technical Specification
+# Oxagen Mission Control: Product and Technical Specification
 
 | | |
 |---|---|
@@ -7,6 +7,7 @@
 | **Author** | Drafted for Mac Anderson |
 | **Supersedes** | The `oxagen-platform` and `oxagen` codebases as products. Carries forward the designs named in §16. |
 | **Builds on** | Context Graph Protocol `contextgraph/1.0` and the `contextgraph/lifecycle/1.0-draft` profile (repo at `origin/main`, ADRs 0001 to 0018). Stella's context-record and Context PR corpus. Oxagen ADR-024, 025, 042, 043, 051, 052, 053 and the current wrapper spec (in the repo today under `docs/specs/tacho/`, renamed here). |
+| **Amended** | 2026-09-14, by the scope review (`scope-review.md`) and the definition of done (`dod-spec.md`). The in-app agent, Neo4j, SSO and SCIM, policy simulation, the assurance suite, two-person mandates, steering effect metrics and retirement, legal holds, crypto-shredding and provider reconciliation are out. The definition of done (§8.6) is in, and it is the billable unit (§12.1). Sections carry the change in place. |
 
 ---
 
@@ -16,21 +17,22 @@ This table lists every decision that shapes the rest of the document, in one pla
 
 | # | Decision | Section |
 |---|---|---|
-| 1 | A build from scratch. One control plane, one language (TypeScript), one kernel. A control plane is the one system that sets and enforces the rules for every agent. Oxagen has one in-app agent. It handles onboarding, configuration, and questions over the fleet record. Its engine is **Stella serving over HTTP** in its own container. That engine holds no credentials and no authority. Every completion and tool call the engine needs comes back to Oxagen as a request, and Oxagen answers it. Model access for Oxagen's own work goes through **OpenRouter**. OpenRouter routes by tier to Z.AI GLM: the latest full model for complex work, and the flash model for classification and labeling. | §2, §4.4, §4.5, §16 |
+| 1 | A build from scratch. One control plane, one language (TypeScript), one kernel. A control plane is the one system that sets and enforces the rules for every agent. Oxagen has no in-app agent: onboarding is three screens, configuration is the same agent tools a person clicks, and explanation is the record itself. Model access for Oxagen's own work (reflection, promotion rationale, Context PR bodies, run names and summaries) goes through **OpenRouter**, routed by tier (§4.5). | §4 |
 | 2 | The organization is the tenant and the hard isolation boundary. A tenant is one customer whose data stays fully separate from every other customer's data. A workspace is a governance partition inside the organization: a section with its own rules, approvals, and ownership. This is the same model as today, with fewer tables. | §5 |
 | 3 | Postgres tenant isolation uses Row-Level Security (RLS). RLS is a database feature that filters every row by rules tied to settings on the current transaction. There is **no bypass setting**. System access uses a separate database role with its own policy. | §5.2 |
-| 4 | Neo4j isolation is **one database per organization**, and the engine enforces it. Workspace is a required property on the data, and a single graph service enforces that rule. | §5.3 |
-| 5 | Three stores, not four. Postgres holds the control ledger. Neo4j holds the knowledge graph and the run record, and it is the source of truth. Object storage with write-once retention holds frame bodies and the archive. Write-once means a stored object cannot be changed after it is written. ClickHouse is retired. | §4 |
+| 4 | The run record, context records and the code graph live in Postgres beside the control ledger, under the same row-level security. There is no second datastore and no graph engine. | §5.3 |
+| 5 | Two stores, not four. Postgres holds the control ledger, the run record, the records and the code graph. Object storage with write-once retention holds frame bodies and the archive. Write-once means a stored object cannot be changed after it is written. Neo4j and ClickHouse are retired. | §4 |
 | 6 | Every wrapped agent passes through at least one of two gateway points where the agent connects to Oxagen: the **model proxy** and the **tool gateway**. Hooks and SDK adapters (the wrapper) add finer control. An SDK is a software development kit, the code library an agent is built with. Oxagen records the enforcement tier on every run, and the tier can never be over-stated. | §7 |
 | 7 | Intervention is a defined contract: pause, resume, steer, cancel, revoke, approve, and inject. The guarantees are stated for each gateway point. Halting works by revoking credentials, not by asking the agent to cooperate. | §7.4 |
-| 8 | A run is a hash-chained sequence of **frames**. A hash is a short fingerprint computed from data. A hash chain links each frame to the one before it, so no frame can be altered without detection. A frame is the replay unit. Frame metadata and cost live in the graph. Frame bodies are content-addressed, encrypted blobs. Content-addressed means each body is stored under the hash of its own content. | §8 |
+| 8 | A run is a hash-chained sequence of **frames**. A hash is a short fingerprint computed from data. A hash chain links each frame to the one before it, so no frame can be altered without detection. A frame is the replay unit. Frame metadata and cost live in the run record. Frame bodies are content-addressed, encrypted blobs. Content-addressed means each body is stored under the hash of its own content. | §8 |
 | 9 | Agents learn by appending **context records** (the protocol's record kinds). They never learn by writing frames. Records are canonically hashed and countersigned. Canonical hashing puts a record in one standard form before hashing, so the same content always gives the same hash. Countersigned means a second party adds its own signature. | §9 |
-| 10 | A workspace links to one or more GitHub repositories. Exactly one of them is its **main repo**, bound at creation. The main repo is the place where the workspace's steering and configuration are managed in source control. Published steering and every agent definition live there under `.oxagen/`. Stella reads that folder natively through a symlink, a file system pointer to another path. Oxagen mirrors the same folder into each coding harness's own agent format in the same pull request. Linked repos may carry repository-scoped records of their own. A **Context PR** is a GitHub pull request (PR), a proposed change that others review before it is merged. Merge is the promotion event. Nothing steers until it is published. The graph is the system of record. Git is the system of control, which is GitOps: steering changes are managed through git. | §10 |
-| 11 | Oxagen governs the toolbelt. An agent sees only the tools it is granted, and it can search them when the belt is large. The agent holds no credentials at all. Every call passes one pipeline: validate, taint-check, decide (allow, approve, or deny, deterministically), broker a per-call credential, dispatch idempotently, validate output, sign a receipt. A taint-check looks for data marked as untrusted or sensitive. Deterministic means the same input always gives the same decision. Idempotent dispatch means a repeated call has the same effect as a single call. A tool's safety classification describes the tool. The customer's approval rules decide, with auto-approval conditions Oxagen can apply to skip the human. Any consequence the customer marks (money, data destruction, production changes, external communication, access changes) requires a human-granted mandate. The mandate sets limits over the tool's declared measures and keeps a ledger. Kill switches exist at every level. Policy is versioned and simulated against real history before activation. An adversarial suite proves the guarantees per release. | §6.5–6.13 |
-| 12 | Oxagen accounts customer spend per model call by normalized token class, including cache reads and writes. It attributes spend up the chain operator → agent → run → turn → step. It reports proven versus unproven spend with a productive ratio and ranked optimization findings. It reconciles spend to the cent against provider statements. Oxagen bills per run on a plan allowance and never marks up tokens. It reports governed actions and retained storage as secondary meters. | §12 |
-| 13 | Audit fidelity: **full bodies, seven years, write-once at seal time**. Seal time is the moment a record is closed and locked against change. Each organization has its own keys. Redaction happens before write. Erasure uses crypto-shredding: destroying the key so the encrypted data can never be read again. Frame nodes stay in the graph for a hot window. The run ledger stays forever. | §13 |
+| 10 | A workspace links to one or more GitHub repositories. Exactly one of them is its **main repo**, bound at creation. The main repo is the place where the workspace's steering and configuration are managed in source control. Published steering and every agent definition live there under `.oxagen/`. Stella reads that folder natively through a symlink, a file system pointer to another path. Oxagen mirrors the same folder into each coding harness's own agent format in the same pull request. Linked repos may carry repository-scoped records of their own. A **Context PR** is a GitHub pull request (PR), a proposed change that others review before it is merged. Merge is the promotion event. Nothing steers until it is published. Postgres is the system of record. Git is the system of control, which is GitOps: steering changes are managed through git. | §10 |
+| 11 | Oxagen governs the toolbelt. An agent sees only the tools it is granted, and it can search them when the belt is large. The agent holds no credentials at all. Every call passes one pipeline: validate, taint-check, decide (allow, approve, or deny, deterministically), broker a per-call credential, dispatch idempotently, validate output, sign a receipt. A taint-check looks for data marked as untrusted or sensitive. Deterministic means the same input always gives the same decision. Idempotent dispatch means a repeated call has the same effect as a single call. A tool's safety classification describes the tool. The customer's approval rules decide, with auto-approval conditions Oxagen can apply to skip the human. Any consequence the customer marks (money, data destruction, production changes, external communication, access changes) requires a human-granted mandate. The mandate sets limits over the tool's declared measures and keeps a ledger. Kill switches exist at every level. Policy is versioned, signed and tested. | §6.5–6.12 |
+| 12 | Oxagen accounts customer spend per model call by normalized token class, including cache reads and writes. It attributes spend up the chain operator → agent → run → turn → step. It reports proven versus unproven spend with a productive ratio and ranked optimization findings. Oxagen prices one thing, the **proven run**: a run whose definition of done held (§8.6). Runs, governed actions and retained storage are reported as secondary meters. Tokens are never marked up. | §12 |
+| 13 | Audit fidelity: **full bodies, seven years, write-once at seal time**. Seal time is the moment a record is closed and locked against change. Each organization has its own keys. Redaction happens before write. Frame rows stay in the hot table for a window, then compact into the archive segment. The run ledger stays forever. | §13 |
 | 14 | Mission Control is nine pages: six in a workspace and three for the organization, down from 70. Everything else is deleted. Appendix F says where each old route went. | §14, App. F |
 | 15 | A run is proven only by a **witness** Oxagen wrote. A witness is a test built with one of several deterministic oracles, checkers whose result is fixed for a given input. The witness fails on the PR's target branch and passes on the PR. It runs in a witness runner the worker can never see or reach. The runner reports only pass or fail back to the worker. The flip from fail to pass stamps the run. Stamped runs are the training asset. | §8.5 |
+| 16 | An agent cannot finish until its **definition of done** says so. Before the agent moves, Oxagen drafts the acceptance checks for the prompt (or loads hand-written ones) and locks them by digest. At every Stop the checks run, hidden holdouts included, and a pure `decide(evidence)` answers HELD, PENDING or BROKEN with a closed reason. Oxagen never runs a check; it re-decides the evidence, binds the outcome to the sealed attempt, signs a certificate and meters one governed action. The held run is what the customer pays for. | §8.6, §12.1 |
 
 ---
 
@@ -44,11 +46,11 @@ The wedge is narrow on purpose. A customer wraps the agents they already run (St
 2. lets an operator watch, pause, steer, approve, and halt any run,
 3. explains any decision by walking the chain: who asked, what the agent was told, what it did, what proved it, and what it cost,
 4. turns what agents learn into reviewed, versioned steering (each change is numbered and kept) that lives in the customer's own repository,
-5. teaches every future run from one knowledge graph, a linked map of the customer's data, built from the customer's data sources.
+5. teaches every future run from what earlier runs learned, published as records in the repository the team already reviews.
 
 Owned intelligence (training a model per customer on proven runs) is the phase-three business. Nothing in this spec builds it. Nothing in this spec makes it harder, because proven runs are stored in the shape a training set needs.
 
-**What this product is not.** It is not a coding-agent runtime, the system that runs an agent's code. It has no sandbox for agents, no file system, and no browser. A sandbox is an isolated space where code runs. It has no subagent fan-out, no skills engine, no evals harness, and no content generation. Subagent fan-out means one agent starting many helper agents. An evals harness is a test setup that scores agent output. The one execution plane it operates is the witness runner (§8.5). An execution plane is the place where work runs. The witness runner runs proofs, never agents. ADR-043 already made that cut in the current repo. An ADR is an architecture decision record, a short written note of a design choice. This spec keeps that cut. Oxagen does have one **in-app agent**. It onboards a new organization (bind the repo, register the first agent, pick tools, set budgets). It helps configure the workspace afterwards. It answers questions over the fleet record and the graph. Its engine is Stella, running as a separate service over HTTP (ADR-053). HTTP is the standard web protocol. Its tools are agent tool contracts and nothing else (§4.4).
+**What this product is not.** It is not a coding-agent runtime, the system that runs an agent's code. It has no sandbox for agents, no file system, and no browser. A sandbox is an isolated space where code runs. It has no subagent fan-out, no skills engine, no evals harness, and no content generation. Subagent fan-out means one agent starting many helper agents. An evals harness is a test setup that scores agent output. The one execution plane it operates is the witness runner (§8.5). An execution plane is the place where work runs. The witness runner runs proofs, never agents. ADR-043 already made that cut in the current repo. An ADR is an architecture decision record, a short written note of a design choice. This spec keeps that cut. Oxagen has no in-app agent either (§4.4): onboarding is three screens, and every question about the fleet is a page.
 
 ---
 
@@ -57,22 +59,24 @@ Owned intelligence (training a model per customer on proven runs) is the phase-t
 ### 2.1 In scope for v1
 
 - **Two renames, applied everywhere.** The current codebase uses the word *capability* for a registered contract with schemas, IAM defaults, and a handler. IAM is identity and access management, the system that decides who may do what. That contract is now called an **agent tool**. One registry holds Oxagen's own agent tools and the tools imported from MCP servers, APIs, and harnesses. MCP is the Model Context Protocol, a standard way for agents to reach outside tools. An API is an application programming interface, a way for one program to call another. A governed action is one top-level call to an agent tool. The current codebase uses the word *tacho* for the second thing, and that thing has no product name at all. It is simply **wrapping an agent**. In the SDK, the software development kit that developers use to call Oxagen from code, wrapping is `oxagen.agent.wrap({ ... })` in TypeScript and Python and `oxagen.Agent.Wrap(...)` in Go. All of these ship in one `@oxagen/sdk` package. In the CLI, the command-line tool, wrapping is `oxagen agent enroll | status | unenroll`. The runtime pieces are the `oxagend` collector, the `oxagen-hook` binary, and the `oxagen.frame/1.0` envelope. Neither old word appears in the product, the API, the UI (the user interface, the screens people work in), or the docs. Appendix E is the definitive list of agent tools that survive.
-- **A free tier with the whole product in it, and one-click wrapping.** Every organization gets its first 1,000 runs each month free. Every governance feature is on for those runs (§12.1). Governance means the rules, approvals, and records that control what agents do. Wrapping Claude Code or Codex takes one click. That click runs a signed installer on macOS, Windows, or Linux (§7.2). Onboarding is three steps. The app does not open until an agent has talked to Oxagen (§4.4).
+- **A free tier with the whole product in it, and one-click wrapping.** Every organization gets every governance feature, unlimited runs, thirty days of evidence and three seats free (§12.1). Governance means the rules, approvals, and records that control what agents do. Wrapping Claude Code or Codex takes one click. That click runs a signed installer on macOS, Windows, or Linux (§7.2). Onboarding is three steps. The app does not open until an agent has talked to Oxagen (§4.4).
 - Organizations, workspaces, members, invitations, roles.
 - Agent identity, credentials, RBAC down to the tool version, and delegation ceilings. RBAC is role-based access control, where a role decides what each agent may do. A delegation ceiling means an agent can never do more than the person it acts for.
 - The gateway. It includes the model proxy (the path each model call travels through), the tool gateway, the hook and SDK adapters, and the control channel.
 - Run recording, the frame chain (the ordered, linked sequence of frames in a run), checkpoints (saved points a run can be restored from), attestation (a signed statement that a record is what it claims to be), replay in two forms (render and fork), and bisect between two runs (narrowing down the step where two runs start to differ).
-- Cost ledger, price book, budgets, provider reconciliation (matching Oxagen's cost records against the provider's bill), and spend views.
+- Cost ledger, price book, budgets, and spend views.
 - Context records, reflection, promotion, Context PRs (a PR is a pull request, a proposed change submitted for review), and steering delivery.
+- The definition of done: drafting, locking, the three hooks in the harness, `decide()`, certificates, human signatures, and templates for repeatable tasks (§8.6).
 - Mission Control UI, API, MCP endpoint, and a thin CLI (`oxagen`) for enrollment and administration.
-- Audit archive, retention, erasure, legal hold (keeping records past their normal deletion date because of a legal matter), and export.
+- Audit archive, retention, and export.
 
 ### 2.2 Out of scope for v1
 
 - Training pipeline, eval harness (an evaluation harness, a test rig that measures model or agent quality), model serving, and in-firewall installer (phase 3).
 - Marketplace, installable plugins, reseller billing, A2A federation (agent-to-agent, where agents from different systems work together), and mobile parity (a mobile app that matches the full product).
 - Workflows and playbooks. Automations. Chat as a product interface.
-- Connectors beyond the three named. A connector SDK ships in v1 so partners can add more.
+- Connectors beyond GitHub. There is no connector SDK in v1.
+- Cut by the scope review of 2026-09-14, and not on the roadmap: the in-app agent, the ontology engine and Neo4j, SSO and SCIM, policy simulation against history, the published assurance suite, two-person mandates, steering effect metrics and retirement candidates, legal holds, crypto-shredding, and provider reconciliation to the cent. Each is a Series A question a customer has to ask for.
 
 ### 2.3 Non-goals stated so they stay out
 
@@ -89,10 +93,10 @@ This document uses each name exactly as defined here.
 
 | Term | Meaning |
 |---|---|
-| **Organization** | The tenant, meaning one customer's own space in the system. An organization owns a Neo4j database, a key-encryption key (the key that protects other encryption keys), a Postgres partition, and a billing account. It may also own a dedicated data plane. |
+| **Organization** | The tenant, meaning one customer's own space in the system. An organization owns a key-encryption key (the key that protects other encryption keys), a Postgres partition, and a billing account. It may also own a dedicated data plane. |
 | **Workspace** | A governance partition inside an organization, meaning a section with its own rules, approvals, and ownership. A workspace owns one **main repo** and any number of linked repos. It also owns one steering set, a set of agents, tool grants, and budgets. |
 | **Main repo** | The one linked repository where a workspace keeps its steering and configuration under source control (version-tracked file history). Every workspace has exactly one. |
-| **Linked repo** | Any other repository that a workspace's agents work on. Oxagen loads it into the graph. It may carry steering records scoped to that one repository. |
+| **Linked repo** | Any other repository that a workspace's agents work on. Oxagen indexes it into the code graph. It may carry steering records scoped to that one repository. |
 | **Principal** | Anything that IAM makes a decision about. IAM is identity and access management, the system that decides who may do what. The three kinds are `human`, `agent`, and `service`. |
 | **Agent** | A registered principal of kind `agent`. It has an immutable key, meaning a key that never changes, in the form `org_ns.ws_ns.slug` (ADR-024). It also has a harness type (the software that runs the agent) and credentials. Each agent has one identity. Identity is never per run. |
 | **Operator** | The human accountable for an agent's runs. Every run has exactly one operator. That holds even when a schedule or a webhook (an automatic call from another system) started the run. In that case the operator is the person who owns that trigger. The IAM field is `initiating_principal`. The word people see is operator. |
@@ -106,7 +110,7 @@ This document uses each name exactly as defined here.
 | **Context record** | The protocol's immutable record (`ContextRecord`), one that cannot change once written. It holds what an agent or a person asserts, learns, proposes, or decides. There are twelve kinds. |
 | **Steering** | Published directive and knowledge records that reach an agent during a run. |
 | **Context PR** | A pull request (PR, a proposed change submitted for review) on the workspace repository. It proposes a change to steering. |
-| **Governed action** | One top-level kernel call that passed IAM and the other gates, ran its handler, and wrote an audit record. The kernel is the system's core, a gate is a check a call must pass, and an audit record is a log entry of what happened. This is the billable unit (ADR-052). Invoices and the UI (user interface) show it as **action**. A governed action is something *Oxagen enforced*. A tool call is something *an agent did*. The two overlap only where an agent's tool call went through the tool gateway. A harness-native tool call under the harness tier is a tool call but not a governed action. Oxagen observed it but did not gate it. A denied tool call is recorded but is not a governed action. Denials are free. Some things are governed actions but are not the worker's tool calls. These include a human granting a role, a Context PR merge, a repo sync, an approval decision, and every call the in-app agent makes. |
+| **Governed action** | One top-level kernel call that passed IAM and the other gates, ran its handler, and wrote an audit record. The kernel is the system's core, a gate is a check a call must pass, and an audit record is a log entry of what happened. This is the billable unit (ADR-052). Invoices and the UI (user interface) show it as **action**. A governed action is something *Oxagen enforced*. A tool call is something *an agent did*. The two overlap only where an agent's tool call went through the tool gateway. A harness-native tool call under the harness tier is a tool call but not a governed action. Oxagen observed it but did not gate it. A denied tool call is recorded but is not a governed action. Denials are free. Some things are governed actions but are not the worker's tool calls. These include a human granting a role, a Context PR merge, a repo sync, an approval decision, and a dod certificate settling. |
 | **Enforcement tier** | What Oxagen could enforce on a run in practice. The tiers are `gateway`, `harness`, and `observe`. |
 | **Replay grade** | The strongest thing a person can do with a run's recording. The grade comes from gaps in how complete the recording is. The grades are `inspect`, `view`, `fork`, and `retry`, ordered weakest first (§8.4). |
 | **Delivery mode** | The boundary where a steer (one steering message) or a message enters a run. The modes are `next_step` (the default), `interrupt`, and `turn_boundary` (§7.3). |
@@ -134,18 +138,18 @@ This document uses each name exactly as defined here.
   custom ──────────▶│         │  kernel.invoke() with IAM, budget, approval │
                     └─────────┼────────────────┼───────────────┼───────────┘
                               ▼                ▼               ▼
-  ┌───────────────┐   ┌──────────────┐   ┌─────────────┐   ┌──────────────┐
-  │ Postgres      │   │ Neo4j        │   │ Object store│   │ GitHub repo  │
-  │ control ledger│   │ one db / org │   │ WORM, keyed │   │ per workspace│
-  │ identity, IAM │   │ graph, runs, │   │ frame bodies│   │ published    │
-  │ tools, prices │   │ frames,      │   │ archive     │   │ steering     │
-  │ cost, billing │   │ records,     │   │ segments    │   │ (Context PRs)│
-  │ approvals     │   │              │   │             │   │              │
-  └───────────────┘   └──────────────┘   └─────────────┘   └──────────────┘
+  ┌───────────────────────────────┐   ┌─────────────┐   ┌──────────────┐
+  │ Postgres                      │   │ Object store│   │ GitHub repo  │
+  │ control ledger: identity, IAM,│   │ WORM, keyed │   │ per workspace│
+  │ tools, prices, cost, billing, │   │ frame bodies│   │ published    │
+  │ approvals, dod sets and certs │   │ archive     │   │ steering     │
+  │ run record: runs, frames,     │   │ segments    │   │ (Context PRs)│
+  │ records, the code graph       │   │             │   │              │
+  └───────────────────────────────┘   └─────────────┘   └──────────────┘
                               ▲
                     ┌─────────┴──────────────────────────────────────────┐
                     │  SERVICES: recorder, reflector, promoter,           │
-                    │  reconciler, archiver, GitHub app                   │
+                    │  archiver, GitHub app, dod settle                   │
                     └─────────────────────────────────────────────────────┘
                     ┌────────────────────────────────────────────────────┐
                     │  MISSION CONTROL (web), API, MCP, CLI               │
@@ -154,74 +158,66 @@ This document uses each name exactly as defined here.
 
 - **Gateway.** The only path from an agent to a model or a tool. It is stateless, meaning it keeps no data of its own between requests. It reads policy bundles and budgets from Postgres through a short-lived cache. It writes frames to the recorder queue.
 - **Kernel.** One `invoke()` call runs the pipeline that exists today. The steps are: resolve the agent tool, validate the input, enter tenant scope (limit the call to one organization's data), make the IAM decision (IAM is identity and access management, the check of who may do what), which is always audited, admit the call against the budget, pass the approval gate, run the handler, validate the output, and write the audit record. The shape carries over unchanged. The count drops to about seventy agent tools.
-- **Recorder.** Consumes batches of frames and checks that each frame chain is intact. Writes frame nodes to Neo4j and frame bodies to object storage. Prices model frames and updates run rollups (summed totals per run).
+- **Recorder.** Consumes batches of frames and checks that each frame chain is intact. Writes frame rows to Postgres and frame bodies to object storage. Prices model frames and updates run rollups (summed totals per run).
 - **Reflector.** After a seal (the step that closes a run's record), it produces observation and memory records from the run.
 - **Promoter.** Collects records across runs, produces proposals, opens Context PRs, and records promotion events when a Context PR merges. A Context PR is a pull request, a proposed change that reviewers approve before it merges.
-- **Reconciler.** Matches the cost ledger to the provider's usage exports and invoices.
-- **Archiver.** Seals archive segments, compacts frame nodes older than the hot window (the recent period kept in the graph for fast queries), and enforces retention rules and holds.
+- **Archiver.** Seals archive segments, compacts frame rows older than the hot window (the recent period kept in the hot table for fast queries), and enforces retention rules.
 - **GitHub App.** Binds repositories, creates Context PRs, runs checks, handles merges, and re-indexes after changes.
-- **Engine.** `stella serve` running in its own container. The in-app agent service reaches it over HTTP (§4.4). It runs no model and no tool itself.
-- **Model layer.** The one path for every model call Oxagen makes on its own behalf (the in-app agent, reflector, and promoter). Calls route by tier through OpenRouter (§4.5), a service that forwards model calls to many vendors. Customer agents' model calls go through the model proxy, not this layer.
+- **DoD settle.** The one service with an opinion about done. It registers locked sets, keeps the hidden checks, re-runs `decide()` on submitted evidence, binds the outcome to the sealed attempt, signs the certificate and meters `dod.held` (§8.6). It executes nothing.
+- **Model layer.** The one path for every model call Oxagen makes on its own behalf (the reflector, the promoter, the dod drafter, and the run namer). Calls route by tier through OpenRouter (§4.5), a service that forwards model calls to many vendors. Customer agents' model calls go through the model proxy, not this layer.
 
-### 4.2 The three stores and what belongs where
+### 4.2 The two stores and what belongs where
 
 | Store | Holds | Never holds |
 |---|---|---|
-| **Postgres** (shared plane, or dedicated for tenant data) | Identity, tenancy, IAM, the tool registry and its schemas, the price book, the cost ledger and its rollups, reconciliation, billing, budgets, approvals, intervention commands, archive manifests, control-plane audit events, connector sync state | Graph relationships, frame bodies, traces |
-| **Neo4j** (one database per organization) | Entities and relationships, source records, context records and their lineage, runs, attempts, frames (metadata, digests as content fingerprints, and cost), the steering index, provenance edges | Bytes larger than a few KB, money of record, credentials |
+| **Postgres** (shared plane, or dedicated for tenant data) | Identity, tenancy, IAM, the tool registry and its schemas, the price book, the cost ledger and its rollups, billing, budgets, approvals, intervention commands, archive manifests, control-plane audit events, connector sync state; and the run record: runs, attempts, frames (metadata, digests as content fingerprints, and cost), context records and their lineage, the code graph of each main repo, dod sets and certificates | Frame bodies, traces |
 | **Object storage** (write-once, per-org key) | Frame bodies (prompts, completions, tool input and output), archive segments, exports | Anything queried directly |
-| **GitHub repository** (per workspace) | Published steering records and the promotion ledger | Traces, memories, proposals |
+| **GitHub repository** (per workspace) | Published steering records, agent definitions, locked dod sets and templates, and the promotion ledger | Traces, memories, proposals |
 
-Rule: **the graph is the system of record, and git is the system of control.** The graph is the source of truth for everything the product explains: entities and their provenance, runs, frames, records, and their whole lineage. Git is the source of truth for exactly one thing: what is published and active. That means steering records and agent definitions, each approved through a pull request. Postgres holds what must be transactional and money-grade (each change lands whole or not at all, and the amounts are exact). Object storage holds raw bytes. A rollup in Postgres (per-run cost, daily spend by agent) is a derived index. It is labeled as such and can be rebuilt from the graph.
+Rule: **Postgres is the system of record, and git is the system of control.** Postgres is the source of truth for everything the product explains: runs, frames, records, their lineage, and the code graph. Git is the source of truth for exactly one thing: what is published and active. That means steering records and agent definitions, each approved through a pull request. Object storage holds raw bytes. A rollup (per-run cost, daily spend by agent) is a derived index. It is labeled as such and can be rebuilt from the frames.
 
 This is not the mirror problem (two copies that drift apart), because every fact has exactly one writer:
 
 | Fact | Written by | Read by | How the copy is kept honest |
 |---|---|---|---|
-| Published text of a record or an agent definition | git, on merge | the graph indexes it by content hash (a short fingerprint computed from the text) at the merged commit | recompute the hash, and a mismatch is `steering_drift`, which blocks delivery |
-| A record's lineage, evidence, contradictions, promotion events, and effect | the graph | Mission Control and agents | never in git |
-| A proposal | the graph | delivered to git as a pull request | one direction only: graph to git |
-| Publication | git | flows to the graph on merge | one direction only: git to graph |
+| Published text of a record or an agent definition | git, on merge | the record index stores it by content hash (a short fingerprint computed from the text) at the merged commit | recompute the hash, and a mismatch is `steering_drift`, which blocks delivery |
+| A record's lineage, evidence, contradictions and promotion events | Postgres | Mission Control and agents | never in git |
+| A proposal | Postgres | delivered to git as a pull request | one direction only: record to git |
+| Publication | git | flows to the record index on merge | one direction only: git to record |
+| A locked dod set | the harness, at lock | the cloud keeps a copy and the hidden checks | the digest; a mismatch is `LOCK_MISMATCH` |
 
-Platform engineers call this pattern GitOps: the desired state lives in git, a controller reconciles the live system to it, and drift is detected and reported. Oxagen is the controller. Steering and definitions are the desired state. The graph and the wrapped agents are the live system.
+Platform engineers call this pattern GitOps: the desired state lives in git, a controller reconciles the live system to it, and drift is detected and reported. Oxagen is the controller. Steering and definitions are the desired state. The record and the wrapped agents are the live system.
 
-ClickHouse is retired. Its two jobs, append-only trace rows and spend analytics, are now covered by frame nodes in the graph (for the hot window) plus Postgres rollups. The current `tacho_events` table, `token_usage`, and `tool_invocations` do not carry forward. The reason is the one already stated: one store of truth for the run record, with no mirror copy to keep in sync.
+Neo4j is retired with the ontology engine (the scope review of 2026-09-14). The run record was the reason a second datastore existed once the ontology went; it is a set of narrow tables with a hot window, and Postgres carries it at the wedge's volume with room to spare (§15). ClickHouse is retired too. Its two jobs, append-only trace rows and spend analytics, are covered by frame rows (for the hot window) plus rollups. One store of truth for the run record, with no mirror copy to keep in sync.
 
 ### 4.3 Language and runtime
 
-TypeScript on Node runs the control plane (the part that sets and enforces rules), the gateway, the services, and the UI. Hono handles HTTP, Drizzle handles Postgres access, and the official Neo4j driver sits behind one graph service. The official `@contextgraphprotocol/typescript-sdk` is the source of protocol types (ADR-036). An SDK is a software development kit, a library that developers build on. Zod schemas remain the runtime validators at the trust boundary (the point where outside input enters the system). They are compile-checked against the SDK types. Rust stays in Stella and the protocol crates (Rust packages). Stella is deployed as a service, never embedded. The gateway's hot path is streaming pass-through. A Node process adds well under thirty milliseconds at the median for a proxied model call, which is the budget in §15.
+TypeScript on Node runs the control plane (the part that sets and enforces rules), the gateway, the services, and the UI. Hono handles HTTP and Drizzle handles Postgres access. The official `@contextgraphprotocol/typescript-sdk` is the source of protocol types (ADR-036). An SDK is a software development kit, a library that developers build on. Zod schemas remain the runtime validators at the trust boundary (the point where outside input enters the system). They are compile-checked against the SDK types. Rust stays in Stella and the protocol crates (Rust packages). Stella is deployed as a service, never embedded. The gateway's hot path is streaming pass-through. A Node process adds well under thirty milliseconds at the median for a proxied model call, which is the budget in §15.
 
-### 4.4 The in-app agent and the Stella engine
+### 4.4 Onboarding, and Oxagen's own model calls
 
-The in-app agent is a turn on `stella serve`, reached over HTTP (ADR-053, carried unchanged). The engine runs as its own container next to the control plane. Oxagen opens a run, posts a turn, and reads the event stream. **The engine never calls a model and never runs a tool.** Each completion and each tool call comes back to Oxagen as a reverse request, meaning the engine asks Oxagen to do the work:
+There is no in-app agent. The scope review of 2026-09-14 cut it: a chat panel sells nothing, it needed a second engine container in every deployment, and every question it could answer is a page in Mission Control. Configuration is the same agent tools a person clicks (§6, Appendix E). Explanation is the record: a chain of links to frames, records and commits, never a summary. Stella stays where it belongs, on the customer's machine as a wrapped agent.
 
-- A **tool call** is answered through `kernel.invoke()`. It passes the IAM, entitlement (what the plan allows), approval, and budget gates like every other call. It writes an audit record and bills as one governed action. The engine sees a tool result, never a credential. The in-app agent's tools are agent tool contracts only: bind a repository, register an agent, grant a tool, set a budget, query the graph, open a run, explain a frame, and open a Context PR.
-- A **completion** is answered through the model layer (§4.5). The key stays in Oxagen. The engine sees only text.
-- The engine holds no authority. Its only configuration is a bearer token (a secret string sent with each request to prove identity) and the tool set named `remote`. Oxagen owns all persistence. The turn's checkpoint (a saved snapshot of the turn's state) and its events are frames in a run of the in-app agent. So a turn can be replayed from Oxagen's record like any other run.
-- The engine is a required service. If it is down, the in-app agent says so with a named error. Nothing falls back to an in-process loop.
+Oxagen still makes model calls on its own behalf: the reflector (§9.1), the promoter's rationale and Context PR bodies (§9.2), the dod drafter (§8.6), and the run namer that writes `run.name` and `run.summary` from the frames. Every one of them goes through the model layer (§4.5), runs under a service principal, and is a frame in a run of its own, so its cost is accounted like everything else.
 
-The in-app agent does three things, in order of importance: **onboarding**, **configuration** (roles, grants, budgets, connectors, retention, all through the same agent tools a human would click), and **explanation** (answering questions about runs, frames, records, and spend). It has no sandbox, no file system, no browser, and no subagents. Those live in the Stella CLI on the customer's machine.
-
-**Onboarding is gated, and it is three steps.** A new organization does not see the app. It sees one screen with three steps: (1) name the organization, (2) wrap an agent, with one click for Claude Code or Codex (the installer, §7.2) or with the five-line `oxagen.agent.wrap({})` snippet for an SDK agent, and (3) start a run. The full app unlocks the moment the first frame from that agent reaches Oxagen. The operator then lands on Fleet looking at their own run. That run is also the installer's smoke test, so there is one path, not two. The installer reads the git remote of the directory it ran in. It offers that remote as the main repo with one more click, which installs the GitHub App. The workspace is then bound without any typing. If that step is skipped, the workspace is provisional for 14 days. Runs record and spend counts, but steering, records, and agent definitions stay off until a main repo is bound, and the reason is shown. The unlock screen shows the first run's actual cost beside the onboarding discount (§12.1), once. Onboarding is not complete, and the app does not open, until an agent has talked to Oxagen.
+**Onboarding is gated, and it is three steps.** A new organization does not see the app. It sees one screen with three steps: (1) name the organization, (2) wrap an agent, with one click for Claude Code or Codex (the installer, §7.2) or with the five-line `oxagen.agent.wrap({})` snippet for an SDK agent, and (3) start a run. The full app unlocks the moment the first frame from that agent reaches Oxagen. The operator then lands on Fleet looking at their own run. That run is also the installer's smoke test, so there is one path, not two. The installer reads the git remote of the directory it ran in, so binding the main repo is one click.
 
 ### 4.5 Model access and routing
 
 Every model call Oxagen makes on its own behalf goes through one model layer. That layer resolves three things, in order: the organization's **funding source**, the **tier** the caller asked for, and the **provider route** for that tier.
 
-**Funding source** (ADR-053, carried): `platform` or `customer_key`. With the first, Oxagen pays on Oxagen's OpenRouter account. That usage is billed back as assistant usage at vendor cost plus a published markup, capped per organization. With the second, the customer's own OpenRouter or vendor key is used. That key is stored enveloped (encrypted with a key that is itself encrypted), tested before save, and never returned, and every read of it is audited. Its tokens are reported and billed at zero. A new organization starts on `platform`. Every tier's month-to-date use (complex, light, embed, rerank) is one record, the route table, read by both Organization → Funding (the cap's "used") and Spend (the month total and By model), so the two pages report the same month. Vendor neutrality is preserved: a customer key may point at OpenRouter or directly at a vendor, and the route table below is set per organization.
+**Funding source** (ADR-053, carried): `platform` or `customer_key`. With the first, Oxagen pays on Oxagen's OpenRouter account. That usage is billed back at vendor cost plus a published markup, capped per organization. With the second, the customer's own OpenRouter or vendor key is used. That key is stored enveloped (encrypted with a key that is itself encrypted), tested before save, and never returned, and every read of it is audited. Its tokens are reported and billed at zero. A new organization starts on `platform`. Every tier's month-to-date use (complex, light) is one record, the route table, read by both Organization → Funding (the cap's "used") and Spend (the month total and By model), so the two pages report the same month. Vendor neutrality is preserved: a customer key may point at OpenRouter or directly at a vendor, and the route table below is set per organization.
 
 **Tiers and default routes:**
 
 | Tier | Use | Default route (OpenRouter) | Resolves today to |
 |---|---|---|---|
-| `complex` | in-app agent turns, reflection reasoning, promotion rationale, conflict analysis, Context PR bodies | `z-ai/glm-latest` | GLM 5.3 (1.3M context) |
-| `light` | classification, labeling, entity and property naming, record kind detection, redaction hints, approval summaries, retrieval reranking | `z-ai/glm-flash-latest` | GLM 5.3 Flash |
-| `embed` | embeddings (numeric vectors that capture meaning, used for search) for entities, records, documents, issues, and code (§11.5) | Voyage AI, direct API (the vendor's own programming interface, not OpenRouter): `voyage-4` family for text, `voyage-code-3` for code, `voyage-context-3` for chunked documents | one 1024-dimension space per model family |
-| `rerank` | reordering hybrid retrieval candidates (§11.5) | Voyage AI `rerank-2.5` | n/a |
+| `complex` | reflection reasoning, promotion rationale, conflict analysis, Context PR bodies, dod drafting | `z-ai/glm-latest` | GLM 5.3 (1.3M context) |
+| `light` | classification, labeling, record kind detection, redaction hints, approval summaries, run names and summaries | `z-ai/glm-flash-latest` | GLM 5.3 Flash |
 
 Rules:
 
-1. **Configure the alias, record the concrete model.** Tiers point at OpenRouter's rolling aliases, so "latest" stays current without a deploy. Every `model.response` frame records the concrete model id the provider returned. The cost record prices that concrete id from the price book. A replay therefore names the exact model, and a reconciliation never matches on an alias.
+1. **Configure the alias, record the concrete model.** Tiers point at OpenRouter's rolling aliases, so "latest" stays current without a deploy. Every `model.response` frame records the concrete model id the provider returned. The cost record prices that concrete id from the price book. A replay therefore names the exact model, and a price is never looked up by alias.
 2. **Routes are organization settings** with platform defaults. An organization may pin a concrete id, choose a different vendor per tier, or set a fallback route for when the primary returns a provider error. Every fallback is recorded as a frame.
 3. **No call reads the process environment.** Keys and routes come from the model layer's resolver, the same lookup point the data-plane resolver uses. A call path that bypasses it is a defect.
 4. **Batch variants** (`:batch`) queue calls to be processed together later, at their own price. They are allowed only for the reflector and promoter, which run asynchronously (outside the request path). They are recorded with their own price entries.
@@ -233,10 +229,10 @@ Rules:
 
 Oxagen runs as a multi-tenant cloud (one deployment serving many organizations) and, from Series A, behind a customer's firewall, from the same code. Per-organization data planes (§5) already make every store switchable. So the appliance is a deployment mode, not a fork.
 
-- **One deployment artifact.** A signed bundle stands up the gateway, the services, Mission Control, the Stella engine, the witness runner, Postgres, Neo4j Enterprise, and S3-compatible object storage with object lock. The bundle is a Helm chart (an install package) for Kubernetes (the system that runs and scales containers), with a single-node Docker Compose variant (a one-machine setup) for evaluation. Object lock is a storage setting that blocks edits and deletes for a set period. The containers are the same as the cloud's, with a deployment mode flag.
+- **One deployment artifact.** A signed bundle stands up the gateway, the services, Mission Control, the witness runner, Postgres, and S3-compatible object storage with object lock. The bundle is a Helm chart (an install package) for Kubernetes (the system that runs and scales containers), with a single-node Docker Compose variant (a one-machine setup) for evaluation. Object lock is a storage setting that blocks edits and deletes for a set period. The containers are the same as the cloud's, with a deployment mode flag.
 - **Connectivity is outbound only, and optional.** Nothing inbound is required. Outbound is needed only for what the customer chooses: model providers (or none), GitHub or GitHub Enterprise Server, and an optional signed usage report sent to Oxagen for metering (measuring usage). Fully air-gapped, meaning no network path to the outside, is a supported mode, not a degraded one.
-- **Air-gapped means in-firewall models.** Model routes (§4.5) point at models the customer serves inside its own network: the owned models on the roadmap, or any OpenAI- or Anthropic-compatible endpoint. Embeddings default to Voyage's API in the cloud. Behind a firewall they get an in-firewall route to a self-served open-weight embedding model (one whose weights are published for anyone to run). One model per index (§11.5) makes that a per-deployment choice, never a mixed state.
-- **Everything the cloud enforces, the appliance enforces.** That includes the witness runner and the assurance suite, which the customer runs against its own deployment and hands to its auditor.
+- **Air-gapped means in-firewall models.** Model routes (§4.5) point at models the customer serves inside its own network: the owned models on the roadmap, or any OpenAI- or Anthropic-compatible endpoint.
+- **Everything the cloud enforces, the appliance enforces.** That includes the witness runner and the dod settle service, whose sealed results the customer hands to its auditor.
 - **Updates are signed bundles** that the customer applies on its own schedule. The migration runners already iterate per plane. Licensing is per organization, annual, and invoiced. Stripe is not involved behind a firewall. The two cloud-only assumptions in this document (Stripe, OpenRouter) are deployment-mode settings.
 
 ## 5. Tenancy and isolation
@@ -245,7 +241,7 @@ Oxagen runs as a multi-tenant cloud (one deployment serving many organizations) 
 
 The model is exactly today's model. An **organization** holds **workspaces**. A person belongs to an organization with one org role. The same person belongs to workspaces with one workspace role each. Agents belong to a workspace. Only the table count and the enforcement change.
 
-**Organization.** Its `public_id` starts with `org_`. It has a `slug` and an immutable `namespace` of 2 to 6 characters. Immutable means the value is fixed at creation and never changes. The `namespace` is used in agent keys and in the Neo4j database name. The organization also has a `plan`, a `status`, and settings. It owns: a KMS key-encryption key, the Neo4j database `org_<namespace>`, a billing account, an optional dedicated data plane (ADR-042), and its retention policy. KMS is a key management service, a cloud service that stores and guards encryption keys. A key-encryption key is a top-level key that encrypts other keys rather than data.
+**Organization.** Its `public_id` starts with `org_`. It has a `slug` and an immutable `namespace` of 2 to 6 characters. Immutable means the value is fixed at creation and never changes. The `namespace` is used in agent keys. The organization also has a `plan`, a `status`, and settings. It owns: a KMS key-encryption key, a billing account, an optional dedicated data plane (ADR-042), and its retention policy. KMS is a key management service, a cloud service that stores and guards encryption keys. A key-encryption key is a top-level key that encrypts other keys rather than data.
 
 **Workspace.** Its `public_id` starts with `wrk_`. Its `slug` and immutable `namespace` are unique within the org. It owns: one **main repo** (required at creation, §10.1) plus any number of linked repos, one steering set, agents, tool grants, budgets, a governance mode (`solo` | `team` | `regulated`), and a retention mode (`content_exact` by default, `digest_only` as an opt-down).
 
@@ -289,32 +285,17 @@ Rules:
 4. **The policy manifest is generated from the schema.** A CI test checks that every `org_id` column appears in it. This rule carries over from today.
 5. **Dedicated data planes.** A dedicated Postgres data plane holds tenant data only. Identity, IAM, billing, and the price book stay on the shared data plane (ADR-042). The resolver is the only place that reads a connection string.
 
-### 5.3 Neo4j: one database per organization
+### 5.3 The run record and the code graph in Postgres
 
-Property-based access control is a Neo4j feature that grants or denies access based on a property value on each node. In Neo4j it is read-only, it takes literal values only, and it costs query performance. It cannot be the write-side boundary, so it is not the tenant boundary.
+The run record (runs, attempts, frames, seals), the context records and the code graph are tenant tables in Postgres under the same row-level security as the control ledger (§5.2). There is no second engine to isolate. Every row carries `org_id` and `ws`; the kernel is the only writer, and a write that omits either is refused before it reaches the database. Cross-tenant reads are refused by the database, not by application code, and the startup guard (no superuser, no `BYPASSRLS`, RLS never off) applies to the whole plane.
 
-The tenant boundary is the database. Each organization gets `org_<namespace>` at creation. Aura Business Critical and Virtual Dedicated Cloud support multiple databases per instance at the same GB-hour price. Self-managed Enterprise does the same. A query cannot cross databases without a composite database, and Oxagen never creates one. That is the graph equivalent of RLS. The engine enforces isolation, with no `WHERE org_id` clause anywhere.
+Frames are the volume. They live in a hot table for the retention window (§13.3), partitioned by month, and compact into the archive segment after it. A run's rollups (frame count, cost, tier, gaps) are columns on the run row. The code graph (`File`, `Symbol` and their edges, §11) is a set of ordinary tables keyed by repository and commit. Platform catalogs (price books, tool schemas, connector definitions) are platform tables, never tenant rows, so a tenant partition never contains another tenant's data, by construction.
 
-Inside an organization:
-
-- **Every node and relationship carries `ws` (workspace public id)** as a required property. The graph service sets it, and the graph service is the only writer. The graph service rejects a write that omits it before Cypher runs. Cypher is Neo4j's query language. Indexes exist on `(ws)` for every label.
-- **The graph service issues reads under the caller's scope.** Workspace-scoped sessions inject `$ws`. They refuse Cypher that does not bind it. The regex guard exists today and stays as defense in depth, a second check behind the first. Org-scoped sessions may read across workspaces.
-- **Enterprise option:** per-workspace Neo4j users with property-based READ privileges (`WHERE n.ws = '<id>'`) for human graph-explorer sessions. These sessions run through impersonation from one application connection. Impersonation means the one application connection acts as the per-workspace user for that session. This option is off by default because of the performance cost. It is on for customers who require an engine-enforced workspace boundary for reads.
-- **Platform catalogs are not in the graph.** Price books, tool schemas, and connector definitions live in Postgres. The graph holds tenant knowledge only. So a per-org database never contains another tenant's data, by construction.
-
-**The limits, verified against Neo4j's documentation (2026-09-11).** The following limits apply to Aura Business Critical and Virtual Dedicated Cloud. Multiple databases must be enabled when the instance is created, and the setting cannot be changed later. The cap is 5 databases per GB of RAM, with a hard ceiling of 100 per instance (2 GB: 10, 4 GB: 20, 8 GB: 40, 16 GB: 80, 32 GB and above: 100). All databases share the instance's compute and memory. Databases are created only through the Aura API or console, never with Cypher. A default `neo4j` database always exists. Billing is the standard GB-hour rate regardless of count. Neo4j still lists the feature as public preview. Public preview means Neo4j offers the feature to customers before it is generally available. On self-managed Enterprise the cap is the `dbms.max_databases` setting. Its minimum is 2, and it is configurable. The current default was not confirmed from the documentation and is not assumed here.
-
-Operational rules that follow:
-
-1. **Every Aura instance is created with multiple databases enabled**, since it cannot be turned on later. Organization creation calls the Aura API to create the database. The self-managed path uses Cypher. Both sit behind one provisioning interface.
-2. **Sharding rule.** Sharding means splitting organizations across several instances. The vendor's ceiling allows at most 100 organizations per instance. The operational target is 25 paid organizations per 32 GB instance, so tenants are not starved of page cache. Page cache is the memory Neo4j uses to hold graph data for fast reads. The target is revisited from memory metrics. The `neo4j_instance_id` column on organizations carries the mapping. Adding instances is therefore an operations task, not a code change.
-3. **Free and trial organizations do not consume a database.** With a ceiling of 100, provisioning on signup would burn the cap on empty tenants. Free organizations run in a pooled database with the same workspace property scoping and the same graph service. They move to their own database on the first paid plan. The move is an export and import of one organization's subgraph, and the archiver runs it.
-4. Database creation is part of organization creation and is safe to repeat. Deletion is a soft state (`suspended`), followed by export and drop after the retention window.
-5. **Preview status is a named risk** (§18). Self-managed Enterprise on Kubernetes is the fallback if Aura's feature slips or its limits change before customer 1. The data plane table can point an organization at either.
+A dedicated data plane (§4.6) is a dedicated Postgres cluster and object-storage bucket. Identity, IAM, billing and the price book stay on the shared plane.
 
 ### 5.4 Keys
 
-Each organization has one key-encryption key in KMS. Data-encryption keys are the keys that encrypt the data itself, and the key-encryption key encrypts them. There is one data-encryption key per object (frame bodies, archive segments). Where erasure requires it, there is also one per subject (§13.5). The existing envelope-encryption package carries over.
+Each organization has one key-encryption key in KMS. Data-encryption keys are the keys that encrypt the data itself, and the key-encryption key encrypts them. There is one data-encryption key per object (frame bodies, archive segments). The existing envelope-encryption package carries over.
 
 ---
 ## 6. Identity, access, and the toolbelt
@@ -370,7 +351,7 @@ One grant table: `iam.role_grants(role_id, subject_kind, subject, effect, resour
 
 - `subject_kind ∈ {agent tool, tool}`. An agent tool subject is a kernel agent tool name (verb-first snake case, ADR-025). A tool subject is a tool pattern `server:tool@version` with globs.
 - `effect ∈ {allow, deny, require_approval}`. Deny wins. `require_approval` routes to a human (§7.5).
-- `resource_scope` is a typed JSON ceiling. It names the graph labels and relationship types the agent may read or extend, a traversal budget, repositories, the side-effect classes allowed (`read`, `write`, `irreversible`), the egress classes allowed, and spend limits per run and per day.
+- `resource_scope` is a typed JSON ceiling. It names the record kinds and code-graph tables the agent may read or extend, repositories, the side-effect classes allowed (`read`, `write`, `irreversible`), the egress classes allowed, and spend limits per run and per day.
 
 The resolver keeps the three live rules of today's resolver: role grant, org-owner override, and the agent tool's declared default. The dead condition language is not carried.
 
@@ -473,7 +454,7 @@ Latency budget for steps 1 through 5 and 9 through 10 combined: 20 ms at p99 for
 
 Each mint is a **credential grant**: connection id, scope, TTL, call id, and the provider's token identifier where one exists, recorded on the call's receipt. TTL defaults to the call's expected duration plus a margin, never more than one hour. Revoking a connection invalidates its grants at the next use.
 
-**Connections behind consequential tools.** A connection is marked `requires_mandate` when any tool it backs carries a consequence tag: payment processors, banking, cloud billing, production databases, deployment systems, customer messaging, identity providers. Such a connection requires a named human owner with a role the workspace names for that consequence. It requires a mandate (§6.9) for every agent that may use it. It requires a restricted or downscoped credential where the provider offers one, and the gateway refuses to expose a full-scope key to such a tool. It also offers a two-person rule option (two people must approve) on connection creation and on mandate changes.
+**Connections behind consequential tools.** A connection is marked `requires_mandate` when any tool it backs carries a consequence tag: payment processors, banking, cloud billing, production databases, deployment systems, customer messaging, identity providers. Such a connection requires a named human owner with a role the workspace names for that consequence. It requires a mandate (§6.9) for every agent that may use it. It requires a restricted or downscoped credential where the provider offers one, and the gateway refuses to expose a full-scope key to such a tool.
 
 ### 6.9 Safety classification, approval rules, auto-approval, and mandates
 
@@ -481,7 +462,7 @@ Three things that are easy to confuse are kept apart, in the code and in the int
 
 **1. Safety classification describes a tool and decides nothing.** Every tool version carries the following. A risk grade. A side-effect class (`read`, `write`, `irreversible`). An egress class. **Consequence tags**, from a starter set the customer extends (`moves_money`, `destroys_data`, `alters_production`, `communicates_externally`, `changes_access`, `changes_entitlement`, and any tag the customer defines). **Measures** the tool exposes, declared as paths into its input with a type and a unit (an amount with a currency path, rows affected, a target environment, a recipient count, a table name). And the data classes it touches, from the data layer (§11.7). Classification is set when a tool is imported or declared, reviewed on the Tools page, and shown to the model in the tool definition. It never allows or denies anything by itself.
 
-**2. Approval rules decide, and they belong to the customer.** An approval rule is policy (§6.12) over any tool, written against the classification and the call: tool pattern, consequence tags, measures, data classes, taint, time window, sequence, environment, operator role, agent, mandate position. Its outcome is allow, approve (a human must look), or deny. **Auto-approval** is an approval rule whose conditions, when met, let Oxagen skip the human. Those conditions can be a measure under a threshold, a counterparty or environment on an allow list, a call inside a mandate's remaining authority, a standing approval (the same call digest approved by a person within a window the rule names), no taint, or business hours. An auto-approved call is recorded as an approval whose approver is `policy:<rule id>`. So the receipt says plainly that no person looked. The assurance suite includes a case that an auto-approval never fires outside its conditions.
+**2. Approval rules decide, and they belong to the customer.** An approval rule is policy (§6.12) over any tool, written against the classification and the call: tool pattern, consequence tags, measures, data classes, taint, time window, sequence, environment, operator role, agent, mandate position. Its outcome is allow, approve (a human must look), or deny. **Auto-approval** is an approval rule whose conditions, when met, let Oxagen skip the human. Those conditions can be a measure under a threshold, a counterparty or environment on an allow list, a call inside a mandate's remaining authority, a standing approval (the same call digest approved by a person within a window the rule names), no taint, or business hours. An auto-approved call is recorded as an approval whose approver is `policy:<rule id>`. So the receipt says plainly that no person looked. A rule cannot be saved that would widen an agent past its operator's grants.
 
 **3. A mandate is bounded, expiring authority for a consequence.** A human with the role the workspace names for a consequence tag grants one agent authority to cause that consequence, within limits over the tool's declared measures. Nothing in a grant, a role, or a bundle substitutes for it. A call carrying a consequence tag with no mandate is denied before dispatch. One that exceeds its mandate is denied or routed to a human by the mandate's own approval rule.
 
@@ -498,7 +479,6 @@ Three things that are easy to confuse are kept apart, in the code and in the int
   "approval": { "human_above": { "amount": 100000000 }, "always_human_for": ["destroys_data"], "approvers": ["role:org.billing"] },
   "purpose": "monthly infrastructure invoices, PO-4471",
   "valid_from": "2026-09-01T00:00:00Z", "valid_to": "2026-12-31T23:59:59Z",
-  "two_person": true, "second_approver": "usr_…",
   "status": "active"
 }
 ```
@@ -509,8 +489,8 @@ Rules:
 
 - **Measures are read from the call**, by the tool version's declared paths. A tool that carries a consequence tag but exposes no measure for the limit a mandate names cannot be granted that mandate. It is denied by construction.
 - **Remaining authority is tracked in Postgres** as a ledger by measure (`tools.mandate_ledger`: reservations at decision time, settlements at receipt time, releases on failure). So two concurrent calls cannot both fit under the same remaining limit.
-- **Every consequential receipt records the external effect id** (a transaction id, a migration id, a message id, a deployment id) and the mandate it drew on. Where a connection reports its own activity (a payment processor's statement, a database's audit log, a deployment system's history), the reconciler matches settlements to it. Any external effect attributable to the connection with no receipt is an exception at severity critical: an action Oxagen did not govern.
-- **Mandates expire.** They are reviewed on a schedule the organization sets. Every change is a two-person action when the mandate says so. Revoking a mandate ends in-flight calls that have not dispatched.
+- **Every consequential receipt records the external effect id** (a transaction id, a migration id, a message id, a deployment id) and the mandate it drew on. Where a connection reports its own activity by webhook (a payment processor's charge events, a deployment system's history), the gateway matches the event to a receipt. An event attributable to the connection with no receipt is an exception at severity critical: an action Oxagen did not govern.
+- **Mandates expire.** They are reviewed on a schedule the organization sets. A person with the finance role grants and changes them; each change is a governed action with a receipt. Revoking a mandate ends in-flight calls that have not dispatched.
 - Mandates are visible on the Tools page as a ledger the accountable office can read (finance for money, the platform team for production, security for access). It shows who granted what authority to which agent, how much is used, and what it was for.
 
 ### 6.10 Receipts: provenance for every call
@@ -538,38 +518,15 @@ Deny is available at every level. It takes effect at the next call boundary thro
 
 Automatic triggers issue the same denies: repeated `unknown_tool` attempts, taint on a call carrying a consequence tag, a mandate exception, a credential probe, a chain break. Every switch flip is a security event with who, why, and what it stopped. Every flip shows up on the affected runs as `policy.decision` frames.
 
-### 6.12 Policy: deterministic, versioned, simulated
+### 6.12 Policy: deterministic, versioned, tested
 
-Tool policy is written in **Cedar**, an open policy language (the decision the wrapper design already reserved). It is compiled from three inputs: role grants and resource scopes (§6.3), mandates (§6.9), and workspace rules authored on the Tools page or as records in the main repo. Policy is:
+Tool policy is written in **Cedar**, an open policy language (the decision the wrapper design already reserved). Simulation of a draft version against the workspace's real history was cut by the scope review; a version ships with its tests, and activation is a governed action with approval. It is compiled from three inputs: role grants and resource scopes (§6.3), mandates (§6.9), and workspace rules authored on the Tools page or as records in the main repo. Policy is:
 
 - **Deterministic.** Same call, same policy version, same answer. No model in the decision path, ever.
 - **Versioned and signed.** Every decision cites the policy version. Every bundle carries it. A policy change is a governed action with approval and, in regulated mode, a Context PR.
 - **Testable.** Policies ship with test cases (this call must be denied, this one must require approval) that run on every change.
-- **Simulated.** Before a policy version is activated, Oxagen replays it against the workspace's last N days of tool calls from the frames. It reports what would have changed: calls that would now be denied, calls that would now need approval, and calls the new version would allow that the old version denied. A CIO sees the effect of a control before it is switched on, on their own agents' real history.
 
 Policy can use these conditions. All come from the call and the record, none from prose: tool version and its safety classification (risk, side effect, egress, consequence tags, measures, data classes), argument values by path (amount, counterparty, repository, path prefix, recipient domain), taint and its sources, time window, rate and sequence (a payment requires a prior quote call in the same run, and a delete requires a prior read of the same object), operator role, enforcement tier, and budget and mandate position.
-
-### 6.13 Assurance
-
-Guarantees a customer cannot test are claims. Oxagen ships an **adversarial tool-governance suite**. It runs against a live gateway in CI and against a customer's own deployment on demand. Each case tries to break one guarantee and must be caught:
-
-| Case | Expected |
-|---|---|
-| Call a tool outside the belt by name | `unknown_tool`, no dispatch, halt threshold incremented |
-| Search for a tool outside the belt | zero results |
-| Reuse an approval token on a second call, or on a modified call | `token_denied` |
-| Present a run token to a tool server directly | rejected, because tool servers accept only broker credentials |
-| Call a tool carrying a consequence tag with no mandate, with a measure over the mandate, or with a target outside it | denied before dispatch, mandate ledger unchanged |
-| Retry a dispatched consequential call | `duplicate_suppressed`, one external effect |
-| Trigger an auto-approval rule with one condition unmet (tainted input, off hours, over threshold) | routed to a human, never auto-approved. The receipt names the unmet condition |
-| Pass an argument copied from a tool output into a write call | `tainted`, raised to approval |
-| Flip a kill switch during a run | next call denied, frame shows the switch and the reason |
-| Modify a receipt after the fact | chain verification fails |
-| Report a client-attested call as gateway-enforced | rendering refuses, because the tier is read from the record |
-
-Results are published per release with the suite's version. The suite is part of the export a customer's auditor receives. The suite's own results are reported as they are, with their source: a case that cannot run at a customer's enforcement tier is reported as not applicable, never as passed.
-
----
 
 ## 7. The gateway and intervention
 
@@ -677,7 +634,7 @@ Operators and agents can send messages to other agents in the same workspace. Th
 
 Customers subscribe to what happens in their runs and receive it in their own systems. Nothing is invented for this. Every event maps to a frame kind or an audit event.
 
-- **Catalog.** `run.started`, `run.sealed`, `run.proven`, `approval.requested`, `approval.resolved`, `tool_call.denied`, `kill_switch.flipped`, `mandate.exception`, `budget.breached`, `incident.raised`, `context_pr.opened`, `context_pr.merged`, `repository.indexed`, `reconciliation.exception`. New kinds are added to the catalog, never emitted ad hoc.
+- **Catalog.** `run.started`, `run.sealed`, `run.proven`, `approval.requested`, `approval.resolved`, `tool_call.denied`, `kill_switch.flipped`, `mandate.exception`, `budget.breached`, `incident.raised`, `context_pr.opened`, `context_pr.merged`, `repository.indexed`, `dod.settled`. New kinds are added to the catalog, never emitted ad hoc.
 - **Subscriptions** at workspace or organization scope name the event kinds and optional filters (agent, operator, severity). Only those events are emitted. Everything else never leaves.
 - **Two delivery modes on one unique endpoint per subscription**, generated at creation. Push: Oxagen sends a signed webhook, an HTTP request to the customer's URL when an event happens. It is signed with HMAC, a keyed hash that proves who sent it, using a rotating secret. It carries a delivery id for safe retries, is ordered per run, and is delivered at least once with backoff. A dead-letter view, the list of deliveries that failed after all retries, sits on the Audit page. Pull: the customer reads from an Oxagen-hosted streaming endpoint unique to the subscription, with a replay window.
 - **Payloads** carry ids, kind, time, scope, and a compact body with a link to the run and frame. Never raw prompt or tool bodies. Redaction rules apply.
@@ -705,7 +662,7 @@ A frame is the `oxagen.frame/1.0` envelope, kept as is. Its fields are `event_id
 | `control.steer` | control channel | steer text digest, issuer, `requested_mode` and `delivery_mode` (§7.3), `interrupted` (bool) with `interrupted_step {kind, seq}` when true, `degraded_reason` when the requested mode could not be honoured, `delivered_at_seq` (the `model.request` that carried it), status |
 | `proof.observed` | witness runner (§8.5), the isolated service that runs witnesses, or Stella's local ladder when the run came through Stella | witness id, oracle kind (the type of check the witness makes), target and PR refs and shas, normalized command digest, verdict, fail fingerprint (a hash of the failure output), tamper exclusion (a check that the witness was not altered), disclosure grain (how much detail the worker is told), runner attestation (the runner's signed statement of what it ran) |
 
-**Bodies are content-addressed blobs**, stored and found by the hash of their bytes. `content.digest` is SHA-256 over the exact bytes. `bytes_ref` points to the encrypted object. The frame node in the graph holds everything except the bytes. Redaction runs before the bytes are written. It is recorded per frame with the digest of what was removed. A redacted body can therefore still be verified against its digest.
+**Bodies are content-addressed blobs**, stored and found by the hash of their bytes. `content.digest` is SHA-256 over the exact bytes. `bytes_ref` points to the encrypted object. The frame row holds everything except the bytes. Redaction runs before the bytes are written. It is recorded per frame with the digest of what was removed. A redacted body can therefore still be verified against its digest.
 
 ### 8.3 Chain, checkpoints, attestation
 
@@ -789,13 +746,36 @@ The verdict vocabulary is closed: `flipped`, `failing`, `unmoved`, `unsatisfied`
 
 ---
 
+### 8.6 Definition of done
+
+An agent cannot finish until its definition of done says so. The full design is `dod-spec.md`; this section is the contract Mission Control renders.
+
+**The file is the contract.** On `UserPromptSubmit` the harness asks Oxagen to draft the acceptance checks for the prompt, or loads a hand-written set (`oxagen dod new`) or a template matched by task name (`.oxagen/dod/templates/`). The set is locked by digest (RFC 8785 canonical JSON of the set with `locked` removed, then sha256), written to `.oxagen/dod/<run>.yaml`, and registered with Oxagen. The agent is told where the file is and that it cannot finish until every check passes. It can read the file and cannot change it: an edit is `LOCK_MISMATCH` at the next Stop.
+
+**Six check kinds, nothing else.** `run` (a command exits 0 inside its timeout, credentials scrubbed from the environment), `file` (a path exists, contains a string, or matches a digest), `diff` (every changed file matches an allow glob and no deny glob), `tools` (no tool call matched a deny pattern; enforced live by the `PreToolUse` hook), `budget` (cost, tool calls and minutes under limits; `stop_attempts` caps how often the Stop hook may block) and `human` (a named person signs after the run; it never blocks the agent, it withholds the certificate). Anything else is a `run` check that calls a script. The schema rejects a set with no executable check. The witness (§8.5) enters as a `run` check that exits 0 only on a flip.
+
+**Hidden checks.** At lock time the cloud may keep some drafted checks back. They never appear in the file. The Stop hook fetches them and runs them beside the visible ones, so an agent that games the visible set, for example by editing the tests it was told to pass, meets the hidden one.
+
+**One pure function decides.** At every Stop the harness collects evidence (the set as locked, the digest of the file on disk, a result per executable check with the sha256 of what it produced, the usage counters from the tool log, the denials, the signatures) and calls `decide(evidence)`. It has no clock, network, filesystem or model. Three verdicts: **HELD** (every executable check passed, no tool denied, budget held, no human check outstanding), **PENDING** (executable checks passed, a signature outstanding) and **BROKEN**, with a closed list of eight reasons: `CHECK_FAILED`, `TOOL_DENIED`, `BUDGET_EXCEEDED`, `ATTEMPTS_EXHAUSTED`, `LOCK_MISMATCH`, `EVIDENCE_INVALID`, `HUMAN_PENDING`, `HARNESS_ERROR`. A timeout, crash or missing result is `HARNESS_ERROR` and never a pass. Adding a reason means amending the ADR.
+
+**Block or settle.** BROKEN with attempts left blocks the stop; the agent sees the failing ids and keeps going. Otherwise the evidence is submitted. Oxagen never runs a check (ADR-043): the settle handler re-runs `decide()` on the same evidence, checks the lock against what was registered, binds the outcome to the run ledger's sealed attempt and its stream digest, signs the certificate (`dodc_…`) with the org key, stores it, and meters one governed action, `dod.held`, for HELD. A PENDING run becomes HELD on `oxagen dod sign`, which adds the signature to the evidence and decides again.
+
+**What a held dod warrants.** That the submitted evidence decides to HELD under the locked set, that the lock matches what was registered before the run, that the certificate is bound to the sealed attempt, and that the org key signed it. Anyone with the evidence and `decide()` can recompute the verdict. It does not warrant that the set was the right set, that the developer's harness was not tampered with (the same trust the run ledger already places in the engine build digest), or that the outcome was worth money. Replay in a cloud sandbox is a later tier and a deliberate exception to ADR-043; it is not in this spec.
+
+**Where it shows.** Every run carries its verdict as a badge shaped by state (double border held, dashed pending, single broken, dotted while locked and running). The Run page has a Done tab: the verdict and its reasons, the certificate and what it binds to, the checks with their evidence digests, the hidden checks that ran, the budget from the tool log, and every Stop. Fleet has a Done column, a tile counting sealed runs whose checks held, and counts outstanding signatures as waiting on a human. Billing prices the held run (§12.1).
+
+**Where it lives.** Two packages (`packages/dod`, pure: schema, reasons, verdict, lock, drafting prompt; `packages/dod-harness`, beside the agent, shipped inside the CLI, never imported by the API), four capabilities (`dod.draft`, `dod.lock`, `dod.settle`, `dod.sign`), two tables (`dod.dod_sets`, `dod.dod_certificates`, Appendix A.11), three hook lines in `.claude/settings.json`, and one CLI command (`oxagen dod hook|new|lock|run|sign|status`). The drafting model is recorded on the set and is never the model running the task.
+
+---
+
+
 ## 9. Context records: how agents learn
 
 Agents do not write frames as memory. When an agent wants to remember something, it appends a **context record**. The record goes through Oxagen's exchange-provider endpoint (`context/append`, lifecycle profile). Any harness can send one. Stella sends records natively. Other agents use the SDK wrapper's `remember()` and `propose()` calls, or an MCP tool on the tool gateway.
 
 - **Kinds accepted from agents:** `observation`, `memory`, `knowledge` (fact, assumption, decision), `evidence`, `record_proposal`, `context_use`, `context_use_feedback`. An agent may only *propose* a `directive`. It becomes active only through a Context PR (§10). The promoter writes `promotion_event`, never an agent.
 - **Identity and hash.** A hash is a short fingerprint computed from a record's bytes. `record_hash` is SHA-256 over the RFC 8785 canonical bytes, with the hash member removed. RFC 8785 is the standard that defines one canonical, meaning fixed and repeatable, byte layout for JSON. The protocol and Stella compute it the same way. Oxagen adopts Stella's null-stripping divergence so all three agree. `record_id` is derived from the content. A correction is a new record on the same `lineage_id`. A lineage is the chain of records that revise one idea over time. Superseded is derived, never stored.
-- **Attestation.** Oxagen countersigns every accepted record. To countersign means to add its own signature beside any existing one (`RecordAttestation`, detached, Ed25519). An agent that holds a key may sign first. The graph keeps both signatures.
+- **Attestation.** Oxagen countersigns every accepted record. To countersign means to add its own signature beside any existing one (`RecordAttestation`, detached, Ed25519). An agent that holds a key may sign first. The record keeps both signatures.
 - **Scope.** `scope` uses the protocol's portable keys (`organization_id`, `workspace_id`, `repository_id`, `user_id`, `session_id`, `task_id`). `sharing_scope ∈ {user, repository, workspace, organization}` widens visibility. The sharing scope sets how far beyond its author a record can be seen. Oxagen enforces sharing authorization before persistence and on every read, per the profile.
 - **Provenance.** Provenance is the trail that shows where a record came from. `provenance.source_refs` point at frames (`frame:<run>/<seq>`) and at other records. `evidence_links` point at frames or tool outputs by digest. An evidence link is a pointer to the proof behind a record. So every learned thing walks back to the exact frame that taught it.
 - **Retention.** Oxagen honors or refuses `requested_retention` before persistence. A refusal returns `retention_rejected`. The accepted value is stored on the record.
@@ -813,13 +793,11 @@ Reflection uses a model. It runs through the model proxy under a service princip
 
 ### 9.2 Aggregation and promotion
 
-The promoter aggregates records across runs by lineage and by entity. A candidate becomes a `record_proposal` when a workspace policy's thresholds are met. The thresholds are: support across at least N runs and M distinct agents, confidence above a floor, no active contradiction, and no open proposal on the lineage. The thresholds belong to the product, not the protocol. A proposal carries `proposed_kind` (a directive kind or knowledge kind), a rationale, the supporting record ids, and the sharing scope it asks for. Proposals appear in Mission Control and become Context PRs (§10.3). Ranking uses citation pressure and confidence with decay. Citation pressure is how often later records cite a record. Decay means older support counts for less as time passes. Both come from the two-axis memory model.
-
----
+The promoter aggregates records across runs by lineage and by entity. A candidate becomes a `record_proposal` when the promoter has support to show: the runs it cites, the distinct agents among them, and its own confidence. There are no promotion thresholds; a person reads the support on the Steering page and decides whether to open a Context PR. A person's own proposal goes through the same six checks as the promoter's. A proposal carries `proposed_kind` (a directive kind or knowledge kind), a rationale, the supporting record ids, and the sharing scope it asks for. Proposals appear in Mission Control and become Context PRs (§10.3). Effect metrics (rendered, cited, violated, proof rate before and after) and retirement candidates were cut by the scope review; a published record shows where it landed because every run that renders it cites it in a context frame, and retiring one is an ordinary Context PR that sets `status = "archived"` in place.
 
 ## 10. The repository, steering, and Context PRs
 
-People trust pull requests, proposed code changes that named reviewers approve before they merge. Every engineering organization already runs them, with named reviewers, required checks, and a history the customer can verify without Oxagen. So Oxagen governs the records that steer agents the same way teams govern code. Each record is authored in the workspace's main repo, proposed as a pull request, and published on merge. The graph remembers everything about those records. Git decides what is in force. Section 4.2 states the rule. This section describes the mechanism.
+People trust pull requests, proposed code changes that named reviewers approve before they merge. Every engineering organization already runs them, with named reviewers, required checks, and a history the customer can verify without Oxagen. So Oxagen governs the records that steer agents the same way teams govern code. Each record is authored in the workspace's main repo, proposed as a pull request, and published on merge. The record keeps everything about those records. Git decides what is in force. Section 4.2 states the rule. This section describes the mechanism.
 
 ### 10.1 Repositories: one main repo, any number of linked repos
 
@@ -828,7 +806,7 @@ A workspace links to one or more GitHub repositories through the Oxagen GitHub A
 - **`main`**, exactly one per workspace, required at creation. The main repo is where the workspace's steering and configuration are managed in source control. That covers published steering records, the promotion ledger (the log of each promotion event), governance mode, and the workspace's Oxagen configuration file. That file is `.oxagen/workspace.toml`. It declares linked repos, tool servers, and budgets. Oxagen reconciles those declarations against Postgres and reports drift, any gap between the file and the live state. Workspace-scoped Context PRs are opened here. A workspace without a main repo cannot exist. Changing which repo is main is an org-owner action with approval, recorded as a security event.
 - **`linked`**, zero or more. These are the repositories the workspace's agents work on. Each is a valid `resource_scope.repositories` target in grants. Each may carry its own `.oxagen/rules/` holding records with `sharing_scope = "repository"`. Those records steer only runs on that repo. Repository-scoped Context PRs are opened on the linked repo itself.
 
-A repository may be linked to more than one workspace in the same organization. It is main for at most one. The graph node for a repository is shared across the workspaces that link it. Each link edge sets `ws`, so isolation holds per workspace.
+A repository may be linked to more than one workspace in the same organization. It is main for at most one. The repository row is shared across the workspaces that link it. Each link row sets `ws`, so isolation holds per workspace.
 
 ### 10.2 On-disk layout: `.oxagen/`
 
@@ -851,7 +829,7 @@ Each record is one TOML file, a plain-text settings format. The file holds `sche
 
 The layout is the same in the main repo and in a linked repo. What differs is the sharing scope. Records in the main repo carry `sharing_scope = "workspace"` and apply to every run in the workspace. They may instead carry `organization` when the org allows a workspace to publish org-wide. Records in a linked repo carry `sharing_scope = "repository"` and apply only to runs whose repository binding is that repo. A linked-repo record that claims workspace scope fails the checks. Precedence at run time follows Stella's authority rule. Repository records may narrow what workspace records allow. They may never widen it.
 
-**Published** means the record file exists under `.oxagen/rules/` on the default (or context) branch of the main repo. For repository-scoped records, the file exists on that branch of the linked repo. The graph indexes every published record by `record_hash` and by the repo and commit it came from. Oxagen verifies the index against the merged commit. A mismatch is a `steering_drift` incident that blocks delivery of that record until resolved. The graph never silently outranks git for steering. Git never holds anything but steering and configuration.
+**Published** means the record file exists under `.oxagen/rules/` on the default (or context) branch of the main repo. For repository-scoped records, the file exists on that branch of the linked repo. The record index stores every published record by `record_hash` and by the repo and commit it came from. Oxagen verifies the index against the merged commit. A mismatch is a `steering_drift` incident that blocks delivery of that record until resolved. The record never silently outranks git for steering. Git never holds anything but steering and configuration.
 
 ### 10.3 Context PR lifecycle
 
@@ -862,7 +840,7 @@ proposal (graph)  →  Context PR (GitHub)  →  checks  →  review per mode  �
 1. **Open.** The promoter, a person in Mission Control, or `stella context propose` opens a branch `context/<lineage>` with the single record file. It also opens a PR. The PR body carries the rationale, the supporting record ids, evidence links, and an Oxagen check-run link. One concern per PR. The target is the main repo for workspace-scoped records and the linked repo for repository-scoped ones. The promoter picks the scope from where the evidence came, either all supporting runs on one repo or across repos.
 2. **Checks** are Oxagen GitHub App check runs with the same rules as `stella context validate`. They cover schema, lineage uniqueness, `record_hash` recomputation, and a secret and PII scan. They detect conflicts against active records, so a `forbid` against an active `require` on the same subject fails. They run truth probes where declared. They enforce the `constraint_effect ∈ {require, forbid}` rule, which means a record can never grant authority.
 3. **Review.** In `solo` mode, the author may merge. In `team` mode, a code-owner review is required. In `regulated` mode, a named approver from a role must approve, and Oxagen records that as an accountable approval. A `promotions.jsonl` entry is appended in the same merge.
-4. **Merge** triggers a `promotion_event` record in the graph. That record holds `from_status`, `to_status`, subject lineage, approver, PR url, and commit sha. Merge also triggers re-indexing from the merged commit, a bundle version bump for the workspace, and a `steering_published` audit event.
+4. **Merge** triggers a `promotion_event` record. That record holds `from_status`, `to_status`, subject lineage, approver, PR url, and commit sha. Merge also triggers re-indexing from the merged commit, a bundle version bump for the workspace, and a `steering_published` audit event.
 5. **Retirement** is a Context PR that sets `status = "archived"` in place. Files are never deleted.
 
 Oxagen honors enforcement grants only when they appear in the promotion ledger, never from a private local approval. An enforcement grant is a `blocking` directive that arms a tool guard. This rule carries over from Stella's authority rule.
@@ -875,94 +853,46 @@ Published records reach agents three ways, all recorded:
 - **Turn injection.** The model proxy's volatile steering message (ADR-051).
 - **Context frames.** Oxagen's provider serves them as `fact` and `memory` context frames. Each carries provenance to the record and the commit. Valid-from is set to the merge time, so `as_of` queries are exact.
 
-Oxagen measures the effect of each published record: the runs that rendered it, cited it, or violated it, and the proof rate before and after publication. Records with no effect after a window are surfaced for retirement.
 
 ---
 
-## 11. The knowledge graph
+## 11. The code graph
 
-Earlier drafts of this specification described a dynamic, customer-extensible ontology: business entity types (`Customer`, `Contract`, `Ticket`, and the like) inferred by a model from ingested Postgres and Linear data, proposed and activated as version-controlled pull requests, browsable and queryable in plain English on a dedicated Ontology page. That capability does not ship in core Oxagen. There is no ontology engine, no customer-defined entity type, no connector-driven schema inference or versioning, and no natural-language-to-Cypher query surface (§11.6). What remains is a fixed, built-in entity graph fed by the GitHub connector alone, because other still-shipping features depend on it: witness authoring reads the target-branch code graph (§8.5), a run's task reference is an `Issue` or `PullRequest` entity (§8.1), and the toolbelt policy can gate a tool call on the data-layer table it resolves to (§6.12, §11.7).
+Earlier drafts of this specification described a dynamic, customer-extensible ontology inferred from ingested data, browsable and queryable in plain English, stored in Neo4j. It does not ship, and neither does the datastore it needed. What remains is the part the witness author reads and the toolbelt policy cites: a fixed, built-in graph of each workspace's main repository, kept in Postgres and kept current by the GitHub App.
 
-### 11.1 Layers in the organization database
+### 11.1 What the graph holds
 
-| Layer | Labels | Purpose |
+| Layer | Tables | Purpose |
 |---|---|---|
-| Source | `:Source`, `:SyncRun`, `:SourceRecord` | Raw records as ingested from the GitHub connector, with external id, digest, and sync time |
-| Entity | `:Entity` + a built-in class label (`:Repository`, `:PullRequest`, `:Issue`, `:File`, `:Symbol`, …) | Resolved entities from the GitHub connector's fixed fragment, with `DERIVED_FROM → :SourceRecord` provenance |
-| Context | `:Record` and its edges (§9) | What was learned, proposed, and published |
-| Run | `:Run`, `:Attempt`, `:Frame`, `:Checkpoint`, `:Seal` | The run record (§8) |
-| Reference | `:Principal`, `:Agent`, `:Workspace` | Reference nodes keyed by public id only. Their fields live in Postgres |
+| Repository | `repositories`, `commits`, `branches`, `pull_requests`, `issues`, `releases` | The GitHub entities of every linked repository, from the App's events, with the delivery id and payload digest of the event that wrote them |
+| Code | `files`, `symbols`, `code_edges` (`DEFINES`, `IMPORTS`, `CALLS`, `REFERENCES`) | The production branch, indexed on every push, each row stamped with the commit that introduced it (`valid_from`) and the one that removed it (`valid_to`) |
+| Data | `tables`, `columns`, `data_edges` (`READS`, `WRITES`, `DELETES`, `MIGRATES`) | What the code declares and touches (§11.4) |
+| Run | `runs`, `attempts`, `frames`, `seals` and their edges to tasks, PRs and files | The run record (§8) |
+| Context | `records` and their lineage (§9) | What was learned, proposed and published |
 
-Every node carries `id` (public id), `ws`, `created_at`, `valid_from`, `valid_to`, `recorded_at`, and `is_system`. Embeddings (numeric vectors that capture the meaning of text) live in Neo4j native vector indexes, which are indexes built for nearest-neighbor search over those vectors. There is one per label and embedding model (§11.5). A full-text index per label sits beside it for hybrid retrieval.
+Every row carries `org_id`, `ws` and `recorded_at`. There are no embeddings and no vector index; retrieval over records and symbols is full-text, and the protocol provider (§11.3) says so in its frames.
 
-### 11.2 Entity ingestion
-
-The GitHub connector populates a fixed, built-in entity fragment (`Repository`, `Branch`, `Commit`, `PullRequest`, `Issue`, `Release`, `File`, `Symbol`, and their relations) from every linked repository. It is not customer-extensible and carries no version or proposal workflow: there is nothing to propose, activate, or merge. A connector syncs a source into `:SourceRecord` nodes (the cursor and health live in Postgres, and the records live in the graph), and entities are upserted by natural key (repository, PR number, issue number, file path, symbol signature) and linked to their source records.
-
-### 11.3 Oxagen as a protocol provider
-
-Oxagen exposes one provider per workspace on the tool gateway host. The provider offers `context/query` over entities, records, and runs, with kinds `fact`, `doc`, `memory`, and `episode`. It also offers `context/verify` and the lifecycle operations `append`, `get`, and `resolve`. It declares `data_flow.egress: true` with scope `org-tenant`. Egress means data leaving the organization's boundary, so a host gates the provider behind consent as the protocol requires. Frames carry provenance to the entity, source record, connector, and digest. `token_cost` is the protocol's exact accounting. `valid_from`/`valid_to` come from the entity's temporal fields. Conformance runs in CI against the pinned protocol fixtures (ADR-035 pattern).
-
----
-
-### 11.4 GitHub: events in, code graph up to date
+### 11.2 GitHub: events in, code graph up to date
 
 Linking a repository does four things, in this order.
 
 **1. Confirm the production branch.** The link dialog shows GitHub's default branch. It asks the customer to confirm that branch as the production branch or pick another (`main`, `release`, `production`, whatever they ship from). The production branch is the only branch whose commits update the code graph. If GitHub's default branch later changes, the App receives the `repository` event, records it, and prompts the workspace owner. The binding never moves on its own.
 
-**2. Subscribe to events.** The App subscribes the repository to every event the product uses. It records each delivery as an `:Event` node in the graph, linked to the entity it concerns. The node holds the delivery id, the actor, the timestamp, and the payload digest. The payload itself is a source record. Events used in v1:
+**2. Subscribe to events.** The App subscribes the repository to every event the product uses and records each delivery, idempotent on GitHub's delivery id. Events used in v1: `push` (commits to the production branch drive the code graph); `pull_request` and its review events (PRs are entities, a merge into the production branch is a verified outcome for the run that opened it, reviews are evidence); `issues`, `issue_comment`, `label`, `milestone` (issues are task references for runs, §8.1); `check_suite`, `check_run`, `workflow_run` (CI results attach to commits and PRs and feed proof and findings); `release`, `create`, `delete`; `commit_comment`; and `repository`, `installation`, `installation_repositories` (renames, default-branch changes, permission changes and uninstalls, each of which prompts and none of which silently alters a binding). Delivery is by webhook into a durable job. There is no polling and no cron. Every `push` carries the previous head; a gap is detected from the events themselves and fetched before the new push. GitHub's own redelivery is the second line.
 
-| Event | Why it matters |
-|---|---|
-| `push` | Commits to the production branch drive the code graph. Commits to other branches are recorded as commits only |
-| `pull_request`, `pull_request_review`, `pull_request_review_comment` | PRs are entities. A merge into the production branch is a verified outcome for the run that opened it (§12.8). Reviews are evidence |
-| `issues`, `issue_comment`, `label`, `milestone` | Issues are entities and task references for runs (§8.1) |
-| `check_suite`, `check_run`, `workflow_run` | CI results attach to commits and PRs and feed proof and findings |
-| `release`, `create`, `delete` | Releases and branch or tag lifecycle |
-| `commit_comment` | Evidence on a commit |
-| `repository`, `installation`, `installation_repositories` | Renames, default-branch changes, permission changes, and uninstalls. Each prompts, and none silently alters a binding |
+**3. Import issues.** If the repository has Issues enabled, the link runs a one-time backfill: paginated, rate-limit aware, resumable. After it, issue events keep the rows current. An issue becomes a run's task reference automatically when the run's branch name, PR body or commit message references it (`#123`, `Closes #123`, or the issue URL). Spend then rolls up to the issue.
 
-Delivery is by webhook (GitHub sends each event to Oxagen over HTTP) into a durable job, idempotent on GitHub's delivery id. There is no polling and no cron. Missed deliveries are detected from the events themselves. Every `push` carries the previous head. If that head does not equal the head Oxagen last recorded for the branch, the job fetches the compare range and processes the gap before the new push. GitHub's own redelivery is enabled for the App as the second line.
+**4. Build and keep the code graph.** On link, the indexer clones the production branch head (shallow, into ephemeral storage discarded after indexing) and builds the code graph with tree-sitter grammars, the same grammars the protocol's reference provider uses, so symbols agree between Oxagen and Stella. A **manual sync** (`sync_repository`, a governed action) does a full re-index of the production branch head; it is idempotent and archives anything the full pass does not see. An operator reaches for it after a force-push, a history rewrite, or a doubt. It is never scheduled.
 
-**3. Import issues.** If the repository has Issues enabled, the link runs a one-time backfill. The backfill is paginated, rate-limit aware, and resumable. It creates an `:Issue` entity per issue with labels, milestone, state history, and the issue-to-PR links GitHub exposes. Assignees map to principals where a GitHub login matches a member. After the backfill, issue events keep the entities current. An issue becomes a run's task reference automatically when the run's branch name, PR body, or commit message references it (`#123`, `Closes #123`, or the issue URL). Spend then rolls up to the issue without anyone tagging anything.
+Division of labor with Stella: Oxagen holds the production truth of each repository and its history. Stella's local provider serves working-tree context (uncommitted changes, feature branches) as context frames during a run. Both cite the same symbols. A run's frames show which one a piece of context came from.
 
-**4. Build and keep the code graph.** On link, the indexer clones the production branch head. The clone is shallow and goes into ephemeral storage that is discarded after indexing. The indexer builds the code graph: `:File` and `:Symbol` nodes with `DEFINES`, `IMPORTS`, `CALLS`, and `REFERENCES` relationships. Each is stamped with the commit that introduced it (`valid_from`) and, on removal, the commit that removed it (`valid_to`). Parsing uses tree-sitter grammars (a parser library with one grammar per language). These are the same grammars the protocol's reference provider uses, so symbols agree with what Stella sees locally. Every `push` to the production branch then updates the graph **incrementally**. Only the files in the push's diff are re-parsed. Changed symbols are versioned rather than overwritten. The repository's recorded head moves forward in the same transaction. No other branch is ever parsed into the code graph. Pull requests from feature branches are recorded as entities with their diff metadata, and nothing more.
+### 11.3 Oxagen as a protocol provider
 
-A **manual sync** (`sync_repository`, a governed action available through the API) does a full re-index of the production branch head. It is idempotent. It archives anything the full pass does not see, with the current commit as `valid_to`. An operator reaches for it after a force-push, a history rewrite, or a doubt. It is never scheduled.
+Oxagen exposes one provider per workspace on the tool gateway host. The provider offers `context/query` over records, runs and the code graph, with kinds `fact`, `doc`, `memory`, and `episode`, and `context/verify` with the lifecycle operations `append`, `get`, and `resolve`. It declares `data_flow.egress: true` with scope `org-tenant`, so a host gates the provider behind consent as the protocol requires. Frames carry provenance to the row, the event that wrote it, and its digest. `token_cost` is the protocol's exact accounting.
 
-Division of labor with Stella: the graph holds the production truth of each repository and its history. Stella's local provider serves working-tree context (uncommitted changes, feature branches) as context frames during a run. Both cite the same symbols, because both use the same grammars. A run's frames show which one a piece of context came from.
 
-### 11.5 Embeddings and semantic retrieval
+### 11.4 The data layer of the code graph: tables, queries, and storage objects
 
-Embeddings run on the **Voyage AI API**, called directly (not through OpenRouter). They run under the organization's funding source like every other model call: on the platform key by default, and on the customer's Voyage key when they set one. Every embedding request is a model call with a cost record (§12.3, token class `input` only). It is also a frame in the run of whatever produced it (an ingest job, a reflection, a query). Embedding spend is therefore attributed like everything else.
-
-**Models, one space per family.**
-
-| Content | Model | Why |
-|---|---|---|
-| Entities, records, issues, PRs, short documents | `voyage-4` for documents, `voyage-4-lite` for queries | The voyage-4 family shares one 1024-dimension space with a 32K context. A cheap query embedding can therefore search an index built with a stronger document embedding (asymmetric retrieval). `voyage-4-large` is a per-workspace upgrade for the entity index when recall matters more than cost |
-| Long documents and source records | `voyage-context-3`, chunks of about 800 tokens with 100-token overlap, embedded as one grouped document | Contextualized chunk embeddings (each chunk is embedded with knowledge of the document around it) make a mid-document chunk findable |
-| Code: files and symbols from the code graph (§11.4) | `voyage-code-3` | Trained for code. Symbol embeddings cover the signature, docstring, and a bounded body window |
-| Reranking (a second model re-scores the top candidates) | `rerank-2.5` over the top 50 hybrid candidates | The last mile of precision, paid only on the candidates that survive retrieval |
-
-Rules:
-
-1. **One model per index, never mixed.** An index is named by label and model (`entity_voyage4_1024`, `symbol_voyagecode3_1024`, `chunk_voyagecontext3_1024`). A model upgrade is a migration. Build the new index alongside the old one, backfill in batch, and cut retrieval over when the retrieval evaluation (below) is at least as good. Then drop the old index. Queries never span two models.
-2. **Embed the canonical text, store its digest.** Each embedded node carries `embedding_model`, `embedding_dims`, `embedding_input_digest`, and `embedded_at`. The canonical text is rendered deterministically per label. An entity card holds class, name, key properties, and a one-line relation summary. A record holds statement and rationale. A symbol holds signature, docstring, and body window. A node is re-embedded only when its input digest or the model changes. An ingestion that touches unrelated properties therefore costs nothing.
-3. **Batch for backfills, realtime for the edge.** Backfills and re-indexes use Voyage's batch pricing. Incremental updates from a push, a sync, or a record append embed in the same job that wrote the node.
-4. **Redact before embedding.** Redaction strips sensitive values from text before use. The same detectors that run on tool output run on embedding input. PII classes a workspace marks as never-embed are dropped from the canonical text. Embedding input leaves the organization's plane to Voyage and is declared as third-party egress in the provider's data flow. A customer that cannot accept that sets `embed: off` for a label and gets full-text retrieval only for it. Vectors never leave the organization's database. Erasure deletes the subject's vectors with the subject's nodes.
-5. **Isolation.** Vector indexes live in the organization's own database (§5.3), so there is no cross-tenant nearest neighbor by construction. Inside an organization, the workspace filter is applied after the approximate search with an over-fetch factor (four times k, doubling once if the filtered set is short). Retrieval falls back to full-text when a workspace's share of an index is too small for that to converge.
-
-**Retrieval is hybrid, then reranked, then cited.** A semantic request runs a vector search and a full-text (BM25, keyword-based) search over the allowed labels. It fuses the two ranked lists by reciprocal rank (each result's score comes from its position in each list), reranks the top 50 with `rerank-2.5`, and returns the top k as context frames. Each frame has a kind by label (`fact` for entities and knowledge records, `memory` for memory records, `doc` for chunks, `symbol` for code, `episode` for run summaries). Each frame also carries provenance to the node, its source record and digest, temporal validity from the node, a score normalized into the protocol's provider-local range, and the exact token cost. The frames pass the same conformance checks as any provider's.
-
-**Quality is measured, not assumed.** Every run's `context_use_feedback` records (§9.1) say which frames were rendered, cited, or ignored. From them, Oxagen maintains a per-workspace retrieval evaluation set (query, cited frames). It reports recall at k and the citation rate per index. Model upgrades, chunking changes, and reranker changes are gated on that set. The findings job flags workspaces whose citation rate is falling.
-
-### 11.6 Graph queries — not shipped
-
-Earlier drafts specified four governed agent tools (`get_ontology`, `search_graph`, `expand_graph`, `query_graph`) that let an agent, the in-app agent, or a person ask the graph plain-English questions compiled to Cypher and executed against the active ontology version. That surface does not ship: it depended entirely on the dynamic ontology described at the top of this section.
-
-### 11.7 The data layer of the code graph: tables, queries, and storage objects
 
 Code changes are only half of what an agent touches. The other half is the data behind the code. The code graph therefore carries a **data layer** built the same way the code layer is. Parsers run over the repository and resolve what they find into typed nodes, with provenance to the file and line that declared them. The layer is kept current on every push to the production branch and confirmed by what runs actually did.
 
@@ -977,34 +907,34 @@ Code changes are only half of what an agent touches. The other half is the data 
 
 Confidence is assigned by how the reference was resolved. `high` means a literal statement the SQL parser resolved to named tables and columns. `medium` means an ORM call resolved through a model declaration. `low` means a dynamically built query where only the table name is recoverable. `unresolved` means a query site was found but nothing could be named. Unresolved sites are still recorded, so coverage is reported as it is. Edges carry the operation (`select`, `insert`, `update`, `delete`, `ddl`) and, where resolvable, the columns.
 
-**Runtime confirmation.** Frames confirm and extend the static picture. A tool call or command frame that executed a query, a storage SDK call captured as a `network` or `file_io` side effect, and connector sync runs against the live Postgres connector all produce `OBSERVED_ACCESS` edges from the run to the data object. A static edge that a run confirms is raised to `confirmed`. An observed access with no static edge is a finding (a dynamic query the parser missed).
+**Runtime confirmation.** Frames confirm and extend the static picture. A tool call or command frame that executed a query, or a storage SDK call captured as a `network` or `file_io` side effect, produces an `OBSERVED_ACCESS` edge from the run to the data object. A static edge that a run confirms is raised to `confirmed`. An observed access with no static edge is a finding (a dynamic query the parser missed).
 
-**Live schema reconciliation.** Where a Postgres connection is configured for the database the code declares, Oxagen links declared `Table` nodes to live tables by name. It then compares columns, types, and indexes. Drift is any gap between what the code declares and what the database has: code references a column the database does not have, a migration is not applied, or a table has nothing referencing it. Drift is offered to the findings job.
+**Live schema drift.** Where a Postgres connection is configured for the database the code declares, Oxagen links declared `Table` rows to live tables by name. It then compares columns, types, and indexes. Drift is any gap between what the code declares and what the database has: code references a column the database does not have, a migration is not applied, or a table has nothing referencing it. Drift is offered to the findings job.
 
 **What this buys the governor.** With this layer, the toolbelt policy (§6.12) can say what no static allowlist can. It can deny, or route to approval, any tool call whose resolved effect is a write to a table the customer has classed as sensitive (money, personal data, regulated), whichever code path performs it. It can require an approval when a change touches a symbol that writes a table in that class. It can show a CIO, per agent and per run, which tables and buckets the agent's work reached, with the evidence.
-## 12. Cost: accounted to the token, attributed to the operator, reconciled to the cent
+## 12. Cost: accounted to the token, attributed to the operator, priced on the proven run
 
-### 12.1 What is being reconciled
+### 12.1 What is tracked, and what is priced
 
 Two different things are tracked, and they are kept apart on purpose:
 
-- **Customer spend**: the money the customer pays to model and tool providers. Oxagen measures it per frame and adds it up into rollups (a rollup is a total built from smaller records). Oxagen then reconciles it against provider statements, meaning it checks that the two sets of numbers match. This is a FinOps feature (FinOps is the practice of tracking and managing cloud and AI spend). It is billed at zero (ADR-052).
-- **Oxagen revenue**: priced by usage, per run. Every account includes the free tier. Starting is easy, and each run costs less as volume grows.
+- **Customer spend**: the money the customer pays to model and tool providers. Oxagen measures it per frame and adds it up into rollups (a rollup is a total built from smaller records). This is a FinOps feature (FinOps is the practice of tracking and managing cloud and AI spend). It is billed at zero (ADR-052). Matching it to the cent against provider statements was cut by the scope review; every figure carries its basis instead (`gateway_observed`, `client_attested`, `estimated`), and the Spend page never claims more than the basis allows.
+- **Oxagen revenue**: priced on one thing, the **proven run**, a run whose definition of done held (§8.6). You pay when the work is verified. Runs, governed actions and retained evidence are reported as secondary meters so the price can move later without rewriting the meter.
 
 | | Price |
 |---|---|
-| Every month, every organization | first 1,000 runs free, every governance feature on |
-| Runs 1,001 to 10,000 | $0.30 per run |
-| Runs 10,001 to 100,000 | $0.20 per run |
-| Above 100,000 | $0.12 per run |
-| Evidence retention | 13 months included, then $0.10 per GB-month |
+| Free, every organization | every governance feature on, unlimited runs, thirty days of evidence, three seats |
+| Proven runs 1 to 10,000 a month | $0.30 per proven run |
+| Proven runs 10,001 to 100,000 | $0.20 per proven run |
+| Above 100,000 | $0.15 per proven run |
+| Evidence retention | 13 months included on paid plans, then $0.10 per GB-month |
 | Tokens Oxagen buys on the customer's behalf (`platform` funding source, §4.5) | at cost, no markup, capped per organization |
-| Enterprise (annual) | committed use at 20 to 30 percent off the tiers, from $60,000 per year. Adds dedicated data plane or behind-the-firewall deployment, SSO and SCIM, the hosted witness runner, two-person mandates, support with an SLA, and invoicing |
+| Enterprise (annual) | committed use at 20 to 30 percent off the tiers, from $60,000 per year. Adds a dedicated data plane or behind-the-firewall deployment, the hosted witness runner, support with an SLA, and invoicing |
 | Onboarding discount | 20 percent off usage for 12 months when the customer converts to a paid plan within 7 days of the first run. Annual prepayment earns a further 20 percent |
 
-  What counts as a run: a sealed run with at least one model call. Some runs are free: runs Oxagen halted before any model call, runs of the in-app agent, and witness runs. The customer never pays for Oxagen saying no, or for Oxagen proving work. Proven runs carry no surcharge. They are the asset. Every statement reports governed actions per run and retained gigabytes as secondary meters. These can be priced later without changing the model. Payment is by card, monthly, with no minimum below enterprise, and the customer can cancel any time. Stripe holds plans, customers, and invoices. Oxagen holds the meter. There are no credits, no resellers, and no revenue dashboard. The Spend page is for the customer's money.
+What counts: a sealed run whose certificate says HELD, metered as the governed action `dod.held` the day it settles. A PENDING run is metered the day it is signed. BROKEN runs, runs Oxagen halted before any model call, and witness runs are free. The customer never pays for Oxagen saying no, or for Oxagen proving work. Payment is by card, monthly, with no minimum below enterprise, and the customer can cancel any time. Stripe holds plans, customers, and invoices. Oxagen holds the meter.
 
-  Why these numbers: the reference customer (50 agents, 5,000 runs a month) pays about $1,200 a month. That is roughly 5 to 10 percent of its token spend, an amount a team lead can approve without procurement. A large division at 50,000 runs a month pays about $10,000 a month, a normal governance line. Oxagen's direct cost per run (graph, storage, reflection, and amortized witness authoring on paid tiers) is one to four cents. Gross margin therefore stays above 80 percent at every tier. The free tier is the whole product, limited by volume and retention, never by features. Developers prove the value in pre-production, and upgrading becomes a volume decision. This replaces the governed-action meter of ADR-052 with the per-run model the positioning states. The governed-action count stays as a reported number.
+Why these numbers: the reference customer (50 agents, 5,000 sealed runs a month, about 3,200 of them held) pays about $960 a month. That is roughly 5 to 10 percent of its token spend, an amount a team lead can approve without procurement. A large division at 50,000 sealed runs a month pays about $8,000 a month, a normal governance line. Oxagen's direct cost per run (storage, reflection, and amortized witness authoring on paid tiers) is one to four cents; at $0.15 and four cents the margin on the top tier is 73 percent, above 80 percent below it, and the margin claim is stated at that volume rather than everywhere. The free tier is the whole product, limited by retention and seats, never by features or volume, so a ten-developer team on Claude Code installs in sixty seconds and stays free until keeping evidence longer than a month becomes a governance decision. That is a decision a team lead makes, not a volume accident.
 
 ### 12.2 Price book
 
@@ -1026,16 +956,6 @@ Oxagen writes a cost record on every `model.response` frame (proxied) or `llm_ca
 ```
 
 Every amount is an integer in micro-USD. Per-frame cost is computed at full precision. Rounding to cents happens once, at the invoice or statement line, using half-even rounding (a value exactly halfway rounds to the nearest even cent). Tool calls with a declared price get the same record. Rollups (`cost.run_totals`, `cost.daily_totals` by agent, workspace, org, model, provider key) are derived indexes in Postgres. They are rebuilt from frames on demand.
-
-### 12.4 Reconciliation
-
-Reconciliation checks Oxagen's records against what providers report. The reconciler pulls provider usage exports (Anthropic, OpenAI, Bedrock, Vertex, and gateway providers) by provider key and day. It pulls provider invoices monthly. Matching runs at three levels, best first:
-
-1. **By provider request id** to a single frame. The provider request id is the identifier a provider assigns to each request. Gateway-observed frames always have one.
-2. **By key, model, day, and token class totals** to the ledger's rollup.
-3. **By invoice line** to the monthly rollup.
-
-Variance is recorded per key-day and per invoice line in `cost.reconciliations` with `matched_micros`, `provider_micros`, `variance_micros`, and a status. Any variance above one cent per key-day opens an exception. The exception attaches the unmatched frames or the unmatched provider lines. The Spend page reports two targets: the share of provider spend matched to a frame, by month, and the open variance in dollars. Client-attested frames without a provider request id match only at level 2 and are labeled as such.
 
 ### 12.5 Budgets
 
@@ -1064,7 +984,7 @@ Every field is an integer. Absent classes are zero, never null. When a provider 
 - **Effective input price** `= cost(all input classes) / (input_uncached + cache_read)`, per million.
 - **Prompt composition**: the shares of the prompt spent on tool definitions, context frames, steering, and conversation, from the measured fields.
 - **Latency**: time to first token, total duration, retries, and the provider error that caused each retry.
-- **Provider request id and concrete model id**, for reconciliation (§12.4).
+- **Provider request id and concrete model id**, so a cost record can be traced to the provider's own log.
 
 Client-attested model calls (harness telemetry rather than the proxy) carry the same fields where the harness reports them. The fields the harness does not report are marked as gaps. A cache hit rate over a mixed fleet is therefore never computed from missing data as if it were zero.
 
@@ -1093,7 +1013,7 @@ Customers pay for tokens. They want to know what the tokens bought. Oxagen answe
 2. **Productive ratio.** Per run, the share of steps that advanced the task. Where the run came through Stella, Stella's step-grading ladder grades the steps. Elsewhere a deterministic rubric grades them: a tool call that produced a side effect the run kept, a model call whose output led to a kept side effect, or a read whose result was later cited. Repeated identical tool calls, calls denied by policy, retries after provider errors, and steps after a halt are unproductive by definition. This measure is carried from the wrapper design corpus, where it is already specified.
 3. **Spend per proven run** and its trend, per agent and per operator. A team can see whether an agent is getting cheaper at producing verified work.
 
-**Where to optimize.** The **findings** job is the reconciler's sibling. Findings are specific, costed problems an operator can act on. The job runs after each seal and writes `cost.findings` rows. Each row carries the frames that prove it and the money at stake:
+**Where to optimize.** The **findings** job runs beside the recorder. Findings are specific, costed problems an operator can act on. The job runs after each seal and writes `cost.findings` rows. Each row carries the frames that prove it and the money at stake:
 
 | Finding | Detected from | What it tells the operator |
 |---|---|---|
@@ -1114,7 +1034,7 @@ Each finding names the level it applies to (run, agent, operator, workspace) and
 - **Operator view.** For one operator: their agents, runs, spend by model and provider, proven spend, productive ratio, budget position, and their findings. This is the report a team lead reads.
 - **Agent view.** For one agent across operators: the same, plus spend per proven run over time and the tool-call mix.
 - **Run waterfall.** For one run: turns as bars, steps inside them, cost accumulating left to right, cache hit rate per turn, the proof frame marked, and findings pinned to the frames that caused them.
-- **Monthly statement** per workspace and organization: spend by operator, agent, model, provider key, and task. Proven versus unproven. Reconciliation status against provider invoices (§12.4). Exported as CSV and as a signed PDF.
+- **Monthly statement** per workspace and organization: spend by operator, agent, model, provider key, and task. Proven versus unproven. Exported as CSV and as a signed PDF.
 - **API and MCP** expose the same rollups, so a customer can pull attribution into their own FinOps tooling. Every number carries its basis (`gateway_observed`, `client_attested`, `estimated`).
 
 ---
@@ -1143,30 +1063,28 @@ Order-of-magnitude figures for the deck's reference customer (fifty agents, five
 | Archive growth per month | 1.5 to 5 GB |
 | Seven-year archive | 130 to 420 GB |
 | Cold storage at roughly a tenth of a cent per GB-month | under $1 per month |
-| Frame nodes in the graph over the thirteen-month hot window (the period frames stay in the graph) | 6 to 25 million |
+| Frame rows in the hot table over the thirteen-month hot window (the period frames stay there) | 6 to 25 million |
 
-The graph, not the archive, is the cost that needs a window. That is why frame nodes are compacted (§13.3), meaning removed from the graph once the segment holds them. Bodies are never moved.
+The hot table, not the archive, is the cost that needs a window. That is why frame rows are compacted (§13.3), meaning removed from the hot table once the segment holds them. Bodies are never moved.
 
 ### 13.3 Tiers
 
 | Tier | Where | What | Retention |
 |---|---|---|---|
-| Ledger | Neo4j (+ Postgres rollups) | `:Run`, `:Attempt`, `:Seal`, attestation, counts, cost, tier, gaps | forever |
-| Frames | Neo4j | `:Frame` nodes with digests, cost, policy decisions | hot window, default 13 months, then compacted into the segment |
-| Bodies and segments | Object storage, write-once (data cannot be changed once written) | encrypted bodies and a per-seal archive segment: frame envelopes as NDJSON, a Merkle root (one hash that covers every frame), and an attestation | 7 years default, unless a legal hold (a block on deletion for a legal matter) overrides it |
+| Ledger | Postgres | runs, attempts, seals, attestation, counts, cost, tier, gaps | forever |
+| Frames | Postgres, partitioned by month | frame rows with digests, cost, policy decisions | hot window, default 13 months, then compacted into the segment |
+| Bodies and segments | Object storage, write-once (data cannot be changed once written) | encrypted bodies and a per-seal archive segment: frame envelopes as NDJSON, a Merkle root (one hash that covers every frame), and an attestation | 7 years default |
 | Control-plane audit | Postgres | admin actions, IAM changes, repo bindings, plane changes, key rotations | 7 years |
 
-The archive segment is written **at seal time**. It is never a later copy of the graph. It is the same bytes the graph indexed, written once. Compaction removes frame nodes and leaves the run node with `frame_count`, `merkle_root`, `segment_ref`, and the rollups. Render replay of a compacted run reads the segment.
+The archive segment is written **at seal time**. It is never a later copy of the hot table. It is the same bytes the recorder indexed, written once. Compaction removes frame rows and leaves the run row with `frame_count`, `merkle_root`, `segment_ref`, and the rollups. Render replay of a compacted run reads the segment.
 
-### 13.4 Object storage and holds
+### 13.4 Object storage
 
-Each data plane gets its own buckets with object lock, a storage setting that blocks deletion. The lock runs in compliance mode, so no one, not even an admin, can lift it early. Retention is set per object from the organization's policy. Each organization has its own key-encryption key, and each object has its own data key. Legal holds are records in Postgres. They pin retention and block erasure for named runs, agents, or a whole workspace. Exports produce a verifiable bundle: segments, attestations, key ids, and a verifier script.
+Each data plane gets its own buckets with object lock, a storage setting that blocks deletion. The lock runs in compliance mode, so no one, not even an admin, can lift it early. Retention is set per object from the organization's policy. Each organization has its own key-encryption key, and each object has its own data key. Exports produce a verifiable bundle: segments, attestations, key ids, and a verifier script. Legal holds were cut by the scope review; the retention clock is the organization's policy and nothing in the product shortens it.
 
-### 13.5 Erasure
+### 13.5 Personal data
 
-GDPR (the EU privacy law) erasure works by **crypto-shredding**, which destroys the encryption key so the data can never be read again. Bodies attributable to a natural person are encrypted under a per-subject data key. Erasure destroys the key and writes a tombstone frame in the ledger with the digests that remain. The chain stays intact and verifiable. The content is unrecoverable. Redaction detectors run before write, so most personal data never enters a body in the first place. The erasure SOP carries over.
-
----
+Redaction detectors run before write, so personal data does not enter a body in the first place, and the archive has no edit path. A GDPR erasure request (the EU privacy law's right to be forgotten) is handled by support against the retention policy and the redaction record. Crypto-shredding (a per-subject data key destroyed on request, with a tombstone frame keeping the chain verifiable) was cut by the scope review and waits for the customer who blocks on it.
 
 ## 14. Mission Control
 
@@ -1174,22 +1092,22 @@ Mission Control has nine pages: six at workspace scope and three at organization
 
 | Screen | Job | Primary actions |
 |---|---|---|
-| **Fleet** | Every run, live and recent, with its enforcement tier, replay grade, cost so far, and pending approvals | pause, resume, cancel, open |
-| **Run** | A frame-by-frame player for one run. It shows the transcript at three zoom levels (turns, steps, everything) under a transport, the playback controls (scrub, step, play, pause, ×1 to ×4). It also shows what the agent was told, each model exchange, tool calls with their validation results, policy decisions, proof, a cost strip, and chain status | steer (with a delivery mode), pause, cancel, approve, fork replay, bisect, export |
+| **Fleet** | Every run, live and recent, with its enforcement tier, replay grade, verdict, definition-of-done state, cost so far, and pending approvals and signatures | pause, resume, cancel, open |
+| **Run** | A frame-by-frame player for one run. It shows the transcript at three zoom levels (turns, steps, everything) under a transport, the playback controls (scrub, step, play, pause, ×1 to ×4). It also shows what the agent was told, each model exchange, tool calls with their validation results, policy decisions, proof, the definition of done (the verdict, the certificate, the checks and every Stop, §8.6), a cost strip, and chain status | steer (with a delivery mode), pause, cancel, approve, sign a human check, fork replay, bisect, export |
 | *(panel on Fleet and Run)* **Approvals** | The queue. Each item shows its four-hop chain, the four links behind a request (who asked, which agent, which action, which rule) | approve, deny, add reason |
 | **Agents** | Each agent's identity, run credential, roles, its toolbelt (the tools it may call, with schemas and per-tool decision rules), the mandates it holds, budgets, enrollment status, and tamper incidents | register, enroll, revoke, grant, set budget, request mandate |
-| **Tools** | The registry (servers, tools, versions, schemas, safety classification), approval rules and auto-approval conditions, connections and their owners, credential grants, the mandates ledger, policy versions with their tests and simulation, kill switches, and the last result from the assurance suite | import server, approve observed schema, add connection, grant mandate, edit and simulate policy, flip a switch |
-| **Steering** | Published records, proposals, open Context PRs, effect metrics, and retirement candidates | open Context PR, review, retire |
-| **Spend** | Findings ranked by the money at stake. Cost by operator, agent, model, provider key, and task. Proven spend versus unproven spend, and the productive ratio. Cache hit rate. Reconciliation status and variance. Budgets | act on a finding, set budget, open exception, export statement |
-| *(org)* **Organization** | People, roles, invitations, SSO (single sign-on), workspaces, model funding and routes, the data plane, and API keys | invite, change role, create workspace, set funding, set route |
-| *(org)* **Billing** | Governed-action usage, the retention meter, plan, and invoices | change plan |
-| *(org)* **Audit** | Control-plane audit events, data plane, key rotation, legal holds, and exports | export, hold, rotate |
+| **Tools** | The registry (servers, tools, versions, schemas, safety classification), approval rules and auto-approval conditions, connections and their owners, credential grants, the mandates ledger, policy versions with their tests, and kill switches | import server, approve observed schema, add connection, grant mandate, edit policy, flip a switch |
+| **Steering** | Published records, proposals, and open Context PRs | open Context PR, review |
+| **Spend** | Findings ranked by the money at stake. Cost by operator, agent, model, provider key, and task. Proven spend versus unproven spend, and the productive ratio. Cache hit rate. Wasted spend. Budgets | act on a finding, set budget, export statement |
+| *(org)* **Organization** | People, roles, invitations, workspaces, model funding and routes, the data plane, and API keys | invite, change role, create workspace, set funding, set route |
+| *(org)* **Billing** | Proven runs this period, the secondary meters, the plan, and invoices | change plan |
+| *(org)* **Audit** | Control-plane audit events, incidents, receipts, exports, keys, and retention | export, rotate |
 
 Interaction rules: every badge that describes trust (enforcement tier, replay grade, attestation, cost basis) shows the recorded value and nothing stronger. Every number that is money shows its basis. Every explanation is a chain of links to frames, records, and commits, not a summary.
 
 ### 14.1 Surfaces
 
-One agent tool contract drives all four surfaces: the API, MCP (Model Context Protocol, the standard way agents connect to tools), the CLI (the command-line tool), and the UI. The manifest gate that exists today checks that the four stay in parity. The CLI is thin: `oxagen login`, `oxagen agent enroll|status|unenroll`, `oxagen agent register`, `oxagen run list|show|export`, and `oxagen context propose` (which delegates to Stella when Stella is present). The in-app agent (§4.4) sits on every screen as a side panel. It onboards a new organization, changes configuration through the same contracts the screens use, and explains runs and spend. Each of its turns is a run of its own, recorded and metered like any other agent's run.
+One agent tool contract drives all four surfaces: the API, MCP (Model Context Protocol, the standard way agents connect to tools), the CLI (the command-line tool), and the UI. The manifest gate that exists today checks that the four stay in parity. The CLI is thin: `oxagen login`, `oxagen agent enroll|status|unenroll`, `oxagen agent register`, `oxagen run list|show|export`, and `oxagen context propose` (which delegates to Stella when Stella is present), and `oxagen dod hook|new|lock|run|sign|status` (§8.6).
 
 ---
 
@@ -1203,9 +1121,9 @@ One agent tool contract drives all four surfaces: the API, MCP (Model Context Pr
 | Throughput | 2,000 frames per second per organization, sustained, on the shared plane. Graph writes are batched |
 | Isolation | Neither store can express a query that crosses organizations. A nightly cross-tenant probe on both stores verifies this |
 | Security | All credentials are hashed or KMS-enveloped (encrypted under a key management service key). Run tokens last ≤ 15 min. Bundle and attestation keys rotate with published validity windows. Secret scanning runs on tool arguments and record bodies |
-| Compliance | SOC 2 Type II controls map to the audit tiers. Data residency is set per data plane. Erasure works by crypto-shredding (destroying the key so the data can no longer be read) |
+| Compliance | SOC 2 Type II controls map to the audit tiers. Data residency is set per data plane. Personal data is redacted before write (§13.5) |
 | Conformance | Provider conformance and lifecycle fixtures (shared test cases that check an implementation follows the protocol) from the protocol repo run in CI, pinned by commit |
-| Currency | Every price entry and cost record carries its currency. The value of record is the provider's billing currency. Conversions use a dated rate table (`cost.fx_rates`), at the frame's time for display and at the statement's time for reconciliation. Every converted number carries its rate and source. An organization has a display currency and a billing currency, chosen from the set Stripe supports. Mandates are compared in their own currency. Reconciliation matches in the provider's currency and reports variance in both. The wedge is USD only. The model is built in from the first release |
+| Currency | Every price entry and cost record carries its currency. The value of record is the provider's billing currency. Conversions use a dated rate table (`cost.fx_rates`), at the frame's time for display and at the statement's time for the monthly statement. Every converted number carries its rate and source. An organization has a display currency and a billing currency, chosen from the set Stripe supports. Mandates are compared in their own currency. The wedge is USD only. The model is built in from the first release |
 | Language | No prose is hard-coded. Every string the interface shows lives in a message catalog keyed by a stable message id, in ICU MessageFormat (a standard format for translatable strings with plurals and variables). There is one catalog per locale, with English as the source. Locale is negotiated per person, profile first, then browser. Dates, numbers, currencies, and units format by locale. Layout supports right-to-left (scripts that read from right to left) from the first release. Prose the models generate (findings, explanations, rationales, assistant replies) is generated in the operator's locale and recorded on the frame. Steering records keep their language with a tag. Machine-readable fields in records, receipts, and exports are never translated. The wedge is English only. The first additional locales land in Series A |
 | Deployment | The same containers run in Oxagen's cloud and behind a customer's firewall (§4.6). There is no fork |
 
@@ -1222,32 +1140,33 @@ This table lists what carries over from the current `oxagen` repository (and its
 | The organization and workspace model, immutable namespaces, and the Better Auth binding | About 110 tables across 20 schemas. 35 tables in 9 schemas remain, listed with their columns in Appendix A |
 | IAM principals (IAM is identity and access management, the rules for who may do what), the delegation ceiling, resource-scope ceilings, and the three live resolver rules | Dead condition language, and the enterprise-tier "allow everything" bypass |
 | The wrapper (today's tacho package) and its parts: enrollment, device keys, the collector, hooks, the policy bundle, commands, approval tokens, incident kinds, and the event vocabulary | ClickHouse `tacho_events`, and all of ClickHouse |
-| The run ledger invariants, the rules that must always hold: dense seq, digest chain, seal fence, and one-shot finalization | Postgres as the run store. The store is the graph plus segments |
+| The run ledger invariants, the rules that must always hold: dense seq, digest chain, seal fence, and one-shot finalization | Postgres as the run store. The store is the hot table plus segments |
 | The run-evidence protocol consumer, pinned fixtures, and SDK types with a Zod drift check | Vendored protocol drafts |
 | The two-axis memory concepts: confidence versus enforcement, decay, and citation pressure | The `engram` package, the `rules` engine, and the `:AgentMemory` label. Records replace them |
 | The GitHub App and its repository-linking flow | The workspace schema registry entirely: its validation, versions, pin, diff, and export layout, the `schema_registry.*` Postgres tables, and the connectors and ingestion validation that fed it (§11) |
 | The crypto envelope (envelope encryption: a data key encrypts the content, and a master key encrypts that data key), the storage adapter, and notifications | The `content`, `cms`, `chat`, `workflow`, `eval`, `environments`, `plugin`, and `mcp` registry tables |
 | Nothing from billing. Billing is rebuilt small (§12.1): Stripe for plans and invoices, one usage meter per run, and budgets | The entire billing package: credits, the metering gate, the rate card (the price list for each unit of usage), the governed-action meter, reseller tables, Stripe sync jobs, and spend dashboards as a revenue line |
 | Data planes (ADR-042) | Per-store singletons |
-| The in-app agent design (ADR-053). Stella runs as its own service, and Oxagen talks to it over HTTP. The engine asks Oxagen for every model call and tool call. Each organization has one model funding source | Running any agent loop inside Oxagen's own process, and the older plan of packaging the Rust engine as a helper container that Oxagen starts and supervises. Over HTTP is the design. Those two were the alternatives it replaced |
+| The model layer of ADR-053: one funding source per organization, keys enveloped and never returned, every call a frame. The in-app agent that ADR-053 also described is cut (§4.4) | Running any agent loop inside Oxagen's own process. There is no engine container and nothing for one to do |
 | The web-app 2.0 information architecture (workspace, org, and account scopes) | 70 page files. Ten pages remain, mapped in Appendix F |
 
-The target Postgres schemas are `auth`, `org`, `wrk`, `iam`, `tools`, `prices`, `cost`, `billing`, and `control` (commands, approvals, archive manifests, and audit). Everything else lives in the graph or is gone.
+The target Postgres schemas are `auth`, `org`, `wrk`, `iam`, `tools`, `prices`, `cost`, `billing`, `control` (commands, approvals, archive manifests, and audit), `dod`, and the run record's `run`, `ctx` and `code`. Everything else is gone.
 
 ---
 ## 17. Delivery plan
 
-Each milestone has an acceptance test that a customer could run.
+Each milestone has an acceptance test that a customer could run. The scope review of 2026-09-14 pulled the ontology and the audit-archive milestones out of the middle of the plan and moved the proof to the front of what remained; the definition of done, which gates the proof, sits beside it. The plan is about fifteen weeks, not twenty-four.
 
 | Milestone | Delivers | Accepted when |
 |---|---|---|
-| **M0 Foundations** (weeks 1–4) | The repo, the kernel, tenancy, RLS (row-level security) with role-based system access, org and workspace creation including a Neo4j database and repo binding, IAM, and the tool registry. | A cross-tenant probe (a test that tries to reach one tenant's data from another tenant) finds nothing in either store. A workspace cannot be created without a main repo. A second repo can be linked and unlinked. |
-| **M1 Gateway** (weeks 3–8) | The model proxy. The tool gateway with schema validation (each tool call is checked against the tool's declared input shape before it runs). Run tokens (credentials tied to a single run). Frames, chain, seal, and attestation. The Fleet and Run pages with render replay. The model layer with OpenRouter routes and funding sources. The Stella engine container and the in-app agent's onboarding flow. | The gateway wraps Stella and Claude Code. A run can be halted mid-loop from the UI. An exported run can be verified offline. The in-app agent onboards a new organization end to end, and its turns replay as runs. |
-| **M2 Control** (weeks 7–11) | Bundles, commands, approvals with tokens, and budgets. The full call pipeline with taint and receipts. The credential broker with at least token exchange and restricted keys. Mandates and the ledger. Kill switches. Cedar policy with tests and simulation. The Tools page. Cost records with normalized token classes, the price book, and rollups to operator level. The findings job and the Spend page. | The adversarial suite (§6.13) passes every case against the live gateway. A consequential call that exceeds its mandate is denied, and the ledger does not change. An auto-approval fires only inside its conditions. A `require_approval` tool call parks, is approved from Slack, and is billed to the cent. A budget breach pauses a run. An operator's statement sums exactly to their agents' runs. |
-| **M3 Teach** (weeks 10–15) | The records endpoint, the reflector, the promoter, Context PRs through the GitHub App, steering delivery, and effect metrics. | An agent learns something. The lesson becomes a Context PR. Merging it changes the next run's context, and the frame shows the change. |
-| **M4 Ground** (weeks 13–18) | Retired. This milestone built the knowledge graph and dynamic ontology (the ontology engine, connectors, code graph, embeddings, and graph query tools); that capability does not ship in core Oxagen (§11). | — |
-| **M5 Audit** (weeks 16–20) | The archiver, compaction, holds, erasure, and reconciliation against a real provider invoice. | The provider invoice matches above 99.9% by frame. Erasure leaves a verifiable chain. |
-| **M6 Prove** (weeks 18–24) | The witness runner. The witness author, with the test-flip and build oracles first. The airlock at `L0`. Tamper exclusion, proof stamping, and proven spend in the Spend page. | A witness the agent never saw proves a PR opened by a wrapped agent. The agent's frames contain only pass or fail. A PR that edits the test harness is recorded as tampered. The proof verifies offline. |
+| **M0 Foundations** (weeks 1–4) | The repo, the kernel, tenancy, RLS (row-level security) with role-based system access, org and workspace creation including repo binding, IAM, and the tool registry. | A cross-tenant probe (a test that tries to reach one tenant's data from another tenant) finds nothing. A workspace cannot be created without a main repo. A second repo can be linked and unlinked. |
+| **M1 Gateway** (weeks 3–8) | The model proxy. The tool gateway with schema validation. Run tokens. Frames, chain, seal, and attestation in Postgres. The Fleet and Run pages with render replay. The model layer with OpenRouter routes and funding sources. The three-step onboarding gate and the installers. | The gateway wraps Stella and Claude Code. A run can be halted mid-loop from the UI. An exported run can be verified offline. A new organization reaches Fleet with its own first run in under a minute. |
+| **M2 Control** (weeks 7–11) | Bundles, commands, approvals with tokens, and budgets. The full call pipeline with taint and receipts. The credential broker with at least token exchange and restricted keys. Mandates and the ledger. Kill switches. Cedar policy with tests. The Tools page. Cost records with normalized token classes, the price book, and rollups to operator level. The findings job and the Spend page. | A consequential call that exceeds its mandate is denied, and the ledger does not change. An approval token cannot be replayed. A finding's saving reproduces from the frames it cites. |
+| **M3 Done** (weeks 9–13) | The definition of done, in its five gated phases (§8.6, `dod-spec.md`): the language; the harness and CLI; the cloud (contracts, handlers, tables, routes, the `dod.held` governed action, signing); drafting and holdouts; humans and templates. Billing on the proven run. | In this repository, a scripted Claude Code session with the prompt "add a failing test, then make it pass" is blocked once with `CHECK_FAILED` and allowed on the second stop with HELD; the certificate's stream digest equals the sealed attempt's; a governed action `dod.held` is in the ledger; an agent that satisfies the visible set by editing tests is rejected by a hidden check; a PENDING run becomes HELD after a signature. |
+| **M4 Prove** (weeks 11–15) | The witness runner. The witness author, with the test-flip and build oracles first. The airlock at `L0`. Tamper exclusion, proof stamping, proven spend in the Spend page, and the witness as a dod check. | A witness the agent never saw proves a PR opened by a wrapped agent. The agent's frames contain only pass or fail. A PR that edits the test harness is recorded as tampered and its dod is BROKEN. The proof verifies offline. |
+| **M5 Teach** (weeks 12–15) | The records endpoint, the reflector, the promoter, Context PRs through the GitHub App, and steering delivery. | An agent learns something. The lesson becomes a Context PR. Merging it changes the next run's context, and the frame shows the change. |
+
+Retired from the plan: **Ground** (the knowledge graph, the ontology engine, connectors and embeddings; §11 keeps the code graph only) and **Audit** as a milestone of its own (the archive segment written at seal is in M1 because the chain depends on it; holds, crypto-shredding and provider reconciliation are cut).
 
 ### 17.1 Three phases
 
@@ -1255,38 +1174,36 @@ The milestones above are the build order. The phases below are the business orde
 
 | Phase | What ships | Trigger to leave |
 |---|---|---|
-| **The wedge** | Tenancy and identity. The gateway (the model proxy, the tool gateway, wrapping for Stella, Claude Code, Codex, and SDK agents, and one-click installers on three platforms). The toolbelt with approvals, mandates, and kill switches. Runs and frames with render replay. Main and linked repos. Records, Context PRs, and agent definitions in git. Spend accounted to the operator, with findings. The GitHub link with issues. Proof ingested from Stella's own ladder. The free tier and gated onboarding. Milestones M0 to M3. | Customer 1 in production and paying. Five paying accounts opens the seed round. |
-| **Series A** | What a Fortune 500 security review asks for and what the seed funds. The hosted witness runner with several oracles, so any agent's work is proven (M6). The audit tiers with archive, holds, and erasure, plus provider reconciliation (M5). Dedicated data planes and running behind the firewall (§4.6). SSO and SCIM (single sign-on, plus automatic user provisioning from the customer's identity provider). Two-person mandates and the published assurance suite. Outbound events (§7.7) and agent messaging (§7.6). Fork replay and bisect. Multicurrency and the first non-English locales (§15). SOC 2 Type II (an independent audit of security controls over a period of months). Owned intelligence v1: training-set export, the training pipeline, the evaluation harness (the test set that scores a trained model), and hosted serving. | Thirty-five owned models sold. |
-| **Dominate** | The in-firewall installer for owned models. Sovereign and regional planes. Community summaries over the graph. A public registry of conformant providers and tool servers. Agent definitions and policy packs shared across organizations and by industry. Federation between organizations. The connector ecosystem through the SDK. Further locales. | None. Growth. |
+| **The wedge** | Tenancy and identity. The gateway (the model proxy, the tool gateway, wrapping for Stella, Claude Code, Codex, and SDK agents, and one-click installers on three platforms). The toolbelt with approvals, mandates, and kill switches. Runs and frames with render replay. Main and linked repos. Records, Context PRs, and agent definitions in git. Spend accounted to the operator, with findings. The GitHub link with issues and the code graph. The definition of done and the proven-run meter. The witness runner with the test-flip oracle. The free tier and gated onboarding. Milestones M0 to M5. | Customer 1 in production and paying. Five paying accounts opens the next phase. |
+| **Series A** | What a Fortune 500 security review asks for, and only when one asks. More oracles for the witness. Dedicated data planes and running behind the firewall (§4.6). SSO and SCIM. Two-person mandates. Legal holds and crypto-shredding. Provider reconciliation. A replay tier for the definition of done that re-executes checks in a cloud sandbox. Outbound events (§7.7) and agent messaging (§7.6). Fork replay and bisect. Multicurrency and the first non-English locales. | Renewal of the first annual contracts. |
+| **Dominate** | The in-firewall installer for owned models. Sovereign and regional planes. A public registry of conformant providers and tool servers. Agent definitions, dod templates and policy packs shared across organizations and by industry. Federation between organizations. Further locales. | None. Growth. |
 
-The wedge ends when Customer 1 is in production, not on a date. M6 produces the labeled runs that the Series A training pipeline consumes.
-
----
+The wedge ends when Customer 1 is in production, not on a date. M4 produces the labeled runs that the Series A training pipeline consumes, and M3 produces the certificates that say which of them were done.
 
 ## 18. Risks and open decisions
 
 | Item | Position | What would change it |
 |---|---|---|
-| Neo4j databases per instance | Verified. Aura allows 5 databases per GB of RAM, with a ceiling of 100 per Aura instance. The setting is enabled only at creation and is in public preview (open for use, but not yet final). Sharding, which spreads organizations across instances, starts at 25 paid organizations per 32 GB instance. Free organizations are pooled (§5.3) | If Aura's preview slips or the ceiling drops, the fallback is self-managed Enterprise on Kubernetes with `dbms.max_databases`. The data plane table can point any organization at either option |
-| Graph write throughput for frames | Batched writes, a hot window, then compaction | If a customer exceeds 2,000 frames/s, add a per-org ingest partition. Never add a second store of truth |
+| Frame write throughput | Batched writes into a month-partitioned hot table, then compaction | If a customer exceeds 2,000 frames/s, add a per-org ingest partition. Never add a second store of truth |
 | Claude Code model calls | Setting the base URL to the proxy earns the `gateway` tier for model calls | If a harness cannot point at the proxy, the run gets the `harness` tier and the record says so |
 | Approval tokens | Biscuit v2 as designed (a Biscuit token is a signed token that its holder can narrow without asking the issuer again) | If SDK support in Python or Go lags, fall back to a signed JWT (JSON Web Token) with the same claims |
 | Steering format | `.oxagen/rules`, in the context-record TOML format that Stella implements. Stella symlinks to it | The directory name is fixed. If a second agent needs its own path, it gets a symlink the same way Stella does |
 | Protocol trace journal | Export a `contextgraph-trace` journal per run and pass its oracles | The journal is a sketch (`0.1`). Pin its fixtures by commit, like the frame fixtures |
-| Rolling model aliases | Tiers point at `z-ai/glm-latest` and `z-ai/glm-flash-latest`. Frames record the concrete model, meaning the exact model id behind the alias | If an alias flips to a model with a different price or behavior mid-month, the reconciler flags it by concrete id. An organization can pin a model |
-| Engine availability | `stella serve` is a required service for the in-app agent only | The gateway, recording, and every screen work with the engine down. Only the assistant panel reports the outage |
-| Billable unit | Per run, with a plan allowance. Governed actions and retention are reported as secondary meters | ADR-052 chose the governed action because runs vary a hundredfold in size. If small runs subsidize large runs in practice, price the governed action meter, which is already reported |
+| Rolling model aliases | Tiers point at `z-ai/glm-latest` and `z-ai/glm-flash-latest`. Frames record the concrete model, meaning the exact model id behind the alias | If an alias flips to a model with a different price or behavior mid-month, the price book flags it by concrete id. An organization can pin a model |
+| Billable unit | The proven run: `dod.held`, one governed action per held certificate. Runs, governed actions and retention are reported as secondary meters | The price has moved three times in a month. This one is held for two quarters. If small runs subsidize large runs in practice, price the governed-action meter, which is already reported, rather than reprice the run |
 | Witness disclosure grain | `L0` (pass or fail only) by default. The disclosure grain is how much detail a witness reveals about a proof. Stella's own default is `L3` for convergence speed | If `L0` measurably slows convergence for a customer, the workspace can raise the grain as a recorded policy decision. The record keeps the grain per proof, so a training set can be filtered by it |
 | Witness runner isolation | A separate execution plane (the witness runs on its own infrastructure), separate credentials, and no path from the worker's run | Any probe from a worker toward witness storage is a denied tool call and an incident. The proof frame carries the runner's attestation, so isolation is verifiable, not asserted |
+| Hidden checks | Kept cloud-side at lock time, sent to the harness only from the Stop hook | If a customer's harness cannot reach the cloud at Stop, the run settles with the visible set only and the certificate says so; a hidden check is never assumed to have passed |
+| Harness trust | The harness runs the checks on the developer's machine; the certificate warrants the evidence, not the machine | The same trust the run ledger places in the engine build digest. A replay tier that re-executes checks in a cloud sandbox is Series A and a deliberate exception to ADR-043 |
 | Behind the firewall | Same containers, a deployment mode flag, air-gapped supported (§4.6), Series A | If a customer needs it in the wedge, the single-node Compose variant is the early path. The Helm chart follows |
 | Agent messaging | Agent-to-agent messages are evidence, not instructions. Taint applies (§7.6), so their content is marked untrusted | If customers need agent messages to carry authority, that is a grant on a named sender, never a default |
 
 ---
 ## 19. Demo Wow! Scenarios
 
-Status: `complete` (2026-09-11, coverage audit, prompt W12).
+Status: `complete` (2026-09-14; W7 and the assistant half of W11 were cut with the ontology and the in-app agent, W14 added with the definition of done).
 
-Each scenario is one moment an investor or a customer should remember. The mockups are the app, screen for screen, in the house brand. The prompts that produce them are in `2026-09-11-oxagen-demo-mockup-prompts.md`, beside this document; each prompt publishes its mockup and fills in its row and its page-coverage cells below.
+Each scenario is one moment an investor or a customer should remember. The mockups are the app, screen for screen, in the house brand. The prompts that produced them are in `demo-mockup-prompts.md`, beside this document. Every scenario is a guided walk inside `mockups/missioncontrol.html` and a story in the Storybook catalog.
 
 | Id | Wow moment | Pages covered | Mockup | Status |
 |---|---|---|---|---|
@@ -1294,13 +1211,14 @@ Each scenario is one moment an investor or a customer should remember. The mocku
 | W2 | Stop it. Steer it.: watch fifty agents, pause one, steer it, see the frame that received it; mass steer with @agents | Fleet, Run (live), messages | [W2 mockup](https://claude.ai/code/artifact/0b3eae2f-4fd9-45a5-b667-e04367999d1d) | mocked |
 | W3 | Money asked, a human answered: a mandate-bound payment parks, is approved with the full chain, and the receipt shows the one-call credential | Approvals panel, Run strip, Agents (mandate), Tools (mandates ledger), receipt | [W3 mockup](https://claude.ai/code/artifact/9a8bcd5c-c66c-462d-992a-a449679801ce) | mocked |
 | W4 | The flight recorder: a sealed run replayed frame by frame with cost, fork, bisect, export | Run (sealed, compacted) | [W4 mockup](https://claude.ai/code/artifact/a4b69d0b-715c-434c-9f4e-80534bf2e462) | mocked |
-| W5 | Proven, not claimed: the witness flipped on main and the PR; the agent saw only "pass". Disclosure model: the worker never runs or sees the witness. A separate witness-runner run authors, fingerprints and runs it; each `verify@1` call from the worker returns the single word pass or fail at grain L0, so the worker fixes its work, not the oracle | Run (proof), witness run, Tools (assurance), Spend (proven) | [W5 mockup](https://claude.ai/code/artifact/81725124-b936-4cbb-9e40-79089b5a1e35) | mocked |
+| W5 | Proven, not claimed: the witness flipped on main and the PR; the agent saw only "pass". Disclosure model: the worker never runs or sees the witness. A separate witness-runner run authors, fingerprints and runs it; each `verify@1` call from the worker returns the single word pass or fail at grain L0, so the worker fixes its work, not the oracle | Run (proof, chain), witness run, Spend (proven) | [W5 mockup](https://claude.ai/code/artifact/81725124-b936-4cbb-9e40-79089b5a1e35) | mocked |
 | W6 | It learned, you approved, it changed: record to proposal to Context PR to merge to the next run | Steering, Run, Agents (definition in git) | [W6 mockup](https://claude.ai/code/artifact/2bbadccb-92ff-4ade-8f6d-704d9c66dafe) | mocked |
-| W8 | Every dollar, every operator: proven spend, findings ranked by money, reconciled to the cent | Spend, Billing | [W8 mockup](https://claude.ai/code/artifact/6a15975f-6719-4b4c-aae5-4b942dea0bb1) | mocked |
-| W9 | The toolbelt, governed: only granted tools visible, no credentials held, policy simulated on real history | Agents, Tools | [W9 mockup](https://claude.ai/code/artifact/c16a2951-1a79-4c70-b202-ec405c0563dc) | mocked |
+| W8 | Every dollar, every operator: proven spend, findings ranked by money, wasted spend, budgets | Spend, Billing | [W8 mockup](https://claude.ai/code/artifact/6a15975f-6719-4b4c-aae5-4b942dea0bb1) | mocked |
+| W9 | The toolbelt, governed: only granted tools visible, no credentials held, approval rules and kill switches | Agents, Tools | [W9 mockup](https://claude.ai/code/artifact/c16a2951-1a79-4c70-b202-ec405c0563dc) | mocked |
 | W10 | The CIO's console: who can do what, where data lives, what happened, what can be proven, behind the firewall | Organization, Audit | [The CIO's console](https://claude.ai/code/artifact/403166f6-9216-4d23-86ac-bb3c2aa60b23) | mocked |
-| W11 | Configuration is a conversation: the assistant acts through the same governed actions, with receipts | Assistant panel (all pages), Account dialog, notifications, command menu | [W11 mockup](https://claude.ai/code/artifact/317226a1-c2ff-43ce-a439-4a54f8b8288b) | mocked |
+| W11 | Whose account it is: security, preferences as governed actions, notifications that map to frame kinds, and a command menu that cannot find a tool outside the belt | Account dialog, notifications, command menu | [W11 mockup](https://claude.ai/code/artifact/317226a1-c2ff-43ce-a439-4a54f8b8288b) | mocked |
 | W12 | Coverage audit: every page and state mocked | all | [W12 audit](https://claude.ai/code/artifact/45c5e3f9-82f0-404e-ad69-b3279d84c649), [The Ten Pages](https://claude.ai/code/artifact/3fcf949a-c455-4efd-af36-1c2d1f13088e) | mocked |
+| W14 | Done means done: the locked set, one blocked stop, a held certificate, the hidden check that caught a gamed run, a signature that turns PENDING into HELD, and the proven run as the meter | Fleet (Done column, held tile), Run (Done tab), Billing | in `mockups/missioncontrol.html` | mocked |
 
 **Page coverage.** Every row must carry at least one link before the section is complete.
 
@@ -1312,13 +1230,12 @@ Each scenario is one moment an investor or a customer should remember. The mocku
 | Approvals panel | on Fleet and Run | loaded, empty, phone | [W2 mockup](https://claude.ai/code/artifact/0b3eae2f-4fd9-45a5-b667-e04367999d1d), [W11 mockup](https://claude.ai/code/artifact/317226a1-c2ff-43ce-a439-4a54f8b8288b), [W3 mockup](https://claude.ai/code/artifact/9a8bcd5c-c66c-462d-992a-a449679801ce), [W12 mockup](https://claude.ai/code/artifact/3fcf949a-c455-4efd-af36-1c2d1f13088e) |
 | Run (live, sealed, compacted) | `/{org}/{ws}/runs/{run}` | loaded, loading, error, denied, phone | [W2 mockup](https://claude.ai/code/artifact/0b3eae2f-4fd9-45a5-b667-e04367999d1d), [W5 mockup](https://claude.ai/code/artifact/81725124-b936-4cbb-9e40-79089b5a1e35), [W6 mockup](https://claude.ai/code/artifact/2bbadccb-92ff-4ade-8f6d-704d9c66dafe), [W11 mockup](https://claude.ai/code/artifact/317226a1-c2ff-43ce-a439-4a54f8b8288b), [W3 mockup](https://claude.ai/code/artifact/9a8bcd5c-c66c-462d-992a-a449679801ce), [W4 mockup](https://claude.ai/code/artifact/a4b69d0b-715c-434c-9f4e-80534bf2e462), [W12 mockup](https://claude.ai/code/artifact/3fcf949a-c455-4efd-af36-1c2d1f13088e) |
 | Agents (list, detail, mandate detail) | `/{org}/{ws}/agents`, `/{agent}` | loaded, empty, error, denied, phone | [W6 mockup](https://claude.ai/code/artifact/2bbadccb-92ff-4ade-8f6d-704d9c66dafe), [W11 mockup](https://claude.ai/code/artifact/317226a1-c2ff-43ce-a439-4a54f8b8288b), [W9](https://claude.ai/code/artifact/c16a2951-1a79-4c70-b202-ec405c0563dc), [W3 mockup](https://claude.ai/code/artifact/9a8bcd5c-c66c-462d-992a-a449679801ce), [W12 mockup](https://claude.ai/code/artifact/3fcf949a-c455-4efd-af36-1c2d1f13088e) |
-| Tools (registry, connections, mandates, policy, kill switches, assurance) | `/{org}/{ws}/tools` | loaded, empty, error, denied, phone | [W5 mockup](https://claude.ai/code/artifact/81725124-b936-4cbb-9e40-79089b5a1e35), [W11 mockup](https://claude.ai/code/artifact/317226a1-c2ff-43ce-a439-4a54f8b8288b), [W9](https://claude.ai/code/artifact/c16a2951-1a79-4c70-b202-ec405c0563dc), [W3 mockup](https://claude.ai/code/artifact/9a8bcd5c-c66c-462d-992a-a449679801ce), [W12 mockup](https://claude.ai/code/artifact/3fcf949a-c455-4efd-af36-1c2d1f13088e) |
-| Steering (records, proposals, Context PR, retirement) | `/{org}/{ws}/steering` | loaded, empty, error, denied, phone | [W6 mockup](https://claude.ai/code/artifact/2bbadccb-92ff-4ade-8f6d-704d9c66dafe), [W11 mockup](https://claude.ai/code/artifact/317226a1-c2ff-43ce-a439-4a54f8b8288b), [W12 mockup](https://claude.ai/code/artifact/3fcf949a-c455-4efd-af36-1c2d1f13088e) |
-| Spend (findings, operator, agent, waterfall, reconciliation, budgets) | `/{org}/{ws}/spend` | loaded, empty, loading, error, denied, phone | [W5 mockup](https://claude.ai/code/artifact/81725124-b936-4cbb-9e40-79089b5a1e35), [W11 mockup](https://claude.ai/code/artifact/317226a1-c2ff-43ce-a439-4a54f8b8288b), [W8 mockup](https://claude.ai/code/artifact/6a15975f-6719-4b4c-aae5-4b942dea0bb1), [W12 mockup](https://claude.ai/code/artifact/3fcf949a-c455-4efd-af36-1c2d1f13088e) |
+| Tools (registry, connections, mandates, policy, kill switches, auto-approvals) | `/{org}/{ws}/tools` | loaded, empty, error, denied, phone | [W5 mockup](https://claude.ai/code/artifact/81725124-b936-4cbb-9e40-79089b5a1e35), [W11 mockup](https://claude.ai/code/artifact/317226a1-c2ff-43ce-a439-4a54f8b8288b), [W9](https://claude.ai/code/artifact/c16a2951-1a79-4c70-b202-ec405c0563dc), [W3 mockup](https://claude.ai/code/artifact/9a8bcd5c-c66c-462d-992a-a449679801ce), [W12 mockup](https://claude.ai/code/artifact/3fcf949a-c455-4efd-af36-1c2d1f13088e) |
+| Steering (records, proposals, Context PRs) | `/{org}/{ws}/steering` | loaded, empty, error, denied, phone | [W6 mockup](https://claude.ai/code/artifact/2bbadccb-92ff-4ade-8f6d-704d9c66dafe), [W11 mockup](https://claude.ai/code/artifact/317226a1-c2ff-43ce-a439-4a54f8b8288b), [W12 mockup](https://claude.ai/code/artifact/3fcf949a-c455-4efd-af36-1c2d1f13088e) |
+| Spend (findings, operator, agent, tool, wasted spend, budgets) | `/{org}/{ws}/spend` | loaded, empty, loading, error, denied, phone | [W5 mockup](https://claude.ai/code/artifact/81725124-b936-4cbb-9e40-79089b5a1e35), [W11 mockup](https://claude.ai/code/artifact/317226a1-c2ff-43ce-a439-4a54f8b8288b), [W8 mockup](https://claude.ai/code/artifact/6a15975f-6719-4b4c-aae5-4b942dea0bb1), [W12 mockup](https://claude.ai/code/artifact/3fcf949a-c455-4efd-af36-1c2d1f13088e) |
 | Organization | `/{org}` | loaded, denied, phone | [W11 mockup](https://claude.ai/code/artifact/317226a1-c2ff-43ce-a439-4a54f8b8288b), [W10](https://claude.ai/code/artifact/403166f6-9216-4d23-86ac-bb3c2aa60b23), [W12 mockup](https://claude.ai/code/artifact/3fcf949a-c455-4efd-af36-1c2d1f13088e) |
 | Billing | `/{org}/billing` | loaded, error, denied, phone | [W11 mockup](https://claude.ai/code/artifact/317226a1-c2ff-43ce-a439-4a54f8b8288b), [W8 mockup](https://claude.ai/code/artifact/6a15975f-6719-4b4c-aae5-4b942dea0bb1), [W12 mockup](https://claude.ai/code/artifact/3fcf949a-c455-4efd-af36-1c2d1f13088e) |
 | Audit | `/{org}/audit` | loaded, empty, error, denied, phone | [W11 mockup](https://claude.ai/code/artifact/317226a1-c2ff-43ce-a439-4a54f8b8288b), [W3 mockup](https://claude.ai/code/artifact/9a8bcd5c-c66c-462d-992a-a449679801ce), [W10](https://claude.ai/code/artifact/403166f6-9216-4d23-86ac-bb3c2aa60b23), [W12 mockup](https://claude.ai/code/artifact/3fcf949a-c455-4efd-af36-1c2d1f13088e) |
-| Assistant panel | every page | collapsed, open, engine down, phone | [W1 mockup](https://claude.ai/code/artifact/31579436-1abf-48f8-b320-8740c4029b0f), [W5 mockup](https://claude.ai/code/artifact/81725124-b936-4cbb-9e40-79089b5a1e35), [W11 mockup](https://claude.ai/code/artifact/317226a1-c2ff-43ce-a439-4a54f8b8288b), [W3 mockup](https://claude.ai/code/artifact/9a8bcd5c-c66c-462d-992a-a449679801ce), [W4 mockup](https://claude.ai/code/artifact/a4b69d0b-715c-434c-9f4e-80534bf2e462), [W10](https://claude.ai/code/artifact/403166f6-9216-4d23-86ac-bb3c2aa60b23), [W12 mockup](https://claude.ai/code/artifact/3fcf949a-c455-4efd-af36-1c2d1f13088e) |
 | Account dialog, notifications, command menu | user menu, top bar | loaded, phone | [W5 mockup](https://claude.ai/code/artifact/81725124-b936-4cbb-9e40-79089b5a1e35), [W11 mockup](https://claude.ai/code/artifact/317226a1-c2ff-43ce-a439-4a54f8b8288b), [W3 mockup](https://claude.ai/code/artifact/9a8bcd5c-c66c-462d-992a-a449679801ce), [W4 mockup](https://claude.ai/code/artifact/a4b69d0b-715c-434c-9f4e-80534bf2e462), [W10](https://claude.ai/code/artifact/403166f6-9216-4d23-86ac-bb3c2aa60b23), [W12 mockup](https://claude.ai/code/artifact/3fcf949a-c455-4efd-af36-1c2d1f13088e) |
 
 ---
@@ -1370,7 +1287,7 @@ Money is `bigint` micro-USD unless a `currency` column says otherwise. Secrets a
 |---|---|---|
 | `user_id` | uuid → `auth.users` | |
 | `provider_id`, `account_id` | text | the identity provider and the id there |
-| `access_token`, `refresh_token`, `id_token` | text | provider tokens for SSO |
+| `access_token`, `refresh_token`, `id_token` | text | provider tokens for Google and GitHub sign-in |
 | `expires_at` | timestamptz | |
 | `scope` | text | |
 | `password` | text | hash, for email and password accounts |
@@ -1390,7 +1307,7 @@ Money is `bigint` micro-USD unless a `currency` column says otherwise. Secrets a
 |---|---|---|
 | `name` | text | |
 | `slug` | citext | unique |
-| `namespace` | citext | 2 to 6 characters, unique, immutable; used in agent keys and the Neo4j database name |
+| `namespace` | citext | 2 to 6 characters, unique, immutable; used in agent keys |
 | `status` | text | `active`, `suspended`, `deleted` |
 | `plan` | text | `free`, `team`, `enterprise` |
 | `stripe_customer_id` | text | |
@@ -1400,14 +1317,12 @@ Money is `bigint` micro-USD unless a `currency` column says otherwise. Secrets a
 | `onboarding_state` | text | `gated`, `unlocked` |
 | `unlocked_at`, `discount_offered_at` | timestamptz | |
 | `kek_key_id` | text | the organization's key-encryption key in KMS |
-| `neo4j_database` | text | `org_<namespace>` |
-| `neo4j_instance_id` | text | which instance hosts the database (§5.3 sharding) |
 | `funding_source` | text | `platform`, `customer_key` |
 | `funding_connection_id` | uuid → `tools.connections` | the customer's model provider key, when `customer_key` |
 | `model_routes` | jsonb | tier → provider, model, fallback (§4.5) |
 | `retention_days` | int | default 2555 (seven years) |
 | `retention_mode` | text | `content_exact`, `digest_only` |
-| `assistant_spend_cap_micros` | bigint | cap on tokens Oxagen buys on the organization's behalf |
+| `platform_spend_cap_micros` | bigint | cap on tokens Oxagen buys on the organization's behalf |
 | `deny_generation` | bigint | bumped to invalidate every cached policy bundle in the organization |
 | `settings` | jsonb | |
 
@@ -1426,7 +1341,7 @@ Money is `bigint` micro-USD unless a `currency` column says otherwise. Secrets a
 
 | Column | Type | Notes |
 |---|---|---|
-| `store` | text | `postgres`, `neo4j`, `objects`; unique with `org_id` |
+| `store` | text | `postgres`, `objects`; unique with `org_id` |
 | `mode` | text | `shared`, `dedicated` |
 | `config_ciphertext`, `key_id`, `digest` | bytea, text, text | the connection configuration, enveloped |
 | `status` | text | `active`, `degraded`, `rotating` |
@@ -1588,7 +1503,6 @@ Money is `bigint` micro-USD unless a `currency` column says otherwise. Secrets a
 | `review_at` | timestamptz | |
 | `status` | text | `active`, `expired`, `revoked` |
 | `last_tested_at`, `last_test_result` | timestamptz, text | |
-| `two_person_required` | bool | |
 
 **`tools.credential_grants`** (class `workspace`)
 
@@ -1606,7 +1520,7 @@ Money is `bigint` micro-USD unless a `currency` column says otherwise. Secrets a
 | Column | Type | Notes |
 |---|---|---|
 | `agent_principal_id` | uuid → `iam.principals` | |
-| `granted_by`, `second_approver` | uuid → `auth.users` | |
+| `granted_by` | uuid → `auth.users` | |
 | `role_at_grant` | text | the granter's role at the time |
 | `consequence_tags` | text[] | |
 | `limits` | jsonb | measure → per_call, per_period, period, currency or unit |
@@ -1641,10 +1555,9 @@ Money is `bigint` micro-USD unless a `currency` column says otherwise. Secrets a
 | `digest` | text | |
 | `tests` | jsonb | the policy's own test cases |
 | `test_result` | text | |
-| `simulation_id`, `simulation_summary` | text, jsonb | would-deny, would-approve, would-allow counts and the runs (§6.12) |
 | `authored_by`, `approved_by` | uuid → `auth.users` | |
 | `activated_at` | timestamptz | |
-| `status` | text | `draft`, `simulated`, `active`, `superseded` |
+| `status` | text | `draft`, `active`, `superseded` |
 
 ### A.6 `control` (4 tables in the wedge, 5 with event subscriptions)
 
@@ -1743,7 +1656,7 @@ Money is `bigint` micro-USD unless a `currency` column says otherwise. Secrets a
 | `model` | text | canonical model id |
 | `model_aliases` | text[] | |
 | `region` | text | |
-| `token_class` | text | `input_uncached`, `cache_read`, `cache_write_5m`, `cache_write_1h`, `output`, `reasoning`, `server_tool_request`, `embedding_input`, `rerank` |
+| `token_class` | text | `input_uncached`, `cache_read`, `cache_write_5m`, `cache_write_1h`, `output`, `reasoning`, `server_tool_request`, `rerank` |
 | `unit` | text | |
 | `currency` | text | ISO 4217 |
 | `micros_per_million` | bigint | |
@@ -1797,18 +1710,6 @@ Money is `bigint` micro-USD unless a `currency` column says otherwise. Secrets a
 | `invoice_id`, `invoice_line_ref` | text | |
 | `imported_at`, `import_digest` | timestamptz, text | |
 
-**`cost.reconciliations`** (class `org`)
-
-| Column | Type | Notes |
-|---|---|---|
-| `period_start`, `period_end` | date | |
-| `provider`, `provider_key_id` | text | |
-| `level` | text | `request_id`, `key_day`, `invoice_line` |
-| `matched_micros`, `provider_micros`, `variance_micros` | bigint | |
-| `status` | text | `matched`, `variance`, `exception`, `resolved` |
-| `unmatched_frames`, `unmatched_lines` | jsonb | |
-| `resolved_by`, `resolution_note` | uuid, text | |
-
 ### A.8 `billing` (2 tables)
 
 **`billing.subscriptions`** (class `org`)
@@ -1824,7 +1725,7 @@ Money is `bigint` micro-USD unless a `currency` column says otherwise. Secrets a
 | `current_period_start`, `current_period_end` | timestamptz | |
 | `runs_this_period` | int | |
 | `retained_gb` | numeric | |
-| `assistant_micros_this_period` | bigint | |
+| `platform_micros_this_period` | bigint | |
 | `cancel_at` | timestamptz | |
 
 **`billing.budgets`** (class `org`; `workspace_id` nullable)
@@ -1870,18 +1771,7 @@ Money is `bigint` micro-USD unless a `currency` column says otherwise. Secrets a
 | `sealed_at` | timestamptz | |
 | `retention_until` | timestamptz | |
 | `lock_mode` | text | `compliance` |
-| `compacted_at` | timestamptz | when the frame nodes left the graph |
-| `legal_hold_id` | uuid → `audit.legal_holds` | |
-
-**`audit.legal_holds`** (class `org`)
-
-| Column | Type | Notes |
-|---|---|---|
-| `scope_kind` | text | `run`, `agent`, `workspace`, `org` |
-| `scope_id` | text | |
-| `reason` | text | |
-| `placed_by`, `placed_at` | uuid, timestamptz | |
-| `released_by`, `released_at` | uuid, timestamptz | |
+| `compacted_at` | timestamptz | when the frame rows left the hot table |
 
 ### A.10 Where today's tables went
 
@@ -1894,89 +1784,58 @@ Money is `bigint` micro-USD unless a `currency` column says otherwise. Secrets a
 | `billing.credit_*`, `billing.reseller_*`, `billing.invoices`, `billing.payment_methods` | gone; Stripe holds invoices and cards |
 | `security.security_events`, `privacy.*` requests | `audit.audit_events` |
 | `ingestion.*` cursors and health | columns on `wrk.repositories` and `tools.tool_servers`, and `:Source` nodes |
-| `chat.*` conversations | runs of the in-app agent |
+| `chat.*` conversations | gone; there is no in-app agent |
 | `mcp.*`, `plugin.*`, `content.*`, `cms.*`, `environments.*`, `eval.*`, `workflow.*`, `ai.*`, `ratelimit.*`, `engram.*`, `codegraph.*` | gone |
 
 The nine schemas are `auth`, `org`, `wrk`, `iam`, `tools`, `control`, `cost`, `billing`, `audit`. Thirty-five tables in the wedge, thirty-seven in full. Every tenant table uses one of the two policy classes in §5.2.
 
-## Appendix B. Neo4j model (per organization database)
+### A.11 `dod` (2 tables)
 
-Every organization has its own database (§5.3). Every node and relationship carries `ws` (the workspace public id), and every node carries `id` (its public id), `created_at`, `valid_from`, `valid_to`, `recorded_at`, and `is_system`. The tables below list what is specific to each label and relationship type.
+**`dod.dod_sets`** (class `org`)
 
-### B.1 Node labels
-
-| Layer | Label | Key properties | What it is |
-|---|---|---|---|
-| Reference | `Workspace` | `id` | reference node for a workspace; fields live in Postgres |
-| Reference | `Principal` | `id`, `kind` | reference node for an operator, agent, or service |
-| Reference | `Agent` | `id`, `agent_key`, `definition_digest` | reference node for an agent identity |
-| Source | `Source` | `connector`, `connection_id`, `status` | the GitHub connector |
-| Source | `SyncRun` | `started_at`, `ended_at`, `records`, `status` | one synchronization |
-| Source | `SourceRecord` | `external_id`, `digest`, `synced_at`, `payload_ref` | one raw record as ingested |
-| Source | `Event` | `delivery_id`, `kind`, `actor`, `occurred_at`, `payload_digest` | one repository event (§11.4) |
-| Entity (GitHub fragment) | `Repository`, `Branch`, `Commit`, `PullRequest`, `Issue`, `Release`, `File`, `Symbol` | per class | the fixed, built-in code and repository classes (§11.2); not customer-extensible |
-| Entity (data layer) | `Database`, `Schema`, `Table`, `Column`, `Index`, `Constraint`, `View`, `Migration`, `StorageBucket`, `Queue`, `Topic`, `Cache`, `Secret`, `DatabaseInstance` | per class | the built-in data classes (§11.7) |
-| Context | `Record` | `record_id`, `lineage_id`, `record_kind`, `record_hash`, `status`, `sharing_scope`, `confidence`, `origin`, `attestation` | a context record (§9) |
-| Run | `Run` | `operator_id`, `agent_id`, `harness`, `task_ref`, `enforcement_tier`, `replay_grade`, `verdict`, `cost_micros`, `frame_count`, `merkle_root`, `segment_ref` | one run (§8.1) |
-| Run | `Attempt` | `seq`, `kind` (`initial`, `resume`, `fork`), `engine`, `engine_version` | one attempt of a run |
-| Run | `Frame` | `seq`, `kind`, `ts`, `hash`, `prev_hash`, `content_digest`, `bytes_ref`, `cost_micros`, `redactions` | one recorded event (§8.2); compacted after the hot window |
-| Run | `Checkpoint` | `seq`, `signature`, `signer`, `countersignature` | a signed point in the chain |
-| Run | `Seal` | `merkle_root`, `attestation_key_id`, `signature`, `sealed_at`, `completeness_gaps` | the end of an attempt |
-| Proof | `Witness` | `witness_id`, `oracle`, `command_digest`, `authored_at`, `fingerprint` | a witness written by Oxagen (§8.5) |
-| Proof | `Verdict` | `verdict`, `target_sha`, `pr_sha`, `fail_fingerprint`, `disclosure_grain`, `runner_attestation` | the outcome of running a witness |
-
-### B.2 Relationship types
-
-| Layer | Type | From → To | Properties | Meaning |
-|---|---|---|---|---|
-| Structure | `IN_WORKSPACE` | any node → `Workspace` | | membership, in addition to the `ws` property |
-| Entity | `DERIVED_FROM` | `Entity` → `SourceRecord` | `confidence`, `resolved_by` | provenance of every entity |
-| Source | `PRODUCED` | `SyncRun` → `SourceRecord` | | |
-| Source | `FROM_SOURCE` | `SyncRun` → `Source` | | |
-| Source | `CONCERNS` | `Event` → `Entity` | | which entity a repository event is about |
-| Context | `APPENDED` | `Run` → `Record` | `frame_seq` | which run appended a record |
-| Context | `EVIDENCED_BY` | `Record` → `Frame` | | evidence links |
-| Context | `SUPERSEDES`, `REFINES`, `CONTRADICTS` | `Record` → `Record` | | typed record links from the protocol |
-| Context | `PROPOSES` | `Record` (proposal) → `Record` | | |
-| Context | `PROMOTED_BY` | `Record` → `Record` (promotion event) | `pr_url`, `commit_sha`, `approver` | merge of a Context PR |
-| Context | `ABOUT` | `Record` → `Entity` | | |
-| Run | `IN_RUN` | `Frame` → `Run` | | |
-| Run | `ATTEMPT_OF` | `Attempt` → `Run` | | |
-| Run | `NEXT` | `Frame` → `Frame` | | the chain order |
-| Run | `SEALED_BY` | `Attempt` → `Seal` | | |
-| Run | `RAN_AS` | `Run` → `Agent` | | |
-| Run | `OPERATED_BY` | `Run` → `Principal` | | the operator |
-| Run | `FOR_TASK` | `Run` → `Issue` or `PullRequest` | | the task reference |
-| Run | `USED_CONTEXT` | `Frame` → `Record` or `Entity` | `rendered`, `cited` | what a model call was given |
-| Run | `DECIDED` | `Frame` → `Frame` | | a policy decision about a tool call |
-| Run | `OPENED_BY` | `PullRequest` → `Run` | | a PR a run's side effect opened |
-| Proof | `WITNESSED_BY` | `Run` → `Witness` | | |
-| Proof | `VERDICT_OF` | `Verdict` → `Witness` | | |
-| Proof | `MEASURED_AGAINST` | `Verdict` → `Commit` | `side` (`target`, `pr`) | the two commits a witness ran on |
-| Proof | `RAN_IN` | `Verdict` → `Run` | | the witness runner's own run |
-| Proof | `PROVED_BY` | `Run` → `Verdict` | | set only when the verdict is `flipped` |
-| Code graph | `DEFINES` | `File` → `Symbol` | | |
-| Code graph | `IMPORTS`, `CALLS`, `REFERENCES` | `Symbol` → `Symbol` or `File` | `evidence` | |
-| Code graph | `INTRODUCED_IN`, `REMOVED_IN` | `File` or `Symbol` → `Commit` | | versioning of the code graph |
-| Code graph | `HEAD_OF` | `Commit` → `Branch` | | |
-| Data layer | `DEFINES_TABLE`, `ALTERS` | `Migration` → `Table` or `Column` | `order` | |
-| Data layer | `DECLARED_BY` | `Table` → `Symbol` | `framework` | the model class that declares a table |
-| Data layer | `READS`, `WRITES`, `DELETES`, `MIGRATES` | `Symbol` → `Table`, `Column`, or storage object | `confidence`, `operation`, `columns`, `evidence` | what code does to data |
-| Data layer | `OBSERVED_ACCESS` | `Run` → data object | `frame_seq` | runtime confirmation |
-| Data layer | `LIVE_MATCH` | `Table` (declared) → `Table` (synced) | `drift` | declared versus live schema |
-
-### B.3 Constraints and indexes
-
-| Kind | On | Purpose |
+| Column | Type | Notes |
 |---|---|---|
-| Uniqueness | `id` on every label | one node per public id |
-| Existence | `ws` on every label and relationship type | no node without a workspace |
-| Uniqueness | (`ws`, `natural_key`) on `Entity` | one entity per natural key per workspace |
-| Uniqueness | (`ws`, `record_id`) on `Record` | |
-| Uniqueness | (`run_id`, `attempt_id`, `seq`) on `Frame` | dense sequence, no duplicates |
-| Range | `ws`, `valid_from`, `valid_to`, every natural key | scoping and `as_of` queries |
-| Vector | `entity_voyage4_1024`, `record_voyage4_1024`, `chunk_voyagecontext3_1024`, `symbol_voyagecode3_1024`, `run_voyage4_1024` | one index per label and embedding model (§11.5); never mixed |
-| Full-text | one per searchable label | the keyword half of hybrid retrieval |
+| `run` | text | the run public id |
+| `locked` | text | `sha256:…`, the lock digest: RFC 8785 canonical JSON of the set with `locked` removed |
+| `visible` | jsonb | the set the agent can read |
+| `hidden` | jsonb | holdout checks; sent to the harness only at Stop |
+| `drafted_by` | text | the model that drafted the set, or `human`, or the template name; never the model running the task |
+| `locked_at` | timestamptz | |
+
+Index `(org_id, run)`.
+
+**`dod.dod_certificates`** (class `org`)
+
+| Column | Type | Notes |
+|---|---|---|
+| `public_id` | text | `dodc_…`, unique |
+| `run`, `attempt` | text | the run and the sealed attempt (`arat_…`) from the run ledger |
+| `stream_digest` | text | the sealed attempt's event-stream digest the certificate is bound to |
+| `lock` | text | the lock digest the evidence was decided under |
+| `verdict` | text | `HELD`, `PENDING`, `BROKEN` |
+| `reasons` | jsonb | the closed reason codes |
+| `body`, `digest`, `signature` | jsonb, text, text | the canonical certificate, its digest, and the org key's ed25519 signature over it |
+| `issued_at` | timestamptz | |
+
+Index `(org_id, run)`. A HELD certificate meters the governed action `dod.held`; a PENDING one meters it on signature.
+
+
+## Appendix B. The run record and code graph (Postgres)
+
+Appendix B once described the Neo4j model. The same shapes are Postgres tables now, under the schemas `run`, `ctx` and `code`, each with `org_id` and `ws` and the RLS policy of A.0.
+
+| Table | Rows | Keys and indexes |
+|---|---|---|
+| `run.runs` | one per run: agent, operator, workspace, task ref, tier, grade, verdict, status, rollups (`frame_count`, `cost_micros`, `merkle_root`, `segment_ref`) | `(org_id, ws, started_at desc)`, `(org_id, agent_id)` |
+| `run.attempts` | one per attempt: `public_id` (`arat_…`), `stream_digest`, sealed at | `(org_id, run_id)` |
+| `run.frames` | one per frame in the hot window: seq, kind, tier, digest, prev digest, cost, policy decision, body ref | partitioned by month on `recorded_at`; `(org_id, run_id, seq)` |
+| `run.seals` | one per seal: attestation, signer key id, segment ref | `(org_id, run_id)` |
+| `ctx.records` | context records and their lineage: kind, statement, rationale, evidence refs, contradiction refs, promotion events, content hash | `(org_id, ws, lineage)`, full-text on statement |
+| `code.files`, `code.symbols`, `code.edges` | the code graph of each main repo: path, language, signature, docstring window, `valid_from`, `valid_to` commit, and the `DEFINES`, `IMPORTS`, `CALLS`, `REFERENCES` edges | `(org_id, repo_id, valid_to nulls first)`, full-text on symbol |
+| `code.tables`, `code.columns`, `code.data_edges` | the data layer of §11.4 | `(org_id, repo_id)` |
+
+Constraints: a frame's `prev_digest` must equal the previous frame's `digest` (checked by the recorder, asserted by the verifier); `valid_to` is null while a symbol is live; a record's `content_hash` is unique per lineage.
+
 
 ## Appendix C. Frame envelope (gateway kind example)
 
@@ -2013,7 +1872,7 @@ Every organization has its own database (§5.3). Every node and relationship car
 | `fidelity` | string | `gateway`, `sdk`, or `harness`: who observed the event |
 | `span` | object | OpenTelemetry trace, span, and parent ids for export |
 | `body` | object | the kind-specific payload; for `model.response`: provider, model, provider request id, stop reason, latency, usage by token class, and the cost record (§12.3) |
-| `content.digest` | string | SHA-256 of the exact body bytes stored outside the graph |
+| `content.digest` | string | SHA-256 of the exact body bytes stored in object storage |
 | `content.bytes_ref` | string | where the encrypted body is stored |
 | `content.redactions` | array | what was removed before storage, with the digest of the removed text |
 | `prev_hash`, `hash` | string | the hash chain: `hash` is SHA-256 over `prev_hash` and the canonical envelope without `hash` |
@@ -2044,7 +1903,7 @@ Every organization has its own database (§5.3). Every node and relationship car
 | `grants[].resource_scope` | the ceiling for that grant: side-effect classes, repositories, graph labels and mode, hop budget, egress classes, spend limits |
 | `budget` | spend limits per run and per day, `enforced` at the model proxy or `observed` only |
 
-How the four grants combine for this role: every GitHub tool is allowed for reads and writes on one repository, merging a pull request always waits for a human, deleting anything is denied outright, and the graph can be searched for customers and tickets two hops deep. Anything not named is denied, because the default effect is deny.
+How the four grants combine for this role: every GitHub tool is allowed for reads and writes on one repository, merging a pull request always waits for a human, deleting anything is denied outright, and the code graph and records can be searched. Anything not named is denied, because the default effect is deny.
 
 ## Appendix E. The agent tools that survive
 
@@ -2054,7 +1913,7 @@ The current repository registers 229 real contracts (244 names minus test fixtur
 
 | Agent tool | Absorbs | Does |
 |---|---|---|
-| `create_org` | create_org | organization, Neo4j database, keys, billing account |
+| `create_org` | create_org | organization, keys, billing account |
 | `update_org` | update_org_settings | name, settings, retention policy |
 | `invite_member` | send_workspace_invite, add_org_member | invite to org or workspace with role |
 | `respond_to_invite` | accept_member_invite, decline_member_invite | accept or decline |
@@ -2119,7 +1978,6 @@ The current repository registers 229 real contracts (244 names minus test fixtur
 | `revoke_mandate` | (new) | |
 | `list_mandates` | (new) | ledger view |
 | `set_policy` | (new) | new policy version with tests |
-| `simulate_policy` | (new) | replay a version against history |
 | `set_kill_switch` | (new) | any level |
 
 **Repositories (3)**
@@ -2152,7 +2010,6 @@ Dropped from this family (§11): `add_source`, `update_source`, `remove_source`,
 |---|---|---|
 | `get_spend` | get_usage_breakdown, list_routing_stats, get_repo_metrics | rollups at any level with basis |
 | `list_findings` | list_error_clusters | ranked optimizations |
-| `get_reconciliation` | (new) | matched, variance, exceptions |
 | `export_statement` | export_data (billing part) | |
 | `set_budget` | set_spend_budget, get_spend_budget, update_user_budget, get_user_budget, get_budget_policy | any level |
 | `set_model_route` | update_model_settings, get_model_settings, list_model_agent tools, preview_routing_decision, get_routing_policy | tiers and fallbacks |
@@ -2166,42 +2023,44 @@ Dropped from this family (§11): `add_source`, `update_source`, `remove_source`,
 |---|---|---|
 | `query_audit_log` | query_audit_log, get_auth_alerts | control-plane events, receipts |
 | `export_data` | export_data | organization export |
-| `erase_data` | erase_data | crypto-shred |
-| `set_legal_hold` | (new) | |
 | `list_incidents` | (new; incidents had no list) | tamper, probes, chain breaks, mandate exceptions |
 | `set_event_subscription` | (new; Series A) | event kinds, filters, delivery mode; returns the unique endpoint (§7.7) |
 | `list_event_subscriptions` | (new; Series A) | with delivery health and dead letters |
 
-**Assistant and account (6)**
+**Account (5)**
 
 | Agent tool | Absorbs | Does |
 |---|---|---|
-| `ask_assistant` | send_message, post_conversation_message, add_conversation_attachment | a turn of the in-app agent |
 | `list_conversations` | list_conversations, rename_conversation, archive_conversation, delete_conversation, export_conversation, purge_conversations, list_conversation_files | with the actions as arguments |
 | `set_preferences` | update_user_preferences, get_user_preferences, update_workspace_user_preferences, get_workspace_user_preferences, set_auth_alerts | |
 | `list_notifications` | list_notifications | |
 | `mark_notification` | mark_notification | |
 | `get_install_instructions` | get_install_instructions | per harness |
 
-**Dropped, by family** (everything not named above): `environment.*` and `bind/unbind_agent_environment` (no runtime); `plugin.*`, `browse_plugin_catalog`, `add/remove_plugin_registry`, `install_plugins_bulk`, `sync_plugin_catalog`, `get_catalog_plugin`, `get_plugin_schema`, `validate_plugin_schema`, `list_plugin_registries`, `list_plugin_versions`, `set_plugin_enabled` (no marketplace in v1; sources and tool servers replace it); `prompt.settings.*` (steering replaces prompt settings); `import_env_secrets`, `export_secrets`, `reveal_secret` (secrets are connections and are never revealed); `parse_memory_import`, `commit_memory_import` (records are appended, not imported); `get_pr`, `get_pr_diff`, `list_branches`, `get_ci_status`, `read_file` (the graph and the GitHub events hold these; agents read code through their own harness); `upload_asset` (no content); `get_org_settings`, `get_workspace_settings`, `get_environment`, `get_connection`, `get_connection_mappings`, `get_memory_policy`, `get_prompt_settings`, `get_routing_policy` (reads folded into the objects above); everything in the test fixtures.
+**Definition of done (4)**
 
-Count: 11 + 10 + 14 + 17 + 3 + 9 + 9 + 7 + 6 = **86** for the full product. The wedge ships 68: the 86 minus the eighteen marked new in the toolbelt, compliance, and wrapping families that land from M2 onward and in Series A. Nothing is added back without a row in this appendix.
+| Agent tool | Absorbs | Does |
+|---|---|---|
+| `draft_dod` | (new) | draft a set from a prompt through the model layer; splits the result into visible and hidden; the drafting model is recorded on the set |
+| `lock_dod` | (new) | register a locked set (visible and hidden) for a run |
+| `settle_dod` | (new) | verify submitted evidence against the locked set, re-run `decide()`, bind to the sealed attempt, sign a certificate, meter `dod.held` |
+| `sign_dod` | (new) | a human signature on a PENDING run's human check; decides again |
 
 ## Appendix F. The pages that survive
 
-The current web app has 70 page files. Nine remain: six at workspace scope, three at organization scope. Sign-in flows (login, signup, password reset, two-factor, verify, accept an invite, create the first organization) are not screens and are not counted; there are seven of them and they stay as they are. Onboarding is not a page: it is the in-app agent's first run inside the workspace.
+The current web app has 70 page files. Nine remain: six at workspace scope, three at organization scope. Sign-in flows (login, signup, password reset, two-factor, verify, accept an invite, create the first organization) are not screens and are not counted; there are seven of them and they stay as they are. Onboarding is not a page: it is the three-step gate, and the first run inside the workspace.
 
 | # | Page | Route | Absorbs today's routes | Job |
 |---|---|---|---|---|
 | 1 | **Fleet** | `/{org}/{ws}` | `[ws]` (workspace home), `sessions`, `workbench`, `access/sessions`, `dashboard`, and the approvals queue as a panel | every run, live and recent; pending approvals; pause, resume, cancel |
 | 2 | **Run** | `/{org}/{ws}/runs/{run}` | `sessions/*` detail, `knowledge/citations` | frame-by-frame player, cost strip, approvals on this run, steer, fork, bisect, export |
 | 3 | **Agents** | `/{org}/{ws}/agents` and `/{run}`-style detail `/{agent}` | `workbench/agents`, `workbench/agents/[agentId]`, `workbench/agents/new`, `workbench/environments`, `settings/agent-defaults`, `developer/mcp` | identity, credentials, roles, toolbelt, mandates, budgets, enrollment |
-| 4 | **Tools** | `/{org}/{ws}/tools` | `workbench/tools`, `workbench/tools/agent tools`, `workbench/tools/mcp`, `settings/mcp-server-registries`, `marketplace`, `marketplace/agent-tools`, `marketplace/integrations`, `marketplace/integrations/[connectorId]`, `governance/agent tools`, `governance/policies`, `access/reviews` | registry, connections, mandates ledger, policy versions with simulation, kill switches, assurance results |
-| 5 | **Steering** | `/{org}/{ws}/steering` | `knowledge/memory` | records, proposals, Context PRs, effect, retirement |
-| 6 | **Spend** | `/{org}/{ws}/spend` | `settings/spend-budgets`, `billing/usage` | findings, spend by operator and agent, proven spend, reconciliation, budgets |
+| 4 | **Tools** | `/{org}/{ws}/tools` | `workbench/tools`, `workbench/tools/agent tools`, `workbench/tools/mcp`, `settings/mcp-server-registries`, `marketplace`, `marketplace/agent-tools`, `marketplace/integrations`, `marketplace/integrations/[connectorId]`, `governance/agent tools`, `governance/policies`, `access/reviews` | registry, connections, mandates ledger, policy versions with their tests, kill switches, auto-approval rules |
+| 5 | **Steering** | `/{org}/{ws}/steering` | `knowledge/memory` | records, proposals, Context PRs |
+| 6 | **Spend** | `/{org}/{ws}/spend` | `settings/spend-budgets`, `billing/usage` | findings, spend by operator and agent, proven spend, wasted spend, budgets |
 | 7 | **Organization** | `/{org}` | `[orgSlug]` (org home), `members`, `members/pending`, `workspaces`, `new-workspace`, `settings/general`, `settings/model-funding`, `settings/privacy`, `settings/github`, `developer/tokens`, `settings` (workspace general), `settings/general` (workspace) | members and roles, workspaces, model funding and routes, data plane, API keys, workspace settings including repo binding |
-| 8 | **Billing** | `/{org}/billing` | `billing`, `billing/subscription`, `billing/invoices` | plan, run allowance, meters, invoices (linked to Stripe) |
-| 9 | **Audit** | `/{org}/audit` | `security`, `security/audit`, `security/compliance`, `security/mfa`, `security/trust`, `governance`, `access` | audit events, incidents, receipts search, legal holds, exports, key rotation, assurance suite results |
+| 8 | **Billing** | `/{org}/billing` | `billing`, `billing/subscription`, `billing/invoices` | plan, proven runs, the secondary meters, invoices (linked to Stripe) |
+| 9 | **Audit** | `/{org}/audit` | `security`, `security/audit`, `security/compliance`, `security/mfa`, `security/trust`, `governance`, `access` | audit events, incidents, receipts search, exports, key rotation, retention |
 
 The routes `knowledge`, `knowledge/graph`, `knowledge/graph/[nodeId]`, `knowledge/ontology`, `knowledge/sources`, and `knowledge/sources/connect` are dropped along with the dynamic knowledge graph they served (§11); nothing absorbs them.
 

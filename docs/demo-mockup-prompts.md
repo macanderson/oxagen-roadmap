@@ -1,6 +1,6 @@
 # Oxagen Mission Control: mockup prompts, one per demo flow
 
-**Purpose.** Each prompt below produces one high-fidelity, clickable mockup of Oxagen Mission Control, built on the Oxagen house brand, showing exactly what the app should be. The twelve prompts together cover every page, panel, dialog, and sign-in flow in the spec. Nothing in the app is left unmocked; prompt 12 audits that.
+**Purpose.** Each prompt below produced one high-fidelity, clickable mockup of Oxagen Mission Control, built on the Oxagen house brand. This is the record of how the W flows were made; the flows themselves now live as guided scenarios inside `mockups/missioncontrol.html` and as stories in the Storybook catalog, and the coverage audit prompt 12 ran is replaced by `tools/check-mockup.mjs`, which walks every page in every state and every scenario. The W7 (ontology) and assistant prompts were cut by the scope review of 2026-09-14 (`scope-review.md`); W11 survives as the account.
 
 **How to use.** Paste **Part A (the common brief)** followed by **one** Part B prompt into a fresh agent session. Run the prompts in order; later flows reuse screens from earlier ones. Run prompt 12 last.
 
@@ -8,7 +8,7 @@
 
 ## Part A. Common brief (paste before every prompt)
 
-You are building a high-fidelity, clickable mockup of one flow of **Oxagen Mission Control**, the product specified in `/Users/macanderson/Documents/Oxagen/Specs/2026-09-11-oxagen-mission-control-spec.md` (published copy: https://claude.ai/code/artifact/6fd65e38-2667-480c-85c4-96407b2a0c5b). Read the whole spec before you design; sections 3 (vocabulary), 6 (identity and the toolbelt), 7 (gateway and intervention), 8 (runs and frames), 10 (repository and Context PRs), 12 (spend), 14 (Mission Control pages), and Appendix F (the nine pages and what each absorbs) are binding. The mockup is not a concept: it is what the app should be, screen for screen, control for control, in the real information architecture (the sidebar with the six workspace pages and three organization pages, the top bar with the assistant toggle and the command menu, breadcrumbs, and the organization and workspace switchers).
+You are building a high-fidelity, clickable mockup of one flow of **Oxagen Mission Control**, the product specified in `docs/mission-control-spec.md`. Read the whole spec before you design; sections 3 (vocabulary), 6 (identity and the toolbelt), 7 (gateway and intervention), 8 (runs and frames), 10 (repository and Context PRs), 12 (spend), 14 (Mission Control pages), and Appendix F (the nine pages and what each absorbs) are binding. The mockup is not a concept: it is what the app should be, screen for screen, control for control, in the real information architecture (the sidebar with the six workspace pages and three organization pages, the top bar with the assistant toggle and the command menu, breadcrumbs, and the organization and workspace switchers).
 
 **Brand, no exceptions.** Use the Oxagen house system in `/Users/macanderson/Projects/oxagen-house-brand`: read `tokens/house-tokens.css`, the CSS and conventions in `playbook.html`, and inline `logo/svg/oxagen-lockup-adaptive.svg` (strip its internal `<style>` block; color it with `currentColor`). Rules from the kit: Space Grotesk everywhere (load from Google Fonts, weights 400, 500, 600, 700; display 700, headings 600, body 400); dark-first, ink `#10100F` canvas with paper `#F2EEE5` in light mode; panels `#181715` / `#F8F5EE`; hairlines `#292722` / `#D8CDBD`; gold `#D6962C` is identity and at most one primary action per screen and never encodes a state (`#8B5E1A` for gold text on paper, `#F1C364` for hover on ink); semantic state colors (allowed, needs approval, denied, proven, failed, critical) are separate from gold and used consistently; code and identifiers in the system monospace stack; panels with 10 to 14 px radius; eyebrows 12 px uppercase letter-spaced. Both themes must be complete: define the full dark palette on `:root`, override tokens under `@media (prefers-color-scheme: light)` guarded as `:root:not([data-theme="dark"])`, and again under `:root[data-theme="light"]`; give `body` an explicit token background.
 
@@ -80,13 +80,15 @@ Build the Agents page (list; agent detail with identity, run credential, roles, 
 
 **Wow moment.** Every control the security review asks about is on two pages: who can do what, where the data lives, what happened, and what can be proven.
 
-Build the Organization page (members with org and workspace roles, invitations, SSO and SCIM status, workspaces list and create-workspace with main repo binding, model funding source and routes per tier with the OpenRouter and Voyage defaults and an in-firewall route, data plane binding with the dedicated and behind-the-firewall states, API keys, workspace settings) and the Audit page (control-plane events, incidents with severity and resolution, receipt search, legal holds, exports with the verifier, key rotation with validity windows, the assurance suite per release, retention settings and the archive tiers, GDPR erasure request state with crypto-shredding explained in one line). Include the behind-the-firewall deployment status card (version, bundle signature, outbound connections in use, air-gapped mode).
+Build the Organization page (members with org and workspace roles, invitations, workspaces list and create-workspace with main repo binding, model funding source and routes per tier with the OpenRouter defaults and an in-firewall route, data plane binding with the dedicated and behind-the-firewall states, API keys, workspace settings) and the Audit page (control-plane events, incidents with severity and resolution, receipt search, legal holds, exports with the verifier, key rotation with validity windows, the assurance suite per release, retention settings and the archive tiers, GDPR erasure request state with crypto-shredding explained in one line). Include the behind-the-firewall deployment status card (version, bundle signature, outbound connections in use, air-gapped mode).
 
-### W11. The assistant on every page, and the account
+### W11. The account
 
-**Wow moment.** Configuration is a conversation: the operator asks the assistant to grant a tool, set a budget, or explain a run, and watches the same governed actions the screens use happen with receipts.
+*Cut down on 2026-09-14: the assistant half of this prompt went with the in-app agent (`scope-review.md`). What remains is the account.*
 
-Build the assistant side panel as it appears on each of the ten pages (collapsed and open), three conversations (onboarding, "grant `linear__get_issue` to triage and cap it at $5 a run," "why did invoice-bot stop at 14:03"), each reply showing the actions it took as governed actions with links to their receipts and the run of the assistant's own turn; the engine-down state with its named error. Also build the Account dialog from the user menu (profile, preferences with locale and display currency, security with two-factor and sessions, privacy with export and erasure), the notifications list, and the command menu (`search_tools` as the UI's command palette).
+**Wow moment.** Whose account it is: the person behind every governed action, how they sign in, what reaches them, and a command menu that cannot find a tool outside the belt.
+
+Build the Account dialog (profile, preferences as governed actions, security and sessions, privacy and export), the notifications list where every kind maps to a frame kind or an audit event, and the ⌘K command menu (`search_tools`) that returns navigation, actions and the belt's tools with their hazards, and nothing outside the belt.
 
 ### W12. Coverage audit
 
@@ -127,10 +129,10 @@ Each scenario is one moment an investor or a customer should remember. The mocku
 | W4 | The flight recorder: a sealed run replayed frame by frame with cost, fork, bisect, export | Run (sealed, compacted) | | not started |
 | W5 | Proven, not claimed: the witness flipped on main and the PR; the agent saw only "pass" | Run (proof), witness run, Tools (assurance), Spend (proven) | | not started |
 | W6 | It learned, you approved, it changed: record to proposal to Context PR to merge to the next run | Steering, Run, Agents (definition in git) | | not started |
-| W8 | Every dollar, every operator: proven spend, findings ranked by money, reconciled to the cent | Spend, Billing | | not started |
-| W9 | The toolbelt, governed: only granted tools visible, no credentials held, policy simulated on real history | Agents, Tools | | not started |
+| W8 | Every dollar, every operator: proven spend, findings ranked by money, wasted spend | Spend, Billing | | not started |
+| W9 | The toolbelt, governed: only granted tools visible, no credentials held, approval rules and kill switches | Agents, Tools | | not started |
 | W10 | The CIO's console: who can do what, where data lives, what happened, what can be proven, behind the firewall | Organization, Audit | | not started |
-| W11 | Configuration is a conversation: the assistant acts through the same governed actions, with receipts | Assistant panel (all pages), Account dialog, notifications, command menu | | not started |
+| W11 | Whose account it is: security, preferences, notifications, the command menu | Account dialog, notifications, command menu | | not started |
 | W12 | Coverage audit: every page and state mocked | all | | not started |
 
 **Page coverage.** Every row must carry at least one link before the section is complete.
@@ -149,6 +151,5 @@ Each scenario is one moment an investor or a customer should remember. The mocku
 | Organization | `/{org}` | loaded, denied, phone | |
 | Billing | `/{org}/billing` | loaded, error, denied, phone | |
 | Audit | `/{org}/audit` | loaded, empty, error, denied, phone | |
-| Assistant panel | every page | collapsed, open, engine down, phone | |
 | Account dialog, notifications, command menu | user menu, top bar | loaded, phone | |
 ```

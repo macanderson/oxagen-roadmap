@@ -5,21 +5,21 @@
 | Route | `#/welcome/login` |
 | Scope | auth |
 | Spec | §14 Mission Control; Appendix F sign-in flows |
-| Design | `mc.html` → `obLogin()` (the single source; `consolidated.html` is the product build of it) |
+| Design | `mockups/src/engine.js` → `obLogin()`, built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded · loading · error · access denied |
-| Files | `login-loaded.html` / `login-loaded-mobile.html`, `login-loading.html` / `login-loading-mobile.html`, `login-error.html` / `login-error-mobile.html`, `login-denied.html` / `login-denied-mobile.html` |
+| Storybook | `Mission Control / … / login`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
 | Audit | `login.audit-prompt.md` |
 
 ## Job
 
-Returning operator: SSO or email and password, then two-factor.
+Returning operator: Google or GitHub, or email and password, then two-factor.
 
 ## What is on the page
 
 **Header** — eyebrow “Welcome back”, h1 “Log in to Mission Control”.
 Actions: **Log in** (gold, full width)
 
-- SSO: Google · GitHub · SAML SSO — then “or”. Form: Work email · Password (show/hide; **Forgot password?** link) · “Keep me logged in on this device for 30 days” checkbox.
+- Sign in with: Google · GitHub — then “or”. Form: Work email · Password (show/hide; **Forgot password?** link) · “Keep me logged in on this device for 30 days” checkbox.
 - Footer: “New to Oxagen? Create an account · Have an invitation? Accept it”.
 
 
@@ -27,7 +27,7 @@ Actions: **Log in** (gold, full width)
 
 ## Data sources
 
-Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBacked` in production). From `docs/2026-09-12-mission-control-app-implementation-plan.md` §3; the *mockup collection* column names the constant in `mc.html` that the design renders from.
+Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBacked` in production). From `docs/implementation-plan.md` §3; the *mockup collection* column names the file in `mockups/fixtures/` (as `FIXTURES.<NAME>`) or the constant in `mockups/src/engine.js` that the design renders from.
 
 | Element | Mockup collection | Target store (spec) | Backing today (repo) | Status |
 |---|---|---|---|---|
@@ -35,7 +35,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 
 ## Functionality
 
-- Submit goes to Two-factor; SSO signs in directly and lands on Fleet.
+- Submit goes to Two-factor; Google and GitHub sign in directly and land on Fleet.
 - Signing in is recorded like any other governed action.
 
 ## States

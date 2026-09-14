@@ -5,9 +5,9 @@
 | Route | `#/welcome/invite` |
 | Scope | auth |
 | Spec | §14 Mission Control; Appendix F sign-in flows |
-| Design | `mc.html` → `obInvite()` (the single source; `consolidated.html` is the product build of it) |
+| Design | `mockups/src/engine.js` → `obInvite()`, built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded · loading · error · access denied |
-| Files | `accept-invitation-loaded.html` / `accept-invitation-loaded-mobile.html`, `accept-invitation-loading.html` / `accept-invitation-loading-mobile.html`, `accept-invitation-error.html` / `accept-invitation-error-mobile.html`, `accept-invitation-denied.html` / `accept-invitation-denied-mobile.html` |
+| Storybook | `Mission Control / … / accept-invitation`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
 | Audit | `accept-invitation.audit-prompt.md` |
 
 ## Job
@@ -26,7 +26,7 @@ Actions: **Accept invitation** (gold) · **Decline**
 
 ## Data sources
 
-Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBacked` in production). From `docs/2026-09-12-mission-control-app-implementation-plan.md` §3; the *mockup collection* column names the constant in `mc.html` that the design renders from.
+Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBacked` in production). From `docs/implementation-plan.md` §3; the *mockup collection* column names the file in `mockups/fixtures/` (as `FIXTURES.<NAME>`) or the constant in `mockups/src/engine.js` that the design renders from.
 
 | Element | Mockup collection | Target store (spec) | Backing today (repo) | Status |
 |---|---|---|---|---|

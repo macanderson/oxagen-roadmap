@@ -6,7 +6,6 @@
 - [W4 - ]
 - [W5 - ]
 - [W6 - ]
-- [W7 - ]
 - [W8 - Spend Attribution](https://www.loom.com/share/17d7274785384cbcb92a03cd6562a263)
 - [W9 - ]
 - [W10 - ]

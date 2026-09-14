@@ -5,9 +5,9 @@
 | Route | `#/a-intel/core-platform/agents/<slug>[/<tab>]` |
 | Scope | workspace |
 | Spec | §14 Mission Control; Appendix F page 3 |
-| Design | `mc.html` → `pAgent(r)` (the single source; `consolidated.html` is the product build of it) |
+| Design | `mockups/src/engine.js` → `pAgent(r)`, built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded · empty · loading · error · access denied |
-| Files | `agent-loaded.html` / `agent-loaded-mobile.html`, `agent-empty.html` / `agent-empty-mobile.html`, `agent-loading.html` / `agent-loading-mobile.html`, `agent-error.html` / `agent-error-mobile.html`, `agent-denied.html` / `agent-denied-mobile.html` |
+| Storybook | `Mission Control / … / agent`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
 | Audit | `agent.audit-prompt.md` |
 
 ## Job
@@ -22,7 +22,7 @@ Actions: **Edit avatar** · **Rotate credential** · **Suspend** (danger) · **D
 - **Tabs** (hash-routed: `/agents/<slug>/<tab>`): Identity · Toolbelt (N) · Mandates · Budgets · Runs · Enrollment · Tamper incidents (N) · Definition in git.
 - **Identity** — Identity (Agent key · Principal · Kind · Harness · Model tier · Operator · Status · First frame), Credentials this agent holds (**See the connections that mint them**), Run credential (Key · Purpose lock · Issued · Last used · Run tokens · Host device key; **Rotate**, **Revoke credential**), Roles and the delegation ceiling (`agent.graph.read`, Resource scope · Spend ceiling · Can move money; **Assign a role**, **Change identity**), What was actually enforced (Model calls · MCP tool calls · Harness-native tools — the tier computed per run and rendered verbatim), Definition in git (Path · Repo · Commit · `definition_digest` · Generated beside it; **Open the file**).
 - **Toolbelt** — How this belt was computed (Searchable belt / Full belt), What the model receives, Try the belt search (queries: pull request · context record · stripe payment · delete repository · graph; **Run**), Per-tool decision rules table: Tool · Category · Decision · Hazard · Egress · Financial · Schema digest (Labels / API names toggle, By category / Flat), What this agent cannot see (Tool · Why it is not on the belt).
-- **Mandates** — the mandate page inline (see `mandate.md`): Per call · Per period · Settled · Remaining tiles, The ledger, The grant, Reconciliation.
+- **Mandates** — the mandate page inline (see `mandate.md`): Per call · Per period · Settled · Remaining tiles, The ledger, The grant, Ledger note.
 - **Budgets** — Budgets (Mode · On a breach · Spend 30d · Proven spend 30d · Runs 30d · Cost per run; **Set budget**), Token accounting (Class · Tokens 30d · Rate · Cost), Findings for this agent (**Evidence**, **Fix**, **Open on Spend**).
 - **Runs** — Run · Status · Verdict · Cost · Frames · Started.
 - **Enrollment** — Host (Device · Device key · Collector · Hook binary · Hooks written · Model proxy · Tool gateway · Settings · Tier earned · First frame · Last checkpoint; **Run a smoke session**), Rollback (**Unenroll**; hooks stripped by hand record `hooks_removed` and the tier falls to what was observed).
@@ -31,11 +31,11 @@ Actions: **Edit avatar** · **Rotate credential** · **Suspend** (danger) · **D
 
 **Dialogs this page opens:** `delagent`, `assignrole`, `avatar`, `budget`, `evidence`, `fix`, `connection`.
 
-**Shell.** Sidebar (organization switcher, workspace switcher, Workspace nav: Fleet · Agent IAM · Tools · Steering · Spend; Organization nav: Organization · Billing · Audit; Assistant launcher; agent count · data plane · tier badge), top bar (breadcrumbs, ⌘K search-or-run, notifications with unread dot, Assistant toggle, account avatar → user menu: Account, Preferences, Security and sessions, Privacy and data, Switch theme, Sign out).
+**Shell.** Sidebar (organization switcher, workspace switcher, Workspace nav: Fleet · Agent IAM · Tools · Steering · Spend; Organization nav: Organization · Billing · Audit; agent count · data plane · tier badge), top bar (breadcrumbs, ⌘K search-or-run, notifications with unread dot, account avatar → user menu: Account, Preferences, Security and sessions, Privacy and data, Switch theme, Sign out).
 
 ## Data sources
 
-Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBacked` in production). From `docs/2026-09-12-mission-control-app-implementation-plan.md` §3; the *mockup collection* column names the constant in `mc.html` that the design renders from.
+Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBacked` in production). From `docs/implementation-plan.md` §3; the *mockup collection* column names the file in `mockups/fixtures/` (as `FIXTURES.<NAME>`) or the constant in `mockups/src/engine.js` that the design renders from.
 
 | Element | Mockup collection | Target store (spec) | Backing today (repo) | Status |
 |---|---|---|---|---|
@@ -66,7 +66,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 
 ## Mobile
 
-Top bar collapses to hamburger · current crumb · search glyph · notifications · assistant · avatar. A fixed five-slot thumb bar replaces the sidebar: **Fleet** (count = approvals waiting), **Agents**, **Tools**, **Spend**, **More** (count = open critical incidents). **More** is a bottom sheet listing Steering, Organization, Billing, Audit, Assistant, Search, Notifications, Account, Switch organization, Switch workspace. The hamburger opens the full sidebar as a drawer over a scrim. Every dialog rises from the bottom edge as a sheet with a drag handle and full-width footer buttons; every list table becomes a stack of cards, each cell labelled with its column header; touch targets are ≥ 44 px; inputs are 16 px; nothing scrolls sideways.
+Top bar collapses to hamburger · current crumb · search glyph · notifications · avatar. A fixed five-slot thumb bar replaces the sidebar: **Fleet** (count = approvals waiting), **Agents**, **Tools**, **Spend**, **More** (count = open critical incidents). **More** is a bottom sheet listing Steering, Organization, Billing, Audit, Search, Notifications, Account, Switch organization, Switch workspace. The hamburger opens the full sidebar as a drawer over a scrim. Every dialog rises from the bottom edge as a sheet with a drag handle and full-width footer buttons; every list table becomes a stack of cards, each cell labelled with its column header; touch targets are ≥ 44 px; inputs are 16 px; nothing scrolls sideways.
 
 ## Permissions
 

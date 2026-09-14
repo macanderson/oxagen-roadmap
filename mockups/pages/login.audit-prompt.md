@@ -11,7 +11,7 @@ You are auditing the **Log in** page of Oxagen Mission Control (`#/welcome/login
 ## Inputs
 
 1. The page spec: `pages/login.md` (read it first, in full).
-2. The design, rendered: `pages/login-<state>.html` and `pages/login-<state>-mobile.html` for each state (loaded, loading, error, access denied); open them in a browser or with Playwright. `pages/index.html` links all of them.
+2. The design, rendered: the `login` stories in Storybook (`npm run storybook`), one per state (loaded, loading, error, access denied), desktop and mobile; or `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` in a browser or with Playwright.
 3. The product spec for context: `docs/2026-09-11-oxagen-mission-control-spec.md` §14 (Mission Control), Appendix F (the pages that survive), Appendix A (target tables); the data mapping in `docs/2026-09-12-mission-control-app-implementation-plan.md` §3.
 4. The build under audit: `{{APP_ROOT}}` (the Next.js app), served at `{{APP_URL}}`. Route under audit: `/welcome/login`.
 
@@ -23,14 +23,14 @@ Work through every check. For each, record PASS, FAIL, or N/A (with why). Cite e
 2. **Header.** Eyebrow “Welcome back”, h1 “Log in to Mission Control”. Actions present, in order, with the same labels: Log in. Exactly one gold (primary) action on the screen.
 3. **Summary tiles.** None on this page; fail if the build added decorative ones.
 4. **Sections, tabs and tables.** For each item below, the build has it, with the same tab labels (and live counts where the design shows them), the same panel headings, and every table column named in the spec, in that order. Missing or renamed columns are FAILs; extra columns are noted.
-   - SSO: Google · GitHub · SAML SSO — then “or”. Form: Work email · Password (show/hide; Forgot password? link) · “Keep me logged in on this device for 30 days” checkbox.
+   - Sign in with: Google · GitHub — then “or”. Form: Work email · Password (show/hide; Forgot password? link) · “Keep me logged in on this device for 30 days” checkbox.
    - Footer: “New to Oxagen? Create an account · Have an invitation? Accept it”.
 5. **Actions and dialogs.** Every button in the spec exists, opens what the spec says (no dialogs), and each write is a governed action: it passes IAM, produces an audit event, and shows a receipt or reference. A stub must say what the product would do; a control that silently does nothing is a FAIL.
 6. **Data sources.** For each row of the spec’s data-source table, find the adapter or query in the build that feeds it. ✅ rows must be wired to the named store; 🟡 rows must be wired for the fields that exist and render `NotBacked` (an honest “not recorded yet”, never a zero) for the rest; ❌ rows must render `NotBacked` with the milestone named. A fixture reaching production is a FAIL.
 7. **States.** Force each state and compare copy and controls with the design file:
-   - **loading** (`login-loading.html`): the shell stays and the body is the skeleton; no data, no zeros, no stale rows.
-   - **error** (`login-error.html`): “Email or password is wrong. Check both and try again, or reset your password.” Email field marked bad.
-   - **access denied** (`login-denied.html`): Full-card state: “This account is suspended” — who suspended it (the organization owner), when, that recorded runs are kept and no new run tokens are minted. Action: Contact your organization owner.
+   - **loading** (`state=loading`): the shell stays and the body is the skeleton; no data, no zeros, no stale rows.
+   - **error** (`state=error`): “Email or password is wrong. Check both and try again, or reset your password.” Email field marked bad.
+   - **access denied** (`state=denied`): Full-card state: “This account is suspended” — who suspended it (the organization owner), when, that recorded runs are kept and no new run tokens are minted. Action: Contact your organization owner.
    Loading must not flash zeros. Error must name the code and offer Try again and Open an incident. Denied must name the missing permission and offer Request access.
 8. **Trust language.** Every tier, replay grade, attestation and cost basis on the page shows the recorded value; search the build for any place a stronger word could be rendered than the record allows (e.g. “gateway” for a client-attested window). Money always carries its basis.
 9. **Mobile.** At 390 × 844 with a touch pointer: the card fills the width with 16 px gutters, buttons are full width and ≥ 44 px, inputs are 16 px, code inputs use the numeric keypad. Compare against `pages/login-loaded-mobile.html`.

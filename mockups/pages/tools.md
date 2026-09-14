@@ -5,36 +5,35 @@
 | Route | `#/a-intel/core-platform/tools[/<tab>]` |
 | Scope | workspace |
 | Spec | §14 Mission Control; Appendix F page 4 |
-| Design | `mc.html` → `pTools()` (the single source; `consolidated.html` is the product build of it) |
+| Design | `mockups/src/engine.js` → `pTools()`, built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded · empty · loading · error · access denied |
-| Files | `tools-loaded.html` / `tools-loaded-mobile.html`, `tools-empty.html` / `tools-empty-mobile.html`, `tools-loading.html` / `tools-loading-mobile.html`, `tools-error.html` / `tools-error-mobile.html`, `tools-denied.html` / `tools-denied-mobile.html` |
+| Storybook | `Mission Control / … / tools`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
 | Audit | `tools.audit-prompt.md` |
 
 ## Job
 
-The registry (servers, tool versions, schemas, safety classification), connections and their owners with credential grants, the mandates ledger, policy versions with tests and simulation, kill switches, auto-approval rules, and the last assurance result.
+The registry (servers, tool versions, schemas, safety classification), connections and their owners with credential grants, the mandates ledger, policy versions with their tests, kill switches, and the auto-approval rules.
 
 ## What is on the page
 
 **Header** — eyebrow “Workspace · <workspace name>”, h1 “Tools”.
 Actions: **Import server** (opens the import dialog: pull `tools/list` from an MCP server, version it, store both schemas) · **Flip a kill switch** (gold; opens the switch dialog)
 
-- **Tabs** (`/tools/<tab>`): Registry (N to approve) · Connections (N) · Mandates ledger (N) · Policy (N) · Kill switches (N on) · Auto-approvals (N) · Assurance.
+- **Tabs** (`/tools/<tab>`): Registry (N to approve) · Connections (N) · Mandates ledger (N) · Policy (N) · Kill switches (N on) · Auto-approvals (N).
 - **Registry** — banner “N awaiting approval: output schemas were observed, not declared” (**Review** opens the schema dialog); Tool servers table: Server · Kind · Tools · Health · Schemas · Connection · Last import (**Import tools from an MCP server**); Tool versions table: Tool version · Category · Hazard · Gate today · Egress · Financial · Schema origin · Digest · On belts · Calls 30d (Labels / API names toggle; category chips with counts across the ten categories, By category / Flat). A row opens the tool dialog. Note: the gate shown is today’s — the version’s own kill switch, then its server’s, then the mandate rule, then `pol_v41`.
-- **Connections** — the customer’s credentials in the vault: Connection · Kind · Owner · Servers · Downscope · Grants 30d · Reviewed · Next review · Status (**Add a connection**); Credential grants log: Grant · Tool version · Agent · run · Connection · Scope · TTL · State; How the broker chooses: Provider capability · What the broker mints · Here; Financial connections carry extra rules: Named human owner · Mandate per agent · Full-scope keys · Two-person rule.
+- **Connections** — the customer’s credentials in the vault: Connection · Kind · Owner · Servers · Downscope · Grants 30d · Reviewed · Next review · Status (**Add a connection**); Credential grants log: Grant · Tool version · Agent · run · Connection · Scope · TTL · State; How the broker chooses: Provider capability · What the broker mints · Here; Financial connections carry extra rules: Named human owner · Mandate per agent · Full-scope keys · Named human owner.
 - **Mandates ledger** — Mandate · Agent · Granted by · Purpose · Per call · Per period · Settled · Reserved · Remaining · Valid to · Status (**Grant a mandate** opens the mandate dialog).
-- **Policy** — Policy versions: Version · State · Author · When · Rules · Tests · What changed (**Edit** opens the policy dialog); Simulation of the draft against this workspace’s real history (tiles: Would now be denied · Would now need approval · Would now be allowed, each with share and per-day rate; **Simulate over 90 days**, **Activate <version>**); Conditions available to policy.
+- **Policy** — Policy versions: Version · State · Author · When · Rules · Tests · What changed (**Edit** opens the policy dialog); a note that activation is a governed action with approval and the superseded version is kept; Conditions available to policy; a sequence rule as shipped.
 - **Kill switches** — “Deny is available at every level”: platform-wide classes (every `moves_funds` tool, every irreversible tool, every tool with egress: third_party), organization, workspace, server, tool version, connection, key, category, agent, person. Each switch: allowing / denying toggle, Blast radius · Takes effect · Flipped by · Reason. Flipping bumps `deny_generation` so every live run token is re-checked at the next call.
 - **Auto-approvals** — trust-gated rules: Rule · Applies to · Requires · Qualifying now · Approved 30d · On (**Create rule**, **Edit**, **Delete**); tiles: Rules on · Auto-approved 30d (each one a frame with the rule id) · Held by a floor (tainted, critical, or above a ceiling) · Median wait saved.
-- **Assurance** — Adversarial tool-governance suite: Case · Result · What happened; Suite · Ran · Against; **Run against this deployment**, **Download the bundle** (“Hand this to an auditor”).
 
-**Dialogs this page opens:** `import`, `connection`, `tool`, `schema (approve observed)`, `mandate`, `policy (edit + simulate)`, `switch`.
+**Dialogs this page opens:** `import`, `connection`, `tool`, `schema (approve observed)`, `mandate`, `policy (edit)`, `switch`.
 
-**Shell.** Sidebar (organization switcher, workspace switcher, Workspace nav: Fleet · Agent IAM · Tools · Steering · Spend; Organization nav: Organization · Billing · Audit; Assistant launcher; agent count · data plane · tier badge), top bar (breadcrumbs, ⌘K search-or-run, notifications with unread dot, Assistant toggle, account avatar → user menu: Account, Preferences, Security and sessions, Privacy and data, Switch theme, Sign out).
+**Shell.** Sidebar (organization switcher, workspace switcher, Workspace nav: Fleet · Agent IAM · Tools · Steering · Spend; Organization nav: Organization · Billing · Audit; agent count · data plane · tier badge), top bar (breadcrumbs, ⌘K search-or-run, notifications with unread dot, account avatar → user menu: Account, Preferences, Security and sessions, Privacy and data, Switch theme, Sign out).
 
 ## Data sources
 
-Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBacked` in production). From `docs/2026-09-12-mission-control-app-implementation-plan.md` §3; the *mockup collection* column names the constant in `mc.html` that the design renders from.
+Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBacked` in production). From `docs/implementation-plan.md` §3; the *mockup collection* column names the file in `mockups/fixtures/` (as `FIXTURES.<NAME>`) or the constant in `mockups/src/engine.js` that the design renders from.
 
 | Element | Mockup collection | Target store (spec) | Backing today (repo) | Status |
 |---|---|---|---|---|
@@ -42,10 +41,9 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 | Tool versions + classification | `TOOLS` | `tools.tool_versions` | `agent.tools`/`tool_versions`, `mcp.tool_snapshots` | 🟡 risk/side-effect/consequence tags to verify |
 | Connections, grants | `CONNECTIONS` | `tools.connections` | `ingestion.source_connections`, `mcp.credentials` | 🟡 |
 | Mandates ledger | `MANDATES` | `tools.mandate_ledger` | none | ❌ (G1) |
-| Policy versions + simulation | `POLICIES`, `SIM` | `tools.policy_versions` (Cedar) | none | ❌ (G2) |
+| Policy versions | `POLICIES` | `tools.policy_versions` (Cedar, tests) | none | ❌ (G2) |
 | Kill switches | `SWITCHES`, `S.switches`, `S.denyGen` | `control.commands` + `deny_generation` | `iam.emergency_denies`, `authorization_deny_generations` | 🟡 |
 | Auto-approval rules | `AUTORULES` | not in App. A | none | ❌ (G12, spec decision first) |
-| Assurance | `ASSURANCE` | M2 suite | none | ❌ |
 | Observed schemas | `OBSERVED_SCHEMAS` | `schema_origin=observed_proposed` | none | ❌ |
 
 ## Functionality
@@ -53,7 +51,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 - Tool identity is `name@schema-version` everywhere (registry, approval, kill switch, `tool_requested` frame). The cell shows the human label over the mono API name; a toggle swaps them.
 - Category is a registry attribute, never a policy: only risk, side effect, financial effect and egress carry a decision by themselves.
 - Until an observed output schema is approved, outputs are validated only for size and type and every run that used them says so in its completeness record.
-- Policy is deterministic and versioned; a draft is simulated against real history before activation; activation is a governed action.
+- Policy is deterministic, versioned and tested; activation is a governed action with approval.
 - A kill switch flip is recorded with who, when and why (`S.flipMeta`) and shows its blast radius before confirming.
 
 ## States
@@ -66,19 +64,18 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 
 ## Mobile
 
-Top bar collapses to hamburger · current crumb · search glyph · notifications · assistant · avatar. A fixed five-slot thumb bar replaces the sidebar: **Fleet** (count = approvals waiting), **Agents**, **Tools**, **Spend**, **More** (count = open critical incidents). **More** is a bottom sheet listing Steering, Organization, Billing, Audit, Assistant, Search, Notifications, Account, Switch organization, Switch workspace. The hamburger opens the full sidebar as a drawer over a scrim. Every dialog rises from the bottom edge as a sheet with a drag handle and full-width footer buttons; every list table becomes a stack of cards, each cell labelled with its column header; touch targets are ≥ 44 px; inputs are 16 px; nothing scrolls sideways.
+Top bar collapses to hamburger · current crumb · search glyph · notifications · avatar. A fixed five-slot thumb bar replaces the sidebar: **Fleet** (count = approvals waiting), **Agents**, **Tools**, **Spend**, **More** (count = open critical incidents). **More** is a bottom sheet listing Steering, Organization, Billing, Audit, Search, Notifications, Account, Switch organization, Switch workspace. The hamburger opens the full sidebar as a drawer over a scrim. Every dialog rises from the bottom edge as a sheet with a drag handle and full-width footer buttons; every list table becomes a stack of cards, each cell labelled with its column header; touch targets are ≥ 44 px; inputs are 16 px; nothing scrolls sideways.
 
 ## Permissions
 
 - Read: `tools.read`
-- Writes (each a governed action recorded in Audit): `tools.import`, `tools.schema.approve`, `connection.add`, `mandate.grant`, `policy.edit / policy.activate`, `switch.flip`, `autorule.edit`, `assurance.run`
+- Writes (each a governed action recorded in Audit): `tools.import`, `tools.schema.approve`, `connection.add`, `mandate.grant`, `policy.edit / policy.activate`, `switch.flip`, `autorule.edit`
 
 ## Backend gaps this page depends on
 
 - G1 mandates
-- G2 policy versions + Cedar simulation
+- G2 policy versions with tests
 - G12 auto-approval store
-- assurance suite (M2)
 - observed-schema proposals
 
 ## Rules every build of this page must keep

@@ -5,9 +5,9 @@
 | Route | `#/welcome/installer` |
 | Scope | auth |
 | Spec | §14 Mission Control; Appendix F not a page — the signed package’s own screens |
-| Design | `mc.html` → `obInstaller()` (the single source; `consolidated.html` is the product build of it) |
+| Design | `mockups/src/engine.js` → `obInstaller()`, built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded |
-| Files | `installer-loaded.html` / `installer-loaded-mobile.html` |
+| Storybook | `Mission Control / … / installer`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
 | Audit | `installer.audit-prompt.md` |
 
 ## Job
@@ -26,7 +26,7 @@ Actions: **Download** · **Install** · **Cancel**
 
 ## Data sources
 
-Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBacked` in production). From `docs/2026-09-12-mission-control-app-implementation-plan.md` §3; the *mockup collection* column names the constant in `mc.html` that the design renders from.
+Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBacked` in production). From `docs/implementation-plan.md` §3; the *mockup collection* column names the file in `mockups/fixtures/` (as `FIXTURES.<NAME>`) or the constant in `mockups/src/engine.js` that the design renders from.
 
 | Element | Mockup collection | Target store (spec) | Backing today (repo) | Status |
 |---|---|---|---|---|

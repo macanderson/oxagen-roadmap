@@ -1,10 +1,13 @@
-# Mission Control app — implementation plan
+# Oxagen Mission Control app: implementation plan
 
 | | |
 |---|---|
+| **Status** | Draft |
 | **Date** | 2026-09-12 |
+| **Owner** | Mac Anderson |
 | **Builds** | a new `apps/app` (`@oxagen/app`) in `~/Projects/oxagen`; today's app moves to `apps/app_deprecated` (`@oxagen/app-deprecated`) |
-| **Inputs** | `2026-09-11-oxagen-mission-control-spec.md` (§3, §4, §14, §15, §19, App. A, B, F) · mockups `~/Documents/Oxagen/Mockups` (`mc.html` @ tag `mc-baseline-w4`, W1–W12) · `docs/feedback-mockups.md` · the repo at `origin/main` |
+| **Source** | `mission-control-spec.md` (§3, §4, §8.6, §14, §15, §19, App. A, B, F) · the mockups in this repository: `mockups/missioncontrol.html` built from `mockups/src` and `mockups/fixtures`, catalogued by Storybook (`npm run storybook`), every page's spec in `mockups/pages/<page>.md` · `docs/feedback-mockups.md` · the repo at `origin/main` |
+| **Amended** | 2026-09-14, by the scope review (`scope-review.md`): the assistant flyout, Neo4j, SSO and SCIM, policy simulation, the assurance suite, two-person mandates, steering effect and retirement, legal holds, erasure and reconciliation are out of every lane; the definition of done (`dod-spec.md`) is in. Rows below carry the change in place. |
 | **Optimised for** | parallel agents: every lane owns a disjoint set of paths, and every batch lists what it waits on |
 
 ---
@@ -18,7 +21,7 @@
 | 3 | Every read goes through a **port** (`src/data/ports.ts`) with two adapters: `fixture` (the mockup's data, typed and integrity-checked) and `live` (today's tables through the kernel, run-ledger, tacho, ClickHouse). A port method with no backing store returns `NotBacked` and the page renders an honest "not recorded yet" state. | Of the 68 page-data slices mapped in §3, 22 have no store today, 27 are partial and only 19 are fully backed. Pages must not wait for M2–M6, and production must never show fixture data or a number stronger than what was recorded (spec §14 interaction rules). |
 | 4 | Every write is a server action that calls kernel `invoke()` through **one seam** (`src/server/invoke.ts`), which parses the contract's output schema. | Spec §14.1: one agent tool contract drives API, MCP, CLI and UI. The ui-parity gate already checks this. Today's `invokeOrgCapability` casts `as Promise<T>`; the new seam validates instead. |
 | 5 | Tabs are URL segments through optional catch-alls (`tools/[[...tab]]`); the default tab renders in place and never redirects. | Deep links in the mockups (`#/a-intel/core-platform/tools/connections`). Under `cacheComponents`, a bare parent `redirect()` after `await params` 500s. |
-| 6 | Pages are Server Components. Client islands only for the transport (player), approval countdown, dialogs, the command menu, the assistant flyout and list controls. Live data arrives over one SSE route with a `run_seq` cursor. | The run ledger already exposes `readAttemptEventsSince(runId, afterRunSeq, limit)`, a resumable cursor that maps directly onto `Last-Event-ID`. |
+| 6 | Pages are Server Components. Client islands only for the transport (player), approval countdown, dialogs, the command menu and list controls. Live data arrives over one SSE route with a `run_seq` cursor. | The run ledger already exposes `readAttemptEventsSince(runId, afterRunSeq, limit)`, a resumable cursor that maps directly onto `Last-Event-ID`. |
 | 7 | All interface prose lives in `messages/en.json` (ICU) via `next-intl`, without locale routing. | Spec §15 "Language": no hard-coded prose, ICU MessageFormat, English source, RTL-ready. Today's app has no catalog, so doing it from line one is cheaper than retrofitting. |
 | 8 | Money on the wire is `{ micros: string, currency, basis }`. Formatting happens only in `<Money>`. | Spec App. A: money is bigint micro-USD. The mockup stores `"2,450.00"`-style strings, which silently zero under `parseFloat`. |
 
@@ -66,11 +69,10 @@
 | W2 | **`docs/feedback-mockups.md` items are in no mockup:** (1) approvals render first and collapse when empty; (2) the onboarding content floats right; (3) one-thumb mobile navigation; (4) LLM-generated run name and summary, plus a file-diff card under approvals; (5) run cost large, near the run name, basis in a dialog; (6) prompt shown inspectable but collapsed; (7) run outputs (PRs, files, media) as the story; (8) spend by operator, agent and run on Fleet. | These change the Run and Fleet pages. | In scope: 1, 2, 5, 6, 8 (clear enough to build). 4's UI is in scope; the classifier that writes `run.name`/`run.summary` is a backend gap (G14). **3 and 7 need a design decision.** Their lanes build behind a component seam (`<MobileNav>`, `<RunOutputs>`) with a plain first version, so the design can drop in later. |
 | W3 | **Vocabulary drifts from the spec.** Replay grade: mockup `full/partial/digest/ledger` vs spec `inspect/view/fork/retry`. Egress: `third_party/internal/none` vs `local/org_tenant/third_party`. Schema origin: `observed` vs `observed_proposed/observed_approved`. Financial: `fin: moves_funds/commits_spend` vs `consequence_tags text[]`. Agent status `enrolled` vs `unenrolled/active/suspended/retired`. Verdict `null` vs `none`. Record kinds: 6 in the mockup (from Stella's `RecordKind`) vs "twelve kinds" in spec §3. | Types built from the mockup would diverge from the target schema on day one. | **View-model enums follow the spec (App. A).** The fixture adapter maps mockup values once, in one file. Record kinds: use the six real kinds; flag the spec's "twelve" as a spec defect to fix. |
 | W4 | **Fixture data has integrity defects.** `EVIDENCE` references agent `a-intel.finops.cost-reporter`, which is not in `AGENTS`. `FIX["Refetching a stable list"]` carries the cache-write finding's text. Several `NOTIFS`/`INCIDENTS`/`RECEIPTS` run ids are not in `RUNS`. `FRAMES` is one list shared by every run. The Mandate page always renders `MANDATES[0]`. | Ported naively, links 404 and every run shows the same frames. | The fixture adapter validates referential integrity in a unit test that **fails on a dangling id** (mutation-test it by deleting one agent). Frames are keyed by run. |
-| W5 | **Data is hard-coded in the mockup's markup:** the agent toolbelt rows, the mandate ledger rows, Steering's effect and retirement rows, the funding routes table, the assistant transcript. | No collection to type from. | Types come from spec App. A (`iam.role_grants`, `tools.mandate_ledger`, `org.organizations.model_routes`) instead. |
+| W5 | **Data was hard-coded in the mockup's markup** (resolved 2026-09-14): the seed dataset now lives in `mockups/fixtures/*.json`, one file per collection, and the engine binds them as `FIXTURES.<NAME>`. What is still derived in code (the toolbelt rows, the mandate ledger rows, the funding routes) is derived from those files. | A fixture adapter can read the JSON directly. | Types still come from spec App. A; the fixture adapter maps `mockups/fixtures/*.json` onto them in one file. |
 | W6 | **`kindBadge` was declared twice** in `mc.html`; the later role badge silently replaced the record-kind icon badge on Steering. The baseline renames the role one `roleKindBadge`, and `tsec` had the same collision (fixed by deleting the loose parser). | A defect in the mockup, not intent. | The React components are `RecordKindBadge` and `PrincipalKindBadge`, module-scoped, so the collision cannot recur. Steering uses the icon badge. |
 | W7 | **Features in the mockup with no spec table:** agent trust/spend `SCORES`, auto-approval rules `AUTORULES` (Tools › auto), the Org › roles editor with `PERMS`. | Planned, but with no store. | Built UI-first behind `NotBacked`. SCORES and AUTORULES are gaps G11/G12; they need a spec decision on whether they are columns on `iam.role_grants.conditions` or new tables. |
 | W8 | **About 60 write interactions are toast-only in the mockup.** | They have no payload contract. | §3 maps each write to an existing capability or to a gap. |
-| W9 | **The assistant's "engine down" state is unreachable** (nothing sets `S.asstEngine="down"`). | Spec §18 requires every screen to work with the engine down. | The flyout reads engine health from the port; e2e covers the down state. |
 
 ---
 
@@ -108,21 +110,18 @@ Status comes from table and contract names in the repo. **Batch 3 lanes must con
 | Agents · incidents | `incidents` | `audit.audit_events` incident kinds | `tacho.incidents` | ✅ |
 | **Tools** · servers | `SERVERS` | `tools.tool_servers` | `mcp.mcp_servers`, `mcp.registries` | ✅ |
 | Tools · tool versions + classification | `TOOLS` | `tools.tool_versions` | `agent.tools`/`tool_versions`, `mcp.tool_snapshots` | 🟡 risk/side-effect/consequence tags/measures to verify |
+| Tools · policy versions | `POLICIES` | `tools.policy_versions` (Cedar, tests, no simulation) | none | ❌ |
 | Tools · connections | `CONNECTIONS` | `tools.connections` | `ingestion.source_connections`, `mcp.credentials` | 🟡 |
 | Tools · mandates ledger | `MANDATES` | `tools.mandate_ledger` | none | ❌ |
-| Tools · policy versions + simulation | `POLICIES`, `SIM` | `tools.policy_versions` (Cedar) | none | ❌ |
 | Tools · kill switches | `SWITCHES` | `control.commands` + `deny_generation` | `iam.emergency_denies`, `authorization_deny_generations` | 🟡 |
 | Tools · auto-approval rules | `AUTORULES` | not in App. A | none | ❌ G12 |
-| Tools · assurance | `ASSURANCE` | M2 suite | none | ❌ |
 | Tools · observed schemas | `OBSERVED_SCHEMAS` | `schema_origin=observed_proposed` | none | ❌ |
 | **Steering** · records | `RECORDS` | `:Record` + git | `agent.context_records`, `context_record_versions`; `context.record.*` | ✅ |
 | Steering · proposals, Context PRs | `PROPOSALS` | `PROPOSES`, `PROMOTED_BY` | `agent.context_promotions`; `agent.memory_promotion.*` | 🟡 |
-| Steering · effect, retirement | hard-coded | effect metrics (M3) | none | ❌ |
 | **Spend** · totals, by operator/agent/model | `SPEND` | `cost.run_totals` | ClickHouse `token_usage`, `usage_events`; `billing.usage.breakdown` | 🟡 |
 | Spend · by tool | `SPEND.byTool` | `control.tool_calls` × price | ClickHouse `tool_invocations` | 🟡 |
 | Spend · proven vs unproven, productive ratio | `SPEND.proven`, `ratio` | `run_totals.verdict/productive_ratio` | none | ❌ |
 | Spend · findings + evidence + fix | `FINDINGS`, `EVIDENCE`, `FIX` | findings job (M2) | none | ❌ |
-| Spend · reconciliation | `SPEND.variance/matched` | `cost.reconciliations`, `provider_usage` | none (M5) | ❌ |
 | Spend · budgets | `SPEND.budgets` | `billing.budgets` | `billing.spend_budgets`; `billing.budget.{get,set}` | ✅ |
 
 ### 3.2 Organization pages and shell
@@ -140,24 +139,23 @@ Status comes from table and contract names in the repo. **Batch 3 lanes must con
 | **Audit** · events | `AUDIT` | `audit.audit_events` | ClickHouse `audit_events` + `security.security_events`; `audit.log.query` | 🟡 |
 | Audit · incidents | `INCIDENTS` | incident kinds | `tacho.incidents` | ✅ |
 | Audit · receipts | `RECEIPTS` | receipt frames | none | ❌ |
-| Audit · legal holds | `HOLDS` | `audit.legal_holds` | none | ❌ |
 | Audit · exports | `EXPORTS` | archive exports | `privacy.data.export` | 🟡 |
 | Audit · keys, KEK rotation | `KEYS` | KMS per org | none | ❌ |
-| Audit · erasure | `ERASURE` | crypto-shred | `privacy_erasure_requests` | 🟡 |
 | Audit · retention | `RETENTION_TIERS` | §13.3 tiers | `evidence.retention_policy_versions` | 🟡 |
-| Audit · assurance history | `ASSURANCE_HISTORY` | M2 suite | none | ❌ |
 | **Shell** · notifications | `NOTIFS` | — | `notification.notifications` | ✅ |
 | Shell · people, avatars | `PEOPLE` | `auth.users` | `auth.users`, `user_preferences`; `@oxagen/oxagen/avatar` | ✅ |
-| Shell · assistant flyout | static | `stella serve` (ADR-053) | `chat.stream`, stella-serve service | 🟡 |
 | **Auth + onboarding gate** | `#/welcome/*`, register flow | `org.onboarding_state` | Better Auth pages; `tacho.enrollment.create` | 🟡 no gate state |
+| **Run · definition of done** | `DOD` (`fixtures/dod.json`, derived for the rest) | `dod.dod_sets`, `dod.dod_certificates` (spec A.11) | none | ❌ G15 |
+| Fleet · Done column, held tile | derived from `DOD` | the same | none | ❌ G15 |
+| Billing · proven runs | `BILLING` | `dod.held` governed actions (§12.1) | `billing.*` usage | ❌ G13 |
 
 ### 3.3 What the mapping says
 
 **Tally: 68 slices — ✅ 19 · 🟡 27 · ❌ 22.**
 
 - **Backed or nearly backed:** org and workspace administration (members, workspaces, roles, API keys, data plane), agent identity/roles/enrollment, tool servers, sources and repositories, steering records, budgets, notifications. These pages can go live in Batch 3.
-- **Fixture-first by necessity:** mandates, policy versions and simulation, findings, proven spend, reconciliation, receipts, legal holds, KEK rotation, embedding indexes, run proof, context-window evidence, run graph. They map to spec milestones M2–M6 and have **no table today**. The app must ship them as `NotBacked` states, not wait for them.
-- **The biggest structural gap is the run record.** The spec puts runs and frames in Neo4j (`:Run`, `:Frame`); today they are in Postgres `agent.agent_runs*` plus ClickHouse `tacho_events`, and **no Run/Frame/Seal node exists in the graph.** The `RunReadPort` (§4.5) hides that choice, so the Run page is written once and the adapter changes when M1's recorder lands.
+- **Fixture-first by necessity:** mandates, policy versions, findings, proven spend, receipts, KEK rotation, run proof, the definition of done, context-window evidence, run graph. They map to spec milestones M2–M5 and have **no table today**. The app must ship them as `NotBacked` states, not wait for them.
+- **The biggest structural gap is the run record.** The spec puts runs, attempts, frames and seals in Postgres tables of their own (spec App. B); today they are in `agent.agent_runs*` plus ClickHouse `tacho_events`. The `RunReadPort` (§4.5) hides that choice, so the Run page is written once and the adapter changes when M1's recorder lands.
 - **Mockup-only concepts** (`SCORES`, `AUTORULES`, the role editor's `PERMS`) need a spec decision before any backend work.
 
 ### 3.4 Backend gaps (not app work, but the app's `NotBacked` states point at them)
@@ -165,19 +163,19 @@ Status comes from table and contract names in the repo. **Batch 3 lanes must con
 | Gap | Store / job | Unblocks | Spec milestone |
 |---|---|---|---|
 | G1 | `tools.mandates`, `tools.mandate_ledger` | Agents › mandates, Tools › mandates, approval four-hop chain | M2 |
-| G2 | `tools.policy_versions` + Cedar simulation | Tools › policy | M2 |
+| G2 | `tools.policy_versions` with tests | Tools › policy | M2 |
 | G3 | `cost.price_entries`, `cost.run_totals` rollup | Fleet cost, Spend totals with basis | M2 |
 | G4 | Findings job | Spend › findings | M2 |
-| G5 | `cost.provider_usage`, `cost.reconciliations` | Spend › reconciliation | M5 |
 | G6 | `:Run/:Attempt/:Frame/:Seal` recorder + frame bodies in object store | Run transport with bodies, replay grade | M1 |
 | G7 | `:Witness/:Verdict` | Run › proof, proven spend | M6 |
-| G8 | `audit.audit_events` in Postgres, `legal_holds`, `archive_segments` | Audit › holds, exports, receipts | M5 |
+| G8 | `audit.audit_events` in Postgres, `archive_segments` | Audit › exports, receipts | M1 |
 | G9 | `control.commands` `steer` with delivery mode for ledger runs | Run › steer on non-tacho runs | M1/M2 |
 | G10 | `USED_CONTEXT` edges from context assembly | Run › context | M3/M4 |
 | G11 | Agent trust/spend scores. Decided in the mockup (2026-09-13): the score is the agent's own (0–1000, nightly from frames); its colour is its percentile among every scored agent on Oxagen — the tenant's agents plus a nightly platform rollup (`PLATFORM`: org and agent counts and an anonymised sorted score sample per kind). Green at or above p90, no colour p10–p90 (eight in ten by construction), amber below p10, red below p5; cuts recomputed per render (`scoreCuts()`). Needs a `score_distribution` rollup the platform publishes to every org. An agent identity is drawn only by `agentCard()` in three layouts: `list` (rows), `compact` (one agent on someone else's record), `detail` (the agent's page). | Agents scores, auto-approval eligibility | — |
 | G12 | Auto-approval rules store (spec decision first) | Tools › auto | M2 |
 | G13 | Per-run billing allowance (§12.1) | Billing meters | M2 |
 | G14 | `light`-tier run namer/summariser | Run name + summary (feedback 4) | M1 |
+| G15 | `dod.dod_sets`, `dod.dod_certificates`, the four `dod.*` capabilities, `dod.held` metering (`dod-spec.md`) | Run › Done, Fleet › Done column, Billing › proven runs | M3 |
 | G15 | `org.onboarding_state` + first-frame unlock | Onboarding gate | M1 |
 
 ---
@@ -211,7 +209,7 @@ apps/app/
    │  ├─ api/mc/[org]/[ws]/stream/route.ts              # SSE: fleet + run frames
    │  ├─ cli/authorize/  github/setup/                   # callbacks, carried over
    │  └─ [org]/
-   │     ├─ layout.tsx                                   # org shell, assistant host
+   │     ├─ layout.tsx                                   # org shell
    │     ├─ [[...tab]]/page.tsx                          # Organization
    │     ├─ billing/page.tsx
    │     ├─ audit/[[...tab]]/page.tsx
@@ -596,7 +594,7 @@ export const liveRuns: RunReadPort = {
 ```ts
 // src/data/adapters/fixture/integrity.test.ts
 import { describe, expect, it } from "vitest";
-import { seed } from "./seed"; // ported from mc.html @ mc-baseline-w4, mapped to spec vocabulary
+import { seed } from "./seed"; // built from mockups/fixtures/*.json, mapped to spec vocabulary
 
 describe("fixture referential integrity", () => {
   const agentKeys = new Set(seed.agents.map((a) => a.key));
@@ -1021,9 +1019,9 @@ flowchart LR
 
 | Lane | Owns | Delivers | Waits on |
 |---|---|---|---|
-| **L1 contracts + ports + fixture** | `src/data/**` | All view-model schemas (§4.5) for the nine pages, every port interface, the fixture seed ported from `mc.html` @ `mc-baseline-w4` with W3's vocabulary mapping (its `TOOLPOOL` and `AGENT_BELTS` agree: seed no tool call an agent's belt cannot make; its `ASST_RUNS` stay out of the tenant's run index), the integrity test (W4), and the `mc_state` state switch for dev/e2e | B0 |
-| **L2 ui primitives** | `src/ui/**`, `.storybook/**` | `Money` (large-figure variant + basis dialog, feedback 5), `TierBadge`, `GradeBadge`, `VerdictBadge`, `StatusBadge`, `RiskBadge`, `EffectBadge`, `Gate`, `Hazard`, `ToolCell`, `RecordKindBadge`, `PrincipalKindBadge`, `Avatar` (initials/icon/photo × solid/soft/line), `PageState` + `Skeleton/Empty/Error/Denied/NotRecordedYet`, `DataTable` (search, sort, facet, rows per page, pager: the `listify()` behaviour as a component, opt-out by omission), `RouteTabs`, `FormDialog` (Base UI + `useActionState`), `Sparkline`, `Tile`, `Meter`. House tokens only, Lucide only. Charts: identity is an icon, magnitude is one hue (the tool-family and record-kind tokens fail colour-vision checks as series colours). Stories with a11y addon. | B0 enums |
-| **L3 shell** | `src/app/[org]/layout.tsx`, `src/app/[org]/[ws]/layout.tsx`, `src/features/shell/**` | Sidebar, top bar, org/ws switchers, ⌘K command menu, notifications, Account dialog (profile, preferences, security, privacy), assistant flyout host with the engine-down state (W9), `<MobileNav>` seam with a plain bottom bar (feedback 3 pending design), theme (light/dark/system via `data-theme`) | B0 |
+| **L1 contracts + ports + fixture** | `src/data/**` | All view-model schemas (§4.5) for the nine pages, every port interface, the fixture seed read from `mockups/fixtures/*.json` with W3's vocabulary mapping (its `TOOLPOOL` and `AGENT_BELTS` agree: seed no tool call an agent's belt cannot make), the integrity test (W4), and the `mc_state` state switch for dev/e2e | B0 |
+| **L2 ui primitives** | `src/ui/**`, `.storybook/**` | `Money` (large-figure variant + basis dialog, feedback 5), `TierBadge`, `GradeBadge`, `VerdictBadge`, `StatusBadge`, `RiskBadge`, `EffectBadge`, `Gate`, `Hazard`, `ToolCell`, `RecordKindBadge`, `PrincipalKindBadge`, `Avatar` (initials/icon/photo × solid/soft/line), `PageState` + `Skeleton/Empty/Error/Denied/NotRecordedYet`, `DataTable` (search, sort, facet, rows per page, pager: the `listify()` behaviour as a component, opt-out by omission), `RouteTabs`, `FormDialog` (Base UI + `useActionState`), `Sparkline`, `Tile`, `Meter`, `DodBadge` (state by shape: double, dashed, single, dotted). House tokens only, Lucide only. Charts: identity is an icon, magnitude is one hue (the tool-family and record-kind tokens fail colour-vision checks as series colours). Stories with a11y addon. | B0 enums |
+| **L3 shell** | `src/app/[org]/layout.tsx`, `src/app/[org]/[ws]/layout.tsx`, `src/features/shell/**` | Sidebar, top bar, org/ws switchers, ⌘K command menu, notifications, Account dialog (profile, preferences, security, privacy), `<MobileNav>` seam with a plain bottom bar (feedback 3 pending design), theme (light/dark/system via `data-theme`) | B0 |
 | **L4 server seams** | `src/server/**`, `src/app/api/mc/**`, `src/ui/hooks/**` | `session`, `requireViewer`, tenancy lookups ported from `resolve-org.ts` (incl. slug-history redirects, MFA gate), `invokeTool` (§4.6), cache tags, SSE route + `useFrames` + `useFleetLive` (§4.9) | B0 |
 | **L5 auth + onboarding** | `src/app/(auth)/**`, `src/app/(onboarding)/**`, `src/app/[org]/[ws]/register/**`, `src/features/onboarding/**`, `src/app/api/auth/**`, `src/proxy.ts` | Port the six auth pages + invite + create organization; onboarding gate name → wrap (Claude Code / Codex one-click, SDK snippet) → run, with feedback 2's layout fix; register flow reusing the same wrap/first-frame components; `proxy.ts` session gate (legacy redirects added in B5) | B0 |
 
@@ -1037,12 +1035,13 @@ Each lane owns `src/app/<route>/**`, `src/features/<page>/**`, `messages/<page>.
 | P2a | **Run**: header + transcript + transport | run name + large cost (feedback 5), collapsed inspectable prompt (feedback 6), transcript at three zoom levels, transport (scrub/step/play/pause, ×1–×4 per spec; mockup's ×6 dropped), pause/resume/steer banner states, frame detail | Uses `useFrames` |
 | P2b | **Run**: side panels | approvals strip (from P1), file-diff card under approvals (feedback 4), `<RunOutputs>` seam (feedback 7), tabs proof/cost/policy/context/chain, `runMetrics` instruments, compacted/sealed variants | |
 | P3 | **Agents** (section "Agent IAM", list page "Identities" in the baseline) | list; detail tabs identity/definition/toolbelt/mandates/budgets/runs/enrollment; source editor + commit dialog; mandate detail (real `[mandate]` param, W4); register entry point | Editor is a client island |
-| P4 | **Tools** | tabs registry/connections/mandates/policy/switches/auto/assurance; kill-switch dialog with blast-radius text; observed-schema approval; policy draft + simulation view | |
-| P5 | **Steering** | tabs records/proposals/prs/effect/retirement; `RecordKindBadge` (W6); Context PR dialog | |
-| P6 | **Spend** | tabs findings/operator/agent/tool/waste/reconciliation/budgets; drill `spend/<kind>/<id>`; evidence + fix dialogs; export | |
+| P4 | **Tools** | tabs registry/connections/mandates/policy/switches/auto; kill-switch dialog with blast-radius text; observed-schema approval; policy draft with its tests | |
+| P5 | **Steering** | tabs records/proposals/prs; `RecordKindBadge` (W6); Context PR dialog | |
+| P6 | **Spend** | tabs findings/operator/agent/tool/waste/budgets; drill `spend/<kind>/<id>`; evidence + fix dialogs; export | |
 | P7 | **Organization** | tabs people/roles/invitations/workspaces/funding/plane/keys; role editor; API key create/rotate/revoke dialogs | |
-| P8 | **Billing** | plan, run allowance, meters, invoices | |
-| P9 | **Audit** | tabs events/incidents/receipts/holds/exports/keys/assurance/retention; receipt viewer; hold, export, KEK rotation, erasure dialogs | |
+| P8 | **Billing** | plan, proven runs this period, the secondary meters, invoices | |
+| P9 | **Audit** | tabs events/incidents/receipts/exports/keys/retention; receipt viewer; export and KEK rotation dialogs | |
+| P10 | **Run · Done** | the Done tab (`dod-spec.md`): verdict by shape, certificate, checks with evidence digests, hidden checks, budget from the tool log, the stops; the locked-file dialog; the sign dialog | P2 |
 
 ### Batch 3: live adapters (9 lanes, start as soon as L1 merges; runs alongside B2)
 
@@ -1053,9 +1052,9 @@ Each lane owns `src/data/adapters/live/<domain>.ts` + `mappers/<domain>.ts` + te
 | A1 | runs + frames | `RunStore.getRunByPublicId`, `listRunAttempts`, `readAttemptEventsSince`; tacho sessions for wrapped agents; cost via `sumTokenUsageByExecutionStep` | tier/grade/verdict (G6, G7), run graph, context (G10), name (G14) |
 | A2 | approvals + commands | `agent.approval_requests` read; command status from `tacho.control_commands` | four-hop mandate/rules (G1) |
 | A3 | agents + iam | `iam.principals`, roles, grants, assignments; `tacho.hosts`; `agent.definition.get/list`; `billing.spend_budgets`; `tacho.incidents` | mandates (G1), scores (G11) |
-| A4 | tools | `mcp.mcp_servers`, `agent.tools/tool_versions`, `mcp.tool_snapshots`, `ingestion.source_connections`; emergency denies as switches | policy (G2), auto rules (G12), assurance, observed schemas |
-| A5 | steering | `agent.context_records(_versions)`, `context_promotions` | effect, retirement |
-| A6 | spend + budgets | ClickHouse `readUsageBreakdown` by operator/agent/model; `tool_invocations`; `billing.spend_budgets` | proven (G7), findings (G4), reconciliation (G5) |
+| A4 | tools | `mcp.mcp_servers`, `agent.tools/tool_versions`, `mcp.tool_snapshots`, `ingestion.source_connections`; emergency denies as switches | policy (G2), auto rules (G12), observed schemas |
+| A5 | steering | `agent.context_records(_versions)`, `context_promotions` | none |
+| A6 | spend + budgets | ClickHouse `readUsageBreakdown` by operator/agent/model; `tool_invocations`; `billing.spend_budgets` | proven (G7), findings (G4) |
 | A7 | org + members + keys | `org.org_users`, `org.invitations`, `workspace.workspaces`, `iam.roles`, `org.data_planes`, `auth.api_keys`, `org.model_credentials` | none |
 | A8 | billing | `billing.subscriptions`, invoices, Stripe via existing contracts | run allowance (G13) |
 | A9 | audit + shell | ClickHouse `audit_events` + `security.security_events`, `tacho.incidents`, `privacy_*`, `notification.notifications` | receipts, holds, KEK (G8) |
@@ -1074,7 +1073,7 @@ Each lane owns `src/features/<page>/actions.ts` and wires its page's dialogs to 
 | Organization | `org.member_invite.*`, `org.member_role.change`, `workspace.create`, `workspace.settings.*`, `org.settings.write`, `org.model_credential`, `org.data_plane`, `api.key.{create,rotate,revoke}` | role editor custom roles (enterprise) |
 | Billing | `billing.subscription_upgrade.start` | per-run plan (G13) |
 | Audit | `privacy.data.export`, `privacy.data.erase` | holds, KEK rotation (G8) |
-| Shell | `agent.memory.*` none; account settings via Better Auth client | assistant send until stella-serve turn contract is exposed to the app |
+| Shell | account settings via Better Auth client | none |
 
 Each wired action updates `apps/app/capability-ui-map.json` with its binding, which feeds the parity gate at cutover.
 
@@ -1122,16 +1121,14 @@ You are lane <ID> of batch <N> building the new Mission Control app at ~/Project
 on branch app-rebuild/<N>-<id>, PR target app-rebuild.
 
 Read first:
-- plan: `git -C ~/Documents/Oxagen/Mockups show origin/main:docs/2026-09-12-mission-control-app-implementation-plan.md`
-  (§0, §4, and your row in §5)
-- spec: `git -C ~/Documents/Oxagen/Mockups show origin/main:docs/2026-09-11-oxagen-mission-control-spec.md`
-  (§3 vocabulary, §14, §19 row for <page>). These docs/ copies are canonical, not ~/Documents/Oxagen/Specs.
-- mockup baseline: `git -C ~/Documents/Oxagen/Mockups show mc-baseline-w4:mc.html` (tag). It carries
-  everything in mc-baseline-w1 (Agent IAM, the small approval card, the sidebar flyout, the runMetrics
-  instruments), everything W1–W11 showed, per-run frames and context, the tenant Anderson Intelligence Corp.
-  at business scale, and the eleven flows as guided scenarios (`#/a-intel/<ws>/scenarios/<id>/<step>`):
-  walk your page's scenario first. Read no other branch and not Specs/mockups. Decisions and their
-  sources: tools/baseline/README.md at the same tag.
+- plan: `docs/implementation-plan.md` in the mockups repository (§0, §4, and your row in §5)
+- spec: `docs/mission-control-spec.md` (§3 vocabulary, §8.6, §14, §19 row for <page>). These docs/ copies are canonical.
+- the page's spec: `mockups/pages/<page>.md`, and its audit prompt beside it.
+- the mockup: `mockups/missioncontrol.html`, built from `mockups/src` and `mockups/fixtures` by
+  `node tools/build-mockup.mjs`. Open your page in Storybook (`npm run storybook`: every page in
+  every state, desktop and mobile, with the page's spec on its Docs tab), and walk your page's
+  scenario first (`#/a-intel/<ws>/scenarios/<id>/<step>`; the Scenarios stories). The fixtures are
+  the seed data; `mockups/fixtures/README.md` says what each collection is.
 
 You own ONLY: <paths>. Do not edit any other path; if you need a shared primitive, build it
 locally in your feature folder and note it under "promote" in the PR body.

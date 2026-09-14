@@ -1,12 +1,13 @@
 # Consolidating W1–W11 into one design
 
-> **2026-09-14.** `consolidated.html` is no longer the lean hand-drawn file this document
-> describes. It is now generated from `mc.html` by `tools/build-pages.mjs` — the full design
-> with the mockup chrome removed — alongside `consolidated-loaded.html`,
-> `consolidated-loaded-mobile.html` and `pages/`. The decisions below still stand where
-> `mc.html` adopted them (the breadcrumb switchers, the nav-count rule, one gold action, states
-> that replace the body and never the shell); the ceilings (three tiles, five tabs) were the lean
-> file's and `mc.html` does not hold to them. The hand-drawn file is at commit `61f88e1`.
+> **2026-09-14.** The lean hand-drawn `consolidated.html` this document describes is gone, and so
+> are the generated copies that replaced it for a day. The design is one master file,
+> `mockups/missioncontrol.html`, built from `mockups/src` and `mockups/fixtures`; the product build,
+> every page in every state and every W flow are URLs of that file, catalogued by Storybook. The
+> decisions below still stand where the master adopted them (the breadcrumb switchers, the nav-count
+> rule, one gold action, states that replace the body and never the shell); the ceilings (three
+> tiles, five tabs) were the lean file's and the master does not hold to them. The assistant dock
+> and W7 were cut by the scope review of 2026-09-14. The hand-drawn file is at commit `61f88e1`.
 
 Published: https://claude.ai/code/artifact/25a71da8-dc9d-49b6-b57d-9240da40310e
 Source: `consolidated.html` (71 KB, against 135–201 KB for each single-flow original)
@@ -25,7 +26,7 @@ set had grown fat.
 | Sidebar nav | W2 / W8 | Icons plus section headers. W4's two-letter mono codes (FL, RN) are lighter but slower to scan. |
 | Nav counts | new rule | A count appears **only where something waits on a person** — Fleet approvals, Steering proposals, Audit incidents. Dropped the decorative ones (`Tools 214`, `Agents 50`, `Spend $412.66`), which read as alerts and are not. |
 | Sidebar footer | W2 | Account button only. Dropped W6's version block and W10's enforcement meter to the Organization page, where someone is actually looking for them. |
-| Top bar | W7 | Labelled `Assistant` button beats an unlabelled icon. Theme moved into the account dialog; W11's top bar had a broken oversized search icon. |
+| Top bar | W7 | Theme moved into the account dialog; W11's top bar had a broken oversized search icon. (The labelled assistant button this row chose was cut with the assistant on 2026-09-14.) |
 | Summary tiles | W10, capped at 3 | W4 shipped seven tiles plus a second row; W8 five. Three, each one number and one basis line. |
 | Run header | W5 | Id, four inline chips, meta, task. W4's six chips over two rows is the single fattest element in the set. |
 | Run body | W4, reduced to two panes | Frame list plus inspector. Chain and seal becomes a tab rather than a permanent third column. |
@@ -33,7 +34,6 @@ set had grown fat.
 | Approvals | W11 list + W3 chain | Compact rows on Fleet; W3's four-hop chain is the detail, not the list item. |
 | Fleet table | W2, 8 columns → 6 | Dropped harness and tier as columns; harness sits under the agent name. |
 | Agents, Steering, Spend, Organization, Audit | W9, W6, W8, W10, W10 | Each trimmed to the ceilings above. |
-| Assistant dock | W11 | Same panel on every page, showing the governed actions it took with receipt links. |
 | States control | W7 / W10 | One row. W11's six-group panel was itself an example of the problem. |
 
 ## Rules the consolidated file holds to
@@ -51,10 +51,10 @@ set had grown fat.
   invalidate this.
 - Every stub control says "Not in this mockup" rather than silently doing nothing.
 
-## Tool grammar (2026-09-11, shared by mc.html and W1–W11)
+## Tool grammar (2026-09-11, shared by the master and W1–W11)
 
 Every place a tool is displayed goes through one component and three orthogonal axes.
-mc.html carries it as `toolCell` / `catBadge` / `hazard` / `gate`; the standalone W files
+The master carries it as `toolCell` / `catBadge` / `hazard` / `gate`; the standalone W files
 carry the same thing namespaced as a `TG` object (`TG.cell`, `TG.cat`, `TG.hazard`,
 `TG.gate`, `TG.legend`, `TG.chips`, `TG.seg`) with `tg-` CSS classes so nothing collides.
 
@@ -80,11 +80,10 @@ side effect, financial effect and egress carry a decision by themselves.
 
 ## One source (2026-09-12)
 
-`mc.html` is the design. W1–W11 used to be eleven hand-drawn apps that each disagreed with it
+the master is the design. W1–W11 used to be eleven hand-drawn apps that each disagreed with it
 somewhere (the bottom dock, approval size, the Agents naming, a run page that showed one run's
-frames for every run). Everything each W file showed that `mc.html` lacked was ported into
-`mc.html`, each flow became a `SCENARIOS` entry, and the W files are now generated from it by
-`tools/build-w.mjs`. Where a W file and `mc.html` disagreed on a decision already recorded in
+frames for every run). Everything each W file showed that the master lacked was ported into
+the master, each flow became a `SCENARIOS` entry, and the W files are URLs of it. Where a W file and the master disagreed on a decision already recorded in
 `tools/baseline/README.md`, the baseline won and nothing was ported. Superseded and not ported:
 W1's right-side assistant drawer, W2's three delivery modes and @-addressing, W3's run strip (runMetrics instruments won),
 W6's "create an agent opens a PR",

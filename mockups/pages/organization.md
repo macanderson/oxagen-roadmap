@@ -5,14 +5,14 @@
 | Route | `#/a-intel[/<tab>]` |
 | Scope | organization |
 | Spec | §14 Mission Control; Appendix F page 8 |
-| Design | `mc.html` → `pOrganization()` (the single source; `consolidated.html` is the product build of it) |
+| Design | `mockups/src/engine.js` → `pOrganization()`, built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded · empty · loading · error · access denied |
-| Files | `organization-loaded.html` / `organization-loaded-mobile.html`, `organization-empty.html` / `organization-empty-mobile.html`, `organization-loading.html` / `organization-loading-mobile.html`, `organization-error.html` / `organization-error-mobile.html`, `organization-denied.html` / `organization-denied-mobile.html` |
+| Storybook | `Mission Control / … / organization`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
 | Audit | `organization.audit-prompt.md` |
 
 ## Job
 
-People, roles, invitations, SSO and SCIM, workspaces, model funding and routes, the data plane, and API keys — the tenant’s administration in one page.
+People, roles, invitations, workspaces, model funding and routes, the data plane, and API keys — the tenant’s administration in one page.
 
 ## What is on the page
 
@@ -20,21 +20,21 @@ People, roles, invitations, SSO and SCIM, workspaces, model funding and routes, 
 Actions: **Invite** (opens the invite dialog) · **Create a workspace** (gold; opens the new-workspace dialog)
 
 - **Tabs**: People (N) · Roles (N) · Invitations (N) · Workspaces (N) · Model funding and routes · Data plane · API keys. `/api-keys` and `/roles` are routes of their own (see `organization-api-keys.md`, `organization-roles.md`).
-- **People** — Single sign-on (Provider · Status · Entity id · Metadata · Signing certificate · Break-glass · Last sign-in; **Edit**), SCIM provisioning (Protocol · Endpoint · Token · In scope · Group → role · Deprovision; **Edit mappings**), People table: Person · Role · Workspaces · Two-factor · SSO · Last seen · Status (**Open**, **Change role** → role dialog, **Remove** → remove-member dialog), The delegation ceiling, Roles in use (**Manage roles**).
+- **People** — the People table: Person · Role · Workspaces · Two-factor · Last seen · Status (**Open**, **Change role** → role dialog, **Remove** → remove-member dialog), The delegation ceiling, Roles in use (**Manage roles**).
 - **Roles** — Role · Kind · Scope · Permissions · Held by · Origin (**Create role**, **View**, **Duplicate**, **Delete**, **Edit** — the role editor over `PERMS`).
 - **Invitations** — Email · Role offered · Invited by · Sent · Expires (**Resend**, **Revoke**).
 - **Workspaces** — Workspace · Main repo · Production branch · Linked repos · Agents · Owner · Governance (**Open**, **Edit** → editws, **Archive** → archivews).
 - **Model funding and routes** — Model routes (Oxagen’s own work only): Tier · Provider · Route · Fallback · Use · Cost (**Edit**); In-firewall routes: Tier · Endpoint · Dialect · Model served inside the network; Funding source (Current · Cap · Key storage · “No call reads the environment”; **Change funding source** → funding dialog).
-- **Data plane** — Shared (current) · Dedicated · Behind the firewall; Binding · Neo4j · Postgres · Object storage · Key-encryption key · Attester key · Witness runner · Frame bodies · Run ledger · Frame nodes in the graph · Control-plane audit · `digest_only` mode · Erasure; Retention; Graph isolation (Database · Workspace scoping · Cross-tenant reads · Platform catalogs · Startup guard); **Request a change of plane**, **Rotate keys**.
+- **Data plane** — Shared (current) · Dedicated · Behind the firewall; Binding · Postgres · Object storage · Key-encryption key · Attester key · Witness runner · Frame bodies · Run ledger · Frame rows · Control-plane audit · `digest_only` mode; Retention; Tenant isolation (Rows · Workspace scoping · Cross-tenant reads · Platform catalogs · Startup guard); **Request a change of plane**, **Rotate keys**.
 - **API keys** — Name · Principal · Grants · Created by · Last used · Actions 30d · Expires (**Create key** → apikey, **Rotate** → rotatekey, **Revoke** → revokekey); Surfaces this reaches.
 
 **Dialogs this page opens:** `invite`, `member`, `role`, `removemember`, `newws`, `editws`, `archivews`, `funding`, `apikey`, `rotatekey`, `revokekey`.
 
-**Shell.** Sidebar (organization switcher, workspace switcher, Workspace nav: Fleet · Agent IAM · Tools · Steering · Spend; Organization nav: Organization · Billing · Audit; Assistant launcher; agent count · data plane · tier badge), top bar (breadcrumbs, ⌘K search-or-run, notifications with unread dot, Assistant toggle, account avatar → user menu: Account, Preferences, Security and sessions, Privacy and data, Switch theme, Sign out).
+**Shell.** Sidebar (organization switcher, workspace switcher, Workspace nav: Fleet · Agent IAM · Tools · Steering · Spend; Organization nav: Organization · Billing · Audit; agent count · data plane · tier badge), top bar (breadcrumbs, ⌘K search-or-run, notifications with unread dot, account avatar → user menu: Account, Preferences, Security and sessions, Privacy and data, Switch theme, Sign out).
 
 ## Data sources
 
-Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBacked` in production). From `docs/2026-09-12-mission-control-app-implementation-plan.md` §3; the *mockup collection* column names the constant in `mc.html` that the design renders from.
+Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBacked` in production). From `docs/implementation-plan.md` §3; the *mockup collection* column names the file in `mockups/fixtures/` (as `FIXTURES.<NAME>`) or the constant in `mockups/src/engine.js` that the design renders from.
 
 | Element | Mockup collection | Target store (spec) | Backing today (repo) | Status |
 |---|---|---|---|---|
@@ -44,13 +44,12 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 | Model funding + routes | hard-coded | `org.organizations.funding_source/model_routes` | `org.model_credentials`, `workspace.routing_policy` | 🟡 |
 | Data plane | plane tab | `org.data_planes` | same; `org.data_plane` | ✅ |
 | API keys | `APIKEYS` | `iam.credentials` | `auth.api_keys`; `api.key.{create,revoke,rotate}` | ✅ |
-| SSO / SCIM | fixtures | Better Auth SSO + SCIM | Better Auth | 🟡 |
 
 ## Functionality
 
-- Changing a role is a governed action: it passes IAM, writes an audit record and bills as one action — the same path the in-app agent takes.
+- Changing a role is a governed action: it passes IAM, writes an audit record and bills as one action.
 - A workspace owns one main repo, one steering set, its agents, tool grants and budgets; a workspace without a main repo cannot exist (it is *provisional*).
-- Funding source and routes cover Oxagen’s own model work (the assistant, classifiers, embeddings, rerank); the customer’s agents pay their own providers.
+- Funding source and routes cover Oxagen’s own model work (reflection, promotion rationale, classifiers, run names); the customer’s agents pay their own providers.
 - Rotate keys on the data plane is a KEK rotation and lands on Audit › Keys.
 
 ## States
@@ -63,7 +62,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 
 ## Mobile
 
-Top bar collapses to hamburger · current crumb · search glyph · notifications · assistant · avatar. A fixed five-slot thumb bar replaces the sidebar: **Fleet** (count = approvals waiting), **Agents**, **Tools**, **Spend**, **More** (count = open critical incidents). **More** is a bottom sheet listing Steering, Organization, Billing, Audit, Assistant, Search, Notifications, Account, Switch organization, Switch workspace. The hamburger opens the full sidebar as a drawer over a scrim. Every dialog rises from the bottom edge as a sheet with a drag handle and full-width footer buttons; every list table becomes a stack of cards, each cell labelled with its column header; touch targets are ≥ 44 px; inputs are 16 px; nothing scrolls sideways.
+Top bar collapses to hamburger · current crumb · search glyph · notifications · avatar. A fixed five-slot thumb bar replaces the sidebar: **Fleet** (count = approvals waiting), **Agents**, **Tools**, **Spend**, **More** (count = open critical incidents). **More** is a bottom sheet listing Steering, Organization, Billing, Audit, Search, Notifications, Account, Switch organization, Switch workspace. The hamburger opens the full sidebar as a drawer over a scrim. Every dialog rises from the bottom edge as a sheet with a drag handle and full-width footer buttons; every list table becomes a stack of cards, each cell labelled with its column header; touch targets are ≥ 44 px; inputs are 16 px; nothing scrolls sideways.
 
 ## Permissions
 
@@ -74,7 +73,6 @@ Top bar collapses to hamburger · current crumb · search glyph · notifications
 
 - role editor writes
 - funding and routes are hard-coded
-- SSO/SCIM configuration surface
 
 ## Rules every build of this page must keep
 

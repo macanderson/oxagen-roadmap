@@ -5,9 +5,9 @@
 | Route | `#/welcome/two-factor` |
 | Scope | auth |
 | Spec | §14 Mission Control; Appendix F sign-in flows |
-| Design | `mc.html` → `obTwoFactor()` (the single source; `consolidated.html` is the product build of it) |
+| Design | `mockups/src/engine.js` → `obTwoFactor()`, built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded · loading · error |
-| Files | `two-factor-loaded.html` / `two-factor-loaded-mobile.html`, `two-factor-loading.html` / `two-factor-loading-mobile.html`, `two-factor-error.html` / `two-factor-error-mobile.html` |
+| Storybook | `Mission Control / … / two-factor`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
 | Audit | `two-factor.audit-prompt.md` |
 
 ## Job
@@ -26,7 +26,7 @@ Actions: **Verify** (gold, full width)
 
 ## Data sources
 
-Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBacked` in production). From `docs/2026-09-12-mission-control-app-implementation-plan.md` §3; the *mockup collection* column names the constant in `mc.html` that the design renders from.
+Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBacked` in production). From `docs/implementation-plan.md` §3; the *mockup collection* column names the file in `mockups/fixtures/` (as `FIXTURES.<NAME>`) or the constant in `mockups/src/engine.js` that the design renders from.
 
 | Element | Mockup collection | Target store (spec) | Backing today (repo) | Status |
 |---|---|---|---|---|

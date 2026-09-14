@@ -5,9 +5,9 @@
 | Route | `#/welcome/run` |
 | Scope | onboarding gate |
 | Spec | §14 Mission Control; Appendix F onboarding (the gate) |
-| Design | `mc.html` → `pWelcome(r) → regRun() in onboard mode` (the single source; `consolidated.html` is the product build of it) |
+| Design | `mockups/src/engine.js` → `pWelcome(r) → regRun() in onboard mode`, built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded · loading · error · access denied |
-| Files | `onboarding-run-loaded.html` / `onboarding-run-loaded-mobile.html`, `onboarding-run-loading.html` / `onboarding-run-loading-mobile.html`, `onboarding-run-error.html` / `onboarding-run-error-mobile.html`, `onboarding-run-denied.html` / `onboarding-run-denied-mobile.html` |
+| Storybook | `Mission Control / … / onboarding-run`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
 | Audit | `onboarding-run.audit-prompt.md` |
 
 ## Job
@@ -27,7 +27,7 @@ Actions: **Cancel** · **Back** · **Open the installer**
 
 ## Data sources
 
-Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBacked` in production). From `docs/2026-09-12-mission-control-app-implementation-plan.md` §3; the *mockup collection* column names the constant in `mc.html` that the design renders from.
+Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBacked` in production). From `docs/implementation-plan.md` §3; the *mockup collection* column names the file in `mockups/fixtures/` (as `FIXTURES.<NAME>`) or the constant in `mockups/src/engine.js` that the design renders from.
 
 | Element | Mockup collection | Target store (spec) | Backing today (repo) | Status |
 |---|---|---|---|---|

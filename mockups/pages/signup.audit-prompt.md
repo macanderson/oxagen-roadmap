@@ -11,7 +11,7 @@ You are auditing the **Sign up** page of Oxagen Mission Control (`#/welcome/sign
 ## Inputs
 
 1. The page spec: `pages/signup.md` (read it first, in full).
-2. The design, rendered: `pages/signup-<state>.html` and `pages/signup-<state>-mobile.html` for each state (loaded, loading, error); open them in a browser or with Playwright. `pages/index.html` links all of them.
+2. The design, rendered: the `signup` stories in Storybook (`npm run storybook`), one per state (loaded, loading, error), desktop and mobile; or `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` in a browser or with Playwright.
 3. The product spec for context: `docs/2026-09-11-oxagen-mission-control-spec.md` §14 (Mission Control), Appendix F (the pages that survive), Appendix A (target tables); the data mapping in `docs/2026-09-12-mission-control-app-implementation-plan.md` §3.
 4. The build under audit: `{{APP_ROOT}}` (the Next.js app), served at `{{APP_URL}}`. Route under audit: `/welcome/signup`.
 
@@ -23,14 +23,14 @@ Work through every check. For each, record PASS, FAIL, or N/A (with why). Cite e
 2. **Header.** Eyebrow “Create your account”, h1 “Govern the agents you already run.”. Actions present, in order, with the same labels: Create account. Exactly one gold (primary) action on the screen.
 3. **Summary tiles.** None on this page; fail if the build added decorative ones.
 4. **Sections, tabs and tables.** For each item below, the build has it, with the same tab labels (and live counts where the design shows them), the same panel headings, and every table column named in the spec, in that order. Missing or renamed columns are FAILs; extra columns are noted.
-   - SSO: Continue with Google · Continue with GitHub · Continue with SAML SSO — then “or”.
+   - Sign up with: Continue with Google · Continue with GitHub — then “or”.
    - Form: Name · Work email · Password (show/hide, strength meter, requirements: ≥ 12 characters, one symbol, one digit). Terms line: Oxagen never stores model provider keys in plain text and never returns them once saved.
    - Footer: “Already have an account? Log in”.
 5. **Actions and dialogs.** Every button in the spec exists, opens what the spec says (no dialogs), and each write is a governed action: it passes IAM, produces an audit event, and shows a receipt or reference. A stub must say what the product would do; a control that silently does nothing is a FAIL.
 6. **Data sources.** For each row of the spec’s data-source table, find the adapter or query in the build that feeds it. ✅ rows must be wired to the named store; 🟡 rows must be wired for the fields that exist and render `NotBacked` (an honest “not recorded yet”, never a zero) for the rest; ❌ rows must render `NotBacked` with the milestone named. A fixture reaching production is a FAIL.
 7. **States.** Force each state and compare copy and controls with the design file:
-   - **loading** (`signup-loading.html`): the shell stays and the body is the skeleton; no data, no zeros, no stale rows.
-   - **error** (`signup-error.html`): Inline error above the form: “That email is already registered. Log in instead, or reset your password.” The email field is marked bad with the hint “An account for this address was created on <date>.”
+   - **loading** (`state=loading`): the shell stays and the body is the skeleton; no data, no zeros, no stale rows.
+   - **error** (`state=error`): Inline error above the form: “That email is already registered. Log in instead, or reset your password.” The email field is marked bad with the hint “An account for this address was created on <date>.”
    Loading must not flash zeros. Error must name the code and offer Try again and Open an incident. Denied must name the missing permission and offer Request access.
 8. **Trust language.** Every tier, replay grade, attestation and cost basis on the page shows the recorded value; search the build for any place a stronger word could be rendered than the record allows (e.g. “gateway” for a client-attested window). Money always carries its basis.
 9. **Mobile.** At 390 × 844 with a touch pointer: the card fills the width with 16 px gutters, buttons are full width and ≥ 44 px, inputs are 16 px, code inputs use the numeric keypad. Compare against `pages/signup-loaded-mobile.html`.

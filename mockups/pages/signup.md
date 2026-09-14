@@ -5,21 +5,21 @@
 | Route | `#/welcome/signup` |
 | Scope | auth |
 | Spec | §14 Mission Control; Appendix F sign-in flows (not a page) |
-| Design | `mc.html` → `obSignup()` (the single source; `consolidated.html` is the product build of it) |
+| Design | `mockups/src/engine.js` → `obSignup()`, built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded · loading · error |
-| Files | `signup-loaded.html` / `signup-loaded-mobile.html`, `signup-loading.html` / `signup-loading-mobile.html`, `signup-error.html` / `signup-error-mobile.html` |
+| Storybook | `Mission Control / … / signup`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
 | Audit | `signup.audit-prompt.md` |
 
 ## Job
 
-Create the account — SSO, or email and password. The first of the sixty-seconds-to-governed path: sign up → verify email → name the organization → wrap an agent → start a run.
+Create the account — Google, GitHub, or email and password. The first of the sixty-seconds-to-governed path: sign up → verify email → name the organization → wrap an agent → start a run.
 
 ## What is on the page
 
 **Header** — eyebrow “Create your account”, h1 “Govern the agents you already run.”. Lead: wrap Claude Code, Codex CLI, Stella or an SDK agent; the first 1,000 runs a month free with every governance feature on. Tags: runs free / month · no token markup · SOC 2 evidence built in.
 Actions: **Create account** (gold, full width)
 
-- SSO: **Continue with Google** · **Continue with GitHub** · **Continue with SAML SSO** — then “or”.
+- Sign up with: **Continue with Google** · **Continue with GitHub** — then “or”.
 - Form: Name · Work email · Password (show/hide, strength meter, requirements: ≥ 12 characters, one symbol, one digit). Terms line: Oxagen never stores model provider keys in plain text and never returns them once saved.
 - Footer: “Already have an account? Log in”.
 
@@ -28,7 +28,7 @@ Actions: **Create account** (gold, full width)
 
 ## Data sources
 
-Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBacked` in production). From `docs/2026-09-12-mission-control-app-implementation-plan.md` §3; the *mockup collection* column names the constant in `mc.html` that the design renders from.
+Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBacked` in production). From `docs/implementation-plan.md` §3; the *mockup collection* column names the file in `mockups/fixtures/` (as `FIXTURES.<NAME>`) or the constant in `mockups/src/engine.js` that the design renders from.
 
 | Element | Mockup collection | Target store (spec) | Backing today (repo) | Status |
 |---|---|---|---|---|
@@ -36,7 +36,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 
 ## Functionality
 
-- Submit goes to Verify email; SSO goes straight to Name the organization.
+- Submit goes to Verify email; Google and GitHub go straight to Name the organization.
 - Loading disables the primary button with a spinner (“Creating account…”).
 
 ## States

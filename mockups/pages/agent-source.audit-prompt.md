@@ -11,7 +11,7 @@ You are auditing the **Agent source** page of Oxagen Mission Control (`#/a-intel
 ## Inputs
 
 1. The page spec: `pages/agent-source.md` (read it first, in full).
-2. The design, rendered: `pages/agent-source-<state>.html` and `pages/agent-source-<state>-mobile.html` for each state (loaded, loading, error, access denied); open them in a browser or with Playwright. `pages/index.html` links all of them.
+2. The design, rendered: the `agent-source` stories in Storybook (`npm run storybook`), one per state (loaded, loading, error, access denied), desktop and mobile; or `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` in a browser or with Playwright.
 3. The product spec for context: `docs/2026-09-11-oxagen-mission-control-spec.md` §14 (Mission Control), Appendix F (the pages that survive), Appendix A (target tables); the data mapping in `docs/2026-09-12-mission-control-app-implementation-plan.md` §3.
 4. The build under audit: `{{APP_ROOT}}` (the Next.js app), served at `{{APP_URL}}`. Route under audit: `/a-intel/core-platform/agents/<slug>/source`.
 
@@ -19,7 +19,7 @@ You are auditing the **Agent source** page of Oxagen Mission Control (`#/a-intel
 
 Work through every check. For each, record PASS, FAIL, or N/A (with why). Cite evidence: a file and line in the build, a screenshot path, or a DOM selector and its text.
 
-1. **Route and shell.** The build serves the route; the sidebar, breadcrumbs, ⌘K search, notifications, assistant and account are present and match the spec’s shell; the breadcrumb ends on this page. The document title names the page.
+1. **Route and shell.** The build serves the route; the sidebar, breadcrumbs, ⌘K search, notifications and account are present and match the spec’s shell; the breadcrumb ends on this page. The document title names the page.
 2. **Header.** Eyebrow “Agent · source”, h1 “`.oxagen/agents/<slug>.toml` (mono)”. Actions present, in order, with the same labels: Back to the form · Discard · Save. Exactly one gold (primary) action on the screen.
 3. **Summary tiles.** None on this page; fail if the build added decorative ones.
 4. **Sections, tabs and tables.** For each item below, the build has it, with the same tab labels (and live counts where the design shows them), the same panel headings, and every table column named in the spec, in that order. Missing or renamed columns are FAILs; extra columns are noted.
@@ -28,9 +28,9 @@ Work through every check. For each, record PASS, FAIL, or N/A (with why). Cite e
 5. **Actions and dialogs.** Every button in the spec exists, opens what the spec says (`commit (branch, message, diff)`, `discard`), and each write is a governed action: it passes IAM, produces an audit event, and shows a receipt or reference. A stub must say what the product would do; a control that silently does nothing is a FAIL.
 6. **Data sources.** For each row of the spec’s data-source table, find the adapter or query in the build that feeds it. ✅ rows must be wired to the named store; 🟡 rows must be wired for the fields that exist and render `NotBacked` (an honest “not recorded yet”, never a zero) for the rest; ❌ rows must render `NotBacked` with the milestone named. A fixture reaching production is a FAIL.
 7. **States.** Force each state and compare copy and controls with the design file:
-   - **loading** (`agent-source-loading.html`): the shell stays and the body is the skeleton; no data, no zeros, no stale rows.
-   - **error** (`agent-source-error.html`): “This file could not be loaded” — `502 git_read_unreachable`. Nothing was changed. Runs kept recording while this page was down — frames are written by the gateway, not by Mission Control. Actions: Try again, Open an incident; a trace id, region and timestamp line.
-   - **access denied** (`agent-source-denied.html`): “You cannot see this agent’s definition” — the roles the signed-in person holds on the organization do not include `agent.write on core-platform`. Copy explains an owner can grant it and that the grant is itself a governed action in the audit record. Actions: Request access (opens the request-access dialog), Back to Fleet. Below: *Signed in as* (name · role), *Needed* (the permission), *Decided by
+   - **loading** (`state=loading`): the shell stays and the body is the skeleton; no data, no zeros, no stale rows.
+   - **error** (`state=error`): “This file could not be loaded” — `502 git_read_unreachable`. Nothing was changed. Runs kept recording while this page was down — frames are written by the gateway, not by Mission Control. Actions: Try again, Open an incident; a trace id, region and timestamp line.
+   - **access denied** (`state=denied`): “You cannot see this agent’s definition” — the roles the signed-in person holds on the organization do not include `agent.write on core-platform`. Copy explains an owner can grant it and that the grant is itself a governed action in the audit record. Actions: Request access (opens the request-access dialog), Back to Fleet. Below: *Signed in as* (name · role), *Needed* (the permission), *Decided by
    Loading must not flash zeros. Error must name the code and offer Try again and Open an incident. Denied must name the missing permission and offer Request access.
 8. **Trust language.** Every tier, replay grade, attestation and cost basis on the page shows the recorded value; search the build for any place a stronger word could be rendered than the record allows (e.g. “gateway” for a client-attested window). Money always carries its basis.
 9. **Mobile.** At 390 × 844 with a touch pointer: the five-slot thumb bar is present with Fleet/Agents/Tools/Spend/More, counts only where something waits on a person; More opens a bottom sheet; every dialog is a bottom sheet with full-width footer buttons; every list table renders as labelled cards; the page never scrolls sideways; every tap target is ≥ 44 px; inputs are 16 px. Compare against `pages/agent-source-loaded-mobile.html`.

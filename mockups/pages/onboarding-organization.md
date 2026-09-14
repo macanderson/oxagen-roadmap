@@ -5,9 +5,9 @@
 | Route | `#/welcome/organization` |
 | Scope | onboarding gate |
 | Spec | §14 Mission Control; Appendix F onboarding (the gate) |
-| Design | `mc.html` → `pWelcome(r) → obOrg()` (the single source; `consolidated.html` is the product build of it) |
+| Design | `mockups/src/engine.js` → `pWelcome(r) → obOrg()`, built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded · loading · error · access denied |
-| Files | `onboarding-organization-loaded.html` / `onboarding-organization-loaded-mobile.html`, `onboarding-organization-loading.html` / `onboarding-organization-loading-mobile.html`, `onboarding-organization-error.html` / `onboarding-organization-error-mobile.html`, `onboarding-organization-denied.html` / `onboarding-organization-denied-mobile.html` |
+| Storybook | `Mission Control / … / onboarding-organization`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
 | Audit | `onboarding-organization.audit-prompt.md` |
 
 ## Job
@@ -26,11 +26,11 @@ Actions: **Cancel** · **Continue** (gold)
 
 ## Data sources
 
-Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBacked` in production). From `docs/2026-09-12-mission-control-app-implementation-plan.md` §3; the *mockup collection* column names the constant in `mc.html` that the design renders from.
+Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBacked` in production). From `docs/implementation-plan.md` §3; the *mockup collection* column names the file in `mockups/fixtures/` (as `FIXTURES.<NAME>`) or the constant in `mockups/src/engine.js` that the design renders from.
 
 | Element | Mockup collection | Target store (spec) | Backing today (repo) | Status |
 |---|---|---|---|---|
-| Organization, first workspace | `ORG`, `WS[0]` | `org.organizations`, `wrk.workspaces`, per-org Neo4j database | `org.organizations`, `workspace.workspaces` | ✅ / 🟡 gate state (G15) |
+| Organization, first workspace | `ORG`, `WS[0]` | `org.organizations`, `wrk.workspaces` | `org.organizations`, `workspace.workspaces` | ✅ / 🟡 gate state (G15) |
 
 ## Functionality
 

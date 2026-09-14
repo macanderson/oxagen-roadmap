@@ -5,9 +5,9 @@
 | Route | `#/a-intel/core-platform/register/wrap` |
 | Scope | workspace gate |
 | Spec | §14 Mission Control; Appendix F page 3 |
-| Design | `mc.html` → `pRegister(r) → regWrap()` (the single source; `consolidated.html` is the product build of it) |
+| Design | `mockups/src/engine.js` → `pRegister(r) → regWrap()`, built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded · loading · access denied |
-| Files | `register-wrap-loaded.html` / `register-wrap-loaded-mobile.html`, `register-wrap-loading.html` / `register-wrap-loading-mobile.html`, `register-wrap-denied.html` / `register-wrap-denied-mobile.html` |
+| Storybook | `Mission Control / … / register-wrap`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
 | Audit | `register-wrap.audit-prompt.md` |
 
 ## Job
@@ -27,7 +27,7 @@ Actions: **Cancel** · **Back** · **I have already installed it — continue** 
 
 ## Data sources
 
-Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBacked` in production). From `docs/2026-09-12-mission-control-app-implementation-plan.md` §3; the *mockup collection* column names the constant in `mc.html` that the design renders from.
+Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBacked` in production). From `docs/implementation-plan.md` §3; the *mockup collection* column names the file in `mockups/fixtures/` (as `FIXTURES.<NAME>`) or the constant in `mockups/src/engine.js` that the design renders from.
 
 | Element | Mockup collection | Target store (spec) | Backing today (repo) | Status |
 |---|---|---|---|---|

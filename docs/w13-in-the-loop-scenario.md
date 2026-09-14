@@ -199,9 +199,9 @@ Five policy versions, each a pull request. End on the bottom row:
 
 ## Known gaps
 
-- **Not integrated into `mc.html`.** The showboat has no Skills page and no `in-the-loop` entry in
+- **Not integrated into the master (`mockups/missioncontrol.html`).** The showboat has no Skills page and no `in-the-loop` entry in
   its `SCENARIOS` map, so this scenario is not yet walkable from The Ten Pages. It was left out on
-  purpose: `mc.html` had uncommitted concurrent edits when this was built, and a 16 KB divergence in
+  purpose: the master had uncommitted concurrent edits when this was built, and a 16 KB divergence in
   an 850 KB single file is a merge nobody wants. Port it once that settles.
 - **The spec is untouched.** § 19's tables still end at W12 and its status line still reads
   `complete`; § 2 still says "no skills engine" without the run-versus-resolve distinction. Both
