@@ -1,5 +1,13 @@
 # Consolidating W1–W11 into one design
 
+> **2026-09-14.** `consolidated.html` is no longer the lean hand-drawn file this document
+> describes. It is now generated from `mc.html` by `tools/build-pages.mjs` — the full design
+> with the mockup chrome removed — alongside `consolidated-loaded.html`,
+> `consolidated-loaded-mobile.html` and `pages/`. The decisions below still stand where
+> `mc.html` adopted them (the breadcrumb switchers, the nav-count rule, one gold action, states
+> that replace the body and never the shell); the ceilings (three tiles, five tabs) were the lean
+> file's and `mc.html` does not hold to them. The hand-drawn file is at commit `61f88e1`.
+
 Published: https://claude.ai/code/artifact/25a71da8-dc9d-49b6-b57d-9240da40310e
 Source: `consolidated.html` (71 KB, against 135–201 KB for each single-flow original)
 

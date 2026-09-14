@@ -742,6 +742,97 @@ a.inv-i:hover{border-color:var(--rule);text-decoration:none}
 .menu-hd span{display:block;font-size:11.5px;color:var(--dim);font-family:var(--mono)}
 .rel{position:relative}
 
+/* ---------- mobile: the thumb bar, the More sheet, bottom-sheet dialogs, card tables ----------
+   Everything an operator does on a phone is reachable from the bottom third of the screen: the
+   five-slot bar, dialogs that rise from the bottom edge, the drawer's scrim, and the assistant.
+   Touch targets are 44px or larger; inputs are 16px so iOS never zooms the page on focus. */
+#viewport.mobile{max-width:none;border:0}
+.mnav{display:none}
+#viewport.phone .mnav{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:400px;z-index:60;
+  background:color-mix(in srgb,var(--void) 94%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--border);
+  padding:6px 4px calc(6px + env(safe-area-inset-bottom));gap:2px}
+#viewport.mobile .mnav{max-width:none;left:0;transform:none;width:auto;right:0}
+.mn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:52px;border:0;background:none;color:var(--muted);font-size:10.5px;font-weight:600;letter-spacing:.01em;border-radius:10px;position:relative;-webkit-tap-highlight-color:transparent}
+.mn .ic{width:24px;height:24px;display:grid;place-items:center}
+.mn .ic svg{width:22px;height:22px}
+.mn[aria-current="page"]{color:var(--fg)}
+.mn[aria-current="page"]::before{content:"";position:absolute;top:-7px;left:50%;transform:translateX(-50%);width:26px;height:2px;background:var(--gold);border-radius:0 0 2px 2px}
+.mn:active{background:var(--hl)}
+.mn .ct{position:absolute;top:2px;left:calc(50% + 6px);font-family:var(--mono);font-size:10px;line-height:1.5;color:var(--dim);background:var(--panel);border:1px solid var(--border);border-radius:9px;padding:0 5px;min-width:18px;text-align:center}
+.mn .ct.hot{color:var(--st-approval);border-color:color-mix(in srgb,var(--st-approval) 40%,transparent)}
+html.has-mnav #viewport.phone .page{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
+html.has-mnav #toast.phone{bottom:calc(88px + env(safe-area-inset-bottom))}
+#viewport.mobile .page{padding:14px 16px calc(96px + env(safe-area-inset-bottom))}
+.mgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.mgrid.one{grid-template-columns:minmax(0,1fr)}
+.mtile{display:flex;align-items:center;gap:10px;min-height:56px;min-width:0;padding:8px 10px;border:1px solid var(--border);background:var(--ink);border-radius:12px;color:var(--fg);text-align:left;position:relative;-webkit-tap-highlight-color:transparent}
+.mtile:active{background:var(--hl)}
+.mtile .ic{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;background:var(--panel);border:1px solid var(--border);color:var(--muted);flex:none}
+.mtile .tx{min-width:0;display:flex;flex-direction:column}
+.mtile .tx b{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mtile .tx span{font-size:11px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mtile .ct{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--dim);background:var(--panel);border:1px solid var(--border);border-radius:5px;padding:0 5px;flex:none}
+.mtile .ct.hot{color:var(--st-approval);border-color:color-mix(in srgb,var(--st-approval) 40%,transparent)}
+/* drawer: a scrim behind the sidebar, and the drawer itself is the full height with big rows */
+.side-scrim{display:none}
+#viewport.phone .side-scrim{display:block;position:fixed;inset:0;z-index:79;background:rgba(10,10,9,.6)}
+#viewport.phone .side.open{width:min(300px,86vw);padding-bottom:env(safe-area-inset-bottom)}
+#viewport.phone .navitem{padding:12px 10px;font-size:15px;min-height:44px}
+#viewport.phone .switcher{min-height:44px}
+/* top bar: the current crumb and its parent only; search collapses to its glyph */
+#viewport.phone .top{padding:8px 12px;gap:8px;flex-wrap:nowrap;padding-top:calc(8px + env(safe-area-inset-top))}
+#viewport.phone .crumbs{flex-wrap:nowrap;overflow:hidden;white-space:nowrap;flex:1}
+#viewport.phone .crumbs>*:not(:last-child){display:none}
+#viewport.phone .crumbs>*{overflow:hidden;text-overflow:ellipsis}
+#viewport.phone .crumbs b{font-size:15px}
+#viewport.phone .top .sp{display:none}
+#viewport.phone .kbtn{min-width:0;width:40px;height:40px;padding:0;justify-content:center;border-radius:10px}
+#viewport.phone .kbtn .kt,#viewport.phone .kbtn kbd{display:none}
+#viewport.phone .iconbtn,#viewport.phone .hamburger{width:40px;height:40px;border-radius:10px}
+/* touch targets and type */
+#viewport.phone .btn{min-height:40px;padding:8px 14px;font-size:14px}
+#viewport.phone .btn.sm{min-height:36px;padding:6px 11px;font-size:13px}
+#viewport.phone .tab{padding:12px 14px;font-size:14px;min-height:44px}
+#viewport.phone .tabs{margin-left:-16px;margin-right:-16px;padding:0 16px;scroll-snap-type:x proximity}
+#viewport.phone .tab{scroll-snap-align:start}
+#viewport.phone input,#viewport.phone select,#viewport.phone textarea,#layer.phone input,#layer.phone select,#layer.phone textarea{font-size:16px}
+#viewport.phone .field input,#viewport.phone .field select,#layer.phone .field input,#layer.phone .field select{min-height:44px}
+#viewport.phone .sel-sm{min-height:36px}
+#viewport.phone .menu-i{min-height:44px;font-size:14px}
+#viewport.phone .phead h1{font-size:20px}
+#viewport.phone .g3,#viewport.phone .g4{grid-template-columns:1fr 1fr}
+#viewport.phone .stat{padding:11px 12px}
+/* dialogs rise from the bottom edge as sheets; the primary action is full width under the thumb */
+#layer.phone .scrim{place-items:end center;padding:0}
+#layer.phone .dlg,#layer.phone .cmd{max-width:none;width:100%;border-radius:18px 18px 0 0;border-bottom:0;max-height:calc(100dvh - 24px);display:flex;flex-direction:column;
+  animation:sheet-up .3s cubic-bezier(.32,.72,0,1);padding-bottom:env(safe-area-inset-bottom)}
+#layer.phone .dlg::before,#layer.phone .cmd::before{content:"";display:block;width:36px;height:4px;border-radius:2px;background:var(--rule);margin:8px auto -4px}
+#layer.phone .dlg-b{max-height:none;flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch}
+#layer.phone .dlg-f{flex-direction:row-reverse;flex-wrap:wrap}
+#layer.phone .dlg-f .btn{flex:1 1 45%;justify-content:center;min-height:46px}
+#layer.phone .dlg-f .grow{flex-basis:100%}
+#layer.phone .cmd-l{max-height:none;flex:1;overflow-y:auto}
+#layer.phone .cmd-i{min-height:44px}
+#layer:not(.mobile).phone .scrim{padding:0 calc(50vw - 200px)}
+@keyframes sheet-up{from{transform:translateY(24px);opacity:.6}to{transform:none;opacity:1}}
+@media(prefers-reduced-motion:reduce){#layer.phone .dlg,#layer.phone .cmd{animation:none}}
+/* the assistant on a real phone is the whole width */
+.asst.mobile{max-width:none;border:0}
+/* card tables: each row a card, each cell labelled by its column */
+#viewport.phone table.cards,#layer.phone table.cards{display:block;min-width:0}
+#viewport.phone table.cards thead,#layer.phone table.cards thead{display:none}
+#viewport.phone table.cards tbody,#layer.phone table.cards tbody{display:grid;gap:8px}
+#viewport.phone table.cards tr,#layer.phone table.cards tr{display:grid;grid-template-columns:minmax(0,1fr);border:1px solid var(--border);border-radius:12px;background:var(--ink);padding:6px 12px}
+#viewport.phone table.cards tr:hover,#layer.phone table.cards tr:hover{background:var(--ink)}
+#viewport.phone table.cards td,#layer.phone table.cards td{display:flex;justify-content:flex-end;align-items:center;gap:8px;flex-wrap:wrap;padding:7px 0;border:0;border-bottom:1px solid color-mix(in srgb,var(--border) 60%,transparent);text-align:left;white-space:normal;min-height:34px}
+#viewport.phone table.cards td:first-child,#layer.phone table.cards td:first-child{justify-content:flex-start;padding-top:9px}
+#viewport.phone table.cards td:first-child::before,#layer.phone table.cards td:first-child::before{display:none}
+#viewport.phone table.cards td:last-child,#layer.phone table.cards td:last-child{border-bottom:0}
+#viewport.phone table.cards td[data-l]::before,#layer.phone table.cards td[data-l]::before{content:attr(data-l);color:var(--dim);font-size:10.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;flex:none;max-width:38%;text-align:left;margin-right:auto}
+#viewport.phone table.cards td:not([data-l]),#layer.phone table.cards td:not([data-l]){justify-content:flex-start}
+#viewport.phone table.cards td.num,#layer.phone table.cards td.num{text-align:right}
+#viewport.phone table.cards .lt-empty td{justify-content:center;color:var(--muted)}
+#viewport.phone .tw .tc:not(.sm){min-width:0}
 /* ---------- mockup chrome (never product UI) ---------- */
 /* sits above the in-app agent dock, which owns the bottom edge */
 #chrome{position:fixed;right:12px;bottom:12px;z-index:200;font-family:var(--mono);font-size:11px}
@@ -1600,6 +1691,10 @@ pre .dn{color:var(--st-denied)}
 
 <script>
 "use strict";
+/* PRODUCT: true in the files tools/build-pages.mjs generates. Hides everything that is mockup
+   chrome rather than product UI: the state bar, the scenario rail and nav item, the onboarding
+   demo entry points and their "Exit demo" buttons. mc.html itself keeps it false. */
+var PRODUCT=false;
 var DLG_EXT={};   /* lazily built dialogs, registered beside their code; see dialog() */
 /* ============================== demo record ============================== */
 var ORG = {slug:"a-intel", name:"Anderson Intelligence Corp.", currency:"USD", plan:"Team", dataPlane:"shared",
@@ -2719,7 +2814,7 @@ var BILLING = {plan:"Team", runsIncluded:1000, runsUsed:4218, billable:3218,
   ]};
 
 /* ============================== engine ============================== */
-var S = {state:"loaded", phone:false, theme:null, asst:false, asstEngine:"up",
+var S = {state:"loaded", phone:false, mobile:false, theme:null, asst:false, asstEngine:"up",
          layer:null, tab:{}, side:false, ws:"core-platform", frame:15, runFilter:"all",
          ctxSel:"frames", approved:{}, toolNames:"label", beltView:"group", beltCat:"", regCat:""};
 
@@ -3467,6 +3562,9 @@ function edMarks(text,q,cur){
 /* ---- the source editor page ---- */
 function pAgentSource(r){
   var a=agentBySlug(r.id)||AGENTS[0], slug=defSlug(a), w=ws(), path='.oxagen/agents/'+slug+'.toml';
+  if(S.state==="loading") return skeleton();
+  if(S.state==="error") return errorState("This file","502 git_read_unreachable");
+  if(S.state==="denied") return deniedState("this agent’s definition","agent.write on "+w.slug);
   if(!S.ed||S.ed.slug!==slug)S.ed={slug:slug,sel:[0,0],find:"",cur:-1,matches:0};
   var dirty=defDirty(slug), pend=S.defPending[slug];
   return '<div class="phead"><div class="t"><p class="eyebrow">Agent · source</p><h1 class="mono" style="font-size:18px">'+h(path)+'</h1>'+
@@ -3730,6 +3828,11 @@ function commitConfirm(){
 function icon(n){
   var p={fleet:'<circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l2.8 2.8M16.2 16.2 19 19M19 5l-2.8 2.8M7.8 16.2 5 19"/>',
    agents:'<rect x="3" y="8" width="18" height="12" rx="2"/><path d="M9 8V5a3 3 0 0 1 6 0v3M8 14h.01M16 14h.01"/>',
+   more:'<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>',
+   search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
+   bell:'<path d="M18 8a6 6 0 1 0-12 0c0 7-3 8-3 8h18s-3-1-3-8"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>',
+   org:'<path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-5h6v5M9 10h.01M15 10h.01M9 14h.01M15 14h.01"/>',
+   ws:'<path d="M6 3v12M18 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM6 21a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM18 9a9 9 0 0 1-9 9"/>',
    tools:'<path d="M14.7 6.3a4 4 0 0 0 5 5L15 16l-3.5 3.5a2.1 2.1 0 0 1-3-3L12 13z"/>',
    ontology:'<circle cx="6" cy="7" r="2.5"/><circle cx="18" cy="7" r="2.5"/><circle cx="12" cy="17" r="2.5"/><path d="M8.5 7h7M7.4 9.2 10.8 15M16.6 9.2 13.2 15"/>',
    steering:'<path d="M4 5h16M4 12h10M4 19h7"/><circle cx="18" cy="17" r="3"/>',
@@ -3784,7 +3887,7 @@ function sidebar(r){
       (count?'<span class="ct'+(hot?' hot':'')+'">'+count+'</span>':'')+'</button>';
   }
   var base="#/"+ORG.slug+"/"+w.slug;
-  return '<aside class="side'+(S.side?" open":"")+'">'+
+  return (S.side?'<div class="side-scrim" onclick="S.side=false;render()"></div>':'')+'<aside class="side'+(S.side?" open":"")+'">'+
    '<div class="side-top"><div class="brandmark">'+LOGO+'</div>'+
     '<button class="switcher" onclick="openDialog(\'org-switch\')" aria-label="Switch organization">'+
       '<span class="av">A</span><span class="tx"><b>'+h(ORG.name)+'</b><span>'+h(ORG.slug)+' · '+ORG.plan+'</span></span><span class="cv">▾</span></button>'+
@@ -3798,7 +3901,7 @@ function sidebar(r){
    item("ontology","Ontology",base+"/ontology")+
    item("steering","Steering",base+"/steering",fr?0:PROPOSALS.length)+
    item("spend","Spend",base+"/spend")+
-   item("scenarios","Scenarios",base+"/scenarios")+
+   (PRODUCT?"":item("scenarios","Scenarios",base+"/scenarios"))+
    '<div class="navlabel">Organization</div>'+
    item("organization","Organization","#/"+ORG.slug)+
    item("billing","Billing","#/"+ORG.slug+"/billing")+
@@ -3845,7 +3948,7 @@ function topbar(r){
      '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>'+
    '<div class="crumbs">'+crumbs(r)+'</div>'+
    '<div class="sp"></div>'+
-   '<button class="kbtn" onclick="openDialog(\'cmd\')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Search or run an action<kbd>⌘K</kbd></button>'+
+   '<button class="kbtn" onclick="openDialog(\'cmd\')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><span class="kt">Search or run an action</span><kbd>⌘K</kbd></button>'+
    '<button class="iconbtn" onclick="openDialog(\'notifs\')" aria-label="Notifications, '+notifUnread()+' unread">'+
      '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 8-3 8h18s-3-1-3-8"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>'+
      (notifUnread()?'<span class="dot"></span>':'')+'</button>'+
@@ -3877,7 +3980,7 @@ function userMenu(){
    '<button class="menu-i" onclick="openDialog(\'account\',\'preferences\')">Preferences</button>'+
    '<button class="menu-i" onclick="openDialog(\'account\',\'security\')">Security and sessions</button>'+
    '<button class="menu-i" onclick="openDialog(\'account\',\'privacy\')">Privacy and data</button>'+
-   '<button class="menu-i" onclick="openDialog(\'account\',\'onboarding\')">Onboarding demo</button>'+
+   (PRODUCT?'':'<button class="menu-i" onclick="openDialog(\'account\',\'onboarding\')">Onboarding demo</button>')+
    '<div class="hr" style="margin:5px 0"></div>'+
    '<button class="menu-i" onclick="toggleTheme()">Switch theme</button>'+
    '<button class="menu-i" onclick="S.layer=null;render()">Sign out</button></div>';
@@ -11199,7 +11302,7 @@ function scnHref(id,step){var s=SCENARIOS[id];return "#/"+ORG.slug+"/"+s.ws+"/sc
 function scnGo(hash){S.dlg=null;S.dlgArg=null;go(hash);}
 function scnExit(){var s=SCENARIOS[S.scn.id];S.scn=null;scnGo("#/"+ORG.slug+"/"+s.ws);}
 function scnRail(){
-  if(!S.scn) return "";
+  if(!S.scn||PRODUCT) return "";
   var s=SCENARIOS[S.scn.id]; if(!s) return "";
   var i=S.scn.step, st=s.steps[i-1], n=s.steps.length;
   var dots=""; for(var k=1;k<=n;k++) dots+='<i class="'+(k<=i?"on":"")+'"></i>';
@@ -11968,7 +12071,7 @@ function mandateBody(){
 }
 function accountTabs(){
   var cur=S.dlgArg||"profile";
-  return [["profile","Profile"],["preferences","Preferences"],["security","Security"],["privacy","Privacy"],["onboarding","Onboarding"]].map(function(t){
+  return [["profile","Profile"],["preferences","Preferences"],["security","Security"],["privacy","Privacy"]].concat(PRODUCT?[]:[["onboarding","Onboarding"]]).map(function(t){
     return '<button class="tab" role="tab" aria-selected="'+(t[0]===cur)+'" onclick="S.dlgArg=\''+t[0]+'\';render()">'+t[1]+'</button>';}).join("");
 }
 function kvl(pairs,cls){
@@ -12611,7 +12714,7 @@ S.reg=null; S.regN=0;
 function regTabFor(harness){return harness==="claude-code"?"cc":harness==="codex-cli"?"codex":"sdk";}
 function regNew(){return {slug:"perf-watch",harness:"claude-code",tier:"complex",os:"macos",lang:"ts",tab:"cc",log:0,first:false,polling:false,countdown:false,timers:[]};}
 function regHash(step){if(S.reg&&S.reg.mode==="onboard")return obHash(step);return '#/'+ORG.slug+'/'+ws().slug+'/register'+(step&&step!=="name"?'/'+step:'');}
-function regCancelBtn(){return '<button class="btn" onclick="regCancel()">'+(S.reg&&S.reg.mode==="onboard"?"Exit demo":"Cancel")+'</button>';}
+function regCancelBtn(){return '<button class="btn" onclick="regCancel()">'+(S.reg&&S.reg.mode==="onboard"&&!PRODUCT?"Exit demo":"Cancel")+'</button>';}
 function regStart(){S.dlg=null;S.dlgArg=null;S.layer=null;S.reg=regNew();regNav("name");}
 function regNav(step){var hh=regHash(step);if(location.hash!==hh)location.hash=hh;else render();}
 function regLater(fn,ms){var t=setTimeout(fn,ms);if(S.reg)S.reg.timers.push(t);return t;}
@@ -12682,7 +12785,7 @@ function regShell(step,inner){
               :[{id:"name",n:1,lab:"Name the agent"},{id:"wrap",n:2,lab:"Wrap the agent"},{id:"run",n:3,lab:"Wait for the first frame"}];
   var cur=step==="wrap"?2:step==="run"?3:1, me=PEOPLE.marcus;
   return '<div class="reg-gate"><div class="reg-top"><div class="brandmark">'+LOGO+'</div><span class="who">'+h(me.email)+'</span>'+
-   '<button class="btn sm" onclick="regCancel()">'+(ob?"Exit demo":"Cancel")+'</button></div>'+
+   '<button class="btn sm" onclick="regCancel()">'+(ob&&!PRODUCT?"Exit demo":"Cancel")+'</button></div>'+
    '<div class="reg-in"><nav class="reg-steps" aria-label="'+(ob?"Onboarding":"Register an agent")+'">'+steps.map(function(s){
      var done=s.n<cur;
      return '<button type="button"'+(done?' class="done" onclick="regNav(\''+s.id+'\')"':'')+(s.n===cur?' aria-current="step"':'')+(s.n>cur?' disabled':'')+'>'+
@@ -12882,7 +12985,7 @@ function obGo(step){
   if(OB_GATE[step]&&!(S.reg&&S.reg.mode==="onboard")){regClear();S.reg=obNew();}
   var hh=obHash(step); if(location.hash!==hh)location.hash=hh; else render();
 }
-function obExit(){regClear();S.reg=null;go('#/'+ORG.slug+'/'+ws().slug);act('Onboarding demo closed. Nothing was written.');}
+function obExit(){regClear();S.reg=null;go('#/'+ORG.slug+'/'+ws().slug);if(!PRODUCT)act('Onboarding demo closed. Nothing was written.');}
 function obSignedIn(){regClear();S.reg=null;go('#/'+ORG.slug+'/'+ws().slug);act('Signed in as '+PEOPLE.marcus.name+'. The session is recorded like any other governed action.');}
 function obBind(){if(S.reg)S.reg.repo="bound";delete ws().provisional;render();act('GitHub App installed on '+ws().main+'. Main repo bound — Context PRs, checks and the code graph are on.');}
 function obSkip(){
@@ -13022,7 +13125,7 @@ function obAccountTab(){
 /* ---- auth shell and form pieces ---- */
 function obShell(inner,wide){
   return '<div class="ob-auth"><div class="ob-top"><div class="brandmark">'+LOGO+'</div>'+
-   '<button class="btn sm" onclick="obExit()">Exit demo</button></div>'+
+   (PRODUCT?'':'<button class="btn sm" onclick="obExit()">Exit demo</button>')+'</div>'+
    '<div class="ob-card'+(wide?" wide":"")+'">'+inner+'</div></div>';
 }
 function obErr(html){return '<div class="ob-err">'+OB_ICON.warn+'<span>'+html+'</span></div>';}
@@ -13397,22 +13500,93 @@ function render(){
   else if(r.page==="register"||r.page==="welcome")page="";
   else page=pFleet();
 
+  var shell=r.page!=="register"&&r.page!=="welcome";
   el("app").innerHTML=r.page==="register"?pRegister(r):r.page==="welcome"?scnRailFloat()+pWelcome(r):'<div class="app">'+sidebar(r)+'<div class="main">'+topbar(r)+
-    '<main class="page" id="pg">'+scnRail()+page+'</main></div></div>';
+    '<main class="page" id="pg">'+scnRail()+page+'</main></div></div>'+(isPhone()?mobileNav(r):"");
+  document.documentElement.classList.toggle("has-mnav",shell&&isPhone());
   if(r.page==="register")regSchedule(regStepOf(r));
   else if(r.page==="welcome")regSchedule(r.step);
   el("layer").innerHTML=dialog();
   if(r.page==="agentsource")edMount();
   listify();
-  var vp=el("viewport");
-  vp.className=S.phone?"phone":"";
-  el("layer").className=S.phone?"phone":"";
-  el("toast").className=S.phone?"phone":"";
+  var vp=el("viewport"), vcls=(isPhone()?"phone":"")+(S.mobile?" mobile":"");
+  vp.className=vcls;
+  el("layer").className=vcls;
+  el("toast").className=vcls;
+  if(isPhone())cardTables();
   asstMount();
-  document.querySelectorAll("#chrome [data-st]").forEach(function(b){
-    b.setAttribute("aria-pressed",b.getAttribute("data-st")===S.state?"true":"false");});
-  el("cPhone").setAttribute("aria-pressed",S.phone?"true":"false");
+  if(el("chrome")){
+    document.querySelectorAll("#chrome [data-st]").forEach(function(b){
+      b.setAttribute("aria-pressed",b.getAttribute("data-st")===S.state?"true":"false");});
+    el("cPhone").setAttribute("aria-pressed",S.phone?"true":"false");
+  }
 }
+/* ---- mobile: the phone preview (S.phone, a 400px column) and the real thing (S.mobile, the
+   whole viewport on a narrow or coarse-pointer screen) share every phone rule; only S.mobile drops
+   the preview's column. Both get the thumb bar. ---- */
+function isPhone(){return S.phone||S.mobile;}
+function mobileMedia(){return !!(window.matchMedia&&(matchMedia("(max-width:760px)").matches||(matchMedia("(pointer:coarse)").matches&&matchMedia("(max-width:1024px)").matches)));}
+/* Every list table becomes a stack of cards on a phone: each cell is labelled by its column
+   header, so nothing scrolls sideways and no column is lost. Tables with grouped headers keep
+   their grid and scroll. */
+function cardTables(){
+  document.querySelectorAll("#pg table:not([data-cards]),#layer table:not([data-cards])").forEach(function(t){
+    t.setAttribute("data-cards","1");
+    if(!t.tHead||!t.tHead.rows[0]||t.tHead.rows.length!==1)return;
+    var ths=[].slice.call(t.tHead.rows[0].cells); if(ths.some(function(x){return x.colSpan>1;}))return;
+    var labels=ths.map(function(x){return x.textContent.replace(/\s+/g," ").trim();});
+    [].forEach.call(t.tBodies,function(tb){[].forEach.call(tb.rows,function(tr){
+      [].forEach.call(tr.cells,function(td,i){if(td.colSpan===1&&labels[i])td.setAttribute("data-l",labels[i]);});});});
+    t.classList.add("cards");
+  });
+}
+/* The thumb bar: the four places an operator opens most, then More, which is the rest of the
+   sidebar, the assistant, search, notifications and the account as one sheet from the bottom.
+   Counts follow the sidebar's rule: only where something waits on a person. */
+var MNAV_MORE={organization:1,billing:1,audit:1,ontology:1,steering:1,scenarios:1};
+function mobileNav(r){
+  var w=ws(), fr=obFirstRun(w), base="#/"+ORG.slug+"/"+w.slug;
+  var waiting=fr?APPROVALS.filter(function(a){return a.run===fr.id&&apState(a.id).status==="pending";}).length:pendingCount(w.slug);
+  var crit=fr?0:INCIDENTS.filter(function(i){return i.status==="open"&&i.sev==="critical";}).length;
+  var cur=r.page==="run"?"fleet":r.page==="agent"||r.page==="mandate"||r.page==="agentsource"?"agents":r.page;
+  function b(id,label,href,count,hot,on){
+    return '<button class="mn" '+(on?'aria-current="page"':'')+' onclick="'+href+'"><span class="ic">'+icon(id)+'</span><span>'+label+'</span>'+
+      (count?'<span class="ct'+(hot?" hot":"")+'">'+count+'</span>':'')+'</button>';
+  }
+  return '<nav class="mnav" aria-label="Primary">'+
+   b("fleet","Fleet","go(\''+base+'\')",waiting,true,cur==="fleet")+
+   b("agents","Agents","go(\''+base+'/agents\')",0,false,cur==="agents")+
+   b("tools","Tools","go(\''+base+'/tools\')",0,false,cur==="tools")+
+   b("spend","Spend","go(\''+base+'/spend\')",0,false,cur==="spend")+
+   b("more","More","openDialog(\'more\')",crit,true,!!MNAV_MORE[cur]||S.dlg==="more")+
+   '</nav>';
+}
+DLG_EXT.more=function(){
+  var w=ws(), base="#/"+ORG.slug+"/"+w.slug, fr=obFirstRun(w);
+  var crit=fr?0:INCIDENTS.filter(function(i){return i.status==="open"&&i.sev==="critical";}).length;
+  function t(id,label,sub,on,count,hot){
+    return '<button class="mtile" onclick="closeDialog();'+on+'"><span class="ic">'+icon(id)+'</span><span class="tx"><b>'+h(label)+'</b><span>'+h(sub)+'</span></span>'+
+      (count?'<span class="ct'+(hot?" hot":"")+'">'+count+'</span>':'')+'</button>';
+  }
+  return {t:"More",w:false,
+   b:'<div class="mgrid">'+
+     t("ontology","Ontology","the model of the business",'go(\''+base+'/ontology\')')+
+     t("steering","Steering","records, proposals, Context PRs",'go(\''+base+'/steering\')',fr?0:PROPOSALS.length)+
+     t("organization","Organization","people, workspaces, funding",'go(\'#/'+ORG.slug+'\')')+
+     t("billing","Billing","plan, meters, invoices",'go(\'#/'+ORG.slug+'/billing\')')+
+     t("audit","Audit","events, incidents, holds",'go(\'#/'+ORG.slug+'/audit\')',crit,true)+
+     (PRODUCT?'':t("scenarios","Scenarios","guided walkthroughs",'go(\''+base+'/scenarios\')'))+
+     '</div><div class="hr"></div><div class="mgrid">'+
+     t("assistant","Assistant",S.asstEngine==="down"?"engine down":"glm-latest · ready",'asstToggle(true)')+
+     t("search","Search","or run an action",'openDialog(\'cmd\')')+
+     t("bell","Notifications",notifUnread()+" unread",'openDialog(\'notifs\')',notifUnread(),true)+
+     t("user","Account",me().name,'openDialog(\'account\',\'profile\')')+
+     '</div><div class="hr"></div><div class="mgrid one">'+
+     t("org","Switch organization",ORG.name,'openDialog(\'org-switch\')')+
+     t("ws","Switch workspace",w.name,'openDialog(\'ws-switch\')')+
+     '</div>',
+   f:'<button class="btn" onclick="closeDialog()">Close</button>'};
+};
 function setTheme(v){
   if(v==="system")document.documentElement.removeAttribute("data-theme");
   else document.documentElement.setAttribute("data-theme",v);
@@ -13423,12 +13597,17 @@ function toggleTheme(){
   setTheme(cur==="light"?"dark":cur==="dark"?"system":"light");
   S.layer=null;render();
 }
-document.querySelectorAll("#chrome [data-st]").forEach(function(b){
-  b.addEventListener("click",function(){S.state=b.getAttribute("data-st");render();});});
-el("cPhone").addEventListener("click",function(){S.phone=!S.phone;render();});
-el("cTheme").addEventListener("click",toggleTheme);
-el("cIndex").addEventListener("click",function(){openDialog("cmd");});
-el("cReset").addEventListener("click",function(){seedApprovals();S.dlg=null;S.dlgArg=null;render();toast("Approvals reset — every parked call is pending again with a fresh clock.","gold");});
+if(el("chrome")){
+  document.querySelectorAll("#chrome [data-st]").forEach(function(b){
+    b.addEventListener("click",function(){S.state=b.getAttribute("data-st");render();});});
+  el("cPhone").addEventListener("click",function(){S.phone=!S.phone;render();});
+  el("cTheme").addEventListener("click",toggleTheme);
+  el("cIndex").addEventListener("click",function(){openDialog("cmd");});
+  el("cReset").addEventListener("click",function(){seedApprovals();S.dlg=null;S.dlgArg=null;render();toast("Approvals reset — every parked call is pending again with a fresh clock.","gold");});
+}
+/* a resize across the phone breakpoint re-lays the shell; BOOT.mobile pins it either way */
+(function(){var t=null;window.addEventListener("resize",function(){if(BOOT.mobile!=null)return;clearTimeout(t);t=setTimeout(function(){var m=mobileMedia();if(m!==S.mobile){S.mobile=m;S.side=false;render();}},120);});})();
+window.addEventListener("hashchange",function(){if(isPhone())window.scrollTo(0,0);});
 document.addEventListener("keydown",function(e){
   if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==="k"){e.preventDefault();openDialog("cmd");}
   if(e.key==="Escape"){if(S.dlg)closeDialog();else if(S.layer){S.layer=null;render();}else if(S.asst){asstToggle(false);}else{var rp=route();if(rp.page==="register")regCancel();else if(rp.page==="welcome"&&S.reg&&S.reg.mode==="onboard")obExit();}}
@@ -14166,7 +14345,13 @@ seedApprovals();
   NOTIFS.sort(function(x,y){return key(x.t)<key(y.t)?1:key(x.t)>key(y.t)?-1:0;});
 })();
 
-if(!location.hash)location.hash="#/a-intel/core-platform/scenarios/proven-not-claimed/1"; /* generated by tools/build-w.mjs from mc.html */
+/* BOOT: what a generated file pins. tools/build-pages.mjs rewrites the object literal (state,
+   mobile, theme, hash); a thin page file sets window.BOOT before the engine loads instead. */
+var BOOT=window.BOOT||{state:null,mobile:null,theme:null,hash:null};
+if(BOOT.state)S.state=BOOT.state;
+S.mobile=BOOT.mobile!=null?!!BOOT.mobile:mobileMedia();
+if(BOOT.theme)setTheme(BOOT.theme);
+if(!location.hash)location.hash=BOOT.hash||"#/a-intel/core-platform/scenarios/proven-not-claimed/1"; /* generated by tools/build-w.mjs from mc.html */
 applyHashTab();
 render();
 </script>
