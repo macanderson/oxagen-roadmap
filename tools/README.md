@@ -1,83 +1,36 @@
-# Guards for consolidated.html, and the mc.html dataset transform
+# Guards for the generated product files, and the mc.html dataset transform
 
-The first five scripts guard `consolidated.html`; the last section covers the two files
-that build `mc.html`'s business-scale dataset.
-
-Five guard scripts. They exist because three independent audits found 80 defects in
-`consolidated.html`, and most of them were the kind that come straight back: a
-figure typed on two pages, a control with no handler, a colour that fails
-contrast, a table only a mouse can use. Fixing those is cheap. Keeping them
-fixed is what these are for.
-
-Three of the scripts check the file. Two check the checkers.
-
-## Running them
-
-The two `verify-*` scripts need only Node. The oracle and `mutate-oracle.sh`
-also need the Playwright Chromium that Homebrew's `playwright` already
-downloaded. `playwright-core` is nested under `@playwright/cli`, and `launch()`
-needs an explicit `executablePath`, so both are passed by environment variable
-rather than guessed:
+`consolidated.html`, `consolidated-loaded.html`, `consolidated-loaded-mobile.html` and everything
+under `pages/` are generated from `mc.html` by `tools/build-pages.mjs` (the README says what each
+one is). Two scripts keep that true, and the mc.html guards further down keep the source true.
 
 ```sh
-node tools/verify-data.js          # 242 arithmetic and narrative invariants
-node tools/verify-contrast.js      # 163 colour pairs, tokens read from the file
-bash tools/mutate-data.sh          # proves both of the above can fail
-
-export PW_EXE="$HOME/Library/Caches/ms-playwright/chromium-1234/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing"
-# optional, if playwright-core lives somewhere else:
-# export PW_CORE=/opt/homebrew/lib/node_modules/@playwright/cli/node_modules/playwright-core/index.js
-
-node tools/audit-oracle.mjs        # ~110 assertions against the rendered page
-bash tools/mutate-oracle.sh        # proves the oracle can fail (slow: one browser run per mutation)
+node tools/build-pages.mjs            # regenerate the three consolidated files and pages/ from mc.html
+node tools/build-pages.mjs --check    # exit 1 if any generated file is not exactly what mc.html produces
+node tools/check-pages.mjs            # open every generated file in Chromium and assert it is what its name says
+node tools/check-pages.mjs --only fleet --shots out/   # one page id; write a screenshot per file
 ```
 
-Run the two fast ones on every edit. Run the browser pair before you ship.
+`check-pages.mjs` needs the Playwright Chromium that Homebrew's `playwright` already downloaded
+(it looks in `~/Library/Caches/ms-playwright` for the headless shell, the same way
+`check-scenarios.mjs` does). Per file it asserts: no JavaScript error; `PRODUCT` is true and the
+`#chrome` bar, the scenario rail, the Scenarios nav item and every piece of onboarding-demo copy
+are gone; `S.state` and `S.mobile` are pinned to what the file name says; the state's own markup
+is on screen (the skeleton, the empty / error / denied panel, or a loaded page with a heading and
+no state panel); a mobile shell page has the thumb bar and never scrolls sideways. Then, on
+`consolidated-loaded-mobile.html`, it checks the mobile shell's own guarantees: five thumb-bar
+slots at least 44 px tall in the bottom quarter of the screen, More opening as a full-width sheet
+on the bottom edge with the rest of the app in it, the drawer opening over a scrim and closing
+when the scrim is tapped, list tables rendered as cards, and every input 16 px or larger.
 
-The Chromium build number in that path changes when Playwright updates. If the
-binary is missing, `ls ~/Library/Caches/ms-playwright` and use whatever
-`chromium-*` is there — note the app inside is called *Google Chrome for
-Testing*, not *Chromium*.
+Run `build-pages.mjs --check` on every edit to `mc.html`; run `check-pages.mjs` before you ship.
 
-## What each one is for
-
-**`verify-data.js`** lifts the data `<script>` straight out of the file, runs
-it, and checks the invariants the pages assume: the org totals are the
-workspaces added up, billing meters both of them, each connector owns whole
-class groups so nothing is counted twice, a run's cost and frame count come
-from its own per-turn ledger, a frame that names a turn agrees with that
-ledger, run ids sort into their start order the way ULIDs must, no finding
-claims more monthly waste than its agent spends, and every panel that shows a
-sample says how big the whole is. No browser, milliseconds, no excuse.
-
-**`verify-contrast.js`** parses the token blocks out of the stylesheet and
-checks every text colour against every surface it can land on — including the
-row-hover highlight and its own state wash — plus that the two dark paths
-(`prefers-color-scheme` and `[data-theme="dark"]`) still define the same
-values. It used to hold its own copy of the tokens, which meant it could pass
-while the stylesheet said something else; it reads the file now.
-
-**`audit-oracle.mjs`** drives the page in a real browser and asserts one or
-more things per finding — the tile equals the rows it counts, a run row opens
-its own run, every frame opens *its own* detail, a receipt survives leaving the
-page, approving moves the run it is about, focus survives the re-render, the
-split collapses when the assistant takes the width, a full-screen overlay makes
-what it covers inert. Each finding is isolated in a `step()`, so one broken
-interaction cannot hide the other hundred. It also shells out to
-`verify-contrast.js`, so one command covers the colour arithmetic too.
-
-**`mutate-oracle.sh` / `mutate-data.sh`** revert one fix at a time in a
-throwaway copy and check the guard fails. `MISSED` means an assertion cannot
-catch its own defect. That has already happened twice: the run-row check read
-the run id out of the very `data-go` attribute the bug corrupts, so it passed
-with every row pointing at the same run; and the tab check asserted on
-`aria-selected`, which `.click()` sets by itself, so it passed with the
-focus-restoring line deleted. An assertion has to compare two independent
-sources, and a keyboard assertion has to read `document.activeElement`.
-
-If a mutation reports `SKIP`, its pattern has drifted away from the file — fix
-the pattern. Both scripts treat `SKIP` as a failure, because a drifted pattern
-silently stops testing that fix.
+The five guards that used to live here (`verify-data.js`, `verify-contrast.js`,
+`audit-oracle.mjs`, `mutate-data.sh`, `mutate-oracle.sh`) guarded the hand-drawn
+`consolidated.html` that preceded the generated one. They parsed that file's own data block and
+token blocks and cannot read the generated file, so they were removed with it; the last commit
+carrying both is `61f88e1`. The lessons they taught are kept below because they apply to
+`check-pages.mjs` and `check-scenarios.mjs` just as much.
 
 ## Four things that will waste your afternoon
 
