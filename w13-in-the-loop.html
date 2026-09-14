@@ -1633,7 +1633,6 @@ function icon(n){
    agents:'<rect x="3" y="8" width="18" height="12" rx="2"/><path d="M9 8V5a3 3 0 0 1 6 0v3M8 14h.01M16 14h.01"/>',
    tools:'<path d="M14.7 6.3a4 4 0 0 0 5 5L15 16l-3.5 3.5a2.1 2.1 0 0 1-3-3L12 13z"/>',
    skills:'<path d="M12 3 3 7.5 12 12l9-4.5z"/><path d="M7 10v5.2c0 1.6 2.2 2.8 5 2.8s5-1.2 5-2.8V10"/><path d="M21 7.5V14"/>',
-   ontology:'<circle cx="6" cy="7" r="2.5"/><circle cx="18" cy="7" r="2.5"/><circle cx="12" cy="17" r="2.5"/><path d="M8.5 7h7M7.4 9.2 10.8 15M16.6 9.2 13.2 15"/>',
    steering:'<path d="M4 5h16M4 12h10M4 19h7"/><circle cx="18" cy="17" r="3"/>',
    spend:'<path d="M12 2v20M17 6.5C17 4.6 14.8 3.5 12 3.5S7 4.6 7 6.8s2.2 3 5 3.7 5 1.6 5 3.7-2.2 3.3-5 3.3-5-1.1-5-3"/>',
    organization:'<rect x="3" y="7" width="8" height="13" rx="1"/><rect x="13" y="3" width="8" height="17" rx="1"/><path d="M6 11h2M6 15h2M16 7h2M16 11h2M16 15h2"/>',
@@ -1730,7 +1729,6 @@ function sidebar(r){
    item("agents","Agents",null,w.agents)+
    item("tools","Tools",null)+
    item("skills","Skills",base+"/skills",wsSkills(w)?SKILLS.filter(inScope).length:"off",false)+
-   item("ontology","Ontology",null)+
    item("steering","Steering",null)+
    item("spend","Spend",null)+
    '<div class="navlabel">Organization</div>'+
@@ -2155,7 +2153,7 @@ function tReflect(w){
     '<p style="margin-bottom:8px;font-size:12.8px">A captured reflection is written to a store that five rules fence off. '+
      'These are not preferences on this screen; they are the reason the feature was allowed to exist.</p>'+
     '<ol>'+
-     '<li><b>It never enters a context frame.</b> No later run of this agent, or any agent, can cite it. It is not in the ontology and it is not a context record.</li>'+
+     '<li><b>It never enters a context frame.</b> No later run of this agent, or any agent, can cite it. It is not a context record.</li>'+
      '<li><b>It cannot be promoted.</b> There is no path from a reflection to a proposal, to a Context PR, or to steering. The promote action does not exist for this kind.</li>'+
      '<li><b>It does not price the work.</b> Its tokens are billed as overhead on the Spend page and excluded from the productive ratio, so a run cannot look better by grading itself.</li>'+
      '<li><b>It is not evidence about a person.</b> It carries the agent, the run and the rubric. Reading it is <span class="mono">research.read</span>, an organization grant that '+h(PEOPLE.priya.name)+' holds and no workspace role inherits.</li>'+

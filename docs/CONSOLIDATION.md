@@ -32,7 +32,6 @@ set had grown fat.
 | Tabs | ceiling of 5 | W8's Spend page had eight. |
 | Approvals | W11 list + W3 chain | Compact rows on Fleet; W3's four-hop chain is the detail, not the list item. |
 | Fleet table | W2, 8 columns → 6 | Dropped harness and tier as columns; harness sits under the agent name. |
-| Ontology map | W7 | Classes grouped by source. |
 | Agents, Steering, Spend, Organization, Audit | W9, W6, W8, W10, W10 | Each trimmed to the ceilings above. |
 | Assistant dock | W11 | Same panel on every page, showing the governed actions it took with receipt links. |
 | States control | W7 / W10 | One row. W11's six-group panel was itself an example of the problem. |

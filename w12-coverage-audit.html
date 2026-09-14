@@ -164,8 +164,8 @@ footer{border-top:1px solid var(--rule);padding-block:34px 70px;color:var(--mute
 
 <section>
 <p class="eyebrow q">The gap table</p>
-<h2>Fifteen rows, and what each one rests on</h2>
-<p>A row counts as covered when a linked artifact contains the page, the sub-areas the row names in its own title, and the states the row requires &mdash; checked by reading the file, not by trusting the link. On that test, all fifteen pass.</p>
+<h2>Fourteen rows, and what each one rests on</h2>
+<p>A row counts as covered when a linked artifact contains the page, the sub-areas the row names in its own title, and the states the row requires &mdash; checked by reading the file, not by trusting the link. On that test, all fourteen pass.</p>
 <div class="tw"><table>
 <thead><tr><th>Page, panel, dialog or flow</th><th>States required</th><th>Carried by</th><th>What was checked</th><th>Result</th></tr></thead>
 <tbody>
@@ -176,7 +176,6 @@ footer{border-top:1px solid var(--rule);padding-block:34px 70px;color:var(--mute
 <tr><td>Run (live, sealed, compacted)</td><td class="mono">loaded, loading, error, denied, phone</td><td class="mono">W2, W4, W5, W12</td><td>All three kinds exist: W2 live, W4 sealed <em>and</em> compacted with the archive segment and its Merkle root, W5 the proof frame.</td><td><span class="b b-ok"><span class="d"></span>covered</span></td></tr>
 <tr><td>Agents (list, detail, mandate detail)</td><td class="mono">loaded, empty, error, denied, phone</td><td class="mono">W3, W6, W9, W11, W12</td><td>W9 carries the list for both workspaces and the toolbelt with its per-tool decision; W6 the definition in git; W3 the mandate detail with its ledger.</td><td><span class="b b-ok"><span class="d"></span>covered</span></td></tr>
 <tr><td>Tools (registry, connections, mandates, policy, kill switches, assurance)</td><td class="mono">loaded, empty, error, denied, phone</td><td class="mono">W3, W5, W9, W11, W12</td><td>All six named areas present. W9 carries the registry, the connections, the policy simulation over real history and the switches; W5 the assurance suite with its one not-applicable case.</td><td><span class="b b-ok"><span class="d"></span>covered</span></td></tr>
-<tr><td>Ontology (Model, Graph, Sources, Repositories, Versions)</td><td class="mono">loaded, empty, loading, error, denied, phone</td><td class="mono">W7, W11, W12</td><td>All five tabs. W7 carries the class map as drawn SVG, the compiled Cypher with the workspace predicate injected, and the version history with an open proposal.</td><td><span class="b b-ok"><span class="d"></span>covered</span></td></tr>
 <tr><td>Steering (records, proposals, Context PR, retirement)</td><td class="mono">loaded, empty, error, denied, phone</td><td class="mono">W6, W11, W12</td><td>All four. W6 carries the record file diff, the five check runs, and two retirement candidates each with the reason it earned retirement.</td><td><span class="b b-ok"><span class="d"></span>covered</span></td></tr>
 <tr><td>Spend (findings, operator, agent, waterfall, reconciliation, budgets)</td><td class="mono">loaded, empty, loading, error, denied, phone</td><td class="mono">W5, W8, W11, W12</td><td>All six. W8 carries eight findings ranked by money with the frames that prove each, the attribution rollup by operator and by agent, the run waterfall, three-level reconciliation, and budgets in hard and soft mode.</td><td><span class="b b-ok"><span class="d"></span>covered</span></td></tr>
 <tr><td>Organization</td><td class="mono">loaded, denied, phone</td><td class="mono">W10, W11, W12</td><td>W10 carries members with org and workspace roles, invitations, both workspaces, the four model tiers with their in-firewall alternatives, the data plane per store, and four API keys with their scopes.</td><td><span class="b b-ok"><span class="d"></span>covered</span></td></tr>
@@ -225,7 +224,7 @@ footer{border-top:1px solid var(--rule);padding-block:34px 70px;color:var(--mute
 <div class="panel"><h3>What driving the addendum caught</h3>
 <p>Two defects that read correctly as source. <b>Horizontal overflow at 400&nbsp;px</b> on Fleet (772&nbsp;px) and Billing (179&nbsp;px): a grid track written <span class="mono">1fr</span> instead of <span class="mono">minmax(0,1fr)</span> let a wide table push the body sideways, because grid children default to <span class="mono">min-width:auto</span>. And <b>gold encoding state</b>: the run filter marked its selected option gold, and six repeated actions on Spend were all gold against a rule of one primary per screen. Both fixed and re-measured; the same two traps are worth checking in the other eleven.</p></div>
 <div class="panel"><h3>The section&rsquo;s own test is the one applied</h3>
-<p>&sect;19 says every row must carry at least one link before the section is complete. Fifteen of fifteen do, each one verified, so the status line is set to <span class="mono">complete</span>. No other reading of &ldquo;complete&rdquo; was assumed.</p></div>
+<p>&sect;19 says every row must carry at least one link before the section is complete. Fourteen of fourteen do, each one verified, so the status line is set to <span class="mono">complete</span>. No other reading of &ldquo;complete&rdquo; was assumed.</p></div>
 </div>
 </section>
 
@@ -246,7 +245,7 @@ footer{border-top:1px solid var(--rule);padding-block:34px 70px;color:var(--mute
 <div class="ln"><span class="w">W11</span><span class="t">Configuration is a conversation</span><span class="r"><span class="b b-ok"><span class="d"></span>mocked</span></span></div>
 <div class="ln"><span class="w">W12</span><span class="t">Coverage audit &mdash; every page and state mocked</span><span class="r"><span class="b b-ok"><span class="d"></span>mocked</span></span></div>
 </div>
-<p class="note" style="margin-top:20px">Twelve of twelve scenarios mocked, fifteen of fifteen page-coverage rows verified. Section 19 is complete.</p>
+<p class="note" style="margin-top:20px">Twelve of twelve scenarios mocked, fourteen of fourteen page-coverage rows verified. Section 19 is complete.</p>
 </section>
 
 </main>
