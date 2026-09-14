@@ -24,7 +24,6 @@ export const W = [
   ["w4-flight-recorder.html", "flight-recorder", "Oxagen Flight Recorder"],
   ["w5-proven-not-claimed.html", "proven-not-claimed", "Proven, Not Claimed"],
   ["w6-learned-approved-changed.html", "learned-approved-changed", "It learned, you approved, it changed"],
-  ["w7-shape-of-your-business.html", "shape-of-your-business", "The shape of your business"],
   ["w8-every-dollar-every-operator.html", "every-dollar-every-operator", "Every Dollar, Every Operator"],
   ["w9-toolbelt-governed.html", "toolbelt-governed", "The Toolbelt, Governed"],
   ["w10-cio-console.html", "cio-console", "The CIO's Console"],
