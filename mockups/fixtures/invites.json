@@ -1,0 +1,16 @@
+[
+ {
+  "email": "rowan@a-intel.example",
+  "role": "workspace.member · core-platform",
+  "by": "Marcus Bell",
+  "sent": "2026-09-10",
+  "expires": "2026-09-17"
+ },
+ {
+  "email": "kai@a-intel.example",
+  "role": "org.auditor",
+  "by": "Priya Natarajan",
+  "sent": "2026-09-09",
+  "expires": "2026-09-16"
+ }
+]

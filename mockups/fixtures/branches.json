@@ -1,0 +1,23 @@
+[
+ {
+  "name": "agents/release-manager-budget-cap",
+  "pr": null,
+  "ahead": 2,
+  "by": "marcus",
+  "when": "2 days ago"
+ },
+ {
+  "name": "context/ctx.release.no-reread-changelog",
+  "pr": "a-intel/platform#519",
+  "ahead": 1,
+  "by": "marcus",
+  "when": "5 hours ago"
+ },
+ {
+  "name": "ops/kill-switch-runbook",
+  "pr": "a-intel/platform#517",
+  "ahead": 4,
+  "by": "priya",
+  "when": "yesterday"
+ }
+]

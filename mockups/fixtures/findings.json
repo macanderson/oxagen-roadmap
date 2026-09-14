@@ -1,0 +1,101 @@
+[
+ {
+  "id": "fnd_01K5RTGH",
+  "kind": "Unpaged results",
+  "level": "tool",
+  "subject": "aws_billing__get_cost_and_usage",
+  "save": "984.60",
+  "window": "last 30 days",
+  "why": "Each run requests thirty days of line items unpaged; a 41,200-token result body enters the context on every one of 88 runs and is re-read by every later turn.",
+  "fix": "Request grouped totals; page line items only on drill-down.",
+  "frames": "88 runs · 3,106 tool calls"
+ },
+ {
+  "id": "fnd_01K5RTEG",
+  "kind": "Repeated shell commands",
+  "level": "tool",
+  "subject": "claude_code__Bash",
+  "save": "486.20",
+  "window": "last 30 days",
+  "why": "2,741 of 8,841 calls re-ran a command whose result was still in the window with an identical digest; the 4.1k-token result body re-entered the context each time.",
+  "fix": "Cache identical command results inside a turn window; re-run only after a write.",
+  "frames": "1,912 runs · 8,841 tool calls"
+ },
+ {
+  "id": "fnd_01K5RT2A",
+  "kind": "Tool-list bloat",
+  "level": "agent",
+  "subject": "a-intel.core.triage",
+  "save": "188.40",
+  "window": "last 30 days",
+  "why": "tool_definition_tokens averages 9,140 per model call, 3.9× the workspace median; 34 of the 52 tools on the belt were not called once in 1,340 runs.",
+  "fix": "Narrow the grants to the 18 tools actually used.",
+  "frames": "1,340 runs · 11,902 model calls"
+ },
+ {
+  "id": "fnd_01K5RT4B",
+  "kind": "Cache misses after a stable prefix changed",
+  "level": "workspace",
+  "subject": "core-platform",
+  "save": "94.12",
+  "window": "since 2026-09-04",
+  "why": "Publishing steering record ctx.release.notes-format on 2026-09-04 changed the system-context digest mid-conversation on 212 runs; cache_read fell from 88% to 61% for two days.",
+  "fix": "Publish steering at the start of a window, not mid-day.",
+  "frames": "212 runs · 1,908 model calls"
+ },
+ {
+  "id": "fnd_01K5RTJI",
+  "kind": "Refetching a stable list",
+  "level": "tool",
+  "subject": "slack__list_channels",
+  "save": "84.20",
+  "window": "last 30 days",
+  "why": "Called once at the start of 341 runs for a channel list that changed twice this month; the same 3.4k-token result entered 341 contexts.",
+  "fix": "Cache the list at the workspace with a 24-hour TTL.",
+  "frames": "341 runs · 341 tool calls"
+ },
+ {
+  "id": "fnd_01K5RT6C",
+  "kind": "Duplicate tool calls",
+  "level": "agent",
+  "subject": "a-intel.core.release-manager",
+  "save": "41.77",
+  "window": "last 30 days",
+  "why": "github__get_file_contents@2 called with an identical input digest 3.2 times per run on average.",
+  "fix": "Open a steering proposal: do not re-read CHANGELOG.md within a run.",
+  "frames": "212 runs · 682 tool calls"
+ },
+ {
+  "id": "fnd_01K5RT8D",
+  "kind": "Wrong tier",
+  "level": "agent",
+  "subject": "a-intel.core.triage",
+  "save": "28.05",
+  "window": "last 30 days",
+  "why": "91% of this agent's steps are classification-shaped but 14% of its model calls went to a flagship model after a retry.",
+  "fix": "Pin the fallback route to the light tier.",
+  "frames": "1,340 runs"
+ },
+ {
+  "id": "fnd_01K5RTAE",
+  "kind": "Unproductive tail",
+  "level": "agent",
+  "subject": "a-intel.core.docs-writer",
+  "save": "12.33",
+  "window": "last 30 days",
+  "why": "On 41 of 64 runs, more than 6 steps followed the last step that produced a kept side effect.",
+  "fix": "Set a stop rule after two consecutive unproductive steps.",
+  "frames": "64 runs"
+ },
+ {
+  "id": "fnd_01K5RTCF",
+  "kind": "Cache writes never read",
+  "level": "operator",
+  "subject": "Priya Natarajan",
+  "save": "6.91",
+  "window": "last 30 days",
+  "why": "cache_write_5m on the last turn of 28 one-turn runs; nothing read the prefix inside the TTL.",
+  "fix": "Stop writing cache for one-turn runs.",
+  "frames": "28 runs"
+ }
+]

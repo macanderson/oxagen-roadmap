@@ -1,0 +1,72 @@
+{
+ "plan": "Team",
+ "runsIncluded": 1000,
+ "runsUsed": 4218,
+ "billable": 3218,
+ "tier1": "1,000 free",
+ "tier2": "3,218 × $0.30",
+ "amount": "965.40",
+ "retention": "13 months included · 41.2 GB · $0.00",
+ "discount": "Onboarding discount — 20% off usage for 12 months (converted 2026-03-02, 5 days after first run)",
+ "discountAmount": "-193.08",
+ "total": "772.32",
+ "next": "2026-10-01",
+ "invoices": [
+  {
+   "n": "INV-2026-08",
+   "p": "August 2026",
+   "runs": 3904,
+   "amt": "715.20",
+   "st": "paid",
+   "d": "2026-09-01"
+  },
+  {
+   "n": "INV-2026-07",
+   "p": "July 2026",
+   "runs": 3412,
+   "amt": "578.88",
+   "st": "paid",
+   "d": "2026-08-01"
+  },
+  {
+   "n": "INV-2026-06",
+   "p": "June 2026",
+   "runs": 2988,
+   "amt": "476.64",
+   "st": "paid",
+   "d": "2026-07-01"
+  }
+ ],
+ "meters": [
+  {
+   "m": "Sealed runs with at least one model call",
+   "v": "4,218",
+   "note": "the billable unit"
+  },
+  {
+   "m": "Governed actions",
+   "v": "61,904",
+   "note": "reported, not priced"
+  },
+  {
+   "m": "Retained evidence",
+   "v": "41.2 GB",
+   "note": "13 months included"
+  },
+  {
+   "m": "Runs Oxagen halted before any model call",
+   "v": "37",
+   "note": "free"
+  },
+  {
+   "m": "In-app agent runs",
+   "v": "412",
+   "note": "free"
+  },
+  {
+   "m": "Witness runs",
+   "v": "1,884",
+   "note": "free"
+  }
+ ]
+}

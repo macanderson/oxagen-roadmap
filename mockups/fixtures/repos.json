@@ -1,0 +1,35 @@
+[
+ {
+  "n": "a-intel/platform",
+  "role": "main",
+  "branch": "main",
+  "head": "a4c91e2",
+  "indexed": "2 min ago",
+  "issues": "enabled · 3,907 imported",
+  "events": "ok · 8,142 deliveries / 30d · 0 gaps",
+  "symbols": 118402,
+  "drift": "3 data-layer findings"
+ },
+ {
+  "n": "a-intel/billing",
+  "role": "linked",
+  "branch": "main",
+  "head": "7e0b331",
+  "indexed": "6 min ago",
+  "issues": "enabled · 812 imported",
+  "events": "ok · 1,904 deliveries / 30d · 0 gaps",
+  "symbols": 24118,
+  "drift": "none"
+ },
+ {
+  "n": "a-intel/mobile",
+  "role": "linked",
+  "branch": "release",
+  "head": "c02fa77",
+  "indexed": "2 h ago",
+  "issues": "disabled",
+  "events": "ok · 640 deliveries / 30d · 1 gap recovered",
+  "symbols": 31904,
+  "drift": "1 data-layer finding"
+ }
+]

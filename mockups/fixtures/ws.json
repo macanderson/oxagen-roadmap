@@ -1,0 +1,25 @@
+[
+ {
+  "slug": "core-platform",
+  "name": "Core platform",
+  "main": "a-intel/platform",
+  "branch": "main",
+  "linked": [
+   "a-intel/billing",
+   "a-intel/mobile"
+  ],
+  "agents": 38,
+  "enrolled": 36,
+  "owner": "Marcus Bell"
+ },
+ {
+  "slug": "finops",
+  "name": "FinOps",
+  "main": "a-intel/finops-agents",
+  "branch": "main",
+  "linked": [],
+  "agents": 12,
+  "enrolled": 12,
+  "owner": "Dana Okafor"
+ }
+]
