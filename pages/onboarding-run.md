@@ -37,7 +37,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 ## Functionality
 
 - Binding is one click and installs the GitHub App on the repo.
-- Skipping is reversible from Fleet’s provisional banner or Ontology › Repositories.
+- Skipping is reversible from Fleet’s provisional banner.
 
 ## States
 

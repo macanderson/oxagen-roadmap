@@ -49,7 +49,6 @@ export const PAGES = [
   { id: "agent-source",      title: "Agent source",                hash: "/{org}/core-platform/agents/release-manager/source",    states: NO_EMPTY },
   { id: "mandate",           title: "Mandate",                     hash: "/{org}/finops/agents/invoice-bot/mandates/mnd_7K2ETQ4", states: ALL },
   { id: "tools",             title: "Tools",                       hash: "/{org}/core-platform/tools",                            states: ALL },
-  { id: "ontology",          title: "Ontology",                    hash: "/{org}/core-platform/ontology",                         states: ALL },
   { id: "steering",          title: "Steering",                    hash: "/{org}/core-platform/steering",                         states: ALL },
   { id: "spend",             title: "Spend",                       hash: "/{org}/core-platform/spend",                            states: ALL },
   // organization scope (pages 8–10)

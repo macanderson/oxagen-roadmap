@@ -23,7 +23,7 @@ Which states a page has is decided by `mc.html`: a page gets a file for a state 
 renderer branches on it. The auth screens have no empty state; the installer has only loaded;
 the gate steps have loading and denied, and the first-run step an error.
 
-Pages (29): fleet · run · agents · agent · agent-source · mandate · tools · ontology · steering ·
+Pages (28): fleet · run · agents · agent · agent-source · mandate · tools · steering ·
 spend · organization · organization-api-keys · organization-roles · billing · audit ·
 register-name · register-wrap · register-run · signup · verify-email · login · two-factor ·
 forgot-password · reset-password · accept-invitation · onboarding-organization ·

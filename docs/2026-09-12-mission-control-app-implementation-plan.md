@@ -57,7 +57,7 @@
 
 - **Coverage is complete.** Spec §19 lists every page, panel, dialog and flow with the states each needs (loaded, empty, loading, error, denied, phone), and every row links to a mockup.
 - **One demo record everywhere** (Anderson Intelligence Corp. / `core-platform` / Marcus Bell). It becomes the fixture adapter's seed.
-- **Errors are specified.** Each page has a named error code (Fleet `503 run_index_unavailable`, Run `502 frame_store_unreachable`, Agents `503 iam_principals_unavailable`, Mandate `503 mandate_ledger_unavailable`, Tools `503 tool_registry_unavailable`, Ontology `504 graph_read_timeout`, Steering `503 record_index_unavailable`, Spend `504 rollup_rebuild_in_progress`, Organization `503 control_plane_unavailable`, Billing `502 stripe_unreachable`, Audit `503 audit_store_unavailable`). Each also has a named denied permission. These become the `PageState` contract (§4.8).
+- **Errors are specified.** Each page has a named error code (Fleet `503 run_index_unavailable`, Run `502 frame_store_unreachable`, Agents `503 iam_principals_unavailable`, Mandate `503 mandate_ledger_unavailable`, Tools `503 tool_registry_unavailable`, Steering `503 record_index_unavailable`, Spend `504 rollup_rebuild_in_progress`, Organization `503 control_plane_unavailable`, Billing `502 stripe_unreachable`, Audit `503 audit_store_unavailable`). Each also has a named denied permission. These become the `PageState` contract (§4.8).
 - **Interaction rules are stated once.** Trust badges show the recorded value and nothing stronger; money shows its basis; explanations are chains of links.
 
 ### 2.2 What must be settled before or while building
@@ -117,12 +117,6 @@ Status comes from table and contract names in the repo. **Batch 3 lanes must con
 | Tools · auto-approval rules | `AUTORULES` | not in App. A | none | ❌ G12 |
 | Tools · assurance | `ASSURANCE` | M2 suite | none | ❌ |
 | Tools · observed schemas | `OBSERVED_SCHEMAS` | `schema_origin=observed_proposed` | none | ❌ |
-| **Ontology** · model map | `CLASSES` | `:OntologyVersion`/`:Class` | `schema_registry.*` (Postgres) + Neo4j labels | 🟡 |
-| Ontology · graph, ask in plain English | graph tab | Cypher + citations | `ontology.query`, `ontology.neighbors`, `graph.*` | 🟡 Cypher shown ❌ |
-| Ontology · sources | `SOURCES` | `:Source`, `:SyncRun` | `ingestion.source_connections` | ✅ |
-| Ontology · repositories | `REPOS` | `wrk.repositories` | `ingestion.repository_bindings` (+heads, `github_installations`) | ✅ |
-| Ontology · versions | `ONTVERSIONS` | git `.oxagen/ontology/` | `schema_registry.schema_versions` | 🟡 |
-| Ontology · embedding indexes | `INDEXES` | Voyage vector indexes | none | ❌ |
 | **Steering** · records | `RECORDS` | `:Record` + git | `agent.context_records`, `context_record_versions`; `context.record.*` | ✅ |
 | Steering · proposals, Context PRs | `PROPOSALS` | `PROPOSES`, `PROMOTED_BY` | `agent.context_promotions`; `agent.memory_promotion.*` | 🟡 |
 | Steering · effect, retirement | hard-coded | effect metrics (M3) | none | ❌ |
@@ -232,7 +226,6 @@ apps/app/
    │        ├─ agents/[agent]/source/page.tsx
    │        ├─ agents/[agent]/mandates/[mandate]/page.tsx
    │        ├─ tools/[[...tab]]/page.tsx
-   │        ├─ ontology/[[...tab]]/page.tsx
    │        ├─ steering/[[...tab]]/page.tsx
    │        ├─ spend/[[...drill]]/page.tsx
    │        └─ register/[[...step]]/page.tsx
@@ -546,7 +539,7 @@ export interface RunReadPort {
 export interface ApprovalReadPort {
   pending(scope: Scope, q?: { runId?: string }): Promise<Read<ApprovalItem[]>>;
 }
-// … AgentReadPort, ToolReadPort, OntologyReadPort, SteeringReadPort, SpendReadPort,
+// … AgentReadPort, ToolReadPort, SteeringReadPort, SpendReadPort,
 //   OrgReadPort, BillingReadPort, AuditReadPort, ShellReadPort
 
 export interface DataSource {
@@ -912,8 +905,7 @@ const LEGACY: Array<[RegExp, (m: RegExpMatchArray) => string]> = [
   [/^\/([^/]+)\/([^/]+)\/workbench\/agents(?:\/new)?\/?$/, (m) => `/${m[1]}/${m[2]}/agents`],
   [/^\/([^/]+)\/([^/]+)\/workbench\/agents\/([^/]+)/, (m) => `/${m[1]}/${m[2]}/agents/${m[3]}`],
   [/^\/([^/]+)\/([^/]+)\/(workbench\/tools|marketplace|governance)(\/.*)?$/, (m) => `/${m[1]}/${m[2]}/tools`],
-  [/^\/([^/]+)\/([^/]+)\/knowledge\/memory/, (m) => `/${m[1]}/${m[2]}/steering`],
-  [/^\/([^/]+)\/([^/]+)\/knowledge(\/.*)?$/, (m) => `/${m[1]}/${m[2]}/ontology`],
+  [/^\/([^/]+)\/([^/]+)\/knowledge(\/.*)?$/, (m) => `/${m[1]}/${m[2]}/steering`],
   [/^\/([^/]+)\/([^/]+)\/settings\/spend-budgets/, (m) => `/${m[1]}/${m[2]}/spend/budgets`],
   [/^\/([^/]+)\/([^/]+)\/(settings|developer\/mcp)(\/.*)?$/, (m) => `/${m[1]}${m[3] === "developer/mcp" ? `/${m[2]}/agents` : ""}`],
   [/^\/([^/]+)\/(members|workspaces|new-workspace|developer\/tokens|settings)(\/.*)?$/, (m) => `/${m[1]}`],
@@ -995,20 +987,20 @@ flowchart LR
     L5[auth + onboarding]
   end
   B1 --> B2
-  subgraph B2["B2 Pages on fixtures · 11 lanes"]
+  subgraph B2["B2 Pages on fixtures · 10 lanes"]
     P1[Fleet] --- P2a[Run: transcript + transport] --- P2b[Run: side panels]
-    P3[Agents] --- P4[Tools] --- P5[Ontology] --- P6[Steering]
-    P7[Spend] --- P8[Organization] --- P9[Billing] --- P10[Audit]
+    P3[Agents] --- P4[Tools] --- P5[Steering]
+    P6[Spend] --- P7[Organization] --- P8[Billing] --- P9[Audit]
   end
   L1 --> B3
-  subgraph B3["B3 Live adapters · 10 lanes (starts with B2)"]
+  subgraph B3["B3 Live adapters · 9 lanes (starts with B2)"]
     A1[runs + frames] --- A2[approvals + commands] --- A3[agents + iam] --- A4[tools]
-    A5[ontology + repos] --- A6[steering] --- A7[spend + budgets] --- A8[org + keys]
-    A9[billing] --- A10[audit + incidents]
+    A5[steering] --- A6[spend + budgets] --- A7[org + keys]
+    A8[billing] --- A9[audit + incidents]
   end
   B2 --> B4
   B3 --> B4
-  subgraph B4["B4 Writes · 10 lanes"]
+  subgraph B4["B4 Writes · 9 lanes"]
     W[server actions per page]
   end
   B4 --> B5["B5 Cutover<br/>1 lane"]
@@ -1031,13 +1023,13 @@ flowchart LR
 
 | Lane | Owns | Delivers | Waits on |
 |---|---|---|---|
-| **L1 contracts + ports + fixture** | `src/data/**` | All view-model schemas (§4.5) for the ten pages, every port interface, the fixture seed ported from `mc.html` @ `mc-baseline-w3` with W3's vocabulary mapping (its `TOOLPOOL` and `AGENT_BELTS` agree: seed no tool call an agent's belt cannot make), the integrity test (W4), and the `mc_state` state switch for dev/e2e | B0 |
+| **L1 contracts + ports + fixture** | `src/data/**` | All view-model schemas (§4.5) for the nine pages, every port interface, the fixture seed ported from `mc.html` @ `mc-baseline-w4` with W3's vocabulary mapping (its `TOOLPOOL` and `AGENT_BELTS` agree: seed no tool call an agent's belt cannot make; its `ASST_RUNS` stay out of the tenant's run index), the integrity test (W4), and the `mc_state` state switch for dev/e2e | B0 |
 | **L2 ui primitives** | `src/ui/**`, `.storybook/**` | `Money` (large-figure variant + basis dialog, feedback 5), `TierBadge`, `GradeBadge`, `VerdictBadge`, `StatusBadge`, `RiskBadge`, `EffectBadge`, `Gate`, `Hazard`, `ToolCell`, `RecordKindBadge`, `PrincipalKindBadge`, `Avatar` (initials/icon/photo × solid/soft/line), `PageState` + `Skeleton/Empty/Error/Denied/NotRecordedYet`, `DataTable` (search, sort, facet, rows per page, pager: the `listify()` behaviour as a component, opt-out by omission), `RouteTabs`, `FormDialog` (Base UI + `useActionState`), `Sparkline`, `Tile`, `Meter`. House tokens only, Lucide only. Charts: identity is an icon, magnitude is one hue (the tool-family and record-kind tokens fail colour-vision checks as series colours). Stories with a11y addon. | B0 enums |
 | **L3 shell** | `src/app/[org]/layout.tsx`, `src/app/[org]/[ws]/layout.tsx`, `src/features/shell/**` | Sidebar, top bar, org/ws switchers, ⌘K command menu, notifications, Account dialog (profile, preferences, security, privacy), assistant flyout host with the engine-down state (W9), `<MobileNav>` seam with a plain bottom bar (feedback 3 pending design), theme (light/dark/system via `data-theme`) | B0 |
 | **L4 server seams** | `src/server/**`, `src/app/api/mc/**`, `src/ui/hooks/**` | `session`, `requireViewer`, tenancy lookups ported from `resolve-org.ts` (incl. slug-history redirects, MFA gate), `invokeTool` (§4.6), cache tags, SSE route + `useFrames` + `useFleetLive` (§4.9) | B0 |
 | **L5 auth + onboarding** | `src/app/(auth)/**`, `src/app/(onboarding)/**`, `src/app/[org]/[ws]/register/**`, `src/features/onboarding/**`, `src/app/api/auth/**`, `src/proxy.ts` | Port the six auth pages + invite + create organization; onboarding gate name → wrap (Claude Code / Codex one-click, SDK snippet) → run, with feedback 2's layout fix; register flow reusing the same wrap/first-frame components; `proxy.ts` session gate (legacy redirects added in B5) | B0 |
 
-### Batch 2: pages on fixtures (11 lanes in parallel)
+### Batch 2: pages on fixtures (10 lanes in parallel)
 
 Each lane owns `src/app/<route>/**`, `src/features/<page>/**`, `messages/<page>.json`, `e2e/<page>*.spec.ts`. Each page reads **only** through `dataSource()` and renders all states from §19.
 
@@ -1048,14 +1040,13 @@ Each lane owns `src/app/<route>/**`, `src/features/<page>/**`, `messages/<page>.
 | P2b | **Run**: side panels | approvals strip (from P1), file-diff card under approvals (feedback 4), `<RunOutputs>` seam (feedback 7), tabs proof/cost/policy/context/chain, `runMetrics` instruments, compacted/sealed variants | |
 | P3 | **Agents** (section "Agent IAM", list page "Identities" in the baseline) | list; detail tabs identity/definition/toolbelt/mandates/budgets/runs/enrollment; source editor + commit dialog; mandate detail (real `[mandate]` param, W4); register entry point | Editor is a client island |
 | P4 | **Tools** | tabs registry/connections/mandates/policy/switches/auto/assurance; kill-switch dialog with blast-radius text; observed-schema approval; policy draft + simulation view | |
-| P5 | **Ontology** | tabs model/graph/sources/repositories/versions; embedding indexes list; ask-the-graph with Cypher + citations | Graph canvas behind a dynamic import |
-| P6 | **Steering** | tabs records/proposals/prs/effect/retirement; `RecordKindBadge` (W6); Context PR dialog | |
-| P7 | **Spend** | tabs findings/operator/agent/tool/waste/reconciliation/budgets; drill `spend/<kind>/<id>`; evidence + fix dialogs; export | |
-| P8 | **Organization** | tabs people/roles/invitations/workspaces/funding/plane/keys; role editor; API key create/rotate/revoke dialogs | |
-| P9 | **Billing** | plan, run allowance, meters, invoices | |
-| P10 | **Audit** | tabs events/incidents/receipts/holds/exports/keys/assurance/retention; receipt viewer; hold, export, KEK rotation, erasure dialogs | |
+| P5 | **Steering** | tabs records/proposals/prs/effect/retirement; `RecordKindBadge` (W6); Context PR dialog | |
+| P6 | **Spend** | tabs findings/operator/agent/tool/waste/reconciliation/budgets; drill `spend/<kind>/<id>`; evidence + fix dialogs; export | |
+| P7 | **Organization** | tabs people/roles/invitations/workspaces/funding/plane/keys; role editor; API key create/rotate/revoke dialogs | |
+| P8 | **Billing** | plan, run allowance, meters, invoices | |
+| P9 | **Audit** | tabs events/incidents/receipts/holds/exports/keys/assurance/retention; receipt viewer; hold, export, KEK rotation, erasure dialogs | |
 
-### Batch 3: live adapters (10 lanes, start as soon as L1 merges; runs alongside B2)
+### Batch 3: live adapters (9 lanes, start as soon as L1 merges; runs alongside B2)
 
 Each lane owns `src/data/adapters/live/<domain>.ts` + `mappers/<domain>.ts` + tests. Every method is either **wired** (with a column-level mapping note in the PR, and a contract test parsing a real row through the view-model schema), or returns `notBacked(milestone, gap)`. **No method returns fabricated zeros.**
 
@@ -1065,14 +1056,13 @@ Each lane owns `src/data/adapters/live/<domain>.ts` + `mappers/<domain>.ts` + te
 | A2 | approvals + commands | `agent.approval_requests` read; command status from `tacho.control_commands` | four-hop mandate/rules (G1) |
 | A3 | agents + iam | `iam.principals`, roles, grants, assignments; `tacho.hosts`; `agent.definition.get/list`; `billing.spend_budgets`; `tacho.incidents` | mandates (G1), scores (G11) |
 | A4 | tools | `mcp.mcp_servers`, `agent.tools/tool_versions`, `mcp.tool_snapshots`, `ingestion.source_connections`; emergency denies as switches | policy (G2), auto rules (G12), assurance, observed schemas |
-| A5 | ontology + repos | `schema_registry.*`, `ontology.query`/`graph.*`, `ingestion.repository_bindings`, `source_connections` | indexes, Cypher-shown |
-| A6 | steering | `agent.context_records(_versions)`, `context_promotions` | effect, retirement |
-| A7 | spend + budgets | ClickHouse `readUsageBreakdown` by operator/agent/model; `tool_invocations`; `billing.spend_budgets` | proven (G7), findings (G4), reconciliation (G5) |
-| A8 | org + members + keys | `org.org_users`, `org.invitations`, `workspace.workspaces`, `iam.roles`, `org.data_planes`, `auth.api_keys`, `org.model_credentials` | none |
-| A9 | billing | `billing.subscriptions`, invoices, Stripe via existing contracts | run allowance (G13) |
-| A10 | audit + shell | ClickHouse `audit_events` + `security.security_events`, `tacho.incidents`, `privacy_*`, `notification.notifications` | receipts, holds, KEK (G8) |
+| A5 | steering | `agent.context_records(_versions)`, `context_promotions` | effect, retirement |
+| A6 | spend + budgets | ClickHouse `readUsageBreakdown` by operator/agent/model; `tool_invocations`; `billing.spend_budgets` | proven (G7), findings (G4), reconciliation (G5) |
+| A7 | org + members + keys | `org.org_users`, `org.invitations`, `workspace.workspaces`, `iam.roles`, `org.data_planes`, `auth.api_keys`, `org.model_credentials` | none |
+| A8 | billing | `billing.subscriptions`, invoices, Stripe via existing contracts | run allowance (G13) |
+| A9 | audit + shell | ClickHouse `audit_events` + `security.security_events`, `tacho.incidents`, `privacy_*`, `notification.notifications` | receipts, holds, KEK (G8) |
 
-### Batch 4: writes (10 lanes, after B2 page + B3 domain pair merge)
+### Batch 4: writes (9 lanes, after B2 page + B3 domain pair merge)
 
 Each lane owns `src/features/<page>/actions.ts` and wires its page's dialogs to server actions through `invokeTool`. An action with no contract renders its button disabled with the reason and gap id; it is never a silent toast.
 
@@ -1081,7 +1071,6 @@ Each lane owns `src/features/<page>/actions.ts` and wires its page's dialogs to 
 | Fleet / Run | `resolve_approval`; `dispatch_tacho_command` (pause/resume/cancel/message for tacho runs) | steer with delivery mode on ledger runs (G9); fork/bisect (Series A); export (M1) |
 | Agents | `agent.definition.{create,update,publish,revise,delete}`, `agent.role.*`, `tacho.enrollment.{create,revoke}`, `billing.budget.set` | mandates (G1) |
 | Tools | `agent.mcp.{register,set_enabled,delete}`, `agent.mcp_consent.resolve`, connection contracts | kill switch as `control.commands` (verify emergency-deny contract), policy (G2), auto rules (G12) |
-| Ontology | repo link/sync, source connect contracts (`repo.ts`, `connection.ts`, `integration.ts`), `ontology.query` | index upgrade, ontology proposal PR |
 | Steering | `context.record.*`, `agent.memory_promotion.*` | Context PR through GitHub App (M3) |
 | Spend | `billing.budget.set`, `workspace.budget_policy.*` | findings actions (G4), statement export (G5) |
 | Organization | `org.member_invite.*`, `org.member_role.change`, `workspace.create`, `workspace.settings.*`, `org.settings.write`, `org.model_credential`, `org.data_plane`, `api.key.{create,rotate,revoke}` | role editor custom roles (enterprise) |
@@ -1105,11 +1094,11 @@ Each wired action updates `apps/app/capability-ui-map.json` with its binding, wh
 |---|---|---|---|
 | B0 | 1 | 1.5 | 1.5 |
 | B1 | 5 | L2 primitives ≈ 3 | 3 |
-| B2 | 11 | P2a Run transport ≈ 4 | 4 (B3 overlaps) |
-| B3 | 10 | A1 runs ≈ 3 | (within B2) |
-| B4 | 10 | Organization ≈ 2 | 2 |
+| B2 | 10 | P2a Run transport ≈ 4 | 4 (B3 overlaps) |
+| B3 | 9 | A1 runs ≈ 3 | (within B2) |
+| B4 | 9 | Organization ≈ 2 | 2 |
 | B5 | 1 | 1.5 | 1.5 |
-| **Total** | | | **≈ 12 agent-days wall-clock** with 11 concurrent lanes |
+| **Total** | | | **≈ 12 agent-days wall-clock** with 10 concurrent lanes |
 
 ---
 

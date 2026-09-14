@@ -1425,6 +1425,42 @@ table{color:inherit}
 .rng-prev{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:6px}
 .rowacts{white-space:nowrap}
 .rowacts .btn{margin-right:4px}
+/* Auto-approval rules: one horizontal card per rule, stacked. Toggle spine | body | rail.
+   The body carries the name and provenance on top and three labelled facts below; the rail
+   carries the 30-day count and the actions. Every value is a single line that ellipsises
+   behind a title, so a long rule name or tool pattern never wraps however narrow the page. */
+.arules{display:grid;gap:10px;padding:12px 16px}
+.arule{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:16px;align-items:start;padding:14px 16px;border:1px solid var(--border);border-radius:12px;background:var(--ink);cursor:pointer;transition:border-color .15s}
+.arule>*{min-width:0}
+.arule:hover{border-color:var(--rule)}
+.arule.off .ar-body,.arule.off .ar-n{opacity:.55}
+.ar-tog{padding-top:3px}
+.ar-head{display:flex;align-items:center;gap:8px;min-width:0}
+.ar-head .b{flex:none}
+.ar-name{flex:0 1 auto;min-width:0;font-size:14.5px;font-weight:600;color:var(--fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.5}
+.ar-sub{font-family:var(--mono);font-size:10.5px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.ar-facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px 20px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+@media(min-width:1180px){.ar-facts{grid-template-columns:minmax(0,1.2fr) minmax(0,1.1fr) minmax(0,1.7fr)}}
+.ar-f{min-width:0}
+.ar-f .k{display:block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:600;margin-bottom:4px;white-space:nowrap}
+.ar-f .v{display:block;font-size:12.5px;color:var(--body);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.8}
+.ar-f .v.mono{font-size:11.5px;color:var(--fg)}
+.ar-f .v .scs{gap:10px;vertical-align:middle}
+.ar-f .v .b{vertical-align:middle;font-weight:500;margin-left:4px}
+.ar-f .v .b:first-of-type{margin-left:6px}
+.ar-rail{display:grid;gap:10px;justify-items:end;text-align:right;align-self:stretch;align-content:space-between}
+.ar-stat{display:grid;justify-items:end}
+.ar-n{font-size:24px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.05;color:var(--fg)}
+.ar-stat .s{font-size:11px;color:var(--muted);white-space:nowrap;margin-top:3px}
+.ar-stat .s.held{color:var(--dim)}
+.ar-acts{display:flex;gap:6px}
+@media(max-width:1180px){.arule{grid-template-columns:auto minmax(0,1fr)}.ar-rail{grid-column:2;grid-auto-flow:column;justify-content:space-between;align-items:center;text-align:left;justify-items:start;gap:16px}.ar-stat{grid-auto-flow:column;align-items:baseline;gap:8px;justify-items:start}.ar-stat .s{margin-top:0}.ar-stat .s.held::before{content:"· ";color:var(--rule)}}
+#viewport.phone .arules{padding:10px 12px}
+#viewport.phone .arule{grid-template-columns:auto minmax(0,1fr);gap:12px;padding:12px}
+#viewport.phone .ar-rail{grid-column:1/-1;grid-auto-flow:row;justify-content:stretch;align-items:start;text-align:left;justify-items:start;gap:8px}
+#viewport.phone .ar-stat{grid-auto-flow:column;align-items:baseline;gap:8px;justify-items:start}#viewport.phone .ar-stat .s{margin-top:0}#viewport.phone .ar-stat .s.held::before{content:"· ";color:var(--rule)}
+#viewport.phone .ar-facts{grid-template-columns:minmax(0,1fr)}
+#viewport.phone .ar-head{flex-wrap:wrap;gap:4px 8px}#viewport.phone .ar-name{flex-basis:100%}
 #viewport.phone .perm-grid{grid-template-columns:minmax(0,1fr)}
 .field label.check{display:flex;font-size:inherit;font-weight:inherit;color:inherit;margin-bottom:8px}
 .field .check input{width:auto;flex:none;margin:3px 0 0}

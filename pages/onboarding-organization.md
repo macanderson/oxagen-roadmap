@@ -19,7 +19,7 @@ Step 1 of 3 of the gate after sign-up: name the organization — the tenant that
 **Header** — eyebrow “Step 1 of 3”, h1 “Name your organization”. Rail: 1 Name the organization · 2 Wrap an agent · 3 Start a run. Caption: “Creates `org_<namespace>` and its graph database.”
 Actions: **Cancel** · **Continue** (gold)
 
-- Fields: Organization name · Address (derived, read-only) · Namespace (2–6 characters, immutable; every agent key starts with it). First workspace: Workspace name · Governance mode (solo / team / regulated). A workspace is a governance partition: one main repo, one ontology, one steering set, its own agents, tool grants and budgets.
+- Fields: Organization name · Address (derived, read-only) · Namespace (2–6 characters, immutable; every agent key starts with it). First workspace: Workspace name · Governance mode (solo / team / regulated). A workspace is a governance partition: one main repo, one steering set, its own agents, tool grants and budgets.
 
 
 **Shell.** No sidebar or top bar: the brandmark, then a centred card; the phone layout is the same card at full width.
