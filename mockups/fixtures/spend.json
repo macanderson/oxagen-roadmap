@@ -1,0 +1,407 @@
+{
+ "month": "September 2026",
+ "spend": "18,402.66",
+ "proven": "7,914.03",
+ "accepted": "3,208.41",
+ "unproven": "7,280.22",
+ "ratio": 0.43,
+ "cache": 0.81,
+ "runs": 4218,
+ "actions": 61904,
+ "byOperator": [
+  {
+   "p": "marcus",
+   "agents": 22,
+   "runs": 2986,
+   "spend": "12,440.19",
+   "proven": "6,802.55",
+   "ratio": 0.55,
+   "budget": "15,000.00",
+   "used": 0.83
+  },
+  {
+   "p": "priya",
+   "agents": 19,
+   "runs": 702,
+   "spend": "3,918.22",
+   "proven": "901.48",
+   "ratio": 0.23,
+   "budget": "5,000.00",
+   "used": 0.78
+  },
+  {
+   "p": "dana",
+   "agents": 9,
+   "runs": 530,
+   "spend": "2,044.25",
+   "proven": "210.00",
+   "ratio": 0.1,
+   "budget": "3,000.00",
+   "used": 0.68
+  }
+ ],
+ "byAgent": [
+  {
+   "k": "a-intel.core.stella-ci",
+   "runs": 486,
+   "flipped": 389,
+   "spend": "1,104.70",
+   "proven": "881.19",
+   "trend": "-8%"
+  },
+  {
+   "k": "a-intel.core.release-manager",
+   "runs": 212,
+   "flipped": 61,
+   "spend": "612.48",
+   "proven": "318.22",
+   "trend": "-3%"
+  },
+  {
+   "k": "a-intel.core.triage",
+   "runs": 1340,
+   "flipped": 47,
+   "spend": "402.11",
+   "proven": "38.90",
+   "trend": "+12%"
+  },
+  {
+   "k": "a-intel.finops.invoice-bot",
+   "runs": 88,
+   "flipped": 0,
+   "spend": "96.34",
+   "proven": "0.00",
+   "trend": "+1%"
+  },
+  {
+   "k": "a-intel.core.docs-writer",
+   "runs": 64,
+   "flipped": 0,
+   "spend": "71.09",
+   "proven": "0.00",
+   "trend": "-1%"
+  }
+ ],
+ "byModel": [
+  {
+   "m": "claude-opus-5",
+   "calls": 41220,
+   "spend": "13,918.02",
+   "cache": 0.84
+  },
+  {
+   "m": "claude-haiku-4-5",
+   "calls": 88104,
+   "spend": "3,402.19",
+   "cache": 0.76
+  },
+  {
+   "m": "z-ai/glm-latest (Oxagen)",
+   "calls": 1204,
+   "spend": "1,082.45",
+   "cache": 0.62
+  }
+ ],
+ "byTool": [
+  {
+   "t": "claude_code__Bash",
+   "s": "harness",
+   "calls": 8841,
+   "runs": 1912,
+   "spend": 6204.18,
+   "perCall": 0.7,
+   "perRun": 3.25,
+   "note": "result bodies average 4.1k tokens; 31% of calls are re-runs of the same command"
+  },
+  {
+   "t": "search_graph",
+   "s": "oxagen",
+   "calls": 12904,
+   "runs": 3406,
+   "spend": 2918.4,
+   "perCall": 0.23,
+   "perRun": 0.86,
+   "note": "cheapest call on the belt; cache hit 94%"
+  },
+  {
+   "t": "aws_billing__get_cost_and_usage",
+   "s": "aws-billing",
+   "calls": 3106,
+   "runs": 88,
+   "spend": 1842.77,
+   "perCall": 0.59,
+   "perRun": 20.94,
+   "note": "invoice-bot pages a month of line items through the context window on every run"
+  },
+  {
+   "t": "linear__update_issue",
+   "s": "linear",
+   "calls": 2417,
+   "runs": 1340,
+   "spend": 1102.31,
+   "perCall": 0.46,
+   "perRun": 0.82,
+   "note": "triage; the turn after the call is usually the reply"
+  },
+  {
+   "t": "github__create_pull_request",
+   "s": "github",
+   "calls": 1284,
+   "runs": 698,
+   "spend": 988.06,
+   "perCall": 0.77,
+   "perRun": 1.42,
+   "note": "diff bodies are the cost; 12% of calls are retried after a 422"
+  },
+  {
+   "t": "slack__post_message",
+   "s": "slack",
+   "calls": 912,
+   "runs": 604,
+   "spend": 411.2,
+   "perCall": 0.45,
+   "perRun": 0.68,
+   "note": "\u2014"
+  },
+  {
+   "t": "snowflake__run_query",
+   "s": "snowflake",
+   "calls": 188,
+   "runs": 61,
+   "spend": 366.92,
+   "perCall": 1.95,
+   "perRun": 6.01,
+   "note": "result sets returned unpaged; the most expensive call per use"
+  },
+  {
+   "t": "slack__get_thread",
+   "s": "slack",
+   "calls": 204,
+   "runs": 190,
+   "spend": 148.1,
+   "perCall": 0.73,
+   "perRun": 0.78,
+   "note": "\u2014"
+  },
+  {
+   "t": "slack__list_channels",
+   "s": "slack",
+   "calls": 341,
+   "runs": 341,
+   "spend": 96.44,
+   "perCall": 0.28,
+   "perRun": 0.28,
+   "note": "called once per run for a list that changes weekly"
+  },
+  {
+   "t": "stripe__create_payment",
+   "s": "stripe",
+   "calls": 63,
+   "runs": 63,
+   "spend": 41.16,
+   "perCall": 0.65,
+   "perRun": 0.65,
+   "note": "\u2014"
+  },
+  {
+   "t": "(no tool call)",
+   "s": "model",
+   "calls": 0,
+   "runs": 4218,
+   "spend": 4283.12,
+   "perCall": null,
+   "perRun": 1.02,
+   "note": "reasoning and reply turns; not attributable to a tool"
+  }
+ ],
+ "wasteTotal": "4,730.42",
+ "wasteShare": 0.26,
+ "wasteRuns": 412,
+ "wasteByCause": [
+  {
+   "c": "unproven outcome",
+   "spend": "2,318.90",
+   "runs": 141,
+   "why": "verdict failing, tampered or unsatisfied \u2014 the run ended and the task did not move"
+  },
+  {
+   "c": "cache misses",
+   "spend": "1,204.35",
+   "runs": 212,
+   "why": "system-context digest changed mid-conversation; every later turn re-read the prefix at full price"
+  },
+  {
+   "c": "retry loops",
+   "spend": "612.08",
+   "runs": 38,
+   "why": "the same tool call repeated three or more times with the same arguments"
+  },
+  {
+   "c": "context bloat",
+   "spend": "412.77",
+   "runs": 97,
+   "why": "tool list or tool results larger than the turn used; the belt was recomputed mid-run"
+  },
+  {
+   "c": "idle while parked",
+   "spend": "96.14",
+   "runs": 19,
+   "why": "turns spent re-checking an approval that had not arrived"
+  },
+  {
+   "c": "halted early",
+   "spend": "86.18",
+   "runs": 37,
+   "why": "a policy deny at turn 1 after the prompt was already paid for"
+  }
+ ],
+ "wasteRunsList": [
+  {
+   "run": "run_01K5RG6H1L4OIU9Y",
+   "wasted": "5.08",
+   "badges": [
+    [
+     "tampered",
+     "critical"
+    ],
+    [
+     "no proof",
+     "failed"
+    ],
+    [
+     "47 steps, 0 advanced",
+     "approval"
+    ]
+   ],
+   "what": "Evidence chain broke at frame #171: an evidence-ledger row was rewritten after seal. Nothing this run produced can be trusted, so the whole cost is unproven."
+  },
+  {
+   "run": "run_01K5RK7C2V8BNM3X",
+   "wasted": "2.10",
+   "badges": [
+    [
+     "verdict failing",
+     "failed"
+    ],
+    [
+     "retry loop \u00d73",
+     "denied"
+    ]
+   ],
+   "what": "Turns 4\u20136 repeated github__create_pull_request with identical arguments after a 422; the backport never landed."
+  },
+  {
+   "run": "run_01K5RP2D6H4KLM8V",
+   "wasted": "0.53",
+   "badges": [
+    [
+     "unmoved",
+     "failed"
+    ],
+    [
+     "productive ratio 44%",
+     "approval"
+    ]
+   ],
+   "what": "Triage labelled the issue but the witness found the label already present. Five of nine steps changed nothing."
+  },
+  {
+   "run": "run_01K5RS7M2E8FJ3QW",
+   "wasted": "0.61",
+   "badges": [
+    [
+     "context bloat +1,900 tok",
+     "approval"
+    ],
+    [
+     "belt recomputed mid-run",
+     "q"
+    ],
+    [
+     "live",
+     "allowed"
+    ]
+   ],
+   "what": "The tool list grew at turn 5 when a deny-generation bump recomputed the belt. Every turn since pays for 1,900 tokens of definitions the run never calls."
+  },
+  {
+   "run": "run_01K5RE9P4Q2WSX6C",
+   "wasted": "0.44",
+   "badges": [
+    [
+     "cache 0%",
+     "approval"
+    ],
+    [
+     "client_attested",
+     "q"
+    ],
+    [
+     "unverified",
+     "failed"
+    ]
+   ],
+   "what": "Arrived through harness telemetry with no gateway request ids. No prefix cache was possible and no witness could run; nothing here is provable."
+  },
+  {
+   "run": "run_01K5RN8F3J2GHY6T",
+   "wasted": "0.38",
+   "badges": [
+    [
+     "idle while parked",
+     "approval"
+    ],
+    [
+     "3 turns waiting",
+     "q"
+    ]
+   ],
+   "what": "Parked at turn 3 for an approval on aws_billing__purchase_savings_plan. Three turns re-asked whether the approval had arrived; a wake-on-decision would have cost none."
+  },
+  {
+   "run": "run_01K5RH3G8K5PAS7D",
+   "wasted": "0.22",
+   "badges": [
+    [
+     "halted turn 1",
+     "failed"
+    ],
+    [
+     "cache 12%",
+     "approval"
+    ]
+   ],
+   "what": "Policy denied the first tool call. The prompt, including a cold 14k-token context, was already paid for."
+  }
+ ],
+ "budgets": [
+  {
+   "scope": "organization \u00b7 a-intel",
+   "period": "monthly",
+   "limit": "25,000.00",
+   "used": "18,402.66",
+   "mode": "soft"
+  },
+  {
+   "scope": "workspace \u00b7 core-platform",
+   "period": "monthly",
+   "limit": "18,000.00",
+   "used": "14,213.78",
+   "mode": "hard"
+  },
+  {
+   "scope": "workspace \u00b7 finops",
+   "period": "monthly",
+   "limit": "4,000.00",
+   "used": "2,044.25",
+   "mode": "hard"
+  },
+  {
+   "scope": "agent \u00b7 a-intel.core.triage",
+   "period": "per run",
+   "limit": "0.40",
+   "used": "0.29",
+   "mode": "hard"
+  }
+ ]
+}

@@ -5,8 +5,8 @@ import { useEffect, useRef, useState } from "react";
 const LABEL: Record<string, string> = { loaded: "Loaded", empty: "Empty", loading: "Loading", error: "Error", denied: "Denied" };
 const FRAME = { desktop: { w: 1280, h: 800 }, mobile: { w: 390, h: 844 } };
 
-/** The generated page file for one state, desktop or mobile, scaled to the column. */
-export function MockPanel({ id, title, states }: { id: string; title: string; states: string[] }) {
+/** One state of the page in the master mockup, desktop or mobile, scaled to the column. */
+export function MockPanel({ title, hash, states }: { title: string; hash: string | null; states: string[] }) {
   const [state, setState] = useState(states.includes("loaded") ? "loaded" : states[0]);
   const [mobile, setMobile] = useState(false);
   const [width, setWidth] = useState(0);
@@ -27,7 +27,7 @@ export function MockPanel({ id, title, states }: { id: string; title: string; st
   if (!state) return null;
   const frame = mobile ? FRAME.mobile : FRAME.desktop;
   const scale = width ? Math.min(1, width / frame.w) : 0;
-  const src = `/mock/pages/${id}-${state}${mobile ? "-mobile" : ""}.html`;
+  const src = `/mock/mockups/missioncontrol.html?product=1&state=${state}&mobile=${mobile ? 1 : 0}${hash ?? ""}`;
 
   return (
     <figure className="ox-mock not-prose" aria-label="Mocked page">

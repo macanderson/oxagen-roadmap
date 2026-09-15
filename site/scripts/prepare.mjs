@@ -1,12 +1,12 @@
 // Runs before dev and build. Everything it writes is gitignored:
-//   public/mock/            the generated HTML (pages/, consolidated*, w*, mc.html, docs/*.html,
-//                           docs/_house, badges), copied so relative engine paths keep working
+//   public/mock/            the served HTML (mockups/missioncontrol.html, docs/*.html, docs/_house,
+//                           badges), copied so relative paths keep working
 //   .generated/content/     scenario outlines, the scenarios index, the rendered-HTML index, and a
 //                           walkthrough stub while docs/walkthrough.md is absent
 //   .generated/manifest.json  page states, groups, audit prompts, walkthrough and scenario links
 import fs from "node:fs";
 import path from "node:path";
-import { GEN, GEN_CONTENT, REPO, SITE, mdxText, plain, readPages, rewriteRepoUrl, slugify, writeGenerated } from "./lib.mjs";
+import { CATALOG_SCENARIO_LINKS, GEN, GEN_CONTENT, MOCKUP, REPO, SITE, mdxText, plain, readPages, rewriteRepoUrl, slugify, writeGenerated } from "./lib.mjs";
 import { generateScenarios } from "./gen-scenarios.mjs";
 
 const MOCK = path.join(SITE, "public", "mock");
@@ -16,15 +16,9 @@ function syncMock() {
   fs.mkdirSync(path.join(MOCK, "docs"), { recursive: true });
   const copy = (rel) => fs.cpSync(path.join(REPO, rel), path.join(MOCK, rel), { recursive: true });
   let n = 0;
-  for (const dir of ["pages", "badges", "docs/_house"]) {
-    if (fs.existsSync(path.join(REPO, dir))) {
-      copy(dir);
-      n++;
-    }
-  }
-  for (const f of fs.readdirSync(REPO)) {
-    if (/^(mc|consolidated[\w-]*|w\d+-[\w-]+)\.html$/.test(f)) {
-      copy(f);
+  for (const rel of ["mockups/missioncontrol.html", "badges", "docs/_house"]) {
+    if (fs.existsSync(path.join(REPO, rel))) {
+      copy(rel);
       n++;
     }
   }
@@ -79,7 +73,7 @@ function writeWalkthroughStub(pages, scenarios) {
     [
       "# Walkthrough",
       "",
-      "`docs/walkthrough.md` is not on this branch yet. This page is generated from pages/README.md and mc.html until it lands, and lists every page in build order and every scenario.",
+      "`docs/walkthrough.md` is not on this branch yet. This page is generated from mockups/pages/README.md and mockups/catalog.mjs until it lands, and lists every page in build order and every scenario.",
       "",
       ...["Workspace", "Organization", "Auth & onboarding"].flatMap((g) => [
         `## ${g}`,
@@ -102,31 +96,26 @@ function writeRenderedIndex() {
   };
   const row = (rel) => `- [${mdxText(titleOf(rel))}](/mock/${rel}) \`${rel}\``;
   const docsHtml = fs.readdirSync(path.join(REPO, "docs")).filter((f) => f.endsWith(".html")).sort().map((f) => `docs/${f}`);
-  const rootHtml = fs.readdirSync(REPO).filter((f) => /^(mc|consolidated[\w-]*)\.html$/.test(f)).sort();
-  const wHtml = fs
-    .readdirSync(REPO)
-    .filter((f) => /^w\d+-[\w-]+\.html$/.test(f))
-    .sort((a, b) => parseInt(a.slice(1), 10) - parseInt(b.slice(1), 10));
   writeGenerated(
     "specs/rendered-html.mdx",
     [
       "---",
       'title: "Rendered HTML"',
-      'description: "The house-rendered companions of the docs, and the generated mockup files, served as they are."',
+      'description: "The house-rendered companions of the docs, and the master mockup, served as they are."',
       "---",
       "",
       "## Specs, plans and reviews",
       "",
       ...docsHtml.map(row),
       "",
-      "## The design and its product builds",
+      "## The master mockup",
       "",
-      ...rootHtml.map(row),
-      ...["pages/index.html", "badges/index.html"].filter((f) => fs.existsSync(path.join(REPO, f))).map(row),
+      ...["mockups/missioncontrol.html", "badges/index.html"].filter((f) => fs.existsSync(path.join(REPO, f))).map(row),
+      `- [The product build, without the mockup chrome](${MOCKUP}?product=1)`,
       "",
-      "## W files",
+      "## Scenarios in the mockup",
       "",
-      ...wHtml.map(row),
+      ...CATALOG_SCENARIO_LINKS().map((l) => `- [${mdxText(l.text)}](${l.href})`),
       "",
     ].join("\n"),
   );

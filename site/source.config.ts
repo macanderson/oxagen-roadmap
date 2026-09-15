@@ -22,8 +22,8 @@ const schema = ({ source }: { source: string }) =>
 /** docs/*.md: the spec, the plan, the desktop spec, the prompts, the W13 doc, and the walkthrough. */
 export const docs = defineCollections({ type: "doc", dir: "../docs", files: ["*.md"], schema });
 
-/** pages/*.md: every page spec, every audit prompt, and the pages README. */
-export const pages = defineCollections({ type: "doc", dir: "../pages", files: ["*.md"], schema });
+/** mockups/pages/*.md: every page spec, every audit prompt, and the pages README. */
+export const pages = defineCollections({ type: "doc", dir: "../mockups/pages", files: ["*.md"], schema });
 
 /** Written by scripts/prepare.mjs: scenario outlines, indexes, and the walkthrough stub. */
 export const generated = defineCollections({ type: "doc", dir: ".generated/content", files: ["**/*.md", "**/*.mdx"], schema });

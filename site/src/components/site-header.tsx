@@ -14,11 +14,8 @@ export function SiteHeader(props: ComponentProps<"header">) {
         <Link href="/scenarios/">Scenarios</Link>
         <Link href="/specs/mission-control-spec/">Spec</Link>
         <Link href="/specs/implementation-plan/">Plan</Link>
-        <a href="/mock/pages/index.html" target="_blank" rel="noopener">
-          Page map
-        </a>
-        <a href="/mock/mc.html" target="_blank" rel="noopener">
-          mc.html
+        <a href="/mock/mockups/missioncontrol.html" target="_blank" rel="noopener">
+          Mockup
         </a>
       </nav>
       <ThemeSwitch mode="light-dark-system" />

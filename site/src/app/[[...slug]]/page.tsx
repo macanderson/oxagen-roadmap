@@ -65,7 +65,7 @@ export default async function Page(props: { params: Promise<{ slug?: string[] }>
       {page.data.description && !page.data.descriptionInBody ? <DocsDescription>{page.data.description}</DocsDescription> : null}
       {spec && page.data.kind === "page" ? (
         <>
-          <MockPanel id={spec.id} title={spec.shortTitle} states={spec.states} />
+          <MockPanel title={spec.shortTitle} hash={spec.hash} states={spec.states} />
           <PageLinks page={spec} from="page" />
         </>
       ) : null}

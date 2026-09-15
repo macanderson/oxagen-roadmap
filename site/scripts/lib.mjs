@@ -1,8 +1,9 @@
 // Shared by the prepare step, the scenario generator and the MDX pipeline. Everything here reads
-// the repo's own sources (pages/README.md, tools/build-pages.mjs, tools/build-w.mjs, the markdown)
-// and never writes into them.
+// the repo's own sources (mockups/catalog.mjs, mockups/pages/README.md, the markdown) and never
+// writes into them.
 import fs from "node:fs";
 import path from "node:path";
+import { PAGES as CATALOG_PAGES, SCENARIOS as CATALOG_SCENARIOS, mockupUrl } from "../../mockups/catalog.mjs";
 import { docSlug } from "../src/lib/doc-slugs.mjs";
 
 // Scripts and the MDX config both run with the site directory as the working directory.
@@ -17,6 +18,16 @@ export const STATES = ["loaded", "empty", "loading", "error", "denied"];
 export const GROUPS = ["Workspace", "Organization", "Auth & onboarding"];
 
 const read = (rel) => fs.readFileSync(path.join(REPO, rel), "utf8");
+
+/** Where the page specs and audit prompts live. */
+export const PAGE_DIR = "mockups/pages";
+/** The master mockup as the site serves it: every page, state, shell and scenario is a URL of it. */
+export const MOCKUP = "/mock/mockups/missioncontrol.html";
+
+/** One view of the master mockup; `product` hides the mockup chrome (a scenario needs it shown). */
+export function mockHref({ state = null, mobile = null, hash = null, product = true } = {}) {
+  return mockupUrl(MOCKUP, { product, state, mobile, hash: hash ?? undefined });
+}
 
 /** Markdown inline syntax reduced to its text. */
 export function plain(md) {
@@ -122,62 +133,71 @@ export function rewriteRepoUrl(url, fromFile) {
   }
   if (rel.startsWith("..")) return null;
   let m;
-  if ((m = /^pages\/([\w-]+)\.audit-prompt\.md$/.exec(rel))) return `/audit-prompts/${m[1]}/${hash}`;
-  if (rel === "pages/audit-prompt.md") return `/audit-prompts/${hash}`;
-  if (rel === "pages/README.md") return `/pages/${hash}`;
-  if ((m = /^pages\/([\w-]+)\.md$/.exec(rel))) return `/pages/${m[1]}/${hash}`;
+  // Page specs moved from pages/ to mockups/pages/; a link written against either resolves.
+  const page = /^(?:mockups\/)?pages\/(.+)$/.exec(rel)?.[1];
+  if (page !== undefined) {
+    if ((m = /^([\w-]+)\.audit-prompt\.md$/.exec(page))) return `/audit-prompts/${m[1]}/${hash}`;
+    if (page === "audit-prompt.md") return `/audit-prompts/${hash}`;
+    if (page === "README.md") return `/pages/${hash}`;
+    if ((m = /^([\w-]+)\.md$/.exec(page))) return `/pages/${m[1]}/${hash}`;
+    // A per-state page file (id-state[-mobile].html) is now a URL of the master mockup.
+    if ((m = /^([\w-]+?)-(loaded|empty|loading|error|denied)(-mobile)?\.html$/.exec(page))) {
+      const entry = CATALOG_PAGES.find((p) => p.id === m[1]);
+      if (entry) return mockHref({ state: m[2], mobile: Boolean(m[3]), hash: entry.hash });
+    }
+  }
+  if (rel === "mockups/missioncontrol.html") return `${MOCKUP}${hash}`;
   if (rel === "docs/walkthrough.md") return `/${hash}`;
   if ((m = /^docs\/([^/]+\.md)$/.exec(rel))) return `/specs/${docSlug(m[1])}/${hash}`;
-  if (
-    /^pages\/.+/.test(rel) ||
-    /^docs\/_house\/.+/.test(rel) ||
-    /^badges\/.+/.test(rel) ||
-    /^docs\/[^/]+\.html$/.test(rel) ||
-    /^[^/]+\.html$/.test(rel)
-  )
-    return `/mock/${rel}${hash}`;
+  if (/^docs\/_house\/.+/.test(rel) || /^badges\/.+/.test(rel) || /^docs\/[^/]+\.html$/.test(rel)) return `/mock/${rel}${hash}`;
   return `${GITHUB}/blob/main/${rel}${hash}`;
 }
 
-/** The W files and the scenario each one boots, as tools/build-w.mjs declares them. */
-export function readWFiles() {
-  const src = read("tools/build-w.mjs");
-  const out = [];
-  for (const m of src.matchAll(/\[\s*"(w\d+-[\w-]+\.html)",\s*"([\w-]+)",\s*"((?:[^"\\]|\\.)*)"\s*\]/g)) {
-    out.push({ file: m[1], scenario: m[2], title: m[3], label: m[1].match(/^w(\d+)/)[0].toUpperCase() });
-  }
-  return out;
+/** A link per scenario straight into the mockup, with its chrome (the scenario rail) shown. */
+export function CATALOG_SCENARIO_LINKS() {
+  return CATALOG_SCENARIOS.map((s) => ({
+    text: `W${s.n} · ${s.title}`,
+    href: mockHref({ product: false, hash: `#/${ORG}/${s.ws}/scenarios/${s.id}/1` }),
+  }));
 }
 
+/** The guided scenarios in W order, as mockups/catalog.mjs declares them. */
+export function readScenarioCatalog() {
+  return CATALOG_SCENARIOS.map((s) => ({ scenario: s.id, title: s.title, label: `W${s.n}` }));
+}
+
+const CATALOG_GROUP = { Workspace: GROUPS[0], Register: GROUPS[0], Organization: GROUPS[1], Auth: GROUPS[2], Onboarding: GROUPS[2] };
+
 /**
- * Every page, in the order pages/README.md lists them, with its title, group (from the Scope row
- * of its spec), the states that exist on disk, and whether it has an audit prompt. The page ids
- * and boot hashes come from PAGES in tools/build-pages.mjs.
+ * Every page, in the order mockups/pages/README.md lists them and then the catalog's, with its
+ * title, group (from the Scope row of its spec, else the catalog group), the states the renderer
+ * implements, its route, and whether it has an audit prompt. Ids, routes and states come from
+ * mockups/catalog.mjs.
  */
 export function readPages() {
-  const build = read("tools/build-pages.mjs");
-  const declared = [...build.matchAll(/\{\s*id:\s*"([\w-]+)",\s*title:\s*"([^"]*)",\s*hash:\s*"([^"]*)"/g)].map((m) => ({
-    id: m[1],
-    shortTitle: m[2],
-    hash: m[3],
-  }));
-  const readme = read("pages/README.md");
+  const readme = read(`${PAGE_DIR}/README.md`);
   const listed = /Pages \(\d+\):([\s\S]*?)\.\s*(?:\n\s*\n|$)/.exec(readme);
   const order = listed ? listed[1].split("·").map((s) => s.trim()).filter(Boolean) : [];
-  const ids = [...new Set([...order, ...declared.map((d) => d.id)])].filter((id) => fs.existsSync(path.join(REPO, "pages", `${id}.md`)));
+  const ids = [...new Set([...order, ...CATALOG_PAGES.map((p) => p.id)])].filter((id) => fs.existsSync(path.join(REPO, PAGE_DIR, `${id}.md`)));
   return ids.map((id) => {
-    const md = read(`pages/${id}.md`);
+    const md = read(`${PAGE_DIR}/${id}.md`);
     const scope = (/^\|\s*Scope\s*\|\s*([^|]+?)\s*\|/m.exec(md)?.[1] ?? "").toLowerCase();
-    const group = scope.startsWith("organization") ? GROUPS[1] : scope.startsWith("auth") || scope.startsWith("onboarding") ? GROUPS[2] : GROUPS[0];
-    const d = declared.find((x) => x.id === id);
+    const d = CATALOG_PAGES.find((x) => x.id === id);
+    const group = scope.startsWith("organization")
+      ? GROUPS[1]
+      : scope.startsWith("auth") || scope.startsWith("onboarding")
+        ? GROUPS[2]
+        : scope
+          ? GROUPS[0]
+          : (CATALOG_GROUP[d?.group] ?? GROUPS[0]);
     return {
       id,
-      title: firstHeading(md) ?? d?.shortTitle ?? id,
-      shortTitle: d?.shortTitle ?? id,
+      title: firstHeading(md) ?? d?.title ?? id,
+      shortTitle: d?.title ?? id,
       hash: d?.hash ?? null,
       group,
-      states: STATES.filter((s) => fs.existsSync(path.join(REPO, "pages", `${id}-${s}.html`))),
-      audit: fs.existsSync(path.join(REPO, "pages", `${id}.audit-prompt.md`)),
+      states: STATES.filter((s) => d?.states.includes(s)),
+      audit: fs.existsSync(path.join(REPO, PAGE_DIR, `${id}.audit-prompt.md`)),
     };
   });
 }

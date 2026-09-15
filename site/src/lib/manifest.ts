@@ -9,6 +9,8 @@ export interface ManifestPage {
   id: string;
   title: string;
   shortTitle: string;
+  /** The page's route inside the master mockup; null for a spec with no catalogued view. */
+  hash: string | null;
   group: string;
   states: string[];
   audit: boolean;
@@ -21,8 +23,7 @@ export interface ManifestPage {
 export interface ManifestScenario {
   id: string;
   title: string;
-  release: "wedge" | "full";
-  w: { file: string; label: string; title: string } | null;
+  w: { label: string; title: string } | null;
   steps: { n: number; page: string | null }[];
 }
 

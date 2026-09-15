@@ -1,0 +1,13 @@
+{
+ "id": "run_01K6QW3D5N7TYBA2",
+ "agent": "a-intel.core.release-manager",
+ "op": "marcus",
+ "ws": "core-platform",
+ "harness": "Claude Code",
+ "tier": "gateway",
+ "cost": "0.18",
+ "repo": "a-intel/edge-proxy",
+ "remote": "github.com/a-intel/edge-proxy",
+ "sha": "e7c41a9",
+ "taskTitle": "Cut the first release notes for edge-proxy"
+}
