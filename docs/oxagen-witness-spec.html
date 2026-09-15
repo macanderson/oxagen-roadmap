@@ -1,0 +1,459 @@
+<title>Witness — outcome verification spec</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --ink:#10100F; --void:#0A0A09; --panel:#181715; --hl:#201F1C; --border:#292722; --rule:#34322D;
+  --fg:#F2EEE5; --body:#DDD8CD; --muted:#9B958A; --dim:#6E6A62;
+  --gold:#D6962C; --gold-bright:#F1C364; --gold-deep:#8B5E1A; --accent-text:#D6962C; --on-gold:#10100F;
+  --st-allowed:#57A97C; --st-approval:#5B93D6; --st-denied:#C66A4A;
+  --st-proven:#3FA2A2; --st-failed:#C0453C; --st-critical:#D6455E;
+  --shadow:0 1px 0 rgba(255,255,255,.03),0 18px 44px rgba(0,0,0,.5);
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --font:"Space Grotesk","Helvetica Neue",Arial,sans-serif;
+}
+@media(prefers-color-scheme:light){:root:not([data-theme="dark"]){
+  --ink:#F2EEE5; --void:#E9E3D8; --panel:#F8F5EE; --hl:#EFEAE0; --border:#D8CDBD; --rule:#C9BFAE;
+  --fg:#10100F; --body:#2A2823; --muted:#6B665C; --dim:#8C877C; --accent-text:#8B5E1A;
+  --st-allowed:#2F7D52; --st-approval:#2E6BA8; --st-denied:#9B4526;
+  --st-proven:#1F7676; --st-failed:#992F28; --st-critical:#AE2540;
+  --shadow:0 1px 0 rgba(255,255,255,.7),0 18px 44px rgba(16,16,15,.08);
+}}
+:root[data-theme="light"]{
+  --ink:#F2EEE5; --void:#E9E3D8; --panel:#F8F5EE; --hl:#EFEAE0; --border:#D8CDBD; --rule:#C9BFAE;
+  --fg:#10100F; --body:#2A2823; --muted:#6B665C; --dim:#8C877C; --accent-text:#8B5E1A;
+  --st-allowed:#2F7D52; --st-approval:#2E6BA8; --st-denied:#9B4526;
+  --st-proven:#1F7676; --st-failed:#992F28; --st-critical:#AE2540;
+  --shadow:0 1px 0 rgba(255,255,255,.7),0 18px 44px rgba(16,16,15,.08);
+}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--ink);color:var(--body);font-family:var(--font);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important}}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:4px}
+a{color:var(--accent-text);text-decoration:none;border-bottom:1px solid transparent}
+a:hover{border-bottom-color:currentColor}
+h1,h2,h3{margin:0;color:var(--fg);letter-spacing:-.02em;text-wrap:balance}
+h1{font-size:clamp(30px,5vw,46px);font-weight:700;line-height:1.05}
+h2{font-size:24px;font-weight:600;line-height:1.15}
+h3{font-size:16px;font-weight:600}
+p{margin:0 0 14px;max-width:70ch}
+code{font-family:var(--mono);font-size:.88em;background:var(--hl);padding:1px 5px;border-radius:4px}
+pre{font-family:var(--mono);font-size:13px;line-height:1.55;background:var(--void);color:var(--body);border:1px solid var(--border);padding:16px 18px;border-radius:12px;overflow:auto;margin:0}
+pre code{background:none;padding:0;font-size:inherit;color:inherit}
+.mono{font-family:var(--mono);font-size:.9em}
+.eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-text);font-weight:600;margin:0 0 12px}
+.eyebrow.q{color:var(--muted)}
+.wrap{max-width:1120px;margin:0 auto;padding-inline:24px}
+header.top{border-bottom:1px solid var(--rule);padding-block:26px 0;position:sticky;top:0;background:var(--ink);z-index:5}
+header.top .bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding-bottom:14px}
+header.top svg{height:21px;width:auto;color:var(--fg);display:block}
+header.top .tag{margin-left:auto;font-family:var(--mono);font-size:11.5px;color:var(--dim)}
+nav.sub{display:flex;gap:16px;overflow-x:auto;padding-bottom:14px;font-size:13.5px;scrollbar-width:none}
+nav.sub::-webkit-scrollbar{display:none}
+nav.sub a{color:var(--muted);white-space:nowrap;border-bottom:none}
+nav.sub a:hover{color:var(--fg)}
+.btn{font-family:var(--font);font-weight:600;font-size:13.5px;border:1px solid var(--gold-deep);border-radius:8px;padding:8px 13px;cursor:pointer;white-space:nowrap;color:var(--on-gold);background:var(--gold)}
+.btn:hover{background:var(--gold-bright)}
+.btn.ghost{background:transparent;color:var(--fg);border-color:var(--border)}
+.btn.ghost:hover{border-color:var(--gold-deep);color:var(--accent-text)}
+.btn[data-done="1"]{background:var(--st-allowed);border-color:var(--st-allowed);color:var(--ink)}
+.hero{padding-block:52px 46px}
+.hero .lead{font-size:19px;line-height:1.5;color:var(--fg);max-width:60ch;margin-top:18px}
+.hero-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}
+section{padding-block:44px;border-top:1px solid var(--border)}
+.grid{display:grid;gap:16px}
+.g3{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:17px 19px}
+.panel h3{margin-bottom:9px}
+.panel p:last-child{margin-bottom:0}
+.tw{overflow-x:auto;border:1px solid var(--border);border-radius:12px;background:var(--panel);margin-block:20px}
+table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:640px}
+th,td{text-align:left;padding:10px 13px;border-bottom:1px solid var(--border);vertical-align:top}
+th{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:600;white-space:nowrap;background:var(--hl)}
+tr:last-child td{border-bottom:0}
+ol.method{counter-reset:m;list-style:none;padding:0;margin:0;display:grid;gap:14px}
+ol.method li{counter-increment:m;padding-left:42px;position:relative}
+ol.method li::before{content:counter(m);position:absolute;left:0;top:1px;width:27px;height:27px;border-radius:8px;
+  background:var(--hl);border:1px solid var(--rule);color:var(--accent-text);font-family:var(--mono);font-size:12px;
+  font-weight:700;display:grid;place-items:center}
+.note{border-left:2px solid var(--gold);padding:3px 0 3px 14px;color:var(--muted);font-size:14px;max-width:66ch}
+.cert{position:relative;border:1px solid var(--border);border-radius:12px;background:var(--void);padding:20px 20px 18px;overflow:hidden}
+.cert .k{color:var(--dim)}
+.cert .v{color:var(--fg)}
+.cert .g{color:var(--st-allowed)}
+.stamp{position:absolute;right:16px;top:16px;transform:rotate(-9deg);font-family:var(--font);font-weight:700;font-size:19px;letter-spacing:.05em;
+  color:var(--gold);border:3px solid var(--gold);border-radius:8px;padding:5px 12px;opacity:.9}
+.cert-cap{font-size:13.5px;color:var(--muted);margin-top:10px}
+.phase{border-top:1px solid var(--border);padding:20px 0}
+.phase:first-child{border-top:0}
+.phase:last-child{padding-bottom:0}
+.phase h3{display:flex;gap:12px;align-items:baseline;margin-bottom:8px}
+.phase h3 span{font-family:var(--mono);font-weight:500;font-size:12.5px;color:var(--dim)}
+.phase .gate{font-size:14.5px;background:var(--hl);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-top:10px}
+.phase .gate b{color:var(--accent-text)}
+.promptbox{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:18px}
+.promptbox .top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.promptbox pre{max-height:440px}
+details summary{cursor:pointer;font-weight:600;padding:10px 0;color:var(--fg)}
+footer{border-top:1px solid var(--rule);padding-block:34px 70px;color:var(--muted);font-size:13px}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(20px);background:var(--panel);border:1px solid var(--border);color:var(--fg);padding:10px 16px;border-radius:8px;font-size:13.5px;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media(max-width:640px){h1{font-size:27px}.hero .lead{font-size:16.5px}}
+</style>
+
+<header class="top"><div class="wrap">
+<div class="bar">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 574.244 106.313" role="img" aria-label="oxagen"><g transform="translate(0,0) scale(2.842952)"><path d="M6.300 0.000L12.600 3.320L12.600 9.960L6.300 13.280L0.000 9.960L0.000 3.320ZM1.000 3.885L1.000 9.395L6.300 12.150L11.600 9.395L11.600 3.885L6.300 1.130Z M19.376 0.000L25.676 3.320L25.676 9.960L19.376 13.280L13.076 9.960L13.076 3.320ZM14.076 3.885L14.076 9.395L19.376 12.150L24.676 9.395L24.676 3.885L19.376 1.130Z M12.838 10.240L19.138 13.560L19.138 20.200L12.838 23.520L6.538 20.200L6.538 13.560ZM7.538 14.125L7.538 19.635L12.838 22.390L18.138 19.635L18.138 14.125L12.838 11.370Z M19.376 20.480L25.676 23.800L25.676 30.440L19.376 33.760L13.076 30.440L13.076 23.800ZM14.076 24.365L14.076 29.875L19.376 32.630L24.676 29.875L24.676 24.365L19.376 21.610Z" fill="currentColor"/><path d="M25.914 10.240L32.214 13.560L32.214 20.200L25.914 23.520L19.614 20.200L19.614 13.560Z M6.300 20.480L12.600 23.800L12.600 30.440L6.300 33.760L0.000 30.440L0.000 23.800Z" fill="#D6962C"/></g><g transform="translate(120.376,13.067)"><path d="M33.9083 68.758Q24.1657 68.758 16.4786 64.7737Q8.79142 60.7894 4.39571 53.2965Q0 45.8035 0 35.3862V33.3718Q0 22.9544 4.39571 15.4615Q8.79142 7.96854 16.4786 3.98427Q24.1657 0 33.9083 0Q43.6509 0 51.3381 3.98427Q59.0252 7.96854 63.4209 15.4615Q67.8166 22.9544 67.8166 33.3718V35.3862Q67.8166 45.8035 63.4209 53.2965Q59.0252 60.7894 51.3381 64.7737Q43.6509 68.758 33.9083 68.758ZM33.9083 55.3486Q42.1895 55.3486 47.4689 50.0198Q52.7484 44.691 52.7484 35.0142V33.7437Q52.7484 24.067 47.5233 18.7382Q42.2981 13.4094 33.9083 13.4094Q25.6502 13.4094 20.3592 18.7382Q15.0683 24.067 15.0683 33.7437V35.0142Q15.0683 44.691 20.3592 50.0198Q25.6502 55.3486 33.9083 55.3486Z M176.569 68.758Q169.637 68.758 164.119 66.3453Q158.601 63.9327 155.387 59.2935Q152.173 54.6542 152.173 48.0088Q152.173 41.3403 155.387 36.8558Q158.601 32.3712 164.27 30.1017Q169.94 27.8323 177.174 27.8323H196.047V23.8925Q196.047 18.7316 192.874 15.5274Q189.701 12.3232 182.99 12.3232Q176.411 12.3232 173.049 15.3842Q169.686 18.4452 168.627 23.3593L154.691 18.7315Q156.27 13.6133 159.748 9.39702Q163.225 5.18071 169.049 2.59035Q174.874 0 183.208 0Q195.972 0 203.326 6.42816Q210.681 12.8563 210.681 24.9392V50.4707Q210.681 54.4204 214.368 54.4204H219.795V66.9148H209.197Q204.464 66.9148 201.442 64.5334Q198.42 62.1521 198.42 58.1563V57.8864H196.126Q195.392 59.6967 193.399 62.2985Q191.406 64.9004 187.388 66.8292Q183.369 68.758 176.569 68.758ZM179.05 56.4348Q186.581 56.4348 191.314 52.1592Q196.047 47.8837 196.047 40.6031V39.2405H178.175Q173.175 39.2405 170.208 41.3881Q167.241 43.5358 167.241 47.5513Q167.241 51.5668 170.34 54.0008Q173.439 56.4348 179.05 56.4348Z M227.767 34.6423V32.6279Q227.767 22.3817 231.86 15.0863Q235.953 7.79081 242.768 3.8954Q249.582 0 257.706 0Q266.935 0 271.762 3.33256Q276.589 6.66512 278.81 10.4107H281.042V1.8432H295.801V79.33Q295.801 85.6989 292.104 89.4725Q288.408 93.2462 282.079 93.2462H238.369V80.0541H277.023Q280.779 80.0541 280.779 76.1043V57.2775H278.547Q277.161 59.5683 274.665 61.8904Q272.168 64.2125 268.057 65.7414Q263.946 67.2702 257.706 67.2702Q249.582 67.2702 242.756 63.3748Q235.93 59.4794 231.848 52.1724Q227.767 44.8655 227.767 34.6423ZM261.938 54.0781Q270.151 54.0781 275.573 48.8612Q280.996 43.6443 280.996 34.2704V32.9999Q280.996 23.4943 275.627 18.3432Q270.259 13.1921 261.938 13.1921Q253.749 13.1921 248.315 18.3432Q242.881 23.4943 242.881 32.9999V34.2704Q242.881 43.6443 248.315 48.8612Q253.749 54.0781 261.938 54.0781Z M344.764 68.758Q334.998 68.758 327.583 64.6108Q320.167 60.4636 316.031 52.9048Q311.896 45.346 311.896 35.1689V33.589Q311.896 23.3889 315.977 15.8416Q320.059 8.2944 327.397 4.1472Q334.735 0 344.385 0Q353.881 0 360.956 4.1867Q368.031 8.37341 371.981 15.8515Q375.931 23.3297 375.931 33.2895V38.6974H327.181Q327.468 46.3334 332.587 50.9496Q337.707 55.5658 345.198 55.5658Q352.522 55.5658 356.101 52.3534Q359.681 49.141 361.553 45.0629L373.985 51.4813Q372.119 55.0656 368.63 59.1042Q365.141 63.1428 359.394 65.9504Q353.648 68.758 344.764 68.758ZM327.313 27.2892H360.622Q360.095 20.7986 355.7 16.9954Q351.304 13.1921 344.277 13.1921Q337.055 13.1921 332.691 16.9954Q328.327 20.7986 327.313 27.2892Z M391.548 66.9148V1.8432H406.353V10.9769H408.585Q410.303 7.25429 414.832 3.99908Q419.361 0.743866 428.435 0.743866Q435.956 0.743866 441.695 4.12911Q447.434 7.51435 450.651 13.5903Q453.868 19.6663 453.868 27.9442V66.9148H438.8V29.1226Q438.8 21.1969 434.891 17.3492Q430.983 13.5015 423.9 13.5015Q415.872 13.5015 411.244 18.8237Q406.617 24.146 406.617 33.9445V66.9148Z" fill="currentColor"/><path d="M73.9979 66.9148 98.2261 34.0696 74.3764 1.8432H91.9626L107.9 24.3499H110.131L126.068 1.8432H143.654L119.805 34.0696L144.033 66.9148H126.206L110.131 44.0065H107.9L91.8244 66.9148Z" fill="#D6962C"/></g></svg>
+<span class="tag">Witness &middot; 2026-09-13</span>
+</div>
+<nav class="sub">
+<a href="#why">Why</a><a href="#oracles">Oracle classes</a><a href="#record">Witness record</a><a href="#spec">Spec</a><a href="#plan">Plan</a><a href="#prompt">Build prompt</a>
+<button class="btn" data-copy="build-prompt" style="margin-left:auto">Copy build prompt</button>
+</nav>
+</div></header>
+
+<main class="wrap">
+
+<section class="hero" style="border-top:0;padding-top:0">
+<p class="eyebrow">Outcome verification &middot; spec, September 2026</p>
+<h1>Every trace ends in a stamp or a reason.</h1>
+<p class="lead">Witness turns requirements into oracles before an agent runs. When a trace finishes, deterministic evaluators either stamp it as a verified outcome, which releases the funds metered against it, or reject it with a reason code. No model sits in the path that decides.</p>
+<div class="hero-actions">
+<button class="btn" data-copy="build-prompt">Copy build prompt</button>
+<a class="btn ghost" href="#record" style="display:inline-flex;align-items:center">See a witness record</a>
+</div>
+
+<div class="cert" style="margin-top:30px">
+<span class="stamp">STAMPED</span>
+<pre><span class="k">trace_id</span>      <span class="v">tr_01J8ZK7Q4M</span>
+<span class="k">witness_id</span>    <span class="v">WR-0042  refund-under-50-auto-approve</span>
+<span class="k">verdict</span>       <span class="g">STAMPED</span>
+<span class="k">oracles</span>       <span class="v">predicate:pass  invariant:pass  policy:pass  budget:pass</span>
+<span class="k">evidence</span>      <span class="v">sha256:4c1f&hellip;9e02</span>
+<span class="k">evaluator_env</span> <span class="v">sha256:b77a&hellip;13d4  (pinned, no egress)</span>
+<span class="k">prev_stamp</span>    <span class="v">sha256:0a9d&hellip;77c1</span>
+<span class="k">funded</span>        <span class="g">true</span>   <span class="k">unit</span> <span class="v">outcome:refund.approved</span>
+<span class="k">signature</span>     <span class="v">ed25519:MEUCIQ&hellip;</span></pre>
+</div>
+<p class="cert-cap">A certificate is a pure function of the trace, the fixtures, and the witness record. Run it twice, get the same bytes.</p>
+
+<div class="grid g3" style="margin-top:30px">
+<div class="panel"><h3>Prompt to fund</h3><p>A trace starts when a prompt enters Oxagen and ends when its outcome is verified and metered. Nothing in between may declare success.</p></div>
+<div class="panel"><h3>No witness, no requirement</h3><p>A requirement with no executable witness is not finished. The authoring tool refuses to mark it ready.</p></div>
+<div class="panel"><h3>Models propose, oracles decide</h3><p>An LLM may draft witnesses and explain rejections. It never issues a verdict.</p></div>
+</div>
+</section>
+
+<section id="why">
+<p class="eyebrow q">Why this is the wedge</p>
+<h2>Everyone else's oracle is another model</h2>
+<p>"AI writes your tests" starts from a prose spec. Prose underdetermines behavior, so the model writing the test fills the gaps with the same assumptions the model writing the code will make. The tests pass by construction and prove nothing. Oxagen already bills on outcomes; the missing piece is a verification layer customers, auditors, and insurers can trust because it's mechanically reproducible.</p>
+<p>Witness moves the disambiguation to requirements time, when a human is still in the loop and precision is cheap. It makes the requirement and the oracle the same object, so verification stays deterministic even when the implementer isn't.</p>
+<div class="grid g3" style="margin-top:24px">
+<div class="panel"><h3>For the customer</h3><p>They buy verified outcomes, not tokens. Every invoice line links to a signed certificate with the evidence that earned it. Disputes become a hash comparison, not an argument.</p></div>
+<div class="panel"><h3>For Oxagen</h3><p>Stamps are the billable unit, so metering is defensible. Every stamped or rejected trace is a labeled example for the oracle-flip pipeline. Certificates are the artifact an auditor can actually read.</p></div>
+<div class="panel"><h3>For the builder</h3><p>"Looks right" stops being a completion state. Rejections carry a reason code and a pointer into the trace, so the fix loop runs unattended.</p></div>
+</div>
+</section>
+
+<section id="oracles">
+<p class="eyebrow q">The engine's stamp path</p>
+<h2>Fourteen deterministic ways to stamp a trace</h2>
+<p>An oracle class enters the stamp path only if its evaluator is a pure function of the trace, the fixtures, and the witness record. Anything that fails that test is judgment-gated: a human can sign it, but it never stamps, and it's labeled separately in exports.</p>
+<div class="tw"><table>
+<thead><tr><th>Class</th><th>Checks</th><th>Why it's deterministic</th></tr></thead>
+<tbody>
+<tr><td class="mono">example</td><td>Concrete inputs against an expected output, compared by hash or structural equality.</td><td>The expected value is fixed at authoring time; the comparison is exact.</td></tr>
+<tr><td class="mono">predicate</td><td>Assertions over end state: rows, files, emitted events, responses, queue depth.</td><td>Evaluated against a captured snapshot, not a live system.</td></tr>
+<tr><td class="mono">invariant</td><td>What must hold across the whole trace: totals reconcile, a record is never deleted.</td><td>Compares pre- and post-state snapshots already captured at ingest.</td></tr>
+<tr><td class="mono">schema</td><td>Output conforms to a JSON schema, protobuf, or type signature.</td><td>Validation is syntactic.</td></tr>
+<tr><td class="mono">executable</td><td>A pinned command exits zero: tests, build, typecheck, migration apply and rollback.</td><td>Runs in a pinned image, no network, fixed seed &mdash; enforced by the engine.</td></tr>
+<tr><td class="mono">differential</td><td>Output agrees with a reference: a prior release, or N implementations voting.</td><td>Reference outputs are captured once and compared by hash.</td></tr>
+<tr><td class="mono">property</td><td>Relations across runs: sort twice equals sort once, doubling the input doubles the total.</td><td>The generator is seeded; outputs are stored, not live.</td></tr>
+<tr><td class="mono">replay</td><td>Re-run with recorded tool responses and pinned model outputs; artifact hash must match.</td><td>Every external call is answered from the recording.</td></tr>
+<tr><td class="mono">policy</td><td>Every tool call stayed inside the contracted capability set; no secret left the sandbox.</td><td>A set-membership check over the recorded call log.</td></tr>
+<tr><td class="mono">budget</td><td>Cost, tokens, wall time, tool calls, and retries stayed under the declared limits.</td><td>The counters are part of the trace.</td></tr>
+<tr><td class="mono">provenance</td><td>Every citation resolves to a retrieved chunk in the trace; artifacts hash-chain to inputs.</td><td>Verifies references, not content.</td></tr>
+<tr><td class="mono">structural</td><td>The PR merges clean, the diff touches only allowed paths, the file count matches.</td><td>Shape checks are mechanical.</td></tr>
+<tr><td class="mono">convergence</td><td>A looped agent stopped for an allowed reason and the iteration count is under cap.</td><td>Loop state is recorded per iteration.</td></tr>
+<tr><td class="mono">formal</td><td>A solver proves a property of the produced code against a specification.</td><td>Pinned solver, fixed timeout; a timeout counts as rejection.</td></tr>
+<tr><td class="mono">judgment&#8209;gated</td><td>Taste, tone, "feels right," anything scored by a model.</td><td>Not an oracle &mdash; a human signature, kept out of the stamp path on purpose.</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="record">
+<p class="eyebrow q">Requirements, collected as oracles</p>
+<h2>The witness record</h2>
+<p>A requirement is collected in this shape from the start. The authoring tool drafts it from a conversation, but the record is what gets reviewed, versioned, and executed. If a field can't be filled, the requirement isn't ready and the tool says so.</p>
+<pre><code>witness:
+  id: WR-0042
+  title: refund-under-50-auto-approve
+  requirement: >
+    A refund request for a delivered order under $50 is approved
+    without human review and the customer is notified once.
+  owner: ops@customer.example
+  oracle_classes: [predicate, invariant, policy, budget]
+
+  pre:
+    fixtures:
+      - db: snapshots/orders-2026-09-01.sql        # content-addressed
+      - order: {id: o-1187, amount: 42.00, status: delivered}
+    tool_recordings: recordings/refund-happy.jsonl  # replay source
+
+  act:
+    prompt: "Customer 8812 asks for a refund on order o-1187"
+    capability_set: [cap:orders.read, cap:refunds.write, cap:notify.email]
+
+  post:
+    - db: "select status, amount from refunds where order_id='o-1187'"
+      equals: {status: approved, amount: 42.00}
+    - event: refund.approved
+      count: 1
+    - event: email.sent
+      count: 1
+      where: {to: customer_8812}
+
+  invariants:
+    - db: "select total from orders where id='o-1187'"
+      unchanged: true
+    - no_tool_call_outside: act.capability_set
+
+  budget: {max_cost_usd: 0.20, max_tool_calls: 6, max_wall_ms: 30000}
+
+  witnesses:                       # concrete examples, at least one required
+    - name: happy-path
+      inputs: fixtures/refund-happy.json
+      expected: sha256:9f2c&hellip;a17e
+    - name: exactly-50-is-not-under
+      inputs: fixtures/refund-50.json
+      expect_verdict: REJECTED
+      reason: POST_MISMATCH
+
+  judgment_gated:                  # optional, never stamps
+    - "Email tone matches brand voice"
+
+  funding:
+    unit: outcome:refund.approved
+    release_on: STAMPED</code></pre>
+<p class="note" style="margin-top:16px">A negative witness &mdash; an input that must be rejected &mdash; is required whenever the requirement names a threshold or the word "only". The model that drafted a record is never the model that implements the feature it covers.</p>
+</section>
+
+<section id="spec">
+<p class="eyebrow q">System spec</p>
+<h2>Components</h2>
+<div class="tw"><table>
+<thead><tr><th>Component</th><th>Responsibility</th></tr></thead>
+<tbody>
+<tr><td>Witness Studio</td><td>Conversational authoring. Lints records; refuses to mark a requirement ready with no executable witness. Stores records in git alongside the customer's code.</td></tr>
+<tr><td>Oracle Registry</td><td>Catalog of evaluators, one per oracle class, published as pinned container digests. New evaluators must pass the determinism gate before listing.</td></tr>
+<tr><td>Trace Ingest</td><td>Captures prompt, model calls, tool calls with arguments and responses, state snapshots, artifacts, counters. Everything content-addressed.</td></tr>
+<tr><td>Fixture Vault</td><td>Immutable pre-states: database snapshots, filesystem trees, recorded tool responses. Referenced by hash.</td></tr>
+<tr><td>Stamp Engine</td><td>Runs evaluators in sandboxes with no egress, no clock, fixed seed. Aggregates verdicts, emits the certificate. Re-runs a sample and halts a registry entry if bytes differ.</td></tr>
+<tr><td>Certificate Ledger</td><td>Append-only, hash-chained, signed. Publishes <code>stamp.issued</code> and <code>stamp.rejected</code> to metering.</td></tr>
+<tr><td>Judgment Queue</td><td>Routes judgment-gated items to a human; records the signature with a distinct type.</td></tr>
+<tr><td>Dataset Exporter</td><td>Emits stamped and rejected traces with reason codes as training labels, drafting and implementing model kept separate.</td></tr>
+</tbody></table></div>
+
+<h2 style="margin-top:40px">Determinism rules</h2>
+<ol class="method">
+<li>No model call runs in the stamp path. The engine rejects any evaluator that declares network egress.</li>
+<li>Evaluators are pinned by image digest. A certificate names the digest that produced each verdict.</li>
+<li>Each evaluator is a pure function of <code>(trace, fixtures, witness)</code> &mdash; fixed clock, fixed seed, no filesystem outside the mounted inputs.</li>
+<li>Same inputs produce byte-identical certificates. The engine double-runs 5% of traces and alarms on any diff.</li>
+<li>Evidence is stored, never summarized. Every verdict links to an evidence blob by hash.</li>
+<li>A timeout, crash, or missing fixture is a rejection with its own reason code &mdash; never a pass.</li>
+<li>Rejection reasons come from a closed enum: <code>POST_MISMATCH</code>, <code>INVARIANT_BROKEN</code>, <code>POLICY_VIOLATION</code>, <code>BUDGET_EXCEEDED</code>, <code>SCHEMA_INVALID</code>, <code>EXEC_FAILED</code>, <code>DIFF_DISAGREE</code>, <code>PROPERTY_FAILED</code>, <code>REPLAY_DIVERGED</code>, <code>PROVENANCE_MISSING</code>, <code>STRUCTURE_INVALID</code>, <code>NO_CONVERGENCE</code>, <code>FORMAL_UNPROVEN</code>, <code>EVALUATOR_ERROR</code>, <code>FIXTURE_MISSING</code>.</li>
+<li>Certificates are signed with a per-tenant key and chained to the tenant's previous certificate.</li>
+</ol>
+
+<h2 style="margin-top:40px">Certificate schema</h2>
+<pre><code>{
+  "trace_id": "tr_01J8ZK7Q4M",
+  "witness_id": "WR-0042",
+  "witness_hash": "sha256:&hellip;",
+  "verdict": "STAMPED | REJECTED | JUDGMENT_GATED",
+  "reason": null,
+  "oracles": [
+    {"class": "predicate", "evaluator": "sha256:&hellip;", "verdict": "pass",
+     "evidence": "sha256:&hellip;", "duration_ms": 412}
+  ],
+  "evaluator_env": "sha256:&hellip;",
+  "prev_stamp": "sha256:&hellip;",
+  "funding": {"unit": "outcome:refund.approved", "released": true},
+  "issued_at": "2026-09-09T18:02:11Z",
+  "signature": "ed25519:&hellip;"
+}</code></pre>
+
+<h2 style="margin-top:40px">API surface</h2>
+<div class="tw"><table>
+<thead><tr><th>Call</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td class="mono">POST /witnesses</td><td>Create or version a witness record; returns lint results and readiness.</td></tr>
+<tr><td class="mono">POST /traces</td><td>Ingest a completed trace; triggers stamping for every witness bound to the run.</td></tr>
+<tr><td class="mono">GET /stamps/{trace_id}</td><td>Fetch the certificate and evidence index.</td></tr>
+<tr><td class="mono">POST /oracles</td><td>Register an evaluator image; runs the determinism gate before listing.</td></tr>
+<tr><td class="mono">POST /stamps/{id}/verify</td><td>Recompute from evidence and compare bytes. The auditor and insurer endpoint.</td></tr>
+<tr><td>Webhooks</td><td><code>stamp.issued</code>, <code>stamp.rejected</code>, <code>judgment.requested</code>, <code>judgment.signed</code>.</td></tr>
+</tbody></table></div>
+
+<p class="note" style="margin-top:20px">Not in v1: partial credit, model-judged quality in the stamp path, cross-tenant fixture sharing.</p>
+</section>
+
+<section id="plan">
+<p class="eyebrow q">Implementation plan</p>
+<h2>Eight weeks, five phases</h2>
+<p>Each phase gate is itself a witness record, so the system stamps its own build from phase one.</p>
+
+<div class="phase">
+<h3>Schema and lint <span>week 1</span></h3>
+<p>Record schema, both enums, and <code>ox witness lint</code>, which rejects records missing an executable witness or a negative witness on threshold language.</p>
+<div class="gate"><b>Gate</b> &mdash; twenty real requirements from the design partner pass lint, and the partner confirms each says what they meant.</div>
+</div>
+<div class="phase">
+<h3>Ingest and first oracles <span>weeks 2&ndash;3</span></h3>
+<p>Trace ingest, fixture vault, sandbox runner, evaluators for example, predicate, schema, executable. Unsigned certificates.</p>
+<div class="gate"><b>Gate</b> &mdash; the phase-1 records stamp against real traces. A double run on 100 traces yields 100 byte-identical certificates.</div>
+</div>
+<div class="phase">
+<h3>Trust and governance <span>weeks 4&ndash;5</span></h3>
+<p>Signing, hash chain, invariant, policy, budget, provenance evaluators, the closed reason enum, the verify endpoint, the determinism gate for new evaluators.</p>
+<div class="gate"><b>Gate</b> &mdash; an outside party recomputes a certificate from evidence alone and matches bytes. An out-of-scope tool call rejects with <code>POLICY_VIOLATION</code>.</div>
+</div>
+<div class="phase">
+<h3>Depth and authoring <span>weeks 6&ndash;7</span></h3>
+<p>Differential, property, replay, structural, convergence, formal evaluators. Witness Studio's conversational drafting, with drafting-model tagging and the judgment queue.</p>
+<div class="gate"><b>Gate</b> &mdash; replay catches an injected nondeterminism. A non-engineer drafts a passing record from conversation in under fifteen minutes.</div>
+</div>
+<div class="phase">
+<h3>Fund and export <span>week 8</span></h3>
+<p>The metering hook that releases funds on <code>stamp.issued</code>, the dataset exporter with provenance separation, a pilot dashboard.</p>
+<div class="gate"><b>Gate</b> &mdash; one invoice line links to a certificate. The first export of 10,000 labeled traces lands in the oracle-flip pipeline.</div>
+</div>
+
+<h2 style="margin-top:40px">Measures</h2>
+<div class="tw"><table>
+<thead><tr><th>Measure</th><th>Target</th></tr></thead>
+<tbody>
+<tr><td>Byte-identical certificates on double run</td><td>100%</td></tr>
+<tr><td>Requirements with an executable witness before build starts</td><td>100%</td></tr>
+<tr><td>Traces stamped or rejected with no human involved</td><td>Above 90% by week 8</td></tr>
+<tr><td>Trace ingest to certificate, p95</td><td>Under 60 seconds</td></tr>
+<tr><td>Rejections that map to a fix without opening the trace manually</td><td>Above 80%</td></tr>
+<tr><td>Funded outcomes per week at the design partner</td><td>Growing week over week from launch</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="prompt">
+<p class="eyebrow q">Autonomous build</p>
+<h2>Build prompt for Claude</h2>
+<p>Paste this into Claude Code at the root of the Oxagen repository. It runs the five phases without further input and stops only at a gate that fails twice.</p>
+<div class="promptbox" style="margin-top:16px">
+<div class="top"><strong>build-witness.prompt</strong><button class="btn" data-copy="build-prompt">Copy build prompt</button></div>
+<pre id="build-prompt"><code>You are building Witness, Oxagen's outcome verification layer, fully autonomously in this repository. Do not stop to ask questions. Make reasonable decisions, record them in DECISIONS.md, and continue. Stop only when every phase gate below has passed, or when a single gate has failed twice in a row, in which case write BLOCKED.md with the failing witness, the evidence, and your best hypothesis, then halt.
+
+THESIS
+A trace starts when a prompt enters Oxagen and ends when its outcome is verified and metered. Nothing in between may declare success. Requirements are collected as witness records, which are executable oracles. When a trace finishes, deterministic evaluators either stamp it or reject it with a reason code. No model call executes in the stamp path. Models propose; oracles decide.
+
+HOW YOU WORK
+1. Before any engine code, write the witness records for every phase gate in ./witness/. These are your definition of done. You are not allowed to change a gate's record after you begin building that phase.
+2. Work phase by phase. A phase is complete only when its gate record stamps against a real trace produced by the code you wrote. Do not begin the next phase until the current gate stamps.
+3. Use the repository's lifecycle agents where they fit: simplifier before each phase, feature-shipper to implement, test-engineer to write executable oracles, code-reviewer before every PR, debugger on any gate failure, docs-writer at the end of each phase.
+4. One PR per phase on a branch named witness/phase-N. Each PR description links the gate certificate.
+5. Keep a running log in ./witness/BUILD_LOG.md: what you tried, what failed, what you changed. Write it for a future run that has no memory of this one.
+6. Follow the house prose style in every human-readable file: actor-first sentences, concrete verbs, plain language, no marketing fluff, never strengthen a claim beyond what the evidence shows.
+
+HARD CONSTRAINTS
+- No evaluator may make a network call, read the wall clock, or use an unseeded random source. The sandbox runner must enforce this, not just document it.
+- Every evaluator is pinned by image digest and version, and every certificate names the digests that produced it.
+- A timeout, crash, or missing fixture is a rejection with its own reason code. It is never a pass.
+- Rejection reasons are a closed enum: POST_MISMATCH, INVARIANT_BROKEN, POLICY_VIOLATION, BUDGET_EXCEEDED, SCHEMA_INVALID, EXEC_FAILED, DIFF_DISAGREE, PROPERTY_FAILED, REPLAY_DIVERGED, PROVENANCE_MISSING, STRUCTURE_INVALID, NO_CONVERGENCE, FORMAL_UNPROVEN, EVALUATOR_ERROR, FIXTURE_MISSING.
+- Certificates are signed with a per-tenant ed25519 key and chained to the previous certificate for that tenant.
+- Judgment-gated items are recorded as signatures, never as stamps, and are labeled separately in every export.
+- The model that drafts a witness record is tagged on the record and is never the model that implements the feature the record covers.
+
+WITNESS RECORD SCHEMA (implement exactly; extend only additively)
+witness:
+  id, title, requirement, owner
+  oracle_classes: subset of [example, predicate, invariant, schema, executable, differential, property, replay, policy, budget, provenance, structural, convergence, formal]
+  pre: {fixtures: [content-addressed refs], tool_recordings: ref}
+  act: {prompt, capability_set}
+  post: [assertions over db, files, events, http, artifacts]
+  invariants: [unchanged checks, set-membership checks]
+  budget: {max_cost_usd, max_tool_calls, max_wall_ms, max_retries}
+  witnesses: [{name, inputs, expected (hash) | expect_verdict + reason}]  at least one required; a negative witness is required if the requirement contains a threshold, a boundary, or the word "only"
+  judgment_gated: [strings]
+  funding: {unit, release_on}
+
+CERTIFICATE SCHEMA
+{trace_id, witness_id, witness_hash, verdict: STAMPED|REJECTED|JUDGMENT_GATED, reason, oracles: [{class, evaluator digest, verdict, evidence hash, duration_ms}], evaluator_env, prev_stamp, funding: {unit, released}, issued_at, signature}
+
+COMPONENTS TO BUILD
+Witness Studio (authoring CLI first, conversational drafting in phase 4), Oracle Registry, Trace Ingest (content-addressed), Fixture Vault, Stamp Engine with sandbox runner, Certificate Ledger (append-only, hash-chained, signed), Judgment Queue, Dataset Exporter, and these endpoints: POST /witnesses, POST /traces, GET /stamps/{trace_id}, POST /oracles, POST /stamps/{id}/verify, plus webhooks stamp.issued, stamp.rejected, judgment.requested, judgment.signed.
+
+PHASES AND GATES
+Phase 1, schema and lint. Deliver the record schema, both enums, and `ox witness lint`, which rejects records with no executable witness or a missing negative witness on threshold language. Gate: twenty records drawn from existing Oxagen requirements pass lint, and a lint run on a deliberately incomplete record fails with a specific message.
+Phase 2, ingest and first oracles. Deliver trace ingest, fixture vault, sandbox runner, and evaluators for example, predicate, schema, executable, and unsigned certificates. Gate: the phase-1 gate record stamps against a real trace, and a double run on 100 traces produces 100 byte-identical certificates.
+Phase 3, trust and governance. Deliver signing, hash chain, invariant, policy, budget, and provenance evaluators, the closed reason enum, the verify endpoint, and the determinism gate for registering evaluators. Gate: recompute a certificate from evidence alone via the verify endpoint and match bytes; a trace with an out-of-scope tool call is rejected with POLICY_VIOLATION; an evaluator image that declares egress is refused by the registry.
+Phase 4, depth and authoring. Deliver differential, property, replay, structural, convergence, and formal evaluators, conversational drafting in Witness Studio with drafting-model tagging, and the judgment queue. Gate: replay rejects a trace into which you injected nondeterminism with REPLAY_DIVERGED; a witness record drafted from a three-message conversation passes lint without manual edits.
+Phase 5, fund and export. Deliver the metering hook that releases funds on stamp.issued, the dataset exporter with provenance separation, and a dashboard of stamped, rejected, and gated counts per witness. Gate: a metering record links to a certificate; an export of 1,000 labeled traces validates against the exporter schema with drafting and implementing model fields populated and distinct.
+
+DEFINITION OF DONE
+Every phase gate has stamped. README.md explains Witness to a new engineer in under 600 words. DECISIONS.md lists every non-obvious choice with the reason. The final PR includes the five gate certificates. If any statement in the docs is not backed by a stamped witness, remove the statement.
+
+Begin with Phase 1. Write the gate records first.</code></pre>
+</div>
+
+<details style="margin-top:22px">
+<summary>Also copy the witness record schema on its own</summary>
+<div class="promptbox" style="margin-top:8px">
+<div class="top"><strong>witness-schema.yaml</strong><button class="btn ghost" data-copy="schema">Copy schema</button></div>
+<pre id="schema"><code>witness:
+  id: string                 # WR-####
+  title: string
+  requirement: string
+  owner: string
+  oracle_classes: [example|predicate|invariant|schema|executable|differential|property|replay|policy|budget|provenance|structural|convergence|formal]
+  pre:
+    fixtures: [ref]          # content-addressed
+    tool_recordings: ref
+  act:
+    prompt: string
+    capability_set: [cap:*]
+  post: [assertion]          # db | file | event | http | artifact
+  invariants: [check]        # unchanged | no_tool_call_outside | count_never_decreases
+  budget: {max_cost_usd, max_tool_calls, max_wall_ms, max_retries}
+  witnesses:                 # >=1; negative witness required on thresholds
+    - {name, inputs: ref, expected: sha256}
+    - {name, inputs: ref, expect_verdict: REJECTED, reason: enum}
+  judgment_gated: [string]   # signatures only, never stamps
+  funding: {unit: string, release_on: STAMPED}
+  drafted_by: model-id       # set by Studio, never the implementer</code></pre>
+</div>
+</details>
+
+</section>
+
+</main>
+
+<footer><div class="wrap">
+<p style="margin:0">Witness is a working name. The spec assumes Oxagen's existing metering service, capability contracts, and lifecycle agent toolkit.</p>
+</div></footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite">Copied</div>
+
+<script>
+(function(){
+  var toast=document.getElementById('toast'),t;
+  function say(m){toast.textContent=m;toast.classList.add('show');clearTimeout(t);t=setTimeout(function(){toast.classList.remove('show')},1600)}
+  function fallback(text){var ta=document.createElement('textarea');ta.value=text;ta.setAttribute('readonly','');ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();var ok=false;try{ok=document.execCommand('copy')}catch(e){}document.body.removeChild(ta);return ok}
+  document.querySelectorAll('[data-copy]').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var src=document.getElementById(btn.getAttribute('data-copy'));
+      if(!src)return;
+      var text=src.innerText;
+      var done=function(){var label=btn.textContent;btn.textContent='Copied';btn.dataset.done='1';say('Copied to clipboard');setTimeout(function(){btn.textContent=label;delete btn.dataset.done},1800)};
+      if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(text).then(done,function(){fallback(text)?done():say('Copy failed. Select the text and copy manually.')})}
+      else{fallback(text)?done():say('Copy failed. Select the text and copy manually.')}
+    });
+  });
+})();
+</script>

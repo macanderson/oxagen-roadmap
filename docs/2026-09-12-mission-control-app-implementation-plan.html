@@ -286,7 +286,7 @@ footer.colophon{margin-top:72px;padding-top:20px;border-top:1px solid var(--line
 <ul>
 <li><strong>Coverage is complete.</strong> Spec §19 lists every page, panel, dialog and flow with the states each needs (loaded, empty, loading, error, denied, phone), and every row links to a mockup.</li>
 <li><strong>One demo record everywhere</strong> (Anderson Intelligence Corp. / <code>core-platform</code> / Marcus Bell). It becomes the fixture adapter's seed.</li>
-<li><strong>Errors are specified.</strong> Each page has a named error code (Fleet <code>503 run_index_unavailable</code>, Run <code>502 frame_store_unreachable</code>, Agents <code>503 iam_principals_unavailable</code>, Mandate <code>503 mandate_ledger_unavailable</code>, Tools <code>503 tool_registry_unavailable</code>, Ontology <code>504 graph_read_timeout</code>, Steering <code>503 record_index_unavailable</code>, Spend <code>504 rollup_rebuild_in_progress</code>, Organization <code>503 control_plane_unavailable</code>, Billing <code>502 stripe_unreachable</code>, Audit <code>503 audit_store_unavailable</code>). Each also has a named denied permission. These become the <code>PageState</code> contract (§4.8).</li>
+<li><strong>Errors are specified.</strong> Each page has a named error code (Fleet <code>503 run_index_unavailable</code>, Run <code>502 frame_store_unreachable</code>, Agents <code>503 iam_principals_unavailable</code>, Mandate <code>503 mandate_ledger_unavailable</code>, Tools <code>503 tool_registry_unavailable</code>, Steering <code>503 record_index_unavailable</code>, Spend <code>504 rollup_rebuild_in_progress</code>, Organization <code>503 control_plane_unavailable</code>, Billing <code>502 stripe_unreachable</code>, Audit <code>503 audit_store_unavailable</code>). Each also has a named denied permission. These become the <code>PageState</code> contract (§4.8).</li>
 <li><strong>Interaction rules are stated once.</strong> Trust badges show the recorded value and nothing stronger; money shows its basis; explanations are chains of links.</li>
 </ul>
 <h3 id="2-2-what-must-be-settled-before-or-while-building">2.2 What must be settled before or while building</h3>
@@ -593,48 +593,6 @@ Status comes from table and contract names in the repo. <strong>Batch 3 lanes mu
 <td>Tools · observed schemas</td>
 <td><code>OBSERVED_SCHEMAS</code></td>
 <td><code>schema_origin=observed_proposed</code></td>
-<td>none</td>
-<td>❌</td>
-</tr>
-<tr>
-<td><strong>Ontology</strong> · model map</td>
-<td><code>CLASSES</code></td>
-<td><code>:OntologyVersion</code>/<code>:Class</code></td>
-<td><code>schema_registry.*</code> (Postgres) + Neo4j labels</td>
-<td>🟡</td>
-</tr>
-<tr>
-<td>Ontology · graph, ask in plain English</td>
-<td>graph tab</td>
-<td>Cypher + citations</td>
-<td><code>ontology.query</code>, <code>ontology.neighbors</code>, <code>graph.*</code></td>
-<td>🟡 Cypher shown ❌</td>
-</tr>
-<tr>
-<td>Ontology · sources</td>
-<td><code>SOURCES</code></td>
-<td><code>:Source</code>, <code>:SyncRun</code></td>
-<td><code>ingestion.source_connections</code></td>
-<td>✅</td>
-</tr>
-<tr>
-<td>Ontology · repositories</td>
-<td><code>REPOS</code></td>
-<td><code>wrk.repositories</code></td>
-<td><code>ingestion.repository_bindings</code> (+heads, <code>github_installations</code>)</td>
-<td>✅</td>
-</tr>
-<tr>
-<td>Ontology · versions</td>
-<td><code>ONTVERSIONS</code></td>
-<td>git <code>.oxagen/ontology/</code></td>
-<td><code>schema_registry.schema_versions</code></td>
-<td>🟡</td>
-</tr>
-<tr>
-<td>Ontology · embedding indexes</td>
-<td><code>INDEXES</code></td>
-<td>Voyage vector indexes</td>
 <td>none</td>
 <td>❌</td>
 </tr>
@@ -1015,7 +973,6 @@ Status comes from table and contract names in the repo. <strong>Batch 3 lanes mu
    │        ├─ agents/[agent]/source/page.tsx
    │        ├─ agents/[agent]/mandates/[mandate]/page.tsx
    │        ├─ tools/[[...tab]]/page.tsx
-   │        ├─ ontology/[[...tab]]/page.tsx
    │        ├─ steering/[[...tab]]/page.tsx
    │        ├─ spend/[[...drill]]/page.tsx
    │        └─ register/[[...step]]/page.tsx
@@ -1306,7 +1263,7 @@ export interface RunReadPort {
 export interface ApprovalReadPort {
   pending(scope: Scope, q?: { runId?: string }): Promise&lt;Read&lt;ApprovalItem[]&gt;&gt;;
 }
-// … AgentReadPort, ToolReadPort, OntologyReadPort, SteeringReadPort, SpendReadPort,
+// … AgentReadPort, ToolReadPort, SteeringReadPort, SpendReadPort,
 //   OrgReadPort, BillingReadPort, AuditReadPort, ShellReadPort
 
 export interface DataSource {
@@ -1632,8 +1589,7 @@ const LEGACY: Array&lt;[RegExp, (m: RegExpMatchArray) =&gt; string]&gt; = [
   [/^\/([^/]+)\/([^/]+)\/workbench\/agents(?:\/new)?\/?$/, (m) =&gt; `/${m[1]}/${m[2]}/agents`],
   [/^\/([^/]+)\/([^/]+)\/workbench\/agents\/([^/]+)/, (m) =&gt; `/${m[1]}/${m[2]}/agents/${m[3]}`],
   [/^\/([^/]+)\/([^/]+)\/(workbench\/tools|marketplace|governance)(\/.*)?$/, (m) =&gt; `/${m[1]}/${m[2]}/tools`],
-  [/^\/([^/]+)\/([^/]+)\/knowledge\/memory/, (m) =&gt; `/${m[1]}/${m[2]}/steering`],
-  [/^\/([^/]+)\/([^/]+)\/knowledge(\/.*)?$/, (m) =&gt; `/${m[1]}/${m[2]}/ontology`],
+  [/^\/([^/]+)\/([^/]+)\/knowledge(\/.*)?$/, (m) =&gt; `/${m[1]}/${m[2]}/steering`],
   [/^\/([^/]+)\/([^/]+)\/settings\/spend-budgets/, (m) =&gt; `/${m[1]}/${m[2]}/spend/budgets`],
   [/^\/([^/]+)\/([^/]+)\/(settings|developer\/mcp)(\/.*)?$/, (m) =&gt; `/${m[1]}${m[3] === &quot;developer/mcp&quot; ? `/${m[2]}/agents` : &quot;&quot;}`],
   [/^\/([^/]+)\/(members|workspaces|new-workspace|developer\/tokens|settings)(\/.*)?$/, (m) =&gt; `/${m[1]}`],
@@ -1706,20 +1662,20 @@ test(&quot;fleet · phone&quot;, async ({ page }) =&gt; {
     L5[auth + onboarding]
   end
   B1 --&gt; B2
-  subgraph B2[&quot;B2 Pages on fixtures · 11 lanes&quot;]
+  subgraph B2[&quot;B2 Pages on fixtures · 10 lanes&quot;]
     P1[Fleet] --- P2a[Run: transcript + transport] --- P2b[Run: side panels]
-    P3[Agents] --- P4[Tools] --- P5[Ontology] --- P6[Steering]
-    P7[Spend] --- P8[Organization] --- P9[Billing] --- P10[Audit]
+    P3[Agents] --- P4[Tools] --- P5[Steering]
+    P6[Spend] --- P7[Organization] --- P8[Billing] --- P9[Audit]
   end
   L1 --&gt; B3
-  subgraph B3[&quot;B3 Live adapters · 10 lanes (starts with B2)&quot;]
+  subgraph B3[&quot;B3 Live adapters · 9 lanes (starts with B2)&quot;]
     A1[runs + frames] --- A2[approvals + commands] --- A3[agents + iam] --- A4[tools]
-    A5[ontology + repos] --- A6[steering] --- A7[spend + budgets] --- A8[org + keys]
-    A9[billing] --- A10[audit + incidents]
+    A5[steering] --- A6[spend + budgets] --- A7[org + keys]
+    A8[billing] --- A9[audit + incidents]
   end
   B2 --&gt; B4
   B3 --&gt; B4
-  subgraph B4[&quot;B4 Writes · 10 lanes&quot;]
+  subgraph B4[&quot;B4 Writes · 9 lanes&quot;]
     W[server actions per page]
   end
   B4 --&gt; B5[&quot;B5 Cutover&lt;br/&gt;1 lane&quot;]
@@ -1781,7 +1737,7 @@ test(&quot;fleet · phone&quot;, async ({ page }) =&gt; {
 <tr>
 <td><strong>L1 contracts + ports + fixture</strong></td>
 <td><code>src/data/**</code></td>
-<td>All view-model schemas (§4.5) for the ten pages, every port interface, the fixture seed ported from <code>mc.html</code> @ <code>mc-baseline-w3</code> with W3's vocabulary mapping (its <code>TOOLPOOL</code> and <code>AGENT_BELTS</code> agree: seed no tool call an agent's belt cannot make), the integrity test (W4), and the <code>mc_state</code> state switch for dev/e2e</td>
+<td>All view-model schemas (§4.5) for the nine pages, every port interface, the fixture seed ported from <code>mc.html</code> @ <code>mc-baseline-w4</code> with W3's vocabulary mapping (its <code>TOOLPOOL</code> and <code>AGENT_BELTS</code> agree: seed no tool call an agent's belt cannot make; its <code>ASST_RUNS</code> stay out of the tenant's run index), the integrity test (W4), and the <code>mc_state</code> state switch for dev/e2e</td>
 <td>B0</td>
 </tr>
 <tr>
@@ -1810,7 +1766,7 @@ test(&quot;fleet · phone&quot;, async ({ page }) =&gt; {
 </tr>
 </tbody>
 </table></div>
-<h3 id="batch-2-pages-on-fixtures-11-lanes-in-parallel">Batch 2: pages on fixtures (11 lanes in parallel)</h3>
+<h3 id="batch-2-pages-on-fixtures-10-lanes-in-parallel">Batch 2: pages on fixtures (10 lanes in parallel)</h3>
 <p>Each lane owns <code>src/app/&lt;route&gt;/**</code>, <code>src/features/&lt;page&gt;/**</code>, <code>messages/&lt;page&gt;.json</code>, <code>e2e/&lt;page&gt;*.spec.ts</code>. Each page reads <strong>only</strong> through <code>dataSource()</code> and renders all states from §19.</p>
 <div class="tw"><table>
 <thead>
@@ -1854,43 +1810,37 @@ test(&quot;fleet · phone&quot;, async ({ page }) =&gt; {
 </tr>
 <tr>
 <td>P5</td>
-<td><strong>Ontology</strong></td>
-<td>tabs model/graph/sources/repositories/versions; embedding indexes list; ask-the-graph with Cypher + citations</td>
-<td>Graph canvas behind a dynamic import</td>
-</tr>
-<tr>
-<td>P6</td>
 <td><strong>Steering</strong></td>
 <td>tabs records/proposals/prs/effect/retirement; <code>RecordKindBadge</code> (W6); Context PR dialog</td>
 <td></td>
 </tr>
 <tr>
-<td>P7</td>
+<td>P6</td>
 <td><strong>Spend</strong></td>
 <td>tabs findings/operator/agent/tool/waste/reconciliation/budgets; drill <code>spend/&lt;kind&gt;/&lt;id&gt;</code>; evidence + fix dialogs; export</td>
 <td></td>
 </tr>
 <tr>
-<td>P8</td>
+<td>P7</td>
 <td><strong>Organization</strong></td>
 <td>tabs people/roles/invitations/workspaces/funding/plane/keys; role editor; API key create/rotate/revoke dialogs</td>
 <td></td>
 </tr>
 <tr>
-<td>P9</td>
+<td>P8</td>
 <td><strong>Billing</strong></td>
 <td>plan, run allowance, meters, invoices</td>
 <td></td>
 </tr>
 <tr>
-<td>P10</td>
+<td>P9</td>
 <td><strong>Audit</strong></td>
 <td>tabs events/incidents/receipts/holds/exports/keys/assurance/retention; receipt viewer; hold, export, KEK rotation, erasure dialogs</td>
 <td></td>
 </tr>
 </tbody>
 </table></div>
-<h3 id="batch-3-live-adapters-10-lanes-start-as-soon-as-l1-merges-runs-alongside-b2">Batch 3: live adapters (10 lanes, start as soon as L1 merges; runs alongside B2)</h3>
+<h3 id="batch-3-live-adapters-9-lanes-start-as-soon-as-l1-merges-runs-alongside-b2">Batch 3: live adapters (9 lanes, start as soon as L1 merges; runs alongside B2)</h3>
 <p>Each lane owns <code>src/data/adapters/live/&lt;domain&gt;.ts</code> + <code>mappers/&lt;domain&gt;.ts</code> + tests. Every method is either <strong>wired</strong> (with a column-level mapping note in the PR, and a contract test parsing a real row through the view-model schema), or returns <code>notBacked(milestone, gap)</code>. <strong>No method returns fabricated zeros.</strong></p>
 <div class="tw"><table>
 <thead>
@@ -1928,43 +1878,37 @@ test(&quot;fleet · phone&quot;, async ({ page }) =&gt; {
 </tr>
 <tr>
 <td>A5</td>
-<td>ontology + repos</td>
-<td><code>schema_registry.*</code>, <code>ontology.query</code>/<code>graph.*</code>, <code>ingestion.repository_bindings</code>, <code>source_connections</code></td>
-<td>indexes, Cypher-shown</td>
-</tr>
-<tr>
-<td>A6</td>
 <td>steering</td>
 <td><code>agent.context_records(_versions)</code>, <code>context_promotions</code></td>
 <td>effect, retirement</td>
 </tr>
 <tr>
-<td>A7</td>
+<td>A6</td>
 <td>spend + budgets</td>
 <td>ClickHouse <code>readUsageBreakdown</code> by operator/agent/model; <code>tool_invocations</code>; <code>billing.spend_budgets</code></td>
 <td>proven (G7), findings (G4), reconciliation (G5)</td>
 </tr>
 <tr>
-<td>A8</td>
+<td>A7</td>
 <td>org + members + keys</td>
 <td><code>org.org_users</code>, <code>org.invitations</code>, <code>workspace.workspaces</code>, <code>iam.roles</code>, <code>org.data_planes</code>, <code>auth.api_keys</code>, <code>org.model_credentials</code></td>
 <td>none</td>
 </tr>
 <tr>
-<td>A9</td>
+<td>A8</td>
 <td>billing</td>
 <td><code>billing.subscriptions</code>, invoices, Stripe via existing contracts</td>
 <td>run allowance (G13)</td>
 </tr>
 <tr>
-<td>A10</td>
+<td>A9</td>
 <td>audit + shell</td>
 <td>ClickHouse <code>audit_events</code> + <code>security.security_events</code>, <code>tacho.incidents</code>, <code>privacy_*</code>, <code>notification.notifications</code></td>
 <td>receipts, holds, KEK (G8)</td>
 </tr>
 </tbody>
 </table></div>
-<h3 id="batch-4-writes-10-lanes-after-b2-page-b3-domain-pair-merge">Batch 4: writes (10 lanes, after B2 page + B3 domain pair merge)</h3>
+<h3 id="batch-4-writes-9-lanes-after-b2-page-b3-domain-pair-merge">Batch 4: writes (9 lanes, after B2 page + B3 domain pair merge)</h3>
 <p>Each lane owns <code>src/features/&lt;page&gt;/actions.ts</code> and wires its page's dialogs to server actions through <code>invokeTool</code>. An action with no contract renders its button disabled with the reason and gap id; it is never a silent toast.</p>
 <div class="tw"><table>
 <thead>
@@ -1989,11 +1933,6 @@ test(&quot;fleet · phone&quot;, async ({ page }) =&gt; {
 <td>Tools</td>
 <td><code>agent.mcp.{register,set_enabled,delete}</code>, <code>agent.mcp_consent.resolve</code>, connection contracts</td>
 <td>kill switch as <code>control.commands</code> (verify emergency-deny contract), policy (G2), auto rules (G12)</td>
-</tr>
-<tr>
-<td>Ontology</td>
-<td>repo link/sync, source connect contracts (<code>repo.ts</code>, <code>connection.ts</code>, <code>integration.ts</code>), <code>ontology.query</code></td>
-<td>index upgrade, ontology proposal PR</td>
 </tr>
 <tr>
 <td>Steering</td>
@@ -2061,19 +2000,19 @@ test(&quot;fleet · phone&quot;, async ({ page }) =&gt; {
 </tr>
 <tr>
 <td>B2</td>
-<td>11</td>
+<td>10</td>
 <td>P2a Run transport ≈ 4</td>
 <td>4 (B3 overlaps)</td>
 </tr>
 <tr>
 <td>B3</td>
-<td>10</td>
+<td>9</td>
 <td>A1 runs ≈ 3</td>
 <td>(within B2)</td>
 </tr>
 <tr>
 <td>B4</td>
-<td>10</td>
+<td>9</td>
 <td>Organization ≈ 2</td>
 <td>2</td>
 </tr>
@@ -2087,7 +2026,7 @@ test(&quot;fleet · phone&quot;, async ({ page }) =&gt; {
 <td><strong>Total</strong></td>
 <td></td>
 <td></td>
-<td><strong>≈ 12 agent-days wall-clock</strong> with 11 concurrent lanes</td>
+<td><strong>≈ 12 agent-days wall-clock</strong> with 10 concurrent lanes</td>
 </tr>
 </tbody>
 </table></div>
@@ -2169,7 +2108,7 @@ Done when: pnpm --filter @oxagen/app lint typecheck test:unit test:e2e -- &lt;pa
 stories for new components; PR body lists each §3 row you touched with its status.
 </code></pre>
 
-<footer class="colophon"><span>Oxagen · Plan</span><span>Source: <code>2026-09-12-mission-control-app-implementation-plan.md</code> · rendered 2026-09-14</span></footer>
+<footer class="colophon"><span>Oxagen · Plan</span><span>Source: <code>2026-09-12-mission-control-app-implementation-plan.md</code> · rendered 2026-09-15</span></footer>
 </main>
 </div>
 </div>

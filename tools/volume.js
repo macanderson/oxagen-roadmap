@@ -184,30 +184,14 @@
   });
   var agentsBy={}; AGENTS.forEach(function(a){agentsBy[a.key]=a;});
 
-  /* ---------- repos, branches, sources, ontology ---------- */
+  /* ---------- repos, branches ---------- */
   var repoSeen={}; REPOS.forEach(function(r){repoSeen[r.n]=1;});
   newWS.forEach(function(w){[w.main].concat(w.linked).forEach(function(rn){
     if(repoSeen[rn])return; repoSeen[rn]=1;
     var sym=ri(4000,90000), main=rn===w.main;
     REPOS.push({n:rn,role:main?"main":"linked",branch:main?w.branch:"main",head:main?w.head:hex(7),indexed:pick(["2 min ago","4 min ago","9 min ago","31 min ago","1 h ago"]),
       issues:rnd()<0.7?"enabled · "+ic(ri(120,4200))+" imported":"disabled",events:"ok · "+ic(ri(200,9000))+" deliveries / 30d · "+(rnd()<0.8?"0 gaps":"1 gap recovered"),symbols:sym,drift:rnd()<0.7?"none":ri(1,4)+" data-layer finding"+(rnd()<0.5?"":"s")});
-    SOURCES.push({n:"GitHub · "+rn,kind:"github",records:ri(9000,160000),last:pick(["2 min ago","6 min ago","14 min ago","1 h ago"]),health:rnd()<0.9?"ok":"degraded",cursor:"delivery "+hex(8),entities:main?"Repository, PullRequest, Issue, File, Symbol":"Repository, PullRequest, Issue"});
   });});
-  SOURCES.push({n:"Zendesk · support",kind:"zendesk",records:184201,last:"3 min ago",health:"ok",cursor:"cursor 2026-09-11T09:11Z",entities:"Ticket, Customer, Macro"},
-    {n:"Salesforce · sales cloud",kind:"salesforce",records:61340,last:"12 min ago",health:"ok",cursor:"SystemModstamp 2026-09-11T09:02Z",entities:"Account, Opportunity, Contract"},
-    {n:"Snowflake · analytics (14 tables)",kind:"snowflake",records:2210044,last:"41 min ago",health:"ok",cursor:"stream offset 91,204",entities:"Customer, Device, Event"},
-    {n:"Datadog · monitors",kind:"datadog",records:3122,last:"1 min ago",health:"ok",cursor:"monitor.modified 2026-09-11T09:13Z",entities:"Monitor, Service, Incident"},
-    {n:"PagerDuty · a-intel",kind:"pagerduty",records:1188,last:"5 min ago",health:"ok",cursor:"page 12",entities:"Incident, Service, Schedule"});
-  CLASSES.push({n:"Service",ents:212,fresh:"1 min",src:"Datadog, PagerDuty, GitHub",rel:"OWNED_BY, DEPLOYS_FROM, ALERTS_ON",cited:1502,rules:5,proven:44,drift:0,builtin:false},
-    {n:"Account",ents:9114,fresh:"12 min",src:"Salesforce",rel:"HAS_CONTRACT, OWNS_DEVICE, RAISED_TICKET",cited:2210,rules:3,proven:18,drift:1,builtin:false},
-    {n:"Opportunity",ents:3402,fresh:"12 min",src:"Salesforce",rel:"FOR_ACCOUNT, OWNED_BY",cited:640,rules:2,proven:2,drift:0,builtin:false},
-    {n:"Monitor",ents:3122,fresh:"1 min",src:"Datadog",rel:"WATCHES_SERVICE, PAGES",cited:880,rules:4,proven:31,drift:0,builtin:false},
-    {n:"Pipeline",ents:1408,fresh:"4 min",src:"GitHub (dbt), Snowflake",rel:"READS, WRITES, SCHEDULED_BY",cited:1930,rules:6,proven:52,drift:2,builtin:false},
-    {n:"Macro",ents:612,fresh:"3 min",src:"Zendesk",rel:"USED_ON, WRITTEN_BY",cited:410,rules:1,proven:0,drift:0,builtin:false});
-  ONTVERSIONS.push({v:"v16",state:"superseded",commit:hex(7),at:"2026-08-04 15:10",by:"Priya Natarajan",pr:"a-intel/platform#402",diff:"+3 classes (Service, Monitor, Pipeline), +6 relations"},
-    {v:"v15",state:"superseded",commit:hex(7),at:"2026-07-11 10:40",by:PEOPLE[WSX["data-platform"].owner].name,pr:"a-intel/platform#361",diff:"+2 classes (Account, Opportunity), Salesforce source bound"},
-    {v:"v14",state:"superseded",commit:hex(7),at:"2026-06-20 09:05",by:"Marcus Bell",pr:"a-intel/platform#318",diff:"+1 class (Macro), +2 properties on Ticket"},
-    {v:"v13",state:"superseded",commit:hex(7),at:"2026-05-30 16:22",by:"Marcus Bell",pr:"a-intel/platform#270",diff:"+4 properties on Customer, retired 1 relation"});
   BRANCHES.push({name:"agents/triage-reproduce-first",pr:"a-intel/platform#521",ahead:3,by:"marcus",when:"3 hours ago"},
     {name:"context/ctx.core.migration-order",pr:"a-intel/platform#520",ahead:1,by:"marcus",when:"yesterday"},
     {name:"agents/pr-reviewer-belt-narrow",pr:null,ahead:2,by:people[8].key,when:"yesterday"},
@@ -222,7 +206,7 @@
     "aws-billing":["get_forecast","list_budgets","update_budget","get_reservation_coverage","list_savings_plans","get_anomalies","get_rightsizing","tag_resource"],
     slack:["get_channel","list_users","get_user","send_dm","update_message","delete_message","add_reaction","pin_message","create_channel","archive_channel","set_topic","search_messages"],
     snowflake:["list_tables","describe_table","list_schemas","get_query_history","cancel_query","create_stage"],
-    oxagen:["expand_entity","recall_context","get_run","list_runs","read_frame","list_frames","propose_record","open_context_pr","get_agent","list_agents","get_policy","simulate_policy","list_receipts","get_receipt","export_bundle","verify_bundle","get_budget","set_preferences","list_mandates","draw_mandate","get_witness","run_witness","search_tools","describe_tool","request_approval","check_approval","get_ontology","diff_ontology","list_sources","get_source_cursor","score_candidates","compose_context","summarize_run","reflect_run","promote_finding","list_findings","get_spend","list_switches","read_switch","enqueue_export"],
+    oxagen:["expand_entity","recall_context","get_run","list_runs","read_frame","list_frames","propose_record","open_context_pr","get_agent","list_agents","get_policy","simulate_policy","list_receipts","get_receipt","export_bundle","verify_bundle","get_budget","set_preferences","list_mandates","draw_mandate","get_witness","run_witness","search_tools","describe_tool","request_approval","check_approval","score_candidates","compose_context","summarize_run","reflect_run","promote_finding","list_findings","get_spend","list_switches","read_switch","enqueue_export"],
     harness:["Read","Edit","Write","Glob","Grep","WebFetch","WebSearch","Agent","NotebookEdit","apply_patch","shell","update_plan","view_image","exec","file_write","file_read","git_commit","git_diff"],
     jira:["create_issue","get_issue","search_issues","update_issue","transition_issue","add_comment","list_boards","get_sprint","list_sprints","assign_issue","link_issues","add_attachment","list_projects","get_project","create_version","list_components","add_watcher","get_changelog","list_filters","run_filter","bulk_update","delete_issue","create_epic","list_epics","get_worklog","add_worklog"],
     datadog:["list_monitors","get_monitor","mute_monitor","unmute_monitor","create_monitor","query_metrics","search_logs","list_incidents","get_incident","create_incident","list_dashboards","get_dashboard","list_slos","get_slo","list_services","get_service","post_event"],
@@ -330,7 +314,7 @@
     {id:"prp_01K5RV6H",lineage:"ctx.data.backfill-partitions",kind:"procedure",force:"should",from:PEOPLE[WSX["data-platform"].owner].name,st:"Backfill in day-sized partitions and verify row counts after each.",support:"2 quality-gate failures traced to whole-table backfills",state:"open Context PR",pr:"a-intel/data-platform#341",checks:"5 / 5 pass"},
     {id:"prp_01K5RV8K",lineage:"ctx.sec.never-rotate-own-credential",kind:"constraint",force:"must",from:PEOPLE[WSX.security.owner].name,st:"No agent may rotate a credential it holds.",support:"policy review 2026-09",state:"merged",pr:"a-intel/security-tools#77",checks:"7 / 7 pass"},
     {id:"prp_01K5RW0M",lineage:"ctx.growth.brief-as-table",kind:"preference",force:"may",from:"reflector · 14 runs",st:"Campaign briefs are a table of channel, audience, budget and owner.",support:"9 briefs rewritten by hand",state:"candidate",pr:"—",checks:"—"},
-    {id:"prp_01K5RW2P",lineage:"ctx.mobile.release-branch",kind:"fact",force:"info",from:"ontology engine",st:"The production branch of a-intel/mobile is release, not main.",support:"4 runs targeted main",state:"open Context PR",pr:"a-intel/mobile#96",checks:"4 / 4 pass"});
+    {id:"prp_01K5RW2P",lineage:"ctx.mobile.release-branch",kind:"fact",force:"info",from:"reflector · run_01K5R"+ulid(11),st:"The production branch of a-intel/mobile is release, not main.",support:"4 runs targeted main",state:"open Context PR",pr:"a-intel/mobile#96",checks:"4 / 4 pass"});
 
   /* ---------- runs ---------- */
   var TASKS={

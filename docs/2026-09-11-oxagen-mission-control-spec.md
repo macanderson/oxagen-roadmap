@@ -27,12 +27,11 @@ This table lists every decision that shapes the rest of the document, in one pla
 | 8 | A run is a hash-chained sequence of **frames**. A hash is a short fingerprint computed from data. A hash chain links each frame to the one before it, so no frame can be altered without detection. A frame is the replay unit. Frame metadata and cost live in the graph. Frame bodies are content-addressed, encrypted blobs. Content-addressed means each body is stored under the hash of its own content. | §8 |
 | 9 | Agents learn by appending **context records** (the protocol's record kinds). They never learn by writing frames. Records are canonically hashed and countersigned. Canonical hashing puts a record in one standard form before hashing, so the same content always gives the same hash. Countersigned means a second party adds its own signature. | §9 |
 | 10 | A workspace links to one or more GitHub repositories. Exactly one of them is its **main repo**, bound at creation. The main repo is the place where the workspace's steering and configuration are managed in source control. Published steering and every agent definition live there under `.oxagen/`. Stella reads that folder natively through a symlink, a file system pointer to another path. Oxagen mirrors the same folder into each coding harness's own agent format in the same pull request. Linked repos may carry repository-scoped records of their own. A **Context PR** is a GitHub pull request (PR), a proposed change that others review before it is merged. Merge is the promotion event. Nothing steers until it is published. The graph is the system of record. Git is the system of control, which is GitOps: steering changes are managed through git. | §10 |
-| 11 | Oxagen infers ontologies from ingested sources. An ontology is the set of entity types and the relationships between them. Each ontology is proposed, reviewed, and activated as a versioned graph object. Entities carry provenance, a trace back to their source records. Linking a GitHub repo confirms its production branch, subscribes to every relevant event by webhook, imports its issues, and keeps a code graph of the production branch current on every push. A webhook is a call GitHub sends to Oxagen when an event happens. A manual sync is available, and there is no cron (a timer that runs jobs on a schedule). | §11 |
-| 12 | Oxagen governs the toolbelt. An agent sees only the tools it is granted, and it can search them when the belt is large. The agent holds no credentials at all. Every call passes one pipeline: validate, taint-check, decide (allow, approve, or deny, deterministically), broker a per-call credential, dispatch idempotently, validate output, sign a receipt. A taint-check looks for data marked as untrusted or sensitive. Deterministic means the same input always gives the same decision. Idempotent dispatch means a repeated call has the same effect as a single call. A tool's safety classification describes the tool. The customer's approval rules decide, with auto-approval conditions Oxagen can apply to skip the human. Any consequence the customer marks (money, data destruction, production changes, external communication, access changes) requires a human-granted mandate. The mandate sets limits over the tool's declared measures and keeps a ledger. Kill switches exist at every level. Policy is versioned and simulated against real history before activation. An adversarial suite proves the guarantees per release. | §6.5–6.13 |
-| 13 | Oxagen accounts customer spend per model call by normalized token class, including cache reads and writes. It attributes spend up the chain operator → agent → run → turn → step. It reports proven versus unproven spend with a productive ratio and ranked optimization findings. It reconciles spend to the cent against provider statements. Oxagen bills per run on a plan allowance and never marks up tokens. It reports governed actions and retained storage as secondary meters. **Amendment 2026-09-13 (ADR-055):** Oxagen bills governed action units (GAUs) from a monthly bucket on the subscription, sells more in unit quantities at the customer's contracted rate, and never marks up tokens; see §12.1. | §12 |
-| 14 | Audit fidelity: **full bodies, seven years, write-once at seal time**. Seal time is the moment a record is closed and locked against change. Each organization has its own keys. Redaction happens before write. Erasure uses crypto-shredding: destroying the key so the encrypted data can never be read again. Frame nodes stay in the graph for a hot window. The run ledger stays forever. | §13 |
-| 15 | Mission Control is ten pages: seven in a workspace and three for the organization, down from 70. Everything else is deleted. Appendix F says where each old route went. | §14, App. F |
-| 16 | A run is proven only by a **witness** Oxagen wrote. A witness is a test built with one of several deterministic oracles, checkers whose result is fixed for a given input. The witness fails on the PR's target branch and passes on the PR. It runs in a witness runner the worker can never see or reach. The runner reports only pass or fail back to the worker. The flip from fail to pass stamps the run. Stamped runs are the training asset. | §8.5 |
+| 11 | Oxagen governs the toolbelt. An agent sees only the tools it is granted, and it can search them when the belt is large. The agent holds no credentials at all. Every call passes one pipeline: validate, taint-check, decide (allow, approve, or deny, deterministically), broker a per-call credential, dispatch idempotently, validate output, sign a receipt. A taint-check looks for data marked as untrusted or sensitive. Deterministic means the same input always gives the same decision. Idempotent dispatch means a repeated call has the same effect as a single call. A tool's safety classification describes the tool. The customer's approval rules decide, with auto-approval conditions Oxagen can apply to skip the human. Any consequence the customer marks (money, data destruction, production changes, external communication, access changes) requires a human-granted mandate. The mandate sets limits over the tool's declared measures and keeps a ledger. Kill switches exist at every level. Policy is versioned and simulated against real history before activation. An adversarial suite proves the guarantees per release. | §6.5–6.13 |
+| 12 | Oxagen accounts customer spend per model call by normalized token class, including cache reads and writes. It attributes spend up the chain operator → agent → run → turn → step. It reports proven versus unproven spend with a productive ratio and ranked optimization findings. It reconciles spend to the cent against provider statements. Oxagen bills per run on a plan allowance and never marks up tokens. It reports governed actions and retained storage as secondary meters. **Amendment 2026-09-13 (ADR-055):** Oxagen bills governed action units (GAUs) from a monthly bucket on the subscription, sells more in unit quantities at the customer's contracted rate, and never marks up tokens; see §12.1. | §12 |
+| 13 | Audit fidelity: **full bodies, seven years, write-once at seal time**. Seal time is the moment a record is closed and locked against change. Each organization has its own keys. Redaction happens before write. Erasure uses crypto-shredding: destroying the key so the encrypted data can never be read again. Frame nodes stay in the graph for a hot window. The run ledger stays forever. | §13 |
+| 14 | Mission Control is nine pages: six in a workspace and three for the organization, down from 70. Everything else is deleted. Appendix F says where each old route went. | §14, App. F |
+| 15 | A run is proven only by a **witness** Oxagen wrote. A witness is a test built with one of several deterministic oracles, checkers whose result is fixed for a given input. The witness fails on the PR's target branch and passes on the PR. It runs in a witness runner the worker can never see or reach. The runner reports only pass or fail back to the worker. The flip from fail to pass stamps the run. Stamped runs are the training asset. | §8.5 |
 
 ---
 
@@ -65,7 +64,6 @@ Owned intelligence (training a model per customer on proven runs) is the phase-t
 - The gateway. It includes the model proxy (the path each model call travels through), the tool gateway, the hook and SDK adapters, and the control channel.
 - Run recording, the frame chain (the ordered, linked sequence of frames in a run), checkpoints (saved points a run can be restored from), attestation (a signed statement that a record is what it claims to be), replay in two forms (render and fork), and bisect between two runs (narrowing down the step where two runs start to differ).
 - Cost ledger, price book, budgets, provider reconciliation (matching Oxagen's cost records against the provider's bill), and spend views.
-- Knowledge graph per organization. It includes the ontology engine (the ontology is the set of entity types and the relationships between them), three connectors (GitHub, Linear, Postgres), entity resolution (deciding when two source records describe the same entity), and provenance (the record of where each fact came from).
 - Context records, reflection, promotion, Context PRs (a PR is a pull request, a proposed change submitted for review), and steering delivery.
 - Mission Control UI, API, MCP endpoint, and a thin CLI (`oxagen`) for enrollment and administration.
 - Audit archive, retention, erasure, legal hold (keeping records past their normal deletion date because of a legal matter), and export.
@@ -93,7 +91,7 @@ This document uses each name exactly as defined here.
 | Term | Meaning |
 |---|---|
 | **Organization** | The tenant, meaning one customer's own space in the system. An organization owns a Neo4j database, a key-encryption key (the key that protects other encryption keys), a Postgres partition, and a billing account. It may also own a dedicated data plane. |
-| **Workspace** | A governance partition inside an organization, meaning a section with its own rules, approvals, and ownership. A workspace owns one **main repo** and any number of linked repos. It also owns one ontology (its shared model of concepts and how they relate), one steering set, a set of agents, tool grants, and budgets. |
+| **Workspace** | A governance partition inside an organization, meaning a section with its own rules, approvals, and ownership. A workspace owns one **main repo** and any number of linked repos. It also owns one steering set, a set of agents, tool grants, and budgets. |
 | **Main repo** | The one linked repository where a workspace keeps its steering and configuration under source control (version-tracked file history). Every workspace has exactly one. |
 | **Linked repo** | Any other repository that a workspace's agents work on. Oxagen loads it into the graph. It may carry steering records scoped to that one repository. |
 | **Principal** | Anything that IAM makes a decision about. IAM is identity and access management, the system that decides who may do what. The three kinds are `human`, `agent`, and `service`. |
@@ -143,12 +141,12 @@ This document uses each name exactly as defined here.
   │ identity, IAM │   │ graph, runs, │   │ frame bodies│   │ published    │
   │ tools, prices │   │ frames,      │   │ archive     │   │ steering     │
   │ cost, billing │   │ records,     │   │ segments    │   │ (Context PRs)│
-  │ approvals     │   │ ontology     │   │             │   │              │
+  │ approvals     │   │              │   │             │   │              │
   └───────────────┘   └──────────────┘   └─────────────┘   └──────────────┘
                               ▲
                     ┌─────────┴──────────────────────────────────────────┐
-                    │  SERVICES: recorder, reflector, promoter, ontology  │
-                    │  engine, reconciler, archiver, GitHub app           │
+                    │  SERVICES: recorder, reflector, promoter,           │
+                    │  reconciler, archiver, GitHub app                   │
                     └─────────────────────────────────────────────────────┘
                     ┌────────────────────────────────────────────────────┐
                     │  MISSION CONTROL (web), API, MCP, CLI               │
@@ -160,29 +158,28 @@ This document uses each name exactly as defined here.
 - **Recorder.** Consumes batches of frames and checks that each frame chain is intact. Writes frame nodes to Neo4j and frame bodies to object storage. Prices model frames and updates run rollups (summed totals per run).
 - **Reflector.** After a seal (the step that closes a run's record), it produces observation and memory records from the run.
 - **Promoter.** Collects records across runs, produces proposals, opens Context PRs, and records promotion events when a Context PR merges. A Context PR is a pull request, a proposed change that reviewers approve before it merges.
-- **Ontology engine.** Profiles ingested sources, proposes ontology versions, activates them, and builds entities with provenance (a record of where each fact came from). The ontology is the graph's definition of entity types and how they relate.
 - **Reconciler.** Matches the cost ledger to the provider's usage exports and invoices.
 - **Archiver.** Seals archive segments, compacts frame nodes older than the hot window (the recent period kept in the graph for fast queries), and enforces retention rules and holds.
 - **GitHub App.** Binds repositories, creates Context PRs, runs checks, handles merges, and re-indexes after changes.
 - **Engine.** `stella serve` running in its own container. The in-app agent service reaches it over HTTP (§4.4). It runs no model and no tool itself.
-- **Model layer.** The one path for every model call Oxagen makes on its own behalf (the in-app agent, reflector, promoter, and ontology engine). Calls route by tier through OpenRouter (§4.5), a service that forwards model calls to many vendors. Customer agents' model calls go through the model proxy, not this layer.
+- **Model layer.** The one path for every model call Oxagen makes on its own behalf (the in-app agent, reflector, and promoter). Calls route by tier through OpenRouter (§4.5), a service that forwards model calls to many vendors. Customer agents' model calls go through the model proxy, not this layer.
 
 ### 4.2 The three stores and what belongs where
 
 | Store | Holds | Never holds |
 |---|---|---|
 | **Postgres** (shared plane, or dedicated for tenant data) | Identity, tenancy, IAM, the tool registry and its schemas, the price book, the cost ledger and its rollups, reconciliation, billing, budgets, approvals, intervention commands, archive manifests, control-plane audit events, connector sync state | Graph relationships, frame bodies, traces |
-| **Neo4j** (one database per organization) | Ontology versions, entities and relationships, source records, context records and their lineage, runs, attempts, frames (metadata, digests as content fingerprints, and cost), the steering index, provenance edges | Bytes larger than a few KB, money of record, credentials |
+| **Neo4j** (one database per organization) | Entities and relationships, source records, context records and their lineage, runs, attempts, frames (metadata, digests as content fingerprints, and cost), the steering index, provenance edges | Bytes larger than a few KB, money of record, credentials |
 | **Object storage** (write-once, per-org key) | Frame bodies (prompts, completions, tool input and output), archive segments, exports | Anything queried directly |
 | **GitHub repository** (per workspace) | Published steering records and the promotion ledger | Traces, memories, proposals |
 
-Rule: **the graph is the system of record, and git is the system of control.** The graph is the source of truth for everything the product explains: entities, the ontology's versions and provenance, runs, frames, records, and their whole lineage. Git is the source of truth for exactly one thing: what is published and active. That means steering records, agent definitions, and the ontology's active version, each approved through a pull request. Postgres holds what must be transactional and money-grade (each change lands whole or not at all, and the amounts are exact). Object storage holds raw bytes. A rollup in Postgres (per-run cost, daily spend by agent) is a derived index. It is labeled as such and can be rebuilt from the graph.
+Rule: **the graph is the system of record, and git is the system of control.** The graph is the source of truth for everything the product explains: entities and their provenance, runs, frames, records, and their whole lineage. Git is the source of truth for exactly one thing: what is published and active. That means steering records and agent definitions, each approved through a pull request. Postgres holds what must be transactional and money-grade (each change lands whole or not at all, and the amounts are exact). Object storage holds raw bytes. A rollup in Postgres (per-run cost, daily spend by agent) is a derived index. It is labeled as such and can be rebuilt from the graph.
 
 This is not the mirror problem (two copies that drift apart), because every fact has exactly one writer:
 
 | Fact | Written by | Read by | How the copy is kept honest |
 |---|---|---|---|
-| Published text of a record, an agent definition, or the active ontology | git, on merge | the graph indexes it by content hash (a short fingerprint computed from the text) at the merged commit | recompute the hash, and a mismatch is `steering_drift`, which blocks delivery |
+| Published text of a record or an agent definition | git, on merge | the graph indexes it by content hash (a short fingerprint computed from the text) at the merged commit | recompute the hash, and a mismatch is `steering_drift`, which blocks delivery |
 | A record's lineage, evidence, contradictions, promotion events, and effect | the graph | Mission Control and agents | never in git |
 | A proposal | the graph | delivered to git as a pull request | one direction only: graph to git |
 | Publication | git | flows to the graph on merge | one direction only: git to graph |
@@ -218,7 +215,7 @@ Every model call Oxagen makes on its own behalf goes through one model layer. Th
 
 | Tier | Use | Default route (OpenRouter) | Resolves today to |
 |---|---|---|---|
-| `complex` | in-app agent turns, reflection reasoning, promotion rationale, ontology diff explanation, conflict analysis, Context PR bodies | `z-ai/glm-latest` | GLM 5.3 (1.3M context) |
+| `complex` | in-app agent turns, reflection reasoning, promotion rationale, conflict analysis, Context PR bodies | `z-ai/glm-latest` | GLM 5.3 (1.3M context) |
 | `light` | classification, labeling, entity and property naming, record kind detection, redaction hints, approval summaries, retrieval reranking | `z-ai/glm-flash-latest` | GLM 5.3 Flash |
 | `embed` | embeddings (numeric vectors that capture meaning, used for search) for entities, records, documents, issues, and code (§11.5) | Voyage AI, direct API (the vendor's own programming interface, not OpenRouter): `voyage-4` family for text, `voyage-code-3` for code, `voyage-context-3` for chunked documents | one 1024-dimension space per model family |
 | `rerank` | reordering hybrid retrieval candidates (§11.5) | Voyage AI `rerank-2.5` | n/a |
@@ -251,7 +248,7 @@ The model is exactly today's model. An **organization** holds **workspaces**. A 
 
 **Organization.** Its `public_id` starts with `org_`. It has a `slug` and an immutable `namespace` of 2 to 6 characters. Immutable means the value is fixed at creation and never changes. The `namespace` is used in agent keys and in the Neo4j database name. The organization also has a `plan`, a `status`, and settings. It owns: a KMS key-encryption key, the Neo4j database `org_<namespace>`, a billing account, an optional dedicated data plane (ADR-042), and its retention policy. KMS is a key management service, a cloud service that stores and guards encryption keys. A key-encryption key is a top-level key that encrypts other keys rather than data.
 
-**Workspace.** Its `public_id` starts with `wrk_`. Its `slug` and immutable `namespace` are unique within the org. It owns: one **main repo** (required at creation, §10.1) plus any number of linked repos, one active ontology version, one steering set, agents, tool grants, budgets, a governance mode (`solo` | `team` | `regulated`), and a retention mode (`content_exact` by default, `digest_only` as an opt-down).
+**Workspace.** Its `public_id` starts with `wrk_`. Its `slug` and immutable `namespace` are unique within the org. It owns: one **main repo** (required at creation, §10.1) plus any number of linked repos, one steering set, agents, tool grants, budgets, a governance mode (`solo` | `team` | `regulated`), and a retention mode (`content_exact` by default, `digest_only` as an opt-down).
 
 **Roles.** Org roles are `owner`, `admin`, `member`, `billing`, `compliance`, and `viewer`. Workspace roles are `owner`, `member`, and `viewer`. Agent roles are `observer`, `contributor`, and `operator`. Custom roles are an enterprise feature. They are built from the same grant table, not from a second system.
 
@@ -681,7 +678,7 @@ Operators and agents can send messages to other agents in the same workspace. Th
 
 Customers subscribe to what happens in their runs and receive it in their own systems. Nothing is invented for this. Every event maps to a frame kind or an audit event.
 
-- **Catalog.** `run.started`, `run.sealed`, `run.proven`, `approval.requested`, `approval.resolved`, `tool_call.denied`, `kill_switch.flipped`, `mandate.exception`, `budget.breached`, `incident.raised`, `context_pr.opened`, `context_pr.merged`, `ontology.activated`, `repository.indexed`, `reconciliation.exception`. New kinds are added to the catalog, never emitted ad hoc.
+- **Catalog.** `run.started`, `run.sealed`, `run.proven`, `approval.requested`, `approval.resolved`, `tool_call.denied`, `kill_switch.flipped`, `mandate.exception`, `budget.breached`, `incident.raised`, `context_pr.opened`, `context_pr.merged`, `repository.indexed`, `reconciliation.exception`. New kinds are added to the catalog, never emitted ad hoc.
 - **Subscriptions** at workspace or organization scope name the event kinds and optional filters (agent, operator, severity). Only those events are emitted. Everything else never leaves.
 - **Two delivery modes on one unique endpoint per subscription**, generated at creation. Push: Oxagen sends a signed webhook, an HTTP request to the customer's URL when an event happens. It is signed with HMAC, a keyed hash that proves who sent it, using a rotating secret. It carries a delivery id for safe retries, is ordered per run, and is delivered at least once with backoff. A dead-letter view, the list of deliveries that failed after all retries, sits on the Audit page. Pull: the customer reads from an Oxagen-hosted streaming endpoint unique to the subscription, with a replay window.
 - **Payloads** carry ids, kind, time, scope, and a compact body with a link to the run and frame. Never raw prompt or tool bodies. Redaction rules apply.
@@ -829,8 +826,8 @@ People trust pull requests, proposed code changes that named reviewers approve b
 
 A workspace links to one or more GitHub repositories through the Oxagen GitHub App, an installed integration with its own repository access. Each link records the installation, the repository, the **production branch**, whether the repository uses GitHub Issues, and a `role`. The production branch follows §11.4. GitHub's default branch, the branch a repository treats as its primary line, is offered as the suggestion. The customer confirms or changes it. If GitHub's default branch changes later, Oxagen raises a prompt rather than silently moving the binding.
 
-- **`main`**, exactly one per workspace, required at creation. The main repo is where the workspace's steering and configuration are managed in source control. That covers published steering records, the promotion ledger (the log of each promotion event), governance mode, and the workspace's Oxagen configuration file. That file is `.oxagen/workspace.toml`. It declares linked repos, tool servers, budgets, and ontology sources. Oxagen reconciles those declarations against Postgres and reports drift, any gap between the file and the live state. Workspace-scoped Context PRs are opened here. A workspace without a main repo cannot exist. Changing which repo is main is an org-owner action with approval, recorded as a security event.
-- **`linked`**, zero or more. These are the repositories the workspace's agents work on. Oxagen ingests each one into the graph (§11.2). Each is a valid `resource_scope.repositories` target in grants. Each may carry its own `.oxagen/rules/` holding records with `sharing_scope = "repository"`. Those records steer only runs on that repo. Repository-scoped Context PRs are opened on the linked repo itself.
+- **`main`**, exactly one per workspace, required at creation. The main repo is where the workspace's steering and configuration are managed in source control. That covers published steering records, the promotion ledger (the log of each promotion event), governance mode, and the workspace's Oxagen configuration file. That file is `.oxagen/workspace.toml`. It declares linked repos, tool servers, and budgets. Oxagen reconciles those declarations against Postgres and reports drift, any gap between the file and the live state. Workspace-scoped Context PRs are opened here. A workspace without a main repo cannot exist. Changing which repo is main is an org-owner action with approval, recorded as a security event.
+- **`linked`**, zero or more. These are the repositories the workspace's agents work on. Each is a valid `resource_scope.repositories` target in grants. Each may carry its own `.oxagen/rules/` holding records with `sharing_scope = "repository"`. Those records steer only runs on that repo. Repository-scoped Context PRs are opened on the linked repo itself.
 
 A repository may be linked to more than one workspace in the same organization. It is main for at most one. The graph node for a repository is shared across the workspaces that link it. Each link edge sets `ws`, so isolation holds per workspace.
 
@@ -840,14 +837,13 @@ The directory is `.oxagen/`. The word `.stella` never appears in an Oxagen produ
 
 ```
 .oxagen/
-  workspace.toml             # linked repos, tool servers, budgets, ontology sources (main repo only)
+  workspace.toml             # linked repos, tool servers, budgets (main repo only)
   rules/
     governance.toml          # mode = solo | team | regulated; separation flag
     promotions.jsonl         # hash-chained promotion ledger (regulated mode)
     ctx.<set>.<slug>.toml    # one published record per lineage id
   proposals/*.toml           # candidates; steer nothing
   agents/<slug>.toml         # agent definitions, one per agent (§6.2); harness files are generated beside them
-  ontology/                  # optional, §11.8: one file per class and relation type
 ```
 
 Each record is one TOML file, a plain-text settings format. The file holds `schema = "context-record/v0.1"`, the record's `lineage_id`, kind, statement, steering and enforcement blocks, truth probes, and `record_hash`, a fingerprint of the record's content. Custom agents never parse the file. Oxagen serves published records as context frames and as compiled steering text. So the file format is a publication concern, not an integration concern.
@@ -884,40 +880,35 @@ Oxagen measures the effect of each published record: the runs that rendered it, 
 
 ---
 
-## 11. The knowledge graph and dynamic ontologies
+## 11. The knowledge graph
+
+Earlier drafts of this specification described a dynamic, customer-extensible ontology: business entity types (`Customer`, `Contract`, `Ticket`, and the like) inferred by a model from ingested Postgres and Linear data, proposed and activated as version-controlled pull requests, browsable and queryable in plain English on a dedicated Ontology page. That capability does not ship in core Oxagen. There is no ontology engine, no customer-defined entity type, no connector-driven schema inference or versioning, and no natural-language-to-Cypher query surface (§11.6). What remains is a fixed, built-in entity graph fed by the GitHub connector alone, because other still-shipping features depend on it: witness authoring reads the target-branch code graph (§8.5), a run's task reference is an `Issue` or `PullRequest` entity (§8.1), and the toolbelt policy can gate a tool call on the data-layer table it resolves to (§6.12, §11.7).
 
 ### 11.1 Layers in the organization database
 
 | Layer | Labels | Purpose |
 |---|---|---|
-| Ontology (meta) | `:Ontology`, `:OntologyVersion`, `:Class`, `:Property`, `:RelationType` | What kinds of things exist, per workspace. Every version is indexed from the files in git (§11.8), with proposal provenance (a trace of where each change came from) |
-| Source | `:Source`, `:SyncRun`, `:SourceRecord` | Raw records as ingested, with connector id, external id, digest, and sync time |
-| Entity | `:Entity` + dynamic class label (`:Customer`, `:Ticket`, `:Repository`, …) | Resolved entities, with `DERIVED_FROM → :SourceRecord` provenance |
+| Source | `:Source`, `:SyncRun`, `:SourceRecord` | Raw records as ingested from the GitHub connector, with external id, digest, and sync time |
+| Entity | `:Entity` + a built-in class label (`:Repository`, `:PullRequest`, `:Issue`, `:File`, `:Symbol`, …) | Resolved entities from the GitHub connector's fixed fragment, with `DERIVED_FROM → :SourceRecord` provenance |
 | Context | `:Record` and its edges (§9) | What was learned, proposed, and published |
 | Run | `:Run`, `:Attempt`, `:Frame`, `:Checkpoint`, `:Seal` | The run record (§8) |
 | Reference | `:Principal`, `:Agent`, `:Workspace` | Reference nodes keyed by public id only. Their fields live in Postgres |
 
 Every node carries `id` (public id), `ws`, `created_at`, `valid_from`, `valid_to`, `recorded_at`, and `is_system`. Embeddings (numeric vectors that capture the meaning of text) live in Neo4j native vector indexes, which are indexes built for nearest-neighbor search over those vectors. There is one per label and embedding model (§11.5). A full-text index per label sits beside it for hybrid retrieval.
 
-### 11.2 Ontology engine
+### 11.2 Entity ingestion
 
-1. **Ingest.** A connector syncs a source into `:SourceRecord` nodes. The cursor and health live in Postgres, and the records live in the graph, so the connector dual-write pattern carries over. Three connectors ship in v1: GitHub (§11.4: every linked repo and the main repo), Linear (teams, projects, issues), and Postgres (tables selected by the customer).
-2. **Profile.** A deterministic profiler reads a sample of source records per source type. It computes candidate classes (from record types and tables), properties (names, inferred types, cardinality, nullability), relation types (foreign keys, reference fields, mention patterns), and natural keys (the fields that identify an item on their own). A model names and describes candidates only after the deterministic pass. It never invents a class the profiler did not see.
-3. **Propose.** The result is a pull request on the main repo (§11.8). The branch changes the ontology files. The PR body holds a diff against the active version (classes added, properties changed, relations added) and the migration plan for existing entities. Proposals from the engine, from the Ontology page, and from a hand edit all take this path, with the same checks a Context PR gets. The graph records the proposal's provenance: which source records and which profiler run inferred each change.
-4. **Activate.** Merge is activation. The merged manifest freezes a new immutable version and moves the workspace's pin. The graph then indexes it by digest, applies labels and constraints, migrates entities, and stamps `valid_from`. Nothing activates any other way. Prior versions remain queryable `as_of`.
-5. **Materialize.** This step builds the entities. Entities are upserted with natural keys and resolved across sources. This entity resolution (matching the same entity across sources) uses email, URL, external id, and a model-assisted match. The confidence threshold for that match is a workspace setting. Every entity is always linked to its source records.
-
-The GitHub connector ships a built-in ontology fragment (`Repository`, `Branch`, `Commit`, `PullRequest`, `Issue`, `Release`, `File`, `Symbol`, and their relations). The fragment is merged into a workspace's ontology when the first repo is linked. Customers extend it and never redefine it.
+The GitHub connector populates a fixed, built-in entity fragment (`Repository`, `Branch`, `Commit`, `PullRequest`, `Issue`, `Release`, `File`, `Symbol`, and their relations) from every linked repository. It is not customer-extensible and carries no version or proposal workflow: there is nothing to propose, activate, or merge. A connector syncs a source into `:SourceRecord` nodes (the cursor and health live in Postgres, and the records live in the graph), and entities are upserted by natural key (repository, PR number, issue number, file path, symbol signature) and linked to their source records.
 
 ### 11.3 Oxagen as a protocol provider
 
-Oxagen exposes one provider per workspace on the tool gateway host. The provider offers `context/query` over entities, records, and runs, with kinds `fact`, `doc`, `memory`, `episode`, and `graph`. It also offers `context/verify` and the lifecycle operations `append`, `get`, and `resolve`. It declares `data_flow.egress: true` with scope `org-tenant`. Egress means data leaving the organization's boundary, so a host gates the provider behind consent as the protocol requires. Frames carry provenance to the entity, source record, connector, and digest. `token_cost` is the protocol's exact accounting. `valid_from`/`valid_to` come from the entity's temporal fields. Conformance runs in CI against the pinned protocol fixtures (ADR-035 pattern).
+Oxagen exposes one provider per workspace on the tool gateway host. The provider offers `context/query` over entities, records, and runs, with kinds `fact`, `doc`, `memory`, and `episode`. It also offers `context/verify` and the lifecycle operations `append`, `get`, and `resolve`. It declares `data_flow.egress: true` with scope `org-tenant`. Egress means data leaving the organization's boundary, so a host gates the provider behind consent as the protocol requires. Frames carry provenance to the entity, source record, connector, and digest. `token_cost` is the protocol's exact accounting. `valid_from`/`valid_to` come from the entity's temporal fields. Conformance runs in CI against the pinned protocol fixtures (ADR-035 pattern).
 
 ---
 
 ### 11.4 GitHub: events in, code graph up to date
 
-Linking a repository does four things, in this order. Each is visible on the Ontology page with its own status.
+Linking a repository does four things, in this order.
 
 **1. Confirm the production branch.** The link dialog shows GitHub's default branch. It asks the customer to confirm that branch as the production branch or pick another (`main`, `release`, `production`, whatever they ship from). The production branch is the only branch whose commits update the code graph. If GitHub's default branch later changes, the App receives the `repository` event, records it, and prompts the workspace owner. The binding never moves on its own.
 
@@ -935,11 +926,11 @@ Linking a repository does four things, in this order. Each is visible on the Ont
 
 Delivery is by webhook (GitHub sends each event to Oxagen over HTTP) into a durable job, idempotent on GitHub's delivery id. There is no polling and no cron. Missed deliveries are detected from the events themselves. Every `push` carries the previous head. If that head does not equal the head Oxagen last recorded for the branch, the job fetches the compare range and processes the gap before the new push. GitHub's own redelivery is enabled for the App as the second line.
 
-**3. Import issues.** If the repository has Issues enabled, the link runs a one-time backfill. The backfill is paginated, rate-limit aware, and resumable, with a progress bar on the Ontology page. It creates an `:Issue` entity per issue with labels, milestone, state history, and the issue-to-PR links GitHub exposes. Assignees map to principals where a GitHub login matches a member. After the backfill, issue events keep the entities current. An issue becomes a run's task reference automatically when the run's branch name, PR body, or commit message references it (`#123`, `Closes #123`, or the issue URL). Spend then rolls up to the issue without anyone tagging anything.
+**3. Import issues.** If the repository has Issues enabled, the link runs a one-time backfill. The backfill is paginated, rate-limit aware, and resumable. It creates an `:Issue` entity per issue with labels, milestone, state history, and the issue-to-PR links GitHub exposes. Assignees map to principals where a GitHub login matches a member. After the backfill, issue events keep the entities current. An issue becomes a run's task reference automatically when the run's branch name, PR body, or commit message references it (`#123`, `Closes #123`, or the issue URL). Spend then rolls up to the issue without anyone tagging anything.
 
 **4. Build and keep the code graph.** On link, the indexer clones the production branch head. The clone is shallow and goes into ephemeral storage that is discarded after indexing. The indexer builds the code graph: `:File` and `:Symbol` nodes with `DEFINES`, `IMPORTS`, `CALLS`, and `REFERENCES` relationships. Each is stamped with the commit that introduced it (`valid_from`) and, on removal, the commit that removed it (`valid_to`). Parsing uses tree-sitter grammars (a parser library with one grammar per language). These are the same grammars the protocol's reference provider uses, so symbols agree with what Stella sees locally. Every `push` to the production branch then updates the graph **incrementally**. Only the files in the push's diff are re-parsed. Changed symbols are versioned rather than overwritten. The repository's recorded head moves forward in the same transaction. No other branch is ever parsed into the code graph. Pull requests from feature branches are recorded as entities with their diff metadata, and nothing more.
 
-A **manual sync** (`sync_repository`, a governed action on the Ontology page and the API) does a full re-index of the production branch head. It is idempotent. It archives anything the full pass does not see, with the current commit as `valid_to`. An operator reaches for it after a force-push, a history rewrite, or a doubt. It is never scheduled.
+A **manual sync** (`sync_repository`, a governed action available through the API) does a full re-index of the production branch head. It is idempotent. It archives anything the full pass does not see, with the current commit as `valid_to`. An operator reaches for it after a force-push, a history rewrite, or a doubt. It is never scheduled.
 
 Division of labor with Stella: the graph holds the production truth of each repository and its history. Stella's local provider serves working-tree context (uncommitted changes, feature branches) as context frames during a run. Both cite the same symbols, because both use the same grammars. A run's frames show which one a piece of context came from.
 
@@ -966,26 +957,11 @@ Rules:
 
 **Retrieval is hybrid, then reranked, then cited.** A semantic request runs a vector search and a full-text (BM25, keyword-based) search over the allowed labels. It fuses the two ranked lists by reciprocal rank (each result's score comes from its position in each list), reranks the top 50 with `rerank-2.5`, and returns the top k as context frames. Each frame has a kind by label (`fact` for entities and knowledge records, `memory` for memory records, `doc` for chunks, `symbol` for code, `episode` for run summaries). Each frame also carries provenance to the node, its source record and digest, temporal validity from the node, a score normalized into the protocol's provider-local range, and the exact token cost. The frames pass the same conformance checks as any provider's.
 
-**Quality is measured, not assumed.** Every run's `context_use_feedback` records (§9.1) say which frames were rendered, cited, or ignored. From them, Oxagen maintains a per-workspace retrieval evaluation set (query, cited frames). It reports recall at k and the citation rate per index on the Ontology page. Model upgrades, chunking changes, and reranker changes are gated on that set. The findings job flags workspaces whose citation rate is falling.
+**Quality is measured, not assumed.** Every run's `context_use_feedback` records (§9.1) say which frames were rendered, cited, or ignored. From them, Oxagen maintains a per-workspace retrieval evaluation set (query, cited frames). It reports recall at k and the citation rate per index. Model upgrades, chunking changes, and reranker changes are gated on that set. The findings job flags workspaces whose citation rate is falling.
 
-### 11.6 Semantic graph queries
+### 11.6 Graph queries — not shipped
 
-Agents, operators, and the in-app agent ask the graph questions in four ways. All four are governed agent tools. They are read-only and scoped to the caller's workspace and resource scope (§6.3: allowed labels, relationship types, and hop, node, and time budgets). They execute through the graph service on a read-only database role. They are recorded as frames and returned as context frames with citations. The same path therefore serves a wrapped agent, the in-app agent, and a person at the Ontology page.
-
-1. **`get_ontology`**: how an agent learns the shape before it asks anything. It returns the active version's classes, properties, relation types, synonyms, and example questions as `graph` context frames. A planning model reads this the way it reads a database schema.
-2. **`search_graph`**: the hybrid semantic retrieval of §11.5, with filters by label, property, time (`as_of`), and repository.
-3. **`expand_graph`**: typed traversal from seed nodes (by id or from a search) along allowed relationship types, up to a hop budget. It returns a subgraph as `graph` frames whose `relations[]` carry the edges. This is how "everything connected to Customer X" and "what does this symbol call" are answered without generating a query.
-4. **`query_graph`**: a natural-language question compiled to Cypher (the graph database's query language) and executed. The compiler is a `complex`-tier model call. It receives the active ontology version (classes, properties, relation types, and the synonyms the ontology engine collected), the workspace's query examples, and the question. What it produces is never trusted as written:
-   - the Cypher is **parsed**. Only `MATCH`, `OPTIONAL MATCH`, `WHERE`, `WITH`, `RETURN`, `ORDER BY`, `SKIP`, `LIMIT`, `UNWIND`, and calls to an allowlist of read procedures are accepted. Any write clause, any schema clause, or any other procedure rejects the query before it runs.
-   - the workspace predicate, the label and relationship allowlists from the caller's resource scope, and a `LIMIT` are **injected** by the graph service, never left to the model.
-   - the plan is checked with `EXPLAIN` (which shows how the database would run the query without running it) against the node budget. A plan that scans beyond the budget is rejected with the reason.
-   - it runs on a read-only role with the caller's time budget as the transaction timeout.
-   - a syntax or plan rejection is fed back to the compiler at most twice, with the error, before the agent tool returns a typed failure.
-   - the answer carries the executed Cypher, the ontology version, the nodes it cited as context frames, and a confidence that is the compiler's, labeled as such. The question, the Cypher, its digest, and the result digest are frames. Identical questions against the same ontology version are served from the recorded query.
-
-Entity linking inside a question (matching a name to a node) uses the `light` tier and the entity index. Every linked node is cited in the answer, so a wrong link is visible. Questions are untrusted text. Nothing in them reaches Cypher except through the compiler. The compiler's output reaches the database only through the parser and the injector.
-
-`as_of` applies to all four, using the node and edge temporal fields. So "what did we know about this account in June" is a query, not an export. Community summaries over graph neighborhoods (a GraphRAG-style layer of summarized clusters served as `doc` frames) are a v2 item. The four query kinds above are v1.
+Earlier drafts specified four governed agent tools (`get_ontology`, `search_graph`, `expand_graph`, `query_graph`) that let an agent, the in-app agent, or a person ask the graph plain-English questions compiled to Cypher and executed against the active ontology version. That surface does not ship: it depended entirely on the dynamic ontology described at the top of this section.
 
 ### 11.7 The data layer of the code graph: tables, queries, and storage objects
 
@@ -1002,34 +978,11 @@ Code changes are only half of what an agent touches. The other half is the data 
 
 Confidence is assigned by how the reference was resolved. `high` means a literal statement the SQL parser resolved to named tables and columns. `medium` means an ORM call resolved through a model declaration. `low` means a dynamically built query where only the table name is recoverable. `unresolved` means a query site was found but nothing could be named. Unresolved sites are still recorded, so coverage is reported as it is. Edges carry the operation (`select`, `insert`, `update`, `delete`, `ddl`) and, where resolvable, the columns.
 
-**Runtime confirmation.** Frames confirm and extend the static picture. A tool call or command frame that executed a query, a storage SDK call captured as a `network` or `file_io` side effect, and connector sync runs against the live Postgres connector all produce `OBSERVED_ACCESS` edges from the run to the data object. A static edge that a run confirms is raised to `confirmed`. An observed access with no static edge is a finding (a dynamic query the parser missed) and a candidate ontology proposal.
+**Runtime confirmation.** Frames confirm and extend the static picture. A tool call or command frame that executed a query, a storage SDK call captured as a `network` or `file_io` side effect, and connector sync runs against the live Postgres connector all produce `OBSERVED_ACCESS` edges from the run to the data object. A static edge that a run confirms is raised to `confirmed`. An observed access with no static edge is a finding (a dynamic query the parser missed).
 
-**Live schema reconciliation.** Where the Postgres connector (§11.2) is connected to the database the code declares, the ontology engine links declared `Table` nodes to live tables by name. It then compares columns, types, and indexes. Drift is any gap between what the code declares and what the database has: code references a column the database does not have, a migration is not applied, or a table has nothing referencing it. Drift is reported on the Ontology page and offered to the findings job.
+**Live schema reconciliation.** Where a Postgres connection is configured for the database the code declares, Oxagen links declared `Table` nodes to live tables by name. It then compares columns, types, and indexes. Drift is any gap between what the code declares and what the database has: code references a column the database does not have, a migration is not applied, or a table has nothing referencing it. Drift is offered to the findings job.
 
 **What this buys the governor.** With this layer, the toolbelt policy (§6.12) can say what no static allowlist can. It can deny, or route to approval, any tool call whose resolved effect is a write to a table the customer has classed as sensitive (money, personal data, regulated), whichever code path performs it. It can require an approval when a change touches a symbol that writes a table in that class. It can show a CIO, per agent and per run, which tables and buckets the agent's work reached, with the evidence.
-
-### 11.8 The ontology lives in git, and the schema registry is its loader
-
-The current codebase already has a workspace schema registry. It holds an allow-listed vocabulary of labels and relationship types, immutable version snapshots, a pinned version per workspace, diffs, and validation that ingestion is grounded against. Its export layout was designed for git from the start. That code carries over. What changes is where the truth lives. The registry stops being a Postgres store. It becomes the loader, validator, differ, and pin logic over files in the main repo, the same rule as steering (§4.2).
-
-The layout is the registry's own export layout, unchanged. There is one file per label and per relationship type, grouped by schema, with a manifest. It is JSON rather than TOML for three reasons. It is already built that way. Its diffs are already review-friendly. The read path needs no second parser. This is the one JSON directory under `.oxagen/`.
-
-```
-.oxagen/ontology/
-  manifest.json                    # version, label, published_at, enforcement_mode, schemas[] (name, source, enabled)
-  schemas/
-    sales_crm/
-      labels/
-        Customer.json              # description, natural_key_props, properties[], synonyms[], sources[]
-        Contract.json
-      relationships/
-        SIGNED_CONTRACT.json       # start_label, end_label, cardinality, description, properties[]
-    github/                        # the built-in fragment, marked source = "builtin", never edited by hand
-```
-
-**A proposal is a pull request, and merge is activation** (§11.2). The engine's inferred changes, an edit on the Ontology page, and a hand edit all become a branch and a PR on the main repo. The PR gets the checks a Context PR gets plus the registry's own: schema validity, naming, no orphaned relation, no label removed while entities carry it without a migration plan, and a diff against the pinned version. The merged manifest freezes a new immutable version and moves the pin. The graph indexes the active version by digest and keeps every version for `as_of` queries. It holds each proposal's provenance (which source records and which profiler run inferred each class), and it holds all the entities. The Postgres `schema_registry.*` tables are gone. Enabled state and enforcement mode live in the manifest.
-
-**Size, so nobody fears the repository.** An ontology is the schema, not the data. Entities (instances) never go to git. They belong to the graph, in the millions. Per workspace, an ontology is tens to a few hundred classes. Organization-wide, a Fortune 500 company's business ontology, all workspaces merged, lands in the range of a few hundred to about a thousand classes, a few thousand properties, and a few hundred to a couple of thousand relation types. That is one file per class and relation type, so low thousands of small files, which is a modest repository. Steering records are a separate count: hundreds to low thousands per workspace at maturity, again one file each.
 ## 12. Cost: accounted to the token, attributed to the operator, reconciled to the cent
 
 ### 12.1 What is being reconciled
@@ -1229,7 +1182,7 @@ GDPR (the EU privacy law) erasure works by **crypto-shredding**, which destroys 
 
 ## 14. Mission Control
 
-Mission Control has ten pages: seven at workspace scope and three at organization scope. No other pages ship in v1. Appendix F maps every current route onto these ten. Approvals are not a page of their own. They appear as a panel on Fleet and as a strip on Run, because an approval is always about a run.
+Mission Control has nine pages: six at workspace scope and three at organization scope. No other pages ship in v1. Appendix F maps every current route onto these nine. Approvals are not a page of their own. They appear as a panel on Fleet and as a strip on Run, because an approval is always about a run.
 
 | Screen | Job | Primary actions |
 |---|---|---|
@@ -1238,7 +1191,6 @@ Mission Control has ten pages: seven at workspace scope and three at organizatio
 | *(panel on Fleet and Run)* **Approvals** | The queue. Each item shows its four-hop chain, the four links behind a request (who asked, which agent, which action, which rule) | approve, deny, add reason |
 | **Agents** | Each agent's identity, run credential, roles, its toolbelt (the tools it may call, with schemas and per-tool decision rules), the mandates it holds, budgets, enrollment status, and tamper incidents | register, enroll, revoke, grant, set budget, request mandate |
 | **Tools** | The registry (servers, tools, versions, schemas, safety classification), approval rules and auto-approval conditions, connections and their owners, credential grants, the mandates ledger, policy versions with their tests and simulation, kill switches, and the last result from the assurance suite | import server, approve observed schema, add connection, grant mandate, edit and simulate policy, flip a switch |
-| **Ontology** | The workspace's model of its own business, and the page the product is known for. Tabs in order: **Model** (the live map: every class with its entity count, freshness, sources, and relations drawn, plus the consequence on hover: most cited by agents, rules that reference it, proven runs per class, drift found), **Graph** (explore instances, typed expansion, ask in plain English and see the Cypher graph query and the citations behind the answer), **Sources** (connectors, sync health, entity provenance), **Repositories** (main repo and linked repos, production branch, last indexed commit, event health, issue import, code graph, data-layer drift), **Versions** (the git history of `.oxagen/ontology/`, open proposals as pull requests with diffs, an `as_of` picker). The page also lists embedding indexes with their recall and citation rate | ask the graph, open an ontology proposal, link repo, set production branch, sync now, add source, resolve entity, upgrade an embedding index |
 | **Steering** | Published records, proposals, open Context PRs, effect metrics, and retirement candidates | open Context PR, review, retire |
 | **Spend** | Findings ranked by the money at stake. Cost by operator, agent, model, provider key, and task. Proven spend versus unproven spend, and the productive ratio. Cache hit rate. Reconciliation status and variance. Budgets | act on a finding, set budget, open exception, export statement |
 | *(org)* **Organization** | People, roles, invitations, SSO (single sign-on), workspaces, model funding and routes, the data plane, and API keys | invite, change role, create workspace, set funding, set route |
@@ -1277,7 +1229,7 @@ This table lists what carries over from the current `oxagen` repository (and its
 
 | Carry over (design and often code) | Leave behind |
 |---|---|
-| The kernel (the core that runs every call) and its `invoke()` pipeline, the registry, verb-first naming, and the manifest and parity gates. One rename: contracts and agent tools are both called agent tools now | 229 contracts. 78 agent tools in the wedge and 96 for the full product, listed in Appendix E |
+| The kernel (the core that runs every call) and its `invoke()` pipeline, the registry, verb-first naming, and the manifest and parity gates. One rename: contracts and agent tools are both called agent tools now | 229 contracts. 68 agent tools in the wedge and 86 for the full product, listed in Appendix E |
 | Tenancy seams (`runInTenantScope`, `withTenantDb`), the RLS manifest generator (RLS is row-level security, Postgres rules that hide one tenant's rows from another), and the startup guards | `app.rls_bypass`, six policy classes, and nullable-workspace tables |
 | The organization and workspace model, immutable namespaces, and the Better Auth binding | About 110 tables across 20 schemas. 35 tables in 9 schemas remain, listed with their columns in Appendix A |
 | IAM principals (IAM is identity and access management, the rules for who may do what), the delegation ceiling, resource-scope ceilings, and the three live resolver rules | Dead condition language, and the enterprise-tier "allow everything" bypass |
@@ -1285,8 +1237,7 @@ This table lists what carries over from the current `oxagen` repository (and its
 | The run ledger invariants, the rules that must always hold: dense seq, digest chain, seal fence, and one-shot finalization | Postgres as the run store. The store is the graph plus segments |
 | The run-evidence protocol consumer, pinned fixtures, and SDK types with a Zod drift check | Vendored protocol drafts |
 | The two-axis memory concepts: confidence versus enforcement, decay, and citation pressure | The `engram` package, the `rules` engine, and the `:AgentMemory` label. Records replace them |
-| The workspace schema registry's code: validation, immutable versions, pin, diff, the ingestion grounding seam, and its export layout. It now reads `.oxagen/ontology/` in the main repo (§11.8) | The `schema_registry.*` Postgres tables, and activation by API. A merge activates instead |
-| Connector dual-write (each change is written to both the old store and the new one), the GitHub App, and ingestion validation | The Slack, Google, Microsoft, Salesforce, and Stripe connectors (v2 via SDK) |
+| The GitHub App and its repository-linking flow | The workspace schema registry entirely: its validation, versions, pin, diff, and export layout, the `schema_registry.*` Postgres tables, and the connectors and ingestion validation that fed it (§11) |
 | The crypto envelope (envelope encryption: a data key encrypts the content, and a master key encrypts that data key), the storage adapter, and notifications | The `content`, `cms`, `chat`, `workflow`, `eval`, `environments`, `plugin`, and `mcp` registry tables |
 | Nothing from billing. Billing is rebuilt small (§12.1): Stripe for plans and invoices, one usage meter per run, and budgets | The entire billing package: credits, the metering gate, the rate card (the price list for each unit of usage), the governed-action meter, reseller tables, Stripe sync jobs, and spend dashboards as a revenue line |
 | Data planes (ADR-042) | Per-store singletons |
@@ -1306,7 +1257,7 @@ Each milestone has an acceptance test that a customer could run.
 | **M1 Gateway** (weeks 3–8) | The model proxy. The tool gateway with schema validation (each tool call is checked against the tool's declared input shape before it runs). Run tokens (credentials tied to a single run). Frames, chain, seal, and attestation. The Fleet and Run pages with render replay. The model layer with OpenRouter routes and funding sources. The Stella engine container and the in-app agent's onboarding flow. | The gateway wraps Stella and Claude Code. A run can be halted mid-loop from the UI. An exported run can be verified offline. The in-app agent onboards a new organization end to end, and its turns replay as runs. |
 | **M2 Control** (weeks 7–11) | Bundles, commands, approvals with tokens, and budgets. The full call pipeline with taint and receipts. The credential broker with at least token exchange and restricted keys. Mandates and the ledger. Kill switches. Cedar policy with tests and simulation. The Tools page. Cost records with normalized token classes, the price book, and rollups to operator level. The findings job and the Spend page. | The adversarial suite (§6.13) passes every case against the live gateway. A consequential call that exceeds its mandate is denied, and the ledger does not change. An auto-approval fires only inside its conditions. A `require_approval` tool call parks, is approved from Slack, and is billed to the cent. A budget breach pauses a run. An operator's statement sums exactly to their agents' runs. |
 | **M3 Teach** (weeks 10–15) | The records endpoint, the reflector, the promoter, Context PRs through the GitHub App, steering delivery, and effect metrics. | An agent learns something. The lesson becomes a Context PR. Merging it changes the next run's context, and the frame shows the change. |
-| **M4 Ground** (weeks 13–18) | The ontology engine and three connectors. GitHub events and issue import. The code graph with webhook-driven incremental updates and manual sync. Voyage embeddings with hybrid retrieval and reranking. The three graph query agent tools with the Cypher parser and injector. Entity provenance. Oxagen as a protocol provider that passes conformance. | A customer's Linear and GitHub data produce an ontology proposal. Activating it yields cited context frames in a run. A push to the production branch updates the code graph within a minute, and a push to another branch does not. A missed webhook is repaired from the next push's previous-head. A natural-language question returns cited nodes with its Cypher shown. A question that would write or scan past budget is rejected before it runs. |
+| **M4 Ground** (weeks 13–18) | Retired. This milestone built the knowledge graph and dynamic ontology (the ontology engine, connectors, code graph, embeddings, and graph query tools); that capability does not ship in core Oxagen (§11). | — |
 | **M5 Audit** (weeks 16–20) | The archiver, compaction, holds, erasure, and reconciliation against a real provider invoice. | The provider invoice matches above 99.9% by frame. Erasure leaves a verifiable chain. |
 | **M6 Prove** (weeks 18–24) | The witness runner. The witness author, with the test-flip and build oracles first. The airlock at `L0`. Tamper exclusion, proof stamping, and proven spend in the Spend page. | A witness the agent never saw proves a PR opened by a wrapped agent. The agent's frames contain only pass or fail. A PR that edits the test harness is recorded as tampered. The proof verifies offline. |
 
@@ -1316,8 +1267,8 @@ The milestones above are the build order. The phases below are the business orde
 
 | Phase | What ships | Trigger to leave |
 |---|---|---|
-| **The wedge** | Tenancy and identity. The gateway (the model proxy, the tool gateway, wrapping for Stella, Claude Code, Codex, and SDK agents, and one-click installers on three platforms). The toolbelt with approvals, mandates, and kill switches. Runs and frames with render replay. Main and linked repos. Records, Context PRs, and agent definitions in git. Spend accounted to the operator, with findings. The GitHub link with issues and the code graph. Voyage embeddings, search, and graph questions. The Ontology page. Proof ingested from Stella's own ladder. The free tier and gated onboarding. Milestones M0 to M3 and the coding-team half of M4. | Customer 1 in production and paying. Five paying accounts opens the seed round. |
-| **Series A** | What a Fortune 500 security review asks for and what the seed funds. The hosted witness runner with several oracles, so any agent's work is proven (M6). The audit tiers with archive, holds, and erasure, plus provider reconciliation (M5). Dedicated data planes and running behind the firewall (§4.6). SSO and SCIM (single sign-on, plus automatic user provisioning from the customer's identity provider). Two-person mandates and the published assurance suite. The data layer of the code graph, the Linear and Postgres connectors, and the full ontology engine. Outbound events (§7.7) and agent messaging (§7.6). Fork replay and bisect. Multicurrency and the first non-English locales (§15). SOC 2 Type II (an independent audit of security controls over a period of months). Owned intelligence v1: training-set export, the training pipeline, the evaluation harness (the test set that scores a trained model), and hosted serving. | Thirty-five owned models sold. |
+| **The wedge** | Tenancy and identity. The gateway (the model proxy, the tool gateway, wrapping for Stella, Claude Code, Codex, and SDK agents, and one-click installers on three platforms). The toolbelt with approvals, mandates, and kill switches. Runs and frames with render replay. Main and linked repos. Records, Context PRs, and agent definitions in git. Spend accounted to the operator, with findings. The GitHub link with issues. Proof ingested from Stella's own ladder. The free tier and gated onboarding. Milestones M0 to M3. | Customer 1 in production and paying. Five paying accounts opens the seed round. |
+| **Series A** | What a Fortune 500 security review asks for and what the seed funds. The hosted witness runner with several oracles, so any agent's work is proven (M6). The audit tiers with archive, holds, and erasure, plus provider reconciliation (M5). Dedicated data planes and running behind the firewall (§4.6). SSO and SCIM (single sign-on, plus automatic user provisioning from the customer's identity provider). Two-person mandates and the published assurance suite. Outbound events (§7.7) and agent messaging (§7.6). Fork replay and bisect. Multicurrency and the first non-English locales (§15). SOC 2 Type II (an independent audit of security controls over a period of months). Owned intelligence v1: training-set export, the training pipeline, the evaluation harness (the test set that scores a trained model), and hosted serving. | Thirty-five owned models sold. |
 | **Dominate** | The in-firewall installer for owned models. Sovereign and regional planes. Community summaries over the graph. A public registry of conformant providers and tool servers. Agent definitions and policy packs shared across organizations and by industry. Federation between organizations. The connector ecosystem through the SDK. Further locales. | None. Growth. |
 
 The wedge ends when Customer 1 is in production, not on a date. M6 produces the labeled runs that the Series A training pipeline consumes.
@@ -1331,7 +1282,6 @@ The wedge ends when Customer 1 is in production, not on a date. M6 produces the 
 | Neo4j databases per instance | Verified. Aura allows 5 databases per GB of RAM, with a ceiling of 100 per Aura instance. The setting is enabled only at creation and is in public preview (open for use, but not yet final). Sharding, which spreads organizations across instances, starts at 25 paid organizations per 32 GB instance. Free organizations are pooled (§5.3) | If Aura's preview slips or the ceiling drops, the fallback is self-managed Enterprise on Kubernetes with `dbms.max_databases`. The data plane table can point any organization at either option |
 | Graph write throughput for frames | Batched writes, a hot window, then compaction | If a customer exceeds 2,000 frames/s, add a per-org ingest partition. Never add a second store of truth |
 | Claude Code model calls | Setting the base URL to the proxy earns the `gateway` tier for model calls | If a harness cannot point at the proxy, the run gets the `harness` tier and the record says so |
-| Ontology in git | Graph-only in v1 | Regulated customers may ask for ontology changes as Context PRs. The proposal object already has a diff |
 | Approval tokens | Biscuit v2 as designed (a Biscuit token is a signed token that its holder can narrow without asking the issuer again) | If SDK support in Python or Go lags, fall back to a signed JWT (JSON Web Token) with the same claims |
 | Steering format | `.oxagen/rules`, in the context-record TOML format that Stella implements. Stella symlinks to it | The directory name is fixed. If a second agent needs its own path, it gets a symlink the same way Stella does |
 | Protocol trace journal | Export a `contextgraph-trace` journal per run and pass its oracles | The journal is a sketch (`0.1`). Pin its fixtures by commit, like the frame fixtures |
@@ -1358,7 +1308,6 @@ Each scenario is one moment an investor or a customer should remember. The mocku
 | W4 | The flight recorder: a sealed run replayed frame by frame with cost, fork, bisect, export | Run (sealed, compacted) | [W4 mockup](https://claude.ai/code/artifact/a4b69d0b-715c-434c-9f4e-80534bf2e462) | mocked |
 | W5 | Proven, not claimed: the witness flipped on main and the PR; the agent saw only "pass" | Run (proof), witness run, Tools (assurance), Spend (proven) | [W5 mockup](https://claude.ai/code/artifact/81725124-b936-4cbb-9e40-79089b5a1e35) | mocked |
 | W6 | It learned, you approved, it changed: record to proposal to Context PR to merge to the next run | Steering, Run, Agents (definition in git) | [W6 mockup](https://claude.ai/code/artifact/2bbadccb-92ff-4ade-8f6d-704d9c66dafe) | mocked |
-| W7 | The shape of your business: the Ontology map, ask in plain English, Cypher shown, versions in git | Ontology (Model, Graph, Sources, Repositories, Versions) | [W7 mockup](https://claude.ai/code/artifact/8692f683-0eab-4a1f-ad66-20f4a1a2db5b) | mocked |
 | W8 | Every dollar, every operator: proven spend, findings ranked by money, reconciled to the cent | Spend, Billing | [W8 mockup](https://claude.ai/code/artifact/6a15975f-6719-4b4c-aae5-4b942dea0bb1) | mocked |
 | W9 | The toolbelt, governed: only granted tools visible, no credentials held, policy simulated on real history | Agents, Tools | [W9 mockup](https://claude.ai/code/artifact/c16a2951-1a79-4c70-b202-ec405c0563dc) | mocked |
 | W10 | The CIO's console: who can do what, where data lives, what happened, what can be proven, behind the firewall | Organization, Audit | [The CIO's console](https://claude.ai/code/artifact/403166f6-9216-4d23-86ac-bb3c2aa60b23) | mocked |
@@ -1376,7 +1325,6 @@ Each scenario is one moment an investor or a customer should remember. The mocku
 | Run (live, sealed, compacted) | `/{org}/{ws}/runs/{run}` | loaded, loading, error, denied, phone | [W2 mockup](https://claude.ai/code/artifact/0b3eae2f-4fd9-45a5-b667-e04367999d1d), [W5 mockup](https://claude.ai/code/artifact/81725124-b936-4cbb-9e40-79089b5a1e35), [W6 mockup](https://claude.ai/code/artifact/2bbadccb-92ff-4ade-8f6d-704d9c66dafe), [W11 mockup](https://claude.ai/code/artifact/317226a1-c2ff-43ce-a439-4a54f8b8288b), [W3 mockup](https://claude.ai/code/artifact/9a8bcd5c-c66c-462d-992a-a449679801ce), [W4 mockup](https://claude.ai/code/artifact/a4b69d0b-715c-434c-9f4e-80534bf2e462), [W12 mockup](https://claude.ai/code/artifact/3fcf949a-c455-4efd-af36-1c2d1f13088e) |
 | Agents (list, detail, mandate detail) | `/{org}/{ws}/agents`, `/{agent}` | loaded, empty, error, denied, phone | [W6 mockup](https://claude.ai/code/artifact/2bbadccb-92ff-4ade-8f6d-704d9c66dafe), [W11 mockup](https://claude.ai/code/artifact/317226a1-c2ff-43ce-a439-4a54f8b8288b), [W9](https://claude.ai/code/artifact/c16a2951-1a79-4c70-b202-ec405c0563dc), [W3 mockup](https://claude.ai/code/artifact/9a8bcd5c-c66c-462d-992a-a449679801ce), [W12 mockup](https://claude.ai/code/artifact/3fcf949a-c455-4efd-af36-1c2d1f13088e) |
 | Tools (registry, connections, mandates, policy, kill switches, assurance) | `/{org}/{ws}/tools` | loaded, empty, error, denied, phone | [W5 mockup](https://claude.ai/code/artifact/81725124-b936-4cbb-9e40-79089b5a1e35), [W11 mockup](https://claude.ai/code/artifact/317226a1-c2ff-43ce-a439-4a54f8b8288b), [W9](https://claude.ai/code/artifact/c16a2951-1a79-4c70-b202-ec405c0563dc), [W3 mockup](https://claude.ai/code/artifact/9a8bcd5c-c66c-462d-992a-a449679801ce), [W12 mockup](https://claude.ai/code/artifact/3fcf949a-c455-4efd-af36-1c2d1f13088e) |
-| Ontology (Model, Graph, Sources, Repositories, Versions) | `/{org}/{ws}/ontology` | loaded, empty, loading, error, denied, phone | [W7 mockup](https://claude.ai/code/artifact/8692f683-0eab-4a1f-ad66-20f4a1a2db5b), [W11 mockup](https://claude.ai/code/artifact/317226a1-c2ff-43ce-a439-4a54f8b8288b), [W12 mockup](https://claude.ai/code/artifact/3fcf949a-c455-4efd-af36-1c2d1f13088e) |
 | Steering (records, proposals, Context PR, retirement) | `/{org}/{ws}/steering` | loaded, empty, error, denied, phone | [W6 mockup](https://claude.ai/code/artifact/2bbadccb-92ff-4ade-8f6d-704d9c66dafe), [W11 mockup](https://claude.ai/code/artifact/317226a1-c2ff-43ce-a439-4a54f8b8288b), [W12 mockup](https://claude.ai/code/artifact/3fcf949a-c455-4efd-af36-1c2d1f13088e) |
 | Spend (findings, operator, agent, waterfall, reconciliation, budgets) | `/{org}/{ws}/spend` | loaded, empty, loading, error, denied, phone | [W5 mockup](https://claude.ai/code/artifact/81725124-b936-4cbb-9e40-79089b5a1e35), [W11 mockup](https://claude.ai/code/artifact/317226a1-c2ff-43ce-a439-4a54f8b8288b), [W8 mockup](https://claude.ai/code/artifact/6a15975f-6719-4b4c-aae5-4b942dea0bb1), [W12 mockup](https://claude.ai/code/artifact/3fcf949a-c455-4efd-af36-1c2d1f13088e) |
 | Organization | `/{org}` | loaded, denied, phone | [W11 mockup](https://claude.ai/code/artifact/317226a1-c2ff-43ce-a439-4a54f8b8288b), [W10](https://claude.ai/code/artifact/403166f6-9216-4d23-86ac-bb3c2aa60b23), [W12 mockup](https://claude.ai/code/artifact/3fcf949a-c455-4efd-af36-1c2d1f13088e) |
@@ -1508,7 +1456,6 @@ Money is `bigint` micro-USD unless a `currency` column says otherwise. Secrets a
 | `namespace` | citext | unique per organization, immutable |
 | `governance_mode` | text | `solo`, `team`, `regulated` |
 | `retention_mode` | text | override of the organization's, or null |
-| `active_ontology_version` | text | graph id of the pinned version |
 | `bundle_version` | bigint | bumped on every publish or grant change |
 | `deny_generation` | bigint | workspace-level kill switch counter |
 | `promotion_policy` | jsonb | support runs, distinct agents, confidence floor (§9.2) |
@@ -1969,7 +1916,7 @@ Money is `bigint` micro-USD unless a `currency` column says otherwise. Secrets a
 | `agent.agent_runs*`, `agent.agent_executions*`, `tacho_*`, every ClickHouse table | graph nodes (`:Run`, `:Attempt`, `:Frame`) and archive segments |
 | `iam.authorization_decisions` | `policy.decision` frames |
 | `iam.deny_generations` | the two counters on `org.organizations` and `wrk.workspaces` |
-| `schema_registry.*` | ontology versions in the graph, loaded from `.oxagen/ontology/` (§11.8) |
+| `schema_registry.*` | gone; the knowledge graph and dynamic ontology it backed do not ship (§11) |
 | `billing.credit_*`, `billing.reseller_*`, `billing.invoices`, `billing.payment_methods` | gone; Stripe holds invoices and cards. **Amendment 2026-09-13 (ADR-055):** `billing.invoices` is retained as the webhook mirror (`list_invoices` reads it and labels each invoice's kind through `gau_settlements`), and `billing.payment_methods` as the mirror of the saved default card that auto top-up charges; Stripe stays the system of record for both. `billing.credit_*` stays only for the ADR-053 platform-funded assistant balance, which starts at zero for a new organization |
 | `security.security_events`, `privacy.*` requests | `audit.audit_events` |
 | `ingestion.*` cursors and health | columns on `wrk.repositories` and `tools.tool_servers`, and `:Source` nodes |
@@ -1989,17 +1936,11 @@ Every organization has its own database (§5.3). Every node and relationship car
 | Reference | `Workspace` | `id` | reference node for a workspace; fields live in Postgres |
 | Reference | `Principal` | `id`, `kind` | reference node for an operator, agent, or service |
 | Reference | `Agent` | `id`, `agent_key`, `definition_digest` | reference node for an agent identity |
-| Ontology | `Ontology` | `id` | one per workspace |
-| Ontology | `OntologyVersion` | `version`, `digest`, `commit_sha`, `activated_at`, `enforcement_mode` | one per merged version of `.oxagen/ontology/` (§11.8) |
-| Ontology | `Class` | `name`, `description`, `natural_key`, `synonyms`, `sensitivity` | a kind of entity |
-| Ontology | `Property` | `name`, `type`, `required`, `unit` | a property of a class |
-| Ontology | `RelationType` | `name`, `start_label`, `end_label`, `cardinality` | a kind of relationship between classes |
-| Source | `Source` | `connector`, `connection_id`, `status` | a connected system (GitHub, Linear, Postgres) |
+| Source | `Source` | `connector`, `connection_id`, `status` | the GitHub connector |
 | Source | `SyncRun` | `started_at`, `ended_at`, `records`, `status` | one synchronization |
 | Source | `SourceRecord` | `external_id`, `digest`, `synced_at`, `payload_ref` | one raw record as ingested |
 | Source | `Event` | `delivery_id`, `kind`, `actor`, `occurred_at`, `payload_digest` | one repository event (§11.4) |
-| Entity | `Entity` + class label | `natural_key`, `display_name`, class properties, `embedding_*` | a resolved thing; the class label is dynamic (`:Customer`, `:Ticket`) |
-| Entity (GitHub fragment) | `Repository`, `Branch`, `Commit`, `PullRequest`, `Issue`, `Release`, `File`, `Symbol` | per class | the built-in code and repository classes |
+| Entity (GitHub fragment) | `Repository`, `Branch`, `Commit`, `PullRequest`, `Issue`, `Release`, `File`, `Symbol` | per class | the fixed, built-in code and repository classes (§11.2); not customer-extensible |
 | Entity (data layer) | `Database`, `Schema`, `Table`, `Column`, `Index`, `Constraint`, `View`, `Migration`, `StorageBucket`, `Queue`, `Topic`, `Cache`, `Secret`, `DatabaseInstance` | per class | the built-in data classes (§11.7) |
 | Context | `Record` | `record_id`, `lineage_id`, `record_kind`, `record_hash`, `status`, `sharing_scope`, `confidence`, `origin`, `attestation` | a context record (§9) |
 | Run | `Run` | `operator_id`, `agent_id`, `harness`, `task_ref`, `enforcement_tier`, `replay_grade`, `verdict`, `cost_micros`, `frame_count`, `merkle_root`, `segment_ref` | one run (§8.1) |
@@ -2015,12 +1956,7 @@ Every organization has its own database (§5.3). Every node and relationship car
 | Layer | Type | From → To | Properties | Meaning |
 |---|---|---|---|---|
 | Structure | `IN_WORKSPACE` | any node → `Workspace` | | membership, in addition to the `ws` property |
-| Ontology | `HAS_VERSION` | `Ontology` → `OntologyVersion` | | |
-| Ontology | `DEFINES` | `OntologyVersion` → `Class`, `RelationType` | | what a version contains |
-| Ontology | `HAS_PROPERTY` | `Class` → `Property` | | |
-| Entity | `INSTANCE_OF` | `Entity` → `Class` | `as_of_version` | |
 | Entity | `DERIVED_FROM` | `Entity` → `SourceRecord` | `confidence`, `resolved_by` | provenance of every entity |
-| Entity | `RELATES` | `Entity` → `Entity` | `type` (a `RelationType` name), class-specific properties | the customer's own relationships |
 | Source | `PRODUCED` | `SyncRun` → `SourceRecord` | | |
 | Source | `FROM_SOURCE` | `SyncRun` → `Source` | | |
 | Source | `CONCERNS` | `Event` → `Entity` | | which entity a repository event is about |
@@ -2138,7 +2074,7 @@ How the four grants combine for this role: every GitHub tool is allowed for read
 
 ## Appendix E. The agent tools that survive
 
-The current repository registers 229 real contracts (244 names minus test fixtures). The list below is the definitive set for the rebuild: **96 agent tools** (78 of them in the wedge), grouped by the job they serve. Each row names the new tool, what it absorbs from today's registry, and what it does. Anything not named here is dropped, and the drop is listed by family at the end. Names follow ADR-025 (verb-first snake case, scope as an argument). Every tool has an input schema, an output schema, a risk grade, a default effect, and is exposed on API, MCP, and the UI unless marked headless.
+The current repository registers 229 real contracts (244 names minus test fixtures). The list below is the definitive set for the rebuild: **86 agent tools** (68 of them in the wedge), grouped by the job they serve. Each row names the new tool, what it absorbs from today's registry, and what it does. Anything not named here is dropped, and the drop is listed by family at the end. Names follow ADR-025 (verb-first snake case, scope as an argument). Every tool has an input schema, an output schema, a risk grade, a default effect, and is exposed on API, MCP, and the UI unless marked headless.
 
 **Organization and workspace (11)**
 
@@ -2213,23 +2149,15 @@ The current repository registers 229 real contracts (244 names minus test fixtur
 | `simulate_policy` | (new) | replay a version against history |
 | `set_kill_switch` | (new) | any level |
 
-**Ontology and knowledge (13)**
+**Repositories (3)**
 
 | Agent tool | Absorbs | Does |
 |---|---|---|
 | `link_repository` | configure_repo, sync_repo, install_integration (GitHub part) | link, role, production branch, issue import |
 | `unlink_repository` | pause_repo, delete_integration | |
 | `sync_repository` | sync_repo, resume_repo, sync_integration | manual full re-index |
-| `add_source` | create_connection (ingestion part), install_plugin, configure_integration | connector source |
-| `update_source` | update_connection, set_connection_mappings, suggest_connection_mappings, pause_connection, preview_connection | mappings, state |
-| `remove_source` | delete_connection, uninstall_plugin | |
-| `list_sources` | list_connections, list_integrations, list_plugins, get_integration, get_integration_metrics, get_reconcile_status | health, cursors, counts |
-| `propose_ontology_version` | recommend_schema, setup_schema, create_schema_version, run_schema_chat, pin_schema_version, toggle_schema, dispatch_schema_reconcile | profiler plus author; opens the pull request on the main repo (merge activates, §11.8) |
-| `get_ontology` | get_schema_registry, list_schema_versions, list_schemas, diff_schema_versions, export_schema, get_node_labels | active version, classes, relations, synonyms, proposals, diffs; also served to agents as `graph` frames |
-| `update_ontology` | upsert_schema_label, upsert_schema_property, upsert_schema_relationship, delete_schema_label, delete_schema_property, delete_schema_relationship, validate_schema_node, validate_schema_relationship | edits on a proposal branch |
-| `search_graph` | search_graph, search_nodes, search_references, list_nodes | hybrid semantic |
-| `expand_graph` | get_ontology_neighbors, get_node | typed traversal |
-| `query_graph` | query_ontology, get_graph_stats | natural language to Cypher |
+
+Dropped from this family (§11): `add_source`, `update_source`, `remove_source`, `list_sources` (connector-based ingestion beyond GitHub), `propose_ontology_version`, `get_ontology`, `update_ontology` (the dynamic ontology's proposal and versioning surface), and `search_graph`, `expand_graph`, `query_graph` (the natural-language-to-Cypher graph query surface). None of these ship in core Oxagen.
 
 **Context and steering (9)**
 
@@ -2295,11 +2223,11 @@ The current repository registers 229 real contracts (244 names minus test fixtur
 
 **Dropped, by family** (everything not named above): `environment.*` and `bind/unbind_agent_environment` (no runtime); `plugin.*`, `browse_plugin_catalog`, `add/remove_plugin_registry`, `install_plugins_bulk`, `sync_plugin_catalog`, `get_catalog_plugin`, `get_plugin_schema`, `validate_plugin_schema`, `list_plugin_registries`, `list_plugin_versions`, `set_plugin_enabled` (no marketplace in v1; sources and tool servers replace it); `prompt.settings.*` (steering replaces prompt settings); `import_env_secrets`, `export_secrets`, `reveal_secret` (secrets are connections and are never revealed); `parse_memory_import`, `commit_memory_import` (records are appended, not imported); `get_pr`, `get_pr_diff`, `list_branches`, `get_ci_status`, `read_file` (the graph and the GitHub events hold these; agents read code through their own harness); `upload_asset` (no content); `get_org_settings`, `get_workspace_settings`, `get_environment`, `get_connection`, `get_connection_mappings`, `get_memory_policy`, `get_prompt_settings`, `get_routing_policy` (reads folded into the objects above); everything in the test fixtures.
 
-Count: 11 + 10 + 14 + 17 + 13 + 9 + 9 + 7 + 6 = **96** for the full product. The wedge ships 78: the 96 minus the eighteen marked new in the toolbelt, compliance, wrapping, and knowledge families that land from M2 onward and in Series A. Nothing is added back without a row in this appendix.
+Count: 11 + 10 + 14 + 17 + 3 + 9 + 9 + 7 + 6 = **86** for the full product. The wedge ships 68: the 86 minus the eighteen marked new in the toolbelt, compliance, and wrapping families that land from M2 onward and in Series A. Nothing is added back without a row in this appendix.
 
 ## Appendix F. The pages that survive
 
-The current web app has 70 page files. Ten remain: seven at workspace scope, three at organization scope. Sign-in flows (login, signup, password reset, two-factor, verify, accept an invite, create the first organization) are not screens and are not counted; there are seven of them and they stay as they are. Onboarding is not a page: it is the in-app agent's first run inside the workspace.
+The current web app has 70 page files. Nine remain: six at workspace scope, three at organization scope. Sign-in flows (login, signup, password reset, two-factor, verify, accept an invite, create the first organization) are not screens and are not counted; there are seven of them and they stay as they are. Onboarding is not a page: it is the in-app agent's first run inside the workspace.
 
 | # | Page | Route | Absorbs today's routes | Job |
 |---|---|---|---|---|
@@ -2307,12 +2235,13 @@ The current web app has 70 page files. Ten remain: seven at workspace scope, thr
 | 2 | **Run** | `/{org}/{ws}/runs/{run}` | `sessions/*` detail, `knowledge/citations` | frame-by-frame player, cost strip, approvals on this run, steer, fork, bisect, export |
 | 3 | **Agents** | `/{org}/{ws}/agents` and `/{run}`-style detail `/{agent}` | `workbench/agents`, `workbench/agents/[agentId]`, `workbench/agents/new`, `workbench/environments`, `settings/agent-defaults`, `developer/mcp` | identity, credentials, roles, toolbelt, mandates, budgets, enrollment |
 | 4 | **Tools** | `/{org}/{ws}/tools` | `workbench/tools`, `workbench/tools/agent tools`, `workbench/tools/mcp`, `settings/mcp-server-registries`, `marketplace`, `marketplace/agent-tools`, `marketplace/integrations`, `marketplace/integrations/[connectorId]`, `governance/agent tools`, `governance/policies`, `access/reviews` | registry, connections, mandates ledger, policy versions with simulation, kill switches, assurance results |
-| 5 | **Ontology** | `/{org}/{ws}/ontology` | `knowledge`, `knowledge/graph`, `knowledge/graph/[nodeId]`, `knowledge/ontology`, `knowledge/sources`, `knowledge/sources/connect`, `settings/github` | the model map, graph explorer and questions, sources, repositories, versions in git, embedding indexes |
-| 6 | **Steering** | `/{org}/{ws}/steering` | `knowledge/memory` | records, proposals, Context PRs, effect, retirement |
-| 7 | **Spend** | `/{org}/{ws}/spend` | `settings/spend-budgets`, `billing/usage` | findings, spend by operator and agent, proven spend, reconciliation, budgets |
-| 8 | **Organization** | `/{org}` | `[orgSlug]` (org home), `members`, `members/pending`, `workspaces`, `new-workspace`, `settings/general`, `settings/model-funding`, `settings/privacy`, `developer/tokens`, `settings` (workspace general), `settings/general` (workspace) | members and roles, workspaces, model funding and routes, data plane, API keys, workspace settings |
-| 9 | **Billing** | `/{org}/billing` | `billing`, `billing/subscription`, `billing/invoices` | plan, run allowance, meters, invoices (linked to Stripe) |
-| 10 | **Audit** | `/{org}/audit` | `security`, `security/audit`, `security/compliance`, `security/mfa`, `security/trust`, `governance`, `access` | audit events, incidents, receipts search, legal holds, exports, key rotation, assurance suite results |
+| 5 | **Steering** | `/{org}/{ws}/steering` | `knowledge/memory` | records, proposals, Context PRs, effect, retirement |
+| 6 | **Spend** | `/{org}/{ws}/spend` | `settings/spend-budgets`, `billing/usage` | findings, spend by operator and agent, proven spend, reconciliation, budgets |
+| 7 | **Organization** | `/{org}` | `[orgSlug]` (org home), `members`, `members/pending`, `workspaces`, `new-workspace`, `settings/general`, `settings/model-funding`, `settings/privacy`, `settings/github`, `developer/tokens`, `settings` (workspace general), `settings/general` (workspace) | members and roles, workspaces, model funding and routes, data plane, API keys, workspace settings including repo binding |
+| 8 | **Billing** | `/{org}/billing` | `billing`, `billing/subscription`, `billing/invoices` | plan, run allowance, meters, invoices (linked to Stripe) |
+| 9 | **Audit** | `/{org}/audit` | `security`, `security/audit`, `security/compliance`, `security/mfa`, `security/trust`, `governance`, `access` | audit events, incidents, receipts search, legal holds, exports, key rotation, assurance suite results |
+
+The routes `knowledge`, `knowledge/graph`, `knowledge/graph/[nodeId]`, `knowledge/ontology`, `knowledge/sources`, and `knowledge/sources/connect` are dropped along with the dynamic knowledge graph they served (§11); nothing absorbs them.
 
 Account pages (`account`, `account/profile`, `account/preferences`, `account/privacy`, `account/security`) collapse into one **Account** dialog reachable from the user menu; it is a dialog, not a page. `cli/authorize` and `github/setup` are callback endpoints, not pages, and stay. Every other route in today's list redirects to the page that absorbed it for one release, then is removed.
 

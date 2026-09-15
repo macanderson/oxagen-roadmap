@@ -742,6 +742,97 @@ a.inv-i:hover{border-color:var(--rule);text-decoration:none}
 .menu-hd span{display:block;font-size:11.5px;color:var(--dim);font-family:var(--mono)}
 .rel{position:relative}
 
+/* ---------- mobile: the thumb bar, the More sheet, bottom-sheet dialogs, card tables ----------
+   Everything an operator does on a phone is reachable from the bottom third of the screen: the
+   five-slot bar, dialogs that rise from the bottom edge, the drawer's scrim, and the assistant.
+   Touch targets are 44px or larger; inputs are 16px so iOS never zooms the page on focus. */
+#viewport.mobile{max-width:none;border:0}
+.mnav{display:none}
+#viewport.phone .mnav{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:400px;z-index:60;
+  background:color-mix(in srgb,var(--void) 94%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--border);
+  padding:6px 4px calc(6px + env(safe-area-inset-bottom));gap:2px}
+#viewport.mobile .mnav{max-width:none;left:0;transform:none;width:auto;right:0}
+.mn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:52px;border:0;background:none;color:var(--muted);font-size:10.5px;font-weight:600;letter-spacing:.01em;border-radius:10px;position:relative;-webkit-tap-highlight-color:transparent}
+.mn .ic{width:24px;height:24px;display:grid;place-items:center}
+.mn .ic svg{width:22px;height:22px}
+.mn[aria-current="page"]{color:var(--fg)}
+.mn[aria-current="page"]::before{content:"";position:absolute;top:-7px;left:50%;transform:translateX(-50%);width:26px;height:2px;background:var(--gold);border-radius:0 0 2px 2px}
+.mn:active{background:var(--hl)}
+.mn .ct{position:absolute;top:2px;left:calc(50% + 6px);font-family:var(--mono);font-size:10px;line-height:1.5;color:var(--dim);background:var(--panel);border:1px solid var(--border);border-radius:9px;padding:0 5px;min-width:18px;text-align:center}
+.mn .ct.hot{color:var(--st-approval);border-color:color-mix(in srgb,var(--st-approval) 40%,transparent)}
+html.has-mnav #viewport.phone .page{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
+html.has-mnav #toast.phone{bottom:calc(88px + env(safe-area-inset-bottom))}
+#viewport.mobile .page{padding:14px 16px calc(96px + env(safe-area-inset-bottom))}
+.mgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.mgrid.one{grid-template-columns:minmax(0,1fr)}
+.mtile{display:flex;align-items:center;gap:10px;min-height:56px;min-width:0;padding:8px 10px;border:1px solid var(--border);background:var(--ink);border-radius:12px;color:var(--fg);text-align:left;position:relative;-webkit-tap-highlight-color:transparent}
+.mtile:active{background:var(--hl)}
+.mtile .ic{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;background:var(--panel);border:1px solid var(--border);color:var(--muted);flex:none}
+.mtile .tx{min-width:0;display:flex;flex-direction:column}
+.mtile .tx b{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mtile .tx span{font-size:11px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mtile .ct{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--dim);background:var(--panel);border:1px solid var(--border);border-radius:5px;padding:0 5px;flex:none}
+.mtile .ct.hot{color:var(--st-approval);border-color:color-mix(in srgb,var(--st-approval) 40%,transparent)}
+/* drawer: a scrim behind the sidebar, and the drawer itself is the full height with big rows */
+.side-scrim{display:none}
+#viewport.phone .side-scrim{display:block;position:fixed;inset:0;z-index:79;background:rgba(10,10,9,.6)}
+#viewport.phone .side.open{width:min(300px,86vw);padding-bottom:env(safe-area-inset-bottom)}
+#viewport.phone .navitem{padding:12px 10px;font-size:15px;min-height:44px}
+#viewport.phone .switcher{min-height:44px}
+/* top bar: the current crumb and its parent only; search collapses to its glyph */
+#viewport.phone .top{padding:8px 12px;gap:8px;flex-wrap:nowrap;padding-top:calc(8px + env(safe-area-inset-top))}
+#viewport.phone .crumbs{flex-wrap:nowrap;overflow:hidden;white-space:nowrap;flex:1}
+#viewport.phone .crumbs>*:not(:last-child){display:none}
+#viewport.phone .crumbs>*{overflow:hidden;text-overflow:ellipsis}
+#viewport.phone .crumbs b{font-size:15px}
+#viewport.phone .top .sp{display:none}
+#viewport.phone .kbtn{min-width:0;width:40px;height:40px;padding:0;justify-content:center;border-radius:10px}
+#viewport.phone .kbtn .kt,#viewport.phone .kbtn kbd{display:none}
+#viewport.phone .iconbtn,#viewport.phone .hamburger{width:40px;height:40px;border-radius:10px}
+/* touch targets and type */
+#viewport.phone .btn{min-height:40px;padding:8px 14px;font-size:14px}
+#viewport.phone .btn.sm{min-height:36px;padding:6px 11px;font-size:13px}
+#viewport.phone .tab{padding:12px 14px;font-size:14px;min-height:44px}
+#viewport.phone .tabs{margin-left:-16px;margin-right:-16px;padding:0 16px;scroll-snap-type:x proximity}
+#viewport.phone .tab{scroll-snap-align:start}
+#viewport.phone input,#viewport.phone select,#viewport.phone textarea,#layer.phone input,#layer.phone select,#layer.phone textarea{font-size:16px}
+#viewport.phone .field input,#viewport.phone .field select,#layer.phone .field input,#layer.phone .field select{min-height:44px}
+#viewport.phone .sel-sm{min-height:36px}
+#viewport.phone .menu-i{min-height:44px;font-size:14px}
+#viewport.phone .phead h1{font-size:20px}
+#viewport.phone .g3,#viewport.phone .g4{grid-template-columns:1fr 1fr}
+#viewport.phone .stat{padding:11px 12px}
+/* dialogs rise from the bottom edge as sheets; the primary action is full width under the thumb */
+#layer.phone .scrim{place-items:end center;padding:0}
+#layer.phone .dlg,#layer.phone .cmd{max-width:none;width:100%;border-radius:18px 18px 0 0;border-bottom:0;max-height:calc(100dvh - 24px);display:flex;flex-direction:column;
+  animation:sheet-up .3s cubic-bezier(.32,.72,0,1);padding-bottom:env(safe-area-inset-bottom)}
+#layer.phone .dlg::before,#layer.phone .cmd::before{content:"";display:block;width:36px;height:4px;border-radius:2px;background:var(--rule);margin:8px auto -4px}
+#layer.phone .dlg-b{max-height:none;flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch}
+#layer.phone .dlg-f{flex-direction:row-reverse;flex-wrap:wrap}
+#layer.phone .dlg-f .btn{flex:1 1 45%;justify-content:center;min-height:46px}
+#layer.phone .dlg-f .grow{flex-basis:100%}
+#layer.phone .cmd-l{max-height:none;flex:1;overflow-y:auto}
+#layer.phone .cmd-i{min-height:44px}
+#layer:not(.mobile).phone .scrim{padding:0 calc(50vw - 200px)}
+@keyframes sheet-up{from{transform:translateY(24px);opacity:.6}to{transform:none;opacity:1}}
+@media(prefers-reduced-motion:reduce){#layer.phone .dlg,#layer.phone .cmd{animation:none}}
+/* the assistant on a real phone is the whole width */
+.asst.mobile{max-width:none;border:0}
+/* card tables: each row a card, each cell labelled by its column */
+#viewport.phone table.cards,#layer.phone table.cards{display:block;min-width:0}
+#viewport.phone table.cards thead,#layer.phone table.cards thead{display:none}
+#viewport.phone table.cards tbody,#layer.phone table.cards tbody{display:grid;gap:8px}
+#viewport.phone table.cards tr,#layer.phone table.cards tr{display:grid;grid-template-columns:minmax(0,1fr);border:1px solid var(--border);border-radius:12px;background:var(--ink);padding:6px 12px}
+#viewport.phone table.cards tr:hover,#layer.phone table.cards tr:hover{background:var(--ink)}
+#viewport.phone table.cards td,#layer.phone table.cards td{display:flex;justify-content:flex-end;align-items:center;gap:8px;flex-wrap:wrap;padding:7px 0;border:0;border-bottom:1px solid color-mix(in srgb,var(--border) 60%,transparent);text-align:left;white-space:normal;min-height:34px}
+#viewport.phone table.cards td:first-child,#layer.phone table.cards td:first-child{justify-content:flex-start;padding-top:9px}
+#viewport.phone table.cards td:first-child::before,#layer.phone table.cards td:first-child::before{display:none}
+#viewport.phone table.cards td:last-child,#layer.phone table.cards td:last-child{border-bottom:0}
+#viewport.phone table.cards td[data-l]::before,#layer.phone table.cards td[data-l]::before{content:attr(data-l);color:var(--dim);font-size:10.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;flex:none;max-width:38%;text-align:left;margin-right:auto}
+#viewport.phone table.cards td:not([data-l]),#layer.phone table.cards td:not([data-l]){justify-content:flex-start}
+#viewport.phone table.cards td.num,#layer.phone table.cards td.num{text-align:right}
+#viewport.phone table.cards .lt-empty td{justify-content:center;color:var(--muted)}
+#viewport.phone .tw .tc:not(.sm){min-width:0}
 /* ---------- mockup chrome (never product UI) ---------- */
 /* sits above the in-app agent dock, which owns the bottom edge */
 #chrome{position:fixed;right:12px;bottom:12px;z-index:200;font-family:var(--mono);font-size:11px}
@@ -1636,6 +1727,10 @@ pre .dn{color:var(--st-denied)}
 
 <script>
 "use strict";
+/* PRODUCT: true in the files tools/build-pages.mjs generates. Hides everything that is mockup
+   chrome rather than product UI: the state bar, the scenario rail and nav item, the onboarding
+   demo entry points and their "Exit demo" buttons. mc.html itself keeps it false. */
+var PRODUCT=false;
 var DLG_EXT={};   /* lazily built dialogs, registered beside their code; see dialog() */
 /* ============================== demo record ============================== */
 var ORG = {slug:"a-intel", name:"Anderson Intelligence Corp.", currency:"USD", plan:"Team", dataPlane:"shared",
@@ -2439,26 +2534,6 @@ var ASSURANCE = {version:"suite v0.9.3", ran:"2026-09-11 06:00 UTC", against:"a-
  {c:"Modify a receipt after the fact",r:"n/a",d:"object lock is not enabled on the shared plane; not applicable at this tier"}
 ]};
 
-var CLASSES = [
- {n:"Repository",ents:3,fresh:"2 min",src:"GitHub",rel:"HAS_BRANCH, HAS_PULL_REQUEST, CONTAINS_FILE",cited:1842,rules:4,proven:212,drift:0,builtin:true},
- {n:"PullRequest",ents:1284,fresh:"2 min",src:"GitHub",rel:"TARGETS_BRANCH, REVIEWED_BY, CLOSES_ISSUE",cited:2610,rules:6,proven:198,drift:0,builtin:true},
- {n:"Issue",ents:3907,fresh:"2 min",src:"GitHub, Linear",rel:"ASSIGNED_TO, CLOSES_ISSUE, IN_PROJECT",cited:4120,rules:3,proven:141,drift:0,builtin:true},
- {n:"Symbol",ents:118402,fresh:"2 min",src:"GitHub (code graph)",rel:"DEFINES, CALLS, IMPORTS, READS, WRITES",cited:7733,rules:2,proven:176,drift:0,builtin:true},
- {n:"Customer",ents:1461,fresh:"41 min",src:"Postgres · aintel_prod",rel:"SIGNED_CONTRACT, OWNS_DEVICE, RAISED_TICKET",cited:988,rules:5,proven:12,drift:2,builtin:false},
- {n:"Contract",ents:1188,fresh:"41 min",src:"Postgres · aintel_prod",rel:"SIGNED_CONTRACT, BILLS_TO",cited:402,rules:7,proven:4,drift:0,builtin:false},
- {n:"Device",ents:22840,fresh:"41 min",src:"Postgres · aintel_prod",rel:"OWNS_DEVICE, REPORTS_TELEMETRY",cited:1206,rules:2,proven:31,drift:1,builtin:false},
- {n:"Ticket",ents:8821,fresh:"11 min",src:"Linear",rel:"RAISED_TICKET, ABOUT_DEVICE",cited:1540,rules:1,proven:9,drift:0,builtin:false},
- {n:"Table",ents:214,fresh:"2 min",src:"GitHub (data layer)",rel:"DECLARED_BY, READS, WRITES, MIGRATES",cited:611,rules:8,proven:22,drift:3,builtin:false}
-];
-
-var SOURCES = [
- {n:"GitHub · a-intel/platform",kind:"github",records:184022,last:"2 min ago",health:"ok",cursor:"delivery 8f21c04e",entities:"Repository, PullRequest, Issue, File, Symbol, Table"},
- {n:"GitHub · a-intel/billing",kind:"github",records:41908,last:"6 min ago",health:"ok",cursor:"delivery 3ac70b19",entities:"Repository, PullRequest, Issue"},
- {n:"GitHub · a-intel/mobile",kind:"github",records:38115,last:"2 h ago",health:"ok",cursor:"delivery 91e4dd02",entities:"Repository, PullRequest, Issue"},
- {n:"Linear · Anderson Intelligence Corp.",kind:"linear",records:12044,last:"11 min ago",health:"ok",cursor:"page 402",entities:"Issue, Project, Ticket"},
- {n:"Postgres · aintel_prod (7 tables)",kind:"postgres",records:49330,last:"41 min ago",health:"degraded",cursor:"customers.updated_at = 2026-09-11T07:29Z",entities:"Customer, Contract, Device"}
-];
-
 var REPOS = [
  {n:"a-intel/platform",role:"main",branch:"main",head:"a4c91e2",indexed:"2 min ago",issues:"enabled · 3,907 imported",
   events:"ok · 8,142 deliveries / 30d · 0 gaps",symbols:118402,drift:"3 data-layer findings"},
@@ -2466,22 +2541,6 @@ var REPOS = [
   events:"ok · 1,904 deliveries / 30d · 0 gaps",symbols:24118,drift:"none"},
  {n:"a-intel/mobile",role:"linked",branch:"release",head:"c02fa77",indexed:"2 h ago",issues:"disabled",
   events:"ok · 640 deliveries / 30d · 1 gap recovered",symbols:31904,drift:"1 data-layer finding"}
-];
-
-var ONTVERSIONS = [
- {v:"v18",state:"active",commit:"d91f30c",at:"2026-09-09 11:42",by:"Priya Natarajan",pr:"a-intel/platform#488",
-  diff:"+1 class (Table), +4 properties on Customer, +1 relation (MIGRATES)"},
- {v:"v17",state:"superseded",commit:"6b02ae4",at:"2026-08-22 09:15",by:"Marcus Bell",pr:"a-intel/platform#441",
-  diff:"+2 classes (Device, Ticket), +3 relations"},
- {v:"v19",state:"open proposal",commit:"—",at:"2026-09-11 07:50",by:"ontology engine",pr:"a-intel/platform#517",
-  diff:"+1 class (SupportPlan), +2 properties on Contract · migration plan for 1,188 entities"}
-];
-
-var INDEXES = [
- {n:"entity · voyage-4",dims:1024,nodes:38402,recall:0.91,cite:0.74,state:"current"},
- {n:"record · voyage-4",dims:1024,nodes:1204,recall:0.88,cite:0.81,state:"current"},
- {n:"code · voyage-code-3",dims:1024,nodes:118402,recall:0.83,cite:0.66,state:"upgrade available"},
- {n:"doc · voyage-context-3",dims:1024,nodes:9118,recall:0.79,cite:0.58,state:"current"}
 ];
 
 var RECORDS = [
@@ -2755,7 +2814,7 @@ var BILLING = {plan:"Team", runsIncluded:1000, runsUsed:4218, billable:3218,
   ]};
 
 /* ============================== engine ============================== */
-var S = {state:"loaded", phone:false, theme:null, asst:false, asstEngine:"up",
+var S = {state:"loaded", phone:false, mobile:false, theme:null, asst:false, asstEngine:"up",
          layer:null, tab:{}, side:false, ws:"core-platform", frame:15, runFilter:"all",
          ctxSel:"frames", approved:{}, toolNames:"label", beltView:"group", beltCat:"", regCat:""};
 
@@ -2789,16 +2848,6 @@ function me(){return PEOPLE[SESSION_USER]||PEOPLE.marcus;}
 function srvCount(){return SERVERS.length;}
 function verCount(){return SERVERS.reduce(function(n,x){return n+(x.versions||0);},0);}
 function srvToolCount(){return SERVERS.reduce(function(n,x){return n+(x.tools||0);},0);}
-function ontEntities(){return CLASSES.reduce(function(n,c){return n+(c.ents||0);},0);}
-function ontRelTypes(){
-  var seen={},out=[];
-  CLASSES.forEach(function(c){String(c.rel||"").split(",").forEach(function(r){
-    r=r.trim(); if(r&&!seen[r]){seen[r]=1;out.push(r);}
-  });});
-  return out;
-}
-function ontDrift(){return CLASSES.reduce(function(n,c){return n+(c.drift||0);},0);}
-function ontDriftClasses(){return CLASSES.filter(function(c){return (c.drift||0)>0;}).map(function(c){return c.n;});}
 /* Spend per proven run: spend divided by runs whose verdict flipped (§12.8). Derived, so it
    can never drift into equalling spend per run. */
 function perProvenRun(row){
@@ -3290,7 +3339,7 @@ function applyHashTab(){
 window.addEventListener("hashchange",function(){S.side=false;fpStop();applyHashTab();render();});
 
 var PAGES={fleet:"Fleet",run:"Run",agents:"Agent IAM",agent:"Agent IAM",mandate:"Agent IAM",tools:"Tools",
-  agentsource:"Agent IAM",ontology:"Ontology",steering:"Steering",spend:"Spend",organization:"Organization",billing:"Billing",audit:"Audit",
+  agentsource:"Agent IAM",steering:"Steering",spend:"Spend",organization:"Organization",billing:"Billing",audit:"Audit",
   scenarios:"Scenarios"};
 
 /* ============================== agent definition: the TOML file is the record ==============================
@@ -3503,6 +3552,9 @@ function edMarks(text,q,cur){
 /* ---- the source editor page ---- */
 function pAgentSource(r){
   var a=agentBySlug(r.id)||AGENTS[0], slug=defSlug(a), w=ws(), path='.oxagen/agents/'+slug+'.toml';
+  if(S.state==="loading") return skeleton();
+  if(S.state==="error") return errorState("This file","502 git_read_unreachable");
+  if(S.state==="denied") return deniedState("this agent’s definition","agent.write on "+w.slug);
   if(!S.ed||S.ed.slug!==slug)S.ed={slug:slug,sel:[0,0],find:"",cur:-1,matches:0};
   var dirty=defDirty(slug), pend=S.defPending[slug];
   return '<div class="phead"><div class="t"><p class="eyebrow">Agent · source</p><h1 class="mono" style="font-size:18px">'+h(path)+'</h1>'+
@@ -3766,8 +3818,12 @@ function commitConfirm(){
 function icon(n){
   var p={fleet:'<circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l2.8 2.8M16.2 16.2 19 19M19 5l-2.8 2.8M7.8 16.2 5 19"/>',
    agents:'<rect x="3" y="8" width="18" height="12" rx="2"/><path d="M9 8V5a3 3 0 0 1 6 0v3M8 14h.01M16 14h.01"/>',
+   more:'<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>',
+   search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
+   bell:'<path d="M18 8a6 6 0 1 0-12 0c0 7-3 8-3 8h18s-3-1-3-8"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>',
+   org:'<path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-5h6v5M9 10h.01M15 10h.01M9 14h.01M15 14h.01"/>',
+   ws:'<path d="M6 3v12M18 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM6 21a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM18 9a9 9 0 0 1-9 9"/>',
    tools:'<path d="M14.7 6.3a4 4 0 0 0 5 5L15 16l-3.5 3.5a2.1 2.1 0 0 1-3-3L12 13z"/>',
-   ontology:'<circle cx="6" cy="7" r="2.5"/><circle cx="18" cy="7" r="2.5"/><circle cx="12" cy="17" r="2.5"/><path d="M8.5 7h7M7.4 9.2 10.8 15M16.6 9.2 13.2 15"/>',
    steering:'<path d="M4 5h16M4 12h10M4 19h7"/><circle cx="18" cy="17" r="3"/>',
    scenarios:'<path d="M4 5h11a3 3 0 0 1 3 3v11"/><path d="M15 16l3 3 3-3"/><path d="M4 10h7M4 15h4"/>',
    spend:'<path d="M12 2v20M17 6.5C17 4.6 14.8 3.5 12 3.5S7 4.6 7 6.8s2.2 3 5 3.7 5 1.6 5 3.7-2.2 3.3-5 3.3-5-1.1-5-3"/>',
@@ -3820,7 +3876,7 @@ function sidebar(r){
       (count?'<span class="ct'+(hot?' hot':'')+'">'+count+'</span>':'')+'</button>';
   }
   var base="#/"+ORG.slug+"/"+w.slug;
-  return '<aside class="side'+(S.side?" open":"")+'">'+
+  return (S.side?'<div class="side-scrim" onclick="S.side=false;render()"></div>':'')+'<aside class="side'+(S.side?" open":"")+'">'+
    '<div class="side-top"><div class="brandmark">'+LOGO+'</div>'+
     '<button class="switcher" onclick="openDialog(\'org-switch\')" aria-label="Switch organization">'+
       '<span class="av">A</span><span class="tx"><b>'+h(ORG.name)+'</b><span>'+h(ORG.slug)+' · '+ORG.plan+'</span></span><span class="cv">▾</span></button>'+
@@ -3831,10 +3887,9 @@ function sidebar(r){
    item("fleet","Fleet",base,waiting,true)+
    item("agents","Agent IAM",base+"/agents",fr?1:w.agents)+
    item("tools","Tools",base+"/tools")+
-   item("ontology","Ontology",base+"/ontology")+
    item("steering","Steering",base+"/steering",fr?0:PROPOSALS.length)+
    item("spend","Spend",base+"/spend")+
-   item("scenarios","Scenarios",base+"/scenarios")+
+   (PRODUCT?"":item("scenarios","Scenarios",base+"/scenarios"))+
    '<div class="navlabel">Organization</div>'+
    item("organization","Organization","#/"+ORG.slug)+
    item("billing","Billing","#/"+ORG.slug+"/billing")+
@@ -3867,7 +3922,6 @@ function crumbs(r){
     if(r.page==="mandate"){out.push('<a href="'+base+'/agents">Agent IAM</a>');
       out.push('<a class="mono" href="'+base+'/agents/'+h(r.id)+'">'+h(r.id)+'</a>');out.push('<b class="mono">'+h(r.mid)+'</b>');}
     if(r.page==="tools")out.push('<b>Tools</b>');
-    if(r.page==="ontology")out.push('<b>Ontology</b>');
     if(r.page==="scenarios")out.push('<b>Scenarios</b>');
     if(r.page==="steering")out.push('<b>Steering</b>');
     if(r.page==="spend")out.push('<b>Spend</b>');
@@ -3881,7 +3935,7 @@ function topbar(r){
      '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>'+
    '<div class="crumbs">'+crumbs(r)+'</div>'+
    '<div class="sp"></div>'+
-   '<button class="kbtn" onclick="openDialog(\'cmd\')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Search or run an action<kbd>⌘K</kbd></button>'+
+   '<button class="kbtn" onclick="openDialog(\'cmd\')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><span class="kt">Search or run an action</span><kbd>⌘K</kbd></button>'+
    '<button class="iconbtn" onclick="openDialog(\'notifs\')" aria-label="Notifications, '+notifUnread()+' unread">'+
      '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 8-3 8h18s-3-1-3-8"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>'+
      (notifUnread()?'<span class="dot"></span>':'')+'</button>'+
@@ -3913,7 +3967,7 @@ function userMenu(){
    '<button class="menu-i" onclick="openDialog(\'account\',\'preferences\')">Preferences</button>'+
    '<button class="menu-i" onclick="openDialog(\'account\',\'security\')">Security and sessions</button>'+
    '<button class="menu-i" onclick="openDialog(\'account\',\'privacy\')">Privacy and data</button>'+
-   '<button class="menu-i" onclick="openDialog(\'account\',\'onboarding\')">Onboarding demo</button>'+
+   (PRODUCT?'':'<button class="menu-i" onclick="openDialog(\'account\',\'onboarding\')">Onboarding demo</button>')+
    '<div class="hr" style="margin:5px 0"></div>'+
    '<button class="menu-i" onclick="toggleTheme()">Switch theme</button>'+
    '<button class="menu-i" onclick="S.layer=null;render()">Sign out</button></div>';
@@ -7842,652 +7896,6 @@ DLG_EXT.import=function(arg){
     '<button class="btn primary" onclick="closeDialog();act(\'Imported '+picked.length+' tool versions from confluence. They are in the registry and on no belt.\')">Import '+picked.length+' tools</button>'};
 };
 
-/* ============================== Ontology ============================== */
-/* The class map, as_of and the ask box (W7). The ontology literals above are extended here by
-   statement: a schema and a map position per class, the class-to-class edges (ONTREL), the pol_v41
-   rules that name a class (ONTRULES), and what each merged version lacked (absent) and held (scale).
-   Every count on the page is read from these, so the map, the tiles and the side panel cannot disagree. */
-S.ontAsOf=null; S.ontSel=null; S.ontView="map"; S.ontQ="q1"; S.ontHop2=false;
-(function(){
-  var css=
-   '.ont-mapw{overflow-x:auto;max-width:100%;border:1px solid var(--border);border-radius:10px;background:var(--void)}'+
-   '.ont-map{display:block;width:100%;min-width:720px;height:auto}'+
-   '.ont-map .ob{fill:none;stroke:var(--border);stroke-dasharray:4 4}'+
-   '.ont-map .ol{fill:var(--dim);font:600 10px var(--mono);letter-spacing:.06em}'+
-   '.ont-map path.oe{stroke:var(--rule);stroke-width:1.4;fill:none;transition:opacity .12s}'+
-   '.ont-map path.oe.lit{stroke:var(--fg);stroke-width:2}'+
-   '.ont-map marker path{fill:var(--muted)}'+
-   '.ont-map .dim{opacity:.22}'+
-   '.ont-map .on{cursor:pointer;transition:opacity .12s}'+
-   '.ont-map .on:focus{outline:none}'+
-   '.ont-map .on rect.nb{fill:var(--panel);stroke:var(--rule);stroke-width:1.2}'+
-   '.ont-map .on:hover rect.nb{stroke:var(--muted)}'+
-   '.ont-map .on.sel rect.nb{stroke:var(--fg);stroke-width:2}'+
-   '.ont-map .on:focus-visible rect.nb{stroke:var(--st-approval);stroke-width:2.4}'+
-   '.ont-map .nm{fill:var(--fg);font:600 13px var(--font)}'+
-   '.ont-map .ct{fill:var(--muted);font:11px var(--mono)}'+
-   '.ont-map .el{display:none;pointer-events:none}.ont-map .el.lit{display:inline}'+
-   '.ont-map .el rect{fill:var(--ink);stroke:var(--border)}.ont-map .el text{fill:var(--fg);font:10px var(--mono)}'+
-   '.ont-side{border:1px solid var(--border);border-radius:10px;padding:13px 14px;background:var(--panel);min-width:0}'+
-   '.ont-side h3{margin:0;font-size:15px}'+
-   '.ont-side ul{list-style:none;margin:0;padding:0;display:grid;gap:6px;font-size:12px}'+
-   '.ont-side li .mono{font-size:10.5px;color:var(--dim)}'+
-   '.ont-asof{background:var(--ink);border:1px solid var(--border);border-radius:7px;padding:4px 8px;font-size:12px;color:var(--fg);font-family:var(--mono);max-width:100%}'+
-   '.ont-bad{display:inline-block;width:100%;background:color-mix(in srgb,var(--st-denied) 20%,transparent)}'+
-   '.ont-frame{border:1px solid var(--border);border-radius:9px;padding:9px 11px;display:grid;gap:5px;font-size:12px;background:var(--ink)}'+
-   '.ont-frame .fm{display:flex;flex-wrap:wrap;gap:4px 12px;font-family:var(--mono);font-size:10.5px;color:var(--dim)}'+
-   '.ont-meter{height:7px;border-radius:4px;background:var(--hl);overflow:hidden;border:1px solid var(--border)}'+
-   '.ont-meter i{display:block;height:100%;background:var(--st-allowed)}.ont-meter i.over{background:var(--st-denied)}.ont-meter i.wait{background:var(--st-approval)}';
-  var st=document.createElement("style"); st.textContent=css; document.head.appendChild(st);
-})();
-
-var ONT_W=150, ONT_H=50;
-var ONTSCHEMAS={github:"github · builtin",data_layer:"data_layer · code graph",sales_crm:"sales_crm · aintel_prod",fleet_ops:"fleet_ops · aintel_prod, Linear"};
-var ONTLAYOUT={Repository:["github",95,72],PullRequest:["github",295,72],Issue:["github",295,192],Symbol:["github",95,192],
- Table:["data_layer",95,352],Customer:["sales_crm",545,72],Contract:["sales_crm",795,72],Ticket:["fleet_ops",545,262],Device:["fleet_ops",795,262]};
-var ONTPROPS={
- Repository:[["full_name","string · natural key"],["production_branch","string"],["role","enum main|linked"],["issues_enabled","bool"]],
- PullRequest:[["number","int · natural key"],["state","enum"],["base_branch","string"],["merged_at","datetime"]],
- Issue:[["number","int · natural key"],["title","string"],["state","enum"],["labels","string[]"]],
- Symbol:[["qualified_name","string · natural key"],["kind","enum"],["signature","string"],["file","path"]],
- Customer:[["billing_email","string · natural key"],["name","string"],["region","enum"],["health_score","float"],["csm","principal"]],
- Contract:[["contract_number","string · natural key"],["tier","enum"],["starts_at","date"],["ends_at","date"],["acv_usd","money"]],
- Device:[["serial","string · natural key"],["model","enum"],["firmware","version"],["shipped_at","date"]],
- Ticket:[["key","string · natural key"],["status","enum"],["priority","enum"],["opened_at","datetime"]],
- Table:[["schema+name","string · natural key"],["row_estimate","int"],["data_class","enum pii|financial|regulated|none"]]
-};
-CLASSES.forEach(function(c){var l=ONTLAYOUT[c.n]||["github",95,72]; c.schema=l[0]; c.x=l[1]; c.y=l[2]; c.props=ONTPROPS[c.n]||[];});
-/* Class-to-class relation types. A relation in a class's rel list that is not here points at
-   something the map does not draw as a class (a branch, a file, a person). */
-var ONTREL=[
- {a:"Repository",b:"PullRequest",n:"HAS_PULL_REQUEST",card:"1:n"},
- {a:"PullRequest",b:"Issue",n:"CLOSES_ISSUE",card:"n:n"},
- {a:"Symbol",b:"Table",n:"READS",card:"n:n"},
- {a:"Symbol",b:"Table",n:"WRITES",card:"n:n"},
- {a:"Customer",b:"Contract",n:"SIGNED_CONTRACT",card:"1:n"},
- {a:"Contract",b:"Customer",n:"BILLS_TO",card:"n:1"},
- {a:"Customer",b:"Device",n:"OWNS_DEVICE",card:"1:n"},
- {a:"Customer",b:"Ticket",n:"RAISED_TICKET",card:"1:n"},
- {a:"Ticket",b:"Device",n:"ABOUT_DEVICE",card:"n:1"}
-];
-/* The pol_v41 rules whose subject is a class. A rule can name more than one. */
-var ONTRULES=[
- {id:"rg_0101",t:"Change a repository's production branch → org owner + approval",cls:["Repository"]},
- {id:"rg_0102",t:"Delete or archive a repository → denied",cls:["Repository"]},
- {id:"rg_0103",t:"Push to the production branch → witness required",cls:["Repository"]},
- {id:"rg_0104",t:"Open a pull request on a linked repository → allowed",cls:["Repository","PullRequest"]},
- {id:"rg_0105",t:"Merge a pull request → approval + witness flip",cls:["PullRequest"]},
- {id:"rg_0106",t:"Force-push a pull request branch → denied",cls:["PullRequest"]},
- {id:"rg_0107",t:"Close an issue from a pull request → allowed on merge only",cls:["PullRequest","Issue"]},
- {id:"rg_0108",t:"Approve your own pull request → denied",cls:["PullRequest"]},
- {id:"rg_0109",t:"Pull request that alters a financial table → approval",cls:["PullRequest","Table"]},
- {id:"rg_0110",t:"Comment on an issue → allowed; close it → approval",cls:["Issue"]},
- {id:"rg_0111",t:"Issue that names a customer → PII redacted before embedding",cls:["Issue","Customer"]},
- {id:"rg_0112",t:"Call whose resolved effect writes a financial table → approval",cls:["Symbol","Table"]},
- {id:"rg_0113",t:"Hand-edit a generated symbol → denied",cls:["Symbol"]},
- {id:"rg_0114",t:"Write to customers.billing_email → approval",cls:["Customer"]},
- {id:"rg_0115",t:"Delete a customer → denied",cls:["Customer"]},
- {id:"rg_0116",t:"Customer region is never embedded",cls:["Customer"]},
- {id:"rg_0117",t:"Join a contract's financial columns to a customer → approval",cls:["Contract","Customer"]},
- {id:"rg_0118",t:"Mutate a contract → mandate required",cls:["Contract"]},
- {id:"rg_0119",t:"Write a contract tier → denied to agents",cls:["Contract"]},
- {id:"rg_0120",t:"Read acv_usd → allowed; write it → denied",cls:["Contract"]},
- {id:"rg_0121",t:"Export contracts → receipt",cls:["Contract"]},
- {id:"rg_0122",t:"Change a renewal date → approval",cls:["Contract"]},
- {id:"rg_0123",t:"Contract rows written outside the ledger sync → denied",cls:["Contract","Table"]},
- {id:"rg_0124",t:"Fleet command to a device → approval",cls:["Device"]},
- {id:"rg_0125",t:"Ticket about a device with an open critical → escalate to a person",cls:["Ticket","Device"]},
- {id:"rg_0126",t:"Write to a table classed financial → mandate",cls:["Table"]},
- {id:"rg_0127",t:"Truncate a table → denied",cls:["Table"]},
- {id:"rg_0128",t:"DDL outside a migration → denied",cls:["Table"]},
- {id:"rg_0129",t:"Table nothing references → finding",cls:["Table"]},
- {id:"rg_0130",t:"Read a table classed PII → receipt",cls:["Table"]}
-];
-/* What each version lacked and how much of today's graph it held. v16 predates Device, Ticket (v17) and Table (v18). */
-ONTVERSIONS.forEach(function(v){ v.absent=v.v==="v17"?["Table"]:[]; v.scale=v.v==="v17"?0.93:1; });
-ONTVERSIONS.push({v:"v16",state:"superseded",commit:"2c7d9a1",at:"2026-07-14 16:03",by:"Priya Natarajan",pr:"a-intel/platform#402",
- diff:"+2 classes (Customer, Contract) from aintel_prod, +2 relations",absent:["Device","Ticket","Table"],scale:0.71});
-/* Linear also feeds Customer: the account record carries health and CSM. */
-SOURCES.forEach(function(s){ if(s.kind==="linear"&&s.entities.indexOf("Customer")<0) s.entities+=", Customer"; });
-/* Repositories: GitHub's default branch, and issue import progress where import is enabled. */
-REPOS.forEach(function(r){
-  r.defaultBranch="main";
-  r.imp=r.n==="a-intel/platform"?{done:3907,total:3907}:r.n==="a-intel/billing"?{done:812,total:1204}:null;
-  r.confirmed=r.n==="a-intel/mobile"?"Marcus Bell · 2026-07-02":r.n==="a-intel/billing"?"Priya Natarajan · 2026-07-14":"Marcus Bell · 2026-06-18";
-});
-var ONTDRIFT=[
- {obj:"public.invoices",repo:"a-intel/platform",decl:"Drizzle · db/schema/invoices.ts:12",conf:"high",
-  finding:'code references <span class="mono">tax_rate_id</span>, the live database has no such column',fix:"Apply the migration that adds it, or drop the field from the model."},
- {obj:"public.devices",repo:"a-intel/platform",decl:"migrations/0044_devices.sql",conf:"high",
-  finding:'migration 0044 is not applied to <span class="mono">aintel_prod</span>',fix:"Apply migration 0044 to aintel_prod, or revert it on main."},
- {obj:"s3://a-intel-exports",repo:"a-intel/platform",decl:"Terraform · infra/storage.tf:34",conf:"medium",
-  finding:"observed access from run_01K5RM1A with no static edge",fix:"Offer the observed edge to the ontology as a proposal."},
- {obj:"public.legacy_sessions",repo:"a-intel/mobile",decl:"schema.sql:881",conf:"low",
-  finding:"table exists and nothing in the repository references it",fix:"Candidate for removal. Open an issue rather than a drop."}
-];
-var ONT_MATCH=0.82, ONT_PAIRS=7, ONT_BUDGET=50000;
-/* One entity, walked back to the rows that made it and out to its typed neighbours. Paths are relation
-   names; the class at each hop is read off ONTREL, so a path the ontology does not have cannot render. */
-var ONTENT={id:"ent_01K2X7M4",cls:"Customer",name:"Northwind Logistics",
- records:[
-  {src:"postgres:aintel_prod.customers#4471",digest:"sha256:d40c…8b17",sync:"2026-09-11T07:29:04Z",fields:"name, billing_email, region",run:"syn_9f18"},
-  {src:"linear:AINTEL/customer/NWL",digest:"sha256:41ab…2d90",sync:"2026-09-11T07:58:12Z",fields:"health_score, csm",run:"syn_9f20"},
-  {src:"github:a-intel/platform#issue/2211",digest:"sha256:c70d…4a13",sync:"2026-09-11T08:09:40Z",fields:"mention · “Northwind” matched in the issue body",run:"evt_8f21c04e"}],
- hop1:[{p:["SIGNED_CONTRACT"],name:"CT-2024-0188",sub:"enterprise · ends 2026-10-24"},
-  {p:["OWNS_DEVICE"],name:"212 devices",sub:"NWL-RX-0301 … NWL-RX-0512"},
-  {p:["RAISED_TICKET"],name:"7 tickets",sub:"2 open"}],
- hop2:[{p:["RAISED_TICKET","ABOUT_DEVICE"],name:"NWL-RX-0442",sub:"RX-4 · shipped 2026-07-19 · named by 3 tickets"},
-  {p:["OWNS_DEVICE","ABOUT_DEVICE"],name:"AINTEL-8812, AINTEL-8840",sub:"open tickets about devices Northwind owns"}]};
-var ONTQ=[
- {id:"q1",label:"Enterprise tickets on new devices",verdict:"ran",
-  q:"Which customers on an enterprise contract raised a ticket about a device that shipped in the last quarter?",
-  labels:["Customer","Contract","Ticket","Device"],
-  cypher:["MATCH (c:Customer)-[:SIGNED_CONTRACT]->(k:Contract)","WHERE k.tier = 'enterprise'",
-   "MATCH (c)-[:RAISED_TICKET]->(t:Ticket)-[:ABOUT_DEVICE]->(d:Device)","WHERE d.shipped_at >= date('2026-07-01')"],
-  injected:"  AND c.ws = $ws AND k.ws = $ws AND t.ws = $ws AND d.ws = $ws",
-  tail:["RETURN c.name, k.tier, count(t) AS tickets","ORDER BY tickets DESC LIMIT 50"],
-  plan:{est:8204,ms:214},conf:0.86,cost:"0.0041",basis:"price book v22 · 3,180 input + 412 output tokens",
-  rows:[["Northwind Logistics","enterprise",7,"ent_01K2X7M4 ← aintel_prod.customers#4471"],
-   ["Helio Freight","enterprise",4,"ent_01K2X8Q1 ← aintel_prod.customers#5102"],
-   ["Bastion Mining","enterprise",2,"ent_01K2X9R7 ← aintel_prod.customers#5518"]],
-  frames:[
-   {kind:"fact",label:"Customer",title:"Northwind Logistics",id:"ent_01K2X7M4",body:"Customer · NA-EAST · health 0.62 · CSM Dana Okafor",
-    src:"postgres:aintel_prod.customers#4471",digest:"sha256:d40c…8b17",tokens:118,from:"2026-09-11T07:29Z"},
-   {kind:"fact",label:"Contract",title:"CT-2024-0188",id:"ent_01K2XA02",body:"Contract · tier enterprise · starts 2024-10-24 · ends 2026-10-24",
-    src:"postgres:aintel_prod.contracts#1188",digest:"sha256:7b01…9c55",tokens:96,from:"2026-09-11T07:29Z"},
-   {kind:"fact",label:"Ticket",title:"AINTEL-8812 · arm calibration loop",id:"ent_01K2XB7T",body:"Ticket · open · priority urgent · about NWL-RX-0442",
-    src:"linear:AINTEL/ticket/8812",digest:"sha256:aa41…6e02",tokens:141,from:"2026-09-08T14:02Z"},
-   {kind:"fact",label:"Device",title:"NWL-RX-0442",id:"ent_01K2XC4D",body:"Device · RX-4 · firmware 4.2.1 · shipped 2026-07-19",
-    src:"postgres:aintel_prod.devices#22107",digest:"sha256:3c9e…41d0",tokens:88,from:"2026-09-11T07:29Z"},
-   {kind:"graph",label:"subgraph",title:"3 customers → their tickets → devices",id:"",body:"SIGNED_CONTRACT, RAISED_TICKET, ABOUT_DEVICE · hop budget 3, used 2",
-    src:"graph:core-platform",digest:"sha256:31c8…de71",tokens:204,from:"2026-09-11T07:29Z"}]},
- {id:"q2",label:"A question that writes",verdict:"write",
-  q:"Delete the tickets we closed as duplicates last quarter",
-  labels:["Ticket"],
-  reason:"Write clause refused at parse",
-  detail:"The compiler produced a DETACH DELETE. query_graph accepts MATCH, OPTIONAL MATCH, WHERE, WITH, RETURN, ORDER BY, SKIP, LIMIT and UNWIND, and nothing else reaches the database. The parser refused it before the graph service was called.",
-  cypher:["MATCH (t:Ticket)","WHERE t.closed_reason = 'duplicate' AND t.closed_at >= date('2026-04-01')","DETACH DELETE t"],bad:2,
-  cost:"0.0028",basis:"price book v22 · 2,104 input + 96 output tokens · compile only, nothing executed",
-  next:"Deleting entities is not a question. Retire them from Sources, which is a governed action with a receipt."},
- {id:"q3",label:"A question past budget",verdict:"budget",
-  q:"For every symbol in every repository, list every table it has ever read",
-  labels:["Symbol","Table"],
-  reason:"Plan exceeds the node budget",
-  cypher:["MATCH (s:Symbol)-[r:READS]->(t:Table)","WHERE r.valid_from IS NOT NULL","RETURN s.qualified_name, collect(DISTINCT t.name) AS tables"],
-  plan:{est:4182900,ms:31},
-  cost:"0.0033",basis:"price book v22 · 2,480 input + 142 output tokens · plan only, nothing executed",
-  next:"Narrow it: name a repository, a package, or an as_of window. Scoped to a-intel/billing the estimate is 41,200 rows."}
-];
-
-function ontActive(){for(var i=0;i<ONTVERSIONS.length;i++){if(ONTVERSIONS[i].state==="active")return ONTVERSIONS[i];}return ONTVERSIONS[0];}
-function ontVer(){for(var i=0;i<ONTVERSIONS.length;i++){if(ONTVERSIONS[i].v===S.ontAsOf)return ONTVERSIONS[i];}return ontActive();}
-function ontPast(){return ontVer().state!=="active";}
-function ontNum(v){return parseInt(String(v.v).slice(1),10)||0;}
-function ontMerged(){return ONTVERSIONS.filter(function(v){return v.state==="active"||v.state==="superseded";}).sort(function(a,b){return ontNum(b)-ontNum(a);});}
-function ontVisible(){var ab=ontVer().absent||[]; return CLASSES.filter(function(c){return ab.indexOf(c.n)<0;});}
-function ontCount(c){return Math.round((c.ents||0)*(ontVer().scale||1));}
-function ontRelsVisible(){var on={}; ontVisible().forEach(function(c){on[c.n]=1;}); return ONTREL.filter(function(r){return on[r.a]&&on[r.b];});}
-function ontRelsOf(n){return ontRelsVisible().filter(function(r){return r.a===n||r.b===n;});}
-function ontRulesOf(n){return ONTRULES.filter(function(r){return r.cls.indexOf(n)>=0;});}
-function ontSourcesOf(n){return SOURCES.filter(function(s){return String(s.entities).split(",").map(function(x){return x.trim();}).indexOf(n)>=0;});}
-function ontStale(n){return ontSourcesOf(n).some(function(s){return s.health!=="ok";});}
-function ontRelTypesIn(list){var seen={},out=[]; list.forEach(function(c){String(c.rel||"").split(",").forEach(function(r){r=r.trim(); if(r&&!seen[r]){seen[r]=1;out.push(r);}});}); return out;}
-function ontPolicy(){for(var i=0;i<POLICIES.length;i++){if(POLICIES[i].state==="active")return POLICIES[i].v;}return "";}
-function ontSetAsOf(v){
-  S.ontAsOf=(!v||v===ontActive().v)?null:v;
-  if(S.ontSel&&(ontVer().absent||[]).indexOf(S.ontSel)>=0) S.ontSel=null;
-  render();
-}
-/* The date picker answers with the version that was in force on that day. */
-function ontAsOfDate(d){
-  var m=ontMerged(), pick=m[m.length-1];
-  for(var i=m.length-1;i>=0;i--){ if(m[i].at.slice(0,10)<=d) pick=m[i]; }
-  ontSetAsOf(pick.v);
-}
-function ontPick(n){
-  var prev=S.ontSel; S.ontSel=(n&&n!==S.ontSel)?n:null; render();
-  var f=n||prev, g=f&&document.querySelector('.ont-map [data-cls="'+f+'"]');
-  if(g&&g.focus) g.focus({preventScroll:true});
-}
-function ontKey(e,n){
-  if(e.key==="Enter"||e.key===" "){e.preventDefault();ontPick(n);}
-  else if(e.key==="Escape"&&S.ontSel){e.preventDefault();e.stopPropagation();ontPick(null);}
-}
-/* Hover and focus light a class's edges without a render, so the pointer never loses its place. */
-function ontHi(n){
-  var m=document.querySelector(".ont-map"); if(!m) return;
-  n=n||S.ontSel||null; var near={};
-  m.querySelectorAll("[data-e]").forEach(function(e){
-    var a=e.getAttribute("data-a"), b=e.getAttribute("data-b"), t=!!n&&(a===n||b===n);
-    if(t&&e.tagName.toLowerCase()==="path"){near[a]=1;near[b]=1;}
-    e.classList.toggle("lit",t); e.classList.toggle("dim",!!n&&!t);
-  });
-  m.querySelectorAll("[data-cls]").forEach(function(g){var k=g.getAttribute("data-cls"); g.classList.toggle("dim",!!n&&k!==n&&!near[k]);});
-}
-function ontPicker(){
-  var cur=ontVer().v;
-  return '<select class="ont-asof" aria-label="as_of: ontology version" onchange="ontSetAsOf(this.value)">'+
-   ontMerged().map(function(v){return '<option value="'+h(v.v)+'"'+(v.v===cur?' selected':'')+'>'+
-    (v.state==="active"?'as_of now · '+h(v.v):'as_of '+h(v.at.slice(0,10))+' · '+h(v.v))+'</option>';}).join("")+'</select>';
-}
-function ontBanner(){
-  if(!ontPast()) return "";
-  var v=ontVer(), a=ontActive(), n=(v.absent||[]).length;
-  return '<div class="banner" role="status" data-ont-banner style="margin-bottom:14px"><span class="b b-approval"><span class="d"></span>as_of '+h(v.at.slice(0,10))+'</span>'+
-   '<span class="grow"><b>You are looking at ontology '+h(v.v)+' at '+h(v.commit)+', merged in '+h(v.pr)+'</b>'+
-   (n?n+' class'+(n===1?' that exists':'es that exist')+' in '+h(a.v)+' did not exist yet ('+h(v.absent.join(", "))+'); ':'')+
-   'entity counts are what the graph held then.</span>'+
-   '<button class="btn sm" onclick="ontSetAsOf(null)">Back to now</button></div>';
-}
-
-function ontAnchor(a,b){
-  var dx=b.x-a.x, dy=b.y-a.y, hw=ONT_W/2+5, hh=ONT_H/2+5;
-  var sx=dx?Math.abs(hw/dx):Infinity, sy=dy?Math.abs(hh/dy):Infinity, s=Math.min(sx,sy);
-  return {x:a.x+dx*s,y:a.y+dy*s};
-}
-function ontMap(vis){
-  var by={}; vis.forEach(function(c){by[c.n]=c;});
-  var rels=ontRelsVisible(), sel=S.ontSel&&by[S.ontSel]?S.ontSel:null, near={};
-  rels.forEach(function(r){ if(sel&&(r.a===sel||r.b===sel)){near[r.a]=1;near[r.b]=1;} });
-  var boxes=Object.keys(ONTSCHEMAS).map(function(sc){
-    var ns=vis.filter(function(c){return c.schema===sc;}); if(!ns.length) return "";
-    var xs=ns.map(function(c){return c.x;}), ys=ns.map(function(c){return c.y;}), pad=16;
-    var x1=Math.min.apply(null,xs)-ONT_W/2-pad, x2=Math.max.apply(null,xs)+ONT_W/2+pad;
-    var y1=Math.min.apply(null,ys)-ONT_H/2-pad-14, y2=Math.max.apply(null,ys)+ONT_H/2+pad;
-    return '<rect class="ob" x="'+x1+'" y="'+y1+'" width="'+(x2-x1)+'" height="'+(y2-y1)+'" rx="12"/>'+
-     '<text class="ol" x="'+(x1+11)+'" y="'+(y1+16)+'">'+h(ONTSCHEMAS[sc])+'</text>';
-  }).join("");
-  var pairN={}, pairI={};
-  rels.forEach(function(r){var k=[r.a,r.b].sort().join("|"); pairN[k]=(pairN[k]||0)+1;});
-  var edges="", labels="";
-  rels.forEach(function(r){
-    var k=[r.a,r.b].sort().join("|"), i=pairI[k]=(pairI[k]===undefined?0:pairI[k]+1), n=pairN[k];
-    var p=by[k.split("|")[0]], q=by[k.split("|")[1]], dx=q.x-p.x, dy=q.y-p.y, len=Math.sqrt(dx*dx+dy*dy)||1;
-    var off=(i-(n-1)/2)*12, nx=-dy/len*off, ny=dx/len*off;
-    var A=by[r.a], B=by[r.b], a={x:A.x+nx,y:A.y+ny}, b={x:B.x+nx,y:B.y+ny};
-    var p1=ontAnchor(a,b), p2=ontAnchor(b,a), lit=!!sel&&(r.a===sel||r.b===sel), dim=!!sel&&!lit;
-    var attrs=' data-e="'+h(r.n)+'" data-a="'+h(r.a)+'" data-b="'+h(r.b)+'"';
-    edges+='<path class="oe'+(lit?' lit':'')+(dim?' dim':'')+'"'+attrs+' marker-end="url(#ont-arr)" d="M'+p1.x.toFixed(1)+' '+p1.y.toFixed(1)+' L'+p2.x.toFixed(1)+' '+p2.y.toFixed(1)+'"/>';
-    /* Parallel labels stack across a mostly horizontal edge and spread along a mostly vertical one. */
-    var flat=Math.abs(p2.x-p1.x)>Math.abs(p2.y-p1.y), t=(n>1&&!flat)?0.32+0.36*i/(n-1):0.5;
-    var mx=p1.x+(p2.x-p1.x)*t, my=p1.y+(p2.y-p1.y)*t+((n>1&&flat)?ny*1.6:0), w=r.n.length*6.3+12;
-    labels+='<g class="el'+(lit?' lit':'')+'"'+attrs+'><rect x="'+(mx-w/2).toFixed(1)+'" y="'+(my-8).toFixed(1)+'" width="'+w.toFixed(1)+'" height="16" rx="4"/>'+
-     '<text x="'+mx.toFixed(1)+'" y="'+(my+3.5).toFixed(1)+'" text-anchor="middle">'+h(r.n)+'</text></g>';
-  });
-  var nodes=vis.map(function(c){
-    var x=c.x-ONT_W/2, y=c.y-ONT_H/2, isSel=c.n===sel, dim=!!sel&&!isSel&&!near[c.n], stale=ontStale(c.n);
-    var kinds=[]; ontSourcesOf(c.n).forEach(function(s){if(kinds.indexOf(s.kind)<0)kinds.push(s.kind);});
-    var pips=kinds.map(function(k,i){return '<rect x="'+(x+ONT_W-16-i*11)+'" y="'+(y+ONT_H-15)+'" width="8" height="8" rx="2" fill="var(--dim)"><title>'+h(k)+'</title></rect>';}).join("");
-    var nRel=ontRelsOf(c.n).length, cnt=ontCount(c);
-    return '<g class="on'+(isSel?' sel':'')+(dim?' dim':'')+'" data-cls="'+h(c.n)+'" tabindex="0" role="button" aria-pressed="'+isSel+'"'+
-     ' aria-label="'+h(c.n)+', '+cnt.toLocaleString()+' entities, '+nRel+' relation'+(nRel===1?'':'s')+' on the map'+(stale?', stale':'')+'"'+
-     ' onclick="ontPick(\''+h(c.n)+'\')" onkeydown="ontKey(event,\''+h(c.n)+'\')" onmouseenter="ontHi(\''+h(c.n)+'\')" onmouseleave="ontHi()" onfocus="ontHi(\''+h(c.n)+'\')" onblur="ontHi()">'+
-     '<rect class="nb" x="'+x+'" y="'+y+'" width="'+ONT_W+'" height="'+ONT_H+'" rx="9"/>'+
-     '<circle cx="'+(x+13)+'" cy="'+(y+16)+'" r="3.6" fill="var('+(ontPast()?'--dim':stale?'--st-approval':'--st-allowed')+')"><title>'+(ontPast()?'as held at '+h(ontVer().v):stale?'a source feeding it is degraded · fresh '+h(c.fresh):'fresh '+h(c.fresh))+'</title></circle>'+
-     '<text class="nm" x="'+(x+24)+'" y="'+(y+20)+'">'+h(c.n)+'</text>'+
-     '<text class="ct" x="'+(x+13)+'" y="'+(y+39)+'">'+cnt.toLocaleString()+' entities</text>'+pips+'</g>';
-  }).join("");
-  return '<svg class="ont-map" viewBox="0 0 900 420" role="group" aria-label="Class map for '+h(ws().name)+' at ontology '+h(ontVer().v)+': '+vis.length+' classes, '+rels.length+' relations">'+
-   '<defs><marker id="ont-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1L9 5L0 9z"/></marker></defs>'+
-   boxes+edges+nodes+labels+'</svg>';
-}
-function ontSide(vis){
-  var c=null; vis.forEach(function(x){if(x.n===S.ontSel)c=x;});
-  if(!c){
-    var top=vis.slice().sort(function(a,b){return b.cited-a.cited;}).slice(0,3), dr=vis.filter(function(x){return x.drift;});
-    return '<aside class="ont-side" aria-label="Class detail"><h3>Consequence</h3>'+
-     '<p class="muted" style="font-size:12.5px;margin:8px 0 12px">Hover or focus a class to light its relations. Select one, by click or Enter, to read its properties, its relations, and the rules that name it.</p>'+
-     '<p class="eyebrow q">Most cited by agents</p><dl class="kv">'+top.map(function(x){return '<dt>'+h(x.n)+'</dt><dd class="mono">'+x.cited.toLocaleString()+' retrievals</dd>';}).join("")+'</dl>'+
-     '<div class="hr"></div><p class="eyebrow q">Drift found</p>'+
-     (dr.length?'<dl class="kv">'+dr.map(function(x){return '<dt>'+h(x.n)+'</dt><dd>'+x.drift+'</dd>';}).join("")+'</dl>':'<p class="dim" style="margin:0;font-size:12px">none</p>')+
-     '</aside>';
-  }
-  var rels=ontRelsOf(c.n), rules=ontRulesOf(c.n), srcs=ontSourcesOf(c.n), stale=ontStale(c.n);
-  var outside=String(c.rel||"").split(",").map(function(x){return x.trim();}).filter(function(x){
-    return x&&!ONTREL.some(function(r){return r.n===x&&(r.a===c.n||r.b===c.n);});});
-  return '<aside class="ont-side" aria-label="Class detail: '+h(c.n)+'" data-ont-side="'+h(c.n)+'">'+
-   '<div class="row" style="align-items:flex-start"><div style="min-width:0"><h3>'+h(c.n)+'</h3>'+
-    '<div class="mono dim" style="font-size:11px;margin-top:3px">'+h(ONTSCHEMAS[c.schema]||c.schema)+'</div></div>'+
-    '<button class="btn sm ghost" style="margin-left:auto" aria-label="Close the class detail" onclick="ontPick(null)">Close</button></div>'+
-   '<dl class="kv" style="margin-top:11px">'+
-    '<dt>Entities</dt><dd class="mono">'+ontCount(c).toLocaleString()+(ontPast()?' <span class="dim">at '+h(ontVer().v)+'</span>':'')+'</dd>'+
-    '<dt>Freshness</dt><dd>'+(ontPast()?'<span class="dim">as held at '+h(ontVer().at.slice(0,10))+'</span>':
-      '<span class="b b-'+(stale?'approval':'allowed')+'"><span class="d"></span>'+(stale?'stale':'fresh')+' · '+h(c.fresh)+'</span>')+'</dd>'+
-    '<dt>Sources</dt><dd style="font-size:12px">'+srcs.map(function(s){return h(s.n)+(s.health!=="ok"?' <span class="b b-approval">'+h(s.health)+'</span>':'');}).join("<br>")+'</dd>'+
-    '<dt>Cited by</dt><dd>'+c.cited.toLocaleString()+' agent retrievals</dd>'+
-    '<dt>Proven runs</dt><dd>'+c.proven+'</dd>'+
-    '<dt>Drift</dt><dd>'+(c.drift?'<span class="b b-critical"><span class="d"></span>'+c.drift+'</span>':'<span class="dim">none</span>')+'</dd></dl>'+
-   '<div class="hr"></div><p class="eyebrow q">Properties · '+c.props.length+'</p>'+
-   '<dl class="kv" style="font-size:11.5px">'+c.props.map(function(p){return '<dt class="mono">'+h(p[0])+'</dt><dd class="mono dim">'+h(p[1])+'</dd>';}).join("")+'</dl>'+
-   '<div class="hr"></div><p class="eyebrow q">Relations on the map · <span data-ont-relcount>'+rels.length+'</span></p>'+
-   (rels.length?'<ul>'+rels.map(function(r){var out=r.a===c.n, other=out?r.b:r.a;
-     return '<li><span class="mono" style="color:var(--fg);font-size:11px">'+h(r.n)+'</span> '+(out?'→':'←')+' '+
-      '<button class="btn sm ghost" style="padding:1px 6px" onclick="ontPick(\''+h(other)+'\')">'+h(other)+'</button> <span class="mono">'+h(r.card)+'</span></li>';}).join("")+'</ul>'
-    :'<p class="dim" style="margin:0;font-size:12px">None at '+h(ontVer().v)+'.</p>')+
-   (outside.length?'<p class="dim" style="font-size:11.5px;margin:8px 0 0">Also relates to things the map does not draw as classes: <span class="mono">'+h(outside.join(", "))+'</span></p>':'')+
-   '<div class="hr"></div><p class="eyebrow q">Rules that name it · '+h(ontPolicy())+' · <span data-ont-rulecount>'+rules.length+'</span></p>'+
-   (rules.length?'<ul data-ont-rules>'+rules.map(function(r){return '<li><span class="mono">'+h(r.id)+'</span><br>'+h(r.t)+'</li>';}).join("")+'</ul>'
-    :'<p class="dim" style="margin:0;font-size:12px">No rule names it; the workspace default governs it.</p>')+
-   '<div class="row" style="margin-top:13px"><button class="btn sm" onclick="S.tab.ontology=\'graph\';render()">Explore instances</button>'+
-   '<button class="btn sm" onclick="openDialog(\'ontprop\')">Propose a change</button></div></aside>';
-}
-
-function ontCy(lines,bad){
-  return lines.map(function(ln,i){
-    var s=h(ln).replace(/'([^']*)'/g,'<span class="s">\'$1\'</span>')
-     .replace(/\b(OPTIONAL MATCH|MATCH|WHERE|WITH|RETURN|ORDER BY|SKIP|LIMIT|UNWIND|AND|AS|DESC|DISTINCT|DETACH DELETE|IS NOT NULL)\b/g,'<span class="k">$1</span>');
-    return bad!=null&&i===bad?'<span class="ont-bad">'+s+'</span>':s;
-  }).join("\n");
-}
-function ontQ(){for(var i=0;i<ONTQ.length;i++){if(ONTQ[i].id===S.ontQ)return ONTQ[i];}return ONTQ[0];}
-/* A question is compiled against the ontology in force at as_of: a label that version lacks refuses it. */
-function ontVerdict(q){
-  var ab=ontVer().absent||[], miss=q.labels.filter(function(l){return ab.indexOf(l)>=0;});
-  if(miss.length) return {v:"labels",miss:miss};
-  return {v:q.verdict};
-}
-function ontAsk(){
-  var q=ontQ(), vd=ontVerdict(q);
-  if(vd.v==="ran") act('Compiled, parsed, scoped and EXPLAINed within the node budget. '+q.rows.length+' rows, '+q.frames.length+' context frames cited.');
-  else act('Refused before it reached the database: '+(vd.v==="labels"?'ontology '+ontVer().v+' has no '+vd.miss.join(" or ")+' class.':q.reason.toLowerCase()+'.'));
-}
-function ontAnswer(){
-  var q=ontQ(), vd=ontVerdict(q), v=ontVer();
-  var picks='<div class="seg" role="group" aria-label="Recorded questions" style="flex-wrap:wrap">'+ONTQ.map(function(x){
-    return '<button class="btn sm" aria-pressed="'+(x.id===q.id)+'" onclick="S.ontQ=\''+x.id+'\';render()">'+h(x.label)+'</button>';}).join("")+'</div>';
-  var ask='<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Ask in plain English</h3>'+
-   '<span class="b b-q" style="margin-left:auto">query_graph · read-only role · recorded as frames</span></div><div class="panel-b">'+
-   picks+
-   '<div class="field" style="margin:12px 0"><input value="'+h(q.q)+'" aria-label="Ask the graph" readonly></div>'+
-   '<div class="row"><button class="btn" onclick="ontAsk()">Ask</button>'+
-   '<span class="mono dim" style="font-size:11px">as_of '+(ontPast()?h(v.at.slice(0,10))+' · '+h(v.v):'now')+' · hops ≤ 3 · nodes ≤ '+ONT_BUDGET.toLocaleString()+'</span></div>';
-  var kvBase='<dt>Compiler</dt><dd class="mono" style="font-size:11px">complex tier · via OpenRouter</dd>'+
-   '<dt>Ontology version</dt><dd class="mono">'+h(v.v)+' @ '+h(v.commit)+'</dd>';
-  if(vd.v==="ran"){
-    var tok=q.frames.reduce(function(n,f){return n+f.tokens;},0), pct=Math.min(100,q.plan.est/ONT_BUDGET*100);
-    return ask+'<div class="hr"></div><p class="eyebrow q">The Cypher it produced — parsed, never trusted as written</p>'+
-     '<pre>'+ontCy(q.cypher)+'\n<span class="c">// injected by the graph service, never left to the model:</span>\n'+h(q.injected).replace(/\bAND\b/g,'<span class="k">AND</span>')+'\n'+ontCy(q.tail)+'</pre>'+
-     '<dl class="kv" style="margin-top:13px"><dt>Accepted clauses only</dt><dd class="mono" style="font-size:11px">MATCH, OPTIONAL MATCH, WHERE, WITH, RETURN, ORDER BY, SKIP, LIMIT, UNWIND</dd>'+
-     '<dt>EXPLAIN plan</dt><dd>'+q.plan.est.toLocaleString()+' estimated rows of '+ONT_BUDGET.toLocaleString()+' · accepted in '+q.plan.ms+' ms<div class="ont-meter" style="margin-top:5px"><i style="width:'+pct.toFixed(1)+'%"></i></div></dd>'+
-     kvBase+'<dt>Compiler confidence</dt><dd>'+q.conf+' — <span class="dim">the compiler’s, labelled as such</span></dd>'+
-     '<dt>Cost</dt><dd class="mono">'+usd(q.cost)+' <span class="dim" style="font-size:11px">'+h(q.basis)+'</span></dd></dl></div></div>'+
-     '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Answer · '+q.rows.length+' rows</h3><span class="b b-allowed" style="margin-left:auto"><span class="d"></span>ran on a read-only role</span></div>'+
-     '<div class="tw"><table data-lt="off"><thead><tr><th>Customer</th><th>Contract tier</th><th class="num">Tickets</th><th>Cited node</th></tr></thead><tbody>'+
-     q.rows.map(function(r){return '<tr><td>'+h(r[0])+'</td><td>'+h(r[1])+'</td><td class="num">'+r[2]+'</td><td class="mono dim" style="font-size:11px">'+h(r[3])+'</td></tr>';}).join("")+
-     '</tbody></table></div></div>'+
-     '<div class="panel" data-ont-frames><div class="panel-h"><h3>Cited context frames · '+q.frames.length+'</h3><span class="mono dim" style="margin-left:auto;font-size:11px">'+tok.toLocaleString()+' tokens</span></div>'+
-     '<div class="panel-b" style="display:grid;gap:9px">'+q.frames.map(function(f){
-       return '<div class="ont-frame" data-ont-frame data-src="'+h(f.src)+'" data-from="'+h(f.from)+'" data-tokens="'+f.tokens+'"><div class="row" style="gap:6px"><span class="b b-q">'+h(f.kind)+'</span><span class="b b-q">'+h(f.label)+'</span><b>'+h(f.title)+'</b>'+
-        (f.id?'<span class="mono dim" style="font-size:10.5px;margin-left:auto">'+h(f.id)+'</span>':'')+'</div>'+
-        '<div style="color:var(--body)">'+h(f.body)+'</div>'+
-        '<div class="fm"><span>'+h(f.src)+'</span><span>'+h(f.digest)+'</span><span>'+f.tokens+' tokens</span><span>valid_from '+h(f.from)+'</span></div></div>';}).join("")+
-     '<div class="note">The same frames a wrapped agent would receive, each recorded in this question’s run. Frames built from <span class="mono">aintel_prod</span> carry that connector’s cursor as their valid_from.</div></div></div>';
-  }
-  var reason=vd.v==="labels"?'Labels not in ontology '+v.v:q.reason;
-  var detail=vd.v==="labels"?'The compiler grounds every label against the ontology in force at as_of. Ontology '+v.v+' has no '+vd.miss.join(" or ")+' class, so the question cannot be compiled against it.':
-   vd.v==="budget"?'EXPLAIN estimated '+q.plan.est.toLocaleString()+' rows against this role’s node budget of '+ONT_BUDGET.toLocaleString()+'. It was refused before it ran; the budget is a resource-scope setting on your role, not a timeout.':q.detail;
-  var next=vd.v==="labels"?'Go back to now, or ask about the classes '+v.v+' had.':q.next;
-  return ask+'</div></div>'+
-   '<div class="panel" data-ont-refusal="'+h(vd.v)+'" style="border-color:color-mix(in srgb,var(--st-denied) 45%,var(--border))"><div class="panel-h">'+
-   '<span class="b b-denied"><span class="d"></span>refused</span><h3>'+h(reason)+'</h3>'+
-   '<span class="mono dim" style="margin-left:auto;font-size:11px">nothing reached the database</span></div><div class="panel-b">'+
-   '<p style="margin:0 0 12px;font-size:13px;color:var(--body);max-width:74ch">'+h(detail)+'</p>'+
-   '<p class="eyebrow q">What the compiler produced'+(vd.v==="write"?' — the marked clause is why it stopped':'')+'</p>'+
-   '<pre>'+ontCy(q.cypher,vd.v==="write"?q.bad:null)+'</pre>'+
-   '<dl class="kv" style="margin-top:13px">'+
-   (vd.v==="budget"?'<dt>EXPLAIN estimate</dt><dd class="mono" style="color:var(--st-denied)">'+q.plan.est.toLocaleString()+' rows · '+(q.plan.est/ONT_BUDGET).toFixed(1)+'× the budget'+
-     '<div class="ont-meter" style="margin-top:5px"><i class="over" style="width:100%"></i></div></dd>'+
-     '<dt>Node budget on your role</dt><dd class="mono">'+ONT_BUDGET.toLocaleString()+'</dd><dt>Planned in</dt><dd class="mono">'+q.plan.ms+' ms</dd>':'')+
-   kvBase+'<dt>Cost of the attempt</dt><dd class="mono">'+usd(q.cost)+' <span class="dim" style="font-size:11px">'+h(q.basis)+'</span></dd></dl>'+
-   '<div class="note" style="margin-top:13px"><b style="color:var(--fg)">What to do instead.</b> '+h(next)+'</div></div></div>';
-}
-function ontWalk(from,path){
-  var cur=from, arrows=[], on={}; ontVisible().forEach(function(c){on[c.n]=1;});
-  for(var i=0;i<path.length;i++){
-    var r=null; ONTREL.forEach(function(x){ if(!r&&x.n===path[i]&&(x.a===cur||x.b===cur)) r=x; });
-    if(!r) return null;
-    var out=r.a===cur; cur=out?r.b:r.a; if(!on[cur]) return null; arrows.push((out?'→ ':'← ')+r.n);
-  }
-  return {cls:cur,path:arrows.join(" ")};
-}
-function ontExplore(){
-  var e=ONTENT, rows=e.hop1.concat(S.ontHop2?e.hop2:[]).map(function(n){var w=ontWalk(e.cls,n.p); return w?{w:w,n:n,hop:n.p.length}:null;}).filter(Boolean);
-  var v=ontVer();
-  return '<div class="panel"><div class="panel-h"><h3>Explore instances</h3></div><div class="panel-b">'+
-   '<div class="field" style="margin:0"><input placeholder="Search entities, records, runs" aria-label="Search the graph"></div>'+
-   '<div class="row" style="margin-top:11px">'+ontVisible().map(function(c){return '<span class="b b-q">'+h(c.n)+'</span>';}).join("")+'</div>'+
-   '<div class="hr"></div><div class="row" style="gap:6px"><span class="b b-q">'+h(e.cls)+'</span><b>'+h(e.name)+'</b><span class="mono dim" style="font-size:10.5px">'+h(e.id)+'</span></div>'+
-   '<p class="eyebrow q" style="margin:11px 0 6px">Typed neighbours · hop '+(S.ontHop2?2:1)+' of 3 · <span data-ont-nb>'+rows.length+'</span> edges</p>'+
-   '<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Path</th><th>Class</th><th>Node</th></tr></thead><tbody>'+
-   rows.map(function(x){return '<tr><td class="mono" style="font-size:10.5px">'+h(x.w.path)+'</td><td class="mono dim" style="font-size:11px">'+h(x.w.cls)+'</td>'+
-    '<td style="font-size:12px"><b>'+h(x.n.name)+'</b><div class="dim" style="font-size:11px">'+h(x.n.sub)+'</div></td></tr>';}).join("")+
-   '</tbody></table></div>'+
-   '<div class="row" style="margin-top:10px"><button class="btn sm" aria-pressed="'+S.ontHop2+'" onclick="S.ontHop2=!S.ontHop2;render()">'+(S.ontHop2?'Collapse to hop 1':'Expand to hop 2')+'</button>'+
-   '<span class="mono dim" style="font-size:10.5px">expand_graph · relation types in '+h(v.v)+' only</span></div>'+
-   '<div class="hr"></div><p class="eyebrow q">as_of</p>'+
-   '<div class="field" style="margin:0"><input type="date" value="'+h(ontPast()?v.at.slice(0,10):"2026-09-11")+'" max="2026-09-11" aria-label="as of date" onchange="if(this.value)ontAsOfDate(this.value)"></div>'+
-   '<p class="dim" style="font-size:11.5px;margin:7px 0 0">Answers with the version in force that day: '+h(v.v)+'.</p></div></div>';
-}
-
-DLG_EXT.ontresolve=function(){
-  return {t:"Resolve entities",s:"1 of "+ONT_PAIRS+" candidate pairs below the match threshold",w:false,
-   b:'<p class="muted" style="margin:0 0 12px;font-size:12.5px">Two entities resolved to separate nodes below the confidence threshold. Merging keeps both source records and both provenance chains; nothing is discarded.</p>'+
-    '<div class="grid g2" style="gap:10px;margin-bottom:12px">'+
-    '<div class="stat"><span class="k">Survivor</span><span class="v" style="font-size:14px">'+h(ONTENT.name)+'</span><span class="s mono">'+h(ONTENT.id)+' · '+ONTENT.records.length+' source records</span></div>'+
-    '<div class="stat"><span class="k">Candidate</span><span class="v" style="font-size:14px">Northwind Logistics Inc.</span><span class="s mono">ent_01K2Y3P9 · 1 source record</span></div></div>'+
-    '<dl class="kv"><dt>Match confidence</dt><dd>0.79 <span class="dim">/ threshold '+ONT_MATCH+' — below, so it did not merge on its own</span></dd>'+
-    '<dt>Matched on</dt><dd class="mono" style="font-size:11px">name trigram + region; billing_email differs</dd>'+
-    '<dt>After the merge</dt><dd>'+(ONTENT.records.length+1)+' source records on the survivor</dd></dl>',
-   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Merged into '+ONTENT.id+'. '+(ONTENT.records.length+1)+' source records now on the survivor; a governed action with a receipt.\')">Merge entities</button>'};
-};
-DLG_EXT.ontbranch=function(repo){
-  var r=REPOS.filter(function(x){return x.n===repo;})[0]||REPOS[0];
-  return {t:"Set the production branch",s:r.n+" · GitHub’s default is "+r.defaultBranch,w:false,
-   b:'<p class="muted" style="margin:0 0 12px;font-size:12.5px">The production branch is the only branch whose commits update the code graph. Changing it re-indexes from that branch’s head.</p>'+
-    '<div class="field"><label>Production branch</label><select aria-label="Production branch">'+
-    ["main","release","production"].map(function(b){return '<option'+(b===r.branch?' selected':'')+'>'+b+(b===r.defaultBranch?' — GitHub’s default':'')+'</option>';}).join("")+'</select></div>'+
-    '<dl class="kv"><dt>Current binding</dt><dd class="mono">'+h(r.branch)+' · confirmed by '+h(r.confirmed)+'</dd><dt>Effect</dt><dd>full re-index · idempotent</dd></dl>'+
-    '<div class="note" style="margin-top:12px">Re-indexing archives symbols the full pass does not see, with the current commit as valid_to. Nothing is deleted; history stays queryable as_of.</div>',
-   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Production branch for '+h(r.n)+' confirmed. Full re-index queued.\')">Confirm branch</button>'};
-};
-DLG_EXT.ontindex=function(name){
-  var i=INDEXES.filter(function(x){return x.n===name;})[0]||INDEXES[0];
-  return {t:"Upgrade an embedding index",s:i.n+" · "+i.state,w:false,
-   b:'<p class="muted" style="margin:0 0 12px;font-size:12.5px">A model upgrade is a migration, never a swap. The new index is built alongside and backfilled; retrieval cuts over only when the evaluation set is at least as good. A query never spans two models.</p>'+
-    '<dl class="kv"><dt>Index</dt><dd class="mono">'+h(i.n)+' · '+i.dims+' dims</dd><dt>Nodes to backfill</dt><dd class="mono">'+i.nodes.toLocaleString()+'</dd>'+
-    '<dt>Recall @ 10 today</dt><dd>'+per(i.recall)+'</dd><dt>Citation rate today</dt><dd>'+per(i.cite)+'</dd>'+
-    '<dt>Cut over when</dt><dd>recall @ 10 ≥ '+per(i.recall)+' on 412 (query, cited frames) pairs</dd></dl>',
-   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Building '+h(i.n)+' alongside. Cutover gated on the retrieval evaluation set.\')">Build alongside</button>'};
-};
-
-function pOntology(){
-  var w=ws(), t=tab("ontology","model");
-  if(S.state==="loading") return skeleton();
-  if(S.state==="error") return errorState("Ontology","504 graph_read_timeout");
-  if(S.state==="denied") return deniedState("this workspace’s ontology","graph.read on core-platform");
-  if(S.state==="empty") return emptyState("No ontology yet in "+w.name,
-    "An ontology is proposed, never generated in place. Link a repository and the GitHub fragment merges in; connect a source and the profiler reads a sample, then opens a pull request with the classes it actually saw.",
-    '<button class="btn primary" onclick="openDialog(\'source\')">Add a source</button>'+
-    '<button class="btn" onclick="openDialog(\'linkrepo\')">Link a repository</button>');
-
-  var vis=ontVisible(), ver=ontVer(), past=ontPast();
-  var tabs='<div class="tabs" role="tablist">'+
-   [["model","Model",vis.length],["graph","Graph"],["sources","Sources",SOURCES.length],
-    ["repositories","Repositories",REPOS.length],["versions","Versions",ONTVERSIONS.length]]
-   .map(function(x){return '<button class="tab" role="tab" aria-selected="'+(t===x[0])+'" onclick="S.tab.ontology=\''+x[0]+'\';render()">'+x[1]+(x[2]?'<span class="n">'+x[2]+'</span>':'')+'</button>';}).join("")+'</div>';
-
-  var body="";
-  if(t==="model"){
-    var drift=vis.reduce(function(n,c){return n+(c.drift||0);},0), driftCls=vis.filter(function(c){return c.drift;}).map(function(c){return c.n;});
-    var ents=vis.reduce(function(n,c){return n+ontCount(c);},0);
-    var cards=vis.map(function(c){
-      return '<div class="panel" style="padding:0"><div class="panel-b">'+
-       '<div class="row" style="margin-bottom:8px"><b style="font-size:14px">'+h(c.n)+'</b>'+
-       (c.builtin?'<span class="b b-q" style="font-size:10px">builtin</span>':'')+
-       (c.drift?'<span class="b b-critical" style="margin-left:auto;font-size:10px"><span class="d"></span>'+c.drift+' drift</span>':'<span class="b b-allowed" style="margin-left:auto;font-size:10px"><span class="d"></span>clean</span>')+'</div>'+
-       '<div style="font-size:21px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.02em">'+ontCount(c).toLocaleString()+'</div>'+
-       '<div class="dim" style="font-size:11px;margin-bottom:9px">entities · '+(past?'as held at '+h(ver.v):'fresh '+h(c.fresh))+'</div>'+
-       '<dl class="kv" style="font-size:11.5px;gap:4px 10px">'+
-       '<dt>Sources</dt><dd>'+h(c.src)+'</dd>'+
-       '<dt>Most cited by</dt><dd>'+c.cited.toLocaleString()+' agent retrievals</dd>'+
-       '<dt>Rules referencing</dt><dd>'+ontRulesOf(c.n).length+'</dd>'+
-       '<dt>Proven runs</dt><dd>'+c.proven+'</dd>'+
-       '<dt>Relations</dt><dd class="mono" style="font-size:10.5px">'+h(c.rel)+'</dd></dl>'+
-       '<button class="btn sm" style="margin-top:10px" onclick="S.ontView=\'map\';ontPick(\''+h(c.n)+'\')">Show on the map</button></div></div>';}).join("");
-    var map=S.ontView!=="cards";
-    body='<div class="grid g4" style="margin-bottom:16px">'+
-     '<div class="stat"><span class="k">Classes</span><span class="v" data-ont-tile-classes>'+vis.length+'</span><span class="s">'+(past?'as_of '+h(ver.v)+' · active is '+h(ontActive().v):'active version '+h(ver.v))+'</span></div>'+
-     '<div class="stat"><span class="k">Entities</span><span class="v">'+ents.toLocaleString()+'</span><span class="s">'+(past?'what the graph held then':'instances never go to git')+'</span></div>'+
-     '<div class="stat"><span class="k">Relation types</span><span class="v">'+ontRelTypesIn(vis).length+'</span><span class="s">'+ontRelsVisible().length+' drawn between classes</span></div>'+
-     '<div class="stat"><span class="k">Drift found</span><span class="v">'+drift+'</span><span class="s">'+(driftCls.length?'across '+h(driftCls.join(', ')):'none found')+'</span></div></div>'+
-     '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>The live map</h3>'+
-     '<div class="sp"><div class="seg" role="group" aria-label="Map or cards">'+
-      '<button class="btn sm" aria-pressed="'+map+'" onclick="S.ontView=\'map\';render()">Map</button>'+
-      '<button class="btn sm" aria-pressed="'+(!map)+'" onclick="S.ontView=\'cards\';render()">Cards</button></div>'+
-     ontPicker()+'<button class="btn sm" onclick="openDialog(\'ontprop\')">Open a proposal</button></div></div>'+
-     '<div class="panel-b">'+(map?
-      '<div class="split"><div style="min-width:0"><div class="ont-mapw">'+ontMap(vis)+'</div>'+
-      '<div class="row dim" style="font-size:11.5px;margin-top:9px;gap:6px 14px">'+
-       '<span class="row" style="gap:5px"><svg width="8" height="8" aria-hidden="true"><circle cx="4" cy="4" r="3.6" fill="var(--st-allowed)"/></svg>every source feeding it healthy</span>'+
-       '<span class="row" style="gap:5px"><svg width="8" height="8" aria-hidden="true"><circle cx="4" cy="4" r="3.6" fill="var(--st-approval)"/></svg>a source is degraded</span>'+
-       '<span>one pip per source kind</span><span>dashed box · schema</span>'+
-       '<span class="mono" style="margin-left:auto">'+vis.length+' classes · '+ontRelsVisible().length+' relations · '+h(ver.v)+'</span></div></div>'+
-      ontSide(vis)+'</div>'
-      :'<div class="grid g3">'+cards+'</div>')+'</div></div>'+
-     '<div class="panel"><div class="panel-h"><h3>Embedding indexes</h3></div><div class="tw"><table>'+
-     '<thead><tr><th>Index</th><th class="num">Dims</th><th class="num">Nodes</th><th class="num">Recall @ 10</th><th class="num">Citation rate</th><th>State</th><th></th></tr></thead><tbody>'+
-     INDEXES.map(function(i){return '<tr><td class="tkey" style="font-size:12px">'+h(i.n)+'</td><td class="num">'+i.dims+'</td>'+
-      '<td class="num">'+i.nodes.toLocaleString()+'</td><td class="num">'+per(i.recall)+'</td><td class="num">'+per(i.cite)+'</td>'+
-      '<td><span class="b b-'+(i.state==="current"?"allowed":"approval")+'"><span class="d"></span>'+h(i.state)+'</span></td>'+
-      '<td>'+(i.state!=="current"?'<button class="btn sm" onclick="openDialog(\'ontindex\',\''+h(i.n)+'\')">Upgrade</button>':'')+'</td></tr>';}).join("")+
-     '</tbody></table></div><div class="panel-b"><div class="note">Quality is measured, not assumed. Recall and citation rate come from every run’s <span class="mono">context_use_feedback</span> records; model, chunking, and reranker changes are gated on that set.</div></div></div>';
-  } else if(t==="graph"){
-    body='<div class="split"><div style="min-width:0">'+ontAnswer()+'</div>'+
-     '<div><div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>The four ways to ask</h3></div><div class="panel-b">'+
-     '<ul class="chain"><li class="on"><span class="h">get_ontology</span><div>The shape before anything else. A planning model reads it the way it reads a schema.</div></li>'+
-     '<li class="on"><span class="h">search_graph</span><div>Hybrid: vector + BM25, fused by reciprocal rank, reranked, cited.</div></li>'+
-     '<li class="on"><span class="h">expand_graph</span><div>Typed traversal from seeds to a hop budget. No query generated.</div></li>'+
-     '<li class="on"><span class="h">query_graph</span><div>Natural language compiled to Cypher, then parsed and injected.</div></li></ul>'+
-     '<div class="note" style="margin-top:12px"><span class="mono">as_of</span> applies to all four. “What did we know about this account in June” is a query, not an export.</div></div></div>'+
-     ontExplore()+'</div></div>';
-  } else if(t==="sources"){
-    var cust=CLASSES.filter(function(c){return c.n===ONTENT.cls;})[0];
-    body='<div class="panel"><div class="panel-h"><h3>Sources</h3>'+
-     '<button class="btn sm" style="margin-left:auto" onclick="openDialog(\'source\')">Add a source</button></div>'+
-     '<div class="tw"><table><thead><tr><th>Source</th><th>Kind</th><th class="num">Source records</th><th>Last sync</th><th>Health</th><th>Cursor</th><th>Entities produced</th><th></th></tr></thead><tbody>'+
-     SOURCES.map(function(s){
-      return '<tr><td><b>'+h(s.n)+'</b></td><td class="mono" style="font-size:11.5px">'+h(s.kind)+'</td>'+
-       '<td class="num">'+s.records.toLocaleString()+'</td><td>'+h(s.last)+'</td>'+
-       '<td><span class="b b-'+(s.health==="ok"?"allowed":"approval")+'"><span class="d"></span>'+h(s.health)+'</span></td>'+
-       '<td class="mono dim" style="font-size:10.5px">'+h(s.cursor)+'</td>'+
-       '<td class="dim" style="font-size:11.5px">'+h(s.entities)+'</td>'+
-       '<td><button class="btn sm" onclick="act(\'Sync queued. Idempotent full pass; anything not seen is archived with the current commit as valid_to.\')">Sync now</button></td></tr>';}).join("")+
-     '</tbody></table></div>'+
-     '<div class="panel-b"><div class="warn"><b>The Postgres connector is degraded.</b> <span class="mono">aintel_prod</span> answered 3 of the last 5 polls; the cursor has not moved past <span class="mono">2026-09-11T07:29Z</span>. '+
-     'Customer, Contract, and Device entities are stale by 41 minutes and every context frame built from them carries that <span class="mono">valid_from</span>.</div></div></div>'+
-     '<div class="grid g2" style="margin-top:14px">'+
-     '<div class="panel"><div class="panel-h"><h3>Entity provenance</h3><span class="b b-q" style="margin-left:auto">'+h(ONTENT.cls)+'</span></div><div class="panel-b">'+
-     '<p class="muted" style="font-size:12.5px;margin-top:0">Every resolved entity is linked to the source records it came from. Nothing is materialized without provenance; each property came from exactly one of these.</p>'+
-     '<p class="eyebrow q">'+h(ONTENT.name)+' · DERIVED_FROM · <span data-ont-records>'+ONTENT.records.length+'</span> source records</p>'+
-     '<pre>(:Entity:'+h(ONTENT.cls)+' {id: <span class="s">"'+h(ONTENT.id)+'"</span>})'+ONTENT.records.map(function(r){
-       return '\n  -[:DERIVED_FROM]-&gt; (:SourceRecord {\n      connector: <span class="s">"'+h(r.src.split(":")[0])+'"</span>,\n      external_id: <span class="s">"'+h(r.src.slice(r.src.indexOf(":")+1))+'"</span>,\n'+
-        '      digest: <span class="s">"'+h(r.digest)+'"</span>,\n      sync_time: <span class="s">"'+h(r.sync)+'"</span> })  <span class="c">// '+h(r.fields)+' · '+h(r.run)+'</span>';}).join("")+'</pre></div></div>'+
-     '<div class="panel"><div class="panel-h"><h3>Resolution</h3></div><div class="panel-b"><dl class="kv">'+
-     '<dt>Natural keys</dt><dd>email, URL, external id</dd>'+
-     '<dt>Model-assisted match</dt><dd>confidence threshold '+ONT_MATCH+' — a workspace setting</dd>'+
-     '<dt>Resolved across sources</dt><dd>'+(cust?cust.ents.toLocaleString():"0")+' '+h(ONTENT.cls)+' entities from '+ontSourcesOf(ONTENT.cls).length+' sources</dd>'+
-     '<dt>Awaiting a human</dt><dd>'+ONT_PAIRS+' candidate pairs below threshold</dd></dl>'+
-     '<button class="btn sm" style="margin-top:12px" onclick="openDialog(\'ontresolve\')">Resolve entities</button></div></div></div>';
-  } else if(t==="repositories"){
-    body='<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Repositories</h3>'+
-     '<button class="btn sm" style="margin-left:auto" onclick="openDialog(\'linkrepo\')">Link a repository</button></div>'+
-     '<div class="tw"><table><thead><tr><th>Repository</th><th>Role</th><th>Production branch</th><th>Head</th><th>Indexed</th><th>Issues</th><th>Event health</th><th class="num">Symbols</th><th>Data-layer drift</th></tr></thead><tbody>'+
-     REPOS.map(function(r){
-      var nd=ONTDRIFT.filter(function(d){return d.repo===r.n;}).length, off=r.branch!==r.defaultBranch;
-      var pct=r.imp?Math.round(r.imp.done/r.imp.total*100):0, importing=r.imp&&r.imp.done<r.imp.total;
-      return '<tr><td class="tkey">'+h(r.n)+'</td>'+
-       '<td>'+(r.role==="main"?'<span class="b b-proven"><span class="d"></span>main</span>':'<span class="b b-q">linked</span>')+'</td>'+
-       '<td><span class="mono">'+h(r.branch)+'</span>'+(off?' <span class="b b-approval" data-ont-offdefault><span class="d"></span>not GitHub’s default</span>':'')+
-        '<div class="dim" style="font-size:11px">confirmed by '+h(r.confirmed)+'</div>'+
-        '<button class="btn sm ghost" style="margin-top:4px" aria-label="Set the production branch for '+h(r.n)+'" onclick="openDialog(\'ontbranch\',\''+h(r.n)+'\')">Change</button></td>'+
-       '<td class="mono dim">'+h(r.head)+'</td><td>'+h(r.indexed)+'</td>'+
-       '<td style="font-size:11.5px;min-width:130px">'+(r.imp?'<span class="mono">'+r.imp.done.toLocaleString()+' of '+r.imp.total.toLocaleString()+'</span> '+
-         (importing?'<span class="b b-approval"><span class="d"></span>importing '+pct+'%</span>':'<span class="dim">imported</span>')+
-         '<div class="ont-meter" style="margin-top:5px"><i class="'+(importing?'wait':'')+'" style="width:'+pct+'%"></i></div>'+
-         '<div class="dim" style="font-size:10.5px;margin-top:3px">'+(importing?'resumable · rate-limit aware':'events keep them current')+'</div>'
-        :'<span class="dim">disabled</span>')+'</td>'+
-       '<td class="dim" style="font-size:11.5px">'+h(r.events)+'</td>'+
-       '<td class="num">'+r.symbols.toLocaleString()+'</td>'+
-       '<td>'+(!nd?'<span class="b b-allowed"><span class="d"></span>none</span>':'<span class="b b-critical"><span class="d"></span>'+nd+' finding'+(nd===1?'':'s')+'</span>')+'</td></tr>';}).join("")+
-     '</tbody></table></div>'+
-     '<div class="panel-b"><div class="note">Only the production branch updates the code graph. When it is not GitHub’s default the page says so, and the binding never moves on its own. Commits to other branches are recorded as commits; pull requests from feature branches are entities with their diff metadata, and nothing more.</div></div></div>'+
-     '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>The data layer</h3>'+
-     '<span class="b b-critical" style="margin-left:auto"><span class="d"></span>'+ONTDRIFT.length+' findings</span></div><div class="tw"><table class="narrow">'+
-     '<thead><tr><th>Object</th><th>Declared by</th><th>Confidence</th><th>Finding</th></tr></thead><tbody>'+
-     ONTDRIFT.map(function(d){var cf={high:"allowed",medium:"approval",low:"q"}[d.conf]||"q";
-      return '<tr><td class="mono" style="font-size:11.5px">'+h(d.obj)+'<div class="dim" style="font-size:10.5px">'+h(d.repo)+'</div></td><td class="mono" style="font-size:11px">'+h(d.decl)+'</td>'+
-       '<td><span class="b b-'+cf+'">'+h(d.conf)+'</span></td>'+
-       '<td style="font-size:11.5px">'+d.finding+'<div class="dim" style="margin-top:4px"><b style="color:var(--body)">Fix:</b> '+h(d.fix)+'</div>'+
-       '<button class="btn sm ghost" style="margin-top:5px" onclick="openDialog(\'ontprop\')">Open a proposal</button></td></tr>';}).join("")+
-     '</tbody></table></div><div class="panel-b"><p class="muted" style="font-size:12px;margin:0">'+
-     'This is what lets policy say what no allowlist can: route to approval any tool call whose resolved effect is a write to a table classed financial, PII, or regulated — whichever code path performs it.</p></div></div>'+
-     '<div class="grid g2"><div class="panel"><div class="panel-h"><h3>Events in</h3></div><div class="tw"><table class="narrow">'+
-     '<thead><tr><th>Event</th><th class="num">30d</th><th>Health</th></tr></thead><tbody>'+
-     [["push",1204,"ok"],["pull_request",3180,"ok"],["pull_request_review",2044,"ok"],["issues",1908,"ok"],
-      ["issue_comment",2810,"ok"],["check_suite",4012,"ok"],["workflow_run",4012,"ok"],["release",38,"ok"],
-      ["repository",2,"prompted the owner"],["installation",0,"ok"]]
-     .map(function(e){return '<tr><td class="mono" style="font-size:11.5px">'+h(e[0])+'</td><td class="num">'+e[1].toLocaleString()+'</td>'+
-      '<td><span class="b b-'+(e[2]==="ok"?"allowed":"approval")+'"><span class="d"></span>'+h(e[2])+'</span></td>'+'</tr>';}).join("")+
-     '</tbody></table></div><div class="panel-b"><div class="note">No polling and no cron. A missed delivery is detected from the events themselves: every push carries the previous head, and a mismatch fetches the compare range before the new push is processed.</div></div></div></div>';
-  } else {
-    var ordered=ONTVERSIONS.slice().sort(function(a,b){return ontNum(b)-ontNum(a);});
-    body='<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Versions — the git history of <span class="mono">.oxagen/ontology/</span></h3>'+
-     '<div class="sp"><span class="b b-q">merge is activation · nothing activates any other way</span>'+
-     '<button class="btn sm" onclick="openDialog(\'ontprop\')">Open a proposal</button></div></div>'+
-     '<div class="tw"><table><thead><tr><th>Version</th><th>State</th><th>Commit</th><th>Merged</th><th>By</th><th>Pull request</th><th>Diff against the pinned version</th><th class="num">Classes</th><th></th></tr></thead><tbody>'+
-     ordered.map(function(v){
-      var sm={active:"proven","superseded":"q"}, merged=v.state==="active"||v.state==="superseded", viewing=merged&&v.v===ver.v;
-      return '<tr><td class="mono"><b>'+h(v.v)+'</b>'+(viewing&&past?' <span class="b b-approval" data-ont-viewing><span class="d"></span>viewing</span>':'')+'</td>'+
-       '<td><span class="b b-'+(sm[v.state]||"approval")+'"><span class="d"></span>'+h(v.state)+'</span></td>'+
-       '<td class="mono dim">'+h(v.commit)+'</td><td class="mono dim" style="font-size:11px">'+h(v.at)+'</td><td>'+h(v.by)+'</td>'+
-       '<td><a href="#" onclick="event.preventDefault()">'+h(v.pr)+'</a></td><td style="font-size:12px">'+h(v.diff)+'</td>'+
-       '<td class="num">'+(merged?CLASSES.length-(v.absent||[]).length:'—')+'</td>'+
-       '<td>'+(merged?(viewing?'<button class="btn sm" onclick="S.tab.ontology=\'model\';render()">Open the map</button>':
-         '<button class="btn sm" onclick="S.tab.ontology=\'model\';ontSetAsOf(\''+h(v.v)+'\')">View the map</button>'):'')+'</td></tr>';}).join("")+
-     '</tbody></table></div></div>'+
-     '<div class="split"><div class="panel"><div class="panel-h"><h3>Open proposal · <span class="mono">a-intel/platform#517</span></h3>'+
-     '<span class="b b-approval" style="margin-left:auto"><span class="d"></span>checks running</span></div><div class="panel-b">'+
-     '<pre><span class="c">diff --git a/.oxagen/ontology/schemas/sales_crm/labels/SupportPlan.json</span>\n'+
-     '<span class="s">+{</span>\n<span class="s">+  "description": "A support entitlement attached to a contract.",</span>\n'+
-     '<span class="s">+  "natural_key_props": ["contract_id", "plan_code"],</span>\n'+
-     '<span class="s">+  "properties": [</span>\n'+
-     '<span class="s">+    {"name": "plan_code", "type": "string", "nullable": false},</span>\n'+
-     '<span class="s">+    {"name": "response_minutes", "type": "integer", "nullable": false}</span>\n'+
-     '<span class="s">+  ],</span>\n'+
-     '<span class="s">+  "synonyms": ["support tier", "SLA plan"],</span>\n'+
-     '<span class="s">+  "sources": ["postgres:aintel_prod.support_plans"]</span>\n<span class="s">+}</span></pre>'+
-     '<div class="hr"></div><p class="eyebrow q">Provenance — what inferred this</p>'+
-     '<dl class="kv"><dt>Profiler run</dt><dd class="mono">prf_01K5RU2X · deterministic pass over 2,000 source records</dd>'+
-     '<dt>Source records</dt><dd class="mono">aintel_prod.support_plans · 1,188 rows sampled</dd>'+
-     '<dt>Named by</dt><dd>a light-tier model call, <b>after</b> the deterministic pass — it never invents a class the profiler did not see</dd>'+
-     '<dt>Migration plan</dt><dd>1,188 Contract entities gain a <span class="mono">HAS_SUPPORT_PLAN</span> edge; no label is removed</dd></dl></div></div>'+
-     '<div class="panel"><div class="panel-h"><h3>Checks</h3></div><div class="panel-b">'+
-     '<div class="tw"><table class="narrow"><tbody>'+
-     [["Schema validity","pass"],["Naming","pass"],["No orphaned relation","pass"],
-      ["No label removed while entities carry it","pass"],["Diff against the pinned version","pass"],
-      ["Secret and PII scan","pass"],["Conflict against active records","running"]]
-     .map(function(c){return '<tr><td style="font-size:12.5px">'+h(c[0])+'</td><td>'+
-      (c[1]==="pass"?'<span class="b b-allowed"><span class="d"></span>pass</span>':'<span class="b b-approval"><span class="d"></span>running</span>')+'</td></tr>';}).join("")+
-     '</tbody></table></div>'+
-     '<div class="hr"></div><p class="eyebrow q">as_of picker</p>'+ontPicker()+
-     '<p class="dim" style="font-size:11.5px;margin-top:9px">Prior versions stay queryable, and the Model map redraws as it stood. The graph keeps every version indexed by digest.</p></div></div></div>';
-  }
-  return '<div class="phead"><div class="t"><p class="eyebrow">Workspace · '+h(w.name)+'</p><h1>Ontology</h1>'+
-   '<p>This workspace’s model of its business. Every version is a commit in <span class="mono">.oxagen/ontology/</span> on '+h(w.main)+'; merge is activation, and nothing activates any other way.</p></div>'+
-   '<div class="acts"><button class="btn" onclick="act(\'Full re-index of the production branch head queued. Idempotent.\')">Sync now</button>'+
-   '<button class="btn primary" onclick="openDialog(\'ontprop\')">Open a proposal</button></div></div>'+ontBanner()+tabs+body;
-}
-
 /* ============================== Steering ============================== */
 /* One concern carried from proposal to publication, all of it derived:
    - PRP_SUPPORT holds the supporting-run rows behind each proposal; every count a proposal shows
@@ -8873,8 +8281,7 @@ function pSteering(){
      '    ctx.release.notes-format.toml\n    ctx.release.never-merge.toml\n    ctx.platform.changelog-once.toml\n'+
      (stgRecord(CTXPR.record.id)?'    '+h(CTXPR.record.id)+'.toml  <span class="c"># merged in '+h(CTXPR.pr)+'</span>\n':'')+
      '  proposals/*.toml           <span class="c"># candidates; steer nothing</span>\n'+
-     '  agents/&lt;slug&gt;.toml         <span class="c"># one per agent</span>\n'+
-     '  ontology/                  <span class="c"># one file per class and relation</span></pre>'+
+     '  agents/&lt;slug&gt;.toml         <span class="c"># one per agent</span></pre>'+
      '<div class="note" style="margin-top:12px">Stella symlinks into this directory rather than copying it, so its loader and its CI validation work unchanged on the same files with no second copy that could drift. Oxagen reads <span class="mono">.oxagen/</span> and nothing else.</div></div></div>'+
      '<div class="panel"><div class="panel-h"><h3>Delivery — three ways, all recorded</h3></div><div class="panel-b">'+
      '<ul class="chain"><li class="on"><span class="h">Bundle context</span><div>Compiled steering text in the signed policy bundle: <span class="mono">must</span>/<span class="mono">should</span> in the stable prefix, <span class="mono">may</span>/<span class="mono">info</span> selected by relevance.</div></li>'+
@@ -9474,7 +8881,7 @@ function pOrganization(){
   if(S.state==="error") return errorState("Organization","503 control_plane_unavailable");
   if(S.state==="denied") return deniedState("this organization’s settings","org.admin — members, funding, and the data plane are owner-only");
   if(S.state==="empty") return emptyState("This organization has no workspaces",
-    "A workspace owns one main repo, one ontology, one steering set, a set of agents, tool grants, and budgets. A workspace without a main repo cannot exist.",
+    "A workspace owns one main repo, one steering set, a set of agents, tool grants, and budgets. A workspace without a main repo cannot exist.",
     '<button class="btn primary" onclick="openDialog(\'newws\')">Create a workspace</button>');
 
   var tabs='<div class="tabs" role="tablist">'+
@@ -9600,7 +9007,7 @@ function orgLatestSeen(){var best=null;MEMBERS.forEach(function(m){if(!best||m.l
    and Spend reads them back through orgRoutesOffSpend(), so its month total and By model table carry
    every tier Funding counts. */
 var ORG_ROUTES=[
- {tier:"complex",use:"in-app agent turns, reflection, promotion rationale, ontology diff explanation, Context PR bodies",
+ {tier:"complex",use:"in-app agent turns, reflection, promotion rationale, Context PR bodies",
   provider:"OpenRouter",route:"z-ai/glm-latest",resolves:"GLM 5.3 · 1.3M context",fallback:"z-ai/glm-4.7",spendModel:"z-ai/glm-latest (assistant)",
   fw:{endpoint:"https://models.a-intel.internal/v1",dialect:"Anthropic Messages-compatible",served:"llama-4-405b-instruct (self-served)"}},
  {tier:"light",use:"classification, labeling, entity and property naming, redaction hints, approval summaries, reranking",
@@ -10513,7 +9920,7 @@ var ASST_CONVOS={
       'The namespace is <b>immutable</b>: it is inside every agent key, so <code>a-intel.core.release-manager</code> reads the same in five years.']}},
     {card:{tool:"create_workspace@1", step:"step 2", decision:"allow", policy:"pol_v1", rules:["workspace.org_owner_override"], receipt:"rcp_01K3F8Q5D", lines:[
       'Workspace <b>'+h(WS[0].slug)+'</b> · governance mode <b>'+h(ORG.governance)+'</b> · main repo <b>'+h(WS[0].main)+'</b> @ <code>'+h(WS[0].branch)+'</code>.',
-      'Every workspace has exactly one main repo. It is where steering, agent definitions and the ontology live in source control.']}},
+      'Every workspace has exactly one main repo. It is where steering and agent definitions live in source control.']}},
     {p:'Now wrap an agent. One click installs the collector and the hook, or five lines wrap an SDK agent.'},
     {buttons:[["Wrap Claude Code","noop",true],["Wrap Codex","noop"],["Show the SDK snippet","noop"]]}]},
    {role:"op", who:"priya", t:"09:16", text:"Show the SDK snippet."},
@@ -11037,43 +10444,6 @@ SCENARIOS["learned-approved-changed"]={title:"Learned, approved, changed", ws:"c
    setup:function(){S.tab.agent="definition";}}
  ]};
 /* ---- end W6 ---- */
-/* ---- W7 · shape-of-your-business ---- */
-SCENARIOS["shape-of-your-business"]={title:"The shape of your business", ws:"core-platform",
- blurb:"What kinds of things exist at Anderson Intelligence Corp., how many of each the graph holds, where each came from, and which version of that model is in force.",
- steps:[
-  {say:"This is Anderson Intelligence Corp.’ model of its business: "+CLASSES.length+" classes in "+Object.keys(ONTSCHEMAS).length+" schemas, with the relations between them drawn. Customer is selected, so its edges are lit and the panel names the rules that reference it.",
-   note:"Counts are the graph’s, live. Customer shows stale because the Postgres source feeding it is degraded. Hover any class to light its edges; Tab and Enter do the same by keyboard.",
-   route:function(o){return {page:"ontology",org:o,ws:"core-platform"};},
-   setup:function(){S.tab.ontology="model";S.ontView="map";S.ontAsOf=null;S.ontSel="Customer";},
-   act:["Select Contract","ontPick('Contract')"]},
-  {say:"Ask in plain English. The compiler writes Cypher, the parser accepts read clauses only, and the graph service adds the workspace predicate itself, so the model never gets the chance to leave it out.",
-   note:"The answer cites its context frames with digest, tokens and valid_from. Frames built from aintel_prod carry that connector’s stuck cursor as their valid_from.",
-   route:function(o){return {page:"ontology",org:o,ws:"core-platform"};},
-   setup:function(){S.tab.ontology="graph";S.ontQ="q1";S.ontAsOf=null;S.ontHop2=false;},
-   act:["Expand to hop 2","S.ontHop2=true;render()"]},
-  {say:"A question that writes is refused at parse. The compiler produced a <span class=\"mono\">DETACH DELETE</span>; nothing reached the database.",
-   note:"Questions are untrusted text. The attempt still cost a compile, and the refusal says what it cost. The third question is refused on its EXPLAIN plan instead.",
-   route:function(o){return {page:"ontology",org:o,ws:"core-platform"};},
-   setup:function(){S.tab.ontology="graph";S.ontQ="q2";S.ontAsOf=null;},
-   act:["Ask the one past budget","S.ontQ='q3';render()"]},
-  {say:"Sources. The Postgres connector is degraded: its cursor has not moved past 07:29Z, and every Customer, Contract and Device frame says so.",
-   note:"Adding a source profiles it deterministically first. A model names what the profiler saw afterwards and never invents a class.",
-   route:function(o){return {page:"ontology",org:o,ws:"core-platform"};},
-   setup:function(){S.tab.ontology="sources";S.ontAsOf=null;},
-   act:["Add a source","openDialog('source')"]},
-  {say:"Repositories. a-intel/mobile ships from <span class=\"mono\">release</span>, not GitHub’s default, and the page says so rather than guessing. a-intel/billing is still importing its issues.",
-   note:"Linking confirms the production branch, subscribes to events, imports issues, then builds the code graph, each with its own status.",
-   route:function(o){return {page:"ontology",org:o,ws:"core-platform"};},
-   setup:function(){S.tab.ontology="repositories";S.ontAsOf=null;},
-   act:["Link a repository","openDialog('linkrepo')"]},
-  {say:"Versions are commits. An older as_of redraws the model as it stood: v16 predates "+ONTVERSIONS.filter(function(v){return v.v==="v16";})[0].absent.join(", ")+", and its counts are what the graph held then.",
-   note:"Merge is activation. A change is a pull request with checks, and nothing activates any other way.",
-   route:function(o){return {page:"ontology",org:o,ws:"core-platform"};},
-   setup:function(){S.tab.ontology="versions";S.ontAsOf="v16";S.ontSel=null;},
-   act:["Open a proposal","openDialog('ontprop')"]}
- ]};
-
-/* ---- end W7 ---- */
 /* ---- W8 · every-dollar-every-operator ---- */
 SCENARIOS["every-dollar-every-operator"]={title:"Every dollar, every operator", ws:"core-platform",
  blurb:"What the tokens bought, per operator, agent and run, and whether every provider dollar has a frame behind it.",
@@ -11235,7 +10605,7 @@ function scnHref(id,step){var s=SCENARIOS[id];return "#/"+ORG.slug+"/"+s.ws+"/sc
 function scnGo(hash){S.dlg=null;S.dlgArg=null;go(hash);}
 function scnExit(){var s=SCENARIOS[S.scn.id];S.scn=null;scnGo("#/"+ORG.slug+"/"+s.ws);}
 function scnRail(){
-  if(!S.scn) return "";
+  if(!S.scn||PRODUCT) return "";
   var s=SCENARIOS[S.scn.id]; if(!s) return "";
   var i=S.scn.step, st=s.steps[i-1], n=s.steps.length;
   var dots=""; for(var k=1;k<=n;k++) dots+='<i class="'+(k<=i?"on":"")+'"></i>';
@@ -11749,25 +11119,6 @@ function dialog(){
      '<div class="field"><label>Retention mode</label><select aria-label="Retention mode"><option>content_exact — keep prompts and tool bodies in full</option><option>digest_only — digests only, lowers the replay grade</option></select></div>'+
      '<div class="note">Until the GitHub App binds the main repo the workspace is provisional for 14 days: runs record and spend counts, but steering, records and agent definitions stay off.</div>',
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Workspace created. Installing the GitHub App on a-intel/data-platform.\')">Create</button>'},
-   linkrepo:{t:"Link a repository",w:false,b:
-     '<div class="field"><label>Repository</label><select aria-label="Repository"><option>a-intel/telemetry</option><option>a-intel/edge-firmware</option></select></div>'+
-     '<div class="field"><label>Production branch</label><select aria-label="Production branch"><option>main — GitHub’s default, suggested</option><option>release</option></select>'+
-     '<div class="hint">Confirm it or pick another. This is the only branch parsed into the code graph.</div></div>'+
-     '<div class="field"><label>Role</label><select aria-label="Role"><option>linked</option><option disabled>main — already bound to a-intel/platform</option></select></div>'+
-     '<div class="note">Linking does four things in order, each visible on this page with its own status: confirm the production branch, subscribe to events, import issues, then build the code graph.</div>',
-     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Linked. Subscribing to events, then backfilling issues, then indexing the head.\')">Link</button>'},
-   source:{t:"Add a source",w:false,b:
-     '<div class="field"><label>Connector</label><select aria-label="Connector"><option>Postgres</option><option>GitHub</option><option>Linear</option></select>'+
-     '<div class="hint">Three connectors in v1. A source is profiled deterministically before any model sees it.</div></div>'+
-     '<div class="field"><label>Tables</label><input value="support_plans, entitlements" aria-label="Tables"></div>'+
-     '<div class="note">The profiler reads a sample and computes candidate classes, properties, relation types, and natural keys. A model names and describes them only afterwards, and never invents a class the profiler did not see.</div>',
-     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Profiling 2,000 source records. The result opens as a pull request on a-intel/platform.\')">Profile and propose</button>'},
-   ontprop:{t:"Open an ontology proposal",w:false,b:
-     '<div class="field"><label>Change</label><select aria-label="Change"><option>Add a class</option><option>Add a property</option><option>Add a relation type</option></select></div>'+
-     '<div class="field"><label>Class name</label><input value="SupportPlan" aria-label="Class name"></div>'+
-     '<div class="field"><label>Natural key</label><input value="contract_id, plan_code" aria-label="Natural key"></div>'+
-     '<div class="note">This becomes a branch and a pull request on a-intel/platform with the Context PR checks plus the registry’s own: schema validity, naming, no orphaned relation, and no label removed while entities carry it without a migration plan. Merge freezes a new immutable version and moves the pin.</div>',
-     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'a-intel/platform#517 opened. Merge is activation.\')">Open the pull request</button>'},
    import:{t:"Import an MCP server",w:false,b:
      '<div class="field"><label>Endpoint</label><input value="https://mcp.internal.a-intel.example/sse" aria-label="Endpoint"></div>'+
      '<div class="field"><label>Connection</label><select aria-label="Connection"><option>con_01K2A7 · GitHub App installation</option><option>Create a new connection</option></select></div>'+
@@ -12004,7 +11355,7 @@ function mandateBody(){
 }
 function accountTabs(){
   var cur=S.dlgArg||"profile";
-  return [["profile","Profile"],["preferences","Preferences"],["security","Security"],["privacy","Privacy"],["onboarding","Onboarding"]].map(function(t){
+  return [["profile","Profile"],["preferences","Preferences"],["security","Security"],["privacy","Privacy"]].concat(PRODUCT?[]:[["onboarding","Onboarding"]]).map(function(t){
     return '<button class="tab" role="tab" aria-selected="'+(t[0]===cur)+'" onclick="S.dlgArg=\''+t[0]+'\';render()">'+t[1]+'</button>';}).join("");
 }
 function kvl(pairs,cls){
@@ -12085,8 +11436,8 @@ function accountBody(){
    grants, and the members of this workspace's belt, each with the hazard the model is shown. */
 var CMDS=[
  {g:"Go",i:[["Fleet","#/a-intel/core-platform","⌘ 1"],["Agent IAM","#/a-intel/core-platform/agents","⌘ 2"],
-   ["Tools","#/a-intel/core-platform/tools","⌘ 3"],["Ontology","#/a-intel/core-platform/ontology","⌘ 4"],
-   ["Steering","#/a-intel/core-platform/steering","⌘ 5"],["Spend","#/a-intel/core-platform/spend","⌘ 6"],
+   ["Tools","#/a-intel/core-platform/tools","⌘ 3"],
+   ["Steering","#/a-intel/core-platform/steering","⌘ 4"],["Spend","#/a-intel/core-platform/spend","⌘ 5"],
    ["Organization","#/a-intel"],["API keys","#/a-intel/api-keys"],["Billing","#/a-intel/billing"],["Audit","#/a-intel/audit"],
    ["Onboarding demo — sign up","#/welcome"],["Onboarding demo — log in","#/welcome/login"]]},
  {g:"Runs",i:[["run_01K5RS7M2E8FJ3QW · release-manager · live","#/a-intel/core-platform/runs/run_01K5RS7M2E8FJ3QW"],
@@ -12624,7 +11975,7 @@ function wsSave(){var w=wsById(S.dlgArg);if(!w)return;var n=el("wsName"),b=el("w
 function wsEditDlg(){
   var w=S.dlg==="editws"?wsById(S.dlgArg):null; if(!w) return {t:"Edit workspace",w:false,b:"",f:""};
   return {t:"Edit workspace",s:w.slug,w:false,b:'<div class="field"><label>Name</label><input id="wsName" value="'+h(w.name)+'" aria-label="Name"></div>'+
-   '<div class="field"><label>Main repository</label><input value="'+h(w.main)+'" readonly aria-label="Main repository"><div class="hint">Changing main is an org-owner action with approval — start it from the repository row on Ontology.</div></div>'+
+   '<div class="field"><label>Main repository</label><input value="'+h(w.main)+'" readonly aria-label="Main repository"><div class="hint">Changing main is an org-owner action with approval.</div></div>'+
    '<div class="field"><label>Production branch</label><select id="wsBranch" aria-label="Production branch">'+["main","release","production"].map(function(x){return '<option'+(w.branch===x?' selected':'')+'>'+x+'</option>';}).join("")+'</select></div>'+
    '<div class="field"><label>Governance mode</label><select aria-label="Governance mode"><option>team — one code-owner review</option><option>solo — merge on green checks</option><option>regulated — two reviews and a promotion ledger</option></select></div>'+
    '<div class="field"><label>Namespace</label><input value="'+h(w.ns||w.slug.split("-")[0])+'" disabled aria-label="Namespace"><div class="hint">Immutable. It is in every agent key here: <span class="mono">'+h(ORG.slug+"."+(w.ns||w.slug.split("-")[0]))+'.&lt;agent&gt;</span>.</div></div>'+
@@ -12660,7 +12011,7 @@ S.reg=null; S.regN=0;
 function regTabFor(harness){return harness==="claude-code"?"cc":harness==="codex-cli"?"codex":"sdk";}
 function regNew(){return {slug:"perf-watch",harness:"claude-code",tier:"complex",os:"macos",lang:"ts",tab:"cc",log:0,first:false,polling:false,countdown:false,timers:[]};}
 function regHash(step){if(S.reg&&S.reg.mode==="onboard")return obHash(step);return '#/'+ORG.slug+'/'+ws().slug+'/register'+(step&&step!=="name"?'/'+step:'');}
-function regCancelBtn(){return '<button class="btn" onclick="regCancel()">'+(S.reg&&S.reg.mode==="onboard"?"Exit demo":"Cancel")+'</button>';}
+function regCancelBtn(){return '<button class="btn" onclick="regCancel()">'+(S.reg&&S.reg.mode==="onboard"&&!PRODUCT?"Exit demo":"Cancel")+'</button>';}
 function regStart(){S.dlg=null;S.dlgArg=null;S.layer=null;S.reg=regNew();regNav("name");}
 function regNav(step){var hh=regHash(step);if(location.hash!==hh)location.hash=hh;else render();}
 function regLater(fn,ms){var t=setTimeout(fn,ms);if(S.reg)S.reg.timers.push(t);return t;}
@@ -12731,7 +12082,7 @@ function regShell(step,inner){
               :[{id:"name",n:1,lab:"Name the agent"},{id:"wrap",n:2,lab:"Wrap the agent"},{id:"run",n:3,lab:"Wait for the first frame"}];
   var cur=step==="wrap"?2:step==="run"?3:1, me=PEOPLE.marcus;
   return '<div class="reg-gate"><div class="reg-top"><div class="brandmark">'+LOGO+'</div><span class="who">'+h(me.email)+'</span>'+
-   '<button class="btn sm" onclick="regCancel()">'+(ob?"Exit demo":"Cancel")+'</button></div>'+
+   '<button class="btn sm" onclick="regCancel()">'+(ob&&!PRODUCT?"Exit demo":"Cancel")+'</button></div>'+
    '<div class="reg-in"><nav class="reg-steps" aria-label="'+(ob?"Onboarding":"Register an agent")+'">'+steps.map(function(s){
      var done=s.n<cur;
      return '<button type="button"'+(done?' class="done" onclick="regNav(\''+s.id+'\')"':'')+(s.n===cur?' aria-current="step"':'')+(s.n>cur?' disabled':'')+'>'+
@@ -12931,7 +12282,7 @@ function obGo(step){
   if(OB_GATE[step]&&!(S.reg&&S.reg.mode==="onboard")){regClear();S.reg=obNew();}
   var hh=obHash(step); if(location.hash!==hh)location.hash=hh; else render();
 }
-function obExit(){regClear();S.reg=null;go('#/'+ORG.slug+'/'+ws().slug);act('Onboarding demo closed. Nothing was written.');}
+function obExit(){regClear();S.reg=null;go('#/'+ORG.slug+'/'+ws().slug);if(!PRODUCT)act('Onboarding demo closed. Nothing was written.');}
 function obSignedIn(){regClear();S.reg=null;go('#/'+ORG.slug+'/'+ws().slug);act('Signed in as '+PEOPLE.marcus.name+'. The session is recorded like any other governed action.');}
 function obBind(){if(S.reg)S.reg.repo="bound";delete ws().provisional;render();act('GitHub App installed on '+ws().main+'. Main repo bound — Context PRs, checks and the code graph are on.');}
 function obSkip(){
@@ -13071,7 +12422,7 @@ function obAccountTab(){
 /* ---- auth shell and form pieces ---- */
 function obShell(inner,wide){
   return '<div class="ob-auth"><div class="ob-top"><div class="brandmark">'+LOGO+'</div>'+
-   '<button class="btn sm" onclick="obExit()">Exit demo</button></div>'+
+   (PRODUCT?'':'<button class="btn sm" onclick="obExit()">Exit demo</button>')+'</div>'+
    '<div class="ob-card'+(wide?" wide":"")+'">'+inner+'</div></div>';
 }
 function obErr(html){return '<div class="ob-err">'+OB_ICON.warn+'<span>'+html+'</span></div>';}
@@ -13213,7 +12564,7 @@ function obOrg(){
    '<div class="hr"></div><h3 style="font-size:13px;margin:0 0 10px">First workspace</h3>'+
    '<div class="grid g2"><div class="field"><label for="ob-ws">Workspace name</label><input id="ob-ws" value="'+h(w.slug)+'"></div>'+
    '<div class="field"><label for="ob-mode">Governance mode</label><select id="ob-mode"><option>solo</option><option selected>team</option><option>regulated</option></select></div></div>'+
-   '<div class="dim" style="font-size:12px;line-height:1.5">A workspace is a governance partition: one main repo, one ontology, one steering set, its own agents, tool grants and budgets.</div>'+
+   '<div class="dim" style="font-size:12px;line-height:1.5">A workspace is a governance partition: one main repo, one steering set, its own agents, tool grants and budgets.</div>'+
    '</div></div>'+
    '<div class="reg-foot">'+regCancelBtn()+'<div class="sp"><span class="reg-cap">Creates <span class="mono">org_'+h(ORG.slug)+'</span> and its graph database.</span><button class="btn primary" onclick="regNav(\'wrap\')">Continue</button></div></div>';
 }
@@ -13222,7 +12573,7 @@ function obRepoPanel(){
   var r=S.reg, w=ws();
   if(r.repo==="bound") return '<div class="reg-card ob-repo"><div class="ch"><span class="reg-ok"><span class="dot"></span>bound</span><h3>Main repo</h3></div><div class="cb">'+
    '<div class="row" style="margin-bottom:10px"><span class="b b-q mono">'+h(w.main)+'</span><span class="b b-q">production branch: '+h(w.branch)+'</span><span class="b b-allowed"><span class="d"></span>GitHub App installed</span></div>'+
-   '<p class="muted" style="font-size:12.5px;margin:0">Steering, context records and agent definitions will live in <span class="mono">'+h(w.main)+'</span> under <span class="mono">.oxagen/</span>, published through Context PRs. Linked repos can be added later from Ontology → Repositories.</p></div></div>';
+   '<p class="muted" style="font-size:12.5px;margin:0">Steering, context records and agent definitions will live in <span class="mono">'+h(w.main)+'</span> under <span class="mono">.oxagen/</span>, published through Context PRs.</p></div></div>';
   if(r.repo==="skipped") return '<div class="reg-card ob-repo"><div class="ch"><span class="b b-denied">provisional</span><h3>No main repo bound</h3></div><div class="cb">'+
    '<p class="muted" style="font-size:12.5px;margin:0 0 10px"><b>'+h(w.slug)+' is provisional until '+h(w.provisional?w.provisional.until:obDate(OB_PROVISIONAL_DAYS))+'</b> ('+OB_PROVISIONAL_DAYS+' days). Runs record and spend counts. Steering, context records, and agent definitions stay off until a main repo is bound.</p>'+
    '<button class="btn sm" onclick="obBind()">Bind '+h(w.main)+' now</button></div></div>';
@@ -13440,7 +12791,6 @@ function render(){
   else if(r.page==="mandate")page=pMandate(r);
   else if(r.page==="agentsource")page=pAgentSource(r);
   else if(r.page==="tools")page=pTools();
-  else if(r.page==="ontology")page=pOntology();
   else if(r.page==="scenarios")page=pScenarios();
   else if(r.page==="steering")page=pSteering();
   else if(r.page==="spend")page=pSpend();
@@ -13450,22 +12800,92 @@ function render(){
   else if(r.page==="register"||r.page==="welcome")page="";
   else page=pFleet();
 
+  var shell=r.page!=="register"&&r.page!=="welcome";
   el("app").innerHTML=r.page==="register"?pRegister(r):r.page==="welcome"?scnRailFloat()+pWelcome(r):'<div class="app">'+sidebar(r)+'<div class="main">'+topbar(r)+
-    '<main class="page" id="pg">'+scnRail()+page+'</main></div></div>';
+    '<main class="page" id="pg">'+scnRail()+page+'</main></div></div>'+(isPhone()?mobileNav(r):"");
+  document.documentElement.classList.toggle("has-mnav",shell&&isPhone());
   if(r.page==="register")regSchedule(regStepOf(r));
   else if(r.page==="welcome")regSchedule(r.step);
   el("layer").innerHTML=dialog();
   if(r.page==="agentsource")edMount();
   listify();
-  var vp=el("viewport");
-  vp.className=S.phone?"phone":"";
-  el("layer").className=S.phone?"phone":"";
-  el("toast").className=S.phone?"phone":"";
+  var vp=el("viewport"), vcls=(isPhone()?"phone":"")+(S.mobile?" mobile":"");
+  vp.className=vcls;
+  el("layer").className=vcls;
+  el("toast").className=vcls;
+  if(isPhone())cardTables();
   asstMount();
-  document.querySelectorAll("#chrome [data-st]").forEach(function(b){
-    b.setAttribute("aria-pressed",b.getAttribute("data-st")===S.state?"true":"false");});
-  el("cPhone").setAttribute("aria-pressed",S.phone?"true":"false");
+  if(el("chrome")){
+    document.querySelectorAll("#chrome [data-st]").forEach(function(b){
+      b.setAttribute("aria-pressed",b.getAttribute("data-st")===S.state?"true":"false");});
+    el("cPhone").setAttribute("aria-pressed",S.phone?"true":"false");
+  }
 }
+/* ---- mobile: the phone preview (S.phone, a 400px column) and the real thing (S.mobile, the
+   whole viewport on a narrow or coarse-pointer screen) share every phone rule; only S.mobile drops
+   the preview's column. Both get the thumb bar. ---- */
+function isPhone(){return S.phone||S.mobile;}
+function mobileMedia(){return !!(window.matchMedia&&(matchMedia("(max-width:760px)").matches||(matchMedia("(pointer:coarse)").matches&&matchMedia("(max-width:1024px)").matches)));}
+/* Every list table becomes a stack of cards on a phone: each cell is labelled by its column
+   header, so nothing scrolls sideways and no column is lost. Tables with grouped headers keep
+   their grid and scroll. */
+function cardTables(){
+  document.querySelectorAll("#pg table:not([data-cards]),#layer table:not([data-cards])").forEach(function(t){
+    t.setAttribute("data-cards","1");
+    if(!t.tHead||!t.tHead.rows[0]||t.tHead.rows.length!==1)return;
+    var ths=[].slice.call(t.tHead.rows[0].cells); if(ths.some(function(x){return x.colSpan>1;}))return;
+    var labels=ths.map(function(x){return x.textContent.replace(/\s+/g," ").trim();});
+    [].forEach.call(t.tBodies,function(tb){[].forEach.call(tb.rows,function(tr){
+      [].forEach.call(tr.cells,function(td,i){if(td.colSpan===1&&labels[i])td.setAttribute("data-l",labels[i]);});});});
+    t.classList.add("cards");
+  });
+}
+/* The thumb bar: the four places an operator opens most, then More, which is the rest of the
+   sidebar, the assistant, search, notifications and the account as one sheet from the bottom.
+   Counts follow the sidebar's rule: only where something waits on a person. */
+var MNAV_MORE={organization:1,billing:1,audit:1,steering:1,scenarios:1};
+function mobileNav(r){
+  var w=ws(), fr=obFirstRun(w), base="#/"+ORG.slug+"/"+w.slug;
+  var waiting=fr?APPROVALS.filter(function(a){return a.run===fr.id&&apState(a.id).status==="pending";}).length:pendingCount(w.slug);
+  var crit=fr?0:INCIDENTS.filter(function(i){return i.status==="open"&&i.sev==="critical";}).length;
+  var cur=r.page==="run"?"fleet":r.page==="agent"||r.page==="mandate"||r.page==="agentsource"?"agents":r.page;
+  function b(id,label,href,count,hot,on){
+    return '<button class="mn" '+(on?'aria-current="page"':'')+' onclick="'+href+'"><span class="ic">'+icon(id)+'</span><span>'+label+'</span>'+
+      (count?'<span class="ct'+(hot?" hot":"")+'">'+count+'</span>':'')+'</button>';
+  }
+  return '<nav class="mnav" aria-label="Primary">'+
+   b("fleet","Fleet","go(\''+base+'\')",waiting,true,cur==="fleet")+
+   b("agents","Agents","go(\''+base+'/agents\')",0,false,cur==="agents")+
+   b("tools","Tools","go(\''+base+'/tools\')",0,false,cur==="tools")+
+   b("spend","Spend","go(\''+base+'/spend\')",0,false,cur==="spend")+
+   b("more","More","openDialog(\'more\')",crit,true,!!MNAV_MORE[cur]||S.dlg==="more")+
+   '</nav>';
+}
+DLG_EXT.more=function(){
+  var w=ws(), base="#/"+ORG.slug+"/"+w.slug, fr=obFirstRun(w);
+  var crit=fr?0:INCIDENTS.filter(function(i){return i.status==="open"&&i.sev==="critical";}).length;
+  function t(id,label,sub,on,count,hot){
+    return '<button class="mtile" onclick="closeDialog();'+on+'"><span class="ic">'+icon(id)+'</span><span class="tx"><b>'+h(label)+'</b><span>'+h(sub)+'</span></span>'+
+      (count?'<span class="ct'+(hot?" hot":"")+'">'+count+'</span>':'')+'</button>';
+  }
+  return {t:"More",w:false,
+   b:'<div class="mgrid">'+
+     t("steering","Steering","records, proposals, Context PRs",'go(\''+base+'/steering\')',fr?0:PROPOSALS.length)+
+     t("organization","Organization","people, workspaces, funding",'go(\'#/'+ORG.slug+'\')')+
+     t("billing","Billing","plan, meters, invoices",'go(\'#/'+ORG.slug+'/billing\')')+
+     t("audit","Audit","events, incidents, holds",'go(\'#/'+ORG.slug+'/audit\')',crit,true)+
+     (PRODUCT?'':t("scenarios","Scenarios","guided walkthroughs",'go(\''+base+'/scenarios\')'))+
+     '</div><div class="hr"></div><div class="mgrid">'+
+     t("assistant","Assistant",S.asstEngine==="down"?"engine down":"glm-latest · ready",'asstToggle(true)')+
+     t("search","Search","or run an action",'openDialog(\'cmd\')')+
+     t("bell","Notifications",notifUnread()+" unread",'openDialog(\'notifs\')',notifUnread(),true)+
+     t("user","Account",me().name,'openDialog(\'account\',\'profile\')')+
+     '</div><div class="hr"></div><div class="mgrid one">'+
+     t("org","Switch organization",ORG.name,'openDialog(\'org-switch\')')+
+     t("ws","Switch workspace",w.name,'openDialog(\'ws-switch\')')+
+     '</div>',
+   f:'<button class="btn" onclick="closeDialog()">Close</button>'};
+};
 function setTheme(v){
   if(v==="system")document.documentElement.removeAttribute("data-theme");
   else document.documentElement.setAttribute("data-theme",v);
@@ -13476,12 +12896,17 @@ function toggleTheme(){
   setTheme(cur==="light"?"dark":cur==="dark"?"system":"light");
   S.layer=null;render();
 }
-document.querySelectorAll("#chrome [data-st]").forEach(function(b){
-  b.addEventListener("click",function(){S.state=b.getAttribute("data-st");render();});});
-el("cPhone").addEventListener("click",function(){S.phone=!S.phone;render();});
-el("cTheme").addEventListener("click",toggleTheme);
-el("cIndex").addEventListener("click",function(){openDialog("cmd");});
-el("cReset").addEventListener("click",function(){seedApprovals();S.dlg=null;S.dlgArg=null;render();toast("Approvals reset — every parked call is pending again with a fresh clock.","gold");});
+if(el("chrome")){
+  document.querySelectorAll("#chrome [data-st]").forEach(function(b){
+    b.addEventListener("click",function(){S.state=b.getAttribute("data-st");render();});});
+  el("cPhone").addEventListener("click",function(){S.phone=!S.phone;render();});
+  el("cTheme").addEventListener("click",toggleTheme);
+  el("cIndex").addEventListener("click",function(){openDialog("cmd");});
+  el("cReset").addEventListener("click",function(){seedApprovals();S.dlg=null;S.dlgArg=null;render();toast("Approvals reset — every parked call is pending again with a fresh clock.","gold");});
+}
+/* a resize across the phone breakpoint re-lays the shell; BOOT.mobile pins it either way */
+(function(){var t=null;window.addEventListener("resize",function(){if(BOOT.mobile!=null)return;clearTimeout(t);t=setTimeout(function(){var m=mobileMedia();if(m!==S.mobile){S.mobile=m;S.side=false;render();}},120);});})();
+window.addEventListener("hashchange",function(){if(isPhone())window.scrollTo(0,0);});
 document.addEventListener("keydown",function(e){
   if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==="k"){e.preventDefault();openDialog("cmd");}
   if(e.key==="Escape"){if(S.dlg)closeDialog();else if(S.layer){S.layer=null;render();}else if(S.asst){asstToggle(false);}else{var rp=route();if(rp.page==="register")regCancel();else if(rp.page==="welcome"&&S.reg&&S.reg.mode==="onboard")obExit();}}
@@ -13699,30 +13124,14 @@ document.addEventListener("click",function(e){
   });
   var agentsBy={}; AGENTS.forEach(function(a){agentsBy[a.key]=a;});
 
-  /* ---------- repos, branches, sources, ontology ---------- */
+  /* ---------- repos, branches ---------- */
   var repoSeen={}; REPOS.forEach(function(r){repoSeen[r.n]=1;});
   newWS.forEach(function(w){[w.main].concat(w.linked).forEach(function(rn){
     if(repoSeen[rn])return; repoSeen[rn]=1;
     var sym=ri(4000,90000), main=rn===w.main;
     REPOS.push({n:rn,role:main?"main":"linked",branch:main?w.branch:"main",head:main?w.head:hex(7),indexed:pick(["2 min ago","4 min ago","9 min ago","31 min ago","1 h ago"]),
       issues:rnd()<0.7?"enabled · "+ic(ri(120,4200))+" imported":"disabled",events:"ok · "+ic(ri(200,9000))+" deliveries / 30d · "+(rnd()<0.8?"0 gaps":"1 gap recovered"),symbols:sym,drift:rnd()<0.7?"none":ri(1,4)+" data-layer finding"+(rnd()<0.5?"":"s")});
-    SOURCES.push({n:"GitHub · "+rn,kind:"github",records:ri(9000,160000),last:pick(["2 min ago","6 min ago","14 min ago","1 h ago"]),health:rnd()<0.9?"ok":"degraded",cursor:"delivery "+hex(8),entities:main?"Repository, PullRequest, Issue, File, Symbol":"Repository, PullRequest, Issue"});
   });});
-  SOURCES.push({n:"Zendesk · support",kind:"zendesk",records:184201,last:"3 min ago",health:"ok",cursor:"cursor 2026-09-11T09:11Z",entities:"Ticket, Customer, Macro"},
-    {n:"Salesforce · sales cloud",kind:"salesforce",records:61340,last:"12 min ago",health:"ok",cursor:"SystemModstamp 2026-09-11T09:02Z",entities:"Account, Opportunity, Contract"},
-    {n:"Snowflake · analytics (14 tables)",kind:"snowflake",records:2210044,last:"41 min ago",health:"ok",cursor:"stream offset 91,204",entities:"Customer, Device, Event"},
-    {n:"Datadog · monitors",kind:"datadog",records:3122,last:"1 min ago",health:"ok",cursor:"monitor.modified 2026-09-11T09:13Z",entities:"Monitor, Service, Incident"},
-    {n:"PagerDuty · a-intel",kind:"pagerduty",records:1188,last:"5 min ago",health:"ok",cursor:"page 12",entities:"Incident, Service, Schedule"});
-  CLASSES.push({n:"Service",ents:212,fresh:"1 min",src:"Datadog, PagerDuty, GitHub",rel:"OWNED_BY, DEPLOYS_FROM, ALERTS_ON",cited:1502,rules:5,proven:44,drift:0,builtin:false},
-    {n:"Account",ents:9114,fresh:"12 min",src:"Salesforce",rel:"HAS_CONTRACT, OWNS_DEVICE, RAISED_TICKET",cited:2210,rules:3,proven:18,drift:1,builtin:false},
-    {n:"Opportunity",ents:3402,fresh:"12 min",src:"Salesforce",rel:"FOR_ACCOUNT, OWNED_BY",cited:640,rules:2,proven:2,drift:0,builtin:false},
-    {n:"Monitor",ents:3122,fresh:"1 min",src:"Datadog",rel:"WATCHES_SERVICE, PAGES",cited:880,rules:4,proven:31,drift:0,builtin:false},
-    {n:"Pipeline",ents:1408,fresh:"4 min",src:"GitHub (dbt), Snowflake",rel:"READS, WRITES, SCHEDULED_BY",cited:1930,rules:6,proven:52,drift:2,builtin:false},
-    {n:"Macro",ents:612,fresh:"3 min",src:"Zendesk",rel:"USED_ON, WRITTEN_BY",cited:410,rules:1,proven:0,drift:0,builtin:false});
-  ONTVERSIONS.push({v:"v16",state:"superseded",commit:hex(7),at:"2026-08-04 15:10",by:"Priya Natarajan",pr:"a-intel/platform#402",diff:"+3 classes (Service, Monitor, Pipeline), +6 relations"},
-    {v:"v15",state:"superseded",commit:hex(7),at:"2026-07-11 10:40",by:PEOPLE[WSX["data-platform"].owner].name,pr:"a-intel/platform#361",diff:"+2 classes (Account, Opportunity), Salesforce source bound"},
-    {v:"v14",state:"superseded",commit:hex(7),at:"2026-06-20 09:05",by:"Marcus Bell",pr:"a-intel/platform#318",diff:"+1 class (Macro), +2 properties on Ticket"},
-    {v:"v13",state:"superseded",commit:hex(7),at:"2026-05-30 16:22",by:"Marcus Bell",pr:"a-intel/platform#270",diff:"+4 properties on Customer, retired 1 relation"});
   BRANCHES.push({name:"agents/triage-reproduce-first",pr:"a-intel/platform#521",ahead:3,by:"marcus",when:"3 hours ago"},
     {name:"context/ctx.core.migration-order",pr:"a-intel/platform#520",ahead:1,by:"marcus",when:"yesterday"},
     {name:"agents/pr-reviewer-belt-narrow",pr:null,ahead:2,by:people[8].key,when:"yesterday"},
@@ -13737,7 +13146,7 @@ document.addEventListener("click",function(e){
     "aws-billing":["get_forecast","list_budgets","update_budget","get_reservation_coverage","list_savings_plans","get_anomalies","get_rightsizing","tag_resource"],
     slack:["get_channel","list_users","get_user","send_dm","update_message","delete_message","add_reaction","pin_message","create_channel","archive_channel","set_topic","search_messages"],
     snowflake:["list_tables","describe_table","list_schemas","get_query_history","cancel_query","create_stage"],
-    oxagen:["expand_entity","recall_context","get_run","list_runs","read_frame","list_frames","propose_record","open_context_pr","get_agent","list_agents","get_policy","simulate_policy","list_receipts","get_receipt","export_bundle","verify_bundle","get_budget","set_preferences","list_mandates","draw_mandate","get_witness","run_witness","search_tools","describe_tool","request_approval","check_approval","get_ontology","diff_ontology","list_sources","get_source_cursor","score_candidates","compose_context","summarize_run","reflect_run","promote_finding","list_findings","get_spend","list_switches","read_switch","enqueue_export"],
+    oxagen:["expand_entity","recall_context","get_run","list_runs","read_frame","list_frames","propose_record","open_context_pr","get_agent","list_agents","get_policy","simulate_policy","list_receipts","get_receipt","export_bundle","verify_bundle","get_budget","set_preferences","list_mandates","draw_mandate","get_witness","run_witness","search_tools","describe_tool","request_approval","check_approval","score_candidates","compose_context","summarize_run","reflect_run","promote_finding","list_findings","get_spend","list_switches","read_switch","enqueue_export"],
     harness:["Read","Edit","Write","Glob","Grep","WebFetch","WebSearch","Agent","NotebookEdit","apply_patch","shell","update_plan","view_image","exec","file_write","file_read","git_commit","git_diff"],
     jira:["create_issue","get_issue","search_issues","update_issue","transition_issue","add_comment","list_boards","get_sprint","list_sprints","assign_issue","link_issues","add_attachment","list_projects","get_project","create_version","list_components","add_watcher","get_changelog","list_filters","run_filter","bulk_update","delete_issue","create_epic","list_epics","get_worklog","add_worklog"],
     datadog:["list_monitors","get_monitor","mute_monitor","unmute_monitor","create_monitor","query_metrics","search_logs","list_incidents","get_incident","create_incident","list_dashboards","get_dashboard","list_slos","get_slo","list_services","get_service","post_event"],
@@ -13845,7 +13254,7 @@ document.addEventListener("click",function(e){
     {id:"prp_01K5RV6H",lineage:"ctx.data.backfill-partitions",kind:"procedure",force:"should",from:PEOPLE[WSX["data-platform"].owner].name,st:"Backfill in day-sized partitions and verify row counts after each.",support:"2 quality-gate failures traced to whole-table backfills",state:"open Context PR",pr:"a-intel/data-platform#341",checks:"5 / 5 pass"},
     {id:"prp_01K5RV8K",lineage:"ctx.sec.never-rotate-own-credential",kind:"constraint",force:"must",from:PEOPLE[WSX.security.owner].name,st:"No agent may rotate a credential it holds.",support:"policy review 2026-09",state:"merged",pr:"a-intel/security-tools#77",checks:"7 / 7 pass"},
     {id:"prp_01K5RW0M",lineage:"ctx.growth.brief-as-table",kind:"preference",force:"may",from:"reflector · 14 runs",st:"Campaign briefs are a table of channel, audience, budget and owner.",support:"9 briefs rewritten by hand",state:"candidate",pr:"—",checks:"—"},
-    {id:"prp_01K5RW2P",lineage:"ctx.mobile.release-branch",kind:"fact",force:"info",from:"ontology engine",st:"The production branch of a-intel/mobile is release, not main.",support:"4 runs targeted main",state:"open Context PR",pr:"a-intel/mobile#96",checks:"4 / 4 pass"});
+    {id:"prp_01K5RW2P",lineage:"ctx.mobile.release-branch",kind:"fact",force:"info",from:"reflector · run_01K5R"+ulid(11),st:"The production branch of a-intel/mobile is release, not main.",support:"4 runs targeted main",state:"open Context PR",pr:"a-intel/mobile#96",checks:"4 / 4 pass"});
 
   /* ---------- runs ---------- */
   var TASKS={
@@ -14219,7 +13628,13 @@ seedApprovals();
   NOTIFS.sort(function(x,y){return key(x.t)<key(y.t)?1:key(x.t)>key(y.t)?-1:0;});
 })();
 
-if(!location.hash)location.hash="#/a-intel/core-platform/scenarios/assistant-and-account/1"; /* generated by tools/build-w.mjs from mc.html */
+/* BOOT: what a generated file pins. tools/build-pages.mjs rewrites the object literal (state,
+   mobile, theme, hash); a thin page file sets window.BOOT before the engine loads instead. */
+var BOOT=window.BOOT||{state:null,mobile:null,theme:null,hash:null};
+if(BOOT.state)S.state=BOOT.state;
+S.mobile=BOOT.mobile!=null?!!BOOT.mobile:mobileMedia();
+if(BOOT.theme)setTheme(BOOT.theme);
+if(!location.hash)location.hash=BOOT.hash||"#/a-intel/core-platform/scenarios/assistant-and-account/1"; /* generated by tools/build-w.mjs from mc.html */
 applyHashTab();
 render();
 </script>

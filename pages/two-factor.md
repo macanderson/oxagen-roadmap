@@ -1,0 +1,66 @@
+# Two-factor
+
+| | |
+|---|---|
+| Route | `#/welcome/two-factor` |
+| Scope | auth |
+| Spec | §14 Mission Control; Appendix F sign-in flows |
+| Design | `mc.html` → `obTwoFactor()` (the single source; `consolidated.html` is the product build of it) |
+| States | loaded · loading · error |
+| Files | `two-factor-loaded.html` / `two-factor-loaded-mobile.html`, `two-factor-loading.html` / `two-factor-loading-mobile.html`, `two-factor-error.html` / `two-factor-error-mobile.html` |
+| Audit | `two-factor.audit-prompt.md` |
+
+## Job
+
+Step 2 of 2 of log in: the six-digit code from the authenticator app.
+
+## What is on the page
+
+**Header** — eyebrow “Step 2 of 2”, h1 “Two-factor authentication”.
+Actions: **Verify** (gold, full width)
+
+- Six one-digit inputs. **Use a recovery code instead** (single use; N of 10 remain) and the code expiry countdown. Footer: “Back to log in”.
+
+
+**Shell.** No sidebar or top bar: the brandmark, then a centred card; the phone layout is the same card at full width.
+
+## Data sources
+
+Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBacked` in production). From `docs/2026-09-12-mission-control-app-implementation-plan.md` §3; the *mockup collection* column names the constant in `mc.html` that the design renders from.
+
+| Element | Mockup collection | Target store (spec) | Backing today (repo) | Status |
+|---|---|---|---|---|
+| TOTP / passkey | `PEOPLE.*.mfa` | Better Auth 2FA | Better Auth | ✅ |
+
+## Functionality
+
+- Submit signs in and lands on Fleet.
+- Three wrong codes lock the account for 15 minutes.
+
+## States
+
+- **loaded** — the page as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell).
+- **loading** — Primary button busy: “Verifying…”.
+- **error** — “That code is wrong. 2 attempts left before a 15-minute lockout.” Inputs cleared.
+
+## Mobile
+
+The card fills the width with 16 px gutters; buttons are full width and at least 44 px tall; inputs are 16 px so iOS does not zoom on focus; code inputs are numeric-keypad (`inputmode="numeric"`).
+
+## Permissions
+
+- Read: `authenticated (first factor)`
+- Writes (each a governed action recorded in Audit): `auth.2fa`
+
+## Backend gaps this page depends on
+
+- none
+
+## Rules every build of this page must keep
+
+- Every badge that describes trust (enforcement tier, replay grade, attestation, cost basis) shows the recorded value and nothing stronger; a client-attested window is labelled as such.
+- Every number that is money shows its basis. Headers are rollups of the rows beneath them, never typed twice.
+- Every explanation is a chain of links to frames, records and commits, not a summary.
+- Exactly one gold action per screen. Gold is identity; it never encodes state. State reads as a dot and a word, so it survives greyscale.
+- A not-loaded state replaces the page body, never the shell. Stub controls say what the product would do; nothing silently does nothing.
+- A count in navigation appears only where something waits on a person.
