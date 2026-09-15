@@ -3,11 +3,11 @@
  "runsIncluded": 1000,
  "runsUsed": 4218,
  "billable": 3218,
- "tier1": "1,000 free",
- "tier2": "3,218 × $0.30",
+ "tier1": "free tier: unlimited runs, 30 days of evidence, 3 seats",
+ "tier2": "3,218 \u00d7 $0.30 per proven run",
  "amount": "965.40",
- "retention": "13 months included · 41.2 GB · $0.00",
- "discount": "Onboarding discount — 20% off usage for 12 months (converted 2026-03-02, 5 days after first run)",
+ "retention": "13 months included \u00b7 41.2 GB \u00b7 $0.00",
+ "discount": "Onboarding discount \u2014 20% off usage for 12 months (converted 2026-03-02, 5 days after first run)",
  "discountAmount": "-193.08",
  "total": "772.32",
  "next": "2026-10-01",
@@ -39,9 +39,19 @@
  ],
  "meters": [
   {
-   "m": "Sealed runs with at least one model call",
+   "m": "Proven runs (definition of done held)",
+   "v": "3,218",
+   "note": "the billable unit \u00b7 dod.held"
+  },
+  {
+   "m": "Pending a signature",
+   "v": "41",
+   "note": "metered when signed"
+  },
+  {
+   "m": "Sealed runs",
    "v": "4,218",
-   "note": "the billable unit"
+   "note": "reported, not priced"
   },
   {
    "m": "Governed actions",
@@ -54,13 +64,8 @@
    "note": "13 months included"
   },
   {
-   "m": "Runs Oxagen halted before any model call",
-   "v": "37",
-   "note": "free"
-  },
-  {
-   "m": "In-app agent runs",
-   "v": "412",
+   "m": "Broken runs and runs halted before any model call",
+   "v": "1,037",
    "note": "free"
   },
   {
@@ -68,5 +73,6 @@
    "v": "1,884",
    "note": "free"
   }
- ]
+ ],
+ "pendingNote": "41 runs await a signature \u00b7 metered when signed"
 }

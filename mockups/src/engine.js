@@ -3593,7 +3593,7 @@ function ctxDetail(R,W,sel){
        '<div class="warn" style="margin-top:13px"><b>This is the context-bloat finding.</b> The last three runs of this agent '+
        'each pulled an episode that scored just over the floor, and cited none of them — 4,900 tokens, $0.31, nothing bought. '+
        'Raising this agent’s episodic floor from 0.60 to 0.70 drops all three and keeps every episode that was ever cited.</div>'+
-       '<div class="row" style="margin-top:13px"><button class="btn sm" onclick="act(\'Proposed: episodic floor 0.60 → 0.70 for a-intel.core.release-manager. Simulated against 30 days — 41 runs affected, 0 cited episodes lost.\')">Simulate the floor change</button>'+
+       '<div class="row" style="margin-top:13px"><button class="btn sm" onclick="act(\'Proposed: episodic floor 0.60 → 0.70 for a-intel.core.release-manager. Replayed over 30 days of context frames — 41 runs affected, 0 cited episodes lost.\')">Try the floor change</button>'+
        '<button class="btn sm" onclick="S.tab.run=\'cost\';render()">See it on Cost</button></div>');
     }
     if(sel==="f5"){
@@ -3671,7 +3671,7 @@ function ctxDetail(R,W,sel){
        'evidence: without it, five changelog chunks would have filled the window and the repository state, the symbol and the '+
        'prior pull request would all have been squeezed out. It cost 7,550 tokens of changelog this turn, and there was room for it. '+
        'This is a real trade, and it is tuned per index, not guessed per run.</div>'+
-       '<div class="row" style="margin-top:13px"><button class="btn sm" onclick="act(\'Simulated: doc chunk cap 1 → 3 for idx_docs_v3. Window grows 7,550 tok; 30-day cost +$0.18 per run; 0 frames evicted.\')">Simulate cap 1 → 3</button></div>');
+       '<div class="row" style="margin-top:13px"><button class="btn sm" onclick="act(\'Replayed over 30 days of context frames: doc chunk cap 1 → 3 for idx_docs_v3. Window grows 7,550 tok; 30-day cost +$0.18 per run; 0 frames evicted.\')">Try cap 1 → 3</button></div>');
     }
     if(x.why==="grain"){
       return hdx+ctxBody(
@@ -5547,7 +5547,7 @@ function pSteering(){
   var body="";
   if(t==="records"){
     /* The panel is headed "Published records" and the tab badge counts published, so the
-       list and its kind chips count published too. The archived record lives on Retirement. */
+       list and its kind chips count published too. Archiving is a Context PR that sets status = "archived". */
     var rk=S.recKind||"", kc={};
     var pub=RECORDS.filter(function(r){return r.status==="published";});
     pub.forEach(function(r){kc[r.kind]=(kc[r.kind]||0)+1;});
@@ -6175,7 +6175,7 @@ function orgRoutesPanel(){
      '<td class="rowacts"><button class="btn sm" onclick="openDialog(\'editroute\','+i+')">Edit</button></td></tr>';}).join("")+
    '<tr><td colspan="5"><b>Total</b> <span class="dim" style="font-size:11.5px">· basis gateway_observed · '+h(ORG.currency)+'</span></td><td class="num" id="orgRoutesTotal"><b>'+usd(fmt2(total))+'</b></td><td></td></tr>'+
    '</tbody></table></div><div class="panel-b">'+
-   '<div class="note">Tiers point at rolling aliases so “latest” stays current without a deploy. Every <span class="mono">model.response</span> frame records the concrete model id the provider returned, and the cost record prices <i>that</i> id — so a replay names the exact model and a reconciliation never matches an alias. The complex row is the assistant line on Spend.</div></div></div>';
+   '<div class="note">Tiers point at rolling aliases so “latest” stays current without a deploy. Every <span class="mono">model.response</span> frame records the concrete model id the provider returned, and the cost record prices <i>that</i> id — so a replay names the exact model and a price is never looked up by alias. The complex row is the Oxagenant line on Spend.</div></div></div>';
 }
 function orgFirewallRoutesPanel(){
   return '<div class="panel"><div class="panel-h"><h3>In-firewall routes</h3>'+
@@ -6844,8 +6844,8 @@ var SCENARIOS={
     act:["Open the receipt","openDialog('receipt',apState('apr_01K5RN9T4').rcp||'rcp_01K5RN9T4')"]}
   ]}
 };
-/* One slot per flow. tools/build-w.mjs boots each w*.html into the scenario named here and
-   reads its ws from the entry, so each entry starts SCENARIOS["id"]={title:"…", ws:"…", …}. */
+/* One slot per flow. mockups/catalog.mjs names each scenario and its ws, and tools/check-mockup.mjs
+   asserts the two agree, so each entry starts SCENARIOS["id"]={title:"…", ws:"…", …}. */
 /* ---- W1 · sixty-seconds-to-governed ---- */
 /* Steps 1–5 are the onboarding screens (no shell; the rail floats beside them), step 6 is first-run Fleet.
    The scenario writes a smoke run, perhaps an agent and a provisional flag; obScnLeft() in render() takes
@@ -8175,7 +8175,7 @@ var ROLES=[
  {id:"org.owner",kind:"human",builtin:true,scope:"organization",desc:"everything, including the data plane and funding",perms:["org.*"]},
  {id:"org.billing",kind:"human",builtin:true,scope:"organization",desc:"mandates, connections with a financial class, invoices",perms:["mandate.grant","mandate.draw","invoice.read","budget.set"]},
  {id:"org.auditor",kind:"human",builtin:true,scope:"organization",desc:"read-only across the audit record",perms:["audit.read","run.read","frame.read"]},
- {id:"workspace.owner",kind:"human",builtin:true,scope:"workspace",desc:"agents, tools, policy, budgets in one workspace",perms:["agent.read","agent.register","agent.suspend","agent.roles.assign","tool.read","tool.grant","policy.simulate","policy.activate","switch.flip","budget.set","run.read","run.steer","run.pause","run.cancel","steering.read","steering.propose"]},
+ {id:"workspace.owner",kind:"human",builtin:true,scope:"workspace",desc:"agents, tools, policy, budgets in one workspace",perms:["agent.read","agent.register","agent.suspend","agent.roles.assign","tool.read","tool.grant","policy.activate","switch.flip","budget.set","run.read","run.steer","run.pause","run.cancel","steering.read","steering.propose"]},
  {id:"workspace.member",kind:"human",builtin:true,scope:"workspace",desc:"runs and steering in one workspace",perms:["run.read","run.steer","steering.read","steering.propose"]},
  {id:"agent.repo.write",kind:"agent",builtin:true,scope:"repository",desc:"open branches and pull requests on a named repository; never merge",perms:["repo.read","repo.branch.write","repo.pr.open"]},
  {id:"agent.graph.read",kind:"agent",builtin:true,scope:"workspace",desc:"search and traverse the run graph: runs, frames, records and the code graph",perms:["graph.search","graph.expand","context.recall"]},
@@ -8186,7 +8186,7 @@ var ROLES=[
 var PERMS=[
  ["Runs",["run.read","run.steer","run.pause","run.cancel","export.create"]],
  ["Agents",["agent.read","agent.register","agent.suspend","agent.roles.assign"]],
- ["Tools and policy",["tool.read","tool.grant","policy.simulate","policy.activate","switch.flip"]],
+ ["Tools and policy",["tool.read","tool.grant","policy.activate","switch.flip"]],
  ["Repository",["repo.read","repo.branch.write","repo.pr.open","repo.release.create","repo.tag.create","repo.merge"]],
  ["Graph and steering",["graph.search","graph.expand","context.recall","steering.read","steering.propose"]],
  ["Money",["mandate.draw","mandate.grant","invoice.read","budget.set"]],
@@ -9610,7 +9610,7 @@ document.addEventListener("click",function(e){
      ones the page used to hardcode, including the reservation that matches the parked payment. */
   MANDATES.forEach(function(m){
     if(m.id==="mnd_7K2ETQ4"){
-      /* the base mc.html carries the seed mandate's own ledger (settled and released by the approval flow); keep it */
+      /* the seed fixture carries the seed mandate's own ledger (settled and released by the approval flow); keep it */
       if(m.ledger) return;
       m.ledger=[
        {when:"08:40:19",call:"stripe__create_payment@4",amount:"2,450.00",state:"reserved",ext:"— awaiting approval",rcp:null},

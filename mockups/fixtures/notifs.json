@@ -4,7 +4,7 @@
   "tone": "approval",
   "unread": true,
   "t": "15:44",
-  "title": "Approval waiting · github__merge_pull_request@3",
+  "title": "Approval waiting \u00b7 github__merge_pull_request@3",
   "body": "a-intel.core.release-manager on run_01K5ZB4T8P wants to merge a-intel/platform#1893 into main. Rule merge.requires_approval. Expires 15:54."
  },
  {
@@ -12,7 +12,7 @@
   "tone": "failed",
   "unread": true,
   "t": "15:21",
-  "title": "Hard budget reached · a-intel.core.docs-writer",
+  "title": "Hard budget reached \u00b7 a-intel.core.docs-writer",
   "body": "$0.80 per run reached at turn 3 of run_01K5ZA0J2M. The run was paused at the model proxy before the call."
  },
  {
@@ -20,7 +20,7 @@
   "tone": "failed",
   "unread": true,
   "t": "14:13",
-  "title": "Approval expired · stripe__create_payment@4",
+  "title": "Approval expired \u00b7 stripe__create_payment@4",
   "body": "No approver resolved apr_01K5YQ9T2B within 10 minutes. $184.20 USD to vendor:aws was never dispatched; mandate mnd_4471 released the reservation."
  },
  {
@@ -28,15 +28,15 @@
   "tone": "gold",
   "unread": false,
   "t": "13:02",
-  "title": "Context PR opened · a-intel/platform#519",
-  "body": "The promoter proposed a rule on lineage ctx.release.no-reread-changelog: “Do not re-read CHANGELOG.md more than once in a run; cache the first read.” Supported by 682 duplicate tool calls across 212 runs of a-intel.core.release-manager."
+  "title": "Context PR opened \u00b7 a-intel/platform#519",
+  "body": "The promoter proposed a rule on lineage ctx.release.no-reread-changelog: \u201cDo not re-read CHANGELOG.md more than once in a run; cache the first read.\u201d Supported by 682 duplicate tool calls across 212 runs of a-intel.core.release-manager."
  },
  {
   "kind": "run.proven",
   "tone": "allowed",
   "unread": false,
   "t": "15:09",
-  "title": "Run proven · run_01K5YX2D6R",
+  "title": "Run proven \u00b7 run_01K5YX2D6R",
   "body": "Witness wit_01K5YX51 flipped: failing on main at 9c41ab0, passing on refs/pull/1887/head at 3d8f77e. Oracle test_flip, disclosure grain L0."
  },
  {
@@ -44,23 +44,23 @@
   "tone": "allowed",
   "unread": false,
   "t": "12:40",
-  "title": "Code graph current · a-intel/platform",
+  "title": "Code graph current \u00b7 a-intel/platform",
   "body": "Push 3d8f77e to main indexed in 41 s. 18 files re-parsed, 62 symbols versioned, 3 data-layer edges raised to confirmed."
  },
  {
-  "kind": "reconciliation.exception",
+  "kind": "dod.settled",
   "tone": "failed",
   "unread": false,
   "t": "09:12",
-  "title": "Reconciliation variance · anthropic key pk_9f21",
-  "body": "2026-09-10 key-day variance $0.83 above the one-cent threshold. 4 client-attested frames carry no provider request id and match only at level 2."
+  "title": "Definition of done broke \u00b7 run_01K5RK7C2V8BNM3X",
+  "body": "release-manager tried to finish three times; the contract test and the witness never passed. ATTEMPTS_EXHAUSTED \u00b7 CHECK_FAILED. Not metered."
  },
  {
   "kind": "kill_switch.flipped",
   "tone": "critical",
   "unread": false,
   "t": "2026-09-09",
-  "title": "Kill switch flipped · tool version",
+  "title": "Kill switch flipped \u00b7 tool version",
   "body": "Priya Natarajan disabled slack__post_message@7 across a-intel after a schema regression. 2 runs saw the deny at their next call boundary."
  }
 ]
