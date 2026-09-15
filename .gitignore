@@ -1,1 +1,11 @@
 .DS_Store
+
+# Docs site (site/): dependencies, build output, and everything generated from the repo sources
+site/node_modules/
+site/.next/
+site/out/
+site/.source/
+site/.generated/
+site/public/mock/
+site/next-env.d.ts
+site/tsconfig.tsbuildinfo

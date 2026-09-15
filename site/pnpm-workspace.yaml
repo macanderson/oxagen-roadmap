@@ -1,0 +1,7 @@
+# The docs site is its own pnpm project, outside any workspace.
+confirmModulesPurge: false
+
+allowBuilds:
+  esbuild: true
+  sharp: true
+  "@tailwindcss/oxide": true
