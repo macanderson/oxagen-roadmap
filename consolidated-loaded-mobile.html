@@ -4021,7 +4021,7 @@ function sidebar(r){
   var w=ws(), cur=PAGES[r.page]||"";
   /* On first-run Fleet the organization is the one smoke run, so the counts here read off it too. */
   var fr=obFirstRun(w);
-  var waiting=fr?APPROVALS.filter(function(a){return a.run===fr.id&&apState(a.id).status==="pending";}).length:pendingCount(w.slug);
+  var waiting=fr?APPROVALS.filter(function(a){return a.run===fr.id&&apState(a.id).status==="pending";}).length:pendingCount(w.slug)+skWaiting(w);
   var orgAgents=fr?1:WS.reduce(function(n,x){return n+(x.agents||0);},0);
   function item(id,label,href,count,hot){
     return '<button class="navitem" '+(cur===label?'aria-current="page"':'')+' onclick="go(\''+href+'\')">'+
@@ -4040,7 +4040,7 @@ function sidebar(r){
    item("fleet","Fleet",base,waiting,true)+
    item("agents","Agent IAM",base+"/agents",fr?1:w.agents)+
    item("tools","Tools",base+"/tools")+
-   item("skills","Skills",base+"/skills",(skOn(w)&&w.slug===SKRUN.ws&&!SKS.answered)?1:0,true)+
+   item("skills","Skills",base+"/skills",skWaiting(w),true)+
    item("steering","Steering",base+"/steering",fr?0:PROPOSALS.length)+
    item("spend","Spend",base+"/spend")+
    (PRODUCT?"":item("scenarios","Scenarios",base+"/scenarios"))+
@@ -4179,7 +4179,8 @@ function pFleet(){
   var pend=APPROVALS.filter(function(a){return (fr?a.run===fr.id:a.ws===w.slug)&&apState(a.id).status==="pending";});
   var agentsShown=fr?list.reduce(function(k,r){if(k.indexOf(r.agent)<0)k.push(r.agent);return k;},[]).length:w.agents;
   var oldest=0; pend.forEach(function(a){var e=600-apLeft(a.id); if(e>oldest)oldest=e;});
-  var waitLabel=pend.length?'oldest has waited '+mmss(oldest)+' of 10m':'nothing is parked';
+  var skw=fr?0:skWaiting(w);
+  var waitLabel=pend.length?'oldest has waited '+mmss(oldest)+' of 10m'+(skw?' · 1 interjection':''):skw?'an interjection has waited 3m 36s of 30m':'nothing is parked';
 
   return ''+
   '<div class="phead"><div class="t"><p class="eyebrow">Workspace · '+h(w.name)+'</p>'+
@@ -4190,7 +4191,7 @@ function pFleet(){
 
   '<div class="grid g4" style="margin-bottom:16px">'+
    '<div class="stat"><span class="k">Live runs</span><span class="v">'+live+'</span><span class="s">of '+agentsShown+' agent'+(agentsShown===1?'':'s')+' in this workspace</span></div>'+
-   '<div class="stat"><span class="k">Waiting on a human</span><span class="v" style="color:var(--st-approval)">'+pend.length+'</span><span class="s">'+waitLabel+'</span></div>'+
+   '<div class="stat"><span class="k">Waiting on a human</span><span class="v" style="color:var(--st-approval)">'+(pend.length+skw)+'</span><span class="s">'+waitLabel+'</span></div>'+
    '<div class="stat"><span class="k">Spend, runs shown</span><span class="v">'+usd(spendShown)+'</span><span class="s">'+basisLabel+' · '+ORG.currency+'</span></div>'+
    '<div class="stat"><span class="k">Cache hit rate</span><span class="v">'+(cacheRate==null?'<span class="dim">—</span>':per(cacheRate))+'</span><span class="s">'+(cacheRate==null?'no run shown records it':'cache_read ÷ (input_uncached + cache_read)')+'</span></div></div>'+
 
@@ -11066,8 +11067,10 @@ function skReset(){
 
 /* The interjection queue, above Fleet's own tiles: a run that has stopped is not a row in a table,
    it is a thing waiting on a person, so it sits where the approvals do. */
+/* 1 while the interjected run is waiting in this workspace: it counts wherever approvals do. */
+function skWaiting(w){return (skOn(w)&&w.slug===SKRUN.ws&&!SKS.answered)?1:0;}
 function skFleetBanner(w){
-  if(!skOn(w)||w.slug!==SKRUN.ws||SKS.answered) return "";
+  if(!skWaiting(w)) return "";
   return '<div class="banner"><span class="b b-approval" style="flex:none"><span class="d"></span>1 interjection</span>'+
    '<div class="grow"><b>'+h(SKRUN.agent)+' is paused before its first model call.</b> '+
    'It started in <span class="mono">'+h(SKRUN.repo)+'</span>, which no workspace owns. Skills are on here, so there is a config to resolve '+
@@ -13836,7 +13839,7 @@ function cardTables(){
 var MNAV_MORE={organization:1,billing:1,audit:1,steering:1,scenarios:1,skills:1};
 function mobileNav(r){
   var w=ws(), fr=obFirstRun(w), base="#/"+ORG.slug+"/"+w.slug;
-  var waiting=fr?APPROVALS.filter(function(a){return a.run===fr.id&&apState(a.id).status==="pending";}).length:pendingCount(w.slug);
+  var waiting=fr?APPROVALS.filter(function(a){return a.run===fr.id&&apState(a.id).status==="pending";}).length:pendingCount(w.slug)+skWaiting(w);
   var crit=fr?0:INCIDENTS.filter(function(i){return i.status==="open"&&i.sev==="critical";}).length;
   var cur=r.page==="run"?"fleet":r.page==="agent"||r.page==="mandate"||r.page==="agentsource"?"agents":r.page;
   function b(id,label,href,count,hot,on){
@@ -13861,7 +13864,7 @@ DLG_EXT.more=function(){
   return {t:"More",w:false,
    b:'<div class="mgrid">'+
      t("steering","Steering","records, proposals, Context PRs",'go(\''+base+'/steering\')',fr?0:PROPOSALS.length)+
-     t("skills","Skills","resolution, the loop, reflection",'go(\''+base+'/skills\')',(skOn(w)&&w.slug===SKRUN.ws&&!SKS.answered)?1:0,true)+
+     t("skills","Skills","resolution, the loop, reflection",'go(\''+base+'/skills\')',skWaiting(w),true)+
      t("organization","Organization","people, workspaces, funding",'go(\'#/'+ORG.slug+'\')')+
      t("billing","Billing","plan, meters, invoices",'go(\'#/'+ORG.slug+'/billing\')')+
      t("audit","Audit","events, incidents, holds",'go(\'#/'+ORG.slug+'/audit\')',crit,true)+
@@ -13893,7 +13896,7 @@ if(el("chrome")){
   el("cPhone").addEventListener("click",function(){S.phone=!S.phone;render();});
   el("cTheme").addEventListener("click",toggleTheme);
   el("cIndex").addEventListener("click",function(){openDialog("cmd");});
-  el("cReset").addEventListener("click",function(){seedApprovals();S.dlg=null;S.dlgArg=null;render();toast("Approvals reset — every parked call is pending again with a fresh clock.","gold");});
+  el("cReset").addEventListener("click",function(){seedApprovals();SKS.answered=null;SKS.picked=null;S.dlg=null;S.dlgArg=null;render();toast("Approvals reset — every parked call is pending again with a fresh clock, and the interjection is waiting again.","gold");});
 }
 /* a resize across the phone breakpoint re-lays the shell; BOOT.mobile pins it either way */
 (function(){var t=null;window.addEventListener("resize",function(){if(BOOT.mobile!=null)return;clearTimeout(t);t=setTimeout(function(){var m=mobileMedia();if(m!==S.mobile){S.mobile=m;S.side=false;render();}},120);});})();
