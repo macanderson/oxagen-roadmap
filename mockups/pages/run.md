@@ -52,7 +52,8 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 | Name + summary | `R.summary` | `light` tier classifier | none | ❌ (G14) |
 | File diffs | `RUNGRAPH.files`, `txDiffBlock` | tool I/O with file-tool classification | `tacho.session_files` | 🟡 |
 | Fork / bisect / export | toast | Series A / M1 | none | ❌ |
-| Approvals on this run | `APPROVALS` filtered by run | `control.approvals` | `agent.approval_requests` | ✅ / 🟡 chain |
+| Pause / cancel | toast + `pauseRun` | `control.commands` | `tacho.control_commands` via `dispatch_tacho_command`; ledger-ingested runs through a revocable run token (G17) | 🟡 wrapped runs ✅ · ledger runs ❌ (G17, built now) |
+| Approvals on this run | `APPROVALS` filtered by run | `control.approvals` | `agent.approval_requests` filtered on `run_id` (nullable, set from `ctx.agentRun`) | ✅ / 🟡 chain |
 
 ## Functionality
 
@@ -60,6 +61,8 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 - Every trust badge (tier, replay grade, attestation, cost basis) shows the recorded value and nothing stronger; a client-attested window is labelled as such.
 - Every number that is money shows its basis; cost per turn comes from the run’s own per-turn ledger (`RUN_TURNS`), and the header total is the sum of it.
 - Approvals on the run resolve through the same approve/deny dialogs as Fleet; the strip and the Fleet card read the same `S.ap` record.
+- The approvals strip lists the requests whose `run_id` is this run: `agent.approval_requests` gains a nullable `run_id` set from `ctx.agentRun`, and `list_approvals` filters on it (2026-09-15, maintainer decision).
+- Cancel works on a ledger-ingested run as on a wrapped run: the ledger ingest contract carries a revocable run token, and cancel revokes it (2026-09-15, maintainer decision; G17).
 - Evidence pins on the waterfall open the evidence dialog for the finding they cite; a pin never asserts more than the frame it points at.
 
 ## States
@@ -86,6 +89,7 @@ Top bar collapses to hamburger · current crumb · search glyph · notifications
 - G9 steer delivery mode
 - G10 USED_CONTEXT edges
 - G14 run namer/summariser
+- G17 revocable run token on the ledger ingest contract (Cancel on ledger-ingested runs)
 
 ## Rules every build of this page must keep
 

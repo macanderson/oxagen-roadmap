@@ -39,6 +39,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 
 - A key is bound to a service principal with explicit grants; create, rotate and revoke are governed actions with audit records.
 - The route pins the tab so a link lands on the keys, not on People.
+- Rotation ships in rev1 (2026-09-15, maintainer decision): **Rotate** calls `rotate_api_key`, issues a new secret shown once, and keeps the old one valid for 24 hours.
 
 ## States
 

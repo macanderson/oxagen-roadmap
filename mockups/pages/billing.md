@@ -17,7 +17,7 @@ Proven runs this period, the secondary meters, the plan, this period’s lines a
 ## What is on the page
 
 **Header** — eyebrow “Organization”, h1 “Billing”.
-Actions: **Change plan** (gold; opens the plan dialog)
+Actions: **Change plan** (gold; opens the plan dialog; Build or Scale goes through Stripe Checkout)
 
 **Summary tiles** (one number and one basis line each):
 - **Plan** — the plan name · “monthly, cancel any time”
@@ -28,7 +28,7 @@ Actions: **Change plan** (gold; opens the plan dialog)
 - **This period** — Line · Basis · Amount (proven runs at the tier price, pending runs at $0.00 until signed, evidence, discount, tax).
 - **Meters** — Meter · This period · Note: one priced meter (the proven run, `dod.held`), and the secondary meters (sealed runs, governed actions, retained evidence, halted runs, witness runs) reported and never priced.
 - **Invoices** — Invoice · Period · Proven runs · Amount · Status · Paid; a row opens the Stripe-hosted invoice.
-- **The price list** — Free (every governance feature, unlimited runs, 30 days of evidence, 3 seats) · $0.30 / $0.20 / $0.15 per proven run by monthly volume · evidence retention · tokens at cost · Enterprise from $60,000 a year.
+- **The price list** — Free (every governance feature, unlimited runs, 30 days of evidence, 3 seats) · $0.30 / $0.20 / $0.15 per proven run by monthly volume · evidence retention · tokens at cost · Enterprise, negotiated per contract.
 - **What counts** — Priced: a proven run (sealed, its definition of done held, certificate signed). Pending: metered the day it is signed. Reported: sealed runs, governed actions, retained evidence. Free: broken runs, halted runs, witness runs.
 
 **Dialogs this page opens:** `plan`.
@@ -49,7 +49,16 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 
 - The free tier has every governance feature on and unlimited runs; it is limited to thirty days of evidence and three seats.
 - The proven run is the only priced meter; broken runs, denials and witness runs cost nothing.
-- Change plan goes to Stripe checkout; the page shows the amount due before it is charged.
+- Change plan upgrades to Build or Scale through Stripe Checkout (`start_subscription_upgrade`, kept in rev1); the page shows the amount due before it is charged.
+
+**Decisions of 2026-09-15 (maintainer decision; spec §12.10).** The mockup does not show these yet.
+
+- Credit packs stay as the in-app agent's top-up (`purchase_credits`). GAU blocks remain the governed-action product.
+- Enterprise is negotiated only: a `billing.contract_terms` row, with no enterprise plan in Stripe or in the plan dialog. No feature is gated on the enterprise license; every feature, IAM and SOC 2 controls included, is on for every tier.
+- When invoice billing is switched off, the organization's `overage_invoiced_gau` is added to `purchased_gau`: the invoice is the purchase.
+- `invoice_gau_max` bounds overage beyond the monthly allowance; the interim invoice fires at unit `invoice_gau_max` + 1.
+- An invoice-billed organization is suspended 5 days after an invoice is past due. Metering continues while it is suspended. Paying the full outstanding balance reactivates it.
+- `get_rate_card`, `preview_action_cost` and `get_evidence_retention` retire at cutover; nothing on this page reads them.
 
 ## States
 

@@ -8,6 +8,7 @@
 | **Builds** | a new `apps/app` (`@oxagen/app`) in `~/Projects/oxagen`; today's app moves to `apps/app_deprecated` (`@oxagen/app-deprecated`) |
 | **Source** | `mission-control-spec.md` (§3, §4, §8.6, §14, §15, §19, App. A, B, F) · the mockups in this repository: `mockups/missioncontrol.html` built from `mockups/src` and `mockups/fixtures`, catalogued by Storybook (`npm run storybook`), every page's spec in `mockups/pages/<page>.md` · `docs/feedback-mockups.md` · the repo at `origin/main` |
 | **Amended** | 2026-09-14, by the scope review (`scope-review.md`): the assistant flyout, Neo4j, SSO and SCIM, policy simulation, the assurance suite, two-person mandates, steering effect and retirement, legal holds, erasure and reconciliation are out of every lane; the definition of done (`dod-spec.md`) is in. Rows below carry the change in place. |
+| **Decided** | 2026-09-15, maintainer decisions (spec §20). §0.1 lists the lanes each one binds. |
 | **Optimised for** | parallel agents: every lane owns a disjoint set of paths, and every batch lists what it waits on |
 
 ---
@@ -24,6 +25,19 @@
 | 6 | Pages are Server Components. Client islands only for the transport (player), approval countdown, dialogs, the command menu and list controls. Live data arrives over one SSE route with a `run_seq` cursor. | The run ledger already exposes `readAttemptEventsSince(runId, afterRunSeq, limit)`, a resumable cursor that maps directly onto `Last-Event-ID`. |
 | 7 | All interface prose lives in `messages/en.json` (ICU) via `next-intl`, without locale routing. | Spec §15 "Language": no hard-coded prose, ICU MessageFormat, English source, RTL-ready. Today's app has no catalog, so doing it from line one is cheaper than retrofitting. |
 | 8 | Money on the wire is `{ micros: string, currency, basis }`. Formatting happens only in `<Money>`. | Spec App. A: money is bigint micro-USD. The mockup stores `"2,450.00"`-style strings, which silently zero under `parseFloat`. |
+
+### 0.1 Maintainer decisions of 2026-09-15
+
+| Decision | Lanes | Change |
+|---|---|---|
+| 2, 7: purchases and upgrade | P8, A8, Billing writes | Billing keeps `purchase_credits` (credit packs for the in-app agent) and `start_subscription_upgrade` (Build or Scale through Stripe Checkout). `get_rate_card`, `preview_action_cost` and `get_evidence_retention` retire at cutover (B5). |
+| 3: enterprise | P7, P8, A8, Organization writes | `enterprise-v2` leaves `SUBSCRIPTION_PLANS` and Stripe; a negotiated contract is a `billing.contract_terms` row. No lane gates a feature on the enterprise license: custom roles, IAM and SOC 2 controls are on for every tier. |
+| 5, 6, 12: invoice billing | A8 | Switching invoice billing off adds `overage_invoiced_gau` to `purchased_gau`. `invoice_gau_max` bounds overage beyond the monthly allowance, and the interim invoice fires at unit max + 1. An invoice-billed organization is suspended 5 days after an invoice is past due; metering continues; paying the full outstanding balance reactivates it. |
+| 8: approvals on a run | A2, P1, P2b | `agent.approval_requests.run_id` (nullable, set from `ctx.agentRun`); `list_approvals` filters on it; the Run strip reads it. |
+| 9: the shell | L3 | The shell keeps the sidebar flyout. The `small-approvals-bottom-dock-scenarios` branch is not adopted. |
+| 11: ledger-ingested runs | A2, Fleet / Run writes | G17, built now: the ledger ingest contract carries a revocable run token, and Halt and Cancel are enabled on ledger-ingested runs. |
+| 13: rev1 scope | P1, P6, P7, A6, Organization writes | Fix `macanderson/oxagen#3029`; Organization gets an in-app create-workspace form over `create_workspace`; the Spend lane ships in rev1 with Fleet's Spend and Cache-hit tiles. |
+| Override and confirmed defaults | P7, Organization writes | API key rotation (`rotate_api_key`, the rotatekey dialog) ships in rev1. Membership writes are free; `resolve_approval` is the only billable action. |
 
 ---
 
@@ -65,7 +79,7 @@
 
 | # | Finding | Impact | Resolution in this plan |
 |---|---|---|---|
-| W1 | **The design baseline was split across branches** (resolved). Agent IAM was on `main` (54f9107; the 1b0634c first named here is an unmerged `worktree-audit-fix` commit). `approvalCardSm` and the flyout were on `small-approvals-bottom-dock-scenarios` (3f345d5, which merged the flyout as PR #1). `runMetrics(R)` was only in the `Specs/mockups/mc.html` scratch copy. | Twenty lanes reading "the mockup" would build three different apps. | **Baseline = tag `mc-baseline-w1`: one `mc.html` with Agent IAM + small approval card + sidebar flyout + `runMetrics` instruments.** Read it with `git show mc-baseline-w1:mc.html`; `tools/baseline/README.md` records what each decision came from, and `tools/baseline/check-baseline.mjs` checks it in a browser. Every lane prompt names the tag, never a branch or the Specs scratch. Where a W file or an older branch disagrees, the baseline wins (w2 and w3 still carry the bottom dock). Superseded by `mc-baseline-w2` (2026-09-13), which adds the W1–W11 parity work and the a-intel dataset, and by `mc-baseline-w3` (2026-09-13, PR #12), which makes every run's tool calls a subset of its agent's belt at registry versions. Lanes read the newest tag; `tools/baseline/README.md` lists them. |
+| W1 | **The design baseline was split across branches** (resolved). Agent IAM was on `main` (54f9107; the 1b0634c first named here is an unmerged `worktree-audit-fix` commit). `approvalCardSm` and the flyout were on `small-approvals-bottom-dock-scenarios` (3f345d5, which merged the flyout as PR #1). `runMetrics(R)` was only in the `Specs/mockups/mc.html` scratch copy. | Twenty lanes reading "the mockup" would build three different apps. | **Baseline = tag `mc-baseline-w1`: one `mc.html` with Agent IAM + small approval card + sidebar flyout + `runMetrics` instruments.** Read it with `git show mc-baseline-w1:mc.html`; `tools/baseline/README.md` records what each decision came from, and `tools/baseline/check-baseline.mjs` checks it in a browser. Every lane prompt names the tag, never a branch or the Specs scratch. Where a W file or an older branch disagrees, the baseline wins (w2 and w3 still carry the bottom dock). Superseded by `mc-baseline-w2` (2026-09-13), which adds the W1–W11 parity work and the a-intel dataset, and by `mc-baseline-w3` (2026-09-13, PR #12), which makes every run's tool calls a subset of its agent's belt at registry versions. Lanes read the newest tag; `tools/baseline/README.md` lists them. 2026-09-15, maintainer decision: the shell keeps the sidebar flyout, and the `small-approvals-bottom-dock-scenarios` branch is not adopted. |
 | W2 | **`docs/feedback-mockups.md` items are in no mockup:** (1) approvals render first and collapse when empty; (2) the onboarding content floats right; (3) one-thumb mobile navigation; (4) LLM-generated run name and summary, plus a file-diff card under approvals; (5) run cost large, near the run name, basis in a dialog; (6) prompt shown inspectable but collapsed; (7) run outputs (PRs, files, media) as the story; (8) spend by operator, agent and run on Fleet. | These change the Run and Fleet pages. | In scope: 1, 2, 5, 6, 8 (clear enough to build). 4's UI is in scope; the classifier that writes `run.name`/`run.summary` is a backend gap (G14). **3 and 7 need a design decision.** Their lanes build behind a component seam (`<MobileNav>`, `<RunOutputs>`) with a plain first version, so the design can drop in later. |
 | W3 | **Vocabulary drifts from the spec.** Replay grade: mockup `full/partial/digest/ledger` vs spec `inspect/view/fork/retry`. Egress: `third_party/internal/none` vs `local/org_tenant/third_party`. Schema origin: `observed` vs `observed_proposed/observed_approved`. Financial: `fin: moves_funds/commits_spend` vs `consequence_tags text[]`. Agent status `enrolled` vs `unenrolled/active/suspended/retired`. Verdict `null` vs `none`. Record kinds: 6 in the mockup (from Stella's `RecordKind`) vs "twelve kinds" in spec §3. | Types built from the mockup would diverge from the target schema on day one. | **View-model enums follow the spec (App. A).** The fixture adapter maps mockup values once, in one file. Record kinds: use the six real kinds; flag the spec's "twelve" as a spec defect to fix. |
 | W4 | **Fixture data has integrity defects.** `EVIDENCE` references agent `a-intel.finops.cost-reporter`, which is not in `AGENTS`. `FIX["Refetching a stable list"]` carries the cache-write finding's text. Several `NOTIFS`/`INCIDENTS`/`RECEIPTS` run ids are not in `RUNS`. `FRAMES` is one list shared by every run. The Mandate page always renders `MANDATES[0]`. | Ported naively, links 404 and every run shows the same frames. | The fixture adapter validates referential integrity in a unit test that **fails on a dangling id** (mutation-test it by deleting one agent). Frames are keyed by run. |
@@ -88,7 +102,7 @@ Status comes from table and contract names in the repo. **Batch 3 lanes must con
 | **Fleet** · runs list | `RUNS` | `:Run` + `cost.run_totals` | `agent.agent_runs` (+attempts, seals) via `@oxagen/run-ledger` `RunStore`; wrapped agents in `tacho.sessions`; cost from ClickHouse `token_usage` | 🟡 status/turns/steps ✅; tier, replay grade, verdict, proven spend ❌ |
 | Fleet · approvals panel | `APPROVALS` + `S.ap` | `control.approvals` | `agent.approval_requests`; `resolve_approval` | ✅ request/decision · 🟡 four-hop chain (rules, taint, mandate ❌) |
 | Fleet · spend by operator / agent / run (feedback 8) | `SPEND.byOperator` | `cost.run_totals` grouped | ClickHouse `readUsageBreakdown` | 🟡 |
-| Fleet · pause / resume / cancel | toast + `pauseRun` | `control.commands` | `tacho.control_commands` via `dispatch_tacho_command` | 🟡 wrapped (tacho) runs ✅ · ledger runs ❌ |
+| Fleet · pause / resume / cancel | toast + `pauseRun` | `control.commands` | `tacho.control_commands` via `dispatch_tacho_command` | 🟡 wrapped (tacho) runs ✅ · ledger runs ❌ (G17, built now) |
 | **Run** · header, cost strip | `RUNS[id]`, `runMetrics` | `:Run`, `cost.run_totals` | `RunStore.getRunByPublicId`, `sumTokenUsageByExecutionStep` | 🟡 |
 | Run · frames / transport | `FRAMES`, `TRANSCRIPTS` | `:Frame` + object bodies | `agent_run_events` via `readAttemptEventsSince`; `tacho_events` (ClickHouse) | 🟡 events ✅, digest chain ✅; model/tool frame kinds partial; bodies ❌ |
 | Run · chain / seal | chain tab | `:Checkpoint`, `:Seal` | `agent_run_attempt_seals`; `tacho.checkpoints` | ✅ |
@@ -176,7 +190,8 @@ Status comes from table and contract names in the repo. **Batch 3 lanes must con
 | G13 | Per-run billing allowance (§12.1) | Billing meters | M2 |
 | G14 | `light`-tier run namer/summariser | Run name + summary (feedback 4) | M1 |
 | G15 | `dod.dod_sets`, `dod.dod_certificates`, the four `dod.*` capabilities, `dod.held` metering (`dod-spec.md`) | Run › Done, Fleet › Done column, Billing › proven runs | M3 |
-| G15 | `org.onboarding_state` + first-frame unlock | Onboarding gate | M1 |
+| G16 | `org.onboarding_state` + first-frame unlock | Onboarding gate | M1 |
+| G17 | Ledger ingest contract with a revocable run token (2026-09-15, maintainer decision: built now) | Halt and Cancel on ledger-ingested runs (Fleet, Run) | M1 |
 
 ---
 
@@ -1065,13 +1080,13 @@ Each lane owns `src/features/<page>/actions.ts` and wires its page's dialogs to 
 
 | Page | Existing contracts to wire | Disabled until |
 |---|---|---|
-| Fleet / Run | `resolve_approval`; `dispatch_tacho_command` (pause/resume/cancel/message for tacho runs) | steer with delivery mode on ledger runs (G9); fork/bisect (Series A); export (M1) |
+| Fleet / Run | `resolve_approval`; `dispatch_tacho_command` (pause/resume/cancel/message for tacho runs) | steer with delivery mode on ledger runs (G9); halt and cancel on ledger-ingested runs (G17); fork/bisect (Series A); export (M1) |
 | Agents | `agent.definition.{create,update,publish,revise,delete}`, `agent.role.*`, `tacho.enrollment.{create,revoke}`, `billing.budget.set` | mandates (G1) |
 | Tools | `agent.mcp.{register,set_enabled,delete}`, `agent.mcp_consent.resolve`, connection contracts | kill switch as `control.commands` (verify emergency-deny contract), policy (G2), auto rules (G12) |
 | Steering | `context.record.*`, `agent.memory_promotion.*` | Context PR through GitHub App (M3) |
 | Spend | `billing.budget.set`, `workspace.budget_policy.*` | findings actions (G4), statement export (G5) |
-| Organization | `org.member_invite.*`, `org.member_role.change`, `workspace.create`, `workspace.settings.*`, `org.settings.write`, `org.model_credential`, `org.data_plane`, `api.key.{create,rotate,revoke}` | role editor custom roles (enterprise) |
-| Billing | `billing.subscription_upgrade.start` | per-run plan (G13) |
+| Organization | `org.member_invite.*`, `org.member_role.change`, `workspace.create`, `workspace.settings.*`, `org.settings.write`, `org.model_credential`, `org.data_plane`, `api.key.{create,rotate,revoke}` | role editor custom roles (every tier, 2026-09-15, maintainer decision) |
+| Billing | `billing.subscription_upgrade.start` (Build or Scale through Stripe Checkout, kept in rev1), `purchase_credits` (credit packs) | per-run plan (G13) |
 | Audit | `privacy.data.export`, `privacy.data.erase` | holds, KEK rotation (G8) |
 | Shell | account settings via Better Auth client | none |
 

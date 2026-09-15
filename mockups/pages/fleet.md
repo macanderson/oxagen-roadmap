@@ -44,7 +44,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 | Runs list | `RUNS` | `:Run` + `cost.run_totals` | `agent.agent_runs` (+attempts, seals) via `@oxagen/run-ledger` `RunStore`; wrapped agents in `tacho.sessions`; cost from ClickHouse `token_usage` | 🟡 status/turns/steps ✅; tier, replay grade, verdict, proven spend ❌ |
 | Approvals panel | `APPROVALS` + `S.ap` | `control.approvals` | `agent.approval_requests`; `resolve_approval` | ✅ request/decision · 🟡 four-hop chain (rules, taint, mandate ❌) |
 | Tiles (live, waiting, spend, cache) | rollups over `RUNS` / `APPROVALS` | `cost.run_totals` grouped | ClickHouse `readUsageBreakdown` | 🟡 |
-| Pause / resume / cancel | toast + `pauseRun` | `control.commands` | `tacho.control_commands` via `dispatch_tacho_command` | 🟡 wrapped (tacho) runs ✅ · ledger runs ❌ |
+| Pause / resume / cancel | toast + `pauseRun` | `control.commands` | `tacho.control_commands` via `dispatch_tacho_command` | 🟡 wrapped (tacho) runs ✅ · ledger runs ❌ (G17: revocable run token on the ledger ingest contract, built now) |
 | Steer | `steerSend` | `control.commands` `steer` with delivery mode | tacho `message` command | 🟡 no delivery mode (G9) |
 
 ## Functionality
@@ -52,6 +52,9 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 - Approve mints a single-use token bound to the call digest, the agent, the run and an expiry; the reason typed reaches the model as the permission decision reason. Deny requires a reason. Both are governed actions and land in the audit record.
 - An approval that times out is never dispatched; the run ends on the permission decision and the Fleet card shows *expired*.
 - Pause holds the run at the model proxy before the next call; resume continues; cancel ends it. Every command is a frame on the run.
+- Halt and Cancel work on ledger-ingested runs as on wrapped runs: the ledger ingest contract carries a revocable run token, and cancel or halt revokes it (2026-09-15, maintainer decision).
+- The approvals panel lists every pending request in the workspace, including one raised outside a run (no `run_id`); the Run strip lists only its own run's (2026-09-15, maintainer decision).
+- The Spend and Cache-hit tiles ship in rev1 with the Spend lane (2026-09-15, maintainer decision). In the mockup they are the *Spend, runs shown* tile and the cache-hit rate on the *Definition of done held* tile.
 - The tile figures are computed from the rows (`liveCount`, `pendingCount`, sum of cost) so a header can never disagree with its table.
 - Nav count on Fleet = approvals waiting; it is the only count on the Workspace nav besides Steering proposals.
 
@@ -78,6 +81,7 @@ Top bar collapses to hamburger · current crumb · search glyph · notifications
 - G6 run recorder (tier, replay grade)
 - G7 verdict
 - G9 steer with delivery mode on ledger runs
+- G17 revocable run token on the ledger ingest contract (Halt and Cancel on ledger-ingested runs)
 - G1 mandate hop of the approval chain
 - G15 the definition of done (`dod-spec.md`): sets and certificates
 

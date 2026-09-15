@@ -54,7 +54,7 @@ The card fills the width with 16 px gutters; buttons are full width and at least
 
 ## Backend gaps this page depends on
 
-- G15 `org.onboarding_state`
+- G16 `org.onboarding_state`
 
 ## Rules every build of this page must keep
 
