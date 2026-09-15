@@ -140,10 +140,10 @@ main hr+h2{border-top:0;padding-top:0;margin-top:0}
 <header class="mast">
   <p class="eyebrow">Oxagen · Specification</p>
   <h1>Oxagen Mission Control: Product and Technical Specification</h1>
-  <dl class="facts"><dt>Status</dt><dd>Draft for review</dd><dt>Date</dt><dd>2026-09-11</dd><dt>Owner</dt><dd>Mac Anderson</dd><dt>Supersedes</dt><dd>The <code>oxagen-platform</code> and <code>oxagen</code> codebases as products. Carries forward the designs named in §16.</dd><dt>Builds on</dt><dd>Context Graph Protocol <code>contextgraph/1.0</code> and the <code>contextgraph/lifecycle/1.0-draft</code> profile (repo at <code>origin/main</code>, ADRs 0001 to 0018). Stella's context-record and Context PR corpus. Oxagen ADR-024, 025, 042, 043, 051, 052, 053 and the current wrapper spec (in the repo today under <code>docs/specs/tacho/</code>, renamed here).</dd><dt>Amended</dt><dd>2026-09-14, by the scope review (<code>scope-review.md</code>) and the definition of done (<code>dod-spec.md</code>). The ontology engine, SSO and SCIM, policy simulation, the assurance suite, two-person mandates, steering effect metrics and retirement, legal holds, crypto-shredding and provider reconciliation are out. The definition of done (§8.6) is in. The review also proposed cutting the in-app agent and Neo4j and pricing the proven run. The maintainer kept the in-app agent (2026-09-14, &quot;dont cut the in app agent&quot;; its shell is the sidebar flyout, 2026-09-15), kept Neo4j through rev1 (2026-09-15), and set governed action units as the one price list (2026-09-14, reaffirmed 2026-09-15). §12.1 carries that price list, the GAU billing of Oxagen ADR-055 (2026-09-13); proven spend is a report figure. Sections carry each change in place.</dd><dt>Decided</dt><dd>2026-09-15, maintainer decisions (§20): billing (credit packs, negotiated enterprise with every feature on for every tier, invoice billing, the Build and Scale upgrade, suspension), the approvals strip on Run, the shell's sidebar flyout, Halt and Cancel on ledger-ingested runs, the create-workspace form and the Spend lane, API key rotation in rev1, Neo4j through rev1, and GAU pricing reaffirmed as the one price list. Each section carries its change in place with the date.</dd></dl>
+  <dl class="facts"><dt>Status</dt><dd>Draft for review</dd><dt>Date</dt><dd>2026-09-11</dd><dt>Owner</dt><dd>Mac Anderson</dd><dt>Supersedes</dt><dd>The <code>oxagen-platform</code> and <code>oxagen</code> codebases as products. Carries forward the designs named in §16.</dd><dt>Builds on</dt><dd>Context Graph Protocol <code>contextgraph/1.0</code> and the <code>contextgraph/lifecycle/1.0-draft</code> profile (repo at <code>origin/main</code>, ADRs 0001 to 0018). Stella's context-record and Context PR corpus. Oxagen ADR-024, 025, 042, 043, 051, 052, 053 and the current wrapper spec (in the repo today under <code>docs/specs/tacho/</code>, renamed here).</dd><dt>Amended</dt><dd>2026-09-14, by the scope review (<code>scope-review.md</code>) and the definition of done (<code>dod-spec.md</code>). The ontology engine, SSO and SCIM, policy simulation, the assurance suite, two-person mandates, steering effect metrics and retirement, legal holds, crypto-shredding and provider reconciliation are out. The definition of done (§8.6) is in. The review also proposed cutting the in-app agent and Neo4j and pricing the proven run. The maintainer kept the in-app agent (2026-09-14, &quot;dont cut the in app agent&quot;; its shell is the sidebar flyout, 2026-09-15), kept Neo4j through rev1 (2026-09-15), and set governed action units as the one price list (2026-09-14, reaffirmed 2026-09-15). §12.1 carries that price list, the GAU billing of Oxagen ADR-055 (2026-09-13), beside the usage-credit meter for in-app AI usage (two meters, 2026-09-15); proven spend is a report figure. Sections carry each change in place.</dd><dt>Decided</dt><dd>2026-09-15, maintainer decisions (§20): billing (credit packs, negotiated enterprise with every feature on for every tier, invoice billing, the Build and Scale upgrade, suspension), the approvals strip on Run, the shell's sidebar flyout, Halt and Cancel on ledger-ingested runs, the create-workspace form and the Spend lane, API key rotation in rev1, Neo4j through rev1, GAU pricing reaffirmed as the governed-action price list, and pricing on two meters: governed actions in GAUs and in-app AI usage in usage credits. Each section carries its change in place with the date.</dd></dl>
 </header>
 <div class="grid">
-<nav class="toc" aria-label="Contents of this document"><p>Contents</p><ol><li><a href="#spec/0-the-call-sheet">0. The call sheet</a></li><li><a href="#spec/1-why-this-product-in-one-page">1. Why this product, in one page</a></li><li><a href="#spec/2-scope">2. Scope</a></li><li><a href="#spec/3-vocabulary">3. Vocabulary</a></li><li><a href="#spec/4-architecture">4. Architecture</a></li><li><a href="#spec/5-tenancy-and-isolation">5. Tenancy and isolation</a></li><li><a href="#spec/6-identity-access-and-the-toolbelt">6. Identity, access, and the toolbelt</a></li><li><a href="#spec/7-the-gateway-and-intervention">7. The gateway and intervention</a></li><li><a href="#spec/8-runs-and-frames">8. Runs and frames</a></li><li><a href="#spec/9-context-records-how-agents-learn">9. Context records: how agents learn</a></li><li><a href="#spec/10-the-repository-steering-and-context-prs">10. The repository, steering, and Context PRs</a></li><li><a href="#spec/11-the-code-graph">11. The code graph</a></li><li><a href="#spec/12-cost-accounted-to-the-token-attributed-to-the-operator-priced-in-governed-action-units">12. Cost: accounted to the token, attributed to the operator, priced in governed action units</a></li><li><a href="#spec/13-audit-retention-and-the-fidelity-call">13. Audit, retention, and the fidelity call</a></li><li><a href="#spec/14-mission-control">14. Mission Control</a></li><li><a href="#spec/15-non-functional-requirements">15. Non-functional requirements</a></li><li><a href="#spec/16-carry-over-leave-behind">16. Carry over, leave behind</a></li><li><a href="#spec/17-delivery-plan">17. Delivery plan</a></li><li><a href="#spec/18-risks-and-open-decisions">18. Risks and open decisions</a></li><li><a href="#spec/19-demo-wow-scenarios">19. Demo Wow! Scenarios</a></li><li><a href="#spec/20-maintainer-decisions-of-2026-09-15">20. Maintainer decisions of 2026-09-15</a></li><li><a href="#spec/appendix-a-postgres-tables-target">Appendix A. Postgres tables (target)</a></li><li><a href="#spec/appendix-b-the-run-record-and-code-graph-postgres">Appendix B. The run record and code graph (Postgres)</a></li><li><a href="#spec/appendix-c-frame-envelope-gateway-kind-example">Appendix C. Frame envelope (gateway kind example)</a></li><li><a href="#spec/appendix-d-tool-grant-example">Appendix D. Tool grant example</a></li><li><a href="#spec/appendix-e-the-agent-tools-that-survive">Appendix E. The agent tools that survive</a></li><li><a href="#spec/appendix-f-the-pages-that-survive">Appendix F. The pages that survive</a></li></ol></nav>
+<nav class="toc" aria-label="Contents of this document"><p>Contents</p><ol><li><a href="#spec/0-the-call-sheet">0. The call sheet</a></li><li><a href="#spec/1-why-this-product-in-one-page">1. Why this product, in one page</a></li><li><a href="#spec/2-scope">2. Scope</a></li><li><a href="#spec/3-vocabulary">3. Vocabulary</a></li><li><a href="#spec/4-architecture">4. Architecture</a></li><li><a href="#spec/5-tenancy-and-isolation">5. Tenancy and isolation</a></li><li><a href="#spec/6-identity-access-and-the-toolbelt">6. Identity, access, and the toolbelt</a></li><li><a href="#spec/7-the-gateway-and-intervention">7. The gateway and intervention</a></li><li><a href="#spec/8-runs-and-frames">8. Runs and frames</a></li><li><a href="#spec/9-context-records-how-agents-learn">9. Context records: how agents learn</a></li><li><a href="#spec/10-the-repository-steering-and-context-prs">10. The repository, steering, and Context PRs</a></li><li><a href="#spec/11-the-code-graph">11. The code graph</a></li><li><a href="#spec/12-cost-accounted-to-the-token-attributed-to-the-operator-charged-on-two-meters">12. Cost: accounted to the token, attributed to the operator, charged on two meters</a></li><li><a href="#spec/13-audit-retention-and-the-fidelity-call">13. Audit, retention, and the fidelity call</a></li><li><a href="#spec/14-mission-control">14. Mission Control</a></li><li><a href="#spec/15-non-functional-requirements">15. Non-functional requirements</a></li><li><a href="#spec/16-carry-over-leave-behind">16. Carry over, leave behind</a></li><li><a href="#spec/17-delivery-plan">17. Delivery plan</a></li><li><a href="#spec/18-risks-and-open-decisions">18. Risks and open decisions</a></li><li><a href="#spec/19-demo-wow-scenarios">19. Demo Wow! Scenarios</a></li><li><a href="#spec/20-maintainer-decisions-of-2026-09-15">20. Maintainer decisions of 2026-09-15</a></li><li><a href="#spec/appendix-a-postgres-tables-target">Appendix A. Postgres tables (target)</a></li><li><a href="#spec/appendix-b-the-run-record-and-code-graph-postgres">Appendix B. The run record and code graph (Postgres)</a></li><li><a href="#spec/appendix-c-frame-envelope-gateway-kind-example">Appendix C. Frame envelope (gateway kind example)</a></li><li><a href="#spec/appendix-d-tool-grant-example">Appendix D. Tool grant example</a></li><li><a href="#spec/appendix-e-the-agent-tools-that-survive">Appendix E. The agent tools that survive</a></li><li><a href="#spec/appendix-f-the-pages-that-survive">Appendix F. The pages that survive</a></li></ol></nav>
 <main>
 <h2 id="spec/0-the-call-sheet">0. The call sheet</h2>
 <p>This table lists every decision that shapes the rest of the document, in one place. Each decision is argued in its own section.</p>
@@ -158,7 +158,7 @@ main hr+h2{border-top:0;padding-top:0;margin-top:0}
 <tbody>
 <tr>
 <td>1</td>
-<td>A build from scratch. One control plane, one language (TypeScript), one kernel. A control plane is the one system that sets and enforces the rules for every agent. Onboarding is three screens, configuration is the same agent tools a person clicks, and explanation is the record itself. The in-app agent is in scope: it opens as a flyout from the sidebar, acts through those same agent tools, runs on a platform balance funded by the $5 signup grant, and is topped up with credit packs (§4.4). Model access for Oxagen's own work (reflection, promotion rationale, Context PR bodies, run names and summaries) goes through <strong>OpenRouter</strong>, routed by tier (§4.5).</td>
+<td>A build from scratch. One control plane, one language (TypeScript), one kernel. A control plane is the one system that sets and enforces the rules for every agent. Onboarding is three screens, configuration is the same agent tools a person clicks, and explanation is the record itself. The in-app agent is in scope: it opens as a flyout from the sidebar, acts through those same agent tools, and its model calls are metered in usage credits, funded by the $5 signup grant and topped up with credit packs (§4.4, §12.1). Model access for Oxagen's own work (reflection, promotion rationale, Context PR bodies, run names and summaries) goes through <strong>OpenRouter</strong>, routed by tier (§4.5).</td>
 <td>§4</td>
 </tr>
 <tr>
@@ -213,7 +213,7 @@ main hr+h2{border-top:0;padding-top:0;margin-top:0}
 </tr>
 <tr>
 <td>12</td>
-<td>Oxagen accounts customer spend per model call by normalized token class, including cache reads and writes. It attributes spend up the chain operator → agent → run → turn → step. It reports proven versus unproven spend with a productive ratio and ranked optimization findings. Oxagen prices one thing, the <strong>governed action unit</strong> (GAU), on one price list: $5 per 1,000 GAU list, a monthly allowance per tier (Free 5,000, Build 50,000, Scale 300,000, Enterprise negotiated), and 5,000-GAU blocks at $25. <code>resolve_approval</code> is the only billable governed action. Proven spend is a report figure. Tokens are never marked up.</td>
+<td>Oxagen accounts customer spend per model call by normalized token class, including cache reads and writes. It attributes spend up the chain operator → agent → run → turn → step. It reports proven versus unproven spend with a productive ratio and ranked optimization findings. Oxagen charges on two meters (2026-09-15, maintainer decision). Governed actions are priced in <strong>governed action units</strong> (GAUs) on one price list: $5 per 1,000 GAU list, a monthly allowance per tier (Free 5,000, Build 50,000, Scale 300,000, Enterprise negotiated), and 5,000-GAU blocks at $25. <code>resolve_approval</code> is the only billable governed action. In-app AI usage, the in-app agent's model calls, is metered in <strong>usage credits</strong> (1 credit = $0.01) at provider cost times the meter markup, funded by the $5 signup grant and topped up with credit packs. Tokens are not passed through at cost. Proven spend is a report figure.</td>
 <td>§12</td>
 </tr>
 <tr>
@@ -515,7 +515,7 @@ main hr+h2{border-top:0;padding-top:0;margin-top:0}
 <h3 id="spec/4-3-language-and-runtime">4.3 Language and runtime</h3>
 <p>TypeScript on Node runs the control plane (the part that sets and enforces rules), the gateway, the services, and the UI. Hono handles HTTP and Drizzle handles Postgres access. The official <code>@contextgraphprotocol/typescript-sdk</code> is the source of protocol types (ADR-036). An SDK is a software development kit, a library that developers build on. Zod schemas remain the runtime validators at the trust boundary (the point where outside input enters the system). They are compile-checked against the SDK types. Rust stays in Stella and the protocol crates (Rust packages). Stella is deployed as a service, never embedded. The gateway's hot path is streaming pass-through. A Node process adds well under thirty milliseconds at the median for a proxied model call, which is the budget in §15.</p>
 <h3 id="spec/4-4-onboarding-and-oxagen-s-own-model-calls">4.4 Onboarding, and Oxagen's own model calls</h3>
-<p>The in-app agent is in scope. The scope review of 2026-09-14 proposed cutting it, and the maintainer kept it the same day (&quot;dont cut the in app agent&quot;). It opens as a flyout from the sidebar, as merged into the mockups repository in PR #1; the bottom dock on the <code>small-approvals-bottom-dock-scenarios</code> branch is not adopted (2026-09-15, maintainer decision, §20). Each of its turns is a run of its own, and it acts through the same agent tools a person clicks (§6, Appendix E), so what it does passes IAM and lands in the record like an action taken on a page. The $5 signup grant in <code>create_org</code> funds its platform balance, and credit packs (<code>purchase_credits</code>) top it up (§12.10). Configuration is the same agent tools a person clicks. Explanation is the record: a chain of links to frames, records and commits. Stella stays on the customer's machine as a wrapped agent.</p>
+<p>The in-app agent is in scope. The scope review of 2026-09-14 proposed cutting it, and the maintainer kept it the same day (&quot;dont cut the in app agent&quot;). It opens as a flyout from the sidebar, as merged into the mockups repository in PR #1; the bottom dock on the <code>small-approvals-bottom-dock-scenarios</code> branch is not adopted (2026-09-15, maintainer decision, §20). Each of its turns is a run of its own, and it acts through the same agent tools a person clicks (§6, Appendix E), so what it does passes IAM and lands in the record like an action taken on a page. Its model calls are Oxagen's second meter, metered in usage credits (§12.1): the $5 signup grant in <code>create_org</code> funds the balance, and credit packs (<code>purchase_credits</code>) top it up (§12.10). Configuration is the same agent tools a person clicks. Explanation is the record: a chain of links to frames, records and commits. Stella stays on the customer's machine as a wrapped agent.</p>
 <p>Oxagen also makes model calls on its own behalf: the reflector (§9.1), the promoter's rationale and Context PR bodies (§9.2), the dod drafter (§8.6), and the run namer that writes <code>run.name</code> and <code>run.summary</code> from the frames. Every one of them goes through the model layer (§4.5), runs under a service principal, and is a frame in a run of its own, so its cost is accounted like everything else.</p>
 <p><strong>Onboarding is gated, and it is three steps.</strong> A new organization does not see the app. It sees one screen with three steps: (1) name the organization, (2) wrap an agent, with one click for Claude Code or Codex (the installer, §7.2) or with the five-line <code>oxagen.agent.wrap({})</code> snippet for an SDK agent, and (3) start a run. The full app unlocks the moment the first frame from that agent reaches Oxagen. The operator then lands on Fleet looking at their own run. That run is also the installer's smoke test, so there is one path, not two. The installer reads the git remote of the directory it ran in, so binding the main repo is one click.</p>
 <h3 id="spec/4-5-model-access-and-routing">4.5 Model access and routing</h3>
@@ -1523,12 +1523,12 @@ sandbox = &quot;read-only&quot;
 <p><strong>Runtime confirmation.</strong> Frames confirm and extend the static picture. A tool call or command frame that executed a query, or a storage SDK call captured as a <code>network</code> or <code>file_io</code> side effect, produces an <code>OBSERVED_ACCESS</code> edge from the run to the data object. A static edge that a run confirms is raised to <code>confirmed</code>. An observed access with no static edge is a finding (a dynamic query the parser missed).</p>
 <p><strong>Live schema drift.</strong> Where a Postgres connection is configured for the database the code declares, Oxagen links declared <code>Table</code> rows to live tables by name. It then compares columns, types, and indexes. Drift is any gap between what the code declares and what the database has: code references a column the database does not have, a migration is not applied, or a table has nothing referencing it. Drift is offered to the findings job.</p>
 <p><strong>What this buys the governor.</strong> With this layer, the toolbelt policy (§6.12) can say what no static allowlist can. It can deny, or route to approval, any tool call whose resolved effect is a write to a table the customer has classed as sensitive (money, personal data, regulated), whichever code path performs it. It can require an approval when a change touches a symbol that writes a table in that class. It can show a CIO, per agent and per run, which tables and buckets the agent's work reached, with the evidence.</p>
-<h2 id="spec/12-cost-accounted-to-the-token-attributed-to-the-operator-priced-in-governed-action-units">12. Cost: accounted to the token, attributed to the operator, priced in governed action units</h2>
+<h2 id="spec/12-cost-accounted-to-the-token-attributed-to-the-operator-charged-on-two-meters">12. Cost: accounted to the token, attributed to the operator, charged on two meters</h2>
 <h3 id="spec/12-1-what-is-tracked-and-what-is-priced">12.1 What is tracked, and what is priced</h3>
 <p>Two different things are tracked, and they are kept apart on purpose:</p>
 <ul>
 <li><strong>Customer spend</strong>: the money the customer pays to model and tool providers. Oxagen measures it per frame and adds it up into rollups (a rollup is a total built from smaller records). This is a FinOps feature (FinOps is the practice of tracking and managing cloud and AI spend). It is billed at zero (ADR-052). Matching it to the cent against provider statements was cut by the scope review; every figure carries its basis instead (<code>gateway_observed</code>, <code>client_attested</code>, <code>estimated</code>), and the Spend page never claims more than the basis allows.</li>
-<li><strong>Oxagen revenue</strong>: priced in <strong>governed action units</strong> (GAUs) on one price list, the GAU billing of Oxagen ADR-055 (maintainer decisions of 2026-09-14, reaffirmed 2026-09-15). One billable governed action is one GAU. <code>resolve_approval</code> is the only billable governed action. Membership writes are free, and every other governed action, <code>dod.held</code> included, is recorded in the ledger and not billed. Proven spend (§12.8) and held runs (§8.6) are report figures on Spend and Billing, and nothing is priced per run.</li>
+<li><strong>Oxagen revenue</strong>: charged on two meters (2026-09-15, maintainer decision, §12.10). Meter 1 prices governed actions in <strong>governed action units</strong> (GAUs) on one price list, the GAU billing of Oxagen ADR-055 (maintainer decisions of 2026-09-14, reaffirmed 2026-09-15). Meter 2 prices in-app AI usage, the in-app agent's model calls, in <strong>usage credits</strong>. One billable governed action is one GAU. <code>resolve_approval</code> is the only billable governed action. Membership writes are free, and every other governed action, <code>dod.held</code> included, is recorded in the ledger and not billed. Proven spend (§12.8) and held runs (§8.6) are report figures on Spend and Billing, and nothing is priced per run.</li>
 </ul>
 <div class="tw"><table>
 <thead>
@@ -1595,15 +1595,42 @@ sandbox = &quot;read-only&quot;
 <td>Enterprise</td>
 <td>negotiated only (2026-09-15, maintainer decision). Each contract is a <code>billing.contract_terms</code> row carrying its own rate, block size and monthly allowance; no enterprise plan exists in Stripe or in <code>SUBSCRIPTION_PLANS</code>. A contract covers committed use, a dedicated data plane or behind-the-firewall deployment, support with an SLA, and invoicing</td>
 </tr>
-<tr>
-<td>Tokens Oxagen buys on the customer's behalf (<code>platform</code> funding source, §4.5)</td>
-<td>at cost, no markup, capped per organization</td>
-</tr>
 </tbody>
 </table></div>
 <p><strong>Every feature on every tier.</strong> No feature is gated on a tier or on the enterprise license (2026-09-15, maintainer decision 3). IAM, SOC 2 controls, the definition of done, the in-app agent and the hosted witness runner are on for Free, Build, Scale and Enterprise alike. Tiers differ in price, allowance, included evidence and billing mode.</p>
 <p><strong>The meter.</strong> Each organization has one bucket a month (<code>billing.gau_buckets</code>), and its remaining units are included + purchased + carried − used. At remaining ≤ 0 a prepaid organization's auto top-up charges the saved card for <code>auto_topup_blocks</code> blocks; when auto top-up cannot run, further governed actions are refused until a card is saved or the month renews. Purchased and carried units roll into the next month, and included units do not. A platform operator approves invoice billing (<code>approved_for_invoice_billing</code>); an invoice-billed organization is never refused for lack of units, and its overage is invoiced at period end or on an interim invoice at <code>invoice_gau_max</code> (§12.10). Every block purchase, top-up and invoice is a <code>billing.gau_settlements</code> row that records the rate it charged. The Billing page prints the organization's contracted rate: the <code>billing.contract_terms</code> row in effect, else its plan's terms.</p>
-<p><strong>The in-app agent's credits.</strong> The $5 signup grant funds the in-app agent's platform balance, and credit packs (<code>purchase_credits</code>) top it up (§4.4, §12.10). Credits pay for the in-app agent's model use and sit outside the GAU meter.</p>
+<p><strong>Meter 2: in-app AI usage, in usage credits</strong> (2026-09-15, maintainer decision, §12.10). The in-app agent's model calls (§4.4) are metered in usage credits, on a balance separate from the GAU bucket.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Price</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Unit</td>
+<td>1 usage credit = $0.01</td>
+</tr>
+<tr>
+<td>Rate</td>
+<td>provider cost times the meter markup set in <code>packages/billing/src/pricing.ts</code>; tokens are not passed through at cost</td>
+</tr>
+<tr>
+<td>Metering</td>
+<td>the credit gate debits each model call from the organization's balance (<code>billing.credit_balances</code>, <code>billing.credit_lots</code>, <code>billing.credit_ledger</code>, App. A.8), carrying fractions of a credit in <code>meter_carry_micro_credits</code></td>
+</tr>
+<tr>
+<td>Funding</td>
+<td>a $5 signup grant (500 credits) written by <code>create_org</code></td>
+</tr>
+<tr>
+<td>Top-up</td>
+<td>credit packs, bought with <code>purchase_credits</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>GAU blocks buy governed actions and credit packs buy in-app AI usage; neither balance pays for the other. Customer agents' model calls stay customer spend, billed at zero.</p>
 <p>Payment is by card, or by invoice for an approved organization, and a subscription can be cancelled any time. Stripe holds customers, subscriptions and invoices; Oxagen holds the meter and mirrors invoices in <code>billing.invoices</code>. The 7-day onboarding offer is deferred (§20). The figures are the published terms <code>billing.plans</code> carries, set on 2026-09-14 in <code>macanderson/oxagen</code> <code>docs/specs/governed-action-metering.md</code> §4. Oxagen's marginal cost per GAU is under $0.001, so the margin exceeds 85 percent at every band.</p>
 <h3 id="spec/12-2-price-book">12.2 Price book</h3>
 <p>A price book is the table of prices Oxagen applies to each provider and model. <code>prices.price_books</code> and <code>prices.price_entries</code> hold: provider, model (canonical id and aliases), region, token class (<code>input</code>, <code>output</code>, <code>cache_read</code>, <code>cache_write_5m</code>, <code>cache_write_1h</code>, <code>thinking</code>, <code>web_search</code>, …), unit, <strong>micro-USD per million units as an integer</strong>, <code>effective_from</code>, <code>effective_to</code>, and source (provider list price, negotiated, customer override). A token class is one kind of token a provider charges for. Micro-USD are millionths of a dollar. Cache read tokens are prompt tokens served from a stored copy. Cache write tokens are prompt tokens saved for later reuse. Reasoning tokens (<code>thinking</code>) are tokens the model spends thinking before it answers. Organizations may override prices to record negotiated rates. Every cost record names the price entry id it used. A price correction therefore produces a recomputed record, never a silent change.</p>
@@ -1847,7 +1874,7 @@ sandbox = &quot;read-only&quot;
 <li><strong>API and MCP</strong> expose the same rollups, so a customer can pull attribution into their own FinOps tooling. Every number carries its basis (<code>gateway_observed</code>, <code>client_attested</code>, <code>estimated</code>).</li>
 </ul>
 <h3 id="spec/12-10-billing-decisions-of-2026-09-15">12.10 Billing decisions of 2026-09-15</h3>
-<p>Maintainer decisions, dated 2026-09-15. They bind the GAU billing of §12.1 as <code>macanderson/oxagen</code> builds it: a monthly allowance, prepaid GAU blocks with auto top-up, and invoice billing for approved organizations. §12.1 and this table are one price list. Each row states the behaviour the build ships.</p>
+<p>Maintainer decisions, dated 2026-09-15. They bind the two meters of §12.1 as <code>macanderson/oxagen</code> builds them: for governed actions, a monthly GAU allowance, prepaid GAU blocks with auto top-up, and invoice billing for approved organizations; for in-app AI usage, usage credits. §12.1 and this table carry one set of terms. Each row states the behaviour the build ships.</p>
 <div class="tw"><table>
 <thead>
 <tr>
@@ -1858,13 +1885,18 @@ sandbox = &quot;read-only&quot;
 </thead>
 <tbody>
 <tr>
+<td>17</td>
+<td>Oxagen charges on two meters (2026-09-15). Governed actions are priced in GAUs on the price list of §12.1. In-app AI usage, the in-app agent's model calls, is priced in usage credits: 1 credit = $0.01, debited by the credit gate at provider cost times the meter markup (<code>packages/billing/src/pricing.ts</code>), funded by the $5 signup grant on <code>create_org</code> and topped up with credit packs (<code>purchase_credits</code>). Tokens are not passed through at cost.</td>
+<td>§0 rows 1 and 12, §4.4, §12.1, Billing page</td>
+</tr>
+<tr>
 <td>Reaffirmed</td>
-<td>The GAU pricing of 2026-09-14 is the one price list (§12.1). Proven spend is a report figure and carries no price.</td>
+<td>The GAU pricing of 2026-09-14 is the governed-action price list (§12.1). Proven spend is a report figure and carries no price.</td>
 <td>§0 row 12, §12.1, §18, Billing page</td>
 </tr>
 <tr>
 <td>2</td>
-<td>Credit packs stay as the in-app agent's top-up, and <code>purchase_credits</code> is not retired. GAU blocks remain the governed-action product.</td>
+<td>Credit packs top up the usage-credit meter, and <code>purchase_credits</code> is not retired. The signup grant funds that meter, and credits pay for in-app AI usage at provider cost times the meter markup (row 17). GAU blocks remain the governed-action product.</td>
 <td>Billing page, App. E</td>
 </tr>
 <tr>
@@ -2536,12 +2568,12 @@ sandbox = &quot;read-only&quot;
 <tbody>
 <tr>
 <td>1</td>
-<td>The in-app agent's platform balance: the $5 signup grant is restored in <code>create_org</code>.</td>
+<td>The in-app agent's usage-credit balance: the $5 signup grant is restored in <code>create_org</code>.</td>
 <td><code>macanderson/oxagen</code></td>
 </tr>
 <tr>
 <td>2</td>
-<td>Credit packs stay as the in-app agent's top-up; <code>purchase_credits</code> is not retired. GAU blocks remain the governed-action product.</td>
+<td>Credit packs top up the usage-credit meter (row 17); <code>purchase_credits</code> is not retired. GAU blocks remain the governed-action product.</td>
 <td>§12.10, App. E, Billing page</td>
 </tr>
 <tr>
@@ -2645,8 +2677,13 @@ sandbox = &quot;read-only&quot;
 <td>§0 row 1, §1, §2, §4.4, §16, App. A.10, <code>scope-review.md</code></td>
 </tr>
 <tr>
+<td>17</td>
+<td>2026-09-15: Oxagen charges on two meters. (1) Governed actions, in GAUs, on the price list below; <code>resolve_approval</code> is the billable governed action and membership writes are free. (2) In-app AI usage (the in-app agent's model calls), in usage credits: 1 credit = $0.01, metered by the credit gate at provider cost times the meter markup (<code>packages/billing/src/pricing.ts</code>), funded by the $5 signup grant on <code>create_org</code> and topped up with credit packs (<code>purchase_credits</code>). Tokens are not passed through at cost. Proven spend stays a report figure.</td>
+<td>§0 rows 1 and 12, §4.4, §12.1, §12.10, Billing page, <code>walkthrough.md</code>, <code>implementation-plan.md</code></td>
+</tr>
+<tr>
 <td>Reaffirmed</td>
-<td>The GAU pricing of 2026-09-14 is the one price list: $5 per 1,000 GAU list, 5,000-GAU blocks at $25, Free with 5,000 GAU a month, Build at $199 with 50,000, Scale at $999 with 300,000, Enterprise negotiated (<code>billing.contract_terms</code>) with every feature on every tier, and volume bands of $5, $4, $3 and $2 per 1,000. Proven spend is a report figure and carries no price.</td>
+<td>The GAU pricing of 2026-09-14 is the governed-action price list: $5 per 1,000 GAU list, 5,000-GAU blocks at $25, Free with 5,000 GAU a month, Build at $199 with 50,000, Scale at $999 with 300,000, Enterprise negotiated (<code>billing.contract_terms</code>) with every feature on every tier, and volume bands of $5, $4, $3 and $2 per 1,000. Proven spend is a report figure and carries no price.</td>
 <td>§0 row 12, §12.1, §12.10, §18, Billing page, <code>scope-review.md</code></td>
 </tr>
 </tbody>
@@ -7758,7 +7795,7 @@ pnpm --filter @oxagen/desktop dev          # tauri dev over Vite on :1420
 <header class="mast">
   <p class="eyebrow">Oxagen · Plan</p>
   <h1>Oxagen Mission Control app: implementation plan</h1>
-  <dl class="facts"><dt>Status</dt><dd>Draft</dd><dt>Date</dt><dd>2026-09-12</dd><dt>Owner</dt><dd>Mac Anderson</dd><dt>Builds</dt><dd>a new <code>apps/app</code> (<code>@oxagen/app</code>) in <code>~/Projects/oxagen</code>; today's app moves to <code>apps/app_deprecated</code> (<code>@oxagen/app-deprecated</code>)</dd><dt>Source</dt><dd><code>mission-control-spec.md</code> (§3, §4, §8.6, §14, §15, §19, App. A, B, F) · the mockups in this repository: <code>mockups/missioncontrol.html</code> built from <code>mockups/src</code> and <code>mockups/fixtures</code>, catalogued by Storybook (<code>npm run storybook</code>), every page's spec in <code>mockups/pages/&lt;page&gt;.md</code> · <code>docs/feedback-mockups.md</code> · the repo at <code>origin/main</code></dd><dt>Amended</dt><dd>2026-09-14, by the scope review (<code>scope-review.md</code>): SSO and SCIM, policy simulation, the assurance suite, two-person mandates, steering effect and retirement, legal holds, erasure and reconciliation are out of every lane; the definition of done (<code>dod-spec.md</code>) is in. The in-app agent stays in scope (2026-09-14, maintainer decision), and its sidebar flyout is lane L3's (decision 9, 2026-09-15). Neo4j stays through rev1 (2026-09-15). Billing prices governed action units on one price list (spec §12.1; 2026-09-14, reaffirmed 2026-09-15). Rows below carry the change in place.</dd><dt>Decided</dt><dd>2026-09-15, maintainer decisions (spec §20). §0.1 lists the lanes each one binds.</dd><dt>Optimised for</dt><dd>parallel agents: every lane owns a disjoint set of paths, and every batch lists what it waits on</dd></dl>
+  <dl class="facts"><dt>Status</dt><dd>Draft</dd><dt>Date</dt><dd>2026-09-12</dd><dt>Owner</dt><dd>Mac Anderson</dd><dt>Builds</dt><dd>a new <code>apps/app</code> (<code>@oxagen/app</code>) in <code>~/Projects/oxagen</code>; today's app moves to <code>apps/app_deprecated</code> (<code>@oxagen/app-deprecated</code>)</dd><dt>Source</dt><dd><code>mission-control-spec.md</code> (§3, §4, §8.6, §14, §15, §19, App. A, B, F) · the mockups in this repository: <code>mockups/missioncontrol.html</code> built from <code>mockups/src</code> and <code>mockups/fixtures</code>, catalogued by Storybook (<code>npm run storybook</code>), every page's spec in <code>mockups/pages/&lt;page&gt;.md</code> · <code>docs/feedback-mockups.md</code> · the repo at <code>origin/main</code></dd><dt>Amended</dt><dd>2026-09-14, by the scope review (<code>scope-review.md</code>): SSO and SCIM, policy simulation, the assurance suite, two-person mandates, steering effect and retirement, legal holds, erasure and reconciliation are out of every lane; the definition of done (<code>dod-spec.md</code>) is in. The in-app agent stays in scope (2026-09-14, maintainer decision), and its sidebar flyout is lane L3's (decision 9, 2026-09-15). Neo4j stays through rev1 (2026-09-15). Billing charges on two meters (spec §12.1; 2026-09-15): governed action units on one price list (2026-09-14, reaffirmed 2026-09-15), and usage credits for in-app AI usage. Rows below carry the change in place.</dd><dt>Decided</dt><dd>2026-09-15, maintainer decisions (spec §20). §0.1 lists the lanes each one binds.</dd><dt>Optimised for</dt><dd>parallel agents: every lane owns a disjoint set of paths, and every batch lists what it waits on</dd></dl>
 </header>
 <div class="grid">
 <nav class="toc" aria-label="Contents of this document"><p>Contents</p><ol><li><a href="#plan/0-decisions-in-one-place">0. Decisions in one place</a></li><li><a href="#plan/1-toolchain-latest-stable-verified-against-npm-on-2026-09-12">1. Toolchain: latest stable, verified against npm on 2026-09-12</a></li><li><a href="#plan/2-evaluation-the-wireframes">2. Evaluation: the wireframes</a></li><li><a href="#plan/3-evaluation-the-data-mapping">3. Evaluation: the data mapping</a></li><li><a href="#plan/4-architecture-of-the-new-apps-app">4. Architecture of the new <code>apps/app</code></a></li><li><a href="#plan/5-batches-parallel-lanes">5. Batches: parallel lanes</a></li><li><a href="#plan/6-open-decisions-each-blocks-a-named-lane-and-each-has-a-recommendation">6. Open decisions (each blocks a named lane, and each has a recommendation)</a></li><li><a href="#plan/7-lane-prompt-template">7. Lane prompt template</a></li></ol></nav>
@@ -7826,9 +7863,14 @@ pnpm --filter @oxagen/desktop dev          # tauri dev over Vite on :1420
 </thead>
 <tbody>
 <tr>
+<td>17: two meters</td>
+<td>P8, A8, Billing writes</td>
+<td>Billing renders two meters. Governed actions: GAU used against the allowance, blocks, auto top-up and the contracted rate (G13). In-app AI usage: the usage-credit balance, where 1 credit = $0.01, the credit gate debits each in-app agent model call at provider cost times the meter markup (<code>packages/billing/src/pricing.ts</code>), <code>create_org</code> writes the $5 signup grant, and credit packs (<code>purchase_credits</code>) top it up. No lane prices tokens at cost.</td>
+</tr>
+<tr>
 <td>2, 7: purchases and upgrade</td>
 <td>P8, A8, Billing writes</td>
-<td>Billing keeps <code>purchase_credits</code> (credit packs for the in-app agent) and <code>start_subscription_upgrade</code> (Build or Scale through Stripe Checkout). <code>get_rate_card</code>, <code>preview_action_cost</code> and <code>get_evidence_retention</code> retire at cutover (B5).</td>
+<td>Billing keeps <code>purchase_credits</code> (credit packs, the usage-credit top-up) and <code>start_subscription_upgrade</code> (Build or Scale through Stripe Checkout). <code>get_rate_card</code>, <code>preview_action_cost</code> and <code>get_evidence_retention</code> retire at cutover (B5).</td>
 </tr>
 <tr>
 <td>3: enterprise</td>
@@ -8389,8 +8431,15 @@ Status comes from table and contract names in the repo. <strong>Batch 3 lanes mu
 <td>Billing · GAU allowance, meters</td>
 <td><code>runsIncluded/runsUsed</code>, <code>meters</code></td>
 <td><code>billing.gau_buckets</code>, <code>billing.gau_settlements</code>, <code>billing.contract_terms</code> (§12.1, App. A.8)</td>
-<td>credits model (<code>credit_ledger</code>)</td>
+<td>none on <code>main</code>; the tables on <code>app-rebuild</code></td>
 <td>❌ billing rebuild</td>
+</tr>
+<tr>
+<td>Billing · usage credits (in-app AI usage)</td>
+<td>none</td>
+<td><code>billing.credit_balances</code>, <code>billing.credit_lots</code>, <code>billing.credit_ledger</code> (§12.1, App. A.8)</td>
+<td>same tables; the credit gate and <code>packages/billing/src/pricing.ts</code> meter markup; <code>purchase_credits</code></td>
+<td>✅</td>
 </tr>
 <tr>
 <td><strong>Audit</strong> · events</td>
@@ -9491,7 +9540,7 @@ test(&quot;fleet · phone&quot;, async ({ page }) =&gt; {
 <tr>
 <td>P8</td>
 <td><strong>Billing</strong></td>
-<td>plan, GAU used against the allowance, blocks and auto top-up, the contracted rate, credit packs for the in-app agent, invoices; held runs as a report figure</td>
+<td>two meters: GAU used against the allowance, blocks and auto top-up, and the contracted rate; the usage-credit balance for in-app AI usage (1 credit = $0.01, the signup grant, credit packs); the plan and invoices; held runs as a report figure</td>
 <td></td>
 </tr>
 <tr>
@@ -9565,7 +9614,7 @@ test(&quot;fleet · phone&quot;, async ({ page }) =&gt; {
 <tr>
 <td>A8</td>
 <td>billing</td>
-<td><code>billing.subscriptions</code>, invoices, Stripe via existing contracts</td>
+<td><code>billing.subscriptions</code>, invoices, Stripe via existing contracts; usage credits from <code>billing.credit_balances</code> and <code>billing.credit_ledger</code></td>
 <td>GAU meter (G13)</td>
 </tr>
 <tr>
@@ -9619,7 +9668,7 @@ test(&quot;fleet · phone&quot;, async ({ page }) =&gt; {
 </tr>
 <tr>
 <td>Billing</td>
-<td><code>billing.subscription_upgrade.start</code> (Build or Scale through Stripe Checkout, kept in rev1), <code>purchase_credits</code> (credit packs)</td>
+<td><code>billing.subscription_upgrade.start</code> (Build or Scale through Stripe Checkout, kept in rev1), <code>purchase_credits</code> (credit packs for the usage-credit meter)</td>
 <td>GAU blocks and auto top-up (G13)</td>
 </tr>
 <tr>
