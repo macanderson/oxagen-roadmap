@@ -1840,10 +1840,10 @@ pre .dn{color:var(--st-denied)}
 .sx-path{border:1px solid var(--border);border-radius:12px;background:var(--panel);padding:14px;display:flex;flex-direction:column;gap:9px}
 .sx-path.on{border-color:var(--gold);box-shadow:0 0 0 1px color-mix(in srgb,var(--gold) 30%,transparent)}
 .sx-path h3{display:flex;align-items:center;gap:8px}
-.sx-path .dl{display:grid;gap:5px;margin:0}
-.sx-path .dl .li{display:grid;grid-template-columns:14px 1fr;gap:8px;font-size:12.4px;color:var(--body);align-items:start}
-.sx-path .dl .li .s{font-family:var(--mono);font-size:12px;line-height:1.5}
-.sx-path .dl .li .s.add{color:var(--sk-on)} .sx-path .dl .li .s.rem{color:var(--sk-held)} .sx-path .dl .li .s.same{color:var(--dim)}
+.sx-path .sx-dl{display:grid;gap:5px;margin:0}
+.sx-path .sx-dl .sx-li{display:grid;grid-template-columns:14px 1fr;gap:8px;font-size:12.4px;color:var(--body);align-items:start}
+.sx-path .sx-dl .sx-li .s{font-family:var(--mono);font-size:12px;line-height:1.5}
+.sx-path .sx-dl .sx-li .s.add{color:var(--sk-on)} .sx-path .sx-dl .sx-li .s.rem{color:var(--sk-held)} .sx-path .sx-dl .sx-li .s.same{color:var(--dim)}
 
 /* config / diff */
 .sx-cfg{border:1px solid var(--border);border-radius:11px;background:var(--void);overflow:hidden}
@@ -3476,7 +3476,9 @@ function route(){
          inside the step (a tab, an act that collapses what setup opened) snaps straight back. */
       if(st.setup&&scnRan!==key) st.setup();
       S.scnRan=key;
-      return st.route(org);
+      /* a step may live in another workspace than the scenario (W13 opens on FinOps, then core-platform) */
+      var rr=st.route(org); if(rr.ws) S.ws=rr.ws;
+      return rr;
     }
     return {page:"scenarios",org:org,ws:w};
   }
@@ -11014,7 +11016,7 @@ function skTrOperator(ans){
    '<div class="sx-paths">'+
     '<div class="sx-path'+(SKS.picked==="link"?" on":"")+'"><h3>'+icon("git")+'Link</h3>'+
      '<p class="muted" style="font-size:12px;margin:0">to <b>core-platform</b></p>'+
-     '<div class="dl">'+
+     '<div class="sx-dl">'+
       skDl("add","Inherits <span class=\"mono\">"+SK_CFG.ver+"</span> — 7 skills in scope, 1 withheld")+
       skDl("add","Inherits the belt, the $2.00 run budget and gateway tier")+
       skDl("add","Becomes the third linked repo · indexed into the code graph")+
@@ -11023,7 +11025,7 @@ function skTrOperator(ans){
      '</div></div>'+
     '<div class="sx-path'+(SKS.picked==="create"?" on":"")+'"><h3>'+icon("skills")+'Create</h3>'+
      '<p class="muted" style="font-size:12px;margin:0">a workspace called <b>edge</b></p>'+
-     '<div class="dl">'+
+     '<div class="sx-dl">'+
       skDl("rem","<b>Skills ship off.</b> 0 in scope, and <span class=\"mono\">search_skills</span> is not on the belt")+
       skDl("rem","No belt, no budget, no price book until somebody sets them")+
       skDl("add","Its own spend, its own audit, its own owner")+
@@ -11039,7 +11041,7 @@ function skTrOperator(ans){
     'because the safe end of an unanswered question is fewer skills, not more.</div></div>'+
    '</div>';
 }
-function skDl(k,t){return '<div class="li"><span class="s '+k+'">'+(k==="add"?"+":k==="rem"?"−":"·")+'</span><span>'+t+'</span></div>';}
+function skDl(k,t){return '<div class="sx-li"><span class="s '+k+'">'+(k==="add"?"+":k==="rem"?"−":"·")+'</span><span>'+t+'</span></div>';}
 function skAfterPanel(ans){
   if(ans==="link") return '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>The skill it loaded</h3>'+
     '<span class="sp mono dim" style="font-size:11px">1,840 tokens · $0.0055 · priced on the Spend page as context, not as output</span></div>'+
