@@ -1,18 +1,25 @@
 "use client";
 
+import { useTheme } from "next-themes";
 import { useEffect, useRef, useState } from "react";
 
 const LABEL: Record<string, string> = { loaded: "Loaded", empty: "Empty", loading: "Loading", error: "Error", denied: "Denied" };
 const FRAME = { desktop: { w: 1280, h: 800 }, mobile: { w: 390, h: 844 } };
 
-/** One state of the page in the master mockup, desktop or mobile, scaled to the column. */
+/**
+ * One state of the page in the master mockup, desktop or mobile, scaled to the column, in the
+ * site's resolved theme: switching the theme changes the URL, which reloads the frame.
+ */
 export function MockPanel({ title, hash, states }: { title: string; hash: string | null; states: string[] }) {
   const [state, setState] = useState(states.includes("loaded") ? "loaded" : states[0]);
   const [mobile, setMobile] = useState(false);
   const [width, setWidth] = useState(0);
+  const [mounted, setMounted] = useState(false);
+  const { resolvedTheme } = useTheme();
   const stage = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    setMounted(true);
     if (window.matchMedia("(max-width: 767px)").matches) setMobile(true);
   }, []);
 
@@ -27,7 +34,9 @@ export function MockPanel({ title, hash, states }: { title: string; hash: string
   if (!state) return null;
   const frame = mobile ? FRAME.mobile : FRAME.desktop;
   const scale = width ? Math.min(1, width / frame.w) : 0;
-  const src = `/mock/mockups/missioncontrol.html?product=1&state=${state}&mobile=${mobile ? 1 : 0}${hash ?? ""}`;
+  // The server render has no theme; light until mounted keeps hydration in step.
+  const theme = mounted && resolvedTheme === "dark" ? "dark" : "light";
+  const src = `/mock/mockups/missioncontrol.html?product=1&state=${state}&mobile=${mobile ? 1 : 0}&theme=${theme}${hash ?? ""}`;
 
   return (
     <figure className="ox-mock not-prose" aria-label="Mocked page">
@@ -58,7 +67,7 @@ export function MockPanel({ title, hash, states }: { title: string; hash: string
             <iframe
               key={src}
               src={src}
-              title={`${title}, ${LABEL[state] ?? state}, ${mobile ? "mobile" : "desktop"}`}
+              title={`${title}, ${LABEL[state] ?? state}, ${mobile ? "mobile" : "desktop"}, ${theme}`}
               sandbox="allow-scripts allow-same-origin allow-popups"
               loading="lazy"
               style={{ width: frame.w, height: frame.h, transform: `scale(${scale})`, transformOrigin: "0 0" }}

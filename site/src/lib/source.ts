@@ -52,7 +52,9 @@ const grouped = (ids: (p: (typeof manifest.pages)[number]) => boolean) =>
 addMeta("meta.json", { pages: ["index", "pages", "scenarios", "specs", "audit-prompts"] });
 addMeta("pages/meta.json", { title: "Pages", defaultOpen: true, pages: grouped(() => true) });
 addMeta("scenarios/meta.json", { title: "Scenarios", defaultOpen: true, pages: manifest.scenarios.map((s) => s.id) });
-addMeta("specs/meta.json", { title: "Specs & plans", pages: [...DOCS.map(([, slug]) => slug), "...", "rendered-html"] });
+// Catalog: the Storybook `npm run build-storybook` writes to storybook-static/, served beside the
+// site at /storybook/ by the host. The site links it and does not build it.
+addMeta("specs/meta.json", { title: "Specs & plans", pages: [...DOCS.map(([, slug]) => slug), "...", "rendered-html", "[Catalog](/storybook/)"] });
 addMeta("audit-prompts/meta.json", { title: "Audit prompts", pages: grouped((p) => p.audit) });
 
 export const source = loader({ baseUrl: "/", source: { files } });

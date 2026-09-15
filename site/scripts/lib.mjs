@@ -122,8 +122,12 @@ export function slugify(text) {
 export function rewriteRepoUrl(url, fromFile) {
   if (!url || !fromFile || /^[a-z][a-z0-9+.-]*:/i.test(url) || url.startsWith("#") || url.startsWith("/")) return null;
   const hashAt = url.indexOf("#");
-  const target = hashAt === -1 ? url : url.slice(0, hashAt);
+  const beforeHash = hashAt === -1 ? url : url.slice(0, hashAt);
   const hash = hashAt === -1 ? "" : url.slice(hashAt);
+  // A query pins a view of the master mockup (?product=1&state=…&mobile=…) and carries over.
+  const queryAt = beforeHash.indexOf("?");
+  const target = queryAt === -1 ? beforeHash : beforeHash.slice(0, queryAt);
+  const query = queryAt === -1 ? "" : beforeHash.slice(queryAt);
   if (!target) return null;
   let rel;
   try {
@@ -146,11 +150,11 @@ export function rewriteRepoUrl(url, fromFile) {
       if (entry) return mockHref({ state: m[2], mobile: Boolean(m[3]), hash: entry.hash });
     }
   }
-  if (rel === "mockups/missioncontrol.html") return `${MOCKUP}${hash}`;
+  if (rel === "mockups/missioncontrol.html") return `${MOCKUP}${query}${hash}`;
   if (rel === "docs/walkthrough.md") return `/${hash}`;
   if ((m = /^docs\/([^/]+\.md)$/.exec(rel))) return `/specs/${docSlug(m[1])}/${hash}`;
-  if (/^docs\/_house\/.+/.test(rel) || /^badges\/.+/.test(rel) || /^docs\/[^/]+\.html$/.test(rel)) return `/mock/${rel}${hash}`;
-  return `${GITHUB}/blob/main/${rel}${hash}`;
+  if (/^docs\/_house\/.+/.test(rel) || /^badges\/.+/.test(rel) || /^docs\/[^/]+\.html$/.test(rel)) return `/mock/${rel}${query}${hash}`;
+  return `${GITHUB}/blob/main/${rel}${query}${hash}`;
 }
 
 /** A link per scenario straight into the mockup, with its chrome (the scenario rail) shown. */

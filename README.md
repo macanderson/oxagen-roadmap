@@ -129,7 +129,8 @@ pnpm -C site build     # static export to site/out, hostable on any static file 
 | `docs/*.md` | Specs & plans: the spec, the implementation plan, the definition of done, the scope review, the witness spec, the desktop spec, the demo prompts, the scale-back prompt, the W13 scenario doc. |
 | `mockups/catalog.mjs` | Every page's route and states, and the scenarios in W order. |
 | `SCENARIOS` in `mockups/src/engine.js` (with `mockups/fixtures`) | One outline per scenario: its steps, the page each step routes to, and a link to each step inside the mockup. |
-| `mockups/missioncontrol.html`, `docs/*.html`, `docs/_house`, `badges` | Served unchanged under `/mock/`. |
+| `mockups/missioncontrol.html`, `docs/*.html`, `docs/_house`, `badges` | Served unchanged under `/mock/`. The Mocked page panel and its Open full page link are `/mock/mockups/missioncontrol.html?product=1&state=<state>&mobile=<0\|1>&theme=<light\|dark>#<route>`, with the theme following the site's. |
+| `storybook-static/` (from `npm run build-storybook`) | Not built into the site. Specs & plans ends with a Catalog link to `/storybook/`, where the host serves the built Storybook beside `site/out`. |
 
 Generated and gitignored: `site/public/mock/` (the HTML copied by `site/scripts/prepare.mjs`),
 `site/.generated/` (scenario outlines from `site/scripts/gen-scenarios.mjs`, the scenarios and
