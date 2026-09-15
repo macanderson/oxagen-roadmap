@@ -70,6 +70,7 @@ var S = {state:"loaded", phone:false, mobile:false, theme:null,
          layer:null, tab:{}, side:false, ws:"core-platform", frame:15, runFilter:"all",
          ctxSel:"frames", approved:{}, toolNames:"label", beltView:"group", beltCat:"", regCat:""};
 
+
 /* kill switches — mutable state lives on S; SWITCHES is the seed and is never mutated */
 S.switches={}; S.flipMeta={}; S.denyGen=118; S.killBanner=null;
 SWITCHES.forEach(function(s){S.switches[s.id]=s.on;});
@@ -1140,16 +1141,20 @@ function sidebar(r){
       '<span class="av ws">'+h(w.slug.slice(0,2))+'</span><span class="tx"><b>'+h(w.name)+'</b><span>'+(w.provisional?'<span class="b b-denied">provisional</span> until '+h(w.provisional.until):h(w.main)+' · '+h(w.branch))+'</span></span><span class="cv">▾</span></button>'+
    '</div><nav>'+
    '<div class="navlabel">Workspace</div>'+
+   /* The recorder, the money, then identity and the belt. Spend sits second because findings
+      ranked by money at stake are what a buyer measures first. */
    item("fleet","Fleet",base,waiting,true)+
+   item("spend","Spend",base+"/spend")+
    item("agents","Agent IAM",base+"/agents",fr?1:w.agents)+
    item("tools","Tools",base+"/tools")+
-   item("skills","Skills",base+"/skills",skWaiting(w),true)+
    item("steering","Steering",base+"/steering",fr?0:PROPOSALS.length)+
-   item("spend","Spend",base+"/spend")+
    (PRODUCT?"":item("scenarios","Scenarios",base+"/scenarios"))+
    '<div class="navlabel">Organization</div>'+
    item("organization","Organization","#/"+ORG.slug)+
    item("billing","Billing","#/"+ORG.slug+"/billing")+
+   /* Already built: designed and working, not what is sold this quarter. */
+   '<div class="navlabel" title="Designed and working; not in the first release">Already built</div>'+
+   item("skills","Skills",base+"/skills",skWaiting(w),true)+
    item("audit","Audit","#/"+ORG.slug+"/audit",fr?0:INCIDENTS.filter(function(i){return i.status==="open"&&i.sev==="critical";}).length,true)+
    '</nav><div class="side-foot">'+
    '<div class="row" style="justify-content:space-between;padding:0 4px"><span class="mono dim" style="font-size:10.5px">'+orgAgents+(orgAgents===1?' agent':' agents')+' · '+ORG.dataPlane+' plane</span>'+
@@ -10099,10 +10104,10 @@ DLG_EXT.more=function(){
   return {t:"More",w:false,
    b:'<div class="mgrid">'+
      t("steering","Steering","records, proposals, Context PRs",'go(\''+base+'/steering\')',fr?0:PROPOSALS.length)+
-     t("skills","Skills","resolution, the loop, reflection",'go(\''+base+'/skills\')',skWaiting(w),true)+
+     t("skills","Skills","already built · resolution, the loop, reflection",'go(\''+base+'/skills\')',skWaiting(w),true)+
      t("organization","Organization","people, workspaces, funding",'go(\'#/'+ORG.slug+'\')')+
      t("billing","Billing","plan, meters, invoices",'go(\'#/'+ORG.slug+'/billing\')')+
-     t("audit","Audit","events, incidents, holds",'go(\'#/'+ORG.slug+'/audit\')',crit,true)+
+     t("audit","Audit","already built · events, incidents, receipts",'go(\'#/'+ORG.slug+'/audit\')',crit,true)+
      (PRODUCT?'':t("scenarios","Scenarios","guided walkthroughs",'go(\''+base+'/scenarios\')'))+
      '</div><div class="hr"></div><div class="mgrid">'+
      t("search","Search","or run an action",'openDialog(\'cmd\')')+

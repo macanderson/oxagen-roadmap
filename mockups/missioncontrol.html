@@ -22,6 +22,7 @@
   --fk-model:#3987E5; --fk-tool:#D95926; --fk-gov:#199E70; --fk-ctx:#9085E9; --fk-op:#D55181; --k-constraint:#D677B5; --k-procedure:#A6B95E; --k-fact:#5CB5D6; --k-memory:#94A3C2; --k-preference:#D08FA0;
   --shadow:0 1px 0 rgba(255,255,255,.03),0 18px 44px rgba(0,0,0,.5);
   --shadow-sm:0 1px 2px rgba(0,0,0,.4);
+  --tx-surface:var(--void);
   --side-w:236px;
   --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
   --font:"Space Grotesk","Helvetica Neue",Arial,sans-serif;
@@ -36,6 +37,7 @@
   --fk-model:#2A78D6; --fk-tool:#EB6834; --fk-gov:#1BAF7A; --fk-ctx:#4A3AA7; --fk-op:#E87BA4; --k-constraint:#A0397F; --k-procedure:#5F7A1F; --k-fact:#1E7392; --k-memory:#4E6280; --k-preference:#98485E;
   --shadow:0 1px 0 rgba(255,255,255,.7),0 18px 44px rgba(16,16,15,.08);
   --shadow-sm:0 1px 2px rgba(16,16,15,.06);
+  --tx-surface:#FFFFFF;
 }}
 :root[data-theme="light"]{
   --ink:#F2EEE5; --void:#E9E3D8; --panel:#F8F5EE; --hl:#EFEAE0; --border:#D8CDBD; --rule:#C9BFAE;
@@ -47,6 +49,7 @@
   --fk-model:#2A78D6; --fk-tool:#EB6834; --fk-gov:#1BAF7A; --fk-ctx:#4A3AA7; --fk-op:#E87BA4; --k-constraint:#A0397F; --k-procedure:#5F7A1F; --k-fact:#1E7392; --k-memory:#4E6280; --k-preference:#98485E;
   --shadow:0 1px 0 rgba(255,255,255,.7),0 18px 44px rgba(16,16,15,.08);
   --shadow-sm:0 1px 2px rgba(16,16,15,.06);
+  --tx-surface:#FFFFFF;
 }
 *,*::before,*::after{box-sizing:border-box}
 body{margin:0;background:var(--ink);color:var(--fg);font-family:var(--font);font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden}
@@ -1187,7 +1190,7 @@ details.cm-diff[open] summary::before{content:"▾"}
 .tx-play .btn.sm{padding:3px 8px;font-family:var(--mono);font-size:11.5px;min-width:30px;justify-content:center}
 .tx-play .btn.sm[aria-pressed="true"]{background:var(--hl);border-color:var(--rule);color:var(--fg)}
 .tx-play .cnt{font-size:10.5px;color:var(--dim);font-variant-numeric:tabular-nums;margin-left:4px;white-space:nowrap}
-.tx-frame{background:var(--void);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.tx-frame{background:var(--tx-surface);border:1px solid var(--border);border-radius:12px;overflow:hidden}
 .tx-runbar{display:flex;align-items:center;gap:12px;padding:9px 14px;border-bottom:1px solid var(--border);background:var(--panel);flex-wrap:wrap}
 .tx-runbar .name{font-weight:700;letter-spacing:.05em}
 .tx-runbar .meta{color:var(--dim);font-size:11px}
@@ -1201,7 +1204,7 @@ details.cm-diff[open] summary::before{content:"▾"}
 .tx-clock{color:var(--dim);font-size:10.5px;text-align:right;padding-right:10px;font-variant-numeric:tabular-nums;white-space:nowrap}
 .tx-node{position:relative;text-align:center;align-self:stretch}
 .tx-node::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--border)}
-.tx-dot{position:relative;z-index:1;display:inline-block;width:7px;height:7px;margin-top:6px;border-radius:50%;background:var(--void);border:2px solid currentColor}
+.tx-dot{position:relative;z-index:1;display:inline-block;width:7px;height:7px;margin-top:6px;border-radius:50%;background:var(--tx-surface);border:2px solid currentColor}
 .tx-dot.solid{background:currentColor}
 .tx-role{display:grid;grid-template-columns:72px minmax(0,1fr);padding:9px 0;border-bottom:1px solid var(--border)}
 .tx-rolegut{text-align:right;padding-right:14px}
@@ -1910,6 +1913,7 @@ function notifUnread(){var n=0;for(var i=0;i<NOTIFS.length;i++){if(NOTIFS[i].unr
 var S = {state:"loaded", phone:false, mobile:false, theme:null,
          layer:null, tab:{}, side:false, ws:"core-platform", frame:15, runFilter:"all",
          ctxSel:"frames", approved:{}, toolNames:"label", beltView:"group", beltCat:"", regCat:""};
+
 
 /* kill switches — mutable state lives on S; SWITCHES is the seed and is never mutated */
 S.switches={}; S.flipMeta={}; S.denyGen=118; S.killBanner=null;
@@ -2981,16 +2985,20 @@ function sidebar(r){
       '<span class="av ws">'+h(w.slug.slice(0,2))+'</span><span class="tx"><b>'+h(w.name)+'</b><span>'+(w.provisional?'<span class="b b-denied">provisional</span> until '+h(w.provisional.until):h(w.main)+' · '+h(w.branch))+'</span></span><span class="cv">▾</span></button>'+
    '</div><nav>'+
    '<div class="navlabel">Workspace</div>'+
+   /* The recorder, the money, then identity and the belt. Spend sits second because findings
+      ranked by money at stake are what a buyer measures first. */
    item("fleet","Fleet",base,waiting,true)+
+   item("spend","Spend",base+"/spend")+
    item("agents","Agent IAM",base+"/agents",fr?1:w.agents)+
    item("tools","Tools",base+"/tools")+
-   item("skills","Skills",base+"/skills",skWaiting(w),true)+
    item("steering","Steering",base+"/steering",fr?0:PROPOSALS.length)+
-   item("spend","Spend",base+"/spend")+
    (PRODUCT?"":item("scenarios","Scenarios",base+"/scenarios"))+
    '<div class="navlabel">Organization</div>'+
    item("organization","Organization","#/"+ORG.slug)+
    item("billing","Billing","#/"+ORG.slug+"/billing")+
+   /* Already built: designed and working, not what is sold this quarter. */
+   '<div class="navlabel" title="Designed and working; not in the first release">Already built</div>'+
+   item("skills","Skills",base+"/skills",skWaiting(w),true)+
    item("audit","Audit","#/"+ORG.slug+"/audit",fr?0:INCIDENTS.filter(function(i){return i.status==="open"&&i.sev==="critical";}).length,true)+
    '</nav><div class="side-foot">'+
    '<div class="row" style="justify-content:space-between;padding:0 4px"><span class="mono dim" style="font-size:10.5px">'+orgAgents+(orgAgents===1?' agent':' agents')+' · '+ORG.dataPlane+' plane</span>'+
@@ -11940,10 +11948,10 @@ DLG_EXT.more=function(){
   return {t:"More",w:false,
    b:'<div class="mgrid">'+
      t("steering","Steering","records, proposals, Context PRs",'go(\''+base+'/steering\')',fr?0:PROPOSALS.length)+
-     t("skills","Skills","resolution, the loop, reflection",'go(\''+base+'/skills\')',skWaiting(w),true)+
+     t("skills","Skills","already built · resolution, the loop, reflection",'go(\''+base+'/skills\')',skWaiting(w),true)+
      t("organization","Organization","people, workspaces, funding",'go(\'#/'+ORG.slug+'\')')+
      t("billing","Billing","plan, meters, invoices",'go(\'#/'+ORG.slug+'/billing\')')+
-     t("audit","Audit","events, incidents, holds",'go(\'#/'+ORG.slug+'/audit\')',crit,true)+
+     t("audit","Audit","already built · events, incidents, receipts",'go(\'#/'+ORG.slug+'/audit\')',crit,true)+
      (PRODUCT?'':t("scenarios","Scenarios","guided walkthroughs",'go(\''+base+'/scenarios\')'))+
      '</div><div class="hr"></div><div class="mgrid">'+
      t("search","Search","or run an action",'openDialog(\'cmd\')')+
