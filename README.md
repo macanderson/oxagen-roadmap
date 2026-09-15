@@ -112,7 +112,4 @@ The spec, the plan and the desktop spec are also carried in the oxagen monorepo 
 `docs/specs/mission-control/` (`spec.md`, `plan.md`, `plan.html`) and `docs/specs/oxagen-desktop/`;
 when one copy changes, change the other.
 - `docs/2026-09-11-oxagen-demo-mockup-prompts.md` — the brief and the one-prompt-per-flow list that produced W1–W12.
-- `docs/CONSOLIDATION.md` — how W1–W11 were folded into one design; which version of each shared thing won.
-- `docs/feedback-mockups.md` — review feedback on the set.
-- `docs/videos-mockup-narrated.md` — narrated walkthrough links.
 - `docs/w13-in-the-loop-scenario.md` — the W13 demo scenario: the six beats, the talk track, the audience cut-downs, and the two open decisions it leaves for the spec.

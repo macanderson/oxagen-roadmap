@@ -56,12 +56,12 @@ decides every call. Adopting W13 means § 2 needs one sentence distinguishing *r
 ## The walk — six beats
 
 Open `w13-in-the-loop.html` (or **Scenarios → In the loop** inside `mc.html`). The rail walks the
-beats in order; the `screens` index below refers to the hand-drawn original, and each beat names the
-route it now lives on.
+beats in order; each beat below names its rail step and the route it lives on, and the state bar in
+the mockup chrome gives the loading, empty, error, denied and phone states of every screen.
 
 ### 1. The default (≈40s)
 
-Land on **Skills** in `finops`, or use *screens → "Skills, off"*.
+Rail step 1 — `#/a-intel/finops/skills`.
 
 > "This is a workspace with skills off. Not disabled by an admin — this is what a workspace is made
 > as. The screen says what turning it on would do and, just as carefully, what it would *not* do:
@@ -73,7 +73,7 @@ with. The default is visible rather than implied.
 
 ### 2. Turning it on is a pull request (≈30s)
 
-*screens → "Turning it on, as a pull request"*.
+Rail step 2 — the same route; the step's action opens the **Turn skills on** dialog.
 
 > "The switch in this dialog is the outcome. The control is the pull request. `.oxagen/skills.toml`
 > is a file in `a-intel/platform`, so the person who turned skills on is in the git history and on a
@@ -84,7 +84,7 @@ once, at the start.
 
 ### 3. The search belongs to the config (≈90s — the technical beat)
 
-*screens → "search_skills, answered as the agent"*.
+Rail step 3 — `#/a-intel/core-platform/skills/search`.
 
 Type nothing; the box already holds `cut the first release notes`. Press **Ask as the agent**.
 
@@ -107,7 +107,7 @@ Try *"pay an invoice"* for an empty result with a reason — not an error, and n
 
 ### 4. The seat in the loop (≈2m — **the wow**)
 
-*screens → "The run, from three sides"*.
+Rail steps 4 and 5 — `#/a-intel/core-platform` (Fleet, the interjection banner), then `#/a-intel/core-platform/runs/run_01K6QW3D5N7TYBA2`.
 
 > "A run just started in `a-intel/edge-proxy`. Nobody has bound that repository to a workspace. Skills
 > are on, so there is a config to resolve and nothing to resolve it against — and Oxagen is not
@@ -140,7 +140,7 @@ The safe end of an unanswered question is fewer skills, not more.
 
 ### 5. Reflection, and the fence around it (≈90s)
 
-*screens → "The injected turn and the self-grade"*.
+Rail step 6 — `#/a-intel/core-platform/skills/reflect`.
 
 > "Sitting in the loop means we can also ask the agent a question of our own, after the work is
 > sealed. This run's verdict was `failing`, and `rfl_v3` always samples a failing run."
@@ -164,7 +164,7 @@ reviewers ask about.
 
 ### 6. The history (≈30s)
 
-*screens → "The config file and its history"*.
+Rail step 7 — `#/a-intel/core-platform/skills/versions`.
 
 Five policy versions, each a pull request. End on the bottom row:
 

@@ -57,7 +57,7 @@ bugs work exactly once.
 
 # Guards for mc.html and the W files
 
-W1–W11 are generated from `mc.html` (see the README). Three checks keep that true:
+W1–W11 and W13 are generated from `mc.html` (see the README). Three checks keep that true:
 
 ```sh
 node tools/build-w.mjs --check              # every w1–w11 file is exactly mc.html + its title + its boot hash
