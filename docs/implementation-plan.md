@@ -7,7 +7,7 @@
 | **Owner** | Mac Anderson |
 | **Builds** | a new `apps/app` (`@oxagen/app`) in `~/Projects/oxagen`; today's app moves to `apps/app_deprecated` (`@oxagen/app-deprecated`) |
 | **Source** | `mission-control-spec.md` (§3, §4, §8.6, §14, §15, §19, App. A, B, F) · the mockups in this repository: `mockups/missioncontrol.html` built from `mockups/src` and `mockups/fixtures`, catalogued by Storybook (`npm run storybook`), every page's spec in `mockups/pages/<page>.md` · `docs/feedback-mockups.md` · the repo at `origin/main` |
-| **Amended** | 2026-09-14, by the scope review (`scope-review.md`): the assistant flyout, Neo4j, SSO and SCIM, policy simulation, the assurance suite, two-person mandates, steering effect and retirement, legal holds, erasure and reconciliation are out of every lane; the definition of done (`dod-spec.md`) is in. Rows below carry the change in place. |
+| **Amended** | 2026-09-14, by the scope review (`scope-review.md`): SSO and SCIM, policy simulation, the assurance suite, two-person mandates, steering effect and retirement, legal holds, erasure and reconciliation are out of every lane; the definition of done (`dod-spec.md`) is in. The in-app agent stays in scope (2026-09-14, maintainer decision), and its sidebar flyout is lane L3's (decision 9, 2026-09-15). Neo4j stays through rev1 (2026-09-15). Billing prices governed action units on one price list (spec §12.1; 2026-09-14, reaffirmed 2026-09-15). Rows below carry the change in place. |
 | **Decided** | 2026-09-15, maintainer decisions (spec §20). §0.1 lists the lanes each one binds. |
 | **Optimised for** | parallel agents: every lane owns a disjoint set of paths, and every batch lists what it waits on |
 
@@ -149,7 +149,7 @@ Status comes from table and contract names in the repo. **Batch 3 lanes must con
 | Organization · data plane | plane tab | `org.data_planes` | same; `org.data_plane` | ✅ |
 | Organization · API keys | `APIKEYS` | `iam.credentials` | `auth.api_keys`; `api.key.{create,revoke,rotate}` | ✅ |
 | **Billing** · plan, invoices | `BILLING` | `billing.subscriptions` + Stripe | `billing.subscriptions`, `billing.invoices`; `billing.subscription.read` | ✅ |
-| Billing · run allowance, meters | `runsIncluded/runsUsed`, `meters` | per-run plan (§12.1) | credits model (`credit_ledger`) | ❌ billing rebuild |
+| Billing · GAU allowance, meters | `runsIncluded/runsUsed`, `meters` | `billing.gau_buckets`, `billing.gau_settlements`, `billing.contract_terms` (§12.1, App. A.8) | credits model (`credit_ledger`) | ❌ billing rebuild |
 | **Audit** · events | `AUDIT` | `audit.audit_events` | ClickHouse `audit_events` + `security.security_events`; `audit.log.query` | 🟡 |
 | Audit · incidents | `INCIDENTS` | incident kinds | `tacho.incidents` | ✅ |
 | Audit · receipts | `RECEIPTS` | receipt frames | none | ❌ |
@@ -161,7 +161,7 @@ Status comes from table and contract names in the repo. **Batch 3 lanes must con
 | **Auth + onboarding gate** | `#/welcome/*`, register flow | `org.onboarding_state` | Better Auth pages; `tacho.enrollment.create` | 🟡 no gate state |
 | **Run · definition of done** | `DOD` (`fixtures/dod.json`, derived for the rest) | `dod.dod_sets`, `dod.dod_certificates` (spec A.11) | none | ❌ G15 |
 | Fleet · Done column, held tile | derived from `DOD` | the same | none | ❌ G15 |
-| Billing · proven runs | `BILLING` | `dod.held` governed actions (§12.1) | `billing.*` usage | ❌ G13 |
+| Billing · held runs (reported) | `BILLING` | `dod.dod_certificates` (§8.6); a report figure with no price (§12.1) | none | ❌ G15 |
 
 ### 3.3 What the mapping says
 
@@ -187,9 +187,9 @@ Status comes from table and contract names in the repo. **Batch 3 lanes must con
 | G10 | `USED_CONTEXT` edges from context assembly | Run › context | M3/M4 |
 | G11 | Agent trust/spend scores (spec decision first) | Agents scores, auto-approval eligibility | none |
 | G12 | Auto-approval rules store (spec decision first) | Tools › auto | M2 |
-| G13 | Per-run billing allowance (§12.1) | Billing meters | M2 |
+| G13 | GAU buckets, settlements and contract terms (§12.1, App. A.8) | Billing meters | M2 |
 | G14 | `light`-tier run namer/summariser | Run name + summary (feedback 4) | M1 |
-| G15 | `dod.dod_sets`, `dod.dod_certificates`, the four `dod.*` capabilities, `dod.held` metering (`dod-spec.md`) | Run › Done, Fleet › Done column, Billing › proven runs | M3 |
+| G15 | `dod.dod_sets`, `dod.dod_certificates`, the four `dod.*` capabilities, the `dod.held` governed action, recorded and not billable (`dod-spec.md`) | Run › Done, Fleet › Done column, Billing › held runs | M3 |
 | G16 | `org.onboarding_state` + first-frame unlock | Onboarding gate | M1 |
 | G17 | Ledger ingest contract with a revocable run token (2026-09-15, maintainer decision: built now) | Halt and Cancel on ledger-ingested runs (Fleet, Run) | M1 |
 
@@ -1054,7 +1054,7 @@ Each lane owns `src/app/<route>/**`, `src/features/<page>/**`, `messages/<page>.
 | P5 | **Steering** | tabs records/proposals/prs; `RecordKindBadge` (W6); Context PR dialog | |
 | P6 | **Spend** | tabs findings/operator/agent/tool/waste/budgets; drill `spend/<kind>/<id>`; evidence + fix dialogs; export | |
 | P7 | **Organization** | tabs people/roles/invitations/workspaces/funding/plane/keys; role editor; API key create/rotate/revoke dialogs | |
-| P8 | **Billing** | plan, proven runs this period, the secondary meters, invoices | |
+| P8 | **Billing** | plan, GAU used against the allowance, blocks and auto top-up, the contracted rate, credit packs for the in-app agent, invoices; held runs as a report figure | |
 | P9 | **Audit** | tabs events/incidents/receipts/exports/keys/retention; receipt viewer; export and KEK rotation dialogs | |
 | P10 | **Run · Done** | the Done tab (`dod-spec.md`): verdict by shape, certificate, checks with evidence digests, hidden checks, budget from the tool log, the stops; the locked-file dialog; the sign dialog | P2 |
 
@@ -1071,7 +1071,7 @@ Each lane owns `src/data/adapters/live/<domain>.ts` + `mappers/<domain>.ts` + te
 | A5 | steering | `agent.context_records(_versions)`, `context_promotions` | none |
 | A6 | spend + budgets | ClickHouse `readUsageBreakdown` by operator/agent/model; `tool_invocations`; `billing.spend_budgets` | proven (G7), findings (G4) |
 | A7 | org + members + keys | `org.org_users`, `org.invitations`, `workspace.workspaces`, `iam.roles`, `org.data_planes`, `auth.api_keys`, `org.model_credentials` | none |
-| A8 | billing | `billing.subscriptions`, invoices, Stripe via existing contracts | run allowance (G13) |
+| A8 | billing | `billing.subscriptions`, invoices, Stripe via existing contracts | GAU meter (G13) |
 | A9 | audit + shell | ClickHouse `audit_events` + `security.security_events`, `tacho.incidents`, `privacy_*`, `notification.notifications` | receipts, holds, KEK (G8) |
 
 ### Batch 4: writes (9 lanes, after B2 page + B3 domain pair merge)
@@ -1086,7 +1086,7 @@ Each lane owns `src/features/<page>/actions.ts` and wires its page's dialogs to 
 | Steering | `context.record.*`, `agent.memory_promotion.*` | Context PR through GitHub App (M3) |
 | Spend | `billing.budget.set`, `workspace.budget_policy.*` | findings actions (G4), statement export (G5) |
 | Organization | `org.member_invite.*`, `org.member_role.change`, `workspace.create`, `workspace.settings.*`, `org.settings.write`, `org.model_credential`, `org.data_plane`, `api.key.{create,rotate,revoke}` | role editor custom roles (every tier, 2026-09-15, maintainer decision) |
-| Billing | `billing.subscription_upgrade.start` (Build or Scale through Stripe Checkout, kept in rev1), `purchase_credits` (credit packs) | per-run plan (G13) |
+| Billing | `billing.subscription_upgrade.start` (Build or Scale through Stripe Checkout, kept in rev1), `purchase_credits` (credit packs) | GAU blocks and auto top-up (G13) |
 | Audit | `privacy.data.export`, `privacy.data.erase` | holds, KEK rotation (G8) |
 | Shell | account settings via Better Auth client | none |
 

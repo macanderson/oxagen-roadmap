@@ -7,8 +7,8 @@
 | **Owner** | Mac Anderson |
 | **Supersedes** | The `oxagen-platform` and `oxagen` codebases as products. Carries forward the designs named in §16. |
 | **Builds on** | Context Graph Protocol `contextgraph/1.0` and the `contextgraph/lifecycle/1.0-draft` profile (repo at `origin/main`, ADRs 0001 to 0018). Stella's context-record and Context PR corpus. Oxagen ADR-024, 025, 042, 043, 051, 052, 053 and the current wrapper spec (in the repo today under `docs/specs/tacho/`, renamed here). |
-| **Amended** | 2026-09-14, by the scope review (`scope-review.md`) and the definition of done (`dod-spec.md`). The in-app agent, Neo4j, SSO and SCIM, policy simulation, the assurance suite, two-person mandates, steering effect metrics and retirement, legal holds, crypto-shredding and provider reconciliation are out. The definition of done (§8.6) is in, and it is the billable unit (§12.1). Sections carry the change in place. It also supersedes the billing amendment of 2026-09-13 (Oxagen ADR-055, governed action units in monthly buckets at contracted rates): the one priced meter is the proven run, and governed actions are reported beside it (§12.1). |
-| **Decided** | 2026-09-15, maintainer decisions (§20): billing (credit packs, negotiated enterprise with every feature on for every tier, invoice billing, the Build and Scale upgrade, suspension), the approvals strip on Run, the shell's sidebar flyout, Halt and Cancel on ledger-ingested runs, the create-workspace form and the Spend lane, and API key rotation in rev1. Each section carries its change in place with the date. |
+| **Amended** | 2026-09-14, by the scope review (`scope-review.md`) and the definition of done (`dod-spec.md`). The ontology engine, SSO and SCIM, policy simulation, the assurance suite, two-person mandates, steering effect metrics and retirement, legal holds, crypto-shredding and provider reconciliation are out. The definition of done (§8.6) is in. The review also proposed cutting the in-app agent and Neo4j and pricing the proven run. The maintainer kept the in-app agent (2026-09-14, "dont cut the in app agent"; its shell is the sidebar flyout, 2026-09-15), kept Neo4j through rev1 (2026-09-15), and set governed action units as the one price list (2026-09-14, reaffirmed 2026-09-15). §12.1 carries that price list, the GAU billing of Oxagen ADR-055 (2026-09-13); proven spend is a report figure. Sections carry each change in place. |
+| **Decided** | 2026-09-15, maintainer decisions (§20): billing (credit packs, negotiated enterprise with every feature on for every tier, invoice billing, the Build and Scale upgrade, suspension), the approvals strip on Run, the shell's sidebar flyout, Halt and Cancel on ledger-ingested runs, the create-workspace form and the Spend lane, API key rotation in rev1, Neo4j through rev1, and GAU pricing reaffirmed as the one price list. Each section carries its change in place with the date. |
 
 ---
 
@@ -18,23 +18,23 @@ This table lists every decision that shapes the rest of the document, in one pla
 
 | # | Decision | Section |
 |---|---|---|
-| 1 | A build from scratch. One control plane, one language (TypeScript), one kernel. A control plane is the one system that sets and enforces the rules for every agent. Oxagen has no in-app agent: onboarding is three screens, configuration is the same agent tools a person clicks, and explanation is the record itself. Model access for Oxagen's own work (reflection, promotion rationale, Context PR bodies, run names and summaries) goes through **OpenRouter**, routed by tier (§4.5). | §4 |
+| 1 | A build from scratch. One control plane, one language (TypeScript), one kernel. A control plane is the one system that sets and enforces the rules for every agent. Onboarding is three screens, configuration is the same agent tools a person clicks, and explanation is the record itself. The in-app agent is in scope: it opens as a flyout from the sidebar, acts through those same agent tools, runs on a platform balance funded by the $5 signup grant, and is topped up with credit packs (§4.4). Model access for Oxagen's own work (reflection, promotion rationale, Context PR bodies, run names and summaries) goes through **OpenRouter**, routed by tier (§4.5). | §4 |
 | 2 | The organization is the tenant and the hard isolation boundary. A tenant is one customer whose data stays fully separate from every other customer's data. A workspace is a governance partition inside the organization: a section with its own rules, approvals, and ownership. This is the same model as today, with fewer tables. | §5 |
 | 3 | Postgres tenant isolation uses Row-Level Security (RLS). RLS is a database feature that filters every row by rules tied to settings on the current transaction. There is **no bypass setting**. System access uses a separate database role with its own policy. | §5.2 |
-| 4 | The run record, context records and the code graph live in Postgres beside the control ledger, under the same row-level security. There is no second datastore and no graph engine. | §5.3 |
-| 5 | Two stores, not four. Postgres holds the control ledger, the run record, the records and the code graph. Object storage with write-once retention holds frame bodies and the archive. Write-once means a stored object cannot be changed after it is written. Neo4j and ClickHouse are retired. | §4 |
+| 4 | The run record, context records and the code graph live in Postgres beside the control ledger, under the same row-level security. In the target there is no second datastore and no graph engine (row 5). | §5.3 |
+| 5 | The target has two stores. Postgres holds the control ledger, the run record, the records and the code graph. Object storage with write-once retention holds frame bodies and the archive. Write-once means a stored object cannot be changed after it is written. ClickHouse is retired. Neo4j stays through rev1; its retirement ADR is written after the witness lane lands, and the two-store set holds from that retirement (2026-09-15, maintainer decision, §20). | §4 |
 | 6 | Every wrapped agent passes through at least one of two gateway points where the agent connects to Oxagen: the **model proxy** and the **tool gateway**. Hooks and SDK adapters (the wrapper) add finer control. An SDK is a software development kit, the code library an agent is built with. Oxagen records the enforcement tier on every run, and the tier can never be over-stated. | §7 |
 | 7 | Intervention is a defined contract: pause, resume, steer, cancel, revoke, approve, and inject. The guarantees are stated for each gateway point. Halting works by revoking credentials, not by asking the agent to cooperate. | §7.4 |
 | 8 | A run is a hash-chained sequence of **frames**. A hash is a short fingerprint computed from data. A hash chain links each frame to the one before it, so no frame can be altered without detection. A frame is the replay unit. Frame metadata and cost live in the run record. Frame bodies are content-addressed, encrypted blobs. Content-addressed means each body is stored under the hash of its own content. | §8 |
 | 9 | Agents learn by appending **context records** (the protocol's record kinds). They never learn by writing frames. Records are canonically hashed and countersigned. Canonical hashing puts a record in one standard form before hashing, so the same content always gives the same hash. Countersigned means a second party adds its own signature. | §9 |
 | 10 | A workspace links to one or more GitHub repositories. Exactly one of them is its **main repo**, bound at creation. The main repo is the place where the workspace's steering and configuration are managed in source control. Published steering and every agent definition live there under `.oxagen/`. Stella reads that folder natively through a symlink, a file system pointer to another path. Oxagen mirrors the same folder into each coding harness's own agent format in the same pull request. Linked repos may carry repository-scoped records of their own. A **Context PR** is a GitHub pull request (PR), a proposed change that others review before it is merged. Merge is the promotion event. Nothing steers until it is published. Postgres is the system of record. Git is the system of control, which is GitOps: steering changes are managed through git. | §10 |
 | 11 | Oxagen governs the toolbelt. An agent sees only the tools it is granted, and it can search them when the belt is large. The agent holds no credentials at all. Every call passes one pipeline: validate, taint-check, decide (allow, approve, or deny, deterministically), broker a per-call credential, dispatch idempotently, validate output, sign a receipt. A taint-check looks for data marked as untrusted or sensitive. Deterministic means the same input always gives the same decision. Idempotent dispatch means a repeated call has the same effect as a single call. A tool's safety classification describes the tool. The customer's approval rules decide, with auto-approval conditions Oxagen can apply to skip the human. Any consequence the customer marks (money, data destruction, production changes, external communication, access changes) requires a human-granted mandate. The mandate sets limits over the tool's declared measures and keeps a ledger. Kill switches exist at every level. Policy is versioned, signed and tested. | §6.5–6.12 |
-| 12 | Oxagen accounts customer spend per model call by normalized token class, including cache reads and writes. It attributes spend up the chain operator → agent → run → turn → step. It reports proven versus unproven spend with a productive ratio and ranked optimization findings. Oxagen prices one thing, the **proven run**: a run whose definition of done held (§8.6). Runs, governed actions and retained storage are reported as secondary meters. Tokens are never marked up. | §12 |
+| 12 | Oxagen accounts customer spend per model call by normalized token class, including cache reads and writes. It attributes spend up the chain operator → agent → run → turn → step. It reports proven versus unproven spend with a productive ratio and ranked optimization findings. Oxagen prices one thing, the **governed action unit** (GAU), on one price list: $5 per 1,000 GAU list, a monthly allowance per tier (Free 5,000, Build 50,000, Scale 300,000, Enterprise negotiated), and 5,000-GAU blocks at $25. `resolve_approval` is the only billable governed action. Proven spend is a report figure. Tokens are never marked up. | §12 |
 | 13 | Audit fidelity: **full bodies, seven years, write-once at seal time**. Seal time is the moment a record is closed and locked against change. Each organization has its own keys. Redaction happens before write. Frame rows stay in the hot table for a window, then compact into the archive segment. The run ledger stays forever. | §13 |
 | 14 | Mission Control is nine pages: six in a workspace and three for the organization, down from 70. Everything else is deleted. Appendix F says where each old route went. | §14, App. F |
 | 15 | A run is proven only by a **witness** Oxagen wrote. A witness is a test built with one of several deterministic oracles, checkers whose result is fixed for a given input. The witness fails on the PR's target branch and passes on the PR. It runs in a witness runner the worker can never see or reach. The runner reports only pass or fail back to the worker. The flip from fail to pass stamps the run. Stamped runs are the training asset. | §8.5 |
-| 16 | An agent cannot finish until its **definition of done** says so. Before the agent moves, Oxagen drafts the acceptance checks for the prompt (or loads hand-written ones) and locks them by digest. At every Stop the checks run, hidden holdouts included, and a pure `decide(evidence)` answers HELD, PENDING or BROKEN with a closed reason. Oxagen never runs a check; it re-decides the evidence, binds the outcome to the sealed attempt, signs a certificate and meters one governed action. The held run is what the customer pays for. | §8.6, §12.1 |
-| 17 | The maintainer decisions of 2026-09-15 bind billing, approvals, the shell, intervention on ledger-ingested runs, and the rev1 scope of Organization, Spend and API keys. A sentence above that one of them changes carries a dated note. | §20 |
+| 16 | An agent cannot finish until its **definition of done** says so. Before the agent moves, Oxagen drafts the acceptance checks for the prompt (or loads hand-written ones) and locks them by digest. At every Stop the checks run, hidden holdouts included, and a pure `decide(evidence)` answers HELD, PENDING or BROKEN with a closed reason. Oxagen never runs a check; it re-decides the evidence, binds the outcome to the sealed attempt, signs a certificate and records one governed action, `dod.held`, which is not billable. | §8.6 |
+| 17 | The maintainer decisions of 2026-09-15 bind billing, approvals, the shell, intervention on ledger-ingested runs, Neo4j through rev1, and the rev1 scope of Organization, Spend and API keys. A sentence above that one of them changes carries a dated note. | §20 |
 
 ---
 
@@ -52,7 +52,7 @@ The wedge is narrow on purpose. A customer wraps the agents they already run (St
 
 Owned intelligence (training a model per customer on proven runs) is the phase-three business. Nothing in this spec builds it. Nothing in this spec makes it harder, because proven runs are stored in the shape a training set needs.
 
-**What this product is not.** It is not a coding-agent runtime, the system that runs an agent's code. It has no sandbox for agents, no file system, and no browser. A sandbox is an isolated space where code runs. It has no subagent fan-out, no skills engine, no evals harness, and no content generation. Subagent fan-out means one agent starting many helper agents. An evals harness is a test setup that scores agent output. The one execution plane it operates is the witness runner (§8.5). An execution plane is the place where work runs. The witness runner runs proofs, never agents. ADR-043 already made that cut in the current repo. An ADR is an architecture decision record, a short written note of a design choice. This spec keeps that cut. Oxagen has no in-app agent either (§4.4): onboarding is three screens, and every question about the fleet is a page.
+**What this product is not.** It is not a coding-agent runtime, the system that runs an agent's code. It has no sandbox for agents, no file system, and no browser. A sandbox is an isolated space where code runs. It has no subagent fan-out, no skills engine, no evals harness, and no content generation. Subagent fan-out means one agent starting many helper agents. An evals harness is a test setup that scores agent output. The one execution plane it operates is the witness runner (§8.5). An execution plane is the place where work runs. The witness runner runs proofs, never agents. ADR-043 already made that cut in the current repo. An ADR is an architecture decision record, a short written note of a design choice. This spec keeps that cut. Onboarding is three screens, and every question about the fleet has a page. The in-app agent (§4.4) works through the same agent tools as those pages.
 
 ---
 
@@ -61,7 +61,7 @@ Owned intelligence (training a model per customer on proven runs) is the phase-t
 ### 2.1 In scope for v1
 
 - **Two renames, applied everywhere.** The current codebase uses the word *capability* for a registered contract with schemas, IAM defaults, and a handler. IAM is identity and access management, the system that decides who may do what. That contract is now called an **agent tool**. One registry holds Oxagen's own agent tools and the tools imported from MCP servers, APIs, and harnesses. MCP is the Model Context Protocol, a standard way for agents to reach outside tools. An API is an application programming interface, a way for one program to call another. A governed action is one top-level call to an agent tool. The current codebase uses the word *tacho* for the second thing, and that thing has no product name at all. It is simply **wrapping an agent**. In the SDK, the software development kit that developers use to call Oxagen from code, wrapping is `oxagen.agent.wrap({ ... })` in TypeScript and Python and `oxagen.Agent.Wrap(...)` in Go. All of these ship in one `@oxagen/sdk` package. In the CLI, the command-line tool, wrapping is `oxagen agent enroll | status | unenroll`. The runtime pieces are the `oxagend` collector, the `oxagen-hook` binary, and the `oxagen.frame/1.0` envelope. Neither old word appears in the product, the API, the UI (the user interface, the screens people work in), or the docs. Appendix E is the definitive list of agent tools that survive.
-- **A free tier with the whole product in it, and one-click wrapping.** Every organization gets every governance feature, unlimited runs, thirty days of evidence and three seats free (§12.1). Governance means the rules, approvals, and records that control what agents do. Wrapping Claude Code or Codex takes one click. That click runs a signed installer on macOS, Windows, or Linux (§7.2). Onboarding is three steps. The app does not open until an agent has talked to Oxagen (§4.4).
+- **A free tier with the whole product in it, and one-click wrapping.** Every organization gets every feature, unlimited runs, 5,000 governed action units a month and thirty days of evidence free (§12.1). Governance means the rules, approvals, and records that control what agents do. Wrapping Claude Code or Codex takes one click. That click runs a signed installer on macOS, Windows, or Linux (§7.2). Onboarding is three steps. The app does not open until an agent has talked to Oxagen (§4.4).
 - Organizations, workspaces, members, invitations, roles.
 - Agent identity, credentials, RBAC down to the tool version, and delegation ceilings. RBAC is role-based access control, where a role decides what each agent may do. A delegation ceiling means an agent can never do more than the person it acts for.
 - The gateway. It includes the model proxy (the path each model call travels through), the tool gateway, the hook and SDK adapters, and the control channel.
@@ -70,6 +70,7 @@ Owned intelligence (training a model per customer on proven runs) is the phase-t
 - Context records, reflection, promotion, Context PRs (a PR is a pull request, a proposed change submitted for review), and steering delivery.
 - The definition of done: drafting, locking, the three hooks in the harness, `decide()`, certificates, human signatures, and templates for repeatable tasks (§8.6).
 - Mission Control UI, API, MCP endpoint, and a thin CLI (`oxagen`) for enrollment and administration.
+- The in-app agent: a flyout from the sidebar, funded by the $5 signup grant and topped up with credit packs (§4.4, §12.10).
 - Audit archive, retention, and export.
 
 ### 2.2 Out of scope for v1
@@ -78,7 +79,7 @@ Owned intelligence (training a model per customer on proven runs) is the phase-t
 - Marketplace, installable plugins, reseller billing, A2A federation (agent-to-agent, where agents from different systems work together), and mobile parity (a mobile app that matches the full product).
 - Workflows and playbooks. Automations. Chat as a product interface.
 - Connectors beyond GitHub. There is no connector SDK in v1.
-- Cut by the scope review of 2026-09-14, and not on the roadmap: the in-app agent, the ontology engine and Neo4j, SSO and SCIM, policy simulation against history, the published assurance suite, two-person mandates, steering effect metrics and retirement candidates, legal holds, crypto-shredding, and provider reconciliation to the cent. Each is a Series A question a customer has to ask for.
+- Cut by the scope review of 2026-09-14, and not on the roadmap: the ontology engine, SSO and SCIM, policy simulation against history, the published assurance suite, two-person mandates, steering effect metrics and retirement candidates, legal holds, crypto-shredding, and provider reconciliation to the cent. Each is a Series A question a customer has to ask for. The review also listed the in-app agent and Neo4j. The in-app agent is in scope (2026-09-14 and 2026-09-15, maintainer decisions, §4.4). Neo4j stays through rev1 and is retired by an ADR after the witness lane (2026-09-15, §4.2).
 
 ### 2.3 Non-goals stated so they stay out
 
@@ -102,7 +103,7 @@ This document uses each name exactly as defined here.
 | **Principal** | Anything that IAM makes a decision about. IAM is identity and access management, the system that decides who may do what. The three kinds are `human`, `agent`, and `service`. |
 | **Agent** | A registered principal of kind `agent`. It has an immutable key, meaning a key that never changes, in the form `org_ns.ws_ns.slug` (ADR-024). It also has a harness type (the software that runs the agent) and credentials. Each agent has one identity. Identity is never per run. |
 | **Operator** | The human accountable for an agent's runs. Every run has exactly one operator. That holds even when a schedule or a webhook (an automatic call from another system) started the run. In that case the operator is the person who owns that trigger. The IAM field is `initiating_principal`. The word people see is operator. |
-| **Run** | One session of one agent under one operator, from start to stop, on one task. Claude Code and Stella call this a *session*. The run stores the harness's session id, and the two words mean the same thing. A resumed or forked run is the same run with a new attempt. The run is the unit of attribution (who gets credited or charged), billing, replay, and proof. |
+| **Run** | One session of one agent under one operator, from start to stop, on one task. Claude Code and Stella call this a *session*. The run stores the harness's session id, and the two words mean the same thing. A resumed or forked run is the same run with a new attempt. The run is the unit of attribution (who gets credited or charged), replay, and proof. |
 | **Turn** | One prompt through to the point where the agent stops. The prompt can come from the operator, a schedule, or a resumed context. This is the same thing Claude Code and the OpenAI Agents SDK (software development kit, a library for building agents) call a turn. |
 | **Step** | One model call or one tool call inside a turn. There are exactly two kinds of step, and no others. |
 | **Model call** | One request to a model and the model's response. It carries usage counted by token class and a cost. OpenTelemetry (an open standard for activity data) calls this an inference span. |
@@ -112,7 +113,7 @@ This document uses each name exactly as defined here.
 | **Context record** | The protocol's immutable record (`ContextRecord`), one that cannot change once written. It holds what an agent or a person asserts, learns, proposes, or decides. There are twelve kinds. |
 | **Steering** | Published directive and knowledge records that reach an agent during a run. |
 | **Context PR** | A pull request (PR, a proposed change submitted for review) on the workspace repository. It proposes a change to steering. |
-| **Governed action** | One top-level kernel call that passed IAM and the other gates, ran its handler, and wrote an audit record. The kernel is the system's core, a gate is a check a call must pass, and an audit record is a log entry of what happened. This is the billable unit (ADR-052). Invoices and the UI (user interface) show it as **action**. A governed action is something *Oxagen enforced*. A tool call is something *an agent did*. The two overlap only where an agent's tool call went through the tool gateway. A harness-native tool call under the harness tier is a tool call but not a governed action. Oxagen observed it but did not gate it. A denied tool call is recorded but is not a governed action. Denials are free. Some things are governed actions but are not the worker's tool calls. These include a human granting a role, a Context PR merge, a repo sync, an approval decision, and a dod certificate settling. |
+| **Governed action** | One top-level kernel call that passed IAM and the other gates, ran its handler, and wrote an audit record. The kernel is the system's core, a gate is a check a call must pass, and an audit record is a log entry of what happened. GAU billing counts it (§12.1): `resolve_approval` is the only billable governed action, and membership writes are free. Invoices and the UI (user interface) show it as **action**. A governed action is something *Oxagen enforced*. A tool call is something *an agent did*. The two overlap only where an agent's tool call went through the tool gateway. A harness-native tool call under the harness tier is a tool call but not a governed action. Oxagen observed it but did not gate it. A denied tool call is recorded but is not a governed action. Denials are free. Some things are governed actions but are not the worker's tool calls. These include a human granting a role, a Context PR merge, a repo sync, an approval decision, and a dod certificate settling. |
 | **Enforcement tier** | What Oxagen could enforce on a run in practice. The tiers are `gateway`, `harness`, and `observe`. |
 | **Replay grade** | The strongest thing a person can do with a run's recording. The grade comes from gaps in how complete the recording is. The grades are `inspect`, `view`, `fork`, and `retry`, ordered weakest first (§8.4). |
 | **Delivery mode** | The boundary where a steer (one steering message) or a message enters a run. The modes are `next_step` (the default), `interrupt`, and `turn_boundary` (§7.3). |
@@ -165,7 +166,7 @@ This document uses each name exactly as defined here.
 - **Promoter.** Collects records across runs, produces proposals, opens Context PRs, and records promotion events when a Context PR merges. A Context PR is a pull request, a proposed change that reviewers approve before it merges.
 - **Archiver.** Seals archive segments, compacts frame rows older than the hot window (the recent period kept in the hot table for fast queries), and enforces retention rules.
 - **GitHub App.** Binds repositories, creates Context PRs, runs checks, handles merges, and re-indexes after changes.
-- **DoD settle.** The one service with an opinion about done. It registers locked sets, keeps the hidden checks, re-runs `decide()` on submitted evidence, binds the outcome to the sealed attempt, signs the certificate and meters `dod.held` (§8.6). It executes nothing.
+- **DoD settle.** The one service with an opinion about done. It registers locked sets, keeps the hidden checks, re-runs `decide()` on submitted evidence, binds the outcome to the sealed attempt, signs the certificate and records the governed action `dod.held` (§8.6). It executes nothing.
 - **Model layer.** The one path for every model call Oxagen makes on its own behalf (the reflector, the promoter, the dod drafter, and the run namer). Calls route by tier through OpenRouter (§4.5), a service that forwards model calls to many vendors. Customer agents' model calls go through the model proxy, not this layer.
 
 ### 4.2 The two stores and what belongs where
@@ -190,7 +191,7 @@ This is not the mirror problem (two copies that drift apart), because every fact
 
 Platform engineers call this pattern GitOps: the desired state lives in git, a controller reconciles the live system to it, and drift is detected and reported. Oxagen is the controller. Steering and definitions are the desired state. The record and the wrapped agents are the live system.
 
-Neo4j is retired with the ontology engine (the scope review of 2026-09-14). The run record was the reason a second datastore existed once the ontology went; it is a set of narrow tables with a hot window, and Postgres carries it at the wedge's volume with room to spare (§15). ClickHouse is retired too. Its two jobs, append-only trace rows and spend analytics, are covered by frame rows (for the hot window) plus rollups. One store of truth for the run record, with no mirror copy to keep in sync.
+The target retires Neo4j with the ontology engine. Neo4j stays through rev1, and its retirement ADR is written after the witness lane lands (2026-09-15, maintainer decision, §20). The run record was the reason a second datastore existed once the ontology went; it is a set of narrow tables with a hot window, and Postgres carries it at the wedge's volume with room to spare (§15). ClickHouse is retired too. Its two jobs, append-only trace rows and spend analytics, are covered by frame rows (for the hot window) plus rollups. One store of truth for the run record, with no mirror copy to keep in sync.
 
 ### 4.3 Language and runtime
 
@@ -198,11 +199,9 @@ TypeScript on Node runs the control plane (the part that sets and enforces rules
 
 ### 4.4 Onboarding, and Oxagen's own model calls
 
-There is no in-app agent. The scope review of 2026-09-14 cut it: a chat panel sells nothing, it needed a second engine container in every deployment, and every question it could answer is a page in Mission Control. Configuration is the same agent tools a person clicks (§6, Appendix E). Explanation is the record: a chain of links to frames, records and commits, never a summary. Stella stays where it belongs, on the customer's machine as a wrapped agent.
+The in-app agent is in scope. The scope review of 2026-09-14 proposed cutting it, and the maintainer kept it the same day ("dont cut the in app agent"). It opens as a flyout from the sidebar, as merged into the mockups repository in PR #1; the bottom dock on the `small-approvals-bottom-dock-scenarios` branch is not adopted (2026-09-15, maintainer decision, §20). Each of its turns is a run of its own, and it acts through the same agent tools a person clicks (§6, Appendix E), so what it does passes IAM and lands in the record like an action taken on a page. The $5 signup grant in `create_org` funds its platform balance, and credit packs (`purchase_credits`) top it up (§12.10). Configuration is the same agent tools a person clicks. Explanation is the record: a chain of links to frames, records and commits. Stella stays on the customer's machine as a wrapped agent.
 
-> **2026-09-15, maintainer decision.** The shell keeps the sidebar flyout: the in-app agent opens from the sidebar, as merged into the mockups repository in PR #1. The bottom dock on the `small-approvals-bottom-dock-scenarios` branch is not adopted. Credit packs stay as the in-app agent's top-up (§12.10). The paragraph above predates this decision; where the two disagree about the shell, the decision holds.
-
-Oxagen still makes model calls on its own behalf: the reflector (§9.1), the promoter's rationale and Context PR bodies (§9.2), the dod drafter (§8.6), and the run namer that writes `run.name` and `run.summary` from the frames. Every one of them goes through the model layer (§4.5), runs under a service principal, and is a frame in a run of its own, so its cost is accounted like everything else.
+Oxagen also makes model calls on its own behalf: the reflector (§9.1), the promoter's rationale and Context PR bodies (§9.2), the dod drafter (§8.6), and the run namer that writes `run.name` and `run.summary` from the frames. Every one of them goes through the model layer (§4.5), runs under a service principal, and is a frame in a run of its own, so its cost is accounted like everything else.
 
 **Onboarding is gated, and it is three steps.** A new organization does not see the app. It sees one screen with three steps: (1) name the organization, (2) wrap an agent, with one click for Claude Code or Codex (the installer, §7.2) or with the five-line `oxagen.agent.wrap({})` snippet for an SDK agent, and (3) start a run. The full app unlocks the moment the first frame from that agent reaches Oxagen. The operator then lands on Fleet looking at their own run. That run is also the installer's smoke test, so there is one path, not two. The installer reads the git remote of the directory it ran in, so binding the main repo is one click.
 
@@ -766,11 +765,11 @@ An agent cannot finish until its definition of done says so. The full design is 
 
 **One pure function decides.** At every Stop the harness collects evidence (the set as locked, the digest of the file on disk, a result per executable check with the sha256 of what it produced, the usage counters from the tool log, the denials, the signatures) and calls `decide(evidence)`. It has no clock, network, filesystem or model. Three verdicts: **HELD** (every executable check passed, no tool denied, budget held, no human check outstanding), **PENDING** (executable checks passed, a signature outstanding) and **BROKEN**, with a closed list of eight reasons: `CHECK_FAILED`, `TOOL_DENIED`, `BUDGET_EXCEEDED`, `ATTEMPTS_EXHAUSTED`, `LOCK_MISMATCH`, `EVIDENCE_INVALID`, `HUMAN_PENDING`, `HARNESS_ERROR`. A timeout, crash or missing result is `HARNESS_ERROR` and never a pass. Adding a reason means amending the ADR.
 
-**Block or settle.** BROKEN with attempts left blocks the stop; the agent sees the failing ids and keeps going. Otherwise the evidence is submitted. Oxagen never runs a check (ADR-043): the settle handler re-runs `decide()` on the same evidence, checks the lock against what was registered, binds the outcome to the run ledger's sealed attempt and its stream digest, signs the certificate (`dodc_…`) with the org key, stores it, and meters one governed action, `dod.held`, for HELD. A PENDING run becomes HELD on `oxagen dod sign`, which adds the signature to the evidence and decides again.
+**Block or settle.** BROKEN with attempts left blocks the stop; the agent sees the failing ids and keeps going. Otherwise the evidence is submitted. Oxagen never runs a check (ADR-043): the settle handler re-runs `decide()` on the same evidence, checks the lock against what was registered, binds the outcome to the run ledger's sealed attempt and its stream digest, signs the certificate (`dodc_…`) with the org key, stores it, and records one governed action, `dod.held`, for HELD. `dod.held` is not billable (§12.1). A PENDING run becomes HELD on `oxagen dod sign`, which adds the signature to the evidence and decides again.
 
 **What a held dod warrants.** That the submitted evidence decides to HELD under the locked set, that the lock matches what was registered before the run, that the certificate is bound to the sealed attempt, and that the org key signed it. Anyone with the evidence and `decide()` can recompute the verdict. It does not warrant that the set was the right set, that the developer's harness was not tampered with (the same trust the run ledger already places in the engine build digest), or that the outcome was worth money. Replay in a cloud sandbox is a later tier and a deliberate exception to ADR-043; it is not in this spec.
 
-**Where it shows.** Every run carries its verdict as a badge shaped by state (double border held, dashed pending, single broken, dotted while locked and running). The Run page has a Done tab: the verdict and its reasons, the certificate and what it binds to, the checks with their evidence digests, the hidden checks that ran, the budget from the tool log, and every Stop. Fleet has a Done column, a tile counting sealed runs whose checks held, and counts outstanding signatures as waiting on a human. Billing prices the held run (§12.1).
+**Where it shows.** Every run carries its verdict as a badge shaped by state (double border held, dashed pending, single broken, dotted while locked and running). The Run page has a Done tab: the verdict and its reasons, the certificate and what it binds to, the checks with their evidence digests, the hidden checks that ran, the budget from the tool log, and every Stop. Fleet has a Done column, a tile counting sealed runs whose checks held, and counts outstanding signatures as waiting on a human. Billing reports held runs as a figure beside the GAU meter (§12.1).
 
 **Where it lives.** Two packages (`packages/dod`, pure: schema, reasons, verdict, lock, drafting prompt; `packages/dod-harness`, beside the agent, shipped inside the CLI, never imported by the API), four capabilities (`dod.draft`, `dod.lock`, `dod.settle`, `dod.sign`), two tables (`dod.dod_sets`, `dod.dod_certificates`, Appendix A.11), three hook lines in `.claude/settings.json`, and one CLI command (`oxagen dod hook|new|lock|run|sign|status`). The drafting model is recorded on the set and is never the model running the task.
 
@@ -866,7 +865,7 @@ Published records reach agents three ways, all recorded:
 
 ## 11. The code graph
 
-Earlier drafts of this specification described a dynamic, customer-extensible ontology inferred from ingested data, browsable and queryable in plain English, stored in Neo4j. It does not ship, and neither does the datastore it needed. What remains is the part the witness author reads and the toolbelt policy cites: a fixed, built-in graph of each workspace's main repository, kept in Postgres and kept current by the GitHub App.
+Earlier drafts of this specification described a dynamic, customer-extensible ontology inferred from ingested data, browsable and queryable in plain English, stored in Neo4j. It does not ship. Neo4j, the datastore it needed, stays through rev1 and is retired by an ADR after the witness lane (§4.2). What remains is the part the witness author reads and the toolbelt policy cites: a fixed, built-in graph of each workspace's main repository, kept in Postgres and kept current by the GitHub App.
 
 ### 11.1 What the graph holds
 
@@ -920,29 +919,37 @@ Confidence is assigned by how the reference was resolved. `high` means a literal
 **Live schema drift.** Where a Postgres connection is configured for the database the code declares, Oxagen links declared `Table` rows to live tables by name. It then compares columns, types, and indexes. Drift is any gap between what the code declares and what the database has: code references a column the database does not have, a migration is not applied, or a table has nothing referencing it. Drift is offered to the findings job.
 
 **What this buys the governor.** With this layer, the toolbelt policy (§6.12) can say what no static allowlist can. It can deny, or route to approval, any tool call whose resolved effect is a write to a table the customer has classed as sensitive (money, personal data, regulated), whichever code path performs it. It can require an approval when a change touches a symbol that writes a table in that class. It can show a CIO, per agent and per run, which tables and buckets the agent's work reached, with the evidence.
-## 12. Cost: accounted to the token, attributed to the operator, priced on the proven run
+## 12. Cost: accounted to the token, attributed to the operator, priced in governed action units
 
 ### 12.1 What is tracked, and what is priced
 
 Two different things are tracked, and they are kept apart on purpose:
 
 - **Customer spend**: the money the customer pays to model and tool providers. Oxagen measures it per frame and adds it up into rollups (a rollup is a total built from smaller records). This is a FinOps feature (FinOps is the practice of tracking and managing cloud and AI spend). It is billed at zero (ADR-052). Matching it to the cent against provider statements was cut by the scope review; every figure carries its basis instead (`gateway_observed`, `client_attested`, `estimated`), and the Spend page never claims more than the basis allows.
-- **Oxagen revenue**: priced on one thing, the **proven run**, a run whose definition of done held (§8.6). You pay when the work is verified. Runs, governed actions and retained evidence are reported as secondary meters so the price can move later without rewriting the meter.
+- **Oxagen revenue**: priced in **governed action units** (GAUs) on one price list, the GAU billing of Oxagen ADR-055 (maintainer decisions of 2026-09-14, reaffirmed 2026-09-15). One billable governed action is one GAU. `resolve_approval` is the only billable governed action. Membership writes are free, and every other governed action, `dod.held` included, is recorded in the ledger and not billed. Proven spend (§12.8) and held runs (§8.6) are report figures on Spend and Billing, and nothing is priced per run.
 
-| | Price |
+| Tier | Price | GAU included each month | Evidence included | Past the allowance |
+|---|---|---|---|---|
+| Free | $0 | 5,000 | 30 days | refused until the organization saves a card or the next month opens; with a saved card, auto top-up at list |
+| Build | $199 a month | 50,000 | 12 months | auto top-up at list |
+| Scale | $999 a month | 300,000 | 12 months | auto top-up at list; eligible for invoice billing |
+| Enterprise | negotiated | negotiated | 12 months, extensible | invoice billing |
+
+| Term | Price |
 |---|---|
-| Free, every organization | every governance feature on, unlimited runs, thirty days of evidence, three seats |
-| Proven runs 1 to 10,000 a month | $0.30 per proven run |
-| Proven runs 10,001 to 100,000 | $0.20 per proven run |
-| Above 100,000 | $0.15 per proven run |
-| Evidence retention | 13 months included on paid plans, then $0.10 per GB-month |
+| List rate | $5 per 1,000 GAU (5,000 micro-USD per GAU), the rate every published tier carries |
+| Blocks | 5,000 GAU at $25, bought through Stripe Checkout or by auto top-up |
+| Volume bands, by annual volume | $5 per 1,000 for the first 1M, $4 from 1M to 5M, $3 from 5M to 25M, $2 above 25M committed |
+| Enterprise | negotiated only (2026-09-15, maintainer decision). Each contract is a `billing.contract_terms` row carrying its own rate, block size and monthly allowance; no enterprise plan exists in Stripe or in `SUBSCRIPTION_PLANS`. A contract covers committed use, a dedicated data plane or behind-the-firewall deployment, support with an SLA, and invoicing |
 | Tokens Oxagen buys on the customer's behalf (`platform` funding source, §4.5) | at cost, no markup, capped per organization |
-| Enterprise | negotiated only (2026-09-15, maintainer decision). Each contract is a `billing.contract_terms` row; no enterprise plan exists in Stripe or in `SUBSCRIPTION_PLANS`. A contract covers committed use, a dedicated data plane or behind-the-firewall deployment, support with an SLA, and invoicing. No feature is gated on the enterprise license: every feature, IAM and SOC 2 controls included, is on for every tier |
-| Onboarding discount | 20 percent off usage for 12 months when the customer converts to a paid plan within 7 days of the first run. Annual prepayment earns a further 20 percent |
 
-What counts: a sealed run whose certificate says HELD, metered as the governed action `dod.held` the day it settles. A PENDING run is metered the day it is signed. BROKEN runs, runs Oxagen halted before any model call, and witness runs are free. The customer never pays for Oxagen saying no, or for Oxagen proving work. Payment is by card, monthly, with no minimum below enterprise, and the customer can cancel any time. Stripe holds plans, customers, and invoices. Oxagen holds the meter.
+**Every feature on every tier.** No feature is gated on a tier or on the enterprise license (2026-09-15, maintainer decision 3). IAM, SOC 2 controls, the definition of done, the in-app agent and the hosted witness runner are on for Free, Build, Scale and Enterprise alike. Tiers differ in price, allowance, included evidence and billing mode.
 
-Why these numbers: the reference customer (50 agents, 5,000 sealed runs a month, about 3,200 of them held) pays about $960 a month. That is roughly 5 to 10 percent of its token spend, an amount a team lead can approve without procurement. A large division at 50,000 sealed runs a month pays about $8,000 a month, a normal governance line. Oxagen's direct cost per run (storage, reflection, and amortized witness authoring on paid tiers) is one to four cents; at $0.15 and four cents the margin on the top tier is 73 percent, above 80 percent below it, and the margin claim is stated at that volume rather than everywhere. The free tier is the whole product, limited by retention and seats, never by features or volume, so a ten-developer team on Claude Code installs in sixty seconds and stays free until keeping evidence longer than a month becomes a governance decision. That is a decision a team lead makes, not a volume accident.
+**The meter.** Each organization has one bucket a month (`billing.gau_buckets`), and its remaining units are included + purchased + carried − used. At remaining ≤ 0 a prepaid organization's auto top-up charges the saved card for `auto_topup_blocks` blocks; when auto top-up cannot run, further governed actions are refused until a card is saved or the month renews. Purchased and carried units roll into the next month, and included units do not. A platform operator approves invoice billing (`approved_for_invoice_billing`); an invoice-billed organization is never refused for lack of units, and its overage is invoiced at period end or on an interim invoice at `invoice_gau_max` (§12.10). Every block purchase, top-up and invoice is a `billing.gau_settlements` row that records the rate it charged. The Billing page prints the organization's contracted rate: the `billing.contract_terms` row in effect, else its plan's terms.
+
+**The in-app agent's credits.** The $5 signup grant funds the in-app agent's platform balance, and credit packs (`purchase_credits`) top it up (§4.4, §12.10). Credits pay for the in-app agent's model use and sit outside the GAU meter.
+
+Payment is by card, or by invoice for an approved organization, and a subscription can be cancelled any time. Stripe holds customers, subscriptions and invoices; Oxagen holds the meter and mirrors invoices in `billing.invoices`. The 7-day onboarding offer is deferred (§20). The figures are the published terms `billing.plans` carries, set on 2026-09-14 in `macanderson/oxagen` `docs/specs/governed-action-metering.md` §4. Oxagen's marginal cost per GAU is under $0.001, so the margin exceeds 85 percent at every band.
 
 ### 12.2 Price book
 
@@ -1047,10 +1054,11 @@ Each finding names the level it applies to (run, agent, operator, workspace) and
 
 ### 12.10 Billing decisions of 2026-09-15
 
-Maintainer decisions, dated 2026-09-15. They bind the billing build in `macanderson/oxagen`, which meters governed action units (GAUs) against a monthly allowance, sells prepaid GAU blocks, and bills approved organizations by invoice. The proven-run price list in §12.1 and that GAU billing are not yet one price list. Each row states the behaviour the build ships.
+Maintainer decisions, dated 2026-09-15. They bind the GAU billing of §12.1 as `macanderson/oxagen` builds it: a monthly allowance, prepaid GAU blocks with auto top-up, and invoice billing for approved organizations. §12.1 and this table are one price list. Each row states the behaviour the build ships.
 
 | # | Decision | Lands in |
 |---|---|---|
+| Reaffirmed | The GAU pricing of 2026-09-14 is the one price list (§12.1). Proven spend is a report figure and carries no price. | §0 row 12, §12.1, §18, Billing page |
 | 2 | Credit packs stay as the in-app agent's top-up, and `purchase_credits` is not retired. GAU blocks remain the governed-action product. | Billing page, App. E |
 | 3 | Enterprise is negotiated only: a `billing.contract_terms` row. `enterprise-v2` is removed from `SUBSCRIPTION_PLANS` and from Stripe. No feature is gated on the enterprise license; every feature, IAM and SOC 2 controls included, is on for every tier. | §6.3, §12.1, App. A.6, App. A.8, Billing page |
 | 5 | When invoice billing is switched off for an organization, its `overage_invoiced_gau` is added to `purchased_gau`. The invoice is the purchase. | Billing page |
@@ -1121,7 +1129,7 @@ Mission Control has nine pages: six at workspace scope and three at organization
 | **Steering** | Published records, proposals, and open Context PRs | open Context PR, review |
 | **Spend** | Findings ranked by the money at stake. Cost by operator, agent, model, provider key, and task. Proven spend versus unproven spend, and the productive ratio. Cache hit rate. Wasted spend. Budgets | act on a finding, set budget, export statement |
 | *(org)* **Organization** | People, roles, invitations, workspaces, model funding and routes, the data plane, and API keys | invite, change role, create workspace (an in-app form, rev1), set funding, set route, create, rotate and revoke an API key (rotation ships in rev1) |
-| *(org)* **Billing** | Proven runs this period, the secondary meters, the plan, and invoices | change plan (Build or Scale through Stripe Checkout, §12.10), buy credit packs for the in-app agent |
+| *(org)* **Billing** | The plan, GAU used against the month's allowance, blocks and auto top-up, the contracted rate, the in-app agent's credits, and invoices (§12.1) | change plan (Build or Scale through Stripe Checkout, §12.10), buy GAU blocks, set auto top-up, buy credit packs for the in-app agent |
 | *(org)* **Audit** | Control-plane audit events, incidents, receipts, exports, keys, and retention | export, rotate |
 
 Interaction rules: every badge that describes trust (enforcement tier, replay grade, attestation, cost basis) shows the recorded value and nothing stronger. Every number that is money shows its basis. Every explanation is a chain of links to frames, records, and commits, not a summary.
@@ -1158,17 +1166,17 @@ This table lists what carries over from the current `oxagen` repository (and its
 |---|---|
 | The kernel (the core that runs every call) and its `invoke()` pipeline, the registry, verb-first naming, and the manifest and parity gates. One rename: contracts and agent tools are both called agent tools now | 229 contracts. 68 agent tools in the wedge and 86 for the full product, listed in Appendix E |
 | Tenancy seams (`runInTenantScope`, `withTenantDb`), the RLS manifest generator (RLS is row-level security, Postgres rules that hide one tenant's rows from another), and the startup guards | `app.rls_bypass`, six policy classes, and nullable-workspace tables |
-| The organization and workspace model, immutable namespaces, and the Better Auth binding | About 110 tables across 20 schemas. 35 tables in 9 schemas remain, listed with their columns in Appendix A |
+| The organization and workspace model, immutable namespaces, and the Better Auth binding | About 110 tables across 20 schemas. 51 tables in 10 schemas remain, listed with their columns in Appendix A |
 | IAM principals (IAM is identity and access management, the rules for who may do what), the delegation ceiling, resource-scope ceilings, and the three live resolver rules | Dead condition language, and the enterprise-tier "allow everything" bypass |
 | The wrapper (today's tacho package) and its parts: enrollment, device keys, the collector, hooks, the policy bundle, commands, approval tokens, incident kinds, and the event vocabulary | ClickHouse `tacho_events`, and all of ClickHouse |
 | The run ledger invariants, the rules that must always hold: dense seq, digest chain, seal fence, and one-shot finalization | Postgres as the run store. The store is the hot table plus segments |
 | The run-evidence protocol consumer, pinned fixtures, and SDK types with a Zod drift check | Vendored protocol drafts |
 | The two-axis memory concepts: confidence versus enforcement, decay, and citation pressure | The `engram` package, the `rules` engine, and the `:AgentMemory` label. Records replace them |
 | The GitHub App and its repository-linking flow | The workspace schema registry entirely: its validation, versions, pin, diff, and export layout, the `schema_registry.*` Postgres tables, and the connectors and ingestion validation that fed it (§11) |
-| The crypto envelope (envelope encryption: a data key encrypts the content, and a master key encrypts that data key), the storage adapter, and notifications | The `content`, `cms`, `chat`, `workflow`, `eval`, `environments`, `plugin`, and `mcp` registry tables |
-| Nothing from billing. Billing is rebuilt small (§12.1): Stripe for plans and invoices, one usage meter per run, and budgets | The entire billing package: credits, the metering gate, the rate card (the price list for each unit of usage), the governed-action meter, reseller tables, Stripe sync jobs, and spend dashboards as a revenue line |
+| The crypto envelope (envelope encryption: a data key encrypts the content, and a master key encrypts that data key), the storage adapter, and notifications | The `content`, `cms`, `workflow`, `eval`, `environments`, `plugin`, and `mcp` registry tables |
+| The GAU billing of ADR-055 (§12.1): plans and negotiated contract terms, monthly GAU buckets and the settlement ledger, auto top-up and invoice billing, credits for the in-app agent, the Stripe invoice mirror, and spend budgets (App. A.8) | The rate card tools (`get_rate_card`, `preview_action_cost`, `get_evidence_retention` retire at cutover), reseller tables, and spend dashboards as a revenue line |
 | Data planes (ADR-042) | Per-store singletons |
-| The model layer of ADR-053: one funding source per organization, keys enveloped and never returned, every call a frame. The in-app agent that ADR-053 also described is cut (§4.4) | Running any agent loop inside Oxagen's own process. There is no engine container and nothing for one to do |
+| The model layer of ADR-053: one funding source per organization, keys enveloped and never returned, every call a frame. The in-app agent that ADR-053 also described carries over, opening as a flyout from the sidebar (§4.4) | Running a customer's agent loop inside Oxagen's own process |
 | The web-app 2.0 information architecture (workspace, org, and account scopes) | 70 page files. Ten pages remain, mapped in Appendix F |
 
 The target Postgres schemas are `auth`, `org`, `wrk`, `iam`, `tools`, `prices`, `cost`, `billing`, `control` (commands, approvals, archive manifests, and audit), `dod`, and the run record's `run`, `ctx` and `code`. Everything else is gone.
@@ -1183,7 +1191,7 @@ Each milestone has an acceptance test that a customer could run. The scope revie
 | **M0 Foundations** (weeks 1–4) | The repo, the kernel, tenancy, RLS (row-level security) with role-based system access, org and workspace creation including repo binding, IAM, and the tool registry. | A cross-tenant probe (a test that tries to reach one tenant's data from another tenant) finds nothing. A workspace cannot be created without a main repo. A second repo can be linked and unlinked. |
 | **M1 Gateway** (weeks 3–8) | The model proxy. The tool gateway with schema validation. Run tokens. Frames, chain, seal, and attestation in Postgres. The Fleet and Run pages with render replay. The model layer with OpenRouter routes and funding sources. The three-step onboarding gate and the installers. | The gateway wraps Stella and Claude Code. A run can be halted mid-loop from the UI. An exported run can be verified offline. A new organization reaches Fleet with its own first run in under a minute. |
 | **M2 Control** (weeks 7–11) | Bundles, commands, approvals with tokens, and budgets. The full call pipeline with taint and receipts. The credential broker with at least token exchange and restricted keys. Mandates and the ledger. Kill switches. Cedar policy with tests. The Tools page. Cost records with normalized token classes, the price book, and rollups to operator level. The findings job and the Spend page. | A consequential call that exceeds its mandate is denied, and the ledger does not change. An approval token cannot be replayed. A finding's saving reproduces from the frames it cites. |
-| **M3 Done** (weeks 9–13) | The definition of done, in its five gated phases (§8.6, `dod-spec.md`): the language; the harness and CLI; the cloud (contracts, handlers, tables, routes, the `dod.held` governed action, signing); drafting and holdouts; humans and templates. Billing on the proven run. | In this repository, a scripted Claude Code session with the prompt "add a failing test, then make it pass" is blocked once with `CHECK_FAILED` and allowed on the second stop with HELD; the certificate's stream digest equals the sealed attempt's; a governed action `dod.held` is in the ledger; an agent that satisfies the visible set by editing tests is rejected by a hidden check; a PENDING run becomes HELD after a signature. |
+| **M3 Done** (weeks 9–13) | The definition of done, in its five gated phases (§8.6, `dod-spec.md`): the language; the harness and CLI; the cloud (contracts, handlers, tables, routes, the `dod.held` governed action, signing); drafting and holdouts; humans and templates. | In this repository, a scripted Claude Code session with the prompt "add a failing test, then make it pass" is blocked once with `CHECK_FAILED` and allowed on the second stop with HELD; the certificate's stream digest equals the sealed attempt's; a governed action `dod.held` is in the ledger; an agent that satisfies the visible set by editing tests is rejected by a hidden check; a PENDING run becomes HELD after a signature. |
 | **M4 Prove** (weeks 11–15) | The witness runner. The witness author, with the test-flip and build oracles first. The airlock at `L0`. Tamper exclusion, proof stamping, proven spend in the Spend page, and the witness as a dod check. | A witness the agent never saw proves a PR opened by a wrapped agent. The agent's frames contain only pass or fail. A PR that edits the test harness is recorded as tampered and its dod is BROKEN. The proof verifies offline. |
 | **M5 Teach** (weeks 12–15) | The records endpoint, the reflector, the promoter, Context PRs through the GitHub App, and steering delivery. | An agent learns something. The lesson becomes a Context PR. Merging it changes the next run's context, and the frame shows the change. |
 
@@ -1195,7 +1203,7 @@ The milestones above are the build order. The phases below are the business orde
 
 | Phase | What ships | Trigger to leave |
 |---|---|---|
-| **The wedge** | Tenancy and identity. The gateway (the model proxy, the tool gateway, wrapping for Stella, Claude Code, Codex, and SDK agents, and one-click installers on three platforms). The toolbelt with approvals, mandates, and kill switches. Runs and frames with render replay. Main and linked repos. Records, Context PRs, and agent definitions in git. Spend accounted to the operator, with findings. The GitHub link with issues and the code graph. The definition of done and the proven-run meter. The witness runner with the test-flip oracle. The free tier and gated onboarding. Milestones M0 to M5. | Customer 1 in production and paying. Five paying accounts opens the next phase. |
+| **The wedge** | Tenancy and identity. The gateway (the model proxy, the tool gateway, wrapping for Stella, Claude Code, Codex, and SDK agents, and one-click installers on three platforms). The toolbelt with approvals, mandates, and kill switches. Runs and frames with render replay. Main and linked repos. Records, Context PRs, and agent definitions in git. Spend accounted to the operator, with findings. The GitHub link with issues and the code graph. The definition of done. GAU billing (§12.1). The witness runner with the test-flip oracle. The free tier and gated onboarding. Milestones M0 to M5. | Customer 1 in production and paying. Five paying accounts opens the next phase. |
 | **Series A** | What a Fortune 500 security review asks for, and only when one asks. More oracles for the witness. Dedicated data planes and running behind the firewall (§4.6). SSO and SCIM. Two-person mandates. Legal holds and crypto-shredding. Provider reconciliation. A replay tier for the definition of done that re-executes checks in a cloud sandbox. Outbound events (§7.7) and agent messaging (§7.6). Fork replay and bisect. Multicurrency and the first non-English locales. | Renewal of the first annual contracts. |
 | **Dominate** | The in-firewall installer for owned models. Sovereign and regional planes. A public registry of conformant providers and tool servers. Agent definitions, dod templates and policy packs shared across organizations and by industry. Federation between organizations. Further locales. | None. Growth. |
 
@@ -1211,7 +1219,7 @@ The wedge ends when Customer 1 is in production, not on a date. M4 produces the 
 | Steering format | `.oxagen/rules`, in the context-record TOML format that Stella implements. Stella symlinks to it | The directory name is fixed. If a second agent needs its own path, it gets a symlink the same way Stella does |
 | Protocol trace journal | Export a `contextgraph-trace` journal per run and pass its oracles | The journal is a sketch (`0.1`). Pin its fixtures by commit, like the frame fixtures |
 | Rolling model aliases | Tiers point at `z-ai/glm-latest` and `z-ai/glm-flash-latest`. Frames record the concrete model, meaning the exact model id behind the alias | If an alias flips to a model with a different price or behavior mid-month, the price book flags it by concrete id. An organization can pin a model |
-| Billable unit | The proven run: `dod.held`, one governed action per held certificate. Runs, governed actions and retention are reported as secondary meters | The price has moved three times in a month. This one is held for two quarters. If small runs subsidize large runs in practice, price the governed-action meter, which is already reported, rather than reprice the run |
+| Billable unit | The governed action unit: one billable governed action is one GAU, and `resolve_approval` is the only billable governed action (§12.1). Proven spend and held runs are report figures | GAU pricing was set on 2026-09-14 and reaffirmed on 2026-09-15. Making another governed action billable is a maintainer decision, and the price list stays as it is |
 | Witness disclosure grain | `L0` (pass or fail only) by default. The disclosure grain is how much detail a witness reveals about a proof. Stella's own default is `L3` for convergence speed | If `L0` measurably slows convergence for a customer, the workspace can raise the grain as a recorded policy decision. The record keeps the grain per proof, so a training set can be filtered by it |
 | Witness runner isolation | A separate execution plane (the witness runs on its own infrastructure), separate credentials, and no path from the worker's run | Any probe from a worker toward witness storage is a denied tool call and an incident. The proof frame carries the runner's attestation, so isolation is verifiable, not asserted |
 | Hidden checks | Kept cloud-side at lock time, sent to the harness only from the Stop hook | If a customer's harness cannot reach the cloud at Stop, the run settles with the visible set only and the certificate says so; a hidden check is never assumed to have passed |
@@ -1222,7 +1230,7 @@ The wedge ends when Customer 1 is in production, not on a date. M4 produces the 
 ---
 ## 19. Demo Wow! Scenarios
 
-Status: `complete` (2026-09-14; W7 and the assistant half of W11 were cut with the ontology and the in-app agent, W14 added with the definition of done). The shell's sidebar flyout is kept by the maintainer decision of 2026-09-15 (§20).
+Status: `complete` (2026-09-14; W7 was cut with the ontology, the assistant steps of W11 were removed from the mockups, and W14 was added with the definition of done). The in-app agent is in scope (2026-09-14, maintainer decision), and its shell is the sidebar flyout (2026-09-15, §20).
 
 Each scenario is one moment an investor or a customer should remember. The mockups are the app, screen for screen, in the house brand. The prompts that produced them are in `demo-mockup-prompts.md`, beside this document. Every scenario is a guided walk inside `mockups/missioncontrol.html` and a story in the Storybook catalog.
 
@@ -1239,7 +1247,7 @@ Each scenario is one moment an investor or a customer should remember. The mocku
 | W10 | The CIO's console: who can do what, where data lives, what happened, what can be proven, behind the firewall | Organization, Audit | [The CIO's console](https://claude.ai/code/artifact/403166f6-9216-4d23-86ac-bb3c2aa60b23) | mocked |
 | W11 | Whose account it is: security, preferences as governed actions, notifications that map to frame kinds, and a command menu that cannot find a tool outside the belt | Account dialog, notifications, command menu | [W11 mockup](https://claude.ai/code/artifact/317226a1-c2ff-43ce-a439-4a54f8b8288b) | mocked |
 | W12 | Coverage audit: every page and state mocked | all | [W12 audit](https://claude.ai/code/artifact/45c5e3f9-82f0-404e-ad69-b3279d84c649), [The Ten Pages](https://claude.ai/code/artifact/3fcf949a-c455-4efd-af36-1c2d1f13088e) | mocked |
-| W14 | Done means done: the locked set, one blocked stop, a held certificate, the hidden check that caught a gamed run, a signature that turns PENDING into HELD, and the proven run as the meter | Fleet (Done column, held tile), Run (Done tab), Billing | in `mockups/missioncontrol.html` | mocked |
+| W14 | Done means done: the locked set, one blocked stop, a held certificate, the hidden check that caught a gamed run, a signature that turns PENDING into HELD, and held runs reported on Billing | Fleet (Done column, held tile), Run (Done tab), Billing | in `mockups/missioncontrol.html` | mocked |
 
 **Page coverage.** Every row must carry at least one link before the section is complete.
 
@@ -1281,19 +1289,21 @@ The maintainer decided these items on 2026-09-15. A decision that changes produc
 | 12 | Invoice-billed organizations are suspended 5 days after an invoice is past due; metering continues while suspended; paying the full outstanding balance reactivates the organization. | §12.10, App. A.2, Billing page |
 | 13 | Fix `macanderson/oxagen#3029` (the org-only `create_workspace` REST mount fails before its handler), add an in-app create-workspace form, and ship the Spend lane including Fleet's Spend and Cache-hit tiles. | §14, App. E, Organization, Spend and Fleet pages |
 | 14 | The metering shadow period is skipped; the waiver is dated 2026-09-15. | operations |
-| 15 | Neo4j stays through rev1; the retirement ADR is written after the witness lane lands. §0 row 5 describes the store set after that retirement. | `macanderson/oxagen` |
+| 15 | Neo4j stays through rev1; the retirement ADR is written after the witness lane lands. §0 row 5 and §4.2 state the store set through rev1 and after that retirement. | §0 row 5, §2.2, §4.2, §11, `macanderson/oxagen` |
 | 16a | Dependabot re-pins (`macanderson/oxagen#2989`): compare what each pin resolves to, and add Dependabot ignore entries. | `macanderson/oxagen` |
 | 16b | The CI ticket-filing scripts retire (`macanderson/oxagen#2980`). | `macanderson/oxagen` |
 | 16c | Stella's `SharingScope` gains a `workspace` value; Oxagen steering records stay workspace-scoped. | Stella, `macanderson/oxagen` |
 | 16d | A forked run's grade seals when the fork's own attempt seals; the unreachable mint-at-fork path is deleted. | `macanderson/oxagen` |
 | Override | API key rotation ships in rev1. | App. E, Organization and API keys pages |
 | Confirmed | The agent-adopted defaults stand: `resolve_approval` is the only billable action and membership writes are free; `set_org_billing_terms` is operator-script only; action counters are dropped; the `billing.invoices` mirror is kept; settlement states as designed; steering team mode with N=3, M=2, confidence 0.7; verify-by-link auth, no SAML button, and `governance_mode` not asked at signup; the onboarding gate with the CLI installer and a provisional workspace, with the 7-day offer deferred; the seven-group permission catalogue; the agent definition in git and spend budgets in micros; the fixture adapter deleted; three notification events. | Organization page (membership writes); `macanderson/oxagen` |
+| Reaffirmed | The in-app agent stays in scope (2026-09-14, "dont cut the in app agent"). The $5 signup grant funds it (row 1), credit packs top it up (row 2), and the sidebar flyout is its shell (row 9). | §0 row 1, §1, §2, §4.4, §16, App. A.10, `scope-review.md` |
+| Reaffirmed | The GAU pricing of 2026-09-14 is the one price list: $5 per 1,000 GAU list, 5,000-GAU blocks at $25, Free with 5,000 GAU a month, Build at $199 with 50,000, Scale at $999 with 300,000, Enterprise negotiated (`billing.contract_terms`) with every feature on every tier, and volume bands of $5, $4, $3 and $2 per 1,000. Proven spend is a report figure and carries no price. | §0 row 12, §12.1, §12.10, §18, Billing page, `scope-review.md` |
 
 ---
 
 ## Appendix A. Postgres tables (target)
 
-Thirty-five tables in nine schemas in the wedge, thirty-seven for the full product (`cost.fx_rates` and `control.event_subscriptions` arrive in Series A), down from about 110 tables in 20 schemas today. This is the definitive list. A table not here does not exist.
+Fifty-one tables in ten schemas in the wedge, fifty-three for the full product (`cost.fx_rates` and `control.event_subscriptions` arrive in Series A), down from about 110 tables in 20 schemas today. This is the definitive list. A table not here does not exist.
 
 ### A.0 Conventions that apply to every table
 
@@ -1360,7 +1370,7 @@ Money is `bigint` micro-USD unless a `currency` column says otherwise. Secrets a
 | `slug` | citext | unique |
 | `namespace` | citext | 2 to 6 characters, unique, immutable; used in agent keys |
 | `status` | text | `active`, `suspended`, `deleted`. An invoice-billed organization is `suspended` 5 days after an invoice is past due; metering continues, and paying the full outstanding balance returns it to `active` (2026-09-15, maintainer decision, §12.10) |
-| `plan` | text | `free`, `team`, `enterprise` |
+| `plan` | text | `free`, `build`, `scale`, `enterprise`. Enterprise is negotiated: a `billing.contract_terms` row, with no Stripe plan (§12.1) |
 | `stripe_customer_id` | text | |
 | `display_currency`, `billing_currency` | text | ISO 4217 codes |
 | `default_locale` | text | BCP 47 tag |
@@ -1761,40 +1771,201 @@ Money is `bigint` micro-USD unless a `currency` column says otherwise. Secrets a
 | `invoice_id`, `invoice_line_ref` | text | |
 | `imported_at`, `import_digest` | timestamptz, text | |
 
-### A.8 `billing` (2 tables)
+### A.8 `billing` (16 tables)
 
-A negotiated enterprise contract is a `billing.contract_terms` row in the `macanderson/oxagen` billing schema; enterprise has no Stripe plan (2026-09-15, maintainer decision, §12.10).
+The columns follow `packages/database/src/schema/billing.ts` on the `app-rebuild` branch of `macanderson/oxagen`. A.0's conventions apply, with two differences: a table marked "no `public_id`" is internal and addressed by `org_id` or its own id, and Stripe-facing amounts are integer cents. A GAU rate is micro-USD per GAU.
+
+**`billing.plans`** (platform scope; the published terms of each tier)
+
+| Column | Type | Notes |
+|---|---|---|
+| `name` | text | |
+| `slug` | citext | unique |
+| `tier` | text | `free`, `build`, `scale`, `enterprise`. No enterprise plan is catalogued; an enterprise contract is a `billing.contract_terms` row (2026-09-15, maintainer decision, §12.10) |
+| `stripe_product_id` | text | |
+| `stripe_price_id_monthly`, `stripe_price_id_annual` | text | nullable |
+| `monthly_cents`, `annual_cents` | int | `annual_cents` nullable |
+| `included_credit_cents` | int | default 0 |
+| `included_seats` | int | default 1 |
+| `currency` | text | default `usd` |
+| `rate_per_gau_micros` | bigint | ≥ 0; 5,000 on every published tier |
+| `block_size_gau` | int | > 0; 5,000 on every published tier |
+| `included_gau_per_month` | int | ≥ 0; 5,000 Free, 50,000 Build, 300,000 Scale |
+| `features` | jsonb | |
+| `is_public` | boolean | default true |
+
+A check keeps `rate_per_gau_micros × block_size_gau` a whole number of cents, so a block prices without rounding.
+
+**`billing.contract_terms`** (class `org`; no `public_id`; a negotiated agreement)
+
+| Column | Type | Notes |
+|---|---|---|
+| `agreement_ref` | text | |
+| `currency`, `rate_per_gau_micros`, `block_size_gau`, `included_gau_per_month` | text, bigint, int, int | the same four terms and check as `billing.plans`; a contract replaces all four at once |
+| `effective_from` | timestamptz | |
+| `effective_to` | timestamptz | nullable; later than `effective_from` |
+
+At most one row per organization has `effective_to` null, and that row is the organization's terms. With no row in effect, the terms are the entitled subscription's plan, else Free. An operator writes the row; the app and `create_org` never do.
 
 **`billing.subscriptions`** (class `org`)
 
 | Column | Type | Notes |
 |---|---|---|
-| `stripe_subscription_id` | text | |
-| `plan`, `status` | text | |
-| `included_runs` | int | |
-| `overage_price_micros` | bigint | |
-| `retention_included_months` | int | |
-| `retention_price_micros_per_gb_month` | bigint | |
+| `plan_id` | uuid → `billing.plans` | |
+| `stripe_subscription_id` | text | unique |
+| `stripe_customer_id` | text | |
+| `status` | text | `active`, `past_due`, `canceled`, `trialing`, `unpaid`, `incomplete`, `incomplete_expired`, `paused`; one `active` row per organization |
+| `billing_interval` | text | `month`, `year` |
 | `current_period_start`, `current_period_end` | timestamptz | |
-| `runs_this_period` | int | |
-| `retained_gb` | numeric | |
-| `platform_micros_this_period` | bigint | |
-| `cancel_at` | timestamptz | |
+| `cancel_at_period_end` | boolean | |
+| `canceled_at`, `trial_end` | timestamptz | nullable |
+| `seat_count` | int | default 1 |
 
-**`billing.budgets`** (class `org`; `workspace_id` nullable)
+**`billing.payment_methods`** (class `org`)
 
 | Column | Type | Notes |
 |---|---|---|
-| `scope_kind` | text | `org`, `workspace`, `operator`, `agent` |
-| `scope_id` | text | |
-| `limit_micros` | bigint | |
-| `period` | text | `daily`, `monthly`, `rolling` |
-| `window_days` | int | rolling budgets |
-| `mode` | text | `hard`, `soft` |
-| `notify_at` | int[] | percentages |
-| `spent_micros` | bigint | running counter |
-| `period_key` | text | |
-| `breached_at` | timestamptz | |
+| `stripe_customer_id` | text | |
+| `stripe_payment_method_id` | text | unique |
+| `type`, `brand`, `last4` | text | |
+| `exp_month`, `exp_year` | int | |
+| `is_default` | boolean | default false |
+
+**`billing.invoices`** (class `org`; the Stripe invoice mirror, kept by the confirmed defaults of 2026-09-15, §20)
+
+| Column | Type | Notes |
+|---|---|---|
+| `subscription_id` | uuid → `billing.subscriptions` | nullable for one-off invoices |
+| `stripe_invoice_id` | text | unique |
+| `number` | text | |
+| `status` | text | `draft`, `open`, `paid`, `uncollectible`, `void` |
+| `amount_due_cents`, `amount_paid_cents`, `amount_remaining_cents` | int | |
+| `currency` | text | default `usd` |
+| `period_start`, `period_end` | timestamptz | |
+| `due_at`, `paid_at` | timestamptz | |
+| `hosted_invoice_url`, `invoice_pdf_url` | text | |
+
+**`billing.credit_balances`** (class `org`; one row per organization)
+
+| Column | Type | Notes |
+|---|---|---|
+| `balance_cents` | bigint | ≥ 0; one credit is one cent; a cached total of the lots |
+| `last_event_at` | timestamptz | |
+
+**`billing.credit_lots`** (class `org`; the credit holdings behind the in-app agent's balance)
+
+| Column | Type | Notes |
+|---|---|---|
+| `source` | text | `free_grant`, `subscription`, `purchase` |
+| `original_cents`, `remaining_cents` | bigint | 0 ≤ remaining ≤ original |
+| `granted_at` | timestamptz | |
+| `expires_at` | timestamptz | nullable (never expires); lots drain soonest-expiring first |
+
+**`billing.credit_ledger`** (class `org`; append-only; no `public_id`)
+
+| Column | Type | Notes |
+|---|---|---|
+| `delta_cents` | bigint | ≠ 0 |
+| `reason` | text | a `grant_*` reason is written once per reference |
+| `reference_type`, `reference_id` | text, uuid | |
+| `created_by_user_id` | uuid | |
+
+**`billing.org_billing_settings`** (class `org`; one row per organization; no `public_id`)
+
+| Column | Type | Notes |
+|---|---|---|
+| `stripe_customer_id` | text | unique |
+| `approved_for_invoice_billing` | boolean | default false; set only by a platform operator (`set_org_billing_terms`) |
+| `invoice_gau_max` | int | > 0, default 100,000; read only under invoice billing (§12.10) |
+| `auto_topup_enabled`, `auto_topup_blocks` | boolean, int | default true and 1; prepaid only; an Owner or Admin sets them |
+| `auto_reload_enabled`, `auto_reload_threshold_cents`, `auto_reload_amount_cents`, `auto_reload_payment_method_id`, `last_auto_reload_at` | boolean, bigint, bigint, text, timestamptz | credit auto-reload on the saved card |
+| `auto_reload_episode_key`, `auto_reload_episode_started_at` | text, timestamptz | the Stripe idempotency key of the reload in flight |
+| `meter_carry_micro_credits` | bigint | ≥ 0; fractional credits owed and not yet debited |
+| `low_balance_threshold_cents` | bigint | default 500 |
+| `assistant_spend_cap_cents` | bigint | default 2,000; the monthly cap on the in-app agent's tokens the platform key pays for; null is no cap |
+| `extended_evidence_retention_enabled` | boolean | default false |
+| `dunning_state` | text | `active`, `grace`, `suspended` |
+| `delinquent_since`, `grace_ends_at`, `suspended_at`, `last_dunning_notified_at` | timestamptz | |
+
+**`billing.gau_buckets`** (class `org`; one row per organization per month; no `public_id`)
+
+| Column | Type | Notes |
+|---|---|---|
+| `period_start`, `period_end` | timestamptz | unique with `org_id` on `period_start` |
+| `included_gau` | bigint | the terms' `included_gau_per_month` when the row was created |
+| `purchased_gau` | bigint | blocks bought this month through Checkout or auto top-up |
+| `carried_gau` | bigint | carried from last month: min(purchased + carried, max(0, remaining)) |
+| `used_gau` | bigint | GAU used this month |
+| `overage_invoiced_gau` | bigint | invoice billing: overage already claimed; ≤ `used_gau` |
+| `interim_seq`, `topup_seq` | int | interim invoices and auto top-up episodes claimed this month |
+| `open_topup_settlement_id` | uuid | the one auto top-up open at a time |
+| `closed_at` | timestamptz | set once the month has ended and its overage is claimed |
+
+Remaining is included + purchased + carried − used. It may go negative: the gate reads it before a handler and the recorder debits after, so concurrent actions can overrun it.
+
+**`billing.gau_settlements`** (class `org`; the settlement ledger; no `public_id`; `id` is the Stripe idempotency key)
+
+| Column | Type | Notes |
+|---|---|---|
+| `bucket_id` | uuid → `billing.gau_buckets` | |
+| `kind` | text | `checkout`, `auto_topup`, `interim_invoice`, `period_close` |
+| `seq` | int | null exactly for `checkout`; unique with `bucket_id` and `kind` |
+| `quantity_gau` | bigint | > 0 |
+| `rate_per_gau_micros`, `currency` | bigint, text | the contracted rate charged, recorded at claim |
+| `status` | text | `pending`, `open`, `paid`, `failed`; `paid` is terminal |
+| `stripe_checkout_session_id` | text | unique; the checkout grant's idempotency key |
+| `stripe_invoice_id` | text | the Stripe invoice behind the settlement |
+| `settled_at` | timestamptz | |
+
+**`billing.spend_budgets`** (class `org`; `workspace_id` nullable)
+
+| Column | Type | Notes |
+|---|---|---|
+| `workspace_id` | uuid | null is the organization's ceiling; at most one per organization and one per workspace |
+| `enabled` | boolean | |
+| `period` | text | `monthly`, `rolling` |
+| `window_days` | int | rolling only, > 0 |
+| `limit_micros` | bigint | > 0 |
+| `notified_threshold`, `notified_period_start` | int, timestamptz | the highest of 50, 80, 95 and 100 percent already notified this period |
+
+The build holds organization and workspace ceilings. §12.5's operator and agent scopes and its soft mode are not yet columns.
+
+**`billing.spend_counters`** (class `org`; no `public_id`)
+
+| Column | Type | Notes |
+|---|---|---|
+| `workspace_id` | uuid | nullable |
+| `day` | date | unique with `org_id` and `workspace_id` |
+| `spent_micros` | bigint | ≥ 0; the running counter the budget gate sums (§12.5) |
+
+**`billing.stripe_events`** (platform scope; append-only; no `public_id`)
+
+| Column | Type | Notes |
+|---|---|---|
+| `stripe_event_id` | text | unique; a retried webhook is a no-op |
+| `event_type`, `api_version` | text | |
+| `payload` | jsonb | |
+| `received_at` | timestamptz | |
+
+**`billing.stripe_event_processing`** (platform scope; no `public_id`)
+
+| Column | Type | Notes |
+|---|---|---|
+| `stripe_event_id` | uuid → `billing.stripe_events` | unique |
+| `processed_at` | timestamptz | |
+| `processing_error` | text | |
+
+**`billing.billing_disputes`** (class `org`)
+
+| Column | Type | Notes |
+|---|---|---|
+| `stripe_dispute_id` | text | unique |
+| `stripe_charge_id`, `payment_intent_id` | text | |
+| `amount_cents` | int | |
+| `currency` | text | |
+| `reason`, `status` | text | Stripe's values |
+| `clawed_back_cents` | bigint | credits reversed from the lots when the dispute opened |
+| `resolved_at` | timestamptz | |
 
 ### A.9 `audit` (3 tables)
 
@@ -1834,13 +2005,13 @@ A negotiated enterprise contract is a `billing.contract_terms` row in the `macan
 | `iam.authorization_decisions` | `policy.decision` frames |
 | `iam.deny_generations` | the two counters on `org.organizations` and `wrk.workspaces` |
 | `schema_registry.*` | gone; the knowledge graph and dynamic ontology it backed do not ship (§11) |
-| `billing.credit_*`, `billing.reseller_*`, `billing.invoices`, `billing.payment_methods` | gone; Stripe holds invoices and cards |
+| `billing.reseller_*` | gone. The credit, invoice and payment method tables stay in `billing` (A.8) |
 | `security.security_events`, `privacy.*` requests | `audit.audit_events` |
 | `ingestion.*` cursors and health | columns on `wrk.repositories` and `tools.tool_servers`, and `:Source` nodes |
-| `chat.*` conversations | gone; there is no in-app agent |
+| `chat.conversations`, `chat.messages` | the in-app agent's conversations; in scope with the in-app agent (§4.4), and not yet written into this appendix |
 | `mcp.*`, `plugin.*`, `content.*`, `cms.*`, `environments.*`, `eval.*`, `workflow.*`, `ai.*`, `ratelimit.*`, `engram.*`, `codegraph.*` | gone |
 
-The nine schemas are `auth`, `org`, `wrk`, `iam`, `tools`, `control`, `cost`, `billing`, `audit`. Thirty-five tables in the wedge, thirty-seven in full. Every tenant table uses one of the two policy classes in §5.2.
+The ten schemas are `auth`, `org`, `wrk`, `iam`, `tools`, `control`, `cost`, `billing`, `audit`, `dod`. Fifty-one tables in the wedge, fifty-three in full. Every tenant table uses one of the two policy classes in §5.2.
 
 ### A.11 `dod` (2 tables)
 
@@ -1870,7 +2041,7 @@ Index `(org_id, run)`.
 | `body`, `digest`, `signature` | jsonb, text, text | the canonical certificate, its digest, and the org key's ed25519 signature over it |
 | `issued_at` | timestamptz | |
 
-Index `(org_id, run)`. A HELD certificate meters the governed action `dod.held`; a PENDING one meters it on signature.
+Index `(org_id, run)`. A HELD certificate records the governed action `dod.held`; a PENDING one records it on signature. `dod.held` is not billable (§12.1).
 
 
 ## Appendix B. The run record and code graph (Postgres)
@@ -2097,7 +2268,7 @@ Dropped from this family (§11): `add_source`, `update_source`, `remove_source`,
 |---|---|---|
 | `draft_dod` | (new) | draft a set from a prompt through the model layer; splits the result into visible and hidden; the drafting model is recorded on the set |
 | `lock_dod` | (new) | register a locked set (visible and hidden) for a run |
-| `settle_dod` | (new) | verify submitted evidence against the locked set, re-run `decide()`, bind to the sealed attempt, sign a certificate, meter `dod.held` |
+| `settle_dod` | (new) | verify submitted evidence against the locked set, re-run `decide()`, bind to the sealed attempt, sign a certificate, record the governed action `dod.held` (not billable, §12.1) |
 | `sign_dod` | (new) | a human signature on a PENDING run's human check; decides again |
 
 ## Appendix F. The pages that survive
@@ -2113,7 +2284,7 @@ The current web app has 70 page files. Nine remain: six at workspace scope, thre
 | 5 | **Steering** | `/{org}/{ws}/steering` | `knowledge/memory` | records, proposals, Context PRs |
 | 6 | **Spend** | `/{org}/{ws}/spend` | `settings/spend-budgets`, `billing/usage` | findings, spend by operator and agent, proven spend, wasted spend, budgets |
 | 7 | **Organization** | `/{org}` | `[orgSlug]` (org home), `members`, `members/pending`, `workspaces`, `new-workspace`, `settings/general`, `settings/model-funding`, `settings/privacy`, `settings/github`, `developer/tokens`, `settings` (workspace general), `settings/general` (workspace) | members and roles, workspaces, model funding and routes, data plane, API keys, workspace settings including repo binding |
-| 8 | **Billing** | `/{org}/billing` | `billing`, `billing/subscription`, `billing/invoices` | plan, proven runs, the secondary meters, invoices (linked to Stripe) |
+| 8 | **Billing** | `/{org}/billing` | `billing`, `billing/subscription`, `billing/invoices` | plan, GAU used against the allowance, blocks and auto top-up, the contracted rate, credit packs, invoices (linked to Stripe) |
 | 9 | **Audit** | `/{org}/audit` | `security`, `security/audit`, `security/compliance`, `security/mfa`, `security/trust`, `governance`, `access` | audit events, incidents, receipts search, exports, key rotation, retention |
 
 The routes `knowledge`, `knowledge/graph`, `knowledge/graph/[nodeId]`, `knowledge/ontology`, `knowledge/sources`, and `knowledge/sources/connect` are dropped along with the dynamic knowledge graph they served (§11); nothing absorbs them.

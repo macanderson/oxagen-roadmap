@@ -13,13 +13,13 @@ DoD is a working name.
 
 ## An agent cannot finish until the dod says so
 
-You type a prompt into Claude Code. Before the agent moves, Oxagen writes the acceptance checks for that prompt and locks them. The agent works. When it tries to stop, the checks run. If they fail, the agent gets the failing ids and keeps going. If they pass, Oxagen signs a certificate against the sealed run and meters one governed action. Humans can write the checks by hand for repeatable tasks. Either way, the file is the only definition of done.
+You type a prompt into Claude Code. Before the agent moves, Oxagen writes the acceptance checks for that prompt and locks them. The agent works. When it tries to stop, the checks run. If they fail, the agent gets the failing ids and keeps going. If they pass, Oxagen signs a certificate against the sealed run and records one governed action, `dod.held`, which is not billable. Humans can write the checks by hand for repeatable tasks. Either way, the file is the only definition of done.
 
 1. **Prompt.** The `UserPromptSubmit` hook. Oxagen drafts the set, or loads a hand-written one. Locked by digest, written to `.oxagen/dod/<run>.yaml`.
 2. **Work.** The agent reads its definition of done. `PreToolUse` logs every call and refuses the ones the set denies.
 3. **Stop.** The `Stop` hook runs every check plus hidden holdouts. `decide()` returns a verdict.
 4. **Block or seal.** BROKEN with attempts left: the stop is blocked and the agent sees the failing ids. Otherwise the evidence is submitted.
-5. **Settle.** Oxagen re-runs `decide()`, binds to the sealed attempt, signs, stores, and meters `dod.held`.
+5. **Settle.** Oxagen re-runs `decide()`, binds to the sealed attempt, signs, stores, and records `dod.held`.
 
 ## Three decisions do all the work
 
@@ -134,11 +134,11 @@ oxagen/
 │   ├── oxagen/src/contracts/
 │   │   ├── dod.draft.ts           capability: draft a set from a prompt (calls @oxagen/ai)
 │   │   ├── dod.lock.ts            capability: register a locked set (visible + hidden)
-│   │   ├── dod.settle.ts           capability: decide, bind, sign, meter
+│   │   ├── dod.settle.ts           capability: decide, bind, sign, record
 │   │   └── dod.sign.ts            capability: human signature on a PENDING run
 │   ├── handlers/src/dod.*.ts      the four handlers
 │   ├── database/src/schema/dod.ts dod_sets, dod_certificates
-│   └── billing/src/actions.ts         + "dod.held" governed action (ADR-052)
+│   └── billing/src/actions.ts         + "dod.held" governed action, recorded and not billable
 ├── apps/
 │   ├── api/src/routes/v1/dod.*.ts Hono routes, one per capability, same pattern as agent.*
 │   └── cli/src/commands/dod.ts    oxagen dod hook|new|lock|run|sign|status
@@ -500,6 +500,7 @@ export async function settleDod(input: DodSettleInput, ctx: CapabilityContext) {
   const signature = await sign(ctx.org.signingKey, certificate.digest);
   await insertCertificate(ctx, { ...certificate, signature });
   if (outcome.verdict !== "BROKEN") {
+    // Recorded in the governed-action ledger. resolve_approval is the only billable action (mission-control-spec §12.1).
     await meterGovernedAction(ctx, { action: "dod.held", ref: certificate.id, tier: outcome.verdict });
   }
   return { certificate: certificate.id, verdict: outcome.verdict, reasons: outcome.reasons, attempt: attempt.publicId, signature };
@@ -600,7 +601,7 @@ READ FIRST
 CLAUDE.md, AGENTS.md, .claude/skills/oxagen-naming, oxagen-capability-contracts, oxagen-testing, quality-gates, oxagen-tenancy. docs/adr/ADR-041 (one canonical JSON rule), ADR-043 (Oxagen governs, does not run), ADR-052 (governed action is the billable unit). packages/run-ledger/README.md and packages/run-evidence/src/digest.ts. Follow what they say over anything below.
 
 THE SYSTEM IN ONE PARAGRAPH
-A developer runs Claude Code with three hooks installed. On UserPromptSubmit the harness asks Oxagen to draft a dod for the prompt (or loads a hand-written one), locks it by digest, writes it to .oxagen/dod/<run>.yaml, and tells the agent its definition of done. On PreToolUse the harness logs every tool call and denies the ones the set forbids. On Stop the harness runs the checks plus any hidden holdout checks the cloud kept back, and calls decide(). If BROKEN and attempts remain, it blocks the stop and hands the agent the failing check ids. Otherwise it submits the evidence; the cloud re-runs decide() on the same evidence, binds the outcome to the sealed run-ledger attempt, signs a certificate, and meters one governed action. Three verdicts: HELD (all executable checks pass, no human check outstanding), PENDING (executable checks pass, a human signature is pending), BROKEN (a closed reason code).
+A developer runs Claude Code with three hooks installed. On UserPromptSubmit the harness asks Oxagen to draft a dod for the prompt (or loads a hand-written one), locks it by digest, writes it to .oxagen/dod/<run>.yaml, and tells the agent its definition of done. On PreToolUse the harness logs every tool call and denies the ones the set forbids. On Stop the harness runs the checks plus any hidden holdout checks the cloud kept back, and calls decide(). If BROKEN and attempts remain, it blocks the stop and hands the agent the failing check ids. Otherwise it submits the evidence; the cloud re-runs decide() on the same evidence, binds the outcome to the sealed run-ledger attempt, signs a certificate, and records one governed action, dod.held, which is not billable. Three verdicts: HELD (all executable checks pass, no human check outstanding), PENDING (executable checks pass, a human signature is pending), BROKEN (a closed reason code).
 
 HARD CONSTRAINTS
 - decide() is pure. No clock, network, filesystem, or model call. The cloud and the harness run the same function on the same evidence and must produce the same bytes.
@@ -620,7 +621,7 @@ packages/dod (pure), packages/dod-harness (checks, collect, store, hooks, api), 
 PHASES AND GATES
 Phase 1, the language. packages/dod with schema, reasons, verdict, lock, draft-prompt, full unit tests. Gate: 30 fixture evidence files in packages/dod/fixtures decide to the expected verdict, and decide() on each fixture produces byte-identical JSON across 100 runs.
 Phase 2, the harness and CLI. packages/dod-harness, apps/cli dod command, the three hooks in .claude/settings.json. Gate: in this repository, a prompt "add a failing test then make it pass" produces a locked set, the Stop hook blocks once with CHECK_FAILED, and the second stop is allowed with HELD, all from a real Claude Code session driven by a script under tools/scripts.
-Phase 3, the cloud. Contracts, handlers, schema, migration, routes, billing action, signing with the org key. Gate: the harness from phase 2 submits evidence, the API returns a certificate, the certificate row's stream_digest equals the sealed attempt's stream digest, and a governed action dod.held appears in the ledger for that run.
+Phase 3, the cloud. Contracts, handlers, schema, migration, routes, the dod.held governed action, signing with the org key. Gate: the harness from phase 2 submits evidence, the API returns a certificate, the certificate row's stream_digest equals the sealed attempt's stream digest, and a governed action dod.held appears in the ledger for that run.
 Phase 4, drafting and holdouts. dod.draft calls @oxagen/ai with DRAFT_SYSTEM, splits the result into visible and hidden, stores both. Gate: five prompts from docs/prompts draft sets that parse first try; an agent that satisfies the visible checks by editing tests instead of code is rejected by a hidden check.
 Phase 5, humans and repeatable tasks. dod sign, .oxagen/dod/templates matched by task name, oxagen dod new for hand authoring. Gate: a hand-written set locks and settles; a PENDING run becomes HELD after oxagen dod sign; a template settles two different runs of the same task.
 
