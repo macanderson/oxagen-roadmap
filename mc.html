@@ -10399,7 +10399,7 @@ SCENARIOS["flight-recorder"]={title:"The flight recorder", ws:"core-platform",
    witness-probe case, so the row reads its counts off the suite. ASSURANCE_HISTORY is declared after them. */
 (function(){var A=ASSURANCE,r=ASSURANCE_HISTORY[0];
   if(r&&r.ran===A.ran){r.rel=A.version;r.cases=A.cases.length;r.pass=A.pass;r.fail=A.fail;r.na=A.na;r.note="witness-probe case added in "+A.version.replace(/^suite /,"");}})();
-SCENARIOS["proven-not-claimed"]={release:"full", title:"Proven, not claimed", ws:"core-platform",
+SCENARIOS["proven-not-claimed"]={title:"Proven, not claimed", ws:"core-platform", release:"full",
  blurb:"A run is proven because a witness it never saw failed on main and passed on the pull request. The agent was told one word.",
  steps:(function(){
   var P=run("run_01K5RQ4B9C7XTN2P"), f=P.flip, W=proofWitnessRun(P), T=run("run_01K5RG6H1L4OIU9Y");
@@ -10436,7 +10436,7 @@ SCENARIOS["proven-not-claimed"]={release:"full", title:"Proven, not claimed", ws
  })()};
 /* ---- end W5 ---- */
 /* ---- W6 · learned-approved-changed ---- */
-SCENARIOS["learned-approved-changed"]={release:"full", title:"Learned, approved, changed", ws:"core-platform",
+SCENARIOS["learned-approved-changed"]={title:"Learned, approved, changed", ws:"core-platform", release:"full",
  blurb:"The promoter learns a rule from runs, a person merges it as a pull request, and the next model call carries it.",
  steps:[
   {say:"These are the records that steer core-platform. Each one is a file in <span class=\"mono\">.oxagen/rules/</span> on a-intel/platform, and each was published by a merge.",
@@ -10472,7 +10472,7 @@ SCENARIOS["learned-approved-changed"]={release:"full", title:"Learned, approved,
  ]};
 /* ---- end W6 ---- */
 /* ---- W8 · every-dollar-every-operator ---- */
-SCENARIOS["every-dollar-every-operator"]={release:"full", title:"Every dollar, every operator", ws:"core-platform",
+SCENARIOS["every-dollar-every-operator"]={title:"Every dollar, every operator", ws:"core-platform", release:"full",
  blurb:"What the tokens bought, per operator, agent and run, and whether every provider dollar has a frame behind it.",
  steps:[
   {say:"September’s spend opens on what it bought. The findings are savings, each one measured minus counterfactual over the runs it cites.",
@@ -10509,7 +10509,7 @@ SCENARIOS["every-dollar-every-operator"]={release:"full", title:"Every dollar, e
  ]};
 /* ---- end W8 ---- */
 /* ---- W9 · toolbelt-governed ---- */
-SCENARIOS["toolbelt-governed"]={release:"full", title:"The toolbelt, governed", ws:"core-platform",
+SCENARIOS["toolbelt-governed"]={title:"The toolbelt, governed", ws:"core-platform", release:"full",
  blurb:"What one agent may reach, the credential it never holds, and the policy change you can see before you switch it on.",
  steps:[
   {say:"Triage’s belt is searchable, not preloaded: 52 tools, and the agent finds the one it needs by asking.",
@@ -10548,7 +10548,7 @@ SCENARIOS["toolbelt-governed"]={release:"full", title:"The toolbelt, governed", 
  ]};
 /* ---- end W9 ---- */
 /* ---- W10 · cio-console ---- */
-SCENARIOS["cio-console"]={release:"full", title:"The CIO’s console", ws:"core-platform",
+SCENARIOS["cio-console"]={title:"The CIO’s console", ws:"core-platform", release:"full",
  blurb:"Organization and Audit from the chair that answers for both: who can sign in, where the data lives, what the models cost, and what can be proven.",
  steps:[
   {say:"Who can sign in is decided upstream. Okta enforces single sign-on for every member but the break-glass accounts, and SCIM writes this table from group mappings.",
@@ -10589,7 +10589,7 @@ SCENARIOS["cio-console"]={release:"full", title:"The CIO’s console", ws:"core-
  ]};
 /* ---- end W10 ---- */
 /* ---- W11 · assistant-and-account ---- */
-SCENARIOS["assistant-and-account"]={release:"full", title:"The assistant, and whose account it is", ws:"core-platform",
+SCENARIOS["assistant-and-account"]={title:"The assistant, and whose account it is", ws:"core-platform", release:"full",
  blurb:"The in-app agent explains a park, changes configuration through governed actions, and stops where its authority stops. Every turn is a run of its own.",
  steps:[
   {say:"Priya asks why invoice-bot stopped. It did not stop: the <b>$2,450.00</b> payment parked on <span class=\"mono\">apr_01K5RN9T4</span>, and the assistant walks the chain from who asked to which rule.",
