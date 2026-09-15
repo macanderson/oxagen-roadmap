@@ -3,10 +3,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "node tools/build-mockup.mjs && node tools/build-stories.mjs && python3 tools/build-docs.py",
-    "check": "node tools/build-mockup.mjs --check && node tools/build-stories.mjs --check && python3 tools/build-docs.py --check && node tools/check-mockup.mjs",
+    "build": "node tools/build-mockup.mjs && node tools/build-stories.mjs && python3 tools/build-docs.py && node tools/build-badges.mjs",
+    "check": "node tools/build-mockup.mjs --check && node tools/build-stories.mjs --check && python3 tools/build-docs.py --check && node tools/build-badges.mjs --check && node tools/check-mockup.mjs",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build && node tools/build-mockup.mjs --out storybook-static/missioncontrol.html && cp mockups/w13-in-the-loop.html storybook-static/"
+    "build-storybook": "storybook build && node tools/build-mockup.mjs --out storybook-static/missioncontrol.html"
   },
   "devDependencies": {
     "@storybook/addon-docs": "^10.6.0",

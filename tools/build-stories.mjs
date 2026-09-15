@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Writes the Storybook stories from mockups/catalog.mjs: one file per page (a story per state,
-// desktop and mobile, the page's spec on its Docs tab), one per scenario, the product build and
-// the hand-drawn W13. Storybook indexes named exports statically, so the files are written rather
+// desktop and mobile, the page's spec on its Docs tab), one per scenario, and the product build.
+// Storybook indexes named exports statically, so the files are written rather
 // than built at run time; this script keeps them equal to the catalog.
 //
 //   node tools/build-stories.mjs           # write mockups/stories/**
@@ -70,15 +70,6 @@ outs.set("product.stories.js", [HEAD,
   `export const Desktop = { args: { shell: "desktop" } };`,
   `export const Mobile = { args: { shell: "mobile" } };`,
   `export const WithMockupChrome = { name: "With the mockup chrome", args: { shell: "desktop", product: false } };`,
-  ``].join("\n"));
-
-outs.set("hand-drawn.stories.js", [HEAD,
-  `import { view } from "../_view.js";`,
-  ``,
-  `// Still hand-written, not in the master: W13, the interjection and skills (docs/w13-in-the-loop-scenario.md).`,
-  `export default { title: "Hand-drawn/W13 In the Loop", render: view };`,
-  ``,
-  `export const W13 = { name: "In the Loop", args: { file: "./w13-in-the-loop.html", product: false, shell: "desktop", theme: "system", hash: "" } };`,
   ``].join("\n"));
 
 // A generated file the catalog no longer produces is stale; it goes.

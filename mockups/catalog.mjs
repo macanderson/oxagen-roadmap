@@ -24,6 +24,10 @@ export const PAGES = [
   { id: "tools",             title: "Tools",                       group: "Workspace",    hash: `#/${ORG}/core-platform/tools`,                            states: ALL },
   { id: "steering",          title: "Steering",                    group: "Workspace",    hash: `#/${ORG}/core-platform/steering`,                         states: ALL },
   { id: "spend",             title: "Spend",                       group: "Workspace",    hash: `#/${ORG}/core-platform/spend`,                            states: ALL },
+  // skills (W13): resolution, the seat in the loop, reflection; the off-by-default gate; the interjected run
+  { id: "skills",            title: "Skills",                      group: "Workspace",    hash: `#/${ORG}/core-platform/skills`,                           states: ALL },
+  { id: "skills-off",        title: "Skills · off (the default)",  group: "Workspace",    hash: `#/${ORG}/finops/skills`,                                  states: ["loaded"] },
+  { id: "run-interjection",  title: "Run · interjection",          group: "Workspace",    hash: `#/${ORG}/core-platform/runs/run_01K6QW3D5N7TYBA2`,        states: NO_EMPTY },
   // organization scope (pages 8–10)
   { id: "organization",      title: "Organization",                group: "Organization", hash: `#/${ORG}`,                                                states: ALL },
   { id: "organization-api-keys", title: "Organization · API keys", group: "Organization", hash: `#/${ORG}/api-keys`,                                       states: ALL },
@@ -61,6 +65,7 @@ export const SCENARIOS = [
   { n: 9,  id: "toolbelt-governed",           ws: "core-platform", title: "The Toolbelt, Governed" },
   { n: 10, id: "cio-console",                 ws: "core-platform", title: "The CIO's Console" },
   { n: 11, id: "the-account",                 ws: "core-platform", title: "The Account" },
+  { n: 13, id: "in-the-loop",                 ws: "core-platform", title: "In the Loop" },
   { n: 14, id: "done-means-done",             ws: "core-platform", title: "Done Means Done" },
 ];
 

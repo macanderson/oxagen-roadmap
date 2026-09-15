@@ -27,7 +27,7 @@ Record PASS / FAIL / N/A per check with evidence (file:line, selector + text, or
 3. Run every per-page audit prompt (`<page>.audit-prompt.md`) and attach each report. This audit is FAIL if any of them is.
 
 ### B. Shell (desktop)
-4. Sidebar: organization switcher and workspace switcher at the top; Workspace nav Fleet · Agent IAM · Tools · Steering · Spend; Organization nav Organization · Billing · Audit; the footer line (agent count · data plane · tier badge). No Scenarios item, no onboarding-demo entry anywhere.
+4. Sidebar: organization switcher and workspace switcher at the top; Workspace nav Fleet · Agent IAM · Tools · Skills · Steering · Spend (Skills carries a count of 1 while an interjection waits on a person); Organization nav Organization · Billing · Audit; the footer line (agent count · data plane · tier badge). No Scenarios item, no onboarding-demo entry anywhere.
 5. Nav counts appear only where something waits on a person: Fleet (approvals pending), Steering (proposals), Audit (open critical incidents). Any other count is a FAIL.
 6. Top bar: breadcrumbs ending on the current page; ⌘K opens search-or-run and lists every page and action; notifications with an unread dot and a list where every kind maps to a frame kind or audit event; the account avatar → Account, Preferences, Security and sessions, Privacy and data, Switch theme, Sign out.
 7. There is no assistant panel; every question about the fleet is a page, and every configuration change is a dialog that runs a governed action.
@@ -35,7 +35,7 @@ Record PASS / FAIL / N/A per check with evidence (file:line, selector + text, or
 
 ### C. Shell (mobile — 390 × 844, touch)
 9. A fixed five-slot thumb bar: Fleet · Agents · Tools · Spend · More; counts as in B5 (Fleet, and More carrying Audit’s); the active slot is marked; every slot ≥ 44 px tall and inside the bottom quarter of the screen.
-10. More is a bottom sheet listing Steering, Organization, Billing, Audit, Search, Notifications, Account, Switch organization, Switch workspace — the whole app reachable with one thumb.
+10. More is a bottom sheet listing Steering, Skills, Organization, Billing, Audit, Search, Notifications, Account, Switch organization, Switch workspace — the whole app reachable with one thumb.
 11. The hamburger opens the full sidebar as a drawer over a scrim; tapping the scrim closes it.
 12. Every dialog rises from the bottom edge as a sheet with a drag handle, a scrolling body and full-width footer buttons, the primary under the thumb.
 13. Every list table renders as a stack of cards with each cell labelled by its column header; no page scrolls sideways at any width down to 360 px.

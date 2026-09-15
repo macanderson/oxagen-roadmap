@@ -46,3 +46,12 @@ record must be derived the same way in the fixture, or two pages disagree.
 | `spend-detail.json` | `SPEND_DETAIL` | Drill-down detail behind every row of By operator, By agent and By tool. Keyed "kind:id". Cross-cuts (agents / operators / tools / models) are [name, spend] pairs that sum to at most the entity's own spend; a name that is not itself a row (e.g. "19 other agents") is not drillable. |
 | `billing.json` | `BILLING` | the plan, this period's lines, meters and invoices |
 | `dod.json` | `DOD` | the definition of done of each seed run, keyed by run id: the locked set, checks with evidence, hidden checks, usage, every Stop, the verdict and certificate (`dod-spec.md`) |
+| `skills.json` | `SKILLS` | the skill catalog: id, version, kind, source, path, digest, load tokens, decision tier, state (ok, out of scope, unapproved digest), cited and proof rate |
+| `sk-cfg.json` | `SK_CFG` | the workspace's `.oxagen/skills.toml`: version, sources, search cut-off and budget, reflection settings, the unbound-repo policy |
+| `skrun.json` | `SKRUN` | the interjected run: the agent, operator, harness and the unbound repository it started in |
+| `sk-frames.json` | `SK_FRAMES` | that run's frames while it waits on a person |
+| `sk-after.json` | `SK_AFTER` | the frames each answer writes: link to core-platform, or create the workspace edge |
+| `sk-queries.json` | `SK_QUERIES` | canned `search_skills` answers: hits with scores, withheld skills, the reason for an empty result |
+| `sk-reflect.json` | `SK_REFLECT` | one quarantined reflection: the rubric axes, the self-grade against the record, the contradictions |
+| `sk-hist.json` | `SK_HIST` | the config's version history, each a pull request |
+| `sk-created.json` | `SK_CREATED` | when each workspace was created, with skills off |

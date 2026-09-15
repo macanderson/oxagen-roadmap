@@ -132,7 +132,7 @@ main hr+h2{border-top:0;padding-top:0;margin-top:0}
 <div class="site">
 <nav class="docs" aria-label="Documents">
   <a class="wordmark" href="#spec">o<span class="x">x</span>agen</a>
-  <p>Specifications</p><ol><li><a href="#spec" data-doc="spec">Oxagen Mission Control: Product and Technical Specification</a></li><li><a href="#dod" data-doc="dod">Oxagen DoD: the definition of done for agent runs</a></li><li><a href="#desktop" data-doc="desktop">Oxagen Desktop: product specification, rev 1</a></li></ol><p>Plans and decisions</p><ol><li><a href="#plan" data-doc="plan">Oxagen Mission Control app: implementation plan</a></li><li><a href="#scope" data-doc="scope">Oxagen Mission Control: the scope review, and what it changed</a></li></ol><p>The mockups</p><ol><li><a href="#prompts" data-doc="prompts">Oxagen Mission Control: mockup prompts, one per demo flow</a></li><li><a href="#consolidation" data-doc="consolidation">Consolidating W1–W11 into one design</a></li><li><a href="#feedback" data-doc="feedback">Feedback on the mockups</a></li><li><a href="#videos" data-doc="videos">Videos of the mockups, narrated</a></li><li><a href="#w13" data-doc="w13">W13: in the loop</a></li></ol>
+  <p>Specifications</p><ol><li><a href="#spec" data-doc="spec">Oxagen Mission Control: Product and Technical Specification</a></li><li><a href="#dod" data-doc="dod">Oxagen DoD: the definition of done for agent runs</a></li><li><a href="#witness" data-doc="witness">Oxagen Witness: outcome verification</a></li><li><a href="#desktop" data-doc="desktop">Oxagen Desktop: product specification, rev 1</a></li></ol><p>Plans and decisions</p><ol><li><a href="#plan" data-doc="plan">Oxagen Mission Control app: implementation plan</a></li><li><a href="#scope" data-doc="scope">Oxagen Mission Control: the scope review, and what it changed</a></li></ol><p>The mockups</p><ol><li><a href="#prompts" data-doc="prompts">Oxagen Mission Control: mockup prompts, one per demo flow</a></li><li><a href="#consolidation" data-doc="consolidation">Consolidating W1–W11 into one design</a></li><li><a href="#feedback" data-doc="feedback">Feedback on the mockups</a></li><li><a href="#videos" data-doc="videos">Videos of the mockups, narrated</a></li><li><a href="#w13" data-doc="w13">W13: in the loop</a></li></ol>
   <div class="foot">One file, every document. The markdown in <code>docs/</code> is the source; <code>tools/build-docs.py</code> writes this page.</div>
 </nav>
 <div>
@@ -140,7 +140,7 @@ main hr+h2{border-top:0;padding-top:0;margin-top:0}
 <header class="mast">
   <p class="eyebrow">Oxagen · Specification</p>
   <h1>Oxagen Mission Control: Product and Technical Specification</h1>
-  <dl class="facts"><dt>Status</dt><dd>Draft for review</dd><dt>Date</dt><dd>2026-09-11</dd><dt>Author</dt><dd>Drafted for Mac Anderson</dd><dt>Supersedes</dt><dd>The <code>oxagen-platform</code> and <code>oxagen</code> codebases as products. Carries forward the designs named in §16.</dd><dt>Builds on</dt><dd>Context Graph Protocol <code>contextgraph/1.0</code> and the <code>contextgraph/lifecycle/1.0-draft</code> profile (repo at <code>origin/main</code>, ADRs 0001 to 0018). Stella's context-record and Context PR corpus. Oxagen ADR-024, 025, 042, 043, 051, 052, 053 and the current wrapper spec (in the repo today under <code>docs/specs/tacho/</code>, renamed here).</dd><dt>Amended</dt><dd>2026-09-14, by the scope review (<code>scope-review.md</code>) and the definition of done (<code>dod-spec.md</code>). The in-app agent, Neo4j, SSO and SCIM, policy simulation, the assurance suite, two-person mandates, steering effect metrics and retirement, legal holds, crypto-shredding and provider reconciliation are out. The definition of done (§8.6) is in, and it is the billable unit (§12.1). Sections carry the change in place.</dd></dl>
+  <dl class="facts"><dt>Status</dt><dd>Draft for review</dd><dt>Date</dt><dd>2026-09-11</dd><dt>Owner</dt><dd>Mac Anderson</dd><dt>Supersedes</dt><dd>The <code>oxagen-platform</code> and <code>oxagen</code> codebases as products. Carries forward the designs named in §16.</dd><dt>Builds on</dt><dd>Context Graph Protocol <code>contextgraph/1.0</code> and the <code>contextgraph/lifecycle/1.0-draft</code> profile (repo at <code>origin/main</code>, ADRs 0001 to 0018). Stella's context-record and Context PR corpus. Oxagen ADR-024, 025, 042, 043, 051, 052, 053 and the current wrapper spec (in the repo today under <code>docs/specs/tacho/</code>, renamed here).</dd><dt>Amended</dt><dd>2026-09-14, by the scope review (<code>scope-review.md</code>) and the definition of done (<code>dod-spec.md</code>). The in-app agent, Neo4j, SSO and SCIM, policy simulation, the assurance suite, two-person mandates, steering effect metrics and retirement, legal holds, crypto-shredding and provider reconciliation are out. The definition of done (§8.6) is in, and it is the billable unit (§12.1). Sections carry the change in place. It also supersedes the billing amendment of 2026-09-13 (Oxagen ADR-055, governed action units in monthly buckets at contracted rates): the one priced meter is the proven run, and governed actions are reported beside it (§12.1).</dd></dl>
 </header>
 <div class="grid">
 <nav class="toc" aria-label="Contents of this document"><p>Contents</p><ol><li><a href="#spec/0-the-call-sheet">0. The call sheet</a></li><li><a href="#spec/1-why-this-product-in-one-page">1. Why this product, in one page</a></li><li><a href="#spec/2-scope">2. Scope</a></li><li><a href="#spec/3-vocabulary">3. Vocabulary</a></li><li><a href="#spec/4-architecture">4. Architecture</a></li><li><a href="#spec/5-tenancy-and-isolation">5. Tenancy and isolation</a></li><li><a href="#spec/6-identity-access-and-the-toolbelt">6. Identity, access, and the toolbelt</a></li><li><a href="#spec/7-the-gateway-and-intervention">7. The gateway and intervention</a></li><li><a href="#spec/8-runs-and-frames">8. Runs and frames</a></li><li><a href="#spec/9-context-records-how-agents-learn">9. Context records: how agents learn</a></li><li><a href="#spec/10-the-repository-steering-and-context-prs">10. The repository, steering, and Context PRs</a></li><li><a href="#spec/11-the-code-graph">11. The code graph</a></li><li><a href="#spec/12-cost-accounted-to-the-token-attributed-to-the-operator-priced-on-the-proven-run">12. Cost: accounted to the token, attributed to the operator, priced on the proven run</a></li><li><a href="#spec/13-audit-retention-and-the-fidelity-call">13. Audit, retention, and the fidelity call</a></li><li><a href="#spec/14-mission-control">14. Mission Control</a></li><li><a href="#spec/15-non-functional-requirements">15. Non-functional requirements</a></li><li><a href="#spec/16-carry-over-leave-behind">16. Carry over, leave behind</a></li><li><a href="#spec/17-delivery-plan">17. Delivery plan</a></li><li><a href="#spec/18-risks-and-open-decisions">18. Risks and open decisions</a></li><li><a href="#spec/19-demo-wow-scenarios">19. Demo Wow! Scenarios</a></li><li><a href="#spec/appendix-a-postgres-tables-target">Appendix A. Postgres tables (target)</a></li><li><a href="#spec/appendix-b-the-run-record-and-code-graph-postgres">Appendix B. The run record and code graph (Postgres)</a></li><li><a href="#spec/appendix-c-frame-envelope-gateway-kind-example">Appendix C. Frame envelope (gateway kind example)</a></li><li><a href="#spec/appendix-d-tool-grant-example">Appendix D. Tool grant example</a></li><li><a href="#spec/appendix-e-the-agent-tools-that-survive">Appendix E. The agent tools that survive</a></li><li><a href="#spec/appendix-f-the-pages-that-survive">Appendix F. The pages that survive</a></li></ol></nav>
@@ -4957,6 +4957,11 @@ sandbox = &quot;read-only&quot;
 </thead>
 <tbody>
 <tr>
+<td><code>list_api_keys</code></td>
+<td>list_api_keys</td>
+<td>read: the org's keys with principal, grants, last use and expiry; never the secret or its hash (added 2026-09-14 for the API keys page)</td>
+</tr>
+<tr>
 <td><code>create_api_key</code></td>
 <td>create_api_key</td>
 <td>purpose-locked keys for humans and services</td>
@@ -6155,6 +6160,447 @@ Begin with Phase 1. Write the fixtures before the code.
 <footer class="colophon"><span>Oxagen · Specification</span><span>Source: <code>docs/dod-spec.md</code></span></footer>
 </main>
 </div>
+</article><article id="witness" class="doc" hidden>
+<header class="mast">
+  <p class="eyebrow">Oxagen · Specification</p>
+  <h1>Oxagen Witness: outcome verification</h1>
+  <dl class="facts"><dt>Status</dt><dd>Spec, for build</dd><dt>Date</dt><dd>2026-09-13</dd><dt>Owner</dt><dd>Mac Anderson</dd><dt>Related</dt><dd><code>dod-spec.md</code> (the definition of done that gates a run; the witness is one of its checks), <code>mission-control-spec.md</code> §8.5, <code>scope-review.md</code></dd></dl>
+</header>
+<div class="grid">
+<nav class="toc" aria-label="Contents of this document"><p>Contents</p><ol><li><a href="#witness/every-trace-ends-in-a-stamp-or-a-reason">Every trace ends in a stamp or a reason</a></li><li><a href="#witness/everyone-else-s-oracle-is-another-model">Everyone else's oracle is another model</a></li><li><a href="#witness/fourteen-deterministic-ways-to-stamp-a-trace">Fourteen deterministic ways to stamp a trace</a></li><li><a href="#witness/the-witness-record">The witness record</a></li><li><a href="#witness/components">Components</a></li><li><a href="#witness/determinism-rules">Determinism rules</a></li><li><a href="#witness/certificate-schema">Certificate schema</a></li><li><a href="#witness/api-surface">API surface</a></li><li><a href="#witness/eight-weeks-five-phases">Eight weeks, five phases</a></li><li><a href="#witness/measures">Measures</a></li><li><a href="#witness/build-prompt-for-claude-code">Build prompt for Claude Code</a></li><li><a href="#witness/the-witness-record-schema">The witness record schema</a></li></ol></nav>
+<main>
+<p>Witness is a working name. The spec assumes Oxagen's existing metering service, capability contracts, and lifecycle agent toolkit.</p>
+<h2 id="witness/every-trace-ends-in-a-stamp-or-a-reason">Every trace ends in a stamp or a reason</h2>
+<p>Witness turns requirements into oracles before an agent runs. When a trace finishes, deterministic evaluators either stamp it as a verified outcome, which releases the funds metered against it, or reject it with a reason code. No model sits in the path that decides.</p>
+<pre><code class="language-text">trace_id      tr_01J8ZK7Q4M
+witness_id    WR-0042  refund-under-50-auto-approve
+verdict       STAMPED
+oracles       predicate:pass  invariant:pass  policy:pass  budget:pass
+evidence      sha256:4c1f…9e02
+evaluator_env sha256:b77a…13d4  (pinned, no egress)
+prev_stamp    sha256:0a9d…77c1
+funded        true   unit outcome:refund.approved
+signature     ed25519:MEUCIQ…
+</code></pre>
+<p>A certificate is a pure function of the trace, the fixtures, and the witness record. Run it twice, get the same bytes.</p>
+<ul>
+<li><strong>Prompt to fund.</strong> A trace starts when a prompt enters Oxagen and ends when its outcome is verified and metered. Nothing in between may declare success.</li>
+<li><strong>No witness, no requirement.</strong> A requirement with no executable witness is not finished. The authoring tool refuses to mark it ready.</li>
+<li><strong>Models propose, oracles decide.</strong> An LLM may draft witnesses and explain rejections. It never issues a verdict.</li>
+</ul>
+<h2 id="witness/everyone-else-s-oracle-is-another-model">Everyone else's oracle is another model</h2>
+<p>&quot;AI writes your tests&quot; starts from a prose spec. Prose underdetermines behavior, so the model writing the test fills the gaps with the same assumptions the model writing the code will make. The tests pass by construction and prove nothing. Oxagen already bills on outcomes; the missing piece is a verification layer customers, auditors, and insurers can trust because it is mechanically reproducible.</p>
+<p>Witness moves the disambiguation to requirements time, when a human is still in the loop and precision is cheap. It makes the requirement and the oracle the same object, so verification stays deterministic even when the implementer is not.</p>
+<ul>
+<li><strong>For the customer.</strong> They buy verified outcomes, not tokens. Every invoice line links to a signed certificate with the evidence that earned it. Disputes become a hash comparison, not an argument.</li>
+<li><strong>For Oxagen.</strong> Stamps are the billable unit, so metering is defensible. Every stamped or rejected trace is a labeled example for the oracle-flip pipeline. Certificates are the artifact an auditor can actually read.</li>
+<li><strong>For the builder.</strong> &quot;Looks right&quot; stops being a completion state. Rejections carry a reason code and a pointer into the trace, so the fix loop runs unattended.</li>
+</ul>
+<h2 id="witness/fourteen-deterministic-ways-to-stamp-a-trace">Fourteen deterministic ways to stamp a trace</h2>
+<p>An oracle class enters the stamp path only if its evaluator is a pure function of the trace, the fixtures, and the witness record. Anything that fails that test is judgment-gated: a human can sign it, but it never stamps, and it is labeled separately in exports.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Class</th>
+<th>Checks</th>
+<th>Why it is deterministic</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>example</td>
+<td>Concrete inputs against an expected output, compared by hash or structural equality.</td>
+<td>The expected value is fixed at authoring time; the comparison is exact.</td>
+</tr>
+<tr>
+<td>predicate</td>
+<td>Assertions over end state: rows, files, emitted events, responses, queue depth.</td>
+<td>Evaluated against a captured snapshot, not a live system.</td>
+</tr>
+<tr>
+<td>invariant</td>
+<td>What must hold across the whole trace: totals reconcile, a record is never deleted.</td>
+<td>Compares pre- and post-state snapshots already captured at ingest.</td>
+</tr>
+<tr>
+<td>schema</td>
+<td>Output conforms to a JSON schema, protobuf, or type signature.</td>
+<td>Validation is syntactic.</td>
+</tr>
+<tr>
+<td>executable</td>
+<td>A pinned command exits zero: tests, build, typecheck, migration apply and rollback.</td>
+<td>Runs in a pinned image, no network, fixed seed, enforced by the engine.</td>
+</tr>
+<tr>
+<td>differential</td>
+<td>Output agrees with a reference: a prior release, or N implementations voting.</td>
+<td>Reference outputs are captured once and compared by hash.</td>
+</tr>
+<tr>
+<td>property</td>
+<td>Relations across runs: sort twice equals sort once, doubling the input doubles the total.</td>
+<td>The generator is seeded; outputs are stored, not live.</td>
+</tr>
+<tr>
+<td>replay</td>
+<td>Re-run with recorded tool responses and pinned model outputs; artifact hash must match.</td>
+<td>Every external call is answered from the recording.</td>
+</tr>
+<tr>
+<td>policy</td>
+<td>Every tool call stayed inside the contracted capability set; no secret left the sandbox.</td>
+<td>A set-membership check over the recorded call log.</td>
+</tr>
+<tr>
+<td>budget</td>
+<td>Cost, tokens, wall time, tool calls, and retries stayed under the declared limits.</td>
+<td>The counters are part of the trace.</td>
+</tr>
+<tr>
+<td>provenance</td>
+<td>Every citation resolves to a retrieved chunk in the trace; artifacts hash-chain to inputs.</td>
+<td>Verifies references, not content.</td>
+</tr>
+<tr>
+<td>structural</td>
+<td>The PR merges clean, the diff touches only allowed paths, the file count matches.</td>
+<td>Shape checks are mechanical.</td>
+</tr>
+<tr>
+<td>convergence</td>
+<td>A looped agent stopped for an allowed reason and the iteration count is under cap.</td>
+<td>Loop state is recorded per iteration.</td>
+</tr>
+<tr>
+<td>formal</td>
+<td>A solver proves a property of the produced code against a specification.</td>
+<td>Pinned solver, fixed timeout; a timeout counts as rejection.</td>
+</tr>
+<tr>
+<td>judgment‑gated</td>
+<td>Taste, tone, &quot;feels right,&quot; anything scored by a model.</td>
+<td>Not an oracle, a human signature, kept out of the stamp path on purpose.</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="witness/the-witness-record">The witness record</h2>
+<p>A requirement is collected in this shape from the start. The authoring tool drafts it from a conversation, but the record is what gets reviewed, versioned, and executed. If a field cannot be filled, the requirement is not ready and the tool says so.</p>
+<pre><code class="language-yaml">witness:
+  id: WR-0042
+  title: refund-under-50-auto-approve
+  requirement: &gt;
+    A refund request for a delivered order under $50 is approved
+    without human review and the customer is notified once.
+  owner: ops@customer.example
+  oracle_classes: [predicate, invariant, policy, budget]
+
+  pre:
+    fixtures:
+      - db: snapshots/orders-2026-09-01.sql        # content-addressed
+      - order: {id: o-1187, amount: 42.00, status: delivered}
+    tool_recordings: recordings/refund-happy.jsonl  # replay source
+
+  act:
+    prompt: &quot;Customer 8812 asks for a refund on order o-1187&quot;
+    capability_set: [cap:orders.read, cap:refunds.write, cap:notify.email]
+
+  post:
+    - db: &quot;select status, amount from refunds where order_id='o-1187'&quot;
+      equals: {status: approved, amount: 42.00}
+    - event: refund.approved
+      count: 1
+    - event: email.sent
+      count: 1
+      where: {to: customer_8812}
+
+  invariants:
+    - db: &quot;select total from orders where id='o-1187'&quot;
+      unchanged: true
+    - no_tool_call_outside: act.capability_set
+
+  budget: {max_cost_usd: 0.20, max_tool_calls: 6, max_wall_ms: 30000}
+
+  witnesses:                       # concrete examples, at least one required
+    - name: happy-path
+      inputs: fixtures/refund-happy.json
+      expected: sha256:9f2c…a17e
+    - name: exactly-50-is-not-under
+      inputs: fixtures/refund-50.json
+      expect_verdict: REJECTED
+      reason: POST_MISMATCH
+
+  judgment_gated:                  # optional, never stamps
+    - &quot;Email tone matches brand voice&quot;
+
+  funding:
+    unit: outcome:refund.approved
+    release_on: STAMPED
+</code></pre>
+<p>A negative witness, an input that must be rejected, is required whenever the requirement names a threshold or the word &quot;only&quot;. The model that drafted a record is never the model that implements the feature it covers.</p>
+<h2 id="witness/components">Components</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Responsibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Witness Studio</td>
+<td>Conversational authoring. Lints records; refuses to mark a requirement ready with no executable witness. Stores records in git alongside the customer's code.</td>
+</tr>
+<tr>
+<td>Oracle Registry</td>
+<td>Catalog of evaluators, one per oracle class, published as pinned container digests. New evaluators must pass the determinism gate before listing.</td>
+</tr>
+<tr>
+<td>Trace Ingest</td>
+<td>Captures prompt, model calls, tool calls with arguments and responses, state snapshots, artifacts, counters. Everything content-addressed.</td>
+</tr>
+<tr>
+<td>Fixture Vault</td>
+<td>Immutable pre-states: database snapshots, filesystem trees, recorded tool responses. Referenced by hash.</td>
+</tr>
+<tr>
+<td>Stamp Engine</td>
+<td>Runs evaluators in sandboxes with no egress, no clock, fixed seed. Aggregates verdicts, emits the certificate. Re-runs a sample and halts a registry entry if bytes differ.</td>
+</tr>
+<tr>
+<td>Certificate Ledger</td>
+<td>Append-only, hash-chained, signed. Publishes <code>stamp.issued</code> and <code>stamp.rejected</code> to metering.</td>
+</tr>
+<tr>
+<td>Judgment Queue</td>
+<td>Routes judgment-gated items to a human; records the signature with a distinct type.</td>
+</tr>
+<tr>
+<td>Dataset Exporter</td>
+<td>Emits stamped and rejected traces with reason codes as training labels, drafting and implementing model kept separate.</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="witness/determinism-rules">Determinism rules</h2>
+<ul>
+<li>No model call runs in the stamp path. The engine rejects any evaluator that declares network egress.</li>
+<li>Evaluators are pinned by image digest. A certificate names the digest that produced each verdict.</li>
+<li>Each evaluator is a pure function of <code>(trace, fixtures, witness)</code>, fixed clock, fixed seed, no filesystem outside the mounted inputs.</li>
+<li>Same inputs produce byte-identical certificates. The engine double-runs 5% of traces and alarms on any diff.</li>
+<li>Evidence is stored, never summarized. Every verdict links to an evidence blob by hash.</li>
+<li>A timeout, crash, or missing fixture is a rejection with its own reason code, never a pass.</li>
+<li>Rejection reasons come from a closed enum: <code>POST_MISMATCH</code>, <code>INVARIANT_BROKEN</code>, <code>POLICY_VIOLATION</code>, <code>BUDGET_EXCEEDED</code>, <code>SCHEMA_INVALID</code>, <code>EXEC_FAILED</code>, <code>DIFF_DISAGREE</code>, <code>PROPERTY_FAILED</code>, <code>REPLAY_DIVERGED</code>, <code>PROVENANCE_MISSING</code>, <code>STRUCTURE_INVALID</code>, <code>NO_CONVERGENCE</code>, <code>FORMAL_UNPROVEN</code>, <code>EVALUATOR_ERROR</code>, <code>FIXTURE_MISSING</code>.</li>
+<li>Certificates are signed with a per-tenant key and chained to the tenant's previous certificate.</li>
+</ul>
+<h2 id="witness/certificate-schema">Certificate schema</h2>
+<pre><code class="language-json">{
+  &quot;trace_id&quot;: &quot;tr_01J8ZK7Q4M&quot;,
+  &quot;witness_id&quot;: &quot;WR-0042&quot;,
+  &quot;witness_hash&quot;: &quot;sha256:…&quot;,
+  &quot;verdict&quot;: &quot;STAMPED | REJECTED | JUDGMENT_GATED&quot;,
+  &quot;reason&quot;: null,
+  &quot;oracles&quot;: [
+    {&quot;class&quot;: &quot;predicate&quot;, &quot;evaluator&quot;: &quot;sha256:…&quot;, &quot;verdict&quot;: &quot;pass&quot;,
+     &quot;evidence&quot;: &quot;sha256:…&quot;, &quot;duration_ms&quot;: 412}
+  ],
+  &quot;evaluator_env&quot;: &quot;sha256:…&quot;,
+  &quot;prev_stamp&quot;: &quot;sha256:…&quot;,
+  &quot;funding&quot;: {&quot;unit&quot;: &quot;outcome:refund.approved&quot;, &quot;released&quot;: true},
+  &quot;issued_at&quot;: &quot;2026-09-09T18:02:11Z&quot;,
+  &quot;signature&quot;: &quot;ed25519:…&quot;
+}
+</code></pre>
+<h2 id="witness/api-surface">API surface</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Call</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>POST /witnesses</td>
+<td>Create or version a witness record; returns lint results and readiness.</td>
+</tr>
+<tr>
+<td>POST /traces</td>
+<td>Ingest a completed trace; triggers stamping for every witness bound to the run.</td>
+</tr>
+<tr>
+<td>GET /stamps/{trace_id}</td>
+<td>Fetch the certificate and evidence index.</td>
+</tr>
+<tr>
+<td>POST /oracles</td>
+<td>Register an evaluator image; runs the determinism gate before listing.</td>
+</tr>
+<tr>
+<td>POST /stamps/{id}/verify</td>
+<td>Recompute from evidence and compare bytes. The auditor and insurer endpoint.</td>
+</tr>
+<tr>
+<td>Webhooks</td>
+<td><code>stamp.issued</code>, <code>stamp.rejected</code>, <code>judgment.requested</code>, <code>judgment.signed</code>.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Not in v1: partial credit, model-judged quality in the stamp path, cross-tenant fixture sharing.</p>
+<h2 id="witness/eight-weeks-five-phases">Eight weeks, five phases</h2>
+<p>Each phase gate is itself a witness record, so the system stamps its own build from phase one.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Builds</th>
+<th>Gate</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. Schema and lint (week 1)</td>
+<td>Record schema, both enums, and <code>ox witness lint</code>, which rejects records missing an executable witness or a negative witness on threshold language.</td>
+<td>Twenty real requirements from the design partner pass lint, and the partner confirms each says what they meant.</td>
+</tr>
+<tr>
+<td>2. Ingest and first oracles (weeks 2–3)</td>
+<td>Trace ingest, fixture vault, sandbox runner, evaluators for example, predicate, schema, executable. Unsigned certificates.</td>
+<td>The phase-1 records stamp against real traces. A double run on 100 traces yields 100 byte-identical certificates.</td>
+</tr>
+<tr>
+<td>3. Trust and governance (weeks 4–5)</td>
+<td>Signing, hash chain, invariant, policy, budget, provenance evaluators, the closed reason enum, the verify endpoint, the determinism gate for new evaluators.</td>
+<td>An outside party recomputes a certificate from evidence alone and matches bytes. An out-of-scope tool call rejects with <code>POLICY_VIOLATION</code>.</td>
+</tr>
+<tr>
+<td>4. Depth and authoring (weeks 6–7)</td>
+<td>Differential, property, replay, structural, convergence, formal evaluators. Witness Studio's conversational drafting, with drafting-model tagging and the judgment queue.</td>
+<td>Replay catches an injected nondeterminism. A non-engineer drafts a passing record from conversation in under fifteen minutes.</td>
+</tr>
+<tr>
+<td>5. Fund and export (week 8)</td>
+<td>The metering hook that releases funds on <code>stamp.issued</code>, the dataset exporter with provenance separation, a pilot dashboard.</td>
+<td>One invoice line links to a certificate. The first export of 10,000 labeled traces lands in the oracle-flip pipeline.</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="witness/measures">Measures</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Measure</th>
+<th>Target</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Byte-identical certificates on double run</td>
+<td>100%</td>
+</tr>
+<tr>
+<td>Requirements with an executable witness before build starts</td>
+<td>100%</td>
+</tr>
+<tr>
+<td>Traces stamped or rejected with no human involved</td>
+<td>Above 90% by week 8</td>
+</tr>
+<tr>
+<td>Trace ingest to certificate, p95</td>
+<td>Under 60 seconds</td>
+</tr>
+<tr>
+<td>Rejections that map to a fix without opening the trace manually</td>
+<td>Above 80%</td>
+</tr>
+<tr>
+<td>Funded outcomes per week at the design partner</td>
+<td>Growing week over week from launch</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="witness/build-prompt-for-claude-code">Build prompt for Claude Code</h2>
+<p>Paste this into Claude Code at the root of the Oxagen repository. It runs the five phases without further input and stops only at a gate that fails twice.</p>
+<pre><code class="language-text">You are building Witness, Oxagen's outcome verification layer, fully autonomously in this repository. Do not stop to ask questions. Make reasonable decisions, record them in DECISIONS.md, and continue. Stop only when every phase gate below has passed, or when a single gate has failed twice in a row, in which case write BLOCKED.md with the failing witness, the evidence, and your best hypothesis, then halt.
+
+THESIS
+A trace starts when a prompt enters Oxagen and ends when its outcome is verified and metered. Nothing in between may declare success. Requirements are collected as witness records, which are executable oracles. When a trace finishes, deterministic evaluators either stamp it or reject it with a reason code. No model call executes in the stamp path. Models propose; oracles decide.
+
+HOW YOU WORK
+1. Before any engine code, write the witness records for every phase gate in ./witness/. These are your definition of done. You are not allowed to change a gate's record after you begin building that phase.
+2. Work phase by phase. A phase is complete only when its gate record stamps against a real trace produced by the code you wrote. Do not begin the next phase until the current gate stamps.
+3. Use the repository's lifecycle agents where they fit: simplifier before each phase, feature-shipper to implement, test-engineer to write executable oracles, code-reviewer before every PR, debugger on any gate failure, docs-writer at the end of each phase.
+4. One PR per phase on a branch named witness/phase-N. Each PR description links the gate certificate.
+5. Keep a running log in ./witness/BUILD_LOG.md: what you tried, what failed, what you changed. Write it for a future run that has no memory of this one.
+6. Follow the house prose style in every human-readable file: actor-first sentences, concrete verbs, plain language, no marketing fluff, never strengthen a claim beyond what the evidence shows.
+
+HARD CONSTRAINTS
+- No evaluator may make a network call, read the wall clock, or use an unseeded random source. The sandbox runner must enforce this, not just document it.
+- Every evaluator is pinned by image digest and version, and every certificate names the digests that produced it.
+- A timeout, crash, or missing fixture is a rejection with its own reason code. It is never a pass.
+- Rejection reasons are a closed enum: POST_MISMATCH, INVARIANT_BROKEN, POLICY_VIOLATION, BUDGET_EXCEEDED, SCHEMA_INVALID, EXEC_FAILED, DIFF_DISAGREE, PROPERTY_FAILED, REPLAY_DIVERGED, PROVENANCE_MISSING, STRUCTURE_INVALID, NO_CONVERGENCE, FORMAL_UNPROVEN, EVALUATOR_ERROR, FIXTURE_MISSING.
+- Certificates are signed with a per-tenant ed25519 key and chained to the previous certificate for that tenant.
+- Judgment-gated items are recorded as signatures, never as stamps, and are labeled separately in every export.
+- The model that drafts a witness record is tagged on the record and is never the model that implements the feature the record covers.
+
+WITNESS RECORD SCHEMA (implement exactly; extend only additively)
+witness:
+  id, title, requirement, owner
+  oracle_classes: subset of [example, predicate, invariant, schema, executable, differential, property, replay, policy, budget, provenance, structural, convergence, formal]
+  pre: {fixtures: [content-addressed refs], tool_recordings: ref}
+  act: {prompt, capability_set}
+  post: [assertions over db, files, events, http, artifacts]
+  invariants: [unchanged checks, set-membership checks]
+  budget: {max_cost_usd, max_tool_calls, max_wall_ms, max_retries}
+  witnesses: [{name, inputs, expected (hash) | expect_verdict + reason}]  at least one required; a negative witness is required if the requirement contains a threshold, a boundary, or the word &quot;only&quot;
+  judgment_gated: [strings]
+  funding: {unit, release_on}
+
+CERTIFICATE SCHEMA
+{trace_id, witness_id, witness_hash, verdict: STAMPED|REJECTED|JUDGMENT_GATED, reason, oracles: [{class, evaluator digest, verdict, evidence hash, duration_ms}], evaluator_env, prev_stamp, funding: {unit, released}, issued_at, signature}
+
+COMPONENTS TO BUILD
+Witness Studio (authoring CLI first, conversational drafting in phase 4), Oracle Registry, Trace Ingest (content-addressed), Fixture Vault, Stamp Engine with sandbox runner, Certificate Ledger (append-only, hash-chained, signed), Judgment Queue, Dataset Exporter, and these endpoints: POST /witnesses, POST /traces, GET /stamps/{trace_id}, POST /oracles, POST /stamps/{id}/verify, plus webhooks stamp.issued, stamp.rejected, judgment.requested, judgment.signed.
+
+PHASES AND GATES
+Phase 1, schema and lint. Deliver the record schema, both enums, and `ox witness lint`, which rejects records with no executable witness or a missing negative witness on threshold language. Gate: twenty records drawn from existing Oxagen requirements pass lint, and a lint run on a deliberately incomplete record fails with a specific message.
+Phase 2, ingest and first oracles. Deliver trace ingest, fixture vault, sandbox runner, and evaluators for example, predicate, schema, executable, and unsigned certificates. Gate: the phase-1 gate record stamps against a real trace, and a double run on 100 traces produces 100 byte-identical certificates.
+Phase 3, trust and governance. Deliver signing, hash chain, invariant, policy, budget, and provenance evaluators, the closed reason enum, the verify endpoint, and the determinism gate for registering evaluators. Gate: recompute a certificate from evidence alone via the verify endpoint and match bytes; a trace with an out-of-scope tool call is rejected with POLICY_VIOLATION; an evaluator image that declares egress is refused by the registry.
+Phase 4, depth and authoring. Deliver differential, property, replay, structural, convergence, and formal evaluators, conversational drafting in Witness Studio with drafting-model tagging, and the judgment queue. Gate: replay rejects a trace into which you injected nondeterminism with REPLAY_DIVERGED; a witness record drafted from a three-message conversation passes lint without manual edits.
+Phase 5, fund and export. Deliver the metering hook that releases funds on stamp.issued, the dataset exporter with provenance separation, and a dashboard of stamped, rejected, and gated counts per witness. Gate: a metering record links to a certificate; an export of 1,000 labeled traces validates against the exporter schema with drafting and implementing model fields populated and distinct.
+
+DEFINITION OF DONE
+Every phase gate has stamped. README.md explains Witness to a new engineer in under 600 words. DECISIONS.md lists every non-obvious choice with the reason. The final PR includes the five gate certificates. If any statement in the docs is not backed by a stamped witness, remove the statement.
+
+Begin with Phase 1. Write the gate records first.
+</code></pre>
+<h2 id="witness/the-witness-record-schema">The witness record schema</h2>
+<pre><code class="language-yaml">witness:
+  id: string                 # WR-####
+  title: string
+  requirement: string
+  owner: string
+  oracle_classes: [example|predicate|invariant|schema|executable|differential|property|replay|policy|budget|provenance|structural|convergence|formal]
+  pre:
+    fixtures: [ref]          # content-addressed
+    tool_recordings: ref
+  act:
+    prompt: string
+    capability_set: [cap:*]
+  post: [assertion]          # db | file | event | http | artifact
+  invariants: [check]        # unchanged | no_tool_call_outside | count_never_decreases
+  budget: {max_cost_usd, max_tool_calls, max_wall_ms, max_retries}
+  witnesses:                 # &gt;=1; negative witness required on thresholds
+    - {name, inputs: ref, expected: sha256}
+    - {name, inputs: ref, expect_verdict: REJECTED, reason: enum}
+  judgment_gated: [string]   # signatures only, never stamps
+  funding: {unit: string, release_on: STAMPED}
+  drafted_by: model-id       # set by Studio, never the implementer
+</code></pre>
+
+<footer class="colophon"><span>Oxagen · Specification</span><span>Source: <code>docs/witness-spec.md</code></span></footer>
+</main>
+</div>
 </article><article id="desktop" class="doc" hidden>
 <header class="mast">
   <p class="eyebrow">Oxagen · Specification</p>
@@ -6691,7 +7137,7 @@ pnpm --filter @oxagen/desktop dev          # tauri dev over Vite on :1420
 <td>W1</td>
 <td><strong>The design baseline was split across branches</strong> (resolved). Agent IAM was on <code>main</code> (54f9107; the 1b0634c first named here is an unmerged <code>worktree-audit-fix</code> commit). <code>approvalCardSm</code> and the flyout were on <code>small-approvals-bottom-dock-scenarios</code> (3f345d5, which merged the flyout as PR #1). <code>runMetrics(R)</code> was only in the <code>Specs/mockups/mc.html</code> scratch copy.</td>
 <td>Twenty lanes reading &quot;the mockup&quot; would build three different apps.</td>
-<td><strong>Baseline = tag <code>mc-baseline-w1</code>: one <code>mc.html</code> with Agent IAM + small approval card + sidebar flyout + <code>runMetrics</code> instruments.</strong> Read it with <code>git show mc-baseline-w1:mc.html</code>; <code>tools/baseline/README.md</code> records what each decision came from, and <code>tools/baseline/check-baseline.mjs</code> checks it in a browser. Every lane prompt names the tag, never a branch or the Specs scratch. Where a W file or an older branch disagrees, the baseline wins (w2 and w3 still carry the bottom dock). Superseded by <code>mc-baseline-w2</code> (2026-09-13), which adds the W1–W11 parity work and the a-intel dataset, by <code>mc-baseline-w3</code> (2026-09-13, PR #12), which makes every run's tool calls a subset of its agent's belt at registry versions, and by <code>mc-baseline-w4</code> (2026-09-13, PR #14), which keeps the in-app agent's runs out of the tenant's run index while <code>run(id)</code> still opens them. Lanes read the newest tag; <code>tools/baseline/README.md</code> lists them.</td>
+<td><strong>Baseline = tag <code>mc-baseline-w1</code>: one <code>mc.html</code> with Agent IAM + small approval card + sidebar flyout + <code>runMetrics</code> instruments.</strong> Read it with <code>git show mc-baseline-w1:mc.html</code>; <code>tools/baseline/README.md</code> records what each decision came from, and <code>tools/baseline/check-baseline.mjs</code> checks it in a browser. Every lane prompt names the tag, never a branch or the Specs scratch. Where a W file or an older branch disagrees, the baseline wins (w2 and w3 still carry the bottom dock). Superseded by <code>mc-baseline-w2</code> (2026-09-13), which adds the W1–W11 parity work and the a-intel dataset, and by <code>mc-baseline-w3</code> (2026-09-13, PR #12), which makes every run's tool calls a subset of its agent's belt at registry versions. Lanes read the newest tag; <code>tools/baseline/README.md</code> lists them.</td>
 </tr>
 <tr>
 <td>W2</td>
@@ -6902,7 +7348,7 @@ Status comes from table and contract names in the repo. <strong>Batch 3 lanes mu
 </tr>
 <tr>
 <td>Agents · trust / spend scores</td>
-<td><code>SCORES</code>, <code>PLATFORM</code>, <code>scoreCuts()</code></td>
+<td><code>SCORES</code></td>
 <td>none in spec</td>
 <td>none</td>
 <td>❌ G11</td>
@@ -7176,7 +7622,7 @@ Status comes from table and contract names in the repo. <strong>Batch 3 lanes mu
 </tbody>
 </table></div>
 <h3 id="plan/3-3-what-the-mapping-says">3.3 What the mapping says</h3>
-<p><strong>Tally: 68 slices — ✅ 19 · 🟡 27 · ❌ 22.</strong></p>
+<p><strong>Tally: 68 slices: ✅ 19 · 🟡 27 · ❌ 22.</strong></p>
 <ul>
 <li><strong>Backed or nearly backed:</strong> org and workspace administration (members, workspaces, roles, API keys, data plane), agent identity/roles/enrollment, tool servers, sources and repositories, steering records, budgets, notifications. These pages can go live in Batch 3.</li>
 <li><strong>Fixture-first by necessity:</strong> mandates, policy versions, findings, proven spend, receipts, KEK rotation, run proof, the definition of done, context-window evidence, run graph. They map to spec milestones M2–M5 and have <strong>no table today</strong>. The app must ship them as <code>NotBacked</code> states, not wait for them.</li>
@@ -7250,9 +7696,9 @@ Status comes from table and contract names in the repo. <strong>Batch 3 lanes mu
 </tr>
 <tr>
 <td>G11</td>
-<td>Agent trust/spend scores. Decided in the mockup (2026-09-13): the score is the agent's own (0–1000, nightly from frames); its colour is its percentile among every scored agent on Oxagen — the tenant's agents plus a nightly platform rollup (<code>PLATFORM</code>: org and agent counts and an anonymised sorted score sample per kind). Green at or above p90, no colour p10–p90 (eight in ten by construction), amber below p10, red below p5; cuts recomputed per render (<code>scoreCuts()</code>). Needs a <code>score_distribution</code> rollup the platform publishes to every org. An agent identity is drawn only by <code>agentCard()</code> in three layouts: <code>list</code> (rows), <code>compact</code> (one agent on someone else's record), <code>detail</code> (the agent's page).</td>
+<td>Agent trust/spend scores (spec decision first)</td>
 <td>Agents scores, auto-approval eligibility</td>
-<td>—</td>
+<td>none</td>
 </tr>
 <tr>
 <td>G12</td>
@@ -7290,7 +7736,7 @@ Status comes from table and contract names in the repo. <strong>Batch 3 lanes mu
 <h2 id="plan/4-architecture-of-the-new-apps-app">4. Architecture of the new <code>apps/app</code></h2>
 <h3 id="plan/4-1-tree">4.1 Tree</h3>
 <pre><code class="language-text">apps/app/
-├─ package.json               # @oxagen/app — same name, same port, same build/start scripts
+├─ package.json               # @oxagen/app: same name, same port, same build/start scripts
 ├─ next.config.ts
 ├─ tsconfig.json
 ├─ eslint.config.mjs          # ESLint 10, standalone (does not import eslint.next.mjs)
@@ -7479,7 +7925,7 @@ export default createNextIntlPlugin(&quot;./src/i18n/request.ts&quot;)(nextConfi
   &quot;exclude&quot;: [&quot;node_modules&quot;, &quot;.next&quot;, &quot;e2e&quot;]
 }
 </code></pre>
-<pre><code class="language-js">// apps/app/eslint.config.mjs — ESLint 10. Standalone: eslint.next.mjs is ESLint 9 + eslint-config-next.
+<pre><code class="language-js">// apps/app/eslint.config.mjs: ESLint 10. Standalone: eslint.next.mjs is ESLint 9 + eslint-config-next.
 import { defineConfig, globalIgnores } from &quot;eslint/config&quot;;
 import js from &quot;@eslint/js&quot;;
 import tseslint from &quot;typescript-eslint&quot;;
@@ -7623,7 +8069,7 @@ export interface DataSource {
   runs: RunReadPort; approvals: ApprovalReadPort; /* … one field per port */
 }
 </code></pre>
-<pre><code class="language-ts">// src/data/source.ts — the ONLY file that imports adapters
+<pre><code class="language-ts">// src/data/source.ts: the ONLY file that imports adapters
 import &quot;server-only&quot;;
 import type { DataSource } from &quot;./ports&quot;;
 import { liveSource } from &quot;./adapters/live&quot;;
@@ -7714,7 +8160,7 @@ export const requireViewer = cache(async (orgSlug: string, wsSlug?: string): Pro
   };
 });
 </code></pre>
-<pre><code class="language-ts">// src/server/invoke.ts — every write in the app goes through here
+<pre><code class="language-ts">// src/server/invoke.ts: every write in the app goes through here
 import &quot;server-only&quot;;
 import &quot;@oxagen/handlers/register&quot;;
 import { getCapability, invoke, type CapabilityContext } from &quot;@oxagen/oxagen&quot;;
@@ -7808,7 +8254,7 @@ export default async function FleetPage(props: PageProps&lt;&quot;/[org]/[ws]&qu
   );
 }
 </code></pre>
-<pre><code class="language-tsx">// src/features/fleet/fleet-table.tsx — the Read&lt;T&gt; result drives the four states
+<pre><code class="language-tsx">// src/features/fleet/fleet-table.tsx: the Read&lt;T&gt; result drives the four states
 import { dataSource } from &quot;@/data/source&quot;;
 import { PageState } from &quot;@/ui/page-state&quot;;
 import type { Viewer } from &quot;@/server/scope&quot;;
@@ -7854,7 +8300,7 @@ export async function PageState(props: Props) {
   }
 }
 </code></pre>
-<pre><code class="language-tsx">// src/app/[org]/[ws]/runs/[run]/run-error-boundary.tsx — 16.3 catchError: retry re-renders the Server Components
+<pre><code class="language-tsx">// src/app/[org]/[ws]/runs/[run]/run-error-boundary.tsx: 16.3 catchError: retry re-renders the Server Components
 &quot;use client&quot;;
 import { catchError, type ErrorInfo } from &quot;next/error&quot;;
 import { ErrorState } from &quot;@/ui/error-state&quot;;
@@ -7967,7 +8413,7 @@ export const config = { matcher: [&quot;/((?!_next/|favicon|robots|manifest|font
 </code></pre>
 <p>Workspace slugs must not collide with org-level segments (<code>billing</code>, <code>audit</code>, <code>members</code>, <code>settings</code>, <code>security</code>, <code>access</code>, <code>workspaces</code>, <code>developer</code>); <code>workspace.create</code> already validates slugs, so add these to its reserved list in B4. The proxy only checks that the cookie exists, as today. The real session and membership check is <code>requireViewer</code> in every layout and page. Batch 5 adds a test that walks all 70 old routes from Appendix F and asserts each one lands on the right page (the table is data; the test reads the spec's list, not the regex).</p>
 <h3 id="plan/4-12-testing-per-lane">4.12 Testing, per lane</h3>
-<pre><code class="language-ts">// e2e/fleet.spec.ts — one file per page; states come from MC_DATA=fixture + a state cookie honoured only in dev/test
+<pre><code class="language-ts">// e2e/fleet.spec.ts: one file per page; states come from MC_DATA=fixture + a state cookie honoured only in dev/test
 import AxeBuilder from &quot;@axe-core/playwright&quot;;
 import { instant } from &quot;@next/playwright&quot;;
 import { expect, test } from &quot;@playwright/test&quot;;
@@ -9049,10 +9495,10 @@ renders first and when it is empty make sure it does not consume alot of vspace.
 <header class="mast">
   <p class="eyebrow">Oxagen · Scenario</p>
   <h1>W13: in the loop</h1>
-  <dl class="facts"><dt>Status</dt><dd>Hand-drawn; not in the master or the spec yet</dd><dt>Mockup</dt><dd><code>mockups/w13-in-the-loop.html</code>, the Hand-drawn story in Storybook</dd><dt>Owner</dt><dd>Mac Anderson</dd></dl>
+  <dl class="facts"><dt>Status</dt><dd>In the master; not in the spec yet</dd><dt>Mockup</dt><dd><code>mockups/missioncontrol.html#/a-intel/core-platform/scenarios/in-the-loop/1</code>, and the W13 story in Storybook</dd><dt>Owner</dt><dd>Mac Anderson</dd></dl>
 </header>
 <div class="grid">
-<nav class="toc" aria-label="Contents of this document"><p>Contents</p><ol><li><a href="#w13/the-three-things-this-scenario-proves">The three things this scenario proves</a></li><li><a href="#w13/where-this-sits-against-the-spec">Where this sits against the spec</a></li><li><a href="#w13/the-walk-six-beats">The walk — six beats</a></li><li><a href="#w13/cut-downs">Cut-downs</a></li><li><a href="#w13/what-is-mocked">What is mocked</a></li><li><a href="#w13/known-gaps">Known gaps</a></li></ol></nav>
+<nav class="toc" aria-label="Contents of this document"><p>Contents</p><ol><li><a href="#w13/the-three-things-this-scenario-proves">The three things this scenario proves</a></li><li><a href="#w13/where-this-sits-against-the-spec">Where this sits against the spec</a></li><li><a href="#w13/the-walk-six-beats">The walk — six beats</a></li><li><a href="#w13/cut-downs">Cut-downs</a></li><li><a href="#w13/what-is-mocked">What is mocked</a></li><li><a href="#w13/in-the-master">In the master</a></li><li><a href="#w13/known-gaps">Known gaps</a></li></ol></nav>
 <main>
 <p><strong>Wow moment.</strong> An agent starts a run in a repository nobody has bound. Because skills are on,
 there is a config to resolve and nothing to resolve it against — so Oxagen stops the loop before
@@ -9102,9 +9548,11 @@ decides every call. Adopting W13 means § 2 needs one sentence distinguishing <e
 <code>workspace.created</code>, <code>reflection.captured</code>.</p>
 <hr />
 <h2 id="w13/the-walk-six-beats">The walk — six beats</h2>
-<p>Open <code>w13-in-the-loop.html</code>. The <code>screens</code> button in the mockup chrome jumps to any beat directly.</p>
+<p>Open <strong>Scenarios → In the loop</strong> in <code>mockups/missioncontrol.html</code>, or the W13 story in Storybook. The rail walks the
+beats in order; each beat below names its rail step and the route it lives on, and the state bar in
+the mockup chrome gives the loading, empty, error, denied and phone states of every screen.</p>
 <h3 id="w13/1-the-default-40s">1. The default (≈40s)</h3>
-<p>Land on <strong>Skills</strong> in <code>finops</code>, or use <em>screens → &quot;Skills, off&quot;</em>.</p>
+<p>Rail step 1 — <code>#/a-intel/finops/skills</code>.</p>
 <blockquote>
 <p>&quot;This is a workspace with skills off. Not disabled by an admin — this is what a workspace is made
 as. The screen says what turning it on would do and, just as carefully, what it would <em>not</em> do:
@@ -9114,7 +9562,7 @@ not own.&quot;</p>
 <p>Point at the table underneath: both workspaces, each with its creation date and the value it shipped
 with. The default is visible rather than implied.</p>
 <h3 id="w13/2-turning-it-on-is-a-pull-request-30s">2. Turning it on is a pull request (≈30s)</h3>
-<p><em>screens → &quot;Turning it on, as a pull request&quot;</em>.</p>
+<p>Rail step 2 — the same route; the step's action opens the <strong>Turn skills on</strong> dialog.</p>
 <blockquote>
 <p>&quot;The switch in this dialog is the outcome. The control is the pull request. <code>.oxagen/skills.toml</code>
 is a file in <code>a-intel/platform</code>, so the person who turned skills on is in the git history and on a
@@ -9123,7 +9571,7 @@ receipt, and the config a run resolved is a version you can go back and read.&qu
 <p>Note the line about runs already in flight: they finish without skills. A run resolves its config
 once, at the start.</p>
 <h3 id="w13/3-the-search-belongs-to-the-config-90s-the-technical-beat">3. The search belongs to the config (≈90s — the technical beat)</h3>
-<p><em>screens → &quot;search_skills, answered as the agent&quot;</em>.</p>
+<p>Rail step 3 — <code>#/a-intel/core-platform/skills/search</code>.</p>
 <p>Type nothing; the box already holds <code>cut the first release notes</code>. Press <strong>Ask as the agent</strong>.</p>
 <blockquote>
 <p>&quot;This is not a search box for me. It is the tool the agent holds, answered exactly as the gateway
@@ -9144,7 +9592,7 @@ withholding leaks the thing it is withholding.&quot;</p>
 <em>&quot;extract tables from a pdf&quot;</em> for the digest case. Finish on the right-hand panel: the
 <code>skills.searched</code> frame, and the line that replay resolves <code>skl_v7</code> rather than today's config.</p>
 <h3 id="w13/4-the-seat-in-the-loop-2m-the-wow">4. The seat in the loop (≈2m — <strong>the wow</strong>)</h3>
-<p><em>screens → &quot;The run, from three sides&quot;</em>.</p>
+<p>Rail steps 4 and 5 — <code>#/a-intel/core-platform</code> (Fleet, the interjection banner), then <code>#/a-intel/core-platform/runs/run_01K6QW3D5N7TYBA2</code>.</p>
 <blockquote>
 <p>&quot;A run just started in <code>a-intel/edge-proxy</code>. Nobody has bound that repository to a workspace. Skills
 are on, so there is a config to resolve and nothing to resolve it against — and Oxagen is not
@@ -9175,7 +9623,7 @@ pull request so a reviewer knows the work was done without the procedure.</li>
 <p>Close the beat on the timeout rule: at 30 minutes an unanswered interjection times out to <strong>deny</strong>.
 The safe end of an unanswered question is fewer skills, not more.</p>
 <h3 id="w13/5-reflection-and-the-fence-around-it-90s">5. Reflection, and the fence around it (≈90s)</h3>
-<p><em>screens → &quot;The injected turn and the self-grade&quot;</em>.</p>
+<p>Rail step 6 — <code>#/a-intel/core-platform/skills/reflect</code>.</p>
 <blockquote>
 <p>&quot;Sitting in the loop means we can also ask the agent a question of our own, after the work is
 sealed. This run's verdict was <code>failing</code>, and <code>rfl_v3</code> always samples a failing run.&quot;</p>
@@ -9197,7 +9645,7 @@ is fenced.&quot;</p>
 <p>Scroll to <strong>Quarantine</strong> and read the five rules. The fifth one — it expires — is the one security
 reviewers ask about.</p>
 <h3 id="w13/6-the-history-30s">6. The history (≈30s)</h3>
-<p><em>screens → &quot;The config file and its history&quot;</em>.</p>
+<p>Rail step 7 — <code>#/a-intel/core-platform/skills/versions</code>.</p>
 <p>Five policy versions, each a pull request. End on the bottom row:</p>
 <blockquote>
 <p>&quot;core-platform was created on 2026-07-30 with skills off, and stayed off for three days until
@@ -9295,12 +9743,18 @@ workspace is made.&quot;</p>
 </tr>
 </tbody>
 </table></div>
+<h2 id="w13/in-the-master">In the master</h2>
+<p>Ported on 2026-09-14. The master (<code>mockups/src/engine.js</code>) has the <strong>Skills</strong> page (<code>pSkills()</code>: Catalog · Search · In the
+loop · Reflection · Versions), the off-by-default gate (<code>skGate()</code>, rendered for any workspace whose
+<code>SK_ON</code> is false — FinOps), the interjected run (<code>pRun()</code> hands <code>run_01K6QW3D5N7TYBA2</code> to
+<code>skRunPage()</code>, the triptych), an interjection banner on Fleet, Skills in the sidebar and the mobile
+More sheet, four dialogs (<code>skenable</code>, <code>skcfg</code>, <code>skill</code>, <code>skadd</code>) and <code>SCENARIOS[&quot;in-the-loop&quot;]</code> —
+the six beats above as seven rail steps (beat 4 is two: Fleet, then the run). The Skills, skills-off and run-interjection pages
+are rows in <code>mockups/catalog.mjs</code>, so Storybook shows them in every state and <code>tools/check-mockup.mjs</code>
+walks them; their specs and audit prompts are in <code>mockups/pages/</code>. The <code>screens</code> index of the hand-drawn original
+is replaced by the scenario rail and the state bar. Every W13 class in the master is <code>sx-</code> prefixed.</p>
 <h2 id="w13/known-gaps">Known gaps</h2>
 <ul>
-<li><strong>Not integrated into the master (<code>mockups/missioncontrol.html</code>).</strong> The showboat has no Skills page and no <code>in-the-loop</code> entry in
-its <code>SCENARIOS</code> map, so this scenario is not yet walkable from The Ten Pages. It was left out on
-purpose: the master had uncommitted concurrent edits when this was built, and a 16 KB divergence in
-an 850 KB single file is a merge nobody wants. Port it once that settles.</li>
 <li><strong>The spec is untouched.</strong> § 19's tables still end at W12 and its status line still reads
 <code>complete</code>; § 2 still says &quot;no skills engine&quot; without the run-versus-resolve distinction. Both
 need a decision before W13 is written into the spec.</li>
@@ -9314,7 +9768,7 @@ need a decision before W13 is written into the spec.</li>
 </div>
 <script>
 (function(){
-  var TITLES={'spec': 'Oxagen Mission Control: Product and Technical Specification', 'dod': 'Oxagen DoD: the definition of done for agent runs', 'desktop': 'Oxagen Desktop: product specification, rev 1', 'plan': 'Oxagen Mission Control app: implementation plan', 'scope': 'Oxagen Mission Control: the scope review, and what it changed', 'prompts': 'Oxagen Mission Control: mockup prompts, one per demo flow', 'consolidation': 'Consolidating W1–W11 into one design', 'feedback': 'Feedback on the mockups', 'videos': 'Videos of the mockups, narrated', 'w13': 'W13: in the loop'};
+  var TITLES={'spec': 'Oxagen Mission Control: Product and Technical Specification', 'dod': 'Oxagen DoD: the definition of done for agent runs', 'witness': 'Oxagen Witness: outcome verification', 'desktop': 'Oxagen Desktop: product specification, rev 1', 'plan': 'Oxagen Mission Control app: implementation plan', 'scope': 'Oxagen Mission Control: the scope review, and what it changed', 'prompts': 'Oxagen Mission Control: mockup prompts, one per demo flow', 'consolidation': 'Consolidating W1–W11 into one design', 'feedback': 'Feedback on the mockups', 'videos': 'Videos of the mockups, narrated', 'w13': 'W13: in the loop'};
   var first='spec';
   function show(){
     var h=location.hash.replace(/^#/,""), id=h.split("/")[0];

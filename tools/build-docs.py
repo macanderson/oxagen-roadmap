@@ -23,6 +23,7 @@ CATALOG = [
     ("Specifications", [
         ("spec", "mission-control-spec.md", "Specification"),
         ("dod", "dod-spec.md", "Specification"),
+        ("witness", "witness-spec.md", "Specification"),
         ("desktop", "desktop-spec.md", "Specification"),
     ]),
     ("Plans and decisions", [

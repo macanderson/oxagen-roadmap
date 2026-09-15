@@ -1,6 +1,6 @@
 # The builds and the guards
 
-Three things are built from sources, and each build has a `--check` that says whether the
+Four things are built from sources, and each build has a `--check` that says whether the
 committed output is what the sources produce. `npm run build` runs the builds; `npm run check`
 runs the checks and then the browser guard.
 
@@ -9,6 +9,7 @@ runs the checks and then the browser guard.
 | `node tools/build-mockup.mjs` | `mockups/missioncontrol.html`, the one self-contained master | `mockups/src/{engine.css,shell.html,engine.js}` and `mockups/fixtures/*.json` (inlined as `FIXTURES`) |
 | `node tools/build-stories.mjs` | `mockups/stories/**`, the Storybook catalog | `mockups/catalog.mjs` (every page with its states; every scenario) |
 | `python3 tools/build-docs.py` | `docs/missioncontrol-docs.html`, every document on one page | `docs/*.md` and `docs/_house/oxagen-doc.css` (needs `markdown-it-py`) |
+| `node tools/build-badges.mjs` | `badges/*.svg`, `badges/index.html`, `badges/README.md` | the verdict and attestation vocabularies in the script, coloured with the engine's tokens |
 
 Edit the sources, run the build, commit both. A `--check` failure means the two drifted.
 
