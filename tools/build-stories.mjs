@@ -56,7 +56,7 @@ for (const s of SCENARIOS) {
 }
 
 outs.set("product.stories.js", [HEAD,
-  `import { view, argTypes } from "../_view.js";`,
+  `import { view, argTypes } from "./_view.js";`,
   `import { HOME } from "../catalog.mjs";`,
   ``,
   `// The product build: every page, dialog and auth screen with the mockup chrome taken off.`,

@@ -8,9 +8,10 @@
     "predev": "node scripts/prepare.mjs",
     "dev": "next dev --port 3310",
     "prebuild": "node scripts/prepare.mjs",
-    "build": "NODE_ENV=production next build",
+    "build": "NODE_ENV=production next build && node scripts/catalog.mjs",
     "postinstall": "node scripts/prepare.mjs && fumadocs-mdx",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "catalog": "node scripts/catalog.mjs"
   },
   "dependencies": {
     "fumadocs-core": "16.9.3",
