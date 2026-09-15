@@ -1,4 +1,10 @@
-feedback on ui mockups
+# Feedback on the mockups
+
+| | |
+|---|---|
+| **Status** | Items 1, 2, 5, 6 and 8 are in the master; 4 is in (the run name and summary, the file-diff card); 3 and 7 wait on a design decision (`implementation-plan.md` §2 W2) |
+| **Date** | 2026-09-12 |
+| **Owner** | Mac Anderson |
 
 1. globally wherever the approval card is shown on the right column make sure it
    renders first and when it is empty make sure it does not consume alot of vspace.

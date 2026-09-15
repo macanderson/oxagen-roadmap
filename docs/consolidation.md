@@ -84,7 +84,7 @@ the master is the design. W1–W11 used to be eleven hand-drawn apps that each d
 somewhere (the bottom dock, approval size, the Agents naming, a run page that showed one run's
 frames for every run). Everything each W file showed that the master lacked was ported into
 the master, each flow became a `SCENARIOS` entry, and the W files are URLs of it. Where a W file and the master disagreed on a decision already recorded in
-`tools/baseline/README.md`, the baseline won and nothing was ported. Superseded and not ported:
+the master, the master won and nothing was ported. Superseded and not ported:
 W1's right-side assistant drawer, W2's three delivery modes and @-addressing, W3's run strip (runMetrics instruments won),
 W6's "create an agent opens a PR",
 W7's page-local assistant, W8's display-currency switch, W11's right rail.

@@ -1,6 +1,10 @@
-# W13 — In the loop
+# W13: in the loop
 
-**Mockup.** `w13-in-the-loop.html`
+| | |
+|---|---|
+| **Status** | Hand-drawn; not in the master or the spec yet |
+| **Mockup** | `mockups/w13-in-the-loop.html`, the Hand-drawn story in Storybook |
+| **Owner** | Mac Anderson |
 
 **Wow moment.** An agent starts a run in a repository nobody has bound. Because skills are on,
 there is a config to resolve and nothing to resolve it against — so Oxagen stops the loop before

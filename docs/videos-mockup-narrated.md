@@ -1,4 +1,9 @@
-# Videos of Mockups with Narration
+# Videos of the mockups, narrated
+
+| | |
+|---|---|
+| **Status** | Two of eleven recorded |
+| **Owner** | Mac Anderson |
 
 - [W1 - Onboarding in 90 Seconds](https://www.loom.com/share/579f2db5b35a4f01891c030e28846b84)
 - [W2 - ]
