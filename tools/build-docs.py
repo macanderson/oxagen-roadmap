@@ -29,6 +29,7 @@ CATALOG = [
     ("Plans and decisions", [
         ("plan", "implementation-plan.md", "Plan"),
         ("scope", "scope-review.md", "Decision record"),
+        ("scaleback", "scale-back-prompt.md", "Record"),
     ]),
     ("The mockups", [
         ("prompts", "demo-mockup-prompts.md", "Record"),

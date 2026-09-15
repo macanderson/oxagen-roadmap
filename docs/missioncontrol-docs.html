@@ -132,7 +132,7 @@ main hr+h2{border-top:0;padding-top:0;margin-top:0}
 <div class="site">
 <nav class="docs" aria-label="Documents">
   <a class="wordmark" href="#spec">o<span class="x">x</span>agen</a>
-  <p>Specifications</p><ol><li><a href="#spec" data-doc="spec">Oxagen Mission Control: Product and Technical Specification</a></li><li><a href="#dod" data-doc="dod">Oxagen DoD: the definition of done for agent runs</a></li><li><a href="#witness" data-doc="witness">Oxagen Witness: outcome verification</a></li><li><a href="#desktop" data-doc="desktop">Oxagen Desktop: product specification, rev 1</a></li></ol><p>Plans and decisions</p><ol><li><a href="#plan" data-doc="plan">Oxagen Mission Control app: implementation plan</a></li><li><a href="#scope" data-doc="scope">Oxagen Mission Control: the scope review, and what it changed</a></li></ol><p>The mockups</p><ol><li><a href="#prompts" data-doc="prompts">Oxagen Mission Control: mockup prompts, one per demo flow</a></li><li><a href="#consolidation" data-doc="consolidation">Consolidating W1–W11 into one design</a></li><li><a href="#feedback" data-doc="feedback">Feedback on the mockups</a></li><li><a href="#videos" data-doc="videos">Videos of the mockups, narrated</a></li><li><a href="#w13" data-doc="w13">W13: in the loop</a></li></ol>
+  <p>Specifications</p><ol><li><a href="#spec" data-doc="spec">Oxagen Mission Control: Product and Technical Specification</a></li><li><a href="#dod" data-doc="dod">Oxagen DoD: the definition of done for agent runs</a></li><li><a href="#witness" data-doc="witness">Oxagen Witness: outcome verification</a></li><li><a href="#desktop" data-doc="desktop">Oxagen Desktop: product specification, rev 1</a></li></ol><p>Plans and decisions</p><ol><li><a href="#plan" data-doc="plan">Oxagen Mission Control app: implementation plan</a></li><li><a href="#scope" data-doc="scope">Oxagen Mission Control: the scope review, and what it changed</a></li><li><a href="#scaleback" data-doc="scaleback">Scale back Mission Control: the mockup prompt</a></li></ol><p>The mockups</p><ol><li><a href="#prompts" data-doc="prompts">Oxagen Mission Control: mockup prompts, one per demo flow</a></li><li><a href="#consolidation" data-doc="consolidation">Consolidating W1–W11 into one design</a></li><li><a href="#feedback" data-doc="feedback">Feedback on the mockups</a></li><li><a href="#videos" data-doc="videos">Videos of the mockups, narrated</a></li><li><a href="#w13" data-doc="w13">W13: in the loop</a></li></ol>
   <div class="foot">One file, every document. The markdown in <code>docs/</code> is the source; <code>tools/build-docs.py</code> writes this page.</div>
 </nav>
 <div>
@@ -9140,6 +9140,186 @@ stories for new components; PR body lists each §3 row you touched with its stat
 <footer class="colophon"><span>Oxagen · Decision record</span><span>Source: <code>docs/scope-review.md</code></span></footer>
 </main>
 </div>
+</article><article id="scaleback" class="doc" hidden>
+<header class="mast">
+  <p class="eyebrow">Oxagen · Record</p>
+  <h1>Scale back Mission Control: the mockup prompt</h1>
+  <dl class="facts"><dt>Status</dt><dd>Superseded on 2026-09-15</dd><dt>Date</dt><dd>2026-09-14</dd><dt>Owner</dt><dd>Mac Anderson</dd><dt>Related</dt><dd><code>scope-review.md</code></dd></dl>
+</header>
+<div class="grid">
+<nav class="toc" aria-label="Contents of this document"><p>Contents</p><ol><li><a href="#scaleback/decide-these-two-before-running-the-prompt">Decide these two before running the prompt</a></li><li><a href="#scaleback/ground-truth-the-agent-must-not-rediscover">Ground truth the agent must not rediscover</a></li><li><a href="#scaleback/the-prompt">The prompt</a></li><li><a href="#scaleback/what-done-looks-like">What &quot;done&quot; looks like</a></li><li><a href="#scaleback/open-and-deliberately-not-answered-here">Open, and deliberately not answered here</a></li></ol></nav>
+<main>
+<blockquote>
+<p>This prompt drove the wedge approach (PR #25): the cut surfaces stayed in the mockup behind a release switch and an &quot;Already built&quot; group. It was not kept. The review's cuts are removed outright from the mockup, the spec and the plan, and <code>scope-review.md</code> records where each landed. The prompt refers to <code>mc.html</code> and its generated files, which no longer exist.</p>
+</blockquote>
+<p>Source of the argument: <code>docs/oxagen-mission-control-review.html</code> (&quot;The scale-back
+question&quot;, 14 September 2026). This file turns that review into a prompt you can
+hand to an agent working in <code>tmp-oxagen-mockups</code>.</p>
+<p>The review's one-line thesis, which the whole task serves: <strong>this is an ordering
+problem that looks like a surface-area problem.</strong> Nothing gets deleted to look
+smaller. Surfaces move out of the first release and into an appendix titled
+&quot;already built,&quot; and the wedge — recorder, money, governance — is what a visitor
+meets first.</p>
+<hr />
+<h2 id="scaleback/decide-these-two-before-running-the-prompt">Decide these two before running the prompt</h2>
+<p>The rest of the work is mechanical. These are not.</p>
+<ol>
+<li><strong>The in-app assistant — cut, or demote?</strong> The review says cut it (&quot;a chat
+assistant that sells nothing&quot;). It is not a page you can lift out: it is the
+<code>asstConvo</code> panel, <code>w11-assistant-and-account</code>, the <code>z-ai/glm-latest (assistant)</code> rows on Spend, and the <code>oxagen.assistant</code> actor on audit records.
+Pick one and write it into the prompt below:
+<ul>
+<li><strong>Cut</strong> — remove the panel, retire w11 the way w7 was retired, drop the
+assistant model rows from Spend, reattribute the audit records to a human
+operator.</li>
+<li><strong>Demote</strong> — panel stays in <code>mc.html</code> behind the appendix framing, does not
+appear in the wedge tour, and w11 moves to the &quot;already built&quot; list.</li>
+</ul>
+</li>
+<li><strong>Does the Witness flow exist yet?</strong> The review moves Witness from last to
+front. There is no witness page or scenario in <code>mc.html</code> today; <code>w5-proven-not- claimed</code> is the closest thing. Either the prompt scopes a new witness surface
+(a real design job, not a re-label) or it stops at re-sequencing what exists
+and Witness is a separate task. Say which.</li>
+</ol>
+<hr />
+<h2 id="scaleback/ground-truth-the-agent-must-not-rediscover">Ground truth the agent must not rediscover</h2>
+<ul>
+<li><strong><code>mc.html</code> is the only file you edit.</strong> <code>consolidated*.html</code>, <code>pages/**</code> and
+<code>w1</code>–<code>w13</code> are generated from it. Editing a generated file is the one way to
+get this task wrong.</li>
+<li><strong>The graph cut is already done</strong> (commits <code>48f5e8a</code>, <code>4052cdd</code>). There is
+no graph page slug, and <code>w7</code> is gone. The review's largest recommendation
+has already landed — verify, do not redo, and do not re-add it in passing.</li>
+<li><strong>Rebuild chain</strong>, run in this order after any <code>mc.html</code> change:<pre><code class="language-sh">node tools/build-w.mjs            # regenerate w1–w13
+node tools/build-pages.mjs        # regenerate consolidated*.html and pages/
+node tools/build-w.mjs --check
+node tools/build-pages.mjs --check
+node tools/check-scenarios.mjs    # walk every scenario step in Chromium
+node tools/check-pages.mjs        # open every generated page in Chromium
+node tools/baseline/check-baseline.mjs mc.html
+</code></pre>
+</li>
+<li><strong>The demo record is fixed everywhere:</strong> Anderson Intelligence Corp.
+(<code>a-intel</code>), workspace <code>core-platform</code>, operator Marcus Bell. Do not invent a
+second tenant to demonstrate the smaller product.</li>
+<li><strong>Retiring a W file follows the w7 precedent</strong> — removed from <code>SCENARIOS</code>, the
+file deleted, the README table updated, the numbering left with its hole. Do
+not renumber survivors.</li>
+</ul>
+<hr />
+<h2 id="scaleback/the-prompt">The prompt</h2>
+<blockquote>
+<p>You are working in <code>~/Projects/tmp-oxagen-mockups</code>, a repo of self-contained
+HTML mockups for Oxagen Mission Control. Read <code>README.md</code> and
+<code>docs/oxagen-mission-control-review.html</code> first.</p>
+<p><strong>Task: re-sequence the mockups so the first release is the wedge, and
+everything else reads as &quot;already built&quot; rather than &quot;on the roadmap.&quot;</strong> Not a
+deletion pass. The page count barely changes; what changes is what a visitor
+meets first and what the mockup chrome claims is next.</p>
+<p>Work only in <code>mc.html</code> and regenerate. Branch first, push immediately, commit
+per surface.</p>
+<h3 id="scaleback/1-establish-the-wedge">1. Establish the wedge</h3>
+<p>Four surfaces are the first release: <strong>Fleet</strong>, <strong>Run</strong>, <strong>Spend</strong>, <strong>Agents</strong>.
+They must be what the product opens on, what the nav leads with, and what the
+scenario rail tours. Spend carries findings ranked by money at stake — that is
+the page the review calls the cheapest revenue in the spec, so it must not read
+as a reporting afterthought behind Billing.</p>
+<h3 id="scaleback/2-thin-four-surfaces">2. Thin four surfaces</h3>
+<p>Keep the page, cut the second-year features out of the mockup so it stops
+promising what the wedge does not ship:</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Surface</th>
+<th>Keep</th>
+<th>Cut from the mockup</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tools</td>
+<td>registry, approval rules, mandates, kill switches</td>
+<td>policy simulation against real history, two-person mandates, the published assurance suite</td>
+</tr>
+<tr>
+<td>Billing</td>
+<td>plan, invoices, one meter</td>
+<td>every alternative pricing display; the meter appears once and does not vary by screen</td>
+</tr>
+<tr>
+<td>Organization</td>
+<td>members, roles, invitations, API keys</td>
+<td>SSO and SCIM</td>
+</tr>
+<tr>
+<td>Steering</td>
+<td>record → proposal → pull request</td>
+<td>effect metrics, retirement candidates, promotion thresholds</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="scaleback/3-defer-audit-to-the-appendix">3. Defer Audit to the appendix</h3>
+<p>Write-once archive at seal time stays — the evidence chain depends on it.
+Legal holds, crypto-shredding and reconciliation-to-the-cent come out of the
+first-release framing and into &quot;already built.&quot;</p>
+<h3 id="scaleback/4-handle-the-assistant">4. Handle the assistant</h3>
+<p>[Paste your decision from &quot;Decide these two&quot; above. If <strong>cut</strong>: remove the
+<code>asstConvo</code> panel, retire <code>w11-assistant-and-account</code> following the w7
+precedent, drop the <code>z-ai/glm-latest (assistant)</code> rows from the Spend model
+table, and reattribute <code>agent:&quot;oxagen.assistant&quot;</code> audit records to Marcus Bell.
+If <strong>demote</strong>: leave the panel in place, remove it from the wedge tour, and
+list w11 under &quot;already built&quot; in the README.]</p>
+<h3 id="scaleback/5-one-meter-stated-once">5. One meter, stated once</h3>
+<p>The review's sharpest commercial finding is that the price has moved three
+times in a month and that the meter prices the recording rather than the
+finding. In the mockups this means: <strong>one</strong> pricing story, appearing
+identically on Billing, on Spend and in any onboarding screen that mentions
+cost. If two screens disagree about the meter, the mockup is wrong regardless
+of which number is right. Ask before inventing a number — the price itself is
+the founder's call, not yours.</p>
+<h3 id="scaleback/6-re-frame-do-not-delete">6. Re-frame, do not delete</h3>
+<p>Add an &quot;already built&quot; section to <code>README.md</code> listing the deferred surfaces and
+their W files. The review's exact framing: <em>not deleted, not deprecated, not on
+the roadmap — built, working, and not what you are selling this quarter.</em> The
+mockup chrome (state bar, scenario rail) must not present a deferred surface as
+upcoming work.</p>
+<h3 id="scaleback/7-verify">7. Verify</h3>
+<p>Run the full rebuild chain above. Every <code>--check</code> exits 0, both Chromium walks
+pass, and the baseline check passes. Then screenshot the wedge tour —
+Fleet → Run → Spend → Agents — from <code>consolidated-loaded.html</code> and from
+<code>consolidated-loaded-mobile.html</code>, and save them under <code>verifications/</code>.</p>
+<h3 id="scaleback/do-not">Do not</h3>
+<ul>
+<li>Do not edit <code>consolidated*.html</code>, <code>pages/**</code> or <code>w*.html</code> by hand.</li>
+<li>Do not re-add connectors or the graph surfaces.</li>
+<li>Do not renumber W files around the holes left by w7 (and w11, if cut).</li>
+<li>Do not change the demo record, the tenant, or the operator.</li>
+<li>Do not delete a surface the review told you to defer. Deferral is a framing
+change; deletion loses work that is already built and already correct.</li>
+</ul>
+</blockquote>
+<hr />
+<h2 id="scaleback/what-done-looks-like">What &quot;done&quot; looks like</h2>
+<ul>
+<li><code>mc.html</code> opens on the wedge; Fleet, Run, Spend, Agents lead the nav.</li>
+<li>Four surfaces thinned per the table, Audit deferred, assistant resolved per
+your decision.</li>
+<li>One pricing story, identical everywhere it appears.</li>
+<li>README carries an &quot;already built&quot; section; no deferred surface is presented as
+upcoming.</li>
+<li>Full rebuild chain green, both Chromium walks pass, wedge screenshots saved
+desktop and mobile.</li>
+</ul>
+<h2 id="scaleback/open-and-deliberately-not-answered-here">Open, and deliberately not answered here</h2>
+<p>The review closes with three questions for the customer council — what the three
+paying partners actually bought, whether any asked for the ontology, and whether
+any would pay for a stamp. Those answers can change the ranking above. This
+prompt encodes the review's ranking; if the council contradicts it, rewrite the
+wedge in step 1 before running anything.</p>
+
+<footer class="colophon"><span>Oxagen · Record</span><span>Source: <code>docs/scale-back-prompt.md</code></span></footer>
+</main>
+</div>
 </article><article id="prompts" class="doc" hidden>
 <header class="mast">
   <p class="eyebrow">Oxagen · Record</p>
@@ -9768,7 +9948,7 @@ need a decision before W13 is written into the spec.</li>
 </div>
 <script>
 (function(){
-  var TITLES={'spec': 'Oxagen Mission Control: Product and Technical Specification', 'dod': 'Oxagen DoD: the definition of done for agent runs', 'witness': 'Oxagen Witness: outcome verification', 'desktop': 'Oxagen Desktop: product specification, rev 1', 'plan': 'Oxagen Mission Control app: implementation plan', 'scope': 'Oxagen Mission Control: the scope review, and what it changed', 'prompts': 'Oxagen Mission Control: mockup prompts, one per demo flow', 'consolidation': 'Consolidating W1–W11 into one design', 'feedback': 'Feedback on the mockups', 'videos': 'Videos of the mockups, narrated', 'w13': 'W13: in the loop'};
+  var TITLES={'spec': 'Oxagen Mission Control: Product and Technical Specification', 'dod': 'Oxagen DoD: the definition of done for agent runs', 'witness': 'Oxagen Witness: outcome verification', 'desktop': 'Oxagen Desktop: product specification, rev 1', 'plan': 'Oxagen Mission Control app: implementation plan', 'scope': 'Oxagen Mission Control: the scope review, and what it changed', 'scaleback': 'Scale back Mission Control: the mockup prompt', 'prompts': 'Oxagen Mission Control: mockup prompts, one per demo flow', 'consolidation': 'Consolidating W1–W11 into one design', 'feedback': 'Feedback on the mockups', 'videos': 'Videos of the mockups, narrated', 'w13': 'W13: in the loop'};
   var first='spec';
   function show(){
     var h=location.hash.replace(/^#/,""), id=h.split("/")[0];
