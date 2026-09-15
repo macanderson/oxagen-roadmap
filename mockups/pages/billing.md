@@ -12,24 +12,28 @@
 
 ## Job
 
-Proven runs this period, the secondary meters, the plan, this period’s lines and the invoices, linked to Stripe. The customer pays when the work is verified. Readable only by a finance role.
+The plan, governed action units (GAUs) used against this month's allowance, blocks and auto top-up, the contracted rate, the in-app agent's credits, and the invoices, linked to Stripe. Readable only by a finance role.
 
 ## What is on the page
+
+The mockup (`pBilling()`) still renders the proven-run price list. Billing prices governed action units on one price list (spec §12.1; maintainer decisions of 2026-09-14, reaffirmed 2026-09-15), and the build renders the page below.
 
 **Header** — eyebrow “Organization”, h1 “Billing”.
 Actions: **Change plan** (gold; opens the plan dialog; Build or Scale goes through Stripe Checkout)
 
 **Summary tiles** (one number and one basis line each):
 - **Plan** — the plan name · “monthly, cancel any time”
-- **Proven runs this period** — count · “definition of done held · of N sealed runs”
-- **Retained evidence** — GB · “N months included”
-- **Due <date>** — $ USD · after the onboarding discount
+- **GAU this month** — remaining · “used of included + purchased + carried”
+- **Contracted rate** — $ per 1,000 GAU · the plan's terms, or the contract's agreement reference
+- **Due <date>** — $ USD
 
-- **This period** — Line · Basis · Amount (proven runs at the tier price, pending runs at $0.00 until signed, evidence, discount, tax).
-- **Meters** — Meter · This period · Note: one priced meter (the proven run, `dod.held`), and the secondary meters (sealed runs, governed actions, retained evidence, halted runs, witness runs) reported and never priced.
-- **Invoices** — Invoice · Period · Proven runs · Amount · Status · Paid; a row opens the Stripe-hosted invoice.
-- **The price list** — Free (every governance feature, unlimited runs, 30 days of evidence, 3 seats) · $0.30 / $0.20 / $0.15 per proven run by monthly volume · evidence retention · tokens at cost · Enterprise, negotiated per contract.
-- **What counts** — Priced: a proven run (sealed, its definition of done held, certificate signed). Pending: metered the day it is signed. Reported: sealed runs, governed actions, retained evidence. Free: broken runs, halted runs, witness runs.
+- **This month** — Line · Basis · Amount (the plan, blocks bought through Checkout, auto top-ups, invoiced overage, tax).
+- **Meters** — Meter · This month · Note: GAU used against the allowance (`resolve_approval` is the only billable governed action), with held runs and other governed actions reported beside it and carrying no price.
+- **Invoices** — Invoice · Period · GAU · Amount · Status · Paid; a row opens the Stripe-hosted invoice.
+- **The price list** — Free $0 with 5,000 GAU a month · Build $199 with 50,000 · Scale $999 with 300,000 · Enterprise negotiated per contract · $5 per 1,000 GAU list · 5,000-GAU blocks at $25 · volume bands of $5, $4, $3 and $2 per 1,000 · tokens at cost. Every feature is on for every tier.
+- **Auto top-up** — on or off, and the blocks it buys; an Owner or Admin changes it.
+- **Credits** — the in-app agent's credit balance; buy a credit pack.
+- **What counts** — Billed: `resolve_approval`, one GAU each. Free: membership writes and every other governed action, `dod.held` included. Reported: held runs and proven spend.
 
 **Dialogs this page opens:** `plan`.
 
@@ -41,14 +45,16 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 
 | Element | Mockup collection | Target store (spec) | Backing today (repo) | Status |
 |---|---|---|---|---|
-| Plan, invoices | `BILLING` | `billing.subscriptions` + Stripe | `billing.subscriptions`, `billing.invoices`; `billing.subscription.read` | ✅ |
-| Proven runs, meters | `BILLING.billable`, `meters` | `dod.held` governed actions (§12.1, G15) | credits model (`credit_ledger`) | ❌ billing rebuild (G13) |
-| Onboarding discount | `BILLING.discount` | Stripe coupon | none | 🟡 |
+| Plan, invoices | `BILLING` | `billing.plans`, `billing.subscriptions`, `billing.invoices` + Stripe | `billing.subscriptions`, `billing.invoices`; `billing.subscription.read` | ✅ |
+| GAU meter, blocks, contracted rate | `BILLING.billable`, `meters` | `billing.gau_buckets`, `billing.gau_settlements`, `billing.contract_terms` (§12.1, App. A.8) | the same tables on `macanderson/oxagen` `app-rebuild` | 🟡 billing rebuild (G13) |
+| Held runs (reported) | `BILLING.billable` | `dod.dod_certificates` (§8.6) | none | ❌ G15 |
+| Onboarding discount | `BILLING.discount` | deferred (spec §20, the 7-day offer) | none | ❌ deferred |
 
 ## Functionality
 
-- The free tier has every governance feature on and unlimited runs; it is limited to thirty days of evidence and three seats.
-- The proven run is the only priced meter; broken runs, denials and witness runs cost nothing.
+- Every feature is on for every tier, the in-app agent and the hosted witness runner included. The free tier includes 5,000 GAU a month and thirty days of evidence.
+- `resolve_approval` is the only billable governed action. Membership writes, denials, broken runs and witness runs cost nothing. Held runs and proven spend are report figures.
+- A Free organization that uses its allowance saves a card or waits for the next month. A prepaid organization's auto top-up buys blocks when the bucket reaches zero.
 - Change plan upgrades to Build or Scale through Stripe Checkout (`start_subscription_upgrade`, kept in rev1); the page shows the amount due before it is charged.
 
 **Decisions of 2026-09-15 (maintainer decision; spec §12.10).** The mockup does not show these yet.
@@ -63,7 +69,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 ## States
 
 - **loaded** — the page as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell).
-- **empty** — “Nothing billable yet” — you pay when the work is verified; the free tier is every feature, unlimited runs, thirty days of evidence and three seats. Action: **Back to Fleet**.
+- **empty** — “Nothing billed yet” — no billable governed action this month; the free tier is every feature, 5,000 GAU a month and thirty days of evidence. Action: **Back to Fleet**.
 - **loading** — the shell stays; the page body is replaced by the skeleton (four tile blocks and a panel of seven rows), so the operator keeps their bearings.
 - **error** — “Billing could not be loaded” — `502 stripe_unreachable`. Nothing was changed. Runs kept recording while this page was down — frames are written by the gateway, not by Mission Control. Actions: **Try again**, **Open an incident**; a trace id, region and timestamp line.
 - **access denied** — “You cannot see billing” — the roles the signed-in person holds on the organization do not include `org.billing — plan and invoices are readable only by a finance role`. Copy explains an owner can grant it and that the grant is itself a governed action in the audit record. Actions: **Request access** (opens the request-access dialog), **Back to Fleet**. Below: *Signed in as* (name · role), *Needed* (the permission), *Decided by* (`pol_v41` · deny wins over every allow).
@@ -79,7 +85,7 @@ Top bar collapses to hamburger · current crumb · search glyph · notifications
 
 ## Backend gaps this page depends on
 
-- G13 per-run allowance and meters (billing rebuild)
+- G13 GAU buckets, settlements and contract terms (billing rebuild)
 
 ## Rules every build of this page must keep
 
