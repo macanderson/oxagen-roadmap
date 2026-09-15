@@ -12,11 +12,11 @@
 
 ## Job
 
-The plan, governed action units (GAUs) used against this month's allowance, blocks and auto top-up, the contracted rate, the in-app agent's credits, and the invoices, linked to Stripe. Readable only by a finance role.
+The plan, the two meters, and the invoices, linked to Stripe. Meter 1 is governed action units (GAUs): used against this month's allowance, blocks and auto top-up, and the contracted rate. Meter 2 is usage credits for in-app AI usage: the balance, the signup grant and credit packs. Readable only by a finance role.
 
 ## What is on the page
 
-The mockup (`pBilling()`) still renders the proven-run price list. Billing prices governed action units on one price list (spec §12.1; maintainer decisions of 2026-09-14, reaffirmed 2026-09-15), and the build renders the page below.
+The mockup (`pBilling()`) still renders the proven-run price list. Billing charges on two meters (spec §12.1; 2026-09-15, maintainer decision): governed actions in GAUs on one price list (maintainer decisions of 2026-09-14, reaffirmed 2026-09-15), and in-app AI usage in usage credits. The build renders the page below.
 
 **Header** — eyebrow “Organization”, h1 “Billing”.
 Actions: **Change plan** (gold; opens the plan dialog; Build or Scale goes through Stripe Checkout)
@@ -28,12 +28,12 @@ Actions: **Change plan** (gold; opens the plan dialog; Build or Scale goes throu
 - **Due <date>** — $ USD
 
 - **This month** — Line · Basis · Amount (the plan, blocks bought through Checkout, auto top-ups, invoiced overage, tax).
-- **Meters** — Meter · This month · Note: GAU used against the allowance (`resolve_approval` is the only billable governed action), with held runs and other governed actions reported beside it and carrying no price.
+- **Meters** — Meter · This month · Note: GAU used against the allowance (`resolve_approval` is the only billable governed action), with held runs and other governed actions reported beside it and carrying no price; and usage credits spent on in-app AI usage.
 - **Invoices** — Invoice · Period · GAU · Amount · Status · Paid; a row opens the Stripe-hosted invoice.
-- **The price list** — Free $0 with 5,000 GAU a month · Build $199 with 50,000 · Scale $999 with 300,000 · Enterprise negotiated per contract · $5 per 1,000 GAU list · 5,000-GAU blocks at $25 · volume bands of $5, $4, $3 and $2 per 1,000 · tokens at cost. Every feature is on for every tier.
-- **Auto top-up** — on or off, and the blocks it buys; an Owner or Admin changes it.
-- **Credits** — the in-app agent's credit balance; buy a credit pack.
-- **What counts** — Billed: `resolve_approval`, one GAU each. Free: membership writes and every other governed action, `dod.held` included. Reported: held runs and proven spend.
+- **The price list** — Governed actions: Free $0 with 5,000 GAU a month · Build $199 with 50,000 · Scale $999 with 300,000 · Enterprise negotiated per contract · $5 per 1,000 GAU list · 5,000-GAU blocks at $25 · volume bands of $5, $4, $3 and $2 per 1,000. In-app AI usage: 1 usage credit = $0.01 · each in-app agent model call debits provider cost times the meter markup · a $5 signup grant · credit packs. Every feature is on for every tier.
+- **Auto top-up** — on or off, and the GAU blocks it buys; an Owner or Admin changes it.
+- **Usage credits** — the balance that pays for in-app AI usage, the signup grant and the packs bought against it; buy a credit pack (`purchase_credits`).
+- **What counts** — Billed in GAU: `resolve_approval`, one GAU each. Billed in usage credits: each model call the in-app agent makes, at provider cost times the meter markup. Free: membership writes and every other governed action, `dod.held` included. Reported: held runs and proven spend.
 
 **Dialogs this page opens:** `plan`.
 
@@ -47,6 +47,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 |---|---|---|---|---|
 | Plan, invoices | `BILLING` | `billing.plans`, `billing.subscriptions`, `billing.invoices` + Stripe | `billing.subscriptions`, `billing.invoices`; `billing.subscription.read` | ✅ |
 | GAU meter, blocks, contracted rate | `BILLING.billable`, `meters` | `billing.gau_buckets`, `billing.gau_settlements`, `billing.contract_terms` (§12.1, App. A.8) | the same tables on `macanderson/oxagen` `app-rebuild` | 🟡 billing rebuild (G13) |
+| Usage credits (in-app AI usage) | none | `billing.credit_balances`, `billing.credit_lots`, `billing.credit_ledger` (§12.1, App. A.8) | the same tables; the credit gate with the meter markup in `packages/billing/src/pricing.ts` | ✅ |
 | Held runs (reported) | `BILLING.billable` | `dod.dod_certificates` (§8.6) | none | ❌ G15 |
 | Onboarding discount | `BILLING.discount` | deferred (spec §20, the 7-day offer) | none | ❌ deferred |
 
@@ -54,12 +55,13 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 
 - Every feature is on for every tier, the in-app agent and the hosted witness runner included. The free tier includes 5,000 GAU a month and thirty days of evidence.
 - `resolve_approval` is the only billable governed action. Membership writes, denials, broken runs and witness runs cost nothing. Held runs and proven spend are report figures.
+- Two meters, two balances. GAU blocks buy governed actions; credit packs buy in-app AI usage. Neither balance pays for the other, and tokens are not passed through at cost.
 - A Free organization that uses its allowance saves a card or waits for the next month. A prepaid organization's auto top-up buys blocks when the bucket reaches zero.
 - Change plan upgrades to Build or Scale through Stripe Checkout (`start_subscription_upgrade`, kept in rev1); the page shows the amount due before it is charged.
 
 **Decisions of 2026-09-15 (maintainer decision; spec §12.10).** The mockup does not show these yet.
 
-- Credit packs stay as the in-app agent's top-up (`purchase_credits`). GAU blocks remain the governed-action product.
+- Oxagen charges on two meters. In-app AI usage is priced in usage credits: 1 credit = $0.01, debited by the credit gate at provider cost times the meter markup, funded by the $5 signup grant on `create_org` and topped up with credit packs (`purchase_credits`). GAU blocks remain the governed-action product.
 - Enterprise is negotiated only: a `billing.contract_terms` row, with no enterprise plan in Stripe or in the plan dialog. No feature is gated on the enterprise license; every feature, IAM and SOC 2 controls included, is on for every tier.
 - When invoice billing is switched off, the organization's `overage_invoiced_gau` is added to `purchased_gau`: the invoice is the purchase.
 - `invoice_gau_max` bounds overage beyond the monthly allowance; the interim invoice fires at unit `invoice_gau_max` + 1.
