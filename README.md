@@ -118,7 +118,7 @@ plan section. Nothing in `site/` holds prose of its own.
 ```sh
 pnpm -C site install   # dependencies, then the prepare step and the Fumadocs source index
 pnpm -C site dev       # http://localhost:3310, with the prepare step run first
-pnpm -C site build     # static export to site/out, hostable on any static file server
+pnpm -C site build     # static export to site/out, Storybook catalog included, hostable on any static file server
 ```
 
 | Source (committed) | What the site makes of it |
@@ -130,7 +130,7 @@ pnpm -C site build     # static export to site/out, hostable on any static file 
 | `mockups/catalog.mjs` | Every page's route and states, and the scenarios in W order. |
 | `SCENARIOS` in `mockups/src/engine.js` (with `mockups/fixtures`) | One outline per scenario: its steps, the page each step routes to, and a link to each step inside the mockup. |
 | `mockups/missioncontrol.html`, `docs/*.html`, `docs/_house`, `badges` | Served unchanged under `/mock/`. The Mocked page panel and its Open full page link are `/mock/mockups/missioncontrol.html?product=1&state=<state>&mobile=<0\|1>&theme=<light\|dark>#<route>`, with the theme following the site's. |
-| `storybook-static/` (from `npm run build-storybook`) | Not built into the site. Specs & plans ends with a Catalog link to `/storybook/`, where the host serves the built Storybook beside `site/out`. |
+| `storybook-static/` (from `npm run build-storybook`) | Copied to `site/out/storybook/` by `site/scripts/catalog.mjs`, the last step of `pnpm -C site build`, which runs `npm ci` at the repo root first when the root dependencies are absent. Specs & plans ends with a Catalog link to `/storybook/`. |
 
 Generated and gitignored: `site/public/mock/` (the HTML copied by `site/scripts/prepare.mjs`),
 `site/.generated/` (scenario outlines from `site/scripts/gen-scenarios.mjs`, the scenarios and
