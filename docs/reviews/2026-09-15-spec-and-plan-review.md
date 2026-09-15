@@ -2,6 +2,8 @@
 
 15 September 2026 · Reviewed repository commit `762e495b021e40da65c34d1a891110fb6041f438`
 
+> Historical review: subsequent main-branch changes revise several decisions and rename source documents. Source links below are pinned to the reviewed commit; findings have not been reassessed against those later changes.
+
 ## Overall opinion
 
 **The product has a strong foundation, but these documents are not yet one executable release plan.** The strongest idea is the connection between an agent’s authority, its actual actions, their cost, and evidence of the result. Fleet, Run, approvals, agent identity, and basic Spend make that connection understandable.
@@ -26,7 +28,7 @@ This is a review of requirements, sample code, mockup definitions, and plans. It
 
 ## 1. Establish one authoritative release definition
 
-The [main specification](/Users/macanderson/Projects/tmp-oxagen-mockups/docs/2026-09-11-oxagen-mission-control-spec.md), [implementation plan](/Users/macanderson/Projects/tmp-oxagen-mockups/docs/2026-09-12-mission-control-app-implementation-plan.md), [scale-back document](/Users/macanderson/Projects/tmp-oxagen-mockups/docs/2026-09-14-scale-back-prompt.md), page specifications, and README do not describe the same release.
+The [main specification](https://github.com/macanderson/tmp-oxagen-mockups/blob/762e495b021e40da65c34d1a891110fb6041f438/docs/2026-09-11-oxagen-mission-control-spec.md), [implementation plan](https://github.com/macanderson/tmp-oxagen-mockups/blob/762e495b021e40da65c34d1a891110fb6041f438/docs/2026-09-12-mission-control-app-implementation-plan.md), [scale-back document](https://github.com/macanderson/tmp-oxagen-mockups/blob/762e495b021e40da65c34d1a891110fb6041f438/docs/2026-09-14-scale-back-prompt.md), page specifications, and README do not describe the same release.
 
 | Conflict | Why it matters | Suggested resolution |
 |---|---|---|
@@ -84,7 +86,7 @@ The review includes all 31 standalone page specifications, grouped above: `login
 
 ## 3. Resolve the three verification designs
 
-Sources: [Mission Control proof](/Users/macanderson/Projects/tmp-oxagen-mockups/docs/2026-09-11-oxagen-mission-control-spec.md:740), [Witness](/Users/macanderson/Projects/tmp-oxagen-mockups/docs/oxagen-witness-spec.html:119), [DoD](/Users/macanderson/Projects/tmp-oxagen-mockups/docs/oxagen-dod-spec.html:120), and [badges](/Users/macanderson/Projects/tmp-oxagen-mockups/badges/README.md).
+Sources: [Mission Control proof](https://github.com/macanderson/tmp-oxagen-mockups/blob/762e495b021e40da65c34d1a891110fb6041f438/docs/2026-09-11-oxagen-mission-control-spec.md#L740), [Witness](https://github.com/macanderson/tmp-oxagen-mockups/blob/762e495b021e40da65c34d1a891110fb6041f438/docs/oxagen-witness-spec.html#L119), [DoD](https://github.com/macanderson/tmp-oxagen-mockups/blob/762e495b021e40da65c34d1a891110fb6041f438/docs/oxagen-dod-spec.html#L120), and [badges](https://github.com/macanderson/tmp-oxagen-mockups/blob/762e495b021e40da65c34d1a891110fb6041f438/badges/README.md).
 
 Keep one evidence/certificate format, but record independent dimensions:
 
@@ -115,7 +117,7 @@ These should block copying the sample into production unchanged.
 | Check execution is not a sandbox | `shell: true` and an environment allowlist retain `HOME` and `NODE_OPTIONS` | Define command trust and process/filesystem isolation; terminate process groups and cap output/resources |
 | Repeated settlement can mint repeated certificates and charges | Handler allocates a new certificate ID and meters it; no uniqueness boundary is shown | Enforce database uniqueness and idempotency for attempt + lock + evaluation version; reconcile with kernel metering |
 
-Relevant examples: [decision logic](/Users/macanderson/Projects/tmp-oxagen-mockups/docs/oxagen-dod-spec.html:337), [Stop hook](/Users/macanderson/Projects/tmp-oxagen-mockups/docs/oxagen-dod-spec.html:428), [diff check](/Users/macanderson/Projects/tmp-oxagen-mockups/docs/oxagen-dod-spec.html:477), [settlement](/Users/macanderson/Projects/tmp-oxagen-mockups/docs/oxagen-dod-spec.html:575).
+Relevant examples: [decision logic](https://github.com/macanderson/tmp-oxagen-mockups/blob/762e495b021e40da65c34d1a891110fb6041f438/docs/oxagen-dod-spec.html#L337), [Stop hook](https://github.com/macanderson/tmp-oxagen-mockups/blob/762e495b021e40da65c34d1a891110fb6041f438/docs/oxagen-dod-spec.html#L428), [diff check](https://github.com/macanderson/tmp-oxagen-mockups/blob/762e495b021e40da65c34d1a891110fb6041f438/docs/oxagen-dod-spec.html#L477), [settlement](https://github.com/macanderson/tmp-oxagen-mockups/blob/762e495b021e40da65c34d1a891110fb6041f438/docs/oxagen-dod-spec.html#L575).
 
 Also resolve the reuse of `ADR-055`, already assigned to GAU billing, and bootstrap the phase gates realistically: early local phases cannot require certificates from a cloud service scheduled for a later phase.
 
@@ -123,19 +125,19 @@ Also resolve the reuse of `ADR-055`, already assigned to GAU billing, and bootst
 
 ### Workspace writes: the RLS example does not enforce its stated rule
 
-The [sample policy](/Users/macanderson/Projects/tmp-oxagen-mockups/docs/2026-09-11-oxagen-mission-control-spec.md:274) permits org-wide visibility when workspace scope is absent. Its `WITH CHECK` requires a workspace, but DELETE uses `USING`, not `WITH CHECK`. Therefore an org-scoped DELETE allowed by table privileges can affect workspace rows despite the statement that all writes require workspace scope. This is a defect in the example, not evidence that production has the same policy. [PostgreSQL policy semantics](https://www.postgresql.org/docs/16/sql-createpolicy.html).
+The [sample policy](https://github.com/macanderson/tmp-oxagen-mockups/blob/762e495b021e40da65c34d1a891110fb6041f438/docs/2026-09-11-oxagen-mission-control-spec.md#L274) permits org-wide visibility when workspace scope is absent. Its `WITH CHECK` requires a workspace, but DELETE uses `USING`, not `WITH CHECK`. Therefore an org-scoped DELETE allowed by table privileges can affect workspace rows despite the statement that all writes require workspace scope. This is a defect in the example, not evidence that production has the same policy. [PostgreSQL policy semantics](https://www.postgresql.org/docs/16/sql-createpolicy.html).
 
 Use separate SELECT, INSERT, UPDATE and DELETE policies, with explicit workspace requirements on writes. Test with the actual non-owner application role, missing scope, wrong scope, org scope, and system-role boundaries.
 
 ### Pooled graph tenancy contradicts the proposed boundary
 
-[Section 5.3](/Users/macanderson/Projects/tmp-oxagen-mockups/docs/2026-09-11-oxagen-mission-control-spec.md:293) says the database is the tenant boundary and no org filter is needed, then pools free tenants with workspace scoping. Org-wide reads in that pool need an explicit org boundary. Specify separate pooled and dedicated strategies, including search/vector retrieval and relationships. Test cross-tenant identifiers, not just ordinary filtered lists.
+[Section 5.3](https://github.com/macanderson/tmp-oxagen-mockups/blob/762e495b021e40da65c34d1a891110fb6041f438/docs/2026-09-11-oxagen-mission-control-spec.md#L293) says the database is the tenant boundary and no org filter is needed, then pools free tenants with workspace scoping. Org-wide reads in that pool need an explicit org boundary. Specify separate pooled and dedicated strategies, including search/vector retrieval and relationships. Test cross-tenant identifiers, not just ordinary filtered lists.
 
 Shared repository nodes also conflict with a single required workspace property. Choose per-workspace projections or explicit shared identities with access-controlled edges. Free-to-paid graph migration needs a verified snapshot, catch-up, cutover and recovery protocol.
 
 ### Dispatch needs an operation identity, not only an input hash
 
-The [dispatch pipeline](/Users/macanderson/Projects/tmp-oxagen-mockups/docs/2026-09-11-oxagen-mission-control-spec.md:443) calls canonical input digest the identity for idempotency. Two intentional identical operations must remain possible. Bind a logical operation ID to the payload digest; retries reuse that ID, new actions receive a new one.
+The [dispatch pipeline](https://github.com/macanderson/tmp-oxagen-mockups/blob/762e495b021e40da65c34d1a891110fb6041f438/docs/2026-09-11-oxagen-mission-control-spec.md#L443) calls canonical input digest the identity for idempotency. Two intentional identical operations must remain possible. Bind a logical operation ID to the payload digest; retries reuse that ID, new actions receive a new one.
 
 Reserve mandate/budget capacity before dispatch, then settle the actual effect. A timeout after a provider accepted an action is an unknown outcome requiring reconciliation, not permission to release the reservation and repeat it. Recheck revoked grants and expired authority after human approval and immediately before dispatch.
 
@@ -145,7 +147,7 @@ A model gateway does not automatically control native shell tools. A local adapt
 
 ### Separate three kinds of money
 
-The [GAU amendment](/Users/macanderson/Projects/tmp-oxagen-mockups/docs/2026-09-11-oxagen-mission-control-spec.md:1010) is the clearest current commercial requirement. Make it the sole billing definition unless deliberately superseded.
+The [GAU amendment](https://github.com/macanderson/tmp-oxagen-mockups/blob/762e495b021e40da65c34d1a891110fb6041f438/docs/2026-09-11-oxagen-mission-control-spec.md#L1010) is the clearest current commercial requirement. Make it the sole billing definition unless deliberately superseded.
 
 Maintain separate ledgers/views for customer provider spend, Oxagen GAU charges, and Oxagen’s own service costs. DoD’s lower-tier pending charge and Witness’s funds-release model need explicit reconciliation with that definition; they must not silently add new meters.
 
@@ -159,11 +161,11 @@ Specify duplicate versus divergent frames, out-of-order producers, late arrival 
 
 ## 5. Onboarding, desktop and W13 integration
 
-The [desktop spec](/Users/macanderson/Projects/tmp-oxagen-mockups/docs/2026-09-13-oxagen-desktop-spec.md) adds a real operational product, not just an installer screen. Define offline queue size/age, disk-full behavior, credential expiry, server rejection and host reassignment. Old tenant frames must retain their original scope and never be relabeled into the new organization. Reassignment needs recoverable intermediate states when old credentials are revoked but new enrollment fails.
+The [desktop spec](https://github.com/macanderson/tmp-oxagen-mockups/blob/762e495b021e40da65c34d1a891110fb6041f438/docs/2026-09-13-oxagen-desktop-spec.md) adds a real operational product, not just an installer screen. Define offline queue size/age, disk-full behavior, credential expiry, server rejection and host reassignment. Old tenant frames must retain their original scope and never be relabeled into the new organization. Reassignment needs recoverable intermediate states when old credentials are revoked but new enrollment fails.
 
 Give administrators access to invitations, credentials and troubleshooting before their first agent frame. Report connection and enforcement separately: receiving a frame proves a reporting path works, not that every tool is governed.
 
-[W13](/Users/macanderson/Projects/tmp-oxagen-mockups/docs/w13-in-the-loop-scenario.md) combines several features that should be specified separately:
+[W13](https://github.com/macanderson/tmp-oxagen-mockups/blob/762e495b021e40da65c34d1a891110fb6041f438/docs/w13-in-the-loop-scenario.md) combines several features that should be specified separately:
 
 1. **Skill resolution:** agent grants and workspace binding determine visibility; pin a versioned resolution manifest for reproducibility.
 2. **Emergency control:** revocation must override a previously pinned resolution where continued use is unsafe.
@@ -183,7 +185,7 @@ Do not leak withheld skill names/counts/reasons to unauthorized users. Clarify w
 
 ## 7. Replace the delivery schedule with verifiable milestones
 
-The [rough 12-day estimate](/Users/macanderson/Projects/tmp-oxagen-mockups/docs/2026-09-12-mission-control-app-implementation-plan.md:1091) assumes ten concurrent lanes and largely covers app construction. Its own data mapping identifies substantial absent or partial backend work. It cannot be used as the estimate for the complete product, nor simply combined with the 24-week Mission Control and eight-week Witness schedules.
+The [rough 12-day estimate](https://github.com/macanderson/tmp-oxagen-mockups/blob/762e495b021e40da65c34d1a891110fb6041f438/docs/2026-09-12-mission-control-app-implementation-plan.md#L1091) assumes ten concurrent lanes and largely covers app construction. Its own data mapping identifies substantial absent or partial backend work. It cannot be used as the estimate for the complete product, nor simply combined with the 24-week Mission Control and eight-week Witness schedules.
 
 | Gate | Scope | Acceptance evidence |
 |---|---|---|
@@ -211,7 +213,7 @@ The repository’s generated-file, scenario and baseline guards are useful desig
 
 ## 8. Suggestions for the product decision
 
-I agree with the [earlier strategic review](/Users/macanderson/Projects/tmp-oxagen-mockups/docs/oxagen-mission-control-review.html) that sequencing matters and that broad ontology work should not delay the first useful workflow. I would not adopt its pricing change, schedule compression, competitive claims, or “already built” label without separate evidence. Its customer and revenue assertions are inputs to validate, not facts established by this repo.
+I agree with the [earlier strategic review](https://github.com/macanderson/tmp-oxagen-mockups/blob/762e495b021e40da65c34d1a891110fb6041f438/docs/oxagen-mission-control-review.html) that sequencing matters and that broad ontology work should not delay the first useful workflow. I would not adopt its pricing change, schedule compression, competitive claims, or “already built” label without separate evidence. Its customer and revenue assertions are inputs to validate, not facts established by this repo.
 
 Use the next customer review to establish three things: which pain they are paying to remove, which action they need governed, and who actually consumes the resulting proof. That determines whether Spend, control, or verification leads the demonstration.
 
