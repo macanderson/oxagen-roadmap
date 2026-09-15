@@ -1884,6 +1884,9 @@ pre .dn{color:var(--st-denied)}
     <button id="cIndex">screens</button>
     <span class="rule"></span>
     <button id="cReset" title="every parked approval pending again, fresh clocks; the interjection waiting again">reset approvals</button>
+    <span class="rule"></span>
+    <span class="lab">release</span>
+    <button data-rel="wedge" title="the first release: Fleet, Run, Spend, Agents; the rest thinned or under Already built">wedge</button><button data-rel="full" title="everything designed">everything built</button>
   </div>
 </div>
 
@@ -1893,6 +1896,14 @@ pre .dn{color:var(--st-denied)}
    chrome rather than product UI: the state bar, the scenario rail and nav item, the onboarding
    demo entry points and their "Exit demo" buttons. mc.html itself keeps it false. */
 var PRODUCT=false;
+/* RELEASE: "wedge" is the first release — Fleet, Run, Spend and Agents lead; Tools, Billing,
+   Organization and Steering are thinned to what ships first; Audit and the Assistant sit under
+   "Already built". "full" is everything designed. Product files inherit wedge (BOOT.release can
+   pin either); a scenario that walks a deferred surface carries release:"full" and switches when
+   it opens; the mockup chrome toggles it. The switch deletes nothing — the deferred design stays
+   in this file, which is the point: built, working, and not what is sold this quarter.
+   Argued in docs/oxagen-mission-control-review.html; the task in docs/2026-09-14-scale-back-prompt.md. */
+var RELEASE_DEFAULT="wedge";
 var DLG_EXT={};   /* lazily built dialogs, registered beside their code; see dialog() */
 /* ============================== demo record ============================== */
 var ORG = {slug:"a-intel", name:"Anderson Intelligence Corp.", currency:"USD", plan:"Team", dataPlane:"shared",
@@ -2980,6 +2991,14 @@ var S = {state:"loaded", phone:false, mobile:false, theme:null, asst:false, asst
          layer:null, tab:{}, side:false, ws:"core-platform", frame:15, runFilter:"all",
          ctxSel:"frames", approved:{}, toolNames:"label", beltView:"group", beltCat:"", regCat:""};
 
+S.release=RELEASE_DEFAULT;
+function wedge(){return S.release==="wedge";}
+function setRelease(v){S.release=v==="full"?"full":"wedge";render();}
+/* Tabs a surface does not carry in the wedge. A route that lands on one falls back to the page's first tab. */
+var WEDGE_HIDES={tools:{assurance:1},steering:{effect:1,retirement:1},spend:{reconciliation:1},audit:{holds:1,assurance:1,retention:1}};
+function wedgeTab(page,t,def){return wedge()&&WEDGE_HIDES[page]&&WEDGE_HIDES[page][t]?def:t;}
+function wedgeTabs(page,defs){return wedge()&&WEDGE_HIDES[page]?defs.filter(function(x){return !WEDGE_HIDES[page][x[0]];}):defs;}
+
 /* kill switches — mutable state lives on S; SWITCHES is the seed and is never mutated */
 S.switches={}; S.flipMeta={}; S.denyGen=118; S.killBanner=null;
 SWITCHES.forEach(function(s){S.switches[s.id]=s.on;});
@@ -3474,6 +3493,7 @@ function route(){
     if(sc){
       var stp=parseInt(p[4]||"1",10); if(!(stp>=1)) stp=1; if(stp>sc.steps.length) stp=sc.steps.length;
       S.scn={id:sid,step:stp};
+      if(sc.release==="full") S.release="full";   /* the flow walks a surface the wedge does not carry */
       var st=sc.steps[stp-1], key=sid+"/"+stp;
       /* route() runs on every render, so setup runs only on arriving at a step. Otherwise a click
          inside the step (a tab, an act that collapses what setup opened) snaps straight back. */
@@ -4055,23 +4075,31 @@ function sidebar(r){
       '<span class="av ws">'+h(w.slug.slice(0,2))+'</span><span class="tx"><b>'+h(w.name)+'</b><span>'+(w.provisional?'<span class="b b-denied">provisional</span> until '+h(w.provisional.until):h(w.main)+' · '+h(w.branch))+'</span></span><span class="cv">▾</span></button>'+
    '</div><nav>'+
    '<div class="navlabel">Workspace</div>'+
+   /* wedge order: the recorder, the money, then identity and the belt. Spend sits second because
+      findings ranked by money at stake are what a buyer measures first. */
    item("fleet","Fleet",base,waiting,true)+
+   (wedge()?item("spend","Spend",base+"/spend"):"")+
    item("agents","Agent IAM",base+"/agents",fr?1:w.agents)+
    item("tools","Tools",base+"/tools")+
-   item("skills","Skills",base+"/skills",skWaiting(w),true)+
+   (wedge()?"":item("skills","Skills",base+"/skills",skWaiting(w),true))+
    item("steering","Steering",base+"/steering",fr?0:PROPOSALS.length)+
-   item("spend","Spend",base+"/spend")+
+   (wedge()?"":item("spend","Spend",base+"/spend"))+
    (PRODUCT?"":item("scenarios","Scenarios",base+"/scenarios"))+
    '<div class="navlabel">Organization</div>'+
    item("organization","Organization","#/"+ORG.slug)+
    item("billing","Billing","#/"+ORG.slug+"/billing")+
-   item("audit","Audit","#/"+ORG.slug+"/audit",fr?0:INCIDENTS.filter(function(i){return i.status==="open"&&i.sev==="critical";}).length,true)+
+   (wedge()?"":item("audit","Audit","#/"+ORG.slug+"/audit",fr?0:INCIDENTS.filter(function(i){return i.status==="open"&&i.sev==="critical";}).length,true))+
+   /* Already built: designed and working, not what is sold this quarter. Still one click away. */
+   (wedge()?'<div class="navlabel" title="Designed and working; not in the first release">Already built</div>'+
+    item("skills","Skills",base+"/skills",skWaiting(w),true)+
+    item("audit","Audit","#/"+ORG.slug+"/audit",fr?0:INCIDENTS.filter(function(i){return i.status==="open"&&i.sev==="critical";}).length,true)+
+    '<button class="navitem" onclick="asstToggle()" aria-controls="asst" aria-expanded="'+(S.asst?"true":"false")+'"><span class="ic">'+icon("assistant")+'</span>Assistant</button>':"")+
    '</nav><div class="side-foot">'+
-   '<button class="asst-launch" onclick="asstToggle()" aria-controls="asst" aria-expanded="'+(S.asst?"true":"false")+'">'+
+   (wedge()?"":'<button class="asst-launch" onclick="asstToggle()" aria-controls="asst" aria-expanded="'+(S.asst?"true":"false")+'">'+
     '<span class="asst-g">'+icon("assistant")+'</span>'+
     '<span class="tx"><b>Assistant</b>'+
      (S.asstEngine==="down"?'<span class="down">engine down</span>':'<span>glm-latest · ready</span>')+'</span>'+
-    '<span class="cv">'+"<svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.9\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M9 6l6 6-6 6\"/></svg>"+'</span></button>'+
+    '<span class="cv">'+"<svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.9\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M9 6l6 6-6 6\"/></svg>"+'</span></button>')+
    '<div class="row" style="justify-content:space-between;padding:0 4px"><span class="mono dim" style="font-size:10.5px">'+orgAgents+(orgAgents===1?' agent':' agents')+' · '+ORG.dataPlane+' plane</span>'+
    '<span class="b b-allowed" style="font-size:10px"><span class="d"></span>gateway</span></div></div></aside>';
 }
@@ -4112,8 +4140,8 @@ function topbar(r){
    '<button class="iconbtn" onclick="openDialog(\'notifs\')" aria-label="Notifications, '+notifUnread()+' unread">'+
      '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 8-3 8h18s-3-1-3-8"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>'+
      (notifUnread()?'<span class="dot"></span>':'')+'</button>'+
-   '<button class="iconbtn" onclick="asstToggle()" aria-pressed="'+(S.asst?"true":"false")+'" aria-label="Assistant">'+
-     '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3l1.8 4.7L18.5 9.5 13.8 11.3 12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M18.5 16.5 19.4 19l2.5.9-2.5.9-.9 2.5-.9-2.5-2.5-.9 2.5-.9z"/></svg></button>'+
+   (wedge()?'':'<button class="iconbtn" onclick="asstToggle()" aria-pressed="'+(S.asst?"true":"false")+'" aria-label="Assistant">'+
+     '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3l1.8 4.7L18.5 9.5 13.8 11.3 12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M18.5 16.5 19.4 19l2.5.9-2.5.9-.9 2.5-.9-2.5-2.5-.9 2.5-.9z"/></svg></button>')+
    '<div class="rel"><button class="iconbtn" onclick="toggleLayer(\'user\')" aria-label="Account" style="padding:0;border-radius:50%;overflow:hidden">'+personAv("marcus",30)+'</button>'+
      (S.layer==="user"?userMenu():'')+'</div>'+
    '</header>';
@@ -7696,7 +7724,7 @@ function pMandate(r){
   var showRes=money(m.reserved)>0;
   return '<div class="phead"><div class="t"><p class="eyebrow">Mandate</p><h1 class="mono" style="font-size:20px">'+h(m.id)+'</h1>'+
    '<div class="row" style="margin-top:8px"><span class="b b-'+(m.status==="active"?"allowed":m.status==="expired"?"q":"denied")+'"><span class="d"></span>'+h(m.status)+'</span>'+
-   (m.twoPerson?'<span class="b b-approval"><span class="d"></span>two-person</span>':'<span class="b b-q">single approver</span>')+
+   (m.twoPerson&&!wedge()?'<span class="b b-approval"><span class="d"></span>two-person</span>':'<span class="b b-q">single approver</span>')+
    '<span class="b b-q">'+h(m.currency)+'</span></div>'+
    '<p style="margin-top:8px">'+h(m.purpose)+'</p></div>'+
    '<div class="acts"><button class="btn" onclick="openDialog(\'mandate\')">Change limits</button>'+
@@ -7740,7 +7768,7 @@ function pMandate(r){
 
 /* ============================== Tools ============================== */
 function pTools(){
-  var w=ws(), t=tab("tools","registry");
+  var w=ws(), t=wedgeTab("tools",tab("tools","registry"),"registry");
   if(S.state==="loading") return skeleton();
   if(S.state==="error") return errorState("Tools","503 tool_registry_unavailable");
   if(S.state==="denied") return deniedState("the tool registry","tools.read on core-platform");
@@ -7752,8 +7780,8 @@ function pTools(){
   /* Registry's count is the only one that waits on a person: observed schemas to approve. */
   var np=proposals().length;
   var tabs='<div class="tabs" role="tablist">'+
-   [["registry","Registry",np?np+" to approve":"",np?"var(--st-approval)":""],["connections","Connections",CONNECTIONS.length],["mandates","Mandates ledger",MANDATES.length],
-    ["policy","Policy",POLICIES.length],["switches","Kill switches",switchesOn()],["auto","Auto-approvals",AUTORULES.filter(function(r){return r.on;}).length],["assurance","Assurance"]]
+   wedgeTabs("tools",[["registry","Registry",np?np+" to approve":"",np?"var(--st-approval)":""],["connections","Connections",CONNECTIONS.length],["mandates","Mandates ledger",MANDATES.length],
+    ["policy","Policy",POLICIES.length],["switches","Kill switches",switchesOn()],["auto","Auto-approvals",AUTORULES.filter(function(r){return r.on;}).length],["assurance","Assurance"]])
    .map(function(x){return '<button class="tab" role="tab" aria-selected="'+(t===x[0])+'" onclick="go(\'#/'+ORG.slug+'/'+w.slug+'/tools/'+x[0]+'\')">'+x[1]+
      (x[2]?'<span class="n"'+(x[3]?' style="color:'+x[3]+'"':'')+'>'+x[2]+'</span>':'')+'</button>';}).join("")+'</div>';
 
@@ -7859,7 +7887,7 @@ function pTools(){
        '<td>'+h(p.by)+'</td><td class="mono dim" style="font-size:11px">'+h(p.at)+'</td><td class="num">'+p.rules+'</td>'+
        '<td><span class="b b-allowed">'+h(p.tests)+'</span></td><td style="font-size:12px">'+h(p.note)+'</td></tr>';}).join("")+
      '</tbody></table></div></div>'+
-     simPanel()+'</div>'+
+     (wedge()?"":simPanel())+'</div>'+
      '<div class="panel"><div class="panel-h"><h3>Conditions available to policy</h3></div><div class="panel-b">'+
      '<p class="muted" style="font-size:12px;margin-bottom:11px">All derived from the call and the record. None from prose.</p>'+
      '<div class="row">'+["tool version","risk","side effect","egress","financial class","amount by path","counterparty","repository","path prefix","recipient domain","taint and its sources","time window","rate","sequence","operator role","enforcement tier","budget position","mandate position"]
@@ -8416,7 +8444,7 @@ function ctxprTab(){
 }
 
 function pSteering(){
-  var w=ws(), t=tab("steering","records");
+  var w=ws(), t=wedgeTab("steering",tab("steering","records"),"records");
   if(S.state==="loading") return skeleton();
   if(S.state==="error") return errorState("Steering","503 record_index_unavailable");
   if(S.state==="denied") return deniedState("this workspace’s steering","steering.read on core-platform");
@@ -8427,8 +8455,8 @@ function pSteering(){
   var cands=stgRetireCands(), archived=RECORDS.filter(function(r){return r.status==="archived";});
   var openPRs=(S.ctxpr.st!=="none"&&S.ctxpr.st!=="merged"?1:0)+PROPOSALS.filter(function(q){return q.id!==CTXPR.prp&&q.pr!=="—";}).length+Object.keys(S.retirePR).length;
   var tabs='<div class="tabs" role="tablist">'+
-   [["records","Records",RECORDS.filter(function(r){return r.status==="published";}).length],
-    ["proposals","Proposals",PROPOSALS.length],["prs","Context PRs",openPRs],["effect","Effect"],["retirement","Retirement",cands.length+archived.length]]
+   wedgeTabs("steering",[["records","Records",RECORDS.filter(function(r){return r.status==="published";}).length],
+    ["proposals","Proposals",PROPOSALS.length],["prs","Context PRs",openPRs],["effect","Effect"],["retirement","Retirement",cands.length+archived.length]])
    .map(function(x){return '<button class="tab" role="tab" aria-selected="'+(t===x[0])+'" onclick="S.tab.steering=\''+x[0]+'\';render()">'+x[1]+(x[2]?'<span class="n">'+x[2]+'</span>':'')+'</button>';}).join("")+'</div>';
 
   /* the page header gives up the gold when the tab below holds the one primary action */
@@ -8529,8 +8557,8 @@ function pSpend(){
     '<button class="btn" onclick="go(\'#/'+ORG.slug+'/'+w.slug+'\')">Back to Fleet</button>');
 
   var tabs='<div class="tabs" role="tablist">'+
-   [["findings","Findings",FINDINGS.length],["operator","By operator"],["agent","By agent"],
-    ["tool","By tool"],["waste","Wasted spend",SPEND.wasteRunsList.length],["reconciliation","Reconciliation"],["budgets","Budgets",SPEND.budgets.length]]
+   wedgeTabs("spend",[["findings","Findings",FINDINGS.length],["operator","By operator"],["agent","By agent"],
+    ["tool","By tool"],["waste","Wasted spend",SPEND.wasteRunsList.length],["reconciliation","Reconciliation"],["budgets","Budgets",SPEND.budgets.length]])
    .map(function(x){return '<button class="tab" role="tab" aria-selected="'+(t===x[0])+'" onclick="spendGo(\''+x[0]+'\')">'+x[1]+(x[2]?'<span class="n">'+x[2]+'</span>':'')+'</button>';}).join("")+'</div>';
 
   var strip='<div class="grid g4" style="margin-bottom:16px">'+
@@ -9066,14 +9094,14 @@ function pOrganization(){
 
   var body="";
   if(t==="people"){
-    body=orgIdentityPanels()+'<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>People</h3>'+
-     '<div class="sp"><span class="b b-q" data-sso-badge>'+h(orgSsoBadge())+'</span>'+
+    body=(wedge()?"":orgIdentityPanels())+'<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>People</h3>'+
+     '<div class="sp">'+(wedge()?'<span class="b b-q">email and password · two-factor</span>':'<span class="b b-q" data-sso-badge>'+h(orgSsoBadge())+'</span>')+
      '<button class="btn sm" onclick="openDialog(\'invite\')">Invite</button></div></div><div class="tw"><table>'+
-     '<thead><tr><th>Person</th><th>Role</th><th>Workspaces</th><th>Two-factor</th><th>SSO</th><th>Last seen</th><th>Status</th><th></th></tr></thead><tbody>'+
+     '<thead><tr><th>Person</th><th>Role</th><th>Workspaces</th><th>Two-factor</th>'+(wedge()?'':'<th>SSO</th>')+'<th>Last seen</th><th>Status</th><th></th></tr></thead><tbody>'+
      MEMBERS.map(function(m){var p=PEOPLE[m.p];
       return '<tr><td><b>'+h(p.name)+'</b><div class="dim mono" style="font-size:11px">'+h(p.email)+'</div></td>'+
        '<td class="mono" style="font-size:11.5px">'+h(p.role)+'</td>'+
-       '<td>'+h(m.ws)+'</td><td>'+h(m.mfa)+'</td><td>'+h(m.sso)+' · '+(m.src==="scim"?"SCIM":"manual")+'</td>'+
+       '<td>'+h(m.ws)+'</td><td>'+h(m.mfa)+'</td>'+(wedge()?'':'<td>'+h(m.sso)+' · '+(m.src==="scim"?"SCIM":"manual")+'</td>')+
        '<td class="mono dim" style="font-size:11px">'+h(m.last)+'</td>'+
        '<td><span class="b b-allowed"><span class="d"></span>'+h(m.status)+'</span></td>'+
        '<td class="rowacts"><button class="btn sm" onclick="openDialog(\'member\',\''+m.p+'\')">Open</button><button class="btn sm" onclick="openDialog(\'role\',\''+m.p+'\')">Change role</button><button class="btn sm danger" onclick="openDialog(\'removemember\',\''+m.p+'\')">Remove</button></td></tr>';}).join("")+
@@ -9348,7 +9376,7 @@ DLG_EXT.plane=function(){
     '<div class="field"><label for="planeMode">Mode</label><select id="planeMode">'+
      [["dedicated","dedicated · Oxagen cloud"],["firewall","behind your firewall · signed Helm bundle"],["airgap","air-gapped · in-firewall models"]].map(function(x){return '<option'+(x[0]===v?' selected':'')+'>'+h(x[1])+'</option>';}).join("")+'</select></div>'+
     '<div class="field"><label for="planeRegion">Region</label><select id="planeRegion">'+["us-east-1","eu-west-1","ap-southeast-2"].map(function(r){return '<option'+(r===ORG.region?' selected':'')+'>'+r+'</option>';}).join("")+'</select></div>'+
-    '<dl class="kv"><dt>Included</dt><dd>the witness runner inside your plane, SSO and SCIM, two-person mandates, the assurance suite you run yourself</dd>'+
+    '<dl class="kv"><dt>Included</dt><dd>'+(wedge()?'the witness runner inside your plane, and support with an SLA':'the witness runner inside your plane, SSO and SCIM, two-person mandates, the assurance suite you run yourself')+'</dd>'+
     '<dt>Plan</dt><dd>Enterprise, annual, invoiced · from $60,000 per year</dd></dl>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Request sent. An owner signs the annual agreement before anything moves.\')">Request it</button>'};
 };
@@ -9641,9 +9669,9 @@ function auditGo(t){S.tab.audit=t;var hsh="#/"+ORG.slug+"/audit/"+t;if(location.
 function auditTabs(t){
   var open=INCIDENTS.filter(function(i){return i.status==="open";}).length;
   var active=HOLDS.filter(function(x){return x.st==="active";}).length;
-  var defs=[["events","Events",AUDIT.length],["incidents","Incidents",open+" open"],["receipts","Receipts",RECEIPTS.length],
+  var defs=wedgeTabs("audit",[["events","Events",AUDIT.length],["incidents","Incidents",open+" open"],["receipts","Receipts",RECEIPTS.length],
    ["holds","Legal holds",active],["exports","Exports",EXPORTS.length],["keys","Keys"],
-   ["assurance","Assurance",ASSURANCE.pass+"/"+ASSURANCE.cases.length],["retention","Retention"]];
+   ["assurance","Assurance",ASSURANCE.pass+"/"+ASSURANCE.cases.length],["retention","Retention"]]);
   return '<div class="tabs" role="tablist">'+defs.map(function(x){
     return '<button class="tab" role="tab" aria-selected="'+(t===x[0])+'" onclick="auditGo(\''+x[0]+'\')">'+x[1]+(x[2]!==undefined?'<span class="n">'+h(x[2])+'</span>':'')+'</button>';}).join("")+'</div>';
 }
@@ -9827,7 +9855,7 @@ function auditRetention(){
 }
 
 function pAudit(){
-  var t=tab("audit","events");
+  var t=wedgeTab("audit",tab("audit","events"),"events");
   if(S.state==="loading") return skeleton();
   if(S.state==="error") return errorState("Audit","503 audit_store_unavailable");
   if(S.state==="denied") return deniedState("the audit record","org.auditor or org.owner");
@@ -10074,7 +10102,7 @@ var ASST_CONVOS={
      ].concat(now)},
     {p:'<b>Money has not moved.</b> The mandate ledger holds the amount as a reservation. Approve it and it settles; deny it or let it expire and the reservation is released.'},
     {kv:[
-      ["mandate",h(M.id)+' · '+h(M.status)+(M.twoPerson?' · two-person':'')],
+      ["mandate",h(M.id)+' · '+h(M.status)+(M.twoPerson&&!wedge()?' · two-person':'')],
       ["period",h(M.period)+' · settled '+usd(M.used)+' · reserved '+usd(M.reserved)+' · remaining '+usd(M.remaining)+' of '+usd(M.perPeriod)],
       ["this call",led?'reserved '+usd(led.amount)+' at '+h(led.when)+' · '+h(led.ext):'no ledger row'],
       ["run cost",usd(R.cost)+' '+h(ORG.currency)+' · '+h(R.basis)]]},
@@ -11337,7 +11365,7 @@ SCENARIOS["flight-recorder"]={title:"The flight recorder", ws:"core-platform",
    witness-probe case, so the row reads its counts off the suite. ASSURANCE_HISTORY is declared after them. */
 (function(){var A=ASSURANCE,r=ASSURANCE_HISTORY[0];
   if(r&&r.ran===A.ran){r.rel=A.version;r.cases=A.cases.length;r.pass=A.pass;r.fail=A.fail;r.na=A.na;r.note="witness-probe case added in "+A.version.replace(/^suite /,"");}})();
-SCENARIOS["proven-not-claimed"]={title:"Proven, not claimed", ws:"core-platform",
+SCENARIOS["proven-not-claimed"]={title:"Proven, not claimed", ws:"core-platform", release:"full",
  blurb:"A run is proven because a witness it never saw failed on main and passed on the pull request. The agent was told one word.",
  steps:(function(){
   var P=run("run_01K5RQ4B9C7XTN2P"), f=P.flip, W=proofWitnessRun(P), T=run("run_01K5RG6H1L4OIU9Y");
@@ -11374,7 +11402,7 @@ SCENARIOS["proven-not-claimed"]={title:"Proven, not claimed", ws:"core-platform"
  })()};
 /* ---- end W5 ---- */
 /* ---- W6 · learned-approved-changed ---- */
-SCENARIOS["learned-approved-changed"]={title:"Learned, approved, changed", ws:"core-platform",
+SCENARIOS["learned-approved-changed"]={title:"Learned, approved, changed", ws:"core-platform", release:"full",
  blurb:"The promoter learns a rule from runs, a person merges it as a pull request, and the next model call carries it.",
  steps:[
   {say:"These are the records that steer core-platform. Each one is a file in <span class=\"mono\">.oxagen/rules/</span> on a-intel/platform, and each was published by a merge.",
@@ -11410,7 +11438,7 @@ SCENARIOS["learned-approved-changed"]={title:"Learned, approved, changed", ws:"c
  ]};
 /* ---- end W6 ---- */
 /* ---- W8 · every-dollar-every-operator ---- */
-SCENARIOS["every-dollar-every-operator"]={title:"Every dollar, every operator", ws:"core-platform",
+SCENARIOS["every-dollar-every-operator"]={title:"Every dollar, every operator", ws:"core-platform", release:"full",
  blurb:"What the tokens bought, per operator, agent and run, and whether every provider dollar has a frame behind it.",
  steps:[
   {say:"September’s spend opens on what it bought. The findings are savings, each one measured minus counterfactual over the runs it cites.",
@@ -11447,7 +11475,7 @@ SCENARIOS["every-dollar-every-operator"]={title:"Every dollar, every operator", 
  ]};
 /* ---- end W8 ---- */
 /* ---- W9 · toolbelt-governed ---- */
-SCENARIOS["toolbelt-governed"]={title:"The toolbelt, governed", ws:"core-platform",
+SCENARIOS["toolbelt-governed"]={title:"The toolbelt, governed", ws:"core-platform", release:"full",
  blurb:"What one agent may reach, the credential it never holds, and the policy change you can see before you switch it on.",
  steps:[
   {say:"Triage’s belt is searchable, not preloaded: 52 tools, and the agent finds the one it needs by asking.",
@@ -11486,7 +11514,7 @@ SCENARIOS["toolbelt-governed"]={title:"The toolbelt, governed", ws:"core-platfor
  ]};
 /* ---- end W9 ---- */
 /* ---- W10 · cio-console ---- */
-SCENARIOS["cio-console"]={title:"The CIO’s console", ws:"core-platform",
+SCENARIOS["cio-console"]={title:"The CIO’s console", ws:"core-platform", release:"full",
  blurb:"Organization and Audit from the chair that answers for both: who can sign in, where the data lives, what the models cost, and what can be proven.",
  steps:[
   {say:"Who can sign in is decided upstream. Okta enforces single sign-on for every member but the break-glass accounts, and SCIM writes this table from group mappings.",
@@ -11527,7 +11555,7 @@ SCENARIOS["cio-console"]={title:"The CIO’s console", ws:"core-platform",
  ]};
 /* ---- end W10 ---- */
 /* ---- W11 · assistant-and-account ---- */
-SCENARIOS["assistant-and-account"]={title:"The assistant, and whose account it is", ws:"core-platform",
+SCENARIOS["assistant-and-account"]={title:"The assistant, and whose account it is", ws:"core-platform", release:"full",
  blurb:"The in-app agent explains a park, changes configuration through governed actions, and stops where its authority stops. Every turn is a run of its own.",
  steps:[
   {say:"Priya asks why invoice-bot stopped. It did not stop: the <b>$2,450.00</b> payment parked on <span class=\"mono\">apr_01K5RN9T4</span>, and the assistant walks the chain from who asked to which rule.",
@@ -11573,7 +11601,7 @@ SCENARIOS["assistant-and-account"]={title:"The assistant, and whose account it i
    them back once the route leaves the scenario, so the rest of the demo is the seeded app. */
 function skScnArm(){S.skScn=true;}
 function skScnLeave(){ if(!S.skScn||S.scn) return; S.skScn=false; SK_ON["core-platform"]=true; SK_ON["finops"]=false; SKS.answered=null; SKS.picked=null; SKS.q="cut the first release notes"; }
-SCENARIOS["in-the-loop"]={title:"In the loop", ws:"core-platform",
+SCENARIOS["in-the-loop"]={title:"In the loop", ws:"core-platform", release:"full",
  blurb:"Skills ship off. The search is the config, not the model. And when a run starts in a repository nobody bound, Oxagen stops the loop and asks a person — through the agent.",
  steps:[
   {say:"FinOps has skills off. Not disabled by an admin — this is what a workspace is made as. The page says what turning them on would do and, just as carefully, what it would not do.",
@@ -11636,13 +11664,17 @@ function scnRail(){
 }
 function pScenarios(){
   var ids=Object.keys(SCENARIOS);
+  function cards(list){return '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px">'+list.map(function(id){var s=SCENARIOS[id];
+     return '<div class="scn-card"><b>'+h(s.title)+'</b><p>'+h(s.blurb)+'</p>'+
+      '<p class="mono dim" style="font-size:11px;margin:0">'+s.steps.length+' steps \u00b7 workspace '+h(s.ws)+(s.release==="full"?' \u00b7 opens everything built':'')+'</p>'+
+      '<div><button class="btn primary sm" onclick="go(\''+scnHref(id,1)+'\')">Start</button></div></div>';
+   }).join("")+'</div>';}
+  var wedgeIds=ids.filter(function(id){return SCENARIOS[id].release!=="full";}), builtIds=ids.filter(function(id){return SCENARIOS[id].release==="full";});
   return '<p class="eyebrow">Workspace \u00b7 '+h(ws().name)+'</p><h1>Scenarios</h1>'+
    '<p class="lede">'+ids.length+' demos, each one a walk through the real screens. A scenario owns no screens of its own, so it cannot drift away from the product it is demonstrating.</p>'+
-   '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px">'+ids.map(function(id){var s=SCENARIOS[id];
-     return '<div class="scn-card"><b>'+h(s.title)+'</b><p>'+h(s.blurb)+'</p>'+
-      '<p class="mono dim" style="font-size:11px;margin:0">'+s.steps.length+' steps \u00b7 workspace '+h(s.ws)+'</p>'+
-      '<div><button class="btn primary sm" onclick="go(\''+scnHref(id,1)+'\')">Start</button></div></div>';
-   }).join("")+'</div>';
+   '<p class="eyebrow q" style="margin-top:6px">The wedge \u00b7 the first release</p>'+cards(wedgeIds)+
+   '<p class="eyebrow q" style="margin-top:18px">Already built \u00b7 designed and working, not what is sold this quarter</p>'+
+   '<p class="muted" style="font-size:12.5px;margin:0 0 10px">Starting one of these switches the mockup to everything built, because the flow walks a surface the wedge does not carry.</p>'+cards(builtIds);
 }
 
 /* ---- steering: one run, or the fleet. State lives on S; the switch flips and re-renders. ---- */
@@ -12175,7 +12207,7 @@ function dialog(){
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn danger" onclick="closeDialog();act(\'Revoked. The service principal loses access at its next call; runs it started keep their records.\')">Revoke</button>'},
    plan:{t:"Change plan",w:false,b:
      '<div class="field"><label>Plan</label><select aria-label="Plan"><option>Team — usage-based, monthly, cancel any time</option><option>Enterprise — annual, committed use at 20–30% off, from $60,000</option></select></div>'+
-     '<div class="note">The free tier is in every plan: first 1,000 runs each month, every governance feature on. Enterprise adds a dedicated data plane or behind-the-firewall deployment, SSO and SCIM, the hosted witness runner, two-person mandates, and support with an SLA.</div>',
+     '<div class="note">The free tier is in every plan: first 1,000 runs each month, every governance feature on. Enterprise adds '+(wedge()?'a dedicated data plane or behind-the-firewall deployment, the hosted witness runner, and support with an SLA.':'a dedicated data plane or behind-the-firewall deployment, SSO and SCIM, the hosted witness runner, two-person mandates, and support with an SLA.')+'</div>',
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Plan change staged in Stripe. Oxagen holds the meter; Stripe holds the plan.\')">Change plan</button>'},
    /* ---- audit dialogs (W10 port) — bodies are built by guarded functions in the Audit section ---- */
    receipt:{t:receiptDlgTitle(),s:receiptDlgSub(),w:true,b:receiptDlgBody(),f:receiptDlgFoot()},
@@ -13829,6 +13861,8 @@ function render(){
   if(el("chrome")){
     document.querySelectorAll("#chrome [data-st]").forEach(function(b){
       b.setAttribute("aria-pressed",b.getAttribute("data-st")===S.state?"true":"false");});
+    document.querySelectorAll("#chrome [data-rel]").forEach(function(b){
+      b.setAttribute("aria-pressed",b.getAttribute("data-rel")===S.release?"true":"false");});
     el("cPhone").setAttribute("aria-pressed",S.phone?"true":"false");
   }
 }
@@ -13882,13 +13916,13 @@ DLG_EXT.more=function(){
   return {t:"More",w:false,
    b:'<div class="mgrid">'+
      t("steering","Steering","records, proposals, Context PRs",'go(\''+base+'/steering\')',fr?0:PROPOSALS.length)+
-     t("skills","Skills","resolution, the loop, reflection",'go(\''+base+'/skills\')',skWaiting(w),true)+
+     t("skills","Skills",wedge()?"already built · resolution, the loop":"resolution, the loop, reflection",'go(\''+base+'/skills\')',skWaiting(w),true)+
      t("organization","Organization","people, workspaces, funding",'go(\'#/'+ORG.slug+'\')')+
      t("billing","Billing","plan, meters, invoices",'go(\'#/'+ORG.slug+'/billing\')')+
-     t("audit","Audit","events, incidents, holds",'go(\'#/'+ORG.slug+'/audit\')',crit,true)+
+     t("audit","Audit",wedge()?"already built · events, receipts":"events, incidents, holds",'go(\'#/'+ORG.slug+'/audit\')',crit,true)+
      (PRODUCT?'':t("scenarios","Scenarios","guided walkthroughs",'go(\''+base+'/scenarios\')'))+
      '</div><div class="hr"></div><div class="mgrid">'+
-     t("assistant","Assistant",S.asstEngine==="down"?"engine down":"glm-latest · ready",'asstToggle(true)')+
+     t("assistant","Assistant",wedge()?"already built":S.asstEngine==="down"?"engine down":"glm-latest · ready",'asstToggle(true)')+
      t("search","Search","or run an action",'openDialog(\'cmd\')')+
      t("bell","Notifications",notifUnread()+" unread",'openDialog(\'notifs\')',notifUnread(),true)+
      t("user","Account",me().name,'openDialog(\'account\',\'profile\')')+
@@ -13911,6 +13945,8 @@ function toggleTheme(){
 if(el("chrome")){
   document.querySelectorAll("#chrome [data-st]").forEach(function(b){
     b.addEventListener("click",function(){S.state=b.getAttribute("data-st");render();});});
+  document.querySelectorAll("#chrome [data-rel]").forEach(function(b){
+    b.addEventListener("click",function(){setRelease(b.getAttribute("data-rel"));});});
   el("cPhone").addEventListener("click",function(){S.phone=!S.phone;render();});
   el("cTheme").addEventListener("click",toggleTheme);
   el("cIndex").addEventListener("click",function(){openDialog("cmd");});
@@ -14644,6 +14680,7 @@ seedApprovals();
    mobile, theme, hash); a thin page file sets window.BOOT before the engine loads instead. */
 var BOOT=window.BOOT||{state:null,mobile:null,theme:null,hash:null};
 if(BOOT.state)S.state=BOOT.state;
+if(BOOT.release)S.release=BOOT.release;
 S.mobile=BOOT.mobile!=null?!!BOOT.mobile:mobileMedia();
 if(BOOT.theme)setTheme(BOOT.theme);
 if(!location.hash)location.hash=BOOT.hash||"#/a-intel/core-platform/scenarios/toolbelt-governed/1"; /* generated by tools/build-w.mjs from mc.html */
