@@ -51,6 +51,10 @@ export const PAGES = [
   { id: "tools",             title: "Tools",                       hash: "/{org}/core-platform/tools",                            states: ALL },
   { id: "steering",          title: "Steering",                    hash: "/{org}/core-platform/steering",                         states: ALL },
   { id: "spend",             title: "Spend",                       hash: "/{org}/core-platform/spend",                            states: ALL },
+  // skills (W13): resolution, the seat in the loop, reflection; the off-by-default gate; the interjected run
+  { id: "skills",            title: "Skills",                      hash: "/{org}/core-platform/skills",                           states: ALL },
+  { id: "skills-off",        title: "Skills · off (the default)",  hash: "/{org}/finops/skills",                                  states: ["loaded"] },
+  { id: "run-interjection",  title: "Run · interjection",          hash: "/{org}/core-platform/runs/run_01K6QW3D5N7TYBA2",        states: NO_EMPTY },
   // organization scope (pages 8–10)
   { id: "organization",      title: "Organization",                hash: "/{org}",                                                states: ALL },
   { id: "organization-api-keys", title: "Organization · API keys", hash: "/{org}/api-keys",                                       states: ALL },
