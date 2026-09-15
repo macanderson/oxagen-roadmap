@@ -47,7 +47,10 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 
 ## Functionality
 
-- Changing a role is a governed action: it passes IAM, writes an audit record and bills as one action.
+- Changing a role is a governed action: it passes IAM and writes an audit record. Membership writes are free; `resolve_approval` is the only billable action (2026-09-15, maintainer decision).
+- **Create a workspace** opens an in-app form (the `newws` dialog: name, namespace, main repository, production branch) that calls `create_workspace`. It ships in rev1 with the fix for `macanderson/oxagen#3029`, where the org-only `create_workspace` REST mount fails before its handler (2026-09-15, maintainer decision).
+- API key rotation ships in rev1: **Rotate** opens the rotatekey dialog and calls `rotate_api_key` (2026-09-15, maintainer decision).
+- No control on this page is gated on the enterprise license; custom roles in the role editor are on for every tier (2026-09-15, maintainer decision).
 - A workspace owns one main repo, one steering set, its agents, tool grants and budgets; a workspace without a main repo cannot exist (it is *provisional*).
 - Funding source and routes cover Oxagen’s own model work (reflection, promotion rationale, classifiers, run names); the customer’s agents pay their own providers.
 - Rotate keys on the data plane is a KEK rotation and lands on Audit › Keys.

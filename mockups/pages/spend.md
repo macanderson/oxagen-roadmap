@@ -54,6 +54,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 - Each saving is measured minus counterfactual over the runs it cites, at the price each call actually paid; nothing is an opinion.
 - Accepted (human-verified) spend is never folded into proven.
 - A budget breach pauses at the model proxy before the call (mode: hard) or notifies (mode: soft).
+- The Spend lane ships in rev1, with Fleet's Spend and Cache-hit tiles (2026-09-15, maintainer decision).
 
 ## States
 

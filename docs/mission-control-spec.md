@@ -8,6 +8,7 @@
 | **Supersedes** | The `oxagen-platform` and `oxagen` codebases as products. Carries forward the designs named in §16. |
 | **Builds on** | Context Graph Protocol `contextgraph/1.0` and the `contextgraph/lifecycle/1.0-draft` profile (repo at `origin/main`, ADRs 0001 to 0018). Stella's context-record and Context PR corpus. Oxagen ADR-024, 025, 042, 043, 051, 052, 053 and the current wrapper spec (in the repo today under `docs/specs/tacho/`, renamed here). |
 | **Amended** | 2026-09-14, by the scope review (`scope-review.md`) and the definition of done (`dod-spec.md`). The in-app agent, Neo4j, SSO and SCIM, policy simulation, the assurance suite, two-person mandates, steering effect metrics and retirement, legal holds, crypto-shredding and provider reconciliation are out. The definition of done (§8.6) is in, and it is the billable unit (§12.1). Sections carry the change in place. It also supersedes the billing amendment of 2026-09-13 (Oxagen ADR-055, governed action units in monthly buckets at contracted rates): the one priced meter is the proven run, and governed actions are reported beside it (§12.1). |
+| **Decided** | 2026-09-15, maintainer decisions (§20): billing (credit packs, negotiated enterprise with every feature on for every tier, invoice billing, the Build and Scale upgrade, suspension), the approvals strip on Run, the shell's sidebar flyout, Halt and Cancel on ledger-ingested runs, the create-workspace form and the Spend lane, and API key rotation in rev1. Each section carries its change in place with the date. |
 
 ---
 
@@ -33,6 +34,7 @@ This table lists every decision that shapes the rest of the document, in one pla
 | 14 | Mission Control is nine pages: six in a workspace and three for the organization, down from 70. Everything else is deleted. Appendix F says where each old route went. | §14, App. F |
 | 15 | A run is proven only by a **witness** Oxagen wrote. A witness is a test built with one of several deterministic oracles, checkers whose result is fixed for a given input. The witness fails on the PR's target branch and passes on the PR. It runs in a witness runner the worker can never see or reach. The runner reports only pass or fail back to the worker. The flip from fail to pass stamps the run. Stamped runs are the training asset. | §8.5 |
 | 16 | An agent cannot finish until its **definition of done** says so. Before the agent moves, Oxagen drafts the acceptance checks for the prompt (or loads hand-written ones) and locks them by digest. At every Stop the checks run, hidden holdouts included, and a pure `decide(evidence)` answers HELD, PENDING or BROKEN with a closed reason. Oxagen never runs a check; it re-decides the evidence, binds the outcome to the sealed attempt, signs a certificate and meters one governed action. The held run is what the customer pays for. | §8.6, §12.1 |
+| 17 | The maintainer decisions of 2026-09-15 bind billing, approvals, the shell, intervention on ledger-ingested runs, and the rev1 scope of Organization, Spend and API keys. A sentence above that one of them changes carries a dated note. | §20 |
 
 ---
 
@@ -198,6 +200,8 @@ TypeScript on Node runs the control plane (the part that sets and enforces rules
 
 There is no in-app agent. The scope review of 2026-09-14 cut it: a chat panel sells nothing, it needed a second engine container in every deployment, and every question it could answer is a page in Mission Control. Configuration is the same agent tools a person clicks (§6, Appendix E). Explanation is the record: a chain of links to frames, records and commits, never a summary. Stella stays where it belongs, on the customer's machine as a wrapped agent.
 
+> **2026-09-15, maintainer decision.** The shell keeps the sidebar flyout: the in-app agent opens from the sidebar, as merged into the mockups repository in PR #1. The bottom dock on the `small-approvals-bottom-dock-scenarios` branch is not adopted. Credit packs stay as the in-app agent's top-up (§12.10). The paragraph above predates this decision; where the two disagree about the shell, the decision holds.
+
 Oxagen still makes model calls on its own behalf: the reflector (§9.1), the promoter's rationale and Context PR bodies (§9.2), the dod drafter (§8.6), and the run namer that writes `run.name` and `run.summary` from the frames. Every one of them goes through the model layer (§4.5), runs under a service principal, and is a frame in a run of its own, so its cost is accounted like everything else.
 
 **Onboarding is gated, and it is three steps.** A new organization does not see the app. It sees one screen with three steps: (1) name the organization, (2) wrap an agent, with one click for Claude Code or Codex (the installer, §7.2) or with the five-line `oxagen.agent.wrap({})` snippet for an SDK agent, and (3) start a run. The full app unlocks the moment the first frame from that agent reaches Oxagen. The operator then lands on Fleet looking at their own run. That run is also the installer's smoke test, so there is one path, not two. The installer reads the git remote of the directory it ran in, so binding the main repo is one click.
@@ -245,7 +249,7 @@ The model is exactly today's model. An **organization** holds **workspaces**. A 
 
 **Workspace.** Its `public_id` starts with `wrk_`. Its `slug` and immutable `namespace` are unique within the org. It owns: one **main repo** (required at creation, §10.1) plus any number of linked repos, one steering set, agents, tool grants, budgets, a governance mode (`solo` | `team` | `regulated`), and a retention mode (`content_exact` by default, `digest_only` as an opt-down).
 
-**Roles.** Org roles are `owner`, `admin`, `member`, `billing`, `compliance`, and `viewer`. Workspace roles are `owner`, `member`, and `viewer`. Agent roles are `observer`, `contributor`, and `operator`. Custom roles are an enterprise feature. They are built from the same grant table, not from a second system.
+**Roles.** Org roles are `owner`, `admin`, `member`, `billing`, `compliance`, and `viewer`. Workspace roles are `owner`, `member`, and `viewer`. Agent roles are `observer`, `contributor`, and `operator`. Custom roles are on for every tier (2026-09-15, maintainer decision: no feature is gated on the enterprise license, §12.10). They are built from the same grant table, not from a second system.
 
 ### 5.2 Postgres: Row-Level Security without a bypass switch
 
@@ -616,9 +620,13 @@ Commands are rows in `control.commands`. They travel on the control channel, eit
 
 Automatic halts are the same commands issued by policy. A budget breach, a schema violation on an irreversible tool, an egress-class violation, a chain break, or a detector hit (a secret in a tool argument, a forbidden path) each produce a `policy.decision` frame. Then, per workspace policy, each produces a `pause` or `cancel`.
 
+**Ledger-ingested runs (2026-09-15, maintainer decision).** A run that reaches Oxagen only through the ledger ingest contract (`ingest_frames`, Appendix E) has no proxy or wrapper in its path to refuse its next call. The ingest contract is built now with a revocable run token: the token is minted at run start (§6.2) and every ingest call carries it. `cancel` and a halt (`revoke`) revoke the token, and the next ingest call under it is refused. Halt and Cancel on Fleet and Run work on ledger-ingested runs as they do on wrapped runs.
+
 ### 7.5 Human approval
 
 `require_approval` on a grant, a tool's risk grade, a budget threshold, or a standing rule routes an action to the **approvals queue**. The gateway parks the call (default timeout ten minutes, set per bundle). It creates an `approvals.requests` row with the canonical action, input digest, requesting span, and trust tier. It then notifies (Mission Control, Slack, email). A resolution mints a single-use **approval token** bound to the agent, run, exact action, expiry, and the approval event. The token is a Biscuit v2 token, a signed token format that can be checked without calling back to Oxagen, as decided in the wrapper design. The adapter verifies it offline and the gateway verifies it inline. Approve, deny, and expiry are all frames. The approver's reason reaches the model as the permission decision reason.
+
+**The run on an approval (2026-09-15, maintainer decision).** In the current repository the request row is `agent.approval_requests`. It gains a nullable `run_id`, set from `ctx.agentRun` when the request is created. `list_approvals` filters on it, and the approvals strip on the Run page reads it. A request raised outside a run has no `run_id` and appears on the Fleet panel only.
 
 ### 7.6 Messages between agents, and mass steering
 
@@ -929,7 +937,7 @@ Two different things are tracked, and they are kept apart on purpose:
 | Above 100,000 | $0.15 per proven run |
 | Evidence retention | 13 months included on paid plans, then $0.10 per GB-month |
 | Tokens Oxagen buys on the customer's behalf (`platform` funding source, §4.5) | at cost, no markup, capped per organization |
-| Enterprise (annual) | committed use at 20 to 30 percent off the tiers, from $60,000 per year. Adds a dedicated data plane or behind-the-firewall deployment, the hosted witness runner, support with an SLA, and invoicing |
+| Enterprise | negotiated only (2026-09-15, maintainer decision). Each contract is a `billing.contract_terms` row; no enterprise plan exists in Stripe or in `SUBSCRIPTION_PLANS`. A contract covers committed use, a dedicated data plane or behind-the-firewall deployment, support with an SLA, and invoicing. No feature is gated on the enterprise license: every feature, IAM and SOC 2 controls included, is on for every tier |
 | Onboarding discount | 20 percent off usage for 12 months when the customer converts to a paid plan within 7 days of the first run. Annual prepayment earns a further 20 percent |
 
 What counts: a sealed run whose certificate says HELD, metered as the governed action `dod.held` the day it settles. A PENDING run is metered the day it is signed. BROKEN runs, runs Oxagen halted before any model call, and witness runs are free. The customer never pays for Oxagen saying no, or for Oxagen proving work. Payment is by card, monthly, with no minimum below enterprise, and the customer can cancel any time. Stripe holds plans, customers, and invoices. Oxagen holds the meter.
@@ -1037,6 +1045,19 @@ Each finding names the level it applies to (run, agent, operator, workspace) and
 - **Monthly statement** per workspace and organization: spend by operator, agent, model, provider key, and task. Proven versus unproven. Exported as CSV and as a signed PDF.
 - **API and MCP** expose the same rollups, so a customer can pull attribution into their own FinOps tooling. Every number carries its basis (`gateway_observed`, `client_attested`, `estimated`).
 
+### 12.10 Billing decisions of 2026-09-15
+
+Maintainer decisions, dated 2026-09-15. They bind the billing build in `macanderson/oxagen`, which meters governed action units (GAUs) against a monthly allowance, sells prepaid GAU blocks, and bills approved organizations by invoice. The proven-run price list in §12.1 and that GAU billing are not yet one price list. Each row states the behaviour the build ships.
+
+| # | Decision | Lands in |
+|---|---|---|
+| 2 | Credit packs stay as the in-app agent's top-up, and `purchase_credits` is not retired. GAU blocks remain the governed-action product. | Billing page, App. E |
+| 3 | Enterprise is negotiated only: a `billing.contract_terms` row. `enterprise-v2` is removed from `SUBSCRIPTION_PLANS` and from Stripe. No feature is gated on the enterprise license; every feature, IAM and SOC 2 controls included, is on for every tier. | §6.3, §12.1, App. A.6, App. A.8, Billing page |
+| 5 | When invoice billing is switched off for an organization, its `overage_invoiced_gau` is added to `purchased_gau`. The invoice is the purchase. | Billing page |
+| 6 | `invoice_gau_max` bounds overage beyond the monthly allowance. The interim invoice fires at unit `invoice_gau_max` + 1. | Billing page |
+| 7 | Rev1 keeps an in-app Build and Scale upgrade through Stripe Checkout, so `start_subscription_upgrade` stays. `get_rate_card`, `preview_action_cost` and `get_evidence_retention` retire at cutover. | §14, App. E, Billing page |
+| 12 | An invoice-billed organization is suspended 5 days after an invoice is past due. Metering continues while it is suspended. Paying the full outstanding balance reactivates it. | App. A.2, Billing page |
+
 ---
 
 ## 13. Audit, retention, and the fidelity call
@@ -1099,8 +1120,8 @@ Mission Control has nine pages: six at workspace scope and three at organization
 | **Tools** | The registry (servers, tools, versions, schemas, safety classification), approval rules and auto-approval conditions, connections and their owners, credential grants, the mandates ledger, policy versions with their tests, and kill switches | import server, approve observed schema, add connection, grant mandate, edit policy, flip a switch |
 | **Steering** | Published records, proposals, and open Context PRs | open Context PR, review |
 | **Spend** | Findings ranked by the money at stake. Cost by operator, agent, model, provider key, and task. Proven spend versus unproven spend, and the productive ratio. Cache hit rate. Wasted spend. Budgets | act on a finding, set budget, export statement |
-| *(org)* **Organization** | People, roles, invitations, workspaces, model funding and routes, the data plane, and API keys | invite, change role, create workspace, set funding, set route |
-| *(org)* **Billing** | Proven runs this period, the secondary meters, the plan, and invoices | change plan |
+| *(org)* **Organization** | People, roles, invitations, workspaces, model funding and routes, the data plane, and API keys | invite, change role, create workspace (an in-app form, rev1), set funding, set route, create, rotate and revoke an API key (rotation ships in rev1) |
+| *(org)* **Billing** | Proven runs this period, the secondary meters, the plan, and invoices | change plan (Build or Scale through Stripe Checkout, §12.10), buy credit packs for the in-app agent |
 | *(org)* **Audit** | Control-plane audit events, incidents, receipts, exports, keys, and retention | export, rotate |
 
 Interaction rules: every badge that describes trust (enforcement tier, replay grade, attestation, cost basis) shows the recorded value and nothing stronger. Every number that is money shows its basis. Every explanation is a chain of links to frames, records, and commits, not a summary.
@@ -1201,7 +1222,7 @@ The wedge ends when Customer 1 is in production, not on a date. M4 produces the 
 ---
 ## 19. Demo Wow! Scenarios
 
-Status: `complete` (2026-09-14; W7 and the assistant half of W11 were cut with the ontology and the in-app agent, W14 added with the definition of done).
+Status: `complete` (2026-09-14; W7 and the assistant half of W11 were cut with the ontology and the in-app agent, W14 added with the definition of done). The shell's sidebar flyout is kept by the maintainer decision of 2026-09-15 (§20).
 
 Each scenario is one moment an investor or a customer should remember. The mockups are the app, screen for screen, in the house brand. The prompts that produced them are in `demo-mockup-prompts.md`, beside this document. Every scenario is a guided walk inside `mockups/missioncontrol.html` and a story in the Storybook catalog.
 
@@ -1237,6 +1258,36 @@ Each scenario is one moment an investor or a customer should remember. The mocku
 | Billing | `/{org}/billing` | loaded, error, denied, phone | [W11 mockup](https://claude.ai/code/artifact/317226a1-c2ff-43ce-a439-4a54f8b8288b), [W8 mockup](https://claude.ai/code/artifact/6a15975f-6719-4b4c-aae5-4b942dea0bb1), [W12 mockup](https://claude.ai/code/artifact/3fcf949a-c455-4efd-af36-1c2d1f13088e) |
 | Audit | `/{org}/audit` | loaded, empty, error, denied, phone | [W11 mockup](https://claude.ai/code/artifact/317226a1-c2ff-43ce-a439-4a54f8b8288b), [W3 mockup](https://claude.ai/code/artifact/9a8bcd5c-c66c-462d-992a-a449679801ce), [W10](https://claude.ai/code/artifact/403166f6-9216-4d23-86ac-bb3c2aa60b23), [W12 mockup](https://claude.ai/code/artifact/3fcf949a-c455-4efd-af36-1c2d1f13088e) |
 | Account dialog, notifications, command menu | user menu, top bar | loaded, phone | [W5 mockup](https://claude.ai/code/artifact/81725124-b936-4cbb-9e40-79089b5a1e35), [W11 mockup](https://claude.ai/code/artifact/317226a1-c2ff-43ce-a439-4a54f8b8288b), [W3 mockup](https://claude.ai/code/artifact/9a8bcd5c-c66c-462d-992a-a449679801ce), [W4 mockup](https://claude.ai/code/artifact/a4b69d0b-715c-434c-9f4e-80534bf2e462), [W10](https://claude.ai/code/artifact/403166f6-9216-4d23-86ac-bb3c2aa60b23), [W12 mockup](https://claude.ai/code/artifact/3fcf949a-c455-4efd-af36-1c2d1f13088e) |
+
+---
+
+## 20. Maintainer decisions of 2026-09-15
+
+The maintainer decided these items on 2026-09-15. A decision that changes product behaviour or copy is also written into the section and the page spec it changes, with the date. The others change neither, and the table records them so the set reads in one place.
+
+| # | Decision | Lands in |
+|---|---|---|
+| 1 | The in-app agent's platform balance: the $5 signup grant is restored in `create_org`. | `macanderson/oxagen` |
+| 2 | Credit packs stay as the in-app agent's top-up; `purchase_credits` is not retired. GAU blocks remain the governed-action product. | §12.10, App. E, Billing page |
+| 3 | Enterprise is negotiated only (a `billing.contract_terms` row); `enterprise-v2` leaves `SUBSCRIPTION_PLANS` and Stripe. No feature is gated on the enterprise license: every feature, IAM and SOC 2 controls included, is on for every tier. | §6.3, §12.1, §12.10, App. A.6, App. A.8, Billing and Organization pages |
+| 4 | Migrate the production database, then run `stripe-sync` and `price-book-sync` against production. Held pending a check: the `app-rebuild` migrations are not purely additive. | operations; held |
+| 5 | When invoice billing is switched off, `overage_invoiced_gau` is added to `purchased_gau`. | §12.10, Billing page |
+| 6 | `invoice_gau_max` bounds overage beyond the monthly allowance; the interim invoice fires at unit max + 1. | §12.10, Billing page |
+| 7 | Rev1 keeps an in-app Build and Scale upgrade through Stripe Checkout (`start_subscription_upgrade` stays). `get_rate_card`, `preview_action_cost` and `get_evidence_retention` retire at cutover. | §12.10, §14, App. E, Billing page |
+| 8 | `agent.approval_requests` gains a nullable `run_id` set from `ctx.agentRun`; `list_approvals` filters on it; the Run page strip reads it. | §7.5, App. E, Run and Fleet pages |
+| 9 | The shell keeps the sidebar flyout; the `small-approvals-bottom-dock-scenarios` mockup branch is not adopted. | §4.4, §19, the whole-app audit prompt |
+| 10 | The witness runner plane is approved with a $200 a month AWS budget cap. | operations |
+| 11 | The ledger ingest contract is built now with a revocable run token, so Halt and Cancel work on ledger-ingested runs. | §7.4, App. E, Run and Fleet pages, plan gap G17 |
+| 12 | Invoice-billed organizations are suspended 5 days after an invoice is past due; metering continues while suspended; paying the full outstanding balance reactivates the organization. | §12.10, App. A.2, Billing page |
+| 13 | Fix `macanderson/oxagen#3029` (the org-only `create_workspace` REST mount fails before its handler), add an in-app create-workspace form, and ship the Spend lane including Fleet's Spend and Cache-hit tiles. | §14, App. E, Organization, Spend and Fleet pages |
+| 14 | The metering shadow period is skipped; the waiver is dated 2026-09-15. | operations |
+| 15 | Neo4j stays through rev1; the retirement ADR is written after the witness lane lands. §0 row 5 describes the store set after that retirement. | `macanderson/oxagen` |
+| 16a | Dependabot re-pins (`macanderson/oxagen#2989`): compare what each pin resolves to, and add Dependabot ignore entries. | `macanderson/oxagen` |
+| 16b | The CI ticket-filing scripts retire (`macanderson/oxagen#2980`). | `macanderson/oxagen` |
+| 16c | Stella's `SharingScope` gains a `workspace` value; Oxagen steering records stay workspace-scoped. | Stella, `macanderson/oxagen` |
+| 16d | A forked run's grade seals when the fork's own attempt seals; the unreachable mint-at-fork path is deleted. | `macanderson/oxagen` |
+| Override | API key rotation ships in rev1. | App. E, Organization and API keys pages |
+| Confirmed | The agent-adopted defaults stand: `resolve_approval` is the only billable action and membership writes are free; `set_org_billing_terms` is operator-script only; action counters are dropped; the `billing.invoices` mirror is kept; settlement states as designed; steering team mode with N=3, M=2, confidence 0.7; verify-by-link auth, no SAML button, and `governance_mode` not asked at signup; the onboarding gate with the CLI installer and a provisional workspace, with the 7-day offer deferred; the seven-group permission catalogue; the agent definition in git and spend budgets in micros; the fixture adapter deleted; three notification events. | Organization page (membership writes); `macanderson/oxagen` |
 
 ---
 
@@ -1308,7 +1359,7 @@ Money is `bigint` micro-USD unless a `currency` column says otherwise. Secrets a
 | `name` | text | |
 | `slug` | citext | unique |
 | `namespace` | citext | 2 to 6 characters, unique, immutable; used in agent keys |
-| `status` | text | `active`, `suspended`, `deleted` |
+| `status` | text | `active`, `suspended`, `deleted`. An invoice-billed organization is `suspended` 5 days after an invoice is past due; metering continues, and paying the full outstanding balance returns it to `active` (2026-09-15, maintainer decision, §12.10) |
 | `plan` | text | `free`, `team`, `enterprise` |
 | `stripe_customer_id` | text | |
 | `display_currency`, `billing_currency` | text | ISO 4217 codes |
@@ -1569,7 +1620,7 @@ Money is `bigint` micro-USD unless a `currency` column says otherwise. Secrets a
 | `hostname`, `os_user`, `platform` | text | |
 | `harness`, `harness_version` | text | `claude-code`, `codex-cli` |
 | `device_public_key` | text | |
-| `managed` | bool | enterprise managed enrollment |
+| `managed` | bool | managed enrollment, on for every tier (2026-09-15, maintainer decision) |
 | `enrollment_claims`, `enrollment_signature` | jsonb, text | |
 | `bundle_version_served` | bigint | |
 | `status` | text | `active`, `paused`, `suspended`, `revoked` |
@@ -1711,6 +1762,8 @@ Money is `bigint` micro-USD unless a `currency` column says otherwise. Secrets a
 | `imported_at`, `import_digest` | timestamptz, text | |
 
 ### A.8 `billing` (2 tables)
+
+A negotiated enterprise contract is a `billing.contract_terms` row in the `macanderson/oxagen` billing schema; enterprise has no Stripe plan (2026-09-15, maintainer decision, §12.10).
 
 **`billing.subscriptions`** (class `org`)
 
@@ -1919,7 +1972,7 @@ The current repository registers 229 real contracts (244 names minus test fixtur
 | `respond_to_invite` | accept_member_invite, decline_member_invite | accept or decline |
 | `set_member_role` | change_member_role, remove_org_member | set a role or remove (role `none`) at org or workspace |
 | `list_members` | list_workspace_members | members with roles at either scope |
-| `create_workspace` | create_workspace, configure_repo | workspace plus its main repo binding and production branch |
+| `create_workspace` | create_workspace, configure_repo | workspace plus its main repo binding and production branch; rev1 ships an in-app form for it on Organization (2026-09-15, maintainer decision) |
 | `update_workspace` | update_workspace_settings, update_memory_policy, update_budget_policy, set_routing_policy | governance mode, retention mode, promotion thresholds, budgets, model routes |
 | `list_workspaces` | list_workspaces, list_orgs | scoped listing |
 | `get_data_plane` | get_data_plane | plane binding, DSN never returned |
@@ -1931,7 +1984,7 @@ The current repository registers 229 real contracts (244 names minus test fixtur
 |---|---|---|
 | `list_api_keys` | list_api_keys | read: the org's keys with principal, grants, last use and expiry; never the secret or its hash (added 2026-09-14 for the API keys page) |
 | `create_api_key` | create_api_key | purpose-locked keys for humans and services |
-| `rotate_api_key` | rotate_api_key | |
+| `rotate_api_key` | rotate_api_key | a new secret, the old one valid for 24 hours; ships in rev1 (2026-09-15, maintainer decision) |
 | `revoke_api_key` | revoke_api_key | |
 | `register_agent` | create_agent_def, suggest_agent_def, summarize_agent_def | opens a Context PR adding `.oxagen/agents/<slug>.toml` and the generated harness files; identity is created on merge |
 | `update_agent` | update_agent_def, revise_agent_def, publish_agent_def, deploy_agent | a Context PR changing the definition; identity and belt update on merge |
@@ -1949,13 +2002,13 @@ The current repository registers 229 real contracts (244 names minus test fixtur
 | `revoke_enrollment` | revoke_tacho_enrollment | |
 | `list_hosts` | list_tacho_hosts | |
 | `get_policy_bundle` | get_tacho_bundle, get_registry_config | signed bundle for a host or agent |
-| `ingest_frames` | ingest_tacho_events, record_execution, ingest_stella_operational_telemetry, debug_execution | the one evidence ingress; headless |
+| `ingest_frames` | ingest_tacho_events, record_execution, ingest_stella_operational_telemetry, debug_execution | the one evidence ingress; headless; carries a revocable run token, so `cancel` and `revoke` stop a ledger-ingested run (§7.4) |
 | `fetch_commands` | fetch_tacho_commands | control channel; headless |
 | `dispatch_command` | dispatch_tacho_command | pause, resume, steer, cancel, revoke |
 | `list_runs` | list_executions, list_tacho_sessions | by operator, agent, task, tier, verdict |
 | `get_run` | get_tacho_session, get_execution_trace, get_message_execution | run with turns, steps, frames, receipts, cost |
 | `export_run` | export_data (run part) | signed bundle with verifier |
-| `list_approvals` | (new; approvals had no list) | queue with the four-hop chain |
+| `list_approvals` | (new; approvals had no list) | queue with the four-hop chain; filters on `run_id` (§7.5) |
 | `resolve_approval` | resolve_approval, resolve_mcp_consent | approve or deny, mints the token |
 | `send_message` | (new) | message to `@<agent-slug>`, `@agents`, or a run id, with a delivery mode; reaches `applied` at the model request that carried it (§7.3, §7.6) |
 | `list_messages` | (new) | sent and received, with delivery outcome |
@@ -2016,7 +2069,7 @@ Dropped from this family (§11): `add_source`, `update_source`, `remove_source`,
 | `set_model_route` | update_model_settings, get_model_settings, list_model_agent tools, preview_routing_decision, get_routing_policy | tiers and fallbacks |
 | `set_funding_source` | (new; was implicit in credentials) | platform or customer key |
 | `get_subscription` | get_subscription | |
-| `change_subscription` | start_subscription_upgrade, purchase_credits | |
+| `change_subscription` | start_subscription_upgrade, purchase_credits | in rev1 both absorbed tools stay: `start_subscription_upgrade` (Build or Scale through Stripe Checkout) and `purchase_credits` (credit packs for the in-app agent). `get_rate_card`, `preview_action_cost` and `get_evidence_retention` retire at cutover (2026-09-15, maintainer decision, §12.10) |
 
 **Audit and compliance (7)**
 
