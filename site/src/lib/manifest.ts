@@ -12,7 +12,6 @@ export interface ManifestPage {
   group: string;
   states: string[];
   audit: boolean;
-  description: string;
   walkthrough: SiteLink[];
   spec: SiteLink[];
   plan: SiteLink[];

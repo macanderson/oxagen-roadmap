@@ -6,7 +6,7 @@
 //   .generated/manifest.json  page states, groups, audit prompts, walkthrough and scenario links
 import fs from "node:fs";
 import path from "node:path";
-import { GEN, GEN_CONTENT, REPO, SITE, firstParagraph, mdxText, plain, readPages, rewriteRepoUrl, slugify, writeGenerated } from "./lib.mjs";
+import { GEN, GEN_CONTENT, REPO, SITE, mdxText, plain, readPages, rewriteRepoUrl, slugify, writeGenerated } from "./lib.mjs";
 import { generateScenarios } from "./gen-scenarios.mjs";
 
 const MOCK = path.join(SITE, "public", "mock");
@@ -148,7 +148,6 @@ const manifest = {
   walkthrough: hasWalkthrough ? "docs/walkthrough.md" : null,
   pages: pages.map((p) => ({
     ...p,
-    description: firstParagraph(fs.readFileSync(path.join(REPO, "pages", `${p.id}.md`), "utf8")) ?? "",
     walkthrough: walk.get(p.id)?.walkthrough ?? [],
     spec: walk.get(p.id)?.spec ?? [],
     plan: walk.get(p.id)?.plan ?? [],

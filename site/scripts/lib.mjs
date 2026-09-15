@@ -84,6 +84,17 @@ export function firstParagraph(source, max = 220) {
   return cut.slice(0, cut.lastIndexOf(" ")).replace(/[,;:]$/, "") + "…";
 }
 
+/**
+ * The one-line summary of a markdown file: in a page spec, the last paragraph of its Job section
+ * (a lead note there points at a variant page, such as the interjection page for Fleet and Run);
+ * anywhere else, the first paragraph.
+ */
+export function summary(source, max = 220) {
+  const job = /^## Job\s*\n([\s\S]*?)(?=^## |(?![\s\S]))/m.exec(source);
+  const paras = job ? job[1].split(/\n\s*\n/).filter((p) => p.trim()) : [];
+  return paras.length ? firstParagraph(`# Job\n\n${paras[paras.length - 1]}`, max) ?? firstParagraph(source, max) : firstParagraph(source, max);
+}
+
 /** GitHub-style heading anchor. */
 export function slugify(text) {
   return plain(text)
