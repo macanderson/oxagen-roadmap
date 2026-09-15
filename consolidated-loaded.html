@@ -1703,6 +1703,165 @@ pre .dn{color:var(--st-denied)}
 .lw-files .dbar{display:inline-flex;gap:1px;width:60px;height:7px}
 .lw-files .dbar i{display:block;height:100%;border-radius:1px}
 .lw-files .dbar i.a{background:var(--st-allowed)} .lw-files .dbar i.d{background:var(--st-denied)}
+/* ============================== Skills · resolution, the seat in the loop, reflection (W13) ==============================
+   Ported from w13-in-the-loop.html. Every class is sx- prefixed so nothing here reaches another page,
+   and every colour is one of mc.html's own tokens. */
+:root{ --sk-on:#57A97C; --sk-off:#6E6A62; --sk-held:#C66A4A; --sk-res:#9085E9; }
+@media(prefers-color-scheme:light){:root:not([data-theme="dark"]){ --sk-on:#2F7D52; --sk-off:#8C877C; --sk-held:#9B4526; --sk-res:#4A3AA7; }}
+:root[data-theme="light"]{ --sk-on:#2F7D52; --sk-off:#8C877C; --sk-held:#9B4526; --sk-res:#4A3AA7; }
+
+/* the big off-by-default gate */
+.sx-gate{border:1px solid var(--border);border-radius:14px;background:var(--panel);padding:22px;box-shadow:var(--shadow-sm)}
+.sx-gate .gh{display:flex;align-items:flex-start;gap:14px;margin-bottom:14px}
+.sx-gate .gi{width:38px;height:38px;flex:none;border-radius:10px;border:1px solid var(--rule);background:var(--hl);display:grid;place-items:center;color:var(--muted)}
+.sx-gate h2{margin-bottom:4px}
+.sx-gate .sub{color:var(--muted);font-size:12.5px;margin:0}
+.sx-gate .gbody{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0}
+#viewport.phone .sx-gate .gbody{grid-template-columns:1fr}
+.sx-gate .gcol{border:1px solid var(--border);border-radius:11px;padding:13px;background:var(--ink)}
+.sx-gate .gcol h4{margin-bottom:7px;display:flex;align-items:center;gap:7px}
+.sx-gate .gcol ul{margin:0;padding-left:16px;color:var(--body);font-size:12.7px;line-height:1.65}
+.sx-gate .gcol li{margin-bottom:4px}
+.sx-gate .gfoot{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding-top:14px;border-top:1px solid var(--border)}
+
+/* the toggle, rendered as a governed action rather than a switch */
+.sx-ga{display:flex;align-items:center;gap:12px;border:1px solid var(--border);border-radius:11px;background:var(--ink);padding:12px 14px}
+.sx-ga .grow{min-width:0;flex:1}
+.sx-ga .n{font-weight:600;font-size:13.5px}
+.sx-ga .d{color:var(--muted);font-size:12px}
+.sx-sw{width:42px;height:23px;border-radius:99px;border:1px solid var(--rule);background:var(--hl);position:relative;padding:0;flex:none;transition:background .16s,border-color .16s}
+.sx-sw i{position:absolute;top:2px;left:2px;width:17px;height:17px;border-radius:99px;background:var(--muted);transition:transform .16s,background .16s}
+.sx-sw[aria-checked="true"]{background:color-mix(in srgb,var(--sk-on) 26%,transparent);border-color:var(--sk-on)}
+.sx-sw[aria-checked="true"] i{transform:translateX(19px);background:var(--sk-on)}
+
+/* skill rows */
+.sx-skl{display:grid;gap:9px}
+.sx-row{border:1px solid var(--border);border-radius:11px;background:var(--panel);padding:12px 13px;display:grid;grid-template-columns:26px 1fr auto;gap:12px;align-items:start;transition:border-color .14s}
+.sx-row:hover{border-color:var(--rule)}
+.sx-row.held{border-color:color-mix(in srgb,var(--sk-held) 45%,transparent);background:color-mix(in srgb,var(--sk-held) 5%,var(--panel))}
+.sx-row .sx-ki{width:26px;height:26px;border-radius:7px;border:1px solid var(--rule);background:var(--hl);display:grid;place-items:center;color:var(--muted);flex:none}
+.sx-row .nm{font-family:var(--mono);font-size:12.5px;font-weight:600;color:var(--fg);word-break:break-all}
+.sx-row .st{color:var(--body);font-size:12.7px;margin:3px 0 6px}
+.sx-row .meta{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.sx-row .rt{text-align:right;flex:none;display:grid;gap:4px;justify-items:end}
+#viewport.phone .sx-row{grid-template-columns:26px 1fr}
+#viewport.phone .sx-row .rt{grid-column:1/-1;justify-items:start;text-align:left}
+.sx-chip{display:inline-block;font-family:var(--mono);font-size:10.5px;color:var(--muted);background:var(--hl);border:1px solid var(--border);border-radius:5px;padding:1px 6px;white-space:nowrap}
+.sx-chip.src{color:var(--accent-text);border-color:color-mix(in srgb,var(--gold) 38%,transparent)}
+.sx-chip.held{color:var(--sk-held);border-color:color-mix(in srgb,var(--sk-held) 42%,transparent)}
+.sx-chip.ok{color:var(--sk-on);border-color:color-mix(in srgb,var(--sk-on) 42%,transparent)}
+.sx-chip.res{color:var(--sk-res);border-color:color-mix(in srgb,var(--sk-res) 45%,transparent)}
+
+/* the search console — what the agent asked, what the config answered */
+.sx-sbox{border:1px solid var(--border);border-radius:12px;background:var(--panel);overflow:hidden}
+.sx-sbox .sq{display:flex;align-items:center;gap:9px;padding:11px 13px;border-bottom:1px solid var(--border);background:var(--hl);flex-wrap:wrap}
+.sx-sbox .sq .lbl{font-family:var(--mono);font-size:11px;color:var(--accent-text);flex:none}
+.sx-sbox .sq input{flex:1;min-width:140px;background:var(--ink);border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-family:var(--mono);font-size:12.5px;color:var(--fg)}
+.sx-sbox .sres{padding:12px 13px}
+.sx-sres-h{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--muted);margin-bottom:9px;flex-wrap:wrap}
+.sx-hit{border:1px solid var(--border);border-radius:9px;background:var(--ink);padding:9px 11px;margin-bottom:7px;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
+.sx-hit .sc{font-family:var(--mono);font-size:11px;color:var(--sk-on);flex:none}
+.sx-hit .nm{font-family:var(--mono);font-size:12.3px;font-weight:600}
+.sx-hit .d{color:var(--muted);font-size:12px;margin-top:2px}
+.sx-held{border:1px dashed color-mix(in srgb,var(--sk-held) 50%,transparent);border-radius:9px;background:color-mix(in srgb,var(--sk-held) 6%,transparent);padding:9px 11px;margin-bottom:7px}
+.sx-held .nm{font-family:var(--mono);font-size:12.3px;color:var(--muted);text-decoration:line-through}
+.sx-held .why{font-size:12px;color:var(--body);margin-top:3px}
+
+/* the triptych: agent side / operator side / the record */
+.sx-tript{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;align-items:start}
+@media(max-width:1100px){.sx-tript{grid-template-columns:1fr}}
+#viewport.phone .sx-tript{grid-template-columns:1fr}
+.sx-pane{border:1px solid var(--border);border-radius:12px;background:var(--panel);overflow:hidden;min-width:0}
+.sx-pane-h{padding:9px 12px;border-bottom:1px solid var(--border);background:var(--hl);display:flex;align-items:center;gap:8px}
+.sx-pane-h .eb{font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;font-weight:600;color:var(--muted)}
+.sx-pane-h .who{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--dim)}
+.sx-pane-b{padding:12px}
+.sx-pane.hot{border-color:color-mix(in srgb,var(--gold) 45%,transparent)}
+.sx-pane.hot .sx-pane-h{background:color-mix(in srgb,var(--gold) 9%,var(--hl))}
+.sx-pane.hot .sx-pane-h .eb{color:var(--accent-text)}
+
+/* agent transcript bubbles */
+.sx-tr{display:grid;gap:9px}
+.sx-msg{border:1px solid var(--border);border-radius:10px;padding:9px 11px;background:var(--ink);margin:0;font-size:inherit;line-height:inherit}
+.sx-msg .mh{display:flex;align-items:center;gap:7px;margin-bottom:5px}
+.sx-msg .mh b{font-size:11.5px;font-weight:600}
+.sx-msg .mh .tm{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--dim)}
+.sx-msg p{margin:0 0 6px;font-size:12.7px;color:var(--body)}
+.sx-msg p:last-child{margin-bottom:0}
+.sx-msg.agent{border-left:2px solid var(--fk-model)}
+.sx-msg.op{border-left:2px solid var(--fk-op)}
+.sx-msg.gw{border-left:2px solid var(--gold);background:color-mix(in srgb,var(--gold) 6%,var(--ink))}
+.sx-msg .sx-picks{display:grid;gap:6px;margin-top:8px}
+.sx-pick{display:flex;align-items:flex-start;gap:9px;width:100%;text-align:left;border:1px solid var(--border);border-radius:9px;background:var(--panel);padding:9px 10px;transition:border-color .14s,background .14s}
+.sx-pick:hover{border-color:var(--gold);background:var(--hl)}
+.sx-pick[aria-pressed="true"]{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 10%,var(--panel))}
+.sx-pick .pk{width:19px;height:19px;border-radius:5px;border:1px solid var(--rule);flex:none;display:grid;place-items:center;font-family:var(--mono);font-size:10px;color:var(--muted)}
+.sx-pick[aria-pressed="true"] .pk{border-color:var(--gold);color:var(--accent-text)}
+.sx-pick .pn{font-size:12.5px;font-weight:600;display:block}
+.sx-pick .pd{font-size:11.7px;color:var(--muted);display:block;margin-top:1px}
+
+/* frame strip */
+.sx-fr{display:grid;gap:5px}
+.sx-frm{display:grid;grid-template-columns:auto 1fr auto;gap:9px;align-items:center;border:1px solid var(--border);border-radius:8px;background:var(--ink);padding:7px 9px;font-size:12px}
+.sx-frm .fi{width:6px;height:6px;border-radius:99px;flex:none}
+.sx-frm .fk{font-family:var(--mono);font-size:11.3px;font-weight:600}
+.sx-frm .fd{color:var(--muted);font-size:11.5px}
+.sx-frm .ft{font-family:var(--mono);font-size:10px;color:var(--dim);flex:none}
+.sx-frm.new{border-color:color-mix(in srgb,var(--gold) 50%,transparent);background:color-mix(in srgb,var(--gold) 7%,var(--ink))}
+.sx-frm.oob{border-style:dashed;border-color:color-mix(in srgb,var(--sk-res) 55%,transparent);background:color-mix(in srgb,var(--sk-res) 6%,var(--ink))}
+.sx-frm .mid{min-width:0}
+
+/* reflection rubric */
+.sx-rub{display:grid;gap:8px}
+.sx-rax{border:1px solid var(--border);border-radius:10px;background:var(--ink);padding:10px 12px}
+.sx-rax .rq{font-size:12.8px;font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.sx-rax .rq .gp{margin-left:auto;font-family:var(--mono);font-size:10px;font-weight:400;color:var(--st-failed);border:1px solid color-mix(in srgb,var(--st-failed) 40%,transparent);border-radius:5px;padding:0 5px;white-space:nowrap}
+.sx-rax .rbar{display:grid;grid-template-columns:78px 1fr auto;gap:9px;align-items:center;margin-bottom:4px}
+.sx-rax .rlab{font-family:var(--mono);font-size:10.5px;color:var(--dim)}
+.sx-rax .rtrack{height:6px;border-radius:99px;background:var(--hl);border:1px solid var(--border);overflow:hidden}
+.sx-rax .rfill{height:100%;border-radius:99px;display:block}
+.sx-rax .rfill.self{background:var(--sk-res)}
+.sx-rax .rfill.obs{background:var(--st-proven)}
+.sx-rax .rn{font-family:var(--mono);font-size:11px;color:var(--body);min-width:30px;text-align:right}
+.sx-rax .rsay{font-size:12px;color:var(--muted);margin-top:5px;border-left:2px solid var(--rule);padding-left:8px}
+.sx-rax.gap{border-color:color-mix(in srgb,var(--st-failed) 45%,transparent)}
+
+/* the quarantine box — the promise that research data stays research data */
+.sx-quar{border:1px solid color-mix(in srgb,var(--sk-res) 50%,transparent);border-radius:12px;background:color-mix(in srgb,var(--sk-res) 7%,var(--panel));padding:14px 16px}
+.sx-quar h3{display:flex;align-items:center;gap:8px;color:var(--fg);margin-bottom:8px}
+.sx-quar ol{margin:0;padding-left:18px;color:var(--body);font-size:12.8px;line-height:1.7}
+.sx-quar li{margin-bottom:5px}
+.sx-quar li b{color:var(--fg)}
+.sx-quar .cons{margin-top:12px;padding-top:11px;border-top:1px solid color-mix(in srgb,var(--sk-res) 30%,transparent);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+
+/* two-path compare */
+.sx-paths{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+#viewport.phone .sx-paths{grid-template-columns:1fr}
+.sx-path{border:1px solid var(--border);border-radius:12px;background:var(--panel);padding:14px;display:flex;flex-direction:column;gap:9px}
+.sx-path.on{border-color:var(--gold);box-shadow:0 0 0 1px color-mix(in srgb,var(--gold) 30%,transparent)}
+.sx-path h3{display:flex;align-items:center;gap:8px}
+.sx-path .sx-dl{display:grid;gap:5px;margin:0}
+.sx-path .sx-dl .sx-li{display:grid;grid-template-columns:14px 1fr;gap:8px;font-size:12.4px;color:var(--body);align-items:start}
+.sx-path .sx-dl .sx-li .s{font-family:var(--mono);font-size:12px;line-height:1.5}
+.sx-path .sx-dl .sx-li .s.add{color:var(--sk-on)} .sx-path .sx-dl .sx-li .s.rem{color:var(--sk-held)} .sx-path .sx-dl .sx-li .s.same{color:var(--dim)}
+
+/* config / diff */
+.sx-cfg{border:1px solid var(--border);border-radius:11px;background:var(--void);overflow:hidden}
+.sx-cfg-h{padding:8px 12px;border-bottom:1px solid var(--border);background:var(--hl);font-family:var(--mono);font-size:11px;color:var(--muted);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.sx-cfg pre{margin:0;padding:12px;overflow-x:auto;font-family:var(--mono);font-size:11.7px;line-height:1.65;color:var(--body)}
+.sx-cfg pre .c{color:var(--dim)} .sx-cfg pre .k{color:var(--accent-text)} .sx-cfg pre .s{color:var(--st-proven)} .sx-cfg pre .n{color:var(--fk-model)}
+.sx-cfg pre .ad{background:color-mix(in srgb,var(--sk-on) 14%,transparent);display:block}
+.sx-cfg pre .rm{background:color-mix(in srgb,var(--sk-held) 14%,transparent);display:block}
+
+/* mini stats */
+.sx-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:10px}
+.sx-stat{border:1px solid var(--border);border-radius:11px;background:var(--panel);padding:12px 13px}
+.sx-stat .sl{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:600}
+.sx-stat .sv{font-size:21px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:3px}
+.sx-stat .sd{font-size:11.5px;color:var(--muted);margin-top:2px}
+.sx-stat.res .sv{color:var(--sk-res)}
+.sx-stat.on .sv{color:var(--sk-on)}
+.sx-stat.held .sv{color:var(--sk-held)}
 </style>
 </head>
 <body>
@@ -3305,6 +3464,7 @@ function route(){
   if(p.length===2) return {page:"fleet",org:org,ws:w};
   var sec=p[2];
   if(sec==="tools"&&p[3]) S.tab.tools=p[3];
+  if(sec==="skills"&&p[3]) S.tab.skills=p[3];
   if(sec==="scenarios"){
     var sid=p[3];
     if(!sid) return {page:"scenarios",org:org,ws:w};
@@ -3318,7 +3478,9 @@ function route(){
          inside the step (a tab, an act that collapses what setup opened) snaps straight back. */
       if(st.setup&&scnRan!==key) st.setup();
       S.scnRan=key;
-      return st.route(org);
+      /* a step may live in another workspace than the scenario (W13 opens on FinOps, then core-platform) */
+      var rr=st.route(org); if(rr.ws) S.ws=rr.ws;
+      return rr;
     }
     return {page:"scenarios",org:org,ws:w};
   }
@@ -3342,7 +3504,7 @@ window.addEventListener("hashchange",function(){S.side=false;fpStop();applyHashT
 
 var PAGES={fleet:"Fleet",run:"Run",agents:"Agent IAM",agent:"Agent IAM",mandate:"Agent IAM",tools:"Tools",
   agentsource:"Agent IAM",steering:"Steering",spend:"Spend",organization:"Organization",billing:"Billing",audit:"Audit",
-  scenarios:"Scenarios"};
+  scenarios:"Scenarios",skills:"Skills"};
 
 /* ============================== agent definition: the TOML file is the record ==============================
    S.defBase[slug]  = the file at the head of the branch it was last committed to (main until the first commit)
@@ -3835,7 +3997,13 @@ function icon(n){
    lock:'<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
    assistant:'<path d="M12 3v3m0 12v3M5 12H2m20 0h-3"/><rect x="7" y="7" width="10" height="10" rx="3"/>',
    shield:'<path d="M12 3 5 6v6c0 4 3 7.5 7 9 4-1.5 7-5 7-9V6z"/>',
-   user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>'};
+   user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+   skills:'<path d="M12 3 3 7.5 12 12l9-4.5z"/><path d="M7 10v5.2c0 1.6 2.2 2.8 5 2.8s5-1.2 5-2.8V10"/><path d="M21 7.5V14"/>',
+   ask:'<path d="M9.1 9a3 3 0 1 1 4.5 2.6c-.9.5-1.6 1.2-1.6 2.4"/><path d="M12 18h.01"/><circle cx="12" cy="12" r="9"/>',
+   mirror:'<path d="M12 3v18"/><path d="M8 7 4 12l4 5z"/><path d="M16 7l4 5-4 5z"/>',
+   git:'<circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="12" r="2.5"/><path d="M6 8.5v7M8.5 6H13a2.5 2.5 0 0 1 2.5 2.5V10"/>',
+   proc:'<path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/>',
+   cons:'<path d="M12 3l8 3.5v5c0 4.6-3.2 8.6-8 9.5-4.8-.9-8-4.9-8-9.5v-5z"/><path d="M9 12h6"/>'};
   return '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">'+(p[n]||'')+'</svg>';
 }
 /* The six record kinds of context-record/v0.1. Icon + hue per kind; the statement is always the headline. */
@@ -3870,7 +4038,7 @@ function sidebar(r){
   var w=ws(), cur=PAGES[r.page]||"";
   /* On first-run Fleet the organization is the one smoke run, so the counts here read off it too. */
   var fr=obFirstRun(w);
-  var waiting=fr?APPROVALS.filter(function(a){return a.run===fr.id&&apState(a.id).status==="pending";}).length:pendingCount(w.slug);
+  var waiting=fr?APPROVALS.filter(function(a){return a.run===fr.id&&apState(a.id).status==="pending";}).length:pendingCount(w.slug)+skWaiting(w);
   var orgAgents=fr?1:WS.reduce(function(n,x){return n+(x.agents||0);},0);
   function item(id,label,href,count,hot){
     return '<button class="navitem" '+(cur===label?'aria-current="page"':'')+' onclick="go(\''+href+'\')">'+
@@ -3892,6 +4060,7 @@ function sidebar(r){
    (wedge()?item("spend","Spend",base+"/spend"):"")+
    item("agents","Agent IAM",base+"/agents",fr?1:w.agents)+
    item("tools","Tools",base+"/tools")+
+   (wedge()?"":item("skills","Skills",base+"/skills",skWaiting(w),true))+
    item("steering","Steering",base+"/steering",fr?0:PROPOSALS.length)+
    (wedge()?"":item("spend","Spend",base+"/spend"))+
    (PRODUCT?"":item("scenarios","Scenarios",base+"/scenarios"))+
@@ -3901,6 +4070,7 @@ function sidebar(r){
    (wedge()?"":item("audit","Audit","#/"+ORG.slug+"/audit",fr?0:INCIDENTS.filter(function(i){return i.status==="open"&&i.sev==="critical";}).length,true))+
    /* Already built: designed and working, not what is sold this quarter. Still one click away. */
    (wedge()?'<div class="navlabel" title="Designed and working; not in the first release">Already built</div>'+
+    item("skills","Skills",base+"/skills",skWaiting(w),true)+
     item("audit","Audit","#/"+ORG.slug+"/audit",fr?0:INCIDENTS.filter(function(i){return i.status==="open"&&i.sev==="critical";}).length,true)+
     '<button class="navitem" onclick="asstToggle()" aria-controls="asst" aria-expanded="'+(S.asst?"true":"false")+'"><span class="ic">'+icon("assistant")+'</span>Assistant</button>':"")+
    '</nav><div class="side-foot">'+
@@ -3931,6 +4101,7 @@ function crumbs(r){
     if(r.page==="mandate"){out.push('<a href="'+base+'/agents">Agent IAM</a>');
       out.push('<a class="mono" href="'+base+'/agents/'+h(r.id)+'">'+h(r.id)+'</a>');out.push('<b class="mono">'+h(r.mid)+'</b>');}
     if(r.page==="tools")out.push('<b>Tools</b>');
+    if(r.page==="skills")out.push('<b>Skills</b>');
     if(r.page==="scenarios")out.push('<b>Scenarios</b>');
     if(r.page==="steering")out.push('<b>Steering</b>');
     if(r.page==="spend")out.push('<b>Spend</b>');
@@ -4033,18 +4204,19 @@ function pFleet(){
   var pend=APPROVALS.filter(function(a){return (fr?a.run===fr.id:a.ws===w.slug)&&apState(a.id).status==="pending";});
   var agentsShown=fr?list.reduce(function(k,r){if(k.indexOf(r.agent)<0)k.push(r.agent);return k;},[]).length:w.agents;
   var oldest=0; pend.forEach(function(a){var e=600-apLeft(a.id); if(e>oldest)oldest=e;});
-  var waitLabel=pend.length?'oldest has waited '+mmss(oldest)+' of 10m':'nothing is parked';
+  var skw=fr?0:skWaiting(w);
+  var waitLabel=pend.length?'oldest has waited '+mmss(oldest)+' of 10m'+(skw?' · 1 interjection':''):skw?'an interjection has waited 3m 36s of 30m':'nothing is parked';
 
   return ''+
   '<div class="phead"><div class="t"><p class="eyebrow">Workspace · '+h(w.name)+'</p>'+
    '<h1>Fleet</h1><p>Every run in this workspace, live and recent. Runs are not started here — agents start them, and this is where you stop, steer, or open one.</p></div>'+
    '<div class="acts"><button class="btn" onclick="openSteerFleet()">Steer</button>'+
    '<button class="btn" onclick="regStart()">Register Agent</button></div></div>'+
-  obFleetBanners(w,fr)+
+  obFleetBanners(w,fr)+skFleetBanner(w)+
 
   '<div class="grid g4" style="margin-bottom:16px">'+
    '<div class="stat"><span class="k">Live runs</span><span class="v">'+live+'</span><span class="s">of '+agentsShown+' agent'+(agentsShown===1?'':'s')+' in this workspace</span></div>'+
-   '<div class="stat"><span class="k">Waiting on a human</span><span class="v" style="color:var(--st-approval)">'+pend.length+'</span><span class="s">'+waitLabel+'</span></div>'+
+   '<div class="stat"><span class="k">Waiting on a human</span><span class="v" style="color:var(--st-approval)">'+(pend.length+skw)+'</span><span class="s">'+waitLabel+'</span></div>'+
    '<div class="stat"><span class="k">Spend, runs shown</span><span class="v">'+usd(spendShown)+'</span><span class="s">'+basisLabel+' · '+ORG.currency+'</span></div>'+
    '<div class="stat"><span class="k">Cache hit rate</span><span class="v">'+(cacheRate==null?'<span class="dim">—</span>':per(cacheRate))+'</span><span class="s">'+(cacheRate==null?'no run shown records it':'cache_read ÷ (input_uncached + cache_read)')+'</span></div></div>'+
 
@@ -4343,6 +4515,7 @@ function toast(msg,tone){
 
 /* ============================== Run ============================== */
 function pRun(r){
+  if(r.id===SKRUN.id) return skRunPage();
   var R=run(r.id)||RUNS[0];
   FRAMES=runFrames(R);
   if(S.frameRun!==R.id){S.frameRun=R.id;S.frame=Math.min(S.frame||0,FRAMES.length-1);}
@@ -10214,6 +10387,796 @@ function doFlip(id){
 }
 function closeDialog(){S.dlg=null;S.dlgArg=null;render();}
 
+/* ============================== Skills · resolution, the seat in the loop, reflection ==============================
+   Oxagen does not run a skill — the harness does. What it governs is resolution: which skills a
+   workspace's config lets an agent find, which it may load, what that cost, and what was held back
+   and why. Ported from w13-in-the-loop.html; W13 is generated from this. */
+
+/* skills ship OFF. This map is the value a workspace is created with, not a value somebody set. */
+var SK_ON={"core-platform":true,"finops":false};
+var SKS={q:"cut the first release notes", answered:null, picked:null};
+function skOn(w){return !!SK_ON[w.slug];}
+
+/* ---- the catalogue. Every row is a file with a digest; nothing here is a model's opinion. ---- */
+var SKILLS=[
+ {id:"a-intel.release-notes-from-prs", ver:"2.1.0", kind:"procedure",
+  src:"repo", srcLabel:"a-intel/platform", path:".oxagen/skills/release-notes-from-prs/SKILL.md",
+  digest:"sha256:4b1e90c7ad38fe52", tokens:1840, tier:"allowed", state:"ok",
+  st:"Groups merged pull requests into Features, Fixes and Breaking, and writes the draft to a release branch. Never publishes.",
+  cited:186, runs:212, proofBefore:0.62, proofAfter:0.81, owner:"marcus", updated:"6 days ago"},
+ {id:"a-intel.rollback-a-bad-release", ver:"1.4.2", kind:"constraint",
+  src:"repo", srcLabel:"a-intel/platform", path:".oxagen/skills/rollback-a-bad-release/SKILL.md",
+  digest:"sha256:c02f7719be4a0d31", tokens:960, tier:"approval", state:"ok",
+  st:"The order of operations for pulling a release back off the production branch, and the two things you must never do first.",
+  cited:14, runs:14, proofBefore:0.40, proofAfter:0.86, owner:"marcus", updated:"3 weeks ago",
+  note:"Loading it is allowed. Acting on it touches <span class=\"mono\">main</span>, so every governed action it names still parks."},
+ {id:"a-intel.triage-a-flaky-test", ver:"3.0.1", kind:"procedure",
+  src:"registry", srcLabel:"a-intel org registry", path:"registry://a-intel/skills/triage-a-flaky-test@3.0.1",
+  digest:"sha256:88d3c5e10f7b2a94", tokens:2210, tier:"allowed", state:"ok",
+  st:"Reruns the case under seed control, bisects the commit range, and opens a proposal when it cannot reproduce.",
+  cited:1104, runs:1340, proofBefore:0.19, proofAfter:0.34, owner:"priya", updated:"yesterday"},
+ {id:"a-intel.postgres-safe-migration", ver:"1.2.0", kind:"constraint",
+  src:"linked", srcLabel:"a-intel/billing", path:".oxagen/skills/postgres-safe-migration/SKILL.md",
+  digest:"sha256:1a7fe4b309cd8265", tokens:1320, tier:"approval", state:"ok", twoPerson:true,
+  st:"Expand, backfill, contract — and never in one deploy. Names the four migrations that took production down in 2025.",
+  cited:37, runs:41, proofBefore:0.55, proofAfter:0.92, owner:"dana", updated:"2 months ago"},
+ {id:"a-intel.customer-escalation-writeup", ver:"1.1.0", kind:"procedure",
+  src:"repo", srcLabel:"a-intel/platform", path:".oxagen/skills/customer-escalation-writeup/SKILL.md",
+  digest:"sha256:9e05b2c8417df6a0", tokens:740, tier:"allowed", state:"ok",
+  st:"The shape of an escalation note: what broke, who it reached, what we did, what we owe them.",
+  cited:52, runs:64, proofBefore:null, proofAfter:null, owner:"priya", updated:"5 days ago"},
+ {id:"a-intel.codegraph-walk", ver:"2.2.0", kind:"procedure",
+  src:"registry", srcLabel:"a-intel org registry", path:"registry://a-intel/skills/codegraph-walk@2.2.0",
+  digest:"sha256:6cb1039fa7e25d48", tokens:1580, tier:"allowed", state:"ok",
+  st:"Walks the code graph from a symbol to its callers and its data-layer references before proposing a change.",
+  cited:441, runs:530, proofBefore:0.48, proofAfter:0.71, owner:"marcus", updated:"9 days ago"},
+ {id:"a-intel.invoice-reconciliation", ver:"1.0.0", kind:"procedure",
+  src:"registry", srcLabel:"a-intel org registry", path:"registry://a-intel/skills/invoice-reconciliation@1.0.0",
+  digest:"sha256:03ae7c5921b4ef7d", tokens:2040, tier:"approval", state:"scope",
+  st:"Matches a statement line to a purchase order and a receipt before anything is settled.",
+  cited:0, runs:0, proofBefore:null, proofAfter:null, owner:"dana", updated:"a month ago",
+  why:"Published with <span class=\"mono\">scope = workspace:finops</span>. <b>core-platform</b> is not in its scope, so it is not in this belt and it does not come back from a search here."},
+ {id:"oxagen.pdf-extract", ver:"0.9.3", kind:"procedure",
+  src:"market", srcLabel:"marketplace", path:"marketplace://oxagen/pdf-extract@0.9.3",
+  digest:"sha256:f41c08b7e6d2593a", tokens:3100, tier:"denied", state:"unapproved",
+  st:"Pulls tables out of a PDF and returns them as rows.",
+  cited:0, runs:0, proofBefore:null, proofAfter:null, owner:null, updated:"never",
+  why:"The digest the marketplace served on 2026-09-09 is not the digest <b>Priya Natarajan</b> approved on 2026-08-21. Held until a person looks at the diff and approves the new one."}
+];
+function skillOf(id){for(var i=0;i<SKILLS.length;i++){if(SKILLS[i].id===id)return SKILLS[i];}return null;}
+function skInScope(s){return s.state!=="scope";}
+
+/* ---- the config. This, and not the model, is what a search returns. ---- */
+var SK_CFG={
+ ver:"skl_v7", by:"marcus", when:"2026-09-10 11:42:07Z", pr:"a-intel/platform#523",
+ file:".oxagen/skills.toml",
+ sources:[
+  {k:"repo", label:"a-intel/platform · .oxagen/skills/", on:true, n:3, d:"The workspace's own main repo. Versioned with the code that the skills are about."},
+  {k:"linked", label:"a-intel/billing · .oxagen/skills/", on:true, n:1, d:"A linked repo. Its skills resolve here because core-platform binds it."},
+  {k:"linked2", label:"a-intel/mobile · .oxagen/skills/", on:false, n:0, d:"Linked, but skills are not drawn from it. Nothing in this repo reaches an agent."},
+  {k:"registry", label:"a-intel org registry", on:true, n:3, d:"Published across the organization. Scope on the skill still decides which workspaces see it."},
+  {k:"market", label:"Oxagen marketplace", on:true, n:1, d:"Third-party. Every version is held until a person approves its digest."}
+ ],
+ search:{mode:"searchable", k:5, minScore:0.42, budget:6000},
+ reflect:{on:true, sample:0.20, always:["failing","tampered"], rubric:"rfl_v3", consent:"org", retain:"180 days"},
+ unbound:"ask"
+};
+
+/* ---- the run that walks into a repository nobody bound ---- */
+var SKRUN={
+ id:"run_01K6QW3D5N7TYBA2", agent:"a-intel.core.release-manager", op:"marcus", ws:"core-platform",
+ harness:"Claude Code", tier:"gateway", cost:"0.18",
+ repo:"a-intel/edge-proxy", remote:"github.com/a-intel/edge-proxy", sha:"e7c41a9",
+ taskTitle:"Cut the first release notes for edge-proxy"
+};
+var SK_FRAMES=[
+ {k:"run.started", c:"op", t:"09:14:02.118Z", d:"marcus · Claude Code on host mbp-marcus · harness reported a git remote"},
+ {k:"repo.unknown", c:"gov", t:"09:14:02.140Z", d:"github.com/a-intel/edge-proxy resolves to no workspace in a-intel", hot:true},
+ {k:"control.interject", c:"gov", t:"09:14:02.146Z", d:"skills.enabled = true and no config resolves · policy unbound = ask", hot:true},
+ {k:"control.answer", c:"op", t:"09:17:38.902Z", d:"marcus answered · pending", pend:true},
+ {k:"skills.resolved", c:"gov", t:"—", d:"waits on the answer", pend:true},
+ {k:"context.assembled", c:"ctx", t:"—", d:"waits on the answer", pend:true},
+ {k:"model.request", c:"model", t:"—", d:"the first model call of the run has not happened", pend:true}
+];
+var SK_AFTER={
+ link:[
+  {k:"control.answer", c:"op", t:"09:17:38.902Z", d:"marcus · link a-intel/edge-proxy to core-platform as a linked repo"},
+  {k:"repo.bound", c:"gov", t:"09:17:39.004Z", d:"a-intel/edge-proxy · linked repo of core-platform · receipt rcp_01K6QW44"},
+  {k:"skills.resolved", c:"gov", t:"09:17:39.011Z", d:"config skl_v7 · 7 skills in scope · 1 withheld"},
+  {k:"skills.searched", c:"gov", t:"09:17:39.318Z", d:"“cut the first release notes” · 3 returned, 2 withheld", hot:true},
+  {k:"skills.loaded", c:"ctx", t:"09:17:39.402Z", d:"a-intel.release-notes-from-prs@2.1.0 · 1,840 tokens · $0.0055", hot:true},
+  {k:"context.assembled", c:"ctx", t:"09:17:39.410Z", d:"6 context frames · 9,204 tokens · 1 skill"},
+  {k:"model.request", c:"model", t:"09:17:39.455Z", d:"turn 1 · claude-sonnet-5 · the skill is cited in the system position"}
+ ],
+ create:[
+  {k:"control.answer", c:"op", t:"09:17:38.902Z", d:"marcus · create workspace edge, bind a-intel/edge-proxy as its main repo"},
+  {k:"workspace.created", c:"gov", t:"09:17:39.140Z", d:"edge · owner marcus · skills.enabled = false · receipt rcp_01K6QW45", hot:true},
+  {k:"repo.bound", c:"gov", t:"09:17:39.208Z", d:"a-intel/edge-proxy · main repo of edge · production branch main"},
+  {k:"skills.resolved", c:"gov", t:"09:17:39.215Z", d:"skills are off in edge · 0 skills in scope · search_skills is not on the belt", hot:true},
+  {k:"context.assembled", c:"ctx", t:"09:17:39.221Z", d:"4 context frames · 3,110 tokens · 0 skills"},
+  {k:"model.request", c:"model", t:"09:17:39.266Z", d:"turn 1 · claude-sonnet-5 · the agent is told, in one line, that it has none"}
+ ]
+};
+
+/* ---- the search, as the gateway answers it ---- */
+var SK_QUERIES={
+ "cut the first release notes":{
+   hits:[["a-intel.release-notes-from-prs",0.94],["a-intel.codegraph-walk",0.51],["a-intel.customer-escalation-writeup",0.44]],
+   held:["a-intel.invoice-reconciliation","oxagen.pdf-extract"]},
+ "pay an invoice":{
+   hits:[], held:["a-intel.invoice-reconciliation"],
+   none:"Nothing in this workspace's config answers that. The agent gets an empty result and a reason, not an error and not a guess."},
+ "roll back the release":{
+   hits:[["a-intel.rollback-a-bad-release",0.91],["a-intel.release-notes-from-prs",0.47]],
+   held:["oxagen.pdf-extract"]},
+ "migrate the billing schema":{
+   hits:[["a-intel.postgres-safe-migration",0.89],["a-intel.codegraph-walk",0.58]],
+   held:["oxagen.pdf-extract"]},
+ "extract tables from a pdf":{
+   hits:[], held:["oxagen.pdf-extract"],
+   none:"The only skill that matches is held on its digest. An unapproved skill is not a low-ranked result — it is not a result."}
+};
+
+/* ---- the reflection, captured out of band and quarantined ---- */
+var SK_REFLECT={
+ run:"run_01K5RS7M2E8FJ3QW", agent:"a-intel.core.release-manager", when:"2026-09-11 14:22:41Z",
+ rubric:"rfl_v3", why:"verdict = failing · rfl_v3 always samples a failing run",
+ cost:"0.0141", tokens:2740, model:"claude-haiku-4-5",
+ axes:[
+  {q:"Did you do the thing that was asked?", self:5, obs:5, obsLab:"task closed",
+   say:"I drafted 4.11.0 notes covering all 38 merged pull requests and wrote them to the release branch."},
+  {q:"Did you verify it, or did you assert it?", self:4, obs:1, obsLab:"witness: failing", gap:true,
+   say:"I checked the note count against the merge list and it matched, so I was confident it was right."},
+  {q:"Did you stay inside the scope you were given?", self:5, obs:2, obsLab:"1 out-of-scope call", gap:true,
+   say:"I worked only in a-intel/platform as instructed."},
+  {q:"Was what it cost proportionate to what it produced?", self:3, obs:3, obsLab:"$4.13 · 0.62 ratio",
+   say:"I re-read CHANGELOG.md more times than I needed to. A cached read would have done."}
+ ],
+ contra:[
+  {ax:1, what:"The witness returned <span class=\"mono\">failing</span> on the pull request at 14:19:06Z, three minutes before this reflection. The agent never saw it — the airlock passes only the word.",
+   ev:"frame 171 · proof.observed"},
+  {ax:2, what:"<span class=\"mono\">github__get_contents</span> read <span class=\"mono\">a-intel/mobile</span> at turn 5. In scope for the belt, outside the scope the operator stated.",
+   ev:"frame 96 · tool_call"}
+ ]
+};
+
+var SK_HIST=[
+ {ver:"skl_v7", when:"2026-09-10", by:"marcus", pr:"a-intel/platform#523", d:"Marketplace added as a source, held-by-default. Search budget raised to 6,000 tokens."},
+ {ver:"skl_v6", when:"2026-09-02", by:"priya", pr:"a-intel/platform#498", d:"Reflection turned on at a 20% sample with rubric rfl_v3, research-use only, 180-day retention."},
+ {ver:"skl_v5", when:"2026-08-21", by:"priya", pr:"a-intel/platform#471", d:"a-intel/mobile dropped as a skill source after two skills in it went eleven weeks without an owner."},
+ {ver:"skl_v4", when:"2026-08-14", by:"marcus", pr:"a-intel/platform#455", d:"Searchable belt replaced the pinned belt. Agents stopped carrying 7 skills they never cited."},
+ {ver:"skl_v1", when:"2026-08-02", by:"marcus", pr:"a-intel/platform#402", d:"Skills turned on in core-platform. The workspace shipped with them off on 2026-07-30."}
+];
+var SK_CREATED={"core-platform":"2026-07-30","finops":"2026-08-19"};
+
+/* ---- small shared pieces ---- */
+function skPct(v){return Math.round(v*100)+"%";}
+function skBadge(cls,txt){return '<span class="b b-'+cls+'">'+txt+'</span>';}
+function skTier(t){
+  var m={allowed:["allowed","allowed"],approval:["approval","needs approval"],denied:["denied","denied"]};
+  var x=m[t]||["q",t]; return '<span class="b b-'+x[0]+'">'+x[1]+'</span>';
+}
+function skFrameDot(c){
+  var m={model:"var(--fk-model)",tool:"var(--fk-tool)",gov:"var(--fk-gov)",ctx:"var(--fk-ctx)",op:"var(--fk-op)"};
+  return '<span class="fi" style="background:'+(m[c]||"var(--muted)")+'"></span>';
+}
+function skFrameRow(f){
+  return '<div class="sx-frm'+(f.hot?" new":"")+(f.oob?" oob":"")+'"'+(f.pend?' style="opacity:.48"':'')+'>'+skFrameDot(f.c)+
+   '<span class="mid"><span class="fk">'+h(f.k)+'</span> <span class="fd">'+f.d+'</span></span>'+
+   '<span class="ft">'+h(f.t)+'</span></div>';
+}
+function skStat(l,v,d,cls){
+  return '<div class="sx-stat'+(cls?" "+cls:"")+'"><div class="sl">'+h(l)+'</div><div class="sv">'+v+'</div><div class="sd">'+h(d)+'</div></div>';
+}
+
+/* ============================== the page ============================== */
+function pSkills(){
+  var w=ws();
+  if(S.state==="loading") return skeleton();
+  if(S.state==="error") return errorState("Skills","503 skill_registry_unavailable");
+  if(S.state==="denied") return deniedState("the skills of this workspace","skills.read on "+w.slug);
+  if(!skOn(w)) return skGate(w);
+  if(S.state==="empty") return skHead(w)+emptyState("Skills are on, and there is nothing to resolve",
+    "The config names five sources and none of them holds a skill yet. An agent that calls <span class=\"mono\">search_skills</span> in this workspace gets an empty result and the reason, which is a different thing from an error. Nothing is broken; nothing has been written.",
+    '<button class="btn primary" onclick="openDialog(\'skadd\')">Add a skill to '+h(w.main)+'</button>'+
+    '<button class="btn" onclick="openDialog(\'skcfg\')">Open the config</button>');
+
+  var t=tab("skills","catalog");
+  var tabs=[["catalog","Catalog",SKILLS.filter(skInScope).length],["search","Search",""],
+            ["loop","In the loop",SKS.answered?"":"1"],["reflect","Reflection",SK_REFLECT.axes.length],
+            ["versions","Versions",SK_HIST.length]];
+  var bar='<div class="tabs" role="tablist">'+tabs.map(function(x){
+    return '<button class="tab" role="tab" aria-selected="'+(t===x[0])+'" onclick="go(\'#/'+ORG.slug+'/'+w.slug+'/skills/'+x[0]+'\')">'+
+      h(x[1])+(x[2]?'<span class="n">'+x[2]+'</span>':'')+'</button>';}).join("")+'</div>';
+
+  var body=t==="search"?skSearch(w):t==="loop"?skLoop(w):t==="reflect"?skReflect(w):
+           t==="versions"?skVersions(w):skCatalog(w);
+  return skHead(w)+bar+body;
+}
+
+function skHead(w){
+  return '<div class="phead"><div class="t"><p class="eyebrow">Workspace · '+h(w.name)+'</p><h1>Skills</h1>'+
+   '<p>A skill is procedure written down: a file, in a repo, with a version and a digest. '+
+   'Oxagen does not run it — the harness does. What Oxagen governs is <b>resolution</b>: which skills this workspace’s config '+
+   'lets an agent find, which it may load, what that cost, and what was held back and why.</p></div></div>';
+}
+
+/* ---- the default state of every workspace ever created ---- */
+function skGate(w){
+  return '<div class="phead"><div class="t"><p class="eyebrow">Workspace · '+h(w.name)+'</p><h1>Skills</h1></div></div>'+
+   '<div class="sx-gate">'+
+    '<div class="gh"><div class="gi">'+icon("lock")+'</div><div>'+
+      '<h2>Skills are off in '+h(w.name)+'</h2>'+
+      '<p class="sub">Every workspace ships this way. <span class="mono">skills.enabled = false</span> is the value a workspace is created with, not a value somebody set afterwards.</p>'+
+    '</div><div style="margin-left:auto">'+skBadge("q","off")+'</div></div>'+
+    '<div class="gbody">'+
+     '<div class="gcol"><h4>'+icon("proc")+'What turning it on does</h4><ul>'+
+      '<li>Adds one tool to every agent’s belt in this workspace: <span class="mono">search_skills</span>. Not a list of skills — a door.</li>'+
+      '<li>Lets the harness load a skill file into the agent’s context, at a token cost this page prices to the cent.</li>'+
+      '<li>Starts a <span class="mono">skills.searched</span> and a <span class="mono">skills.loaded</span> frame on every run that uses one, so a sealed run says exactly what procedure it was carrying.</li>'+
+      '<li>Makes <span class="mono">.oxagen/skills.toml</span> a governed file. Changing it is a Context PR, not a settings screen.</li>'+
+     '</ul></div>'+
+     '<div class="gcol"><h4>'+icon("ask")+'What it does not do</h4><ul>'+
+      '<li>It grants no tool. A skill that describes a deploy still cannot deploy; the governed action underneath it decides that.</li>'+
+      '<li>It raises no tier. A skill loaded at <span class="mono">gateway</span> tier is still served through Oxagen call by call.</li>'+
+      '<li>It does not reach into an unbound repo. If an agent starts a run somewhere this workspace does not own, the loop <b>stops and asks</b> rather than guessing.</li>'+
+      '<li>It does not turn on reflection. That is a second switch, with its own consent, on the Reflection tab.</li>'+
+     '</ul></div>'+
+    '</div>'+
+    '<div class="note" style="margin-bottom:14px"><b>Why off, and not on.</b> A skill is the one kind of context that tells an agent '+
+     'what to <i>do</i> rather than what is true. Shipping that on by default would mean every new workspace inherits procedure that '+
+     'nobody in it has read. So the first person to turn it on is named on the receipt, and the config they turn on is a file in the repo.</div>'+
+    '<div class="gfoot">'+
+     '<button class="btn primary" onclick="openDialog(\'skenable\')">Turn skills on for '+h(w.name)+'</button>'+
+     '<button class="btn" onclick="openDialog(\'skcfg\')">Read the config it would write</button>'+
+     '<span class="grow"></span>'+
+     '<span class="mono dim" style="font-size:11px">needs <span style="color:var(--accent-text)">skills.admin</span> on '+h(w.slug)+'</span>'+
+    '</div>'+
+   '</div>'+
+   '<div class="panel" style="margin-top:16px"><div class="panel-h"><h3>Every workspace in '+h(ORG.name)+'</h3>'+
+    '<span class="sp mono dim" style="font-size:11px">the default is visible, not implied</span></div><div class="panel-b">'+
+    '<div class="sx-skl">'+WS.map(function(x){
+      var on=skOn(x);
+      return '<div class="sx-row"><div class="sx-ki">'+icon("skills")+'</div>'+
+       '<div><div class="nm">'+h(x.slug)+'</div><div class="st">'+h(x.main)+' · created '+h(SK_CREATED[x.slug]||"—")+' with <span class="mono">skills.enabled = false</span></div>'+
+       '<div class="meta"><span class="sx-chip">'+x.agents+' agents</span><span class="sx-chip src">'+h(x.owner)+'</span>'+
+        (on?'<span class="sx-chip ok">turned on '+(x.slug==="core-platform"?"2026-08-02 by Marcus Bell":"")+'</span>':'<span class="sx-chip">never turned on</span>')+'</div></div>'+
+       '<div class="rt">'+(on?skBadge("allowed","on"):skBadge("q","off"))+'</div></div>';}).join("")+
+    '</div></div></div>';
+}
+
+/* ---- catalog ---- */
+function skCatalog(w){
+  var live=SKILLS.filter(function(s){return s.state==="ok";});
+  var held=SKILLS.filter(function(s){return s.state!=="ok";});
+  var tok=live.reduce(function(a,s){return a+s.tokens;},0);
+  return '<div class="sx-stats" style="margin:14px 0">'+
+    skStat("In scope here",live.length,"of "+SKILLS.length+" the sources hold","on")+
+    skStat("Held back",held.length,"scope, or an unapproved digest","held")+
+    skStat("If all loaded",tok.toLocaleString(),"tokens · $"+(tok*0.000003).toFixed(4)+" a turn")+
+    skStat("Actually loaded","1.4","skills a run, median · the belt is searchable")+
+   '</div>'+
+   '<div class="note" style="margin-bottom:12px">The belt is <b>searchable</b>, so an agent carries none of these until it asks. '+
+    'Before <span class="mono">skl_v4</span> the belt was pinned and every agent carried seven skills into every run, '+
+    'which cost 9,650 tokens a turn and was cited in under a fifth of them.</div>'+
+   '<div class="panel"><div class="panel-h"><h3>Resolved by <span class="mono">'+h(SK_CFG.ver)+'</span></h3>'+
+     '<button class="btn sm sp" onclick="openDialog(\'skcfg\')">Open '+h(SK_CFG.file)+'</button></div>'+
+    '<div class="panel-b"><div class="sx-skl">'+live.map(skRow).join("")+'</div></div></div>'+
+   '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Held back</h3>'+
+     '<span class="sp mono dim" style="font-size:11px">these do not appear in a search, at any rank</span></div>'+
+    '<div class="panel-b"><div class="sx-skl">'+held.map(skRow).join("")+'</div>'+
+    '<div class="note" style="margin-top:10px">A held skill is not a low-scoring result. It is not a result. '+
+    'The agent is told the count of what was withheld and the reason class, never the name — otherwise the withholding leaks the thing it withholds.</div>'+
+    '</div></div>';
+}
+function skRow(s){
+  return '<div class="sx-row'+(s.state!=="ok"?" held":"")+'">'+
+   '<div class="sx-ki">'+icon(s.kind==="constraint"?"cons":"proc")+'</div>'+
+   '<div><div class="nm">'+h(s.id)+' <span class="dim">@'+h(s.ver)+'</span></div>'+
+    '<div class="st">'+h(s.st)+'</div>'+
+    (s.note?'<div class="note" style="margin:0 0 6px">'+s.note+'</div>':'')+
+    (s.why?'<div class="note" style="margin:0 0 6px"><b>Why it is held: </b>'+s.why+'</div>':'')+
+    '<div class="meta">'+
+     '<span class="sx-chip src">'+h(s.srcLabel)+'</span>'+
+     '<span class="sx-chip">'+h(s.kind)+'</span>'+
+     '<span class="sx-chip">'+s.tokens.toLocaleString()+' tok</span>'+
+     '<span class="sx-chip">'+h(s.digest.slice(0,18))+'…</span>'+
+     (s.twoPerson?'<span class="sx-chip held">two-person</span>':'')+
+     (s.cited?'<span class="sx-chip">cited in '+s.cited+' of '+s.runs+' runs</span>':'')+
+     (s.proofAfter!=null?'<span class="sx-chip ok">proof rate '+skPct(s.proofBefore)+' → '+skPct(s.proofAfter)+'</span>':'')+
+    '</div></div>'+
+   '<div class="rt">'+skTier(s.tier)+
+    '<span class="mono dim" style="font-size:10.5px">'+h(s.updated)+'</span>'+
+    '<button class="btn sm" onclick="openDialog(\'skill\',\''+s.id+'\')">Open</button></div>'+
+   '</div>';
+}
+
+/* ---- search: the workspace's config, answering in the agent's voice ---- */
+function skSearch(w){
+  var q=SKS.q, r=SK_QUERIES[q]||null, keys=Object.keys(SK_QUERIES);
+  return '<div class="note" style="margin:14px 0"><b>This is not a search box for you.</b> It is the tool the agent holds, '+
+    'answered here exactly as the gateway would answer it in a run — same config, same cut-off, same withholding. '+
+    'What you type is what the model would have typed.</div>'+
+   '<div class="sx-sbox">'+
+    '<div class="sq"><span class="lbl">search_skills(</span>'+
+      '<input id="skq" value="'+h(q)+'" aria-label="Query" autocomplete="off" '+
+        'oninput="SKS.q=this.value" onkeydown="if(event.key===\'Enter\')skRunQuery()">'+
+      '<span class="lbl">)</span>'+
+      '<button class="btn sm primary" onclick="skRunQuery()">Ask as the agent</button></div>'+
+    '<div class="sres">'+(r?skSres(r,q):skNoQ(q))+'</div>'+
+   '</div>'+
+   '<div class="row" style="gap:6px;flex-wrap:wrap;margin:12px 0">'+
+    '<span class="mono dim" style="font-size:11px">try:</span>'+
+    keys.map(function(k){return '<button class="btn sm" onclick="SKS.q=\''+k+'\';render()">'+h(k)+'</button>';}).join("")+
+   '</div>'+
+   '<div class="grid g2" style="gap:12px">'+
+    '<div class="panel"><div class="panel-h"><h3>What decided this</h3></div><div class="panel-b">'+
+     '<dl class="kv">'+
+      '<dt>Config</dt><dd><span class="mono">'+h(SK_CFG.ver)+'</span> · merged as '+h(SK_CFG.pr)+' by '+h(PEOPLE[SK_CFG.by].name)+'</dd>'+
+      '<dt>Sources on</dt><dd>'+SK_CFG.sources.filter(function(x){return x.on;}).length+' of '+SK_CFG.sources.length+' · <span class="mono">a-intel/mobile</span> is linked but off</dd>'+
+      '<dt>Belt mode</dt><dd><span class="mono">searchable</span> · nothing is carried until it is asked for</dd>'+
+      '<dt>Cut-off</dt><dd>top <span class="mono">'+SK_CFG.search.k+'</span>, minimum score <span class="mono">'+SK_CFG.search.minScore+'</span></dd>'+
+      '<dt>Load budget</dt><dd><span class="mono">'+SK_CFG.search.budget.toLocaleString()+'</span> tokens a turn · a skill past the budget is refused, not truncated</dd>'+
+      '<dt>Unbound repo</dt><dd><span class="mono">ask</span> · the loop stops and a person answers</dd>'+
+     '</dl></div></div>'+
+    '<div class="panel"><div class="panel-h"><h3>The frame this wrote</h3></div><div class="panel-b">'+
+     '<div class="sx-cfg"><div class="sx-cfg-h">skills.searched · frame 4 · run '+h(SKRUN.id)+'</div><pre>'+
+      '<span class="k">query</span>        <span class="s">"'+h(q)+'"</span>\n'+
+      '<span class="k">config</span>       <span class="s">"'+h(SK_CFG.ver)+'"</span>\n'+
+      '<span class="k">returned</span>     <span class="n">'+(r?r.hits.length:0)+'</span>\n'+
+      '<span class="k">withheld</span>     <span class="n">'+(r?r.held.length:0)+'</span>  <span class="c"># count and reason class reach the model; names do not</span>\n'+
+      '<span class="k">reasons</span>      ['+(r?r.held.map(function(id){var s=skillOf(id);return '<span class="s">"'+(s.state==="scope"?"out_of_scope":"unapproved_digest")+'"</span>';}).join(", "):'')+']\n'+
+      '<span class="k">cost</span>         <span class="n">0.0002</span>  <span class="c"># the search itself, before anything is loaded</span>\n'+
+      '<span class="k">grade</span>        <span class="s">"full"</span>'+
+     '</pre></div>'+
+     '<div class="note" style="margin-top:9px">Replaying this run replays the search against <span class="mono">'+h(SK_CFG.ver)+'</span>, not against today’s config. '+
+      'A skill added tomorrow cannot appear in yesterday’s run.</div>'+
+     '</div></div>'+
+   '</div>';
+}
+function skNoQ(q){
+  return '<div class="sx-sres-h">No canned answer for <span class="mono">'+h(q)+'</span> in this mockup.</div>'+
+   '<p class="muted" style="font-size:12.5px;margin:0">Pick one of the queries below. Each is a real shape: a hit, an empty result, '+
+   'a scope withholding, and a digest withholding.</p>';
+}
+function skSres(r,q){
+  var out='<div class="sx-sres-h">'+
+    '<span class="b b-allowed"><span class="d"></span>'+r.hits.length+' returned</span>'+
+    (r.held.length?'<span class="b b-denied">'+r.held.length+' withheld</span>':'')+
+    '<span class="grow"></span>'+
+    '<span class="mono">'+h(SK_CFG.ver)+' · top '+SK_CFG.search.k+' · min '+SK_CFG.search.minScore+'</span></div>';
+  if(!r.hits.length){
+    out+='<div class="sx-held" style="border-style:solid;border-color:var(--border);background:var(--ink)">'+
+      '<div class="nm" style="text-decoration:none;color:var(--body)">[]</div>'+
+      '<div class="why">'+h(r.none||"")+'</div></div>';
+  }
+  out+=r.hits.map(function(x){
+    var s=skillOf(x[0]); if(!s) return "";
+    return '<div class="sx-hit"><div><div class="nm">'+h(s.id)+' <span class="dim">@'+h(s.ver)+'</span></div>'+
+     '<div class="d">'+h(s.st)+'</div>'+
+     '<div class="meta" style="margin-top:5px"><span class="sx-chip src">'+h(s.srcLabel)+'</span>'+
+      '<span class="sx-chip">'+s.tokens.toLocaleString()+' tok</span> '+skTier(s.tier)+'</div></div>'+
+     '<div class="sc">'+x[1].toFixed(2)+'</div></div>';
+  }).join("");
+  out+=r.held.map(function(id){
+    var s=skillOf(id); if(!s) return "";
+    var scope=s.state==="scope";
+    return '<div class="sx-held"><div class="row" style="gap:8px;align-items:center">'+
+      '<span class="nm">'+h(s.id)+'</span><span class="grow"></span>'+
+      '<span class="sx-chip held">'+(scope?"out_of_scope":"unapproved_digest")+'</span></div>'+
+     '<div class="why">'+(scope?
+      'Published with <span class="mono">scope = workspace:finops</span>. It matched the query and was dropped before ranking.':
+      'The served digest is not the approved digest. It matched the query and was dropped before ranking.')+'</div>'+
+     '<div class="note" style="margin-top:5px">The agent is told <span class="mono">withheld: 1</span> and the reason class. It is not told this name.</div></div>';
+  }).join("");
+  return out;
+}
+function skRunQuery(){
+  var i=el("skq"); if(i) SKS.q=i.value.trim();
+  render();
+  var r=SK_QUERIES[SKS.q];
+  if(!r) act("No canned answer for that query in this mockup.","gold");
+  else if(!r.hits.length) act("Empty result, with a reason. Not an error — the agent carries on knowing it has no procedure for this.","gold");
+  else act(r.hits.length+" returned, "+r.held.length+" withheld. Recorded as a skills.searched frame.");
+}
+
+/* ---- versions: the config is a file with a history ---- */
+function skVersions(w){
+  return '<div class="note" style="margin:14px 0">Skills are not a settings screen. <span class="mono">'+h(SK_CFG.file)+'</span> lives in '+
+   h(w.main)+' on <span class="mono">'+h(w.branch)+'</span>, and every line below was a pull request somebody reviewed.</div>'+
+   '<div class="panel"><div class="panel-h"><h3>'+h(SK_CFG.file)+'</h3>'+
+    '<span class="sp mono dim" style="font-size:11px">'+h(w.main)+' · '+h(w.branch)+'</span></div>'+
+   '<div class="panel-b">'+skCfgFile()+'</div></div>'+
+   '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>History</h3>'+
+    '<span class="sp mono dim" style="font-size:11px">'+SK_HIST.length+' policy versions</span></div>'+
+   '<div class="panel-b"><div class="sx-skl">'+SK_HIST.map(function(x){
+     return '<div class="sx-row"><div class="sx-ki">'+icon("git")+'</div>'+
+      '<div><div class="nm">'+h(x.ver)+'</div><div class="st">'+h(x.d)+'</div>'+
+      '<div class="meta"><span class="sx-chip src">'+h(x.pr)+'</span><span class="sx-chip">'+h(PEOPLE[x.by].name)+'</span>'+
+       '<span class="sx-chip">'+h(x.when)+'</span></div></div>'+
+      '<div class="rt">'+(x.ver===SK_CFG.ver?skBadge("allowed","in effect"):skBadge("q","superseded"))+'</div></div>';
+   }).join("")+'</div>'+
+   '<div class="note" style="margin-top:10px">The last line is the one that matters: '+
+    '<b>core-platform was created on 2026-07-30 with skills off</b>, and stayed off for three days until Marcus opened '+
+    '<span class="mono">a-intel/platform#402</span>.</div>'+
+   '</div></div>';
+}
+function skCfgFile(){
+  return '<div class="sx-cfg"><div class="sx-cfg-h">'+h(SK_CFG.file)+' <span class="grow"></span>'+h(SK_CFG.ver)+' · merged '+h(SK_CFG.when)+'</div><pre>'+
+  '<span class="c"># Every workspace is created with this file absent, which reads as false.</span>\n'+
+  '<span class="k">enabled</span> = <span class="n">true</span>\n\n'+
+  '[<span class="k">sources</span>]\n'+
+  '<span class="k">repo</span>      = <span class="s">".oxagen/skills/"</span>          <span class="c"># a-intel/platform</span>\n'+
+  '<span class="k">linked</span>    = [<span class="s">"a-intel/billing"</span>]          <span class="c"># a-intel/mobile is linked, and not a source</span>\n'+
+  '<span class="k">registry</span>  = <span class="s">"a-intel"</span>\n'+
+  '<span class="k">market</span>    = <span class="s">"hold"</span>                   <span class="c"># every version waits for a person</span>\n\n'+
+  '[<span class="k">search</span>]\n'+
+  '<span class="k">mode</span>      = <span class="s">"searchable"</span>             <span class="c"># the belt carries a door, not a list</span>\n'+
+  '<span class="k">top_k</span>     = <span class="n">'+SK_CFG.search.k+'</span>\n'+
+  '<span class="k">min_score</span> = <span class="n">'+SK_CFG.search.minScore+'</span>\n'+
+  '<span class="k">budget</span>    = <span class="n">'+SK_CFG.search.budget+'</span>                  <span class="c"># tokens a turn; past it a load is refused, never truncated</span>\n\n'+
+  '[<span class="k">unbound_repo</span>]\n'+
+  '<span class="ad"><span class="k">policy</span>    = <span class="s">"ask"</span>                    <span class="c"># stop the loop and put it to a person</span></span>\n'+
+  '<span class="c"># "deny"  — the run starts with no skills and is told so</span>\n'+
+  '<span class="c"># "allow" — not available. There is no config to resolve, so there is nothing to allow.</span>\n\n'+
+  '[<span class="k">reflection</span>]\n'+
+  '<span class="k">enabled</span>   = <span class="n">true</span>\n'+
+  '<span class="k">rubric</span>    = <span class="s">"'+h(SK_CFG.reflect.rubric)+'"</span>\n'+
+  '<span class="k">sample</span>    = <span class="n">'+SK_CFG.reflect.sample+'</span>\n'+
+  '<span class="k">always</span>    = [<span class="s">"failing"</span>, <span class="s">"tampered"</span>]\n'+
+  '<span class="k">use</span>       = <span class="s">"research"</span>               <span class="c"># the only accepted value. See the Reflection tab.</span>\n'+
+  '<span class="k">retain</span>    = <span class="s">"'+h(SK_CFG.reflect.retain)+'"</span>\n'+
+  '</pre></div>';
+}
+
+/* ---- in the loop: the seat, and what it is used for ---- */
+function skLoop(w){
+  var open=!SKS.answered, base="#/"+ORG.slug+"/"+w.slug;
+  return '<div class="note" style="margin:14px 0"><b>Oxagen sits between the harness and the model.</b> Every model call and every tool call '+
+   'passes through it at <span class="mono">gateway</span> tier. That position is what makes the rest of this page enforceable: '+
+   'a default nobody can stop is a suggestion.</div>'+
+   '<div class="sx-stats" style="margin-bottom:14px">'+
+    skStat("Interjections, 30 days",18,"14 answered, 3 timed out, 1 open")+
+    skStat("Median answer","4m 12s","the run waits; nothing is charged while it waits")+
+    skStat("On timeout","deny","the run continues with no skills and is told so")+
+    skStat("Open now",open?1:0,open?"run "+SKRUN.id.slice(0,12)+"…":"nothing is waiting",open?"held":"")+
+   '</div>'+
+   (open?
+    '<div class="panel" style="border-color:color-mix(in srgb,var(--gold) 45%,transparent);margin-bottom:14px">'+
+     '<div class="panel-h" style="background:color-mix(in srgb,var(--gold) 9%,var(--hl))"><h3>A run is waiting on you</h3>'+
+      '<span class="sp live"><span class="p"></span>paused mid-loop</span></div>'+
+     '<div class="panel-b">'+
+      '<p style="margin:0 0 10px"><span class="mono">'+h(SKRUN.agent)+'</span> started in <span class="mono">'+h(SKRUN.repo)+'</span>, '+
+       'a repository no workspace in <b>'+h(ORG.name)+'</b> owns. Skills are on here, so there is a config to resolve — and nothing to resolve it against. '+
+       'The gateway stopped before the first model call and put the question to you <b>through the agent</b>.</p>'+
+      '<button class="btn primary" onclick="go(\''+base+'/runs/'+SKRUN.id+'\')">Open the run and answer it</button>'+
+     '</div></div>'
+    :
+    '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Nothing is waiting</h3>'+
+      '<span class="sp">'+skBadge("allowed","answered")+'</span></div><div class="panel-b">'+
+     '<p style="margin:0">You answered <span class="mono">'+h(SKRUN.id)+'</span> with '+
+      '<b>'+(SKS.answered==="link"?"link to core-platform":"create the workspace edge")+'</b>. '+
+      '<a href="'+base+'/runs/'+h(SKRUN.id)+'">Open the run</a> to see the frames it wrote, '+
+      'or <button class="btn sm" onclick="skReset()">reset the demo</button> to be asked again.</p>'+
+     '</div></div>')+
+   '<div class="grid g2" style="gap:12px">'+
+    '<div class="panel"><div class="panel-h"><h3>What the seat is allowed to do</h3></div><div class="panel-b">'+
+     '<div class="sx-skl">'+[
+      ["ask","Ask a person a question","The loop pauses at a boundary and the question reaches the operator in the agent’s own voice. The agent is not told what to say; it is handed the answer as evidence."],
+      ["cons","Stop before a guess","An unbound repo, a skill past the load budget, a digest that changed. Each one is a stop, not a fallback."],
+      ["mirror","Ask the agent to reflect","An out-of-band turn, after the work is sealed. Its output is quarantined; see the Reflection tab."],
+      ["proc","Record what it did","Every one of the above is a frame with a time, an author and a digest. Nothing above happens off the record."]
+     ].map(function(x){
+      return '<div class="sx-row"><div class="sx-ki">'+icon(x[0])+'</div><div><div class="nm">'+h(x[1])+'</div>'+
+       '<div class="st">'+h(x[2])+'</div></div><div class="rt"></div></div>';}).join("")+'</div></div></div>'+
+    '<div class="panel"><div class="panel-h"><h3>What it is not allowed to do</h3></div><div class="panel-b">'+
+     '<div class="sx-skl">'+[
+      ["Rewrite what the agent said","An interjection is a new frame beside the agent’s turn. The agent’s own output is never edited, and a replay shows both."],
+      ["Answer on the operator’s behalf","No default answer, no remembered answer, no “last time you chose…”. On timeout the run continues with nothing, which is the conservative end."],
+      ["Feed a reflection back into the work","A self-grade cannot become steering, cannot become a Context PR, and cannot change a later run’s context. The Reflection tab states it in five lines and the file enforces it."],
+      ["Hide that it happened","There is no silent interjection. A run that was asked something carries the question, the pause, the answer and the wait in its frames."]
+     ].map(function(x){
+      return '<div class="sx-row"><div class="sx-ki" style="color:var(--sk-held);border-color:color-mix(in srgb,var(--sk-held) 40%,transparent)">'+icon("lock")+'</div>'+
+       '<div><div class="nm">'+h(x[0])+'</div><div class="st">'+h(x[1])+'</div></div><div class="rt"></div></div>';}).join("")+'</div></div></div>'+
+   '</div>';
+}
+
+/* ---- reflection: captured, and then fenced ---- */
+function skReflect(w){
+  var R=SK_REFLECT;
+  return '<div class="note" style="margin:14px 0"><b>Research only, and the file says so.</b> '+
+   '<span class="mono">use = "research"</span> is the only value <span class="mono">'+h(SK_CFG.file)+'</span> accepts for reflection. '+
+   'There is no setting that turns a self-grade into steering, because the thing a model says about its own work is evidence about the model, not about the work.</div>'+
+   '<div class="sx-stats" style="margin-bottom:14px">'+
+    skStat("Sampled",skPct(SK_CFG.reflect.sample),"plus every failing and tampered run","res")+
+    skStat("Captured, 30 days",127,"out of 611 sealed runs","res")+
+    skStat("Cost","$1.79","0.09% of the month’s spend · billed as overhead, never as productive")+
+    skStat("Calibration gap","2 of 4","axes where the agent scored itself above the record","held")+
+   '</div>'+
+   '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>The turn that was injected</h3>'+
+     '<span class="sp mono dim" style="font-size:11px">'+h(R.when)+'</span></div><div class="panel-b">'+
+    '<div class="sx-fr" style="margin-bottom:12px">'+
+     skFrameRow({k:"run.sealed",c:"gov",t:"14:22:09.440Z",d:"run "+R.run+" · verdict failing · chain sealed, attestation key atk_7"})+
+     skFrameRow({k:"control.reflect",c:"gov",t:"14:22:41.002Z",d:"rubric "+R.rubric+" · "+h(R.why),oob:true})+
+     skFrameRow({k:"model.request",c:"model",t:"14:22:41.118Z",d:R.model+" · the sealed run is the evidence; the agent is asked four questions",oob:true})+
+     skFrameRow({k:"reflection.captured",c:"gov",t:"14:22:44.870Z",d:R.tokens.toLocaleString()+" tokens · $"+R.cost+" · quarantined on write",oob:true})+
+    '</div>'+
+    '<div class="note">Dashed frames are <b>out of band</b>. They sit after the seal, they are excluded from the chain the seal covers, '+
+     'and they are not replayed when the run is forked. A fork of this run re-runs the work and not the grading.</div>'+
+   '</div></div>'+
+   '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>What it said about itself</h3>'+
+     '<span class="sp"><span class="sx-chip res">self</span> <span class="sx-chip" style="color:var(--st-proven);border-color:color-mix(in srgb,var(--st-proven) 45%,transparent)">the record</span></span></div>'+
+    '<div class="panel-b"><div class="sx-rub">'+R.axes.map(function(a){
+      return '<div class="sx-rax'+(a.gap?" gap":"")+'">'+
+       '<div class="rq">'+h(a.q)+(a.gap?'<span class="gp">calibration gap</span>':'')+'</div>'+
+       '<div class="rbar"><span class="rlab">self</span><span class="rtrack"><span class="rfill self" style="width:'+(a.self*20)+'%"></span></span><span class="rn">'+a.self+' / 5</span></div>'+
+       '<div class="rbar"><span class="rlab">the record</span><span class="rtrack"><span class="rfill obs" style="width:'+(a.obs*20)+'%"></span></span><span class="rn">'+a.obs+' / 5</span></div>'+
+       '<div class="rsay">“'+h(a.say)+'”</div>'+
+       '<div class="note" style="margin-top:6px">the record says: '+h(a.obsLab)+'</div>'+
+      '</div>';}).join("")+'</div>'+
+    '<div style="margin-top:12px">'+R.contra.map(function(c){
+      return '<div class="sx-held" style="border-style:solid;border-color:color-mix(in srgb,var(--st-failed) 42%,transparent);background:color-mix(in srgb,var(--st-failed) 5%,transparent)">'+
+       '<div class="row" style="gap:8px;align-items:center"><span class="nm" style="text-decoration:none;color:var(--fg)">Axis '+(c.ax+1)+'</span>'+
+       '<span class="grow"></span><span class="sx-chip held">'+h(c.ev)+'</span></div>'+
+       '<div class="why">'+c.what+'</div></div>';}).join("")+'</div>'+
+   '</div></div>'+
+   '<div class="sx-quar">'+
+    '<h3>'+icon("lock")+'Quarantine</h3>'+
+    '<p style="margin-bottom:8px;font-size:12.8px">A captured reflection is written to a store that five rules fence off. '+
+     'These are not preferences on this screen; they are the reason the feature was allowed to exist.</p>'+
+    '<ol>'+
+     '<li><b>It never enters a context frame.</b> No later run of this agent, or any agent, can cite it. It is not a context record.</li>'+
+     '<li><b>It cannot be promoted.</b> There is no path from a reflection to a proposal, to a Context PR, or to steering. The promote action does not exist for this kind.</li>'+
+     '<li><b>It does not price the work.</b> Its tokens are billed as overhead on the Spend page and excluded from the productive ratio, so a run cannot look better by grading itself.</li>'+
+     '<li><b>It is not evidence about a person.</b> It carries the agent, the run and the rubric. Reading it is <span class="mono">research.read</span>, an organization grant that '+h(PEOPLE.priya.name)+' holds and no workspace role inherits.</li>'+
+     '<li><b>It expires.</b> '+h(SK_CFG.reflect.retain)+' from capture, then crypto-shredded with the run’s research key. An erasure request takes it with the run.</li>'+
+    '</ol>'+
+    '<div class="cons">'+
+     '<span class="sx-chip res">use = research</span>'+
+     '<span class="sx-chip res">consent: organization · recorded by '+h(PEOPLE.priya.name)+' on 2026-09-02</span>'+
+     '<span class="sx-chip res">retain '+h(SK_CFG.reflect.retain)+'</span>'+
+     '<span class="grow"></span>'+
+     '<button class="btn sm" onclick="act(\'Reflection capture turned off for core-platform. 127 captured reflections remain under their retention clock.\')">Turn capture off</button>'+
+     '<button class="btn sm" onclick="act(\'Export requires research.read. Priya Natarajan holds it; you do not.\',\'denied\')">Export for research</button>'+
+    '</div>'+
+   '</div>';
+}
+
+/* ============================== the run, from three sides ==============================
+   Not a second run page: pRun() hands this one run to this renderer, because the thing it has to
+   show — the same moment from the agent's side, the operator's side and the record's — has no
+   counterpart in a run that was never interrupted. */
+function skRunPage(){
+  var w=ws(), ans=SKS.answered;
+  if(S.state==="loading") return skeleton();
+  if(S.state==="error") return errorState("This run","502 frame_store_unreachable");
+  if(S.state==="denied") return deniedState("this run","runs.read on "+w.slug);
+  return '<div class="phead"><div class="t"><p class="eyebrow">Run · '+h(SKRUN.id)+'</p>'+
+    '<h1>'+h(SKRUN.taskTitle)+'</h1>'+
+    '<p><span class="mono">'+h(SKRUN.agent)+'</span> · '+h(SKRUN.harness)+' · '+
+      h(PEOPLE[SKRUN.op].name)+' · gateway tier · <span class="mono">'+h(SKRUN.remote)+'@'+h(SKRUN.sha)+'</span></p></div>'+
+    '<div class="acts">'+(ans?'<span class="live"><span class="p"></span>live</span>':'<span class="b b-approval"><span class="d"></span>paused · waiting on a person</span>')+'</div></div>'+
+   (ans?
+    '<div class="note" style="margin:12px 0"><b>Answered.</b> '+
+     (ans==="link"?'<span class="mono">a-intel/edge-proxy</span> is a linked repo of <b>core-platform</b>, the run resolved '+h(SK_CFG.ver)+', and one skill is loaded.'
+                  :'The workspace <b>edge</b> exists, <span class="mono">a-intel/edge-proxy</span> is its main repo, and — because that is what a new workspace ships as — <b>skills are off in it</b>. The run carries none, and the agent was told so in one line.')+
+     ' <button class="btn sm" onclick="skReset()">Ask again</button></div>'
+    :
+    '<div class="note" style="margin:12px 0;border-color:color-mix(in srgb,var(--gold) 42%,transparent);background:color-mix(in srgb,var(--gold) 7%,var(--panel))">'+
+     '<b>The loop is stopped.</b> Not failed, not queued, not continuing on a default. The harness is holding at the boundary before its first model call, '+
+     'the clock on this run is not running, and nothing has been charged since 09:14:02Z.</div>')+
+   '<div class="sx-tript">'+
+    '<div class="sx-pane"><div class="sx-pane-h"><span class="eb">What the agent shows '+h(PEOPLE[SKRUN.op].name.split(" ")[0])+'</span><span class="who">harness</span></div>'+
+     '<div class="sx-pane-b">'+skTrAgent(ans)+'</div></div>'+
+    '<div class="sx-pane hot"><div class="sx-pane-h"><span class="eb">What Oxagen put to a person</span><span class="who">gateway</span></div>'+
+     '<div class="sx-pane-b">'+skTrOperator(ans)+'</div></div>'+
+    '<div class="sx-pane"><div class="sx-pane-h"><span class="eb">What was written down</span><span class="who">frames</span></div>'+
+     '<div class="sx-pane-b"><div class="sx-fr">'+(ans?SK_AFTER[ans]:SK_FRAMES).map(skFrameRow).join("")+'</div>'+
+      '<div class="note" style="margin-top:9px">'+(ans?
+        'Nothing here is reconstructed. The pause, the question, the wait and the answer are frames in the same chain as the work.':
+        'The three greyed frames have not happened. A run that is waiting is a run that has written down that it is waiting.')+
+      '</div></div></div>'+
+   '</div>'+
+   (ans?skAfterPanel(ans):'');
+}
+function skTrAgent(ans){
+  var out='<div class="sx-tr">'+
+   '<div class="sx-msg op"><div class="mh"><b>'+h(PEOPLE[SKRUN.op].name)+'</b><span class="tm">09:14:01Z</span></div>'+
+    '<p>Cut the first release notes for edge-proxy. Everything since the repo was created.</p></div>'+
+   '<div class="sx-msg gw"><div class="mh"><b>Oxagen</b><span class="sx-chip">interjection</span><span class="tm">09:14:02Z</span></div>'+
+    '<p>Before I start: this repository is not bound to a workspace, so I have no skills config to work from. I am not going to guess which one applies.</p>'+
+    '<p style="color:var(--muted);font-size:12px">Two ways forward, and they are not the same:</p>'+
+    (ans?'':'<div class="sx-picks">'+
+      skPick("link","Link it to core-platform","Becomes a linked repo. Inherits "+SK_CFG.ver+", the belt, the budget and the gateway tier of that workspace.")+
+      skPick("create","Create a new workspace","Called edge, with a-intel/edge-proxy as its main repo. Ships with skills off, like every workspace does.")+
+     '</div>'+
+     '<div class="row" style="gap:7px;margin-top:9px"><button class="btn primary sm"'+(SKS.picked?'':' disabled')+' onclick="skAnswer()">Send this answer</button>'+
+      '<span class="mono dim" style="font-size:10.5px">'+(SKS.picked?'answers as '+h(PEOPLE[SKRUN.op].name):'pick one')+'</span></div>')+
+   '</div>';
+  if(ans){
+    out+='<div class="sx-msg op"><div class="mh"><b>'+h(PEOPLE[SKRUN.op].name)+'</b><span class="tm">09:17:38Z</span></div>'+
+      '<p>'+(ans==="link"?"Link it to core-platform.":"Make a new workspace. Call it edge.")+'</p></div>'+
+     '<div class="sx-msg agent"><div class="mh"><b>'+h(SKRUN.agent)+'</b><span class="sx-chip">turn 1</span><span class="tm">09:17:39Z</span></div>'+
+      (ans==="link"
+       ? '<p>Bound. I have <span class="mono">a-intel.release-notes-from-prs@2.1.0</span> and I am following it: group the merged pull requests, write the draft to a release branch, publish nothing.</p>'+
+         '<p style="color:var(--muted);font-size:12px">2 skills were withheld from my search. I am told the count and the reason class, not the names.</p>'
+       : '<p>Working in <b>edge</b>. I have no skills in this workspace — skills are off here — so I will do this from the commit history directly and write the draft to a branch.</p>'+
+         '<p style="color:var(--muted);font-size:12px">I will say so in the pull request, because a reviewer should know this was done without the release-notes procedure.</p>')+
+     '</div>';
+  }
+  return out+'</div>'+
+   '<div class="note" style="margin-top:9px">The question reaches '+h(PEOPLE[SKRUN.op].name.split(" ")[0])+' <b>where they already are</b> — '+
+   'in the agent’s own surface. There is no second inbox to check, and the agent is not the author of the question.</div>';
+}
+function skPick(k,n,d){
+  var on=SKS.picked===k;
+  return '<button class="sx-pick" aria-pressed="'+(on?"true":"false")+'" onclick="SKS.picked=\''+k+'\';render()">'+
+   '<span class="pk">'+(on?"✓":"")+'</span><span><span class="pn">'+h(n)+'</span><span class="pd">'+h(d)+'</span></span></button>';
+}
+function skTrOperator(ans){
+  if(ans) return '<div class="sx-tr"><div class="sx-msg gw"><div class="mh"><b>Answered</b>'+skBadge("allowed","closed")+'<span class="tm">09:17:38Z</span></div>'+
+   '<p>'+h(PEOPLE[SKRUN.op].name)+' chose <b>'+(ans==="link"?"link to core-platform":"create the workspace edge")+'</b>. '+
+   'Receipt <span class="mono">'+(ans==="link"?"rcp_01K6QW44":"rcp_01K6QW45")+'</span>, waited 3m 36s.</p>'+
+   '<p style="font-size:12px;color:var(--muted)">Binding a repository is a governed action, so this answer went through the same path as approving a payment: '+
+   'a rule, a grant, a receipt, and a name that stays on it.</p></div></div>';
+  return '<div class="sx-tr">'+
+   '<div class="sx-msg gw"><div class="mh"><b>control.interject</b><span class="sx-chip held">the loop is held</span><span class="tm">09:14:02Z</span></div>'+
+    '<p><span class="mono">repo.unknown</span> — <span class="mono">'+h(SKRUN.remote)+'</span> resolves to no workspace in <span class="mono">'+h(ORG.slug)+'</span>.</p>'+
+    '<p><span class="mono">skills.enabled = true</span> and <span class="mono">unbound_repo = ask</span>, so the gateway put it to a person instead of resolving nothing quietly.</p>'+
+   '</div>'+
+   '<div class="sx-paths">'+
+    '<div class="sx-path'+(SKS.picked==="link"?" on":"")+'"><h3>'+icon("git")+'Link</h3>'+
+     '<p class="muted" style="font-size:12px;margin:0">to <b>core-platform</b></p>'+
+     '<div class="sx-dl">'+
+      skDl("add","Inherits <span class=\"mono\">"+SK_CFG.ver+"</span> — 7 skills in scope, 1 withheld")+
+      skDl("add","Inherits the belt, the $2.00 run budget and gateway tier")+
+      skDl("add","Becomes the third linked repo · indexed into the code graph")+
+      skDl("same","Marcus already owns this workspace, so no new grant")+
+      skDl("rem","Everything in edge-proxy is now in core-platform’s spend and audit")+
+     '</div></div>'+
+    '<div class="sx-path'+(SKS.picked==="create"?" on":"")+'"><h3>'+icon("skills")+'Create</h3>'+
+     '<p class="muted" style="font-size:12px;margin:0">a workspace called <b>edge</b></p>'+
+     '<div class="sx-dl">'+
+      skDl("rem","<b>Skills ship off.</b> 0 in scope, and <span class=\"mono\">search_skills</span> is not on the belt")+
+      skDl("rem","No belt, no budget, no price book until somebody sets them")+
+      skDl("add","Its own spend, its own audit, its own owner")+
+      skDl("add","<span class=\"mono\">a-intel/edge-proxy</span> becomes its main repo, branch <span class=\"mono\">main</span>")+
+      skDl("same","This run continues either way — with a procedure, or without one")+
+     '</div></div>'+
+   '</div>'+
+   '<div class="note" style="margin-top:10px">Notice what the second path does: a brand new workspace comes up with skills <b>off</b>, '+
+    'in the middle of a run that was asking for skills. The default is not a first-run nicety — it holds every time a workspace is made.</div>'+
+   '<div class="sx-held" style="margin-top:10px;border-style:solid;border-color:var(--border);background:var(--ink)">'+
+    '<div class="nm" style="text-decoration:none;color:var(--fg)">If nobody answers</div>'+
+    '<div class="why">At 30 minutes this times out to <span class="mono">deny</span>. The run continues with no skills and the agent is told why, '+
+    'because the safe end of an unanswered question is fewer skills, not more.</div></div>'+
+   '</div>';
+}
+function skDl(k,t){return '<div class="sx-li"><span class="s '+k+'">'+(k==="add"?"+":k==="rem"?"−":"·")+'</span><span>'+t+'</span></div>';}
+function skAfterPanel(ans){
+  if(ans==="link") return '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>The skill it loaded</h3>'+
+    '<span class="sp mono dim" style="font-size:11px">1,840 tokens · $0.0055 · priced on the Spend page as context, not as output</span></div>'+
+   '<div class="panel-b">'+skRow(skillOf("a-intel.release-notes-from-prs"))+
+    '<div class="note" style="margin-top:10px">The model call that follows cites it in the system position. A sealed replay of this run '+
+    'resolves the same digest, so “what procedure was it following” has an answer a year from now.</div></div></div>';
+  return '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>The workspace that was created</h3>'+
+    '<span class="sp">'+skBadge("q","skills off")+'</span></div><div class="panel-b">'+
+   '<div class="sx-cfg"><div class="sx-cfg-h">a-intel/edge-proxy · .oxagen/workspace.toml <span class="grow"></span>committed by the gateway, 09:17:39Z</div><pre>'+
+   '<span class="k">slug</span>    = <span class="s">"edge"</span>\n'+
+   '<span class="k">name</span>    = <span class="s">"Edge"</span>\n'+
+   '<span class="k">owner</span>   = <span class="s">"marcus"</span>\n'+
+   '<span class="k">main</span>    = <span class="s">"a-intel/edge-proxy"</span>\n'+
+   '<span class="k">branch</span>  = <span class="s">"main"</span>\n\n'+
+   '<span class="c"># No [skills] block. An absent block reads as false, and a workspace is</span>\n'+
+   '<span class="c"># created without one every time. Turning it on is a-intel/edge-proxy#2.</span>'+
+   '</pre></div>'+
+   '<div class="note" style="margin-top:10px">This is the same file <b>core-platform</b> had on 2026-07-30. '+
+   'It took a pull request and a named person to change it then, and it takes one now.</div>'+
+   '<div class="row" style="gap:7px;margin-top:11px">'+
+    '<button class="btn" onclick="S.tab.skills=\'versions\';go(\'#/'+ORG.slug+'/core-platform/skills/versions\')">See how core-platform did it</button>'+
+   '</div></div></div>';
+}
+function skAnswer(){
+  if(!SKS.picked) return;
+  SKS.answered=SKS.picked;
+  render();
+  act(SKS.answered==="link"
+    ? "Answered. a-intel/edge-proxy is linked to core-platform; the run resolved skl_v7 and loaded one skill."
+    : "Answered. Workspace edge created — with skills off, which is what every workspace ships as.",
+    SKS.answered==="link"?"":"gold");
+}
+function skReset(){
+  SKS.answered=null;SKS.picked=null;SKS.q="cut the first release notes";
+  render();act("Reset. The repo is unbound again and the run is waiting.","gold");
+}
+
+/* The interjection queue, above Fleet's own tiles: a run that has stopped is not a row in a table,
+   it is a thing waiting on a person, so it sits where the approvals do. */
+/* 1 while the interjected run is waiting in this workspace: it counts wherever approvals do. */
+function skWaiting(w){return (skOn(w)&&w.slug===SKRUN.ws&&!SKS.answered)?1:0;}
+function skFleetBanner(w){
+  if(!skWaiting(w)) return "";
+  return '<div class="banner"><span class="b b-approval" style="flex:none"><span class="d"></span>1 interjection</span>'+
+   '<div class="grow"><b>'+h(SKRUN.agent)+' is paused before its first model call.</b> '+
+   'It started in <span class="mono">'+h(SKRUN.repo)+'</span>, which no workspace owns. Skills are on here, so there is a config to resolve '+
+   'and nothing to resolve it against — and the gateway will not guess which one applies. Nothing has been charged since 09:14:02Z; '+
+   'at 30 minutes the question times out to <span class="mono">deny</span> and the run continues with no skills.</div>'+
+   '<button class="btn primary" onclick="go(\'#/'+ORG.slug+'/'+w.slug+'/runs/'+SKRUN.id+'\')">Answer it</button></div>';
+}
+
+/* ---- dialogs ---- */
+DLG_EXT.skenable=function(){
+  var w=ws();
+  return {t:"Turn skills on for "+w.name, s:"This is a governed action. It writes a file, opens a pull request, and puts your name on both.", w:false,
+   b:'<div class="sx-ga" style="margin-bottom:12px"><div class="grow"><div class="n">skills.enabled</div>'+
+     '<div class="d">false → true in <span class="mono">'+h(SK_CFG.file)+'</span></div></div>'+
+     '<button class="sx-sw" role="switch" aria-checked="true" aria-label="Enabled" onclick="act(\'The switch is the outcome, not the control. The pull request is the control.\',\'gold\')"><i></i></button></div>'+
+    '<div class="field"><label>What this writes</label>'+skCfgFile()+'</div>'+
+    '<div class="field"><label>What happens to runs already in flight</label>'+
+     '<div class="note">Nothing. A run resolves its config once, at the start. The runs in flight right now finish without skills; '+
+     'the next run each agent starts picks this up.</div></div>'+
+    '<div class="note">Every agent in '+h(w.name)+' gains <span class="mono">search_skills</span> and nothing else. '+
+     'No tool is granted, no tier changes, no budget moves.</div>',
+   f:'<span class="grow mono dim" style="font-size:11px">opens a Context PR against '+h(w.main)+'</span>'+
+     '<button class="btn" onclick="closeDialog()">Cancel</button>'+
+     '<button class="btn primary" onclick="skEnable()">Open the pull request</button>'};
+};
+DLG_EXT.skcfg=function(){
+  return {t:SK_CFG.file, s:"Version "+SK_CFG.ver+", merged as "+SK_CFG.pr+" by "+PEOPLE[SK_CFG.by].name+" on "+SK_CFG.when, w:true,
+   b:skCfgFile()+'<div style="margin-top:14px"><h4 style="margin-bottom:8px">Sources, and what each contributes</h4>'+
+     '<div class="sx-skl">'+SK_CFG.sources.map(function(x){
+      return '<div class="sx-row'+(x.on?"":" held")+'"><div class="sx-ki">'+icon(x.k==="registry"?"organization":x.k==="market"?"tools":"git")+'</div>'+
+       '<div><div class="nm">'+h(x.label)+'</div><div class="st">'+h(x.d)+'</div></div>'+
+       '<div class="rt">'+(x.on?skBadge("allowed",x.n+" skills"):skBadge("q","not a source"))+'</div></div>';}).join("")+'</div></div>',
+   f:'<span class="grow mono dim" style="font-size:11px">changing this is a pull request, not a save button</span><button class="btn" onclick="closeDialog()">Close</button>'};
+};
+DLG_EXT.skill=function(arg){
+  var s=skillOf(arg)||SKILLS[0];
+  return {t:s.id, s:s.srcLabel+" · "+s.path, w:true,
+   b:'<dl class="kv" style="margin-bottom:14px">'+
+      '<dt>Version</dt><dd><span class="mono">'+h(s.ver)+'</span></dd>'+
+      '<dt>Digest</dt><dd><span class="mono">'+h(s.digest)+'</span></dd>'+
+      '<dt>Kind</dt><dd>'+h(s.kind)+'</dd>'+
+      '<dt>Load cost</dt><dd><span class="mono">'+s.tokens.toLocaleString()+'</span> tokens · $'+(s.tokens*0.000003).toFixed(4)+' a turn it is loaded into</dd>'+
+      '<dt>Decision</dt><dd>'+skTier(s.tier)+(s.twoPerson?' · two people, and not the one who ran it':'')+'</dd>'+
+      '<dt>Owner</dt><dd>'+(s.owner?h(PEOPLE[s.owner].name):'<span class="muted">nobody — which is why it is held</span>')+'</dd>'+
+      '<dt>Cited</dt><dd>'+(s.cited?s.cited+' of '+s.runs+' runs that searched for it':'never')+'</dd>'+
+      (s.proofAfter!=null?'<dt>Proof rate</dt><dd>'+skPct(s.proofBefore)+' before it existed → <b>'+skPct(s.proofAfter)+'</b> after · measured over '+s.runs+' runs</dd>':'')+
+     '</dl>'+
+     (s.why?'<div class="note" style="border-color:color-mix(in srgb,var(--sk-held) 45%,transparent)"><b>Held: </b>'+s.why+'</div>':'')+
+     '<div class="sx-cfg"><div class="sx-cfg-h">'+h(s.path)+'</div><pre>'+skBody(s)+'</pre></div>'+
+     '<div class="note" style="margin-top:9px">This is the whole of it. A skill has no code to run and no credential to hold — '+
+      'it is prose an agent reads, and every action it describes still goes through the toolbelt and the policy that governs it.</div>',
+   f:'<span class="grow mono dim" style="font-size:11px">'+h(s.srcLabel)+'</span>'+
+     (s.state==="unapproved"
+      ?'<button class="btn" onclick="closeDialog()">Close</button><button class="btn primary" onclick="closeDialog();act(\'Digest diff sent to Priya Natarajan. It stays held until she approves it.\',\'approval\')">Send the digest for approval</button>'
+      :'<button class="btn" onclick="closeDialog()">Close</button>')};
+};
+DLG_EXT.skadd=function(){
+  var w=ws();
+  return {t:"Add a skill", s:"Skills are files. This opens a pull request against "+w.main+".", w:false,
+   b:'<div class="field"><label>Path</label><div class="sx-cfg"><pre><span class="k">.oxagen/skills/</span><span class="s">&lt;name&gt;</span><span class="k">/SKILL.md</span></pre></div>'+
+      '<div class="note">The directory name is the skill’s id inside this workspace. The digest is taken at merge.</div></div>'+
+     '<div class="note">There is no upload here, and no editor that writes to a database. A skill an agent can find is a skill somebody merged.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Branch skills/new-skill created. Nothing resolves until it merges.\',\'gold\')">Create the branch</button>'};
+};
+function skBody(s){
+  var m={
+   "a-intel.release-notes-from-prs":'<span class="c">---</span>\n<span class="k">name</span>: release-notes-from-prs\n<span class="k">scope</span>: workspace:core-platform\n<span class="c">---</span>\n\n<span class="k"># Cutting release notes</span>\n\n1. List the pull requests merged into <span class="s">main</span> since the last tag.\n2. Group them under <span class="s">Features</span>, <span class="s">Fixes</span>, <span class="s">Breaking</span>. A PR with no label goes to Fixes.\n3. Read CHANGELOG.md <span class="k">once</span>. It is 40k tokens; re-reading it is the single largest\n   waste in this task’s history.\n4. Write the draft to <span class="s">release/&lt;version&gt;-notes</span>. Open a PR.\n5. <span class="k">Never</span> publish the release. That is github__create_release, it needs approval,\n   and it is not yours to ask for.',
+   "a-intel.rollback-a-bad-release":'<span class="c">---</span>\n<span class="k">name</span>: rollback-a-bad-release\n<span class="k">scope</span>: workspace:core-platform\n<span class="c">---</span>\n\n<span class="k"># Pulling a release back</span>\n\n<span class="k">Do not</span> revert the merge commit first. <span class="k">Do not</span> force-push main. Both of those\nhave cost us a day each, on 2025-03-11 and on 2025-11-02.\n\n1. Flip the feature flag. This is the only step that is fast.\n2. Cut a revert PR against main and let the ladder run on it.\n3. Only once the witness flips, tag and deploy.',
+   "a-intel.postgres-safe-migration":'<span class="c">---</span>\n<span class="k">name</span>: postgres-safe-migration\n<span class="k">scope</span>: workspace:core-platform, workspace:finops\n<span class="c">---</span>\n\n<span class="k"># Expand, backfill, contract</span>\n\nNever in one deploy. The four outages in 2025 were all one deploy.\n\n1. <span class="k">Expand</span>: add the column, nullable, no default on a large table.\n2. <span class="k">Backfill</span>: in batches, off the request path, resumable.\n3. <span class="k">Contract</span>: drop the old column, in a later deploy, after a week of dual reads.',
+   "a-intel.invoice-reconciliation":'<span class="c">---</span>\n<span class="k">name</span>: invoice-reconciliation\n<span class="k">scope</span>: workspace:finops\n<span class="c">---</span>\n\n<span class="c"># You are reading this because you opened it from Mission Control.</span>\n<span class="c"># An agent in core-platform cannot: scope says finops, and scope is</span>\n<span class="c"># checked before ranking, not after.</span>\n\n<span class="k"># Matching a statement line</span>\n\n1. Find the purchase order. No PO, no payment.\n2. Find the receipt. Amounts must agree to the cent.\n3. Anything above the mandate parks. That is not your call to make.',
+   "oxagen.pdf-extract":'<span class="c">---</span>\n<span class="k">name</span>: pdf-extract\n<span class="k">publisher</span>: oxagen-marketplace\n<span class="c">---</span>\n\n<span class="c"># Held. The body below is the 0.9.3 the marketplace served on 2026-09-09.</span>\n<span class="c"># The digest Priya approved on 2026-08-21 was sha256:b78e...0c14, and this</span>\n<span class="c"># one is sha256:f41c...593a. No agent has seen either.</span>\n\n<span class="k"># Extracting tables</span>\n\n1. Detect ruled regions. 2. Read cells left to right. 3. Return rows.'
+  };
+  return m[s.id]||'<span class="c">---</span>\n<span class="k">name</span>: '+h(s.id.split(".").pop())+'\n<span class="c">---</span>\n\n'+h(s.st);
+}
+function skEnable(){
+  var w=ws();
+  closeDialog();SK_ON[w.slug]=true;S.tab.skills="catalog";
+  go("#/"+ORG.slug+"/"+w.slug+"/skills/catalog");
+  act(w.main+"#523 opened and merged. skl_v7 is in effect; every agent in "+w.slug+" now holds search_skills.");
+}
+
 /* ============================== guided scenarios ==============================
    W2 (stop-it-steer-it) and W3 (money-asked) as routes over the real product.
    Each step names the route to render, optionally arranges state first, and
@@ -10609,6 +11572,51 @@ SCENARIOS["assistant-and-account"]={title:"The assistant, and whose account it i
    act:["Open the command menu","openDialog('cmd')"]}
  ]};
 /* ---- end W11 ---- */
+
+/* ---- W13 · in-the-loop ---- */
+/* Skills ship off; search_skills answers from the config; and when a run starts in a repository nobody
+   bound, Oxagen stops the loop and puts the question to a person through the agent. The scenario
+   toggles SK_ON for finops/core-platform and SKS (the open interjection); skScnLeave() below puts
+   them back once the route leaves the scenario, so the rest of the demo is the seeded app. */
+function skScnArm(){S.skScn=true;}
+function skScnLeave(){ if(!S.skScn||S.scn) return; S.skScn=false; SK_ON["core-platform"]=true; SK_ON["finops"]=false; SKS.answered=null; SKS.picked=null; SKS.q="cut the first release notes"; }
+SCENARIOS["in-the-loop"]={title:"In the loop", ws:"core-platform", release:"full",
+ blurb:"Skills ship off. The search is the config, not the model. And when a run starts in a repository nobody bound, Oxagen stops the loop and asks a person — through the agent.",
+ steps:[
+  {say:"FinOps has skills off. Not disabled by an admin — this is what a workspace is made as. The page says what turning them on would do and, just as carefully, what it would not do.",
+   note:"The table underneath shows both workspaces, each with its creation date and the value it shipped with. The default is visible rather than implied.",
+   route:function(o){return {page:"skills",org:o,ws:"finops"};},
+   setup:function(){skScnArm();SK_ON["finops"]=false;SK_ON["core-platform"]=true;SKS.answered=null;SKS.picked=null;}},
+  {say:"The switch in this dialog is the outcome. The control is the pull request: <span class=\"mono\">.oxagen/skills.toml</span> is a file in the repo, so the person who turned skills on is in the git history and on a receipt.",
+   note:"Runs already in flight finish without skills. A run resolves its config once, at the start.",
+   route:function(o){return {page:"skills",org:o,ws:"finops"};},
+   setup:function(){skScnArm();SK_ON["finops"]=false;},
+   act:["Turn skills on for FinOps","openDialog('skenable')"]},
+  {say:"This is not a search box for you. It is the tool the agent holds, answered exactly as the gateway answers it inside a run — same config, same cut-off, same withholding. Three came back. Two were withheld.",
+   note:"The agent is told <span class=\"mono\">withheld: 2</span> and the reason classes, never the names. A withholding that names what it withholds has not withheld it. Try <i>pay an invoice</i> for an empty result with a reason.",
+   route:function(o){return {page:"skills",org:o,ws:"core-platform"};},
+   setup:function(){skScnArm();SK_ON["core-platform"]=true;S.tab.skills="search";SKS.q="cut the first release notes";},
+   act:["Ask as the agent","skRunQuery()"]},
+  {say:"A run just started in <span class=\"mono\">a-intel/edge-proxy</span>. Nobody has bound that repository to a workspace. Skills are on, so there is a config to resolve and nothing to resolve it against — and Oxagen is not going to guess.",
+   note:"The run is <b>paused</b>, not failed and not queued. The clock is not running and nothing has been charged since 09:14:02Z. It sits above Fleet with the approvals, because it is waiting on a person.",
+   route:function(o){return {page:"fleet",org:o,ws:"core-platform"};},
+   setup:function(){skScnArm();SK_ON["core-platform"]=true;SKS.answered=null;SKS.picked=null;S.runFilter="all";}},
+  {say:"The same moment from three sides. Left: the question arrives in the agent’s own window, where Marcus already is, and the bubble says Oxagen wrote it. Middle: the two paths and their real consequences. Right: seven frames, three greyed because they have not happened.",
+   note:"Read the second path: <b>creating a workspace ships it with skills off</b>, in the middle of a run that was asking for skills. Pick either path and send it; at 30 minutes an unanswered interjection times out to <span class=\"mono\">deny</span>.",
+   route:function(o){return {page:"run",org:o,ws:"core-platform",id:SKRUN.id};},
+   setup:function(){skScnArm();SKS.answered=null;SKS.picked=null;},
+   act:["Link it to core-platform and send","SKS.picked='link';skAnswer()"]},
+  {say:"Sitting in the loop also lets Oxagen ask the agent a question of its own, after the work is sealed. This run’s verdict was <span class=\"mono\">failing</span>, and <span class=\"mono\">rfl_v3</span> always samples a failing run. Two of four axes disagree with the record.",
+   note:"The injected turn is dashed: out of band, after the seal, not replayed on a fork. The self-grade is quarantined by five rules — it never enters a context frame, cannot be promoted, is billed as overhead, needs an organization grant to read, and expires.",
+   route:function(o){return {page:"skills",org:o,ws:"core-platform"};},
+   setup:function(){skScnArm();SK_ON["core-platform"]=true;S.tab.skills="reflect";}},
+  {say:"The config is a file with a history: five policy versions, each a pull request. The last row is the one that matters — core-platform was created on 2026-07-30 with skills off, and stayed off for three days until Marcus opened <span class=\"mono\">a-intel/platform#402</span>.",
+   note:"The default is not a first-run nicety. It holds every time a workspace is made.",
+   route:function(o){return {page:"skills",org:o,ws:"core-platform"};},
+   setup:function(){skScnArm();SK_ON["core-platform"]=true;S.tab.skills="versions";},
+   act:["Open the config file","openDialog('skcfg')"]}
+ ]};
+/* ---- end W13 ---- */
 function scnHref(id,step){var s=SCENARIOS[id];return "#/"+ORG.slug+"/"+s.ws+"/scenarios/"+id+"/"+step;}
 /* A step's act can open a dialog; moving to another step or leaving closes it, so the next step is not read under it. */
 function scnGo(hash){S.dlg=null;S.dlgArg=null;go(hash);}
@@ -12795,7 +13803,7 @@ function listify(){
 
 function render(){
   var r=route(); _cuts=null;
-  obScnLeft();
+  obScnLeft(); skScnLeave();
   var page="";
   if(r.page==="fleet")page=pFleet();
   else if(r.page==="run")page=pRun(r);
@@ -12804,6 +13812,7 @@ function render(){
   else if(r.page==="mandate")page=pMandate(r);
   else if(r.page==="agentsource")page=pAgentSource(r);
   else if(r.page==="tools")page=pTools();
+  else if(r.page==="skills")page=pSkills();
   else if(r.page==="scenarios")page=pScenarios();
   else if(r.page==="steering")page=pSteering();
   else if(r.page==="spend")page=pSpend();
@@ -12858,10 +13867,10 @@ function cardTables(){
 /* The thumb bar: the four places an operator opens most, then More, which is the rest of the
    sidebar, the assistant, search, notifications and the account as one sheet from the bottom.
    Counts follow the sidebar's rule: only where something waits on a person. */
-var MNAV_MORE={organization:1,billing:1,audit:1,steering:1,scenarios:1};
+var MNAV_MORE={organization:1,billing:1,audit:1,steering:1,scenarios:1,skills:1};
 function mobileNav(r){
   var w=ws(), fr=obFirstRun(w), base="#/"+ORG.slug+"/"+w.slug;
-  var waiting=fr?APPROVALS.filter(function(a){return a.run===fr.id&&apState(a.id).status==="pending";}).length:pendingCount(w.slug);
+  var waiting=fr?APPROVALS.filter(function(a){return a.run===fr.id&&apState(a.id).status==="pending";}).length:pendingCount(w.slug)+skWaiting(w);
   var crit=fr?0:INCIDENTS.filter(function(i){return i.status==="open"&&i.sev==="critical";}).length;
   var cur=r.page==="run"?"fleet":r.page==="agent"||r.page==="mandate"||r.page==="agentsource"?"agents":r.page;
   function b(id,label,href,count,hot,on){
@@ -12886,6 +13895,7 @@ DLG_EXT.more=function(){
   return {t:"More",w:false,
    b:'<div class="mgrid">'+
      t("steering","Steering","records, proposals, Context PRs",'go(\''+base+'/steering\')',fr?0:PROPOSALS.length)+
+     t("skills","Skills",wedge()?"already built · resolution, the loop":"resolution, the loop, reflection",'go(\''+base+'/skills\')',skWaiting(w),true)+
      t("organization","Organization","people, workspaces, funding",'go(\'#/'+ORG.slug+'\')')+
      t("billing","Billing","plan, meters, invoices",'go(\'#/'+ORG.slug+'/billing\')')+
      t("audit","Audit",wedge()?"already built · events, receipts":"events, incidents, holds",'go(\'#/'+ORG.slug+'/audit\')',crit,true)+
@@ -12919,7 +13929,7 @@ if(el("chrome")){
   el("cPhone").addEventListener("click",function(){S.phone=!S.phone;render();});
   el("cTheme").addEventListener("click",toggleTheme);
   el("cIndex").addEventListener("click",function(){openDialog("cmd");});
-  el("cReset").addEventListener("click",function(){seedApprovals();S.dlg=null;S.dlgArg=null;render();toast("Approvals reset — every parked call is pending again with a fresh clock.","gold");});
+  el("cReset").addEventListener("click",function(){seedApprovals();SKS.answered=null;SKS.picked=null;S.dlg=null;S.dlgArg=null;render();toast("Approvals reset — every parked call is pending again with a fresh clock, and the interjection is waiting again.","gold");});
 }
 /* a resize across the phone breakpoint re-lays the shell; BOOT.mobile pins it either way */
 (function(){var t=null;window.addEventListener("resize",function(){if(BOOT.mobile!=null)return;clearTimeout(t);t=setTimeout(function(){var m=mobileMedia();if(m!==S.mobile){S.mobile=m;S.side=false;render();}},120);});})();

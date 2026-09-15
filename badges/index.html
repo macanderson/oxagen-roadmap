@@ -1,0 +1,61 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Oxagen verification badge</title>
+<style>
+:root{--ink:#F8F5EE;--fg:#10100F;--muted:#6B665C;--border:#D8CDBD;--panel:#FFFDF8;--gold:#8B5E1A;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+@media(prefers-color-scheme:dark){:root{--ink:#0A0A09;--fg:#F2EEE5;--muted:#9B958A;--border:#292722;--panel:#181715;--gold:#D6962C}}
+body{margin:0;padding:32px 20px 60px;background:var(--ink);color:var(--fg);font:14px/1.5 "Space Grotesk","Helvetica Neue",Arial,sans-serif;max-width:1080px;margin-inline:auto}
+h1{font-size:22px;margin:0 0 6px}h2{font-size:15px;margin:32px 0 10px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted)}
+p{max-width:70ch;color:var(--muted)}code{font-family:var(--mono);font-size:12px}
+table{border-collapse:collapse;width:100%;font-size:13px}th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:middle}
+th{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.pair{display:inline-flex;gap:6px;align-items:center}.sw{display:inline-flex;padding:6px;border-radius:8px}.sw.light{background:#F8F5EE}.sw.dark{background:#181715}
+.dim{color:var(--muted)}
+.gh{border:1px solid var(--border);border-radius:8px;background:var(--panel);padding:14px 16px;margin-top:10px}
+.gh .t{font-size:18px;font-weight:600;display:flex;align-items:center;gap:10px;flex-wrap:wrap}.gh .m{font-size:12.5px;color:var(--muted);margin-top:6px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.gh .st{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:600;color:#fff;background:#1f883d}
+.gh .br{font-family:var(--mono);font-size:12px;padding:1px 6px;border-radius:5px;background:rgba(9,105,218,.12);color:#0969da}
+pre{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-size:12px;overflow-x:auto}
+</style></head><body>
+<h1>Oxagen verification badge</h1>
+<p>What a pull request or branch carries once Oxagen has looked at it. The word on the badge is the word the record holds: the witness verdict (spec §8.5, a closed vocabulary) or the attestation the chain carries (§8.3). It never shows a stronger word than the record. One SVG per state and theme, built by <code>tools/build-badges.mjs</code>.</p>
+
+<h2>On a pull request</h2>
+<div class="gh"><div class="t">Cut 4.11.0 release notes <span class="dim" style="font-weight:400">#482</span> <img src="proven-light.svg" alt="proven · fail → pass"></div>
+<div class="m"><span class="st">Open</span> <b>a-intel.core.release-manager</b> wants to merge 3 commits into <span class="br">main</span> from <span class="br">release/4.11.0</span></div></div>
+<div class="gh"><div class="t">Retry budget exhaustion drops webhooks <span class="dim" style="font-weight:400">#478</span> <img src="verifying-light.svg" alt="verifying · witness running"></div>
+<div class="m"><span class="st" style="background:#8250df">Draft</span> <b>a-intel.core.triage</b> wants to merge 1 commit into <span class="br">main</span> from <span class="br">fix/retry-budget</span></div></div>
+<div class="gh"><div class="t">Sync warehouse partitions <span class="dim" style="font-weight:400">#471</span> <img src="tampered-light.svg" alt="tampered · witness reached"></div>
+<div class="m"><span class="st" style="background:#cf222e">Closed</span> <b>a-intel.data.dbt-runner</b> wanted to merge 2 commits into <span class="br">main</span> from <span class="br">data/partitions</span></div></div>
+
+<h2>Every state</h2>
+<table><thead><tr><th>Badge · light, dark</th><th>File</th><th>Asked for as</th><th>What the record holds</th></tr></thead>
+<tbody><tr><td><span class="pair"><span class="sw light"><img src="verifying-light.svg" alt="verifying · witness running (light)"></span><span class="sw dark"><img src="verifying-dark.svg" alt="verifying · witness running (dark)"></span></span></td>
+    <td><code>verifying</code></td><td><code>VERIFYING</code></td><td>§8.5 · the witness runs on the target, then on the PR head; only pass or fail comes back</td></tr>
+<tr><td><span class="pair"><span class="sw light"><img src="proven-light.svg" alt="proven · fail → pass (light)"></span><span class="sw dark"><img src="proven-dark.svg" alt="proven · fail → pass (dark)"></span></span></td>
+    <td><code>proven</code></td><td><code>SUCCESSFUL VERIFICATION</code></td><td>§8.5 · verdict flipped: the witness failed on the target and passed on the PR head; the only verdict that proves a run</td></tr>
+<tr><td><span class="pair"><span class="sw light"><img src="failing-light.svg" alt="failing · on the PR head (light)"></span><span class="sw dark"><img src="failing-dark.svg" alt="failing · on the PR head (dark)"></span></span></td>
+    <td><code>failing</code></td><td><code>FAILED VERIFICATION</code></td><td>§8.5 · verdict failing: the witness fails on the PR head</td></tr>
+<tr><td><span class="pair"><span class="sw light"><img src="unmoved-light.svg" alt="unmoved · passes on both (light)"></span><span class="sw dark"><img src="unmoved-dark.svg" alt="unmoved · passes on both (dark)"></span></span></td>
+    <td><code>unmoved</code></td><td><span class="dim">no request; spec state</span></td><td>§8.5 · verdict unmoved: the witness passes on target and head, so it proves nothing about the change</td></tr>
+<tr><td><span class="pair"><span class="sw light"><img src="unsatisfied-light.svg" alt="unsatisfied · fails on both (light)"></span><span class="sw dark"><img src="unsatisfied-dark.svg" alt="unsatisfied · fails on both (dark)"></span></span></td>
+    <td><code>unsatisfied</code></td><td><span class="dim">no request; spec state</span></td><td>§8.5 · verdict unsatisfied: the witness fails on target and head</td></tr>
+<tr><td><span class="pair"><span class="sw light"><img src="tampered-light.svg" alt="tampered · witness reached (light)"></span><span class="sw dark"><img src="tampered-dark.svg" alt="tampered · witness reached (dark)"></span></span></td>
+    <td><code>tampered</code></td><td><code>TAMPERED</code></td><td>§8.5 · verdict tampered: the tamper exclusion tripped; the worker reached the witness or its environment</td></tr>
+<tr><td><span class="pair"><span class="sw light"><img src="unverified-light.svg" alt="unverified · no conclusion (light)"></span><span class="sw dark"><img src="unverified-dark.svg" alt="unverified · no conclusion (dark)"></span></span></td>
+    <td><code>unverified</code></td><td><span class="dim">no request; spec state</span></td><td>§8.5 · verdict unverified: the runner could not reach a conclusion; never resolved by a model</td></tr>
+<tr><td><span class="pair"><span class="sw light"><img src="waived-light.svg" alt="waived · per policy (light)"></span><span class="sw dark"><img src="waived-dark.svg" alt="waived · per policy (dark)"></span></span></td>
+    <td><code>waived</code></td><td><span class="dim">no request; spec state</span></td><td>§8.5 · verdict waived: nothing changed and nothing tried, per policy</td></tr>
+<tr><td><span class="pair"><span class="sw light"><img src="attested-light.svg" alt="attested · gateway (light)"></span><span class="sw dark"><img src="attested-dark.svg" alt="attested · gateway (dark)"></span></span></td>
+    <td><code>attested</code></td><td><code>VERIFIED</code></td><td>§8.3 · chain intact and the run attestation verifies; gateway-observed frames are Oxagen-attested</td></tr>
+<tr><td><span class="pair"><span class="sw light"><img src="client-attested-light.svg" alt="attested · client (light)"></span><span class="sw dark"><img src="client-attested-dark.svg" alt="attested · client (dark)"></span></span></td>
+    <td><code>client-attested</code></td><td><code>UNVERIFIED - ATTESTATION</code></td><td>§8.3 · producer-signed, Oxagen-countersigned at ingest: Oxagen attests receipt and chain integrity, not the truth of the content</td></tr>
+<tr><td><span class="pair"><span class="sw light"><img src="chain-break-light.svg" alt="chain break · hash refused (light)"></span><span class="sw dark"><img src="chain-break-dark.svg" alt="chain break · hash refused (dark)"></span></span></td>
+    <td><code>chain-break</code></td><td><code>UNVERIFIED - TAMPERED</code></td><td>§8.3 · the same seq with a different hash, or a gap that is not a telemetry_gap frame; refused and reported as a security incident</td></tr></tbody></table>
+
+<h2>Embed</h2>
+<p>GitHub picks the theme with <code>&lt;picture&gt;</code>. Both files are committed; nothing is fetched at render time.</p>
+<pre>&lt;picture&gt;
+  &lt;source media="(prefers-color-scheme: dark)" srcset="badges/proven-dark.svg"&gt;
+  &lt;img alt="Oxagen: proven · fail → pass" src="badges/proven-light.svg"&gt;
+&lt;/picture&gt;</pre>
+</body></html>
