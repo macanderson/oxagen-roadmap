@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// W1–W11 are not separate designs. Each one is mc.html, booted into its guided scenario.
+// W1–W11 and W13 are not separate designs. Each one is mc.html, booted into its guided scenario.
 //
 //   node tools/build-w.mjs           # regenerate every w*.html from mc.html
 //   node tools/build-w.mjs --check   # exit 1 if any w*.html is not exactly what mc.html produces
@@ -28,6 +28,7 @@ export const W = [
   ["w9-toolbelt-governed.html", "toolbelt-governed", "The Toolbelt, Governed"],
   ["w10-cio-console.html", "cio-console", "The CIO's Console"],
   ["w11-assistant-and-account.html", "assistant-and-account", "The Assistant on Every Page, and the Account"],
+  ["w13-in-the-loop.html", "in-the-loop", "In the Loop"],
 ];
 
 // Only build when run directly; tools/check-scenarios.mjs imports W from here.
