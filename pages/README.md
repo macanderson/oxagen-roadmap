@@ -15,7 +15,7 @@ Open `index.html` for the map.
 | `_engine/mc.css`, `_engine/mc.js` | The product stylesheet and script, split out of `consolidated.html`, shared by every page file. |
 
 A page file is thin — the shell markup plus a `BOOT` object (`{state, mobile, theme, hash}`)
-that pins what the engine renders — so 240 of them weigh 2 MB instead of 340 MB, and none can
+that pins what the engine renders — so 250 of them weigh 2 MB instead of 350 MB, and none can
 drift from `consolidated.html`: it is the same bytes. Open them from disk (`file://`) or serve
 the repo folder (`python3 -m http.server`); the engine is loaded by relative path.
 
@@ -23,8 +23,8 @@ Which states a page has is decided by `mc.html`: a page gets a file for a state 
 renderer branches on it. The auth screens have no empty state; the installer has only loaded;
 the gate steps have loading and denied, and the first-run step an error.
 
-Pages (28): fleet · run · agents · agent · agent-source · mandate · tools · steering ·
-spend · organization · organization-api-keys · organization-roles · billing · audit ·
+Pages (31): fleet · run · agents · agent · agent-source · mandate · tools · skills ·
+skills-off · run-interjection · steering · spend · organization · organization-api-keys · organization-roles · billing · audit ·
 register-name · register-wrap · register-run · signup · verify-email · login · two-factor ·
 forgot-password · reset-password · accept-invitation · onboarding-organization ·
 onboarding-wrap · onboarding-run · installer.
