@@ -1,0 +1,62 @@
+[
+ {
+  "id": "mnd_7K2ETQ4",
+  "agent": "a-intel.finops.invoice-bot",
+  "by": "Dana Okafor",
+  "roleAt": "org.billing",
+  "effect": "commits_spend, moves_funds",
+  "currency": "USD",
+  "perCall": "250.00",
+  "perPeriod": "5,000.00",
+  "period": "monthly",
+  "callsPerDay": 50,
+  "used": "1,284.60",
+  "reserved": "2,450.00",
+  "remaining": "1,265.40",
+  "allow": "vendor:aws, vendor:github",
+  "deny": "*",
+  "tools": "stripe__create_payment@*, aws_billing__purchase_savings_plan@2",
+  "approvalAbove": "100.00",
+  "alwaysFor": "moves_funds",
+  "approvers": "role:org.billing",
+  "purpose": "monthly infrastructure invoices, PO-4471",
+  "from": "2026-09-01",
+  "to": "2026-12-31",
+  "second": "Priya Natarajan",
+  "status": "active",
+  "ledger": [
+   {
+    "when": "08:40:19",
+    "call": "stripe__create_payment@4",
+    "amount": "2,450.00",
+    "state": "reserved",
+    "ext": "\u2014 awaiting approval",
+    "rcp": null
+   },
+   {
+    "when": "2026-09-04",
+    "call": "stripe__create_payment@4",
+    "amount": "884.60",
+    "state": "settled",
+    "ext": "pi_3QaL8f2Xk",
+    "rcp": "rcp_01K4X8\u2026"
+   },
+   {
+    "when": "2026-09-02",
+    "call": "aws_billing__purchase_savings_plan@2",
+    "amount": "400.00",
+    "state": "settled",
+    "ext": "sp-0a4f91c",
+    "rcp": "rcp_01K4W2\u2026"
+   },
+   {
+    "when": "2026-09-01",
+    "call": "stripe__create_payment@4",
+    "amount": "0.00",
+    "state": "released",
+    "ext": "dispatch failed \u00b7 released",
+    "rcp": "rcp_01K4V7\u2026"
+   }
+  ]
+ }
+]

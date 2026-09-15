@@ -7,7 +7,7 @@
    gateway-observed frames, producer-signed and countersigned for client-attested ones). The badge
    renders the word the record holds and never a stronger one.
 
-   Colours are the Mission Control tokens (mc.html), light and dark. GitHub cannot load a webfont
+   Colours are the Mission Control tokens (mockups/src/engine.css), light and dark. GitHub cannot load a webfont
    into an image, so the text is locked with textLength and drawn in the platform's UI fonts.
 
      node tools/build-badges.mjs           # write badges/*.svg, badges/index.html, badges/README.md
@@ -19,7 +19,7 @@ import { fileURLToPath } from "node:url";
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const OUT = join(ROOT, "badges");
 
-/* ---- tokens, lifted from mc.html's two palettes ---- */
+/* ---- tokens, lifted from the engine's two palettes (mockups/src/engine.css) ---- */
 const THEMES = {
   light: { ink: "#F8F5EE", fg: "#10100F", muted: "#6B665C", border: "#D8CDBD",
     allowed: "#2F7D52", proven: "#1F7676", failed: "#992F28", critical: "#AE2540", denied: "#9B4526", observe: "#6B665C", gold: "#8B5E1A" },

@@ -1,0 +1,414 @@
+@import "tailwindcss";
+@import "fumadocs-ui/css/neutral.css";
+@import "fumadocs-ui/css/preset.css";
+
+@source "../../node_modules/fumadocs-ui/dist/**/*.js";
+
+@theme {
+  --font-sans: "Space Grotesk", "Helvetica Neue", Arial, ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+/* The house palette (docs/_house/oxagen-doc.css): paper and ink, one gold. Light by default,
+   dark when the switch or the OS says so. */
+:root:not(.dark) {
+  --color-fd-background: #f2eee5;
+  --color-fd-foreground: #10100f;
+  --color-fd-muted: #ece6da;
+  --color-fd-muted-foreground: #6b665c;
+  --color-fd-popover: #f8f5ee;
+  --color-fd-popover-foreground: #10100f;
+  --color-fd-card: #f8f5ee;
+  --color-fd-card-foreground: #10100f;
+  --color-fd-border: #d8cdbd;
+  --color-fd-primary: #8b5e1a;
+  --color-fd-primary-foreground: #f8f5ee;
+  --color-fd-secondary: #ece6da;
+  --color-fd-secondary-foreground: #10100f;
+  --color-fd-accent: #ece6da;
+  --color-fd-accent-foreground: #10100f;
+  --color-fd-ring: #8b5e1a;
+  --ox-gold: #d6962c;
+}
+:root.dark {
+  --color-fd-background: #10100f;
+  --color-fd-foreground: #f2eee5;
+  --color-fd-muted: #201f1c;
+  --color-fd-muted-foreground: #9b958a;
+  --color-fd-popover: #181715;
+  --color-fd-popover-foreground: #f2eee5;
+  --color-fd-card: #181715;
+  --color-fd-card-foreground: #f2eee5;
+  --color-fd-border: #292722;
+  --color-fd-primary: #d6962c;
+  --color-fd-primary-foreground: #10100f;
+  --color-fd-secondary: #201f1c;
+  --color-fd-secondary-foreground: #f2eee5;
+  --color-fd-accent: #201f1c;
+  --color-fd-accent-foreground: #f2eee5;
+  --color-fd-ring: #d6962c;
+  --ox-gold: #d6962c;
+}
+
+html,
+body {
+  overflow-x: clip;
+}
+
+.ox-wordmark {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-weight: 600;
+  font-size: 1.05rem;
+  letter-spacing: -0.01em;
+}
+.ox-wordmark .ox-x {
+  color: var(--ox-gold);
+}
+.ox-wordmark-sub {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--color-fd-muted-foreground);
+}
+
+/* Prose that does not fit the column wraps or scrolls inside itself, never the page. */
+#nd-page {
+  min-width: 0;
+}
+#nd-page :not(pre) > code {
+  overflow-wrap: anywhere;
+}
+#nd-page h1,
+#nd-page h2,
+#nd-page h3,
+#nd-page h4 {
+  overflow-wrap: anywhere;
+}
+#nd-page pre {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+/* ── Desktop header (768px and up) ─────────────────────────────────────────── */
+.ox-header {
+  grid-area: header;
+  position: sticky;
+  top: var(--fd-docs-row-1);
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  height: var(--fd-header-height);
+  padding-inline: 1.5rem;
+  border-bottom: 1px solid var(--color-fd-border);
+  background: color-mix(in srgb, var(--color-fd-background) 85%, transparent);
+  backdrop-filter: blur(8px);
+}
+.ox-header-links {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  min-width: 0;
+  overflow-x: auto;
+  font-size: 0.875rem;
+  color: var(--color-fd-muted-foreground);
+  white-space: nowrap;
+}
+.ox-header-links a:hover {
+  color: var(--color-fd-foreground);
+}
+@media (min-width: 768px) {
+  #nd-docs-layout {
+    --fd-header-height: 3.5rem !important;
+  }
+}
+
+/* ── Page spec: mocked page panel and link rows ────────────────────────────── */
+.ox-mock {
+  margin: 0.5rem 0 0;
+  border: 1px solid var(--color-fd-border);
+  border-radius: 12px;
+  background: var(--color-fd-card);
+  overflow: hidden;
+}
+.ox-mock-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid var(--color-fd-border);
+  font-size: 0.85rem;
+}
+.ox-mock-title {
+  font-weight: 600;
+  margin-inline-end: auto;
+}
+.ox-mock-open {
+  color: var(--color-fd-primary);
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.ox-mock-stage {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  background: var(--color-fd-muted);
+}
+.ox-mock-frame {
+  overflow: hidden;
+  background: var(--color-fd-background);
+}
+.ox-mock-phone {
+  border-radius: 18px;
+  box-shadow: 0 0 0 1px var(--color-fd-border);
+}
+.ox-mock-frame iframe {
+  display: block;
+  border: 0;
+}
+
+.ox-seg {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--color-fd-border);
+  border-radius: 999px;
+  background: var(--color-fd-background);
+}
+.ox-seg button {
+  min-height: 32px;
+  padding: 0 0.7rem;
+  border-radius: 999px;
+  color: var(--color-fd-muted-foreground);
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+.ox-seg button[aria-pressed="true"] {
+  background: var(--color-fd-primary);
+  color: var(--color-fd-primary-foreground);
+}
+.ox-seg-wide {
+  display: flex;
+}
+.ox-seg-wide button {
+  flex: 1;
+  min-height: 44px;
+  font-size: 0.9rem;
+}
+
+.ox-links {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.875rem;
+}
+.ox-linkrow {
+  display: grid;
+  grid-template-columns: 6.5rem minmax(0, 1fr);
+  gap: 0.75rem;
+}
+.ox-linkrow-label {
+  color: var(--color-fd-muted-foreground);
+}
+.ox-linkrow-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+}
+.ox-linkrow-links a {
+  color: var(--color-fd-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.ox-mermaid {
+  margin: 1.5rem 0;
+  overflow-x: auto;
+}
+.ox-mermaid svg {
+  max-width: 100%;
+  height: auto;
+  margin-inline: auto;
+}
+
+/* ── Mobile thumb bar and sheets (below 768px) ─────────────────────────────── */
+.ox-thumb,
+.ox-sheet-root {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  /* The thumb bar replaces the top bar, the sidebar drawer trigger and the TOC popover. */
+  #nd-subnav,
+  #nd-sidebar-mobile,
+  #nd-docs-layout > [class*="toc-popover"] {
+    display: none !important;
+  }
+  #nd-docs-layout {
+    --fd-header-height: 0px !important;
+    --fd-toc-popover-height: 0px !important;
+  }
+  #nd-page {
+    padding-bottom: calc(6rem + env(safe-area-inset-bottom, 0px));
+  }
+  .ox-linkrow {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.1rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .ox-thumb {
+    position: fixed;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: 40;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    padding: 4px max(4px, env(safe-area-inset-right, 0px)) calc(4px + env(safe-area-inset-bottom, 0px)) max(4px, env(safe-area-inset-left, 0px));
+    border-top: 1px solid var(--color-fd-border);
+    background: color-mix(in srgb, var(--color-fd-background) 92%, transparent);
+    backdrop-filter: blur(10px);
+  }
+  .ox-slot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    min-height: 56px;
+    border-radius: 12px;
+    color: var(--color-fd-muted-foreground);
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .ox-slot span {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .ox-slot[aria-current="page"],
+  .ox-slot[data-active],
+  .ox-slot[aria-expanded="true"] {
+    color: var(--color-fd-primary);
+  }
+  .ox-slot:active {
+    background: var(--color-fd-accent);
+  }
+
+  .ox-sheet-root {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: block;
+  }
+  .ox-scrim {
+    position: absolute;
+    inset: 0;
+    background: rgb(0 0 0 / 0.45);
+  }
+  .ox-sheet {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    max-height: 82dvh;
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+    border-top: 1px solid var(--color-fd-border);
+    background: var(--color-fd-popover);
+    color: var(--color-fd-popover-foreground);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .ox-sheet-head {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1rem 0.5rem;
+  }
+  .ox-sheet-grip {
+    position: absolute;
+    top: 6px;
+    left: 50%;
+    width: 36px;
+    height: 4px;
+    margin-left: -18px;
+    border-radius: 999px;
+    background: var(--color-fd-border);
+  }
+  .ox-sheet-head h2 {
+    font-size: 1.05rem;
+    font-weight: 600;
+  }
+  .ox-sheet-close {
+    min-height: 44px;
+    padding: 0 0.75rem;
+    color: var(--color-fd-primary);
+    font-weight: 500;
+  }
+  .ox-sheet-body {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 0 0.5rem 1rem;
+  }
+  .ox-sheet-section {
+    padding: 0.5rem 0.5rem 0.75rem;
+    border-top: 1px solid var(--color-fd-border);
+  }
+  .ox-sheet-section:first-child {
+    border-top: 0;
+  }
+  .ox-sheet-section h3,
+  .ox-sheet-section summary {
+    margin: 0.25rem 0 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-fd-muted-foreground);
+  }
+  .ox-sheet-section summary {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    margin: 0;
+  }
+  .ox-sheet-list {
+    display: grid;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .ox-sheet-list a {
+    display: block;
+    min-height: 44px;
+    padding: 0.7rem 0.5rem;
+    line-height: 1.35;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+  .ox-sheet-list a[aria-current="page"] {
+    background: var(--color-fd-accent);
+    color: var(--color-fd-primary);
+    font-weight: 600;
+  }
+  .ox-sheet-sep {
+    padding: 0.9rem 0.5rem 0.2rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-fd-muted-foreground);
+  }
+  .ox-sheet-toc li[data-depth="3"] a {
+    padding-left: 1.25rem;
+    font-size: 0.875rem;
+    color: var(--color-fd-muted-foreground);
+  }
+}
