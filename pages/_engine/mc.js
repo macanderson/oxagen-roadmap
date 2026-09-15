@@ -2236,8 +2236,8 @@ function topbar(r){
    '<button class="iconbtn" onclick="openDialog(\'notifs\')" aria-label="Notifications, '+notifUnread()+' unread">'+
      '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 8-3 8h18s-3-1-3-8"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>'+
      (notifUnread()?'<span class="dot"></span>':'')+'</button>'+
-   '<button class="iconbtn" onclick="asstToggle()" aria-pressed="'+(S.asst?"true":"false")+'" aria-label="Assistant">'+
-     '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3l1.8 4.7L18.5 9.5 13.8 11.3 12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M18.5 16.5 19.4 19l2.5.9-2.5.9-.9 2.5-.9-2.5-2.5-.9 2.5-.9z"/></svg></button>'+
+   (wedge()?'':'<button class="iconbtn" onclick="asstToggle()" aria-pressed="'+(S.asst?"true":"false")+'" aria-label="Assistant">'+
+     '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3l1.8 4.7L18.5 9.5 13.8 11.3 12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M18.5 16.5 19.4 19l2.5.9-2.5.9-.9 2.5-.9-2.5-2.5-.9 2.5-.9z"/></svg></button>')+
    '<div class="rel"><button class="iconbtn" onclick="toggleLayer(\'user\')" aria-label="Account" style="padding:0;border-radius:50%;overflow:hidden">'+personAv("marcus",30)+'</button>'+
      (S.layer==="user"?userMenu():'')+'</div>'+
    '</header>';

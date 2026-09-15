@@ -32,6 +32,33 @@ and accept-invitation are in the set too. "Exit demo" on any screen returns to F
 Nothing on these screens writes anything; it is clickable demo chrome and is not
 meant to ship in the live app.
 
+## The wedge, and what is already built
+
+`mc.html` carries a release switch, `wedge` or `full`, in its mockup chrome (`release` on the
+state bar) and on `S.release`. **Every product file (`consolidated*.html`, `pages/`) opens in the
+wedge**: the first release as argued in `docs/oxagen-mission-control-review.html` and specified
+in `docs/2026-09-14-scale-back-prompt.md`. The switch deletes nothing — the full design stays in
+the file, one click away, which is the point: built, working, and not what is sold this quarter.
+
+| In the wedge | What the wedge shows |
+|---|---|
+| **Fleet, Run, Spend, Agent IAM** | Everything. These lead the nav, Spend second. |
+| Tools | Registry, connections, mandates ledger, policy, kill switches, auto-approvals. Not the assurance suite, policy simulation, or two-person mandates. |
+| Steering | Records, proposals, Context PRs. Not effect metrics or retirement candidates. |
+| Organization | People, roles, invitations, workspaces, funding, data plane, API keys. Not SSO or SCIM. |
+| Billing | The one meter: sealed runs billable, governed actions reported. The Enterprise blurbs stop promising SSO, SCIM, two-person mandates and the assurance suite. |
+| **Already built** (a nav group) | Audit — events, incidents, receipts, exports, keys; not legal holds, retention or assurance — and the Assistant, demoted from the sidebar footer and the top bar to this group. |
+
+A route that lands on a tab the wedge does not carry falls back to the page's first tab
+(`WEDGE_HIDES` in `mc.html`). A scenario that walks a deferred surface carries `release:"full"`
+and switches the mockup to everything built when it opens; the Scenarios page lists those under
+"Already built". The wedge flows are W1–W4 (and W3 reaches Audit receipts, which the wedge keeps).
+W5, W6 and W8–W11 open everything built.
+
+Witness is not in the wedge yet because no witness surface exists in `mc.html`: `w5-proven-not-claimed`
+is the nearest thing, and it walks the assurance suite. Moving Witness to the front, as the review
+argues, is a design task of its own, not a re-label.
+
 ## One flow per file (W1–W12)
 
 **W1–W11 are generated from `mc.html`. Do not edit them.** Each one is `mc.html` byte for byte
