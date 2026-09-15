@@ -107,3 +107,32 @@ npm run check   # the three --check runs, then tools/check-mockup.mjs in Chromiu
 ```
 
 `tools/README.md` says what each checks and what to watch for.
+
+
+## Docs site
+
+`site/` is the internal documentation site: a Next.js and Fumadocs app that renders the repo's
+markdown where it lives and links every section to its mocked page, audit prompt, spec section and
+plan section. Nothing in `site/` holds prose of its own.
+
+```sh
+pnpm -C site install   # dependencies, then the prepare step and the Fumadocs source index
+pnpm -C site dev       # http://localhost:3310, with the prepare step run first
+pnpm -C site build     # static export to site/out, hostable on any static file server
+```
+
+| Source (committed) | What the site makes of it |
+|---|---|
+| `docs/walkthrough.md` | The home page and first sidebar entry. |
+| `mockups/pages/<page>.md` | One page per spec, grouped Workspace, Organization, Auth & onboarding in `mockups/pages/README.md` order, each with a Mocked page panel (state tabs, Desktop and Mobile, each a URL of `mockups/missioncontrol.html`) and links to its audit prompt, the walkthrough sections that cover it, their spec and plan links, and the scenarios that visit it. |
+| `mockups/pages/*.audit-prompt.md`, `mockups/pages/audit-prompt.md` | Audit prompts. |
+| `docs/*.md` | Specs & plans: the spec, the implementation plan, the definition of done, the scope review, the witness spec, the desktop spec, the demo prompts, the scale-back prompt, the W13 scenario doc. |
+| `mockups/catalog.mjs` | Every page's route and states, and the scenarios in W order. |
+| `SCENARIOS` in `mockups/src/engine.js` (with `mockups/fixtures`) | One outline per scenario: its steps, the page each step routes to, and a link to each step inside the mockup. |
+| `mockups/missioncontrol.html`, `docs/*.html`, `docs/_house`, `badges` | Served unchanged under `/mock/`. |
+
+Generated and gitignored: `site/public/mock/` (the HTML copied by `site/scripts/prepare.mjs`),
+`site/.generated/` (scenario outlines from `site/scripts/gen-scenarios.mjs`, the scenarios and
+rendered-HTML indexes, `manifest.json`, and a walkthrough stub while `docs/walkthrough.md` is
+absent), `site/.source/` (the Fumadocs index), `site/.next/` and `site/out/`. The markdown carries
+no frontmatter: a page's title is its first heading and its description its first paragraph.
