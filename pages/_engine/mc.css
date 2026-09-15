@@ -1691,3 +1691,162 @@ pre .dn{color:var(--st-denied)}
 .lw-files .dbar{display:inline-flex;gap:1px;width:60px;height:7px}
 .lw-files .dbar i{display:block;height:100%;border-radius:1px}
 .lw-files .dbar i.a{background:var(--st-allowed)} .lw-files .dbar i.d{background:var(--st-denied)}
+/* ============================== Skills · resolution, the seat in the loop, reflection (W13) ==============================
+   Ported from w13-in-the-loop.html. Every class is sx- prefixed so nothing here reaches another page,
+   and every colour is one of mc.html's own tokens. */
+:root{ --sk-on:#57A97C; --sk-off:#6E6A62; --sk-held:#C66A4A; --sk-res:#9085E9; }
+@media(prefers-color-scheme:light){:root:not([data-theme="dark"]){ --sk-on:#2F7D52; --sk-off:#8C877C; --sk-held:#9B4526; --sk-res:#4A3AA7; }}
+:root[data-theme="light"]{ --sk-on:#2F7D52; --sk-off:#8C877C; --sk-held:#9B4526; --sk-res:#4A3AA7; }
+
+/* the big off-by-default gate */
+.sx-gate{border:1px solid var(--border);border-radius:14px;background:var(--panel);padding:22px;box-shadow:var(--shadow-sm)}
+.sx-gate .gh{display:flex;align-items:flex-start;gap:14px;margin-bottom:14px}
+.sx-gate .gi{width:38px;height:38px;flex:none;border-radius:10px;border:1px solid var(--rule);background:var(--hl);display:grid;place-items:center;color:var(--muted)}
+.sx-gate h2{margin-bottom:4px}
+.sx-gate .sub{color:var(--muted);font-size:12.5px;margin:0}
+.sx-gate .gbody{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0}
+#viewport.phone .sx-gate .gbody{grid-template-columns:1fr}
+.sx-gate .gcol{border:1px solid var(--border);border-radius:11px;padding:13px;background:var(--ink)}
+.sx-gate .gcol h4{margin-bottom:7px;display:flex;align-items:center;gap:7px}
+.sx-gate .gcol ul{margin:0;padding-left:16px;color:var(--body);font-size:12.7px;line-height:1.65}
+.sx-gate .gcol li{margin-bottom:4px}
+.sx-gate .gfoot{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding-top:14px;border-top:1px solid var(--border)}
+
+/* the toggle, rendered as a governed action rather than a switch */
+.sx-ga{display:flex;align-items:center;gap:12px;border:1px solid var(--border);border-radius:11px;background:var(--ink);padding:12px 14px}
+.sx-ga .grow{min-width:0;flex:1}
+.sx-ga .n{font-weight:600;font-size:13.5px}
+.sx-ga .d{color:var(--muted);font-size:12px}
+.sx-sw{width:42px;height:23px;border-radius:99px;border:1px solid var(--rule);background:var(--hl);position:relative;padding:0;flex:none;transition:background .16s,border-color .16s}
+.sx-sw i{position:absolute;top:2px;left:2px;width:17px;height:17px;border-radius:99px;background:var(--muted);transition:transform .16s,background .16s}
+.sx-sw[aria-checked="true"]{background:color-mix(in srgb,var(--sk-on) 26%,transparent);border-color:var(--sk-on)}
+.sx-sw[aria-checked="true"] i{transform:translateX(19px);background:var(--sk-on)}
+
+/* skill rows */
+.sx-skl{display:grid;gap:9px}
+.sx-row{border:1px solid var(--border);border-radius:11px;background:var(--panel);padding:12px 13px;display:grid;grid-template-columns:26px 1fr auto;gap:12px;align-items:start;transition:border-color .14s}
+.sx-row:hover{border-color:var(--rule)}
+.sx-row.held{border-color:color-mix(in srgb,var(--sk-held) 45%,transparent);background:color-mix(in srgb,var(--sk-held) 5%,var(--panel))}
+.sx-row .sx-ki{width:26px;height:26px;border-radius:7px;border:1px solid var(--rule);background:var(--hl);display:grid;place-items:center;color:var(--muted);flex:none}
+.sx-row .nm{font-family:var(--mono);font-size:12.5px;font-weight:600;color:var(--fg);word-break:break-all}
+.sx-row .st{color:var(--body);font-size:12.7px;margin:3px 0 6px}
+.sx-row .meta{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.sx-row .rt{text-align:right;flex:none;display:grid;gap:4px;justify-items:end}
+#viewport.phone .sx-row{grid-template-columns:26px 1fr}
+#viewport.phone .sx-row .rt{grid-column:1/-1;justify-items:start;text-align:left}
+.sx-chip{display:inline-block;font-family:var(--mono);font-size:10.5px;color:var(--muted);background:var(--hl);border:1px solid var(--border);border-radius:5px;padding:1px 6px;white-space:nowrap}
+.sx-chip.src{color:var(--accent-text);border-color:color-mix(in srgb,var(--gold) 38%,transparent)}
+.sx-chip.held{color:var(--sk-held);border-color:color-mix(in srgb,var(--sk-held) 42%,transparent)}
+.sx-chip.ok{color:var(--sk-on);border-color:color-mix(in srgb,var(--sk-on) 42%,transparent)}
+.sx-chip.res{color:var(--sk-res);border-color:color-mix(in srgb,var(--sk-res) 45%,transparent)}
+
+/* the search console — what the agent asked, what the config answered */
+.sx-sbox{border:1px solid var(--border);border-radius:12px;background:var(--panel);overflow:hidden}
+.sx-sbox .sq{display:flex;align-items:center;gap:9px;padding:11px 13px;border-bottom:1px solid var(--border);background:var(--hl);flex-wrap:wrap}
+.sx-sbox .sq .lbl{font-family:var(--mono);font-size:11px;color:var(--accent-text);flex:none}
+.sx-sbox .sq input{flex:1;min-width:140px;background:var(--ink);border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-family:var(--mono);font-size:12.5px;color:var(--fg)}
+.sx-sbox .sres{padding:12px 13px}
+.sx-sres-h{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--muted);margin-bottom:9px;flex-wrap:wrap}
+.sx-hit{border:1px solid var(--border);border-radius:9px;background:var(--ink);padding:9px 11px;margin-bottom:7px;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
+.sx-hit .sc{font-family:var(--mono);font-size:11px;color:var(--sk-on);flex:none}
+.sx-hit .nm{font-family:var(--mono);font-size:12.3px;font-weight:600}
+.sx-hit .d{color:var(--muted);font-size:12px;margin-top:2px}
+.sx-held{border:1px dashed color-mix(in srgb,var(--sk-held) 50%,transparent);border-radius:9px;background:color-mix(in srgb,var(--sk-held) 6%,transparent);padding:9px 11px;margin-bottom:7px}
+.sx-held .nm{font-family:var(--mono);font-size:12.3px;color:var(--muted);text-decoration:line-through}
+.sx-held .why{font-size:12px;color:var(--body);margin-top:3px}
+
+/* the triptych: agent side / operator side / the record */
+.sx-tript{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;align-items:start}
+@media(max-width:1100px){.sx-tript{grid-template-columns:1fr}}
+#viewport.phone .sx-tript{grid-template-columns:1fr}
+.sx-pane{border:1px solid var(--border);border-radius:12px;background:var(--panel);overflow:hidden;min-width:0}
+.sx-pane-h{padding:9px 12px;border-bottom:1px solid var(--border);background:var(--hl);display:flex;align-items:center;gap:8px}
+.sx-pane-h .eb{font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;font-weight:600;color:var(--muted)}
+.sx-pane-h .who{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--dim)}
+.sx-pane-b{padding:12px}
+.sx-pane.hot{border-color:color-mix(in srgb,var(--gold) 45%,transparent)}
+.sx-pane.hot .sx-pane-h{background:color-mix(in srgb,var(--gold) 9%,var(--hl))}
+.sx-pane.hot .sx-pane-h .eb{color:var(--accent-text)}
+
+/* agent transcript bubbles */
+.sx-tr{display:grid;gap:9px}
+.sx-msg{border:1px solid var(--border);border-radius:10px;padding:9px 11px;background:var(--ink);margin:0;font-size:inherit;line-height:inherit}
+.sx-msg .mh{display:flex;align-items:center;gap:7px;margin-bottom:5px}
+.sx-msg .mh b{font-size:11.5px;font-weight:600}
+.sx-msg .mh .tm{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--dim)}
+.sx-msg p{margin:0 0 6px;font-size:12.7px;color:var(--body)}
+.sx-msg p:last-child{margin-bottom:0}
+.sx-msg.agent{border-left:2px solid var(--fk-model)}
+.sx-msg.op{border-left:2px solid var(--fk-op)}
+.sx-msg.gw{border-left:2px solid var(--gold);background:color-mix(in srgb,var(--gold) 6%,var(--ink))}
+.sx-msg .sx-picks{display:grid;gap:6px;margin-top:8px}
+.sx-pick{display:flex;align-items:flex-start;gap:9px;width:100%;text-align:left;border:1px solid var(--border);border-radius:9px;background:var(--panel);padding:9px 10px;transition:border-color .14s,background .14s}
+.sx-pick:hover{border-color:var(--gold);background:var(--hl)}
+.sx-pick[aria-pressed="true"]{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 10%,var(--panel))}
+.sx-pick .pk{width:19px;height:19px;border-radius:5px;border:1px solid var(--rule);flex:none;display:grid;place-items:center;font-family:var(--mono);font-size:10px;color:var(--muted)}
+.sx-pick[aria-pressed="true"] .pk{border-color:var(--gold);color:var(--accent-text)}
+.sx-pick .pn{font-size:12.5px;font-weight:600;display:block}
+.sx-pick .pd{font-size:11.7px;color:var(--muted);display:block;margin-top:1px}
+
+/* frame strip */
+.sx-fr{display:grid;gap:5px}
+.sx-frm{display:grid;grid-template-columns:auto 1fr auto;gap:9px;align-items:center;border:1px solid var(--border);border-radius:8px;background:var(--ink);padding:7px 9px;font-size:12px}
+.sx-frm .fi{width:6px;height:6px;border-radius:99px;flex:none}
+.sx-frm .fk{font-family:var(--mono);font-size:11.3px;font-weight:600}
+.sx-frm .fd{color:var(--muted);font-size:11.5px}
+.sx-frm .ft{font-family:var(--mono);font-size:10px;color:var(--dim);flex:none}
+.sx-frm.new{border-color:color-mix(in srgb,var(--gold) 50%,transparent);background:color-mix(in srgb,var(--gold) 7%,var(--ink))}
+.sx-frm.oob{border-style:dashed;border-color:color-mix(in srgb,var(--sk-res) 55%,transparent);background:color-mix(in srgb,var(--sk-res) 6%,var(--ink))}
+.sx-frm .mid{min-width:0}
+
+/* reflection rubric */
+.sx-rub{display:grid;gap:8px}
+.sx-rax{border:1px solid var(--border);border-radius:10px;background:var(--ink);padding:10px 12px}
+.sx-rax .rq{font-size:12.8px;font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.sx-rax .rq .gp{margin-left:auto;font-family:var(--mono);font-size:10px;font-weight:400;color:var(--st-failed);border:1px solid color-mix(in srgb,var(--st-failed) 40%,transparent);border-radius:5px;padding:0 5px;white-space:nowrap}
+.sx-rax .rbar{display:grid;grid-template-columns:78px 1fr auto;gap:9px;align-items:center;margin-bottom:4px}
+.sx-rax .rlab{font-family:var(--mono);font-size:10.5px;color:var(--dim)}
+.sx-rax .rtrack{height:6px;border-radius:99px;background:var(--hl);border:1px solid var(--border);overflow:hidden}
+.sx-rax .rfill{height:100%;border-radius:99px;display:block}
+.sx-rax .rfill.self{background:var(--sk-res)}
+.sx-rax .rfill.obs{background:var(--st-proven)}
+.sx-rax .rn{font-family:var(--mono);font-size:11px;color:var(--body);min-width:30px;text-align:right}
+.sx-rax .rsay{font-size:12px;color:var(--muted);margin-top:5px;border-left:2px solid var(--rule);padding-left:8px}
+.sx-rax.gap{border-color:color-mix(in srgb,var(--st-failed) 45%,transparent)}
+
+/* the quarantine box — the promise that research data stays research data */
+.sx-quar{border:1px solid color-mix(in srgb,var(--sk-res) 50%,transparent);border-radius:12px;background:color-mix(in srgb,var(--sk-res) 7%,var(--panel));padding:14px 16px}
+.sx-quar h3{display:flex;align-items:center;gap:8px;color:var(--fg);margin-bottom:8px}
+.sx-quar ol{margin:0;padding-left:18px;color:var(--body);font-size:12.8px;line-height:1.7}
+.sx-quar li{margin-bottom:5px}
+.sx-quar li b{color:var(--fg)}
+.sx-quar .cons{margin-top:12px;padding-top:11px;border-top:1px solid color-mix(in srgb,var(--sk-res) 30%,transparent);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+
+/* two-path compare */
+.sx-paths{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+#viewport.phone .sx-paths{grid-template-columns:1fr}
+.sx-path{border:1px solid var(--border);border-radius:12px;background:var(--panel);padding:14px;display:flex;flex-direction:column;gap:9px}
+.sx-path.on{border-color:var(--gold);box-shadow:0 0 0 1px color-mix(in srgb,var(--gold) 30%,transparent)}
+.sx-path h3{display:flex;align-items:center;gap:8px}
+.sx-path .sx-dl{display:grid;gap:5px;margin:0}
+.sx-path .sx-dl .sx-li{display:grid;grid-template-columns:14px 1fr;gap:8px;font-size:12.4px;color:var(--body);align-items:start}
+.sx-path .sx-dl .sx-li .s{font-family:var(--mono);font-size:12px;line-height:1.5}
+.sx-path .sx-dl .sx-li .s.add{color:var(--sk-on)} .sx-path .sx-dl .sx-li .s.rem{color:var(--sk-held)} .sx-path .sx-dl .sx-li .s.same{color:var(--dim)}
+
+/* config / diff */
+.sx-cfg{border:1px solid var(--border);border-radius:11px;background:var(--void);overflow:hidden}
+.sx-cfg-h{padding:8px 12px;border-bottom:1px solid var(--border);background:var(--hl);font-family:var(--mono);font-size:11px;color:var(--muted);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.sx-cfg pre{margin:0;padding:12px;overflow-x:auto;font-family:var(--mono);font-size:11.7px;line-height:1.65;color:var(--body)}
+.sx-cfg pre .c{color:var(--dim)} .sx-cfg pre .k{color:var(--accent-text)} .sx-cfg pre .s{color:var(--st-proven)} .sx-cfg pre .n{color:var(--fk-model)}
+.sx-cfg pre .ad{background:color-mix(in srgb,var(--sk-on) 14%,transparent);display:block}
+.sx-cfg pre .rm{background:color-mix(in srgb,var(--sk-held) 14%,transparent);display:block}
+
+/* mini stats */
+.sx-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:10px}
+.sx-stat{border:1px solid var(--border);border-radius:11px;background:var(--panel);padding:12px 13px}
+.sx-stat .sl{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:600}
+.sx-stat .sv{font-size:21px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:3px}
+.sx-stat .sd{font-size:11.5px;color:var(--muted);margin-top:2px}
+.sx-stat.res .sv{color:var(--sk-res)}
+.sx-stat.on .sv{color:var(--sk-on)}
+.sx-stat.held .sv{color:var(--sk-held)}
