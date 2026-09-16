@@ -515,12 +515,21 @@ main hr+h2{border-top:0;padding-top:0;margin-top:0}
 <h3 id="spec/4-3-language-and-runtime">4.3 Language and runtime</h3>
 <p>TypeScript on Node runs the control plane (the part that sets and enforces rules), the gateway, the services, and the UI. Hono handles HTTP and Drizzle handles Postgres access. The official <code>@contextgraphprotocol/typescript-sdk</code> is the source of protocol types (ADR-036). An SDK is a software development kit, a library that developers build on. Zod schemas remain the runtime validators at the trust boundary (the point where outside input enters the system). They are compile-checked against the SDK types. Rust stays in Stella and the protocol crates (Rust packages). Stella is deployed as a service, never embedded. The gateway's hot path is streaming pass-through. A Node process adds well under thirty milliseconds at the median for a proxied model call, which is the budget in §15.</p>
 <h3 id="spec/4-4-onboarding-and-oxagen-s-own-model-calls">4.4 Onboarding, and Oxagen's own model calls</h3>
-<p>The in-app agent is in scope. The scope review of 2026-09-14 proposed cutting it, and the maintainer kept it the same day (&quot;dont cut the in app agent&quot;). It opens as a flyout from the sidebar, as merged into the mockups repository in PR #1; the bottom dock on the <code>small-approvals-bottom-dock-scenarios</code> branch is not adopted (2026-09-15, maintainer decision, §20). Each of its turns is a run of its own, and it acts through the same agent tools a person clicks (§6, Appendix E), so what it does passes IAM and lands in the record like an action taken on a page. Its model calls are Oxagen's second meter, metered in usage credits (§12.1): the $5 signup grant in <code>create_org</code> funds the balance, and credit packs (<code>purchase_credits</code>) top it up (§12.10). Configuration is the same agent tools a person clicks. Explanation is the record: a chain of links to frames, records and commits. Stella stays on the customer's machine as a wrapped agent.</p>
+<p>The in-app agent is in scope. The scope review of 2026-09-14 proposed cutting it, and the maintainer kept it the same day (&quot;dont cut the in app agent&quot;). It opens as a flyout from the sidebar, as merged into the mockups repository in PR #1; the bottom dock on the <code>small-approvals-bottom-dock-scenarios</code> branch is not adopted (2026-09-15, maintainer decision, §20). Each of its turns is a run of its own, and it acts through the same agent tools a person clicks (§6, Appendix E), so what it does passes IAM and lands in the record like an action taken on a page. Its model calls are Oxagen's second meter, metered in usage credits (§12.1): the $5 signup grant in <code>create_org</code> funds the balance, and credit packs (<code>purchase_credits</code>) top it up (§12.10). Configuration is the same agent tools a person clicks. Explanation is the record: a chain of links to frames, records and commits.</p>
+<p><strong>The engine.</strong> The in-app agent is served by <strong>Stella over HTTP</strong> (2026-09-15, maintainer decision): Oxagen calls a hosted <code>stella serve</code> rather than running an agent loop in its own process, which keeps ADR-043's cut intact — Oxagen still governs rather than runs. The engine is a <strong>required service</strong>: nothing falls back to an in-process loop, so a panel that cannot reach it says so by name rather than degrading into something that reads like an answer. Its model calls are spent on the organization's own model key (§4.5), which is what makes a turn reconcilable to the organization that asked for it. With no key there is nothing to spend against, so the panel refuses and nothing is charged.</p>
+<p>Stella also stays on the customer's machine as a wrapped agent. The two are different deployments of the same engine and are not confused in the record: a wrapped Stella's runs are the customer's, and the in-app agent's are Oxagen's.</p>
+<p><strong>Its chrome.</strong> The launcher at the foot of the sidebar, a top-bar button, the ⌘K group and the panel itself were removed on 2026-09-14 by the scope review, before the maintainer reversed the cut the same day, and were restored on 2026-09-15 (<code>scope-review.md</code>, the In-app agent row). The panel is a host the app reclasses but never rebuilds, so the flyout transition runs and a half-typed message survives a re-render.</p>
 <p>Oxagen also makes model calls on its own behalf: the reflector (§9.1), the promoter's rationale and Context PR bodies (§9.2), the dod drafter (§8.6), and the run namer that writes <code>run.name</code> and <code>run.summary</code> from the frames. Every one of them goes through the model layer (§4.5), runs under a service principal, and is a frame in a run of its own, so its cost is accounted like everything else.</p>
 <p><strong>Onboarding is gated, and it is three steps.</strong> A new organization does not see the app. It sees one screen with three steps: (1) name the organization, (2) wrap an agent, with one click for Claude Code or Codex (the installer, §7.2) or with the five-line <code>oxagen.agent.wrap({})</code> snippet for an SDK agent, and (3) start a run. The full app unlocks the moment the first frame from that agent reaches Oxagen. The operator then lands on Fleet looking at their own run. That run is also the installer's smoke test, so there is one path, not two. The installer reads the git remote of the directory it ran in, so binding the main repo is one click.</p>
 <h3 id="spec/4-5-model-access-and-routing">4.5 Model access and routing</h3>
 <p>Every model call Oxagen makes on its own behalf goes through one model layer. That layer resolves three things, in order: the organization's <strong>funding source</strong>, the <strong>tier</strong> the caller asked for, and the <strong>provider route</strong> for that tier.</p>
-<p><strong>Funding source</strong> (ADR-053, carried): <code>platform</code> or <code>customer_key</code>. With the first, Oxagen pays on Oxagen's OpenRouter account. That usage is billed back at vendor cost plus a published markup, capped per organization. With the second, the customer's own OpenRouter or vendor key is used. That key is stored enveloped (encrypted with a key that is itself encrypted), tested before save, and never returned, and every read of it is audited. Its tokens are reported and billed at zero. A new organization starts on <code>platform</code>. Every tier's month-to-date use (complex, light) is one record, the route table, read by both Organization → Funding (the cap's &quot;used&quot;) and Spend (the month total and By model), so the two pages report the same month. Vendor neutrality is preserved: a customer key may point at OpenRouter or directly at a vendor, and the route table below is set per organization.</p>
+<p><strong>Funding source</strong> (ADR-053, carried; a third value added 2026-09-15, maintainer decision): <code>platform_minted</code>, <code>platform</code> or <code>customer_key</code>.</p>
+<ul>
+<li><code>platform_minted</code> — Oxagen mints <strong>one OpenRouter key per organization</strong> through the provider's key-provisioning API, on Oxagen's own account, and holds it enveloped. Oxagen owns it, pays for it, and can rotate or revoke it, so its tokens are billed exactly as <code>platform</code>. What it buys is reconciliation: the provider's own usage report carries one line per provisioned key, so the provider's number and Oxagen's usage-credit ledger can be joined on <code>provisioned_id</code> and compared. The monthly cap is set <strong>on the key at the provider</strong>, not only in Oxagen's meter, so a fault in Oxagen's metering cannot spend past it. This is what a new organization starts on.</li>
+<li><code>platform</code> — Oxagen pays on Oxagen's OpenRouter account, on one key shared across customers. Billed back at vendor cost plus a published markup, capped per organization. The provider returns a single undifferentiated total for every customer at once, so Oxagen's meter is the only witness to its own arithmetic; <code>platform_minted</code> exists because that is not good enough to reconcile against.</li>
+<li><code>customer_key</code> — the customer's own OpenRouter or vendor key. Its tokens are reported and billed at zero.</li>
+</ul>
+<p>In all three the key is stored enveloped (encrypted with a key that is itself encrypted), tested before save, and never returned, and every read of it is audited. What a screen may render is the prefix, the provisioned id, the key hash and the counters, never the secret. Minting, rotating and revoking are governed actions and appear in the audit record by name (<code>org.model_key.mint</code>, <code>.rotate</code>, <code>.revoke</code>). Every tier's month-to-date use (complex, light) is one record, the route table, read by both Organization → Funding (the cap's &quot;used&quot;) and Spend (the month total and By model), so the two pages report the same month. Vendor neutrality is preserved: a customer key may point at OpenRouter or directly at a vendor, and the route table below is set per organization.</p>
 <p><strong>Tiers and default routes:</strong></p>
 <div class="tw"><table>
 <thead>
@@ -9690,8 +9699,8 @@ test(&quot;fleet · phone&quot;, async ({ page }) =&gt; {
 <tr>
 <td>P7</td>
 <td><strong>Organization</strong></td>
-<td>tabs people/roles/invitations/workspaces/funding/plane/keys; role editor; API key create/rotate/revoke dialogs</td>
-<td></td>
+<td>tabs people/roles/invitations/workspaces/funding/plane/keys; role editor; API key create/rotate/revoke dialogs; the <strong>Model key</strong> panel on funding: the three funding sources, the prefix and provisioned id (never the secret), the cap set at the provider, and the reconciliation block comparing the provider's report against the credit ledger as two independent numbers</td>
+<td>Mint/rotate/revoke dialogs; the write lane is B4 Organization</td>
 </tr>
 <tr>
 <td>P8</td>
@@ -9710,6 +9719,12 @@ test(&quot;fleet · phone&quot;, async ({ page }) =&gt; {
 <td><strong>Run · Done</strong></td>
 <td>the Done tab (<code>dod-spec.md</code>): verdict by shape, certificate, checks with evidence digests, hidden checks, budget from the tool log, the stops; the locked-file dialog; the sign dialog</td>
 <td>P2</td>
+</tr>
+<tr>
+<td>P11</td>
+<td><strong>In-app agent</strong> (spec §4.4)</td>
+<td>the flyout: the launcher at the foot of the rail, the top-bar button, the ⌘K group, the mobile More tile, and the panel — a host the app reclasses but never rebuilds, so the transition runs and a half-typed message survives a re-render. Closed it is <code>inert</code> and <code>aria-hidden</code>; it paints under the rail; Escape closes it without changing the route. Both refusals are first-class: <strong>engine down</strong> (<code>stella serve</code> unreachable — a required service, no in-process fallback) and <strong>no model key</strong> (nothing to spend against, so nothing is charged). A turn's badge says the run is Oxagen's and never links into the tenant's run index.</td>
+<td>Owns <code>#asst</code>; the transcript is <code>chat.conversations</code>/<code>chat.messages</code> (App. A.10). Not a route — the guard is <code>tools/check-assistant.mjs</code>, not a page story</td>
 </tr>
 </tbody>
 </table></div>
@@ -9765,7 +9780,7 @@ test(&quot;fleet · phone&quot;, async ({ page }) =&gt; {
 <td>A7</td>
 <td>org + members + keys</td>
 <td><code>org.org_users</code>, <code>org.invitations</code>, <code>workspace.workspaces</code>, <code>iam.roles</code>, <code>org.data_planes</code>, <code>auth.api_keys</code>, <code>org.model_credentials</code></td>
-<td>none</td>
+<td>the minted key's <code>provisioned_id</code>, <code>key_hash</code>, <code>prefix</code> and provider cap, and the provider usage report the reconciliation row reads (§4.5)</td>
 </tr>
 <tr>
 <td>A8</td>
@@ -9820,7 +9835,7 @@ test(&quot;fleet · phone&quot;, async ({ page }) =&gt; {
 <tr>
 <td>Organization</td>
 <td><code>org.member_invite.*</code>, <code>org.member_role.change</code>, <code>workspace.create</code>, <code>workspace.settings.*</code>, <code>org.settings.write</code>, <code>org.model_credential</code>, <code>org.data_plane</code>, <code>api.key.{create,rotate,revoke}</code></td>
-<td>role editor custom roles (every tier, 2026-09-15, maintainer decision)</td>
+<td>role editor custom roles (every tier, 2026-09-15, maintainer decision); <code>org.model_key.{mint,rotate,revoke}</code> against the provider's provisioning API (§4.5)</td>
 </tr>
 <tr>
 <td>Billing</td>
@@ -10139,8 +10154,8 @@ stories for new components; PR body lists each §3 row you touched with its stat
 <tr>
 <td>In-app agent (kept, 2026-09-14)</td>
 <td>§0 row 1, §1, §2, §4.4, §16 and App. A.10 state it in scope (2026-09-15)</td>
-<td>the sidebar flyout is lane L3's (decision 9, 2026-09-15)</td>
-<td>the sidebar launcher, the top-bar button, the panel, the ⌘K agent-tools group and the W11 assistant steps were removed on 2026-09-14; W11 is &quot;the account&quot;</td>
+<td>the sidebar flyout is lane P11 (decision 9, 2026-09-15; <code>implementation-plan.md</code> Batch 2)</td>
+<td>the sidebar launcher, the top-bar button, the panel and the ⌘K agent-tools group were removed on 2026-09-14, before the reversal the same day, and <strong>restored on 2026-09-15</strong> — with the engine (Stella over HTTP) and the organization's model key written into §4.4 and §4.5. The W11 assistant steps stay removed; W11 is &quot;the account&quot;</td>
 </tr>
 <tr>
 <td>The ontology; Neo4j kept through rev1 (2026-09-15)</td>

@@ -1937,3 +1937,56 @@ button.wz-opt:hover{border-color:var(--rule)}
 #layer.phone .wz-opt-tools .wz-mt{gap:5px}
 #layer.phone .wz-drop{flex-direction:column;align-items:stretch}
 #layer.phone .wz-langs{overflow-x:auto}
+
+/* ---------- the in-app agent: a flyout from the sidebar ----------
+   Restored 2026-09-15 (spec §4.4). The panel flies out from the rail's right edge and is tucked
+   fully behind it when closed (.side paints at z-index 55, the panel at 50). It overlays the page
+   instead of reflowing it: an operator opens the agent to ask about what is already on screen, so
+   the screen must not move underneath them. The host (#asst, beside #layer) is permanent and
+   render() only rewrites its contents when what it renders changes — that is what lets the
+   transition survive a re-render, and what keeps a half-typed message alive. */
+.asst{position:fixed;top:0;bottom:0;left:var(--side-w);width:min(430px,calc(100vw - var(--side-w) - 56px));
+  background:var(--panel);border-right:1px solid var(--border);z-index:50;display:flex;flex-direction:column;
+  box-shadow:18px 0 44px rgba(0,0,0,.44);padding-bottom:env(safe-area-inset-bottom);
+  translate:-100% 0;opacity:0;visibility:hidden;
+  transition:translate .34s cubic-bezier(.32,.72,0,1),opacity .18s ease,visibility 0s .34s}
+.asst.open{translate:0 0;opacity:1;visibility:visible;
+  transition:translate .34s cubic-bezier(.32,.72,0,1),opacity .18s ease,visibility 0s 0s}
+/* on a phone the rail is itself a left drawer, so the panel flies in over the whole column;
+   translate composes with the centring transform rather than fighting it */
+.asst.phone{left:50%;width:100%;max-width:400px;transform:translateX(-50%);
+  border-left:1px solid var(--rule);border-right:1px solid var(--rule);box-shadow:var(--shadow)}
+@media(prefers-reduced-motion:reduce){
+  .asst{translate:0 0;transition:opacity .12s ease,visibility 0s .12s}
+  .asst.open{translate:0 0;transition:opacity .12s ease,visibility 0s 0s}
+}
+/* the launcher at the foot of the rail — the point the panel flies out of */
+.asst-launch{width:100%;display:flex;align-items:center;gap:9px;padding:7px 9px;margin-bottom:9px;
+  border:1px solid var(--border);border-radius:10px;background:var(--panel);color:var(--muted);
+  text-align:left;transition:border-color .15s,color .15s}
+.asst-launch:hover{border-color:var(--rule);color:var(--fg)}
+.asst-launch[aria-expanded="true"]{border-color:var(--gold)}
+.asst-launch .tx{min-width:0;flex:1}
+.asst-launch .tx b{display:block;font-size:12.5px;font-weight:600;color:var(--fg)}
+.asst-launch .tx span{display:block;font-size:10.5px;color:var(--dim);font-family:var(--mono);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.asst-launch .tx span.down{color:var(--st-failed)}
+.asst-launch .cv{flex:none;color:var(--dim);display:grid;place-items:center;
+  transition:transform .3s cubic-bezier(.32,.72,0,1)}
+.asst-launch[aria-expanded="true"] .cv{transform:rotate(180deg);color:var(--gold)}
+@media(prefers-reduced-motion:reduce){.asst-launch .cv{transition:none}}
+.asst-g{width:28px;height:28px;border-radius:9px;flex:none;display:grid;place-items:center;background:var(--gold);color:var(--on-gold)}
+.asst-g svg{width:15px;height:15px}
+.asst-launch .asst-g{width:24px;height:24px;border-radius:7px}
+.asst-h{padding:12px 15px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex:none}
+.asst-b{flex:1;min-height:0;overflow-y:auto;padding:15px}
+.asst-f{border-top:1px solid var(--border);padding:11px 13px;flex:none}
+.asst-f .box{background:var(--ink);border:1px solid var(--border);border-radius:10px;padding:9px 11px;display:flex;gap:9px;align-items:flex-end}
+.asst-f textarea{flex:1;background:none;border:0;resize:none;outline:none;font-size:13px;line-height:1.5;min-height:38px;color:var(--fg)}
+.msg{margin-bottom:16px;font-size:13px;line-height:1.6}
+.msg .who{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:600;margin-bottom:5px;display:flex;gap:8px;align-items:center}
+.msg.op .bub{background:var(--hl);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:var(--body)}
+.msg .bub{color:var(--body)}
+.act-card{background:var(--ink);border:1px solid var(--border);border-radius:10px;padding:11px 13px;margin:9px 0;font-size:12.5px}
+.act-card .t{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.act-card .t code{font-size:11.5px}
