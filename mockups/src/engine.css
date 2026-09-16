@@ -1805,3 +1805,135 @@ tr.dod-fail td{background:color-mix(in srgb,var(--st-failed) 6%,transparent)}
 .sx-stat.res .sv{color:var(--sk-res)}
 .sx-stat.on .sv{color:var(--sk-on)}
 .sx-stat.held .sv{color:var(--sk-held)}
+
+/* ---------- creating things: the wizard, and the surfaces it drafts into ----------
+   One shape for an agent, a tool, a skill and a context record, because all four are a file in a
+   repository. Nothing here paints a colour that is not a house token, and gold stays identity:
+   the step you are on, and the one primary button that opens the pull request. */
+.lnk{background:none;border:0;padding:0;font:inherit;color:var(--accent-text);text-decoration:underline;text-underline-offset:2px}
+.lnk:hover{color:var(--gold-bright)}
+
+/* the chooser */
+.wz-pick{display:grid;grid-template-columns:repeat(auto-fit,minmax(232px,1fr));gap:10px}
+.wz-card{display:flex;gap:12px;text-align:left;align-items:flex-start;padding:14px;border:1px solid var(--border);border-radius:12px;background:var(--panel);color:var(--body);transition:border-color .15s}
+.wz-card:hover{border-color:var(--gold)}
+.wz-card .ic{flex:none;width:34px;height:34px;border-radius:9px;display:grid;place-items:center;background:var(--hl);border:1px solid var(--border);color:var(--accent-text)}
+.wz-card .ic svg{width:17px;height:17px}
+.wz-card .tx{min-width:0;display:grid;gap:3px}
+.wz-card .tx b{font-size:14px;color:var(--fg)}
+.wz-card .d{font-size:12.3px;color:var(--muted);line-height:1.5}
+.wz-card .fp{font-size:10.5px;color:var(--dim);margin-top:2px}
+
+/* the step rail */
+.wz-rail{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.wz-st{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;color:var(--dim);border:1px solid var(--border);background:var(--hl);border-radius:20px;padding:3px 11px 3px 4px;white-space:nowrap}
+.wz-st i{font-style:normal;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;font-size:10.5px;font-weight:700;background:var(--panel);border:1px solid var(--rule);color:var(--dim)}
+.wz-st i svg{width:10px;height:10px}
+.wz-st.on{color:var(--fg);border-color:var(--gold)}
+.wz-st.on i{background:var(--gold);border-color:var(--gold);color:var(--on-gold)}
+.wz-st.done{color:var(--muted)}
+.wz-st.done i{background:transparent;border-color:var(--st-allowed);color:var(--st-allowed)}
+
+/* describe */
+.wz-chips{display:flex;flex-wrap:wrap;gap:6px;margin:-4px 0 14px}
+.wz-chips .btn{font-weight:400;color:var(--muted);text-align:left;white-space:normal}
+.wz-asst{display:flex;gap:11px;align-items:flex-start;padding:12px 14px;border:1px solid var(--border);border-left:2px solid var(--gold);border-radius:10px;background:var(--hl);margin-bottom:14px}
+.wz-asst .ic{flex:none;width:26px;height:26px;border-radius:7px;display:grid;place-items:center;color:var(--accent-text);background:var(--panel);border:1px solid var(--border)}
+.wz-asst .ic svg{width:14px;height:14px}
+.wz-asst b{display:block;font-size:13px;color:var(--fg);margin-bottom:2px}
+.wz-asst p{margin:0;font-size:12.3px;color:var(--muted);line-height:1.55}
+
+/* the two answers to "I want a tool that does X" */
+.wz-opts{display:grid;gap:10px}
+.wz-opt{display:grid;gap:8px;text-align:left;padding:14px;border:1px solid var(--border);border-radius:12px;background:var(--panel);color:var(--body);transition:border-color .15s}
+button.wz-opt:hover{border-color:var(--rule)}
+.wz-opt.on{border-color:var(--gold);box-shadow:0 0 0 1px color-mix(in srgb,var(--gold) 30%,transparent)}
+.wz-opt.off{opacity:.6}
+.wz-opt-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.wz-opt-h b{font-size:14px;color:var(--fg)}
+.wz-opt .d{font-size:12.4px;color:var(--muted);line-height:1.55}
+.wz-opt-tools{display:grid;gap:6px}
+.wz-mt{display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:6px 9px;border:1px solid var(--border);border-radius:9px;background:var(--hl)}
+.wz-opt-kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:6px 14px;font-size:11.5px;color:var(--body)}
+.wz-opt-kv i{display:block;font-style:normal;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--dim);font-weight:600}
+
+/* what the file says, read back as chips */
+.wz-derived{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;align-items:center}
+.wz-langs{display:flex;gap:2px;margin-bottom:10px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.wz-sum{border:1px solid var(--border);border-radius:11px;background:var(--hl);padding:13px 15px}
+.wz-drop{display:flex;align-items:center;gap:10px;flex-wrap:wrap;border:1px dashed var(--rule);border-radius:11px;padding:12px 14px;background:var(--void)}
+.wz-drop input[type=file]{flex:1;min-width:180px;font-size:12px;color:var(--muted);background:none;border:0;padding:0}
+.sx-row.wz-on{border-color:var(--gold);box-shadow:inset 2px 0 0 var(--gold)}
+
+/* the six kinds, as six cards that say what each one can never do */
+.wz-kinds{display:grid;grid-template-columns:repeat(auto-fit,minmax(248px,1fr));gap:10px}
+.wz-kind{display:flex;gap:11px;text-align:left;align-items:flex-start;padding:13px;border:1px solid var(--border);border-left:3px solid var(--kc);border-radius:11px;background:var(--panel);color:var(--body);transition:border-color .15s}
+.wz-kind:hover{border-color:var(--rule);border-left-color:var(--kc)}
+.wz-kind.on{border-color:var(--gold);border-left-color:var(--kc);box-shadow:0 0 0 1px color-mix(in srgb,var(--gold) 30%,transparent)}
+.wz-kind .kt{flex:none;width:30px;height:30px;border-radius:8px;display:grid;place-items:center;color:var(--kc);background:color-mix(in srgb,var(--kc) 14%,transparent);border:1px solid color-mix(in srgb,var(--kc) 32%,transparent)}
+.wz-kind .kt svg{width:16px;height:16px}
+.wz-kind .tx{min-width:0;display:grid;gap:4px}
+.wz-kind .tx b{font-size:13.5px;color:var(--fg);text-transform:lowercase;letter-spacing:.02em}
+.wz-kind .d{font-size:12px;color:var(--body)}
+.wz-kind .u{font-size:11.8px;color:var(--muted);line-height:1.5}
+.wz-kind .n{font-size:11.5px;color:var(--dim);line-height:1.5;border-top:1px solid var(--border);padding-top:5px;margin-top:2px}
+
+/* the pull request every wizard ends on */
+.wz-pr{border:1px solid var(--border);border-radius:11px;overflow:hidden;background:var(--panel)}
+.wz-pr-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:9px 13px;border-bottom:1px solid var(--border);background:var(--hl);font-size:12px;color:var(--muted)}
+.wz-pr .diff{border:0;border-radius:0}
+.wz-files{display:grid}
+.wz-file{display:grid;grid-template-columns:16px minmax(0,auto) 1fr;gap:10px;align-items:baseline;padding:8px 13px;border-top:1px solid var(--border);font-size:12px}
+.wz-file:first-child{border-top:0}
+.wz-file .s{font-family:var(--mono);font-weight:700;text-align:center}
+.wz-file.add .s{color:var(--st-allowed)} .wz-file.mod .s{color:var(--st-approval)} .wz-file.del .s{color:var(--st-failed)}
+.wz-file .p{color:var(--fg);overflow-wrap:anywhere}
+.wz-file .d{color:var(--dim);font-size:11.5px}
+.wz-checks{list-style:none;margin:0;padding:0;display:grid;gap:0;border:1px solid var(--border);border-radius:11px;overflow:hidden}
+.wz-checks li{display:grid;grid-template-columns:minmax(120px,auto) 1fr;gap:6px 14px;padding:9px 13px;border-top:1px solid var(--border);font-size:12.2px;align-items:baseline}
+.wz-checks li:first-child{border-top:0}
+.wz-checks .n{font-weight:600;color:var(--fg)}
+.wz-checks .d{color:var(--muted);line-height:1.5}
+
+/* the editor, shortened when it sits inside a dialog */
+.ced.sm .ed-scroll{max-height:300px;min-height:190px}
+/* prose wraps: the content column is bounded, every layer is one block per logical line, and the
+   gutter's rows are measured to match in cedPaint. A statement that scrolls sideways is unreadable. */
+.ced.wrap .ed-scroll{grid-template-columns:max-content minmax(0,1fr);min-height:180px}
+.ced.wrap .ed-wrap{width:100%}
+.ced.wrap .ed-hl,.ced.wrap .ed-mk,.ced.wrap .ed-t{white-space:pre-wrap;overflow-wrap:break-word;word-break:normal}
+.ced.wrap .ed-hl .ln,.ced.wrap .ed-mk .ln{display:block;min-height:var(--ed-lh)}
+.ced.wrap .ed-gut{white-space:normal}
+.ced.wrap .ed-gut>div{min-height:var(--ed-lh);line-height:var(--ed-lh)}
+
+/* ---------- one context record ---------- */
+.crec-h .crec-hl{display:flex;gap:12px;align-items:flex-start}
+.crec-h .crec-hl .kt{flex:none;width:36px;height:36px;border-radius:9px;display:grid;place-items:center;color:var(--kc);background:color-mix(in srgb,var(--kc) 14%,transparent);border:1px solid color-mix(in srgb,var(--kc) 32%,transparent);margin-top:2px}
+.crec-h .crec-hl .kt svg{width:18px;height:18px}
+.crec-h h1{font-size:21px;font-weight:600;line-height:1.35;max-width:62ch}
+.crec-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(300px,1fr);gap:16px;align-items:start}
+.crec-steps{margin:0;padding-left:20px;display:grid;gap:8px}
+.crec-steps li{font-size:13px;color:var(--body);line-height:1.5;padding-left:4px}
+.crec-steps li::marker{color:var(--kc);font-weight:700;font-variant-numeric:tabular-nums}
+.crec-bound{display:grid;gap:6px;padding:12px 14px;border-radius:10px;margin-bottom:14px;border:1px solid}
+.crec-bound .w{font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.crec-bound .d{font-size:12.3px;line-height:1.55;color:var(--body)}
+.crec-bound.forbid{border-color:color-mix(in srgb,var(--st-denied) 45%,transparent);background:color-mix(in srgb,var(--st-denied) 9%,transparent)}
+.crec-bound.forbid .w{color:var(--st-denied)}
+.crec-bound.require{border-color:color-mix(in srgb,var(--st-approval) 45%,transparent);background:color-mix(in srgb,var(--st-approval) 9%,transparent)}
+.crec-bound.require .w{color:var(--st-approval)}
+@media (max-width:1000px){.crec-grid{grid-template-columns:1fr}}
+/* Page content is under #viewport; a dialog is under #layer, and render() puts the phone class on
+   both. Every rule below that dresses a dialog has to name #layer or it never fires. */
+#viewport.phone .crec-grid{grid-template-columns:1fr}
+#viewport.phone .crec-h h1{font-size:18px}
+#layer.phone .wz-pick,#layer.phone .wz-kinds,#layer.phone .wz-opt-kv,
+#viewport.phone .wz-pick,#viewport.phone .wz-kinds,#viewport.phone .wz-opt-kv{grid-template-columns:1fr}
+#layer.phone .wz-rail,#viewport.phone .wz-rail{gap:4px}
+#layer.phone .wz-st,#viewport.phone .wz-st{font-size:11px;padding:3px 9px 3px 3px}
+#layer.phone .wz-checks li,#viewport.phone .wz-checks li{grid-template-columns:1fr}
+#layer.phone .wz-file,#viewport.phone .wz-file{grid-template-columns:16px 1fr}
+#layer.phone .wz-file .d,#viewport.phone .wz-file .d{grid-column:2}
+#layer.phone .wz-opt-tools .wz-mt{gap:5px}
+#layer.phone .wz-drop{flex-direction:column;align-items:stretch}
+#layer.phone .wz-langs{overflow-x:auto}

@@ -39,6 +39,29 @@ A scenario in the catalog with no `SCENARIOS` entry fails; nothing skips.
 
 Run `build-mockup.mjs --check` on every edit to the sources; run `check-mockup.mjs` before you ship.
 
+## The wizard guard
+
+```sh
+node tools/check-creation.mjs           # every creation wizard, both editing pages, the entry points
+node tools/check-creation.mjs --shots   # also write a screenshot per step to .claude/shots/
+```
+
+`check-mockup.mjs` opens pages. The four creation wizards (`docs/creation-spec.md`) are dialogs, so
+nothing there ever reaches them. This walks each one step by step: the tool wizard down both of its
+paths (import, where it must name the matched server and hand off to the importer; and build, where
+the manifest must parse, the derived chips must be read out of the file, and all four language
+samples must render and read the grant off the call), the skill wizard down all three of its sources
+(registry search narrowing and excluding, a bundle bumping a pinned version, a drafted file), the
+agent wizard through identity, definition and belt, and the record wizard through all six kinds. It
+then opens one record page per kind and asserts each kind renders **its own** treatment and borrows
+no other's, opens the skill source page and asserts the editor holds text rather than markup and
+that the version bumps before the merge, and checks every page's entry point is present.
+
+Every assertion names a string the surface is supposed to render, never a value read back out of
+the field the bug would corrupt. It was mutation-tested against three deliberate regressions —
+collapsing the six kind panels into one, putting the tool matcher back on substring matching, and
+emptying the editor gutter — and catches all three.
+
 ## Writing a scenario
 
 `SCENARIOS["id"]={title:"…", ws:"…", blurb:"…", steps:[…]}` in `mockups/src/engine.js`, and a row in

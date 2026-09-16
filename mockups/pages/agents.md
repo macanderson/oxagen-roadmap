@@ -17,7 +17,7 @@ Every agent identity in the workspace: identity in Postgres, definition in git, 
 ## What is on the page
 
 **Header** — eyebrow “Workspace · <workspace name>”, h1 “Identities”.
-Actions: **Register an agent** (opens the Register Agent gate) · **Wrap Claude Code** (gold; the same gate with Claude Code preselected)
+Actions: **New agent** (opens the agent wizard: an agent that does not exist yet) · **Register an agent** (opens the Register Agent gate: an agent that already runs somewhere) · **Wrap Claude Code** (gold; the same gate with Claude Code preselected)
 
 **Summary tiles** (one number and one basis line each):
 - **Identities here** — count in the workspace · “N across the organization · N listed below”
@@ -27,7 +27,9 @@ Actions: **Register an agent** (opens the Register Agent gate) · **Wrap Claude 
 
 - **Registered in <workspace>** panel — header shows `.oxagen/agents/ @ <commit>`. Table columns: Identity · trust · spend (the agent card, list layout: avatar, key, harness, trust and spend scores coloured by platform percentile) · Harness · Operator · Status · Tier (model + native) · Belt · Runs 30d · Spend 30d · Proven 30d · Mandates · Incidents. Per-row: **Edit** (the agent page), **Roles** (assign-role dialog), **Deregister** (danger; the deregister dialog, which is a pull request removing the file). Search, sort, facets (Tier, Operator), pager.
 
-**Dialogs this page opens:** `register (gate)`, `wrap (gate)`, `assignrole`, `delagent`.
+**Dialogs this page opens:** `register (gate)`, `wrap (gate)`, `wz (agent wizard: describe → identity → definition → toolbelt → pull request)`, `assignrole`, `delagent`.
+
+**New agent is not Register an agent.** Register wraps an agent that already runs on a machine or in CI; New agent writes one that does not exist yet. Both end on a pull request; they start from opposite ends. Every creation wizard is `DLG_EXT.wz`; its spec is `docs/creation-spec.md`.
 
 **Shell.** Sidebar (organization switcher, workspace switcher, Workspace nav: Fleet · Agent IAM · Tools · Skills · Steering · Spend; Organization nav: Organization · Billing · Audit; agent count · data plane · tier badge), top bar (breadcrumbs, ⌘K search-or-run, notifications with unread dot, account avatar → user menu: Account, Preferences, Security and sessions, Privacy and data, Switch theme, Sign out).
 

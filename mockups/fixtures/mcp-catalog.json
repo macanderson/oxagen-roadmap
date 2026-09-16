@@ -1,0 +1,118 @@
+[
+ {
+  "id": "stripe",
+  "name": "Stripe",
+  "url": "https://mcp.stripe.com/mcp",
+  "publisher": "Stripe, Inc.",
+  "verified": true,
+  "transport": "streamable-http",
+  "cred": "api_key",
+  "downscope": "restricted key, per call",
+  "fin": true,
+  "installs": 4120,
+  "d": "The payments API as MCP tools. Every money-moving tool declares an amount, which is what a mandate is written against.",
+  "match": ["refund", "refunds", "charge", "charges", "payment", "payments", "payout", "invoice", "invoices", "card", "stripe", "money back", "customer balance", "dispute", "chargeback"],
+  "tools": [
+   { "n": "create_refund", "d": "Refund a charge, whole or in part.", "risk": "high", "eff": "irreversible", "out": true, "fin": "spend" },
+   { "n": "list_refunds", "d": "List refunds against a charge or a customer.", "risk": "low", "eff": "read", "out": true, "fin": "none" },
+   { "n": "get_charge", "d": "Read one charge by id.", "risk": "low", "eff": "read", "out": true, "fin": "none" },
+   { "n": "list_disputes", "d": "List open disputes and their evidence deadlines.", "risk": "low", "eff": "read", "out": true, "fin": "none" },
+   { "n": "cancel_payment_intent", "d": "Cancel a payment intent that has not captured.", "risk": "high", "eff": "irreversible", "out": false, "fin": "spend" }
+  ]
+ },
+ {
+  "id": "github",
+  "name": "GitHub",
+  "url": "https://api.githubcopilot.com/mcp",
+  "publisher": "GitHub",
+  "verified": true,
+  "transport": "streamable-http",
+  "cred": "github_app",
+  "downscope": "installation token, per repo",
+  "fin": false,
+  "installs": 9840,
+  "d": "Repositories, pull requests, issues, checks and releases. The server every Oxagen workspace already imports.",
+  "match": ["repo", "repository", "pull request", "pr", "issue", "issues", "branch", "commit", "release", "github", "code review", "merge", "changelog", "tag"],
+  "tools": [
+   { "n": "get_file_contents", "d": "Read one file at a ref.", "risk": "low", "eff": "read", "out": true, "fin": "none" },
+   { "n": "create_pull_request", "d": "Open a pull request from a branch.", "risk": "medium", "eff": "write", "out": true, "fin": "none" },
+   { "n": "create_release", "d": "Publish a release against a tag.", "risk": "high", "eff": "irreversible", "out": true, "fin": "none" },
+   { "n": "list_commits", "d": "List commits on a ref.", "risk": "low", "eff": "read", "out": true, "fin": "none" }
+  ]
+ },
+ {
+  "id": "slack",
+  "name": "Slack",
+  "url": "https://mcp.slack.a-intel.internal/mcp",
+  "publisher": "a-intel platform team",
+  "verified": false,
+  "transport": "sse",
+  "cred": "oauth_user_token",
+  "downscope": "none available",
+  "fin": false,
+  "installs": 0,
+  "d": "Already imported in this workspace. Three of its tools declare no output schema and are running on observed ones.",
+  "match": ["slack", "channel", "message", "notify", "notification", "post", "chat", "announce", "dm", "thread"],
+  "tools": [
+   { "n": "post_message", "d": "Post a message to a channel.", "risk": "medium", "eff": "write", "out": true, "fin": "none" },
+   { "n": "list_channels", "d": "List channels the token can see.", "risk": "low", "eff": "read", "out": false, "fin": "none" },
+   { "n": "upload_file", "d": "Upload a file to a channel.", "risk": "medium", "eff": "write", "out": false, "fin": "none" }
+  ]
+ },
+ {
+  "id": "linear",
+  "name": "Linear",
+  "url": "https://mcp.linear.app/mcp",
+  "publisher": "Linear Orbit, Inc.",
+  "verified": true,
+  "transport": "streamable-http",
+  "cred": "oauth_user_token",
+  "downscope": "team scope, per call",
+  "fin": false,
+  "installs": 2270,
+  "d": "Issues, projects and cycles. Reads are cheap; writes are attributed to the operator whose token minted the grant.",
+  "match": ["linear", "ticket", "tickets", "issue tracker", "backlog", "sprint", "cycle", "triage", "project"],
+  "tools": [
+   { "n": "get_issue", "d": "Read one issue.", "risk": "low", "eff": "read", "out": true, "fin": "none" },
+   { "n": "create_issue", "d": "File an issue on a team.", "risk": "medium", "eff": "write", "out": true, "fin": "none" },
+   { "n": "update_issue", "d": "Change state, assignee or labels.", "risk": "medium", "eff": "write", "out": true, "fin": "none" }
+  ]
+ },
+ {
+  "id": "snowflake",
+  "name": "Snowflake",
+  "url": "https://mcp.snowflake.com/mcp",
+  "publisher": "Snowflake Inc.",
+  "verified": true,
+  "transport": "streamable-http",
+  "cred": "key_pair_jwt",
+  "downscope": "role and warehouse, per call",
+  "fin": false,
+  "installs": 1180,
+  "d": "Warehouse queries as tools. Every statement is charged to a warehouse, so a read here is still spend.",
+  "match": ["warehouse", "sql", "query", "snowflake", "table", "rows", "analytics", "report", "dataset", "data"],
+  "tools": [
+   { "n": "run_query", "d": "Run a read-only statement on a warehouse.", "risk": "medium", "eff": "read", "out": true, "fin": "spend" },
+   { "n": "describe_table", "d": "Read a table's columns and types.", "risk": "low", "eff": "read", "out": true, "fin": "none" }
+  ]
+ },
+ {
+  "id": "confluence",
+  "name": "Confluence",
+  "url": "https://mcp.confluence.a-intel.internal/mcp",
+  "publisher": "a-intel platform team",
+  "verified": false,
+  "transport": "streamable-http",
+  "cred": "api_key",
+  "downscope": "none available",
+  "fin": false,
+  "installs": 0,
+  "d": "The internal wiki. Its tools/list is the one the import dialog walks.",
+  "match": ["wiki", "confluence", "page", "space", "docs", "documentation", "runbook"],
+  "tools": [
+   { "n": "search_pages", "d": "Search pages the token can read.", "risk": "low", "eff": "read", "out": true, "fin": "none" },
+   { "n": "get_page", "d": "Read one page by id.", "risk": "low", "eff": "read", "out": true, "fin": "none" },
+   { "n": "delete_page", "d": "Delete a page and its children.", "risk": "high", "eff": "irreversible", "out": false, "fin": "none" }
+  ]
+ }
+]

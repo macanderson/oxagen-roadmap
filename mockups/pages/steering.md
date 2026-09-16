@@ -17,14 +17,16 @@ Published context records, proposals, and open Context PRs. A record becomes pub
 ## What is on the page
 
 **Header** — eyebrow “Workspace · <workspace name>”, h1 “Steering”.
-Actions: **Open a Context PR** (gold; opens the ctxpr dialog)
+Actions: **Write a context record** (gold; opens the record wizard: describe → kind → statement → checks → pull request)
 
 - **Tabs**: Records (N) · Proposals (N) · Context PRs (N).
 - **Records** — Published records as cards grouped by kind (chips: All · rule · constraint · procedure · fact · memory · preference; the six kinds of `context-record/v0.1`, icon + hue per kind, the statement always the headline); search, sort, pager. On disk: the `.oxagen/` tree (Stella symlinks into it). Delivery — three ways, all recorded.
 - **Proposals** — candidates that steer nothing until merged: each with its evidence and **Review**.
 - **Context PRs** — Pull request · Branch · Kind · State; the selected PR: body, Checks, What merge will do; **Merge pull request**.
 
-**Dialogs this page opens:** `ctxpr`, `review (proposal)`.
+**Dialogs this page opens:** `wz (record wizard)`, `ctxpr` (opened from a proposal, which already has its concern, kind and evidence), `review (proposal)`.
+
+Every published record card carries **Open**, which routes to `pages/record.md`. Every creation wizard is `DLG_EXT.wz`; its spec is `docs/creation-spec.md`.
 
 **Shell.** Sidebar (organization switcher, workspace switcher, Workspace nav: Fleet · Agent IAM · Tools · Skills · Steering · Spend; Organization nav: Organization · Billing · Audit; agent count · data plane · tier badge), top bar (breadcrumbs, ⌘K search-or-run, notifications with unread dot, account avatar → user menu: Account, Preferences, Security and sessions, Privacy and data, Switch theme, Sign out).
 
