@@ -4,7 +4,7 @@
 |---|---|
 | Route | `#/a-intel/core-platform/skills[/<tab>]` |
 | Scope | workspace |
-| Spec | not yet in `docs/2026-09-11-oxagen-mission-control-spec.md` — see `docs/w13-in-the-loop-scenario.md` (§ 2 needs one sentence distinguishing *running* a skill from *resolving* one) |
+| Spec | not yet in `docs/mission-control-spec.md` — see `docs/w13-in-the-loop-scenario.md` (§ 2 needs one sentence distinguishing *running* a skill from *resolving* one) |
 | Design | `mockups/src/engine.js` → `pSkills()`. The off-by-default gate is `skills-off.md`; the interjected run is `run-interjection.md`. |
 | States | loaded · empty · loading · error · access denied |
 | Storybook | `Mission Control / … / skills`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |

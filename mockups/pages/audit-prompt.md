@@ -14,8 +14,8 @@ against its design. The design is the spec. Be exact and adversarial; “close e
 
 1. `pages/index.html` — every page in every state, desktop and mobile; each row links the page’s spec (`<page>.md`) and its audit prompt (`<page>.audit-prompt.md`).
 2. `mockups/missioncontrol.html?product=1&state=loaded&mobile=0` (the whole design, desktop) and `…&mobile=1` (the whole design, mobile), or the Product stories in Storybook. Open them and navigate; everything on them is the design.
-3. `docs/2026-09-11-oxagen-mission-control-spec.md` §14 (Mission Control), §14.1 (surfaces), Appendix F (the pages that survive), Appendix A (target tables).
-4. `docs/2026-09-12-mission-control-app-implementation-plan.md` §3 (data mapping), §4.8 (page states), §4.10 (tabs as segments), §4.11 (session gate and Appendix F redirects).
+3. `docs/mission-control-spec.md` §14 (Mission Control), §14.1 (surfaces), Appendix F (the pages that survive), Appendix A (target tables).
+4. `docs/implementation-plan.md` §3 (data mapping), §4.8 (page states), §4.10 (tabs as segments), §4.11 (session gate and Appendix F redirects).
 
 ## Procedure
 

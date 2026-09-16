@@ -46,7 +46,7 @@ A person joining an organization someone else created sees who invited them, the
 
 ### 6. Name the organization
 
-The first of three gate steps after sign-up names the organization and its first workspace. The organization is the tenant: it owns its own graph database, encryption key, billing account and the namespace inside every agent key. Continuing provisions the tenant and moves to wrapping an agent. Mission Control stays locked until a first frame arrives, which is why these steps are a gate and have no app shell around them.
+The first of three gate steps after sign-up names the organization and its first workspace. The organization is the tenant: it owns its own encryption key, billing account, retention policy and the namespace inside every agent key. Continuing provisions the tenant and moves to wrapping an agent. Mission Control stays locked until a first frame arrives, which is why these steps are a gate and have no app shell around them.
 
 **Sources** · Prompt: [onboarding-organization.audit-prompt.md](../mockups/pages/onboarding-organization.audit-prompt.md), [W1 prompt](demo-mockup-prompts.md#w1-sixty-seconds-to-governed) · Spec: [§5.1 Tenancy, the model](mission-control-spec.md#51-the-model) · Plan: [Batch 1, lane L5](implementation-plan.md#batch-1-foundations-5-lanes-in-parallel) · Page: [Onboarding · Organization](../mockups/missioncontrol.html?product=1&state=loaded&mobile=0#/welcome/organization) ([mobile](../mockups/missioncontrol.html?product=1&state=loaded&mobile=1#/welcome/organization)), [onboarding-organization.md](../mockups/pages/onboarding-organization.md)
 
