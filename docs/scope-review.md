@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Applied on 2026-09-14 to the spec, the plan, the mockups and the page specs. Amended 2026-09-15: the maintainer kept the in-app agent (2026-09-14) and Neo4j through rev1 (2026-09-15), and GAU pricing is the one price list (2026-09-14, reaffirmed 2026-09-15) |
+| **Status** | Applied on 2026-09-14 to the spec, the plan, the mockups and the page specs. Amended 2026-09-15: the maintainer kept the in-app agent (2026-09-14) and Neo4j in the architecture (2026-09-15), and GAU pricing is the one price list (2026-09-14, reaffirmed 2026-09-15) |
 | **Date** | 2026-09-14 |
 | **Owner** | Mac Anderson |
 | **Source** | A product review of the Mission Control spec and the Witness spec against the oxagen repository, written for the council meeting of Wednesday 2026-09-16 |
@@ -20,7 +20,7 @@ The review's answer, applied in full:
 | **Keep** | Fleet, Run, Spend, and the toolbelt | The flight recorder, the money, and the reason security signs off. These work on day one with no configuration, which is the only thing that matters when the install is sixty seconds. |
 | **Move** | The proof to the front | It was scheduled last, at weeks 18 to 24. It is the most defensible idea in either document and the only one that makes an outside party depend on Oxagen's records. |
 
-The review also proposed cutting the in-app agent and Neo4j. The maintainer kept the in-app agent the same day (2026-09-14, "dont cut the in app agent"), and it opens as a flyout from the sidebar (2026-09-15). Neo4j stays through rev1, and its retirement ADR is written after the witness lane lands (2026-09-15).
+The review also proposed cutting the in-app agent and Neo4j. The maintainer kept the in-app agent the same day (2026-09-14, "dont cut the in app agent"), and it opens as a flyout from the sidebar (2026-09-15). Neo4j stays in the architecture, and there is no retirement ADR (2026-09-15).
 
 ## Surface by surface
 
@@ -70,7 +70,7 @@ The whole argument rests on assumptions the council can test in an hour. If an a
 | Cut | Spec | Plan | Mockups |
 |---|---|---|---|
 | In-app agent (kept, 2026-09-14) | §0 row 1, §1, §2, §4.4, §16 and App. A.10 state it in scope (2026-09-15) | the sidebar flyout is lane L3's (decision 9, 2026-09-15) | the sidebar launcher, the top-bar button, the panel, the ⌘K agent-tools group and the W11 assistant steps were removed on 2026-09-14; W11 is "the account" |
-| The ontology; Neo4j kept through rev1 (2026-09-15) | §0 rows 4 and 5, §4.1, §4.2, §5.3, §11, §13.3, App. B; §0 row 5 and §4.2 state Neo4j through rev1 | Neo4j lanes removed | "Graph isolation" is "Tenant isolation"; every store label reads Postgres |
+| The ontology; Neo4j kept (2026-09-15) | §0 rows 4 and 5, §4.1, §4.2, §5.3, §11, §13.3, App. B; §0 row 5 and §4.2 state what each store holds | Neo4j lanes removed | "Graph isolation" is "Tenant isolation"; every store label reads Postgres |
 | SSO and SCIM | §12.1 enterprise row, §14, App. A.1 | none | the SSO and SCIM panels and dialogs, the SSO column, the Okta copy |
 | Policy simulation | §6.12, §14, App. A.5, App. E | none | the simulation panel, the Activate dialog, the Simulate footer |
 | Assurance suite | §6.13, §14, App. F | none | the Assurance tabs on Tools and Audit, the suite dialogs, the assurance-gap incident |

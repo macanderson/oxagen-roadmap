@@ -140,7 +140,7 @@ main hr+h2{border-top:0;padding-top:0;margin-top:0}
 <header class="mast">
   <p class="eyebrow">Oxagen · Specification</p>
   <h1>Oxagen Mission Control: Product and Technical Specification</h1>
-  <dl class="facts"><dt>Status</dt><dd>Draft for review</dd><dt>Date</dt><dd>2026-09-11</dd><dt>Owner</dt><dd>Mac Anderson</dd><dt>Supersedes</dt><dd>The <code>oxagen-platform</code> and <code>oxagen</code> codebases as products. Carries forward the designs named in §16.</dd><dt>Builds on</dt><dd>Context Graph Protocol <code>contextgraph/1.0</code> and the <code>contextgraph/lifecycle/1.0-draft</code> profile (repo at <code>origin/main</code>, ADRs 0001 to 0018). Stella's context-record and Context PR corpus. Oxagen ADR-024, 025, 042, 043, 051, 052, 053 and the current wrapper spec (in the repo today under <code>docs/specs/tacho/</code>, renamed here).</dd><dt>Amended</dt><dd>2026-09-14, by the scope review (<code>scope-review.md</code>) and the definition of done (<code>dod-spec.md</code>). The ontology engine, SSO and SCIM, policy simulation, the assurance suite, two-person mandates, steering effect metrics and retirement, legal holds, crypto-shredding and provider reconciliation are out. The definition of done (§8.6) is in. The review also proposed cutting the in-app agent and Neo4j and pricing the proven run. The maintainer kept the in-app agent (2026-09-14, &quot;dont cut the in app agent&quot;; its shell is the sidebar flyout, 2026-09-15), kept Neo4j through rev1 (2026-09-15), and set governed action units as the one price list (2026-09-14, reaffirmed 2026-09-15). §12.1 carries that price list, the GAU billing of Oxagen ADR-055 (2026-09-13), beside the usage-credit meter for in-app AI usage (two meters, 2026-09-15); proven spend is a report figure. Sections carry each change in place.</dd><dt>Decided</dt><dd>2026-09-15, maintainer decisions (§20): billing (credit packs, negotiated enterprise with every feature on for every tier, invoice billing, the Build and Scale upgrade, suspension), the approvals strip on Run, the shell's sidebar flyout, Halt and Cancel on ledger-ingested runs, the create-workspace form and the Spend lane, API key rotation in rev1, Neo4j through rev1, GAU pricing reaffirmed as the governed-action price list, and pricing on two meters: governed actions in GAUs and in-app AI usage in usage credits. Each section carries its change in place with the date.</dd></dl>
+  <dl class="facts"><dt>Status</dt><dd>Draft for review</dd><dt>Date</dt><dd>2026-09-11</dd><dt>Owner</dt><dd>Mac Anderson</dd><dt>Supersedes</dt><dd>The <code>oxagen-platform</code> and <code>oxagen</code> codebases as products. Carries forward the designs named in §16.</dd><dt>Builds on</dt><dd>Context Graph Protocol <code>contextgraph/1.0</code> and the <code>contextgraph/lifecycle/1.0-draft</code> profile (repo at <code>origin/main</code>, ADRs 0001 to 0018). Stella's context-record and Context PR corpus. Oxagen ADR-024, 025, 042, 043, 051, 052, 053 and the current wrapper spec (in the repo today under <code>docs/specs/tacho/</code>, renamed here).</dd><dt>Amended</dt><dd>2026-09-14, by the scope review (<code>scope-review.md</code>) and the definition of done (<code>dod-spec.md</code>). The ontology engine, SSO and SCIM, policy simulation, the assurance suite, two-person mandates, steering effect metrics and retirement, legal holds, crypto-shredding and provider reconciliation are out. The definition of done (§8.6) is in. The review also proposed cutting the in-app agent and Neo4j and pricing the proven run. The maintainer kept the in-app agent (2026-09-14, &quot;dont cut the in app agent&quot;; its shell is the sidebar flyout, 2026-09-15), kept Neo4j in the architecture (2026-09-15), and set governed action units as the one price list (2026-09-14, reaffirmed 2026-09-15). §12.1 carries that price list, the GAU billing of Oxagen ADR-055 (2026-09-13), beside the usage-credit meter for in-app AI usage (two meters, 2026-09-15); proven spend is a report figure. Sections carry each change in place.</dd><dt>Decided</dt><dd>2026-09-15, maintainer decisions (§20): billing (credit packs, negotiated enterprise with every feature on for every tier, invoice billing, the Build and Scale upgrade, suspension), the approvals strip on Run, the shell's sidebar flyout, Halt and Cancel on ledger-ingested runs, the create-workspace form and the Spend lane, API key rotation in rev1, Neo4j staying in the architecture, GAU pricing reaffirmed as the governed-action price list, and pricing on two meters: governed actions in GAUs and in-app AI usage in usage credits. Each section carries its change in place with the date.</dd></dl>
 </header>
 <div class="grid">
 <nav class="toc" aria-label="Contents of this document"><p>Contents</p><ol><li><a href="#spec/0-the-call-sheet">0. The call sheet</a></li><li><a href="#spec/1-why-this-product-in-one-page">1. Why this product, in one page</a></li><li><a href="#spec/2-scope">2. Scope</a></li><li><a href="#spec/3-vocabulary">3. Vocabulary</a></li><li><a href="#spec/4-architecture">4. Architecture</a></li><li><a href="#spec/5-tenancy-and-isolation">5. Tenancy and isolation</a></li><li><a href="#spec/6-identity-access-and-the-toolbelt">6. Identity, access, and the toolbelt</a></li><li><a href="#spec/7-the-gateway-and-intervention">7. The gateway and intervention</a></li><li><a href="#spec/8-runs-and-frames">8. Runs and frames</a></li><li><a href="#spec/9-context-records-how-agents-learn">9. Context records: how agents learn</a></li><li><a href="#spec/10-the-repository-steering-and-context-prs">10. The repository, steering, and Context PRs</a></li><li><a href="#spec/11-the-code-graph">11. The code graph</a></li><li><a href="#spec/12-cost-accounted-to-the-token-attributed-to-the-operator-charged-on-two-meters">12. Cost: accounted to the token, attributed to the operator, charged on two meters</a></li><li><a href="#spec/13-audit-retention-and-the-fidelity-call">13. Audit, retention, and the fidelity call</a></li><li><a href="#spec/14-mission-control">14. Mission Control</a></li><li><a href="#spec/15-non-functional-requirements">15. Non-functional requirements</a></li><li><a href="#spec/16-carry-over-leave-behind">16. Carry over, leave behind</a></li><li><a href="#spec/17-delivery-plan">17. Delivery plan</a></li><li><a href="#spec/18-risks-and-open-decisions">18. Risks and open decisions</a></li><li><a href="#spec/19-demo-wow-scenarios">19. Demo Wow! Scenarios</a></li><li><a href="#spec/20-maintainer-decisions-of-2026-09-15">20. Maintainer decisions of 2026-09-15</a></li><li><a href="#spec/appendix-a-postgres-tables-target">Appendix A. Postgres tables (target)</a></li><li><a href="#spec/appendix-b-the-run-record-and-code-graph-postgres">Appendix B. The run record and code graph (Postgres)</a></li><li><a href="#spec/appendix-c-frame-envelope-gateway-kind-example">Appendix C. Frame envelope (gateway kind example)</a></li><li><a href="#spec/appendix-d-tool-grant-example">Appendix D. Tool grant example</a></li><li><a href="#spec/appendix-e-the-agent-tools-that-survive">Appendix E. The agent tools that survive</a></li><li><a href="#spec/appendix-f-the-pages-that-survive">Appendix F. The pages that survive</a></li></ol></nav>
@@ -173,12 +173,12 @@ main hr+h2{border-top:0;padding-top:0;margin-top:0}
 </tr>
 <tr>
 <td>4</td>
-<td>The run record, context records and the code graph live in Postgres beside the control ledger, under the same row-level security. In the target there is no second datastore and no graph engine (row 5).</td>
+<td>The run record, context records and the code graph live in Postgres beside the control ledger, under the same row-level security. Neo4j stays in the architecture and holds the ontology graph; no Mission Control surface reads or writes it (row 5).</td>
 <td>§5.3</td>
 </tr>
 <tr>
 <td>5</td>
-<td>The target has two stores. Postgres holds the control ledger, the run record, the records and the code graph. Object storage with write-once retention holds frame bodies and the archive. Write-once means a stored object cannot be changed after it is written. ClickHouse is retired. Neo4j stays through rev1; its retirement ADR is written after the witness lane lands, and the two-store set holds from that retirement (2026-09-15, maintainer decision, §20).</td>
+<td>Mission Control writes two stores. Postgres holds the control ledger, the run record, the records and the code graph. Object storage with write-once retention holds frame bodies and the archive. Write-once means a stored object cannot be changed after it is written. ClickHouse is retired. Neo4j stays in the architecture and holds the ontology graph of the platform as it runs today; there is no retirement ADR and no migration off it (2026-09-15, maintainer decision, §20).</td>
 <td>§4</td>
 </tr>
 <tr>
@@ -238,7 +238,7 @@ main hr+h2{border-top:0;padding-top:0;margin-top:0}
 </tr>
 <tr>
 <td>17</td>
-<td>The maintainer decisions of 2026-09-15 bind billing, approvals, the shell, intervention on ledger-ingested runs, Neo4j through rev1, and the rev1 scope of Organization, Spend and API keys. A sentence above that one of them changes carries a dated note.</td>
+<td>The maintainer decisions of 2026-09-15 bind billing, approvals, the shell, intervention on ledger-ingested runs, Neo4j staying in the architecture, and the rev1 scope of Organization, Spend and API keys. A sentence above that one of them changes carries a dated note.</td>
 <td>§20</td>
 </tr>
 </tbody>
@@ -279,7 +279,7 @@ main hr+h2{border-top:0;padding-top:0;margin-top:0}
 <li>Marketplace, installable plugins, reseller billing, A2A federation (agent-to-agent, where agents from different systems work together), and mobile parity (a mobile app that matches the full product).</li>
 <li>Workflows and playbooks. Automations. Chat as a product interface.</li>
 <li>Connectors beyond GitHub. There is no connector SDK in v1.</li>
-<li>Cut by the scope review of 2026-09-14, and not on the roadmap: the ontology engine, SSO and SCIM, policy simulation against history, the published assurance suite, two-person mandates, steering effect metrics and retirement candidates, legal holds, crypto-shredding, and provider reconciliation to the cent. Each is a Series A question a customer has to ask for. The review also listed the in-app agent and Neo4j. The in-app agent is in scope (2026-09-14 and 2026-09-15, maintainer decisions, §4.4). Neo4j stays through rev1 and is retired by an ADR after the witness lane (2026-09-15, §4.2).</li>
+<li>Cut by the scope review of 2026-09-14, and not on the roadmap: the ontology engine, SSO and SCIM, policy simulation against history, the published assurance suite, two-person mandates, steering effect metrics and retirement candidates, legal holds, crypto-shredding, and provider reconciliation to the cent. Each is a Series A question a customer has to ask for. The review also listed the in-app agent and Neo4j. The in-app agent is in scope (2026-09-14 and 2026-09-15, maintainer decisions, §4.4). Neo4j stays in the architecture (2026-09-15, §4.2).</li>
 </ul>
 <h3 id="spec/2-3-non-goals-stated-so-they-stay-out">2.3 Non-goals stated so they stay out</h3>
 <ul>
@@ -439,7 +439,7 @@ main hr+h2{border-top:0;padding-top:0;margin-top:0}
 <li><strong>DoD settle.</strong> The one service with an opinion about done. It registers locked sets, keeps the hidden checks, re-runs <code>decide()</code> on submitted evidence, binds the outcome to the sealed attempt, signs the certificate and records the governed action <code>dod.held</code> (§8.6). It executes nothing.</li>
 <li><strong>Model layer.</strong> The one path for every model call Oxagen makes on its own behalf (the reflector, the promoter, the dod drafter, and the run namer). Calls route by tier through OpenRouter (§4.5), a service that forwards model calls to many vendors. Customer agents' model calls go through the model proxy, not this layer.</li>
 </ul>
-<h3 id="spec/4-2-the-two-stores-and-what-belongs-where">4.2 The two stores and what belongs where</h3>
+<h3 id="spec/4-2-the-stores-and-what-belongs-where">4.2 The stores and what belongs where</h3>
 <div class="tw"><table>
 <thead>
 <tr>
@@ -458,6 +458,11 @@ main hr+h2{border-top:0;padding-top:0;margin-top:0}
 <td><strong>Object storage</strong> (write-once, per-org key)</td>
 <td>Frame bodies (prompts, completions, tool input and output), archive segments, exports</td>
 <td>Anything queried directly</td>
+</tr>
+<tr>
+<td><strong>Neo4j</strong> (the platform as it runs today)</td>
+<td>The ontology graph: the entities and relationships inferred from ingested data, and the Cypher surface over them</td>
+<td>The run record, the context records, the code graph, frame bodies</td>
 </tr>
 <tr>
 <td><strong>GitHub repository</strong> (per workspace)</td>
@@ -511,7 +516,7 @@ main hr+h2{border-top:0;padding-top:0;margin-top:0}
 </tbody>
 </table></div>
 <p>Platform engineers call this pattern GitOps: the desired state lives in git, a controller reconciles the live system to it, and drift is detected and reported. Oxagen is the controller. Steering and definitions are the desired state. The record and the wrapped agents are the live system.</p>
-<p>The target retires Neo4j with the ontology engine. Neo4j stays through rev1, and its retirement ADR is written after the witness lane lands (2026-09-15, maintainer decision, §20). The run record was the reason a second datastore existed once the ontology went; it is a set of narrow tables with a hot window, and Postgres carries it at the wedge's volume with room to spare (§15). ClickHouse is retired too. Its two jobs, append-only trace rows and spend analytics, are covered by frame rows (for the hot window) plus rollups. One store of truth for the run record, with no mirror copy to keep in sync.</p>
+<p>Neo4j stays in the architecture (2026-09-15, maintainer decision, §20). It holds the ontology graph of the platform as it runs today. The ontology engine does not ship in Mission Control (§11), so no Mission Control surface reads or writes Neo4j, and there is no retirement ADR and no migration off it. The run record, the context records and the code graph are Postgres tables: the run record is a set of narrow tables with a hot window, and Postgres carries it at the wedge's volume with room to spare (§15). ClickHouse is retired too. Its two jobs, append-only trace rows and spend analytics, are covered by frame rows (for the hot window) plus rollups. One store of truth for the run record, with no mirror copy to keep in sync.</p>
 <h3 id="spec/4-3-language-and-runtime">4.3 Language and runtime</h3>
 <p>TypeScript on Node runs the control plane (the part that sets and enforces rules), the gateway, the services, and the UI. Hono handles HTTP and Drizzle handles Postgres access. The official <code>@contextgraphprotocol/typescript-sdk</code> is the source of protocol types (ADR-036). An SDK is a software development kit, a library that developers build on. Zod schemas remain the runtime validators at the trust boundary (the point where outside input enters the system). They are compile-checked against the SDK types. Rust stays in Stella and the protocol crates (Rust packages). Stella is deployed as a service, never embedded. The gateway's hot path is streaming pass-through. A Node process adds well under thirty milliseconds at the median for a proxied model call, which is the budget in §15.</p>
 <h3 id="spec/4-4-onboarding-and-oxagen-s-own-model-calls">4.4 Onboarding, and Oxagen's own model calls</h3>
@@ -605,7 +610,7 @@ create policy system_access on wrk.agents
 <li><strong>Dedicated data planes.</strong> A dedicated Postgres data plane holds tenant data only. Identity, IAM, billing, and the price book stay on the shared data plane (ADR-042). The resolver is the only place that reads a connection string.</li>
 </ol>
 <h3 id="spec/5-3-the-run-record-and-the-code-graph-in-postgres">5.3 The run record and the code graph in Postgres</h3>
-<p>The run record (runs, attempts, frames, seals), the context records and the code graph are tenant tables in Postgres under the same row-level security as the control ledger (§5.2). There is no second engine to isolate. Every row carries <code>org_id</code> and <code>ws</code>; the kernel is the only writer, and a write that omits either is refused before it reaches the database. Cross-tenant reads are refused by the database, not by application code, and the startup guard (no superuser, no <code>BYPASSRLS</code>, RLS never off) applies to the whole plane.</p>
+<p>The run record (runs, attempts, frames, seals), the context records and the code graph are tenant tables in Postgres under the same row-level security as the control ledger (§5.2). Neo4j holds none of them (§4.2), so these tables have no second engine to isolate. Every row carries <code>org_id</code> and <code>ws</code>; the kernel is the only writer, and a write that omits either is refused before it reaches the database. Cross-tenant reads are refused by the database, not by application code, and the startup guard (no superuser, no <code>BYPASSRLS</code>, RLS never off) applies to the whole plane.</p>
 <p>Frames are the volume. They live in a hot table for the retention window (§13.3), partitioned by month, and compact into the archive segment after it. A run's rollups (frame count, cost, tier, gaps) are columns on the run row. The code graph (<code>File</code>, <code>Symbol</code> and their edges, §11) is a set of ordinary tables keyed by repository and commit. Platform catalogs (price books, tool schemas, connector definitions) are platform tables, never tenant rows, so a tenant partition never contains another tenant's data, by construction.</p>
 <p>A dedicated data plane (§4.6) is a dedicated Postgres cluster and object-storage bucket. Identity, IAM, billing and the price book stay on the shared plane.</p>
 <h3 id="spec/5-4-keys">5.4 Keys</h3>
@@ -1437,7 +1442,7 @@ sandbox = &quot;read-only&quot;
 </ul>
 <hr />
 <h2 id="spec/11-the-code-graph">11. The code graph</h2>
-<p>Earlier drafts of this specification described a dynamic, customer-extensible ontology inferred from ingested data, browsable and queryable in plain English, stored in Neo4j. It does not ship. Neo4j, the datastore it needed, stays through rev1 and is retired by an ADR after the witness lane (§4.2). What remains is the part the witness author reads and the toolbelt policy cites: a fixed, built-in graph of each workspace's main repository, kept in Postgres and kept current by the GitHub App.</p>
+<p>Earlier drafts of this specification described a dynamic, customer-extensible ontology inferred from ingested data, browsable and queryable in plain English, stored in Neo4j. It does not ship. Neo4j, the datastore it needed, stays in the architecture and keeps that graph (§4.2). What remains in Mission Control is the part the witness author reads and the toolbelt policy cites: a fixed, built-in graph of each workspace's main repository, kept in Postgres and kept current by the GitHub App.</p>
 <h3 id="spec/11-1-what-the-graph-holds">11.1 What the graph holds</h3>
 <div class="tw"><table>
 <thead>
@@ -2113,7 +2118,7 @@ sandbox = &quot;read-only&quot;
 </tr>
 <tr>
 <td>Isolation</td>
-<td>Neither store can express a query that crosses organizations. A nightly cross-tenant probe on both stores verifies this</td>
+<td>No store can express a query that crosses organizations. A nightly cross-tenant probe on every store verifies this</td>
 </tr>
 <tr>
 <td>Security</td>
@@ -2638,7 +2643,7 @@ sandbox = &quot;read-only&quot;
 </tr>
 <tr>
 <td>15</td>
-<td>Neo4j stays through rev1; the retirement ADR is written after the witness lane lands. §0 row 5 and §4.2 state the store set through rev1 and after that retirement.</td>
+<td>Neo4j stays in the architecture. There is no retirement ADR and no removal work. §0 row 5 and §4.2 state what each store holds.</td>
 <td>§0 row 5, §2.2, §4.2, §11, <code>macanderson/oxagen</code></td>
 </tr>
 <tr>
@@ -5385,7 +5390,7 @@ sandbox = &quot;read-only&quot;
 <tbody>
 <tr>
 <td><code>agent.agent_runs*</code>, <code>agent.agent_executions*</code>, <code>tacho_*</code>, every ClickHouse table</td>
-<td>graph nodes (<code>:Run</code>, <code>:Attempt</code>, <code>:Frame</code>) and archive segments</td>
+<td><code>run.runs</code>, <code>run.attempts</code>, <code>run.frames</code> and <code>run.seals</code> (App. B), and archive segments</td>
 </tr>
 <tr>
 <td><code>iam.authorization_decisions</code></td>
@@ -5409,7 +5414,7 @@ sandbox = &quot;read-only&quot;
 </tr>
 <tr>
 <td><code>ingestion.*</code> cursors and health</td>
-<td>columns on <code>wrk.repositories</code> and <code>tools.tool_servers</code>, and <code>:Source</code> nodes</td>
+<td>columns on <code>wrk.repositories</code> and <code>tools.tool_servers</code></td>
 </tr>
 <tr>
 <td><code>chat.conversations</code>, <code>chat.messages</code></td>
@@ -5520,7 +5525,7 @@ sandbox = &quot;read-only&quot;
 </table></div>
 <p>Index <code>(org_id, run)</code>. A HELD certificate records the governed action <code>dod.held</code>; a PENDING one records it on signature. <code>dod.held</code> is not billable (§12.1).</p>
 <h2 id="spec/appendix-b-the-run-record-and-code-graph-postgres">Appendix B. The run record and code graph (Postgres)</h2>
-<p>Appendix B once described the Neo4j model. The same shapes are Postgres tables now, under the schemas <code>run</code>, <code>ctx</code> and <code>code</code>, each with <code>org_id</code> and <code>ws</code> and the RLS policy of A.0.</p>
+<p>Appendix B once described these shapes in the Neo4j model. They are Postgres tables now, under the schemas <code>run</code>, <code>ctx</code> and <code>code</code>, each with <code>org_id</code> and <code>ws</code> and the RLS policy of A.0. Neo4j stays in the architecture and holds the ontology graph (§4.2), which is none of these tables.</p>
 <div class="tw"><table>
 <thead>
 <tr>
@@ -7795,7 +7800,7 @@ pnpm --filter @oxagen/desktop dev          # tauri dev over Vite on :1420
 <header class="mast">
   <p class="eyebrow">Oxagen · Plan</p>
   <h1>Oxagen Mission Control app: implementation plan</h1>
-  <dl class="facts"><dt>Status</dt><dd>Draft</dd><dt>Date</dt><dd>2026-09-12</dd><dt>Owner</dt><dd>Mac Anderson</dd><dt>Builds</dt><dd>a new <code>apps/app</code> (<code>@oxagen/app</code>) in <code>~/Projects/oxagen</code>; today's app moves to <code>apps/app_deprecated</code> (<code>@oxagen/app-deprecated</code>)</dd><dt>Source</dt><dd><code>mission-control-spec.md</code> (§3, §4, §8.6, §14, §15, §19, App. A, B, F) · the mockups in this repository: <code>mockups/missioncontrol.html</code> built from <code>mockups/src</code> and <code>mockups/fixtures</code>, catalogued by Storybook (<code>npm run storybook</code>), every page's spec in <code>mockups/pages/&lt;page&gt;.md</code> · <code>docs/feedback-mockups.md</code> · the repo at <code>origin/main</code></dd><dt>Amended</dt><dd>2026-09-14, by the scope review (<code>scope-review.md</code>): SSO and SCIM, policy simulation, the assurance suite, two-person mandates, steering effect and retirement, legal holds, erasure and reconciliation are out of every lane; the definition of done (<code>dod-spec.md</code>) is in. The in-app agent stays in scope (2026-09-14, maintainer decision), and its sidebar flyout is lane L3's (decision 9, 2026-09-15). Neo4j stays through rev1 (2026-09-15). Billing charges on two meters (spec §12.1; 2026-09-15): governed action units on one price list (2026-09-14, reaffirmed 2026-09-15), and usage credits for in-app AI usage. Rows below carry the change in place.</dd><dt>Decided</dt><dd>2026-09-15, maintainer decisions (spec §20). §0.1 lists the lanes each one binds.</dd><dt>Optimised for</dt><dd>parallel agents: every lane owns a disjoint set of paths, and every batch lists what it waits on</dd></dl>
+  <dl class="facts"><dt>Status</dt><dd>Draft</dd><dt>Date</dt><dd>2026-09-12</dd><dt>Owner</dt><dd>Mac Anderson</dd><dt>Builds</dt><dd>a new <code>apps/app</code> (<code>@oxagen/app</code>) in <code>~/Projects/oxagen</code>; today's app moves to <code>apps/app_deprecated</code> (<code>@oxagen/app-deprecated</code>)</dd><dt>Source</dt><dd><code>mission-control-spec.md</code> (§3, §4, §8.6, §14, §15, §19, App. A, B, F) · the mockups in this repository: <code>mockups/missioncontrol.html</code> built from <code>mockups/src</code> and <code>mockups/fixtures</code>, catalogued by Storybook (<code>npm run storybook</code>), every page's spec in <code>mockups/pages/&lt;page&gt;.md</code> · <code>docs/feedback-mockups.md</code> · the repo at <code>origin/main</code></dd><dt>Amended</dt><dd>2026-09-14, by the scope review (<code>scope-review.md</code>): SSO and SCIM, policy simulation, the assurance suite, two-person mandates, steering effect and retirement, legal holds, erasure and reconciliation are out of every lane; the definition of done (<code>dod-spec.md</code>) is in. The in-app agent stays in scope (2026-09-14, maintainer decision), and its sidebar flyout is lane L3's (decision 9, 2026-09-15). Neo4j stays in the architecture (2026-09-15). Billing charges on two meters (spec §12.1; 2026-09-15): governed action units on one price list (2026-09-14, reaffirmed 2026-09-15), and usage credits for in-app AI usage. Rows below carry the change in place.</dd><dt>Decided</dt><dd>2026-09-15, maintainer decisions (spec §20). §0.1 lists the lanes each one binds.</dd><dt>Optimised for</dt><dd>parallel agents: every lane owns a disjoint set of paths, and every batch lists what it waits on</dd></dl>
 </header>
 <div class="grid">
 <nav class="toc" aria-label="Contents of this document"><p>Contents</p><ol><li><a href="#plan/0-decisions-in-one-place">0. Decisions in one place</a></li><li><a href="#plan/1-toolchain-latest-stable-verified-against-npm-on-2026-09-12">1. Toolchain: latest stable, verified against npm on 2026-09-12</a></li><li><a href="#plan/2-evaluation-the-wireframes">2. Evaluation: the wireframes</a></li><li><a href="#plan/3-evaluation-the-data-mapping">3. Evaluation: the data mapping</a></li><li><a href="#plan/4-architecture-of-the-new-apps-app">4. Architecture of the new <code>apps/app</code></a></li><li><a href="#plan/5-batches-parallel-lanes">5. Batches: parallel lanes</a></li><li><a href="#plan/6-open-decisions-each-blocks-a-named-lane-and-each-has-a-recommendation">6. Open decisions (each blocks a named lane, and each has a recommendation)</a></li><li><a href="#plan/7-lane-prompt-template">7. Lane prompt template</a></li></ol></nav>
@@ -9830,7 +9835,7 @@ stories for new components; PR body lists each §3 row you touched with its stat
 <header class="mast">
   <p class="eyebrow">Oxagen · Decision record</p>
   <h1>Oxagen Mission Control: the scope review, and what it changed</h1>
-  <dl class="facts"><dt>Status</dt><dd>Applied on 2026-09-14 to the spec, the plan, the mockups and the page specs. Amended 2026-09-15: the maintainer kept the in-app agent (2026-09-14) and Neo4j through rev1 (2026-09-15), and GAU pricing is the one price list (2026-09-14, reaffirmed 2026-09-15)</dd><dt>Date</dt><dd>2026-09-14</dd><dt>Owner</dt><dd>Mac Anderson</dd><dt>Source</dt><dd>A product review of the Mission Control spec and the Witness spec against the oxagen repository, written for the council meeting of Wednesday 2026-09-16</dd><dt>Related</dt><dd><code>mission-control-spec.md</code>, <code>implementation-plan.md</code>, <code>dod-spec.md</code></dd></dl>
+  <dl class="facts"><dt>Status</dt><dd>Applied on 2026-09-14 to the spec, the plan, the mockups and the page specs. Amended 2026-09-15: the maintainer kept the in-app agent (2026-09-14) and Neo4j in the architecture (2026-09-15), and GAU pricing is the one price list (2026-09-14, reaffirmed 2026-09-15)</dd><dt>Date</dt><dd>2026-09-14</dd><dt>Owner</dt><dd>Mac Anderson</dd><dt>Source</dt><dd>A product review of the Mission Control spec and the Witness spec against the oxagen repository, written for the council meeting of Wednesday 2026-09-16</dd><dt>Related</dt><dd><code>mission-control-spec.md</code>, <code>implementation-plan.md</code>, <code>dod-spec.md</code></dd></dl>
 </header>
 <div class="grid">
 <nav class="toc" aria-label="Contents of this document"><p>Contents</p><ol><li><a href="#scope/the-call">The call</a></li><li><a href="#scope/surface-by-surface">Surface by surface</a></li><li><a href="#scope/the-sequence">The sequence</a></li><li><a href="#scope/the-price-list">The price list</a></li><li><a href="#scope/two-documents-one-company">Two documents, one company</a></li><li><a href="#scope/three-questions-for-wednesday">Three questions for Wednesday</a></li><li><a href="#scope/where-each-cut-landed">Where each cut landed</a></li></ol></nav>
@@ -9864,7 +9869,7 @@ stories for new components; PR body lists each §3 row you touched with its stat
 </tr>
 </tbody>
 </table></div>
-<p>The review also proposed cutting the in-app agent and Neo4j. The maintainer kept the in-app agent the same day (2026-09-14, &quot;dont cut the in app agent&quot;), and it opens as a flyout from the sidebar (2026-09-15). Neo4j stays through rev1, and its retirement ADR is written after the witness lane lands (2026-09-15).</p>
+<p>The review also proposed cutting the in-app agent and Neo4j. The maintainer kept the in-app agent the same day (2026-09-14, &quot;dont cut the in app agent&quot;), and it opens as a flyout from the sidebar (2026-09-15). Neo4j stays in the architecture, and there is no retirement ADR (2026-09-15).</p>
 <h2 id="scope/surface-by-surface">Surface by surface</h2>
 <p>Each row asks the same four questions: who buys because of it, does it work before the customer configures anything, how long it takes, and what it costs to carry.</p>
 <div class="tw"><table>
@@ -9987,8 +9992,8 @@ stories for new components; PR body lists each §3 row you touched with its stat
 <td>the sidebar launcher, the top-bar button, the panel, the ⌘K agent-tools group and the W11 assistant steps were removed on 2026-09-14; W11 is &quot;the account&quot;</td>
 </tr>
 <tr>
-<td>The ontology; Neo4j kept through rev1 (2026-09-15)</td>
-<td>§0 rows 4 and 5, §4.1, §4.2, §5.3, §11, §13.3, App. B; §0 row 5 and §4.2 state Neo4j through rev1</td>
+<td>The ontology; Neo4j kept (2026-09-15)</td>
+<td>§0 rows 4 and 5, §4.1, §4.2, §5.3, §11, §13.3, App. B; §0 row 5 and §4.2 state what each store holds</td>
 <td>Neo4j lanes removed</td>
 <td>&quot;Graph isolation&quot; is &quot;Tenant isolation&quot;; every store label reads Postgres</td>
 </tr>

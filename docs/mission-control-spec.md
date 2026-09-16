@@ -7,8 +7,8 @@
 | **Owner** | Mac Anderson |
 | **Supersedes** | The `oxagen-platform` and `oxagen` codebases as products. Carries forward the designs named in §16. |
 | **Builds on** | Context Graph Protocol `contextgraph/1.0` and the `contextgraph/lifecycle/1.0-draft` profile (repo at `origin/main`, ADRs 0001 to 0018). Stella's context-record and Context PR corpus. Oxagen ADR-024, 025, 042, 043, 051, 052, 053 and the current wrapper spec (in the repo today under `docs/specs/tacho/`, renamed here). |
-| **Amended** | 2026-09-14, by the scope review (`scope-review.md`) and the definition of done (`dod-spec.md`). The ontology engine, SSO and SCIM, policy simulation, the assurance suite, two-person mandates, steering effect metrics and retirement, legal holds, crypto-shredding and provider reconciliation are out. The definition of done (§8.6) is in. The review also proposed cutting the in-app agent and Neo4j and pricing the proven run. The maintainer kept the in-app agent (2026-09-14, "dont cut the in app agent"; its shell is the sidebar flyout, 2026-09-15), kept Neo4j through rev1 (2026-09-15), and set governed action units as the one price list (2026-09-14, reaffirmed 2026-09-15). §12.1 carries that price list, the GAU billing of Oxagen ADR-055 (2026-09-13), beside the usage-credit meter for in-app AI usage (two meters, 2026-09-15); proven spend is a report figure. Sections carry each change in place. |
-| **Decided** | 2026-09-15, maintainer decisions (§20): billing (credit packs, negotiated enterprise with every feature on for every tier, invoice billing, the Build and Scale upgrade, suspension), the approvals strip on Run, the shell's sidebar flyout, Halt and Cancel on ledger-ingested runs, the create-workspace form and the Spend lane, API key rotation in rev1, Neo4j through rev1, GAU pricing reaffirmed as the governed-action price list, and pricing on two meters: governed actions in GAUs and in-app AI usage in usage credits. Each section carries its change in place with the date. |
+| **Amended** | 2026-09-14, by the scope review (`scope-review.md`) and the definition of done (`dod-spec.md`). The ontology engine, SSO and SCIM, policy simulation, the assurance suite, two-person mandates, steering effect metrics and retirement, legal holds, crypto-shredding and provider reconciliation are out. The definition of done (§8.6) is in. The review also proposed cutting the in-app agent and Neo4j and pricing the proven run. The maintainer kept the in-app agent (2026-09-14, "dont cut the in app agent"; its shell is the sidebar flyout, 2026-09-15), kept Neo4j in the architecture (2026-09-15), and set governed action units as the one price list (2026-09-14, reaffirmed 2026-09-15). §12.1 carries that price list, the GAU billing of Oxagen ADR-055 (2026-09-13), beside the usage-credit meter for in-app AI usage (two meters, 2026-09-15); proven spend is a report figure. Sections carry each change in place. |
+| **Decided** | 2026-09-15, maintainer decisions (§20): billing (credit packs, negotiated enterprise with every feature on for every tier, invoice billing, the Build and Scale upgrade, suspension), the approvals strip on Run, the shell's sidebar flyout, Halt and Cancel on ledger-ingested runs, the create-workspace form and the Spend lane, API key rotation in rev1, Neo4j staying in the architecture, GAU pricing reaffirmed as the governed-action price list, and pricing on two meters: governed actions in GAUs and in-app AI usage in usage credits. Each section carries its change in place with the date. |
 
 ---
 
@@ -21,8 +21,8 @@ This table lists every decision that shapes the rest of the document, in one pla
 | 1 | A build from scratch. One control plane, one language (TypeScript), one kernel. A control plane is the one system that sets and enforces the rules for every agent. Onboarding is three screens, configuration is the same agent tools a person clicks, and explanation is the record itself. The in-app agent is in scope: it opens as a flyout from the sidebar, acts through those same agent tools, and its model calls are metered in usage credits, funded by the $5 signup grant and topped up with credit packs (§4.4, §12.1). Model access for Oxagen's own work (reflection, promotion rationale, Context PR bodies, run names and summaries) goes through **OpenRouter**, routed by tier (§4.5). | §4 |
 | 2 | The organization is the tenant and the hard isolation boundary. A tenant is one customer whose data stays fully separate from every other customer's data. A workspace is a governance partition inside the organization: a section with its own rules, approvals, and ownership. This is the same model as today, with fewer tables. | §5 |
 | 3 | Postgres tenant isolation uses Row-Level Security (RLS). RLS is a database feature that filters every row by rules tied to settings on the current transaction. There is **no bypass setting**. System access uses a separate database role with its own policy. | §5.2 |
-| 4 | The run record, context records and the code graph live in Postgres beside the control ledger, under the same row-level security. In the target there is no second datastore and no graph engine (row 5). | §5.3 |
-| 5 | The target has two stores. Postgres holds the control ledger, the run record, the records and the code graph. Object storage with write-once retention holds frame bodies and the archive. Write-once means a stored object cannot be changed after it is written. ClickHouse is retired. Neo4j stays through rev1; its retirement ADR is written after the witness lane lands, and the two-store set holds from that retirement (2026-09-15, maintainer decision, §20). | §4 |
+| 4 | The run record, context records and the code graph live in Postgres beside the control ledger, under the same row-level security. Neo4j stays in the architecture and holds the ontology graph; no Mission Control surface reads or writes it (row 5). | §5.3 |
+| 5 | Mission Control writes two stores. Postgres holds the control ledger, the run record, the records and the code graph. Object storage with write-once retention holds frame bodies and the archive. Write-once means a stored object cannot be changed after it is written. ClickHouse is retired. Neo4j stays in the architecture and holds the ontology graph of the platform as it runs today; there is no retirement ADR and no migration off it (2026-09-15, maintainer decision, §20). | §4 |
 | 6 | Every wrapped agent passes through at least one of two gateway points where the agent connects to Oxagen: the **model proxy** and the **tool gateway**. Hooks and SDK adapters (the wrapper) add finer control. An SDK is a software development kit, the code library an agent is built with. Oxagen records the enforcement tier on every run, and the tier can never be over-stated. | §7 |
 | 7 | Intervention is a defined contract: pause, resume, steer, cancel, revoke, approve, and inject. The guarantees are stated for each gateway point. Halting works by revoking credentials, not by asking the agent to cooperate. | §7.4 |
 | 8 | A run is a hash-chained sequence of **frames**. A hash is a short fingerprint computed from data. A hash chain links each frame to the one before it, so no frame can be altered without detection. A frame is the replay unit. Frame metadata and cost live in the run record. Frame bodies are content-addressed, encrypted blobs. Content-addressed means each body is stored under the hash of its own content. | §8 |
@@ -34,7 +34,7 @@ This table lists every decision that shapes the rest of the document, in one pla
 | 14 | Mission Control is nine pages: six in a workspace and three for the organization, down from 70. Everything else is deleted. Appendix F says where each old route went. | §14, App. F |
 | 15 | A run is proven only by a **witness** Oxagen wrote. A witness is a test built with one of several deterministic oracles, checkers whose result is fixed for a given input. The witness fails on the PR's target branch and passes on the PR. It runs in a witness runner the worker can never see or reach. The runner reports only pass or fail back to the worker. The flip from fail to pass stamps the run. Stamped runs are the training asset. | §8.5 |
 | 16 | An agent cannot finish until its **definition of done** says so. Before the agent moves, Oxagen drafts the acceptance checks for the prompt (or loads hand-written ones) and locks them by digest. At every Stop the checks run, hidden holdouts included, and a pure `decide(evidence)` answers HELD, PENDING or BROKEN with a closed reason. Oxagen never runs a check; it re-decides the evidence, binds the outcome to the sealed attempt, signs a certificate and records one governed action, `dod.held`, which is not billable. | §8.6 |
-| 17 | The maintainer decisions of 2026-09-15 bind billing, approvals, the shell, intervention on ledger-ingested runs, Neo4j through rev1, and the rev1 scope of Organization, Spend and API keys. A sentence above that one of them changes carries a dated note. | §20 |
+| 17 | The maintainer decisions of 2026-09-15 bind billing, approvals, the shell, intervention on ledger-ingested runs, Neo4j staying in the architecture, and the rev1 scope of Organization, Spend and API keys. A sentence above that one of them changes carries a dated note. | §20 |
 
 ---
 
@@ -79,7 +79,7 @@ Owned intelligence (training a model per customer on proven runs) is the phase-t
 - Marketplace, installable plugins, reseller billing, A2A federation (agent-to-agent, where agents from different systems work together), and mobile parity (a mobile app that matches the full product).
 - Workflows and playbooks. Automations. Chat as a product interface.
 - Connectors beyond GitHub. There is no connector SDK in v1.
-- Cut by the scope review of 2026-09-14, and not on the roadmap: the ontology engine, SSO and SCIM, policy simulation against history, the published assurance suite, two-person mandates, steering effect metrics and retirement candidates, legal holds, crypto-shredding, and provider reconciliation to the cent. Each is a Series A question a customer has to ask for. The review also listed the in-app agent and Neo4j. The in-app agent is in scope (2026-09-14 and 2026-09-15, maintainer decisions, §4.4). Neo4j stays through rev1 and is retired by an ADR after the witness lane (2026-09-15, §4.2).
+- Cut by the scope review of 2026-09-14, and not on the roadmap: the ontology engine, SSO and SCIM, policy simulation against history, the published assurance suite, two-person mandates, steering effect metrics and retirement candidates, legal holds, crypto-shredding, and provider reconciliation to the cent. Each is a Series A question a customer has to ask for. The review also listed the in-app agent and Neo4j. The in-app agent is in scope (2026-09-14 and 2026-09-15, maintainer decisions, §4.4). Neo4j stays in the architecture (2026-09-15, §4.2).
 
 ### 2.3 Non-goals stated so they stay out
 
@@ -169,12 +169,13 @@ This document uses each name exactly as defined here.
 - **DoD settle.** The one service with an opinion about done. It registers locked sets, keeps the hidden checks, re-runs `decide()` on submitted evidence, binds the outcome to the sealed attempt, signs the certificate and records the governed action `dod.held` (§8.6). It executes nothing.
 - **Model layer.** The one path for every model call Oxagen makes on its own behalf (the reflector, the promoter, the dod drafter, and the run namer). Calls route by tier through OpenRouter (§4.5), a service that forwards model calls to many vendors. Customer agents' model calls go through the model proxy, not this layer.
 
-### 4.2 The two stores and what belongs where
+### 4.2 The stores and what belongs where
 
 | Store | Holds | Never holds |
 |---|---|---|
 | **Postgres** (shared plane, or dedicated for tenant data) | Identity, tenancy, IAM, the tool registry and its schemas, the price book, the cost ledger and its rollups, billing, budgets, approvals, intervention commands, archive manifests, control-plane audit events, connector sync state; and the run record: runs, attempts, frames (metadata, digests as content fingerprints, and cost), context records and their lineage, the code graph of each main repo, dod sets and certificates | Frame bodies, traces |
 | **Object storage** (write-once, per-org key) | Frame bodies (prompts, completions, tool input and output), archive segments, exports | Anything queried directly |
+| **Neo4j** (the platform as it runs today) | The ontology graph: the entities and relationships inferred from ingested data, and the Cypher surface over them | The run record, the context records, the code graph, frame bodies |
 | **GitHub repository** (per workspace) | Published steering records, agent definitions, locked dod sets and templates, and the promotion ledger | Traces, memories, proposals |
 
 Rule: **Postgres is the system of record, and git is the system of control.** Postgres is the source of truth for everything the product explains: runs, frames, records, their lineage, and the code graph. Git is the source of truth for exactly one thing: what is published and active. That means steering records and agent definitions, each approved through a pull request. Object storage holds raw bytes. A rollup (per-run cost, daily spend by agent) is a derived index. It is labeled as such and can be rebuilt from the frames.
@@ -191,7 +192,7 @@ This is not the mirror problem (two copies that drift apart), because every fact
 
 Platform engineers call this pattern GitOps: the desired state lives in git, a controller reconciles the live system to it, and drift is detected and reported. Oxagen is the controller. Steering and definitions are the desired state. The record and the wrapped agents are the live system.
 
-The target retires Neo4j with the ontology engine. Neo4j stays through rev1, and its retirement ADR is written after the witness lane lands (2026-09-15, maintainer decision, §20). The run record was the reason a second datastore existed once the ontology went; it is a set of narrow tables with a hot window, and Postgres carries it at the wedge's volume with room to spare (§15). ClickHouse is retired too. Its two jobs, append-only trace rows and spend analytics, are covered by frame rows (for the hot window) plus rollups. One store of truth for the run record, with no mirror copy to keep in sync.
+Neo4j stays in the architecture (2026-09-15, maintainer decision, §20). It holds the ontology graph of the platform as it runs today. The ontology engine does not ship in Mission Control (§11), so no Mission Control surface reads or writes Neo4j, and there is no retirement ADR and no migration off it. The run record, the context records and the code graph are Postgres tables: the run record is a set of narrow tables with a hot window, and Postgres carries it at the wedge's volume with room to spare (§15). ClickHouse is retired too. Its two jobs, append-only trace rows and spend analytics, are covered by frame rows (for the hot window) plus rollups. One store of truth for the run record, with no mirror copy to keep in sync.
 
 ### 4.3 Language and runtime
 
@@ -290,7 +291,7 @@ Rules:
 
 ### 5.3 The run record and the code graph in Postgres
 
-The run record (runs, attempts, frames, seals), the context records and the code graph are tenant tables in Postgres under the same row-level security as the control ledger (§5.2). There is no second engine to isolate. Every row carries `org_id` and `ws`; the kernel is the only writer, and a write that omits either is refused before it reaches the database. Cross-tenant reads are refused by the database, not by application code, and the startup guard (no superuser, no `BYPASSRLS`, RLS never off) applies to the whole plane.
+The run record (runs, attempts, frames, seals), the context records and the code graph are tenant tables in Postgres under the same row-level security as the control ledger (§5.2). Neo4j holds none of them (§4.2), so these tables have no second engine to isolate. Every row carries `org_id` and `ws`; the kernel is the only writer, and a write that omits either is refused before it reaches the database. Cross-tenant reads are refused by the database, not by application code, and the startup guard (no superuser, no `BYPASSRLS`, RLS never off) applies to the whole plane.
 
 Frames are the volume. They live in a hot table for the retention window (§13.3), partitioned by month, and compact into the archive segment after it. A run's rollups (frame count, cost, tier, gaps) are columns on the run row. The code graph (`File`, `Symbol` and their edges, §11) is a set of ordinary tables keyed by repository and commit. Platform catalogs (price books, tool schemas, connector definitions) are platform tables, never tenant rows, so a tenant partition never contains another tenant's data, by construction.
 
@@ -865,7 +866,7 @@ Published records reach agents three ways, all recorded:
 
 ## 11. The code graph
 
-Earlier drafts of this specification described a dynamic, customer-extensible ontology inferred from ingested data, browsable and queryable in plain English, stored in Neo4j. It does not ship. Neo4j, the datastore it needed, stays through rev1 and is retired by an ADR after the witness lane (§4.2). What remains is the part the witness author reads and the toolbelt policy cites: a fixed, built-in graph of each workspace's main repository, kept in Postgres and kept current by the GitHub App.
+Earlier drafts of this specification described a dynamic, customer-extensible ontology inferred from ingested data, browsable and queryable in plain English, stored in Neo4j. It does not ship. Neo4j, the datastore it needed, stays in the architecture and keeps that graph (§4.2). What remains in Mission Control is the part the witness author reads and the toolbelt policy cites: a fixed, built-in graph of each workspace's main repository, kept in Postgres and kept current by the GitHub App.
 
 ### 11.1 What the graph holds
 
@@ -1158,7 +1159,7 @@ One agent tool contract drives all four surfaces: the API, MCP (Model Context Pr
 | Fail behavior | Enforcement seams fail **closed**, meaning a missing policy blocks the call. Telemetry seams fail **open**, meaning the call proceeds and the gap is recorded. Recorder backpressure never blocks an agent. The recorder spools instead |
 | Availability | Gateway and control channel: 99.9%. Mission Control: 99.5%. The recorder delivers at-least-once (a frame may arrive more than once but is not dropped), with idempotent frame ids so a repeat is stored only once |
 | Throughput | 2,000 frames per second per organization, sustained, on the shared plane. Graph writes are batched |
-| Isolation | Neither store can express a query that crosses organizations. A nightly cross-tenant probe on both stores verifies this |
+| Isolation | No store can express a query that crosses organizations. A nightly cross-tenant probe on every store verifies this |
 | Security | All credentials are hashed or KMS-enveloped (encrypted under a key management service key). Run tokens last ≤ 15 min. Bundle and attestation keys rotate with published validity windows. Secret scanning runs on tool arguments and record bodies |
 | Compliance | SOC 2 Type II controls map to the audit tiers. Data residency is set per data plane. Personal data is redacted before write (§13.5) |
 | Conformance | Provider conformance and lifecycle fixtures (shared test cases that check an implementation follows the protocol) from the protocol repo run in CI, pinned by commit |
@@ -1299,7 +1300,7 @@ The maintainer decided these items on 2026-09-15. A decision that changes produc
 | 12 | Invoice-billed organizations are suspended 5 days after an invoice is past due; metering continues while suspended; paying the full outstanding balance reactivates the organization. | §12.10, App. A.2, Billing page |
 | 13 | Fix `macanderson/oxagen#3029` (the org-only `create_workspace` REST mount fails before its handler), add an in-app create-workspace form, and ship the Spend lane including Fleet's Spend and Cache-hit tiles. | §14, App. E, Organization, Spend and Fleet pages |
 | 14 | The metering shadow period is skipped; the waiver is dated 2026-09-15. | operations |
-| 15 | Neo4j stays through rev1; the retirement ADR is written after the witness lane lands. §0 row 5 and §4.2 state the store set through rev1 and after that retirement. | §0 row 5, §2.2, §4.2, §11, `macanderson/oxagen` |
+| 15 | Neo4j stays in the architecture. There is no retirement ADR and no removal work. §0 row 5 and §4.2 state what each store holds. | §0 row 5, §2.2, §4.2, §11, `macanderson/oxagen` |
 | 16a | Dependabot re-pins (`macanderson/oxagen#2989`): compare what each pin resolves to, and add Dependabot ignore entries. | `macanderson/oxagen` |
 | 16b | The CI ticket-filing scripts retire (`macanderson/oxagen#2980`). | `macanderson/oxagen` |
 | 16c | Stella's `SharingScope` gains a `workspace` value; Oxagen steering records stay workspace-scoped. | Stella, `macanderson/oxagen` |
@@ -2012,13 +2013,13 @@ The build holds organization and workspace ceilings. §12.5's operator and agent
 
 | Today | In the rebuild |
 |---|---|
-| `agent.agent_runs*`, `agent.agent_executions*`, `tacho_*`, every ClickHouse table | graph nodes (`:Run`, `:Attempt`, `:Frame`) and archive segments |
+| `agent.agent_runs*`, `agent.agent_executions*`, `tacho_*`, every ClickHouse table | `run.runs`, `run.attempts`, `run.frames` and `run.seals` (App. B), and archive segments |
 | `iam.authorization_decisions` | `policy.decision` frames |
 | `iam.deny_generations` | the two counters on `org.organizations` and `wrk.workspaces` |
 | `schema_registry.*` | gone; the knowledge graph and dynamic ontology it backed do not ship (§11) |
 | `billing.reseller_*` | gone. The credit, invoice and payment method tables stay in `billing` (A.8) |
 | `security.security_events`, `privacy.*` requests | `audit.audit_events` |
-| `ingestion.*` cursors and health | columns on `wrk.repositories` and `tools.tool_servers`, and `:Source` nodes |
+| `ingestion.*` cursors and health | columns on `wrk.repositories` and `tools.tool_servers` |
 | `chat.conversations`, `chat.messages` | the in-app agent's conversations; in scope with the in-app agent (§4.4), and not yet written into this appendix |
 | `mcp.*`, `plugin.*`, `content.*`, `cms.*`, `environments.*`, `eval.*`, `workflow.*`, `ai.*`, `ratelimit.*`, `engram.*`, `codegraph.*` | gone |
 
@@ -2057,7 +2058,7 @@ Index `(org_id, run)`. A HELD certificate records the governed action `dod.held`
 
 ## Appendix B. The run record and code graph (Postgres)
 
-Appendix B once described the Neo4j model. The same shapes are Postgres tables now, under the schemas `run`, `ctx` and `code`, each with `org_id` and `ws` and the RLS policy of A.0.
+Appendix B once described these shapes in the Neo4j model. They are Postgres tables now, under the schemas `run`, `ctx` and `code`, each with `org_id` and `ws` and the RLS policy of A.0. Neo4j stays in the architecture and holds the ontology graph (§4.2), which is none of these tables.
 
 | Table | Rows | Keys and indexes |
 |---|---|---|
