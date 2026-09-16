@@ -69,7 +69,7 @@ The whole argument rests on assumptions the council can test in an hour. If an a
 
 | Cut | Spec | Plan | Mockups |
 |---|---|---|---|
-| In-app agent (kept, 2026-09-14) | §0 row 1, §1, §2, §4.4, §16 and App. A.10 state it in scope (2026-09-15) | the sidebar flyout is lane L3's (decision 9, 2026-09-15) | the sidebar launcher, the top-bar button, the panel, the ⌘K agent-tools group and the W11 assistant steps were removed on 2026-09-14; W11 is "the account" |
+| In-app agent (kept, 2026-09-14) | §0 row 1, §1, §2, §4.4, §16 and App. A.10 state it in scope (2026-09-15) | the sidebar flyout is lane P11 (decision 9, 2026-09-15; `implementation-plan.md` Batch 2) | the sidebar launcher, the top-bar button, the panel and the ⌘K agent-tools group were removed on 2026-09-14, before the reversal the same day, and **restored on 2026-09-15** — with the engine (Stella over HTTP) and the organization's model key written into §4.4 and §4.5. The W11 assistant steps stay removed; W11 is "the account" |
 | The ontology; Neo4j kept (2026-09-15) | §0 rows 4 and 5, §4.1, §4.2, §5.3, §11, §13.3, App. B; §0 row 5 and §4.2 state what each store holds | Neo4j lanes removed | "Graph isolation" is "Tenant isolation"; every store label reads Postgres |
 | SSO and SCIM | §12.1 enterprise row, §14, App. A.1 | none | the SSO and SCIM panels and dialogs, the SSO column, the Okta copy |
 | Policy simulation | §6.12, §14, App. A.5, App. E | none | the simulation panel, the Activate dialog, the Simulate footer |

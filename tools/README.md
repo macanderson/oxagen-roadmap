@@ -39,6 +39,50 @@ A scenario in the catalog with no `SCENARIOS` entry fails; nothing skips.
 
 Run `build-mockup.mjs --check` on every edit to the sources; run `check-mockup.mjs` before you ship.
 
+## The wizard guard
+
+```sh
+node tools/check-creation.mjs           # every creation wizard, both editing pages, the entry points
+node tools/check-creation.mjs --shots   # also write a screenshot per step to .claude/shots/
+```
+
+`check-mockup.mjs` opens pages. The four creation wizards (`docs/creation-spec.md`) are dialogs, so
+nothing there ever reaches them. This walks each one step by step: the tool wizard down both of its
+paths (import, where it must name the matched server and hand off to the importer; and build, where
+the manifest must parse, the derived chips must be read out of the file, and all four language
+samples must render and read the grant off the call), the skill wizard down all three of its sources
+(registry search narrowing and excluding, a bundle bumping a pinned version, a drafted file), the
+agent wizard through identity, definition and belt, and the record wizard through all six kinds. It
+then opens one record page per kind and asserts each kind renders **its own** treatment and borrows
+no other's, opens the skill source page and asserts the editor holds text rather than markup and
+that the version bumps before the merge, and checks every page's entry point is present.
+
+Every assertion names a string the surface is supposed to render, never a value read back out of
+the field the bug would corrupt. It was mutation-tested against four deliberate regressions —
+collapsing the six kind panels into one, putting the tool matcher back on substring matching,
+emptying the editor gutter, and scoping the phone rule to `#viewport` only — and catches all four.
+
+## The assistant guard
+
+```sh
+node tools/check-assistant.mjs           # the flyout, its states, the org's model key
+node tools/check-assistant.mjs --shots   # a screenshot per state
+```
+
+The in-app agent (spec §4.4) is neither a page nor a dialog: it is a permanent host beside `#layer`
+that `render()` reclasses but never rebuilds, which is exactly the property a tidy-up of `render()`
+would break. This asserts the behaviour that property exists for — a half-typed message survives a
+re-render, and the host is the same DOM node afterwards — plus the closed panel being `inert` and
+`aria-hidden`, the panel painting under the rail rather than over it, Escape closing it without also
+changing the route, the turn badge naming whose run it is and never linking into the tenant's run
+index, and both refusals (engine down, no model key) saying so by name with the message box disabled
+rather than degrading into something that looks like an answer. It then walks the organization's
+model key on the funding tab: the prefix rather than the secret, the provisioned id reconciliation
+joins on, the two independent numbers in the reconciliation block, and mint, rotate and revoke.
+
+Mutation-tested against three deliberate regressions — rebuilding the sheet on every render,
+removing the no-key refusal, and dropping the `inert` guard — and catches all three.
+
 ## Writing a scenario
 
 `SCENARIOS["id"]={title:"…", ws:"…", blurb:"…", steps:[…]}` in `mockups/src/engine.js`, and a row in

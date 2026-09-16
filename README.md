@@ -103,10 +103,23 @@ the spec's closed vocabularies (§8.5 verdicts, §8.3 attestation), never a stro
 
 ```sh
 npm run build   # build-mockup, build-stories, build-docs, build-badges
-npm run check   # the three --check runs, then tools/check-mockup.mjs in Chromium
+npm run check   # the four --check runs, then check-mockup.mjs and check-creation.mjs in Chromium
 ```
 
 `tools/README.md` says what each checks and what to watch for.
+
+## Creating things
+
+Four things an operator creates — an agent, a tool, a skill and a context record — and one shape
+for all four, because all four are a file in a repository: describe it, Oxagen drafts the file, you
+read the file, a pull request publishes it. Nothing in it writes a row. `docs/creation-spec.md` is
+the spec; the wizards are `DLG_EXT.wz` in `mockups/src/engine.js` and reached from `Create` in ⌘K
+and from each page's own action. The tool wizard matches a description against the MCP servers
+Oxagen can already reach (`mockups/fixtures/mcp-catalog.json`) and offers to import before it offers
+to generate a handler in TypeScript, Python, Go or Rust. The skill wizard searches the registry
+(`mockups/fixtures/skill-registry.json`), drafts from prose, or takes a `.skill` bundle that
+replaces a pinned version. Two pages carry the editing half: `record` (a published record, presented
+by its kind, with its statement in a real editor) and `skill-source`.
 
 
 ## Docs site

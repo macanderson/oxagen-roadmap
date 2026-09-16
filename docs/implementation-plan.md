@@ -1055,10 +1055,11 @@ Each lane owns `src/app/<route>/**`, `src/features/<page>/**`, `messages/<page>.
 | P4 | **Tools** | tabs registry/connections/mandates/policy/switches/auto; kill-switch dialog with blast-radius text; observed-schema approval; policy draft with its tests | |
 | P5 | **Steering** | tabs records/proposals/prs; `RecordKindBadge` (W6); Context PR dialog | |
 | P6 | **Spend** | tabs findings/operator/agent/tool/waste/budgets; drill `spend/<kind>/<id>`; evidence + fix dialogs; export | |
-| P7 | **Organization** | tabs people/roles/invitations/workspaces/funding/plane/keys; role editor; API key create/rotate/revoke dialogs | |
+| P7 | **Organization** | tabs people/roles/invitations/workspaces/funding/plane/keys; role editor; API key create/rotate/revoke dialogs; the **Model key** panel on funding: the three funding sources, the prefix and provisioned id (never the secret), the cap set at the provider, and the reconciliation block comparing the provider's report against the credit ledger as two independent numbers | Mint/rotate/revoke dialogs; the write lane is B4 Organization |
 | P8 | **Billing** | two meters: GAU used against the allowance, blocks and auto top-up, and the contracted rate; the usage-credit balance for in-app AI usage (1 credit = $0.01, the signup grant, credit packs); the plan and invoices; held runs as a report figure | |
 | P9 | **Audit** | tabs events/incidents/receipts/exports/keys/retention; receipt viewer; export and KEK rotation dialogs | |
 | P10 | **Run · Done** | the Done tab (`dod-spec.md`): verdict by shape, certificate, checks with evidence digests, hidden checks, budget from the tool log, the stops; the locked-file dialog; the sign dialog | P2 |
+| P11 | **In-app agent** (spec §4.4) | the flyout: the launcher at the foot of the rail, the top-bar button, the ⌘K group, the mobile More tile, and the panel — a host the app reclasses but never rebuilds, so the transition runs and a half-typed message survives a re-render. Closed it is `inert` and `aria-hidden`; it paints under the rail; Escape closes it without changing the route. Both refusals are first-class: **engine down** (`stella serve` unreachable — a required service, no in-process fallback) and **no model key** (nothing to spend against, so nothing is charged). A turn's badge says the run is Oxagen's and never links into the tenant's run index. | Owns `#asst`; the transcript is `chat.conversations`/`chat.messages` (App. A.10). Not a route — the guard is `tools/check-assistant.mjs`, not a page story |
 
 ### Batch 3: live adapters (9 lanes, start as soon as L1 merges; runs alongside B2)
 
@@ -1072,7 +1073,7 @@ Each lane owns `src/data/adapters/live/<domain>.ts` + `mappers/<domain>.ts` + te
 | A4 | tools | `mcp.mcp_servers`, `agent.tools/tool_versions`, `mcp.tool_snapshots`, `ingestion.source_connections`; emergency denies as switches | policy (G2), auto rules (G12), observed schemas |
 | A5 | steering | `agent.context_records(_versions)`, `context_promotions` | none |
 | A6 | spend + budgets | ClickHouse `readUsageBreakdown` by operator/agent/model; `tool_invocations`; `billing.spend_budgets` | proven (G7), findings (G4) |
-| A7 | org + members + keys | `org.org_users`, `org.invitations`, `workspace.workspaces`, `iam.roles`, `org.data_planes`, `auth.api_keys`, `org.model_credentials` | none |
+| A7 | org + members + keys | `org.org_users`, `org.invitations`, `workspace.workspaces`, `iam.roles`, `org.data_planes`, `auth.api_keys`, `org.model_credentials` | the minted key's `provisioned_id`, `key_hash`, `prefix` and provider cap, and the provider usage report the reconciliation row reads (§4.5) |
 | A8 | billing | `billing.subscriptions`, invoices, Stripe via existing contracts; usage credits from `billing.credit_balances` and `billing.credit_ledger` | GAU meter (G13) |
 | A9 | audit + shell | ClickHouse `audit_events` + `security.security_events`, `tacho.incidents`, `privacy_*`, `notification.notifications` | receipts, holds, KEK (G8) |
 
@@ -1087,7 +1088,7 @@ Each lane owns `src/features/<page>/actions.ts` and wires its page's dialogs to 
 | Tools | `agent.mcp.{register,set_enabled,delete}`, `agent.mcp_consent.resolve`, connection contracts | kill switch as `control.commands` (verify emergency-deny contract), policy (G2), auto rules (G12) |
 | Steering | `context.record.*`, `agent.memory_promotion.*` | Context PR through GitHub App (M3) |
 | Spend | `billing.budget.set`, `workspace.budget_policy.*` | findings actions (G4), statement export (G5) |
-| Organization | `org.member_invite.*`, `org.member_role.change`, `workspace.create`, `workspace.settings.*`, `org.settings.write`, `org.model_credential`, `org.data_plane`, `api.key.{create,rotate,revoke}` | role editor custom roles (every tier, 2026-09-15, maintainer decision) |
+| Organization | `org.member_invite.*`, `org.member_role.change`, `workspace.create`, `workspace.settings.*`, `org.settings.write`, `org.model_credential`, `org.data_plane`, `api.key.{create,rotate,revoke}` | role editor custom roles (every tier, 2026-09-15, maintainer decision); `org.model_key.{mint,rotate,revoke}` against the provider's provisioning API (§4.5) |
 | Billing | `billing.subscription_upgrade.start` (Build or Scale through Stripe Checkout, kept in rev1), `purchase_credits` (credit packs for the usage-credit meter) | GAU blocks and auto top-up (G13) |
 | Audit | `privacy.data.export`, `privacy.data.erase` | holds, KEK rotation (G8) |
 | Shell | account settings via Better Auth client | none |

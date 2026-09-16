@@ -17,7 +17,7 @@ The registry (servers, tool versions, schemas, safety classification), connectio
 ## What is on the page
 
 **Header** — eyebrow “Workspace · <workspace name>”, h1 “Tools”.
-Actions: **Import server** (opens the import dialog: pull `tools/list` from an MCP server, version it, store both schemas) · **Flip a kill switch** (gold; opens the switch dialog)
+Actions: **Import server** (opens the import dialog: pull `tools/list` from an MCP server, version it, store both schemas) · **New tool** (gold; opens the tool wizard) · **Flip a kill switch** (opens the switch dialog)
 
 - **Tabs** (`/tools/<tab>`): Registry (N to approve) · Connections (N) · Mandates ledger (N) · Policy (N) · Kill switches (N on) · Auto-approvals (N).
 - **Registry** — banner “N awaiting approval: output schemas were observed, not declared” (**Review** opens the schema dialog); Tool servers table: Server · Kind · Tools · Health · Schemas · Connection · Last import (**Import tools from an MCP server**); Tool versions table: Tool version · Category · Hazard · Gate today · Egress · Financial · Schema origin · Digest · On belts · Calls 30d (Labels / API names toggle; category chips with counts across the ten categories, By category / Flat). A row opens the tool dialog. Note: the gate shown is today’s — the version’s own kill switch, then its server’s, then the mandate rule, then `pol_v41`.
@@ -27,7 +27,9 @@ Actions: **Import server** (opens the import dialog: pull `tools/list` from an M
 - **Kill switches** — “Deny is available at every level”: platform-wide classes (every `moves_funds` tool, every irreversible tool, every tool with egress: third_party), organization, workspace, server, tool version, connection, key, category, agent, person. Each switch: allowing / denying toggle, Blast radius · Takes effect · Flipped by · Reason. Flipping bumps `deny_generation` so every live run token is re-checked at the next call.
 - **Auto-approvals** — trust-gated rules: Rule · Applies to · Requires · Qualifying now · Approved 30d · On (**Create rule**, **Edit**, **Delete**); tiles: Rules on · Auto-approved 30d (each one a frame with the rule id) · Held by a floor (tainted, critical, or above a ceiling) · Median wait saved.
 
-**Dialogs this page opens:** `import`, `connection`, `tool`, `schema (approve observed)`, `mandate`, `policy (edit)`, `switch`.
+**Dialogs this page opens:** `import`, `wz (tool wizard: describe → recommendation → manifest or import → code in four languages → pull request)`, `connection`, `tool`, `schema (approve observed)`, `mandate`, `policy (edit)`, `switch`.
+
+Every creation wizard is `DLG_EXT.wz`; its spec is `docs/creation-spec.md`.
 
 **Shell.** Sidebar (organization switcher, workspace switcher, Workspace nav: Fleet · Agent IAM · Tools · Skills · Steering · Spend; Organization nav: Organization · Billing · Audit; agent count · data plane · tier badge), top bar (breadcrumbs, ⌘K search-or-run, notifications with unread dot, account avatar → user menu: Account, Preferences, Security and sessions, Privacy and data, Switch theme, Sign out).
 
@@ -57,7 +59,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 ## States
 
 - **loaded** — the page as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell).
-- **empty** — “No tool server is registered” — no belt, every call by name is `unknown_tool`. Actions: **Import from an MCP server**, **Add a connection**.
+- **empty** — “No tool server is registered” — no belt, every call by name is `unknown_tool`. Actions: **Import from an MCP server**, **Add a connection**. The wizard reaches the same importer, from a description rather than a URL.
 - **loading** — the shell stays; the page body is replaced by the skeleton (four tile blocks and a panel of seven rows), so the operator keeps their bearings.
 - **error** — “Tools could not be loaded” — `503 tool_registry_unavailable`. Nothing was changed. Runs kept recording while this page was down — frames are written by the gateway, not by Mission Control. Actions: **Try again**, **Open an incident**; a trace id, region and timestamp line.
 - **access denied** — “You cannot see the tool registry” — the roles the signed-in person holds on the organization do not include `tools.read on core-platform`. Copy explains an owner can grant it and that the grant is itself a governed action in the audit record. Actions: **Request access** (opens the request-access dialog), **Back to Fleet**. Below: *Signed in as* (name · role), *Needed* (the permission), *Decided by* (`pol_v41` · deny wins over every allow).

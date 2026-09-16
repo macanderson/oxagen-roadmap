@@ -132,7 +132,7 @@ main hr+h2{border-top:0;padding-top:0;margin-top:0}
 <div class="site">
 <nav class="docs" aria-label="Documents">
   <a class="wordmark" href="#spec">o<span class="x">x</span>agen</a>
-  <p>Specifications</p><ol><li><a href="#spec" data-doc="spec">Oxagen Mission Control: Product and Technical Specification</a></li><li><a href="#dod" data-doc="dod">Oxagen DoD: the definition of done for agent runs</a></li><li><a href="#witness" data-doc="witness">Oxagen Witness: outcome verification</a></li><li><a href="#desktop" data-doc="desktop">Oxagen Desktop: product specification, rev 1</a></li></ol><p>Plans and decisions</p><ol><li><a href="#plan" data-doc="plan">Oxagen Mission Control app: implementation plan</a></li><li><a href="#scope" data-doc="scope">Oxagen Mission Control: the scope review, and what it changed</a></li><li><a href="#scaleback" data-doc="scaleback">Scale back Mission Control: the mockup prompt</a></li></ol><p>The mockups</p><ol><li><a href="#prompts" data-doc="prompts">Oxagen Mission Control: mockup prompts, one per demo flow</a></li><li><a href="#consolidation" data-doc="consolidation">Consolidating W1–W11 into one design</a></li><li><a href="#feedback" data-doc="feedback">Feedback on the mockups</a></li><li><a href="#videos" data-doc="videos">Videos of the mockups, narrated</a></li><li><a href="#w13" data-doc="w13">W13: in the loop</a></li></ol>
+  <p>Specifications</p><ol><li><a href="#spec" data-doc="spec">Oxagen Mission Control: Product and Technical Specification</a></li><li><a href="#dod" data-doc="dod">Oxagen DoD: the definition of done for agent runs</a></li><li><a href="#witness" data-doc="witness">Oxagen Witness: outcome verification</a></li><li><a href="#desktop" data-doc="desktop">Oxagen Desktop: product specification, rev 1</a></li><li><a href="#creation" data-doc="creation">Creating things in Oxagen: agents, tools, skills and context records</a></li></ol><p>Plans and decisions</p><ol><li><a href="#plan" data-doc="plan">Oxagen Mission Control app: implementation plan</a></li><li><a href="#scope" data-doc="scope">Oxagen Mission Control: the scope review, and what it changed</a></li><li><a href="#scaleback" data-doc="scaleback">Scale back Mission Control: the mockup prompt</a></li></ol><p>The mockups</p><ol><li><a href="#prompts" data-doc="prompts">Oxagen Mission Control: mockup prompts, one per demo flow</a></li><li><a href="#consolidation" data-doc="consolidation">Consolidating W1–W11 into one design</a></li><li><a href="#feedback" data-doc="feedback">Feedback on the mockups</a></li><li><a href="#videos" data-doc="videos">Videos of the mockups, narrated</a></li><li><a href="#w13" data-doc="w13">W13: in the loop</a></li></ol>
   <div class="foot">One file, every document. The markdown in <code>docs/</code> is the source; <code>tools/build-docs.py</code> writes this page.</div>
 </nav>
 <div>
@@ -520,12 +520,21 @@ main hr+h2{border-top:0;padding-top:0;margin-top:0}
 <h3 id="spec/4-3-language-and-runtime">4.3 Language and runtime</h3>
 <p>TypeScript on Node runs the control plane (the part that sets and enforces rules), the gateway, the services, and the UI. Hono handles HTTP and Drizzle handles Postgres access. The official <code>@contextgraphprotocol/typescript-sdk</code> is the source of protocol types (ADR-036). An SDK is a software development kit, a library that developers build on. Zod schemas remain the runtime validators at the trust boundary (the point where outside input enters the system). They are compile-checked against the SDK types. Rust stays in Stella and the protocol crates (Rust packages). Stella is deployed as a service, never embedded. The gateway's hot path is streaming pass-through. A Node process adds well under thirty milliseconds at the median for a proxied model call, which is the budget in §15.</p>
 <h3 id="spec/4-4-onboarding-and-oxagen-s-own-model-calls">4.4 Onboarding, and Oxagen's own model calls</h3>
-<p>The in-app agent is in scope. The scope review of 2026-09-14 proposed cutting it, and the maintainer kept it the same day (&quot;dont cut the in app agent&quot;). It opens as a flyout from the sidebar, as merged into the mockups repository in PR #1; the bottom dock on the <code>small-approvals-bottom-dock-scenarios</code> branch is not adopted (2026-09-15, maintainer decision, §20). Each of its turns is a run of its own, and it acts through the same agent tools a person clicks (§6, Appendix E), so what it does passes IAM and lands in the record like an action taken on a page. Its model calls are Oxagen's second meter, metered in usage credits (§12.1): the $5 signup grant in <code>create_org</code> funds the balance, and credit packs (<code>purchase_credits</code>) top it up (§12.10). Configuration is the same agent tools a person clicks. Explanation is the record: a chain of links to frames, records and commits. Stella stays on the customer's machine as a wrapped agent.</p>
+<p>The in-app agent is in scope. The scope review of 2026-09-14 proposed cutting it, and the maintainer kept it the same day (&quot;dont cut the in app agent&quot;). It opens as a flyout from the sidebar, as merged into the mockups repository in PR #1; the bottom dock on the <code>small-approvals-bottom-dock-scenarios</code> branch is not adopted (2026-09-15, maintainer decision, §20). Each of its turns is a run of its own, and it acts through the same agent tools a person clicks (§6, Appendix E), so what it does passes IAM and lands in the record like an action taken on a page. Its model calls are Oxagen's second meter, metered in usage credits (§12.1): the $5 signup grant in <code>create_org</code> funds the balance, and credit packs (<code>purchase_credits</code>) top it up (§12.10). Configuration is the same agent tools a person clicks. Explanation is the record: a chain of links to frames, records and commits.</p>
+<p><strong>The engine.</strong> The in-app agent is served by <strong>Stella over HTTP</strong> (2026-09-15, maintainer decision): Oxagen calls a hosted <code>stella serve</code> rather than running an agent loop in its own process, which keeps ADR-043's cut intact — Oxagen still governs rather than runs. The engine is a <strong>required service</strong>: nothing falls back to an in-process loop, so a panel that cannot reach it says so by name rather than degrading into something that reads like an answer. Its model calls are spent on the organization's own model key (§4.5), which is what makes a turn reconcilable to the organization that asked for it. With no key there is nothing to spend against, so the panel refuses and nothing is charged.</p>
+<p>Stella also stays on the customer's machine as a wrapped agent. The two are different deployments of the same engine and are not confused in the record: a wrapped Stella's runs are the customer's, and the in-app agent's are Oxagen's.</p>
+<p><strong>Its chrome.</strong> The launcher at the foot of the sidebar, a top-bar button, the ⌘K group and the panel itself were removed on 2026-09-14 by the scope review, before the maintainer reversed the cut the same day, and were restored on 2026-09-15 (<code>scope-review.md</code>, the In-app agent row). The panel is a host the app reclasses but never rebuilds, so the flyout transition runs and a half-typed message survives a re-render.</p>
 <p>Oxagen also makes model calls on its own behalf: the reflector (§9.1), the promoter's rationale and Context PR bodies (§9.2), the dod drafter (§8.6), and the run namer that writes <code>run.name</code> and <code>run.summary</code> from the frames. Every one of them goes through the model layer (§4.5), runs under a service principal, and is a frame in a run of its own, so its cost is accounted like everything else.</p>
 <p><strong>Onboarding is gated, and it is three steps.</strong> A new organization does not see the app. It sees one screen with three steps: (1) name the organization, (2) wrap an agent, with one click for Claude Code or Codex (the installer, §7.2) or with the five-line <code>oxagen.agent.wrap({})</code> snippet for an SDK agent, and (3) start a run. The full app unlocks the moment the first frame from that agent reaches Oxagen. The operator then lands on Fleet looking at their own run. That run is also the installer's smoke test, so there is one path, not two. The installer reads the git remote of the directory it ran in, so binding the main repo is one click.</p>
 <h3 id="spec/4-5-model-access-and-routing">4.5 Model access and routing</h3>
 <p>Every model call Oxagen makes on its own behalf goes through one model layer. That layer resolves three things, in order: the organization's <strong>funding source</strong>, the <strong>tier</strong> the caller asked for, and the <strong>provider route</strong> for that tier.</p>
-<p><strong>Funding source</strong> (ADR-053, carried): <code>platform</code> or <code>customer_key</code>. With the first, Oxagen pays on Oxagen's OpenRouter account. That usage is billed back at vendor cost plus a published markup, capped per organization. With the second, the customer's own OpenRouter or vendor key is used. That key is stored enveloped (encrypted with a key that is itself encrypted), tested before save, and never returned, and every read of it is audited. Its tokens are reported and billed at zero. A new organization starts on <code>platform</code>. Every tier's month-to-date use (complex, light) is one record, the route table, read by both Organization → Funding (the cap's &quot;used&quot;) and Spend (the month total and By model), so the two pages report the same month. Vendor neutrality is preserved: a customer key may point at OpenRouter or directly at a vendor, and the route table below is set per organization.</p>
+<p><strong>Funding source</strong> (ADR-053, carried; a third value added 2026-09-15, maintainer decision): <code>platform_minted</code>, <code>platform</code> or <code>customer_key</code>.</p>
+<ul>
+<li><code>platform_minted</code> — Oxagen mints <strong>one OpenRouter key per organization</strong> through the provider's key-provisioning API, on Oxagen's own account, and holds it enveloped. Oxagen owns it, pays for it, and can rotate or revoke it, so its tokens are billed exactly as <code>platform</code>. What it buys is reconciliation: the provider's own usage report carries one line per provisioned key, so the provider's number and Oxagen's usage-credit ledger can be joined on <code>provisioned_id</code> and compared. The monthly cap is set <strong>on the key at the provider</strong>, not only in Oxagen's meter, so a fault in Oxagen's metering cannot spend past it. This is what a new organization starts on.</li>
+<li><code>platform</code> — Oxagen pays on Oxagen's OpenRouter account, on one key shared across customers. Billed back at vendor cost plus a published markup, capped per organization. The provider returns a single undifferentiated total for every customer at once, so Oxagen's meter is the only witness to its own arithmetic; <code>platform_minted</code> exists because that is not good enough to reconcile against.</li>
+<li><code>customer_key</code> — the customer's own OpenRouter or vendor key. Its tokens are reported and billed at zero.</li>
+</ul>
+<p>In all three the key is stored enveloped (encrypted with a key that is itself encrypted), tested before save, and never returned, and every read of it is audited. What a screen may render is the prefix, the provisioned id, the key hash and the counters, never the secret. Minting, rotating and revoking are governed actions and appear in the audit record by name (<code>org.model_key.mint</code>, <code>.rotate</code>, <code>.revoke</code>). Every tier's month-to-date use (complex, light) is one record, the route table, read by both Organization → Funding (the cap's &quot;used&quot;) and Spend (the month total and By model), so the two pages report the same month. Vendor neutrality is preserved: a customer key may point at OpenRouter or directly at a vendor, and the route table below is set per organization.</p>
 <p><strong>Tiers and default routes:</strong></p>
 <div class="tw"><table>
 <thead>
@@ -7796,6 +7805,162 @@ pnpm --filter @oxagen/desktop dev          # tauri dev over Vite on :1420
 <footer class="colophon"><span>Oxagen · Specification</span><span>Source: <code>docs/desktop-spec.md</code></span></footer>
 </main>
 </div>
+</article><article id="creation" class="doc" hidden>
+<header class="mast">
+  <p class="eyebrow">Oxagen · Specification</p>
+  <h1>Creating things in Oxagen: agents, tools, skills and context records</h1>
+  <dl class="facts"><dt>Status</dt><dd>Spec v1, for build — rev 1 scope</dd><dt>Date</dt><dd>2026-09-15</dd><dt>Owner</dt><dd>Mac Anderson</dd><dt>Source</dt><dd><code>mockups/src/engine.js</code> → <code>DLG_EXT.create</code>, <code>DLG_EXT.wz</code>, <code>wzTool</code>, <code>wzSkill</code>, <code>wzAgent</code>, <code>wzRecord</code>, <code>pRecord</code>, <code>pSkillSource</code>; rendered in <code>mockups/missioncontrol.html</code></dd><dt>Builds on</dt><dd>ADR-043 (Oxagen governs, it does not run); <code>mission-control-spec.md</code> §10 (context and steering), §14 (Mission Control); <code>w13-in-the-loop-scenario.md</code></dd><dt>Related</dt><dd><code>pages/record.md</code>, <code>pages/skill-source.md</code>, <code>pages/tools.md</code>, <code>pages/agents.md</code>, <code>pages/skills.md</code>, <code>pages/steering.md</code></dd></dl>
+</header>
+<div class="grid">
+<nav class="toc" aria-label="Contents of this document"><p>Contents</p><ol><li><a href="#creation/1-one-shape-four-things">1. One shape, four things</a></li><li><a href="#creation/2-the-wizard-shell">2. The wizard shell</a></li><li><a href="#creation/3-a-tool">3. A tool</a></li><li><a href="#creation/4-a-skill">4. A skill</a></li><li><a href="#creation/5-a-context-record">5. A context record</a></li><li><a href="#creation/6-what-this-feature-must-never-do">6. What this feature must never do</a></li></ol></nav>
+<main>
+<h2 id="creation/1-one-shape-four-things">1. One shape, four things</h2>
+<p>There are four things an operator creates in Oxagen — an agent, a tool, a skill and a context
+record — and all four are the same kind of object: <strong>a file in a repository</strong>. So all four are
+created the same way:</p>
+<blockquote>
+<p>describe it → Oxagen drafts the file → you read the file → a pull request → it exists on merge</p>
+</blockquote>
+<p>Nothing in this feature writes a row. No wizard has a Save button that ends in a database. The last
+step of every one of them opens a pull request against the workspace's main repo, and the thing
+exists when somebody merges it — which is also the only place a reviewer can stop it.</p>
+<p>That is not ceremony. It is the same argument the Steering page has always made: people trust pull
+requests, and a thing that can appear in a product by somebody clicking Save is a thing nobody
+reviewed. It is also what lets the tool wizard offer to generate Rust: the code is yours, in your
+repository, under your review. What Oxagen governs is the call, not the source.</p>
+<p><strong>The drafting turn belongs to <code>oxagen.assistant</code>.</strong> It is recorded with frames and a receipt like
+any turn, and it is billed to Oxagen, never to the tenant: it is not one of your runs and it never
+appears in Fleet or in Spend. Every line it drafts is the operator's to change before anybody
+reviews it, and the wizard says so on every drafting step.</p>
+<h3 id="creation/entry-points">Entry points</h3>
+<p><code>Create</code> in ⌘K opens the chooser (<code>DLG_EXT.create</code>), and each page carries its own:</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Page</th>
+<th>Action</th>
+<th>Opens</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Agent IAM</td>
+<td><strong>New agent</strong></td>
+<td><code>wzOpen(&quot;agent&quot;)</code></td>
+</tr>
+<tr>
+<td>Tools</td>
+<td><strong>New tool</strong></td>
+<td><code>wzOpen(&quot;tool&quot;)</code></td>
+</tr>
+<tr>
+<td>Skills</td>
+<td><strong>Add a skill</strong></td>
+<td><code>wzOpen(&quot;skill&quot;)</code></td>
+</tr>
+<tr>
+<td>Steering</td>
+<td><strong>Write a context record</strong></td>
+<td><code>wzOpen(&quot;record&quot;)</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>New agent</strong> is not <strong>Register an agent</strong>. Register wraps an agent that already runs on a machine
+or in CI; New agent writes one that does not exist yet. Both end on a pull request; they start from
+opposite ends.</p>
+<h2 id="creation/2-the-wizard-shell">2. The wizard shell</h2>
+<p><code>S.wz</code> holds the draft. <code>wzSteps()</code> returns the step list, which is a function of the kind and — for
+a tool — of the path the operator took at the recommendation. The rail shows every step, the one you
+are on in gold, the ones behind you ticked.</p>
+<p>A description field does not re-render the dialog on every keystroke; that would rebuild the textarea
+and take the caret with it. The input event writes the draft and enables the one control the
+description gates (<code>wzDescIn</code>), and nothing else.</p>
+<h2 id="creation/3-a-tool">3. A tool</h2>
+<p>There are two honest answers to &quot;I want a tool that does X&quot;: somebody already wrote it, or nobody
+did. Oxagen gives the first one where it can, because an imported tool arrives with a schema, a
+publisher and a credential story, and a tool you write arrives with none of those until you write
+them too.</p>
+<ol>
+<li><strong>Describe</strong> — the capability, not the implementation.</li>
+<li><strong>Recommendation</strong> — <code>mcpMatch()</code> scores the description against <code>MCP_CATALOG</code> on <strong>whole words,
+never substrings</strong>: &quot;admin&quot; contains &quot;dm&quot;, and a matcher that does not know that will offer to
+import Slack for a feature-flag tool, which is worse than offering nothing because the operator
+cannot tell a real match from a spelling accident. Both paths are always shown; one is marked
+recommended, with the matched tools, their hazards, the publisher's verification state, the
+credential kind and what downscoping the provider allows.</li>
+<li><strong>Import</strong> — hands off to the existing importer with the server chosen. A server that moves money
+carries the warning that its financial tools are denied by construction until a named human owner
+with a finance role holds the connection and every agent that may call them holds a mandate.
+Import grants nothing.</li>
+<li><strong>Manifest</strong> (the build path) — <code>.oxagen/tools/&lt;name&gt;.toml</code>, drafted from the description, in the
+source editor. The classification chips above it are <strong>read out of the file</strong> by <code>tomlParse</code>, not
+out of a form: break the file and the chips say so and the step will not advance. Declare the
+worst case, not the common case — the gate a call gets is computed from category, risk, side
+effects, egress and financial class and nothing else.</li>
+<li><strong>Code</strong> — a handler in TypeScript, Python, Go or Rust, plus the input JSON Schema. All four do
+the same three things: read the grant off the call rather than a key out of the environment, pass
+the request id as the idempotency key so a retried call is one effect and not two, and declare
+their annotations so a server that lies about being read-only is a diff somebody can see.</li>
+<li><strong>Pull request</strong> — the manifest, both schemas, the handler, and a test that calls the tool with no
+grant and expects a refusal. Five checks: schema, name uniqueness, hazard fully declared, the
+financial rule (a financial tool whose input schema exposes no amount cannot be held against a
+mandate and is denied by construction), and a secret scan over all of it.</li>
+</ol>
+<h2 id="creation/4-a-skill">4. A skill</h2>
+<p>Three ways in, one way out.</p>
+<ol>
+<li><strong>Source</strong> — search the registry, describe it, or upload a bundle.</li>
+<li><strong>Find it</strong> (registry) — <code>skrMatch()</code> over <code>SKILL_REGISTRY</code>, showing publisher and verification,
+version, digest, load cost in tokens, install count and the proof rate somebody measured. Pinning
+takes the version and the digest, never &quot;latest&quot;: a publisher shipping a new version is a digest
+diff somebody has to approve, which is exactly what <code>market = &quot;hold&quot;</code> means.
+<strong>Describe it</strong> — prose in, a <code>SKILL.md</code> out.
+<strong>Upload</strong> — a <code>.skill</code>, a <code>.zip</code> or a bare <code>SKILL.md</code>, read in the browser and hashed there.
+Choose what it replaces, and the version in the bundle becomes the pinned version: <code>2.1.0 → 2.2.0</code>, with the digest shown before anything merges. The old version stays readable, because
+every run that loaded it named its digest.</li>
+<li><strong>Review</strong> — the file in the source editor, with its load cost priced to the cent. Every token is
+paid for on every turn it is loaded into, by every agent that loads it.</li>
+<li><strong>Pull request</strong> — six checks: frontmatter, semver strictly greater than what it replaces, digest
+recomputed at merge, grants (a skill cannot raise a tier or add a tool), secret scan, and the load
+cost against the workspace's search budget.</li>
+</ol>
+<p><strong>Changing a skill</strong> is <code>pages/skill-source.md</code>: the same editor over <code>SKILL.md</code>, reached from the
+catalog row's <strong>Edit</strong> and from the skill dialog, ending on the same kind of pull request with the
+patch version bumped.</p>
+<h2 id="creation/5-a-context-record">5. A context record</h2>
+<p>The kind is not a label. It decides how the statement is delivered, what the checks assert about it,
+and how a run is allowed to use it — so the wizard makes you pick one before it will let you write
+the sentence, and it shows what each kind can never do.</p>
+<ol>
+<li><strong>Describe</strong> — the concern. Say the thing itself, not the reason for it: the reason belongs in the
+rationale on the pull request, where a reviewer reads it once, not in the bundle, where every
+agent pays for it on every turn.</li>
+<li><strong>Kind</strong> — six cards, each with what it is for, what it can never do, and how it reaches a run.</li>
+<li><strong>Statement</strong> — the source editor over the statement, plus force, scope and, for the two
+constraining kinds, the constraint effect. Force is filtered by kind: a preference cannot be
+<code>must</code>, and a fact or a memory is <code>info</code>. A live preview shows the record card as it will read,
+and the step prices the bundle recompile.</li>
+<li><strong>Checks</strong> — the six, spelled out for this record. The fifth one earns the others: two people can
+each write a sensible record, six weeks apart, that together say a call must happen and must not,
+and the only place that is catchable is on the pull request, before either reaches a run.</li>
+<li><strong>Pull request</strong> — merge is the publication, and the record is in force from the merge commit, not
+from when it was written.</li>
+</ol>
+<p><strong>Reading and changing one</strong> is <code>pages/record.md</code>: the statement as the headline, a per-kind panel,
+and the statement in the same editor.</p>
+<h2 id="creation/6-what-this-feature-must-never-do">6. What this feature must never do</h2>
+<ul>
+<li>Write a row. Every path ends on a pull request.</li>
+<li>Let a record, a skill or a tool manifest grant authority. A record steers; a skill is prose; a tool
+version lands in the registry callable by nobody until a role grant puts it on a belt.</li>
+<li>Show a number stronger than the record holds, or a gate softer than policy would apply.</li>
+<li>Recommend an import on a substring match.</li>
+<li>Put more than one gold action on a screen. Gold is identity; it never encodes state.</li>
+</ul>
+
+<footer class="colophon"><span>Oxagen · Specification</span><span>Source: <code>docs/creation-spec.md</code></span></footer>
+</main>
+</div>
 </article><article id="plan" class="doc" hidden>
 <header class="mast">
   <p class="eyebrow">Oxagen · Plan</p>
@@ -9539,8 +9704,8 @@ test(&quot;fleet · phone&quot;, async ({ page }) =&gt; {
 <tr>
 <td>P7</td>
 <td><strong>Organization</strong></td>
-<td>tabs people/roles/invitations/workspaces/funding/plane/keys; role editor; API key create/rotate/revoke dialogs</td>
-<td></td>
+<td>tabs people/roles/invitations/workspaces/funding/plane/keys; role editor; API key create/rotate/revoke dialogs; the <strong>Model key</strong> panel on funding: the three funding sources, the prefix and provisioned id (never the secret), the cap set at the provider, and the reconciliation block comparing the provider's report against the credit ledger as two independent numbers</td>
+<td>Mint/rotate/revoke dialogs; the write lane is B4 Organization</td>
 </tr>
 <tr>
 <td>P8</td>
@@ -9559,6 +9724,12 @@ test(&quot;fleet · phone&quot;, async ({ page }) =&gt; {
 <td><strong>Run · Done</strong></td>
 <td>the Done tab (<code>dod-spec.md</code>): verdict by shape, certificate, checks with evidence digests, hidden checks, budget from the tool log, the stops; the locked-file dialog; the sign dialog</td>
 <td>P2</td>
+</tr>
+<tr>
+<td>P11</td>
+<td><strong>In-app agent</strong> (spec §4.4)</td>
+<td>the flyout: the launcher at the foot of the rail, the top-bar button, the ⌘K group, the mobile More tile, and the panel — a host the app reclasses but never rebuilds, so the transition runs and a half-typed message survives a re-render. Closed it is <code>inert</code> and <code>aria-hidden</code>; it paints under the rail; Escape closes it without changing the route. Both refusals are first-class: <strong>engine down</strong> (<code>stella serve</code> unreachable — a required service, no in-process fallback) and <strong>no model key</strong> (nothing to spend against, so nothing is charged). A turn's badge says the run is Oxagen's and never links into the tenant's run index.</td>
+<td>Owns <code>#asst</code>; the transcript is <code>chat.conversations</code>/<code>chat.messages</code> (App. A.10). Not a route — the guard is <code>tools/check-assistant.mjs</code>, not a page story</td>
 </tr>
 </tbody>
 </table></div>
@@ -9614,7 +9785,7 @@ test(&quot;fleet · phone&quot;, async ({ page }) =&gt; {
 <td>A7</td>
 <td>org + members + keys</td>
 <td><code>org.org_users</code>, <code>org.invitations</code>, <code>workspace.workspaces</code>, <code>iam.roles</code>, <code>org.data_planes</code>, <code>auth.api_keys</code>, <code>org.model_credentials</code></td>
-<td>none</td>
+<td>the minted key's <code>provisioned_id</code>, <code>key_hash</code>, <code>prefix</code> and provider cap, and the provider usage report the reconciliation row reads (§4.5)</td>
 </tr>
 <tr>
 <td>A8</td>
@@ -9669,7 +9840,7 @@ test(&quot;fleet · phone&quot;, async ({ page }) =&gt; {
 <tr>
 <td>Organization</td>
 <td><code>org.member_invite.*</code>, <code>org.member_role.change</code>, <code>workspace.create</code>, <code>workspace.settings.*</code>, <code>org.settings.write</code>, <code>org.model_credential</code>, <code>org.data_plane</code>, <code>api.key.{create,rotate,revoke}</code></td>
-<td>role editor custom roles (every tier, 2026-09-15, maintainer decision)</td>
+<td>role editor custom roles (every tier, 2026-09-15, maintainer decision); <code>org.model_key.{mint,rotate,revoke}</code> against the provider's provisioning API (§4.5)</td>
 </tr>
 <tr>
 <td>Billing</td>
@@ -9988,8 +10159,8 @@ stories for new components; PR body lists each §3 row you touched with its stat
 <tr>
 <td>In-app agent (kept, 2026-09-14)</td>
 <td>§0 row 1, §1, §2, §4.4, §16 and App. A.10 state it in scope (2026-09-15)</td>
-<td>the sidebar flyout is lane L3's (decision 9, 2026-09-15)</td>
-<td>the sidebar launcher, the top-bar button, the panel, the ⌘K agent-tools group and the W11 assistant steps were removed on 2026-09-14; W11 is &quot;the account&quot;</td>
+<td>the sidebar flyout is lane P11 (decision 9, 2026-09-15; <code>implementation-plan.md</code> Batch 2)</td>
+<td>the sidebar launcher, the top-bar button, the panel and the ⌘K agent-tools group were removed on 2026-09-14, before the reversal the same day, and <strong>restored on 2026-09-15</strong> — with the engine (Stella over HTTP) and the organization's model key written into §4.4 and §4.5. The W11 assistant steps stay removed; W11 is &quot;the account&quot;</td>
 </tr>
 <tr>
 <td>The ontology; Neo4j kept (2026-09-15)</td>
@@ -10865,7 +11036,7 @@ need a decision before W13 is written into the spec.</li>
 </div>
 <script>
 (function(){
-  var TITLES={'spec': 'Oxagen Mission Control: Product and Technical Specification', 'dod': 'Oxagen DoD: the definition of done for agent runs', 'witness': 'Oxagen Witness: outcome verification', 'desktop': 'Oxagen Desktop: product specification, rev 1', 'plan': 'Oxagen Mission Control app: implementation plan', 'scope': 'Oxagen Mission Control: the scope review, and what it changed', 'scaleback': 'Scale back Mission Control: the mockup prompt', 'prompts': 'Oxagen Mission Control: mockup prompts, one per demo flow', 'consolidation': 'Consolidating W1–W11 into one design', 'feedback': 'Feedback on the mockups', 'videos': 'Videos of the mockups, narrated', 'w13': 'W13: in the loop'};
+  var TITLES={'spec': 'Oxagen Mission Control: Product and Technical Specification', 'dod': 'Oxagen DoD: the definition of done for agent runs', 'witness': 'Oxagen Witness: outcome verification', 'desktop': 'Oxagen Desktop: product specification, rev 1', 'creation': 'Creating things in Oxagen: agents, tools, skills and context records', 'plan': 'Oxagen Mission Control app: implementation plan', 'scope': 'Oxagen Mission Control: the scope review, and what it changed', 'scaleback': 'Scale back Mission Control: the mockup prompt', 'prompts': 'Oxagen Mission Control: mockup prompts, one per demo flow', 'consolidation': 'Consolidating W1–W11 into one design', 'feedback': 'Feedback on the mockups', 'videos': 'Videos of the mockups, narrated', 'w13': 'W13: in the loop'};
   var first='spec';
   function show(){
     var h=location.hash.replace(/^#/,""), id=h.split("/")[0];

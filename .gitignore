@@ -3,6 +3,9 @@ node_modules/
 storybook-static/
 *storybook.log
 
+# Screenshots from tools/check-creation.mjs --shots
+.claude/shots/
+
 # Docs site (site/): dependencies, build output, and everything generated from the repo sources
 site/node_modules/
 site/.next/

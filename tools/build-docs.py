@@ -25,6 +25,7 @@ CATALOG = [
         ("dod", "dod-spec.md", "Specification"),
         ("witness", "witness-spec.md", "Specification"),
         ("desktop", "desktop-spec.md", "Specification"),
+        ("creation", "creation-spec.md", "Specification"),
     ]),
     ("Plans and decisions", [
         ("plan", "implementation-plan.md", "Plan"),
