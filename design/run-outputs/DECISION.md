@@ -78,4 +78,5 @@ Item 7 names *new media assets*. The component renders a `media` node with a rea
 video or audio path as media, but **no seed run produces a media asset**, so no fixture exercises
 the thumbnail. Grounding a media node needs a run that genuinely generates one rather than a
 picture invented for the mockup; when that run exists, give its node a `thumb` and it renders. This
-is the only part of item 7 not visible in the built mockup today.
+is the only part of item 7 not visible in the built mockup today, and it is tracked as issue #39,
+which carries the constraints already found.
