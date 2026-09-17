@@ -7374,47 +7374,78 @@ var CTXPR={prp:"prp_01K5RU4A", pr:"a-intel/platform#519", branch:"context/ctx.re
   st:"Do not re-read CHANGELOG.md more than once in a run; cache the first read.",
   effect:"rendered 1 · cited 0 · violated 0", commit:"7d2e91a", pub:"2026-09-11"}};
 CTXPR.rule={id:CTXPR.record.id,tok:CTXPR.record.tok,isNew:true};
+/* the record's own clock, not the viewer's: the run it reaches is on 2026-09-11 */
+CTXPR.mergedAt=function(){return CTXPR.record.pub+" 09:16:40 UTC";};
+CTXPR.author="promoter";
 S.ctxpr={st:"passed",done:CTXPR.checks.length,timers:[],mergedAt:null};
 S.prpSel=null;
 
-function ctxprStop(){S.ctxpr.timers.forEach(clearTimeout);S.ctxpr.timers=[];}
-function ctxprPublish(on){
-  var rec=CTXPR.record, i=RECORDS.indexOf(rec);
+/* ---- the Context PR lifecycle, shared by the promoter's and the operator's ----
+   Two things open a Context PR: the promoter, out of runs it aggregated into a proposal, and a
+   person, out of the record wizard. They differ in what they can show for themselves — the
+   promoter cites runs and a confidence, a person cites themselves — and they are identical in
+   everything that decides whether the record publishes: the same six checks, the same merge, the
+   same promotion event, the same bundle bump. So the lifecycle is parameterised over a PR
+   definition and its own state, and the two differ only in what they render. */
+function prStop(st){st.timers.forEach(clearTimeout);st.timers=[];}
+function prPublish(def,on){
+  var rec=def.record, i=RECORDS.indexOf(rec);
   if(on===(i>=0)) return;
   /* Publishing compiles a new bundle version. Recorded requests keep the version they were sent with
      (CTXB's steering band reads the one on seq 2), so nothing already recorded moves; the next model call reads it. */
   if(on){
-    RECORDS.push(rec); STEER_BUNDLE.rules.push(CTXPR.rule); STEER_BUNDLE.v++; CTXPR.rule.since=STEER_BUNDLE.v;
-    auditEvent("steering_published",me().name,rec.id+" · "+CTXPR.pr+" merged as "+rec.commit+" · bundle v"+(STEER_BUNDLE.v-1)+" → v"+STEER_BUNDLE.v,"info",CTXPR.evt);
+    RECORDS.push(rec); STEER_BUNDLE.rules.push(def.rule); STEER_BUNDLE.v++; def.rule.since=STEER_BUNDLE.v;
+    auditEvent("steering_published",me().name,rec.id+" · "+def.pr+" merged as "+rec.commit+" · bundle v"+(STEER_BUNDLE.v-1)+" → v"+STEER_BUNDLE.v,"info",def.evt);
   } else {
-    RECORDS.splice(i,1); STEER_BUNDLE.rules.splice(STEER_BUNDLE.rules.indexOf(CTXPR.rule),1); STEER_BUNDLE.v--;
-    for(var k=AUDIT.length-1;k>=0;k--){if(AUDIT[k].ref===CTXPR.evt)AUDIT.splice(k,1);}
+    RECORDS.splice(i,1);
+    /* The record and its compiled rule go in together and come out together, so the version moves
+       with the rule and not with the record. Splicing on a bare indexOf would pass -1 through and
+       take the last rule in the bundle instead — a wrong rule removed and a version decremented
+       for a compile that never happened. */
+    var ri=STEER_BUNDLE.rules.indexOf(def.rule);
+    if(ri>=0){ STEER_BUNDLE.rules.splice(ri,1); STEER_BUNDLE.v--; }
+    for(var k=AUDIT.length-1;k>=0;k--){if(AUDIT[k].ref===def.evt)AUDIT.splice(k,1);}
   }
 }
 /* none · opened · checking · passed · merged */
-function ctxprSet(st){
-  var c=S.ctxpr; ctxprStop();
-  c.st=st; c.done=(st==="passed"||st==="merged")?CTXPR.checks.length:0;
-  /* the record's own clock, not the viewer's: the run it reaches is on 2026-09-11 */
-  c.mergedAt=st==="merged"?CTXPR.record.pub+" 09:16:40 UTC":null;
-  ctxprPublish(st==="merged");
+function prSet(def,st,to){
+  prStop(st);
+  st.st=to; st.done=(to==="passed"||to==="merged")?def.checks.length:0; st.failed=null;
+  st.mergedAt=to==="merged"?def.mergedAt():null;
+  prPublish(def,to==="merged");
 }
-function ctxprPaint(){ if(route().page==="steering") render(); }
 /* The checks, one at a time, in regSchedule's idiom: timers live on the state they drive and die with it. */
-function ctxprRun(){
-  ctxprSet("opened");
-  var c=S.ctxpr;
-  function later(fn,ms){c.timers.push(setTimeout(fn,ms));}
+function prRun(def,st,paint){
+  prSet(def,st,"opened");
+  function later(fn,ms){st.timers.push(setTimeout(fn,ms));}
   function next(){
-    c.st="checking"; ctxprPaint();
+    st.st="checking"; paint();
     later(function(){
-      c.done++;
-      if(c.done>=CTXPR.checks.length){c.st="passed";ctxprPaint();return;}
+      /* A check that cannot report anything but "pass" is not a check. One that carries a `test`
+         is evaluated when its turn comes, and a false answer stops the run where it stopped: the
+         state is `failed`, merge stays blocked, and nothing is published. */
+      var c=def.checks[st.done];
+      if(c.test&&!c.test()){ st.st="failed"; st.failed=st.done; paint(); return; }
+      st.done++;
+      if(st.done>=def.checks.length){st.st="passed";paint();return;}
       next();
-    },CTXPR.checks[c.done].ms);
+    },def.checks[st.done].ms);
   }
   later(next,450);
 }
+function prLabel(def,st){
+  var n=def.checks.length;
+  if(st.st==="failed") return ["failed",(st.failed+1)+" / "+n+" \u00b7 check failed"];
+  return st.st==="merged"?["proven","merged"]:st.st==="passed"?["allowed",n+" / "+n+" checks pass"]:
+   st.st==="checking"?["approval",st.done+" / "+n+" checks · running"]:st.st==="opened"?["approval","0 / "+n+" checks · queued"]:["q","not opened"];
+}
+
+/* the promoter's, for prp_01K5RU4A */
+function ctxprStop(){prStop(S.ctxpr);}
+function ctxprPublish(on){prPublish(CTXPR,on);}
+function ctxprSet(st){prSet(CTXPR,S.ctxpr,st);}
+function ctxprPaint(){ if(route().page==="steering") render(); }
+function ctxprRun(){prRun(CTXPR,S.ctxpr,ctxprPaint);}
 function ctxprOpen(){
   S.dlg=null; S.dlgArg=null; S.prpSel=null; S.tab.steering="prs";
   if(S.ctxpr.st!=="none"){ if(route().page!=="steering") go('#/'+ORG.slug+'/'+S.ws+'/steering'); else render(); return; }
@@ -7427,11 +7458,7 @@ function ctxprMerge(){
   ctxprSet("merged"); S.tab.steering="prs"; render();
   act("Merged "+CTXPR.pr+". promotion_event written, bundle v"+(STEER_BUNDLE.v-1)+" → v"+STEER_BUNDLE.v+" signed, steering_published audited.");
 }
-function ctxprLabel(){
-  var c=S.ctxpr, n=CTXPR.checks.length;
-  return c.st==="merged"?["proven","merged"]:c.st==="passed"?["allowed",n+" / "+n+" checks pass"]:
-   c.st==="checking"?["approval",c.done+" / "+n+" checks · running"]:c.st==="opened"?["approval","0 / "+n+" checks · queued"]:["q","not opened"];
-}
+function ctxprLabel(){return prLabel(CTXPR,S.ctxpr);}
 function ctxprCheckOk(c){return typeof c.ok==="function"?c.ok():c.ok;}
 
 DLG_EXT.ctxpr=function(arg){
@@ -7507,19 +7534,241 @@ function prpDetail(p){
 }
 
 /* ---- the Context PR, as a state machine ---- */
+
+/* ---- the operator's Context PRs ----
+   The wizard's last step opens a real one. It is the same object the promoter's lifecycle runs on,
+   with one difference that is not cosmetic: a promoter's pull request argues from runs it
+   aggregated, and a person's argues from the person. So the checks, the merge, the promotion event
+   and the bundle bump are shared, and only the body differs.
+
+   There can be several open at once, because "one concern per pull request" limits what one PR may
+   carry, not how many concerns a person may have in flight. They live in session state, like the
+   promoter's — nothing here is a new store. */
+var RECPRS=[];
+S.recprs={};          /* pr id -> {st, done, failed, timers, mergedAt} */
+S.prSel=null;
+
+function recprById(pr){for(var i=0;i<RECPRS.length;i++){if(RECPRS[i].pr===pr)return RECPRS[i];}return null;}
+function recprSt(def){ return def?(S.recprs[def.pr]||(S.recprs[def.pr]={st:"none",done:0,failed:null,timers:[],mergedAt:null})):null; }
+/* the one the tab is showing: what was selected, else the newest still open, else the newest */
+function recprCur(){
+  if(!RECPRS.length) return null;
+  var byId=S.prSel&&S.prSel!=="ctxpr"?recprById(S.prSel):null;
+  if(byId) return byId;
+  for(var i=0;i<RECPRS.length;i++){ if(recprSt(RECPRS[i]).st!=="merged") return RECPRS[i]; }
+  return RECPRS[0];
+}
+function recprOpenCount(){var n=0;RECPRS.forEach(function(d){if(recprSt(d).st!=="merged")n++;});return n;}
+
+/* The next free number on the workspace's main repo, read off the pull requests that exist rather
+   than invented, so two open PRs never claim the same one. */
+function prNextNumber(){
+  var max=0;
+  function take(x){var m=/#(\d+)/.exec(String(x||""));if(m&&+m[1]>max)max=+m[1];}
+  take(CTXPR.pr); PROPOSALS.forEach(function(q){take(q.pr);}); RECPRS.forEach(function(d){take(d.pr);});
+  return max+1;
+}
+function recprPaint(){ if(route().page==="steering") render(); }
+function recprRun(def){ prRun(def,recprSt(def),recprPaint); }
+function recprLabel(def){ return prLabel(def,recprSt(def)); }
+function recprMerge(pr){
+  var def=pr?recprById(pr):recprCur(); if(!def) return;
+  var st=recprSt(def);
+  if(st.st!=="passed"){
+    act(st.st==="merged"?def.pr+" is already merged.":
+        st.st==="failed"?"A check failed. "+def.pr+" cannot merge until the file changes.":
+        "Merge is blocked until all "+def.checks.length+" checks pass.");
+    return;
+  }
+  prSet(def,st,"merged"); S.tab.steering="prs"; S.prSel=def.pr; render();
+  act("Merged "+def.pr+". promotion_event written, bundle v"+(STEER_BUNDLE.v-1)+" → v"+STEER_BUNDLE.v+" signed, steering_published audited.","gold");
+}
+/* Closing an unmerged one throws the draft away; closing a merged one would unpublish a record,
+   which is a second pull request, not a button. */
+function recprDiscard(pr){
+  var def=pr?recprById(pr):recprCur(); if(!def) return;
+  var st=recprSt(def);
+  if(st.st==="merged"){act("It is merged. Taking a published record back out of force is its own pull request.");return;}
+  prStop(st); delete S.recprs[def.pr];
+  RECPRS.splice(RECPRS.indexOf(def),1);
+  if(S.prSel===def.pr)S.prSel=null;
+  render(); act("Closed "+def.pr+" without merging. Nothing was published and the branch is gone.");
+}
+
+/* The wizard's last step. Everything the PR needs is already in the draft; nothing new is stored. */
+function wzRecOpenPr(){
+  var z=S.wz; if(!z) return;
+  var w=ws(), id=wzRecLineage(), st=String(cedText("wz:record")||wzRecStatement()).trim(), tok=wzRecTok();
+  var ce=wzRecCe()?z.ce:null, head=sha7(id+st), day=new Date(storyMs()).toISOString().slice(0,10);
+  var rec={id:id,kind:z.rkind,force:z.force,ce:ce,scope:z.scope,status:"published",isNew:true,tok:tok,
+    st:st,effect:"rendered 0 · cited 0 · violated 0",commit:head,pub:day};
+  var def={
+    pr:w.main+"#"+prNextNumber(), branch:"context/"+id, base:CTXPR.base, head:head,
+    record:rec, rule:{id:id,tok:tok,isNew:true},
+    promo:"rec_01K5"+sha7(id).toUpperCase(), evt:"evt_01K5"+sha7(st).toUpperCase(),
+    hash:"sha256:"+sha7(st)+sha7(id)+"a1",
+    author:"operator", by:CMD_OP, desc:String(z.desc||"").trim(), ws:w.slug, opened:nowT().slice(0,8),
+    mergedAt:function(){return rec.pub+" "+nowT().slice(0,8)+" UTC";}
+  };
+  /* The checks close over this pull request, not over whichever one is selected, so several can be
+     open at once and each still reports on its own file. */
+  def.checks=[
+   {n:"Schema",ms:900,
+    test:function(){return !!tomlOf(recprFileText(def));},
+    ok:"context-record/v0.1 valid · 1 file, 1 record, 1 lineage",
+    bad:"the record file does not parse as TOML"},
+   {n:"Lineage uniqueness",ms:700,
+    /* A real check, not a sentence. Two descriptions can slug to one lineage, and without this the
+       second pull request merges a second record under an id that is already published: two rows,
+       two compiled rules, the tokens counted twice, and this line claiming otherwise on screen. */
+    test:function(){return !RECORDS.some(function(r){return r.status==="published"&&r.id===def.record.id;});},
+    ok:function(){return "no published record holds "+def.record.id+"; this pull request is its only holder";},
+    bad:function(){return def.record.id+" is already published. One lineage, one record — amend the published one instead of opening a second under its id.";}},
+   {n:"record_hash recomputation",ms:600,
+    ok:function(){return "recomputed over the canonical bytes · "+def.hash.slice(0,20)+"… matches the file";}},
+   {n:"Secret and PII scan",ms:900,ok:"statement, rationale and evidence scanned · 0 findings"},
+   {n:"Conflict against active records",ms:1000,ok:function(){
+      return RECORDS.filter(function(r){return r.status==="published"&&r.id!==def.record.id;}).length+
+        " published records checked · no require or forbid on the same subject";}},
+   {n:"constraint_effect ∈ {require, forbid}",ms:500,ok:function(){
+      var e=def.record.ce;
+      return e?("constraint_effect = "+e+" · grants nothing"):"not a constraining kind · the field is absent, which is also a pass";}}
+  ];
+  RECPRS.unshift(def);
+  S.recprs[def.pr]={st:"none",done:0,failed:null,timers:[],mergedAt:null};
+  S.wz=null; S.dlg=null; S.dlgArg=null; S.prpSel=null;
+  S.tab.steering="prs"; S.prSel=def.pr;
+  recprRun(def);
+  if(route().page!=="steering") go('#/'+ORG.slug+'/'+w.slug+'/steering'); else render();
+  act("Branch "+def.branch+" pushed and "+def.pr+" opened. "+def.checks.length+" checks queued; it steers nothing until it merges.","gold");
+}
+
+/* The file the pull request carries. The statement is operator text, so it is escaped as TOML —
+   a quote or a backslash in it must not be able to produce a file that does not parse while the
+   schema check says it does. tomlStr and tomlMulti are the same serialisers the agent definition
+   editor writes with. */
+function recprFileText(def){
+  var r=def.record, multi=/\n/.test(r.st);
+  return '# .oxagen/rules/'+r.id+'.toml\n'+
+   'schema = "context-record/v0.1"\n'+
+   'lineage_id = '+tomlStr(r.id)+'\n'+
+   'kind = '+tomlStr(r.kind)+'\n'+
+   'sharing_scope = '+tomlStr(r.scope)+'\n'+
+   'statement = '+(multi?tomlMulti(r.st):tomlStr(r.st))+'\n\n'+
+   '[steering]\nstrength = '+tomlStr(r.force)+'\n\n'+
+   (r.ce?'[enforcement]\nconstraint_effect = '+tomlStr(r.ce)+'\nblocking = false\n\n'
+        :'# no [enforcement] table: a '+r.kind+' constrains nothing\n\n')+
+   'record_hash = '+tomlStr(def.hash)+'\n';
+}
+function tomlOf(text){try{return tomlParse(text);}catch(e){return null;}}
+function recprFile(def){
+  /* highlighted with the same grammar the source editor uses, so what is shown is what parses */
+  return '<pre>'+hlToml(recprFileText(def))+'</pre>';
+}
+function recprBody(def){
+  var r=def.record, w=ws();
+  return ['## '+r.st, '',
+   'Written by '+me().name+' in the record wizard on '+r.pub+'.', '',
+   '### What this asks for',
+   'Kind `'+r.kind+'`. Strength `'+r.force+'`.'+(r.ce?' Constraint effect `'+r.ce+'`; it grants nothing.':' It constrains nothing and grants nothing.'), '',
+   'Scope `'+r.scope+'` — '+(r.scope==="workspace"?'every agent in '+w.name:r.scope==="repository"?'the linked repository itself':'one agent’s runs and no other')+'.', '',
+   '### Why',
+   (def.desc||'(no rationale given)'), '',
+   '### What it costs',
+   'Adds '+r.tok+' steering tokens a turn to every turn in scope.', '',
+   '---',
+   'Opened by '+me().name+' · workspace `'+def.ws+'` · governance `team`'].join('\n');
+}
+function recprDetail(def){
+  var st=recprSt(def), r=def.record, n=def.checks.length, l=recprLabel(def);
+  var merged=st.st==="merged", passed=st.st==="passed", failed=st.st==="failed", sb=stgBundle();
+  var checks=def.checks.map(function(k,i){
+    var s2=i<st.done?"pass":(failed&&i===st.failed)?"fail":(st.st==="checking"&&i===st.done)?"running":"queued";
+    return '<tr data-check="'+s2+'"><td style="font-size:12.5px">'+h(k.n)+'<div class="dim" style="font-size:11.5px">'+
+     (s2==="pass"?h(ctxprCheckOk(k)):s2==="fail"?h(typeof k.bad==="function"?k.bad():k.bad):s2==="running"?'running…':'queued')+'</div></td>'+
+     '<td style="text-align:right">'+(s2==="pass"?'<span class="b b-allowed"><span class="d"></span>pass</span>':
+      s2==="fail"?'<span class="b b-failed"><span class="d"></span>fail</span>':
+      s2==="running"?'<span class="reg-spin" aria-label="running"></span>':'<span class="b b-q">queued</span>')+'</td></tr>';}).join("");
+  var mergebar=merged
+   ? '<div class="panel-b" style="border-top:1px solid var(--border)"><b style="color:var(--st-proven)">Merged by '+h(me().name)+'</b>'+
+     '<div class="dim" style="font-size:12px">'+h(st.mergedAt)+' · squashed into main as '+h(r.commit)+'</div>'+
+     '<div class="row" style="margin-top:11px;gap:8px;flex-wrap:wrap">'+
+     '<button class="btn primary" onclick="go(\''+crecUrl(r.id)+'\')">Open the record</button>'+
+     '<button class="btn" onclick="S.tab.steering=\'records\';S.prSel=null;render()">See it in Records</button></div></div>'
+   : '<div class="panel-b row" style="border-top:1px solid var(--border);gap:12px;flex-wrap:wrap"><div style="flex:1;min-width:200px;font-size:12.5px">'+
+     (failed?'<b style="color:var(--st-failed)">A check failed.</b> <span class="muted">Nothing merges and nothing is published. Change the file and open it again.</span>'
+      :passed?'<b>'+n+' checks passed.</b> <span class="muted">Governance team: '+h(me().name)+' owns <span class="mono">.oxagen/rules/</span>.</span>'
+             :'<b>Checks are running.</b> <span class="muted">Merge is blocked until all '+n+' report.</span>')+'</div>'+
+     '<button class="btn" onclick="recprDiscard(\''+h(def.pr)+'\')">Close without merging</button>'+
+     '<button class="btn'+(passed?' primary':'')+'" '+(passed?'':'disabled ')+'onclick="recprMerge(\''+h(def.pr)+'\')">Merge pull request</button></div>';
+  var right=merged
+   ? '<div class="panel" style="margin-bottom:14px" data-promo-bundle="'+sb.v+'"><div class="panel-h"><h3>promotion_event</h3>'+
+     '<span class="b b-q" style="margin-left:auto">written on merge, never by an agent</span></div><div class="panel-b"><dl class="kv code">'+
+     '<dt>record_id</dt><dd>'+h(def.promo)+'</dd><dt>lineage_id</dt><dd>'+h(r.id)+'</dd>'+
+     '<dt>from → to</dt><dd>authored → <b>published</b></dd>'+
+     '<dt>author</dt><dd>'+h(me().name)+' · '+h(me().role)+'</dd>'+
+     '<dt>approver</dt><dd>'+h(me().name)+' · '+h(me().role)+'</dd>'+
+     '<dt>pr_url</dt><dd>github.com/'+h(def.pr.replace("#","/pull/"))+'</dd>'+
+     '<dt>commit_sha</dt><dd>'+h(r.commit)+'</dd><dt>merged_at</dt><dd>'+h(st.mergedAt)+'</dd>'+
+     '<dt>re-indexed</dt><dd>from the merged commit · '+h(def.hash.slice(0,20))+'… verified</dd>'+
+     '<dt>bundle</dt><dd>v'+(sb.v-1)+' → <b>v'+sb.v+'</b> · '+h(sb.digest||"re-signed")+'</dd>'+
+     '<dt>tokens per turn</dt><dd>'+tokn(sb.tok-r.tok)+' → '+tokn(sb.tok)+'</dd>'+
+     '<dt>audit</dt><dd>steering_published · '+h(def.evt)+'</dd>'+
+     '<dt>ledger</dt><dd>promotions.jsonl not written · regulated mode only; this workspace is team</dd></dl>'+
+     '<div class="row" style="margin-top:13px;gap:8px;flex-wrap:wrap">'+
+     '<button class="btn" onclick="go(\'#/'+ORG.slug+'/audit/events\')">Audit log</button></div></div></div>'
+   : '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>What merge will do</h3></div><div class="panel-b"><dl class="kv">'+
+     '<dt>1</dt><dd>write a promotion_event with the author, the pull request and the commit</dd>'+
+     '<dt>2</dt><dd>re-index the record from the merged commit; a hash mismatch blocks delivery</dd>'+
+     '<dt>3</dt><dd>bump the bundle v'+sb.v+' → v'+(sb.v+1)+' and re-sign it · '+tokn(sb.tok)+' → '+tokn(sb.tok+r.tok)+' steering tokens a turn</dd>'+
+     '<dt>4</dt><dd>emit steering_published to the audit log</dd>'+
+     '<dt>5</dt><dd>deliver it on the next model call of every run in '+h(ws().name)+'</dd></dl>'+
+     '<div class="note" style="margin-top:12px">Nothing above happens on the way here. The record steers nothing while this pull request is open, which is the whole reason it is a pull request.</div></div></div>';
+  return '<div class="split"><div>'+
+   '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Context PR · <span class="mono">'+h(def.pr)+'</span></h3>'+
+    '<span class="b b-'+l[0]+'" style="margin-left:auto" data-recpr-state="'+st.st+'"><span class="d"></span>'+h(l[1])+'</span></div><div class="panel-b">'+
+    '<p class="eyebrow q">Branch <span class="mono">'+h(def.branch)+'</span> · base main · '+h(def.base)+' · one concern per PR</p>'+
+    recprFile(def)+'</div></div>'+
+   '<div class="panel"><div class="panel-h"><h3>Pull request body</h3>'+
+    '<span class="b b-q" style="margin-left:auto">written by '+h(me().name)+'</span></div>'+
+    '<div class="panel-b"><pre>'+h(recprBody(def))+'</pre></div></div></div>'+
+   '<div><div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Checks</h3>'+
+    '<span class="muted" style="font-size:12px">the same rules as <span class="mono">stella context validate</span></span></div>'+
+    '<div class="tw"><table class="narrow"><tbody data-recpr-done="'+st.done+'">'+checks+'</tbody></table></div>'+mergebar+'</div>'+right+'</div></div>';
+}
+
+/* Which pull request the tab is showing. An operator's wins by default because it is the one they
+   just opened; the promoter's is one click away and stays selectable after. */
+function prSelect(v){S.prSel=v;render();}
+function prSelected(){ return (RECPRS.length&&S.prSel!=="ctxpr")?"recpr":"ctxpr"; }
+function prTable(){
+  var rows=[], cur=recprCur();
+  RECPRS.forEach(function(d){var lr=recprLabel(d);
+    rows.push([d.pr,d.pr,d.record.st,d.branch,me().name,'<span class="b b-'+lr[0]+'"><span class="d"></span>'+h(lr[1])+'</span>',
+      cur&&cur.pr===d.pr&&prSelected()==="recpr"]);});
+  if(S.ctxpr.st!=="none"){var p=prpById(CTXPR.prp),lc=ctxprLabel();
+    rows.push(["ctxpr",CTXPR.pr,p.st,CTXPR.branch,"the promoter",'<span class="b b-'+lc[0]+'"><span class="d"></span>'+h(lc[1])+'</span>',
+      prSelected()==="ctxpr"]);}
+  PROPOSALS.forEach(function(q){ if(q.id!==CTXPR.prp&&q.pr!=="—")
+    rows.push([null,q.pr,q.st,"context/"+q.lineage,"the promoter",'<span class="b b-approval"><span class="d"></span>'+h(q.checks)+'</span>',false]);});
+  return '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Open and recent Context PRs</h3>'+
+   '<span class="b b-q" style="margin-left:auto">governance: team · code-owner review required</span></div>'+
+   '<div class="tw"><table data-lt="off"><thead><tr><th>Pull request</th><th>Branch</th><th>Opened by</th><th>State</th></tr></thead><tbody>'+
+   rows.map(function(x){
+     return '<tr'+(x[0]?' class="click'+(x[6]?' on':'')+'" onclick="prSelect(\''+h(x[0])+'\')" aria-current="'+(x[6]?"true":"false")+'"':'')+'>'+
+      '<td><span class="mono" style="font-size:12px">'+h(x[1])+'</span><div class="dim" style="font-size:11.5px">'+h(x[2])+'</div></td>'+
+      '<td class="mono" style="font-size:11.5px">'+h(x[3])+'</td><td style="font-size:12.5px">'+h(x[4])+'</td><td>'+x[5]+'</td></tr>';}).join("")+
+   '</tbody></table></div></div>';
+}
+
 function ctxprTab(){
+  var table=prTable();
+  if(prSelected()==="recpr") return table+recprDetail(recprCur());
   var c=S.ctxpr, n=CTXPR.checks.length, l=ctxprLabel(), merged=c.st==="merged", passed=c.st==="passed"||merged;
   var p=prpById(CTXPR.prp), s=prpStats(CTXPR.prp), sb=stgBundle();
-  var list=[];
-  if(c.st!=="none") list.push([CTXPR.pr,p.st,CTXPR.branch,"steering",'<span class="b b-'+l[0]+'"><span class="d"></span>'+h(l[1])+'</span>']);
-  PROPOSALS.forEach(function(q){if(q.id!==CTXPR.prp&&q.pr!=="—")list.push([q.pr,q.st,"context/"+q.lineage,"steering",'<span class="b b-approval"><span class="d"></span>'+h(q.checks)+'</span>']);});
-  var table='<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Open and recent Context PRs</h3><span class="b b-q" style="margin-left:auto">governance: team · code-owner review required</span></div>'+
-   '<div class="tw"><table><thead><tr><th>Pull request</th><th>Branch</th><th>Kind</th><th>State</th></tr></thead><tbody>'+
-   list.map(function(x){return '<tr><td><span class="mono" style="font-size:12px">'+h(x[0])+'</span><div class="dim" style="font-size:11.5px">'+h(x[1])+'</div></td>'+
-    '<td class="mono" style="font-size:11.5px">'+h(x[2])+'</td><td><span class="b b-q">'+h(x[3])+'</span></td><td>'+x[4]+'</td></tr>';}).join("")+
-   '</tbody></table></div></div>';
   if(c.st==="none") return table+'<div class="panel"><div class="panel-b"><p style="margin:0 0 12px;font-size:13px">'+h(CTXPR.prp)+' is ready and has no Context PR yet. It steers nothing until one merges.</p>'+
-   '<button class="btn primary" onclick="openDialog(\'ctxpr\',\''+CTXPR.prp+'\')">Open a Context PR</button></div></div>';
+   '<button class="btn primary" onclick="openDialog(\'ctxpr\',\''+CTXPR.prp+'\')">Open a Context PR</button>'+
+   '<div class="note" style="margin-top:12px">A pull request here is opened by the promoter, out of runs. <button class="lnk" onclick="wzOpen(\'record\')">Writing one yourself</button> opens the same kind of pull request, argued from you rather than from runs.</div></div></div>';
 
   var checks=CTXPR.checks.map(function(k,i){
     var st=i<c.done?"pass":(c.st==="checking"&&i===c.done)?"running":"queued";
@@ -7588,7 +7837,8 @@ function pSteering(){
     "Published records live in <span class=\"mono\">.oxagen/rules/</span> on "+h(w.main)+". A record becomes published by being merged, never by being saved here.",
     '<button class="btn primary" onclick="wzOpen(\'record\')">Write a context record</button>');
 
-  var openPRs=(S.ctxpr.st!=="none"&&S.ctxpr.st!=="merged"?1:0)+PROPOSALS.filter(function(q){return q.id!==CTXPR.prp&&q.pr!=="—";}).length;
+  var openPRs=(S.ctxpr.st!=="none"&&S.ctxpr.st!=="merged"?1:0)+recprOpenCount()+
+   PROPOSALS.filter(function(q){return q.id!==CTXPR.prp&&q.pr!=="—";}).length;
   var tabs='<div class="tabs" role="tablist">'+
    [["records","Records",RECORDS.filter(function(r){return r.status==="published";}).length],
     ["proposals","Proposals",PROPOSALS.length],["prs","Context PRs",openPRs]]
@@ -7601,11 +7851,15 @@ function pSteering(){
     /* The panel is headed "Published records" and the tab badge counts published, so the
        list and its kind chips count published too. Archiving is a Context PR that sets status = "archived". */
     var rk=S.recKind||"", kc={};
-    var pub=RECORDS.filter(function(r){return r.status==="published";});
+    /* Newest first. The list had no order at all, so a record you merged a moment ago landed
+       wherever the fixture happened to put it — which on a workspace with sixty published records
+       means the one thing you came here to see is the one thing you cannot find. */
+    var pub=RECORDS.filter(function(r){return r.status==="published";})
+      .sort(function(a,b){return String(b.pub||"").localeCompare(String(a.pub||""));});
     pub.forEach(function(r){kc[r.kind]=(kc[r.kind]||0)+1;});
     var shown=pub.filter(function(r){return !rk||r.kind===rk;});
     body='<div class="panel"><div class="panel-h"><h3>Published records</h3>'+
-     '<span class="b b-q" style="margin-left:auto">the graph remembers everything; git decides what is in force</span></div>'+
+     '<span class="b b-q" style="margin-left:auto">newest first \u00b7 the graph remembers everything; git decides what is in force</span></div>'+
      '<div class="kf" role="group" aria-label="Filter records by kind">'+
      '<button class="btn sm" aria-pressed="'+(!rk)+'" onclick="S.recKind=\'\';render()">All <span class="dim">'+pub.length+'</span></button>'+
      Object.keys(KINDS).map(function(k){return '<button class="btn sm k-'+k+'" aria-pressed="'+(rk===k)+'" title="'+h(KINDS[k].d)+'" onclick="S.recKind=\''+k+'\';render()">'+kindSvg(k)+h(KINDS[k].l)+'<span class="dim">'+(kc[k]||0)+'</span></button>';}).join("")+'</div>'+
@@ -13259,7 +13513,10 @@ function wzRecord(){
     return {t:"What the checks will assert", s:"Six of them, on the pull request, before anybody can merge it.",
      b:wzChecks([
        ["Schema","<span class=\"mono\">context-record/v0.1</span> valid \u00b7 1 file, 1 record, 1 lineage"],
-       ["Lineage uniqueness","no published record holds <span class=\"mono\">"+h(wzRecLineage())+"</span>; this pull request would be its only holder"],
+       ["Lineage uniqueness",(function(){var id=wzRecLineage();
+         return RECORDS.some(function(r){return r.status==="published"&&r.id===id;})
+          ?'<span style="color:var(--st-failed)"><b>'+h(id)+' is already published.</b></span> This check will fail and nothing will merge \u2014 amend the published record instead of opening a second under its id.'
+          :"no published record holds <span class=\"mono\">"+h(id)+"</span>; this pull request would be its only holder";})()],
        ["record_hash recomputation","recomputed over the canonical bytes and compared to the file"],
        ["Secret and PII scan","the statement, the rationale and the evidence are scanned \u00b7 a name or a key in any of them fails"],
        ["Conflict against active records",others+" published records checked \u00b7 a <span class=\"mono\">forbid</span> that contradicts an active <span class=\"mono\">require</span> on the same subject fails"],
@@ -13277,7 +13534,7 @@ function wzRecord(){
     "Open the pull request",
     w.main+"#527 opened on branch context/"+wzRecLineage()+". It steers nothing until it merges.");
   return {t:pr4.t, s:"People trust pull requests. That is the whole design.", b:pr4.b,
-   f:'<button class="btn primary" onclick="wzOpenPr(\''+pr4.msg.replace(/'/g,"\\'")+'\')">'+h(pr4.btn)+'</button>'};
+   f:'<button class="btn primary" onclick="wzRecOpenPr()">'+h(pr4.btn)+'</button>'};
 }
 
 /* ============================== the record page ==============================
