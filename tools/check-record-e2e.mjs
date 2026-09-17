@@ -15,6 +15,12 @@
 //   * a lineage that is already published FAILS its check, and nothing merges (PR #36 review, P1)
 //   * a second operator PR does not erase the first (P2)
 //   * a statement with a quote still produces a file that parses as TOML (P3)
+//   * two OPEN pull requests cannot both publish one lineage — the later one fails, and the
+//     uniqueness check is re-run at merge, not only when the check first ran (second review, P1)
+//   * every compiled bundle version gets its own digest, so a panel claiming it was re-signed
+//     renders one (second review, P2)
+//   * every string shape round-trips through the TOML writer and the reader: quotes, backslashes,
+//     newlines, and a trailing newline (second review, P2)
 // Counts are read before and after and compared, never read back out of the thing under test.
 import { existsSync, mkdirSync } from "node:fs";
 import path from "node:path";
@@ -332,6 +338,109 @@ const clickPg = async (page, re) => await page.evaluate(src => {
   ok((await world(page)).recprState === "passed", "and its schema check passes honestly");
   await shot(page, "rec-e2e-8-quoted-statement");
   ok(errs.length === 0, "no errors on the quoted-statement path: " + errs.join(" | "));
+  await page.close();
+}
+
+/* ---------- second review, P1: two OPEN pull requests racing for one lineage ---------- */
+{
+  const { page, errs } = await open();
+  const before = await world(page);
+  // both opened before either merges, so both run their checks against a world with neither in it
+  await page.evaluate(() => { wzOpen("record"); S.wz.desc = "Never hand-edit a generated migration; regenerate it."; S.wz.rkind = "constraint"; wzGo(3); wzGo(5); wzRecOpenPr(); });
+  await page.evaluate(() => { wzOpen("record"); S.wz.desc = "Never hand-edit a generated migration under any circumstance."; S.wz.rkind = "constraint"; wzGo(3); wzGo(5); wzRecOpenPr(); });
+  await page.waitForFunction(() => RECPRS.length === 2 && RECPRS.every(d => /passed|failed/.test(recprSt(d).st)), null, { timeout: 15000 }).catch(() => {});
+  const st = await page.evaluate(() => RECPRS.map(d => ({ pr: d.pr, id: d.record.id, st: recprSt(d).st })));
+  ok(st.length === 2 && st[0].id === st[1].id, "the two do claim one lineage, got " + JSON.stringify(st.map(x => x.id)));
+  ok(st.filter(x => x.st === "passed").length === 1, "exactly one of them passes, got " + JSON.stringify(st.map(x => x.st)));
+  ok(st.filter(x => x.st === "failed").length === 1, "and exactly one fails");
+  ok(/opened first/.test(await pgText(page)), "the loser is told which pull request claimed it first");
+
+  // merging both, oldest first, must still publish once
+  await page.evaluate(() => { RECPRS.slice().reverse().forEach(d => recprMerge(d.pr)); });
+  await page.waitForTimeout(400);
+  const after = await world(page);
+  ok(after.records === before.records + 1, "one record published from two competing PRs, got " + (after.records - before.records));
+  ok(after.dupes === 1, "one published record holds the lineage, got " + after.dupes);
+  ok(after.ruleDupes === 1, "and one compiled rule, got " + after.ruleDupes);
+  ok(after.bundleV === before.bundleV + 1, "and the bundle moved exactly one version");
+  ok(errs.length === 0, "no errors racing two PRs: " + errs.join(" | "));
+  await page.close();
+}
+
+/* ---------- second review, P1b: a check that passed is re-run at merge ---------- */
+{
+  const { page, errs } = await open();
+  const before = await world(page);
+  // one PR goes green, then the lineage is taken out from under it by a direct publication
+  await page.evaluate(() => { wzOpen("record"); S.wz.desc = "Rotate the signing key every ninety days."; S.wz.rkind = "rule"; wzGo(3); wzGo(5); wzRecOpenPr(); });
+  await page.waitForFunction(() => recprCur() && recprSt(recprCur()).st === "passed", null, { timeout: 15000 }).catch(() => {});
+  ok((await world(page)).recprState === "passed", "it went green");
+  await page.evaluate(() => {
+    const id = recprCur().record.id;
+    RECORDS.push({ id, kind: "rule", force: "should", scope: "workspace", status: "published",
+      st: "Something else got there first.", effect: "rendered 0", commit: "aaaaaaa", pub: "2026-09-11" });
+  });
+  await page.evaluate(() => recprMerge());
+  await page.waitForTimeout(300);
+  const after = await world(page);
+  ok(after.recprState === "failed", "merging re-runs the check and it now fails, got " + after.recprState);
+  ok(after.dupes === 1, "and nothing was published on top of the record that got there first, got " + after.dupes);
+  ok(after.bundleV === before.bundleV, "and the bundle did not move");
+  ok(/no longer does|already published/.test(await page.evaluate(() => document.getElementById("toast").innerText + " " + document.getElementById("pg").innerText)),
+     "and the operator is told why");
+  ok(errs.length === 0, "no errors on the stale-check path: " + errs.join(" | "));
+  await page.close();
+}
+
+/* ---------- second review, P2: every compiled version has a digest ---------- */
+{
+  const { page, errs } = await open();
+  const merge = async d => {
+    await page.evaluate(x => { wzOpen("record"); S.wz.desc = x; S.wz.rkind = "rule"; wzGo(3); wzGo(5); wzRecOpenPr(); }, d);
+    await page.waitForFunction(() => recprCur() && /passed|failed/.test(recprSt(recprCur()).st), null, { timeout: 15000 }).catch(() => {});
+    await page.evaluate(() => recprMerge());
+    await page.waitForTimeout(250);
+  };
+  await merge("Freeze main before cutting a release tag.");
+  await merge("Label every flaky test with its owning team.");
+  const d = await page.evaluate(() => ({ v: STEER_BUNDLE.v, digest: stgBundle().digest, all: STEER_BUNDLE.digest }));
+  ok(typeof d.digest === "string" && /^sha256:/.test(d.digest),
+     "the bundle has a digest after a second merge, got " + d.digest);
+  const vals = Object.values(d.all);
+  ok(new Set(vals).size === vals.length, "each version's digest is its own, got " + JSON.stringify(d.all));
+  const shown = await pgText(page);
+  ok(!/re-signed/.test(shown), "the promotion panel names a digest rather than the word re-signed");
+  ok(new RegExp(d.digest).test(shown), "and it is the digest the bundle actually holds");
+  ok(errs.length === 0, "no errors across two merges: " + errs.join(" | "));
+  await page.close();
+}
+
+/* ---------- second review, P2b: the TOML writer and reader agree on every shape ---------- */
+{
+  const { page, errs } = await open();
+  const cases = await page.evaluate(() => {
+    const vs = ["plain one liner", 'has a "quote" in it', "has a \\ backslash", "two\nlines",
+                "two\nlines with a \\ backslash", 'multi\nline with "quotes" and \\ and a trailing newline\n'];
+    return vs.map(v => {
+      const doc = "k = " + (/\n/.test(v) ? tomlMulti(v) : tomlStr(v)) + "\n";
+      let back = null, err = null;
+      try { back = tomlParse(doc).k; } catch (e) { err = String(e.message || e); }
+      return { v, back, err, equal: back === v };
+    });
+  });
+  cases.forEach(c => ok(c.equal, "TOML round-trip " + JSON.stringify(c.v) + (c.equal ? "" : " -> " + JSON.stringify(c.back) + (c.err ? " err=" + c.err : ""))));
+  // and the same through the record the wizard actually writes
+  const rec = await page.evaluate(() => {
+    const body = "Deploy from the bundle at:\nPath:\\deploy\\q and never by hand.";
+    wzOpen("record"); S.wz.desc = "Deploy from the bundle path."; S.wz.rkind = "rule"; wzGo(3);
+    S.cedVal["wz:record"] = body; wzGo(5); wzRecOpenPr();
+    const def = recprCur(); let parsed = null, err = null;
+    try { parsed = tomlParse(recprFileText(def)); } catch (e) { err = String(e.message || e); }
+    return { err, equal: parsed && parsed.statement === def.record.st, statement: parsed && parsed.statement };
+  });
+  ok(rec.err === null, "a multi-line statement with a backslash still parses, got " + rec.err);
+  ok(rec.equal, "and round-trips exactly, got " + JSON.stringify(rec.statement));
+  ok(errs.length === 0, "no errors on the TOML path: " + errs.join(" | "));
   await page.close();
 }
 

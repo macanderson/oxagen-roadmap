@@ -108,11 +108,25 @@ on screen claiming otherwise); a second operator pull request does not erase the
 statement containing a quote still produces a file that parses with the app's own TOML reader.
 
 Counts are read before and after and compared, never read back out of the thing under test.
-Mutation-tested against eight deliberate regressions — publishing when the pull request opens rather
-than when it merges, merging without waiting for the checks, dropping the newest-first order on the
-records list, replacing the per-record check text with a fixed string, removing the lineage
+The second review round found three more, each also reproduced first — and the first of them was a
+defect introduced by fixing the first round. Making pull requests a collection opened a window where
+two of them run the uniqueness predicate before either publishes, both go green, and merging both
+publishes the duplicate anyway. So the check counts competing **open** pull requests (earliest claim
+wins), and **every check with a predicate is re-run at merge**: one that went green five minutes ago
+may not be green now. Alongside it: every compiled bundle version derives its own digest, so a panel
+claiming the bundle was re-signed renders one; and the multi-line TOML writer escapes backslashes
+and reaches its closing fence with a line continuation, because a bare newline before the fence is
+part of the value — without it every round-trip appended a blank line, which also hit the agent
+definition editor.
+
+Mutation-tested against thirteen deliberate regressions — publishing when the pull request opens
+rather than when it merges, merging without waiting for the checks, dropping the newest-first order
+on the records list, replacing the per-record check text with a fixed string, removing the lineage
 predicate, making the check runner ignore every test, collapsing the pull-request collection back to
-one, and dropping the TOML escaping — and catches all eight.
+one, dropping the TOML escaping, ignoring competing open pull requests, skipping the re-check at
+merge, leaving a new bundle version without a digest, unescaping nothing on the way back in, and
+writing a bare newline before the closing fence — and catches all thirteen. The escaping one is
+worth seeing fail: with it removed, `Path:\deploy\q` comes back as `Path:deployq`.
 
 ## Writing a scenario
 
