@@ -2674,10 +2674,13 @@ function tomlParse(text){
     if(c==='"'){
       if(s.substr(p,3)==='"""'){
         var buf=s.slice(p+3), k=buf.indexOf('"""');
-        if(k>=0) return [buf.slice(0,k).replace(/^\n/,""), p+3+k+3];
+        while(k>0&&buf.charAt(k-1)==="\\"){var k2=buf.indexOf('"""',k+3);if(k2<0)break;k=k2;}
+        if(k>=0) return [tomlUnesc(buf.slice(0,k).replace(/^\n/,"")), p+3+k+3];
         var parts=[]; if(buf.length)parts.push(buf);
         i++;
-        for(;i<n;i++){k=lines[i].indexOf('"""');if(k>=0){parts.push(lines[i].slice(0,k));return [parts.join("\n"),-1];}parts.push(lines[i]);}
+        /* the value spans lines, so the escapes have to be undone here too, not only on the
+           single-line path above — that asymmetry is what let a backslash through unread */
+        for(;i<n;i++){k=lines[i].indexOf('"""');if(k>=0){parts.push(lines[i].slice(0,k));return [tomlUnesc(parts.join("\n")),-1];}parts.push(lines[i]);}
         err("unterminated multi-line string",ln);
       }
       var out="",q=p+1;
@@ -2711,7 +2714,26 @@ function tomlLit(v){
   if(v&&typeof v==="object")return "{ "+Object.keys(v).map(function(k){return k+" = "+tomlLit(v[k]);}).join(", ")+" }";
   return tomlStr(v);
 }
-function tomlMulti(v){return '"""\n'+String(v).replace(/"""/g,'\\"""')+'\n"""';}
+/* A basic multi-line string processes escapes, so a backslash in operator text has to be written
+   as one — otherwise `Path:\deploy` is either an invalid escape or quietly changes meaning. The
+   closing fence is reached with a line-continuation backslash rather than a bare newline, because a
+   newline before the fence is part of the value: without it every save through this writer appended
+   one more blank line to whatever it round-tripped. */
+function tomlMulti(v){
+  return '"""\n'+String(v).replace(/\\/g,"\\\\").replace(/"""/g,'\\"""')+'\\\n"""';
+}
+/* the escapes a basic string may carry, applied to the multi-line form too */
+function tomlUnesc(raw){
+  var out="",i=0,ESC2={n:"\n",t:"\t",r:"\r",'"':'"',"\\":"\\"};
+  while(i<raw.length){
+    var c=raw.charAt(i);
+    if(c!=="\\"){out+=c;i++;continue;}
+    var nx=raw.charAt(i+1);
+    if(nx==="\n"||nx==="\r"){ i++; while(i<raw.length&&/[ \t\r\n]/.test(raw.charAt(i)))i++; continue; }
+    out+=ESC2[nx]!=null?ESC2[nx]:nx; i+=2;
+  }
+  return out;
+}
 /* Replace one key's literal in place and keep every other byte, comments included. section null = the root table. */
 function tomlSet(text,section,key,lit){
   var lines=text.split("\n"), start=-1, end=lines.length, i, j;
@@ -7388,6 +7410,13 @@ S.prpSel=null;
    same promotion event, the same bundle bump. So the lifecycle is parameterised over a PR
    definition and its own state, and the two differ only in what they render. */
 function prStop(st){st.timers.forEach(clearTimeout);st.timers=[];}
+/* The digest of a compiled bundle, derived from what is in it. Publishing compiles a new version,
+   and a version with no digest is a bundle the promotion panel and the run's context tab claim was
+   re-signed while rendering nothing — so it is computed here rather than read from a fixed map. */
+function steerDigestOf(v){
+  var seed=v+"|"+STEER_BUNDLE.rules.map(function(r){return r.id+":"+r.tok;}).join(",");
+  return "sha256:"+sha7(seed)+sha7(seed+"#")+"c4";
+}
 function prPublish(def,on){
   var rec=def.record, i=RECORDS.indexOf(rec);
   if(on===(i>=0)) return;
@@ -7395,6 +7424,7 @@ function prPublish(def,on){
      (CTXB's steering band reads the one on seq 2), so nothing already recorded moves; the next model call reads it. */
   if(on){
     RECORDS.push(rec); STEER_BUNDLE.rules.push(def.rule); STEER_BUNDLE.v++; def.rule.since=STEER_BUNDLE.v;
+    if(!STEER_BUNDLE.digest[STEER_BUNDLE.v]) STEER_BUNDLE.digest[STEER_BUNDLE.v]=steerDigestOf(STEER_BUNDLE.v);
     auditEvent("steering_published",me().name,rec.id+" · "+def.pr+" merged as "+rec.commit+" · bundle v"+(STEER_BUNDLE.v-1)+" → v"+STEER_BUNDLE.v,"info",def.evt);
   } else {
     RECORDS.splice(i,1);
@@ -7549,6 +7579,21 @@ S.recprs={};          /* pr id -> {st, done, failed, timers, mergedAt} */
 S.prSel=null;
 
 function recprById(pr){for(var i=0;i<RECPRS.length;i++){if(RECPRS[i].pr===pr)return RECPRS[i];}return null;}
+/* Who else holds this lineage: a published record, or an open pull request opened before this one.
+   RECPRS is newest first, so a higher index was opened earlier and wins the claim. Checking only
+   RECORDS is not enough — two pull requests can both run their checks before either merges, and
+   without this both reach `passed` and the second publishes a duplicate under a published id. */
+function lineageClaim(def){
+  var id=def.record.id;
+  if(RECORDS.some(function(r){return r.status==="published"&&r.id===id;})) return "published";
+  var mine=RECPRS.indexOf(def), claim=null;
+  RECPRS.forEach(function(d,j){
+    if(d===def||d.record.id!==id||j<=mine) return;
+    var st=recprSt(d).st;
+    if(st!=="merged"&&st!=="failed") claim=d.pr;
+  });
+  return claim;
+}
 function recprSt(def){ return def?(S.recprs[def.pr]||(S.recprs[def.pr]={st:"none",done:0,failed:null,timers:[],mergedAt:null})):null; }
 /* the one the tab is showing: what was selected, else the newest still open, else the newest */
 function recprCur(){
@@ -7571,9 +7616,24 @@ function prNextNumber(){
 function recprPaint(){ if(route().page==="steering") render(); }
 function recprRun(def){ prRun(def,recprSt(def),recprPaint); }
 function recprLabel(def){ return prLabel(def,recprSt(def)); }
+/* Re-run every check that has one. A pull request that went green five minutes ago may not be green
+   now: something else merged, and its evidence moved. Checks are cheap; publishing a wrong record
+   is not. */
+function prRecheck(def,st){
+  for(var i=0;i<def.checks.length;i++){
+    var c=def.checks[i];
+    if(c.test&&!c.test()){ prStop(st); st.st="failed"; st.failed=i; st.done=i; return false; }
+  }
+  return true;
+}
 function recprMerge(pr){
   var def=pr?recprById(pr):recprCur(); if(!def) return;
   var st=recprSt(def);
+  if(st.st==="passed"&&!prRecheck(def,st)){
+    S.tab.steering="prs"; S.prSel=def.pr; render();
+    act("A check that passed no longer does. "+def.pr+" is blocked and nothing was published.","approval");
+    return;
+  }
   if(st.st!=="passed"){
     act(st.st==="merged"?def.pr+" is already merged.":
         st.st==="failed"?"A check failed. "+def.pr+" cannot merge until the file changes.":
@@ -7618,12 +7678,14 @@ function wzRecOpenPr(){
     ok:"context-record/v0.1 valid · 1 file, 1 record, 1 lineage",
     bad:"the record file does not parse as TOML"},
    {n:"Lineage uniqueness",ms:700,
-    /* A real check, not a sentence. Two descriptions can slug to one lineage, and without this the
-       second pull request merges a second record under an id that is already published: two rows,
-       two compiled rules, the tokens counted twice, and this line claiming otherwise on screen. */
-    test:function(){return !RECORDS.some(function(r){return r.status==="published"&&r.id===def.record.id;});},
+    /* A real check, not a sentence, and it is re-run at merge because another pull request can
+       claim the lineage after this one went green. */
+    test:function(){return !lineageClaim(def);},
     ok:function(){return "no published record holds "+def.record.id+"; this pull request is its only holder";},
-    bad:function(){return def.record.id+" is already published. One lineage, one record — amend the published one instead of opening a second under its id.";}},
+    bad:function(){var c=lineageClaim(def);
+      return c==="published"
+        ?def.record.id+" is already published. One lineage, one record — amend the published one instead of opening a second under its id."
+        :def.record.id+" is already claimed by "+c+", which was opened first. Close one of them, or give this record a lineage of its own.";}},
    {n:"record_hash recomputation",ms:600,
     ok:function(){return "recomputed over the canonical bytes · "+def.hash.slice(0,20)+"… matches the file";}},
    {n:"Secret and PII scan",ms:900,ok:"statement, rationale and evidence scanned · 0 findings"},
