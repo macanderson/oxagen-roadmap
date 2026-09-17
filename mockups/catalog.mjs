@@ -23,6 +23,7 @@ export const PAGES = [
   { id: "mandate",           title: "Mandate",                     group: "Workspace",    hash: `#/${ORG}/finops/agents/invoice-bot/mandates/mnd_7K2ETQ4`, states: ALL },
   { id: "tools",             title: "Tools",                       group: "Workspace",    hash: `#/${ORG}/core-platform/tools`,                            states: ALL },
   { id: "steering",          title: "Steering",                    group: "Workspace",    hash: `#/${ORG}/core-platform/steering`,                         states: ALL },
+  { id: "repositories",      title: "Repositories",                group: "Workspace",    hash: `#/${ORG}/core-platform/repositories`,                     states: ALL },
   { id: "record",            title: "Context record",              group: "Workspace",    hash: `#/${ORG}/core-platform/steering/records/ctx.release.never-merge`, states: NO_EMPTY },
   { id: "spend",             title: "Spend",                       group: "Workspace",    hash: `#/${ORG}/core-platform/spend`,                            states: ALL },
   // skills (W13): resolution, the seat in the loop, reflection; the off-by-default gate; the interjected run

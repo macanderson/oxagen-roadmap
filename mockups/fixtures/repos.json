@@ -8,7 +8,13 @@
   "issues": "enabled · 3,907 imported",
   "events": "ok · 8,142 deliveries / 30d · 0 gaps",
   "symbols": 118402,
-  "drift": "3 data-layer findings"
+  "drift": "3 data-layer findings",
+  "ox": "governed",
+  "oxCommit": "a4c91e2",
+  "oxFiles": 9,
+  "visibility": "private",
+  "lang": "TypeScript",
+  "pushed": "11 min ago"
  },
  {
   "n": "a-intel/billing",
@@ -19,7 +25,13 @@
   "issues": "enabled · 812 imported",
   "events": "ok · 1,904 deliveries / 30d · 0 gaps",
   "symbols": 24118,
-  "drift": "none"
+  "drift": "none",
+  "ox": "governed",
+  "oxCommit": "7e0b331",
+  "oxFiles": 3,
+  "visibility": "private",
+  "lang": "TypeScript",
+  "pushed": "1 h ago"
  },
  {
   "n": "a-intel/mobile",
@@ -30,6 +42,46 @@
   "issues": "disabled",
   "events": "ok · 640 deliveries / 30d · 1 gap recovered",
   "symbols": 31904,
-  "drift": "1 data-layer finding"
+  "drift": "1 data-layer finding",
+  "ox": "unbound",
+  "oxCommit": null,
+  "oxFiles": 0,
+  "visibility": "private",
+  "lang": "Swift",
+  "pushed": "5 h ago"
+ },
+ {
+  "n": "a-intel/ledger-service",
+  "role": "available",
+  "branch": "main",
+  "head": "5fd2c80",
+  "indexed": "—",
+  "issues": "enabled · 0 imported",
+  "events": "—",
+  "symbols": 0,
+  "drift": "—",
+  "ox": "unbound",
+  "oxCommit": null,
+  "oxFiles": 0,
+  "visibility": "private",
+  "lang": "Go",
+  "pushed": "yesterday"
+ },
+ {
+  "n": "a-intel/docs-site",
+  "role": "available",
+  "branch": "main",
+  "head": "e19a744",
+  "indexed": "—",
+  "issues": "disabled",
+  "events": "—",
+  "symbols": 0,
+  "drift": "—",
+  "ox": "unbound",
+  "oxCommit": null,
+  "oxFiles": 0,
+  "visibility": "public",
+  "lang": "MDX",
+  "pushed": "3 days ago"
  }
 ]
