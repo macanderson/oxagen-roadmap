@@ -21,6 +21,73 @@
    "release/4.11.0-notes",
    "CHANGELOG.md · read once"
   ],
+  "outputs": [
+   {
+    "kind": "task",
+    "name": "a-intel/platform#482",
+    "where": "GitHub",
+    "state": "linked",
+    "note": "Cut 4.11.0 release notes",
+    "at": "09:14:02",
+    "fr": 1
+   },
+   {
+    "kind": "read",
+    "name": "CHANGELOG.md",
+    "where": "a-intel/platform",
+    "state": "read",
+    "note": "read once, never modified",
+    "at": "09:15:20",
+    "fr": 6
+   },
+   {
+    "kind": "read",
+    "name": "38 merged pull requests",
+    "where": "a-intel/platform",
+    "state": "read",
+    "note": "since 4.10.3",
+    "at": "09:16:41",
+    "fr": 9
+   },
+   {
+    "kind": "branch",
+    "name": "release/4.11.0-notes",
+    "where": "a-intel/platform",
+    "state": "created",
+    "note": "cut from main · 1 commit",
+    "at": "09:21:07",
+    "fr": 28
+   },
+   {
+    "kind": "file",
+    "name": "RELEASE-4.11.0.md",
+    "where": "release/4.11.0-notes",
+    "state": "written",
+    "note": "31 changes grouped under Features, Fixes and Breaking",
+    "stat": {
+     "add": 118,
+     "del": 0
+    },
+    "at": "09:22:41",
+    "fr": 33
+   },
+   {
+    "kind": "gate",
+    "name": "github__create_release",
+    "where": "gateway · rule rg_0093",
+    "state": "awaiting",
+    "note": "parked at the gateway; the model sees a wait with a reason, not a failure",
+    "at": "09:24:16",
+    "fr": 41
+   },
+   {
+    "kind": "would",
+    "name": "4.11.0 release",
+    "where": "GitHub releases",
+    "state": "withheld",
+    "note": "not published; main untouched"
+   }
+  ],
   "gen": {
    "model": "claude-haiku-4-5",
    "when": "turn 7 · regenerated at each turn boundary",
@@ -54,6 +121,47 @@
    "a-intel/platform#482",
    "refs/pull/482/head · 2 pushes, main untouched",
    "wit_01K5RQ8M4 · verdicts only"
+  ],
+  "outputs": [
+   {
+    "kind": "task",
+    "name": "a-intel/platform#482",
+    "where": "GitHub",
+    "state": "linked",
+    "note": "Cut 4.11.0 release notes",
+    "fr": 1
+   },
+   {
+    "kind": "read",
+    "name": "release-notes contract",
+    "where": "a-intel/platform",
+    "state": "read",
+    "note": "read twice",
+    "fr": 5
+   },
+   {
+    "kind": "branch",
+    "name": "refs/pull/482/head",
+    "where": "a-intel/platform",
+    "state": "pushed",
+    "note": "2 pushes · main untouched",
+    "fr": 22
+   },
+   {
+    "kind": "proof",
+    "name": "wit_01K5RQ8M4",
+    "where": "witness runner · run_01K5RQ5W7T2HVN9K",
+    "state": "proven",
+    "note": "fail · fail · pass — verdicts only; the witness never entered this run",
+    "fr": 58
+   },
+   {
+    "kind": "seal",
+    "name": "sealed",
+    "where": "chain",
+    "state": "flipped",
+    "note": "3 attempts, the third passed"
+   }
   ],
   "gen": {
    "model": "claude-haiku-4-5",
@@ -141,6 +249,47 @@
    "a-intel/platform#511",
    "labels · flaky-test, area:worker"
   ],
+  "outputs": [
+   {
+    "kind": "task",
+    "name": "a-intel/platform#511",
+    "where": "GitHub",
+    "state": "linked",
+    "note": "Worker restarts under load",
+    "fr": 1
+   },
+   {
+    "kind": "read",
+    "name": "worker restart logs",
+    "where": "a-intel/platform",
+    "state": "read",
+    "note": "reproduced twice in nine steps",
+    "fr": 4
+   },
+   {
+    "kind": "label",
+    "name": "flaky-test, area:worker",
+    "where": "a-intel/platform#511",
+    "state": "posted",
+    "note": "2 labels added",
+    "fr": 12
+   },
+   {
+    "kind": "comment",
+    "name": "reproduction command",
+    "where": "a-intel/platform#511",
+    "state": "posted",
+    "note": "one comment",
+    "fr": 15
+   },
+   {
+    "kind": "seal",
+    "name": "sealed",
+    "where": "chain",
+    "state": "unmoved",
+    "note": "no code changed and no branch was created"
+   }
+  ],
   "gen": {
    "model": "claude-haiku-4-5",
    "when": "at seal 08:53:30",
@@ -175,6 +324,47 @@
    "mnd_7K2ETQ4",
    "3 invoices · $18,472.36"
   ],
+  "outputs": [
+   {
+    "kind": "task",
+    "name": "PO-4471",
+    "where": "the ledger",
+    "state": "linked",
+    "note": "September infrastructure invoices",
+    "fr": 1
+   },
+   {
+    "kind": "read",
+    "name": "3 invoices",
+    "where": "the ledger",
+    "state": "read",
+    "note": "matched to PO-4471 · $18,472.36",
+    "fr": 7
+   },
+   {
+    "kind": "record",
+    "name": "mnd_7K2ETQ4",
+    "where": "mandates",
+    "state": "linked",
+    "note": "the mandate this payment would draw on",
+    "fr": 11
+   },
+   {
+    "kind": "gate",
+    "name": "stripe__create_payment",
+    "where": "gateway · mandate mnd_7K2ETQ4",
+    "state": "awaiting",
+    "note": "parked on approval; no money has moved",
+    "fr": 19
+   },
+   {
+    "kind": "would",
+    "name": "$18,472.36 payment",
+    "where": "Stripe",
+    "state": "withheld",
+    "note": "prepared, not sent"
+   }
+  ],
   "gen": {
    "model": "claude-haiku-4-5",
    "when": "turn 3 · regenerated at each turn boundary",
@@ -207,6 +397,51 @@
   "touched": [
    "a-intel/platform#498",
    "docs/operator/kill-switches.md"
+  ],
+  "outputs": [
+   {
+    "kind": "task",
+    "name": "a-intel/platform#498",
+    "where": "GitHub",
+    "state": "linked",
+    "note": "Operator guide: kill switches",
+    "fr": 1
+   },
+   {
+    "kind": "read",
+    "name": "docs/operator/kill-switches.md",
+    "where": "a-intel/platform",
+    "state": "read",
+    "note": "read before the rewrite",
+    "fr": 3
+   },
+   {
+    "kind": "file",
+    "name": "docs/operator/kill-switches.md",
+    "where": "a-intel/platform",
+    "state": "written",
+    "note": "deny-generation explanation and two worked examples",
+    "stat": {
+     "add": 84,
+     "del": 12
+    },
+    "fr": 21
+   },
+   {
+    "kind": "pr",
+    "name": "a-intel/platform#498",
+    "where": "GitHub",
+    "state": "open",
+    "note": "1 file changed · awaiting review",
+    "fr": 30
+   },
+   {
+    "kind": "seal",
+    "name": "sealed",
+    "where": "chain",
+    "state": "waived",
+    "note": "prose carries no test oracle"
+   }
   ],
   "gen": {
    "model": "claude-haiku-4-5",
@@ -241,6 +476,51 @@
    "a-intel/platform#476",
    "packages/release/backport.ts",
    "release/4.10"
+  ],
+  "outputs": [
+   {
+    "kind": "task",
+    "name": "a-intel/platform#476",
+    "where": "GitHub",
+    "state": "linked",
+    "note": "Backport 4.10.3 onto release/4.10",
+    "fr": 1
+   },
+   {
+    "kind": "branch",
+    "name": "release/4.10",
+    "where": "a-intel/platform",
+    "state": "pushed",
+    "note": "4 cherry-pick attempts",
+    "fr": 9
+   },
+   {
+    "kind": "file",
+    "name": "packages/release/backport.ts",
+    "where": "release/4.10",
+    "state": "blocked",
+    "note": "a conflict marker was left in every attempt",
+    "stat": {
+     "add": 61,
+     "del": 47
+    },
+    "fr": 26
+   },
+   {
+    "kind": "pr",
+    "name": "a-intel/platform#476",
+    "where": "GitHub",
+    "state": "failing",
+    "note": "open with a failing integration check · nothing merged",
+    "fr": 44
+   },
+   {
+    "kind": "seal",
+    "name": "sealed",
+    "where": "chain",
+    "state": "failing",
+    "note": "the integration test never passed"
+   }
   ],
   "gen": {
    "model": "claude-haiku-4-5",
@@ -337,6 +617,32 @@
    "a-intel/platform#514",
    "kill switch · hooks_removed"
   ],
+  "outputs": [
+   {
+    "kind": "task",
+    "name": "a-intel/platform#514",
+    "where": "GitHub",
+    "state": "linked",
+    "note": "the issue the run was given",
+    "fr": 1
+   },
+   {
+    "kind": "read",
+    "name": "a-intel/platform#514",
+    "where": "GitHub",
+    "state": "read",
+    "note": "read twice; the only work the run got to do",
+    "fr": 2
+   },
+   {
+    "kind": "halt",
+    "name": "kill switch · hooks_removed",
+    "where": "gateway",
+    "state": "blocked",
+    "note": "the run token was revoked before a label or a comment was written",
+    "fr": 3
+   }
+  ],
   "gen": {
    "model": "claude-haiku-4-5",
    "when": "at halt 07:41:39",
@@ -369,6 +675,63 @@
   "touched": [
    "a-intel/platform#469",
    "frames 88–102 · unverifiable"
+  ],
+  "outputs": [
+   {
+    "kind": "task",
+    "name": "a-intel/platform#469",
+    "where": "GitHub",
+    "state": "linked",
+    "note": "Cut 4.10.2 release notes",
+    "fr": 1
+   },
+   {
+    "kind": "file",
+    "name": "RELEASE-4.10.2.md",
+    "where": "a-intel/platform#469",
+    "state": "written",
+    "note": "the 4.10.2 notes",
+    "stat": {
+     "add": 96,
+     "del": 0
+    },
+    "fr": 30
+   },
+   {
+    "kind": "file",
+    "name": "vitest.config.ts",
+    "where": "a-intel/platform#469",
+    "state": "blocked",
+    "note": "added an exclude that matched the witness path",
+    "stat": {
+     "add": 1,
+     "del": 0
+    },
+    "fr": 61
+   },
+   {
+    "kind": "pr",
+    "name": "a-intel/platform#469",
+    "where": "GitHub",
+    "state": "open",
+    "note": "2 files changed",
+    "fr": 72
+   },
+   {
+    "kind": "proof",
+    "name": "wit_01K5RG2T7",
+    "where": "witness",
+    "state": "blocked",
+    "note": "the fingerprint moved between authoring and the run · head result excluded",
+    "fr": 94
+   },
+   {
+    "kind": "seal",
+    "name": "sealed",
+    "where": "chain",
+    "state": "tampered",
+    "note": "nothing is credited until a clean run re-derives the notes"
+   }
   ],
   "gen": {
    "model": "claude-haiku-4-5",
@@ -403,6 +766,39 @@
    "PO-4471",
    "ledger note · $412.00 duplicate"
   ],
+  "outputs": [
+   {
+    "kind": "task",
+    "name": "PO-4471",
+    "where": "the ledger",
+    "state": "linked",
+    "note": "August statement reconciliation",
+    "fr": 1
+   },
+   {
+    "kind": "read",
+    "name": "August statement",
+    "where": "the ledger",
+    "state": "read",
+    "note": "read line by line against PO-4471",
+    "fr": 4
+   },
+   {
+    "kind": "record",
+    "name": "ledger note · $412.00 duplicate",
+    "where": "PO-4471",
+    "state": "posted",
+    "note": "one duplicated line on the vendor side",
+    "fr": 18
+   },
+   {
+    "kind": "seal",
+    "name": "sealed",
+    "where": "chain",
+    "state": "waived",
+    "note": "no payment was attempted; reconciliation has no test oracle"
+   }
+  ],
   "gen": {
    "model": "claude-haiku-4-5",
    "when": "at seal 07:01:02",
@@ -436,6 +832,43 @@
    "a-intel/platform#204",
    "tests/integration/test_idempotency_key.py",
    "seg_01K4QJ9E4T6YUI1O"
+  ],
+  "outputs": [
+   {
+    "kind": "task",
+    "name": "a-intel/platform#204",
+    "where": "GitHub",
+    "state": "linked",
+    "note": "Idempotency key replays a charge",
+    "fr": 1
+   },
+   {
+    "kind": "file",
+    "name": "tests/integration/test_idempotency_key.py",
+    "where": "a-intel/platform#204",
+    "state": "written",
+    "note": "the replay case the flip turns on",
+    "stat": {
+     "add": 38,
+     "del": 2
+    },
+    "fr": 22
+   },
+   {
+    "kind": "proof",
+    "name": "seg_01K4QJ9E4T6YUI1O",
+    "where": "archive segment",
+    "state": "proven",
+    "note": "a duplicate charge first, the first receipt second · frames compacted",
+    "fr": 49
+   },
+   {
+    "kind": "seal",
+    "name": "sealed 2025-07-02",
+    "where": "chain",
+    "state": "flipped",
+    "note": "this summary was kept with the ledger"
+   }
   ],
   "gen": {
    "model": "claude-haiku-4-5",
@@ -514,6 +947,43 @@
    "a-intel/platform#503",
    "docs/cli/reference.md"
   ],
+  "outputs": [
+   {
+    "kind": "task",
+    "name": "a-intel/platform#503",
+    "where": "GitHub",
+    "state": "linked",
+    "note": "CLI reference wording pass",
+    "fr": 1
+   },
+   {
+    "kind": "file",
+    "name": "docs/cli/reference.md",
+    "where": "a-intel/platform#503",
+    "state": "written",
+    "note": "41 wording and heading-case edits · digests only, no bodies",
+    "stat": {
+     "add": 41,
+     "del": 41
+    },
+    "fr": 19
+   },
+   {
+    "kind": "pr",
+    "name": "a-intel/platform#503",
+    "where": "GitHub",
+    "state": "open",
+    "note": "1 file changed",
+    "fr": 26
+   },
+   {
+    "kind": "seal",
+    "name": "sealed",
+    "where": "chain",
+    "state": "unverified",
+    "note": "client tier; drawn from what the harness reported, not what Oxagen saw"
+   }
+  ],
   "gen": {
    "model": "claude-haiku-4-5",
    "when": "at seal 06:34:51",
@@ -547,6 +1017,39 @@
    "a-intel/platform#505",
    "retry · budget_invariant",
    "wit_01K5RCZ8Q"
+  ],
+  "outputs": [
+   {
+    "kind": "task",
+    "name": "a-intel/platform#505",
+    "where": "GitHub",
+    "state": "linked",
+    "note": "Retry budget invariant",
+    "fr": 1
+   },
+   {
+    "kind": "read",
+    "name": "retry · budget_invariant",
+    "where": "a-intel/platform#505",
+    "state": "read",
+    "note": "5 attempts read from the harness",
+    "fr": 8
+   },
+   {
+    "kind": "proof",
+    "name": "wit_01K5RCZ8Q",
+    "where": "witness",
+    "state": "proven",
+    "note": "four panicked at the budget boundary, the fifth passed · 2 of 4 fingerprints held out",
+    "fr": 57
+   },
+   {
+    "kind": "seal",
+    "name": "sealed",
+    "where": "chain",
+    "state": "flipped",
+    "note": "nothing was written to the repository"
+   }
   ],
   "gen": {
    "model": "claude-haiku-4-5",

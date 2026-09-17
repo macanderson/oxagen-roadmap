@@ -8212,7 +8212,7 @@ version lands in the registry callable by nobody until a role grant puts it on a
 <td>W2</td>
 <td><strong><code>docs/feedback-mockups.md</code> items are in no mockup:</strong> (1) approvals render first and collapse when empty; (2) the onboarding content floats right; (3) one-thumb mobile navigation; (4) LLM-generated run name and summary, plus a file-diff card under approvals; (5) run cost large, near the run name, basis in a dialog; (6) prompt shown inspectable but collapsed; (7) run outputs (PRs, files, media) as the story; (8) spend by operator, agent and run on Fleet.</td>
 <td>These change the Run and Fleet pages.</td>
-<td>In scope: 1, 2, 5, 6, 8 (clear enough to build). 4's UI is in scope; the classifier that writes <code>run.name</code>/<code>run.summary</code> is a backend gap (G14). <strong>3 and 7 need a design decision.</strong> Their lanes build behind a component seam (<code>&lt;MobileNav&gt;</code>, <code>&lt;RunOutputs&gt;</code>) with a plain first version, so the design can drop in later.</td>
+<td>In scope: 1, 2, 5, 6, 8 (clear enough to build). 4's UI is in scope; the classifier that writes <code>run.name</code>/<code>run.summary</code> is a backend gap (G14). <strong>7 is decided: Option Story</strong>, 2026-09-17 — the outputs render as one time-ordered spine with the governed gate in the position it stopped the run (<code>design/run-outputs/DECISION.md</code>); it is built in the mockup as <code>runOutputs(R)</code> on <code>runs[].outputs</code>, so <code>&lt;RunOutputs&gt;</code> builds to that, not to a plain first version. <strong>3 still needs a design decision</strong>; its lane builds behind the <code>&lt;MobileNav&gt;</code> seam with a plain bottom bar, so the design can drop in later.</td>
 </tr>
 <tr>
 <td>W3</td>
@@ -9674,7 +9674,7 @@ test(&quot;fleet · phone&quot;, async ({ page }) =&gt; {
 <tr>
 <td>P2b</td>
 <td><strong>Run</strong>: side panels</td>
-<td>approvals strip (from P1), file-diff card under approvals (feedback 4), <code>&lt;RunOutputs&gt;</code> seam (feedback 7), tabs proof/cost/policy/context/chain, <code>runMetrics</code> instruments, compacted/sealed variants</td>
+<td>approvals strip (from P1), file-diff card under approvals (feedback 4), <code>&lt;RunOutputs&gt;</code> as the time-ordered spine (feedback 7, decided — <code>design/run-outputs/DECISION.md</code>; mockup: <code>runOutputs(R)</code>, data <code>runs[].outputs</code>), tabs proof/cost/policy/context/chain, <code>runMetrics</code> instruments, compacted/sealed variants</td>
 <td></td>
 </tr>
 <tr>

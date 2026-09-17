@@ -19,7 +19,7 @@ record must be derived the same way in the fixture, or two pages disagree.
 | `av-sample-photo.json` | `AV_SAMPLE_PHOTO` | a stylised sample portrait so the photo path renders without a network or an upload |
 | `people.json` | `PEOPLE` | the people, keyed by handle: name, role, email, two-factor, avatar |
 | `agents.json` | `AGENTS` | the seed agents with their identity (principal, harness, host, credential, budget) merged in |
-| `runs.json` | `RUNS` | the seed runs: the story runs the scenarios walk, with status, verdict, cost, task, summary and linked work |
+| `runs.json` | `RUNS` | the seed runs: the story runs the scenarios walk, with status, verdict, cost, task, summary and linked work. `outputs` is the `<RunOutputs>` spine (see below); `touched` is the older flat list and is kept only because `RUNGRAPH`, `frPath` and the generated fleet still read it. |
 | `approvals.json` | `APPROVALS` | the parked approvals the Fleet and Run pages show; resolution state lives on S.ap at runtime |
 | `frames.json` | `FRAMES` | the authored frames of the live release-manager run; every other run derives its frames |
 | `notes-v1.json` | `NOTES_V1` | The transcript is the model-visible projection of a run's frames: the prompt, the agent's prose, its tool calls with their outputs, and the usage each model step burned. Times are seconds from R.started. `fr` on an entry points at the governed frame (FRAMES seq) the gateway wrote for it. |
@@ -55,3 +55,27 @@ record must be derived the same way in the fixture, or two pages disagree.
 | `sk-reflect.json` | `SK_REFLECT` | one quarantined reflection: the rubric axes, the self-grade against the record, the contradictions |
 | `sk-hist.json` | `SK_HIST` | the config's version history, each a pull request |
 | `sk-created.json` | `SK_CREATED` | when each workspace was created, with skills off |
+
+## `runs[].outputs` — the `<RunOutputs>` spine
+
+Decided 2026-09-17 (`design/run-outputs/DECISION.md`, feedback item 7). A run's outputs are a
+list of nodes **in the order the run produced them**, not a bag of strings. The flat `touched`
+list smuggled a qualifier in after a `·` (`CHANGELOG.md · read once`) and could not say which
+items a human would go and open, or what the run was still waiting on. Each node is:
+
+| Field | Meaning |
+|---|---|
+| `kind` | `task` · `read` · `file` · `branch` · `pr` · `release` · `media` · `comment` · `label` · `record` · `proof` · `gate` · `halt` · `would` · `seal`. Picks the glyph and how the node renders. |
+| `name` | what it is called; rendered monospace (a path, a ref, a tool name, an id) |
+| `where` | where it landed — the repo, the branch, the ledger, the gateway |
+| `state` | its disposition: `created` `written` `pushed` `posted` `open` `linked` `read` `awaiting` `blocked` `failing` `proven` `withheld`, or, on a `seal`, the run's verdict. Drives the badge and the node's ring colour. |
+| `note` | one line of prose: what the reader needs and nothing more |
+| `at` | wall-clock time, optional |
+| `fr` | the frame that produced it; renders as a chip that opens that frame |
+| `stat` | `{add, del}` for a file, optional |
+| `thumb` / `dim` | a data URI and its dimensions for a `media` node, optional |
+
+Rules the renderer relies on: `read` nodes never become cards, consecutive nodes of one kind fold
+past three, a `gate` sits at the position it stopped the run, and a `would` node names what the run
+has *not* done. A run with no `outputs` derives a spine from `touched`, so the generated fleet
+still renders.

@@ -1275,6 +1275,63 @@ button.edge:hover{color:var(--fg)}
 .lw-files .diff{margin-bottom:10px;max-height:360px}
 .lw-note{font-size:11px;color:var(--dim);margin:0 0 12px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 
+/* ---- <RunOutputs>: the story of a run, on one spine ----
+   Time is the axis, so there is exactly one vertical rule and every node hangs off it. A durable
+   artifact gets a ringed node and a card; a read gets a hairline tick and a line of text, never a
+   card, because the difference between "looked at" and "changed" is the whole point. The gate
+   borrows --st-approval and nothing here is gold: gold is identity, not state. The spine of a live
+   run fades out at the bottom — the story is not finished. */
+.ro{border:1px solid var(--border);border-radius:12px;background:var(--panel);padding:15px 18px 13px;margin-bottom:16px}
+.ro-h{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.ro-tally{font-family:var(--mono);font-size:11px;color:var(--dim);margin-left:auto}
+.ro-link{border:0;background:none;padding:0;color:var(--muted);font:inherit;font-size:11.5px;cursor:pointer;text-decoration:underline;text-underline-offset:2px;text-decoration-color:var(--rule)}
+.ro-link:hover{color:var(--fg)}
+.ro-spine{display:block;list-style:none;margin:0;padding:0 0 0 30px;position:relative}
+.ro-spine::before{content:"";position:absolute;left:11px;top:6px;bottom:6px;width:1px;background:var(--rule)}
+.ro-spine.ro-live::before{background:linear-gradient(to bottom,var(--rule) 78%,transparent)}
+.ro-n{position:relative;padding:7px 0;min-width:0}
+.ro-dot{position:absolute;left:-30px;top:6px;width:23px;height:23px;border-radius:50%;border:1px solid var(--border);background:var(--panel);color:var(--muted);display:grid;place-items:center}
+.ro-dot svg{width:13px;height:13px}
+/* the ring takes its colour from the node's state, never from its kind: a seal on a tampered run
+   must not read the same teal as a seal on a proven one */
+.ro-n.s-awaiting .ro-dot{border-color:color-mix(in srgb,var(--st-approval) 55%,transparent);color:var(--st-approval)}
+.ro-n.s-blocked .ro-dot{border-color:color-mix(in srgb,var(--st-denied) 55%,transparent);color:var(--st-denied)}
+.ro-n.s-failing .ro-dot{border-color:color-mix(in srgb,var(--st-failed) 55%,transparent);color:var(--st-failed)}
+.ro-n.s-unsatisfied .ro-dot{border-color:color-mix(in srgb,var(--st-denied) 55%,transparent);color:var(--st-denied)}
+.ro-n.s-tampered .ro-dot{border-color:color-mix(in srgb,var(--st-critical) 55%,transparent);color:var(--st-critical)}
+.ro-n.s-proven .ro-dot,.ro-n.s-sealed .ro-dot,.ro-n.s-flipped .ro-dot{border-color:color-mix(in srgb,var(--st-proven) 55%,transparent);color:var(--st-proven)}
+.ro-n.ro-would .ro-dot{border-style:dashed;color:var(--dim)}
+.ro-b{min-width:0}
+.ro-t{display:flex;gap:8px;flex-wrap:wrap;align-items:center;min-width:0}
+.ro-name{font-weight:600;color:var(--fg);font-size:13px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+.ro-would .ro-name,.ro-seal .ro-name{color:var(--muted);font-weight:500}
+.ro-w{display:flex;gap:8px;flex-wrap:wrap;align-items:baseline;margin-top:3px;font-size:11.5px;line-height:1.5}
+.ro-where{color:var(--dim);font-size:11px}
+.ro-note{color:var(--muted);min-width:0}
+.ro-stat{font-family:var(--mono);font-size:11px}
+.ro-stat .a{color:var(--st-allowed);font-weight:600}
+.ro-stat .d{color:var(--st-denied);font-weight:600}
+.ro-fr{border:1px solid var(--border);background:var(--ink);color:var(--dim);border-radius:6px;padding:1px 6px;font-family:var(--mono);font-size:10.5px;cursor:pointer}
+.ro-fr:hover{border-color:var(--rule);color:var(--fg)}
+.ro-gate{border-left:0}
+.ro-gate .ro-b{border:1px solid color-mix(in srgb,var(--st-approval) 38%,transparent);background:color-mix(in srgb,var(--st-approval) 8%,transparent);border-radius:10px;padding:10px 12px}
+.ro-act{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:9px}
+.ro-hint{font-size:11px;color:var(--muted)}
+.ro-would .ro-b{border:1px dashed var(--rule);border-radius:10px;padding:8px 12px;background:transparent}
+.ro-read{padding:5px 0;display:flex;gap:8px;flex-wrap:wrap;align-items:baseline;min-width:0}
+.ro-tick{position:absolute;left:-23px;top:12px;width:9px;height:1px;background:var(--rule)}
+.ro-rt{font-size:11.5px;color:var(--dim);min-width:0}
+.ro-rt b{font-weight:500;color:var(--muted);font-size:11px}
+.ro-rn{color:var(--dim)}
+.ro-fold{padding:5px 0}
+.ro-thumb{margin-top:8px;display:flex;gap:9px;align-items:flex-end}
+.ro-thumb img{display:block;max-width:220px;max-height:132px;border:1px solid var(--border);border-radius:8px;background:var(--void);object-fit:cover}
+.ro-dim{font-size:10.5px;color:var(--dim)}
+.ro-foot{font-size:11px;color:var(--dim);margin:11px 0 0;border-top:1px solid var(--border);padding-top:10px}
+#viewport.phone .ro{padding:13px 14px 11px}
+#viewport.phone .ro-tally{margin-left:0;width:100%}
+#viewport.phone .ro-name{max-width:100%}
+
 /* ---- agent scores: trust and spend, 0–1000, traffic-lit by band ---- */
 /* A score reads as a label and a number, nothing more. The number is the page's own text colour
    unless the agent sits in a tail of the whole Oxagen population (scoreBand): top decile green,
