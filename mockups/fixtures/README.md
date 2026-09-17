@@ -35,7 +35,9 @@ record must be derived the same way in the fixture, or two pages disagree.
 | `mandates.json` | `MANDATES` | the mandates: limits by measure, counterparties, tools, approval rule, validity, ledger position |
 | `policies.json` | `POLICIES` | the policy versions: state, author, rules, tests, what changed |
 | `switches.json` | `SWITCHES` | the kill switches, class and scoped, with their default position |
-| `repos.json` | `REPOS` | the repositories linked to workspaces, with production branch and code-graph state |
+| `repos.json` | `REPOS` | the repositories linked to workspaces, with production branch, code-graph state, and whether the repository carries a `.oxagen/` tree (`ox`). A row with `role: "available"` is one the installation can reach that no workspace has bound — the init wizard's target. |
+| `workcopies.json` | `WORKCOPIES` | the same `.oxagen/` tree on a machine: the directory, its git remote and head, whether it is in sync with the production branch, whether Stella's symlinks are there, and the steering bundle it last saw |
+| `oxprs.json` | `OXPRS` | every pull request Oxagen has open, across all six kinds of file (`bootstrap`, `record`, `skill`, `agent`, `tool`, `config`), each with who opened it, the files it carries and its checks. The `record` rows are the same lifecycle the Steering page's Context PRs tab shows; this collection is the whole of it. |
 | `records.json` | `RECORDS` | the published context records and their lineage |
 | `proposals.json` | `PROPOSALS` | the promoter's proposals, with support and Context PR state |
 | `members.json` | `MEMBERS` | organization membership: person, workspaces, status, two-factor, last seen |
