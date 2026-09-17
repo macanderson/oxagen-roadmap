@@ -4835,12 +4835,24 @@ document.addEventListener("keydown",function(e){
 function txQ(v){S.tx.q=v;clearTimeout(txQTimer);txQTimer=setTimeout(function(){var q=v;render();var inp=document.querySelector(".tx-tools input");if(inp){inp.focus();inp.setSelectionRange(q.length,q.length);}},160);}
 
 /* ===================== Linked work: the run node's neighbourhood ===================== */
+/* An artifact the outputs spine cites a frame for is OBSERVED, and must not turn up two panels
+   lower as an inferred edge a model guessed at. Before `runs[].outputs` existed the only source
+   here was the flat `touched` list, which nothing had cited, so inferred at 0.7 was the honest
+   label for all of it. It is no longer honest for a node carrying an `fr`: the same artifact would
+   render twice on one page, once citing the frame that produced it and once as a 70% guess, and an
+   inferred edge is never allowed to stand beside the record it contradicts. */
 function runGraphOf(R){
   if(RUNGRAPH[R.id])return RUNGRAPH[R.id];
-  var m=String(R.task||"").match(/^([\w.-]+\/[\w.-]+)#(\d+)$/);
+  var m=String(R.task||"").match(/^([\w.-]+\/[\w.-]+)#(\d+)$/),
+      arts=(R.outputs&&R.outputs.length?R.outputs.filter(roDurable):[]).map(function(n){
+        return {kind:n.kind, ref:n.name, title:n.note||n.where||"", state:n.state||"",
+                edge:n.fr!=null?"observed":"inferred", conf:n.fr!=null?null:0.7,
+                fr:n.fr!=null?[n.fr]:null};
+      });
+  if(!arts.length)arts=(R.touched||[]).map(function(t){return {kind:"touched",ref:t,title:"named in the generated summary",state:"",edge:"inferred",conf:0.7};});
   return {repos:m?[{name:m[1],ref:"from the task",note:"no tool call on this repository was observed",edge:"stated"}]:[],
           issues:R.task?[{ref:R.task,title:R.taskTitle,rel:"task",edge:"stated"}]:[],
-          artifacts:(R.touched||[]).map(function(t){return {kind:"touched",ref:t,title:"named in the generated summary",state:"",edge:"inferred",conf:0.7};}),
+          artifacts:arts,
           files:[]};
 }
 function edgeChip(it){
@@ -4852,8 +4864,11 @@ function lwItem(ic,title,sub,it){return '<div class="lw-item"><span class="ic">'
 function linkedWork(R){
   var g=runGraphOf(R),inf=0,obs=0,dm=runMetrics(R);
   [].concat(g.repos,g.issues,g.artifacts).forEach(function(it){if(it.edge==="inferred")inf++;else if(it.edge==="observed")obs++;});
-  var artIc={pr:"⇄",release:"⬡",branch:"⑂",witness:"⊢",comment:"✎",touched:"·"};
-  var artState={open:"b-approval",pushed:"b-proven",pending:"b-approval",failing:"b-denied",sealed:"b-proven",posted:"b-proven",merged:"b-allowed",none:"b-q"};
+  /* the kinds a spine node can carry are added here, so an artifact keeps one glyph on both surfaces */
+  var artIc={pr:"⇄",release:"⬡",branch:"⑂",witness:"⊢",proof:"⊢",comment:"✎",label:"⌾",file:"▤",media:"▣",record:"❑",touched:"·"};
+  var artState={open:"b-approval",pushed:"b-proven",pending:"b-approval",failing:"b-denied",sealed:"b-proven",posted:"b-proven",merged:"b-allowed",none:"b-q",
+   /* the spine's own vocabulary, mapped to the same badge classes it uses there */
+   created:"b-allowed",written:"b-allowed",linked:"b-q",blocked:"b-denied",proven:"b-proven"};
   var panel=function(title,items,empty){return '<div class="panel"><div class="panel-h"><h3>'+title+'</h3><span class="b b-q" style="margin-left:auto">'+items.length+'</span></div><div class="panel-b">'+(items.length?items.join(""):'<div class="lw-item"><span class="ic">—</span><div class="t"><span class="sub">'+empty+'</span></div></div>')+'</div></div>';};
   var repos=g.repos.map(function(r){return lwItem("⌂",r.name,(r.ref?r.ref+" · ":"")+(r.note||""),r);});
   var issues=g.issues.map(function(i){return lwItem("◌",i.ref+" · "+i.title,i.rel,i);});
