@@ -83,6 +83,29 @@ joins on, the two independent numbers in the reconciliation block, and mint, rot
 Mutation-tested against three deliberate regressions — rebuilding the sheet on every render,
 removing the no-key refusal, and dropping the `inert` guard — and catches all three.
 
+## The record end-to-end guard
+
+```sh
+node tools/check-record-e2e.mjs           # wizard → Context PR → checks → merge → published
+node tools/check-record-e2e.mjs --shots   # a screenshot at each stage
+```
+
+A context record is the one object in the product that goes all the way from a sentence somebody
+typed to something that steers every agent in a workspace, and every step between those two is a
+place the guarantee can be lost. This walks the whole path in one session and asserts the things
+that make it a governed publication rather than a save button: while the pull request is open the
+record is **not** in Records, **not** in the compiled bundle, **not** in the audit log and the
+bundle version has not moved; merge is blocked until every check reports, and forcing it through
+publishes nothing; merge publishes exactly once — one record, one rule, one version, one audit
+event; and the promoter's own pull request is untouched throughout. It then opens the record's page
+and finds it in the list, and separately checks that closing a pull request without merging leaves
+nothing behind and that a kind which constrains nothing takes the other branch of the sixth check.
+
+Counts are read before and after and compared, never read back out of the thing under test.
+Mutation-tested against four deliberate regressions — publishing when the pull request opens rather
+than when it merges, merging without waiting for the checks, dropping the newest-first order on the
+records list, and replacing the per-record check text with a fixed string — and catches all four.
+
 ## Writing a scenario
 
 `SCENARIOS["id"]={title:"…", ws:"…", blurb:"…", steps:[…]}` in `mockups/src/engine.js`, and a row in

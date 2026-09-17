@@ -19,10 +19,15 @@ Published context records, proposals, and open Context PRs. A record becomes pub
 **Header** — eyebrow “Workspace · <workspace name>”, h1 “Steering”.
 Actions: **Write a context record** (gold; opens the record wizard: describe → kind → statement → checks → pull request)
 
-- **Tabs**: Records (N) · Proposals (N) · Context PRs (N).
+- **Tabs**: Records (N) · Proposals (N) · Context PRs (N). The Context PRs count includes an operator's open pull request as well as the promoter's.
+- Published records are listed **newest first**. Without an order, a record merged a moment ago lands wherever the collection happens to put it, which on a workspace with sixty of them is the one record the operator cannot find.
 - **Records** — Published records as cards grouped by kind (chips: All · rule · constraint · procedure · fact · memory · preference; the six kinds of `context-record/v0.1`, icon + hue per kind, the statement always the headline); search, sort, pager. On disk: the `.oxagen/` tree (Stella symlinks into it). Delivery — three ways, all recorded.
 - **Proposals** — candidates that steer nothing until merged: each with its evidence and **Review**.
-- **Context PRs** — Pull request · Branch · Kind · State; the selected PR: body, Checks, What merge will do; **Merge pull request**.
+- **Context PRs** — Pull request · Branch · **Opened by** · State. A row is selectable; the selected pull request is shown below it. Two things open one, and the table says which: the **promoter**, out of runs it aggregated into a proposal, and **a person**, out of the record wizard. The lifecycle is the same for both — the same six checks, run one at a time, the same merge, the same promotion event, the same bundle bump — and only the pull request body differs, because a promoter argues from runs and a person argues from the person.
+  - The selected PR shows: the file it carries (`.oxagen/rules/<lineage>.toml`), the pull request body, the Checks list with each check's own result text computed for *that* record, and either **What merge will do** (five numbered consequences) or, once merged, the **promotion_event**.
+  - **Merge pull request** is disabled until every check reports, and is a no-op if called anyway. An operator's PR also offers **Close without merging**, which discards the branch and publishes nothing; a merged one cannot be closed, because taking a published record back out of force is its own pull request.
+  - On merge: the record enters `RECORDS`, the bundle gains its rule and one version, one `steering_published` audit event is written, and the panel offers **Open the record** and **See it in Records**.
+  - **While a pull request is open the record steers nothing** — it is not in Records, not in the compiled bundle, not in the audit log, and the bundle version has not moved. `tools/check-record-e2e.mjs` asserts each of those separately.
 
 **Dialogs this page opens:** `wz (record wizard)`, `ctxpr` (opened from a proposal, which already has its concern, kind and evidence), `review (proposal)`.
 
@@ -48,7 +53,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 ## States
 
 - **loaded** — the page as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell).
-- **empty** — “Nothing steers this workspace yet” — published records live in `.oxagen/rules/` on the main repo. Action: **Open a Context PR**.
+- **empty** — “Nothing steers this workspace yet” — published records live in `.oxagen/rules/` on the main repo. Action: **Write a context record** (opens the record wizard, which ends on a Context PR).
 - **loading** — the shell stays; the page body is replaced by the skeleton (four tile blocks and a panel of seven rows), so the operator keeps their bearings.
 - **error** — “Steering could not be loaded” — `503 record_index_unavailable`. Nothing was changed. Runs kept recording while this page was down — frames are written by the gateway, not by Mission Control. Actions: **Try again**, **Open an incident**; a trace id, region and timestamp line.
 - **access denied** — “You cannot see this workspace’s steering” — the roles the signed-in person holds on the organization do not include `steering.read on core-platform`. Copy explains an owner can grant it and that the grant is itself a governed action in the audit record. Actions: **Request access** (opens the request-access dialog), **Back to Fleet**. Below: *Signed in as* (name · role), *Needed* (the permission), *Decided by* (`pol_v41` · deny wins over every allow).
