@@ -12,6 +12,9 @@
 //   * merge publishes exactly once: Records gains one row, the bundle gains one rule and one version
 //   * the promoter's pull request is untouched by any of it
 //   * closing without merging leaves nothing behind
+//   * a lineage that is already published FAILS its check, and nothing merges (PR #36 review, P1)
+//   * a second operator PR does not erase the first (P2)
+//   * a statement with a quote still produces a file that parses as TOML (P3)
 // Counts are read before and after and compared, never read back out of the thing under test.
 import { existsSync, mkdirSync } from "node:fs";
 import path from "node:path";
@@ -56,10 +59,14 @@ const world = async page => await page.evaluate(() => ({
   bundleRules: STEER_BUNDLE.rules.length,
   audit: AUDIT.filter(a => a.ev === "steering_published").length,
   ctxprState: S.ctxpr.st,
-  recprState: S.recpr.st,
-  hasRecpr: !!RECPR,
-  prNumber: RECPR ? RECPR.pr : null,
-  lineage: RECPR ? RECPR.record.id : null,
+  recprState: recprCur() ? recprSt(recprCur()).st : "none",
+  hasRecpr: RECPRS.length > 0,
+  openPrs: RECPRS.length,
+  prNumber: recprCur() ? recprCur().pr : null,
+  lineage: recprCur() ? recprCur().record.id : null,
+  // two independent readings of the same claim: how many published records hold this lineage
+  dupes: recprCur() ? RECORDS.filter(r => r.status === "published" && r.id === recprCur().record.id).length : 0,
+  ruleDupes: recprCur() ? STEER_BUNDLE.rules.filter(r => r.id === recprCur().record.id).length : 0,
 }));
 const shot = async (page, name) => { if (shots) await page.screenshot({ path: path.join(shots, name + ".png"), fullPage: true }); };
 const primary = async page => await page.evaluate(() => {
@@ -145,7 +152,7 @@ const clickPg = async (page, re) => await page.evaluate(src => {
   ok((await world(page)).records === before.records, "forcing a merge while checks run publishes nothing");
 
   /* ---------- the checks ---------- */
-  await page.waitForFunction(() => S.recpr.st === "passed", null, { timeout: 15000 }).catch(() => {});
+  await page.waitForFunction(() => recprCur() && recprSt(recprCur()).st === "passed", null, { timeout: 15000 }).catch(() => {});
   const passed = await world(page);
   ok(passed.recprState === "passed", "every check reported, got " + passed.recprState);
   txt = await pgText(page);
@@ -223,13 +230,108 @@ const clickPg = async (page, re) => await page.evaluate(src => {
     wzOpen("record"); S.wz.desc = s; S.wz.rkind = "memory"; wzGo(3); wzGo(5); wzRecOpenPr();
   }, "The checkout suite flaked on Safari through August.");
   await page.waitForTimeout(400);
-  await page.waitForFunction(() => S.recpr.st === "passed", null, { timeout: 15000 }).catch(() => {});
+  await page.waitForFunction(() => recprCur() && recprSt(recprCur()).st === "passed", null, { timeout: 15000 }).catch(() => {});
   const txt = await pgText(page);
   ok(/not a constraining kind/.test(txt), "a memory passes the constraint check by not having one");
   ok(!/constraint_effect = /.test(txt), "and claims no constraint_effect");
-  ok(/no \[enforcement\] table/.test(txt), "its file has no enforcement table");
+  ok(/no \[enforcement\] table/.test(txt), "its file says why it has no enforcement table");
+  // and the structural fact, not only the sentence about it
+  const f = await page.evaluate(() => { const d = recprCur(); return { text: recprFileText(d), ce: d.record.ce }; });
+  ok(f.ce === null, "a memory carries no constraint effect");
+  ok(!/^\[enforcement\]/m.test(f.text), "and its file has no [enforcement] table at all");
+  ok(!/constraint_effect\s*=/.test(f.text), "and never writes a constraint_effect key");
   ok(/info/.test(txt), "a memory carries info force");
   ok(errs.length === 0, "no errors on the memory path: " + errs.join(" | "));
+  await page.close();
+}
+
+/* ---------- P1: a lineage that is already published must fail its check ---------- */
+{
+  const { page, errs } = await open();
+  const write = async desc => {
+    await page.evaluate(d => { wzOpen("record"); S.wz.desc = d; S.wz.rkind = "constraint"; wzGo(3); wzGo(5); wzRecOpenPr(); }, desc);
+    await page.waitForFunction(() => recprCur() && /passed|failed/.test(recprSt(recprCur()).st), null, { timeout: 15000 }).catch(() => {});
+  };
+  await write("Never hand-edit a generated migration; regenerate it from the schema.");
+  const first = await world(page);
+  ok(first.recprState === "passed", "the first record's checks pass");
+  await page.evaluate(() => recprMerge());
+  await page.waitForTimeout(300);
+  const afterOne = await world(page);
+  ok(afterOne.dupes === 1, "one published record holds the lineage");
+
+  // a different sentence that slugs to the same lineage
+  await write("Never hand-edit a generated migration under any circumstances whatsoever.");
+  const second = await world(page);
+  ok(second.lineage === first.lineage, "the two descriptions do collide on one lineage, got " + second.lineage);
+  ok(second.recprState === "failed", "the second pull request FAILS its lineage check, got " + second.recprState);
+  const txt2 = await pgText(page);
+  ok(/already published/.test(txt2), "the failing check says why");
+  ok(/check failed/.test(txt2), "the state badge says a check failed");
+  const mergeBtn = await page.evaluate(() => {
+    const b = [...document.querySelectorAll("#pg button")].find(x => /Merge pull request/.test(x.textContent));
+    return b ? b.disabled : null;
+  });
+  ok(mergeBtn === true, "merge stays disabled on a failed check");
+  await page.evaluate(() => recprMerge());     // and forcing it does nothing
+  await page.waitForTimeout(200);
+  const afterTwo = await world(page);
+  ok(afterTwo.dupes === 1, "still exactly one record holds the lineage, got " + afterTwo.dupes);
+  ok(afterTwo.ruleDupes === 1, "and exactly one compiled rule, got " + afterTwo.ruleDupes);
+  ok(afterTwo.bundleV === afterOne.bundleV, "the bundle version did not move on the failed PR");
+  await shot(page, "rec-e2e-6-lineage-taken");
+  ok(errs.length === 0, "no errors on the duplicate-lineage path: " + errs.join(" | "));
+  await page.close();
+}
+
+/* ---------- P2: a second pull request does not erase the first ---------- */
+{
+  const { page, errs } = await open();
+  await page.evaluate(() => { wzOpen("record"); S.wz.desc = "First concern, entirely its own."; S.wz.rkind = "rule"; wzGo(3); wzGo(5); wzRecOpenPr(); });
+  await page.waitForTimeout(300);
+  const one = await page.evaluate(() => recprCur().pr);
+  await page.evaluate(() => { wzOpen("record"); S.wz.desc = "Second concern, unrelated to the first."; S.wz.rkind = "rule"; wzGo(3); wzGo(5); wzRecOpenPr(); });
+  await page.waitForTimeout(300);
+  const two = await page.evaluate(() => recprCur().pr);
+  ok(one !== two, "the second pull request gets its own number, " + one + " then " + two);
+  ok((await world(page)).openPrs === 2, "both are open");
+  const txt = await pgText(page);
+  ok(txt.includes(one), "the first is still listed after the second opens");
+  ok(txt.includes(two), "and so is the second");
+  // and each keeps its own state and its own file
+  await page.evaluate(p => prSelect(p), one);
+  await page.waitForTimeout(250);
+  ok((await pgText(page)).includes("First concern"), "selecting the first shows the first's statement");
+  await page.evaluate(p => prSelect(p), two);
+  await page.waitForTimeout(250);
+  ok((await pgText(page)).includes("Second concern"), "selecting the second shows the second's");
+  await shot(page, "rec-e2e-7-two-open");
+  ok(errs.length === 0, "no errors with two open: " + errs.join(" | "));
+  await page.close();
+}
+
+/* ---------- P3: operator text is serialised as TOML, not just HTML-escaped ---------- */
+{
+  const { page, errs } = await open();
+  const tricky = 'Always say "ready" before a deploy, and never use a \\ in a branch name.';
+  await page.evaluate(d => { wzOpen("record"); S.wz.desc = d; S.wz.rkind = "rule"; wzGo(3); wzGo(5); wzRecOpenPr(); }, tricky);
+  await page.waitForTimeout(400);
+  // the file the PR carries must parse with the app's own TOML reader — two independent things:
+  // what is rendered, and what the parser makes of it.
+  const r = await page.evaluate(() => {
+    const def = recprCur(), text = recprFileText(def);
+    let parsed = null, err = null;
+    try { parsed = tomlParse(text); } catch (e) { err = String(e.message || e); }
+    return { text, err, statement: parsed && parsed.statement, rendered: document.querySelector("#pg pre").innerText };
+  });
+  ok(r.err === null, "the record file parses as TOML, got " + r.err);
+  ok(r.statement === (await page.evaluate(() => recprCur().record.st)),
+     "and round-trips the statement exactly, got " + JSON.stringify(r.statement));
+  ok(/\\"ready\\"/.test(r.text) || r.text.includes('\\"ready\\"'), "the quotes are escaped in the file, got " + JSON.stringify(r.text.split("\n").find(l => /statement/.test(l))));
+  await page.waitForFunction(() => recprCur() && recprSt(recprCur()).st === "passed", null, { timeout: 15000 }).catch(() => {});
+  ok((await world(page)).recprState === "passed", "and its schema check passes honestly");
+  await shot(page, "rec-e2e-8-quoted-statement");
+  ok(errs.length === 0, "no errors on the quoted-statement path: " + errs.join(" | "));
   await page.close();
 }
 

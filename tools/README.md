@@ -101,10 +101,18 @@ event; and the promoter's own pull request is untouched throughout. It then open
 and finds it in the list, and separately checks that closing a pull request without merging leaves
 nothing behind and that a kind which constrains nothing takes the other branch of the sixth check.
 
+It also covers what the review of PR #36 found, each reproduced before it was fixed: a lineage that
+is already published **fails** its check so nothing merges (without it, two descriptions sharing
+their first four words publish two records under one id, with the tokens counted twice and the check
+on screen claiming otherwise); a second operator pull request does not erase the first; and a
+statement containing a quote still produces a file that parses with the app's own TOML reader.
+
 Counts are read before and after and compared, never read back out of the thing under test.
-Mutation-tested against four deliberate regressions — publishing when the pull request opens rather
+Mutation-tested against eight deliberate regressions — publishing when the pull request opens rather
 than when it merges, merging without waiting for the checks, dropping the newest-first order on the
-records list, and replacing the per-record check text with a fixed string — and catches all four.
+records list, replacing the per-record check text with a fixed string, removing the lineage
+predicate, making the check runner ignore every test, collapsing the pull-request collection back to
+one, and dropping the TOML escaping — and catches all eight.
 
 ## Writing a scenario
 
