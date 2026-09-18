@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-09-18T18:00:00Z",
+ "generated_at": "2026-09-18T20:52:30Z",
  "thesis": "The mockups are the spec. This page is the distance between them and the build, plus the witness and the definition of done that make a run provable, and the decisions that unblock the work. GitHub status is live; everything else is editable here and by Claude.",
  "repos": {
   "owner": "macanderson",
@@ -12,7 +12,7 @@
  },
  "built_app": {
   "exists": true,
-  "notes": "The new Mission Control app is apps/app (@oxagen/app, version 3.0.0) on main; the rebuild cut over to app.oxagen.sh on 2026-09-17 (PR #2997, WL-52) and the old app is apps/app_deprecated. 26 page.tsx routes exist. There is no fixture adapter: ARCHITECTURE.md §5 deleted it, so every page reads live kernel contracts through src/data/live/* and renders <NotRecorded> for unbacked slices. The mockups repository moved during this run from ~/Projects/tmp-oxagen-mockups to ~/Projects/product-roadmap (github.com/macanderson/roadmap); spec_path values below are relative to that repo. Two rev1 items have NOT landed on main despite the cutover: the Run page is a title-only stub (apps/app/src/app/[org]/[ws]/runs/[run]/page.tsx says 'The title alone until WL-35') and no UI calls resolve_approval or dispatch_tacho_command (approvals-panel.tsx: 'this panel reads'; neither appears in capability-ui-map.json). No packages/dod, no witness runner, no certificate or verify endpoint exist in oxagen or stella; the witness backend half (#2955) does: evidence.witnesses/verdicts tables, proof.observed ingest, get_run_proof, disclosure grain."
+  "notes": "The Mission Control app is apps/app (@oxagen/app 3.0.0) on main; the rebuild cut over to app.oxagen.sh on 2026-09-17 (PR #2997, WL-52) and the old app is apps/app_deprecated. 26 page.tsx routes exist. There is no fixture adapter: ARCHITECTURE.md §5 deleted it, so every page reads live kernel contracts through src/data/live/* and renders <NotRecorded> for unbacked slices. spec_path values below are relative to this repo (github.com/macanderson/roadmap). As of 2026-09-18 evening (main @ cc26fe14e): the Run page landed in PR #3282 (WL-35), apps/app/src/app/[org]/[ws]/runs/[run]/page.tsx renders src/features/run/* with a header (generated name, summary, cost with basis, replay grade), Transcript, Frames and Cost tabs, Pause/Resume/Steer/Cancel through dispatch_command, and Export and Summarize on sealed runs; capability-ui-map.json binds get_run, get_run_transcript, get_run_frame_body, get_run_cost, summarize_run, export_run and dispatch_command to it (the contract is named dispatch_command; dispatch_tacho_command does not exist). Two things are still missing on main: no UI invokes resolve_approval (the Fleet approvals panel reads only, and resolve_approval is absent from capability-ui-map.json), and there is no SSE or stream route for a run (the page renders per request). No packages/dod, no witness runner, no certificate or verify endpoint exist in oxagen or stella; the witness backend half (#2955) does: evidence.witnesses/verdicts tables, proof.observed ingest, get_run_proof (api only, no app or mcp layer), disclosure grain."
  },
  "surfaces": [
   {
@@ -28,23 +28,26 @@
     "apps/app/src/features/fleet/runs-table.tsx",
     "apps/app/src/features/fleet/stat-strip.tsx",
     "apps/app/src/features/fleet/approvals-panel.tsx",
+    "apps/app/src/features/fleet/fleet.builders.ts",
     "apps/app/src/features/spend/fleet-tiles.tsx",
     "apps/app/src/features/onboarding/gate.tsx",
     "apps/app/src/data/live/runs.ts",
-    "apps/app/src/data/live/approvals.ts"
+    "apps/app/src/data/live/mappers/runs.ts",
+    "apps/app/src/data/live/approvals.ts",
+    "apps/app/src/ui/generated-summary.tsx",
+    "apps/app/src/ui/replay-grade.tsx"
    ],
-   "gap_summary": "Reads are live: a runs table (run, agent, operator, status, cost, frames, started), two stat tiles plus Spend today and cache hit rate, an approvals panel with the mandate bar, and the onboarding rail. But the panel only reads: approve/deny (resolve_approval, the one billable action) and Halt are not wired anywhere in the app, and no row carries tier, replay grade, verdict or Done. P0 because Fleet is the day-one page and its one governed write is missing.",
+   "gap_summary": "Reads are live and, since PR #3282, rows can be told apart: each row shows the generated name over the id and task ref, the generated summary, the agent card with its source, the operator, status, replay grade, cost with basis, frames and started, and links to the Run page. Two stat tiles, Spend today, cache hit rate, the approvals panel with the mandate bar and the onboarding rail are live. The panel still only reads: approve and deny (resolve_approval, the one billable action) are not wired anywhere in the app, and no row carries tier, verdict or Done. P0 because Fleet is the day-one page and its one governed write is missing.",
    "gaps": [
     "Approve/deny dialog calling resolve_approval (WL-40) is absent; resolve_approval is not in capability-ui-map.json",
-    "Halt/Cancel on wrapped and ledger runs (WL-41, dispatch_tacho_command kill) not wired",
-    "No Done column or held tile (G15) and no tier, replay grade, verdict or proven filter on rows",
+    "Halt/Cancel from the Fleet list (WL-41): dispatch_command is wired on the Run page only, not on a Fleet row",
+    "No Done column or held tile (G15); no tier column; verdict comes back from list_runs but the app's RunRow mapper drops it; no proven filter",
     "Auto-approval eligibility line on the approval card (#2970 app half; backend approval_rule.* and get_auto_eligibility exist)",
-    "Spend summed by run (an agent + operator + prompt) — feedback 8; by operator/agent lives on Spend only",
+    "Spend summed by run (an agent + operator + prompt), feedback 8; by operator/agent lives on Spend only",
     "Fleet steer dialog (steer the fleet, #2953)"
    ],
    "backend_gaps": [
     "G3 cost rollup with basis",
-    "G6 run recorder (tier, replay grade)",
     "G7 verdict",
     "G9 steer with delivery mode on ledger runs",
     "G17 revocable run token on the ledger ingest contract",
@@ -53,7 +56,16 @@
    ],
    "plan_lane": "P1",
    "priority": "P0",
-   "issue_links": []
+   "issue_links": [
+    {
+     "repo": "oxagen",
+     "number": 3282
+    },
+    {
+     "repo": "oxagen",
+     "number": 2953
+    }
+   ]
   },
   {
    "id": "run",
@@ -62,42 +74,74 @@
    "route": "#/a-intel/core-platform/runs/run_01K5RS7M2E8FJ3QW",
    "spec_path": "mockups/pages/run.md",
    "scope_verdict": "keep",
-   "built_status": "not-started",
+   "built_status": "partial",
    "built_evidence": [
     "apps/app/src/app/[org]/[ws]/runs/[run]/page.tsx",
+    "apps/app/src/features/run/run.tsx",
+    "apps/app/src/features/run/header.tsx",
+    "apps/app/src/features/run/transcript.tsx",
+    "apps/app/src/features/run/frames.tsx",
+    "apps/app/src/features/run/cost.tsx",
+    "apps/app/src/features/run/run-controls.tsx",
+    "apps/app/src/features/run/record-actions.tsx",
+    "apps/app/src/features/run/actions.ts",
+    "apps/app/src/features/run/run.test.tsx",
+    "apps/app/src/features/run/controls.test.tsx",
     "apps/app/src/data/live/runs.ts",
+    "apps/app/src/ui/generated-summary.tsx",
+    "apps/app/src/ui/replay-grade.tsx",
+    "packages/handlers/src/run.get.ts",
     "packages/oxagen/src/contracts/run.get.ts",
     "packages/oxagen/src/contracts/run.transcript.get.ts",
     "packages/oxagen/src/contracts/run.frame_body.get.ts",
     "packages/oxagen/src/contracts/run.proof.get.ts",
     "packages/oxagen/src/contracts/run.summarize.ts",
-    "packages/oxagen/src/contracts/run.fork.ts",
-    "packages/oxagen/src/contracts/run.bisect.ts",
     "packages/oxagen/src/contracts/run.export.ts",
-    "packages/database/atlas/migrations/20260915150000_run_recorder_replay.sql"
+    "packages/oxagen/src/contracts/tacho.command.dispatch.ts"
    ],
-   "gap_summary": "The route renders only the page title: WL-35 (header, frames, SSE stream, approvals strip, Halt) never landed on main, and there is no SSE route under src/app/api. The kernel is far ahead of the UI: get_run, transcript, frame bodies, recorder/replay tables, run.summarize (the feedback-4 namer), fork, bisect, export and get_run_proof all exist. P0: the flight recorder is the product's first sentence and the page is empty.",
+   "gap_summary": "PR #3282 (WL-35, merged 2026-09-18) built the page: a header with the generated name and summary (summarize_run, feedback 4), the cost large with its basis (feedback 5), status and replay grade, the agent and operator cards, three tabs (Transcript at three zoom levels, Frames with a frame-body drawer, Cost), Pause, Resume, Steer and Cancel on live runs through dispatch_command, and Export and Summarize on sealed runs. 39 component tests, 15 control tests and 11 action tests prove it. Still missing: an approvals strip with approve and deny (no UI invokes resolve_approval), a stream (the page renders per request, no SSE route exists), the Proof, Policy, Chain and Done tabs, fork and bisect, and the <RunOutputs> spine. P0 stays because the flight recorder is the product's first sentence and half of it is in.",
    "gaps": [
-    "Header with run name, summary and large cost with basis dialog (feedback 4, 5); run.summarize exists in the kernel but nothing displays it",
-    "Transcript at three zoom levels, transport (scrub/step/play), frame detail, SSE resume (no api/mc stream route exists)",
-    "Collapsed inspectable prompt (feedback 6)",
+    "Approvals-on-this-run strip and approve/deny: resolve_approval is not bound in capability-ui-map.json and no UI calls it",
+    "Live updates: no SSE or stream route under apps/app/src/app; the page renders per request and re-reads after a dialog",
+    "Proof tab: get_run_proof exists (api only, layers without app or mcp) and the page still defers it to #2955",
+    "Policy tab (approvals do not record their run, #3286), Chain and seal tab (no read for the Merkle root), Done tab (dod-spec)",
     "<RunOutputs> time-ordered spine (feedback 7, decided 2026-09-17) and the file-diff card under approvals",
-    "Approvals-on-this-run strip and approve/deny; Halt/Cancel/pause/resume/steer with delivery mode (#2953)",
-    "Tabs: Proof (#2955, get_run_proof exists), Cost (get_run_cost), Policy, Chain and seal, Done (dod-spec)",
+    "Fork and bisect buttons (contracts exist, nothing in features/run calls them)",
+    "Collapsed inspectable prompt (feedback 6)",
     "Linked work graph and context window (cut/G10)",
-    "Fork, bisect and export buttons (contracts exist)"
+    "Controls are offered on observe-tier runs and a live run never updates (residue #3285)"
    ],
    "backend_gaps": [
-    "G6 recorder + frame bodies",
     "G7 witness/verdict",
-    "G9 steer delivery mode",
+    "G9 steer delivery mode: interrupt delivers only on the gateway tier, else degrades to next_step (#3319)",
     "G10 USED_CONTEXT edges",
-    "G14 run namer/summariser",
-    "G17 revocable run token on the ledger ingest contract"
+    "G17 revocable run token on the ledger ingest contract",
+    "A stream route for run frames"
    ],
    "plan_lane": "P2a",
    "priority": "P0",
-   "issue_links": []
+   "issue_links": [
+    {
+     "repo": "oxagen",
+     "number": 3282
+    },
+    {
+     "repo": "oxagen",
+     "number": 3285
+    },
+    {
+     "repo": "oxagen",
+     "number": 3286
+    },
+    {
+     "repo": "oxagen",
+     "number": 2953
+    },
+    {
+     "repo": "oxagen",
+     "number": 2955
+    }
+   ]
   },
   {
    "id": "agents",
@@ -264,21 +308,30 @@
     "apps/app/src/features/steering/proposals.tsx",
     "apps/app/src/features/steering/context-prs.tsx",
     "apps/app/src/features/steering/actions.ts",
+    "packages/handlers/src/lib/tacho-steering.ts",
+    "packages/handlers/src/lib/tacho-host.ts",
+    "packages/tacho/src/claude-code/hook-client.ts",
+    "docs/adr/ADR-091-one-record-steers-one-agent.md",
+    "docs/adr/ADR-093-one-assembler-decides-what-reaches-the-agent-and-records-what-it-cut.md",
+    "docs/adr/ADR-097-steering-and-gating-are-two-planes-authored-on-one-surface-and-compiled-twice.md",
     "packages/database/atlas/migrations/20260915060000_steering_proposals_and_context_pr.sql"
    ],
-   "gap_summary": "Records, proposals and Context PRs tabs are live with open_context_pr, merge_context_pr and dismiss_proposal (ADR-061). But no agent run follows what gets published: the bundle's context.system is hardcoded null, so a published record never reaches a wrapped Claude Code or Codex run (issue #2592, reopened 2026-09-18). An adversarial review on 2026-09-18 found the same gap across eight sources of steering, and the maintainer approved a six-phase fix: one assembler, one item type, one hub screen. Phase 0 (compile must/should records into the bundle) is in review as PR #3289.",
+   "gap_summary": "Records, proposals and Context PRs tabs are live with open_context_pr, merge_context_pr and dismiss_proposal (ADR-061). Phase 0 merged on 2026-09-18 (#3289, ADR-091): the bundle's context.system now compiles every active must and should record, the etag moves when a record merges, and a wrapped Claude Code run receives it through the SessionStart hook. Issue #2592 stays open until a merged record is seen in a production run, and #3302 means a record published through publish_context_record (no kind or force) never reaches an agent. The six-phase plan is decided (#3294: ADR-093 one assembler, ADR-097 two planes). Phase 1 (one SteeringItem, assembleSteering, the steering.manifest frame, #3296) and Phase 2 (this page becomes the hub with seven tabs, #3297) are not started.",
    "gaps": [
-    "No run-time reader of context.system: the server hardcodes it to null",
-    "Bundle permissions, tools and budget are always empty; nothing enforces session_limit_usd",
+    "Records published through publish_context_record carry no kind or force, so the Phase 0 filter never selects them (#3302)",
+    "Bundle permissions, tools and budget: permissions and tools still empty; session_limit_usd is now enforced only at the loopback proxy (#3319)",
     "Write a context record wizard (creation-spec §5)",
     "Record rows do not open a record page",
     "Context PR state read from GitHub (webhook-driven status)",
-    "Phase 2 turns this page into the Steering hub (Records, Skills, Memory, Ontology, Policy, Proposals, Preview); mockups depicting it are in review as roadmap PR #44"
+    "Phase 2 turns this page into the Steering hub (Records, Skills, Memory, Ontology, Policy, Proposals, Preview); the mockups depict it (roadmap PR #44)",
+    "may and info records by relevance, and delivery through context frames (ADR-091 defers them)"
    ],
    "backend_gaps": [
     "Context PR state from GitHub",
-    "Phase 0: compile active must/should records into the signed bundle (PR #3289, ADR-091)",
-    "Phase 1: one assembler, one SteeringItem type, the steering.manifest frame (issue #3296)"
+    "Phase 1: one assembler, one SteeringItem type, the steering.manifest frame (#3296)",
+    "Adapters other than Claude Code must inject context.system themselves; the Agent SDK adapter is next",
+    "Workspace additionalInstructions are appended with no budget, record or check (#3303)",
+    "Compile the pinned record version instead of stale row fields (#3312); every control response loads all records (#3311)"
    ],
    "plan_lane": "P5",
    "priority": "P0",
@@ -298,6 +351,22 @@
     {
      "repo": "oxagen",
      "number": 3297
+    },
+    {
+     "repo": "oxagen",
+     "number": 3302
+    },
+    {
+     "repo": "oxagen",
+     "number": 3303
+    },
+    {
+     "repo": "oxagen",
+     "number": 3311
+    },
+    {
+     "repo": "oxagen",
+     "number": 3312
     }
    ]
   },
@@ -311,15 +380,22 @@
    "built_status": "partial",
    "built_evidence": [
     "apps/app/src/features/shell/workspace-settings.tsx",
+    "apps/app/src/features/shell/workspace-settings-actions.ts",
+    "apps/app/src/features/shell/workspace-settings.test.tsx",
     "apps/app/src/features/onboarding/ui/bind-repository.tsx",
     "packages/oxagen/src/contracts/repository.main.bind.ts",
+    "packages/oxagen/src/contracts/repository.main.get.ts",
     "packages/oxagen/src/contracts/repository.installation.attach.ts",
-    "packages/oxagen/src/contracts/repository.installation.candidates.ts"
+    "packages/oxagen/src/contracts/repository.installation.candidates.ts",
+    "packages/oxagen/src/contracts/repository.installation.list.ts",
+    "packages/database/atlas/migrations/20260918040000_repository_main_binding_is_exclusive.sql",
+    "packages/handlers/src/context.steering.github.ts",
+    "docs/specs/repository-binding/README.md"
    ],
-   "gap_summary": "Only the main-repository binding exists, as a Workspace settings dialog (#3233) over bind_main_repository and the GitHub installation contracts; spec #3242 merged on 2026-09-17 and issue #3241 tracks the rest. The page with its four tabs (Repositories, Working copies, Changes, Configuration) and the init wizard is not started.",
+   "gap_summary": "The main-repository binding is built as a Workspace settings dialog (#3233) over bind_main_repository, get_main_repository and the three GitHub installation contracts; #3269 made one main repository per workspace exclusive across the whole store (a partial unique index on role='main'), #3265 makes steering read the ref the binding approved, and #3278 stamps Context records with the approved repository name. The spec (#3242, docs/specs/repository-binding/README.md) settled the GitHub App as read-write. Open PR #3326 (ADR-099) adds link_repository, unlink_repository and list_repositories, a Repositories section in the same dialog, the CLI oxagen repo list|link|unlink, and makes a second create_workspace require a main repository. The page with its four tabs (Repositories, Working copies, Changes, Configuration) and the init wizard is not started.",
    "gaps": [
-    "The /repositories page and its four tabs",
-    "Linked repositories (link/unlink) and unbound repositories the installation can reach",
+    "The /repositories page and its four tabs (the binding lives in the Workspace settings dialog)",
+    "Linked repositories (link/unlink) and unbound repositories the installation can reach: in open PR #3326, not on main",
     "Working copies: oxagen init reporting back, drift record and reconciler",
     "Changes tab: one pull-request lifecycle for every governed file (agent, tool, skill, record)",
     "Configuration tab: governance.toml written by the app",
@@ -328,15 +404,33 @@
    "backend_gaps": [
     ".oxagen/ presence read from the production branch",
     "A working-copy record: oxagen init reports nothing back",
-    "Writing governance.toml",
+    "Writing governance.toml (no writer exists)",
     "A merge capability for agent-definition pull requests, to match merge_context_pr",
     "Skill and tool pull-request paths (.oxagen/tools/ unbuilt, ADR-072)",
     "The reconciler and the drift record it reads",
-    "GitHub App permissions: the documented set is read-only, and this page's lifecycle writes"
+    "The spec's 16 contracts (list_repository_bindings, init_oxagen_directory, the *_oxagen_pr and *_working_copy sets, get_workspace_config, list_config_drift, open_reconcile_pr) do not exist; the v2 link/unlink descriptors on main are inert",
+    "Binds on a dedicated data plane are refused; the exclusivity index holds within one Postgres only"
    ],
    "plan_lane": null,
    "priority": "P1",
-   "issue_links": []
+   "issue_links": [
+    {
+     "repo": "oxagen",
+     "number": 3241
+    },
+    {
+     "repo": "oxagen",
+     "number": 3326
+    },
+    {
+     "repo": "oxagen",
+     "number": 3288
+    },
+    {
+     "repo": "oxagen",
+     "number": 3335
+    }
+   ]
   },
   {
    "id": "record",
@@ -411,9 +505,10 @@
     "apps/app/src/app/[org]/[ws]/skills/page.tsx",
     "apps/app/src/features/skills/sections.tsx",
     "apps/app/src/data/live/skills.ts",
-    "packages/oxagen/src/contracts/skill.list.ts"
+    "packages/oxagen/src/contracts/skill.list.ts",
+    "docs/adr/ADR-090-oxagen-governs-skill-resolution.md"
    ],
-   "gap_summary": "One section is live: the skill names harness sessions reported at start (list_skills over tacho.sessions.skills_available). The mockup's resolution catalog, search, in-the-loop, reflection and versions tabs, the off-by-default gate and every dialog have no store and render nothing. W13's two spec decisions are still open.",
+   "gap_summary": "One section is live: the skill names harness sessions reported at start (list_skills over tacho.sessions.skills_available). ADR-090 (#3284, 2026-09-18) reversed the 2026-09-15 narrowing: Oxagen governs skill resolution, skills ship off by default, the config of record is .oxagen/skills.toml through the repository binding, and Skills becomes a tab under Steering (ADR-097). The spec now lists W13 as adopted. Nothing of that is code yet: the resolution catalog, search, in-the-loop, reflection and versions tabs, the off-by-default gate, search_skills and every dialog have no store and render nothing.",
    "gaps": [
     "Resolution catalog with version, digest, load cost, proof rate and pinning",
     "Search, In the loop, Reflection and Versions tabs",
@@ -422,13 +517,22 @@
     "Add a skill wizard (creation-spec §4)"
    ],
    "backend_gaps": [
-    "Spec §2 run-vs-resolve sentence and §19 tables end at W12 (open in w13-in-the-loop-scenario.md)",
-    "A skills resolution store and config versioning",
-    "control.interject / control.answer frame kinds and reflection.captured behind a quarantined store"
+    "A skills resolution store, .oxagen/skills.toml reading through the binding, and config versioning (ADR-090; no skills.* contract exists beyond list_skills)",
+    "control.interject / control.answer frame kinds and reflection.captured behind a quarantined store",
+    "Delivery by sync through the assembler (ADR-093, Phase 1 #3296)"
    ],
    "plan_lane": null,
    "priority": "P2",
-   "issue_links": []
+   "issue_links": [
+    {
+     "repo": "oxagen",
+     "number": 3098
+    },
+    {
+     "repo": "oxagen",
+     "number": 3297
+    }
+   ]
   },
   {
    "id": "skills-off",
@@ -509,12 +613,13 @@
     "apps/app/src/features/organization/people.tsx",
     "apps/app/src/features/organization/workspaces.tsx",
     "apps/app/src/features/organization/actions.ts",
-    "apps/app/src/features/organization/tabs.tsx"
+    "apps/app/src/features/organization/tabs.tsx",
+    "packages/handlers/src/org.member_role.change.ts"
    ],
-   "gap_summary": "People (members and pending invitations), workspaces (create, rename, archive) and the role/API-key tabs are live with change_member_role and remove_org_member. Sending an invitation from the page and the model-funding panel are not built; SSO/SCIM and the data-plane tab were cut.",
+   "gap_summary": "People (members and pending invitations), workspaces (create, rename, archive) and the role/API-key tabs are live with change_member_role and remove_org_member; #3269 fixed the role-change self-lockout (a re-grant upserts and the handler asserts a live org role remains). Sending an invitation from the page and the model-funding panel are not built; BYOK to any OpenAI-compatible endpoint (#3290) exists only as api and mcp contracts. SSO/SCIM and the data-plane tab were cut.",
    "gaps": [
     "Invite a member from the page (workspace.invite.send exists, not bound)",
-    "Funding tab: model key mint/rotate/revoke panel and the reconciliation block (ADR-053)",
+    "Funding tab: model key mint/rotate/revoke panel and the reconciliation block (ADR-053); the set/get/verify/delete_model_credential contracts (now any OpenAI-compatible endpoint, #3290) have no app layer",
     "Org settings write (name, slug)"
    ],
    "backend_gaps": [
@@ -523,7 +628,16 @@
    ],
    "plan_lane": "P7",
    "priority": "P1",
-   "issue_links": []
+   "issue_links": [
+    {
+     "repo": "oxagen",
+     "number": 3314
+    },
+    {
+     "repo": "oxagen",
+     "number": 3317
+    }
+   ]
   },
   {
    "id": "organization-api-keys",
@@ -536,12 +650,16 @@
    "built_evidence": [
     "apps/app/src/app/[org]/api-keys/page.tsx",
     "apps/app/src/features/organization/api-keys.tsx",
+    "apps/app/src/features/organization/api-keys-view.ts",
+    "apps/app/src/features/organization/key-row.tsx",
     "apps/app/src/features/organization/api-key-actions.ts",
     "apps/app/src/features/organization/create-key-dialog.tsx"
    ],
-   "gap_summary": "Complete for rev1: workspace picker, list, create with the secret shown once, rotate (WL-63) and revoke over api.key.* (ADR-073).",
+   "gap_summary": "Complete for rev1: workspace picker, list, create with the secret shown once, rotate (WL-63) and revoke over api.key.* (ADR-073). #3270 hides revoked keys by default (an All link carries the hidden count) and pages the roster 20 rows at a time.",
    "gaps": [],
-   "backend_gaps": [],
+   "backend_gaps": [
+    "list_api_keys has no filter or cursor: the whole roster crosses the wire on every load and the page cuts it (#3270)"
+   ],
    "plan_lane": "P7",
    "priority": "P1",
    "issue_links": []
@@ -582,22 +700,41 @@
    "built_evidence": [
     "apps/app/src/app/[org]/billing/page.tsx",
     "apps/app/src/features/billing/billing.tsx",
-    "apps/app/src/features/billing/bucket-meter.tsx",
-    "apps/app/src/features/billing/usage-credits.tsx",
+    "apps/app/src/features/billing/summary.tsx",
+    "apps/app/src/features/billing/this-month.tsx",
+    "apps/app/src/features/billing/meters.tsx",
+    "apps/app/src/features/billing/invoices.tsx",
+    "apps/app/src/features/billing/purchase-form.tsx",
+    "apps/app/src/features/billing/change-plan.tsx",
+    "apps/app/src/features/billing/what-counts.tsx",
     "apps/app/src/features/billing/actions.ts",
+    "apps/app/src/features/billing/billing.test.tsx",
+    "apps/app/src/features/billing/change-plan.test.tsx",
+    "packages/billing/src/subscriptions.ts",
     "packages/database/atlas/migrations/20260914165423_gau_buckets_and_contract_terms.sql",
     "docs/adr/ADR-055-gau-buckets-and-contracted-rates.md"
    ],
-   "gap_summary": "Both meters are live: the GAU bucket with auto top-up, contracted rate, block purchase through Stripe Checkout and invoices, plus usage credits for in-app AI with top-up, and the Build/Scale upgrade. The held-runs report figure waits on the definition of done.",
+   "gap_summary": "#3309 laid the page out as the design draws it: four summary tiles (plan, GAU this month, contracted rate, due), This month, Meters and Invoices on the left, Price list, Auto top-up, Buy governed action units, Usage credits and What counts on the right, and one gold action, Change plan, which invokes start_subscription_upgrade. #3171 made the plan-change proration direction a measured Stripe invoice preview rather than an inference. Both meters are live (GAU bucket with auto top-up, contracted rate, block purchase through Stripe Checkout, invoices, usage credits). Held runs renders as a not-recorded row: no capability produces the figure.",
    "gaps": [
-    "Held runs as a report figure beside the GAU meter (G15)"
+    "Held runs as a report figure beside the GAU meter (G15): meters.tsx prints not recorded, and nothing server-side counts dod.held"
    ],
    "backend_gaps": [
-    "G13 GAU buckets, settlements and contract terms (built)"
+    "G13 GAU buckets, settlements and contract terms (built)",
+    "A held-runs producer (no capability returns it)",
+    "Negotiated rates scheduled for the future cannot be seen or cancelled (#3323); backdated list-price successors are not rejected (#3329)"
    ],
    "plan_lane": "P8",
    "priority": "P0",
-   "issue_links": []
+   "issue_links": [
+    {
+     "repo": "oxagen",
+     "number": 3323
+    },
+    {
+     "repo": "oxagen",
+     "number": 3329
+    }
+   ]
   },
   {
    "id": "audit",
@@ -641,10 +778,12 @@
     "apps/app/src/app/[org]/[ws]/register/[step]/page.tsx",
     "apps/app/src/features/onboarding/ui/register-form.tsx",
     "apps/app/src/features/onboarding/steps.ts",
+    "apps/app/src/features/shell/page-record.tsx",
+    "apps/app/src/features/shell/assistant-flyout.tsx",
     "packages/oxagen/src/contracts/agent.register.ts",
     "docs/adr/ADR-065-onboarding-gate-shape-installer-path-provisional-workspace.md"
    ],
-   "gap_summary": "Live: register_agent mints the identity, delegated principal and one credential shown once. The AI-drafting step the mockup showed is gone even though suggest_agent_def works (#3260).",
+   "gap_summary": "Live: register_agent mints the identity, delegated principal and one credential shown once. The in-app assistant now knows which agent is being registered: the page declares it with <PageRecord> (#3275), the shell stops reading the URL, and a turn asked from the register page is owned to completion even after the person walks away (ADR-092, #3292). The AI-drafting step the mockup showed is gone even though suggest_agent_def works (#3260).",
    "gaps": [
     "AI-drafted agent definition step (#3260)"
    ],
@@ -653,7 +792,16 @@
    ],
    "plan_lane": "L5",
    "priority": "P0",
-   "issue_links": []
+   "issue_links": [
+    {
+     "repo": "oxagen",
+     "number": 3230
+    },
+    {
+     "repo": "oxagen",
+     "number": 3313
+    }
+   ]
   },
   {
    "id": "register-wrap",
@@ -665,9 +813,10 @@
    "built_status": "partial",
    "built_evidence": [
     "apps/app/src/features/onboarding/ui/wrap-agent.tsx",
-    "packages/oxagen/src/contracts/tacho.enrollment_token.create.ts"
+    "packages/oxagen/src/contracts/tacho.enrollment_token.create.ts",
+    "packages/tacho/src/host/model-base-url.ts"
    ],
-   "gap_summary": "Live for the recorded harness: create_enrollment_token mints the single-use token and the oxagen agent enroll command. The mockup's three wrap tabs (Claude Code, Codex CLI, SDK) are not drawn because the harness enum carries no codex member and is fixed at registration.",
+   "gap_summary": "Live for the recorded harness: create_enrollment_token mints the single-use token and the oxagen agent enroll command. Since #3319 enrollment writes ANTHROPIC_BASE_URL and openai_base_url so Claude Code and Codex route through the loopback proxy, once the daemon reports the gateway listening. The mockup's three wrap tabs (Claude Code, Codex CLI, SDK) are not drawn because the harness enum carries no codex member and is fixed at registration.",
    "gaps": [
     "Codex CLI path (harness enum has no codex member)",
     "One-click installer handoff from this step"
@@ -918,18 +1067,39 @@
    "built_status": "built",
    "built_evidence": [
     "apps/desktop/README.md",
-    "apps/desktop/src-tauri",
+    "apps/desktop/src-tauri/src/cli_install.rs",
+    "apps/desktop/src-tauri/src/install_rig_tests.rs",
+    "apps/desktop/src/machine-state.ts",
+    "packages/tacho/src/cli/install-rig.test.ts",
+    "packages/tacho/src/cli/enroll.ts",
+    "packages/tacho/src/cli/unenroll.ts",
+    ".github/workflows/desktop-rig.yml",
     "docs/specs/oxagen-desktop"
    ],
-   "gap_summary": "The signed installer is the Tauri desktop app (@oxagen/desktop): it installs oxagen and tacho, signs the machine in, enrolls the host for Claude Code and Codex. Rev 1 is built and verified on macOS; Linux and Windows bundles have not been run (desktop-spec.md).",
+   "gap_summary": "The signed installer is the Tauri desktop app (@oxagen/desktop): it installs oxagen and tacho, signs the machine in, enrolls the host for Claude Code and Codex, and since #3319 writes the model base URLs that route the harness through the loopback proxy. #3321 reviewed it line by line and fixed install and uninstall (two P0, seven P1: displaced settings no longer clobbered, a revoked host reads as not enrolled, uninstall always renders and removes the 240 MB of sidecars) against a snapshot rig that runs in CI on Linux. macOS and Linux paths are exercised by the rig; the Windows Rust paths compile in CI but no test runs them.",
    "gaps": [
-    "Linux and Windows bundles unverified",
-    "Handoff link from the register/wrap step to the download"
+    "Windows: cli_install.rs has windows branches, but desktop.yml only builds on windows-latest and install_rig_tests.rs is cfg(unix)",
+    "Handoff link from the register/wrap step to the download",
+    "The smoke script (e2e-smoke.mjs) needs a real /Applications/Oxagen.app and was not run",
+    "detector.ts reports hooks_removed on hosts that never enrolled Claude Code (#3320)"
    ],
    "backend_gaps": [],
    "plan_lane": null,
    "priority": "P1",
-   "issue_links": []
+   "issue_links": [
+    {
+     "repo": "oxagen",
+     "number": 3301
+    },
+    {
+     "repo": "oxagen",
+     "number": 3320
+    },
+    {
+     "repo": "oxagen",
+     "number": 3330
+    }
+   ]
   },
   {
    "id": "wizard-agent",
@@ -1498,22 +1668,22 @@
    "title": "Skills: run-vs-resolve sentence and W13 in the spec",
    "question": "Spec §2 must say Oxagen resolves skills, never runs them; §19's tables end at W12 and need W13's states.",
    "recommendation": "Amend the spec; skills ship off by default.",
-   "source": "docs/w13-in-the-loop-scenario.md / mockups/pages/skills.md backend gaps",
+   "source": "docs/w13-in-the-loop-scenario.md / oxagen ADR-090, PRs #3280, #3284",
    "blocks": [
     "skills",
     "skills-off",
     "run-interjection"
    ],
-   "status": "open",
-   "decided_on": null,
-   "decided": null
+   "status": "decided",
+   "decided_on": "2026-09-18",
+   "decided": "ADR-090 (#3284) settles both: Oxagen governs skill resolution and never runs a skill; skills ship off by default; the config of record is .oxagen/skills.toml through the repository binding. #3280 listed W13 in §19 and #3284 marked it adopted. Skills becomes a tab under Steering (ADR-097)."
   },
   {
    "id": "D17",
    "title": "GitHub App permissions for the pull-request lifecycle",
    "question": "The documented installation permission set is read-only, but every creation wizard and the Repositories page open pull requests.",
    "recommendation": "Request contents, pull requests and checks write on the installation.",
-   "source": "mockups/pages/repositories.md backend gaps / oxagen #3241, #3242",
+   "source": "docs/specs/repository-binding/README.md (oxagen PR #3242) / oxagen #3241",
    "blocks": [
     "repositories",
     "wizard-agent",
@@ -1521,9 +1691,9 @@
     "wizard-skill",
     "wizard-record"
    ],
-   "status": "open",
-   "decided_on": null,
-   "decided": null
+   "status": "decided",
+   "decided_on": "2026-09-18",
+   "decided": "The GitHub App is read-write: Contents read and write, Pull requests read and write, Checks write (maintainer on #3242; docs/specs/repository-binding/README.md). Oxagen writes only to a branch, never the production branch, and merges only what a person merges."
   },
   {
    "id": "D18",
@@ -1603,7 +1773,7 @@
    ],
    "status": "decided",
    "decided_on": "2026-09-18",
-   "decided": "Approved and built: an Anthropic and OpenAI passthrough on loopback, observed metering, an enforced session budget, and a real interrupt. The MCP aggregator is scoped but not yet built (tracked on issue #3299)."
+   "decided": "Approved and built (#3319 merged 2026-09-18): Anthropic Messages, OpenAI Responses and Chat Completions passthrough on 127.0.0.1 with streaming, one llm_call frame per observed call with cost_basis observed, session_limit_usd refused at the proxy when the bundle's budget mode is enforced, and interrupt delivered as interrupt on the gateway tier. The MCP aggregator is not built (issue #3299 item 6), and enforcement covers only traffic actually routed: a person can unset the base URL."
   },
   {
    "id": "D24",
@@ -1617,6 +1787,46 @@
    "status": "decided",
    "decided_on": "2026-09-18",
    "decided": "Approved. contained is the only tier that earns the word \"enforced\" against the machine's operator; oxagen run -- <agent> and the witness runner build on the same launcher in Phase 5."
+  },
+  {
+   "id": "D25",
+   "title": "A workspace is born with its main repository",
+   "question": "Should create_workspace require a main repository, and how do a second and third repository attach?",
+   "recommendation": "A second create_workspace requires owner/name and binds it in one transaction; the org's first workspace stays repo-less and binds through the onboarding banner. Further repositories link and unlink with role linked; the main role is exclusive across the store.",
+   "source": "oxagen ADR-099, PR #3326 (open), spec §17 M0; exclusivity index from PR #3269",
+   "blocks": [
+    "repositories",
+    "M0"
+   ],
+   "status": "decided",
+   "decided_on": "2026-09-18",
+   "decided": "ADR-099 rides open PR #3326 with link_repository, unlink_repository, list_repositories, the Repositories section in Workspace settings and oxagen repo list|link|unlink. The exclusive main index (one repository is main for one workspace anywhere) merged in #3269."
+  },
+  {
+   "id": "D26",
+   "title": "Organisation graph placement: pooled by default",
+   "question": "Does every organisation get its own Neo4j database, or share one with per-pattern tenant anchors?",
+   "recommendation": "Pooled by default with an org anchor on every pattern; a per-org database (CREATE DATABASE org-<ns>) for a dedicated plane; Aura refuses.",
+   "source": "oxagen ADR-098, PR #3310",
+   "blocks": [
+    "M0"
+   ],
+   "status": "decided",
+   "decided_on": "2026-09-18",
+   "decided": "Merged in #3310: OrgGraphProvisioner (pooled | cypher | aura throws), org.data_planes.graph_database, and a real-Neo4j cross-tenant probe in the rls-integration job. Open: workspace-scoped sessions do not refuse Cypher that omits the workspace, the per-org path never ran against Enterprise, and no free-to-dedicated migration exists (#3318)."
+  },
+  {
+   "id": "D27",
+   "title": "BYOK to any OpenAI-compatible endpoint",
+   "question": "Do organisations bring keys only for the named providers, or any endpoint that speaks the OpenAI shape?",
+   "recommendation": "Any https endpoint that speaks OpenAI Chat Completions, with a model map; the outbound-URL guard blocks private and metadata addresses.",
+   "source": "oxagen PR #3290; packages/config/src/public-url.ts; apps/docs governance/byok-and-models.mdx",
+   "blocks": [
+    "organization"
+   ],
+   "status": "decided",
+   "decided_on": "2026-09-18",
+   "decided": "Merged in #3290: provider openai_compatible with base_url and model_map on org model credentials, set/get/verify/delete_model_credential on api and mcp, and the SSRF bypass through IPv4-mapped addresses closed. No app UI: the Funding tab remains a gap. Residue: direct-key models lose their provider identity (#3314), structured output assumed (#3324)."
   }
  ],
  "feedback": [
@@ -1672,7 +1882,8 @@
     "organization-api-keys",
     "repositories"
    ],
-   "weeks": "1–4"
+   "weeks": "1–4",
+   "summary": "Acceptance A done: the real-Neo4j cross-tenant probe runs beside the Postgres RLS job in CI (#3310, ADR-098, rls-integration). B and C (a workspace is born with its main repository; a second repository links and unlinks) ride open PR #3326 (ADR-099). Exclusive main binding landed in #3269."
   },
   {
    "id": "M1",
@@ -1695,7 +1906,8 @@
     "reset-password",
     "accept-invitation"
    ],
-   "weeks": "3–8"
+   "weeks": "3–8",
+   "summary": "The Run page landed (#3282): header, Transcript, Frames, Cost, run controls, export. No approve/deny, no stream yet."
   },
   {
    "id": "M2",
@@ -1710,7 +1922,8 @@
     "billing",
     "wizard-tool"
    ],
-   "weeks": "7–11"
+   "weeks": "7–11",
+   "summary": "Billing laid out per design with Change plan wired (#3309); approvals, mandates and kill switches not started."
   },
   {
    "id": "M3",
@@ -1755,7 +1968,8 @@
    "surfaces": [
     "steering"
    ],
-   "weeks": "Phase 0 in review (PR #3289) · Phase 4 in build (PR #3319, PR #3321) · Phases 1, 2, 3, 5 next"
+   "weeks": "Phase 0 merged · Phase 4 merged, aggregator open · Phases 1, 2, 3, 5 next",
+   "summary": "Phase 0 merged (#3289, ADR-091; #2592 open until a production sighting). Phase 4 merged for the proxy, observed metering, session budget and interrupt (#3319, #3321); the MCP aggregator stays on #3299. ADRs 093 to 097 decided (#3294). Phases 1, 2, 3, 5 not started."
   }
  ],
  "catalog": {
@@ -4204,21 +4418,6 @@
    "is_handoff": true,
    "milestone": null
   },
-  "oxagen#3230": {
-   "title": "Assistant flyout: page context trusts the URL over the rendered view, focus breaks at the md boundary, abandoned turns keep spending",
-   "theme": "mission-control",
-   "kind": "task",
-   "has_spec_backing": false,
-   "spec_refs": [],
-   "pillar": "reliability,efficiency",
-   "labels": [
-    "P2",
-    "area:app"
-   ],
-   "updatedAt": "2026-09-18T01:25:32Z",
-   "is_handoff": false,
-   "milestone": null
-  },
   "oxagen#3235": {
    "title": "schema.reconcile paginates with SKIP over rows it mutates, so relationships are silently never reconciled",
    "theme": "other",
@@ -4594,22 +4793,6 @@
     "triage"
    ],
    "updatedAt": "2026-09-18T01:37:55Z",
-   "is_handoff": true,
-   "milestone": null
-  },
-  "oxagen#3264": {
-   "title": "Steering follows GitHub's live default branch instead of the binding's approved ref",
-   "theme": "mission-control",
-   "kind": "defect",
-   "has_spec_backing": true,
-   "spec_refs": [
-    "ADR"
-   ],
-   "pillar": "reliability",
-   "labels": [
-    "triage"
-   ],
-   "updatedAt": "2026-09-18T03:48:15Z",
    "is_handoff": true,
    "milestone": null
   },
@@ -13902,6 +14085,681 @@
    ],
    "updatedAt": "2026-09-17T19:45:34Z",
    "is_handoff": false,
+   "milestone": null
+  },
+  "oxagen#3335": {
+   "title": "Residue from #3326: Workspace settings promises Context PR routing to linked repositories that does not exist",
+   "theme": "governance",
+   "kind": "defect",
+   "has_spec_backing": true,
+   "spec_refs": [
+    "ADR-099",
+    "docs/specs/repository-binding/README.md"
+   ],
+   "pillar": null,
+   "labels": [
+    "triage"
+   ],
+   "updatedAt": "2026-09-18T20:30:58Z",
+   "is_handoff": true,
+   "milestone": null
+  },
+  "oxagen#3334": {
+   "title": "Make the gateway real: the gaps between ADR-094/095/096 and the code",
+   "theme": "witness",
+   "kind": "epic",
+   "has_spec_backing": true,
+   "spec_refs": [
+    "ADR-094",
+    "ADR-095",
+    "ADR-096"
+   ],
+   "pillar": null,
+   "labels": [
+    "triage"
+   ],
+   "updatedAt": "2026-09-18T20:45:22Z",
+   "is_handoff": false,
+   "milestone": null
+  },
+  "oxagen#3333": {
+   "title": "Residue from #3327: six unsaved-state and unapplied-preference defects in the Account dialog and user menu",
+   "theme": "mission-control",
+   "kind": "defect",
+   "has_spec_backing": false,
+   "spec_refs": [],
+   "pillar": null,
+   "labels": [
+    "triage"
+   ],
+   "updatedAt": "2026-09-18T20:46:32Z",
+   "is_handoff": true,
+   "milestone": null
+  },
+  "oxagen#3331": {
+   "title": "Residue from #3271: cold-book floor immutability, the past-boundary guard, and per-catalog retirement provenance",
+   "theme": "billing",
+   "kind": "defect",
+   "has_spec_backing": false,
+   "spec_refs": [],
+   "pillar": null,
+   "labels": [
+    "triage"
+   ],
+   "updatedAt": "2026-09-18T20:11:38Z",
+   "is_handoff": true,
+   "milestone": null
+  },
+  "oxagen#3330": {
+   "title": "Residue from #3321: the P2/P3 desktop and Tacho host-writer findings its review left open",
+   "theme": "mission-control",
+   "kind": "defect",
+   "has_spec_backing": false,
+   "spec_refs": [],
+   "pillar": null,
+   "labels": [
+    "triage"
+   ],
+   "updatedAt": "2026-09-18T20:04:49Z",
+   "is_handoff": true,
+   "milestone": null
+  },
+  "oxagen#3329": {
+   "title": "Reject backdated list price successors",
+   "theme": "billing",
+   "kind": "task",
+   "has_spec_backing": false,
+   "spec_refs": [],
+   "pillar": null,
+   "labels": [
+    "triage"
+   ],
+   "updatedAt": "2026-09-18T20:00:53Z",
+   "is_handoff": false,
+   "milestone": null
+  },
+  "oxagen#3328": {
+   "title": "Residue from #3276: the isAncestor preflight turns an operational cat-file failure into a block",
+   "theme": "governance",
+   "kind": "defect",
+   "has_spec_backing": false,
+   "spec_refs": [],
+   "pillar": null,
+   "labels": [
+    "triage"
+   ],
+   "updatedAt": "2026-09-18T19:55:48Z",
+   "is_handoff": true,
+   "milestone": null
+  },
+  "oxagen#3324": {
+   "title": "Residue from #3308: the OpenAI-compatible client wrongly assumes structured output support, and the probe drops the query string",
+   "theme": "governance",
+   "kind": "defect",
+   "has_spec_backing": false,
+   "spec_refs": [],
+   "pillar": null,
+   "labels": [
+    "triage"
+   ],
+   "updatedAt": "2026-09-18T19:17:39Z",
+   "is_handoff": true,
+   "milestone": null
+  },
+  "oxagen#3323": {
+   "title": "Residue from #3271: a negotiated rate scheduled for the future cannot be seen or cancelled in the app until it starts",
+   "theme": "billing",
+   "kind": "defect",
+   "has_spec_backing": false,
+   "spec_refs": [],
+   "pillar": null,
+   "labels": [
+    "triage"
+   ],
+   "updatedAt": "2026-09-18T18:53:44Z",
+   "is_handoff": true,
+   "milestone": null
+  },
+  "oxagen#3320": {
+   "title": "tacho collector: detector.ts checks for Claude Code hooks even on hosts that never enrolled Claude Code",
+   "theme": "mission-control",
+   "kind": "task",
+   "has_spec_backing": false,
+   "spec_refs": [],
+   "pillar": null,
+   "labels": [
+    "triage"
+   ],
+   "updatedAt": "2026-09-18T18:53:43Z",
+   "is_handoff": false,
+   "milestone": null
+  },
+  "oxagen#3318": {
+   "title": "Residue from #3310: org.data_planes.graph_database is not cleared by set_data_plane(dedicated) and not reported by get_data_plane",
+   "theme": "governance",
+   "kind": "defect",
+   "has_spec_backing": true,
+   "spec_refs": [
+    "ADR-098"
+   ],
+   "pillar": null,
+   "labels": [
+    "triage"
+   ],
+   "updatedAt": "2026-09-18T19:36:15Z",
+   "is_handoff": true,
+   "milestone": null
+  },
+  "oxagen#3317": {
+   "title": "Residue from #3308: the Model funding form's wrong explanation, provider switch, and stale test verdict",
+   "theme": "mission-control",
+   "kind": "defect",
+   "has_spec_backing": false,
+   "spec_refs": [],
+   "pillar": null,
+   "labels": [
+    "triage"
+   ],
+   "updatedAt": "2026-09-18T19:58:58Z",
+   "is_handoff": true,
+   "milestone": null
+  },
+  "oxagen#3316": {
+   "title": "Residue from #3294: prompt-body wording, a stale Phase 0 status, and two places where ADR-093 contradicts ADR-094",
+   "theme": "docs",
+   "kind": "defect",
+   "has_spec_backing": true,
+   "spec_refs": [
+    "ADR-093",
+    "ADR-097"
+   ],
+   "pillar": null,
+   "labels": [
+    "triage"
+   ],
+   "updatedAt": "2026-09-18T18:52:42Z",
+   "is_handoff": true,
+   "milestone": null
+  },
+  "oxagen#3315": {
+   "title": "Residue from #3307: fourteen P2 corrections to the spec, plan and Tacho README",
+   "theme": "docs",
+   "kind": "defect",
+   "has_spec_backing": true,
+   "spec_refs": [
+    "docs/specs/mission-control/spec.md",
+    "packages/tacho/README.md"
+   ],
+   "pillar": null,
+   "labels": [
+    "triage"
+   ],
+   "updatedAt": "2026-09-18T20:19:10Z",
+   "is_handoff": true,
+   "milestone": null
+  },
+  "oxagen#3314": {
+   "title": "Residue from #3290: direct-key models lose their provider identity, verification asks less than the turn does, and endpoint URLs can carry embedded credentials",
+   "theme": "governance",
+   "kind": "defect",
+   "has_spec_backing": false,
+   "spec_refs": [],
+   "pillar": null,
+   "labels": [
+    "triage"
+   ],
+   "updatedAt": "2026-09-18T19:11:21Z",
+   "is_handoff": true,
+   "milestone": null
+  },
+  "oxagen#3313": {
+   "title": "Residue from #3292: key assistant threads by the workspace's stable identity, not by its slug",
+   "theme": "mission-control",
+   "kind": "defect",
+   "has_spec_backing": true,
+   "spec_refs": [
+    "ADR-092"
+   ],
+   "pillar": null,
+   "labels": [
+    "triage"
+   ],
+   "updatedAt": "2026-09-18T18:51:31Z",
+   "is_handoff": true,
+   "milestone": null
+  },
+  "oxagen#3312": {
+   "title": "Compile the pinned record version instead of stale row fields",
+   "theme": "governance",
+   "kind": "task",
+   "has_spec_backing": true,
+   "spec_refs": [
+    "ADR-091"
+   ],
+   "pillar": null,
+   "labels": [
+    "P1",
+    "size/S"
+   ],
+   "updatedAt": "2026-09-18T18:58:51Z",
+   "is_handoff": false,
+   "milestone": null
+  },
+  "oxagen#3311": {
+   "title": "Avoid loading all steering records for every control response",
+   "theme": "governance",
+   "kind": "task",
+   "has_spec_backing": true,
+   "spec_refs": [
+    "ADR-091"
+   ],
+   "pillar": null,
+   "labels": [
+    "P1",
+    "job:ground",
+    "size/S"
+   ],
+   "updatedAt": "2026-09-18T18:58:50Z",
+   "is_handoff": false,
+   "milestone": null
+  },
+  "oxagen#3305": {
+   "title": "The public decks under apps/docs describe the runtime ADR-043 removed: sandboxes, fan-out and hard caps as if they still shipped",
+   "theme": "docs",
+   "kind": "task",
+   "has_spec_backing": true,
+   "spec_refs": [
+    "ADR-043"
+   ],
+   "pillar": "maintainability",
+   "labels": [
+    "P2",
+    "kind:debt",
+    "area:surfaces",
+    "job:explain",
+    "pillar:maintainability",
+    "needs:decision",
+    "size/L"
+   ],
+   "updatedAt": "2026-09-18T18:50:16Z",
+   "is_handoff": true,
+   "milestone": null
+  },
+  "oxagen#3304": {
+   "title": "Codex and Stella runs report no usage, and spend totals leave them out without saying so",
+   "theme": "billing",
+   "kind": "defect",
+   "has_spec_backing": false,
+   "spec_refs": [],
+   "pillar": "reliability",
+   "labels": [
+    "P2",
+    "area:billing",
+    "kind:defect",
+    "area:evidence",
+    "job:meter",
+    "pillar:reliability",
+    "size/M"
+   ],
+   "updatedAt": "2026-09-18T18:50:15Z",
+   "is_handoff": true,
+   "milestone": null
+  },
+  "oxagen#3303": {
+   "title": "Workspace additionalInstructions are appended to the in-app agent's prompt with no budget, no record, and no check against rules or published records",
+   "theme": "governance",
+   "kind": "defect",
+   "has_spec_backing": true,
+   "spec_refs": [
+    "ADR-091"
+   ],
+   "pillar": "reliability",
+   "labels": [
+    "P2",
+    "kind:defect",
+    "job:govern",
+    "area:kernel",
+    "pillar:reliability",
+    "size/S"
+   ],
+   "updatedAt": "2026-09-18T18:50:13Z",
+   "is_handoff": true,
+   "milestone": null
+  },
+  "oxagen#3302": {
+   "title": "A record published through publish_context_record has no kind or force, so it never reaches an agent",
+   "theme": "governance",
+   "kind": "defect",
+   "has_spec_backing": true,
+   "spec_refs": [
+    "ADR-091"
+   ],
+   "pillar": "reliability",
+   "labels": [
+    "P1",
+    "kind:defect",
+    "area:knowledge",
+    "job:ground",
+    "area:kernel",
+    "pillar:reliability",
+    "size/M"
+   ],
+   "updatedAt": "2026-09-18T18:50:12Z",
+   "is_handoff": true,
+   "milestone": null
+  },
+  "oxagen#3301": {
+   "title": "Desktop app: a line-by-line bug review, then install and uninstall fixed and proven",
+   "theme": "mission-control",
+   "kind": "defect",
+   "has_spec_backing": true,
+   "spec_refs": [
+    "docs/specs/oxagen-desktop"
+   ],
+   "pillar": "stability,reliability",
+   "labels": [
+    "P0",
+    "kind:defect",
+    "area:ops",
+    "job:govern",
+    "pillar:stability",
+    "pillar:reliability",
+    "size/L"
+   ],
+   "updatedAt": "2026-09-18T18:50:11Z",
+   "is_handoff": true,
+   "milestone": null
+  },
+  "oxagen#3300": {
+   "title": "Phase 5. The contained tier: `oxagen run -- <agent>` inside an OS sandbox, with the witness runner on the same launcher",
+   "theme": "witness",
+   "kind": "feature",
+   "has_spec_backing": true,
+   "spec_refs": [
+    "ADR-096",
+    "ADR-095"
+   ],
+   "pillar": "innovation,reliability",
+   "labels": [
+    "P3",
+    "kind:feature",
+    "area:evidence",
+    "area:ops",
+    "job:govern",
+    "pillar:innovation",
+    "needs:rig",
+    "pillar:reliability",
+    "size/XL"
+   ],
+   "updatedAt": "2026-09-18T18:50:10Z",
+   "is_handoff": true,
+   "milestone": null
+  },
+  "oxagen#3299": {
+   "title": "Phase 4. The gateway: a loopback model proxy and an MCP aggregator in tachod",
+   "theme": "witness",
+   "kind": "feature",
+   "has_spec_backing": true,
+   "spec_refs": [
+    "ADR-094",
+    "ADR-095"
+   ],
+   "pillar": "innovation,reliability",
+   "labels": [
+    "P0",
+    "kind:feature",
+    "area:evidence",
+    "job:govern",
+    "job:meter",
+    "pillar:innovation",
+    "area:platform",
+    "pillar:reliability",
+    "size/XL"
+   ],
+   "updatedAt": "2026-09-18T18:48:50Z",
+   "is_handoff": true,
+   "milestone": null
+  },
+  "oxagen#3298": {
+   "title": "Phase 3. The graph becomes the index: Record nodes with ABOUT edges behind the index port",
+   "theme": "governance",
+   "kind": "feature",
+   "has_spec_backing": true,
+   "spec_refs": [
+    "ADR-093"
+   ],
+   "pillar": "performance,reliability",
+   "labels": [
+    "P3",
+    "kind:feature",
+    "area:knowledge",
+    "job:ground",
+    "pillar:performance",
+    "needs:rig",
+    "pillar:reliability",
+    "size/L"
+   ],
+   "updatedAt": "2026-09-18T18:48:48Z",
+   "is_handoff": true,
+   "milestone": null
+  },
+  "oxagen#3297": {
+   "title": "Phase 2. One screen: Steering becomes the hub, with Skills and Ontology under it and a Preview tab",
+   "theme": "mission-control",
+   "kind": "feature",
+   "has_spec_backing": true,
+   "spec_refs": [
+    "ADR-097",
+    "mockups/pages/steering.md"
+   ],
+   "pillar": "maintainability,innovation",
+   "labels": [
+    "P2",
+    "area:app",
+    "kind:feature",
+    "job:ground",
+    "pillar:maintainability",
+    "pillar:innovation",
+    "size/L"
+   ],
+   "updatedAt": "2026-09-18T18:48:47Z",
+   "is_handoff": true,
+   "milestone": null
+  },
+  "oxagen#3296": {
+   "title": "Phase 1. One type, one assembler: SteeringItem, assembleSteering, and the steering.manifest frame",
+   "theme": "governance",
+   "kind": "feature",
+   "has_spec_backing": true,
+   "spec_refs": [
+    "ADR-093"
+   ],
+   "pillar": "maintainability,reliability",
+   "labels": [
+    "P1",
+    "kind:feature",
+    "area:knowledge",
+    "job:ground",
+    "pillar:maintainability",
+    "area:platform",
+    "pillar:reliability",
+    "size/XL"
+   ],
+   "updatedAt": "2026-09-18T18:48:04Z",
+   "is_handoff": true,
+   "milestone": null
+  },
+  "oxagen#3295": {
+   "title": "Steering, gating and the gateway: the six-phase plan to fix it",
+   "theme": "governance",
+   "kind": "epic",
+   "has_spec_backing": true,
+   "spec_refs": [
+    "ADR-093",
+    "ADR-094",
+    "ADR-095",
+    "ADR-096",
+    "ADR-097"
+   ],
+   "pillar": "maintainability,innovation,reliability",
+   "labels": [
+    "P0",
+    "kind:feature",
+    "area:evidence",
+    "job:govern",
+    "pillar:maintainability",
+    "pillar:innovation",
+    "area:platform",
+    "pillar:reliability",
+    "size/XL"
+   ],
+   "updatedAt": "2026-09-18T18:48:03Z",
+   "is_handoff": true,
+   "milestone": null
+  },
+  "oxagen#3293": {
+   "title": "Residue from #3269: tacho still rejects delivered commands that carry an extra field",
+   "theme": "mission-control",
+   "kind": "defect",
+   "has_spec_backing": true,
+   "spec_refs": [
+    "docs/specs/tacho"
+   ],
+   "pillar": null,
+   "labels": [
+    "triage"
+   ],
+   "updatedAt": "2026-09-18T18:47:14Z",
+   "is_handoff": true,
+   "milestone": null
+  },
+  "oxagen#3288": {
+   "title": "Residue from #3269: the main-repo plane recheck is not atomic with the claim write",
+   "theme": "governance",
+   "kind": "defect",
+   "has_spec_backing": true,
+   "spec_refs": [
+    "ADR-099"
+   ],
+   "pillar": null,
+   "labels": [
+    "triage"
+   ],
+   "updatedAt": "2026-09-18T15:50:12Z",
+   "is_handoff": true,
+   "milestone": null
+  },
+  "oxagen#3286": {
+   "title": "The Run page's Policy tab needs approvals that record their run",
+   "theme": "mission-control",
+   "kind": "feature",
+   "has_spec_backing": true,
+   "spec_refs": [
+    "mockups/pages/run.md"
+   ],
+   "pillar": null,
+   "labels": [
+    "triage"
+   ],
+   "updatedAt": "2026-09-18T15:47:00Z",
+   "is_handoff": false,
+   "milestone": null
+  },
+  "oxagen#3285": {
+   "title": "Residue from #3282: run controls offered on observe-tier runs, and a live run that never updates",
+   "theme": "mission-control",
+   "kind": "defect",
+   "has_spec_backing": true,
+   "spec_refs": [
+    "mockups/pages/run.md"
+   ],
+   "pillar": null,
+   "labels": [
+    "triage"
+   ],
+   "updatedAt": "2026-09-18T15:53:45Z",
+   "is_handoff": true,
+   "milestone": null
+  },
+  "oxagen#3283": {
+   "title": "Residue from #3269: two regression tests pass without reaching the rollback and the head insert they pin",
+   "theme": "governance",
+   "kind": "defect",
+   "has_spec_backing": false,
+   "spec_refs": [],
+   "pillar": null,
+   "labels": [
+    "triage"
+   ],
+   "updatedAt": "2026-09-18T15:52:32Z",
+   "is_handoff": true,
+   "milestone": null
+  },
+  "oxagen#3281": {
+   "title": "Residue from #3271: cost-frames observed usage is per-turn and per-aggregate, so it undercounts and misreports unpriced classes",
+   "theme": "billing",
+   "kind": "defect",
+   "has_spec_backing": false,
+   "spec_refs": [],
+   "pillar": null,
+   "labels": [
+    "triage"
+   ],
+   "updatedAt": "2026-09-18T15:48:23Z",
+   "is_handoff": true,
+   "milestone": null
+  },
+  "oxagen#3279": {
+   "title": "Residue from #3265: the two same-repository repair controls duplicate one submit flow",
+   "theme": "mission-control",
+   "kind": "defect",
+   "has_spec_backing": true,
+   "spec_refs": [
+    "docs/specs/repository-binding/README.md"
+   ],
+   "pillar": null,
+   "labels": [
+    "triage"
+   ],
+   "updatedAt": "2026-09-18T15:51:28Z",
+   "is_handoff": true,
+   "milestone": null
+  },
+  "oxagen#3277": {
+   "title": "Residue from #3265: bind re-approval docs, a binding test that cannot fail, and a duplicated repair flow",
+   "theme": "governance",
+   "kind": "defect",
+   "has_spec_backing": true,
+   "spec_refs": [
+    "docs/specs/repository-binding/README.md"
+   ],
+   "pillar": null,
+   "labels": [
+    "triage"
+   ],
+   "updatedAt": "2026-09-18T15:48:48Z",
+   "is_handoff": true,
+   "milestone": null
+  },
+  "oxagen#2592": {
+   "title": "A workspace can publish steering rules, but no agent run actually follows them",
+   "theme": "governance",
+   "kind": "defect",
+   "has_spec_backing": true,
+   "spec_refs": [
+    "ADR-091",
+    "ADR-061"
+   ],
+   "pillar": "reliability",
+   "labels": [
+    "P0",
+    "kind:defect",
+    "job:ground",
+    "area:kernel",
+    "pillar:reliability"
+   ],
+   "updatedAt": "2026-09-18T15:52:56Z",
+   "is_handoff": true,
    "milestone": null
   }
  }
