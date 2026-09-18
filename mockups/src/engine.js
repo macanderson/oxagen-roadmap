@@ -6006,10 +6006,10 @@ function repoTab(){
    '<div class="panel"><div class="panel-h"><h3>The permissions this needs</h3></div><div class="panel-b">'+
    '<div class="kv"><dt>Contents</dt><dd>read <b>and write</b> — the branch and the file every pull request carries</dd>'+
    '<dt>Pull requests</dt><dd>read <b>and write</b> — opening one, and reading its head</dd>'+
-   '<dt>Checks</dt><dd><b>write</b> — the six check runs on the head commit</dd>'+
+   '<dt>Checks</dt><dd><b>write</b> — the check runs on the head commit, and the CI a governed change needs</dd>'+
    '<dt>Metadata</dt><dd>read — mandatory</dd>'+
    '<dt>Issues</dt><dd>read — task references for runs</dd></div>'+
-   '<div class="note" style="margin-top:12px">Oxagen writes to a branch and never to the production branch. It opens pull requests; it merges only the ones a person merges from here, under the governance mode the repository itself declares.</div></div></div></div>';
+   '<div class="note" style="margin-top:12px">Oxagen writes to a branch and never to the production branch. It opens and closes pull requests; it merges only the ones a person merges from here, under the governance mode the repository itself declares.</div></div></div></div>';
 }
 
 /* ---- tab 2: the working copies ---- */
