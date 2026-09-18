@@ -48,6 +48,19 @@ In the claude.ai artifact the page gains what a static file cannot have:
 - **GitHub, live.** Issue lists refresh every two minutes; creating an issue from a gap or a decision uses the viewer's own GitHub credentials. Without the connector (GitHub Pages, a saved file) the page falls back to the triage snapshot and pre-filled "new issue" links.
 - **Comments.** Every card and detail has a Comment button that opens the claude.ai composer, so a thread can be sent to Claude from the page itself.
 
+### Hosted on Vercel
+
+The public home is **https://oxagen-roadmap.vercel.app** (Vercel project `oxagen-roadmap`). The same `index.html` runs there in hosted mode: it asks `/api/config` what the deployment can do and uses that instead of the claude.ai capabilities.
+
+| Piece | Hosted mode | Who can use it |
+|---|---|---|
+| Roadmap, wireframes, specs | static files from this repo | everyone |
+| GitHub issues | GitHub's public REST API, read in the browser every ten minutes; creating an issue opens GitHub's pre-filled form | everyone |
+| Shared state (status, priority, owner, notes, links, decisions, activity) | `api/state.js`, one private Vercel Blob (`roadmap/state.json`) | everyone reads; the **edit key** writes |
+| Claude | `api/ask.js`: one streamed round per call with the Anthropic SDK (Opus by default; the drawer's tier picks Sonnet or Haiku); the page runs the tool loop because the tools are page functions | the **edit key**, so a public link cannot spend the API key |
+
+Environment variables: `BLOB_READ_WRITE_TOKEN` (set by `vercel blob create-store`), `EDIT_KEY` (a random string; enter it once behind the page's **Edit key** button), and `ANTHROPIC_API_KEY` (add it to turn Claude on: `vercel env add ANTHROPIC_API_KEY production`, then redeploy). Deploy with `vercel deploy --prod`; the build step is `node tools/build-roadmap.mjs --check`, so a stale `index.html` fails the deploy.
+
 ### Refreshing the content
 
 `roadmap/data.json` is the roadmap's content. It was assembled on 2026-09-17 from a page-by-page comparison of `mockups/pages/*.md` against `apps/app` in `macanderson/oxagen`, the witness and DoD specs, the plan's open decisions, and a triage of every open issue in `macanderson/oxagen` and `macanderson/stella`. To refresh it, redo that comparison (an agent session with both repos checked out does it in minutes) and write the same shape; then `node tools/build-roadmap.mjs` and republish the artifact. Overrides made in the app live in the shared store and survive a rebuild.
