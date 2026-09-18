@@ -173,13 +173,13 @@
    ],
    [
     "secret_pii_scan",
-    "pass",
-    "Nothing found in the bundle."
+    "queued",
+    "Did not run: grants stopped the run."
    ],
    [
     "load_cost",
-    "pass",
-    "1,840 tokens, inside the workspace search budget of 4,000."
+    "queued",
+    "Did not run: grants stopped the run."
    ]
   ]
  },

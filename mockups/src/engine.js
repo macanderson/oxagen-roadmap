@@ -5940,7 +5940,11 @@ function stBadge(m){return '<span class="b '+m.b+'"><span class="d"></span>'+h(m
 
 /* The file the init pull request carries. It is written out here rather than interpolated into a
    string elsewhere, because the review step shows this exact text and the operator edits it. */
-function oxWorkspaceToml(w,repo,mode){
+/* `role` is the operator's choice on step 1, not a fact about the workspace as it stands. The
+   file used to derive it from `w.main`, so a repository chosen as the new main was drafted as
+   `linked` — the one line the review step exists to let somebody read, contradicting the choice
+   two steps earlier, and leaving an empty workspace unable to draft the main binding it needs. */
+function oxWorkspaceToml(w,repo,mode,role){
   return '# .oxagen/workspace.toml — committed, reviewed, and the source of truth.\n'+
    '# The local link (org, workspace, machine) is .oxagen/workspace.json, which is gitignored.\n'+
    'schema = "oxagen-workspace/v0.1"\n'+
@@ -5948,7 +5952,7 @@ function oxWorkspaceToml(w,repo,mode){
    'workspace = "'+w.slug+'"\n\n'+
    '[[repos]]\n'+
    'name = "'+repo.n+'"\n'+
-   'role = "'+(repo.n===w.main?"main":"linked")+'"\n'+
+   'role = "'+(role||(repo.n===w.main?"main":"linked"))+'"\n'+
    'production_branch = "'+repo.branch+'"\n'+
    'issues = '+(String(repo.issues).indexOf("enabled")===0?"true":"false")+'\n\n'+
    '[servers]\n'+
@@ -6036,7 +6040,7 @@ function copyTab(){
     '<button class="btn" onclick="act(\'Sent oxagen pull to 2 machines\',\'gold\')">Ask them to pull</button></div>':'')+
    '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Working copies</h3>'+
    '<p class="muted" style="margin:2px 0 0;font-size:12px">The same <span class="mono">.oxagen/</span> tree on a machine. Each is a directory somebody ran <span class="mono">oxagen init</span> in; the enrollment is the machine’s, and the link is one gitignored file.</p></div>'+
-   '<div class="sp"><button class="btn sm" onclick="openDialog(\'linkdir\')">Connect a directory</button></div></div>'+
+   '<div class="sp"><button class="btn primary" onclick="openDialog(\'linkdir\')">Connect a directory</button></div></div>'+
    '<div class="tw"><table><thead><tr><th>Directory</th><th>Repository</th><th>Branch</th><th>.oxagen/</th><th>Symlinks</th><th>Bundle</th><th>Last seen</th></tr></thead>'+
    '<tbody>'+trows+'</tbody></table></div></div>'+
    '<div class="grid g2" style="margin-top:14px">'+
@@ -6055,7 +6059,11 @@ function copyTab(){
 
 /* ---- tab 3: the changes ---- */
 function chgTab(){
-  var rows=wsOxprs(), sel=S.oxprSel&&oxprById(S.oxprSel);
+  var rows=wsOxprs();
+  /* S.oxprSel outlives a workspace switch, and OXPRS is global — so looking the id up there
+     would show one workspace's change while the shell says you are in another. The selection
+     is only a selection if it is in this workspace's rows. */
+  var sel=S.oxprSel&&rows.filter(function(p){return p.id===S.oxprSel;})[0];
   if(sel) return oxprDetail(sel);
   var trows=rows.map(function(p){
     var k=OXPR_KIND[p.kind]||OXPR_KIND.config, st=PR_STATE[p.state]||PR_STATE.open;
@@ -6130,14 +6138,21 @@ function oxprDetail(p){
 
 /* ---- tab 4: the configuration ---- */
 function cfgTab(){
-  var w=ws(), repo=repoByName(w.main)||wsRepos()[0];
+  var w=ws();
+  /* wsRepos() also returns the repositories the installation can reach but nobody has bound, so
+     falling back to its first row labels an unrelated repository as this workspace's main and
+     renders its head under that name. A workspace whose main repo has no row gets a record of
+     its own main instead. */
+  var repo=repoByName(w.main)||{n:w.main,role:"main",branch:w.branch,head:w.head||null,
+    issues:"enabled",ox:"governed",oxCommit:w.head||null,oxFiles:0,lang:"",visibility:"private",pushed:""};
   var drift=[["[servers.linear]","absent","present since 2026-09-14","the file"],
              ["budget.monthly_usd","400","600","the file"],
              ["[[repos]] a-intel/mobile","role = linked","linked, no .oxagen/","neither"]];
   return '<div class="grid g2">'+
    '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>.oxagen/workspace.toml</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">On <span class="mono">'+h(w.main)+'</span> at <span class="mono">'+h(repo?repo.head:"")+'</span></p></div></div>'+
-   '<div class="panel-b"><pre>'+h(oxWorkspaceToml(w,repo||{n:w.main,branch:w.branch,issues:"enabled"},"team"))+'</pre></div></div>'+
+   '<p class="muted" style="margin:2px 0 0;font-size:12px">On <span class="mono">'+h(w.main)+'</span>'+
+   (repo.head?' at <span class="mono">'+h(repo.head)+'</span>':' \u00b7 <span class="dim">not indexed yet</span>')+'</p></div></div>'+
+   '<div class="panel-b"><pre>'+h(oxWorkspaceToml(w,repo,"team","main"))+'</pre></div></div>'+
    '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Drift</h3>'+
    '<p class="muted" style="margin:2px 0 0;font-size:12px">The file against what the control plane has. Reported, never repaired in place.</p></div>'+
    '<div class="sp"><button class="btn sm" onclick="S.tab.repositories=\'changes\';S.oxprSel=\'oxpr_01K6T4E5\';render()">See the pull request</button></div></div>'+
@@ -11229,7 +11244,7 @@ function wzInit(){
   if(z.step===4){
     return {b:wzDraftNote("The files, drafted for "+r.n)+
       '<div class="field" style="margin-top:14px"><label>.oxagen/workspace.toml</label>'+
-      '<pre>'+h(oxWorkspaceToml(w,Object.assign({},r,{branch:z.branch||r.branch}),z.mode||"team"))+'</pre></div>'+
+      '<pre>'+h(oxWorkspaceToml(w,Object.assign({},r,{branch:z.branch||r.branch}),z.mode||"team",z.role||"linked"))+'</pre></div>'+
       '<div class="field"><label>.oxagen/rules/governance.toml</label>'+
       '<pre>'+h(oxGovernanceToml(z.mode||"team"))+'</pre></div>'+
       '<div class="note">Every line is yours to change before anybody reviews it. What lands is what the pull request carries, not what this screen drafted.</div>',
