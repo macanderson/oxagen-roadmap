@@ -194,7 +194,7 @@
   "by": "Marcus Bell",
   "byKind": "person",
   "opened": "3 h ago",
-  "state": "open",
+  "state": "checks_passed",
   "trigger": "Edited in the agent source editor.",
   "files": [
    [
