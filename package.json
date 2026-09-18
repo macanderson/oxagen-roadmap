@@ -1,12 +1,13 @@
 {
-  "name": "oxagen-mission-control-mockups",
+  "name": "oxagen-product-roadmap",
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "node tools/build-mockup.mjs && node tools/build-stories.mjs && python3 tools/build-docs.py && node tools/build-badges.mjs",
-    "check": "node tools/build-mockup.mjs --check && node tools/build-stories.mjs --check && python3 tools/build-docs.py --check && node tools/build-badges.mjs --check && node tools/check-mockup.mjs && node tools/check-creation.mjs && node tools/check-assistant.mjs && node tools/check-record-e2e.mjs",
+    "build": "node tools/build-roadmap.mjs && node tools/build-mockup.mjs && node tools/build-stories.mjs && python3 tools/build-docs.py && node tools/build-badges.mjs",
+    "check": "node tools/build-roadmap.mjs --check && node tools/build-mockup.mjs --check && node tools/build-stories.mjs --check && python3 tools/build-docs.py --check && node tools/build-badges.mjs --check && node tools/check-mockup.mjs && node tools/check-creation.mjs && node tools/check-assistant.mjs && node tools/check-record-e2e.mjs",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build && node tools/build-mockup.mjs --out storybook-static/missioncontrol.html"
+    "build-storybook": "storybook build && node tools/build-mockup.mjs --out storybook-static/missioncontrol.html",
+    "roadmap": "node tools/build-roadmap.mjs"
   },
   "devDependencies": {
     "@storybook/addon-docs": "^10.6.0",

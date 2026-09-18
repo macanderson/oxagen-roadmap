@@ -1,0 +1,812 @@
+<title>Oxagen Roadmap</title>
+<meta name="description" content="The living roadmap for Oxagen Mission Control: the gaps between the mockups and the build, the witness, the definition of done, the decisions, and the GitHub issues, live.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap">
+<style>
+/* Oxagen house tokens (dark first, parchment light). Source: oxagen-brand assets/tokens.css */
+:root{
+  --ink:#10100F; --void:#0A0A09; --panel:#181715; --hl:#201F1C; --border:#292722; --rule:#34322D;
+  --fg:#F2EEE5; --body:#DDD8CD; --muted:#9B958A; --dim:#6E6A62;
+  --gold:#D6962C; --gold-bright:#F1C364; --gold-deep:#8B5E1A; --accent-text:#D6962C; --on-gold:#10100F;
+  --st-allowed:#57A97C; --st-approval:#5B93D6; --st-denied:#C66A4A;
+  --st-proven:#3FA2A2; --st-failed:#C0453C; --st-critical:#D6455E; --st-observe:#9B958A;
+  --shadow:0 1px 0 rgba(255,255,255,.03),0 18px 44px rgba(0,0,0,.5);
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --font:"Aeonik","Helvetica Neue",Helvetica,Arial,sans-serif;
+  --font-display:"Space Grotesk","Helvetica Neue",Arial,sans-serif;
+  --radius:12px; --side-w:212px; --drawer-w:400px;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){
+  --ink:#F2EEE5; --void:#E9E3D8; --panel:#F8F5EE; --hl:#EFEAE0; --border:#D8CDBD; --rule:#C9BFAE;
+  --fg:#10100F; --body:#2A2823; --muted:#6B665C; --dim:#8C877C; --accent-text:#8B5E1A; --on-gold:#10100F;
+  --st-allowed:#2F7D52; --st-approval:#2E6BA8; --st-denied:#9B4526;
+  --st-proven:#1F7676; --st-failed:#992F28; --st-critical:#AE2540; --st-observe:#6B665C;
+  --shadow:0 1px 0 rgba(255,255,255,.7),0 18px 44px rgba(16,16,15,.08);
+  color-scheme:light;
+}}
+:root[data-theme="light"]{
+  --ink:#F2EEE5; --void:#E9E3D8; --panel:#F8F5EE; --hl:#EFEAE0; --border:#D8CDBD; --rule:#C9BFAE;
+  --fg:#10100F; --body:#2A2823; --muted:#6B665C; --dim:#8C877C; --accent-text:#8B5E1A; --on-gold:#10100F;
+  --st-allowed:#2F7D52; --st-approval:#2E6BA8; --st-denied:#9B4526;
+  --st-proven:#1F7676; --st-failed:#992F28; --st-critical:#AE2540; --st-observe:#6B665C;
+  --shadow:0 1px 0 rgba(255,255,255,.7),0 18px 44px rgba(16,16,15,.08);
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--ink);color:var(--fg);font-family:var(--font);font-size:14.5px;line-height:1.55;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:var(--font-display);letter-spacing:-.02em;text-wrap:balance;margin:0}
+h1{font-size:26px;font-weight:600}
+h2{font-size:20px;font-weight:600}
+h3{font-size:15px;font-weight:600}
+a{color:var(--accent-text);text-decoration:none}
+a:hover{text-decoration:underline}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+.mono{font-family:var(--mono);font-size:.9em}
+.eyebrow{font-size:11.5px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);font-weight:600}
+.eyebrow.gold{color:var(--gold)}
+.muted{color:var(--muted)} .dim{color:var(--dim)} .small{font-size:12.5px}
+:focus-visible{outline:2px solid var(--accent-text);outline-offset:2px}
+[hidden]{display:none!important}
+
+/* shell */
+#app{display:grid;grid-template-columns:var(--side-w) 1fr;grid-template-rows:52px 1fr;height:100%;min-height:0}
+#app.drawer-open{grid-template-columns:var(--side-w) 1fr var(--drawer-w)}
+header.top{grid-column:1/-1;display:flex;align-items:center;gap:14px;padding:0 16px;border-bottom:1px solid var(--border);background:var(--panel);position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
+.mark{font-family:var(--font-display);font-weight:700;font-size:18px;letter-spacing:-.02em;display:flex;align-items:center;gap:8px}
+.mark b{color:var(--gold);font-weight:700}
+.mark .tag{font-family:var(--mono);font-size:11px;color:var(--dim);border:1px solid var(--border);border-radius:5px;padding:1px 6px;font-weight:400}
+.pills{display:flex;gap:6px;margin-left:auto;align-items:center;flex-wrap:wrap}
+.pill{font-family:var(--mono);font-size:11px;padding:2px 8px;border-radius:999px;border:1px solid var(--border);color:var(--muted);display:inline-flex;align-items:center;gap:6px;background:var(--hl)}
+.pill i{width:7px;height:7px;border-radius:50%;background:var(--dim);display:inline-block}
+.pill.on i{background:var(--st-allowed)} .pill.warn i{background:var(--st-approval)} .pill.off i{background:var(--st-denied)}
+.btn{border:1px solid var(--rule);background:var(--hl);color:var(--fg);border-radius:8px;padding:6px 12px;cursor:pointer;font-size:13px;line-height:1.3;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn:hover{background:var(--border)}
+.btn.gold{background:var(--gold);border-color:var(--gold);color:var(--on-gold);font-weight:600}
+.btn.gold:hover{background:var(--gold-bright)}
+.btn.sm{padding:3px 8px;font-size:12px;border-radius:6px}
+.btn.ghost{background:transparent}
+.btn:disabled{opacity:.5;cursor:default}
+nav.side{border-right:1px solid var(--border);background:var(--panel);padding:12px 8px;display:flex;flex-direction:column;gap:2px;overflow:auto}
+nav.side a{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;color:var(--body);font-size:13.5px}
+nav.side a:hover{background:var(--hl);text-decoration:none}
+nav.side a.active{background:var(--hl);color:var(--fg);font-weight:600}
+nav.side a .ct{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--dim);background:var(--ink);border:1px solid var(--border);border-radius:5px;padding:0 5px}
+nav.side .sep{margin:10px 10px 4px;font-size:10.5px;text-transform:uppercase;letter-spacing:.12em;color:var(--dim)}
+main{overflow:auto;padding:22px 24px 60px;min-width:0}
+.wrap{max-width:1120px;margin:0 auto}
+.page-head{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px 18px;margin-bottom:18px}
+.page-head .lead{flex:1 1 380px;max-width:64ch;color:var(--body)}
+.page-head .actions{display:flex;gap:8px;flex-wrap:wrap}
+
+/* cards + state by shape */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.card.clickable{cursor:pointer} .card.clickable:hover{background:var(--hl)}
+.card.built{border:3px double var(--rule)}
+.card.partial,.card.fixtures-only,.card.open{border:1px dashed var(--rule)}
+.card.not-started,.card.cut{border:1px solid var(--border)}
+.card .title{display:flex;align-items:flex-start;gap:8px;justify-content:space-between}
+.card .title h3{flex:1;min-width:0}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{font-family:var(--mono);font-size:10.5px;padding:1px 7px;border-radius:5px;border:1px solid var(--border);color:var(--muted);background:var(--ink);white-space:nowrap}
+.chip.p0{color:var(--st-critical);border-color:var(--st-critical)} .chip.p1{color:var(--st-denied)} .chip.p2{color:var(--st-approval)}
+.chip.built{color:var(--st-allowed)} .chip.partial,.chip.fixtures-only{color:var(--st-approval)} .chip.not-started{color:var(--muted)} .chip.cut,.chip.defer{color:var(--dim);text-decoration:line-through}
+.chip.open{color:var(--st-approval)} .chip.decided{color:var(--st-allowed)} .chip.unbacked{color:var(--st-denied);border-color:var(--st-denied)}
+.chip.lbl{color:var(--body)}
+.stat{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px}
+.stat .v{font-family:var(--font-display);font-size:28px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.1}
+.stat .l{font-size:12px;color:var(--muted);margin-top:2px}
+.stat .s{font-size:11.5px;color:var(--dim);font-family:var(--mono);margin-top:4px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:22px}
+.bar{height:6px;background:var(--hl);border-radius:3px;overflow:hidden;display:flex}
+.bar i{display:block;height:100%}
+.bar .b{background:var(--st-allowed)} .bar .p{background:var(--st-approval)} .bar .f{background:var(--st-observe)} .bar .n{background:transparent}
+.section{margin-top:28px;padding-top:18px;border-top:1px solid var(--border)}
+.section h2{margin-bottom:12px}
+.filters{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:14px}
+.filters input[type=search]{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:6px 10px;min-width:200px;flex:1 1 200px}
+.filters select{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:5px 8px}
+.tog{border:1px solid var(--border);background:var(--panel);border-radius:999px;padding:3px 10px;font-size:12px;cursor:pointer;color:var(--muted)}
+.tog.on{color:var(--fg);border-color:var(--rule);background:var(--hl)}
+.table-wrap{border:1px solid var(--border);border-radius:var(--radius);overflow:auto;background:var(--panel)}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th{background:var(--hl);text-align:left;padding:8px 10px;font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600;white-space:nowrap}
+td{padding:8px 10px;border-top:1px solid var(--border);vertical-align:top}
+tr.clickable{cursor:pointer} tr.clickable:hover td{background:var(--hl)}
+td.num{font-family:var(--mono);color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.note{border-left:3px solid var(--rule);padding:8px 12px;color:var(--body);background:var(--panel);border-radius:0 8px 8px 0}
+.list{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px;color:var(--body)}
+.kv{display:grid;grid-template-columns:130px 1fr;gap:4px 12px;font-size:13.5px}
+.kv dt{color:var(--muted)} .kv dd{margin:0;min-width:0;overflow-wrap:anywhere}
+.detail{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;display:flex;flex-direction:column;gap:14px}
+.detail .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.milestone{display:grid;grid-template-columns:70px 1fr 160px;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--border)}
+.milestone:first-child{border-top:0}
+.milestone .id{font-family:var(--mono);color:var(--muted)}
+.decision-q{font-size:15px;color:var(--fg)}
+.banner{border:1px dashed var(--rule);border-radius:var(--radius);padding:10px 14px;color:var(--body);background:var(--panel);margin-bottom:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+textarea.field,input.field,select.field{width:100%;background:var(--ink);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--fg)}
+textarea.field{min-height:90px;resize:vertical;font-family:var(--mono);font-size:12.5px;line-height:1.5}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:var(--muted)}
+.frame-wrap{border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;background:var(--void);position:relative}
+.frame-wrap iframe{width:100%;height:min(78vh,900px);border:0;display:block;background:var(--void)}
+.frame-wrap.phone{display:flex;justify-content:center;padding:20px;background:var(--hl)}
+.frame-wrap.phone iframe{width:390px;height:844px;border-radius:26px;border:8px solid var(--void);max-width:100%}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.toolbar select{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:5px 8px}
+
+/* Claude drawer */
+aside.drawer{border-left:1px solid var(--border);background:var(--panel);display:none;flex-direction:column;min-height:0}
+#app.drawer-open aside.drawer{display:flex}
+.drawer .dh{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--border)}
+.drawer .dh h3{flex:1}
+.drawer .ctx{padding:8px 12px;border-bottom:1px solid var(--border);font-size:12px;color:var(--muted);display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.drawer .ctx .chip{max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.drawer .msgs{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
+.msg{max-width:100%;padding:8px 11px;border-radius:10px;font-size:13.5px;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.5}
+.msg.user{background:var(--hl);align-self:flex-end;border:1px solid var(--border)}
+.msg.ai{background:var(--ink);border:1px solid var(--border);align-self:stretch}
+.msg.ai.thinking{color:var(--muted);font-style:italic}
+.msg .tools{font-family:var(--mono);font-size:11px;color:var(--dim);margin-top:6px;border-top:1px dashed var(--border);padding-top:4px}
+.drawer .quick{display:flex;gap:6px;flex-wrap:wrap;padding:0 12px 8px}
+.drawer .compose{border-top:1px solid var(--border);padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.drawer .compose textarea{min-height:64px}
+.drawer .compose .row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.drawer .compose select{background:var(--ink);border:1px solid var(--border);border-radius:6px;padding:3px 6px;font-size:12px}
+
+dialog{background:var(--panel);color:var(--fg);border:1px solid var(--rule);border-radius:var(--radius);padding:0;max-width:min(680px,94vw);width:100%;box-shadow:var(--shadow)}
+dialog::backdrop{background:rgba(0,0,0,.55)}
+dialog .db{padding:18px 20px;display:flex;flex-direction:column;gap:12px;max-height:88vh;overflow:auto}
+dialog .db .row{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--hl);border:1px solid var(--rule);border-radius:10px;padding:8px 14px;font-size:13px;z-index:50;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:opacity .2s;max-width:90vw}
+#toast.show{opacity:1}
+.empty{padding:28px;text-align:center;color:var(--muted);border:1px dashed var(--border);border-radius:var(--radius)}
+.spin{display:inline-block;width:12px;height:12px;border:2px solid var(--border);border-top-color:var(--accent-text);border-radius:50%;animation:sp 1s linear infinite;vertical-align:middle}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion: reduce){.spin{animation:none}}
+
+@media (max-width: 980px){
+  #app,#app.drawer-open{grid-template-columns:1fr;grid-template-rows:52px auto 1fr}
+  nav.side{flex-direction:row;overflow-x:auto;padding:6px 10px;border-right:0;border-bottom:1px solid var(--border);gap:4px}
+  nav.side .sep{display:none}
+  nav.side a{white-space:nowrap;padding:5px 10px}
+  nav.side a .ct{display:none}
+  main{padding:16px 16px 60px}
+  aside.drawer{position:fixed;inset:52px 0 0 0;z-index:20;border-left:0}
+  .kv{grid-template-columns:1fr}
+  .milestone{grid-template-columns:60px 1fr;} .milestone .m3{grid-column:1/-1}
+  header.top .mark .tag{display:none}
+}
+</style>
+
+<div id="app">
+  <header class="top">
+    <div class="mark">oxagen <span class="tag">roadmap</span></div>
+    <div class="pills">
+      <span class="pill" id="pill-gh" title="GitHub issues"><i></i>GitHub: connecting</span>
+      <span class="pill" id="pill-db" title="Shared roadmap state"><i></i>store</span>
+      <span class="pill" id="pill-ai" title="Claude"><i></i>Claude</span>
+      <button class="btn sm ghost" id="theme-btn" title="Theme">Theme</button>
+      <button class="btn gold sm" id="ask-btn">Ask Claude</button>
+    </div>
+  </header>
+  <nav class="side" id="nav"></nav>
+  <main id="main"><div class="wrap"><div class="empty">Loading the roadmap.</div></div></main>
+  <aside class="drawer" id="drawer">
+    <div class="dh"><h3>Claude</h3><select id="tier" title="Model tier"><option value="complex">Opus-class (complex)</option><option value="default">Default</option><option value="quick">Quick</option></select><button class="btn sm ghost" id="clear-chat" title="Clear the conversation">Clear</button><button class="btn sm ghost" id="close-drawer">Close</button></div>
+    <div class="ctx" id="ctx"></div>
+    <div class="msgs" id="msgs"></div>
+    <div class="quick" id="quick"></div>
+    <div class="compose">
+      <textarea class="field" id="chat-in" placeholder="Ask about the roadmap, or tell Claude what to change. It can update items, record decisions, link issues, and draft GitHub issues for you to confirm."></textarea>
+      <div class="row"><span class="small muted" id="chat-status"></span><span style="flex:1"></span><button class="btn sm ghost" id="stop-btn" hidden>Stop</button><button class="btn sm" id="send-btn">Send</button></div>
+    </div>
+  </aside>
+  <dialog id="dlg"><div class="db" id="dlg-body"></div></dialog>
+  <div id="toast" role="status"></div>
+</div>
+
+<script type="application/json" id="roadmap-data">/*__DATA__*/</script>
+<script>
+(() => {
+"use strict";
+const D = JSON.parse(document.getElementById("roadmap-data").textContent || "{}");
+const ORG = D.repos?.owner || "oxageninc";
+const ROADMAP_REPO = D.repos?.roadmap || "product-roadmap";
+const REPOS = D.repos?.tracked || ["product-roadmap", "oxagen", "stella"];
+let GH = "GitHub";              // connector display name; confirmed against listTools() at boot
+const BLOB = `https://github.com/${ORG}/${ROADMAP_REPO}/blob/main/`;
+const MOCKUP = "mockups/missioncontrol.html";
+const DOCS = "docs/missioncontrol-docs.html";
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const el = (h) => { const t = document.createElement("template"); t.innerHTML = h.trim(); return t.content.firstElementChild; };
+const fmtDate = s => s ? new Date(s).toLocaleDateString(undefined, {month:"short", day:"numeric"}) : "";
+const ago = s => { if (!s) return ""; const d = (Date.now() - new Date(s)) / 864e5; return d < 1 ? "today" : d < 2 ? "yesterday" : `${Math.floor(d)}d ago`; };
+const toast = (t) => { const x = $("#toast"); x.textContent = t; x.classList.add("show"); clearTimeout(toast._t); toast._t = setTimeout(() => x.classList.remove("show"), 2600); };
+const lsGet = (k, d) => { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+
+/* ---------- unified items ---------- */
+const ITEMS = [];
+for (const s of D.surfaces || []) ITEMS.push({ ...s, kind: "surface" });
+for (const f of D.witness?.features || []) ITEMS.push({ ...f, kind: "witness", area: "witness", spec_path: f.spec_ref || "docs/witness-spec.md", priority: f.priority || "P1" });
+for (const f of D.dod?.features || []) ITEMS.push({ ...f, kind: "dod", area: "dod", spec_path: f.spec_ref || "docs/dod-spec.md", priority: f.priority || "P1" });
+const byId = Object.fromEntries(ITEMS.map(i => [i.id, i]));
+const DECISIONS = (D.decisions || []).map(d => ({ ...d }));
+const CATALOG = D.catalog || { pages: [], scenarios: [] };
+const ANN = D.issue_annotations || {};   // "repo#number" -> triage snapshot
+
+/* ---------- state ---------- */
+const S = {
+  overrides: {},      // db: overrides/<itemId>
+  decided: {},        // db: decisions/<id>
+  activity: [],       // db: activity
+  issues: {},         // repo -> {items:[], storedAt, error, total}
+  prs: {},
+  caps: { db: null, mcp: null, sample: null, comments: null, user: null, ready: false },
+  uid: null,
+  route: "now",
+  arg: null,
+  ui: lsGet("rm.ui", { filters: {} }),
+};
+const itemState = (it) => ({ ...it, ...(S.overrides[it.id] || {}) });
+const statusOf = it => itemState(it).built_status || "not-started";
+const prioOf = it => itemState(it).priority || "P2";
+const decState = d => ({ ...d, ...(S.decided[d.id] || {}) });
+const issueKey = (repo, n) => `${repo}#${n}`;
+const liveIssue = (repo, n) => (S.issues[repo]?.items || []).find(i => i.number === n);
+const linksOf = (it) => (itemState(it).linked_issues || []).concat((it.issue_links || []).filter(l => !(itemState(it).linked_issues || []).some(x => x.repo === l.repo && x.number === l.number)));
+
+/* ---------- router ---------- */
+const NAV = [
+  ["now", "Now"], ["gaps", "Gaps"], ["witness", "Witness"], ["done", "Done"], ["decisions", "Decisions"], ["issues", "Issues"], ["wireframes", "Wireframes"], ["docs", "Specs"],
+];
+function parseHash() {
+  const h = location.hash.replace(/^#\/?/, "");
+  const [path, qs] = h.split("?");
+  const [route, ...rest] = path.split("/");
+  S.route = NAV.some(n => n[0] === route) ? route : "now";
+  S.arg = rest.join("/") || null;
+  S.q = Object.fromEntries(new URLSearchParams(qs || ""));
+}
+function go(route, arg, q) { location.hash = "#/" + route + (arg ? "/" + arg : "") + (q ? "?" + new URLSearchParams(q) : ""); }
+window.addEventListener("hashchange", () => { parseHash(); render(); });
+
+/* ---------- nav ---------- */
+function renderNav() {
+  const counts = {
+    gaps: ITEMS.filter(i => i.kind === "surface" && ["not-started","partial","fixtures-only"].includes(statusOf(i)) && !["cut","defer"].includes(i.scope_verdict)).length,
+    witness: ITEMS.filter(i => i.kind === "witness" && statusOf(i) !== "built").length,
+    done: ITEMS.filter(i => i.kind === "dod" && statusOf(i) !== "built").length,
+    decisions: DECISIONS.filter(d => decState(d).status !== "decided").length,
+    issues: Object.values(S.issues).reduce((a, r) => a + (r.total || r.items?.length || 0), 0) || null,
+  };
+  $("#nav").innerHTML = `<div class="sep">Roadmap</div>` + NAV.slice(0, 5).map(([r, t]) => `<a href="#/${r}" class="${S.route === r ? "active" : ""}">${t}${counts[r] != null ? `<span class="ct">${counts[r]}</span>` : ""}</a>`).join("") +
+    `<div class="sep">Work</div>` + NAV.slice(5).map(([r, t]) => `<a href="#/${r}" class="${S.route === r ? "active" : ""}">${t}${counts[r] != null ? `<span class="ct">${counts[r]}</span>` : ""}</a>`).join("") +
+    `<div class="sep">Links</div><a href="https://github.com/${ORG}/${ROADMAP_REPO}" target="_blank" rel="noopener">Repository ↗</a><a href="https://github.com/${ORG}" target="_blank" rel="noopener">${ORG} on GitHub ↗</a>`;
+}
+
+/* ---------- shared renderers ---------- */
+const chip = (t, cls = "") => `<span class="chip ${cls}">${esc(t)}</span>`;
+function statusChips(it) {
+  const s = itemState(it);
+  return chip(statusOf(it).replace("-", " "), statusOf(it)) + chip(prioOf(it), prioOf(it).toLowerCase()) + (it.scope_verdict && it.scope_verdict !== "keep" ? chip(it.scope_verdict, it.scope_verdict) : "") + (it.plan_lane ? chip(it.plan_lane) : "") + (s.owner ? chip("@" + s.owner) : "");
+}
+function itemCard(it) {
+  const links = linksOf(it);
+  return `<div class="card clickable ${statusOf(it)}" data-item="${esc(it.id)}" tabindex="0" role="button">
+    <div class="title"><h3>${esc(it.title)}</h3>${it.route ? `<button class="btn sm ghost wf" data-wf="${esc(it.id)}" title="Open the wireframe">Wireframe</button>` : ""}</div>
+    <div class="chips">${statusChips(it)}</div>
+    <div class="small" style="color:var(--body)">${esc(it.gap_summary || it.summary || "")}</div>
+    ${links.length ? `<div class="chips">${links.map(l => issueChip(l.repo, l.number)).join("")}</div>` : ""}
+  </div>`;
+}
+function issueChip(repo, n) {
+  const live = liveIssue(repo, n);
+  const st = live ? (live.state === "OPEN" ? "open" : "closed") : (S.caps.mcp ? "loaded?" : "snapshot");
+  const title = live?.title || ANN[issueKey(repo, n)]?.title || "";
+  return `<a class="chip ${live ? (live.state === "OPEN" ? "open" : "decided") : ""}" href="https://github.com/${ORG}/${repo}/issues/${n}" target="_blank" rel="noopener" title="${esc(title)}">${esc(repo)}#${n} · ${st}</a>`;
+}
+function ghLabelChips(labels) { return (labels || []).slice(0, 5).map(l => chip(typeof l === "string" ? l : l.name, "lbl")).join(""); }
+
+/* ---------- pages ---------- */
+const PAGES = {
+  now() {
+    const surf = ITEMS.filter(i => i.kind === "surface" && !["cut"].includes(i.scope_verdict));
+    const n = (st) => surf.filter(i => statusOf(i) === st).length;
+    const built = n("built"), partial = n("partial"), fix = n("fixtures-only"), ns = n("not-started");
+    const openDec = DECISIONS.filter(d => decState(d).status !== "decided");
+    const live = Object.entries(S.issues);
+    const liveOpen = live.reduce((a, [, r]) => a + (r.total ?? r.items?.length ?? 0), 0);
+    const unbacked = Object.entries(ANN).filter(([, a]) => (a.kind === "feature" || a.kind === "epic") && !a.has_spec_backing);
+    const next = surf.filter(i => ["not-started","partial","fixtures-only"].includes(statusOf(i)) && ["P0","P1"].includes(prioOf(i))).sort((a, b) => prioOf(a).localeCompare(prioOf(b))).slice(0, 8);
+    const ms = D.milestones || [];
+    return `<div class="page-head"><div><div class="eyebrow gold">Mission Control</div><h1>What we build next</h1></div>
+      <p class="lead">${esc(D.thesis || "The mockups are the spec. This page is the distance between them and the build, the witness and the definition of done that make a run provable, and the decisions that unblock the work. GitHub status is live; everything else is editable here and by Claude.")}</p>
+      <div class="actions"><button class="btn" data-ask="Suggest the five most valuable things to build next, with a one-line reason each, using the roadmap overview.">Ask what to build next</button></div></div>
+      <div class="stats">
+        <div class="stat"><div class="v">${surf.length}</div><div class="l">surfaces in the mockups</div><div class="s">${(D.catalog?.pages || []).length} pages · ${(D.catalog?.scenarios || []).length} scenarios</div></div>
+        <div class="stat"><div class="v">${built}</div><div class="l">built</div><div class="s">${partial} partial · ${fix} on fixtures</div></div>
+        <div class="stat"><div class="v">${ns}</div><div class="l">not started</div><div class="s">${surf.filter(i => prioOf(i) === "P0" && statusOf(i) !== "built").length} are P0</div></div>
+        <div class="stat"><div class="v">${openDec.length}</div><div class="l">decisions open</div><div class="s">${DECISIONS.length - openDec.length} decided</div></div>
+        <div class="stat"><div class="v">${S.caps.mcp ? (live.length ? liveOpen : '<span class="spin"></span>') : Object.keys(ANN).length}</div><div class="l">open issues${S.caps.mcp ? "" : " (snapshot)"}</div><div class="s">${live.map(([r, x]) => `${r} ${x.total ?? x.items?.length ?? "…"}`).join(" · ") || (D.issue_snapshot_date ? "as of " + D.issue_snapshot_date : "")}</div></div>
+        <div class="stat"><div class="v">${unbacked.length}</div><div class="l">features without a spec</div><div class="s">need a design doc first</div></div>
+      </div>
+      <div class="section" style="margin-top:0;border-top:0;padding-top:0"><h2>Build progress</h2>
+        <div class="bar" style="height:10px;margin-bottom:8px"><i class="b" style="width:${100*built/surf.length}%"></i><i class="p" style="width:${100*(partial+fix)/surf.length}%"></i></div>
+        <div class="small muted">Double border is built. Dashed is partial or on fixtures. Single is not started. State by shape, never by colour alone.</div></div>
+      <div class="section"><h2>Milestones</h2><div class="card" style="gap:0">${ms.map(m => {
+        const its = (m.surfaces || []).map(id => byId[id]).filter(Boolean);
+        const b = its.filter(i => statusOf(i) === "built").length, p = its.filter(i => ["partial","fixtures-only"].includes(statusOf(i))).length;
+        return `<div class="milestone"><div class="id">${esc(m.id)}</div><div><div style="font-weight:600">${esc(m.title)}</div><div class="small muted">${its.length} surfaces · ${esc(m.weeks || "")}${m.summary ? " · " + esc(m.summary) : ""}</div></div><div class="m3"><div class="bar"><i class="b" style="width:${its.length ? 100*b/its.length : 0}%"></i><i class="p" style="width:${its.length ? 100*p/its.length : 0}%"></i></div><div class="small mono muted" style="margin-top:4px">${b} built · ${p} partial · ${its.length - b - p} to go</div></div></div>`;
+      }).join("") || '<div class="empty">No milestones in the data.</div>'}</div></div>
+      <div class="section"><h2>Next up</h2><div class="grid">${next.map(itemCard).join("") || '<div class="empty">Nothing is queued. Every P0 and P1 surface is built.</div>'}</div></div>
+      <div class="section"><h2>Decisions blocking work</h2><div class="grid">${openDec.slice(0, 6).map(decisionCard).join("") || '<div class="empty">No open decisions.</div>'}</div></div>
+      <div class="section"><h2>Recent activity</h2>${activityList()}</div>`;
+  },
+
+  gaps() {
+    if (S.arg && byId[S.arg]) return itemDetail(byId[S.arg]);
+    const f = S.ui.filters;
+    const areas = [...new Set(ITEMS.filter(i => i.kind === "surface").map(i => i.area))];
+    let list = ITEMS.filter(i => i.kind === "surface");
+    if (f.area) list = list.filter(i => i.area === f.area);
+    if (f.status) list = list.filter(i => statusOf(i) === f.status);
+    if (f.prio) list = list.filter(i => prioOf(i) === f.prio);
+    if (!f.showCut) list = list.filter(i => i.scope_verdict !== "cut");
+    if (f.q) { const q = f.q.toLowerCase(); list = list.filter(i => JSON.stringify(i).toLowerCase().includes(q)); }
+    list.sort((a, b) => prioOf(a).localeCompare(prioOf(b)) || statusRank(a) - statusRank(b));
+    return `<div class="page-head"><div><div class="eyebrow">Mockups vs build</div><h1>Gaps</h1></div>
+      <p class="lead">Every page and wizard in the master mockup, and what the build does today. Open one for the concrete gaps, the backend gaps, the spec, the wireframe, and the live issues. Create an issue from any gap; ask Claude for a plan.</p></div>
+      <div class="filters">
+        <input type="search" id="f-q" placeholder="Search surfaces" value="${esc(f.q || "")}">
+        <select id="f-area"><option value="">All areas</option>${areas.map(a => `<option ${f.area === a ? "selected" : ""}>${esc(a)}</option>`).join("")}</select>
+        <select id="f-status"><option value="">Any status</option>${["not-started","fixtures-only","partial","built"].map(s => `<option value="${s}" ${f.status === s ? "selected" : ""}>${s.replace("-"," ")}</option>`).join("")}</select>
+        <select id="f-prio"><option value="">Any priority</option>${["P0","P1","P2","P3"].map(s => `<option ${f.prio === s ? "selected" : ""}>${s}</option>`).join("")}</select>
+        <button class="tog ${f.showCut ? "on" : ""}" id="f-cut">show cut</button>
+        <span class="small muted">${list.length} shown</span></div>
+      <div class="grid">${list.map(itemCard).join("") || '<div class="empty">Nothing matches.</div>'}</div>`;
+  },
+
+  witness() { return featurePage("witness", "The witness", D.witness?.summary, "docs/witness-spec.md"); },
+  done() { return featurePage("dod", "Definition of done", D.dod?.summary, "docs/dod-spec.md"); },
+
+  decisions() {
+    const open = DECISIONS.filter(d => decState(d).status !== "decided"), done = DECISIONS.filter(d => decState(d).status === "decided");
+    return `<div class="page-head"><div><div class="eyebrow">Open questions with a recommendation each</div><h1>Decisions</h1></div>
+      <p class="lead">Each one blocks a named lane. Decide it here and the record is shared; ask Claude to argue both sides first; or open it as a GitHub issue with the <span class="mono">needs:decision</span> label so the team sees it.</p>
+      <div class="actions"><button class="btn" data-ask="Rank the open decisions by how much work each one unblocks, and say which one to make first and why.">Which decision first?</button></div></div>
+      <h2 style="margin-bottom:12px">Open · ${open.length}</h2><div class="grid">${open.map(decisionCard).join("") || '<div class="empty">Every decision is made.</div>'}</div>
+      <div class="section"><h2>Decided · ${done.length}</h2><div class="grid">${done.map(decisionCard).join("")}</div></div>
+      ${(D.feedback || []).length ? `<div class="section"><h2>Maintainer feedback on the mockups</h2><div class="table-wrap"><table><thead><tr><th>#</th><th>Feedback</th><th>Status</th></tr></thead><tbody>${D.feedback.map(f => `<tr><td class="num">${f.n}</td><td>${esc(f.text)}</td><td>${chip(f.status, f.status === "in" ? "built" : f.status === "open" ? "not-started" : "partial")}</td></tr>`).join("")}</tbody></table></div></div>` : ""}`;
+  },
+
+  issues() {
+    const f = S.ui.filters;
+    const repo = f.repo || "oxagen";
+    const r = S.issues[repo];
+    const live = !!S.caps.mcp;
+    let rows = live ? (r?.items || []) : Object.entries(ANN).filter(([k]) => k.startsWith(repo + "#")).map(([k, a]) => ({ number: +k.split("#")[1], title: a.title, labels: a.labels || [], updated_at: a.updatedAt, state: "OPEN", snapshot: true }));
+    const themes = [...new Set(Object.values(ANN).map(a => a.theme).filter(Boolean))].sort();
+    rows = rows.map(i => ({ ...i, ann: ANN[issueKey(repo, i.number)] }));
+    if (f.theme) rows = rows.filter(i => i.ann?.theme === f.theme);
+    if (f.unbacked) rows = rows.filter(i => i.ann && (i.ann.kind === "feature" || i.ann.kind === "epic") && !i.ann.has_spec_backing);
+    if (f.decision) rows = rows.filter(i => i.ann?.kind === "decision" || (i.labels || []).some(l => (l.name || l) === "needs:decision"));
+    if (f.iq) { const q = f.iq.toLowerCase(); rows = rows.filter(i => (i.title || "").toLowerCase().includes(q) || String(i.number).includes(q)); }
+    const linkedTo = {}; for (const it of ITEMS) for (const l of linksOf(it)) if (l.repo === repo) (linkedTo[l.number] ||= []).push(it);
+    return `<div class="page-head"><div><div class="eyebrow">${live ? "Live from GitHub" : "Snapshot"}</div><h1>Issues</h1></div>
+      <p class="lead">${live ? `Open issues in ${esc(ORG)}/${esc(repo)}, the 100 most recently updated, refreshed every two minutes through your GitHub connector. ${r?.storedAt ? "Last updated " + ago(new Date(r.storedAt).toISOString()) + "." : ""}` : "Open this page in claude.ai with the GitHub connector for live status. This is the triage snapshot" + (D.issue_snapshot_date ? " from " + esc(D.issue_snapshot_date) : "") + "."}</p>
+      <div class="actions"><button class="btn" id="new-issue">New issue</button>${live ? `<button class="btn ghost" id="refresh-issues">Refresh</button>` : ""}</div></div>
+      ${r?.error ? `<div class="banner">${esc(ghErrorCopy(r.error))}</div>` : ""}
+      <div class="filters">
+        ${REPOS.map(x => `<button class="tog ${repo === x ? "on" : ""}" data-repo="${x}">${x}${S.issues[x]?.total != null ? ` · ${S.issues[x].total}` : ""}</button>`).join("")}
+        <input type="search" id="f-iq" placeholder="Search title or number" value="${esc(f.iq || "")}">
+        <select id="f-theme"><option value="">Any theme</option>${themes.map(t => `<option ${f.theme === t ? "selected" : ""}>${esc(t)}</option>`).join("")}</select>
+        <button class="tog ${f.unbacked ? "on" : ""}" id="f-unbacked">no spec backing</button>
+        <button class="tog ${f.decision ? "on" : ""}" id="f-decision">needs a decision</button>
+        <span class="small muted">${rows.length} shown</span></div>
+      <div class="table-wrap"><table><thead><tr><th>#</th><th>Title</th><th>Labels</th><th>Triage</th><th>Roadmap</th><th>Updated</th></tr></thead><tbody>
+      ${rows.map(i => `<tr class="clickable" data-issue="${repo}#${i.number}"><td class="num"><a href="https://github.com/${ORG}/${repo}/issues/${i.number}" target="_blank" rel="noopener">#${i.number}</a></td><td>${esc(i.title)}</td><td><div class="chips">${ghLabelChips(i.labels)}</div></td><td><div class="chips">${i.ann ? chip(i.ann.theme) + chip(i.ann.kind) + (["feature","epic"].includes(i.ann.kind) && !i.ann.has_spec_backing ? chip("no spec", "unbacked") : "") : '<span class="dim small">new since triage</span>'}</div></td><td><div class="chips">${(linkedTo[i.number] || []).map(it => `<a class="chip" href="#/${it.kind === "surface" ? "gaps" : it.kind === "witness" ? "witness" : "done"}/${esc(it.id)}">${esc(it.title)}</a>`).join("")}</div></td><td class="num">${ago(i.updated_at)}</td></tr>`).join("") || `<tr><td colspan="6"><div class="empty">${live && !r ? '<span class="spin"></span> Loading from GitHub' : "No issues match."}</div></td></tr>`}
+      </tbody></table></div>
+      ${live && r?.hasNext ? `<div style="margin-top:10px"><button class="btn" id="more-issues">Load older issues</button></div>` : ""}`;
+  },
+
+  wireframes() {
+    const pages = CATALOG.pages || [], sc = CATALOG.scenarios || [];
+    const q = S.q || {};
+    const pid = S.arg || q.page || pages[0]?.id;
+    const page = pages.find(p => p.id === pid) || pages[0];
+    const scen = sc.find(s => s.id === q.scenario);
+    const state = q.state || "loaded", mobile = q.mobile === "1", theme = q.theme || "";
+    const hash = scen ? `#/${CATALOG.org || "a-intel"}/${scen.ws}/scenarios/${scen.id}/1` : (page?.hash || "");
+    const url = mockupUrl({ state: scen ? null : state, mobile, theme, hash });
+    const item = page && byId[page.id];
+    return `<div class="page-head"><div><div class="eyebrow">The master mockup, framed</div><h1>Wireframes</h1></div>
+      <p class="lead">Every page in every state, desktop and mobile, straight from <span class="mono">mockups/missioncontrol.html</span>. Pick a page or a guided scenario. The roadmap card for the page is linked below the frame.</p>
+      <div class="actions"><a class="btn" href="${esc(url)}" target="_blank" rel="noopener">Open full size ↗</a></div></div>
+      <div class="toolbar">
+        <select id="wf-page">${groupOptions(pages, page?.id)}</select>
+        <select id="wf-scenario"><option value="">No scenario</option>${sc.map(s => `<option value="${esc(s.id)}" ${scen?.id === s.id ? "selected" : ""}>W${s.n} · ${esc(s.title)}</option>`).join("")}</select>
+        <select id="wf-state" ${scen ? "disabled" : ""}>${(page?.states || ["loaded"]).map(s => `<option value="${s}" ${state === s ? "selected" : ""}>${s}</option>`).join("")}</select>
+        <button class="tog ${mobile ? "on" : ""}" id="wf-mobile">phone</button>
+        <select id="wf-theme"><option value="">viewer theme</option><option value="dark" ${theme === "dark" ? "selected" : ""}>dark</option><option value="light" ${theme === "light" ? "selected" : ""}>light</option></select>
+        ${item ? `<a class="btn ghost sm" href="#/gaps/${esc(item.id)}">Roadmap card: ${esc(item.title)}</a>` : ""}
+        ${page?.id ? `<a class="btn ghost sm" href="${BLOB}mockups/pages/${esc(page.id)}.md" target="_blank" rel="noopener">Page spec ↗</a>` : ""}
+      </div>
+      <div class="frame-wrap ${mobile ? "phone" : ""}"><iframe id="wf" src="${esc(url)}" title="Mission Control mockup"></iframe></div>
+      ${item ? `<div class="section"><h2>What the build is missing here</h2>${itemCard(item)}</div>` : ""}`;
+  },
+
+  docs() {
+    const docs = D.docs || [];
+    const cur = S.arg ? docs.find(d => d.id === S.arg) : null;
+    return `<div class="page-head"><div><div class="eyebrow">Specs and plans</div><h1>Specs</h1></div>
+      <p class="lead">The documents the roadmap is built from. Each opens on GitHub; the rendered set is framed below.</p></div>
+      <div class="grid" style="margin-bottom:18px">${docs.map(d => `<div class="card"><div class="title"><h3>${esc(d.title)}</h3></div><div class="small" style="color:var(--body)">${esc(d.summary || "")}</div><div class="row" style="display:flex;gap:6px;flex-wrap:wrap"><a class="btn sm" href="${BLOB}${esc(d.path)}" target="_blank" rel="noopener">GitHub ↗</a>${d.anchor ? `<a class="btn sm ghost" href="#/docs/${esc(d.id)}">Read here</a>` : ""}<button class="btn sm ghost" data-ask="Summarize ${esc(d.path)} in five bullets and list what it says is still undecided.">Ask Claude</button></div></div>`).join("")}</div>
+      <div class="frame-wrap"><iframe src="${DOCS}${cur?.anchor ? "#" + esc(cur.anchor) : ""}" title="Mission Control documents"></iframe></div>`;
+  },
+};
+const statusRank = it => ({ "not-started": 0, "fixtures-only": 1, partial: 2, built: 3 })[statusOf(it)] ?? 0;
+function groupOptions(pages, sel) {
+  const groups = [...new Set(pages.map(p => p.group))];
+  return groups.map(g => `<optgroup label="${esc(g)}">${pages.filter(p => p.group === g).map(p => `<option value="${esc(p.id)}" ${sel === p.id ? "selected" : ""}>${esc(p.title)}</option>`).join("")}</optgroup>`).join("");
+}
+function mockupUrl({ state, mobile, theme, hash }) {
+  const q = new URLSearchParams(); q.set("product", "1"); if (state) q.set("state", state); q.set("mobile", mobile ? "1" : "0"); if (theme) q.set("theme", theme);
+  return `${MOCKUP}?${q}${hash || ""}`;
+}
+function featurePage(kind, title, summary, spec) {
+  if (S.arg && byId[S.arg]) return itemDetail(byId[S.arg]);
+  const list = ITEMS.filter(i => i.kind === kind);
+  const need = list.filter(i => itemState(i).decision_needed);
+  return `<div class="page-head"><div><div class="eyebrow">${kind === "witness" ? "Proven, not claimed" : "A gate, not a badge"}</div><h1>${esc(title)}</h1></div>
+    <p class="lead">${esc(summary || "")}</p>
+    <div class="actions"><a class="btn" href="${BLOB}${spec}" target="_blank" rel="noopener">Read the spec ↗</a><button class="btn" data-ask="For the ${kind === "witness" ? "witness" : "definition of done"} features, propose a build order that ships a first usable version fastest, and name the decision each step needs.">Ask for a build order</button></div></div>
+    ${need.length ? `<div class="banner">${need.length} feature${need.length > 1 ? "s" : ""} here need a decision before they can be built. They are marked below.</div>` : ""}
+    <div class="grid">${list.map(itemCard).join("") || '<div class="empty">No features in the data.</div>'}</div>`;
+}
+function decisionCard(d) {
+  const s = decState(d);
+  return `<div class="card ${s.status === "decided" ? "built" : "open"}" data-decision="${esc(d.id)}">
+    <div class="title"><h3>${esc(d.title)}</h3><span class="chip mono">${esc(d.id)}</span></div>
+    <div class="decision-q">${esc(d.question)}</div>
+    ${d.recommendation ? `<div class="note small"><b>Recommendation.</b> ${esc(d.recommendation)}</div>` : ""}
+    ${s.status === "decided" ? `<div class="note small" style="border-left-color:var(--st-allowed)"><b>Decided${s.decided_on ? " " + esc(s.decided_on) : ""}.</b> ${esc(s.decided || "")}</div>` : ""}
+    <div class="chips">${chip(s.status || "open", s.status || "open")}${(d.blocks || []).map(b => chip("blocks " + b)).join("")}${d.source ? chip(d.source) : ""}</div>
+    <div class="row" style="display:flex;gap:6px;flex-wrap:wrap">
+      ${s.status !== "decided" ? `<button class="btn sm" data-decide="${esc(d.id)}">Decide</button>` : `<button class="btn sm ghost" data-reopen="${esc(d.id)}">Reopen</button>`}
+      <button class="btn sm ghost" data-ask="Argue both sides of decision ${esc(d.id)} (${esc(d.title)}): ${esc(d.question)} Then recommend one option and say what it unblocks.">Argue both sides</button>
+      <button class="btn sm ghost" data-issue-decision="${esc(d.id)}">Open as issue</button>
+      <button class="btn sm ghost" data-comment="${esc(d.id)}">Comment</button>
+    </div></div>`;
+}
+function itemDetail(it) {
+  const s = itemState(it);
+  const back = it.kind === "surface" ? "gaps" : it.kind === "witness" ? "witness" : "done";
+  const links = linksOf(it);
+  const wf = it.route ? `<a class="btn" href="#/wireframes/${esc(it.id)}">Open wireframe</a>` : "";
+  return `<div class="page-head"><div><a href="#/${back}" class="small">← ${back === "gaps" ? "Gaps" : back === "witness" ? "Witness" : "Done"}</a><h1 style="margin-top:4px">${esc(it.title)}</h1><div class="chips" style="margin-top:8px">${statusChips(it)}${it.area ? chip(it.area) : ""}</div></div>
+    <div class="actions">${wf}<a class="btn" href="${BLOB}${esc(it.spec_path || "")}" target="_blank" rel="noopener">Spec ↗</a><button class="btn" data-issue-item="${esc(it.id)}">Create issue</button><button class="btn ghost" data-comment="${esc(it.id)}">Comment</button></div></div>
+    <div class="detail" id="item-${esc(it.id)}">
+      <div>${esc(s.gap_summary || s.summary || "")}</div>
+      ${(it.gaps || []).length ? `<div><h3 style="margin-bottom:6px">What the mockup shows that the build does not</h3><ul class="list">${it.gaps.map(g => `<li>${esc(g)}</li>`).join("")}</ul></div>` : ""}
+      ${(it.backend_gaps || []).length ? `<div><h3 style="margin-bottom:6px">Backend gaps</h3><ul class="list">${it.backend_gaps.map(g => `<li>${esc(g)}</li>`).join("")}</ul></div>` : ""}
+      ${(it.built_evidence || it.evidence || []).length ? `<div><h3 style="margin-bottom:6px">Evidence in the build</h3><ul class="list mono small">${(it.built_evidence || it.evidence).map(e => `<li><a href="https://github.com/${ORG}/${it.kind === "surface" || it.kind === "dod" ? "oxagen" : "oxagen"}/blob/main/${esc(e)}" target="_blank" rel="noopener">${esc(e)}</a></li>`).join("")}</ul></div>` : ""}
+      ${s.decision_needed ? `<div class="note"><b>Needs a decision.</b> ${esc(s.decision_needed)}</div>` : ""}
+      <div class="row"><label class="f">Status <select class="field" data-ov="built_status" data-id="${esc(it.id)}">${["not-started","fixtures-only","partial","built"].map(x => `<option value="${x}" ${statusOf(it) === x ? "selected" : ""}>${x.replace("-"," ")}</option>`).join("")}</select></label>
+        <label class="f">Priority <select class="field" data-ov="priority" data-id="${esc(it.id)}">${["P0","P1","P2","P3"].map(x => `<option ${prioOf(it) === x ? "selected" : ""}>${x}</option>`).join("")}</select></label>
+        <label class="f" style="flex:1;min-width:160px">Owner <input class="field" data-ov="owner" data-id="${esc(it.id)}" value="${esc(s.owner || "")}" placeholder="github login"></label></div>
+      <label class="f">Notes (shared) <textarea class="field" data-ov="note" data-id="${esc(it.id)}" placeholder="What changed, what is decided, what to remember.">${esc(s.note || "")}</textarea></label>
+      <div><h3 style="margin-bottom:6px">Issues</h3><div class="chips">${links.map(l => issueChip(l.repo, l.number)).join("") || '<span class="dim small">None linked yet.</span>'} <button class="btn sm ghost" data-link-item="${esc(it.id)}">Link an issue</button></div></div>
+      <div class="row"><button class="btn gold" data-ask="Write a definition of done for the roadmap item '${esc(it.title)}' as a checklist of verifiable checks, then a build plan in three steps. Use get_item('${esc(it.id)}') first.">Ask Claude for a plan</button><button class="btn ghost" data-ask="Draft a GitHub issue for the roadmap item '${esc(it.title)}' (use get_item('${esc(it.id)}')) as a handoff: problem, spec paths, wireframe route, gaps as a checklist, done looks like, pillar. Then call create_issue so I can confirm it.">Ask Claude to draft the issue</button></div>
+    </div>`;
+}
+function activityList() {
+  if (!S.caps.db) return `<div class="empty">Shared activity appears here once the page is open in claude.ai.</div>`;
+  if (!S.activity.length) return `<div class="empty">No activity yet. Change a status, decide something, or link an issue.</div>`;
+  return `<div class="table-wrap"><table><tbody>${S.activity.slice(0, 20).map(a => `<tr><td class="num">${ago(a.ts)}</td><td>${esc(a.text)}</td><td class="small muted">${a.item ? `<a href="#/${a.route || "gaps"}/${esc(a.item)}">${esc(byId[a.item]?.title || a.item)}</a>` : ""}</td></tr>`).join("")}</tbody></table></div>`;
+}
+function ghErrorCopy(e) {
+  const c = e?.code || "";
+  if (c === "needs_reauth") return "GitHub needs to be reconnected. Open claude.ai Settings → Connectors and reconnect GitHub.";
+  if (c === "server_not_connected") return "Add the GitHub connector in claude.ai Settings → Connectors to see live issues.";
+  if (c === "not_in_manifest") return "This page was not allowed to use GitHub for this view. Allow it from the page's connector prompt.";
+  if (c === "server_unavailable") return "GitHub did not answer in time. Showing the last good data; it will retry.";
+  return "GitHub could not be read: " + (e?.message || c);
+}
+
+/* ---------- render ---------- */
+function render() {
+  renderNav();
+  const html = (PAGES[S.route] || PAGES.now)();
+  $("#main").innerHTML = `<div class="wrap">${html}</div>`;
+  $("#main").scrollTop = 0;
+  renderCtx();
+}
+
+/* ---------- interactions (event delegation) ---------- */
+document.addEventListener("click", async (e) => {
+  const t = e.target.closest("[data-ask],[data-item],[data-wf],[data-decide],[data-reopen],[data-issue-item],[data-issue-decision],[data-comment],[data-link-item],[data-repo],[data-issue],#new-issue,#refresh-issues,#more-issues,#f-cut,#f-unbacked,#f-decision,#wf-mobile,#ask-btn,#close-drawer,#theme-btn,#clear-chat");
+  if (!t) return;
+  if (t.matches("[data-wf]")) { e.stopPropagation(); go("wireframes", t.dataset.wf); return; }
+  if (t.matches("[data-ask]")) { openDrawer(); askClaude(t.dataset.ask); return; }
+  if (t.matches("[data-item]")) { const it = byId[t.dataset.item]; go(it.kind === "surface" ? "gaps" : it.kind === "witness" ? "witness" : "done", it.id); return; }
+  if (t.matches("[data-decide]")) return decideDialog(t.dataset.decide);
+  if (t.matches("[data-reopen]")) { await writeDecision(t.dataset.reopen, { status: "open", decided: null, decided_on: null }); return; }
+  if (t.matches("[data-issue-item]")) return issueDialog(draftFromItem(byId[t.dataset.issueItem]));
+  if (t.matches("[data-issue-decision]")) return issueDialog(draftFromDecision(DECISIONS.find(d => d.id === t.dataset.issueDecision)));
+  if (t.matches("#new-issue")) return issueDialog({ repo: S.ui.filters.repo || "oxagen", title: "", body: "", labels: [] });
+  if (t.matches("[data-comment]")) return openComment(t);
+  if (t.matches("[data-link-item]")) return linkDialog(t.dataset.linkItem);
+  if (t.matches("[data-repo]")) { S.ui.filters.repo = t.dataset.repo; saveUi(); render(); return; }
+  if (t.matches("[data-issue]")) { if (e.target.closest("a")) return; const [repo, n] = t.dataset.issue.split("#"); window.open(`https://github.com/${ORG}/${repo}/issues/${n}`, "_blank", "noopener"); return; }
+  if (t.matches("#refresh-issues")) { await S.caps.mcp?.invalidate(GH, "list_issues").catch(() => {}); toast("Refreshing"); return; }
+  if (t.matches("#more-issues")) return loadOlder(S.ui.filters.repo || "oxagen");
+  if (t.matches("#f-cut")) { S.ui.filters.showCut = !S.ui.filters.showCut; saveUi(); render(); return; }
+  if (t.matches("#f-unbacked")) { S.ui.filters.unbacked = !S.ui.filters.unbacked; saveUi(); render(); return; }
+  if (t.matches("#f-decision")) { S.ui.filters.decision = !S.ui.filters.decision; saveUi(); render(); return; }
+  if (t.matches("#wf-mobile")) { const q = { ...(S.q || {}) }; q.mobile = q.mobile === "1" ? "0" : "1"; go("wireframes", S.arg, q); return; }
+  if (t.matches("#ask-btn")) { toggleDrawer(true); $("#chat-in").focus(); return; }
+  if (t.matches("#close-drawer")) { toggleDrawer(false); return; }
+  if (t.matches("#theme-btn")) { const r = document.documentElement; const cur = r.getAttribute("data-theme"); const next = cur === "dark" ? "light" : cur === "light" ? "" : "dark"; if (next) r.setAttribute("data-theme", next); else r.removeAttribute("data-theme"); lsSet("rm.theme", next); return; }
+  if (t.matches("#clear-chat")) { CHAT.turns = []; saveChat(); renderChat(); return; }
+});
+document.addEventListener("keydown", (e) => { if (e.key === "Enter" && e.target.matches(".card[data-item]")) e.target.click(); });
+document.addEventListener("input", (e) => {
+  const t = e.target;
+  if (t.id === "f-q") { S.ui.filters.q = t.value; saveUi(); debounce(render, 200); }
+  if (t.id === "f-iq") { S.ui.filters.iq = t.value; saveUi(); debounce(render, 200); }
+});
+document.addEventListener("change", async (e) => {
+  const t = e.target;
+  if (t.id === "f-area") { S.ui.filters.area = t.value; saveUi(); render(); }
+  if (t.id === "f-status") { S.ui.filters.status = t.value; saveUi(); render(); }
+  if (t.id === "f-prio") { S.ui.filters.prio = t.value; saveUi(); render(); }
+  if (t.id === "f-theme") { S.ui.filters.theme = t.value; saveUi(); render(); }
+  if (t.id === "wf-page") go("wireframes", t.value, { ...(S.q || {}), scenario: "" });
+  if (t.id === "wf-scenario") go("wireframes", S.arg, { ...(S.q || {}), scenario: t.value });
+  if (t.id === "wf-state") go("wireframes", S.arg, { ...(S.q || {}), state: t.value });
+  if (t.id === "wf-theme") go("wireframes", S.arg, { ...(S.q || {}), theme: t.value });
+  if (t.id === "tier") lsSet("rm.tier", t.value);
+  if (t.matches("[data-ov]")) await writeOverride(t.dataset.id, { [t.dataset.ov]: t.value }, t.dataset.ov === "note" ? null : `${t.dataset.ov.replace("_"," ")} → ${t.value}`);
+});
+let _deb; function debounce(fn, ms) { clearTimeout(_deb); _deb = setTimeout(fn, ms); }
+function saveUi() { lsSet("rm.ui", S.ui); }
+
+/* ---------- db writes ---------- */
+async function writeOverride(id, patch, activityText) {
+  S.overrides[id] = { ...(S.overrides[id] || {}), ...patch };
+  if (!S.caps.db) { toast("Saved for this browser only. Open in claude.ai to share."); lsSet("rm.overrides", S.overrides); renderNav(); return; }
+  try {
+    await S.caps.db.doc("overrides/" + id).set({ ...S.overrides[id], updated_at: new Date().toISOString(), updated_by: S.uid });
+    if (activityText) logActivity(`${byId[id]?.title || id}: ${activityText}`, id);
+    toast("Saved");
+  } catch (err) { toast("Could not save: " + (err.code || err.message)); }
+}
+async function writeDecision(id, patch) {
+  S.decided[id] = { ...(S.decided[id] || {}), ...patch };
+  if (!S.caps.db) { lsSet("rm.decided", S.decided); render(); toast("Saved for this browser only."); return; }
+  try { await S.caps.db.doc("decisions/" + id).set({ ...S.decided[id], updated_at: new Date().toISOString(), updated_by: S.uid }); logActivity(`Decision ${id} ${patch.status === "decided" ? "decided: " + (patch.decided || "").slice(0, 120) : "reopened"}`); toast(patch.status === "decided" ? "Decided" : "Reopened"); }
+  catch (err) { toast("Could not save: " + (err.code || err.message)); }
+  render();
+}
+async function logActivity(text, item) {
+  if (!S.caps.db) return;
+  try { await S.caps.db.collection("activity").add({ ts: new Date().toISOString(), text, item: item || null, route: item ? (byId[item]?.kind === "surface" ? "gaps" : byId[item]?.kind === "witness" ? "witness" : "done") : null, who: S.uid }); } catch {}
+}
+
+/* ---------- dialogs ---------- */
+function dialog(html, wire) {
+  const d = $("#dlg"); $("#dlg-body").innerHTML = html; d.showModal();
+  const close = () => { d.close(); };
+  $("#dlg-body").querySelectorAll("[data-close]").forEach(b => b.onclick = close);
+  wire?.(close);
+  return close;
+}
+function decideDialog(id) {
+  const d = DECISIONS.find(x => x.id === id);
+  dialog(`<h2>Decide: ${esc(d.title)}</h2><div class="decision-q">${esc(d.question)}</div>${d.recommendation ? `<div class="note small"><b>Recommendation.</b> ${esc(d.recommendation)}</div>` : ""}
+    <label class="f">The decision <textarea class="field" id="dec-text" placeholder="One or two sentences. What was decided and why.">${esc(decState(d).decided || "")}</textarea></label>
+    <div class="row"><button class="btn ghost" data-close>Cancel</button><button class="btn gold" id="dec-ok">Record decision</button></div>`, (close) => {
+    $("#dec-ok").onclick = async () => { const v = $("#dec-text").value.trim(); if (!v) return; await writeDecision(id, { status: "decided", decided: v, decided_on: new Date().toISOString().slice(0, 10) }); close(); };
+  });
+}
+function draftFromItem(it) {
+  const s = itemState(it);
+  const wfUrl = it.route ? `https://github.com/${ORG}/${ROADMAP_REPO}/blob/main/${MOCKUP}` + "?product=1&state=loaded" + it.route : null;
+  const body = `## Problem\n\nThe mockup for **${it.title}** shows behaviour the build does not have yet. Build status today: **${statusOf(it)}**${it.plan_lane ? ` (plan lane ${it.plan_lane})` : ""}.\n\n${s.gap_summary || s.summary || ""}\n\n## Gaps\n\n${(it.gaps || []).map(g => `- [ ] ${g}`).join("\n") || "- [ ] (fill in)"}\n${(it.backend_gaps || []).length ? `\n## Backend gaps\n\n${it.backend_gaps.map(g => `- ${g}`).join("\n")}\n` : ""}\n## Spec and design\n\n- Spec: https://github.com/${ORG}/${ROADMAP_REPO}/blob/main/${it.spec_path || ""}\n${wfUrl ? `- Wireframe route: \`${it.route}\` in \`${MOCKUP}\` (open with \`?product=1&state=loaded${it.route}\`)\n` : ""}- Roadmap: this issue is tracked on the Oxagen Roadmap under **${it.title}** (id \`${it.id}\`).\n\n## Done looks like\n\n- The page renders in every state the catalog lists (loaded, empty, loading, error, denied) and matches the page spec check by check.\n- The audit prompt \`mockups/pages/${it.id}.audit-prompt.md\` passes against the build.\n${s.decision_needed ? `\n## Decision needed first\n\n${s.decision_needed}\n` : ""}\nPillar: innovation (closes a gap between the design and the product).`;
+  return { repo: "oxagen", title: `${it.kind === "surface" ? "Build" : "Implement"} ${it.title}: close the mockup gap`, body, labels: ["kind:feature", `area:${it.kind === "surface" ? "app" : it.kind === "witness" ? "evidence" : "app"}`, prioOf(it)], item: it.id };
+}
+function draftFromDecision(d) {
+  const body = `## Decision needed\n\n${d.question}\n\n## Recommendation\n\n${d.recommendation || "(none recorded)"}\n\n## What it blocks\n\n${(d.blocks || []).map(b => `- ${b}`).join("\n") || "- (unknown)"}\n\n## Source\n\n${d.source || ""}\n\nTracked as decision \`${d.id}\` on the Oxagen Roadmap. Record the outcome there once made.\n\nPillar: efficiency (an open decision is idle work).`;
+  return { repo: "oxagen", title: `Decision: ${d.title}`, body, labels: ["needs:decision"], decision: d.id };
+}
+function issueDialog(draft) {
+  const live = !!S.caps.mcp;
+  dialog(`<h2>${live ? "Create a GitHub issue" : "Draft a GitHub issue"}</h2>
+    <div class="row" style="justify-content:flex-start"><label class="f">Repository <select class="field" id="is-repo">${REPOS.map(r => `<option ${draft.repo === r ? "selected" : ""}>${r}</option>`).join("")}</select></label><label class="f" style="flex:1;min-width:200px">Labels (comma separated) <input class="field" id="is-labels" value="${esc((draft.labels || []).join(", "))}"></label></div>
+    <label class="f">Title <input class="field" id="is-title" value="${esc(draft.title)}"></label>
+    <label class="f">Body (Markdown) <textarea class="field" id="is-body" style="min-height:220px">${esc(draft.body)}</textarea></label>
+    ${live ? "" : `<div class="note small">Live creation needs the GitHub connector in claude.ai. <b>Open on GitHub</b> pre-fills a new issue there instead.</div>`}
+    <div class="row"><button class="btn ghost" data-close>Cancel</button><a class="btn ghost" id="is-open" target="_blank" rel="noopener">Open on GitHub ↗</a>${live ? `<button class="btn gold" id="is-ok">Create issue</button>` : ""}</div>`, (close) => {
+    const sync = () => { const r = $("#is-repo").value; $("#is-open").href = `https://github.com/${ORG}/${r}/issues/new?` + new URLSearchParams({ title: $("#is-title").value, body: $("#is-body").value, labels: $("#is-labels").value }); };
+    sync(); ["is-repo","is-title","is-body","is-labels"].forEach(id => $("#" + id).addEventListener("input", sync));
+    if (live) $("#is-ok").onclick = async () => {
+      const btn = $("#is-ok"); btn.disabled = true; btn.textContent = "Creating…";
+      try {
+        const res = await createIssue({ repo: $("#is-repo").value, title: $("#is-title").value, body: $("#is-body").value, labels: $("#is-labels").value.split(",").map(s => s.trim()).filter(Boolean) });
+        if (draft.item && res?.number) await writeOverride(draft.item, { linked_issues: [...(S.overrides[draft.item]?.linked_issues || []), { repo: $("#is-repo").value, number: res.number }] }, `linked ${$("#is-repo").value}#${res.number}`);
+        if (draft.decision && res?.number) await writeDecision(draft.decision, { issue: { repo: $("#is-repo").value, number: res.number } });
+        toast(`Created #${res?.number ?? "?"}`); close(); render();
+      } catch (err) { btn.disabled = false; btn.textContent = "Create issue"; toast("GitHub refused: " + (err.message || err.code)); }
+    };
+  });
+}
+async function createIssue({ repo, title, body, labels }) {
+  const mcp = S.caps.mcp; if (!mcp) throw { code: "not_granted", message: "GitHub connector unavailable" };
+  const r = await mcp.callTool(GH, "issue_write", { method: "create", owner: ORG, repo, title, body, labels }, { cache: false });
+  const p = r.payload && typeof r.payload === "object" ? r.payload : (() => { try { return JSON.parse(r.content?.[0]?.text || "{}"); } catch { return {}; } })();
+  await mcp.invalidate(GH, "list_issues").catch(() => {});
+  logActivity(`Created ${repo}#${p.number}: ${title}`);
+  return p;
+}
+function linkDialog(itemId) {
+  dialog(`<h2>Link an issue</h2><div class="row" style="justify-content:flex-start"><label class="f">Repository <select class="field" id="ln-repo">${REPOS.map(r => `<option ${r === "oxagen" ? "selected" : ""}>${r}</option>`).join("")}</select></label><label class="f">Issue number <input class="field" id="ln-num" type="number" min="1"></label></div>
+    <div class="row"><button class="btn ghost" data-close>Cancel</button><button class="btn" id="ln-ok">Link</button></div>`, (close) => {
+    $("#ln-ok").onclick = async () => { const n = +$("#ln-num").value; if (!n) return; await writeOverride(itemId, { linked_issues: [...(S.overrides[itemId]?.linked_issues || []), { repo: $("#ln-repo").value, number: n }] }, `linked ${$("#ln-repo").value}#${n}`); close(); render(); };
+  });
+}
+async function openComment(btn) {
+  const c = S.caps.comments;
+  const target = btn.closest(".card, .detail, .page-head") || btn;
+  if (!c) { toast("Comments open when this page is viewed in claude.ai."); return; }
+  try { const r = await c.openComposer({ element: target }); if (!r.opened) toast("Finish the comment you already have open first."); }
+  catch (err) { toast(err.code === "unavailable" ? "Commenting is off for this view." : "Could not open the composer."); }
+}
+
+/* ---------- GitHub live data ---------- */
+const watches = [];
+function startGitHub() {
+  const mcp = S.caps.mcp; if (!mcp) { setPill("gh", "off", "GitHub: snapshot"); return; }
+  setPill("gh", "warn", "GitHub: loading");
+  for (const repo of REPOS) {
+    const input = { owner: ORG, repo, state: "OPEN", perPage: 100, orderBy: "UPDATED_AT", direction: "DESC", fields: ["number","title","state","labels","assignees","comments","created_at","updated_at","user"] };
+    const un = mcp.watchTool(GH, "list_issues", input, (ev) => {
+      if (ev.type === "data") {
+        const p = payloadOf(ev.result);
+        S.issues[repo] = { items: p.issues || [], total: p.totalCount ?? (p.issues || []).length, hasNext: !!p.pageInfo?.hasNextPage, cursor: p.pageInfo?.endCursor, storedAt: ev.result.cache?.storedAt || Date.now(), error: null };
+        setPill("gh", "on", "GitHub: live");
+      } else {
+        const e = ev.error; S.issues[repo] = { ...(S.issues[repo] || { items: [] }), error: e };
+        if (["needs_reauth","server_not_connected","blocked_by_policy","approval_required","not_in_manifest"].includes(e.code)) { S.issues[repo].items = []; setPill("gh", "off", "GitHub: " + e.code.replace(/_/g, " ")); }
+        else setPill("gh", "warn", "GitHub: retrying");
+      }
+      if (["now","issues","gaps","witness","done","wireframes"].includes(S.route)) render(); else renderNav();
+    }, { refetchInterval: 120000, cache: { staleTime: 60000 } });
+    watches.push(un);
+  }
+}
+function payloadOf(r) { if (r.payload && typeof r.payload === "object") return r.payload; try { return JSON.parse(r.content?.[0]?.text || "{}"); } catch { return {}; } }
+async function loadOlder(repo) {
+  const mcp = S.caps.mcp, r = S.issues[repo]; if (!mcp || !r?.cursor) return;
+  try {
+    const res = await mcp.callTool(GH, "list_issues", { owner: ORG, repo, state: "OPEN", perPage: 100, orderBy: "UPDATED_AT", direction: "DESC", after: r.cursor, fields: ["number","title","state","labels","assignees","comments","created_at","updated_at","user"] });
+    const p = payloadOf(res); const seen = new Set(r.items.map(i => i.number));
+    r.items = r.items.concat((p.issues || []).filter(i => !seen.has(i.number))); r.hasNext = !!p.pageInfo?.hasNextPage; r.cursor = p.pageInfo?.endCursor; render();
+  } catch (err) { toast(ghErrorCopy(err)); }
+}
+function setPill(which, cls, text) { const p = $("#pill-" + which); p.className = "pill " + cls; p.innerHTML = `<i></i>${esc(text)}`; }
+
+/* ---------- Claude ---------- */
+const CHAT = { turns: lsGet("rm.chat", []), busy: false, ctl: null };
+function saveChat() { lsSet("rm.chat", CHAT.turns.slice(-30)); }
+function toggleDrawer(on) { $("#app").classList.toggle("drawer-open", on); lsSet("rm.drawer", on); if (on) renderChat(); }
+function openDrawer() { if (!$("#app").classList.contains("drawer-open")) toggleDrawer(true); }
+function renderCtx() {
+  const it = S.arg && byId[S.arg]; const ctx = $("#ctx");
+  ctx.innerHTML = `<span>Context:</span>${chip(NAV.find(n => n[0] === S.route)?.[1] || "Now")}${it ? chip(it.title) : ""}${S.route === "wireframes" && S.arg ? chip("wireframe " + S.arg) : ""}`;
+  $("#quick").innerHTML = [
+    ["What next?", "Suggest the five most valuable things to build next, with a one-line reason each."],
+    it ? ["Plan this item", `Write a three-step build plan and a definition-of-done checklist for '${it.title}' (get_item('${it.id}') first).`] : ["Biggest risk", "What is the biggest risk in this roadmap and what would you change?"],
+    ["Unblock", "Which open decision unblocks the most work? Give a recommendation I can record."],
+    ["Spec gaps", "Which open GitHub features have no spec or design backing, and which three should get a design doc first?"],
+  ].map(([l, p]) => `<button class="btn sm ghost" data-ask="${esc(p)}">${esc(l)}</button>`).join("");
+}
+function renderChat() {
+  const m = $("#msgs");
+  m.innerHTML = CHAT.turns.map(t => `<div class="msg ${t.role === "user" ? "user" : "ai"}">${esc(t.content)}${t.tools?.length ? `<div class="tools">${t.tools.map(esc).join(" · ")}</div>` : ""}</div>`).join("") || `<div class="msg ai">Ask about the roadmap, or tell me what to change. I can read every item, update status and priority, record decisions, link issues, and draft GitHub issues for you to confirm. I answer on your Claude account.</div>`;
+  m.scrollTop = m.scrollHeight;
+}
+function overview() {
+  const surf = ITEMS.filter(i => i.kind === "surface");
+  return {
+    generated_at: D.generated_at, repos: REPOS.map(r => `${ORG}/${r}`),
+    counts: { built: surf.filter(i => statusOf(i) === "built").length, partial: surf.filter(i => ["partial","fixtures-only"].includes(statusOf(i))).length, not_started: surf.filter(i => statusOf(i) === "not-started").length, open_decisions: DECISIONS.filter(d => decState(d).status !== "decided").length, live_open_issues: Object.fromEntries(Object.entries(S.issues).map(([r, x]) => [r, x.total ?? x.items?.length])) },
+    items: ITEMS.map(i => ({ id: i.id, kind: i.kind, title: i.title, status: statusOf(i), priority: prioOf(i), scope: i.scope_verdict, lane: i.plan_lane, decision_needed: !!itemState(i).decision_needed })),
+    decisions: DECISIONS.map(d => ({ id: d.id, title: d.title, status: decState(d).status || "open", blocks: d.blocks })),
+    milestones: (D.milestones || []).map(m => ({ id: m.id, title: m.title, surfaces: m.surfaces })),
+  };
+}
+const TOOLS = () => [
+  { name: "get_roadmap_overview", description: "Returns the whole roadmap in compact form: counts, every item with id, kind, status and priority, every decision with status, the milestones, and live open-issue counts. Call it first when a question needs the big picture.", execute: () => overview() },
+  { name: "get_item", description: "Returns one roadmap item in full (gap summary, gaps, backend gaps, spec path, wireframe route, evidence, shared notes, linked issues with live state). Input: {id}.", inputSchema: { type: "object", properties: { id: { type: "string" } }, required: ["id"] },
+    execute: ({ id }) => { const it = byId[String(id)]; if (!it) throw new Error("No item with id " + id + ". Ids come from get_roadmap_overview."); const s = itemState(it); return { ...s, linked_issues: linksOf(it).map(l => ({ ...l, live: liveIssue(l.repo, l.number) ? { title: liveIssue(l.repo, l.number).title, state: liveIssue(l.repo, l.number).state } : null })) }; } },
+  { name: "update_item", description: "Changes a roadmap item's shared status, priority, owner or note (any subset). Status is one of not-started, fixtures-only, partial, built; priority P0..P3. Returns ok. Use only when the viewer asked for a change.", inputSchema: { type: "object", properties: { id: { type: "string" }, status: { type: "string" }, priority: { type: "string" }, owner: { type: "string" }, note: { type: "string" } }, required: ["id"] },
+    execute: async ({ id, status, priority, owner, note }) => { const it = byId[String(id)]; if (!it) throw new Error("No item " + id); const patch = {}; if (status) patch.built_status = String(status); if (priority) patch.priority = String(priority); if (owner != null) patch.owner = String(owner); if (note != null) patch.note = String(note); await writeOverride(it.id, patch, "updated by Claude: " + Object.keys(patch).join(", ")); render(); return { ok: true, item: itemState(it) }; } },
+  { name: "record_decision", description: "Records the outcome of a decision by id (from get_roadmap_overview) and marks it decided. Input: {id, decision}. Use only when the viewer asked to record it.", inputSchema: { type: "object", properties: { id: { type: "string" }, decision: { type: "string" } }, required: ["id","decision"] },
+    execute: async ({ id, decision }) => { const d = DECISIONS.find(x => x.id === String(id)); if (!d) throw new Error("No decision " + id); await writeDecision(d.id, { status: "decided", decided: String(decision), decided_on: new Date().toISOString().slice(0, 10) }); return { ok: true }; } },
+  { name: "list_open_issues", description: "Returns open GitHub issues already loaded on the page for a repo (product-roadmap, oxagen or stella): number, title, labels, triage theme, whether a spec backs it, updated date. Optional text filter. Up to 60 results, no network call.", inputSchema: { type: "object", properties: { repo: { type: "string" }, filter: { type: "string" } }, required: ["repo"] },
+    execute: ({ repo, filter }) => { const r = S.issues[String(repo)]; const src = r?.items?.length ? r.items : Object.entries(ANN).filter(([k]) => k.startsWith(repo + "#")).map(([k, a]) => ({ number: +k.split("#")[1], title: a.title, labels: a.labels, updated_at: a.updatedAt, snapshot: true })); const q = (filter || "").toLowerCase(); return src.filter(i => !q || (i.title || "").toLowerCase().includes(q)).slice(0, 60).map(i => { const a = ANN[issueKey(repo, i.number)]; return { number: i.number, title: i.title, labels: (i.labels || []).map(l => l.name || l), theme: a?.theme, spec_backed: a?.has_spec_backing, kind: a?.kind, updated: i.updated_at, snapshot: !!i.snapshot }; }); } },
+  { name: "link_issue", description: "Links an existing GitHub issue to a roadmap item so it shows on the card. Input: {item_id, repo, number}.", inputSchema: { type: "object", properties: { item_id: { type: "string" }, repo: { type: "string" }, number: { type: "number" } }, required: ["item_id","repo","number"] },
+    execute: async ({ item_id, repo, number }) => { const it = byId[String(item_id)]; if (!it) throw new Error("No item " + item_id); await writeOverride(it.id, { linked_issues: [...(S.overrides[it.id]?.linked_issues || []), { repo: String(repo), number: Number(number) }] }, `linked ${repo}#${number}`); render(); return { ok: true }; } },
+  { name: "create_issue", description: "Drafts a GitHub issue and opens it for the viewer to confirm and create; nothing is created until they click. Input: {repo, title, body (Markdown), labels (array), item_id (optional roadmap item to link)}. Returns whether the viewer created it and the issue number.", inputSchema: { type: "object", properties: { repo: { type: "string" }, title: { type: "string" }, body: { type: "string" }, labels: { type: "array", items: { type: "string" } }, item_id: { type: "string" } }, required: ["repo","title","body"] },
+    execute: ({ repo, title, body, labels, item_id }) => new Promise((resolve) => {
+      const before = (S.overrides[item_id]?.linked_issues || []).length;
+      issueDialog({ repo: String(repo), title: String(title), body: String(body), labels: Array.isArray(labels) ? labels.map(String) : [], item: item_id ? String(item_id) : undefined });
+      const d = $("#dlg"); const onClose = () => { d.removeEventListener("close", onClose); const links = S.overrides[item_id]?.linked_issues || []; resolve(links.length > before ? { created: true, ...links[links.length - 1] } : { created: false, note: "The viewer closed the dialog without creating it, or no item was linked." }); }; d.addEventListener("close", onClose);
+    }) },
+];
+function instructions() {
+  const it = S.arg && byId[S.arg];
+  return `You are the product-management partner bound to the Oxagen Roadmap page. Oxagen is Mission Control for an autonomous agent workforce; this page tracks the gap between the Mission Control mockups (the spec) and the oxagen build, plus the witness (proof) and definition-of-done features, open decisions, and live GitHub issues in ${ORG}/oxagen, ${ORG}/stella and ${ORG}/product-roadmap.
+Voice: plain, specific, unhurried, a senior engineer who read the logs. No em dashes. Sentence case. Never strengthen a claim past the evidence. Say what you would do and why, then stop.
+You have tools. Read before you write: call get_roadmap_overview or get_item before making claims about an item. Only change data (update_item, record_decision, link_issue) when the viewer clearly asked for that change; otherwise propose it and ask. create_issue only opens a confirmation dialog, so you may use it freely when asked to draft an issue; write the body as a handoff: problem, spec paths, wireframe route, gaps as a checklist, what done looks like, and which pillar it moves (stability, reliability, maintainability, innovation, efficiency, performance).
+Keep answers under 250 words unless asked for a document. Use short lists. Reference items by title and id.
+Page context right now: route "${S.route}"${it ? `, focused item "${it.title}" (id ${it.id}, status ${statusOf(it)}, priority ${prioOf(it)})` : ""}.
+Overview (JSON): ${JSON.stringify(overview()).slice(0, 14000)}`;
+}
+async function askClaude(text) {
+  const sample = S.caps.sample;
+  if (!sample) { toast("Claude answers when this page is open in claude.ai."); return; }
+  if (CHAT.busy) { toast("Wait for the current answer, or press Stop."); return; }
+  CHAT.turns.push({ role: "user", content: text }); saveChat(); renderChat();
+  CHAT.busy = true; CHAT.ctl = new AbortController(); $("#stop-btn").hidden = false; $("#send-btn").disabled = true; $("#chat-status").innerHTML = '<span class="spin"></span> Thinking';
+  const bubble = el(`<div class="msg ai thinking">Thinking…</div>`); $("#msgs").append(bubble); $("#msgs").scrollTop = 1e9;
+  const used = []; const tools = TOOLS().map(t => ({ ...t, execute: async (i, c) => { used.push(t.name); $("#chat-status").textContent = "Using " + t.name; return t.execute(i, c); } }));
+  const turns = [{ role: "user", content: instructions() }, ...CHAT.turns.slice(-12).map(t => ({ role: t.role, content: t.content }))];
+  const tier = $("#tier").value;
+  let caps = null; try { caps = await sample.limits(); } catch {}
+  try {
+    const res = await sample(turns, { modelTier: tier, cache: false, signal: CHAT.ctl.signal, tools: caps?.tools ? tools : undefined, onText: ({ text }) => { bubble.classList.remove("thinking"); bubble.textContent = text; $("#msgs").scrollTop = 1e9; } });
+    CHAT.turns.push({ role: "assistant", content: res.text + (res.truncated ? "\n\n(Cut short. Ask for less at a time.)" : ""), tools: used }); saveChat();
+    if (res.modelTierApplied !== tier) toast(`Answered on the ${res.modelTierApplied} tier`);
+  } catch (e) {
+    const keep = e.text || "";
+    const copy = { not_granted: "You have not allowed this page to use Claude. Allow it from the page's prompt.", sampling_disabled: "Claude is not available on this account.", rate_limited: "Too many requests right now. Try again in a minute.", refused: "Claude declined that request. Rephrase it.", cancelled: "", upstream_error: "The connection dropped. Try again.", tools_unavailable: "Page tools are not available in this view; plain questions still work.", prompt_too_large: "Too much context. Ask about a narrower part of the roadmap." }[e.code] ?? ("Could not answer: " + (e.message || e.code));
+    if (keep || copy) { CHAT.turns.push({ role: "assistant", content: (keep ? keep + "\n\n" : "") + copy, tools: used }); saveChat(); }
+    if (["not_granted","sampling_disabled","not_declared","capability_disabled"].includes(e.code)) setPill("ai", "off", "Claude: off");
+  } finally { CHAT.busy = false; $("#stop-btn").hidden = true; $("#send-btn").disabled = false; $("#chat-status").textContent = ""; renderChat(); }
+}
+$("#send-btn").onclick = () => { const v = $("#chat-in").value.trim(); if (!v) return; $("#chat-in").value = ""; askClaude(v); };
+$("#chat-in").addEventListener("keydown", (e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) $("#send-btn").click(); });
+$("#stop-btn").onclick = () => CHAT.ctl?.abort();
+
+/* ---------- boot ---------- */
+async function boot() {
+  const th = lsGet("rm.theme", ""); if (th) document.documentElement.setAttribute("data-theme", th);
+  $("#tier").value = lsGet("rm.tier", "complex");
+  S.overrides = lsGet("rm.overrides", {}); S.decided = lsGet("rm.decided", {});
+  parseHash(); render();
+  if (lsGet("rm.drawer", false)) toggleDrawer(true);
+  const use = (n) => (window.claude?.use ? window.claude.use(n) : Promise.resolve(null)).catch(() => null);
+  const [db, mcp, sample, comments, user] = await Promise.all([use("db"), use("mcp"), use("sample"), use("comments"), use("user")]);
+  Object.assign(S.caps, { db, mcp, sample, comments, user, ready: true });
+  if (user) { try { S.uid = await user.id(); } catch {} }
+  if (mcp) { try { const { servers } = await mcp.listTools(); const gh = servers.find(x => /github/i.test(x.server)); if (gh) GH = gh.server; } catch {} }
+  setPill("ai", sample ? "on" : "off", sample ? "Claude: ready" : "Claude: off");
+  if (db) {
+    setPill("db", "warn", "store: syncing");
+    S.overrides = {}; S.decided = {};
+    db.collection("overrides").onSnapshot((snap) => { S.overrides = {}; snap.docs.forEach(d => { if (d.exists) S.overrides[d.id] = d.data(); }); setPill("db", "on", "store: shared"); render(); }, (e) => setPill("db", "off", "store: " + e.code));
+    db.collection("decisions").onSnapshot((snap) => { S.decided = {}; snap.docs.forEach(d => { if (d.exists) S.decided[d.id] = d.data(); }); render(); }, () => {});
+    db.collection("activity").orderBy("ts", "desc").limit(50).onSnapshot((snap) => { S.activity = snap.docs.map(d => d.data()); if (S.route === "now") render(); }, () => {});
+  } else setPill("db", "off", "store: this browser");
+  startGitHub();
+  render();
+}
+boot();
+})();
+</script>
