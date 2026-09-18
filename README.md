@@ -63,7 +63,17 @@ Environment variables: `BLOB_READ_WRITE_TOKEN` (set by `vercel blob create-store
 
 ### Refreshing the content
 
-`roadmap/data.json` is the roadmap's content. It was assembled on 2026-09-17 from a page-by-page comparison of `mockups/pages/*.md` against `apps/app` in `macanderson/oxagen`, the witness and DoD specs, the plan's open decisions, and a triage of every open issue in `macanderson/oxagen` and `macanderson/stella`. To refresh it, redo that comparison (an agent session with both repos checked out does it in minutes) and write the same shape; then `node tools/build-roadmap.mjs` and republish the artifact. Overrides made in the app live in the shared store and survive a rebuild.
+The roadmap has two layers, and the shared store sits on top of both:
+
+1. **`roadmap/data.json`, written by people.** The page-by-page comparison of `mockups/pages/*.md` against `apps/app`, the gaps, the recommendations, the milestones. Redo that comparison when the plan itself changes (an agent session with both repos checked out does it in minutes), then `node tools/build-roadmap.mjs` and deploy.
+2. **`roadmap/refresh.json`, written by GitHub Actions every fifteen minutes.** `.github/workflows/refresh-roadmap.yml` runs `node tools/refresh-roadmap.mjs`, which reads only what changed since its last run (four API calls on a quiet quarter hour) and records:
+   - the state, labels and closing references of every issue and pull request in `oxagen`, `stella` and this repo;
+   - for each surface, witness and DoD feature, the merged pull requests that touched its evidence or closed its linked issues, and whether the page for its route exists in `apps/app`;
+   - a status moved **forward only, and only on proof**: not started → partial when its page appears or a merge closes a linked issue; partial → built when every linked issue and every issue its gaps cite is closed. When the gaps cite no issue it flags the item "ready for review" and a person decides;
+   - decisions settled by an ADR that landed after `data.json` was written, or by the close of the issue a decision was opened as; ADRs that match no open decision appear as new decided ones, and every open `needs:decision` issue appears as an open one;
+   - each milestone's open linked issues, merges and last merge.
+
+The page reads `refresh.json` from `raw.githubusercontent.com` on load and every five minutes, so a refresh is live without a deploy. The rules live in `tools/lib/refresh-rules.mjs` and `node tools/check-refresh.mjs` proves them. A person's override in the app always wins over both layers. Run `npm run refresh` locally, or the workflow with `full` set, to rebuild the file from scratch; rewriting `data.json` moves the baseline and the refresh starts counting from it.
 
 ## The master
 

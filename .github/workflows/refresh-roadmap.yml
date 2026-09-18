@@ -1,0 +1,46 @@
+# Every fifteen minutes, read what changed in macanderson/oxagen, stella and roadmap since the last
+# run and fold it into roadmap/refresh.json: issue and PR state, merges on each item's evidence,
+# status moved forward on proof, decisions settled by an ADR or a closed issue, decisions raised by
+# `needs:decision` issues, and milestone progress. The page reads the file straight from main, so a
+# commit here is live within minutes, with no deploy. A run that finds nothing commits nothing.
+name: refresh-roadmap
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+    inputs:
+      full:
+        description: "Forget the watermarks and read everything again"
+        type: boolean
+        default: false
+  repository_dispatch:
+    types: [oxagen-merged]
+permissions:
+  contents: write
+concurrency:
+  group: refresh-roadmap
+  cancel-in-progress: false
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Refresh from GitHub (delta since the last run)
+        run: node tools/refresh-roadmap.mjs ${{ inputs.full && '--full' || '' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.ROADMAP_READ_TOKEN || github.token }}
+      - name: Check the rules and the file's shape
+        run: node tools/check-refresh.mjs
+      - name: Commit when something moved
+        run: |
+          git diff --quiet -- roadmap/refresh.json && { echo "nothing moved"; exit 0; }
+          git config user.name "roadmap-refresh[bot]"
+          git config user.email "roadmap-refresh@users.noreply.github.com"
+          git add roadmap/refresh.json
+          git commit -m "refresh: roadmap state from GitHub, $(date -u +%Y-%m-%dT%H:%MZ)"
+          for i in 1 2 3; do git pull --rebase -q origin main && git push -q origin HEAD:main && exit 0; sleep 5; done
+          exit 1
