@@ -7,7 +7,7 @@ export default {
   title: "Mission Control/Workspace/Skill source",
   tags: ["autodocs"],
   argTypes,
-  args: { shell: "desktop", theme: "system", product: true, hash: "#/a-intel/core-platform/skills/a-intel.release-notes-from-prs/source" },
+  args: { shell: "desktop", theme: "system", product: true, hash: "#/a-intel/core-platform/steering/skills/a-intel.release-notes-from-prs/source" },
   parameters: { docs: { description: { component: spec } } },
   render: view,
 };

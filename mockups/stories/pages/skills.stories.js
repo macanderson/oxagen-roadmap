@@ -4,10 +4,10 @@ import { view, argTypes } from "../_view.js";
 import spec from "../../pages/skills.md?raw";
 
 export default {
-  title: "Mission Control/Workspace/Skills",
+  title: "Mission Control/Workspace/Steering · Skills",
   tags: ["autodocs"],
   argTypes,
-  args: { shell: "desktop", theme: "system", product: true, hash: "#/a-intel/core-platform/skills" },
+  args: { shell: "desktop", theme: "system", product: true, hash: "#/a-intel/core-platform/steering/skills" },
   parameters: { docs: { description: { component: spec } } },
   render: view,
 };

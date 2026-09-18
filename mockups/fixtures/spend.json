@@ -341,7 +341,7 @@
      "failed"
     ]
    ],
-   "what": "Arrived through harness telemetry with no gateway request ids. No prefix cache was possible and no witness could run; nothing here is provable."
+   "what": "Arrived from an observe tier agent with no provider request ids. No prefix cache was possible and no witness could run; nothing here is provable."
   },
   {
    "run": "run_01K5RN8F3J2GHY6T",

@@ -1,0 +1,83 @@
+{
+ "budget": {
+  "sessionStartBytes": 16384,
+  "bytesPerTok": 4,
+  "volatileTok": 430,
+  "compileHeaderTok": 38
+ },
+ "instructions": [
+  {
+   "id": "ins.finops.additional",
+   "lineage": "ins.finops.additional",
+   "kind": "instruction",
+   "force": "should",
+   "scope": "workspace",
+   "ws": "finops",
+   "body": "Quote every amount with its currency and its purchase order. Never round.",
+   "token_cost": 19,
+   "about": [
+    "invoice",
+    "payment",
+    "amount",
+    "purchase",
+    "order"
+   ],
+   "provenance": "workspace settings · additional instructions · edited by Dana Okafor",
+   "hash": "sha256:f19a60c7d2e4b853",
+   "valid_from": "2026-08-30"
+  }
+ ],
+ "prompts": [
+  {
+   "id": "release-notes",
+   "text": "Cut the 4.11.0 release notes"
+  },
+  {
+   "id": "merge-green",
+   "text": "CI is green, merge the release pull request"
+  },
+  {
+   "id": "flaky-safari",
+   "text": "Label the flaky checkout e2e test on Safari"
+  },
+  {
+   "id": "ledger-migration",
+   "text": "Plan the ledger entries migration for billing"
+  },
+  {
+   "id": "cli-style",
+   "text": "Tighten the CLI reference style guide"
+  },
+  {
+   "id": "pay-invoice",
+   "text": "Pay the September AWS invoice"
+  }
+ ],
+ "agents": [
+  {
+   "slug": "release-manager",
+   "repo": "a-intel/platform",
+   "prompt": "release-notes"
+  },
+  {
+   "slug": "stella-ci",
+   "repo": "a-intel/platform",
+   "prompt": "flaky-safari"
+  },
+  {
+   "slug": "triage",
+   "repo": "a-intel/platform",
+   "prompt": "flaky-safari"
+  },
+  {
+   "slug": "docs-writer",
+   "repo": "a-intel/platform",
+   "prompt": "cli-style"
+  },
+  {
+   "slug": "invoice-bot",
+   "repo": "a-intel/billing",
+   "prompt": "pay-invoice"
+  }
+ ]
+}

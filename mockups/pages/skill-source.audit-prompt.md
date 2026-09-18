@@ -6,21 +6,21 @@ unless told to in a second turn.
 
 ---
 
-You are auditing the **Skill source** page of Oxagen Mission Control (`#/a-intel/core-platform/skills/<id>/source`) for conformance to its design. Be exact and adversarial: the design is the spec, and “close enough” is a fail. Do not summarise what you see; compare it.
+You are auditing the **Skill source** page of Oxagen Mission Control (`#/a-intel/core-platform/steering/skills/<id>/source`) for conformance to its design. Be exact and adversarial: the design is the spec, and “close enough” is a fail. Do not summarise what you see; compare it.
 
 ## Inputs
 
 1. The page spec: `pages/skill-source.md` (read it first, in full).
 2. The design, rendered: the `skill-source` stories in Storybook (`npm run storybook`), one per state, desktop and mobile; or `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>`.
 3. Context: `docs/w13-in-the-loop-scenario.md`, `docs/creation-spec.md` §4, and the Skills page spec `pages/skills.md`.
-4. The build under audit: `{{APP_ROOT}}`, served at `{{APP_URL}}`. Route under audit: `/a-intel/core-platform/skills/<id>/source`.
+4. The build under audit: `{{APP_ROOT}}`, served at `{{APP_URL}}`. Route under audit: `/a-intel/core-platform/steering/skills/<id>/source`.
 
 ## Procedure
 
 Work through every check. For each, record PASS, FAIL, or N/A (with why). Cite evidence: a file and line in the build, a screenshot path, or a DOM selector and its text.
 
 1. **Route and shell.** The build serves the route for every catalog skill whose state is `ok`; the shell matches; the breadcrumb ends on this page. The skill id may contain dots — verify a dotted id routes rather than 404s.
-2. **Header.** Eyebrow “Skills · source”, Skills links back to the catalog, h1 is the file path in mono. Chips, in order: source label, `@version`, digest prefix, resolution tier, load cost in tokens. Actions: Back to the catalog · Discard · Propose a change. Exactly one gold action.
+2. **Header.** Eyebrow “Steering · Skills · source”, the link goes back to the Skills tab of Steering, h1 is the file path in mono. Chips, in order: source label, `@version`, digest prefix, resolution tier, load cost in tokens. Actions: Back to the catalog · Discard · Propose a change. Exactly one gold action.
 3. **The editor.** A real editor, not a textarea with a monospace font: line-number gutter whose count equals the file’s line count, markdown highlighting that treats the frontmatter block as its own grammar (assert highlight spans inside and outside the `---` fences differ), a current-line band, Find ⌘F with a match count, and a status line with Ln/Col, the grammar, a line and character count.
 4. **The file is the file.** Read the textarea’s value. It must be text, not markup — a `<span` anywhere in it is a FAIL — and it must begin with the frontmatter fence. Round-trip: type a line, discard, and assert the original bytes come back.
 5. **Version bump.** Modify the body and open Propose a change. The dialog names the current version and the next patch version, and the checks say a changed body with an unchanged version fails. A build that bumps silently after the merge, or not at all, is a FAIL.

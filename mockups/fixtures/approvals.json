@@ -19,7 +19,7 @@
   "waited": "4m 12s",
   "timeout": "10m",
   "tainted": false,
-  "tier": "gateway",
+  "tier": "harness",
   "parkedAt": "09:31:08Z",
   "approvers": "role:org.billing — Marcus Bell, Priya Natarajan · Dana Okafor is the operator of this run and is excluded by fin.no_self_approval",
   "rules": [
@@ -70,7 +70,7 @@
   "waited": "47s",
   "timeout": "10m",
   "tainted": false,
-  "tier": "gateway",
+  "tier": "harness",
   "parkedAt": "09:14:51Z",
   "approvers": "role:workspace.owner — Marcus Bell, Priya Natarajan",
   "rules": [

@@ -4,7 +4,7 @@
  "op": "marcus",
  "ws": "core-platform",
  "harness": "Claude Code",
- "tier": "gateway",
+ "tier": "harness",
  "cost": "0.18",
  "repo": "a-intel/edge-proxy",
  "remote": "github.com/a-intel/edge-proxy",
