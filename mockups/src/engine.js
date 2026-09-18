@@ -6183,6 +6183,13 @@ function oxprOpen(){return wsOxprs().filter(function(p){return p.state!=="merged
 function oxprById(id){for(var i=0;i<OXPRS.length;i++){if(OXPRS[i].id===id)return OXPRS[i];}return null;}
 function copyById(id){for(var i=0;i<WORKCOPIES.length;i++){if(WORKCOPIES[i].id===id)return WORKCOPIES[i];}return null;}
 function repoByName(n){for(var i=0;i<REPOS.length;i++){if(REPOS[i].n===n)return REPOS[i];}return null;}
+/* A row that only answers a click is a row a keyboard cannot reach, and this page's own rules
+   say it must be operable end to end. The engine's older tables use a bare `class="click"`; these
+   three do not, and the helper is here rather than inline so they cannot drift apart. */
+function rowClick(on,label){
+  return 'class="click" tabindex="0" role="button" aria-label="'+h(label)+'"'+
+   ' onclick="'+on+'" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();'+on+'}"';
+}
 function stBadge(m){return '<span class="b '+m.b+'"><span class="d"></span>'+h(m.l)+'</span>';}
 
 /* The file the init pull request carries. It is written out here rather than interpolated into a
@@ -6229,7 +6236,7 @@ function repoTab(){
 
   var trows=rows.map(function(r){
     var st=oxState(r), avail=r.role==="available";
-    return '<tr class="click" onclick="openDialog(\'repo\',\''+h(r.n)+'\')">'+
+    return '<tr '+rowClick("openDialog('repo','"+h(r.n)+"')","Open "+r.n)+'>'+
      '<td><span class="row-ic">'+icon("repo")+'</span><b class="mono">'+h(r.n)+'</b>'+
        (repoMeta(r)?'<div class="dim" style="font-size:11px;margin-top:2px">'+h(repoMeta(r))+'</div>':'')+'</td>'+
      '<td>'+(r.role==="main"?'<span class="b b-proven">main</span>':r.role==="linked"?'<span class="b b-q">linked</span>':'<span class="b b-q" style="opacity:.7">not linked</span>')+'</td>'+
@@ -6276,7 +6283,7 @@ function copyTab(){
   var stale=rows.filter(function(c){return c.oxagen!=="in-sync";});
   var trows=rows.map(function(c){
     var st=WC_STATE[c.oxagen]||WC_STATE.unbound;
-    return '<tr class="click" onclick="openDialog(\'workcopy\',\''+h(c.id)+'\')">'+
+    return '<tr '+rowClick("openDialog('workcopy','"+h(c.id)+"')","Open "+c.path+" on "+c.machine)+'>'+
      '<td><span class="row-ic">'+icon("dir")+'</span><b class="mono">'+h(c.path)+'</b>'+
        '<div class="dim" style="font-size:11px;margin-top:2px">'+h(c.machine)+' · '+h(c.person)+'</div></td>'+
      '<td class="mono" style="font-size:12px">'+h(c.repo)+'</td>'+
@@ -6325,7 +6332,7 @@ function chgTab(){
   var trows=rows.map(function(p){
     var k=OXPR_KIND[p.kind]||OXPR_KIND.config, st=PR_STATE[p.state]||PR_STATE.open;
     var pass=p.checks.filter(function(c){return c[1]==="pass";}).length;
-    return '<tr class="click" onclick="S.oxprSel=\''+h(p.id)+'\';render()">'+
+    return '<tr '+rowClick("S.oxprSel='"+h(p.id)+"';render()","Open "+p.title)+'>'+
      '<td><span class="row-ic">'+icon(k.i)+'</span><b>'+h(p.title)+'</b>'+
        '<div class="dim mono" style="font-size:11px;margin-top:2px">'+h(p.branch)+'</div></td>'+
      '<td><span class="b b-q">'+h(k.l)+'</span></td>'+
@@ -6347,11 +6354,20 @@ function chgTab(){
    '<div class="note" style="margin-top:12px">Drift is reported, never repaired in place. A reconciler that silently edited either side would make the file a description of the past and the product unreviewable — the pull request is the only place a person can say which of the two was right.</div></div></div>';
 }
 
+/* Merge is enabled only when every check has reported, none failed, and the pull request is not
+   already merged. The detail view computed this inline while the page header separately assumed
+   that *any* selected change supplied a gold action — so selecting a running, failed or merged
+   one demoted the header for a primary that was never rendered, and the screen had none. Same
+   shape as the stale-selection bug: two readers of one fact, only one of them right. */
+function oxprCanMerge(p){
+  return !!p&&p.state!=="merged"
+    &&p.checks.every(function(c){return c[1]==="pass"||c[1]==="fail";})
+    &&!p.checks.some(function(c){return c[1]==="fail";});
+}
 function oxprDetail(p){
   var k=OXPR_KIND[p.kind]||OXPR_KIND.config, st=PR_STATE[p.state]||PR_STATE.open;
   var failed=p.checks.filter(function(c){return c[1]==="fail";});
-  var done=p.checks.every(function(c){return c[1]==="pass"||c[1]==="fail";});
-  var canMerge=done&&!failed.length&&p.state!=="merged";
+  var canMerge=oxprCanMerge(p);
   return '<div class="panel"><div class="panel-h">'+
    '<button class="btn sm" onclick="S.oxprSel=null;render()">← All changes</button>'+
    '<h3 style="margin-left:10px">'+h(p.title)+'</h3><span class="sp">'+stBadge(st)+'</span></div>'+
@@ -6461,7 +6477,8 @@ function pRepos(){
 
   var body=t==="copies"?copyTab():t==="changes"?chgTab():t==="config"?cfgTab():repoTab();
   /* the page header gives up the gold when the tab below holds the one primary action */
-  var tabPrimary=(t==="changes"&&!!selectedOxpr())||t==="copies";
+  /* Give up the header's gold only where the tab below actually renders an enabled one. */
+  var tabPrimary=(t==="changes"&&oxprCanMerge(selectedOxpr()))||t==="copies";
   return '<div class="phead"><div class="t"><p class="eyebrow">Workspace · '+h(w.name)+'</p><h1>Repositories</h1>'+
    '<p>Where this workspace’s files live, who has them on disk, and every change Oxagen has proposed to them. The record mirrors what git holds; git decides what is in force.</p></div>'+
    '<div class="acts"><button class="btn'+(tabPrimary?'':' primary')+'" onclick="wzOpen(\'init\')">Add Oxagen to a repository</button></div></div>'+tabs+body;
@@ -11392,7 +11409,11 @@ DLG_EXT.workcopy=function(){
 
 /* ---- one repository ---- */
 DLG_EXT.repo=function(){
-  var r=repoByName(S.dlgArg); if(!r) return {t:"Repository",w:false,b:"",f:'<button class="btn" onclick="closeDialog()">Close</button>'};
+  /* Through wsRepos(), not REPOS: a workspace's main repo may have no fixture row, and the row
+     the operator just clicked came from wsRepos() — looking it up anywhere else opens an empty
+     dialog for the one repository the page is most about. */
+  var r=wsRepos().filter(function(x){return x.n===S.dlgArg;})[0]||repoByName(S.dlgArg);
+  if(!r) return {t:"Repository",w:false,b:"",f:'<button class="btn" onclick="closeDialog()">Close</button>'};
   var w=ws(), st=oxState(r), gov=(r.ox||"governed")==="governed", avail=r.role==="available";
   var copies=WORKCOPIES.filter(function(c){return c.repo===r.n;});
   return {t:r.n, s:(r.n===w.main?"main repo":avail?"not linked to this workspace":"linked repo")+" · "+r.lang, w:false,
