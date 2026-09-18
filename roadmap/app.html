@@ -332,7 +332,7 @@ const PAGES = {
         <div class="stat"><div class="v">${built}</div><div class="l">built</div><div class="s">${partial} partial · ${fix} on fixtures</div></div>
         <div class="stat"><div class="v">${ns}</div><div class="l">not started</div><div class="s">${surf.filter(i => prioOf(i) === "P0" && statusOf(i) !== "built").length} are P0</div></div>
         <div class="stat"><div class="v">${openDec.length}</div><div class="l">decisions open</div><div class="s">${DECISIONS.length - openDec.length} decided</div></div>
-        <div class="stat"><div class="v">${S.caps.mcp ? (live.length ? liveOpen : '<span class="spin"></span>') : Object.keys(ANN).length}</div><div class="l">open issues${S.caps.mcp ? "" : " (snapshot)"}</div><div class="s">${live.map(([r, x]) => `${r} ${x.total ?? x.items?.length ?? "…"}`).join(" · ") || (D.issue_snapshot_date ? "as of " + D.issue_snapshot_date : "")}</div></div>
+        <div class="stat"><div class="v">${S.caps.mcp && !S.ghDown ? (live.length ? liveOpen : '<span class="spin"></span>') : Object.keys(ANN).length}</div><div class="l">open issues${S.caps.mcp && !S.ghDown ? "" : " (snapshot)"}</div><div class="s">${(!S.ghDown && live.map(([r, x]) => `${r} ${x.total ?? x.items?.length ?? "…"}`).join(" · ")) || (D.issue_snapshot_date ? "as of " + D.issue_snapshot_date : "")}</div></div>
         <div class="stat"><div class="v">${unbacked.length}</div><div class="l">features without a spec</div><div class="s">need a design doc first</div></div>
       </div>
       <div class="section" style="margin-top:0;border-top:0;padding-top:0"><h2>Build progress</h2>
@@ -388,7 +388,7 @@ const PAGES = {
     const f = S.ui.filters;
     const repo = f.repo || "oxagen";
     const r = S.issues[repo];
-    const live = !!S.caps.mcp;
+    const live = !!S.caps.mcp && !S.ghDown;
     let rows = live ? (r?.items || []) : Object.entries(ANN).filter(([k]) => k.startsWith(repo + "#")).map(([k, a]) => ({ number: +k.split("#")[1], title: a.title, labels: a.labels || [], updated_at: a.updatedAt, state: "OPEN", snapshot: true }));
     const themes = [...new Set(Object.values(ANN).map(a => a.theme).filter(Boolean))].sort();
     rows = rows.map(i => ({ ...i, ann: ANN[issueKey(repo, i.number)] }));
@@ -398,7 +398,7 @@ const PAGES = {
     if (f.iq) { const q = f.iq.toLowerCase(); rows = rows.filter(i => (i.title || "").toLowerCase().includes(q) || String(i.number).includes(q)); }
     const linkedTo = {}; for (const it of ITEMS) for (const l of linksOf(it)) if (l.repo === repo) (linkedTo[l.number] ||= []).push(it);
     return `<div class="page-head"><div><div class="eyebrow">${live ? "Live from GitHub" : "Snapshot"}</div><h1>Issues</h1></div>
-      <p class="lead">${live ? `Open issues in ${esc(ORG)}/${esc(repo)}, the 100 most recently updated, refreshed every two minutes through your GitHub connector. ${r?.storedAt ? "Last updated " + ago(new Date(r.storedAt).toISOString()) + "." : ""}` : "Open this page in claude.ai with the GitHub connector for live status. This is the triage snapshot" + (D.issue_snapshot_date ? " from " + esc(D.issue_snapshot_date) : "") + "."}</p>
+      <p class="lead">${live ? `Open issues in ${esc(ORG)}/${esc(repo)}, the 100 most recently updated, refreshed every two minutes through your GitHub connector. ${r?.storedAt ? "Last updated " + ago(new Date(r.storedAt).toISOString()) + "." : ""}` : (S.ghDown ? ghErrorCopy(S.ghDown) + " Until then this is the triage snapshot" : "Open this page in claude.ai with the GitHub connector for live status. This is the triage snapshot") + (D.issue_snapshot_date ? " from " + esc(D.issue_snapshot_date) : "") + "."}</p>
       <div class="actions"><button class="btn" id="new-issue">New issue</button>${live ? `<button class="btn ghost" id="refresh-issues">Refresh</button>` : ""}</div></div>
       ${r?.error ? `<div class="banner">${esc(ghErrorCopy(r.error))}</div>` : ""}
       <div class="filters">
@@ -512,7 +512,7 @@ function activityList() {
 function ghErrorCopy(e) {
   const c = e?.code || "";
   if (c === "needs_reauth") return "GitHub needs to be reconnected. Open claude.ai Settings → Connectors and reconnect GitHub.";
-  if (c === "server_not_connected") return "Add the GitHub connector in claude.ai Settings → Connectors to see live issues.";
+  if (c === "server_not_connected") return "Add the GitHub MCP server as a connector named GitHub in claude.ai (Settings → Connectors → Add custom, URL https://api.githubcopilot.com/mcp/) to see live issues and create them from here.";
   if (c === "not_in_manifest") return "This page was not allowed to use GitHub for this view. Allow it from the page's connector prompt.";
   if (c === "server_unavailable") return "GitHub did not answer in time. Showing the last good data; it will retry.";
   return "GitHub could not be read: " + (e?.message || c);
@@ -678,10 +678,10 @@ function startGitHub() {
       if (ev.type === "data") {
         const p = payloadOf(ev.result);
         S.issues[repo] = { items: p.issues || [], total: p.totalCount ?? (p.issues || []).length, hasNext: !!p.pageInfo?.hasNextPage, cursor: p.pageInfo?.endCursor, storedAt: ev.result.cache?.storedAt || Date.now(), error: null };
-        setPill("gh", "on", "GitHub: live");
+        S.ghDown = null; setPill("gh", "on", "GitHub: live");
       } else {
         const e = ev.error; S.issues[repo] = { ...(S.issues[repo] || { items: [] }), error: e };
-        if (["needs_reauth","server_not_connected","blocked_by_policy","approval_required","not_in_manifest"].includes(e.code)) { S.issues[repo].items = []; setPill("gh", "off", "GitHub: " + e.code.replace(/_/g, " ")); }
+        if (["needs_reauth","server_not_connected","blocked_by_policy","approval_required","not_in_manifest","selection_required"].includes(e.code)) { S.issues[repo].items = []; S.ghDown = e; setPill("gh", "off", "GitHub: " + (e.code === "server_not_connected" ? "add the connector" : e.code.replace(/_/g, " "))); }
         else setPill("gh", "warn", "GitHub: retrying");
       }
       if (["now","issues","gaps","witness","done","wireframes"].includes(S.route)) render(); else renderNav();
