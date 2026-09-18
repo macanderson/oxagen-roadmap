@@ -38,8 +38,14 @@ record must be derived the same way in the fixture, or two pages disagree.
 | `repos.json` | `REPOS` | the repositories linked to workspaces, with production branch, code-graph state, and whether the repository carries a `.oxagen/` tree (`ox`). A row with `role: "available"` is one the installation can reach that no workspace has bound — the init wizard's target. |
 | `workcopies.json` | `WORKCOPIES` | the same `.oxagen/` tree on a machine: the directory, its git remote and head, whether it is in sync with the production branch, whether Stella's symlinks are there, and the steering bundle it last saw |
 | `oxprs.json` | `OXPRS` | every pull request Oxagen has open, across all six kinds of file (`bootstrap`, `record`, `skill`, `agent`, `tool`, `config`), each with who opened it, the files it carries and its checks. The `record` rows are the same lifecycle the Steering page's Context PRs tab shows; this collection is the whole of it. |
-| `records.json` | `RECORDS` | the published context records and their lineage |
+| `records.json` | `RECORDS` | the published context records and their lineage. Seed rows carry the `SteeringItem` fields the hub shows and the assembler reads: `tok` (token cost), `grant` (the enforcement grant: `gate`, `rule`, `outcome`, `on`; absent means the record compiles to text only), `about` (relevance terms), `repo` (on a repository-scoped record), and `hash`. A row the volume generator grows has no `hash` and takes no part in the assembler. |
 | `proposals.json` | `PROPOSALS` | the promoter's proposals, with support and Context PR state |
+| `memory.json` | `MEMORY` | recalled memory as `SteeringItem`s of kind `memory`: class (`RULE`, `FACT`, `EPISODE`, `PREFERENCE`), force (`may` or `info`), scope, body, `token_cost`, provenance (run and frame), `hash`, `valid_from`, last recalled, and recalls in 30 days. `yieldsTo` names a published `must` that beats it. `supersededBy` names the record that replaced it. |
+| `ontology.json` | `ONTOLOGY` | ontology notes as `SteeringItem`s of kind `ontology`: one entity or term definition each, with the file under `.oxagen/ontology/` it lives in and the things it is about. Force is `info`. `ws` places a note in a workspace other than core-platform. |
+| `gates.json` | `GATES` | the gates as the second compilation, each with the one-line gate notice it puts into steering: a `SteeringItem` of kind `policy` and force `must`. `gate` is `decision rule`, `mandate`, or `kill switch`. `source` names the rule, mandate, switch, or the record whose grant compiled it. `outcome` is the gate badge. `edit` says where the gate is edited (`tools/policy`, `tools/switches`, `mandate`, `record`, `agents`). `agents` limits the notice to the agents that hold the gated tool. |
+| `skill-sync.json` | `SKILL_SYNC` | sync status per repository: state (`in-sync`, `behind`, `unbound`), the synced commit and the head, skills and files written, checkouts, and where sync writes |
+| `steering-preview.json` | `STEERING_PREVIEW` | the Preview dataset: `budget` (the SessionStart cap in bytes, bytes per token, the volatile token budget, the compile header), `instructions` (workspace additional instructions as items of kind `instruction`), `prompts` (the prompt chips), and `agents` (slug, the repository it works in, its default prompt) |
+| `steering-manifests.json` | `STEERING_MANIFESTS` | the `steering.manifest` frame of a seed run, keyed by run id: the frame it sits beside, the time, the bundle version the run started on, the prompt, and the repository. The rendered and cut lists are not stored: `assembleSteering()` rebuilds them from these inputs, so the frame and Preview cannot disagree. A run with no entry uses its task title and bundle v41. |
 | `members.json` | `MEMBERS` | organization membership: person, workspaces, status, two-factor, last seen |
 | `invites.json` | `INVITES` | open invitations |
 | `audit.json` | `AUDIT` | seed control-plane audit events |
@@ -81,3 +87,15 @@ Rules the renderer relies on: `read` nodes never become cards, consecutive nodes
 past three, a `gate` sits at the position it stopped the run, and a `would` node names what the run
 has *not* done. A run with no `outputs` derives a spine from `touched`, so the generated fleet
 still renders.
+
+## The assembler's arithmetic
+
+The live release run's `steering.compiled` band is 1,340 tokens, and its `steering.manifest` frame
+renders the same 1,340: compile header 38, three gate notices 92 (33 + 31 + 28), four `must` and
+`should` records 783, and two `info` records 427 in the volatile selection. The volatile budget is
+430, so nothing else fits. Change a gate notice's `token_cost`, a bundle rule's `tok`, or the budget
+and the two numbers on the Run page stop agreeing.
+
+Agents carry one tier word from the ladder: `observe` or `harness`. `gateway` and `contained` are
+not yet available in the mockup's world, so no agent, run, frame, approval, or receipt carries them.
+Spend basis is `client_attested` throughout.

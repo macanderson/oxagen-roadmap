@@ -363,7 +363,7 @@ ok(seen.size === 6, "six kinds, six different treatments, got " + seen.size);
   await page.close();
 }
 {
-  const { page, errs } = await open("#/a-intel/core-platform/skills/a-intel.release-notes-from-prs/source");
+  const { page, errs } = await open("#/a-intel/core-platform/steering/skills/a-intel.release-notes-from-prs/source");
   const r = await page.evaluate(() => ({
     h1: document.querySelector("#pg h1")?.textContent || "",
     tab: document.querySelector('#pg .tabs .tab[aria-selected="true"]')?.textContent || "",
@@ -394,7 +394,7 @@ ok(seen.size === 6, "six kinds, six different treatments, got " + seen.size);
   const cases = [
     ["#/a-intel/core-platform/tools", "New tool"],
     ["#/a-intel/core-platform/agents", "New agent"],
-    ["#/a-intel/core-platform/skills", "Add a skill"],
+    ["#/a-intel/core-platform/steering/skills", "Add a skill"],
     ["#/a-intel/core-platform/steering", "Write a context record"],
   ];
   for (const [hash, label] of cases) {

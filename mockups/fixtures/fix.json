@@ -163,7 +163,7 @@
   "steps": [
    "Write the cache when a read is likely: multi-turn runs, or a schedule that fires again inside the TTL.",
    "Alternatively batch the invoice runs: 28 runs five minutes apart would share one write and read it 27 times.",
-   "The gateway records cache_write and cache_read on every frame, so the Spend page shows the premium disappearing the next day."
+   "The harness reports cache_write and cache_read on every model frame, so the Spend page shows the premium disappearing the next day."
   ],
   "action": "Stop writing cache on one-turn runs",
   "done": "Recorded on a-intel.finops.invoice-bot: cache writes only when a read is expected. Priya is notified as the operator."
