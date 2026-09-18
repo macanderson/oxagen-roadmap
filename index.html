@@ -258,6 +258,7 @@ const prioOf = it => itemState(it).priority || "P2";
 const decState = d => ({ ...d, ...(S.decided[d.id] || {}) });
 const issueKey = (repo, n) => `${repo}#${n}`;
 const liveIssue = (repo, n) => (S.issues[repo]?.items || []).find(i => i.number === n);
+const ghLive = () => !!S.caps.mcp && !S.ghDown && Object.values(S.issues).some(r => r && !r.error);
 const linksOf = (it) => (itemState(it).linked_issues || []).concat((it.issue_links || []).filter(l => !(itemState(it).linked_issues || []).some(x => x.repo === l.repo && x.number === l.number)));
 
 /* ---------- router ---------- */
@@ -319,8 +320,9 @@ const PAGES = {
     const n = (st) => surf.filter(i => statusOf(i) === st).length;
     const built = n("built"), partial = n("partial"), fix = n("fixtures-only"), ns = n("not-started");
     const openDec = DECISIONS.filter(d => decState(d).status !== "decided");
-    const live = Object.entries(S.issues);
+    const live = Object.entries(S.issues).filter(([, r]) => r && !r.error);
     const liveOpen = live.reduce((a, [, r]) => a + (r.total ?? r.items?.length ?? 0), 0);
+    const ghOn = ghLive();
     const unbacked = Object.entries(ANN).filter(([, a]) => (a.kind === "feature" || a.kind === "epic") && !a.has_spec_backing);
     const next = surf.filter(i => ["not-started","partial","fixtures-only"].includes(statusOf(i)) && ["P0","P1"].includes(prioOf(i))).sort((a, b) => prioOf(a).localeCompare(prioOf(b))).slice(0, 8);
     const ms = D.milestones || [];
@@ -332,7 +334,7 @@ const PAGES = {
         <div class="stat"><div class="v">${built}</div><div class="l">built</div><div class="s">${partial} partial · ${fix} on fixtures</div></div>
         <div class="stat"><div class="v">${ns}</div><div class="l">not started</div><div class="s">${surf.filter(i => prioOf(i) === "P0" && statusOf(i) !== "built").length} are P0</div></div>
         <div class="stat"><div class="v">${openDec.length}</div><div class="l">decisions open</div><div class="s">${DECISIONS.length - openDec.length} decided</div></div>
-        <div class="stat"><div class="v">${S.caps.mcp && !S.ghDown ? (live.length ? liveOpen : '<span class="spin"></span>') : Object.keys(ANN).length}</div><div class="l">open issues${S.caps.mcp && !S.ghDown ? "" : " (snapshot)"}</div><div class="s">${(!S.ghDown && live.map(([r, x]) => `${r} ${x.total ?? x.items?.length ?? "…"}`).join(" · ")) || (D.issue_snapshot_date ? "as of " + D.issue_snapshot_date : "")}</div></div>
+        <div class="stat"><div class="v">${ghOn ? liveOpen : (S.caps.mcp && !S.ghDown && !Object.keys(S.issues).length ? '<span class="spin"></span>' : Object.keys(ANN).length)}</div><div class="l">open issues${ghOn ? "" : " (snapshot)"}</div><div class="s">${(ghOn && live.map(([r, x]) => `${r} ${x.total ?? x.items?.length ?? "…"}`).join(" · ")) || (D.issue_snapshot_date ? "as of " + D.issue_snapshot_date : "")}</div></div>
         <div class="stat"><div class="v">${unbacked.length}</div><div class="l">features without a spec</div><div class="s">need a design doc first</div></div>
       </div>
       <div class="section" style="margin-top:0;border-top:0;padding-top:0"><h2>Build progress</h2>
@@ -388,7 +390,7 @@ const PAGES = {
     const f = S.ui.filters;
     const repo = f.repo || "oxagen";
     const r = S.issues[repo];
-    const live = !!S.caps.mcp && !S.ghDown;
+    const live = !!S.caps.mcp && !S.ghDown && !(r?.error && !r.items?.length);
     let rows = live ? (r?.items || []) : Object.entries(ANN).filter(([k]) => k.startsWith(repo + "#")).map(([k, a]) => ({ number: +k.split("#")[1], title: a.title, labels: a.labels || [], updated_at: a.updatedAt, state: "OPEN", snapshot: true }));
     const themes = [...new Set(Object.values(ANN).map(a => a.theme).filter(Boolean))].sort();
     rows = rows.map(i => ({ ...i, ann: ANN[issueKey(repo, i.number)] }));
@@ -398,7 +400,7 @@ const PAGES = {
     if (f.iq) { const q = f.iq.toLowerCase(); rows = rows.filter(i => (i.title || "").toLowerCase().includes(q) || String(i.number).includes(q)); }
     const linkedTo = {}; for (const it of ITEMS) for (const l of linksOf(it)) if (l.repo === repo) (linkedTo[l.number] ||= []).push(it);
     return `<div class="page-head"><div><div class="eyebrow">${live ? "Live from GitHub" : "Snapshot"}</div><h1>Issues</h1></div>
-      <p class="lead">${live ? `Open issues in ${esc(ORG)}/${esc(repo)}, the 100 most recently updated, refreshed every two minutes through your GitHub connector. ${r?.storedAt ? "Last updated " + ago(new Date(r.storedAt).toISOString()) + "." : ""}` : (S.ghDown ? ghErrorCopy(S.ghDown) + " Until then this is the triage snapshot" : "Open this page in claude.ai with the GitHub connector for live status. This is the triage snapshot") + (D.issue_snapshot_date ? " from " + esc(D.issue_snapshot_date) : "") + "."}</p>
+      <p class="lead">${live ? `Open issues in ${esc(ORG)}/${esc(repo)}, the 100 most recently updated, refreshed every two minutes through your GitHub connector. ${r?.storedAt ? "Last updated " + ago(new Date(r.storedAt).toISOString()) + "." : ""}` : ((S.ghDown || r?.error) ? ghErrorCopy(S.ghDown || r.error) + " Until then this is the triage snapshot" : "Open this page in claude.ai with the GitHub connector for live status. This is the triage snapshot") + (D.issue_snapshot_date ? " from " + esc(D.issue_snapshot_date) : "") + "."}</p>
       <div class="actions"><button class="btn" id="new-issue">New issue</button>${live ? `<button class="btn ghost" id="refresh-issues">Refresh</button>` : ""}</div></div>
       ${r?.error ? `<div class="banner">${esc(ghErrorCopy(r.error))}</div>` : ""}
       <div class="filters">
@@ -529,6 +531,9 @@ function render() {
 
 /* ---------- interactions (event delegation) ---------- */
 document.addEventListener("click", async (e) => {
+  // In-page routes: drive the hash ourselves so a host that intercepts anchor clicks cannot swallow them.
+  const a = e.target.closest('a[href^="#/"]');
+  if (a) { e.preventDefault(); const h = a.getAttribute("href"); if (location.hash !== h) location.hash = h; else { parseHash(); render(); } return; }
   const t = e.target.closest("[data-ask],[data-item],[data-wf],[data-decide],[data-reopen],[data-issue-item],[data-issue-decision],[data-comment],[data-link-item],[data-repo],[data-issue],#new-issue,#refresh-issues,#more-issues,#f-cut,#f-unbacked,#f-decision,#wf-mobile,#ask-btn,#close-drawer,#theme-btn,#clear-chat");
   if (!t) return;
   if (t.matches("[data-wf]")) { e.stopPropagation(); go("wireframes", t.dataset.wf); return; }
