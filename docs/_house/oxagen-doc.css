@@ -6,7 +6,7 @@
 :root{
   --ground:#FFFFFF; --panel:#FFFFFF; --hl:#F4F4F5; --line:#E4E4E7; --rule:#D4D4D8;
   --text:#09090B; --body:#27272A; --muted:#71717A; --dim:#A1A1AA;
-  --gold:#D4AF37; --gold-bright:#F1CE65; --gold-deep:#977017; --gold-text:#977017;
+  --gold:#D4AF37; --gold-bright:#F1CE65; --gold-deep:#8A7223; --gold-text:#8A7223;
   --ok:#2F7D4F; --warn:#B8651C; --bad:#9A3E2E; --info:#3D5F86;
   --font:"Geist",system-ui,-apple-system,"Segoe UI",sans-serif;
   --font-display:"Space Grotesk","Helvetica Neue",Arial,sans-serif;

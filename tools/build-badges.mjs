@@ -22,7 +22,7 @@ const OUT = join(ROOT, "badges");
 /* ---- tokens, lifted from the engine's two palettes (mockups/src/engine.css) ---- */
 const THEMES = {
   light: { ink: "#FFFFFF", fg: "#09090B", muted: "#71717A", border: "#E4E4E7",
-    allowed: "#2F7D52", proven: "#1F7676", failed: "#992F28", critical: "#AE2540", denied: "#9B4526", observe: "#71717A", gold: "#977017" },
+    allowed: "#2F7D52", proven: "#1F7676", failed: "#992F28", critical: "#AE2540", denied: "#9B4526", observe: "#71717A", gold: "#8A7223" },
   dark:  { ink: "#18181B", fg: "#FFFFFF", muted: "#A1A1AA", border: "#27272A",
     allowed: "#57A97C", proven: "#3FA2A2", failed: "#C0453C", critical: "#D6455E", denied: "#C66A4A", observe: "#A1A1AA", gold: "#D4AF37" },
 };
@@ -95,7 +95,7 @@ function indexHTML() {
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Oxagen verification badge</title>
 <style>
-:root{--ink:#FFFFFF;--fg:#09090B;--muted:#71717A;--border:#E4E4E7;--panel:#FFFDF8;--gold:#977017;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+:root{--ink:#FFFFFF;--fg:#09090B;--muted:#71717A;--border:#E4E4E7;--panel:#FFFDF8;--gold:#8A7223;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
 @media(prefers-color-scheme:dark){:root{--ink:#000000;--fg:#FFFFFF;--muted:#A1A1AA;--border:#27272A;--panel:#18181B;--gold:#D4AF37}}
 body{margin:0;padding:32px 20px 60px;background:var(--ink);color:var(--fg);font:14px/1.5 "Space Grotesk","Helvetica Neue",Arial,sans-serif;max-width:1080px;margin-inline:auto}
 h1{font-size:22px;margin:0 0 6px}h2{font-size:15px;margin:32px 0 10px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted)}

@@ -32,13 +32,13 @@ h1, h2, h3 { font-family: var(--font-display); }
   --color-fd-card: #ffffff;
   --color-fd-card-foreground: #09090b;
   --color-fd-border: #e4e4e7;
-  --color-fd-primary: #977017;
+  --color-fd-primary: #8A7223;
   --color-fd-primary-foreground: #ffffff;
   --color-fd-secondary: #f4f4f5;
   --color-fd-secondary-foreground: #09090b;
   --color-fd-accent: #f4f4f5;
   --color-fd-accent-foreground: #09090b;
-  --color-fd-ring: #977017;
+  --color-fd-ring: #8A7223;
   --ox-gold: #d4af37;
 }
 :root.dark {

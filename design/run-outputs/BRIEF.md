@@ -124,7 +124,7 @@ Dark surface (`engine.css` `:root`, which is the Run page's default), and these 
 --border #27272A  --rule #3F3F46
 
 --gold  #D4AF37   identity — ONE gold action per screen, never a state
---gold-bright #F1CE65   --gold-deep #977017
+--gold-bright #F1CE65   --gold-deep #8A7223
 
 state: --st-allowed #57A97C · --st-approval #5B93D6 · --st-denied #C66A4A
        --st-proven  #3FA2A2 · --st-failed   #C0453C · --st-critical #D6455E
