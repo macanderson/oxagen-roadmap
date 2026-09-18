@@ -97,7 +97,9 @@
     "docs/adr/ADR-095-the-tier-ladder-is-four-words-computed-from-what-was-routed.md",
     "docs/adr/ADR-096-oxagen-may-contain-the-process-that-runs-turns-the-contained-tier.md",
     "docs/adr/ADR-097-steering-and-gating-are-two-planes-authored-on-one-surface-and-compiled-twice.md",
-    "docs/adr/ADR-098-organisation-graph-provisioning-pooled-by-default.md"
+    "docs/adr/ADR-098-organisation-graph-provisioning-pooled-by-default.md",
+    "docs/adr/ADR-099-a-workspace-is-born-with-its-main-repository.md",
+    "docs/adr/ADR-100-frame-bodies-are-captured-by-default-redacted-at-the-host-capped-and-governed-by-retention.md"
   ],
   "adrs": {
     "ADR-001": {
@@ -883,9 +885,25 @@
       "path": "docs/adr/ADR-098-organisation-graph-provisioning-pooled-by-default.md",
       "status": null,
       "title": "Organisation graphs are placed by one provisioning interface, and pooled is the default"
+    },
+    "ADR-099": {
+      "date": null,
+      "decision": "### 1. Two roles, and a workspace is written with its main head",
+      "id": "ADR-099",
+      "path": "docs/adr/ADR-099-a-workspace-is-born-with-its-main-repository.md",
+      "status": null,
+      "title": "A workspace is born with its main repository, and a repository is main for at most one workspace"
+    },
+    "ADR-100": {
+      "date": null,
+      "decision": "### 1. A body is captured by default, not on request",
+      "id": "ADR-100",
+      "path": "docs/adr/ADR-100-frame-bodies-are-captured-by-default-redacted-at-the-host-capped-and-governed-by-retention.md",
+      "status": null,
+      "title": "Frame bodies are captured by default, redacted where they are produced, capped, and released by retention"
     }
   },
-  "baseline": "2026-09-18T18:00:00Z",
+  "baseline": "2026-09-18T20:52:30Z",
   "decisions": {},
   "decisions_added": {
     "ADR-092": {
@@ -978,6 +996,32 @@
       "source": "docs/adr/ADR-098-organisation-graph-provisioning-pooled-by-default.md",
       "status": "decided",
       "title": "Organisation graphs are placed by one provisioning interface, and pooled is the default"
+    },
+    "ADR-099": {
+      "blocks": [],
+      "decided": "ADR-099: A workspace is born with its main repository, and a repository is main for at most one workspace. ### 1. Two roles, and a workspace is written with its main head",
+      "decided_on": "2026-09-18",
+      "id": "ADR-099",
+      "origin": "adr",
+      "pr": 3326,
+      "question": "Decided in the repository: A workspace is born with its main repository, and a repository is main for at most one workspace.",
+      "recommendation": null,
+      "source": "docs/adr/ADR-099-a-workspace-is-born-with-its-main-repository.md",
+      "status": "decided",
+      "title": "A workspace is born with its main repository, and a repository is main for at most one workspace"
+    },
+    "ADR-100": {
+      "blocks": [],
+      "decided": "ADR-100: Frame bodies are captured by default, redacted where they are produced, capped, and released by retention. ### 1. A body is captured by default, not on request",
+      "decided_on": "2026-09-18",
+      "id": "ADR-100",
+      "origin": "adr",
+      "pr": 3351,
+      "question": "Decided in the repository: Frame bodies are captured by default, redacted where they are produced, capped, and released by retention.",
+      "recommendation": null,
+      "source": "docs/adr/ADR-100-frame-bodies-are-captured-by-default-redacted-at-the-host-capped-and-governed-by-retention.md",
+      "status": "decided",
+      "title": "Frame bodies are captured by default, redacted where they are produced, capped, and released by retention"
     },
     "I-oxagen#2949": {
       "blocks": [],
@@ -1578,9 +1622,9 @@
       "title": "The public decks under apps/docs describe the runtime ADR-043 removed: sandboxes, fan-out and hard caps as if they still shipped"
     }
   },
-  "generated_at": "2026-09-18T21:13:37.847Z",
+  "generated_at": "2026-09-18T23:26:29.677Z",
   "heads": {
-    "oxagen": "b7a0f0989b2ff8193df748e0931f32d321a5704f"
+    "oxagen": "29da3bdcee28a4c2e265a99d9c5983dcde8972f7"
   },
   "issues": {
     "oxagen#2592": {
@@ -1868,7 +1912,7 @@
       ],
       "state": "open",
       "title": "Proof: witness runs, the flip, verdicts on runs, and proven spend",
-      "updated_at": "2026-09-18T15:53:41Z"
+      "updated_at": "2026-09-18T22:24:28Z"
     },
     "oxagen#2956": {
       "author": "macanderson",
@@ -1903,7 +1947,7 @@
       ],
       "state": "open",
       "title": "Agents (Agent IAM): identities list, agent detail with identity, credentials, roles, toolbelt, budgets, runs, enrollment, incidents, and the definition in git",
-      "updated_at": "2026-09-18T15:48:34Z"
+      "updated_at": "2026-09-18T21:37:50Z"
     },
     "oxagen#2957": {
       "author": "macanderson",
@@ -2815,7 +2859,7 @@
       ],
       "state": "open",
       "title": "Skills: what is built today on the new Mission Control skin (rev1)",
-      "updated_at": "2026-09-18T15:53:38Z"
+      "updated_at": "2026-09-18T22:24:31Z"
     },
     "oxagen#3103": {
       "author": "macanderson",
@@ -4387,7 +4431,7 @@
       ],
       "state": "open",
       "title": "Repositories: bind a repository, connect a local directory, and one pull-request lifecycle for every governed file",
-      "updated_at": "2026-09-18T15:48:45Z"
+      "updated_at": "2026-09-18T22:24:26Z"
     },
     "oxagen#3243": {
       "author": "macanderson",
@@ -4882,7 +4926,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "cost: record and show run cost — auto-seeded price book, negotiated rates, unpriced-model surfacing",
-      "updated_at": "2026-09-18T21:12:47Z"
+      "updated_at": "2026-09-18T23:14:52Z"
     },
     "oxagen#3276": {
       "author": "macanderson",
@@ -4908,7 +4952,7 @@
       ],
       "state": "open",
       "title": "feat(steering): warn and optionally refuse a prompt when a checkout's .oxagen/ is behind the production branch",
-      "updated_at": "2026-09-18T21:12:21Z"
+      "updated_at": "2026-09-18T23:12:35Z"
     },
     "oxagen#3277": {
       "author": "macanderson",
@@ -4965,16 +5009,18 @@
       "has_spec_backing": false,
       "html_url": "https://github.com/macanderson/oxagen/issues/3281",
       "is_pr": false,
-      "kind": null,
+      "kind": "defect",
       "labels": [
-        "triage"
+        "P1",
+        "kind:defect",
+        "pillar:reliability"
       ],
       "merged_at": null,
       "milestone": null,
       "needs_decision": false,
       "number": 3281,
-      "pillar": null,
-      "priority": null,
+      "pillar": "reliability",
+      "priority": "P1",
       "refs": [
         2962
       ],
@@ -4982,7 +5028,33 @@
       "spec_refs": [],
       "state": "open",
       "title": "Residue from #3271: cost-frames observed usage is per-turn and per-aggregate, so it undercounts and misreports unpriced classes",
-      "updated_at": "2026-09-18T20:50:23Z"
+      "updated_at": "2026-09-18T23:12:26Z"
+    },
+    "oxagen#3282": {
+      "author": "macanderson",
+      "closed_at": "2026-09-18T15:07:17Z",
+      "closes": [],
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3282",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "closes-nothing"
+      ],
+      "merged_at": "2026-09-18T15:07:17Z",
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3282,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-056"
+      ],
+      "state": "closed",
+      "title": "app: the Run page, and runs you can tell apart in the Fleet list (WL-35)",
+      "updated_at": "2026-09-18T15:07:18Z"
     },
     "oxagen#3283": {
       "author": "macanderson",
@@ -5305,7 +5377,7 @@
       ],
       "state": "open",
       "title": "Phase 2. One screen: Steering becomes the hub, with Skills and Ontology under it and a Preview tab",
-      "updated_at": "2026-09-18T18:48:47Z"
+      "updated_at": "2026-09-18T22:24:33Z"
     },
     "oxagen#3298": {
       "author": "macanderson",
@@ -5415,7 +5487,7 @@
       ],
       "state": "open",
       "title": "Phase 5. The contained tier: `oxagen run -- <agent>` inside an OS sandbox, with the witness runner on the same launcher",
-      "updated_at": "2026-09-18T18:50:10Z"
+      "updated_at": "2026-09-18T22:24:29Z"
     },
     "oxagen#3301": {
       "author": "macanderson",
@@ -6020,7 +6092,7 @@
     },
     "oxagen#3322": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-18T21:36:05Z",
       "closes": [],
       "has_spec_backing": true,
       "html_url": "https://github.com/macanderson/oxagen/pull/3322",
@@ -6029,7 +6101,7 @@
       "labels": [
         "closes-nothing"
       ],
-      "merged_at": null,
+      "merged_at": "2026-09-18T21:36:05Z",
       "milestone": null,
       "needs_decision": false,
       "number": 3322,
@@ -6042,9 +6114,9 @@
         "docs/specs/mission-control/spec.md",
         "docs/specs/governed-action-metering.md"
       ],
-      "state": "open",
+      "state": "closed",
       "title": "billing: bill the in-app agent's platform-funded tokens at exactly cost",
-      "updated_at": "2026-09-18T21:12:45Z"
+      "updated_at": "2026-09-18T21:36:07Z"
     },
     "oxagen#3323": {
       "author": "macanderson",
@@ -6122,18 +6194,18 @@
       ],
       "state": "open",
       "title": "tacho: compile steering from the pinned version, and cache it on the steering version (#3311, #3312)",
-      "updated_at": "2026-09-18T21:05:40Z"
+      "updated_at": "2026-09-18T23:11:34Z"
     },
     "oxagen#3326": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-18T22:36:11Z",
       "closes": [],
       "has_spec_backing": true,
       "html_url": "https://github.com/macanderson/oxagen/pull/3326",
       "is_pr": true,
       "kind": null,
       "labels": [],
-      "merged_at": null,
+      "merged_at": "2026-09-18T22:36:11Z",
       "milestone": null,
       "needs_decision": false,
       "number": 3326,
@@ -6147,9 +6219,9 @@
       "spec_refs": [
         "ADR-099"
       ],
-      "state": "open",
+      "state": "closed",
       "title": "M0: a workspace is born with its main repository; a second repository links and unlinks (§17 M0)",
-      "updated_at": "2026-09-18T21:07:22Z"
+      "updated_at": "2026-09-18T22:36:12Z"
     },
     "oxagen#3327": {
       "author": "macanderson",
@@ -6173,7 +6245,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "app: Account dialog, avatar editor and user menu as the W11 mockup draws them",
-      "updated_at": "2026-09-18T20:46:40Z"
+      "updated_at": "2026-09-18T23:25:59Z"
     },
     "oxagen#3328": {
       "author": "macanderson",
@@ -6298,7 +6370,7 @@
       ],
       "state": "open",
       "title": "desktop: sign-in stops holding the setup wizard for five minutes, and a spec for the remaining gateway gaps",
-      "updated_at": "2026-09-18T21:03:23Z"
+      "updated_at": "2026-09-18T23:26:04Z"
     },
     "oxagen#3333": {
       "author": "macanderson",
@@ -6321,8 +6393,8 @@
       "repo": "oxagen",
       "spec_refs": [],
       "state": "open",
-      "title": "Residue from #3327: six unsaved-state and unapplied-preference defects in the Account dialog and user menu",
-      "updated_at": "2026-09-18T20:46:32Z"
+      "title": "Residue from #3327: eight state and affordance defects in the Account dialog and user menu",
+      "updated_at": "2026-09-18T23:09:53Z"
     },
     "oxagen#3334": {
       "author": "macanderson",
@@ -6351,7 +6423,7 @@
       ],
       "state": "open",
       "title": "Make the gateway real: the gaps between ADR-094/095/096 and the code",
-      "updated_at": "2026-09-18T20:45:22Z"
+      "updated_at": "2026-09-18T21:30:20Z"
     },
     "oxagen#3335": {
       "author": "macanderson",
@@ -6379,7 +6451,7 @@
       ],
       "state": "open",
       "title": "Residue from #3326: Workspace settings promises Context PR routing to linked repositories that does not exist",
-      "updated_at": "2026-09-18T20:30:58Z"
+      "updated_at": "2026-09-18T22:20:03Z"
     },
     "oxagen#3336": {
       "author": "macanderson",
@@ -6433,7 +6505,7 @@
       ],
       "state": "open",
       "title": "Every date in the app renders in your time zone, Pacific by default",
-      "updated_at": "2026-09-18T20:54:59Z"
+      "updated_at": "2026-09-18T23:15:01Z"
     },
     "oxagen#3338": {
       "author": "macanderson",
@@ -6485,8 +6557,8 @@
         "docs/specs/model-funding-source/spec.md"
       ],
       "state": "open",
-      "title": "Residue from #3322: three pricing references still say assistant tokens carry the markup",
-      "updated_at": "2026-09-18T20:59:31Z"
+      "title": "Residue from #3322: pricing docs and the subscription contract still say assistant tokens carry the markup",
+      "updated_at": "2026-09-18T21:33:42Z"
     },
     "oxagen#3340": {
       "author": "macanderson",
@@ -6514,19 +6586,21 @@
         "ADR-099"
       ],
       "state": "open",
-      "title": "Residue from #3326: link_repository does not recheck the data plane, and the retired-connection copy instructs a step that fails",
-      "updated_at": "2026-09-18T21:03:54Z"
+      "title": "Residue from #3326: the repositories slice's seven P2 findings — plane recheck, role enforcement, the trigger's index, binding lineage, and three surfaces that overstate what the code does",
+      "updated_at": "2026-09-18T21:58:16Z"
     },
     "oxagen#3341": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-18T21:43:14Z",
       "closes": [],
       "has_spec_backing": true,
       "html_url": "https://github.com/macanderson/oxagen/pull/3341",
       "is_pr": true,
       "kind": null,
-      "labels": [],
-      "merged_at": null,
+      "labels": [
+        "closes-nothing"
+      ],
+      "merged_at": "2026-09-18T21:43:14Z",
       "milestone": null,
       "needs_decision": false,
       "number": 3341,
@@ -6537,13 +6611,13 @@
       "spec_refs": [
         "ADR-053"
       ],
-      "state": "open",
+      "state": "closed",
       "title": "app: the in-app assistant renders markdown, highlights code, and reve…",
-      "updated_at": "2026-09-18T21:12:38Z"
+      "updated_at": "2026-09-18T21:43:15Z"
     },
     "oxagen#3342": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-18T22:27:26Z",
       "closes": [],
       "has_spec_backing": false,
       "html_url": "https://github.com/macanderson/oxagen/pull/3342",
@@ -6552,7 +6626,7 @@
       "labels": [
         "closes-nothing"
       ],
-      "merged_at": null,
+      "merged_at": "2026-09-18T22:27:26Z",
       "milestone": null,
       "needs_decision": false,
       "number": 3342,
@@ -6561,9 +6635,9 @@
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "tacho: ship prompts, transcripts and per-call tokens so the Run page has cost and content",
-      "updated_at": "2026-09-18T21:09:56Z"
+      "updated_at": "2026-09-18T22:45:25Z"
     },
     "oxagen#3343": {
       "author": "macanderson",
@@ -6587,7 +6661,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "Residue from #3271: scheduled rows survive a withdrawal, the unpriced probe over-reports, and Anthropic cache tiers are derived for every provider",
-      "updated_at": "2026-09-18T21:10:49Z"
+      "updated_at": "2026-09-18T21:14:11Z"
     },
     "oxagen#3344": {
       "author": "macanderson",
@@ -6611,11 +6685,778 @@
       "spec_refs": [],
       "state": "open",
       "title": "Residue from #3276: a forced sync classifies an ignored directory as a removed file",
-      "updated_at": "2026-09-18T21:10:51Z"
+      "updated_at": "2026-09-18T22:16:07Z"
+    },
+    "oxagen#3345": {
+      "author": "macanderson",
+      "closed_at": "2026-09-18T23:02:28Z",
+      "closes": [],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3345",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "closes-nothing"
+      ],
+      "merged_at": "2026-09-18T23:02:28Z",
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3345,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "app: the Mission Control transcript on every run's page",
+      "updated_at": "2026-09-18T23:02:29Z"
+    },
+    "oxagen#3346": {
+      "author": "macanderson",
+      "closed_at": "2026-09-18T22:11:59Z",
+      "closes": [],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3346",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "closes-nothing"
+      ],
+      "merged_at": "2026-09-18T22:11:59Z",
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3346,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "Brand: obsidian and white palette, three faces, across the design system and apps",
+      "updated_at": "2026-09-18T22:12:00Z"
+    },
+    "oxagen#3347": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3347",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "closes-nothing"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3347,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        2956,
+        2967
+      ],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-099",
+        "ADR-101"
+      ],
+      "state": "open",
+      "title": "Cursor is the fourth wrapped harness, and every export must load in all four (ADR-099)",
+      "updated_at": "2026-09-18T23:11:50Z"
+    },
+    "oxagen#3348": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/issues/3348",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3348,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Residue from #3346: desktop font imports and the web hex texture still carry the old brand",
+      "updated_at": "2026-09-18T21:51:01Z"
+    },
+    "oxagen#3349": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/issues/3349",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3349,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-099"
+      ],
+      "state": "open",
+      "title": "Residue from #3347: detect an IDE-only Cursor install",
+      "updated_at": "2026-09-18T21:56:12Z"
+    },
+    "oxagen#3350": {
+      "author": "macanderson",
+      "closed_at": "2026-09-18T22:41:25Z",
+      "closes": [],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3350",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "closes-nothing"
+      ],
+      "merged_at": "2026-09-18T22:41:25Z",
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3350,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "app: fix the five review findings left on the assistant reveal",
+      "updated_at": "2026-09-18T22:41:27Z"
+    },
+    "oxagen#3351": {
+      "author": "macanderson",
+      "closed_at": "2026-09-18T23:25:45Z",
+      "closes": [],
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3351",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": "2026-09-18T23:25:45Z",
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3351,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        2952
+      ],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-058",
+        "ADR-100"
+      ],
+      "state": "closed",
+      "title": "run replay 1/3: capture frame bodies at the host and the assistant",
+      "updated_at": "2026-09-18T23:25:46Z"
+    },
+    "oxagen#3352": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3352",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3352,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        2951,
+        2952,
+        3285,
+        3286
+      ],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-043",
+        "ADR-058",
+        "ADR-064",
+        "docs/specs/mission-control/spec.md"
+      ],
+      "state": "open",
+      "title": "run replay 2/3: transcript steps with tool i/o, chain and seal, live stream",
+      "updated_at": "2026-09-18T23:21:18Z"
+    },
+    "oxagen#3353": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/issues/3353",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3353,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Approvals written by the mandate gate and the MCP consent path record no run, so a run's approvals list is incomplete",
+      "updated_at": "2026-09-18T22:20:28Z"
+    },
+    "oxagen#3354": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/issues/3354",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3354,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-094",
+        "ADR-095"
+      ],
+      "state": "open",
+      "title": "Residue from #3332: an unshippable event wedges the WAL, and an expired bundle still grants retention",
+      "updated_at": "2026-09-18T22:26:17Z"
+    },
+    "oxagen#3355": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/issues/3355",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3355,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Residue from #3345: the run transcript's live head, turn grouping, step counting and label copy",
+      "updated_at": "2026-09-18T22:27:55Z"
+    },
+    "oxagen#3356": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/issues/3356",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3356,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Residue from #3345: the run transcript's live path and its tool grouping",
+      "updated_at": "2026-09-18T22:50:24Z"
+    },
+    "oxagen#3357": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/issues/3357",
+      "is_pr": false,
+      "kind": "defect",
+      "labels": [
+        "P1",
+        "area:billing",
+        "kind:defect",
+        "pillar:reliability"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3357,
+      "pillar": "reliability",
+      "priority": "P1",
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Residue from #3271: the reprice chain skips a failed run for good and never scans a partially unpriced run",
+      "updated_at": "2026-09-18T22:30:46Z"
+    },
+    "oxagen#3358": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/issues/3358",
+      "is_pr": false,
+      "kind": "defect",
+      "labels": [
+        "P1",
+        "kind:defect",
+        "job:govern",
+        "pillar:stability"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3358,
+      "pillar": "stability",
+      "priority": "P1",
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Residue from #3276: the committed-gate lookup takes its remote and branch from the editable settings file",
+      "updated_at": "2026-09-18T22:31:37Z"
+    },
+    "oxagen#3359": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/issues/3359",
+      "is_pr": false,
+      "kind": "defect",
+      "labels": [
+        "P1",
+        "kind:defect",
+        "job:govern",
+        "pillar:stability"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3359,
+      "pillar": "stability",
+      "priority": "P1",
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Residue from #3276: the committed gate is read before the production ref is refreshed, so enforcement starts one prompt late",
+      "updated_at": "2026-09-18T22:31:38Z"
+    },
+    "oxagen#3360": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/issues/3360",
+      "is_pr": false,
+      "kind": "defect",
+      "labels": [
+        "P2",
+        "area:app",
+        "kind:defect",
+        "pillar:reliability"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3360,
+      "pillar": "reliability",
+      "priority": "P2",
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Residue from #3276: the Steering gate switches are enabled for workspace roles the handler denies",
+      "updated_at": "2026-09-18T22:30:54Z"
+    },
+    "oxagen#3361": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3361",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "closes-nothing"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3361,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "tacho: keep a drained transcript cursor until the registry forgets the session",
+      "updated_at": "2026-09-18T22:38:44Z"
+    },
+    "oxagen#3362": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/issues/3362",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3362,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Residue from #3350: the announcement copy's links take focus, and the reveal follows a stale scroll height",
+      "updated_at": "2026-09-18T22:41:07Z"
+    },
+    "oxagen#3363": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3363",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3363,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        3365
+      ],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "tacho: pack ingest batches under the route's request limit, and split a 413",
+      "updated_at": "2026-09-18T23:12:38Z"
+    },
+    "oxagen#3364": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3364",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "closes-nothing"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3364,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "tacho: fix the three P1 review findings that missed the merge of #3342",
+      "updated_at": "2026-09-18T23:15:56Z"
+    },
+    "oxagen#3365": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/issues/3365",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3365,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-094",
+        "ADR-095"
+      ],
+      "state": "open",
+      "title": "Decide which host-side body pipeline is Tacho's: #3342's shipped in main, #3332's cannot merge beside it, and main's batch budget wedges the WAL",
+      "updated_at": "2026-09-18T23:23:34Z"
+    },
+    "oxagen#3366": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3366",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3366,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        2951,
+        2952,
+        3285,
+        3286
+      ],
+      "repo": "oxagen",
+      "spec_refs": [
+        "docs/specs/mission-control/spec.md"
+      ],
+      "state": "open",
+      "title": "run replay 3/3: the Run page transcript, player, chain and cost",
+      "updated_at": "2026-09-18T23:24:07Z"
+    },
+    "oxagen#3367": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/issues/3367",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3367,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-101",
+        "ADR-099"
+      ],
+      "state": "open",
+      "title": "Residue from #3347: Cursor's steer delivery, the hook file's version key, and the docs that still say three harnesses",
+      "updated_at": "2026-09-18T23:06:14Z"
+    },
+    "oxagen#3368": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/issues/3368",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3368,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Residue from #3337: the viewer clock does not reach the invite page, and an unsupported zone reports twice",
+      "updated_at": "2026-09-18T23:06:30Z"
+    },
+    "oxagen#3369": {
+      "author": "macanderson",
+      "closed_at": "2026-09-18T23:09:57Z",
+      "closes": [],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/issues/3369",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3369,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "Residue from #3327: the account export download link and the export that is lost on unmount",
+      "updated_at": "2026-09-18T23:09:57Z"
+    },
+    "oxagen#3370": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/issues/3370",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3370,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Residue from #3352: the run chain read, the live stream's terminal states, and the fold's call correlation",
+      "updated_at": "2026-09-18T23:07:03Z"
+    },
+    "oxagen#3371": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/issues/3371",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3371,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Residue from #3271: repricing races the run rollup, and scheduled rates disappear after saving",
+      "updated_at": "2026-09-18T23:07:10Z"
+    },
+    "oxagen#3372": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/issues/3372",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3372,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [
+        "docs/specs/tacho/"
+      ],
+      "state": "open",
+      "title": "Residue from #3351: completeness gaps the replay grade does not see, and four smaller capture defects",
+      "updated_at": "2026-09-18T23:07:33Z"
+    },
+    "oxagen#3373": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/issues/3373",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3373,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Residue from #3332: mandate freshness trusts unverified and operator-editable inputs, git probes block the hook path, and the retention class map is incomplete",
+      "updated_at": "2026-09-18T23:22:34Z"
+    },
+    "oxagen#3374": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/issues/3374",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3374,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Residue from #3337: the viewer clock stops at the org routes, and the unsupported-zone error reports twice",
+      "updated_at": "2026-09-18T23:08:35Z"
     },
     "roadmap#39": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-18T22:24:36Z",
       "closes": [],
       "has_spec_backing": false,
       "html_url": "https://github.com/macanderson/roadmap/issues/39",
@@ -6631,20 +7472,20 @@
       "refs": [],
       "repo": "roadmap",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "No seed run produces a media asset, so `<RunOutputs>` cannot show one",
-      "updated_at": "2026-09-17T21:43:15Z"
+      "updated_at": "2026-09-18T22:24:34Z"
     },
     "roadmap#46": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-18T22:38:07Z",
       "closes": [],
       "has_spec_backing": true,
       "html_url": "https://github.com/macanderson/roadmap/pull/46",
       "is_pr": true,
       "kind": null,
       "labels": [],
-      "merged_at": null,
+      "merged_at": "2026-09-18T22:38:07Z",
       "milestone": null,
       "needs_decision": false,
       "number": 46,
@@ -6658,9 +7499,9 @@
         "ADR-098",
         "docs/specs/repository-binding/README.md"
       ],
-      "state": "open",
+      "state": "closed",
       "title": "roadmap: status as of 2026-09-18 evening — Run page, M0, Billing, BYOK, steering phases",
-      "updated_at": "2026-09-18T20:57:21Z"
+      "updated_at": "2026-09-18T22:38:07Z"
     },
     "roadmap#47": {
       "author": "macanderson",
@@ -6683,6 +7524,28 @@
       "state": "closed",
       "title": "Refresh the roadmap from GitHub every fifteen minutes",
       "updated_at": "2026-09-18T21:12:09Z"
+    },
+    "roadmap#48": {
+      "author": "macanderson",
+      "closed_at": "2026-09-18T22:38:19Z",
+      "closes": [],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/roadmap/pull/48",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": "2026-09-18T22:38:19Z",
+      "milestone": null,
+      "needs_decision": false,
+      "number": 48,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "roadmap",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "Brand: obsidian and white, one gold, three faces",
+      "updated_at": "2026-09-18T22:39:27Z"
     },
     "stella#1044": {
       "author": "macanderson",
@@ -20516,6 +21379,28 @@
       "title": "build(deps): bump the actions group with 5 updates",
       "updated_at": "2026-09-18T04:51:36Z"
     },
+    "stella#6529": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/stella/pull/6529",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 6529,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "stella",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Tokens v7.0: obsidian and white, one gold, neutral greys, three faces",
+      "updated_at": "2026-09-18T23:03:15Z"
+    },
     "stella#834": {
       "author": "macanderson",
       "closed_at": null,
@@ -20617,7 +21502,7 @@
       "links": [],
       "merged_prs": [],
       "open_issues": 0,
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": false
     },
     "D10": {
@@ -20628,114 +21513,92 @@
       "links": [],
       "merged_prs": [],
       "open_issues": 0,
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": false
     },
     "D2": {
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "dod",
-      "last_merge": "2026-09-18T20:49:21Z",
+      "last_merge": "2026-09-18T23:25:45Z",
       "links": [],
       "merged_prs": [
         {
           "closes": [],
-          "merged_at": "2026-09-18T20:49:21Z",
-          "number": 3307,
+          "merged_at": "2026-09-18T23:25:45Z",
+          "number": 3351,
           "repo": "oxagen",
-          "title": "Spec and plan: one assembler, two planes, the gateway, and the four-word tier ladder",
+          "title": "run replay 1/3: capture frame bodies at the host and the assistant",
           "touched": [
             "packages/tacho"
           ]
         },
         {
           "closes": [],
-          "merged_at": "2026-09-18T20:05:55Z",
-          "number": 3321,
+          "merged_at": "2026-09-18T22:36:11Z",
+          "number": 3326,
           "repo": "oxagen",
-          "title": "desktop: a line-by-line review; install and uninstall fixed and proven against a snapshot rig",
+          "title": "M0: a workspace is born with its main repository; a second repository links and unlinks (§17 M0)",
           "touched": [
-            "apps/cli/src",
-            "packages/tacho"
+            "apps/cli/src"
           ]
         },
         {
           "closes": [],
-          "merged_at": "2026-09-18T20:04:11Z",
-          "number": 3319,
+          "merged_at": "2026-09-18T22:27:26Z",
+          "number": 3342,
           "repo": "oxagen",
-          "title": "tacho: the loopback model proxy, observed metering, an enforced session budget and a real interrupt (Phase 4)",
-          "touched": [
-            "packages/tacho"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-18T18:31:11Z",
-          "number": 3294,
-          "repo": "oxagen",
-          "title": "ADRs and architecture: steering and gating, the assembler, the gateway, the tier ladder, the contained tier",
+          "title": "tacho: ship prompts, transcripts and per-call tokens so the Run page has cost and content",
           "touched": [
             "packages/tacho"
           ]
         }
       ],
       "open_issues": 0,
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": false
     },
     "D3": {
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "dod",
-      "last_merge": "2026-09-18T18:39:51Z",
+      "last_merge": "2026-09-18T23:25:45Z",
       "links": [],
       "merged_prs": [
         {
           "closes": [],
-          "merged_at": "2026-09-18T18:39:51Z",
-          "number": 3309,
+          "merged_at": "2026-09-18T23:25:45Z",
+          "number": 3351,
           "repo": "oxagen",
-          "title": "app: lay the Billing page out as the Mission Control design draws it, and wire Change plan",
+          "title": "run replay 1/3: capture frame bodies at the host and the assistant",
+          "touched": [
+            "packages/billing/src"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-18T21:36:05Z",
+          "number": 3322,
+          "repo": "oxagen",
+          "title": "billing: bill the in-app agent's platform-funded tokens at exactly cost",
           "touched": [
             "packages/billing/src"
           ]
         }
       ],
       "open_issues": 0,
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": false
     },
     "D4": {
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "dod",
-      "last_merge": "2026-09-18T20:20:03Z",
+      "last_merge": null,
       "links": [],
-      "merged_prs": [
-        {
-          "closes": [],
-          "merged_at": "2026-09-18T20:20:03Z",
-          "number": 3308,
-          "repo": "oxagen",
-          "title": "Organization › Model funding: bring your own model key from the app",
-          "touched": [
-            "packages/ai/src"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-18T19:12:00Z",
-          "number": 3290,
-          "repo": "oxagen",
-          "title": "BYOK for any OpenAI-compatible endpoint, and close an SSRF bypass in the outbound-URL guard",
-          "touched": [
-            "packages/ai/src"
-          ]
-        }
-      ],
+      "merged_prs": [],
       "open_issues": 0,
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": false
     },
     "D5": {
@@ -20746,7 +21609,7 @@
       "links": [],
       "merged_prs": [],
       "open_issues": 0,
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": false
     },
     "D6": {
@@ -20757,29 +21620,18 @@
       "links": [],
       "merged_prs": [],
       "open_issues": 0,
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": false
     },
     "D7": {
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "dod",
-      "last_merge": "2026-09-18T18:39:51Z",
+      "last_merge": null,
       "links": [],
-      "merged_prs": [
-        {
-          "closes": [],
-          "merged_at": "2026-09-18T18:39:51Z",
-          "number": 3309,
-          "repo": "oxagen",
-          "title": "app: lay the Billing page out as the Mission Control design draws it, and wire Change plan",
-          "touched": [
-            "apps/app/src/features/billing/billing.tsx"
-          ]
-        }
-      ],
+      "merged_prs": [],
       "open_issues": 0,
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": false
     },
     "D8": {
@@ -20790,7 +21642,7 @@
       "links": [],
       "merged_prs": [],
       "open_issues": 0,
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": false
     },
     "D9": {
@@ -20801,7 +21653,7 @@
       "links": [],
       "merged_prs": [],
       "open_issues": 0,
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": false
     },
     "W1": {
@@ -20812,7 +21664,7 @@
       "links": [],
       "merged_prs": [],
       "open_issues": 0,
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": false
     },
     "W10": {
@@ -20823,7 +21675,7 @@
       "links": [],
       "merged_prs": [],
       "open_issues": 0,
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": false
     },
     "W11": {
@@ -20834,39 +21686,29 @@
       "links": [],
       "merged_prs": [],
       "open_issues": 0,
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": false
     },
     "W2": {
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "witness",
-      "last_merge": "2026-09-18T20:05:55Z",
+      "last_merge": "2026-09-18T22:27:26Z",
       "links": [],
       "merged_prs": [
         {
           "closes": [],
-          "merged_at": "2026-09-18T20:05:55Z",
-          "number": 3321,
+          "merged_at": "2026-09-18T22:27:26Z",
+          "number": 3342,
           "repo": "oxagen",
-          "title": "desktop: a line-by-line review; install and uninstall fixed and proven against a snapshot rig",
-          "touched": [
-            "packages/handlers/src/tacho.events.ingest.ts"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-18T20:04:11Z",
-          "number": 3319,
-          "repo": "oxagen",
-          "title": "tacho: the loopback model proxy, observed metering, an enforced session budget and a real interrupt (Phase 4)",
+          "title": "tacho: ship prompts, transcripts and per-call tokens so the Run page has cost and content",
           "touched": [
             "packages/handlers/src/tacho.events.ingest.ts"
           ]
         }
       ],
       "open_issues": 0,
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": false
     },
     "W3": {
@@ -20877,29 +21719,18 @@
       "links": [],
       "merged_prs": [],
       "open_issues": 0,
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": false
     },
     "W4": {
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "witness",
-      "last_merge": "2026-09-18T18:31:11Z",
+      "last_merge": null,
       "links": [],
-      "merged_prs": [
-        {
-          "closes": [],
-          "merged_at": "2026-09-18T18:31:11Z",
-          "number": 3294,
-          "repo": "oxagen",
-          "title": "ADRs and architecture: steering and gating, the assembler, the gateway, the tier ladder, the contained tier",
-          "touched": [
-            "docs/adr/ADR-064-proof-the-witness-runner-plane.md"
-          ]
-        }
-      ],
+      "merged_prs": [],
       "open_issues": 0,
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": false
     },
     "W5": {
@@ -20910,18 +21741,39 @@
       "links": [],
       "merged_prs": [],
       "open_issues": 0,
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": false
     },
     "W6": {
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "witness",
-      "last_merge": null,
+      "last_merge": "2026-09-18T23:25:45Z",
       "links": [],
-      "merged_prs": [],
+      "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-18T23:25:45Z",
+          "number": 3351,
+          "repo": "oxagen",
+          "title": "run replay 1/3: capture frame bodies at the host and the assistant",
+          "touched": [
+            "packages/run-ledger"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-18T23:02:28Z",
+          "number": 3345,
+          "repo": "oxagen",
+          "title": "app: the Mission Control transcript on every run's page",
+          "touched": [
+            "packages/run-ledger"
+          ]
+        }
+      ],
       "open_issues": 0,
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": false
     },
     "W7": {
@@ -20932,7 +21784,7 @@
       "links": [],
       "merged_prs": [],
       "open_issues": 0,
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": false
     },
     "W8": {
@@ -20943,7 +21795,7 @@
       "links": [],
       "merged_prs": [],
       "open_issues": 0,
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": false
     },
     "W9": {
@@ -20954,32 +21806,42 @@
       "links": [],
       "merged_prs": [],
       "open_issues": 0,
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": false
     },
     "accept-invitation": {
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "surface",
-      "last_merge": "2026-09-18T20:20:03Z",
+      "last_merge": "2026-09-18T23:02:28Z",
       "links": [],
       "merged_prs": [
         {
           "closes": [],
-          "merged_at": "2026-09-18T20:20:03Z",
-          "number": 3308,
+          "merged_at": "2026-09-18T23:02:28Z",
+          "number": 3345,
           "repo": "oxagen",
-          "title": "Organization › Model funding: bring your own model key from the app",
+          "title": "app: the Mission Control transcript on every run's page",
           "touched": [
             "apps/app/src/app/"
           ]
         },
         {
           "closes": [],
-          "merged_at": "2026-09-18T18:39:51Z",
-          "number": 3309,
+          "merged_at": "2026-09-18T22:27:26Z",
+          "number": 3342,
           "repo": "oxagen",
-          "title": "app: lay the Billing page out as the Mission Control design draws it, and wire Change plan",
+          "title": "tacho: ship prompts, transcripts and per-call tokens so the Run page has cost and content",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-18T21:43:14Z",
+          "number": 3341,
+          "repo": "oxagen",
+          "title": "app: the in-app assistant renders markdown, highlights code, and reve…",
           "touched": [
             "apps/app/src/app/"
           ]
@@ -20987,7 +21849,7 @@
       ],
       "open_issues": 0,
       "page": "apps/app/src/app/(auth)/invite/[token]/page.tsx",
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": false
     },
     "agent": {
@@ -21008,7 +21870,7 @@
       "merged_prs": [],
       "open_issues": 0,
       "page": "apps/app/src/app/[org]/[ws]/agents/[agent]/page.tsx",
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": false
     },
     "agent-source": {
@@ -21025,7 +21887,7 @@
       "merged_prs": [],
       "open_issues": 0,
       "page": "apps/app/src/app/[org]/[ws]/agents/[agent]/source/page.tsx",
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": false
     },
     "agents": {
@@ -21037,7 +21899,7 @@
       "merged_prs": [],
       "open_issues": 0,
       "page": "apps/app/src/app/[org]/[ws]/agents/page.tsx",
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": false
     },
     "audit": {
@@ -21049,37 +21911,36 @@
       "merged_prs": [],
       "open_issues": 0,
       "page": "apps/app/src/app/[org]/audit/page.tsx",
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": false
     },
     "billing": {
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "surface",
-      "last_merge": "2026-09-18T18:39:51Z",
-      "links": [],
-      "merged_prs": [
+      "last_merge": null,
+      "links": [
         {
-          "closes": [],
-          "merged_at": "2026-09-18T18:39:51Z",
-          "number": 3309,
+          "number": 3323,
           "repo": "oxagen",
-          "title": "app: lay the Billing page out as the Mission Control design draws it, and wire Change plan",
-          "touched": [
-            "apps/app/src/app/[org]/billing/page.tsx",
-            "apps/app/src/features/billing/billing.tsx",
-            "apps/app/src/features/billing/bucket-meter.tsx",
-            "apps/app/src/features/billing/actions.ts"
-          ]
+          "state": "open",
+          "title": "Residue from #3271: a negotiated rate scheduled for the future cannot be seen or cancelled in the app until it starts"
+        },
+        {
+          "number": 3329,
+          "repo": "oxagen",
+          "state": "open",
+          "title": "Reject backdated list price successors"
         }
       ],
-      "open_issues": 0,
+      "merged_prs": [],
+      "open_issues": 2,
       "page": "apps/app/src/app/[org]/billing/page.tsx",
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": false
     },
     "fleet": {
-      "closed_issues": 0,
+      "closed_issues": 1,
       "gap_refs": [
         {
           "number": 2970,
@@ -21092,36 +21953,59 @@
       ],
       "kind": "surface",
       "last_merge": null,
-      "links": [],
+      "links": [
+        {
+          "number": 3282,
+          "repo": "oxagen",
+          "state": "closed",
+          "title": "app: the Run page, and runs you can tell apart in the Fleet list (WL-35)"
+        },
+        {
+          "number": 2953,
+          "repo": "oxagen",
+          "state": "open",
+          "title": "Run controls: pause, resume, cancel and steer with a delivery mode on every run, and Steer the fleet"
+        }
+      ],
       "merged_prs": [],
-      "open_issues": 0,
+      "open_issues": 1,
       "page": "apps/app/src/app/[org]/[ws]/page.tsx",
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": false
     },
     "forgot-password": {
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "surface",
-      "last_merge": "2026-09-18T20:20:03Z",
+      "last_merge": "2026-09-18T23:02:28Z",
       "links": [],
       "merged_prs": [
         {
           "closes": [],
-          "merged_at": "2026-09-18T20:20:03Z",
-          "number": 3308,
+          "merged_at": "2026-09-18T23:02:28Z",
+          "number": 3345,
           "repo": "oxagen",
-          "title": "Organization › Model funding: bring your own model key from the app",
+          "title": "app: the Mission Control transcript on every run's page",
           "touched": [
             "apps/app/src/app/"
           ]
         },
         {
           "closes": [],
-          "merged_at": "2026-09-18T18:39:51Z",
-          "number": 3309,
+          "merged_at": "2026-09-18T22:27:26Z",
+          "number": 3342,
           "repo": "oxagen",
-          "title": "app: lay the Billing page out as the Mission Control design draws it, and wire Change plan",
+          "title": "tacho: ship prompts, transcripts and per-call tokens so the Run page has cost and content",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-18T21:43:14Z",
+          "number": 3341,
+          "repo": "oxagen",
+          "title": "app: the in-app assistant renders markdown, highlights code, and reve…",
           "touched": [
             "apps/app/src/app/"
           ]
@@ -21129,65 +22013,90 @@
       ],
       "open_issues": 0,
       "page": "apps/app/src/app/(auth)/forgot-password/page.tsx",
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": false
     },
     "installer": {
       "closed_issues": 0,
-      "gap_refs": [],
+      "gap_refs": [
+        {
+          "number": 3320,
+          "state": "open"
+        }
+      ],
       "kind": "surface",
-      "last_merge": "2026-09-18T20:49:21Z",
-      "links": [],
+      "last_merge": "2026-09-18T22:27:26Z",
+      "links": [
+        {
+          "number": 3301,
+          "repo": "oxagen",
+          "state": "open",
+          "title": "Desktop app: a line-by-line bug review, then install and uninstall fixed and proven"
+        },
+        {
+          "number": 3320,
+          "repo": "oxagen",
+          "state": "open",
+          "title": "tacho collector: detector.ts checks for Claude Code hooks even on hosts that never enrolled Claude Code"
+        },
+        {
+          "number": 3330,
+          "repo": "oxagen",
+          "state": "open",
+          "title": "Residue from #3321: the P2/P3 desktop and Tacho host-writer findings its review left open"
+        }
+      ],
       "merged_prs": [
         {
           "closes": [],
-          "merged_at": "2026-09-18T20:49:21Z",
-          "number": 3307,
+          "merged_at": "2026-09-18T22:27:26Z",
+          "number": 3342,
           "repo": "oxagen",
-          "title": "Spec and plan: one assembler, two planes, the gateway, and the four-word tier ladder",
+          "title": "tacho: ship prompts, transcripts and per-call tokens so the Run page has cost and content",
           "touched": [
-            "docs/specs/oxagen-desktop"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-18T20:05:55Z",
-          "number": 3321,
-          "repo": "oxagen",
-          "title": "desktop: a line-by-line review; install and uninstall fixed and proven against a snapshot rig",
-          "touched": [
-            "apps/desktop/src-tauri"
+            "packages/tacho/src/cli/enroll.ts",
+            "packages/tacho/src/cli/unenroll.ts"
           ]
         }
       ],
-      "open_issues": 0,
+      "open_issues": 3,
       "page": "apps/app/src/app/[org]/[ws]/register/[step]/page.tsx",
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": true
     },
     "login": {
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "surface",
-      "last_merge": "2026-09-18T20:20:03Z",
+      "last_merge": "2026-09-18T23:02:28Z",
       "links": [],
       "merged_prs": [
         {
           "closes": [],
-          "merged_at": "2026-09-18T20:20:03Z",
-          "number": 3308,
+          "merged_at": "2026-09-18T23:02:28Z",
+          "number": 3345,
           "repo": "oxagen",
-          "title": "Organization › Model funding: bring your own model key from the app",
+          "title": "app: the Mission Control transcript on every run's page",
           "touched": [
             "apps/app/src/app/"
           ]
         },
         {
           "closes": [],
-          "merged_at": "2026-09-18T18:39:51Z",
-          "number": 3309,
+          "merged_at": "2026-09-18T22:27:26Z",
+          "number": 3342,
           "repo": "oxagen",
-          "title": "app: lay the Billing page out as the Mission Control design draws it, and wire Change plan",
+          "title": "tacho: ship prompts, transcripts and per-call tokens so the Run page has cost and content",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-18T21:43:14Z",
+          "number": 3341,
+          "repo": "oxagen",
+          "title": "app: the in-app assistant renders markdown, highlights code, and reve…",
           "touched": [
             "apps/app/src/app/"
           ]
@@ -21195,7 +22104,7 @@
       ],
       "open_issues": 0,
       "page": "apps/app/src/app/(auth)/login/page.tsx",
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": false
     },
     "mandate": {
@@ -21207,32 +22116,42 @@
       "merged_prs": [],
       "open_issues": 0,
       "page": null,
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": false
     },
     "onboarding-organization": {
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "surface",
-      "last_merge": "2026-09-18T20:20:03Z",
+      "last_merge": "2026-09-18T23:02:28Z",
       "links": [],
       "merged_prs": [
         {
           "closes": [],
-          "merged_at": "2026-09-18T20:20:03Z",
-          "number": 3308,
+          "merged_at": "2026-09-18T23:02:28Z",
+          "number": 3345,
           "repo": "oxagen",
-          "title": "Organization › Model funding: bring your own model key from the app",
+          "title": "app: the Mission Control transcript on every run's page",
           "touched": [
             "apps/app/src/app/"
           ]
         },
         {
           "closes": [],
-          "merged_at": "2026-09-18T18:39:51Z",
-          "number": 3309,
+          "merged_at": "2026-09-18T22:27:26Z",
+          "number": 3342,
           "repo": "oxagen",
-          "title": "app: lay the Billing page out as the Mission Control design draws it, and wire Change plan",
+          "title": "tacho: ship prompts, transcripts and per-call tokens so the Run page has cost and content",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-18T21:43:14Z",
+          "number": 3341,
+          "repo": "oxagen",
+          "title": "app: the in-app assistant renders markdown, highlights code, and reve…",
           "touched": [
             "apps/app/src/app/"
           ]
@@ -21240,7 +22159,7 @@
       ],
       "open_issues": 0,
       "page": "apps/app/src/app/(onboarding)/new-organization/page.tsx",
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": false
     },
     "onboarding-run": {
@@ -21252,7 +22171,7 @@
       "merged_prs": [],
       "open_issues": 0,
       "page": "apps/app/src/app/[org]/[ws]/register/[step]/page.tsx",
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": true
     },
     "onboarding-wrap": {
@@ -21264,30 +22183,48 @@
       "merged_prs": [],
       "open_issues": 0,
       "page": "apps/app/src/app/[org]/[ws]/register/[step]/page.tsx",
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": true
     },
     "organization": {
       "closed_issues": 0,
-      "gap_refs": [],
+      "gap_refs": [
+        {
+          "number": 3290,
+          "state": "closed"
+        }
+      ],
       "kind": "surface",
-      "last_merge": "2026-09-18T20:20:03Z",
-      "links": [],
+      "last_merge": "2026-09-18T22:36:11Z",
+      "links": [
+        {
+          "number": 3314,
+          "repo": "oxagen",
+          "state": "open",
+          "title": "Residue from #3290: direct-key models lose their provider identity, verification asks less than the turn does, and endpoint URLs can carry embedded credentials"
+        },
+        {
+          "number": 3317,
+          "repo": "oxagen",
+          "state": "open",
+          "title": "Residue from #3308: the Model funding form's wrong explanation, provider switch, and stale test verdict"
+        }
+      ],
       "merged_prs": [
         {
           "closes": [],
-          "merged_at": "2026-09-18T20:20:03Z",
-          "number": 3308,
+          "merged_at": "2026-09-18T22:36:11Z",
+          "number": 3326,
           "repo": "oxagen",
-          "title": "Organization › Model funding: bring your own model key from the app",
+          "title": "M0: a workspace is born with its main repository; a second repository links and unlinks (§17 M0)",
           "touched": [
-            "apps/app/src/features/organization/tabs.tsx"
+            "apps/app/src/features/organization/actions.ts"
           ]
         }
       ],
-      "open_issues": 0,
+      "open_issues": 2,
       "page": "apps/app/src/app/[org]/page.tsx",
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": false
     },
     "organization-api-keys": {
@@ -21299,7 +22236,7 @@
       "merged_prs": [],
       "open_issues": 0,
       "page": "apps/app/src/app/[org]/api-keys/page.tsx",
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": false
     },
     "organization-roles": {
@@ -21311,7 +22248,7 @@
       "merged_prs": [],
       "open_issues": 0,
       "page": "apps/app/src/app/[org]/roles/page.tsx",
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": false
     },
     "record": {
@@ -21323,11 +22260,11 @@
       "merged_prs": [],
       "open_issues": 0,
       "page": null,
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": false
     },
     "register-name": {
-      "closed_issues": 0,
+      "closed_issues": 1,
       "gap_refs": [
         {
           "number": 3260,
@@ -21335,12 +22272,46 @@
         }
       ],
       "kind": "surface",
-      "last_merge": null,
-      "links": [],
-      "merged_prs": [],
-      "open_issues": 0,
+      "last_merge": "2026-09-18T22:41:25Z",
+      "links": [
+        {
+          "number": 3230,
+          "repo": "oxagen",
+          "state": "closed",
+          "title": "Assistant flyout: page context trusts the URL over the rendered view, focus breaks at the md boundary, abandoned turns keep spending"
+        },
+        {
+          "number": 3313,
+          "repo": "oxagen",
+          "state": "open",
+          "title": "Residue from #3292: key assistant threads by the workspace's stable identity, not by its slug"
+        }
+      ],
+      "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-18T22:41:25Z",
+          "number": 3350,
+          "repo": "oxagen",
+          "title": "app: fix the five review findings left on the assistant reveal",
+          "touched": [
+            "apps/app/src/features/shell/assistant-flyout.tsx"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-18T21:43:14Z",
+          "number": 3341,
+          "repo": "oxagen",
+          "title": "app: the in-app assistant renders markdown, highlights code, and reve…",
+          "touched": [
+            "apps/app/src/features/shell/assistant-flyout.tsx"
+          ]
+        }
+      ],
+      "open_issues": 1,
       "page": "apps/app/src/app/[org]/[ws]/register/[step]/page.tsx",
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": true
     },
     "register-run": {
@@ -21352,7 +22323,7 @@
       "merged_prs": [],
       "open_issues": 0,
       "page": "apps/app/src/app/[org]/[ws]/register/[step]/page.tsx",
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": true
     },
     "register-wrap": {
@@ -21364,44 +22335,99 @@
       "merged_prs": [],
       "open_issues": 0,
       "page": "apps/app/src/app/[org]/[ws]/register/[step]/page.tsx",
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": true
     },
     "repositories": {
-      "closed_issues": 0,
-      "gap_refs": [],
+      "closed_issues": 1,
+      "gap_refs": [
+        {
+          "number": 3326,
+          "state": "closed"
+        }
+      ],
       "kind": "surface",
-      "last_merge": null,
-      "links": [],
-      "merged_prs": [],
-      "open_issues": 0,
+      "last_merge": "2026-09-18T22:36:11Z",
+      "links": [
+        {
+          "number": 3241,
+          "repo": "oxagen",
+          "state": "open",
+          "title": "Repositories: bind a repository, connect a local directory, and one pull-request lifecycle for every governed file"
+        },
+        {
+          "number": 3326,
+          "repo": "oxagen",
+          "state": "closed",
+          "title": "M0: a workspace is born with its main repository; a second repository links and unlinks (§17 M0)"
+        },
+        {
+          "number": 3288,
+          "repo": "oxagen",
+          "state": "open",
+          "title": "Residue from #3269: the main-repo plane recheck is not atomic with the claim write"
+        },
+        {
+          "number": 3335,
+          "repo": "oxagen",
+          "state": "open",
+          "title": "Residue from #3326: Workspace settings promises Context PR routing to linked repositories that does not exist"
+        }
+      ],
+      "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-18T22:36:11Z",
+          "number": 3326,
+          "repo": "oxagen",
+          "title": "M0: a workspace is born with its main repository; a second repository links and unlinks (§17 M0)",
+          "touched": [
+            "apps/app/src/features/shell/workspace-settings.tsx",
+            "apps/app/src/features/shell/workspace-settings-actions.ts",
+            "apps/app/src/features/shell/workspace-settings.test.tsx",
+            "packages/oxagen/src/contracts/repository.main.bind.ts",
+            "packages/handlers/src/context.steering.github.ts"
+          ]
+        }
+      ],
+      "open_issues": 3,
       "page": null,
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": false
     },
     "reset-password": {
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "surface",
-      "last_merge": "2026-09-18T20:20:03Z",
+      "last_merge": "2026-09-18T23:02:28Z",
       "links": [],
       "merged_prs": [
         {
           "closes": [],
-          "merged_at": "2026-09-18T20:20:03Z",
-          "number": 3308,
+          "merged_at": "2026-09-18T23:02:28Z",
+          "number": 3345,
           "repo": "oxagen",
-          "title": "Organization › Model funding: bring your own model key from the app",
+          "title": "app: the Mission Control transcript on every run's page",
           "touched": [
             "apps/app/src/app/"
           ]
         },
         {
           "closes": [],
-          "merged_at": "2026-09-18T18:39:51Z",
-          "number": 3309,
+          "merged_at": "2026-09-18T22:27:26Z",
+          "number": 3342,
           "repo": "oxagen",
-          "title": "app: lay the Billing page out as the Mission Control design draws it, and wire Change plan",
+          "title": "tacho: ship prompts, transcripts and per-call tokens so the Run page has cost and content",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-18T21:43:14Z",
+          "number": 3341,
+          "repo": "oxagen",
+          "title": "app: the in-app assistant renders markdown, highlights code, and reve…",
           "touched": [
             "apps/app/src/app/"
           ]
@@ -21409,28 +22435,77 @@
       ],
       "open_issues": 0,
       "page": "apps/app/src/app/(auth)/reset-password/page.tsx",
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": false
     },
     "run": {
-      "closed_issues": 0,
+      "closed_issues": 1,
       "gap_refs": [
         {
-          "number": 2953,
+          "number": 2955,
           "state": "open"
         },
         {
-          "number": 2955,
+          "number": 3286,
+          "state": "open"
+        },
+        {
+          "number": 3285,
           "state": "open"
         }
       ],
       "kind": "surface",
-      "last_merge": null,
-      "links": [],
-      "merged_prs": [],
-      "open_issues": 0,
+      "last_merge": "2026-09-18T23:02:28Z",
+      "links": [
+        {
+          "number": 3282,
+          "repo": "oxagen",
+          "state": "closed",
+          "title": "app: the Run page, and runs you can tell apart in the Fleet list (WL-35)"
+        },
+        {
+          "number": 3285,
+          "repo": "oxagen",
+          "state": "open",
+          "title": "Residue from #3282: run controls offered on observe-tier runs, and a live run that never updates"
+        },
+        {
+          "number": 3286,
+          "repo": "oxagen",
+          "state": "open",
+          "title": "The Run page's Policy tab needs approvals that record their run"
+        },
+        {
+          "number": 2953,
+          "repo": "oxagen",
+          "state": "open",
+          "title": "Run controls: pause, resume, cancel and steer with a delivery mode on every run, and Steer the fleet"
+        },
+        {
+          "number": 2955,
+          "repo": "oxagen",
+          "state": "open",
+          "title": "Proof: witness runs, the flip, verdicts on runs, and proven spend"
+        }
+      ],
+      "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-18T23:02:28Z",
+          "number": 3345,
+          "repo": "oxagen",
+          "title": "app: the Mission Control transcript on every run's page",
+          "touched": [
+            "apps/app/src/features/run/run.tsx",
+            "apps/app/src/features/run/transcript.tsx",
+            "apps/app/src/features/run/run.test.tsx",
+            "packages/oxagen/src/contracts/run.transcript.get.ts"
+          ]
+        }
+      ],
+      "open_issues": 4,
       "page": "apps/app/src/app/[org]/[ws]/runs/[run]/page.tsx",
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": true
     },
     "run-interjection": {
@@ -21442,32 +22517,42 @@
       "merged_prs": [],
       "open_issues": 0,
       "page": "apps/app/src/app/[org]/[ws]/runs/[run]/page.tsx",
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": true
     },
     "signup": {
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "surface",
-      "last_merge": "2026-09-18T20:20:03Z",
+      "last_merge": "2026-09-18T23:02:28Z",
       "links": [],
       "merged_prs": [
         {
           "closes": [],
-          "merged_at": "2026-09-18T20:20:03Z",
-          "number": 3308,
+          "merged_at": "2026-09-18T23:02:28Z",
+          "number": 3345,
           "repo": "oxagen",
-          "title": "Organization › Model funding: bring your own model key from the app",
+          "title": "app: the Mission Control transcript on every run's page",
           "touched": [
             "apps/app/src/app/"
           ]
         },
         {
           "closes": [],
-          "merged_at": "2026-09-18T18:39:51Z",
-          "number": 3309,
+          "merged_at": "2026-09-18T22:27:26Z",
+          "number": 3342,
           "repo": "oxagen",
-          "title": "app: lay the Billing page out as the Mission Control design draws it, and wire Change plan",
+          "title": "tacho: ship prompts, transcripts and per-call tokens so the Run page has cost and content",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-18T21:43:14Z",
+          "number": 3341,
+          "repo": "oxagen",
+          "title": "app: the in-app assistant renders markdown, highlights code, and reve…",
           "touched": [
             "apps/app/src/app/"
           ]
@@ -21475,7 +22560,7 @@
       ],
       "open_issues": 0,
       "page": "apps/app/src/app/(auth)/signup/page.tsx",
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": false
     },
     "skill-source": {
@@ -21487,7 +22572,7 @@
       "merged_prs": [],
       "open_issues": 0,
       "page": null,
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": false
     },
     "skills": {
@@ -21495,11 +22580,24 @@
       "gap_refs": [],
       "kind": "surface",
       "last_merge": null,
-      "links": [],
+      "links": [
+        {
+          "number": 3098,
+          "repo": "oxagen",
+          "state": "open",
+          "title": "Skills: what is built today on the new Mission Control skin (rev1)"
+        },
+        {
+          "number": 3297,
+          "repo": "oxagen",
+          "state": "open",
+          "title": "Phase 2. One screen: Steering becomes the hub, with Skills and Ontology under it and a Preview tab"
+        }
+      ],
       "merged_prs": [],
-      "open_issues": 0,
+      "open_issues": 2,
       "page": "apps/app/src/app/[org]/[ws]/skills/page.tsx",
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": true
     },
     "skills-off": {
@@ -21511,7 +22609,7 @@
       "merged_prs": [],
       "open_issues": 0,
       "page": "apps/app/src/app/[org]/[ws]/skills/page.tsx",
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": true
     },
     "spend": {
@@ -21523,12 +22621,21 @@
       "merged_prs": [],
       "open_issues": 0,
       "page": "apps/app/src/app/[org]/[ws]/spend/page.tsx",
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": false
     },
     "steering": {
       "closed_issues": 0,
-      "gap_refs": [],
+      "gap_refs": [
+        {
+          "number": 3302,
+          "state": "open"
+        },
+        {
+          "number": 3319,
+          "state": "closed"
+        }
+      ],
       "kind": "surface",
       "last_merge": null,
       "links": [
@@ -21555,12 +22662,36 @@
           "repo": "oxagen",
           "state": "open",
           "title": "Phase 2. One screen: Steering becomes the hub, with Skills and Ontology under it and a Preview tab"
+        },
+        {
+          "number": 3302,
+          "repo": "oxagen",
+          "state": "open",
+          "title": "A record published through publish_context_record has no kind or force, so it never reaches an agent"
+        },
+        {
+          "number": 3303,
+          "repo": "oxagen",
+          "state": "open",
+          "title": "Workspace additionalInstructions are appended to the in-app agent's prompt with no budget, no record, and no check against rules or published records"
+        },
+        {
+          "number": 3311,
+          "repo": "oxagen",
+          "state": "open",
+          "title": "Avoid loading all steering records for every control response"
+        },
+        {
+          "number": 3312,
+          "repo": "oxagen",
+          "state": "open",
+          "title": "Compile the pinned record version instead of stale row fields"
         }
       ],
       "merged_prs": [],
-      "open_issues": 4,
+      "open_issues": 8,
       "page": "apps/app/src/app/[org]/[ws]/steering/page.tsx",
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": false
     },
     "tools": {
@@ -21577,32 +22708,42 @@
       "merged_prs": [],
       "open_issues": 0,
       "page": "apps/app/src/app/[org]/[ws]/tools/page.tsx",
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": false
     },
     "two-factor": {
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "surface",
-      "last_merge": "2026-09-18T20:20:03Z",
+      "last_merge": "2026-09-18T23:02:28Z",
       "links": [],
       "merged_prs": [
         {
           "closes": [],
-          "merged_at": "2026-09-18T20:20:03Z",
-          "number": 3308,
+          "merged_at": "2026-09-18T23:02:28Z",
+          "number": 3345,
           "repo": "oxagen",
-          "title": "Organization › Model funding: bring your own model key from the app",
+          "title": "app: the Mission Control transcript on every run's page",
           "touched": [
             "apps/app/src/app/"
           ]
         },
         {
           "closes": [],
-          "merged_at": "2026-09-18T18:39:51Z",
-          "number": 3309,
+          "merged_at": "2026-09-18T22:27:26Z",
+          "number": 3342,
           "repo": "oxagen",
-          "title": "app: lay the Billing page out as the Mission Control design draws it, and wire Change plan",
+          "title": "tacho: ship prompts, transcripts and per-call tokens so the Run page has cost and content",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-18T21:43:14Z",
+          "number": 3341,
+          "repo": "oxagen",
+          "title": "app: the in-app assistant renders markdown, highlights code, and reve…",
           "touched": [
             "apps/app/src/app/"
           ]
@@ -21610,32 +22751,42 @@
       ],
       "open_issues": 0,
       "page": "apps/app/src/app/(auth)/two-factor/page.tsx",
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": false
     },
     "verify-email": {
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "surface",
-      "last_merge": "2026-09-18T20:20:03Z",
+      "last_merge": "2026-09-18T23:02:28Z",
       "links": [],
       "merged_prs": [
         {
           "closes": [],
-          "merged_at": "2026-09-18T20:20:03Z",
-          "number": 3308,
+          "merged_at": "2026-09-18T23:02:28Z",
+          "number": 3345,
           "repo": "oxagen",
-          "title": "Organization › Model funding: bring your own model key from the app",
+          "title": "app: the Mission Control transcript on every run's page",
           "touched": [
             "apps/app/src/app/"
           ]
         },
         {
           "closes": [],
-          "merged_at": "2026-09-18T18:39:51Z",
-          "number": 3309,
+          "merged_at": "2026-09-18T22:27:26Z",
+          "number": 3342,
           "repo": "oxagen",
-          "title": "app: lay the Billing page out as the Mission Control design draws it, and wire Change plan",
+          "title": "tacho: ship prompts, transcripts and per-call tokens so the Run page has cost and content",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-18T21:43:14Z",
+          "number": 3341,
+          "repo": "oxagen",
+          "title": "app: the in-app assistant renders markdown, highlights code, and reve…",
           "touched": [
             "apps/app/src/app/"
           ]
@@ -21643,7 +22794,7 @@
       ],
       "open_issues": 0,
       "page": "apps/app/src/app/(auth)/verify/page.tsx",
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": false
     },
     "wizard-agent": {
@@ -21655,7 +22806,7 @@
       "merged_prs": [],
       "open_issues": 0,
       "page": null,
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": false
     },
     "wizard-record": {
@@ -21667,19 +22818,30 @@
       "merged_prs": [],
       "open_issues": 0,
       "page": null,
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": false
     },
     "wizard-repository-init": {
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "surface",
-      "last_merge": null,
+      "last_merge": "2026-09-18T22:36:11Z",
       "links": [],
-      "merged_prs": [],
+      "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-18T22:36:11Z",
+          "number": 3326,
+          "repo": "oxagen",
+          "title": "M0: a workspace is born with its main repository; a second repository links and unlinks (§17 M0)",
+          "touched": [
+            "apps/app/src/features/shell/workspace-settings.tsx"
+          ]
+        }
+      ],
       "open_issues": 0,
       "page": null,
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": false
     },
     "wizard-skill": {
@@ -21691,7 +22853,7 @@
       "merged_prs": [],
       "open_issues": 0,
       "page": null,
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": false
     },
     "wizard-tool": {
@@ -21703,87 +22865,92 @@
       "merged_prs": [],
       "open_issues": 0,
       "page": null,
-      "refreshed_at": "2026-09-18T21:10:04.500Z",
+      "refreshed_at": "2026-09-18T23:26:29.677Z",
       "shared_page": false
     }
   },
   "last_run": {
-    "at": "2026-09-18T21:13:37.847Z",
-    "calls": 4,
+    "at": "2026-09-18T23:26:29.677Z",
+    "calls": 17,
     "quiet": false
   },
   "milestones": {
     "M0": {
       "built": 4,
       "last_merge": {
-        "merged_at": "2026-09-18T20:20:03Z",
-        "number": 3308,
+        "merged_at": "2026-09-18T23:02:28Z",
+        "number": 3345,
         "repo": "oxagen",
-        "title": "Organization › Model funding: bring your own model key from the app"
+        "title": "app: the Mission Control transcript on every run's page"
       },
-      "merged_prs": 2,
+      "merged_prs": 4,
       "not_started": 0,
-      "open_issues": 0,
+      "open_issues": 5,
       "partial": 1,
       "total": 5
     },
     "M1": {
       "built": 10,
       "last_merge": {
-        "merged_at": "2026-09-18T20:49:21Z",
-        "number": 3307,
+        "merged_at": "2026-09-18T23:02:28Z",
+        "number": 3345,
         "repo": "oxagen",
-        "title": "Spec and plan: one assembler, two planes, the gateway, and the four-word tier ladder"
+        "title": "app: the Mission Control transcript on every run's page"
       },
       "merged_prs": 4,
-      "not_started": 2,
-      "open_issues": 4,
-      "partial": 4,
+      "not_started": 1,
+      "open_issues": 10,
+      "partial": 5,
       "total": 16
     },
     "M2": {
       "built": 4,
-      "last_merge": {
-        "merged_at": "2026-09-18T18:39:51Z",
-        "number": 3309,
-        "repo": "oxagen",
-        "title": "app: lay the Billing page out as the Mission Control design draws it, and wire Change plan"
-      },
-      "merged_prs": 1,
+      "last_merge": null,
+      "merged_prs": 0,
       "not_started": 2,
-      "open_issues": 3,
+      "open_issues": 5,
       "partial": 2,
       "total": 8
     },
     "M3": {
       "built": 1,
       "last_merge": {
-        "merged_at": "2026-09-18T18:39:51Z",
-        "number": 3309,
+        "merged_at": "2026-09-18T23:02:28Z",
+        "number": 3345,
         "repo": "oxagen",
-        "title": "app: lay the Billing page out as the Mission Control design draws it, and wire Change plan"
+        "title": "app: the Mission Control transcript on every run's page"
       },
       "merged_prs": 1,
-      "not_started": 1,
-      "open_issues": 3,
-      "partial": 1,
+      "not_started": 0,
+      "open_issues": 7,
+      "partial": 2,
       "total": 3
     },
     "M4": {
       "built": 1,
-      "last_merge": null,
-      "merged_prs": 0,
-      "not_started": 1,
-      "open_issues": 3,
-      "partial": 1,
+      "last_merge": {
+        "merged_at": "2026-09-18T23:02:28Z",
+        "number": 3345,
+        "repo": "oxagen",
+        "title": "app: the Mission Control transcript on every run's page"
+      },
+      "merged_prs": 1,
+      "not_started": 0,
+      "open_issues": 5,
+      "partial": 2,
       "total": 3
     },
     "M5": {
       "built": 0,
-      "last_merge": null,
-      "merged_prs": 0,
+      "last_merge": {
+        "merged_at": "2026-09-18T22:36:11Z",
+        "number": 3326,
+        "repo": "oxagen",
+        "title": "M0: a workspace is born with its main repository; a second repository links and unlinks (§17 M0)"
+      },
+      "merged_prs": 1,
       "not_started": 7,
-      "open_issues": 4,
+      "open_issues": 9,
       "partial": 3,
       "total": 10
     },
@@ -21792,7 +22959,7 @@
       "last_merge": null,
       "merged_prs": 0,
       "not_started": 0,
-      "open_issues": 4,
+      "open_issues": 8,
       "partial": 1,
       "total": 1
     }
@@ -22412,11 +23579,573 @@
       ],
       "repo": "oxagen",
       "title": "desktop: a line-by-line review; install and uninstall fixed and proven against a snapshot rig"
+    },
+    "oxagen#3322": {
+      "added": [
+        "packages/database/atlas/migrations/20260918120000_meter_carry_per_billing_reason.sql"
+      ],
+      "author": "macanderson",
+      "closes": [],
+      "files": [
+        "apps/docs/content/docs/governance/byok-and-models.mdx",
+        "docs/adr/ADR-053-in-app-agent-on-stella-serve-and-funding-sources.md",
+        "docs/ops/stripe-product-sync-sop.md",
+        "docs/specs/governed-action-metering.md",
+        "docs/specs/mission-control/spec.html",
+        "docs/specs/mission-control/spec.md",
+        "packages/billing/src/consume-credits.test.ts",
+        "packages/billing/src/credits.ts",
+        "packages/billing/src/metering.test.ts",
+        "packages/billing/src/metering.ts",
+        "packages/database/atlas/migrations/20260918120000_meter_carry_per_billing_reason.sql",
+        "packages/database/atlas/migrations/atlas.sum",
+        "packages/database/src/schema/billing.ts",
+        "packages/database/storage-manifest.json"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3322",
+      "merged_at": "2026-09-18T21:36:05Z",
+      "number": 3322,
+      "refs": [],
+      "repo": "oxagen",
+      "title": "billing: bill the in-app agent's platform-funded tokens at exactly cost"
+    },
+    "oxagen#3326": {
+      "added": [
+        "apps/api/src/routes/v1/repository.link.ts",
+        "apps/api/src/routes/v1/repository.list.ts",
+        "apps/api/src/routes/v1/repository.unlink.ts",
+        "apps/app/src/features/shell/workspace-repositories.tsx",
+        "apps/cli/src/commands/repo.test.ts",
+        "apps/cli/src/commands/repo.ts",
+        "apps/mcp/src/tools/repository.handlers.test.ts",
+        "apps/mcp/src/tools/repository.link.ts",
+        "apps/mcp/src/tools/repository.list.ts",
+        "apps/mcp/src/tools/repository.unlink.ts",
+        "docs/adr/ADR-099-a-workspace-is-born-with-its-main-repository.md",
+        "docs/capabilities/repository.link.md",
+        "docs/capabilities/repository.list.md",
+        "docs/capabilities/repository.unlink.md",
+        "docs/capabilities/schemas/link_repository.json",
+        "docs/capabilities/schemas/list_repositories.json",
+        "docs/capabilities/schemas/unlink_repository.json",
+        "packages/database/atlas/migrations/20260918200000_repository_binding_heads_exclusive_across_roles.sql",
+        "packages/database/integration/repository-heads-reconcile.test.ts",
+        "packages/handlers/src/repository.binding-write.test.ts",
+        "packages/handlers/src/repository.binding-write.ts",
+        "packages/handlers/src/repository.link.test.ts",
+        "packages/handlers/src/repository.link.ts",
+        "packages/handlers/src/repository.list.test.ts",
+        "packages/handlers/src/repository.list.ts",
+        "packages/handlers/src/repository.pg.test.ts",
+        "packages/handlers/src/repository.unlink.test.ts",
+        "packages/handlers/src/repository.unlink.ts",
+        "packages/oxagen/src/contracts/repository.link.ts",
+        "packages/oxagen/src/contracts/repository.list.ts",
+        "packages/oxagen/src/contracts/repository.unlink.ts"
+      ],
+      "author": "macanderson",
+      "closes": [],
+      "files": [
+        "apps/api/src/__tests__/routes.workspace.test.ts",
+        "apps/api/src/app.ts",
+        "apps/api/src/routes/v1/repository.link.ts",
+        "apps/api/src/routes/v1/repository.list.ts",
+        "apps/api/src/routes/v1/repository.unlink.ts",
+        "apps/api/src/routes/v1/thin-capability-routes.test.ts",
+        "apps/api/src/routes/v1/workspace.create.test.ts",
+        "apps/app/capability-ui-map.json",
+        "apps/app/messages/onboarding.json",
+        "apps/app/messages/organization.json",
+        "apps/app/messages/workspace-settings.json",
+        "apps/app/src/data/contracts/repository.ts",
+        "apps/app/src/features/organization/action-failure.ts",
+        "apps/app/src/features/organization/actions.test.ts",
+        "apps/app/src/features/organization/actions.ts",
+        "apps/app/src/features/organization/workspace-actions.test.tsx",
+        "apps/app/src/features/organization/workspace-actions.tsx",
+        "apps/app/src/features/shell/workspace-repositories.tsx",
+        "apps/app/src/features/shell/workspace-settings-actions.test.ts",
+        "apps/app/src/features/shell/workspace-settings-actions.ts",
+        "apps/app/src/features/shell/workspace-settings-failure.ts",
+        "apps/app/src/features/shell/workspace-settings.test.tsx",
+        "apps/app/src/features/shell/workspace-settings.tsx",
+        "apps/app/src/i18n/messages.d.ts",
+        "apps/app_deprecated/src/app/(onboarding)/new-organization/actions.test.ts",
+        "apps/app_deprecated/src/app/(onboarding)/new-organization/actions.ts",
+        "apps/app_deprecated/src/app/[orgSlug]/new-workspace/actions.test.ts",
+        "apps/app_deprecated/src/app/[orgSlug]/new-workspace/actions.ts",
+        "apps/cli/src/commands/repo.test.ts",
+        "apps/cli/src/commands/repo.ts",
+        "apps/cli/src/program.ts",
+        "apps/mcp/src/tools/misc.handlers.test.ts",
+        "apps/mcp/src/tools/repository.handlers.test.ts",
+        "apps/mcp/src/tools/repository.link.ts",
+        "apps/mcp/src/tools/repository.list.ts",
+        "apps/mcp/src/tools/repository.unlink.ts",
+        "apps/mcp/src/tools/schemas.test.ts",
+        "apps/mcp/src/tools/workspace.create.ts",
+        "docs/adr/ADR-099-a-workspace-is-born-with-its-main-repository.md",
+        "docs/adr/README.md",
+        "docs/capabilities/_index.md",
+        "docs/capabilities/repository.link.md",
+        "docs/capabilities/repository.list.md",
+        "docs/capabilities/repository.main.bind.md",
+        "docs/capabilities/repository.unlink.md",
+        "docs/capabilities/schemas/README.md",
+        "docs/capabilities/schemas/_index.json",
+        "docs/capabilities/schemas/create_workspace.json",
+        "docs/capabilities/schemas/link_repository.json",
+        "docs/capabilities/schemas/list_repositories.json",
+        "docs/capabilities/schemas/unlink_repository.json",
+        "docs/capabilities/workspace.create.md",
+        "packages/database/atlas/migrations/20260918200000_repository_binding_heads_exclusive_across_roles.sql",
+        "packages/database/atlas/migrations/atlas.sum",
+        "packages/database/integration/repository-heads-reconcile.test.ts",
+        "packages/database/integration/run-attempt-foundation.test.ts",
+        "packages/database/src/schema/ingestion.ts",
+        "packages/database/src/seed.ts",
+        "packages/database/storage-manifest.json",
+        "packages/handlers/src/agent.definition.commit.test.ts",
+        "packages/handlers/src/context.steering.github.test.ts",
+        "packages/handlers/src/context.steering.github.ts",
+        "packages/handlers/src/org.create.ts",
+        "packages/handlers/src/organization.pg.test.ts",
+        "packages/handlers/src/register.ts",
+        "packages/handlers/src/repository.binding-write.test.ts",
+        "packages/handlers/src/repository.binding-write.ts",
+        "packages/handlers/src/repository.github-connection.ts",
+        "packages/handlers/src/repository.github-env.test.ts",
+        "packages/handlers/src/repository.link.test.ts",
+        "packages/handlers/src/repository.link.ts",
+        "packages/handlers/src/repository.list.test.ts",
+        "packages/handlers/src/repository.list.ts",
+        "packages/handlers/src/repository.main.bind.test.ts",
+        "packages/handlers/src/repository.main.bind.ts",
+        "packages/handlers/src/repository.main.get.test.ts",
+        "packages/handlers/src/repository.pg.test.ts",
+        "packages/handlers/src/repository.unlink.test.ts",
+        "packages/handlers/src/repository.unlink.ts",
+        "packages/handlers/src/workspace-bootstrap.ts",
+        "packages/handlers/src/workspace.create.test.ts",
+        "packages/handlers/src/workspace.create.ts",
+        "packages/oxagen/capabilities.manifest.json",
+        "packages/oxagen/src/contracts.generated.ts",
+        "packages/oxagen/src/contracts/index.ts",
+        "packages/oxagen/src/contracts/repository.link.ts",
+        "packages/oxagen/src/contracts/repository.list.ts",
+        "packages/oxagen/src/contracts/repository.main.bind.ts",
+        "packages/oxagen/src/contracts/repository.unlink.ts",
+        "packages/oxagen/src/contracts/workspace.create.test.ts",
+        "packages/oxagen/src/contracts/workspace.create.ts",
+        "packages/oxagen/src/workspace-slug.test.ts",
+        "tools/scripts/check-naming.mjs"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3326",
+      "merged_at": "2026-09-18T22:36:11Z",
+      "number": 3326,
+      "refs": [
+        3241,
+        2949
+      ],
+      "repo": "oxagen",
+      "title": "M0: a workspace is born with its main repository; a second repository links and unlinks (§17 M0)"
+    },
+    "oxagen#3341": {
+      "added": [
+        "apps/app/src/features/shell/assistant-markdown.tsx",
+        "apps/app/src/features/shell/assistant-streaming-text.tsx",
+        "apps/app/src/features/shell/assistant-thinking-dots.tsx"
+      ],
+      "author": "macanderson",
+      "closes": [],
+      "files": [
+        "apps/app/package.json",
+        "apps/app/src/app/globals.css",
+        "apps/app/src/features/shell/assistant-flyout.test.tsx",
+        "apps/app/src/features/shell/assistant-flyout.tsx",
+        "apps/app/src/features/shell/assistant-markdown.tsx",
+        "apps/app/src/features/shell/assistant-streaming-text.tsx",
+        "apps/app/src/features/shell/assistant-thinking-dots.tsx",
+        "pnpm-lock.yaml"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3341",
+      "merged_at": "2026-09-18T21:43:14Z",
+      "number": 3341,
+      "refs": [],
+      "repo": "oxagen",
+      "title": "app: the in-app assistant renders markdown, highlights code, and reve…"
+    },
+    "oxagen#3342": {
+      "added": [
+        "packages/tacho/src/claude-code/llm-call-dedupe.test.ts",
+        "packages/tacho/src/claude-code/llm-call-dedupe.ts",
+        "packages/tacho/src/collector/daemon-bodies.test.ts",
+        "packages/tacho/src/collector/daemon-transcript.test.ts",
+        "packages/tacho/src/collector/detector-scan.test.ts",
+        "packages/tacho/src/collector/transcript-tailer.test.ts",
+        "packages/tacho/src/collector/transcript-tailer.ts",
+        "packages/tacho/src/evidence/frame-body.test.ts",
+        "packages/tacho/src/evidence/frame-body.ts"
+      ],
+      "author": "macanderson",
+      "closes": [],
+      "files": [
+        "apps/api/src/app.ts",
+        "apps/api/src/routes/v1/tacho.events.ingest.test.ts",
+        "apps/api/src/routes/v1/tacho.host.enroll.test.ts",
+        "apps/app/src/app/[org]/pages.test.tsx",
+        "docs/specs/tacho/data-model.md",
+        "docs/specs/tacho/spec.md",
+        "packages/handlers/src/tacho.events.ingest.test.ts",
+        "packages/handlers/src/tacho.events.ingest.ts",
+        "packages/tacho/src/claude-code/context.test.ts",
+        "packages/tacho/src/claude-code/context.ts",
+        "packages/tacho/src/claude-code/hooks.test.ts",
+        "packages/tacho/src/claude-code/hooks.ts",
+        "packages/tacho/src/claude-code/llm-call-dedupe.test.ts",
+        "packages/tacho/src/claude-code/llm-call-dedupe.ts",
+        "packages/tacho/src/claude-code/recorder.ts",
+        "packages/tacho/src/claude-code/replay.test.ts",
+        "packages/tacho/src/claude-code/stella-adapter.test.ts",
+        "packages/tacho/src/claude-code/stella-adapter.ts",
+        "packages/tacho/src/claude-code/transcript.ts",
+        "packages/tacho/src/cli/cli.test.ts",
+        "packages/tacho/src/cli/enroll.ts",
+        "packages/tacho/src/cli/unenroll.ts",
+        "packages/tacho/src/collector/collector-units.test.ts",
+        "packages/tacho/src/collector/daemon-bodies.test.ts",
+        "packages/tacho/src/collector/daemon-transcript.test.ts",
+        "packages/tacho/src/collector/daemon.test.ts",
+        "packages/tacho/src/collector/daemon.ts",
+        "packages/tacho/src/collector/detector-harness.test.ts",
+        "packages/tacho/src/collector/detector-scan.test.ts",
+        "packages/tacho/src/collector/detector.ts",
+        "packages/tacho/src/collector/hook-handler.test.ts",
+        "packages/tacho/src/collector/hook-handler.ts",
+        "packages/tacho/src/collector/spool.ts",
+        "packages/tacho/src/collector/transcript-tailer.test.ts",
+        "packages/tacho/src/collector/transcript-tailer.ts",
+        "packages/tacho/src/evidence/frame-body.test.ts",
+        "packages/tacho/src/evidence/frame-body.ts",
+        "packages/tacho/src/evidence/index.ts",
+        "packages/tacho/src/host/control-client.ts",
+        "packages/tacho/src/host/host-primitives.test.ts",
+        "packages/tacho/src/host/paths.ts",
+        "packages/tacho/src/host/wal.test.ts",
+        "packages/tacho/src/host/wal.ts",
+        "packages/tacho/src/index.ts",
+        "packages/tacho/src/wire.test.ts",
+        "packages/tacho/src/wire.ts",
+        "packages/telemetry/src/cost-frames.test.ts",
+        "packages/telemetry/src/cost-frames.ts"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3342",
+      "merged_at": "2026-09-18T22:27:26Z",
+      "number": 3342,
+      "refs": [],
+      "repo": "oxagen",
+      "title": "tacho: ship prompts, transcripts and per-call tokens so the Run page has cost and content"
+    },
+    "oxagen#3345": {
+      "added": [
+        "apps/app/src/features/run/transcript-model.test.ts",
+        "apps/app/src/features/run/transcript-model.ts",
+        "apps/app/src/features/run/transcript-view.tsx"
+      ],
+      "author": "macanderson",
+      "closes": [],
+      "files": [
+        "apps/app/capability-ui-map.json",
+        "apps/app/messages/run.json",
+        "apps/app/src/app/[org]/pages.test.tsx",
+        "apps/app/src/data/contracts/run.ts",
+        "apps/app/src/data/live/mappers/run.ts",
+        "apps/app/src/data/live/runs.test.ts",
+        "apps/app/src/features/run/run.builders.ts",
+        "apps/app/src/features/run/run.test.tsx",
+        "apps/app/src/features/run/run.tsx",
+        "apps/app/src/features/run/transcript-model.test.ts",
+        "apps/app/src/features/run/transcript-model.ts",
+        "apps/app/src/features/run/transcript-view.tsx",
+        "apps/app/src/features/run/transcript.tsx",
+        "apps/app/src/i18n/messages.d.ts",
+        "docs/capabilities/run.transcript.get.md",
+        "docs/capabilities/schemas/get_run_transcript.json",
+        "packages/handlers/src/run.transcript.get.test.ts",
+        "packages/handlers/src/run.transcript.get.ts",
+        "packages/oxagen/src/contracts/run.transcript.get.test.ts",
+        "packages/oxagen/src/contracts/run.transcript.get.ts",
+        "packages/run-ledger/src/index.ts",
+        "packages/run-ledger/src/run-frames.test.ts",
+        "packages/run-ledger/src/run-frames.ts"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3345",
+      "merged_at": "2026-09-18T23:02:28Z",
+      "number": 3345,
+      "refs": [],
+      "repo": "oxagen",
+      "title": "app: the Mission Control transcript on every run's page"
+    },
+    "oxagen#3346": {
+      "added": [
+        "apps/web/fonts/LICENSE-OFL-geist.txt",
+        "apps/web/fonts/LICENSE-OFL-monaspace.txt",
+        "apps/web/fonts/geist-latin-wght.woff2",
+        "apps/web/fonts/monaspace-neon-latin-wght.woff2",
+        "packages/ui/src/styles/fonts/LICENSE-OFL-geist.txt",
+        "packages/ui/src/styles/fonts/LICENSE-OFL-monaspace.txt",
+        "packages/ui/src/styles/fonts/geist-latin-wght.woff2",
+        "packages/ui/src/styles/fonts/monaspace-neon-latin-wght.woff2",
+        "packages/ui/src/styles/house-fonts.css"
+      ],
+      "author": "macanderson",
+      "closes": [],
+      "files": [
+        ".claude/skills/oxagen-branding/SKILL.md",
+        ".claude/skills/oxagen-branding/assets/logo.svg",
+        ".claude/skills/oxagen-branding/assets/tokens.css",
+        ".claude/skills/oxagen-branding/references/positioning.md",
+        ".claude/skills/oxagen-branding/references/system.md",
+        "apps/app/public/brand/oxagen-avatar-dark.svg",
+        "apps/app/public/brand/oxagen-avatar-light.svg",
+        "apps/app/public/brand/oxagen-icon-tile-dark.svg",
+        "apps/app/public/brand/oxagen-icon-tile-light.svg",
+        "apps/app/public/brand/oxagen-icon.svg",
+        "apps/app/public/brand/oxagen-wordmark-on-dark.svg",
+        "apps/app/public/brand/oxagen-wordmark-on-light.svg",
+        "apps/app/public/brand/oxagen-wordmark.svg",
+        "apps/app/public/brand/stella-avatar-dark.svg",
+        "apps/app/public/brand/stella-avatar-light.svg",
+        "apps/app/public/brand/stella-icon-tile-dark.svg",
+        "apps/app/public/brand/stella-icon-tile-light.svg",
+        "apps/app/public/brand/stella-icon.svg",
+        "apps/app/public/brand/stella-wordmark-on-dark.svg",
+        "apps/app/public/brand/stella-wordmark-on-light.svg",
+        "apps/app/public/brand/stella-wordmark.svg",
+        "apps/app/public/favicon/favicon-16.png",
+        "apps/app/public/favicon/favicon-192.png",
+        "apps/app/public/favicon/favicon-32.png",
+        "apps/app/public/favicon/favicon-48.png",
+        "apps/app/public/favicon/favicon-512.png",
+        "apps/app/public/favicon/favicon.ico",
+        "apps/app/public/favicon/favicon.svg",
+        "apps/app/public/pwa/apple-touch-icon.png",
+        "apps/app/public/pwa/icon-128.png",
+        "apps/app/public/pwa/icon-144.png",
+        "apps/app/public/pwa/icon-152.png",
+        "apps/app/public/pwa/icon-167.png",
+        "apps/app/public/pwa/icon-180.png",
+        "apps/app/public/pwa/icon-192.png",
+        "apps/app/public/pwa/icon-256.png",
+        "apps/app/public/pwa/icon-384.png",
+        "apps/app/public/pwa/icon-512.png",
+        "apps/app/public/pwa/icon-72.png",
+        "apps/app/public/pwa/icon-96.png",
+        "apps/app/public/pwa/maskable-192.png",
+        "apps/app/public/pwa/maskable-512.png",
+        "apps/app/public/pwa/maskable-light-192.png",
+        "apps/app/public/pwa/maskable-light-512.png",
+        "apps/app/public/social/og-image-dark-1200x630.png",
+        "apps/app/public/social/og-image-light-1200x630.png",
+        "apps/app/public/spinner/oxagen-spinner-wordmark.svg",
+        "apps/app/public/spinner/oxagen-spinner.svg",
+        "apps/desktop/src/downloads.ts",
+        "apps/docs/public/brand/oxagen-avatar-dark.svg",
+        "apps/docs/public/brand/oxagen-avatar-light.svg",
+        "apps/docs/public/brand/oxagen-icon-tile-dark.svg",
+        "apps/docs/public/brand/oxagen-icon-tile-light.svg",
+        "apps/docs/public/brand/oxagen-icon.svg",
+        "apps/docs/public/brand/oxagen-wordmark-on-dark.svg",
+        "apps/docs/public/brand/oxagen-wordmark-on-light.svg",
+        "apps/docs/public/brand/oxagen-wordmark.svg",
+        "apps/docs/public/brand/stella-avatar-dark.svg",
+        "apps/docs/public/brand/stella-avatar-light.svg",
+        "apps/docs/public/brand/stella-icon-tile-dark.svg",
+        "apps/docs/public/brand/stella-icon-tile-light.svg",
+        "apps/docs/public/brand/stella-icon.svg",
+        "apps/docs/public/brand/stella-wordmark-on-dark.svg",
+        "apps/docs/public/brand/stella-wordmark-on-light.svg",
+        "apps/docs/public/brand/stella-wordmark.svg",
+        "apps/docs/public/decks/agentic-cli-roadmap/index.html",
+        "apps/docs/public/decks/architecture-deep-dive/index.html",
+        "apps/docs/public/decks/first-call-enterprise/index.html",
+        "apps/docs/public/decks/first-call-enterprise/script.html",
+        "apps/docs/public/decks/index.html",
+        "apps/docs/public/decks/investor/index.html",
+        "apps/docs/public/decks/mutation-verifier/index.html",
+        "apps/docs/public/decks/roadmap/index.html",
+        "apps/docs/public/decks/unpoisonable-edits/index.html",
+        "apps/docs/public/decks/verified-outcome-router/index.html",
+        "apps/docs/public/favicon/favicon-16.png",
+        "apps/docs/public/favicon/favicon-192.png",
+        "apps/docs/public/favicon/favicon-32.png",
+        "apps/docs/public/favicon/favicon-48.png",
+        "apps/docs/public/favicon/favicon-512.png",
+        "apps/docs/public/favicon/favicon.ico",
+        "apps/docs/public/favicon/favicon.svg",
+        "apps/docs/public/pwa/apple-touch-icon.png",
+        "apps/docs/public/pwa/icon-128.png",
+        "apps/docs/public/pwa/icon-144.png",
+        "apps/docs/public/pwa/icon-152.png",
+        "apps/docs/public/pwa/icon-167.png",
+        "apps/docs/public/pwa/icon-180.png",
+        "apps/docs/public/pwa/icon-192.png",
+        "apps/docs/public/pwa/icon-256.png",
+        "apps/docs/public/pwa/icon-384.png",
+        "apps/docs/public/pwa/icon-512.png",
+        "apps/docs/public/pwa/icon-72.png",
+        "apps/docs/public/pwa/icon-96.png",
+        "apps/docs/public/pwa/manifest.json",
+        "apps/docs/public/pwa/maskable-192.png",
+        "apps/docs/public/pwa/maskable-512.png",
+        "apps/docs/public/pwa/maskable-light-192.png",
+        "apps/docs/public/pwa/maskable-light-512.png",
+        "apps/docs/public/social/og-image-dark-1200x630.png",
+        "apps/docs/public/social/og-image-light-1200x630.png",
+        "apps/docs/public/spinner/oxagen-spinner-wordmark.svg",
+        "apps/docs/public/spinner/oxagen-spinner.svg",
+        "apps/docs/src/app/(home)/install/page.tsx",
+        "apps/docs/src/app/(home)/page.tsx",
+        "apps/docs/src/app/layout.tsx",
+        "apps/docs/src/app/manifest.ts",
+        "apps/docs/src/components/install/celebrate.ts",
+        "apps/docs/src/components/install/install-cli-button.tsx",
+        "apps/docs/src/components/landing/context-window.tsx",
+        "apps/docs/src/components/landing/copy-command.tsx",
+        "apps/docs/src/components/landing/typewriter-terminal.tsx",
+        "apps/docs/src/components/tui/tui-theme.ts",
+        "apps/web/README.md",
+        "apps/web/apple-touch-icon.png",
+        "apps/web/assets/brand/oxagen-icon-tile-dark.svg",
+        "apps/web/assets/brand/oxagen-icon.svg",
+        "apps/web/assets/brand/oxagen-spinner.svg",
+        "apps/web/assets/brand/oxagen-wordmark-on-dark.svg",
+        "apps/web/assets/brand/oxagen-wordmark.svg",
+        "apps/web/assets/oxagen.css",
+        "apps/web/favicon-16.png",
+        "apps/web/favicon-32.png",
+        "apps/web/favicon.ico",
+        "apps/web/favicon.svg",
+        "apps/web/fonts/LICENSE-OFL-geist.txt",
+        "apps/web/fonts/LICENSE-OFL-monaspace.txt",
+        "apps/web/fonts/geist-latin-wght.woff2",
+        "apps/web/fonts/monaspace-neon-latin-wght.woff2",
+        "apps/web/fonts/space-grotesk-latin-400.woff2",
+        "apps/web/fonts/space-grotesk-latin-500.woff2",
+        "apps/web/fonts/space-grotesk-latin-600.woff2",
+        "apps/web/fonts/space-grotesk-latin-700.woff2",
+        "apps/web/index.html",
+        "apps/web/og.png",
+        "apps/web/products/oxagen/index.html",
+        "apps/web/scripts/lib/art.test.mjs",
+        "apps/web/scripts/lib/html.mjs",
+        "apps/web/scripts/lib/html.test.mjs",
+        "apps/web/scripts/lib/images.test.mjs",
+        "apps/web/scripts/lib/raster.test.mjs",
+        "apps/web/scripts/lib/theme.mjs",
+        "apps/web/scripts/lib/theme.test.mjs",
+        "biome.json",
+        "packages/database/seed-assets/books/field-manual.html",
+        "packages/database/seed-assets/books/page-flip-reader.html",
+        "packages/ui/src/components/brand-marks.generated.ts",
+        "packages/ui/src/components/brand.test.tsx",
+        "packages/ui/src/components/brand.tsx",
+        "packages/ui/src/components/global-error.tsx",
+        "packages/ui/src/components/hex-field.tsx",
+        "packages/ui/src/styles/fonts/LICENSE-OFL-geist.txt",
+        "packages/ui/src/styles/fonts/LICENSE-OFL-monaspace.txt",
+        "packages/ui/src/styles/fonts/geist-latin-wght.woff2",
+        "packages/ui/src/styles/fonts/monaspace-neon-latin-wght.woff2",
+        "packages/ui/src/styles/globals.css",
+        "packages/ui/src/styles/house-fonts.css",
+        "packages/ui/src/styles/house-tokens.css",
+        "packages/ui/src/styles/house-tokens.json",
+        "tools/scripts/sync-brand-assets.mjs"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3346",
+      "merged_at": "2026-09-18T22:11:59Z",
+      "number": 3346,
+      "refs": [],
+      "repo": "oxagen",
+      "title": "Brand: obsidian and white palette, three faces, across the design system and apps"
+    },
+    "oxagen#3350": {
+      "added": [],
+      "author": "macanderson",
+      "closes": [],
+      "files": [
+        "apps/app/src/features/shell/assistant-flyout.test.tsx",
+        "apps/app/src/features/shell/assistant-flyout.tsx",
+        "apps/app/src/features/shell/assistant-markdown.tsx",
+        "apps/app/src/features/shell/assistant-streaming-text.tsx",
+        "apps/app/src/features/shell/assistant-thinking-dots.tsx"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3350",
+      "merged_at": "2026-09-18T22:41:25Z",
+      "number": 3350,
+      "refs": [],
+      "repo": "oxagen",
+      "title": "app: fix the five review findings left on the assistant reveal"
+    },
+    "oxagen#3351": {
+      "added": [
+        "docs/adr/ADR-100-frame-bodies-are-captured-by-default-redacted-at-the-host-capped-and-governed-by-retention.md"
+      ],
+      "author": "macanderson",
+      "closes": [],
+      "files": [
+        "docs/adr/ADR-100-frame-bodies-are-captured-by-default-redacted-at-the-host-capped-and-governed-by-retention.md",
+        "docs/adr/README.md",
+        "packages/agent/src/runtime/assistant-run.test.ts",
+        "packages/agent/src/runtime/assistant-run.ts",
+        "packages/agent/src/runtime/governed-turn.ts",
+        "packages/billing/package.json",
+        "packages/billing/src/cost-rollup-store.ts",
+        "packages/handlers/src/run.list.test.ts",
+        "packages/handlers/src/run.list.ts",
+        "packages/inngest-functions/src/lib/run-record.ts",
+        "packages/run-ledger/src/event-payload-registry.test.ts",
+        "packages/run-ledger/src/event-payload-registry.ts",
+        "packages/run-ledger/src/evidence-store.ts",
+        "packages/run-ledger/src/frame-body.ts",
+        "packages/run-ledger/src/index.ts",
+        "packages/run-ledger/src/run-frames.test.ts",
+        "packages/run-ledger/src/run-frames.ts",
+        "packages/run-ledger/src/run-store.test.ts",
+        "packages/tacho/src/claude-code/stella-adapter.test.ts",
+        "packages/tacho/src/collector/collector-units.test.ts",
+        "packages/tacho/src/collector/daemon-bodies.test.ts",
+        "packages/tacho/src/collector/daemon.ts",
+        "packages/tacho/src/collector/detector.ts",
+        "packages/tacho/src/collector/mcp-gateway.test.ts",
+        "packages/tacho/src/collector/mcp-gateway.ts",
+        "packages/tacho/src/collector/model-proxy.test.ts",
+        "packages/tacho/src/collector/model-proxy.ts",
+        "packages/tacho/src/collector/transcript-tailer.test.ts",
+        "packages/tacho/src/evidence/replay-grade.ts",
+        "pnpm-lock.yaml"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3351",
+      "merged_at": "2026-09-18T23:25:45Z",
+      "number": 3351,
+      "refs": [
+        2952
+      ],
+      "repo": "oxagen",
+      "title": "run replay 1/3: capture frame bodies at the host and the assistant"
     }
   },
   "since": {
-    "oxagen": "2026-09-18T21:12:47Z",
-    "roadmap": "2026-09-18T21:12:09Z",
-    "stella": "2026-09-18T21:13:37.847Z"
+    "oxagen": "2026-09-18T23:26:04Z",
+    "roadmap": "2026-09-18T22:39:27Z",
+    "stella": "2026-09-18T23:03:15Z"
   }
 }
