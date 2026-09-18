@@ -16,15 +16,17 @@ loaded, the gate steps have loading and denied, and the first-run step an error.
 | `<page>.audit-prompt.md` | A prompt to paste into an agent session that audits the built page against `<page>.md`, check by check, and reports PASS/FAIL with evidence. |
 | `audit-prompt.md` | The whole-app prompt: shell, mobile shell, auth sequences, cross-cutting rules; it runs every per-page prompt. |
 
-Pages (30): fleet · run · agents · agent · agent-source · mandate · tools · steering · record ·
-skill-source · spend · organization · organization-api-keys · organization-roles · billing · audit ·
+Pages (34): fleet · run · run-interjection · agents · agent · agent-source · mandate · tools ·
+skills · skills-off · skill-source · steering · record · repositories · spend · organization ·
+organization-api-keys · organization-roles · billing · audit ·
 register-name · register-wrap · register-run · signup · verify-email · login · two-factor ·
 forgot-password · reset-password · accept-invitation · onboarding-organization · onboarding-wrap ·
 onboarding-run · installer.
 
-The four creation wizards (agent, tool, skill, context record) are dialogs rather than pages, so
-they have no `<page>.md`; their spec is `docs/creation-spec.md`, and the two pages they end at —
-`record` and `skill-source` — are specified here.
+The five creation wizards (agent, tool, skill, context record, and the `.oxagen/` directory
+itself) are dialogs rather than pages, so they have no `<page>.md`; their spec is
+`docs/creation-spec.md`, and the three pages they end at — `record`, `skill-source` and
+`repositories` — are specified here.
 
 Guards: `node tools/build-mockup.mjs --check` (the master is what the sources produce) and
 `node tools/check-mockup.mjs` (every page renders in every state in either shell, with no mockup
