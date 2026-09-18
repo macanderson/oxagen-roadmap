@@ -1,0 +1,2592 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Oxagen Mission Control</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap">
+</head>
+<body>
+<style>
+/* ─── Tokens. Oxagen house brand. Light is the bare :root; dark overrides.
+       Every text colour here clears 4.5:1 against every surface it can land on,
+       including the row-hover highlight and its own state wash. The washes are
+       built from the same colour as the text that sits on them, so these values
+       were solved for colour and alpha together — re-solve them with
+       tools/verify-contrast.js rather than nudging by eye. ─── */
+:root{
+  --ink:#F2EEE5; --panel:#F8F5EE; --panel-2:#FFFDF8; --hl:#EDE7DA;
+  --rule:#D8CDBD; --rule-2:#C9BCA6;
+  --fg:#10100F; --body:#2A2823; --muted:#5F5B54; --dim:#6D675C;
+  --gold:#825511; --gold-ink:#10100F; --gold-solid:#D6962C;
+  --gold-wash:rgba(130,85,17,.10); --gold-edge:rgba(130,85,17,.30);
+  --ok:#1E693E;      --ok-wash:rgba(30,105,62,.12);
+  --proven:#00685A;  --proven-wash:rgba(0,104,90,.12);
+  --wait:#2E5D9A;    --wait-wash:rgba(46,93,154,.12);
+  --deny:#A13846;    --deny-wash:rgba(161,56,70,.11);
+  --fail:#994110;    --fail-wash:rgba(153,65,16,.12);
+  --crit:#AD271F;    --crit-wash:rgba(173,39,31,.12);
+  --neutral:#625E56; --neutral-wash:rgba(98,94,86,.10);
+  --shadow:0 1px 2px rgba(16,16,15,.06),0 10px 28px rgba(16,16,15,.07);
+  --scrim:rgba(28,24,18,.46);
+  --sans:"Space Grotesk","Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+  --r:12px; --r-sm:8px; --r-xs:5px;
+  --rail:232px; --bar:52px; --page:1180px;
+}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+  --ink:#10100F; --panel:#181715; --panel-2:#1D1C19; --hl:#201F1C;
+  --rule:#292722; --rule-2:#34322D;
+  --fg:#F2EEE5; --body:#DDD8CD; --muted:#A8A298; --dim:#8A867E;
+  --gold:#D6962C; --gold-ink:#10100F; --gold-solid:#D6962C;
+  --gold-wash:rgba(214,150,44,.12); --gold-edge:rgba(214,150,44,.32);
+  --ok:#5BA97C;      --ok-wash:rgba(91,169,124,.14);
+  --proven:#4FB3A3;  --proven-wash:rgba(79,179,163,.14);
+  --wait:#6E9BD6;    --wait-wash:rgba(110,155,214,.14);
+  --deny:#DB7B86;    --deny-wash:rgba(219,123,134,.14);
+  --fail:#E17C4E;    --fail-wash:rgba(225,124,78,.14);
+  --crit:#FD655C;    --crit-wash:rgba(253,101,92,.15);
+  --neutral:#9C968B; --neutral-wash:rgba(156,150,139,.13);
+  --shadow:0 1px 0 rgba(255,255,255,.03),0 12px 32px rgba(0,0,0,.44);
+  --scrim:rgba(4,4,4,.62);
+}}
+:root[data-theme="dark"]{
+  --ink:#10100F; --panel:#181715; --panel-2:#1D1C19; --hl:#201F1C;
+  --rule:#292722; --rule-2:#34322D;
+  --fg:#F2EEE5; --body:#DDD8CD; --muted:#A8A298; --dim:#8A867E;
+  --gold:#D6962C; --gold-ink:#10100F; --gold-solid:#D6962C;
+  --gold-wash:rgba(214,150,44,.12); --gold-edge:rgba(214,150,44,.32);
+  --ok:#5BA97C;      --ok-wash:rgba(91,169,124,.14);
+  --proven:#4FB3A3;  --proven-wash:rgba(79,179,163,.14);
+  --wait:#6E9BD6;    --wait-wash:rgba(110,155,214,.14);
+  --deny:#DB7B86;    --deny-wash:rgba(219,123,134,.14);
+  --fail:#E17C4E;    --fail-wash:rgba(225,124,78,.14);
+  --crit:#FD655C;    --crit-wash:rgba(253,101,92,.15);
+  --neutral:#9C968B; --neutral-wash:rgba(156,150,139,.13);
+  --shadow:0 1px 0 rgba(255,255,255,.03),0 12px 32px rgba(0,0,0,.44);
+  --scrim:rgba(4,4,4,.62);
+}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--ink);color:var(--body);font-family:var(--sans);
+  font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+h1,h2,h3{margin:0;color:var(--fg);font-weight:600;text-wrap:balance}
+h1{font-size:26px;letter-spacing:-.015em;font-weight:700}
+h2{font-size:16px}
+h3{font-size:13px}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+table{border-collapse:collapse;width:100%}
+:focus-visible{outline:2px solid var(--fg);outline-offset:2px;border-radius:3px}
+.mono{font-family:var(--mono);font-size:.92em;font-variant-ligatures:none}
+.num{font-variant-numeric:tabular-nums}
+.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.12em;
+  color:var(--gold);font-weight:600}
+.sub{color:var(--muted)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* Visually hidden but reachable by a screen reader. Never `hidden` — that
+   removes the element from the accessibility tree as well as the screen. */
+.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+  clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0}
+.skip{position:absolute;left:-9999px;top:0}
+.skip:focus{position:fixed;left:10px;top:10px;z-index:120;display:inline-block;
+  min-height:32px;background:var(--panel);color:var(--fg);border:1px solid var(--rule-2);
+  border-radius:var(--r-sm);padding:9px 14px;font-size:13px;font-weight:500;box-shadow:var(--shadow)}
+
+/* ─── Shell ─── */
+#app{display:grid;grid-template-columns:var(--rail) 1fr;min-height:100vh}
+#app[data-asst="open"]{grid-template-columns:var(--rail) 1fr 340px}
+
+/* A 100vh pane needs its own scrollbar, or at 400% zoom the last six
+   destinations are focusable and permanently off-screen. */
+.rail{border-right:1px solid var(--rule);background:var(--panel);
+  display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
+.rail-top{padding:16px 14px 10px;flex:none}
+/* A presentation attribute cannot carry var(), so the accent is themed here
+   and the literal in the markup is only a fallback. */
+.lockup{height:22px;width:auto;color:var(--fg);display:block}
+.lockup .accent{fill:var(--gold-solid)}
+.navsec{padding:6px 8px;flex:none;min-height:0}
+.navsec + .navsec{margin-top:2px}
+.navsec h3{padding:10px 8px 6px;font-size:10px;text-transform:uppercase;
+  letter-spacing:.13em;color:var(--dim);font-weight:600}
+.navsec a{display:flex;align-items:center;gap:10px;padding:7px 8px;border-radius:var(--r-sm);
+  color:var(--body);font-size:13.5px;position:relative}
+.navsec a svg{width:16px;height:16px;flex:none;stroke:currentColor;fill:none;
+  stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;opacity:.72}
+.navsec a:hover{background:var(--hl);color:var(--fg)}
+/* Current page is marked with weight, ground and a spine — never with gold.
+   Gold is identity in this product; it does not encode state. */
+.navsec a[aria-current="page"]{background:var(--hl);color:var(--fg);font-weight:500}
+.navsec a[aria-current="page"] svg{opacity:1}
+.navsec a[aria-current="page"]::before{content:"";position:absolute;left:-8px;top:7px;bottom:7px;
+  width:2px;border-radius:0 2px 2px 0;background:var(--fg)}
+/* A count appears only when something is waiting on a person. */
+.wait-n{margin-left:auto;font-family:var(--mono);font-size:11px;padding:1px 6px;border-radius:999px;
+  background:var(--wait-wash);color:var(--wait)}
+.rail-foot{margin-top:auto;border-top:1px solid var(--rule);padding:10px;flex:none}
+.who{display:flex;align-items:center;gap:9px;width:100%;padding:6px;border-radius:var(--r-sm);text-align:left}
+.who:hover{background:var(--hl)}
+.av{width:26px;height:26px;flex:none;border-radius:50%;background:var(--gold-wash);
+  color:var(--gold);display:grid;place-items:center;font-size:10.5px;font-weight:600;
+  border:1px solid var(--gold-edge)}
+.who b{display:block;font-size:13px;color:var(--fg);font-weight:500}
+.who span{display:block;font-size:11.5px;color:var(--muted)}
+
+.bar{height:var(--bar);border-bottom:1px solid var(--rule);background:var(--ink);
+  display:flex;align-items:center;gap:10px;padding:0 18px;position:sticky;top:0;z-index:40}
+/* The org and workspace switchers live in the breadcrumb, not the sidebar. */
+.crumb{display:flex;align-items:center;gap:2px;min-width:0;flex:1;flex-wrap:wrap}
+.crumb .sep{color:var(--dim);padding:0 2px}
+.chip-sw{display:flex;align-items:center;gap:6px;padding:4px 8px;border-radius:var(--r-sm);
+  color:var(--body);font-size:13px;max-width:200px}
+.chip-sw:hover{background:var(--hl);color:var(--fg)}
+.chip-sw .tag{font-family:var(--mono);font-size:10.5px;color:var(--dim)}
+.chip-sw svg{width:10px;height:10px;stroke:currentColor;fill:none;stroke-width:1.8;opacity:.6}
+.crumb .here{padding:4px 6px;color:var(--fg);font-weight:500;font-size:13px}
+.crumb a.here{color:var(--body);font-weight:400;border-radius:var(--r-sm)}
+.crumb a.here:hover{background:var(--hl);color:var(--fg)}
+.search{display:flex;align-items:center;gap:8px;height:30px;padding:0 10px;min-width:0;
+  border:1px solid var(--rule);border-radius:var(--r-sm);background:var(--panel);
+  color:var(--muted);font-size:13px;width:250px}
+.search:hover{border-color:var(--rule-2);color:var(--body)}
+.search svg{width:14px;height:14px;flex:none;stroke:currentColor;fill:none;stroke-width:1.7}
+.search kbd{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--dim)}
+.bar-btn{display:flex;align-items:center;gap:7px;height:30px;padding:0 11px;border-radius:var(--r-sm);
+  border:1px solid var(--rule);color:var(--body);font-size:13px}
+.bar-btn:hover{background:var(--hl);color:var(--fg)}
+.bar-btn[aria-pressed="true"]{border-color:var(--rule-2);color:var(--fg);background:var(--hl);font-weight:500}
+
+.canvas{padding:26px 26px 90px;min-width:0}
+.page{max-width:var(--page);margin:0 auto;min-width:0}
+/* Suppress the ring only for programmatic focus, never for the keyboard. */
+.page:focus:not(:focus-visible){outline:none}
+.head{display:flex;align-items:flex-start;gap:20px;flex-wrap:wrap;margin-bottom:22px}
+.head-t{flex:1;min-width:260px}
+.head p{margin:7px 0 0;color:var(--muted);max-width:64ch}
+
+/* ─── Components ─── */
+/* One primary action per screen. Gold is identity, never state. */
+.btn{display:inline-flex;align-items:center;gap:7px;height:32px;padding:0 13px;
+  border-radius:var(--r-sm);border:1px solid var(--rule);color:var(--fg);font-size:13px;font-weight:500}
+.btn:hover{background:var(--hl)}
+.btn-primary{background:var(--gold-solid);border-color:var(--gold-solid);color:var(--gold-ink);font-weight:600}
+.btn-primary:hover{filter:brightness(1.07)}
+.btn-sm{height:26px;padding:0 10px;font-size:12.5px}
+
+/* Summary: at most three. One number, one basis line. Not cards — plain columns. */
+.summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;
+  border:1px solid var(--rule);border-radius:var(--r);background:var(--panel);margin-bottom:20px}
+.summary > div{padding:14px 18px;min-width:0}
+.summary > div + div{border-left:1px solid var(--rule)}
+.summary dt{font-size:10.5px;text-transform:uppercase;letter-spacing:.11em;color:var(--muted);font-weight:600}
+.summary dd{margin:5px 0 0;font-size:25px;font-weight:600;color:var(--fg);
+  font-variant-numeric:tabular-nums;letter-spacing:-.02em;line-height:1.1}
+.summary small{display:block;margin-top:3px;font-size:11.5px;color:var(--muted)}
+
+/* A simulation result is not a page summary, so it does not borrow the tile
+   element — three tiles per page is the ceiling and the page already spends it. */
+.simrow{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+.simrow > div{flex:1 1 190px;min-width:0;border:1px solid var(--rule);border-radius:var(--r-sm);
+  background:var(--ink);padding:10px 13px}
+.simrow b{display:block;color:var(--fg);font-size:17px;font-weight:600;font-variant-numeric:tabular-nums}
+.simrow span{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--rule);margin-bottom:20px;
+  overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{padding:9px 12px;font-size:13.5px;color:var(--muted);white-space:nowrap;
+  border-bottom:2px solid transparent;margin-bottom:-1px}
+.tabs button:hover{color:var(--fg)}
+.tabs button[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--fg);font-weight:500}
+.tabs .n{font-family:var(--mono);font-size:11px;color:var(--dim);margin-left:5px}
+[role="tabpanel"]:focus:not(:focus-visible){outline:none}
+
+.panel{border:1px solid var(--rule);border-radius:var(--r);background:var(--panel);margin-bottom:18px;overflow:hidden}
+.panel-h{display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+.panel-h h2{flex:1;min-width:140px}
+.panel-h .note{font-size:12px;color:var(--muted)}
+.panel-b{padding:16px}
+.scroll{overflow-x:auto}
+
+th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;
+  color:var(--muted);font-weight:600;padding:9px 16px;border-bottom:1px solid var(--rule);white-space:nowrap}
+td{padding:11px 16px;border-bottom:1px solid var(--rule);vertical-align:top;font-size:13px}
+tbody tr:last-child td{border-bottom:0}
+/* Hover feedback only where hovering leads somewhere. */
+tbody tr[data-go]:hover td{background:var(--hl)}
+td b{color:var(--fg);font-weight:500;display:block}
+td .s{display:block;color:var(--muted);font-size:11.5px;margin-top:2px}
+.r{text-align:right}
+tr[data-go]{cursor:pointer}
+td a.rowlink{border-bottom:1px solid var(--rule-2)}
+
+/* State reads as form as well as colour: a dot plus a word. */
+.st{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:999px;
+  font-size:11.5px;font-weight:500;background:var(--neutral-wash);color:var(--neutral);white-space:nowrap}
+.st::before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor;flex:none}
+.st.ok{background:var(--ok-wash);color:var(--ok)}
+.st.proven{background:var(--proven-wash);color:var(--proven)}
+.st.wait{background:var(--wait-wash);color:var(--wait)}
+.st.deny{background:var(--deny-wash);color:var(--deny)}
+.st.fail{background:var(--fail-wash);color:var(--fail)}
+.st.crit{background:var(--crit-wash);color:var(--crit)}
+.st.flat{background:none;border:1px solid var(--rule);color:var(--muted)}
+.st.flat::before{display:none}
+
+/* ─── Tool grammar. Three axes, three grammars, never mixed.
+       Category is a glyph and a word — monochrome, because a ten-hue scale is
+       unreadable to anyone who cannot separate ten hues, and the glyph already
+       carries the meaning. Hazard and gate keep the state palette, because
+       those two ARE state. ─── */
+.tc{display:inline-flex;align-items:center;gap:7px;min-width:0}
+.tc > .mono{color:var(--fg);overflow-wrap:anywhere}
+.tc .tv{color:var(--dim)}
+.cg{width:15px;height:15px;flex:none;stroke:currentColor;fill:none;stroke-width:1.7;
+  stroke-linecap:round;stroke-linejoin:round}
+.tc > .cg{width:24px;height:24px;padding:4px;border-radius:6px;color:var(--fg);
+  background:var(--hl);border:1px solid var(--rule);box-sizing:border-box}
+
+.tcb{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:600;
+  letter-spacing:.05em;text-transform:uppercase;padding:2px 8px 2px 6px;border-radius:6px;
+  border:1px solid var(--rule);background:var(--hl);color:var(--body);white-space:nowrap;line-height:1.6}
+.tcb .cg{width:12px;height:12px}
+
+.hz{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;
+  white-space:nowrap;line-height:1.6;letter-spacing:.02em}
+.hz + .hz{margin-left:10px}
+.hzi{width:14px;height:14px;flex:none;stroke:currentColor;fill:none;stroke-width:2;
+  stroke-linecap:round;stroke-linejoin:round}
+.hz.r-low,.hz.e-read{color:var(--muted)}
+.hz.r-medium,.hz.e-write{color:var(--wait)}
+.hz.r-high,.hz.e-irreversible{color:var(--fail)}
+.hz.r-critical{color:var(--crit)}
+
+.gt{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;
+  letter-spacing:.02em;padding:2px 8px 2px 6px;border-radius:6px;border:1px solid;
+  white-space:nowrap;line-height:1.6}
+.gti{width:12px;height:12px;flex:none;stroke:currentColor;fill:none;stroke-width:2.2;
+  stroke-linecap:round;stroke-linejoin:round}
+.gt.g-allow{color:var(--ok);border-color:var(--ok-wash);background:var(--ok-wash)}
+/* Dashed means a person still stands in the way. */
+.gt.g-require_approval,.gt.g-mandate{color:var(--wait);border-style:dashed;
+  border-color:var(--wait);background:var(--wait-wash)}
+.gt.g-deny{color:var(--deny);border-color:var(--deny-wash);background:var(--deny-wash)}
+.gt.g-killed{color:var(--crit);border-color:var(--crit);background:var(--crit-wash)}
+
+/* A row whose tool could do real damage carries it on the row, not only in a cell. */
+tr.hz-row-critical > td:first-child{box-shadow:inset 3px 0 0 var(--crit)}
+tr.hz-row-high > td:first-child{box-shadow:inset 3px 0 0 var(--fail)}
+
+.toolargs{display:block;font-family:var(--mono);font-size:11.5px;color:var(--muted);margin-top:2px}
+
+.kv{display:grid;grid-template-columns:minmax(120px,auto) 1fr;gap:8px 18px;font-size:13px;min-width:0}
+.kv dt{color:var(--muted)}
+.kv dd{margin:0;color:var(--fg);min-width:0;overflow-wrap:anywhere}
+
+.bar-meter{height:5px;border-radius:3px;background:var(--hl);overflow:hidden;display:flex}
+.bar-meter i{display:block;height:100%}
+
+.empty{padding:40px 20px;text-align:center;color:var(--muted)}
+.empty b{display:block;color:var(--fg);font-size:15px;margin-bottom:5px}
+.skel{height:11px;border-radius:3px;background:var(--hl);animation:pulse 1.5s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.45}}
+.notice{display:flex;gap:11px;padding:13px 15px;border-radius:var(--r);font-size:13px;
+  border:1px solid var(--rule);background:var(--panel);margin-bottom:18px}
+.notice.deny{border-color:var(--deny-wash);background:var(--deny-wash)}
+.notice.crit{border-color:var(--crit-wash);background:var(--crit-wash)}
+.notice b{color:var(--fg);display:block;margin-bottom:2px}
+
+/* ─── Approvals. Resolving one writes a receipt that survives navigation. ─── */
+.appr{display:flex;gap:14px;align-items:flex-start;padding:13px 16px;
+  border-bottom:1px solid var(--rule);flex-wrap:wrap}
+.appr:last-child{border-bottom:0}
+.appr-t{flex:1;min-width:220px}
+.appr-a{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.appr-amt{margin-top:7px;font-size:19px;font-weight:600;color:var(--fg)}
+.appr-amt span{font-size:12px;font-weight:400;color:var(--muted)}
+
+/* ─── Agent IAM. Two shapes carry the whole page.
+
+       The intersection: effective permission is what the agent was granted
+       AND what the person invoking it holds. It is written as the formula it
+       is, so nobody has to be told that subagents can only narrow.
+
+       The chain: a numbered walk from the call to the decision. Used where the
+       answer is "no", because a refusal that does not show its reasoning is
+       indistinguishable from a bug. ─── */
+.iamw{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.iamw .t{display:block;padding:7px 10px;border:1px solid var(--rule);border-radius:var(--r-sm);
+  background:var(--ink);font-size:11.5px;line-height:1.35;color:var(--fg);font-weight:500}
+.iamw .t i{display:block;font-style:normal;font-size:10.5px;color:var(--muted);margin-top:2px;font-weight:400}
+.iamw .op,.iamw .eqs{color:var(--muted);font-family:var(--mono);font-size:13px;flex:0 0 auto}
+.iamw .t.out{border-color:var(--rule-2);background:var(--hl)}
+.iamw .t.nil{border-style:dashed;color:var(--ok)}
+
+.iamc{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.iamc li{display:flex;gap:10px;align-items:flex-start;padding:9px 11px;border:1px solid var(--rule);
+  border-radius:var(--r-sm);background:var(--ink)}
+.iamc li > .n{flex:0 0 auto;width:19px;height:19px;border-radius:50%;border:1px solid var(--rule-2);
+  display:grid;place-items:center;font-size:10.5px;color:var(--muted);font-family:var(--mono)}
+.iamc li .l{display:block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--muted);font-weight:600;margin-bottom:3px}
+.iamc li .v{font-size:12.5px;color:var(--body);min-width:0;overflow-wrap:anywhere}
+
+/* The agent header: the key is the identity, so the key is the heading. */
+.phead{display:flex;align-items:flex-start;gap:20px;flex-wrap:wrap;margin-bottom:18px}
+.phead .t{flex:1;min-width:280px}
+.phead h1{font-family:var(--mono);font-size:19px;letter-spacing:-.01em}
+.phead .badges{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-top:9px}
+.phead p.d{margin-top:9px;color:var(--muted);max-width:66ch}
+
+/* ─── The flight recorder. Selection carries a spine and weight, not a 1.13:1
+       wash — colour alone was the only channel and it was below the floor. ─── */
+.fr{display:flex;gap:9px;width:100%;text-align:left;padding:9px 14px;
+  border-bottom:1px solid var(--rule);border-left:2px solid transparent}
+.fr[aria-current]{background:var(--hl);border-left-color:var(--fg)}
+.fr[aria-current] .frt{font-weight:600}
+.frt{color:var(--fg);font-size:12px}
+
+/* ─── Assistant. One dock, same on every page. ─── */
+.asst{border-left:1px solid var(--rule);background:var(--panel);position:sticky;top:0;
+  height:100vh;display:flex;flex-direction:column;min-width:0}
+.asst-h{display:flex;align-items:center;gap:9px;padding:0 14px;height:var(--bar);
+  border-bottom:1px solid var(--rule);flex:none}
+.asst-h b{flex:1;color:var(--fg);font-size:13.5px;font-weight:500}
+.asst-b{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px}
+.msg{font-size:13px}
+.msg.you{align-self:flex-end;max-width:88%;background:var(--hl);padding:9px 12px;border-radius:var(--r) var(--r) 3px var(--r)}
+.msg.it b{display:block;color:var(--fg);margin-bottom:4px;font-size:11px;
+  text-transform:uppercase;letter-spacing:.1em;font-weight:600}
+.did{margin-top:9px;border:1px solid var(--rule);border-radius:var(--r-sm);background:var(--ink);padding:10px 11px}
+.did .eyebrow{font-size:10px;margin-bottom:6px;display:block}
+.did a{color:var(--gold);border-bottom:1px solid var(--gold-edge)}
+.asst-f{flex:none;border-top:1px solid var(--rule);padding:11px 14px}
+.asst-f input{width:100%;height:32px;padding:0 11px;border-radius:var(--r-sm);
+  border:1px solid var(--rule);background:var(--ink);color:var(--fg);font:inherit;font-size:13px}
+
+/* ─── Dialogs ─── */
+dialog{border:1px solid var(--rule);border-radius:var(--r);background:var(--panel);color:var(--body);
+  padding:0;max-width:min(560px,calc(100vw - 32px));width:100%;box-shadow:var(--shadow)}
+dialog::backdrop{background:var(--scrim)}
+.dlg-h{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--rule)}
+.dlg-h h2{flex:1}
+.dlg-b{padding:16px;max-height:65vh;overflow-y:auto}
+.cmd input{width:100%;height:42px;padding:0 16px;border:0;border-bottom:1px solid var(--rule);
+  background:none;color:var(--fg);font:inherit;font-size:15px}
+.cmd ul{list-style:none;margin:0;padding:6px}
+/* Options carry no focusable descendants — the input owns the selection, so a
+   link inside an option would be a second, competing selection model. */
+.cmd li{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:var(--r-sm);
+  font-size:13.5px;cursor:pointer}
+.cmd li[aria-selected="true"],.cmd li:hover{background:var(--hl);color:var(--fg)}
+.cmd li .k{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--dim)}
+.cmd .nohit{padding:11px 17px;font-size:13.5px;color:var(--muted)}
+
+/* ─── Mockup chrome. Deliberately unlike the product, and dismissible —
+       it must never be the thing standing between you and a control. ─── */
+.chrome{position:fixed;right:14px;bottom:14px;z-index:90;background:var(--panel);
+  border:1px dashed var(--rule-2);border-radius:var(--r-sm);padding:9px 11px;
+  font-family:var(--mono);font-size:11px;color:var(--muted);box-shadow:var(--shadow);
+  max-width:calc(100vw - 28px)}
+.chrome-top{display:flex;align-items:center;gap:10px}
+.chrome-r{display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-top:6px}
+.chrome b{color:var(--gold);font-weight:600;letter-spacing:.06em}
+.chrome button{min-height:24px;padding:3px 8px;border-radius:var(--r-xs);border:1px solid var(--rule);
+  font-family:var(--mono);font-size:11px;color:var(--muted)}
+.chrome button:hover{color:var(--fg);background:var(--hl)}
+.chrome button[aria-pressed="true"]{background:var(--hl);border-color:var(--rule-2);color:var(--fg)}
+.chrome .fold{margin-left:auto}
+
+/* The drawer scrim: a way out of the phone navigation that is not the
+   button that opened it. */
+.scrim{position:fixed;inset:0;background:var(--scrim);z-index:60;border:0;padding:0;width:100%}
+
+/* ─── The run's cost. The ask was a much larger total, logically placed and
+       close to the run name, with the basis a click away rather than inline. ─── */
+.runcost{display:flex;align-items:baseline;gap:12px;margin-top:12px;flex-wrap:wrap}
+.rc-n{font-size:38px;font-weight:700;color:var(--fg);letter-spacing:-.03em;line-height:1;
+  font-variant-numeric:tabular-nums}
+.rc-l{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:600}
+.rc-b{font-size:12.5px;color:var(--body);border-bottom:1px solid var(--rule-2);padding-bottom:1px}
+.rc-b:hover{color:var(--fg);border-bottom-color:var(--fg)}
+
+/* A name a model wrote is marked as one. */
+.gen{font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;
+  padding:1px 6px;border-radius:999px;background:var(--hl);color:var(--muted);
+  white-space:nowrap;margin-left:7px;vertical-align:1px}
+
+/* The prompt: inspectable, and not fully visible until asked for. */
+details.more{margin-top:14px;border-top:1px solid var(--rule);padding-top:12px}
+details.more summary{font-size:12.5px;color:var(--body);cursor:pointer;
+  list-style:none;display:flex;align-items:center;gap:7px}
+details.more summary::-webkit-details-marker{display:none}
+details.more summary::before{content:"";width:0;height:0;flex:none;
+  border-left:5px solid currentColor;border-top:4px solid transparent;
+  border-bottom:4px solid transparent;transition:transform .15s}
+details.more[open] summary::before{transform:rotate(90deg)}
+details.more summary:hover{color:var(--fg)}
+details.more pre{margin-top:10px;padding:12px 14px;background:var(--ink);
+  border:1px solid var(--rule);border-radius:var(--r-sm);overflow-x:auto;
+  font-family:var(--mono);font-size:12px;line-height:1.55;color:var(--body);white-space:pre-wrap}
+
+/* ─── Phone. Two containers, because two different widths are being asked about.
+       `app` is the whole application frame — it decides whether the shell is a
+       sidebar or a drawer. `canvas` is the width the page content actually gets,
+       which shrinks when the assistant opens; content queries must read that one,
+       or a 528px canvas keeps rendering as if it had 1,100px. ─── */
+.frame{container-type:inline-size;container-name:app;min-width:0}
+.canvas{container-type:inline-size;container-name:canvas}
+@container app (max-width:640px){
+  #app,#app[data-asst="open"]{grid-template-columns:1fr}
+  .rail{position:fixed;left:0;top:0;bottom:0;width:250px;z-index:70;
+    transform:translateX(-100%);transition:transform .2s}
+  body[data-nav="open"] .rail{transform:none}
+  .asst{position:fixed;inset:0;width:100%;height:100dvh;z-index:80;border-left:0}
+  .navtoggle{display:inline-flex!important}
+  .canvas{padding:18px 16px 90px}
+  /* The command menu matters most on the device with the least screen, so it
+     collapses to an icon rather than disappearing. */
+  .search{width:auto;flex:none;padding:0 9px}
+  .search kbd,.search .lbl,.hide-s{display:none}
+}
+@container canvas (max-width:640px){
+  .summary{grid-template-columns:1fr}
+  .summary > div + div{border-left:0;border-top:1px solid var(--rule)}
+  h1{font-size:21px}
+  .kv{grid-template-columns:1fr;gap:3px 0}
+  .kv dd{margin-bottom:7px}
+}
+@container canvas (max-width:760px){
+  .split{grid-template-columns:1fr!important}
+  .split3{grid-template-columns:1fr!important}
+}
+.navtoggle{display:none}
+/* The in-page phone simulator. `container-type` does not make `.frame` a
+   containing block for fixed descendants, so the drawer, the dock and the
+   scrim used to render against the desktop viewport — 520px away from the
+   device they were meant to be inside. */
+body[data-w="phone"] .frame{max-width:400px;margin:0 auto;border-left:1px solid var(--rule);
+  border-right:1px solid var(--rule);min-height:100vh;position:relative;overflow:clip}
+body[data-w="phone"] .rail,
+body[data-w="phone"] .asst,
+body[data-w="phone"] .scrim{position:absolute}
+body[data-w="phone"] .asst{height:100%}
+body[data-w="phone"]{background:var(--panel-2)}
+</style>
+
+<a class="skip" href="#view">Skip to page content</a>
+<div class="frame">
+<div id="app" data-asst="closed">
+
+  <aside class="rail" id="rail">
+    <div class="rail-top"><svg class="lockup" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 574.244 106.313" role="img" aria-label="oxagen"><g transform="translate(0,0.000) scale(2.842952)"><path class="cells" d="M6.300 0.000L12.600 3.320L12.600 9.960L6.300 13.280L0.000 9.960L0.000 3.320ZM1.000 3.885L1.000 9.395L6.300 12.150L11.600 9.395L11.600 3.885L6.300 1.130Z M19.376 0.000L25.676 3.320L25.676 9.960L19.376 13.280L13.076 9.960L13.076 3.320ZM14.076 3.885L14.076 9.395L19.376 12.150L24.676 9.395L24.676 3.885L19.376 1.130Z M12.838 10.240L19.138 13.560L19.138 20.200L12.838 23.520L6.538 20.200L6.538 13.560ZM7.538 14.125L7.538 19.635L12.838 22.390L18.138 19.635L18.138 14.125L12.838 11.370Z M19.376 20.480L25.676 23.800L25.676 30.440L19.376 33.760L13.076 30.440L13.076 23.800ZM14.076 24.365L14.076 29.875L19.376 32.630L24.676 29.875L24.676 24.365L19.376 21.610Z" fill="currentColor"/><path class="accent" d="M25.914 10.240L32.214 13.560L32.214 20.200L25.914 23.520L19.614 20.200L19.614 13.560Z M6.300 20.480L12.600 23.800L12.600 30.440L6.300 33.760L0.000 30.440L0.000 23.800Z" fill="#D6962C"/></g><g transform="translate(120.376,13.067)"><path class="letters" d="M33.9083 68.758Q24.1657 68.758 16.4786 64.7737Q8.79142 60.7894 4.39571 53.2965Q0 45.8035 0 35.3862V33.3718Q0 22.9544 4.39571 15.4615Q8.79142 7.96854 16.4786 3.98427Q24.1657 0 33.9083 0Q43.6509 0 51.3381 3.98427Q59.0252 7.96854 63.4209 15.4615Q67.8166 22.9544 67.8166 33.3718V35.3862Q67.8166 45.8035 63.4209 53.2965Q59.0252 60.7894 51.3381 64.7737Q43.6509 68.758 33.9083 68.758ZM33.9083 55.3486Q42.1895 55.3486 47.4689 50.0198Q52.7484 44.691 52.7484 35.0142V33.7437Q52.7484 24.067 47.5233 18.7382Q42.2981 13.4094 33.9083 13.4094Q25.6502 13.4094 20.3592 18.7382Q15.0683 24.067 15.0683 33.7437V35.0142Q15.0683 44.691 20.3592 50.0198Q25.6502 55.3486 33.9083 55.3486Z M176.569 68.758Q169.637 68.758 164.119 66.3453Q158.601 63.9327 155.387 59.2935Q152.173 54.6542 152.173 48.0088Q152.173 41.3403 155.387 36.8558Q158.601 32.3712 164.27 30.1017Q169.94 27.8323 177.174 27.8323H196.047V23.8925Q196.047 18.7316 192.874 15.5274Q189.701 12.3232 182.99 12.3232Q176.411 12.3232 173.049 15.3842Q169.686 18.4452 168.627 23.3593L154.691 18.7315Q156.27 13.6133 159.748 9.39702Q163.225 5.18071 169.049 2.59035Q174.874 0 183.208 0Q195.972 0 203.326 6.42816Q210.681 12.8563 210.681 24.9392V50.4707Q210.681 54.4204 214.368 54.4204H219.795V66.9148H209.197Q204.464 66.9148 201.442 64.5334Q198.42 62.1521 198.42 58.1563V57.8864H196.126Q195.392 59.6967 193.399 62.2985Q191.406 64.9004 187.388 66.8292Q183.369 68.758 176.569 68.758ZM179.05 56.4348Q186.581 56.4348 191.314 52.1592Q196.047 47.8837 196.047 40.6031V39.2405H178.175Q173.175 39.2405 170.208 41.3881Q167.241 43.5358 167.241 47.5513Q167.241 51.5668 170.34 54.0008Q173.439 56.4348 179.05 56.4348Z M227.767 34.6423V32.6279Q227.767 22.3817 231.86 15.0863Q235.953 7.79081 242.768 3.8954Q249.582 0 257.706 0Q266.935 0 271.762 3.33256Q276.589 6.66512 278.81 10.4107H281.042V1.8432H295.801V79.33Q295.801 85.6989 292.104 89.4725Q288.408 93.2462 282.079 93.2462H238.369V80.0541H277.023Q280.779 80.0541 280.779 76.1043V57.2775H278.547Q277.161 59.5683 274.665 61.8904Q272.168 64.2125 268.057 65.7414Q263.946 67.2702 257.706 67.2702Q249.582 67.2702 242.756 63.3748Q235.93 59.4794 231.848 52.1724Q227.767 44.8655 227.767 34.6423ZM261.938 54.0781Q270.151 54.0781 275.573 48.8612Q280.996 43.6443 280.996 34.2704V32.9999Q280.996 23.4943 275.627 18.3432Q270.259 13.1921 261.938 13.1921Q253.749 13.1921 248.315 18.3432Q242.881 23.4943 242.881 32.9999V34.2704Q242.881 43.6443 248.315 48.8612Q253.749 54.0781 261.938 54.0781Z M344.764 68.758Q334.998 68.758 327.583 64.6108Q320.167 60.4636 316.031 52.9048Q311.896 45.346 311.896 35.1689V33.589Q311.896 23.3889 315.977 15.8416Q320.059 8.2944 327.397 4.1472Q334.735 0 344.385 0Q353.881 0 360.956 4.1867Q368.031 8.37341 371.981 15.8515Q375.931 23.3297 375.931 33.2895V38.6974H327.181Q327.468 46.3334 332.587 50.9496Q337.707 55.5658 345.198 55.5658Q352.522 55.5658 356.101 52.3534Q359.681 49.141 361.553 45.0629L373.985 51.4813Q372.119 55.0656 368.63 59.1042Q365.141 63.1428 359.394 65.9504Q353.648 68.758 344.764 68.758ZM327.313 27.2892H360.622Q360.095 20.7986 355.7 16.9954Q351.304 13.1921 344.277 13.1921Q337.055 13.1921 332.691 16.9954Q328.327 20.7986 327.313 27.2892Z M391.548 66.9148V1.8432H406.353V10.9769H408.585Q410.303 7.25429 414.832 3.99908Q419.361 0.743866 428.435 0.743866Q435.956 0.743866 441.695 4.12911Q447.434 7.51435 450.651 13.5903Q453.868 19.6663 453.868 27.9442V66.9148H438.8V29.1226Q438.8 21.1969 434.891 17.3492Q430.983 13.5015 423.9 13.5015Q415.872 13.5015 411.244 18.8237Q406.617 24.146 406.617 33.9445V66.9148Z" fill="currentColor"/><path class="accent" d="M73.9979 66.9148 98.2261 34.0696 74.3764 1.8432H91.9626L107.9 24.3499H110.131L126.068 1.8432H143.654L119.805 34.0696L144.033 66.9148H126.206L110.131 44.0065H107.9L91.8244 66.9148Z" fill="#D6962C"/></g></svg></div>
+
+    <nav class="navsec" aria-label="Workspace">
+      <h3>Workspace</h3>
+      <a href="#/fleet" data-nav="fleet"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h3.5l2 5.5L12 5l2.5 8 1.5-3H21"/></svg>Fleet<span class="wait-n" id="navApprovals" aria-hidden="true"></span><span class="sr" id="navApprovalsSr"></span></a>
+      <a href="#/agents" data-nav="agents"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="7.5" width="16" height="11.5" rx="3"/><path d="M12 4.5v3M9.2 12.5h.01M14.8 12.5h.01M9.8 16h4.4"/></svg>Agent IAM</a>
+      <a href="#/tools" data-nav="tools"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.6 5.6a4 4 0 0 0 4.8 4.8L14 15.8 10.2 19.6 7 16.4l3.8-3.8 3.8-7z"/></svg>Tools</a>
+      <a href="#/ontology" data-nav="ontology"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5.2" r="2.3"/><circle cx="5.2" cy="18" r="2.3"/><circle cx="18.8" cy="18" r="2.3"/><path d="M10.7 7.1 6.4 15.9M13.3 7.1l4.3 8.8M7.5 18h9"/></svg>Ontology</a>
+      <a href="#/steering" data-nav="steering"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6.5h16M4 12h9M4 17.5h6"/><circle cx="17" cy="15.5" r="3"/></svg>Steering<span class="wait-n" id="navSteering" aria-hidden="true"></span><span class="sr" id="navSteeringSr"></span></a>
+      <a href="#/spend" data-nav="spend"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5v17M16.3 7.6c0-1.7-1.9-2.6-4.3-2.6s-4.4 1-4.4 2.9 2 2.6 4.4 3.1 4.4 1.1 4.4 3-1.9 2.7-4.4 2.7-4.3-.9-4.3-2.5"/></svg>Spend</a>
+    </nav>
+
+    <nav class="navsec" aria-label="Organization">
+      <h3>Organization</h3>
+      <a href="#/organization" data-nav="organization"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 20V7.2L11.5 4l7 3.2V20M9.2 20v-4.8h4.6V20M8.4 10.3h.01M11.5 10.3h.01M14.6 10.3h.01"/></svg>Organization</a>
+      <a href="#/billing" data-nav="billing"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5.8" width="18" height="12.4" rx="2.5"/><path d="M3 10.2h18M6.4 14.6h3.2"/></svg>Billing</a>
+      <a href="#/audit" data-nav="audit"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.6 19 6.1v5.8c0 4-3 6.9-7 8.5-4-1.6-7-4.5-7-8.5V6.1l7-2.5z"/><path d="M9.4 11.9l1.9 1.9 3.4-3.6"/></svg>Audit<span class="wait-n" id="navAudit" aria-hidden="true"></span><span class="sr" id="navAuditSr"></span></a>
+    </nav>
+
+    <div class="rail-foot">
+      <button class="who" id="acctBtn" aria-haspopup="dialog">
+        <span class="av" aria-hidden="true" id="acctInitials">MB</span>
+        <span><b id="acctName">Marcus Bell</b><span id="acctRole">Workspace owner</span></span>
+      </button>
+    </div>
+  </aside>
+
+  <div id="main" style="min-width:0">
+    <header class="bar">
+      <button class="bar-btn navtoggle" id="navToggle" aria-label="Menu" aria-expanded="false" aria-controls="rail"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+
+      <nav class="crumb" aria-label="Breadcrumb">
+        <button class="chip-sw" id="orgSw" data-act="switch-org">Acme Robotics <span class="tag">acme</span>
+          <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 4.7 6 2.4l2.5 2.3M3.5 7.3 6 9.6l2.5-2.3"/></svg></button>
+        <span class="sep" aria-hidden="true">/</span>
+        <button class="chip-sw" id="wsSw" data-act="switch-ws">core-platform
+          <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 4.7 6 2.4l2.5 2.3M3.5 7.3 6 9.6l2.5-2.3"/></svg></button>
+        <span class="sep" aria-hidden="true">/</span>
+        <span id="crumbTail"><span class="here">Fleet</span></span>
+      </nav>
+
+      <button class="search" id="cmdBtn" aria-label="Search or run a command">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
+        <span class="lbl" aria-hidden="true">Search or run a command</span> <kbd aria-hidden="true">⌘K</kbd>
+      </button>
+      <button class="bar-btn" id="asstBtn" aria-pressed="false" aria-controls="asst" aria-label="Assistant">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l1.9 4.9 4.9 1.9-4.9 1.9L12 17.1l-1.9-4.9-4.9-1.9 4.9-1.9z"/></svg>
+        <span class="hide-s" aria-hidden="true">Assistant</span>
+      </button>
+    </header>
+
+    <main class="canvas"><div class="page" id="view" tabindex="-1"></div></main>
+  </div>
+
+  <aside class="asst" id="asst" hidden aria-label="Assistant">
+    <div class="asst-h">
+      <svg viewBox="0 0 24 24" aria-hidden="true" style="width:15px;height:15px;stroke:var(--gold);fill:none;stroke-width:1.6"><path d="M12 3.5l1.9 4.9 4.9 1.9-4.9 1.9L12 17.1l-1.9-4.9-4.9-1.9 4.9-1.9z"/></svg>
+      <b>Assistant</b>
+      <button class="btn btn-sm" id="asstClose">Close</button>
+    </div>
+    <div class="asst-b" id="asstBody"></div>
+    <div class="asst-f">
+      <label class="sr" for="asstIn">Ask the assistant</label>
+      <input id="asstIn" placeholder="Ask, or tell it to change something">
+    </div>
+  </aside>
+
+  <button class="scrim" id="scrim" hidden aria-label="Close the menu"></button>
+</div>
+</div>
+
+<!-- Everything that changes without a page load is announced here. -->
+<div id="say" class="sr" role="status" aria-live="polite"></div>
+
+<dialog id="cmd" class="cmd" aria-label="Command menu">
+  <label class="sr" for="cmdIn">Search runs, agents, tools, or type a command</label>
+  <input id="cmdIn" placeholder="Search runs, agents, tools, or type a command" autocomplete="off"
+    role="combobox" aria-expanded="false" aria-controls="cmdList" aria-autocomplete="list">
+  <ul id="cmdList" role="listbox" aria-label="Results"></ul>
+  <div id="cmdNone" class="nohit" role="status" hidden></div>
+</dialog>
+
+<dialog id="basis" aria-label="Cost basis">
+  <div class="dlg-h"><h2 id="basisTitle">Cost basis</h2><button class="btn btn-sm" data-close="basis">Close</button></div>
+  <div class="dlg-b" id="basisBody"></div>
+</dialog>
+
+<dialog id="acct" aria-label="Account">
+  <div class="dlg-h"><h2>Account</h2><button class="btn btn-sm" data-close="acct">Close</button></div>
+  <div class="dlg-b">
+    <dl class="kv">
+      <dt>Name</dt><dd id="acctDlgName">Marcus Bell</dd>
+      <dt>Email</dt><dd class="mono" id="acctDlgEmail">marcus.bell@acmerobotics.com</dd>
+      <dt>Org role</dt><dd id="acctDlgRole">member · workspace owner on core-platform</dd>
+      <dt>Display currency</dt><dd>USD · set by the organization</dd>
+      <dt>Two-factor</dt><dd><span class="st ok">hardware key</span></dd>
+      <dt>Theme</dt><dd id="themeRow"></dd>
+    </dl>
+  </div>
+</dialog>
+
+<div class="chrome" id="chrome">
+  <div class="chrome-top"><b>MOCKUP</b> · not product UI
+    <button class="fold" id="chromeFold" aria-expanded="true" aria-controls="chromeBody">hide</button></div>
+  <div id="chromeBody">
+    <div class="chrome-r" id="stateRow" role="group" aria-label="Simulated page state"></div>
+    <div class="chrome-r" id="widthRow" role="group" aria-label="Simulated viewport width"></div>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* ═══════════════════════════════════════════════════════════════════════════
+   Canonical figures. Acme Robotics, one consistent customer.
+
+   Every number rendered anywhere in this file is either in this block or
+   derived from it in code. Nothing is typed twice — that is the only way a
+   mockup with ten pages stays internally true after it is edited.
+   ═══════════════════════════════════════════════════════════════════════════ */
+const ORG = {name:"Acme Robotics", ns:"acme", id:"org_7QK3M8VZ", members:34,
+  plan:"Enterprise, annual", currency:"USD"};
+
+const WS = {name:"core-platform", repo:"acme/platform", agents:41,
+  runsMTD:2904, spendMTD:18407.62, provenSpend:7913.28, provenRuns:1204,
+  spendToday:1204.71,
+  augLedger:21879.91,                         /* August, reconciled — see Spend */
+  proven90:9612, witnessed90:10998,           /* Steering proof rate, 90 days */
+  records:7, recordMix:"4 rule · 2 procedure · 1 constraint", proposals:2,
+  incidents:1};
+
+const WS2 = {name:"finops", repo:"acme/finops-agents", agents:9, runsMTD:414, entities:12480};
+
+/* A trailing 30 days ending 11 September is 19 August days plus 11 September
+   days. A round number typed here instead was larger than the whole of August
+   and September put together. */
+WS.spend30d = Math.round((19 / 31 * WS.augLedger + WS.spendMTD) * 100) / 100;
+
+/* Billing is org-scope, so it meters both workspaces. */
+const PERIOD = {label:"1 Sep – 11 Sep", free:1000, rate:0.50,
+  archiveGB:184, archiveRate:0.02, next:"1 Oct 2026", terms:"net 30"};
+
+const ORG_AGENTS = WS.agents + WS2.agents;              /* 50 */
+const ORG_RUNS   = WS.runsMTD + WS2.runsMTD;            /* 3,318 */
+const BILLABLE   = Math.max(0, ORG_RUNS - PERIOD.free); /* 2,318 */
+const RUN_CHARGE = BILLABLE * PERIOD.rate;              /* 1,159.00 */
+const ARCHIVE    = PERIOD.archiveGB * PERIOD.archiveRate;
+const CHARGES    = RUN_CHARGE + ARCHIVE;
+
+/* ═══════════════════════ Tool grammar ═══════════════════════
+   Three orthogonal axes, three visual grammars, never mixed:
+
+     category = what the tool ACTS ON     → a glyph and a word. Monochrome: the
+                                            icon carries the category, never a hue,
+                                            because a ten-hue scale fails the reader
+                                            who cannot separate ten hues.
+     hazard   = how bad a wrong call is   → a risk mark (circle · diamond · outline
+                                            triangle · filled triangle) beside a
+                                            side-effect glyph, in the state hues.
+     gate     = what the belt DECIDED     → a badge. A dashed border means a person
+                                            still stands in the way.
+
+   Ten categories, ordered least to most consequential. The order is the grammar:
+   a reader who learns it once can rank an unfamiliar tool by its badge alone. ─── */
+const TCAT_ORDER = ["read","query","record","message","file","exec","vcs","infra","access","finance"];
+const TCAT = {
+  read:   {l:"Read-only", s:"Observes and returns. Changes nothing anywhere.",
+    eg:"github__get_file_contents · linear__get_issue · repo.search",
+    i:`<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.6"/>`},
+  query:  {l:"Data query", s:"Bulk read from a store. Read-only, but the result set is the exfiltration and the cost.",
+    eg:"snowflake__run_query · aws_billing__get_cost_and_usage",
+    i:`<ellipse cx="12" cy="6" rx="7.5" ry="3"/><path d="M4.5 6v12c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3V6M4.5 12c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3"/>`},
+  record: {l:"Record write", s:"Creates or updates a record in a system of work. Reversible by another write.",
+    eg:"linear__update_issue · notion__update_page",
+    i:`<path d="M11 4H5.5A2.5 2.5 0 0 0 3 6.5v12A2.5 2.5 0 0 0 5.5 21h12a2.5 2.5 0 0 0 2.5-2.5V13"/><path d="M18.4 3.6a1.9 1.9 0 0 1 2.7 2.7L12.5 15l-3.5.8.8-3.5z"/>`},
+  message:{l:"Messaging & authoring", s:"Speaks to people on the organization's behalf. A sent message cannot be unsent.",
+    eg:"slack__post_message · gmail__send_message",
+    i:`<path d="M21 3 10.5 13.5"/><path d="M21 3 14.5 21l-4-8-8-4z"/>`},
+  file:   {l:"File mutation", s:"Writes, edits, moves or deletes files in a workspace or a drive.",
+    eg:"write__file · edit__file · drive__trash_file",
+    i:`<path d="M13.5 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8.5z"/><path d="M13.5 3v5.5H19M9 14.5h5"/>`},
+  exec:   {l:"Code & shell", s:"Runs a command or a program. Its effect is whatever the sandbox allows.",
+    eg:"bash · sandbox__run_python",
+    i:`<path d="M4.5 6.5 9.5 12l-5 5.5"/><path d="M12.5 17.5h7"/>`},
+  vcs:    {l:"Source control", s:"Changes code history: branches, pull requests, merges, releases, repositories.",
+    eg:"github__create_pull_request · github__merge_pull_request",
+    i:`<circle cx="7" cy="6" r="2.2"/><circle cx="7" cy="18" r="2.2"/><circle cx="17" cy="9" r="2.2"/><path d="M7 8.2v7.6M17 11.2c0 3-4 3.3-6.2 4"/>`},
+  infra:  {l:"Infrastructure", s:"Deploys, scales, pauses or reconfigures a running system.",
+    eg:"vercel__deploy_to_vercel · k8s__scale_deployment",
+    i:`<rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="13" width="18" height="7" rx="2"/><path d="M7 7.5h.01M7 16.5h.01"/>`},
+  access: {l:"Access & identity", s:"Grants, shares, rotates or revokes access. Widens what every later call can reach.",
+    eg:"drive__share_file · iam__rotate_key · oxagen__grant_role",
+    i:`<circle cx="8" cy="14" r="4"/><path d="M10.8 11.2 20 2m-3 3 2.5 2.5M14.5 7.5 17 10"/>`},
+  finance:{l:"Financial control", s:"Moves funds or commits spend. Never callable without a mandate.",
+    eg:"stripe__create_payment · stripe__create_refund",
+    i:`<path d="M12 3v18M16.5 7.5c0-1.7-2-3-4.5-3S7.5 5.8 7.5 7.5s2 2.7 4.5 3.3 4.5 1.6 4.5 3.5-2 3.2-4.5 3.2-4.5-1.3-4.5-3"/>`}
+};
+/* The label and category for names the verb heuristic would misfile. Anything
+   not here is inferred, so a new tool needs no entry to render correctly. */
+const TOOLMETA = {
+  "repo.search":["Search the repository","read"],
+  "linear__get_issue":["Get issue","read"],
+  "linear__update_issue":["Update issue","record"],
+  "snowflake__run_query":["Run query","query"],
+  "slack__post_message":["Post message","message"],
+  "write__file":["Write file","file"],
+  "bash":["Run a shell command","exec"],
+  "github__merge_pull_request":["Merge pull request","vcs"],
+  "vercel__deploy_to_vercel":["Deploy","infra"],
+  "drive__share_file":["Share file","access"],
+  "stripe__create_payment":["Create payment","finance"]
+};
+/* Ordered least to most consequential — the grammar's own ordering, and NOT by
+   call volume: 18 calls is not a top-ten figure in a registry that replayed
+   67,412. One tool per category, so the page teaches the whole scale. */
+const TOOLS = [
+  {n:"repo.search",               v:"2", s:"builtin", risk:"low",      eff:"read",         eg:"internal",     fin:"none",        dec:"allow",            dig:"sha256:7c41a9…", calls:12880},
+  {n:"linear__get_issue",         v:"2", s:"linear",  risk:"low",      eff:"read",         eg:"third_party",  fin:"none",        dec:"allow",            dig:"sha256:3ab704…", calls:3914},
+  {n:"snowflake__run_query",      v:"1", s:"snowflake",risk:"medium",  eff:"read",         eg:"internal",     fin:"none",        dec:"allow",            dig:"sha256:b02f18…", calls:812},
+  {n:"linear__update_issue",      v:"2", s:"linear",  risk:"low",      eff:"write",        eg:"third_party",  fin:"none",        dec:"allow",            dig:"sha256:5d9c33…", calls:1204},
+  {n:"slack__post_message",       v:"1", s:"slack",   risk:"medium",   eff:"irreversible", eg:"third_party",  fin:"none",        dec:"require_approval", dig:"sha256:pending", calls:388},
+  {n:"write__file",               v:"1", s:"harness", risk:"medium",   eff:"write",        eg:"none",         fin:"none",        dec:"allow",            dig:"sha256:e17b40…", calls:9044},
+  {n:"bash",                      v:"1", s:"harness", risk:"critical", eff:"irreversible", eg:"none",         fin:"none",        dec:"require_approval", dig:"sha256:aa2e90…", calls:6102},
+  {n:"github__merge_pull_request",v:"3", s:"github",  risk:"critical", eff:"irreversible", eg:"third_party",  fin:"none",        dec:"require_approval", dig:"sha256:c81d6e…", calls:41},
+  {n:"vercel__deploy_to_vercel",  v:"1", s:"vercel",  risk:"high",     eff:"irreversible", eg:"third_party",  fin:"commits_spend",dec:"require_approval",dig:"sha256:41ba07…", calls:96},
+  {n:"drive__share_file",         v:"2", s:"drive",   risk:"high",     eff:"irreversible", eg:"third_party",  fin:"none",        dec:"deny",             dig:"sha256:90cc2b…", calls:0},
+  {n:"stripe__create_payment",    v:"4", s:"stripe",  risk:"critical", eff:"irreversible", eg:"third_party",  fin:"moves_funds", dec:"mandate",          dig:"sha256:4fe8b1…", calls:18}
+];
+TOOLS.forEach(t => { t.id = t.n + "@" + t.v; });
+
+/* `name@version` split once, so nothing else has to know the shape. */
+const toolParts = id => { const s = String(id ?? ""), i = s.lastIndexOf("@");
+  return i > 0 ? {n:s.slice(0, i), v:s.slice(i + 1)} : {n:s, v:""}; };
+
+/* A tool nobody has classified still has to render. The verb carries the
+   category well enough that an unlisted tool lands in the right place, which
+   is what lets the registry grow without a lookup table growing with it. */
+function toolMeta(id){
+  const p = toolParts(id), m = TOOLMETA[p.n];
+  if(m) return {n:p.n, v:p.v, l:m[0], cat:m[1]};
+  const local = p.n.split("__").pop(), verb = local.split(/[_.]/)[0].toLowerCase();
+  let cat = "record";
+  if(/^(get|list|search|read|fetch|find|describe|show)$/.test(verb)) cat = "read";
+  else if(/^(query|select|aggregate|export)$/.test(verb)) cat = "query";
+  else if(/^(write|edit|move|copy|trash|mkdir)$/.test(verb)) cat = "file";
+  else if(/^(bash|run|exec|execute|eval)$/.test(verb)) cat = "exec";
+  else if(/^(post|send|reply|forward|publish|upload)$/.test(verb)) cat = "message";
+  else if(/^(pay|refund|purchase|charge|transfer|payout)$/.test(verb)) cat = "finance";
+  else if(/^(deploy|scale|pause|restart|provision)$/.test(verb)) cat = "infra";
+  else if(/^(grant|share|rotate|revoke|invite)$/.test(verb)) cat = "access";
+  else if(/^(merge|rebase|tag|release|push|fork)$/.test(verb)) cat = "vcs";
+  return {n:p.n, v:p.v, cat,
+    l: local.replace(/_/g, " ").replace(/^./, c => c.toUpperCase())};
+}
+
+const REGISTRY = {tools:214, servers:8, external:5};
+const TOOL = id => TOOLS.find(t => t.id === id);
+
+
+/* ─── Approvals. Each is about a run, and resolving one moves that run. ─── */
+const APPROVALS = [
+  {tool:"stripe__create_payment@4", args:null, run:"run_01K6QXD4M9",
+   agent:"acme.core.invoice-bot", op:"Dana Okafor",
+   rule:"mandate.above_threshold", amount:18420.00, left:"5m 47s", risk:"critical", resolved:null},
+  {tool:"github__merge_pull_request@3", args:"acme/platform#503", run:"run_01K6QXB2K7",
+   agent:"acme.core.release-manager", op:"Marcus Bell",
+   rule:"merge.requires_approval", amount:null, left:"9m 12s", risk:null, resolved:null},
+  {tool:"bash@1", args:"rm -rf node_modules", run:"run_01K6QXH8P4",
+   agent:"acme.core.triage", op:"Marcus Bell",
+   rule:"harness.irreversible_path", amount:null, left:"4m 03s", risk:null, resolved:null}
+];
+/* ULID alphabet — no I, L, O or U. One receipt per decision, never reused. */
+const RECEIPTS = ["rcp_01K6R41D","rcp_01K6R41E","rcp_01K6R41F",
+                  "rcp_01K6R41G","rcp_01K6R41H","rcp_01K6R41J"];
+let receiptN = 0;
+/* Mint and advance in one step, so a second call site cannot reissue an id. */
+const mintReceipt = () => RECEIPTS[receiptN++] ?? ("rcp_01K6R4" + (RECEIPTS.length + receiptN));
+
+/* ─── Runs. Cost and frame count are summed from the per-turn ledger, so a row
+       in the Fleet table can never disagree with the run's own Cost tab. Ids
+       are ULIDs, so their lexicographic order is their time order — sorting by
+       id must reproduce sorting by `started`, and this list is in that order. ─── */
+const RUNS = [
+  {id:"run_01K5XQ7M4A", task:"Retry budget exhaustion drops webhooks", agent:"acme.core.release-manager",
+   op:"Marcus Bell", harness:"Claude Code 2.1.4", state:"sealed", verdict:"flipped",
+   step:"sealed 09:51:47Z", started:"2026-09-11 09:14:02Z", ended:"2026-09-11 09:51:47Z",
+   issue:"acme/platform#478",
+   subtitle:"Retry budget exhaustion silently drops webhook deliveries",
+   inTok:1184902, freshTok:82943,
+   turns:[["T1","Reproduce the drift",14,0.7994,0.0021],
+          ["T2","Write the failing test",21,0.7680,0.0038],
+          ["T3","Fix it — paused and steered mid-turn",44,2.4070,0.0094],
+          ["T4","Open the PR and wait for the witness",47,0.8756,0.0047]],
+   proof:{witness:"wit_retry_budget", oracle:"test_flip", frame:118,
+     target:"main @ 9f2c41aeb7d3", targetResult:"FAIL", targetNote:"fingerprint d92a6f13b804",
+     head:"refs/pull/482/head @ 4d7be053c91a", headResult:"PASS",
+     verdict:"flipped", saw:"pass", grain:"L0"},
+   chain:{root:"9f2a41c7e0b83d…2f8c04", key:"att_acme_2026Q3_8c41",
+     from:"2026-07-01", to:"2027-01-01", grade:"full"}},
+
+  {id:"run_01K6QW2A8C", task:"Reconcile August provider invoices", agent:"acme.core.ledger-recon",
+   op:"Dana Okafor", harness:"OpenAI Agents SDK 1.4.2", state:"sealed", verdict:"flipped",
+   step:"sealed 10:39:28Z", started:"2026-09-11 10:21:07Z", ended:"2026-09-11 10:39:28Z",
+   inTok:88402, freshTok:17498,
+   turns:[["T1","Load both ledgers",22,0.1512,0.0014],
+          ["T2","Diff them line by line",18,0.1140,0.0018],
+          ["T3","Raise the one exception",12,0.1100,0.0016]],
+   proof:{witness:"wit_ledger_tie_out", oracle:"test_flip", frame:40,
+     target:"main @ a4f0182be6cd", targetResult:"FAIL", targetNote:"fingerprint 7b10ce4492af",
+     head:"refs/pull/489/head @ e72a9c05fb31", headResult:"PASS",
+     verdict:"flipped", saw:"pass", grain:"L0"},
+   chain:{root:"d41b7a90c2e856…18f3aa", key:"att_acme_2026Q3_8c41",
+     from:"2026-07-01", to:"2027-01-01", grade:"full"}},
+
+  {id:"run_01K6QW6H3D", task:"Settle the Bedrock overage line", agent:"acme.core.invoice-bot",
+   op:"Dana Okafor", harness:"OpenAI Agents SDK 1.4.2", state:"cancelled", verdict:null,
+   step:"killed at turn 2 · class moves_funds", started:"2026-09-11 11:18:40Z", ended:"2026-09-11 11:22:07Z",
+   inTok:22118, freshTok:6716,
+   turns:[["T1","Read the overage line",6,0.1180,0.0006],
+          ["T2","Raise the payment",3,0.0910,0.0004]]},
+
+  {id:"run_01K6QW9R5F", task:"Quarantine flaky specs in acme/mobile", agent:"acme.core.flake-hunter",
+   op:"Marcus Bell", harness:"Stella 0.9.14", state:"sealed", verdict:"unmoved",
+   step:"sealed 12:06:11Z", started:"2026-09-11 11:44:50Z", ended:"2026-09-11 12:06:11Z",
+   inTok:296510, freshTok:42392,
+   turns:[["T1","Collect the failing specs",31,0.2044,0.0018],
+          ["T2","Re-run them in isolation",28,0.1910,0.0026],
+          ["T3","Quarantine and open the issue",25,0.2078,0.0024]],
+   proof:{witness:"wit_mobile_specs", oracle:"test_flip", frame:60,
+     target:"main @ 71ce09b42a8f", targetResult:"PASS", targetNote:"the witness never failed here",
+     head:"refs/pull/487/head @ 0b61d2e7ac95", headResult:"PASS",
+     verdict:"unmoved", saw:"pass", grain:"L0"},
+   chain:{root:"3c81be04f7a19d…6b2e71", key:"att_acme_2026Q3_8c41",
+     from:"2026-07-01", to:"2027-01-01", grade:"full"}},
+
+  {id:"run_01K6QXB2K7", task:"Cut the 2026.9 release", agent:"acme.core.release-manager",
+   op:"Marcus Bell", harness:"Claude Code 2.1.4", state:"parked", verdict:null,
+   step:"waiting on merge approval", started:"2026-09-11 13:41:08Z", ended:null,
+   inTok:618440, freshTok:58728,
+   turns:[["T1","Assemble the changelog",18,0.6120,0.0018],
+          ["T2","Run the release checks",26,0.9940,0.0042],
+          ["T3","Open the release PR and ask",27,1.1618,0.0062]]},
+
+  {id:"run_01K6QXD4M9", task:"Settle September vendor invoices", agent:"acme.core.invoice-bot",
+   op:"Dana Okafor", harness:"OpenAI Agents SDK 1.4.2", state:"parked", verdict:null,
+   step:"waiting on approval", started:"2026-09-11 13:48:02Z", ended:null,
+   inTok:128904, freshTok:17714,
+   turns:[["T1","Read the open invoices",9,0.3110,0.0009],
+          ["T2","Match them to purchase orders",8,0.2988,0.0031],
+          ["T3","Raise the payment and ask",7,0.3240,0.0022]]},
+
+  {id:"run_01K6QXF6N2", task:"Repair the flaky deploy test", agent:"acme.core.stella-ci",
+   op:"Marcus Bell", harness:"Stella 0.9.14", state:"live", verdict:null,
+   step:"turn 3 · tool call", started:"2026-09-11 13:52:19Z", ended:null,
+   inTok:402118, freshTok:52276,
+   turns:[["T1","Reproduce the flake",15,0.4210,0.0016],
+          ["T2","Isolate the shared fixture",12,0.3388,0.0024],
+          ["T3","Write the regression test",11,0.3540,0.0022]]},
+
+  {id:"run_01K6QXH8P4", task:"Clear the stale node_modules on the CI image", agent:"acme.core.triage",
+   op:"Marcus Bell", harness:"Codex CLI 0.42.1", state:"parked", verdict:null,
+   step:"waiting on approval", started:"2026-09-11 13:55:31Z", ended:null,
+   inTok:41220, freshTok:9040,
+   turns:[["T1","Measure the image",6,0.1620,0.0008],
+          ["T2","Propose the removal and ask",5,0.1460,0.0012]]},
+
+  {id:"run_01K6QXK9R6", task:"Roll firmware 4.2 to the Halvorsen fleet", agent:"acme.core.fleet-ops-bot",
+   op:"Marcus Bell", harness:"Stella 0.9.14", state:"live", verdict:null,
+   step:"turn 2 · tool call", started:"2026-09-11 13:58:44Z", ended:null,
+   inTok:71004, freshTok:12784,
+   turns:[["T1","Read the deployment sites",9,0.2410,0.0011],
+          ["T2","Stage the rollout",7,0.1960,0.0019]]}
+];
+
+/* ─── Run names and summaries are written by the cheap classifier off the
+       first turn's frames, not typed by the operator — so they are marked as
+       generated rather than passed off as something a person wrote. ─── */
+const SUMMARY = {
+  run_01K5XQ7M4A:"Reproduced the drop, wrote the failing test, fixed the retry budget so an exhausted budget parks the delivery instead of discarding it, and opened acme/platform#482.",
+  run_01K6QW2A8C:"Loaded both August ledgers, diffed them line by line, and raised the single Bedrock line dated after the statement closed.",
+  run_01K6QW6H3D:"Read the Bedrock overage line and raised a payment for it. Cancelled at the call boundary by the class-wide moves_funds switch.",
+  run_01K6QW9R5F:"Collected the failing mobile specs, re-ran them in isolation, and quarantined the four that did not reproduce.",
+  run_01K6QXB2K7:"Assembled the 2026.9 changelog, ran the release checks, and opened acme/platform#503. Waiting on a person to merge it.",
+  run_01K6QXD4M9:"Matched September's open invoices to their purchase orders and raised one $18,420.00 payment against PO-4471. Waiting on a person.",
+  run_01K6QXF6N2:"Reproduced the deploy-test flake, traced it to a fixture shared across two suites, and is writing the regression test.",
+  run_01K6QXH8P4:"Measured the CI image and proposed removing a stale node_modules tree. Waiting on a person, because the path cannot be restored.",
+  run_01K6QXK9R6:"Read the Halvorsen deployment sites and is staging firmware 4.2 across the fleet it found."
+};
+
+const runCost   = r => r.turns.reduce((s, t) => s + t[3] + t[4], 0);
+const runFrames = r => r.turns.reduce((s, t) => s + t[2], 0);
+const cached    = r => r.inTok - r.freshTok;
+
+/* Which turn a frame index falls in. The Cost tab prints each turn's frame
+   count and the Timeline prints each frame's index; those are two renderings
+   of one fact, so the turn label has to be derived from the index rather than
+   typed beside it — six of nine runs disagreed with themselves when it was. */
+function turnOf(r, n){
+  let start = 0;
+  for(let i = 0; i < r.turns.length; i++){
+    const end = start + r.turns[i][2];
+    if(n < end) return {i: i + 1, label: r.turns[i][0], what: r.turns[i][1]};
+    start = end;
+  }
+  const last = r.turns.length;
+  return {i: last, label: r.turns[last - 1][0], what: r.turns[last - 1][1]};
+}
+
+/* ─── Frame factories. Every frame carries its own detail, so no frame in the
+       flight recorder is a dead end — that is the product's central claim. ─── */
+const int   = n => n.toLocaleString("en-US");
+const money = n => "$" + n.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+const mon4  = n => "$" + n.toFixed(4);
+const pct1  = (a,b) => (a / b * 100).toFixed(1) + "%";
+
+const topRecord = () => RECORDS.reduce((a, b) => a.cited >= b.cited ? a : b);
+
+/* The stable prefix is assembled by the context service and is identical for
+   every turn of the run, which is what makes it cacheable — so it is shown as
+   the prefix it is, with the turn appended. */
+const PROMPT = (r, t) => `<stable prefix — ${WS.records} records in force, cached>
+  You are ${r.agent}, running on ${r.harness} in the ${WS.name} workspace
+  of ${ORG.name}. Your toolbelt holds ${beltSize(r.agent)} tools; it is the only
+  tool list you will be shown.
+
+  ${RECORDS.map(x => "· " + x.s).join("\n  ")}
+
+</stable prefix>
+<turn ${t.i} of ${r.turns.length}>
+  ${t.what}.
+</turn>`;
+
+const F = {
+  start: (n, r) => ({n, t:"agent_start", d:`${r.agent} · ${r.harness}`, kv:[
+    ["Run", r.id], ["Agent", r.agent], ["Harness", r.harness], ["Operator", r.op],
+    ["Task", r.task], ["Started", r.started], ["Enforcement tier", "gateway"]]}),
+
+  ctx: (n, recs, tok) => ({n, t:"context.assembled",
+    d:`${recs} context records · ${int(tok)} of 24,000 tokens`, kv:[
+    ["Records in force", `${recs} · indexed from ${WS.repo}@e91b2d7`],
+    ["Prefix tokens", `${int(tok)} of 24,000`],
+    ["Stable prefix", "yes · cacheable across the run"],
+    ["Most-cited record in force", topRecord().id],
+    ["Assembled by", "the context service, not the agent"]]}),
+
+  req: (n, r) => { const t = turnOf(r, n); return {n, t:"model.request",
+    d:`claude-fable-5-1 · turn ${t.i} · ${t.what.toLowerCase()}`, kv:[
+    ["Model", "claude-fable-5-1"], ["Turn", `${t.i} of ${r.turns.length} · ${t.what}`],
+    ["Tools offered", `${beltSize(r.agent)} of ${REGISTRY.tools} · the belt, not the registry`],
+    ["Sampling", "temperature 0 · max 8,192"],
+    ["Recorded", "in full · this request is replayable"]],
+    /* The prompt is the thing a sceptic most wants to read and the thing a
+       page can least afford to open with. It is here, and it is collapsed. */
+    more:{label:"The prompt, exactly as it was sent", body:PROMPT(r, t)}}; },
+
+  res: (n, inT, fresh, outT, reason, cost) => ({n, t:"model.response",
+    d:`${int(inT)} in · ${int(outT)} out · ${pct1(inT - fresh, inT)} cached`, cost:mon4(cost), kv:[
+    ["Model", "claude-fable-5-1"],
+    ["Input tokens", `${int(inT)} · ${int(fresh)} fresh · ${int(inT - fresh)} cached`],
+    ["Output tokens", int(outT)],
+    ["Cache hit rate", pct1(inT - fresh, inT)],
+    ["Stop reason", reason],
+    ["Cost", mon4(cost) + " · gateway observed"]]}),
+
+  toolReq: (n, id, args) => { const t = TOOL(id), m = toolMeta(id);
+    return {n, t:"tool_requested", d:`${id} · validated input`, kv:[
+    ["Tool", id], ["Category", TCAT[m.cat].l], ["Server", t.s],
+    ["Hazard", `risk ${t.risk} · side effect ${t.eff}`],
+    ["Egress", t.eg], ["Arguments", args],
+    ["Schema", t.dig], ["Requested by", "the model, in this turn"]]}; },
+
+  policy: (n, decision, rule, note) => ({n, t:"policy.decision",
+    d:`${decision} · ${rule} · pol_v41`, kv:[
+    ["Decision", decision], ["Rule", rule],
+    ["Policy version", "pol_v41 · activated 2026-09-02"],
+    ["Enforcement tier", "gateway"], ["Deny generation", "41"], ["What follows", note]]}),
+
+  call: (n, id, result, cost, ms) => ({n, t:"tool_call", d:`${id} → ${result}`, cost:mon4(cost), kv:[
+    ["Tool", id], ["Result", result],
+    ["Credential", "single-use, minted for this call and expired after it"],
+    ["Latency", ms + " ms"], ["Cost", mon4(cost) + " · gateway observed"]]}),
+
+  ask: (n, who, left, rule) => ({n, t:"approval.requested", d:`${who} · ${left} left`, kv:[
+    ["Sent to", who], ["Rule", rule], ["Expires in", left],
+    ["Run state", "parked at the call boundary"],
+    ["Dispatched", "nothing — the credential is minted only on approval"]]}),
+
+  decided: (n, who, granted, receipt) => ({n,
+    t: granted ? "approval.granted" : "approval.denied",
+    d: `${who} · receipt ${receipt}`, kv:[
+    ["Decision", granted ? "granted" : "denied"], ["Decided by", who], ["Receipt", receipt],
+    ["Run state", granted ? "resumed — the call dispatched" : "resumed — the call was refused"],
+    ["Credential", granted ? "single-use, minted on approval" : "never minted"]]}),
+
+  proof: (n, p) => ({n, t:"proof.observed", d:`witness ${p.witness} · ${p.verdict}`, kv:[
+    ["Witness", p.witness], ["Oracle", p.oracle],
+    ["On " + p.target, p.targetResult + " · " + p.targetNote],
+    ["On " + p.head, p.headResult],
+    ["Verdict", p.verdict],
+    ["What the agent saw", "the four characters " + p.saw],
+    ["Disclosure grain", p.grain]]}),
+
+  stop: (n, r) => ({n, t:"agent_stop", d:`sealed · merkle root ${r.chain.root}`, kv:[
+    ["Outcome", "sealed"],
+    ["Frames", `${runFrames(r)} · dense 0–${runFrames(r) - 1}`],
+    ["Merkle root", "sha256:" + r.chain.root],
+    ["Attestation key", r.chain.key],
+    ["Run cost", money(runCost(r)) + " · gateway observed"],
+    ["Ended", r.ended]]}),
+
+  killed: (n, by, why) => ({n, t:"run.cancelled", d:`${why} · ${by}`, kv:[
+    ["Outcome", "cancelled"], ["Cancelled by", by], ["Reason", why],
+    ["Took effect", "at the next call boundary"],
+    ["Frames", "sealed up to this point, and still replayable"],
+    ["Billing", "the frames before the switch are billable; nothing after it exists"]]})
+};
+
+/* The last frame of a parked run is the approval it is waiting on — and it
+   becomes the decision the moment a person makes one, or the run and the
+   approval queue tell two different stories. */
+const askOrDecision = (n, r, who, left, rule) => {
+  const a = APPROVALS.find(x => x.run === r.id);
+  return a && a.resolved
+    ? F.decided(n, who, a.resolved.granted, a.resolved.receipt)
+    : F.ask(n, who, left, rule);
+};
+
+/* One recorded frame list per run. The lists are samples of a longer chain and
+   say so; the last frame of a sealed run is its real last index. */
+const FRAMES_OF = {
+  run_01K5XQ7M4A: r => [
+    F.start(0, r),
+    F.ctx(7, WS.records, 6310),
+    F.req(12, r),
+    F.res(13, 260322, 18342, 9417, "tool_use", 0.3149),
+    F.toolReq(21, "repo.search@2", "q=\"retry budget\" · path=services/webhooks"),
+    F.policy(22, "allow", "wrk.repo.read.linked_repo", "the call dispatches with a single-use credential"),
+    F.call(23, "repo.search@2", "14 hits · 2 fields redacted", 0.0004, 412),
+    F.proof(118, r.proof),
+    F.stop(runFrames(r) - 1, r)],
+
+  run_01K6QW2A8C: r => [
+    F.start(0, r),
+    F.ctx(4, WS.records, 4910),
+    F.req(18, r),
+    F.res(19, 42118, 8204, 2118, "tool_use", 0.0611),
+    F.proof(40, r.proof),
+    F.stop(runFrames(r) - 1, r)],
+
+  run_01K6QW6H3D: r => [
+    F.start(0, r),
+    F.ctx(2, WS.records, 3980),
+    F.req(4, r),
+    F.res(5, 14204, 3618, 940, "tool_use", 0.0288),
+    F.toolReq(7, "stripe__create_payment@4", "amount=812.40 · currency=usd"),
+    F.killed(runFrames(r) - 1, "Priya Natarajan", "kill switch, class moves_funds")],
+
+  run_01K6QW9R5F: r => [
+    F.start(0, r),
+    F.ctx(5, WS.records, 5620),
+    F.req(30, r),
+    F.res(31, 98420, 14108, 3944, "tool_use", 0.1204),
+    F.proof(60, r.proof),
+    F.stop(runFrames(r) - 1, r)],
+
+  run_01K6QXB2K7: r => [
+    F.start(0, r),
+    F.ctx(6, WS.records, 6310),
+    F.req(52, r),
+    F.res(53, 214880, 20114, 4102, "tool_use", 0.2610),
+    F.toolReq(68, "github__merge_pull_request@3", "repo=acme/platform · pull=503"),
+    F.policy(69, "ask", "merge.requires_approval", "the run parks and a person is asked"),
+    askOrDecision(runFrames(r) - 1, r, "Marcus Bell", "9m 12s", "merge.requires_approval")],
+
+  run_01K6QXD4M9: r => [
+    F.start(0, r),
+    F.ctx(3, WS.records, 4880),
+    F.req(14, r),
+    F.res(15, 61204, 9118, 2610, "tool_use", 0.0904),
+    F.toolReq(21, "stripe__create_payment@4", "amount=18420.00 · currency=usd · po=PO-4471"),
+    F.policy(22, "ask", "mandate.above_threshold", "over $10,000.00, so a person decides"),
+    askOrDecision(runFrames(r) - 1, r, "Dana Okafor", "5m 47s", "mandate.above_threshold")],
+
+  run_01K6QXF6N2: r => [
+    F.start(0, r),
+    F.ctx(4, WS.records, 5940),
+    F.req(20, r),
+    F.res(21, 141002, 19844, 3180, "tool_use", 0.1712),
+    F.toolReq(36, "repo.search@2", "q=\"shared fixture\" · path=test/deploy"),
+    F.call(runFrames(r) - 1, "repo.search@2", "6 hits", 0.0003, 288)],
+
+  run_01K6QXH8P4: r => [
+    F.start(0, r),
+    F.ctx(2, WS.records, 4120),
+    F.req(6, r),
+    F.res(7, 19840, 4402, 1180, "tool_use", 0.0388),
+    F.toolReq(8, "bash@1", "rm -rf node_modules"),
+    F.policy(9, "ask", "harness.irreversible_path", "the path cannot be restored, so a person decides"),
+    askOrDecision(runFrames(r) - 1, r, "Marcus Bell", "4m 03s", "harness.irreversible_path")],
+
+  run_01K6QXK9R6: r => [
+    F.start(0, r),
+    F.ctx(3, WS.records, 5210),
+    F.req(8, r),
+    F.res(9, 38420, 7108, 2044, "tool_use", 0.0642),
+    F.toolReq(14, "repo.search@2", "q=\"firmware 4.2\" · path=fleet/releases"),
+    F.call(runFrames(r) - 1, "repo.search@2", "3 hits", 0.0002, 194)]
+};
+const framesOf = r => FRAMES_OF[r.id](r);
+
+/* ─── Roles. An agent's reach is never what a role says on its own: it is the
+       intersection of the roles the agent holds with the grants of the person
+       who invoked it. A subagent can only ever narrow that. ─── */
+const ROLES = {
+  "agent.repo.read":   {kind:"agent", scope:"workspace", desc:"Read any linked repository.",
+    perms:["repo.search@* allow", "github:get_* allow"]},
+  "agent.repo.write":  {kind:"agent", scope:"workspace", desc:"Open and update pull requests. Never merge without a person.",
+    perms:["github:create_pull_request@* allow", "github:merge_pull_request@* require_approval", "github:delete_* deny"]},
+  "agent.issue.write": {kind:"agent", scope:"workspace", desc:"Read and update issues on the linked trackers.",
+    perms:["linear:get_* allow", "linear:update_* allow"]},
+  "agent.shell":       {kind:"agent", scope:"workspace", desc:"Run commands in the run sandbox. Irreversible paths ask first.",
+    perms:["bash@* require_approval", "write__file@* allow"]},
+  "agent.finance.pay": {kind:"agent", scope:"workspace", desc:"Raise a payment, inside a mandate and never outside one.",
+    perms:["stripe:create_payment@* mandate"]},
+  "workspace.owner":   {kind:"human", scope:"workspace", desc:"Owns core-platform. The ceiling every agent it invokes is capped by.",
+    perms:["*@* allow", "org.billing:* deny"]},
+  "org.billing":       {kind:"human", scope:"organization", desc:"Grants mandates and settles invoices.",
+    perms:["stripe:* allow", "mandate:grant allow"]}
+};
+
+/* ─── Agents. Five of forty-one, chosen to show one of each state and tier —
+       NOT the five highest spenders, which the $0.00 row would make
+       arithmetically impossible against a workspace total. ─── */
+const AGENTS = [
+  {n:"Stella CI", id:"acme.core.stella-ci", slug:"stella-ci", h:"Stella 0.9.14",
+   st:"active", tier:"gateway", tierNative:"gateway", belt:"searchable", spend:1208.44,
+   model:"z-ai/glm-latest", operator:"Marcus Bell", opRole:"workspace.owner",
+   roles:["agent.repo.read","agent.issue.write","agent.shell"],
+   principal:"prn_01JQ8W3F2M6XKD7A9RZT4BVCNF", runs30:1042, incidents:0,
+   enrolled:true, host:"ci-runner-07", budgetRun:4.00, budgetDay:120.00, replay:"re-run",
+   desc:"Runs the deterministic ladder on every pull request and authors the witnesses."},
+
+  {n:"Release manager", id:"acme.core.release-manager", slug:"release-manager", h:"Claude Code 2.1.4",
+   st:"active", tier:"gateway", tierNative:"harness", belt:"searchable", spend:412.78,
+   model:"claude-fable-5-1", operator:"Marcus Bell", opRole:"workspace.owner",
+   roles:["agent.repo.read","agent.repo.write"],
+   principal:"prn_01JQ8W3F2M6XKD7A9RZT4BVCNE", runs30:184, incidents:0,
+   enrolled:true, host:"mbell-mbp-16", budgetRun:2.00, budgetDay:50.00, replay:"fork",
+   desc:"Prepares the release notes and opens the release pull request. Never merges one."},
+
+  {n:"Invoice bot", id:"acme.core.invoice-bot", slug:"invoice-bot", h:"OpenAI Agents SDK 1.4.2",
+   st:"active", tier:"gateway", tierNative:"gateway", belt:"full", spend:143.09,
+   model:"claude-fable-5-1", operator:"Dana Okafor", opRole:"org.billing",
+   roles:["agent.repo.read","agent.finance.pay"],
+   principal:"prn_01JQ8W3F2M6XKD7A9RZT4BVCNG", runs30:212, incidents:0,
+   enrolled:true, host:"finops-worker-02", budgetRun:1.50, budgetDay:40.00, replay:"re-run",
+   desc:"Settles the monthly infrastructure invoices, inside one mandate and never outside it."},
+
+  {n:"Triage", id:"acme.core.triage", slug:"triage", h:"Codex CLI 0.42.1",
+   st:"active", tier:"gateway", tierNative:"harness", belt:"full", spend:96.20,
+   model:"claude-fable-5-1", operator:"Marcus Bell", opRole:"workspace.owner",
+   roles:["agent.repo.read","agent.issue.write","agent.shell"],
+   principal:"prn_01JQ8W3F2M6XKD7A9RZT4BVCNH", runs30:96, incidents:1,
+   enrolled:true, host:"mbell-mbp-16", budgetRun:0.50, budgetDay:10.00, replay:"fork",
+   desc:"Reads a failing build, reproduces it, and files what it finds."},
+
+  {n:"Docs writer", id:"acme.core.docs-writer", slug:"docs-writer", h:"Custom · SDK-wrapped",
+   st:"unenrolled", tier:"observe", tierNative:"observe", belt:"full", spend:0.00,
+   model:"claude-fable-5-1", operator:"Marcus Bell", opRole:"workspace.owner",
+   roles:[],
+   principal:"prn_01JQ8W3F2M6XKD7A9RZT4BVCNJ", runs30:0, incidents:0,
+   enrolled:false, host:null, budgetRun:0.50, budgetDay:5.00, replay:"render",
+   desc:"Wrapped but never enrolled. It holds no roles, so it can reach nothing but its own run channel."}
+];
+const AGENT = id => AGENTS.find(a => a.id === id);
+const agentBySlug = slug => AGENTS.find(a => a.slug === slug);
+
+/* ─── The belt: the tool versions an agent's model is actually shown, with the
+       decision its own grants produced and the rule that produced it. Tool
+       facts are NOT repeated here — risk, side effect, egress, financial class
+       and schema digest all come from the registry, so approving a schema in
+       one place changes it everywhere. ─── */
+const BELTS = {
+  "acme.core.stella-ci":[
+    {id:"repo.search@2",          dec:"allow",            rule:"grant:agent.repo.read #1"},
+    {id:"linear__get_issue@2",    dec:"allow",            rule:"grant:agent.issue.write #1"},
+    {id:"linear__update_issue@2", dec:"allow",            rule:"grant:agent.issue.write #2"},
+    {id:"write__file@1",          dec:"allow",            rule:"grant:agent.shell #2"},
+    {id:"bash@1",                 dec:"require_approval", rule:"grant:agent.shell #1 · pol_v41 R-14"}
+  ],
+  "acme.core.release-manager":[
+    {id:"repo.search@2",                dec:"allow",            rule:"grant:agent.repo.read #1"},
+    {id:"linear__get_issue@2",          dec:"allow",            rule:"grant:agent.repo.read #2"},
+    {id:"github__merge_pull_request@3", dec:"require_approval", rule:"grant:agent.repo.write #2",
+     note:"The record also forbids merging without a person. Both agree, and the stricter one is what runs."}
+  ],
+  "acme.core.invoice-bot":[
+    {id:"repo.search@2",             dec:"allow",   rule:"grant:agent.repo.read #1"},
+    {id:"stripe__create_payment@4",  dec:"mandate", rule:"grant:agent.finance.pay #1 · mnd_7Q2KX4"}
+  ],
+  "acme.core.triage":[
+    {id:"repo.search@2",          dec:"allow",            rule:"grant:agent.repo.read #1"},
+    {id:"linear__get_issue@2",    dec:"allow",            rule:"grant:agent.issue.write #1"},
+    {id:"linear__update_issue@2", dec:"allow",            rule:"grant:agent.issue.write #2"},
+    {id:"bash@1",                 dec:"require_approval", rule:"grant:agent.shell #1 · pol_v41 R-14"}
+  ],
+  "acme.core.docs-writer":[],
+  /* Agents outside the five-row sample still run, so they still have belts. */
+  "acme.core.fleet-ops-bot":[
+    {id:"repo.search@2",               dec:"allow",            rule:"grant:agent.repo.read #1"},
+    {id:"snowflake__run_query@1",      dec:"allow",            rule:"grant:agent.fleet.read #1"},
+    {id:"vercel__deploy_to_vercel@1",  dec:"require_approval", rule:"grant:agent.fleet.ship #1 · pol_v41 R-09"}
+  ],
+  "acme.core.flake-hunter":[
+    {id:"repo.search@2",          dec:"allow",            rule:"grant:agent.repo.read #1"},
+    {id:"linear__get_issue@2",    dec:"allow",            rule:"grant:agent.issue.write #1"},
+    {id:"linear__update_issue@2", dec:"allow",            rule:"grant:agent.issue.write #2"},
+    {id:"bash@1",                 dec:"require_approval", rule:"grant:agent.shell #1 · pol_v41 R-14"}
+  ],
+  "acme.core.ledger-recon":[
+    {id:"repo.search@2",          dec:"allow", rule:"grant:agent.repo.read #1"},
+    {id:"snowflake__run_query@1", dec:"allow", rule:"grant:agent.ledger.read #1"}
+  ]
+};
+const beltOf = a => (BELTS[a.id] ?? []).map(b => ({...TOOL(b.id), ...b}));
+/* The size is the belt's own length. It used to be a second, hand-kept number,
+   which is how one agent came to show two different belt sizes on one day. */
+const beltSize = agentId => (BELTS[agentId] ?? []).length;
+
+/* What an agent cannot see, and why. Derived, so a tool added to the registry
+   appears here the moment it is not on the belt. */
+function outsideOf(a){
+  const on = new Set((BELTS[a.id] ?? []).map(b => b.id));
+  return TOOLS.filter(t => !on.has(t.id)).map(t => ({...t,
+    why: t.fin !== "none"
+      ? `A financial tool, and this agent holds ${a.roles.includes("agent.finance.pay") ? "no mandate covering it" : "no mandate"}.`
+      : t.dec === "deny" ? "Denied for every agent by the workspace policy."
+      : "No grant on this agent's roles reaches this version."}));
+}
+const MANDATE = {agent:"acme.core.invoice-bot", purpose:"Monthly infrastructure invoices, PO-4471",
+  perCall:25000.00, approveAbove:10000.00, grantedBy:"Priya Natarajan, as org billing",
+  validTo:"2026-12-31", authority:60000.00, settled:31280.00, reserved:18420.00};
+
+/* ─── Operators. Spend is tracked by person as well as by agent: a run is an
+       agent, a person and a prompt, so all three have to be answerable. The
+       three columns sum to the workspace figures they sit beside. ─── */
+const OPERATORS = [
+  {name:"Marcus Bell",     role:"workspace owner", runs:1842, spend:11204.88, proven:812},
+  {name:"Dana Okafor",     role:"operator",        runs:704,  spend:4918.02,  proven:246},
+  {name:"Priya Natarajan", role:"org billing",     runs:358,  spend:2284.72,  proven:146}
+];
+
+/* ─── Spend findings. Money at stake is recoverable waste, so it can never
+       exceed what the thing it is scoped to actually spends. ─── */
+const FINDINGS = [
+  {n:"Cache writes never read back",               id:"fnd_9c52", scope:"acme.core.stella-ci",       at:555.19, frames:3},
+  {n:"Retry storms against one provider key",      id:"fnd_9c58", scope:"provider key pk_bdrk_7f2a", at:441.87, frames:5},
+  {n:"Cache misses after a stable prefix changed", id:"fnd_9c41", scope:"acme.core.release-manager", at:291.44, frames:4},
+  {n:"Tool-list bloat on every model call",        id:"fnd_9c3d", scope:"acme.core.triage",          at:64.18,  frames:6}
+];
+
+/* ─── Steering. The six record kinds are rule, constraint, procedure, fact,
+       memory and preference. `directive` and `knowledge` were invented and
+       removed; nothing here may use them. ─── */
+const RECORDS = [
+  {s:"An agent never merges to main on acme/platform without a person's approval. Open the pull request, request review, and stop.",
+   id:"ctx.core.release-pr-never-merged-by-agent", kind:"rule", before:84.1, after:91.6, cited:96, violated:0},
+  {s:"Schema changes ship expand-then-contract: add the column, backfill, switch readers, drop later.",
+   id:"ctx.core.migration-expand-contract", kind:"procedure", before:72.4, after:88.0, cited:143, violated:2},
+  {s:"Never pass a secret through a workflow_dispatch input. Read it from the environment.",
+   id:"ctx.core.no-secrets-in-workflow-inputs", kind:"rule", before:79.0, after:94.2, cited:34, violated:0}
+];
+const CONTEXT_PR = {n:221, id:"ctx.core.no-plaintext-secrets-in-ci-logs", kind:"rule",
+  statement:"Never echo a resolved secret into a CI log, even redacted."};
+
+/* ─── Ontology. Group sums drive the source counts and the entity total, and
+       the class list has to contain whatever the version history says it
+       added — v14 and v13 both named classes the model did not have. ─── */
+const CLASSES = [
+  {n:"Customer", c:1284, g:"sales_crm"}, {n:"Contract", c:412, g:"sales_crm"},
+  {n:"Subscription", c:1190, g:"sales_crm"}, {n:"Invoice", c:8640, g:"sales_crm"},
+  {n:"WarrantyClaim", c:148, g:"sales_crm"},
+  {n:"Robot", c:2317, g:"fleet_ops"}, {n:"FirmwareRelease", c:96, g:"fleet_ops"},
+  {n:"DeploymentSite", c:186, g:"fleet_ops"}, {n:"Depot", c:42, g:"fleet_ops"},
+  {n:"Incident", c:318, g:"fleet_ops"},
+  {n:"PullRequest", c:4918, g:"github"}, {n:"Commit", c:61402, g:"github"},
+  {n:"Repository", c:3, g:"github"},
+  {n:"Issue", c:2764, g:"linear"}
+];
+const GROUPS = [...new Set(CLASSES.map(c => c.g))];
+const groupSum = g => CLASSES.filter(c => c.g === g).reduce((s, c) => s + c.c, 0);
+const ENTITIES = CLASSES.reduce((s, c) => s + c.c, 0);
+/* Each connector owns whole class groups, so no entity is counted twice. */
+const SOURCES = [
+  {n:"GitHub", s:"acme/platform + 2 linked", health:"syncing", cursor:"commit e91b2d7", groups:["github"]},
+  {n:"Linear", s:"acme workspace", health:"syncing", cursor:"2026-09-11T09:30Z", groups:["linear"]},
+  {n:"Postgres", s:"acme production replica", health:"degraded", cursor:"lsn 0/3A2F1C8", groups:["sales_crm","fleet_ops"]}
+];
+const ONT = {version:"v14", pr:1142, proposed:1};
+const ONT_N = Number(ONT.version.slice(1));
+const VERSIONS = [
+  ["v14", "Add <span class=\"mono\">WarrantyClaim</span>, relate to Contract", "PR #1142 · 2026-09-08 · Priya Natarajan", true],
+  ["v13", "Split <span class=\"mono\">Site</span> into DeploymentSite and Depot", "PR #1098 · 2026-08-21 · Marcus Bell", false],
+  ["v12", "Add firmware to Robot, backfill from Postgres", "PR #1054 · 2026-08-02 · Marcus Bell", false]
+];
+
+/* ─── Policy simulation. The three outcomes partition the replayed calls. ─── */
+const SIM = {version:"pol_v42", calls:67412, deny:148, ask:2204, runs:31};
+SIM.unchanged = SIM.calls - SIM.deny - SIM.ask;
+</script>
+
+<script>
+"use strict";
+const $  = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = s => String(s).replace(/[&<>"']/g, c =>
+  ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const slug = s => String(s).toLowerCase().replace(/[^a-z0-9]+/g, "-");
+
+/* Anything that changes without a page load has to be said out loud, or a
+   screen-reader user approves an $18,420 payment and hears nothing. */
+function say(msg){
+  const s = $("#say");
+  s.textContent = "";
+  setTimeout(() => { s.textContent = msg; }, 40);
+}
+
+/* Three tiles. Never more — the fourth is always the one nobody reads. */
+const tiles = items => `<dl class="summary">${items.map(t =>
+  `<div><dt>${t[0]}</dt><dd>${t[1]}</dd><small>${t[2]}</small></div>`).join("")}</dl>`;
+
+/* A tab list that a screen reader can actually use: every tab owns its panel,
+   only the selected tab is in the tab order, and the count is separated from
+   the label with a unit, so the name is not "Timeline126". */
+const tabs = (list, active, key) => `<div class="tabs" role="tablist" data-tablist="${key}">${list.map(t =>
+  `<button role="tab" id="tab-${key}-${slug(t[0])}" aria-controls="panel-${key}"
+    aria-selected="${t[0] === active}" tabindex="${t[0] === active ? 0 : -1}"
+    data-tab="${key}" data-val="${esc(t[0])}">${esc(t[0])}${
+    t[1] != null ? `<span class="n" aria-hidden="true">${esc(String(t[1]))}</span><span class="sr"> · ${
+      esc(String(t[1]))} ${esc(t[2] ?? "items")}</span>` : ""}</button>`).join("")}</div>`;
+
+const tabpanel = (key, active, body) => `<div role="tabpanel" id="panel-${key}"
+  aria-labelledby="tab-${key}-${slug(active)}" tabindex="0">${body}</div>`;
+
+const panel = (title, note, body) => `<section class="panel">
+  <div class="panel-h"><h2>${title}</h2>${note ? `<span class="note">${note}</span>` : ""}</div>
+  ${body}</section>`;
+
+const STATE_CLASS = {live:"ok", parked:"wait", sealed:"", cancelled:"deny",
+  flipped:"proven", unmoved:"", unsatisfied:"fail", tampered:"crit",
+  active:"ok", unenrolled:"", failing:"fail", denied:"deny", degraded:"fail",
+  syncing:"ok", allowed:"ok", "needs approval":"wait", granted:"ok", simulated:""};
+const st = (label, cls) => `<span class="st ${cls ?? STATE_CLASS[label] ?? ""}">${esc(label)}</span>`;
+
+/* ─── Tool grammar. Identity, category and gate render the same way in the
+       registry, in an approval, in a kill switch and in a frame. Category is a
+       glyph and a word — never a hue. ─── */
+const SVG = (body, cls) => `<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true">${body}</svg>`;
+const catSvg = c => SVG((TCAT[c] ?? TCAT.record).i, "cg");
+
+/* The cell. Every tool display in the file goes through it, so the identity
+   is the same string in the registry, in an approval, on a belt and in a frame. */
+const toolCell = id => {
+  const m = toolMeta(id);
+  return `<span class="tc" title="${esc(m.l)} · ${esc(TCAT[m.cat].l)}">${catSvg(m.cat)}<span class="mono">${
+    esc(m.n)}${m.v ? `<span class="tv">@${esc(m.v)}</span>` : ""}</span></span>`;
+};
+
+/* Category: a glyph and a word. The examples ride in the title, which is why
+   this file needs no legend panel. */
+const catBadge = c => `<span class="tcb t-${esc(c)}" title="${esc(TCAT[c].s)} e.g. ${esc(TCAT[c].eg)}">${
+  catSvg(c)}${esc(TCAT[c].l)}</span>`;
+
+/* Hazard: how bad a wrong call is. Risk is a shape that gets heavier —
+   circle, diamond, outline triangle, filled triangle — so it reads without
+   colour; the side effect sits beside it. */
+const RISK_SVG = {
+  low:`<circle cx="12" cy="12" r="8"/><path d="M12 12h.01"/>`,
+  medium:`<path d="M12 3l9 9-9 9-9-9z"/><path d="M12 12h.01"/>`,
+  high:`<path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4M12 17.5v.5"/>`,
+  critical:`<path d="M12 3 2 20h20L12 3z" fill="currentColor"/><path d="M12 10v4M12 17.5v.5" stroke="var(--panel)"/>`
+};
+const EFF_SVG = {
+  read:`<circle cx="12" cy="12" r="8"/><path d="M8 12h8"/>`,
+  write:`<path d="M4 20h4L18 10l-4-4L4 16z"/><path d="M12 8l4 4"/>`,
+  irreversible:`<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>`
+};
+const hazard = (risk, eff) =>
+  `<span class="hz r-${esc(risk)}" title="risk ${esc(risk)}">${SVG(RISK_SVG[risk] ?? RISK_SVG.low, "hzi")}${esc(risk)}</span>`
+  + (eff ? `<span class="hz e-${esc(eff)}" title="side effect ${esc(eff)}">${SVG(EFF_SVG[eff] ?? EFF_SVG.read, "hzi")}${esc(eff)}</span>` : "");
+
+/* Gate: what the belt decided. A dashed border means a person still stands in
+   the way — the one thing an operator has to be able to see across a table. */
+const GATE_L = {allow:"allowed", require_approval:"needs approval", mandate:"mandate + approval",
+  deny:"denied", killed:"kill switch"};
+const GATE_SVG = {
+  allow:`<path d="M5 12.5l4.5 4.5L19 7.5"/>`,
+  require_approval:`<path d="M12 3l8 3.5v5c0 4.6-3.2 8.6-8 9.5-4.8-.9-8-4.9-8-9.5v-5z"/><path d="M12 8v4l2.5 1.5"/>`,
+  mandate:`<path d="M12 3v18M16.5 7.5c0-1.7-2-3-4.5-3S7.5 5.8 7.5 7.5s2 2.7 4.5 3.3 4.5 1.6 4.5 3.5-2 3.2-4.5 3.2-4.5-1.3-4.5-3"/>`,
+  deny:`<circle cx="12" cy="12" r="8.5"/><path d="M6 6l12 12"/>`,
+  killed:`<path d="M12 3v9"/><path d="M6.3 6.3a8 8 0 1 0 11.4 0"/>`
+};
+const gateBadge = (g, note) => `<span class="gt g-${esc(g)}"${note ? ` title="${esc(note)}"` : ""}>${
+  SVG(GATE_SVG[g] ?? GATE_SVG.allow, "gti")}${esc(GATE_L[g] ?? g)}</span>`;
+
+/* Why a gate decided what it did — the one thing an operator asks next. */
+const GATE_NOTE = {
+  allow:"a grant reaches this version and no rule narrows it",
+  require_approval:"pol_v41 · require_approval on side_effect:irreversible",
+  mandate:"a financial effect: a mandate is required, and its own rule decides when a person approves",
+  deny:"denied for every agent by the workspace policy",
+  killed:"a kill switch is on for this version or its server"
+};
+
+/* A financial class is the one fact that outranks the gate, so it is said
+   separately rather than folded into it. */
+const finBadge = f => f && f !== "none"
+  ? `<span class="st flat mono" style="font-size:10.5px">${esc(f)}</span>` : `<span class="sub">none</span>`;
+</script>
+
+<script>
+"use strict";
+/* ═══════════════════════════ Pages ═══════════════════════════ */
+const PAGES = {};
+
+const pendingApprovals = () => APPROVALS.filter(a => !a.resolved);
+const liveRuns = () => RUNS.filter(r => r.state === "live");
+/* Newest first, derived — the table used to claim an order it did not have. */
+const runsNewestFirst = () => [...RUNS].sort((a, b) => b.started.localeCompare(a.started));
+
+PAGES.fleet = () => {
+  const pending = pendingApprovals();
+  /* The oldest parked run is the one that started earliest — not the last
+     element of the array, and not the one with the most time left. */
+  const oldest = pending.length
+    ? pending.map(a => RUNS.find(r => r.id === a.run))
+        .reduce((a, b) => a.started <= b.started ? a : b)
+    : null;
+  const rows = runsNewestFirst();
+  return `
+  <div class="head"><div class="head-t">
+    <span class="eyebrow">Workspace · ${esc(WS.name)}</span>
+    <h1>Fleet</h1>
+    <p>Every run in this workspace, live and recent. Pause, steer and cancel take effect at the next call boundary.</p>
+  </div><button class="btn btn-primary" data-act="steer-all">Message the fleet</button></div>
+
+  ${tiles([
+    ["Runs live", liveRuns().length, `${int(WS.agents)} agents · ${int(WS.runsMTD)} runs this month`],
+    ["Waiting on a person", pending.length,
+      oldest ? `oldest parked since ${esc(oldest.started.slice(11, 16))}Z` : "nothing is waiting"],
+    ["Spent today", money(WS.spendToday), "gateway observed · " + esc(ORG.currency)]
+  ])}
+
+  ${panel("Approvals", "an approval is always about a run", APPROVALS.length ? `<div>${APPROVALS.map((a, i) => `
+    <div class="appr">
+      <div class="appr-t">
+        ${toolCell(a.tool)}
+        ${a.args ? `<span class="toolargs">${esc(a.args)}</span>` : ""}
+        <div class="sub" style="font-size:12px;margin-top:5px">
+          ${esc(a.agent)} · operator ${esc(a.op)} ·
+          <a class="mono" href="#/run/${esc(a.run)}" style="border-bottom:1px solid var(--rule-2)">${esc(a.run)}</a> ·
+          rule <span class="mono">${esc(a.rule)}</span></div>
+        <div style="display:flex;gap:6px;margin-top:7px;flex-wrap:wrap;align-items:center">
+          ${catBadge(toolMeta(a.tool).cat)}
+          ${hazard(TOOL(a.tool).risk, TOOL(a.tool).eff)}
+          ${gateBadge(TOOL(a.tool).dec)}</div>
+        ${a.amount ? `<div class="appr-amt num">${money(a.amount)}
+          <span>above the ${money(MANDATE.approveAbove)} approval threshold on this mandate</span></div>` : ""}
+      </div>
+      <div class="appr-a">${a.resolved
+        ? `${st(a.resolved.granted ? "approved" : "denied", a.resolved.granted ? "ok" : "deny")}
+           <span class="sub mono" style="font-size:11.5px">receipt ${esc(a.resolved.receipt)}</span>
+           ${a.resolved.granted ? `<span class="sub" style="font-size:11.5px">single-use credential minted, call dispatched</span>` : ""}`
+        : `${a.risk ? st("risk critical", "crit") : ""}
+           <span class="sub mono" style="font-size:11.5px">${esc(a.left)}</span>
+           <button class="btn btn-sm" data-act="approve" data-i="${i}">Approve<span class="sr"> ${esc(a.tool)} on ${esc(a.run)}</span></button>
+           <button class="btn btn-sm" data-act="deny" data-i="${i}">Deny<span class="sr"> ${esc(a.tool)} on ${esc(a.run)}</span></button>`}
+      </div>
+    </div>`).join("")}</div>`
+    : `<div class="empty"><b>Nothing is waiting on a person</b>
+         Approvals appear here the moment a run parks at a call boundary.</div>`)}
+
+  ${panel("Runs", `${rows.length} of ${int(WS.runsMTD)} this month · newest first`, `<div class="scroll"><table>
+    <thead><tr><th>Run</th><th>Agent</th><th>Operator</th><th>State</th><th>Now</th><th class="r">Cost</th></tr></thead>
+    <tbody>${rows.map(r => `<tr data-go="#/run/${esc(r.id)}">
+      <td><b><a class="mono rowlink" href="#/run/${esc(r.id)}">${esc(r.id)}</a></b><span class="s">${esc(r.task)}
+        <span class="gen" title="written by the classifier, not by a person">auto</span></span></td>
+      <td class="mono" style="font-size:12px">${esc(r.agent)}<span class="s">${esc(r.harness)}</span></td>
+      <td>${esc(r.op)}</td>
+      <td>${st(r.state)}${r.verdict ? " " + st(r.verdict) : ""}</td>
+      <td class="sub" style="font-size:12.5px">${esc(r.step)}</td>
+      <td class="r num">${money(runCost(r))}</td></tr>`).join("")}</tbody></table></div>`)}
+`;
+};
+
+/* ─── The run page. Every row in Fleet opens its own run, and a run only
+       offers the tabs its own state can honestly fill. ─── */
+const theRun = () => RUNS.find(r => r.id === S.runId) ?? RUNS[0];
+const runTabList = r => {
+  const list = [["Timeline", runFrames(r), "frames"], ["Cost", null]];
+  if(r.proof) list.push(["Proof", null]);
+  if(r.chain) list.push(["Chain", null]);
+  return list;
+};
+
+PAGES.run = () => {
+  const r = theRun();
+  const list = runTabList(r);
+  const active = list.some(t => t[0] === S.runTab) ? S.runTab : "Timeline";
+  const body = {Timeline: runTimeline, Cost: runCostTab, Proof: runProof, Chain: runChain}[active](r);
+  return `
+  <div class="head"><div class="head-t">
+    <h1 class="mono" style="font-size:22px">${esc(r.id)}
+      ${st(r.state)} ${r.verdict ? st(r.verdict) : ""} ${st("tier gateway", "flat")}</h1>
+    <p>${esc(r.agent)} · ${esc(r.harness)} · operator ${esc(r.op)} ·
+      ${esc(r.started)}${r.ended ? " → " + esc(r.ended) : " · still running"}
+      ${r.issue ? `<br>Task <span class="mono">${esc(r.issue)}</span>` : ""}</p>
+    <p style="margin-top:9px;color:var(--body);max-width:66ch">${esc(SUMMARY[r.id] ?? r.task)}
+      <span class="gen" title="written by the classifier, not by a person">auto summary</span></p>
+    <div class="runcost">
+      <span class="rc-n num">${money(runCost(r))}</span>
+      <span class="rc-l">${r.ended ? "run cost" : "cost so far"}</span>
+      <button class="rc-b" data-act="cost-basis">Where it went</button>
+    </div>
+  </div><button class="btn btn-primary" data-act="fork">Fork replay</button></div>
+
+  ${tiles([
+    ["Frames", int(runFrames(r)), r.ended ? `dense 0–${runFrames(r) - 1} · sealed` : "recorded so far"],
+    ["Cache hit rate", pct1(cached(r), r.inTok),
+      `${int(cached(r))} of ${int(r.inTok)} input tokens, across the run`],
+    r.proof ? ["Proof", r.proof.verdict, r.proof.verdict === "flipped"
+        ? "failed on the target, passed on the head"
+        : "passed on both, so it proves nothing about the change"]
+      : ["State", r.state, esc(r.step)]
+  ])}
+
+  ${tabs(list, active, "runTab")}
+  ${tabpanel("runTab", active, body)}
+`;
+};
+
+const runTimeline = r => {
+  const frames = framesOf(r);
+  const sel = frames.find(f => f.n === S.frame) ?? frames[0];
+  return `<div style="display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:16px" class="split">
+  <section class="panel" style="margin:0">
+    <div class="panel-h"><h2>Frames</h2>
+      <span class="note">${frames.length} of ${int(runFrames(r))} · sampled</span></div>
+    <div>${frames.map(f => `<button class="fr" data-frame="${f.n}"${f.n === sel.n ? ' aria-current="true"' : ""}>
+      <span class="mono sub" style="font-size:11px;min-width:26px">${f.n}</span>
+      <span style="flex:1;min-width:0">
+        <span class="mono frt">${esc(f.t)}</span>
+        <span class="s sub" style="display:block;font-size:11.5px">${esc(f.d)}</span></span>
+      ${f.cost ? `<span class="mono sub num" style="font-size:11px">${esc(f.cost)}</span>` : ""}
+    </button>`).join("")}</div>
+  </section>
+  <section class="panel" style="margin:0">
+    <div class="panel-h"><h2 class="mono">${esc(sel.t)}</h2><span class="note">frame ${sel.n}</span></div>
+    <div class="panel-b"><dl class="kv">${sel.kv.map(([k, v]) =>
+      /* Identifiers are set in mono; prose is not. A space is the tell. */
+      `<dt>${esc(k)}</dt><dd class="${!/\s/.test(v) && String(v).length < 48 ? "mono" : ""}">${esc(v)}</dd>`
+      ).join("")}</dl>${sel.more ? `<details class="more"><summary>${
+        esc(sel.more.label)}</summary><pre>${esc(sel.more.body)}</pre></details>` : ""}</div>
+  </section></div>`;
+};
+
+const runCostTab = r => panel(`Where the ${money(runCost(r))} went`, "every figure is gateway observed",
+  `<div class="scroll"><table>
+    <thead><tr><th>Turn</th><th>What happened</th><th class="r">Model</th><th class="r">Tools</th><th class="r">Cost</th></tr></thead>
+    <tbody>${r.turns.map(t => `<tr>
+      <td>${esc(t[0])}</td><td>${esc(t[1])}<span class="s">${t[2]} frames</span></td>
+      <td class="r num">${mon4(t[3])}</td><td class="r num">${mon4(t[4])}</td>
+      <td class="r num">${mon4(t[3] + t[4])}</td></tr>`).join("")}
+    </tbody></table></div>`);
+
+const runProof = r => {
+  const p = r.proof, flipped = p.verdict === "flipped";
+  return `
+  ${panel("The flip", `oracle ${esc(p.oracle)} · same normalized command`, `<div class="panel-b">
+    <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:18px;align-items:center" class="split3">
+      <div><div class="eyebrow">Target branch</div>
+        <div style="font-size:27px;font-weight:700;color:var(--${p.targetResult === "FAIL" ? "fail" : "proven"});margin:4px 0 6px">${esc(p.targetResult)}</div>
+        <p class="sub" style="margin:0;font-size:12.5px"><span class="mono">${esc(p.target)}</span> —
+          ${esc(p.targetNote)}.</p></div>
+      <div class="sub" aria-hidden="true" style="font-size:20px">→</div>
+      <div><div class="eyebrow">Pull request head</div>
+        <div style="font-size:27px;font-weight:700;color:var(--proven);margin:4px 0 6px">${esc(p.headResult)}</div>
+        <p class="sub" style="margin:0;font-size:12.5px"><span class="mono">${esc(p.head)}</span> —
+          same environment, same command.</p></div>
+    </div></div>`)}
+  <div class="notice"><div><b>${flipped
+    ? "Failing on the target, flipped on the head."
+    : "Passing on both, so this run is recorded unmoved."}</b>
+    Only a target-fail paired with a head-pass credits a proof. Passing on both is recorded
+    <span class="mono">unmoved</span>; failing on both, <span class="mono">unsatisfied</span>.
+    ${flipped
+      ? `This run is proven, and its ${money(runCost(r))} counts toward proven spend.`
+      : `This run is not proven, and its ${money(runCost(r))} does not count toward proven spend.`}</div></div>
+  ${panel("What the agent received", `disclosure grain ${esc(p.grain)}`, `<div class="panel-b">
+    <p style="margin:0 0 10px" class="sub">The witness ran as its own service principal. The agent never saw the test,
+      the assertion, or the diff — only the verdict:</p>
+    <div class="mono" style="font-size:24px;color:var(--proven);padding:14px;border:1px solid var(--rule);
+      border-radius:var(--r-sm);background:var(--ink);text-align:center">${esc(p.saw)}</div>
+    <p class="sub" style="margin:10px 0 0;font-size:12.5px">Four characters, in frame #${p.frame}. Nothing an agent cannot see,
+      it cannot fake.</p></div>`)}`;
+};
+
+const runChain = r => panel("Chain and seal", "verified", `<div class="panel-b"><dl class="kv">
+  <dt>Frames</dt><dd>every one of ${int(runFrames(r))} verified</dd>
+  <dt>Sequence</dt><dd>dense 0–${runFrames(r) - 1} · no gaps</dd>
+  <dt>Merkle root</dt><dd class="mono">sha256:${esc(r.chain.root)}</dd>
+  <dt>Attestation key</dt><dd class="mono">${esc(r.chain.key)}</dd>
+  <dt>Key validity</dt><dd>${esc(r.chain.from)} → ${esc(r.chain.to)}</dd>
+  <dt>Replay grade</dt><dd>${st(r.chain.grade, "proven")} every model call and tool call is recorded</dd>
+</dl></div>`);
+</script>
+
+<script>
+"use strict";
+/* The intersection formula. Every governed computation on this page renders
+   through it, so "effective permission is an intersection" is shown, not said. */
+const iamWire = (terms, out, nil) =>
+  `<div class="iamw">${terms.map((t, i) =>
+    (i ? `<span class="op" aria-hidden="true">&cap;</span><span class="sr"> intersected with </span>` : "")
+    + `<span class="t">${esc(t[0])}${t[1] ? `<i>${esc(t[1])}</i>` : ""}</span>`).join("")
+  }<span class="eqs" aria-hidden="true">=</span><span class="sr"> equals </span><span class="t ${nil ? "nil" : "out"}">${
+    esc(out[0])}${out[1] ? `<i>${esc(out[1])}</i>` : ""}</span></div>`;
+
+/* A numbered walk from the call to the decision. Used where the answer is no. */
+const iamChain = steps => `<ol class="iamc">${steps.map((st2, i) =>
+  `<li><span class="n">${i + 1}</span><div style="min-width:0"><span class="l">${esc(st2[0])}</span>
+    <div class="v">${st2[1]}</div></div></li>`).join("")}</ol>`;
+
+const tierBadge = t => st("tier " + t, t === "gateway" ? "proven" : t === "harness" ? "wait" : "flat");
+
+PAGES.agents = () => {
+  const shown = AGENTS.reduce((s, a) => s + a.spend, 0);
+  return `
+  <div class="head"><div class="head-t">
+    <span class="eyebrow">Workspace · ${esc(WS.name)}</span>
+    <h1>Identities</h1>
+    <p>Every agent holds an identity in Postgres and a definition in git. None of them holds a credential.
+      What each one can do is its toolbelt, and the belt is the only tool list its model is ever shown.</p>
+  </div><button class="btn btn-primary" data-act="wrap">Wrap an agent</button></div>
+
+  ${tiles([
+    ["Identities here", int(WS.agents), `${int(ORG_AGENTS)} in the organization`],
+    ["Credentials held by identities", "0", "every secret sits in the broker"],
+    ["Spend · last 30 days", money(WS.spend30d), "metered from model and tool receipts"]
+  ])}
+
+  ${panel("Fleet",
+    `${AGENTS.length} of ${int(WS.agents)} · one of each state and tier · ${money(shown)} of ${money(WS.spend30d)}`,
+    `<div class="scroll"><table>
+    <thead><tr><th>Identity</th><th>Harness</th><th>Status</th><th>Tier</th><th class="r">Belt</th><th class="r">Mandates</th><th class="r">Spend 30d</th></tr></thead>
+    <tbody>${AGENTS.map(a => `<tr data-go="#/agents/${esc(a.slug)}">
+      <td><b><a class="rowlink" href="#/agents/${esc(a.slug)}">${esc(a.n)}</a></b><span class="s mono">${esc(a.id)}</span></td>
+      <td style="font-size:12.5px">${esc(a.h)}<span class="s mono">${esc(a.model)}</span></td>
+      <td>${st(a.st)}</td>
+      <td>${tierBadge(a.tier)}</td>
+      <td class="r"><b class="num">${beltOf(a).length}</b><span class="s">${esc(a.belt)} belt</span></td>
+      <td class="r">${a.id === MANDATE.agent ? st("1", "crit") : `<span class="sub">none</span>`}</td>
+      <td class="r num">${money(a.spend)}<span class="s">${int(a.runs30)} runs</span></td></tr>`).join("")}</tbody></table></div>
+    <div class="panel-b" style="border-top:1px solid var(--rule)"><p class="sub" style="margin:0;font-size:12.5px">
+      Tier is computed from what was actually routed, never from what the adapter could do on paper.
+      Open an identity for the roles it holds and the belt its model is shown.</p></div>`)}
+`;
+};
+
+/* ═══════════════ One agent: the whole access surface for one principal ═══════════════
+   Who it is, what credential it holds (none), what its roles intersect down to,
+   the belt its model is actually shown, and the money it may move. Every tab is
+   a route, so a link can point at one of them. */
+const ATABS = [["Identity", null], ["Toolbelt", null], ["Mandate", null]];
+
+PAGES.agent = () => {
+  const a = agentBySlug(S.agentSlug) ?? AGENTS[0];
+  const list = [["Identity", a.roles.length, "roles"], ["Toolbelt", beltOf(a).length, "tools"],
+                ["Mandate", a.id === MANDATE.agent ? 1 : 0, "in force"]];
+  const active = list.some(t => t[0] === S.agentTab) ? S.agentTab : "Identity";
+  const body = {Identity: aIdentity, Toolbelt: aToolbelt, Mandate: aMandate}[active](a);
+  return `
+  <div class="phead"><div class="t">
+    <span class="eyebrow">Agent · ${esc(a.h)}</span>
+    <h1>${esc(a.id)}</h1>
+    <div class="badges">
+      ${st(a.st)} ${tierBadge(a.tier)} <span class="sub" style="font-size:10.5px">model + tools</span>
+      ${tierBadge(a.tierNative)} <span class="sub" style="font-size:10.5px">harness-native</span>
+      ${st("replay " + a.replay, "flat")}
+      ${st("operator " + a.operator, "flat")}
+    </div>
+    <p class="d">${esc(a.desc)}</p>
+  </div><button class="btn btn-primary" data-act="see-belt">See the belt as the model sees it</button></div>
+
+  ${tiles([
+    ["Credentials held", "0", "every secret is minted per call by the broker"],
+    ["Tools its model is shown", beltOf(a).length, `${esc(a.belt)} belt · ${int(REGISTRY.tools)} in the registry`],
+    ["Spend ceiling", money(a.budgetRun), `per run, enforced · ${money(a.budgetDay)} a day`]
+  ])}
+
+  ${tabs(list, active, "agentTab")}
+  ${tabpanel("agentTab", active, body)}
+`;
+};
+
+const aIdentity = a => `
+  ${panel("Roles, and the ceiling they intersect with",
+    "a subagent can only narrow — never widen", `<div class="panel-b">
+    ${iamWire(
+      (a.roles.length ? a.roles.map(r => [r, ROLES[r].kind]) : [["no roles held", "nothing to intersect"]])
+        .concat([[a.operator, "the person invoking it · " + a.opRole]]),
+      [beltOf(a).length + " tool versions", "the belt its model is shown"],
+      beltOf(a).length === 0)}
+    <dl class="kv" style="margin-top:14px">
+      ${a.roles.length ? a.roles.map(r => `<dt class="mono">${esc(r)}</dt><dd class="mono" style="font-size:11.5px">${
+        esc(ROLES[r].perms.join(" · "))}<span class="s">${esc(ROLES[r].desc)}</span></dd>`).join("")
+        : `<dt>Roles</dt><dd class="sub">none held — it can reach nothing but its own run channel</dd>`}
+      <dt>Invoked by</dt><dd>${esc(a.operator)} <span class="mono sub">${esc(a.opRole)}</span>
+        <span class="s">${esc(ROLES[a.opRole].desc)}</span></dd>
+      <dt>Can move money</dt><dd>${a.id === MANDATE.agent
+        ? `${st("1 mandate", "wait")} — and only inside it`
+        : `${st("no", "ok")} — no mandate, so a financial call is refused before dispatch`}</dd>
+    </dl></div>`)}
+
+  ${panel("Credentials this agent holds", "the property most of the threat model rests on",
+    `<div class="panel-b">
+    <div class="iamw">
+      ${[["API key","none"],["OAuth token","none"],["Cloud role","none"],["Repository token","none"],
+         ["Run token","one, and it reaches Oxagen only"]].map(p =>
+        `<span class="t">${esc(p[0])}<i>${esc(p[1])}</i></span>`).join("")}
+    </div>
+    <p class="sub" style="margin:12px 0 0;font-size:12.5px">Every secret a call needs is minted by the broker
+      at dispatch, scoped to that one call, and never transmitted to the agent. A leaked run token cannot
+      reach a tool server — it can only talk to Oxagen, and revoking it kills every live run token at the
+      next call boundary. That is what makes a halt stick.</p></div>`)}
+
+  ${panel("Identity", "in Postgres, revocable in one second", `<div class="panel-b"><dl class="kv">
+    <dt>Agent key</dt><dd class="mono">${esc(a.id)}</dd>
+    <dt>Principal</dt><dd class="mono">${esc(a.principal)}<span class="s">minted at registration and never reused</span></dd>
+    <dt>Harness</dt><dd>${esc(a.h)}</dd>
+    <dt>Model</dt><dd class="mono">${esc(a.model)}</dd>
+    <dt>Enrollment</dt><dd>${a.enrolled
+      ? `${st("enrolled", "ok")} <span class="mono sub">${esc(a.host)}</span>`
+      : `${st("unenrolled", "flat")} <span class="sub">no host, so nothing it does is signed</span>`}</dd>
+    <dt>Definition</dt><dd class="mono">.oxagen/agents/${esc(a.slug)}.toml<span class="s">changing it is a pull request, not a form</span></dd>
+    <dt>Tamper incidents</dt><dd>${a.incidents
+      ? `${st(a.incidents + " open", "crit")}` : `${st("0", "ok")} <span class="sub">across ${int(a.runs30)} runs in 30 days</span>`}</dd>
+  </dl></div>`)}
+`;
+
+const aToolbelt = a => {
+  const belt = beltOf(a), outside = outsideOf(a);
+  return `
+  ${panel("How this belt was computed", "four narrowings, in order", `<div class="panel-b">
+    ${iamWire([["the roles it holds", a.roles.length + " granted"],
+               ["the delegation ceiling", a.operator + " · " + a.opRole],
+               ["the policy bundle", "pol_v41"],
+               ["the kill switches", "3 armed, none on"]],
+              [belt.length + " tool versions", "what its model is shown"], belt.length === 0)}
+    <p class="sub" style="margin:12px 0 0;font-size:12.5px">The belt is the only tool list this model is ever
+      shown. A search never returns a tool outside it, so there is nothing to be tempted by and nothing to
+      hallucinate a call to.</p></div>`)}
+
+  ${belt.length ? panel("The belt", `${belt.length} tool versions · the decision is this agent's, not the registry's`,
+    `<div class="scroll"><table>
+    <thead><tr><th>Tool</th><th>Category</th><th>Gate</th><th>Hazard</th><th>Why</th></tr></thead>
+    <tbody>${belt.map(t => `<tr class="hz-row-${esc(t.risk)}">
+      <td>${toolCell(t.id)}</td>
+      <td>${catBadge(toolMeta(t.id).cat)}</td>
+      <td>${gateBadge(t.dec, t.note)}</td>
+      <td>${hazard(t.risk, t.eff)}</td>
+      <td class="sub mono" style="font-size:11px">${esc(t.rule)}${
+        t.note ? `<span class="s">${esc(t.note)}</span>` : ""}</td></tr>`).join("")}
+    </tbody></table></div>`)
+  : panel("The belt", "empty", `<div class="empty"><b>This agent is shown no tools at all</b>
+      It holds no roles, so the intersection above is empty. It can start a run and talk to Oxagen; it
+      cannot reach a single tool server.</div>`)}
+
+  ${panel("What this agent cannot see", `${outside.length} of ${int(REGISTRY.tools)} · and why`,
+    `<div class="scroll"><table>
+    <thead><tr><th>Tool</th><th>Category</th><th>Why it is out</th></tr></thead>
+    <tbody>${outside.map(t => `<tr>
+      <td>${toolCell(t.id)}</td>
+      <td>${catBadge(toolMeta(t.id).cat)}</td>
+      <td class="sub" style="font-size:12.5px">${esc(t.why)}</td></tr>`).join("")}
+    </tbody></table></div>`)}
+`;
+};
+
+const aMandate = a => {
+  const m = MANDATE, remaining = m.authority - m.settled - m.reserved;
+  if(a.id !== m.agent) return panel("Mandate", "none in force", `<div class="panel-b">
+    <p class="sub" style="margin:0 0 14px;font-size:12.5px">This agent holds no mandate, so a financial call
+      is refused before anything is dispatched. Here is the walk, for a call it will never make:</p>
+    ${iamChain([
+      ["Call", `<span class="mono">stripe__create_payment@4</span> · amount $1,204.18 USD`],
+      ["Financial class", `<span class="mono">moves_funds</span>, read from the tool version's declared amount path`],
+      ["Mandate lookup", `none for <span class="mono">${esc(a.id)}</span>`],
+      ["Decision", `${gateBadge("deny")} <span class="mono">no_mandate</span> · the ledger is unchanged and no credential was minted`]
+    ])}</div>`);
+
+  return panel("Mandate · " + esc(m.agent), "financial authority, bounded and expiring", `<div class="panel-b">
+    <dl class="kv">
+      <dt>Purpose</dt><dd>${esc(m.purpose)}</dd>
+      <dt>Per call</dt><dd class="num">${money(m.perCall)} ceiling</dd>
+      <dt>Approval above</dt><dd class="num">${money(m.approveAbove)} — and always for <span class="mono">moves_funds</span></dd>
+      <dt>Granted by</dt><dd>${esc(m.grantedBy)}</dd>
+      <dt>Valid to</dt><dd>${esc(m.validTo)}<span class="s">it expires on its own; nobody has to remember to remove it</span></dd>
+    </dl>
+    <div style="margin-top:14px">
+      <div style="display:flex;justify-content:space-between;font-size:11.5px" class="sub">
+        <span>Remaining authority · September 2026</span><span class="num">of ${money(m.authority)}</span></div>
+      <div class="bar-meter" style="margin-top:6px">
+        <i style="width:${(m.settled / m.authority * 100).toFixed(1)}%;background:var(--ok)"></i>
+        <i style="width:${(m.reserved / m.authority * 100).toFixed(1)}%;background:var(--wait)"></i></div>
+      <div style="display:flex;gap:16px;margin-top:7px;font-size:11.5px;flex-wrap:wrap" class="sub">
+        <span>${st("settled " + money(m.settled), "ok")}</span>
+        <span>${st("reserved by this call " + money(m.reserved), "wait")}</span>
+        <span class="num">remaining ${money(remaining)}</span></div>
+    </div></div>`);
+};
+
+PAGES.tools = () => {
+  const list = [["Registry", REGISTRY.tools, "tools"], ["Connections", REGISTRY.external, "external"],
+                ["Policy", null], ["Kill switches", null]];
+  const active = list.some(t => t[0] === S.toolsTab) ? S.toolsTab : "Registry";
+  const body =
+    active === "Registry" ? panel("Registry",
+      `${TOOLS.length} of ${int(REGISTRY.tools)} · all ${TCAT_ORDER.length} categories · ordered by consequence, least first`,
+      `<div class="scroll"><table>
+      <thead><tr><th>Tool</th><th>Category</th><th>Gate</th><th>Hazard</th><th>Egress</th><th>Financial</th><th class="r">Calls 30d</th></tr></thead>
+      <tbody>${TOOLS.map(t => `<tr class="hz-row-${esc(t.risk)}">
+        <td>${toolCell(t.id)}<span class="s mono">${esc(t.s)}</span></td>
+        <td>${catBadge(toolMeta(t.id).cat)}</td>
+        <td>${gateBadge(t.dec, GATE_NOTE[t.dec])}</td>
+        <td>${hazard(t.risk, t.eff)}</td>
+        <td><span class="st flat mono" style="font-size:10.5px">${esc(t.eg)}</span></td>
+        <td>${finBadge(t.fin)}</td>
+        <td class="r num">${int(t.calls)}</td></tr>`).join("")}</tbody></table></div>
+      <div class="panel-b" style="border-top:1px solid var(--rule)"><p class="sub" style="margin:0;font-size:12.5px">
+        Three axes, and they are independent. <b style="color:var(--fg)">Category</b> is what the tool acts on —
+        a glyph and a word, never a hue, because a ten-hue scale is unreadable to anyone who cannot separate ten
+        hues. <b style="color:var(--fg)">Hazard</b> is how bad a wrong call would be: the risk mark gets heavier
+        as it climbs, so it reads without colour. <b style="color:var(--fg)">Gate</b> is what the belt decided,
+        and a dashed border means a person still stands in the way.</p></div>`)
+
+    : active === "Connections" ? panel("Connections", "no agent holds any of these",
+      `<div class="scroll"><table>
+      <thead><tr><th>Connection</th><th>Owner</th><th>Downscoped by</th><th>Review due</th></tr></thead>
+      <tbody>
+        <tr><td><b>GitHub · acme</b><span class="s">installation 48210221</span></td><td>Marcus Bell</td><td>fine-grained token, per call</td><td>2026-12-01</td></tr>
+        <tr><td><b>Stripe · acme live</b><span class="s">restricted key</span></td><td>Priya Natarajan</td><td>single-use token, per call</td><td>2026-10-15</td></tr>
+        <tr><td><b>Linear · acme</b><span class="s">OAuth app</span></td><td>Marcus Bell</td><td>read scope only</td><td>2027-02-01</td></tr>
+      </tbody></table></div>
+      <div class="panel-b" style="border-top:1px solid var(--rule)"><p class="sub" style="margin:0;font-size:12.5px">
+        Three external servers hold a credential. The other ${REGISTRY.servers - REGISTRY.external} —
+        <span class="mono">builtin</span>, <span class="mono">harness</span> and the Postgres store binding —
+        hold none, so there is nothing to downscope.</p></div>`)
+
+    : active === "Policy" ? panel(`Simulate ${esc(SIM.version)} against the last 30 days`,
+      `${int(SIM.calls)} real calls replayed, nothing dispatched`, `<div class="panel-b">
+      <div class="simrow">
+        <div><b class="num">${int(SIM.deny)}</b><span>would deny · ${pct1(SIM.deny, SIM.calls)} of calls · ${SIM.runs} runs affected</span></div>
+        <div><b class="num">${int(SIM.ask)}</b><span>would newly ask · ${pct1(SIM.ask, SIM.calls)} · mostly repo writes</span></div>
+        <div><b class="num">${int(SIM.unchanged)}</b><span>unchanged · ${pct1(SIM.unchanged, SIM.calls)}</span></div>
+      </div>
+      <p class="sub" style="margin:0">Simulation reads the recorded calls and the candidate policy. It never dispatches.
+        Switch the version on only when the list above is one you would defend.</p>
+      <div style="margin-top:12px"><button class="btn" data-act="open-affected">Open the ${SIM.runs} affected runs</button></div></div>`)
+
+    : panel("Kill switches", "a switch takes effect at the next call boundary, everywhere",
+      `<div class="scroll"><table>
+      <thead><tr><th>Switch</th><th>Scope</th><th>State</th></tr></thead>
+      <tbody>
+        <tr><td><b>Every <span class="mono">moves_funds</span> tool</b><span class="s">class-wide</span><div style="margin-top:5px">${catBadge("finance")}</div></td><td>organization</td><td>${st("armed, off", "flat")}</td></tr>
+        <tr><td><b>acme.core.triage</b><span class="s">one agent</span></td><td>${esc(WS.name)}</td><td>${st("armed, off", "flat")}</td></tr>
+        <tr><td><b>stripe server</b><span class="s">one server</span><div style="margin-top:5px">${catBadge("finance")}</div></td><td>organization</td><td>${st("armed, off", "flat")}</td></tr>
+      </tbody></table></div>`);
+
+  return `
+  <div class="head"><div class="head-t">
+    <span class="eyebrow">Workspace · ${esc(WS.name)}</span>
+    <h1>Tools</h1>
+    <p>What exists, who may call it, and what happens when the policy changes. Every tool is versioned by its schema.</p>
+  </div><button class="btn btn-primary" data-act="import">Import from an MCP server</button></div>
+
+  ${tabs(list, active, "toolsTab")}
+  ${tabpanel("toolsTab", active, body)}
+`;
+};
+
+PAGES.ontology = () => {
+  const list = [["Model", CLASSES.length, "classes"], ["Ask", null],
+                ["Sources", SOURCES.length, "connectors"], ["Versions", ONT_N, "versions"]];
+  const active = list.some(t => t[0] === S.ontTab) ? S.ontTab : "Model";
+  const body =
+    active === "Model" ? panel("The map",
+      `${CLASSES.length} classes across ${GROUPS.length} schemas, drawn from the active version in git`,
+      `<div class="panel-b">
+      ${GROUPS.map(g => `
+        <div style="margin-bottom:14px">
+          <div class="eyebrow" style="color:var(--dim);margin-bottom:7px">${esc(g)} ·
+            ${int(groupSum(g))} entities</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px">
+            ${CLASSES.filter(c => c.g === g).map(c => `
+              <div style="border:1px solid var(--rule);border-radius:var(--r-sm);padding:9px 11px;background:var(--ink);min-width:0">
+                <b style="color:var(--fg);font-size:13px">${esc(c.n)}</b>
+                <div class="mono sub num" style="font-size:11.5px;margin-top:2px">${int(c.c)} entities</div>
+              </div>`).join("")}
+          </div></div>`).join("")}</div>`)
+
+    : active === "Ask" ? panel("Ask in plain English", "answers cite the entities they came from",
+      `<div class="panel-b">
+      <div style="border:1px solid var(--rule);border-radius:var(--r-sm);padding:11px 13px;background:var(--ink);margin-bottom:14px">
+        Which customers have an open incident on a robot running firmware older than 4.2?</div>
+      <div class="scroll"><table style="border:1px solid var(--rule);border-radius:var(--r-sm)">
+        <thead><tr><th>Customer</th><th>Robot</th><th>Firmware</th><th>Incident</th></tr></thead>
+        <tbody>
+          <tr><td>Northwind Freight</td><td class="mono">rbt_4471</td><td class="mono">4.1.8</td><td class="mono">inc_2291</td></tr>
+          <tr><td>Cedar Logistics</td><td class="mono">rbt_5120</td><td class="mono">4.0.3</td><td class="mono">inc_2304</td></tr>
+          <tr><td>Halvorsen Ports</td><td class="mono">rbt_2288</td><td class="mono">4.1.1</td><td class="mono">inc_2312</td></tr>
+        </tbody></table></div>
+      <div class="eyebrow" style="margin:14px 0 6px">The Cypher it ran</div>
+      <pre class="mono scroll" style="margin:0;padding:12px;border:1px solid var(--rule);border-radius:var(--r-sm);
+        background:var(--ink);font-size:12px;color:var(--body)">MATCH (c:Customer)-[:OWNS]->(r:Robot)-[:HAS_INCIDENT]->(i:Incident)
+WHERE i.status = 'open' AND r.firmware &lt; '4.2'
+RETURN c.name, r.id, r.firmware, i.id LIMIT 50</pre>
+      <p class="sub" style="margin:10px 0 0;font-size:12.5px">Read-only, budgeted. A question that would write, or scan past
+        the budget, is refused with the reason.</p></div>`)
+
+    : active === "Sources" ? panel("Sources",
+      `every entity walks back to one source · ${int(ENTITIES)} in ${esc(WS.name)}`,
+      `<div class="scroll"><table>
+      <thead><tr><th>Connector</th><th>Health</th><th>Cursor</th><th class="r">Entities</th></tr></thead>
+      <tbody>${SOURCES.map(s => `<tr>
+        <td><b>${esc(s.n)}</b><span class="s">${esc(s.s)}</span><span class="s mono">${s.groups.join(" · ")}</span></td>
+        <td>${st(s.health)}</td><td class="mono">${esc(s.cursor)}</td>
+        <td class="r num">${int(s.groups.reduce((a, g) => a + groupSum(g), 0))}</td></tr>`).join("")}
+      </tbody></table></div>`)
+
+    : panel("Versions", `${VERSIONS.length} of ${ONT_N} · newest first`, `<div class="scroll"><table>
+      <thead><tr><th>Version</th><th>Change</th><th>Merged</th></tr></thead>
+      <tbody>${VERSIONS.map(v => `<tr>
+        <td class="mono">${esc(v[0])} ${v[3] ? st("active", "ok") : ""}</td>
+        <td>${v[1]}</td><td>${esc(v[2])}</td></tr>`).join("")}
+      </tbody></table></div>`);
+
+  return `
+  <div class="head"><div class="head-t">
+    <span class="eyebrow">Workspace · ${esc(WS.name)}</span>
+    <h1>Ontology</h1>
+    <p>What kinds of things exist at ${esc(ORG.name)}, how many of each, and which version of that model is in force.
+      Proposed in a pull request, activated on merge, versioned in <span class="mono">.oxagen/ontology/</span>.</p>
+  </div><button class="btn btn-primary" data-act="propose">Propose a change</button></div>
+
+  ${tiles([
+    ["Classes", CLASSES.length, `+${ONT.proposed} proposed · ${GROUPS.length} schemas`],
+    ["Entities", int(ENTITIES), `resolved, with provenance · ${esc(WS.name)}`],
+    ["Version", ONT.version, `active · PR #${ONT.pr}`]
+  ])}
+
+  ${tabs(list, active, "ontTab")}
+  ${tabpanel("ontTab", active, body)}
+`;
+};
+</script>
+
+<script>
+"use strict";
+PAGES.steering = () => `
+  <div class="head"><div class="head-t">
+    <span class="eyebrow">Workspace · ${esc(WS.name)}</span>
+    <h1>Steering</h1>
+    <p>Published records reach every run in this workspace. Git decides what is in force; the graph remembers
+      what each record changed.</p>
+  </div><button class="btn btn-primary" data-act="propose">Open a Context PR</button></div>
+
+  ${tiles([
+    ["In force", WS.records, esc(WS.recordMix)],
+    ["Proposals waiting", WS.proposals, "with the runs that support them"],
+    ["Proof rate", pct1(WS.proven90, WS.witnessed90),
+      `${int(WS.proven90)} proven of ${int(WS.witnessed90)} witnessed runs · 90 days`]
+  ])}
+
+  ${panel("Published records", `${RECORDS.length} of ${WS.records} · indexed from ${esc(WS.repo)}@e91b2d7`,
+    `<div>${RECORDS.map(r => `
+    <div style="padding:14px 16px;border-bottom:1px solid var(--rule);display:flex;gap:18px;flex-wrap:wrap">
+      <div style="flex:1;min-width:260px">
+        <div style="color:var(--fg)">${esc(r.s)}</div>
+        <div style="display:flex;gap:8px;align-items:center;margin-top:7px;flex-wrap:wrap">
+          ${st(r.kind, "flat")}
+          <span class="mono sub" style="font-size:11.5px">${esc(r.id)}</span></div>
+      </div>
+      <div style="min-width:150px">
+        <div class="sub" style="font-size:11px;text-transform:uppercase;letter-spacing:.1em">Proof rate, 90 days</div>
+        <div class="num" style="color:var(--fg);margin-top:3px">${r.before.toFixed(1)}% → <b style="color:var(--proven)">${r.after.toFixed(1)}%</b></div>
+        <div class="bar-meter" style="margin-top:6px;width:140px"><i style="width:${r.after}%;background:var(--proven)"></i></div>
+        <div class="sub" style="font-size:11.5px;margin-top:5px">cited ${r.cited} · violated ${r.violated}</div>
+      </div>
+    </div>`).join("")}</div>`)}
+
+  ${panel(`Context PR #${CONTEXT_PR.n}`, "the record is one file, so review is one diff", `<div class="panel-b">
+    <pre class="mono scroll" style="margin:0 0 12px;padding:12px;border:1px solid var(--rule);border-radius:var(--r-sm);
+      background:var(--ink);font-size:12px;color:var(--body)">+ [[${esc(CONTEXT_PR.kind)}]]
++ id        = "${esc(CONTEXT_PR.id)}"
++ authority = "must"
++ effect    = "forbid"
++ statement = "${esc(CONTEXT_PR.statement)}"</pre>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      ${st("schema passed", "ok")} ${st("hash passed", "ok")} ${st("conflicts passed", "ok")}
+      ${st("secrets passed", "ok")} ${st("probes 12 of 12", "ok")}
+    </div>
+    <p class="sub" style="margin:11px 0 0;font-size:12.5px">This record is not in force yet. Merging mints the promotion
+      event, and the next run on this workspace carries it in the stable prefix — visible in its
+      <span class="mono">model.request</span> frame.</p></div>`)}
+`;
+
+PAGES.spend = () => {
+  const atStake = FINDINGS.reduce((s, f) => s + f.at, 0);
+  return `
+  <div class="head"><div class="head-t">
+    <span class="eyebrow">Workspace · ${esc(WS.name)}</span>
+    <h1>Spend</h1>
+    <p>September 2026, month to date. Every figure carries its basis; the ledger is kept in micro-USD.</p>
+  </div><button class="btn btn-primary" data-act="export">Export statement</button></div>
+
+  ${tiles([
+    ["Spent", money(WS.spendMTD), `${int(WS.runsMTD)} runs · ${esc(PERIOD.label)} · gateway observed`],
+    ["Proven", money(WS.provenSpend),
+      `${pct1(WS.provenSpend, WS.spendMTD)} of spend · ${int(WS.provenRuns)} runs flipped a witness`],
+    ["At stake in findings", money(atStake), `per month, across ${FINDINGS.length} findings`]
+  ])}
+
+  ${panel("Findings, ranked by money at stake",
+    "each cites the frames that prove it, and none exceeds what its scope spends",
+    `<div class="scroll"><table>
+    <thead><tr><th>Finding</th><th>Scope</th><th class="r">At stake / month</th><th class="r">Frames</th></tr></thead>
+    <tbody>${FINDINGS.map(f => `<tr>
+      <td><b>${esc(f.n)}</b><span class="s mono">${esc(f.id)}</span></td>
+      <td class="mono" style="font-size:12px">${esc(f.scope)}${
+        AGENT(f.scope) ? `<span class="s">of ${money(AGENT(f.scope).spend)} spent in 30 days</span>` : ""}</td>
+      <td class="r num" style="color:var(--fg)">${money(f.at)}</td>
+      <td class="r num sub">${f.frames}</td></tr>`).join("")}</tbody></table></div>`)}
+
+  ${panel("Spend by operator", `a run is an agent, a person and a prompt · ${esc(PERIOD.label)}`,
+    `<div class="scroll"><table>
+    <thead><tr><th>Operator</th><th>Role</th><th class="r">Runs</th><th class="r">Proven</th><th class="r">Spend</th><th class="r">Per run</th></tr></thead>
+    <tbody>${OPERATORS.map(o => `<tr>
+      <td><b>${esc(o.name)}</b></td>
+      <td class="sub" style="font-size:12.5px">${esc(o.role)}</td>
+      <td class="r num">${int(o.runs)}</td>
+      <td class="r num sub">${int(o.proven)} · ${pct1(o.proven, o.runs)}</td>
+      <td class="r num" style="color:var(--fg)">${money(o.spend)}</td>
+      <td class="r num sub">${money(o.spend / o.runs)}</td></tr>`).join("")}
+      <tr><td><b>All operators</b></td><td></td>
+        <td class="r num" style="color:var(--fg)">${int(OPERATORS.reduce((s, o) => s + o.runs, 0))}</td>
+        <td class="r num sub">${int(OPERATORS.reduce((s, o) => s + o.proven, 0))}</td>
+        <td class="r num" style="color:var(--fg);font-weight:600">${money(OPERATORS.reduce((s, o) => s + o.spend, 0))}</td>
+        <td></td></tr>
+    </tbody></table></div>`)}
+
+  ${panel("Reconciliation", "August 2026", `<div class="panel-b"><dl class="kv">
+    <dt>Provider statements</dt><dd class="num">${money(WS.augLedger + 4.12)}</dd>
+    <dt>Oxagen ledger</dt><dd class="num">${money(WS.augLedger)} ${st("matched, one line held out", "ok")}</dd>
+    <dt>Open exceptions</dt><dd>1 — a Bedrock line dated after the statement closed, $4.12, under review.
+      It is the whole of the $4.12 difference above.</dd>
+  </dl></div>`)}
+`;
+};
+
+PAGES.organization = () => `
+  <div class="head"><div class="head-t">
+    <span class="eyebrow">Organization</span>
+    <h1>${esc(ORG.name)}</h1>
+    <p><span class="mono">${esc(ORG.id)}</span> · namespace <span class="mono">${esc(ORG.ns)}</span> ·
+      ${esc(ORG.plan)} · display currency ${esc(ORG.currency)} · ${ORG.members} members · ${ORG_AGENTS} agents</p>
+  </div><button class="btn btn-primary" data-act="invite">Invite people</button></div>
+
+  ${tiles([
+    ["Members", ORG.members, "32 from SCIM · 2 manual"],
+    ["Single sign-on", "Enforced", "Okta · SAML 2.0 · 2 break-glass accounts"],
+    ["Two-factor", `${ORG.members} of ${ORG.members}`, "11 hardware key · 23 app"]
+  ])}
+
+  ${panel("Where the data lives", "one binding per store", `<div class="scroll"><table>
+    <thead><tr><th>Store</th><th>Mode</th><th>State</th><th>Rotated</th></tr></thead>
+    <tbody>
+      <tr><td><b>Postgres</b><span class="s">control plane and ledger</span></td><td>dedicated</td><td>${st("active")}</td><td>2026-07-01</td></tr>
+      <tr><td><b>Neo4j</b><span class="s">org_acme · one subgraph per workspace</span></td><td>dedicated</td><td>${st("active")}</td><td>2026-07-01</td></tr>
+      <tr><td><b>Objects</b><span class="s">frame archive segments</span></td><td>shared</td><td>${st("active")}</td><td>2026-07-01</td></tr>
+    </tbody></table></div>`)}
+
+  ${panel("Workspaces", `each binds one main repo · ${ORG_AGENTS} agents in total`, `<div class="scroll"><table>
+    <thead><tr><th>Workspace</th><th>Main repo</th><th>Production branch</th><th class="r">Agents</th><th class="r">Runs this month</th><th class="r">Entities</th></tr></thead>
+    <tbody>
+      <tr><td><b>${esc(WS.name)}</b><span class="s">2 linked repos</span></td><td class="mono">${esc(WS.repo)}</td><td class="mono">main</td><td class="r num">${WS.agents}</td><td class="r num">${int(WS.runsMTD)}</td><td class="r num">${int(ENTITIES)}</td></tr>
+      <tr><td><b>${esc(WS2.name)}</b></td><td class="mono">${esc(WS2.repo)}</td><td class="mono">main</td><td class="r num">${WS2.agents}</td><td class="r num">${int(WS2.runsMTD)}</td><td class="r num">${int(WS2.entities)}</td></tr>
+    </tbody></table></div>`)}
+`;
+
+PAGES.billing = () => `
+  <div class="head"><div class="head-t">
+    <span class="eyebrow">Organization</span>
+    <h1>Billing</h1>
+    <p>Runs are the meter. The first ${int(PERIOD.free)} a month are free, with every governance feature on.</p>
+  </div><button class="btn btn-primary" data-act="invoices">Download invoices</button></div>
+
+  ${tiles([
+    ["This period", int(ORG_RUNS) + " runs",
+      `${esc(PERIOD.label)} · both workspaces · ${int(BILLABLE)} billable`],
+    ["Charges to date", money(CHARGES), `runs ${money(RUN_CHARGE)} · frame archive ${money(ARCHIVE)}`],
+    ["Next invoice", esc(PERIOD.next), `${esc(ORG.plan)} · ${esc(PERIOD.terms)}`]
+  ])}
+
+  ${panel("How this period is priced", "tiers apply within the period", `<div class="scroll"><table>
+    <thead><tr><th>Tier</th><th>Runs</th><th class="r">Rate</th><th class="r">Amount</th></tr></thead>
+    <tbody>
+      <tr><td>Free</td><td class="num">${int(PERIOD.free)}</td><td class="r num">$0.00</td><td class="r num">$0.00</td></tr>
+      <tr><td>${int(PERIOD.free + 1)} – 10,000</td><td class="num">${int(BILLABLE)}</td><td class="r num">${money(PERIOD.rate)}</td><td class="r num">${money(RUN_CHARGE)}</td></tr>
+      <tr><td>Frame archive</td><td class="sub">${PERIOD.archiveGB} GB month</td><td class="r num">${money(PERIOD.archiveRate)} / GB</td><td class="r num">${money(ARCHIVE)}</td></tr>
+      <tr><td>Graph entities</td><td class="sub">${int(ENTITIES + WS2.entities)} · both workspaces</td><td class="r num">included</td><td class="r num">$0.00</td></tr>
+      <tr><td><b>Total</b></td><td></td><td></td><td class="r num" style="color:var(--fg);font-weight:600">${money(CHARGES)}</td></tr>
+    </tbody></table></div>`)}
+`;
+
+PAGES.audit = () => `
+  <div class="head"><div class="head-t">
+    <span class="eyebrow">Organization</span>
+    <h1>Audit</h1>
+    <p>Every control-plane event, every receipt, and what can be proven about each of them.</p>
+  </div><button class="btn btn-primary" data-act="export">Export a signed bundle</button></div>
+
+  ${tiles([
+    ["Events · 30 days", "41,208", "control plane only; run frames live on the run"],
+    ["Open incidents", WS.incidents, "severity 2 · SCIM deprovision lag"],
+    ["Retention", "2,555 days", "content exact · archive after 90"]
+  ])}
+
+  ${panel("Recent events", "newest first", `<div class="scroll"><table>
+    <thead><tr><th>When</th><th>Event</th><th>Actor</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td class="mono" style="font-size:12px">09-11 13:58:40Z</td><td><b>policy.simulated</b><span class="s mono">${esc(SIM.version)} · ${int(SIM.deny)} would deny · ${int(SIM.ask)} would newly ask</span></td><td>Priya Natarajan</td><td>${st("simulated", "flat")}</td></tr>
+      <tr><td class="mono" style="font-size:12px">09-11 11:22:07Z</td><td><b>run.cancelled</b><span class="s mono">run_01K6QW6H3D · kill switch, class moves_funds</span></td><td>Priya Natarajan</td><td>${st("cancelled")}</td></tr>
+      <tr><td class="mono" style="font-size:12px">09-11 09:30:02Z</td><td><b>scim.sync</b><span class="s mono">${ORG.members} users · 6 groups</span></td><td>Okta</td><td>${st("degraded")}</td></tr>
+      <tr><td class="mono" style="font-size:12px">09-10 16:41:52Z</td><td><b>approval.granted</b><span class="s mono">stripe__create_payment@4 · $12,905.40 · August settlement</span></td><td>Dana Okafor</td><td>${st("granted")}</td></tr>
+    </tbody></table></div>`)}
+`;
+</script>
+
+<script>
+"use strict";
+/* ═══════════════════════════ State and controller ═══════════════════════════ */
+const S = {page:"fleet", runId:"run_01K5XQ7M4A", runTab:"Timeline", toolsTab:"Registry",
+  ontTab:"Model", agentSlug:"release-manager", agentTab:"Identity",
+  frame:118, view:"loaded", width:"desktop", chrome:true};
+
+/* The chrome is fixed to the bottom-right corner. On a small viewport that
+   corner is on top of the page's one primary action, so it starts folded
+   there — dismissible was not enough when it opened over the button. */
+if(innerWidth < 700) S.chrome = false;
+
+const TITLE = {fleet:"Fleet", run:"Run", agents:"Agent IAM", agent:"Agent", tools:"Tools",
+  ontology:"Ontology", steering:"Steering", spend:"Spend", organization:"Organization",
+  billing:"Billing", audit:"Audit"};
+
+/* A run is a Fleet detail view, so Fleet stays lit in the sidebar and stays
+   reachable in the breadcrumb — the operator never loses their bearings. */
+const NAV_OF = {run:"fleet", agent:"agents"};
+
+/* Whether a page belongs to a workspace or to the organization. The denied and
+   empty states have to know, or they write sentences that cannot be true. */
+const SCOPE = {fleet:"ws", run:"ws", agents:"ws", agent:"ws", tools:"ws", ontology:"ws",
+  steering:"ws", spend:"ws", organization:"org", billing:"org", audit:"org"};
+
+/* The empty state is the first-run tutorial, so it has to teach the path into
+   THIS page. One shared sentence about runs sent an operator looking at an
+   empty ontology off to wrap an agent, which is not how an ontology fills. */
+const EMPTY = {
+  fleet:   ["Nothing has run in " + WS.name + " yet", "The first run appears here the moment its first frame arrives.", "wrap", "Wrap an agent"],
+  run:     ["This run has recorded no frames", "Frames appear as the agent works. A run with none has not started its first turn.", "back-to-fleet", "Back to Fleet"],
+  agents:  ["No identities in " + WS.name + " yet", "An agent is a definition in git and an identity in Postgres. Wrapping one takes a minute.", "wrap", "Wrap an agent"],
+  agent:   ["This agent holds nothing yet", "No roles, no belt, no mandate. Grant it a role and the belt its model is shown follows from that.", "grant-role", "Grant a role"],
+  tools:   ["No tools in the registry", "Tools arrive by importing an MCP server. Nothing can be called until one is.", "import", "Import from an MCP server"],
+  ontology:["No model in force yet", "The ontology fills from connectors, not from runs. Connect a source and the classes it resolves appear here.", "connect", "Connect a source"],
+  steering:["No records in force", "Records reach runs from git. Open a Context PR, and merging it publishes the first one.", "propose", "Open a Context PR"],
+  spend:   ["No spend recorded yet", "Spend is metered from model and tool receipts, so it appears once a run makes its first call.", "wrap", "Wrap an agent"],
+  organization:["Nothing across " + ORG.name + " yet", "Organization pages fill in once one of its workspaces records its first run.", "new-workspace", "Create a workspace"],
+  billing: ["Nothing billable yet", "Runs are the meter, and the first " + int(PERIOD.free) + " a month are free. No run has been recorded.", "new-workspace", "Create a workspace"],
+  audit:   ["No control-plane events yet", "Grants, policy activations, approvals and kill switches are all recorded here as they happen.", "new-workspace", "Create a workspace"]
+};
+
+/* The denied state simulates a different viewer, so the shell has to change
+   with it — a rail still reading "Marcus Bell, workspace owner" beside a body
+   saying you have no grant is the shell telling a lie. */
+const VIEWER = {
+  loaded: {name:"Marcus Bell", initials:"MB", role:"Workspace owner",
+    email:"marcus.bell@acmerobotics.com", org:"member · workspace owner on " + WS.name},
+  denied: {name:"Sam Okonkwo", initials:"SO", role:"Observer on " + WS2.name,
+    email:"sam.okonkwo@acmerobotics.com", org:"member · observer on " + WS2.name}
+};
+
+const VIEWS = {
+  empty: () => { const [head, body, act, label] = EMPTY[S.page];
+    return `<div class="head"><div class="head-t"><h1>${esc(TITLE[S.page])}</h1></div></div>
+    <section class="panel"><div class="empty"><b>${esc(head)}</b>${esc(body)}
+      <div style="margin-top:14px"><button class="btn btn-primary" data-act="${act}">${esc(label)}</button></div>
+    </div></section>`; },
+
+  loading: () => `<div class="head"><div class="head-t"><h1>${esc(TITLE[S.page])}</h1></div></div>
+    <dl class="summary">${[0,1,2].map(() => `<div><dt><span class="skel" style="display:block;width:80px"></span></dt>
+      <dd><span class="skel" style="display:block;width:110px;height:24px;margin-top:6px"></span></dd></div>`).join("")}</dl>
+    <section class="panel" style="min-height:340px"><div class="panel-b">${[0,1,2,3,4,5,6,7].map(i =>
+      `<div class="skel" style="width:${94 - (i % 5) * 9}%;margin-bottom:15px"></div>`).join("")}</div></section>`,
+
+  error: () => `<div class="head"><div class="head-t"><h1>${esc(TITLE[S.page])}</h1></div></div>
+    <div class="notice crit" role="alert"><div><b>This page could not be loaded</b>
+      The query timed out after 10 seconds. Nothing was changed. Reference
+      <span class="mono">err_01K6R2T8</span> — quote it if you contact support.
+      <div style="margin-top:11px"><button class="btn btn-sm" data-act="retry">Try again</button></div></div></div>`,
+
+  denied: () => `<div class="head"><div class="head-t"><h1>${esc(TITLE[S.page])}</h1></div></div>
+    <div class="notice deny"><div><b>You do not have access to this page</b>
+      Your only grant is the observer role on ${esc(WS2.name)}. ${SCOPE[S.page] === "ws"
+        ? `${esc(TITLE[S.page])} belongs to ${esc(WS.name)} and needs a grant on that workspace.
+           Marcus Bell, its owner, can give you one.`
+        : `${esc(TITLE[S.page])} is an organization page and needs the org billing or owner role.
+           Priya Natarajan, as org billing, can give you one.`}
+      <div style="margin-top:11px"><button class="btn btn-sm" data-act="request">Request access</button></div></div></div>`
+};
+
+/* innerHTML replacement destroys whatever was focused, so every keyboard
+   interaction inside #view worked exactly once: one arrow press moved the tab,
+   and the second did nothing because focus was on <body>. Remember what had
+   focus and put it back on the element that replaced it. */
+function focusKey(el){
+  if(!el || !$("#view").contains(el)) return null;
+  if(el.dataset.frame) return `[data-frame="${el.dataset.frame}"]`;
+  if(el.dataset.tab)   return `[data-tab="${el.dataset.tab}"][aria-selected="true"]`;
+  if(el.dataset.act && el.dataset.i != null) return `[data-act="${el.dataset.act}"][data-i="${el.dataset.i}"]`;
+  if(el.dataset.act)   return `[data-act="${el.dataset.act}"]`;
+  return null;
+}
+
+function render(){
+  const v = $("#view");
+  const key = focusKey(document.activeElement);
+  v.innerHTML = S.view === "loaded" ? PAGES[S.page]() : VIEWS[S.view]();
+
+  const nav = NAV_OF[S.page] ?? S.page;
+  $$(".navsec a").forEach(a =>
+    a.getAttribute("data-nav") === nav ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current"));
+
+  $("#crumbTail").innerHTML =
+    S.page === "run"
+      ? `<a class="here" href="#/fleet">Fleet</a><span class="sep" aria-hidden="true">/</span>
+         <span class="here mono">${esc(S.runId)}</span>`
+    : S.page === "agent"
+      ? `<a class="here" href="#/agents">${esc(TITLE.agents)}</a><span class="sep" aria-hidden="true">/</span>
+         <span class="here mono">${esc(S.agentSlug)}</span>`
+      : `<span class="here">${esc(TITLE[S.page])}</span>`;
+
+  paintBadges();
+  paintViewer();
+  document.title = TITLE[S.page] + " · Oxagen Mission Control";
+  paintChrome();
+
+  if(key) (v.querySelector(key) || v.querySelector('[data-act="approve"]') || v).focus();
+}
+
+/* Counts live in one place. A badge typed into the markup is a second source
+   that drifts the first time the constant changes. */
+function paintBadges(){
+  const set = (id, n, noun) => {
+    const b = $("#" + id), sr = $("#" + id + "Sr");
+    b.textContent = n; b.hidden = !n;
+    sr.textContent = n ? `, ${n} ${noun}` : "";
+  };
+  const blind = S.view === "denied";
+  set("navApprovals", blind ? 0 : pendingApprovals().length, "waiting on a person");
+  set("navSteering",  blind ? 0 : WS.proposals, "proposals waiting");
+  set("navAudit",     blind ? 0 : WS.incidents, "open incidents");
+}
+
+function paintViewer(){
+  const v = VIEWER[S.view === "denied" ? "denied" : "loaded"];
+  $("#acctName").textContent = v.name;
+  $("#acctInitials").textContent = v.initials;
+  $("#acctRole").textContent = v.role;
+  $("#acctDlgName").textContent = v.name;
+  $("#acctDlgEmail").textContent = v.email;
+  $("#acctDlgRole").textContent = v.org;
+}
+
+let booted = false;
+function route(){
+  const parts = location.hash.replace(/^#\//, "").split("/");
+  const p = parts[0] || "fleet";
+  S.page = PAGES[p] ? p : "fleet";
+  /* #/agents is the list; #/agents/<slug>[/<tab>] is one principal's whole
+     access surface, so a link can point at a tab of it. */
+  if(S.page === "agents" && parts[1]){
+    const hit = agentBySlug(parts[1]);
+    if(hit){
+      S.page = "agent";
+      S.agentSlug = hit.slug;
+      S.agentTab = ["Identity","Toolbelt","Mandate"].includes(parts[2]) ? parts[2] : "Identity";
+    }
+  }
+  if(S.page === "run"){
+    const hit = RUNS.find(r => r.id === parts[1]);
+    S.runId = hit ? hit.id : RUNS[0].id;
+    /* A different run may not offer the tab you were on, and its frames are
+       its own — reset both rather than showing another run's selection. */
+    S.runTab = "Timeline";
+    S.frame = framesOf(theRun())[0].n;
+  }
+  closeNav();
+  render();
+  window.scrollTo(0, 0);
+  /* A route change with no page load is silent and leaves focus behind. */
+  if(booted){ $("#view").focus(); say(TITLE[S.page] + (S.page === "run" ? " " + S.runId : "")); }
+  booted = true;
+}
+addEventListener("hashchange", route);
+
+/* ───────────────────────── Assistant ───────────────────────── */
+const ASST = [
+  {you:"Grant linear__get_issue to triage and cap it at $5 a run.",
+   it: () => "Done. Two governed actions, both with receipts.",
+   did:[["tool.grant", "linear__get_issue@2 → acme.core.triage · read scope", "rcp_01K6R41A"],
+        ["budget.set", "acme.core.triage · $5.00 a run, hard", "rcp_01K6R41B"]]},
+  {you:"Why did invoice-bot stop at 13:48?",
+   /* Reads the approval rather than asserting a state, so it cannot keep
+      insisting the call is parked after you have approved it. */
+   it: () => {
+     const a = APPROVALS[0];
+     const base = `It did not stop — it parked. The call is ${money(a.amount)} against a mandate that sends anything above ${money(MANDATE.approveAbove)} to a person, so ${a.rule} moved it to the approval queue.`;
+     return a.resolved
+       ? `${base} You ${a.resolved.granted ? "approved" : "denied"} it, receipt ${a.resolved.receipt}, and the run resumed.`
+       : `${base} It is still parked with ${a.left} left, at the top of Fleet. Nothing dispatched: the credential is minted only on approval.`;
+   },
+   did:[["run.read", "run_01K6QXD4M9 · frames #21 → #23", "rcp_01K6R41C"]]}
+];
+const asstLog = [...ASST];
+
+function renderAsst(){
+  $("#asstBody").innerHTML = asstLog.map(m => `
+    <div class="msg you"><span class="sr">You said: </span>${esc(m.you)}</div>
+    <div class="msg it"><b>Assistant</b>${esc(typeof m.it === "function" ? m.it() : m.it)}
+      ${m.did.length ? `<div class="did"><span class="eyebrow">What it did</span>${m.did.map(d => `
+        <div style="margin-bottom:6px;font-size:12.5px">
+          <span class="mono" style="color:var(--fg)">${esc(d[0])}</span>
+          <span class="sub"> · ${esc(d[1])}</span><br>
+          <a href="#/audit" class="mono" style="font-size:11.5px">${esc(d[2])}</a></div>`).join("")}
+      </div>` : ""}</div>`).join("");
+  const b = $("#asstBody");
+  b.scrollTop = b.scrollHeight;
+}
+
+function toggleAsst(open){
+  $("#app").dataset.asst = open ? "open" : "closed";
+  $("#asst").hidden = !open;
+  $("#asstBtn").setAttribute("aria-pressed", String(open));
+  /* Where the dock covers the whole screen it is a modal, so what it covers
+     stops being reachable — by Tab or by a screen reader in browse mode. */
+  const overlay = open && asstIsOverlay();
+  $("#main").inert = overlay;
+  $("#rail").inert = overlay;
+  if(open){ renderAsst(); $("#asstIn").focus(); }
+}
+/* At phone width the dock covers the whole screen, so it is a modal and has to
+   behave like one: Escape closes it and Tab stays inside. */
+const asstIsOverlay = () => !$("#asst").hidden
+  && getComputedStyle($("#asst")).position !== "sticky";
+
+/* ───────────────────────── Command menu ───────────────────────── */
+const CMDS = [...Object.keys(TITLE).filter(k => k !== "run").map(k => ["Go to " + TITLE[k], "#/" + k]),
+  ...RUNS.map(r => [`${r.id} — ${r.task}`, "#/run/" + r.id]),
+  ["Pause every run in " + WS.name, "#/fleet"],
+  ["Approve the parked payment", "#/fleet"],
+  ["Search tools · search_tools", "#/tools"]];
+let cmdHits = [], cmdI = 0;
+
+function renderCmd(q = ""){
+  cmdHits = CMDS.filter(c => c[0].toLowerCase().includes(q.toLowerCase())).slice(0, 8);
+  cmdI = 0;
+  paintCmd(q);
+}
+function paintCmd(q = ""){
+  /* Options carry no focusable descendants: the input owns selection, so a
+     link inside an option would be a second, competing selection model. */
+  $("#cmdList").innerHTML = cmdHits.map((c, i) =>
+    `<li role="option" id="cmdopt-${i}" aria-selected="${i === cmdI}" data-cmd="${esc(c[1])}"
+      >${esc(c[0])}<span class="k" aria-hidden="true">↵</span></li>`).join("");
+  const none = $("#cmdNone");
+  none.hidden = cmdHits.length > 0;
+  none.textContent = cmdHits.length ? "" : `Nothing matches “${q}”.`;
+  const input = $("#cmdIn");
+  input.setAttribute("aria-expanded", String(cmdHits.length > 0));
+  if(cmdHits.length) input.setAttribute("aria-activedescendant", "cmdopt-" + cmdI);
+  else input.removeAttribute("aria-activedescendant");
+}
+
+/* ───────────────────────── Mockup chrome ───────────────────────── */
+function paintChrome(){
+  $("#stateRow").innerHTML = `<span aria-hidden="true">state</span> ` + ["loaded","empty","loading","error","denied"].map(v =>
+    `<button data-view="${v}" aria-pressed="${S.view === v}">${v}</button>`).join("");
+  $("#widthRow").innerHTML = `<span aria-hidden="true">width</span> ` + ["desktop","phone"].map(v =>
+    `<button data-width="${v}" aria-pressed="${S.width === v}">${v === "phone" ? "phone 400" : v}</button>`).join("");
+  const t = document.documentElement.getAttribute("data-theme") || "system";
+  const row = $("#themeRow");
+  if(row) row.innerHTML = ["system","dark","light"].map(v =>
+    `<button class="btn btn-sm" data-theme-set="${v}" aria-pressed="${t === v}"${
+      t === v ? ' style="border-color:var(--rule-2);background:var(--hl);font-weight:600"' : ""}>${v}</button>`).join(" ");
+  $("#chromeBody").hidden = !S.chrome;
+  $("#chromeFold").textContent = S.chrome ? "hide" : "show";
+  $("#chromeFold").setAttribute("aria-expanded", String(S.chrome));
+}
+
+/* The basis belongs a click away from the total, not printed under it — but it
+   has to be the same arithmetic the Cost tab shows, so it reads the same turns. */
+function openBasis(r){
+  const model = r.turns.reduce((s, t) => s + t[3], 0);
+  const tools = r.turns.reduce((s, t) => s + t[4], 0);
+  $("#basisTitle").textContent = `Where the ${money(runCost(r))} went`;
+  $("#basisBody").innerHTML = `<dl class="kv">
+    <dt>Model calls</dt><dd class="num">${money(model)} · ${pct1(model, runCost(r))}</dd>
+    <dt>Tool calls</dt><dd class="num">${money(tools)} · ${pct1(tools, runCost(r))}</dd>
+    <dt>Turns</dt><dd>${r.turns.length}, across ${int(runFrames(r))} frames</dd>
+    <dt>Basis</dt><dd>gateway observed — metered from the provider's own receipts, not estimated</dd>
+    <dt>Ledger</dt><dd>kept in micro-USD; every figure here is rounded only for display</dd>
+  </dl>
+  <p class="sub" style="margin:14px 0 0;font-size:12.5px">Turn by turn, with the frame counts, is
+    on the run's Cost tab.</p>`;
+  $("#basis").showModal();
+}
+
+/* ───────────────────────── Phone drawer ───────────────────────── */
+function openNav(){
+  document.body.dataset.nav = "open";
+  $("#scrim").hidden = false;
+  $("#navToggle").setAttribute("aria-expanded", "true");
+  $("#main").inert = true;
+  $(".navsec a").focus();
+}
+function closeNav(back){
+  $("#main").inert = false;
+  if(document.body.dataset.nav !== "open"){ $("#scrim").hidden = true; return; }
+  document.body.dataset.nav = "";
+  $("#scrim").hidden = true;
+  $("#navToggle").setAttribute("aria-expanded", "false");
+  if(back) $("#navToggle").focus();
+}
+
+/* Keep Tab inside an overlay that covers the page. */
+function trap(e, root){
+  const f = $$('a[href],button:not([disabled]),input,[tabindex]:not([tabindex="-1"])', root)
+    .filter(el => el.offsetParent !== null || el === document.activeElement);
+  if(!f.length) return;
+  const first = f[0], last = f[f.length - 1];
+  if(!root.contains(document.activeElement)){ e.preventDefault(); first.focus(); }
+  else if(!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+  else if(e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+}
+
+/* ───────────────────────── One delegated listener ───────────────────────── */
+document.addEventListener("click", e => {
+  const t = e.target.closest("[data-tab],[data-view],[data-width],[data-theme-set],[data-frame],[data-go],[data-act],[data-close],[data-cmd]");
+  if(!t) return;
+
+  if(t.dataset.tab === "agentTab"){
+    /* This one writes the hash, because an agent's tab is a place you can send
+       somebody, not just a state this session happens to be in. */
+    location.hash = `#/agents/${S.agentSlug}/${t.dataset.val}`;
+    return;
+  }
+  if(t.dataset.tab){ S[t.dataset.tab] = t.dataset.val; render(); return; }
+  if(t.dataset.view){ S.view = t.dataset.view; render(); say(`Simulating the ${t.dataset.view} state.`); return; }
+  if(t.dataset.width){ S.width = t.dataset.width; document.body.dataset.w = S.width; paintChrome(); return; }
+  if(t.dataset.themeSet){
+    const v = t.dataset.themeSet;
+    v === "system" ? document.documentElement.removeAttribute("data-theme")
+                   : document.documentElement.setAttribute("data-theme", v);
+    paintChrome(); return;
+  }
+  if(t.dataset.frame){
+    const f = framesOf(theRun()).find(x => String(x.n) === t.dataset.frame);
+    if(f){ S.frame = f.n; render(); }
+    return;
+  }
+  if(t.dataset.cmd){ $("#cmd").close(); location.hash = t.dataset.cmd; return; }
+  if(t.dataset.go){
+    /* A click on the row's own link already navigates; do not fight it. */
+    if(e.target.closest("a")) return;
+    location.hash = t.dataset.go; return;
+  }
+  if(t.dataset.close){ $("#" + t.dataset.close).close(); return; }
+  if(t.dataset.act === "retry"){ S.view = "loaded"; render(); return; }
+  if(t.dataset.act === "cost-basis"){ openBasis(theRun()); return; }
+  if(t.dataset.act === "back-to-fleet"){ S.view = "loaded"; location.hash = "#/fleet"; return; }
+  if(t.dataset.act === "see-belt"){ location.hash = `#/agents/${S.agentSlug}/Toolbelt`; return; }
+
+  if(t.dataset.act === "approve" || t.dataset.act === "deny"){
+    /* Write the decision to the approval itself, not to the DOM: a receipt that
+       vanishes when you leave the page is not a receipt. The run it is about
+       has to move too, or the queue and the run tell two different stories. */
+    const a = APPROVALS[Number(t.dataset.i)];
+    if(a && !a.resolved){
+      const granted = t.dataset.act === "approve";
+      a.resolved = {granted, receipt: mintReceipt()};
+      const run = RUNS.find(r => r.id === a.run);
+      if(run){
+        run.state = "live";
+        run.step = granted ? "resumed · the call dispatched" : "resumed · the call was refused";
+      }
+      say(`${granted ? "Approved" : "Denied"}. Receipt ${a.resolved.receipt}. ${
+        pendingApprovals().length} still waiting on a person.`);
+    }
+    render();
+    return;
+  }
+
+  /* Every other action is a stub: say so rather than pretending. */
+  if(t.dataset.act){
+    const b = t.closest("button");
+    if(!b || b.dataset.stub) return;          /* a second click must not capture the label */
+    b.dataset.stub = "1";
+    const was = b.innerHTML;
+    b.style.minWidth = b.offsetWidth + "px";
+    b.textContent = "Not in this mockup";
+    say("Not in this mockup.");
+    setTimeout(() => { b.innerHTML = was; b.style.minWidth = ""; delete b.dataset.stub; }, 1400);
+  }
+});
+
+/* Arrow keys move between tabs, which is what `role="tab"` promises. The click
+   re-renders, so focus is restored by render() — see focusKey. */
+document.addEventListener("keydown", e => {
+  const t = e.target.closest?.('[role="tab"]');
+  if(!t || !["ArrowLeft","ArrowRight","Home","End"].includes(e.key)) return;
+  const list = $$('[role="tab"]', t.closest('[role="tablist"]'));
+  const i = list.indexOf(t);
+  const next = e.key === "Home" ? 0 : e.key === "End" ? list.length - 1
+    : e.key === "ArrowLeft" ? (i - 1 + list.length) % list.length : (i + 1) % list.length;
+  e.preventDefault();
+  list[next].focus();
+  list[next].click();
+});
+
+$("#asstBtn").onclick = () => toggleAsst($("#asst").hidden);
+$("#asstClose").onclick = () => { toggleAsst(false); $("#asstBtn").focus(); };
+$("#acctBtn").onclick = () => { $("#acct").showModal(); paintChrome(); };
+$("#cmdBtn").onclick = () => { $("#cmdIn").value = ""; renderCmd(); $("#cmd").showModal(); $("#cmdIn").focus(); };
+$("#cmdIn").oninput = e => renderCmd(e.target.value);
+$("#chromeFold").onclick = () => { S.chrome = !S.chrome; paintChrome(); };
+$("#navToggle").onclick = () => document.body.dataset.nav === "open" ? closeNav(true) : openNav();
+$("#scrim").onclick = () => closeNav(true);
+$("#cmdList").onmousemove = e => {
+  const li = e.target.closest("[role=option]");
+  if(!li) return;
+  const i = Number(li.id.replace("cmdopt-", ""));
+  if(i >= 0 && i !== cmdI){ cmdI = i; paintCmd($("#cmdIn").value); }
+};
+
+/* A command menu whose ↵ hint does nothing is worse than no hint. */
+$("#cmdIn").onkeydown = e => {
+  if(!cmdHits.length) return;
+  if(e.key === "ArrowDown" || e.key === "ArrowUp"){
+    e.preventDefault();
+    cmdI = (cmdI + (e.key === "ArrowDown" ? 1 : -1) + cmdHits.length) % cmdHits.length;
+    paintCmd($("#cmdIn").value);
+  } else if(e.key === "Enter"){
+    e.preventDefault();
+    const target = cmdHits[cmdI][1];
+    $("#cmd").close();
+    if(location.hash === target) route(); else location.hash = target;
+  }
+};
+
+/* The assistant is scripted, but it must not swallow what you typed. */
+$("#asstIn").onkeydown = e => {
+  if(e.key !== "Enter") return;
+  const text = e.target.value.trim();
+  if(!text) return;
+  asstLog.push({you:text, did:[],
+    it:"Not in this mockup — the assistant here replays two recorded exchanges. In the product this would be a governed action with a receipt, or a refusal with the reason."});
+  e.target.value = "";
+  renderAsst();
+  say("The assistant replied.");
+};
+
+addEventListener("keydown", e => {
+  if((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k"){ e.preventDefault(); $("#cmdBtn").click(); }
+  if(e.key === "Escape"){
+    if(document.body.dataset.nav === "open"){ closeNav(true); return; }
+    if(asstIsOverlay()){ toggleAsst(false); $("#asstBtn").focus(); }
+  }
+  if(e.key === "Tab"){
+    if(document.body.dataset.nav === "open") trap(e, $("#rail"));
+    else if(asstIsOverlay()) trap(e, $("#asst"));
+  }
+});
+
+route();
+</script>
+</body>
+</html>
