@@ -2054,3 +2054,35 @@ button.wz-opt:hover{border-color:var(--rule)}
 .act-card{background:var(--ink);border:1px solid var(--border);border-radius:10px;padding:11px 13px;margin:9px 0;font-size:12.5px}
 .act-card .t{display:flex;align-items:center;gap:8px;margin-bottom:7px}
 .act-card .t code{font-size:11.5px}
+
+/* ---- Steering hub: seven tabs, the assembler's preview, the manifest on a run ---- */
+.stg-seg{padding:0 0 12px;border-bottom:0}
+.stg-seg .btn .dim{margin-left:3px}
+.stg-cc{cursor:pointer;font:inherit;font-size:11px}
+.stg-cc:hover{filter:brightness(1.12)}
+.stg-notice{display:block;font-size:12.5px;color:var(--body);border-left:2px solid var(--rule);padding-left:9px}
+.stg-pv{display:grid;grid-template-columns:minmax(220px,1fr) 2fr;gap:14px;align-items:start}
+.stg-pv textarea{resize:vertical;min-height:54px}
+.stg-part{border:0;background:none;padding:0;margin:0 0 20px}
+.stg-part:last-child{margin-bottom:0}
+.stg-sub{font-size:11.5px;color:var(--dim);margin:-4px 0 8px;line-height:1.5}
+.stg-n{padding:6px 0}
+.stg-n .ro-note{max-width:86ch}
+.stg-mf .ro-n.s-withheld .ro-dot{border-style:dashed;color:var(--dim)}
+.stg-mf .ro-n.s-withheld .lnk{color:var(--muted)}
+.stg-inj li:not(.on) .h,.stg-inj li:not(.on) div{color:var(--dim)}
+.stg-inj li:not(.on)::before{border-style:dashed}
+.fz-must{color:var(--fg);font-weight:600}
+/* the tier ladder: four rungs, two of them not yet available */
+.tl{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin:0;padding:0;list-style:none}
+.tl li{padding:10px 12px;border-left:1px solid var(--border);min-width:0;font-size:11.5px;color:var(--muted);line-height:1.45}
+.tl li:first-child{border-left:0}
+.tl li b{display:flex;gap:6px;align-items:center;font-family:var(--mono);font-size:12px;color:var(--fg);margin-bottom:3px;flex-wrap:wrap}
+.tl li.cur{background:var(--hl);box-shadow:inset 0 2px 0 var(--st-allowed)}
+.tl li.na{background:repeating-linear-gradient(135deg,transparent 0 7px,color-mix(in srgb,var(--rule) 30%,transparent) 7px 8px)}
+.tl li.na b{color:var(--dim)}
+.b-tier.b-na{border-style:dashed;color:var(--dim)}
+#viewport.phone .stg-pv{grid-template-columns:1fr}
+#viewport.phone .tl{grid-template-columns:1fr 1fr}
+#viewport.phone .tl li:nth-child(3){border-left:0}
+#viewport.phone .tl li:nth-child(n+3){border-top:1px solid var(--border)}

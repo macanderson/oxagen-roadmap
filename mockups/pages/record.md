@@ -16,7 +16,7 @@ One published context record, presented by its kind. The statement is the record
 
 ## What is on the page
 
-**Header** — eyebrow “**Steering** · record” (Steering is a link back to the list). The kind glyph in a tinted tile, then the statement as the h1 (up to 62ch, never truncated). Chips: the kind badge, the steering force, the constraint effect where the kind has one, the scope, `published` (or `archived`), and the pending branch badge when a proposal is open against it. A line under it: what the kind is, and that the record is in force because its commit merged and stops being in force the same way.
+**Header** — eyebrow “**Steering** · record” (Steering is a link back to the Records tab of the hub, `#/…/steering/records`); breadcrumbs Steering / <lineage>. The kind glyph in a tinted tile, then the statement as the h1 (up to 62ch, never truncated). Chips: the kind badge, the steering force, the constraint effect where the kind has one, the scope, `published` (or `archived`), and the pending branch badge when a proposal is open against it. A line under it: what the kind is, and that the record is in force because its commit merged and stops being in force the same way.
 Actions: **Discard** (enabled only when the statement is modified) · **Propose a change** (gold)
 
 - **Statement editor** — the shared code editor (`cedHtml`) over the statement and nothing else, path `.oxagen/rules/<lineage>.toml · statement`. Line-number gutter, markdown syntax highlighting, current-line band, **Find ⌘F** with a match count, a status line with `Ln/Col`, the grammar, a line and character count, and the key hints. The bar carries the record’s token cost in the compiled bundle.
@@ -26,7 +26,7 @@ Actions: **Discard** (enabled only when the statement is modified) · **Propose 
 | Kind | What its panel shows |
 |---|---|
 | `rule` | Where it sits: force → the stable prefix (`must`/`should`) or selection by relevance (`may`/`info`), its share of the bundle’s tokens, and three meters — rendered, cited, went against. |
-| `constraint` | A `require`/`forbid` boundary block, in the state hue, saying what happens to a call that crosses it — denied at the gateway before dispatch, with this record cited. Then the conflict rule: every merge re-runs the check across all published records, so a `forbid` and a `require` on the same subject can never both be in force. Then the three meters. |
+| `constraint` | A `require`/`forbid` boundary block, in the state hue, saying what happens to a call that crosses it — denied before dispatch for a call routed through Oxagen, with this record cited. That holds only where the record carries an enforcement grant: the grant compiles a gate, listed on Steering · Policy with its gate notice. A record with no grant compiles to text only, and nothing refuses a call because of it. Then the conflict rule: every merge re-runs the check across all published records, so a `forbid` and a `require` on the same subject can never both be in force. Then the three meters. |
 | `procedure` | The statement rendered as an ordered list, one step per row, marker in the kind hue — because the order is the record, and a run that did every step in another order did not follow this procedure. |
 | `fact` | The claim and how it is checked: what would falsify it, `valid_from` (the merge time of its commit), how many runs read it without contradicting it, and that it steers nothing by itself. |
 | `memory` | When it happened, what it explains, that it is selected by relevance and never pinned, and that nothing decays automatically — a memory that stops being true is archived by a pull request. |
@@ -38,7 +38,7 @@ Every kind panel ends with **What it can never do** — the one sentence that st
 
 **Dialogs this page opens:** `srcpr` — Propose a change: the statement diff against what is in force, the branch, and the six checks the pull request will run.
 
-**Shell.** Sidebar (organization switcher, workspace switcher, Workspace nav: Fleet · Agent IAM · Tools · Skills · Steering · Spend; Organization nav: Organization · Billing · Audit; agent count · data plane · tier badge), top bar (breadcrumbs, ⌘K search-or-run, notifications with unread dot, account avatar → user menu).
+**Shell.** Sidebar (organization switcher, workspace switcher, Workspace nav: Fleet · Agent IAM · Tools · Steering · Spend; Organization nav: Organization · Billing · Audit; agent count · data plane · connection badge), top bar (breadcrumbs, ⌘K search-or-run, notifications with unread dot, account avatar → user menu).
 
 ## Data sources
 
@@ -46,7 +46,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 
 | Element | Mockup collection | Target store (spec) | Backing today (repo) | Status |
 |---|---|---|---|---|
-| The record | `RECORDS` (`fixtures/records.json`) via `stgRecord(id)` | `.oxagen/rules/<lineage>.toml` on the workspace main repo; the graph holds every version | `agent.context_records` | 🟡 |
+| The record | `RECORDS` (`fixtures/records.json`) via `stgRecord(id)` | `.oxagen/rules/<lineage>.toml` on the workspace main repo; the Postgres registry indexes it (the graph becomes the index in Phase 3) | `agent.context_records` | 🟡 |
 | The statement draft | `S.cedVal["rec:<id>"]` / `S.cedBase` | the working tree of a branch, never a row | — | ❌ |
 | Bundle share | `STEER_BUNDLE` via `stgBundle()` | compiled policy bundle, per version | `agent.policy_bundles` | 🟡 |
 | Effect counters | `rec.effect` | rollups over `frame.context_rendered` / `context_cited` | frame index | 🟡 |
@@ -63,7 +63,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 
 - **loaded** — the page as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell).
 - **loading** — the shell stays; the page body is replaced by the skeleton, so the operator keeps their bearings.
-- **error** — “This record could not be loaded” — `503 record_index_unavailable`. Nothing was changed. Runs kept recording while this page was down — frames are written by the gateway, not by Mission Control. Actions: **Try again**, **Open an incident**; a trace id, region and timestamp line.
+- **error** — “This record could not be loaded” — `503 record_index_unavailable`. Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by Mission Control. Actions: **Try again**, **Open an incident**; a trace id, region and timestamp line.
 - **access denied** — “You cannot see this record” — the roles the signed-in person holds do not include `steering.read on core-platform`. Actions: **Request access**, **Back to Fleet**. Below: *Signed in as*, *Needed*, *Decided by* (`pol_v41` · deny wins over every allow).
 
 There is no empty state: the route names one record, and a lineage nothing holds is a 404, not an empty page.

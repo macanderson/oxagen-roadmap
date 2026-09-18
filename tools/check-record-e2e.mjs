@@ -127,8 +127,8 @@ const clickPg = async (page, re) => await page.evaluate(src => {
   const opened = await world(page);
   ok(opened.hasRecpr, "a Context PR exists");
   ok(!(await page.evaluate(() => !!document.querySelector("#layer .dlg"))), "the wizard closed");
-  ok(await page.evaluate(() => location.hash.endsWith("/steering")), "it landed on Steering, got " + await page.evaluate(() => location.hash));
-  ok(await page.evaluate(() => S.tab.steering) === "prs", "on the Context PRs tab");
+  ok(await page.evaluate(() => location.hash.endsWith("/steering/proposals/prs")), "it landed on Steering, on the pull requests view of Proposals, got " + await page.evaluate(() => location.hash));
+  ok(await page.evaluate(() => S.tab.steering) === "prs", "on the Context PRs view");
   ok(/^a-intel\/platform#\d+$/.test(opened.prNumber), "the PR has a number on the main repo, got " + opened.prNumber);
   ok(opened.prNumber !== "a-intel/platform#519", "and it is not the promoter's number");
   ok(/^ctx\./.test(opened.lineage), "the lineage is derived, got " + opened.lineage);

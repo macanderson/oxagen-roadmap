@@ -4,10 +4,10 @@ import { view, argTypes } from "../_view.js";
 import spec from "../../pages/steering.md?raw";
 
 export default {
-  title: "Mission Control/Workspace/Steering",
+  title: "Mission Control/Workspace/Steering · Records",
   tags: ["autodocs"],
   argTypes,
-  args: { shell: "desktop", theme: "system", product: true, hash: "#/a-intel/core-platform/steering" },
+  args: { shell: "desktop", theme: "system", product: true, hash: "#/a-intel/core-platform/steering/records" },
   parameters: { docs: { description: { component: spec } } },
   render: view,
 };

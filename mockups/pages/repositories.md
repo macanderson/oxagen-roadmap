@@ -70,7 +70,7 @@ Five steps: **Repository** (only repositories with no `.oxagen/` yet; main or li
 
 It writes `.oxagen/rules/governance.toml`, which nothing else in the product writes. A workspace's governance mode is read off that file on every open and every merge, so the mode a repository starts under has to be chosen by a person, once, here — and changed the same way everything else is.
 
-**Shell.** Sidebar (organization switcher, workspace switcher, Workspace nav: Fleet · Agent IAM · Tools · Skills · Steering · Repositories · Spend; Organization nav: Organization · Billing · Audit; agent count · data plane · tier badge), top bar (breadcrumbs, ⌘K search-or-run, notifications with unread dot, account avatar → user menu).
+**Shell.** Sidebar (organization switcher, workspace switcher, Workspace nav: Fleet · Agent IAM · Tools · Steering · Repositories · Spend; Organization nav: Organization · Billing · Audit; agent count · data plane · connection badge), top bar (breadcrumbs, ⌘K search-or-run, notifications with unread dot, account avatar → user menu).
 
 ## Data sources
 
@@ -100,7 +100,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 - **loaded** — the page as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell).
 - **empty** — "This workspace has no repository yet" — a workspace without a main repo cannot exist, so this is the moment between creating one and binding it. Until it is bound there is nowhere for a record to be published to. Action: **Add Oxagen to a repository**.
 - **loading** — the shell stays; the page body is replaced by the skeleton, so the operator keeps their bearings.
-- **error** — "Repositories could not be loaded" — `503 installation_unreachable`. Nothing was changed. Runs kept recording while this page was down — frames are written by the gateway, not by Mission Control. Actions: **Try again**, **Open an incident**; a trace id, region and timestamp line.
+- **error** — "Repositories could not be loaded" — `503 installation_unreachable`. Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by Mission Control. Actions: **Try again**, **Open an incident**; a trace id, region and timestamp line.
 - **access denied** — "You cannot see this workspace's repositories" — the roles the signed-in person holds do not include `repository.read on core-platform`. Actions: **Request access**, **Back to Fleet**. Below: *Signed in as*, *Needed*, *Decided by* (`pol_v41` · deny wins over every allow).
 
 ## Mobile

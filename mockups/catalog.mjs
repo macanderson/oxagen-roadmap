@@ -22,14 +22,23 @@ export const PAGES = [
   { id: "agent-source",      title: "Agent source",                group: "Workspace",    hash: `#/${ORG}/core-platform/agents/release-manager/source`,    states: NO_EMPTY },
   { id: "mandate",           title: "Mandate",                     group: "Workspace",    hash: `#/${ORG}/finops/agents/invoice-bot/mandates/mnd_7K2ETQ4`, states: ALL },
   { id: "tools",             title: "Tools",                       group: "Workspace",    hash: `#/${ORG}/core-platform/tools`,                            states: ALL },
-  { id: "steering",          title: "Steering",                    group: "Workspace",    hash: `#/${ORG}/core-platform/steering`,                         states: ALL },
+  // Steering is the hub: seven tabs, each a URL segment (#/:org/:ws/steering/<tab>). Records is the
+  // page itself; Skills keeps its three page ids; the other five tabs are pages of their own here so
+  // every tab is checked in every state and both shells.
+  { id: "steering",          title: "Steering · Records",          group: "Workspace",    hash: `#/${ORG}/core-platform/steering/records`,                 states: ALL },
+  { id: "steering-memory",   title: "Steering · Memory",           group: "Workspace",    hash: `#/${ORG}/core-platform/steering/memory`,                  states: ALL },
+  { id: "steering-ontology", title: "Steering · Ontology",         group: "Workspace",    hash: `#/${ORG}/core-platform/steering/ontology`,                states: ALL },
+  { id: "steering-policy",   title: "Steering · Policy",           group: "Workspace",    hash: `#/${ORG}/core-platform/steering/policy`,                  states: ALL },
+  { id: "steering-proposals",title: "Steering · Proposals",        group: "Workspace",    hash: `#/${ORG}/core-platform/steering/proposals`,               states: ALL },
+  { id: "steering-preview",  title: "Steering · Preview",          group: "Workspace",    hash: `#/${ORG}/core-platform/steering/preview/release-manager`, states: ALL },
   { id: "repositories",      title: "Repositories",                group: "Workspace",    hash: `#/${ORG}/core-platform/repositories`,                     states: ALL },
   { id: "record",            title: "Context record",              group: "Workspace",    hash: `#/${ORG}/core-platform/steering/records/ctx.release.never-merge`, states: NO_EMPTY },
   { id: "spend",             title: "Spend",                       group: "Workspace",    hash: `#/${ORG}/core-platform/spend`,                            states: ALL },
-  // skills (W13): resolution, the seat in the loop, reflection; the off-by-default gate; the interjected run
-  { id: "skills",            title: "Skills",                      group: "Workspace",    hash: `#/${ORG}/core-platform/skills`,                           states: ALL },
-  { id: "skills-off",        title: "Skills · off (the default)",  group: "Workspace",    hash: `#/${ORG}/finops/skills`,                                  states: ["loaded"] },
-  { id: "skill-source",      title: "Skill source",                group: "Workspace",    hash: `#/${ORG}/core-platform/skills/a-intel.release-notes-from-prs/source`, states: NO_EMPTY },
+  // skills (W13), now the Skills tab of Steering: sync, resolution, the seat in the loop, reflection;
+  // the off-by-default gate; the interjected run. The old #/:org/:ws/skills… routes still resolve.
+  { id: "skills",            title: "Steering · Skills",           group: "Workspace",    hash: `#/${ORG}/core-platform/steering/skills`,                  states: ALL },
+  { id: "skills-off",        title: "Steering · Skills · off (the default)", group: "Workspace", hash: `#/${ORG}/finops/steering/skills`,                 states: ["loaded"] },
+  { id: "skill-source",      title: "Skill source",                group: "Workspace",    hash: `#/${ORG}/core-platform/steering/skills/a-intel.release-notes-from-prs/source`, states: NO_EMPTY },
   { id: "run-interjection",  title: "Run · interjection",          group: "Workspace",    hash: `#/${ORG}/core-platform/runs/run_01K6QW3D5N7TYBA2`,        states: NO_EMPTY },
   // organization scope (pages 8–10)
   { id: "organization",      title: "Organization",                group: "Organization", hash: `#/${ORG}`,                                                states: ALL },

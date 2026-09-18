@@ -32,10 +32,21 @@ Everything a URL of it pins is read at runtime, so there is one file where there
 | `?state=empty#/a-intel/core-platform/tools` | one page in one state; the states are `loaded`, `empty`, `loading`, `error`, `denied` |
 | `#/a-intel/core-platform/scenarios/flight-recorder/1` | a guided scenario (the W flows) on step 1 |
 | `#/a-intel/core-platform/runs/run_01K5RQ4B9C7XTN2P/dod` | a run tab by hash |
+| `#/a-intel/core-platform/steering/preview/release-manager` | a Steering tab by hash: `records`, `skills[/<view>]`, `memory`, `ontology`, `policy`, `proposals[/prs]`, `preview[/<agent>]` |
+| `#/a-intel/core-platform/skills` | an old route: Skills moved under Steering, and this still resolves to `…/steering/skills` |
 | `?theme=dark` | pinned theme |
 
 The onboarding screens live at `#/welcome…` and are reachable from the Account dialog's Onboarding
 tab, the user menu, and ⌘K. Nothing on them writes anything.
+
+## What the mockups depict
+
+Phase 2 of the steering and gateway plan, shipped. Steering is the hub: seven tabs (Records, Skills,
+Memory, Ontology, Policy, Proposals, Preview), one assembler where every item competes, and a
+`steering.manifest` frame on every run. Agents sit on the `observe` or `harness` tier. `gateway` and
+`contained` are on the tier ladder as tiers not yet available, and no screen claims a model proxy,
+observed metering, an enforced budget, a real interrupt, or a sandbox. The index is the Postgres
+registry. `mockups/pages/steering.md` is the spec of the hub.
 
 ## The catalog
 
@@ -69,9 +80,11 @@ and states exist is `mockups/catalog.mjs`, which the stories and the checker bot
 | W14 | Done means done | `done-means-done` |
 
 W7 (the ontology) and the assistant half of W11 were cut by the scope review of 2026-09-14
-(`docs/scope-review.md`); W12 was a coverage audit, now `tools/check-mockup.mjs`. W13 is the Skills
-tab of Steering (`#/a-intel/<ws>/steering/skills`; Skills moved under Steering on 2026-09-18), its
-off-by-default gate and the interjected run (`docs/w13-in-the-loop-scenario.md`, spec §10.6). W14 is the
+(`docs/scope-review.md`); W12 was a coverage audit, now `tools/check-mockup.mjs`. W6 walks Steering:
+Records, Proposals, the pull request, the merge, Preview, and the `steering.manifest` frame on the
+run. W13 is the Skills tab of Steering (`#/a-intel/<ws>/steering/skills`; Skills moved under Steering
+on 2026-09-18), its off-by-default gate and the interjected run (`docs/w13-in-the-loop-scenario.md`,
+spec §10.6). W14 is the
 definition of done (`docs/dod-spec.md`). A scenario is `SCENARIOS["id"]` in `mockups/src/engine.js`
 and a row in `mockups/catalog.mjs`. `docs/videos-mockup-narrated.md` has the narrated walkthroughs.
 

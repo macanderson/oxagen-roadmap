@@ -16,12 +16,20 @@ loaded, the gate steps have loading and denied, and the first-run step an error.
 | `<page>.audit-prompt.md` | A prompt to paste into an agent session that audits the built page against `<page>.md`, check by check, and reports PASS/FAIL with evidence. |
 | `audit-prompt.md` | The whole-app prompt: shell, mobile shell, auth sequences, cross-cutting rules; it runs every per-page prompt. |
 
-Pages (34): fleet · run · run-interjection · agents · agent · agent-source · mandate · tools ·
-skills · skills-off · skill-source · steering · record · repositories · spend · organization ·
+Pages (39): fleet · run · run-interjection · agents · agent · agent-source · mandate · tools ·
+steering · skills · skills-off · skill-source · steering-memory · steering-ontology · steering-policy ·
+steering-proposals · steering-preview · record · repositories · spend · organization ·
 organization-api-keys · organization-roles · billing · audit ·
 register-name · register-wrap · register-run · signup · verify-email · login · two-factor ·
 forgot-password · reset-password · accept-invitation · onboarding-organization · onboarding-wrap ·
 onboarding-run · installer.
+
+Steering is the hub: one page with seven tabs, in this order: Records, Skills, Memory, Ontology,
+Policy, Proposals, Preview. `steering.md` specifies the hub and Records. `skills.md`, `skills-off.md`
+and `skill-source.md` are the Skills tab, which has no nav entry of its own any more (the old
+`#/:org/:ws/skills…` routes still resolve). The other five tabs have a spec each. The mockups depict
+Phase 2 of the steering and gateway plan as shipped: agents sit on the `observe` or `harness` tier,
+and `gateway` and `contained` appear only as tiers not yet available.
 
 The five creation wizards (agent, tool, skill, context record, and the `.oxagen/` directory
 itself) are dialogs rather than pages, so they have no `<page>.md`; their spec is

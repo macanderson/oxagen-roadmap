@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Route | `#/a-intel/core-platform/skills/<id>/source` |
+| Route | `#/a-intel/core-platform/steering/skills/<id>/source` (the old `#/a-intel/core-platform/skills/<id>/source` still resolves) |
 | Scope | workspace |
 | Spec | `docs/w13-in-the-loop-scenario.md`; `docs/creation-spec.md` §4 |
 | Design | `mockups/src/engine.js` → `pSkillSource(r)`, built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
@@ -16,7 +16,7 @@ One skill’s `SKILL.md`, in a source editor. A skill is a file with a version a
 
 ## What is on the page
 
-**Header** — eyebrow “**Skills** · source” (Skills links back to the catalog), h1 the file path in mono. Chips: the source label (repo, linked repo, registry or marketplace), `@version`, the digest prefix, the resolution tier (`allowed` / `needs approval` / `denied`), and the load cost in tokens. A line under it: a skill has no code to run and no credential to hold — it is prose an agent reads, and every action it describes still goes through the toolbelt and the policy that governs it.
+**Header** — eyebrow “**Steering · Skills** · source” (the link goes back to the Skills tab of Steering); breadcrumbs Steering / Skills / source, h1 the file path in mono. Chips: the source label (repo, linked repo, registry or marketplace), `@version`, the digest prefix, the resolution tier (`allowed` / `needs approval` / `denied`), and the load cost in tokens. A line under it: a skill has no code to run and no credential to hold — it is prose an agent reads, and every action it describes still goes through the toolbelt and the policy that governs it.
 Actions: **Back to the catalog** · **Discard** (enabled only when modified) · **Propose a change** (gold)
 
 - **Editor** — the shared code editor (`cedHtml`) over the file. Line-number gutter, markdown highlighting that knows the frontmatter block (keys, values and the `---` fences read as one grammar, fenced code as another), current-line band, **Find ⌘F** with a match count, and a status line with `Ln/Col`, the grammar, a line and character count and the key hints. The bar carries the file’s load cost.

@@ -6,24 +6,24 @@ unless told to in a second turn.
 
 ---
 
-You are auditing the **Skills** page of Oxagen Mission Control (`#/a-intel/core-platform/skills[/<tab>]`) for conformance to its design. Be exact and adversarial: the design is the spec, and “close enough” is a fail. Do not summarise what you see; compare it.
+You are auditing the **Skills** page of Oxagen Mission Control (`#/a-intel/core-platform/steering/skills[/<tab>]`) for conformance to its design. Be exact and adversarial: the design is the spec, and “close enough” is a fail. Do not summarise what you see; compare it.
 
 ## Inputs
 
 1. The page spec: `mockups/pages/skills.md` (read it first, in full), and `mockups/pages/skills.md` for the vocabulary it shares.
 2. The design, rendered: the `skills` stories in Storybook (`npm run storybook`), one per state (loaded, empty, loading, error, access denied), desktop and mobile; or `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` in a browser or with Playwright.
 3. The scenario that walks this page: `docs/w13-in-the-loop-scenario.md`, and the W13 scenario in `mockups/missioncontrol.html`. The product spec does not describe skills yet; where the two disagree, the page spec wins and the disagreement is a finding.
-4. The build under audit: `{{APP_ROOT}}` (the Next.js app), served at `{{APP_URL}}`. Route under audit: `/a-intel/core-platform/skills[/<tab>]`.
+4. The build under audit: `{{APP_ROOT}}` (the Next.js app), served at `{{APP_URL}}`. Route under audit: `/a-intel/core-platform/steering/skills[/<tab>]`.
 
 ## Procedure
 
 Work through every check. For each, record PASS, FAIL, or N/A (with why). Cite evidence: a file and line in the build, a screenshot path, or a DOM selector and its text.
 
-1. **Route and shell.** The build serves the route; the sidebar, breadcrumbs, ⌘K search, notifications and account are present and match the spec’s shell; **Skills** sits in the Workspace nav between Tools and Steering and carries a count of 1 while an interjection waits; the breadcrumb ends on this page.
-2. **Header.** Eyebrow “Workspace · <workspace name>”, h1 “Skills”, the lede verbatim. No header actions; fail if the build added any.
+1. **Route and shell.** The build serves the route; the sidebar, breadcrumbs, ⌘K search, notifications and account are present and match the spec’s shell; Skills carries no nav entry of its own, it is a tab of Steering, and Steering's nav count includes 1 while an interjection waits; the breadcrumb ends on this page.
+2. **Header.** The Steering hub header: eyebrow “Workspace · <workspace name>”, h1 “Steering”, seven tabs in order (Records, Skills, Memory, Ontology, Policy, Proposals, Preview) with Skills selected. The lead note “Skills are steering, and they are files.” verbatim. One gold action: Add a skill. Fail if Skills still has a top-level nav entry, and fail if the old `/skills` route does not resolve to this tab.
 3. **The gate.** With `skills.enabled` false (or the file absent) the route renders the off-by-default gate, not the tabs — audit it with `pages/skills-off.audit-prompt.md`.
-4. **Tabs and sections.** Tabs Catalog (N in scope) · Search · In the loop (1 while open) · Reflection (N) · Versions (N), routed as `/skills/<tab>`. For each tab, every tile, panel, row shape, chip, badge and note listed in the spec is present with the same labels, in the same order. Specifically:
-   - Catalog: four tiles; the searchable-belt note; “Resolved by `skl_v7`” rows with kind glyph, `id @version`, statement, chips (source · kind · tokens · digest prefix · cited · proof rate), decision badge, updated, Open; “Held back” rows with “Why it is held” and the withholding note.
+4. **Views and sections.** A segmented control under the hub tabs: Catalog (N in scope) · Search · In the loop (1 while open) · Reflection (N) · Versions (N), routed as `/steering/skills/<view>`. For each tab, every tile, panel, row shape, chip, badge and note listed in the spec is present with the same labels, in the same order. Specifically:
+   - Catalog: the Delivered by sync panel first (Repository · Sync · Synced at · Skills · Checkouts · Written to, one row per repository, with the note that only the description line competes in the assembler and the link to Preview); four tiles; the searchable-belt note; “Resolved by `skl_v7`” rows with kind glyph, `id @version`, statement, chips (source · kind · tokens · digest prefix · cited · proof rate), decision badge, updated, Open; “Held back” rows with “Why it is held” and the withholding note.
    - Search: the `search_skills(…)` console pre-filled; **Ask as the agent**; result header with returned/withheld counts and `skl_v7 · top 5 · min 0.42`; hit rows with score; withheld rows struck through with `out_of_scope` / `unapproved_digest` and the “not told this name” line; an empty result renders `[]` with a reason — a FAIL if it renders as an error; the five “try:” chips; “What decided this” (six rows); “The frame this wrote” with the replay note.
    - In the loop: four tiles; the gold “A run is waiting on you” panel while open and “Nothing is waiting” once answered; the allowed / not-allowed panels, four rows each, verbatim.
    - Reflection: the research-only note; four tiles; the injected turn with `run.sealed` solid and the three following frames dashed; four rubric axes with self and record bars, the quote, “the record says”, two flagged “calibration gap”; two contradiction cards citing frames; the Quarantine box with five rules and the consent chips; **Turn capture off**, **Export for research** (denied without `research.read`).

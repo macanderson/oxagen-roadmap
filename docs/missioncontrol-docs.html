@@ -8808,17 +8808,19 @@ reviews it, and the wizard says so on every drafting step.</p>
 <td><code>wzOpen(&quot;tool&quot;)</code></td>
 </tr>
 <tr>
-<td>Skills</td>
+<td>Steering · Skills</td>
 <td><strong>Add a skill</strong></td>
 <td><code>wzOpen(&quot;skill&quot;)</code></td>
 </tr>
 <tr>
-<td>Steering</td>
+<td>Steering (every other tab)</td>
 <td><strong>Write a context record</strong></td>
 <td><code>wzOpen(&quot;record&quot;)</code></td>
 </tr>
 </tbody>
 </table></div>
+<p>Skills is a tab of Steering, not a page of its own. Steering is the hub for everything that steers
+an agent: Records, Skills, Memory, Ontology, Policy, Proposals, Preview (<code>mockups/pages/steering.md</code>).</p>
 <p><strong>New agent</strong> is not <strong>Register an agent</strong>. Register wraps an agent that already runs on a machine
 or in CI; New agent writes one that does not exist yet. Both end on a pull request; they start from
 opposite ends.</p>
@@ -8881,6 +8883,11 @@ cost against the workspace's search budget.</li>
 <p><strong>Changing a skill</strong> is <code>pages/skill-source.md</code>: the same editor over <code>SKILL.md</code>, reached from the
 catalog row's <strong>Edit</strong> and from the skill dialog, ending on the same kind of pull request with the
 patch version bumped.</p>
+<p><strong>Where it ends.</strong> The pull request is listed on Repositories · Changes with kind <code>skill</code>. After the
+merge the skill is in the catalog on Steering · Skills, and <strong>sync</strong> materializes its files into
+each enrolled checkout. The Delivered by sync panel shows each repository’s state. The harness loads
+the file by its own progressive disclosure. Only the description line competes in the assembler, and
+Steering · Preview shows it competing.</p>
 <h2 id="creation/5-a-context-record">5. A context record</h2>
 <p>The kind is not a label. It decides how the statement is delivered, what the checks assert about it,
 and how a run is allowed to use it — so the wizard makes you pick one before it will let you write
@@ -8902,6 +8909,12 @@ from when it was written.</li>
 </ol>
 <p><strong>Reading and changing one</strong> is <code>pages/record.md</code>: the statement as the headline, a per-kind panel,
 and the statement in the same editor.</p>
+<p><strong>Where it ends.</strong> The wizard closes on Steering · Proposals, on the Context PRs view
+(<code>#/:org/:ws/steering/proposals/prs</code>), with the new pull request selected. After the merge the record
+is on Steering · Records with its force, scope, token cost, and compilation chip: “compiles to text”,
+or “compiles to text and a gate” when it carries an enforcement grant. A record written in the wizard
+carries no grant. Steering · Preview shows where the record lands for an agent and a prompt: the
+stable prefix for <code>must</code> and <code>should</code>, the volatile selection for <code>may</code> and <code>info</code>.</p>
 <h2 id="creation/6-what-this-feature-must-never-do">6. What this feature must never do</h2>
 <ul>
 <li>Write a row. Every path ends on a pull request.</li>
@@ -12670,7 +12683,7 @@ workspace is made.&quot;</p>
 <tbody>
 <tr>
 <td>Skills — off (the shipping default)</td>
-<td><code>#/a-intel/{ws}/steering/skills</code> with <code>enabled=false</code></td>
+<td><code>#/a-intel/{ws}/steering/skills</code> with <code>enabled=false</code> (the old <code>…/{ws}/skills</code> route still resolves, rewritten in place)</td>
 <td>loaded, phone</td>
 </tr>
 <tr>
@@ -12716,11 +12729,13 @@ workspace is made.&quot;</p>
 </tbody>
 </table></div>
 <h2 id="w13/in-the-master">In the master</h2>
-<p>Ported on 2026-09-14. The master (<code>mockups/src/engine.js</code>) has the <strong>Skills</strong> page (<code>pSkills()</code>: Catalog · Search · In the
+<p>Ported on 2026-09-14, and updated 2026-09-18 when Steering became the hub: Skills is now the second
+tab of Steering, not its own sidebar entry (<code>mockups/pages/skills.md</code>). The master (<code>mockups/src/engine.js</code>) has the <strong>Skills</strong> tab (<code>pSkills()</code>: Catalog · Search · In the
 loop · Reflection · Versions), the off-by-default gate (<code>skGate()</code>, rendered for any workspace whose
 <code>SK_ON</code> is false — FinOps), the interjected run (<code>pRun()</code> hands <code>run_01K6QW3D5N7TYBA2</code> to
-<code>skRunPage()</code>, the triptych), an interjection banner on Fleet, Skills as a tab of Steering (it was in the sidebar and the mobile
-More sheet until 2026-09-18), four dialogs (<code>skenable</code>, <code>skcfg</code>, <code>skill</code>, <code>skadd</code>) and <code>SCENARIOS[&quot;in-the-loop&quot;]</code> —
+<code>skRunPage()</code>, the triptych), an interjection banner on Fleet, Skills in the Steering hub tabs and the mobile
+More sheet's Steering entry (it was in the sidebar and its own mobile entry until 2026-09-18), four dialogs
+(<code>skenable</code>, <code>skcfg</code>, <code>skill</code>, <code>skadd</code>) and <code>SCENARIOS[&quot;in-the-loop&quot;]</code> —
 the six beats above as seven rail steps (beat 4 is two: Fleet, then the run). The Skills, skills-off and run-interjection pages
 are rows in <code>mockups/catalog.mjs</code>, so Storybook shows them in every state and <code>tools/check-mockup.mjs</code>
 walks them; their specs and audit prompts are in <code>mockups/pages/</code>. The <code>screens</code> index of the hand-drawn original

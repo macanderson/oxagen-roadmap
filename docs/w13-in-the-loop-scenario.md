@@ -196,7 +196,7 @@ Five policy versions, each a pull request. End on the bottom row:
 
 | Screen | Route | States |
 |---|---|---|
-| Skills — off (the shipping default) | `#/a-intel/{ws}/steering/skills` with `enabled=false` | loaded, phone |
+| Skills — off (the shipping default) | `#/a-intel/{ws}/steering/skills` with `enabled=false` (the old `…/{ws}/skills` route still resolves, rewritten in place) | loaded, phone |
 | Skills — Catalog | `#/a-intel/core-platform/steering/skills/catalog` | loaded, empty, loading, error, denied, phone |
 | Skills — Search (`search_skills` console) | `…/steering/skills/search` | loaded (5 query shapes), phone |
 | Skills — In the loop | `…/steering/skills/loop` | open interjection, answered, phone |
@@ -208,11 +208,13 @@ Five policy versions, each a pull request. End on the bottom row:
 
 ## In the master
 
-Ported on 2026-09-14. The master (`mockups/src/engine.js`) has the **Skills** page (`pSkills()`: Catalog · Search · In the
+Ported on 2026-09-14, and updated 2026-09-18 when Steering became the hub: Skills is now the second
+tab of Steering, not its own sidebar entry (`mockups/pages/skills.md`). The master (`mockups/src/engine.js`) has the **Skills** tab (`pSkills()`: Catalog · Search · In the
 loop · Reflection · Versions), the off-by-default gate (`skGate()`, rendered for any workspace whose
 `SK_ON` is false — FinOps), the interjected run (`pRun()` hands `run_01K6QW3D5N7TYBA2` to
-`skRunPage()`, the triptych), an interjection banner on Fleet, Skills as a tab of Steering (it was in the sidebar and the mobile
-More sheet until 2026-09-18), four dialogs (`skenable`, `skcfg`, `skill`, `skadd`) and `SCENARIOS["in-the-loop"]` —
+`skRunPage()`, the triptych), an interjection banner on Fleet, Skills in the Steering hub tabs and the mobile
+More sheet's Steering entry (it was in the sidebar and its own mobile entry until 2026-09-18), four dialogs
+(`skenable`, `skcfg`, `skill`, `skadd`) and `SCENARIOS["in-the-loop"]` —
 the six beats above as seven rail steps (beat 4 is two: Fleet, then the run). The Skills, skills-off and run-interjection pages
 are rows in `mockups/catalog.mjs`, so Storybook shows them in every state and `tools/check-mockup.mjs`
 walks them; their specs and audit prompts are in `mockups/pages/`. The `screens` index of the hand-drawn original
