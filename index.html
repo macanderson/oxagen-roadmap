@@ -402,7 +402,7 @@ const PAGES = {
     return `<div class="page-head"><div><div class="eyebrow">${live ? "Live from GitHub" : "Snapshot"}</div><h1>Issues</h1></div>
       <p class="lead">${live ? `Open issues in ${esc(ORG)}/${esc(repo)}, the 100 most recently updated, refreshed every two minutes through your GitHub connector. ${r?.storedAt ? "Last updated " + ago(new Date(r.storedAt).toISOString()) + "." : ""}` : ((S.ghDown || r?.error) ? ghErrorCopy(S.ghDown || r.error) + " Until then this is the triage snapshot" : "Open this page in claude.ai with the GitHub connector for live status. This is the triage snapshot") + (D.issue_snapshot_date ? " from " + esc(D.issue_snapshot_date) : "") + "."}</p>
       <div class="actions"><button class="btn" id="new-issue">New issue</button>${live ? `<button class="btn ghost" id="refresh-issues">Refresh</button>` : ""}</div></div>
-      ${r?.error ? `<div class="banner">${esc(ghErrorCopy(r.error))}</div>` : ""}
+      ${(S.ghDown || r?.error) && S.caps.mcp ? `<div class="banner"><span style="flex:1">${esc(ghErrorCopy(S.ghDown || r.error))}</span><button class="btn sm" id="retry-gh">Retry GitHub</button></div>` : ""}
       <div class="filters">
         ${REPOS.map(x => `<button class="tog ${repo === x ? "on" : ""}" data-repo="${x}">${x}${S.issues[x]?.total != null ? ` · ${S.issues[x].total}` : ""}</button>`).join("")}
         <input type="search" id="f-iq" placeholder="Search title or number" value="${esc(f.iq || "")}">
@@ -534,7 +534,7 @@ document.addEventListener("click", async (e) => {
   // In-page routes: drive the hash ourselves so a host that intercepts anchor clicks cannot swallow them.
   const a = e.target.closest('a[href^="#/"]');
   if (a) { e.preventDefault(); const h = a.getAttribute("href"); if (location.hash !== h) location.hash = h; else { parseHash(); render(); } return; }
-  const t = e.target.closest("[data-ask],[data-item],[data-wf],[data-decide],[data-reopen],[data-issue-item],[data-issue-decision],[data-comment],[data-link-item],[data-repo],[data-issue],#new-issue,#refresh-issues,#more-issues,#f-cut,#f-unbacked,#f-decision,#wf-mobile,#ask-btn,#close-drawer,#theme-btn,#clear-chat");
+  const t = e.target.closest("[data-ask],[data-item],[data-wf],[data-decide],[data-reopen],[data-issue-item],[data-issue-decision],[data-comment],[data-link-item],[data-repo],[data-issue],#new-issue,#refresh-issues,#retry-gh,#more-issues,#f-cut,#f-unbacked,#f-decision,#wf-mobile,#ask-btn,#close-drawer,#theme-btn,#clear-chat");
   if (!t) return;
   if (t.matches("[data-wf]")) { e.stopPropagation(); go("wireframes", t.dataset.wf); return; }
   if (t.matches("[data-ask]")) { openDrawer(); askClaude(t.dataset.ask); return; }
@@ -549,6 +549,7 @@ document.addEventListener("click", async (e) => {
   if (t.matches("[data-repo]")) { S.ui.filters.repo = t.dataset.repo; saveUi(); render(); return; }
   if (t.matches("[data-issue]")) { if (e.target.closest("a")) return; const [repo, n] = t.dataset.issue.split("#"); window.open(`https://github.com/${ORG}/${repo}/issues/${n}`, "_blank", "noopener"); return; }
   if (t.matches("#refresh-issues")) { await S.caps.mcp?.invalidate(GH, "list_issues").catch(() => {}); toast("Refreshing"); return; }
+  if (t.matches("#retry-gh")) { S.ghDown = null; S.issues = {}; startGitHub(); render(); return; }
   if (t.matches("#more-issues")) return loadOlder(S.ui.filters.repo || "oxagen");
   if (t.matches("#f-cut")) { S.ui.filters.showCut = !S.ui.filters.showCut; saveUi(); render(); return; }
   if (t.matches("#f-unbacked")) { S.ui.filters.unbacked = !S.ui.filters.unbacked; saveUi(); render(); return; }
@@ -686,9 +687,14 @@ function startGitHub() {
         S.issues[repo] = { items: p.issues || [], total: p.totalCount ?? (p.issues || []).length, hasNext: !!p.pageInfo?.hasNextPage, cursor: p.pageInfo?.endCursor, storedAt: ev.result.cache?.storedAt || Date.now(), error: null };
         S.ghDown = null; setPill("gh", "on", "GitHub: live");
       } else {
-        const e = ev.error; S.issues[repo] = { ...(S.issues[repo] || { items: [] }), error: e };
-        if (["needs_reauth","server_not_connected","blocked_by_policy","approval_required","not_in_manifest","selection_required"].includes(e.code)) { S.issues[repo].items = []; S.ghDown = e; setPill("gh", "off", "GitHub: " + (e.code === "server_not_connected" ? "add the connector" : e.code.replace(/_/g, " "))); watches.splice(0).forEach(un => { try { un(); } catch {} }); }
-        else setPill("gh", "warn", "GitHub: retrying");
+        const e = ev.error; const had = !!S.issues[repo]?.storedAt; S.issues[repo] = { ...(S.issues[repo] || { items: [] }), error: e };
+        const authz = ["needs_reauth","server_not_connected","blocked_by_policy","approval_required","not_in_manifest","selection_required"].includes(e.code);
+        if (authz || !had) {
+          // A first round that fails (no connector, consent not given, upstream down) stops every watch: each call would re-ask the viewer. The Issues page offers a retry.
+          if (authz) S.issues[repo].items = [];
+          S.ghDown = e; setPill("gh", "off", "GitHub: " + (e.code === "server_not_connected" ? "add the connector" : authz ? e.code.replace(/_/g, " ") : "unreachable, snapshot shown"));
+          watches.splice(0).forEach(un => { try { un(); } catch {} });
+        } else setPill("gh", "warn", "GitHub: retrying, last data shown");
       }
       if (["now","issues","gaps","witness","done","wireframes"].includes(S.route)) render(); else renderNav();
     }, { refetchInterval: 120000, cache: { staleTime: 60000 } });
@@ -805,6 +811,8 @@ async function boot() {
     // A connector the viewer has not added lists with no tools; one not yet consented lists the manifest's tool names.
     try { const { servers } = await mcp.listTools(); const gh = servers.find(x => /github/i.test(x.server)); if (gh) GH = gh.server; if (!gh || !(gh.tools || []).length) S.ghDown = { code: "server_not_connected" }; }
     catch (e) { S.ghDown = { code: e?.code || "upstream_error", message: e?.message }; }
+    // The permissions read never prompts: "unavailable" means the viewer has no such connector, so no call is made and no dialog opens.
+    if (!S.ghDown) { const perms = await use("permissions"); if (perms) { const st = await perms.state("mcp:" + GH).catch(() => "prompt"); if (st === "unavailable") S.ghDown = { code: "server_not_connected" }; else if (st === "denied") S.ghDown = { code: "not_in_manifest" }; } }
   }
   setPill("ai", sample ? "on" : "off", sample ? "Claude: ready" : "Claude: off");
   if (db) {
