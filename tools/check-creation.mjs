@@ -406,7 +406,7 @@ ok(seen.size === 6, "six kinds, six different treatments, got " + seen.size);
   await page.evaluate(() => openDialog("create"));
   await page.waitForTimeout(150);
   const cards = await page.evaluate(() => document.querySelectorAll("#layer .wz-card").length);
-  ok(cards === 4, "create chooser: four cards, got " + cards);
+  ok(cards === 5, "create chooser: five cards, got " + cards);
   await shot(page, "create-chooser");
   ok(errs.length === 0, "entry point errors: " + errs.join(" | "));
   await page.close();

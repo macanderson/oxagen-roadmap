@@ -1,6 +1,12 @@
 # `<RunOutputs>` — design brief
 
-**Status:** blocked on a design decision, by your own plan.
+**Status: decided 2026-09-17 — Option Story.** The decision, its reasoning and where it is built
+are in `DECISION.md` beside this file. The brief below is kept as it was written, as the record of
+what the three options were and what each was judged on.
+
+---
+
+**Status when written:** blocked on a design decision, by your own plan.
 `docs/implementation-plan.md` §2 W2 lists exactly two items as needing one, each with a
 component seam already reserved: `<MobileNav>` (item 3) and **`<RunOutputs>` (item 7)**.
 This brief covers item 7.
@@ -90,7 +96,7 @@ items render as a card with the gate on it.
 - *Tradeoff:* heaviest surface; a run touching 20 files becomes a wall of cards. Needs a
   collapse rule, and that rule is itself a design decision.
 
-### Option Story — organise by time *(leading candidate)*
+### Option Story — organise by time *(chosen 2026-09-17 — see `DECISION.md`)*
 A vertical spine in the order the run produced things, with the governed moments inline:
 read → wrote → created branch → **gate: awaiting approval** → (would publish) → seal.
 Durable artifacts sit as nodes on the spine; reads are demoted to quiet inline marks.
