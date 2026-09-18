@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Items 1, 2, 5, 6 and 8 are in the master; 4 is in (the run name and summary, the file-diff card); 3 and 7 wait on a design decision (`implementation-plan.md` §2 W2) |
+| **Status** | Items 1, 2, 5, 6 and 8 are in the master; 4 is in (the run name and summary, the file-diff card); **7 is decided and in** — Option Story, 2026-09-17, the outputs as one time-ordered spine (`design/run-outputs/DECISION.md`), except the media thumbnail, which has no run that produces one; 3 still waits on a design decision (`implementation-plan.md` §2 W2) |
 | **Date** | 2026-09-12 |
 | **Owner** | Mac Anderson |
 
