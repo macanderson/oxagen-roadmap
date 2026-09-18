@@ -5931,11 +5931,24 @@ var DRIFT_PR={"core-platform":"oxpr_01K6T4E5"};
 function oxState(r){return OX_STATE[r.ox||"governed"]||OX_STATE.governed;}
 /* The repositories this workspace's own record names, main first, then linked, then whatever
    the installation can reach that nobody has bound. Role is the workspace's word, not GitHub's. */
+/* A workspace names its main repo in ws.json; REPOS may hold no row for it, because the seed
+   fixtures only carry core-platform's and the volume generator grows rows for the workspaces it
+   invents rather than the ones already there. Three separate findings on this page were the same
+   omission read three ways — a Repositories tab claiming zero bound repositories, a Configuration
+   panel labelled with one repository and rendering another's head, and a main repo absent from
+   every list that derives from this one. So the record is minted here, once, rather than at each
+   call site: a workspace's main repo always exists, whether or not anybody has indexed it. */
+function repoRecordFor(name,w){
+  return {n:name,role:"main",branch:w.branch,head:w.head||null,indexed:"\u2014",
+    issues:"enabled",events:"\u2014",symbols:0,drift:"\u2014",
+    ox:"governed",oxCommit:w.head||null,oxFiles:0,lang:"",visibility:"private",pushed:""};
+}
 function wsRepos(){
   var w=ws(), order={main:0,linked:1,available:2};
-  return REPOS.filter(function(r){return r.n===w.main||(w.linked||[]).indexOf(r.n)>=0||r.role==="available";})
-   .map(function(r){return r.n===w.main?Object.assign({},r,{role:"main"}):r;})
-   .sort(function(a,b){return (order[a.role]==null?3:order[a.role])-(order[b.role]==null?3:order[b.role]);});
+  var rows=REPOS.filter(function(r){return r.n===w.main||(w.linked||[]).indexOf(r.n)>=0||r.role==="available";})
+   .map(function(r){return r.n===w.main?Object.assign({},r,{role:"main"}):r;});
+  if(!rows.some(function(r){return r.n===w.main;})) rows.push(repoRecordFor(w.main,w));
+  return rows.sort(function(a,b){return (order[a.role]==null?3:order[a.role])-(order[b.role]==null?3:order[b.role]);});
 }
 function wsCopies(){var names={};wsRepos().forEach(function(r){names[r.n]=1;});
   return WORKCOPIES.filter(function(c){return names[c.repo];});}
@@ -6073,12 +6086,16 @@ function copyTab(){
 }
 
 /* ---- tab 3: the changes ---- */
+/* S.oxprSel outlives a workspace switch and OXPRS is global, so the raw id means nothing on its
+   own. Every read of the selection goes through here: chgTab, which would otherwise render one
+   workspace's change under another's name, and the header, which would otherwise give up its gold
+   for a detail view that is not on screen. Two findings, one unvalidated value. */
+function selectedOxpr(){
+  if(!S.oxprSel) return null;
+  return wsOxprs().filter(function(p){return p.id===S.oxprSel;})[0]||null;
+}
 function chgTab(){
-  var rows=wsOxprs();
-  /* S.oxprSel outlives a workspace switch, and OXPRS is global — so looking the id up there
-     would show one workspace's change while the shell says you are in another. The selection
-     is only a selection if it is in this workspace's rows. */
-  var sel=S.oxprSel&&rows.filter(function(p){return p.id===S.oxprSel;})[0];
+  var rows=wsOxprs(), sel=selectedOxpr();
   if(sel) return oxprDetail(sel);
   var trows=rows.map(function(p){
     var k=OXPR_KIND[p.kind]||OXPR_KIND.config, st=PR_STATE[p.state]||PR_STATE.open;
@@ -6154,12 +6171,9 @@ function oxprDetail(p){
 /* ---- tab 4: the configuration ---- */
 function cfgTab(){
   var w=ws();
-  /* wsRepos() also returns the repositories the installation can reach but nobody has bound, so
-     falling back to its first row labels an unrelated repository as this workspace's main and
-     renders its head under that name. A workspace whose main repo has no row gets a record of
-     its own main instead. */
-  var repo=repoByName(w.main)||{n:w.main,role:"main",branch:w.branch,head:w.head||null,
-    issues:"enabled",ox:"governed",oxCommit:w.head||null,oxFiles:0,lang:"",visibility:"private",pushed:""};
+  /* Never wsRepos()[0]: that list also holds repositories the installation can reach but nobody
+     has bound, so its first row can be an unrelated repository wearing this workspace's name. */
+  var repo=repoByName(w.main)||repoRecordFor(w.main,w);
   /* Drift is a fact about one workspace's file against one workspace's live state. These rows are
      core-platform's — its Linear server, its budget, its unbound linked repo — so rendering them
      under another workspace would report drift that workspace does not have, and send the
@@ -6222,7 +6236,7 @@ function pRepos(){
 
   var body=t==="copies"?copyTab():t==="changes"?chgTab():t==="config"?cfgTab():repoTab();
   /* the page header gives up the gold when the tab below holds the one primary action */
-  var tabPrimary=(t==="changes"&&!!S.oxprSel)||t==="copies";
+  var tabPrimary=(t==="changes"&&!!selectedOxpr())||t==="copies";
   return '<div class="phead"><div class="t"><p class="eyebrow">Workspace · '+h(w.name)+'</p><h1>Repositories</h1>'+
    '<p>Where this workspace’s files live, who has them on disk, and every change Oxagen has proposed to them. The record mirrors what git holds; git decides what is in force.</p></div>'+
    '<div class="acts"><button class="btn'+(tabPrimary?'':' primary')+'" onclick="wzOpen(\'init\')">Add Oxagen to a repository</button></div></div>'+tabs+body;
@@ -11227,7 +11241,10 @@ function wzInit(){
       .map(function(x){var on=(z.role||"linked")===x[0], is=w.main===r.n;
         return '<button class="wz-card'+(on?" on":"")+'"'+(x[0]==="main"&&is?' disabled':'')+' onclick="wzSetR(\'role\',\''+x[0]+'\')">'+
          '<span class="tx"><b>'+h(x[1])+'</b><span class="d">'+h(x[2])+'</span></span></button>';}).join("")+'</div>'+
-      '<div class="note" style="margin-top:14px">'+h(w.main)+' is already this workspace’s main repo, so this one is linked.</div>',
+      '<div class="note" style="margin-top:14px">'+
+      ((z.role||"linked")==="main"
+        ?h(w.main)+' is this workspace’s main repo today. Merging this makes '+h(r.n)+' the main repo instead — an organization-owner action with approval, recorded as a security event, and the one change on this page a reviewer cannot undo by closing the pull request.'
+        :h(w.main)+' is already this workspace’s main repo, so this one is linked.')+'</div>',
      t:"Add Oxagen to a repository", s:"the directory every other file needs",
      f:wzNext("Next",true)};
   }
