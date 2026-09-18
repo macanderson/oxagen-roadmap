@@ -1578,7 +1578,7 @@
       "title": "The public decks under apps/docs describe the runtime ADR-043 removed: sandboxes, fan-out and hard caps as if they still shipped"
     }
   },
-  "generated_at": "2026-09-18T21:10:04.500Z",
+  "generated_at": "2026-09-18T21:13:37.847Z",
   "heads": {
     "oxagen": "b7a0f0989b2ff8193df748e0931f32d321a5704f"
   },
@@ -4882,7 +4882,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "cost: record and show run cost — auto-seeded price book, negotiated rates, unpriced-model surfacing",
-      "updated_at": "2026-09-18T21:06:25Z"
+      "updated_at": "2026-09-18T21:12:47Z"
     },
     "oxagen#3276": {
       "author": "macanderson",
@@ -4908,7 +4908,7 @@
       ],
       "state": "open",
       "title": "feat(steering): warn and optionally refuse a prompt when a checkout's .oxagen/ is behind the production branch",
-      "updated_at": "2026-09-18T21:04:00Z"
+      "updated_at": "2026-09-18T21:12:21Z"
     },
     "oxagen#3277": {
       "author": "macanderson",
@@ -6044,7 +6044,7 @@
       ],
       "state": "open",
       "title": "billing: bill the in-app agent's platform-funded tokens at exactly cost",
-      "updated_at": "2026-09-18T21:02:53Z"
+      "updated_at": "2026-09-18T21:12:45Z"
     },
     "oxagen#3323": {
       "author": "macanderson",
@@ -6539,7 +6539,7 @@
       ],
       "state": "open",
       "title": "app: the in-app assistant renders markdown, highlights code, and reve…",
-      "updated_at": "2026-09-18T21:08:28Z"
+      "updated_at": "2026-09-18T21:12:38Z"
     },
     "oxagen#3342": {
       "author": "macanderson",
@@ -6564,6 +6564,54 @@
       "state": "open",
       "title": "tacho: ship prompts, transcripts and per-call tokens so the Run page has cost and content",
       "updated_at": "2026-09-18T21:09:56Z"
+    },
+    "oxagen#3343": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/issues/3343",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3343,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Residue from #3271: scheduled rows survive a withdrawal, the unpriced probe over-reports, and Anthropic cache tiers are derived for every provider",
+      "updated_at": "2026-09-18T21:10:49Z"
+    },
+    "oxagen#3344": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/issues/3344",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3344,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Residue from #3276: a forced sync classifies an ignored directory as a removed file",
+      "updated_at": "2026-09-18T21:10:51Z"
     },
     "roadmap#39": {
       "author": "macanderson",
@@ -6613,6 +6661,28 @@
       "state": "open",
       "title": "roadmap: status as of 2026-09-18 evening — Run page, M0, Billing, BYOK, steering phases",
       "updated_at": "2026-09-18T20:57:21Z"
+    },
+    "roadmap#47": {
+      "author": "macanderson",
+      "closed_at": "2026-09-18T21:10:51Z",
+      "closes": [],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/roadmap/pull/47",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": "2026-09-18T21:10:51Z",
+      "milestone": null,
+      "needs_decision": false,
+      "number": 47,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "roadmap",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "Refresh the roadmap from GitHub every fifteen minutes",
+      "updated_at": "2026-09-18T21:12:09Z"
     },
     "stella#1044": {
       "author": "macanderson",
@@ -21638,8 +21708,8 @@
     }
   },
   "last_run": {
-    "at": "2026-09-18T21:10:04.500Z",
-    "calls": 122,
+    "at": "2026-09-18T21:13:37.847Z",
+    "calls": 4,
     "quiet": false
   },
   "milestones": {
@@ -22345,8 +22415,8 @@
     }
   },
   "since": {
-    "oxagen": "2026-09-18T21:09:56Z",
-    "roadmap": "2026-09-18T20:57:21Z",
-    "stella": "2026-09-18T15:54:10Z"
+    "oxagen": "2026-09-18T21:12:47Z",
+    "roadmap": "2026-09-18T21:12:09Z",
+    "stella": "2026-09-18T21:13:37.847Z"
   }
 }
