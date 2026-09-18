@@ -440,7 +440,8 @@ for (const theme of ["light", "dark"]) {
     ok(r.rail >= 3, theme + " phone " + kind + ": the step rail survives, got " + r.rail);
     ok(r.stacked, theme + " phone " + kind + ": cards stack in one column");
     if (kind === "record") {
-      const dark = /rgb\(1[0-9], 1[0-9], 1[0-9]\)/.test(r.bg);
+      // Dark means a near-black ground, whatever its exact value: every channel under 40.
+      const dark = (r.bg.match(/\d+/g) || []).slice(0, 3).every((c) => Number(c) < 40);
       ok(theme === "dark" ? dark : !dark, theme + ": the theme is actually " + theme + ", body is " + r.bg);
     }
   }

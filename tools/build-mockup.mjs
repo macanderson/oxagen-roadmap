@@ -16,6 +16,7 @@
 // so the product build, every page in every state in either shell, and every W flow are URLs of
 // this one file rather than copies of it. Storybook (npm run storybook) is the catalog of those URLs.
 import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync } from "node:fs";
+import { monoFontFace } from "./lib/house-fonts.mjs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
@@ -25,7 +26,7 @@ const FIX = path.join(root, "mockups/fixtures");
 export const OUT = path.join(root, "mockups/missioncontrol.html");
 
 export const TITLE = "Oxagen Mission Control";
-export const FONT = '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap">';
+export const FONT = '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">';
 
 // Every fixtures/*.json, keyed by its name in upper snake case: spend-detail.json → SPEND_DETAIL.
 export function fixtures() {
@@ -59,7 +60,7 @@ export function buildMockup() {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0A0A09">
+<meta name="theme-color" content="#000000">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>${TITLE}</title>
@@ -67,6 +68,7 @@ export function buildMockup() {
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 ${FONT}
 <style>
+${monoFontFace()}
 ${css.trim()}
 </style>
 </head>

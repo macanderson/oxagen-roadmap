@@ -17,6 +17,10 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 DOCS = ROOT / "docs"
 OUT = DOCS / "missioncontrol-docs.html"
 CSS = (DOCS / "_house" / "oxagen-doc.css").read_text()
+# Monaspace Neon is on no public CDN, so the page carries it inline.
+MONO_B64 = __import__("base64").b64encode((ROOT / "design" / "fonts" / "monaspace-neon-latin-wght.woff2").read_bytes()).decode()
+CSS = ('@font-face{font-family:"Monaspace Neon";font-style:normal;font-weight:200 800;font-display:swap;'
+       f'src:url(data:font/woff2;base64,{MONO_B64}) format("woff2")}}\n') + CSS
 
 # The documents, in the order the rail lists them. id is the hash; kind is the eyebrow.
 CATALOG = [
@@ -139,7 +143,7 @@ def build():
 <title>Oxagen Mission Control: the documents</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
 <style>
 {CSS}
 /* the site around the documents: a rail of documents, one shown at a time */

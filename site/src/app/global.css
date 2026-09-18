@@ -4,50 +4,61 @@
 
 @source "../../node_modules/fumadocs-ui/dist/**/*.js";
 
+@font-face {
+  font-family: "Monaspace Neon";
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+  src: url("./fonts/monaspace-neon-latin-wght.woff2") format("woff2");
+}
+
+h1, h2, h3 { font-family: var(--font-display); }
+
 @theme {
-  --font-sans: "Space Grotesk", "Helvetica Neue", Arial, ui-sans-serif, system-ui, sans-serif;
-  --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+  --font-sans: "Geist", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Space Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "Monaspace Neon", ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
 }
 
 /* The house palette (docs/_house/oxagen-doc.css): paper and ink, one gold. Light by default,
    dark when the switch or the OS says so. */
 :root:not(.dark) {
-  --color-fd-background: #f2eee5;
-  --color-fd-foreground: #10100f;
-  --color-fd-muted: #ece6da;
-  --color-fd-muted-foreground: #6b665c;
-  --color-fd-popover: #f8f5ee;
-  --color-fd-popover-foreground: #10100f;
-  --color-fd-card: #f8f5ee;
-  --color-fd-card-foreground: #10100f;
-  --color-fd-border: #d8cdbd;
-  --color-fd-primary: #8b5e1a;
-  --color-fd-primary-foreground: #f8f5ee;
-  --color-fd-secondary: #ece6da;
-  --color-fd-secondary-foreground: #10100f;
-  --color-fd-accent: #ece6da;
-  --color-fd-accent-foreground: #10100f;
-  --color-fd-ring: #8b5e1a;
-  --ox-gold: #d6962c;
+  --color-fd-background: #ffffff;
+  --color-fd-foreground: #09090b;
+  --color-fd-muted: #f4f4f5;
+  --color-fd-muted-foreground: #71717a;
+  --color-fd-popover: #ffffff;
+  --color-fd-popover-foreground: #09090b;
+  --color-fd-card: #ffffff;
+  --color-fd-card-foreground: #09090b;
+  --color-fd-border: #e4e4e7;
+  --color-fd-primary: #977017;
+  --color-fd-primary-foreground: #ffffff;
+  --color-fd-secondary: #f4f4f5;
+  --color-fd-secondary-foreground: #09090b;
+  --color-fd-accent: #f4f4f5;
+  --color-fd-accent-foreground: #09090b;
+  --color-fd-ring: #977017;
+  --ox-gold: #d4af37;
 }
 :root.dark {
-  --color-fd-background: #10100f;
-  --color-fd-foreground: #f2eee5;
-  --color-fd-muted: #201f1c;
-  --color-fd-muted-foreground: #9b958a;
-  --color-fd-popover: #181715;
-  --color-fd-popover-foreground: #f2eee5;
-  --color-fd-card: #181715;
-  --color-fd-card-foreground: #f2eee5;
-  --color-fd-border: #292722;
-  --color-fd-primary: #d6962c;
-  --color-fd-primary-foreground: #10100f;
-  --color-fd-secondary: #201f1c;
-  --color-fd-secondary-foreground: #f2eee5;
-  --color-fd-accent: #201f1c;
-  --color-fd-accent-foreground: #f2eee5;
-  --color-fd-ring: #d6962c;
-  --ox-gold: #d6962c;
+  --color-fd-background: #09090b;
+  --color-fd-foreground: #ffffff;
+  --color-fd-muted: #27272a;
+  --color-fd-muted-foreground: #a1a1aa;
+  --color-fd-popover: #18181B;
+  --color-fd-popover-foreground: #ffffff;
+  --color-fd-card: #18181B;
+  --color-fd-card-foreground: #ffffff;
+  --color-fd-border: #27272A;
+  --color-fd-primary: #d4af37;
+  --color-fd-primary-foreground: #09090b;
+  --color-fd-secondary: #27272a;
+  --color-fd-secondary-foreground: #ffffff;
+  --color-fd-accent: #27272a;
+  --color-fd-accent-foreground: #ffffff;
+  --color-fd-ring: #d4af37;
+  --ox-gold: #d4af37;
 }
 
 html,

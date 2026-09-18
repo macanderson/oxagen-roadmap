@@ -19,14 +19,14 @@ export function view({ state, shell, theme, product, hash, file = MASTER }) {
   const src = mockupUrl(file, { product, state: state || null, mobile: shell ? mobile : null, theme: theme === "system" ? null : theme, hash });
   const wrap = document.createElement("div");
   wrap.style.cssText = mobile
-    ? "min-height:100vh;display:grid;place-items:center;background:#E9E3D8;padding:24px 16px"
-    : "height:100vh;background:#0A0A09";
+    ? "min-height:100vh;display:grid;place-items:center;background:#F4F4F5;padding:24px 16px"
+    : "height:100vh;background:#000000";
   const frame = document.createElement("iframe");
   frame.src = src;
   frame.title = hash || "Mission Control";
   frame.setAttribute("loading", "eager");
   frame.style.cssText = mobile
-    ? "width:390px;height:844px;max-width:100%;border:10px solid #10100F;border-radius:38px;background:#0A0A09;box-shadow:0 20px 60px rgba(0,0,0,.35)"
+    ? "width:390px;height:844px;max-width:100%;border:10px solid #09090B;border-radius:38px;background:#000000;box-shadow:0 20px 60px rgba(0,0,0,.35)"
     : "width:100%;height:100%;border:0;display:block";
   wrap.appendChild(frame);
   return wrap;
