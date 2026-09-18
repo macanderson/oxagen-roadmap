@@ -31,7 +31,7 @@ Oxagen does not run a skill — the harness does. This page governs **resolution
 
 The hub header carries **Add a skill** (gold) on this tab, which opens the wizard; a catalog row carries **Edit**, which opens `pages/skill-source.md`. Every creation wizard is `DLG_EXT.wz`; its spec is `docs/creation-spec.md`.
 
-**Shell.** As every workspace page (see `tools.md`), with **Skills** in the Workspace nav between Tools and Steering, carrying a count of 1 while an interjection waits on a person.
+**Shell.** As every workspace page (see `tools.md`), with Skills carrying no nav entry of its own: it is a tab of Steering, and Steering's nav count includes 1 while an interjection waits on a person.
 
 ## Data sources
 

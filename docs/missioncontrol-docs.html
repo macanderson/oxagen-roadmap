@@ -10979,32 +10979,32 @@ workspace is made.&quot;</p>
 <tbody>
 <tr>
 <td>Skills — off (the shipping default)</td>
-<td><code>#/a-intel/{ws}/skills</code> with <code>enabled=false</code></td>
+<td><code>#/a-intel/{ws}/steering/skills</code> with <code>enabled=false</code> (the old <code>…/{ws}/skills</code> route still resolves, rewritten in place)</td>
 <td>loaded, phone</td>
 </tr>
 <tr>
 <td>Skills — Catalog</td>
-<td><code>#/a-intel/core-platform/skills/catalog</code></td>
+<td><code>#/a-intel/core-platform/steering/skills/catalog</code></td>
 <td>loaded, empty, loading, error, denied, phone</td>
 </tr>
 <tr>
 <td>Skills — Search (<code>search_skills</code> console)</td>
-<td><code>…/skills/search</code></td>
+<td><code>…/steering/skills/search</code></td>
 <td>loaded (5 query shapes), phone</td>
 </tr>
 <tr>
 <td>Skills — In the loop</td>
-<td><code>…/skills/loop</code></td>
+<td><code>…/steering/skills/loop</code></td>
 <td>open interjection, answered, phone</td>
 </tr>
 <tr>
 <td>Skills — Reflection and quarantine</td>
-<td><code>…/skills/reflect</code></td>
+<td><code>…/steering/skills/reflect</code></td>
 <td>loaded, phone</td>
 </tr>
 <tr>
 <td>Skills — Versions</td>
-<td><code>…/skills/versions</code></td>
+<td><code>…/steering/skills/versions</code></td>
 <td>loaded, phone</td>
 </tr>
 <tr>
@@ -11025,11 +11025,12 @@ workspace is made.&quot;</p>
 </tbody>
 </table></div>
 <h2 id="w13/in-the-master">In the master</h2>
-<p>Ported on 2026-09-14. The master (<code>mockups/src/engine.js</code>) has the <strong>Skills</strong> page (<code>pSkills()</code>: Catalog · Search · In the
+<p>Ported on 2026-09-14, and updated 2026-09-18 when Steering became the hub: Skills is now the second
+tab of Steering, not its own sidebar entry (<code>mockups/pages/skills.md</code>). The master (<code>mockups/src/engine.js</code>) has the <strong>Skills</strong> tab (<code>pSkills()</code>: Catalog · Search · In the
 loop · Reflection · Versions), the off-by-default gate (<code>skGate()</code>, rendered for any workspace whose
 <code>SK_ON</code> is false — FinOps), the interjected run (<code>pRun()</code> hands <code>run_01K6QW3D5N7TYBA2</code> to
-<code>skRunPage()</code>, the triptych), an interjection banner on Fleet, Skills in the sidebar and the mobile
-More sheet, four dialogs (<code>skenable</code>, <code>skcfg</code>, <code>skill</code>, <code>skadd</code>) and <code>SCENARIOS[&quot;in-the-loop&quot;]</code> —
+<code>skRunPage()</code>, the triptych), an interjection banner on Fleet, Skills in the Steering hub tabs and the mobile
+More sheet's Steering entry, four dialogs (<code>skenable</code>, <code>skcfg</code>, <code>skill</code>, <code>skadd</code>) and <code>SCENARIOS[&quot;in-the-loop&quot;]</code> —
 the six beats above as seven rail steps (beat 4 is two: Fleet, then the run). The Skills, skills-off and run-interjection pages
 are rows in <code>mockups/catalog.mjs</code>, so Storybook shows them in every state and <code>tools/check-mockup.mjs</code>
 walks them; their specs and audit prompts are in <code>mockups/pages/</code>. The <code>screens</code> index of the hand-drawn original
