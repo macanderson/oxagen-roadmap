@@ -213,9 +213,9 @@ dialog .db .row{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
 (() => {
 "use strict";
 const D = JSON.parse(document.getElementById("roadmap-data").textContent || "{}");
-const ORG = D.repos?.owner || "oxageninc";
-const ROADMAP_REPO = D.repos?.roadmap || "product-roadmap";
-const REPOS = D.repos?.tracked || ["product-roadmap", "oxagen", "stella"];
+const ORG = D.repos?.owner || "oxagenai";
+const ROADMAP_REPO = D.repos?.roadmap || "roadmap";
+const REPOS = D.repos?.tracked || ["roadmap", "oxagen", "stella"];
 let GH = "GitHub";              // connector display name; confirmed against listTools() at boot
 const BLOB = `https://github.com/${ORG}/${ROADMAP_REPO}/blob/main/`;
 const MOCKUP = "mockups/missioncontrol.html";

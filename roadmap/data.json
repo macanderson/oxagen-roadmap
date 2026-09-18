@@ -2,10 +2,10 @@
  "generated_at": "2026-09-17",
  "thesis": "The mockups are the spec. This page is the distance between them and the build, plus the witness and the definition of done that make a run provable, and the decisions that unblock the work. GitHub status is live; everything else is editable here and by Claude.",
  "repos": {
-  "owner": "oxageninc",
-  "roadmap": "product-roadmap",
+  "owner": "oxagenai",
+  "roadmap": "roadmap",
   "tracked": [
-   "product-roadmap",
+   "roadmap",
    "oxagen",
    "stella"
   ]
