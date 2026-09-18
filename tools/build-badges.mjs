@@ -21,10 +21,10 @@ const OUT = join(ROOT, "badges");
 
 /* ---- tokens, lifted from the engine's two palettes (mockups/src/engine.css) ---- */
 const THEMES = {
-  light: { ink: "#F8F5EE", fg: "#10100F", muted: "#6B665C", border: "#D8CDBD",
-    allowed: "#2F7D52", proven: "#1F7676", failed: "#992F28", critical: "#AE2540", denied: "#9B4526", observe: "#6B665C", gold: "#8B5E1A" },
-  dark:  { ink: "#181715", fg: "#F2EEE5", muted: "#9B958A", border: "#292722",
-    allowed: "#57A97C", proven: "#3FA2A2", failed: "#C0453C", critical: "#D6455E", denied: "#C66A4A", observe: "#9B958A", gold: "#D6962C" },
+  light: { ink: "#FFFFFF", fg: "#09090B", muted: "#71717A", border: "#E4E4E7",
+    allowed: "#2F7D52", proven: "#1F7676", failed: "#992F28", critical: "#AE2540", denied: "#9B4526", observe: "#71717A", gold: "#8A7223" },
+  dark:  { ink: "#18181B", fg: "#FFFFFF", muted: "#A1A1AA", border: "#27272A",
+    allowed: "#57A97C", proven: "#3FA2A2", failed: "#C0453C", critical: "#D6455E", denied: "#C66A4A", observe: "#A1A1AA", gold: "#D4AF37" },
 };
 
 /* ---- the states. word = what the record holds; detail = the qualifier the spec requires the badge
@@ -95,14 +95,14 @@ function indexHTML() {
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Oxagen verification badge</title>
 <style>
-:root{--ink:#F8F5EE;--fg:#10100F;--muted:#6B665C;--border:#D8CDBD;--panel:#FFFDF8;--gold:#8B5E1A;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
-@media(prefers-color-scheme:dark){:root{--ink:#0A0A09;--fg:#F2EEE5;--muted:#9B958A;--border:#292722;--panel:#181715;--gold:#D6962C}}
+:root{--ink:#FFFFFF;--fg:#09090B;--muted:#71717A;--border:#E4E4E7;--panel:#FFFDF8;--gold:#8A7223;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+@media(prefers-color-scheme:dark){:root{--ink:#000000;--fg:#FFFFFF;--muted:#A1A1AA;--border:#27272A;--panel:#18181B;--gold:#D4AF37}}
 body{margin:0;padding:32px 20px 60px;background:var(--ink);color:var(--fg);font:14px/1.5 "Space Grotesk","Helvetica Neue",Arial,sans-serif;max-width:1080px;margin-inline:auto}
 h1{font-size:22px;margin:0 0 6px}h2{font-size:15px;margin:32px 0 10px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted)}
 p{max-width:70ch;color:var(--muted)}code{font-family:var(--mono);font-size:12px}
 table{border-collapse:collapse;width:100%;font-size:13px}th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:middle}
 th{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
-.pair{display:inline-flex;gap:6px;align-items:center}.sw{display:inline-flex;padding:6px;border-radius:8px}.sw.light{background:#F8F5EE}.sw.dark{background:#181715}
+.pair{display:inline-flex;gap:6px;align-items:center}.sw{display:inline-flex;padding:6px;border-radius:8px}.sw.light{background:#FFFFFF}.sw.dark{background:#18181B}
 .dim{color:var(--muted)}
 .gh{border:1px solid var(--border);border-radius:8px;background:var(--panel);padding:14px 16px;margin-top:10px}
 .gh .t{font-size:18px;font-weight:600;display:flex;align-items:center;gap:10px;flex-wrap:wrap}.gh .m{font-size:12.5px;color:var(--muted);margin-top:6px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}

@@ -117,14 +117,14 @@ Dark surface (`engine.css` `:root`, which is the Run page's default), and these 
 `@oxagen/ui` house tokens the design system now ships:
 
 ```
---ink   #10100F   page          --fg    #F2EEE5   primary text
---void  #0A0A09   below page    --body  #DDD8CD   body text
---panel #181715   panels/cards  --muted #9B958A   secondary text
---hl    #201F1C   lifted row    --dim   #6E6A62   tertiary text
---border #292722  --rule #34322D
+--ink   #09090B   page          --fg    #FFFFFF   primary text
+--void  #000000   below page    --body  #E4E4E7   body text
+--panel #18181B   panels/cards  --muted #A1A1AA   secondary text
+--hl    #27272A   lifted row    --dim   #71717A   tertiary text
+--border #27272A  --rule #3F3F46
 
---gold  #D6962C   identity — ONE gold action per screen, never a state
---gold-bright #F1C364   --gold-deep #8B5E1A
+--gold  #D4AF37   identity — ONE gold action per screen, never a state
+--gold-bright #F1CE65   --gold-deep #8A7223
 
 state: --st-allowed #57A97C · --st-approval #5B93D6 · --st-denied #C66A4A
        --st-proven  #3FA2A2 · --st-failed   #C0453C · --st-critical #D6455E

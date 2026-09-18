@@ -1,42 +1,43 @@
 
 :root{
-  --ink:#10100F; --void:#0A0A09; --panel:#181715; --hl:#201F1C; --border:#292722; --rule:#34322D;
-  --fg:#F2EEE5; --body:#DDD8CD; --muted:#9B958A; --dim:#6E6A62;
-  --gold:#D6962C; --gold-bright:#F1C364; --gold-deep:#8B5E1A; --accent-text:#D6962C;
-  --on-gold:#10100F;
+  --ink:#09090B; --void:#000000; --panel:#18181B; --hl:#27272A; --border:#27272A; --rule:#3F3F46;
+  --fg:#FFFFFF; --body:#E4E4E7; --muted:#A1A1AA; --dim:#71717A;
+  --gold:#D4AF37; --gold-bright:#F1CE65; --gold-deep:#8A7223; --accent-text:#D4AF37;
+  --on-gold:#09090B;
   --st-allowed:#57A97C; --st-approval:#5B93D6; --st-denied:#C66A4A;
-  --st-proven:#3FA2A2; --st-failed:#C0453C; --st-critical:#D6455E; --st-observe:#9B958A;
+  --st-proven:#3FA2A2; --st-failed:#C0453C; --st-critical:#D6455E; --st-observe:#A1A1AA;
   --k-rule:#9D8BE3;
   --fk-model:#3987E5; --fk-tool:#D95926; --fk-gov:#199E70; --fk-ctx:#9085E9; --fk-op:#D55181; --k-constraint:#D677B5; --k-procedure:#A6B95E; --k-fact:#5CB5D6; --k-memory:#94A3C2; --k-preference:#D08FA0;
   --shadow:0 1px 0 rgba(255,255,255,.03),0 18px 44px rgba(0,0,0,.5);
   --shadow-sm:0 1px 2px rgba(0,0,0,.4);
   --tx-surface:var(--void);
   --side-w:236px;
-  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
-  --font:"Space Grotesk","Helvetica Neue",Arial,sans-serif;
+  --mono:"Monaspace Neon",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --font:"Geist",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-display:"Space Grotesk","Helvetica Neue",Arial,sans-serif;
 }
 @media(prefers-color-scheme:light){:root:not([data-theme="dark"]){
-  --ink:#F2EEE5; --void:#E9E3D8; --panel:#F8F5EE; --hl:#EFEAE0; --border:#D8CDBD; --rule:#C9BFAE;
-  --fg:#10100F; --body:#2A2823; --muted:#6B665C; --dim:#8C877C;
-  --accent-text:#8B5E1A; --on-gold:#10100F;
+  --ink:#FFFFFF; --void:#F4F4F5; --panel:#FFFFFF; --hl:#F4F4F5; --border:#E4E4E7; --rule:#D4D4D8;
+  --fg:#09090B; --body:#27272A; --muted:#71717A; --dim:#A1A1AA;
+  --accent-text:#8A7223; --on-gold:#09090B;
   --st-allowed:#2F7D52; --st-approval:#2E6BA8; --st-denied:#9B4526;
-  --st-proven:#1F7676; --st-failed:#992F28; --st-critical:#AE2540; --st-observe:#6B665C;
+  --st-proven:#1F7676; --st-failed:#992F28; --st-critical:#AE2540; --st-observe:#71717A;
   --k-rule:#5D4AB5;
   --fk-model:#2A78D6; --fk-tool:#EB6834; --fk-gov:#1BAF7A; --fk-ctx:#4A3AA7; --fk-op:#E87BA4; --k-constraint:#A0397F; --k-procedure:#5F7A1F; --k-fact:#1E7392; --k-memory:#4E6280; --k-preference:#98485E;
-  --shadow:0 1px 0 rgba(255,255,255,.7),0 18px 44px rgba(16,16,15,.08);
-  --shadow-sm:0 1px 2px rgba(16,16,15,.06);
+  --shadow:0 1px 0 rgba(255,255,255,.7),0 18px 44px rgba(9,9,11,.08);
+  --shadow-sm:0 1px 2px rgba(9,9,11,.06);
   --tx-surface:#FFFFFF;
 }}
 :root[data-theme="light"]{
-  --ink:#F2EEE5; --void:#E9E3D8; --panel:#F8F5EE; --hl:#EFEAE0; --border:#D8CDBD; --rule:#C9BFAE;
-  --fg:#10100F; --body:#2A2823; --muted:#6B665C; --dim:#8C877C;
-  --accent-text:#8B5E1A; --on-gold:#10100F;
+  --ink:#FFFFFF; --void:#F4F4F5; --panel:#FFFFFF; --hl:#F4F4F5; --border:#E4E4E7; --rule:#D4D4D8;
+  --fg:#09090B; --body:#27272A; --muted:#71717A; --dim:#A1A1AA;
+  --accent-text:#8A7223; --on-gold:#09090B;
   --st-allowed:#2F7D52; --st-approval:#2E6BA8; --st-denied:#9B4526;
-  --st-proven:#1F7676; --st-failed:#992F28; --st-critical:#AE2540; --st-observe:#6B665C;
+  --st-proven:#1F7676; --st-failed:#992F28; --st-critical:#AE2540; --st-observe:#71717A;
   --k-rule:#5D4AB5;
   --fk-model:#2A78D6; --fk-tool:#EB6834; --fk-gov:#1BAF7A; --fk-ctx:#4A3AA7; --fk-op:#E87BA4; --k-constraint:#A0397F; --k-procedure:#5F7A1F; --k-fact:#1E7392; --k-memory:#4E6280; --k-preference:#98485E;
-  --shadow:0 1px 0 rgba(255,255,255,.7),0 18px 44px rgba(16,16,15,.08);
-  --shadow-sm:0 1px 2px rgba(16,16,15,.06);
+  --shadow:0 1px 0 rgba(255,255,255,.7),0 18px 44px rgba(9,9,11,.08);
+  --shadow-sm:0 1px 2px rgba(9,9,11,.06);
   --tx-surface:#FFFFFF;
 }
 *,*::before,*::after{box-sizing:border-box}
@@ -51,6 +52,8 @@ a:hover{text-decoration:underline}
 .eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-text);font-weight:600;margin:0 0 10px}
 .eyebrow.q{color:var(--muted)}
 h1,h2,h3,h4{margin:0;letter-spacing:-.015em}
+h1,h2,h3{font-family:var(--font-display)}
+h4{font-weight:600}
 h1{font-size:24px;font-weight:700}
 h2{font-size:18px;font-weight:600}
 h3{font-size:15px;font-weight:600}
@@ -526,7 +529,7 @@ tbody tr.click:hover .drill-lnk{border-bottom-style:solid}
 #layer.phone .cpair{grid-template-columns:minmax(0,1fr)}
 
 /* ---------- dialog ---------- */
-.scrim{position:fixed;inset:0;background:rgba(10,10,9,.68);backdrop-filter:blur(3px);z-index:90;display:grid;place-items:start center;padding:70px 18px 30px;overflow-y:auto}
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.68);backdrop-filter:blur(3px);z-index:90;display:grid;place-items:start center;padding:70px 18px 30px;overflow-y:auto}
 .dlg{background:var(--panel);border:1px solid var(--rule);border-radius:14px;width:100%;max-width:600px;box-shadow:var(--shadow);overflow:hidden}
 .dlg.wide{max-width:820px}
 .dlg-h{padding:15px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
@@ -702,7 +705,7 @@ html.has-mnav #toast.phone{bottom:calc(88px + env(safe-area-inset-bottom))}
 .mtile .ct.hot{color:var(--st-approval);border-color:color-mix(in srgb,var(--st-approval) 40%,transparent)}
 /* drawer: a scrim behind the sidebar, and the drawer itself is the full height with big rows */
 .side-scrim{display:none}
-#viewport.phone .side-scrim{display:block;position:fixed;inset:0;z-index:79;background:rgba(10,10,9,.6)}
+#viewport.phone .side-scrim{display:block;position:fixed;inset:0;z-index:79;background:rgba(0,0,0,.6)}
 #viewport.phone .side.open{width:min(300px,86vw);padding-bottom:env(safe-area-inset-bottom)}
 #viewport.phone .navitem{padding:12px 10px;font-size:15px;min-height:44px}
 #viewport.phone .switcher{min-height:44px}
@@ -760,13 +763,13 @@ html.has-mnav #toast.phone{bottom:calc(88px + env(safe-area-inset-bottom))}
 #viewport.phone .tw .tc:not(.sm){min-width:0}
 /* ---------- mockup chrome (never product UI) ---------- */
 #chrome{position:fixed;right:12px;bottom:12px;z-index:200;font-family:var(--mono);font-size:11px}
-#chrome .cbar{background:#0A0A09;border:1px solid #34322D;border-radius:10px;padding:7px;display:flex;gap:5px;align-items:center;box-shadow:0 8px 30px rgba(0,0,0,.6);flex-wrap:wrap;max-width:min(92vw,660px);color:#9B958A}
-#chrome .lab{color:#6E6A62;letter-spacing:.08em;text-transform:uppercase;font-size:9.5px;padding:0 3px}
-#chrome button{background:#181715;border:1px solid #292722;color:#9B958A;border-radius:6px;padding:3px 8px;font-family:inherit;font-size:11px}
-#chrome button:hover{border-color:#6E6A62;color:#F2EEE5}
-#chrome button[aria-pressed="true"]{background:#D6962C;border-color:#D6962C;color:#10100F;font-weight:700}
+#chrome .cbar{background:#000000;border:1px solid #3F3F46;border-radius:10px;padding:7px;display:flex;gap:5px;align-items:center;box-shadow:0 8px 30px rgba(0,0,0,.6);flex-wrap:wrap;max-width:min(92vw,660px);color:#A1A1AA}
+#chrome .lab{color:#71717A;letter-spacing:.08em;text-transform:uppercase;font-size:9.5px;padding:0 3px}
+#chrome button{background:#18181B;border:1px solid #27272A;color:#A1A1AA;border-radius:6px;padding:3px 8px;font-family:inherit;font-size:11px}
+#chrome button:hover{border-color:#71717A;color:#FFFFFF}
+#chrome button[aria-pressed="true"]{background:#D4AF37;border-color:#D4AF37;color:#09090B;font-weight:700}
 #chrome .tog{margin-left:4px}
-#chrome .rule{width:1px;height:16px;background:#34322D}
+#chrome .rule{width:1px;height:16px;background:#3F3F46}
 @media(max-width:640px){#chrome .cbar{max-width:94vw}}
 /* -------- kill switches (ported from W9 · the toolbelt, governed) -------- */
 .ks-stack{display:flex;flex-direction:column;gap:16px}
@@ -1711,9 +1714,9 @@ tr.dod-fail td{background:color-mix(in srgb,var(--st-failed) 6%,transparent)}
 /* ============================== Skills · resolution, the seat in the loop, reflection (W13) ==============================
    Every class is sx- prefixed so nothing here reaches another page, and every colour is one of the
    engine's own tokens. */
-:root{ --sk-on:#57A97C; --sk-off:#6E6A62; --sk-held:#C66A4A; --sk-res:#9085E9; }
-@media(prefers-color-scheme:light){:root:not([data-theme="dark"]){ --sk-on:#2F7D52; --sk-off:#8C877C; --sk-held:#9B4526; --sk-res:#4A3AA7; }}
-:root[data-theme="light"]{ --sk-on:#2F7D52; --sk-off:#8C877C; --sk-held:#9B4526; --sk-res:#4A3AA7; }
+:root{ --sk-on:#57A97C; --sk-off:#71717A; --sk-held:#C66A4A; --sk-res:#9085E9; }
+@media(prefers-color-scheme:light){:root:not([data-theme="dark"]){ --sk-on:#2F7D52; --sk-off:#A1A1AA; --sk-held:#9B4526; --sk-res:#4A3AA7; }}
+:root[data-theme="light"]{ --sk-on:#2F7D52; --sk-off:#A1A1AA; --sk-held:#9B4526; --sk-res:#4A3AA7; }
 
 /* the big off-by-default gate */
 .sx-gate{border:1px solid var(--border);border-radius:14px;background:var(--panel);padding:22px;box-shadow:var(--shadow-sm)}

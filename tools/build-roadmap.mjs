@@ -8,6 +8,7 @@
 // the runtime capabilities (Claude, the shared store, the GitHub connector, comments) light up.
 // Edit the sources, never index.html.
 import { readFileSync, writeFileSync } from "node:fs";
+import { monoFontFace } from "./lib/house-fonts.mjs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -20,7 +21,9 @@ const marker = "/*__DATA__*/";
 if (!template.includes(marker)) throw new Error("roadmap/app.html has no /*__DATA__*/ marker");
 // `</script` inside a JSON string would end the data block early; escape the slash.
 const json = JSON.stringify(data).replace(/<\//g, "<\\/");
-const out = template.replace(marker, json);
+const monoMarker = "/*__MONO_FONT__*/";
+if (!template.includes(monoMarker)) throw new Error("roadmap/app.html has no /*__MONO_FONT__*/ marker");
+const out = template.replace(marker, json).replace(monoMarker, monoFontFace());
 
 const target = resolve(root, "index.html");
 if (check) {
