@@ -1,8 +1,8 @@
-# Skills · off (the default)
+# Steering · Skills · off (the default)
 
 | | |
 |---|---|
-| Route | `#/a-intel/finops/skills` — any workspace whose `skills.enabled` is false (absent) |
+| Route | `#/a-intel/finops/steering/skills` (the old `#/a-intel/finops/skills` still resolves) — any workspace whose `skills.enabled` is false (absent) |
 | Scope | workspace |
 | Spec | see `skills.md` |
 | Design | `mockups/src/engine.js` → `pSkills()` → `skGate()` |
@@ -16,11 +16,11 @@ Show that skills ship **off**: `skills.enabled = false` is the value a workspace
 
 ## What is on the page
 
-**Header** — eyebrow “Workspace · <workspace name>”, h1 “Skills”.
+**Header**: the Steering hub header and its seven tabs, with Skills selected and no count on it. The hub header carries no gold action here, because the gate holds the one primary action.
 
 - **The gate** — lock glyph, h2 “Skills are off in <workspace name>”, sub “Every workspace ships this way. `skills.enabled = false` is the value a workspace is created with, not a value somebody set afterwards.”, badge **off**.
   - “What turning it on does” (four bullets: adds `search_skills` to every belt — a door, not a list; lets the harness load a skill file at a priced token cost; starts `skills.searched` / `skills.loaded` frames; makes `.oxagen/skills.toml` a governed file).
-  - “What it does not do” (four bullets: grants no tool; raises no tier; does not reach into an unbound repo — the loop stops and asks; does not turn on reflection).
+  - “What it does not do” (four bullets: grants no tool; raises no tier (a skill on a `harness` tier agent is delivered and recorded, never enforced); does not reach into an unbound repo — the loop stops and asks; does not turn on reflection).
   - Note “Why off, and not on.”
   - Footer: **Turn skills on for <workspace name>** (gold; → `skenable`) · **Read the config it would write** (→ `skcfg`) · “needs `skills.admin` on <slug>”.
 - **Every workspace in <organization>** — “the default is visible, not implied”: one row per workspace: slug · main repo · “created <date> with `skills.enabled = false`” · chips (agents · owner · “turned on <date> by <person>” or “never turned on”) · badge **on** / **off**.

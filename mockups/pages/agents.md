@@ -25,13 +25,14 @@ Actions: **New agent** (opens the agent wizard: an agent that does not exist yet
 - **Holding a mandate** — count · the agent keys that hold one
 - **Tamper incidents** — count (critical hue) · the latest incident and how many are open
 
-- **Registered in <workspace>** panel — header shows `.oxagen/agents/ @ <commit>`. Table columns: Identity · trust · spend (the agent card, list layout: avatar, key, harness, trust and spend scores coloured by platform percentile) · Harness · Operator · Status · Tier (model + native) · Belt · Runs 30d · Spend 30d · Proven 30d · Mandates · Incidents. Per-row: **Edit** (the agent page), **Roles** (assign-role dialog), **Deregister** (danger; the deregister dialog, which is a pull request removing the file). Search, sort, facets (Tier, Operator), pager.
+- **Registered in <workspace>** panel — header shows `.oxagen/agents/ @ <commit>`. Table columns: Identity · trust · spend (the agent card, list layout: avatar, key, harness, trust and spend scores coloured by platform percentile) · Harness · Operator · Status · Tier (one word from the ladder: `observe` or `harness`) · Belt · Runs 30d · Spend 30d · Proven 30d · Mandates · Incidents. Per-row: **Edit** (the agent page), **Roles** (assign-role dialog), **Deregister** (danger; the deregister dialog, which is a pull request removing the file). Search, sort, facets (Tier, Operator), pager.
+- **The tier ladder** panel under the table (`tierLadder()`), four rungs in order with one line each: `observe` (recorded only), `harness` (hooks installed; steering is delivered and the four blocking hook events can refuse, client-attested and fail-open), `gateway` and `contained`, both hatched and marked **not yet available**. A note: every agent here sits on `observe` or `harness`; a control claim carries its scope, “for actions routed through Oxagen”.
 
 **Dialogs this page opens:** `register (gate)`, `wrap (gate)`, `wz (agent wizard: describe → identity → definition → toolbelt → pull request)`, `assignrole`, `delagent`.
 
 **New agent is not Register an agent.** Register wraps an agent that already runs on a machine or in CI; New agent writes one that does not exist yet. Both end on a pull request; they start from opposite ends. Every creation wizard is `DLG_EXT.wz`; its spec is `docs/creation-spec.md`.
 
-**Shell.** Sidebar (organization switcher, workspace switcher, Workspace nav: Fleet · Agent IAM · Tools · Skills · Steering · Spend; Organization nav: Organization · Billing · Audit; agent count · data plane · tier badge), top bar (breadcrumbs, ⌘K search-or-run, notifications with unread dot, account avatar → user menu: Account, Preferences, Security and sessions, Privacy and data, Switch theme, Sign out).
+**Shell.** Sidebar (organization switcher, workspace switcher, Workspace nav: Fleet · Agent IAM · Tools · Steering · Spend; Organization nav: Organization · Billing · Audit; agent count · data plane · connection badge), top bar (breadcrumbs, ⌘K search-or-run, notifications with unread dot, account avatar → user menu: Account, Preferences, Security and sessions, Privacy and data, Switch theme, Sign out).
 
 ## Data sources
 
@@ -59,12 +60,12 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 - **loaded** — the page as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell).
 - **empty** — “No identities registered in <workspace>” — identity lives in Postgres, definition in `.oxagen/agents/`; registering opens a Context PR. Actions: **Wrap Claude Code**, **Register an agent**.
 - **loading** — the shell stays; the page body is replaced by the skeleton (four tile blocks and a panel of seven rows), so the operator keeps their bearings.
-- **error** — “Identities could not be loaded” — `503 iam_principals_unavailable`. Nothing was changed. Runs kept recording while this page was down — frames are written by the gateway, not by Mission Control. Actions: **Try again**, **Open an incident**; a trace id, region and timestamp line.
+- **error** — “Identities could not be loaded” — `503 iam_principals_unavailable`. Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by Mission Control. Actions: **Try again**, **Open an incident**; a trace id, region and timestamp line.
 - **access denied** — “You cannot see the identities in this workspace” — the roles the signed-in person holds on the organization do not include `agent.read on core-platform`. Copy explains an owner can grant it and that the grant is itself a governed action in the audit record. Actions: **Request access** (opens the request-access dialog), **Back to Fleet**. Below: *Signed in as* (name · role), *Needed* (the permission), *Decided by* (`pol_v41` · deny wins over every allow).
 
 ## Mobile
 
-Top bar collapses to hamburger · current crumb · search glyph · notifications · avatar. A fixed five-slot thumb bar replaces the sidebar: **Fleet** (count = approvals waiting), **Agents**, **Tools**, **Spend**, **More** (count = open critical incidents). **More** is a bottom sheet listing Steering, Skills, Organization, Billing, Audit, Search, Notifications, Account, Switch organization, Switch workspace. The hamburger opens the full sidebar as a drawer over a scrim. Every dialog rises from the bottom edge as a sheet with a drag handle and full-width footer buttons; every list table becomes a stack of cards, each cell labelled with its column header; touch targets are ≥ 44 px; inputs are 16 px; nothing scrolls sideways.
+Top bar collapses to hamburger · current crumb · search glyph · notifications · avatar. A fixed five-slot thumb bar replaces the sidebar: **Fleet** (count = approvals waiting), **Agents**, **Tools**, **Spend**, **More** (count = open critical incidents). **More** is a bottom sheet listing Steering (with Skills inside it), Organization, Billing, Audit, Search, Notifications, Account, Switch organization, Switch workspace. The hamburger opens the full sidebar as a drawer over a scrim. Every dialog rises from the bottom edge as a sheet with a drag handle and full-width footer buttons; every list table becomes a stack of cards, each cell labelled with its column header; touch targets are ≥ 44 px; inputs are 16 px; nothing scrolls sideways.
 
 ## Permissions
 
