@@ -239,6 +239,22 @@ for (const f of D.witness?.features || []) ITEMS.push({ ...f, kind: "witness", a
 for (const f of D.dod?.features || []) ITEMS.push({ ...f, kind: "dod", area: "dod", spec_path: f.spec_ref || "docs/dod-spec.md", priority: f.priority || "P1" });
 const byId = Object.fromEntries(ITEMS.map(i => [i.id, i]));
 const DECISIONS = (D.decisions || []).map(d => ({ ...d }));
+// roadmap/refresh.json: what tools/refresh-roadmap.mjs proved from GitHub since data.json was written.
+// It layers between data.json and the shared store: a person's override still wins.
+const RF = { items: {}, decisions: {}, decisions_added: {}, issues: {}, milestones: {}, generated_at: null };
+const REFRESH_URLS = [`https://raw.githubusercontent.com/${D.repos?.owner || "macanderson"}/${D.repos?.roadmap || "roadmap"}/main/roadmap/refresh.json`, "roadmap/refresh.json"];
+async function loadRefresh() {
+  for (const u of REFRESH_URLS) {
+    try {
+      const r = await fetch(u, { cache: "no-cache" }); if (!r.ok) continue;
+      const x = await r.json(); if (!x?.items || (RF.generated_at && x.generated_at <= RF.generated_at)) return false;
+      Object.assign(RF, x);
+      for (const d of Object.values(RF.decisions_added || {})) { const i = DECISIONS.findIndex(y => y.id === d.id); if (i < 0) DECISIONS.push({ ...d }); else DECISIONS[i] = { ...d }; }
+      return true;
+    } catch {}
+  }
+  return false;
+}
 const CATALOG = D.catalog || { pages: [], scenarios: [] };
 const ANN = D.issue_annotations || {};   // "repo#number" -> triage snapshot
 
@@ -255,10 +271,11 @@ const S = {
   arg: null,
   ui: lsGet("rm.ui", { filters: {} }),
 };
-const itemState = (it) => ({ ...it, ...(S.overrides[it.id] || {}) });
+const rfItem = (it) => { const r = RF.items[it.id]; return r?.built_status ? { built_status: r.built_status } : {}; };
+const itemState = (it) => ({ ...it, ...rfItem(it), ...(S.overrides[it.id] || {}) });
 const statusOf = it => itemState(it).built_status || "not-started";
 const prioOf = it => itemState(it).priority || "P2";
-const decState = d => ({ ...d, ...(S.decided[d.id] || {}) });
+const decState = d => ({ ...d, ...(RF.decisions[d.id] || {}), ...(S.decided[d.id] || {}) });
 const issueKey = (repo, n) => `${repo}#${n}`;
 const liveIssue = (repo, n) => (S.issues[repo]?.items || []).find(i => i.number === n);
 // S.ghMode: "mcp" (the viewer's GitHub connector in claude.ai), "rest" (GitHub's public API, read only), or null.
@@ -310,10 +327,10 @@ function itemCard(it) {
   </div>`;
 }
 function issueChip(repo, n) {
-  const live = liveIssue(repo, n);
-  const st = live ? (live.state === "OPEN" ? "open" : "closed") : (S.ghMode ? "loaded?" : "snapshot");
-  const title = live?.title || ANN[issueKey(repo, n)]?.title || "";
-  return `<a class="chip ${live ? (live.state === "OPEN" ? "open" : "decided") : ""}" href="https://github.com/${ORG}/${repo}/issues/${n}" target="_blank" rel="noopener" title="${esc(title)}">${esc(repo)}#${n} · ${st}</a>`;
+  const live = liveIssue(repo, n), rf = RF.issues[issueKey(repo, n)];
+  const st = live ? (live.state === "OPEN" ? "open" : "closed") : rf ? rf.state : (S.ghMode ? "loaded?" : "snapshot");
+  const title = live?.title || rf?.title || ANN[issueKey(repo, n)]?.title || "";
+  return `<a class="chip ${live ? (live.state === "OPEN" ? "open" : "decided") : rf ? (rf.state === "open" ? "open" : "decided") : ""}" href="https://github.com/${ORG}/${repo}/issues/${n}" target="_blank" rel="noopener" title="${esc(title)}">${esc(repo)}#${n} · ${st}</a>`;
 }
 function ghLabelChips(labels) { return (labels || []).slice(0, 5).map(l => chip(typeof l === "string" ? l : l.name, "lbl")).join(""); }
 
@@ -343,11 +360,11 @@ const PAGES = {
       </div>
       <div class="section" style="margin-top:0;border-top:0;padding-top:0"><h2>Build progress</h2>
         <div class="bar" style="height:10px;margin-bottom:8px"><i class="b" style="width:${100*built/surf.length}%"></i><i class="p" style="width:${100*(partial+fix)/surf.length}%"></i></div>
-        <div class="small muted">Double border is built. Dashed is partial or on fixtures. Single is not started. State by shape, never by colour alone.</div></div>
+        <div class="small muted">Double border is built. Dashed is partial or on fixtures. Single is not started. State by shape, never by colour alone. ${esc(refreshedLine())}</div></div>
       <div class="section"><h2>Milestones</h2><div class="card" style="gap:0">${ms.map(m => {
         const its = (m.surfaces || []).map(id => byId[id]).filter(Boolean);
         const b = its.filter(i => statusOf(i) === "built").length, p = its.filter(i => ["partial","fixtures-only"].includes(statusOf(i))).length;
-        return `<div class="milestone"><div class="id">${esc(m.id)}</div><div><div style="font-weight:600">${esc(m.title)}</div><div class="small muted">${its.length} surfaces · ${esc(m.weeks || "")}${m.summary ? " · " + esc(m.summary) : ""}</div></div><div class="m3"><div class="bar"><i class="b" style="width:${its.length ? 100*b/its.length : 0}%"></i><i class="p" style="width:${its.length ? 100*p/its.length : 0}%"></i></div><div class="small mono muted" style="margin-top:4px">${b} built · ${p} partial · ${its.length - b - p} to go</div></div></div>`;
+        return `<div class="milestone"><div class="id">${esc(m.id)}</div><div><div style="font-weight:600">${esc(m.title)}</div><div class="small muted">${its.length} surfaces · ${esc(m.weeks || "")}${m.summary ? " · " + esc(m.summary) : ""}</div>${RF.milestones[m.id] ? `<div class="small mono muted" style="margin-top:4px">${RF.milestones[m.id].open_issues} open issues linked or cited · ${RF.milestones[m.id].merged_prs} merges since ${fmtDate(RF.baseline)}${RF.milestones[m.id].last_merge ? ` · last <a href="https://github.com/${ORG}/${esc(RF.milestones[m.id].last_merge.repo)}/pull/${RF.milestones[m.id].last_merge.number}" target="_blank" rel="noopener">#${RF.milestones[m.id].last_merge.number}</a> ${fmtDate(RF.milestones[m.id].last_merge.merged_at)}` : ""}</div>` : ""}</div><div class="m3"><div class="bar"><i class="b" style="width:${its.length ? 100*b/its.length : 0}%"></i><i class="p" style="width:${its.length ? 100*p/its.length : 0}%"></i></div><div class="small mono muted" style="margin-top:4px">${b} built · ${p} partial · ${its.length - b - p} to go</div></div></div>`;
       }).join("") || '<div class="empty">No milestones in the data.</div>'}</div></div>
       <div class="section"><h2>Next up</h2><div class="grid">${next.map(itemCard).join("") || '<div class="empty">Nothing is queued. Every P0 and P1 surface is built.</div>'}</div></div>
       <div class="section"><h2>Decisions blocking work</h2><div class="grid">${openDec.slice(0, 6).map(decisionCard).join("") || '<div class="empty">No open decisions.</div>'}</div></div>
@@ -481,7 +498,7 @@ function decisionCard(d) {
     <div class="decision-q">${esc(d.question)}</div>
     ${d.recommendation ? `<div class="note small"><b>Recommendation.</b> ${esc(d.recommendation)}</div>` : ""}
     ${s.status === "decided" ? `<div class="note small" style="border-left-color:var(--st-allowed)"><b>Decided${s.decided_on ? " " + esc(s.decided_on) : ""}.</b> ${esc(s.decided || "")}</div>` : ""}
-    <div class="chips">${chip(s.status || "open", s.status || "open")}${(d.blocks || []).map(b => chip("blocks " + b)).join("")}${d.source ? chip(d.source) : ""}</div>
+    <div class="chips">${chip(s.status || "open", s.status || "open")}${(d.blocks || []).map(b => chip("blocks " + b)).join("")}${d.source ? chip(d.source) : ""}${d.origin ? chip("from " + (d.origin === "adr" ? "an ADR" : "a needs:decision issue")) : ""}${d.html_url ? `<a class="chip" href="${esc(d.html_url)}" target="_blank" rel="noopener">open ↗</a>` : ""}</div>
     <div class="row" style="display:flex;gap:6px;flex-wrap:wrap">
       ${s.status !== "decided" ? `<button class="btn sm" data-decide="${esc(d.id)}">Decide</button>` : `<button class="btn sm ghost" data-reopen="${esc(d.id)}">Reopen</button>`}
       <button class="btn sm ghost" data-ask="Argue both sides of decision ${esc(d.id)} (${esc(d.title)}): ${esc(d.question)} Then recommend one option and say what it unblocks.">Argue both sides</button>
@@ -501,6 +518,7 @@ function itemDetail(it) {
       ${(it.gaps || []).length ? `<div><h3 style="margin-bottom:6px">What the mockup shows that the build does not</h3><ul class="list">${it.gaps.map(g => `<li>${esc(g)}</li>`).join("")}</ul></div>` : ""}
       ${(it.backend_gaps || []).length ? `<div><h3 style="margin-bottom:6px">Backend gaps</h3><ul class="list">${it.backend_gaps.map(g => `<li>${esc(g)}</li>`).join("")}</ul></div>` : ""}
       ${(it.built_evidence || it.evidence || []).length ? `<div><h3 style="margin-bottom:6px">Evidence in the build</h3><ul class="list mono small">${(it.built_evidence || it.evidence).map(e => `<li><a href="https://github.com/${ORG}/${it.kind === "surface" || it.kind === "dod" ? "oxagen" : "oxagen"}/blob/main/${esc(e)}" target="_blank" rel="noopener">${esc(e)}</a></li>`).join("")}</ul></div>` : ""}
+      ${refreshBlock(it)}
       ${s.decision_needed ? `<div class="note"><b>Needs a decision.</b> ${esc(s.decision_needed)}</div>` : ""}
       <div class="row"><label class="f">Status <select class="field" data-ov="built_status" data-id="${esc(it.id)}">${["not-started","fixtures-only","partial","built"].map(x => `<option value="${x}" ${statusOf(it) === x ? "selected" : ""}>${x.replace("-"," ")}</option>`).join("")}</select></label>
         <label class="f">Priority <select class="field" data-ov="priority" data-id="${esc(it.id)}">${["P0","P1","P2","P3"].map(x => `<option ${prioOf(it) === x ? "selected" : ""}>${x}</option>`).join("")}</select></label>
@@ -510,6 +528,15 @@ function itemDetail(it) {
       <div class="row"><button class="btn gold" data-ask="Write a definition of done for the roadmap item '${esc(it.title)}' as a checklist of verifiable checks, then a build plan in three steps. Use get_item('${esc(it.id)}') first.">Ask Claude for a plan</button><button class="btn ghost" data-ask="Draft a GitHub issue for the roadmap item '${esc(it.title)}' (use get_item('${esc(it.id)}')) as a handoff: problem, spec paths, wireframe route, gaps as a checklist, done looks like, pillar. Then call create_issue so I can confirm it.">Ask Claude to draft the issue</button></div>
     </div>`;
 }
+function refreshBlock(it) {
+  const r = RF.items[it.id]; if (!r) return "";
+  const prs = r.merged_prs || [];
+  return `${r.reason && !S.overrides[it.id]?.built_status ? `<div class="note small"><b>Moved to ${esc(r.built_status)} from GitHub.</b> ${esc(r.reason)}</div>` : ""}
+    ${r.ready_for_review ? `<div class="note small"><b>Ready for review.</b> ${esc(r.ready_for_review)}. Set the status above if it is built.</div>` : ""}
+    ${prs.length ? `<div><h3 style="margin-bottom:6px">Merged since the roadmap was written</h3><ul class="list small">${prs.map(p => `<li><a href="https://github.com/${ORG}/${esc(p.repo)}/pull/${p.number}" target="_blank" rel="noopener">${esc(p.repo)}#${p.number}</a> ${esc(p.title)} <span class="muted">· ${fmtDate(p.merged_at)}${p.closes?.length ? " · closes " + p.closes.map(n => "#" + n).join(", ") : ""}${p.touched?.length ? " · " + p.touched.length + " evidence path" + (p.touched.length > 1 ? "s" : "") : ""}</span></li>`).join("")}</ul></div>` : ""}`;
+}
+function refreshedLine() { return RF.generated_at ? `Refreshed from GitHub ${agoMin(RF.generated_at)}.` : ""; }
+const agoMin = s => { const m = Math.round((Date.now() - new Date(s)) / 6e4); return m < 1 ? "just now" : m < 60 ? m + " min ago" : m < 1440 ? Math.round(m / 60) + " h ago" : ago(s); };
 function activityList() {
   if (!S.caps.db && !S.web?.store) return `<div class="empty">Shared activity appears here when the page is served with its store.</div>`;
   if (!S.activity.length) return `<div class="empty">No activity yet. Change a status, decide something, or link an issue.</div>`;
@@ -821,17 +848,17 @@ function renderChat() {
 function overview() {
   const surf = ITEMS.filter(i => i.kind === "surface");
   return {
-    generated_at: D.generated_at, repos: REPOS.map(r => `${ORG}/${r}`),
+    generated_at: D.generated_at, refreshed_at: RF.generated_at, repos: REPOS.map(r => `${ORG}/${r}`),
     counts: { built: surf.filter(i => statusOf(i) === "built").length, partial: surf.filter(i => ["partial","fixtures-only"].includes(statusOf(i))).length, not_started: surf.filter(i => statusOf(i) === "not-started").length, open_decisions: DECISIONS.filter(d => decState(d).status !== "decided").length, live_open_issues: Object.fromEntries(Object.entries(S.issues).map(([r, x]) => [r, x.total ?? x.items?.length])) },
     items: ITEMS.map(i => ({ id: i.id, kind: i.kind, title: i.title, status: statusOf(i), priority: prioOf(i), scope: i.scope_verdict, lane: i.plan_lane, decision_needed: !!itemState(i).decision_needed })),
     decisions: DECISIONS.map(d => ({ id: d.id, title: d.title, status: decState(d).status || "open", blocks: d.blocks })),
-    milestones: (D.milestones || []).map(m => ({ id: m.id, title: m.title, surfaces: m.surfaces })),
+    milestones: (D.milestones || []).map(m => ({ id: m.id, title: m.title, surfaces: m.surfaces, progress: RF.milestones[m.id] || null })),
   };
 }
 const TOOLS = () => [
   { name: "get_roadmap_overview", description: "Returns the whole roadmap in compact form: counts, every item with id, kind, status and priority, every decision with status, the milestones, and live open-issue counts. Call it first when a question needs the big picture.", execute: () => overview() },
   { name: "get_item", description: "Returns one roadmap item in full (gap summary, gaps, backend gaps, spec path, wireframe route, evidence, shared notes, linked issues with live state). Input: {id}.", inputSchema: { type: "object", properties: { id: { type: "string" } }, required: ["id"] },
-    execute: ({ id }) => { const it = byId[String(id)]; if (!it) throw new Error("No item with id " + id + ". Ids come from get_roadmap_overview."); const s = itemState(it); return { ...s, linked_issues: linksOf(it).map(l => ({ ...l, live: liveIssue(l.repo, l.number) ? { title: liveIssue(l.repo, l.number).title, state: liveIssue(l.repo, l.number).state } : null })) }; } },
+    execute: ({ id }) => { const it = byId[String(id)]; if (!it) throw new Error("No item with id " + id + ". Ids come from get_roadmap_overview."); const s = itemState(it); return { ...s, from_github: RF.items[it.id] || null, linked_issues: linksOf(it).map(l => ({ ...l, live: liveIssue(l.repo, l.number) ? { title: liveIssue(l.repo, l.number).title, state: liveIssue(l.repo, l.number).state } : null })) }; } },
   { name: "update_item", description: "Changes a roadmap item's shared status, priority, owner or note (any subset). Status is one of not-started, fixtures-only, partial, built; priority P0..P3. Returns ok. Use only when the viewer asked for a change.", inputSchema: { type: "object", properties: { id: { type: "string" }, status: { type: "string" }, priority: { type: "string" }, owner: { type: "string" }, note: { type: "string" } }, required: ["id"] },
     execute: async ({ id, status, priority, owner, note }) => { const it = byId[String(id)]; if (!it) throw new Error("No item " + id); const patch = {}; if (status) patch.built_status = String(status); if (priority) patch.priority = String(priority); if (owner != null) patch.owner = String(owner); if (note != null) patch.note = String(note); await writeOverride(it.id, patch, "updated by Claude: " + Object.keys(patch).join(", ")); render(); return { ok: true, item: itemState(it) }; } },
   { name: "record_decision", description: "Records the outcome of a decision by id (from get_roadmap_overview) and marks it decided. Input: {id, decision}. Use only when the viewer asked to record it.", inputSchema: { type: "object", properties: { id: { type: "string" }, decision: { type: "string" } }, required: ["id","decision"] },
@@ -970,6 +997,8 @@ async function boot() {
     }
   }
   startGitHub();
+  if (await loadRefresh()) render();
+  setInterval(async () => { if (!document.hidden && await loadRefresh()) render(); }, 300000);
   render();
 }
 boot();
