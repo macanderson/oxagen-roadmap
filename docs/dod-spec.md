@@ -8,7 +8,7 @@
 | **Source** | `macanderson/oxagen` as of 2026-09-14: the run ledger, the capability registry, governed-action metering and the Stella engine client as they exist there |
 | **Builds on** | ADR-041 (one canonical JSON rule), ADR-043 (Oxagen governs, it does not run), ADR-052 (the governed action is the billable unit), ADR-049 (the repository's `dod` GitHub check) |
 | **Related** | `mission-control-spec.md` §8.6 and §12.1; `scope-review.md` |
-| **Amended 2026-09-18** | By the steering, graph and gateway review, approved by the maintainer on 2026-09-18 (`reviews/2026-09-18-steering-graph-gateway-review.md`). The `tools` and `budget` checks now say what tier they run at: delivered by a hook, client-attested and fail-open, with a budget that is counted and not enforced. The replay paragraph names the launcher it waits for. See "What the tier ladder means for a dod". |
+| **Amended 2026-09-18** | By the steering, graph and gateway review, approved by the maintainer on 2026-09-18 (`reviews/2026-09-18-steering-graph-gateway-review.md`). The `tools` and `budget` checks now say what tier they run at: delivered by a hook on a tier that is client-attested and fail-open against the person at the keyboard, with a budget that is counted and not enforced. The replay paragraph names the launcher it waits for. See "What the tier ladder means for a dod". |
 
 DoD is a working name.
 
@@ -76,7 +76,7 @@ checks:
 | `run` | The command exits 0 inside the timeout, with credentials scrubbed from the environment. | sha256 of stdout and stderr |
 | `file` | The path exists, contains the string, or matches the digest. | sha256 of the file bytes |
 | `diff` | Every changed or new file matches an allow glob and no deny glob. | sha256 of the diff manifest |
-| `tools` | No tool call matched a deny pattern. Refused live by the `PreToolUse` hook, not after the fact. The hook is client-attested and fail-open (the `harness` tier), so this is a refusal the machine's owner can step around, and the evidence is the tool log the harness submitted. | sha256 of the tool log |
+| `tools` | No tool call matched a deny pattern. Refused live by the `PreToolUse` hook, not after the fact. The hook process fails closed against its cached bundle. The `harness` tier it runs on is client-attested and fail-open against the person at the keyboard, so this is a refusal the machine's owner can step around, and the evidence is the tool log the harness submitted. | sha256 of the tool log |
 | `budget` | Cost, tool calls, and minutes stay under the limits. `stop_attempts` caps how many times the Stop hook may block. The check decides after the fact from the counters. Nothing stops a run at the limit today: no budget is enforced on a wrapped run until the gateway of Phase 4, and cost is the harness's own number (Claude Code reports it; Codex and Stella report none, so a `usd` limit on those runs cannot be decided and the check says so). | the usage counters, with their basis: `self-reported` until Phase 4, `observed` after |
 | `human` | A named person signs it after the run. It never blocks the agent; it withholds the certificate. | the signature |
 
@@ -585,8 +585,8 @@ The enforcement tier is one of four words, computed from what was actually route
 
 | Tier | What the `tools` and `budget` checks can honestly say | Status at 2026-09-18 |
 |---|---|---|
-| `harness` | Delivered and recorded. The deny pattern was refused by a hook that is client-attested and fail-open. The budget was counted from self-reported numbers | Every wrapped run today |
-| `gateway` | Metering is observed and the budget is enforced, for model and MCP traffic routed through Oxagen | Phase 4 |
+| `harness` | Delivered and recorded. The deny pattern was refused by a hook on a tier that is client-attested and fail-open against the person at the keyboard. The budget was counted from self-reported numbers | Every wrapped run today |
+| `gateway` | Metering is observed and the budget is enforced, for model and MCP traffic routed through Oxagen | Phase 4, in build (oxagen issue #3299, ADR-094) |
 | `contained` | Enforced. The agent had no egress except the gateway | Phase 5 |
 
 The locked set's text is also steering: a dod's deny patterns are gates, and each emits a one-line gate notice through the assembler so the agent does not walk into the denial (`mission-control-spec.md` §10.5).
