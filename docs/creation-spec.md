@@ -39,8 +39,11 @@ reviews it, and the wizard says so on every drafting step.
 |---|---|---|
 | Agent IAM | **New agent** | `wzOpen("agent")` |
 | Tools | **New tool** | `wzOpen("tool")` |
-| Skills | **Add a skill** | `wzOpen("skill")` |
-| Steering | **Write a context record** | `wzOpen("record")` |
+| Steering · Skills | **Add a skill** | `wzOpen("skill")` |
+| Steering (every other tab) | **Write a context record** | `wzOpen("record")` |
+
+Skills is a tab of Steering, not a page of its own. Steering is the hub for everything that steers
+an agent: Records, Skills, Memory, Ontology, Policy, Proposals, Preview (`mockups/pages/steering.md`).
 
 **New agent** is not **Register an agent**. Register wraps an agent that already runs on a machine
 or in CI; New agent writes one that does not exist yet. Both end on a pull request; they start from
@@ -112,6 +115,12 @@ Three ways in, one way out.
 catalog row's **Edit** and from the skill dialog, ending on the same kind of pull request with the
 patch version bumped.
 
+**Where it ends.** The pull request is listed on Repositories · Changes with kind `skill`. After the
+merge the skill is in the catalog on Steering · Skills, and **sync** materializes its files into
+each enrolled checkout. The Delivered by sync panel shows each repository’s state. The harness loads
+the file by its own progressive disclosure. Only the description line competes in the assembler, and
+Steering · Preview shows it competing.
+
 ## 5. A context record
 
 The kind is not a label. It decides how the statement is delivered, what the checks assert about it,
@@ -134,6 +143,13 @@ the sentence, and it shows what each kind can never do.
 
 **Reading and changing one** is `pages/record.md`: the statement as the headline, a per-kind panel,
 and the statement in the same editor.
+
+**Where it ends.** The wizard closes on Steering · Proposals, on the Context PRs view
+(`#/:org/:ws/steering/proposals/prs`), with the new pull request selected. After the merge the record
+is on Steering · Records with its force, scope, token cost, and compilation chip: “compiles to text”,
+or “compiles to text and a gate” when it carries an enforcement grant. A record written in the wizard
+carries no grant. Steering · Preview shows where the record lands for an agent and a prompt: the
+stable prefix for `must` and `should`, the volatile selection for `may` and `info`.
 
 ## 6. What this feature must never do
 
