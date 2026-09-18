@@ -5919,6 +5919,15 @@ var PR_STATE={
 function repoMeta(r){
   return [r.lang,r.visibility,r.pushed?"pushed "+r.pushed:null].filter(function(x){return x;}).join(" · ");
 }
+/* Drift per workspace, and the reconciliation pull request each one's drift produced. Keyed by
+   slug rather than held as one list, because drift is a fact about one workspace's file against
+   its own live state and belongs to nobody else. */
+var DRIFT={
+ "core-platform":[["[servers.linear]","absent","present since 2026-09-14","the file"],
+                  ["budget.monthly_usd","400","600","the file"],
+                  ["[[repos]] a-intel/mobile","role = linked","linked, no .oxagen/","neither"]]
+};
+var DRIFT_PR={"core-platform":"oxpr_01K6T4E5"};
 function oxState(r){return OX_STATE[r.ox||"governed"]||OX_STATE.governed;}
 /* The repositories this workspace's own record names, main first, then linked, then whatever
    the installation can reach that nobody has bound. Role is the workspace's word, not GitHub's. */
@@ -5978,7 +5987,7 @@ function repoTab(){
    '<div class="grow"><b>A run on '+h(unbound.map(function(r){return r.n;}).join(", "))+' is steered by the main repo and by nothing of its own.</b> '+
    'Repository-scoped records live in that repository, so until it has a <span class="mono">.oxagen/</span> tree there is nowhere to put one — '+
    'and a record that tried would have to claim workspace scope, which the checks refuse.</div>'+
-   '<button class="btn" onclick="wzOpen(\'init\')">Add Oxagen</button></div>':'';
+   '<button class="btn" onclick="wzOpen(\'init\',\''+h(unbound[0].n)+'\')">Add Oxagen</button></div>':'';
 
   var trows=rows.map(function(r){
     var st=oxState(r), avail=r.role==="available";
@@ -5992,7 +6001,7 @@ function repoTab(){
      '<td class="num">'+(avail?'<span class="dim">—</span>':r.symbols.toLocaleString())+'</td>'+
      '<td>'+(st===OX_STATE.governed
         ?'<span class="dim" style="font-size:11.5px">nothing waiting</span>'
-        :'<button class="btn sm" onclick="event.stopPropagation();wzOpen(\'init\')">Add Oxagen</button>')+'</td></tr>';}).join("");
+        :'<button class="btn sm" onclick="event.stopPropagation();wzOpen(\'init\',\''+h(r.n)+'\')">Add Oxagen</button>')+'</td></tr>';}).join("");
 
   return banner+
    '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Repositories</h3>'+
@@ -6019,7 +6028,13 @@ function repoTab(){
 /* ---- tab 2: the working copies ---- */
 function copyTab(){
   var w=ws(), rows=wsCopies();
-  if(!rows.length) return '<div class="panel"><div class="panel-b dim">No directory on anybody’s disk is linked to this workspace yet.</div></div>';
+  /* The header gives up its gold on this tab, so an empty list that omitted Connect would leave
+     the screen with no primary action and no way to link its first directory — which is the one
+     thing this tab exists to do. */
+  if(!rows.length) return '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Working copies</h3>'+
+   '<p class="muted" style="margin:2px 0 0;font-size:12px">No directory on anybody’s disk is linked to '+h(w.name)+' yet.</p></div>'+
+   '<div class="sp"><button class="btn primary" onclick="openDialog(\'linkdir\')">Connect a directory</button></div></div>'+
+   '<div class="panel-b"><div class="note">A directory is linked by running <span class="mono">oxagen init</span> in it. Nothing here is linked by a person typing a path: the browser cannot see a filesystem, and a path typed into a form proves nothing about what is at it.</div></div></div>';
   var stale=rows.filter(function(c){return c.oxagen!=="in-sync";});
   var trows=rows.map(function(c){
     var st=WC_STATE[c.oxagen]||WC_STATE.unbound;
@@ -6145,9 +6160,12 @@ function cfgTab(){
      its own main instead. */
   var repo=repoByName(w.main)||{n:w.main,role:"main",branch:w.branch,head:w.head||null,
     issues:"enabled",ox:"governed",oxCommit:w.head||null,oxFiles:0,lang:"",visibility:"private",pushed:""};
-  var drift=[["[servers.linear]","absent","present since 2026-09-14","the file"],
-             ["budget.monthly_usd","400","600","the file"],
-             ["[[repos]] a-intel/mobile","role = linked","linked, no .oxagen/","neither"]];
+  /* Drift is a fact about one workspace's file against one workspace's live state. These rows are
+     core-platform's — its Linear server, its budget, its unbound linked repo — so rendering them
+     under another workspace would report drift that workspace does not have, and send the
+     operator to a reconciliation pull request that is not its own. A workspace with nothing
+     recorded says so. */
+  var drift=DRIFT[w.slug]||[], reconcile=DRIFT_PR[w.slug]||null;
   return '<div class="grid g2">'+
    '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>.oxagen/workspace.toml</h3>'+
    '<p class="muted" style="margin:2px 0 0;font-size:12px">On <span class="mono">'+h(w.main)+'</span>'+
@@ -6155,13 +6173,16 @@ function cfgTab(){
    '<div class="panel-b"><pre>'+h(oxWorkspaceToml(w,repo,"team","main"))+'</pre></div></div>'+
    '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Drift</h3>'+
    '<p class="muted" style="margin:2px 0 0;font-size:12px">The file against what the control plane has. Reported, never repaired in place.</p></div>'+
-   '<div class="sp"><button class="btn sm" onclick="S.tab.repositories=\'changes\';S.oxprSel=\'oxpr_01K6T4E5\';render()">See the pull request</button></div></div>'+
-   '<div class="tw"><table class="narrow"><thead><tr><th>Declared</th><th>In the file</th><th>Live</th><th>Right</th></tr></thead><tbody>'+
-   drift.map(function(d){return '<tr><td class="mono" style="font-size:11.5px">'+h(d[0])+'</td>'+
-     '<td class="muted" style="font-size:12px">'+h(d[1])+'</td><td class="muted" style="font-size:12px">'+h(d[2])+'</td>'+
-     '<td>'+(d[3]==="the file"?'<span class="b b-q">the file</span>':'<span class="b b-approval">a person decides</span>')+'</td></tr>';}).join("")+
-   '</tbody></table></div>'+
-   '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">Two of these the reconciler can argue for, because it read both sides. The third it cannot: a repository with no <span class="mono">.oxagen/</span> is a decision about scope, not a difference between two records, so it waits for a person.</div></div></div></div>'+
+   (reconcile?'<div class="sp"><button class="btn sm" onclick="go(\'#/'+ORG.slug+'/'+h(w.slug)+'/repositories/changes\');S.oxprSel=\''+h(reconcile)+'\';render()">See the pull request</button></div>':'')+'</div>'+
+   (drift.length
+     ?'<div class="tw"><table class="narrow"><thead><tr><th>Declared</th><th>In the file</th><th>Live</th><th>Right</th></tr></thead><tbody>'+
+      drift.map(function(d){return '<tr><td class="mono" style="font-size:11.5px">'+h(d[0])+'</td>'+
+        '<td class="muted" style="font-size:12px">'+h(d[1])+'</td><td class="muted" style="font-size:12px">'+h(d[2])+'</td>'+
+        '<td>'+(d[3]==="the file"?'<span class="b b-q">the file</span>':'<span class="b b-approval">a person decides</span>')+'</td></tr>';}).join("")+
+      '</tbody></table></div>'+
+      '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">Two of these the reconciler can argue for, because it read both sides. The third it cannot: a repository with no <span class="mono">.oxagen/</span> is a decision about scope, not a difference between two records, so it waits for a person.</div></div>'
+     :'<div class="panel-b"><div class="note">The reconciler last read <span class="mono">'+h(w.main)+'</span> against the control plane and found nothing between them. Drift is reported here, never repaired in place — so an empty table is the reconciler saying the file and the live state agree, not that nobody looked.</div></div>')+
+   '</div></div>'+
    '<div class="grid g2" style="margin-top:14px">'+
    '<div class="panel"><div class="panel-h"><h3>.oxagen/rules/governance.toml</h3></div><div class="panel-b">'+
    '<pre>'+h(oxGovernanceToml("team"))+'</pre>'+
@@ -10984,7 +11005,11 @@ function wzNew(kind){
     /* record */ rkind:null, force:"should", ce:"forbid", scope:"workspace",
     /* init */ repoName:null, role:"linked", branch:null, mode:"team"};
 }
-function wzOpen(kind){ S.wz=wzNew(kind); S.dlg="wz"; S.dlgArg=null; S.layer=null; render(); }
+/* `seed` is what the operator was looking at when they asked. Without it, a row's own action
+   opens a wizard on whatever the candidate list happens to put first, so clicking Add Oxagen on
+   one repository can present another — and the wizard's whole first step is that choice. */
+function wzOpen(kind,seed){ S.wz=wzNew(kind); if(seed&&kind==="init")S.wz.repoName=seed;
+  S.dlg="wz"; S.dlgArg=null; S.layer=null; render(); }
 function wzSet(k,v){ if(S.wz)S.wz[k]=v; }
 function wzSetR(k,v){ if(!S.wz)return; S.wz[k]=v; render(); }
 function wzGo(n){ if(!S.wz)return; S.wz.step=n; S.ced=null; render(); }
@@ -11149,7 +11174,7 @@ DLG_EXT.repo=function(){
    f:'<span class="grow mono dim" style="font-size:11px">'+h(r.n)+'</span>'+
      '<button class="btn" onclick="closeDialog()">Close</button>'+
      (gov?'<button class="btn" onclick="closeDialog();S.tab.repositories=\'changes\';go(\'#/'+ORG.slug+'/'+w.slug+'/repositories/changes\')">See its changes</button>'
-      :'<button class="btn primary" onclick="closeDialog();wzOpen(\'init\')">Add Oxagen</button>')};
+      :'<button class="btn primary" onclick="closeDialog();wzOpen(\'init\',\''+h(r.n)+'\')">Add Oxagen</button>')};
 };
 
 /* ============================== adding Oxagen to a repository ==============================
@@ -11172,7 +11197,7 @@ function wzInitCandidates(){
   return REPOS.filter(function(r){return (r.ox||"governed")==="unbound";}).map(function(r){return r.n;});
 }
 function wzInitFiles(){
-  var r=wzInitRepo(), w=ws(), main=r.n===w.main;
+  var r=wzInitRepo(), main=(S.wz.role||"linked")==="main";
   return [["add",".oxagen/workspace.toml", main?"the workspace, its repos, servers and budgets":"the linked-repo declaration"],
    ["add",".oxagen/rules/governance.toml","mode = "+(S.wz.mode||"team")],
    ["add",".oxagen/rules/.gitkeep","published records land here"],
