@@ -15,3 +15,5 @@ site/.generated/
 site/public/mock/
 site/next-env.d.ts
 site/tsconfig.tsbuildinfo
+.vercel
+.env*

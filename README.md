@@ -1,8 +1,15 @@
-# Oxagen Mission Control: the mockups and the documents
+# Oxagen product roadmap
 
-One master mockup, one documents page, and the sources both are built from.
+One place to see what Oxagen is building next, exactly how it will look, and what is still undecided.
+
+- **The roadmap app** (`index.html`, built from `roadmap/`): the gaps between the Mission Control mockups and the build, the witness and definition-of-done features, the open decisions, and the GitHub issues, live. Published as a claude.ai artifact where Claude is bound to the page, and served by GitHub Pages at https://macanderson.github.io/roadmap/ as a read-only fallback.
+- **The mockups** (`mockups/`): the master mockup, every page in every state, desktop and mobile, and the guided scenarios. The roadmap frames them, so a card leads to its wireframe in one click.
+- **The documents** (`docs/`): the Mission Control spec, the DoD spec, the witness spec, the desktop spec, the plan, the scope review, and the reviews.
 
 ```
+index.html                    the roadmap app, ONE file: built from roadmap/app.html + roadmap/data.json (edit those, never this)
+roadmap/app.html              the app: the pages, the Claude drawer, the GitHub wiring, the shared store
+roadmap/data.json             the roadmap content: surfaces, witness, dod, decisions, milestones, the catalog, the issue triage snapshot
 mockups/missioncontrol.html   the master: every page, dialog, auth screen and guided scenario, self-contained, open from disk
 mockups/src/                  its sources: engine.js (the app), engine.css, shell.html
 mockups/fixtures/*.json       the demo record, one file per collection (README.md there says what each is)
@@ -16,6 +23,47 @@ tools/                        the builds and the guards
 
 The demo record is the same everywhere: Anderson Intelligence Corp. (`a-intel`), workspace
 `core-platform`, operator Marcus Bell.
+
+## The roadmap app
+
+`index.html` is built by `node tools/build-roadmap.mjs` from `roadmap/app.html` and `roadmap/data.json`;
+`--check` says whether the three agree, and `npm run check` runs it with the other guards.
+
+What the app does, and where each part lives:
+
+| Page | What it shows | Source of truth |
+|---|---|---|
+| Now | build progress by surface, the milestones, what to build next, the decisions blocking work, shared activity | `data.json` + the shared store |
+| Gaps | every mockup page and wizard with its build status, the concrete gaps, the backend gaps, the spec, the wireframe, the linked issues | `data.json` `surfaces[]`, the mockup pages' specs |
+| Witness, Done | the proof and definition-of-done features, and which ones need a decision first | `docs/witness-spec.md`, `docs/dod-spec.md` |
+| Decisions | each open question with its recommendation; decide it in place, argue it with Claude, or open it as an issue | `docs/implementation-plan.md` §6, the scope review, the feedback |
+| Issues | open issues in `macanderson/oxagen`, `macanderson/stella` and this repo, live through the viewer's GitHub connector, with the triage snapshot (theme, kind, spec backing) beside each | GitHub, `data.json` `issue_annotations` |
+| Wireframes | the master mockup framed: any page, any state, desktop or phone, any scenario | `mockups/missioncontrol.html` |
+| Specs | the documents, on GitHub and framed | `docs/missioncontrol-docs.html` |
+
+In the claude.ai artifact the page gains what a static file cannot have:
+
+- **Claude, bound to the page.** The drawer asks on the viewer's own account, Opus-class by default. It reads the roadmap through page tools (`get_roadmap_overview`, `get_item`, `list_open_issues`) and, when asked, changes it (`update_item`, `record_decision`, `link_issue`). `create_issue` only opens the confirmation dialog: nothing reaches GitHub until the viewer clicks.
+- **A shared store.** Status, priority, owner, notes, linked issues and decisions are kept per item in the artifact's database, so an edit by one person is what everyone sees, and Claude sessions can read and write the same rows.
+- **GitHub, live.** Issue lists refresh every two minutes; creating an issue from a gap or a decision uses the viewer's own GitHub credentials. Without the connector (GitHub Pages, a saved file) the page falls back to the triage snapshot and pre-filled "new issue" links.
+- **Comments.** Every card and detail has a Comment button that opens the claude.ai composer, so a thread can be sent to Claude from the page itself.
+
+### Hosted on Vercel
+
+The public home is **https://oxagen-roadmap.vercel.app** (Vercel project `oxagen-roadmap`). The same `index.html` runs there in hosted mode: it asks `/api/config` what the deployment can do and uses that instead of the claude.ai capabilities.
+
+| Piece | Hosted mode | Who can use it |
+|---|---|---|
+| Roadmap, wireframes, specs | static files from this repo | everyone |
+| GitHub issues | GitHub's public REST API, read in the browser every ten minutes; creating an issue opens GitHub's pre-filled form | everyone |
+| Shared state (status, priority, owner, notes, links, decisions, activity) | `api/state.js`, one private Vercel Blob (`roadmap/state.json`) | everyone reads; the **edit key** writes |
+| Claude | `api/ask.js`: one streamed round per call with the Anthropic SDK (Opus by default; the drawer's tier picks Sonnet or Haiku); the page runs the tool loop because the tools are page functions | the **edit key**, so a public link cannot spend the API key |
+
+Environment variables: `BLOB_READ_WRITE_TOKEN` (set by `vercel blob create-store`), `EDIT_KEY` (a random string; enter it once behind the page's **Edit key** button), and `ANTHROPIC_API_KEY` (add it to turn Claude on: `vercel env add ANTHROPIC_API_KEY production`, then redeploy). Deploy with `vercel deploy --prod`; the build step is `node tools/build-roadmap.mjs --check`, so a stale `index.html` fails the deploy.
+
+### Refreshing the content
+
+`roadmap/data.json` is the roadmap's content. It was assembled on 2026-09-17 from a page-by-page comparison of `mockups/pages/*.md` against `apps/app` in `macanderson/oxagen`, the witness and DoD specs, the plan's open decisions, and a triage of every open issue in `macanderson/oxagen` and `macanderson/stella`. To refresh it, redo that comparison (an agent session with both repos checked out does it in minutes) and write the same shape; then `node tools/build-roadmap.mjs` and republish the artifact. Overrides made in the app live in the shared store and survive a rebuild.
 
 ## The master
 
@@ -60,7 +108,7 @@ Storybook frames URLs of the master. Each page's stories are one per state, desk
 controls for the state, the shell (a 390×844 phone frame), the theme and the chrome; the page's
 `mockups/pages/<page>.md` spec is on its Docs tab. The dev server assembles the master from the
 sources on every request (`.storybook/mockup-plugin.mjs`), so an edit shows on reload. Which pages
-and states exist is `mockups/catalog.mjs`, which the stories and the checker both read.
+and states exist is `mockups/catalog.mjs`, which the stories, the checker and the roadmap app all read.
 
 ## The scenarios
 
@@ -124,7 +172,9 @@ npm run build   # build-mockup, build-stories, build-docs, build-badges
 npm run check   # the four --check runs, then check-mockup.mjs and check-creation.mjs in Chromium
 ```
 
-`tools/README.md` says what each checks and what to watch for.
+`npm run check` builds nothing and fails if any built file is stale or any page fails to render:
+the roadmap app, the master, the stories, the documents page, the badges, then the mockup, creation,
+assistant and record checks. `tools/README.md` says what each checks and what to watch for.
 
 ## Creating things
 

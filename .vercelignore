@@ -1,0 +1,12 @@
+site
+node_modules
+.storybook
+storybook-static
+mockups/stories
+mockups/src
+mockups/fixtures
+.claude
+.github
+design
+pnpm-lock.yaml
+pnpm-workspace.yaml
