@@ -132,7 +132,7 @@ main hr+h2{border-top:0;padding-top:0;margin-top:0}
 <div class="site">
 <nav class="docs" aria-label="Documents">
   <a class="wordmark" href="#spec">o<span class="x">x</span>agen</a>
-  <p>Specifications</p><ol><li><a href="#spec" data-doc="spec">Oxagen Mission Control: Product and Technical Specification</a></li><li><a href="#dod" data-doc="dod">Oxagen DoD: the definition of done for agent runs</a></li><li><a href="#witness" data-doc="witness">Oxagen Witness: outcome verification</a></li><li><a href="#desktop" data-doc="desktop">Oxagen Desktop: product specification, rev 1</a></li><li><a href="#creation" data-doc="creation">Creating things in Oxagen: agents, tools, skills and context records</a></li></ol><p>Plans and decisions</p><ol><li><a href="#plan" data-doc="plan">Oxagen Mission Control app: implementation plan</a></li><li><a href="#scope" data-doc="scope">Oxagen Mission Control: the scope review, and what it changed</a></li><li><a href="#scaleback" data-doc="scaleback">Scale back Mission Control: the mockup prompt</a></li></ol><p>The mockups</p><ol><li><a href="#prompts" data-doc="prompts">Oxagen Mission Control: mockup prompts, one per demo flow</a></li><li><a href="#consolidation" data-doc="consolidation">Consolidating W1–W11 into one design</a></li><li><a href="#feedback" data-doc="feedback">Feedback on the mockups</a></li><li><a href="#videos" data-doc="videos">Videos of the mockups, narrated</a></li><li><a href="#w13" data-doc="w13">W13: in the loop</a></li></ol>
+  <p>Specifications</p><ol><li><a href="#spec" data-doc="spec">Oxagen Mission Control: Product and Technical Specification</a></li><li><a href="#dod" data-doc="dod">Oxagen DoD: the definition of done for agent runs</a></li><li><a href="#witness" data-doc="witness">Oxagen Witness: outcome verification</a></li><li><a href="#desktop" data-doc="desktop">Oxagen Desktop: product specification, rev 1</a></li><li><a href="#creation" data-doc="creation">Creating things in Oxagen: agents, tools, skills and context records</a></li><li><a href="#portability" data-doc="portability">The Agent Portability Atlas</a></li></ol><p>Plans and decisions</p><ol><li><a href="#plan" data-doc="plan">Oxagen Mission Control app: implementation plan</a></li><li><a href="#scope" data-doc="scope">Oxagen Mission Control: the scope review, and what it changed</a></li><li><a href="#scaleback" data-doc="scaleback">Scale back Mission Control: the mockup prompt</a></li></ol><p>The mockups</p><ol><li><a href="#prompts" data-doc="prompts">Oxagen Mission Control: mockup prompts, one per demo flow</a></li><li><a href="#consolidation" data-doc="consolidation">Consolidating W1–W11 into one design</a></li><li><a href="#feedback" data-doc="feedback">Feedback on the mockups</a></li><li><a href="#videos" data-doc="videos">Videos of the mockups, narrated</a></li><li><a href="#w13" data-doc="w13">W13: in the loop</a></li></ol>
   <div class="foot">One file, every document. The markdown in <code>docs/</code> is the source; <code>tools/build-docs.py</code> writes this page.</div>
 </nav>
 <div>
@@ -7961,6 +7961,243 @@ version lands in the registry callable by nobody until a role grant puts it on a
 <footer class="colophon"><span>Oxagen · Specification</span><span>Source: <code>docs/creation-spec.md</code></span></footer>
 </main>
 </div>
+</article><article id="portability" class="doc" hidden>
+<header class="mast">
+  <p class="eyebrow">Oxagen · Specification</p>
+  <h1>The Agent Portability Atlas</h1>
+  <dl class="facts"><dt>Status</dt><dd>Research, step 1 of 3</dd><dt>Date</dt><dd>2026-09-13</dd><dt>Owner</dt><dd>Mac Anderson</dd><dt>Related</dt><dd>ADR-090 (skill resolution), ADR-043 (Oxagen governs agents, does not run them), <code>mission-control-spec.md</code> (Skills, §14, App. E)</dd><dt>Interactive version</dt><dd><a href="https://claude.ai/artifact/YYawKKCKLASpWHcegLyXpC">claude.ai/artifact/YYawKKCKLASpWHcegLyXpC</a> — same content, comparison tables and full source citations</dd></dl>
+</header>
+<div class="grid">
+<nav class="toc" aria-label="Contents of this document"><p>Contents</p><ol><li><a href="#portability/method-and-caveats">Method and caveats</a></li><li><a href="#portability/at-a-glance">At a glance</a></li><li><a href="#portability/1-agents-named-invocable-personas-with-a-system-prompt">1. Agents — named, invocable personas with a system prompt</a></li><li><a href="#portability/2-skills-packaged-invocable-procedure">2. Skills — packaged, invocable procedure</a></li><li><a href="#portability/3-memory-instructions-vs-what-the-agent-learned">3. Memory — instructions vs. what the agent learned</a></li><li><a href="#portability/cross-cutting-convergence">Cross-cutting convergence</a></li><li><a href="#portability/where-oxagen-stands-today">Where Oxagen stands today</a></li><li><a href="#portability/proposed-direction">Proposed direction</a></li><li><a href="#portability/open-questions">Open questions</a></li><li><a href="#portability/sources">Sources</a></li></ol></nav>
+<main>
+<p>A mandate's Equipment clause hands an agent &quot;the knowledge it is handed at the start of a job, the skills and tools it may use&quot; — set by engineering, enforced by Oxagen. Today that equipment is defined once, inside whichever harness happens to run the agent: a Claude Code subagent lives only in <code>.claude/agents/</code>, a skill only in the format the harness that wrote it understands. Move the workspace from Claude Code to Codex and the agent, the skill and its memory don't move with it — they were never Oxagen's to carry.</p>
+<p>The ask this atlas answers: store the <strong>raw</strong>, native form of an agent, a skill and a memory record — not Oxagen's interpretation of it — in a shape that is Anthropic's own on-disk format first, and deliver it to any other code agent, including Codex, in the shape that agent already expects. This is inventory, not design: it establishes what the three formats actually contain today so a later spec can define the canonical store and the export renderers on solid ground.</p>
+<h2 id="portability/method-and-caveats">Method and caveats</h2>
+<p>Three parallel research passes against each vendor's live documentation, run 2026-09-18. Findings below are dated to that day — all three ecosystems ship weekly, and this table will drift.</p>
+<p>Two gaps surfaced and are called out inline where they matter: Cursor's <code>environment.json</code> JSON Schema URL returned a 404 on direct fetch (documented as a pointer, not verified byte-for-byte); Cursor's official Memories doc page did not render fetchable content, so that section is synthesized from forum posts and staff replies, not a primary doc quote. Codex's <code>[agents]</code> table has two fields (<code>max_depth</code>, <code>job_max_runtime_seconds</code>) sourced only from a third-party writeup and flagged below.</p>
+<h2 id="portability/at-a-glance">At a glance</h2>
+<ul>
+<li><strong>Skills converge.</strong> <code>SKILL.md</code> + YAML frontmatter is now the shared atomic unit across all three vendors. <code>name</code> and <code>description</code> are the only fields guaranteed to round-trip everywhere.</li>
+<li><strong>Agents don't.</strong> Anthropic and Codex both define a real named agent (prompt + model + tool scope). Cursor has no such file — its one custom-persona feature was removed in 2.1.</li>
+<li><strong>Instructions converge.</strong> <code>AGENTS.md</code> is read natively by Cursor and Codex; Anthropic's own convention — used in this repo — is a <code>CLAUDE.md</code> that <code>@</code>-imports it.</li>
+<li><strong>Memory doesn't.</strong> Only Anthropic publishes a typed, file-based memory schema. Cursor's is undisclosed; Codex's is deliberately unstructured, plain-text and opt-in.</li>
+</ul>
+<h2 id="portability/1-agents-named-invocable-personas-with-a-system-prompt">1. Agents — named, invocable personas with a system prompt</h2>
+<p>A named identity with a system prompt, a model, and a tool or sandbox scope — the thing Oxagen's <code>agent.definition.*</code> capabilities already model as an in-app governed agent.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Claude Code</th>
+<th>Cursor</th>
+<th>Codex</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Primary artifact</td>
+<td><code>.claude/agents/&lt;name&gt;.md</code> — YAML frontmatter + Markdown body; or SDK <code>AgentDefinition</code> object</td>
+<td><em>None.</em> <code>.cursor/environment.json</code> configures a Cloud Agent's sandbox/VM, not a persona</td>
+<td><code>.codex/agents/&lt;name&gt;.toml</code> (project) or <code>~/.codex/agents/&lt;name&gt;.toml</code> (user) — flat TOML</td>
+</tr>
+<tr>
+<td>Required fields</td>
+<td><code>name</code>, <code>description</code></td>
+<td>n/a</td>
+<td><code>name</code>, <code>description</code>, <code>developer_instructions</code></td>
+</tr>
+<tr>
+<td>System prompt</td>
+<td>Markdown body, below the frontmatter fence</td>
+<td>n/a</td>
+<td><code>developer_instructions</code> — a TOML string field carrying the same content inline</td>
+</tr>
+<tr>
+<td>Model / effort</td>
+<td><code>model</code> (alias, full ID, or <code>inherit</code>), <code>effort</code> (low/medium/high/xhigh/max)</td>
+<td>n/a (Cloud Agents inherit the session's model)</td>
+<td><code>model</code>, <code>model_reasoning_effort</code> (low/medium/high)</td>
+</tr>
+<tr>
+<td>Tool scope</td>
+<td><code>tools</code> allow-list, <code>disallowedTools</code> deny-list, <code>mcpServers</code> — fine-grained, per tool name</td>
+<td>n/a — no tool-scoping field found on any agent-adjacent config</td>
+<td><code>sandbox_mode</code> (read-only / workspace-write / danger-full-access — narrows only), <code>mcp_servers</code></td>
+</tr>
+<tr>
+<td>Isolation / runtime</td>
+<td><code>isolation: worktree</code>, <code>permissionMode</code>, <code>background</code></td>
+<td><code>environment.json</code>: <code>snapshot</code>, <code>build.dockerfile</code>, <code>install</code>, <code>start</code>, <code>terminals[]</code> — a full container spec</td>
+<td><code>sandbox_mode</code> only; inherits the parent session's runtime otherwise</td>
+</tr>
+<tr>
+<td>Built-in types</td>
+<td><code>general-purpose</code>, <code>Explore</code>, <code>Plan</code> — overridable by a same-named custom agent</td>
+<td>n/a</td>
+<td><code>default</code>, <code>worker</code>, <code>explorer</code> — overridable by a same-named custom agent</td>
+</tr>
+<tr>
+<td>Discovery precedence</td>
+<td>managed settings → <code>--agents</code> CLI flag → project <code>.claude/agents/</code> → user <code>~/.claude/agents/</code> → plugin</td>
+<td>repo <code>environment.json</code> → personal saved → team saved (config only — no persona to resolve)</td>
+<td>project <code>.codex/agents/</code> and user <code>~/.codex/agents/</code>; global tuning via <code>[agents]</code> in <code>config.toml</code></td>
+</tr>
+<tr>
+<td>Packaging / versioning</td>
+<td><code>plugin.json</code> <code>agents</code> field bundles many, with dependency metadata; no per-file version</td>
+<td>None found</td>
+<td>None found — loose files, no manifest</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Where they agree:</strong> Anthropic and Codex both express an agent as <code>{name, description, prompt-as-string, model, tool/sandbox scope, MCP bindings}</code> — a near 1:1 structural match; YAML+Markdown vs. pure TOML is a serialization choice, not a conceptual one. Both support project- and user-level definition directories, project taking precedence, both ship built-in default agents a custom file can override.</p>
+<p><strong>Where they don't:</strong> Cursor has no portable persona concept at all — Custom Modes, the one feature that matched, was removed in Cursor 2.1, so there is no like-for-like target to deliver an Oxagen agent <em>to</em> Cursor. Tool authority is expressed oppositely — Anthropic's named allow/deny list vs. Codex's coarse three-tier sandbox bucket that can only narrow — so folding one into the other is lossy in one direction. Only Anthropic has a manifest layer (<code>plugin.json</code>) that bundles and versions multiple agents together.</p>
+<h2 id="portability/2-skills-packaged-invocable-procedure">2. Skills — packaged, invocable procedure</h2>
+<p>A folder describing one reusable procedure, with progressive disclosure into scripts, references and assets. This is the concept nearest to convergence, and the one <code>.oxagen/skills.toml</code> already governs the <em>resolution</em> of (ADR-090) — without storing the raw file itself.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Claude Code</th>
+<th>Cursor</th>
+<th>Codex</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Primary artifact</td>
+<td><code>&lt;skill&gt;/SKILL.md</code> + <code>scripts/</code>, <code>references/</code>, <code>assets/</code></td>
+<td>Same shape</td>
+<td>Same shape, plus a sidecar <code>agents/openai.yaml</code> for UI/behavior metadata</td>
+</tr>
+<tr>
+<td>Required frontmatter</td>
+<td><code>description</code> recommended (<code>name</code> defaults to folder); the portable Agent Skills spec requires <code>name</code> + <code>description</code></td>
+<td><code>name</code>, <code>description</code></td>
+<td><code>name</code>, <code>description</code> — nothing else in-file</td>
+</tr>
+<tr>
+<td>Full optional set</td>
+<td><strong>CLI superset, ~19 fields:</strong> <code>when_to_use</code>, <code>argument-hint</code>, <code>arguments</code>, <code>disable-model-invocation</code>, <code>user-invocable</code>, <code>allowed-tools</code>, <code>disallowed-tools</code>, <code>model</code>, <code>effort</code>, <code>context: fork</code> + <code>agent</code>, <code>background</code>, <code>hooks</code>, <code>paths</code>, <code>shell</code>, <code>metadata</code>, <code>license</code>, <code>compatibility</code>. <strong>Portable spec, 6 fields, upload-enforced:</strong> <code>name</code>, <code>description</code>, <code>license</code>, <code>compatibility</code>, <code>metadata</code>, <code>allowed-tools</code> — anything else is rejected on upload</td>
+<td><code>paths</code>, <code>disable-model-invocation</code>, <code>icon</code>, <code>color</code>, <code>metadata</code> — 6 fields</td>
+<td>None in SKILL.md — UI/behavior metadata lives in <code>agents/openai.yaml</code> instead</td>
+</tr>
+<tr>
+<td>Discovery root</td>
+<td><code>.claude/skills/</code> (project), <code>~/.claude/skills/</code> (user), plugin, synced</td>
+<td><code>.cursor/skills/</code> <em>or</em> <code>.agents/skills/</code> (project); user equivalents — dual path</td>
+<td><code>.agents/skills/</code> primary — walks CWD to repo root, then <code>$HOME/.agents/skills</code>, then admin <code>/etc/codex/skills</code>, then built-in. Not <code>.codex/skills/</code></td>
+</tr>
+<tr>
+<td>Invocation gating</td>
+<td><code>disable-model-invocation</code>, <code>user-invocable</code></td>
+<td><code>disable-model-invocation</code> — same field name</td>
+<td><code>policy.allow_implicit_invocation</code> (sidecar, inverted polarity)</td>
+</tr>
+<tr>
+<td>Tool restriction</td>
+<td><code>allowed-tools</code> / <code>disallowed-tools</code></td>
+<td>None</td>
+<td><code>dependencies.tools</code> (sidecar) — a requirement, not an allow-list</td>
+</tr>
+<tr>
+<td>Packaging / distribution</td>
+<td><code>plugin.json</code> <code>skills</code> field; Skills API zip upload, immutable slug, full-snapshot versions, 30 MB cap</td>
+<td><code>.cursor-plugin/marketplace.json</code></td>
+<td>None in-repo; OpenAI's curated catalog repo (<code>github.com/openai/skills</code>), no per-skill version field</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Where they agree:</strong> All three converge on <code>SKILL.md</code> + YAML frontmatter as the atomic unit, with the same three-tier progressive-disclosure shape underneath. <code>name</code> + <code>description</code> is the one pair every skill can carry losslessly everywhere. All three support explicit and implicit invocation with a boolean to disable the implicit path. Cursor is actively migrating its own legacy formats into this shape (<code>/migrate-to-skills</code>, 2.4+) — Skills, not Rules, is Cursor's own durable target.</p>
+<p><strong>Where they don't:</strong> Frontmatter richness spans roughly 9× (Anthropic ~19 fields, Cursor 6, Codex 2). Codex is the only one that pushes UI/behavior metadata into a separate sidecar file rather than SKILL.md frontmatter — a Codex-targeted exporter writes two files, not one. Discovery root differs by vendor, though <code>.agents/skills/</code> is shared by two of the three. Only Anthropic runs a formally versioned, validating upload endpoint outside a single repo.</p>
+<h2 id="portability/3-memory-instructions-vs-what-the-agent-learned">3. Memory — instructions vs. what the agent learned</h2>
+<p>Every vendor ships <em>two</em> layers under &quot;memory&quot;: a deterministic, human-authored, version-controlled <strong>instructions</strong> layer, and a separately generated, personal <strong>session memory</strong> layer that is not synced or shared by default.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Claude Code</th>
+<th>Cursor</th>
+<th>Codex</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Instructions layer</td>
+<td><code>CLAUDE.md</code> hierarchy — managed → user → project → local (<code>CLAUDE.local.md</code>, gitignored); <code>@path</code> imports (max depth 4); 4 MiB cap. No native <code>AGENTS.md</code> read — the convention (used in this repo) is a <code>CLAUDE.md</code> that <code>@</code>-imports it</td>
+<td><code>.cursor/rules/*.mdc</code> (+ legacy <code>.cursorrules</code>), and native <code>AGENTS.md</code> as &quot;a simple alternative to <code>.cursor/rules</code>&quot;</td>
+<td>Native <code>AGENTS.md</code> — root-to-CWD walk, <code>AGENTS.override.md</code> per directory, concatenated; <code>project_doc_max_bytes</code> (32 KiB default), <code>project_doc_fallback_filenames</code></td>
+</tr>
+<tr>
+<td>Generated session memory</td>
+<td><strong>Auto memory</strong> — <code>~/.claude/projects/&lt;project&gt;/memory/</code>: <code>MEMORY.md</code> index (200 lines / 25 KB cap) + topic files with typed YAML frontmatter (<code>name</code>, <code>description</code>, <code>metadata.type</code> ∈ <code>user | feedback | project | reference</code>). Machine-local. Toggle: <code>/memory</code>, <code>autoMemoryEnabled</code></td>
+<td><strong>Memories (beta)</strong> — auto or manual, approval-gated before saving. Personal <em>and</em> project scoped at once; not synced to teammates. Storage format undisclosed — no official schema page renders as of this research</td>
+<td><strong>Memories</strong> — off by default; EEA/UK/CH require explicit opt-in. <code>[features].memories = true</code> + <code>[memories]</code> sub-table. Storage: plain markdown, <code>~/.codex/memories/</code></td>
+</tr>
+<tr>
+<td>Raw session log</td>
+<td>Not published as a portable schema in this research</td>
+<td>Not found</td>
+<td>Full JSONL rollouts — <code>~/.codex/sessions/YYYY/MM/DD/rollout-*.jsonl</code>, distinct from Memories</td>
+</tr>
+<tr>
+<td>Structure of the generated layer</td>
+<td>Typed, closed taxonomy (4 kinds), file-based, documented</td>
+<td>Undisclosed</td>
+<td>Deliberately unstructured — &quot;no embedding store, no similarity search — plain text and substring matching, by design&quot;</td>
+</tr>
+<tr>
+<td>Portability today</td>
+<td>Most portable — documented format, typed frontmatter, plain files a script can read and write</td>
+<td>Least portable — no disclosed storage, no read path outside the Cursor UI</td>
+<td>Portable in principle (plain markdown) but regulated and explicitly non-semantic</td>
+</tr>
+</tbody>
+</table></div>
+<p>The auto-memory row above is not a secondhand description — it is exactly the mechanism the research for this atlas ran under, confirmed live against <code>code.claude.com/docs/en/memory</code> as Anthropic's current canonical structured-memory schema.</p>
+<p><strong>Where they agree:</strong> All three separate a deterministic instructions layer from a separately generated, personal memory layer not synced team-wide by default. None treats its generated memory as something a person hand-edits and expects to survive. The instructions layer is converging on <code>AGENTS.md</code>.</p>
+<p><strong>Where they don't:</strong> Only Anthropic publishes a typed schema for generated memory — a converter can round-trip it faithfully, can only approximate Cursor's, and must flatten Codex's taxonomy into plain paragraphs. Codex gates memory generation behind a feature flag and, in some jurisdictions, a legal opt-in. Codex alone has a separately documented raw-transcript store, a richer source to derive memory from but not itself &quot;memory&quot; in the other two vendors' sense.</p>
+<h2 id="portability/cross-cutting-convergence">Cross-cutting convergence</h2>
+<p><strong><code>AGENTS.md</code> is becoming the shared instructions file.</strong> Cursor reads it natively as an alternative to <code>.cursor/rules</code>. Codex defines its entire instructions layer around it, with override files and a documented merge order. Claude Code does not read it directly, but its own convention — a <code>CLAUDE.md</code> that <code>@</code>-imports <code>AGENTS.md</code> — is precisely the pattern this repository's own Oxagen monorepo already uses.</p>
+<p><strong><code>.agents/skills/</code> is forming as a shared skill root.</strong> Codex's primary skill-discovery path is <code>.agents/skills/</code>, not a Codex-specific directory. Cursor supports the same path as an alternative to <code>.cursor/skills/</code>. Anthropic has not adopted it — <code>.claude/skills/</code> remains its only path — but two of the three vendors already treat <code>.agents/</code> as the vendor-neutral root.</p>
+<p><strong>Anthropic already ships the converter's mirror image.</strong> Claude Code's own <code>/import</code> command (v2.1.213+) reads another coding agent's AGENTS.md, MCP servers, commands, subagents and skills and writes them into Claude Code's native format in one pass; <code>/init</code> normalizes against Cursor, GitHub Copilot, Devin, Windsurf and Cline formats by name. That is Anthropic's own precedent for exactly the machinery this atlas is scoping, in the opposite direction.</p>
+<p><strong>MCP server config: same protocol, three unrelated files.</strong> All three are MCP clients, and none of their config schemas match — <code>.mcp.json</code>, <code>.cursor/mcp.json</code>, and TOML <code>[mcp_servers.&lt;id&gt;]</code> tables all differ in field names and structure. Out of scope for this atlas (the Equipment clause's <em>tools</em> half, not agents/skills/memory) but adjacent enough to flag for whoever scopes that spec next.</p>
+<h2 id="portability/where-oxagen-stands-today">Where Oxagen stands today</h2>
+<p>Oxagen already has a shape for all three concepts — none of them store or emit the vendor-native raw form the ask requires.</p>
+<ul>
+<li><strong><code>agent.definition.*</code> — an in-app agent, not a portable one.</strong> <code>create_agent_def</code> and its siblings store <code>{slug, name, description, agentType, avatarUrl, config: {graph, agentTools, instructions}}</code>. <code>instructions</code> is a single string — no field for a raw source document, a vendor tag, or a body that round-trips back to a <code>.claude/agents/*.md</code> file or a Codex <code>.toml</code>.</li>
+<li><strong><code>.oxagen/skills.toml</code> — resolution is governed, content is not stored.</strong> ADR-090 makes Oxagen the authority over which skills a wrapped harness may find and load, with versioning, digests and evidence — but it deliberately never runs a skill, and does not store the skill's raw <code>SKILL.md</code> content. <code>list_skills</code> is a read-only inventory of the <em>names</em> a harness reported at session start: no version, digest, source or content travels with it.</li>
+<li><strong><code>agent.memory_import.parse</code> / <code>.commit</code> — a one-way, lossy funnel.</strong> This capability already ingests uploaded markdown — &quot;skill files, rule docs, playbooks&quot; — but by design an AI model reads each document and writes atomic <code>AgentMemory</code> records into Oxagen's own kind+weight taxonomy. The original file's raw bytes, its exact frontmatter, and its vendor-native shape are not retained anywhere the system can later hand back out.</li>
+</ul>
+<p>Every surface Oxagen has today re-interprets the source into its own internal shape at ingest time, and none has an export path back to any vendor's native format — Anthropic's included. That is the specific gap this atlas exists to name.</p>
+<h2 id="portability/proposed-direction">Proposed direction</h2>
+<p>Not a design — the shape the next spec should start from, given what this inventory found.</p>
+<ul>
+<li><strong>Store raw bytes alongside the interpreted record.</strong> Every ingest path (agent create, skill resolution, memory import) keeps the verbatim source plus a <code>sourceFormat</code> tag (<code>anthropic-agent-md</code>, <code>anthropic-skill-md</code>, <code>cursor-skill-md</code>, <code>codex-skill-md</code>, <code>codex-agent-toml</code>, …) so nothing is lost even where Oxagen's own model only understands a subset today.</li>
+<li><strong>Anthropic's shape is the canonical native store, per the ask.</strong> It is the widest of the three for both agents and skills — a near-superset of Cursor's and roughly isomorphic to Codex's — so the other two become renderers <em>of</em> it rather than three independent schemas Oxagen has to keep in sync by hand.</li>
+<li><strong>Exporters are per-format renderers with declared fidelity, not one shared schema.</strong> Codex agent export: lossless. Codex skill export: lossless content, split into two files. Cursor skill export: lossless. Cursor agent export: no target exists — the renderer has to say so rather than silently drop the persona.</li>
+<li><strong>Leave memory export out of the first cut.</strong> Cursor's format is unpublished, so there is no safe canonical superset yet. Anthropic ↔ Codex memory portability is buildable now — both are plain, typed-or-typable files — and should land first.</li>
+</ul>
+<h2 id="portability/open-questions">Open questions</h2>
+<ol>
+<li>Where does a customer-facing &quot;deliver this agent to <code>&lt;harness&gt;</code>&quot; action live — a new <code>agent.definition.export</code>-shaped capability, or a projection through the existing <code>.oxagen/skills.toml</code> resolution and evidence pipeline? This is an architecture decision under SCR-002 and needs an ADR, not a default.</li>
+<li>Does raw-source retention change the shape of <code>skills.config_versions</code> (ADR-090 §8), or does it need its own store?</li>
+<li>Who owns keeping this atlas current as all three vendors ship weekly — a scheduled re-audit, or a drift check tied to a specific doc URL per vendor?</li>
+</ol>
+<h2 id="portability/sources">Sources</h2>
+<ul>
+<li><a href="https://code.claude.com/docs/en/sub-agents">code.claude.com/docs/en/sub-agents</a>, <a href="https://code.claude.com/docs/en/agent-sdk/subagents">agent-sdk/subagents</a></li>
+<li><a href="https://code.claude.com/docs/en/skills">code.claude.com/docs/en/skills</a>, <a href="https://code.claude.com/docs/en/agent-sdk/skills">agent-sdk/skills</a>, <a href="https://code.claude.com/docs/en/plugins-reference">plugins-reference</a>, <a href="https://code.claude.com/docs/en/memory">memory</a></li>
+<li><a href="https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview">platform.claude.com — Agent Skills overview</a>, <a href="https://platform.claude.com/docs/en/build-with-claude/skills-guide">Skills guide</a></li>
+<li><a href="https://cursor.com/docs/rules">cursor.com/docs/rules</a>, <a href="https://cursor.com/docs/skills">skills</a>, <a href="https://cursor.com/docs/mcp">mcp</a>, <a href="https://cursor.com/docs/cloud-agent">cloud-agent</a>, <a href="https://cursor.com/docs/cloud-agent/setup">cloud-agent/setup</a>, <a href="https://cursor.com/changelog/2-1">changelog/2-1</a></li>
+<li><a href="https://forum.cursor.com/t/custom-agents-feature-removed/143897">forum.cursor.com — Custom Agents removed</a>, <a href="https://forum.cursor.com/t/about-cursors-memory-record-feature/107355">Memories</a></li>
+<li><a href="https://learn.chatgpt.com/docs/config-file/config-reference">learn.chatgpt.com — Codex config reference</a>, <a href="https://learn.chatgpt.com/docs/agent-configuration/subagents">subagents</a>, <a href="https://learn.chatgpt.com/docs/agent-configuration/agents-md">AGENTS.md</a>, <a href="https://learn.chatgpt.com/docs/build-skills">skills</a>, <a href="https://learn.chatgpt.com/docs/extend/mcp?surface=cli">MCP</a>, <a href="https://learn.chatgpt.com/docs/customization/memories">memories</a></li>
+<li><a href="https://github.com/openai/skills">github.com/openai/skills</a></li>
+</ul>
+
+<footer class="colophon"><span>Oxagen · Specification</span><span>Source: <code>docs/agent-portability-atlas.md</code></span></footer>
+</main>
+</div>
 </article><article id="plan" class="doc" hidden>
 <header class="mast">
   <p class="eyebrow">Oxagen · Plan</p>
@@ -11036,7 +11273,7 @@ need a decision before W13 is written into the spec.</li>
 </div>
 <script>
 (function(){
-  var TITLES={'spec': 'Oxagen Mission Control: Product and Technical Specification', 'dod': 'Oxagen DoD: the definition of done for agent runs', 'witness': 'Oxagen Witness: outcome verification', 'desktop': 'Oxagen Desktop: product specification, rev 1', 'creation': 'Creating things in Oxagen: agents, tools, skills and context records', 'plan': 'Oxagen Mission Control app: implementation plan', 'scope': 'Oxagen Mission Control: the scope review, and what it changed', 'scaleback': 'Scale back Mission Control: the mockup prompt', 'prompts': 'Oxagen Mission Control: mockup prompts, one per demo flow', 'consolidation': 'Consolidating W1–W11 into one design', 'feedback': 'Feedback on the mockups', 'videos': 'Videos of the mockups, narrated', 'w13': 'W13: in the loop'};
+  var TITLES={'spec': 'Oxagen Mission Control: Product and Technical Specification', 'dod': 'Oxagen DoD: the definition of done for agent runs', 'witness': 'Oxagen Witness: outcome verification', 'desktop': 'Oxagen Desktop: product specification, rev 1', 'creation': 'Creating things in Oxagen: agents, tools, skills and context records', 'portability': 'The Agent Portability Atlas', 'plan': 'Oxagen Mission Control app: implementation plan', 'scope': 'Oxagen Mission Control: the scope review, and what it changed', 'scaleback': 'Scale back Mission Control: the mockup prompt', 'prompts': 'Oxagen Mission Control: mockup prompts, one per demo flow', 'consolidation': 'Consolidating W1–W11 into one design', 'feedback': 'Feedback on the mockups', 'videos': 'Videos of the mockups, narrated', 'w13': 'W13: in the loop'};
   var first='spec';
   function show(){
     var h=location.hash.replace(/^#/,""), id=h.split("/")[0];

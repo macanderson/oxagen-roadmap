@@ -88,6 +88,7 @@ a contents rail per document; a section has a link (`#spec/8-6-definition-of-don
 - `implementation-plan.md`: how the pages become the Next.js `apps/app` in the oxagen monorepo
 - `scope-review.md`: the review of 2026-09-14, what it cut and where each cut landed
 - `demo-mockup-prompts.md`, `consolidation.md`, `feedback-mockups.md`, `videos-mockup-narrated.md`, `w13-in-the-loop-scenario.md`: how the mockups were made and reviewed
+- `agent-portability-atlas.md`: an inventory of how Claude Code, Cursor and Codex store agents, skills and memory on disk — where the schemas match, where they don't, and the gap in Oxagen's own agent/skill/memory capabilities against delivering any of the three in another harness's native format. [Interactive version.](https://claude.ai/artifact/YYawKKCKLASpWHcegLyXpC)
 
 The spec, the plan and the desktop spec are also carried in the oxagen monorepo under
 `docs/specs/`; when one copy changes, change the other.
