@@ -2,7 +2,8 @@
 
 | | |
 |---|---|
-| **Status** | In the master; not in the spec yet |
+| **Status** | In the master. In the spec since 2026-09-18: `mission-control-spec.md` §10.6 (skills are steering, and they are files) and §10.7 (the Steering hub) |
+| **Amended 2026-09-18** | Skills now lives under Steering. It is the second of the hub's seven tabs (Records, Skills, Memory, Ontology, Policy, Proposals, Preview) and has no top-level navigation entry of its own. Every route below moved from `…/skills…` to `…/steering/skills…`, and an old link is rewritten in place. The five views (Catalog, Search, In the loop, Reflection, Versions) are views inside the Skills tab. Approved by the maintainer on 2026-09-18 with the steering, graph and gateway review (`reviews/2026-09-18-steering-graph-gateway-review.md`) |
 | **Mockup** | `mockups/missioncontrol.html#/a-intel/core-platform/scenarios/in-the-loop/1`, and the W13 story in Storybook |
 | **Owner** | Mac Anderson |
 
@@ -39,6 +40,8 @@ The claim underneath it: **Oxagen has a seat in the loop, and here is what it do
 
 ## Where this sits against the spec
 
+> **2026-09-18.** The spec now carries this scenario's subject. A skill is steering, and it is a file: governed like a record through a pull request, delivered by **sync** (materializing files in the checkout), and loaded by the harness's own progressive disclosure. Its description line competes in the assembler like any other steering item, so a loaded or withheld skill shows up in the run's `steering.manifest` frame and in Steering's Preview tab. Resolution as this scenario walks it (`.oxagen/skills.toml`, off by default, the pinned config version, withholding, the interjection) decides which skills are in scope. ADR-090 is being checked against that rule in the ADR amendments of 2026-09-18. Today none of it is built: the only skills data on oxagen `main` is the inventory of skill names a harness reported.
+
 § 2 of the mission-control spec says Oxagen is *not* a coding-agent runtime and has **no skills
 engine**. This scenario keeps that cut rather than reversing it:
 
@@ -65,7 +68,7 @@ the mockup chrome gives the loading, empty, error, denied and phone states of ev
 
 ### 1. The default (≈40s)
 
-Rail step 1 — `#/a-intel/finops/skills`.
+Rail step 1 — `#/a-intel/finops/steering/skills`.
 
 > "This is a workspace with skills off. Not disabled by an admin — this is what a workspace is made
 > as. The screen says what turning it on would do and, just as carefully, what it would *not* do:
@@ -88,7 +91,7 @@ once, at the start.
 
 ### 3. The search belongs to the config (≈90s — the technical beat)
 
-Rail step 3 — `#/a-intel/core-platform/skills/search`.
+Rail step 3 — `#/a-intel/core-platform/steering/skills/search`.
 
 Type nothing; the box already holds `cut the first release notes`. Press **Ask as the agent**.
 
@@ -144,7 +147,7 @@ The safe end of an unanswered question is fewer skills, not more.
 
 ### 5. Reflection, and the fence around it (≈90s)
 
-Rail step 6 — `#/a-intel/core-platform/skills/reflect`.
+Rail step 6 — `#/a-intel/core-platform/steering/skills/reflect`.
 
 > "Sitting in the loop means we can also ask the agent a question of our own, after the work is
 > sealed. This run's verdict was `failing`, and `rfl_v3` always samples a failing run."
@@ -168,7 +171,7 @@ reviewers ask about.
 
 ### 6. The history (≈30s)
 
-Rail step 7 — `#/a-intel/core-platform/skills/versions`.
+Rail step 7 — `#/a-intel/core-platform/steering/skills/versions`.
 
 Five policy versions, each a pull request. End on the bottom row:
 
@@ -210,7 +213,8 @@ tab of Steering, not its own sidebar entry (`mockups/pages/skills.md`). The mast
 loop · Reflection · Versions), the off-by-default gate (`skGate()`, rendered for any workspace whose
 `SK_ON` is false — FinOps), the interjected run (`pRun()` hands `run_01K6QW3D5N7TYBA2` to
 `skRunPage()`, the triptych), an interjection banner on Fleet, Skills in the Steering hub tabs and the mobile
-More sheet's Steering entry, four dialogs (`skenable`, `skcfg`, `skill`, `skadd`) and `SCENARIOS["in-the-loop"]` —
+More sheet's Steering entry (it was in the sidebar and its own mobile entry until 2026-09-18), four dialogs
+(`skenable`, `skcfg`, `skill`, `skadd`) and `SCENARIOS["in-the-loop"]` —
 the six beats above as seven rail steps (beat 4 is two: Fleet, then the run). The Skills, skills-off and run-interjection pages
 are rows in `mockups/catalog.mjs`, so Storybook shows them in every state and `tools/check-mockup.mjs`
 walks them; their specs and audit prompts are in `mockups/pages/`. The `screens` index of the hand-drawn original

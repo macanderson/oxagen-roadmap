@@ -6,8 +6,11 @@
 | **Date** | 2026-09-13 |
 | **Owner** | Mac Anderson |
 | **Related** | `dod-spec.md` (the definition of done that gates a run; the witness is one of its checks), `mission-control-spec.md` §8.5, `scope-review.md` |
+| **Amended 2026-09-18** | By the steering, graph and gateway review, approved by the maintainer on 2026-09-18 (`reviews/2026-09-18-steering-graph-gateway-review.md`). The sandbox runner is not built, and it is built on the launcher of the contained tier. See "The runner and the launcher". |
 
 Witness is a working name. The spec assumes Oxagen's existing metering service, capability contracts, and lifecycle agent toolkit.
+
+> **Status (2026-09-18).** The witness runner is not built, and no sandbox exists in Oxagen today: ADR-043 removed the last one, and the runner of ADR-064 was never built. Wherever this spec says the Stamp Engine or the sandbox runner enforces something (no egress, no clock, a fixed seed), that is a requirement on the runner, not a description of something running. The section "The runner and the launcher" says what it is built on. This note is about the runner only.
 
 ## Every trace ends in a stamp or a reason
 
@@ -179,6 +182,12 @@ A negative witness, an input that must be rejected, is required whenever the req
 | Webhooks | `stamp.issued`, `stamp.rejected`, `judgment.requested`, `judgment.signed`. |
 
 Not in v1: partial credit, model-judged quality in the stamp path, cross-tenant fixture sharing.
+
+## The runner and the launcher
+
+The sandbox runner is not a second sandbox. It is built on the same launcher as the contained tier: `oxagen run -- <agent>`, a supervisor that starts a process under an OS sandbox with egress limited to what it is given (Phase 5 of the refactor path, `mission-control-spec.md` §7.2 and §17.2; ADR-096 "Oxagen may contain the process that runs turns: the contained tier", and the amendment to ADR-064). For an evaluator the launcher is given no egress at all, no clock and a fixed seed. For an agent it is given one egress, the gateway. So phase 2 of the build, which delivers the sandbox runner, depends on that launcher, and the witness spec does not schedule its own.
+
+Two oracle classes read a trace that today is weaker than this spec assumes. The `policy` class checks the recorded call log, and for a wrapped agent that log is client-attested: the hook that wrote it runs in a process the machine's owner controls. The `budget` class reads counters that are self-reported by the harness until the gateway of Phase 4 makes metering observed. A certificate carries the run's enforcement tier and never reads stronger than it.
 
 ## Eight weeks, five phases
 

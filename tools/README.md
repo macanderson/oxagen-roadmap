@@ -163,3 +163,13 @@ run time.
 
 Every handler that calls `render()` replaces `#view.innerHTML` and destroys whatever was focused.
 Test any keyboard interaction **twice in a row**: these bugs work exactly once.
+
+## The spec copies in the oxagen repository
+
+`docs/mission-control-spec.md`, `docs/implementation-plan.md` and `docs/desktop-spec.md` each have a copy in the oxagen repository, and no build step joins them. Their headers name the sections that must match. After editing one of those sections in both repositories, run:
+
+```
+python3 tools/check-spec-sync.py . ~/Projects/oxagen
+```
+
+It exits 0 when every shared section is byte-identical and 1 when one differs, and it names the section.
