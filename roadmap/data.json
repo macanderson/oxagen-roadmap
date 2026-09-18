@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-09-17",
+ "generated_at": "2026-09-18T18:00:00Z",
  "thesis": "The mockups are the spec. This page is the distance between them and the build, plus the witness and the definition of done that make a run provable, and the decisions that unblock the work. GitHub status is live; everything else is editable here and by Claude.",
  "repos": {
   "owner": "macanderson",
@@ -257,7 +257,7 @@
    "route": "#/a-intel/core-platform/steering",
    "spec_path": "mockups/pages/steering.md",
    "scope_verdict": "thin",
-   "built_status": "built",
+   "built_status": "partial",
    "built_evidence": [
     "apps/app/src/app/[org]/[ws]/steering/page.tsx",
     "apps/app/src/features/steering/records.tsx",
@@ -266,18 +266,40 @@
     "apps/app/src/features/steering/actions.ts",
     "packages/database/atlas/migrations/20260915060000_steering_proposals_and_context_pr.sql"
    ],
-   "gap_summary": "Records, proposals and Context PRs tabs are live with open_context_pr, merge_context_pr and dismiss_proposal (ADR-061). Effect metrics, retirement and thresholds were cut. The 'Write a context record' wizard and the record detail page are not built.",
+   "gap_summary": "Records, proposals and Context PRs tabs are live with open_context_pr, merge_context_pr and dismiss_proposal (ADR-061). But no agent run follows what gets published: the bundle's context.system is hardcoded null, so a published record never reaches a wrapped Claude Code or Codex run (issue #2592, reopened 2026-09-18). An adversarial review on 2026-09-18 found the same gap across eight sources of steering, and the maintainer approved a six-phase fix: one assembler, one item type, one hub screen. Phase 0 (compile must/should records into the bundle) is in review as PR #3289.",
    "gaps": [
+    "No run-time reader of context.system: the server hardcodes it to null",
+    "Bundle permissions, tools and budget are always empty; nothing enforces session_limit_usd",
     "Write a context record wizard (creation-spec §5)",
     "Record rows do not open a record page",
-    "Context PR state read from GitHub (webhook-driven status)"
+    "Context PR state read from GitHub (webhook-driven status)",
+    "Phase 2 turns this page into the Steering hub (Records, Skills, Memory, Ontology, Policy, Proposals, Preview); mockups depicting it are in review as roadmap PR #44"
    ],
    "backend_gaps": [
-    "Context PR state from GitHub"
+    "Context PR state from GitHub",
+    "Phase 0: compile active must/should records into the signed bundle (PR #3289, ADR-091)",
+    "Phase 1: one assembler, one SteeringItem type, the steering.manifest frame (issue #3296)"
    ],
    "plan_lane": "P5",
-   "priority": "P1",
-   "issue_links": []
+   "priority": "P0",
+   "issue_links": [
+    {
+     "repo": "oxagen",
+     "number": 2592
+    },
+    {
+     "repo": "oxagen",
+     "number": 3295
+    },
+    {
+     "repo": "oxagen",
+     "number": 3296
+    },
+    {
+     "repo": "oxagen",
+     "number": 3297
+    }
+   ]
   },
   {
    "id": "repositories",
@@ -1542,6 +1564,59 @@
    "status": "open",
    "decided_on": null,
    "decided": null
+  },
+  {
+   "id": "D21",
+   "title": "Subscription logins through the model proxy",
+   "question": "Do Claude Code and Codex subscription logins, not just API keys, pass cleanly through a base URL rewrite, and do the vendors' terms allow it?",
+   "recommendation": "Unverified at review time; would gate the gateway's Phase 4 if it failed.",
+   "source": "docs/reviews/2026-09-18-steering-graph-gateway-review.md §5",
+   "blocks": [
+    "Phase 4"
+   ],
+   "status": "decided",
+   "decided_on": "2026-09-18",
+   "decided": "Validated by the maintainer: both vendors work through a base URL proxy, subscription logins included, and neither vendor's terms explicitly forbid it. Phase 4 build started the same day."
+  },
+  {
+   "id": "D22",
+   "title": "One assembler, two planes, storage stays plural",
+   "question": "Should Oxagen unify steering onto a single store (the graph), or keep sources plural and unify only the read path?",
+   "recommendation": "Storage stays plural, one writer per fact. What must be single is the assembler: the one function where everything competes for the agent's context. Steering (advisory, ranked, budgeted) and gating (deterministic, never budgeted) stay two planes, authored on one surface and compiled twice.",
+   "source": "ADR-097, ADR-093 (oxagen PR #3294)",
+   "blocks": [
+    "Phase 1",
+    "Phase 2"
+   ],
+   "status": "decided",
+   "decided_on": "2026-09-18",
+   "decided": "Approved in full. assembleSteering(run, budget) returns a stable prefix, a volatile selection and a manifest of what was cut, recorded as a steering.manifest frame."
+  },
+  {
+   "id": "D23",
+   "title": "tachod grows into the gateway",
+   "question": "Should Oxagen route model and MCP traffic through a cloud-hosted proxy, a loopback proxy inside the existing tachod daemon, or not build a proxy at all?",
+   "recommendation": "A loopback model proxy inside tachod: no extra network hop, prompt bodies never leave the machine, the vendor credential stays on the machine, metering becomes observed for every harness.",
+   "source": "ADR-094 (oxagen PR #3294), built in oxagen PR #3319",
+   "blocks": [
+    "Phase 4"
+   ],
+   "status": "decided",
+   "decided_on": "2026-09-18",
+   "decided": "Approved and built: an Anthropic and OpenAI passthrough on loopback, observed metering, an enforced session budget, and a real interrupt. The MCP aggregator is scoped but not yet built (tracked on issue #3299)."
+  },
+  {
+   "id": "D24",
+   "title": "Sandbox as the top tier, not the only tier",
+   "question": "Should every wrapped agent run inside a mandatory OS sandbox, or should containment be one tier among several?",
+   "recommendation": "Sandbox is the top tier, aimed at CI, headless runs and managed devices first, never mandatory on a developer's own laptop. Hooks stay. The tier ladder is four words, computed from what was actually routed: observe, harness, gateway, contained.",
+   "source": "ADR-095, ADR-096 (oxagen PR #3294)",
+   "blocks": [
+    "Phase 5"
+   ],
+   "status": "decided",
+   "decided_on": "2026-09-18",
+   "decided": "Approved. contained is the only tier that earns the word \"enforced\" against the machine's operator; oxagen run -- <agent> and the witness runner build on the same launcher in Phase 5."
   }
  ],
  "feedback": [
@@ -1673,6 +1748,14 @@
     "audit"
    ],
    "weeks": "12–15"
+  },
+  {
+   "id": "M6",
+   "title": "Steering, gating and the gateway: the six-phase refactor path (epic #3295)",
+   "surfaces": [
+    "steering"
+   ],
+   "weeks": "Phase 0 in review (PR #3289) · Phase 4 in build (PR #3319, PR #3321) · Phases 1, 2, 3, 5 next"
   }
  ],
  "catalog": {
