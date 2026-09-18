@@ -260,7 +260,6 @@ footer{border-top:1px solid var(--rule);padding-block:34px 70px;color:var(--mute
    Colors derive from the page's own text color so the block reads correctly in
    every mockup theme; only the accent leans on --gold. */
 .lt{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:9px 12px;border-bottom:1px solid var(--border,color-mix(in srgb,currentColor 16%,transparent));font-family:inherit;font-size:12.5px}
-.lt.free{border:1px solid var(--border,color-mix(in srgb,currentColor 16%,transparent));border-radius:10px;margin-bottom:10px}
 .lt .lt-q{flex:1 1 200px;min-width:140px;background:color-mix(in srgb,currentColor 5%,transparent);border:1px solid var(--border,color-mix(in srgb,currentColor 16%,transparent));border-radius:8px;padding:6px 10px;font-size:12.5px;color:inherit;outline:none;font-family:inherit;transition:border-color .12s}
 .lt .lt-q:focus{border-color:var(--gold,#D6962C)}
 .lt .lt-q::placeholder{color:inherit;opacity:.5}
@@ -268,7 +267,6 @@ footer{border-top:1px solid var(--rule);padding-block:34px 70px;color:var(--mute
 .lt select:focus{border-color:var(--gold,#D6962C)}
 .lt .lt-rows{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--muted,inherit);white-space:nowrap;margin-left:auto}
 .lp{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 12px;font-size:11.5px;color:var(--muted,inherit);font-family:inherit}
-.lp.free{border:1px solid var(--border,color-mix(in srgb,currentColor 16%,transparent));border-radius:10px;margin-top:10px}
 .lp .lp-n{font-family:var(--mono,ui-monospace,monospace);font-variant-numeric:tabular-nums;opacity:.85}
 .lp .lp-pg{margin-left:auto;display:flex;gap:4px;align-items:center;flex-wrap:wrap}
 .lp .lp-b{border:1px solid var(--border,color-mix(in srgb,currentColor 16%,transparent));background:color-mix(in srgb,currentColor 5%,transparent);color:inherit;border-radius:7px;padding:2px 8px;min-width:28px;font-size:12px;font-family:inherit;cursor:pointer;font-variant-numeric:tabular-nums;line-height:1.5;transition:border-color .12s}
@@ -310,6 +308,17 @@ function cmp(a,b,isNum,dir){
   return a.t.localeCompare(b.t,undefined,{numeric:true,sensitivity:"base"})*dir;
 }
 function el(html){var d=document.createElement("div");d.innerHTML=html;return d.firstChild;}
+/* The controls belong to the list, not to whatever box they were dropped in:
+   they never draw a frame of their own, so search row, table and pager read as
+   one component flush inside the card instead of three stacked boxes. Two things
+   about that box still have to be undone — a flex gap, which would float the
+   search row's rule and the pager away from the rows, and sideways scrolling,
+   which would otherwise leave them short of a table wider than the card. */
+function ltFit(node,host,edge){
+  var cs=getComputedStyle(host),g=parseFloat(cs.rowGap)||0;
+  if(g)node.style[edge]="-"+g+"px";
+  if(cs.overflowX==="auto"||cs.overflowX==="scroll"){node.style.position="sticky";node.style.left="0";}
+}
 function pageCtx(){var h1=document.querySelector("main h1, .page h1, h1"); return location.hash+"|"+(h1?h1.textContent.trim().slice(0,40):"");}
 function state(sig,ord){var key=pageCtx()+"|"+sig+"#"+ord; return STORE[key]||(STORE[key]={q:"",sort:null,dir:1,per:10,page:1,f:{}});}
 
@@ -371,10 +380,14 @@ function enhance(table,ord){
     var inp=prev.matches("input")?prev:prev.querySelector("input[placeholder^='Search']");
     if(inp&&inp.placeholder&&/^Search/.test(inp.placeholder)&&ins.length<=1&&!prev.textContent.trim()){ph=inp.placeholder;prev.remove();}
   }
-  var free=!/panel|card|box/.test(host.className||"");
+  /* When the wrapper is itself the card — a bordered, rounded table box — the
+     controls belong inside it, above and below the rows, rather than floating
+     outside its corners. */
+  var wcs=getComputedStyle(wrap);
+  if(parseFloat(wcs.borderTopWidth)>0&&parseFloat(wcs.borderTopLeftRadius)>0){host=wrap;wrap=table;}
   var b=bar(st,{ph:ph,filters:fs},apply), lp=document.createElement("div");
-  if(free)b.classList.add("free");
   host.insertBefore(b,wrap); host.insertBefore(lp,wrap.nextSibling);
+  ltFit(b,host,"marginBottom");
   ths.forEach(function(th,i){ if(!cols[i].name)return; th.classList.add("sortable"); th.tabIndex=0; th.setAttribute("role","button");
     function tog(e){ if(e)e.stopPropagation(); if(st.sort===i){ if(st.dir===1)st.dir=-1; else {st.sort=null;st.dir=1;} } else {st.sort=i;st.dir=1;} st.page=1; apply(); }
     th.addEventListener("click",tog); th.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();tog(e);}}); });
@@ -391,7 +404,7 @@ function enhance(table,ord){
     while(tbody.firstChild)tbody.removeChild(tbody.firstChild);
     if(!slice.length){var tr=document.createElement("tr"),td=document.createElement("td");tr.className="lt-empty";td.colSpan=cols.length;td.textContent="No rows match.";tr.appendChild(td);tbody.appendChild(tr);}
     slice.forEach(function(i){tbody.appendChild(rows[i]);});
-    var nlp=pager(st,total,apply); lp.replaceWith(nlp); lp=nlp; if(free)lp.classList.add("free");
+    var nlp=pager(st,total,apply); lp.replaceWith(nlp); lp=nlp; ltFit(lp,host,"marginTop");
     BUSY=false;
   }
   apply();

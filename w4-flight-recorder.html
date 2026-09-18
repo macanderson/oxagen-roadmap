@@ -923,7 +923,6 @@ a.inv-i:hover{border-color:var(--rule);text-decoration:none}
 @media (prefers-reduced-motion:reduce){.ks-sw i,.ks-sw i::after{transition:none}}
 /* List controls: search, column filters, rows per page, sortable headers, pager */
 .lt{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:9px 12px;border-bottom:1px solid var(--border);background:var(--panel)}
-.lt.free{border:1px solid var(--border);border-radius:10px;margin-bottom:10px}
 .lt .lt-q{flex:1 1 200px;min-width:140px;background:var(--ink);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:12.5px;color:var(--fg);outline:none;font-family:var(--font);transition:border-color .12s}
 .lt .lt-q:focus{border-color:var(--gold)}
 .lt .lt-q::placeholder{color:var(--dim)}
@@ -932,7 +931,6 @@ a.inv-i:hover{border-color:var(--rule);text-decoration:none}
 .lt .lt-rows,.lt .lt-sort{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--muted);white-space:nowrap}
 .lt .lt-rows{margin-left:auto}
 .lp{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 12px;font-size:11.5px;color:var(--muted);background:var(--panel)}
-.lp.free{border:1px solid var(--border);border-radius:10px;margin-top:10px}
 .lp .lp-n{font-family:var(--mono);font-variant-numeric:tabular-nums;color:var(--dim)}
 .lp .lp-pg{margin-left:auto;display:flex;gap:4px;align-items:center;flex-wrap:wrap}
 .lp .lp-pg .btn{padding:2px 8px;min-width:28px;justify-content:center;font-variant-numeric:tabular-nums}
@@ -13152,6 +13150,17 @@ function ltFacets(cols,vals,rows){
   return c.slice(0,3).map(function(col){return {key:String(col.i),label:col.name,values:col.values};});
 }
 
+/* The controls belong to the list, not to whatever box they were dropped in:
+   they never draw a frame of their own, so search row, table and pager read as
+   one component flush inside the card instead of three stacked boxes. Two things
+   about that box still have to be undone — a flex gap, which would float the
+   search row's rule and the pager away from the rows, and sideways scrolling,
+   which would otherwise leave them short of a table wider than the card. */
+function ltFit(node,host,edge){
+  var cs=getComputedStyle(host),g=parseFloat(cs.rowGap)||0;
+  if(g)node.style[edge]="-"+g+"px";
+  if(cs.overflowX==="auto"||cs.overflowX==="scroll"){node.style.position="sticky";node.style.left="0";}
+}
 function ltTable(table,prefix){
   if(!table.tHead||!table.tBodies[0]||!table.tHead.rows[0]||table.getAttribute("data-lt"))return;
   table.setAttribute("data-lt","1");
@@ -13173,9 +13182,14 @@ function ltTable(table,prefix){
     var inp=prev.querySelector(".field>input[placeholder^='Search']");
     if(inp&&prev.querySelectorAll("*").length<=2){ph=inp.placeholder;prev.remove();}
   }
+  /* When the wrapper is itself the card — a bordered, rounded table box — the
+     controls belong inside it, above and below the rows, rather than floating
+     outside its corners. */
+  var twcs=getComputedStyle(tw);
+  if(parseFloat(twcs.borderTopWidth)>0&&parseFloat(twcs.borderTopLeftRadius)>0){host=tw;tw=table;}
   var bar=ltBar(st,{ph:ph,filters:facets},apply), lp=document.createElement("div");
-  if(!host.classList.contains("panel")){bar.classList.add("free");lp.className="free";}
   host.insertBefore(bar,tw); host.insertBefore(lp,tw.nextSibling);
+  ltFit(bar,host,"marginBottom");
   ths.forEach(function(th,i){ if(!cols[i].name)return; th.classList.add("sortable"); th.tabIndex=0; th.setAttribute("role","button");
     function tog(){ if(st.sort===i){ if(st.dir===1)st.dir=-1; else {st.sort=null;st.dir=1;} } else {st.sort=i;st.dir=1;} st.page=1; apply(); }
     th.addEventListener("click",tog); th.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();tog();}}); });
@@ -13192,7 +13206,7 @@ function ltTable(table,prefix){
     if(!slice.length){var tr=document.createElement("tr"),td=document.createElement("td");tr.className="lt-empty";td.colSpan=cols.length;td.textContent="No rows match.";tr.appendChild(td);tbody.appendChild(tr);}
     slice.forEach(function(i){tbody.appendChild(rows[i]);});
     var nlp=ltPager(st,total,apply); lp.replaceWith(nlp); lp=nlp;
-    if(!host.classList.contains("panel"))lp.classList.add("free");
+    ltFit(lp,host,"marginTop");
   }
   apply();
 }
@@ -13224,9 +13238,9 @@ function ltCards(cfg){
     var facets=(cfg.facets||[]).map(function(f){var set={},n=0; its.forEach(function(o,i){var v=f.get(o.el); vals[i][f.label]=v; if(v&&!set[v]){set[v]=1;n++;}});
       return (its.length>=4&&n>=2&&n<=8&&n<its.length)?{key:f.label,label:f.label,values:Object.keys(set).sort()}:null;}).filter(Boolean);
     var bar=ltBar(st,{ph:cfg.ph,filters:facets,sorts:cfg.sorts},apply), lp=document.createElement("div");
-    var free=!host.parentNode.classList.contains("panel");
-    if(free)bar.classList.add("free");
-    host.parentNode.insertBefore(bar,host); host.parentNode.insertBefore(lp,host.nextSibling);
+    var box=host.parentNode;
+    box.insertBefore(bar,host); box.insertBefore(lp,host.nextSibling);
+    ltFit(bar,box,"marginBottom");
     function apply(){
       var q=st.q.trim().toLowerCase(), so=cfg.sorts[st.sort||0]||cfg.sorts[0];
       var idx=its.map(function(_,i){return i;}).filter(function(i){ if(q&&vals[i].s.indexOf(q)<0)return false; for(var k in st.f){if(st.f[k]&&vals[i][k]!==st.f[k])return false;} return true;});
@@ -13236,7 +13250,7 @@ function ltCards(cfg){
       while(host.firstChild)host.removeChild(host.firstChild);
       if(!slice.length)host.appendChild(ltEl('<div class="lt-none">Nothing matches.</div>'));
       var lastG=null; slice.forEach(function(i){var o=its[i]; if(cfg.group&&!so.k&&o.g&&o.g!==lastG){host.appendChild(o.g);lastG=o.g;} host.appendChild(o.el);});
-      var nlp=ltPager(st,total,apply); lp.replaceWith(nlp); lp=nlp; if(free)lp.classList.add("free");
+      var nlp=ltPager(st,total,apply); lp.replaceWith(nlp); lp=nlp; ltFit(lp,box,"marginTop");
     }
     apply();
   });
