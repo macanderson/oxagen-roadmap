@@ -17,6 +17,7 @@
   --fail:#A8501F; --fail-wash:rgba(168,80,31,.12);
   --crit:#B02A22; --crit-wash:rgba(176,42,34,.12);
   --neutral:#6E6A62; --neutral-wash:rgba(110,106,98,.10);
+  --series-model:#2A78D6; --series-tool:#EB6834; --series-third:#1BAF7A;
   --shadow:0 1px 2px rgba(16,16,15,.06),0 10px 28px rgba(16,16,15,.07);
   --focus:#8B5E1A;
   --sans:"Space Grotesk","Helvetica Neue",Arial,sans-serif;
@@ -37,6 +38,7 @@
   --fail:#CF6A3C; --fail-wash:rgba(207,106,60,.14);
   --crit:#E0483F; --crit-wash:rgba(224,72,63,.15);
   --neutral:#8B857A; --neutral-wash:rgba(139,133,122,.13);
+  --series-model:#3987E5; --series-tool:#D95926; --series-third:#199E70;
   --shadow:0 1px 0 rgba(255,255,255,.03),0 12px 32px rgba(0,0,0,.44);
   --focus:#F1C364;
 }}
@@ -53,6 +55,7 @@
   --fail:#CF6A3C; --fail-wash:rgba(207,106,60,.14);
   --crit:#E0483F; --crit-wash:rgba(224,72,63,.15);
   --neutral:#8B857A; --neutral-wash:rgba(139,133,122,.13);
+  --series-model:#3987E5; --series-tool:#D95926; --series-third:#199E70;
   --shadow:0 1px 0 rgba(255,255,255,.03),0 12px 32px rgba(0,0,0,.44);
   --focus:#F1C364;
 }
@@ -276,6 +279,43 @@ dialog::backdrop{background:rgba(8,8,7,.62)}
 body[data-w="phone"] .frame{max-width:400px;margin:0 auto;border-left:1px solid var(--rule);
   border-right:1px solid var(--rule);min-height:100vh}
 body[data-w="phone"]{background:var(--panel-2)}
+/* ─── Run instruments. Chart hues are their own slots: the state ramp above is
+   reserved for state and must never stand in for a series. Validated for CVD
+   against both surfaces; every stack ships a legend with figures. ─── */
+.summary .ch{margin-top:10px}
+.stack{display:flex;gap:2px;height:8px;border-radius:4px;margin:2px 0 7px}
+.stack i{display:block;height:100%;min-width:2px;background:var(--sc,var(--neutral))}
+.stack i:first-child{border-radius:4px 0 0 4px}
+.stack i:last-child{border-radius:0 4px 4px 0}
+.s-model{--sc:var(--series-model)} .s-tool{--sc:var(--series-tool)} .s-wait{--sc:var(--series-third)} .s-rest{--sc:var(--rule-2)}
+.legend{display:flex;gap:11px;flex-wrap:wrap;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.legend span{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.legend i{width:9px;height:9px;border-radius:2px;background:var(--sc,var(--neutral));flex:none}
+.legend b{color:var(--fg);font-weight:600}
+.cols{display:flex;align-items:flex-end;gap:2px;height:34px;position:relative;margin-bottom:3px}
+.cols .c{flex:1;max-width:24px;height:100%;display:flex;align-items:flex-end;position:relative}
+.cols .c i{display:block;width:100%;background:var(--series-model);border-radius:4px 4px 0 0;min-height:2px}
+.cols .base{position:absolute;left:0;right:0;bottom:0;height:1px;background:var(--rule)}
+.axis{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--dim)}
+.mbar{display:block;height:7px;border-radius:4px;background:var(--hl);overflow:hidden;min-width:60px}
+.mbar i{display:block;height:100%;background:var(--series-model);border-radius:4px}
+.hist{display:grid;gap:7px;margin-bottom:14px}
+.hist .h{display:grid;grid-template-columns:8ch minmax(0,1fr) auto;align-items:center;gap:10px;font-size:12px;color:var(--muted)}
+.hist .h .k{font-family:var(--mono);font-size:11px}
+.hist .h .v{font-family:var(--mono);font-size:11px;color:var(--fg);font-variant-numeric:tabular-nums}
+.big{font-size:25px;font-weight:600;color:var(--fg);letter-spacing:-.02em;line-height:1.1;margin-bottom:6px}
+.big small{font-size:12px;font-weight:400;color:var(--muted);letter-spacing:0}
+.cc2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.cc2 > div{padding:16px;min-width:0}
+.cc2 > div + div{border-left:1px solid var(--rule)}
+.prompt-b{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px}
+.prompt-b .q{font-size:14.5px;line-height:1.55;color:var(--fg);margin:6px 0 0;max-width:48ch}
+.pbars{display:grid;gap:7px;margin-top:6px}
+.pbars .p{display:grid;grid-template-columns:minmax(0,21ch) minmax(0,1fr) auto;align-items:center;gap:10px;font-size:11.5px;color:var(--muted)}
+.pbars .p .v{font-family:var(--mono);font-size:10.5px;color:var(--fg);font-variant-numeric:tabular-nums}
+@media (max-width:860px){.cc2,.prompt-b{grid-template-columns:minmax(0,1fr)}
+  .cc2 > div + div{border-left:0;border-top:1px solid var(--rule)}
+  .summary{grid-template-columns:minmax(0,1fr)}.summary > div + div{border-left:0;border-top:1px solid var(--rule)}}
 </style>
 <div class="frame">
 <div id="app" data-asst="closed">
@@ -458,7 +498,7 @@ const money = n => "$" + n.toLocaleString("en-US",{minimumFractionDigits:2,maxim
 
 /* Three tiles. Never more — the fourth is always the one nobody reads. */
 const tiles = items => `<dl class="summary">${items.map(t =>
-  `<div><dt>${t[0]}</dt><dd>${t[1]}</dd><small>${t[2]}</small></div>`).join("")}</dl>`;
+  `<div><dt>${t[0]}</dt><dd>${t[1]}</dd><small>${t[2]}</small>${t[3] ?? ""}</div>`).join("")}</dl>`;
 
 const tabs = (list, active, key) => `<div class="tabs" role="tablist">${list.map(t =>
   `<button role="tab" aria-selected="${t[0]===active}" data-tab="${key}" data-val="${t[0]}">${t[0]}${
@@ -524,13 +564,9 @@ PAGES.run = () => `
       Task <span class="mono">acme/platform#478</span> — Retry budget exhaustion silently drops webhook deliveries</p>
   </div><button class="btn btn-primary" data-act="fork">Fork replay</button></div>
 
-  ${tiles([
-    ["Run cost","$4.87","gateway observed · 126 frames"],
-    ["Cache hit rate","93.0%","241,980 of 260,322 input tokens"],
-    ["Proof","flipped","failed on main, passed on the PR"]
-  ])}
+  ${runTiles()}
 
-  ${tabs([["Timeline",126],["Proof",null],["Cost",null],["Chain",null]], S.runTab, "runTab")}
+  ${tabs([["Timeline",126],["Calls",22],["Proof",null],["Cost",null],["Chain",null]], S.runTab, "runTab")}
   ${PAGES["run_"+S.runTab.toLowerCase()]()}
 `;
 
@@ -587,7 +623,7 @@ PAGES.run_cost = () => panel("Where the $4.87 went", "every figure is gateway ob
       <tr><td>T2</td><td>Write the failing test<span class="s">21 frames</span></td><td class="r num">$0.7680</td><td class="r num">$0.0038</td><td class="r num">$0.7718</td></tr>
       <tr><td>T3</td><td>Fix it — paused and steered mid-turn<span class="s">44 frames</span></td><td class="r num">$2.4070</td><td class="r num">$0.0094</td><td class="r num">$2.4164</td></tr>
       <tr><td>T4</td><td>Open the PR and wait for the witness<span class="s">47 frames</span></td><td class="r num">$0.8756</td><td class="r num">$0.0047</td><td class="r num">$0.8803</td></tr>
-    </tbody></table></div>`);
+    </tbody></table></div>`) + promptPanel();
 
 PAGES.run_chain = () => panel("Chain and seal", "verified", `<div class="panel-b"><dl class="kv">
   <dt>Frames</dt><dd>126 of 126 verified</dd>
@@ -600,6 +636,120 @@ PAGES.run_chain = () => panel("Chain and seal", "verified", `<div class="panel-b
 </script>
 <script>
 "use strict";
+/* ───────────────────────── Run metrics ─────────────────────────
+   One derivation behind every instrument on the Run page, so no two panels can
+   disagree. Every figure is anchored on what the run record already states:
+   $4.87, 126 frames, 39 steps, 93.0% of 260,322 input tokens, 09:14:02 → 09:51:47.
+   A step is one model call or one tool call; the two sum to 39. */
+const RUNM = {
+  id:"run_01K5XQ7M4A", cost:4.87, frames:126, steps:39, modelCalls:17, toolCalls:22,
+  turns:[{n:1, what:"Reproduce the drift",            model:0.7994, tools:0.0021, frames:14},
+         {n:2, what:"Write the failing test",          model:0.7680, tools:0.0038, frames:21},
+         {n:3, what:"Fix it — paused and steered",     model:2.4070, tools:0.0094, frames:44},
+         {n:4, what:"Open the PR, wait for the witness",model:0.8756, tools:0.0047, frames:47}],
+  tokIn:260322, cached:241980, fresh:18342, tokOut:9417, reasoning:3208, window:15313, promptTok:34, sysTok:3120,
+  wall:2265, wModel:611, wTool:79, wWait:1575, wPerson:1140, wWitness:435,
+  serialTool:79, togetherTool:58,
+  tools:[{n:"repo.search@2.3.0",      cls:"read_only",   calls:7, ms:8200,  err:0},
+         {n:"repo.read@2.3.0",        cls:"read_only",   calls:6, ms:5100,  err:0},
+         {n:"bash@1",                 cls:"side_effect", calls:5, ms:42400, err:1},
+         {n:"repo.write@2.3.0",       cls:"side_effect", calls:3, ms:18600, err:0},
+         {n:"github__create_pull_request@3", cls:"side_effect", calls:1, ms:4700, err:0}],
+  batches:15, fan:[[1,9],[2,5],[3,1]], maxPar:3,
+  specEligible:13, specStarted:9, specUsed:7, specSaved:6
+};
+const dur = s => s < 60 ? s + "s" : s < 3600 ? Math.floor(s/60) + "m" + (s%60 ? " " + (s%60) + "s" : "")
+  : Math.floor(s/3600) + "h " + Math.floor((s%3600)/60) + "m";
+const tokn = n => n.toLocaleString("en-US");
+const share = (a,b) => b ? Math.round(a/b*100) + "%" : "0%";
+const stack = parts => `<div class="stack">${parts.filter(p=>p[1]>0).map(p =>
+  `<i class="${p[2]}" style="flex:${p[1]}" title="${esc(p[0])} · ${esc(p[3])}"></i>`).join("")}</div>`;
+const legend = parts => `<div class="legend">${parts.filter(p=>p[1]>0).map(p =>
+  `<span><i class="${p[2]}"></i>${esc(p[0])} <b>${esc(p[3])}</b></span>`).join("")}</div>`;
+const mbar = (v,mx) => `<span class="mbar"><i style="width:${Math.round(v/mx*100)}%"></i></span>`;
+
+/* The run's three headline figures. Each is a value, its basis, and the small
+   chart that stops it being a number without a shape. Proof is not a tile: the
+   verdict is a chip in the header and a tab of its own. */
+const runTiles = () => {
+  const m = RUNM, mx = Math.max(...m.turns.map(t => t.model + t.tools)), peak = m.turns.reduce((a,t)=> (t.model+t.tools) > (a.model+a.tools) ? t : a);
+  const costCols = `<div class="cols">${m.turns.map(t => {
+    const c = t.model + t.tools;
+    return `<span class="c" title="Turn ${t.n} · ${money(c)} · ${t.frames} frames"><i style="height:${Math.round(c/mx*100)}%"></i></span>`;
+  }).join("")}<span class="base"></span></div><div class="axis"><span>turn 1</span><span>turn ${m.turns.length}</span></div>`;
+  const wallParts = [["model", m.wModel, "s-model", dur(m.wModel)], ["tools", m.wTool, "s-tool", dur(m.wTool)],
+    ["waiting", m.wWait, "s-wait", dur(m.wWait)]];
+  const tokParts = [["cached", m.cached, "s-model", tokn(m.cached)], ["fresh", m.fresh, "s-tool", tokn(m.fresh)],
+    ["output", m.tokOut, "s-wait", tokn(m.tokOut)]];
+  return tiles([
+    ["Run cost", money(m.cost), `gateway observed · ${money(m.cost/m.turns.length)} a turn · turn ${peak.n} was the dearest at ${money(peak.model+peak.tools)}`,
+      `<div class="ch">${costCols}</div>`],
+    ["Wall clock", dur(m.wall), `${share(m.wWait, m.wall)} of it waiting: ${dur(m.wPerson)} on a person, ${dur(m.wWitness)} on the witness`,
+      `<div class="ch">${stack(wallParts)}${legend(wallParts)}</div>`],
+    ["Tokens", tokn(m.tokIn + m.tokOut), `${tokn(m.tokIn)} in · ${tokn(m.tokOut)} out · ${tokn(m.reasoning)} of the output was reasoning`,
+      `<div class="ch">${stack(tokParts)}${legend(tokParts)}</div>`]
+  ]);
+};
+
+/* Calls, concurrency and prefetch. Grouped by tool, because a run touches five of
+   them and the tool's own class already says what it acts on. */
+PAGES.run_calls = () => {
+  const m = RUNM, mx = Math.max(...m.tools.map(t => t.calls));
+  const reads = m.tools.filter(t => t.cls === "read_only").reduce((a,t) => a + t.calls, 0);
+  const rows = m.tools.map(t => `<tr>
+    <td class="mono">${esc(t.n)}</td>
+    <td>${st(t.cls.replace("_"," "), "flat")}</td>
+    <td class="r num">${t.calls}</td>
+    <td>${mbar(t.calls, mx)}</td>
+    <td class="r num">${share(t.calls, m.toolCalls)}</td>
+    <td class="r num">${dur(Math.round(t.ms/1000))}</td>
+    <td class="r num">${t.err ? st(t.err + " failed", "fail") : `<span class="sub">0</span>`}</td></tr>`).join("");
+  const hmx = Math.max(...m.fan.map(f => f[1]));
+  const hist = m.fan.map(([k,v]) => `<div class="h"><span class="k">${k} tool${k===1?"":"s"}</span>${mbar(v,hmx)}<span class="v">${v}</span></div>`).join("");
+  const par = m.fan.filter(f => f[0] > 1).reduce((a,f) => a + f[1], 0);
+  const specParts = [["used", m.specUsed, "s-model", m.specUsed], ["discarded", m.specStarted - m.specUsed, "s-rest", m.specStarted - m.specUsed]];
+  return `${panel("Tool calls", `${m.toolCalls} calls across ${m.tools.length} tools · ${reads} read-only, ${m.toolCalls - reads} with a side effect`,
+    `<div class="scroll"><table>
+      <thead><tr><th>Tool</th><th>Class</th><th class="r">Calls</th><th></th><th class="r">Share</th><th class="r">Wall clock</th><th class="r">Failed</th></tr></thead>
+      <tbody>${rows}</tbody></table></div>`)}
+  <section class="panel"><div class="cc2">
+    <div><span class="eyebrow">Concurrency · tools per batch</span>
+      <div class="hist" style="margin-top:10px">${hist}</div>
+      <dl class="kv">
+        <dt>Batches</dt><dd>${m.batches} · <b>${par}</b> asked for more than one tool</dd>
+        <dt>Widest batch</dt><dd>${m.maxPar} tools at once</dd>
+        <dt>Mean fan-out</dt><dd>${(m.toolCalls/m.batches).toFixed(2)} tools per batch · ${(m.toolCalls/m.modelCalls).toFixed(2)} tool calls per model call</dd>
+        <dt>Wall clock won</dt><dd><b>${dur(m.serialTool - m.togetherTool)}</b> · ${dur(m.togetherTool)} together against ${dur(m.serialTool)} in turn</dd>
+      </dl></div>
+    <div><span class="eyebrow">Speculative prefetch · started before the step was final</span>
+      <div class="big" style="margin-top:10px">${m.specUsed}<small> of ${m.specStarted} used</small></div>
+      ${stack(specParts)}${legend(specParts)}
+      <dl class="kv" style="margin-top:12px">
+        <dt>Eligible</dt><dd>${m.specEligible} read-only calls · a write is never speculated</dd>
+        <dt>Hit rate</dt><dd>${share(m.specUsed, m.specStarted)}</dd>
+        <dt>Wall clock saved</dt><dd><b>${dur(m.specSaved)}</b></dd>
+        <dt>Billed</dt><dd>a discarded read is still recorded and still billed</dd>
+      </dl></div>
+  </div></section>
+  <div class="notice"><div><b>A discarded write would be an effect nobody asked for.</b>
+    Only read-only tools may be started early, and policy runs on the speculated call exactly as it would on a real one —
+    a prefetch the belt denies is a denial on the record, not a quiet miss.</div></div>`;
+};
+
+/* What the operator wrote, and what reached the model. */
+const promptPanel = () => {
+  const m = RUNM, parts = [["operator’s words", m.promptTok], ["tools and steering", m.sysTok],
+    ["context and conversation", m.window - m.promptTok - m.sysTok]];
+  return panel("The prompt", `${tokn(m.promptTok)} tok written · ${tokn(m.window)} tok sent`, `<div class="panel-b prompt-b">
+    <div><span class="eyebrow">Written by Marcus Bell</span>
+      <p class="q">“Retry budget exhaustion silently drops webhook deliveries. Task acme/platform#478.”</p></div>
+    <div><span class="eyebrow">What reached the model on the last call</span>
+      <div class="pbars">${parts.map(([l,v],i) => `<div class="p"><span>${esc(l)}</span>${
+        `<span class="mbar"><i style="width:${Math.round(v/m.window*100)}%;opacity:${1 - i*0.28}"></i></span>`}<span class="v">${tokn(v)}</span></div>`).join("")}</div>
+      <p class="sub" style="margin:10px 0 0;font-size:12.5px">One sentence expanded to ${tokn(m.window)} tokens a call.
+        ${share(m.cached, m.tokIn)} of the input came from cache, so the stable part was paid for once.</p></div></div>`);
+};
+
 PAGES.agents = () => `
   <div class="head"><div class="head-t">
     <span class="eyebrow">Workspace · core-platform</span>

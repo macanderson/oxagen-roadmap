@@ -23,6 +23,7 @@
   --st-failed:#B4483F;    --st-failed-wash:rgba(180,72,63,.14);
   --st-critical:#E0564A;  --st-critical-wash:rgba(224,86,74,.16);
   --st-neutral:#8A857B;   --st-neutral-wash:rgba(138,133,123,.12);
+  --series-a:#3987E5; --series-b:#D95926; --series-c:#199E70;
 
   --shadow:0 1px 0 rgba(255,255,255,.03),0 18px 44px rgba(0,0,0,.5);
   --shadow-sm:0 1px 2px rgba(0,0,0,.4);
@@ -43,6 +44,7 @@
   --st-failed:#93332B;    --st-failed-wash:rgba(147,51,43,.12);
   --st-critical:#B23328;  --st-critical-wash:rgba(178,51,40,.14);
   --st-neutral:#6B665C;   --st-neutral-wash:rgba(107,102,92,.10);
+  --series-a:#2A78D6; --series-b:#EB6834; --series-c:#1BAF7A;
   --shadow:0 1px 0 rgba(255,255,255,.7),0 18px 44px rgba(16,16,15,.09);
   --shadow-sm:0 1px 2px rgba(16,16,15,.08);
 }}
@@ -59,6 +61,7 @@
   --st-failed:#93332B;    --st-failed-wash:rgba(147,51,43,.12);
   --st-critical:#B23328;  --st-critical-wash:rgba(178,51,40,.14);
   --st-neutral:#6B665C;   --st-neutral-wash:rgba(107,102,92,.10);
+  --series-a:#2A78D6; --series-b:#EB6834; --series-c:#1BAF7A;
   --shadow:0 1px 0 rgba(255,255,255,.7),0 18px 44px rgba(16,16,15,.09);
   --shadow-sm:0 1px 2px rgba(16,16,15,.08);
 }
@@ -186,7 +189,7 @@ nav.pages a .sub{display:block;font-family:var(--mono);font-size:10.5px;color:va
 /* ---------- cost strip ---------- */
 .strip{margin:16px 24px 0;border:1px solid var(--border);border-radius:var(--r);background:var(--panel);
   overflow:hidden}
-.strip-top{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--border)}
+.strip-top{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:1px;background:var(--border)}
 .stat{padding:11px 16px;background:var(--panel);min-width:0}
 .stat .k{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);font-weight:600}
 .stat .v{font-size:19px;font-weight:600;letter-spacing:-.02em;margin-top:3px;font-variant-numeric:tabular-nums;
@@ -524,6 +527,44 @@ body.phone .app{grid-template-columns:1fr}
   .cmdk{min-width:0;flex:1}
   .cmdk span{display:none}
 }
+/* calls tab */
+.calls .wfchart{margin-bottom:14px}
+.cchead{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.cchead h2{font-size:14px}
+.cchead .muted{font-size:12px}
+.cnote{font-size:12px;margin:12px 0 0;line-height:1.55;max-width:88ch}
+.cstack{display:flex;gap:2px;height:10px;border-radius:5px;margin-bottom:9px}
+.cstack i{display:block;height:100%;min-width:2px;background:var(--cc,var(--st-neutral))}
+.cstack i:first-child{border-radius:5px 0 0 5px}
+.cstack i:last-child{border-radius:0 5px 5px 0}
+.cw-model{--cc:var(--series-a)} .cw-tool{--cc:var(--series-b)} .cw-wait{--cc:var(--series-c)} .cw-rest{--cc:var(--border)}
+.cleg{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.cleg span{display:inline-flex;align-items:center;gap:6px}
+.cleg i{width:9px;height:9px;border-radius:2px;background:var(--cc,var(--st-neutral));flex:none}
+.cleg b{color:var(--fg);font-weight:600}
+.cfrow{display:grid;grid-template-columns:232px minmax(200px,1fr) 92px;gap:14px;align-items:center;
+  padding:9px 0;border-bottom:1px solid var(--border)}
+.cfrow:last-of-type{border-bottom:0}
+.cfrow .nm{font-size:12.5px;color:var(--fg);font-weight:500;min-width:0}
+.cfrow .nm small{display:block;font-family:var(--mono);font-size:10.5px;color:var(--dim);font-weight:400;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cftrack{position:relative;height:22px;background:var(--ink);border-radius:6px;border:1px solid var(--border);overflow:hidden;min-width:0}
+.cfbar{position:absolute;left:0;top:0;bottom:0;background:var(--series-a);opacity:.85;border-radius:5px 0 0 5px}
+.cflbl{position:absolute;left:8px;top:50%;transform:translateY(-50%);font-family:var(--mono);font-size:10.5px;
+  color:var(--fg);white-space:nowrap;mix-blend-mode:normal}
+.cfrow .amt{text-align:right;font-family:var(--mono);font-size:12px;color:var(--fg);font-variant-numeric:tabular-nums}
+.cfrow .amt small{display:block;font-size:10px;color:var(--dim)}
+.ctw{overflow-x:auto}
+.ctw table{min-width:660px}
+.ctw .tb td{vertical-align:middle}
+.ctw .tb td small{font-size:10px}
+.ctw td small{margin-left:4px}
+.cbig{font-size:23px;font-weight:600;letter-spacing:-.02em;color:var(--fg);margin-bottom:11px;font-variant-numeric:tabular-nums}
+.cbig small{font-size:12px;font-weight:400;color:var(--muted);letter-spacing:0}
+.ccols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+@media (max-width:900px){.ccols{grid-template-columns:minmax(0,1fr)}
+  .cfrow{grid-template-columns:minmax(0,1fr);gap:5px}.cfrow .amt{text-align:left}
+  .strip-top{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style>
 
 <div class="app" id="app">
@@ -1313,6 +1354,83 @@ const ROLL = (function(){
 ROLL.governedActions = ROLL.toolCalls;
 ROLL.productiveRatio = RUN.productive_steps / ROLL.steps;
 
+/* ---- what the calls did, read off the same frames the replay shows ----
+   Nothing here is invented: every figure below is a sum over the recorded
+   tool_call and model.response frames, so the tab and the timeline can never
+   disagree. Where the record shows an absence, this reports the absence. */
+const TFAM = {
+  read:   {l:"Read-only",         s:"observes and returns"},
+  query:  {l:"Data query",        s:"bulk read from a store"},
+  file:   {l:"File mutation",     s:"writes and edits files"},
+  exec:   {l:"Code execution",    s:"runs a command"},
+  vcs:    {l:"Source control",    s:"changes code history"},
+  record: {l:"Record write",      s:"updates a record"},
+  message:{l:"Messaging",         s:"speaks on the org’s behalf"},
+  finance:{l:"Financial control", s:"moves funds"}
+};
+const TFAM_ORDER = ["read","query","record","message","file","exec","vcs","finance"];
+const FAM_OF = {"repo.search":"read", "repo.read_file":"read", "repo.diff":"read", "issue.read":"read",
+  "graph.query":"query", "repo.write_file":"file", "shell.run":"exec",
+  "github.open_pull_request":"vcs", "issue.comment":"record", "payments.issue_refund":"finance"};
+
+const CALLS = (function(){
+  const rows = [];
+  FRAMES.forEach(f => {
+    if(f.kind !== "tool_call") return;
+    const st = f.payload.step, out = st.out || {};
+    rows.push({ tool:st.tool, ver:st.ver, fam:FAM_OF[st.tool] || "record",
+      ms: out.duration_ms || 0, ok: !(out.ok === false || out.exit === 1),
+      risk:(st.classes||{}).risk, eff:(st.classes||{}).side_effect, seq:f.seq, turn:f.turn });
+  });
+  return rows;
+})();
+
+ROLL.calls = CALLS;
+ROLL.toolMs = CALLS.reduce((a,c) => a + c.ms, 0);
+ROLL.modelMs = FRAMES.filter(f => f.kind === "model.response")
+  .reduce((a,f) => a + (((f.payload.step||{}).res||{}).latency_ms || 0), 0);
+ROLL.wallMs = ROLL.turns[ROLL.turns.length-1].end - ROLL.turns[0].start;
+ROLL.gapMs = ROLL.turns.slice(1).reduce((a,t,i) => a + Math.max(0, t.start - ROLL.turns[i].end), 0);
+ROLL.otherMs = Math.max(0, ROLL.wallMs - ROLL.modelMs - ROLL.toolMs - ROLL.gapMs);
+
+ROLL.families = (function(){
+  const by = {};
+  CALLS.forEach(c => {
+    const f = by[c.fam] || (by[c.fam] = {fam:c.fam, calls:0, ms:0, failed:0, tools:{}});
+    f.calls++; f.ms += c.ms; if(!c.ok) f.failed++; f.tools[c.tool] = 1;
+  });
+  return Object.keys(by).map(k => { by[k].distinct = Object.keys(by[k].tools).length; return by[k]; })
+    .sort((a,b) => b.calls - a.calls || TFAM_ORDER.indexOf(a.fam) - TFAM_ORDER.indexOf(b.fam));
+})();
+
+/* Concurrency, as the record has it. Every model step in this run asked for one
+   tool, so the fan-out is 1.00 and there is nothing to average away. That is a
+   finding, not a gap in the instrument. */
+ROLL.batches = (function(){
+  const b = {}; CALLS.forEach(c => { const k = c.seq - 1; (b[k] = b[k] || []).push(c); });
+  return Object.keys(b).map(k => b[k]);
+})();
+ROLL.fanOut = CALLS.length / Math.max(1, ROLL.batches.length);
+ROLL.maxPar = ROLL.batches.reduce((a,x) => Math.max(a, x.length), 0);
+ROLL.parallelBatches = ROLL.batches.filter(x => x.length > 1).length;
+
+/* Speculative prefetch: a read started before the step is final. None was taken
+   in this run. What it would have saved is bounded by the model latency it could
+   have hidden behind, which the frames already record. */
+ROLL.spec = (function(){
+  const model = FRAMES.filter(f => f.kind === "model.response");
+  let eligible = 0, hideable = 0;
+  CALLS.forEach(c => {
+    if(c.fam !== "read" && c.fam !== "query") return;
+    eligible++;
+    let prev = 0;
+    for(const f of model){ if(f.seq < c.seq) prev = ((f.payload.step||{}).res||{}).latency_ms || 0; }
+    hideable += Math.min(c.ms, prev);
+  });
+  return { eligible, started:0, used:0, discarded:0, hideableMs:hideable };
+})();
+
+
 /* ---- findings (§12.8), each with the frames that prove it ---- */
 const FINDINGS = [
   { id:"fnd_01JB7K9A", title:"Spend on an approach the operator reversed", level:"run",
@@ -1481,7 +1599,8 @@ function costStrip(){
     ["spent so far", usd(spent, 2), "of " + usd(R.total, 2) + " USD \u00b7 at frame " + cur.seq, true],
     ["tokens", n(allTokens), pct(R.cacheHit) + " of the prompt from cache"],
     ["steps", n(R.steps), R.modelCalls + " model \u00b7 " + R.toolCalls + " tool \u00b7 " + R.toolDenied + " denied"],
-    ["effective input", "$" + (R.effInputMicrosPerM/1e6).toFixed(2) + "<small> /M</small>", "against a $3.00 /M list price"]
+    ["effective input", "$" + (R.effInputMicrosPerM/1e6).toFixed(2) + "<small> /M</small>", "against a $3.00 /M list price"],
+    ["wall clock", dur(R.wallMs/1000), pct((R.otherMs+R.gapMs)/R.wallMs, 0) + " waiting \u00b7 " + dur(R.modelMs/1000) + " in the model"]
   ];
   const segs = R.turns.map(t => {
     const past = cur.seq > t.last;
@@ -1512,6 +1631,7 @@ function costStrip(){
 
 function tabs(){
   const t = [["replay","Replay", FRAMES.length + " frames"], ["waterfall","Waterfall", ROLL.turns.length + " turns"],
+             ["calls","Calls", ROLL.calls.length + " calls"],
              ["chain","Chain & seal", ROLL.checkpoints + " checkpoints"], ["records","Records", ROLL.records]];
   return '<nav class="tabs" role="tablist">' + t.map(x =>
     '<button role="tab" type="button" aria-selected="' + (STATE.tab===x[0]) + '" class="' + (STATE.tab===x[0] ? "on" : "") +
@@ -2223,6 +2343,83 @@ function waterfallTab(){
     '<p class="muted" style="font-size:11.5px;margin:12px 0 0">Every figure on this tab is a rollup over the frames in the timeline and is rebuildable from them. The frame is the record; the rollup is a derived index.</p></div>';
 }
 
+
+/* ================================================================
+   PART C5 — calls, concurrency and prefetch
+   ================================================================ */
+function callsTab(){
+  const R = ROLL, C = R.calls;
+  const famMx = R.families.length ? R.families[0].calls : 1;
+  const msMx = R.families.length ? Math.max(...R.families.map(f => f.ms)) : 1;
+  const reads = R.families.filter(f => f.fam === "read" || f.fam === "query").reduce((a,f) => a + f.calls, 0);
+
+  const famRows = R.families.map(f => {
+    const d = TFAM[f.fam] || TFAM.record;
+    return '<div class="cfrow"><div class="nm">' + esc(d.l) +
+      "<small>" + f.distinct + " tool" + (f.distinct === 1 ? "" : "s") + " · " + esc(d.s) + "</small></div>" +
+      '<div class="cftrack"><span class="cfbar" style="width:' + (f.calls/famMx*100).toFixed(1) + '%"></span>' +
+      '<span class="cflbl">' + f.calls + " call" + (f.calls === 1 ? "" : "s") + " · " + pct(f.calls/C.length, 0) + "</span></div>" +
+      '<div class="amt">' + (f.ms/1000).toFixed(1) + 's<small>' +
+      (f.failed ? f.failed + " failed" : "none failed") + "</small></div></div>";
+  }).join("");
+
+  const callRows = C.map(c => {
+    const d = TFAM[c.fam] || TFAM.record;
+    return "<tr><td class='m'>" + esc(c.tool) + "<small class='dim'>@" + esc(c.ver) + "</small></td>" +
+      "<td>" + esc(d.l) + "</td>" +
+      "<td>" + chip(c.eff === "none" ? "no side effect" : esc(c.eff), c.eff === "none" ? "neutral" : "approval") + "</td>" +
+      "<td>" + chip(esc(c.risk), c.risk === "low" ? "allowed" : c.risk === "medium" ? "approval" : "denied") + "</td>" +
+      "<td class='r m'>T" + c.turn + "</td><td class='r m'>" + n(c.ms) + " ms</td>" +
+      "<td class='r'>" + (c.ok ? '<span class="dim">ok</span>' : chip("failed", "failed")) + "</td></tr>";
+  }).join("");
+
+  const wall = [["model", R.modelMs, "cw-model"], ["tools", R.toolMs, "cw-tool"],
+                ["waiting inside a turn", R.otherMs, "cw-wait"], ["between turns", R.gapMs, "cw-rest"]];
+  const waiting = R.otherMs + R.gapMs;
+  const wallBar = '<div class="cstack">' + wall.filter(w => w[1] > 0).map(w =>
+    '<i class="' + w[2] + '" style="flex:' + w[1] + '" title="' + esc(w[0]) + " · " + dur(w[1]/1000) + '"></i>').join("") + "</div>" +
+    '<div class="cleg">' + wall.filter(w => w[1] > 0).map(w =>
+    '<span><i class="' + w[2] + '"></i>' + esc(w[0]) + " <b>" + dur(w[1]/1000) + "</b></span>").join("") + "</div>";
+
+  return '<div class="wf calls">' +
+    '<div class="wfchart"><div class="cchead"><h2>Wall clock</h2>' +
+      '<span class="muted">' + dur(R.wallMs/1000) + " from the first frame to the last · every figure summed off the frames</span></div>" +
+      wallBar +
+      '<p class="muted cnote">The model spent ' + dur(R.modelMs/1000) + " thinking and the tools " + (R.toolMs/1000).toFixed(1) +
+      "s answering. The other " + pct(waiting/R.wallMs, 0) + " is the run waiting rather than working — the operator's pause and steer in turn 3, " +
+      "and the wait on the verification in turn 4. Wall clock is the number an operator feels; it is not the number they are billed for.</p></div>" +
+
+    '<div class="wfchart"><div class="cchead"><h2>Calls by family</h2>' +
+      '<span class="muted">' + C.length + " calls · " + R.families.length + " families · " + reads +
+      " read-only, " + (C.length - reads) + " with a side effect</span></div>" + famRows +
+      '<p class="muted cnote">A family says what a tool <b>acts on</b>. It is orthogonal to the hazard and to what the belt decided, both of which are on every row below.</p></div>' +
+
+    '<div class="wfchart"><div class="cchead"><h2>Every call, in order</h2>' +
+      '<span class="muted">' + n(R.toolMs) + " ms of tool time · " + R.toolDenied + " denied · " + R.toolFailed + " failed</span></div>" +
+      '<div class="ctw"><table class="tb" data-lt="off"><thead><tr><th>Tool</th><th>Family</th><th>Side effect</th><th>Hazard</th>' +
+      "<th class='r'>Turn</th><th class='r'>Duration</th><th class='r'>Result</th></tr></thead><tbody>" + callRows + "</tbody></table></div></div>" +
+
+    '<div class="ccols">' +
+      '<div class="wfchart"><div class="cchead"><h2>Concurrency</h2><span class="muted">tools per model step</span></div>' +
+        '<div class="cbig">' + R.fanOut.toFixed(2) + "<small> tools per step</small></div>" +
+        kv([["Steps that called a tool", R.batches.length],
+            ["Steps that called more than one", R.parallelBatches + " · nothing ran in parallel"],
+            ["Widest step", R.maxPar + " tool"],
+            ["Tool time", (R.toolMs/1000).toFixed(1) + "s, fully serial"]]) +
+        '<p class="muted cnote">Every step in this run asked for exactly one tool, so each call waited for the one before it. ' +
+        "The four reads in turn 1 do not depend on each other; asked for together they would have cost the slowest of them rather than the sum.</p></div>" +
+
+      '<div class="wfchart"><div class="cchead"><h2>Speculative prefetch</h2><span class="muted">started before the step is final</span></div>' +
+        '<div class="cbig">0<small> of ' + R.spec.eligible + " eligible</small></div>" +
+        kv([["Eligible", R.spec.eligible + " read-only calls"],
+            ["Started early", "none in this run"],
+            ["Recoverable", (R.spec.hideableMs/1000).toFixed(1) + "s of tool time sat inside a model call that was still streaming"],
+            ["Never eligible", "a write, a merge, a refund"]]) +
+        '<p class="muted cnote">A read the harness expects can be started while the model is still speaking, and the answer is there when it asks. ' +
+        "Only read-only tools qualify: a speculated write that the model never asks for is an effect nobody wanted. Policy runs on the speculated call exactly as it would on a real one.</p></div>" +
+    "</div></div>";
+}
+
 function chainTab(){
   const s = RUN.seal;
   const cps = FRAMES.filter(f => f.kind === "checkpoint");
@@ -2596,6 +2793,7 @@ function render(){
     html = header() + (isArchived() ? archiveNotice() : "") + costStrip() + tabs();
     if(STATE.tab === "replay")         html += '<div class="player">' + timeline() + inspector() + rail() + "</div>";
     else if(STATE.tab === "waterfall") html += waterfallTab();
+    else if(STATE.tab === "calls")     html += callsTab();
     else if(STATE.tab === "chain")     html += chainTab();
     else                               html += recordsTab();
   }
