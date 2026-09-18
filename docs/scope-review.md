@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Applied on 2026-09-14 to the spec, the plan, the mockups and the page specs. Amended 2026-09-15: the maintainer kept the in-app agent (2026-09-14) and Neo4j in the architecture (2026-09-15), and GAU pricing is the one price list (2026-09-14, reaffirmed 2026-09-15) |
+| **Status** | Applied on 2026-09-14 to the spec, the plan, the mockups and the page specs. Amended 2026-09-15: the maintainer kept the in-app agent (2026-09-14) and Neo4j in the architecture (2026-09-15), and GAU pricing is the one price list (2026-09-14, reaffirmed 2026-09-15). Amended 2026-09-18: see "Amendment of 2026-09-18" at the end |
 | **Date** | 2026-09-14 |
 | **Owner** | Mac Anderson |
 | **Source** | A product review of the Mission Control spec and the Witness spec against the oxagen repository, written for the council meeting of Wednesday 2026-09-16 |
@@ -80,3 +80,16 @@ The whole argument rests on assumptions the council can test in an hour. If an a
 | Reconciliation | §0 row 12, §2, §4.1, §12.1, §12.4, §12.9, App. A.7, App. E | none | the Reconciliation tab and dialog; the Mandate page's ledger note reads from the connection's webhook |
 | Roadmap | §17 | the batch plan | W14 added |
 | The price list | §0 row 12, §12.1, §12.10, §18 | billing lane (P8, A8, G13) | the Billing page still prints the proven-run price list; its page spec (`billing.md`) carries the GAU price list (2026-09-14, reaffirmed 2026-09-15) |
+
+## Amendment of 2026-09-18
+
+This review stands. One of its cuts needs a sentence of precision after the steering, graph and gateway review of 2026-09-18, which the maintainer approved in full (`reviews/2026-09-18-steering-graph-gateway-review.md`).
+
+| What | Verdict | What it means |
+|---|---|---|
+| The ontology **engine** | Stays cut | No connectors, no entity resolution, no inferred ontology, no Cypher layer and no Ontology page. Nothing in this review's reasoning changed |
+| An Ontology **tab** under Steering | New, and small | Steering becomes the hub for everything that can steer an agent, with seven tabs: Records, Skills, Memory, Ontology, Policy, Proposals, Preview. The Ontology tab is a home for ontology notes that steer: a term, its definition and what it is about, written by a person and published through a pull request like a record. It is a file somebody wrote and somebody merged. It is not the engine, and it brings none of the engine's cost |
+| The graph | Becomes the steering index, later | Neo4j stays in the architecture (2026-09-15). In Phase 3 of the refactor path every steering item is projected into the graph as a `:Record` node with `ABOUT` edges, one direction from the Postgres registry, verified by hash, and the assembler's relevance stage reads it. Postgres stays as the fallback behind the same port, and Phase 3 waits until the knowledge graph is on by default. Delivery never waits for the graph (`mission-control-spec.md` §4.2, §10.5, §17.2) |
+| Skills | Move under Steering | Skills is a tab of the hub and has no top-level navigation entry. This review did not rule on Skills, which postdates it |
+
+The question this review asked of every surface still applies to the new tab: it works before the customer configures anything, because an empty Ontology tab costs nothing and steers nothing.

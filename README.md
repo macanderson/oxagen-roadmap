@@ -70,8 +70,8 @@ and states exist is `mockups/catalog.mjs`, which the stories and the checker bot
 
 W7 (the ontology) and the assistant half of W11 were cut by the scope review of 2026-09-14
 (`docs/scope-review.md`); W12 was a coverage audit, now `tools/check-mockup.mjs`. W13 is the Skills
-page (`#/a-intel/<ws>/skills`), its off-by-default gate and the interjected run; it is not in the spec
-yet (`docs/w13-in-the-loop-scenario.md`). W14 is the
+tab of Steering (`#/a-intel/<ws>/steering/skills`; Skills moved under Steering on 2026-09-18), its
+off-by-default gate and the interjected run (`docs/w13-in-the-loop-scenario.md`, spec §10.6). W14 is the
 definition of done (`docs/dod-spec.md`). A scenario is `SCENARIOS["id"]` in `mockups/src/engine.js`
 and a row in `mockups/catalog.mjs`. `docs/videos-mockup-narrated.md` has the narrated walkthroughs.
 
@@ -90,7 +90,11 @@ a contents rail per document; a section has a link (`#spec/8-6-definition-of-don
 - `demo-mockup-prompts.md`, `consolidation.md`, `feedback-mockups.md`, `videos-mockup-narrated.md`, `w13-in-the-loop-scenario.md`: how the mockups were made and reviewed
 
 The spec, the plan and the desktop spec are also carried in the oxagen monorepo under
-`docs/specs/`; when one copy changes, change the other.
+`docs/specs/`. For the spec and the plan, this repository's copy is canonical and the oxagen copy
+is carried for build agents. For the desktop spec, the oxagen copy is canonical and newer. No
+build step joins them, so a change is made in both by hand, in the same change set, and each file's
+header names the sections that are identical in both and the ones that still differ.
+`docs/reviews/` holds dated reviews as records; they are not on the documents page.
 
 ## The verification badge
 

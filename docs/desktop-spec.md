@@ -8,6 +8,8 @@
 | **Source** | `docs/specs/oxagen-desktop` on branch `worktree-oxagen-installer`; Tacho 2.1.1 |
 | **Ships as** | macOS **.dmg**; Linux **.deb / .rpm / .AppImage**; Windows **.msi / .exe** |
 | **Summary** | The Oxagen app puts a machine under Oxagen control: it installs the `oxagen` CLI and the Tacho wrapper for Claude Code and Codex, signs the machine in to an organization, enrolls it against a workspace, and gives the operator one window to see the connection, move the host to another workspace or org, add or drop a wrapper, sign out, and unenroll. |
+| **Amended 2026-09-18** | §14: `tachod` grows into the gateway (target, Phases 4 and 5), and what the app installs today said plainly. §6: the hooks are client-attested and fail-open, where earlier text said "fail closed". |
+| **Canonical copy** | The canonical copy of this spec is `docs/specs/oxagen-desktop/spec.md` in https://github.com/macanderson/oxagen, which is newer: it carries Stella and custom agents in §6, and §13 (rev 2, the connected tier). This copy stops before §13. §14 says the same thing in both. |
 
 
 ## 1. What rev 1 ships
@@ -148,7 +150,7 @@ Tacho's spec (§13) reserved Codex and asked for a spike before committing. The 
 <thead><tr><th></th><th>Claude Code</th><th>Codex CLI</th></tr></thead>
 <tbody>
 <tr><td>Hook file</td><td><code>~/.claude/settings.json</code> (<code>CLAUDE_CONFIG_DIR</code>)</td><td><code>~/.codex/hooks.json</code> (<code>CODEX_HOME</code>); same <code>{hooks: {Event: [{matcher, hooks: [{type, command, timeout}]}]}}</code> shape</td></tr>
-<tr><td>Enforcement events</td><td colspan="2">SessionStart · UserPromptSubmit · PreToolUse · PermissionRequest · Stop: command hooks, fail closed, same stdin fields (<code>session_id</code>, <code>hook_event_name</code>, <code>tool_name</code>, <code>tool_input</code>, <code>cwd</code>, <code>transcript_path</code>)</td></tr>
+<tr><td>Enforcement events</td><td colspan="2">SessionStart · UserPromptSubmit · PreToolUse · PermissionRequest · Stop: command hooks, client-attested and fail-open (with the daemon down the hook answers <code>{}</code>, which the harness reads as allow, except <code>PreToolUse</code>, which decides from the cached bundle; corrected 2026-09-18, earlier text said "fail closed"), same stdin fields (<code>session_id</code>, <code>hook_event_name</code>, <code>tool_name</code>, <code>tool_input</code>, <code>cwd</code>, <code>transcript_path</code>)</td></tr>
 <tr><td>Telemetry events</td><td>28 events as <code>http</code> hooks straight to the daemon; OpenTelemetry export through the env block</td><td>PostToolUse · SubagentStart · SubagentStop · PreCompact · PostCompact · SessionEnd · Interrupt as command hooks (Codex has only <code>command</code>); no env block, no OTel</td></tr>
 <tr><td>Decision</td><td colspan="2"><code>hookSpecificOutput.permissionDecision</code> allow / deny with a reason; exit 0 always</td></tr>
 <tr><td>Hook command</td><td><code>&lt;bin&gt;/tacho hook --enrollment tch_…</code></td><td><code>&lt;bin&gt;/tacho hook --enrollment tch_… --harness codex</code></td></tr>
@@ -237,3 +239,25 @@ Not verified here: an end-to-end enroll against a live control plane from inside
 | `tools/sea/compile.mjs` | bundle → single executable |
 | `.github/workflows/desktop.yml` | the four-target release matrix |
 | `apps/cli/src/commands/tacho.ts` | `oxagen tacho reassign`, `--harness` on enroll |
+
+
+## 14. After rev 2: `tachod` grows into the gateway (2026-09-18)
+
+> **Status of this section (2026-09-18).** Target, not built. Approved by the maintainer on 2026-09-18 with the steering, graph and gateway review. ADR "tachod grows into the gateway: a loopback model proxy and an MCP aggregator". It is Phase 4 of the refactor path, and the contained tier below is Phase 5 (the Mission Control spec §17.2, the implementation plan §8). Everything above this section describes what the app installs today. §13 (rev 2, the connected tier) is in the canonical copy only.
+
+**What the app installs today, said plainly.** Enrollment is file edits plus a daemon. It writes hook entries into each harness's settings file, installs `tachod`, registers it to start at login, and enrolls the host with a device key. No Oxagen command launches the agent. `tachod` is a recorder plus a kill switch: the signed bundle it receives carries empty permissions, `budget.mode = "observed"` and `context.system = null`, so nothing steers the agent and no rule can fire beyond host status and a paused run. No model proxy exists. No sandbox exists. The hooks are client-attested and fail-open: with the daemon down the hook answers `{}`, which the harness reads as allow, except `PreToolUse`, which decides from the cached bundle (`packages/tacho/src/claude-code/hook-client.ts`).
+
+**What `tachod` becomes.** The same daemon, on the same loopback listener, with four parts:
+
+| Part | What the installer and enrollment do for it | Status |
+|---|---|---|
+| Hook adapter | Writes the hook entries (§6) | Built |
+| Control channel | Enrolls the host and keeps the signed bundle current (§2) | Built |
+| MCP aggregator | Re-serves the harness's existing MCP servers through loopback, so their tool calls pass Oxagen. Enrollment displaces the harness's MCP entries and unenroll restores them, extending the merge and strip logic in `packages/tacho/src/host/mcp-config-writer.ts`. Where a vendor offers managed settings, the managed variant pins them | Phase 4. Today the gateway is registered only into Claude Desktop (§13) |
+| Loopback model proxy | Passes Anthropic Messages and OpenAI Responses requests through to the vendor with streaming. Enrollment writes the harness's base URL setting to point at it. Prompt bodies never leave the machine: only digests and usage go up. The vendor credential stays on the machine and Oxagen never holds it | Phase 4 |
+
+**What changes in the panels.** This machine shows the tier as one of four words, computed from what was actually routed: `observe`, `harness`, `gateway`, `contained`. It never shows a stronger word than the run earned. Spend shows its basis, `observed` or `self-reported`. Until Phase 4 every number for a wrapped agent is self-reported, and Codex and Stella show as absent, never as zero. ADR "The tier ladder is four words, computed from what was routed" settles how a connected host (§13, ADR-078) reads on that ladder. Until that ADR lands, §13's rule that wrapped and connected are not ranked against each other stands in every panel.
+
+**The contained tier is not this app's job on a laptop.** `oxagen run -- <agent>` (Phase 5) launches an agent under an OS sandbox whose only egress is the gateway. It is aimed at CI, headless runs, cloud runners and managed devices first, and it is never mandatory on a developer's own laptop. The app may show that a run was contained. It does not force containment.
+
+**One open risk gates the proxy:** whether Claude Code and Codex subscription logins, as opposed to API keys, pass cleanly through a base URL rewrite, and whether the vendors' terms allow it. It is a spike, not a decision, and it gates Phase 4 only. The app writes no base URL until it is answered.
