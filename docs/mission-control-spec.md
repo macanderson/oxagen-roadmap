@@ -2302,7 +2302,7 @@ The current web app has 70 page files. Nine remain: six at workspace scope, thre
 | # | Page | Route | Absorbs today's routes | Job |
 |---|---|---|---|---|
 | 1 | **Fleet** | `/{org}/{ws}` | `[ws]` (workspace home), `sessions`, `workbench`, `access/sessions`, `dashboard`, and the approvals queue as a panel | every run, live and recent; pending approvals; pause, resume, cancel |
-| 2 | **Run** | `/{org}/{ws}/runs/{run}` | `sessions/*` detail, `knowledge/citations` | frame-by-frame player, cost strip, approvals on this run, steer, fork, bisect, export |
+| 2 | **Run** | `/{org}/{ws}/runs/{run}` | `sessions/*` detail, `knowledge/citations` | what the run produced, told as the story it produced it in (the artifacts, the reads demoted to marks, and the gate at the position it stopped the run); frame-by-frame player, cost strip, approvals on this run, steer, fork, bisect, export |
 | 3 | **Agents** | `/{org}/{ws}/agents` and `/{run}`-style detail `/{agent}` | `workbench/agents`, `workbench/agents/[agentId]`, `workbench/agents/new`, `workbench/environments`, `settings/agent-defaults`, `developer/mcp` | identity, credentials, roles, toolbelt, mandates, budgets, enrollment |
 | 4 | **Tools** | `/{org}/{ws}/tools` | `workbench/tools`, `workbench/tools/agent tools`, `workbench/tools/mcp`, `settings/mcp-server-registries`, `marketplace`, `marketplace/agent-tools`, `marketplace/integrations`, `marketplace/integrations/[connectorId]`, `governance/agent tools`, `governance/policies`, `access/reviews` | registry, connections, mandates ledger, policy versions with their tests, kill switches, auto-approval rules |
 | 5 | **Steering** | `/{org}/{ws}/steering` | `knowledge/memory` | records, proposals, Context PRs |
