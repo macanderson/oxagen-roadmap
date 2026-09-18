@@ -214,7 +214,7 @@ dialog .db .row{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
 (() => {
 "use strict";
 const D = JSON.parse(document.getElementById("roadmap-data").textContent || "{}");
-const ORG = D.repos?.owner || "oxagenai";
+const ORG = D.repos?.owner || "macanderson";
 const ROADMAP_REPO = D.repos?.roadmap || "roadmap";
 const REPOS = D.repos?.tracked || ["roadmap", "oxagen", "stella"];
 let GH = "GitHub";              // connector display name; confirmed against listTools() at boot

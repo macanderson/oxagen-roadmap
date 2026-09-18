@@ -2,7 +2,7 @@
 
 One place to see what Oxagen is building next, exactly how it will look, and what is still undecided.
 
-- **The roadmap app** (`index.html`, built from `roadmap/`): the gaps between the Mission Control mockups and the build, the witness and definition-of-done features, the open decisions, and the GitHub issues, live. Published as a claude.ai artifact where Claude is bound to the page, and served by GitHub Pages at https://oxagenai.github.io/roadmap/ as a read-only fallback.
+- **The roadmap app** (`index.html`, built from `roadmap/`): the gaps between the Mission Control mockups and the build, the witness and definition-of-done features, the open decisions, and the GitHub issues, live. Published as a claude.ai artifact where Claude is bound to the page, and served by GitHub Pages at https://macanderson.github.io/roadmap/ as a read-only fallback.
 - **The mockups** (`mockups/`): the master mockup, every page in every state, desktop and mobile, and the guided scenarios. The roadmap frames them, so a card leads to its wireframe in one click.
 - **The documents** (`docs/`): the Mission Control spec, the DoD spec, the witness spec, the desktop spec, the plan, the scope review, and the reviews.
 
@@ -37,7 +37,7 @@ What the app does, and where each part lives:
 | Gaps | every mockup page and wizard with its build status, the concrete gaps, the backend gaps, the spec, the wireframe, the linked issues | `data.json` `surfaces[]`, the mockup pages' specs |
 | Witness, Done | the proof and definition-of-done features, and which ones need a decision first | `docs/witness-spec.md`, `docs/dod-spec.md` |
 | Decisions | each open question with its recommendation; decide it in place, argue it with Claude, or open it as an issue | `docs/implementation-plan.md` §6, the scope review, the feedback |
-| Issues | open issues in `oxagenai/oxagen`, `oxagenai/stella` and this repo, live through the viewer's GitHub connector, with the triage snapshot (theme, kind, spec backing) beside each | GitHub, `data.json` `issue_annotations` |
+| Issues | open issues in `macanderson/oxagen`, `macanderson/stella` and this repo, live through the viewer's GitHub connector, with the triage snapshot (theme, kind, spec backing) beside each | GitHub, `data.json` `issue_annotations` |
 | Wireframes | the master mockup framed: any page, any state, desktop or phone, any scenario | `mockups/missioncontrol.html` |
 | Specs | the documents, on GitHub and framed | `docs/missioncontrol-docs.html` |
 
@@ -50,7 +50,7 @@ In the claude.ai artifact the page gains what a static file cannot have:
 
 ### Refreshing the content
 
-`roadmap/data.json` is the roadmap's content. It was assembled on 2026-09-17 from a page-by-page comparison of `mockups/pages/*.md` against `apps/app` in `oxagenai/oxagen`, the witness and DoD specs, the plan's open decisions, and a triage of every open issue in `oxagenai/oxagen` and `oxagenai/stella`. To refresh it, redo that comparison (an agent session with both repos checked out does it in minutes) and write the same shape; then `node tools/build-roadmap.mjs` and republish the artifact. Overrides made in the app live in the shared store and survive a rebuild.
+`roadmap/data.json` is the roadmap's content. It was assembled on 2026-09-17 from a page-by-page comparison of `mockups/pages/*.md` against `apps/app` in `macanderson/oxagen`, the witness and DoD specs, the plan's open decisions, and a triage of every open issue in `macanderson/oxagen` and `macanderson/stella`. To refresh it, redo that comparison (an agent session with both repos checked out does it in minutes) and write the same shape; then `node tools/build-roadmap.mjs` and republish the artifact. Overrides made in the app live in the shared store and survive a rebuild.
 
 ## The master
 
