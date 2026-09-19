@@ -7,7 +7,11 @@ import { mockupPlugin } from "./mockup-plugin.mjs";
 export default {
   framework: "@storybook/html-vite",
   stories: ["../mockups/stories/**/*.mdx", "../mockups/stories/**/*.stories.js"],
-  addons: ["@storybook/addon-docs"],
+  addons: [
+    "@storybook/addon-docs",
+    "@storybook/addon-vitest",
+    "@chromatic-com/storybook"
+  ],
   core: { disableTelemetry: true },
   async viteFinal(config) {
     config.plugins = [...(config.plugins || []), mockupPlugin()];
