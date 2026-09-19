@@ -107,6 +107,7 @@
     "docs/adr/ADR-104-a-harness-label-round-trips-whatever-it-holds.md",
     "docs/adr/ADR-105-an-archived-workspace-accepts-no-machine-credential.md",
     "docs/adr/ADR-106-retirement-revokes-what-it-scoped.md",
+    "docs/adr/ADR-107-list-mandates-admits-the-roles-request-mandate-admits.md",
     "docs/adr/ADR-108-a-mandate-limit-carries-its-own-measure-kind.md"
   ],
   "adrs": {
@@ -958,6 +959,14 @@
       "status": null,
       "title": "Retirement revokes what it scoped, rather than refusing while it exists"
     },
+    "ADR-107": {
+      "date": null,
+      "decision": "**`list_mandates` and `get_mandate` admit exactly the same roles `request_mandate`'s handler already enforces, and no contract in this family grants a nonexistent org \"Member\" role:**",
+      "id": "ADR-107",
+      "path": "docs/adr/ADR-107-list-mandates-admits-the-roles-request-mandate-admits.md",
+      "status": null,
+      "title": "`list_mandates` and `get_mandate` admit the roles `request_mandate` admits"
+    },
     "ADR-108": {
       "date": null,
       "decision": "### 1. The kind is worked out once, at write time, and stored",
@@ -1164,6 +1173,19 @@
       "source": "docs/adr/ADR-106-retirement-revokes-what-it-scoped.md",
       "status": "decided",
       "title": "Retirement revokes what it scoped, rather than refusing while it exists"
+    },
+    "ADR-107": {
+      "blocks": [],
+      "decided": "ADR-107: `list_mandates` and `get_mandate` admit the roles `request_mandate` admits. **`list_mandates` and `get_mandate` admit exactly the same roles `request_mandate`'s handler already enforces, and no contract in this family grants a nonexistent org \"Member\" role:**",
+      "decided_on": "2026-09-19",
+      "id": "ADR-107",
+      "origin": "adr",
+      "pr": 3440,
+      "question": "Decided in the repository: `list_mandates` and `get_mandate` admit the roles `request_mandate` admits.",
+      "recommendation": null,
+      "source": "docs/adr/ADR-107-list-mandates-admits-the-roles-request-mandate-admits.md",
+      "status": "decided",
+      "title": "`list_mandates` and `get_mandate` admit the roles `request_mandate` admits"
     },
     "ADR-108": {
       "blocks": [],
@@ -1687,15 +1709,15 @@
     },
     "I-oxagen#3138": {
       "blocks": [],
-      "decided": null,
-      "decided_on": null,
+      "decided": "Closed by #3440.",
+      "decided_on": "2026-09-19",
       "html_url": "https://github.com/macanderson/oxagen/issues/3138",
       "id": "I-oxagen#3138",
       "origin": "issue",
       "question": "A person who requests a mandate cannot read the draft they just created, because list_mandates refuses them",
       "recommendation": null,
       "source": "oxagen#3138",
-      "status": "open",
+      "status": "decided",
       "title": "A person who requests a mandate cannot read the draft they just created, because list_mandates refuses them"
     },
     "I-oxagen#3142": {
@@ -2414,9 +2436,9 @@
       "title": "Residue from #3332: mandate freshness trusts unverified and operator-editable inputs, git probes block the hook path, and the retention class map is incomplete"
     }
   },
-  "generated_at": "2026-09-19T14:03:38.787Z",
+  "generated_at": "2026-09-19T17:15:49.797Z",
   "heads": {
-    "oxagen": "accaa23b68e50079e90d90fad6c75b4b59eb9402"
+    "oxagen": "80424b9a11ad5c171e49fdf849138c071df38c78"
   },
   "issues": {
     "oxagen#2592": {
@@ -4028,7 +4050,7 @@
     },
     "oxagen#3138": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-19T14:13:07Z",
       "closes": [],
       "has_spec_backing": true,
       "html_url": "https://github.com/macanderson/oxagen/issues/3138",
@@ -4054,9 +4076,9 @@
       "spec_refs": [
         "ADR-104"
       ],
-      "state": "open",
+      "state": "closed",
       "title": "A person who requests a mandate cannot read the draft they just created, because list_mandates refuses them",
-      "updated_at": "2026-09-19T09:47:51Z"
+      "updated_at": "2026-09-19T14:13:07Z"
     },
     "oxagen#3141": {
       "author": "macanderson",
@@ -10639,7 +10661,7 @@
     },
     "oxagen#3440": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-19T14:13:07Z",
       "closes": [
         3138
       ],
@@ -10648,7 +10670,7 @@
       "is_pr": true,
       "kind": null,
       "labels": [],
-      "merged_at": null,
+      "merged_at": "2026-09-19T14:13:06Z",
       "milestone": null,
       "needs_decision": false,
       "number": 3440,
@@ -10660,9 +10682,9 @@
         "ADR-104",
         "ADR-107"
       ],
-      "state": "open",
+      "state": "closed",
       "title": "fix(mandates): list_mandates admits the roles request_mandate admits",
-      "updated_at": "2026-09-19T13:45:56Z"
+      "updated_at": "2026-09-19T14:13:08Z"
     },
     "oxagen#3441": {
       "author": "macanderson",
@@ -26362,9 +26384,19 @@
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "surface",
-      "last_merge": "2026-09-19T07:12:09Z",
+      "last_merge": "2026-09-19T14:13:06Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-19T14:13:06Z",
+          "number": 3440,
+          "repo": "oxagen",
+          "title": "fix(mandates): list_mandates admits the roles request_mandate admits",
+          "touched": [
+            "packages/oxagen/src/contracts/mandate.get.ts"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-19T07:12:09Z",
@@ -26389,7 +26421,7 @@
       ],
       "open_issues": 0,
       "page": null,
-      "refreshed_at": "2026-09-19T10:53:47.619Z",
+      "refreshed_at": "2026-09-19T17:15:49.797Z",
       "shared_page": false
     },
     "onboarding-organization": {
@@ -27929,8 +27961,8 @@
     }
   },
   "last_run": {
-    "at": "2026-09-19T14:03:38.787Z",
-    "calls": 9,
+    "at": "2026-09-19T17:15:49.797Z",
+    "calls": 7,
     "quiet": false
   },
   "milestones": {
@@ -27965,12 +27997,12 @@
     "M2": {
       "built": 4,
       "last_merge": {
-        "merged_at": "2026-09-19T07:50:45Z",
-        "number": 3271,
+        "merged_at": "2026-09-19T14:13:06Z",
+        "number": 3440,
         "repo": "oxagen",
-        "title": "cost: record and show run cost — auto-seeded price book, negotiated rates, unpriced-model surfacing"
+        "title": "fix(mandates): list_mandates admits the roles request_mandate admits"
       },
-      "merged_prs": 4,
+      "merged_prs": 5,
       "not_started": 2,
       "open_issues": 5,
       "partial": 2,
@@ -31457,6 +31489,43 @@
       "repo": "oxagen",
       "title": "fix(mandates): a retired agent's mandate is revoked, not left active"
     },
+    "oxagen#3440": {
+      "added": [
+        "docs/adr/ADR-107-list-mandates-admits-the-roles-request-mandate-admits.md"
+      ],
+      "author": "macanderson",
+      "closes": [
+        3138
+      ],
+      "files": [
+        "apps/app/ARCHITECTURE.md",
+        "apps/app/messages/agents.json",
+        "apps/app/messages/mandate.json",
+        "apps/app/messages/tools.json",
+        "docs/adr/ADR-107-list-mandates-admits-the-roles-request-mandate-admits.md",
+        "docs/adr/README.md",
+        "docs/capabilities/get_mandate.md",
+        "docs/capabilities/list_mandates.md",
+        "packages/handlers/src/_mandate.ts",
+        "packages/handlers/src/mandate.get.ts",
+        "packages/handlers/src/mandate.handlers.pg.test.ts",
+        "packages/handlers/src/mandate.list.ts",
+        "packages/oxagen/src/contracts/mandate.get.test.ts",
+        "packages/oxagen/src/contracts/mandate.get.ts",
+        "packages/oxagen/src/contracts/mandate.list.test.ts",
+        "packages/oxagen/src/contracts/mandate.list.ts",
+        "packages/oxagen/src/contracts/mandate.request.test.ts",
+        "packages/oxagen/src/contracts/mandate.request.ts",
+        "packages/oxagen/src/iam/resolve.ts"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3440",
+      "merged_at": "2026-09-19T14:13:06Z",
+      "number": 3440,
+      "refs": [],
+      "repo": "oxagen",
+      "title": "fix(mandates): list_mandates admits the roles request_mandate admits"
+    },
     "oxagen#3441": {
       "added": [],
       "author": "macanderson",
@@ -31542,8 +31611,8 @@
     }
   },
   "since": {
-    "oxagen": "2026-09-19T13:45:56Z",
-    "roadmap": "2026-09-19T14:03:38.787Z",
-    "stella": "2026-09-19T14:03:38.787Z"
+    "oxagen": "2026-09-19T14:13:08Z",
+    "roadmap": "2026-09-19T17:15:49.797Z",
+    "stella": "2026-09-19T17:15:49.797Z"
   }
 }
