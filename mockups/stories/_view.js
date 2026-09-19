@@ -23,7 +23,7 @@ export function view({ state, shell, theme, product, hash, file = MASTER }) {
     : "height:100vh;background:#000000";
   const frame = document.createElement("iframe");
   frame.src = src;
-  frame.title = hash || "Mission Control";
+  frame.title = hash || "Oxagen";
   frame.setAttribute("loading", "eager");
   frame.style.cssText = mobile
     ? "width:390px;height:844px;max-width:100%;border:10px solid #09090B;border-radius:38px;background:#000000;box-shadow:0 20px 60px rgba(0,0,0,.35)"

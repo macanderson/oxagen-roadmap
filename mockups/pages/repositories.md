@@ -7,7 +7,7 @@
 | Spec | §10 (the repository, steering and Context PRs); §11.2 (GitHub: events in, code graph up to date); Appendix F |
 | Design | `mockups/src/engine.js` → `pRepos()`, `repoTab()`, `copyTab()`, `chgTab()`, `cfgTab()`, `oxprDetail()`, `wzInit()`, `DLG_EXT.linkdir`, `DLG_EXT.workcopy`, `DLG_EXT.repo`, built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded · empty · loading · error · access denied |
-| Storybook | `Mission Control / … / repositories`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0\|1>#<route>` |
+| Storybook | `Oxagen / … / repositories`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0\|1>#<route>` |
 | Audit | `repositories.audit-prompt.md` |
 
 ## Job
@@ -100,7 +100,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 - **loaded** — the page as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell).
 - **empty** — "This workspace has no repository yet" — a workspace without a main repo cannot exist, so this is the moment between creating one and binding it. Until it is bound there is nowhere for a record to be published to. Action: **Add Oxagen to a repository**.
 - **loading** — the shell stays; the page body is replaced by the skeleton, so the operator keeps their bearings.
-- **error** — "Repositories could not be loaded" — `503 installation_unreachable`. Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by Mission Control. Actions: **Try again**, **Open an incident**; a trace id, region and timestamp line.
+- **error** — "Repositories could not be loaded" — `503 installation_unreachable`. Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by Oxagen. Actions: **Try again**, **Open an incident**; a trace id, region and timestamp line.
 - **access denied** — "You cannot see this workspace's repositories" — the roles the signed-in person holds do not include `repository.read on core-platform`. Actions: **Request access**, **Back to Fleet**. Below: *Signed in as*, *Needed*, *Decided by* (`pol_v41` · deny wins over every allow).
 
 ## Mobile

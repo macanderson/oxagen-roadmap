@@ -6,7 +6,7 @@ unless told to in a second turn.
 
 ---
 
-You are auditing the **Run · interjection** page of Oxagen Mission Control (`#/a-intel/core-platform/runs/run_01K6QW3D5N7TYBA2`) for conformance to its design. Be exact and adversarial: the design is the spec, and “close enough” is a fail. Do not summarise what you see; compare it.
+You are auditing the **Run · interjection** page of Oxagen (`#/a-intel/core-platform/runs/run_01K6QW3D5N7TYBA2`) for conformance to its design. Be exact and adversarial: the design is the spec, and “close enough” is a fail. Do not summarise what you see; compare it.
 
 ## Inputs
 

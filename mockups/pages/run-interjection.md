@@ -7,7 +7,7 @@
 | Spec | see `skills.md`; the ordinary run page is `run.md` |
 | Design | `mockups/src/engine.js` → `pRun()` hands this run to `skRunPage()` |
 | States | loaded (waiting · answered: link · answered: create) · loading · error · access denied |
-| Storybook | `Mission Control / … / run-interjection`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
+| Storybook | `Oxagen / … / run-interjection`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
 | Audit | `run-interjection.audit-prompt.md` |
 
 ## Job

@@ -4,7 +4,7 @@ import { view, argTypes } from "../_view.js";
 import spec from "../../pages/register-wrap.md?raw";
 
 export default {
-  title: "Mission Control/Register/Register agent · Wrap",
+  title: "Oxagen/Register/Register agent · Wrap",
   tags: ["autodocs"],
   argTypes,
   args: { shell: "desktop", theme: "system", product: true, hash: "#/a-intel/core-platform/register/wrap" },

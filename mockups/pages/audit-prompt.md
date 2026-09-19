@@ -7,7 +7,7 @@ fresh agent session and fill the placeholders.
 
 ---
 
-You are auditing the Oxagen Mission Control build at `{{APP_ROOT}}` (served at `{{APP_URL}}`)
+You are auditing the Oxagen build at `{{APP_ROOT}}` (served at `{{APP_URL}}`)
 against its design. The design is the spec. Be exact and adversarial; “close enough” is a fail.
 
 ## Inputs
@@ -59,7 +59,7 @@ Record PASS / FAIL / N/A per check with evidence (file:line, selector + text, or
 ## Output
 
 ```
-# Mission Control — audit {{DATE}}
+# Oxagen audit {{DATE}}
 Verdict: PASS | FAIL (n fails, m notes)
 
 | # | Check | Result | Evidence | Fix |

@@ -7,7 +7,7 @@
 | Spec | §10 Context and steering; `docs/creation-spec.md` §5; Appendix F page 8 (Steering) |
 | Design | `mockups/src/engine.js` → `pRecord(r)`, `crecPanel(rec)`, built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded · loading · error · access denied |
-| Storybook | `Mission Control / Workspace / Context record`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
+| Storybook | `Oxagen / Workspace / Context record`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
 | Audit | `record.audit-prompt.md` |
 
 ## Job
@@ -63,7 +63,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 
 - **loaded** — the page as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell).
 - **loading** — the shell stays; the page body is replaced by the skeleton, so the operator keeps their bearings.
-- **error** — “This record could not be loaded” — `503 record_index_unavailable`. Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by Mission Control. Actions: **Try again**, **Open an incident**; a trace id, region and timestamp line.
+- **error** — “This record could not be loaded” — `503 record_index_unavailable`. Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by Oxagen. Actions: **Try again**, **Open an incident**; a trace id, region and timestamp line.
 - **access denied** — “You cannot see this record” — the roles the signed-in person holds do not include `steering.read on core-platform`. Actions: **Request access**, **Back to Fleet**. Below: *Signed in as*, *Needed*, *Decided by* (`pol_v41` · deny wins over every allow).
 
 There is no empty state: the route names one record, and a lineage nothing holds is a 404, not an empty page.

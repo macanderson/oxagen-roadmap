@@ -7,7 +7,7 @@
 | Spec | §14 Mission Control; Appendix F sign-in flows |
 | Design | `mockups/src/engine.js` → `obLogin()`, built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded · loading · error · access denied |
-| Storybook | `Mission Control / … / login`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
+| Storybook | `Oxagen / … / login`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
 | Audit | `login.audit-prompt.md` |
 
 ## Job
@@ -16,7 +16,7 @@ Returning operator: Google or GitHub, or email and password, then two-factor.
 
 ## What is on the page
 
-**Header** — eyebrow “Welcome back”, h1 “Log in to Mission Control”.
+**Header** — eyebrow “Welcome back”, h1 “Log in to Oxagen”.
 Actions: **Log in** (gold, full width)
 
 - Sign in with: Google · GitHub — then “or”. Form: Work email · Password (show/hide; **Forgot password?** link) · “Keep me logged in on this device for 30 days” checkbox.

@@ -7,7 +7,7 @@
 | Spec | not yet in `docs/mission-control-spec.md` — see `docs/w13-in-the-loop-scenario.md` (§ 2 needs one sentence distinguishing *running* a skill from *resolving* one) |
 | Design | `mockups/src/engine.js` → `pSkills()`, rendered inside the Steering hub by `stgHub()` (see `steering.md`). The off-by-default gate is `skills-off.md`; the interjected run is `run-interjection.md`. |
 | States | loaded · empty · loading · error · access denied |
-| Storybook | `Mission Control / … / skills`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
+| Storybook | `Oxagen / … / skills`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
 | Audit | `skills.audit-prompt.md` |
 
 ## Job

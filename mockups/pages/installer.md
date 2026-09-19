@@ -7,19 +7,19 @@
 | Spec | §14 Mission Control; Appendix F not a page — the signed package’s own screens |
 | Design | `mockups/src/engine.js` → `obInstaller()`, built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded |
-| Storybook | `Mission Control / … / installer`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
+| Storybook | `Oxagen / … / installer`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
 | Audit | `installer.audit-prompt.md` |
 
 ## Job
 
-The signed installer package’s own screens: download, install, connected. Shown so the whole path from sign-up to the first frame can be walked; the package, not Mission Control, renders these.
+The signed installer package’s own screens: download, install, connected. Shown so the whole path from sign-up to the first frame can be walked; the package, not Oxagen, renders these.
 
 ## What is on the page
 
 **Header** — eyebrow “”, h1 “Oxagen Agent Installer / Install the Oxagen agent”. Facts: Package · Size · Signature · Checksum · Token. Progress: Installing → Connected.
 Actions: **Download** · **Install** · **Cancel**
 
-- Three panes: the download (signed package with checksum), the install (what it writes: collector, hooks, base URL), and Connected (**Back to Oxagen**; Mission Control is already unlocking). The uninstall line `oxagen agent unenroll --host <host> --restore` is shown.
+- Three panes: the download (signed package with checksum), the install (what it writes: collector, hooks, base URL), and Connected (**Back to Oxagen**; the operator console is already unlocking). The uninstall line `oxagen agent unenroll --host <host> --restore` is shown.
 
 
 **Shell.** No sidebar or top bar: the brandmark, then a centred card; the phone layout is the same card at full width.
@@ -34,7 +34,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 
 ## Functionality
 
-- Nothing here is a Mission Control write; the installer carries the one-time enrollment token from the wrap step.
+- Nothing here is an Oxagen write; the installer carries the one-time enrollment token from the wrap step.
 
 ## States
 

@@ -4,7 +4,7 @@ import { view, argTypes } from "../_view.js";
 import spec from "../../pages/record.md?raw";
 
 export default {
-  title: "Mission Control/Workspace/Context record",
+  title: "Oxagen/Workspace/Context record",
   tags: ["autodocs"],
   argTypes,
   args: { shell: "desktop", theme: "system", product: true, hash: "#/a-intel/core-platform/steering/records/ctx.release.never-merge" },

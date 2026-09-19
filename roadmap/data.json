@@ -12,7 +12,7 @@
   },
   "built_app": {
     "exists": true,
-    "notes": "The Mission Control app is apps/app (@oxagen/app 3.0.0) on main; the rebuild cut over to app.oxagen.sh on 2026-09-17 (PR #2997, WL-52) and the old app is apps/app_deprecated. 26 page.tsx routes exist. There is no fixture adapter: ARCHITECTURE.md §5 deleted it, so every page reads live kernel contracts through src/data/live/* and renders <NotRecorded> for unbacked slices. spec_path values below are relative to this repo (github.com/macanderson/roadmap). As of 2026-09-18 evening (main @ cc26fe14e): the Run page landed in PR #3282 (WL-35), apps/app/src/app/[org]/[ws]/runs/[run]/page.tsx renders src/features/run/* with a header (generated name, summary, cost with basis, replay grade), Transcript, Frames and Cost tabs, Pause/Resume/Steer/Cancel through dispatch_command, and Export and Summarize on sealed runs; capability-ui-map.json binds get_run, get_run_transcript, get_run_frame_body, get_run_cost, summarize_run, export_run and dispatch_command to it (the contract is named dispatch_command; dispatch_tacho_command does not exist). Two things are still missing on main: no UI invokes resolve_approval (the Fleet approvals panel reads only, and resolve_approval is absent from capability-ui-map.json), and there is no SSE or stream route for a run (the page renders per request). No packages/dod, no witness runner, no certificate or verify endpoint exist in oxagen or stella; the witness backend half (#2955) does: evidence.witnesses/verdicts tables, proof.observed ingest, get_run_proof (api only, no app or mcp layer), disclosure grain."
+    "notes": "The Oxagen app is apps/app (@oxagen/app 3.0.0) on main; the rebuild cut over to app.oxagen.sh on 2026-09-17 (PR #2997, WL-52) and the old app is apps/app_deprecated. 26 page.tsx routes exist. There is no fixture adapter: ARCHITECTURE.md §5 deleted it, so every page reads live kernel contracts through src/data/live/* and renders <NotRecorded> for unbacked slices. spec_path values below are relative to this repo (github.com/macanderson/roadmap). As of 2026-09-18 evening (main @ cc26fe14e): the Run page landed in PR #3282 (WL-35), apps/app/src/app/[org]/[ws]/runs/[run]/page.tsx renders src/features/run/* with a header (generated name, summary, cost with basis, replay grade), Transcript, Frames and Cost tabs, Pause/Resume/Steer/Cancel through dispatch_command, and Export and Summarize on sealed runs; capability-ui-map.json binds get_run, get_run_transcript, get_run_frame_body, get_run_cost, summarize_run, export_run and dispatch_command to it (the contract is named dispatch_command; dispatch_tacho_command does not exist). Two things are still missing on main: no UI invokes resolve_approval (the Fleet approvals panel reads only, and resolve_approval is absent from capability-ui-map.json), and there is no SSE or stream route for a run (the page renders per request). No packages/dod, no witness runner, no certificate or verify endpoint exist in oxagen or stella; the witness backend half (#2955) does: evidence.witnesses/verdicts tables, proof.observed ingest, get_run_proof (api only, no app or mcp layer), disclosure grain."
   },
   "surfaces": [
     {
@@ -1613,8 +1613,8 @@
     {
       "id": "D12",
       "title": "Stamps as the billable unit",
-      "question": "The witness spec bills stamps and releases funds on stamp.issued; Mission Control bills GAU.",
-      "recommendation": "One company: Mission Control feeds the witness; GAU stays the price list.",
+      "question": "The witness spec bills stamps and releases funds on stamp.issued; Oxagen bills GAU.",
+      "recommendation": "One company: Oxagen feeds the witness; GAU stays the price list.",
       "source": "docs/scope-review.md 'Two documents, one company' / witness-spec.md phase 5",
       "blocks": [
         "W10"

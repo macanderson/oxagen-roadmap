@@ -2,7 +2,7 @@
 
 One place to see what Oxagen is building next, exactly how it will look, and what is still undecided.
 
-- **The roadmap app** (`index.html`, built from `roadmap/`): the gaps between the Mission Control mockups and the build, the witness and definition-of-done features, the open decisions, and the GitHub issues, live. Published as a claude.ai artifact where Claude is bound to the page, and served by GitHub Pages at https://macanderson.github.io/roadmap/ as a read-only fallback.
+- **The roadmap app** (`index.html`, built from `roadmap/`): the gaps between the Oxagen mockups and the build, the witness and definition-of-done features, the open decisions, and the GitHub issues, live. Published as a claude.ai artifact where Claude is bound to the page, and served by GitHub Pages at https://macanderson.github.io/roadmap/ as a read-only fallback.
 - **The mockups** (`mockups/`): the master mockup, every page in every state, desktop and mobile, and the guided scenarios. The roadmap frames them, so a card leads to its wireframe in one click.
 - **The documents** (`docs/`): the Mission Control spec, the DoD spec, the witness spec, the desktop spec, the plan, the scope review, and the reviews.
 

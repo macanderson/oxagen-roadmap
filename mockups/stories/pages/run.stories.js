@@ -4,7 +4,7 @@ import { view, argTypes } from "../_view.js";
 import spec from "../../pages/run.md?raw";
 
 export default {
-  title: "Mission Control/Workspace/Run",
+  title: "Oxagen/Workspace/Run",
   tags: ["autodocs"],
   argTypes,
   args: { shell: "desktop", theme: "system", product: true, hash: "#/a-intel/core-platform/runs/run_01K5RS7M2E8FJ3QW" },
