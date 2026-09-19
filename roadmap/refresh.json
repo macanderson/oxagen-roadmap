@@ -104,11 +104,13 @@
     "docs/adr/ADR-102-a-limit-change-merges-under-the-mandates-row-lock.md",
     "docs/adr/ADR-102-restore-marketing-ebook-lead-gate.md",
     "docs/adr/ADR-103-the-price-book-records-its-own-initialization.md",
+    "docs/adr/ADR-103-the-two-renames-land-on-the-surfaces-behind-aliases-in-phases.md",
     "docs/adr/ADR-104-a-harness-label-round-trips-whatever-it-holds.md",
     "docs/adr/ADR-105-an-archived-workspace-accepts-no-machine-credential.md",
     "docs/adr/ADR-106-retirement-revokes-what-it-scoped.md",
     "docs/adr/ADR-107-list-mandates-admits-the-roles-request-mandate-admits.md",
-    "docs/adr/ADR-108-a-mandate-limit-carries-its-own-measure-kind.md"
+    "docs/adr/ADR-108-a-mandate-limit-carries-its-own-measure-kind.md",
+    "docs/adr/ADR-110-a-squash-merge-can-silently-revert-an-older-branch-wins-fix.md"
   ],
   "adrs": {
     "ADR-001": {
@@ -974,6 +976,14 @@
       "path": "docs/adr/ADR-108-a-mandate-limit-carries-its-own-measure-kind.md",
       "status": null,
       "title": "A mandate limit carries its own measure kind, worked out once at write time"
+    },
+    "ADR-110": {
+      "date": null,
+      "decision": "Implement the safe, code-only half of the fix in this PR: an advisory CI check, plus a narrower structural guard on the one file that actually broke. Do not flip the live ruleset setting from an automated session.",
+      "id": "ADR-110",
+      "path": "docs/adr/ADR-110-a-squash-merge-can-silently-revert-an-older-branch-wins-fix.md",
+      "status": null,
+      "title": "A squash merge against a stale base gets an advisory check, not a ruleset flip"
     }
   },
   "baseline": "2026-09-18T20:52:30Z",
@@ -1199,6 +1209,19 @@
       "source": "docs/adr/ADR-108-a-mandate-limit-carries-its-own-measure-kind.md",
       "status": "decided",
       "title": "A mandate limit carries its own measure kind, worked out once at write time"
+    },
+    "ADR-110": {
+      "blocks": [],
+      "decided": "ADR-110: A squash merge against a stale base gets an advisory check, not a ruleset flip. Implement the safe, code-only half of the fix in this PR: an advisory CI check, plus a narrower structural guard on the one file that actually broke. Do not flip the live ruleset setting from an automated session.",
+      "decided_on": "2026-09-19",
+      "id": "ADR-110",
+      "origin": "adr",
+      "pr": 3470,
+      "question": "Decided in the repository: A squash merge against a stale base gets an advisory check, not a ruleset flip.",
+      "recommendation": null,
+      "source": "docs/adr/ADR-110-a-squash-merge-can-silently-revert-an-older-branch-wins-fix.md",
+      "status": "decided",
+      "title": "A squash merge against a stale base gets an advisory check, not a ruleset flip"
     },
     "I-oxagen#2949": {
       "blocks": [],
@@ -1553,15 +1576,15 @@
     },
     "I-oxagen#3029": {
       "blocks": [],
-      "decided": null,
-      "decided_on": null,
+      "decided": "Closed.",
+      "decided_on": "2026-09-19",
       "html_url": "https://github.com/macanderson/oxagen/issues/3029",
       "id": "I-oxagen#3029",
       "origin": "issue",
       "question": "The org-only REST route for create_workspace passes an empty workspace id, and the kernel refuses it",
       "recommendation": null,
       "source": "oxagen#3029",
-      "status": "open",
+      "status": "decided",
       "title": "The org-only REST route for create_workspace passes an empty workspace id, and the kernel refuses it"
     },
     "I-oxagen#3072": {
@@ -1748,15 +1771,15 @@
     },
     "I-oxagen#3150": {
       "blocks": [],
-      "decided": null,
-      "decided_on": null,
+      "decided": "Closed.",
+      "decided_on": "2026-09-19",
       "html_url": "https://github.com/macanderson/oxagen/issues/3150",
       "id": "I-oxagen#3150",
       "origin": "issue",
       "question": "The app has no workspace role for the viewer and reads a membership label, so its role checks disagree with the kernel",
       "recommendation": null,
       "source": "oxagen#3150",
-      "status": "open",
+      "status": "decided",
       "title": "The app has no workspace role for the viewer and reads a membership label, so its role checks disagree with the kernel"
     },
     "I-oxagen#3151": {
@@ -2434,11 +2457,37 @@
       "source": "oxagen#3373",
       "status": "decided",
       "title": "Residue from #3332: mandate freshness trusts unverified and operator-editable inputs, git probes block the hook path, and the retention class map is incomplete"
+    },
+    "I-oxagen#3445": {
+      "blocks": [],
+      "decided": null,
+      "decided_on": null,
+      "html_url": "https://github.com/macanderson/oxagen/issues/3445",
+      "id": "I-oxagen#3445",
+      "origin": "issue",
+      "question": "triage-guard fires once per label with no concurrency group, so one triaged issue costs seven runs on the pool that gates deploys",
+      "recommendation": null,
+      "source": "oxagen#3445",
+      "status": "open",
+      "title": "triage-guard fires once per label with no concurrency group, so one triaged issue costs seven runs on the pool that gates deploys"
+    },
+    "I-oxagen#3448": {
+      "blocks": [],
+      "decided": null,
+      "decided_on": null,
+      "html_url": "https://github.com/macanderson/oxagen/issues/3448",
+      "id": "I-oxagen#3448",
+      "origin": "issue",
+      "question": "Residue from #3442: a non-ISO-4217 currency unit crashes the mandate page instead of mapping",
+      "recommendation": null,
+      "source": "oxagen#3448",
+      "status": "open",
+      "title": "Residue from #3442: a non-ISO-4217 currency unit crashes the mandate page instead of mapping"
     }
   },
-  "generated_at": "2026-09-19T17:15:49.797Z",
+  "generated_at": "2026-09-19T19:27:08.976Z",
   "heads": {
-    "oxagen": "80424b9a11ad5c171e49fdf849138c071df38c78"
+    "oxagen": "8d8f792a291e6d7030fc695367c500ae53b174da"
   },
   "issues": {
     "oxagen#2592": {
@@ -2504,7 +2553,7 @@
       ],
       "state": "open",
       "title": "The background worker in production is stale and cannot claim any run",
-      "updated_at": "2026-09-18T15:43:56Z"
+      "updated_at": "2026-09-19T17:56:36Z"
     },
     "oxagen#2949": {
       "author": "macanderson",
@@ -3509,9 +3558,9 @@
     },
     "oxagen#3029": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-19T17:50:54Z",
       "closes": [],
-      "has_spec_backing": false,
+      "has_spec_backing": true,
       "html_url": "https://github.com/macanderson/oxagen/issues/3029",
       "is_pr": false,
       "kind": "defect",
@@ -3533,10 +3582,14 @@
       "priority": "P1",
       "refs": [],
       "repo": "oxagen",
-      "spec_refs": [],
-      "state": "open",
+      "spec_refs": [
+        "ADR-068",
+        "ADR-086",
+        "ADR-099"
+      ],
+      "state": "closed",
       "title": "The org-only REST route for create_workspace passes an empty workspace id, and the kernel refuses it",
-      "updated_at": "2026-09-19T09:02:20Z"
+      "updated_at": "2026-09-19T17:50:54Z"
     },
     "oxagen#3072": {
       "author": "macanderson",
@@ -4234,7 +4287,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "Kill-switch operator targets use raw user IDs, so no one can flip that switch from the product",
-      "updated_at": "2026-09-18T15:47:03Z"
+      "updated_at": "2026-09-19T18:56:20Z"
     },
     "oxagen#3148": {
       "author": "macanderson",
@@ -4268,7 +4321,7 @@
     },
     "oxagen#3150": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-19T17:45:47Z",
       "closes": [],
       "has_spec_backing": false,
       "html_url": "https://github.com/macanderson/oxagen/issues/3150",
@@ -4294,9 +4347,9 @@
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "The app has no workspace role for the viewer and reads a membership label, so its role checks disagree with the kernel",
-      "updated_at": "2026-09-19T09:41:48Z"
+      "updated_at": "2026-09-19T17:46:38Z"
     },
     "oxagen#3151": {
       "author": "macanderson",
@@ -4323,14 +4376,17 @@
       "number": 3151,
       "pillar": "stability",
       "priority": "P1",
-      "refs": [],
+      "refs": [
+        3151
+      ],
       "repo": "oxagen",
       "spec_refs": [
+        "ADR-078",
         "docs/specs/tacho/"
       ],
       "state": "open",
       "title": "A connected app reaches the MCP surface as the person who enrolled the machine",
-      "updated_at": "2026-09-18T15:48:02Z"
+      "updated_at": "2026-09-19T19:03:01Z"
     },
     "oxagen#3152": {
       "author": "macanderson",
@@ -4393,11 +4449,12 @@
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [
+        "ADR-109",
         "docs/specs/mission-control/spec.md"
       ],
       "state": "open",
       "title": "An auto-approved decision is saved but nothing can read it back",
-      "updated_at": "2026-09-18T15:44:29Z"
+      "updated_at": "2026-09-19T18:17:07Z"
     },
     "oxagen#3155": {
       "author": "macanderson",
@@ -5352,7 +5409,7 @@
       ],
       "state": "open",
       "title": "A squash merge can silently revert another PR's fix, and its test, with every check green",
-      "updated_at": "2026-09-18T23:53:01Z"
+      "updated_at": "2026-09-19T19:11:55Z"
     },
     "oxagen#3239": {
       "author": "macanderson",
@@ -8782,7 +8839,7 @@
       ],
       "state": "open",
       "title": "Residue from #3352 and #3379: run chain read, live stream states and typed errors, fold, hot rollup and waterfall paging",
-      "updated_at": "2026-09-19T09:42:45Z"
+      "updated_at": "2026-09-19T17:50:10Z"
     },
     "oxagen#3371": {
       "author": "macanderson",
@@ -9165,7 +9222,7 @@
       ],
       "state": "open",
       "title": "Residue from #3332: the mandate and the shipping path, the record's absences, and one file getting two identities",
-      "updated_at": "2026-09-19T09:42:03Z"
+      "updated_at": "2026-09-19T17:49:46Z"
     },
     "oxagen#3385": {
       "author": "macanderson",
@@ -9220,7 +9277,7 @@
     },
     "oxagen#3387": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-19T19:20:48Z",
       "closes": [],
       "has_spec_backing": false,
       "html_url": "https://github.com/macanderson/oxagen/issues/3387",
@@ -9244,9 +9301,9 @@
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "db:lint-migrations passes a migration stamped behind the Atlas head, so the migration never applies in production",
-      "updated_at": "2026-09-19T09:39:25Z"
+      "updated_at": "2026-09-19T19:20:48Z"
     },
     "oxagen#3388": {
       "author": "macanderson",
@@ -9469,7 +9526,7 @@
     },
     "oxagen#3396": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-19T18:17:12Z",
       "closes": [],
       "has_spec_backing": false,
       "html_url": "https://github.com/macanderson/oxagen/issues/3396",
@@ -9493,9 +9550,9 @@
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "Residue from #3363: the request-limit test still asserts not.toBe(413) on a malformed payload",
-      "updated_at": "2026-09-19T09:40:36Z"
+      "updated_at": "2026-09-19T18:17:12Z"
     },
     "oxagen#3397": {
       "author": "macanderson",
@@ -9680,7 +9737,7 @@
     },
     "oxagen#3404": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-19T17:49:27Z",
       "closes": [],
       "has_spec_backing": false,
       "html_url": "https://github.com/macanderson/oxagen/issues/3404",
@@ -9705,9 +9762,9 @@
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "Stripe e2e: add STRIPE_TEST_SECRET_KEY and arm the pay gate",
-      "updated_at": "2026-09-19T09:40:47Z"
+      "updated_at": "2026-09-19T17:49:27Z"
     },
     "oxagen#3405": {
       "author": "macanderson",
@@ -9905,7 +9962,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "Residue from #3385: mandate page search heading, route nav, period-change guidance, inactive balances, and the prose gate",
-      "updated_at": "2026-09-19T09:42:32Z"
+      "updated_at": "2026-09-19T17:52:24Z"
     },
     "oxagen#3412": {
       "author": "macanderson",
@@ -10058,7 +10115,7 @@
     },
     "oxagen#3418": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-19T17:49:29Z",
       "closes": [],
       "has_spec_backing": false,
       "html_url": "https://github.com/macanderson/oxagen/issues/3418",
@@ -10081,9 +10138,9 @@
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "@oxagen/handlers is 529 lines below its coverage threshold on main",
-      "updated_at": "2026-09-19T09:41:08Z"
+      "updated_at": "2026-09-19T17:49:29Z"
     },
     "oxagen#3419": {
       "author": "macanderson",
@@ -10268,7 +10325,7 @@
       "spec_refs": [],
       "state": "closed",
       "title": "tacho: one unfamiliar OTel field no longer drops a whole export",
-      "updated_at": "2026-09-19T09:49:36Z"
+      "updated_at": "2026-09-19T18:14:14Z"
     },
     "oxagen#3426": {
       "author": "macanderson",
@@ -10604,7 +10661,7 @@
     },
     "oxagen#3438": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-19T19:20:46Z",
       "closes": [],
       "has_spec_backing": false,
       "html_url": "https://github.com/macanderson/oxagen/issues/3438",
@@ -10627,9 +10684,9 @@
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "tacho: a refused OTel record poisons the recorder's sticky fields for the rest of the session",
-      "updated_at": "2026-09-19T09:41:39Z"
+      "updated_at": "2026-09-19T19:20:46Z"
     },
     "oxagen#3439": {
       "author": "macanderson",
@@ -10657,7 +10714,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "Tools: the Auto-approvals tab and Grant a mandate",
-      "updated_at": "2026-09-19T09:45:13Z"
+      "updated_at": "2026-09-19T19:04:48Z"
     },
     "oxagen#3440": {
       "author": "macanderson",
@@ -10740,7 +10797,7 @@
     },
     "oxagen#3443": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-19T17:49:15Z",
       "closes": [],
       "has_spec_backing": false,
       "html_url": "https://github.com/macanderson/oxagen/pull/3443",
@@ -10749,7 +10806,7 @@
       "labels": [
         "closes-nothing"
       ],
-      "merged_at": null,
+      "merged_at": "2026-09-19T17:49:15Z",
       "milestone": null,
       "needs_decision": false,
       "number": 3443,
@@ -10758,9 +10815,9 @@
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "web, docs: System / Light / Dark theme control in the footer; web footer in columns",
-      "updated_at": "2026-09-19T09:49:44Z"
+      "updated_at": "2026-09-19T17:57:12Z"
     },
     "oxagen#3444": {
       "author": "macanderson",
@@ -10769,22 +10826,28 @@
       "has_spec_backing": false,
       "html_url": "https://github.com/macanderson/oxagen/issues/3444",
       "is_pr": false,
-      "kind": null,
+      "kind": "debt",
       "labels": [
-        "triage"
+        "P3",
+        "area:app",
+        "kind:debt",
+        "area:ops",
+        "job:govern",
+        "pillar:maintainability",
+        "size/XS"
       ],
       "merged_at": null,
       "milestone": null,
       "needs_decision": false,
       "number": 3444,
-      "pillar": null,
-      "priority": null,
+      "pillar": "maintainability",
+      "priority": "P3",
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [],
       "state": "open",
       "title": "Residue from #3441: qualify the [orgSlug] deprecated-app diagnostic in CLAUDE.md",
-      "updated_at": "2026-09-19T09:41:10Z"
+      "updated_at": "2026-09-19T18:01:05Z"
     },
     "oxagen#3445": {
       "author": "macanderson",
@@ -10793,16 +10856,23 @@
       "has_spec_backing": true,
       "html_url": "https://github.com/macanderson/oxagen/issues/3445",
       "is_pr": false,
-      "kind": null,
+      "kind": "debt",
       "labels": [
-        "triage"
+        "P2",
+        "kind:debt",
+        "area:ops",
+        "job:govern",
+        "pillar:efficiency",
+        "pillar:performance",
+        "needs:decision",
+        "size/S"
       ],
       "merged_at": null,
       "milestone": null,
-      "needs_decision": false,
+      "needs_decision": true,
       "number": 3445,
-      "pillar": null,
-      "priority": null,
+      "pillar": "efficiency",
+      "priority": "P2",
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [
@@ -10810,7 +10880,7 @@
       ],
       "state": "open",
       "title": "triage-guard fires once per label with no concurrency group, so one triaged issue costs seven runs on the pool that gates deploys",
-      "updated_at": "2026-09-19T09:42:52Z"
+      "updated_at": "2026-09-19T18:01:09Z"
     },
     "oxagen#3446": {
       "author": "macanderson",
@@ -10819,16 +10889,21 @@
       "has_spec_backing": true,
       "html_url": "https://github.com/macanderson/oxagen/issues/3446",
       "is_pr": false,
-      "kind": null,
+      "kind": "defect",
       "labels": [
-        "triage"
+        "P2",
+        "kind:defect",
+        "job:govern",
+        "area:kernel",
+        "pillar:reliability",
+        "size/S"
       ],
       "merged_at": null,
       "milestone": null,
       "needs_decision": false,
       "number": 3446,
-      "pillar": null,
-      "priority": null,
+      "pillar": "reliability",
+      "priority": "P2",
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [
@@ -10836,7 +10911,7 @@
       ],
       "state": "open",
       "title": "Residue from #3437: repeat retire_agent does not revoke mandates left on already-retired agents",
-      "updated_at": "2026-09-19T09:51:09Z"
+      "updated_at": "2026-09-19T18:01:13Z"
     },
     "oxagen#3447": {
       "author": "macanderson",
@@ -10845,16 +10920,21 @@
       "has_spec_backing": true,
       "html_url": "https://github.com/macanderson/oxagen/issues/3447",
       "is_pr": false,
-      "kind": null,
+      "kind": "gap",
       "labels": [
-        "triage"
+        "P2",
+        "area:app",
+        "job:govern",
+        "kind:gap",
+        "pillar:reliability",
+        "size/S"
       ],
       "merged_at": null,
       "milestone": null,
       "needs_decision": false,
       "number": 3447,
-      "pillar": null,
-      "priority": null,
+      "pillar": "reliability",
+      "priority": "P2",
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [
@@ -10862,7 +10942,7 @@
       ],
       "state": "open",
       "title": "Residue from #3432: surface suspendedApiKeys in the archive-workspace dialog",
-      "updated_at": "2026-09-19T10:13:03Z"
+      "updated_at": "2026-09-19T18:01:17Z"
     },
     "oxagen#3448": {
       "author": "macanderson",
@@ -10871,16 +10951,23 @@
       "has_spec_backing": true,
       "html_url": "https://github.com/macanderson/oxagen/issues/3448",
       "is_pr": false,
-      "kind": null,
+      "kind": "defect",
       "labels": [
-        "triage"
+        "P1",
+        "area:app",
+        "kind:defect",
+        "job:meter",
+        "pillar:stability",
+        "needs:decision",
+        "area:kernel",
+        "size/M"
       ],
       "merged_at": null,
       "milestone": null,
-      "needs_decision": false,
+      "needs_decision": true,
       "number": 3448,
-      "pillar": null,
-      "priority": null,
+      "pillar": "stability",
+      "priority": "P1",
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [
@@ -10888,7 +10975,7 @@
       ],
       "state": "open",
       "title": "Residue from #3442: a non-ISO-4217 currency unit crashes the mandate page instead of mapping",
-      "updated_at": "2026-09-19T10:57:25Z"
+      "updated_at": "2026-09-19T18:01:21Z"
     },
     "oxagen#3449": {
       "author": "github-actions[bot]",
@@ -10897,23 +10984,30 @@
       "has_spec_backing": false,
       "html_url": "https://github.com/macanderson/oxagen/issues/3449",
       "is_pr": false,
-      "kind": null,
+      "kind": "defect",
       "labels": [
-        "triage",
-        "store-drift"
+        "P1",
+        "store-drift",
+        "kind:defect",
+        "area:evidence",
+        "area:ops",
+        "job:explain",
+        "needs:rig",
+        "pillar:reliability",
+        "size/XS"
       ],
       "merged_at": null,
       "milestone": null,
       "needs_decision": false,
       "number": 3449,
-      "pillar": null,
-      "priority": null,
+      "pillar": "reliability",
+      "priority": "P1",
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [],
       "state": "open",
       "title": "Production store schema is behind this repository",
-      "updated_at": "2026-09-19T11:02:03Z"
+      "updated_at": "2026-09-19T18:01:45Z"
     },
     "oxagen#3450": {
       "author": "macanderson",
@@ -10922,16 +11016,22 @@
       "has_spec_backing": true,
       "html_url": "https://github.com/macanderson/oxagen/issues/3450",
       "is_pr": false,
-      "kind": null,
+      "kind": "defect",
       "labels": [
-        "triage"
+        "P3",
+        "kind:defect",
+        "job:govern",
+        "pillar:efficiency",
+        "pillar:performance",
+        "area:kernel",
+        "size/M"
       ],
       "merged_at": null,
       "milestone": null,
       "needs_decision": false,
       "number": 3450,
-      "pillar": null,
-      "priority": null,
+      "pillar": "efficiency",
+      "priority": "P3",
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [
@@ -10939,7 +11039,7 @@
       ],
       "state": "open",
       "title": "Residue from #3440: list_mandates' reader-scope query does not scale with fleet size",
-      "updated_at": "2026-09-19T11:18:50Z"
+      "updated_at": "2026-09-19T18:01:25Z"
     },
     "oxagen#3451": {
       "author": "macanderson",
@@ -10948,6 +11048,36 @@
       "has_spec_backing": false,
       "html_url": "https://github.com/macanderson/oxagen/issues/3451",
       "is_pr": false,
+      "kind": "defect",
+      "labels": [
+        "P2",
+        "area:auth",
+        "kind:defect",
+        "job:govern",
+        "pillar:stability",
+        "area:kernel",
+        "size/M"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3451,
+      "pillar": "stability",
+      "priority": "P2",
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Residue from #3440: readerFilter re-derives org tier instead of reusing checkIAM's decision",
+      "updated_at": "2026-09-19T18:01:29Z"
+    },
+    "oxagen#3452": {
+      "author": "macanderson",
+      "closed_at": "2026-09-19T17:45:52Z",
+      "closes": [],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/issues/3452",
+      "is_pr": false,
       "kind": null,
       "labels": [
         "triage"
@@ -10955,15 +11085,582 @@
       "merged_at": null,
       "milestone": null,
       "needs_decision": false,
-      "number": 3451,
+      "number": 3452,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "placeholder",
+      "updated_at": "2026-09-19T17:45:52Z"
+    },
+    "oxagen#3453": {
+      "author": "macanderson",
+      "closed_at": "2026-09-19T17:51:42Z",
+      "closes": [],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3453",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "closes-nothing"
+      ],
+      "merged_at": "2026-09-19T17:51:42Z",
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3453,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "Bound a review at three rounds, then carry what is left",
+      "updated_at": "2026-09-19T17:51:43Z"
+    },
+    "oxagen#3454": {
+      "author": "macanderson",
+      "closed_at": "2026-09-19T18:20:53Z",
+      "closes": [],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3454",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "no-issue"
+      ],
+      "merged_at": "2026-09-19T18:20:53Z",
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3454,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "tacho: a refused OTel record no longer poisons the records after it",
+      "updated_at": "2026-09-19T18:20:55Z"
+    },
+    "oxagen#3455": {
+      "author": "macanderson",
+      "closed_at": "2026-09-19T18:17:11Z",
+      "closes": [
+        3396
+      ],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3455",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": "2026-09-19T18:17:11Z",
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3455,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        3411
+      ],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "chore(backlog): triage cleanup, 2 issues",
+      "updated_at": "2026-09-19T18:17:13Z"
+    },
+    "oxagen#3456": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3456",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "closes-nothing"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3456,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-109",
+        "ADR-043",
+        "ADR-067",
+        "ADR-102"
+      ],
+      "state": "open",
+      "title": "book: the second edition, 21 parts, built from one manuscript, with print fixed (ADR-109)",
+      "updated_at": "2026-09-19T18:46:54Z"
+    },
+    "oxagen#3457": {
+      "author": "macanderson",
+      "closed_at": "2026-09-19T18:15:30Z",
+      "closes": [],
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3457",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": "2026-09-19T18:15:30Z",
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3457,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        3138
+      ],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-107"
+      ],
+      "state": "closed",
+      "title": "fix(iam): backfill the mandate grants #3440 added for existing enterprise orgs",
+      "updated_at": "2026-09-19T18:15:32Z"
+    },
+    "oxagen#3458": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/issues/3458",
+      "is_pr": false,
+      "kind": "defect",
+      "labels": [
+        "P1",
+        "area:auth",
+        "kind:defect",
+        "job:govern",
+        "pillar:stability",
+        "area:kernel",
+        "size/L"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3458,
+      "pillar": "stability",
+      "priority": "P1",
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Other `sensitivity: high` contracts with no handler-level role check",
+      "updated_at": "2026-09-19T18:01:32Z"
+    },
+    "oxagen#3459": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3459",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "closes-nothing"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3459,
       "pillar": null,
       "priority": null,
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [],
       "state": "open",
-      "title": "Residue from #3440: readerFilter re-derives org tier instead of reusing checkIAM's decision",
-      "updated_at": "2026-09-19T13:11:58Z"
+      "title": "Repositories page, and Settings leaves the workspace menu",
+      "updated_at": "2026-09-19T18:58:08Z"
+    },
+    "oxagen#3460": {
+      "author": "macanderson",
+      "closed_at": "2026-09-19T18:11:54Z",
+      "closes": [],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3460",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "no-issue"
+      ],
+      "merged_at": "2026-09-19T18:11:54Z",
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3460,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "web: fix the three Codex P2s on the theme control",
+      "updated_at": "2026-09-19T18:11:56Z"
+    },
+    "oxagen#3461": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/issues/3461",
+      "is_pr": false,
+      "kind": "defect",
+      "labels": [
+        "P3",
+        "area:app",
+        "kind:defect",
+        "job:govern",
+        "pillar:reliability",
+        "size/XS"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3461,
+      "pillar": "reliability",
+      "priority": "P3",
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Residue from #3439: the Tools grant path admits a retired agent and an approver nobody matches",
+      "updated_at": "2026-09-19T18:33:58Z"
+    },
+    "oxagen#3462": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3462",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "no-issue"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3462,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "web: theme control keeps a choice without storage and colours the browser chrome",
+      "updated_at": "2026-09-19T17:59:34Z"
+    },
+    "oxagen#3463": {
+      "author": "macanderson",
+      "closed_at": "2026-09-19T18:21:07Z",
+      "closes": [],
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3463",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": "2026-09-19T18:21:07Z",
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3463,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        3295
+      ],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-103",
+        "ADR-025"
+      ],
+      "state": "closed",
+      "title": "ADR-103 and phase 1a: take `oxagen tacho` out of --help, keep every command working",
+      "updated_at": "2026-09-19T18:21:09Z"
+    },
+    "oxagen#3464": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3464",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "closes-nothing"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3464,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "cost rollup runs again, and tachod stops parsing its whole WAL per drain",
+      "updated_at": "2026-09-19T18:14:48Z"
+    },
+    "oxagen#3465": {
+      "author": "macanderson",
+      "closed_at": "2026-09-19T19:20:45Z",
+      "closes": [
+        3438
+      ],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3465",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": "2026-09-19T19:20:45Z",
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3465,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "fix(tacho): restore recorder sticky state when a seal refuses a record",
+      "updated_at": "2026-09-19T19:20:47Z"
+    },
+    "oxagen#3466": {
+      "author": "macanderson",
+      "closed_at": "2026-09-19T19:20:47Z",
+      "closes": [
+        3387
+      ],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3466",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": "2026-09-19T19:20:47Z",
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3466,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "feat(migrations): db:lint-migrations catches a migration stamped behind its merge base",
+      "updated_at": "2026-09-19T19:20:49Z"
+    },
+    "oxagen#3467": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [
+        3153
+      ],
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3467",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3467,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-109",
+        "ADR-025"
+      ],
+      "state": "open",
+      "title": "fix(agent): read back a resolved approval, including one auto-approved with no person (#3153)",
+      "updated_at": "2026-09-19T19:20:17Z"
+    },
+    "oxagen#3468": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [
+        3151
+      ],
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3468",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3468,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        3151
+      ],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-078",
+        "docs/specs/tacho/"
+      ],
+      "state": "open",
+      "title": "iam: gateway-forwarded calls attribute evidence to the credential, not the enroller (#3151)",
+      "updated_at": "2026-09-19T19:25:19Z"
+    },
+    "oxagen#3469": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3469",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "closes-nothing"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3469,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-103"
+      ],
+      "state": "open",
+      "title": "ADR-103 phase 1b: the wrapping commands land on `oxagen agent`",
+      "updated_at": "2026-09-19T18:37:41Z"
+    },
+    "oxagen#3470": {
+      "author": "macanderson",
+      "closed_at": "2026-09-19T19:11:00Z",
+      "closes": [
+        3237
+      ],
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3470",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": "2026-09-19T19:11:00Z",
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3470,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        3237
+      ],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-109",
+        "ADR-046",
+        "ADR-110"
+      ],
+      "state": "closed",
+      "title": "Advisory check for a stale-merge-base squash-merge revert, and a machine-key-scope purpose guard (#3237)",
+      "updated_at": "2026-09-19T19:11:02Z"
+    },
+    "oxagen#3471": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [
+        3147
+      ],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3471",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3471,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "fix(kill-switch): accept usr_ public id for operator target",
+      "updated_at": "2026-09-19T18:56:47Z"
+    },
+    "oxagen#3472": {
+      "author": "github-actions[bot]",
+      "closed_at": null,
+      "closes": [],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/issues/3472",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "main-unverified"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3472,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "main has commits nothing verified",
+      "updated_at": "2026-09-19T19:21:12Z"
+    },
+    "oxagen#3473": {
+      "author": "github-actions[bot]",
+      "closed_at": null,
+      "closes": [],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/issues/3473",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "main-unverified"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3473,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "main has commits nothing verified",
+      "updated_at": "2026-09-19T19:21:13Z"
+    },
+    "oxagen#3474": {
+      "author": "github-actions[bot]",
+      "closed_at": null,
+      "closes": [],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/issues/3474",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "main-unverified"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3474,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "main has commits nothing verified",
+      "updated_at": "2026-09-19T19:22:52Z"
     },
     "roadmap#39": {
       "author": "macanderson",
@@ -25079,9 +25776,39 @@
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "dod",
-      "last_merge": "2026-09-19T10:23:48Z",
+      "last_merge": "2026-09-19T19:20:45Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-19T19:20:45Z",
+          "number": 3465,
+          "repo": "oxagen",
+          "title": "fix(tacho): restore recorder sticky state when a seal refuses a record",
+          "touched": [
+            "packages/tacho"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-19T18:21:07Z",
+          "number": 3463,
+          "repo": "oxagen",
+          "title": "ADR-103 and phase 1a: take `oxagen tacho` out of --help, keep every command working",
+          "touched": [
+            "apps/cli/src"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-19T18:20:53Z",
+          "number": 3454,
+          "repo": "oxagen",
+          "title": "tacho: a refused OTel record no longer poisons the records after it",
+          "touched": [
+            "packages/tacho"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-19T10:23:48Z",
@@ -25259,7 +25986,7 @@
         }
       ],
       "open_issues": 0,
-      "refreshed_at": "2026-09-19T10:53:47.619Z",
+      "refreshed_at": "2026-09-19T19:27:08.976Z",
       "shared_page": false
     },
     "D3": {
@@ -27961,8 +28688,8 @@
     }
   },
   "last_run": {
-    "at": "2026-09-19T17:15:49.797Z",
-    "calls": 7,
+    "at": "2026-09-19T19:27:08.976Z",
+    "calls": 16,
     "quiet": false
   },
   "milestones": {
@@ -31608,11 +32335,236 @@
       ],
       "repo": "oxagen",
       "title": "Store a mandate limit's measure kind instead of guessing it (ADR-108)"
+    },
+    "oxagen#3443": {
+      "added": [
+        "apps/docs/src/components/theme-switcher.tsx"
+      ],
+      "author": "macanderson",
+      "closes": [],
+      "files": [
+        "apps/docs/src/app/(home)/layout.tsx",
+        "apps/docs/src/components/theme-switcher.tsx",
+        "apps/docs/src/lib/layout.shared.tsx",
+        "apps/web/assets/blog.css",
+        "apps/web/assets/oxagen.css",
+        "apps/web/assets/oxagen.js",
+        "apps/web/index.html",
+        "apps/web/products/oxagen/index.html",
+        "apps/web/scripts/lib/html.mjs",
+        "apps/web/scripts/lib/html.test.mjs"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3443",
+      "merged_at": "2026-09-19T17:49:15Z",
+      "number": 3443,
+      "refs": [],
+      "repo": "oxagen",
+      "title": "web, docs: System / Light / Dark theme control in the footer; web footer in columns"
+    },
+    "oxagen#3453": {
+      "added": [],
+      "author": "macanderson",
+      "closes": [],
+      "files": [
+        "AGENTS.md",
+        "CLAUDE.md"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3453",
+      "merged_at": "2026-09-19T17:51:42Z",
+      "number": 3453,
+      "refs": [],
+      "repo": "oxagen",
+      "title": "Bound a review at three rounds, then carry what is left"
+    },
+    "oxagen#3454": {
+      "added": [],
+      "author": "macanderson",
+      "closes": [],
+      "files": [
+        "packages/tacho/src/claude-code/otel.test.ts",
+        "packages/tacho/src/claude-code/recorder.ts"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3454",
+      "merged_at": "2026-09-19T18:20:53Z",
+      "number": 3454,
+      "refs": [],
+      "repo": "oxagen",
+      "title": "tacho: a refused OTel record no longer poisons the records after it"
+    },
+    "oxagen#3455": {
+      "added": [],
+      "author": "macanderson",
+      "closes": [
+        3396
+      ],
+      "files": [
+        "apps/api/src/routes/v1/tacho.events.ingest.test.ts",
+        "apps/app/ARCHITECTURE.md",
+        "apps/app/src/features/shell/nav.test.ts",
+        "apps/app/src/features/shell/nav.ts"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3455",
+      "merged_at": "2026-09-19T18:17:11Z",
+      "number": 3455,
+      "refs": [
+        3411
+      ],
+      "repo": "oxagen",
+      "title": "chore(backlog): triage cleanup, 2 issues"
+    },
+    "oxagen#3457": {
+      "added": [
+        "packages/database/atlas/migrations/20260920120000_backfill_mandate_read_grants.sql"
+      ],
+      "author": "macanderson",
+      "closes": [],
+      "files": [
+        "docs/adr/ADR-107-list-mandates-admits-the-roles-request-mandate-admits.md",
+        "packages/database/atlas/migrations/20260920120000_backfill_mandate_read_grants.sql",
+        "packages/database/atlas/migrations/atlas.sum"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3457",
+      "merged_at": "2026-09-19T18:15:30Z",
+      "number": 3457,
+      "refs": [
+        3138
+      ],
+      "repo": "oxagen",
+      "title": "fix(iam): backfill the mandate grants #3440 added for existing enterprise orgs"
+    },
+    "oxagen#3460": {
+      "added": [],
+      "author": "macanderson",
+      "closes": [],
+      "files": [
+        "apps/web/assets/blog.css",
+        "apps/web/assets/oxagen.js",
+        "apps/web/index.html",
+        "apps/web/products/oxagen/index.html",
+        "apps/web/scripts/lib/html.mjs"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3460",
+      "merged_at": "2026-09-19T18:11:54Z",
+      "number": 3460,
+      "refs": [],
+      "repo": "oxagen",
+      "title": "web: fix the three Codex P2s on the theme control"
+    },
+    "oxagen#3463": {
+      "added": [
+        "docs/adr/ADR-103-the-two-renames-land-on-the-surfaces-behind-aliases-in-phases.md"
+      ],
+      "author": "macanderson",
+      "closes": [],
+      "files": [
+        "apps/cli/src/__tests__/program.test.ts",
+        "apps/cli/src/commands/__tests__/retired.test.ts",
+        "apps/cli/src/commands/retired.ts",
+        "apps/cli/src/program.ts",
+        "docs/adr/ADR-103-the-two-renames-land-on-the-surfaces-behind-aliases-in-phases.md"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3463",
+      "merged_at": "2026-09-19T18:21:07Z",
+      "number": 3463,
+      "refs": [
+        3295
+      ],
+      "repo": "oxagen",
+      "title": "ADR-103 and phase 1a: take `oxagen tacho` out of --help, keep every command working"
+    },
+    "oxagen#3465": {
+      "added": [],
+      "author": "macanderson",
+      "closes": [
+        3438
+      ],
+      "files": [
+        "apps/api/src/routes/v1/tacho.events.ingest.test.ts",
+        "apps/docs/src/components/theme-switcher.tsx",
+        "apps/web/assets/oxagen.js",
+        "packages/tacho/src/claude-code/otel.test.ts",
+        "packages/tacho/src/claude-code/recorder.ts"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3465",
+      "merged_at": "2026-09-19T19:20:45Z",
+      "number": 3465,
+      "refs": [],
+      "repo": "oxagen",
+      "title": "fix(tacho): restore recorder sticky state when a seal refuses a record"
+    },
+    "oxagen#3466": {
+      "added": [
+        "tools/scripts/db-lint-migrations.test.ts"
+      ],
+      "author": "macanderson",
+      "closes": [
+        3387
+      ],
+      "files": [
+        ".env.example",
+        ".github/workflows/pipeline.yml",
+        "CLAUDE.md",
+        "packages/config/src/registry.ts",
+        "tools/scripts/db-lint-migrations.test.ts",
+        "tools/scripts/db-lint-migrations.ts"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3466",
+      "merged_at": "2026-09-19T19:20:47Z",
+      "number": 3466,
+      "refs": [],
+      "repo": "oxagen",
+      "title": "feat(migrations): db:lint-migrations catches a migration stamped behind its merge base"
+    },
+    "oxagen#3470": {
+      "added": [
+        "docs/adr/ADR-110-a-squash-merge-can-silently-revert-an-older-branch-wins-fix.md",
+        "tools/scripts/check-machine-key-purpose-coverage.mjs",
+        "tools/scripts/check-machine-key-purpose-coverage.test.ts",
+        "tools/scripts/check-stale-merge-base.mjs",
+        "tools/scripts/check-stale-merge-base.test.ts"
+      ],
+      "author": "macanderson",
+      "closes": [
+        3237
+      ],
+      "files": [
+        ".env.example",
+        ".github/workflows/pipeline.yml",
+        "AGENTS.md",
+        "CONTRIBUTING.md",
+        "docs/adr/ADR-110-a-squash-merge-can-silently-revert-an-older-branch-wins-fix.md",
+        "docs/adr/README.md",
+        "package.json",
+        "packages/config/src/registry.ts",
+        "tools/scripts/check-machine-key-purpose-coverage.mjs",
+        "tools/scripts/check-machine-key-purpose-coverage.test.ts",
+        "tools/scripts/check-stale-merge-base.mjs",
+        "tools/scripts/check-stale-merge-base.test.ts",
+        "tools/scripts/env-check.ts"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3470",
+      "merged_at": "2026-09-19T19:11:00Z",
+      "number": 3470,
+      "refs": [
+        3237
+      ],
+      "repo": "oxagen",
+      "title": "Advisory check for a stale-merge-base squash-merge revert, and a machine-key-scope purpose guard (#3237)"
     }
   },
   "since": {
-    "oxagen": "2026-09-19T14:13:08Z",
-    "roadmap": "2026-09-19T17:15:49.797Z",
-    "stella": "2026-09-19T17:15:49.797Z"
+    "oxagen": "2026-09-19T19:25:19Z",
+    "roadmap": "2026-09-19T19:27:08.976Z",
+    "stella": "2026-09-19T19:27:08.976Z"
   }
 }
