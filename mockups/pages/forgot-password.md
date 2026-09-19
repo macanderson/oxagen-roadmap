@@ -7,7 +7,7 @@
 | Spec | §14 Mission Control; Appendix F sign-in flows |
 | Design | `mockups/src/engine.js` → `obForgot()`, built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded · loading · error |
-| Storybook | `Mission Control / … / forgot-password`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
+| Storybook | `Oxagen / … / forgot-password`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
 | Audit | `forgot-password.audit-prompt.md` |
 
 ## Job

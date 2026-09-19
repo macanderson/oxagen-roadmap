@@ -6,7 +6,7 @@ unless told to in a second turn.
 
 ---
 
-You are auditing the **Agent IAM** page of Oxagen Mission Control (`#/a-intel/core-platform/agents`) for conformance to its design. Be exact and adversarial: the design is the spec, and “close enough” is a fail. Do not summarise what you see; compare it.
+You are auditing the **Agent IAM** page of Oxagen (`#/a-intel/core-platform/agents`) for conformance to its design. Be exact and adversarial: the design is the spec, and “close enough” is a fail. Do not summarise what you see; compare it.
 
 ## Inputs
 
@@ -29,7 +29,7 @@ Work through every check. For each, record PASS, FAIL, or N/A (with why). Cite e
 7. **States.** Force each state and compare copy and controls with the design file:
    - **empty** (`state=empty`): “No identities registered in <workspace>” — identity lives in Postgres, definition in `.oxagen/agents/`; registering opens a Context PR. Actions: Wrap Claude Code, Register an agent.
    - **loading** (`state=loading`): the shell stays and the body is the skeleton; no data, no zeros, no stale rows.
-   - **error** (`state=error`): “Identities could not be loaded” — `503 iam_principals_unavailable`. Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by Mission Control. Actions: Try again, Open an incident; a trace id, region and timestamp line.
+   - **error** (`state=error`): “Identities could not be loaded” — `503 iam_principals_unavailable`. Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by Oxagen. Actions: Try again, Open an incident; a trace id, region and timestamp line.
    - **access denied** (`state=denied`): “You cannot see the identities in this workspace” — the roles the signed-in person holds on the organization do not include `agent.read on core-platform`. Copy explains an owner can grant it and that the grant is itself a governed action in the audit record. Actions: Request access (opens the request-access dialog), Back to Fleet. Below: *Signed in as* (name · role), *Needed* (the permission), *De
    Loading must not flash zeros. Error must name the code and offer Try again and Open an incident. Denied must name the missing permission and offer Request access.
 8. **Trust language.** Every tier, replay grade, attestation and cost basis on the page shows the recorded value; search the build for any place a stronger word could be rendered than the record allows (every agent and run is `observe` or `harness`; `gateway` and `contained` render only as not yet available; nothing says enforced about the harness tier). Money always carries its basis.

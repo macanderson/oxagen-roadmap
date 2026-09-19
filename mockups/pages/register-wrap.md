@@ -7,7 +7,7 @@
 | Spec | §14 Mission Control; Appendix F page 3 |
 | Design | `mockups/src/engine.js` → `pRegister(r) → regWrap()`, built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded · loading · access denied |
-| Storybook | `Mission Control / … / register-wrap`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
+| Storybook | `Oxagen / … / register-wrap`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
 | Audit | `register-wrap.audit-prompt.md` |
 
 ## Job

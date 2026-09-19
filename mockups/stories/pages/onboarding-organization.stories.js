@@ -4,7 +4,7 @@ import { view, argTypes } from "../_view.js";
 import spec from "../../pages/onboarding-organization.md?raw";
 
 export default {
-  title: "Mission Control/Onboarding/Onboarding · Organization",
+  title: "Oxagen/Onboarding/Onboarding · Organization",
   tags: ["autodocs"],
   argTypes,
   args: { shell: "desktop", theme: "system", product: true, hash: "#/welcome/organization" },

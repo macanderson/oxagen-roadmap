@@ -681,7 +681,7 @@ function errorState(what,code){
   return '<div class="state-wrap"><div class="ico" style="color:var(--st-failed);border-color:color-mix(in srgb,var(--st-failed) 40%,transparent)" aria-hidden="true">'+
    '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 8v5M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg></div>'+
    '<h2>'+h(what)+' could not be loaded</h2>'+
-   '<p>The control plane answered <code>'+h(code)+'</code>. Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by Mission Control.</p>'+
+   '<p>The control plane answered <code>'+h(code)+'</code>. Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by Oxagen.</p>'+
    '<div class="acts"><button class="btn primary" onclick="render()">Try again</button>'+
    '<button class="btn" onclick="openDialog(\'incident\')">Open an incident</button></div>'+
    '<p class="mono dim" style="margin-top:16px;font-size:11.5px">trace 01K5RSXQ7F2E · us-east-1 · 2026-09-11 09:16:04Z</p></div>';
@@ -7546,7 +7546,7 @@ function planeDetail(v){
    '<dt>Deployment</dt><dd>Kubernetes, customer-operated · Helm chart</dd>'+
    '<dt>Bundle version</dt><dd class="mono">oxagen/1.4.2</dd>'+
    '<dt>Bundle signature</dt><dd><span class="mono">cosign · sha256:7f31c0…9b42</span> · verified against Oxagen release key <span class="mono">rel-2026-03</span>, the key an evidence bundle is checked against</dd>'+
-   '<dt>Containers</dt><dd>gateway · services · Mission Control · Stella engine · witness runner · Postgres · S3-compatible object storage with object lock</dd>'+
+   '<dt>Containers</dt><dd>gateway · services · operator console · Stella engine · witness runner · Postgres · S3-compatible object storage with object lock</dd>'+
    '<dt>Air-gapped mode</dt><dd><span class="b b-approval"><span class="d"></span>on</span> — model routes point inside the network (see In-firewall routes on Model funding and routes)</dd>'+
    '<dt>Licence</dt><dd>per organization, annual, invoiced. Stripe is not involved behind a firewall.</dd>'+
    '<dt>Next bundle</dt><dd><span class="mono">oxagen/1.4.3</span> available · applied on your schedule, never pushed</dd></dl>'+
@@ -8715,7 +8715,7 @@ function skBody(s){
    "a-intel.release-notes-from-prs":'<span class="c">---</span>\n<span class="k">name</span>: release-notes-from-prs\n<span class="k">scope</span>: workspace:core-platform\n<span class="c">---</span>\n\n<span class="k"># Cutting release notes</span>\n\n1. List the pull requests merged into <span class="s">main</span> since the last tag.\n2. Group them under <span class="s">Features</span>, <span class="s">Fixes</span>, <span class="s">Breaking</span>. A PR with no label goes to Fixes.\n3. Read CHANGELOG.md <span class="k">once</span>. It is 40k tokens; re-reading it is the single largest\n   waste in this task’s history.\n4. Write the draft to <span class="s">release/&lt;version&gt;-notes</span>. Open a PR.\n5. <span class="k">Never</span> publish the release. That is github__create_release, it needs approval,\n   and it is not yours to ask for.',
    "a-intel.rollback-a-bad-release":'<span class="c">---</span>\n<span class="k">name</span>: rollback-a-bad-release\n<span class="k">scope</span>: workspace:core-platform\n<span class="c">---</span>\n\n<span class="k"># Pulling a release back</span>\n\n<span class="k">Do not</span> revert the merge commit first. <span class="k">Do not</span> force-push main. Both of those\nhave cost us a day each, on 2025-03-11 and on 2025-11-02.\n\n1. Flip the feature flag. This is the only step that is fast.\n2. Cut a revert PR against main and let the ladder run on it.\n3. Only once the witness flips, tag and deploy.',
    "a-intel.postgres-safe-migration":'<span class="c">---</span>\n<span class="k">name</span>: postgres-safe-migration\n<span class="k">scope</span>: workspace:core-platform, workspace:finops\n<span class="c">---</span>\n\n<span class="k"># Expand, backfill, contract</span>\n\nNever in one deploy. The four outages in 2025 were all one deploy.\n\n1. <span class="k">Expand</span>: add the column, nullable, no default on a large table.\n2. <span class="k">Backfill</span>: in batches, off the request path, resumable.\n3. <span class="k">Contract</span>: drop the old column, in a later deploy, after a week of dual reads.',
-   "a-intel.invoice-reconciliation":'<span class="c">---</span>\n<span class="k">name</span>: invoice-reconciliation\n<span class="k">scope</span>: workspace:finops\n<span class="c">---</span>\n\n<span class="c"># You are reading this because you opened it from Mission Control.</span>\n<span class="c"># An agent in core-platform cannot: scope says finops, and scope is</span>\n<span class="c"># checked before ranking, not after.</span>\n\n<span class="k"># Matching a statement line</span>\n\n1. Find the purchase order. No PO, no payment.\n2. Find the receipt. Amounts must agree to the cent.\n3. Anything above the mandate parks. That is not your call to make.',
+   "a-intel.invoice-reconciliation":'<span class="c">---</span>\n<span class="k">name</span>: invoice-reconciliation\n<span class="k">scope</span>: workspace:finops\n<span class="c">---</span>\n\n<span class="c"># You are reading this because you opened it from Oxagen.</span>\n<span class="c"># An agent in core-platform cannot: scope says finops, and scope is</span>\n<span class="c"># checked before ranking, not after.</span>\n\n<span class="k"># Matching a statement line</span>\n\n1. Find the purchase order. No PO, no payment.\n2. Find the receipt. Amounts must agree to the cent.\n3. Anything above the mandate parks. That is not your call to make.',
    "oxagen.pdf-extract":'<span class="c">---</span>\n<span class="k">name</span>: pdf-extract\n<span class="k">publisher</span>: oxagen-marketplace\n<span class="c">---</span>\n\n<span class="c"># Held. The body below is the 0.9.3 the marketplace served on 2026-09-09.</span>\n<span class="c"># The digest Priya approved on 2026-08-21 was sha256:b78e...0c14, and this</span>\n<span class="c"># one is sha256:f41c...593a. No agent has seen either.</span>\n\n<span class="k"># Extracting tables</span>\n\n1. Detect ruled regions. 2. Read cells left to right. 3. Return rows.'
   };
   return m[s.id]||'<span class="c">---</span>\n<span class="k">name</span>: '+h(s.id.split(".").pop())+'\n<span class="c">---</span>\n\n'+h(s.st);
@@ -8822,7 +8822,7 @@ var SCENARIOS={
 /* the day of the first run, and the windows it opens: provisional without a main repo, and the onboarding offer */
 var OB_DAY=Date.UTC(2026,8,11), OB_PROVISIONAL_DAYS=14, OB_OFFER_DAYS=7;
 SCENARIOS["sixty-seconds-to-governed"]={title:"Sixty seconds to governed", ws:"core-platform",
- blurb:"A new operator signs up, wraps an agent, and lands on Fleet looking at its first run. Mission Control does not open until that run's first frame arrives.",
+ blurb:"A new operator signs up, wraps an agent, and lands on Fleet looking at its first run. Oxagen does not open until that run's first frame arrives.",
  steps:[
   {say:"A new operator signs up with Google or GitHub, or with an email and a password of at least 12 characters, one symbol and one digit.",
    note:"Every organization gets its first "+BILLING.runsIncluded.toLocaleString("en-US")+" runs a month free, with every governance feature on.",
@@ -8839,8 +8839,8 @@ SCENARIOS["sixty-seconds-to-governed"]={title:"Sixty seconds to governed", ws:"c
    route:function(o){return {page:"welcome",step:"wrap",org:o,ws:"core-platform"};},
    setup:function(){obScnArm();if(!S.reg||S.reg.mode!=="onboard"){regClear();S.reg=obNew();}S.reg.tab="cc";},
    act:["Show the SDK tab","S.reg.tab='sdk';render()"]},
-  {say:"Mission Control stays locked until the first frame arrives. The installer's smoke session sends it, so the install test and the unlock are one event.",
-   note:"Nothing is written before that frame: no agent, no run, no Context PR. When it lands, Mission Control unlocks here and the scenario stays on this step.",
+  {say:"Oxagen stays locked until the first frame arrives. The installer's smoke session sends it, so the install test and the unlock are one event.",
+   note:"Nothing is written before that frame: no agent, no run, no Context PR. When it lands, Oxagen unlocks here and the scenario stays on this step.",
    route:function(o){return {page:"welcome",step:"run",org:o,ws:"core-platform"};},
    setup:function(){obScnArm();if(!S.reg||S.reg.mode!=="onboard"){regClear();S.reg=obNew();}}},
   {say:"The installer read the git remote, so binding the main repo is one click: the GitHub App, Context PRs, checks and the code graph.",
@@ -10602,14 +10602,14 @@ function regFinish(){
     var had=!!r.runId, run=obUnlock();
     if(had){var fs=obScnStepOf("fleet"); if(fs){scnGo(scnHref(S.scn.id,fs));return;}}
     render();
-    act('First frame received from '+key+'. Mission Control is unlocked; '+run.id+' is live.','gold');
+    act('First frame received from '+key+'. Oxagen is unlocked; '+run.id+' is live.','gold');
     return;
   }
   var run2=obUnlock();
   S.reg=null; S.runFilter="all";
   if(ob) S.firstRun=run2.id;
   go('#/'+ORG.slug+'/'+w.slug);
-  act(ob?'Welcome to Mission Control. First frame received from '+key+' — its run is live on Fleet, and the organization is out of the gate.'
+  act(ob?'Welcome to Oxagen. First frame received from '+key+', its run is live on Fleet, and the organization is out of the gate.'
         :key+' registered — first frame received. Its smoke run is live on Fleet.','gold');
 }
 function regInstall(harness){
@@ -10631,7 +10631,7 @@ function regShell(step,inner){
       '<span class="sn">'+(done?'✓':s.n)+'</span><span class="slab">'+h(s.lab)+'</span></button>';}).join("")+'</nav>'+
    inner+
    '<p class="reg-cap" style="margin-top:22px;text-align:center">'+(ob
-    ?'Mission Control does not open until an agent has talked to Oxagen. That first frame is also the installer’s smoke test, so there is one path, not two.'
+    ?'The operator console does not open until an agent has talked to Oxagen. That first frame is also the installer’s smoke test, so there is one path, not two.'
     :'Registration does not complete until the agent has talked to Oxagen. That first frame is also the installer’s smoke test, so there is one path, not two. Cancel at any time — nothing is kept until the frame arrives.')+'</p></div></div>';
 }
 function regName(){
@@ -10721,7 +10721,7 @@ function regRun(){
   var r=S.reg, key=regKey(), me=PEOPLE.marcus, hl=REG_HARNESS[r.harness]||r.harness;
   var ob=r.mode==="onboard";
   var head=ob?'<div><p class="eyebrow">Step 3 of 3</p><h1>Start a run</h1>'+
-   '<p class="reg-lead">Mission Control opens the moment the first frame from <span class="mono">'+h(key)+'</span> reaches Oxagen — and lands you on Fleet looking at your own run.</p></div>'
+   '<p class="reg-lead">The operator console opens the moment the first frame from <span class="mono">'+h(key)+'</span> reaches Oxagen, and lands you on Fleet looking at your own run.</p></div>'
    :'<div><p class="eyebrow">Step 3 of 3</p><h1>Wait for the first frame</h1>'+
    '<p class="reg-lead">Registration completes the moment the first frame from <span class="mono">'+h(key)+'</span> reaches Oxagen — and lands you on Fleet looking at its run.</p></div>';
   if(S.state==="error") return head+
@@ -10741,7 +10741,7 @@ function regRun(){
      '<div class="row" style="margin-top:12px">'+tierBadge("harness")+'<span class="b b-q">replay grade: full</span><span class="b b-q">chain intact</span></div>'+
      '<p class="muted" style="font-size:12.5px;margin:12px 0 0">The tier is computed from what was actually routed, not from what the adapter can do on paper. The hooks answered, so this run is <b>harness</b>: delivered, recorded, client-attested, fail-open.</p></div></div>';
     foot='<div class="reg-foot">'+regCancelBtn()+''+
-     '<div class="sp"><span class="reg-cap" id="regAuto">'+(r.runId?'Unlocked · <span class="mono">'+h(r.runId)+'</span> is live':'Opening automatically…')+'</span><button class="btn primary" onclick="regFinish()">'+(ob?"Open Mission Control":"Open in Fleet")+'</button></div></div>';
+     '<div class="sp"><span class="reg-cap" id="regAuto">'+(r.runId?'Unlocked · <span class="mono">'+h(r.runId)+'</span> is live':'Opening automatically…')+'</span><button class="btn primary" onclick="regFinish()">'+(ob?"Open Oxagen":"Open in Fleet")+'</button></div></div>';
   } else {
     body='<div class="reg-card"><div class="ch"><span class="reg-spin"></span><h3>Waiting for the first frame</h3><span class="sp">polling · 1s</span></div>'+
      '<div class="cb"><div class="row" style="margin-bottom:12px"><span class="b b-q mono">'+h(key)+'</span><span class="b b-q">'+h(hl)+'</span><span class="b b-q">host '+REG_HOST+'</span></div>'+
@@ -10798,7 +10798,7 @@ var OB_STEPS=[
  {id:"verify",lab:"Verify email",sub:"Six-digit code, good for ten minutes"},
  {id:"organization",lab:"Name the organization",sub:"Tenant, namespace and the first workspace"},
  {id:"wrap",lab:"Wrap an agent",sub:"Claude Code, Codex CLI or an SDK agent"},
- {id:"run",lab:"Start a run",sub:"The first frame is what opens Mission Control"}];
+ {id:"run",lab:"Start a run",sub:"The first frame is what opens Oxagen"}];
 var OB_ALT=[
  {id:"login",lab:"Log in",sub:"Returning operator, then two-factor"},
  {id:"forgot",lab:"Forgot password",sub:"Reset link, good for sixty minutes"},
@@ -10945,7 +10945,7 @@ function obInstaller(){
      '<div class="reg-frames"><div><span class="sq">0</span><span class="ts">'+h(fr.t)+'</span><span class="kd">agent_start</span><span class="bd">'+h(dev)+' · countersigned on ingest</span></div></div>'+
      '<p class="muted" style="font-size:12.5px;margin:12px 0 6px">Roll back at any time. This removes the hooks, the login item and the base URL, and restores your previous settings file:</p>'+
      '<pre style="margin:0">oxagen agent unenroll --host '+h(REG_HOST)+' --restore</pre>'+
-     '<div class="row" style="margin-top:14px"><button class="btn primary" onclick="obGo(\'run\')">Back to Oxagen</button><span class="dim" style="font-size:12px">Mission Control is already unlocking in your browser.</span></div>';
+     '<div class="row" style="margin-top:14px"><button class="btn primary" onclick="obGo(\'run\')">Back to Oxagen</button><span class="dim" style="font-size:12px">The operator console is already unlocking in your browser.</span></div>';
   }
   return shell(body);
 }
@@ -10954,7 +10954,7 @@ function obInstaller(){
 function obAccountTab(){
   function row(s,i){return '<div><span class="sn">'+(typeof i==="number"?i+1:"·")+'</span><div class="bd2"><div class="t1">'+h(s.lab)+'</div><div class="t2">'+h(s.sub)+'</div></div>'+
    '<button class="btn sm" onclick="obGo(\''+s.id+'\')">Open</button></div>';}
-  return '<div class="note" style="margin-bottom:16px"><b>Clickable demo only.</b> These are the screens a new operator sees before Mission Control opens — sign-up through the first frame. They are reachable from here so a walkthrough can start from the account you are signed in as. Nothing on them writes anything; Exit demo on any screen brings you back here, still signed in.</div>'+
+  return '<div class="note" style="margin-bottom:16px"><b>Clickable demo only.</b> These are the screens a new operator sees before Oxagen opens, sign-up through the first frame. They are reachable from here so a walkthrough can start from the account you are signed in as. Nothing on them writes anything; Exit demo on any screen brings you back here, still signed in.</div>'+
    '<div class="field"><label>The path — sixty seconds to governed</label><div class="ob-steps">'+OB_STEPS.map(row).join("")+'</div></div>'+
    '<div class="field"><label>Also in the set</label><div class="ob-steps">'+OB_ALT.map(function(s){return row(s,null);}).join("")+'</div></div>'+
    '<div class="row"><button class="btn primary" onclick="obGo(\'signup\')">Start from sign-up</button>'+
@@ -11032,7 +11032,7 @@ function obLogin(){
    '<p>'+h(p.name)+' (organization owner, '+h(ORG.name)+') suspended <span class="mono">'+h(me.email)+'</span> on 9 Sep 2026. Runs already recorded are kept; no new run tokens are minted.</p>'+
    '<button class="btn" onclick="act(\'A message to the organization owner is drafted. Nothing else changes until they act.\')">Contact your organization owner</button></div>');
   var err=S.state==="error";
-  return obShell('<div class="ob-h"><p class="eyebrow">Welcome back</p><h1>Log in to Mission Control</h1></div>'+
+  return obShell('<div class="ob-h"><p class="eyebrow">Welcome back</p><h1>Log in to Oxagen</h1></div>'+
    '<div class="ob-panel">'+(err?obErr('<b>Email or password is wrong.</b> Check both and try again, or reset your password.'):'')+
    obSso("fleet")+'<div class="ob-or">or</div>'+
    '<form class="ob-form" onsubmit="event.preventDefault();obGo(\'two-factor\')">'+

@@ -5,7 +5,7 @@ import { HOME } from "../catalog.mjs";
 
 // The product build: every page, dialog and auth screen with the mockup chrome taken off.
 export default {
-  title: "Mission Control/Product",
+  title: "Oxagen/Product",
   argTypes,
   args: { state: "loaded", theme: "system", product: true, hash: HOME },
   render: view,

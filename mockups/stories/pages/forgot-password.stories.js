@@ -4,7 +4,7 @@ import { view, argTypes } from "../_view.js";
 import spec from "../../pages/forgot-password.md?raw";
 
 export default {
-  title: "Mission Control/Auth/Forgot password",
+  title: "Oxagen/Auth/Forgot password",
   tags: ["autodocs"],
   argTypes,
   args: { shell: "desktop", theme: "system", product: true, hash: "#/welcome/forgot" },

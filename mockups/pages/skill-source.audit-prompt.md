@@ -6,7 +6,7 @@ unless told to in a second turn.
 
 ---
 
-You are auditing the **Skill source** page of Oxagen Mission Control (`#/a-intel/core-platform/steering/skills/<id>/source`) for conformance to its design. Be exact and adversarial: the design is the spec, and “close enough” is a fail. Do not summarise what you see; compare it.
+You are auditing the **Skill source** page of Oxagen (`#/a-intel/core-platform/steering/skills/<id>/source`) for conformance to its design. Be exact and adversarial: the design is the spec, and “close enough” is a fail. Do not summarise what you see; compare it.
 
 ## Inputs
 

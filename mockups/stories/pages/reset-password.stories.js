@@ -4,7 +4,7 @@ import { view, argTypes } from "../_view.js";
 import spec from "../../pages/reset-password.md?raw";
 
 export default {
-  title: "Mission Control/Auth/Reset password",
+  title: "Oxagen/Auth/Reset password",
   tags: ["autodocs"],
   argTypes,
   args: { shell: "desktop", theme: "system", product: true, hash: "#/welcome/reset" },

@@ -6,7 +6,7 @@ unless told to in a second turn.
 
 ---
 
-You are auditing the **Onboarding · Wrap an agent** page of Oxagen Mission Control (`#/welcome/wrap`) for conformance to its design. Be exact and adversarial: the design is the spec, and “close enough” is a fail. Do not summarise what you see; compare it.
+You are auditing the **Onboarding · Wrap an agent** page of Oxagen (`#/welcome/wrap`) for conformance to its design. Be exact and adversarial: the design is the spec, and “close enough” is a fail. Do not summarise what you see; compare it.
 
 ## Inputs
 

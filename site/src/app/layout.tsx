@@ -10,7 +10,7 @@ import { source } from "@/lib/source";
 
 export const metadata: Metadata = {
   title: { default: "Oxagen internal docs", template: "%s · Oxagen internal docs" },
-  description: "Mission Control, page by page: the walkthrough, every mocked page, the scenarios, the spec and the implementation plan.",
+  description: "Oxagen, page by page: the walkthrough, every mocked page, the scenarios, the spec and the implementation plan.",
 };
 
 export const viewport: Viewport = {

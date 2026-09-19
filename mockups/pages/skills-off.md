@@ -7,7 +7,7 @@
 | Spec | see `skills.md` |
 | Design | `mockups/src/engine.js` → `pSkills()` → `skGate()` |
 | States | loaded (the gate renders in place of every tab; loading / error / denied are the Skills page's own, in `skills.md`) |
-| Storybook | `Mission Control / … / skills-off`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
+| Storybook | `Oxagen / … / skills-off`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
 | Audit | `skills-off.audit-prompt.md` |
 
 ## Job
