@@ -82,7 +82,7 @@ Each explores a different organising principle. They are not three shades of one
 ### Option Ledger — organise by disposition
 Grouped list: **Created · Changed · Read only · Pending**. One row per artifact: kind glyph,
 name, destination, state badge. Reuses the existing table + badge vocabulary exactly.
-- *Case for:* scans fastest, matches the rest of Mission Control, cheapest to build, and
+- *Case for:* scans fastest, matches the rest of Oxagen, cheapest to build, and
   the Read-only group finally stops `CHANGELOG.md` from looking like a change.
 - *Tradeoff:* still a list. Answers "what changed" well and "what is the story" barely —
   which is the thing item 7 actually complained about.

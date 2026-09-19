@@ -4,7 +4,7 @@ import { view, argTypes } from "../_view.js";
 import spec from "../../pages/audit.md?raw";
 
 export default {
-  title: "Mission Control/Organization/Audit",
+  title: "Oxagen/Organization/Audit",
   tags: ["autodocs"],
   argTypes,
   args: { shell: "desktop", theme: "system", product: true, hash: "#/a-intel/audit" },

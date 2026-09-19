@@ -6,7 +6,7 @@ unless told to in a second turn.
 
 ---
 
-You are auditing the **Log in** page of Oxagen Mission Control (`#/welcome/login`) for conformance to its design. Be exact and adversarial: the design is the spec, and “close enough” is a fail. Do not summarise what you see; compare it.
+You are auditing the **Log in** page of Oxagen (`#/welcome/login`) for conformance to its design. Be exact and adversarial: the design is the spec, and “close enough” is a fail. Do not summarise what you see; compare it.
 
 ## Inputs
 
@@ -20,7 +20,7 @@ You are auditing the **Log in** page of Oxagen Mission Control (`#/welcome/login
 Work through every check. For each, record PASS, FAIL, or N/A (with why). Cite evidence: a file and line in the build, a screenshot path, or a DOM selector and its text.
 
 1. **Route and shell.** The build serves the route; there is no app shell — brandmark and a centred card only. The document title names the page.
-2. **Header.** Eyebrow “Welcome back”, h1 “Log in to Mission Control”. Actions present, in order, with the same labels: Log in. Exactly one gold (primary) action on the screen.
+2. **Header.** Eyebrow “Welcome back”, h1 “Log in to Oxagen”. Actions present, in order, with the same labels: Log in. Exactly one gold (primary) action on the screen.
 3. **Summary tiles.** None on this page; fail if the build added decorative ones.
 4. **Sections, tabs and tables.** For each item below, the build has it, with the same tab labels (and live counts where the design shows them), the same panel headings, and every table column named in the spec, in that order. Missing or renamed columns are FAILs; extra columns are noted.
    - Sign in with: Google · GitHub — then “or”. Form: Work email · Password (show/hide; Forgot password? link) · “Keep me logged in on this device for 30 days” checkbox.

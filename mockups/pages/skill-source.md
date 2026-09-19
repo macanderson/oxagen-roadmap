@@ -7,7 +7,7 @@
 | Spec | `docs/w13-in-the-loop-scenario.md`; `docs/creation-spec.md` §4 |
 | Design | `mockups/src/engine.js` → `pSkillSource(r)`, built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded · loading · error · access denied |
-| Storybook | `Mission Control / Workspace / Skill source`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
+| Storybook | `Oxagen / Workspace / Skill source`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
 | Audit | `skill-source.audit-prompt.md` |
 
 ## Job

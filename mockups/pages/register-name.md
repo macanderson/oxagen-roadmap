@@ -7,7 +7,7 @@
 | Spec | §14 Mission Control; Appendix F page 3 |
 | Design | `mockups/src/engine.js` → `pRegister(r) → regName()`, built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded · loading · access denied |
-| Storybook | `Mission Control / … / register-name`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
+| Storybook | `Oxagen / … / register-name`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
 | Audit | `register-name.audit-prompt.md` |
 
 ## Job

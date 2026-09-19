@@ -6,7 +6,7 @@ unless told to in a second turn.
 
 ---
 
-You are auditing the **Steering · Ontology** tab of Oxagen Mission Control (`#/a-intel/core-platform/steering/ontology`) for conformance to its design. Be exact and adversarial: the design is the spec, and “close enough” is a fail. Do not summarise what you see. Compare it.
+You are auditing the **Steering · Ontology** tab of Oxagen (`#/a-intel/core-platform/steering/ontology`) for conformance to its design. Be exact and adversarial: the design is the spec, and “close enough” is a fail. Do not summarise what you see. Compare it.
 
 ## Inputs
 

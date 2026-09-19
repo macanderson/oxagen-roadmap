@@ -7,12 +7,12 @@
 | Spec | §14 Mission Control; Appendix F onboarding (the gate) |
 | Design | `mockups/src/engine.js` → `pWelcome(r) → regRun() in onboard mode`, built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded · loading · error · access denied |
-| Storybook | `Mission Control / … / onboarding-run`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
+| Storybook | `Oxagen / … / onboarding-run`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
 | Audit | `onboarding-run.audit-prompt.md` |
 
 ## Job
 
-Step 3 of 3 of the gate: start a run. Mission Control opens the moment the first frame reaches Oxagen and lands the operator on Fleet looking at their own run; the repository the installer saw can be bound now or later.
+Step 3 of 3 of the gate: start a run. The operator console opens the moment the first frame reaches Oxagen and lands the operator on Fleet looking at their own run; the repository the installer saw can be bound now or later.
 
 ## What is on the page
 

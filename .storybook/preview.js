@@ -6,7 +6,7 @@ export default {
     controls: { expanded: true },
     options: {
       storySort: {
-        order: ["Mission Control", ["Product", "Workspace", "Organization", "Register", "Onboarding", "Auth"], "Scenarios"],
+        order: ["Oxagen", ["Product", "Workspace", "Organization", "Register", "Onboarding", "Auth"], "Scenarios"],
       },
     },
   },

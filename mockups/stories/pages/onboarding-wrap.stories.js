@@ -4,7 +4,7 @@ import { view, argTypes } from "../_view.js";
 import spec from "../../pages/onboarding-wrap.md?raw";
 
 export default {
-  title: "Mission Control/Onboarding/Onboarding · Wrap an agent",
+  title: "Oxagen/Onboarding/Onboarding · Wrap an agent",
   tags: ["autodocs"],
   argTypes,
   args: { shell: "desktop", theme: "system", product: true, hash: "#/welcome/wrap" },

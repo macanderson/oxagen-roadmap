@@ -4,7 +4,7 @@ import { view, argTypes } from "../_view.js";
 import spec from "../../pages/signup.md?raw";
 
 export default {
-  title: "Mission Control/Auth/Sign up",
+  title: "Oxagen/Auth/Sign up",
   tags: ["autodocs"],
   argTypes,
   args: { shell: "desktop", theme: "system", product: true, hash: "#/welcome/signup" },

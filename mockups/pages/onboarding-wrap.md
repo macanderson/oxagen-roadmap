@@ -7,7 +7,7 @@
 | Spec | §14 Mission Control; Appendix F onboarding (the gate) |
 | Design | `mockups/src/engine.js` → `pWelcome(r) → regWrap() in onboard mode`, built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded · loading · access denied |
-| Storybook | `Mission Control / … / onboarding-wrap`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
+| Storybook | `Oxagen / … / onboarding-wrap`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
 | Audit | `onboarding-wrap.audit-prompt.md` |
 
 ## Job

@@ -4,7 +4,7 @@ import { view, argTypes } from "../_view.js";
 import spec from "../../pages/organization-api-keys.md?raw";
 
 export default {
-  title: "Mission Control/Organization/Organization · API keys",
+  title: "Oxagen/Organization/Organization · API keys",
   tags: ["autodocs"],
   argTypes,
   args: { shell: "desktop", theme: "system", product: true, hash: "#/a-intel/api-keys" },

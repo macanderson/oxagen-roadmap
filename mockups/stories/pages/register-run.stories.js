@@ -4,7 +4,7 @@ import { view, argTypes } from "../_view.js";
 import spec from "../../pages/register-run.md?raw";
 
 export default {
-  title: "Mission Control/Register/Register agent · First run",
+  title: "Oxagen/Register/Register agent · First run",
   tags: ["autodocs"],
   argTypes,
   args: { shell: "desktop", theme: "system", product: true, hash: "#/a-intel/core-platform/register/run" },

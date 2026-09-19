@@ -25,7 +25,7 @@ const SRC = path.join(root, "mockups/src");
 const FIX = path.join(root, "mockups/fixtures");
 export const OUT = path.join(root, "mockups/missioncontrol.html");
 
-export const TITLE = "Oxagen Mission Control";
+export const TITLE = "Oxagen";
 export const FONT = '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">';
 
 // Every fixtures/*.json, keyed by its name in upper snake case: spend-detail.json → SPEND_DETAIL.

@@ -6,7 +6,7 @@ unless told to in a second turn.
 
 ---
 
-You are auditing the **Installer** page of Oxagen Mission Control (`#/welcome/installer`) for conformance to its design. Be exact and adversarial: the design is the spec, and “close enough” is a fail. Do not summarise what you see; compare it.
+You are auditing the **Installer** page of Oxagen (`#/welcome/installer`) for conformance to its design. Be exact and adversarial: the design is the spec, and “close enough” is a fail. Do not summarise what you see; compare it.
 
 ## Inputs
 
@@ -23,7 +23,7 @@ Work through every check. For each, record PASS, FAIL, or N/A (with why). Cite e
 2. **Header.** Eyebrow “”, h1 “Oxagen Agent Installer / Install the Oxagen agent”. Actions present, in order, with the same labels: Download · Install · Cancel. Exactly one gold (primary) action on the screen.
 3. **Summary tiles.** None on this page; fail if the build added decorative ones.
 4. **Sections, tabs and tables.** For each item below, the build has it, with the same tab labels (and live counts where the design shows them), the same panel headings, and every table column named in the spec, in that order. Missing or renamed columns are FAILs; extra columns are noted.
-   - Three panes: the download (signed package with checksum), the install (what it writes: collector, hooks, base URL), and Connected (Back to Oxagen; Mission Control is already unlocking). The uninstall line `oxagen agent unenroll --host <host> --restore` is shown.
+   - Three panes: the download (signed package with checksum), the install (what it writes: collector, hooks, base URL), and Connected (Back to Oxagen; the operator console is already unlocking). The uninstall line `oxagen agent unenroll --host <host> --restore` is shown.
 5. **Actions and dialogs.** Every button in the spec exists, opens what the spec says (no dialogs), and each write is a governed action: it passes IAM, produces an audit event, and shows a receipt or reference. A stub must say what the product would do; a control that silently does nothing is a FAIL.
 6. **Data sources.** For each row of the spec’s data-source table, find the adapter or query in the build that feeds it. ✅ rows must be wired to the named store; 🟡 rows must be wired for the fields that exist and render `NotBacked` (an honest “not recorded yet”, never a zero) for the rest; ❌ rows must render `NotBacked` with the milestone named. A fixture reaching production is a FAIL.
 7. **States.** Force each state and compare copy and controls with the design file:

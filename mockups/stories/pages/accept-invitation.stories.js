@@ -4,7 +4,7 @@ import { view, argTypes } from "../_view.js";
 import spec from "../../pages/accept-invitation.md?raw";
 
 export default {
-  title: "Mission Control/Auth/Accept invitation",
+  title: "Oxagen/Auth/Accept invitation",
   tags: ["autodocs"],
   argTypes,
   args: { shell: "desktop", theme: "system", product: true, hash: "#/welcome/invite" },
