@@ -1,0 +1,51 @@
+[
+  {
+    "schema": "arp.attestation/0.1",
+    "subject_digest": "sha256:6373c5b620907519562f3a0417db882d51ddeacec977fafd124563225b159e28",
+    "key_id": "fixture-key-1",
+    "algorithm": "Ed25519",
+    "signature": "/+RlHOirMPpqkzDUYSPdGj9maYzT0s4/nyUHPCbzzM0CNY/Q07zWmmlYH7D2BQonsQ+j5yPo521vSctErnQRCQ=="
+  },
+  {
+    "schema": "arp.attestation/0.1",
+    "subject_digest": "sha256:0071cf6620038f5ad3eebd5e2e7433d0130866dfcd54fd24f0f3e17236565248",
+    "key_id": "fixture-key-1",
+    "algorithm": "Ed25519",
+    "signature": "+G9MmKgeJbb1gQaA3A1Qo/Hmnq25G0a8IST1QP97Sf4x96TJSiDmXxeAOd/Hz6I+3H2j4LPj+XYrMS3V3VLBCw=="
+  },
+  {
+    "schema": "arp.attestation/0.1",
+    "subject_digest": "sha256:707646b306c7d4343a0295135aacd929aa90b3fed72a21344051d3d01596524d",
+    "key_id": "fixture-key-1",
+    "algorithm": "Ed25519",
+    "signature": "XNuJL7o0Ft5kxGsDMk7d5FCmjJd0qU7FIVVe3DNM9MBbXYRU15xydR9ltm8FvIObkVXyNIOixuLxmDJ51WoHAQ=="
+  },
+  {
+    "schema": "arp.attestation/0.1",
+    "subject_digest": "sha256:27c2976c8fae1434ad39c5f36e7905331441070a7370cba1f1eb531a160ce0ad",
+    "key_id": "fixture-key-1",
+    "algorithm": "Ed25519",
+    "signature": "kNHWe1tOWp0doyujuvqJG+PoJSPgyTA514Y8NcjBSKQ5K5Sb9SBvDvAXzObXTTwgHwt2kZZ8Eumij92VIV1tAA=="
+  },
+  {
+    "schema": "arp.attestation/0.1",
+    "subject_digest": "sha256:765b3a51b5a16ee7be62c2b40dd3cd268163733b5c97dcaf5f42e19121c80a16",
+    "key_id": "fixture-key-1",
+    "algorithm": "Ed25519",
+    "signature": "SLG8deTf/lt/vj8xTCT2JWhLpTDCcVRjONC35vM34fzJ41j77O9LvTovs0kFB2BwyptuFR1U+gGE6KaYty2gCA=="
+  },
+  {
+    "schema": "arp.attestation/0.1",
+    "subject_digest": "sha256:569d0db55a29e9b0e4b38783b62c407f67e66502ddde88e7216fa72c9ff44d03",
+    "key_id": "fixture-key-1",
+    "algorithm": "Ed25519",
+    "signature": "evCUl5pJqUy4jplF5+2se2ODcCzevkb4y6XOiZ6iFRdL417BAOwkyKWfyzHZvXyCBa6DT4Pc3m3rxD29hZqgDg=="
+  },
+  {
+    "schema": "arp.attestation/0.1",
+    "subject_digest": "sha256:ea3d128af92eae9727df67c24c05992b478a65f5d5f51f5605831c2e769cb3ea",
+    "key_id": "fixture-key-1",
+    "algorithm": "Ed25519",
+    "signature": "W9AP1aE2erxePXeDphk+y5KhLE5PkndCo81Oj0/7RgaWckumbZRtD/jYmxkCgzqgsnAe6Yq1CisXFbPgJm4wDw=="
+  }
+]

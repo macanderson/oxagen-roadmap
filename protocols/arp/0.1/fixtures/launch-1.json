@@ -1,0 +1,31 @@
+{
+  "schema": "arp.launch/0.1",
+  "issuer": "fixture:oxagen",
+  "launch_id": "launch_fixture_1",
+  "checkpoint_digest": "sha256:dee57bf76a6f14bcd593c6b720fb02a0768d64aeb5af76d18a2e9141f8bdc61b",
+  "target": {
+    "harness": "codex",
+    "harness_version": "fixture-only",
+    "adapter": "fixture-adapter",
+    "adapter_version": "0.1.0",
+    "adapter_digest": "sha256:9a63593b7b52dc82acdf4e5e55f4f497e0c2105df11b76446c023b09b503881c",
+    "model": "synthetic-model",
+    "configuration": {
+      "digest": "sha256:a8d9311e3253a07841a1b110e2996ee74acf11dd90f4d792b065f6b759fa2be6",
+      "bytes": 68,
+      "media_type": "application/json"
+    }
+  },
+  "mode": "fork",
+  "tool_mode": "live",
+  "allowed_optional_gaps": [],
+  "budget": {
+    "currency": "USD",
+    "max_microusd": "1000000",
+    "max_wall_seconds": 300
+  },
+  "deadline": "2099-01-01T00:00:00Z",
+  "experiment_id": "experiment_fixture_1",
+  "extensions": {},
+  "required_extensions": []
+}

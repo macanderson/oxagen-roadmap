@@ -1,0 +1,135 @@
+[
+  {
+    "schema": "arp.receipt/0.1",
+    "issuer": "fixture:oxagen",
+    "launch_id": "launch_fixture_1",
+    "launch_digest": "sha256:e6366fb20cf3abd0a6b4274f93203dc6f363d1e15f92c802f3a03d3613c5ae19",
+    "seq": "0",
+    "previous_receipt_digest": null,
+    "created_at": "2026-09-19T12:00:00Z",
+    "state": "requested",
+    "checkpoint_digest": "sha256:dee57bf76a6f14bcd593c6b720fb02a0768d64aeb5af76d18a2e9141f8bdc61b",
+    "evidence": [],
+    "extensions": {},
+    "required_extensions": []
+  },
+  {
+    "schema": "arp.receipt/0.1",
+    "issuer": "fixture:oxagen",
+    "launch_id": "launch_fixture_1",
+    "launch_digest": "sha256:e6366fb20cf3abd0a6b4274f93203dc6f363d1e15f92c802f3a03d3613c5ae19",
+    "seq": "1",
+    "previous_receipt_digest": "sha256:6373c5b620907519562f3a0417db882d51ddeacec977fafd124563225b159e28",
+    "created_at": "2026-09-19T12:00:00Z",
+    "state": "validating",
+    "checkpoint_digest": "sha256:dee57bf76a6f14bcd593c6b720fb02a0768d64aeb5af76d18a2e9141f8bdc61b",
+    "evidence": [],
+    "extensions": {},
+    "required_extensions": []
+  },
+  {
+    "schema": "arp.receipt/0.1",
+    "issuer": "fixture:oxagen",
+    "launch_id": "launch_fixture_1",
+    "launch_digest": "sha256:e6366fb20cf3abd0a6b4274f93203dc6f363d1e15f92c802f3a03d3613c5ae19",
+    "seq": "2",
+    "previous_receipt_digest": "sha256:0071cf6620038f5ad3eebd5e2e7433d0130866dfcd54fd24f0f3e17236565248",
+    "created_at": "2026-09-19T12:00:00Z",
+    "state": "preparing",
+    "checkpoint_digest": "sha256:dee57bf76a6f14bcd593c6b720fb02a0768d64aeb5af76d18a2e9141f8bdc61b",
+    "evidence": [],
+    "extensions": {},
+    "required_extensions": []
+  },
+  {
+    "schema": "arp.receipt/0.1",
+    "issuer": "fixture:oxagen",
+    "launch_id": "launch_fixture_1",
+    "launch_digest": "sha256:e6366fb20cf3abd0a6b4274f93203dc6f363d1e15f92c802f3a03d3613c5ae19",
+    "seq": "3",
+    "previous_receipt_digest": "sha256:707646b306c7d4343a0295135aacd929aa90b3fed72a21344051d3d01596524d",
+    "created_at": "2026-09-19T12:00:00Z",
+    "state": "prepared",
+    "checkpoint_digest": "sha256:dee57bf76a6f14bcd593c6b720fb02a0768d64aeb5af76d18a2e9141f8bdc61b",
+    "evidence": [],
+    "extensions": {},
+    "required_extensions": [],
+    "report_digest": "sha256:bb6a006d9633fd8115121729efc66392e3cf2802e6495c336b7827008b80f1e5",
+    "delivered_context": {
+      "digest": "sha256:a884f8f2c9fe790b38dc4b2e2dd6f1372574ec86a4af31ee191f0665d71a0a97",
+      "bytes": 490,
+      "media_type": "application/json"
+    }
+  },
+  {
+    "schema": "arp.receipt/0.1",
+    "issuer": "fixture:oxagen",
+    "launch_id": "launch_fixture_1",
+    "launch_digest": "sha256:e6366fb20cf3abd0a6b4274f93203dc6f363d1e15f92c802f3a03d3613c5ae19",
+    "seq": "4",
+    "previous_receipt_digest": "sha256:27c2976c8fae1434ad39c5f36e7905331441070a7370cba1f1eb531a160ce0ad",
+    "created_at": "2026-09-19T12:00:00Z",
+    "state": "starting",
+    "checkpoint_digest": "sha256:dee57bf76a6f14bcd593c6b720fb02a0768d64aeb5af76d18a2e9141f8bdc61b",
+    "evidence": [],
+    "extensions": {},
+    "required_extensions": [],
+    "report_digest": "sha256:bb6a006d9633fd8115121729efc66392e3cf2802e6495c336b7827008b80f1e5",
+    "delivered_context": {
+      "digest": "sha256:a884f8f2c9fe790b38dc4b2e2dd6f1372574ec86a4af31ee191f0665d71a0a97",
+      "bytes": 490,
+      "media_type": "application/json"
+    }
+  },
+  {
+    "schema": "arp.receipt/0.1",
+    "issuer": "fixture:oxagen",
+    "launch_id": "launch_fixture_1",
+    "launch_digest": "sha256:e6366fb20cf3abd0a6b4274f93203dc6f363d1e15f92c802f3a03d3613c5ae19",
+    "seq": "5",
+    "previous_receipt_digest": "sha256:765b3a51b5a16ee7be62c2b40dd3cd268163733b5c97dcaf5f42e19121c80a16",
+    "created_at": "2026-09-19T12:00:00Z",
+    "state": "running",
+    "checkpoint_digest": "sha256:dee57bf76a6f14bcd593c6b720fb02a0768d64aeb5af76d18a2e9141f8bdc61b",
+    "evidence": [],
+    "extensions": {},
+    "required_extensions": [],
+    "report_digest": "sha256:bb6a006d9633fd8115121729efc66392e3cf2802e6495c336b7827008b80f1e5",
+    "delivered_context": {
+      "digest": "sha256:a884f8f2c9fe790b38dc4b2e2dd6f1372574ec86a4af31ee191f0665d71a0a97",
+      "bytes": 490,
+      "media_type": "application/json"
+    },
+    "binding": {
+      "child_id": "child_fixture_1",
+      "native_session_id": "synthetic-session-1"
+    }
+  },
+  {
+    "schema": "arp.receipt/0.1",
+    "issuer": "fixture:oxagen",
+    "launch_id": "launch_fixture_1",
+    "launch_digest": "sha256:e6366fb20cf3abd0a6b4274f93203dc6f363d1e15f92c802f3a03d3613c5ae19",
+    "seq": "6",
+    "previous_receipt_digest": "sha256:569d0db55a29e9b0e4b38783b62c407f67e66502ddde88e7216fa72c9ff44d03",
+    "created_at": "2026-09-19T12:00:00Z",
+    "state": "completed",
+    "checkpoint_digest": "sha256:dee57bf76a6f14bcd593c6b720fb02a0768d64aeb5af76d18a2e9141f8bdc61b",
+    "evidence": [],
+    "extensions": {},
+    "required_extensions": [],
+    "report_digest": "sha256:bb6a006d9633fd8115121729efc66392e3cf2802e6495c336b7827008b80f1e5",
+    "delivered_context": {
+      "digest": "sha256:a884f8f2c9fe790b38dc4b2e2dd6f1372574ec86a4af31ee191f0665d71a0a97",
+      "bytes": 490,
+      "media_type": "application/json"
+    },
+    "binding": {
+      "child_id": "child_fixture_1",
+      "native_session_id": "synthetic-session-1"
+    },
+    "usage": {
+      "status": "unknown"
+    }
+  }
+]

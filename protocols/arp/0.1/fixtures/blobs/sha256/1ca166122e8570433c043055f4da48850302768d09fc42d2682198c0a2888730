@@ -1,0 +1,1 @@
+{"events":[{"body":{},"hash":"sha256:74d2dad14b4fa53fe95ca115d8a20002e9eb2e0aace891084a5c2ddfc7751124","kind":"turn_end","prev_hash":"sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855","seq":0,"session_uuid":"00000000-0000-4000-8000-000000000001","version":"tacho/1.0"}],"fixture_only":true}

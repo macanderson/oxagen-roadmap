@@ -1,0 +1,7 @@
+{
+  "schema": "arp.attestation/0.1",
+  "subject_digest": "sha256:03ec79975773d4b28396077d3a7c9a8fb053420c43e53cef264a8f731b314b2b",
+  "key_id": "fixture-key-1",
+  "algorithm": "Ed25519",
+  "signature": "oBr9yMeFpNrW2HOGqxs6CBLcuvd50n44U+F77tBgSmL52oDThMyoP7NgD8g0x+U/zoPAL5n8mtuF6d5MYmsfAw=="
+}

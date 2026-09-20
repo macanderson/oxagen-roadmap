@@ -1,0 +1,6 @@
+{
+  "fixture_only": true,
+  "key_id": "fixture-key-1",
+  "issuer": "fixture:oxagen",
+  "public_key_base64": "/sLhYva3VOC80S/VbKYzi9btGOVjKHUH2Bzpm//I24A="
+}

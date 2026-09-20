@@ -1,0 +1,17 @@
+{
+  "schema": "arp.selection/0.1",
+  "issuer": "fixture:oxagen",
+  "experiment_digest": "sha256:d276d1833476c6605a71b653a76bf8398281a191ba4f67f7a7077bc02c588eb2",
+  "selection_rule_digest": "sha256:be1229f3a8a76ba20a31d7c7d9976f66d748740c4d928bf95529c593e5db1b3f",
+  "evaluations": [
+    "sha256:bdcca46cf69e8bb408024cc9bff0d59cb3dd3c09c48a58a0ae145421a980a625",
+    "sha256:2a9e8f3845d34cf0709cc648ce6a84d9f4ac4d5d764b2548b9a558d66fe0c109"
+  ],
+  "outcome": "winner",
+  "selected_launches": [
+    "sha256:e6366fb20cf3abd0a6b4274f93203dc6f363d1e15f92c802f3a03d3613c5ae19"
+  ],
+  "reason": "Only the first synthetic candidate passed the required check.",
+  "extensions": {},
+  "required_extensions": []
+}

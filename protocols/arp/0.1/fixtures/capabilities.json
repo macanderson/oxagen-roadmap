@@ -1,0 +1,33 @@
+{
+  "schema": "arp.capabilities/0.1",
+  "issuer": "fixture:oxagen",
+  "adapter": "fixture-adapter",
+  "adapter_version": "0.1.0",
+  "adapter_digest": "sha256:9a63593b7b52dc82acdf4e5e55f4f497e0c2105df11b76446c023b09b503881c",
+  "profiles": [
+    "code-workspace/0.1"
+  ],
+  "operations": [
+    "capture",
+    "validate",
+    "prepare",
+    "start",
+    "observe",
+    "cancel"
+  ],
+  "boundaries": [
+    "turn_completed"
+  ],
+  "tool_modes": [
+    "live"
+  ],
+  "handoff_fencing": false,
+  "limits": {
+    "max_bundle_bytes": 10485760,
+    "max_files": 1000,
+    "max_context_bytes": 100000,
+    "max_depth": 16
+  },
+  "extensions": {},
+  "required_extensions": []
+}

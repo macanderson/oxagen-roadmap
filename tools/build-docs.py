@@ -31,6 +31,7 @@ CATALOG = [
         ("desktop", "desktop-spec.md", "Specification"),
         ("creation", "creation-spec.md", "Specification"),
         ("portability", "agent-portability-atlas.md", "Specification"),
+        ("execution-portability", "agent-run-protocol.md", "Draft protocol"),
     ]),
     ("Plans and decisions", [
         ("plan", "implementation-plan.md", "Plan"),

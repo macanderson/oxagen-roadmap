@@ -135,7 +135,7 @@ main hr+h2{border-top:0;padding-top:0;margin-top:0}
 <div class="site">
 <nav class="docs" aria-label="Documents">
   <a class="wordmark" href="#spec">o<span class="x">x</span>agen</a>
-  <p>Specifications</p><ol><li><a href="#spec" data-doc="spec">Oxagen Mission Control: Product and Technical Specification</a></li><li><a href="#dod" data-doc="dod">Oxagen DoD: the definition of done for agent runs</a></li><li><a href="#witness" data-doc="witness">Oxagen Witness: outcome verification</a></li><li><a href="#desktop" data-doc="desktop">Oxagen Desktop: product specification, rev 1</a></li><li><a href="#creation" data-doc="creation">Creating things in Oxagen: agents, tools, skills and context records</a></li><li><a href="#portability" data-doc="portability">The Agent Portability Atlas</a></li></ol><p>Plans and decisions</p><ol><li><a href="#plan" data-doc="plan">Oxagen Mission Control app: implementation plan</a></li><li><a href="#scope" data-doc="scope">Oxagen Mission Control: the scope review, and what it changed</a></li><li><a href="#scaleback" data-doc="scaleback">Scale back Mission Control: the mockup prompt</a></li></ol><p>The mockups</p><ol><li><a href="#prompts" data-doc="prompts">Oxagen Mission Control: mockup prompts, one per demo flow</a></li><li><a href="#consolidation" data-doc="consolidation">Consolidating W1–W11 into one design</a></li><li><a href="#feedback" data-doc="feedback">Feedback on the mockups</a></li><li><a href="#videos" data-doc="videos">Videos of the mockups, narrated</a></li><li><a href="#w13" data-doc="w13">W13: in the loop</a></li></ol>
+  <p>Specifications</p><ol><li><a href="#spec" data-doc="spec">Oxagen Mission Control: Product and Technical Specification</a></li><li><a href="#dod" data-doc="dod">Oxagen DoD: the definition of done for agent runs</a></li><li><a href="#witness" data-doc="witness">Oxagen Witness: outcome verification</a></li><li><a href="#desktop" data-doc="desktop">Oxagen Desktop: product specification, rev 1</a></li><li><a href="#creation" data-doc="creation">Creating things in Oxagen: agents, tools, skills and context records</a></li><li><a href="#portability" data-doc="portability">The Agent Portability Atlas</a></li><li><a href="#execution-portability" data-doc="execution-portability">Agent Run Protocol (ARP)</a></li></ol><p>Plans and decisions</p><ol><li><a href="#plan" data-doc="plan">Oxagen Mission Control app: implementation plan</a></li><li><a href="#scope" data-doc="scope">Oxagen Mission Control: the scope review, and what it changed</a></li><li><a href="#scaleback" data-doc="scaleback">Scale back Mission Control: the mockup prompt</a></li></ol><p>The mockups</p><ol><li><a href="#prompts" data-doc="prompts">Oxagen Mission Control: mockup prompts, one per demo flow</a></li><li><a href="#consolidation" data-doc="consolidation">Consolidating W1–W11 into one design</a></li><li><a href="#feedback" data-doc="feedback">Feedback on the mockups</a></li><li><a href="#videos" data-doc="videos">Videos of the mockups, narrated</a></li><li><a href="#w13" data-doc="w13">W13: in the loop</a></li></ol>
   <div class="foot">One file, every document. The markdown in <code>docs/</code> is the source; <code>tools/build-docs.py</code> writes this page.</div>
 </nav>
 <div>
@@ -9168,6 +9168,275 @@ version lands in the registry callable by nobody until a role grant puts it on a
 <footer class="colophon"><span>Oxagen · Specification</span><span>Source: <code>docs/agent-portability-atlas.md</code></span></footer>
 </main>
 </div>
+</article><article id="execution-portability" class="doc" hidden>
+<header class="mast">
+  <p class="eyebrow">Oxagen · Draft protocol</p>
+  <h1>Agent Run Protocol (ARP)</h1>
+  <dl class="facts"><dt>Status</dt><dd>Design draft 0.1.0; schemas and synthetic conformance fixtures, not a deployed runtime</dd><dt>Date</dt><dd>2026-09-19</dd><dt>Code baseline</dt><dd><code>macanderson/oxagen</code> at <code>f86fbb191881d61444ad63cbecc07a7ece02cb96</code>; existing source inspected read-only</dd><dt>Replaces</dt><dd>Agent Execution Frame Protocol working draft</dd><dt>Artifacts</dt><dd><a href="../protocols/arp/0.1/arp.schema.json">Schema</a>, <a href="../protocols/arp/0.1/fixtures/checkpoint.json">fixture bundle</a>, <a href="../protocols/arp/0.1/README.md">validation guide</a></dd></dl>
+</header>
+<div class="grid">
+<nav class="toc" aria-label="Contents of this document"><p>Contents</p><ol><li><a href="#execution-portability/1-purpose-and-boundary">1. Purpose and boundary</a></li><li><a href="#execution-portability/2-what-we-reuse-and-what-we-must-add">2. What we reuse, and what we must add</a></li><li><a href="#execution-portability/3-objects-and-identities">3. Objects and identities</a></li><li><a href="#execution-portability/4-checkpoint-and-workspace-profile">4. Checkpoint and workspace profile</a></li><li><a href="#execution-portability/5-exact-frame-semantics-and-capture-barrier">5. Exact-frame semantics and capture barrier</a></li><li><a href="#execution-portability/6-context-and-authority-transfer">6. Context and authority transfer</a></li><li><a href="#execution-portability/7-compatibility-is-a-report-not-a-replay-grade">7. Compatibility is a report, not a replay grade</a></li><li><a href="#execution-portability/8-operations-retries-and-lifecycle">8. Operations, retries and lifecycle</a></li><li><a href="#execution-portability/9-tool-modes-and-effects">9. Tool modes and effects</a></li><li><a href="#execution-portability/10-best-of-n-and-promotion">10. Best-of-N and promotion</a></li><li><a href="#execution-portability/11-wire-encoding-integrity-and-bundle-transport">11. Wire encoding, integrity and bundle transport</a></li><li><a href="#execution-portability/12-oxagen-integration-and-delivery">12. Oxagen integration and delivery</a></li><li><a href="#execution-portability/13-design-decisions-made-here">13. Design decisions made here</a></li></ol></nav>
+<main>
+<h2 id="execution-portability/1-purpose-and-boundary">1. Purpose and boundary</h2>
+<p>ARP makes a unit of agent work portable: select a recorded frame, restore the work at that boundary, and start a linked run on another harness. Several independent branches can start from that same checkpoint for best-of-N selection.</p>
+<p>The portable unit is <strong>task + context + workspace + environment + effects + authority requirements + evidence</strong>. Model hidden state, private reasoning, live process memory and an assurance of identical future output are outside the contract. A prompt export is useful but does not satisfy ARP's checkpoint profile.</p>
+<p>Oxagen remains the governor and evidence recorder. A customer-controlled runner captures state, prepares environments and launches native harnesses. ARP describes their exchange. It does not replace MCP tool invocation, Context Graph Protocol records, the capability kernel or harness-native session formats.</p>
+<p>In this document MUST, SHOULD and MAY express requirements of the proposed protocol, not claims about deployed Oxagen. The initial profile is <code>code-workspace/0.1</code>, at completed-turn boundaries. Other workloads can define additional profiles without teaching the core about browsers or databases.</p>
+<h2 id="execution-portability/2-what-we-reuse-and-what-we-must-add">2. What we reuse, and what we must add</h2>
+<p>The implementation differs from some September 18 roadmap text. These concrete source contracts take precedence for migration design:</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Existing contract</th>
+<th>What ARP preserves</th>
+<th>Missing work</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>packages/tacho/src/envelope.ts</code>, <code>chain.ts</code></td>
+<td><code>tacho/1.0</code>, session UUID, dense sequence from <strong>0</strong>, <code>sdk/ambient/proxy</code> fidelity; hash is SHA-256 of JCS(event excluding <code>hash</code>), with <code>prev_hash</code> already inside the event</td>
+<td>Execution-state snapshots and transfer admission</td>
+</tr>
+<tr>
+<td><code>packages/run-ledger/src/run-store.ts</code>, <code>event-payload-registry.ts</code></td>
+<td>Immutable attempts, dense attempt sequence from <strong>1</strong>, separate run-global sequence, original digest algorithm, terminal seal and append fencing</td>
+<td>Checkpoint references and external child bindings</td>
+</tr>
+<tr>
+<td><code>packages/run-ledger/src/run-frames.ts</code></td>
+<td>Common read projection over Tacho and ledger, including decimal sequence and source digest</td>
+<td>Verified portable references, not a replacement hash over the UI projection</td>
+</tr>
+<tr>
+<td><code>run-spec-v2.ts</code></td>
+<td>Trusted server-built identity and authority; exported material cannot mint these</td>
+<td>Destination admission from current trusted policy</td>
+</tr>
+<tr>
+<td><code>packages/handlers/src/run.fork.ts</code></td>
+<td>Existing cassette-fork semantics and guards</td>
+<td>Wrapped sessions are refused today; handler mints a ledger attempt but launches no harness</td>
+</tr>
+<tr>
+<td>Tacho WAL, <code>cli/export.ts</code>, frame-body stores</td>
+<td>Native evidence export and retained bytes</td>
+<td>A restorable package is more than NDJSON evidence</td>
+</tr>
+<tr>
+<td><code>collector/git-facts.ts</code></td>
+<td>Observed worktree changes</td>
+<td>Change summaries/line counts are not file snapshots</td>
+</tr>
+<tr>
+<td>ADR-100 and frame-body helpers</td>
+<td>Capture by default, producer-side redaction, 1 MiB frame-body cap, pinned retention policy, missing-body evidence</td>
+<td>Large workspace blobs need a separate bounded transfer path</td>
+</tr>
+<tr>
+<td>ADR-043, ADR-096, ADR-101</td>
+<td>Governance/runtime split, permitted containment launcher, four first-class harnesses</td>
+<td>Adapter conformance for Codex, Claude Code, Cursor and Stella</td>
+</tr>
+</tbody>
+</table></div>
+<p>ARP MUST NOT insert unrecognized kinds into strict Tacho or ledger parsers, rewrite historical chains, renumber native sequences, or advertise <code>oxagen.frame/1.0</code> as the implemented universal wire format. ARP lifecycle receipts form linked control-plane evidence about transfers. They do not replace native or CGP host journals. Native incorporation requires a versioned migration.</p>
+<h3 id="execution-portability/cgp-foundation">CGP foundation</h3>
+<p>This design reuses <a href="https://github.com/macanderson/context-graph-protocol/tree/6630d631471f001371a9c5281012e04854786d11">Context Graph Protocol at <code>6630d631</code></a>. CGP already defines the context contract ARP needs. ARP context MUST use existing <code>ContextFrame</code> objects and <code>FrameId</code> identities, with CGP's representation and resolution semantics. It MUST NOT define a competing context frame envelope.</p>
+<ul>
+<li><strong>Representations:</strong> <code>full</code> carries canonical inline content. <code>compact</code> carries transformed inline content plus its transform and resolver reference. <code>reference</code> omits inline content and supplies a resolver reference. Resolve required content before composing it into a destination prompt.</li>
+<li><strong>Identity and provenance:</strong> preserve provider identity, frame identity, provenance, and <code>content_digest</code>. The digest identifies inline content and is part of <code>FrameId</code>. <code>canonical_content_hash</code> identifies the complete source content for compact and reference representations. Do not substitute one hash for the other.</li>
+<li><strong>Fidelity and cost:</strong> preserve <code>content_fidelity</code>, minimum fidelity and inline requirements, <code>token_cost</code>, and any declared <code>canonical_token_cost</code> and <code>tokenizer_ref</code>. Representation is not a claim that the transferred context contains the source's complete history.</li>
+<li><strong>Time:</strong> preserve <code>valid_from</code>, <code>valid_to</code>, and <code>recorded_at</code>, and record any retrieval <code>as_of</code> constraint. A historical retrieval time does not reconstruct workspace files or establish present authority.</li>
+<li><strong>Trust:</strong> frame content MUST remain untrusted data, delimited as quoted material rather than promoted into governing instructions. Provenance and a signature do not grant instruction authority.</li>
+</ul>
+<p>The existing <a href="https://github.com/macanderson/context-graph-protocol/tree/6630d631471f001371a9c5281012e04854786d11/contextgraph-trace"><code>contextgraph-trace</code> journal</a> covers prompt assemblies, tool pairing, side effects, crashes, and resumes. Tacho's <code>trace/types.ts</code>, <code>trace/project.ts</code>, and <code>trace/oracles.ts</code> already port this vocabulary and its replay checks. Reuse those checks and report missing evidence as skipped checks. This journal remains a sketch outside core <code>contextgraph/1.0</code>. Adapters MUST pin its explicit <code>TRACE_FORMAT</code>, currently <code>contextgraph-trace/0.1-sketch</code>, rather than infer wire compatibility from a package version.</p>
+<p>ARP adds restorable snapshots, exact source record boundaries, destination admission and launch, and experiment contracts around those existing pieces. The checkpoint schema's opaque <code>context</code> blob reference stays unchanged. Its referenced content follows CGP rather than a new ARP context-item format. The first code slice emits a full CGP <code>episode</code> frame for the operator's supplied summary. Full means the complete supplied summary, not equivalence to native conversation history.</p>
+<h2 id="execution-portability/3-objects-and-identities">3. Objects and identities</h2>
+<p>The schema defines these document types. Identifiers are issuer-scoped opaque strings. Their spelling grants no authority. Digests identify immutable content; IDs identify objects in an issuer's namespace.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Document</th>
+<th>Function</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>arp.checkpoint/0.1</code></td>
+<td>Immutable restorable work manifest, anchored after one source event</td>
+</tr>
+<tr>
+<td><code>arp.capabilities/0.1</code></td>
+<td>Adapter version/build and supported profiles, operations, boundaries and tool modes</td>
+</tr>
+<tr>
+<td><code>arp.report/0.1</code></td>
+<td>Target-specific compatibility, gaps and transformations, scoped to one launch request</td>
+</tr>
+<tr>
+<td><code>arp.launch/0.1</code></td>
+<td>Idempotent request to create one candidate from a checkpoint</td>
+</tr>
+<tr>
+<td><code>arp.receipt/0.1</code></td>
+<td>Hash-linked, signed lifecycle evidence for that launch</td>
+</tr>
+<tr>
+<td><code>arp.experiment/0.1</code></td>
+<td>Pinned candidate roster, budgets, evaluation and winner-selection contract</td>
+</tr>
+<tr>
+<td><code>arp.evaluation/0.1</code></td>
+<td>Candidate artifact, evaluator identity, required-check verdicts and metrics</td>
+</tr>
+<tr>
+<td><code>arp.selection/0.1</code></td>
+<td>All evaluation references, selection-rule digest and winner/tie/no-winner outcome</td>
+</tr>
+</tbody>
+</table></div>
+<p><code>FrameRef</code> contains source format, issuer, stream ID, source sequence, native digest and optional ledger run sequence/run ID/attempt ID. Tacho references require session identity; ledger references require attempt and run identity. The source-native sequence is a decimal string, avoiding bigint rounding. <code>position: after</code> is the only boundary interpretation in v0.1.</p>
+<p>An ARP child has a fresh <code>child_id</code>; it references the source checkpoint and boundary. The authenticated adapter binds it to a native session and evidence stream. <code>oxagen-ledger/v2</code> is an ARP source-verifier profile name, not a renamed native envelope. A Tacho <code>tse_…</code> session is not converted into a fabricated ledger attempt. For a ledger source, an attempt may be added to the same run only when trusted admission says its immutable RunSpec remains applicable. A changed agent identity, tenant or authority context requires a newly admitted run with an explicit parent link. The ARP lineage works in either case.</p>
+<p>Fork is the default: parent and child can continue independently in isolated environments. A handoff requests exclusive transfer. It requires a runner-enforced source fence and monotonic fencing token before the child is released. If the source cannot be fenced, the adapter MUST refuse handoff; a user may explicitly request a fork instead. Imported authority never creates a fence.</p>
+<h2 id="execution-portability/4-checkpoint-and-workspace-profile">4. Checkpoint and workspace profile</h2>
+<p>A checkpoint names:</p>
+<ul>
+<li>The exact source boundary and evidence prefix, producer identity, capture time and quiescence evidence.</li>
+<li>The task request and amendments, criteria and remaining work as a task document.</li>
+<li>Ordered CGP context frames or FrameIds with resolvable content, preserving provenance, representations, fidelity, and declared omissions. Available instruction/skill versions and supplied tool results remain historical data.</li>
+<li>A complete workspace inventory for the captured scope, repository/base-object metadata, file content, executable modes, directories and internal symlinks. The inventory declares exclusions and material external dependencies.</li>
+<li>An environment recipe with platform/runtime requirements, dependency locks and declared setup effects.</li>
+<li>Logical tool requirements with schema digests, expected effects and destination-binding requirements.</li>
+<li>Settled historical effects and receipts; unresolved operations and resources that prevent restoration.</li>
+<li>Source policy and retention references, requested destination constraints and secret-binding names, never reusable credentials.</li>
+</ul>
+<p>These documents are content-addressed blobs; the schema validates the manifest and the workspace subdocument. Context uses CGP's existing schema and negotiated version. ARP's task, environment, tools, and authority document semantics are profile-versioned. Vendor-specific payloads remain available without inventing a replacement prompt or journal schema.</p>
+<p>The workspace inventory is authoritative for included paths: deletions are represented by absence from a complete captured scope. Capture MUST include relevant ignored/untracked files or declare them excluded with an impact. A Git commit plus patch is only an encoding optimization if it reproduces the verified inventory, including binaries, LFS objects and submodules. Staged state, Git metadata and extra mounts require explicit resource descriptors when material to the task. v0.1 blocks unresolved merge/index state rather than pretending it captured it.</p>
+<p>Restoration uses a fresh directory. Reject absolute paths, <code>..</code>, backslashes, NUL, duplicate paths, path-prefix collisions, unsupported modes and target filesystem name collisions. No file writes may traverse a symlink. Symlink targets are root-relative inventory identifiers in this profile; the restorer translates them to filesystem links. Internal symlinks are installed after ordinary entries and must resolve within the restored scope. Chained or cyclic symlinks require another profile and are refused in v0.1. Reject archive devices, hardlinks and implicit execution. Environment setup is executable work governed separately by current runner policy; loading a package does not authorize its scripts.</p>
+<h2 id="execution-portability/5-exact-frame-semantics-and-capture-barrier">5. Exact-frame semantics and capture barrier</h2>
+<p>A frame's integrity checkpoint is not an execution snapshot. An execution checkpoint is eligible only when its files, task context and effects all correspond to the selected event.</p>
+<p>For <code>code-workspace/0.1</code>, capture MUST establish a completed turn, settled tool dispatch, no active child work and no unaccounted workspace writers. The runner fences new dispatch, waits for known calls to settle, obtains a consistent snapshot, writes and verifies all blobs, and commits the signed manifest last. Capture failure produces no ready checkpoint. A cooperating host may attest quiescence, but that is labelled <code>client_attested</code>; enforced isolation is a separate claim.</p>
+<p>An older frame is eligible only if its snapshot already exists or verified state deltas reconstruct it. The adapter MUST NOT combine old conversation with current files. An unavailable frame returns <code>boundary_unavailable</code> and exact alternative references; it never silently picks the nearest frame. Files created after the boundary and future context must not leak into the child.</p>
+<p>Interrupted requests with unknown external outcomes block a ready checkpoint. A successful local file snapshot cannot roll back a remote service. Browsers, databases, queues and long-running processes need profile-specific resource adapters; required resources without one return <code>resource_unsupported</code>.</p>
+<h2 id="execution-portability/6-context-and-authority-transfer">6. Context and authority transfer</h2>
+<p>The context document MUST reuse CGP <code>ContextFrame</code> objects or <code>FrameId</code> references and preserve their provenance, content identity, representation, fidelity, cost, and temporal fields. Resolve references through CGP before use and verify the relevant content hashes. Transfer metadata MUST distinguish historical user requests, source governing instructions, assistant assertions, and tool/retrieved content without granting any of them destination authority. Summaries name their covered source range and summarizer when known, and disclose unavailable provenance. Assistant-generated notes are evidence-backed claims, not an authority source. Unavailable hidden instructions are disclosed as unavailable; ARP does not request or reconstruct private reasoning.</p>
+<p>The destination builds its normal instruction stack. An adapter composes CGP content as delimited, untrusted data through supported inputs and records a <code>delivered_context</code> digest, FrameId-to-target mapping, and omissions. It does not forge native history or turn imported content into a developer/system instruction. Context capacity, unsupported attachments, compaction, and unavailable steering are reported before start. Required material cannot be dropped; optional loss must be permitted by the launch's gap policy.</p>
+<p><code>authority</code> expresses requested constraints, policy provenance and secret slot names. All are untrusted inputs until destination admission resolves them through current identity, policy and credential bindings. The effective authority is bounded by the task's requested ceiling and current destination grants. A report MUST block when the runner cannot enforce a required restriction; prompt text is not enforcement. Historical approvals are receipts, not portable bearer tokens. Reevaluate revocation, expiry, remaining budget and consequential-action approval at dispatch.</p>
+<p>ADR-100 supersedes the first draft's blanket local-only body assumption: redacted bodies may be retained and transferred where current workspace policy permits. <code>digest_only</code>, redaction, caps or expiration can make a checkpoint unavailable. ARP MUST NOT bypass them using a second snapshot channel. Snapshot content requires its own approved retention/data-class policy; a denied necessary file blocks portability. Encryption keys and blob access credentials remain outside the package. Tenant remapping requires an authorized import; copied principal IDs confer nothing.</p>
+<h2 id="execution-portability/7-compatibility-is-a-report-not-a-replay-grade">7. Compatibility is a report, not a replay grade</h2>
+<p>Keep Oxagen's recorded <code>inspect → view → fork → retry</code> grades immutable. ARP reports a different fact: can this runner restore this checkpoint for this target now?</p>
+<p>The report pins checkpoint digest, launch-request digest, target adapter/build digest, negotiated capabilities, current policy digest, expiration and findings. <code>ready</code> means all declared mandatory profile requirements pass, not identical model behavior. <code>degraded</code> means only optional gaps exist and each is explicitly permitted. <code>blocked</code> means a required gap, unresolved outcome or verification failure exists.</p>
+<p>Compatibility dimensions are workspace, environment, context, tools, effects, authority and evidence. Each finding has a stable code, dimension, required flag and source reference where available. Common codes include <code>boundary_unavailable</code>, <code>body_missing</code>, <code>resource_unsupported</code>, <code>context_capacity</code>, <code>tool_unmapped</code>, <code>authority_unenforceable</code>, <code>effect_unknown</code>, <code>integrity_mismatch</code>, <code>profile_unsupported</code> and <code>source_unfenced</code>.</p>
+<p>A capability declaration is an adapter's claim, not proof that a restore succeeded. Prepare and start revalidate the report's digests, expiration, policy and environment. Changes invalidate the prepared handle. Undeclared mandatory differences cannot be accepted as an optional gap.</p>
+<h2 id="execution-portability/8-operations-retries-and-lifecycle">8. Operations, retries and lifecycle</h2>
+<p>These are abstract protocol operations, usable over local IPC or authenticated HTTPS. Oxagen-facing names follow the existing verb-first convention; no new endpoint is claimed as shipped.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>Input → output</th>
+<th>Ownership</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>get_run_capabilities</code></td>
+<td>Target → capabilities</td>
+<td>Adapter</td>
+</tr>
+<tr>
+<td><code>capture_run_checkpoint</code></td>
+<td>Exact source FrameRef → checkpoint</td>
+<td>Source runner</td>
+</tr>
+<tr>
+<td><code>validate_run_checkpoint</code></td>
+<td>Launch → compatibility report</td>
+<td>Destination adapter</td>
+</tr>
+<tr>
+<td><code>prepare_run_transfer</code></td>
+<td>Launch + report → prepared receipt</td>
+<td>Destination runner</td>
+</tr>
+<tr>
+<td><code>start_run_transfer</code></td>
+<td>Launch + prepared receipt → started receipt</td>
+<td>Destination runner</td>
+</tr>
+<tr>
+<td><code>get_run_transfer</code></td>
+<td>Launch ID + receipt cursor → receipts</td>
+<td>Runner/evidence service</td>
+</tr>
+<tr>
+<td><code>cancel_run_transfer</code></td>
+<td>Launch ID + reason → acknowledged request, then terminal receipt</td>
+<td>Runner</td>
+</tr>
+<tr>
+<td><code>record_run_evaluation</code></td>
+<td>Experiment + candidate artifact digests + evaluator evidence → evaluation record</td>
+<td>Independent evaluator</td>
+</tr>
+</tbody>
+</table></div>
+<p>The runner state machine is <code>requested → validating → preparing → prepared → starting → running → completed | failed | cancelled</code>. Validation may terminate as <code>blocked</code>. A crash after possible dispatch enters <code>reconciling</code>; it is not a retryable launch failure. A lifecycle receipt records the transition and its prior receipt digest. Receipt sequences are dense decimal strings starting at <code>0</code>; only the first receipt has a null prior digest. Terminal states admit no further transitions. This control-plane receipt chain has one authorized writer per launch. It references native or CGP host evidence rather than replacing that journal. Writer handover requires a fenced ownership transfer, outside v0.1.</p>
+<p>Idempotency is scoped by issuer/tenant and <code>launch_id</code>, with the digest of the request. Same key/same digest returns the existing state; same key/different digest is <code>idempotency_conflict</code>. Admission reserves the ID durably before restoring or starting. A stable launch marker must let the runner discover an already-started native session after a crash. If an adapter cannot disambiguate a process start, it leaves the operation in reconciliation for operator resolution, never blindly launches again.</p>
+<p>Cancellation acknowledgement is not proof of termination. <code>cancelled</code> requires observed process termination/fencing and reconciliation of outstanding effects. Terminal receipts include artifact refs, effect outcomes, native evidence references and cost provenance when available. Missing usage is <code>unknown</code>, never zero. Retries, failed candidates and evaluation overhead remain charged and visible.</p>
+<h2 id="execution-portability/9-tool-modes-and-effects">9. Tool modes and effects</h2>
+<p>Every launch declares <code>live</code> or <code>recorded</code>. Historical effects are never dispatched simply because their receipts are imported. Tool identity includes semantic capability and schema version; matching display names is insufficient. Argument rewrites and result transformations appear in the compatibility report.</p>
+<p>In recorded mode, match tool identity/schema, canonical arguments and occurrence/causal position. Results come only from the frozen cassette, explicitly labelled recorded. Missing entries return <code>cassette_miss</code>; no automatic live fallback. Recorded file writes require matching verified file deltas. Code-workspace v0.1 advertises live mode only; cassette execution is a separately negotiated capability and not implemented by this design artifact.</p>
+<p>In live mode, read freshness and external state can differ from the source. A best-of-N experiment must clone or freeze relevant external services, or record the drift as a comparison limitation. Unknown historical outcomes require lookup/reconciliation. Exactly-once behavior is possible only where provider idempotency or transaction semantics support it; ARP supplies causal IDs and receipts, not a universal exactly-once guarantee.</p>
+<h2 id="execution-portability/10-best-of-n-and-promotion">10. Best-of-N and promotion</h2>
+<p>An experiment pins one checkpoint digest, a fixed roster of launch documents, evaluator artifact/version, selection rule, per-candidate limits, aggregate limits and deadline. Launches bind the experiment ID. All candidates must use that checkpoint, the declared task, evaluation and permitted transformation policy. Each gets its own session, writable workspace and external namespace. Worktrees alone do not establish process or service isolation.</p>
+<p>Prefer equal dollar/time envelopes rather than pretending vendor token counts and sampling parameters are equivalent. Record the concrete model/configuration, harness and adapter versions; this compares whole systems, not the causal contribution of the model alone. Shared-prefix capture cost is charged once; candidate, setup, verification and judging costs are accounted separately. Aggregate budget admission reserves capacity before candidates launch; providers that cannot enforce the cap are disclosed and may fail an experiment's required constraints.</p>
+<p>The default selection rule is: exclude invalid/incomplete/failed-required-check candidates; compare eligible artifacts by the declared quality metric; apply declared cost/latency tie-breaks; permit ties or no winner. Evaluation occurs in a separate trusted environment using immutable artifact digests. Workers cannot edit the evaluator or read protected witnesses. Preserve Oxagen's witness disclosure and tamper-exclusion rules. Evaluation infrastructure errors are distinct from worker failures.</p>
+<p>Evaluation results MUST bind experiment, launch, final artifact, evaluator, verdict and score/cost evidence. Metrics are signed decimal integer strings; the evaluator declares their units, ranges and direction. Selection produces an immutable record referencing one final evaluation per rostered candidate and the declared rule, including non-winners. A retry of evaluation supersedes a prior evaluation explicitly in its evidence, without deleting it. Winner requires one selected eligible launch; tie requires two or more; no-winner requires none. A selection record never authorizes promotion. The schema includes evaluation and selection documents; the evaluator and ranking engine remain external implementations.</p>
+<p>Promotion is a separate governed action through the existing kernel/finalization path. It rechecks the destination base, authority and tests. No candidate can spend shared production authority merely by winning. A managed tournament scheduler would expand ADR-043's scope and needs its own architecture decision; customer-owned orchestration can consume ARP first.</p>
+<h2 id="execution-portability/11-wire-encoding-integrity-and-bundle-transport">11. Wire encoding, integrity and bundle transport</h2>
+<p>The schema uses strict objects and named <code>extensions</code>; unknown required extensions or schema/profile versions are rejected. Every required extension must also have a value in the extensions map. There is no silent key stripping or default insertion before hashing. Optional extension data is retained byte-for-byte at the blob level and semantically intact in canonical documents. Exact <code>0.1</code> schemas are negotiated; a field addition requires a new minor schema URI and advertised support. No wildcard compatibility is assumed.</p>
+<p>ARP control documents use RFC-8785/JCS with a restricted number profile: JSON integers only, within ±(2^53−1). Sequences and money quantities use canonical decimal strings. Duplicate keys, non-finite numbers, negative zero and lone UTF-16 surrogates are invalid. Do not normalize Unicode. Floating-point vendor payloads can remain opaque blob bytes. This agrees with Oxagen's conservative control-document hashing domain without changing existing native digests.</p>
+<p>Every document digest is <code>sha256:</code> plus lowercase hex over canonical UTF-8 bytes of the <strong>entire document</strong>. Documents carry no self-digest. Blob digests cover their exact stored plaintext bytes after approved redaction; ciphertext is an independent transport encoding. Native evidence is preserved as original bytes and verified by its source-format algorithm, never by rehashing a display projection.</p>
+<p>Detached attestations use Ed25519 over UTF-8 bytes of <code>ARP/0.1\n</code> followed by the subject digest. They contain subject digest, key ID, algorithm and base64 signature. Trust is established by configured issuer/key bindings and key-validity/revocation policy, never by a key bundled by an unknown sender. Producer signatures attest capture claims; an Oxagen countersignature attests receipt/verification scope, not the truth of client-attested behavior. A signed source-prefix anchor is needed to prove boundary provenance; a checkpoint signature alone cannot establish native event completeness.</p>
+<p>The directory transport is:</p>
+<pre><code class="language-text">checkpoint.json
+checkpoint.attestation.json
+blobs/sha256/&lt;64 lowercase hex&gt;
+</code></pre>
+<p>Manifest blob refs include byte count, media type and digest. Consumers resolve digests through an authorized content store or the bundle path; manifests cannot nominate arbitrary fetch URLs. Before execution, verify signatures/trust, document schemas, blob byte counts/digests, transitive closure, source prefix and semantic constraints. Bound depth, file count, expanded bytes and context size before extraction; advertised limits cannot be exceeded by nesting. Retention deletion leaves a verifiable manifest with unavailable content, which is no longer restorable.</p>
+<p>Offline bundles and local IPC come first. Authenticated remote blob transport is an implementation choice; ARP requires authorization on every lookup and must not create a cross-tenant content-existence oracle. Resume large transfers by digest; write blobs atomically and publish the manifest last.</p>
+<h2 id="execution-portability/12-oxagen-integration-and-delivery">12. Oxagen integration and delivery</h2>
+<p>Keep implementation responsibilities at the existing seams:</p>
+<ol>
+<li><strong>Shared contracts:</strong> add a leaf ARP schema/profile package, canonical vectors and typed errors; reuse existing canonicalization utilities only after cross-implementation vectors pass.</li>
+<li><strong>Tacho:</strong> source FrameRef/export adapter, capture barriers and snapshot integration alongside the WAL. Preserve original <code>tacho/1.0</code> chains and fidelity. All four ADR-101 harnesses report supported/unsupported capabilities explicitly; product completion requires the four-harness matrix, even if Codex ↔ Claude is the first vertical slice.</li>
+<li><strong>Run ledger/evidence:</strong> immutable checkpoint descriptors and lineage bindings through the sole writers. Do not resurrect engine-state leases removed by ADR-043. Imported files remain runner-owned; the ledger stores evidence and authorized blob references.</li>
+<li><strong>Kernel/API/MCP:</strong> register the proposed governed capabilities with existing IAM, tenant scope, role checks, entitlement and metering patterns. Source read authority and destination launch authority are separate.</li>
+<li><strong>Runner adapters:</strong> restore and start native sessions, record delivered-context digests, enforce isolation and reconcile launches. Native resume stays optional; portable import uses supported inputs in a fresh session.</li>
+<li><strong>Mission Control:</strong> frame eligibility, “Run in…” target/report, parent/child lineage, comparison and promotion views. Display the exact selected boundary and omissions. A replay-grade badge is never a portability badge.</li>
+</ol>
+<h3 id="execution-portability/first-acceptance-milestone">First acceptance milestone</h3>
+<p>Capture an unfinished coding task with an uncommitted edit and untracked binary after a completed Codex turn. Restore it in an isolated Claude Code workspace, preserve the source, complete the task, and verify lineage, delivered context and final artifact. Repeat in reverse. Demonstrate unavailable historical-frame refusal and crash recovery without a duplicate launch.</p>
+<p>Then prove two candidates on each harness from the same checkpoint, independent writable resources, one pinned evaluator, visible unsuccessful candidates, correct total cost and a separate promotion step. Extend the same conformance matrix to Cursor and Stella before claiming general four-harness support.</p>
+<h3 id="execution-portability/required-conformance-layers">Required conformance layers</h3>
+<p>The included checker validates schemas, byte closure, fixture signatures, source-prefix hashing, workspace relationships and deliberate corruptions. Synthetic data is labelled and its public key is trusted only by the fixture checker. It does not demonstrate actual harness interoperability, process fencing, policy enforcement or complete RFC-8785 compliance for arbitrary payloads.</p>
+<p>Production adapters additionally need: historical snapshot consistency; context role preservation; safe extraction across target filesystems; policy revocation between prepare/start; concurrent launch-id races; uncertain dispatch reconciliation; cancellation with pending effects; credential rebinding; cassette misses; external namespace isolation; witness secrecy; budget accounting; native version skew and bidirectional harness tests. These are implementation gates, not checks this documentation run has performed.</p>
+<h2 id="execution-portability/13-design-decisions-made-here">13. Design decisions made here</h2>
+<ul>
+<li><strong>Preserve native evidence, standardize the portable package.</strong> This avoids a rewrite of two mature chain formats.</li>
+<li><strong>Reuse CGP frames and the existing host journal.</strong> ARP adds transfer and experiment contracts rather than duplicating context identity, representations, fidelity, or host activity records.</li>
+<li><strong>Separate run identity, native session binding and authority.</strong> Imported IDs provide provenance, not admission.</li>
+<li><strong>Make the checkpoint immutable and compatibility target-specific.</strong> A source artifact does not change when a target gains support or policy changes.</li>
+<li><strong>Require a consistent boundary and declare losses.</strong> Historical frames without state remain inspectable but not executable.</li>
+<li><strong>Use external runners first.</strong> This fits Oxagen's governance boundary while enabling customer-owned cross-harness best-of-N.</li>
+</ul>
+<p>These are proposed architecture decisions in the roadmap repository. They do not amend the accepted Oxagen ADR corpus or mark runtime features shipped.</p>
+
+<footer class="colophon"><span>Oxagen · Draft protocol</span><span>Source: <code>docs/agent-run-protocol.md</code></span></footer>
+</main>
+</div>
 </article><article id="plan" class="doc" hidden>
 <header class="mast">
   <p class="eyebrow">Oxagen · Plan</p>
@@ -12758,7 +13027,7 @@ need a decision before W13 is written into the spec.</li>
 </div>
 <script>
 (function(){
-  var TITLES={'spec': 'Oxagen Mission Control: Product and Technical Specification', 'dod': 'Oxagen DoD: the definition of done for agent runs', 'witness': 'Oxagen Witness: outcome verification', 'desktop': 'Oxagen Desktop: product specification, rev 1', 'creation': 'Creating things in Oxagen: agents, tools, skills and context records', 'portability': 'The Agent Portability Atlas', 'plan': 'Oxagen Mission Control app: implementation plan', 'scope': 'Oxagen Mission Control: the scope review, and what it changed', 'scaleback': 'Scale back Mission Control: the mockup prompt', 'prompts': 'Oxagen Mission Control: mockup prompts, one per demo flow', 'consolidation': 'Consolidating W1–W11 into one design', 'feedback': 'Feedback on the mockups', 'videos': 'Videos of the mockups, narrated', 'w13': 'W13: in the loop'};
+  var TITLES={'spec': 'Oxagen Mission Control: Product and Technical Specification', 'dod': 'Oxagen DoD: the definition of done for agent runs', 'witness': 'Oxagen Witness: outcome verification', 'desktop': 'Oxagen Desktop: product specification, rev 1', 'creation': 'Creating things in Oxagen: agents, tools, skills and context records', 'portability': 'The Agent Portability Atlas', 'execution-portability': 'Agent Run Protocol (ARP)', 'plan': 'Oxagen Mission Control app: implementation plan', 'scope': 'Oxagen Mission Control: the scope review, and what it changed', 'scaleback': 'Scale back Mission Control: the mockup prompt', 'prompts': 'Oxagen Mission Control: mockup prompts, one per demo flow', 'consolidation': 'Consolidating W1–W11 into one design', 'feedback': 'Feedback on the mockups', 'videos': 'Videos of the mockups, narrated', 'w13': 'W13: in the loop'};
   var first='spec';
   function show(){
     var h=location.hash.replace(/^#/,""), id=h.split("/")[0];

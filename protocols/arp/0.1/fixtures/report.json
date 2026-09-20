@@ -1,0 +1,27 @@
+{
+  "schema": "arp.report/0.1",
+  "issuer": "fixture:oxagen",
+  "launch_digest": "sha256:e6366fb20cf3abd0a6b4274f93203dc6f363d1e15f92c802f3a03d3613c5ae19",
+  "checkpoint_digest": "sha256:dee57bf76a6f14bcd593c6b720fb02a0768d64aeb5af76d18a2e9141f8bdc61b",
+  "target": {
+    "harness": "codex",
+    "harness_version": "fixture-only",
+    "adapter": "fixture-adapter",
+    "adapter_version": "0.1.0",
+    "adapter_digest": "sha256:9a63593b7b52dc82acdf4e5e55f4f497e0c2105df11b76446c023b09b503881c",
+    "model": "synthetic-model",
+    "configuration": {
+      "digest": "sha256:a8d9311e3253a07841a1b110e2996ee74acf11dd90f4d792b065f6b759fa2be6",
+      "bytes": 68,
+      "media_type": "application/json"
+    }
+  },
+  "capabilities_digest": "sha256:09b09164cb154de6eb0fbb498743b3e09d16b51f5ed566092013301dc1d42e0b",
+  "policy_digest": "sha256:91aaf7337943c9a7c06a9f3188b61e427716f5993d9ba51fead7d62bec6ec621",
+  "expires_at": "2099-01-01T00:00:00Z",
+  "status": "ready",
+  "findings": [],
+  "transformations": [],
+  "extensions": {},
+  "required_extensions": []
+}

@@ -1,0 +1,1418 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:arp:schema:0.1",
+  "title": "Agent Run Protocol 0.1 design schemas",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/checkpoint"
+    },
+    {
+      "$ref": "#/$defs/capabilities"
+    },
+    {
+      "$ref": "#/$defs/launch"
+    },
+    {
+      "$ref": "#/$defs/report"
+    },
+    {
+      "$ref": "#/$defs/receipt"
+    },
+    {
+      "$ref": "#/$defs/experiment"
+    },
+    {
+      "$ref": "#/$defs/workspace"
+    },
+    {
+      "$ref": "#/$defs/attestation"
+    },
+    {
+      "$ref": "#/$defs/evaluation"
+    },
+    {
+      "$ref": "#/$defs/selection"
+    }
+  ],
+  "$defs": {
+    "blob": {
+      "type": "object",
+      "properties": {
+        "digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "media_type": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "digest",
+        "bytes",
+        "media_type"
+      ],
+      "additionalProperties": false
+    },
+    "frame": {
+      "type": "object",
+      "properties": {
+        "format": {
+          "enum": [
+            "tacho/1.0",
+            "oxagen-ledger/v2"
+          ]
+        },
+        "issuer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "stream_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "seq": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)$"
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "run_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "attempt_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "run_seq": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)$"
+        }
+      },
+      "required": [
+        "format",
+        "issuer",
+        "stream_id",
+        "seq",
+        "digest"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "format": {
+                "const": "oxagen-ledger/v2"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "run_id",
+              "attempt_id",
+              "run_seq"
+            ],
+            "properties": {
+              "seq": {
+                "pattern": "^[1-9][0-9]*$"
+              },
+              "run_seq": {
+                "pattern": "^[1-9][0-9]*$"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "target": {
+      "type": "object",
+      "properties": {
+        "harness": {
+          "type": "string",
+          "minLength": 1
+        },
+        "harness_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "adapter": {
+          "type": "string",
+          "minLength": 1
+        },
+        "adapter_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "adapter_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "model": {
+          "type": "string",
+          "minLength": 1
+        },
+        "configuration": {
+          "$ref": "#/$defs/blob"
+        }
+      },
+      "required": [
+        "harness",
+        "harness_version",
+        "adapter",
+        "adapter_version",
+        "adapter_digest",
+        "model",
+        "configuration"
+      ],
+      "additionalProperties": false
+    },
+    "finding": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dimension": {
+          "enum": [
+            "workspace",
+            "environment",
+            "context",
+            "tools",
+            "effects",
+            "authority",
+            "evidence"
+          ]
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "detail": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source": {
+          "$ref": "#/$defs/frame"
+        }
+      },
+      "required": [
+        "code",
+        "dimension",
+        "required",
+        "detail"
+      ],
+      "additionalProperties": false
+    },
+    "budget": {
+      "type": "object",
+      "properties": {
+        "currency": {
+          "const": "USD"
+        },
+        "max_microusd": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)$"
+        },
+        "max_wall_seconds": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "currency",
+        "max_microusd",
+        "max_wall_seconds"
+      ],
+      "additionalProperties": false
+    },
+    "effect": {
+      "type": "object",
+      "properties": {
+        "operation_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "enum": [
+            "settled",
+            "unknown"
+          ]
+        },
+        "receipt": {
+          "$ref": "#/$defs/blob"
+        },
+        "external_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "operation_id",
+        "status",
+        "external_ids"
+      ],
+      "additionalProperties": false
+    },
+    "binding": {
+      "type": "object",
+      "properties": {
+        "child_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "native_session_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence_stream": {
+          "$ref": "#/$defs/frame"
+        }
+      },
+      "required": [
+        "child_id",
+        "native_session_id"
+      ],
+      "additionalProperties": false
+    },
+    "checkpoint": {
+      "type": "object",
+      "properties": {
+        "schema": {
+          "const": "arp.checkpoint/0.1"
+        },
+        "checkpoint_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "issuer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "profile": {
+          "const": "code-workspace/0.1"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "source": {
+          "type": "object",
+          "properties": {
+            "boundary": {
+              "$ref": "#/$defs/frame"
+            },
+            "position": {
+              "const": "after"
+            },
+            "evidence_prefix": {
+              "$ref": "#/$defs/blob"
+            }
+          },
+          "required": [
+            "boundary",
+            "position",
+            "evidence_prefix"
+          ],
+          "additionalProperties": false
+        },
+        "capture": {
+          "type": "object",
+          "properties": {
+            "boundary_kind": {
+              "const": "turn_completed"
+            },
+            "quiescence": {
+              "enum": [
+                "client_attested",
+                "runner_enforced"
+              ]
+            },
+            "barrier_evidence": {
+              "$ref": "#/$defs/blob"
+            },
+            "pending_operations": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "maxItems": 0
+            },
+            "active_children": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "maxItems": 0
+            }
+          },
+          "required": [
+            "boundary_kind",
+            "quiescence",
+            "barrier_evidence",
+            "pending_operations",
+            "active_children"
+          ],
+          "additionalProperties": false
+        },
+        "task": {
+          "$ref": "#/$defs/blob"
+        },
+        "context": {
+          "$ref": "#/$defs/blob"
+        },
+        "workspace": {
+          "$ref": "#/$defs/blob"
+        },
+        "environment": {
+          "$ref": "#/$defs/blob"
+        },
+        "tools": {
+          "$ref": "#/$defs/blob"
+        },
+        "authority": {
+          "$ref": "#/$defs/blob"
+        },
+        "effects": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/effect"
+          }
+        },
+        "gaps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/finding"
+          }
+        },
+        "extensions": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z0-9.-]+:[a-z0-9._-]+$"
+          },
+          "additionalProperties": true
+        },
+        "required_extensions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "schema",
+        "checkpoint_id",
+        "issuer",
+        "profile",
+        "created_at",
+        "source",
+        "capture",
+        "task",
+        "context",
+        "workspace",
+        "environment",
+        "tools",
+        "authority",
+        "effects",
+        "gaps",
+        "extensions",
+        "required_extensions"
+      ],
+      "additionalProperties": false
+    },
+    "capabilities": {
+      "type": "object",
+      "properties": {
+        "schema": {
+          "const": "arp.capabilities/0.1"
+        },
+        "issuer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "adapter": {
+          "type": "string",
+          "minLength": 1
+        },
+        "adapter_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "adapter_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "profiles": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "operations": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "capture",
+              "validate",
+              "prepare",
+              "start",
+              "observe",
+              "cancel"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "boundaries": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "turn_completed"
+            ]
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "tool_modes": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "live",
+              "recorded"
+            ]
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "handoff_fencing": {
+          "type": "boolean"
+        },
+        "limits": {
+          "type": "object",
+          "properties": {
+            "max_bundle_bytes": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "max_files": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "max_context_bytes": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "max_depth": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "max_bundle_bytes",
+            "max_files",
+            "max_context_bytes",
+            "max_depth"
+          ],
+          "additionalProperties": false
+        },
+        "extensions": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z0-9.-]+:[a-z0-9._-]+$"
+          },
+          "additionalProperties": true
+        },
+        "required_extensions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "schema",
+        "issuer",
+        "adapter",
+        "adapter_version",
+        "adapter_digest",
+        "profiles",
+        "operations",
+        "boundaries",
+        "tool_modes",
+        "handoff_fencing",
+        "limits",
+        "extensions",
+        "required_extensions"
+      ],
+      "additionalProperties": false
+    },
+    "launch": {
+      "type": "object",
+      "properties": {
+        "schema": {
+          "const": "arp.launch/0.1"
+        },
+        "issuer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "launch_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "checkpoint_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "target": {
+          "$ref": "#/$defs/target"
+        },
+        "mode": {
+          "enum": [
+            "fork",
+            "handoff"
+          ]
+        },
+        "tool_mode": {
+          "enum": [
+            "live",
+            "recorded"
+          ]
+        },
+        "allowed_optional_gaps": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "budget": {
+          "$ref": "#/$defs/budget"
+        },
+        "deadline": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "experiment_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "extensions": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z0-9.-]+:[a-z0-9._-]+$"
+          },
+          "additionalProperties": true
+        },
+        "required_extensions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "schema",
+        "issuer",
+        "launch_id",
+        "checkpoint_digest",
+        "target",
+        "mode",
+        "tool_mode",
+        "allowed_optional_gaps",
+        "budget",
+        "deadline",
+        "extensions",
+        "required_extensions"
+      ],
+      "additionalProperties": false
+    },
+    "report": {
+      "type": "object",
+      "properties": {
+        "schema": {
+          "const": "arp.report/0.1"
+        },
+        "issuer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "launch_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "checkpoint_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "target": {
+          "$ref": "#/$defs/target"
+        },
+        "capabilities_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "policy_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "status": {
+          "enum": [
+            "ready",
+            "degraded",
+            "blocked"
+          ]
+        },
+        "findings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/finding"
+          }
+        },
+        "transformations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "minLength": 1
+              },
+              "detail": {
+                "type": "string",
+                "minLength": 1
+              },
+              "source_digest": {
+                "type": "string",
+                "pattern": "^sha256:[0-9a-f]{64}$"
+              },
+              "delivered_digest": {
+                "type": "string",
+                "pattern": "^sha256:[0-9a-f]{64}$"
+              }
+            },
+            "required": [
+              "kind",
+              "detail"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "extensions": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z0-9.-]+:[a-z0-9._-]+$"
+          },
+          "additionalProperties": true
+        },
+        "required_extensions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "schema",
+        "issuer",
+        "launch_digest",
+        "checkpoint_digest",
+        "target",
+        "capabilities_digest",
+        "policy_digest",
+        "expires_at",
+        "status",
+        "findings",
+        "transformations",
+        "extensions",
+        "required_extensions"
+      ],
+      "additionalProperties": false
+    },
+    "receipt": {
+      "type": "object",
+      "properties": {
+        "schema": {
+          "const": "arp.receipt/0.1"
+        },
+        "issuer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "launch_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "launch_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "seq": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)$"
+        },
+        "previous_receipt_digest": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "state": {
+          "enum": [
+            "requested",
+            "validating",
+            "preparing",
+            "prepared",
+            "starting",
+            "running",
+            "reconciling",
+            "completed",
+            "failed",
+            "cancelled",
+            "blocked"
+          ]
+        },
+        "checkpoint_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "report_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "binding": {
+          "$ref": "#/$defs/binding"
+        },
+        "delivered_context": {
+          "$ref": "#/$defs/blob"
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/blob"
+          }
+        },
+        "usage": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "observed",
+                "self_reported",
+                "unknown"
+              ]
+            },
+            "cost_microusd": {
+              "type": "string",
+              "pattern": "^(0|[1-9][0-9]*)$"
+            }
+          },
+          "required": [
+            "status"
+          ],
+          "additionalProperties": false
+        },
+        "extensions": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z0-9.-]+:[a-z0-9._-]+$"
+          },
+          "additionalProperties": true
+        },
+        "required_extensions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "schema",
+        "issuer",
+        "launch_id",
+        "launch_digest",
+        "seq",
+        "previous_receipt_digest",
+        "created_at",
+        "state",
+        "checkpoint_digest",
+        "evidence",
+        "extensions",
+        "required_extensions"
+      ],
+      "additionalProperties": false
+    },
+    "experiment": {
+      "type": "object",
+      "properties": {
+        "schema": {
+          "const": "arp.experiment/0.1"
+        },
+        "issuer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "experiment_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "checkpoint_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "candidate_launches": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "minItems": 2,
+          "uniqueItems": true
+        },
+        "evaluator": {
+          "$ref": "#/$defs/blob"
+        },
+        "selection_rule": {
+          "$ref": "#/$defs/blob"
+        },
+        "aggregate_budget": {
+          "$ref": "#/$defs/budget"
+        },
+        "deadline": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "isolation": {
+          "type": "object",
+          "properties": {
+            "workspace": {
+              "const": "independent"
+            },
+            "external_effects": {
+              "enum": [
+                "disabled",
+                "isolated_namespaces"
+              ]
+            }
+          },
+          "required": [
+            "workspace",
+            "external_effects"
+          ],
+          "additionalProperties": false
+        },
+        "extensions": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z0-9.-]+:[a-z0-9._-]+$"
+          },
+          "additionalProperties": true
+        },
+        "required_extensions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "schema",
+        "issuer",
+        "experiment_id",
+        "checkpoint_digest",
+        "candidate_launches",
+        "evaluator",
+        "selection_rule",
+        "aggregate_budget",
+        "deadline",
+        "isolation",
+        "extensions",
+        "required_extensions"
+      ],
+      "additionalProperties": false
+    },
+    "workspace": {
+      "type": "object",
+      "properties": {
+        "schema": {
+          "const": "arp.workspace/0.1"
+        },
+        "complete_scope": {
+          "const": true
+        },
+        "repositories": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "root": {
+                "type": "string",
+                "minLength": 1
+              },
+              "provider_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "base_object": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "root",
+              "provider_id",
+              "base_object"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "path": {
+                    "type": "string",
+                    "minLength": 1,
+                    "pattern": "^(?!/)(?!.*\\\\)(?!.*\\u0000)(?!.*(?:^|/)\\.{1,2}(?:/|$))[^/]+(?:/[^/]+)*$"
+                  },
+                  "kind": {
+                    "const": "file"
+                  },
+                  "blob": {
+                    "$ref": "#/$defs/blob"
+                  },
+                  "executable": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "path",
+                  "kind",
+                  "blob",
+                  "executable"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "path": {
+                    "type": "string",
+                    "minLength": 1,
+                    "pattern": "^(?!/)(?!.*\\\\)(?!.*\\u0000)(?!.*(?:^|/)\\.{1,2}(?:/|$))[^/]+(?:/[^/]+)*$"
+                  },
+                  "kind": {
+                    "const": "directory"
+                  }
+                },
+                "required": [
+                  "path",
+                  "kind"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "path": {
+                    "type": "string",
+                    "minLength": 1,
+                    "pattern": "^(?!/)(?!.*\\\\)(?!.*\\u0000)(?!.*(?:^|/)\\.{1,2}(?:/|$))[^/]+(?:/[^/]+)*$"
+                  },
+                  "kind": {
+                    "const": "symlink"
+                  },
+                  "target": {
+                    "type": "string",
+                    "minLength": 1,
+                    "pattern": "^(?!/)(?!.*\\\\)(?!.*\\u0000)(?!.*(?:^|/)\\.{1,2}(?:/|$))[^/]+(?:/[^/]+)*$"
+                  }
+                },
+                "required": [
+                  "path",
+                  "kind",
+                  "target"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          }
+        },
+        "exclusions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "path": {
+                "type": "string",
+                "minLength": 1
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 1
+              },
+              "required": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "path",
+              "reason",
+              "required"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "resources": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "profile": {
+                "type": "string",
+                "minLength": 1
+              },
+              "required": {
+                "type": "boolean"
+              },
+              "state": {
+                "$ref": "#/$defs/blob"
+              }
+            },
+            "required": [
+              "name",
+              "profile",
+              "required"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "extensions": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z0-9.-]+:[a-z0-9._-]+$"
+          },
+          "additionalProperties": true
+        },
+        "required_extensions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "schema",
+        "complete_scope",
+        "repositories",
+        "entries",
+        "exclusions",
+        "resources",
+        "extensions",
+        "required_extensions"
+      ],
+      "additionalProperties": false
+    },
+    "attestation": {
+      "type": "object",
+      "properties": {
+        "schema": {
+          "const": "arp.attestation/0.1"
+        },
+        "subject_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "key_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "algorithm": {
+          "const": "Ed25519"
+        },
+        "signature": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9+/]{86}==$"
+        }
+      },
+      "required": [
+        "schema",
+        "subject_digest",
+        "key_id",
+        "algorithm",
+        "signature"
+      ],
+      "additionalProperties": false
+    },
+    "evaluation": {
+      "type": "object",
+      "properties": {
+        "schema": {
+          "const": "arp.evaluation/0.1"
+        },
+        "issuer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evaluation_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "experiment_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "experiment_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "launch_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "artifact": {
+          "$ref": "#/$defs/blob"
+        },
+        "evaluator_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "verdict": {
+          "enum": [
+            "eligible",
+            "ineligible",
+            "infrastructure_error"
+          ]
+        },
+        "checks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "required": {
+                "type": "boolean"
+              },
+              "verdict": {
+                "enum": [
+                  "pass",
+                  "fail",
+                  "error"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "required",
+              "verdict"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "metrics": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "pattern": "^(0|-?[1-9][0-9]*)$"
+          }
+        },
+        "cost": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "observed",
+                "self_reported",
+                "unknown"
+              ]
+            },
+            "microusd": {
+              "type": "string",
+              "pattern": "^(0|[1-9][0-9]*)$"
+            }
+          },
+          "required": [
+            "status"
+          ],
+          "additionalProperties": false
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/blob"
+          }
+        },
+        "extensions": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z0-9.-]+:[a-z0-9._-]+$"
+          },
+          "additionalProperties": true
+        },
+        "required_extensions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "schema",
+        "issuer",
+        "evaluation_id",
+        "experiment_id",
+        "experiment_digest",
+        "launch_digest",
+        "artifact",
+        "evaluator_digest",
+        "verdict",
+        "checks",
+        "metrics",
+        "cost",
+        "evidence",
+        "extensions",
+        "required_extensions"
+      ],
+      "additionalProperties": false
+    },
+    "selection": {
+      "type": "object",
+      "properties": {
+        "schema": {
+          "const": "arp.selection/0.1"
+        },
+        "issuer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "experiment_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "selection_rule_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "evaluations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "minItems": 2,
+          "uniqueItems": true
+        },
+        "outcome": {
+          "enum": [
+            "winner",
+            "tie",
+            "no_winner"
+          ]
+        },
+        "selected_launches": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "uniqueItems": true
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "extensions": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z0-9.-]+:[a-z0-9._-]+$"
+          },
+          "additionalProperties": true
+        },
+        "required_extensions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "schema",
+        "issuer",
+        "experiment_digest",
+        "selection_rule_digest",
+        "evaluations",
+        "outcome",
+        "selected_launches",
+        "reason",
+        "extensions",
+        "required_extensions"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

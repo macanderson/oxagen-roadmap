@@ -1,0 +1,16 @@
+[
+  {
+    "schema": "arp.attestation/0.1",
+    "subject_digest": "sha256:bdcca46cf69e8bb408024cc9bff0d59cb3dd3c09c48a58a0ae145421a980a625",
+    "key_id": "fixture-key-1",
+    "algorithm": "Ed25519",
+    "signature": "zcAF3elvTdW1Jn4eAKtIXtCFcjGO187c6Y65hAg58S2OGIfGJ7gf28XMzVwMjrWpTuJOHdpWvLI0d5JKaQooAw=="
+  },
+  {
+    "schema": "arp.attestation/0.1",
+    "subject_digest": "sha256:2a9e8f3845d34cf0709cc648ce6a84d9f4ac4d5d764b2548b9a558d66fe0c109",
+    "key_id": "fixture-key-1",
+    "algorithm": "Ed25519",
+    "signature": "yYDHDn+Q3yINbRcMYfm6vHH/VZVYdO9yg110NepVCzwxynsP5EUJnYXh3UqCpXbn33DNiISBco+jr+kPu4+fBQ=="
+  }
+]

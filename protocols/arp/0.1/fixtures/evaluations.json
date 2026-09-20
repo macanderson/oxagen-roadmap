@@ -1,0 +1,64 @@
+[
+  {
+    "schema": "arp.evaluation/0.1",
+    "issuer": "fixture:oxagen",
+    "evaluation_id": "evaluation_fixture_1",
+    "experiment_id": "experiment_fixture_1",
+    "experiment_digest": "sha256:d276d1833476c6605a71b653a76bf8398281a191ba4f67f7a7077bc02c588eb2",
+    "launch_digest": "sha256:e6366fb20cf3abd0a6b4274f93203dc6f363d1e15f92c802f3a03d3613c5ae19",
+    "artifact": {
+      "digest": "sha256:b2a74d04fc40a9bd4e4583d305251d29d85086b3a69db2c12b6728ca99b79380",
+      "bytes": 44,
+      "media_type": "application/json"
+    },
+    "evaluator_digest": "sha256:c138ead0fa5a7b04155329db416defbd7e17556cf680513f2c056aa14c3d4995",
+    "verdict": "eligible",
+    "checks": [
+      {
+        "id": "task-complete",
+        "required": true,
+        "verdict": "pass"
+      }
+    ],
+    "metrics": {
+      "quality_points": "100"
+    },
+    "cost": {
+      "status": "unknown"
+    },
+    "evidence": [],
+    "extensions": {},
+    "required_extensions": []
+  },
+  {
+    "schema": "arp.evaluation/0.1",
+    "issuer": "fixture:oxagen",
+    "evaluation_id": "evaluation_fixture_2",
+    "experiment_id": "experiment_fixture_1",
+    "experiment_digest": "sha256:d276d1833476c6605a71b653a76bf8398281a191ba4f67f7a7077bc02c588eb2",
+    "launch_digest": "sha256:93e9f1be1f704173debeb9d6c1e73edbd3a7e1b1cf99341e23fffc78e788107c",
+    "artifact": {
+      "digest": "sha256:6f07bd610576607ec1861dd4636264130d4f9b3d711873059a09a62b8bc44743",
+      "bytes": 46,
+      "media_type": "application/json"
+    },
+    "evaluator_digest": "sha256:c138ead0fa5a7b04155329db416defbd7e17556cf680513f2c056aa14c3d4995",
+    "verdict": "ineligible",
+    "checks": [
+      {
+        "id": "task-complete",
+        "required": true,
+        "verdict": "fail"
+      }
+    ],
+    "metrics": {
+      "quality_points": "20"
+    },
+    "cost": {
+      "status": "unknown"
+    },
+    "evidence": [],
+    "extensions": {},
+    "required_extensions": []
+  }
+]

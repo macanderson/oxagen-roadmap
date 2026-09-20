@@ -1,0 +1,67 @@
+{
+  "schema": "arp.checkpoint/0.1",
+  "checkpoint_id": "checkpoint_fixture_1",
+  "issuer": "fixture:oxagen",
+  "profile": "code-workspace/0.1",
+  "created_at": "2026-09-19T12:00:00Z",
+  "source": {
+    "boundary": {
+      "format": "tacho/1.0",
+      "issuer": "fixture:oxagen",
+      "stream_id": "00000000-0000-4000-8000-000000000001",
+      "seq": "0",
+      "digest": "sha256:74d2dad14b4fa53fe95ca115d8a20002e9eb2e0aace891084a5c2ddfc7751124"
+    },
+    "position": "after",
+    "evidence_prefix": {
+      "digest": "sha256:1ca166122e8570433c043055f4da48850302768d09fc42d2682198c0a2888730",
+      "bytes": 313,
+      "media_type": "application/json"
+    }
+  },
+  "capture": {
+    "boundary_kind": "turn_completed",
+    "quiescence": "client_attested",
+    "barrier_evidence": {
+      "digest": "sha256:64867d51e629322448874a2f1df7bf6c97dbfce85eb75f00e3dabdd43183285e",
+      "bytes": 58,
+      "media_type": "application/json"
+    },
+    "pending_operations": [],
+    "active_children": []
+  },
+  "task": {
+    "digest": "sha256:c3ee0e19cb0dcade97bc1ffffc17d9a7b76096ac67d4699d379219a56872b8fe",
+    "bytes": 124,
+    "media_type": "application/json"
+  },
+  "context": {
+    "digest": "sha256:a884f8f2c9fe790b38dc4b2e2dd6f1372574ec86a4af31ee191f0665d71a0a97",
+    "bytes": 490,
+    "media_type": "application/json"
+  },
+  "workspace": {
+    "digest": "sha256:a26b210f826cbfedd4c84c149910704c3f4399c8110fab36032988d4a94e8dd1",
+    "bytes": 571,
+    "media_type": "application/json"
+  },
+  "environment": {
+    "digest": "sha256:8d80516564fec6b19eab581b0b5be89bb86df6910ef71dca3f20e67aeacd71c9",
+    "bytes": 47,
+    "media_type": "application/json"
+  },
+  "tools": {
+    "digest": "sha256:c3b8d7696495ac046861b945a15c1c752930d6d80f2fba768820197b02de36dc",
+    "bytes": 49,
+    "media_type": "application/json"
+  },
+  "authority": {
+    "digest": "sha256:91aaf7337943c9a7c06a9f3188b61e427716f5993d9ba51fead7d62bec6ec621",
+    "bytes": 68,
+    "media_type": "application/json"
+  },
+  "effects": [],
+  "gaps": [],
+  "extensions": {},
+  "required_extensions": []
+}

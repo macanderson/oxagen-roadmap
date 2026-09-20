@@ -1,0 +1,32 @@
+{
+  "schema": "arp.experiment/0.1",
+  "issuer": "fixture:oxagen",
+  "experiment_id": "experiment_fixture_1",
+  "checkpoint_digest": "sha256:dee57bf76a6f14bcd593c6b720fb02a0768d64aeb5af76d18a2e9141f8bdc61b",
+  "candidate_launches": [
+    "sha256:e6366fb20cf3abd0a6b4274f93203dc6f363d1e15f92c802f3a03d3613c5ae19",
+    "sha256:93e9f1be1f704173debeb9d6c1e73edbd3a7e1b1cf99341e23fffc78e788107c"
+  ],
+  "evaluator": {
+    "digest": "sha256:c138ead0fa5a7b04155329db416defbd7e17556cf680513f2c056aa14c3d4995",
+    "bytes": 54,
+    "media_type": "application/json"
+  },
+  "selection_rule": {
+    "digest": "sha256:be1229f3a8a76ba20a31d7c7d9976f66d748740c4d928bf95529c593e5db1b3f",
+    "bytes": 109,
+    "media_type": "application/json"
+  },
+  "aggregate_budget": {
+    "currency": "USD",
+    "max_microusd": "2500000",
+    "max_wall_seconds": 600
+  },
+  "deadline": "2099-01-01T00:00:00Z",
+  "isolation": {
+    "workspace": "independent",
+    "external_effects": "disabled"
+  },
+  "extensions": {},
+  "required_extensions": []
+}
