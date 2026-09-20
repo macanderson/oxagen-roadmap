@@ -17,3 +17,7 @@ site/next-env.d.ts
 site/tsconfig.tsbuildinfo
 .vercel
 .env*
+
+# Oxagen: this machine's link to a workspace; never committed.
+.oxagen/workspace.json
+.stella/private/
