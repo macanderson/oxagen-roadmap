@@ -42,6 +42,44 @@ export function labelsToMeta(labels) {
   };
 }
 
+/**
+ * The question a `needs:decision` issue puts to the maintainer, or null when it puts none.
+ *
+ * The label alone is not evidence. Triage applies `needs:decision` to ordinary work, so on
+ * 2026-09-20 it sat on 69 open oxagen issues while 10 of them actually asked the maintainer
+ * something. A decision card that cannot state its question is not a decision, so this reads the
+ * question out of the body and the caller drops the issue when it finds none.
+ *
+ * Two shapes count. A heading (`## Decision needed`, `## Options`) means the paragraph under it is
+ * the question. A sentence that names the maintainer counts only when the clause after it says what
+ * is being decided, which is what the connector test does: reciting the filing rule ("case 1 is a
+ * decision only the maintainer can make, real spend, or is bigger than one session") names nothing
+ * and stops here.
+ */
+const DECISION_ASK = /(?:needs?|requires?|wants?) (?:a |an )?(?:maintainer|owner|human)(?:'s|\u2019s)? (?:decision|call|choice|answer)|(?:a |the )?decision (?:that )?only (?:the )?(?:maintainer|owner|you) (?:can|must) (?:make|take)|maintainer (?:must|has to|needs to) (?:decide|choose|pick)/i;
+const DECISION_LEAD = /^\s*(?:[:\u2014\u2013-]\s*|(?:on |about )?(?:whether|which|what|how|if)\b)/i;
+const DECISION_HEAD = /^#{1,4}\s*(?:the )?(?:decision needed|decision required|open questions?|the question|questions? for the maintainer|options|the choice)\s*$/im;
+const plain = (s) => String(s).replace(/`([^`]+)`/g, "$1").replace(/\*\*?([^*]+)\*\*?/g, "$1")
+  .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1").replace(/\s+/g, " ").trim();
+
+export function decisionAsked(body) {
+  const src = String(body || "").replace(/<!--[\s\S]*?-->/g, "").replace(/```[\s\S]*?```/g, " ");
+  const head = DECISION_HEAD.exec(src);
+  if (head) {
+    const para = src.slice(head.index + head[0].length).replace(/^\s+/, "").split(/\n\s*\n/)[0] || "";
+    const q = plain(para);
+    if (q.length >= 30) return q.slice(0, 400);
+  }
+  const m = DECISION_ASK.exec(src);
+  if (!m) return null;
+  const tail = src.slice(m.index + m[0].length);
+  if (!DECISION_LEAD.test(tail)) return null;
+  const stop = /(?:[.!?](?:\s|$)|\n\s*\n|\n\s*[-*#])/.exec(tail);
+  const q = plain(stop ? tail.slice(0, stop.index) : tail.slice(0, 400)).replace(/^[,:;\u2014\u2013\s-]+/, "");
+  if (q.length < 25) return null;
+  return (q.charAt(0).toUpperCase() + q.slice(1)).slice(0, 400);
+}
+
 // The mockup's welcome routes do not follow the org/workspace pattern; this is where each one lives.
 const WELCOME = {
   signup: "(auth)/signup", verify: "(auth)/verify", login: "(auth)/login", "two-factor": "(auth)/two-factor",

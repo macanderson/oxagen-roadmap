@@ -12,10 +12,7 @@ export default {
   render: view,
 };
 
-export const Loaded = { name: "Loaded", args: {
-  state: "loaded",
-  theme: "dark"
-} };
+export const Loaded = { name: "Loaded", args: { state: "loaded" } };
 export const Empty = { name: "Empty", args: { state: "empty" } };
 export const Loading = { name: "Loading", args: { state: "loading" } };
 export const Error = { name: "Error", args: { state: "error" } };
