@@ -933,10 +933,19 @@ const TOOLS = () => [
   { name: "link_issue", description: "Links an existing GitHub issue to a roadmap item so it shows on the card. Input: {item_id, repo, number}.", inputSchema: { type: "object", properties: { item_id: { type: "string" }, repo: { type: "string" }, number: { type: "number" } }, required: ["item_id","repo","number"] },
     execute: async ({ item_id, repo, number }) => { const it = byId[String(item_id)]; if (!it) throw new Error("No item " + item_id); await writeOverride(it.id, { linked_issues: [...(S.overrides[it.id]?.linked_issues || []), { repo: String(repo), number: Number(number) }] }, `linked ${repo}#${number}`); render(); return { ok: true }; } },
   { name: "create_issue", description: "Drafts a GitHub issue and opens it for the viewer to confirm and create; nothing is created until they click. Input: {repo, title, body (Markdown), labels (array), item_id (optional roadmap item to link)}. Returns whether the viewer created it and the issue number.", inputSchema: { type: "object", properties: { repo: { type: "string" }, title: { type: "string" }, body: { type: "string" }, labels: { type: "array", items: { type: "string" } }, item_id: { type: "string" } }, required: ["repo","title","body"] },
-    execute: ({ repo, title, body, labels, item_id }) => new Promise((resolve) => {
+    // This one stops and waits for a person. The drawer says so, because a modal waiting for a
+    // click looks exactly like a hang from inside the chat.
+    waits: "A draft issue is open. Create it or close it to continue.",
+    execute: ({ repo, title, body, labels, item_id }, ctx) => new Promise((resolve) => {
       const before = (S.overrides[item_id]?.linked_issues || []).length;
       issueDialog({ repo: String(repo), title: String(title), body: String(body), labels: Array.isArray(labels) ? labels.map(String) : [], item: item_id ? String(item_id) : undefined });
-      const d = $("#dlg"); const onClose = () => { d.removeEventListener("close", onClose); const links = S.overrides[item_id]?.linked_issues || []; resolve(links.length > before ? { created: true, ...links[links.length - 1] } : { created: false, note: "The viewer closed the dialog without creating it, or no item was linked." }); }; d.addEventListener("close", onClose);
+      const d = $("#dlg");
+      const done = (out) => { d.removeEventListener("close", onClose); ctx?.signal?.removeEventListener("abort", onAbort); resolve(out); };
+      const onClose = () => { const links = S.overrides[item_id]?.linked_issues || []; done(links.length > before ? { created: true, ...links[links.length - 1] } : { created: false, note: "The viewer closed the dialog without creating it, or no item was linked." }); };
+      // Stop has to reach in here too, or pressing it leaves the round waiting on a dialog.
+      const onAbort = () => { try { d.close(); } catch {} done({ created: false, note: "The viewer stopped the answer before deciding." }); };
+      d.addEventListener("close", onClose);
+      ctx?.signal?.addEventListener("abort", onAbort);
     }) },
 ];
 function instructions() {
@@ -958,7 +967,7 @@ async function readSse(body, onEvent) {
     while ((i = buf.indexOf("\n\n")) >= 0) {
       const chunk = buf.slice(0, i); buf = buf.slice(i + 2);
       const ev = (chunk.match(/^event: (.*)$/m) || [])[1]; const data = (chunk.match(/^data: (.*)$/m) || [])[1];
-      if (ev && data) { try { onEvent(ev, JSON.parse(data)); } catch {} }
+      if (ev && data) { try { onEvent(ev, JSON.parse(data)); } catch {} }   // a ": ping" comment carries no event, so it never counts as progress
     }
   }
 }
@@ -969,15 +978,31 @@ async function askHosted(tools, tier, signal, onText) {
   let shown = "", truncated = false;
   try {
     for (let round = 0; round < 8; round++) {
-      const r = await fetch("/api/ask", { method: "POST", signal, headers: { "content-type": "application/json" }, body: JSON.stringify({ tier, system: instructions(), messages, tools: defs }) });
-      if (!r.ok) { const j = await r.json().catch(() => ({})); throw { code: j.error === "password" ? "password" : j.error === "not_configured" ? "sampling_disabled" : "upstream_error", message: j.message }; }
+      // This waits on PROGRESS, not on bytes. The function heartbeats every ten seconds and
+      // OpenRouter sends its own keep-alives, so a watchdog fed by traffic is fed forever by a
+      // model that writes nothing. Ninety seconds is a backstop: the function gives up at sixty
+      // and sends a sentence saying which limit it hit, which is the better message to show.
+      const ctl = new AbortController();
+      const stop = () => ctl.abort();
+      signal.addEventListener("abort", stop);
+      let dead = false, idle = setTimeout(() => { dead = true; ctl.abort(); }, 90000);
+      const beat = () => { clearTimeout(idle); idle = setTimeout(() => { dead = true; ctl.abort(); }, 90000); };
       let roundText = "", done = null, err = null;
-      await readSse(r.body, (ev, data) => {
-        if (ev === "text") { roundText += data.delta; onText({ text: (shown ? shown + "\n\n" : "") + roundText }); }
-        else if (ev === "done") done = data.message; else if (ev === "error") err = data;
-      });
+      try {
+        const r = await fetch("/api/ask", { method: "POST", signal: ctl.signal, headers: { "content-type": "application/json" }, body: JSON.stringify({ tier, system: instructions(), messages, tools: defs }) });
+        beat();
+        if (!r.ok) { const j = await r.json().catch(() => ({})); throw { code: j.error === "password" ? "password" : j.error === "not_configured" ? "sampling_disabled" : "upstream_error", message: j.message }; }
+        await readSse(r.body, (ev, data) => {
+          beat();
+          if (ev === "text") { roundText += data.delta; onText({ text: (shown ? shown + "\n\n" : "") + roundText }); }
+          else if (ev === "done") done = data.message; else if (ev === "error") err = data;
+        });
+      } catch (e) {
+        if (dead) throw { code: "timeout", message: "The model wrote nothing for 90 seconds." };
+        throw e;
+      } finally { clearTimeout(idle); signal.removeEventListener("abort", stop); }
       if (roundText) shown = (shown ? shown + "\n\n" : "") + roundText;
-      if (err) throw { code: ["rate_limited", "cancelled"].includes(err.code) ? err.code : "upstream_error", message: err.message };
+      if (err) throw { code: ["rate_limited", "cancelled", "timeout"].includes(err.code) ? err.code : "upstream_error", message: err.message };
       if (!done) throw { code: "upstream_error" };
       if (done.stop_reason === "refusal") throw { code: "refused" };
       // The assistant content goes back unchanged: thinking blocks must be replayed as they were written.
@@ -1004,7 +1029,19 @@ async function askAssistant(text) {
   CHAT.turns.push({ role: "user", content: text }); saveChat(); renderChat();
   CHAT.busy = true; CHAT.ctl = new AbortController(); $("#stop-btn").hidden = false; $("#send-btn").disabled = true; $("#chat-status").innerHTML = '<span class="spin"></span> Thinking';
   const bubble = el(`<div class="msg ai thinking">Thinking…</div>`); $("#msgs").append(bubble); $("#msgs").scrollTop = 1e9;
-  const used = []; const tools = TOOLS().map(t => ({ ...t, execute: async (i, c) => { used.push(t.name); $("#chat-status").textContent = "Using " + t.name; return t.execute(i, c); } }));
+  // A tool that opens a dialog stops the round until a person answers it. "Using create_issue" and
+  // a spinner read as a hang, so a waiting tool names what it is waiting for, in the chat and in
+  // the status line, and the bubble stops pretending to think.
+  const used = []; const tools = TOOLS().map(t => ({ ...t, execute: async (i, c) => {
+    used.push(t.name);
+    if (t.waits) { $("#chat-status").textContent = "Waiting for you"; bubble.classList.remove("thinking"); bubble.textContent = t.waits; $("#msgs").scrollTop = 1e9; }
+    else $("#chat-status").textContent = "Using " + t.name;
+    // Every tool restores the line on the way out, not just the ones that wait. A tool that returns
+    // in a second is followed by a model turn that can run for a minute, and "Using get_item" left
+    // sitting there reads as a tool that never came back.
+    try { return await t.execute(i, c); }
+    finally { $("#chat-status").innerHTML = '<span class="spin"></span> Thinking'; if (t.waits) { bubble.classList.add("thinking"); bubble.textContent = "Thinking…"; } }
+  } }));
   const turns = [{ role: "user", content: instructions() }, ...CHAT.turns.slice(-12).map(t => ({ role: t.role, content: t.content }))];
   const tier = $("#tier").value;
   let caps = null; if (sample) { try { caps = await sample.limits(); } catch {} }
@@ -1016,7 +1053,7 @@ async function askAssistant(text) {
     if (res.modelTierApplied !== tier) toast(`Answered on the ${res.modelTierApplied} tier`);
   } catch (e) {
     const keep = e.text || "";
-    const copy = { not_granted: "You have not allowed this page to use the assistant. Allow it from the page's prompt.", sampling_disabled: "The assistant is not available on this account.", rate_limited: "Too many requests right now. Try again in a minute.", refused: "The model declined that request. Rephrase it.", cancelled: "", upstream_error: "The connection dropped. Try again.", tools_unavailable: "Page tools are not available in this view. Plain questions still work.", prompt_too_large: "Too much context. Ask about a narrower part of the roadmap.", password: "Sign in again with the Sign in button.", empty_completion: "The model returned nothing. Ask again, or ask for less." }[e.code] ?? ("Could not answer: " + (e.message || e.code));
+    const copy = { not_granted: "You have not allowed this page to use the assistant. Allow it from the page's prompt.", sampling_disabled: "The assistant is not available on this account.", rate_limited: "Too many requests right now. Try again in a minute.", refused: "The model declined that request. Rephrase it.", cancelled: "", upstream_error: "The connection dropped. Try again.", tools_unavailable: "Page tools are not available in this view. Plain questions still work.", prompt_too_large: "Too much context. Ask about a narrower part of the roadmap.", password: "Sign in again with the Sign in button.", empty_completion: "The model returned nothing. Ask again, or ask for less.", timeout: "The model went quiet and the answer was dropped. Ask again." }[e.code] ?? ("Could not answer: " + (e.message || e.code));
     if (keep || copy) { CHAT.turns.push({ role: "assistant", content: (keep ? keep + "\n\n" : "") + copy, tools: used }); saveChat(); }
     if (["not_granted","sampling_disabled","not_declared","capability_disabled"].includes(e.code)) setPill("ai", "off", "Assistant: off");
   } finally { CHAT.busy = false; $("#stop-btn").hidden = true; $("#send-btn").disabled = false; $("#chat-status").textContent = ""; renderChat(); }

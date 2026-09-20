@@ -62,6 +62,13 @@ ok(dp.messages.length === 2 && dp.messages[0].role === "system" && dp.messages[1
 ok(typeof dp.model === "string" && dp.model.length > 0, "a draft names a model");
 ok(draftParams({ tier: "nonsense", prompt: "p" }).model === dp.model, "an unknown tier falls back rather than sending undefined");
 
+// K3 does not answer this deployment's tool payload. It thinks and never writes: 816 seconds,
+// 20,000 reasoning tokens, zero content, on 2026-09-20. Bounding the thinking did not help and
+// switching it off made it emit control tokens as prose. Pinning it again is the way the drawer
+// hangs, so the pin is checked rather than remembered.
+const cfg = await readFile(new URL("../api/_model.js", import.meta.url), "utf8");
+ok(!/model: process\.env\.[A-Z_]+ \|\| "moonshotai\/kimi-k3"/.test(cfg), "no tier defaults to K3, which never finishes a round with tools");
+
 // --- the recorder's prompt keeps its limits -------------------------------
 // The comment goes onto a real issue under the decider's name, so the model's licence is the
 // wording and nothing else. An earlier draft added "No further changes to the integration are
@@ -74,6 +81,21 @@ ok(/No closing or summary sentence/.test(SYSTEM), "the prompt forbids the closin
 ok(/Name no actor the decision does not name/.test(SYSTEM), "the prompt forbids inventing who decided");
 ok(/Never claim the work is done/.test(SYSTEM), "the prompt forbids calling the build finished");
 
+// --- nothing is allowed to wait forever -----------------------------------
+// The drawer hung on "Thinking..." with no error because two waits were unbounded: the function
+// waited on an upstream that had gone quiet, and the page waited on a tool that was waiting on a
+// person. Both are timed now, and both say which one it was.
+const ask = await readFile(new URL("../api/ask.js", import.meta.url), "utf8");
+ok(/res\.flushHeaders\?\.\(\)/.test(ask), "headers go out before the first token, so a tool-only round is not silent");
+ok(/setInterval\(.*": ping\\n\\n"/s.test(ask), "the function heartbeats while the model thinks");
+ok(/FIRST_BYTE_MS\s*=\s*\d+/.test(ask) && /IDLE_MS\s*=\s*\d+/.test(ask) && /ROUND_MS\s*=\s*\d+/.test(ask), "the round is bounded three ways");
+ok(/code = "timeout"/.test(ask), "a timeout reaches the page as its own code, not as a generic failure");
+ok(/clearInterval\(beat\)/.test(ask), "the heartbeat is cleared when the round ends");
+// OpenRouter writes ": OPENROUTER PROCESSING" while it waits on a provider. A watchdog reset by any
+// byte is reset forever by a model that never writes a token, which is exactly the hang being fixed.
+ok(!/if \(done\) break;\s*alive\(\);/.test(ask), "a keep-alive byte does not count as the model making progress");
+ok(/JSON\.parse\(raw\); } catch { continue; }\s*alive\(\);/.test(ask), "only a parsed chunk resets the watchdog");
+
 // --- the page and the functions agree on the names ------------------------
 const app = await readFile(new URL("../roadmap/app.html", import.meta.url), "utf8");
 ok(!/x-edit-key|S\.editKey|EDIT_KEY/.test(app), "the page carries no trace of the old edit key");
@@ -81,6 +103,12 @@ ok(app.includes('fetch("/api/session"'), "the page signs in through /api/session
 ok(app.includes('fetch("/api/record-decision"'), "the page records decisions through /api/record-decision");
 // The password must never be written to storage: an httpOnly cookie is the whole point.
 ok(!/lsSet\(\s*["'`]rm\.(password|pw)/.test(app), "the page never stores the password");
+ok(/waits: "A draft issue is open/.test(app), "the tool that waits for a person says what it waits for");
+ok(/Waiting for you/.test(app), "the status line names the wait instead of showing a spinner");
+ok(/ctx\?\.signal\?\.addEventListener\("abort"/.test(app), "Stop reaches the dialog the round is waiting on");
+ok(/timeout: "The model went quiet/.test(app), "a timeout prints a sentence rather than nothing");
+ok(/dead = true; ctl\.abort\(\)/.test(app), "the page gives up on a silent socket");
+ok(/async function readSse\(body, onEvent\)/.test(app), "the page's reader has no byte-level callback left to feed the watchdog");
 
 console.log(`${passes} checks passed${fails ? `, ${fails} FAILED` : ""}`);
 process.exit(fails ? 1 : 0);

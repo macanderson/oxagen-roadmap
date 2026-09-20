@@ -3,14 +3,19 @@ export const OPENROUTER = "https://openrouter.ai/api/v1/chat/completions";
 
 // The drawer's tier selector is the viewer's explicit model choice.
 //
-// Kimi K3 is pinned as the primary, and `~moonshotai/kimi-latest` sits behind it in OpenRouter's
-// fallback list. The floating slug is not a safe primary: it follows whatever Moonshot serves on
-// their own `kimi-latest` endpoint, which answered as kimi-k2.6 on 2026-09-20, a generation back
-// from K3. As a fallback it earns its place, because it keeps answering after a pinned slug is
-// retired. Set OPENROUTER_MODEL to move the primary without a deploy.
+// Kimi K2.5 is the primary. K3 was, and it cannot be used here: given this deployment's tool
+// definitions it thinks without ever writing an answer. Measured on 2026-09-20 against the drawer's
+// own captured payload: 816 seconds, 20,000 reasoning tokens, zero content, stopped on `length`,
+// and $0.14 for nothing. `reasoning: {max_tokens: 2000}` and `reasoning: {effort: "low"}` were both
+// ignored, and `reasoning: {enabled: false}` made it stream raw `<|close|>[PAD]` control tokens as
+// the answer. K2.5 answers the identical payload in 2 to 5 seconds with the right tool call.
+// `~moonshotai/kimi-latest` sits behind it in OpenRouter's fallback list: the floating slug is not
+// a safe primary, because it follows whatever Moonshot serves and answered as kimi-k2.6 on
+// 2026-09-20, but it keeps answering after a pinned slug is retired. Set OPENROUTER_MODEL to move
+// the primary without a deploy. Whatever goes there must be checked against tools first.
 export const MODELS = {
-  complex: { model: process.env.OPENROUTER_MODEL || "moonshotai/kimi-k3", models: ["~moonshotai/kimi-latest"] },
-  default: { model: process.env.OPENROUTER_MODEL || "moonshotai/kimi-k3", models: ["~moonshotai/kimi-latest"] },
+  complex: { model: process.env.OPENROUTER_MODEL || "moonshotai/kimi-k2.5", models: ["~moonshotai/kimi-latest"] },
+  default: { model: process.env.OPENROUTER_MODEL || "moonshotai/kimi-k2.5", models: ["~moonshotai/kimi-latest"] },
   quick: { model: process.env.OPENROUTER_MODEL_QUICK || "moonshotai/kimi-k2.5", models: ["moonshotai/kimi-k2-0905"] },
 };
 
@@ -29,8 +34,8 @@ export const attribution = (apiKey) => ({
 // the thinking is spent out of `max_tokens`: asked for a three-sentence record inside 700 tokens,
 // K3 spent all 700 reasoning, stopped on `length`, and returned empty content. Every draft then
 // fell back to the template and nothing said why. With thinking off the same prompt answers in
-// about a second and costs a fraction. The drawer in ask.js keeps thinking on, because it is doing
-// a longer job with room to do it in.
+// about a second and costs a fraction. The drawer in ask.js keeps thinking on: on K2.5 it spends a
+// few hundred characters on it and picks better tools for the trouble.
 export function draftParams({ tier = "quick", system, prompt, max_tokens = 1200 }) {
   return {
     ...(MODELS[tier] || MODELS.quick),

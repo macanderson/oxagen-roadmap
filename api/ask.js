@@ -98,11 +98,32 @@ export default async function handler(req, res) {
   res.setHeader("content-type", "text/event-stream; charset=utf-8");
   res.setHeader("cache-control", "no-store, no-transform");
   res.setHeader("x-accel-buffering", "no");
+  // Headers go out now, not when the first token arrives. A round that opens with a tool call
+  // writes no text at all, so without this the browser holds an open fetch with no response object
+  // for the whole round and cannot tell a working stream from a dead one.
+  res.flushHeaders?.();
   const send = (event, data) => res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+  // A comment line every ten seconds. SSE ignores it, and it keeps the connection provably alive
+  // through every hop while the model is still thinking.
+  const beat = setInterval(() => { try { res.write(": ping\n\n"); } catch {} }, 10000);
 
   const ctl = new AbortController();
-  let cancelled = false;
+  let cancelled = false, timedOut = null;
   req.on("close", () => { cancelled = true; ctl.abort(); });
+
+  // Nothing here used to bound the round. When OpenRouter accepted the request and then went quiet,
+  // this function waited on it forever, wrote nothing, and the drawer sat on "Thinking..." with no
+  // error to show. Reproduced twice against production: 40 seconds, not one byte. Three limits now
+  // bound it, and each one ends as an `error` event the page can print.
+  // These watch for PROGRESS, not for bytes. OpenRouter emits ": OPENROUTER PROCESSING" comment
+  // lines while it waits on a provider, so a watchdog reset by any byte is reset forever by a model
+  // that never writes a token: the round then runs to the 280 second ceiling and the drawer says
+  // "Thinking..." the whole way. Only a parsed chunk counts.
+  const FIRST_BYTE_MS = 45000, IDLE_MS = 60000, ROUND_MS = 280000;
+  const give_up = (why) => { timedOut = why; ctl.abort(); };
+  let watchdog = setTimeout(() => give_up("first_byte"), FIRST_BYTE_MS);
+  const whole = setTimeout(() => give_up("round"), ROUND_MS);
+  const alive = () => { clearTimeout(watchdog); watchdog = setTimeout(() => give_up("idle"), IDLE_MS); };
 
   try {
     const upstream = await fetch(OPENROUTER, {
@@ -132,9 +153,10 @@ export default async function handler(req, res) {
         const line = buf.slice(0, i).trim(); buf = buf.slice(i + 1);
         if (!line.startsWith("data:")) continue;          // ": OPENROUTER PROCESSING" keep-alives
         const raw = line.slice(5).trim();
-        if (raw === "[DONE]") { buf = ""; closed = true; break; }
+        if (raw === "[DONE]") { alive(); buf = ""; closed = true; break; }
         let chunk;
         try { chunk = JSON.parse(raw); } catch { continue; }
+        alive();
         if (chunk.error) {
           const e = new Error(String(chunk.error.message || "upstream error"));
           e.status = chunk.error.code;
@@ -172,13 +194,21 @@ export default async function handler(req, res) {
       },
     });
   } catch (e) {
-    let code = "upstream_error";
-    if (cancelled || e?.name === "AbortError") code = "cancelled";
+    let code = "upstream_error", message = String(e?.message || e).slice(0, 400);
+    if (timedOut) {
+      code = "timeout";
+      message = timedOut === "first_byte" ? `The model accepted the request and sent nothing for ${FIRST_BYTE_MS / 1000} seconds.`
+        : timedOut === "idle" ? `The model stopped writing for ${IDLE_MS / 1000} seconds.`
+        : `The round passed ${ROUND_MS / 1000} seconds.`;
+    } else if (cancelled || e?.name === "AbortError") code = "cancelled";
     else if (e?.status === 401 || e?.status === 403) code = "auth";
     else if (e?.status === 402) code = "budget";
     else if (e?.status === 429) code = "rate_limited";
     else if (e?.status === 400) code = "bad_request";
-    console.error("ask failed", code, e?.status, e?.message);
-    if (!cancelled) send("error", { code, message: String(e?.message || e).slice(0, 400) });
-  } finally { res.end(); }
+    console.error("ask failed", code, e?.status, message);
+    if (!cancelled) send("error", { code, message });
+  } finally {
+    clearInterval(beat); clearTimeout(watchdog); clearTimeout(whole);
+    res.end();
+  }
 }
