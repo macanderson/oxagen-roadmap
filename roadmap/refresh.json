@@ -128,6 +128,7 @@
     "docs/adr/ADR-125-audit-partition-maintenance-and-telemetry-boundaries.md",
     "docs/adr/ADR-126-wal-frame-content-and-redaction-evidence.md",
     "docs/adr/ADR-127-wal-body-write-failure.md",
+    "docs/adr/ADR-128-local-arp-checkpoints-prepare-external-runs.md",
     "docs/adr/ADR-128-source-identifiers-determine-draft-filenames.md",
     "docs/adr/ADR-130-spend-and-operator-feedback-ui.md"
   ],
@@ -2921,9 +2922,9 @@
       "title": "P2 · app/Agents · Registered source filenames cannot be renamed without changing identity keys"
     }
   },
-  "generated_at": "2026-09-20T16:01:12.398Z",
+  "generated_at": "2026-09-20T18:45:12.516Z",
   "heads": {
-    "oxagen": "fe6dcd2780b05aa69f1d45dd709223851e23c99a"
+    "oxagen": "9cc53457b1a420a5d205bce7f7035e69f68cd589"
   },
   "issues": {
     "oxagen#20": {
@@ -14842,7 +14843,7 @@
     },
     "oxagen#3574": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-20T17:31:24Z",
       "closes": [],
       "has_spec_backing": true,
       "html_url": "https://github.com/macanderson/oxagen/pull/3574",
@@ -14851,7 +14852,7 @@
       "labels": [
         "closes-nothing"
       ],
-      "merged_at": null,
+      "merged_at": "2026-09-20T17:31:24Z",
       "milestone": null,
       "needs_decision": false,
       "number": 3574,
@@ -14862,9 +14863,9 @@
       "spec_refs": [
         "ADR-128"
       ],
-      "state": "open",
+      "state": "closed",
       "title": "Add CGP-backed local agent run checkpoints",
-      "updated_at": "2026-09-20T13:57:11Z"
+      "updated_at": "2026-09-20T17:31:29Z"
     },
     "oxagen#3575": {
       "author": "macanderson",
@@ -15227,7 +15228,7 @@
     },
     "oxagen#3588": {
       "author": "github-actions[bot]",
-      "closed_at": null,
+      "closed_at": "2026-09-20T18:39:52Z",
       "closes": [],
       "has_spec_backing": false,
       "html_url": "https://github.com/macanderson/oxagen/issues/3588",
@@ -15245,9 +15246,9 @@
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "main has commits nothing verified",
-      "updated_at": "2026-09-20T08:28:59Z"
+      "updated_at": "2026-09-20T18:39:52Z"
     },
     "oxagen#3589": {
       "author": "oxagen-connect[bot]",
@@ -15302,7 +15303,7 @@
       ],
       "state": "open",
       "title": "P2 · app/Agents · Registered source filenames cannot be renamed without changing identity keys",
-      "updated_at": "2026-09-20T08:12:50Z"
+      "updated_at": "2026-09-20T17:42:55Z"
     },
     "oxagen#3591": {
       "author": "macanderson",
@@ -15358,7 +15359,7 @@
     },
     "oxagen#3593": {
       "author": "oxagen-connect[bot]",
-      "closed_at": null,
+      "closed_at": "2026-09-20T17:33:22Z",
       "closes": [],
       "has_spec_backing": false,
       "html_url": "https://github.com/macanderson/oxagen/pull/3593",
@@ -15367,7 +15368,7 @@
       "labels": [
         "closes-nothing"
       ],
-      "merged_at": null,
+      "merged_at": "2026-09-20T17:33:22Z",
       "milestone": null,
       "needs_decision": false,
       "number": 3593,
@@ -15376,13 +15377,13 @@
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "Context PR: ctx.product.do-not-re-read",
-      "updated_at": "2026-09-20T08:52:50Z"
+      "updated_at": "2026-09-20T17:33:24Z"
     },
     "oxagen#3594": {
       "author": "oxagen-connect[bot]",
-      "closed_at": null,
+      "closed_at": "2026-09-20T17:35:28Z",
       "closes": [],
       "has_spec_backing": false,
       "html_url": "https://github.com/macanderson/oxagen/pull/3594",
@@ -15400,9 +15401,9 @@
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "Agent: watch-performance",
-      "updated_at": "2026-09-20T09:44:57Z"
+      "updated_at": "2026-09-20T17:35:28Z"
     },
     "oxagen#3595": {
       "author": "macanderson",
@@ -15432,7 +15433,7 @@
     },
     "oxagen#3596": {
       "author": "oxagen-connect[bot]",
-      "closed_at": null,
+      "closed_at": "2026-09-20T17:36:07Z",
       "closes": [],
       "has_spec_backing": false,
       "html_url": "https://github.com/macanderson/oxagen/pull/3596",
@@ -15450,9 +15451,9 @@
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "Agent definition: cc-default-agent",
-      "updated_at": "2026-09-20T09:45:53Z"
+      "updated_at": "2026-09-20T17:36:07Z"
     },
     "oxagen#3597": {
       "author": "macanderson",
@@ -15477,6 +15478,34 @@
       "state": "closed",
       "title": "fix(inngest): hold batchEvents.timeout to Inngest's 30s limit",
       "updated_at": "2026-09-20T10:51:28Z"
+    },
+    "oxagen#3598": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [
+        2
+      ],
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3598",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "closes-nothing"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3598,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-131"
+      ],
+      "state": "open",
+      "title": "feat(ai): mint one OpenRouter key per organisation, and fix model funding drift",
+      "updated_at": "2026-09-20T18:42:21Z"
     },
     "oxagen#4": {
       "author": "macanderson",
@@ -25511,6 +25540,54 @@
       "title": "A user-published gated probe is admitted and then never run",
       "updated_at": "2026-09-03T22:18:14Z"
     },
+    "stella#5809": {
+      "author": "macanderson",
+      "closed_at": "2026-09-03T21:50:06Z",
+      "closes": [
+        5804
+      ],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/stella/pull/5809",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 5809,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "stella",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "fix(stella-cli): assert FD_CLOEXEC directly instead of probing for EPIPE",
+      "updated_at": "2026-09-20T18:09:34Z"
+    },
+    "stella#5815": {
+      "author": "macanderson",
+      "closed_at": "2026-09-05T00:40:11Z",
+      "closes": [
+        5814
+      ],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/stella/pull/5815",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 5815,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "stella",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "fix(stella-cli): compare fd identity, not fd number, in the cloexec probe",
+      "updated_at": "2026-09-20T18:09:31Z"
+    },
     "stella#5819": {
       "author": "macanderson",
       "closed_at": null,
@@ -26380,6 +26457,82 @@
       "title": "Give UserPromptSubmit's require_approval a real interactive approval route",
       "updated_at": "2026-09-07T01:23:31Z"
     },
+    "stella#5907": {
+      "author": "macanderson",
+      "closed_at": "2026-09-05T06:29:33Z",
+      "closes": [
+        5901
+      ],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/stella/pull/5907",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "unblocks-main"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 5907,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "stella",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "fix(stella-records): move the published-record collision test to its own crate",
+      "updated_at": "2026-09-20T18:09:30Z"
+    },
+    "stella#5908": {
+      "author": "macanderson",
+      "closed_at": "2026-09-05T06:30:38Z",
+      "closes": [
+        5901
+      ],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/stella/pull/5908",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "unblocks-main"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 5908,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "stella",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "fix(stella-records): move the published-record test to the crate that holds the code",
+      "updated_at": "2026-09-20T18:09:30Z"
+    },
+    "stella#5909": {
+      "author": "macanderson",
+      "closed_at": "2026-09-05T06:37:38Z",
+      "closes": [
+        5901
+      ],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/stella/pull/5909",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 5909,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "stella",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "fix(stella-records): move the published-records test to the crate that owns it",
+      "updated_at": "2026-09-20T18:09:29Z"
+    },
     "stella#5923": {
       "author": "macanderson",
       "closed_at": null,
@@ -26465,6 +26618,30 @@
       "title": "SCR-005 says five priority levels in stella and four everywhere else",
       "updated_at": "2026-09-07T01:21:41Z"
     },
+    "stella#5932": {
+      "author": "macanderson",
+      "closed_at": "2026-09-05T09:55:20Z",
+      "closes": [
+        5910
+      ],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/stella/pull/5932",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 5932,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "stella",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "fix(scripts): stop check-rebase-replay reading an upstream move as an undo",
+      "updated_at": "2026-09-20T18:09:27Z"
+    },
     "stella#5938": {
       "author": "macanderson",
       "closed_at": null,
@@ -26494,6 +26671,58 @@
       "state": "open",
       "title": "Audit other crates' subprocess spawns for the same test-binary env-race #5264 hit",
       "updated_at": "2026-09-07T01:21:32Z"
+    },
+    "stella#5941": {
+      "author": "macanderson",
+      "closed_at": "2026-09-05T10:19:21Z",
+      "closes": [
+        5939
+      ],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/stella/pull/5941",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "unblocks-main"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 5941,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "stella",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "fix(workspace): move the lock entry for stella-learn to 0.9.330",
+      "updated_at": "2026-09-20T18:09:27Z"
+    },
+    "stella#5942": {
+      "author": "macanderson",
+      "closed_at": "2026-09-05T10:22:57Z",
+      "closes": [
+        5939
+      ],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/stella/pull/5942",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "unblocks-main"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 5942,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "stella",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "fix(build): bump Cargo.lock's stella-learn entry to 0.9.330",
+      "updated_at": "2026-09-20T18:09:26Z"
     },
     "stella#5945": {
       "author": "macanderson",
@@ -26794,6 +27023,30 @@
       "state": "open",
       "title": "Give plugin seats a cheap-model option",
       "updated_at": "2026-09-07T01:21:11Z"
+    },
+    "stella#5995": {
+      "author": "macanderson",
+      "closed_at": "2026-09-05T12:14:14Z",
+      "closes": [],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/stella/pull/5995",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 5995,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        5139
+      ],
+      "repo": "stella",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "fix(gate): drop the -p from doc-warnings-schema's clean, which cargo refuses",
+      "updated_at": "2026-09-20T18:09:26Z"
     },
     "stella#5997": {
       "author": "macanderson",
@@ -28072,6 +28325,60 @@
       "title": "The old-pipeline arm of the A/B has no binary, and the run scripts can only hold one arm",
       "updated_at": "2026-09-07T21:51:09Z"
     },
+    "stella#6197": {
+      "author": "macanderson",
+      "closed_at": "2026-09-06T08:41:05Z",
+      "closes": [],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/stella/pull/6197",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "unblocks-main"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 6197,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        6158,
+        6150,
+        6121
+      ],
+      "repo": "stella",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "fix(stella-parity): the served turn binds a re-query plane, so say so",
+      "updated_at": "2026-09-20T18:09:25Z"
+    },
+    "stella#6200": {
+      "author": "macanderson",
+      "closed_at": "2026-09-06T08:45:51Z",
+      "closes": [
+        6193
+      ],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/stella/pull/6200",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "unblocks-main"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 6200,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "stella",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "fix(stella-parity,stella-serve): the ServeSession lane binds the re-query seam",
+      "updated_at": "2026-09-20T18:09:25Z"
+    },
     "stella#6201": {
       "author": "macanderson",
       "closed_at": null,
@@ -28248,6 +28555,32 @@
       "state": "open",
       "title": "The plugin table's Points column means two different things",
       "updated_at": "2026-09-07T01:22:03Z"
+    },
+    "stella#6215": {
+      "author": "macanderson",
+      "closed_at": "2026-09-06T09:04:57Z",
+      "closes": [
+        6196
+      ],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/stella/pull/6215",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "unblocks-main"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 6215,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "stella",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "docs(prose): repair the prose gate on main",
+      "updated_at": "2026-09-20T18:09:23Z"
     },
     "stella#6219": {
       "author": "macanderson",
@@ -28875,6 +29208,30 @@
       "title": "stella-fleet: flaky CI test assumes one poll always reaches the parked state",
       "updated_at": "2026-09-16T22:02:49Z"
     },
+    "stella#6372": {
+      "author": "macanderson",
+      "closed_at": "2026-09-07T04:56:08Z",
+      "closes": [],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/stella/pull/6372",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 6372,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        6369
+      ],
+      "repo": "stella",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "fix(stella-tools): give the hook witness time to have a grandchild",
+      "updated_at": "2026-09-20T18:09:21Z"
+    },
     "stella#6378": {
       "author": "macanderson",
       "closed_at": null,
@@ -29111,6 +29468,54 @@
       "state": "open",
       "title": "Buy the six missing provider keys and top up Anthropic and Z.ai so live-smoke covers all nine adapters",
       "updated_at": "2026-09-11T23:25:48Z"
+    },
+    "stella#6443": {
+      "author": "macanderson",
+      "closed_at": "2026-09-07T22:27:21Z",
+      "closes": [
+        5595
+      ],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/stella/pull/6443",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 6443,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "stella",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "fix(stella-model): declare the live-smoke providers this repo cannot reach",
+      "updated_at": "2026-09-20T18:09:17Z"
+    },
+    "stella#6446": {
+      "author": "macanderson",
+      "closed_at": "2026-09-07T22:53:58Z",
+      "closes": [],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/stella/pull/6446",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 6446,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        6443
+      ],
+      "repo": "stella",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "fix(stella-cli): a driver session id the clock cannot make collide",
+      "updated_at": "2026-09-20T18:09:17Z"
     },
     "stella#6455": {
       "author": "macanderson",
@@ -29440,7 +29845,7 @@
       "spec_refs": [],
       "state": "closed",
       "title": "Limit skill holdouts to prompt-matched skills",
-      "updated_at": "2026-09-20T05:50:42Z"
+      "updated_at": "2026-09-20T18:09:16Z"
     },
     "stella#6525": {
       "author": "github-actions[bot]",
@@ -29466,9 +29871,31 @@
       "title": "CodeQL is red on main",
       "updated_at": "2026-09-20T09:23:35Z"
     },
+    "stella#6526": {
+      "author": "macanderson",
+      "closed_at": "2026-09-18T04:48:04Z",
+      "closes": [],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/stella/pull/6526",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 6526,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "stella",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "chore: point repository references at oxagenai after the org transfer",
+      "updated_at": "2026-09-20T18:09:15Z"
+    },
     "stella#6527": {
       "author": "dependabot[bot]",
-      "closed_at": null,
+      "closed_at": "2026-09-20T18:05:27Z",
       "closes": [],
       "has_spec_backing": false,
       "html_url": "https://github.com/macanderson/stella/pull/6527",
@@ -29479,7 +29906,7 @@
         "no-issue",
         "rust"
       ],
-      "merged_at": null,
+      "merged_at": "2026-09-20T18:05:27Z",
       "milestone": null,
       "needs_decision": false,
       "number": 6527,
@@ -29488,13 +29915,13 @@
       "refs": [],
       "repo": "stella",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "build(deps): bump the cargo group with 2 updates",
-      "updated_at": "2026-09-20T12:17:43Z"
+      "updated_at": "2026-09-20T18:05:29Z"
     },
     "stella#6528": {
       "author": "dependabot[bot]",
-      "closed_at": null,
+      "closed_at": "2026-09-20T18:05:35Z",
       "closes": [],
       "has_spec_backing": true,
       "html_url": "https://github.com/macanderson/stella/pull/6528",
@@ -29505,7 +29932,7 @@
         "dependencies",
         "no-issue"
       ],
-      "merged_at": null,
+      "merged_at": "2026-09-20T18:05:35Z",
       "milestone": null,
       "needs_decision": false,
       "number": 6528,
@@ -29516,13 +29943,13 @@
       "spec_refs": [
         "ADR-043"
       ],
-      "state": "open",
+      "state": "closed",
       "title": "build(deps): bump the actions group with 5 updates",
-      "updated_at": "2026-09-20T12:21:55Z"
+      "updated_at": "2026-09-20T18:05:36Z"
     },
     "stella#6529": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-20T18:05:13Z",
       "closes": [],
       "has_spec_backing": false,
       "html_url": "https://github.com/macanderson/stella/pull/6529",
@@ -29531,7 +29958,7 @@
       "labels": [
         "no-issue"
       ],
-      "merged_at": null,
+      "merged_at": "2026-09-20T18:05:13Z",
       "milestone": null,
       "needs_decision": false,
       "number": 6529,
@@ -29540,13 +29967,13 @@
       "refs": [],
       "repo": "stella",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "Tokens v7.0: obsidian and white, one gold, neutral greys, three faces",
-      "updated_at": "2026-09-20T09:43:53Z"
+      "updated_at": "2026-09-20T18:05:14Z"
     },
     "stella#6530": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-20T18:05:45Z",
       "closes": [],
       "has_spec_backing": false,
       "html_url": "https://github.com/macanderson/stella/pull/6530",
@@ -29555,7 +29982,7 @@
       "labels": [
         "closes-nothing"
       ],
-      "merged_at": null,
+      "merged_at": "2026-09-20T18:05:45Z",
       "milestone": null,
       "needs_decision": false,
       "number": 6530,
@@ -29566,9 +29993,9 @@
       ],
       "repo": "stella",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "fix(search): keep prompts available during detached indexing",
-      "updated_at": "2026-09-20T09:41:18Z"
+      "updated_at": "2026-09-20T18:05:47Z"
     },
     "stella#6531": {
       "author": "oxagen-connect[bot]",
@@ -29645,6 +30072,30 @@
       "state": "open",
       "title": "The embed lease is one row per workspace, so a second fingerprint's vectors go unindexed",
       "updated_at": "2026-09-20T10:14:59Z"
+    },
+    "stella#6534": {
+      "author": "github-actions[bot]",
+      "closed_at": null,
+      "closes": [],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/stella/pull/6534",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "no-issue"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 6534,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "stella",
+      "spec_refs": [],
+      "state": "open",
+      "title": "chore(release): sync versions to 0.9.427 [skip release]",
+      "updated_at": "2026-09-20T18:27:13Z"
     },
     "stella#834": {
       "author": "macanderson",
@@ -29765,9 +30216,19 @@
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "dod",
-      "last_merge": "2026-09-20T06:11:21Z",
+      "last_merge": "2026-09-20T17:31:24Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-20T17:31:24Z",
+          "number": 3574,
+          "repo": "oxagen",
+          "title": "Add CGP-backed local agent run checkpoints",
+          "touched": [
+            "packages/tacho"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-20T06:11:21Z",
@@ -29958,20 +30419,10 @@
           "touched": [
             "apps/cli/src"
           ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-19T18:20:53Z",
-          "number": 3454,
-          "repo": "oxagen",
-          "title": "tacho: a refused OTel record no longer poisons the records after it",
-          "touched": [
-            "packages/tacho"
-          ]
         }
       ],
       "open_issues": 0,
-      "refreshed_at": "2026-09-20T06:59:55.517Z",
+      "refreshed_at": "2026-09-20T18:45:12.516Z",
       "shared_page": false
     },
     "D3": {
@@ -30187,11 +30638,23 @@
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "dod",
-      "last_merge": null,
+      "last_merge": "2026-09-20T18:05:35Z",
       "links": [],
-      "merged_prs": [],
+      "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-20T18:05:35Z",
+          "number": 6528,
+          "repo": "stella",
+          "title": "build(deps): bump the actions group with 5 updates",
+          "touched": [
+            ".github/workflows/dod-check.yml",
+            ".github/workflows/dod-close-guard.yml"
+          ]
+        }
+      ],
       "open_issues": 0,
-      "refreshed_at": "2026-09-18T23:26:29.677Z",
+      "refreshed_at": "2026-09-20T18:45:12.516Z",
       "shared_page": false
     },
     "W1": {
@@ -33886,8 +34349,8 @@
     }
   },
   "last_run": {
-    "at": "2026-09-20T16:01:12.398Z",
-    "calls": 4,
+    "at": "2026-09-20T18:45:12.516Z",
+    "calls": 12,
     "quiet": false
   },
   "milestones": {
@@ -41365,6 +41828,40 @@
       "repo": "oxagen",
       "title": "Fix parked external approvals and invocation audit outcomes"
     },
+    "oxagen#3574": {
+      "added": [
+        "docs/adr/ADR-128-local-arp-checkpoints-prepare-external-runs.md",
+        "docs/specs/agent-run-protocol.md",
+        "packages/tacho/src/arp/bundle.ts",
+        "packages/tacho/src/arp/context.ts",
+        "packages/tacho/src/arp/schema.ts",
+        "packages/tacho/src/arp/transfer.test.ts",
+        "packages/tacho/src/arp/transfer.ts",
+        "packages/tacho/src/cli/arp.ts"
+      ],
+      "author": "macanderson",
+      "closes": [],
+      "files": [
+        "docs/adr/ADR-128-local-arp-checkpoints-prepare-external-runs.md",
+        "docs/specs/agent-run-protocol.md",
+        "packages/tacho/package.json",
+        "packages/tacho/src/arp/bundle.ts",
+        "packages/tacho/src/arp/context.ts",
+        "packages/tacho/src/arp/schema.ts",
+        "packages/tacho/src/arp/transfer.test.ts",
+        "packages/tacho/src/arp/transfer.ts",
+        "packages/tacho/src/cli/arp.ts",
+        "packages/tacho/src/cli/main.ts",
+        "pnpm-lock.yaml"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3574",
+      "merged_at": "2026-09-20T17:31:24Z",
+      "number": 3574,
+      "refs": [],
+      "repo": "oxagen",
+      "title": "Add CGP-backed local agent run checkpoints"
+    },
     "oxagen#3575": {
       "added": [],
       "author": "macanderson",
@@ -41439,6 +41936,23 @@
       "refs": [],
       "repo": "oxagen",
       "title": "Add explicit manual app deployment for merged revisions"
+    },
+    "oxagen#3593": {
+      "added": [
+        ".oxagen/rules/ctx.product.do-not-re-read.toml"
+      ],
+      "author": "oxagen-connect[bot]",
+      "closes": [],
+      "files": [
+        ".oxagen/rules/ctx.product.do-not-re-read.toml"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3593",
+      "merged_at": "2026-09-20T17:33:22Z",
+      "number": 3593,
+      "refs": [],
+      "repo": "oxagen",
+      "title": "Context PR: ctx.product.do-not-re-read"
     },
     "oxagen#3595": {
       "added": [
@@ -41529,6 +42043,278 @@
       "repo": "oxagen",
       "title": "fix(inngest): hold batchEvents.timeout to Inngest's 30s limit"
     },
+    "stella#6527": {
+      "added": [],
+      "author": "dependabot[bot]",
+      "closes": [],
+      "files": [
+        "Cargo.lock"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/stella/pull/6527",
+      "merged_at": "2026-09-20T18:05:27Z",
+      "number": 6527,
+      "refs": [],
+      "repo": "stella",
+      "title": "build(deps): bump the cargo group with 2 updates"
+    },
+    "stella#6528": {
+      "added": [],
+      "author": "dependabot[bot]",
+      "closes": [],
+      "files": [
+        ".github/workflows/docker-serve-publish.yml",
+        ".github/workflows/docker-serve.yml",
+        ".github/workflows/docs.yml",
+        ".github/workflows/dod-check.yml",
+        ".github/workflows/dod-close-guard.yml"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/stella/pull/6528",
+      "merged_at": "2026-09-20T18:05:35Z",
+      "number": 6528,
+      "refs": [],
+      "repo": "stella",
+      "title": "build(deps): bump the actions group with 5 updates"
+    },
+    "stella#6529": {
+      "added": [
+        ".claude/skills/oxagen-branding/SKILL.md",
+        ".claude/skills/oxagen-branding/assets/logo.svg",
+        ".claude/skills/oxagen-branding/assets/tokens.css",
+        ".claude/skills/oxagen-branding/references/examples.md",
+        ".claude/skills/oxagen-branding/references/positioning.md",
+        ".claude/skills/oxagen-branding/references/system.md",
+        ".claude/skills/oxagen-branding/references/voice.md",
+        ".claude/skills/oxagen-branding/references/words.md",
+        "docs/brand/fonts/geist-latin-wght.woff2",
+        "docs/brand/fonts/monaspace-neon-latin-wght.woff2",
+        "website/src/fonts/LICENSE-OFL-geist.txt",
+        "website/src/fonts/LICENSE-OFL-monaspace.txt",
+        "website/src/fonts/geist-latin-wght.woff2",
+        "website/src/fonts/monaspace-neon-latin-wght.woff2"
+      ],
+      "author": "macanderson",
+      "closes": [],
+      "files": [
+        ".claude/skills/oxagen-branding/SKILL.md",
+        ".claude/skills/oxagen-branding/assets/logo.svg",
+        ".claude/skills/oxagen-branding/assets/tokens.css",
+        ".claude/skills/oxagen-branding/references/examples.md",
+        ".claude/skills/oxagen-branding/references/positioning.md",
+        ".claude/skills/oxagen-branding/references/system.md",
+        ".claude/skills/oxagen-branding/references/voice.md",
+        ".claude/skills/oxagen-branding/references/words.md",
+        ".gitignore",
+        "crates/stella-cli/src/export.rs",
+        "crates/stella-cli/src/export/tests.rs",
+        "crates/stella-cli/src/plain.rs",
+        "crates/stella-cli/tests/design_token_parity.rs",
+        "crates/stella-mcp/src/oauth/callback_page.css",
+        "crates/stella-observatory/README.md",
+        "crates/stella-observatory/src/assets/index.html",
+        "crates/stella-observatory/src/assets/mark.svg",
+        "crates/stella-observatory/src/assets/wordmark-light.svg",
+        "crates/stella-observatory/src/assets/wordmark.svg",
+        "crates/stella-observatory/tests/light_mode.rs",
+        "crates/stella-plugin/tests/panel_contract.rs",
+        "crates/stella-transcript/src/html/transcript.css",
+        "crates/stella-tui-theme/README.md",
+        "crates/stella-tui-theme/src/clamp.rs",
+        "crates/stella-tui-theme/src/fallback.rs",
+        "crates/stella-tui-theme/src/oklch.rs",
+        "crates/stella-tui-theme/src/tests.rs",
+        "crates/stella-tui-theme/src/token.rs",
+        "crates/stella-tui/src/palette.rs",
+        "crates/stella-tui/src/render/tests/result_row.rs",
+        "crates/stella-tui/src/theme.rs",
+        "crates/stella-tui/src/theme/tests.rs",
+        "design/tokens/stella-tokens.css",
+        "design/tokens/stella-tokens.json",
+        "design/tui-v2/SPEC.md",
+        "design/tui-v2/renderings/svg/01-session-turn-lifecycle.svg",
+        "design/tui-v2/renderings/svg/02-event-vocabulary.svg",
+        "design/tui-v2/renderings/svg/03-task-zoom.svg",
+        "design/tui-v2/renderings/svg/04-graph.svg",
+        "design/tui-v2/renderings/svg/05-skills.svg",
+        "design/tui-v2/renderings/svg/06-mcp.svg",
+        "design/tui-v2/renderings/svg/07-issues.svg",
+        "design/tui-v2/renderings/svg/08-command-palette.svg",
+        "design/tui-v2/renderings/svg/09-gate-failure.svg",
+        "design/tui-v2/renderings/svg/10-start-work.svg",
+        "docs/benchmarks/index.html",
+        "docs/benchmarks/terminal-bench-2-1-glm-5-2.html",
+        "docs/brand/README.md",
+        "docs/brand/brand-guidelines.html",
+        "docs/brand/css/tokens.css",
+        "docs/brand/fonts/geist-latin-wght.woff2",
+        "docs/brand/fonts/monaspace-neon-latin-wght.woff2",
+        "docs/brand/fonts/space-grotesk-latin-400.woff2",
+        "docs/brand/fonts/space-grotesk-latin-500.woff2",
+        "docs/brand/fonts/space-grotesk-latin-600.woff2",
+        "docs/brand/fonts/space-grotesk-latin-700.woff2",
+        "docs/brand/logo/svg/stella-favicon.svg",
+        "docs/brand/logo/svg/stella-icon-adaptive.svg",
+        "docs/brand/logo/svg/stella-icon-mono-black.svg",
+        "docs/brand/logo/svg/stella-icon-mono-white.svg",
+        "docs/brand/logo/svg/stella-icon-tile-dark.svg",
+        "docs/brand/logo/svg/stella-icon-tile-light.svg",
+        "docs/brand/logo/svg/stella-wordmark-adaptive.svg",
+        "docs/brand/logo/svg/stella-wordmark-dark.svg",
+        "docs/brand/logo/svg/stella-wordmark-light.svg",
+        "docs/brand/logo/svg/stella-wordmark-mono-black.svg",
+        "docs/brand/logo/svg/stella-wordmark-mono-white.svg",
+        "docs/brand/prompts/stella-design-system-prompt.md",
+        "docs/brand/pwa/apple-touch-icon.png",
+        "docs/brand/pwa/favicon-16.png",
+        "docs/brand/pwa/favicon-32.png",
+        "docs/brand/pwa/favicon-48.png",
+        "docs/brand/pwa/favicon.ico",
+        "docs/brand/pwa/head-snippet.html",
+        "docs/brand/pwa/icon-192.png",
+        "docs/brand/pwa/icon-512.png",
+        "docs/brand/pwa/icon-maskable-192.png",
+        "docs/brand/pwa/icon-maskable-512.png",
+        "docs/brand/pwa/manifest.webmanifest",
+        "docs/brand/pwa/safari-pinned-tab.svg",
+        "docs/brand/site/stella-mobile-mock.html",
+        "docs/brand/site/stella-site-mock.html",
+        "docs/brand/social/stella-avatar-dark.png",
+        "docs/brand/social/stella-avatar-light.png",
+        "docs/brand/social/stella-linkedin-banner-dark.png",
+        "docs/brand/social/stella-linkedin-banner-light.png",
+        "docs/brand/social/stella-og-image-dark.png",
+        "docs/brand/social/stella-og-image-light.png",
+        "docs/brand/social/stella-x-banner-dark.png",
+        "docs/brand/social/stella-x-banner-light.png",
+        "docs/brand/social/stella-youtube-banner-dark.png",
+        "docs/brand/social/stella-youtube-banner-light.png",
+        "docs/brand/spinners/spinner-lockup-adaptive.svg",
+        "docs/brand/spinners/spinner-lockup-dark.svg",
+        "docs/brand/spinners/spinner-lockup-light.svg",
+        "docs/brand/spinners/spinner-logomark.svg",
+        "docs/brand/spinners/stella-spinner-wordmark.svg",
+        "docs/brand/spinners/stella-spinner.svg",
+        "docs/papers/stella-foundry.html",
+        "scripts/check-hue-separation.py",
+        "scripts/check-light-clamp.py",
+        "scripts/check-prose.py",
+        "scripts/check-tokens.py",
+        "scripts/gen-tokens.py",
+        "scripts/light-clamp-baseline.txt",
+        "scripts/sync-brand-assets.mjs",
+        "scripts/test-contrast.sh",
+        "scripts/test-light-clamp.sh",
+        "website/README.md",
+        "website/public/brand/stella-icon-adaptive.svg",
+        "website/public/brand/stella-icon-mono-black.svg",
+        "website/public/brand/stella-icon-mono-white.svg",
+        "website/public/brand/stella-icon-tile-dark.svg",
+        "website/public/brand/stella-icon-tile-light.svg",
+        "website/public/brand/stella-spinner.svg",
+        "website/public/brand/stella-wordmark-adaptive.svg",
+        "website/public/brand/stella-wordmark-dark.svg",
+        "website/public/brand/stella-wordmark-light.svg",
+        "website/public/brand/stella-wordmark-mono-black.svg",
+        "website/public/brand/stella-wordmark-mono-white.svg",
+        "website/public/icons/favicon-16.png",
+        "website/public/icons/favicon-32.png",
+        "website/public/icons/favicon-48.png",
+        "website/public/icons/icon-192.png",
+        "website/public/icons/icon-512.png",
+        "website/public/icons/maskable-192.png",
+        "website/public/icons/maskable-512.png",
+        "website/public/icons/maskable-light-192.png",
+        "website/public/icons/maskable-light-512.png",
+        "website/public/icons/safari-pinned-tab.svg",
+        "website/public/presentations/investor-deck.html",
+        "website/public/tui/01-session-turn-lifecycle.svg",
+        "website/public/tui/02-event-vocabulary.svg",
+        "website/public/tui/03-task-zoom.svg",
+        "website/public/tui/04-graph.svg",
+        "website/public/tui/05-skills.svg",
+        "website/public/tui/06-mcp.svg",
+        "website/public/tui/07-issues.svg",
+        "website/public/tui/08-command-palette.svg",
+        "website/public/tui/09-gate-failure.svg",
+        "website/public/tui/10-start-work.svg",
+        "website/public/vision.html",
+        "website/src/app/apple-icon.png",
+        "website/src/app/engine/layout.tsx",
+        "website/src/app/favicon.ico",
+        "website/src/app/global.css",
+        "website/src/app/icon.svg",
+        "website/src/app/layout.tsx",
+        "website/src/app/manifest.ts",
+        "website/src/app/opengraph-image.tsx",
+        "website/src/app/tokens.css",
+        "website/src/components/brand-marks.generated.ts",
+        "website/src/components/deck-shots.ts",
+        "website/src/fonts/LICENSE-OFL-geist.txt",
+        "website/src/fonts/LICENSE-OFL-monaspace.txt",
+        "website/src/fonts/geist-latin-wght.woff2",
+        "website/src/fonts/monaspace-neon-latin-wght.woff2",
+        "website/src/fonts/space-grotesk-latin-400.woff2",
+        "website/src/fonts/space-grotesk-latin-500.woff2",
+        "website/src/fonts/space-grotesk-latin-600.woff2",
+        "website/src/fonts/space-grotesk-latin-700.woff2",
+        "website/src/lib/brand-parity.test.ts"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/stella/pull/6529",
+      "merged_at": "2026-09-20T18:05:13Z",
+      "number": 6529,
+      "refs": [],
+      "repo": "stella",
+      "title": "Tokens v7.0: obsidian and white, one gold, neutral greys, three faces"
+    },
+    "stella#6530": {
+      "added": [
+        "crates/stella-cli/src/semantic_worker.rs",
+        "crates/stella-cli/src/semantic_worker/tests.rs",
+        "crates/stella-cli/tests/semantic_worker_cli.rs",
+        "docs/adr/0043-background-indexing-never-gates-prompts.md"
+      ],
+      "author": "macanderson",
+      "closes": [],
+      "files": [
+        "crates/stella-cli/src/agent/graph.rs",
+        "crates/stella-cli/src/agent/init.rs",
+        "crates/stella-cli/src/cli/command.rs",
+        "crates/stella-cli/src/credential_handoff.rs",
+        "crates/stella-cli/src/main.rs",
+        "crates/stella-cli/src/search_cmd.rs",
+        "crates/stella-cli/src/semantic_worker.rs",
+        "crates/stella-cli/src/semantic_worker/tests.rs",
+        "crates/stella-cli/tests/semantic_worker_cli.rs",
+        "crates/stella-tool-facts/README.md",
+        "crates/stella-tool-facts/src/readiness.rs",
+        "crates/stella-tools/src/search.rs",
+        "crates/stella-tools/src/search/backfill.rs",
+        "crates/stella-tools/src/search/engine.rs",
+        "crates/stella-tools/src/search/engine/tests/eager_pass.rs",
+        "crates/stella-tools/src/search/readiness.rs",
+        "crates/stella-tools/src/search/semantic.rs",
+        "crates/stella-tui/src/deck_ui.rs",
+        "crates/stella-tui/src/deck_ui/gates.rs",
+        "crates/stella-tui/src/deck_ui/tests/gates.rs",
+        "crates/stella-tui/src/envelope/inbound.rs",
+        "docs/adr/0043-background-indexing-never-gates-prompts.md",
+        "docs/adr/README.md",
+        "docs/manifest.json",
+        "docs/spec/search-tool.md",
+        "scripts/command-docs-exempt.txt"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/stella/pull/6530",
+      "merged_at": "2026-09-20T18:05:45Z",
+      "number": 6530,
+      "refs": [
+        4048
+      ],
+      "repo": "stella",
+      "title": "fix(search): keep prompts available during detached indexing"
+    },
     "stella#6531": {
       "added": [
         ".oxagen/agents/.gitkeep",
@@ -41574,8 +42360,8 @@
     }
   },
   "since": {
-    "oxagen": "2026-09-20T13:57:11Z",
-    "roadmap": "2026-09-20T16:01:12.398Z",
-    "stella": "2026-09-20T12:21:55Z"
+    "oxagen": "2026-09-20T18:42:21Z",
+    "roadmap": "2026-09-20T18:45:12.516Z",
+    "stella": "2026-09-20T18:27:13Z"
   }
 }
