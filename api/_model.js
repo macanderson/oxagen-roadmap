@@ -23,28 +23,44 @@ export const attribution = (apiKey) => ({
   "x-title": "Oxagen roadmap assistant",
 });
 
+// The request for a short, non-streamed drafting job.
+//
+// `reasoning: {enabled: false}` is load bearing. Kimi thinks before it answers, and on these models
+// the thinking is spent out of `max_tokens`: asked for a three-sentence record inside 700 tokens,
+// K3 spent all 700 reasoning, stopped on `length`, and returned empty content. Every draft then
+// fell back to the template and nothing said why. With thinking off the same prompt answers in
+// about a second and costs a fraction. The drawer in ask.js keeps thinking on, because it is doing
+// a longer job with room to do it in.
+export function draftParams({ tier = "quick", system, prompt, max_tokens = 1200 }) {
+  return {
+    ...(MODELS[tier] || MODELS.quick),
+    reasoning: { enabled: false },
+    max_tokens,
+    messages: [...(system ? [{ role: "system", content: system }] : []), { role: "user", content: prompt }],
+  };
+}
+
 // One non-streamed round. Returns the assistant's text, or null when the model gives nothing back.
 // Callers that must produce a result anyway pass their own fallback, because a model outage is not
 // a reason to lose a decision.
-export async function complete({ tier = "quick", system, prompt, max_tokens = 700, timeout_ms = 30000 }) {
+export async function complete(opts) {
   const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey) return null;
   const ctl = new AbortController();
-  const timer = setTimeout(() => ctl.abort(), timeout_ms);
+  const timer = setTimeout(() => ctl.abort(), opts.timeout_ms ?? 30000);
   try {
     const r = await fetch(OPENROUTER, {
       method: "POST",
       signal: ctl.signal,
       headers: attribution(apiKey),
-      body: JSON.stringify({
-        ...(MODELS[tier] || MODELS.quick),
-        max_tokens,
-        messages: [...(system ? [{ role: "system", content: system }] : []), { role: "user", content: prompt }],
-      }),
+      body: JSON.stringify(draftParams(opts)),
     });
     if (!r.ok) { console.error("complete: upstream", r.status, (await r.text().catch(() => "")).slice(0, 300)); return null; }
     const j = await r.json();
-    const text = String(j.choices?.[0]?.message?.content || "").trim();
+    const choice = j.choices?.[0];
+    const text = String(choice?.message?.content || "").trim();
+    // An empty answer earns a line in the log. Silence here is what hid the reasoning trap.
+    if (!text) console.error("complete: empty content", j.model, choice?.finish_reason, "reasoning chars", String(choice?.message?.reasoning || "").length);
     return text || null;
   } catch (e) {
     console.error("complete failed", e?.name, e?.message);
