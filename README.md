@@ -56,10 +56,28 @@ The public home is **https://oxagen-roadmap.vercel.app** (Vercel project `oxagen
 |---|---|---|
 | Roadmap, wireframes, specs | static files from this repo | everyone |
 | GitHub issues | GitHub's public REST API, read in the browser every ten minutes; creating an issue opens GitHub's pre-filled form | everyone |
-| Shared state (status, priority, owner, notes, links, decisions, activity) | `api/state.js`, one private Vercel Blob (`roadmap/state.json`) | everyone reads; the **edit key** writes |
-| Claude | `api/ask.js`: one streamed round per call with the Anthropic SDK (Opus by default; the drawer's tier picks Sonnet or Haiku); the page runs the tool loop because the tools are page functions | the **edit key**, so a public link cannot spend the API key |
+| Shared state (status, priority, owner, notes, links, decisions, activity) | `api/state.js`, one private Vercel Blob (`roadmap/state.json`) | everyone reads; the **password** writes |
+| The assistant | `api/ask.js`: one streamed round per call against OpenRouter (Kimi K3 by default, `~moonshotai/kimi-latest` behind it); the page runs the tool loop because the tools are page functions | the **password**, so a public link cannot spend the model budget |
+| Recording a decision | `api/record-decision.js`: the model drafts the record, the function comments on the GitHub issue that asked, drops the `needs:decision` label, and closes the issue when you tick the box | the **password** |
 
-Environment variables: `BLOB_READ_WRITE_TOKEN` (set by `vercel blob create-store`), `EDIT_KEY` (a random string; enter it once behind the page's **Edit key** button), and `ANTHROPIC_API_KEY` (add it to turn Claude on: `vercel env add ANTHROPIC_API_KEY production`, then redeploy). Deploy with `vercel deploy --prod`; the build step is `node tools/build-roadmap.mjs --check`, so a stale `index.html` fails the deploy.
+#### Signing in
+
+`ROADMAP_PASSWORD` is the one credential a person types. `POST /api/session` checks it and returns it as an httpOnly cookie, so the page holds nothing: a script on the page cannot read the cookie back, and the browser attaches it to `/api/state`, `/api/ask` and `/api/record-decision` by itself. Scripts and smoke tests that have no cookie jar send the `x-roadmap-password` header instead.
+
+The OpenRouter key is not the password. It lives on the server as `OPENROUTER_API_KEY` and never reaches the browser. Typing an `sk-or-v1-...` value into the sign-in box gets you told so.
+
+#### Environment variables
+
+| Variable | What it turns on |
+|---|---|
+| `ROADMAP_PASSWORD` | signing in. Without it the deployment is read only. |
+| `OPENROUTER_API_KEY` | the assistant, and the model that drafts decision records |
+| `OPENROUTER_MODEL` | moves the primary model without a deploy (default `moonshotai/kimi-k3`) |
+| `BLOB_READ_WRITE_TOKEN` | the shared store. Set by `vercel blob create-store`. |
+| `GITHUB_TOKEN` | writing a decision back to its issue. Needs issue write on the tracked repositories. |
+| `GITHUB_OWNER`, `GITHUB_REPOS` | where decisions may be written. Default `macanderson` and `roadmap,oxagen,stella`. |
+
+Deploy with `vercel deploy --prod`; the build step is `node tools/build-roadmap.mjs --check`, so a stale `index.html` fails the deploy.
 
 ### Refreshing the content
 

@@ -1,17 +1,17 @@
 // GET  /api/state   the shared roadmap state: item overrides, decisions, recent activity. Public.
 // POST /api/state   {op: "override"|"decision"|"activity", id?, patch?, activity?, text?, item?, route?}
-//                   Needs the edit key. Read-modify-write on one JSON blob; last writer wins.
-import { json, canEdit, readBody, readState, writeState, pick } from "./_lib.js";
+//                   Needs the password. Read-modify-write on one JSON blob; last writer wins.
+import { json, signedIn, readBody, readState, writeState, pick, UNAUTHORIZED } from "./_lib.js";
 
 const ID = /^[A-Za-z0-9_.:-]{1,80}$/;
 
 export default async function handler(req, res) {
   if (req.method === "GET") {
     const state = await readState();
-    return json(res, 200, { ...state, can_edit: canEdit(req) });
+    return json(res, 200, { ...state, can_edit: signedIn(req) });
   }
   if (req.method !== "POST") return json(res, 405, { error: "method" });
-  if (!canEdit(req)) return json(res, 401, { error: "edit_key", message: "A valid edit key is required to change the roadmap." });
+  if (!signedIn(req)) return json(res, 401, UNAUTHORIZED);
   if (!process.env.BLOB_READ_WRITE_TOKEN) return json(res, 503, { error: "store_not_configured" });
 
   let body;

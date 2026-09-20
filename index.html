@@ -191,7 +191,7 @@ dialog .db .row{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
       <span class="pill" id="pill-gh" title="GitHub issues"><i></i>GitHub: connecting</span>
       <span class="pill" id="pill-db" title="Shared roadmap state"><i></i>store</span>
       <span class="pill" id="pill-ai" title="Assistant"><i></i>Assistant</span>
-      <button class="btn sm ghost" id="key-btn" title="Enter the edit key to change the roadmap and ask the assistant" hidden>Edit key</button>
+      <button class="btn sm ghost" id="auth-btn" title="Sign in with the roadmap password to change the roadmap and ask the assistant" hidden>Sign in</button>
       <button class="btn sm ghost" id="theme-btn" title="Theme">Theme</button>
       <button class="btn gold sm" id="ask-btn">Ask</button>
     </div>
@@ -267,6 +267,8 @@ const S = {
   issues: {},         // repo -> {items:[], storedAt, error, total}
   prs: {},
   caps: { db: null, mcp: null, sample: null, comments: null, user: null, ready: false },
+  signedIn: false,    // hosted mode: the password cookie is set. The password itself is never held here.
+  web: null,          // hosted mode: what /api/config says this deployment can do
   uid: null,
   route: "now",
   arg: null,
@@ -498,7 +500,7 @@ function decisionCard(d) {
     <div class="title"><h3>${esc(d.title)}</h3><span class="chip mono">${esc(d.id)}</span></div>
     <div class="decision-q">${esc(d.question)}</div>
     ${d.recommendation ? `<div class="note small"><b>Recommendation.</b> ${esc(d.recommendation)}</div>` : ""}
-    ${s.status === "decided" ? `<div class="note small" style="border-left-color:var(--st-allowed)"><b>Decided${s.decided_on ? " " + esc(s.decided_on) : ""}.</b> ${esc(s.decided || "")}</div>` : ""}
+    ${s.status === "decided" ? `<div class="note small" style="border-left-color:var(--st-allowed)"><b>Decided${s.decided_on ? " " + esc(s.decided_on) : ""}.</b> ${esc(s.decided || "")}${s.recorded ? ` <a href="${esc(s.recorded)}" target="_blank" rel="noopener">Recorded on the issue ↗</a>` : ""}</div>` : ""}
     <div class="chips">${chip(s.status || "open", s.status || "open")}${(d.blocks || []).map(b => chip("blocks " + b)).join("")}${d.source ? chip(d.source) : ""}${d.origin ? chip("from " + (d.origin === "adr" ? "an ADR" : "a needs:decision issue")) : ""}${d.html_url ? `<a class="chip" href="${esc(d.html_url)}" target="_blank" rel="noopener">open ↗</a>` : ""}</div>
     <div class="row" style="display:flex;gap:6px;flex-wrap:wrap">
       ${s.status !== "decided" ? `<button class="btn sm" data-decide="${esc(d.id)}">Decide</button>` : `<button class="btn sm ghost" data-reopen="${esc(d.id)}">Reopen</button>`}
@@ -567,7 +569,7 @@ document.addEventListener("click", async (e) => {
   // In-page routes: drive the hash ourselves so a host that intercepts anchor clicks cannot swallow them.
   const a = e.target.closest('a[href^="#/"]');
   if (a) { e.preventDefault(); const h = a.getAttribute("href"); if (location.hash !== h) location.hash = h; else { parseHash(); render(); } return; }
-  const t = e.target.closest("[data-ask],[data-item],[data-wf],[data-decide],[data-reopen],[data-issue-item],[data-issue-decision],[data-comment],[data-link-item],[data-repo],[data-issue],#new-issue,#refresh-issues,#retry-gh,#key-btn,#more-issues,#f-cut,#f-unbacked,#f-decision,#wf-mobile,#ask-btn,#close-drawer,#theme-btn,#clear-chat");
+  const t = e.target.closest("[data-ask],[data-item],[data-wf],[data-decide],[data-reopen],[data-issue-item],[data-issue-decision],[data-comment],[data-link-item],[data-repo],[data-issue],#new-issue,#refresh-issues,#retry-gh,#auth-btn,#more-issues,#f-cut,#f-unbacked,#f-decision,#wf-mobile,#ask-btn,#close-drawer,#theme-btn,#clear-chat");
   if (!t) return;
   if (t.matches("[data-wf]")) { e.stopPropagation(); go("wireframes", t.dataset.wf); return; }
   if (t.matches("[data-ask]")) { openDrawer(); askAssistant(t.dataset.ask); return; }
@@ -582,7 +584,7 @@ document.addEventListener("click", async (e) => {
   if (t.matches("[data-repo]")) { S.ui.filters.repo = t.dataset.repo; saveUi(); render(); return; }
   if (t.matches("[data-issue]")) { if (e.target.closest("a")) return; const [repo, n] = t.dataset.issue.split("#"); window.open(`https://github.com/${ORG}/${repo}/issues/${n}`, "_blank", "noopener"); return; }
   if (t.matches("#refresh-issues")) { if (S.ghMode === "rest") fetchRest(); else await S.caps.mcp?.invalidate(GH, "list_issues").catch(() => {}); toast("Refreshing"); return; }
-  if (t.matches("#key-btn")) return keyDialog();
+  if (t.matches("#auth-btn")) return signInDialog();
   if (t.matches("#retry-gh")) { S.ghDown = null; S.issues = {}; startGitHub(); render(); return; }
   if (t.matches("#more-issues")) return loadOlder(S.ui.filters.repo || "oxagen");
   if (t.matches("#f-cut")) { S.ui.filters.showCut = !S.ui.filters.showCut; saveUi(); render(); return; }
@@ -617,39 +619,54 @@ let _deb; function debounce(fn, ms) { clearTimeout(_deb); _deb = setTimeout(fn, 
 function saveUi() { lsSet("rm.ui", S.ui); }
 
 /* ---------- db writes ---------- */
-/* Hosted mode (Vercel): the shared state lives behind /api/state. Reading is public; writing needs the edit key. */
-function keyDialog(then) {
-  dialog(`<h2>Edit key</h2><p class="muted" style="margin:0">Anyone can read this roadmap. Changing it, and asking the assistant, needs the edit key. It is kept in this browser only.</p>
-    <label class="f">Edit key <input class="field" id="ek" type="password" autocomplete="off" value="${esc(S.editKey || "")}"></label>
-    <div class="row">${S.editKey ? `<button class="btn ghost" id="ek-clear">Forget it</button>` : ""}<button class="btn ghost" data-close>Cancel</button><button class="btn gold" id="ek-ok">Use this key</button></div>`, (close) => {
-    const clear = $("#ek-clear"); if (clear) clear.onclick = () => { S.editKey = ""; lsSet("rm.editKey", ""); S.canEdit = false; syncWebPills(); close(); };
-    $("#ek-ok").onclick = async () => {
-      const v = $("#ek").value.trim(); if (!v) return;
-      const r = await fetch("/api/config", { headers: { "x-edit-key": v } }).then(x => x.json()).catch(() => null);
-      if (!r?.can_edit) { toast("That key was not accepted."); return; }
-      S.editKey = v; lsSet("rm.editKey", v); S.canEdit = true; syncWebPills(); close(); toast("Editing is on"); then?.();
+/* Hosted mode (Vercel): the shared state lives behind /api/state. Reading is public; writing needs the password. */
+/* The password is posted once to /api/session, which returns it as an httpOnly cookie. Nothing here
+   holds it afterwards: this page cannot read the cookie, and the browser attaches it to every later
+   call by itself. The OpenRouter key never comes near the browser. It stays on the server. */
+function signInDialog(then) {
+  dialog(`<h2>${S.signedIn ? "Signed in" : "Sign in"}</h2><p class="muted" style="margin:0">Anyone can read this roadmap. Changing it, asking the assistant, and recording a decision back to its issue need the password.</p>
+    ${S.signedIn ? "" : `<label class="f">Password <input class="field" id="pw" type="password" autocomplete="current-password"></label>`}
+    <div class="row">${S.signedIn ? `<button class="btn ghost" id="pw-out">Sign out</button><button class="btn ghost" data-close>Close</button>` : `<button class="btn ghost" data-close>Cancel</button><button class="btn gold" id="pw-ok">Sign in</button>`}</div>`, (close) => {
+    const out = $("#pw-out");
+    if (out) out.onclick = async () => {
+      await fetch("/api/session", { method: "DELETE" }).catch(() => {});
+      S.signedIn = false; syncWebPills(); close(); toast("Signed out");
     };
+    const ok = $("#pw-ok");
+    if (!ok) return;
+    $("#pw").focus();
+    const submit = async () => {
+      const v = $("#pw").value; if (!v) return;
+      ok.disabled = true; ok.textContent = "Checking…";
+      const r = await fetch("/api/session", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ password: v }) }).catch(() => null);
+      const j = await r?.json().catch(() => null);
+      ok.disabled = false; ok.textContent = "Sign in";
+      if (!j?.signed_in) { toast(j?.message || "That password was not accepted."); return; }
+      S.signedIn = true; syncWebPills(); close(); toast("Signed in"); then?.();
+    };
+    ok.onclick = submit;
+    $("#pw").onkeydown = (e) => { if (e.key === "Enter") { e.preventDefault(); submit(); } };
   });
 }
 function syncWebPills() {
   if (!S.web) return;
-  setPill("db", S.web.store ? (S.canEdit ? "on" : "warn") : "off", S.web.store ? (S.canEdit ? "store: shared, editing" : "store: shared, read only") : "store: this browser");
-  setPill("ai", S.web.assistant ? (S.canEdit ? "on" : "warn") : "off", S.web.assistant ? (S.canEdit ? `Assistant: ready on ${S.web.model || "the configured model"}` : "Assistant: needs the edit key") : "Assistant: not configured");
-  $("#key-btn").textContent = S.canEdit ? "Editing" : "Edit key";
+  setPill("db", S.web.store ? (S.signedIn ? "on" : "warn") : "off", S.web.store ? (S.signedIn ? "store: shared, editing" : "store: shared, read only") : "store: this browser");
+  setPill("ai", S.web.assistant ? (S.signedIn ? "on" : "warn") : "off", S.web.assistant ? (S.signedIn ? `Assistant: ready on ${S.web.model || "the configured model"}` : "Assistant: needs the password") : "Assistant: not configured");
+  $("#auth-btn").textContent = S.signedIn ? "Signed in" : "Sign in";
 }
 function applyState(st) {
   if (!st) return;
   S.overrides = st.overrides || {}; S.decided = st.decisions || {}; S.activity = st.activity || [];
-  if (typeof st.can_edit === "boolean" && S.editKey) S.canEdit = st.can_edit;
+  if (typeof st.can_edit === "boolean") S.signedIn = st.can_edit;
 }
 async function loadState() {
-  try { const r = await fetch("/api/state", { headers: S.editKey ? { "x-edit-key": S.editKey } : {} }); if (!r.ok) return; const before = JSON.stringify([S.overrides, S.decided, S.activity.length]); applyState(await r.json()); if (before !== JSON.stringify([S.overrides, S.decided, S.activity.length]) && !$("#dlg").open && !document.activeElement?.matches?.("textarea,input")) render(); } catch {}
+  try { const r = await fetch("/api/state"); if (!r.ok) return; const before = JSON.stringify([S.overrides, S.decided, S.activity.length]); applyState(await r.json()); if (before !== JSON.stringify([S.overrides, S.decided, S.activity.length]) && !$("#dlg").open && !document.activeElement?.matches?.("textarea,input")) render(); } catch {}
 }
 async function webWrite(payload, okToast) {
-  if (!S.editKey) { keyDialog(() => webWrite(payload, okToast)); return false; }
+  if (!S.signedIn) { signInDialog(() => webWrite(payload, okToast)); return false; }
   try {
-    const r = await fetch("/api/state", { method: "POST", headers: { "content-type": "application/json", "x-edit-key": S.editKey }, body: JSON.stringify(payload) });
-    if (r.status === 401) { S.canEdit = false; syncWebPills(); toast("The edit key was not accepted."); keyDialog(() => webWrite(payload, okToast)); return false; }
+    const r = await fetch("/api/state", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(payload) });
+    if (r.status === 401) { S.signedIn = false; syncWebPills(); toast("Sign in again to save this."); signInDialog(() => webWrite(payload, okToast)); return false; }
     if (!r.ok) { const j = await r.json().catch(() => ({})); toast("Could not save: " + (j.error || r.status)); return false; }
     applyState(await r.json()); if (okToast) toast(okToast); return true;
   } catch { toast("Could not reach the store. Try again."); return false; }
@@ -675,7 +692,7 @@ async function writeDecision(id, patch) {
   render();
 }
 async function logActivity(text, item) {
-  if (!S.caps.db && S.web?.store) { if (S.editKey) webWrite({ op: "activity", text, item: item || null, route: routeOf(item) }); return; }
+  if (!S.caps.db && S.web?.store) { if (S.signedIn) webWrite({ op: "activity", text, item: item || null, route: routeOf(item) }); return; }
   if (!S.caps.db) return;
   try { await S.caps.db.collection("activity").add({ ts: new Date().toISOString(), text, item: item || null, route: item ? (byId[item]?.kind === "surface" ? "gaps" : byId[item]?.kind === "witness" ? "witness" : "done") : null, who: S.uid }); } catch {}
 }
@@ -688,12 +705,59 @@ function dialog(html, wire) {
   wire?.(close);
   return close;
 }
+/* Where a decision came from, and so where the answer belongs. A decision lifted out of a
+   needs:decision issue carries `source` as "<repo>#<number>"; one you opened as an issue yourself
+   carries `issue` in the shared state. Decisions read out of an ADR have no issue to answer: the
+   ADR in the repository is already the record. */
+function decisionTarget(d) {
+  const s = decState(d);
+  if (s.issue?.repo && s.issue?.number) return { repo: s.issue.repo, number: Number(s.issue.number) };
+  const m = /^([\w.-]+)#(\d+)$/.exec(String(d.source || ""));
+  if (m && REPOS.includes(m[1])) return { repo: m[1], number: Number(m[2]) };
+  return null;
+}
+
+/* Recording the decision on GitHub. The assistant drafts the comment from what you wrote, the
+   server posts it, and the `needs:decision` label comes off. Closing the issue is opt in, because a
+   decision settles a question and the work behind it usually continues. */
+async function recordOnIssue(d, target, decided, close_issue) {
+  const r = await fetch("/api/record-decision", {
+    method: "POST", headers: { "content-type": "application/json" },
+    body: JSON.stringify({ id: d.id, title: d.title, question: d.question, decided, decided_on: new Date().toISOString().slice(0, 10), repo: target.repo, number: target.number, close: !!close_issue }),
+  });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(j.message || j.error || `HTTP ${r.status}`);
+  return j;
+}
+
 function decideDialog(id) {
   const d = DECISIONS.find(x => x.id === id);
+  const target = decisionTarget(d);
+  const canRecord = target && S.web?.record_decisions;
   dialog(`<h2>Decide: ${esc(d.title)}</h2><div class="decision-q">${esc(d.question)}</div>${d.recommendation ? `<div class="note small"><b>Recommendation.</b> ${esc(d.recommendation)}</div>` : ""}
     <label class="f">The decision <textarea class="field" id="dec-text" placeholder="One or two sentences. What was decided and why.">${esc(decState(d).decided || "")}</textarea></label>
+    ${canRecord ? `<div class="note small"><label style="display:flex;gap:8px;align-items:flex-start"><input type="checkbox" id="dec-post" checked><span>Write it back to <b>${esc(target.repo)}#${target.number}</b>, the issue that asked. The assistant drafts the comment and the <span class="mono">needs:decision</span> label comes off.</span></label>
+      <label style="display:flex;gap:8px;align-items:flex-start;margin-top:8px"><input type="checkbox" id="dec-close"><span>Close that issue too.</span></label></div>`
+    : target ? `<div class="note small">This decision came from <b>${esc(target.repo)}#${target.number}</b>. Writing back needs a GitHub token on this deployment, so for now it is recorded here only.</div>`
+    : d.origin === "adr" ? `<div class="note small">This one was decided in the repository already: <span class="mono">${esc(d.source || "an ADR")}</span> is the record.</div>` : ""}
     <div class="row"><button class="btn ghost" data-close>Cancel</button><button class="btn gold" id="dec-ok">Record decision</button></div>`, (close) => {
-    $("#dec-ok").onclick = async () => { const v = $("#dec-text").value.trim(); if (!v) return; await writeDecision(id, { status: "decided", decided: v, decided_on: new Date().toISOString().slice(0, 10) }); close(); };
+    $("#dec-ok").onclick = async () => {
+      const v = $("#dec-text").value.trim(); if (!v) return;
+      const btn = $("#dec-ok"); btn.disabled = true; btn.textContent = "Recording…";
+      const post = canRecord && $("#dec-post").checked;
+      await writeDecision(id, { status: "decided", decided: v, decided_on: new Date().toISOString().slice(0, 10) });
+      if (!post) { close(); return; }
+      btn.textContent = "Writing to GitHub…";
+      try {
+        const res = await recordOnIssue(d, target, v, $("#dec-close").checked);
+        await writeDecision(id, { recorded: res.url || `${target.repo}#${target.number}` });
+        logActivity(`Decision ${id} recorded on ${target.repo}#${target.number}${res.closed ? ", issue closed" : ""}`);
+        toast(`Recorded on ${target.repo}#${target.number}`);
+      } catch (err) {
+        toast("Decided here, but GitHub refused: " + (err.message || err));
+      }
+      close(); render();
+    };
   });
 }
 function draftFromItem(it) {
@@ -905,8 +969,8 @@ async function askHosted(tools, tier, signal, onText) {
   let shown = "", truncated = false;
   try {
     for (let round = 0; round < 8; round++) {
-      const r = await fetch("/api/ask", { method: "POST", signal, headers: { "content-type": "application/json", "x-edit-key": S.editKey }, body: JSON.stringify({ tier, system: instructions(), messages, tools: defs }) });
-      if (!r.ok) { const j = await r.json().catch(() => ({})); throw { code: j.error === "edit_key" ? "edit_key" : j.error === "not_configured" ? "sampling_disabled" : "upstream_error", message: j.message }; }
+      const r = await fetch("/api/ask", { method: "POST", signal, headers: { "content-type": "application/json" }, body: JSON.stringify({ tier, system: instructions(), messages, tools: defs }) });
+      if (!r.ok) { const j = await r.json().catch(() => ({})); throw { code: j.error === "password" ? "password" : j.error === "not_configured" ? "sampling_disabled" : "upstream_error", message: j.message }; }
       let roundText = "", done = null, err = null;
       await readSse(r.body, (ev, data) => {
         if (ev === "text") { roundText += data.delta; onText({ text: (shown ? shown + "\n\n" : "") + roundText }); }
@@ -935,7 +999,7 @@ async function askAssistant(text) {
   const sample = S.caps.sample;
   const hosted = !sample && !!S.web?.assistant;
   if (!sample && !hosted) { toast(S.web ? "The assistant is not configured on this deployment yet." : "The assistant answers when this page is served with its functions."); return; }
-  if (hosted && !S.editKey) { keyDialog(() => askAssistant(text)); return; }
+  if (hosted && !S.signedIn) { signInDialog(() => askAssistant(text)); return; }
   if (CHAT.busy) { toast("Wait for the current answer, or press Stop."); return; }
   CHAT.turns.push({ role: "user", content: text }); saveChat(); renderChat();
   CHAT.busy = true; CHAT.ctl = new AbortController(); $("#stop-btn").hidden = false; $("#send-btn").disabled = true; $("#chat-status").innerHTML = '<span class="spin"></span> Thinking';
@@ -952,7 +1016,7 @@ async function askAssistant(text) {
     if (res.modelTierApplied !== tier) toast(`Answered on the ${res.modelTierApplied} tier`);
   } catch (e) {
     const keep = e.text || "";
-    const copy = { not_granted: "You have not allowed this page to use the assistant. Allow it from the page's prompt.", sampling_disabled: "The assistant is not available on this account.", rate_limited: "Too many requests right now. Try again in a minute.", refused: "The model declined that request. Rephrase it.", cancelled: "", upstream_error: "The connection dropped. Try again.", tools_unavailable: "Page tools are not available in this view. Plain questions still work.", prompt_too_large: "Too much context. Ask about a narrower part of the roadmap.", edit_key: "The edit key was not accepted. Set it again with the Edit key button.", empty_completion: "The model returned nothing. Ask again, or ask for less." }[e.code] ?? ("Could not answer: " + (e.message || e.code));
+    const copy = { not_granted: "You have not allowed this page to use the assistant. Allow it from the page's prompt.", sampling_disabled: "The assistant is not available on this account.", rate_limited: "Too many requests right now. Try again in a minute.", refused: "The model declined that request. Rephrase it.", cancelled: "", upstream_error: "The connection dropped. Try again.", tools_unavailable: "Page tools are not available in this view. Plain questions still work.", prompt_too_large: "Too much context. Ask about a narrower part of the roadmap.", password: "Sign in again with the Sign in button.", empty_completion: "The model returned nothing. Ask again, or ask for less." }[e.code] ?? ("Could not answer: " + (e.message || e.code));
     if (keep || copy) { CHAT.turns.push({ role: "assistant", content: (keep ? keep + "\n\n" : "") + copy, tools: used }); saveChat(); }
     if (["not_granted","sampling_disabled","not_declared","capability_disabled"].includes(e.code)) setPill("ai", "off", "Assistant: off");
   } finally { CHAT.busy = false; $("#stop-btn").hidden = true; $("#send-btn").disabled = false; $("#chat-status").textContent = ""; renderChat(); }
@@ -965,7 +1029,9 @@ $("#stop-btn").onclick = () => CHAT.ctl?.abort();
 async function boot() {
   const th = lsGet("rm.theme", ""); if (th) document.documentElement.setAttribute("data-theme", th);
   $("#tier").value = lsGet("rm.tier", "complex");
-  S.overrides = lsGet("rm.overrides", {}); S.decided = lsGet("rm.decided", {}); S.editKey = lsGet("rm.editKey", "");
+  S.overrides = lsGet("rm.overrides", {}); S.decided = lsGet("rm.decided", {});
+  // The edit key used to live here in the clear. The password never does, so any left over goes.
+  try { localStorage.removeItem("rm.editKey"); } catch {}
   document.body.classList.add("no-comments");   // comment threads exist only inside claude.ai
   parseHash(); render();
   if (lsGet("rm.drawer", false)) toggleDrawer(true);
@@ -991,9 +1057,9 @@ async function boot() {
   } else setPill("db", "off", "store: this browser");
   // Hosted mode: outside claude.ai the page asks its own server what it can do.
   if (!db && !mcp && !sample && location.protocol.startsWith("http")) {
-    try { const cfg = await fetch("/api/config", { headers: S.editKey ? { "x-edit-key": S.editKey } : {} }).then(r => r.ok ? r.json() : null); if (cfg?.hosted) { S.web = cfg; S.canEdit = !!cfg.can_edit; } } catch {}
+    try { const cfg = await fetch("/api/config").then(r => r.ok ? r.json() : null); if (cfg?.hosted) { S.web = cfg; S.signedIn = !!cfg.signed_in; } } catch {}
     if (S.web) {
-      $("#key-btn").hidden = false; syncWebPills();
+      $("#auth-btn").hidden = false; syncWebPills();
       if (S.web.model) $("#ai-name").title = `Model: ${S.web.model}`;
       if (S.web.store) { await loadState(); syncWebPills(); setInterval(() => { if (!document.hidden) loadState(); }, 20000); window.addEventListener("focus", loadState); }
     }

@@ -3,7 +3,7 @@
 // The page owns the tool loop: its tools read and change page state, so they run in the browser.
 // This function runs ONE round: it streams text deltas as they are written, then sends the whole
 // assistant message (`done`). When that message stops on `tool_use`, the page runs the tools,
-// appends the assistant content plus the tool results, and calls again. Needs the edit key, so a
+// appends the assistant content plus the tool results, and calls again. Needs the password, so a
 // public link cannot spend the model budget.
 //
 //   event: text   {"delta": "..."}
@@ -14,22 +14,8 @@
 // translates in both directions: blocks in, OpenAI chat messages out, and the reply back into
 // blocks. Reasoning tokens are read and dropped. They are never shown and never replayed, because
 // a model handed its own reasoning back as assistant text repeats it on every tool turn.
-import { json, canEdit, readBody } from "./_lib.js";
-
-const OPENROUTER = "https://openrouter.ai/api/v1/chat/completions";
-
-// The drawer's tier selector is the viewer's explicit model choice.
-//
-// Kimi K3 is pinned as the primary, and `~moonshotai/kimi-latest` sits behind it in OpenRouter's
-// fallback list. The floating slug is not a safe primary: it follows whatever Moonshot serves on
-// their own `kimi-latest` endpoint, which answered as kimi-k2.6 on 2026-09-20, a generation back
-// from K3. As a fallback it earns its place, because it keeps answering after a pinned slug is
-// retired. Set OPENROUTER_MODEL to move the primary without a deploy.
-const MODELS = {
-  complex: { model: process.env.OPENROUTER_MODEL || "moonshotai/kimi-k3", models: ["~moonshotai/kimi-latest"] },
-  default: { model: process.env.OPENROUTER_MODEL || "moonshotai/kimi-k3", models: ["~moonshotai/kimi-latest"] },
-  quick: { model: process.env.OPENROUTER_MODEL_QUICK || "moonshotai/kimi-k2.5", models: ["moonshotai/kimi-k2-0905"] },
-};
+import { json, signedIn, readBody, UNAUTHORIZED } from "./_lib.js";
+import { MODELS, OPENROUTER, attribution } from "./_model.js";
 
 // Anthropic content blocks -> OpenAI chat messages.
 // A user turn carrying tool results becomes one `tool` message per result, which is where the
@@ -82,7 +68,7 @@ export function toToolUse(call) {
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return json(res, 405, { error: "method" });
-  if (!canEdit(req)) return json(res, 401, { error: "edit_key", message: "A valid edit key is required to ask here." });
+  if (!signedIn(req)) return json(res, 401, UNAUTHORIZED);
   const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey) return json(res, 503, { error: "not_configured", message: "No model credential is configured for this deployment." });
 
@@ -122,13 +108,7 @@ export default async function handler(req, res) {
     const upstream = await fetch(OPENROUTER, {
       method: "POST",
       signal: ctl.signal,
-      headers: {
-        authorization: `Bearer ${apiKey}`,
-        "content-type": "application/json",
-        // OpenRouter attributes spend to these, which is how the roadmap's share reads separately.
-        "http-referer": "https://oxagen-roadmap.vercel.app",
-        "x-title": "Oxagen roadmap assistant",
-      },
+      headers: attribution(apiKey),
       body: JSON.stringify(params),
     });
     if (!upstream.ok || !upstream.body) {
