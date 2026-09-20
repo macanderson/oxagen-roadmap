@@ -140,7 +140,7 @@ label.f{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:var(--
 .toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
 .toolbar select{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:5px 8px}
 
-/* Claude drawer */
+/* Assistant drawer */
 aside.drawer{border-left:1px solid var(--border);background:var(--panel);display:none;flex-direction:column;min-height:0}
 #app.drawer-open aside.drawer{display:flex}
 .drawer .dh{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--border)}
@@ -190,21 +190,21 @@ dialog .db .row{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
     <div class="pills">
       <span class="pill" id="pill-gh" title="GitHub issues"><i></i>GitHub: connecting</span>
       <span class="pill" id="pill-db" title="Shared roadmap state"><i></i>store</span>
-      <span class="pill" id="pill-ai" title="Claude"><i></i>Claude</span>
-      <button class="btn sm ghost" id="key-btn" title="Enter the edit key to change the roadmap and ask Claude" hidden>Edit key</button>
+      <span class="pill" id="pill-ai" title="Assistant"><i></i>Assistant</span>
+      <button class="btn sm ghost" id="key-btn" title="Enter the edit key to change the roadmap and ask the assistant" hidden>Edit key</button>
       <button class="btn sm ghost" id="theme-btn" title="Theme">Theme</button>
-      <button class="btn gold sm" id="ask-btn">Ask Claude</button>
+      <button class="btn gold sm" id="ask-btn">Ask</button>
     </div>
   </header>
   <nav class="side" id="nav"></nav>
   <main id="main"><div class="wrap"><div class="empty">Loading the roadmap.</div></div></main>
   <aside class="drawer" id="drawer">
-    <div class="dh"><h3>Claude</h3><select id="tier" title="Model tier"><option value="complex">Opus-class (complex)</option><option value="default">Default</option><option value="quick">Quick</option></select><button class="btn sm ghost" id="clear-chat" title="Clear the conversation">Clear</button><button class="btn sm ghost" id="close-drawer">Close</button></div>
+    <div class="dh"><h3 id="ai-name">Assistant</h3><select id="tier" title="Model tier"><option value="complex">Best answer</option><option value="default">Balanced</option><option value="quick">Fastest</option></select><button class="btn sm ghost" id="clear-chat" title="Clear the conversation">Clear</button><button class="btn sm ghost" id="close-drawer">Close</button></div>
     <div class="ctx" id="ctx"></div>
     <div class="msgs" id="msgs"></div>
     <div class="quick" id="quick"></div>
     <div class="compose">
-      <textarea class="field" id="chat-in" placeholder="Ask about the roadmap, or tell Claude what to change. It can update items, record decisions, link issues, and draft GitHub issues for you to confirm."></textarea>
+      <textarea class="field" id="chat-in" placeholder="Ask about the roadmap, or say what to change. The assistant updates items, records decisions, links issues, and drafts GitHub issues for you to confirm."></textarea>
       <div class="row"><span class="small muted" id="chat-status"></span><span style="flex:1"></span><button class="btn sm ghost" id="stop-btn" hidden>Stop</button><button class="btn sm" id="send-btn">Send</button></div>
     </div>
   </aside>
@@ -349,7 +349,7 @@ const PAGES = {
     const next = surf.filter(i => ["not-started","partial","fixtures-only"].includes(statusOf(i)) && ["P0","P1"].includes(prioOf(i))).sort((a, b) => prioOf(a).localeCompare(prioOf(b))).slice(0, 8);
     const ms = D.milestones || [];
     return `<div class="page-head"><div><div class="eyebrow gold">Oxagen</div><h1>What we build next</h1></div>
-      <p class="lead">${esc(D.thesis || "The mockups are the spec. This page is the distance between them and the build, the witness and the definition of done that make a run provable, and the decisions that unblock the work. GitHub status is live; everything else is editable here and by Claude.")}</p>
+      <p class="lead">${esc(D.thesis || "The mockups are the spec. This page measures the distance between them and the build, carries the witness and the definition of done that make a run provable, and lists the decisions that unblock the work. GitHub status is live. Everything else is editable here, by you or by the assistant.")}</p>
       <div class="actions"><button class="btn" data-ask="Suggest the five most valuable things to build next, with a one-line reason each, using the roadmap overview.">Ask what to build next</button></div></div>
       <div class="stats">
         <div class="stat"><div class="v">${surf.length}</div><div class="l">surfaces in the mockups</div><div class="s">${(D.catalog?.pages || []).length} pages · ${(D.catalog?.scenarios || []).length} scenarios</div></div>
@@ -384,7 +384,7 @@ const PAGES = {
     if (f.q) { const q = f.q.toLowerCase(); list = list.filter(i => JSON.stringify(i).toLowerCase().includes(q)); }
     list.sort((a, b) => prioOf(a).localeCompare(prioOf(b)) || statusRank(a) - statusRank(b));
     return `<div class="page-head"><div><div class="eyebrow">Mockups vs build</div><h1>Gaps</h1></div>
-      <p class="lead">Every page and wizard in the master mockup, and what the build does today. Open one for the concrete gaps, the backend gaps, the spec, the wireframe, and the live issues. Create an issue from any gap; ask Claude for a plan.</p></div>
+      <p class="lead">Every page and wizard in the master mockup, and what the build does today. Open one for the concrete gaps, the backend gaps, the spec, the wireframe, and the live issues. Create an issue from any gap. Ask the assistant for a plan.</p></div>
       <div class="filters">
         <input type="search" id="f-q" placeholder="Search surfaces" value="${esc(f.q || "")}">
         <select id="f-area"><option value="">All areas</option>${areas.map(a => `<option ${f.area === a ? "selected" : ""}>${esc(a)}</option>`).join("")}</select>
@@ -401,7 +401,7 @@ const PAGES = {
   decisions() {
     const open = DECISIONS.filter(d => decState(d).status !== "decided"), done = DECISIONS.filter(d => decState(d).status === "decided");
     return `<div class="page-head"><div><div class="eyebrow">Open questions with a recommendation each</div><h1>Decisions</h1></div>
-      <p class="lead">Each one blocks a named lane. Decide it here and the record is shared; ask Claude to argue both sides first; or open it as a GitHub issue with the <span class="mono">needs:decision</span> label so the team sees it.</p>
+      <p class="lead">Each one blocks a named lane. Decide it here and the record is shared. Ask the assistant to argue both sides first, or open it as a GitHub issue with the <span class="mono">needs:decision</span> label so the team sees it.</p>
       <div class="actions"><button class="btn" data-ask="Rank the open decisions by how much work each one unblocks, and say which one to make first and why.">Which decision first?</button></div></div>
       <h2 style="margin-bottom:12px">Open · ${open.length}</h2><div class="grid">${open.map(decisionCard).join("") || '<div class="empty">Every decision is made.</div>'}</div>
       <div class="section"><h2>Decided · ${done.length}</h2><div class="grid">${done.map(decisionCard).join("")}</div></div>
@@ -469,7 +469,7 @@ const PAGES = {
     const cur = S.arg ? docs.find(d => d.id === S.arg) : null;
     return `<div class="page-head"><div><div class="eyebrow">Specs and plans</div><h1>Specs</h1></div>
       <p class="lead">The documents the roadmap is built from. Each opens on GitHub; the rendered set is framed below.</p></div>
-      <div class="grid" style="margin-bottom:18px">${docs.map(d => `<div class="card"><div class="title"><h3>${esc(d.title)}</h3></div><div class="small" style="color:var(--body)">${esc(d.summary || "")}</div><div class="row" style="display:flex;gap:6px;flex-wrap:wrap"><a class="btn sm" href="${BLOB}${esc(d.path)}" target="_blank" rel="noopener">GitHub ↗</a>${d.anchor ? `<a class="btn sm ghost" href="#/docs/${esc(d.id)}">Read here</a>` : ""}<button class="btn sm ghost" data-ask="Summarize ${esc(d.path)} in five bullets and list what it says is still undecided.">Ask Claude</button></div></div>`).join("")}</div>
+      <div class="grid" style="margin-bottom:18px">${docs.map(d => `<div class="card"><div class="title"><h3>${esc(d.title)}</h3></div><div class="small" style="color:var(--body)">${esc(d.summary || "")}</div><div class="row" style="display:flex;gap:6px;flex-wrap:wrap"><a class="btn sm" href="${BLOB}${esc(d.path)}" target="_blank" rel="noopener">GitHub ↗</a>${d.anchor ? `<a class="btn sm ghost" href="#/docs/${esc(d.id)}">Read here</a>` : ""}<button class="btn sm ghost" data-ask="Summarize ${esc(d.path)} in five bullets and list what it says is still undecided.">Summarize it</button></div></div>`).join("")}</div>
       <div class="frame-wrap"><iframe src="${DOCS}${cur?.anchor ? "#" + esc(cur.anchor) : ""}" title="Oxagen documents"></iframe></div>`;
   },
 };
@@ -526,7 +526,7 @@ function itemDetail(it) {
         <label class="f" style="flex:1;min-width:160px">Owner <input class="field" data-ov="owner" data-id="${esc(it.id)}" value="${esc(s.owner || "")}" placeholder="github login"></label></div>
       <label class="f">Notes (shared) <textarea class="field" data-ov="note" data-id="${esc(it.id)}" placeholder="What changed, what is decided, what to remember.">${esc(s.note || "")}</textarea></label>
       <div><h3 style="margin-bottom:6px">Issues</h3><div class="chips">${links.map(l => issueChip(l.repo, l.number)).join("") || '<span class="dim small">None linked yet.</span>'} <button class="btn sm ghost" data-link-item="${esc(it.id)}">Link an issue</button></div></div>
-      <div class="row"><button class="btn gold" data-ask="Write a definition of done for the roadmap item '${esc(it.title)}' as a checklist of verifiable checks, then a build plan in three steps. Use get_item('${esc(it.id)}') first.">Ask Claude for a plan</button><button class="btn ghost" data-ask="Draft a GitHub issue for the roadmap item '${esc(it.title)}' (use get_item('${esc(it.id)}')) as a handoff: problem, spec paths, wireframe route, gaps as a checklist, done looks like, pillar. Then call create_issue so I can confirm it.">Ask Claude to draft the issue</button></div>
+      <div class="row"><button class="btn gold" data-ask="Write a definition of done for the roadmap item '${esc(it.title)}' as a checklist of verifiable checks, then a build plan in three steps. Use get_item('${esc(it.id)}') first.">Ask for a plan</button><button class="btn ghost" data-ask="Draft a GitHub issue for the roadmap item '${esc(it.title)}' (use get_item('${esc(it.id)}')) as a handoff: problem, spec paths, wireframe route, gaps as a checklist, done looks like, pillar. Then call create_issue so I can confirm it.">Ask for a draft issue</button></div>
     </div>`;
 }
 function refreshBlock(it) {
@@ -570,7 +570,7 @@ document.addEventListener("click", async (e) => {
   const t = e.target.closest("[data-ask],[data-item],[data-wf],[data-decide],[data-reopen],[data-issue-item],[data-issue-decision],[data-comment],[data-link-item],[data-repo],[data-issue],#new-issue,#refresh-issues,#retry-gh,#key-btn,#more-issues,#f-cut,#f-unbacked,#f-decision,#wf-mobile,#ask-btn,#close-drawer,#theme-btn,#clear-chat");
   if (!t) return;
   if (t.matches("[data-wf]")) { e.stopPropagation(); go("wireframes", t.dataset.wf); return; }
-  if (t.matches("[data-ask]")) { openDrawer(); askClaude(t.dataset.ask); return; }
+  if (t.matches("[data-ask]")) { openDrawer(); askAssistant(t.dataset.ask); return; }
   if (t.matches("[data-item]")) { const it = byId[t.dataset.item]; go(it.kind === "surface" ? "gaps" : it.kind === "witness" ? "witness" : "done", it.id); return; }
   if (t.matches("[data-decide]")) return decideDialog(t.dataset.decide);
   if (t.matches("[data-reopen]")) { await writeDecision(t.dataset.reopen, { status: "open", decided: null, decided_on: null }); return; }
@@ -619,7 +619,7 @@ function saveUi() { lsSet("rm.ui", S.ui); }
 /* ---------- db writes ---------- */
 /* Hosted mode (Vercel): the shared state lives behind /api/state. Reading is public; writing needs the edit key. */
 function keyDialog(then) {
-  dialog(`<h2>Edit key</h2><p class="muted" style="margin:0">Anyone can read this roadmap. Changing it, and asking Claude, needs the edit key. It is kept in this browser only.</p>
+  dialog(`<h2>Edit key</h2><p class="muted" style="margin:0">Anyone can read this roadmap. Changing it, and asking the assistant, needs the edit key. It is kept in this browser only.</p>
     <label class="f">Edit key <input class="field" id="ek" type="password" autocomplete="off" value="${esc(S.editKey || "")}"></label>
     <div class="row">${S.editKey ? `<button class="btn ghost" id="ek-clear">Forget it</button>` : ""}<button class="btn ghost" data-close>Cancel</button><button class="btn gold" id="ek-ok">Use this key</button></div>`, (close) => {
     const clear = $("#ek-clear"); if (clear) clear.onclick = () => { S.editKey = ""; lsSet("rm.editKey", ""); S.canEdit = false; syncWebPills(); close(); };
@@ -634,7 +634,7 @@ function keyDialog(then) {
 function syncWebPills() {
   if (!S.web) return;
   setPill("db", S.web.store ? (S.canEdit ? "on" : "warn") : "off", S.web.store ? (S.canEdit ? "store: shared, editing" : "store: shared, read only") : "store: this browser");
-  setPill("ai", S.web.claude ? (S.canEdit ? "on" : "warn") : "off", S.web.claude ? (S.canEdit ? "Claude: ready" : "Claude: needs the edit key") : "Claude: not configured");
+  setPill("ai", S.web.assistant ? (S.canEdit ? "on" : "warn") : "off", S.web.assistant ? (S.canEdit ? `Assistant: ready on ${S.web.model || "the configured model"}` : "Assistant: needs the edit key") : "Assistant: not configured");
   $("#key-btn").textContent = S.canEdit ? "Editing" : "Edit key";
 }
 function applyState(st) {
@@ -826,7 +826,7 @@ async function loadOlder(repo) {
 }
 function setPill(which, cls, text) { const p = $("#pill-" + which); p.className = "pill " + cls; p.innerHTML = `<i></i>${esc(text)}`; }
 
-/* ---------- Claude ---------- */
+/* ---------- assistant ---------- */
 const CHAT = { turns: lsGet("rm.chat", []), busy: false, ctl: null };
 function saveChat() { lsSet("rm.chat", CHAT.turns.slice(-30)); }
 function toggleDrawer(on) { $("#app").classList.toggle("drawer-open", on); lsSet("rm.drawer", on); if (on) renderChat(); }
@@ -861,7 +861,7 @@ const TOOLS = () => [
   { name: "get_item", description: "Returns one roadmap item in full (gap summary, gaps, backend gaps, spec path, wireframe route, evidence, shared notes, linked issues with live state). Input: {id}.", inputSchema: { type: "object", properties: { id: { type: "string" } }, required: ["id"] },
     execute: ({ id }) => { const it = byId[String(id)]; if (!it) throw new Error("No item with id " + id + ". Ids come from get_roadmap_overview."); const s = itemState(it); return { ...s, from_github: RF.items[it.id] || null, linked_issues: linksOf(it).map(l => ({ ...l, live: liveIssue(l.repo, l.number) ? { title: liveIssue(l.repo, l.number).title, state: liveIssue(l.repo, l.number).state } : null })) }; } },
   { name: "update_item", description: "Changes a roadmap item's shared status, priority, owner or note (any subset). Status is one of not-started, fixtures-only, partial, built; priority P0..P3. Returns ok. Use only when the viewer asked for a change.", inputSchema: { type: "object", properties: { id: { type: "string" }, status: { type: "string" }, priority: { type: "string" }, owner: { type: "string" }, note: { type: "string" } }, required: ["id"] },
-    execute: async ({ id, status, priority, owner, note }) => { const it = byId[String(id)]; if (!it) throw new Error("No item " + id); const patch = {}; if (status) patch.built_status = String(status); if (priority) patch.priority = String(priority); if (owner != null) patch.owner = String(owner); if (note != null) patch.note = String(note); await writeOverride(it.id, patch, "updated by Claude: " + Object.keys(patch).join(", ")); render(); return { ok: true, item: itemState(it) }; } },
+    execute: async ({ id, status, priority, owner, note }) => { const it = byId[String(id)]; if (!it) throw new Error("No item " + id); const patch = {}; if (status) patch.built_status = String(status); if (priority) patch.priority = String(priority); if (owner != null) patch.owner = String(owner); if (note != null) patch.note = String(note); await writeOverride(it.id, patch, "updated by the assistant: " + Object.keys(patch).join(", ")); render(); return { ok: true, item: itemState(it) }; } },
   { name: "record_decision", description: "Records the outcome of a decision by id (from get_roadmap_overview) and marks it decided. Input: {id, decision}. Use only when the viewer asked to record it.", inputSchema: { type: "object", properties: { id: { type: "string" }, decision: { type: "string" } }, required: ["id","decision"] },
     execute: async ({ id, decision }) => { const d = DECISIONS.find(x => x.id === String(id)); if (!d) throw new Error("No decision " + id); await writeDecision(d.id, { status: "decided", decided: String(decision), decided_on: new Date().toISOString().slice(0, 10) }); return { ok: true }; } },
   { name: "list_open_issues", description: "Returns open GitHub issues already loaded on the page for a repo (roadmap, oxagen or stella): number, title, labels, triage theme, whether a spec backs it, updated date. Optional text filter. Up to 60 results, no network call.", inputSchema: { type: "object", properties: { repo: { type: "string" }, filter: { type: "string" } }, required: ["repo"] },
@@ -931,11 +931,11 @@ async function askHosted(tools, tier, signal, onText) {
   if (!shown.trim()) throw { code: "empty_completion" };
   return { text: shown, truncated, modelTierApplied: tier };
 }
-async function askClaude(text) {
+async function askAssistant(text) {
   const sample = S.caps.sample;
-  const hosted = !sample && !!S.web?.claude;
-  if (!sample && !hosted) { toast(S.web ? "Claude is not configured on this deployment yet." : "Claude answers when this page is served with its functions."); return; }
-  if (hosted && !S.editKey) { keyDialog(() => askClaude(text)); return; }
+  const hosted = !sample && !!S.web?.assistant;
+  if (!sample && !hosted) { toast(S.web ? "The assistant is not configured on this deployment yet." : "The assistant answers when this page is served with its functions."); return; }
+  if (hosted && !S.editKey) { keyDialog(() => askAssistant(text)); return; }
   if (CHAT.busy) { toast("Wait for the current answer, or press Stop."); return; }
   CHAT.turns.push({ role: "user", content: text }); saveChat(); renderChat();
   CHAT.busy = true; CHAT.ctl = new AbortController(); $("#stop-btn").hidden = false; $("#send-btn").disabled = true; $("#chat-status").innerHTML = '<span class="spin"></span> Thinking';
@@ -952,12 +952,12 @@ async function askClaude(text) {
     if (res.modelTierApplied !== tier) toast(`Answered on the ${res.modelTierApplied} tier`);
   } catch (e) {
     const keep = e.text || "";
-    const copy = { not_granted: "You have not allowed this page to use Claude. Allow it from the page's prompt.", sampling_disabled: "Claude is not available on this account.", rate_limited: "Too many requests right now. Try again in a minute.", refused: "Claude declined that request. Rephrase it.", cancelled: "", upstream_error: "The connection dropped. Try again.", tools_unavailable: "Page tools are not available in this view; plain questions still work.", prompt_too_large: "Too much context. Ask about a narrower part of the roadmap.", edit_key: "The edit key was not accepted. Set it again with the Edit key button.", empty_completion: "Claude returned nothing. Ask again, or ask for less." }[e.code] ?? ("Could not answer: " + (e.message || e.code));
+    const copy = { not_granted: "You have not allowed this page to use the assistant. Allow it from the page's prompt.", sampling_disabled: "The assistant is not available on this account.", rate_limited: "Too many requests right now. Try again in a minute.", refused: "The model declined that request. Rephrase it.", cancelled: "", upstream_error: "The connection dropped. Try again.", tools_unavailable: "Page tools are not available in this view. Plain questions still work.", prompt_too_large: "Too much context. Ask about a narrower part of the roadmap.", edit_key: "The edit key was not accepted. Set it again with the Edit key button.", empty_completion: "The model returned nothing. Ask again, or ask for less." }[e.code] ?? ("Could not answer: " + (e.message || e.code));
     if (keep || copy) { CHAT.turns.push({ role: "assistant", content: (keep ? keep + "\n\n" : "") + copy, tools: used }); saveChat(); }
-    if (["not_granted","sampling_disabled","not_declared","capability_disabled"].includes(e.code)) setPill("ai", "off", "Claude: off");
+    if (["not_granted","sampling_disabled","not_declared","capability_disabled"].includes(e.code)) setPill("ai", "off", "Assistant: off");
   } finally { CHAT.busy = false; $("#stop-btn").hidden = true; $("#send-btn").disabled = false; $("#chat-status").textContent = ""; renderChat(); }
 }
-$("#send-btn").onclick = () => { const v = $("#chat-in").value.trim(); if (!v) return; $("#chat-in").value = ""; askClaude(v); };
+$("#send-btn").onclick = () => { const v = $("#chat-in").value.trim(); if (!v) return; $("#chat-in").value = ""; askAssistant(v); };
 $("#chat-in").addEventListener("keydown", (e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) $("#send-btn").click(); });
 $("#stop-btn").onclick = () => CHAT.ctl?.abort();
 
@@ -981,7 +981,7 @@ async function boot() {
     // The permissions read never prompts: "unavailable" means the viewer has no such connector, so no call is made and no dialog opens.
     if (!S.ghDown) { const perms = await use("permissions"); if (perms) { const st = await perms.state("mcp:" + GH).catch(() => "prompt"); if (st === "unavailable") S.ghDown = { code: "server_not_connected" }; else if (st === "denied") S.ghDown = { code: "not_in_manifest" }; } }
   }
-  setPill("ai", sample ? "on" : "off", sample ? "Claude: ready" : "Claude: off");
+  setPill("ai", sample ? "on" : "off", sample ? "Assistant: ready on Claude" : "Assistant: off");
   if (db) {
     setPill("db", "warn", "store: syncing");
     S.overrides = {}; S.decided = {};
@@ -994,6 +994,7 @@ async function boot() {
     try { const cfg = await fetch("/api/config", { headers: S.editKey ? { "x-edit-key": S.editKey } : {} }).then(r => r.ok ? r.json() : null); if (cfg?.hosted) { S.web = cfg; S.canEdit = !!cfg.can_edit; } } catch {}
     if (S.web) {
       $("#key-btn").hidden = false; syncWebPills();
+      if (S.web.model) $("#ai-name").title = `Model: ${S.web.model}`;
       if (S.web.store) { await loadState(); syncWebPills(); setInterval(() => { if (!document.hidden) loadState(); }, 20000); window.addEventListener("focus", loadState); }
     }
   }

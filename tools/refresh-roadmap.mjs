@@ -31,7 +31,7 @@ import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   parseRefs, gapIssueRefs, labelsToMeta, pageFor, touchedEvidence, deriveStatus,
-  matchAdrToDecision, milestoneRollup, stableStringify,
+  matchAdrToDecision, milestoneRollup, stableStringify, decisionAsked,
 } from "./lib/refresh-rules.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -84,6 +84,11 @@ const R = prev || { generated_at: null, baseline: null, since: {}, heads: {}, is
 // someone rewrites data.json the baseline moves with it and the older merges fall out on prune.
 const BASELINE = data.generated_at || "1970-01-01T00:00:00Z";
 if (R.baseline !== BASELINE) { R.baseline = BASELINE; R.items = {}; }
+// Bump when the rule that turns an issue into a decision changes. Clearing the watermarks makes the
+// next run re-read every open issue, so every stored record carries a verdict under the new rule
+// before section 7 sweeps the cards an older rule left behind.
+const DECISION_RULE = 2;
+if (R.decision_rule !== DECISION_RULE) { R.decision_rule = DECISION_RULE; R.since = {}; }
 const startedAt = new Date().toISOString();
 const summary = { calls: 0, issues: 0, prs: 0, files: 0, items: [], decisions: [], adrs: [], quiet: true };
 const key = (repo, n) => `${repo}#${n}`;
@@ -96,6 +101,9 @@ function recordIssue(repo, it) {
     repo, number: it.number, title: it.title, state: it.state === "open" ? "open" : "closed", is_pr: isPr,
     updated_at: it.updated_at, closed_at: it.closed_at || null, merged_at: isPr ? it.pull_request.merged_at || null : null,
     labels: meta.labels, kind: meta.kind, priority: meta.priority, pillar: meta.pillar, needs_decision: meta.needs_decision,
+    // The question the issue puts to the maintainer, read from the body. Null means the
+    // `needs:decision` label is on ordinary work, so section 7 keeps it off the decisions page.
+    decision_question: !isPr && meta.needs_decision ? decisionAsked(it.body) : null,
     milestone: it.milestone?.title || null, closes: refs.closes, refs: refs.refs,
     spec_refs: refs.adrs.concat(refs.specs), has_spec_backing: refs.adrs.length + refs.specs.length > 0,
     author: it.user?.login || null, html_url: it.html_url,
@@ -259,14 +267,32 @@ for (const path of R.adr_files || []) {
   }
   summary.quiet = false;
 }
+// An issue earns a decision card only when its body states what the maintainer must decide.
+// The label by itself does not: triage puts `needs:decision` on ordinary work, and counting those
+// as decisions put 68 work items on the Now page under "decisions blocking work".
+const asked = new Set();
 for (const rec of Object.values(R.issues)) {
-  if (rec.is_pr || !rec.needs_decision) continue;
+  if (rec.is_pr || !rec.needs_decision || !rec.decision_question) continue;
   const id = `I-${rec.repo}#${rec.number}`;
+  asked.add(id);
   const before = R.decisions_added[id];
+  const common = { id, title: rec.title, question: rec.decision_question, recommendation: null, source: `${rec.repo}#${rec.number}`, blocks: [], origin: "issue", html_url: rec.html_url };
   const now = rec.state === "open"
-    ? { id, title: rec.title, question: rec.title, recommendation: null, source: `${rec.repo}#${rec.number}`, blocks: [], status: "open", decided_on: null, decided: null, origin: "issue", html_url: rec.html_url }
-    : { id, title: rec.title, question: rec.title, recommendation: null, source: `${rec.repo}#${rec.number}`, blocks: [], status: "decided", decided_on: (rec.closed_at || "").slice(0, 10), decided: `Closed${(closedBy[key(rec.repo, rec.number)] || []).length ? " by #" + closedBy[key(rec.repo, rec.number)].join(", #") : ""}.`, origin: "issue", html_url: rec.html_url };
+    ? { ...common, status: "open", decided_on: null, decided: null }
+    : { ...common, status: "decided", decided_on: (rec.closed_at || "").slice(0, 10), decided: `Closed${(closedBy[key(rec.repo, rec.number)] || []).length ? " by #" + closedBy[key(rec.repo, rec.number)].join(", #") : ""}.` };
   if (stableStringify(before ?? null) !== stableStringify(now)) { R.decisions_added[id] = now; summary.decisions.push(id + " " + now.status); summary.quiet = false; }
+}
+// Drop issue cards a past run added under the old rule, or whose body no longer asks anything.
+// This file is incremental state, so without the sweep the page keeps showing what was fixed here.
+// A card is dropped only on a record this run judged (`decision_question === null`). A legacy record
+// carries `undefined`, and its card stays until a run reads that issue and decides.
+for (const id of Object.keys(R.decisions_added)) {
+  const card = R.decisions_added[id];
+  if (card?.origin !== "issue" || asked.has(id)) continue;
+  const rec = R.issues[String(card.source || "")];
+  if (rec?.decision_question !== null) continue;
+  delete R.decisions_added[id];
+  summary.decisions.push(id + " dropped"); summary.quiet = false;
 }
 for (const d of decisions) {
   if (d.status === "decided" || !d.issue?.number) continue;

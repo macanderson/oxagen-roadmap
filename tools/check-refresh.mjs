@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 import assert from "node:assert/strict";
 import {
   parseRefs, gapIssueRefs, labelsToMeta, appRouteCandidates, pageFor, touchedEvidence, deriveStatus,
-  matchAdrToDecision, milestoneRollup, stableStringify,
+  matchAdrToDecision, milestoneRollup, stableStringify, decisionAsked,
 } from "./lib/refresh-rules.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -30,6 +30,28 @@ t("labelsToMeta reads oxagen's label scheme", () => {
   const m = labelsToMeta([{ name: "P1" }, "kind:gap", "pillar:reliability", "needs:decision", "area:app"]);
   assert.equal(m.kind, "gap"); assert.equal(m.priority, "P1"); assert.equal(m.pillar, "reliability");
   assert.equal(m.needs_decision, true); assert.equal(m.triage, false);
+});
+
+t("decisionAsked reads the question a needs:decision issue puts to the maintainer", () => {
+  assert.equal(
+    decisionAsked("## Summary\n\nThis needs a maintainer decision on whether `labeled` should remain a trigger at all."),
+    "On whether labeled should remain a trigger at all");
+  assert.equal(
+    decisionAsked("It is a decision only the maintainer can make: which layer owns the event."),
+    "Which layer owns the event");
+  assert.match(
+    decisionAsked("## Options\n\n1. Do nothing, which is right when the query returns no rows.\n2. Rename the workspace."),
+    /^1\. Do nothing/);
+});
+
+t("decisionAsked refuses an issue that only wears the label", () => {
+  // Triage applies needs:decision to ordinary work, so the label alone is not a question.
+  assert.equal(decisionAsked("## Summary\n\nThe workflow starts one run per label. Group them."), null);
+  // Reciting the filing rule names nothing that has to be decided.
+  assert.equal(decisionAsked("Case 1 is a decision only the maintainer can make. Case 2 needs a rig."), null);
+  assert.equal(decisionAsked("This falls under case 3, a decision only the maintainer can make, real spend, or bigger than one session."), null);
+  assert.equal(decisionAsked(""), null);
+  assert.equal(decisionAsked(null), null);
 });
 
 const PAGES = [
@@ -115,6 +137,12 @@ t("roadmap/refresh.json, when present, has the shape the app reads", () => {
     if (it.built_status) assert.ok(["partial", "built"].includes(it.built_status), `item ${id}: the machine may only move status forward`);
   }
   for (const d of Object.values(R.decisions_added)) assert.ok(["open", "decided"].includes(d.status) && d.id && d.title, "a raised decision is malformed");
+  // An open issue card has to state its question, or the Now page fills with work items again.
+  for (const d of Object.values(R.decisions_added)) {
+    if (d.origin !== "issue" || d.status !== "open") continue;
+    assert.notEqual(d.question, d.title, `${d.id} repeats its title instead of asking something`);
+    assert.ok(String(d.question || "").length >= 25, `${d.id} has no question`);
+  }
   assert.equal(readFileSync(p, "utf8"), stableStringify(R), "refresh.json is not in stable key order; it was hand-edited");
 });
 

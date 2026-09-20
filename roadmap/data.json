@@ -1,6 +1,6 @@
 {
   "generated_at": "2026-09-18T20:52:30Z",
-  "thesis": "The mockups are the spec. This page is the distance between them and the build, plus the witness and the definition of done that make a run provable, and the decisions that unblock the work. GitHub status is live; everything else is editable here and by Claude.",
+  "thesis": "The mockups are the spec. This page measures the distance between them and the build, carries the witness and the definition of done that make a run provable, and lists the decisions that unblock the work. GitHub status is live. Everything else is editable here, by you or by the assistant.",
   "repos": {
     "owner": "macanderson",
     "roadmap": "roadmap",
@@ -1626,7 +1626,7 @@
     {
       "id": "D13",
       "title": "Council question 1: what did the paying partners buy?",
-      "question": "Spend is ranked first because the pain is budgeted; if the partners bought governance or the recorder, the ranking should follow their money.",
+      "question": "Spend is ranked first because the pain is budgeted. If the partners bought governance or the recorder, the ranking should follow their money.",
       "recommendation": "Ask the three partners; re-rank if the answer differs.",
       "source": "docs/scope-review.md 'Three questions for Wednesday' (2026-09-16 council)",
       "blocks": [
@@ -1639,7 +1639,7 @@
     {
       "id": "D14",
       "title": "Council question 2: has any partner asked for the ontology?",
-      "question": "The ontology cut is the largest decision; it is right only if nobody has a scheduled use.",
+      "question": "The ontology cut is the largest decision. It is right only if nobody has a scheduled use.",
       "recommendation": "Cut stands unless a partner names a scheduled use.",
       "source": "docs/scope-review.md 'Three questions for Wednesday'",
       "blocks": [
@@ -1652,7 +1652,7 @@
     {
       "id": "D15",
       "title": "Council question 3: would partners pay for a stamp?",
-      "question": "Describe the certificate, the verify endpoint and an invoice line linking to evidence; if two of nine lean in, the proof stays at the front.",
+      "question": "Describe the certificate, the verify endpoint and an invoice line linking to evidence. If two of nine lean in, the proof stays at the front.",
       "recommendation": "Keep witness first (M4) unless the answer is no.",
       "source": "docs/scope-review.md 'Three questions for Wednesday'",
       "blocks": [
@@ -2506,7 +2506,7 @@
       "id": "dod",
       "path": "docs/dod-spec.md",
       "title": "Definition of done spec",
-      "summary": "Six check kinds, the Done tab, the gate, and how Mission Control shows it.",
+      "summary": "Six check kinds, the Done tab, the gate, and how the operator console shows it.",
       "anchor": "dod"
     },
     {

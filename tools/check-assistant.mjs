@@ -13,27 +13,17 @@
 //   * the assistant's turn never links into the tenant's run index — its runs are Oxagen's
 //   * with no key the panel refuses by name and charges nothing, rather than degrading quietly
 //   * reconciliation shows two independent numbers, not one derived from the other
-import { existsSync, mkdirSync } from "node:fs";
+import { mkdirSync } from "node:fs";
 import path from "node:path";
-import os from "node:os";
 import { fileURLToPath } from "node:url";
+import { launchChromium } from "./lib/playwright.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const FILE = "file://" + path.join(root, "mockups/missioncontrol.html");
 const shots = process.argv.includes("--shots") ? path.join(root, ".claude/shots") : null;
 if (shots) mkdirSync(shots, { recursive: true });
 
-const mod = ["/opt/homebrew/lib/node_modules/@playwright/cli/node_modules/playwright/index.js",
-  "/opt/homebrew/lib/node_modules/playwright/index.js",
-  path.join(root, "node_modules/playwright/index.js")].find(existsSync);
-if (!mod) { console.error("playwright not found"); process.exit(2); }
-const pw = (await import(mod)).default ?? (await import(mod));
-const cache = path.join(os.homedir(), "Library/Caches/ms-playwright");
-const exe = ["chromium_headless_shell-1234", "chromium_headless_shell-1223"]
-  .flatMap(d => ["chrome-headless-shell-mac-arm64", "chrome-headless-shell-mac-x64"].map(s => path.join(cache, d, s, "chrome-headless-shell")))
-  .find(existsSync);
-
-const browser = await pw.chromium.launch(exe ? { executablePath: exe } : {});
+const browser = await launchChromium(root);
 let fails = 0, passes = 0;
 const ok = (c, m) => { if (c) passes++; else { fails++; console.log("FAIL " + m); } };
 

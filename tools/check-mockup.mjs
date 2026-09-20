@@ -22,11 +22,11 @@
 // page under it rendered, the step's act runs, Next closes any dialog the act opened and lands on
 // the following step, no page error fired; then phone mode has no horizontal overflow and both
 // themes render. A scenario that is missing fails; nothing skips.
-import { existsSync, mkdirSync } from "node:fs";
+import { mkdirSync } from "node:fs";
 import path from "node:path";
-import os from "node:os";
 import { fileURLToPath } from "node:url";
 import { PAGES, SCENARIOS, mockupUrl, scenarioHash, ORG } from "../mockups/catalog.mjs";
+import { launchChromium } from "./lib/playwright.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const FILE = "file://" + path.join(root, "mockups/missioncontrol.html");
@@ -37,17 +37,7 @@ const doPages = !args.includes("--scenarios");
 const doScenarios = !args.includes("--pages");
 if (shots) mkdirSync(shots, { recursive: true });
 
-const mod = ["/opt/homebrew/lib/node_modules/@playwright/cli/node_modules/playwright/index.js",
-  "/opt/homebrew/lib/node_modules/playwright/index.js",
-  path.join(root, "node_modules/playwright/index.js")].find(existsSync);
-if (!mod) { console.error("playwright not found"); process.exit(2); }
-const pw = (await import(mod)).default ?? (await import(mod));
-const cache = path.join(os.homedir(), "Library/Caches/ms-playwright");
-const exe = ["chromium_headless_shell-1234", "chromium_headless_shell-1223"]
-  .flatMap(d => ["chrome-headless-shell-mac-arm64", "chrome-headless-shell-mac-x64"].map(s => path.join(cache, d, s, "chrome-headless-shell")))
-  .find(existsSync);
-
-const browser = await pw.chromium.launch(exe ? { executablePath: exe } : {});
+const browser = await launchChromium(root);
 let failures = 0, passes = 0;
 const ok = (cond, msg) => { if (cond) passes++; else { failures++; console.log("FAIL " + msg); } };
 

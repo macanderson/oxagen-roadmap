@@ -7,6 +7,9 @@ mockups/src
 mockups/fixtures
 .claude
 .github
-design
+# The build inlines design/fonts/monaspace-neon-latin-wght.woff2, so excluding all of design
+# failed every deploy at `build-roadmap.mjs --check` with ENOENT. Keep the fonts, drop the rest.
+design/*
+!design/fonts
 pnpm-lock.yaml
 pnpm-workspace.yaml
