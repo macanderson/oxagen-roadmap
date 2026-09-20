@@ -130,7 +130,8 @@
     "docs/adr/ADR-127-wal-body-write-failure.md",
     "docs/adr/ADR-128-local-arp-checkpoints-prepare-external-runs.md",
     "docs/adr/ADR-128-source-identifiers-determine-draft-filenames.md",
-    "docs/adr/ADR-130-spend-and-operator-feedback-ui.md"
+    "docs/adr/ADR-130-spend-and-operator-feedback-ui.md",
+    "docs/adr/ADR-131-one-openrouter-key-per-organisation.md"
   ],
   "adrs": {
     "ADR-001": {
@@ -1148,6 +1149,14 @@
       "path": "docs/adr/ADR-130-spend-and-operator-feedback-ui.md",
       "status": "accepted",
       "title": "Spend and operator feedback lead the app"
+    },
+    "ADR-131": {
+      "date": null,
+      "decision": "### 1. Oxagen mints one OpenRouter key per organisation, on its own account",
+      "id": "ADR-131",
+      "path": "docs/adr/ADR-131-one-openrouter-key-per-organisation.md",
+      "status": null,
+      "title": "One OpenRouter key per organisation, and funding is decided with the model"
     }
   },
   "baseline": "2026-09-18T20:52:30Z",
@@ -1621,6 +1630,19 @@
       "source": "docs/adr/ADR-130-spend-and-operator-feedback-ui.md",
       "status": "decided",
       "title": "Spend and operator feedback lead the app"
+    },
+    "ADR-131": {
+      "blocks": [],
+      "decided": "ADR-131: One OpenRouter key per organisation, and funding is decided with the model. ### 1. Oxagen mints one OpenRouter key per organisation, on its own account",
+      "decided_on": "2026-09-20",
+      "id": "ADR-131",
+      "origin": "adr",
+      "pr": 3598,
+      "question": "Decided in the repository: One OpenRouter key per organisation, and funding is decided with the model.",
+      "recommendation": null,
+      "source": "docs/adr/ADR-131-one-openrouter-key-per-organisation.md",
+      "status": "decided",
+      "title": "One OpenRouter key per organisation, and funding is decided with the model"
     },
     "I-oxagen#2961": {
       "blocks": [],
@@ -2156,11 +2178,34 @@
       "title": "P1 · kernel/Approvals · Keep each approval linked to its run and final result"
     }
   },
-  "generated_at": "2026-09-20T19:53:07.008Z",
+  "generated_at": "2026-09-20T21:07:52.836Z",
   "heads": {
-    "oxagen": "9cc53457b1a420a5d205bce7f7035e69f68cd589"
+    "oxagen": "9dcc33312de9687d80d888636950ee9499aa32d6"
   },
   "issues": {
+    "oxagen#2": {
+      "author": "macanderson",
+      "closed_at": "2026-05-30T22:52:12Z",
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/2",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": "2026-05-30T22:52:12Z",
+      "milestone": null,
+      "needs_decision": false,
+      "number": 2,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "OXA-1388 — Wave 1 / Phase 1: rename tenant → org across schema, code, routes, telemetry",
+      "updated_at": "2026-05-30T22:52:12Z"
+    },
     "oxagen#20": {
       "author": "macanderson",
       "closed_at": "2026-06-03T02:51:10Z",
@@ -13487,7 +13532,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "P2 · evidence · Desktop uninstall can leave harnesses half-removed or hide a failed status probe (residue #3538)",
-      "updated_at": "2026-09-20T09:19:25Z"
+      "updated_at": "2026-09-20T21:01:53Z"
     },
     "oxagen#3543": {
       "author": "macanderson",
@@ -14685,66 +14730,81 @@
       "has_spec_backing": false,
       "html_url": "https://github.com/macanderson/oxagen/issues/3585",
       "is_pr": false,
-      "kind": null,
-      "labels": [],
+      "kind": "defect",
+      "labels": [
+        "P2",
+        "kind:defect",
+        "area:surfaces",
+        "job:govern",
+        "pillar:reliability"
+      ],
       "merged_at": null,
       "milestone": null,
       "needs_decision": false,
       "number": 3585,
-      "pillar": null,
-      "priority": null,
+      "pillar": "reliability",
+      "priority": "P2",
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [],
       "state": "open",
-      "title": "**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Preserve external failure causes in the audit event**",
-      "updated_at": "2026-09-20T06:12:59Z"
+      "title": "P2 · surfaces/MCP · External failure causes collapse into rule or IAM denials in audit events",
+      "updated_at": "2026-09-20T21:05:50Z"
     },
     "oxagen#3586": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-20T21:06:53Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": false,
       "html_url": "https://github.com/macanderson/oxagen/issues/3586",
       "is_pr": false,
-      "kind": null,
-      "labels": [],
+      "kind": "defect",
+      "labels": [
+        "P1",
+        "kind:defect",
+        "pillar:stability",
+        "size/XS"
+      ],
       "merged_at": null,
       "milestone": null,
       "needs_decision": false,
       "number": 3586,
-      "pillar": null,
-      "priority": null,
+      "pillar": "stability",
+      "priority": "P1",
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [],
-      "state": "open",
-      "title": "**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Update the preflight audit regression test**",
-      "updated_at": "2026-09-20T06:13:11Z"
+      "state": "closed",
+      "title": "P1 •Tests • Update the preflight audit regression test",
+      "updated_at": "2026-09-20T21:06:53Z"
     },
     "oxagen#3587": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-20T21:06:55Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": false,
       "html_url": "https://github.com/macanderson/oxagen/issues/3587",
       "is_pr": false,
-      "kind": null,
-      "labels": [],
+      "kind": "defect",
+      "labels": [
+        "P1",
+        "kind:defect",
+        "pillar:reliability"
+      ],
       "merged_at": null,
       "milestone": null,
       "needs_decision": false,
       "number": 3587,
-      "pillar": null,
-      "priority": null,
+      "pillar": "reliability",
+      "priority": "P1",
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [],
-      "state": "open",
-      "title": "**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Treat MCP isError results as failures before auditing**",
-      "updated_at": "2026-09-20T06:13:41Z"
+      "state": "closed",
+      "title": "P1 • MCP Server • Treat MCP isError results as failures before auditing",
+      "updated_at": "2026-09-20T21:06:55Z"
     },
     "oxagen#3588": {
       "author": "github-actions[bot]",
@@ -14806,14 +14866,13 @@
         "area:app",
         "job:govern",
         "pillar:maintainability",
-        "needs:decision",
         "kind:gap",
         "build-time:3hrs",
         "model:tier-3"
       ],
       "merged_at": null,
       "milestone": null,
-      "needs_decision": true,
+      "needs_decision": false,
       "number": 3590,
       "pillar": "maintainability",
       "priority": "P2",
@@ -14823,8 +14882,8 @@
         "ADR-128"
       ],
       "state": "open",
-      "title": "P2 · app/Agents · Registered source filenames cannot be renamed without changing identity keys",
-      "updated_at": "2026-09-20T17:42:55Z"
+      "title": "P2 · app/Agents+Steering · Configuration records need clone and retire workflows with immutable slugs",
+      "updated_at": "2026-09-20T21:04:48Z"
     },
     "oxagen#3591": {
       "author": "macanderson",
@@ -15007,7 +15066,7 @@
     },
     "oxagen#3598": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-20T20:55:01Z",
       "closes": [
         2
       ],
@@ -15019,7 +15078,7 @@
       "labels": [
         "closes-nothing"
       ],
-      "merged_at": null,
+      "merged_at": "2026-09-20T20:55:01Z",
       "milestone": null,
       "needs_decision": false,
       "number": 3598,
@@ -15030,9 +15089,93 @@
       "spec_refs": [
         "ADR-131"
       ],
-      "state": "open",
+      "state": "closed",
       "title": "feat(ai): mint one OpenRouter key per organisation, and fix model funding drift",
-      "updated_at": "2026-09-20T19:04:26Z"
+      "updated_at": "2026-09-20T20:55:02Z"
+    },
+    "oxagen#3599": {
+      "author": "macanderson",
+      "closed_at": "2026-09-20T20:55:31Z",
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3599",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "closes-nothing"
+      ],
+      "merged_at": "2026-09-20T20:55:31Z",
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3599,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "Fix tachod startup conflicts, compaction hooks, and stream error reporting",
+      "updated_at": "2026-09-20T20:55:33Z"
+    },
+    "oxagen#3600": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/issues/3600",
+      "is_pr": false,
+      "kind": "defect",
+      "labels": [
+        "P1",
+        "area:billing",
+        "kind:defect",
+        "area:surfaces",
+        "job:meter",
+        "pillar:stability"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3600,
+      "pillar": "stability",
+      "priority": "P1",
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-131"
+      ],
+      "state": "open",
+      "title": "P1 · billing/CLI+MCP · The per-organisation key minter skips organisations it should serve and mints for ones it should not (residue #3598)",
+      "updated_at": "2026-09-20T21:04:50Z"
+    },
+    "oxagen#3601": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3601",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3601,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        3600
+      ],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-131"
+      ],
+      "state": "open",
+      "title": "fix(billing): repair the per-organisation key minter's silent wrong answers",
+      "updated_at": "2026-09-20T21:01:13Z"
     },
     "oxagen#4": {
       "author": "macanderson",
@@ -15244,7 +15387,7 @@
     },
     "roadmap#53": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-20T20:28:33Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": true,
@@ -15252,7 +15395,7 @@
       "is_pr": true,
       "kind": null,
       "labels": [],
-      "merged_at": null,
+      "merged_at": "2026-09-20T20:28:33Z",
       "milestone": null,
       "needs_decision": false,
       "number": 53,
@@ -15263,9 +15406,78 @@
       "spec_refs": [
         "ADR-113"
       ],
-      "state": "open",
+      "state": "closed",
       "title": "Run the roadmap assistant on OpenRouter, and show only real decisions",
-      "updated_at": "2026-09-20T19:35:17Z"
+      "updated_at": "2026-09-20T20:29:43Z"
+    },
+    "roadmap#54": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen-roadmap/pull/54",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 54,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "roadmap",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Sign in with a password, and write decisions back to their issues",
+      "updated_at": "2026-09-20T21:03:11Z"
+    },
+    "roadmap#55": {
+      "author": "macanderson",
+      "closed_at": "2026-09-20T21:02:06Z",
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen-roadmap/issues/55",
+      "is_pr": false,
+      "kind": null,
+      "labels": [],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 55,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "roadmap",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "Verifying the decision write-back (safe to delete)",
+      "updated_at": "2026-09-20T21:02:06Z"
+    },
+    "roadmap#56": {
+      "author": "macanderson",
+      "closed_at": "2026-09-20T21:04:15Z",
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen-roadmap/issues/56",
+      "is_pr": false,
+      "kind": null,
+      "labels": [],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 56,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "roadmap",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "Verifying the decision write-back, take two (safe to delete)",
+      "updated_at": "2026-09-20T21:04:15Z"
     },
     "stella#1044": {
       "author": "macanderson",
@@ -30159,6 +30371,31 @@
       "title": "chore(release): sync versions to 0.9.428 [skip release]",
       "updated_at": "2026-09-20T19:12:26Z"
     },
+    "stella#6536": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/stella/pull/6536",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "no-issue"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 6536,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "stella",
+      "spec_refs": [],
+      "state": "open",
+      "title": "docs(readme): add CGP conformant badge",
+      "updated_at": "2026-09-20T21:04:18Z"
+    },
     "stella#834": {
       "author": "macanderson",
       "closed_at": null,
@@ -30281,9 +30518,19 @@
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "dod",
-      "last_merge": "2026-09-20T17:31:24Z",
+      "last_merge": "2026-09-20T20:55:31Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-20T20:55:31Z",
+          "number": 3599,
+          "repo": "oxagen",
+          "title": "Fix tachod startup conflicts, compaction hooks, and stream error reporting",
+          "touched": [
+            "packages/tacho"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-20T17:31:24Z",
@@ -30474,20 +30721,10 @@
           "touched": [
             "packages/tacho"
           ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-19T18:21:07Z",
-          "number": 3463,
-          "repo": "oxagen",
-          "title": "ADR-103 and phase 1a: take `oxagen tacho` out of --help, keep every command working",
-          "touched": [
-            "apps/cli/src"
-          ]
         }
       ],
       "open_issues": 0,
-      "refreshed_at": "2026-09-20T18:45:12.516Z",
+      "refreshed_at": "2026-09-20T21:07:52.836Z",
       "shared_page": false
     },
     "D3": {
@@ -30586,11 +30823,22 @@
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "dod",
-      "last_merge": null,
+      "last_merge": "2026-09-20T20:55:01Z",
       "links": [],
-      "merged_prs": [],
+      "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-20T20:55:01Z",
+          "number": 3598,
+          "repo": "oxagen",
+          "title": "feat(ai): mint one OpenRouter key per organisation, and fix model funding drift",
+          "touched": [
+            "packages/ai/src"
+          ]
+        }
+      ],
       "open_issues": 0,
-      "refreshed_at": "2026-09-18T23:26:29.677Z",
+      "refreshed_at": "2026-09-20T21:07:52.836Z",
       "shared_page": false
     },
     "D5": {
@@ -34414,8 +34662,8 @@
     }
   },
   "last_run": {
-    "at": "2026-09-20T19:53:07.008Z",
-    "calls": 15,
+    "at": "2026-09-20T21:07:52.836Z",
+    "calls": 9,
     "quiet": false
   },
   "milestones": {
@@ -42108,6 +42356,131 @@
       "repo": "oxagen",
       "title": "fix(inngest): hold batchEvents.timeout to Inngest's 30s limit"
     },
+    "oxagen#3598": {
+      "added": [
+        "docs/adr/ADR-131-one-openrouter-key-per-organisation.md",
+        "packages/ai/src/assistant-key-name.test.ts",
+        "packages/ai/src/assistant-key-name.ts",
+        "packages/ai/src/assistant-key-provision.test.ts",
+        "packages/ai/src/assistant-key-provision.ts",
+        "packages/ai/src/openrouter-provisioning.test.ts",
+        "packages/ai/src/openrouter-provisioning.ts",
+        "packages/ai/src/select-model-for-org.test.ts",
+        "packages/ai/src/select-model-for-org.ts",
+        "packages/database/atlas/migrations/20260921070000_org_assistant_model_keys.sql",
+        "packages/database/src/assistant-model-key.test.ts",
+        "packages/database/src/assistant-model-key.ts",
+        "packages/handlers/src/assistant-key-bootstrap.ts",
+        "tools/scripts/assistant-model-keys.ts"
+      ],
+      "author": "macanderson",
+      "closes": [
+        2
+      ],
+      "files": [
+        ".env.example",
+        "apps/app_deprecated/src/app/api/v1/chat/stream/auto-title.ts",
+        "apps/app_deprecated/src/app/api/v1/chat/stream/route.funding.test.ts",
+        "apps/app_deprecated/src/app/api/v1/chat/stream/route.ts",
+        "apps/app_deprecated/src/app/api/v1/chat/stream/suggest-prompts.test.ts",
+        "apps/app_deprecated/src/app/api/v1/chat/stream/suggest-prompts.ts",
+        "apps/docs/content/docs/governance/byok-and-models.mdx",
+        "docs/adr/ADR-131-one-openrouter-key-per-organisation.md",
+        "docs/adr/README.md",
+        "package.json",
+        "packages/agent/src/handlers/agent.debug.trace.test.ts",
+        "packages/agent/src/handlers/agent.debug.trace.ts",
+        "packages/agent/src/handlers/agent.debug.trace.tx.test.ts",
+        "packages/agent/src/handlers/agent.memory.remember.test.ts",
+        "packages/agent/src/handlers/agent.memory.remember.ts",
+        "packages/agent/src/handlers/agent.memory_promotion.rationales.test.ts",
+        "packages/agent/src/handlers/agent.memory_promotion.rationales.ts",
+        "packages/agent/src/memory/import.test.ts",
+        "packages/agent/src/memory/import.ts",
+        "packages/agent/src/runtime/assistant-turn.ts",
+        "packages/ai/package.json",
+        "packages/ai/src/assistant-key-name.test.ts",
+        "packages/ai/src/assistant-key-name.ts",
+        "packages/ai/src/assistant-key-provision.test.ts",
+        "packages/ai/src/assistant-key-provision.ts",
+        "packages/ai/src/funding-source.test.ts",
+        "packages/ai/src/funding-source.ts",
+        "packages/ai/src/index.ts",
+        "packages/ai/src/openrouter-provisioning.test.ts",
+        "packages/ai/src/openrouter-provisioning.ts",
+        "packages/ai/src/select-model-for-org.test.ts",
+        "packages/ai/src/select-model-for-org.ts",
+        "packages/config/src/env.ts",
+        "packages/config/src/registry.ts",
+        "packages/database/atlas/migrations/20260921070000_org_assistant_model_keys.sql",
+        "packages/database/atlas/migrations/atlas.sum",
+        "packages/database/package.json",
+        "packages/database/src/assistant-model-key.test.ts",
+        "packages/database/src/assistant-model-key.ts",
+        "packages/database/src/schema/org.ts",
+        "packages/database/src/tenant-policy.manifest.test.ts",
+        "packages/database/src/tenant-policy.manifest.ts",
+        "packages/database/storage-manifest.json",
+        "packages/engram/src/consolidation/distill.test.ts",
+        "packages/engram/src/consolidation/distill.ts",
+        "packages/handlers/src/agent.definition.revise.test.ts",
+        "packages/handlers/src/agent.definition.revise.ts",
+        "packages/handlers/src/agent.definition.suggest.test.ts",
+        "packages/handlers/src/agent.definition.suggest.ts",
+        "packages/handlers/src/agent.definition.summarize.test.ts",
+        "packages/handlers/src/agent.definition.summarize.ts",
+        "packages/handlers/src/assistant-key-bootstrap.ts",
+        "packages/handlers/src/chat.message.send.ts",
+        "packages/handlers/src/command.menu.suggest.test.ts",
+        "packages/handlers/src/command.menu.suggest.ts",
+        "packages/handlers/src/connection.mappings.suggest.ts",
+        "packages/handlers/src/org.create.test.ts",
+        "packages/handlers/src/org.create.ts",
+        "packages/handlers/src/schema.chat.timeout.test.ts",
+        "packages/handlers/src/schema.chat.ts",
+        "packages/handlers/src/schema.recommend.test.ts",
+        "packages/handlers/src/schema.recommend.ts",
+        "packages/inngest-functions/src/functions/run.summarize.test.ts",
+        "packages/inngest-functions/src/functions/run.summarize.ts",
+        "packages/inngest-functions/src/functions/schema.reconcile.handler.test.ts",
+        "packages/inngest-functions/src/functions/schema.reconcile.ts",
+        "pnpm-lock.yaml",
+        "tools/scripts/assistant-model-keys.ts",
+        "tools/scripts/package.json"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3598",
+      "merged_at": "2026-09-20T20:55:01Z",
+      "number": 3598,
+      "refs": [],
+      "repo": "oxagen",
+      "title": "feat(ai): mint one OpenRouter key per organisation, and fix model funding drift"
+    },
+    "oxagen#3599": {
+      "added": [
+        "packages/tacho/src/collector/startup-listeners.test.ts"
+      ],
+      "author": "macanderson",
+      "closes": [],
+      "files": [
+        "packages/tacho/src/claude-code/hooks.test.ts",
+        "packages/tacho/src/claude-code/hooks.ts",
+        "packages/tacho/src/collector/daemon.ts",
+        "packages/tacho/src/collector/model-proxy.test.ts",
+        "packages/tacho/src/collector/model-proxy.ts",
+        "packages/tacho/src/collector/server.ts",
+        "packages/tacho/src/collector/startup-listeners.test.ts",
+        "packages/tacho/src/evidence/retention.test.ts",
+        "packages/tacho/src/evidence/retention.ts"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3599",
+      "merged_at": "2026-09-20T20:55:31Z",
+      "number": 3599,
+      "refs": [],
+      "repo": "oxagen",
+      "title": "Fix tachod startup conflicts, compaction hooks, and stream error reporting"
+    },
     "stella#6527": {
       "added": [],
       "author": "dependabot[bot]",
@@ -42459,8 +42832,8 @@
     }
   },
   "since": {
-    "oxagen": "2026-09-20T19:04:26Z",
-    "roadmap": "2026-09-20T19:35:17Z",
-    "stella": "2026-09-20T19:12:26Z"
+    "oxagen": "2026-09-20T21:06:55Z",
+    "roadmap": "2026-09-20T21:04:15Z",
+    "stella": "2026-09-20T21:04:18Z"
   }
 }
