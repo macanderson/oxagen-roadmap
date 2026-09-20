@@ -2921,7 +2921,7 @@
       "title": "P2 · app/Agents · Registered source filenames cannot be renamed without changing identity keys"
     }
   },
-  "generated_at": "2026-09-20T12:09:02.574Z",
+  "generated_at": "2026-09-20T16:01:12.398Z",
   "heads": {
     "oxagen": "fe6dcd2780b05aa69f1d45dd709223851e23c99a"
   },
@@ -14864,7 +14864,7 @@
       ],
       "state": "open",
       "title": "Add CGP-backed local agent run checkpoints",
-      "updated_at": "2026-09-20T10:58:27Z"
+      "updated_at": "2026-09-20T13:57:11Z"
     },
     "oxagen#3575": {
       "author": "macanderson",
@@ -29490,7 +29490,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "build(deps): bump the cargo group with 2 updates",
-      "updated_at": "2026-09-20T09:51:14Z"
+      "updated_at": "2026-09-20T12:17:43Z"
     },
     "stella#6528": {
       "author": "dependabot[bot]",
@@ -29518,7 +29518,7 @@
       ],
       "state": "open",
       "title": "build(deps): bump the actions group with 5 updates",
-      "updated_at": "2026-09-20T09:51:24Z"
+      "updated_at": "2026-09-20T12:21:55Z"
     },
     "stella#6529": {
       "author": "macanderson",
@@ -33886,8 +33886,8 @@
     }
   },
   "last_run": {
-    "at": "2026-09-20T12:09:02.574Z",
-    "calls": 10,
+    "at": "2026-09-20T16:01:12.398Z",
+    "calls": 4,
     "quiet": false
   },
   "milestones": {
@@ -41574,8 +41574,8 @@
     }
   },
   "since": {
-    "oxagen": "2026-09-20T11:27:29Z",
-    "roadmap": "2026-09-20T07:16:13Z",
-    "stella": "2026-09-20T10:14:59Z"
+    "oxagen": "2026-09-20T13:57:11Z",
+    "roadmap": "2026-09-20T16:01:12.398Z",
+    "stella": "2026-09-20T12:21:55Z"
   }
 }
