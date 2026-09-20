@@ -2156,7 +2156,7 @@
       "title": "P1 · kernel/Approvals · Keep each approval linked to its run and final result"
     }
   },
-  "generated_at": "2026-09-20T18:51:42.624Z",
+  "generated_at": "2026-09-20T19:53:07.008Z",
   "heads": {
     "oxagen": "9cc53457b1a420a5d205bce7f7035e69f68cd589"
   },
@@ -14748,7 +14748,7 @@
     },
     "oxagen#3588": {
       "author": "github-actions[bot]",
-      "closed_at": null,
+      "closed_at": "2026-09-20T18:39:52Z",
       "closes": [],
       "has_spec_backing": false,
       "html_url": "https://github.com/macanderson/oxagen/issues/3588",
@@ -14766,9 +14766,9 @@
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "main has commits nothing verified",
-      "updated_at": "2026-09-20T08:28:59Z"
+      "updated_at": "2026-09-20T18:39:52Z"
     },
     "oxagen#3589": {
       "author": "oxagen-connect[bot]",
@@ -14907,7 +14907,7 @@
     },
     "oxagen#3594": {
       "author": "oxagen-connect[bot]",
-      "closed_at": null,
+      "closed_at": "2026-09-20T17:35:28Z",
       "closes": [],
       "has_spec_backing": false,
       "html_url": "https://github.com/macanderson/oxagen/pull/3594",
@@ -14925,9 +14925,9 @@
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "Agent: watch-performance",
-      "updated_at": "2026-09-20T09:44:57Z"
+      "updated_at": "2026-09-20T17:35:28Z"
     },
     "oxagen#3595": {
       "author": "macanderson",
@@ -14958,7 +14958,7 @@
     },
     "oxagen#3596": {
       "author": "oxagen-connect[bot]",
-      "closed_at": null,
+      "closed_at": "2026-09-20T17:36:07Z",
       "closes": [],
       "has_spec_backing": false,
       "html_url": "https://github.com/macanderson/oxagen/pull/3596",
@@ -14976,9 +14976,9 @@
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "Agent definition: cc-default-agent",
-      "updated_at": "2026-09-20T09:45:53Z"
+      "updated_at": "2026-09-20T17:36:07Z"
     },
     "oxagen#3597": {
       "author": "macanderson",
@@ -15032,7 +15032,7 @@
       ],
       "state": "open",
       "title": "feat(ai): mint one OpenRouter key per organisation, and fix model funding drift",
-      "updated_at": "2026-09-20T18:42:21Z"
+      "updated_at": "2026-09-20T19:04:26Z"
     },
     "oxagen#4": {
       "author": "macanderson",
@@ -15241,6 +15241,31 @@
       "state": "closed",
       "title": "Add Oxagen to this repository",
       "updated_at": "2026-09-20T07:16:13Z"
+    },
+    "roadmap#53": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen-roadmap/pull/53",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 53,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "roadmap",
+      "spec_refs": [
+        "ADR-113"
+      ],
+      "state": "open",
+      "title": "Run the roadmap assistant on OpenRouter, and show only real decisions",
+      "updated_at": "2026-09-20T19:35:17Z"
     },
     "stella#1044": {
       "author": "macanderson",
@@ -25410,6 +25435,54 @@
       "title": "A user-published gated probe is admitted and then never run",
       "updated_at": "2026-09-03T22:18:14Z"
     },
+    "stella#5809": {
+      "author": "macanderson",
+      "closed_at": "2026-09-03T21:50:06Z",
+      "closes": [
+        5804
+      ],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/stella/pull/5809",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 5809,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "stella",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "fix(stella-cli): assert FD_CLOEXEC directly instead of probing for EPIPE",
+      "updated_at": "2026-09-20T18:09:34Z"
+    },
+    "stella#5815": {
+      "author": "macanderson",
+      "closed_at": "2026-09-05T00:40:11Z",
+      "closes": [
+        5814
+      ],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/stella/pull/5815",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 5815,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "stella",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "fix(stella-cli): compare fd identity, not fd number, in the cloexec probe",
+      "updated_at": "2026-09-20T18:09:31Z"
+    },
     "stella#5819": {
       "author": "macanderson",
       "closed_at": null,
@@ -26309,6 +26382,82 @@
       "title": "Give UserPromptSubmit's require_approval a real interactive approval route",
       "updated_at": "2026-09-07T01:23:31Z"
     },
+    "stella#5907": {
+      "author": "macanderson",
+      "closed_at": "2026-09-05T06:29:33Z",
+      "closes": [
+        5901
+      ],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/stella/pull/5907",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "unblocks-main"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 5907,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "stella",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "fix(stella-records): move the published-record collision test to its own crate",
+      "updated_at": "2026-09-20T18:09:30Z"
+    },
+    "stella#5908": {
+      "author": "macanderson",
+      "closed_at": "2026-09-05T06:30:38Z",
+      "closes": [
+        5901
+      ],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/stella/pull/5908",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "unblocks-main"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 5908,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "stella",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "fix(stella-records): move the published-record test to the crate that holds the code",
+      "updated_at": "2026-09-20T18:09:30Z"
+    },
+    "stella#5909": {
+      "author": "macanderson",
+      "closed_at": "2026-09-05T06:37:38Z",
+      "closes": [
+        5901
+      ],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/stella/pull/5909",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 5909,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "stella",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "fix(stella-records): move the published-records test to the crate that owns it",
+      "updated_at": "2026-09-20T18:09:29Z"
+    },
     "stella#5923": {
       "author": "macanderson",
       "closed_at": null,
@@ -26397,6 +26546,30 @@
       "title": "SCR-005 says five priority levels in stella and four everywhere else",
       "updated_at": "2026-09-07T01:21:41Z"
     },
+    "stella#5932": {
+      "author": "macanderson",
+      "closed_at": "2026-09-05T09:55:20Z",
+      "closes": [
+        5910
+      ],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/stella/pull/5932",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 5932,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "stella",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "fix(scripts): stop check-rebase-replay reading an upstream move as an undo",
+      "updated_at": "2026-09-20T18:09:27Z"
+    },
     "stella#5938": {
       "author": "macanderson",
       "closed_at": null,
@@ -26427,6 +26600,58 @@
       "state": "open",
       "title": "Audit other crates' subprocess spawns for the same test-binary env-race #5264 hit",
       "updated_at": "2026-09-07T01:21:32Z"
+    },
+    "stella#5941": {
+      "author": "macanderson",
+      "closed_at": "2026-09-05T10:19:21Z",
+      "closes": [
+        5939
+      ],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/stella/pull/5941",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "unblocks-main"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 5941,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "stella",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "fix(workspace): move the lock entry for stella-learn to 0.9.330",
+      "updated_at": "2026-09-20T18:09:27Z"
+    },
+    "stella#5942": {
+      "author": "macanderson",
+      "closed_at": "2026-09-05T10:22:57Z",
+      "closes": [
+        5939
+      ],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/stella/pull/5942",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "unblocks-main"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 5942,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "stella",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "fix(build): bump Cargo.lock's stella-learn entry to 0.9.330",
+      "updated_at": "2026-09-20T18:09:26Z"
     },
     "stella#5945": {
       "author": "macanderson",
@@ -26737,6 +26962,30 @@
       "state": "open",
       "title": "Give plugin seats a cheap-model option",
       "updated_at": "2026-09-07T01:21:11Z"
+    },
+    "stella#5995": {
+      "author": "macanderson",
+      "closed_at": "2026-09-05T12:14:14Z",
+      "closes": [],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/stella/pull/5995",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 5995,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        5139
+      ],
+      "repo": "stella",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "fix(gate): drop the -p from doc-warnings-schema's clean, which cargo refuses",
+      "updated_at": "2026-09-20T18:09:26Z"
     },
     "stella#5997": {
       "author": "macanderson",
@@ -28059,6 +28308,60 @@
       "title": "The old-pipeline arm of the A/B has no binary, and the run scripts can only hold one arm",
       "updated_at": "2026-09-07T21:51:09Z"
     },
+    "stella#6197": {
+      "author": "macanderson",
+      "closed_at": "2026-09-06T08:41:05Z",
+      "closes": [],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/stella/pull/6197",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "unblocks-main"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 6197,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        6158,
+        6150,
+        6121
+      ],
+      "repo": "stella",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "fix(stella-parity): the served turn binds a re-query plane, so say so",
+      "updated_at": "2026-09-20T18:09:25Z"
+    },
+    "stella#6200": {
+      "author": "macanderson",
+      "closed_at": "2026-09-06T08:45:51Z",
+      "closes": [
+        6193
+      ],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/stella/pull/6200",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "unblocks-main"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 6200,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "stella",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "fix(stella-parity,stella-serve): the ServeSession lane binds the re-query seam",
+      "updated_at": "2026-09-20T18:09:25Z"
+    },
     "stella#6201": {
       "author": "macanderson",
       "closed_at": null,
@@ -28241,6 +28544,32 @@
       "state": "open",
       "title": "The plugin table's Points column means two different things",
       "updated_at": "2026-09-07T01:22:03Z"
+    },
+    "stella#6215": {
+      "author": "macanderson",
+      "closed_at": "2026-09-06T09:04:57Z",
+      "closes": [
+        6196
+      ],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/stella/pull/6215",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "unblocks-main"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 6215,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "stella",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "docs(prose): repair the prose gate on main",
+      "updated_at": "2026-09-20T18:09:23Z"
     },
     "stella#6219": {
       "author": "macanderson",
@@ -28889,6 +29218,30 @@
       "title": "stella-fleet: flaky CI test assumes one poll always reaches the parked state",
       "updated_at": "2026-09-16T22:02:49Z"
     },
+    "stella#6372": {
+      "author": "macanderson",
+      "closed_at": "2026-09-07T04:56:08Z",
+      "closes": [],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/stella/pull/6372",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 6372,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        6369
+      ],
+      "repo": "stella",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "fix(stella-tools): give the hook witness time to have a grandchild",
+      "updated_at": "2026-09-20T18:09:21Z"
+    },
     "stella#6378": {
       "author": "macanderson",
       "closed_at": null,
@@ -29133,6 +29486,54 @@
       "state": "open",
       "title": "Buy the six missing provider keys and top up Anthropic and Z.ai so live-smoke covers all nine adapters",
       "updated_at": "2026-09-11T23:25:48Z"
+    },
+    "stella#6443": {
+      "author": "macanderson",
+      "closed_at": "2026-09-07T22:27:21Z",
+      "closes": [
+        5595
+      ],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/stella/pull/6443",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 6443,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "stella",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "fix(stella-model): declare the live-smoke providers this repo cannot reach",
+      "updated_at": "2026-09-20T18:09:17Z"
+    },
+    "stella#6446": {
+      "author": "macanderson",
+      "closed_at": "2026-09-07T22:53:58Z",
+      "closes": [],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/stella/pull/6446",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 6446,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        6443
+      ],
+      "repo": "stella",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "fix(stella-cli): a driver session id the clock cannot make collide",
+      "updated_at": "2026-09-20T18:09:17Z"
     },
     "stella#6455": {
       "author": "macanderson",
@@ -29473,7 +29874,7 @@
       "spec_refs": [],
       "state": "closed",
       "title": "Limit skill holdouts to prompt-matched skills",
-      "updated_at": "2026-09-20T05:50:42Z"
+      "updated_at": "2026-09-20T18:09:16Z"
     },
     "stella#6525": {
       "author": "github-actions[bot]",
@@ -29498,6 +29899,28 @@
       "state": "closed",
       "title": "CodeQL is red on main",
       "updated_at": "2026-09-20T09:23:35Z"
+    },
+    "stella#6526": {
+      "author": "macanderson",
+      "closed_at": "2026-09-18T04:48:04Z",
+      "closes": [],
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/stella/pull/6526",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 6526,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "stella",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "chore: point repository references at oxagenai after the org transfer",
+      "updated_at": "2026-09-20T18:09:15Z"
     },
     "stella#6527": {
       "author": "dependabot[bot]",
@@ -29713,7 +30136,7 @@
     },
     "stella#6535": {
       "author": "github-actions[bot]",
-      "closed_at": null,
+      "closed_at": "2026-09-20T19:12:26Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": false,
@@ -29723,7 +30146,7 @@
       "labels": [
         "no-issue"
       ],
-      "merged_at": null,
+      "merged_at": "2026-09-20T19:12:26Z",
       "milestone": null,
       "needs_decision": false,
       "number": 6535,
@@ -29732,9 +30155,9 @@
       "refs": [],
       "repo": "stella",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "chore(release): sync versions to 0.9.428 [skip release]",
-      "updated_at": "2026-09-20T18:51:43Z"
+      "updated_at": "2026-09-20T19:12:26Z"
     },
     "stella#834": {
       "author": "macanderson",
@@ -30064,7 +30487,7 @@
         }
       ],
       "open_issues": 0,
-      "refreshed_at": "2026-09-20T18:51:42.624Z",
+      "refreshed_at": "2026-09-20T18:45:12.516Z",
       "shared_page": false
     },
     "D3": {
@@ -30296,7 +30719,7 @@
         }
       ],
       "open_issues": 0,
-      "refreshed_at": "2026-09-20T18:51:42.624Z",
+      "refreshed_at": "2026-09-20T18:45:12.516Z",
       "shared_page": false
     },
     "W1": {
@@ -33991,8 +34414,8 @@
     }
   },
   "last_run": {
-    "at": "2026-09-20T18:51:42.624Z",
-    "calls": 22,
+    "at": "2026-09-20T19:53:07.008Z",
+    "calls": 15,
     "quiet": false
   },
   "milestones": {
@@ -42016,11 +42439,28 @@
       "refs": [],
       "repo": "stella",
       "title": "chore(release): sync versions to 0.9.427 [skip release]"
+    },
+    "stella#6535": {
+      "added": [],
+      "author": "github-actions[bot]",
+      "closes": [],
+      "files": [
+        "Cargo.lock",
+        "Cargo.toml",
+        "packaging/homebrew/stella.rb"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/stella/pull/6535",
+      "merged_at": "2026-09-20T19:12:26Z",
+      "number": 6535,
+      "refs": [],
+      "repo": "stella",
+      "title": "chore(release): sync versions to 0.9.428 [skip release]"
     }
   },
   "since": {
-    "oxagen": "2026-09-20T18:42:21Z",
-    "roadmap": "2026-09-20T18:51:42.624Z",
-    "stella": "2026-09-20T18:51:43Z"
+    "oxagen": "2026-09-20T19:04:26Z",
+    "roadmap": "2026-09-20T19:35:17Z",
+    "stella": "2026-09-20T19:12:26Z"
   }
 }
