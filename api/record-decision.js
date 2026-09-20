@@ -21,15 +21,23 @@ const REPOS = (process.env.GITHUB_REPOS || "roadmap,oxagen,stella").split(",").m
 const DECISION_LABEL = "needs:decision";
 const ROADMAP_URL = "https://oxagen-roadmap.vercel.app/#/decisions";
 
+// The model writes the wording and nothing else, which is a narrower job than it will take on if
+// you let it. Given only "it works", an earlier draft added "the automated workflow is now
+// unblocked for production use. No further changes to the integration are needed." Nobody decided
+// either of those, and both would have gone onto a real issue under the decider's name. So the
+// rules below forbid the shapes the invention arrives in: a closing summary, an actor nobody
+// named, and a consequence that was not written down.
 const SYSTEM = `You write the record of a decision onto the GitHub issue that asked for it.
 
 Rules:
-- Two to four sentences of GitHub-flavoured Markdown. No heading, no preamble, no sign-off.
+- Two or three sentences of GitHub-flavoured Markdown. No heading, no preamble, no sign-off.
 - Say what was decided, then what it means for this issue: what to build, what to stop, or what is now unblocked.
-- Plain language, active voice, actor first. One idea per sentence.
+- Every clause restates something in the decision text. If the decision does not say what happens next, do not say it.
+- No closing or summary sentence. Stop after the last thing the decision actually settles.
+- Name no actor the decision does not name. Write "the roadmap records" or the passive, not "the team confirmed".
+- Plain language, active voice. One idea per sentence.
 - No em dashes. No exclamation points. No praise and no filler.
-- Do not invent detail. Everything you write comes from the decision text you are given.
-- Never claim the work is done. A decision settles a question, not the build.`;
+- Never claim the work is done, unblocked, validated, verified, complete, or ready to ship unless the decision says so in those words. A decision settles a question, not the build.`;
 
 function template({ title, decided, decided_on }) {
   return `**Decided${decided_on ? ` ${decided_on}` : ""}: ${title}**\n\n${decided}`;

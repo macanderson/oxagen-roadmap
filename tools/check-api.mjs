@@ -62,6 +62,18 @@ ok(dp.messages.length === 2 && dp.messages[0].role === "system" && dp.messages[1
 ok(typeof dp.model === "string" && dp.model.length > 0, "a draft names a model");
 ok(draftParams({ tier: "nonsense", prompt: "p" }).model === dp.model, "an unknown tier falls back rather than sending undefined");
 
+// --- the recorder's prompt keeps its limits -------------------------------
+// The comment goes onto a real issue under the decider's name, so the model's licence is the
+// wording and nothing else. An earlier draft added "No further changes to the integration are
+// needed" to a decision that said no such thing. These three rules are what stopped that.
+const rec = await readFile(new URL("../api/record-decision.js", import.meta.url), "utf8");
+const SYSTEM = rec.split("const SYSTEM = `")[1]?.split("`;")[0] || "";
+ok(SYSTEM.length > 0, "the recorder has a system prompt");
+ok(/Every clause restates something in the decision text/.test(SYSTEM), "the prompt forbids inventing a consequence");
+ok(/No closing or summary sentence/.test(SYSTEM), "the prompt forbids the closing sentence the invention arrives in");
+ok(/Name no actor the decision does not name/.test(SYSTEM), "the prompt forbids inventing who decided");
+ok(/Never claim the work is done/.test(SYSTEM), "the prompt forbids calling the build finished");
+
 // --- the page and the functions agree on the names ------------------------
 const app = await readFile(new URL("../roadmap/app.html", import.meta.url), "utf8");
 ok(!/x-edit-key|S\.editKey|EDIT_KEY/.test(app), "the page carries no trace of the old edit key");
