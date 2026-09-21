@@ -9,7 +9,12 @@
   "next": "2026-11-14",
   "grants30": 8142,
   "status": "active",
-  "downscope": "installation token"
+  "downscope": "installation token",
+  "authState": "connected",
+  "scopes": "contents:read, pull_requests:write, checks:read",
+  "tokenExp": "minted per call, 5 minutes",
+  "authUrl": "https://github.com/login/oauth/authorize",
+  "client": "Iv1.8f3c2a9b7e10"
  },
  {
   "id": "con_01K2A8",
@@ -21,7 +26,12 @@
   "next": "2026-10-30",
   "grants30": 6240,
   "status": "active",
-  "downscope": "token exchange"
+  "downscope": "token exchange",
+  "authState": "connected",
+  "scopes": "read, write, issues:create",
+  "tokenExp": "2026-10-30 12:00 UTC",
+  "authUrl": "https://linear.app/oauth/authorize",
+  "client": "lin_9c41f0a2"
  },
  {
   "id": "con_01K2A9",
@@ -33,7 +43,12 @@
   "next": "2026-10-01",
   "grants30": 23,
   "status": "active · financial",
-  "downscope": "restricted key"
+  "downscope": "restricted key",
+  "authState": "key held",
+  "scopes": "payment_intents:write, prices:read",
+  "tokenExp": "no expiry",
+  "authUrl": "",
+  "client": ""
  },
  {
   "id": "con_01K2AA",
@@ -45,7 +60,12 @@
   "next": "2026-10-01",
   "grants30": 1,
   "status": "active · financial",
-  "downscope": "session policy"
+  "downscope": "session policy",
+  "authState": "role assumed",
+  "scopes": "ce:GetCostAndUsage, savingsplans:Describe*",
+  "tokenExp": "1 hour per session",
+  "authUrl": "",
+  "client": ""
  },
  {
   "id": "con_01K2AB",
@@ -57,6 +77,11 @@
   "next": "2026-09-12",
   "grants30": 311,
   "status": "review due",
-  "downscope": "token exchange"
+  "downscope": "token exchange",
+  "authState": "expired",
+  "scopes": "chat:write, channels:read",
+  "tokenExp": "2026-09-12 00:00 UTC",
+  "authUrl": "https://slack.com/oauth/v2/authorize",
+  "client": "7714209.5583"
  }
 ]

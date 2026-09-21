@@ -292,14 +292,14 @@ function coachStrip(a){
   if(typeof a==="string")a=agent(a);
   var t=agentTok(a); if(!t) return '';
   var items=coachItems("agents",a.key), sp=money(a.spend30)||0;
-  return '<div class="grid g2" style="margin-bottom:16px">'+
-   '<div class="panel" style="margin:0"><div class="panel-h"><h3>30-day token use</h3><span class="mono dim" style="margin-left:auto;font-size:11px">'+tokn(t.total)+' tok · '+usd(fmt2(sp))+' · <span class="basis">'+(t.observed?'gateway_observed':'client_attested')+'</span></span></div>'+
+  return '<div class="grid g2">'+
+   '<div class="panel" style="margin:0;align-self:start"><div class="panel-h"><h3>30-day token use</h3><span class="mono dim" style="margin-left:auto;font-size:11px">'+tokn(t.total)+' tok · '+usd(fmt2(sp))+' · <span class="basis">'+(t.observed?'gateway_observed':'client_attested')+'</span></span></div>'+
     '<div class="panel-b">'+tokBars(t,{tight:true})+'<div class="hr"></div><dl class="kv">'+
     '<dt>Cache hit rate</dt><dd>'+per(t.cacheRate)+' · '+tokn(t.cacheRead)+' of '+tokn(t.tokIn)+' input tokens served from cache</dd>'+
     '<dt>Per run</dt><dd>'+tokn(t.perRun)+' tok · '+(a.runs30?usd(fmt2(sp/a.runs30)):'—')+'</dd>'+
     '<dt>Per model call</dt><dd>'+tokn(t.perCall)+' tok in the mean request</dd>'+
     '<dt>Basis</dt><dd>'+(t.observed?'observed by the gateway proxy from the bytes that passed through it':'self-reported by the harness · absent classes are marked, never zero')+'</dd></dl></div></div>'+
-   '<div class="panel" style="margin:0"><div class="panel-h"><h3>Coaching</h3><span class="b b-q" style="margin-left:auto">'+items.length+' from the token record</span></div>'+
+   '<div class="panel" style="margin:0;align-self:start"><div class="panel-h"><h3>Coaching</h3><span class="b b-q" style="margin-left:auto">'+items.length+' from the token record</span></div>'+
     '<div class="panel-b" style="display:grid;gap:8px">'+(items.length?items.slice(0,3).map(function(c){
       return '<div class="row" style="align-items:flex-start;gap:10px"><span class="b b-'+c.sev+'" style="flex:none;margin-top:2px"><span class="d"></span>'+h(c.title)+'</span>'+
        '<div style="min-width:0;flex:1"><div class="mono dim" style="font-size:11px">'+c.signal+'</div>'+(c.usd?'<div style="font-size:12px;margin-top:2px"><b>'+fmt$(c.usd)+'</b> a month at stake</div>':'')+'</div>'+
@@ -2085,7 +2085,7 @@ function pRun(r){
   } else if(t==="issues"){
     bodyHtml=issuesTab(R);
   } else if(t==="cost"){
-    bodyHtml=runSpendByArea(R,false)+runInstruments(R)+callsPanel(R)+costTab(R);
+    bodyHtml=runInstruments(R)+runSpendByArea(R)+callsPanel(R)+costTab(R);
   } else if(t==="policy"){
     bodyHtml='<div class="panel"><div class="panel-h"><h3>Policy decisions</h3>'+
      '</div><div class="tw"><table>'+
@@ -2364,14 +2364,14 @@ function runAreas(R){
   var tools=Object.keys(byTool).map(function(k){var t=byTool[k];var share=msTot?t.ms/msTot:1/Math.max(1,m.calls.length);return {id:t.id,calls:t.calls,tok:Math.round(results*share),usd:per(results)*share};}).sort(function(x,y){return y.usd-x.usd;});
   return {areas:areas,tools:tools,total:total};
 }
-function runSpendByArea(R,compact){
+function runSpendByArea(R){
   var A=runAreas(R), mx=Math.max.apply(null,A.areas.map(function(a){return a[2];}))||1;
   var bars=A.areas.map(function(a){return '<div class="meter"'+tipAttr(a[3])+'><div class="lab">'+a[0]+'<b>'+(a[2]>0&&a[2]<0.005?'$'+a[2].toFixed(3):fmt$(a[2]))+' <span class="dim" style="font-weight:500">· '+tokn(a[1])+' tok</span></b></div><div class="bar"><i style="width:'+Math.max(1,Math.round(a[2]/mx*100))+'%;background:var(--st-approval)"></i></div></div>';}).join("");
-  var top=A.tools.slice(0,compact?3:8).map(function(t){return '<div class="rs-file"><span class="mono" title="'+h(t.id)+'">'+h(toolParts(t.id).n)+'</span><span class="mono dim">'+t.calls+' call'+(t.calls===1?'':'s')+' · <b style="color:var(--fg)">'+fmt$(t.usd)+'</b></span></div>';}).join("");
+  var top=A.tools.slice(0,8).map(function(t){return '<div class="rs-file"><span class="mono" title="'+h(t.id)+'">'+h(toolParts(t.id).n)+'</span><span class="mono dim">'+t.calls+' call'+(t.calls===1?'':'s')+' · <b style="color:var(--fg)">'+fmt$(t.usd)+'</b></span></div>';}).join("");
   return '<div class="panel"><div class="panel-h"><h3>Spend by area</h3><span class="mono dim" style="margin-left:auto;font-size:11px">'+usd(R.cost)+' · '+h(R.basis)+'</span></div>'+
-   '<div class="panel-b" style="display:grid;gap:'+(compact?'6px':'9px')+'">'+bars+'</div>'+
-   (A.tools.length?'<div class="panel-b" style="border-top:1px solid var(--border)"><p class="eyebrow q" style="margin:0 0 4px">Dearest tools</p><div class="rs-files" style="margin:0;border:0">'+top+'</div>'+(compact&&A.tools.length>3?'<div class="row" style="margin-top:8px"><button class="btn sm" onclick="S.tab.run=\'cost\';render()">All '+A.tools.length+' tools on Cost</button></div>':'')+'</div>':'')+
-   (compact?'':'<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">Input is a third of the money, split by the tokens each area put into the window; output is the rest. Tool calls split again by the wall clock each tool held, so the dearest tool is visible. A follow-up prompt re-sends the window, which is why it costs more than its own words.</div></div>')+'</div>';
+   '<div class="panel-b" style="display:grid;gap:9px">'+bars+'</div>'+
+   (A.tools.length?'<div class="panel-b" style="border-top:1px solid var(--border)"><p class="eyebrow q" style="margin:0 0 4px">Dearest tools</p><div class="rs-files" style="margin:0;border:0">'+top+'</div>'+'</div>':'')+
+   ('<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">Input is a third of the money, split by the tokens each area put into the window; output is the rest. Tool calls split again by the wall clock each tool held, so the dearest tool is visible. A follow-up prompt re-sends the window, which is why it costs more than its own words.</div></div>')+'</div>';
 }
 function runSide(R){
   var g=runGraphOf(R), m=runMetrics(R), outs=R.outputs||[];
@@ -2393,7 +2393,7 @@ function runSide(R){
    '<div class="panel-b"><dl class="kv rs-kv">'+rows.map(function(r){return '<dt>'+r[0]+'</dt><dd>'+r[1]+'</dd>';}).join("")+'</dl>'+
    (files?'<div class="rs-files">'+files+'</div><div class="row" style="margin-top:8px"><button class="btn sm" onclick="S.tab.run=\'transcript\';render()">Open the diff in the transcript</button></div>':'')+
    '</div></div>';
-  return work+runOutputs(R)+runSpendByArea(R,true);
+  return work+runOutputs(R);
 }
 function instTile(k,basis,value,sub,chart,foot){
   return '<div class="inst"><div class="ih"><span class="k">'+k+'</span><span class="basis">'+basis+'</span></div>'+
@@ -4309,9 +4309,7 @@ function pAgents(){
    '<span class="mono dim" style="margin-left:auto;font-size:11px">.oxagen/agents/ @ '+h(list[0]?list[0].commit:"")+'</span></div>'+
    '<div class="tw"><table><thead><tr><th>Identity</th><th>Harness</th><th>Operator</th><th>Status</th><th>Tier</th>'+
    '<th class="num">Belt</th><th class="num">Runs 30d</th><th class="num">Spend 30d</th><th class="num">Tokens 30d</th><th>Mandates</th><th>Incidents</th><th></th>'+
-   '</tr></thead><tbody>'+rows+'</tbody></table></div></div>'+
-   '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Tier ladder</h3></div>'+
-   '<div class="panel-b">'+tierLadder(null)+'<div class="note" style="margin-top:12px">The tier is computed per run from what was routed. On <span class="mono">gateway</span> and <span class="mono">contained</span> every model and tool call passes the proxy and the server decides; on <span class="mono">harness</span> the hooks can refuse and the rest is client-attested and fail-open; on <span class="mono">observe</span> the run is recorded only.</div></div></div>';
+   '</tr></thead><tbody>'+rows+'</tbody></table></div></div>';
 }
 
 /* ══════════════════════════════ Agent IAM ══════════════════════════════
@@ -4516,7 +4514,7 @@ function flippedSwitches(){var n=0;for(var k in S.switches){if(S.switches[k])n++
 function beltFocus(){setTimeout(function(){var e=el("beltq");
   if(e){e.focus();e.setSelectionRange(e.value.length,e.value.length);}},0);}
 
-var IAM_TABS=[["identity","Identity"],["toolbelt","Toolbelt"],["mandates","Mandates"],["budgets","Budgets"],
+var IAM_TABS=[["identity","Identity"],["toolbelt","Toolbelt"],["mandates","Mandates"],["budgets","Budget and spend"],
   ["runs","Runs"],["enrollment","Enrollment"],["incidents","Tamper incidents"],["definition","Definition in git"]];
 var IAM_TAB_KEYS={}; IAM_TABS.forEach(function(x){IAM_TAB_KEYS[x[0]]=1;});
 
@@ -4559,8 +4557,7 @@ function pAgent(r){
     '<button class="btn" onclick="act(\'Credential rotated. The old key stops working at the next call and every live run token dies with it.\',\'gold\')">Rotate credential</button>'+
     '<button class="btn danger" onclick="act(\'Agent suspended. Every run token dies at the next call, even if the daemon is down.\')">Suspend</button>'+
     '<button class="btn danger" onclick="openDialog(\'delagent\',\''+a.key+'\')">Deregister</button>'+
-    '<button class="btn primary" onclick="S.tab.agent=\'toolbelt\';go(\''+base+'toolbelt\')">See the belt as the model sees it</button>'+
-   '</div></div>'+coachStrip(a)+tabs+body(a,r);
+   '</div></div>'+tabs+body(a,r);
 }
 
 /* ---- Identity: the principal, and the one property most of the threat model rests on ---- */
@@ -4600,7 +4597,7 @@ function aIdentity(a,r){
     '<p style="font-size:12.5px;margin:0">It holds one run token, and that token is good for talking to Oxagen and '+
     'nothing else. Every secret a call needs is minted by the broker at dispatch, scoped to that one call, and never '+
     'transmitted to the agent. A leaked run token cannot reach a tool server.</p>'+
-    '<button class="btn sm" onclick="go(\'#/'+ORG.slug+'/'+S.ws+'/tools/connections\')">See the connections that mint them</button>'+
+    '<button class="btn sm" onclick="go(\'#/'+ORG.slug+'/'+S.ws+'/tools/servers\')">See the connections that mint them</button>'+
     '</div></div></div>'+
 
   '<div class="grid g2">'+
@@ -4861,7 +4858,7 @@ function aBudgets(a,r){
     ["Input, cache read",38441227,"0.30","11.53"],["Output",2610884,"15.00","39.16"]];
   var findings=FINDINGS.filter(function(f){return f.subject===a.key;});
 
-  return '<div class="grid">'+
+  return '<div class="grid">'+coachStrip(a)+
   '<div class="grid g2">'+
    '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Budgets</h3>'+
     '<p class="muted" style="margin:2px 0 0;font-size:12px">Checked at each hook boundary against the spend the harness reports. A breach pauses the run at the next boundary: client-attested and fail-open. On the <span class="mono">gateway</span> and <span class="mono">contained</span> tiers the proxy enforces the ceiling before the call.</p></div>'+
@@ -4880,10 +4877,8 @@ function aBudgets(a,r){
     '<dt>On a breach</dt><dd><span class="mono">pause</span> at the next boundary, a '+
      '<span class="mono">policy.decision</span> frame, and the operator notified</dd>'+
     '<dt>Spend 30d</dt><dd>'+iamMoney(a.spend30,"model calls as the harness reported them + priced tool calls, client_attested")+'</dd>'+
-    '<dt>Tokens 30d</dt><dd><span class="num">'+tokn(agentTok(a).total)+'</span> · '+per(agentTok(a).cacheRate)+' served from cache</dd>'+
     '<dt>Productive ratio</dt><dd>'+per(a.ratio)+'</dd>'+
     '<dt>Runs 30d</dt><dd><span class="num">'+a.runs30.toLocaleString()+'</span></dd>'+
-    '<dt>Cost per run</dt><dd>'+(a.runs30?iamMoney((money(a.spend30)/a.runs30).toFixed(2),"mean"):'—')+'</dd>'+
     '</dl></div></div>'+
 
    '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Token accounting</h3>'+
@@ -5065,7 +5060,8 @@ function pMandate(r){
 
 /* ============================== Tools ============================== */
 function pTools(){
-  var w=ws(), t=tab("tools","registry");
+  var w=ws(), t=tab("tools","tools");
+  if(["tools","servers","policy","switches"].indexOf(t)<0) t="tools";
   if(S.state==="loading") return skeleton();
   if(S.state==="error") return errorState("Tools","503 tool_registry_unavailable");
   if(S.state==="denied") return deniedState("the tool registry","tools.read on core-platform");
@@ -5077,32 +5073,22 @@ function pTools(){
   /* Registry's count is the only one that waits on a person: observed schemas to approve. */
   var np=proposals().length;
   var tabs='<div class="tabs" role="tablist">'+
-   [["registry","Registry",np?np+" to approve":"",np?"var(--st-approval)":""],["connections","Connections",CONNECTIONS.length],["mandates","Mandates ledger",MANDATES.length],
-    ["policy","Policy",POLICIES.length],["switches","Kill switches",switchesOn()],["auto","Auto-approvals",AUTORULES.filter(function(r){return r.on;}).length]]
+   [["tools","Tools",np?np+" to approve":verCount().toLocaleString(),np?"var(--st-approval)":""],["servers","MCP servers",SERVERS.length],
+    ["policy","Policy",POLICIES.length],["switches","Kill switches",switchesOn()]]
    .map(function(x){return '<button class="tab" role="tab" aria-selected="'+(t===x[0])+'" onclick="go(\'#/'+ORG.slug+'/'+w.slug+'/tools/'+x[0]+'\')">'+x[1]+
      (x[2]?'<span class="n"'+(x[3]?' style="color:'+x[3]+'"':'')+'>'+x[2]+'</span>':'')+'</button>';}).join("")+'</div>';
 
   var body="";
-  if(t==="registry"){
+  if(t==="tools"){
     var props=proposals();
-    var srows=SERVERS.map(function(s){
-      return '<tr '+rowClick("openDialog('server','"+s.id+"')","Open "+s.name)+'>'+
-       '<td><b class="mono">'+h(s.name)+'</b><span class="sub">'+h(s.url)+'</span></td>'+
-       '<td><span class="b b-q">'+h(s.kind)+'</span><span class="sub">'+h(s.transport)+'</span></td>'+
-       '<td class="num">'+s.tools+'<span class="sub">'+s.versions+' versions</span></td>'+
-       '<td>'+(s.health==="ok"?'<span class="b b-allowed"><span class="d"></span>ok</span>':'<span class="b b-approval"><span class="d"></span>degraded</span>')+'</td>'+
-       '<td class="muted" style="font-size:12px">'+h(s.schemas)+'</td>'+
-       '<td class="muted" style="font-size:12px">'+h(s.conn)+'</td>'+
-       '<td class="muted mono" style="font-size:11px">'+h(s.imported)+'</td>'+
-       '<td class="rowacts" onclick="event.stopPropagation()"><button class="btn sm" onclick="openDialog(\'server\',\''+s.id+'\')">Open</button>'+
-       '<button class="btn sm" onclick="openDialog(\'serveredit\',\''+s.id+'\')">Edit</button>'+
-       '<button class="btn sm danger" onclick="openDialog(\'serverdel\',\''+s.id+'\')">Remove</button></td></tr>';}).join("");
     var rc=S.regCat||"", rcount={};
     TOOLS.forEach(function(x){var c=toolMeta(x.n).cat;rcount[c]=(rcount[c]||0)+1;});
     var tsel=rc?TOOLS.filter(function(x){return toolMeta(x.n).cat===rc;}):TOOLS;
     var trows=tsel.map(function(x){var m=toolMeta(x.n);
       return '<tr class="click hz-row-'+h(x.risk)+'" onclick="openDialog(\'tool\',\''+x.n+'@'+x.v+'\')">'+
-       '<td>'+toolCell(x.n+"@"+x.v)+'</td><td>'+catBadge(m.cat)+'</td>'+
+       '<td>'+toolCell(x.n+"@"+x.v)+'</td>'+
+       '<td class="rowacts" onclick="event.stopPropagation()"><button class="btn sm ghost" onclick="openDialog(\'server\',\''+h(x.s)+'\')">'+h(x.s)+'</button></td>'+
+       '<td>'+catBadge(m.cat)+'</td>'+
        '<td>'+hazard(x.risk,x.eff)+'</td><td>'+toolGate(x)+'</td>'+
        '<td><span class="b b-q">'+h(x.eg)+'</span></td><td>'+finBadge(x.fin)+'</td>'+
        '<td>'+originBadge(toolOrigin(x))+'</td>'+
@@ -5118,65 +5104,43 @@ function pTools(){
       'The gateway recorded the outputs, inferred a schema, and filed it as a registry proposal. Until an admin approves, outputs are validated only for size and type, '+
       'and every run that used them says so in its completeness record.</div>'+
       '<button class="btn" onclick="openDialog(\'schema\')">Review</button></div>':'')+
-     '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Tool servers</h3>'+
-     '<p class="muted" style="margin:2px 0 0;font-size:12px">'+srvCount()+' servers, '+verCount().toLocaleString()+' tool versions. The registry is the catalog; a belt is what one agent may reach.</p></div>'+
-     '<div class="sp"><button class="btn sm" onclick="openDialog(\'import\')">Import tools from an MCP server</button></div></div>'+
-     '<div class="tw"><table><thead><tr><th>Server</th><th>Kind</th><th class="num">Tools</th><th>Health</th><th>Schemas</th><th>Connection</th><th>Last import</th><th></th></tr></thead>'+
-     '<tbody>'+srows+'</tbody></table></div></div>'+
-     '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Tool versions</h3>'+
-     '<p class="muted" style="margin:2px 0 0;font-size:12px">RBAC reaches the version. A server shipping a new version does not silently widen a belt.</p></div>'+
-     '<div class="sp">'+namesToggle()+'<span class="b b-q">'+tsel.length+' of '+verCount().toLocaleString()+' shown</span></div></div>'+
+     '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Tools</h3>'+
+     '<p class="muted" style="margin:2px 0 0;font-size:12px">Every version imported from every server. RBAC reaches the version, so a server shipping a new one does not widen a belt.</p></div>'+
+     '<div class="sp">'+namesToggle()+'<span class="b b-q">'+tsel.length+' of '+verCount().toLocaleString()+' shown</span>'+
+     '<button class="btn sm" onclick="openDialog(\'import\')">Import from a server</button></div></div>'+
      '<div class="panel-b" style="border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:center;flex-wrap:wrap">'+
      '<div style="flex:1;min-width:0">'+catChips(rcount,rc,"S.regCat='%s';render()",TOOLS.length)+'</div>'+
      '<button class="btn sm ghost" onclick="openDialog(\'toolcats\')">What the categories mean</button></div>'+
-     '<div class="tw"><table><thead><tr><th>Tool version</th><th>Category</th><th>Hazard</th><th>Gate today</th><th>Egress</th><th>Financial</th><th>Schema origin</th><th>Digest</th>'+
+     '<div class="tw"><table><thead><tr><th>Tool version</th><th>Server</th><th>Category</th><th>Hazard</th><th>Gate today</th><th>Egress</th><th>Financial</th><th>Schema origin</th><th>Digest</th>'+
      '<th class="num">On belts</th><th class="num">Calls 30d</th></tr></thead><tbody>'+trows+'</tbody></table></div>'+
-     '<div class="panel-b"><div class="note">A financial tool whose schema does not expose an amount cannot be granted a mandate and is denied by construction. '+
-     'The gate shown is today’s: the version’s own kill switch, then its server’s, then the mandate rule, then <span class="mono">pol_v41</span>.</div></div></div>'+
+     '<div class="panel-b"><div class="note">The gate shown is today’s: the version’s own kill switch, then its server’s, then <span class="mono">pol_v41</span>. '+
+     'Open a server on any row to see what it imported and the connection it is reached with.</div></div></div>'+
      '</div>';
-  } else if(t==="connections"){
-    body='<div class="panel"><div class="panel-h"><h3>Connections</h3>'+
-     '<button class="btn sm" style="margin-left:auto" onclick="openDialog(\'connection\')">Add a connection</button></div>'+
-     '<div class="panel-b" style="border-bottom:1px solid var(--border)"><p class="muted" style="margin:0;font-size:12.5px">'+
-     'Enveloped under the organization key, every read audited. <b>No agent holds any of these.</b> For each dispatched call the broker mints the narrowest credential the provider allows.</p></div>'+
-     '<div class="tw"><table><thead><tr><th>Connection</th><th>Kind</th><th>Owner</th><th>Servers</th><th>Downscope</th>'+
-     '<th class="num">Grants 30d</th><th>Reviewed</th><th>Next review</th><th>Status</th><th></th></tr></thead><tbody>'+
-     CONNECTIONS.map(function(c){
-      var due=c.status==="review due";
-      return '<tr '+rowClick("openDialog('conn','"+c.id+"')","Open "+c.name)+'><td><b>'+h(c.name)+'</b><div class="dim mono" style="font-size:10.5px">'+h(c.id)+'</div></td>'+
-       '<td class="mono" style="font-size:11.5px">'+h(c.kind)+'</td><td>'+h(c.owner)+'</td>'+
-       '<td class="mono dim" style="font-size:11.5px">'+h(c.servers)+'</td>'+
-       '<td class="mono" style="font-size:11.5px">'+h(c.downscope)+'</td>'+
-       '<td class="num">'+c.grants30.toLocaleString()+'</td><td>'+h(c.reviewed)+'</td><td>'+h(c.next)+'</td>'+
-       '<td><span class="b b-'+(due?"approval":c.status.indexOf("financial")>-1?"critical":"allowed")+'"><span class="d"></span>'+h(c.status)+'</span></td>'+
-       '<td class="rowacts" onclick="event.stopPropagation()"><button class="btn sm" onclick="openDialog(\'conn\',\''+c.id+'\')">Open</button>'+
-       '<button class="btn sm" onclick="openDialog(\'connedit\',\''+c.id+'\')">Edit</button>'+
-       '<button class="btn sm danger" onclick="openDialog(\'connrevoke\',\''+c.id+'\')">Revoke</button></td></tr>';}).join("")+
+  } else if(t==="servers"){
+    body='<div class="grid">'+
+     '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>MCP servers</h3>'+
+     '<p class="muted" style="margin:2px 0 0;font-size:12px">'+srvCount()+' servers hold '+verCount().toLocaleString()+' tool versions. Open one to authorize it, re-import its tools, or see what it imported.</p></div>'+
+     '<div class="sp"><button class="btn sm primary" onclick="openDialog(\'import\')">Add a server</button></div></div>'+
+     '<div class="tw"><table><thead><tr><th>Server</th><th>Kind</th><th class="num">Tools</th><th>Health</th><th>Connection</th><th>Authorization</th><th>Last import</th><th></th></tr></thead><tbody>'+
+     SERVERS.map(function(sv){
+      var c=connByServer(sv.id);
+      return '<tr '+rowClick("openDialog('server','"+sv.id+"')","Open "+sv.name)+'>'+
+       '<td><b class="mono">'+h(sv.name)+'</b><span class="sub">'+h(sv.url)+'</span></td>'+
+       '<td><span class="b b-q">'+h(sv.kind)+'</span><span class="sub">'+h(sv.transport)+'</span></td>'+
+       '<td class="num">'+sv.tools+'<span class="sub">'+sv.versions+' versions</span></td>'+
+       '<td>'+(sv.health==="ok"?'<span class="b b-allowed"><span class="d"></span>ok</span>':'<span class="b b-approval"><span class="d"></span>degraded</span>')+'</td>'+
+       '<td style="font-size:12px">'+(c?h(c.name)+'<div class="dim mono" style="font-size:10.5px">'+h(c.kind)+'</div>':'<span class="dim">'+h(sv.conn)+'</span>')+'</td>'+
+       '<td>'+authBadge(sv)+'</td>'+
+       '<td class="muted mono" style="font-size:11px">'+h(sv.imported)+'</td>'+
+       '<td class="rowacts" onclick="event.stopPropagation()"><button class="btn sm" onclick="openDialog(\'server\',\''+sv.id+'\')">Open</button>'+
+       (needsAuth(sv)?'<button class="btn sm primary" onclick="openDialog(\'oauth\',\''+sv.id+'\')">'+(c&&c.authState==="expired"?"Reconnect":"Connect")+'</button>':'')+
+       '<button class="btn sm danger" onclick="openDialog(\'serverdel\',\''+sv.id+'\')">Remove</button></td></tr>';}).join("")+
      '</tbody></table></div>'+
-     (function(){var od=CONNECTIONS.filter(function(c){return c.status==="review due";});
-       return od.length?'<div class="panel-b"><div class="warn"><b>'+od.length+' connection'+(od.length>1?'s are':' is')+' past its review date.</b> '+
-        od.map(function(c){return h(c.name)+' was due '+h(c.next)+' and has issued '+c.grants30.toLocaleString()+' grants in 30 days';}).join('. ')+'. '+
-        'Revoking a connection invalidates every grant it minted at the next use.</div></div>':'';})()+'</div>'+
-     grantsLog();
-  } else if(t==="mandates"){
-    var m=MANDATES[0];
-    body='<div class="panel"><div class="panel-h"><h3>Mandates ledger</h3>'+
-     '<button class="btn sm" style="margin-left:auto" onclick="openDialog(\'mandate\')">Grant a mandate</button></div>'+
-     '<div class="tw"><table><thead><tr><th>Mandate</th><th>Agent</th><th>Granted by</th><th>Purpose</th>'+
-     '<th class="num">Per call</th><th class="num">Per period</th><th class="num">Settled</th><th class="num">Reserved</th><th class="num">Remaining</th><th>Valid to</th><th>Status</th><th></th></tr></thead><tbody>'+
-     '<tr class="click" onclick="go(\'#/'+ORG.slug+'/finops/agents/invoice-bot/mandates/'+m.id+'\')">'+
-     '<td class="mono">'+h(m.id)+'</td><td class="mono" style="font-size:11.5px">'+h(m.agent)+'</td>'+
-     '<td>'+h(m.by)+'<div class="dim mono" style="font-size:10.5px">'+h(m.roleAt)+'</div></td>'+
-     '<td style="font-size:12px">'+h(m.purpose)+'</td>'+
-     '<td class="num">'+usd(m.perCall)+'</td><td class="num">'+usd(m.perPeriod)+'</td>'+
-     '<td class="num">'+usd(m.used)+'</td><td class="num" style="color:var(--st-approval)">'+usd(m.reserved)+'</td>'+
-     '<td class="num">'+usd(m.remaining)+'</td><td>'+h(m.to)+'</td>'+
-     '<td><span class="b b-allowed"><span class="d"></span>'+h(m.status)+'</span></td>'+
-     '<td class="rowacts" onclick="event.stopPropagation()"><button class="btn sm" onclick="openDialog(\'mandateedit\',\''+m.id+'\')">Edit limits</button>'+
-     '<button class="btn sm danger" onclick="openDialog(\'mandaterevoke\',\''+m.id+'\')">Revoke</button></td></tr>'+
-     '</tbody></table></div><div class="panel-b">'+
-     '<div class="warn"><b>One exception, severity critical.</b> The connection’s Stripe webhook reported a charge on <span class="mono">con_01K2A9</span> that has no receipt: '+
-     'Stripe charge <span class="mono">ch_3Qa8</span>, $18.00 USD, 2026-09-11 08:40Z. Money moved that Oxagen did not govern.</div></div></div>';
+     (function(){var ex=CONNECTIONS.filter(function(c){return c.authState==="expired"||c.status==="review due";});
+       return ex.length?'<div class="panel-b"><div class="warn"><b>'+ex.length+' connection'+(ex.length>1?'s need':' needs')+' attention.</b> '+
+        ex.map(function(c){return h(c.name)+(c.authState==="expired"?' has an expired token; calls through it are denied until it is reconnected':' was due for review '+h(c.next));}).join('. ')+'.</div></div>':'';})()+
+     '</div>'+
+     grantsLog()+'</div>';
   } else if(t==="policy"){
     body='<div class="panel"><div class="panel-h"><h3>Policy versions</h3>'+
      '<div class="sp"><span class="b b-q">Cedar · deterministic · no model in the decision path</span>'+
@@ -5200,8 +5164,6 @@ function pTools(){
      '<pre><span class="c">// a payment requires a prior quote call in the same run</span>\n'+
      '<span class="k">forbid</span> (principal, action == Action::<span class="s">"stripe__create_payment"</span>, resource)\n'+
      '<span class="k">unless</span> { context.run.has_prior_call(<span class="s">"stripe__list_prices"</span>) };</pre></div></div>';
-  } else if(t==="auto"){
-    body=autoRulesBody();
   } else if(t==="switches"){
     var cls=SWITCHES.filter(function(s){return s.cls;}), rest=SWITCHES.filter(function(s){return !s.cls;});
     body='<div class="ks-stack">'+
@@ -5259,32 +5221,122 @@ function serverById(id){for(var i=0;i<SERVERS.length;i++){if(SERVERS[i].id===id)
 function connById(id){for(var i=0;i<CONNECTIONS.length;i++){if(CONNECTIONS[i].id===id)return CONNECTIONS[i];}return null;}
 function serverTools(id){return TOOLS.filter(function(x){return x.s===id;});}
 function serverConns(id){return CONNECTIONS.filter(function(c){return String(c.servers).split(/[\s,]+/).indexOf(id)>-1;});}
+function connByServer(id){var c=serverConns(id);return c.length?c[0]:null;}
+/* A server reached in-process or over a harness hook holds no credential, so it has nothing to
+   authorize. Everything else is reached as somebody, and that somebody has to be connected. */
+function needsAuth(sv){return sv.conn!=="none";}
+var AUTH_BADGE={connected:["allowed","connected"],expired:["critical","token expired"],"key held":["allowed","key held"],"role assumed":["allowed","role assumed"]};
+function authBadge(sv){
+  if(!needsAuth(sv)) return '<span class="b b-q">none needed</span>';
+  var c=connByServer(sv.id);
+  if(!c) return '<span class="b b-approval"><span class="d"></span>not connected</span>';
+  var a=AUTH_BADGE[c.authState]||["approval",c.authState||"not connected"];
+  return '<span class="b b-'+a[0]+'"><span class="d"></span>'+h(a[1])+'</span>'+
+   (c.tokenExp?'<div class="dim" style="font-size:10.5px">'+h(c.tokenExp)+'</div>':'');
+}
+function oauthKind(c){return c&&(c.kind==="oauth"||c.kind==="github_app");}
+/* Configure once, then authorize by clicking. The redirect comes back to Oxagen, the token is
+   enveloped under the organization key on arrival, and no agent ever holds it. */
+DLG_EXT.oauth=function(id){
+  var sv=serverById(id); if(!sv) return noSuch("Tool server");
+  var c=connByServer(sv.id), back=c&&c.authState==="expired";
+  return {t:(back?"Reconnect ":"Connect ")+sv.name,s:"OAuth · you authorize it, Oxagen holds the token",w:false,
+   b:(back?'<div class="warn"><b>The token expired '+h(c.tokenExp)+'.</b> Calls through this connection are denied until you authorize it again. Nothing else about the connection changes.</div>':'')+
+    '<div class="field"><label for="oa-client">Client id</label><input id="oa-client" value="'+h(c&&c.client||"")+'" placeholder="issued by '+h(sv.name)+'" autocomplete="off"></div>'+
+    '<div class="field"><label for="oa-secret">Client secret</label><input id="oa-secret" type="password" placeholder="'+(c&&c.client?"leave empty to keep the current one":"issued by "+sv.name)+'" autocomplete="off"></div>'+
+    '<div class="field"><label for="oa-url">Authorization URL</label><input id="oa-url" value="'+h(c&&c.authUrl||"")+'" placeholder="https://'+h(sv.name)+'.com/oauth/authorize"></div>'+
+    '<div class="field"><label for="oa-scopes">Scopes</label><input id="oa-scopes" value="'+h(c&&c.scopes||"")+'" placeholder="read, write">'+
+    '<div class="hint">Ask for the narrowest set the tools need. The broker downscopes again per call, but it cannot ask for less than nothing.</div></div>'+
+    '<div class="field"><label>Redirect URL</label><div class="mono" style="font-size:12px">'+h(ASST_ENGINE_URL.replace(/^https?:\/\//,"https://"))+'/oauth/callback</div>'+
+    '<div class="hint">Register this with '+h(sv.name)+' before you authorize.</div></div>'+
+    '<div class="note">Authorizing opens '+h(sv.name)+' in a new tab. When it redirects back, Oxagen exchanges the code, envelopes the token under the organization key, and records who authorized it. The token is never returned to a screen and never sent to an agent.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
+    '<button class="btn primary" onclick="oauthAuthorize(\''+sv.id+'\')">Authorize with '+h(sv.name)+'</button>'};
+};
+function oauthAuthorize(id){
+  var sv=serverById(id); if(!sv) return;
+  function v(k){var n=el(k);return n?n.value.trim():"";}
+  var client=v("oa-client"), url=v("oa-url"), scopes=v("oa-scopes");
+  if(!client||!url){ act("A client id and an authorization URL come first. "+sv.name+" issues both when you register Oxagen as an app."); return; }
+  var c=connByServer(sv.id);
+  if(!c){
+    c={id:"con_"+rid(6,"0123456789ABCDEFGHJKMNPQRSTVWXYZ"),kind:"oauth",name:sv.name+" · "+ORG.name,owner:"Marcus Bell",servers:sv.id,
+       reviewed:"2026-09-11",next:"2026-12-10",grants30:0,status:"active",downscope:"token exchange"};
+    CONNECTIONS.push(c);
+    sv.conn=c.name;
+  }
+  c.client=client; c.authUrl=url; if(scopes) c.scopes=scopes;
+  c.authState="connected"; c.tokenExp="2026-12-20 09:00 UTC";
+  closeDialog(); render();
+  act(sv.name+" authorized as "+c.owner+". The token is enveloped under the organization key and expires "+c.tokenExp+".","gold");
+}
+function oauthRefresh(cid){
+  var c=connById(cid); if(!c) return;
+  c.authState="connected"; c.tokenExp="2026-12-20 09:00 UTC";
+  closeDialog(); render();
+  act("Refreshed against the provider. The new token expires "+c.tokenExp+"; grants already minted keep their own TTL.");
+}
+function oauthDisconnect(cid){
+  var c=connById(cid); if(!c) return;
+  c.authState="not connected"; c.tokenExp="";
+  closeDialog(); render();
+  act("Disconnected "+c.name+". Every call through it is denied until it is authorized again.");
+}
+function serverReimport(id){
+  var sv=serverById(id); if(!sv) return;
+  sv.imported="2026-09-11 09:14 UTC";
+  closeDialog(); render();
+  act("Re-imported "+sv.name+" from tools/list. New versions land as new rows; nothing widens a belt on its own.");
+}
 function noSuch(what){return {t:what,w:false,b:'<div class="note">That record is no longer here.</div>',
   f:'<button class="btn" onclick="closeDialog()">Close</button>'};}
 
 DLG_EXT.server=function(id){
-  var s=serverById(id); if(!s) return noSuch("Tool server");
-  var tv=serverTools(s.id), cs=serverConns(s.id), props=proposals().filter(function(p){return p.s===s.id;});
-  return {t:s.name,s:s.url,w:true,
-   b:(s.health==="ok"?'':'<div class="warn"><b>This server is degraded.</b> Calls to it are retried once and then denied; the run says so on its frames.</div>')+
+  var sv=serverById(id); if(!sv) return noSuch("Tool server");
+  var tv=serverTools(sv.id), c=connByServer(sv.id), props=proposals().filter(function(p){return p.s===sv.id;});
+  var conn=c
+   ? '<dl class="kv"><dt>Connection</dt><dd>'+h(c.name)+' <span class="dim mono" style="font-size:11px">'+h(c.id)+' · '+h(c.kind)+'</span></dd>'+
+     '<dt>Authorization</dt><dd>'+authBadge(sv)+'</dd>'+
+     '<dt>Scopes</dt><dd class="mono" style="font-size:11.5px">'+h(c.scopes||"—")+'</dd>'+
+     '<dt>Owner</dt><dd>'+h(c.owner)+' · reviewed '+h(c.reviewed)+', next '+h(c.next)+'</dd>'+
+     '<dt>What the broker mints</dt><dd>'+h(brokerMints(c.downscope))+'</dd>'+
+     '<dt>Grants 30d</dt><dd>'+c.grants30.toLocaleString()+'</dd></dl>'+
+     '<div class="row" style="margin-top:11px">'+
+      (oauthKind(c)
+        ? '<button class="btn sm primary" onclick="openDialog(\'oauth\',\''+sv.id+'\')">'+(c.authState==="expired"?"Reconnect":"Reconfigure OAuth")+'</button>'+
+          (c.authState==="connected"?'<button class="btn sm" onclick="oauthRefresh(\''+c.id+'\')">Refresh the token</button>':'')
+        : '')+
+      '<button class="btn sm" onclick="openDialog(\'connedit\',\''+c.id+'\')">Edit the connection</button>'+
+      (oauthKind(c)&&c.authState==="connected"?'<button class="btn sm" onclick="oauthDisconnect(\''+c.id+'\')">Disconnect</button>':'')+
+      '<button class="btn sm danger" onclick="openDialog(\'connrevoke\',\''+c.id+'\')">Revoke</button></div>'
+   : needsAuth(sv)
+     ? '<div class="note">This server is reached as somebody, and nobody is connected yet. Every call to it is denied until it is.</div>'+
+       '<div class="row" style="margin-top:11px"><button class="btn sm primary" onclick="openDialog(\'oauth\',\''+sv.id+'\')">Connect with OAuth</button>'+
+       '<button class="btn sm" onclick="openDialog(\'connection\')">Add a key or a role instead</button></div>'
+     : '<div class="note">Reached '+h(sv.transport)+', with no credential to hold. There is nothing here to authorize.</div>';
+  return {t:sv.name,s:sv.url,w:true,
+   b:(sv.health==="ok"?'':'<div class="warn"><b>This server is degraded.</b> Calls to it are retried once and then denied; the run says so on its frames.</div>')+
+    (c&&c.authState==="expired"?'<div class="warn"><b>The token expired '+h(c.tokenExp)+'.</b> Reconnect to bring the '+tv.length+' tools below back into reach.</div>':'')+
     (props.length?'<div class="warn"><b>'+props.length+' schema'+(props.length>1?'s are':' is')+' awaiting approval.</b> '+
       'Until an admin approves, outputs are validated only for size and type.</div>':'')+
-    '<dl class="kv"><dt>Kind</dt><dd class="mono">'+h(s.kind)+' · '+h(s.transport)+'</dd>'+
-    '<dt>Connection</dt><dd>'+h(s.conn)+'</dd>'+
-    '<dt>Schemas</dt><dd>'+h(s.schemas)+'</dd>'+
-    '<dt>Tool versions</dt><dd>'+s.versions+' across '+s.tools+' tools</dd>'+
-    '<dt>Last import</dt><dd class="mono">'+h(s.imported)+'</dd></dl>'+
-    (tv.length?'<p class="eyebrow" style="margin:16px 0 8px">Tool versions on belts</p>'+
-     '<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Tool version</th><th>Hazard</th><th class="num">On belts</th><th class="num">Calls 30d</th></tr></thead><tbody>'+
-     tv.slice(0,8).map(function(x){return '<tr><td class="mono" style="font-size:11.5px">'+h(x.n)+'@'+h(x.v)+'</td><td>'+hazard(x.risk,x.eff)+'</td>'+
-      '<td class="num">'+x.belts+'</td><td class="num">'+x.calls30.toLocaleString()+'</td></tr>';}).join("")+
-     '</tbody></table></div>'+(tv.length>8?'<p class="muted" style="font-size:12px;margin:8px 0 0">The leading 8 of '+tv.length+'. The registry table holds every one.</p>':''):'')+
-    (cs.length?'<p class="eyebrow" style="margin:16px 0 8px">Connections that reach it</p><div class="row">'+
-     cs.map(function(c){return '<button class="btn sm" onclick="openDialog(\'conn\',\''+c.id+'\')">'+h(c.name)+'</button>';}).join("")+'</div>':''),
-   f:'<button class="btn danger" onclick="openDialog(\'serverdel\',\''+s.id+'\')">Remove</button>'+
+    '<dl class="kv"><dt>Kind</dt><dd class="mono">'+h(sv.kind)+' · '+h(sv.transport)+'</dd>'+
+    '<dt>Schemas</dt><dd>'+h(sv.schemas)+'</dd>'+
+    '<dt>Tool versions</dt><dd>'+sv.versions+' across '+sv.tools+' tools</dd>'+
+    '<dt>Last import</dt><dd class="mono">'+h(sv.imported)+'</dd></dl>'+
+    '<p class="eyebrow" style="margin:18px 0 8px">Authorization</p>'+conn+
+    '<p class="eyebrow" style="margin:18px 0 8px">Tools imported from '+h(sv.name)+'</p>'+
+    (tv.length
+     ? '<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Tool version</th><th>Hazard</th><th>Gate today</th><th class="num">On belts</th><th class="num">Calls 30d</th></tr></thead><tbody>'+
+       tv.map(function(x){return '<tr class="click" onclick="openDialog(\'tool\',\''+x.n+'@'+x.v+'\')"><td class="mono" style="font-size:11.5px">'+h(x.n)+'@'+h(x.v)+'</td>'+
+        '<td>'+hazard(x.risk,x.eff)+'</td><td>'+toolGate(x)+'</td>'+
+        '<td class="num">'+x.belts+'</td><td class="num">'+x.calls30.toLocaleString()+'</td></tr>';}).join("")+
+       '</tbody></table></div>'+
+       '<p class="muted" style="font-size:12px;margin:8px 0 0">'+tv.length+' of the '+sv.versions+' versions this server has shipped are in the registry. Re-import to pull the rest.</p>'
+     : '<div class="note">Nothing from this server is in the registry yet. Re-import to pull its <span class="mono">tools/list</span>.</div>'),
+   f:'<button class="btn danger" onclick="openDialog(\'serverdel\',\''+sv.id+'\')">Remove</button>'+
     '<span class="grow"></span>'+
-    '<button class="btn" onclick="closeDialog();act(\'Re-importing from tools/list. New versions land as new rows; nothing widens a belt on its own.\')">Re-import</button>'+
-    '<button class="btn primary" onclick="openDialog(\'serveredit\',\''+s.id+'\')">Edit</button>'};
+    '<button class="btn" onclick="serverReimport(\''+sv.id+'\')">Re-import tools</button>'+
+    '<button class="btn primary" onclick="openDialog(\'serveredit\',\''+sv.id+'\')">Edit</button>'};
 };
 DLG_EXT.serveredit=function(id){
   var s=serverById(id); if(!s) return noSuch("Tool server");
@@ -6794,12 +6846,9 @@ function copyTab(){
      '<td class="mono" style="font-size:11.5px">'+h(c.bundle)+'</td>'+
      '<td class="muted" style="font-size:12px">'+h(c.seen)+'</td></tr>';}).join("");
 
-  return (stale.length?'<div class="banner"><span class="b b-approval" style="flex:none"><span class="d"></span>'+stale.length+' out of step</span>'+
-    '<div class="grow"><b>A working copy that is behind is not a run that is behind.</b> '+
-    'Steering reaches a run in the signed bundle and at the hooks, from the merged commit, whatever the directory on the operator’s disk holds. '+
-    'What a stale copy costs is the person: they read rules that are no longer in force.</div>'+
-    '<button class="btn" onclick="act(\'Sent oxagen pull to 2 machines\',\'gold\')">Ask them to pull</button></div>':'')+
-   '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Working copies</h3>'+
+  /* The banner that used to sit here said in a paragraph what the .oxagen/ column says in a
+     word, on the row of the copy it is true of. The count is already on the tab. */
+  return '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Working copies</h3>'+
    '<p class="muted" style="margin:2px 0 0;font-size:12px">The same <span class="mono">.oxagen/</span> tree on a machine. Each is a directory somebody ran <span class="mono">oxagen init</span> in; the enrollment is the machine’s, and the link is one gitignored file.</p></div>'+
    '<div class="sp"><button class="btn primary" onclick="openDialog(\'linkdir\')">Connect a directory</button></div></div>'+
    '<div class="tw"><table><thead><tr><th>Directory</th><th>Repository</th><th>Branch</th><th>.oxagen/</th><th>Symlinks</th><th>Bundle</th><th>Last seen</th></tr></thead>'+
@@ -7656,7 +7705,7 @@ function pOrganization(){
 
   var tabs='<div class="tabs" role="tablist">'+
    [["people","People",MEMBERS.length],["roles","Roles",ROLES.length],["invitations","Invitations",INVITES.length],["workspaces","Workspaces",WS.length],
-    ["funding","Model funding and routes"],["plane","Data plane"],["keys","API keys"]]
+    ["funding","Model funding and routes"],["keys","API keys"]]
    .map(function(x){return '<button class="tab" role="tab" aria-selected="'+(t===x[0])+'" onclick="orgTab(\''+x[0]+'\')">'+x[1]+(x[2]?'<span class="n">'+x[2]+'</span>':'')+'</button>';}).join("")+'</div>';
 
   var body="";
@@ -7674,11 +7723,7 @@ function pOrganization(){
        '<td class="rowacts"><button class="btn sm" onclick="openDialog(\'member\',\''+m.p+'\')">Open</button><button class="btn sm" onclick="openDialog(\'role\',\''+m.p+'\')">Change role</button><button class="btn sm danger" onclick="openDialog(\'removemember\',\''+m.p+'\')">Remove</button></td></tr>';}).join("")+
      '</tbody></table></div><div class="panel-b">'+
      '<div class="note">Changing a role is a governed action. It passes IAM, writes an audit record, and bills as one action.</div></div></div>'+
-     '<div class="grid g2" style="margin-top:14px">'+
-     '<div class="panel"><div class="panel-h"><h3>Delegation ceiling</h3></div><div class="panel-b">'+
-     '<p class="muted" style="font-size:12.5px">An agent’s effective permission is its own grants intersected with the invoking human’s grants. Subagents can only narrow. This is what stops a confused deputy.</p>'+
-     '<pre>effective = agent.grants\n          ∩ operator.grants\n          ∩ policy_bundle\n          ∩ kill_switches</pre></div></div>'+
-     rolesInUsePanel()+'</div>';
+     '<div style="margin-top:14px">'+rolesInUsePanel()+'</div>';
   } else if(t==="roles"){
     body=rolesBody();
   } else if(t==="invitations"){
@@ -7687,8 +7732,8 @@ function pOrganization(){
      '<thead><tr><th>Email</th><th>Role offered</th><th>Invited by</th><th>Sent</th><th>Expires</th><th></th></tr></thead><tbody>'+
      INVITES.map(function(i){return '<tr><td class="mono" style="font-size:12px">'+h(i.email)+'</td>'+
       '<td class="mono" style="font-size:11.5px">'+h(i.role)+'</td><td>'+h(i.by)+'</td><td>'+h(i.sent)+'</td><td>'+h(i.expires)+'</td>'+
-      '<td><button class="btn sm" onclick="act(\'Invitation resent.\')">Resend</button> '+
-      '<button class="btn sm danger" onclick="act(\'Invitation revoked.\')">Revoke</button></td></tr>';}).join("")+
+      '<td class="rowacts"><button class="btn sm" onclick="inviteResend(\''+h(i.email)+'\')">Resend</button>'+
+      '<button class="btn sm danger" onclick="openDialog(\'invrevoke\',\''+h(i.email)+'\')">Revoke</button></td></tr>';}).join("")+
      '</tbody></table></div></div>';
   } else if(t==="workspaces"){
     body='<div class="panel"><div class="panel-h"><h3>Workspaces</h3>'+
@@ -7703,17 +7748,7 @@ function pOrganization(){
      '</tbody></table></div><div class="panel-b">'+
      '<div class="note">Changing which repository is main is an org-owner action with approval, recorded as a security event. A repository may be linked to more than one workspace; it is main for at most one.</div></div></div>';
   } else if(t==="funding"){
-    body=orgKeyPanel()+'<div style="height:14px"></div>'+orgRoutesPanel()+'<div class="split" style="margin-top:14px">'+orgFirewallRoutesPanel()+
-     '<div class="panel"><div class="panel-h"><h3>Funding source</h3></div><div class="panel-b">'+
-     '<div class="field"><label>Source</label><select aria-label="Funding source"><option>platform — Oxagen pays, billed back at vendor cost plus a published markup</option><option>customer_key — your own OpenRouter or vendor key</option></select>'+
-     '<div class="hint">A new organization starts on <span class="mono">platform</span>, capped per organization. A customer key may point at OpenRouter or directly at a vendor.</div></div>'+
-     '<dl class="kv"><dt>Current</dt><dd><span class="b b-allowed"><span class="d"></span>platform</span></dd>'+
-     '<dt>Cap</dt><dd>$2,000.00 USD per month · <span id="orgCapUsed">'+usd(fmt2(orgRoutesTotal()))+'</span> used in '+h(SPEND.month)+', the total of the routes · the same lines are on Spend, By model</dd>'+
-     '<dt>Key storage</dt><dd>enveloped, tested before save, never returned, every read audited</dd>'+
-     '<dt>No call reads the environment</dt><dd>keys and routes come from the model layer’s resolver; a path that bypasses it is a defect</dd></dl>'+
-     '<button class="btn" style="margin-top:12px" onclick="openDialog(\'funding\')">Change funding source</button></div></div></div>';
-  } else if(t==="plane"){
-    body=orgPlaneBody();
+    body=orgKeyPanel()+'<div style="height:14px"></div>'+orgRoutesPanel();
   } else {
     var KST={ok:["b-allowed","active"],expiring:["b-approval","expires in 21 days"],unused:["b-q","never used"]};
     body='<div class="panel"><div class="panel-h"><h3>API keys</h3>'+
@@ -7775,7 +7810,7 @@ var ORG_ROUTES=[
   provider:"Voyage AI (direct)",route:"rerank-2.5",resolves:"rerank-2.5",fallback:"",calls:31206,unit:"calls",cost:"9.36",
   fw:{endpoint:"https://embed.a-intel.internal",dialect:"—",served:"bge-reranker-v2-m3"}}
 ];
-var ORG_ROUTE_PROVIDERS=["OpenRouter","Anthropic (direct)","OpenAI (direct)","Voyage AI (direct)","In-firewall endpoint"];
+var ORG_ROUTE_PROVIDERS=["OpenRouter","Anthropic (direct)","OpenAI (direct)","Voyage AI (direct)"];
 function orgRouteUse(r){
   if(r.spendModel){var m=null;SPEND.byModel.forEach(function(x){if(x.m===r.spendModel)m=x;});
     if(m) return {calls:m.calls,unit:"calls",cost:money(m.spend)};}
@@ -7811,125 +7846,26 @@ function orgRoutesPanel(){
    '</tbody></table></div><div class="panel-b">'+
    '<div class="note">Tiers point at rolling aliases so “latest” stays current without a deploy. Every <span class="mono">model.response</span> frame records the concrete model id the provider returned, and the cost record prices <i>that</i> id — so a replay names the exact model and a price is never looked up by alias. The complex row is the Oxagenant line on Spend.</div></div></div>';
 }
-function orgFirewallRoutesPanel(){
-  return '<div class="panel"><div class="panel-h"><h3>In-firewall routes</h3>'+
-   '<div class="sp"><span class="b b-q">preview · behind-the-firewall deployment</span><span class="b b-q">air-gapped mode</span></div></div>'+
-   '<div class="panel-b" style="padding-bottom:0"><p class="muted" style="font-size:12.5px;margin:0">What each tier resolves to when the deployment runs inside your network. '+h(ORG.name)+' is on the <b>'+h(ORG.dataPlane)+'</b> plane, so none of these is in effect today.</p></div>'+
-   '<div class="tw"><table data-lt="off"><thead><tr><th>Tier</th><th>Endpoint</th><th>Dialect</th><th>Model served inside the network</th><th></th></tr></thead><tbody>'+
-   ORG_ROUTES.map(function(r,i){return '<tr data-fwroute="'+h(r.tier)+'"><td class="mono">'+h(r.tier)+'</td><td class="mono" style="font-size:11.5px">'+h(r.fw.endpoint)+'</td>'+
-    '<td style="font-size:12px">'+h(r.fw.dialect)+'</td><td class="mono" style="font-size:11.5px">'+h(r.fw.served)+'</td>'+
-    '<td class="rowacts"><button class="btn sm" onclick="openDialog(\'editroute\',\'fw:'+i+'\')">Edit</button></td></tr>';}).join("")+
-   '</tbody></table></div><div class="panel-b">'+
-   '<div class="note">Air-gapped is a supported mode, not a degraded one. Embeddings default to Voyage’s API in the cloud and to a self-served model here; one model per index makes that a per-deployment choice, never a mixed state. Changing an embedding route rebuilds the index rather than mixing two spaces.</div></div></div>';
-}
 DLG_EXT.editroute=function(arg){
-  var fw=typeof arg==="string"&&arg.indexOf("fw:")===0, i=parseInt(fw?arg.slice(3):arg,10), r=ORG_ROUTES[i];
+  var i=parseInt(arg,10), r=ORG_ROUTES[i];
   if(!r) return {t:"Edit a route",w:false,b:'<div class="note">No route selected.</div>',f:'<button class="btn" onclick="closeDialog()">Close</button>'};
-  var prov=fw?"In-firewall endpoint":r.provider;
-  var opts=ORG_ROUTE_PROVIDERS.map(function(p){var inFw=p==="In-firewall endpoint";
-    return '<option'+(p===prov?' selected':'')+((inFw&&!fw)||(!inFw&&fw)?' disabled':'')+'>'+h(p)+(inFw&&!fw?' — behind the firewall only':'')+'</option>';}).join("");
-  return {t:"Edit the "+r.tier+" route",s:fw?"in-firewall route · preview until a behind-the-firewall deployment exists":"organization setting · platform default",w:false,
+  var opts=ORG_ROUTE_PROVIDERS.map(function(p){return '<option'+(p===r.provider?' selected':'')+'>'+h(p)+'</option>';}).join("");
+  return {t:"Edit the "+r.tier+" route",s:"organization setting · platform default",w:false,
    b:'<div class="field"><label for="rtProv">Provider</label><select id="rtProv">'+opts+'</select>'+
-     '<div class="hint">OpenRouter, a vendor directly, or an endpoint inside your network. The last is offered only on a behind-the-firewall deployment; '+h(ORG.name)+' is on '+h(ORG.dataPlane)+'.</div></div>'+
-     (fw?'<div class="field"><label for="rtEnd">Endpoint</label><input id="rtEnd" value="'+h(r.fw.endpoint)+'"></div>'+
-        '<div class="field"><label for="rtServed">Model served inside the network</label><input id="rtServed" value="'+h(r.fw.served)+'"></div>'
-       :'<div class="field"><label for="rtRoute">Route</label><input id="rtRoute" value="'+h(r.route)+'"></div>'+
-        '<div class="field"><label for="rtFb">Fallback on a provider error</label><input id="rtFb" value="'+h(r.fallback)+'" placeholder="none"></div>')+
+     '<div class="hint">OpenRouter, or a vendor directly.</div></div>'+
+     '<div class="field"><label for="rtRoute">Route</label><input id="rtRoute" value="'+h(r.route)+'"></div>'+
+     '<div class="field"><label for="rtFb">Fallback on a provider error</label><input id="rtFb" value="'+h(r.fallback)+'" placeholder="none"></div>'+
      '<div class="note">Configure the alias, record the concrete model. Every fallback is a frame, so a run shows exactly which model answered and why.</div>',
-   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="orgRouteSave(\''+h(String(arg))+'\')">Save route</button>'};
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="orgRouteSave('+i+')">Save route</button>'};
 };
-function orgRouteSave(arg){
-  var fw=arg.indexOf("fw:")===0, r=ORG_ROUTES[parseInt(fw?arg.slice(3):arg,10)]; if(!r){closeDialog();return;}
+function orgRouteSave(i){
+  var r=ORG_ROUTES[i]; if(!r){closeDialog();return;}
   function v(id){var n=el(id);return n?n.value.trim():null;}
-  if(fw){if(v("rtEnd"))r.fw.endpoint=v("rtEnd");if(v("rtServed"))r.fw.served=v("rtServed");}
-  else{var p=el("rtProv");if(p&&p.value.indexOf("In-firewall")<0)r.provider=p.value;if(v("rtRoute"))r.route=v("rtRoute");if(v("rtFb")!==null)r.fallback=v("rtFb");}
+  var p=el("rtProv"); if(p)r.provider=p.value;
+  if(v("rtRoute"))r.route=v("rtRoute");
+  if(v("rtFb")!==null)r.fallback=v("rtFb");
   closeDialog();act("The "+r.tier+" route was saved. Recorded as a control-plane event; it applies at the next model call.");
 }
-
-/* Data plane: one binding, three deployment modes. The org is on ORG.dataPlane; the other two render as previews. */
-S.planeView=null;
-var PLANE_MODES=[
- ["shared","Shared","Tenant data on Oxagen’s shared plane, isolated by row-level security with no bypass setting."],
- ["dedicated","Dedicated","Your own Postgres cluster and object-storage bucket. Identity, IAM, billing and the price book stay on the shared plane."],
- ["firewall","Behind the firewall","The same containers, as a signed bundle you run. Outbound only, and optional. Fully air-gapped is supported, not degraded."]];
-var FW_OUTBOUND=[
- ["GitHub Enterprise Server · github.a-intel.internal","repo binding, Context PRs, checks, code graph","in use","allowed"],
- ["Model providers","none — every tier resolves inside the network","not used","q"],
- ["Voyage AI","none — embeddings served in-firewall","not used","q"],
- ["Signed usage report · meter.oxagen.com","licence metering: run counts and retained GB, no content","weekly","allowed"],
- ["Everything else","nothing inbound is required","blocked at the perimeter","q"]];
-function planeDetail(v){
-  if(v==="shared") return '<dl class="kv">'+
-   '<dt>Binding</dt><dd><span class="b b-allowed"><span class="d"></span>shared</span> · '+h(ORG.region)+'</dd>'+
-   '<dt>Postgres</dt><dd>partitioned by <span class="mono">org_id</span> · row-level policies enforced</dd>'+
-   '<dt>Object storage</dt><dd>object lock, compliance mode · per-organization key-encryption key</dd>'+
-   '<dt>Key-encryption key</dt><dd class="mono">kek_aintel_2026Q3 · rotated 2026-09-10</dd>'+
-    '<dt>Attester key</dt><dd class="mono">'+h(ORG.attester)+' · published so a customer can verify an export offline</dd>'+
-    '<dt>Gateway</dt><dd>Oxagen-hosted · the loopback proxy on every host reports to it, so metering is observed, never self-reported</dd></dl>';
-  if(v==="dedicated") return '<dl class="kv">'+
-   '<dt>Postgres — tenant data</dt><dd>a dedicated cluster in your region, the same schema and the same row-level policies</dd>'+
-   '<dt>Postgres — identity, IAM, billing, price book</dt><dd>stay on the shared plane by design</dd>'+
-   '<dt>Object storage</dt><dd>your own bucket · object lock in compliance mode · write-once</dd>'+
-   '<dt>Key-encryption key</dt><dd>in your KMS, referenced by ARN; Oxagen never holds the key material</dd>'+
-    '<dt>Gateway</dt><dd>inside your plane</dd>'+
-    '<dt>Resolver</dt><dd>the only place a connection string is read. A call path that bypasses it is a defect, and CI fails on it.</dd></dl>';
-  return '<dl class="kv">'+
-   '<dt>Deployment</dt><dd>Kubernetes, customer-operated · Helm chart</dd>'+
-   '<dt>Bundle version</dt><dd class="mono">oxagen/1.4.2</dd>'+
-   '<dt>Bundle signature</dt><dd><span class="mono">cosign · sha256:7f31c0…9b42</span> · verified against Oxagen release key <span class="mono">rel-2026-03</span>, the key an evidence bundle is checked against</dd>'+
-   '<dt>Containers</dt><dd>gateway · services · operator console · Stella engine · Postgres · S3-compatible object storage with object lock</dd>'+
-   '<dt>Air-gapped mode</dt><dd><span class="b b-approval"><span class="d"></span>on</span> — model routes point inside the network (see In-firewall routes on Model funding and routes)</dd>'+
-   '<dt>Licence</dt><dd>per organization, annual, invoiced. Stripe is not involved behind a firewall.</dd>'+
-   '<dt>Next bundle</dt><dd><span class="mono">oxagen/1.4.3</span> available · applied on your schedule, never pushed</dd></dl>'+
-   '<p class="eyebrow" style="margin:16px 0 8px">Outbound connections in use</p>'+
-   '<div class="tw"><table data-lt="off"><thead><tr><th>Destination</th><th>Why</th><th>State</th></tr></thead><tbody>'+
-   FW_OUTBOUND.map(function(o){return '<tr><td style="font-size:12.5px"><b>'+h(o[0])+'</b></td><td class="dim" style="font-size:12px">'+h(o[1])+'</td>'+
-    '<td><span class="b b-'+o[3]+'"><span class="d"></span>'+h(o[2])+'</span></td></tr>';}).join("")+'</tbody></table></div>'+
-   '<p class="muted" style="font-size:12.5px;margin:12px 0 0">Everything the cloud enforces, the appliance enforces — including the gateway, whose sealed cost records you hand to your auditor.</p>';
-}
-function orgPlaneBody(){
-  var v=S.planeView||ORG.dataPlane, cur=v===ORG.dataPlane, mode=PLANE_MODES.filter(function(x){return x[0]===v;})[0]||PLANE_MODES[0];
-  return '<div class="split"><div class="panel"><div class="panel-h"><h3>Data plane</h3>'+
-   '<div class="sp"><span class="b b-allowed"><span class="d"></span>'+h(ORG.name)+' is on '+h(ORG.dataPlane)+'</span></div></div><div class="panel-b">'+
-   '<div class="seg" role="group" aria-label="Deployment mode">'+PLANE_MODES.map(function(x){
-     return '<button class="btn sm" aria-pressed="'+(x[0]===v)+'" onclick="S.planeView=\''+x[0]+'\';render()">'+h(x[1])+(x[0]===ORG.dataPlane?' · current':'')+'</button>';}).join("")+'</div>'+
-   '<p class="muted" style="font-size:12.5px;margin:12px 0">'+h(mode[2])+'</p>'+
-   (cur?'':'<div class="note" style="margin-bottom:12px" data-plane-preview="'+h(v)+'"><b>Preview.</b> This is what the page shows on a '+h(mode[1].toLowerCase())+' deployment. Modes, not forks: every store is resolved per organization, so moving is a deployment change, never a different product. Nothing below is in effect for '+h(ORG.name)+'.</div>')+
-   planeDetail(v)+
-   '<div class="row" style="margin-top:14px"><button class="btn" onclick="openDialog(\'plane\')">Request a change of plane</button>'+
-   '<button class="btn" onclick="act(\'Key rotation scheduled. A rotation is a governed action and a security event.\')">Rotate keys</button></div></div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>Retention</h3></div><div class="panel-b"><dl class="kv">'+
-   '<dt>Frame bodies</dt><dd>7 years from the seal · encrypted, content-addressed</dd>'+
-   '<dt>Run ledger</dt><dd>forever</dd>'+
-   '<dt>Frame rows</dt><dd>13-month hot window, then compacted into the segment</dd>'+
-   '<dt>Control-plane audit</dt><dd>7 years</dd>'+
-   '<dt><span class="mono">digest_only</span> mode</dt><dd>'+orgDigestOnly()+'</dd>'+
-   '</dl>'+
-   '<div class="note" style="margin-top:12px">Replay without bodies is a timeline, not a replay. The explanation promise depends on bodies, so keeping them is the default.</div></div></div></div>'+
-   '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Tenant isolation</h3><div class="sp"><span class="b b-q">postgres · '+h(ORG.slug)+'</span></div></div><div class="panel-b"><dl class="kv">'+
-   '<dt>Rows</dt><dd>every tenant table carries <span class="mono">org_id</span> and row-level security is on with no bypass; the tenant boundary is the policy, and the policy is tested</dd>'+
-   '<dt>Workspace scoping</dt><dd>every run, frame and record carries <span class="mono">ws</span> ('+WS.map(function(w){return '<span class="mono">'+h(w.slug)+'</span>';}).join(", ")+'), set by the kernel, the only writer</dd>'+
-   '<dt>Cross-tenant reads</dt><dd>refused by the database itself, not by application code</dd>'+
-   '<dt>Platform catalogs</dt><dd>price books, tool schemas and connector definitions are platform tables, never tenant rows</dd>'+
-   '<dt>Startup guard</dt><dd>the app role may not be a superuser, may not hold <span class="mono">BYPASSRLS</span>, and row-level security may not be off, or the plane refuses to boot</dd></dl></div></div>';
-}
-function orgDigestOnly(){
-  var off=WS.filter(function(w){return w.retention==="digest_only";});
-  return off.length?'<b>on</b> in '+off.map(function(w){return h(w.slug);}).join(", ")+' — recorded as a completeness gap on every run there, and it lowers the replay grade'
-   :'<b>off</b> in every workspace — it is an opt-down, recorded as a completeness gap, and it lowers the replay grade';
-}
-
-DLG_EXT.plane=function(){
-  var v=S.planeView&&S.planeView!=="shared"?S.planeView:"dedicated";
-  return {t:"Request a change of data plane",s:ORG.name+" is on "+ORG.dataPlane,w:false,
-   b:'<div class="note" style="margin-bottom:14px">Per-organization data planes make every store switchable, so a dedicated plane — and behind-the-firewall deployment — is a deployment mode, not a fork.</div>'+
-    '<div class="field"><label for="planeMode">Mode</label><select id="planeMode">'+
-     [["dedicated","dedicated · Oxagen cloud"],["firewall","behind your firewall · signed Helm bundle"],["airgap","air-gapped · in-firewall models"]].map(function(x){return '<option'+(x[0]===v?' selected':'')+'>'+h(x[1])+'</option>';}).join("")+'</select></div>'+
-    '<div class="field"><label for="planeRegion">Region</label><select id="planeRegion">'+["us-east-1","eu-west-1","ap-southeast-2"].map(function(r){return '<option'+(r===ORG.region?' selected':'')+'>'+r+'</option>';}).join("")+'</select></div>'+
-    '<dl class="kv"><dt>Included</dt><dd>the gateway inside your plane, a dedicated Postgres cluster and object store, and your own release key</dd>'+
-    '<dt>Plan</dt><dd>Enterprise, annual, invoiced · from $60,000 per year</dd></dl>',
-   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Request sent. An owner signs the annual agreement before anything moves.\')">Request it</button>'};
-};
 
 /* Change role, for the person the row names. It used to name Dana Okafor on every row. */
 DLG_EXT.role=function(p){
@@ -8179,7 +8115,8 @@ function auditIncidents(){
      '<td><div class="t-main" style="font-size:12.5px">'+h(i.title)+'</div><div class="t-sub mono" style="font-size:11px">'+h(i.kind)+' · '+h(i.scope)+'</div></td>'+
      '<td class="mono dim" style="font-size:11.5px;white-space:nowrap">'+h(i.at)+'</td><td style="font-size:12.5px">'+h(i.by)+'</td>'+
      '<td>'+(i.status==="open"?auditBadge("approval","open"):auditBadge("allowed","resolved"))+(i.closedAt?'<div class="t-sub mono" style="font-size:11px">'+h(i.closedAt)+'</div>':'')+'</td>'+
-     '<td class="num"><button class="btn sm" onclick="event.stopPropagation();openDialog(\'incidentview\',\''+i.id+'\')">Open</button></td></tr>';}).join("");
+     '<td class="rowacts" onclick="event.stopPropagation()"><button class="btn sm" onclick="openDialog(\'incidentview\',\''+i.id+'\')">Open</button>'+
+     (i.status==="open"?'<button class="btn sm primary" onclick="openDialog(\'incidentclose\',\''+i.id+'\')">Resolve</button>':'')+'</td></tr>';}).join("");
   return auditStats([["Open",String(open.length),crit?"one critical · money moved without a receipt":"none critical",crit?"critical":"approval"],
     ["Critical · 12 months","1","open since 08:40 today"],
     ["Median time to resolve","2 h<small>38 m</small>","across 5 resolved incidents"],
@@ -8317,8 +8254,9 @@ function incidentDlgBody(){
 function incidentDlgFoot(){
   var i=S.dlg==="incidentview"?incidentById(S.dlgArg):null;
   return '<button class="btn" onclick="closeDialog()">Close</button>'+
-   (i&&i.status==="open"?'<button class="btn" onclick="closeDialog();act(\'Assigned. The assignment is an audit event with your name on it.\')">Assign</button>':'')+
-   '<button class="btn" onclick="closeDialog();act(\'In the product this exports the incident with its frames. A mockup writes nothing to disk.\')">Export incident</button>';
+   '<button class="btn" onclick="closeDialog();act(\'In the product this exports the incident with its frames. A mockup writes nothing to disk.\')">Export incident</button>'+
+   (i&&i.status==="open"?'<button class="btn"'+(i.owner===me().name?' disabled title="Already yours"':'')+' onclick="incidentAssign(\''+h(i.id)+'\')">Assign to me</button>'+
+     '<button class="btn primary" onclick="openDialog(\'incidentclose\',\''+h(i.id)+'\')">Resolve</button>':'');
 }
 function queueExport(){
   var scope=el("ex-scope")?el("ex-scope").value:"core-platform · all runs";
@@ -9312,17 +9250,13 @@ SCENARIOS["toolbelt-governed"]={title:"The toolbelt, governed", ws:"core-platfor
   {say:"Connections hold the customer’s credentials. No agent holds any of them: for each call the broker mints the narrowest one the provider allows.",
    note:"The grants log shows it, including the Stripe grant that was not minted because the call is still parked for a human.",
    route:function(o){return {page:"tools",org:o,ws:"core-platform"};},
-   setup:function(){S.tab.tools="connections";},
-   act:["Add a connection","openDialog('connection')"]},
+   setup:function(){S.tab.tools="servers";},
+   act:["Open the Slack server","openDialog('server','slack')"]},
   {say:"The registry is the only source of tools. Three Slack output schemas were observed, not declared, and wait for an admin.",
    note:"Until approval an output is validated only for size and type, and every run that used it says so.",
    route:function(o){return {page:"tools",org:o,ws:"core-platform"};},
-   setup:function(){S.tab.tools="registry";},
+   setup:function(){S.tab.tools="tools";},
    act:["Review the observed schemas","openDialog('schema')"]},
-  {say:"Auto-approval rules are the customer’s, not Oxagen’s: a rule names the tool, the agent, the ceiling and the condition under which the human is skipped.",
-   note:"A rule that would widen an agent past its operator’s grants cannot be saved. The intersection is the ceiling.",
-   route:function(o){return {page:"tools",org:o,ws:"core-platform"};},
-   setup:function(){S.tab.tools="auto";}},
   {say:"Deny is available at every level, down to a class: every tool that moves funds, organization-wide, in one action.",
    note:"A flip bumps the deny generation, and every affected run sees it at its next call boundary.",
    route:function(o){return {page:"tools",org:o,ws:"core-platform"};},
@@ -9335,39 +9269,34 @@ SCENARIOS["cio-console"]={title:"The CIO’s console", ws:"core-platform",
  blurb:"Organization and Audit from the chair that answers for both: who can sign in, where the data lives, what the models cost, and what every token bought.",
  steps:[
   {say:"Who can sign in is this table: every member, their role, their workspaces and whether two-factor is on. Invitations are the only way in.",
-   note:"Changing a role here is a governed action, and it never widens an agent: effective permission is the agent’s grants intersected with its operator’s. That is the delegation ceiling below the table.",
+   note:"Changing a role here is a governed action, and it never widens an agent: effective permission is the agent’s grants intersected with its operator’s.",
    route:function(o){return {page:"organization",org:o};},
-   setup:function(){S.tab.organization="people";S.planeView=null;S.rq="";},
+   setup:function(){S.tab.organization="people";S.rq="";},
    act:["Change a role","openDialog('role')"]},
   {say:"A workspace is a governance partition with exactly one main repo, bound at creation. Its namespace is immutable because it is part of every agent key.",
    note:"Retention mode is per workspace. <span class=\"mono\">content_exact</span> is the default; <span class=\"mono\">digest_only</span> is an opt-down recorded as a completeness gap.",
    route:function(o){return {page:"organization",org:o};},
-   setup:function(){S.tab.organization="workspaces";S.planeView=null;S.rq="";},
+   setup:function(){S.tab.organization="workspaces";S.rq="";},
    act:["Create a workspace","openDialog('newws')"]},
   {say:"Oxagen’s own model calls run on routes by tier. Each row carries this month’s use and cost, and the total is what the platform cap has used.",
-   note:"In-firewall routes sit below: what each tier resolves to on a deployment inside your network. Anderson Intelligence Corp. is on the shared plane, so they are a preview, not in effect.",
+   note:"Every model.response frame records the concrete model the provider returned, so a replay names the model that answered and the cost record prices that id, never the alias.",
    route:function(o){return {page:"organization",org:o};},
-   setup:function(){S.tab.organization="funding";S.planeView=null;S.rq="";},
+   setup:function(){S.tab.organization="funding";S.rq="";},
    act:["Change the funding source","openDialog('funding')"]},
-  {say:"Shared, dedicated and behind the firewall are deployment modes, not forks. This is the behind-the-firewall preview: a signed bundle verified against release key rel-2026-03, air-gapped, with its outbound connections listed.",
-   note:"Anderson Intelligence Corp. stays on shared. The startup guard is the same in every mode: no superuser, no BYPASSRLS, or the plane refuses to boot.",
-   route:function(o){return {page:"organization",org:o};},
-   setup:function(){S.tab.organization="plane";S.planeView="firewall";S.rq="";},
-   act:["Request a change of plane","openDialog('plane')"]},
   {say:"One critical incident: a Stripe charge with no receipt. Money moved that Oxagen did not govern, and the audit archiver caught it as exc_01K5RN2P.",
    note:"An incident is a chain of records, not a summary. Open it to read the frames and the connection it points at.",
    route:function(o){return {page:"audit",org:o};},
-   setup:function(){S.tab.audit="incidents";S.planeView=null;S.rq="";},
+   setup:function(){S.tab.audit="incidents";S.rq="";},
    act:["Open the incident","openDialog('incidentview','exc_01K5RN2P')"]},
   {say:"Every governed call has a receipt, searchable by tool, agent or external effect id. Search for stripe and open the payment Dana’s invoice bot made on 2026-09-04.",
    note:"The receipt names who, what, under which authority, with which credential, and what it changed.",
    route:function(o){return {page:"audit",org:o};},
-   setup:function(){S.tab.audit="receipts";S.planeView=null;S.rq="stripe";},
+   setup:function(){S.tab.audit="receipts";S.rq="stripe";},
    act:["Open the receipt","openDialog('receipt','rcp_01K4X8M2E')"]},
   {say:"An evidence bundle is for the auditor, who should not have to trust Oxagen. Verify exp_01K4Q7M1 and the check runs against the release key, offline.",
    note:"Merkle roots recomputed, seal attestations verified, no gaps in the chain.",
    route:function(o){return {page:"audit",org:o};},
-   setup:function(){S.tab.audit="exports";S.planeView=null;S.rq="";S.verified=S.verified||{};S.verified["exp_01K4Q7M1"]=false;},
+   setup:function(){S.tab.audit="exports";S.rq="";S.verified=S.verified||{};S.verified["exp_01K4Q7M1"]=false;},
    act:["Verify the bundle","S.verified['exp_01K4Q7M1']=true;render()"]}
  ]};
 /* ---- end W10 ---- */
@@ -9833,7 +9762,7 @@ function dialog(){
   if(!S.dlg) return '';
   var k=S.dlg;
   if(k==="cmd") return cmdMenu();
-  var kk=(typeof S.dlgArg==="number"&&APIKEYS[S.dlgArg])||APIKEYS[0];
+  var kki=(typeof S.dlgArg==="number"&&APIKEYS[S.dlgArg])?S.dlgArg:0, kk=APIKEYS[kki];
   var D={
    notifs:{t:"Notifications",w:false,b:notifsBody(),
      f:'<div class="grow"><span class="mono">list_notifications</span> · '+notifUnread()+' unread · every kind here maps to a frame kind or an audit event, never to something invented for a bell.</div>'+
@@ -9880,6 +9809,8 @@ function dialog(){
    commit:{t:"Commit this change",w:true,b:commitBody(),f:commitFoot()},
    roleedit:S.dlg==="roleedit"?roleEditDlg():{t:"Role",w:true,b:"",f:""},
    roledel:roleDelDlg(),
+   invrevoke:inviteRevokeDlg(),
+   incidentclose:incidentResolveDlg(),
    assignrole:assignRoleDlg(),
    identity:identityDlg(),
    ruleedit:S.dlg==="ruleedit"?ruleEditDlg():{t:"Rule",w:true,b:"",f:""},
@@ -9903,11 +9834,11 @@ function dialog(){
      '<div class="note">Granting a role is a governed action. It will appear in the audit record with the granter’s name, your name, and this reason.</div>',
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Request sent to Priya Natarajan.\')">Send the request</button>'},
    incident:{t:"Open an incident",w:false,b:
-     '<div class="field"><label>Subject</label><input value="Stripe charge ch_3Qa8 has no receipt" aria-label="Subject"></div>'+
-     '<div class="field"><label>Severity</label><select aria-label="Severity"><option>critical — money moved that Oxagen did not govern</option><option>warning</option><option>info</option></select></div>'+
+     '<div class="field"><label for="in-title">Subject</label><input id="in-title" value="Stripe charge ch_3Qa8 has no receipt"></div>'+
+     '<div class="field"><label for="in-sev">Severity</label><select id="in-sev"><option value="critical">critical — money moved that Oxagen did not govern</option><option value="warning">warning</option><option value="info">info</option></select></div>'+
      '<div class="field"><label>Attach</label><div class="row"><span class="b b-q mono" style="font-size:11px">con_01K2A9</span>'+
      '<span class="b b-q mono" style="font-size:11px">mnd_7K2ETQ4</span><span class="b b-q mono" style="font-size:11px">exc_01K5RN2P</span></div></div>',
-     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Incident raised. It is a security event with who, why, and what it stopped.\')">Raise it</button>'},
+     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="incidentRaise()">Raise it</button>'},
    "switch":switchDialog(),
    policy:{t:"Edit policy",w:true,b:
      '<p class="eyebrow q">pol_v42 draft</p>'+
@@ -9938,21 +9869,21 @@ function dialog(){
      '<div class="field"><label>Mode</label><select aria-label="Mode"><option>hard: checked at each hook boundary, pauses at the next one</option><option>soft — recorded and reported, never blocks</option></select></div>',
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Budget set. A breach is a policy.decision frame and, by policy, a pause.\')">Set it</button>'},
    invite:{t:"Invite a person",w:false,b:
-     '<div class="field"><label>Email</label><input value="rowan@a-intel.example" aria-label="Email"></div>'+
-     '<div class="field"><label>Role</label><select aria-label="Role"><option>workspace.member · core-platform</option><option>workspace.owner · core-platform</option><option>org.auditor</option><option>org.billing</option><option>org.owner</option></select></div>'+
+     '<div class="field"><label for="iv-email">Email</label><input id="iv-email" value="rowan@a-intel.example"></div>'+
+     '<div class="field"><label for="iv-role">Role</label><select id="iv-role"><option>workspace.member · core-platform</option><option>workspace.owner · core-platform</option><option>org.auditor</option><option>org.billing</option><option>org.owner</option></select></div>'+
      '<div class="note">An invitation is the only way into the organization. It expires in seven days, and accepting it requires a verified email and two-factor.</div>',
-     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Invitation sent. It expires in 7 days.\')">Send the invitation</button>'},
+     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="inviteSend()">Send the invitation</button>'},
    newws:{t:"Create a workspace",w:false,b:
-     '<div class="field"><label>Name</label><input value="Data platform" aria-label="Name"></div>'+
-     '<div class="field"><label>Namespace</label><input value="data" maxlength="6" aria-label="Namespace"><div class="hint">2–6 characters, immutable, and part of every agent key in the workspace: <span class="mono">'+h(ORG.slug)+'.data.&lt;agent&gt;</span>.</div></div>'+
-     '<div class="field"><label>Main repository</label><select aria-label="Main repository"><option>a-intel/data-platform</option><option>a-intel/warehouse</option></select>'+
+     '<div class="field"><label for="nw-name">Name</label><input id="nw-name" value="Warehouse ops"></div>'+
+     '<div class="field"><label for="nw-ns">Namespace</label><input id="nw-ns" value="wh" maxlength="6"><div class="hint">2–6 characters, immutable, and part of every agent key in the workspace: <span class="mono">'+h(ORG.slug)+'.data.&lt;agent&gt;</span>.</div></div>'+
+     '<div class="field"><label for="nw-main">Main repository</label><select id="nw-main"><option>a-intel/warehouse</option><option>a-intel/data-platform</option></select>'+
      '<div class="hint">Required at creation. A workspace without a main repo cannot exist.</div></div>'+
-     '<div class="field"><label>Production branch</label><select aria-label="Production branch"><option>main — GitHub’s default, suggested</option><option>release</option><option>production</option></select>'+
+     '<div class="field"><label for="nw-branch">Production branch</label><select id="nw-branch"><option value="main">main — GitHub’s default, suggested</option><option value="release">release</option><option value="production">production</option></select>'+
      '<div class="hint">The only branch whose commits update the code graph. If GitHub’s default changes later you are prompted; the binding never moves on its own.</div></div>'+
-     '<div class="field"><label>Governance mode</label><select aria-label="Governance mode"><option>team — a code-owner review is required</option><option>solo — the author may merge</option><option>regulated — a named approver and a ledger entry</option></select></div>'+
-     '<div class="field"><label>Retention mode</label><select aria-label="Retention mode"><option>content_exact — keep prompts and tool bodies in full</option><option>digest_only — digests only, lowers the replay grade</option></select></div>'+
+     '<div class="field"><label for="nw-gov">Governance mode</label><select id="nw-gov"><option value="team">team — a code-owner review is required</option><option value="solo">solo — the author may merge</option><option value="regulated">regulated — a named approver and a ledger entry</option></select></div>'+
+     '<div class="field"><label for="nw-ret">Retention mode</label><select id="nw-ret"><option value="content_exact">content_exact — keep prompts and tool bodies in full</option><option value="digest_only">digest_only — digests only, lowers the replay grade</option></select></div>'+
      '<div class="note">Until the GitHub App binds the main repo the workspace is provisional for 14 days: runs record and spend counts, but steering, records and agent definitions stay off.</div>',
-     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Workspace created. Installing the GitHub App on a-intel/data-platform.\')">Create</button>'},
+     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="wsCreate()">Create</button>'},
    import:{t:"Import an MCP server",w:false,b:
      '<div class="field"><label>Endpoint</label><input value="https://mcp.internal.a-intel.example/sse" aria-label="Endpoint"></div>'+
      '<div class="field"><label>Connection</label><select aria-label="Connection"><option>con_01K2A7 · GitHub App installation</option><option>Create a new connection</option></select></div>'+
@@ -9982,26 +9913,24 @@ function dialog(){
         (ORG_KEY.source===x[0]?'<span class="b b-allowed">current</span>':'')+
         (x[0]==="platform_minted"?'<span class="b b-proven">reconciles per organization</span>':'')+
         '</span><span class="d"><b>'+h(x[1])+'.</b> '+h(x[2])+'</span></div>';}).join("")+'</div>'+
-     '<div class="field" style="margin-top:14px"><label>Key</label><input value="sk-or-v1-••••••••••••••••" aria-label="Key" type="password">'+
-      '<div class="hint">Only <span class="mono">customer_key</span> takes a key here. The other two are minted or held by Oxagen, and no screen ever sees the secret.</div></div>'+
-     '<div class="note">Stored enveloped, tested before save, never returned, every read audited. On a customer key your tokens are reported and billed at zero; on the other two they are billed to this organization.</div>',
-     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Key tested against '+ASST_MODEL+' and stored. Nothing was returned.\')">Test and save</button>'},
+     '<div class="note">Pick a source on the panel behind this dialog; it carries the key field and the lifecycle. Every key is stored enveloped, tested before save, never returned, and every read is audited. On a customer key your tokens are reported and billed at zero; on the other two they are billed to this organization.</div>',
+     f:'<button class="btn" onclick="closeDialog()">Close</button>'},
    apikey:{t:"Create an API key",w:false,b:
      '<p class="muted" style="font-size:12.5px;margin:0 0 12px">Shown once, at creation, and never again.</p>'+
-     '<div class="field"><label>Name</label><input placeholder="What is it for" aria-label="Name"></div>'+
-     '<div class="field"><label>Grants</label><select aria-label="Grants"><option>audit.read, receipt.read, export.read</option><option>cost.read, run.read</option><option>workspace.write, agent.write, grant.write</option></select>'+
+     '<div class="field"><label for="ak-name">Name</label><input id="ak-name" value="Warehouse nightly export"></div>'+
+     '<div class="field"><label for="ak-grants">Grants</label><select id="ak-grants"><option>audit.read, receipt.read, export.read</option><option>cost.read, run.read</option><option>workspace.write, agent.write, grant.write</option></select>'+
      '<div class="hint">A key can reach exactly what a person with those grants can. One agent tool contract drives the API, MCP, the CLI, and these screens.</div></div>'+
-     '<div class="field"><label>Expires</label><select aria-label="Expires"><option>90 days</option><option>180 days</option><option>1 year</option></select></div>'+
+     '<div class="field"><label for="ak-exp">Expires</label><select id="ak-exp"><option value="2026-12-10">90 days</option><option value="2027-03-10">180 days</option><option value="2027-09-11">1 year</option></select></div>'+
      '<div class="note">A key carries grants, not roles. It becomes a service principal and every call it makes is audited against it.</div>',
-     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Key created. It is shown once and stored hashed; api_key.create is in the audit record.\')">Create key</button>'},
+     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="apikeyCreate()">Create key</button>'},
    rotatekey:{t:"Rotate this key",w:false,b:
      '<p style="margin:0 0 10px"><b>'+h(kk.name)+'</b> <span class="mono dim" style="font-size:11.5px">'+h(kk.key)+' · '+h(kk.principal)+'</span></p>'+
      '<div class="note">Rotation issues a new secret and keeps the old one valid for 24 hours so callers can move. Both are audited.</div>',
-     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Rotated. The new secret is shown once; the old one stays valid for 24 hours.\')">Rotate</button>'},
+     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="apikeyRotate('+kki+')">Rotate</button>'},
    revokekey:{t:"Revoke this key",w:false,b:
      '<p style="margin:0 0 10px"><b>'+h(kk.name)+'</b> <span class="mono dim" style="font-size:11.5px">'+h(kk.key)+' · '+h(kk.principal)+'</span></p>'+
      '<div class="warn">Revocation ends the service principal’s access at the next call. Runs it started keep their records.</div>',
-     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn danger" onclick="closeDialog();act(\'Revoked. The service principal loses access at its next call; runs it started keep their records.\')">Revoke</button>'},
+     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn danger" onclick="apikeyRevoke('+kki+')">Revoke</button>'},
    plan:{t:"Change plan",w:false,b:
      '<div class="field"><label>Plan</label><select aria-label="Plan"><option>Team — usage-based, monthly, cancel any time</option><option>Enterprise — annual, committed use at 20–30% off, from $60,000</option></select></div>'+
      '<div class="note">The free tier is in every plan: an included monthly allowance of governed actions and every governance feature on. Enterprise adds a dedicated data plane or behind-the-firewall deployment, and support with an SLA.</div>',
@@ -10701,6 +10630,106 @@ function wsArchiveDlg(){
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn danger"'+(n?' disabled':'')+' onclick="wsArchive(\''+h(w.slug)+'\')">Archive</button>'};
 }
 
+/* ---------- Workspaces, invitations, API keys and incidents: the create writes the record ----------
+   Each of these pages already edited and deleted real rows while its create button only raised a toast,
+   so a workspace could be archived that the page had never been able to add. The handlers below write
+   to the same array the table reads, which is what makes the new row appear behind the dialog. */
+function rid(n,alpha){var a=alpha||"0123456789abcdef",s="";for(var i=0;i<n;i++)s+=a[Math.floor(Math.random()*a.length)];return s;}
+function wsCreate(){
+  var name=(el("nw-name")&&el("nw-name").value||"").trim(), ns=(el("nw-ns")&&el("nw-ns").value||"").trim().toLowerCase();
+  if(!name||!ns) return;
+  var slug=name.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/(^-|-$)/g,"");
+  if(wsById(slug)){act("A workspace called "+name+" is already here.","gold");return;}
+  var main=el("nw-main")?el("nw-main").value:"a-intel/data-platform";
+  WS.push({slug:slug,name:name,ns:ns,main:main,branch:el("nw-branch")?el("nw-branch").value:"main",
+    linked:[],agents:0,enrolled:0,owner:me().name,governance:el("nw-gov")?el("nw-gov").value:"team",
+    retention:el("nw-ret")?el("nw-ret").value:"content_exact",budgetDay:"20.00"});
+  closeDialog(); render();
+  act(name+" is here, provisional for 14 days. Installing the GitHub App on "+main+".");
+}
+function inviteFind(email){for(var i=0;i<INVITES.length;i++){if(INVITES[i].email===email)return i;}return -1;}
+function inviteSend(){
+  var email=(el("iv-email")&&el("iv-email").value||"").trim();
+  if(!email) return;
+  if(inviteFind(email)>-1){act(email+" already has an invitation open.","gold");return;}
+  INVITES.push({email:email,role:el("iv-role")?el("iv-role").value:"workspace.member · core-platform",
+    by:me().name,sent:"2026-09-11",expires:"2026-09-18"});
+  closeDialog(); render();
+  act("Invitation sent to "+email+". It expires 2026-09-18 and needs a verified email and two-factor.");
+}
+function inviteResend(email){
+  var i=inviteFind(email); if(i<0) return;
+  INVITES[i].sent="2026-09-11"; INVITES[i].expires="2026-09-18"; INVITES[i].by=me().name;
+  render(); act("Sent again to "+email+". The clock restarts: it now expires 2026-09-18.");
+}
+function inviteRevokeDlg(){
+  var email=S.dlg==="invrevoke"?S.dlgArg:null, i=email?inviteFind(email):-1;
+  if(i<0) return {t:"Revoke invitation",w:false,b:'<div class="note">That invitation is no longer here.</div>',
+    f:'<button class="btn" onclick="closeDialog()">Close</button>'};
+  return {t:"Revoke invitation",s:email,w:false,
+   b:'<p style="font-size:13px">The link stops working the moment this is revoked, and <b>'+h(email)+'</b> gets no notice. Nothing is created for them, so nothing is left behind.</p>'+
+     '<div class="note">Who invited them, when, and who revoked it stay in the audit record. Inviting them again issues a new link.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn danger" onclick="inviteRevoke(\''+h(email)+'\')">Revoke</button>'};
+}
+function inviteRevoke(email){
+  var i=inviteFind(email); if(i<0) return;
+  INVITES.splice(i,1); closeDialog(); render();
+  act("Revoked. The link "+email+" holds no longer works.");
+}
+function apikeyCreate(){
+  var name=(el("ak-name")&&el("ak-name").value||"").trim(); if(!name) return;
+  var grants=(el("ak-grants")?el("ak-grants").value:"run.read").split(",").map(function(g){return g.trim();});
+  APIKEYS.push({name:name,key:"ox_live_"+rid(4)+"…"+rid(3),
+    principal:"svc_"+name.toLowerCase().replace(/[^a-z0-9]+/g,"_").slice(0,20),
+    grants:grants,by:me().name,last:"never used",n30:0,
+    expires:el("ak-exp")?el("ak-exp").value:"2026-12-10",st:"unused"});
+  closeDialog(); render();
+  act("Created. The secret is shown once and stored hashed; api_key.create is in the audit record.");
+}
+function apikeyRotate(i){
+  var k=APIKEYS[i]; if(!k) return;
+  k.key="ox_live_"+rid(4)+"…"+rid(3); k.st="ok";
+  closeDialog(); render();
+  act("Rotated. "+k.name+" has a new secret, shown once; the old one stays valid for 24 hours.");
+}
+function apikeyRevoke(i){
+  var k=APIKEYS[i]; if(!k) return;
+  APIKEYS.splice(i,1); closeDialog(); render();
+  act(k.name+" is revoked. "+k.principal+" loses access at its next call; runs it started keep their records.");
+}
+function incidentRaise(){
+  var title=(el("in-title")&&el("in-title").value||"").trim(); if(!title) return;
+  var sev=el("in-sev")?el("in-sev").value:"warning", id="inc_01K"+rid(6,"0123456789ABCDEFGHJKMNPQRSTVWXYZ");
+  INCIDENTS.unshift({id:id,sev:sev,title:title,kind:"raised_by_operator",at:"2026-09-11 09:14",by:me().name,
+    scope:"con_01K2A9 · mnd_7K2ETQ4 · exc_01K5RN2P",
+    detail:"Raised by "+me().name+" from the audit record, with the connection, the mandate and the exception attached.",
+    resolution:"Open. Nobody is assigned yet.",
+    status:"open",owner:"",due:"2026-09-12",closedAt:"",closedBy:"",runs:0});
+  closeDialog(); render();
+  act(id+" is open. It is a security event with who, why, and what it stopped.","gold");
+}
+function incidentAssign(id){
+  var i=incidentById(id); if(!i) return;
+  i.owner=me().name; i.resolution="Open. "+me().name+" is tracing it.";
+  render(); act(i.id+" is yours. The assignment is in the audit record.");
+}
+function incidentResolve(id){
+  var i=incidentById(id); if(!i||i.status==="resolved") return;
+  i.status="resolved"; i.closedAt="2026-09-11 09:20"; i.closedBy=me().name;
+  closeDialog(); render();
+  act(i.id+" is resolved. The detail and the chain stay exactly as they were.");
+}
+function incidentResolveDlg(){
+  var i=S.dlg==="incidentclose"?incidentById(S.dlgArg):null;
+  if(!i) return {t:"Resolve incident",w:false,b:'<div class="note">That incident is no longer here.</div>',
+    f:'<button class="btn" onclick="closeDialog()">Close</button>'};
+  return {t:"Resolve incident",s:i.id+" · "+i.sev,w:false,
+   b:'<p style="font-size:13px">Resolving <b>'+h(i.title)+'</b> records who closed it and when. It changes nothing about what happened: the detail, the scope and the chain stay as they are.</p>'+
+     (i.sev==="critical"?'<div class="warn">This one is critical. While it is open the mandate ledger for '+h(i.scope.split(" · ")[0])+' carries an exception, and closing it clears that exception. Close it only once the money is accounted for.</div>'
+      :'<div class="note">A resolved incident stays in the list and in every export that covers its date.</div>'),
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="incidentResolve(\''+h(i.id)+'\')">Resolve</button>'};
+}
+
 /* ============================== Register Agent (the W1 onboarding gate, in-app) ==============================
    Fleet's "Register Agent" runs the onboarding gate inside the app: name the agent, wrap it, wait for its
    first frame. Nothing completes until that frame reaches Oxagen — the ping is also the installer's smoke
@@ -11335,6 +11364,7 @@ var ASST_MODEL="z-ai/glm-flash-latest";
 
 var ORG_KEY={
   source:"platform_minted",
+  customerPrefix:null,                /* set when an operator saves their own key */
   provisionedId:"key_01K5RW8Q2N",     /* OpenRouter's own id — what reconciliation joins on */
   label:"oxagen/a-intel",             /* the name the key carries on Oxagen's OpenRouter account */
   prefix:"sk-or-v1-a3f1",             /* the only part of the secret anything may render */
@@ -11350,7 +11380,11 @@ var ORG_KEY={
   providerUsd:"148.02",
   ledgerUsd:"148.02"
 };
-function orgKeyState(){ return ORG_KEY.source==="none"||!ORG_KEY.provisionedId?"none":"ok"; }
+function orgKeyState(){
+  if(ORG_KEY.source==="none") return "none";
+  if(ORG_KEY.source==="customer_key") return ORG_KEY.customerPrefix?"ok":"none";
+  return ORG_KEY.provisionedId?"ok":"none";
+}
 var ORG_KEY_SOURCES=[
  ["platform_minted","one key minted for this organization on Oxagen’s OpenRouter account",
   "Oxagen owns, pays, rotates and revokes it. Its tokens are billed. The provider reports it on its own line, so the bill and the ledger can be compared."],
@@ -11362,32 +11396,82 @@ var ORG_KEY_SOURCES=[
 function orgKeySource(){ for(var i=0;i<ORG_KEY_SOURCES.length;i++){ if(ORG_KEY_SOURCES[i][0]===ORG_KEY.source) return ORG_KEY_SOURCES[i]; } return ORG_KEY_SOURCES[0]; }
 function orgKeyDrift(){ return Math.round((n$(ORG_KEY.providerUsd)-n$(ORG_KEY.ledgerUsd))*100)/100; }
 
+function orgKeyHeld(){ return ORG_KEY.source==="customer_key"?!!ORG_KEY.customerPrefix:!!ORG_KEY.provisionedId; }
+
+/* Switching the source is a claim about who pays, so nothing is charged and no key is resolved
+   until a key is actually held under the new source. Picking customer_key therefore leaves the
+   organization without a key, and the panel says so, until one is saved. */
+function orgKeySourceSet(v){
+  if(ORG_KEY.source===v) return;
+  ORG_KEY.source=v;
+  render();
+  act(v==="customer_key"&&!ORG_KEY.customerPrefix
+    ? "Save your own key below. Until you do, no model call resolves and nothing is charged."
+    : "Funding source set to "+v+". Recorded as a control-plane event.");
+}
+function orgKeySave(){
+  var n=el("byokKey"), v=n?n.value.trim():"";
+  if(!v){ act("Paste a key first. Oxagen tests it against the provider before it saves anything."); return; }
+  ORG_KEY.customerPrefix=v.slice(0,13);
+  render();
+  act("Tested against "+ASST_MODEL+" and saved, enveloped. Nothing was returned to this screen.","gold");
+}
+function orgKeyClear(){
+  ORG_KEY.customerPrefix=null;
+  render();
+  act("Your key was removed. Model calls stop at the next request until a source is chosen.");
+}
+
 function orgKeyPanel(){
-  var src=orgKeySource(), none=orgKeyState()==="none", drift=orgKeyDrift();
-  return '<div class="panel"><div class="panel-h"><h3>Model key</h3>'+
-   '<span class="sp">'+(none?'<span class="b b-approval"><span class="d"></span>none</span>'
-     :'<span class="b b-allowed"><span class="d"></span>'+h(ORG_KEY.source)+'</span>')+'</span></div>'+
+  var src=orgKeySource(), none=orgKeyState()==="none", byok=ORG_KEY.source==="customer_key",
+      held=orgKeyHeld(), drift=orgKeyDrift(), minted=ORG_KEY.source==="platform_minted";
+  var rows="";
+  if(byok){
+    rows='<dl class="kv">'+
+     '<dt>Key</dt><dd>'+(held
+       ?'<span class="mono">'+h(ORG_KEY.customerPrefix)+'…</span> <span class="dim">enveloped, never returned — this prefix is all any screen may show</span>'
+       :'<span class="dim">none saved yet</span>')+'</dd>'+
+     '<dt>Billing</dt><dd>your tokens are reported and billed at zero; governed actions are billed as usual</dd>'+
+     '<dt>Key storage</dt><dd>enveloped, tested before save, never returned, every read audited</dd>'+
+     '<dt>Engine</dt><dd><span class="mono">'+h(ASST_ENGINE_URL)+'</span> · Stella '+h(ASST_ENGINE_VER)+' over HTTP, on this key</dd>'+
+     '</dl>'+
+     '<div class="field" style="margin-top:14px"><label for="byokKey">Your OpenRouter or vendor key</label>'+
+     '<input id="byokKey" type="password" autocomplete="off" placeholder="sk-or-v1-…" aria-label="Your key">'+
+     '<div class="hint">Oxagen calls '+h(ASST_MODEL)+' with it once to check it works, then envelopes it. It is never returned to a screen and never read from the environment.</div></div>';
+  } else if(none){
+    rows='<div class="note">No key is held for '+h(ORG.name)+'. The in-app agent cannot run, and nothing has been charged. Minting one is a governed action and puts your name on it.</div>';
+  } else {
+    rows='<dl class="kv">'+
+     '<dt>Secret</dt><dd><span class="mono">'+h(ORG_KEY.prefix)+'…</span> <span class="dim">enveloped, never returned — this prefix is all any screen may show</span></dd>'+
+     '<dt>Provisioned id</dt><dd><span class="mono">'+h(ORG_KEY.provisionedId)+'</span> <span class="dim">the provider’s own id; reconciliation joins on it</span></dd>'+
+     '<dt>Name on the account</dt><dd><span class="mono">'+h(ORG_KEY.label)+'</span></dd>'+
+     '<dt>Minted</dt><dd>'+h(ORG_KEY.minted)+' by '+h(PEOPLE[ORG_KEY.mintedBy].name)+(ORG_KEY.rotated?' · rotated '+h(ORG_KEY.rotated):' · never rotated')+'</dd>'+
+     '<dt>Monthly cap</dt><dd>'+usd(fmt2(ORG_KEY.capUsd))+' USD, set on the key at the provider — not only in our meter · <span id="orgCapUsed">'+usd(fmt2(orgRoutesTotal()))+'</span> used in '+h(SPEND.month)+', the total of the routes below</dd>'+
+     '<dt>Reads</dt><dd>'+ORG_KEY.reads30+' in 30 days, each one an audit event</dd>'+
+     '<dt>Engine</dt><dd><span class="mono">'+h(ASST_ENGINE_URL)+'</span> · Stella '+h(ASST_ENGINE_VER)+' over HTTP, on this key</dd>'+
+     '</dl>';
+  }
+  var acts=byok
+   ? '<button class="btn primary" onclick="orgKeySave()">Test and save</button>'+
+     (held?'<button class="btn danger" onclick="orgKeyClear()">Remove the key</button>':'')
+   : (none?'<button class="btn primary" onclick="openDialog(\'mintkey\')">Mint a key for '+h(ORG.name)+'</button>'
+        :'<button class="btn" onclick="openDialog(\'rotateorgkey\')">Rotate</button>'+
+         '<button class="btn danger" onclick="openDialog(\'revokeorgkey\')">Revoke</button>');
+
+  return '<div class="panel"><div class="panel-h"><h3>Funding source</h3>'+
+   '<span class="sp">'+(held
+     ?'<span class="b b-allowed"><span class="d"></span>'+h(ORG_KEY.source)+'</span>'
+     :'<span class="b b-approval"><span class="d"></span>no key held</span>')+'</span></div>'+
    '<div class="panel-b">'+
-   '<p class="muted" style="margin:0 0 12px;font-size:12.5px">'+h(src[2])+'</p>'+
-   (none
-    ?'<div class="note">No key is held for '+h(ORG.name)+'. The in-app agent cannot run, and nothing has been charged. Minting one is a governed action and puts your name on it.</div>'
-    :'<dl class="kv">'+
-      '<dt>Secret</dt><dd><span class="mono">'+h(ORG_KEY.prefix)+'…</span> <span class="dim">enveloped, never returned — this prefix is all any screen may show</span></dd>'+
-      '<dt>Provisioned id</dt><dd><span class="mono">'+h(ORG_KEY.provisionedId)+'</span> <span class="dim">the provider’s own id; reconciliation joins on it</span></dd>'+
-      '<dt>Key hash</dt><dd><span class="mono">'+h(ORG_KEY.hash)+'</span></dd>'+
-      '<dt>Name on the account</dt><dd><span class="mono">'+h(ORG_KEY.label)+'</span></dd>'+
-      '<dt>Minted</dt><dd>'+h(ORG_KEY.minted)+' by '+h(PEOPLE[ORG_KEY.mintedBy].name)+(ORG_KEY.rotated?' · rotated '+h(ORG_KEY.rotated):' · never rotated')+'</dd>'+
-      '<dt>Monthly cap</dt><dd>'+usd(fmt2(ORG_KEY.capUsd))+' USD, set on the key at the provider — not only in our meter</dd>'+
-      '<dt>Reads</dt><dd>'+ORG_KEY.reads30+' in 30 days, each one an audit event</dd>'+
-      '<dt>Engine</dt><dd><span class="mono">'+h(ASST_ENGINE_URL)+'</span> · Stella '+h(ASST_ENGINE_VER)+' over HTTP, on this key</dd>'+
-     '</dl>')+
-   '<div class="row" style="margin-top:13px">'+
-    (none?'<button class="btn primary" onclick="openDialog(\'mintkey\')">Mint a key for '+h(ORG.name)+'</button>'
-      :'<button class="btn" onclick="openDialog(\'rotateorgkey\')">Rotate</button>'+
-       '<button class="btn danger" onclick="openDialog(\'revokeorgkey\')">Revoke</button>')+
-    '<button class="btn" onclick="openDialog(\'funding\')">Change source</button></div>'+
+   '<div class="field"><label for="orgFundSrc">Source</label>'+
+   '<select id="orgFundSrc" onchange="orgKeySourceSet(this.value)" aria-label="Funding source">'+
+    ORG_KEY_SOURCES.map(function(x){return '<option value="'+h(x[0])+'"'+(ORG_KEY.source===x[0]?' selected':'')+'>'+h(x[0])+' — '+h(x[1])+'</option>';}).join("")+
+   '</select><div class="hint">'+h(src[2])+'</div></div>'+
+   rows+
+   '<div class="row" style="margin-top:13px">'+acts+'</div>'+
+   '<div class="note" style="margin-top:13px">No call reads the environment. Keys and routes come from the model layer’s resolver, and a path that bypasses it is a defect.</div>'+
    '</div>'+
-   (none?'':'<div class="panel-b" style="border-top:1px solid var(--border)">'+
+   (minted&&held?'<div class="panel-b" style="border-top:1px solid var(--border)">'+
     '<p class="eyebrow q" style="margin:0 0 8px">Reconciliation</p>'+
     '<dl class="kv">'+
     '<dt>OpenRouter reports</dt><dd><span class="mono">'+usd(ORG_KEY.providerUsd)+'</span> on <span class="mono">'+h(ORG_KEY.provisionedId)+'</span></dd>'+
@@ -11396,8 +11480,8 @@ function orgKeyPanel(){
       ?'<span class="b b-allowed"><span class="d"></span>none</span>'
       :'<span class="b b-critical"><span class="d"></span>'+usd(fmt2(Math.abs(drift)))+' '+(drift>0?'unbilled':'over-billed')+'</span>')+'</dd>'+
     '</dl>'+
-    '<div class="note" style="margin-top:10px">Two independent numbers, not one derived from the other: the first is read off the provider’s usage report for this key, the second is summed from our own ledger. A shared key cannot produce this row at all — the provider returns one total for every customer at once, which is the whole reason this organization has a key of its own.</div>'+
-   '</div>')+
+    '<div class="note" style="margin-top:10px">Two independent numbers, not one derived from the other: the first is read off the provider’s usage report for this key, the second is summed from our own ledger. A shared key cannot produce this row at all, which is the whole reason this organization has a key of its own.</div>'+
+   '</div>':'')+
    '</div>';
 }
 
@@ -11848,7 +11932,7 @@ DLG_EXT.create=function(){
 
 function wzNew(kind){
   var w=ws();
-  return {kind:kind, step:1, desc:"", path:null, ws:w.slug, drafted:false,
+  return {kind:kind, step:1, desc:"", descAI:false, path:null, ws:w.slug, drafted:false,
     /* tool */ srv:null, tname:"", lang:"ts",
     /* skill */ q:"", pick:null, file:null,
     /* agent */ slug:"", harness:"claude-code", tier:"complex", av:null, belt:{},
@@ -11861,7 +11945,7 @@ function wzNew(kind){
 function wzOpen(kind,seed){ S.wz=wzNew(kind); if(seed&&kind==="init")S.wz.repoName=seed;
   S.dlg="wz"; S.dlgArg=null; S.layer=null; render(); }
 function wzSet(k,v){ if(S.wz)S.wz[k]=v; }
-function wzSetR(k,v){ if(!S.wz)return; S.wz[k]=v; render(); }
+function wzSetR(k,v){ if(!S.wz)return; if(k==="desc")S.wz.descAI=false; S.wz[k]=v; render(); }
 function wzGo(n){ if(!S.wz)return; S.wz.step=n; S.ced=null; render(); }
 function wzCancel(){ S.wz=null; closeDialog(); }
 
@@ -11890,13 +11974,52 @@ function wzNext(label,ok,extra){
    gates, and nothing else. */
 function wzDescIn(v){
   if(!S.wz)return;
-  S.wz.desc=v;
-  var b=el("wzNextBtn"); if(b)b.disabled=!String(v).trim();
+  S.wz.desc=v; S.wz.descAI=false;
+  wzDescSync();
+}
+/* What you type is a draft. The file the pull request carries is prose the assistant wrote from
+   it, so the step does not advance until that turn has run. The same rule holds in all four
+   wizards, because all four turn this one box into the instructions, the statement or the body. */
+function wzDescOk(){ var z=S.wz; return !!(z&&String(z.desc||"").trim()&&z.descAI); }
+function wzDescSync(){
+  var z=S.wz; if(!z) return;
+  var b=el("wzNextBtn"); if(b)b.disabled=!wzDescOk();
+  var raw=!!String(z.desc||"").trim();
+  var n=el("wzWandNote"); if(n)n.className="wand-note"+(raw&&!z.descAI?" on":"");
+  var w=el("wzWandBtn"); if(w)w.disabled=false;
+}
+var WAND_SAY={
+  agent:"The assistant wrote the instructions from what you typed. Read them before anybody reviews them.",
+  tool:"The assistant wrote the description from what you typed. Read it before anybody reviews it.",
+  skill:"The assistant wrote the skill body from what you typed. Read it before anybody reviews it.",
+  record:"The assistant wrote the statement from what you typed. Read it before anybody reviews it."
+};
+/* Deterministic on purpose: the same sentence in gives the same file out, so a headless check of
+   this screen reads the same text every run. */
+function assistProse(kind,raw){
+  var s=String(raw).trim().replace(/\s+/g," ");
+  var one=s.charAt(0).toUpperCase()+s.slice(1);
+  if(!/[.!?]$/.test(one))one+=".";
+  if(kind==="agent")return one+" Work inside the toolbelt you were given. When a step needs authority you do not hold, stop and say what you needed, and leave the decision to the operator.";
+  if(kind==="skill")return one+" Check what has to be true before the first step. Follow the steps in order. This procedure grants nothing: every action it names still goes through the toolbelt and the policy that governs it.";
+  if(kind==="record")return one+" It holds for every run in scope until a later record supersedes it.";
+  return one+" Call it when that is what you need, and read the arguments it takes before you do.";
+}
+function wzWand(){
+  var z=S.wz; if(!z)return;
+  var raw=String(z.desc||"").trim();
+  if(!raw){ act("Write a line or two first. The assistant rewrites what you give it; it does not decide what you are building."); return; }
+  if(z.descAI){ act("The assistant already wrote this one. Change it and run the wand again."); return; }
+  z.desc=assistProse(z.kind,raw); z.descAI=true;
+  render();
+  act(WAND_SAY[z.kind]||WAND_SAY.record,"gold");
 }
 function wzDesc(placeholder,chips,hint){
-  var z=S.wz;
-  return '<div class="field"><label for="wzDesc">In your own words</label>'+
+  var z=S.wz, raw=!!String(z.desc||"").trim();
+  return '<div class="field"><div class="lab-row"><label for="wzDesc">In your own words</label>'+
+   '<button class="btn wand" id="wzWandBtn" onclick="wzWand()" title="Have the assistant write it" aria-label="Have the assistant write it">'+avSvg("wand-sparkles")+'</button></div>'+
    '<textarea id="wzDesc" rows="4" placeholder="'+h(placeholder)+'" oninput="wzDescIn(this.value)" aria-label="Describe it">'+h(z.desc)+'</textarea>'+
+   '<div class="wand-note'+(raw&&!z.descAI?" on":"")+'" id="wzWandNote">Press the wand. <b>oxagen.assistant</b> rewrites what you wrote into the prose the file carries, and the next step opens when it has. Its turn is recorded, billed to Oxagen, and never counted as one of your runs.</div>'+
    (hint?'<div class="hint">'+hint+'</div>':'')+'</div>'+
    (chips&&chips.length?'<div class="wz-chips">'+chips.map(function(c){
      return '<button class="btn sm" onclick="wzSetR(\'desc\',\''+h(c).replace(/'/g,"\\'")+'\')">'+h(c)+'</button>';}).join("")+'</div>':'');
@@ -12374,7 +12497,7 @@ function wzToolCode(lang){
 function wzTool(){
   var z=S.wz,w=ws();
   if(z.step===1){
-    var ok=!!String(z.desc).trim();
+    var ok=wzDescOk();
     return {t:"Create a tool", s:"Describe the capability, not the implementation.",
      b:wzDesc("Refund a Stripe charge when support asks for one, never above the amount on the original payment.",
        ["Process refunds against Stripe charges","Post a release note to the ops channel in Slack",
@@ -12622,7 +12745,7 @@ function wzSkill(){
      f:wzNext("Read the file",!!f)};
   }
   if(z.step===2){
-    var okd=!!String(z.desc).trim();
+    var okd=wzDescOk();
     return {t:"Describe the skill", s:"Procedure, not policy. What to do, in what order, and the one thing never to do.",
      b:wzDesc("How we cut release notes: group merged PRs by surface, read the changelog once, open a PR, and never publish the release.",
        ["How we cut release notes","How to roll a bad release back","How to run a safe Postgres migration","How to triage a flaky test"],
@@ -12722,7 +12845,7 @@ var WZ_BELT_POOL=["github__get_file_contents@2","github__create_pull_request@3",
 function wzAgent(){
   var z=S.wz,w=ws();
   if(z.step===1){
-    var ok=!!String(z.desc).trim();
+    var ok=wzDescOk();
     return {t:"Create an agent", s:"What should it be for? One job, said plainly.",
      b:wzDesc("Watch the performance budget on every pull request, and comment with the regression when a page gets slower.",
        ["Watch the performance budget on every pull request","Keep the changelog in step with what merged",
@@ -12848,7 +12971,7 @@ function wzRecPreview(){
 function wzRecord(){
   var z=S.wz,w=ws();
   if(z.step===1){
-    var ok=!!String(z.desc).trim();
+    var ok=wzDescOk();
     return {t:"Write a context record", s:"One concern per record, and one record per pull request.",
      b:wzDesc("Do not re-read CHANGELOG.md more than once in a run; cache the first read.",
        ["Do not re-read CHANGELOG.md more than once in a run",

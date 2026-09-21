@@ -3,6 +3,7 @@
   --ink:#09090B; --void:#000000; --panel:#18181B; --panel-h:#1F1F23; --hl:#27272A; --border:#27272A; --rule:#3F3F46;
   --fg:#FFFFFF; --body:#E4E4E7; --muted:#A1A1AA; --dim:#71717A;
   --gold:#D4AF37; --gold-bright:#F1CE65; --gold-deep:#8A7223; --accent-text:#D4AF37;
+  --spot:22%;
   --on-gold:#09090B;
   --st-allowed:#57A97C; --st-approval:#5B93D6; --st-denied:#C66A4A;
   --st-proven:#3FA2A2; --st-failed:#C0453C; --st-critical:#D6455E; --st-observe:#A1A1AA;
@@ -19,6 +20,7 @@
 @media(prefers-color-scheme:light){:root:not([data-theme="dark"]){
   --ink:#FFFFFF; --void:#F4F4F5; --panel:#FFFFFF; --panel-h:#F4F4F5; --hl:#F4F4F5; --border:#E4E4E7; --rule:#D4D4D8;
   --fg:#09090B; --body:#27272A; --muted:#71717A; --dim:#A1A1AA;
+  --spot:11%;
   --accent-text:#8A7223; --on-gold:#09090B;
   --st-allowed:#2F7D52; --st-approval:#2E6BA8; --st-denied:#9B4526;
   --st-proven:#1F7676; --st-failed:#992F28; --st-critical:#AE2540; --st-observe:#71717A;
@@ -31,6 +33,7 @@
 :root[data-theme="light"]{
   --ink:#FFFFFF; --void:#F4F4F5; --panel:#FFFFFF; --panel-h:#F4F4F5; --hl:#F4F4F5; --border:#E4E4E7; --rule:#D4D4D8;
   --fg:#09090B; --body:#27272A; --muted:#71717A; --dim:#A1A1AA;
+  --spot:11%;
   --accent-text:#8A7223; --on-gold:#09090B;
   --st-allowed:#2F7D52; --st-approval:#2E6BA8; --st-denied:#9B4526;
   --st-proven:#1F7676; --st-failed:#992F28; --st-critical:#AE2540; --st-observe:#71717A;
@@ -41,7 +44,8 @@
   --tx-surface:#FFFFFF;
 }
 *,*::before,*::after{box-sizing:border-box}
-body{margin:0;background:var(--ink);color:var(--fg);font-family:var(--font);font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body{margin:0;background:var(--ink);color:var(--fg);font-family:var(--font);font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden;isolation:isolate}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(1400px 720px at 50% -14%,color-mix(in srgb,var(--gold) var(--spot),transparent),transparent 70%)}
 @media(prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
 :focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:4px}
 button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
@@ -998,9 +1002,23 @@ details.cm-diff summary{cursor:pointer;font-size:12.5px;color:var(--muted);margi
 details.cm-diff summary::-webkit-details-marker{display:none}
 details.cm-diff summary::before{content:"▸";color:var(--dim)}
 details.cm-diff[open] summary::before{content:"▾"}
+/* ---- The assist button ----
+   It carries the one background in the palette that is neither panel nor gold: the foreground
+   colour itself, so it reads as ink on a light theme and as light on a dark one. Gold is
+   identity and is already spent on the step's primary action, and two golds in one field is
+   two things claiming to be the next thing to press. */
+.btn.wand{background:var(--fg);border-color:var(--fg);color:var(--ink);padding:0;width:30px;height:30px;flex:none;display:inline-flex;align-items:center;justify-content:center;border-radius:7px}
+.btn.wand svg{width:16px;height:16px;display:block}
+.btn.wand:hover:not(:disabled){background:var(--fg);border-color:var(--fg);opacity:.84}
+.btn.wand:disabled{opacity:.4}
+.lab-row{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.lab-row label{margin:0}
+.lab-row .wand{margin-left:auto}
+.wand-note{display:none;margin-top:8px;font-size:12px;color:var(--muted)}
+.wand-note.on{display:block}
+.wand-note b{color:var(--fg)}
 /* ---- Register Agent gate — the W1 onboarding screens, run in-app from Fleet ---- */
-.reg-gate{min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:0 20px 72px;position:relative;isolation:isolate;background:var(--ink)}
-.reg-gate::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(900px 460px at 50% -10%,color-mix(in srgb,var(--gold) 14%,transparent),transparent 72%)}
+.reg-gate{min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:0 20px 72px;position:relative}
 .reg-top{width:100%;max-width:772px;display:flex;align-items:center;gap:12px;padding:18px 0 0}
 .reg-top .brandmark{margin:0}
 .reg-top .who{margin-left:auto;font-family:var(--mono);font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
@@ -1441,8 +1459,8 @@ table{color:inherit}
 .tx-kind.all{color:var(--muted);padding-left:8px}
 .tx-kind.err .d{display:none}
 /* ---- Onboarding demo — W1's sign-up, log-in and gate screens, reachable from the account dialog. Demo chrome; not shipped. ---- */
-.ob-auth{min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:0 20px 56px;position:relative;isolation:isolate;background:var(--ink)}
-.ob-auth::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.5;background:radial-gradient(760px 420px at 50% -6%,color-mix(in srgb,var(--gold) 14%,transparent),transparent 70%),repeating-linear-gradient(0deg,transparent 0 47px,var(--border) 47px 48px),repeating-linear-gradient(90deg,transparent 0 47px,var(--border) 47px 48px);-webkit-mask-image:linear-gradient(180deg,#000 0%,transparent 78%);mask-image:linear-gradient(180deg,#000 0%,transparent 78%)}
+.ob-auth{min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:0 20px 56px;position:relative;isolation:isolate}
+.ob-auth::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.5;background:repeating-linear-gradient(0deg,transparent 0 47px,var(--border) 47px 48px),repeating-linear-gradient(90deg,transparent 0 47px,var(--border) 47px 48px);-webkit-mask-image:linear-gradient(180deg,#000 0%,transparent 78%);mask-image:linear-gradient(180deg,#000 0%,transparent 78%)}
 .ob-top{width:100%;max-width:1180px;padding:26px 0 0;display:flex;align-items:center;gap:12px}
 .ob-top .brandmark{margin:0}
 .ob-top .btn{margin-left:auto}
