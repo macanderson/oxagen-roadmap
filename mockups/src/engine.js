@@ -1,14 +1,21 @@
 "use strict";
 /* BOOT: what the URL pins. ?state=loaded|empty|loading|error|denied, ?mobile=1|0 (the shell;
-   unpinned, the viewport decides), ?theme=dark|light, ?product=1 (hide the mockup chrome: the state
-   bar, the scenario rail and nav item, the onboarding demo entry points and "Exit demo"), and the
-   hash the file opens on when the URL carries none. A host page may set window.BOOT instead. */
+   unpinned, the viewport decides), ?theme=dark|light, ?debug=true, and the hash the file opens on
+   when the URL carries none. A host page may set window.BOOT instead.
+
+   The file opens as the product. The mockup chrome — the state bar, the scenario rail, the scenario
+   nav item, the onboarding demo entry points and "Exit demo" — appears only under ?debug=true, so
+   what a reviewer sees on a first open is the design and nothing else. ?product=1 is the old
+   spelling of the same default and still works. */
 var BOOT=(function(){var q=new URLSearchParams(location.search),b=window.BOOT||{};
+  var d=q.get("debug"), debug=d==="true"||d==="1"||!!b.debug;
   return {state:q.get("state")||b.state||null,
           mobile:q.has("mobile")?q.get("mobile")==="1":(b.mobile!=null?!!b.mobile:null),
           theme:q.get("theme")||b.theme||null,
-          product:q.get("product")==="1"||!!b.product,
+          debug:debug,
+          product:!debug,
           hash:q.get("hash")||b.hash||null};})();
+var DEBUG=BOOT.debug;
 var PRODUCT=BOOT.product;
 var DLG_EXT={};   /* lazily built dialogs, registered beside their code; see dialog() */
 /* ============================== demo record ============================== */
@@ -69,7 +76,8 @@ function notifUnread(){var n=0;for(var i=0;i<NOTIFS.length;i++){if(NOTIFS[i].unr
 /* ============================== engine ============================== */
 var S = {state:"loaded", phone:false, mobile:false, theme:null,
          layer:null, tab:{}, side:false, ws:"core-platform", frame:15, runFilter:"all",
-         ctxSel:"frames", approved:{}, toolNames:"label", beltView:"group", beltCat:"", regCat:""};
+         ctxSel:"frames", approved:{}, toolNames:"label", beltView:"group", beltCat:"", regCat:"",
+         coachFor:"agents", coachDrill:null, coachOff:{}, toolMetric:"cum"};
 
 /* kill switches — mutable state lives on S; SWITCHES is the seed and is never mutated */
 S.switches={}; S.flipMeta={}; S.denyGen=118; S.killBanner=null;
@@ -269,19 +277,21 @@ function coachOperator(p){
   out.sort(function(x,y){return y.usd-x.usd;});
   return out;
 }
-function coachCard(c,who){
+function coachCard(c,who,ctx){
   return '<article class="panel coach" style="margin:0"><div class="panel-h"><span class="b b-'+c.sev+'"><span class="d"></span>'+h(c.title)+'</span>'+
    (c.usd?'<span class="mono" style="margin-left:auto;font-size:12px;color:var(--fg)">'+fmt$(c.usd)+' <span class="dim">a month</span></span>':'')+'</div>'+
    '<div class="panel-b"><p class="mono" style="font-size:11.5px;color:var(--muted);margin:0 0 8px">'+c.signal+(c.tok?' · '+tokn(c.tok)+' tok':'')+'</p>'+
    '<p style="margin:0 0 10px;font-size:13px">'+c.say+'</p>'+
    '<div class="row"><button class="btn sm primary" onclick="'+c.act[1]+'">'+h(c.act[0])+'</button>'+
-   '<button class="btn sm" onclick="act(\'Coaching note for '+h(who)+' sent to its operator. It cites the frames the rollup read.\')">Send to the operator</button></div></div></article>';
+   '<button class="btn sm" onclick="act(\'Coaching note for '+h(who)+' sent to its operator. It cites the frames the rollup read.\')">Send to the operator</button>'+
+   (ctx?'<button class="btn sm" style="margin-left:auto" onclick="coachDismiss(\''+ctx.kind+'\',\''+h(ctx.id).replace(/'/g,"\\'")+'\',\''+h(c.k)+'\')">Dismiss</button>':'')+
+   '</div></div></article>';
 }
 /* The strip at the top of an agent page: its token profile and what the record says to change. */
 function coachStrip(a){
   if(typeof a==="string")a=agent(a);
   var t=agentTok(a); if(!t) return '';
-  var items=coachAgent(a), sp=money(a.spend30)||0;
+  var items=coachItems("agents",a.key), sp=money(a.spend30)||0;
   return '<div class="grid g2" style="margin-bottom:16px">'+
    '<div class="panel" style="margin:0"><div class="panel-h"><h3>30-day token use</h3><span class="mono dim" style="margin-left:auto;font-size:11px">'+tokn(t.total)+' tok · '+usd(fmt2(sp))+' · <span class="basis">'+(t.observed?'gateway_observed':'client_attested')+'</span></span></div>'+
     '<div class="panel-b">'+tokBars(t,{tight:true})+'<div class="hr"></div><dl class="kv">'+
@@ -5076,13 +5086,17 @@ function pTools(){
   if(t==="registry"){
     var props=proposals();
     var srows=SERVERS.map(function(s){
-      return '<tr><td><b class="mono">'+h(s.name)+'</b><span class="sub">'+h(s.url)+'</span></td>'+
+      return '<tr '+rowClick("openDialog('server','"+s.id+"')","Open "+s.name)+'>'+
+       '<td><b class="mono">'+h(s.name)+'</b><span class="sub">'+h(s.url)+'</span></td>'+
        '<td><span class="b b-q">'+h(s.kind)+'</span><span class="sub">'+h(s.transport)+'</span></td>'+
        '<td class="num">'+s.tools+'<span class="sub">'+s.versions+' versions</span></td>'+
        '<td>'+(s.health==="ok"?'<span class="b b-allowed"><span class="d"></span>ok</span>':'<span class="b b-approval"><span class="d"></span>degraded</span>')+'</td>'+
        '<td class="muted" style="font-size:12px">'+h(s.schemas)+'</td>'+
        '<td class="muted" style="font-size:12px">'+h(s.conn)+'</td>'+
-       '<td class="muted mono" style="font-size:11px">'+h(s.imported)+'</td></tr>';}).join("");
+       '<td class="muted mono" style="font-size:11px">'+h(s.imported)+'</td>'+
+       '<td class="rowacts" onclick="event.stopPropagation()"><button class="btn sm" onclick="openDialog(\'server\',\''+s.id+'\')">Open</button>'+
+       '<button class="btn sm" onclick="openDialog(\'serveredit\',\''+s.id+'\')">Edit</button>'+
+       '<button class="btn sm danger" onclick="openDialog(\'serverdel\',\''+s.id+'\')">Remove</button></td></tr>';}).join("");
     var rc=S.regCat||"", rcount={};
     TOOLS.forEach(function(x){var c=toolMeta(x.n).cat;rcount[c]=(rcount[c]||0)+1;});
     var tsel=rc?TOOLS.filter(function(x){return toolMeta(x.n).cat===rc;}):TOOLS;
@@ -5107,19 +5121,18 @@ function pTools(){
      '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Tool servers</h3>'+
      '<p class="muted" style="margin:2px 0 0;font-size:12px">'+srvCount()+' servers, '+verCount().toLocaleString()+' tool versions. The registry is the catalog; a belt is what one agent may reach.</p></div>'+
      '<div class="sp"><button class="btn sm" onclick="openDialog(\'import\')">Import tools from an MCP server</button></div></div>'+
-     '<div class="tw"><table><thead><tr><th>Server</th><th>Kind</th><th class="num">Tools</th><th>Health</th><th>Schemas</th><th>Connection</th><th>Last import</th></tr></thead>'+
+     '<div class="tw"><table><thead><tr><th>Server</th><th>Kind</th><th class="num">Tools</th><th>Health</th><th>Schemas</th><th>Connection</th><th>Last import</th><th></th></tr></thead>'+
      '<tbody>'+srows+'</tbody></table></div></div>'+
      '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Tool versions</h3>'+
      '<p class="muted" style="margin:2px 0 0;font-size:12px">RBAC reaches the version. A server shipping a new version does not silently widen a belt.</p></div>'+
      '<div class="sp">'+namesToggle()+'<span class="b b-q">'+tsel.length+' of '+verCount().toLocaleString()+' shown</span></div></div>'+
-     '<div class="panel-b" style="border-bottom:1px solid var(--border)">'+catChips(rcount,rc,"S.regCat='%s';render()",TOOLS.length)+'</div>'+
+     '<div class="panel-b" style="border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:center;flex-wrap:wrap">'+
+     '<div style="flex:1;min-width:0">'+catChips(rcount,rc,"S.regCat='%s';render()",TOOLS.length)+'</div>'+
+     '<button class="btn sm ghost" onclick="openDialog(\'toolcats\')">What the categories mean</button></div>'+
      '<div class="tw"><table><thead><tr><th>Tool version</th><th>Category</th><th>Hazard</th><th>Gate today</th><th>Egress</th><th>Financial</th><th>Schema origin</th><th>Digest</th>'+
      '<th class="num">On belts</th><th class="num">Calls 30d</th></tr></thead><tbody>'+trows+'</tbody></table></div>'+
      '<div class="panel-b"><div class="note">A financial tool whose schema does not expose an amount cannot be granted a mandate and is denied by construction. '+
      'The gate shown is today’s: the version’s own kill switch, then its server’s, then the mandate rule, then <span class="mono">pol_v41</span>.</div></div></div>'+
-     '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Tool categories</h3>'+
-     '<p class="muted" style="margin:2px 0 0;font-size:12px">What a tool acts on. Assigned at import from the schema and the server’s annotations; an admin can reclassify, and the change is a governed action.</p></div></div>'+
-     '<div class="panel-b">'+toolCatsBody()+'</div></div>'+
      '</div>';
   } else if(t==="connections"){
     body='<div class="panel"><div class="panel-h"><h3>Connections</h3>'+
@@ -5127,30 +5140,30 @@ function pTools(){
      '<div class="panel-b" style="border-bottom:1px solid var(--border)"><p class="muted" style="margin:0;font-size:12.5px">'+
      'Enveloped under the organization key, every read audited. <b>No agent holds any of these.</b> For each dispatched call the broker mints the narrowest credential the provider allows.</p></div>'+
      '<div class="tw"><table><thead><tr><th>Connection</th><th>Kind</th><th>Owner</th><th>Servers</th><th>Downscope</th>'+
-     '<th class="num">Grants 30d</th><th>Reviewed</th><th>Next review</th><th>Status</th></tr></thead><tbody>'+
+     '<th class="num">Grants 30d</th><th>Reviewed</th><th>Next review</th><th>Status</th><th></th></tr></thead><tbody>'+
      CONNECTIONS.map(function(c){
       var due=c.status==="review due";
-      return '<tr><td><b>'+h(c.name)+'</b><div class="dim mono" style="font-size:10.5px">'+h(c.id)+'</div></td>'+
+      return '<tr '+rowClick("openDialog('conn','"+c.id+"')","Open "+c.name)+'><td><b>'+h(c.name)+'</b><div class="dim mono" style="font-size:10.5px">'+h(c.id)+'</div></td>'+
        '<td class="mono" style="font-size:11.5px">'+h(c.kind)+'</td><td>'+h(c.owner)+'</td>'+
        '<td class="mono dim" style="font-size:11.5px">'+h(c.servers)+'</td>'+
        '<td class="mono" style="font-size:11.5px">'+h(c.downscope)+'</td>'+
        '<td class="num">'+c.grants30.toLocaleString()+'</td><td>'+h(c.reviewed)+'</td><td>'+h(c.next)+'</td>'+
-       '<td><span class="b b-'+(due?"approval":c.status.indexOf("financial")>-1?"critical":"allowed")+'"><span class="d"></span>'+h(c.status)+'</span></td></tr>';}).join("")+
+       '<td><span class="b b-'+(due?"approval":c.status.indexOf("financial")>-1?"critical":"allowed")+'"><span class="d"></span>'+h(c.status)+'</span></td>'+
+       '<td class="rowacts" onclick="event.stopPropagation()"><button class="btn sm" onclick="openDialog(\'conn\',\''+c.id+'\')">Open</button>'+
+       '<button class="btn sm" onclick="openDialog(\'connedit\',\''+c.id+'\')">Edit</button>'+
+       '<button class="btn sm danger" onclick="openDialog(\'connrevoke\',\''+c.id+'\')">Revoke</button></td></tr>';}).join("")+
      '</tbody></table></div>'+
-     '<div class="panel-b"><div class="warn"><b>Slack review is overdue.</b> Its next review date was 2026-09-12 and it has issued 311 grants in 30 days. '+
-     'Revoking the connection invalidates every grant it minted at the next use.</div></div></div>'+
-     grantsLog()+
-     '<div class="grid g2" style="margin-top:14px">'+brokerChooses()+
-     '<div class="panel"><div class="panel-h"><h3>Financial connections</h3></div><div class="panel-b"><dl class="kv">'+
-     '<dt>Named human owner</dt><dd>required, with a finance role — Dana Okafor</dd>'+
-     '<dt>Mandate per agent</dt><dd>required for every agent that may use it</dd>'+
-     '<dt>Full-scope keys</dt><dd>the gateway refuses to expose one to a financial tool</dd></dl></div></div></div>';
+     (function(){var od=CONNECTIONS.filter(function(c){return c.status==="review due";});
+       return od.length?'<div class="panel-b"><div class="warn"><b>'+od.length+' connection'+(od.length>1?'s are':' is')+' past its review date.</b> '+
+        od.map(function(c){return h(c.name)+' was due '+h(c.next)+' and has issued '+c.grants30.toLocaleString()+' grants in 30 days';}).join('. ')+'. '+
+        'Revoking a connection invalidates every grant it minted at the next use.</div></div>':'';})()+'</div>'+
+     grantsLog();
   } else if(t==="mandates"){
     var m=MANDATES[0];
     body='<div class="panel"><div class="panel-h"><h3>Mandates ledger</h3>'+
      '<button class="btn sm" style="margin-left:auto" onclick="openDialog(\'mandate\')">Grant a mandate</button></div>'+
      '<div class="tw"><table><thead><tr><th>Mandate</th><th>Agent</th><th>Granted by</th><th>Purpose</th>'+
-     '<th class="num">Per call</th><th class="num">Per period</th><th class="num">Settled</th><th class="num">Reserved</th><th class="num">Remaining</th><th>Valid to</th><th>Status</th></tr></thead><tbody>'+
+     '<th class="num">Per call</th><th class="num">Per period</th><th class="num">Settled</th><th class="num">Reserved</th><th class="num">Remaining</th><th>Valid to</th><th>Status</th><th></th></tr></thead><tbody>'+
      '<tr class="click" onclick="go(\'#/'+ORG.slug+'/finops/agents/invoice-bot/mandates/'+m.id+'\')">'+
      '<td class="mono">'+h(m.id)+'</td><td class="mono" style="font-size:11.5px">'+h(m.agent)+'</td>'+
      '<td>'+h(m.by)+'<div class="dim mono" style="font-size:10.5px">'+h(m.roleAt)+'</div></td>'+
@@ -5158,42 +5171,41 @@ function pTools(){
      '<td class="num">'+usd(m.perCall)+'</td><td class="num">'+usd(m.perPeriod)+'</td>'+
      '<td class="num">'+usd(m.used)+'</td><td class="num" style="color:var(--st-approval)">'+usd(m.reserved)+'</td>'+
      '<td class="num">'+usd(m.remaining)+'</td><td>'+h(m.to)+'</td>'+
-     '<td><span class="b b-allowed"><span class="d"></span>'+h(m.status)+'</span></td></tr>'+
+     '<td><span class="b b-allowed"><span class="d"></span>'+h(m.status)+'</span></td>'+
+     '<td class="rowacts" onclick="event.stopPropagation()"><button class="btn sm" onclick="openDialog(\'mandateedit\',\''+m.id+'\')">Edit limits</button>'+
+     '<button class="btn sm danger" onclick="openDialog(\'mandaterevoke\',\''+m.id+'\')">Revoke</button></td></tr>'+
      '</tbody></table></div><div class="panel-b">'+
      '<div class="warn"><b>One exception, severity critical.</b> The connection’s Stripe webhook reported a charge on <span class="mono">con_01K2A9</span> that has no receipt: '+
      'Stripe charge <span class="mono">ch_3Qa8</span>, $18.00 USD, 2026-09-11 08:40Z. Money moved that Oxagen did not govern.</div></div></div>';
   } else if(t==="policy"){
-    body='<div class="split"><div><div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Policy versions</h3>'+
+    body='<div class="panel"><div class="panel-h"><h3>Policy versions</h3>'+
      '<div class="sp"><span class="b b-q">Cedar · deterministic · no model in the decision path</span>'+
      '<button class="btn sm" onclick="openDialog(\'policy\')">Edit</button></div></div>'+
-     '<div class="tw"><table><thead><tr><th>Version</th><th>State</th><th>Author</th><th>When</th><th class="num">Rules</th><th>Tests</th><th>What changed</th></tr></thead><tbody>'+
+     '<div class="tw"><table><thead><tr><th>Version</th><th>State</th><th>Author</th><th>When</th><th class="num">Rules</th><th>Tests</th><th>What changed</th><th></th></tr></thead><tbody>'+
      POLICIES.map(function(p){
       var sm={active:"allowed",superseded:"q"};
       return '<tr><td class="mono">'+h(p.v)+'</td><td><span class="b b-'+(sm[p.state]||"approval")+'"><span class="d"></span>'+h(p.state)+'</span></td>'+
        '<td>'+h(p.by)+'</td><td class="mono dim" style="font-size:11px">'+h(p.at)+'</td><td class="num">'+p.rules+'</td>'+
-       '<td><span class="b b-allowed">'+h(p.tests)+'</span></td><td style="font-size:12px">'+h(p.note)+'</td></tr>';}).join("")+
+       '<td><span class="b b-allowed">'+h(p.tests)+'</span></td><td style="font-size:12px">'+h(p.note)+'</td>'+
+       '<td class="rowacts"><button class="btn sm" onclick="openDialog(\'policyver\',\''+p.v+'\')">Open</button>'+
+       (p.state==="active"?'<button class="btn sm" onclick="openDialog(\'policy\')">Edit</button>':
+        p.state==="draft"?'<button class="btn sm primary" onclick="openDialog(\'policyactivate\',\''+p.v+'\')">Activate</button>':
+        '<button class="btn sm" onclick="openDialog(\'policyrestore\',\''+p.v+'\')">Restore</button>')+'</td></tr>';}).join("")+
      '</tbody></table></div><div class="panel-b"><div class="note">A version is activated by a governed action with approval; in regulated mode it is a Context PR instead. The superseded version is kept, never deleted, because every decision cites the version that made it.</div></div></div>'+
-     '</div>'+
-     '<div class="panel"><div class="panel-h"><h3>Policy conditions</h3></div><div class="panel-b">'+
-     '<p class="muted" style="font-size:12px;margin-bottom:11px">All derived from the call and the record. None from prose.</p>'+
+     '<div class="hr"></div>'+
+     '<p class="eyebrow q">Conditions a rule may test</p>'+
      '<div class="row">'+["tool version","risk","side effect","egress","financial class","amount by path","counterparty","repository","path prefix","recipient domain","taint and its sources","time window","rate","sequence","operator role","enforcement tier","budget position","mandate position"]
       .map(function(c){return '<span class="b b-q" style="font-size:10.5px">'+h(c)+'</span>';}).join("")+'</div>'+
      '<div class="hr"></div><p class="eyebrow q">Sequence rule</p>'+
      '<pre><span class="c">// a payment requires a prior quote call in the same run</span>\n'+
      '<span class="k">forbid</span> (principal, action == Action::<span class="s">"stripe__create_payment"</span>, resource)\n'+
-     '<span class="k">unless</span> { context.run.has_prior_call(<span class="s">"stripe__list_prices"</span>) };</pre></div></div></div>';
+     '<span class="k">unless</span> { context.run.has_prior_call(<span class="s">"stripe__list_prices"</span>) };</pre></div></div>';
   } else if(t==="auto"){
     body=autoRulesBody();
   } else if(t==="switches"){
     var cls=SWITCHES.filter(function(s){return s.cls;}), rest=SWITCHES.filter(function(s){return !s.cls;});
     body='<div class="ks-stack">'+
-     '<div class="panel"><div class="panel-h"><div class="ks-grow"><h3>Deny levels</h3>'+
-     '<p>Automatic triggers issue the same denies: repeated <span class="mono">unknown_tool</span> attempts, taint on a financial call, a mandate exception, a credential probe, a chain break. '+
-     'Every flip is a security event with who, why, and what it stopped, and shows up on the affected runs as <span class="mono">policy.decision</span> frames.</p></div>'+
-     '<span class="b b-q mono" style="font-size:10.5px">deny generation '+S.denyGen+'</span></div>'+
-     '<div class="panel-b"><div class="ks-wire"><span>tool version</span><span>tool server</span><span>connection</span><span>agent</span>'+
-     '<span>operator’s agents</span><span>workspace</span><span>organization</span><span class="out">class</span></div></div></div>'+
-     '<div><p class="eyebrow q">Class switches</p><div class="ks-stack">'+cls.map(switchCard).join("")+'</div></div>'+
+     '<div><p class="eyebrow q" style="display:flex;gap:8px;align-items:center">Class switches<span class="b b-q mono" style="font-size:10.5px">deny generation '+S.denyGen+'</span></p><div class="ks-stack">'+cls.map(switchCard).join("")+'</div></div>'+
      '<div><p class="eyebrow q">Scoped switches</p><div class="grid g2">'+rest.map(switchCard).join("")+'</div></div></div>';
   }
   return '<div class="phead"><div class="t"><p class="eyebrow">'+h(w.name)+'</p><h1>Tools</h1>'+
@@ -5235,14 +5247,240 @@ function grantsLog(){
    '<div class="tw"><table data-lt="1"><thead><tr><th>Grant</th><th>Tool version</th><th>Agent and run</th><th>Connection</th><th>Scope</th><th>TTL</th><th>State</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
    '<div class="panel-b"><p class="muted" style="margin:0;font-size:12px">TTL defaults to the call’s expected duration plus a margin, never more than one hour. The agent sees the result, never the credential.</p></div></div>';
 }
-function brokerChooses(){
-  return '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Broker selection</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">For each dispatched call, the narrowest credential the provider allows, in this order.</p></div></div>'+
-   '<div class="tw"><table data-lt="1"><thead><tr><th>Provider capability</th><th>What the broker mints</th><th>Here</th></tr></thead><tbody>'+
-   BROKER_CAPS.map(function(x){var cs=CONNECTIONS.filter(function(c){return c.downscope===x[0];});
-    return '<tr><td style="font-size:12px"><b>'+h(x[1])+'</b></td><td class="muted" style="font-size:12px">'+h(x[2])+'</td>'+
-     '<td class="mono" style="font-size:11px">'+(cs.length?cs.map(function(c){return h(c.servers);}).join(" · "):'<span class="dim">none</span>')+'</td></tr>';}).join("")+
-   '</tbody></table></div></div>';
+/* ---------- Tool servers, connections, mandates and policy versions: open, edit, remove ----------
+   Every row on the Tools page that names a record opens it here. The dialogs write to the
+   fixtures in place, so a removal is visible on the table behind them, and each destructive one
+   says what stops working before it asks. */
+function brokerMints(downscope){
+  for(var i=0;i<BROKER_CAPS.length;i++){if(BROKER_CAPS[i][0]===downscope)return BROKER_CAPS[i][2];}
+  return "the stored credential, used server-side for this call only";
+}
+function serverById(id){for(var i=0;i<SERVERS.length;i++){if(SERVERS[i].id===id)return SERVERS[i];}return null;}
+function connById(id){for(var i=0;i<CONNECTIONS.length;i++){if(CONNECTIONS[i].id===id)return CONNECTIONS[i];}return null;}
+function serverTools(id){return TOOLS.filter(function(x){return x.s===id;});}
+function serverConns(id){return CONNECTIONS.filter(function(c){return String(c.servers).split(/[\s,]+/).indexOf(id)>-1;});}
+function noSuch(what){return {t:what,w:false,b:'<div class="note">That record is no longer here.</div>',
+  f:'<button class="btn" onclick="closeDialog()">Close</button>'};}
+
+DLG_EXT.server=function(id){
+  var s=serverById(id); if(!s) return noSuch("Tool server");
+  var tv=serverTools(s.id), cs=serverConns(s.id), props=proposals().filter(function(p){return p.s===s.id;});
+  return {t:s.name,s:s.url,w:true,
+   b:(s.health==="ok"?'':'<div class="warn"><b>This server is degraded.</b> Calls to it are retried once and then denied; the run says so on its frames.</div>')+
+    (props.length?'<div class="warn"><b>'+props.length+' schema'+(props.length>1?'s are':' is')+' awaiting approval.</b> '+
+      'Until an admin approves, outputs are validated only for size and type.</div>':'')+
+    '<dl class="kv"><dt>Kind</dt><dd class="mono">'+h(s.kind)+' · '+h(s.transport)+'</dd>'+
+    '<dt>Connection</dt><dd>'+h(s.conn)+'</dd>'+
+    '<dt>Schemas</dt><dd>'+h(s.schemas)+'</dd>'+
+    '<dt>Tool versions</dt><dd>'+s.versions+' across '+s.tools+' tools</dd>'+
+    '<dt>Last import</dt><dd class="mono">'+h(s.imported)+'</dd></dl>'+
+    (tv.length?'<p class="eyebrow" style="margin:16px 0 8px">Tool versions on belts</p>'+
+     '<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Tool version</th><th>Hazard</th><th class="num">On belts</th><th class="num">Calls 30d</th></tr></thead><tbody>'+
+     tv.slice(0,8).map(function(x){return '<tr><td class="mono" style="font-size:11.5px">'+h(x.n)+'@'+h(x.v)+'</td><td>'+hazard(x.risk,x.eff)+'</td>'+
+      '<td class="num">'+x.belts+'</td><td class="num">'+x.calls30.toLocaleString()+'</td></tr>';}).join("")+
+     '</tbody></table></div>'+(tv.length>8?'<p class="muted" style="font-size:12px;margin:8px 0 0">The leading 8 of '+tv.length+'. The registry table holds every one.</p>':''):'')+
+    (cs.length?'<p class="eyebrow" style="margin:16px 0 8px">Connections that reach it</p><div class="row">'+
+     cs.map(function(c){return '<button class="btn sm" onclick="openDialog(\'conn\',\''+c.id+'\')">'+h(c.name)+'</button>';}).join("")+'</div>':''),
+   f:'<button class="btn danger" onclick="openDialog(\'serverdel\',\''+s.id+'\')">Remove</button>'+
+    '<span class="grow"></span>'+
+    '<button class="btn" onclick="closeDialog();act(\'Re-importing from tools/list. New versions land as new rows; nothing widens a belt on its own.\')">Re-import</button>'+
+    '<button class="btn primary" onclick="openDialog(\'serveredit\',\''+s.id+'\')">Edit</button>'};
+};
+DLG_EXT.serveredit=function(id){
+  var s=serverById(id); if(!s) return noSuch("Tool server");
+  return {t:"Edit "+s.name,s:"The endpoint and the credential it is reached with.",w:false,
+   b:'<div class="field"><label for="sv-url">Endpoint</label><input id="sv-url" value="'+h(s.url)+'"></div>'+
+    '<div class="field"><label for="sv-tr">Transport</label><select id="sv-tr">'+
+     ["streamable-http","https","stdio","in-process","hook"].map(function(t){return '<option'+(t===s.transport?' selected':'')+'>'+t+'</option>';}).join("")+'</select></div>'+
+    '<div class="field"><label for="sv-conn">Connection</label><select id="sv-conn">'+
+     ['none'].concat(CONNECTIONS.map(function(c){return c.name;})).map(function(n){return '<option'+(n===s.conn?' selected':'')+'>'+h(n)+'</option>';}).join("")+
+     (CONNECTIONS.map(function(c){return c.name;}).indexOf(s.conn)<0&&s.conn!=="none"?'<option selected>'+h(s.conn)+'</option>':'')+'</select></div>'+
+    '<div class="note">Changing the endpoint does not re-import. Tool versions already on a belt keep their digest until a re-import brings a new one.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="serverSave(\''+s.id+'\')">Save</button>'};
+};
+function serverSave(id){
+  var s=serverById(id); if(!s) return;
+  var u=el("sv-url"), t=el("sv-tr"), c=el("sv-conn");
+  if(u){ var v=u.value.trim(); if(!v){act("A server needs an endpoint.");return;} s.url=v; }
+  if(t) s.transport=t.value;
+  if(c) s.conn=c.value;
+  closeDialog(); render(); act("Saved. "+s.name+" is reached at "+s.url+" from the next call.");
+}
+DLG_EXT.serverdel=function(id){
+  var s=serverById(id); if(!s) return noSuch("Tool server");
+  var tv=serverTools(s.id), belts=tv.reduce(function(n,x){return n+x.belts;},0);
+  return {t:"Remove "+s.name+"?",w:false,
+   b:'<div class="warn"><b>'+s.versions+' tool versions leave the registry.</b> '+
+     (belts?belts+' belt entries lose their tool and the calls they cover are denied as <span class="mono">unknown_tool</span> from the next call boundary.':'No belt reaches it, so nothing in flight is denied.')+'</div>'+
+    '<div class="note">The registry rows are kept for replay: a run that already called this server still cites the version it called. Re-importing the same endpoint restores it.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
+    '<button class="btn danger" onclick="serverDelete(\''+s.id+'\')">Remove it</button>'};
+};
+function serverDelete(id){
+  var i=-1; SERVERS.forEach(function(s,ix){if(s.id===id)i=ix;});
+  if(i<0) return; var n=SERVERS[i].name; SERVERS.splice(i,1);
+  closeDialog(); render(); act("Removed "+n+". Its tool versions are out of the registry and off every belt.");
+}
+
+DLG_EXT.conn=function(id){
+  var c=connById(id); if(!c) return noSuch("Connection");
+  var due=c.status==="review due", fin=c.status.indexOf("financial")>-1;
+  var g=GRANTS.filter(function(x){return x.conn===c.id;});
+  return {t:c.name,s:c.id+" · "+c.kind,w:true,
+   b:(due?'<div class="warn"><b>The review date passed on '+h(c.next)+'.</b> It has issued '+c.grants30.toLocaleString()+' grants since. '+
+      'Marking it reviewed sets the next date 90 days out and is recorded with your name on it.</div>':'')+
+    '<dl class="kv"><dt>Owner</dt><dd>'+h(c.owner)+(fin?' · a finance role, required on a financial connection':'')+'</dd>'+
+    '<dt>Servers</dt><dd class="mono">'+h(c.servers)+'</dd>'+
+    '<dt>Downscope</dt><dd class="mono">'+h(c.downscope)+'</dd>'+
+    '<dt>What the broker mints</dt><dd>'+h(brokerMints(c.downscope))+'</dd>'+
+    '<dt>Grants 30d</dt><dd>'+c.grants30.toLocaleString()+'</dd>'+
+    '<dt>Reviewed</dt><dd>'+h(c.reviewed)+' · next '+h(c.next)+'</dd></dl>'+
+    (g.length?'<p class="eyebrow" style="margin:16px 0 8px">Recent grants</p>'+
+     '<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Tool version</th><th>Scope</th><th>TTL</th><th>State</th></tr></thead><tbody>'+
+     g.map(function(x){return '<tr><td class="mono" style="font-size:11.5px">'+h(x.tool||"—")+'</td>'+
+      '<td class="mono" style="font-size:11px">'+h(x.scope)+'</td><td class="mono">'+h(x.ttl)+'</td><td>'+h(x.state)+'</td></tr>';}).join("")+
+     '</tbody></table></div>':'')+
+    '<div class="note">No agent holds this credential. The secret was enveloped under the organization key at save and cannot be read back.</div>',
+   f:'<button class="btn danger" onclick="openDialog(\'connrevoke\',\''+c.id+'\')">Revoke</button>'+
+    '<span class="grow"></span>'+
+    (due?'<button class="btn" onclick="connReviewed(\''+c.id+'\')">Mark reviewed</button>':'')+
+    '<button class="btn primary" onclick="openDialog(\'connedit\',\''+c.id+'\')">Edit</button>'};
+};
+DLG_EXT.connedit=function(id){
+  var c=connById(id); if(!c) return noSuch("Connection");
+  var owners=["Marcus Bell","Priya Natarajan","Dana Okafor"];
+  if(owners.indexOf(c.owner)<0) owners.unshift(c.owner);
+  return {t:"Edit "+c.name,s:"The secret itself is never readable. Replace it to rotate.",w:false,
+   b:'<div class="field"><label for="cn-name">Name</label><input id="cn-name" value="'+h(c.name)+'"></div>'+
+    '<div class="field"><label for="cn-owner">Owner — a human, not a team</label><select id="cn-owner">'+
+     owners.map(function(o){return '<option'+(o===c.owner?' selected':'')+'>'+h(o)+'</option>';}).join("")+'</select></div>'+
+    '<div class="field"><label for="cn-next">Next review</label><input id="cn-next" type="date" value="'+h(c.next)+'"></div>'+
+    '<div class="field"><label for="cn-secret">Replace the secret</label><input id="cn-secret" type="password" placeholder="leave empty to keep the current one" autocomplete="off">'+
+    '<div class="hint">A replacement is tested against the provider before it is saved. Grants already minted keep their TTL.</div></div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="connSave(\''+c.id+'\')">Save</button>'};
+};
+function connSave(id){
+  var c=connById(id); if(!c) return;
+  var n=el("cn-name"), o=el("cn-owner"), d=el("cn-next"), sec=el("cn-secret");
+  if(n){ var v=n.value.trim(); if(!v){act("A connection needs a name people will read in the audit record.");return;} c.name=v; }
+  if(o) c.owner=o.value;
+  if(d&&d.value) c.next=d.value;
+  if(c.status==="review due"&&d&&d.value>"2026-09-11") c.status="active";
+  closeDialog(); render();
+  act(sec&&sec.value?"Tested against the provider, then saved. The old secret is dead at the next call.":"Saved.");
+}
+function connReviewed(id){
+  var c=connById(id); if(!c) return;
+  c.reviewed="2026-09-11"; c.next="2026-12-10";
+  if(c.status==="review due") c.status="active";
+  closeDialog(); render(); act("Reviewed. The next date is "+c.next+", recorded with your name on it.");
+}
+DLG_EXT.connrevoke=function(id){
+  var c=connById(id); if(!c) return noSuch("Connection");
+  return {t:"Revoke "+c.name+"?",w:false,
+   b:'<div class="warn"><b>Every grant it minted stops at the next use.</b> '+c.grants30.toLocaleString()+' were minted in 30 days. '+
+     'Calls to <span class="mono">'+h(c.servers)+'</span> are denied until another connection covers them.</div>'+
+    (c.status.indexOf("financial")>-1?'<div class="note">This connection is financial. Revoking it leaves its mandates in place with nothing to draw on; reserved amounts are released at the next boundary.</div>':''),
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
+    '<button class="btn danger" onclick="connRevoke(\''+c.id+'\')">Revoke it</button>'};
+};
+function connRevoke(id){
+  var i=-1; CONNECTIONS.forEach(function(c,ix){if(c.id===id)i=ix;});
+  if(i<0) return; var n=CONNECTIONS[i].name; CONNECTIONS.splice(i,1);
+  closeDialog(); render(); act("Revoked "+n+". Its grants are dead at the next use.");
+}
+
+DLG_EXT.mandateedit=function(id){
+  var m=null; MANDATES.forEach(function(x){if(x.id===id)m=x;});
+  if(!m) return noSuch("Mandate");
+  return {t:"Edit "+m.id,s:m.agent,w:false,
+   b:'<div class="fields" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'+
+    '<div class="field"><label for="mn-call">Per call (USD)</label><input id="mn-call" value="'+h(m.perCall)+'"></div>'+
+    '<div class="field"><label for="mn-per">Per '+h(m.period)+' (USD)</label><input id="mn-per" value="'+h(m.perPeriod)+'"></div></div>'+
+    '<div class="field"><label for="mn-appr">Approval above (USD)</label><input id="mn-appr" value="'+h(m.approvalAbove)+'">'+
+    '<div class="hint">A call above this parks for a human whatever the auto-approval rules say.</div></div>'+
+    '<div class="field"><label for="mn-to">Valid to</label><input id="mn-to" type="date" value="'+h(m.to)+'"></div>'+
+    '<div class="note">Lowering a ceiling below what is already reserved does not claw the reservation back; it applies from the next call. Widening one needs the second approver, '+h(m.second)+'.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="mandateSave(\''+m.id+'\')">Save</button>'};
+};
+function mandateSave(id){
+  var m=null; MANDATES.forEach(function(x){if(x.id===id)m=x;});
+  if(!m) return;
+  var a=el("mn-call"), b=el("mn-per"), c=el("mn-appr"), d=el("mn-to");
+  if(a&&a.value.trim()) m.perCall=a.value.trim();
+  if(b&&b.value.trim()) m.perPeriod=b.value.trim();
+  if(c&&c.value.trim()) m.approvalAbove=c.value.trim();
+  if(d&&d.value) m.to=d.value;
+  closeDialog(); render(); act("Saved. The ledger entry names you and the limits you set.");
+}
+DLG_EXT.mandaterevoke=function(id){
+  var m=null; MANDATES.forEach(function(x){if(x.id===id)m=x;});
+  if(!m) return noSuch("Mandate");
+  return {t:"Revoke "+m.id+"?",w:false,
+   b:'<div class="warn"><b>'+h(m.agent)+' can move no money after this.</b> '+usd(m.reserved)+' is reserved and is released at the next boundary; '+
+     usd(m.used)+' already settled and stays on the ledger.</div>'+
+    '<div class="note">The ledger is kept, never deleted. A revoked mandate still answers for every draw it made.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
+    '<button class="btn danger" onclick="mandateRevoke(\''+m.id+'\')">Revoke it</button>'};
+};
+function mandateRevoke(id){
+  var m=null; MANDATES.forEach(function(x){if(x.id===id)m=x;});
+  if(!m) return;
+  m.status="revoked"; m.remaining="0.00";
+  closeDialog(); render(); act("Revoked "+id+". The reservation is released at the next boundary.");
+}
+
+DLG_EXT.policyver=function(v){
+  var p=null; POLICIES.forEach(function(x){if(x.v===v)p=x;});
+  if(!p) return noSuch("Policy version");
+  return {t:p.v,s:p.state==="active"?"The version every decision cites today":"Superseded, and kept because decisions cite it",w:false,
+   b:'<dl class="kv"><dt>State</dt><dd>'+h(p.state)+'</dd><dt>Author</dt><dd>'+h(p.by)+'</dd>'+
+    '<dt>Activated</dt><dd class="mono">'+h(p.at)+'</dd><dt>Rules</dt><dd>'+p.rules+'</dd>'+
+    '<dt>Tests</dt><dd>'+h(p.tests)+'</dd><dt>What changed</dt><dd>'+h(p.note)+'</dd></dl>'+
+    '<div class="note">Cedar, evaluated without a model in the decision path. Every <span class="mono">policy.decision</span> frame names the version that made it, so a replay reads the same either way.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Close</button>'+
+    (p.state==="active"?'<button class="btn primary" onclick="openDialog(\'policy\')">Edit</button>':
+     p.state==="draft"?'<button class="btn primary" onclick="openDialog(\'policyactivate\',\''+p.v+'\')">Activate</button>':
+     '<button class="btn primary" onclick="openDialog(\'policyrestore\',\''+p.v+'\')">Restore</button>')};
+};
+DLG_EXT.policyrestore=function(v){
+  var p=null; POLICIES.forEach(function(x){if(x.v===v)p=x;});
+  if(!p) return noSuch("Policy version");
+  var act0=POLICIES.filter(function(x){return x.state==="active";})[0];
+  return {t:"Restore "+p.v+"?",w:false,
+   b:'<div class="note">A restore does not move the pointer back. It copies '+h(p.v)+'’s rules into a new version above '+
+     h(act0?act0.v:"the active one")+', which activates by a governed action with approval. The record keeps both.</div>'+
+    '<div class="warn"><b>'+h(p.note)+'</b> is undone by this. Read what it changed before you approve it.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
+    '<button class="btn primary" onclick="policyRestore(\''+p.v+'\')">Draft the restore</button>'};
+};
+function policyRestore(v){
+  var p=null; POLICIES.forEach(function(x){if(x.v===v)p=x;});
+  if(!p) return;
+  var n=parseInt(String(POLICIES[0].v).replace(/\D/g,""),10)+1;
+  POLICIES.unshift({v:"pol_v"+n,state:"draft",by:PEOPLE.marcus.name,at:"2026-09-11 09:20Z",rules:p.rules,
+   tests:p.tests,note:"restores "+p.v});
+  closeDialog(); render(); act("Drafted pol_v"+n+" from "+v+". It decides nothing until an approver activates it.","gold");
+}
+DLG_EXT.policyactivate=function(v){
+  var p=null; POLICIES.forEach(function(x){if(x.v===v)p=x;});
+  if(!p) return noSuch("Policy version");
+  var cur=POLICIES.filter(function(x){return x.state==="active";})[0];
+  return {t:"Activate "+p.v+"?",w:false,
+   b:'<div class="note">'+(cur?h(cur.v)+' is superseded and kept, because every decision it made cites it. ':'')+
+     'From the next call boundary every <span class="mono">policy.decision</span> frame names '+h(p.v)+'.</div>'+
+    '<dl class="kv"><dt>Rules</dt><dd>'+p.rules+'</dd><dt>Tests</dt><dd>'+h(p.tests)+'</dd>'+
+    '<dt>What changes</dt><dd>'+h(p.note)+'</dd></dl>'+
+    '<div class="warn"><b>This is a governed action.</b> It records your name, and in regulated mode it is a Context PR instead of a button.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
+    '<button class="btn primary" onclick="policyActivate(\''+p.v+'\')">Activate it</button>'};
+};
+function policyActivate(v){
+  var p=null; POLICIES.forEach(function(x){if(x.v===v)p=x;});
+  if(!p) return;
+  POLICIES.forEach(function(x){if(x.state==="active")x.state="superseded";});
+  p.state="active"; S.denyGen+=1;
+  closeDialog(); render(); act(v+" is active. Deny generation is now "+S.denyGen+".","gold");
 }
 
 /* ---------- Import, in three steps (W9): connect, review tools/list, classify and import ----------
@@ -6530,20 +6768,7 @@ function repoTab(){
    '<div class="sp"><button class="btn sm" onclick="wzOpen(\'init\')">Add Oxagen to a repository</button></div></div>'+
    '<div class="tw"><table><thead><tr><th>Repository</th><th>Role</th><th>Production branch</th><th>.oxagen/</th><th>Events</th><th class="num">Symbols</th><th></th></tr></thead>'+
    '<tbody>'+trows+'</tbody></table></div>'+
-   '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">Changing which repository is <span class="mono">main</span> is an organization-owner action with approval, and it lands in the audit record as a security event. The production branch never moves on its own: when GitHub’s default branch changes, the App records it and prompts, and the binding stays where it is until somebody confirms.</div></div></div>'+
-   '<div class="grid g2" style="margin-top:14px">'+
-   '<div class="panel"><div class="panel-h"><h3>Linking steps</h3></div><div class="panel-b">'+
-   '<ul class="chain"><li class="on"><span class="h">1 · Confirm the production branch</span><div>GitHub’s default branch is the suggestion, never the decision. Only this branch’s commits update the code graph.</div></li>'+
-   '<li class="on"><span class="h">2 · Subscribe to events</span><div>Every event the product uses, recorded idempotently on GitHub’s delivery id. Each <span class="mono">push</span> carries the previous head, so a gap is visible in the events themselves.</div></li>'+
-   '<li class="on"><span class="h">3 · Import issues</span><div>One resumable backfill where Issues is enabled; events keep the rows current afterwards.</div></li>'+
-   '<li class="on"><span class="h">4 · Build the code graph</span><div>A shallow clone of the production head, indexed with the same tree-sitter grammars the protocol provider uses, then discarded.</div></li></ul></div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>Permissions</h3></div><div class="panel-b">'+
-   '<div class="kv"><dt>Contents</dt><dd>read <b>and write</b> — the branch and the file every pull request carries</dd>'+
-   '<dt>Pull requests</dt><dd>read <b>and write</b> — opening one, and reading its head</dd>'+
-   '<dt>Checks</dt><dd><b>write</b> — the check runs on the head commit, and the CI a governed change needs</dd>'+
-   '<dt>Metadata</dt><dd>read — mandatory</dd>'+
-   '<dt>Issues</dt><dd>read — task references for runs</dd></div>'+
-   '<div class="note" style="margin-top:12px">Oxagen writes to a branch and never to the production branch. It opens and closes pull requests; it merges only the ones a person merges from here, under the governance mode the repository itself declares.</div></div></div></div>';
+   '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">Changing which repository is <span class="mono">main</span> is an organization-owner action with approval, and it lands in the audit record as a security event. The production branch never moves on its own: when GitHub’s default branch changes, the App records it and prompts, and the binding stays where it is until somebody confirms.</div></div></div>';
 }
 
 /* ---- tab 2: the working copies ---- */
@@ -6824,7 +7049,7 @@ function pSpend(){
 
   var tabs='<div class="tabs" role="tablist">'+
    [["findings","Findings",FINDINGS.length],["tokens","Tokens"],["coaching","Coaching",coachCount()],["operator","By operator"],["agent","By agent"],
-    ["tool","By tool"],["waste","Wasted spend",SPEND.wasteRunsList.length],["budgets","Budgets",SPEND.budgets.length]]
+    ["model","By model"],["tool","By tool"],["waste","Wasted spend",SPEND.wasteRunsList.length],["budgets","Budgets",SPEND.budgets.length]]
    .map(function(x){return '<button class="tab" role="tab" aria-selected="'+(t===x[0])+'" onclick="spendGo(\''+x[0]+'\')">'+x[1]+(x[2]?'<span class="n">'+x[2]+'</span>':'')+'</button>';}).join("")+'</div>';
 
   var strip='<div class="grid g4" style="margin-bottom:16px">'+
@@ -6874,15 +7099,20 @@ function pSpend(){
      '</tbody></table></div><div class="panel-b">'+
      '<div class="note">Every run has exactly one operator, even when a schedule or a webhook started it: the operator is the person who owns that trigger. A run that arrived without one is attributed to the agent’s owning operator and flagged — never dropped, never spread.</div></div></div>';
   } else if(t==="agent"){
-    body='<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>By agent</h3></div><div class="tw"><table>'+
+    body='<div class="panel"><div class="panel-h"><h3>By agent</h3></div><div class="tw"><table>'+
      '<thead><tr><th>Agent</th><th class="num">Runs</th><th class="num">Spend</th><th class="num">Tokens</th><th class="num">Per run</th><th class="num">Cache hit</th><th class="num">Potential savings</th><th>Trend</th></tr></thead><tbody>'+
      SPEND.byAgent.map(function(a){
       return '<tr'+drillRow("agent",a.k)+'><td>'+agentCard(a.k,{key:a.k})+'</td><td class="num">'+a.runs.toLocaleString()+'</td>'+
        '<td class="num">'+usd(a.spend)+'</td><td class="num">'+tokn(agentTok(a.k).total)+'</td>'+
        '<td class="num">'+tokn(agentTok(a.k).perRun)+'</td><td class="num">'+per(agentTok(a.k).cacheRate)+'</td>'+savingsCell("agent",a.k)+
        '<td><span class="b b-'+(a.trend.charAt(0)==="-"?"allowed":"approval")+'">'+h(a.trend)+'</span></td></tr>';}).join("")+
-     '</tbody></table></div><div class="panel-b"><div class="note">Every figure is a rollup of the agent\u2019s runs, rebuilt from frames. An agent on the harness tier is self-reported: its harness told Oxagen the counts, and a class the harness does not report is marked absent, never zero.</div></div></div>'+
-     '<div class="panel"><div class="panel-h"><h3>Models and keys</h3></div><div class="tw"><table>'+
+     '</tbody></table></div><div class="panel-b"><div class="note">Every figure is a rollup of the agent\u2019s runs, rebuilt from frames. An agent on the harness tier is self-reported: its harness told Oxagen the counts, and a class the harness does not report is marked absent, never zero.</div></div></div>';
+  } else if(t==="model"){
+    /* Consumption by model belongs on Spend; the routes themselves are configured under
+       Organization → Model funding and routes, which this panel links to. */
+    body='<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Models and keys</h3>'+
+     '<p class="muted" style="margin:2px 0 0;font-size:12px">Every model the workspace called this month, and the provider key it was billed to.</p></div>'+
+     '<div class="sp"><button class="btn sm" onclick="go(\'#/'+ORG.slug+'\')">Model routes</button></div></div><div class="tw"><table>'+
      '<thead><tr><th>Model</th><th>Provider key</th><th class="num">Model calls</th><th class="num">Spend</th><th class="num">Cache hit rate</th><th>Basis</th></tr></thead><tbody>'+
      spendModelRows().map(function(m){var k=spendKeyOf(m.m,m.tier);
       return '<tr'+(m.route?' data-route="'+h(m.tier)+'"':'')+'><td class="tkey" style="font-size:12px">'+h(m.m)+(m.route?'<div class="dim" style="font-size:11px">Oxagen’s own work · '+h(m.provider)+'</div>':'')+'</td><td style="font-size:12px">'+(k?'<span class="mono">'+h(k.id)+'</span><div class="dim" style="font-size:11px">'+h(k.src.split(" · ")[0])+'</div>':'<span class="dim">—</span>')+'</td><td class="num">'+(m.route?orgUseCount(m):m.calls.toLocaleString())+'</td>'+
@@ -6915,10 +7145,8 @@ function pSpend(){
 
 /* ---------- Tokens: where the month's tokens went, by class, by prompt part, by harness ---------- */
 function coachCount(){
-  var n=0, w=ws();
-  AGENTS.filter(function(a){return a.ws===w.slug;}).forEach(function(a){n+=coachAgent(a).length;});
-  var ops={}; AGENTS.filter(function(a){return a.ws===w.slug;}).forEach(function(a){ops[a.operator]=1;});
-  Object.keys(ops).forEach(function(p){n+=coachOperator(p).length;});
+  var n=0;
+  ["agents","operators"].forEach(function(kind){coachSubjects(kind).forEach(function(s){n+=s.items.length;});});
   return n;
 }
 function spendTokens(WT){
@@ -6954,43 +7182,144 @@ function spendTokens(WT){
        '<td class="mono dim" style="font-size:11px">'+(t.observed?'gateway_observed':'client_attested')+'</td></tr>';}).join("")+
     '</tbody></table></div></div>';
 }
-/* ---------- Coaching: what the token record says each agent and each operator should change ---------- */
-function spendCoaching(){
-  var w=ws(), agents=AGENTS.filter(function(a){return a.ws===w.slug;}), ops={}, sub=S.coachFor||"agents";
-  agents.forEach(function(a){ops[a.operator]=1;});
-  var opList=Object.keys(ops).filter(function(p){return PEOPLE[p];});
-  var aItems=[], oItems=[];
-  agents.forEach(function(a){coachAgent(a).forEach(function(c){aItems.push({who:a,c:c});});});
-  opList.forEach(function(p){coachOperator(p).forEach(function(c){oItems.push({who:p,c:c});});});
-  aItems.sort(function(x,y){return y.c.usd-x.c.usd;}); oItems.sort(function(x,y){return y.c.usd-x.c.usd;});
-  var at=aItems.reduce(function(n,x){return n+x.c.usd;},0), ot=oItems.reduce(function(n,x){return n+x.c.usd;},0);
-  var pick='<div class="tabs" role="tablist" style="margin-bottom:12px">'+[["agents","Agent coaching",aItems.length],["operators","Operator coaching",oItems.length]].map(function(x){
-    return '<button class="tab" role="tab" aria-selected="'+(sub===x[0])+'" onclick="S.coachFor=\''+x[0]+'\';render()">'+x[1]+'<span class="n">'+x[2]+'</span></button>';}).join("")+'</div>';
-  var strip='<div class="grid g4" style="margin-bottom:14px">'+
-   '<div class="stat"><span class="k">Agent coaching</span><span class="v">'+aItems.length+'</span><span class="s">'+fmt$(at)+' a month at stake</span></div>'+
-   '<div class="stat"><span class="k">Operator coaching</span><span class="v">'+oItems.length+'</span><span class="s">'+fmt$(ot)+' a month at stake</span></div>'+
-   '<div class="stat"><span class="k">Signals read</span><span class="v">7</span><span class="s">from the token record</span></div>'+
-   '<div class="stat"><span class="k">Memories aggregated</span><span class="v">'+MEMORY.length+'</span><span class="s"><a href="#/'+ORG.slug+'/'+w.slug+'/steering/memory">Steering memory</a></span></div></div>';
-  var body;
-  if(sub==="operators"){
-    body=opList.length?opList.map(function(p){var items=oItems.filter(function(x){return x.who===p;}), t=operatorTok(p), who=PEOPLE[p];
-      return '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><span class="row" style="gap:8px">'+personAv(p,26)+'<b>'+h(who.name)+'</b><span class="dim" style="font-size:12px">'+t.agents+' agents · '+tokn(t.total)+' tok · cache '+per(t.cacheRate)+' · '+per(t.observed)+' observed</span></span>'+
-       '<span class="b b-q" style="margin-left:auto">'+items.length+' item'+(items.length===1?'':'s')+'</span></div>'+
-       (items.length?'<div class="panel-b" style="display:grid;gap:10px">'+items.map(function(x){return coachCard(x.c,who.name);}).join("")+'</div>':'<div class="panel-b"><p class="muted" style="margin:0;font-size:12.5px">Nothing to change across this operator\u2019s agents.</p></div>')+'</div>';}).join("")
-     :'<div class="panel"><div class="panel-b"><p class="muted" style="margin:0">No operator owns an agent in this workspace.</p></div></div>';
-  } else {
-    var PER=8, pg=S.coachPage||0, ranked=agents.slice().sort(function(a,b){return coachAgent(b).reduce(function(n,c){return n+c.usd;},0)-coachAgent(a).reduce(function(n,c){return n+c.usd;},0);}), pages=Math.max(1,Math.ceil(ranked.length/PER));
-    if(pg>=pages)pg=pages-1;
-    var pager='<div class="row" style="justify-content:space-between;margin-bottom:12px"><span class="dim mono" style="font-size:11.5px">agents '+(pg*PER+1)+'–'+Math.min(ranked.length,(pg+1)*PER)+' of '+ranked.length+' · ranked by money at stake</span>'+
-     '<span class="row" style="gap:6px"><button class="btn sm" '+(pg?'':'disabled ')+'onclick="S.coachPage='+(pg-1)+';render()">‹</button><span class="mono" style="font-size:12px">'+(pg+1)+' / '+pages+'</span><button class="btn sm" '+(pg<pages-1?'':'disabled ')+'onclick="S.coachPage='+(pg+1)+';render()">›</button></span></div>';
-    body=pager+ranked.slice(pg*PER,(pg+1)*PER).map(function(a){var items=coachAgent(a), t=agentTok(a);
-      return '<div class="panel" style="margin-bottom:14px"><div class="panel-h">'+agentCard(a,{layout:"compact",key:a.key})+'<span class="dim" style="font-size:12px;margin-left:8px">'+tokn(t.total)+' tok · cache '+per(t.cacheRate)+' · '+(t.observed?'observed':'self-reported')+'</span>'+
-       '<span class="b b-q" style="margin-left:auto">'+items.length+' item'+(items.length===1?'':'s')+'</span></div>'+
-       (items.length?'<div class="panel-b" style="display:grid;gap:10px">'+items.map(function(c){return coachCard(c,a.key);}).join("")+'</div>':'<div class="panel-b"><p class="muted" style="margin:0;font-size:12.5px">Every share is inside the workspace norm and the cache holds. Nothing to change.</p></div>')+'</div>';}).join("");
-  }
-  return strip+pick+body+'<div class="note" style="margin-top:4px">Coaching is derived from the same rollup the Tokens tab prints, at read time, so the two cannot disagree. Each item names its signal, the tokens and money behind it, and the one change that moves it. Sending a note records it as a governed action; nothing here changes an agent by itself.</div>';
+/* ---------- Coaching: the agents and operators with something to change ----------
+   The tab opens on the subjects that have a row, worst severity first, then the most rows, then the
+   most money. A subject with nothing to change is not a row: a panel per agent saying "nothing to
+   change" is the page reporting work that does not exist. Opening one shows every row in full, with
+   the signal behind it, the one action that moves it, and a dismiss. Dismissal is keyed by subject
+   and signal, so a signal the rollup raises again after the record changes comes back as a new row
+   rather than staying buried. */
+var COACH_SEV={denied:{r:0,l:"high"},approval:{r:1,l:"medium"},q:{r:2,l:"low"}};
+function coachKey(kind,id,k){return kind+":"+id+":"+k;}
+function coachRank(c){return COACH_SEV[c.sev]?COACH_SEV[c.sev].r:2;}
+function coachWorstLabel(r){var out="\u2014";Object.keys(COACH_SEV).forEach(function(k){if(COACH_SEV[k].r===r)out=COACH_SEV[k].l;});return out;}
+function coachAll(kind,id){return kind==="operators"?coachOperator(id):coachAgent(id);}
+function coachItems(kind,id){return coachAll(kind,id).filter(function(c){return !S.coachOff[coachKey(kind,id,c.k)];});}
+function coachHidden(kind,id){return coachAll(kind,id).filter(function(c){return !!S.coachOff[coachKey(kind,id,c.k)];});}
+function coachDismiss(kind,id,k){
+  S.coachOff[coachKey(kind,id,k)]=1; render();
+  act("Row dismissed. The signal stays in the rollup and returns if it is raised again.");
 }
+function coachRestore(kind,id,k){delete S.coachOff[coachKey(kind,id,k)];render();act("Restored.");}
+function coachLabel(kind,id){return kind==="operators"?(PEOPLE[id]?PEOPLE[id].name:id):id;}
+function coachPool(kind){
+  var w=ws(), mine=AGENTS.filter(function(a){return a.ws===w.slug;});
+  if(kind!=="operators") return mine.length;
+  var ops={}; mine.forEach(function(a){ops[a.operator]=1;});
+  return Object.keys(ops).filter(function(p){return PEOPLE[p];}).length;
+}
+/* Every subject in this workspace with at least one live row, ranked. */
+function coachSubjects(kind){
+  var w=ws(), mine=AGENTS.filter(function(a){return a.ws===w.slug;}), ids;
+  if(kind==="operators"){var ops={};mine.forEach(function(a){ops[a.operator]=1;});ids=Object.keys(ops).filter(function(p){return PEOPLE[p];});}
+  else ids=mine.map(function(a){return a.key;});
+  return ids.map(function(id){
+    var items=coachItems(kind,id).sort(function(x,y){return coachRank(x)-coachRank(y)||y.usd-x.usd;});
+    return {id:id,label:coachLabel(kind,id),items:items,hidden:coachHidden(kind,id).length,
+            worst:items.reduce(function(n,c){return Math.min(n,coachRank(c));},9),
+            usd:items.reduce(function(n,c){return n+c.usd;},0)};})
+   .filter(function(s){return s.items.length;})
+   .sort(function(a,b){return a.worst-b.worst||b.items.length-a.items.length||b.usd-a.usd;});
+}
+function coachSubject(kind,id){return coachSubjects(kind).filter(function(s){return s.id===id;})[0]||null;}
+function coachSevChips(items){
+  var n={}; items.forEach(function(c){n[c.sev]=(n[c.sev]||0)+1;});
+  return ["denied","approval","q"].filter(function(s){return n[s];})
+   .map(function(s){return '<span class="b b-'+s+'"><span class="d"></span>'+n[s]+' '+COACH_SEV[s].l+'</span>';}).join(" ");
+}
+function coachTo(id){S.coachDrill=id||null;render();}
+function coachSub(kind){S.coachFor=kind;S.coachDrill=null;render();}
+function coachJump(label){
+  var kind=S.coachFor||"agents", hit=coachSubjects(kind).filter(function(s){return s.label===label;})[0];
+  if(!hit){act("Nothing with coaching matches \u201c"+label+"\u201d.");return;}
+  coachTo(hit.id);
+}
+/* The jump control is a datalist, so typing filters a list the browser already holds and a name
+   that is not on it is refused rather than opening the wrong subject. */
+function coachPicker(kind){
+  var subs=coachSubjects(kind);
+  return '<input class="coach-pick" list="coachPickList" value="" autocomplete="off" '+
+   'placeholder="Jump to another '+(kind==="operators"?"operator":"agent")+' \u2014 '+subs.length+' with coaching" '+
+   'aria-label="Jump to another subject" onchange="coachJump(this.value)">'+
+   '<datalist id="coachPickList">'+subs.map(function(s){
+     return '<option value="'+h(s.label)+'">'+h(s.items.length+" row"+(s.items.length===1?"":"s")+" \u00b7 "+fmt$(s.usd)+" a month")+'</option>';}).join("")+'</datalist>';
+}
+function coachOffCount(kind){var n=0;Object.keys(S.coachOff).forEach(function(k){if(S.coachOff[k]&&k.indexOf(kind+":")===0)n++;});return n;}
+function coachClear(kind){Object.keys(S.coachOff).forEach(function(k){if(k.indexOf(kind+":")===0)delete S.coachOff[k];});render();act("Dismissed rows restored.");}
+function coachFoot(){
+  return '<div class="note" style="margin-top:14px">Coaching is derived from the same rollup the Tokens tab prints, at read time, so the two cannot disagree. '+
+   'Each row names its signal, the tokens and money behind it, and the one change that moves it. Sending a note records it as a governed action; nothing here changes an agent by itself.</div>';
+}
+function spendCoaching(){
+  var w=ws(), kind=S.coachFor||"agents";
+  var aN=coachSubjects("agents"), oN=coachSubjects("operators"), subs=kind==="operators"?oN:aN;
+  var drill=S.coachDrill?coachSubject(kind,S.coachDrill):null;
+  var tot=function(l){return l.reduce(function(n,s){return n+s.usd;},0);};
+  var rows=function(l){return l.reduce(function(n,s){return n+s.items.length;},0);};
+  var worst=[].concat(aN,oN).sort(function(a,b){return a.worst-b.worst;})[0];
+  var pick='<div class="tabs" role="tablist" style="margin-bottom:12px">'+
+   [["agents","Agents",rows(aN)],["operators","Operators",rows(oN)]].map(function(x){
+    return '<button class="tab" role="tab" aria-selected="'+(kind===x[0])+'" onclick="coachSub(\''+x[0]+'\')">'+x[1]+
+     (x[2]?'<span class="n">'+x[2]+'</span>':'')+'</button>';}).join("")+'</div>';
+  var strip='<div class="grid g3" style="margin-bottom:14px">'+
+   '<div class="stat"><span class="k">Agents to coach</span><span class="v">'+aN.length+'</span><span class="s">'+rows(aN)+' rows \u00b7 '+fmt$(tot(aN))+' a month at stake</span></div>'+
+   '<div class="stat"><span class="k">Operators to coach</span><span class="v">'+oN.length+'</span><span class="s">'+rows(oN)+' rows \u00b7 '+fmt$(tot(oN))+' a month at stake</span></div>'+
+   '<div class="stat"><span class="k">Worst open</span><span class="v">'+(worst?coachWorstLabel(worst.worst):"\u2014")+'</span>'+
+   '<span class="s">'+(worst?h(worst.label):"nothing open")+'</span></div></div>';
 
+  if(drill) return strip+pick+coachDetail(kind,drill);
+
+  if(!subs.length){
+    var off=coachOffCount(kind);
+    return strip+pick+'<div class="panel"><div class="panel-b"><p class="muted" style="margin:0;font-size:12.5px">'+
+     '<b>Nothing to change.</b> Every '+(kind==="operators"?"operator":"agent")+' in '+h(w.name)+' is inside the workspace norm on every signal the rollup reads'+
+     (off?', and '+off+' row'+(off===1?" is":"s are")+' dismissed. <a href="#" onclick="event.preventDefault();coachClear(\''+kind+'\')">Restore them</a>':'.')+
+     '</p></div></div>';
+  }
+
+  var body='<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>'+(kind==="operators"?"Operators":"Agents")+' with coaching</h3>'+
+   '<p class="muted" style="margin:2px 0 0;font-size:12px">Worst severity first, then the most rows. Open one to read its evidence and act.</p></div>'+
+   '<div class="sp"><span class="b b-q">'+subs.length+' of '+coachPool(kind)+'</span>'+
+   (coachOffCount(kind)?'<button class="btn sm" onclick="coachClear(\''+kind+'\')">Restore '+coachOffCount(kind)+' dismissed</button>':'')+'</div></div>'+
+   '<div class="tw"><table><thead><tr><th>'+(kind==="operators"?"Operator":"Agent")+'</th><th>Severity</th><th class="num">Rows</th>'+
+   '<th class="num">At stake</th><th>Top row</th><th class="num">Tokens</th><th class="num">Cache hit</th></tr></thead><tbody>'+
+   subs.map(function(s){var t=kind==="operators"?operatorTok(s.id):agentTok(s.id);
+    return '<tr '+rowClick("coachTo('"+s.id.replace(/'/g,"\\'")+"')","Open coaching for "+s.label)+'>'+
+     '<td>'+(kind==="operators"
+       ? '<span class="row" style="gap:8px">'+personAv(s.id,24)+'<b>'+h(s.label)+'</b></span><div class="dim mono" style="font-size:11px">'+h(PEOPLE[s.id].role)+'</div>'
+       : agentCard(s.id,{layout:"compact",key:s.id}))+'</td>'+
+     '<td>'+coachSevChips(s.items)+'</td>'+
+     '<td class="num">'+s.items.length+(s.hidden?'<div class="dim" style="font-size:11px">'+s.hidden+' dismissed</div>':'')+'</td>'+
+     '<td class="num">'+fmt$(s.usd)+'</td>'+
+     '<td style="font-size:12px">'+h(s.items[0].title)+'</td>'+
+     '<td class="num">'+(t?tokn(t.total):"\u2014")+'</td><td class="num">'+(t?per(t.cacheRate):"\u2014")+'</td></tr>';}).join("")+
+   '</tbody></table></div></div>';
+  return strip+pick+body+coachFoot();
+}
+/* One subject, opened: its token profile, then every row with its signal, its action and a dismiss. */
+function coachDetail(kind,s){
+  var t=kind==="operators"?operatorTok(s.id):agentTok(s.id), hid=coachHidden(kind,s.id);
+  var head='<div class="coach-head">'+
+   '<button class="btn sm" onclick="coachTo(null)">\u2039 All '+(kind==="operators"?"operators":"agents")+'</button>'+
+   '<div class="coach-who">'+(kind==="operators"
+     ? personAv(s.id,32)+'<div style="min-width:0"><b>'+h(s.label)+'</b><div class="dim mono" style="font-size:11px">'+h(PEOPLE[s.id].role)+' \u00b7 '+t.agents+' agents</div></div>'
+     : agentCard(s.id,{layout:"compact",key:s.id}))+'</div>'+
+   coachPicker(kind)+'</div>';
+  var prof='<div class="grid g4" style="margin-bottom:14px">'+
+   '<div class="stat"><span class="k">Rows open</span><span class="v">'+s.items.length+'</span><span class="s">'+coachSevChips(s.items)+'</span></div>'+
+   '<div class="stat"><span class="k">At stake</span><span class="v">'+fmt$(s.usd)+'</span><span class="s">a month, across every row below</span></div>'+
+   '<div class="stat"><span class="k">Tokens</span><span class="v">'+(t?tokn(t.total):"\u2014")+'</span><span class="s">'+(t?per(t.cacheRate)+" served from cache":"")+'</span></div>'+
+   '<div class="stat"><span class="k">Basis</span><span class="v" style="font-size:15px"><span class="basis">'+(t&&t.observed?"gateway_observed":"client_attested")+'</span></span>'+
+   '<span class="s">'+(t&&t.observed?"counted by the proxy":"reported by the harness")+'</span></div></div>';
+  var cards='<div style="display:grid;gap:10px">'+s.items.map(function(c){return coachCard(c,s.label,{kind:kind,id:s.id});}).join("")+'</div>';
+  var back=hid.length?'<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Dismissed</h3>'+
+   '<span class="b b-q" style="margin-left:auto">'+hid.length+'</span></div><div class="panel-b" style="display:grid;gap:8px">'+
+   hid.map(function(c){return '<div class="row" style="gap:10px"><span class="b b-'+c.sev+'" style="flex:none"><span class="d"></span>'+h(c.title)+'</span>'+
+    '<span class="dim mono grow" style="font-size:11px;min-width:0">'+c.signal+'</span>'+
+    '<button class="btn sm" style="flex:none" onclick="coachRestore(\''+kind+'\',\''+s.id.replace(/'/g,"\\'")+'\',\''+h(c.k)+'\')">Restore</button></div>';}).join("")+
+   '</div></div>':'';
+  return head+prof+cards+back+coachFoot();
+}
 /* ---------- Spend drill-down: an operator, agent or tool → every metric, and its findings as potential savings ---------- */
 function n$(s){return parseFloat(String(s).replace(/,/g,""))||0;}
 function fmt$(n){return "$"+n.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});}
@@ -7187,20 +7516,32 @@ function spendByTool(){
      '<b style="margin-left:auto;color:var(--fg);font-variant-numeric:tabular-nums;flex:none">'+text+'</b></div>'+
      '<div class="bar"><i style="width:'+Math.max(1,Math.round(val/mx*100))+'%;background:'+col+'"></i></div></div>';
   }
-  var cum=rows.slice().sort(function(a,b){return b.spend-a.spend;}).map(function(r){
+  /* The chart column shows the leading twelve. Thirty-seven bars beside a ten-row table left one
+     column four times the height of the other, and every bar below the twelfth rounded to 0%. */
+  var TOP=12;
+  var cum=rows.slice().sort(function(a,b){return b.spend-a.spend;}).slice(0,TOP).map(function(r){
     return bar(r.t,r.spend,mxCum,money(r.spend)+' <span class="dim" style="font-weight:500">· '+per(r.spend/total)+'</span>',r.perCall===null?"var(--st-observe)":"var(--gold)");}).join("");
-  var avg=tools.slice().sort(function(a,b){return b.perCall-a.perCall;}).map(function(r){
+  var avg=tools.slice().sort(function(a,b){return b.perCall-a.perCall;}).slice(0,TOP).map(function(r){
     return bar(r.t,r.perCall,mxAvg,money(r.perCall)+' <span class="dim" style="font-weight:500">per call</span>',"var(--st-proven)");}).join("");
-  var avgRun=tools.slice().sort(function(a,b){return b.perRun-a.perRun;}).map(function(r){
+  var avgRun=tools.slice().sort(function(a,b){return b.perRun-a.perRun;}).slice(0,TOP).map(function(r){
     return bar(r.t,r.perRun,mxRun,money(r.perRun)+' <span class="dim" style="font-weight:500">per run</span>',"var(--st-approval)");}).join("");
-  return '<div class="grid g3" style="margin-bottom:14px">'+
-   '<div class="panel"><div class="panel-h"><h3>Cumulative spend</h3><span class="b b-q" style="margin-left:auto">share of '+money(total)+'</span></div>'+
-    '<div class="panel-b" style="display:grid;gap:11px">'+cum+'</div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>Average per call</h3></div>'+
-    '<div class="panel-b" style="display:grid;gap:11px">'+avg+'</div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>Average per run</h3></div>'+
-    '<div class="panel-b" style="display:grid;gap:11px">'+avgRun+'</div></div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>By tool</h3></div><div class="tw"><table>'+
+  /* One chart at a time in the right third: three side by side made every bar too short to
+     compare, and the three answer the same question at different denominators. */
+  var metric=S.toolMetric||"cum";
+  var CHART={cum:{h:"Cumulative spend",note:"share of "+money(total),b:cum},
+             avgRun:{h:"Average per run",note:"",b:avgRun},
+             avgCall:{h:"Average per call",note:"",b:avg}};
+  var pickedChart=CHART[metric]||CHART.cum;
+  var seg='<div class="seg" role="group" aria-label="Chart">'+
+   [["cum","Cumulative spend"],["avgRun","Avg per run"],["avgCall","Avg per call"]].map(function(x){
+    return '<button type="button" class="btn sm" aria-pressed="'+(metric===x[0])+'" onclick="S.toolMetric=\''+x[0]+'\';render()">'+x[1]+'</button>';}).join("")+'</div>';
+  var charts='<div class="panel" style="margin:0"><div class="panel-h" style="flex-wrap:wrap;gap:8px"><h3>'+pickedChart.h+'</h3>'+
+   (pickedChart.note?'<span class="b b-q" style="margin-left:auto">'+pickedChart.note+'</span>':'')+
+   '<div style="flex-basis:100%">'+seg+'</div></div>'+
+   '<div class="panel-b" style="display:grid;gap:11px">'+pickedChart.b+'</div>'+
+   '<div class="panel-b" style="border-top:1px solid var(--border)"><p class="muted" style="margin:0;font-size:11.5px">The leading '+TOP+' of '+rows.length+'. The table holds every tool.</p></div></div>';
+  return '<div class="split23">'+
+   '<div class="panel" style="margin:0"><div class="panel-h"><h3>By tool</h3></div><div class="tw"><table>'+
    '<thead><tr><th>Tool</th><th>Server</th><th class="num">Calls</th><th class="num">Runs</th><th class="num">Cumulative</th><th class="num">Share</th><th class="num">Avg per call</th><th class="num">Avg per run</th><th class="num">Potential savings</th><th>What the frames say</th></tr></thead><tbody>'+
    rows.map(function(r){
     var hot=r.perCall!==null&&(r.perCall>=1.5||r.perRun>=10), dr=r.perCall!==null;
@@ -7211,7 +7552,8 @@ function spendByTool(){
      '<td class="num"'+(hot?' style="color:var(--st-approval);font-weight:600"':'')+'>'+money(r.perRun)+'</td>'+(dr?savingsCell("tool",r.t):'<td class="num"><span class="dim">—</span></td>')+
      '<td class="muted" style="font-size:12px;min-width:220px">'+h(r.note)+'</td></tr>';}).join("")+
    '</tbody></table></div><div class="panel-b"><div class="note">A tool’s spend is the tokens of the turn that called it plus the turn that read its result, so a cheap-to-price tool with a large result body is an expensive tool. '+
-   'Tool prices themselves are on the registry and are billed at zero here; this table is what the model paid to use them.</div></div></div>';
+   'Tool prices themselves are on the registry and are billed at zero here; this table is what the model paid to use them.</div></div></div>'+
+   charts+'</div>';
 }
 
 /* Wasted spend — money whose frames show it bought nothing, and the runs that prove it. */
@@ -13402,7 +13744,9 @@ document.addEventListener("click",function(e){
       }
     });
   });
-  SERVERS.forEach(function(s){var ns={},nv=0;TOOLS.forEach(function(t){if(t.s===s.id){ns[t.n]=1;nv++;}});s.tools=Object.keys(ns).length;s.versions=nv;});
+  SERVERS.forEach(function(s){var ns={},nv=0,np=0;TOOLS.forEach(function(t){if(t.s===s.id){ns[t.n]=1;nv++;if(t.proposal)np++;}});
+    s.tools=Object.keys(ns).length; s.versions=nv;
+    if(np) s.schemas=np+" observed, awaiting approval";});
   var CONN_KIND={jira:"oauth",datadog:"api_key",pagerduty:"oauth",salesforce:"oauth",gdrive:"oauth","postgres-prod":"cloud_role",kubernetes:"cloud_role",sentry:"api_key",hubspot:"oauth",notion:"oauth",zendesk:"oauth"};
   var ci=0;
   NEW_SRV.forEach(function(s){

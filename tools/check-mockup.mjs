@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Opens mockups/missioncontrol.html in headless Chromium, once per view in mockups/catalog.mjs,
 // and asserts each view is what its URL says: the page, in the state, in the shell, with nothing
-// from the mockup chrome left in when ?product=1; then walks every guided scenario step by step.
+// from the mockup chrome, which only ?debug=true brings back; then walks every guided scenario step by step.
 //
 //   node tools/check-mockup.mjs                    # every page × state × shell, then every scenario
 //   node tools/check-mockup.mjs --only fleet       # one page id, or one scenario id
@@ -164,7 +164,7 @@ if (doScenarios) for (const s of SCENARIOS) {
   page.on("pageerror", e => errors.push(String(e.message || e)));
   page.on("dialog", d => d.dismiss());
   await page.goto("about:blank");
-  await page.goto(mockupUrl(FILE, { product: false, hash: scenarioHash(s) }));
+  await page.goto(mockupUrl(FILE, { debug: true, hash: scenarioHash(s) }));
   await page.waitForTimeout(300);
   const meta = await page.evaluate(id => {
     const sc = SCENARIOS[id];

@@ -82,9 +82,12 @@ export const SCENARIOS = [
 export const STATE_WORD = { loaded: "loaded", empty: "empty", loading: "loading", error: "error", denied: "access denied" };
 
 // The URL of one view of the master file. `file` is the path or URL of missioncontrol.html.
-export function mockupUrl(file, { product = true, state = null, mobile = null, theme = null, hash = HOME } = {}) {
+// The file opens as the product; `debug: true` adds ?debug=true, which brings back the mockup
+// chrome — the state bar, the scenario rail and the scenario nav item.
+export function mockupUrl(file, { product = true, debug = false, state = null, mobile = null, theme = null, hash = HOME } = {}) {
   const q = new URLSearchParams();
-  if (product) q.set("product", "1");
+  if (debug) q.set("debug", "true");
+  else if (product) q.set("product", "1");
   if (state) q.set("state", state);
   if (mobile != null) q.set("mobile", mobile ? "1" : "0");
   if (theme) q.set("theme", theme);

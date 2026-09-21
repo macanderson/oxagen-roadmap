@@ -30,8 +30,7 @@ A banner when a linked repository carries no tree: “1 linked repository carrie
 - **Role** is the workspace's word, not GitHub's: `main` (exactly one, required at creation), `linked` (zero or more), `not linked`. A repository may be linked to more than one workspace in the organization and is main for at most one.
 - **`.oxagen/`** is `governed` or `no .oxagen/`. Every row opens the `repo` dialog (Enter and Space too): production branch and head, visibility, `.oxagen/` state with its file count and commit, issues, events, code graph, data layer, working copies, and the scope of records published there; an ungoverned one offers **Add Oxagen** instead of **See its changes**.
 - A note: changing which repository is `main` is an organization-owner action with approval, recorded as a security event; the production branch never moves on its own.
-- **Linking steps**, the four steps of §11.2 as consequences: 1 · Confirm the production branch, 2 · Subscribe to events, 3 · Import issues, 4 · Build the code graph.
-- **Permissions**: Contents read **and write**, Pull requests read **and write**, Checks **write**, Metadata read, Issues read, each with what it is for. A note: Oxagen writes to a branch and never to the production branch, and merges only what a person merges from here, under the governance mode the repository itself declares.
+- Oxagen writes to a branch and never to the production branch, and merges only what a person merges from here, under the governance mode the repository itself declares. The App permissions the binding asks for are named where they are granted, in the install flow, not restated on this tab.
 
 ### Working copies
 
