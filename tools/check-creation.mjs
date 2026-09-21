@@ -446,6 +446,56 @@ for (const theme of ["light", "dark"]) {
   await page.close();
 }
 
+// A policy version is created, edited and discarded from the Policy tab rather than a wizard, and
+// the constraint is the point: a draft is the only version that edits or deletes, because an active
+// or superseded one is cited by every decision it made.
+{
+  const { page, errs } = await open("#/a-intel/core-platform/tools/policy");
+  const dtxt = () => page.evaluate(() => { const d = document.querySelector("#layer .dlg"); return d ? d.innerText : ""; });
+  const rows = () => page.evaluate(() => [...document.querySelectorAll("table tbody tr")].map((r) => r.innerText).join("|"));
+
+  ok(/Draft a version/.test(await page.evaluate(() => document.body.innerText)), "policy: the panel header drafts a version");
+  ok(/Discard/.test(await rows()), "policy: the draft row carries Discard");
+
+  await page.evaluate(() => openDialog("policynew"));
+  await page.waitForTimeout(120);
+  ok(/Draft a policy version/.test(await dtxt()), "policy: the create dialog opens");
+  await page.evaluate(() => { document.getElementById("pn-note").value = ""; policyDraft(); });
+  await page.waitForTimeout(120);
+  ok(await page.evaluate(() => !!document.getElementById("pn-note")), "policy: a draft with no sentence is refused");
+  await page.evaluate(() => { document.getElementById("pn-note").value = "Raises any egress call to approval"; policyDraft(); });
+  await page.waitForTimeout(200);
+  ok(/pol_v43/.test(await rows()), "policy: the new draft is listed");
+  ok(/Raises any egress call to approval/.test(await rows()), "policy: its sentence is listed");
+  ok(/not run yet/.test(await rows()), "policy: a fresh draft has no test run behind it");
+
+  await page.evaluate(() => openDialog("policyedit", "pol_v43"));
+  await page.waitForTimeout(120);
+  ok(/Edit pol_v43/.test(await dtxt()), "policy: a draft edits");
+  await page.evaluate(() => { document.getElementById("pe-note").value = "Raises any egress call, and any tainted write"; policySaveDraft("pol_v43"); });
+  await page.waitForTimeout(200);
+  ok(/any tainted write/.test(await rows()), "policy: the edit is saved");
+
+  await page.evaluate(() => openDialog("policyedit", "pol_v41"));
+  await page.waitForTimeout(120);
+  ok(/cannot be edited/.test(await dtxt()), "policy: the active version refuses an edit");
+  await page.evaluate(() => openDialog("policydiscard", "pol_v41"));
+  await page.waitForTimeout(120);
+  ok(/cannot be discarded/.test(await dtxt()), "policy: the active version refuses a discard");
+  await page.evaluate(() => closeDialog());
+
+  await page.evaluate(() => openDialog("policydiscard", "pol_v43"));
+  await page.waitForTimeout(120);
+  ok(/Discard pol_v43/.test(await dtxt()), "policy: the discard dialog opens");
+  await page.evaluate(() => policyDiscard("pol_v43"));
+  await page.waitForTimeout(200);
+  const left = await rows();
+  ok(!/pol_v43/.test(left), "policy: the draft row is gone");
+  ok(/pol_v41/.test(left) && /pol_v42/.test(left), "policy: the other versions are untouched");
+  ok(errs.length === 0, "policy: no JavaScript error: " + errs.join(" | "));
+  await page.close();
+}
+
 await browser.close();
 console.log(`${passes} passed, ${fails} failed`);
 process.exit(fails ? 1 : 0);

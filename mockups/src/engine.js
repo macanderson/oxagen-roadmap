@@ -5142,19 +5142,21 @@ function pTools(){
      grantsLog()+'</div>';
   } else if(t==="policy"){
     body='<div class="panel"><div class="panel-h"><h3>Policy versions</h3>'+
-     '<div class="sp"><span class="b b-q">Cedar · deterministic · no model in the decision path</span>'+
-     '<button class="btn sm" onclick="openDialog(\'policy\')">Edit</button></div></div>'+
+     '<div class="sp"><span class="b b-q">Cedar</span>'+
+     '<button class="btn sm primary" onclick="openDialog(\'policynew\')">Draft a version</button></div></div>'+
      '<div class="tw"><table><thead><tr><th>Version</th><th>State</th><th>Author</th><th>When</th><th class="num">Rules</th><th>Tests</th><th>What changed</th><th></th></tr></thead><tbody>'+
      POLICIES.map(function(p){
       var sm={active:"allowed",superseded:"q"};
       return '<tr><td class="mono">'+h(p.v)+'</td><td><span class="b b-'+(sm[p.state]||"approval")+'"><span class="d"></span>'+h(p.state)+'</span></td>'+
        '<td>'+h(p.by)+'</td><td class="mono dim" style="font-size:11px">'+h(p.at)+'</td><td class="num">'+p.rules+'</td>'+
-       '<td><span class="b b-allowed">'+h(p.tests)+'</span></td><td style="font-size:12px">'+h(p.note)+'</td>'+
+       '<td><span class="b b-'+(/pass/.test(p.tests)?"allowed":"q")+'">'+h(p.tests)+'</span></td><td style="font-size:12px">'+h(p.note)+'</td>'+
        '<td class="rowacts"><button class="btn sm" onclick="openDialog(\'policyver\',\''+p.v+'\')">Open</button>'+
-       (p.state==="active"?'<button class="btn sm" onclick="openDialog(\'policy\')">Edit</button>':
-        p.state==="draft"?'<button class="btn sm primary" onclick="openDialog(\'policyactivate\',\''+p.v+'\')">Activate</button>':
+       (p.state==="active"?'<button class="btn sm" onclick="openDialog(\'policynew\',\''+p.v+'\')">Draft a change</button>':
+        p.state==="draft"?'<button class="btn sm" onclick="openDialog(\'policyedit\',\''+p.v+'\')">Edit</button>'+
+         '<button class="btn sm primary" onclick="openDialog(\'policyactivate\',\''+p.v+'\')">Activate</button>'+
+         '<button class="btn sm danger" onclick="openDialog(\'policydiscard\',\''+p.v+'\')">Discard</button>':
         '<button class="btn sm" onclick="openDialog(\'policyrestore\',\''+p.v+'\')">Restore</button>')+'</td></tr>';}).join("")+
-     '</tbody></table></div><div class="panel-b"><div class="note">A version is activated by a governed action with approval; in regulated mode it is a Context PR instead. The superseded version is kept, never deleted, because every decision cites the version that made it.</div></div></div>'+
+     '</tbody></table></div><div class="panel-b"><div class="note">A version is activated by a governed action with approval, and in regulated mode it is a Context PR instead. Rules are evaluated without a model in the path. A draft is the only version you can edit or discard: once a version has decided anything it is kept, because every decision cites the version that made it.</div></div></div>'+
      '<div class="hr"></div>'+
      '<p class="eyebrow q">Conditions a rule may test</p>'+
      '<div class="row">'+["tool version","risk","side effect","egress","financial class","amount by path","counterparty","repository","path prefix","recipient domain","taint and its sources","time window","rate","sequence","operator role","enforcement tier","budget position","mandate position"]
@@ -5490,10 +5492,90 @@ DLG_EXT.policyver=function(v){
     '<dt>Tests</dt><dd>'+h(p.tests)+'</dd><dt>What changed</dt><dd>'+h(p.note)+'</dd></dl>'+
     '<div class="note">Cedar, evaluated without a model in the decision path. Every <span class="mono">policy.decision</span> frame names the version that made it, so a replay reads the same either way.</div>',
    f:'<button class="btn" onclick="closeDialog()">Close</button>'+
-    (p.state==="active"?'<button class="btn primary" onclick="openDialog(\'policy\')">Edit</button>':
-     p.state==="draft"?'<button class="btn primary" onclick="openDialog(\'policyactivate\',\''+p.v+'\')">Activate</button>':
+    (p.state==="active"?'<button class="btn primary" onclick="openDialog(\'policynew\',\''+p.v+'\')">Draft a change</button>':
+     p.state==="draft"?'<button class="btn" onclick="openDialog(\'policyedit\',\''+p.v+'\')">Edit</button>'+
+      '<button class="btn primary" onclick="openDialog(\'policyactivate\',\''+p.v+'\')">Activate</button>':
      '<button class="btn primary" onclick="openDialog(\'policyrestore\',\''+p.v+'\')">Restore</button>')};
 };
+DLG_EXT.policynew=function(base){
+  var opts=POLICIES.filter(function(x){return x.state!=="draft";});
+  var from=null; POLICIES.forEach(function(x){if(x.v===base&&x.state!=="draft")from=x;});
+  if(!from) from=opts.filter(function(x){return x.state==="active";})[0]||opts[0];
+  if(!from) return noSuch("Policy version");
+  return {t:"Draft a policy version",s:"A draft decides nothing until an approver activates it",w:false,
+   b:'<div class="field"><label for="pn-base">Based on</label><select id="pn-base">'+
+     opts.map(function(x){return '<option value="'+h(x.v)+'"'+(x.v===from.v?" selected":"")+'>'+h(x.v)+' — '+h(x.state)+', '+x.rules+' rules</option>';}).join("")+
+     '</select><div class="hint">The draft opens as a copy of this version’s rules.</div></div>'+
+     '<div class="field"><label for="pn-note">What changes</label><input id="pn-note" placeholder="Raises any egress call to approval">'+
+     '<div class="hint">One sentence. The version list and every restore dialog show it.</div></div>'+
+     '<div class="note">Its rules compile and its tests run against it, and nothing it says reaches a call until it is activated.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
+     '<button class="btn primary" onclick="policyDraft()">Create the draft</button>'};
+};
+function policyNextV(){var n=0;POLICIES.forEach(function(x){var k=parseInt(String(x.v).replace(/\D/g,""),10);if(k>n)n=k;});return "pol_v"+(n+1);}
+function policyDraft(){
+  var base=el("pn-base")?el("pn-base").value:"";
+  var note=el("pn-note")?el("pn-note").value.trim():"";
+  if(!note) return act("Say what the version changes before you create it.");
+  var from=null; POLICIES.forEach(function(x){if(x.v===base)from=x;});
+  var v=policyNextV();
+  POLICIES.unshift({v:v,state:"draft",by:PEOPLE.marcus.name,at:"2026-09-11 09:20",
+   rules:from?from.rules:0,tests:"not run yet",note:note,from:base});
+  closeDialog(); render(); act("Drafted "+v+" from "+base+". It decides nothing until an approver activates it.","gold");
+}
+DLG_EXT.policyedit=function(v){
+  var p=null; POLICIES.forEach(function(x){if(x.v===v)p=x;});
+  if(!p) return noSuch("Policy version");
+  if(p.state!=="draft") return {t:h(p.v)+" cannot be edited",w:false,
+   b:'<div class="note">'+h(p.v)+' is '+h(p.state)+'. Every decision it made cites it, so its rules are fixed. Draft a version from it instead.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Close</button>'+
+     '<button class="btn primary" onclick="openDialog(\'policynew\',\''+p.v+'\')">Draft a change</button>'};
+  return {t:"Edit "+p.v,s:"A draft, so it is the one version you can change",w:true,
+   b:'<div class="field"><label for="pe-note">What changes</label><input id="pe-note" value="'+h(p.note)+'"></div>'+
+     '<div class="field"><label>Rules</label>'+
+     '<pre><span class="c">// '+h(p.note)+'</span>\n'+
+     '<span class="k">permit</span> (principal, action, resource)\n<span class="k">when</span> { context.tool.side_effect == <span class="s">"irreversible"</span> }\n'+
+     '<span class="k">advice</span> <span class="s">"require_approval"</span>;</pre>'+
+     '<div class="hint">'+p.rules+' rules in this draft. Editing the source is a Context PR against the policy record.</div></div>'+
+     '<div class="field"><label>Tests that ship with it</label>'+
+     '<div class="tw"><table class="narrow"><tbody>'+
+     [["github__create_release@2 must require approval","pass"],
+      ["github__get_file_contents@2 must be allowed","pass"],
+      ["stripe__create_payment@4 with no mandate must be denied","pass"]]
+      .map(function(r){return '<tr><td style="font-size:12px">'+h(r[0])+'</td><td><span class="b b-allowed"><span class="d"></span>'+r[1]+'</span></td></tr>';}).join("")+
+     '</tbody></table></div></div>'+
+     '<div class="note">Activation is a governed action with approval. In regulated mode it is a Context PR instead.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
+     '<button class="btn danger" onclick="openDialog(\'policydiscard\',\''+p.v+'\')">Discard</button>'+
+     '<button class="btn primary" onclick="policySaveDraft(\''+p.v+'\')">Save the draft</button>'};
+};
+function policySaveDraft(v){
+  var p=null; POLICIES.forEach(function(x){if(x.v===v)p=x;});
+  if(!p) return;
+  var note=el("pe-note")?el("pe-note").value.trim():p.note;
+  if(!note) return act("Say what the version changes before you save it.");
+  p.note=note; p.tests="44 / 44 pass";
+  closeDialog(); render(); act(v+" saved. Activating it is a governed action with approval.");
+}
+DLG_EXT.policydiscard=function(v){
+  var p=null; POLICIES.forEach(function(x){if(x.v===v)p=x;});
+  if(!p) return noSuch("Policy version");
+  if(p.state!=="draft") return {t:h(p.v)+" cannot be discarded",w:false,
+   b:'<div class="note">'+h(p.v)+' is '+h(p.state)+'. Every decision it made cites it, so it is kept. Supersede it with a new version instead.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Close</button>'+
+     '<button class="btn primary" onclick="openDialog(\'policynew\',\''+p.v+'\')">Draft a change</button>'};
+  return {t:"Discard "+p.v+"?",w:false,
+   b:'<div class="warn"><b>'+h(p.note)+'</b> goes with it.</div>'+
+     '<div class="note">A draft has decided nothing, so nothing cites it and the row is removed outright. The active version is untouched.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Keep it</button>'+
+     '<button class="btn danger" onclick="policyDiscard(\''+p.v+'\')">Discard</button>'};
+};
+function policyDiscard(v){
+  var i=-1; POLICIES.forEach(function(x,k){if(x.v===v&&x.state==="draft")i=k;});
+  if(i<0) return;
+  POLICIES.splice(i,1);
+  closeDialog(); render(); act("Discarded "+v+".");
+}
 DLG_EXT.policyrestore=function(v){
   var p=null; POLICIES.forEach(function(x){if(x.v===v)p=x;});
   if(!p) return noSuch("Policy version");
@@ -6588,7 +6670,7 @@ function pSteering(){
      records:["Nothing steers this workspace yet","Published records live in <span class=\"mono\">.oxagen/rules/</span> on "+h(w.main)+". A record becomes published by being merged, never by being saved here.",write],
      memory:["Nothing has been recalled yet","Memory is what an agent’s own runs leave behind. No run in this workspace has written one, so nothing competes from here.",""],
      ontology:["No ontology notes yet","A note defines one entity or one term the way this workspace uses it. Notes are files under <span class=\"mono\">.oxagen/ontology/</span> on "+h(w.main)+", published by a merge.",write],
-     policy:["No gate applies to this workspace yet","No decision rule, mandate or kill switch reaches an agent here, so no gate notice enters steering. Gates are written on Tools and on a mandate’s own page.",'<button class="btn" onclick="go(\'#/'+ORG.slug+'/'+w.slug+'/tools/policy\')">Open Tools · Policy</button>'],
+     policy:["No gate applies to this workspace yet","No decision rule, mandate or kill switch reaches an agent here, so no gate notice enters steering. Gates are written on Tools and on a mandate’s own page.",'<button class="btn" onclick="go(\'#/'+ORG.slug+'/'+w.slug+'/tools/policy\')">Open the policy tab</button>'],
      proposals:["No proposals yet","Nothing has been proposed from this workspace’s runs, and no pull request is open against <span class=\"mono\">.oxagen/rules/</span>. A proposal steers nothing until a person opens a pull request from it and someone merges that.",write],
      preview:["Nothing to preview yet","No item is published in this workspace, so the assembler has nothing to select from. Publish a record and this tab shows what an agent would receive.",write]};
     var e=E[on]||E.records;
@@ -9837,19 +9919,6 @@ function dialog(){
      '<span class="b b-q mono" style="font-size:11px">mnd_7K2ETQ4</span><span class="b b-q mono" style="font-size:11px">exc_01K5RN2P</span></div></div>',
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="incidentRaise()">Raise it</button>'},
    "switch":switchDialog(),
-   policy:{t:"Edit policy",w:true,b:
-     '<p class="eyebrow q">pol_v42 draft</p>'+
-     '<pre><span class="c">// require approval for every irreversible call in core-platform</span>\n'+
-     '<span class="k">permit</span> (principal, action, resource)\n<span class="k">when</span> { context.tool.side_effect == <span class="s">"irreversible"</span> }\n'+
-     '<span class="k">advice</span> <span class="s">"require_approval"</span>;</pre>'+
-     '<div class="field" style="margin-top:14px"><label>Test cases that ship with it</label>'+
-     '<div class="tw"><table class="narrow"><tbody>'+
-     '<tr><td style="font-size:12px">github__create_release@2 must require approval</td><td><span class="b b-allowed"><span class="d"></span>pass</span></td></tr>'+
-     '<tr><td style="font-size:12px">github__get_file_contents@2 must be allowed</td><td><span class="b b-allowed"><span class="d"></span>pass</span></td></tr>'+
-     '<tr><td style="font-size:12px">stripe__create_payment@4 with no mandate must be denied</td><td><span class="b b-allowed"><span class="d"></span>pass</span></td></tr>'+
-     '</tbody></table></div></div>'+
-     '<div class="note">Activation is a governed action with approval. In regulated mode it is a Context PR instead.</div>',
-     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'pol_v42 saved as a draft. Activating it is a governed action with approval.\')">Save draft</button>'},
    spendexport:{t:"Export a spend report",w:false,b:
      '<div class="field"><label>Timeframe</label><select aria-label="Timeframe" id="spendexport-range">'+
       '<option>This month · September 2026 (to date)</option><option>Last month · August 2026</option><option>Last 30 days</option><option>Last 90 days</option>'+
