@@ -496,6 +496,79 @@ for (const theme of ["light", "dark"]) {
   await page.close();
 }
 
+// A kill switch is created over the three identities an incident names: an agent, the device it
+// runs on, or everything one operator answers for. The switches that ship with the workspace are
+// the ones that must not be removable, and a denying switch is cleared before it is removed.
+{
+  const { page, errs } = await open("#/a-intel/core-platform/tools/switches");
+  const dtxt = () => page.evaluate(() => { const d = document.querySelector("#layer .dlg"); return d ? d.innerText : ""; });
+  const pg = () => page.evaluate(() => document.body.innerText);
+
+  ok(/Create a switch/.test(await pg()), "switches: the scoped section creates a switch");
+  ok(/core-platform/.test(await pg()), "switches: the workspace-wide switch is there on day one");
+
+  await page.evaluate(() => openDialog("switchnew"));
+  await page.waitForTimeout(150);
+  ok(/Create a kill switch/.test(await dtxt()), "switches: the create dialog opens");
+  const scopes = await page.evaluate(() => [...document.querySelectorAll("#ks-kind option")].map((o) => o.value).join("|"));
+  ok(/Agent/.test(scopes) && /Device/.test(scopes) && /Operator/.test(scopes), "switches: agent, device and operator are the scopes, got " + scopes);
+
+  // A device switch names the host, and its blast radius counts the agents enrolled on it.
+  await page.evaluate(() => { document.getElementById("ks-kind").value = "Device"; ksRefresh(); });
+  await page.waitForTimeout(120);
+  const devs = await page.evaluate(() => [...document.querySelectorAll("#ks-target option")].map((o) => o.value).join("|"));
+  ok(/mbp-01/.test(devs), "switches: an enrolled host is offered, got " + devs);
+  ok(/agent/.test(await dtxt()), "switches: the device blast radius counts agents");
+
+  await page.evaluate(() => { document.getElementById("ks-target").value = "mbp-01"; ksRefresh(); document.getElementById("ks-why").value = "Held ready for an incident on this host"; ksCreate(); });
+  await page.waitForTimeout(250);
+  ok(/mbp-01/.test(await pg()), "switches: the new switch is on the page");
+  ok(/allowing/.test(await pg()), "switches: a new switch is created allowing");
+
+  // Nothing may cover the same target twice.
+  await page.evaluate(() => openDialog("switchnew"));
+  await page.waitForTimeout(120);
+  await page.evaluate(() => { document.getElementById("ks-kind").value = "Device"; ksRefresh(); });
+  await page.waitForTimeout(100);
+  await page.evaluate(() => { document.getElementById("ks-target").value = "mbp-01"; ksCreate(); });
+  await page.waitForTimeout(150);
+  ok(await page.evaluate(() => !!document.getElementById("ks-target")), "switches: a second switch on the same target is refused");
+  await page.evaluate(() => closeDialog());
+
+  const made = await page.evaluate(() => (SWITCHES.filter((x) => x.made)[0] || {}).id);
+  ok(!!made, "switches: the created switch is marked as one you made");
+
+  await page.evaluate((id) => openDialog("switchedit", id), made);
+  await page.waitForTimeout(120);
+  ok(/Edit the switch/.test(await dtxt()), "switches: a switch you made edits");
+  await page.evaluate((id) => { document.getElementById("ks-why").value = "Rotated to the CI host"; ksSave(id); }, made);
+  await page.waitForTimeout(200);
+
+  // The shipped switches refuse both.
+  await page.evaluate(() => openDialog("switchedit", "ks_ws"));
+  await page.waitForTimeout(120);
+  ok(/cannot be edited/.test(await dtxt()), "switches: the workspace switch refuses an edit");
+  await page.evaluate(() => openDialog("switchdel", "ks_ws"));
+  await page.waitForTimeout(120);
+  ok(/cannot be removed/.test(await dtxt()), "switches: the workspace switch refuses a removal");
+  await page.evaluate(() => closeDialog());
+
+  // Denying first: a removal that would silently allow traffic is refused.
+  await page.evaluate((id) => { S.switches[id] = true; openDialog("switchdel", id); }, made);
+  await page.waitForTimeout(120);
+  ok(/Clear it before you remove it/.test(await dtxt()), "switches: a denying switch is cleared before it is removed");
+  await page.evaluate((id) => { S.switches[id] = false; openDialog("switchdel", id); }, made);
+  await page.waitForTimeout(120);
+  ok(/Remove the switch/.test(await dtxt()), "switches: an allowing switch removes");
+  await page.evaluate((id) => ksRemove(id), made);
+  await page.waitForTimeout(250);
+  const cards = await page.evaluate(() => [...document.querySelectorAll(".panel-h h3")].map((x) => x.textContent).join("|"));
+  ok(!/mbp-01/.test(cards), "switches: the created switch card is gone, got " + cards);
+  ok(/core-platform/.test(cards) && /every irreversible tool/.test(cards), "switches: the shipped switches are untouched");
+  ok(errs.length === 0, "switches: no JavaScript error: " + errs.join(" | "));
+  await page.close();
+}
+
 await browser.close();
 console.log(`${passes} passed, ${fails} failed`);
 process.exit(fails ? 1 : 0);

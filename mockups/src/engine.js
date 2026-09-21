@@ -5169,7 +5169,9 @@ function pTools(){
     var cls=SWITCHES.filter(function(s){return s.cls;}), rest=SWITCHES.filter(function(s){return !s.cls;});
     body='<div class="ks-stack">'+
      '<div><p class="eyebrow q" style="display:flex;gap:8px;align-items:center">Class switches<span class="b b-q mono" style="font-size:10.5px">deny generation '+S.denyGen+'</span></p><div class="ks-stack">'+cls.map(switchCard).join("")+'</div></div>'+
-     '<div><p class="eyebrow q">Scoped switches</p><div class="grid g2">'+rest.map(switchCard).join("")+'</div></div></div>';
+     '<div><p class="eyebrow q" style="display:flex;gap:8px;align-items:center">Scoped switches'+
+      '<button class="btn sm" style="margin-left:auto" onclick="openDialog(\'switchnew\')">Create a switch</button></p>'+
+      '<div class="grid g2">'+rest.map(switchCard).join("")+'</div></div></div>';
   }
   return '<div class="phead"><div class="t"><p class="eyebrow">'+h(w.name)+'</p><h1>Tools</h1>'+
    '<p>The registry is the only source of tools an agent can see.</p></div>'+
@@ -8372,7 +8374,129 @@ function switchCard(s){
    'onclick="openDialog(\'switch\',\''+s.id+'\')"><i></i><span class="lbl">'+(on?"denying":"allowing")+'</span></button></div>'+
    '<div class="panel-b"><dl class="kv"><dt>Blast radius</dt><dd>'+h(s.stops)+'</dd>'+
    (on&&by?'<dt>Flipped by</dt><dd>'+h(by)+'<span class="ks-sub">'+h(at)+'</span></dd><dt>Reason</dt><dd>'+h(why)+'</dd>':'')+
-   '<dt>Takes effect</dt><dd>at the next call boundary, through the deny generation, with token revocation behind it for anything that keeps calling</dd></dl></div></div>';
+   '<dt>Takes effect</dt><dd>at the next call boundary, through the deny generation, with token revocation behind it for anything that keeps calling</dd></dl>'+
+   (s.made?'<div class="row" style="margin-top:12px"><button class="btn sm" onclick="openDialog(\'switchedit\',\''+s.id+'\')">Edit</button>'+
+     '<button class="btn sm danger" onclick="openDialog(\'switchdel\',\''+s.id+'\')">Remove</button></div>':'')+
+   '</div></div>';
+}
+
+/* ---- Create a switch over an agent, the device it runs on, or an operator's agents ----
+   The three identities an incident actually names. Blast radius is counted off the agent list, so
+   a device switch says how many agents share that host rather than guessing. */
+var KS_SCOPES=[
+ {k:"Agent",lab:"Agent",scope:"This agent, every run"},
+ {k:"Device",lab:"Enrolled device",scope:"Every agent enrolled on this host"},
+ {k:"Operator’s agents",lab:"Operator’s agents",scope:"Every agent this operator is accountable for"}];
+function ksAgentsFor(kind,target){
+  return AGENTS.filter(function(a){
+   if(kind==="Agent") return a.key===target;
+   if(kind==="Device") return a.host===target;
+   return PEOPLE[a.operator]&&PEOPLE[a.operator].name===target;});
+}
+function ksTargets(kind){
+  if(kind==="Agent") return AGENTS.map(function(a){return {v:a.key,lab:a.key+" — "+a.name};});
+  if(kind==="Device"){
+   var seen={},out=[];
+   AGENTS.forEach(function(a){ if(!a.host||!a.enrolled||seen[a.host])return; seen[a.host]=1;
+    var n=ksAgentsFor("Device",a.host).length;
+    out.push({v:a.host,lab:a.host+" — "+n+" agent"+(n===1?"":"s")+", key "+(a.devKey||"—")});});
+   return out;
+  }
+  var ps={},ls=[];
+  AGENTS.forEach(function(a){var p=PEOPLE[a.operator]; if(!p||ps[p.name])return; ps[p.name]=1;
+   var n=ksAgentsFor("Operator’s agents",p.name).length;
+   ls.push({v:p.name,lab:p.name+" — "+n+" agent"+(n===1?"":"s")});});
+  return ls;
+}
+function ksBlast(kind,target){
+  var as=ksAgentsFor(kind,target);
+  var tools=0; as.forEach(function(a){tools+=(a.belt||0);});
+  return tools+" tool versions · "+as.length+" agent"+(as.length===1?"":"s");
+}
+function ksScopeOf(kind){for(var i=0;i<KS_SCOPES.length;i++){if(KS_SCOPES[i].k===kind)return KS_SCOPES[i];}return KS_SCOPES[0];}
+function ksFields(kind,target,why){
+  var opts=ksTargets(kind);
+  if(!target||!opts.filter(function(o){return o.v===target;}).length) target=opts.length?opts[0].v:"";
+  return '<div class="field"><label for="ks-kind">Scope</label><select id="ks-kind" onchange="ksRefresh()">'+
+   KS_SCOPES.map(function(x){return '<option value="'+h(x.k)+'"'+(x.k===kind?" selected":"")+'>'+h(x.lab)+'</option>';}).join("")+
+   '</select><div class="hint">'+h(ksScopeOf(kind).scope)+'.</div></div>'+
+   '<div class="field"><label for="ks-target">Target</label><select id="ks-target" onchange="ksRefresh()">'+
+   opts.map(function(o){return '<option value="'+h(o.v)+'"'+(o.v===target?" selected":"")+'>'+h(o.lab)+'</option>';}).join("")+
+   '</select></div>'+
+   '<div class="ks-banner info"><span class="b b-q" style="flex:none">blast radius</span>'+
+   '<div class="g"><b>'+h(ksBlast(kind,target))+'</b>A switch is created allowing. Flipping it denies every affected call at its next boundary.</div></div>'+
+   '<div class="field" style="margin-top:14px"><label for="ks-why">Why it exists</label>'+
+   '<input id="ks-why" value="'+h(why||"")+'" placeholder="Held ready for an incident on this host"><div class="hint">One sentence. It sits on the card until somebody flips it.</div></div>';
+}
+function ksRefresh(){
+  var host=el("ks-fields"); if(!host) return;
+  host.innerHTML=ksFields(el("ks-kind").value,el("ks-target").value,el("ks-why")?el("ks-why").value:"");
+}
+DLG_EXT.switchnew=function(){
+  return {t:"Create a kill switch",s:"An agent, the device it runs on, or everything one operator answers for",w:false,
+   b:'<div id="ks-fields">'+ksFields("Agent","","")+'</div>'+
+     '<div class="note">The organization, workspace and class switches ship with the workspace and cannot be removed. One you create here can be edited and removed while it is allowing.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
+     '<button class="btn primary" onclick="ksCreate()">Create it</button>'};
+};
+function ksCreate(){
+  var kind=el("ks-kind")?el("ks-kind").value:"Agent";
+  var target=el("ks-target")?el("ks-target").value:"";
+  var why=el("ks-why")?el("ks-why").value.trim():"";
+  if(!target) return act("Pick what the switch covers before you create it.");
+  var dup=SWITCHES.filter(function(x){return x.lvl===ksScopeOf(kind).k&&x.target===target;})[0];
+  if(dup) return act("A switch already covers "+target+".");
+  var id="ks_"+String(target).replace(/[^a-z0-9]+/gi,"_").toLowerCase().slice(0,24);
+  SWITCHES.push({id:id,lvl:ksScopeOf(kind).k,target:target,on:false,scope:ksScopeOf(kind).scope,
+   by:null,at:null,why:null,stops:ksBlast(kind,target),made:true,note:why});
+  S.switches[id]=false;
+  S.tab.tools="switches";
+  closeDialog(); render(); act("Created a switch on "+target+". It is allowing until you flip it.","gold");
+}
+DLG_EXT.switchedit=function(id){
+  var sw=switchById(id);
+  if(!sw) return noSuch("Kill switch");
+  if(!sw.made) return {t:h(sw.target)+" cannot be edited",w:false,
+   b:'<div class="note">'+h(sw.target)+' ships with the workspace, so its scope is fixed. Flip it, or create a narrower switch beside it.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Close</button>'+
+     '<button class="btn primary" onclick="openDialog(\'switchnew\')">Create a switch</button>'};
+  return {t:"Edit the switch on "+sw.target,w:false,
+   b:'<div id="ks-fields">'+ksFields(sw.lvl==="Device"?"Device":sw.lvl,sw.target,sw.note||"")+'</div>'+
+     (S.switches[id]?'<div class="warn"><b>This switch is denying right now.</b> Moving it moves what is denied, at the next call boundary.</div>':''),
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
+     '<button class="btn danger" onclick="openDialog(\'switchdel\',\''+id+'\')">Remove</button>'+
+     '<button class="btn primary" onclick="ksSave(\''+id+'\')">Save</button>'};
+};
+function ksSave(id){
+  var sw=switchById(id); if(!sw) return;
+  var kind=el("ks-kind")?el("ks-kind").value:sw.lvl;
+  var target=el("ks-target")?el("ks-target").value:sw.target;
+  sw.lvl=ksScopeOf(kind).k; sw.target=target; sw.scope=ksScopeOf(kind).scope;
+  sw.stops=ksBlast(kind,target); sw.note=el("ks-why")?el("ks-why").value.trim():sw.note;
+  closeDialog(); render(); act("Saved the switch on "+target+".");
+}
+DLG_EXT.switchdel=function(id){
+  var sw=switchById(id);
+  if(!sw) return noSuch("Kill switch");
+  if(!sw.made) return {t:h(sw.target)+" cannot be removed",w:false,
+   b:'<div class="note">'+h(sw.target)+' ships with the workspace. Something has to stay flippable when an incident starts, so the organization, workspace and class switches are permanent. Clear it instead of removing it.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Close</button>'};
+  if(S.switches[id]) return {t:"Clear it before you remove it",w:false,
+   b:'<div class="warn"><b>'+h(sw.target)+' is denying right now.</b> Removing the switch would let every denied call through without a record of who allowed it.</div>'+
+     '<div class="note">Clear the switch first. Clearing records your name and your reason; removing it afterwards records nothing, because nothing is denied by then.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
+     '<button class="btn primary" onclick="openDialog(\'switch\',\''+id+'\')">Clear it</button>'};
+  return {t:"Remove the switch on "+sw.target+"?",w:false,
+   b:'<div class="note">It is allowing, so nothing is denied by it and nothing changes for a run. The switch is gone from this page and you can create it again.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Keep it</button>'+
+     '<button class="btn danger" onclick="ksRemove(\''+id+'\')">Remove</button>'};
+};
+function ksRemove(id){
+  var i=-1; SWITCHES.forEach(function(x,k){if(x.id===id&&x.made)i=k;});
+  if(i<0) return;
+  var t=SWITCHES[i].target;
+  SWITCHES.splice(i,1); delete S.switches[id]; delete S.flipMeta[id];
+  closeDialog(); render(); act("Removed the switch on "+t+".");
 }
 function switchDialog(){
   var s=switchById(S.dlg==="switch"&&S.dlgArg?S.dlgArg:"ks_cls_funds")||SWITCHES[0];
