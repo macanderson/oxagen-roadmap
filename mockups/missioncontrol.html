@@ -2039,6 +2039,22 @@ button.wz-opt:hover{border-color:var(--rule)}
 /* the source editor: body on the panel colour, bar and status on the header shade, both themes */
 .ed-scroll,.ed-gut{background:var(--panel)}
 .ed-bar,.ed-status{background:var(--panel-h)}
+
+/* v3: the CI status light on Context PRs */
+.ci{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;color:var(--muted);white-space:nowrap}
+.ci-l{width:10px;height:10px;border-radius:50%;background:var(--rule);flex:none;display:inline-grid;place-items:center;position:relative}
+.ci-l.queued{background:var(--rule)}
+.ci-l.pass{background:var(--st-allowed)}
+.ci-l.run{background:var(--st-approval);animation:ciblink 1s ease-in-out infinite}
+.ci-l.fail{background:transparent;color:var(--st-failed);width:12px;height:12px}
+.ci-l.fail::before{content:"\2715";font-weight:700;font-size:12px;line-height:1}
+.ci-l.fail.pulse{animation:cipulse 1.1s ease-in-out infinite}
+@keyframes ciblink{0%,100%{opacity:1}50%{opacity:.2}}
+@keyframes cipulse{0%,100%{transform:scale(1);text-shadow:none}50%{transform:scale(1.35);text-shadow:0 0 8px color-mix(in srgb,var(--st-failed) 70%,transparent)}}
+@media(prefers-reduced-motion:reduce){.ci-l.run,.ci-l.fail.pulse{animation:none}}
+.gh-comment{border:1px solid var(--border);border-radius:10px;padding:10px 14px;background:var(--panel-h);font-size:13px}
+.gh-comment p{margin:0}.gh-comment hr{border:0;border-top:1px solid var(--rule);margin:8px 0}
+.gh-comment a{overflow-wrap:anywhere}
 </style>
 </head>
 <body>
@@ -7532,6 +7548,7 @@ function prRun(def,st,paint){
 }
 function prLabel(def,st){
   var n=def.checks.length;
+  if(st.st==="closed") return ["q","closed"];
   if(st.st==="failed") return ["failed",(st.failed+1)+" / "+n+" \u00b7 check failed"];
   return st.st==="merged"?["proven","merged"]:st.st==="passed"?["allowed",n+" / "+n+" checks pass"]:
    st.st==="checking"?["approval",st.done+" / "+n+" checks · running"]:st.st==="opened"?["approval","0 / "+n+" checks · queued"]:["q","not opened"];
@@ -7670,7 +7687,7 @@ function recprCur(){
   for(var i=0;i<RECPRS.length;i++){ if(recprSt(RECPRS[i]).st!=="merged") return RECPRS[i]; }
   return RECPRS[0];
 }
-function recprOpenCount(){var n=0;RECPRS.forEach(function(d){if(recprSt(d).st!=="merged")n++;});return n;}
+function recprOpenCount(){var n=0;RECPRS.forEach(function(d){var st=recprSt(d).st;if(st!=="merged"&&st!=="closed")n++;});return n;}
 
 /* The next free number on the workspace's main repo, read off the pull requests that exist rather
    than invented, so two open PRs never claim the same one. */
@@ -7828,7 +7845,7 @@ function recprDetail(def){
      (failed?'<b style="color:var(--st-failed)">A check failed.</b> <span class="muted">Nothing merges and nothing is published. Change the file and open it again.</span>'
       :passed?'<b>'+n+' checks passed.</b> <span class="muted">Governance team: '+h(me().name)+' owns <span class="mono">.oxagen/rules/</span>.</span>'
              :'<b>Checks are running.</b> <span class="muted">Merge is blocked until all '+n+' report.</span>')+'</div>'+
-     '<button class="btn" onclick="recprDiscard(\''+h(def.pr)+'\')">Close without merging</button>'+
+     '<button class="btn danger" onclick="openDialog(\'closepr\',\'recpr|'+h(def.pr)+'\')">Close pull request</button>'+
      '<button class="btn'+(passed?' primary':'')+'" '+(passed?'':'disabled ')+'onclick="recprMerge(\''+h(def.pr)+'\')">Merge pull request</button></div>';
   var right=merged
    ? '<div class="panel" style="margin-bottom:14px" data-promo-bundle="'+sb.v+'"><div class="panel-h"><h3>promotion_event</h3>'+
@@ -7873,10 +7890,10 @@ function prSelected(){ return (RECPRS.length&&S.prSel!=="ctxpr")?"recpr":"ctxpr"
 function prTable(){
   var rows=[], cur=recprCur();
   RECPRS.forEach(function(d){var lr=recprLabel(d);
-    rows.push([d.pr,d.pr,d.record.st,d.branch,me().name,'<span class="b b-'+lr[0]+'"><span class="d"></span>'+h(lr[1])+'</span>',
+    rows.push([d.pr,d.pr,d.record.st,d.branch,me().name,ciLight(ciFromSt(d,recprSt(d)))+'<span class="b b-'+lr[0]+'"><span class="d"></span>'+h(lr[1])+'</span>',
       cur&&cur.pr===d.pr&&prSelected()==="recpr"]);});
   if(S.ctxpr.st!=="none"){var p=prpById(CTXPR.prp),lc=ctxprLabel();
-    rows.push(["ctxpr",CTXPR.pr,p.st,CTXPR.branch,"the promoter",'<span class="b b-'+lc[0]+'"><span class="d"></span>'+h(lc[1])+'</span>',
+    rows.push(["ctxpr",CTXPR.pr,p.st,CTXPR.branch,"the promoter",ciLight(ciFromSt(CTXPR,S.ctxpr))+'<span class="b b-'+lc[0]+'"><span class="d"></span>'+h(lc[1])+'</span>',
       prSelected()==="ctxpr"]);}
   PROPOSALS.forEach(function(q){ if(q.id!==CTXPR.prp&&q.pr!=="—")
     rows.push([null,q.pr,q.st,"context/"+q.lineage,"the promoter",'<span class="b b-approval"><span class="d"></span>'+h(q.checks)+'</span>',false]);});
@@ -7909,6 +7926,7 @@ function ctxprTab(){
    : '<div class="panel-b row" style="border-top:1px solid var(--border);gap:12px;flex-wrap:wrap"><div style="flex:1;min-width:200px;font-size:12.5px">'+
      (passed?'<b>'+n+' checks passed.</b> <span class="muted">Governance team: '+h(me().name)+' owns <span class="mono">.oxagen/rules/</span>.</span>'
             :'<b>Checks are running.</b> <span class="muted">Merge is blocked until all '+n+' report.</span>')+'</div>'+
+     '<button class="btn danger" onclick="openDialog(\'closepr\',\'ctxpr|'+h(CTXPR.pr)+'\')">Close pull request</button>'+
      '<button class="btn'+(passed?' primary':'')+'" '+(passed?'':'disabled ')+'onclick="ctxprMerge()">Merge pull request</button></div>';
   var body=[
    '## '+p.st, '',
@@ -8471,6 +8489,7 @@ var WC_STATE={
 };
 var PR_STATE={
  open:           {b:"b-q",        l:"open"},
+ closed:         {b:"b-q",        l:"closed"},
  checks_running: {b:"b-approval", l:"checks running"},
  checks_passed:  {b:"b-allowed",  l:"checks passed"},
  checks_failed:  {b:"b-failed",   l:"checks failed"},
@@ -8516,7 +8535,7 @@ function wsCopies(){var names={};wsRepos().forEach(function(r){names[r.n]=1;});
   return WORKCOPIES.filter(function(c){return names[c.repo];});}
 function wsOxprs(){var names={};wsRepos().forEach(function(r){names[r.n]=1;});
   return OXPRS.filter(function(p){return names[p.repo];});}
-function oxprOpen(){return wsOxprs().filter(function(p){return p.state!=="merged";});}
+function oxprOpen(){return wsOxprs().filter(function(p){return p.state!=="merged"&&p.state!=="closed";});}
 function oxprById(id){for(var i=0;i<OXPRS.length;i++){if(OXPRS[i].id===id)return OXPRS[i];}return null;}
 function copyById(id){for(var i=0;i<WORKCOPIES.length;i++){if(WORKCOPIES[i].id===id)return WORKCOPIES[i];}return null;}
 function repoByName(n){for(var i=0;i<REPOS.length;i++){if(REPOS[i].n===n)return REPOS[i];}return null;}
@@ -8677,11 +8696,11 @@ function chgTab(){
      '<td>'+(p.byKind==="person"?h(p.by):'<span class="mono">'+h(p.by)+'</span>')+
        '<div class="dim" style="font-size:11px">'+h(p.byKind==="person"?"a person":p.byKind)+'</div></td>'+
      '<td>'+stBadge(st)+'</td>'+
-     '<td class="num mono" style="font-size:11.5px">'+pass+'/'+p.checks.length+'</td>'+
+     '<td>'+oxprCiLight(p)+'</td>'+
      '<td class="muted" style="font-size:12px">'+h(p.opened)+'</td></tr>';}).join("");
   return '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Open Context PRs</h3>'+
    '<p class="muted" style="margin:2px 0 0;font-size:12px">Four kinds of file and one lifecycle. Whoever opened it — a person, the promoter, or the reconciler — the checks, the merge and the publication are the same.</p></div></div>'+
-   '<div class="tw"><table><thead><tr><th>Change</th><th>Kind</th><th>Pull request</th><th>Opened by</th><th>State</th><th class="num">Checks</th><th>Opened</th></tr></thead>'+
+   '<div class="tw"><table><thead><tr><th>Change</th><th>Kind</th><th>Pull request</th><th>Opened by</th><th>State</th><th>Checks</th><th>Opened</th></tr></thead>'+
    '<tbody>'+trows+'</tbody></table></div>'+
    '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">A change is in force from the merge commit, not from when it was written. While a pull request is open the thing it carries steers nothing: it is not in the compiled bundle, not in the record index, and the bundle version has not moved.</div></div></div>'+
    '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Automatic proposals</h3></div><div class="panel-b">'+
@@ -8696,6 +8715,56 @@ function chgTab(){
    that *any* selected change supplied a gold action — so selecting a running, failed or merged
    one demoted the header for a primary that was never rendered, and the screen had none. Same
    shape as the stale-selection bug: two readers of one fact, only one of them right. */
+/* CI status as GitHub reports it, one light: blinking blue while anything runs, a red x the moment
+   one job fails (pulsing while others still run), static green when every job passed, static grey
+   while everything is queued. Beside it, jobs done over jobs in total. */
+function ciCounts(list){
+  var c={pass:0,fail:0,running:0,queued:0,total:list.length};
+  list.forEach(function(x){c[x]=(c[x]||0)+1;});
+  c.done=c.pass+c.fail; return c;
+}
+function ciFromSt(def,st){
+  var n=def.checks.length, list=[];
+  for(var i=0;i<n;i++){list.push(st.st==="merged"||st.st==="passed"?"pass":st.st==="failed"?(i<st.done?"pass":i===st.failed?"fail":"queued"):st.st==="checking"?(i<st.done?"pass":i===st.done?"running":"queued"):"queued");}
+  return ciCounts(list);
+}
+function ciLight(c,label){
+  var mode=c.fail?(c.running?"fail pulse":"fail"):c.running?"run":c.done===c.total&&c.total?"pass":"queued";
+  var title=c.fail?c.fail+" failed":c.running?"running":mode==="pass"?"all passed":"queued";
+  return '<span class="ci" title="'+title+'"><span class="ci-l '+mode+'" aria-label="'+title+'"></span>'+
+   '<span class="mono">'+c.done+' / '+c.total+'</span>'+(label?'<span class="dim">'+h(label)+'</span>':'')+'</span>';
+}
+function oxprCiLight(p){return ciLight(ciCounts(p.checks.map(function(c){return c[1];})));}
+function oxprUrl(p){return "https://app.oxagen.sh/"+ORG.slug+"/"+ws().slug+"/repositories/changes/"+p.id;}
+function oxprMerge(id){
+  var p=oxprById(id); if(!p||!oxprCanMerge(p)) return;
+  p.state="merged"; p.checks.forEach(function(c){if(c[1]!=="pass")c[1]="pass";});
+  render(); act("Merged "+p.pr+". Squashed onto "+p.base+", head branch deleted, bundle bumped, promotion event and audit event written.","gold");
+}
+/* Close: the comment Oxagen leaves on the pull request, previewed before it is posted. */
+function closeComment(url){
+  var m=me(); return "Closed by "+m.name+" <"+m.email+">\n\n---\nAdded via Oxagen "+url;
+}
+function prClose(kind,id){
+  var url, pr;
+  if(kind==="oxpr"){var p=oxprById(id); if(!p) return; p.state="closed"; pr=p.pr; url=oxprUrl(p);}
+  else if(kind==="ctxpr"){S.ctxpr.st="closed"; pr=CTXPR.pr; url="https://app.oxagen.sh/"+ORG.slug+"/"+ws().slug+"/steering/proposals/prs";}
+  else {var d=recprById(id); if(!d) return; recprSt(d).st="closed"; pr=d.pr; url="https://app.oxagen.sh/"+ORG.slug+"/"+ws().slug+"/steering/proposals/prs";}
+  closeDialog(); render();
+  act("Closed "+pr+" without merging. Comment posted: “Closed by "+me().name+" <"+me().email+">”, then Added via Oxagen "+url+".");
+}
+DLG_EXT.closepr=function(arg){
+  var a=String(arg||"").split("|"), kind=a[0], id=a[1], pr, url;
+  if(kind==="oxpr"){var p=oxprById(id); pr=p?p.pr:id; url=p?oxprUrl(p):"";}
+  else if(kind==="ctxpr"){pr=CTXPR.pr; url="https://app.oxagen.sh/"+ORG.slug+"/"+ws().slug+"/steering/proposals/prs";}
+  else {var d=recprById(id); pr=d?d.pr:id; url="https://app.oxagen.sh/"+ORG.slug+"/"+ws().slug+"/steering/proposals/prs";}
+  var m=me();
+  return {t:"Close "+pr,s:"without merging",w:false,
+   b:'<p style="margin:0 0 10px;font-size:13px">The pull request closes on GitHub and nothing is published. Oxagen posts this comment on it:</p>'+
+    '<div class="gh-comment"><p>Closed by '+h(m.name)+' &lt;'+h(m.email)+'&gt;</p><hr><p>Added via Oxagen <a href="'+h(url)+'">'+h(url)+'</a></p></div>'+
+    '<div class="note" style="margin-top:12px">Closing is a governed action: it is recorded in Audit with your name, and the branch stays until someone deletes it.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn danger solid" onclick="prClose(\''+h(kind)+'\',\''+h(id)+'\')">Close pull request</button>'};
+};
 function oxprCanMerge(p){
   return !!p&&p.state!=="merged"
     &&p.checks.every(function(c){return c[1]==="pass"||c[1]==="fail";})
@@ -8707,7 +8776,7 @@ function oxprDetail(p){
   var canMerge=oxprCanMerge(p);
   return '<div class="panel"><div class="panel-h">'+
    '<button class="btn sm" onclick="S.oxprSel=null;render()">← All changes</button>'+
-   '<h3 style="margin-left:10px">'+h(p.title)+'</h3><span class="sp">'+stBadge(st)+'</span></div>'+
+   '<h3 style="margin-left:10px">'+h(p.title)+'</h3><span class="sp">'+oxprCiLight(p)+stBadge(st)+'</span></div>'+
    '<div class="panel-b">'+
    '<div class="kv"><dt>Kind</dt><dd><span class="b b-q">'+h(k.l)+'</span> <span class="mono dim">'+h(k.d)+'</span></dd>'+
    '<dt>Pull request</dt><dd><span class="mono">'+h(p.pr)+'</span></dd>'+
@@ -8732,6 +8801,8 @@ function oxprDetail(p){
    '<div class="panel-b" style="border-top:1px solid var(--border)">'+
    (p.state==="merged"
      ?'<div class="note">Merged. The file is on <span class="mono">'+h(p.base)+'</span>, the promotion event is on the ledger, and the workspace’s steering version is the ledger’s length.</div>'
+     :p.state==="closed"
+     ?'<div class="note">Closed without merging. The comment on '+h(p.pr)+' names who closed it and links back here.</div>'
      :'<label class="sec-lb">What merge will do</label>'+wzChecks([
        ["1",'Squash the branch onto <span class="mono">'+h(p.base)+'</span>, pinned to the commit the checks ran on.'],
        ["2",'Delete the head branch.'],
@@ -8739,8 +8810,8 @@ function oxprDetail(p){
        ["4",'Append the promotion event to the ledger, with the approver and the commit sha.'],
        ["5",'Write one audit event. The change is in force from that commit, not from now.']])+
       '<div class="row" style="margin-top:14px;gap:8px">'+
-      '<button class="btn'+(canMerge?' primary':'')+'"'+(canMerge?'':' disabled')+' onclick="act(\'Merged '+h(p.pr)+'\',\'gold\')">Merge pull request</button>'+
-      '<button class="btn" onclick="act(\'Closed '+h(p.pr)+' without merging\')">Close without merging</button>'+
+      '<button class="btn'+(canMerge?' primary':'')+'"'+(canMerge?'':' disabled')+' onclick="oxprMerge(\''+h(p.id)+'\')">Merge pull request</button>'+
+      '<button class="btn danger" onclick="openDialog(\'closepr\',\'oxpr|'+h(p.id)+'\')">Close pull request</button>'+
       '<span class="grow"></span><span class="dim" style="font-size:11.5px">'+
       (canMerge?'Governance: '+h(wsGov(ws()))+' on GitHub':'Merge stays disabled until every check reports.')+'</span></div>')+
    '</div></div>';

@@ -2026,3 +2026,19 @@ button.wz-opt:hover{border-color:var(--rule)}
 /* the source editor: body on the panel colour, bar and status on the header shade, both themes */
 .ed-scroll,.ed-gut{background:var(--panel)}
 .ed-bar,.ed-status{background:var(--panel-h)}
+
+/* v3: the CI status light on Context PRs */
+.ci{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;color:var(--muted);white-space:nowrap}
+.ci-l{width:10px;height:10px;border-radius:50%;background:var(--rule);flex:none;display:inline-grid;place-items:center;position:relative}
+.ci-l.queued{background:var(--rule)}
+.ci-l.pass{background:var(--st-allowed)}
+.ci-l.run{background:var(--st-approval);animation:ciblink 1s ease-in-out infinite}
+.ci-l.fail{background:transparent;color:var(--st-failed);width:12px;height:12px}
+.ci-l.fail::before{content:"\2715";font-weight:700;font-size:12px;line-height:1}
+.ci-l.fail.pulse{animation:cipulse 1.1s ease-in-out infinite}
+@keyframes ciblink{0%,100%{opacity:1}50%{opacity:.2}}
+@keyframes cipulse{0%,100%{transform:scale(1);text-shadow:none}50%{transform:scale(1.35);text-shadow:0 0 8px color-mix(in srgb,var(--st-failed) 70%,transparent)}}
+@media(prefers-reduced-motion:reduce){.ci-l.run,.ci-l.fail.pulse{animation:none}}
+.gh-comment{border:1px solid var(--border);border-radius:10px;padding:10px 14px;background:var(--panel-h);font-size:13px}
+.gh-comment p{margin:0}.gh-comment hr{border:0;border-top:1px solid var(--rule);margin:8px 0}
+.gh-comment a{overflow-wrap:anywhere}
