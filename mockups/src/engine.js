@@ -321,7 +321,7 @@ function run(id){
    People render round, agents render as squircles, so the two never read alike at a glance. */
 var AV_TONES=[["solid","Solid"],["soft","Soft"],["line","Line"]];
 var AV_ICON_ORDER=["rocket", "compass", "microscope", "stethoscope", "pencil-line", "receipt", "wrench", "flask-conical", "key-round", "package", "satellite", "bot", "bird", "bug", "sprout", "cog", "brain", "search", "radio-tower", "wand-sparkles", "brick-wall", "target", "folder-tree", "shield-check"];
-var AV_ICONS={"rocket":'<path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09"/><path d="M9 12a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.4 22.4 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 .05 5 .05"/>',"compass":'<circle cx="12" cy="12" r="10"/><path d="m16.24 7.76-1.804 5.411a2 2 0 0 1-1.265 1.265L7.76 16.24l1.804-5.411a2 2 0 0 1 1.265-1.265z"/>',"microscope":'<path d="M6 18h8"/><path d="M3 22h18"/><path d="M14 22a7 7 0 1 0 0-14h-1"/><path d="M9 14h2"/><path d="M9 12a2 2 0 0 1-2-2V6h6v4a2 2 0 0 1-2 2Z"/><path d="M12 6V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3"/>',"stethoscope":'<path d="M11 2v2"/><path d="M5 2v2"/><path d="M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1"/><path d="M8 15a6 6 0 0 0 12 0v-3"/><circle cx="20" cy="10" r="2"/>',"pencil-line":'<path d="M13 21h8"/><path d="m15 5 4 4"/><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>',"receipt":'<path d="M12 17V7"/><path d="M16 8h-6a2 2 0 0 0 0 4h4a2 2 0 0 1 0 4H8"/><path d="M4 3a1 1 0 0 1 1-1 1.3 1.3 0 0 1 .7.2l.933.6a1.3 1.3 0 0 0 1.4 0l.934-.6a1.3 1.3 0 0 1 1.4 0l.933.6a1.3 1.3 0 0 0 1.4 0l.933-.6a1.3 1.3 0 0 1 1.4 0l.934.6a1.3 1.3 0 0 0 1.4 0l.933-.6A1.3 1.3 0 0 1 19 2a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1 1.3 1.3 0 0 1-.7-.2l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.934.6a1.3 1.3 0 0 1-1.4 0l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-1.4 0l-.934-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-.7.2 1 1 0 0 1-1-1z"/>',"wrench":'<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z"/>',"flask-conical":'<path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"/><path d="M6.453 15h11.094"/><path d="M8.5 2h7"/>',"key-round":'<path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"/><circle cx="16.5" cy="7.5" r=".5" fill="currentColor"/>',"package":'<path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><polyline points="3.29 7 12 12 20.71 7"/><path d="m7.5 4.27 9 5.15"/>',"satellite":'<path d="m13.5 6.5-3.148-3.148a1.205 1.205 0 0 0-1.704 0L6.352 5.648a1.205 1.205 0 0 0 0 1.704L9.5 10.5"/><path d="M16.5 7.5 19 5"/><path d="m17.5 10.5 3.148 3.148a1.205 1.205 0 0 1 0 1.704l-2.296 2.296a1.205 1.205 0 0 1-1.704 0L13.5 14.5"/><path d="M9 21a6 6 0 0 0-6-6"/><path d="M9.352 10.648a1.205 1.205 0 0 0 0 1.704l2.296 2.296a1.205 1.205 0 0 0 1.704 0l4.296-4.296a1.205 1.205 0 0 0 0-1.704l-2.296-2.296a1.205 1.205 0 0 0-1.704 0z"/>',"bot":'<path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/>',"bird":'<path d="M16 7h.01"/><path d="M3.4 18H12a8 8 0 0 0 8-8V7a4 4 0 0 0-7.28-2.3L2 20"/><path d="m20 7 2 .5-2 .5"/><path d="M10 18v3"/><path d="M14 17.75V21"/><path d="M7 18a6 6 0 0 0 3.84-10.61"/>',"bug":'<path d="M12 20v-9"/><path d="M14 7a4 4 0 0 1 4 4v3a6 6 0 0 1-12 0v-3a4 4 0 0 1 4-4z"/><path d="M14.12 3.88 16 2"/><path d="M21 21a4 4 0 0 0-3.81-4"/><path d="M21 5a4 4 0 0 1-3.55 3.97"/><path d="M22 13h-4"/><path d="M3 21a4 4 0 0 1 3.81-4"/><path d="M3 5a4 4 0 0 0 3.55 3.97"/><path d="M6 13H2"/><path d="m8 2 1.88 1.88"/><path d="M9 7.13V6a3 3 0 1 1 6 0v1.13"/>',"sprout":'<path d="M14 9.536V7a4 4 0 0 1 4-4h1.5a.5.5 0 0 1 .5.5V5a4 4 0 0 1-4 4 4 4 0 0 0-4 4c0 2 1 3 1 5a5 5 0 0 1-1 3"/><path d="M4 9a5 5 0 0 1 8 4 5 5 0 0 1-8-4"/><path d="M5 21h14"/>',"cog":'<path d="M11 10.27 7 3.34"/><path d="m11 13.73-4 6.93"/><path d="M12 22v-2"/><path d="M12 2v2"/><path d="M14 12h8"/><path d="m17 20.66-1-1.73"/><path d="m17 3.34-1 1.73"/><path d="M2 12h2"/><path d="m20.66 17-1.73-1"/><path d="m20.66 7-1.73 1"/><path d="m3.34 17 1.73-1"/><path d="m3.34 7 1.73 1"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="12" r="8"/>',"brain":'<path d="M12 18V5"/><path d="M15 13a4.17 4.17 0 0 1-3-4 4.17 4.17 0 0 1-3 4"/><path d="M17.598 6.5A3 3 0 1 0 12 5a3 3 0 1 0-5.598 1.5"/><path d="M17.997 5.125a4 4 0 0 1 2.526 5.77"/><path d="M18 18a4 4 0 0 0 2-7.464"/><path d="M19.967 17.483A4 4 0 1 1 12 18a4 4 0 1 1-7.967-.517"/><path d="M6 18a4 4 0 0 1-2-7.464"/><path d="M6.003 5.125a4 4 0 0 0-2.526 5.77"/>',"search":'<path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/>',"radio-tower":'<path d="M4.9 16.1C1 12.2 1 5.8 4.9 1.9"/><path d="M7.8 4.7a6.14 6.14 0 0 0-.8 7.5"/><circle cx="12" cy="9" r="2"/><path d="M16.2 4.8c2 2 2.26 5.11.8 7.47"/><path d="M19.1 1.9a9.96 9.96 0 0 1 0 14.1"/><path d="M9.5 18h5"/><path d="m8 22 4-11 4 11"/>',"wand-sparkles":'<path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72"/><path d="m14 7 3 3"/><path d="M5 6v4"/><path d="M19 14v4"/><path d="M10 2v2"/><path d="M7 8H3"/><path d="M21 16h-4"/><path d="M11 3H9"/>',"brick-wall":'<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M12 9v6"/><path d="M16 15v6"/><path d="M16 3v6"/><path d="M3 15h18"/><path d="M3 9h18"/><path d="M8 15v6"/><path d="M8 3v6"/>',"target":'<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',"folder-tree":'<path d="M20 10a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-2.5a1 1 0 0 1-.8-.4l-.9-1.2A1 1 0 0 0 15 3h-2a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1Z"/><path d="M20 21a1 1 0 0 0 1-1v-3a1 1 0 0 0-1-1h-2.9a1 1 0 0 1-.88-.55l-.42-.85a1 1 0 0 0-.92-.6H13a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1Z"/><path d="M3 5a2 2 0 0 0 2 2h3"/><path d="M3 3v13a2 2 0 0 0 2 2h3"/>',"shield-check":'<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>'};
+var AV_ICONS={"rocket":'<path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09"/><path d="M9 12a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.4 22.4 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 .05 5 .05"/>',"compass":'<circle cx="12" cy="12" r="10"/><path d="m16.24 7.76-1.804 5.411a2 2 0 0 1-1.265 1.265L7.76 16.24l1.804-5.411a2 2 0 0 1 1.265-1.265z"/>',"microscope":'<path d="M6 18h8"/><path d="M3 22h18"/><path d="M14 22a7 7 0 1 0 0-14h-1"/><path d="M9 14h2"/><path d="M9 12a2 2 0 0 1-2-2V6h6v4a2 2 0 0 1-2 2Z"/><path d="M12 6V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3"/>',"stethoscope":'<path d="M11 2v2"/><path d="M5 2v2"/><path d="M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1"/><path d="M8 15a6 6 0 0 0 12 0v-3"/><circle cx="20" cy="10" r="2"/>',"pencil-line":'<path d="M13 21h8"/><path d="m15 5 4 4"/><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>',"receipt":'<path d="M12 17V7"/><path d="M16 8h-6a2 2 0 0 0 0 4h4a2 2 0 0 1 0 4H8"/><path d="M4 3a1 1 0 0 1 1-1 1.3 1.3 0 0 1 .7.2l.933.6a1.3 1.3 0 0 0 1.4 0l.934-.6a1.3 1.3 0 0 1 1.4 0l.933.6a1.3 1.3 0 0 0 1.4 0l.933-.6a1.3 1.3 0 0 1 1.4 0l.934.6a1.3 1.3 0 0 0 1.4 0l.933-.6A1.3 1.3 0 0 1 19 2a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1 1.3 1.3 0 0 1-.7-.2l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.934.6a1.3 1.3 0 0 1-1.4 0l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-1.4 0l-.934-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-.7.2 1 1 0 0 1-1-1z"/>',"wrench":'<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z"/>',"flask-conical":'<path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"/><path d="M6.453 15h11.094"/><path d="M8.5 2h7"/>',"key-round":'<path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"/><circle cx="16.5" cy="7.5" r=".5" fill="currentColor"/>',"package":'<path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><polyline points="3.29 7 12 12 20.71 7"/><path d="m7.5 4.27 9 5.15"/>',"satellite":'<path d="m13.5 6.5-3.148-3.148a1.205 1.205 0 0 0-1.704 0L6.352 5.648a1.205 1.205 0 0 0 0 1.704L9.5 10.5"/><path d="M16.5 7.5 19 5"/><path d="m17.5 10.5 3.148 3.148a1.205 1.205 0 0 1 0 1.704l-2.296 2.296a1.205 1.205 0 0 1-1.704 0L13.5 14.5"/><path d="M9 21a6 6 0 0 0-6-6"/><path d="M9.352 10.648a1.205 1.205 0 0 0 0 1.704l2.296 2.296a1.205 1.205 0 0 0 1.704 0l4.296-4.296a1.205 1.205 0 0 0 0-1.704l-2.296-2.296a1.205 1.205 0 0 0-1.704 0z"/>',"bot":'<path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/>',"bird":'<path d="M16 7h.01"/><path d="M3.4 18H12a8 8 0 0 0 8-8V7a4 4 0 0 0-7.28-2.3L2 20"/><path d="m20 7 2 .5-2 .5"/><path d="M10 18v3"/><path d="M14 17.75V21"/><path d="M7 18a6 6 0 0 0 3.84-10.61"/>',"bug":'<path d="M12 20v-9"/><path d="M14 7a4 4 0 0 1 4 4v3a6 6 0 0 1-12 0v-3a4 4 0 0 1 4-4z"/><path d="M14.12 3.88 16 2"/><path d="M21 21a4 4 0 0 0-3.81-4"/><path d="M21 5a4 4 0 0 1-3.55 3.97"/><path d="M22 13h-4"/><path d="M3 21a4 4 0 0 1 3.81-4"/><path d="M3 5a4 4 0 0 0 3.55 3.97"/><path d="M6 13H2"/><path d="m8 2 1.88 1.88"/><path d="M9 7.13V6a3 3 0 1 1 6 0v1.13"/>',"sprout":'<path d="M14 9.536V7a4 4 0 0 1 4-4h1.5a.5.5 0 0 1 .5.5V5a4 4 0 0 1-4 4 4 4 0 0 0-4 4c0 2 1 3 1 5a5 5 0 0 1-1 3"/><path d="M4 9a5 5 0 0 1 8 4 5 5 0 0 1-8-4"/><path d="M5 21h14"/>',"cog":'<path d="M11 10.27 7 3.34"/><path d="m11 13.73-4 6.93"/><path d="M12 22v-2"/><path d="M12 2v2"/><path d="M14 12h8"/><path d="m17 20.66-1-1.73"/><path d="m17 3.34-1 1.73"/><path d="M2 12h2"/><path d="m20.66 17-1.73-1"/><path d="m20.66 7-1.73 1"/><path d="m3.34 17 1.73-1"/><path d="m3.34 7 1.73 1"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="12" r="8"/>',"brain":'<path d="M12 18V5"/><path d="M15 13a4.17 4.17 0 0 1-3-4 4.17 4.17 0 0 1-3 4"/><path d="M17.598 6.5A3 3 0 1 0 12 5a3 3 0 1 0-5.598 1.5"/><path d="M17.997 5.125a4 4 0 0 1 2.526 5.77"/><path d="M18 18a4 4 0 0 0 2-7.464"/><path d="M19.967 17.483A4 4 0 1 1 12 18a4 4 0 1 1-7.967-.517"/><path d="M6 18a4 4 0 0 1-2-7.464"/><path d="M6.003 5.125a4 4 0 0 0-2.526 5.77"/>',"search":'<path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/>',"radio-tower":'<path d="M4.9 16.1C1 12.2 1 5.8 4.9 1.9"/><path d="M7.8 4.7a6.14 6.14 0 0 0-.8 7.5"/><circle cx="12" cy="9" r="2"/><path d="M16.2 4.8c2 2 2.26 5.11.8 7.47"/><path d="M19.1 1.9a9.96 9.96 0 0 1 0 14.1"/><path d="M9.5 18h5"/><path d="m8 22 4-11 4 11"/>',"wand-sparkles":'<path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72"/><path d="m14 7 3 3"/><path d="M5 6v4"/><path d="M19 14v4"/><path d="M10 2v2"/><path d="M7 8H3"/><path d="M21 16h-4"/><path d="M11 3H9"/>',"brick-wall":'<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M12 9v6"/><path d="M16 15v6"/><path d="M16 3v6"/><path d="M3 15h18"/><path d="M3 9h18"/><path d="M8 15v6"/><path d="M8 3v6"/>',"target":'<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',"folder-tree":'<path d="M20 10a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-2.5a1 1 0 0 1-.8-.4l-.9-1.2A1 1 0 0 0 15 3h-2a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1Z"/><path d="M20 21a1 1 0 0 0 1-1v-3a1 1 0 0 0-1-1h-2.9a1 1 0 0 1-.88-.55l-.42-.85a1 1 0 0 0-.92-.6H13a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1Z"/><path d="M3 5a2 2 0 0 0 2 2h3"/><path d="M3 3v13a2 2 0 0 0 2 2h3"/>',"git-branch":'<line x1="6" x2="6" y1="3" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/>',"git-pull-request":'<circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><line x1="6" x2="6" y1="9" y2="21"/>',"shield-check":'<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>'};
 function avSvg(name){var d=AV_ICONS[name]||AV_ICONS.bot;return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+d+'</svg>';}
 function avTone(t){for(var i=0;i<AV_TONES.length;i++){if(AV_TONES[i][0]===t)return t;}return "soft";}
 function avatarHtml(av,size,shape,extra){
@@ -347,7 +347,8 @@ function involved(R){
   return '<div class="inv">'+
    (a?agentCard(a,{layout:"compact",sub:h(a.name)+' \u00b7 '+h(a.harnessLabel)}):'')+
    '<span class="inv-arrow">on behalf of →</span>'+
-   (p?'<span class="inv-i">'+personAv(R.op,30)+'<span class="tx"><b>'+h(p.name)+'</b><span>operator · '+h(p.role)+'</span></span></span>':'')+'</div>';
+   (p?'<a class="inv-i" href="'+spendHref("operator",R.op)+'" onclick="event.preventDefault();spendGo(\'operator\',\''+h(R.op)+'\')" title="Open '+h(p.name)+'">'+
+     personAv(R.op,30)+'<span class="tx"><b>'+h(p.name)+'</b><span>operator · '+h(p.role)+'</span></span></a>':'')+'</div>';
 }
 /* the generated summary: a light-tier model reads the frames and writes what changed; it is labelled as generated and never stands in for the record */
 function runSummary(R){
@@ -2027,6 +2028,7 @@ function pRun(r){
    '<h1 class="mono" style="font-size:19px">'+h(R.id)+'</h1>'+
    '<div class="row" style="margin-top:8px">'+agentCard(a||R.agent,{layout:"compact",key:R.agent})+statusBadge(rs)+tierBadge(R.tier)+gradeBadge(R.grade)+
    '<span class="b b-q">task '+h(R.task)+'</span></div>'+
+   runRig(R)+runWhere(R)+
    '<p style="margin-top:8px">'+h(R.taskTitle)+' · started '+h(R.started)+(R.sealed?' · sealed '+h(R.sealed):'')+'</p></div>'+
    '<div class="acts">'+
     (rs==="live"?'<button class="btn" onclick="openDialog(\'pause\')" title="Takes effect at the next boundary · run.pause">❙❙ Pause run</button>'+
@@ -2083,9 +2085,9 @@ function pRun(r){
      '<div class="panel-b" id="fptl" style="padding:7px;max-height:420px;overflow-y:auto">'+timeline+'</div></div>'+
      '</div></div>';
   } else if(t==="issues"){
-    bodyHtml=issuesTab(R);
+    bodyHtml=issuesTab(R)+linkedWork(R);
   } else if(t==="cost"){
-    bodyHtml=runInstruments(R)+runSpendByArea(R)+callsPanel(R)+costTab(R);
+    bodyHtml=runFitPanel(R)+runInstruments(R)+runSpendByArea(R)+callsPanel(R)+costTab(R);
   } else if(t==="policy"){
     bodyHtml='<div class="panel"><div class="panel-h"><h3>Policy decisions</h3>'+
      '</div><div class="tw"><table>'+
@@ -2301,6 +2303,233 @@ function operatorPrompts(p){
   var n=0, waste=0; rs.forEach(function(r){n+=runPrompts(r); waste+=runWaste(r).corrective;});
   return {avg:n/rs.length,runs:rs.length,oneShot:rs.filter(function(r){return runPrompts(r)===1;}).length,waste:waste};
 }
+/* ===================== Model, effort, and whether either was the right size =====================
+   The model an agent runs on is the single largest lever on what a run costs. It is set in the
+   agent definition, so changing it is a pull request, and the reading below is an argument for
+   opening one. Nothing here changes a run that has already happened. */
+var MODEL_LADDER=[
+ {m:"claude-haiku-4-5",lab:"Haiku 4.5",rank:0,out:PRICE.outLight},
+ {m:"claude-sonnet-5",lab:"Sonnet 5",rank:1,out:PRICE.outLight*3},
+ {m:"claude-opus-5",lab:"Opus 5",rank:2,out:PRICE.out}];
+function modelRung(m){for(var i=0;i<MODEL_LADDER.length;i++){if(MODEL_LADDER[i].m===m)return MODEL_LADDER[i];}return MODEL_LADDER[2];}
+var EFFORT_LADDER=["low","medium","high"];
+
+/* Oxagen reads the effort setting out of the request body, which it only has when the model call
+   went through it. At the harness and observe tiers the harness calls its provider directly and
+   reports usage afterwards, so the setting is never seen. Saying "medium" there would be a guess. */
+function runEffort(R){
+  if(TIER_RANK[R.tier]>=2&&R.effort) return {v:R.effort,seen:true};
+  if(TIER_RANK[R.tier]>=2) return {v:null,seen:false,why:"this agent sent no effort setting, so the model used its own default"};
+  return {v:null,seen:false,why:"the model call did not go through Oxagen, so the request body was never read"};
+}
+
+/* What a reviewer reads: the shape of the run, not its prose. Turns, corrective prompts, how much
+   of the output was reasoning, and whether anything had to be done twice. */
+function runFit(R){
+  var m=runMetrics(R), w=runWaste(R), eff=runEffort(R);
+  var prompts=w.prompts, rung=modelRung(R.model);
+  var reasonShare=m.tokOut?m.reasoning/m.tokOut:0;
+  var redone=prompts>1||(m.errs||0)>0;
+  var fit={read:prompts+" prompt"+(prompts===1?"":"s")+" · "+R.turn+" turn"+(R.turn===1?"":"s")+" · "+
+    tokn(m.tokOut)+" output tokens, "+per(reasonShare)+" of them reasoning · "+
+    ((m.errs||0)?m.errs+" tool call"+(m.errs===1?"":"s")+" failed":"no tool call failed")};
+
+  /* The model. Down a rung when a small job landed first time on a big model; up a rung when the
+     run had to be corrected on a small one. Reasoning share is a fixed fraction of output per model
+     family, so it reads the shape of the work instead: prompts, failed calls, turns, and steps. */
+  var small=R.turn<=3||m.steps<=12;
+  if(!redone&&small&&rung.rank>0){
+    var lower=MODEL_LADDER[rung.rank-1];
+    var save=Math.max(0,(parseFloat(R.cost)||0)-(m.tokIn*PRICE.inEff+m.tokOut*lower.out));
+    fit.model={verdict:"over",title:"Wrong model tier",
+     say:"This run landed in "+R.turn+" turn"+(R.turn===1?"":"s")+" and "+m.steps+" steps, first try, with no tool call failing. "+
+      lower.lab+" answers this shape of work, and this run would have cost about "+usd(save.toFixed(2))+" less.",
+     suggest:lower.m,suggestLab:lower.lab,delta:-save};
+  } else if(redone&&rung.rank<MODEL_LADDER.length-1){
+    var upper=MODEL_LADDER[rung.rank+1];
+    var more=Math.max(0,(m.tokIn*PRICE.inEff+m.tokOut*upper.out)-(parseFloat(R.cost)||0))+w.usd;
+    fit.model={verdict:"under",title:"Wrong model tier",
+     say:"This run took "+prompts+" prompts to land and wasted "+usd(fmt2(w.usd))+" getting there. "+
+      upper.lab+" costs about "+usd(more.toFixed(2))+" more on this shape of work, and the correction is what you are paying for now.",
+     suggest:upper.m,suggestLab:upper.lab,delta:more};
+  } else {
+    fit.model={verdict:"fit",title:"Model fit",
+     say:modelRung(R.model).lab+" matches this shape of work. Nothing in the record argues for moving it either way."};
+  }
+
+  /* The effort setting, only where Oxagen saw it. */
+  if(!eff.seen){
+    fit.effort={verdict:"unseen",title:"Effort setting",
+     say:"Oxagen did not capture the effort setting for this run, because "+eff.why+". It is captured at the gateway and contained tiers."};
+  } else {
+    var er=EFFORT_LADDER.indexOf(eff.v);
+    if(!redone&&er>0&&m.reasoning>0.2*m.tokOut){
+      fit.effort={verdict:"over",title:"Wrong effort setting",
+       say:"This run landed first try and still spent "+tokn(m.reasoning)+" tokens thinking, "+per(reasonShare)+
+        " of everything it wrote. At "+EFFORT_LADDER[er-1]+" the model thinks less and the output bill falls.",
+       suggest:EFFORT_LADDER[er-1],delta:-(m.reasoning*0.45*rung.out)};
+    } else if(redone&&er<EFFORT_LADDER.length-1){
+      fit.effort={verdict:"under",title:"Wrong effort setting",
+       say:"This run "+(prompts>1?"took "+prompts+" prompts to land":"had "+m.errs+" tool call"+(m.errs===1?"":"s")+" fail")+
+        " on effort "+eff.v+". At "+EFFORT_LADDER[er+1]+" the model thinks before it acts, which is cheaper than being told again.",
+       suggest:EFFORT_LADDER[er+1],delta:m.reasoning*0.6*rung.out};
+    } else {
+      fit.effort={verdict:"fit",title:"Effort setting",
+       say:"Effort "+eff.v+" matches this run. "+per(reasonShare)+" of the output was reasoning and nothing had to be done twice."};
+    }
+  }
+  fit.eff=eff;
+  return fit;
+}
+function fitBadge(f){
+  if(f.verdict==="fit")return '<span class="b b-allowed"><span class="d"></span>'+h(f.title)+'</span>';
+  if(f.verdict==="unseen")return "";
+  return '<span class="b b-approval"><span class="d"></span>'+h(f.title)+'</span>';
+}
+/* Where the work is: the repository, the branch it was pushed to, the pull requests it opened, and
+   the directory on the machine the agent ran on. A person reading a sealed run needs to be able to
+   walk to the checkout, so the path is a fact about the run, not a fact about the product. */
+function ghRepoUrl(repo){return "https://github.com/"+repo;}
+function ghBranchUrl(repo,br){
+  var m=/^refs\/pull\/(\d+)\/head$/.exec(br);
+  return m?"https://github.com/"+repo+"/pull/"+m[1]+"/files":"https://github.com/"+repo+"/tree/"+br;
+}
+function ghPrUrl(ref){
+  var m=/^([\w.-]+\/[\w.-]+)#(\d+)$/.exec(ref); if(m) return "https://github.com/"+m[1]+"/pull/"+m[2];
+  return null;
+}
+/* A branch name is buried in the run graph's prose ("branch release/4.11.0-notes pushed"), so read
+   it where it is stated and fall back to the branch this agent's runs are named after. */
+function runBranch(R,repo){
+  var g=runGraphOf(R), hit=null;
+  [].concat(g.repos||[],g.artifacts||[]).forEach(function(x){
+    if(hit)return;
+    if(x.kind==="branch"){hit=String(x.ref).split(" ")[0];return;}
+    var m=/branch ([\w./-]+) pushed/.exec(String(x.note||""))||/refs\/pull\/(\d+)\/head/.exec(String(x.ref||""));
+    if(m)hit=/^\d+$/.test(m[1])?"refs/pull/"+m[1]+"/head":m[1];
+  });
+  if(hit)return {name:hit,stated:true};
+  var slug=String(R.agent).split(".").pop(), n=(/#(\d+)/.exec(R.task||"")||[])[1];
+  return {name:"agents/"+slug+(n?"/"+n:""),stated:false};
+}
+/* Every pull request the run opened or pushed to, each one linkable. */
+function runPrs(R){
+  var g=runGraphOf(R), out=[], seen={};
+  function add(ref,title,state){
+    if(!ref||seen[ref]||!ghPrUrl(ref))return; seen[ref]=1;
+    out.push({ref:ref,url:ghPrUrl(ref),title:title||"",state:state||"open"});
+  }
+  (g.artifacts||[]).forEach(function(x){ if(x.kind==="pr") add(x.ref,x.title,x.state); });
+  (g.repos||[]).forEach(function(x){
+    var m=/refs\/pull\/(\d+)\/head/.exec(String(x.ref||"")); if(m) add(x.name+"#"+m[1],"the head this run pushed to","open");
+  });
+  OXPRS.forEach(function(p){ if(p.trigger&&String(p.trigger).indexOf(R.id)>=0) add(p.pr,p.title,p.state); });
+  return out;
+}
+/* The checkout. An agent runs in a worktree off the main checkout when it works on its own branch,
+   which is where a person goes looking for the files. */
+function runWork(R){
+  var g=runGraphOf(R), a=agent(R.agent), w=wsBySlug(R.ws)||ws();
+  var repo=(g.repos&&g.repos.length?g.repos[0].name:null)||(/^([\w.-]+\/[\w.-]+)#/.exec(R.task||"")||[])[1]||w.main;
+  var br=runBranch(R,repo), machine=(a&&a.host)||"unknown-host";
+  var copy=null; WORKCOPIES.forEach(function(c){ if(!copy&&c.repo===repo&&c.machine===machine)copy=c; });
+  var base=copy?copy.path:"~/src/"+repo.split("/").pop();
+  /* The enrolled checkout sits on one branch. An agent working on another one works in a worktree
+     off it, which is a different directory and the one a person actually wants. */
+  var sameTree=copy&&copy.branch===br.name;
+  var slug=br.name.replace(/^refs\/pull\//,"pr-").replace(/\/head$/,"").replace(/[^\w.-]+/g,"-");
+  var path=sameTree?base:base+"/.worktrees/"+slug;
+  return {repo:repo,branch:br,machine:machine,os:copy?copy.os:null,base:base,path:path,
+    stated:!!sameTree,enrolled:!!copy,worktree:!sameTree,prs:runPrs(R),
+    head:(g.repos&&g.repos.length?(/\b([0-9a-f]{7})\b/.exec(g.repos[0].ref||"")||[])[1]:null)||null};
+}
+function copyPath(txt){
+  /* A browser that refuses clipboard permission rejects or throws, and the run page is not the
+     place to lose that. Show the path either way so it can still be selected by hand. */
+  var wrote=false;
+  try{ if(navigator.clipboard&&navigator.clipboard.writeText){ var p=navigator.clipboard.writeText(txt); wrote=true; if(p&&p.catch)p.catch(function(){}); } }catch(e){ wrote=false; }
+  act(wrote?"Copied "+txt:txt);
+}
+/* The second header strip: the repository, the branch, the pull requests, and the checkout. */
+function runWhere(R){
+  var k=runWork(R);
+  var prs=k.prs.length
+    ? k.prs.map(function(p){return '<a class="b b-q lk" href="'+h(p.url)+'" target="_blank" rel="noopener" title="'+h(p.title)+'">'+
+        avSvg("git-pull-request")+h(p.ref)+'</a>';}).join("")
+    : '<span class="b b-q dim">no pull request</span>';
+  return '<div class="row where" style="margin-top:6px">'+
+   '<a class="b b-q lk" href="'+h(ghRepoUrl(k.repo))+'" target="_blank" rel="noopener">'+h(k.repo)+'</a>'+
+   '<a class="b b-q lk mono" href="'+h(ghBranchUrl(k.repo,k.branch.name))+'" target="_blank" rel="noopener"'+
+    (k.branch.stated?'':' title="derived from the agent and the task; no push was observed"')+'>'+
+    avSvg("git-branch")+h(k.branch.name)+(k.branch.stated?'':' <span class="dim">derived</span>')+'</a>'+
+   prs+
+   '<button class="b b-q lk mono" onclick="copyPath(\''+h(k.path)+'\')" title="'+
+    (k.stated?'Oxagen recorded this checkout on '+h(k.machine)+'. Click to copy the path.'
+     :k.enrolled?h(k.machine)+' has this repository enrolled at '+h(k.base)+'; the branch differs, so the work is in a worktree off it. Click to copy the path.'
+     :'No checkout on '+h(k.machine)+' is enrolled, so this path is worked out from the repository name. Click to copy it.')+'">'+
+    avSvg("folder-tree")+h(k.machine)+':'+h(k.path)+(k.stated?'':' <span class="dim">derived</span>')+'</button>'+
+   '</div>';
+}
+/* The header strip: what the run ran on, and a badge when the record argues it was the wrong size. */
+function runRig(R){
+  var a=agent(R.agent), f=runFit(R), eff=f.eff;
+  return '<div class="row rig" style="margin-top:8px">'+
+   '<span class="b b-q">'+(a?h(a.harnessLabel):"harness")+(a&&a.harnessV?' <span class="mono dim">'+h(a.harnessV)+'</span>':'')+'</span>'+
+   '<span class="b b-q mono">'+h(R.model)+'</span>'+
+   '<span class="b b-q">effort '+(eff.seen?h(eff.v):'<span class="dim">not captured</span>')+'</span>'+
+   fitBadge(f.model)+fitBadge(f.effort)+'</div>';
+}
+/* The argument in full, with the change it asks for. The model is set in the agent definition, so
+   moving it is a pull request against that file, never a write from this page. */
+function runFitPanel(R){
+  var f=runFit(R), a=agent(R.agent);
+  function card(x,kind){
+    if(x.verdict==="fit"||x.verdict==="unseen")
+      return '<div class="panel-b"><b>'+h(x.title)+'</b><p class="muted" style="margin:6px 0 0;font-size:12.5px">'+h(x.say)+'</p></div>';
+    return '<div class="panel-b"><div class="row"><b>'+h(x.title)+'</b>'+fitBadge(x)+'</div>'+
+     '<p class="muted" style="margin:6px 0 0;font-size:12.5px">'+h(x.say)+'</p>'+
+     '<div class="row" style="margin-top:10px"><button class="btn sm" onclick="openDialog(\'fitchange\',\''+h(R.id)+':'+kind+'\')">'+
+     (kind==="model"?'Move this agent to '+h(x.suggestLab):'Set effort to '+h(x.suggest))+'</button></div></div>';
+  }
+  return '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Model fit</h3>'+
+   '<span class="b b-q" style="margin-left:auto;font-size:10.5px">generated · not the record</span></div>'+
+   card(f.model,"model")+card(f.effort,"effort")+
+   '<div class="panel-b"><div class="note">Read from this run only: '+h(f.read)+
+   '. A reading is an argument, not a verdict, and it changes nothing until somebody merges the change to '+
+   (a?'<span class="mono">.oxagen/agents/'+h(a.key.split(".").pop())+'.toml</span>':'the agent definition')+'.</div></div></div>';
+}
+DLG_EXT.fitchange=function(arg){
+  var parts=String(arg||"").split(":"), R=run(parts[0]); if(!R)return noSuch("Run");
+  var f=runFit(R), x=parts[1]==="effort"?f.effort:f.model, a=agent(R.agent);
+  var file=".oxagen/agents/"+(a?a.key.split(".").pop():"agent")+".toml";
+  return {t:parts[1]==="effort"?"Set effort to "+x.suggest:"Move to "+x.suggestLab,w:false,
+   b:'<div class="note">'+h(x.say)+'</div>'+
+    '<dl class="kv" style="margin-top:14px"><dt>Agent</dt><dd>'+(a?h(a.name):h(R.agent))+'</dd>'+
+    '<dt>File</dt><dd class="mono" style="font-size:11.5px">'+h(file)+'</dd>'+
+    '<dt>Today</dt><dd class="mono">'+(parts[1]==="effort"?h(f.eff.v||"not captured"):h(R.model))+'</dd>'+
+    '<dt>Proposed</dt><dd class="mono">'+h(x.suggest)+'</dd>'+
+    '<dt>Effect on this shape of run</dt><dd>'+(x.delta<0?usd(Math.abs(x.delta).toFixed(2))+' less':usd(Math.abs(x.delta).toFixed(2))+' more')+' a run</dd></dl>'+
+    '<div class="note" style="margin-top:14px">Every run the agent has already sealed keeps the model it ran on. This changes the next one.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
+    '<button class="btn primary" onclick="fitPr(\''+h(R.id)+':'+h(parts[1])+'\')">Open the pull request</button>'};
+};
+function fitPr(arg){
+  var parts=String(arg||"").split(":"), R=run(parts[0]); if(!R)return;
+  var f=runFit(R), x=parts[1]==="effort"?f.effort:f.model, a=agent(R.agent);
+  var slug=a?a.key.split(".").pop():"agent";
+  var p={id:"oxpr_fit_"+slug+"_"+parts[1],kind:"agent",title:(a?a.name:R.agent)+": "+(parts[1]==="effort"?"effort "+x.suggest:x.suggestLab),
+   repo:ws().main,base:ws().branch,branch:"agents/"+slug+"-"+parts[1],
+   pr:ws().main+"#"+(524+OXPRS.length),by:PEOPLE.marcus.name,byKind:"person",
+   opened:"just now",state:"checks_running",
+   trigger:"A model fit reading of "+R.id+" argued the "+(parts[1]==="effort"?"effort setting":"model tier")+" was the wrong size.",
+   files:[["mod",".oxagen/agents/"+slug+".toml",(parts[1]==="effort"?"effort = ":"model = ")+x.suggest]],
+   checks:[["schema","pass","agent-definition/v0.3; "+(parts[1]==="effort"?"effort":"model")+" is a value the harness accepts."],
+    ["belt_unchanged","pass","The toolbelt and its tier are untouched, so nothing this agent may do changes."],
+    ["budget_fit","pass","The agent's daily budget covers the new price at its 30-day run count."]]};
+  OXPRS.unshift(p);
+  closeDialog(); render();
+  act("Opened "+p.pr+". The next run uses it; every sealed run keeps the model it ran on.","gold");
+}
 function runStatRow(R){
   var m=runMetrics(R), w=runWaste(R), p=w.prompts, s=m.series;
   var wp=[["model",m.modelMs],["tool",m.toolMs],["waiting on a person",m.waitMs],["harness",m.overMs]].sort(function(x,y){return y[1]-x[1];})[0];
@@ -2375,21 +2604,25 @@ function runSpendByArea(R){
 }
 function runSide(R){
   var g=runGraphOf(R), m=runMetrics(R), outs=R.outputs||[];
-  var branch=outs.filter(function(o){return o.kind==="branch";})[0], pr=g.artifacts.filter(function(a){return a.kind==="pr";})[0]||outs.filter(function(o){return o.kind==="pr";})[0];
-  var checks=outs.filter(function(o){return o.kind==="check";}), rel=g.artifacts.filter(function(a){return a.kind==="release";})[0], repo=g.repos[0];
+  var checks=outs.filter(function(o){return o.kind==="check";}), rel=g.artifacts.filter(function(a){return a.kind==="release";})[0];
+  var k=runWork(R), base="main";
+  REPOS.forEach(function(r){ if(r.n===k.repo&&r.branch) base=r.branch; });
   var artState={open:"b-approval",pushed:"b-allowed",pending:"b-approval",failing:"b-denied",passed:"b-allowed",blocked:"b-denied",merged:"b-allowed",none:"b-q",created:"b-allowed"};
   var chip=function(st){return st?'<span class="b '+(artState[st]||"b-q")+'"><span class="d"></span>'+h(st)+'</span>':'';};
   var ciState=checks.length?(checks.every(function(c){return c.state==="passed";})?"passed":checks.some(function(c){return c.state==="failing"||c.state==="blocked";})?"failing":"pending"):null;
   var rows=[];
-  rows.push(["Repository",repo?'<span class="mono">'+h(repo.name)+'</span> '+edgeChip(repo):'<span class="dim">none touched</span>']);
-  rows.push(["Branch",branch?'<span class="mono">'+h(branch.name)+'</span> '+chip(branch.state)+' <span class="dim">main untouched</span>':'<span class="dim">none pushed</span>']);
-  rows.push(["Pull request",pr?'<span class="mono">'+h(pr.ref||pr.name)+'</span> '+chip(pr.state):'<span class="dim">none yet'+(R.status==="live"?', the run is still working':'')+'</span>']);
+  /* Every pull request the run pushed to, read the way the header strip reads them, so the two
+     never disagree. A run that pushed to a pull request head has one whether or not it opened it. */
+  rows.push(["Pull request",k.prs.length
+    ? k.prs.map(function(p){return '<a class="mono" href="'+h(p.url)+'" target="_blank" rel="noopener">'+h(p.ref)+'</a> '+chip(p.state);}).join('<br>')
+    : '<span class="dim">none yet'+(R.status==="live"?', the run is still working':'')+'</span>']);
+  rows.push(["Base",'<span class="mono">'+h(base)+'</span> <span class="dim">untouched by this run</span>']);
   rows.push(["Checks",ciState?chip(ciState)+' <span class="dim">'+checks.map(function(c){return h(c.name)+' '+h(c.state);}).join(', ')+'</span>':'<span class="dim">none reported</span>']);
   if(rel) rows.push(["Release",'<span class="mono">'+h(rel.ref)+'</span> '+chip(rel.state)]);
   rows.push(["Diff",g.files.length?'<span class="mono"><b style="color:var(--st-allowed)">+'+m.add+'</b> <b style="color:var(--st-denied)">−'+m.del+'</b></span> <span class="dim">in '+g.files.length+' file'+(g.files.length===1?'':'s')+'</span>':'<span class="dim">no file change recorded</span>']);
   var files=g.files.map(function(f){var st=diffStat(txDiffRows(f.before,f.after));
     return '<div class="rs-file"><span class="mono" title="'+h(f.path)+'">'+h(f.path)+'</span><span class="mono dim"><b style="color:var(--st-allowed)">+'+st.add+'</b> <b style="color:var(--st-denied)">−'+st.del+'</b></span></div>';}).join("");
-  var work='<div class="panel"><div class="panel-h"><h3>Repository</h3>'+(pr||ciState?'<span style="margin-left:auto">'+(pr?chip(pr.state):chip(ciState))+'</span>':'')+'</div>'+
+  var work='<div class="panel"><div class="panel-h"><h3>Changes</h3>'+(ciState||k.prs.length?'<span style="margin-left:auto">'+chip(ciState||k.prs[0].state)+'</span>':'')+'</div>'+
    '<div class="panel-b"><dl class="kv rs-kv">'+rows.map(function(r){return '<dt>'+r[0]+'</dt><dd>'+r[1]+'</dd>';}).join("")+'</dl>'+
    (files?'<div class="rs-files">'+files+'</div><div class="row" style="margin-top:8px"><button class="btn sm" onclick="S.tab.run=\'transcript\';render()">Open the diff in the transcript</button></div>':'')+
    '</div></div>';
@@ -2936,27 +3169,38 @@ function edgeChip(it){
   var frs=(it.fr||[]).map(function(f){return '<button class="edge" onclick="S.tab.run=\'player\';S.frame='+f+';render()">fr '+f+'</button>';}).join("");
   return '<span class="ev"><span class="edge '+h(it.edge)+'">'+lab+'</span>'+frs+'</span>';
 }
-function lwItem(ic,title,sub,it){return '<div class="lw-item"><span class="ic">'+ic+'</span><div class="t"><b title="'+h(title)+'">'+h(title)+'</b>'+(sub?'<span class="sub">'+h(sub)+'</span>':'')+edgeChip(it)+'</div></div>';}
+/* Where an artifact lives on the forge. A reference with no address stays plain text. */
+function artRef(a,k){
+  var ref=String(a.ref||""), url=null;
+  if(a.kind==="pr")url=ghPrUrl(ref)||(/^#?(\d+)$/.test(ref)?"https://github.com/"+k.repo+"/pull/"+ref.replace("#","")+"/files":null);
+  else if(a.kind==="branch")url=ghBranchUrl(k.repo,ref.split(" ")[0]);
+  else if(a.kind==="check")url=k.prs.length?k.prs[0].url+"/checks":null;
+  else if(a.kind==="release")url="https://github.com/"+k.repo+"/releases";
+  return url?'<a href="'+h(url)+'" target="_blank" rel="noopener">'+h(ref)+'</a>':h(ref);
+}
+function lwItem(ic,title,sub,it,url){
+  var t=url?'<a href="'+h(url)+'" target="_blank" rel="noopener">'+h(title)+'</a>':h(title);
+  return '<div class="lw-item"><span class="ic">'+ic+'</span><div class="t"><b title="'+h(title)+'">'+t+'</b>'+(sub?'<span class="sub">'+h(sub)+'</span>':'')+edgeChip(it)+'</div></div>';}
 function linkedWork(R){
   var g=runGraphOf(R),inf=0,obs=0,dm=runMetrics(R);
-  [].concat(g.repos,g.issues,g.artifacts).forEach(function(it){if(it.edge==="inferred")inf++;else if(it.edge==="observed")obs++;});
+  [].concat(g.repos,g.artifacts).forEach(function(it){if(it.edge==="inferred")inf++;else if(it.edge==="observed")obs++;});
   /* the kinds a spine node can carry are added here, so an artifact keeps one glyph on both surfaces */
   var artIc={pr:"⇄",release:"⬡",branch:"⑂",comment:"✎",label:"⌾",file:"▤",media:"▣",record:"❑",touched:"·"};
   var artState={open:"b-approval",pushed:"b-proven",pending:"b-approval",failing:"b-denied",sealed:"b-proven",posted:"b-proven",merged:"b-allowed",none:"b-q",
    /* the spine's own vocabulary, mapped to the same badge classes it uses there */
    created:"b-allowed",written:"b-allowed",linked:"b-q",blocked:"b-denied"};
   var panel=function(title,items,empty){return '<div class="panel"><div class="panel-h"><h3>'+title+'</h3><span class="b b-q" style="margin-left:auto">'+items.length+'</span></div><div class="panel-b">'+(items.length?items.join(""):'<div class="lw-item"><span class="ic">—</span><div class="t"><span class="sub">'+empty+'</span></div></div>')+'</div></div>';};
-  var repos=g.repos.map(function(r){return lwItem("⌂",r.name,(r.ref?r.ref+" · ":"")+(r.note||""),r);});
-  var issues=g.issues.map(function(i){return lwItem("◌",i.ref+" · "+i.title,i.rel,i);});
-  var arts=g.artifacts.map(function(a){return '<div class="lw-item"><span class="ic">'+(artIc[a.kind]||"·")+'</span><div class="t"><b>'+h(a.ref)+(a.state?' <span class="b '+(artState[a.state]||"b-q")+'" style="font-size:10px;vertical-align:1px">'+h(a.state)+'</span>':'')+'</b><span class="sub">'+h(a.title)+'</span>'+edgeChip(a)+'</div></div>';});
+  var repos=g.repos.map(function(r){return lwItem("⌂",r.name,(r.ref?r.ref+" · ":"")+(r.note||""),r,ghRepoUrl(r.name));});
+  var k=runWork(R);
+  var arts=g.artifacts.map(function(a){return '<div class="lw-item"><span class="ic">'+(artIc[a.kind]||"·")+'</span><div class="t"><b>'+artRef(a,k)+(a.state?' <span class="b '+(artState[a.state]||"b-q")+'" style="font-size:10px;vertical-align:1px">'+h(a.state)+'</span>':'')+'</b><span class="sub">'+h(a.title)+'</span>'+edgeChip(a)+'</div></div>';});
   var files=g.files.length?'<div class="panel lw-files" style="margin-bottom:16px"><div class="panel-h"><h3>Files changed</h3><span class="dsum"><b class="a" style="color:var(--st-allowed)">+'+dm.add+'</b> <b class="d" style="color:var(--st-denied)">\u2212'+dm.del+'</b><span class="dbar" aria-hidden="true"><i class="a" style="flex:'+dm.add+'"></i><i class="d" style="flex:'+dm.del+'"></i></span>\u00b7 '+g.files.length+' file'+(g.files.length===1?'':'s')+' \u00b7 as the harness reported them</span></div><div class="panel-b" style="padding-top:2px">'+
    g.files.map(function(f){var rows=txDiffRows(f.before,f.after),st=diffStat(rows);return '<details><summary><span class="p">'+h(f.path)+'</span>'+(f.note?'<span class="dim" style="font-size:11px;flex:none">'+h(f.note)+'</span>':'')+'<span class="dstat"><b class="a">+'+st.add+'</b> <b class="d">−'+st.del+'</b></span></summary>'+diffHtml(rows,3)+'</details>';}).join("")+'</div></div>':'';
   return '<section aria-label="Linked work">'+
    '<div class="lw-note"><p class="eyebrow q" style="margin:0">Linked work</p>'+
     '<span><span class="edge observed">observed</span> written by Oxagen from a tool call routed through it</span>'+
     '<span><span class="edge stated">stated</span> carried by the task</span>'+
-    '<span><span class="edge inferred">inferred</span> a light-tier model read the frames and proposed it, scored and cited · '+inf+' of '+(g.repos.length+g.issues.length+g.artifacts.length)+'</span></div>'+
-   '<div class="lw">'+panel("Repositories",repos,"no repository was touched")+panel("Issues and tasks",issues,"no issue is linked")+panel("Pull requests and artifacts",arts,"nothing was produced yet")+'</div>'+files+'</section>';
+    '<span><span class="edge inferred">inferred</span> a light-tier model read the frames and proposed it, scored and cited. '+inf+' of '+(g.repos.length+g.artifacts.length)+'</span></div>'+
+   '<div class="lw">'+panel("Repositories",repos,"no repository was touched")+panel("Pull requests and artifacts",arts,"nothing was produced yet")+'</div>'+files+'</section>';
 }
 
 /* ===================== Frames of a run, synthesized from its record =====================
@@ -5142,8 +5386,8 @@ function pTools(){
      grantsLog()+'</div>';
   } else if(t==="policy"){
     body='<div class="panel"><div class="panel-h"><h3>Policy versions</h3>'+
-     '<div class="sp"><span class="b b-q">Cedar</span>'+
-     '<button class="btn sm primary" onclick="openDialog(\'policynew\')">Draft a version</button></div></div>'+
+     '<div class="sp"><span class="b b-q mono" style="font-size:10.5px">tools.policy_versions</span>'+
+     '<button class="btn sm" onclick="openDialog(\'policynew\')">Draft a version</button></div></div>'+
      '<div class="tw"><table><thead><tr><th>Version</th><th>State</th><th>Author</th><th>When</th><th class="num">Rules</th><th>Tests</th><th>What changed</th><th></th></tr></thead><tbody>'+
      POLICIES.map(function(p){
       var sm={active:"allowed",superseded:"q"};
@@ -5156,12 +5400,22 @@ function pTools(){
          '<button class="btn sm primary" onclick="openDialog(\'policyactivate\',\''+p.v+'\')">Activate</button>'+
          '<button class="btn sm danger" onclick="openDialog(\'policydiscard\',\''+p.v+'\')">Discard</button>':
         '<button class="btn sm" onclick="openDialog(\'policyrestore\',\''+p.v+'\')">Restore</button>')+'</td></tr>';}).join("")+
-     '</tbody></table></div><div class="panel-b"><div class="note">A version is activated by a governed action with approval, and in regulated mode it is a Context PR instead. Rules are evaluated without a model in the path. A draft is the only version you can edit or discard: once a version has decided anything it is kept, because every decision cites the version that made it.</div></div></div>'+
+     '</tbody></table></div><div class="panel-b"><div class="note">A version is activated by a governed action with approval, and in regulated mode it is a Context PR instead. A draft is the only version you can edit or discard: once a version has decided anything it is kept, because every decision cites the version that made it.</div></div></div>'+
+     '<div class="hr"></div>'+
+     '<div class="panel"><div class="panel-h"><h3>Where a version lives</h3></div>'+
+     '<div class="panel-b"><dl class="kv">'+
+      '<dt>Store</dt><dd>One row in Postgres, <span class="mono">tools.policy_versions</span>, holding the rules, the tests and the version string. A policy version is not a context record and never reaches a model.</dd>'+
+      '<dt>In regulated mode</dt><dd>The rules are a file in <span class="mono">.oxagen/policy/</span> in the main repo, and a change is a Context PR. Postgres holds the compiled copy the gateway reads.</dd>'+
+      '<dt>Compiled from</dt><dd>The rules you write here, plus the enforcement grants on each agent and the role grants on each operator. A rule can read those, so you do not restate a grant as a rule.</dd>'+
+      '<dt>Who reads it</dt><dd>The gateway, on every tool call, before the call leaves. No model is in the decision path, so the same call and the same version always decide the same way.</dd>'+
+      '<dt>What it writes</dt><dd>One <span class="mono">policy.decision</span> frame per call, naming the version and the rules that fired. A replay reads the decision back without re-running it.</dd>'+
+     '</dl></div></div>'+
      '<div class="hr"></div>'+
      '<p class="eyebrow q">Conditions a rule may test</p>'+
      '<div class="row">'+["tool version","risk","side effect","egress","financial class","amount by path","counterparty","repository","path prefix","recipient domain","taint and its sources","time window","rate","sequence","operator role","enforcement tier","budget position","mandate position"]
       .map(function(c){return '<span class="b b-q" style="font-size:10.5px">'+h(c)+'</span>';}).join("")+'</div>'+
      '<div class="hr"></div><p class="eyebrow q">Sequence rule</p>'+
+     '<p class="muted" style="margin:0 0 8px;font-size:12.5px">A rule names the call it governs, then the condition that lets it through. This one denies a payment unless the same run already priced it.</p>'+
      '<pre><span class="c">// a payment requires a prior quote call in the same run</span>\n'+
      '<span class="k">forbid</span> (principal, action == Action::<span class="s">"stripe__create_payment"</span>, resource)\n'+
      '<span class="k">unless</span> { context.run.has_prior_call(<span class="s">"stripe__list_prices"</span>) };</pre></div></div>';
@@ -5491,8 +5745,9 @@ DLG_EXT.policyver=function(v){
   return {t:p.v,s:p.state==="active"?"The version every decision cites today":"Superseded, and kept because decisions cite it",w:false,
    b:'<dl class="kv"><dt>State</dt><dd>'+h(p.state)+'</dd><dt>Author</dt><dd>'+h(p.by)+'</dd>'+
     '<dt>Activated</dt><dd class="mono">'+h(p.at)+'</dd><dt>Rules</dt><dd>'+p.rules+'</dd>'+
-    '<dt>Tests</dt><dd>'+h(p.tests)+'</dd><dt>What changed</dt><dd>'+h(p.note)+'</dd></dl>'+
-    '<div class="note">Cedar, evaluated without a model in the decision path. Every <span class="mono">policy.decision</span> frame names the version that made it, so a replay reads the same either way.</div>',
+    '<dt>Tests</dt><dd>'+h(p.tests)+'</dd><dt>What changed</dt><dd>'+h(p.note)+'</dd>'+
+    '<dt>Stored in</dt><dd><span class="mono">tools.policy_versions</span>, one row. In regulated mode the rules are a file in <span class="mono">.oxagen/policy/</span> and this row is the compiled copy.</dd></dl>'+
+    '<div class="note">The gateway evaluates these rules on every tool call, with no model in the decision path. Every <span class="mono">policy.decision</span> frame names the version that made it, so a replay reads the same either way.</div>',
    f:'<button class="btn" onclick="closeDialog()">Close</button>'+
     (p.state==="active"?'<button class="btn primary" onclick="openDialog(\'policynew\',\''+p.v+'\')">Draft a change</button>':
      p.state==="draft"?'<button class="btn" onclick="openDialog(\'policyedit\',\''+p.v+'\')">Edit</button>'+
@@ -6516,20 +6771,164 @@ function stgMemoryTab(w){
 function stgItemLinkById(wslug,id){var it=stgItemById(wslug,id);return it?stgItemLink(it):'<span class="mono">'+h(id)+'</span>';}
 
 /* ---- Ontology ---- */
+function ontById(id){for(var k=0;k<ONTOLOGY.length;k++){if(ONTOLOGY[k].id===id)return ONTOLOGY[k];}return null;}
+function ontSlug(t){return String(t).toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");}
+function ontFile(o){return ".oxagen/ontology/"+ontSlug(o.term)+".toml";}
+/* A note's cost is what its words compile to. Four characters a token is the estimate the
+   assembler uses everywhere else on this page. */
+function ontCost(body){return Math.max(1,Math.round(String(body).trim().length/4));}
+/* Deterministic, so a headless check of this screen reads the same digest every run. */
+function ontHash(t){var n=0,x=String(t);for(var k=0;k<x.length;k++){n=(n*31+x.charCodeAt(k))>>>0;}
+  var o="";for(var m=0;m<16;m++){n=(n*1103515245+12345)>>>0;o+="0123456789abcdef"[n>>>28];}return "sha256:"+o;}
+
 function stgOntologyTab(w){
   var L=stgOntology(w.slug);
   var rows=L.map(function(o){
-    return '<tr><td><b>'+h(o.term)+'</b><span class="sub mono">'+h(o.id)+'</span></td><td><span class="b b-q">'+h(o.noteKind)+'</span></td>'+
-     '<td style="max-width:52ch">'+h(o.body)+'</td><td>'+forceBadge(o.force)+'</td>'+
+    return '<tr class="click" onclick="openDialog(\'ontology\',\''+h(o.id)+'\')"><td><b>'+h(o.term)+'</b><span class="sub mono">'+h(o.id)+'</span></td><td><span class="b b-q">'+h(o.noteKind)+'</span></td>'+
+     '<td style="max-width:52ch">'+h(o.body)+'</td>'+
+     '<td>'+(o.retiring?'<span class="b b-approval"><span class="d"></span>retiring</span>':forceBadge(o.force))+'</td>'+
      '<td class="mono" style="font-size:11.5px">'+o.entities.map(h).join("<br>")+'</td>'+
-     '<td class="num">'+tokn(o.token_cost)+' tok</td><td class="mono" style="font-size:11px">'+h(o.provenance)+'</td></tr>';}).join("");
-  return '<div class="note" style="margin-bottom:14px">An ontology note defines one entity or one term the way this workspace uses it. It compiles to text like any other item, enters the volatile selection as <span class="mono">info</span>, and grants nothing.</div>'+
-   '<div class="panel"><div class="panel-h"><h3>Definitions</h3><span class="b b-q" style="margin-left:auto">'+L.length+'</span></div>'+
-   '<div class="tw"><table><thead><tr><th>Term</th><th>Kind</th><th>Definition</th><th>Force</th><th>About</th><th>Token cost</th><th>File</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>'+
-   '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Index</h3></div><div class="panel-b"><dl class="kv">'+
-   '<dt>Today</dt><dd>The Postgres registry. The assembler reads every item, these notes included, from the registry behind one port.</dd>'+
-   '<dt>Later</dt><dd>The graph becomes the index (Phase 3 of the plan), once the knowledge graph is on by default. Each item is projected one way, registry to graph, and verified by hash. Postgres stays as the fallback behind the same port.</dd>'+
-   '<dt>Not here</dt><dd>There is no ontology engine and there are no connectors on this tab. A note is a file somebody wrote and somebody merged.</dd></dl></div></div>';
+     '<td class="num">'+tokn(o.token_cost)+' tok</td><td class="mono" style="font-size:11px">'+h(o.provenance)+'</td>'+
+     '<td class="rowacts" onclick="event.stopPropagation()"><button class="btn sm" onclick="openDialog(\'ontedit\',\''+h(o.id)+'\')">Edit</button>'+
+     '<button class="btn sm danger" onclick="openDialog(\'ontretire\',\''+h(o.id)+'\')">Retire</button></td></tr>';}).join("");
+  return '<div class="note" style="margin-bottom:14px">An ontology note defines one entity or one term the way this workspace uses it. It compiles to text like any other item, enters the volatile selection as <span class="mono">info</span>, and grants nothing. A note is a file somebody wrote and somebody merged, under <span class="mono">.oxagen/ontology/</span> on '+h(w.main)+', so writing, changing and retiring one each open a pull request.</div>'+
+   '<div class="panel"><div class="panel-h"><h3>Definitions</h3><div class="sp"><span class="b b-q">'+L.length+'</span>'+
+   '<button class="btn sm" onclick="openDialog(\'ontnew\')">New definition</button></div></div>'+
+   '<div class="tw"><table><thead><tr><th>Term</th><th>Kind</th><th>Definition</th><th>Force</th><th>About</th><th>Token cost</th><th>File</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div></div>';
+}
+
+/* ---- Ontology notes: write one, change one, retire one ----
+   Each is a pull request against the workspace repository, because the note is a file there. The
+   row changes the moment the request is opened, so the screen never claims a merge it did not
+   see. */
+var ONT_KINDS=["term","entity","alias","boundary"];
+function ontForm(o,p){
+  o=o||{};
+  return '<div class="field"><label for="'+p+'-term">Term</label><input id="'+p+'-term" value="'+h(o.term||"")+'" placeholder="release train"></div>'+
+   '<div class="field"><label for="'+p+'-kind">Kind</label><select id="'+p+'-kind">'+
+   ONT_KINDS.map(function(k){return '<option'+(k===(o.noteKind||"term")?" selected":"")+'>'+h(k)+'</option>';}).join("")+
+   '</select><div class="hint">A term defines a word. An entity names a thing. An alias points one term at another. A boundary says where something stops.</div></div>'+
+   '<div class="field"><div class="lab-row"><label for="'+p+'-body">Definition</label>'+
+   '<button class="btn wand" id="'+p+'WandBtn" onclick="ontWand(\''+p+'\')" title="Have the assistant write it" aria-label="Have the assistant write it">'+avSvg("wand-sparkles")+'</button></div>'+
+   '<textarea id="'+p+'-body" rows="4" placeholder="The release train is the weekly cut of a-intel/platform from main to a release branch.">'+h(o.body||"")+'</textarea>'+
+   '<div class="wand-note on">Press the wand. <b>oxagen.assistant</b> rewrites what you wrote into the prose the file carries. Read it before anybody reviews it.</div></div>'+
+   '<div class="field"><label for="'+p+'-ent">About</label><input id="'+p+'-ent" value="'+h((o.entities||[]).join(", "))+'" placeholder="a-intel/platform, release/4.11">'+
+   '<div class="hint">The repositories, branches or services this note is about, separated by commas.</div></div>';
+}
+function ontWand(p){
+  var t=el(p+"-body"); if(!t)return;
+  var raw=String(t.value||"").trim();
+  if(!raw)return act("Write the definition first. The assistant rewrites what you give it; it does not decide what the term means.");
+  t.value=assistProse("ontology",raw);
+  act(WAND_SAY.ontology,"gold");
+}
+function ontRead(p){
+  return {term:el(p+"-term")?el(p+"-term").value.trim():"",
+   noteKind:el(p+"-kind")?el(p+"-kind").value:"term",
+   body:el(p+"-body")?el(p+"-body").value.trim():"",
+   entities:el(p+"-ent")?el(p+"-ent").value.split(",").map(function(x){return x.trim();}).filter(Boolean):[]};
+}
+/* The checks a note faces. Each one reads the note in front of it. */
+function ontChecks(o,removing){
+  if(removing)return [["schema","pass","The file is removed, so there is nothing left to validate."],
+   ["reference_scan","pass","No record, skill or agent definition names "+h(o.term)+"."],
+   ["lineage_uniqueness","pass",h(o.id)+" is published nowhere else, so nothing inherits it."]];
+  return [["schema","pass","ontology-note/v0.1; one [[note]]; every required member present."],
+   ["lineage_uniqueness","pass",h(o.id)+" is published nowhere else in this workspace."],
+   ["secret_pii_scan","pass","No credential, email address or card number in the definition."],
+   ["grant_scan","pass","kind = "+h(o.noteKind)+" carries no effect and grants nothing, as an ontology note must."]];
+}
+function ontPr(o,op,trigger){
+  var p={id:"oxpr_ont_"+ontSlug(o.term).slice(0,14),kind:"ontology",title:o.term,
+   repo:ws().main,base:ws().branch,branch:"ontology/"+ontSlug(o.term),
+   pr:ws().main+"#"+(524+OXPRS.length),by:PEOPLE.marcus.name,byKind:"person",
+   opened:"just now",state:"checks_running",trigger:trigger,
+   files:[[op,ontFile(o),op==="del"?"the note is removed":"one [[note]], force = info"]],
+   checks:ontChecks(o,op==="del")};
+  OXPRS.unshift(p);
+  return p;
+}
+DLG_EXT.ontology=function(id){
+  var o=ontById(id);
+  if(!o)return noSuch("Ontology note");
+  return {t:o.term,s:"An ontology note, which compiles to text and grants nothing",w:false,
+   b:'<dl class="kv"><dt>Kind</dt><dd>'+h(o.noteKind)+'</dd>'+
+    '<dt>Definition</dt><dd>'+h(o.body)+'</dd>'+
+    '<dt>About</dt><dd class="mono" style="font-size:11.5px">'+o.entities.map(h).join("<br>")+'</dd>'+
+    '<dt>Force</dt><dd>'+(o.retiring?'A pull request removes this note. It keeps informing the model until that merges.':h(o.force)+', so it informs the model and grants nothing')+'</dd>'+
+    '<dt>Token cost</dt><dd>'+tokn(o.token_cost)+' tokens when it is selected</dd>'+
+    '<dt>File</dt><dd class="mono" style="font-size:11.5px">'+h(o.provenance)+'</dd>'+
+    '<dt>Hash</dt><dd class="mono" style="font-size:11.5px">'+h(o.hash)+'</dd>'+
+    '<dt>In force since</dt><dd class="mono">'+h(o.valid_from)+'</dd></dl>',
+   f:'<button class="btn" onclick="closeDialog()">Close</button>'+
+    '<button class="btn danger" onclick="openDialog(\'ontretire\',\''+h(o.id)+'\')">Retire</button>'+
+    '<button class="btn primary" onclick="openDialog(\'ontedit\',\''+h(o.id)+'\')">Edit</button>'};
+};
+DLG_EXT.ontnew=function(){
+  return {t:"Write an ontology note",s:"One term, defined the way this workspace uses it",w:false,
+   b:ontForm(null,"on")+
+    '<div class="note">Opening this writes <span class="mono">.oxagen/ontology/&lt;term&gt;.toml</span> on '+h(ws().main)+' in a pull request. The note steers nothing until it merges.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
+    '<button class="btn primary" onclick="ontCreate()">Open the pull request</button>'};
+};
+function ontCreate(){
+  var f=ontRead("on");
+  if(!f.term)return act("Name the term before you open the pull request.");
+  if(!f.body)return act("Write the definition before you open the pull request.");
+  var dupe=stgOntology(ws().slug).filter(function(x){return x.term.toLowerCase()===f.term.toLowerCase();});
+  if(dupe.length)return act("This workspace already defines "+f.term+". Edit that note instead.");
+  var o={id:"ont."+ontSlug(f.term),lineage:"ont."+ontSlug(f.term),kind:"ontology",noteKind:f.noteKind,
+   term:f.term,force:"info",scope:"workspace",body:f.body,token_cost:ontCost(f.body),
+   about:f.term.toLowerCase().split(/\s+/),entities:f.entities,ws:ws().slug,
+   provenance:ontFile({term:f.term})+" @ pending",hash:ontHash(f.body),
+   valid_from:"pending the merge",retiring:false};
+  var p=ontPr(o,"add","An operator wrote a definition for "+f.term+".");
+  ONTOLOGY.push(o);
+  closeDialog(); render();
+  act("Opened "+p.pr+" for "+f.term+". It steers nothing until it merges.","gold");
+}
+DLG_EXT.ontedit=function(id){
+  var o=ontById(id);
+  if(!o)return noSuch("Ontology note");
+  if(o.retiring)return {t:o.term+" is being retired",w:false,
+   b:'<div class="note">A pull request removes this note. Close that pull request before you change the definition, or the two write over each other.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Close</button>'};
+  return {t:"Edit "+o.term,w:false,
+   b:ontForm(o,"oe")+
+    '<div class="note">Saving opens a pull request against <span class="mono">'+h(ontFile(o))+'</span>. The definition in force does not change until it merges.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
+    '<button class="btn danger" onclick="openDialog(\'ontretire\',\''+h(o.id)+'\')">Retire</button>'+
+    '<button class="btn primary" onclick="ontSave(\''+h(o.id)+'\')">Open the pull request</button>'};
+};
+function ontSave(id){
+  var o=ontById(id); if(!o)return;
+  var f=ontRead("oe");
+  if(!f.term)return act("Name the term before you open the pull request.");
+  if(!f.body)return act("Write the definition before you open the pull request.");
+  o.term=f.term; o.noteKind=f.noteKind; o.body=f.body; o.entities=f.entities;
+  o.token_cost=ontCost(f.body); o.hash=ontHash(f.body);
+  var p=ontPr(o,"mod","An operator changed the definition of "+f.term+".");
+  closeDialog(); render();
+  act("Opened "+p.pr+" for "+f.term+". The definition in force does not change until it merges.","gold");
+}
+DLG_EXT.ontretire=function(id){
+  var o=ontById(id);
+  if(!o)return noSuch("Ontology note");
+  if(o.retiring)return {t:o.term+" is already being retired",w:false,
+   b:'<div class="note">A pull request removes this note and is waiting on its checks. Open it on the Changes tab.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Close</button>'};
+  return {t:"Retire "+o.term+"?",w:false,
+   b:'<div class="note">A note is a file, so retiring it is a pull request that removes <span class="mono">'+h(ontFile(o))+'</span>. It keeps informing the model until that merges, and the row says so in the meantime.</div>'+
+    '<div class="warn">Once the removal merges, no agent is told that <b>'+h(o.term)+'</b> means what this note says it means.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Keep it</button>'+
+    '<button class="btn danger" onclick="ontRetire(\''+h(o.id)+'\')">Open the pull request</button>'};
+};
+function ontRetire(id){
+  var o=ontById(id); if(!o)return;
+  o.retiring=true;
+  var p=ontPr(o,"del","An operator retired the definition of "+o.term+".");
+  closeDialog(); render();
+  act("Opened "+p.pr+" to remove "+o.term+". It keeps informing the model until that merges.","gold");
 }
 
 /* ---- Policy: the second compilation ---- */
@@ -10460,7 +10859,7 @@ function agentCard(a,o){
   var sz=o.sz||(lay==="detail"?60:lay==="compact"?30:26);
   var sub=o.sub!=null?o.sub:lay==="compact"?h(a.harnessLabel)+' \u00b7 '+(a.runs30||0).toLocaleString()+' runs 30d \u00b7 '+usd(a.spend30):h(a.harnessLabel);
   var link=o.link!=null?o.link:lay==="compact";
-  var inner=agentAv(a,sz)+'<span class="agid" title="'+h(a.key)+'"><span class="tkey">'+h(a.key)+'</span>'+(sub?'<span class="sub">'+sub+'</span>':'')+'</span>';
+  var inner=agentAv(a,sz)+'<span class="agid"><span class="tkey">'+h(a.key)+'</span>'+(sub?'<span class="sub">'+sub+'</span>':'')+'</span>';
   return link?'<a class="agc agc-'+lay+'" href="'+agentUrl(a)+'"'+(o.onclick?' onclick="'+o.onclick+'"':'')+'>'+inner+'</a>':'<span class="agc agc-'+lay+'">'+inner+'</span>';
 }
 /* The 30-day rollup for one agent, which is what the score strip's window is. Prefer the
@@ -12066,7 +12465,8 @@ var WAND_SAY={
   agent:"The assistant wrote the instructions from what you typed. Read them before anybody reviews them.",
   tool:"The assistant wrote the description from what you typed. Read it before anybody reviews it.",
   skill:"The assistant wrote the skill body from what you typed. Read it before anybody reviews it.",
-  record:"The assistant wrote the statement from what you typed. Read it before anybody reviews it."
+  record:"The assistant wrote the statement from what you typed. Read it before anybody reviews it.",
+  ontology:"The assistant wrote the definition from what you typed. Read it before anybody reviews it."
 };
 /* Deterministic on purpose: the same sentence in gives the same file out, so a headless check of
    this screen reads the same text every run. */
@@ -12077,6 +12477,7 @@ function assistProse(kind,raw){
   if(kind==="agent")return one+" Work inside the toolbelt you were given. When a step needs authority you do not hold, stop and say what you needed, and leave the decision to the operator.";
   if(kind==="skill")return one+" Check what has to be true before the first step. Follow the steps in order. This procedure grants nothing: every action it names still goes through the toolbelt and the policy that governs it.";
   if(kind==="record")return one+" It holds for every run in scope until a later record supersedes it.";
+  if(kind==="ontology")return one+" This note defines the term and grants nothing: it tells an agent what the words mean, and every action it might take is still governed by its toolbelt and the policy over it.";
   return one+" Call it when that is what you need, and read the arguments it takes before you do.";
 }
 function wzWand(){
@@ -14030,7 +14431,8 @@ document.addEventListener("click",function(e){
       var grade=status==="compacted"?"ledger":wpick([["full",80],["partial",11],["digest",5],["ledger",4]]);
       var ratio=Math.round(rf(0.2,0.9)*100)/100, sealedAt=status==="live"||status==="parked"?null:when(d,Math.min(sec+ri(60,2400),86399),true).replace(/^\d{4}-\d\d-\d\d /,"");
       var model=a.model==="light"?wpick([["claude-haiku-4-5",70],["claude-sonnet-5",30]]):wpick([["claude-opus-5",58],["claude-sonnet-5",34],["claude-haiku-4-5",8]]);
-      genRuns.push({id:id,agent:a.key,op:a.operator,ws:w.slug,status:status,turn:turn,steps:steps,frames:frames,cost:m2(cost),basis:(a.tier==="gateway"||a.tier==="contained")?"gateway_observed":"client_attested",tier:a.tier,prompts:wpick([[1,55],[2,25],[3,12],[4,5],[5,3]]),
+      var effort=(a.tier==="gateway"||a.tier==="contained")?wpick([["high",44],["medium",34],["low",14],[null,8]]):null;
+      genRuns.push({id:id,agent:a.key,op:a.operator,ws:w.slug,status:status,turn:turn,steps:steps,frames:frames,cost:m2(cost),basis:(a.tier==="gateway"||a.tier==="contained")?"gateway_observed":"client_attested",tier:a.tier,effort:effort,prompts:wpick([[1,55],[2,25],[3,12],[4,5],[5,3]]),
         grade:grade,task:tref,taskTitle:task,
         summary:(status==="live"?"In progress. ":status==="parked"?"Parked on approval. ":status==="halted"?"Halted before completion. ":"")+a.name+" worked "+task.toLowerCase()+" in "+steps+" steps over "+turn+" turn"+(turn===1?"":"s")+".",
         touched:[tref,pick(TOUCH).replace(/\{x\}/g,pick(["billing","export","worker","notes","retry","schema","auth","cache"])).replace(/\{n\}/,String(ri(100,240)))],

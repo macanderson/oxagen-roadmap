@@ -569,6 +569,294 @@ for (const theme of ["light", "dark"]) {
   await page.close();
 }
 
+// An ontology note is a file on the workspace repository, so writing, changing and retiring one
+// each open a pull request and nothing on the page claims a merge it has not seen.
+{
+  const { page, errs } = await open("#/a-intel/core-platform/steering/ontology");
+  const dtxt = () => page.evaluate(() => { const d = document.querySelector("#layer .dlg"); return d ? d.innerText : ""; });
+  const terms = () => page.evaluate(() => [...document.querySelectorAll("table tbody tr td:first-child b")].map((x) => x.textContent).join("|"));
+  const prs = () => page.evaluate(() => OXPRS.filter((x) => x.kind === "ontology").map((x) => x.files[0][0] + ":" + x.files[0][1]).join("|"));
+
+  ok(/release train/.test(await terms()), "ontology: the shipped definitions are listed");
+  ok(await page.evaluate(() => !!document.querySelector("[onclick*=\"ontnew\"]")), "ontology: the panel writes a new definition");
+  ok(!(await page.evaluate(() => [...document.querySelectorAll(".panel-h h3")].map((x) => x.textContent).join("|"))).includes("Index"), "ontology: the Index roadmap panel is gone");
+
+  // Opening a row reads the note; it offers both writes.
+  await page.evaluate(() => openDialog("ontology", "ont.release-train"));
+  await page.waitForTimeout(150);
+  ok(/grants nothing/.test(await dtxt()), "ontology: the drill-down says the note grants nothing");
+  ok(/Edit/.test(await dtxt()) && /Retire/.test(await dtxt()), "ontology: the drill-down edits and retires");
+
+  // Writing one.
+  await page.evaluate(() => openDialog("ontnew"));
+  await page.waitForTimeout(150);
+  ok(/Write an ontology note/.test(await dtxt()), "ontology: the create dialog opens");
+  const kinds = await page.evaluate(() => [...document.querySelectorAll("#on-kind option")].map((o) => o.value).join("|"));
+  ok(/term/.test(kinds) && /entity/.test(kinds) && /alias/.test(kinds) && /boundary/.test(kinds), "ontology: the four note kinds are offered, got " + kinds);
+
+  await page.evaluate(() => ontCreate());
+  await page.waitForTimeout(120);
+  ok(/Name the term/.test(await page.evaluate(() => document.body.innerText)), "ontology: a note with no term is refused");
+
+  // The wand rewrites what you wrote; it does not decide what the term means.
+  await page.evaluate(() => { document.getElementById("on-term").value = "freeze window"; document.getElementById("on-body").value = "the hours before a cut when nothing lands"; ontWand("on"); });
+  await page.waitForTimeout(120);
+  const tightened = await page.evaluate(() => document.getElementById("on-body").value);
+  ok(/^The hours/.test(tightened) && /grants nothing/.test(tightened), "ontology: the wand tightens the definition, got " + tightened);
+
+  await page.evaluate(() => { document.getElementById("on-ent").value = "a-intel/platform"; ontCreate(); });
+  await page.waitForTimeout(250);
+  ok(/freeze window/.test(await terms()), "ontology: the new definition is in the table");
+  ok(/add:\.oxagen\/ontology\/freeze-window\.toml/.test(await prs()), "ontology: writing one opens a pull request that adds the file, got " + (await prs()));
+  const cost = await page.evaluate(() => (ONTOLOGY.filter((x) => x.term === "freeze window")[0] || {}).token_cost);
+  ok(cost > 0, "ontology: the token cost is computed from the words, got " + cost);
+
+  // Two notes may not define the same term.
+  await page.evaluate(() => openDialog("ontnew"));
+  await page.waitForTimeout(120);
+  await page.evaluate(() => { document.getElementById("on-term").value = "freeze window"; document.getElementById("on-body").value = "Something else entirely."; ontCreate(); });
+  await page.waitForTimeout(150);
+  ok(await page.evaluate(() => !!document.getElementById("on-term")), "ontology: a second definition of the same term is refused");
+  await page.evaluate(() => closeDialog());
+
+  // Changing one.
+  await page.evaluate(() => openDialog("ontedit", "ont.freeze-window"));
+  await page.waitForTimeout(150);
+  ok(/Edit freeze window/.test(await dtxt()), "ontology: a note edits");
+  await page.evaluate(() => { document.getElementById("oe-term").value = "release freeze"; ontSave("ont.freeze-window"); });
+  await page.waitForTimeout(250);
+  ok(/release freeze/.test(await terms()), "ontology: the changed term is in the table");
+  ok(/mod:\.oxagen\/ontology\/release-freeze\.toml/.test(await prs()), "ontology: changing one opens a pull request that modifies the file, got " + (await prs()));
+
+  // Retiring one. The note keeps informing the model until the removal merges.
+  await page.evaluate(() => openDialog("ontretire", "ont.freeze-window"));
+  await page.waitForTimeout(150);
+  ok(/removes/.test(await dtxt()), "ontology: retiring a note says it removes the file");
+  await page.evaluate(() => ontRetire("ont.freeze-window"));
+  await page.waitForTimeout(250);
+  ok(/del:\.oxagen\/ontology\/release-freeze\.toml/.test(await prs()), "ontology: retiring one opens a pull request that removes the file, got " + (await prs()));
+  ok(/release freeze/.test(await terms()), "ontology: a note being retired is still in the table");
+  ok(await page.evaluate(() => [...document.querySelectorAll("table tbody tr")].some((r) => /release freeze/.test(r.innerText) && /retiring/.test(r.innerText))), "ontology: its row says it is being retired");
+
+  // A second retirement, and an edit against one, both refuse.
+  await page.evaluate(() => openDialog("ontedit", "ont.freeze-window"));
+  await page.waitForTimeout(120);
+  ok(/Close that pull request/.test(await dtxt()), "ontology: a note being retired refuses an edit");
+  await page.evaluate(() => openDialog("ontretire", "ont.freeze-window"));
+  await page.waitForTimeout(120);
+  ok(/already being retired/.test(await dtxt()), "ontology: a note being retired refuses a second retirement");
+  await page.evaluate(() => closeDialog());
+
+  ok(errs.length === 0, "ontology: no JavaScript error: " + errs.join(" | "));
+  await page.close();
+}
+
+// What a run ran on prints above the fold, and where the record argues the model or the effort
+// setting was the wrong size, the run says so in both directions. Effort prints a value only where
+// Oxagen proxied the model call and could read the request body.
+{
+  const { page, errs } = await open("#/a-intel/core-platform/runs/run_01K5RN8F3J2GHY6T");
+  const rig = () => page.evaluate(() => { const r = document.querySelector(".rig"); return r ? r.innerText : ""; });
+  const panel = () => page.evaluate(() => {
+    const h = [...document.querySelectorAll(".panel-h h3")].find((x) => x.textContent === "Model fit");
+    return h ? h.closest(".panel").innerText : "";
+  });
+  const fitOf = (id, k) => page.evaluate(([i, key]) => runFit(RUNS.find((r) => r.id === i))[key].verdict, [id, k]);
+
+  // The header strip. This run is gateway tier, so all three print.
+  ok(/OpenAI Agents SDK/.test(await rig()), "run rig: the harness prints above the fold, got " + (await rig()));
+  ok(/claude-opus-5/.test(await rig()), "run rig: the model prints above the fold");
+  ok(/effort high/.test(await rig()), "run rig: the effort setting prints above the fold");
+  ok(await page.evaluate(() => {
+    const r = document.querySelector(".rig"), t = document.querySelector(".tabs");
+    return !!r && (!t || r.getBoundingClientRect().top < t.getBoundingClientRect().bottom + 40);
+  }), "run rig: the strip sits above the tab bar");
+
+  // Both readings, and the change each asks for.
+  ok(/Wrong model tier/.test(await rig()), "run rig: an overkill model is badged in the header");
+  ok(/Wrong effort setting/.test(await rig()), "run rig: an overkill effort setting is badged in the header");
+  await page.evaluate(() => { S.tab.run = "cost"; render(); });
+  await page.waitForTimeout(200);
+  ok(/generated · not the record/.test(await panel()), "run fit: the panel says the reading is generated");
+  ok(/Read from this run only/.test(await panel()), "run fit: the panel cites what it read");
+  ok(/Move this agent to/.test(await panel()), "run fit: the model card offers the change");
+  ok(/Set effort to/.test(await panel()), "run fit: the effort card offers the change");
+
+  // The change is a pull request against the agent definition, never a write from this page.
+  const before = await page.evaluate(() => OXPRS.length);
+  await page.evaluate(() => openDialog("fitchange", "run_01K5RN8F3J2GHY6T:model"));
+  await page.waitForTimeout(150);
+  const fd = await page.evaluate(() => { const d = document.querySelector("#layer .dlg"); return d ? d.innerText : ""; });
+  ok(/\.oxagen\/agents\//.test(fd), "run fit: the change is a pull request against the agent file, got " + fd.slice(0, 120));
+  ok(/sealed/.test(fd) || /this run/.test(fd), "run fit: the dialog says the sealed run keeps the model it ran on");
+  await page.evaluate(() => fitPr("run_01K5RN8F3J2GHY6T:model"));
+  await page.waitForTimeout(150);
+  ok((await page.evaluate(() => OXPRS.length)) === before + 1, "run fit: the change opens exactly one pull request");
+  ok(await page.evaluate(() => /^mod$/.test(OXPRS[0].files[0][0]) && /\.oxagen\/agents\//.test(OXPRS[0].files[0][1])),
+    "run fit: the pull request modifies the agent definition");
+
+  // Both directions fire somewhere in the record, so neither branch is dead code.
+  const verdicts = await page.evaluate(() => {
+    const t = {};
+    RUNS.forEach((r) => { const f = runFit(r); t["m:" + f.model.verdict] = 1; t["e:" + f.effort.verdict] = 1; });
+    return Object.keys(t).sort().join("|");
+  });
+  ok(/m:over/.test(verdicts), "run fit: the model-overkill direction fires, got " + verdicts);
+  ok(/m:under/.test(verdicts), "run fit: the model-undersized direction fires, got " + verdicts);
+  ok(/e:over/.test(verdicts), "run fit: the effort-overkill direction fires, got " + verdicts);
+  ok(/e:under/.test(verdicts), "run fit: the effort-undersized direction fires, got " + verdicts);
+
+  // Effort is read out of the request body, so a harness-tier run says it was not captured and
+  // never guesses a value.
+  ok((await fitOf("run_01K5RM1A5Z9QWE4R", "effort")) === "unseen", "run fit: a harness-tier run captures no effort");
+  ok(await page.evaluate(() => !runEffort(RUNS.find((r) => r.id === "run_01K5RM1A5Z9QWE4R")).v),
+    "run fit: an uncaptured effort holds no value");
+  await page.close();
+  ok(errs.length === 0, "run fit: no JavaScript error: " + errs.join(" | "));
+}
+
+{
+  const { page, errs } = await open("#/a-intel/core-platform/runs/run_01K5RM1A5Z9QWE4R");
+  const rig = await page.evaluate(() => { const r = document.querySelector(".rig"); return r ? r.innerText : ""; });
+  ok(/not captured/.test(rig), "run rig: a harness-tier run reads not captured, got " + rig);
+  ok(!/effort (low|medium|high)/.test(rig), "run rig: a harness-tier run prints no effort value");
+  await page.evaluate(() => { S.tab.run = "cost"; render(); });
+  await page.waitForTimeout(200);
+  const txt = await page.evaluate(() => {
+    const h = [...document.querySelectorAll(".panel-h h3")].find((x) => x.textContent === "Model fit");
+    return h ? h.closest(".panel").innerText : "";
+  });
+  ok(/did not capture the effort setting/.test(txt), "run fit: the panel says why the effort setting was not captured");
+  ok(/gateway and contained tiers/.test(txt), "run fit: the panel names the tiers where effort is captured");
+  ok(errs.length === 0, "run fit: no JavaScript error on a harness-tier run: " + errs.join(" | "));
+  await page.close();
+}
+
+// A person reading a sealed run has to be able to walk to the work: the repository, the branch, the
+// pull requests, and the directory on the machine the agent ran on, each one a link or a copy.
+{
+  const { page, errs } = await open("#/a-intel/core-platform/runs/run_01K5RQ4B9C7XTN2P");
+  const where = () => page.evaluate(() => { const w = document.querySelector(".where"); return w ? w.innerText : ""; });
+  const hrefs = () => page.evaluate(() => [...document.querySelectorAll(".where a")].map((a) => a.getAttribute("href")).join(" "));
+
+  ok(/a-intel\/platform/.test(await where()), "run where: the repository prints, got " + (await where()));
+  ok(/github\.com\/a-intel\/platform(\s|$)/.test(await hrefs()), "run where: the repository links out, got " + (await hrefs()));
+  ok(/refs\/pull\/482\/head/.test(await where()), "run where: the branch prints");
+  ok(/a-intel\/platform#482/.test(await where()), "run where: the pull request prints");
+  ok(/\/pull\/482$/m.test((await hrefs()).split(" ").pop() || "") || /\/pull\/482\b/.test(await hrefs()),
+    "run where: the pull request links out, got " + (await hrefs()));
+  ok(/ci-runner-07:/.test(await where()), "run where: the machine prints");
+  ok(/\/home\/runner\/work\/platform/.test(await where()), "run where: the checkout path prints");
+
+  // A pull request head has no /tree address, so the branch chip links to the pull request instead.
+  ok(!/\/tree\/refs\/pull/.test(await hrefs()), "run where: a pull request head is not linked as a branch");
+
+  // The path is a copy target, and copying says so.
+  await page.evaluate(() => copyPath("/tmp/x"));
+  await page.waitForTimeout(120);
+  ok(/Copied \/tmp\/x/.test(await page.evaluate(() => document.body.innerText)), "run where: the path copies");
+
+  // The whole strip sits in the header, above the tab bar.
+  ok(await page.evaluate(() => {
+    const w = document.querySelector(".where"), t = document.querySelector(".tabs");
+    return !!w && !!t && w.getBoundingClientRect().top < t.getBoundingClientRect().top;
+  }), "run where: the strip sits above the tab bar");
+
+  // Linked work reached no screen before this; the Issues tab is where it lives.
+  await page.evaluate(() => { S.tab.run = "issues"; render(); });
+  await page.waitForTimeout(250);
+  const heads = await page.evaluate(() => [...document.querySelectorAll(".panel-h h3")].map((x) => x.textContent).join("|"));
+  ok(/Pull requests and artifacts/.test(heads), "run where: the artifacts panel renders, got " + heads);
+  ok(/Repositories/.test(heads), "run where: the repositories panel renders");
+  ok((heads.match(/Issues/g) || []).length === 1, "run where: the issues list is not printed twice, got " + heads);
+  ok(await page.evaluate(() => [...document.querySelectorAll(".lw-item a")].some((a) => /github\.com/.test(a.getAttribute("href")))),
+    "run where: an artifact links to the forge");
+  ok(errs.length === 0, "run where: no JavaScript error: " + errs.join(" | "));
+  await page.close();
+}
+
+// A run with no recorded checkout on its host says the path was worked out, and never presents it
+// as a fact Oxagen holds.
+{
+  const { page, errs } = await open("#/a-intel/core-platform/runs/run_01K5RS7M2E8FJ3QW");
+  const w = await page.evaluate(() => { const x = document.querySelector(".where"); return x ? x.innerText : ""; });
+  ok(/derived/.test(w), "run where: an unrecorded checkout is marked derived, got " + w);
+  ok(/mbell-mbp-16:/.test(w), "run where: the derived path names the host the agent ran on");
+  ok(/no pull request/.test(w), "run where: a run that opened none says so");
+  ok(errs.length === 0, "run where: no JavaScript error on a derived path: " + errs.join(" | "));
+  await page.close();
+}
+
+// The Changes panel and the header strip read the same run, so they must name the same pull
+// request. The panel used to print "none yet" on a run that pushed to a pull request head.
+{
+  const { page, errs } = await open("#/a-intel/core-platform/runs/run_01K5RQ4B9C7XTN2P");
+  const panel = () => page.evaluate(() => {
+    const hs = [...document.querySelectorAll(".panel")];
+    const p = hs.find((x) => /Changes/.test(x.querySelector(".panel-h h3")?.textContent || ""));
+    return p ? p.innerText : "";
+  });
+  const t = await panel();
+  ok(t !== "", "run changes: the panel renders");
+  ok(/a-intel\/platform#482/.test(t), "run changes: the pull request the run pushed to prints, got " + t);
+  ok(!/none yet/.test(t), "run changes: a run with a pull request does not read none yet");
+  ok(/Base\s*\n?\s*main/.test(t), "run changes: the base branch prints, got " + t);
+
+  // The pull request is a link out, and the strip above agrees with it.
+  ok(await page.evaluate(() => {
+    const p = [...document.querySelectorAll(".panel")].find((x) => /Changes/.test(x.querySelector(".panel-h h3")?.textContent || ""));
+    return !!p && [...p.querySelectorAll("a")].some((a) => /\/pull\/482/.test(a.getAttribute("href") || ""));
+  }), "run changes: the pull request links out");
+
+  // The strip carries the repository and the branch, so the panel no longer repeats them.
+  const heads = await page.evaluate(() => [...document.querySelectorAll(".panel-h h3")].map((x) => x.textContent).join("|"));
+  ok(!/^Repository$|\|Repository\|/.test(heads), "run changes: the old Repository panel is gone, got " + heads);
+  ok(!/\bRepository\b/.test(t), "run changes: the panel does not repeat the repository row");
+  ok(!/^Branch\b/m.test(t), "run changes: the panel does not repeat the branch row");
+  ok(errs.length === 0, "run changes: no JavaScript error: " + errs.join(" | "));
+  await page.close();
+}
+
+// The policy page never answered where a version is kept or what reads it, and it named a policy
+// language instead.
+{
+  const { page, errs } = await open("#/a-intel/core-platform/tools/policy");
+  const txt = await page.evaluate(() => document.body.innerText);
+  ok(!/Cedar/i.test(txt), "policy: the page names no policy language");
+  ok(/tools\.policy_versions/.test(txt), "policy: the store is named");
+
+  const heads = await page.evaluate(() => [...document.querySelectorAll(".panel-h h3")].map((x) => x.textContent).join("|"));
+  ok(/Where a version lives/.test(heads), "policy: the storage panel renders, got " + heads);
+
+  const where = await page.evaluate(() => {
+    const p = [...document.querySelectorAll(".panel")].find((x) => /Where a version lives/.test(x.querySelector(".panel-h h3")?.textContent || ""));
+    return p ? p.innerText : "";
+  });
+  for (const row of ["Store", "In regulated mode", "Compiled from", "Who reads it", "What it writes"]) {
+    ok(new RegExp(row).test(where), "policy: the storage panel states " + row);
+  }
+  ok(/not a context record/.test(where), "policy: a version is distinguished from a context record");
+  ok(/\.oxagen\/policy\//.test(where), "policy: regulated mode names the file");
+  ok(/policy\.decision/.test(where), "policy: the frame it writes is named");
+
+  // The rule sample is glossed in plain words before the source.
+  ok(await page.evaluate(() => {
+    const pre = [...document.querySelectorAll("pre")].find((x) => /forbid/.test(x.textContent));
+    if (!pre) return false;
+    const prev = pre.previousElementSibling;
+    return !!prev && /denies a payment unless/.test(prev.textContent);
+  }), "policy: the rule sample carries a plain sentence above it");
+
+  // Opening a version says where it is kept.
+  await page.evaluate(() => openDialog("policyver", POLICIES.filter((p) => p.state === "active")[0].v));
+  await page.waitForTimeout(200);
+  const dtext = await page.evaluate(() => { const d = document.querySelector("#layer .dlg"); return d ? d.innerText : ""; });
+  ok(/Stored in/.test(dtext), "policy: the version dialog says where it is stored, got " + dtext.slice(0, 200));
+  ok(!/Cedar/i.test(dtext), "policy: the version dialog names no policy language");
+  ok(errs.length === 0, "policy: no JavaScript error: " + errs.join(" | "));
+  await page.close();
+}
+
 await browser.close();
 console.log(`${passes} passed, ${fails} failed`);
 process.exit(fails ? 1 : 0);

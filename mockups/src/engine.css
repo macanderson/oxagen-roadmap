@@ -496,7 +496,9 @@ tbody tr.click:hover .drill-lnk{border-bottom-style:solid}
 .avx.f-mono{font-family:var(--mono);font-weight:600}
 .inv{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px}
 .inv-i{display:inline-flex;align-items:center;gap:9px;padding:5px 12px 5px 6px;border:1px solid var(--border);border-radius:999px;background:var(--ink);color:var(--fg);font-size:12.5px;text-decoration:none;max-width:100%;min-width:0}
-a.inv-i:hover{border-color:var(--rule);text-decoration:none}
+a.inv-i{transition:border-color .15s,background .15s}
+a.inv-i:hover{border-color:var(--gold);background:var(--hl);text-decoration:none}
+a.inv-i:hover *{text-decoration:none}
 .inv-i .tx{display:flex;flex-direction:column;min-width:0;line-height:1.25}
 .inv-i .tx b{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .inv-i .tx span{font-size:10.5px;color:var(--dim);font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -1300,7 +1302,9 @@ button.edge:hover{color:var(--fg)}
 .agc>.scs{flex:none;margin-left:auto;padding-left:6px}
 .agc-compact{display:inline-flex;max-width:100%;padding:5px 11px 5px 6px;border:1px solid var(--border);border-radius:10px;background:var(--ink)}
 .agc-compact .agid{max-width:280px}
-a.agc-compact:hover{background:var(--hl)}
+a.agc-compact{transition:border-color .15s,background .15s}
+a.agc-compact:hover{background:var(--hl);border-color:var(--gold)}
+a.agc:hover,a.agc:hover *{text-decoration:none}
 .agc-compact>.scs{margin-left:4px}
 .agc-detail{gap:16px}
 .agc-detail .agid{max-width:none}
@@ -2037,3 +2041,17 @@ button.wz-opt:hover{border-color:var(--rule)}
 .gh-comment{border:1px solid var(--border);border-radius:10px;padding:10px 14px;background:var(--panel-h);font-size:13px}
 .gh-comment p{margin:0}.gh-comment hr{border:0;border-top:1px solid var(--rule);margin:8px 0}
 .gh-comment a{overflow-wrap:anywhere}
+
+/* The run header's second strip: where the work is. Every chip here is a link out or a copy, so
+   they carry a hover the badges around them do not. */
+.where{gap:6px;flex-wrap:wrap}
+.where .b svg{width:12px;height:12px;flex:none;opacity:.8}
+a.b.lk,button.b.lk{cursor:pointer;font-family:inherit;transition:border-color .15s,background .15s}
+a.b.lk:hover,button.b.lk:hover{border-color:var(--gold);background:var(--hl);text-decoration:none}
+a.b.lk:hover *,button.b.lk:hover *{text-decoration:none}
+.where .b.mono{font-size:10.5px}
+/* A checkout path is one unbreakable string and is routinely longer than a phone is wide, so the
+   chip truncates from the left and keeps the directory, which is the end a person reads. */
+.where .b{max-width:100%;min-width:0}
+.where .b.mono{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.where .b.mono svg{flex:none}
