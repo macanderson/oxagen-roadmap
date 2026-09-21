@@ -27,7 +27,7 @@ Work through every check. For each, record PASS, FAIL, or N/A (with why). Cite e
    - Gate notices with its badge: Gate · Outcome · Applies to · Gate notice · Notice cost · Edited on; filters Outcome and Edited on; Rows; pager.
    - The gate kinds are decision rule, mandate, and kill switch, each with its source line; the Outcome badge is the same gate badge Tools renders.
    - The two closing notes, verbatim.
-5. **Token figures reconcile.** The badge's “N tok of notices” equals the sum of the Notice cost column, and the gate count equals the row count.
+5. **Figures reconcile.** The badge count equals the row count, and the Notice cost column sums to the token total the Preview tab reports for gates.
 6. **Actions.** Each Edited on button opens what the spec says: Tools · Policy, Tools · Kill switches, Tools · Mandates, a Mandate page, or the record. Nothing on this tab edits a gate.
 7. **Data sources.** For each row of the spec’s data-source table, find the adapter or query in the build that feeds it. ✅ rows are wired to the named store; 🟡 rows are wired for the fields that exist and render `NotBacked` for the rest; ❌ rows render `NotBacked` with the milestone named. A fixture reaching production is a FAIL.
 8. **States.** Force each state and compare copy and controls with the design:
