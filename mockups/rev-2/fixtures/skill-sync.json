@@ -1,0 +1,44 @@
+[
+ {
+  "repo": "a-intel/platform",
+  "ws": "core-platform",
+  "state": "in-sync",
+  "source": ".oxagen/skills/",
+  "target": ".claude/skills/ and .codex/skills/",
+  "head": "a4c91e2",
+  "synced": "a4c91e2",
+  "at": "2026-09-11 09:02",
+  "skills": 3,
+  "files": 5,
+  "checkouts": 36,
+  "note": "Every enrolled checkout carries the three skills merged on main."
+ },
+ {
+  "repo": "a-intel/billing",
+  "ws": "core-platform",
+  "state": "behind",
+  "source": ".oxagen/skills/",
+  "target": ".claude/skills/",
+  "head": "7ac20e9",
+  "synced": "51d0b3e",
+  "at": "2026-09-09 17:40",
+  "skills": 1,
+  "files": 1,
+  "checkouts": 4,
+  "note": "postgres-safe-migration 1.4.0 merged two days ago. Two checkouts still hold 1.3.0 and get 1.4.0 at their next sync."
+ },
+ {
+  "repo": "a-intel/mobile",
+  "ws": "core-platform",
+  "state": "unbound",
+  "source": "no .oxagen/ directory",
+  "target": "nothing to write",
+  "head": "c02fa77",
+  "synced": null,
+  "at": null,
+  "skills": 0,
+  "files": 0,
+  "checkouts": 0,
+  "note": "The repository carries no .oxagen/ tree, so there is nothing to sync into it. Bind it on Repositories."
+ }
+]

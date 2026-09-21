@@ -1,0 +1,138 @@
+[
+ {
+  "id": "apr_01K5RN9T4",
+  "run": "run_01K5RN8F3J2GHY6T",
+  "agent": "a-intel.finops.invoice-bot",
+  "op": "dana",
+  "ws": "finops",
+  "tool": "stripe__create_payment@4",
+  "risk": "high",
+  "side": "irreversible",
+  "egress": "third_party",
+  "amount": "2,450.00",
+  "currency": "USD",
+  "counterparty": "vendor:aws",
+  "rule": "mandate mnd_7K2ETQ4 · approval.above_micros = 100000000",
+  "mandate": "mnd_7K2ETQ4",
+  "policy": "pol_v41",
+  "digest": "sha256:c81f04ea6b2d93a7",
+  "waited": "4m 12s",
+  "timeout": "10m",
+  "tainted": false,
+  "tier": "harness",
+  "parkedAt": "09:31:08Z",
+  "approvers": "role:org.billing — Marcus Bell, Priya Natarajan · Dana Okafor is the operator of this run and is excluded by fin.no_self_approval",
+  "rules": [
+   {
+    "id": "mandate.approval.always_for",
+    "v": "approve",
+    "text": "Mandate mnd_7K2ETQ4 requires approval for every call whose financial effect is moves_funds."
+   },
+   {
+    "id": "mandate.approval.above_micros",
+    "v": "approve",
+    "text": "Amount $2,450.00 USD is above the mandate's approval threshold of $100.00 USD."
+   },
+   {
+    "id": "mandate.limits.per_call",
+    "v": "approve",
+    "text": "Amount is above the per-call ceiling of $250.00 USD. The mandate routes the excess to a human instead of denying it outright."
+   },
+   {
+    "id": "mandate.counterparties.allow",
+    "v": "allow",
+    "text": "Counterparty vendor:aws is on the mandate's allow list."
+   },
+   {
+    "id": "fin.no_self_approval",
+    "v": "constrain",
+    "text": "Dana Okafor is the operator of this run and cannot resolve its own approval; eligible approvers are the remaining holders of role:org.billing."
+   }
+  ]
+ },
+ {
+  "id": "apr_01K5RS3K7",
+  "run": "run_01K5RS7M2E8FJ3QW",
+  "agent": "a-intel.core.release-manager",
+  "op": "marcus",
+  "ws": "core-platform",
+  "tool": "github__create_release@2",
+  "risk": "high",
+  "side": "irreversible",
+  "egress": "third_party",
+  "amount": null,
+  "currency": null,
+  "counterparty": "a-intel/platform",
+  "rule": "role_grant rg_0093 · effect = require_approval on side_effect:irreversible",
+  "mandate": null,
+  "policy": "pol_v41",
+  "digest": "sha256:2a7e19b0cd46f358",
+  "waited": "47s",
+  "timeout": "10m",
+  "tainted": false,
+  "tier": "harness",
+  "parkedAt": "09:14:51Z",
+  "approvers": "role:workspace.owner — Marcus Bell, Priya Natarajan",
+  "rules": [
+   {
+    "id": "rg_0093.require_approval",
+    "v": "approve",
+    "text": "Role grant rg_0093 requires approval for every call whose side effect is irreversible."
+   },
+   {
+    "id": "tools.egress.third_party",
+    "v": "allow",
+    "text": "Egress to api.github.com is on the workspace allow list for this tool version."
+   },
+   {
+    "id": "repo.protections",
+    "v": "constrain",
+    "text": "a-intel/platform requires linear history and two reviews; the release can only be cut from a merged main."
+   }
+  ]
+ },
+ {
+  "id": "apr_01K5RH8M2",
+  "run": "run_01K5RH3G8K5PAS7D",
+  "agent": "a-intel.core.triage",
+  "op": "marcus",
+  "ws": "core-platform",
+  "tool": "bash__run@1",
+  "risk": "high",
+  "side": "write",
+  "egress": "none",
+  "amount": null,
+  "currency": null,
+  "counterparty": "local filesystem",
+  "rule": "taint rule tr_0007 · argument derived from untrusted tool output",
+  "mandate": null,
+  "policy": "pol_v41",
+  "digest": "sha256:6f03a92e51bc7d40",
+  "waited": "expired",
+  "timeout": "10m",
+  "tainted": true,
+  "tier": "harness",
+  "parkedAt": "07:31:31Z",
+  "approvers": "role:workspace.owner — Marcus Bell, Priya Natarajan",
+  "taint": [
+   {
+    "frame": 9,
+    "tool": "github__get_issue@3",
+    "path": "$.cmd",
+    "note": "a shell fragment quoted inside the issue body was copied into the command"
+   }
+  ],
+  "rules": [
+   {
+    "id": "tr_0007.taint.write",
+    "v": "approve",
+    "text": "Argument $.cmd derives from untrusted tool output; taint on a write call raises the decision to approval."
+   },
+   {
+    "id": "tools.belt.bash",
+    "v": "allow",
+    "text": "bash__run@1 is on the triage belt for local, non-network commands."
+   }
+  ]
+ }
+]

@@ -1,0 +1,62 @@
+[
+ {
+  "id": "con_01K2A7",
+  "kind": "github_app",
+  "name": "GitHub · a-intel org installation",
+  "owner": "Marcus Bell",
+  "servers": "github",
+  "reviewed": "2026-08-14",
+  "next": "2026-11-14",
+  "grants30": 8142,
+  "status": "active",
+  "downscope": "installation token"
+ },
+ {
+  "id": "con_01K2A8",
+  "kind": "oauth",
+  "name": "Linear · a-intel workspace",
+  "owner": "Marcus Bell",
+  "servers": "linear",
+  "reviewed": "2026-07-30",
+  "next": "2026-10-30",
+  "grants30": 6240,
+  "status": "active",
+  "downscope": "token exchange"
+ },
+ {
+  "id": "con_01K2A9",
+  "kind": "api_key",
+  "name": "Stripe · live (restricted)",
+  "owner": "Dana Okafor",
+  "servers": "stripe",
+  "reviewed": "2026-09-01",
+  "next": "2026-10-01",
+  "grants30": 23,
+  "status": "active · financial",
+  "downscope": "restricted key"
+ },
+ {
+  "id": "con_01K2AA",
+  "kind": "cloud_role",
+  "name": "AWS · billing read + savings plans",
+  "owner": "Dana Okafor",
+  "servers": "aws-billing",
+  "reviewed": "2026-09-01",
+  "next": "2026-10-01",
+  "grants30": 1,
+  "status": "active · financial",
+  "downscope": "session policy"
+ },
+ {
+  "id": "con_01K2AB",
+  "kind": "oauth",
+  "name": "Slack · a-intel.slack.com",
+  "owner": "Priya Natarajan",
+  "servers": "slack",
+  "reviewed": "2026-06-12",
+  "next": "2026-09-12",
+  "grants30": 311,
+  "status": "review due",
+  "downscope": "token exchange"
+ }
+]

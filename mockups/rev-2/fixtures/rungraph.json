@@ -1,0 +1,235 @@
+{
+ "run_01K5RS7M2E8FJ3QW": {
+  "repos": [
+   {
+    "name": "a-intel/platform",
+    "ref": "a4c91e2 · main",
+    "note": "read; branch release/4.11.0-notes pushed · main untouched",
+    "edge": "observed",
+    "fr": [
+     5,
+     7
+    ]
+   },
+   {
+    "name": "a-intel/mobile",
+    "ref": "excluded",
+    "note": "4 pull requests dropped after the operator's steer",
+    "edge": "inferred",
+    "conf": 0.97,
+    "fr": [
+     10,
+     12
+    ]
+   }
+  ],
+  "issues": [
+   {
+    "ref": "a-intel/platform#482",
+    "title": "Cut 4.11.0 release notes",
+    "rel": "task",
+    "edge": "stated"
+   },
+   {
+    "ref": "a-intel/platform#471",
+    "title": "Changelog duplicated the 4.10.3 fixes under two headings",
+    "rel": "resolves · the draft lists each fix once",
+    "edge": "inferred",
+    "conf": 0.84,
+    "fr": [
+     9,
+     12
+    ]
+   },
+   {
+    "ref": "a-intel/platform#465",
+    "title": "Release notes should follow ctx.release.notes-format",
+    "rel": "relates · lint rule applied",
+    "edge": "inferred",
+    "conf": 0.91,
+    "fr": [
+     12
+    ]
+   }
+  ],
+  "artifacts": [
+   {
+    "kind": "branch",
+    "ref": "release/4.11.0-notes @ 3f2a9c1",
+    "title": "1 file · +20 −0 · pushed to origin",
+    "state": "pushed",
+    "edge": "observed"
+   },
+   {
+    "kind": "release",
+    "ref": "v4.11.0 · draft",
+    "title": "github__create_release · parked for approval",
+    "state": "pending",
+    "edge": "observed",
+    "fr": [
+     14,
+     15
+    ]
+   },
+   {
+    "kind": "pr",
+    "ref": "none yet",
+    "title": "the draft rides the branch; a pull request follows approval",
+    "state": "none",
+    "edge": "inferred",
+    "conf": 0.78
+   }
+  ],
+  "files": [
+   {
+    "path": "release/4.11.0-notes.md",
+    "before": "",
+    "after": "# 4.11.0 — 2026-09-11\n\n27 pull requests merged since 4.10.3 (a-intel/platform only; a-intel/mobile ships separately this cycle).\n\n## Features\n- Run tokens carry a delegation ceiling; a call above it is parked, never denied silently (#478)\n- `oxagen runs export` writes a signed bundle with the verifier script alongside (#480)\n- Context recall reports its budget per provider (#474)\n- Kill switches gained a deny generation, visible in every later decision (#469)\n- Oxagen shows a run's cost basis next to the number (#472)\n\n## Breaking\n- `policy.decide` no longer returns allow for an untainted call with no matching rule; the default is approve (#481)\n- `frame.kind` value `tool_call` is renamed `tool.call` in exports (#479)\n\n## Fixes\n- Cache reads were mis-attributed when steering landed mid-conversation (#477)\n- `github__create_release` schema accepted an empty tag (#475)\n- Approval cards no longer expire early when the clock skews (#470)\n- Ledger rollups double-counted a retried model call (#468)",
+    "note": "new file · 2 writes"
+   }
+  ]
+ },
+ "run_01K5RQ4B9C7XTN2P": {
+  "repos": [
+   {
+    "name": "a-intel/platform",
+    "ref": "refs/pull/482/head · 2b8e1c7 → f70b3d9 · vs a4c91e2 main",
+    "note": "two pushes to the pull request head; main untouched",
+    "edge": "observed",
+    "fr": [
+     58,
+     71
+    ]
+   }
+  ],
+  "issues": [
+   {
+    "ref": "a-intel/platform#482",
+    "title": "Cut 4.11.0 release notes",
+    "rel": "task · brought up to the release-notes contract",
+    "edge": "stated"
+   }
+  ],
+  "artifacts": [
+   {
+    "kind": "check",
+    "ref": "contract test",
+    "title": "contract test · fail, fail, pass on the pull request head",
+    "state": "sealed",
+    "edge": "observed",
+    "fr": [
+     62,
+     66,
+     71
+    ]
+   }
+  ],
+  "files": []
+ },
+ "run_01K5RP2D6H4KLM8V": {
+  "repos": [
+   {
+    "name": "a-intel/platform",
+    "ref": "issue #511",
+    "note": "labels and one comment; no branch",
+    "edge": "observed"
+   }
+  ],
+  "issues": [
+   {
+    "ref": "a-intel/platform#511",
+    "title": "Label: flaky worker restart",
+    "rel": "task · labelled flaky-test, area:worker",
+    "edge": "stated"
+   },
+   {
+    "ref": "a-intel/platform#452",
+    "title": "Worker restart drops the in-flight approval",
+    "rel": "relates · same restart path",
+    "edge": "inferred",
+    "conf": 0.72
+   }
+  ],
+  "artifacts": [
+   {
+    "kind": "comment",
+    "ref": "#511 · comment",
+    "title": "reproduction command posted",
+    "state": "posted",
+    "edge": "observed"
+   }
+  ],
+  "files": []
+ },
+ "run_01K5RM1A5Z9QWE4R": {
+  "repos": [
+   {
+    "name": "a-intel/platform",
+    "ref": "docs/operator",
+    "note": "branch docs/kill-switches pushed",
+    "edge": "observed"
+   }
+  ],
+  "issues": [
+   {
+    "ref": "a-intel/platform#490",
+    "title": "Operator guide: explain deny generation",
+    "rel": "resolves · closed by the pull request",
+    "edge": "inferred",
+    "conf": 0.88
+   }
+  ],
+  "artifacts": [
+   {
+    "kind": "pr",
+    "ref": "a-intel/platform#498",
+    "title": "docs: kill-switches deny generation · +84 −12",
+    "state": "open",
+    "edge": "observed"
+   }
+  ],
+  "files": [
+   {
+    "path": "docs/operator/kill-switches.md",
+    "before": "## Kill switches\n\nA kill switch stops a tool for everyone.\n\nFlip it and the next call is denied.",
+    "after": "## Kill switches\n\nA kill switch stops a tool for everyone in the workspace.\n\nFlip it and every later policy decision carries the deny generation, so a reader can tell which decisions the switch shaped.\n\n### Worked example\n\n1. Arm `stripe__create_payment` at 09:12.\n2. The parked call at 09:14 is denied with generation 118.",
+    "note": "+84 −12 on the pull request; excerpt"
+   }
+  ]
+ },
+ "run_01K5RK7C2V8BNM3X": {
+  "repos": [
+   {
+    "name": "a-intel/platform",
+    "ref": "release/4.10",
+    "note": "four cherry-pick attempts, all conflicted",
+    "edge": "observed"
+   }
+  ],
+  "issues": [
+   {
+    "ref": "a-intel/platform#462",
+    "title": "Backport 4.10.3 to release/4.10",
+    "rel": "task",
+    "edge": "stated"
+   }
+  ],
+  "artifacts": [
+   {
+    "kind": "pr",
+    "ref": "a-intel/platform#476",
+    "title": "backport 4.10.3 · check failing",
+    "state": "failing",
+    "edge": "observed"
+   }
+  ],
+  "files": [
+   {
+    "path": "packages/release/backport.ts",
+    "before": "export function pick(sha: string) {\n  return run(`git cherry-pick ${sha}`);\n}",
+    "after": "export function pick(sha: string) {\n<<<<<<< HEAD\n  return run(`git cherry-pick ${sha}`);\n=======\n  return run(`git cherry-pick -x ${sha}`);\n>>>>>>> 4.10.3\n}",
+    "note": "conflict marker left in the tree"
+   }
+  ]
+ }
+}

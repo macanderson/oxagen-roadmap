@@ -1,0 +1,140 @@
+[
+ {
+  "id": "mem_01K5QX2A",
+  "lineage": "mem.release.notes-tone",
+  "kind": "memory",
+  "cls": "PREFERENCE",
+  "force": "may",
+  "scope": "agent",
+  "agent": "release-manager",
+  "body": "Marcus asked for release notes in plain past tense, one line per change, no marketing adjectives.",
+  "token_cost": 27,
+  "about": [
+   "release",
+   "notes",
+   "tone",
+   "write"
+  ],
+  "provenance": "run_01K5RG6H1L4OIU9Y · frame 44 · operator steer",
+  "hash": "sha256:5e1a09c2d47b8f30",
+  "valid_from": "2026-09-03",
+  "lastRecalled": "2026-09-11 09:14",
+  "recalls30": 41
+ },
+ {
+  "id": "mem_01K5QX7C",
+  "lineage": "mem.release.merge-when-green",
+  "kind": "memory",
+  "cls": "RULE",
+  "force": "may",
+  "scope": "workspace",
+  "body": "On 4.10.1 a green release pull request was merged by the agent to save time, and nobody objected.",
+  "token_cost": 29,
+  "about": [
+   "release",
+   "merge",
+   "pull",
+   "request",
+   "green"
+  ],
+  "yieldsTo": "ctx.release.never-merge",
+  "provenance": "run_01K5R52Q3X9YAB9E · frame 88 · reflection",
+  "hash": "sha256:c81f7720ae93b415",
+  "valid_from": "2026-08-14",
+  "lastRecalled": "2026-09-11 09:14",
+  "recalls30": 212
+ },
+ {
+  "id": "mem_01K5QY1D",
+  "lineage": "mem.platform.safari-flake",
+  "kind": "memory",
+  "cls": "EPISODE",
+  "force": "info",
+  "scope": "workspace",
+  "body": "The checkout e2e suite failed twice on Safari and passed on retry with no code change.",
+  "token_cost": 24,
+  "about": [
+   "checkout",
+   "e2e",
+   "safari",
+   "flake",
+   "retry",
+   "test"
+  ],
+  "supersededBy": "ctx.platform.safari-e2e-flake",
+  "provenance": "run_01K5R94P1V8WXZ7D · frame 61 · reflection",
+  "hash": "sha256:0b64e1d95a2c7f18",
+  "valid_from": "2026-08-19",
+  "lastRecalled": "2026-09-02 16:40",
+  "recalls30": 6
+ },
+ {
+  "id": "mem_01K5QY9F",
+  "lineage": "mem.triage.repro-first",
+  "kind": "memory",
+  "cls": "FACT",
+  "force": "info",
+  "scope": "agent",
+  "agent": "triage",
+  "body": "Issues labelled before a reproduction were relabelled by a person 14 times in August.",
+  "token_cost": 23,
+  "about": [
+   "triage",
+   "label",
+   "issue",
+   "reproduce",
+   "flaky"
+  ],
+  "provenance": "run_01K5RH3G8K5PAS7D · frame 52 · reflection",
+  "hash": "sha256:9d2e44b07c1fa683",
+  "valid_from": "2026-09-10",
+  "lastRecalled": "2026-09-11 08:52",
+  "recalls30": 14
+ },
+ {
+  "id": "mem_01K5QZ3H",
+  "lineage": "mem.platform.migration-window",
+  "kind": "memory",
+  "cls": "FACT",
+  "force": "info",
+  "scope": "workspace",
+  "body": "Database migrations on a-intel/platform run in the Tuesday 02:00 UTC window. A release that needs one waits for it.",
+  "token_cost": 30,
+  "about": [
+   "migration",
+   "database",
+   "release",
+   "window",
+   "deploy"
+  ],
+  "provenance": "run_01K5RK7C2V8BNM3X · frame 37 · operator steer",
+  "hash": "sha256:71a3c05e8bd29f46",
+  "valid_from": "2026-08-27",
+  "lastRecalled": "2026-09-10 17:05",
+  "recalls30": 19
+ },
+ {
+  "id": "mem_01K5QZ8K",
+  "lineage": "mem.docs.cli-voice",
+  "kind": "memory",
+  "cls": "PREFERENCE",
+  "force": "may",
+  "scope": "agent",
+  "agent": "docs-writer",
+  "body": "The CLI reference uses the imperative: run, set, open. Never 'you can'.",
+  "token_cost": 21,
+  "about": [
+   "docs",
+   "cli",
+   "reference",
+   "style",
+   "guide",
+   "write"
+  ],
+  "provenance": "run_01K5RE9P4Q2WSX6C · frame 12 · operator steer",
+  "hash": "sha256:e40b92f1637dca05",
+  "valid_from": "2026-09-05",
+  "lastRecalled": "2026-09-09 11:31",
+  "recalls30": 9
+ }
+]
