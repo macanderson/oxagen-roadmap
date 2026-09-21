@@ -1,0 +1,23 @@
+[
+ {
+  "p": "priya",
+  "ws": "all",
+  "status": "active",
+  "last": "2026-09-11 09:12",
+  "mfa": "passkey + TOTP"
+ },
+ {
+  "p": "marcus",
+  "ws": "core-platform",
+  "status": "active",
+  "last": "2026-09-11 09:14",
+  "mfa": "TOTP"
+ },
+ {
+  "p": "dana",
+  "ws": "finops",
+  "status": "active",
+  "last": "2026-09-11 08:40",
+  "mfa": "passkey"
+ }
+]

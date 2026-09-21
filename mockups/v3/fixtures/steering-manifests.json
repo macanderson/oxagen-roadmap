@@ -1,0 +1,29 @@
+{
+ "run_01K5RS7M2E8FJ3QW": {
+  "frame": "steering.manifest",
+  "beside": 1,
+  "at": "09:14:02.331",
+  "bundle": 41,
+  "prompt": "Cut 4.11.0 release notes",
+  "repo": "a-intel/platform",
+  "digest": "sha256:44c19e02f7b3a158"
+ },
+ "run_01K5RH3G8K5PAS7D": {
+  "frame": "steering.manifest",
+  "beside": 1,
+  "at": "08:51:40.207",
+  "bundle": 41,
+  "prompt": "Reproduce: checkout 500",
+  "repo": "a-intel/platform",
+  "digest": "sha256:9d2e44b07c1fa683"
+ },
+ "run_01K5RN8F3J2GHY6T": {
+  "frame": "steering.manifest",
+  "beside": 1,
+  "at": "08:40:11.950",
+  "bundle": 41,
+  "prompt": "September infrastructure invoices",
+  "repo": "a-intel/billing",
+  "digest": "sha256:7e2b40c9a1d6f385"
+ }
+}
