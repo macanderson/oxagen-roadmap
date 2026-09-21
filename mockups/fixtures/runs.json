@@ -97,7 +97,16 @@
   "cache": 0.83,
   "ratio": 0.71,
   "sealed": null,
-  "prompts": 2
+  "prompts": 2,
+  "issues": [
+   {
+    "ref": "a-intel/platform#480",
+    "title": "Notes contract test",
+    "rel": "referenced",
+    "status": "closed",
+    "fr": 5
+   }
+  ]
  },
  {
   "id": "run_01K5RQ4B9C7XTN2P",
@@ -170,7 +179,16 @@
   "cache": 0.91,
   "ratio": 0.88,
   "sealed": "09:11:18",
-  "prompts": 1
+  "prompts": 1,
+  "issues": [
+   {
+    "ref": "a-intel/platform#476",
+    "title": "Backport 4.10.3 to release",
+    "rel": "referenced",
+    "status": "closed",
+    "fr": 22
+   }
+  ]
  },
  {
   "id": "run_01K5RP2D6H4KLM8V",
@@ -243,7 +261,16 @@
   "cache": 0.64,
   "ratio": 0.44,
   "sealed": "08:53:30",
-  "prompts": 3
+  "prompts": 3,
+  "issues": [
+   {
+    "ref": "LIN-2044",
+    "title": "Flaky worker restart on Safari",
+    "rel": "duplicate of",
+    "status": "in progress",
+    "fr": 14
+   }
+  ]
  },
  {
   "id": "run_01K5RN8F3J2GHY6T",
@@ -472,7 +499,23 @@
   "cache": 0.8,
   "ratio": 0.39,
   "sealed": "08:19:47",
-  "prompts": 4
+  "prompts": 4,
+  "issues": [
+   {
+    "ref": "a-intel/platform#471",
+    "title": "Release branch protection",
+    "rel": "blocked by",
+    "status": "open",
+    "fr": 9
+   },
+   {
+    "ref": "a-intel/platform#469",
+    "title": "4.10.2 release notes",
+    "rel": "referenced",
+    "status": "closed",
+    "fr": 31
+   }
+  ]
  },
  {
   "id": "run_01K5RH3G8K5PAS7D",

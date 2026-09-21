@@ -23,7 +23,7 @@ Work through every check. For each, record PASS, FAIL, or N/A (with why). Cite e
 2. **Header.** Eyebrow "Organization", h1 "Billing", subtext "What <organization name> pays Oxagen." One action with the same label: Change plan. Exactly one gold (primary) action on the screen.
 3. **Summary tiles.** Four tiles: Plan, Governed actions this period, Retained evidence, Due <date>. Each shows one number and one basis line as the spec gives them; each number is a rollup of the rows under it (recompute it from the lines and compare).
 4. **Sections, tabs and tables.** For each item below, the build has it, with the same panel headings and every table column named in the spec, in that order. Missing or renamed columns are FAILs; extra columns are noted.
-   - This period: the badge "Stripe holds the plan and the invoice · Oxagen holds the meter"; Line, Basis, Amount; the rows Governed actions 1 – N, Tokens (reported at zero), Evidence retention, Onboarding discount, Total (rounded to cents once, half-even).
+   - This period: the badge "Stripe invoices, Oxagen meter"; Line, Basis, Amount; the rows Governed actions 1 – N, Tokens (reported at zero), Evidence retention, Onboarding discount, Total (rounded to cents once, half-even).
    - Meters: Meter, This period, Note; the rows lead with Governed actions, then Sealed runs with at least one model call, Retained evidence, Runs Oxagen halted before any model call, Runs of the in-app agent; the note.
    - Invoices: Invoice, Period, Governed actions, Amount, Status, Paid, Open in Stripe.
    - Price list: the seven rows of the spec (Free; Governed actions, blocks of 10,000; Negotiated agreement; Invoice billing; Evidence retention; Tokens Oxagen buys for you; Enterprise, annual) and the footer.

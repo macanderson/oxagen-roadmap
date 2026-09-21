@@ -26,7 +26,7 @@ Actions: **Change plan** (gold; opens `plan`).
 - **Due <date>**: $, "USD · after the onboarding discount".
 
 Left column:
-- **This period**: badge "Stripe holds the plan and the invoice · Oxagen holds the meter"; Line, Basis, Amount. Rows: **Governed actions 1 – N** (the blocks and the included allowance), **Tokens** (reported at zero, the customer's own model spend is on Spend, $0.00), **Evidence retention** (13 months included, the GB held, $0.00), **Onboarding discount** (the offer and its negative amount), **Total** (rounded to cents once, half-even, USD).
+- **This period**: badge "Stripe invoices, Oxagen meter"; Line, Basis, Amount. Rows: **Governed actions 1 – N** (the blocks and the included allowance), **Tokens** (reported at zero, the customer's own model spend is on Spend, $0.00), **Evidence retention** (13 months included, the GB held, $0.00), **Onboarding discount** (the offer and its negative amount), **Total** (rounded to cents once, half-even, USD).
 - **Meters**: Meter, This period, Note. Rows lead with **Governed actions** (the billable unit, the included allowance this month), then **Sealed runs with at least one model call** (reported, not priced), **Retained evidence** (13 months included), **Runs Oxagen halted before any model call** (free), **Runs of the in-app agent** (free). A note: one priced meter, the governed action; runs, tokens and retained evidence are reported so the price can move later without rewriting the meter.
 - **Invoices**: Invoice, Period, Governed actions, Amount, Status, Paid, **Open in Stripe ↗**.
 

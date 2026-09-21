@@ -17,7 +17,7 @@ Every run in the workspace, live and recent, with its enforcement tier, replay g
 ## What is on the page
 
 **Header**: eyebrow is the workspace name (“Core platform”), h1 “Fleet”, subtext “Every run in this workspace, live and recent.”
-Actions: **Steer** (opens `steerfleet`, “Steer the fleet”: every agent in the workspace pre-selected with All and None, a Steering text field, and a Delivery block whose Interrupt switch is disabled with “not yet available”; footer “N agents · M in flight · at the boundary”, **Cancel**, **Send at the boundary**) · **Register Agent** (opens the three-step Register Agent gate at `/register/name`). Neither header action is gold.
+Actions: **Steer** (opens `steerfleet`, “Steer the fleet”: every agent in the workspace pre-selected with All and None, a Steering text field, and a Delivery block whose Interrupt switch is disabled with “not yet available”; footer “N agents · M in flight · at the boundary”, **Cancel**, **Steer**) · **Register Agent** (opens the three-step Register Agent gate at `/register/name`). Neither header action is gold.
 
 **Summary tiles** (one number and one basis line each, four across):
 - **Live runs**: count of live runs among the rows listed · “of N agents in this workspace”.

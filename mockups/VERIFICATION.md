@@ -15,6 +15,7 @@
   (16 parked approvals and 1 interjection), selecting one renders the full approval card with its
   three actions, Escape closes it, and the countdowns keep ticking inside it. Screenshots
   `review/approvals-drawer*.png`, `review/governance-mode.png`.
+- The Run page: the summary leads, the stat row, the Issues tab with links, the single Repository panel, the outputs and spend by area in the right column; the transcript feed starts inside the first 1,000 px on a live run. Screenshots `review/run-*.png`, `review/steer-dialog*.png`.
 - Screenshots in `review/`: Fleet (light, dark, mobile), Spend findings, tokens, coaching (desktop
   and mobile), agent drill, wasted spend, run transcript and cost, agent page, identities,
   auto-approvals, steering memory and skills, billing.

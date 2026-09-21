@@ -271,7 +271,7 @@ function coachOperator(p){
 }
 function coachCard(c,who){
   return '<article class="panel coach" style="margin:0"><div class="panel-h"><span class="b b-'+c.sev+'"><span class="d"></span>'+h(c.title)+'</span>'+
-   (c.usd?'<span class="mono" style="margin-left:auto;font-size:12px;color:var(--fg)">'+fmt$(c.usd)+' <span class="dim">a month</span></span>':'<span class="dim mono" style="margin-left:auto;font-size:11px">no dollar figure</span>')+'</div>'+
+   (c.usd?'<span class="mono" style="margin-left:auto;font-size:12px;color:var(--fg)">'+fmt$(c.usd)+' <span class="dim">a month</span></span>':'')+'</div>'+
    '<div class="panel-b"><p class="mono" style="font-size:11.5px;color:var(--muted);margin:0 0 8px">'+c.signal+(c.tok?' · '+tokn(c.tok)+' tok':'')+'</p>'+
    '<p style="margin:0 0 10px;font-size:13px">'+c.say+'</p>'+
    '<div class="row"><button class="btn sm primary" onclick="'+c.act[1]+'">'+h(c.act[0])+'</button>'+
@@ -900,7 +900,7 @@ function applyHashTab(){
   /* an agent tab is p[4], not p[3]: /:org/:ws/agents/:slug/:tab */
   if(p[2]==="agents"&&p.length>=5&&IAM_TAB_KEYS[p[4]]) S.tab.agent=p[4];
   /* a run tab is p[4] too: /:org/:ws/runs/:id/:tab */
-  if(p[2]==="runs"&&p.length>=5&&/^(transcript|player|cost|policy|context|chain)$/.test(p[4])) S.tab.run=p[4];
+  if(p[2]==="runs"&&p.length>=5&&/^(transcript|issues|player|cost|policy|context|chain)$/.test(p[4])) S.tab.run=p[4];
 }
 window.addEventListener("hashchange",function(){S.side=false;fpStop();applyHashTab();render();});
 
@@ -1077,7 +1077,7 @@ function defForm(a){
       "<span class=\"mono\">complex</span> routes to z-ai/glm-latest, <span class=\"mono\">light</span> to z-ai/glm-flash-latest. The harness makes the call with its own key. Oxagen records what it reports.")+
     fld("Per-run budget (USD)",'<input type="number" step="0.01" min="0" value="'+(micros==null?"":(micros/1e6).toFixed(2))+'" aria-label="Per-run budget" onchange="defBudget(\''+slug+'\',this.value)">',
       "Stored as <span class=\"mono\">budget = { per_run_micros = "+(micros==null?"…":micros)+" }</span>. Hard: checked against reported spend at each hook boundary. A breach pauses the run at the next one.")+'</div></div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>Tools</h3><span class="mono dim" style="margin-left:auto;font-size:11px">belt = grants ∩ this list − deny_tools</span></div><div class="panel-b">'+
+   '<div class="panel"><div class="panel-h"><h3>Tools</h3></div><div class="panel-b">'+
     fld("tools",chips("tools",d.tools),"Patterns against the registry. <span class=\"mono\">github__*</span> grants every github tool the operator can delegate.")+
     fld("deny_tools",chips("deny_tools",d.deny_tools),"A deny here wins over any grant. Version-pinned patterns like <span class=\"mono\">@*</span> deny every version.")+
     '<div class="field"><label>Side effects</label><div class="fxl">'+
@@ -1091,7 +1091,7 @@ function defForm(a){
     fld("Color",'<select aria-label="Color" onchange="defField(\''+slug+'\',\''+harnessSec+'\',\'color\',this.value)">'+["blue","green","gold","red","gray"].map(function(v){return '<option'+(hv.color===v?' selected':'')+'>'+v+'</option>';}).join("")+'</select>',"Cosmetic: the label the harness shows on its own screen.")+
    '</div></div></div></div>';
 
-  var right='<div class="panel"><div class="panel-h"><h3>Source</h3><span class="b b-q" style="margin-left:auto">source of truth</span></div><div class="panel-b">'+
+  var right='<div class="panel"><div class="panel-h"><h3>Source</h3></div><div class="panel-b">'+
    '<a class="srclink" href="'+srcHref+'"><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg><span class="p">.oxagen/agents/'+h(slug)+'.toml</span><span class="ar">Open in the source editor</span></a>'+
    '<p class="muted" style="font-size:12px;margin:10px 0 0">Every field on this page is a view of that file. Editing here patches one key in place; editing there changes anything. Both go through the same commit.</p>'+
    '<dl class="kv" style="margin-top:14px"><dt>Repository</dt><dd class="mono">'+h(w.main)+' · '+h(w.branch)+'</dd>'+
@@ -2035,7 +2035,7 @@ function pRun(r){
   if(compacted&&t==="player"&&!S.seg[R.id]){
     bodyHtml='<div class="warn" style="margin-bottom:14px"><b>Compacted.</b> Frame nodes for this run left the graph after the thirteen-month hot window. '+
      'Render replay reads the archive segment, which is the same bytes the graph indexed, written once at seal. Nothing was moved and nothing was recomputed.</div>'+
-     '<div class="panel"><div class="panel-h"><h3>Archive segment</h3><span class="b b-q" style="margin-left:auto">read from object storage</span></div>'+
+     '<div class="panel"><div class="panel-h"><h3>Archive segment</h3></div>'+
      '<div class="panel-b"><dl class="kv">'+
      '<dt>Segment</dt><dd class="mono">seg_01K4QJ9E4T6YUI1O.ndjson.zst · 118 frame envelopes · 0.7 MB</dd>'+
      '<dt>Merkle root</dt><dd class="mono">sha256:b41e07c9a2f5308d6e14bb90c7f2a331</dd>'+
@@ -2066,14 +2066,16 @@ function pRun(r){
        '<button class="btn sm" onclick="fpStep(1)" title="→ next frame">Next ▶</button>'+
        '<span class="dim mono" style="font-size:11px;margin-left:auto">frame '+(S.frame+1)+' of '+FRAMES.length+' shown · '+R.frames+' in the run</span></div>'+
      '</div></div>'+
-     '<div><div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Timeline</h3><span class="dim" style="margin-left:auto;font-size:11px">'+(rs==="live"?'live · new frames append at the end':rs==="paused"?'paused · nothing new until resume':'sealed · complete')+'</span></div>'+
+     '<div><div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Timeline</h3><span class="dim" style="margin-left:auto;font-size:11px">'+(rs==="live"?'live':rs==="paused"?'paused':'sealed')+'</span></div>'+
      '<div class="panel-b" id="fptl" style="padding:7px;max-height:420px;overflow-y:auto">'+timeline+'</div></div>'+
-     '</div></div><div style="margin-top:14px">'+approvalsPanel(R.ws,R.id)+'</div>';
+     '</div></div>';
+  } else if(t==="issues"){
+    bodyHtml=issuesTab(R);
   } else if(t==="cost"){
-    bodyHtml=runInstruments(R)+callsPanel(R)+costTab(R);
+    bodyHtml=runSpendByArea(R,false)+runInstruments(R)+callsPanel(R)+costTab(R);
   } else if(t==="policy"){
-    bodyHtml='<div class="panel"><div class="panel-h"><h3>Every policy decision on this run</h3>'+
-     '<span class="b b-q" style="margin-left:auto">policy pol_v41 · deterministic, no model in the path</span></div><div class="tw"><table>'+
+    bodyHtml='<div class="panel"><div class="panel-h"><h3>Policy decisions</h3>'+
+     '</div><div class="tw"><table>'+
      '<thead><tr><th>Frame</th><th>Call</th><th>Outcome</th><th>Rules that fired</th><th>Taint</th><th>Latency</th></tr></thead><tbody>'+
      '<tr><td class="mono">5</td><td class="mono">github__list_pull_requests@3</td><td><span class="b b-allowed"><span class="d"></span>allow</span></td><td class="mono" style="font-size:11.5px">rg_0088</td><td class="dim">none</td><td class="num">6 ms</td></tr>'+
      '<tr><td class="mono">14</td><td class="mono">github__create_release@2</td><td><span class="b b-approval"><span class="d"></span>approve</span></td><td class="mono" style="font-size:11.5px">rg_0093</td><td class="dim">none</td><td class="num">7 ms</td></tr>'+
@@ -2083,7 +2085,7 @@ function pRun(r){
   } else {
     bodyHtml=chainTab(R);
   }
-  return head+pauseBanner(R)+'<div class="run-cols"><div class="run-main">'+firstPrompt(R)+runStatRow(R)+tabs+bodyHtml+'</div>'+
+  return head+pauseBanner(R)+'<div class="run-cols"><div class="run-main">'+runSummary(R)+runStatRow(R)+tabs+bodyHtml+'</div>'+
    '<aside class="run-side" aria-label="The work">'+runSide(R)+'</aside></div>';
 }
 
@@ -2286,19 +2288,6 @@ function operatorPrompts(p){
   var n=0, waste=0; rs.forEach(function(r){n+=runPrompts(r); waste+=runWaste(r).corrective;});
   return {avg:n/rs.length,runs:rs.length,oneShot:rs.filter(function(r){return runPrompts(r)===1;}).length,waste:waste};
 }
-function firstPrompt(R){
-  var op=PEOPLE[R.op], m=runMetrics(R), W=runContext(R), p=runPrompts(R), first=txEntries(R)[0];
-  var body=first&&first.kind==="prompt"?first.body:R.taskTitle+(R.task?". Task "+R.task+".":"");
-  return '<section class="fp-first" aria-label="First prompt"><div class="row" style="justify-content:space-between;gap:10px">'+
-   '<p class="eyebrow q" style="margin:0">First prompt</p>'+
-   '<span class="mono dim" style="font-size:11px">'+h(op?op.name:R.op)+' · '+h(R.started)+(W.none?'':' · '+tokn(m.promptTok)+' tok written, '+tokn(W.total)+' tok sent')+'</span></div>'+
-   '<p class="q">'+h(body).replace(/\n+/g,'<br>')+'</p>'+
-   '<div class="row" style="margin-top:8px;gap:8px">'+
-    (p===1?'<span class="b b-allowed"><span class="d"></span>one-shot</span>':'<span class="b b-approval"><span class="d"></span>'+(p-1)+' corrective prompt'+(p===2?'':'s')+' after it</span>')+
-    (W.none?'':'<button class="btn sm ghost" onclick="S.tab.run=\'context\';render()">What reached the model</button>')+
-    (p>1?'<button class="btn sm ghost" onclick="S.tab.run=\'transcript\';S.tx.q=\'\';txAll(false);S.tx.on.prompt=true;render()">Show the prompts</button>':'')+
-   '</div></section>';
-}
 function runStatRow(R){
   var m=runMetrics(R), w=runWaste(R), p=w.prompts, s=m.series;
   var wp=[["model",m.modelMs],["tool",m.toolMs],["waiting on a person",m.waitMs],["harness",m.overMs]].sort(function(x,y){return y[1]-x[1];})[0];
@@ -2311,32 +2300,87 @@ function runStatRow(R){
    tile("Wall clock",msDur(m.wall),(wp[0]==="waiting on a person"?'mostly waiting on a person':wp[0]==="model"?'mostly in the model':'mostly in '+wp[0]+' calls'))+
    tile("Cache hit",per(R.cache),'saved about $'+s.saved.toFixed(2))+'</div>';
 }
+/* Every issue a session touched: the task it was started for, and any it read, referenced or closed.
+   A session is not one issue; the tab says which is which and links to each. */
+function issueUrl(ref){
+  var m=/^([\w.-]+\/[\w.-]+)#(\d+)$/.exec(ref); if(m) return "https://github.com/"+m[1]+"/issues/"+m[2];
+  if(/^LIN-\d+$/.test(ref)) return "https://linear.app/a-intel/issue/"+ref;
+  if(/^PO-\d+$/.test(ref)) return "https://erp.a-intel.example/po/"+ref;
+  return null;
+}
+function runIssues(R){
+  var g=runGraphOf(R), out=[], seen={};
+  var add=function(x){if(!x||!x.ref||seen[x.ref])return;seen[x.ref]=1;out.push(x);};
+  if(R.task) add({ref:R.task,title:R.taskTitle,rel:"task",status:R.taskStatus||"open",edge:"stated",fr:1});
+  (R.issues||[]).forEach(function(x){add({ref:x.ref,title:x.title,rel:x.rel||"referenced",status:x.status||"open",edge:x.fr!=null?"observed":"inferred",fr:x.fr});});
+  (g.issues||[]).forEach(function(x){add({ref:x.ref,title:x.title,rel:x.rel||"referenced",status:x.status||"open",edge:x.edge||"stated",fr:x.fr});});
+  (R.outputs||[]).forEach(function(o){if(o.kind==="task"&&o.name!==R.task)add({ref:o.name,title:o.note||"",rel:"referenced",status:"open",edge:o.fr!=null?"observed":"inferred",fr:o.fr});});
+  return out;
+}
+function issuesTab(R){
+  var L=runIssues(R), st={open:"b-allowed",closed:"b-q","in progress":"b-approval",blocked:"b-denied"};
+  var rows=L.map(function(x){var u=issueUrl(x.ref);
+    return '<tr><td><span class="mono" style="font-size:12px">'+h(x.ref)+'</span><div class="dim" style="font-size:11.5px">'+h(x.title||"")+'</div></td>'+
+     '<td><span class="b '+(st[x.status]||"b-q")+'"><span class="d"></span>'+h(x.status)+'</span></td>'+
+     '<td><span class="b b-q">'+h(x.rel)+'</span></td>'+
+     '<td>'+edgeChip({edge:x.edge,fr:x.fr!=null?[x.fr]:null,conf:x.edge==="inferred"?0.7:null})+'</td>'+
+     '<td>'+(u?'<a href="'+h(u)+'" target="_blank" rel="noopener">View ↗</a>':'<span class="dim">no link</span>')+'</td></tr>';}).join("");
+  return '<div class="panel"><div class="panel-h"><h3>Issues</h3><span class="b b-q" style="margin-left:auto">'+L.length+' in this session</span></div>'+
+   '<div class="tw"><table><thead><tr><th>Issue</th><th>Status</th><th>Relation</th><th>Edge</th><th></th></tr></thead><tbody>'+(rows||'<tr><td colspan="5" class="dim">No issue is linked to this session.</td></tr>')+'</tbody></table></div>'+
+   '<div class="panel-b"><div class="note">A session can touch more than one issue: the task it was started for, and any it read, referenced or closed on the way. The relation says which, the edge says how Oxagen knows, and the status is read from the tracker when the page loads.</div></div></div>';
+}
+/* Spend by area: the run's cost split across what the tokens were spent on. Input is a third of the
+   money and splits by the tokens each area put into the window; output is the rest. Tool calls are
+   split again by tool, so the dearest tool is visible. Every figure derives from runMetrics(R). */
+function runAreas(R){
+  var m=runMetrics(R), total=parseFloat(R.cost)||0, p=runPrompts(R), n=Math.max(1,m.modelN);
+  var CW=runContext(R), mc=frReqComp(m.perCall,CW.none?{}:{system:CW.system,steering:CW.steering,tools:CW.tools});
+  var first=m.promptTok*n, follow=p>1?Math.round(m.promptTok*0.8*(p-1)*n*0.6):0;
+  var ctx=Math.round((mc.ctx+mc.steering)*n), defs=Math.round(mc.tools*n), sys=Math.round(mc.system*n);
+  var results=Math.max(0,m.tokIn-first-follow-ctx-defs-sys);
+  var inCost=total/3, per=function(t){return inCost*tokShare(t,m.tokIn);};
+  var areas=[["Initial prompt",first,per(first),"the first prompt, carried in every request"],
+    ["Follow-up prompts",follow,per(follow),p>1?(p-1)+" corrective prompt"+(p===2?"":"s")+", each re-sent with the window":"none"],
+    ["Context retrievals",ctx,per(ctx),"context frames and steering Oxagen injected"],
+    ["Tool definitions",defs,per(defs),"the belt as the model is shown it"],
+    ["Tool calls",results,per(results),m.calls.length+" calls, result bodies in the window"],
+    ["System prompt",sys,per(sys),"the harness's own prompt"],
+    ["Model output",m.tokOut,total*2/3,tokn(m.reasoning)+" of it reasoning"]];
+  var byTool={}, msTot=0; m.calls.forEach(function(c){msTot+=c.ms;});
+  m.calls.forEach(function(c){var t=byTool[c.id]||(byTool[c.id]={id:c.id,calls:0,ms:0});t.calls++;t.ms+=c.ms;});
+  var tools=Object.keys(byTool).map(function(k){var t=byTool[k];var share=msTot?t.ms/msTot:1/Math.max(1,m.calls.length);return {id:t.id,calls:t.calls,tok:Math.round(results*share),usd:per(results)*share};}).sort(function(x,y){return y.usd-x.usd;});
+  return {areas:areas,tools:tools,total:total};
+}
+function runSpendByArea(R,compact){
+  var A=runAreas(R), mx=Math.max.apply(null,A.areas.map(function(a){return a[2];}))||1;
+  var bars=A.areas.map(function(a){return '<div class="meter"'+tipAttr(a[3])+'><div class="lab">'+a[0]+'<b>'+(a[2]>0&&a[2]<0.005?'$'+a[2].toFixed(3):fmt$(a[2]))+' <span class="dim" style="font-weight:500">· '+tokn(a[1])+' tok</span></b></div><div class="bar"><i style="width:'+Math.max(1,Math.round(a[2]/mx*100))+'%;background:var(--st-approval)"></i></div></div>';}).join("");
+  var top=A.tools.slice(0,compact?3:8).map(function(t){return '<div class="rs-file"><span class="mono" title="'+h(t.id)+'">'+h(toolParts(t.id).n)+'</span><span class="mono dim">'+t.calls+' call'+(t.calls===1?'':'s')+' · <b style="color:var(--fg)">'+fmt$(t.usd)+'</b></span></div>';}).join("");
+  return '<div class="panel"><div class="panel-h"><h3>Spend by area</h3><span class="mono dim" style="margin-left:auto;font-size:11px">'+usd(R.cost)+' · '+h(R.basis)+'</span></div>'+
+   '<div class="panel-b" style="display:grid;gap:'+(compact?'6px':'9px')+'">'+bars+'</div>'+
+   (A.tools.length?'<div class="panel-b" style="border-top:1px solid var(--border)"><p class="eyebrow q" style="margin:0 0 4px">Dearest tools</p><div class="rs-files" style="margin:0;border:0">'+top+'</div>'+(compact&&A.tools.length>3?'<div class="row" style="margin-top:8px"><button class="btn sm" onclick="S.tab.run=\'cost\';render()">All '+A.tools.length+' tools on Cost</button></div>':'')+'</div>':'')+
+   (compact?'':'<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">Input is a third of the money, split by the tokens each area put into the window; output is the rest. Tool calls split again by the wall clock each tool held, so the dearest tool is visible. A follow-up prompt re-sends the window, which is why it costs more than its own words.</div></div>')+'</div>';
+}
 function runSide(R){
   var g=runGraphOf(R), m=runMetrics(R), outs=R.outputs||[];
   var branch=outs.filter(function(o){return o.kind==="branch";})[0], pr=g.artifacts.filter(function(a){return a.kind==="pr";})[0]||outs.filter(function(o){return o.kind==="pr";})[0];
-  var checks=outs.filter(function(o){return o.kind==="check";}), rel=g.artifacts.filter(function(a){return a.kind==="release";})[0];
+  var checks=outs.filter(function(o){return o.kind==="check";}), rel=g.artifacts.filter(function(a){return a.kind==="release";})[0], repo=g.repos[0];
   var artState={open:"b-approval",pushed:"b-allowed",pending:"b-approval",failing:"b-denied",passed:"b-allowed",blocked:"b-denied",merged:"b-allowed",none:"b-q",created:"b-allowed"};
   var chip=function(st){return st?'<span class="b '+(artState[st]||"b-q")+'"><span class="d"></span>'+h(st)+'</span>':'';};
-  var kv=function(rows){return '<dl class="kv">'+rows.map(function(r){return '<dt>'+r[0]+'</dt><dd>'+r[1]+'</dd>';}).join("")+'</dl>';};
-  var panel=function(title,badge,body){return '<div class="panel"><div class="panel-h"><h3>'+title+'</h3>'+(badge?'<span style="margin-left:auto">'+badge+'</span>':'')+'</div><div class="panel-b">'+body+'</div></div>';};
-  var repo=g.repos[0];
-  var repoPanel=panel("Repository",repo?edgeChip(repo):'',repo
-    ?kv([["Repository",'<span class="mono">'+h(repo.name)+'</span>'],["Branch",branch?'<span class="mono">'+h(branch.name)+'</span> '+chip(branch.state):'<span class="dim">none pushed</span>'],["Main",'<span class="dim">untouched</span>']])
-    :'<p class="muted" style="margin:0;font-size:12.5px">No repository was touched.</p>');
   var ciState=checks.length?(checks.every(function(c){return c.state==="passed";})?"passed":checks.some(function(c){return c.state==="failing"||c.state==="blocked";})?"failing":"pending"):null;
-  var checksRow=["Checks",ciState?chip(ciState)+' <span class="dim" style="font-size:11.5px">'+checks.map(function(c){return h(c.name)+' '+h(c.state);}).join(', ')+'</span>':'<span class="dim">none reported</span>'];
-  var prPanel=panel("Pull request",pr?chip(pr.state):(ciState?chip(ciState):''),pr
-    ?kv([["Pull request",'<span class="mono">'+h(pr.ref||pr.name)+'</span>'],["Checks",ciState?chip(ciState)+' <span class="dim" style="font-size:11.5px">'+checks.map(function(c){return h(c.name)+' '+h(c.state);}).join(', ')+'</span>':'<span class="dim">none reported</span>'],
-         ["Diff",'<span class="mono">+'+m.add+' \u2212'+m.del+'</span> in '+g.files.length+' file'+(g.files.length===1?'':'s')]].concat(rel?[["Release",'<span class="mono">'+h(rel.ref)+'</span> '+chip(rel.state)]]:[]))
-    :(checks.length?kv([["Pull request",'<span class="dim">none yet</span>'],checksRow]):'<p class="muted" style="margin:0;font-size:12.5px">No pull request yet.'+(R.status==="live"?' The run is still working.':'')+'</p>'));
-  var filesPanel=panel("Files in the diff",g.files.length?'<span class="mono" style="font-size:11px"><b style="color:var(--st-allowed)">+'+m.add+'</b> <b style="color:var(--st-denied)">\u2212'+m.del+'</b></span>':'',
-    g.files.length?g.files.map(function(f){var st=diffStat(txDiffRows(f.before,f.after));
-      return '<div class="lw-item"><span class="ic">\u25a4</span><div class="t"><b class="mono" style="font-size:12px" title="'+h(f.path)+'">'+h(f.path)+'</b><span class="sub"><b style="color:var(--st-allowed)">+'+st.add+'</b> <b style="color:var(--st-denied)">\u2212'+st.del+'</b>'+(f.note?' · '+h(f.note):'')+'</span></div></div>';}).join("")+
-      '<div class="row" style="margin-top:8px"><button class="btn sm" onclick="S.tab.run=\'transcript\';render()">Open the diff in the transcript</button></div>'
-    :'<p class="muted" style="margin:0;font-size:12.5px">No file change recorded on this run.</p>');
-  var task=g.issues[0];
-  var taskPanel=panel("Task",task?edgeChip(task):'',task?'<b class="mono" style="font-size:12.5px">'+h(task.ref)+'</b><div class="muted" style="font-size:12.5px;margin-top:3px">'+h(task.title)+'</div>':'<p class="muted" style="margin:0;font-size:12.5px">No task is linked.</p>');
-  return repoPanel+prPanel+filesPanel+taskPanel+runSummary(R)+runOutputs(R);
+  var rows=[];
+  rows.push(["Repository",repo?'<span class="mono">'+h(repo.name)+'</span> '+edgeChip(repo):'<span class="dim">none touched</span>']);
+  rows.push(["Branch",branch?'<span class="mono">'+h(branch.name)+'</span> '+chip(branch.state)+' <span class="dim">main untouched</span>':'<span class="dim">none pushed</span>']);
+  rows.push(["Pull request",pr?'<span class="mono">'+h(pr.ref||pr.name)+'</span> '+chip(pr.state):'<span class="dim">none yet'+(R.status==="live"?', the run is still working':'')+'</span>']);
+  rows.push(["Checks",ciState?chip(ciState)+' <span class="dim">'+checks.map(function(c){return h(c.name)+' '+h(c.state);}).join(', ')+'</span>':'<span class="dim">none reported</span>']);
+  if(rel) rows.push(["Release",'<span class="mono">'+h(rel.ref)+'</span> '+chip(rel.state)]);
+  rows.push(["Diff",g.files.length?'<span class="mono"><b style="color:var(--st-allowed)">+'+m.add+'</b> <b style="color:var(--st-denied)">−'+m.del+'</b></span> <span class="dim">in '+g.files.length+' file'+(g.files.length===1?'':'s')+'</span>':'<span class="dim">no file change recorded</span>']);
+  var files=g.files.map(function(f){var st=diffStat(txDiffRows(f.before,f.after));
+    return '<div class="rs-file"><span class="mono" title="'+h(f.path)+'">'+h(f.path)+'</span><span class="mono dim"><b style="color:var(--st-allowed)">+'+st.add+'</b> <b style="color:var(--st-denied)">−'+st.del+'</b></span></div>';}).join("");
+  var work='<div class="panel"><div class="panel-h"><h3>Repository</h3>'+(pr||ciState?'<span style="margin-left:auto">'+(pr?chip(pr.state):chip(ciState))+'</span>':'')+'</div>'+
+   '<div class="panel-b"><dl class="kv rs-kv">'+rows.map(function(r){return '<dt>'+r[0]+'</dt><dd>'+r[1]+'</dd>';}).join("")+'</dl>'+
+   (files?'<div class="rs-files">'+files+'</div><div class="row" style="margin-top:8px"><button class="btn sm" onclick="S.tab.run=\'transcript\';render()">Open the diff in the transcript</button></div>':'')+
+   '</div></div>';
+  return work+runOutputs(R)+runSpendByArea(R,true);
 }
 function instTile(k,basis,value,sub,chart,foot){
   return '<div class="inst"><div class="ih"><span class="k">'+k+'</span><span class="basis">'+basis+'</span></div>'+
@@ -2503,7 +2547,7 @@ function runTabKey(R){
 function runTabs(R,t){
   var gov=govCount(),parked=0;FRAMES.forEach(function(f){if(f.kind==="policy_decision"&&/approve/.test(f.sum))parked++;});
   var ctxN=0;FRAMES.forEach(function(f){var m=/(\d+) context frames/.exec(f.sum);if(m)ctxN=Math.max(ctxN,+m[1]);});
-  var tabs=[["transcript","Transcript",txEntries(R).length,""],["player",gov?"Governed actions":"Player",gov||R.frames,parked?'<span class="st" title="a call is parked for approval"></span>':""],
+  var tabs=[["transcript","Transcript",txEntries(R).length,""],["issues","Issues",runIssues(R).length,""],["player",gov?"Governed actions":"Player",gov||R.frames,parked?'<span class="st" title="a call is parked for approval"></span>':""],
    ["cost","Cost",usd(R.cost),""],["policy","Policy",gov,parked?'<span class="st" title="'+parked+' parked"></span>':""],
    ["context","Context",ctxN||"",""],["chain","Chain and seal",R.sealed?"sealed":"live",""]];
   return '<div class="tabs" role="tablist">'+tabs.map(function(x,i){return '<button class="tab" role="tab" aria-selected="'+(t===x[0])+'" title="'+(i+1)+'" onclick="S.tab.run=\''+x[0]+'\';render()">'+x[1]+(x[2]!==""&&x[2]!=null?'<span class="n'+(x[0]==="cost"?" money":"")+'">'+h(String(x[2]))+'</span>':'')+x[3]+'</button>';}).join("")+'</div>';
@@ -3552,7 +3596,7 @@ function contextTab(R){
 
   var stackPanel = '<div class="panel" style="margin-bottom:14px">'+
    '<div class="panel-h"><h3>Walk the window</h3>'+
-   '<span class="b b-q" style="margin-left:auto">top to bottom</span></div>'+
+   '</div>'+
    '<div class="stack">'+stack+'</div></div>';
 
   var budgetPanel;
@@ -4071,7 +4115,7 @@ function costTab(R){
    '<div class="grid g2"><div class="panel"><div class="panel-h"><h3>Spend by token class</h3><span class="mono dim" style="margin-left:auto;font-size:11px">'+tokn(m.tokTotal)+' tokens</span></div>'+
     '<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Class</th><th class="num">Tokens</th><th class="num">Cost</th><th class="num">Share</th></tr></thead><tbody>'+clsRows+'</tbody></table></div>'+
     '<div class="panel-b"><div class="note">Input is a third of the money and priced at the effective rate across its classes, a cache read at a tenth of an uncached token; output and reasoning are priced at '+(light?'the light-tier':'the flagship')+' list rate.</div></div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>Prompt composition</h3><span class="mono dim" style="margin-left:auto;font-size:11px">mean request · '+tokn(m.perCall)+' tok</span></div><div class="panel-b" style="display:grid;gap:11px">'+
+   '<div class="panel"><div class="panel-h"><h3>Prompt composition</h3><span class="mono dim" style="margin-left:auto;font-size:11px">'+tokn(m.perCall)+' tok</span></div><div class="panel-b" style="display:grid;gap:11px">'+
     comp.map(function(x){return '<div class="meter"><div class="lab">'+x[0]+'<b>'+tokn(x[1])+' tok</b></div><div class="bar"><i style="width:'+Math.round(x[1]/Math.max(1,m.perCall)*100)+'%;background:'+x[2]+'"></i></div></div>';}).join("")+
     '<div class="hr"></div><dl class="kv">'+
     '<dt>Effective input price</dt><dd>$1.88 per million across all input classes</dd>'+
@@ -4098,7 +4142,7 @@ function chainTab(R){
     '<dt>Checkpoints</dt><dd>'+cpN+' · every 20 frames · signed by the host device key, countersigned by Oxagen at ingest</dd>'+
     '<dt>Completeness gaps</dt><dd>'+(R.grade==="full"?"none — replay grade is full":R.grade==="partial"?"bodies missing on some frames — replay grade lowered":R.grade==="digest"?"bodies not sent — digests only":"none — frames are in the archive segment")+'</dd></dl>'+
     '<div class="note" style="margin-top:13px">Frames from a wrapped agent are client-attested: producer-signed and countersigned at ingest, so Oxagen attests receipt and chain integrity, not the truth of the content. Frames Oxagen writes itself, a decision on a routed call or a witness result, are Oxagen-attested.</div></div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>Seal and attestation</h3>'+(sealed?'<span class="b b-allowed" style="margin-left:auto"><span class="d"></span>sealed</span>':'<span class="b b-q" style="margin-left:auto">not sealed — run is still open</span>')+'</div>'+
+   '<div class="panel"><div class="panel-h"><h3>Seal and attestation</h3>'+(sealed?'<span class="b b-allowed" style="margin-left:auto"><span class="d"></span>sealed</span>':'')+'</div>'+
     '<div class="panel-b">'+(sealed?'<dl class="kv">'+
     '<dt>Merkle root</dt><dd class="mono" style="word-break:break-all">'+root+'</dd>'+
     '<dt>Over</dt><dd>frames 0 … '+(R.frames-1)+(R.sealed?' · sealed '+h(R.sealed):'')+'</dd>'+
@@ -4113,7 +4157,7 @@ function chainTab(R){
     '<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Grade</th><th>What was recorded</th><th>What it allows</th></tr></thead><tbody>'+ladder+'</tbody></table></div>'+
     '<div class="panel-b"><div class="note">The grade is computed at seal from what the chain holds, never raised afterwards. Bisect and fork replay read the same frames the player shows.</div>'+
     '<div class="row" style="margin-top:12px">'+(sealed?'<button class="btn sm" onclick="S.bis=null;openDialog(\'bisect\')">Bisect against another run</button>':'')+'<button class="btn sm" onclick="openDialog(\'forkreplay\')">Fork replay from frame '+Math.min(S.frame||0,L.length-1)+'</button></div></div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>Checkpoints</h3><span class="mono dim" style="margin-left:auto;font-size:11px">'+cps.length+' in view · '+cpN+' in the run</span></div>'+
+   '<div class="panel"><div class="panel-h"><h3>Checkpoints</h3><span class="mono dim" style="margin-left:auto;font-size:11px">'+cps.length+' of '+cpN+'</span></div>'+
     (cps.length?'<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Frame</th><th class="num">Covers</th><th>Chain head</th><th>Signature</th></tr></thead><tbody>'+cpRows+'</tbody></table></div>':
      '<div class="panel-b muted" style="font-size:12.5px">No checkpoint frame is in view; the recorder writes one every 20 frames.</div>')+'</div>'+
    '</div>';
@@ -4253,7 +4297,7 @@ function pAgents(){
    '<div class="tw"><table><thead><tr><th>Identity</th><th>Harness</th><th>Operator</th><th>Status</th><th>Tier</th>'+
    '<th class="num">Belt</th><th class="num">Runs 30d</th><th class="num">Spend 30d</th><th class="num">Tokens 30d</th><th>Mandates</th><th>Incidents</th><th></th>'+
    '</tr></thead><tbody>'+rows+'</tbody></table></div></div>'+
-   '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Tier ladder</h3><span class="b b-q" style="margin-left:auto">computed per run from what was actually routed</span></div>'+
+   '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Tier ladder</h3></div>'+
    '<div class="panel-b">'+tierLadder(null)+'<div class="note" style="margin-top:12px">The tier is computed per run from what was routed. On <span class="mono">gateway</span> and <span class="mono">contained</span> every model and tool call passes the proxy and the server decides; on <span class="mono">harness</span> the hooks can refuse and the rest is client-attested and fail-open; on <span class="mono">observe</span> the run is recorded only.</div></div></div>';
 }
 
@@ -4534,7 +4578,7 @@ function aIdentity(a,r){
     '</dl></div></div>'+
 
    '<div class="panel" style="border-color:color-mix(in srgb,var(--st-proven) 34%,var(--border))">'+
-    '<div class="panel-h"><div style="flex:1;min-width:0"><h3>Credentials this agent holds</h3>'+
+    '<div class="panel-h"><div style="flex:1;min-width:0"><h3>Credentials</h3>'+
     '<p class="muted" style="margin:2px 0 0;font-size:12px">The single property most of the threat model rests on.</p></div>'+
     '<span class="b b-proven" style="margin-left:auto"><span class="d"></span>none</span></div>'+
     '<div class="panel-b" style="display:grid;gap:12px">'+
@@ -4564,7 +4608,7 @@ function aIdentity(a,r){
     '<button class="btn danger" onclick="act(\'Credential revoked. Every run token dies at the next call.\')">Revoke credential</button></div>'+
     '</div></div>'+
 
-   '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Roles and the delegation ceiling</h3>'+
+   '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Roles</h3>'+
     '<p class="muted" style="margin:2px 0 0;font-size:12px">Effective permission is its own grants ∩ the invoking human\'s grants. Subagents can only narrow.</p></div>'+
     '<button class="btn sm" style="margin-left:auto" onclick="openDialog(\'assignrole\',\''+a.key+'\')">Assign a role</button></div>'+
     '<div class="panel-b" style="display:grid;gap:12px">'+
@@ -4716,7 +4760,7 @@ function aToolbelt(a,r){
       }).join(",\n")+(total>6?',\n  <span class="c">… '+(total-6)+' more</span>':'')+'\n]</pre>')+
    '</div></div>'+
 
-  '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Try the belt search</h3>'+
+  '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Belt search</h3>'+
    '<p class="muted" style="margin:2px 0 0;font-size:12px">This is <span class="mono">search_tools</span> running against the same index the model queries.</p></div></div>'+
    '<div class="panel-b" style="display:grid;gap:11px">'+
    '<div class="iams"><span class="dim mono">search_tools(</span>'+
@@ -4843,7 +4887,7 @@ function aBudgets(a,r){
     'are paid on every call whether the tool is used or not.</div></div></div></div>'+
 
   (findings.length
-   ?'<div class="panel"><div class="panel-h"><h3>Findings for this agent</h3>'+
+   ?'<div class="panel"><div class="panel-h"><h3>Findings</h3>'+
     '<span class="b b-approval" style="margin-left:auto"><span class="d"></span>'+findings.length+'</span></div>'+
     '<div class="panel-b" style="display:grid;gap:11px">'+findings.map(function(f){
      return '<div class="act-card"><div class="t"><b>'+h(f.kind)+'</b>'+
@@ -4864,7 +4908,7 @@ function aRuns(a,r){
    '<div class="row" style="margin-top:12px"><button class="btn sm ghost" onclick="go(\'#/'+ORG.slug+'/audit/events\')">Open the audit record</button></div>'+
    '</div></div>';
   return '<div class="panel"><div class="panel-h"><h3>Runs</h3>'+
-   '<span class="mono dim" style="margin-left:auto;font-size:11px">'+a.runs30.toLocaleString()+' in 30 days · '+rr.length+' shown</span></div>'+
+   '<span class="mono dim" style="margin-left:auto;font-size:11px">'+rr.length+' shown</span></div>'+
    '<div class="tw"><table><thead><tr><th>Run</th><th>Status</th><th class="num">Tokens</th><th class="num">Cost</th>'+
    '<th class="num">Frames</th><th>Started</th></tr></thead><tbody>'+
    rr.map(function(x){return '<tr class="click" onclick="go(\'#/'+ORG.slug+'/'+x.ws+'/runs/'+x.id+'\')">'+
@@ -4975,7 +5019,7 @@ function pMandate(r){
    '<div class="stat"><span class="k">Settled</span><span class="v">'+usd(m.used)+'</span><span class="s">this period, from the ledger</span></div>'+
    '<div class="stat"><span class="k">Remaining</span><span class="v" style="color:var(--st-approval)">'+usd(m.remaining)+'</span><span class="s">after '+usd(m.reserved)+' reserved at decision time</span></div></div>'+
    '<div class="split"><div class="panel"><div class="panel-h"><h3>Ledger</h3>'+
-    '<span class="b b-q" style="margin-left:auto">reservations at decision time · settlements at receipt time</span></div>'+
+    '</div>'+
     '<div class="panel-b" style="border-bottom:1px solid var(--border)">'+
     mandateBar(m,showRes)+
     '<div class="dim" style="font-size:11.5px;margin-top:8px">Two concurrent calls cannot both fit under the same remaining limit — the reservation is taken before dispatch.</div></div>'+
@@ -5094,7 +5138,7 @@ function pTools(){
      'Revoking the connection invalidates every grant it minted at the next use.</div></div></div>'+
      grantsLog()+
      '<div class="grid g2" style="margin-top:14px">'+brokerChooses()+
-     '<div class="panel"><div class="panel-h"><h3>Financial connections carry extra rules</h3></div><div class="panel-b"><dl class="kv">'+
+     '<div class="panel"><div class="panel-h"><h3>Financial connections</h3></div><div class="panel-b"><dl class="kv">'+
      '<dt>Named human owner</dt><dd>required, with a finance role — Dana Okafor</dd>'+
      '<dt>Mandate per agent</dt><dd>required for every agent that may use it</dd>'+
      '<dt>Full-scope keys</dt><dd>the gateway refuses to expose one to a financial tool</dd></dl></div></div></div>';
@@ -5127,7 +5171,7 @@ function pTools(){
        '<td><span class="b b-allowed">'+h(p.tests)+'</span></td><td style="font-size:12px">'+h(p.note)+'</td></tr>';}).join("")+
      '</tbody></table></div><div class="panel-b"><div class="note">A version is activated by a governed action with approval; in regulated mode it is a Context PR instead. The superseded version is kept, never deleted, because every decision cites the version that made it.</div></div></div>'+
      '</div>'+
-     '<div class="panel"><div class="panel-h"><h3>Conditions available to policy</h3></div><div class="panel-b">'+
+     '<div class="panel"><div class="panel-h"><h3>Policy conditions</h3></div><div class="panel-b">'+
      '<p class="muted" style="font-size:12px;margin-bottom:11px">All derived from the call and the record. None from prose.</p>'+
      '<div class="row">'+["tool version","risk","side effect","egress","financial class","amount by path","counterparty","repository","path prefix","recipient domain","taint and its sources","time window","rate","sequence","operator role","enforcement tier","budget position","mandate position"]
       .map(function(c){return '<span class="b b-q" style="font-size:10.5px">'+h(c)+'</span>';}).join("")+'</div>'+
@@ -5140,7 +5184,7 @@ function pTools(){
   } else if(t==="switches"){
     var cls=SWITCHES.filter(function(s){return s.cls;}), rest=SWITCHES.filter(function(s){return !s.cls;});
     body='<div class="ks-stack">'+
-     '<div class="panel"><div class="panel-h"><div class="ks-grow"><h3>Deny is available at every level</h3>'+
+     '<div class="panel"><div class="panel-h"><div class="ks-grow"><h3>Deny levels</h3>'+
      '<p>Automatic triggers issue the same denies: repeated <span class="mono">unknown_tool</span> attempts, taint on a financial call, a mandate exception, a credential probe, a chain break. '+
      'Every flip is a security event with who, why, and what it stopped, and shows up on the affected runs as <span class="mono">policy.decision</span> frames.</p></div>'+
      '<span class="b b-q mono" style="font-size:10.5px">deny generation '+S.denyGen+'</span></div>'+
@@ -5721,7 +5765,7 @@ function recprDetail(def){
      '<button class="btn'+(passed?' primary':'')+'" '+(passed?'':'disabled ')+'onclick="recprMerge(\''+h(def.pr)+'\')">Merge pull request</button></div>';
   var right=merged
    ? '<div class="panel" style="margin-bottom:14px" data-promo-bundle="'+sb.v+'"><div class="panel-h"><h3>promotion_event</h3>'+
-     '<span class="b b-q" style="margin-left:auto">written on merge, never by an agent</span></div><div class="panel-b"><dl class="kv code">'+
+     '</div><div class="panel-b"><dl class="kv code">'+
      '<dt>record_id</dt><dd>'+h(def.promo)+'</dd><dt>lineage_id</dt><dd>'+h(r.id)+'</dd>'+
      '<dt>from → to</dt><dd>authored → <b>published</b></dd>'+
      '<dt>author</dt><dd>'+h(me().name)+' · '+h(me().role)+'</dd>'+
@@ -5769,8 +5813,8 @@ function prTable(){
       prSelected()==="ctxpr"]);}
   PROPOSALS.forEach(function(q){ if(q.id!==CTXPR.prp&&q.pr!=="—")
     rows.push([null,q.pr,q.st,"context/"+q.lineage,"the promoter",'<span class="b b-approval"><span class="d"></span>'+h(q.checks)+'</span>',false]);});
-  return '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Open and recent Context PRs</h3>'+
-   '<span class="b b-q" style="margin-left:auto">governance: '+h(wsGov(ws()))+' · '+h(govDesc(wsGov(ws())))+'</span></div>'+
+  return '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Context PRs</h3>'+
+   '<span class="b b-q" style="margin-left:auto">Governance: '+h(wsGov(ws()))+'</span></div>'+
    '<div class="tw"><table data-lt="off"><thead><tr><th>Pull request</th><th>Branch</th><th>Opened by</th><th>State</th></tr></thead><tbody>'+
    rows.map(function(x){
      return '<tr'+(x[0]?' class="click'+(x[6]?' on':'')+'" onclick="prSelect(\''+h(x[0])+'\')" aria-current="'+(x[6]?"true":"false")+'"':'')+'>'+
@@ -5811,7 +5855,7 @@ function ctxprTab(){
    .concat(['', '### What it costs', 'Adds '+s.meta.tok+' steering tokens a turn.', '', '---',
     'Opened by Oxagen · workspace `core-platform` · governance `team`']).join('\n');
   var promo=merged
-   ? '<div class="panel" style="margin-bottom:14px" data-promo-bundle="'+sb.v+'"><div class="panel-h"><h3>promotion_event</h3><span class="b b-q" style="margin-left:auto">written by the promoter, never by an agent</span></div><div class="panel-b"><dl class="kv code">'+
+   ? '<div class="panel" style="margin-bottom:14px" data-promo-bundle="'+sb.v+'"><div class="panel-h"><h3>promotion_event</h3></div><div class="panel-b"><dl class="kv code">'+
      '<dt>record_id</dt><dd>'+h(CTXPR.promo)+'</dd><dt>lineage_id</dt><dd>'+h(CTXPR.record.id)+'</dd>'+
      '<dt>from → to</dt><dd>proposed → <b>published</b></dd><dt>approver</dt><dd>'+h(me().name)+' · '+h(me().role)+'</dd>'+
      '<dt>pr_url</dt><dd>github.com/a-intel/platform/pull/519</dd><dt>commit_sha</dt><dd>'+h(CTXPR.record.commit)+'</dd><dt>merged_at</dt><dd>'+h(c.mergedAt)+'</dd>'+
@@ -5841,7 +5885,7 @@ function ctxprTab(){
     '[<span class="k">steering</span>]\n<span class="k">strength</span> = <span class="s">"'+h(CTXPR.record.force)+'"</span>\n\n'+
     '[<span class="k">enforcement</span>]\n<span class="k">constraint_effect</span> = <span class="s">"'+h(CTXPR.record.ce)+'"</span>\n<span class="k">blocking</span> = <span class="s">false</span>\n\n'+
     '<span class="k">record_hash</span>  = <span class="s">"'+h(CTXPR.hash)+'"</span></pre></div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>Pull request body</h3><span class="b b-q" style="margin-left:auto">written by the promoter</span></div><div class="panel-b"><pre>'+h(body)+'</pre></div></div></div>'+
+   '<div class="panel"><div class="panel-h"><h3>Pull request body</h3></div><div class="panel-b"><pre>'+h(body)+'</pre></div></div></div>'+
    '<div><div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Checks</h3><span class="muted" style="font-size:12px">the same rules as <span class="mono">stella context validate</span></span></div>'+
     '<div class="tw"><table class="narrow"><tbody data-checks-done="'+c.done+'">'+checks+'</tbody></table></div>'+mergebar+'</div>'+promo+'</div></div>';
 }
@@ -6086,7 +6130,7 @@ function stgMemoryTab(w){
    '<div class="stat"><span class="k">Recalled 30d</span><span class="v">'+G.recalls.toLocaleString()+'</span><span class="s">'+tokn(L.reduce(function(n,m){return n+(m.token_cost||0)*(m.recalls30||0);},0))+' tokens delivered</span></div>'+
    '<div class="stat"><span class="k">By class</span><span class="v" style="font-size:15px;padding-top:6px">'+Object.keys(G.cls).map(function(k){return '<span class="mono">'+h(k)+'</span> '+G.cls[k];}).join(' · ')+'</span><span class="s">a rule is proposed as a record instead</span></div></div>';
   return agg+'<div class="note" style="margin-bottom:14px"><b>A published must beats recalled memory.</b> Memory is what an agent’s own runs left behind. It is recalled, never published, so it competes only in the volatile selection, as <span class="mono">may</span> or <span class="mono">info</span>, and it gives way wherever a published record says otherwise. To make a memory binding, promote it: a proposal, a pull request, a merge.</div>'+
-   '<div class="panel"><div class="panel-h"><h3>Recalled memory</h3><span class="b b-q" style="margin-left:auto">'+L.length+' items · recalled per prompt, never in the stable prefix</span></div>'+
+   '<div class="panel"><div class="panel-h"><h3>Recalled memory</h3><span class="b b-q" style="margin-left:auto">'+L.length+'</span></div>'+
    '<div class="tw"><table><thead><tr><th>Memory</th><th>Class</th><th>Force</th><th>Scope</th><th>Last recalled</th><th>Token cost</th><th>In the assembler</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
    '<div class="panel-b"><div class="row"><button class="btn sm" onclick="S.pv.preset=\'merge-green\';S.pv.text=null;stgTab(\'preview\')">See one yield in Preview</button>'+
    '<span class="dim" style="font-size:12px">Recall used to reach only the in-app agent, capped at six items. It now goes through the same assembler as every other source.</span></div></div></div>';
@@ -6102,7 +6146,7 @@ function stgOntologyTab(w){
      '<td class="mono" style="font-size:11.5px">'+o.entities.map(h).join("<br>")+'</td>'+
      '<td class="num">'+tokn(o.token_cost)+' tok</td><td class="mono" style="font-size:11px">'+h(o.provenance)+'</td></tr>';}).join("");
   return '<div class="note" style="margin-bottom:14px">An ontology note defines one entity or one term the way this workspace uses it. It compiles to text like any other item, enters the volatile selection as <span class="mono">info</span>, and grants nothing.</div>'+
-   '<div class="panel"><div class="panel-h"><h3>Entity and term definitions</h3><span class="b b-q" style="margin-left:auto">'+L.length+' notes · files under .oxagen/ontology/</span></div>'+
+   '<div class="panel"><div class="panel-h"><h3>Definitions</h3><span class="b b-q" style="margin-left:auto">'+L.length+'</span></div>'+
    '<div class="tw"><table><thead><tr><th>Term</th><th>Kind</th><th>Definition</th><th>Force</th><th>About</th><th>Token cost</th><th>File</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>'+
    '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Index</h3></div><div class="panel-b"><dl class="kv">'+
    '<dt>Today</dt><dd>The Postgres registry. The assembler reads every item, these notes included, from the registry behind one port.</dd>'+
@@ -6131,7 +6175,7 @@ function stgPolicyTab(w){
    '<div class="panel"><div class="panel-h"><h3>Text compilation</h3></div><div class="panel-b"><p class="muted" style="margin:0;font-size:13px">Every item compiles to text the model reads. Text is advisory: it is ranked, budgeted, and may be dropped. The other six tabs are this plane.</p></div></div>'+
    '<div class="panel"><div class="panel-h"><h3>Gate compilation</h3></div><div class="panel-b"><p class="muted" style="margin:0;font-size:13px">An item with an enforcement grant also compiles to a gate. A gate is deterministic, never budgeted and never ranked, and it answers when the index is down. This tab is that plane.</p></div></div></div>'+
    '<div class="panel"><div class="panel-h"><h3>Gate notices</h3>'+
-   '<span class="b b-q" style="margin-left:auto">'+L.length+' gates · '+tokn(tok)+' tok of notices · pol_v41</span></div>'+
+   '<span class="b b-q" style="margin-left:auto">'+L.length+'</span></div>'+
    '<div class="tw"><table><thead><tr><th>Gate</th><th>Outcome</th><th>Applies to</th><th>Gate notice</th><th>Notice cost</th><th>Edited on</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
    '<div class="panel-b"><div class="note">A gate notice is one line, so the agent does not spend turns walking into a denial. The assembler puts every notice that applies at the head of the stable prefix and never drops one. Gates are edited where they always were: decision rules and kill switches on Tools, a mandate on its own page. Nothing is edited here.</div>'+
    '<div class="note" style="margin-top:10px">What a gate can refuse depends on the tier. For actions routed through Oxagen, the call is refused on the server. On the <span class="mono">harness</span> tier the four blocking hook events refuse a harness-native call: client-attested and fail-open. No screen says more than that.</div></div></div>';
@@ -6272,7 +6316,7 @@ function pSteering(){
     pub.forEach(function(r){kc[r.kind]=(kc[r.kind]||0)+1;});
     var shown=pub.filter(function(r){return !rk||r.kind===rk;});
     body='<div class="panel"><div class="panel-h"><h3>Published records</h3>'+
-     '<span class="b b-q" style="margin-left:auto">newest first · git decides what is in force, and the Postgres registry indexes it</span></div>'+
+     '</div>'+
      '<div class="kf" role="group" aria-label="Filter records by kind">'+
      '<button class="btn sm" aria-pressed="'+(!rk)+'" onclick="S.recKind=\'\';render()">All <span class="dim">'+pub.length+'</span></button>'+
      Object.keys(KINDS).map(function(k){return '<button class="btn sm k-'+k+'" aria-pressed="'+(rk===k)+'" title="'+h(KINDS[k].d)+'" onclick="S.recKind=\''+k+'\';render()">'+kindSvg(k)+h(KINDS[k].l)+'<span class="dim">'+(kc[k]||0)+'</span></button>';}).join("")+'</div>'+
@@ -6316,7 +6360,7 @@ function pSteering(){
      '<span class="dim" style="font-size:12px;margin-left:6px;align-self:center">a record becomes a proposal, a proposal becomes a pull request, a merge publishes it</span></div>';
     if(t==="proposals"){
       var sel=S.prpSel&&prpById(S.prpSel);
-      body=seg+(sel?prpDetail(sel):'<div class="panel"><div class="panel-h"><h3>Proposals: candidates that steer nothing</h3>'+
+      body=seg+(sel?prpDetail(sel):'<div class="panel"><div class="panel-h"><h3>Proposals</h3>'+
        '<button class="btn sm" style="margin-left:auto" onclick="wzOpen(\'record\')">Write a context record</button></div>'+
        '<div class="recs">'+
        PROPOSALS.map(function(p){
@@ -6568,7 +6612,7 @@ function chgTab(){
      '<td>'+stBadge(st)+'</td>'+
      '<td class="num mono" style="font-size:11.5px">'+pass+'/'+p.checks.length+'</td>'+
      '<td class="muted" style="font-size:12px">'+h(p.opened)+'</td></tr>';}).join("");
-  return '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Every pull request Oxagen has open</h3>'+
+  return '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Open Context PRs</h3>'+
    '<p class="muted" style="margin:2px 0 0;font-size:12px">Four kinds of file and one lifecycle. Whoever opened it — a person, the promoter, or the reconciler — the checks, the merge and the publication are the same.</p></div></div>'+
    '<div class="tw"><table><thead><tr><th>Change</th><th>Kind</th><th>Pull request</th><th>Opened by</th><th>State</th><th class="num">Checks</th><th>Opened</th></tr></thead>'+
    '<tbody>'+trows+'</tbody></table></div>'+
@@ -6631,7 +6675,7 @@ function oxprDetail(p){
       '<button class="btn'+(canMerge?' primary':'')+'"'+(canMerge?'':' disabled')+' onclick="act(\'Merged '+h(p.pr)+'\',\'gold\')">Merge pull request</button>'+
       '<button class="btn" onclick="act(\'Closed '+h(p.pr)+' without merging\')">Close without merging</button>'+
       '<span class="grow"></span><span class="dim" style="font-size:11.5px">'+
-      (canMerge?'governance: '+h(wsGov(ws()))+' · '+h(govDesc(wsGov(ws())))+' on GitHub':'Merge stays disabled until every check reports.')+'</span></div>')+
+      (canMerge?'Governance: '+h(wsGov(ws()))+' on GitHub':'Merge stays disabled until every check reports.')+'</span></div>')+
    '</div></div>';
 }
 
@@ -6761,7 +6805,7 @@ function pSpend(){
      FINDINGS.map(function(f,i){return fndCard(f,i,total,top);}).join("")+
      '</div><div class="note" style="margin-top:14px">Each saving is measured minus counterfactual over the runs it cites, at the price each call actually paid. Nothing here is an opinion: Evidence opens the runs, the people and the arithmetic behind every number, and Fix opens the change that removes it.</div>';
   } else if(t==="operator"){
-    body='<div class="panel"><div class="panel-h"><h3>By operator</h3><span class="dim mono" style="margin-left:auto;font-size:11px">open a row for every metric and its findings</span></div><div class="tw"><table>'+
+    body='<div class="panel"><div class="panel-h"><h3>By operator</h3></div><div class="tw"><table>'+
      '<thead><tr><th>Operator</th><th>Role</th><th class="num">Agents</th><th class="num">Runs</th><th class="num">Spend</th><th class="num">Tokens</th><th class="num">Cache hit</th><th class="num">Potential savings</th><th>Budget position</th></tr></thead><tbody>'+
      SPEND.byOperator.map(function(o){var p=PEOPLE[o.p];
       return '<tr'+drillRow("operator",o.p)+'><td><b>'+drillName("operator",o.p)+'</b></td><td class="mono dim" style="font-size:11.5px">'+h(p.role)+'</td>'+
@@ -6772,7 +6816,7 @@ function pSpend(){
      '</tbody></table></div><div class="panel-b">'+
      '<div class="note">Every run has exactly one operator, even when a schedule or a webhook started it: the operator is the person who owns that trigger. A run that arrived without one is attributed to the agent’s owning operator and flagged — never dropped, never spread.</div></div></div>';
   } else if(t==="agent"){
-    body='<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>By agent</h3><span class="dim mono" style="margin-left:auto;font-size:11px">open a row for every metric and its findings</span></div><div class="tw"><table>'+
+    body='<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>By agent</h3></div><div class="tw"><table>'+
      '<thead><tr><th>Agent</th><th class="num">Runs</th><th class="num">Spend</th><th class="num">Tokens</th><th class="num">Per run</th><th class="num">Cache hit</th><th class="num">Potential savings</th><th>Trend</th></tr></thead><tbody>'+
      SPEND.byAgent.map(function(a){
       return '<tr'+drillRow("agent",a.k)+'><td>'+agentCard(a.k,{key:a.k})+'</td><td class="num">'+a.runs.toLocaleString()+'</td>'+
@@ -6780,7 +6824,7 @@ function pSpend(){
        '<td class="num">'+tokn(agentTok(a.k).perRun)+'</td><td class="num">'+per(agentTok(a.k).cacheRate)+'</td>'+savingsCell("agent",a.k)+
        '<td><span class="b b-'+(a.trend.charAt(0)==="-"?"allowed":"approval")+'">'+h(a.trend)+'</span></td></tr>';}).join("")+
      '</tbody></table></div><div class="panel-b"><div class="note">Every figure is a rollup of the agent\u2019s runs, rebuilt from frames. An agent on the harness tier is self-reported: its harness told Oxagen the counts, and a class the harness does not report is marked absent, never zero.</div></div></div>'+
-     '<div class="panel"><div class="panel-h"><h3>By model and provider key</h3></div><div class="tw"><table>'+
+     '<div class="panel"><div class="panel-h"><h3>Models and keys</h3></div><div class="tw"><table>'+
      '<thead><tr><th>Model</th><th>Provider key</th><th class="num">Model calls</th><th class="num">Spend</th><th class="num">Cache hit rate</th><th>Basis</th></tr></thead><tbody>'+
      spendModelRows().map(function(m){var k=spendKeyOf(m.m,m.tier);
       return '<tr'+(m.route?' data-route="'+h(m.tier)+'"':'')+'><td class="tkey" style="font-size:12px">'+h(m.m)+(m.route?'<div class="dim" style="font-size:11px">Oxagen’s own work · '+h(m.provider)+'</div>':'')+'</td><td style="font-size:12px">'+(k?'<span class="mono">'+h(k.id)+'</span><div class="dim" style="font-size:11px">'+h(k.src.split(" · ")[0])+'</div>':'<span class="dim">—</span>')+'</td><td class="num">'+(m.route?orgUseCount(m):m.calls.toLocaleString())+'</td>'+
@@ -6827,7 +6871,7 @@ function spendTokens(WT){
   var per$=function(tok){return sp*tokShare(tok,clsTot);};
   var hs=Object.keys(WT.byHarness).map(function(k){return WT.byHarness[k];}).sort(function(a,b){return b.total-a.total;});
   return '<div class="grid g2" style="margin-bottom:14px">'+
-   '<div class="panel" style="margin:0"><div class="panel-h"><h3>By token class</h3><span class="mono dim" style="margin-left:auto;font-size:11px">'+tokn(WT.total)+' tokens · '+h(SPEND.month)+'</span></div>'+
+   '<div class="panel" style="margin:0"><div class="panel-h"><h3>By token class</h3><span class="mono dim" style="margin-left:auto;font-size:11px">'+tokn(WT.total)+'</span></div>'+
     '<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Class</th><th class="num">Tokens</th><th class="num">Share</th><th class="num">Cost</th></tr></thead><tbody>'+
     cls.map(function(x){return '<tr><td class="mono"'+tipAttr(x[2])+'>'+x[0]+'</td><td class="num">'+tokn(x[1])+'</td><td class="num dim">'+per(tokShare(x[1],clsTot))+'</td><td class="num">'+(x[0]==="cache_read"?fmt$(per$(x[1])*0.1):fmt$(per$(x[1])))+'</td></tr>';}).join("")+
     '</tbody></table></div><div class="panel-b"><dl class="kv">'+
@@ -6835,7 +6879,7 @@ function spendTokens(WT){
     '<dt>Cache write cost share</dt><dd>'+per(tokShare(WT.cacheWrite*1.25,WT.tokIn))+' · high when a prefix is written and never read</dd>'+
     '<dt>Effective input price</dt><dd>$1.88 per million across every input class</dd>'+
     '<dt>Unmapped classes</dt><dd>0 · a class Oxagen does not know is stored under its raw name and priced at zero, so the gap stays visible</dd></dl></div></div>'+
-   '<div class="panel" style="margin:0"><div class="panel-h"><h3>Prompt composition</h3><span class="mono dim" style="margin-left:auto;font-size:11px">measured from the request, every call</span></div>'+
+   '<div class="panel" style="margin:0"><div class="panel-h"><h3>Prompt composition</h3></div>'+
     '<div class="panel-b">'+tokBars(WT)+'</div>'+
     '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">Tool definitions, context frames and steering are measured by Oxagen from the request it assembled; tool results and conversation are the rest of the input. A part that grows without its citation rate growing is a finding, and Coaching says what to change.</div></div></div></div>'+
    '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>By harness</h3><span class="b b-q" style="margin-left:auto">'+per(WT.observed)+' of tokens observed by the gateway</span></div>'+
@@ -6844,7 +6888,7 @@ function spendTokens(WT){
       return '<tr><td><b>'+h(x.label)+'</b></td><td class="num">'+x.agents+'</td><td class="num">'+tokn(x.total)+'</td><td class="num">'+per(tokShare(x.cacheRead,x.tokIn))+'</td><td class="num">'+fmt$(x.spend)+'</td>'+
        '<td>'+(obs>=0.999?'<span class="basis">gateway_observed</span>':obs<=0.001?'<span class="basis">client_attested</span>':'<span class="basis">gateway_observed</span> '+per(obs)+' · <span class="basis">client_attested</span> '+per(1-obs))+'</td></tr>';}).join("")+
     '</tbody></table></div><div class="panel-b"><div class="note">Observed means the gateway\u2019s proxy counted the tokens from the bytes that passed through it. Self-reported means the harness\u2019s own telemetry said so; a class it does not report is marked absent, never zero, and a cache hit rate over a mixed fleet is never computed from missing data as if it were zero.</div></div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>By agent</h3><span class="dim mono" style="margin-left:auto;font-size:11px">open a row for its coaching</span></div>'+
+   '<div class="panel"><div class="panel-h"><h3>By agent</h3></div>'+
     '<div class="tw"><table><thead><tr><th>Agent</th><th class="num">Runs</th><th class="num">Tokens</th><th class="num">Per run</th><th class="num">Cache hit</th><th class="num">Tool defs</th><th class="num">Context</th><th class="num">Tool results</th><th class="num">Reasoning</th><th>Basis</th></tr></thead><tbody>'+
     AGENTS.filter(function(a){return a.ws===w.slug;}).sort(function(a,b){return agentTok(b).total-agentTok(a).total;}).slice(0,12).map(function(a){var t=agentTok(a);
       return '<tr class="click" onclick="go(\'#/'+ORG.slug+'/'+a.ws+'/agents/'+a.key.split(".").pop()+'\')"><td>'+agentCard(a,{key:a.key})+'</td><td class="num">'+(a.runs30||0).toLocaleString()+'</td><td class="num">'+tokn(t.total)+'</td><td class="num">'+tokn(t.perRun)+'</td><td class="num">'+per(t.cacheRate)+'</td>'+
@@ -7048,10 +7092,10 @@ function spendDrill(dr){
   var tiles='<div class="grid g4" style="margin-bottom:14px">'+T.map(function(t){return tile(t[0],t[1],t[2],t[3]);}).join("")+'</div>';
 
   var pts=spendSeries(kind+":"+E.id,spend,d.trend||r.trend||""), mx=Math.max.apply(null,pts), pk=pts.indexOf(mx);
-  var series='<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Spend by day</h3><span class="b b-q" style="margin-left:auto">last 30 days</span></div>'+
+  var series='<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Spend by day</h3></div>'+
    '<div class="panel-b">'+sparkline(pts,"Daily spend, last 30 days")+
    '<div class="row" style="margin-top:8px;font-size:11.5px;color:var(--muted);flex-wrap:wrap"><span>peak <b style="color:var(--fg)">'+fmt$(mx)+'</b> on '+dayLabel(pk,30)+'</span><span class="dim">·</span>'+
-   '<span>'+fmt$(spend/30)+' a day on average</span><span class="dim">·</span><span>weekends dip with the schedules</span><span class="dim mono" style="margin-left:auto;font-size:10.5px">hover a day for its amount</span></div></div></div>';
+   '<span>'+fmt$(spend/30)+' a day on average</span><span class="dim">·</span><span>weekends dip with the schedules</span></div></div></div>';
 
   var cuts;
   if(kind==="tool") cuts=xcut("By agent",d.agents,"agent",spend)+xcut("By operator",d.operators,"operator",spend)+xcut("By model",d.models,"model",spend);
@@ -7060,7 +7104,7 @@ function spendDrill(dr){
   cuts='<div class="grid g3" style="margin-bottom:14px">'+cuts+'</div>';
 
   var fnd='<div class="panel"><div class="panel-h"><h3>Findings</h3>'+
-   '<span class="dim mono" style="margin-left:auto;font-size:11px">'+(fs.length?fs.length+' · measured minus counterfactual':'none this month')+'</span></div>'+
+   '<span class="dim mono" style="margin-left:auto;font-size:11px">'+(fs.length?fs.length:'none')+'</span></div>'+
    '<div class="panel-b" style="display:grid;gap:10px">'+
    (fs.length?fs.map(function(f,i){return fndCard(f,i,save,top,"of this "+kind+"’s savings");}).join(""):
     '<p class="muted" style="margin:0;font-size:12.5px">No findings cite this '+kind+'. When a rollup finds a frame pattern here it appears in this list with the dollars it would remove, and the same amount shows on the '+listLabel+' table.</p>')+
@@ -7094,11 +7138,11 @@ function spendByTool(){
   return '<div class="grid g3" style="margin-bottom:14px">'+
    '<div class="panel"><div class="panel-h"><h3>Cumulative spend</h3><span class="b b-q" style="margin-left:auto">share of '+money(total)+'</span></div>'+
     '<div class="panel-b" style="display:grid;gap:11px">'+cum+'</div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>Average per call</h3><span class="b b-q" style="margin-left:auto">spend ÷ calls</span></div>'+
+   '<div class="panel"><div class="panel-h"><h3>Average per call</h3></div>'+
     '<div class="panel-b" style="display:grid;gap:11px">'+avg+'</div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>Average per run that used it</h3><span class="b b-q" style="margin-left:auto">spend ÷ runs</span></div>'+
+   '<div class="panel"><div class="panel-h"><h3>Average per run</h3></div>'+
     '<div class="panel-b" style="display:grid;gap:11px">'+avgRun+'</div></div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>By tool</h3><span class="dim mono" style="margin-left:auto;font-size:11px">basis client_attested · attributed per frame · open a row for every metric and its findings</span></div><div class="tw"><table>'+
+   '<div class="panel"><div class="panel-h"><h3>By tool</h3></div><div class="tw"><table>'+
    '<thead><tr><th>Tool</th><th>Server</th><th class="num">Calls</th><th class="num">Runs</th><th class="num">Cumulative</th><th class="num">Share</th><th class="num">Avg per call</th><th class="num">Avg per run</th><th class="num">Potential savings</th><th>What the frames say</th></tr></thead><tbody>'+
    rows.map(function(r){
     var hot=r.perCall!==null&&(r.perCall>=1.5||r.perRun>=10), dr=r.perCall!==null;
@@ -7121,15 +7165,15 @@ function spendWaste(){
    '<div class="stat"><span class="k">Share of spend</span><span class="v">'+per(SPEND.wasteShare)+'</span><span class="s">of '+usd(fmt2(spendMonthTotal()))+' this month</span></div>'+
    '<div class="stat"><span class="k">Runs with waste</span><span class="v">'+SPEND.wasteRuns+'</span><span class="s">of '+SPEND.runs.toLocaleString()+' sealed runs</span></div>'+
    '<div class="stat"><span class="k">Largest cause</span><span class="v" style="font-size:17px;padding-top:4px">'+h(SPEND.wasteByCause[0].c)+'</span><span class="s">'+usd(SPEND.wasteByCause[0].spend)+' · '+SPEND.wasteByCause[0].runs+' runs</span></div></div>';
-  var causes='<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>By cause</h3><span class="b b-q" style="margin-left:auto">each cause is a frame pattern, not a guess</span></div>'+
+  var causes='<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>By cause</h3></div>'+
    '<div class="panel-b" style="display:grid;gap:12px">'+
    SPEND.wasteByCause.map(function(c){var v=parseFloat(c.spend.replace(/,/g,""));
     return '<div class="meter"><div class="lab" style="display:flex;gap:8px;font-size:12px;align-items:baseline"><b style="margin-left:0">'+h(c.c)+'</b><span class="dim mono" style="font-size:10.5px">'+c.runs+' runs</span>'+
      '<b style="margin-left:auto;font-variant-numeric:tabular-nums">'+usd(c.spend)+'</b></div>'+
      '<div class="bar"><i style="width:'+Math.round(v/mx*100)+'%;background:var(--st-critical)"></i></div>'+
      '<div class="muted" style="font-size:11.5px;margin-top:3px">'+h(c.why)+'</div></div>';}).join("")+'</div></div>';
-  var runs='<div class="panel"><div class="panel-h"><h3>Runs that prove it</h3>'+
-   '<span class="dim mono" style="margin-left:auto;font-size:11px">worst first · badges name what was wrong</span></div>'+
+  var runs='<div class="panel"><div class="panel-h"><h3>Runs with waste</h3>'+
+   '</div>'+
    '<div class="panel-b" style="display:grid;gap:12px">'+
    SPEND.wasteRunsList.map(function(x){var r=byRun[x.run]; if(!r) return '';
     var href="#/"+ORG.slug+"/"+r.ws+"/runs/"+r.id;
@@ -7289,7 +7333,7 @@ function pOrganization(){
      '</tbody></table></div><div class="panel-b">'+
      '<div class="note">A key is shown once, at creation, and never again. Keys carry grants, not roles, so an auditor’s key can read receipts and nothing else. Revoking a key ends its service principal’s access at the next call.</div></div></div>'+
      '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Surfaces this reaches</h3>'+
-     '<span class="b b-q" style="margin-left:auto">one agent tool contract</span></div><div class="panel-b">'+
+     '</div><div class="panel-b">'+
      '<p class="muted" style="font-size:12.5px;margin:0 0 10px">One agent tool contract drives the API, MCP, the CLI and these screens, so a key that can do something here can do exactly that much everywhere else. Parity is checked by the manifest gate.</p>'+
      '<pre>$ oxagen login --org a-intel\n$ oxagen run list --workspace core-platform --since 24h\n$ oxagen run export run_01K5RS7M2E8FJ3QW --with-bodies --out ./run_01K5RS7M2E8FJ3QW.bundle\n$ oxagen agent status a-intel.finops.invoice-bot</pre></div></div>';
   }
@@ -7541,7 +7585,7 @@ function pBilling(){
    '<div class="stat"><span class="k">Due '+h(BILLING.next)+'</span><span class="v">'+usd(BILLING.total)+'</span><span class="s">USD · after the onboarding discount</span></div></div>'+
    '<div class="split"><div>'+
    '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>This period</h3>'+
-    '<span class="b b-q" style="margin-left:auto">Stripe holds the plan and the invoice · Oxagen holds the meter</span></div><div class="tw"><table>'+
+    '</div><div class="tw"><table>'+
     '<thead><tr><th>Line</th><th>Basis</th><th class="num">Amount</th></tr></thead><tbody>'+
     '<tr><td>Governed actions 1 – '+BILLING.billable.toLocaleString()+'</td><td class="dim">'+h(BILLING.tier2)+'</td><td class="num">'+usd(BILLING.amount)+'</td></tr>'+
     '<tr><td>Tokens</td><td class="dim">reported at zero · the customer\u2019s own model spend is on Spend</td><td class="num">$0.00</td></tr>'+
@@ -7800,7 +7844,7 @@ function auditKeys(){
      '<td class="mono dim" style="font-size:11.5px;white-space:nowrap">'+h(k.from)+'</td><td class="mono dim" style="font-size:11.5px;white-space:nowrap">'+h(k.to)+'</td>'+
      '<td>'+auditBadge(st[k.st][0],st[k.st][1])+'</td><td style="font-size:12px;max-width:28ch">'+h(k.covers)+'</td>'+
      '<td class="num">'+(k===kek?'<button class="btn sm" onclick="openDialog(\'rotatekek\')">Rotate</button>':'')+'</td></tr>';}).join("");
-  return '<div class="panel"><div class="panel-h"><h3>Keys and validity windows</h3><span class="muted" style="font-size:12.5px">one key-encryption key per organization; data-encryption keys per object and per subject</span>'+
+  return '<div class="panel"><div class="panel-h"><h3>Keys</h3><span class="muted" style="font-size:12.5px">one key-encryption key per organization; data-encryption keys per object and per subject</span>'+
    '<div class="sp">'+auditStore("kms + postgres")+'<button class="btn sm" onclick="openDialog(\'rotatekek\')">Rotate KEK</button></div></div>'+
    '<div class="tw"><table><thead><tr><th>Key</th><th>Algorithm</th><th class="num">Gen</th><th>Valid from</th><th>Valid to</th><th>State</th><th>What it covers</th><th class="num"></th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
    '<div class="panel-b"><div class="note" style="margin-bottom:12px">Rotation does not rewrite history. A retiring generation stays valid for decryption until every object it wrapped has been re-wrapped; a receipt keeps citing the signing generation it was signed under, so a four-month-old receipt still verifies after a rotation. Key ids and validity windows are published per organization, so a customer can verify an export offline years later.</div>'+
@@ -8163,7 +8207,7 @@ function skSearch(w){
       '<dt>Load budget</dt><dd><span class="mono">'+SK_CFG.search.budget.toLocaleString()+'</span> tokens a turn · a skill past the budget is refused, not truncated</dd>'+
       '<dt>Unbound repo</dt><dd><span class="mono">ask</span> · the loop stops and a person answers</dd>'+
      '</dl></div></div>'+
-    '<div class="panel"><div class="panel-h"><h3>The frame this wrote</h3></div><div class="panel-b">'+
+    '<div class="panel"><div class="panel-h"><h3>Frame written</h3></div><div class="panel-b">'+
      '<div class="sx-cfg"><div class="sx-cfg-h">skills.searched · frame 4 · run '+h(SKRUN.id)+'</div><pre>'+
       '<span class="k">query</span>        <span class="s">"'+h(q)+'"</span>\n'+
       '<span class="k">config</span>       <span class="s">"'+h(SK_CFG.ver)+'"</span>\n'+
@@ -8287,7 +8331,7 @@ function skLoop(w){
    '</div>'+
    (open?
     '<div class="panel" style="border-color:color-mix(in srgb,var(--gold) 45%,transparent);margin-bottom:14px">'+
-     '<div class="panel-h" style="background:color-mix(in srgb,var(--gold) 9%,var(--hl))"><h3>A run is waiting on you</h3>'+
+     '<div class="panel-h" style="background:color-mix(in srgb,var(--gold) 9%,var(--hl))"><h3>Interjection</h3>'+
       '<span class="sp live"><span class="p"></span>paused mid-loop</span></div>'+
      '<div class="panel-b">'+
       '<p style="margin:0 0 10px"><span class="mono">'+h(SKRUN.agent)+'</span> started in <span class="mono">'+h(SKRUN.repo)+'</span>, '+
@@ -8304,7 +8348,7 @@ function skLoop(w){
       'or <button class="btn sm" onclick="skReset()">reset the demo</button> to be asked again.</p>'+
      '</div></div>')+
    '<div class="grid g2" style="gap:12px">'+
-    '<div class="panel"><div class="panel-h"><h3>What the seat is allowed to do</h3></div><div class="panel-b">'+
+    '<div class="panel"><div class="panel-h"><h3>Seat permissions</h3></div><div class="panel-b">'+
      '<div class="sx-skl">'+[
       ["ask","Ask a person a question","The loop pauses at a boundary and the question reaches the operator in the agent’s own voice. The agent is not told what to say; it is handed the answer as evidence."],
       ["cons","Stop before a guess","An unbound repo, a skill past the load budget, a digest that changed. Each one is a stop, not a fallback."],
@@ -8337,7 +8381,7 @@ function skReflect(w){
     skStat("Cost","$1.79","0.09% of the month’s spend · billed as overhead, never as productive")+
     skStat("Calibration gap","2 of 4","axes where the agent scored itself above the record","held")+
    '</div>'+
-   '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>The turn that was injected</h3>'+
+   '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Injected turn</h3>'+
      '<span class="sp mono dim" style="font-size:11px">'+h(R.when)+'</span></div><div class="panel-b">'+
     '<div class="sx-fr" style="margin-bottom:12px">'+
      skFrameRow({k:"run.sealed",c:"gov",t:"14:22:09.440Z",d:"run "+R.run+" · chain sealed, attestation key atk_7"})+
@@ -8348,7 +8392,7 @@ function skReflect(w){
     '<div class="note">Dashed frames are <b>out of band</b>. They sit after the seal, they are excluded from the chain the seal covers, '+
      'and they are not replayed when the run is forked. A fork of this run re-runs the work and not the grading.</div>'+
    '</div></div>'+
-   '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>What it said about itself</h3>'+
+   '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Self-report</h3>'+
      '<span class="sp"><span class="sx-chip res">self</span> <span class="sx-chip" style="color:var(--st-proven);border-color:color-mix(in srgb,var(--st-proven) 45%,transparent)">the record</span></span></div>'+
     '<div class="panel-b"><div class="sx-rub">'+R.axes.map(function(a){
       return '<div class="sx-rax'+(a.gap?" gap":"")+'">'+
@@ -8498,12 +8542,12 @@ function skTrOperator(ans){
 }
 function skDl(k,t){return '<div class="sx-li"><span class="s '+k+'">'+(k==="add"?"+":k==="rem"?"−":"·")+'</span><span>'+t+'</span></div>';}
 function skAfterPanel(ans){
-  if(ans==="link") return '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>The skill it loaded</h3>'+
+  if(ans==="link") return '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Skill loaded</h3>'+
     '<span class="sp mono dim" style="font-size:11px">1,840 tokens · $0.0055 · priced on the Spend page as context, not as output</span></div>'+
    '<div class="panel-b">'+skRow(skillOf("a-intel.release-notes-from-prs"))+
     '<div class="note" style="margin-top:10px">The model call that follows cites it in the system position. A sealed replay of this run '+
     'resolves the same digest, so “what procedure was it following” has an answer a year from now.</div></div></div>';
-  return '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>The workspace that was created</h3>'+
+  return '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Workspace created</h3>'+
     '<span class="sp">'+skBadge("q","skills off")+'</span></div><div class="panel-b">'+
    '<div class="sx-cfg"><div class="sx-cfg-h">a-intel/edge-proxy · .oxagen/workspace.toml <span class="grow"></span>committed by Oxagen, 09:17:39Z</div><pre>'+
    '<span class="k">slug</span>    = <span class="s">"edge"</span>\n'+
@@ -9050,7 +9094,7 @@ function steerTextField(dflt,rows){
 function steerModeField(){
   var on=S.steerInt;
   return '<div class="field"><label>Delivery</label>'+
-   '<div class="steer-mode'+(on?" on":"")+'"><div class="grow"><b>'+(on?"Interrupt — now":"At the boundary — end of the current turn")+'</b>'+
+   '<div class="steer-mode'+(on?" on":"")+'"><div class="grow"><b>'+(on?"Interrupt now":"At the boundary")+'</b>'+
     '<div class="d">'+(on?"Every selected agent with a run in flight stops where it stands. The in-flight tool call is cancelled and recorded, the turn is cut, and this steer is the first thing it reads. Idle agents read it at their next run.":
      "Each agent finishes the turn it is on, then reads this before its next model call. Nothing in flight is cut. Idle agents read it at their next run.")+'</div></div>'+
     '<button class="ks-sw int'+(on?" on":"")+'" role="switch" aria-checked="'+(on?"true":"false")+'" aria-label="Interrupt" onclick="steerToggleInt()"><span class="lbl">Interrupt</span><i></i></button></div>'+
@@ -9069,13 +9113,13 @@ function steerFleetBody(){
     '<div class="steer-list">'+rows+'</div>'+
     '<div class="hint">Every agent in '+h(ws().name)+', selected by default. Steering the fleet is a grant you hold by role, not a default.</div></div>'+
    steerTextField(STEER_DEFAULT,3)+steerModeField()+
-   '<div class="note">Oxagen never executes steering as an instruction — it enters as evidence at the steering position with operator authority.</div>';
+   '<div class="note">Oxagen never executes steering as an instruction; it enters as evidence at the steering position with operator authority.</div>';
 }
 function steerFoot(fleet){
   var n=fleet?steerCount():1, on=S.steerInt, who=fleet?(n+' agent'+(n===1?'':'s')+' · '+steerLive()+' in flight'):'this run';
   return '<span class="grow">'+h(who)+' · '+(on?'interrupt':'at the boundary')+'</span>'+
    '<button class="btn" onclick="closeDialog()">Cancel</button>'+
-   '<button class="btn primary"'+(fleet&&!n?' disabled':'')+' onclick="steerSend('+(fleet?'true':'false')+')">'+(on?'Interrupt and send':'Send at the boundary')+'</button>';
+   '<button class="btn '+(on?'danger solid':'primary')+'"'+(fleet&&!n?' disabled':'')+' onclick="steerSend('+(fleet?'true':'false')+')">'+(on?'Send &amp; Interrupt':'Steer')+'</button>';
 }
 /* ---- steering writes frames (ported from W2 stop-it-steer-it) ----
    A steer is a control.steer frame on the run it addresses, queued until that run's next model call.
@@ -9419,7 +9463,7 @@ function dialog(){
      '<div class="field"><label>Address</label><select aria-label="Address"><option>this run</option><option>@a-intel.core.release-manager — every live run of this agent</option></select>'+
      '<div class="hint">To steer every live run in the workspace at once, use Steer on the Fleet page.</div></div>'+
      steerModeField()+
-     '<div class="note">Oxagen never executes steering as an instruction — it enters as evidence at the steering position with operator authority.</div>',
+     '<div class="note">Oxagen never executes steering as an instruction; it enters as evidence at the steering position with operator authority.</div>',
      f:steerFoot(false)},
    steerfleet:{t:"Steer the fleet",w:false,b:steerFleetBody(),f:steerFoot(true)},
    mandate:{t:"Grant a mandate",w:true,b:mandateBody(),f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Mandate granted. It is active from its start date and expires on its end date; every draw is a receipt.\')">Grant the mandate</button>'},
@@ -11062,7 +11106,7 @@ function asstSheet(){
     "needs org.admin")+
    '<div class="asst-f"><div class="box"><textarea placeholder="Unavailable until a model key is minted" disabled aria-label="Message"></textarea></div></div>';
 
-  return asstHead('<span class="b b-q" style="margin-left:auto">every turn is a run of its own</span>')+
+  return asstHead('')+
    '<div class="asst-b">'+
    '<div class="msg op"><div class="who">'+h(me().name)+'</div><div class="bub">Triage is burning money on tool definitions. Narrow its belt to what it actually used in the last 30 days, and tell me what you changed.</div></div>'+
    '<div class="msg"><div class="who">Assistant <span class="b b-q" style="font-size:9.5px">run_01K5RT9X4M2 · Oxagen’s, not yours</span></div><div class="bub">'+
@@ -12657,7 +12701,7 @@ function pRecord(r){
       '</dl></div></div>'+
     '</div>'+
     '<div>'+crecPanel(rec)+
-     '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Other records of this kind</h3></div>'+
+     '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Related records</h3></div>'+
      '<div class="recs">'+(function(){
        var o=RECORDS.filter(function(x){return x.kind===rec.kind&&x.id!==rec.id;}).slice(0,3);
        return o.length?o.map(function(x){

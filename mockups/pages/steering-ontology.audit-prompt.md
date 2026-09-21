@@ -24,7 +24,7 @@ Work through every check. For each, record PASS, FAIL, or N/A (with why). Cite e
 3. **One gold action.** Write a context record in the hub header is the one gold action. The chip is not gold.
 4. **Sections and tables.** The build has each item below with the same headings and every column named, in that order.
    - The lead note, verbatim.
-   - Entity and term definitions with its badge: Term · Kind · Definition · Force · About · Token cost · File; the Kind filter; Rows; pager.
+   - Definitions with its badge: Term · Kind · Definition · Force · About · Token cost · File; the Kind filter; Rows; pager.
    - Index: Today, Later, Not here, with the copy the spec quotes. The Today row names the Postgres registry; the Later row names the graph as Phase 3.
 5. **Actions.** Write a context record opens the record wizard. No row on this tab is a control; nothing is edited here.
 6. **Data sources.** For each row of the spec’s data-source table, find the adapter or query in the build that feeds it. ✅ rows are wired to the named store; 🟡 rows are wired for the fields that exist and render `NotBacked` for the rest; ❌ rows render `NotBacked` with the milestone named. A fixture reaching production is a FAIL.

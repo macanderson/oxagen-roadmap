@@ -59,10 +59,12 @@ depended on proof: it is what the frames show bought nothing, so it stays with o
   Edit workspace dialog carries the same select, and the Organization workspaces table reads it
   off the workspace. Changing it opens a Context PR; nothing else writes that file.
 
-- The Run page leads with the first prompt, then one row of stat boxes (Tokens, Prompts, Cost,
-  Wasted, Wall clock, Cache hit), then the tabs with the transcript open, in a two-thirds column; the
-  right third holds the repository, the pull request with its checks, the files in the diff, the
-  task, the generated summary and the outputs. A prompt after the first is corrective, so prompts
+- The Run page leads with the generated summary, then one row of stat boxes (Tokens, Prompts,
+  Cost, Wasted, Wall clock, Cache hit), then the tabs (Transcript open by default, Issues, Governed
+  actions, Cost, Policy, Context, Chain and seal) in a two-thirds column; the right third holds one
+  Repository panel (branch, pull request, checks, diff and files), the outputs, and spend by area
+  (initial prompt, follow-up prompts, context retrievals, tool definitions, tool calls by tool, model
+  output). The Issues tab lists every issue the session touched with its status, relation and link. A prompt after the first is corrective, so prompts
   per session is a wasted-spend cause and an operator coaching signal.
 - `pages/` holds the spec of every page and its audit prompt, rewritten for this mockup. They are
   what a build of rev1 is measured against.
