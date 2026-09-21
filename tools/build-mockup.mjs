@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // mockups/missioncontrol.html is one self-contained file built from the sources in mockups/src
-// and the dataset in mockups/fixtures. It is the master: every page, every dialog, the auth
+// and the dataset in mockups/fixtures. It is the master and the authoritative design of rev1: every page, every dialog, the auth
 // screens, the guided scenarios and the mockup chrome, opened from disk or served.
 //
 //   node tools/build-mockup.mjs            # write mockups/missioncontrol.html
@@ -47,7 +47,7 @@ function once(haystack, needle, what) {
   if (n !== 1) throw new Error(`mockups/src: expected exactly one ${what}, found ${n}`);
 }
 
-// A version (mockups/v3) is the same build over its own src and fixtures directories.
+// Another version (mockups/future_state_mockups) is the same build over its own src and fixtures.
 export function buildMockup({ src = SRC, fix = FIX } = {}) {
   const css = readFileSync(path.join(src, "engine.css"), "utf8");
   const shell = readFileSync(path.join(src, "shell.html"), "utf8").trim();

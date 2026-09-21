@@ -16,17 +16,17 @@ A home for the entity and term definitions that steer. It is a small tab, not a 
 
 ## What is on the page
 
-**Hub header.** Eyebrow “Workspace · <workspace name>”, h1 “Steering”, and one lead paragraph: everything that can steer an agent in this workspace competes in one assembler, each item is a file proposed as a pull request and published by a merge, and Preview shows what an agent would receive, what was cut, and why.
+**Hub header.** Eyebrow: the workspace name, h1 “Steering”, subtext “Everything that can steer an agent in this workspace competes in one assembler.” Actions: the governance chip **Governance: team** and **Write a context record** (gold; opens the record wizard). The chip and its `govmode` dialog are specified in `steering.md`.
 
-**The seven tabs, in this order:** Records (N published) · Skills (N in scope) · Memory (N) · Ontology (N) · Policy (N gates) · Proposals (N candidates plus open pull requests) · Preview. Each tab is a URL segment, `#/:org/:ws/steering/<tab>`. The hash is read on load and on `hashchange`; a tab changed by code writes the hash back with `replaceState`, so every view is a link. The bare route `#/:org/:ws/steering` is Records.
+**The seven tabs, in this order:** Records (59) · Skills (6) · Memory (6) · Ontology (4) · Policy (6) · Proposals (15) · Preview. Each tab is a URL segment, `#/:org/:ws/steering/<tab>`. The hash is read on load and on `hashchange`; a tab changed by code writes the hash back with `replaceState`, so every view is a link. Ontology is selected.
 
-Header action: **Write a context record** (gold; opens the record wizard: describe, kind, statement, checks, pull request).
+- A lead note, verbatim: “An ontology note defines one entity or one term the way this workspace uses it. It compiles to text like any other item, enters the volatile selection as info, and grants nothing.”
+- **Entity and term definitions** panel, badge “4 notes · files under .oxagen/ontology/”. Filter: Kind (entity, term); Rows; pager (“1–4 of 4”). Columns: Term (bold, with its id under it, `ont.release-train`) · Kind (`term` or `entity`) · Definition (the body, at most 52ch wide) · Force (`info`) · About (the repositories, records, or skills it is linked to, one per line in mono) · Token cost (“34 tok”) · File (`.oxagen/ontology/<name>.toml @ <commit>`).
+- **Index** panel, three rows of a key-value list. **Today**: “The Postgres registry. The assembler reads every item, these notes included, from the registry behind one port.” **Later**: “The graph becomes the index (Phase 3 of the plan), once the knowledge graph is on by default. Each item is projected one way, registry to graph, and verified by hash. Postgres stays as the fallback behind the same port.” **Not here**: “There is no ontology engine and there are no connectors on this tab. A note is a file somebody wrote and somebody merged.”
 
-- A lead note: an ontology note defines one entity or one term the way this workspace uses it. It compiles to text like any other item, enters the volatile selection as `info`, and grants nothing.
-- **Entity and term definitions** table: Term (with its id) · Kind (`entity` or `term`) · Definition · Force · About (the repositories, records, or skills it is linked to) · Token cost · File (`.oxagen/ontology/<id>.toml @ <commit>`).
-- **Where these are indexed**, three rows. **Today**: the Postgres registry; the assembler reads every item, these notes included, from the registry behind one port. **Later**: the graph becomes the index (Phase 3 of the plan), once the knowledge graph is on by default; each item is projected one way, registry to graph, and verified by hash; Postgres stays as the fallback behind the same port. **Not here**: no ontology engine and no connectors; a note is a file somebody wrote and somebody merged.
+**Dialogs this page opens:** `govmode`, `wz (record wizard)`.
 
-**Shell.** Sidebar (organization switcher, workspace switcher, Workspace nav: Fleet · Agent IAM · Tools · Steering · Repositories · Spend; Organization nav: Organization · Billing · Audit; agent count · data plane · connection badge), top bar (breadcrumbs, ⌘K search-or-run, notifications with unread dot, account avatar → user menu: Account, Preferences, Security and sessions, Privacy and data, Switch theme, Sign out). Skills has no nav entry of its own: it is a tab of Steering.
+**Shell.** As `steering.md`: sidebar with Steering lit and Repositories between Steering and Spend, top bar with breadcrumbs, ⌘K search-or-run, notifications, the **Approvals** button (count of everything waiting on you across the organization) that opens the drawer `#apdrawer`, and the account avatar. No assistant button in the top bar. Skills has no nav entry of its own.
 
 ## Data sources
 
@@ -34,24 +34,25 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 
 | Element | Mockup collection | Target store | Backing today (repo) | Status |
 |---|---|---|---|---|
-| Ontology notes | `ONTOLOGY` | `.oxagen/ontology/*.toml` in git; indexed in the Postgres registry | none; `packages/ontology` holds no steering | ❌ |
+| Ontology notes | `ONTOLOGY` (`term`, `noteKind`, `body`, `force`, `entities`, `token_cost`, `provenance`) | `.oxagen/ontology/*.toml` in git; indexed in the Postgres registry | none; `packages/ontology` holds no steering | ❌ |
 
 ## Functionality
 
-- A note is authored through the same pull request flow as a record.
+- A note is authored through the same pull request flow as a record: Write a context record, kind chosen in the wizard.
 - Delivery never waits for the graph.
+- The badge count is the row count and the tab count is the same number.
 
 ## States
 
 - **loaded**: the tab as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell).
-- **empty**: the hub header and the seven tabs stay, and the tab body is “No ontology notes yet”. Notes are files under `.oxagen/ontology/` on the main repo, published by a merge. Action: **Write a context record**.
+- **empty**: the hub header, the chip, and the seven tabs stay; the header holds no gold. The body is “No ontology notes yet”: “A note defines one entity or one term the way this workspace uses it. Notes are files under `.oxagen/ontology/` on a-intel/platform, published by a merge.” Action: **Write a context record** (gold).
 - **loading**: the shell stays; the page body, hub header included, is replaced by the skeleton (four tile blocks and a panel of seven rows).
-- **error**: “Steering could not be loaded”, `503 record_index_unavailable`. Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by Oxagen. Actions: **Try again**, **Open an incident**; a trace id, region and timestamp line.
-- **access denied**: “You cannot see this workspace’s steering”. The roles the signed-in person holds on the organization do not include `steering.read on core-platform`. Actions: **Request access**, **Back to Fleet**. Below: *Signed in as*, *Needed*, *Decided by* (`pol_v41` · deny wins over every allow).
+- **error**: “Steering could not be loaded”. “The control plane answered `503 record_index_unavailable`. Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by Oxagen.” Actions: **Try again**, **Open an incident**; the trace line.
+- **access denied**: “You cannot see this workspace’s steering”, naming `steering.read on core-platform`. Actions: **Request access**, **Back to Fleet**. Below: *Signed in as*, *Needed*, *Decided by* (`pol_v41` · deny wins over every allow).
 
 ## Mobile
 
-The seven tabs are one scrolling strip with scroll snap, and the tab in view is scrolled to on render; the page itself never scrolls sideways. Top bar collapses to hamburger · current crumb · search glyph · notifications · avatar. A fixed five-slot thumb bar replaces the sidebar: **Fleet**, **Agents**, **Tools**, **Spend**, **More**. **More** is a bottom sheet listing Steering (with Skills inside it), Repositories, Organization, Billing, Audit, Search, Notifications, Account, Switch organization, Switch workspace, and it is the lit slot on every Steering tab. Every dialog rises from the bottom edge as a sheet; every list table becomes a stack of cards, each cell labelled with its column header; touch targets are ≥ 44 px; inputs are 16 px.
+The seven tabs are one scrolling strip with scroll snap, and the tab in view is scrolled to on render; the page itself never scrolls sideways. Top bar collapses to hamburger · current crumb · search glyph · notifications · approvals · avatar. A fixed five-slot thumb bar replaces the sidebar: **Fleet**, **Agents**, **Tools**, **Spend**, **More**. **More** is a bottom sheet listing Steering (with Skills inside it), Repositories, Organization, Billing, Audit, Search, Notifications, Account, Switch organization, Switch workspace, and it is the lit slot on every Steering tab. Every dialog rises from the bottom edge as a sheet; the table becomes a stack of cards, each cell labelled with its column header; touch targets are ≥ 44 px; inputs are 16 px.
 
 ## Permissions
 
@@ -65,9 +66,10 @@ The seven tabs are one scrolling strip with scroll snap, and the tab in view is 
 
 ## Rules every build of this page must keep
 
-- Status vocabulary. Hook tier: delivered, recorded, client-attested, fail-open. Never "enforced". A control claim carries its scope: "for actions routed through Oxagen". `gateway` and `contained` appear only as tiers not yet available.
+- Status vocabulary. Hook tier: delivered, recorded, client-attested, fail-open. Never "enforced". A control claim carries its scope: "for actions routed through Oxagen".
 - Every badge that describes trust (tier, replay grade, attestation, cost basis) shows the recorded value and nothing stronger.
 - Every explanation is a chain of links to items, frames, records and commits, not a summary.
+- Plain nouns. A heading names the thing, a caption states one fact, and no label carries a comma, a mid-dot, or a not/never contrast. Subtext under a heading is one sentence or nothing.
 - Exactly one gold action per screen. Gold is identity; it never encodes state. State reads as a dot and a word, or a dashed outline, so it survives greyscale.
 - A not-loaded state replaces the page body, never the shell. Stub controls say what the product would do; nothing silently does nothing.
 - A count in navigation appears only where something waits on a person.

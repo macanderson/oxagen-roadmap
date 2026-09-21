@@ -19,7 +19,7 @@ record must be derived the same way in the fixture, or two pages disagree.
 | `av-sample-photo.json` | `AV_SAMPLE_PHOTO` | a stylised sample portrait so the photo path renders without a network or an upload |
 | `people.json` | `PEOPLE` | the people, keyed by handle: name, role, email, two-factor, avatar |
 | `agents.json` | `AGENTS` | the seed agents with their identity (principal, harness, host, credential, budget) merged in |
-| `runs.json` | `RUNS` | the seed runs: the story runs the scenarios walk, with status, verdict, cost, task, summary and linked work. `outputs` is the `<RunOutputs>` spine (see below); `touched` is the older flat list and is kept only because `RUNGRAPH`, `frPath` and the generated fleet still read it. |
+| `runs.json` | `RUNS` | the seed runs: the story runs the scenarios walk, with status, tier, basis, cost, task, summary and linked work. `outputs` is the `<RunOutputs>` spine (see below); `touched` is the older flat list and is kept only because `RUNGRAPH`, `frPath` and the generated fleet still read it. |
 | `approvals.json` | `APPROVALS` | the parked approvals the Fleet and Run pages show; resolution state lives on S.ap at runtime |
 | `frames.json` | `FRAMES` | the authored frames of the live release-manager run; every other run derives its frames |
 | `notes-v1.json` | `NOTES_V1` | The transcript is the model-visible projection of a run's frames: the prompt, the agent's prose, its tool calls with their outputs, and the usage each model step burned. Times are seconds from R.started. `fr` on an entry points at the governed frame (FRAMES seq) the gateway wrote for it. |
@@ -50,11 +50,10 @@ record must be derived the same way in the fixture, or two pages disagree.
 | `invites.json` | `INVITES` | open invitations |
 | `audit.json` | `AUDIT` | seed control-plane audit events |
 | `notifs.json` | `NOTIFS` | every kind maps to a frame kind or an audit event — nothing invented for a bell. tone is mc's decision vocabulary: approval \| failed \| allowed \| gold \| critical |
-| `spend.json` | `SPEND` | the month's spend rollups: totals, proven, by operator, agent, model and tool, wasted spend, budgets |
+| `spend.json` | `SPEND` | the month's spend rollups: totals, by operator, agent, model and tool, wasted spend, budgets. Token rollups are derived in the engine (`agentTok`, `operatorTok`, `wsTok`) |
 | `spend-detail.json` | `SPEND_DETAIL` | Drill-down detail behind every row of By operator, By agent and By tool. Keyed "kind:id". Cross-cuts (agents / operators / tools / models) are [name, spend] pairs that sum to at most the entity's own spend; a name that is not itself a row (e.g. "19 other agents") is not drillable. |
 | `billing.json` | `BILLING` | the plan, this period's lines, meters and invoices |
-| `dod.json` | `DOD` | the definition of done of each seed run, keyed by run id: the locked set, checks with evidence, hidden checks, usage, every Stop, the verdict and certificate (`dod-spec.md`) |
-| `skills.json` | `SKILLS` | the skill catalog: id, version, kind, source, path, digest, load tokens, decision tier, state (ok, out of scope, unapproved digest), cited and proof rate |
+| `skills.json` | `SKILLS` | the skill catalog: id, version, kind, source, path, digest, load tokens, decision tier, state (ok, out of scope, unapproved digest), cited rate before and after the version |
 | `sk-cfg.json` | `SK_CFG` | the workspace's `.oxagen/skills.toml`: version, sources, search cut-off and budget, reflection settings, the unbound-repo policy |
 | `skrun.json` | `SKRUN` | the interjected run: the agent, operator, harness and the unbound repository it started in |
 | `sk-frames.json` | `SK_FRAMES` | that run's frames while it waits on a person |
@@ -73,10 +72,10 @@ items a human would go and open, or what the run was still waiting on. Each node
 
 | Field | Meaning |
 |---|---|
-| `kind` | `task` · `read` · `file` · `branch` · `pr` · `release` · `media` · `comment` · `label` · `record` · `proof` · `gate` · `halt` · `would` · `seal`. Picks the glyph and how the node renders. |
+| `kind` | `task` · `read` · `file` · `branch` · `pr` · `release` · `media` · `comment` · `label` · `record` · `check` · `gate` · `halt` · `would` · `seal`. Picks the glyph and how the node renders. |
 | `name` | what it is called; rendered monospace (a path, a ref, a tool name, an id) |
 | `where` | where it landed — the repo, the branch, the ledger, the gateway |
-| `state` | its disposition: `created` `written` `pushed` `posted` `open` `linked` `read` `awaiting` `blocked` `failing` `proven` `withheld`, or, on a `seal`, the run's verdict. Drives the badge and the node's ring colour. |
+| `state` | its disposition: `created` `written` `pushed` `posted` `open` `linked` `read` `awaiting` `blocked` `failing` `passed` `withheld`, or `sealed` on a `seal`. Drives the badge and the node's ring colour. |
 | `note` | one line of prose: what the reader needs and nothing more |
 | `at` | wall-clock time, optional |
 | `fr` | the frame that produced it; renders as a chip that opens that frame |

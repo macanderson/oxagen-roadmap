@@ -13,4 +13,6 @@ export default {
 };
 
 export const Loaded = { name: "Loaded", args: { state: "loaded" } };
+export const Error = { name: "Error", args: { state: "error" } };
 export const LoadedMobile = { name: "Loaded · mobile", args: { state: "loaded", shell: "mobile" } };
+export const ErrorMobile = { name: "Error · mobile", args: { state: "error", shell: "mobile" } };

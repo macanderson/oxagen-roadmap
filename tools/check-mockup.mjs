@@ -28,8 +28,8 @@ import { fileURLToPath } from "node:url";
 import { launchChromium } from "./lib/playwright.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-// MOCKUP=v3 checks mockups/v3 (its own catalog and file); unset, the v1 master.
-const VERSION = process.env.MOCKUP === "v3" ? "v3" : "";
+// MOCKUP=future checks mockups/future_state_mockups (its own catalog and file); unset, the master.
+const VERSION = process.env.MOCKUP === "future" ? "future_state_mockups" : "";
 const CATALOG = VERSION ? `../mockups/${VERSION}/catalog.mjs` : "../mockups/catalog.mjs";
 const { PAGES, SCENARIOS, mockupUrl, scenarioHash, ORG } = await import(CATALOG);
 const FILE = "file://" + path.join(root, VERSION ? `mockups/${VERSION}/missioncontrol.html` : "mockups/missioncontrol.html");

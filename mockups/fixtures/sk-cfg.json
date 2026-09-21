@@ -52,7 +52,7 @@
   "sample": 0.2,
   "always": [
    "failing",
-   "tampered"
+   "halted"
   ],
   "rubric": "rfl_v3",
   "consent": "org",

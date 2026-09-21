@@ -351,110 +351,22 @@ code{font-family:var(--mono);font-size:.9em;background:var(--hl);padding:.12em .
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.28}}
 
 /* ---------- the flip: fail on the left, pass on the right. Proven teal only; gold never encodes a state. ---------- */
-.flip-stage{display:grid;grid-template-columns:minmax(0,1fr) 52px minmax(0,1fr);gap:10px;align-items:stretch}
 @media(max-width:640px){.flip-stage{grid-template-columns:minmax(0,1fr)}.flip-arrow svg{transform:rotate(90deg)}}
-#viewport.phone .flip-stage{grid-template-columns:minmax(0,1fr)}
-#viewport.phone .flip-arrow svg{transform:rotate(90deg)}
-.flip-box{position:relative;border:1px solid var(--border);border-radius:12px;padding:14px 16px;background:var(--ink);overflow:hidden;min-width:0}
-.flip-box .k{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:600;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.flip-box .k .n{margin-left:auto;font-family:var(--mono);letter-spacing:0;text-transform:none;font-weight:500}
-.flip-box .w{font-size:38px;font-weight:700;letter-spacing:-.04em;line-height:1;margin-top:8px}
-.flip-box .r{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:8px;overflow-wrap:anywhere}
-.flip-box .m{margin-top:11px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:3px 12px;font-size:11.5px;color:var(--dim)}
-.flip-box .m .v{font-family:var(--mono);font-variant-numeric:tabular-nums;color:var(--body);overflow-wrap:anywhere}
-.flip-box.fail{border-color:color-mix(in srgb,var(--st-failed) 45%,transparent)}
-.flip-box.fail .w{color:var(--st-failed)}
-.flip-box.pass .w{color:var(--st-proven)}
-.flip-box.miss{border-style:dashed}
-.flip-box.miss .w{color:var(--dim)}
-.flip-stage.on .flip-box.pass{border-color:color-mix(in srgb,var(--st-proven) 60%,transparent);box-shadow:0 0 0 1px color-mix(in srgb,var(--st-proven) 22%,transparent),0 0 34px color-mix(in srgb,var(--st-proven) 16%,transparent)}
-.flip-stage.on .flip-box.fail{animation:flipin .55s cubic-bezier(.2,.8,.2,1) both}
-.flip-stage.on .flip-box.pass{animation:flipin .55s cubic-bezier(.2,.8,.2,1) .28s both,flipglow 3.4s ease-in-out 1.1s infinite}
-.flip-stage.on .flip-box.pass::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 35%,color-mix(in srgb,var(--st-proven) 26%,transparent) 50%,transparent 65%);background-size:260% 100%;animation:flipsheen 1.6s ease-in-out .7s 1 both}
-@keyframes flipin{0%{transform:perspective(900px) rotateY(-80deg);opacity:0}100%{transform:perspective(900px) rotateY(0);opacity:1}}
-@keyframes flipsheen{0%{background-position:130% 0}100%{background-position:-30% 0}}
-@keyframes flipglow{0%,100%{box-shadow:0 0 0 1px color-mix(in srgb,var(--st-proven) 22%,transparent),0 0 34px color-mix(in srgb,var(--st-proven) 16%,transparent)}50%{box-shadow:0 0 0 1px color-mix(in srgb,var(--st-proven) 48%,transparent),0 0 56px color-mix(in srgb,var(--st-proven) 32%,transparent)}}
-.flip-arrow{display:grid;place-items:center;color:var(--dim)}
-.flip-arrow.on{color:var(--st-proven)}
-.flip-arrow svg{width:44px;height:44px;overflow:visible}
-.flip-arrow.on .ln{stroke-dasharray:6 5;animation:flipmarch 1.1s linear infinite}
-@keyframes flipmarch{to{stroke-dashoffset:-22}}
 /* the rail: turn opened → each attempt → the flip → agent ended its turn → sealed */
-.flip-rail{position:relative;display:grid;gap:8px;margin-top:6px}
-.flip-rail::before{content:"";position:absolute;left:7px;right:7px;top:7px;height:2px;background:var(--rule)}
-.flip-rail .pt{position:relative;padding-top:20px;font-size:11.5px;color:var(--muted);min-width:0;overflow-wrap:anywhere}
-.flip-rail .pt::before{content:"";position:absolute;left:0;top:1px;width:10px;height:10px;border-radius:50%;background:var(--panel);border:2px solid var(--rule);box-sizing:content-box}
-.flip-rail .pt.fail::before{border-color:var(--st-failed)}
-.flip-rail .pt.pass::before{border-color:var(--st-proven);background:var(--st-proven);box-shadow:0 0 0 5px color-mix(in srgb,var(--st-proven) 24%,transparent)}
-.flip-rail.on .pt.pass::before{animation:pulse 1.8s ease-in-out infinite}
-.flip-rail .pt.end::before{border-color:var(--fg)}
-.flip-rail .pt.seal::before{border-radius:2px;border-color:var(--fg);background:var(--fg)}
-.flip-rail .pt b{display:block;color:var(--fg);font-weight:600;font-size:12px}
-.flip-rail .pt.pass b{color:var(--st-proven)}
-.flip-rail .pt.fail b{color:var(--st-failed)}
-.flip-rail .pt .t{font-family:var(--mono);font-size:10.5px;color:var(--dim);display:block;font-variant-numeric:tabular-nums}
 .fr{font-family:var(--mono);font-size:10.5px;color:var(--dim);text-decoration:underline dotted;background:none;border:0;padding:0;cursor:pointer}
 .fr:hover{color:var(--fg)}
-.flip-rail .lead{position:absolute;top:-6px;right:0;font-family:var(--mono);font-size:10.5px;color:var(--st-proven);white-space:nowrap;background:var(--panel);padding:0 4px}
-#viewport.phone .flip-rail{grid-template-columns:1fr!important}
-#viewport.phone .flip-rail::before{left:7px;right:auto;top:7px;bottom:7px;width:2px;height:auto}
-#viewport.phone .flip-rail .pt{padding:0 0 0 22px}
-#viewport.phone .flip-rail .lead{position:static;display:block;margin-bottom:6px}
 /* hero band under the header of a proven run */
-.flip-hero{position:relative;overflow:hidden;border:1px solid color-mix(in srgb,var(--st-proven) 50%,transparent);border-radius:12px;padding:13px 16px;margin-bottom:16px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;background:linear-gradient(90deg,color-mix(in srgb,var(--st-proven) 13%,var(--panel)),var(--panel) 70%)}
-.flip-hero::before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 40%,color-mix(in srgb,var(--st-proven) 18%,transparent) 50%,transparent 60%);background-size:300% 100%;animation:flipsheen 2.2s ease-in-out .3s 1 both}
-.flip-hero>*{position:relative}
-.flip-hero .fp{font-size:22px;font-weight:700;letter-spacing:-.03em;display:inline-flex;align-items:center;gap:8px;flex:none;animation:flipin .55s cubic-bezier(.2,.8,.2,1) both}
-.flip-hero .fp .f{color:var(--st-failed)}.flip-hero .fp .p{color:var(--st-proven)}.flip-hero .fp .a{color:var(--dim);font-weight:400}
-.flip-hero .tx{font-size:12.5px;color:var(--muted);min-width:0;flex:1 1 260px}
-.flip-hero .tx b{color:var(--fg);font-weight:600}
-.flip-hero .acts{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
 /* attempts ladder */
-tbody tr.att-pass td{background:color-mix(in srgb,var(--st-proven) 9%,transparent)}
-tbody tr.att-pass td:first-child{box-shadow:inset 3px 0 0 var(--st-proven)}
 /* W5 · a tampered head on the flip stage, the pass/fail airlock, the witness ladder */
-.flip-box.crit{border-color:color-mix(in srgb,var(--st-critical) 55%,transparent)}
-.flip-box.crit .w{color:var(--st-critical);font-size:30px}
-.flip-rail .pt.excluded::before{border-color:var(--st-critical)}
-.flip-rail .pt.excluded b{color:var(--st-critical)}
-.airlock{display:grid;grid-template-columns:minmax(0,1fr) 78px minmax(0,1fr);align-items:stretch}
 .chamber{padding:16px;display:grid;gap:12px;align-content:start;min-width:0}
 .chamber.sealed{background:var(--void)}
-.membrane{position:relative;display:grid;place-items:center;min-height:120px;border-left:1px dashed var(--rule);border-right:1px dashed var(--rule);background:repeating-linear-gradient(-45deg,transparent 0 5px,var(--hl) 5px 6px)}
-.membrane .grain{background:var(--panel);border:1px solid var(--st-proven);color:var(--st-proven);border-radius:999px;padding:3px 9px;font-family:var(--mono);font-size:11px;font-weight:700}
-.membrane .grain.bad{border-color:var(--st-failed);color:var(--st-failed)}
-.membrane .ml{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);white-space:nowrap;font-weight:600}
-.redact{display:grid;gap:7px;font-family:var(--mono);font-size:12px}
-.redact .rr{display:grid;grid-template-columns:minmax(72px,auto) minmax(0,1fr);gap:12px;align-items:baseline}
-.redact .rk{color:var(--dim)}
-.redact .rv{color:var(--fg);overflow-wrap:anywhere}
-.redact .rv.x{color:var(--rule);letter-spacing:.08em;user-select:none;overflow:hidden;white-space:nowrap}
-.oneword{border:1px solid var(--border);background:var(--panel);border-radius:10px;padding:20px 16px;display:grid;place-items:center;gap:8px}
-.oneword .w{font-family:var(--mono);font-size:34px;font-weight:700;color:var(--st-proven);line-height:1}
-.oneword .w.bad{color:var(--st-failed)}
-.oneword .c{font-size:11.5px;color:var(--dim);font-family:var(--mono)}
 pre .bad{color:var(--st-failed)}
 @media(max-width:760px){.airlock{grid-template-columns:minmax(0,1fr)}.membrane{min-height:64px;border:0;border-top:1px dashed var(--rule);border-bottom:1px dashed var(--rule)}}
 #viewport.phone .airlock{grid-template-columns:minmax(0,1fr)}
 #viewport.phone .membrane{min-height:64px;border:0;border-top:1px dashed var(--rule);border-bottom:1px dashed var(--rule)}
-.ladder{list-style:none;margin:0;padding:0;display:grid}
-.ladder li{display:grid;grid-template-columns:26px minmax(0,1fr) auto;gap:12px;align-items:start;padding:12px 16px;border-bottom:1px solid var(--border)}
-.ladder li:last-child{border-bottom:0}
-.ladder .sn{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-family:var(--mono);font-size:11px;font-weight:700;border:1px solid color-mix(in srgb,var(--st-proven) 45%,transparent);color:var(--st-proven);background:color-mix(in srgb,var(--st-proven) 11%,transparent)}
-.ladder .st{display:grid;gap:3px;min-width:0}
-.ladder .st b{font-size:13px;font-weight:600;color:var(--fg)}
-.ladder .st span{font-size:12px;color:var(--muted);line-height:1.5}
-.ladder .st .mono{font-size:11.5px;color:var(--body);overflow-wrap:anywhere}
 #viewport.phone .ladder li{grid-template-columns:26px minmax(0,1fr)}
 #viewport.phone .ladder li>.b{grid-column:2;justify-self:start}
 /* proven rows in any runs list */
-tbody tr.flipped td:first-child{box-shadow:inset 3px 0 0 var(--st-proven)}
-tbody tr.flipped{background:linear-gradient(90deg,color-mix(in srgb,var(--st-proven) 8%,transparent),transparent 58%)}
-tbody tr.click.flipped:hover{background:linear-gradient(90deg,color-mix(in srgb,var(--st-proven) 14%,transparent),var(--hl) 58%)}
-.b-flip .d{animation:pulse 1.8s ease-in-out infinite;box-shadow:0 0 0 3px color-mix(in srgb,var(--st-proven) 22%,transparent)}
-.b-flip .fx{font-family:var(--mono);font-weight:500;color:var(--muted);border-left:1px solid color-mix(in srgb,var(--st-proven) 35%,transparent);padding-left:6px;margin-left:1px}
-.b-flip .fx i{font-style:normal;color:var(--st-failed)}.b-flip .fx em{font-style:normal;color:var(--st-proven)}
-.flipsub{font-family:var(--mono);font-size:10.5px;color:var(--dim);margin-top:3px;white-space:nowrap}
 
 .act-card{background:var(--ink);border:1px solid var(--border);border-radius:10px;padding:11px 13px;margin:9px 0;font-size:12.5px}
 .act-card .t{display:flex;align-items:center;gap:8px;margin-bottom:7px}
@@ -604,7 +516,6 @@ a.inv-i:hover{border-color:var(--rule);text-decoration:none}
 .avb .field input.short{width:120px;font-size:15px;letter-spacing:.08em}
 #layer.phone .avb{grid-template-columns:1fr}
 #viewport.phone .inv-i .tx b,#viewport.phone .inv-i .tx span{max-width:150px}
-.sc{font-family:var(--mono);font-size:11px;color:var(--dim)}
 .row2{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
 .row2>*{min-width:0}
 .kv.code dd{font-family:var(--mono);font-size:11.5px}
@@ -1242,8 +1153,6 @@ details.cm-diff[open] summary::before{content:"▾"}
 .tx-diffwrap .diff{border-radius:0 0 9px 9px;max-height:320px}
 .tx-usage{font-size:10.5px;color:var(--dim);display:flex;gap:8px;align-items:baseline;min-width:0}
 .tx-usage .u{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.tx-proof{color:var(--st-proven);font-weight:600}
-.tx-proof.bad{color:var(--st-approval)}
 .tx-recall{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:2px 12px;font-size:11px;margin:3px 0 2px 20px;align-items:baseline}
 .tx-recall .k{color:var(--dim)}.tx-recall .l{color:var(--body);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.tx-recall .n{color:var(--dim);text-align:right;font-variant-numeric:tabular-nums}
 .tx-empty{padding:18px 16px;color:var(--dim)}
@@ -1345,16 +1254,6 @@ button.edge:hover{color:var(--fg)}
    unless the agent sits in a tail of the whole Oxagen population (scoreBand): top decile green,
    below the tenth percentile amber, below the fifth red. Eight in ten agents carry no colour at all,
    so a coloured number is the exception a reader's eye is meant to catch. Never a filled pill. */
-.sc{display:inline-flex;align-items:baseline;gap:4px;font-size:11px;font-weight:500;color:var(--dim);white-space:nowrap;line-height:1.5;font-variant-numeric:tabular-nums}
-.sc b{font-family:var(--mono);font-weight:700;font-size:12px;color:var(--scc,var(--fg))}
-.sc i{display:none;width:6px;height:6px;border-radius:50%;background:var(--scc);align-self:center;flex:none;box-shadow:0 0 0 2px color-mix(in srgb,var(--scc) 22%,transparent)}
-.sc-top i,.sc-warn i,.sc-low i{display:inline-block}
-.sc em{font-style:normal;font-weight:500;opacity:.7;font-size:10px}
-.sc.sm{font-size:10.5px;gap:3px} .sc.sm b{font-size:11.5px}
-.sc-top{--scc:var(--st-allowed)}
-.sc-warn{--scc:var(--gold)}
-.sc-low{--scc:var(--st-failed)}
-.scs{display:inline-flex;gap:12px;flex-wrap:nowrap;align-items:baseline}
 /* The agent card: the one way an agent identity is drawn, anywhere. Avatar, identity and the two
    scores sit on one line in every layout; the identity block is the only part allowed to give way
    (it ellipsises), the scores are flex:none, so they can never drop under the name however narrow
@@ -1383,22 +1282,6 @@ a.agc-compact:hover{background:var(--hl)}
    body's, so in dark mode every unclassed cell was black on black. Inherit it back. */
 table{color:inherit}
 .steer-list .check>.scs{flex:none;margin-left:6px}
-.scm{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:13px 15px}
-.scm-h{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:10px}
-.scm-h .k{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--dim);font-weight:600}
-.scm-h .dim{margin-left:auto;font-family:var(--mono);font-size:10.5px}
-.scm-bar{position:relative;height:8px;border-radius:5px;overflow:visible;display:flex;gap:2px}
-.scm-bar .z{height:100%;border-radius:3px;opacity:.5}
-.scm-bar .z.z-low{background:var(--st-failed)}
-.scm-bar .z.z-warn{background:var(--gold)}
-.scm-bar .z.z-mid{flex:1;background:var(--border);opacity:1}
-.scm-bar .z.z-top{background:var(--st-allowed)}
-.scm-bar .mk{position:absolute;top:-4px;width:3px;height:16px;border-radius:2px;background:var(--fg);transform:translateX(-50%);box-shadow:0 0 0 2px var(--panel)}
-.scm-lg{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--dim);margin-top:6px}
-.scm .kv{margin-top:10px;font-size:12px}
-.scm .kv dd{font-family:var(--mono);font-size:11.5px}
-.scm .kv dd .up{color:var(--st-allowed)} .scm .kv dd .dn{color:var(--st-failed)}
-.sc-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--muted);align-items:center}
 /* ---- roles editor and rule editor ---- */
 .perm-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:6px 0 14px}
 .perm-grid .pg{border:1px solid var(--border);border-radius:9px;background:var(--ink);padding:9px 11px}
@@ -1689,25 +1572,7 @@ pre .dn{color:var(--st-denied)}
 .lw-files .dbar i.a{background:var(--st-allowed)} .lw-files .dbar i.d{background:var(--st-denied)}
 
 /* -------- definition of done: state by shape (double / dashed / single / dotted), hue second -------- */
-.b.dod{gap:6px;padding-left:6px}
-.b.dod .dg{font-family:var(--mono);font-size:10px;line-height:1}
-.b.dod-held{color:var(--st-proven);border:3px double color-mix(in srgb,var(--st-proven) 60%,transparent);background:color-mix(in srgb,var(--st-proven) 10%,transparent)}
-.b.dod-pending{color:var(--st-approval);border:1px dashed color-mix(in srgb,var(--st-approval) 70%,transparent);background:color-mix(in srgb,var(--st-approval) 9%,transparent)}
-.b.dod-broken{color:var(--st-failed);border:1px solid color-mix(in srgb,var(--st-failed) 55%,transparent);background:color-mix(in srgb,var(--st-failed) 9%,transparent)}
-.b.dod-locked{color:var(--muted);border:1px dotted var(--rule);background:var(--hl)}
 .tab .st.wait{background:var(--st-approval)}
-.dod-verdict{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:18px;padding:18px 20px;border-radius:14px;background:var(--panel);border:1px solid var(--border)}
-.dod-verdict .w{font-family:var(--mono);font-size:30px;font-weight:700;letter-spacing:.06em;line-height:1;padding:10px 14px;display:inline-block;border-radius:10px}
-.dod-verdict.held .w{color:var(--st-proven);border:4px double color-mix(in srgb,var(--st-proven) 60%,transparent)}
-.dod-verdict.pending .w{color:var(--st-approval);border:2px dashed color-mix(in srgb,var(--st-approval) 70%,transparent)}
-.dod-verdict.broken .w{color:var(--st-failed);border:2px solid color-mix(in srgb,var(--st-failed) 55%,transparent)}
-.dod-verdict.locked .w{color:var(--muted);border:2px dotted var(--rule)}
-.dod-cert .kv{font-size:12px}
-.dod-reasons{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:5px}
-.dod-reasons li{display:grid;grid-template-columns:auto 1fr;gap:10px;font-size:12px;align-items:baseline}
-.dod-reasons li b{color:var(--st-failed);font-weight:600;font-size:11px}
-.dod-reasons li span{color:var(--muted)}
-.dod-bar .mbar i.over{background:var(--st-failed)}
 tr.dod-fail td{background:color-mix(in srgb,var(--st-failed) 6%,transparent)}
 #viewport.phone .dod-verdict{grid-template-columns:1fr}
 
@@ -2089,3 +1954,65 @@ button.wz-opt:hover{border-color:var(--rule)}
 #viewport.phone .tl{grid-template-columns:1fr 1fr}
 #viewport.phone .tl li:nth-child(3){border-left:0}
 #viewport.phone .tl li:nth-child(n+3){border-top:1px solid var(--border)}
+
+/* v3: coaching cards and the token meters */
+.coach .panel-h{gap:8px}
+.meter .lab{display:flex;justify-content:space-between;gap:10px;font-size:12px;color:var(--muted)}
+.meter .lab b{color:var(--fg);font-variant-numeric:tabular-nums}
+.meter .bar{height:6px;border-radius:3px;background:var(--hl);overflow:hidden;margin-top:4px}
+.meter .bar i{display:block;height:100%;border-radius:3px}
+
+/* v3: the approvals drawer and its topbar button */
+.iconbtn .cnt{position:absolute;top:-6px;right:-6px;min-width:17px;height:17px;padding:0 4px;border-radius:999px;background:var(--st-approval);color:#000;font-family:var(--mono);font-size:10px;font-weight:700;display:grid;place-items:center;border:2px solid var(--ink)}
+.apd-btn[aria-pressed="true"]{border-color:var(--st-approval);color:var(--st-approval)}
+.apd-scrim{position:fixed;inset:0;background:rgba(0,0,0,.42);z-index:60;opacity:0;visibility:hidden;transition:opacity .2s ease,visibility 0s .2s}
+.apd-scrim.open{opacity:1;visibility:visible;transition:opacity .2s ease,visibility 0s 0s}
+.apd{position:fixed;top:0;bottom:0;right:0;width:min(680px,calc(100vw - 56px));background:var(--panel);border-left:1px solid var(--border);z-index:61;display:flex;flex-direction:column;
+  box-shadow:-18px 0 44px rgba(0,0,0,.44);translate:100% 0;opacity:0;visibility:hidden;transition:translate .34s cubic-bezier(.32,.72,0,1),opacity .18s ease,visibility 0s .34s}
+.apd.open{translate:0 0;opacity:1;visibility:visible;transition:translate .34s cubic-bezier(.32,.72,0,1),opacity .18s ease,visibility 0s 0s}
+.apd.phone{width:100%;max-width:100%}
+.apd-h{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--border);flex:none}
+.apd-h h3{margin:0;font-size:14px}
+.apd-b{padding:14px 16px;overflow-y:auto;flex:1;min-height:0}
+.apd-list{display:grid;gap:8px}
+.apd-row{display:flex;align-items:flex-start;gap:10px;width:100%;text-align:left;padding:10px 11px;border:1px solid var(--border);border-radius:10px;background:var(--panel);color:var(--fg);cursor:pointer;transition:border-color .15s}
+.apd-row:hover{border-color:var(--rule)}
+.apd-row.crit{border-color:color-mix(in srgb,var(--st-critical) 45%,var(--border))}
+.apd-row.done{opacity:.72}
+.apd-row.inter{border-color:color-mix(in srgb,var(--st-approval) 45%,var(--border))}
+.apd-row .g{flex:none;width:26px;height:26px;border-radius:7px;display:grid;place-items:center;background:var(--hl);color:var(--muted)}
+.apd-row .g svg{width:14px;height:14px}
+.apd-row .tt{min-width:0;flex:1;display:grid;gap:3px;font-size:12.5px}
+.apd-row .tt b{color:var(--fg);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.apd-row .tt>span{color:var(--muted);font-size:11.5px;line-height:1.4}
+.apd-row .tt .m{display:flex;gap:5px;flex-wrap:wrap;margin-top:2px}
+.apd .apcard{margin:0}
+.stat.click{cursor:pointer;text-align:left;font:inherit;color:inherit;transition:border-color .15s}
+.stat.click:hover{border-color:var(--rule)}
+.gov-chip{white-space:nowrap}
+@media(prefers-reduced-motion:reduce){.apd{translate:0 0;transition:opacity .12s ease,visibility 0s .12s}.apd.open{transition:opacity .12s ease,visibility 0s 0s}}
+/* inside the phone frame, fixed is relative to the frame, so the closed drawer must not sit past its edge */
+.apd.phone:not(.open){display:none}
+.stat.click{width:100%;min-width:0;display:block}
+
+/* v3: the run page layout */
+.run-cols{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:14px;align-items:start}
+@media(max-width:1080px){.run-cols{grid-template-columns:minmax(0,1fr)}}
+#viewport.phone .run-cols{grid-template-columns:minmax(0,1fr)}
+.run-main{min-width:0}
+.run-side{min-width:0;display:grid;gap:12px}
+.run-side .panel,.run-side .sumry{margin:0}
+.run-side .ro{margin:0}
+.fp-first{border:1px solid var(--border);border-radius:12px;background:var(--panel);padding:12px 16px}
+.fp-first .q{font-size:15px;line-height:1.5;color:var(--fg);margin:6px 0 0;max-width:80ch}
+.rstats{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin:12px 0}
+.rstats .stat{padding:9px 11px}
+.rstats .stat .k{font-size:10px}
+.rstats .stat .v{font-size:17px}
+.rstats .stat .s{font-size:10.5px}
+@media(max-width:1380px){.rstats{grid-template-columns:repeat(3,minmax(0,1fr))}}
+#viewport.phone .rstats{grid-template-columns:repeat(2,minmax(0,1fr))}
+.run-main .tabs{margin-top:2px}
+.run-side .sumry .gen{flex-direction:column;align-items:flex-start}
+.run-side .sumry .gen .btn{align-self:flex-start}
+.run-side .sumry .lede{font-size:13.5px}

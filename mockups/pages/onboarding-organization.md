@@ -12,17 +12,18 @@
 
 ## Job
 
-Step 1 of 3 of the gate after sign-up: name the organization — the tenant that owns its graph database, encryption key, billing account and the namespace in every agent key — and its first workspace.
+Step 1 of 3 of the gate after sign-up: name the organization and its first workspace. The organization is the tenant. It owns its graph database, its encryption key, its billing account, and the namespace in every agent key.
 
 ## What is on the page
 
-**Header** — eyebrow “Step 1 of 3”, h1 “Name your organization”. Rail: 1 Name the organization · 2 Wrap an agent · 3 Start a run. Caption: “Creates `org_<namespace>` and its graph database.”
-Actions: **Cancel** · **Continue** (gold)
+**Header.** Eyebrow “Step 1 of 3”, h1 “Name your organization”, lead “The organization is the tenant: it owns its own graph database, its own encryption key, its billing account, and the namespace that appears in every agent key.”
+Actions (card footer): **Cancel** · caption “Creates `org_a-intel` and its graph database.” · **Continue** (gold). The shell carries a second **Cancel** at the top right.
 
-- Fields: Organization name · Address (derived, read-only) · Namespace (2–6 characters, immutable; every agent key starts with it). First workspace: Workspace name · Governance mode (solo / team / regulated). A workspace is a governance partition: one main repo, one steering set, its own agents, tool grants and budgets.
+- **Organization name**: input `#ob-org`, demo value “Anderson Intelligence Corp.”.
+- Two-column grid: **Address**: read-only input `#ob-url`, `oxagen.com/a-intel`, hint “Derived from the name. You can change it later.” · **Namespace**: input `#ob-ns` (`maxlength=6`), `a-intel`, hint “2–6 characters, **immutable**. Every agent key starts with it: `a-intel.<workspace>.<agent>`”.
+- Divider, then h3 “First workspace”. Two-column grid: **Workspace name**: input `#ob-ws`, `core-platform` · **Governance mode**: select `#ob-mode` with `solo`, `team` (selected), `regulated`. Dim copy: “A workspace is a governance partition: one main repo, one steering set, its own agents, tool grants and budgets.”
 
-
-**Shell.** No sidebar or top bar: the brandmark, then a centred card; the phone layout is the same card at full width.
+**Shell.** No sidebar and no topbar, so this page has no approvals button and no approvals drawer. The gate shell (`regShell` in onboard mode): brandmark, `marcus@a-intel.example`, **Cancel** (the demo labels it “Exit demo”; the product build says “Cancel”); a three-step rail (`nav` labelled “Onboarding”): 1 Name the organization, 2 Wrap an agent, 3 Start a run, with step 1 current (`aria-current="step"`) and steps 2 and 3 disabled; the caption “The operator console does not open until an agent has talked to Oxagen. That first frame is also the installer’s smoke test, so there is one path, not two.” The phone layout is the same card at full width.
 
 ## Data sources
 
@@ -30,22 +31,26 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 
 | Element | Mockup collection | Target store (spec) | Backing today (repo) | Status |
 |---|---|---|---|---|
-| Organization, first workspace | `ORG`, `WS[0]` | `org.organizations`, `wrk.workspaces` | `org.organizations`, `workspace.workspaces` | ✅ / 🟡 gate state (G15) |
+| Organization, namespace, address | `FIXTURES.ORG` | `org.organizations` | `org.organizations` | ✅ / 🟡 gate state (G16) |
+| First workspace | `FIXTURES.WS[0]` | `wrk.workspaces` | `workspace.workspaces` | ✅ |
+| Governance mode | `ws.governance` (`solo`, `team`, `regulated`) | `wrk.workspaces.governance` (§14; the same value the Steering header chip and the Edit workspace dialog read) | none | ❌ |
 
 ## Functionality
 
-- Continue provisions the tenant and moves to Wrap an agent (the same Register Agent screens in onboard mode).
+- Continue (`regNav('wrap')`) provisions the tenant, `org_a-intel`, and its graph database, then moves to Wrap an agent, which is the Register agent wrap screen in onboard mode with the key `a-intel.core.release-manager`.
+- The governance mode chosen here becomes the workspace setting that Steering shows as “Governance: team” and that the Organization workspaces table reads.
+- Either Cancel (`obExit`) clears the onboarding state and goes to Fleet. Nothing is written until Continue.
 
 ## States
 
-- **loaded** — the page as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell).
-- **loading** — the shell stays; the page body is replaced by the skeleton (four tile blocks and a panel of seven rows), so the operator keeps their bearings.
-- **error** — Inline: “That namespace is taken. `<ns>` belongs to another organization. Pick a different 2–6 character namespace.” Namespace field marked bad.
-- **access denied** — “You cannot see onboarding” — the roles the signed-in person holds on the organization do not include `org.create for <email>`. Copy explains an owner can grant it and that the grant is itself a governed action in the audit record. Actions: **Request access** (opens the request-access dialog), **Back to Fleet**. Below: *Signed in as* (name · role), *Needed* (the permission), *Decided by* (`pol_v41` · deny wins over every allow).
+- **loaded**: the page as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell).
+- **loading**: the shell and the rail stay. The card is replaced by the skeleton (four tile blocks and a panel of seven rows), so you keep your bearings.
+- **error**: an inline error above the fields: “**That namespace is taken.** `a-intel` belongs to another organization. Pick a different 2–6 character namespace.” The Namespace input is marked bad (`ob-bad`). Everything else stays.
+- **access denied**: “You cannot see onboarding”, then “Your roles on Anderson Intelligence Corp. do not include `org.create for marcus@a-intel.example`. An organization owner can grant it; the grant is a governed action and lands in the audit record with your name on it.” Actions: **Request access** (gold, opens dialog `request-access`), **Back to Fleet**. Below: *Signed in as* “Marcus Bell · workspace.owner · core-platform”, *Needed* “org.create for marcus@a-intel.example”, *Decided by* “pol_v41 · deny wins over every allow”.
 
 ## Mobile
 
-The card fills the width with 16 px gutters; buttons are full width and at least 44 px tall; inputs are 16 px so iOS does not zoom on focus; code inputs are numeric-keypad (`inputmode="numeric"`).
+The card fills the width with 16 px gutters. The two-column grids stack. Buttons are full width and at least 44 px tall. Inputs are 16 px so iOS does not zoom on focus.
 
 ## Permissions
 
@@ -58,9 +63,11 @@ The card fills the width with 16 px gutters; buttons are full width and at least
 
 ## Rules every build of this page must keep
 
-- Every badge that describes trust (enforcement tier, replay grade, attestation, cost basis) shows the recorded value and nothing stronger; a client-attested window is labelled as such.
+- Every badge that describes trust (enforcement tier, replay grade, attestation, cost basis) shows the recorded value and nothing stronger. A client-attested window is labelled as such.
 - Every number that is money shows its basis. Headers are rollups of the rows beneath them, never typed twice.
-- Every explanation is a chain of links to frames, records and commits, not a summary.
-- Exactly one gold action per screen. Gold is identity; it never encodes state. State reads as a dot and a word, so it survives greyscale.
-- A not-loaded state replaces the page body, never the shell. Stub controls say what the product would do; nothing silently does nothing.
+- Every explanation is a chain of links to frames, records, and commits, not a summary.
+- Exactly one gold action per screen. Gold is identity and never encodes state. State reads as a dot and a word, so it survives greyscale.
+- A not-loaded state replaces the page body, never the shell. Stub controls say what the product would do. Nothing silently does nothing.
 - A count in navigation appears only where something waits on a person.
+- Headings are plain nouns: no heading carries a comma, a mid-dot, or a not/never contrast, and subtext under a heading is one sentence or nothing.
+- Nothing on the page mentions a witness, a proof, a verdict, a definition of done, a trust or spend score, or a per-run price.

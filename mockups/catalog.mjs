@@ -1,4 +1,4 @@
-// The catalog of mockups/missioncontrol.html: every page with the states its renderer implements,
+// The catalog of mockups/missioncontrol.html, the authoritative design of rev1: every page with the states its renderer implements,
 // and every guided scenario. Storybook (mockups/stories) and tools/check-mockup.mjs both read
 // this file, so the catalog and the checks cannot disagree.
 //
@@ -61,7 +61,7 @@ export const PAGES = [
   { id: "onboarding-organization", title: "Onboarding · Organization", group: "Onboarding", hash: "#/welcome/organization",                              states: ["loaded", "loading", "error", "denied"] },
   { id: "onboarding-wrap",   title: "Onboarding · Wrap an agent",  group: "Onboarding",   hash: "#/welcome/wrap",                                          states: ["loaded", "loading", "denied"] },
   { id: "onboarding-run",    title: "Onboarding · First run",      group: "Onboarding",   hash: "#/welcome/run",                                           states: ["loaded", "loading", "error", "denied"] },
-  { id: "installer",         title: "Installer",                   group: "Onboarding",   hash: "#/welcome/installer",                                     states: ["loaded"] },
+  { id: "installer",         title: "Installer",                   group: "Onboarding",   hash: "#/welcome/installer",                                     states: ["loaded", "error"] },
 ];
 
 // The guided scenarios (the W flows). id is the SCENARIOS key in src/engine.js; ws the workspace
@@ -71,14 +71,12 @@ export const SCENARIOS = [
   { n: 2,  id: "stop-it-steer-it",            ws: "core-platform", title: "Stop It. Steer It." },
   { n: 3,  id: "money-asked",                 ws: "finops",        title: "Money Asked, A Human Answered" },
   { n: 4,  id: "flight-recorder",             ws: "core-platform", title: "Oxagen Flight Recorder" },
-  { n: 5,  id: "proven-not-claimed",          ws: "core-platform", title: "Proven, Not Claimed" },
   { n: 6,  id: "learned-approved-changed",    ws: "core-platform", title: "It learned, you approved, it changed" },
   { n: 8,  id: "every-dollar-every-operator", ws: "core-platform", title: "Every Dollar, Every Operator" },
   { n: 9,  id: "toolbelt-governed",           ws: "core-platform", title: "The Toolbelt, Governed" },
   { n: 10, id: "cio-console",                 ws: "core-platform", title: "The CIO's Console" },
   { n: 11, id: "the-account",                 ws: "core-platform", title: "The Account" },
   { n: 13, id: "in-the-loop",                 ws: "core-platform", title: "In the Loop" },
-  { n: 14, id: "done-means-done",             ws: "core-platform", title: "Done Means Done" },
 ];
 
 export const STATE_WORD = { loaded: "loaded", empty: "empty", loading: "loading", error: "error", denied: "access denied" };

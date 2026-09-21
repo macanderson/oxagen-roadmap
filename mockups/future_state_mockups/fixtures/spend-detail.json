@@ -1,0 +1,807 @@
+{
+ "operator:marcus": {
+  "cache": 0.84,
+  "wasted": 2614.2,
+  "accepted": 1102.3,
+  "unproven": 4535.34,
+  "perRun": 4.17,
+  "trend": "+6% vs August",
+  "modelCalls": 98410,
+  "toolCalls": 26102,
+  "agents": [
+   [
+    "a-intel.core.stella-ci",
+    1104.7
+   ],
+   [
+    "a-intel.core.release-manager",
+    612.48
+   ],
+   [
+    "a-intel.core.triage",
+    402.11
+   ],
+   [
+    "19 other agents",
+    10320.9
+   ]
+  ],
+  "tools": [
+   [
+    "claude_code__Bash",
+    4890.22
+   ],
+   [
+    "search_graph",
+    1988.1
+   ],
+   [
+    "linear__update_issue",
+    1102.31
+   ],
+   [
+    "github__create_pull_request",
+    988.06
+   ],
+   [
+    "(no tool call)",
+    3471.5
+   ]
+  ],
+  "models": [
+   [
+    "claude-opus-5",
+    9612.4
+   ],
+   [
+    "claude-haiku-4-5",
+    2402.11
+   ],
+   [
+    "z-ai/glm-latest (Oxagen)",
+    425.68
+   ]
+  ]
+ },
+ "operator:priya": {
+  "cache": 0.77,
+  "wasted": 1318.4,
+  "accepted": 2106.11,
+  "unproven": 910.63,
+  "perRun": 5.58,
+  "trend": "-2% vs August",
+  "modelCalls": 22810,
+  "toolCalls": 6904,
+  "agents": [
+   [
+    "a-intel.core.docs-writer",
+    71.09
+   ],
+   [
+    "18 other agents",
+    3847.13
+   ]
+  ],
+  "tools": [
+   [
+    "claude_code__Bash",
+    1313.96
+   ],
+   [
+    "search_graph",
+    702.4
+   ],
+   [
+    "slack__post_message",
+    211.2
+   ],
+   [
+    "slack__get_thread",
+    148.1
+   ],
+   [
+    "(no tool call)",
+    1542.56
+   ]
+  ],
+  "models": [
+   [
+    "claude-opus-5",
+    2811.02
+   ],
+   [
+    "claude-haiku-4-5",
+    690.14
+   ],
+   [
+    "z-ai/glm-latest (Oxagen)",
+    417.06
+   ]
+  ]
+ },
+ "operator:dana": {
+  "cache": 0.74,
+  "wasted": 797.82,
+  "accepted": 0,
+  "unproven": 1834.25,
+  "perRun": 3.86,
+  "trend": "+9% vs August",
+  "modelCalls": 9308,
+  "toolCalls": 3410,
+  "agents": [
+   [
+    "a-intel.finops.invoice-bot",
+    96.34
+   ],
+   [
+    "a-intel.finops.cost-reporter",
+    1780.67
+   ],
+   [
+    "7 other agents",
+    167.24
+   ]
+  ],
+  "tools": [
+   [
+    "aws_billing__get_cost_and_usage",
+    1842.77
+   ],
+   [
+    "snowflake__run_query",
+    121.3
+   ],
+   [
+    "stripe__create_payment",
+    41.16
+   ],
+   [
+    "(no tool call)",
+    39.02
+   ]
+  ],
+  "models": [
+   [
+    "claude-opus-5",
+    1494.6
+   ],
+   [
+    "claude-haiku-4-5",
+    309.94
+   ],
+   [
+    "z-ai/glm-latest (Oxagen)",
+    239.71
+   ]
+  ]
+ },
+ "agent:a-intel.core.stella-ci": {
+  "cache": 0.88,
+  "wasted": 61.2,
+  "accepted": 0,
+  "unproven": 223.51,
+  "perRun": 2.27,
+  "ratio": 0.71,
+  "trend": "-8% vs August",
+  "modelCalls": 6104,
+  "toolCalls": 4212,
+  "operators": [
+   [
+    "marcus",
+    1104.7
+   ]
+  ],
+  "tools": [
+   [
+    "claude_code__Bash",
+    712.4
+   ],
+   [
+    "github__create_pull_request",
+    188.02
+   ],
+   [
+    "search_graph",
+    96.1
+   ],
+   [
+    "slack__post_message",
+    41.2
+   ],
+   [
+    "(no tool call)",
+    66.98
+   ]
+  ],
+  "models": [
+   [
+    "claude-opus-5",
+    812.3
+   ],
+   [
+    "claude-haiku-4-5",
+    292.4
+   ]
+  ]
+ },
+ "agent:a-intel.core.release-manager": {
+  "cache": 0.72,
+  "wasted": 204.6,
+  "accepted": 88.4,
+  "unproven": 205.86,
+  "perRun": 2.89,
+  "ratio": 0.48,
+  "trend": "-3% vs August",
+  "modelCalls": 3120,
+  "toolCalls": 2214,
+  "operators": [
+   [
+    "marcus",
+    612.48
+   ]
+  ],
+  "tools": [
+   [
+    "claude_code__Bash",
+    298.1
+   ],
+   [
+    "github__create_pull_request",
+    161.4
+   ],
+   [
+    "slack__list_channels",
+    41.02
+   ],
+   [
+    "search_graph",
+    38.9
+   ],
+   [
+    "(no tool call)",
+    73.06
+   ]
+  ],
+  "models": [
+   [
+    "claude-opus-5",
+    560.11
+   ],
+   [
+    "claude-haiku-4-5",
+    52.37
+   ]
+  ]
+ },
+ "agent:a-intel.core.triage": {
+  "cache": 0.83,
+  "wasted": 141.3,
+  "accepted": 0,
+  "unproven": 363.21,
+  "perRun": 0.3,
+  "ratio": 0.44,
+  "trend": "+12% vs August",
+  "modelCalls": 11902,
+  "toolCalls": 4106,
+  "budget": {
+   "limit": "0.40",
+   "used": "0.29",
+   "period": "per run",
+   "mode": "hard"
+  },
+  "operators": [
+   [
+    "marcus",
+    402.11
+   ]
+  ],
+  "tools": [
+   [
+    "linear__update_issue",
+    261.4
+   ],
+   [
+    "search_graph",
+    88.2
+   ],
+   [
+    "slack__list_channels",
+    30.1
+   ],
+   [
+    "(no tool call)",
+    22.41
+   ]
+  ],
+  "models": [
+   [
+    "claude-haiku-4-5",
+    301.6
+   ],
+   [
+    "claude-opus-5",
+    100.51
+   ]
+  ]
+ },
+ "agent:a-intel.finops.invoice-bot": {
+  "cache": 0.41,
+  "wasted": 38.1,
+  "accepted": 0,
+  "unproven": 96.34,
+  "perRun": 1.09,
+  "ratio": 0.52,
+  "trend": "+1% vs August",
+  "modelCalls": 412,
+  "toolCalls": 388,
+  "operators": [
+   [
+    "dana",
+    96.34
+   ]
+  ],
+  "tools": [
+   [
+    "aws_billing__get_cost_and_usage",
+    62.1
+   ],
+   [
+    "stripe__create_payment",
+    22.14
+   ],
+   [
+    "snowflake__run_query",
+    12.1
+   ]
+  ],
+  "models": [
+   [
+    "claude-opus-5",
+    71.2
+   ],
+   [
+    "claude-haiku-4-5",
+    25.14
+   ]
+  ]
+ },
+ "agent:a-intel.core.docs-writer": {
+  "cache": 0.69,
+  "wasted": 14.8,
+  "accepted": 71.09,
+  "unproven": 0,
+  "perRun": 1.11,
+  "ratio": 0.38,
+  "trend": "-1% vs August",
+  "modelCalls": 812,
+  "toolCalls": 402,
+  "operators": [
+   [
+    "priya",
+    71.09
+   ]
+  ],
+  "tools": [
+   [
+    "search_graph",
+    31.2
+   ],
+   [
+    "claude_code__Bash",
+    22.14
+   ],
+   [
+    "github__create_pull_request",
+    11.7
+   ],
+   [
+    "(no tool call)",
+    6.05
+   ]
+  ],
+  "models": [
+   [
+    "claude-opus-5",
+    64.02
+   ],
+   [
+    "claude-haiku-4-5",
+    7.07
+   ]
+  ]
+ },
+ "tool:claude_code__Bash": {
+  "cache": 0.81,
+  "wasted": 1512.4,
+  "provenShare": 0.46,
+  "resTok": 4100,
+  "rerun": 0.31,
+  "retry": 0.02,
+  "trend": "+4% vs August",
+  "agents": [
+   [
+    "a-intel.core.stella-ci",
+    712.4
+   ],
+   [
+    "a-intel.core.release-manager",
+    298.1
+   ],
+   [
+    "a-intel.core.docs-writer",
+    22.14
+   ],
+   [
+    "17 other agents",
+    5171.54
+   ]
+  ],
+  "operators": [
+   [
+    "marcus",
+    4890.22
+   ],
+   [
+    "priya",
+    1313.96
+   ]
+  ],
+  "models": [
+   [
+    "claude-opus-5",
+    5104.2
+   ],
+   [
+    "claude-haiku-4-5",
+    1099.98
+   ]
+  ]
+ },
+ "tool:search_graph": {
+  "cache": 0.94,
+  "wasted": 88.1,
+  "provenShare": 0.52,
+  "resTok": 900,
+  "rerun": 0.06,
+  "retry": 0,
+  "trend": "-3% vs August",
+  "agents": [
+   [
+    "a-intel.core.stella-ci",
+    96.1
+   ],
+   [
+    "a-intel.core.triage",
+    88.2
+   ],
+   [
+    "a-intel.core.release-manager",
+    38.9
+   ],
+   [
+    "a-intel.core.docs-writer",
+    31.2
+   ],
+   [
+    "other agents",
+    2664
+   ]
+  ],
+  "operators": [
+   [
+    "marcus",
+    1988.1
+   ],
+   [
+    "priya",
+    702.4
+   ],
+   [
+    "dana",
+    227.9
+   ]
+  ],
+  "models": [
+   [
+    "claude-haiku-4-5",
+    1802.1
+   ],
+   [
+    "claude-opus-5",
+    1116.3
+   ]
+  ]
+ },
+ "tool:aws_billing__get_cost_and_usage": {
+  "cache": 0.41,
+  "wasted": 704.3,
+  "provenShare": 0,
+  "resTok": 41200,
+  "rerun": 0.12,
+  "retry": 0.01,
+  "trend": "+11% vs August",
+  "agents": [
+   [
+    "a-intel.finops.cost-reporter",
+    1780.67
+   ],
+   [
+    "a-intel.finops.invoice-bot",
+    62.1
+   ]
+  ],
+  "operators": [
+   [
+    "dana",
+    1842.77
+   ]
+  ],
+  "models": [
+   [
+    "claude-opus-5",
+    1494.6
+   ],
+   [
+    "claude-haiku-4-5",
+    348.17
+   ]
+  ]
+ },
+ "tool:linear__update_issue": {
+  "cache": 0.86,
+  "wasted": 41.2,
+  "provenShare": 0.12,
+  "resTok": 600,
+  "rerun": 0.04,
+  "retry": 0.01,
+  "trend": "+12% vs August",
+  "agents": [
+   [
+    "a-intel.core.triage",
+    261.4
+   ],
+   [
+    "other agents",
+    840.91
+   ]
+  ],
+  "operators": [
+   [
+    "marcus",
+    1102.31
+   ]
+  ],
+  "models": [
+   [
+    "claude-haiku-4-5",
+    902.1
+   ],
+   [
+    "claude-opus-5",
+    200.21
+   ]
+  ]
+ },
+ "tool:github__create_pull_request": {
+  "cache": 0.79,
+  "wasted": 118.6,
+  "provenShare": 0.61,
+  "resTok": 6200,
+  "rerun": 0.12,
+  "retry": 0.12,
+  "trend": "flat vs August",
+  "agents": [
+   [
+    "a-intel.core.stella-ci",
+    188.02
+   ],
+   [
+    "a-intel.core.release-manager",
+    161.4
+   ],
+   [
+    "a-intel.core.docs-writer",
+    11.7
+   ],
+   [
+    "other agents",
+    626.94
+   ]
+  ],
+  "operators": [
+   [
+    "marcus",
+    988.06
+   ]
+  ],
+  "models": [
+   [
+    "claude-opus-5",
+    902.4
+   ],
+   [
+    "claude-haiku-4-5",
+    85.66
+   ]
+  ]
+ },
+ "tool:slack__post_message": {
+  "cache": 0.83,
+  "wasted": 4.1,
+  "provenShare": 0.58,
+  "resTok": 300,
+  "rerun": 0.01,
+  "retry": 0,
+  "trend": "-1% vs August",
+  "agents": [
+   [
+    "a-intel.core.stella-ci",
+    41.2
+   ],
+   [
+    "other agents",
+    370
+   ]
+  ],
+  "operators": [
+   [
+    "priya",
+    211.2
+   ],
+   [
+    "marcus",
+    200
+   ]
+  ],
+  "models": [
+   [
+    "claude-haiku-4-5",
+    301.1
+   ],
+   [
+    "claude-opus-5",
+    110.1
+   ]
+  ]
+ },
+ "tool:snowflake__run_query": {
+  "cache": 0.52,
+  "wasted": 96.4,
+  "provenShare": 0.22,
+  "resTok": 18400,
+  "rerun": 0.08,
+  "retry": 0.03,
+  "trend": "+2% vs August",
+  "agents": [
+   [
+    "a-intel.finops.invoice-bot",
+    12.1
+   ],
+   [
+    "other agents",
+    354.82
+   ]
+  ],
+  "operators": [
+   [
+    "priya",
+    245.62
+   ],
+   [
+    "dana",
+    121.3
+   ]
+  ],
+  "models": [
+   [
+    "claude-opus-5",
+    340.12
+   ],
+   [
+    "claude-haiku-4-5",
+    26.8
+   ]
+  ]
+ },
+ "tool:slack__get_thread": {
+  "cache": 0.8,
+  "wasted": 6.2,
+  "provenShare": 0.4,
+  "resTok": 2800,
+  "rerun": 0.02,
+  "retry": 0,
+  "trend": "flat vs August",
+  "agents": [
+   [
+    "other agents",
+    148.1
+   ]
+  ],
+  "operators": [
+   [
+    "priya",
+    148.1
+   ]
+  ],
+  "models": [
+   [
+    "claude-opus-5",
+    120.4
+   ],
+   [
+    "claude-haiku-4-5",
+    27.7
+   ]
+  ]
+ },
+ "tool:slack__list_channels": {
+  "cache": 0.71,
+  "wasted": 84.2,
+  "provenShare": 0.3,
+  "resTok": 3400,
+  "rerun": 0,
+  "retry": 0,
+  "trend": "flat vs August",
+  "agents": [
+   [
+    "a-intel.core.release-manager",
+    41.02
+   ],
+   [
+    "a-intel.core.triage",
+    30.1
+   ],
+   [
+    "other agents",
+    25.32
+   ]
+  ],
+  "operators": [
+   [
+    "marcus",
+    96.44
+   ]
+  ],
+  "models": [
+   [
+    "claude-haiku-4-5",
+    60.12
+   ],
+   [
+    "claude-opus-5",
+    36.32
+   ]
+  ]
+ },
+ "tool:stripe__create_payment": {
+  "cache": 0.77,
+  "wasted": 0,
+  "provenShare": 0,
+  "resTok": 400,
+  "rerun": 0,
+  "retry": 0,
+  "trend": "flat vs August",
+  "agents": [
+   [
+    "a-intel.finops.invoice-bot",
+    22.14
+   ],
+   [
+    "other agents",
+    19.02
+   ]
+  ],
+  "operators": [
+   [
+    "dana",
+    41.16
+   ]
+  ],
+  "models": [
+   [
+    "claude-opus-5",
+    41.16
+   ]
+  ]
+ }
+}

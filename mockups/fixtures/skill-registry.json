@@ -10,8 +10,16 @@
   "tokens": 1840,
   "installs": 3120,
   "st": "Groups merged pull requests into Features, Fixes and Breaking, and writes the draft to a release branch. Never publishes.",
-  "match": ["release", "notes", "changelog", "pull request", "ship", "version", "tag"],
-  "proof": 0.81
+  "match": [
+   "release",
+   "notes",
+   "changelog",
+   "pull request",
+   "ship",
+   "version",
+   "tag"
+  ],
+  "cited": 0.81
  },
  {
   "id": "oxagen.refund-with-a-mandate",
@@ -23,8 +31,15 @@
   "tokens": 1120,
   "installs": 640,
   "st": "How to refund a charge against a mandate: find the receipt, check the amount against the per-call ceiling, and park anything above it.",
-  "match": ["refund", "stripe", "money", "charge", "mandate", "payment"],
-  "proof": 0.88
+  "match": [
+   "refund",
+   "stripe",
+   "money",
+   "charge",
+   "mandate",
+   "payment"
+  ],
+  "cited": 0.88
  },
  {
   "id": "oxagen.postgres-safe-migration",
@@ -37,8 +52,16 @@
   "tokens": 1320,
   "installs": 2870,
   "st": "Expand, backfill, contract — and never in one deploy. Names the four migrations that took production down in 2025.",
-  "match": ["migration", "postgres", "database", "schema", "deploy", "sql", "column"],
-  "proof": 0.92
+  "match": [
+   "migration",
+   "postgres",
+   "database",
+   "schema",
+   "deploy",
+   "sql",
+   "column"
+  ],
+  "cited": 0.92
  },
  {
   "id": "oxagen.triage-a-flaky-test",
@@ -50,8 +73,16 @@
   "tokens": 2210,
   "installs": 5410,
   "st": "Reruns the case under seed control, bisects the commit range, and opens a proposal when it cannot reproduce.",
-  "match": ["flaky", "test", "ci", "bisect", "triage", "failure", "retry"],
-  "proof": 0.34
+  "match": [
+   "flaky",
+   "test",
+   "ci",
+   "bisect",
+   "triage",
+   "failure",
+   "retry"
+  ],
+  "cited": 0.34
  },
  {
   "id": "vendorlabs.incident-comms",
@@ -63,9 +94,17 @@
   "tokens": 3640,
   "installs": 210,
   "st": "Writes the status-page update, the internal note and the customer email for an incident, in that order.",
-  "match": ["incident", "status", "outage", "comms", "customer", "email", "postmortem"],
-  "proof": null,
-  "why": "Unverified publisher. <span class=\"mono\">market = \"hold\"</span> in this workspace, so every version of it waits for a person."
+  "match": [
+   "incident",
+   "status",
+   "outage",
+   "comms",
+   "customer",
+   "email",
+   "postmortem"
+  ],
+  "why": "Unverified publisher. <span class=\"mono\">market = \"hold\"</span> in this workspace, so every version of it waits for a person.",
+  "cited": null
  },
  {
   "id": "oxagen.read-a-run-before-you-answer",
@@ -77,8 +116,16 @@
   "tokens": 740,
   "installs": 1890,
   "st": "Before answering a question about a run, open its frames. The summary is a derivation; the frames are the record.",
-  "match": ["run", "frames", "debug", "answer", "support", "investigate", "record"],
-  "proof": 0.77
+  "match": [
+   "run",
+   "frames",
+   "debug",
+   "answer",
+   "support",
+   "investigate",
+   "record"
+  ],
+  "cited": 0.77
  },
  {
   "id": "oxagen.write-a-context-record",
@@ -90,7 +137,15 @@
   "tokens": 980,
   "installs": 1240,
   "st": "Turns an observation into one statement of one kind, with the evidence that carried it, and nothing else.",
-  "match": ["context", "record", "rule", "steering", "constraint", "write", "statement"],
-  "proof": 0.69
+  "match": [
+   "context",
+   "record",
+   "rule",
+   "steering",
+   "constraint",
+   "write",
+   "statement"
+  ],
+  "cited": 0.69
  }
 ]

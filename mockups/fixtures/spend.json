@@ -1,9 +1,6 @@
 {
  "month": "September 2026",
  "spend": "18,402.66",
- "proven": "7,914.03",
- "accepted": "3,208.41",
- "unproven": "7,280.22",
  "ratio": 0.43,
  "cache": 0.81,
  "runs": 4218,
@@ -14,7 +11,6 @@
    "agents": 22,
    "runs": 2986,
    "spend": "12,440.19",
-   "proven": "6,802.55",
    "ratio": 0.55,
    "budget": "15,000.00",
    "used": 0.83
@@ -24,7 +20,6 @@
    "agents": 19,
    "runs": 702,
    "spend": "3,918.22",
-   "proven": "901.48",
    "ratio": 0.23,
    "budget": "5,000.00",
    "used": 0.78
@@ -34,7 +29,6 @@
    "agents": 9,
    "runs": 530,
    "spend": "2,044.25",
-   "proven": "210.00",
    "ratio": 0.1,
    "budget": "3,000.00",
    "used": 0.68
@@ -44,41 +38,31 @@
   {
    "k": "a-intel.core.stella-ci",
    "runs": 486,
-   "flipped": 389,
    "spend": "1,104.70",
-   "proven": "881.19",
    "trend": "-8%"
   },
   {
    "k": "a-intel.core.release-manager",
    "runs": 212,
-   "flipped": 61,
    "spend": "612.48",
-   "proven": "318.22",
    "trend": "-3%"
   },
   {
    "k": "a-intel.core.triage",
    "runs": 1340,
-   "flipped": 47,
    "spend": "402.11",
-   "proven": "38.90",
    "trend": "+12%"
   },
   {
    "k": "a-intel.finops.invoice-bot",
    "runs": 88,
-   "flipped": 0,
    "spend": "96.34",
-   "proven": "0.00",
    "trend": "+1%"
   },
   {
    "k": "a-intel.core.docs-writer",
    "runs": 64,
-   "flipped": 0,
    "spend": "71.09",
-   "proven": "0.00",
    "trend": "-1%"
   }
  ],
@@ -214,21 +198,21 @@
    "note": "reasoning and reply turns; not attributable to a tool"
   }
  ],
- "wasteTotal": "4,730.42",
- "wasteShare": 0.26,
- "wasteRuns": 412,
+ "wasteTotal": "3,591.92",
+ "wasteShare": 0.195,
+ "wasteRuns": 367,
  "wasteByCause": [
-  {
-   "c": "unproven outcome",
-   "spend": "2,318.90",
-   "runs": 141,
-   "why": "verdict failing, tampered or unsatisfied \u2014 the run ended and the task did not move"
-  },
   {
    "c": "cache misses",
    "spend": "1,204.35",
    "runs": 212,
    "why": "system-context digest changed mid-conversation; every later turn re-read the prefix at full price"
+  },
+  {
+   "c": "corrective prompts",
+   "spend": "1,180.40",
+   "runs": 96,
+   "why": "a prompt after the first fixed or filled what the first left out, and each one re-ran the window at full price"
   },
   {
    "c": "retry loops",
@@ -261,26 +245,22 @@
    "wasted": "5.08",
    "badges": [
     [
-     "tampered",
+     "chain break",
      "critical"
-    ],
-    [
-     "no proof",
-     "failed"
     ],
     [
      "47 steps, 0 advanced",
      "approval"
     ]
    ],
-   "what": "Evidence chain broke at frame #171: an evidence-ledger row was rewritten after seal. Nothing this run produced can be trusted, so the whole cost is unproven."
+   "what": "Evidence chain broke at frame #171: a receipt row was rewritten after seal. The frames after it are unverifiable, so the tokens they carry bought nothing that can be shown."
   },
   {
    "run": "run_01K5RK7C2V8BNM3X",
    "wasted": "2.10",
    "badges": [
     [
-     "verdict failing",
+     "contract test failing",
      "failed"
     ],
     [
@@ -303,7 +283,7 @@
      "approval"
     ]
    ],
-   "what": "Triage labelled the issue but the witness found the label already present. Five of nine steps changed nothing."
+   "what": "Triage labelled the issue but the check found the label already present. Five of nine steps changed nothing."
   },
   {
    "run": "run_01K5RS7M2E8FJ3QW",
@@ -341,7 +321,7 @@
      "failed"
     ]
    ],
-   "what": "Arrived from an observe tier agent with no provider request ids. No prefix cache was possible and no witness could run; nothing here is provable."
+   "what": "Arrived from an observe tier agent with no provider request ids. No prefix cache was possible and every class is self-reported; nothing here was observed."
   },
   {
    "run": "run_01K5RN8F3J2GHY6T",

@@ -16,15 +16,15 @@ The agent’s definition file `.oxagen/agents/<slug>.toml` in a source editor. E
 
 ## What is on the page
 
-**Header** — eyebrow “Agent · source”, h1 “`.oxagen/agents/<slug>.toml` (mono)”. Chips: main repo, branch @ commit (or the pending branch badge when a commit exists on a branch but is not merged), “source of truth”, the agent key.
-Actions: **Back to the form** · **Discard** (enabled when dirty) · **Save** (gold; opens the commit dialog)
+**Header**: eyebrow “Agent source”, h1 `.oxagen/agents/<slug>.toml` (mono). Chips: the main repo (`a-intel/platform`), branch @ commit (`main @ a4c91e2`, or the pending branch badge when a commit exists on a branch but is not merged), “source of truth”, the agent key. Subtext: “Every field on the agent form is a view of this file. Saving opens the same commit dialog the form uses; nothing is written to Postgres.”
+Actions: **Back to the form** · **Discard** (enabled when dirty) · **Save** (gold; opens the commit dialog).
 
-- **Editor** panel — bar with the path, a modified dot and *modified / unchanged*, **Find ⌘F** with match count; a gutter with line numbers and a textarea (`#edT`); a status line with the cursor position and key hints; TOML is parsed on every edit (`tomlParse`) and a parse error is shown at its line.
-- **Commit dialog** — the diff of the draft against the base, a commit message, and a branch choice (`BRANCHES` on the workspace’s main repo, or **+ New branch**); committing records `S.defPending[slug]` (the running definition is still main’s until merged).
+- **Editor** panel: a bar with the path, a modified dot and *modified* / *unchanged*, **Find** (aria-label “Find in file”, ⌘F) with a match count; a gutter with line numbers and a textarea labelled with the path (`#edT`); a status line with the cursor position (“Ln 21, Col 1”), “TOML”, “Spaces: 2”, “LF”, “UTF-8”, and the key hints “⌘S save · Tab indent · ⇧Tab outdent · ⌘/ comment · ⌘F find · ⌘Z undo”. TOML is parsed on every edit (`tomlParse`) and a parse error is shown at its line.
+- **Commit dialog** (`commit`): the diff of the draft against the base, a Branch select (`BRANCHES` on the workspace’s main repo, or **+ New branch** with a “New branch name” field), a Summary and a Description (with **Redraft**), an “Open a pull request” checkbox, **Cancel** and the primary button (Commit, or Commit and open a pull request; disabled until the branch and summary are filled). Committing records `S.defPending[slug]`; the running definition is still main’s until merged.
 
-**Dialogs this page opens:** `commit (branch, message, diff)`, `discard`.
+**Dialogs this page opens:** `commit` (branch, message, diff), `request-access` (from denied), `incident` (from error). Discard is a button, not a dialog.
 
-**Shell.** Sidebar (organization switcher, workspace switcher, Workspace nav: Fleet · Agent IAM · Tools · Steering · Spend; Organization nav: Organization · Billing · Audit; agent count · data plane · connection badge), top bar (breadcrumbs, ⌘K search-or-run, notifications with unread dot, account avatar → user menu: Account, Preferences, Security and sessions, Privacy and data, Switch theme, Sign out).
+**Shell.** Sidebar (organization switcher, workspace switcher, Workspace nav: Fleet · Agent IAM · Tools · Steering · Repositories · Spend; Organization nav: Organization · Billing · Audit; foot: the assistant launcher, agent count · data plane, connection badge). Top bar: hamburger, breadcrumbs (… / Agent IAM / <slug> / source), ⌘K search-or-run, notifications with unread dot, the approvals button (left of the avatar, count of everything waiting on you across the organization; opens the drawer described in `fleet.md`), account avatar → user menu. No assistant button in the top bar.
 
 ## Data sources
 
@@ -40,18 +40,19 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 
 - Draft state is shared with the agent form (`S.defSrc`), so a change made on either survives navigation until discarded or committed.
 - `sha7()` of the draft is shown as the would-be digest; the running definition’s digest is what every frame records.
-- Discard returns the draft to the base (the file at the head of the branch it was last committed to).
+- Discard returns the draft to the base (the file at the head of the branch it was last committed to) and is disabled while the draft is unchanged.
+- Save always opens the commit dialog; the diff in it is the draft against the base.
 
 ## States
 
-- **loaded** — the page as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell).
-- **loading** — the shell stays; the page body is replaced by the skeleton (four tile blocks and a panel of seven rows), so the operator keeps their bearings.
-- **error** — “This file could not be loaded” — `502 git_read_unreachable`. Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by Oxagen. Actions: **Try again**, **Open an incident**; a trace id, region and timestamp line.
-- **access denied** — “You cannot see this agent’s definition” — the roles the signed-in person holds on the organization do not include `agent.write on core-platform`. Copy explains an owner can grant it and that the grant is itself a governed action in the audit record. Actions: **Request access** (opens the request-access dialog), **Back to Fleet**. Below: *Signed in as* (name · role), *Needed* (the permission), *Decided by* (`pol_v41` · deny wins over every allow).
+- **loaded**: the page as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell).
+- **loading**: the shell stays; the page body is replaced by the skeleton (four tile blocks and a panel of seven rows), so you keep your bearings.
+- **error**: “This file could not be loaded”. “The control plane answered `502 git_read_unreachable`. Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by Oxagen.” Actions: **Try again**, **Open an incident**; the line “trace 01K5RSXQ7F2E · us-east-1 · 2026-09-11 09:16:04Z”.
+- **access denied**: “You cannot see this agent’s definition”. “Your roles on Anderson Intelligence Corp. do not include `agent.write on core-platform`. An organization owner can grant it; the grant is a governed action and lands in the audit record with your name on it.” Actions: **Request access** (opens `request-access`), **Back to Fleet**. Below: *Signed in as* (Marcus Bell · workspace.owner · core-platform), *Needed* (`agent.write on core-platform`), *Decided by* (`pol_v41` · deny wins over every allow).
 
 ## Mobile
 
-Top bar collapses to hamburger · current crumb · search glyph · notifications · avatar. A fixed five-slot thumb bar replaces the sidebar: **Fleet** (count = approvals waiting), **Agents**, **Tools**, **Spend**, **More** (count = open critical incidents). **More** is a bottom sheet listing Steering (with Skills inside it), Organization, Billing, Audit, Search, Notifications, Account, Switch organization, Switch workspace. The hamburger opens the full sidebar as a drawer over a scrim. Every dialog rises from the bottom edge as a sheet with a drag handle and full-width footer buttons; every list table becomes a stack of cards, each cell labelled with its column header; touch targets are ≥ 44 px; inputs are 16 px; nothing scrolls sideways.
+Top bar collapses to hamburger · current crumb · search glyph · notifications · approvals · avatar. A fixed five-slot thumb bar replaces the sidebar: **Fleet** (count = approvals waiting plus an interjection), **Agents**, **Tools**, **Spend**, **More** (count = open critical incidents). **More** is a bottom sheet listing Steering (with Skills inside it), Repositories, Organization, Billing, Audit, Search, Notifications, Account, Switch organization, Switch workspace. The hamburger opens the full sidebar as a drawer over a scrim. The editor fills the width; the status line wraps. Every dialog rises from the bottom edge as a sheet with a drag handle and full-width footer buttons; touch targets are ≥ 44 px; the textarea is 16 px; nothing scrolls sideways except the editor’s own lines.
 
 ## Permissions
 
@@ -60,13 +61,13 @@ Top bar collapses to hamburger · current crumb · search glyph · notifications
 
 ## Backend gaps this page depends on
 
-- Definitions are DB-backed today; the app must read/write `.oxagen/agents/*.toml` through the repo binding
+- Definitions are DB-backed today; the app must read and write `.oxagen/agents/*.toml` through the repo binding
 
 ## Rules every build of this page must keep
 
-- Every badge that describes trust (enforcement tier, replay grade, attestation, cost basis) shows the recorded value and nothing stronger; a client-attested window is labelled as such.
-- Every number that is money shows its basis. Headers are rollups of the rows beneath them, never typed twice.
-- Every explanation is a chain of links to frames, records and commits, not a summary.
-- Exactly one gold action per screen. Gold is identity; it never encodes state. State reads as a dot and a word, so it survives greyscale.
+- The chips (repo, branch @ commit, source of truth) show the recorded values and nothing stronger; a pending branch is labelled pending until merged.
+- Every explanation is a chain of links to frames, records, and commits, not a summary.
+- Exactly one gold action per screen (Save). Gold is identity; it never encodes state. State reads as a dot and a word, so it survives greyscale.
+- No heading carries a comma, a mid-dot, or a not/never contrast; subtext under a heading is one sentence or nothing.
 - A not-loaded state replaces the page body, never the shell. Stub controls say what the product would do; nothing silently does nothing.
 - A count in navigation appears only where something waits on a person.

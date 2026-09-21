@@ -297,7 +297,7 @@
    ],
    [
     "run_01K5RG7K4M2NPV8Z",
-    "a-intel/platform#480 · Witness: notes contract",
+    "a-intel/platform#480 · contract test: notes",
     "11:21",
     "3.10",
     "0.66",
@@ -464,7 +464,7 @@
    ],
    [
     "Nothing kept",
-    "No tail step produced a side effect that the run kept. The witness confirms the output was identical before and after the tail."
+    "No tail step produced a side effect that the run kept. The diff of the kept files is empty before and after the tail."
    ],
    [
     "Counterfactual",

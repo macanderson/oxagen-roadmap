@@ -4,40 +4,39 @@
 |---|---|
 | Route | `#/a-intel/billing` |
 | Scope | organization |
-| Spec | §14 Mission Control; Appendix F page 9 |
+| Spec | §12.1 as amended by ADR-055 (the governed action is the billable unit), §14 Mission Control; Appendix A.8, Appendix F page 9 |
 | Design | `mockups/src/engine.js` → `pBilling()`, built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
-| States | loaded · empty · loading · error · access denied |
+| States | loaded, empty, loading, error, access denied |
 | Storybook | `Oxagen / … / billing`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
 | Audit | `billing.audit-prompt.md` |
 
 ## Job
 
-The plan, the two meters, and the invoices, linked to Stripe. Meter 1 is governed action units (GAUs): used against this month's allowance, blocks and auto top-up, and the contracted rate. Meter 2 is usage credits for in-app AI usage: the balance, the signup grant and credit packs. Readable only by a finance role.
+The plan, the one priced meter, the reported meters, the invoices and the price list, linked to Stripe. Oxagen prices the governed action: a call it decided, delivered and recorded. Runs, tokens and retained evidence are reported and never priced. Readable only by a finance role.
 
 ## What is on the page
 
-The mockup (`pBilling()`) still renders the proven-run price list. Billing charges on two meters (spec §12.1; 2026-09-15, maintainer decision): governed actions in GAUs on one price list (maintainer decisions of 2026-09-14, reaffirmed 2026-09-15), and in-app AI usage in usage credits. The build renders the page below.
-
-**Header** — eyebrow “Organization”, h1 “Billing”.
-Actions: **Change plan** (gold; opens the plan dialog; Build or Scale goes through Stripe Checkout)
+**Header**: eyebrow "Organization", h1 "Billing", subtext "What <organization name> pays Oxagen."
+Actions: **Change plan** (gold; opens `plan`).
 
 **Summary tiles** (one number and one basis line each):
-- **Plan** — the plan name · “monthly, cancel any time”
-- **GAU this month** — remaining · “used of included + purchased + carried”
-- **Contracted rate** — $ per 1,000 GAU · the plan's terms, or the contract's agreement reference
-- **Due <date>** — $ USD
+- **Plan**: the plan name, "monthly, cancel any time".
+- **Governed actions this period**: the count, "above the included allowance · N blocks × $30.00 · N included".
+- **Retained evidence**: GB, "13 months included".
+- **Due <date>**: $, "USD · after the onboarding discount".
 
-- **This month** — Line · Basis · Amount (the plan, blocks bought through Checkout, auto top-ups, invoiced overage, tax).
-- **Meters** — Meter · This month · Note: GAU used against the allowance (`resolve_approval` is the only billable governed action), with held runs and other governed actions reported beside it and carrying no price; and usage credits spent on in-app AI usage.
-- **Invoices** — Invoice · Period · GAU · Amount · Status · Paid; a row opens the Stripe-hosted invoice.
-- **The price list** — Governed actions: Free $0 with 5,000 GAU a month · Build $199 with 50,000 · Scale $999 with 300,000 · Enterprise negotiated per contract · $5 per 1,000 GAU list · 5,000-GAU blocks at $25 · volume bands of $5, $4, $3 and $2 per 1,000. In-app AI usage: 1 usage credit = $0.01 · each in-app agent model call debits provider cost times the meter markup · a $5 signup grant · credit packs. Every feature is on for every tier.
-- **Auto top-up** — on or off, and the GAU blocks it buys; an Owner or Admin changes it.
-- **Usage credits** — the balance that pays for in-app AI usage, the signup grant and the packs bought against it; buy a credit pack (`purchase_credits`).
-- **What counts** — Billed in GAU: `resolve_approval`, one GAU each. Billed in usage credits: each model call the in-app agent makes, at provider cost times the meter markup. Free: membership writes and every other governed action, `dod.held` included. Reported: held runs and proven spend.
+Left column:
+- **This period**: badge "Stripe holds the plan and the invoice · Oxagen holds the meter"; Line, Basis, Amount. Rows: **Governed actions 1 – N** (the blocks and the included allowance), **Tokens** (reported at zero, the customer's own model spend is on Spend, $0.00), **Evidence retention** (13 months included, the GB held, $0.00), **Onboarding discount** (the offer and its negative amount), **Total** (rounded to cents once, half-even, USD).
+- **Meters**: Meter, This period, Note. Rows lead with **Governed actions** (the billable unit, the included allowance this month), then **Sealed runs with at least one model call** (reported, not priced), **Retained evidence** (13 months included), **Runs Oxagen halted before any model call** (free), **Runs of the in-app agent** (free). A note: one priced meter, the governed action; runs, tokens and retained evidence are reported so the price can move later without rewriting the meter.
+- **Invoices**: Invoice, Period, Governed actions, Amount, Status, Paid, **Open in Stripe ↗**.
 
-**Dialogs this page opens:** `plan`.
+Right column:
+- **Price list**: Free (every governance feature, an included monthly allowance, 30 days of evidence, 3 seats); Governed actions, blocks of 10,000 ($30.00 per block at the published rate); Negotiated agreement (the same four figures, per organization); Invoice billing (never capped, overage invoiced at the contracted rate at period end); Evidence retention (13 months included on paid plans, then $0.10 per GB-month); Tokens Oxagen buys for you (at cost, no markup, capped); Enterprise, annual (from $60,000 per year). A footer: no credits, no resellers, no revenue dashboard; the free tier is the whole product, limited by retention and seats, never by features or volume.
+- **Billable units**: **Priced** (a governed action, with its receipt in the chain), **Reported** (sealed runs, tokens by class, retained evidence), **Free** (denials, runs Oxagen halted before a model call, runs of the in-app agent).
 
-**Shell.** Sidebar (organization switcher, workspace switcher, Workspace nav: Fleet · Agent IAM · Tools · Steering · Spend; Organization nav: Organization · Billing · Audit; agent count · data plane · connection badge), top bar (breadcrumbs, ⌘K search-or-run, notifications with unread dot, account avatar → user menu: Account, Preferences, Security and sessions, Privacy and data, Switch theme, Sign out).
+**Dialogs this page opens:** `plan` (a Plan select with Team and Enterprise, a note, **Change plan**), `incident` (error state), `request-access` (denied state).
+
+**Shell.** Sidebar (organization switcher, workspace switcher, Workspace nav: Fleet, Agent IAM, Tools, Steering, Repositories, Spend; Organization nav: Organization, Billing, Audit; the assistant launcher, agent count, data plane and connection badge at the foot), top bar (Menu, breadcrumbs, ⌘K "Search or run an action", Notifications with the unread count, **Approvals** with the count of everything waiting on you across the organization, account avatar → Account, Preferences, Security and sessions, Privacy and data, Switch theme, Sign out). The Approvals button opens the right-hand drawer `#apdrawer`: heading "Approvals" with an "N waiting" badge and a close button, an open interjection row with **Answer it**, one row per pending approval (tool and amount, agent, task, workspace, risk badges, countdown), the full approval card with **Approve** and **Deny** when a row is picked and "‹ All approvals" to return, "N resolved today" beneath. Escape closes it. There is no assistant button in the top bar.
 
 ## Data sources
 
@@ -46,39 +45,31 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 | Element | Mockup collection | Target store (spec) | Backing today (repo) | Status |
 |---|---|---|---|---|
 | Plan, invoices | `BILLING` | `billing.plans`, `billing.subscriptions`, `billing.invoices` + Stripe | `billing.subscriptions`, `billing.invoices`; `billing.subscription.read` | ✅ |
-| GAU meter, blocks, contracted rate | `BILLING.billable`, `meters` | `billing.gau_buckets`, `billing.gau_settlements`, `billing.contract_terms` (§12.1, App. A.8) | the same tables on `macanderson/oxagen` `app-rebuild` | 🟡 billing rebuild (G13) |
-| Usage credits (in-app AI usage) | none | `billing.credit_balances`, `billing.credit_lots`, `billing.credit_ledger` (§12.1, App. A.8) | the same tables; the credit gate with the meter markup in `packages/billing/src/pricing.ts` | ✅ |
-| Held runs (reported) | `BILLING.billable` | `dod.dod_certificates` (§8.6) | none | ❌ G15 |
+| Governed-action meter, blocks, contracted rate | `BILLING.billable`, `BILLING.tier2`, `meters` | `billing.gau_buckets`, `billing.gau_settlements`, `billing.contract_terms` (§12.1 as amended, App. A.8) | the same tables on `macanderson/oxagen` `app-rebuild` | 🟡 billing rebuild (G13) |
+| Reported meters: sealed runs, tokens, halted runs, in-app runs | `BILLING.meters` | `cost.run_totals`, `cost.daily_totals` | ClickHouse `token_usage` | 🟡 |
+| Retained evidence | `BILLING.retention` | evidence store size by organization | `evidence.retention_policy_versions` | 🟡 |
 | Onboarding discount | `BILLING.discount` | deferred (spec §20, the 7-day offer) | none | ❌ deferred |
 
 ## Functionality
 
-- Every feature is on for every tier, the in-app agent and the hosted witness runner included. The free tier includes 5,000 GAU a month and thirty days of evidence.
-- `resolve_approval` is the only billable governed action. Membership writes, denials, broken runs and witness runs cost nothing. Held runs and proven spend are report figures.
-- Two meters, two balances. GAU blocks buy governed actions; credit packs buy in-app AI usage. Neither balance pays for the other, and tokens are not passed through at cost.
-- A Free organization that uses its allowance saves a card or waits for the next month. A prepaid organization's auto top-up buys blocks when the bucket reaches zero.
-- Change plan upgrades to Build or Scale through Stripe Checkout (`start_subscription_upgrade`, kept in rev1); the page shows the amount due before it is charged.
-
-**Decisions of 2026-09-15 (maintainer decision; spec §12.10).** The mockup does not show these yet.
-
-- Oxagen charges on two meters. In-app AI usage is priced in usage credits: 1 credit = $0.01, debited by the credit gate at provider cost times the meter markup, funded by the $5 signup grant on `create_org` and topped up with credit packs (`purchase_credits`). GAU blocks remain the governed-action product.
-- Enterprise is negotiated only: a `billing.contract_terms` row, with no enterprise plan in Stripe or in the plan dialog. No feature is gated on the enterprise license; every feature, IAM and SOC 2 controls included, is on for every tier.
-- When invoice billing is switched off, the organization's `overage_invoiced_gau` is added to `purchased_gau`: the invoice is the purchase.
-- `invoice_gau_max` bounds overage beyond the monthly allowance; the interim invoice fires at unit `invoice_gau_max` + 1.
-- An invoice-billed organization is suspended 5 days after an invoice is past due. Metering continues while it is suspended. Paying the full outstanding balance reactivates it.
-- `get_rate_card`, `preview_action_cost` and `get_evidence_retention` retire at cutover; nothing on this page reads them.
+- Every governance feature is on for every tier. The free tier includes a monthly allowance of governed actions, thirty days of evidence and three seats; upgrading is a governance decision, not a volume accident.
+- The governed action is the only priced unit (ADR-055): a call Oxagen decided, delivered and recorded, with its receipt in the chain. Denials, runs halted before a model call and runs of the in-app agent are free. Sealed runs, tokens by class and retained evidence are reported so the price can move later without rewriting the meter.
+- Governed actions above the included allowance are sold in blocks of 10,000 at the published rate, or at a contracted rate under a negotiated agreement. Invoice billing is never capped; overage is invoiced at the contracted rate at period end.
+- Tokens are never marked up. The customer's own model spend is on Spend; the Tokens line here is reported at zero. Tokens Oxagen buys for the organization's own model routes are at cost and capped.
+- Stripe holds the plan and the invoice; Oxagen holds the meter. A row of Invoices opens the Stripe-hosted invoice. **Change plan** stages the change in Stripe (`start_subscription_upgrade`, kept in rev1); Enterprise is annual and negotiated per organization.
+- The Total is rounded to cents once, half-even, at the statement line.
 
 ## States
 
-- **loaded** — the page as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell).
-- **empty** — “Nothing billed yet” — no billable governed action this month; the free tier is every feature, 5,000 GAU a month and thirty days of evidence. Action: **Back to Fleet**.
-- **loading** — the shell stays; the page body is replaced by the skeleton (four tile blocks and a panel of seven rows), so the operator keeps their bearings.
-- **error** — “Billing could not be loaded” — `502 stripe_unreachable`. Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by Oxagen. Actions: **Try again**, **Open an incident**; a trace id, region and timestamp line.
-- **access denied** — “You cannot see billing” — the roles the signed-in person holds on the organization do not include `org.billing — plan and invoices are readable only by a finance role`. Copy explains an owner can grant it and that the grant is itself a governed action in the audit record. Actions: **Request access** (opens the request-access dialog), **Back to Fleet**. Below: *Signed in as* (name · role), *Needed* (the permission), *Decided by* (`pol_v41` · deny wins over every allow).
+- **loaded**: the page as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell).
+- **empty**: "Nothing billable yet". You pay per governed action: a call Oxagen decided, delivered and recorded. The free tier has every governance feature on, an included monthly allowance, thirty days of evidence and three seats. Action: **Back to Fleet**.
+- **loading**: the shell stays; the page body is replaced by the skeleton (four tile blocks and a panel of seven rows), so you keep your bearings.
+- **error**: "Billing could not be loaded". The control plane answered `502 stripe_unreachable`. Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by Oxagen. Actions: **Try again**, **Open an incident**; a trace id, region and timestamp line.
+- **access denied**: "You cannot see billing". Your roles on the organization do not include `org.billing` (plan and invoices are readable only by a finance role). An organization owner can grant it; the grant is a governed action and lands in the audit record with your name on it. Actions: **Request access** (opens `request-access`), **Back to Fleet**. Below: *Signed in as* (name, role), *Needed* (the permission), *Decided by* (`pol_v41`, deny wins over every allow).
 
 ## Mobile
 
-Top bar collapses to hamburger · current crumb · search glyph · notifications · avatar. A fixed five-slot thumb bar replaces the sidebar: **Fleet** (count = approvals waiting), **Agents**, **Tools**, **Spend**, **More** (count = open critical incidents). **More** is a bottom sheet listing Steering (with Skills inside it), Organization, Billing, Audit, Search, Notifications, Account, Switch organization, Switch workspace. The hamburger opens the full sidebar as a drawer over a scrim. Every dialog rises from the bottom edge as a sheet with a drag handle and full-width footer buttons; every list table becomes a stack of cards, each cell labelled with its column header; touch targets are ≥ 44 px; inputs are 16 px; nothing scrolls sideways.
+The top bar collapses to hamburger, current crumb, search glyph, notifications, approvals and avatar. A fixed five-slot thumb bar replaces the sidebar: **Fleet** (count = approvals waiting), **Agents**, **Tools**, **Spend**, **More** (count = open critical incidents). **More** is a bottom sheet listing Steering (with Skills inside it), Repositories, Organization, Billing, Audit, Search, Notifications, Account, Switch organization, Switch workspace. The hamburger opens the full sidebar as a drawer over a scrim. The approvals drawer opens full-width. The two columns stack. Every dialog rises from the bottom edge as a sheet with a drag handle and full-width footer buttons; every list table becomes a stack of cards, each cell labelled with its column header; touch targets are at least 44 px; inputs are 16 px; nothing scrolls sideways.
 
 ## Permissions
 
@@ -87,13 +78,15 @@ Top bar collapses to hamburger · current crumb · search glyph · notifications
 
 ## Backend gaps this page depends on
 
-- G13 GAU buckets, settlements and contract terms (billing rebuild)
+- G13 governed-action buckets, settlements and contract terms (billing rebuild)
+- Reported meters on `cost.run_totals` and `cost.daily_totals` (§12.6)
 
 ## Rules every build of this page must keep
 
-- Every badge that describes trust (enforcement tier, replay grade, attestation, cost basis) shows the recorded value and nothing stronger; a client-attested window is labelled as such.
+- Every badge that describes trust (enforcement tier, replay grade, attestation, cost basis) shows the recorded value and nothing stronger; a client-attested figure is labelled as such and is never rendered as observed.
 - Every number that is money shows its basis. Headers are rollups of the rows beneath them, never typed twice.
 - Every explanation is a chain of links to frames, records and commits, not a summary.
+- A heading names the thing, a caption states one fact, and no label carries a comma, a mid-dot, or a not/never contrast. Subtext under a heading is one sentence or nothing.
 - Exactly one gold action per screen. Gold is identity; it never encodes state. State reads as a dot and a word, so it survives greyscale.
 - A not-loaded state replaces the page body, never the shell. Stub controls say what the product would do; nothing silently does nothing.
 - A count in navigation appears only where something waits on a person.

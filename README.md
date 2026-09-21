@@ -3,7 +3,7 @@
 One place to see what Oxagen is building next, exactly how it will look, and what is still undecided.
 
 - **The roadmap app** (`index.html`, built from `roadmap/`): the gaps between the Oxagen mockups and the build, the witness and definition-of-done features, the open decisions, and the GitHub issues, live. Published as a claude.ai artifact where Claude is bound to the page, and served by GitHub Pages at https://macanderson.github.io/roadmap/ as a read-only fallback.
-- **The mockups** (`mockups/`): the master mockup, every page in every state, desktop and mobile, and the guided scenarios. The roadmap frames them, so a card leads to its wireframe in one click.
+- **The mockups** (`mockups/`): the master mockup, the authoritative design of rev1, every page in every state, desktop and mobile, and the guided scenarios. The roadmap frames them, so a card leads to its wireframe in one click. The first version, with the witness runner and the definition of done, is kept as `mockups/future_state_mockups/` and is not a target.
 - **The documents** (`docs/`): the Mission Control spec, the DoD spec, the witness spec, the desktop spec, the plan, the scope review, and the reviews.
 
 ```
@@ -15,6 +15,8 @@ mockups/src/                  its sources: engine.js (the app), engine.css, shel
 mockups/fixtures/*.json       the demo record, one file per collection (README.md there says what each is)
 mockups/pages/<page>.md       the spec of every page, and beside each an audit prompt for a build of it
 mockups/stories/              the Storybook catalog: every page × state × shell, every scenario
+mockups/future_state_mockups/ the first mockup (witness runner, proof, definition of done, scores): kept, not a target
+mockups/v2/                   a shelved redesign on the app shell
 docs/missioncontrol-docs.html the documents page: every docs/*.md, one file
 docs/*.md                     the spec, the DoD spec, the witness spec, the desktop spec, the plan, the scope review, the mockup records
 badges/                       the verification badge for pull requests and branches, one SVG per state and theme
@@ -35,7 +37,7 @@ What the app does, and where each part lives:
 |---|---|---|
 | Now | build progress by surface, the milestones, what to build next, the decisions blocking work, shared activity | `data.json` + the shared store |
 | Gaps | every mockup page and wizard with its build status, the concrete gaps, the backend gaps, the spec, the wireframe, the linked issues | `data.json` `surfaces[]`, the mockup pages' specs |
-| Witness, Done | the proof and definition-of-done features, and which ones need a decision first | `docs/witness-spec.md`, `docs/dod-spec.md` |
+| Witness, Done | the proof and definition-of-done features of the future state (not in rev1; removed from the design on 2026-09-21) | `docs/witness-spec.md`, `docs/dod-spec.md` |
 | Decisions | each open question with its recommendation; decide it in place, argue it with Claude, or open it as an issue | `docs/implementation-plan.md` §6, the scope review, the feedback |
 | Issues | open issues in `macanderson/oxagen`, `macanderson/stella` and this repo, live through the viewer's GitHub connector, with the triage snapshot (theme, kind, spec backing) beside each | GitHub, `data.json` `issue_annotations` |
 | Wireframes | the master mockup framed: any page, any state, desktop or phone, any scenario | `mockups/missioncontrol.html` |
@@ -107,7 +109,7 @@ Everything a URL of it pins is read at runtime, so there is one file where there
 | `?product=1&state=loaded&mobile=1` | the same in the mobile shell: a five-slot thumb bar, a More sheet, dialogs as bottom sheets, list tables as cards |
 | `?state=empty#/a-intel/core-platform/tools` | one page in one state; the states are `loaded`, `empty`, `loading`, `error`, `denied` |
 | `#/a-intel/core-platform/scenarios/flight-recorder/1` | a guided scenario (the W flows) on step 1 |
-| `#/a-intel/core-platform/runs/run_01K5RQ4B9C7XTN2P/dod` | a run tab by hash |
+| `#/a-intel/core-platform/runs/run_01K5RQ4B9C7XTN2P/cost` | a run tab by hash: `transcript`, `player`, `cost`, `policy`, `context`, `chain` |
 | `#/a-intel/core-platform/steering/preview/release-manager` | a Steering tab by hash: `records`, `skills[/<view>]`, `memory`, `ontology`, `policy`, `proposals[/prs]`, `preview[/<agent>]` |
 | `#/a-intel/core-platform/skills` | an old route: Skills moved under Steering, and this still resolves to `…/steering/skills` |
 | `?theme=dark` | pinned theme |
@@ -117,12 +119,16 @@ tab, the user menu, and ⌘K. Nothing on them writes anything.
 
 ## What the mockups depict
 
-Phase 2 of the steering and gateway plan, shipped. Steering is the hub: seven tabs (Records, Skills,
-Memory, Ontology, Policy, Proposals, Preview), one assembler where every item competes, and a
-`steering.manifest` frame on every run. Agents sit on the `observe` or `harness` tier. `gateway` and
-`contained` are on the tier ladder as tiers not yet available, and no screen claims a model proxy,
-observed metering, an enforced budget, a real interrupt, or a sandbox. The index is the Postgres
-registry. `mockups/pages/steering.md` is the spec of the hub.
+Every phase of the steering and gateway plan (0 to 5), shipped. Steering is the hub: seven tabs
+(Records, Skills, Memory, Ontology, Policy, Proposals, Preview), one assembler where every item
+competes, and a `steering.manifest` frame on every run. The tier ladder is complete: `observe`,
+`harness`, `gateway`, `contained`. Most agents run `gateway` with `gateway_observed` metering and
+enforced budgets; Stella CI runs `contained`. Token accounting follows the spec's cost record
+(§12.6) on every run, agent, operator and workspace, and coaching for agents and operators derives
+from it. Approvals live in a drawer opened from the topbar on every page. The governance mode is a
+workspace setting on the Steering header. Not in the design: the witness runner, proof, the
+definition of done, agent scores, proven spend. `mockups/README.md` lists the changes from the first
+mockup; `mockups/pages/` is the spec of every page.
 
 ## The catalog
 
@@ -146,22 +152,19 @@ and states exist is `mockups/catalog.mjs`, which the stories, the checker and th
 | W2 | Stop it. Steer it. | `stop-it-steer-it` |
 | W3 | Money asked, a human answered | `money-asked` |
 | W4 | The flight recorder | `flight-recorder` |
-| W5 | Proven, not claimed | `proven-not-claimed` |
 | W6 | It learned, you approved, it changed | `learned-approved-changed` |
 | W8 | Every dollar, every operator | `every-dollar-every-operator` |
 | W9 | The toolbelt, governed | `toolbelt-governed` |
 | W10 | The CIO's console | `cio-console` |
 | W11 | Whose account it is | `the-account` |
 | W13 | In the loop: skills ship off, the search is the config, and an unbound repository stops the loop to ask a person | `in-the-loop` |
-| W14 | Done means done | `done-means-done` |
 
 W7 (the ontology) and the assistant half of W11 were cut by the scope review of 2026-09-14
 (`docs/scope-review.md`); W12 was a coverage audit, now `tools/check-mockup.mjs`. W6 walks Steering:
 Records, Proposals, the pull request, the merge, Preview, and the `steering.manifest` frame on the
 run. W13 is the Skills tab of Steering (`#/a-intel/<ws>/steering/skills`; Skills moved under Steering
 on 2026-09-18), its off-by-default gate and the interjected run (`docs/w13-in-the-loop-scenario.md`,
-spec §10.6). W14 is the
-definition of done (`docs/dod-spec.md`). A scenario is `SCENARIOS["id"]` in `mockups/src/engine.js`
+spec §10.6). W5 and W14 (proof and the definition of done) exist only in the future-state mockup. A scenario is `SCENARIOS["id"]` in `mockups/src/engine.js`
 and a row in `mockups/catalog.mjs`. `docs/videos-mockup-narrated.md` has the narrated walkthroughs.
 
 ## The documents
@@ -171,8 +174,8 @@ a contents rail per document; a section has a link (`#spec/8-6-definition-of-don
 `python3 tools/build-docs.py` (needs `markdown-it-py`); the markdown is the source.
 
 - `mission-control-spec.md`: the product and technical specification the mockups render
-- `dod-spec.md`: the definition of done for agent runs, which gates a run and is the billable unit
-- `witness-spec.md`: Witness, outcome verification: fourteen deterministic oracle classes, signed certificates, a verify endpoint
+- `dod-spec.md`: the definition of done for agent runs (future state, not in rev1)
+- `witness-spec.md`: Witness, outcome verification (future state, not in rev1)
 - `desktop-spec.md`: the Oxagen Desktop installer
 - `implementation-plan.md`: how the pages become the Next.js `apps/app` in the oxagen monorepo
 - `scope-review.md`: the review of 2026-09-14, what it cut and where each cut landed

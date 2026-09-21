@@ -112,9 +112,9 @@
   ],
   "artifacts": [
    {
-    "kind": "witness",
-    "ref": "wit_01K5RQ8M4",
-    "title": "fail, fail, pass · authored and run on run_01K5RQ5W7T2HVN9K; this run received the verdicts only",
+    "kind": "check",
+    "ref": "contract test",
+    "title": "contract test · fail, fail, pass on the pull request head",
     "state": "sealed",
     "edge": "observed",
     "fr": [

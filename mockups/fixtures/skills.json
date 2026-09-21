@@ -13,10 +13,10 @@
   "st": "Groups merged pull requests into Features, Fixes and Breaking, and writes the draft to a release branch. Never publishes.",
   "cited": 186,
   "runs": 212,
-  "proofBefore": 0.62,
-  "proofAfter": 0.81,
   "owner": "marcus",
-  "updated": "6 days ago"
+  "updated": "6 days ago",
+  "citedBefore": 0.62,
+  "citedAfter": 0.81
  },
  {
   "id": "a-intel.rollback-a-bad-release",
@@ -32,11 +32,11 @@
   "st": "The order of operations for pulling a release back off the production branch, and the two things you must never do first.",
   "cited": 14,
   "runs": 14,
-  "proofBefore": 0.4,
-  "proofAfter": 0.86,
   "owner": "marcus",
   "updated": "3 weeks ago",
-  "note": "Loading it is allowed. Acting on it touches <span class=\"mono\">main</span>, so every governed action it names still parks."
+  "note": "Loading it is allowed. Acting on it touches <span class=\"mono\">main</span>, so every governed action it names still parks.",
+  "citedBefore": 0.4,
+  "citedAfter": 0.86
  },
  {
   "id": "a-intel.triage-a-flaky-test",
@@ -52,10 +52,10 @@
   "st": "Reruns the case under seed control, bisects the commit range, and opens a proposal when it cannot reproduce.",
   "cited": 1104,
   "runs": 1340,
-  "proofBefore": 0.19,
-  "proofAfter": 0.34,
   "owner": "priya",
-  "updated": "yesterday"
+  "updated": "yesterday",
+  "citedBefore": 0.19,
+  "citedAfter": 0.34
  },
  {
   "id": "a-intel.postgres-safe-migration",
@@ -71,10 +71,10 @@
   "st": "Expand, backfill, contract — and never in one deploy. Names the four migrations that took production down in 2025.",
   "cited": 37,
   "runs": 41,
-  "proofBefore": 0.55,
-  "proofAfter": 0.92,
   "owner": "dana",
-  "updated": "2 months ago"
+  "updated": "2 months ago",
+  "citedBefore": 0.55,
+  "citedAfter": 0.92
  },
  {
   "id": "a-intel.customer-escalation-writeup",
@@ -90,10 +90,10 @@
   "st": "The shape of an escalation note: what broke, who it reached, what we did, what we owe them.",
   "cited": 52,
   "runs": 64,
-  "proofBefore": null,
-  "proofAfter": null,
   "owner": "priya",
-  "updated": "5 days ago"
+  "updated": "5 days ago",
+  "citedBefore": null,
+  "citedAfter": null
  },
  {
   "id": "a-intel.codegraph-walk",
@@ -109,10 +109,10 @@
   "st": "Walks the code graph from a symbol to its callers and its data-layer references before proposing a change.",
   "cited": 441,
   "runs": 530,
-  "proofBefore": 0.48,
-  "proofAfter": 0.71,
   "owner": "marcus",
-  "updated": "9 days ago"
+  "updated": "9 days ago",
+  "citedBefore": 0.48,
+  "citedAfter": 0.71
  },
  {
   "id": "a-intel.invoice-reconciliation",
@@ -128,11 +128,11 @@
   "st": "Matches a statement line to a purchase order and a receipt before anything is settled.",
   "cited": 0,
   "runs": 0,
-  "proofBefore": null,
-  "proofAfter": null,
   "owner": "dana",
   "updated": "a month ago",
-  "why": "Published with <span class=\"mono\">scope = workspace:finops</span>. <b>core-platform</b> is not in its scope, so it is not in this belt and it does not come back from a search here."
+  "why": "Published with <span class=\"mono\">scope = workspace:finops</span>. <b>core-platform</b> is not in its scope, so it is not in this belt and it does not come back from a search here.",
+  "citedBefore": null,
+  "citedAfter": null
  },
  {
   "id": "oxagen.pdf-extract",
@@ -148,10 +148,10 @@
   "st": "Pulls tables out of a PDF and returns them as rows.",
   "cited": 0,
   "runs": 0,
-  "proofBefore": null,
-  "proofAfter": null,
   "owner": null,
   "updated": "never",
-  "why": "The digest the marketplace served on 2026-09-09 is not the digest <b>Priya Natarajan</b> approved on 2026-08-21. Held until a person looks at the diff and approves the new one."
+  "why": "The digest the marketplace served on 2026-09-09 is not the digest <b>Priya Natarajan</b> approved on 2026-08-21. Held until a person looks at the diff and approves the new one.",
+  "citedBefore": null,
+  "citedAfter": null
  }
 ]

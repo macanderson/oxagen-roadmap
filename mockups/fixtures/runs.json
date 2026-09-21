@@ -9,17 +9,16 @@
   "steps": 41,
   "frames": 186,
   "cost": "4.13",
-  "basis": "client_attested",
-  "tier": "harness",
+  "basis": "gateway_observed",
+  "tier": "gateway",
   "grade": "full",
-  "verdict": null,
   "task": "a-intel/platform#482",
   "taskTitle": "Cut 4.11.0 release notes",
   "summary": "Drafting the 4.11.0 release notes from the 38 pull requests merged since 4.10.3. So far it has read CHANGELOG.md once, grouped 31 changes under Features, Fixes and Breaking, and written the draft to release/4.11.0-notes. It is waiting on approval for github__create_release; nothing has been published and nothing touched main.",
   "touched": [
    "a-intel/platform#482",
    "release/4.11.0-notes",
-   "CHANGELOG.md · read once"
+   "CHANGELOG.md \u00b7 read once"
   ],
   "outputs": [
    {
@@ -54,7 +53,7 @@
     "name": "release/4.11.0-notes",
     "where": "a-intel/platform",
     "state": "created",
-    "note": "cut from main · 1 commit",
+    "note": "cut from main \u00b7 1 commit",
     "at": "09:21:07",
     "fr": 28
    },
@@ -74,7 +73,7 @@
    {
     "kind": "gate",
     "name": "github__create_release",
-    "where": "Oxagen · rule rg_0093",
+    "where": "Oxagen \u00b7 rule rg_0093",
     "state": "awaiting",
     "note": "parked at Oxagen, on a call routed through it; the model sees a wait with a reason, not a failure",
     "at": "09:24:16",
@@ -90,15 +89,15 @@
   ],
   "gen": {
    "model": "claude-haiku-4-5",
-   "when": "turn 7 · regenerated at each turn boundary",
+   "when": "turn 7 \u00b7 regenerated at each turn boundary",
    "frames": 186
   },
   "started": "09:14:02",
   "model": "claude-opus-5",
   "cache": 0.83,
-  "provenSpend": "0.00",
   "ratio": 0.71,
-  "sealed": null
+  "sealed": null,
+  "prompts": 2
  },
  {
   "id": "run_01K5RQ4B9C7XTN2P",
@@ -110,17 +109,15 @@
   "steps": 23,
   "frames": 97,
   "cost": "2.87",
-  "basis": "client_attested",
-  "tier": "harness",
+  "basis": "gateway_observed",
+  "tier": "contained",
   "grade": "full",
-  "verdict": "flipped",
   "task": "a-intel/platform#482",
   "taskTitle": "Bring #482 up to the release-notes contract",
-  "summary": "Brought pull request #482 up to the release-notes contract and asked Oxagen to verify it three times. The first two answers were fail and the third was pass, and each answer was that one word. The witness, its assertions and its output never entered this run: the witness runner authored and ran it on run_01K5RQ5W7T2HVN9K and stamped the verdict here.",
+  "summary": "Brought pull request #482 up to the release-notes contract and ran the contract test three times on the pull request head. The first two runs failed and the third passed.",
   "touched": [
    "a-intel/platform#482",
-   "refs/pull/482/head · 2 pushes, main untouched",
-   "wit_01K5RQ8M4 · verdicts only"
+   "refs/pull/482/head \u00b7 2 pushes, main untouched"
   ],
   "outputs": [
    {
@@ -144,22 +141,22 @@
     "name": "refs/pull/482/head",
     "where": "a-intel/platform",
     "state": "pushed",
-    "note": "2 pushes · main untouched",
+    "note": "2 pushes \u00b7 main untouched",
     "fr": 22
    },
    {
-    "kind": "proof",
-    "name": "wit_01K5RQ8M4",
-    "where": "witness runner · run_01K5RQ5W7T2HVN9K",
-    "state": "proven",
-    "note": "fail · fail · pass — verdicts only; the witness never entered this run",
+    "kind": "check",
+    "name": "contract test",
+    "where": "pull request checks",
+    "state": "passed",
+    "note": "fail \u00b7 fail \u00b7 pass \u2014 the contract test on the pull request head",
     "fr": 58
    },
    {
     "kind": "seal",
     "name": "sealed",
     "where": "chain",
-    "state": "flipped",
+    "state": "sealed",
     "note": "3 attempts, the third passed"
    }
   ],
@@ -171,62 +168,9 @@
   "started": "09:02:40",
   "model": "claude-opus-5",
   "cache": 0.91,
-  "provenSpend": "2.87",
   "ratio": 0.88,
   "sealed": "09:11:18",
-  "flip": {
-   "oracle": "test_flip",
-   "testKind": "contract test",
-   "runner": "vitest 3.2",
-   "cmd": "pnpm vitest run packages/release/notes.contract.test.ts",
-   "cmdDigest": "sha256:71bd…0c4e",
-   "witness": "wit_01K5RQ8M4",
-   "targetRef": "main",
-   "targetSha": "a4c91e2",
-   "prRef": "refs/pull/482/head",
-   "prSha": "f70b3d9",
-   "turn": 4,
-   "turnStart": "09:07:02.140",
-   "turnStartSeq": 58,
-   "flippedAt": "09:09:33.418",
-   "flipSeq": 71,
-   "turnEnd": "09:10:51.007",
-   "turnEndSeq": 89,
-   "sealedAt": "09:11:18.226",
-   "sealSeq": 97,
-   "fingerprint": "held",
-   "segment": "seg_01K5RQ4B9C7XTN2P",
-   "heldOut": "2 of 5",
-   "attempts": [
-    {
-     "n": 1,
-     "result": "fail",
-     "at": "09:07:41.902",
-     "seq": 62,
-     "ms": 4180,
-     "exit": 1,
-     "note": "3 of 3 assertions failed · pristine tree · the worker was told: fail"
-    },
-    {
-     "n": 2,
-     "result": "fail",
-     "at": "09:08:47.310",
-     "seq": 66,
-     "ms": 4022,
-     "exit": 1,
-     "note": "1 of 3 assertions failed · heading order · the worker was told: fail"
-    },
-    {
-     "n": 3,
-     "result": "pass",
-     "at": "09:09:33.418",
-     "seq": 71,
-     "ms": 3961,
-     "exit": 0,
-     "note": "3 of 3 assertions passed · the worker was told: pass"
-    }
-   ]
-  }
+  "prompts": 1
  },
  {
   "id": "run_01K5RP2D6H4KLM8V",
@@ -238,16 +182,15 @@
   "steps": 9,
   "frames": 38,
   "cost": "0.94",
-  "basis": "client_attested",
-  "tier": "harness",
+  "basis": "gateway_observed",
+  "tier": "gateway",
   "grade": "full",
-  "verdict": "unmoved",
   "task": "a-intel/platform#511",
   "taskTitle": "Label: flaky worker restart",
   "summary": "Labeled a-intel/platform#511 flaky-test and area:worker after reproducing the restart twice in nine steps, and posted the reproduction command as a comment. No code changed and no branch was created.",
   "touched": [
    "a-intel/platform#511",
-   "labels · flaky-test, area:worker"
+   "labels \u00b7 flaky-test, area:worker"
   ],
   "outputs": [
    {
@@ -286,7 +229,7 @@
     "kind": "seal",
     "name": "sealed",
     "where": "chain",
-    "state": "unmoved",
+    "state": "sealed",
     "note": "no code changed and no branch was created"
    }
   ],
@@ -298,9 +241,9 @@
   "started": "08:51:07",
   "model": "claude-haiku-4-5",
   "cache": 0.64,
-  "provenSpend": "0.00",
   "ratio": 0.44,
-  "sealed": "08:53:30"
+  "sealed": "08:53:30",
+  "prompts": 3
  },
  {
   "id": "run_01K5RN8F3J2GHY6T",
@@ -312,17 +255,16 @@
   "steps": 11,
   "frames": 52,
   "cost": "1.36",
-  "basis": "client_attested",
-  "tier": "harness",
+  "basis": "gateway_observed",
+  "tier": "gateway",
   "grade": "full",
-  "verdict": null,
   "task": "PO-4471",
   "taskTitle": "September infrastructure invoices",
   "summary": "Matched three September infrastructure invoices to PO-4471, totalling $18,472.36, and prepared one Stripe payment under mandate mnd_7K2ETQ4. It is parked on approval for stripe__create_payment; no money has moved.",
   "touched": [
    "PO-4471",
    "mnd_7K2ETQ4",
-   "3 invoices · $18,472.36"
+   "3 invoices \u00b7 $18,472.36"
   ],
   "outputs": [
    {
@@ -338,7 +280,7 @@
     "name": "3 invoices",
     "where": "the ledger",
     "state": "read",
-    "note": "matched to PO-4471 · $18,472.36",
+    "note": "matched to PO-4471 \u00b7 $18,472.36",
     "fr": 7
    },
    {
@@ -352,7 +294,7 @@
    {
     "kind": "gate",
     "name": "stripe__create_payment",
-    "where": "Oxagen · mandate mnd_7K2ETQ4",
+    "where": "Oxagen \u00b7 mandate mnd_7K2ETQ4",
     "state": "awaiting",
     "note": "parked on approval; no money has moved",
     "fr": 19
@@ -367,15 +309,15 @@
   ],
   "gen": {
    "model": "claude-haiku-4-5",
-   "when": "turn 3 · regenerated at each turn boundary",
+   "when": "turn 3 \u00b7 regenerated at each turn boundary",
    "frames": 52
   },
   "started": "08:40:19",
   "model": "claude-opus-5",
   "cache": 0.77,
-  "provenSpend": "0.00",
   "ratio": 0.66,
-  "sealed": null
+  "sealed": null,
+  "prompts": 1
  },
  {
   "id": "run_01K5RM1A5Z9QWE4R",
@@ -388,12 +330,11 @@
   "frames": 61,
   "cost": "0.61",
   "basis": "client_attested",
-  "tier": "observe",
+  "tier": "harness",
   "grade": "full",
-  "verdict": "waived",
   "task": "a-intel/platform#498",
   "taskTitle": "Operator guide: kill switches",
-  "summary": "Rewrote the kill-switches section of the operator guide, adding the deny-generation explanation and two worked examples (+84 / −12 lines in docs/operator/kill-switches.md), and opened pull request #498. The verdict is waived: prose carries no test oracle.",
+  "summary": "Rewrote the kill-switches section of the operator guide, adding the deny-generation explanation and two worked examples (+84 / \u221212 lines in docs/operator/kill-switches.md), and opened pull request #498. The verdict is waived: prose carries no test test.",
   "touched": [
    "a-intel/platform#498",
    "docs/operator/kill-switches.md"
@@ -432,15 +373,15 @@
     "name": "a-intel/platform#498",
     "where": "GitHub",
     "state": "open",
-    "note": "1 file changed · awaiting review",
+    "note": "1 file changed \u00b7 awaiting review",
     "fr": 30
    },
    {
     "kind": "seal",
     "name": "sealed",
     "where": "chain",
-    "state": "waived",
-    "note": "prose carries no test oracle"
+    "state": "sealed",
+    "note": "prose carries no test"
    }
   ],
   "gen": {
@@ -451,9 +392,9 @@
   "started": "08:22:55",
   "model": "claude-opus-5",
   "cache": 0.88,
-  "provenSpend": "0.00",
   "ratio": 0.52,
-  "sealed": "08:31:04"
+  "sealed": "08:31:04",
+  "prompts": 2
  },
  {
   "id": "run_01K5RK7C2V8BNM3X",
@@ -465,10 +406,9 @@
   "steps": 33,
   "frames": 141,
   "cost": "3.42",
-  "basis": "client_attested",
-  "tier": "harness",
+  "basis": "gateway_observed",
+  "tier": "gateway",
   "grade": "full",
-  "verdict": "failing",
   "task": "a-intel/platform#476",
   "taskTitle": "Backport 4.10.3 to release",
   "summary": "Tried to backport 4.10.3 onto release/4.10 across four attempts. Every cherry-pick left a conflict marker in packages/release/backport.ts and the integration test never passed. Pull request #476 is open with a failing check; nothing merged.",
@@ -511,14 +451,14 @@
     "name": "a-intel/platform#476",
     "where": "GitHub",
     "state": "failing",
-    "note": "open with a failing integration check · nothing merged",
+    "note": "open with a failing integration check \u00b7 nothing merged",
     "fr": 44
    },
    {
     "kind": "seal",
     "name": "sealed",
     "where": "chain",
-    "state": "failing",
+    "state": "sealed",
     "note": "the integration test never passed"
    }
   ],
@@ -530,71 +470,9 @@
   "started": "07:58:11",
   "model": "claude-opus-5",
   "cache": 0.8,
-  "provenSpend": "0.00",
   "ratio": 0.39,
   "sealed": "08:19:47",
-  "flip": {
-   "oracle": "test_flip",
-   "testKind": "integration test",
-   "runner": "vitest 3.2",
-   "cmd": "pnpm vitest run packages/release/backport.test.ts",
-   "cmdDigest": "sha256:4f1c…77d9",
-   "witness": "wit_01K5RK5N1",
-   "targetRef": "release/4.10",
-   "targetSha": "c2a77e0",
-   "prRef": "refs/pull/476/head",
-   "prSha": "91ab3c0",
-   "turn": 6,
-   "turnStart": "08:12:30.100",
-   "turnStartSeq": 118,
-   "flippedAt": null,
-   "flipSeq": null,
-   "turnEnd": "08:19:12.480",
-   "turnEndSeq": 139,
-   "sealedAt": "08:19:47.902",
-   "sealSeq": 141,
-   "fingerprint": "held",
-   "segment": "seg_01K5RK7C2V8BNM3X",
-   "heldOut": "1 of 2",
-   "attempts": [
-    {
-     "n": 1,
-     "result": "fail",
-     "at": "08:13:20.019",
-     "seq": 121,
-     "ms": 6120,
-     "exit": 1,
-     "note": "2 of 4 assertions failed"
-    },
-    {
-     "n": 2,
-     "result": "fail",
-     "at": "08:15:02.447",
-     "seq": 126,
-     "ms": 6040,
-     "exit": 1,
-     "note": "2 of 4 assertions failed"
-    },
-    {
-     "n": 3,
-     "result": "fail",
-     "at": "08:16:48.910",
-     "seq": 131,
-     "ms": 6210,
-     "exit": 1,
-     "note": "1 of 4 assertions failed"
-    },
-    {
-     "n": 4,
-     "result": "fail",
-     "at": "08:18:20.335",
-     "seq": 136,
-     "ms": 6080,
-     "exit": 1,
-     "note": "1 of 4 assertions failed · cherry-pick left a conflict marker"
-    }
-   ]
-  }
+  "prompts": 4
  },
  {
   "id": "run_01K5RH3G8K5PAS7D",
@@ -606,16 +484,15 @@
   "steps": 3,
   "frames": 14,
   "cost": "0.22",
-  "basis": "client_attested",
-  "tier": "harness",
+  "basis": "gateway_observed",
+  "tier": "gateway",
   "grade": "partial",
-  "verdict": "unsatisfied",
   "task": "a-intel/platform#514",
   "taskTitle": "Reproduce: checkout 500",
   "summary": "Halted after three steps. The run token was revoked by the hooks_removed kill switch before the agent wrote a label or a comment; the only frames are two reads of the issue and the policy decision that stopped it.",
   "touched": [
    "a-intel/platform#514",
-   "kill switch · hooks_removed"
+   "kill switch \u00b7 hooks_removed"
   ],
   "outputs": [
    {
@@ -636,7 +513,7 @@
    },
    {
     "kind": "halt",
-    "name": "kill switch · hooks_removed",
+    "name": "kill switch \u00b7 hooks_removed",
     "where": "Oxagen",
     "state": "blocked",
     "note": "the run token was revoked before a label or a comment was written",
@@ -651,9 +528,9 @@
   "started": "07:41:03",
   "model": "claude-haiku-4-5",
   "cache": 0.12,
-  "provenSpend": "0.00",
   "ratio": 0,
-  "sealed": "07:41:39"
+  "sealed": "07:41:39",
+  "prompts": 2
  },
  {
   "id": "run_01K5RG6H1L4OIU9Y",
@@ -665,16 +542,15 @@
   "steps": 47,
   "frames": 203,
   "cost": "5.08",
-  "basis": "client_attested",
-  "tier": "harness",
+  "basis": "gateway_observed",
+  "tier": "gateway",
   "grade": "full",
-  "verdict": "tampered",
   "task": "a-intel/platform#469",
   "taskTitle": "Release 4.10.2 notes",
-  "summary": "Produced the 4.10.2 release notes and opened pull request #469, and the pull request also added an exclude to vitest.config.ts that matched the witness’s path. The witness fingerprint moved between authoring and the run, so the head result was excluded and the verdict is tampered, not failing: nothing is credited until a clean run re-derives the notes.",
+  "summary": "Produced the 4.10.2 release notes and opened pull request #469, and a receipt row on the run was rewritten after the seal, so the chain shows a mismatch from frame #171 and the frames after it are unverifiable.",
   "touched": [
    "a-intel/platform#469",
-   "frames 88–102 · unverifiable"
+   "frames 88\u2013102 \u00b7 unverifiable"
   ],
   "outputs": [
    {
@@ -702,7 +578,7 @@
     "name": "vitest.config.ts",
     "where": "a-intel/platform#469",
     "state": "blocked",
-    "note": "added an exclude that matched the witness path",
+    "note": "added an exclude to the test config",
     "stat": {
      "add": 1,
      "del": 0
@@ -718,18 +594,18 @@
     "fr": 72
    },
    {
-    "kind": "proof",
-    "name": "wit_01K5RG2T7",
-    "where": "witness",
+    "kind": "check",
+    "name": "contract test",
+    "where": "pull request checks",
     "state": "blocked",
-    "note": "the fingerprint moved between authoring and the run · head result excluded",
+    "note": "the fingerprint moved between authoring and the run \u00b7 head result excluded",
     "fr": 94
    },
    {
     "kind": "seal",
     "name": "sealed",
     "where": "chain",
-    "state": "tampered",
+    "state": "sealed",
     "note": "nothing is credited until a clean run re-derives the notes"
    }
   ],
@@ -741,9 +617,9 @@
   "started": "07:02:38",
   "model": "claude-opus-5",
   "cache": 0.74,
-  "provenSpend": "0.00",
   "ratio": 0.58,
-  "sealed": "07:38:12"
+  "sealed": "07:38:12",
+  "prompts": 3
  },
  {
   "id": "run_01K5RF2J7M3EDC5F",
@@ -755,16 +631,15 @@
   "steps": 7,
   "frames": 31,
   "cost": "0.78",
-  "basis": "client_attested",
-  "tier": "harness",
+  "basis": "gateway_observed",
+  "tier": "gateway",
   "grade": "full",
-  "verdict": "waived",
   "task": "PO-4471",
   "taskTitle": "August reconciliation follow-up",
-  "summary": "Reconciled the August statement against PO-4471, found one duplicated line of $412.00 on the vendor side and left a note on the ledger entry. No payment was attempted; the verdict is waived because reconciliation has no test oracle.",
+  "summary": "Reconciled the August statement against PO-4471, found one duplicated line of $412.00 on the vendor side and left a note on the ledger entry. No payment was attempted; no test applies to a reconciliation, so the record carries the note and the ledger entry.",
   "touched": [
    "PO-4471",
-   "ledger note · $412.00 duplicate"
+   "ledger note \u00b7 $412.00 duplicate"
   ],
   "outputs": [
    {
@@ -785,7 +660,7 @@
    },
    {
     "kind": "record",
-    "name": "ledger note · $412.00 duplicate",
+    "name": "ledger note \u00b7 $412.00 duplicate",
     "where": "PO-4471",
     "state": "posted",
     "note": "one duplicated line on the vendor side",
@@ -795,8 +670,8 @@
     "kind": "seal",
     "name": "sealed",
     "where": "chain",
-    "state": "waived",
-    "note": "no payment was attempted; reconciliation has no test oracle"
+    "state": "sealed",
+    "note": "no payment was attempted; reconciliation has no test"
    }
   ],
   "gen": {
@@ -807,9 +682,9 @@
   "started": "06:55:20",
   "model": "claude-opus-5",
   "cache": 0.85,
-  "provenSpend": "0.00",
   "ratio": 0.61,
-  "sealed": "07:01:02"
+  "sealed": "07:01:02",
+  "prompts": 1
  },
  {
   "id": "run_01K4QJ9E4T6YUI1O",
@@ -821,13 +696,12 @@
   "steps": 28,
   "frames": 118,
   "cost": "2.13",
-  "basis": "client_attested",
-  "tier": "harness",
+  "basis": "gateway_observed",
+  "tier": "contained",
   "grade": "ledger",
-  "verdict": "flipped",
   "task": "a-intel/platform#204",
-  "taskTitle": "Witness: idempotency key path",
-  "summary": "Witnessed the idempotency-key path flip on pull request #204. The first attempt reproduced a duplicate charge on a replayed key; the second returned the first receipt. Sealed 2025-07-02; the frames now live in the archive segment and this summary was kept with the ledger.",
+  "taskTitle": "Contract test: idempotency key path",
+  "summary": "Contract-tested the idempotency-key path flip on pull request #204. The first attempt reproduced a duplicate charge on a replayed key; the second returned the first receipt. Sealed 2025-07-02; the frames now live in the archive segment and this summary was kept with the ledger.",
   "touched": [
    "a-intel/platform#204",
    "tests/integration/test_idempotency_key.py",
@@ -855,18 +729,18 @@
     "fr": 22
    },
    {
-    "kind": "proof",
+    "kind": "check",
     "name": "seg_01K4QJ9E4T6YUI1O",
-    "where": "archive segment",
-    "state": "proven",
-    "note": "a duplicate charge first, the first receipt second · frames compacted",
+    "where": "pull request checks",
+    "state": "passed",
+    "note": "a duplicate charge first, the first receipt second \u00b7 frames compacted",
     "fr": 49
    },
    {
     "kind": "seal",
     "name": "sealed 2025-07-02",
     "where": "chain",
-    "state": "flipped",
+    "state": "sealed",
     "note": "this summary was kept with the ledger"
    }
   ],
@@ -878,53 +752,9 @@
   "started": "2025-07-02 11:20:44",
   "model": "claude-opus-5",
   "cache": 0.86,
-  "provenSpend": "2.13",
   "ratio": 0.81,
   "sealed": "2025-07-02 11:39:10",
-  "flip": {
-   "oracle": "test_flip",
-   "testKind": "integration test",
-   "runner": "pytest 8.3",
-   "cmd": "uv run pytest tests/integration/test_idempotency_key.py -q",
-   "cmdDigest": "sha256:0c9a…e17b",
-   "witness": "wit_01K4QJ7D2",
-   "targetRef": "main",
-   "targetSha": "0b7e9c1",
-   "prRef": "refs/pull/204/head",
-   "prSha": "6d2f4a8",
-   "turn": 5,
-   "turnStart": "11:31:12.004",
-   "turnStartSeq": 92,
-   "flippedAt": "11:36:02.771",
-   "flipSeq": 104,
-   "turnEnd": "11:38:40.115",
-   "turnEndSeq": 116,
-   "sealedAt": "11:39:10.402",
-   "sealSeq": 118,
-   "fingerprint": "held",
-   "segment": "seg_01K4QJ9E4T6YUI1O",
-   "heldOut": "1 of 3",
-   "attempts": [
-    {
-     "n": 1,
-     "result": "fail",
-     "at": "11:33:05.611",
-     "seq": 98,
-     "ms": 12840,
-     "exit": 1,
-     "note": "duplicate charge on replayed key"
-    },
-    {
-     "n": 2,
-     "result": "pass",
-     "at": "11:36:02.771",
-     "seq": 104,
-     "ms": 12210,
-     "exit": 0,
-     "note": "replayed key returns the first receipt"
-    }
-   ]
-  }
+  "prompts": 1
  },
  {
   "id": "run_01K5RE9P4Q2WSX6C",
@@ -937,10 +767,9 @@
   "frames": 34,
   "cost": "0.44",
   "basis": "client_attested",
-  "tier": "observe",
+  "tier": "harness",
   "grade": "digest",
-  "verdict": "unverified",
-  "task": "—",
+  "task": "\u2014",
   "taskTitle": "Style pass on CLI reference",
   "summary": "Made 41 wording and heading-case edits across docs/cli/reference.md and opened pull request #503. Observed at client tier, so only digests were recorded and the change is unverified: this summary is drawn from what the harness reported, not from what Oxagen saw.",
   "touched": [
@@ -961,7 +790,7 @@
     "name": "docs/cli/reference.md",
     "where": "a-intel/platform#503",
     "state": "written",
-    "note": "41 wording and heading-case edits · digests only, no bodies",
+    "note": "41 wording and heading-case edits \u00b7 digests only, no bodies",
     "stat": {
      "add": 41,
      "del": 41
@@ -980,7 +809,7 @@
     "kind": "seal",
     "name": "sealed",
     "where": "chain",
-    "state": "unverified",
+    "state": "sealed",
     "note": "client tier; drawn from what the harness reported, not what Oxagen saw"
    }
   ],
@@ -992,9 +821,9 @@
   "started": "06:30:12",
   "model": "claude-opus-5",
   "cache": 0,
-  "provenSpend": "0.00",
   "ratio": 0.5,
-  "sealed": "06:34:51"
+  "sealed": "06:34:51",
+  "prompts": 2
  },
  {
   "id": "run_01K5RD1X8N7BVF3G",
@@ -1006,17 +835,15 @@
   "steps": 17,
   "frames": 72,
   "cost": "1.66",
-  "basis": "client_attested",
-  "tier": "harness",
+  "basis": "gateway_observed",
+  "tier": "contained",
   "grade": "full",
-  "verdict": "flipped",
   "task": "a-intel/platform#505",
-  "taskTitle": "Witness: retry budget invariant",
-  "summary": "Witnessed the retry budget invariant flip on pull request #505 after five attempts: four panicked with an off-by-one at the budget boundary, the fifth passed. Sealed with 2 of 4 fingerprints held out; nothing was written to the repository.",
+  "taskTitle": "Contract test: retry budget invariant",
+  "summary": "Contract-tested the retry budget invariant flip on pull request #505 after five attempts: four panicked with an off-by-one at the budget boundary, the fifth passed. Sealed with 2 of 4 fingerprints held out; nothing was written to the repository.",
   "touched": [
    "a-intel/platform#505",
-   "retry · budget_invariant",
-   "wit_01K5RCZ8Q"
+   "retry \u00b7 budget_invariant"
   ],
   "outputs": [
    {
@@ -1029,25 +856,25 @@
    },
    {
     "kind": "read",
-    "name": "retry · budget_invariant",
+    "name": "retry \u00b7 budget_invariant",
     "where": "a-intel/platform#505",
     "state": "read",
     "note": "5 attempts read from the harness",
     "fr": 8
    },
    {
-    "kind": "proof",
-    "name": "wit_01K5RCZ8Q",
-    "where": "witness",
-    "state": "proven",
-    "note": "four panicked at the budget boundary, the fifth passed · 2 of 4 fingerprints held out",
+    "kind": "check",
+    "name": "contract test",
+    "where": "pull request checks",
+    "state": "passed",
+    "note": "four panicked at the budget boundary, the fifth passed \u00b7 2 of 4 fingerprints held out",
     "fr": 57
    },
    {
     "kind": "seal",
     "name": "sealed",
     "where": "chain",
-    "state": "flipped",
+    "state": "sealed",
     "note": "nothing was written to the repository"
    }
   ],
@@ -1059,79 +886,8 @@
   "started": "06:11:44",
   "model": "claude-opus-5",
   "cache": 0.89,
-  "provenSpend": "1.66",
   "ratio": 0.84,
   "sealed": "06:22:09",
-  "flip": {
-   "oracle": "test_flip",
-   "testKind": "unit test",
-   "runner": "cargo test 1.89",
-   "cmd": "cargo test -p retry --test budget_invariant",
-   "cmdDigest": "sha256:b3e4…9a02",
-   "witness": "wit_01K5RCZ8Q",
-   "targetRef": "main",
-   "targetSha": "a4c91e2",
-   "prRef": "refs/pull/505/head",
-   "prSha": "2c9e1b4",
-   "turn": 3,
-   "turnStart": "06:16:20.512",
-   "turnStartSeq": 44,
-   "flippedAt": "06:20:12.395",
-   "flipSeq": 60,
-   "turnEnd": "06:21:44.870",
-   "turnEndSeq": 70,
-   "sealedAt": "06:22:09.113",
-   "sealSeq": 72,
-   "fingerprint": "held",
-   "segment": "seg_01K5RD1X8N7BVF3G",
-   "heldOut": "2 of 4",
-   "attempts": [
-    {
-     "n": 1,
-     "result": "fail",
-     "at": "06:16:58.230",
-     "seq": 47,
-     "ms": 21300,
-     "exit": 101,
-     "note": "panicked: budget exceeded by 1"
-    },
-    {
-     "n": 2,
-     "result": "fail",
-     "at": "06:17:52.118",
-     "seq": 51,
-     "ms": 20870,
-     "exit": 101,
-     "note": "panicked: budget exceeded by 1"
-    },
-    {
-     "n": 3,
-     "result": "fail",
-     "at": "06:18:49.004",
-     "seq": 54,
-     "ms": 21010,
-     "exit": 101,
-     "note": "panicked: budget exceeded by 1"
-    },
-    {
-     "n": 4,
-     "result": "fail",
-     "at": "06:19:31.667",
-     "seq": 57,
-     "ms": 20640,
-     "exit": 101,
-     "note": "off by one at the boundary"
-    },
-    {
-     "n": 5,
-     "result": "pass",
-     "at": "06:20:12.395",
-     "seq": 60,
-     "ms": 20990,
-     "exit": 0,
-     "note": "1 passed; 0 failed"
-    }
-   ]
-  }
+  "prompts": 1
  }
 ]

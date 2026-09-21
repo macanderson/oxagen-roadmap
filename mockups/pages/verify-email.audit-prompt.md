@@ -1,7 +1,7 @@
-# Audit prompt — Verify email
+# Audit prompt: Verify email
 
 Copy everything below the line into a fresh agent session. Fill the two placeholders. The agent
-audits the built page against this design and reports a verdict per check; it does not fix anything
+audits the built page against this design and reports a verdict per check. It does not fix anything
 unless told to in a second turn.
 
 ---
@@ -11,7 +11,7 @@ You are auditing the **Verify email** page of Oxagen (`#/welcome/verify`) for co
 ## Inputs
 
 1. The page spec: `pages/verify-email.md` (read it first, in full).
-2. The design, rendered: the `verify-email` stories in Storybook (`npm run storybook`), one per state (loaded, loading, error), desktop and mobile; or `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` in a browser or with Playwright.
+2. The design, rendered: the `verify-email` stories in Storybook (`npm run storybook`), one per state (loaded, loading, error), desktop and mobile; or `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` in a browser or with Playwright. `node tools/check-mockup.mjs` confirms the design renders in every state.
 3. The product spec for context: `docs/mission-control-spec.md` §14 (Mission Control), Appendix F (the pages that survive), Appendix A (target tables); the data mapping in `docs/implementation-plan.md` §3.
 4. The build under audit: `{{APP_ROOT}}` (the Next.js app), served at `{{APP_URL}}`. Route under audit: `/welcome/verify`.
 
@@ -19,29 +19,29 @@ You are auditing the **Verify email** page of Oxagen (`#/welcome/verify`) for co
 
 Work through every check. For each, record PASS, FAIL, or N/A (with why). Cite evidence: a file and line in the build, a screenshot path, or a DOM selector and its text.
 
-1. **Route and shell.** The build serves the route; there is no app shell — brandmark and a centred card only. The document title names the page.
-2. **Header.** Eyebrow “Step 1 of 2”, h1 “Check your email”. Actions present, in order, with the same labels: Verify email. Exactly one gold (primary) action on the screen.
+1. **Route and shell.** The build serves the route with the auth shell only: brandmark and a centred card. There is no sidebar, no topbar, and so no approvals button or drawer. An app shell on this route is a FAIL. The document title names the page.
+2. **Header.** Eyebrow “Step 1 of 2”, h1 “Check your email”, lead as quoted in the spec with the address. Actions present with the same label: Verify email. Exactly one gold (primary) action on the screen, full width.
 3. **Summary tiles.** None on this page; fail if the build added decorative ones.
-4. **Sections, tabs and tables.** For each item below, the build has it, with the same tab labels (and live counts where the design shows them), the same panel headings, and every table column named in the spec, in that order. Missing or renamed columns are FAILs; extra columns are noted.
-   - Six one-digit inputs (auto-advance, backspace moves back). “Did not arrive? Send a new code” with a resend countdown. Footer: “Wrong address? Change it”.
-5. **Actions and dialogs.** Every button in the spec exists, opens what the spec says (no dialogs), and each write is a governed action: it passes IAM, produces an audit event, and shows a receipt or reference. A stub must say what the product would do; a control that silently does nothing is a FAIL.
-6. **Data sources.** For each row of the spec’s data-source table, find the adapter or query in the build that feeds it. ✅ rows must be wired to the named store; 🟡 rows must be wired for the fields that exist and render `NotBacked` (an honest “not recorded yet”, never a zero) for the rest; ❌ rows must render `NotBacked` with the milestone named. A fixture reaching production is a FAIL.
-7. **States.** Force each state and compare copy and controls with the design file:
-   - **loading** (`state=loading`): the shell stays and the body is the skeleton; no data, no zeros, no stale rows.
-   - **error** (`state=error`): “That code has expired. Codes last 10 minutes. Send a new one below.” The inputs are cleared.
-   Loading must not flash zeros. Error must name the code and offer Try again and Open an incident. Denied must name the missing permission and offer Request access.
-8. **Trust language.** Every tier, replay grade, attestation and cost basis on the page shows the recorded value; search the build for any place a stronger word could be rendered than the record allows (every agent and run is `observe` or `harness`; `gateway` and `contained` render only as not yet available; nothing says enforced about the harness tier). Money always carries its basis.
-9. **Mobile.** At 390 × 844 with a touch pointer: the card fills the width with 16 px gutters, buttons are full width and ≥ 44 px, inputs are 16 px, code inputs use the numeric keypad. Compare against `pages/verify-email-loaded-mobile.html`.
-10. **Accessibility.** Tabs use `role=tablist/tab` with `aria-selected`; dialogs are `role=dialog aria-modal` with a labelled close; icon buttons have `aria-label`; state is never colour alone (dot + word); focus is visible; the page is operable by keyboard end to end.
-11. **Permissions.** Read requires `public`; each write (auth.verify) is gated server-side, not only hidden in the UI. Verify with a role that lacks the permission.
-12. **Nothing extra.** List anything on the built page that is not in the spec (tiles, tabs, columns, buttons, copy). Each is a finding; the reviewer decides whether it stays.
+4. **Form and links.** The label “Verification code”, six one-character numeric inputs that auto-advance and back up on Backspace, then “Did not arrive?” with Send a new code and the resend countdown, then the footer “Wrong address? Change it”. Missing or renamed items are FAILs.
+5. **Actions and dialogs.** Submit continues to Name the organization. Send a new code voids the old code and says so. Change it returns to sign-up. Each write is a governed action: it passes IAM, produces an audit event, and shows a receipt or reference. A stub must say what the product would do; a control that silently does nothing is a FAIL.
+6. **Data sources.** For each row of the spec’s data-source table, find the adapter or query in the build that feeds it. ✅ rows must be wired to the named store. A fixture reaching production is a FAIL.
+7. **States.** Force each state and compare copy and controls with the design:
+   - **loading** (`state=loading`): the primary button shows a spinner and “Verifying…” and is `aria-disabled`; the inputs stay.
+   - **error** (`state=error`): the inline error “That code has expired. Codes last 10 minutes. Send a new one below.” above the form, with the six inputs empty.
+   Loading must not clear the form. Error must say what happened and what to do.
+8. **Trust language.** The page names no tier, replay grade, attestation, or cost basis, and it must not add one. Nothing on the page mentions a witness, a proof, a verdict, a definition of done, a trust or spend score, or a per-run price.
+9. **Headings and captions.** No heading on the built page carries a comma, a mid-dot, or a not/never contrast. Subtext under a heading is one sentence or nothing, except where the spec quotes longer rendered copy.
+10. **Mobile.** At 390 × 844 with a touch pointer: the card fills the width with 16 px gutters, the button is full width and at least 44 px, the six inputs stay on one row and open the numeric keypad. Compare against the `verify-email` mobile story (`mobile=1`).
+11. **Accessibility.** Each code input has an `aria-label` (“digit N”) and the field has a visible label; the inline error is announced; Send a new code is a real button; focus is visible; the page is operable by keyboard end to end.
+12. **Permissions.** Read is public for a pending sign-up; `auth.verify` is gated server-side, not only hidden in the UI. Verify that a wrong or expired code is rejected by the server.
+13. **Nothing extra.** List anything on the built page that is not in the spec (tiles, tabs, columns, buttons, copy). Each is a finding; the reviewer decides whether it stays.
 
 ## Output
 
 Return a single markdown report:
 
 ```
-# Verify email — audit {{DATE}}
+# Verify email audit {{DATE}}
 Verdict: PASS | FAIL (n fails, m notes)
 
 | # | Check | Result | Evidence | Fix |
@@ -50,7 +50,7 @@ Verdict: PASS | FAIL (n fails, m notes)
 | … | | | | |
 
 ## Fails, most severe first
-1. <what is wrong> — <where> — <what the design shows> — <the smallest change that fixes it>
+1. <what is wrong>, <where>, <what the design shows>, <the smallest change that fixes it>
 
 ## Not in the spec
 - …
@@ -59,4 +59,4 @@ Verdict: PASS | FAIL (n fails, m notes)
 - …
 ```
 
-Rules: never mark PASS on an assumption — open the file or the DOM. Quote the design’s copy verbatim when a label differs. If the build cannot be started or the route is missing, stop and report that as the single FAIL.
+Rules: never mark PASS on an assumption; open the file or the DOM. Quote the design’s copy verbatim when a label differs. If the build cannot be started or the route is missing, stop and report that as the single FAIL.
