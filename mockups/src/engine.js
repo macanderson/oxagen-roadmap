@@ -701,6 +701,9 @@ var TOOLMETA={
  send_message:["Send message","message"], search_tools:["Search the belt","read"],
  load_tools:["Load tool definitions","read"], okta__deactivate_user:["Deactivate user","access"]
 };
+/* The first row of a tool call leads with the tool's short name and its arguments: a harness-native
+   tool drops its harness prefix (claude_code__Read reads as Read), an MCP tool keeps its id. */
+function txToolName(t){return String(t||"").replace(/^(claude_code|codex|stella|cursor)__/,"").replace(/@[\d.]+$/,"");}
 function toolParts(id){var s=String(id||""),i=s.lastIndexOf("@");return i>0?{n:s.slice(0,i),v:s.slice(i+1)}:{n:s,v:""};}
 function toolMeta(id){
   var p=toolParts(id), m=TOOLMETA[p.n];
@@ -2694,7 +2697,7 @@ function txRow(R,e,i,cum,rows,answerIdx){
     else if(pending)chips+='<span class="tx-chip">running…</span>';
     chips+=txGovChip(e.gov);
     if(e.raw)chips+='<button class="tx-fold" onclick="txOpen('+i+')" aria-label="'+(open?"hide":"show")+' arguments">'+(open?"⏶":"⋯")+'</button>';
-    inner='<div><div class="tx-call"><span class="g'+(failed?' bad':'')+'">'+(failed?"✗":"●")+'</span><span class="nm '+(failed?'bad':cls)+'">'+txHi(e.title,q)+'</span>'+
+    inner='<div><div class="tx-call"><span class="g'+(failed?' bad':'')+'">'+(failed?"✗":"●")+'</span><span class="nm '+(failed?'bad':cls)+'" title="'+h(e.title)+'">'+txHi(txToolName(e.title),q)+'</span>'+
      (e.arg?'<span class="arg" title="'+h(e.arg)+'">'+txHi(e.arg,q)+'</span>':'')+'<span class="tx-chips">'+chips+'</span></div>';
     if(open&&e.raw)inner+='<pre class="tx-args">'+txHi(e.raw,q)+'</pre>';
     if(e.diff)inner+=txDiffBlock(e.diff,open);
