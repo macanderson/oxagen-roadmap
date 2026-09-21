@@ -131,7 +131,8 @@
     "docs/adr/ADR-128-local-arp-checkpoints-prepare-external-runs.md",
     "docs/adr/ADR-128-source-identifiers-determine-draft-filenames.md",
     "docs/adr/ADR-130-spend-and-operator-feedback-ui.md",
-    "docs/adr/ADR-131-one-openrouter-key-per-organisation.md"
+    "docs/adr/ADR-131-one-openrouter-key-per-organisation.md",
+    "docs/adr/ADR-132-the-mockup-css-is-the-design-of-record.md"
   ],
   "adrs": {
     "ADR-001": {
@@ -1157,6 +1158,14 @@
       "path": "docs/adr/ADR-131-one-openrouter-key-per-organisation.md",
       "status": null,
       "title": "One OpenRouter key per organisation, and funding is decided with the model"
+    },
+    "ADR-132": {
+      "date": "2026-09-20",
+      "decision": "The mockup's CSS is the design of record for the app's presentation, rule by rule. The app carries each rule as a named recipe in `apps/app/src/ui/control-styles.ts`, `table.tsx`, `route-tabs.tsx`, `badge.tsx` and `apps/app/src/app/globals.css`, and every recipe names the rule it draws in the comment above it. A page draws from the recipes and never around them.",
+      "id": "ADR-132",
+      "path": "docs/adr/ADR-132-the-mockup-css-is-the-design-of-record.md",
+      "status": "accepted",
+      "title": "The mockup's CSS is the app's design of record"
     }
   },
   "baseline": "2026-09-18T20:52:30Z",
@@ -1644,6 +1653,19 @@
       "status": "decided",
       "title": "One OpenRouter key per organisation, and funding is decided with the model"
     },
+    "ADR-132": {
+      "blocks": [],
+      "decided": "ADR-132: The mockup's CSS is the app's design of record. The mockup's CSS is the design of record for the app's presentation, rule by rule. The app carries each rule as a named recipe in `apps/app/src/ui/control-styles.ts`, `table.tsx`, `route-tabs.tsx`, `badge.tsx` and `apps/app/src/app/globals.css`, and every recipe names the rule it draws in the comment above it. A page draws from the recipes and never around them.",
+      "decided_on": "2026-09-20",
+      "id": "ADR-132",
+      "origin": "adr",
+      "pr": 3611,
+      "question": "Decided in the repository: The mockup's CSS is the app's design of record.",
+      "recommendation": null,
+      "source": "docs/adr/ADR-132-the-mockup-css-is-the-design-of-record.md",
+      "status": "decided",
+      "title": "The mockup's CSS is the app's design of record"
+    },
     "I-oxagen#2961": {
       "blocks": [],
       "decided": null,
@@ -2087,9 +2109,9 @@
       "title": "P1 · kernel/Approvals · Keep each approval linked to its run and final result"
     }
   },
-  "generated_at": "2026-09-20T23:13:20.687Z",
+  "generated_at": "2026-09-21T01:16:49.988Z",
   "heads": {
-    "oxagen": "2e6e991586f3aacc78ba34e143d1596b72179136"
+    "oxagen": "1c3f88da8a6f03165b1238fae6538c5919888768"
   },
   "issues": {
     "oxagen#1204": {
@@ -2452,7 +2474,7 @@
       ],
       "state": "open",
       "title": "P1 · app/Mission Control · Finish the shared foundation for the new Mission Control app",
-      "updated_at": "2026-09-20T22:36:50Z"
+      "updated_at": "2026-09-21T00:12:48Z"
     },
     "oxagen#2950": {
       "author": "macanderson",
@@ -2602,7 +2624,7 @@
       ],
       "state": "open",
       "title": "P3 · app/Run · Add controls to pause, resume, stop, and guide runs",
-      "updated_at": "2026-09-20T22:42:17Z"
+      "updated_at": "2026-09-21T00:12:49Z"
     },
     "oxagen#2955": {
       "author": "macanderson",
@@ -2641,7 +2663,7 @@
       ],
       "state": "open",
       "title": "P3 · app/Proof · Show whether separate checks proved the result of a run",
-      "updated_at": "2026-09-20T02:26:01Z"
+      "updated_at": "2026-09-21T00:12:49Z"
     },
     "oxagen#2956": {
       "author": "macanderson",
@@ -2789,7 +2811,7 @@
       ],
       "state": "open",
       "title": "P0 · app/Steering · Build the full review process for agent guidance",
-      "updated_at": "2026-09-20T22:36:47Z"
+      "updated_at": "2026-09-21T00:12:50Z"
     },
     "oxagen#2962": {
       "author": "macanderson",
@@ -2826,7 +2848,7 @@
       ],
       "state": "open",
       "title": "P0 · app/Spend · Show spend totals with their source, detail, and budget limits",
-      "updated_at": "2026-09-20T02:25:59Z"
+      "updated_at": "2026-09-21T00:12:50Z"
     },
     "oxagen#2963": {
       "author": "macanderson",
@@ -2901,7 +2923,7 @@
       ],
       "state": "open",
       "title": "P1 · app/Organization · Build organization members, roles, invites, workspaces, and keys",
-      "updated_at": "2026-09-20T02:25:57Z"
+      "updated_at": "2026-09-21T00:12:50Z"
     },
     "oxagen#2965": {
       "author": "macanderson",
@@ -2980,7 +3002,7 @@
       ],
       "state": "open",
       "title": "P3 · app/Onboarding · Guide a new account from sign-up to its first recorded run",
-      "updated_at": "2026-09-20T02:25:56Z"
+      "updated_at": "2026-09-21T00:12:51Z"
     },
     "oxagen#2968": {
       "author": "macanderson",
@@ -3162,7 +3184,7 @@
       ],
       "state": "open",
       "title": "P0 · data/Postgres+ClickHouse · Fix data loss and access defects in the database layer",
-      "updated_at": "2026-09-20T03:32:36Z"
+      "updated_at": "2026-09-21T00:12:51Z"
     },
     "oxagen#2973": {
       "author": "macanderson",
@@ -3588,7 +3610,7 @@
     },
     "oxagen#3097": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-21T00:57:18Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": true,
@@ -3617,9 +3639,9 @@
       "spec_refs": [
         "ADR-043"
       ],
-      "state": "open",
+      "state": "closed",
       "title": "P1 · app/Audit · Bring the existing audit log into the new app",
-      "updated_at": "2026-09-20T02:25:46Z"
+      "updated_at": "2026-09-21T00:57:18Z"
     },
     "oxagen#3098": {
       "author": "macanderson",
@@ -6500,7 +6522,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "P1 · billing/Spend · Count all observed usage when calculating run cost",
-      "updated_at": "2026-09-20T22:38:19Z"
+      "updated_at": "2026-09-21T00:12:53Z"
     },
     "oxagen#3282": {
       "author": "macanderson",
@@ -7757,7 +7779,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "P2 · app/Spend · Show future prices and fix spend-page pricing gaps",
-      "updated_at": "2026-09-20T22:38:18Z"
+      "updated_at": "2026-09-21T00:12:53Z"
     },
     "oxagen#3324": {
       "author": "macanderson",
@@ -8060,7 +8082,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "P2 · app/Account · Fix account settings that lose results or hide needed controls",
-      "updated_at": "2026-09-20T22:38:36Z"
+      "updated_at": "2026-09-21T00:12:54Z"
     },
     "oxagen#3334": {
       "author": "macanderson",
@@ -9122,7 +9144,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "P3 · app/Run · Use the viewer's time zone and fix related account settings",
-      "updated_at": "2026-09-20T22:37:36Z"
+      "updated_at": "2026-09-21T00:12:54Z"
     },
     "oxagen#3369": {
       "author": "macanderson",
@@ -9182,7 +9204,7 @@
       ],
       "state": "open",
       "title": "P3 · app/Run · Fix run records, live updates, costs, and long lists",
-      "updated_at": "2026-09-20T02:25:06Z"
+      "updated_at": "2026-09-21T00:12:55Z"
     },
     "oxagen#3371": {
       "author": "macanderson",
@@ -9578,7 +9600,7 @@
       ],
       "state": "open",
       "title": "P2 · evidence/Tacho · Fix gaps in local agent setup and recorded run facts",
-      "updated_at": "2026-09-20T22:38:44Z"
+      "updated_at": "2026-09-21T00:12:55Z"
     },
     "oxagen#3385": {
       "author": "macanderson",
@@ -9887,7 +9909,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "P0 · app/Steering · Add a page for one published guidance record",
-      "updated_at": "2026-09-20T22:08:32Z"
+      "updated_at": "2026-09-21T00:34:28Z"
     },
     "oxagen#3396": {
       "author": "macanderson",
@@ -12630,7 +12652,7 @@
     },
     "oxagen#3494": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-20T23:51:01Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": false,
@@ -12654,9 +12676,9 @@
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "P2 · billing/Spend · Use only price changes inside the report's date range",
-      "updated_at": "2026-09-20T22:58:06Z"
+      "updated_at": "2026-09-20T23:51:01Z"
     },
     "oxagen#3495": {
       "author": "macanderson",
@@ -13967,7 +13989,7 @@
     },
     "oxagen#3541": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-21T00:07:06Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": false,
@@ -13993,9 +14015,9 @@
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "P2 · knowledge · Fork-repo polling swallows cancellation, timeouts, and rate limits and reports success anyway (residue #3537)",
-      "updated_at": "2026-09-20T22:57:08Z"
+      "updated_at": "2026-09-21T00:07:06Z"
     },
     "oxagen#3542": {
       "author": "macanderson",
@@ -15155,7 +15177,7 @@
     },
     "oxagen#3583": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-21T00:53:13Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": false,
@@ -15182,9 +15204,9 @@
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "P2 · kernel+evidence · Rule-load failures during resume show up as errorCode: null in audit and trace events",
-      "updated_at": "2026-09-20T22:39:10Z"
+      "updated_at": "2026-09-21T00:53:13Z"
     },
     "oxagen#3584": {
       "author": "macanderson",
@@ -15754,7 +15776,7 @@
     },
     "oxagen#3605": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-21T00:07:04Z",
       "closes": [
         3541
       ],
@@ -15764,7 +15786,7 @@
       "is_pr": true,
       "kind": null,
       "labels": [],
-      "merged_at": null,
+      "merged_at": "2026-09-21T00:07:04Z",
       "milestone": null,
       "needs_decision": false,
       "number": 3605,
@@ -15773,13 +15795,13 @@
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "Preserve cancellation and retry limits while polling GitHub forks",
-      "updated_at": "2026-09-20T22:56:05Z"
+      "updated_at": "2026-09-21T00:11:50Z"
     },
     "oxagen#3606": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-20T23:51:00Z",
       "closes": [
         3494
       ],
@@ -15789,7 +15811,7 @@
       "is_pr": true,
       "kind": null,
       "labels": [],
-      "merged_at": null,
+      "merged_at": "2026-09-20T23:51:00Z",
       "milestone": null,
       "needs_decision": false,
       "number": 3606,
@@ -15798,20 +15820,22 @@
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "Limit price-change boundaries to the spend report window",
-      "updated_at": "2026-09-20T22:58:17Z"
+      "updated_at": "2026-09-20T23:51:01Z"
     },
     "oxagen#3607": {
       "author": "oxagen-connect[bot]",
-      "closed_at": null,
+      "closed_at": "2026-09-20T23:57:07Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": false,
       "html_url": "https://github.com/macanderson/oxagen/pull/3607",
       "is_pr": true,
       "kind": null,
-      "labels": [],
+      "labels": [
+        "no-issue"
+      ],
       "merged_at": null,
       "milestone": null,
       "needs_decision": false,
@@ -15821,9 +15845,716 @@
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "Context PR: ctx.product.do-not-run-tests",
-      "updated_at": "2026-09-20T23:05:47Z"
+      "updated_at": "2026-09-20T23:57:07Z"
+    },
+    "oxagen#3608": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/issues/3608",
+      "is_pr": false,
+      "kind": "gap",
+      "labels": [
+        "P3",
+        "area:app",
+        "job:explain",
+        "pillar:innovation",
+        "kind:gap",
+        "size/L"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3608,
+      "pillar": "innovation",
+      "priority": "P3",
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "P3 · Run outputs · a screen or image a run produced has nowhere to be captured",
+      "updated_at": "2026-09-21T00:11:32Z"
+    },
+    "oxagen#3609": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/issues/3609",
+      "is_pr": false,
+      "kind": "gap",
+      "labels": [
+        "P1",
+        "area:app",
+        "job:explain",
+        "pillar:innovation",
+        "kind:gap",
+        "size/XL"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3609,
+      "pillar": "innovation",
+      "priority": "P1",
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "P1 · Run page · build the outputs spine, so a run says what it produced",
+      "updated_at": "2026-09-21T00:11:15Z"
+    },
+    "oxagen#3610": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3610",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "no-issue",
+        "closes-nothing"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3610,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        2951,
+        2952
+      ],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-132"
+      ],
+      "state": "open",
+      "title": "fix(run): read the transcript in the run's clock, and say how a run ended",
+      "updated_at": "2026-09-21T00:56:10Z"
+    },
+    "oxagen#3611": {
+      "author": "macanderson",
+      "closed_at": "2026-09-20T23:56:43Z",
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3611",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "closes-nothing"
+      ],
+      "merged_at": "2026-09-20T23:56:42Z",
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3611,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-132"
+      ],
+      "state": "closed",
+      "title": "app: return the presentation to the roadmap mockup, and hold it there (ADR-132)",
+      "updated_at": "2026-09-21T00:00:25Z"
+    },
+    "oxagen#3612": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3612",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "closes-nothing"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3612,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Reject a GitHub fork poll the caller cancelled mid-response",
+      "updated_at": "2026-09-21T00:13:47Z"
+    },
+    "oxagen#3613": {
+      "author": "macanderson",
+      "closed_at": "2026-09-21T00:53:12Z",
+      "closes": [
+        3583
+      ],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3613",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": "2026-09-21T00:53:12Z",
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3613,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "Preserve rule-authority failure codes in invocation events",
+      "updated_at": "2026-09-21T00:53:13Z"
+    },
+    "oxagen#3614": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [
+        3570
+      ],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3614",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3614,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Refresh metadata when agent and skill proposals are resubmitted",
+      "updated_at": "2026-09-21T00:36:23Z"
+    },
+    "oxagen#3615": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3615",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "closes-nothing"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3615,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        3074
+      ],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Fix brand kit discovery and surface mark selection",
+      "updated_at": "2026-09-21T01:01:54Z"
+    },
+    "oxagen#3616": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [
+        3582,
+        3571,
+        3557,
+        3542
+      ],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3616",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3616,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Preserve Tacho recovery across WAL reads and service removal",
+      "updated_at": "2026-09-21T00:56:52Z"
+    },
+    "oxagen#3617": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3617",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "closes-nothing"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3617,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        3573,
+        3577
+      ],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Cover historical tool rules and org-wide kill switch writes",
+      "updated_at": "2026-09-21T01:08:03Z"
+    },
+    "oxagen#3618": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [
+        3547,
+        3536
+      ],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3618",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3618,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Share skill YAML validation and read inventory from one snapshot",
+      "updated_at": "2026-09-21T01:05:22Z"
+    },
+    "oxagen#3619": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3619",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "closes-nothing"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3619,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        2989
+      ],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-045"
+      ],
+      "state": "open",
+      "title": "Compare shared DoD workflow files at their pinned commits",
+      "updated_at": "2026-09-21T00:58:51Z"
+    },
+    "oxagen#3620": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [
+        3554
+      ],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3620",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3620,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Include stored invalidation facts in audit reads and signed exports",
+      "updated_at": "2026-09-21T00:44:48Z"
+    },
+    "oxagen#3621": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3621",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "closes-nothing"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3621,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        3368
+      ],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Report unsupported viewer time zones once per render",
+      "updated_at": "2026-09-21T01:09:04Z"
+    },
+    "oxagen#3622": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [
+        3395
+      ],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3622",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3622,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-025"
+      ],
+      "state": "open",
+      "title": "feat(app): a page for one published guidance record (#3395)",
+      "updated_at": "2026-09-21T00:58:49Z"
+    },
+    "oxagen#3623": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3623",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "closes-nothing"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3623,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        3370
+      ],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Preserve run stream progress and handle terminal errors",
+      "updated_at": "2026-09-21T01:05:20Z"
+    },
+    "oxagen#3624": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3624",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "closes-nothing"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3624,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        3072
+      ],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-084"
+      ],
+      "state": "open",
+      "title": "Stop writing email addresses in legacy telemetry backfill",
+      "updated_at": "2026-09-21T00:40:48Z"
+    },
+    "oxagen#3625": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3625",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "closes-nothing"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3625,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        3167
+      ],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Alert on sustained Tacho intake failures",
+      "updated_at": "2026-09-21T00:45:32Z"
+    },
+    "oxagen#3626": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3626",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "closes-nothing"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3626,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        3333
+      ],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Preserve account operations and restore avatar and theme controls",
+      "updated_at": "2026-09-21T00:56:30Z"
+    },
+    "oxagen#3627": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3627",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "closes-nothing"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3627,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        3384
+      ],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Preserve Cursor session roots and reject ambiguous tool detection",
+      "updated_at": "2026-09-21T01:16:01Z"
+    },
+    "oxagen#3628": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3628",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "closes-nothing"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3628,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        3384
+      ],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Preserve pending bodies and final Tacho observations",
+      "updated_at": "2026-09-21T00:58:12Z"
+    },
+    "oxagen#3629": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3629",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "closes-nothing"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3629,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        3281,
+        3323,
+        2962
+      ],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Show and cancel scheduled prices without losing observed usage",
+      "updated_at": "2026-09-21T01:03:15Z"
+    },
+    "oxagen#3630": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3630",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3630,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        3098
+      ],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "feat(skills): publish resolution config and preview governed catalog",
+      "updated_at": "2026-09-21T01:08:36Z"
+    },
+    "oxagen#3631": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3631",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "closes-nothing"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3631,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        2955
+      ],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Show recorded witness results on the Run proof tab",
+      "updated_at": "2026-09-21T01:10:04Z"
+    },
+    "oxagen#3632": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [
+        3609
+      ],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3632",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3632,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "feat(run): build the outputs spine, so a run says what it produced",
+      "updated_at": "2026-09-21T01:09:12Z"
+    },
+    "oxagen#3633": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3633",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "closes-nothing"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3633,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        3558
+      ],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Report unresolved legacy identities without similarity merges",
+      "updated_at": "2026-09-21T01:15:27Z"
     },
     "oxagen#4": {
       "author": "macanderson",
@@ -16670,7 +17401,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "Sign in with a password, and write decisions back to their issues",
-      "updated_at": "2026-09-20T21:30:05Z"
+      "updated_at": "2026-09-20T23:36:08Z"
     },
     "roadmap#55": {
       "author": "macanderson",
@@ -31691,7 +32422,6 @@
       "is_pr": true,
       "kind": null,
       "labels": [
-        "no-issue",
         "closes-nothing"
       ],
       "merged_at": null,
@@ -31705,7 +32435,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "fix(core): cut a stream that repeats one character forever",
-      "updated_at": "2026-09-20T23:02:07Z"
+      "updated_at": "2026-09-21T01:15:23Z"
     },
     "stella#6538": {
       "author": "github-actions[bot]",
@@ -31731,6 +32461,33 @@
       "state": "closed",
       "title": "chore(release): sync versions to 0.9.429 [skip release]",
       "updated_at": "2026-09-20T23:01:47Z"
+    },
+    "stella#6539": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/stella/pull/6539",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "no-issue"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 6539,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "stella",
+      "spec_refs": [
+        "ADR-045"
+      ],
+      "state": "open",
+      "title": "ci: coordinate shared Oxagen workflow pin updates",
+      "updated_at": "2026-09-21T00:45:25Z"
     },
     "stella#834": {
       "author": "macanderson",
@@ -32067,9 +32824,19 @@
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "dod",
-      "last_merge": "2026-09-20T05:32:42Z",
+      "last_merge": "2026-09-20T23:51:00Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-20T23:51:00Z",
+          "number": 3606,
+          "repo": "oxagen",
+          "title": "Limit price-change boundaries to the spend report window",
+          "touched": [
+            "packages/billing/src"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-20T05:32:42Z",
@@ -32152,7 +32919,7 @@
         }
       ],
       "open_issues": 0,
-      "refreshed_at": "2026-09-20T06:59:55.517Z",
+      "refreshed_at": "2026-09-21T01:16:49.988Z",
       "shared_page": false
     },
     "D4": {
@@ -32192,9 +32959,19 @@
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "dod",
-      "last_merge": "2026-09-19T08:48:51Z",
+      "last_merge": "2026-09-20T23:56:42Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-20T23:56:42Z",
+          "number": 3611,
+          "repo": "oxagen",
+          "title": "app: return the presentation to the roadmap mockup, and hold it there (ADR-132)",
+          "touched": [
+            "apps/app/src/app/[org]/[ws]/runs/[run]/page.tsx"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-19T08:48:51Z",
@@ -32217,7 +32994,7 @@
         }
       ],
       "open_issues": 0,
-      "refreshed_at": "2026-09-19T10:53:47.619Z",
+      "refreshed_at": "2026-09-21T01:16:49.988Z",
       "shared_page": false
     },
     "D7": {
@@ -32512,9 +33289,19 @@
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "witness",
-      "last_merge": "2026-09-19T08:48:51Z",
+      "last_merge": "2026-09-20T23:56:42Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-20T23:56:42Z",
+          "number": 3611,
+          "repo": "oxagen",
+          "title": "app: return the presentation to the roadmap mockup, and hold it there (ADR-132)",
+          "touched": [
+            "apps/app/src/app/[org]/[ws]/runs/[run]/page.tsx"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-19T08:48:51Z",
@@ -32537,16 +33324,26 @@
         }
       ],
       "open_issues": 0,
-      "refreshed_at": "2026-09-19T10:53:47.619Z",
+      "refreshed_at": "2026-09-21T01:16:49.988Z",
       "shared_page": false
     },
     "W9": {
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "witness",
-      "last_merge": "2026-09-20T08:28:43Z",
+      "last_merge": "2026-09-20T23:56:42Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-20T23:56:42Z",
+          "number": 3611,
+          "repo": "oxagen",
+          "title": "app: return the presentation to the roadmap mockup, and hold it there (ADR-132)",
+          "touched": [
+            "apps/app/src/features/spend/figures.tsx"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-20T08:28:43Z",
@@ -32571,16 +33368,26 @@
         }
       ],
       "open_issues": 0,
-      "refreshed_at": "2026-09-20T12:09:02.574Z",
+      "refreshed_at": "2026-09-21T01:16:49.988Z",
       "shared_page": false
     },
     "accept-invitation": {
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "surface",
-      "last_merge": "2026-09-20T08:28:43Z",
+      "last_merge": "2026-09-20T23:56:42Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-20T23:56:42Z",
+          "number": 3611,
+          "repo": "oxagen",
+          "title": "app: return the presentation to the roadmap mockup, and hold it there (ADR-132)",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-20T08:28:43Z",
@@ -32774,7 +33581,7 @@
       ],
       "open_issues": 0,
       "page": "apps/app/src/app/(auth)/invite/[token]/page.tsx",
-      "refreshed_at": "2026-09-20T12:09:02.574Z",
+      "refreshed_at": "2026-09-21T01:16:49.988Z",
       "shared_page": false
     },
     "agent": {
@@ -32790,9 +33597,19 @@
         }
       ],
       "kind": "surface",
-      "last_merge": "2026-09-20T01:39:52Z",
+      "last_merge": "2026-09-20T23:56:42Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-20T23:56:42Z",
+          "number": 3611,
+          "repo": "oxagen",
+          "title": "app: return the presentation to the roadmap mockup, and hold it there (ADR-132)",
+          "touched": [
+            "apps/app/src/app/[org]/[ws]/agents/[agent]/page.tsx"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-20T01:39:52Z",
@@ -32861,7 +33678,7 @@
       ],
       "open_issues": 0,
       "page": "apps/app/src/app/[org]/[ws]/agents/[agent]/page.tsx",
-      "refreshed_at": "2026-09-20T06:59:55.517Z",
+      "refreshed_at": "2026-09-21T01:16:49.988Z",
       "shared_page": false
     },
     "agent-source": {
@@ -32873,9 +33690,19 @@
         }
       ],
       "kind": "surface",
-      "last_merge": "2026-09-20T06:47:08Z",
+      "last_merge": "2026-09-20T23:56:42Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-20T23:56:42Z",
+          "number": 3611,
+          "repo": "oxagen",
+          "title": "app: return the presentation to the roadmap mockup, and hold it there (ADR-132)",
+          "touched": [
+            "apps/app/src/app/[org]/[ws]/agents/[agent]/source/page.tsx"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-20T06:47:08Z",
@@ -32902,16 +33729,26 @@
       ],
       "open_issues": 0,
       "page": "apps/app/src/app/[org]/[ws]/agents/[agent]/source/page.tsx",
-      "refreshed_at": "2026-09-20T06:59:55.517Z",
+      "refreshed_at": "2026-09-21T01:16:49.988Z",
       "shared_page": false
     },
     "agents": {
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "surface",
-      "last_merge": "2026-09-20T08:28:43Z",
+      "last_merge": "2026-09-20T23:56:42Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-20T23:56:42Z",
+          "number": 3611,
+          "repo": "oxagen",
+          "title": "app: return the presentation to the roadmap mockup, and hold it there (ADR-132)",
+          "touched": [
+            "apps/app/src/app/[org]/[ws]/agents/page.tsx"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-20T08:28:43Z",
@@ -32935,7 +33772,7 @@
       ],
       "open_issues": 0,
       "page": "apps/app/src/app/[org]/[ws]/agents/page.tsx",
-      "refreshed_at": "2026-09-20T12:09:02.574Z",
+      "refreshed_at": "2026-09-21T01:16:49.988Z",
       "shared_page": false
     },
     "audit": {
@@ -32976,7 +33813,7 @@
       "closed_issues": 1,
       "gap_refs": [],
       "kind": "surface",
-      "last_merge": "2026-09-20T08:28:43Z",
+      "last_merge": "2026-09-20T23:56:42Z",
       "links": [
         {
           "number": 3323,
@@ -32992,6 +33829,16 @@
         }
       ],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-20T23:56:42Z",
+          "number": 3611,
+          "repo": "oxagen",
+          "title": "app: return the presentation to the roadmap mockup, and hold it there (ADR-132)",
+          "touched": [
+            "apps/app/src/features/billing/summary.tsx"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-20T08:28:43Z",
@@ -33018,7 +33865,7 @@
       ],
       "open_issues": 1,
       "page": "apps/app/src/app/[org]/billing/page.tsx",
-      "refreshed_at": "2026-09-20T12:09:02.574Z",
+      "refreshed_at": "2026-09-21T01:16:49.988Z",
       "shared_page": false
     },
     "fleet": {
@@ -33034,7 +33881,7 @@
         }
       ],
       "kind": "surface",
-      "last_merge": "2026-09-20T08:28:43Z",
+      "last_merge": "2026-09-20T23:56:42Z",
       "links": [
         {
           "number": 3282,
@@ -33050,6 +33897,17 @@
         }
       ],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-20T23:56:42Z",
+          "number": 3611,
+          "repo": "oxagen",
+          "title": "app: return the presentation to the roadmap mockup, and hold it there (ADR-132)",
+          "touched": [
+            "apps/app/src/app/[org]/[ws]/page.tsx",
+            "apps/app/src/features/fleet/stat-strip.tsx"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-20T08:28:43Z",
@@ -33201,16 +34059,26 @@
       ],
       "open_issues": 1,
       "page": "apps/app/src/app/[org]/[ws]/page.tsx",
-      "refreshed_at": "2026-09-20T12:09:02.574Z",
+      "refreshed_at": "2026-09-21T01:16:49.988Z",
       "shared_page": false
     },
     "forgot-password": {
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "surface",
-      "last_merge": "2026-09-20T08:28:43Z",
+      "last_merge": "2026-09-20T23:56:42Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-20T23:56:42Z",
+          "number": 3611,
+          "repo": "oxagen",
+          "title": "app: return the presentation to the roadmap mockup, and hold it there (ADR-132)",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-20T08:28:43Z",
@@ -33404,7 +34272,7 @@
       ],
       "open_issues": 0,
       "page": "apps/app/src/app/(auth)/forgot-password/page.tsx",
-      "refreshed_at": "2026-09-20T12:09:02.574Z",
+      "refreshed_at": "2026-09-21T01:16:49.988Z",
       "shared_page": false
     },
     "installer": {
@@ -33547,9 +34415,19 @@
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "surface",
-      "last_merge": "2026-09-20T08:28:43Z",
+      "last_merge": "2026-09-20T23:56:42Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-20T23:56:42Z",
+          "number": 3611,
+          "repo": "oxagen",
+          "title": "app: return the presentation to the roadmap mockup, and hold it there (ADR-132)",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-20T08:28:43Z",
@@ -33743,7 +34621,7 @@
       ],
       "open_issues": 0,
       "page": "apps/app/src/app/(auth)/login/page.tsx",
-      "refreshed_at": "2026-09-20T12:09:02.574Z",
+      "refreshed_at": "2026-09-21T01:16:49.988Z",
       "shared_page": false
     },
     "mandate": {
@@ -33815,9 +34693,19 @@
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "surface",
-      "last_merge": "2026-09-20T08:28:43Z",
+      "last_merge": "2026-09-20T23:56:42Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-20T23:56:42Z",
+          "number": 3611,
+          "repo": "oxagen",
+          "title": "app: return the presentation to the roadmap mockup, and hold it there (ADR-132)",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-20T08:28:43Z",
@@ -34011,7 +34899,7 @@
       ],
       "open_issues": 0,
       "page": "apps/app/src/app/(onboarding)/new-organization/page.tsx",
-      "refreshed_at": "2026-09-20T12:09:02.574Z",
+      "refreshed_at": "2026-09-21T01:16:49.988Z",
       "shared_page": false
     },
     "onboarding-run": {
@@ -34091,7 +34979,7 @@
         }
       ],
       "kind": "surface",
-      "last_merge": "2026-09-20T01:39:52Z",
+      "last_merge": "2026-09-20T23:56:42Z",
       "links": [
         {
           "number": 3314,
@@ -34107,6 +34995,18 @@
         }
       ],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-20T23:56:42Z",
+          "number": 3611,
+          "repo": "oxagen",
+          "title": "app: return the presentation to the roadmap mockup, and hold it there (ADR-132)",
+          "touched": [
+            "apps/app/src/app/[org]/page.tsx",
+            "apps/app/src/features/organization/people.tsx",
+            "apps/app/src/features/organization/workspaces.tsx"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-20T01:39:52Z",
@@ -34141,16 +35041,26 @@
       ],
       "open_issues": 2,
       "page": "apps/app/src/app/[org]/page.tsx",
-      "refreshed_at": "2026-09-20T06:59:55.517Z",
+      "refreshed_at": "2026-09-21T01:16:49.988Z",
       "shared_page": false
     },
     "organization-api-keys": {
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "surface",
-      "last_merge": "2026-09-19T10:23:48Z",
+      "last_merge": "2026-09-20T23:56:42Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-20T23:56:42Z",
+          "number": 3611,
+          "repo": "oxagen",
+          "title": "app: return the presentation to the roadmap mockup, and hold it there (ADR-132)",
+          "touched": [
+            "apps/app/src/app/[org]/api-keys/page.tsx"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-19T10:23:48Z",
@@ -34164,19 +35074,30 @@
       ],
       "open_issues": 0,
       "page": "apps/app/src/app/[org]/api-keys/page.tsx",
-      "refreshed_at": "2026-09-19T10:53:47.619Z",
+      "refreshed_at": "2026-09-21T01:16:49.988Z",
       "shared_page": false
     },
     "organization-roles": {
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "surface",
-      "last_merge": null,
+      "last_merge": "2026-09-20T23:56:42Z",
       "links": [],
-      "merged_prs": [],
+      "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-20T23:56:42Z",
+          "number": 3611,
+          "repo": "oxagen",
+          "title": "app: return the presentation to the roadmap mockup, and hold it there (ADR-132)",
+          "touched": [
+            "apps/app/src/app/[org]/roles/page.tsx"
+          ]
+        }
+      ],
       "open_issues": 0,
       "page": "apps/app/src/app/[org]/roles/page.tsx",
-      "refreshed_at": "2026-09-18T23:26:29.677Z",
+      "refreshed_at": "2026-09-21T01:16:49.988Z",
       "shared_page": false
     },
     "record": {
@@ -34218,7 +35139,7 @@
         }
       ],
       "kind": "surface",
-      "last_merge": "2026-09-20T08:28:43Z",
+      "last_merge": "2026-09-20T23:56:42Z",
       "links": [
         {
           "number": 3230,
@@ -34234,6 +35155,17 @@
         }
       ],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-20T23:56:42Z",
+          "number": 3611,
+          "repo": "oxagen",
+          "title": "app: return the presentation to the roadmap mockup, and hold it there (ADR-132)",
+          "touched": [
+            "apps/app/src/app/[org]/[ws]/register/[step]/page.tsx",
+            "apps/app/src/features/shell/assistant-flyout.tsx"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-20T08:28:43Z",
@@ -34277,7 +35209,7 @@
       ],
       "open_issues": 1,
       "page": "apps/app/src/app/[org]/[ws]/register/[step]/page.tsx",
-      "refreshed_at": "2026-09-20T12:09:02.574Z",
+      "refreshed_at": "2026-09-21T01:16:49.988Z",
       "shared_page": true
     },
     "register-run": {
@@ -34447,9 +35379,19 @@
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "surface",
-      "last_merge": "2026-09-20T08:28:43Z",
+      "last_merge": "2026-09-20T23:56:42Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-20T23:56:42Z",
+          "number": 3611,
+          "repo": "oxagen",
+          "title": "app: return the presentation to the roadmap mockup, and hold it there (ADR-132)",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-20T08:28:43Z",
@@ -34643,7 +35585,7 @@
       ],
       "open_issues": 0,
       "page": "apps/app/src/app/(auth)/reset-password/page.tsx",
-      "refreshed_at": "2026-09-20T12:09:02.574Z",
+      "refreshed_at": "2026-09-21T01:16:49.988Z",
       "shared_page": false
     },
     "run": {
@@ -34663,7 +35605,7 @@
         }
       ],
       "kind": "surface",
-      "last_merge": "2026-09-20T08:28:43Z",
+      "last_merge": "2026-09-20T23:56:42Z",
       "links": [
         {
           "number": 3282,
@@ -34697,6 +35639,16 @@
         }
       ],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-20T23:56:42Z",
+          "number": 3611,
+          "repo": "oxagen",
+          "title": "app: return the presentation to the roadmap mockup, and hold it there (ADR-132)",
+          "touched": [
+            "apps/app/src/app/[org]/[ws]/runs/[run]/page.tsx"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-20T08:28:43Z",
@@ -34870,16 +35822,26 @@
       ],
       "open_issues": 3,
       "page": "apps/app/src/app/[org]/[ws]/runs/[run]/page.tsx",
-      "refreshed_at": "2026-09-20T12:09:02.574Z",
+      "refreshed_at": "2026-09-21T01:16:49.988Z",
       "shared_page": true
     },
     "run-interjection": {
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "surface",
-      "last_merge": "2026-09-19T08:48:51Z",
+      "last_merge": "2026-09-20T23:56:42Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-20T23:56:42Z",
+          "number": 3611,
+          "repo": "oxagen",
+          "title": "app: return the presentation to the roadmap mockup, and hold it there (ADR-132)",
+          "touched": [
+            "apps/app/src/app/[org]/[ws]/runs/[run]/page.tsx"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-19T08:48:51Z",
@@ -34903,16 +35865,26 @@
       ],
       "open_issues": 0,
       "page": "apps/app/src/app/[org]/[ws]/runs/[run]/page.tsx",
-      "refreshed_at": "2026-09-19T10:53:47.619Z",
+      "refreshed_at": "2026-09-21T01:16:49.988Z",
       "shared_page": true
     },
     "signup": {
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "surface",
-      "last_merge": "2026-09-20T08:28:43Z",
+      "last_merge": "2026-09-20T23:56:42Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-20T23:56:42Z",
+          "number": 3611,
+          "repo": "oxagen",
+          "title": "app: return the presentation to the roadmap mockup, and hold it there (ADR-132)",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-20T08:28:43Z",
@@ -35107,7 +36079,7 @@
       ],
       "open_issues": 0,
       "page": "apps/app/src/app/(auth)/signup/page.tsx",
-      "refreshed_at": "2026-09-20T12:09:02.574Z",
+      "refreshed_at": "2026-09-21T01:16:49.988Z",
       "shared_page": false
     },
     "skill-source": {
@@ -35216,9 +36188,20 @@
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "surface",
-      "last_merge": "2026-09-20T08:28:43Z",
+      "last_merge": "2026-09-20T23:56:42Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-20T23:56:42Z",
+          "number": 3611,
+          "repo": "oxagen",
+          "title": "app: return the presentation to the roadmap mockup, and hold it there (ADR-132)",
+          "touched": [
+            "apps/app/src/app/[org]/[ws]/spend/page.tsx",
+            "apps/app/src/features/spend/findings.tsx"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-20T08:28:43Z",
@@ -35254,7 +36237,7 @@
       ],
       "open_issues": 0,
       "page": "apps/app/src/app/[org]/[ws]/spend/page.tsx",
-      "refreshed_at": "2026-09-20T12:09:02.574Z",
+      "refreshed_at": "2026-09-21T01:16:49.988Z",
       "shared_page": false
     },
     "steering": {
@@ -35270,7 +36253,7 @@
         }
       ],
       "kind": "surface",
-      "last_merge": "2026-09-20T01:40:26Z",
+      "last_merge": "2026-09-20T23:56:42Z",
       "links": [
         {
           "number": 2592,
@@ -35322,6 +36305,16 @@
         }
       ],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-20T23:56:42Z",
+          "number": 3611,
+          "repo": "oxagen",
+          "title": "app: return the presentation to the roadmap mockup, and hold it there (ADR-132)",
+          "touched": [
+            "apps/app/src/app/[org]/[ws]/steering/page.tsx"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-20T01:40:26Z",
@@ -35397,7 +36390,7 @@
       ],
       "open_issues": 4,
       "page": "apps/app/src/app/[org]/[ws]/steering/page.tsx",
-      "refreshed_at": "2026-09-20T06:59:55.517Z",
+      "refreshed_at": "2026-09-21T01:16:49.988Z",
       "shared_page": false
     },
     "tools": {
@@ -35477,9 +36470,19 @@
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "surface",
-      "last_merge": "2026-09-20T08:28:43Z",
+      "last_merge": "2026-09-20T23:56:42Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-20T23:56:42Z",
+          "number": 3611,
+          "repo": "oxagen",
+          "title": "app: return the presentation to the roadmap mockup, and hold it there (ADR-132)",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-20T08:28:43Z",
@@ -35673,16 +36676,26 @@
       ],
       "open_issues": 0,
       "page": "apps/app/src/app/(auth)/two-factor/page.tsx",
-      "refreshed_at": "2026-09-20T12:09:02.574Z",
+      "refreshed_at": "2026-09-21T01:16:49.988Z",
       "shared_page": false
     },
     "verify-email": {
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "surface",
-      "last_merge": "2026-09-20T08:28:43Z",
+      "last_merge": "2026-09-20T23:56:42Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-20T23:56:42Z",
+          "number": 3611,
+          "repo": "oxagen",
+          "title": "app: return the presentation to the roadmap mockup, and hold it there (ADR-132)",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-20T08:28:43Z",
@@ -35876,7 +36889,7 @@
       ],
       "open_issues": 0,
       "page": "apps/app/src/app/(auth)/verify/page.tsx",
-      "refreshed_at": "2026-09-20T12:09:02.574Z",
+      "refreshed_at": "2026-09-21T01:16:49.988Z",
       "shared_page": false
     },
     "wizard-agent": {
@@ -36005,20 +37018,20 @@
     }
   },
   "last_run": {
-    "at": "2026-09-20T23:13:20.687Z",
-    "calls": 12,
+    "at": "2026-09-21T01:16:49.988Z",
+    "calls": 10,
     "quiet": false
   },
   "milestones": {
     "M0": {
       "built": 4,
       "last_merge": {
-        "merged_at": "2026-09-20T08:28:43Z",
-        "number": 3595,
+        "merged_at": "2026-09-20T23:56:42Z",
+        "number": 3611,
         "repo": "oxagen",
-        "title": "Restore readable data views and connect cost findings to correction drafts"
+        "title": "app: return the presentation to the roadmap mockup, and hold it there (ADR-132)"
       },
-      "merged_prs": 24,
+      "merged_prs": 25,
       "not_started": 0,
       "open_issues": 3,
       "partial": 1,
@@ -36027,12 +37040,12 @@
     "M1": {
       "built": 10,
       "last_merge": {
-        "merged_at": "2026-09-20T08:28:43Z",
-        "number": 3595,
+        "merged_at": "2026-09-20T23:56:42Z",
+        "number": 3611,
         "repo": "oxagen",
-        "title": "Restore readable data views and connect cost findings to correction drafts"
+        "title": "app: return the presentation to the roadmap mockup, and hold it there (ADR-132)"
       },
-      "merged_prs": 36,
+      "merged_prs": 37,
       "not_started": 1,
       "open_issues": 8,
       "partial": 5,
@@ -36041,12 +37054,12 @@
     "M2": {
       "built": 4,
       "last_merge": {
-        "merged_at": "2026-09-20T08:28:43Z",
-        "number": 3595,
+        "merged_at": "2026-09-20T23:56:42Z",
+        "number": 3611,
         "repo": "oxagen",
-        "title": "Restore readable data views and connect cost findings to correction drafts"
+        "title": "app: return the presentation to the roadmap mockup, and hold it there (ADR-132)"
       },
-      "merged_prs": 14,
+      "merged_prs": 15,
       "not_started": 2,
       "open_issues": 4,
       "partial": 2,
@@ -36055,12 +37068,12 @@
     "M3": {
       "built": 1,
       "last_merge": {
-        "merged_at": "2026-09-20T08:28:43Z",
-        "number": 3595,
+        "merged_at": "2026-09-20T23:56:42Z",
+        "number": 3611,
         "repo": "oxagen",
-        "title": "Restore readable data views and connect cost findings to correction drafts"
+        "title": "app: return the presentation to the roadmap mockup, and hold it there (ADR-132)"
       },
-      "merged_prs": 20,
+      "merged_prs": 21,
       "not_started": 0,
       "open_issues": 5,
       "partial": 2,
@@ -36069,12 +37082,12 @@
     "M4": {
       "built": 1,
       "last_merge": {
-        "merged_at": "2026-09-20T08:28:43Z",
-        "number": 3595,
+        "merged_at": "2026-09-20T23:56:42Z",
+        "number": 3611,
         "repo": "oxagen",
-        "title": "Restore readable data views and connect cost findings to correction drafts"
+        "title": "app: return the presentation to the roadmap mockup, and hold it there (ADR-132)"
       },
-      "merged_prs": 19,
+      "merged_prs": 20,
       "not_started": 0,
       "open_issues": 4,
       "partial": 2,
@@ -36083,12 +37096,12 @@
     "M5": {
       "built": 0,
       "last_merge": {
-        "merged_at": "2026-09-20T06:47:08Z",
-        "number": 3591,
+        "merged_at": "2026-09-20T23:56:42Z",
+        "number": 3611,
         "repo": "oxagen",
-        "title": "Derive skill and agent draft filenames from editable source names"
+        "title": "app: return the presentation to the roadmap mockup, and hold it there (ADR-132)"
       },
-      "merged_prs": 13,
+      "merged_prs": 14,
       "not_started": 7,
       "open_issues": 6,
       "partial": 3,
@@ -36097,12 +37110,12 @@
     "M6": {
       "built": 0,
       "last_merge": {
-        "merged_at": "2026-09-20T01:40:26Z",
-        "number": 3522,
+        "merged_at": "2026-09-20T23:56:42Z",
+        "number": 3611,
         "repo": "oxagen",
-        "title": "Fix 20 reported authorization, billing, and reliability bugs"
+        "title": "app: return the presentation to the roadmap mockup, and hold it there (ADR-132)"
       },
-      "merged_prs": 7,
+      "merged_prs": 8,
       "not_started": 0,
       "open_issues": 4,
       "partial": 1,
@@ -43887,6 +44900,142 @@
       "repo": "oxagen",
       "title": "Deliver invitation notes in plain text and HTML email"
     },
+    "oxagen#3605": {
+      "added": [],
+      "author": "macanderson",
+      "closes": [
+        3541
+      ],
+      "files": [
+        "packages/github/src/fetch-client.retries.test.ts",
+        "packages/github/src/fetch-client.ts",
+        "packages/github/src/types.ts"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3605",
+      "merged_at": "2026-09-21T00:07:04Z",
+      "number": 3605,
+      "refs": [],
+      "repo": "oxagen",
+      "title": "Preserve cancellation and retry limits while polling GitHub forks"
+    },
+    "oxagen#3606": {
+      "added": [],
+      "author": "macanderson",
+      "closes": [
+        3494
+      ],
+      "files": [
+        "packages/billing/src/price-book.test.ts",
+        "packages/billing/src/price-book.ts",
+        "packages/billing/src/unpriced-models.test.ts",
+        "packages/billing/src/unpriced-models.ts"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3606",
+      "merged_at": "2026-09-20T23:51:00Z",
+      "number": 3606,
+      "refs": [],
+      "repo": "oxagen",
+      "title": "Limit price-change boundaries to the spend report window"
+    },
+    "oxagen#3611": {
+      "added": [
+        "apps/app/src/features/fleet/fleet-actions.tsx",
+        "apps/app/src/test/arch/design-record.test.ts",
+        "apps/app/src/test/arch/probes/design-record/clean.tsx",
+        "apps/app/src/test/arch/probes/design-record/ink.tsx",
+        "apps/app/src/ui/badge.test.tsx",
+        "apps/app/src/ui/badge.tsx",
+        "docs/adr/ADR-132-the-mockup-css-is-the-design-of-record.md"
+      ],
+      "author": "macanderson",
+      "closes": [],
+      "files": [
+        "apps/app/ARCHITECTURE.md",
+        "apps/app/messages/en.json",
+        "apps/app/messages/fleet.json",
+        "apps/app/src/app/[org]/[ws]/agents/[agent]/page.tsx",
+        "apps/app/src/app/[org]/[ws]/agents/[agent]/source/page.tsx",
+        "apps/app/src/app/[org]/[ws]/agents/page.tsx",
+        "apps/app/src/app/[org]/[ws]/page.tsx",
+        "apps/app/src/app/[org]/[ws]/register/[step]/page.tsx",
+        "apps/app/src/app/[org]/[ws]/runs/[run]/page.tsx",
+        "apps/app/src/app/[org]/[ws]/spend/page.tsx",
+        "apps/app/src/app/[org]/[ws]/steering/page.tsx",
+        "apps/app/src/app/[org]/api-keys/page.tsx",
+        "apps/app/src/app/[org]/model-funding/page.tsx",
+        "apps/app/src/app/[org]/page.tsx",
+        "apps/app/src/app/[org]/pages.test.tsx",
+        "apps/app/src/app/[org]/roles/page.tsx",
+        "apps/app/src/app/globals.css",
+        "apps/app/src/features/agents/create-actions.test.tsx",
+        "apps/app/src/features/agents/parts.tsx",
+        "apps/app/src/features/billing/summary.tsx",
+        "apps/app/src/features/create/create-host.tsx",
+        "apps/app/src/features/fleet/fleet-actions.tsx",
+        "apps/app/src/features/fleet/index.ts",
+        "apps/app/src/features/fleet/stat-strip.tsx",
+        "apps/app/src/features/organization/people.tsx",
+        "apps/app/src/features/organization/workspaces.tsx",
+        "apps/app/src/features/shell/assistant-flyout.tsx",
+        "apps/app/src/features/shell/assistant-launcher.tsx",
+        "apps/app/src/features/shell/sidebar.tsx",
+        "apps/app/src/features/shell/switchers.tsx",
+        "apps/app/src/features/shell/topbar.tsx",
+        "apps/app/src/features/spend/figures.tsx",
+        "apps/app/src/features/spend/findings.tsx",
+        "apps/app/src/features/steering/status.tsx",
+        "apps/app/src/features/tools/tabs.tsx",
+        "apps/app/src/i18n/messages.d.ts",
+        "apps/app/src/test/arch/design-record.test.ts",
+        "apps/app/src/test/arch/probes/design-record/clean.tsx",
+        "apps/app/src/test/arch/probes/design-record/ink.tsx",
+        "apps/app/src/ui/auth-shell.tsx",
+        "apps/app/src/ui/badge.test.tsx",
+        "apps/app/src/ui/badge.tsx",
+        "apps/app/src/ui/control-styles.ts",
+        "apps/app/src/ui/create-button.tsx",
+        "apps/app/src/ui/enforcement-tier.tsx",
+        "apps/app/src/ui/page-header.tsx",
+        "apps/app/src/ui/route-tabs.tsx",
+        "apps/app/src/ui/sheet-dialog.tsx",
+        "apps/app/src/ui/status-badge.tsx",
+        "apps/app/src/ui/table.tsx",
+        "docs/adr/ADR-132-the-mockup-css-is-the-design-of-record.md",
+        "docs/adr/README.md"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3611",
+      "merged_at": "2026-09-20T23:56:42Z",
+      "number": 3611,
+      "refs": [],
+      "repo": "oxagen",
+      "title": "app: return the presentation to the roadmap mockup, and hold it there (ADR-132)"
+    },
+    "oxagen#3613": {
+      "added": [
+        ".agent/memory/kernel-fixes/lessons.md",
+        ".agent/memory/kernel-fixes/reflections/2026-09-20-assigned-kernel.md"
+      ],
+      "author": "macanderson",
+      "closes": [
+        3583
+      ],
+      "files": [
+        ".agent/memory/kernel-fixes/lessons.md",
+        ".agent/memory/kernel-fixes/reflections/2026-09-20-assigned-kernel.md",
+        "packages/oxagen/src/kernel.decision-rules.test.ts",
+        "packages/oxagen/src/kernel.ts"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3613",
+      "merged_at": "2026-09-21T00:53:12Z",
+      "number": 3613,
+      "refs": [],
+      "repo": "oxagen",
+      "title": "Preserve rule-authority failure codes in invocation events"
+    },
     "stella#6527": {
       "added": [],
       "author": "dependabot[bot]",
@@ -44270,8 +45419,8 @@
     }
   },
   "since": {
-    "oxagen": "2026-09-20T23:05:47Z",
-    "roadmap": "2026-09-20T21:30:05Z",
-    "stella": "2026-09-20T23:02:07Z"
+    "oxagen": "2026-09-21T01:16:01Z",
+    "roadmap": "2026-09-20T23:36:08Z",
+    "stella": "2026-09-21T01:15:23Z"
   }
 }
