@@ -4,6 +4,7 @@
 import { buildMockup } from "../tools/build-mockup.mjs";
 
 import { buildMockupV2 } from "../tools/build-mockup-v2.mjs";
+import { buildMockupV3 } from "../tools/build-mockup-v3.mjs";
 
 export function mockupPlugin() {
   return {
@@ -14,6 +15,11 @@ export function mockupPlugin() {
         if (url === "/v2/missioncontrol.html") {
           res.setHeader("content-type", "text/html; charset=utf-8");
           res.end(buildMockupV2());
+          return;
+        }
+        if (url === "/v3/missioncontrol.html") {
+          res.setHeader("content-type", "text/html; charset=utf-8");
+          res.end(buildMockupV3());
           return;
         }
         if (url === "/missioncontrol.html") {

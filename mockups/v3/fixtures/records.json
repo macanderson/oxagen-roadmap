@@ -1,0 +1,177 @@
+[
+ {
+  "id": "ctx.release.notes-format",
+  "kind": "rule",
+  "force": "should",
+  "ce": "require",
+  "scope": "workspace",
+  "status": "published",
+  "st": "Release notes group changes by surface, not by author. Every entry links the pull request.",
+  "effect": "rendered 212 · cited 188 · violated 3",
+  "commit": "a4c91e2",
+  "pub": "2026-09-04",
+  "tok": 214,
+  "about": [
+   "release",
+   "notes",
+   "surface",
+   "pull",
+   "request"
+  ],
+  "hash": "sha256:a4c91e2f07b35d18"
+ },
+ {
+  "id": "ctx.release.never-merge",
+  "kind": "constraint",
+  "force": "must",
+  "ce": "forbid",
+  "scope": "workspace",
+  "status": "published",
+  "st": "The release manager opens the release pull request. A person merges it.",
+  "effect": "rendered 212 · cited 212 · violated 0",
+  "commit": "3f0b8c1",
+  "pub": "2026-06-18",
+  "tok": 188,
+  "grant": {
+   "gate": "gate.never-merge",
+   "rule": "rg_0104",
+   "outcome": "deny",
+   "on": "github__merge_pull_request"
+  },
+  "about": [
+   "release",
+   "merge",
+   "pull",
+   "request"
+  ],
+  "hash": "sha256:3f0b8c1d5e2a9974"
+ },
+ {
+  "id": "ctx.mobile.no-codegen",
+  "kind": "constraint",
+  "force": "must",
+  "ce": "forbid",
+  "scope": "repository",
+  "status": "published",
+  "st": "Never hand-edit files under ios/Generated; regenerate them.",
+  "effect": "rendered 84 · cited 71 · violated 1",
+  "commit": "c02fa77",
+  "pub": "2026-07-02",
+  "tok": 162,
+  "repo": "a-intel/mobile",
+  "grant": {
+   "gate": "gate.mobile-codegen",
+   "rule": "rg_0111",
+   "outcome": "deny",
+   "on": "writes under ios/Generated"
+  },
+  "about": [
+   "mobile",
+   "ios",
+   "generated",
+   "codegen"
+  ],
+  "hash": "sha256:c02fa77e81b4d390"
+ },
+ {
+  "id": "ctx.platform.release-order",
+  "kind": "procedure",
+  "force": "should",
+  "scope": "repository",
+  "status": "published",
+  "st": "Cut a release in this order: freeze main, dry-run the migrations, tag, then publish the notes.",
+  "effect": "rendered 61 · cited 58 · violated 0",
+  "commit": "d17e40b",
+  "pub": "2026-08-21",
+  "tok": 171,
+  "repo": "a-intel/billing",
+  "about": [
+   "release",
+   "order",
+   "freeze",
+   "migration",
+   "tag",
+   "notes"
+  ],
+  "hash": "sha256:d17e40b6c2a98e31"
+ },
+ {
+  "id": "ctx.platform.changelog-once",
+  "kind": "fact",
+  "force": "info",
+  "scope": "workspace",
+  "status": "published",
+  "st": "CHANGELOG.md is the only changelog; docs/releases is generated from it.",
+  "effect": "rendered 212 · cited 96 · violated 0",
+  "commit": "a4c91e2",
+  "pub": "2026-05-30",
+  "tok": 231,
+  "about": [
+   "changelog",
+   "release",
+   "notes",
+   "docs"
+  ],
+  "hash": "sha256:a4c91e25be0d7c42"
+ },
+ {
+  "id": "ctx.platform.safari-e2e-flake",
+  "kind": "memory",
+  "force": "info",
+  "scope": "workspace",
+  "status": "published",
+  "st": "The checkout e2e suite flaked on Safari through August. A retry there is not evidence of a regression.",
+  "effect": "rendered 40 · cited 12 · violated 0",
+  "commit": "5b3c9e0",
+  "pub": "2026-09-02",
+  "tok": 143,
+  "about": [
+   "checkout",
+   "e2e",
+   "safari",
+   "flake",
+   "retry",
+   "test",
+   "flaky"
+  ],
+  "hash": "sha256:5b3c9e0a17d4f286"
+ },
+ {
+  "id": "ctx.triage.short-labels",
+  "kind": "preference",
+  "force": "may",
+  "scope": "workspace",
+  "status": "published",
+  "st": "Prefer one-word labels on triaged issues. Longer labels are tolerated, not encouraged.",
+  "effect": "rendered 128 · cited 74 · violated 0",
+  "commit": "e9a12c4",
+  "pub": "2026-08-09",
+  "tok": 118,
+  "about": [
+   "label",
+   "triage",
+   "issue",
+   "labels"
+  ],
+  "hash": "sha256:e9a12c4b3f60d759"
+ },
+ {
+  "id": "ctx.platform.retry-budget",
+  "kind": "rule",
+  "force": "should",
+  "ce": "require",
+  "scope": "workspace",
+  "status": "archived",
+  "st": "Retry provider errors at most twice per turn.",
+  "effect": "rendered 0 · cited 0 · violated 0",
+  "commit": "88ad4f2",
+  "pub": "2026-03-11",
+  "tok": 96,
+  "about": [
+   "retry",
+   "provider",
+   "error"
+  ],
+  "hash": "sha256:88ad4f20c5e1b673"
+ }
+]

@@ -1,0 +1,50 @@
+[
+ {
+  "k": "run.started",
+  "c": "op",
+  "t": "09:14:02.118Z",
+  "d": "marcus · Claude Code on host mbp-marcus · harness reported a git remote"
+ },
+ {
+  "k": "repo.unknown",
+  "c": "gov",
+  "t": "09:14:02.140Z",
+  "d": "github.com/a-intel/edge-proxy resolves to no workspace in a-intel",
+  "hot": true
+ },
+ {
+  "k": "control.interject",
+  "c": "gov",
+  "t": "09:14:02.146Z",
+  "d": "skills.enabled = true and no config resolves · policy unbound = ask",
+  "hot": true
+ },
+ {
+  "k": "control.answer",
+  "c": "op",
+  "t": "09:17:38.902Z",
+  "d": "marcus answered · pending",
+  "pend": true
+ },
+ {
+  "k": "skills.resolved",
+  "c": "gov",
+  "t": "—",
+  "d": "waits on the answer",
+  "pend": true
+ },
+ {
+  "k": "context.assembled",
+  "c": "ctx",
+  "t": "—",
+  "d": "waits on the answer",
+  "pend": true
+ },
+ {
+  "k": "model.request",
+  "c": "model",
+  "t": "—",
+  "d": "the first model call of the run has not happened",
+  "pend": true
+ }
+]

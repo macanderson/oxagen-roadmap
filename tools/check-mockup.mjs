@@ -25,11 +25,14 @@
 import { mkdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { PAGES, SCENARIOS, mockupUrl, scenarioHash, ORG } from "../mockups/catalog.mjs";
 import { launchChromium } from "./lib/playwright.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const FILE = "file://" + path.join(root, "mockups/missioncontrol.html");
+// MOCKUP=v3 checks mockups/v3 (its own catalog and file); unset, the v1 master.
+const VERSION = process.env.MOCKUP === "v3" ? "v3" : "";
+const CATALOG = VERSION ? `../mockups/${VERSION}/catalog.mjs` : "../mockups/catalog.mjs";
+const { PAGES, SCENARIOS, mockupUrl, scenarioHash, ORG } = await import(CATALOG);
+const FILE = "file://" + path.join(root, VERSION ? `mockups/${VERSION}/missioncontrol.html` : "mockups/missioncontrol.html");
 const args = process.argv.slice(2);
 const only = args.includes("--only") ? args[args.indexOf("--only") + 1] : null;
 const shots = args.includes("--shots") ? args[args.indexOf("--shots") + 1] : null;

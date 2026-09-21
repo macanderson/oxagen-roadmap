@@ -1,0 +1,130 @@
+[
+ {
+  "seq": 0,
+  "kind": "agent_start",
+  "tier": "harness",
+  "cost": null,
+  "t": "09:14:02.114",
+  "sum": "Claude Code 2.9.4 on macOS 15.6 · host key ed25519:9c4a…e17b · run token 15m"
+ },
+ {
+  "seq": 1,
+  "kind": "context.assembled",
+  "tier": "harness",
+  "cost": null,
+  "t": "09:14:02.319",
+  "sum": "budget 18,000 tok · 6 context frames · usage 11,204 tok · composition digest sha256:44c1…9e02"
+ },
+ {
+  "seq": 2,
+  "kind": "model.request",
+  "tier": "harness",
+  "cost": null,
+  "t": "09:14:02.402",
+  "sum": "anthropic · claude-opus-5 · 14 tool definitions (2,118 tok) · steering 1,340 tok · 6 context frames"
+ },
+ {
+  "seq": 3,
+  "kind": "model.response",
+  "tier": "harness",
+  "cost": "0.4126",
+  "t": "09:14:09.771",
+  "sum": "stop_reason tool_use · in 3,368 · cache_read 12,000 · out 412 · req_01JQ7F2K"
+ },
+ {
+  "seq": 4,
+  "kind": "tool_requested",
+  "tier": "harness",
+  "cost": null,
+  "t": "09:14:09.812",
+  "sum": "github__list_pull_requests@3 · input digest sha256:7b21…c5df · schema ok"
+ },
+ {
+  "seq": 5,
+  "kind": "policy_decision",
+  "tier": "harness",
+  "cost": null,
+  "t": "09:14:09.819",
+  "sum": "allow · pol_v41 · rule rg_0088 (read on a-intel/platform) · untainted · 6 ms"
+ },
+ {
+  "seq": 6,
+  "kind": "token_issued",
+  "tier": "harness",
+  "cost": null,
+  "t": "09:14:09.826",
+  "sum": "credential grant cg_01K5RS8 · github-app installation token · repos [a-intel/platform] · TTL 5m"
+ },
+ {
+  "seq": 7,
+  "kind": "tool_call",
+  "tier": "harness",
+  "cost": "0.0000",
+  "t": "09:14:10.940",
+  "sum": "200 · 31 pull requests · output schema ok · response digest sha256:0e93…12ba"
+ },
+ {
+  "seq": 8,
+  "kind": "model.request",
+  "tier": "harness",
+  "cost": null,
+  "t": "09:14:11.002",
+  "sum": "anthropic · claude-opus-5 · cache write 5m 0 · conversation 14,190 tok"
+ },
+ {
+  "seq": 9,
+  "kind": "model.response",
+  "tier": "harness",
+  "cost": "0.5518",
+  "t": "09:14:18.664",
+  "sum": "stop_reason tool_use · in 902 · cache_read 14,190 · out 688 · req_01JQ7F4M"
+ },
+ {
+  "seq": 10,
+  "kind": "control.steer",
+  "tier": "harness",
+  "cost": null,
+  "t": "09:14:44.008",
+  "sum": "Marcus Bell · “Skip the mobile repo this cycle; 4.11.0 is platform only.” · 22 tok"
+ },
+ {
+  "seq": 11,
+  "kind": "model.request",
+  "tier": "harness",
+  "cost": null,
+  "t": "09:14:44.210",
+  "sum": "steering block carries control.steer seq 10 immediately after the cached system block"
+ },
+ {
+  "seq": 12,
+  "kind": "model.response",
+  "tier": "harness",
+  "cost": "0.3904",
+  "t": "09:14:51.337",
+  "sum": "stop_reason tool_use · in 264 · cache_read 15,020 · out 501 · req_01JQ7F6P"
+ },
+ {
+  "seq": 13,
+  "kind": "tool_requested",
+  "tier": "harness",
+  "cost": null,
+  "t": "09:14:51.390",
+  "sum": "github__create_release@2 · tag v4.11.0 · input digest sha256:2a7e…f358"
+ },
+ {
+  "seq": 14,
+  "kind": "policy_decision",
+  "tier": "harness",
+  "cost": null,
+  "t": "09:14:51.397",
+  "sum": "approve · pol_v41 · rule rg_0093 (require_approval on side_effect:irreversible) · parked 10m"
+ },
+ {
+  "seq": 15,
+  "kind": "approval_request",
+  "tier": "harness",
+  "cost": null,
+  "t": "09:14:51.404",
+  "sum": "apr_01K5RS3K7 · notified Oxagen, Slack #releases, marcus@a-intel.example"
+ }
+]

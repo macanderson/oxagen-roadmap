@@ -29,17 +29,17 @@ export const TITLE = "Oxagen";
 export const FONT = '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">';
 
 // Every fixtures/*.json, keyed by its name in upper snake case: spend-detail.json → SPEND_DETAIL.
-export function fixtures() {
+export function fixtures(fix = FIX) {
   const out = {};
-  for (const f of readdirSync(FIX).filter(f => f.endsWith(".json")).sort()) {
-    out[f.replace(/\.json$/, "").toUpperCase().replace(/-/g, "_")] = JSON.parse(readFileSync(path.join(FIX, f), "utf8"));
+  for (const f of readdirSync(fix).filter(f => f.endsWith(".json")).sort()) {
+    out[f.replace(/\.json$/, "").toUpperCase().replace(/-/g, "_")] = JSON.parse(readFileSync(path.join(fix, f), "utf8"));
   }
   return out;
 }
 
 // The fixtures as one classic script, for a page that loads the engine by <script src>.
-export function fixturesScript() {
-  return `/* generated from mockups/fixtures/*.json; do not edit */\nvar FIXTURES=${JSON.stringify(fixtures())};\n`;
+export function fixturesScript(fix = FIX) {
+  return `/* generated from mockups/fixtures/*.json; do not edit */\nvar FIXTURES=${JSON.stringify(fixtures(fix))};\n`;
 }
 
 function once(haystack, needle, what) {
@@ -47,14 +47,15 @@ function once(haystack, needle, what) {
   if (n !== 1) throw new Error(`mockups/src: expected exactly one ${what}, found ${n}`);
 }
 
-export function buildMockup() {
-  const css = readFileSync(path.join(SRC, "engine.css"), "utf8");
-  const shell = readFileSync(path.join(SRC, "shell.html"), "utf8").trim();
-  const js = readFileSync(path.join(SRC, "engine.js"), "utf8");
+// A version (mockups/v3) is the same build over its own src and fixtures directories.
+export function buildMockup({ src = SRC, fix = FIX } = {}) {
+  const css = readFileSync(path.join(src, "engine.css"), "utf8");
+  const shell = readFileSync(path.join(src, "shell.html"), "utf8").trim();
+  const js = readFileSync(path.join(src, "engine.js"), "utf8");
   once(js, "var BOOT=(function(){", "BOOT block");
   once(js, "var PRODUCT=BOOT.product;", "PRODUCT line");
   once(shell, '<div id="chrome">', "#chrome block");
-  const fx = fixturesScript().replace(/<\/script/gi, "<\\/script");
+  const fx = fixturesScript(fix).replace(/<\/script/gi, "<\\/script");
   return `<!doctype html>
 <html lang="en">
 <head>
