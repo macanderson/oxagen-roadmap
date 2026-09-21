@@ -45,6 +45,16 @@ depended on proof: it is what the frames show bought nothing, so it stays with o
   are its tabs. The Memory tab gains an aggregation strip: how many run notes and operator steers
   folded into how many items, and how often they were recalled.
 - Skills report a cited rate (loads the run cited) where v1 reported a proof rate.
+- Approvals moved off the Fleet page into a drawer. A button in the topbar, left of your avatar
+  on every page, carries the count of everything waiting on you across the organization: parked
+  approvals and any open interjection. The drawer lists them; picking one shows the full card
+  (the same one the run page shows) with approve and deny. Fleet keeps its "waiting on a human"
+  tile, which opens the drawer, and loses the approvals panel and the interjection banner. The
+  topbar's assistant button is gone; the launcher at the foot of the sidebar stays.
+- The workspace governance mode (`solo`, `team`, `regulated`) is a setting: a chip on the Steering
+  header opens a dialog that shows the three modes and the `governance.toml` it would write, the
+  Edit workspace dialog carries the same select, and the Organization workspaces table reads it
+  off the workspace. Changing it opens a Context PR; nothing else writes that file.
 
 ## Data boundary
 

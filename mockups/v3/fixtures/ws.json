@@ -10,7 +10,8 @@
   ],
   "agents": 38,
   "enrolled": 36,
-  "owner": "Marcus Bell"
+  "owner": "Marcus Bell",
+  "governance": "team"
  },
  {
   "slug": "finops",
@@ -20,6 +21,7 @@
   "linked": [],
   "agents": 12,
   "enrolled": 12,
-  "owner": "Dana Okafor"
+  "owner": "Dana Okafor",
+  "governance": "regulated"
  }
 ]

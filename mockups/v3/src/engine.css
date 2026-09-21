@@ -1961,3 +1961,36 @@ button.wz-opt:hover{border-color:var(--rule)}
 .meter .lab b{color:var(--fg);font-variant-numeric:tabular-nums}
 .meter .bar{height:6px;border-radius:3px;background:var(--hl);overflow:hidden;margin-top:4px}
 .meter .bar i{display:block;height:100%;border-radius:3px}
+
+/* v3: the approvals drawer and its topbar button */
+.iconbtn .cnt{position:absolute;top:-6px;right:-6px;min-width:17px;height:17px;padding:0 4px;border-radius:999px;background:var(--st-approval);color:#000;font-family:var(--mono);font-size:10px;font-weight:700;display:grid;place-items:center;border:2px solid var(--ink)}
+.apd-btn[aria-pressed="true"]{border-color:var(--st-approval);color:var(--st-approval)}
+.apd-scrim{position:fixed;inset:0;background:rgba(0,0,0,.42);z-index:60;opacity:0;visibility:hidden;transition:opacity .2s ease,visibility 0s .2s}
+.apd-scrim.open{opacity:1;visibility:visible;transition:opacity .2s ease,visibility 0s 0s}
+.apd{position:fixed;top:0;bottom:0;right:0;width:min(680px,calc(100vw - 56px));background:var(--panel);border-left:1px solid var(--border);z-index:61;display:flex;flex-direction:column;
+  box-shadow:-18px 0 44px rgba(0,0,0,.44);translate:100% 0;opacity:0;visibility:hidden;transition:translate .34s cubic-bezier(.32,.72,0,1),opacity .18s ease,visibility 0s .34s}
+.apd.open{translate:0 0;opacity:1;visibility:visible;transition:translate .34s cubic-bezier(.32,.72,0,1),opacity .18s ease,visibility 0s 0s}
+.apd.phone{width:100%;max-width:100%}
+.apd-h{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--border);flex:none}
+.apd-h h3{margin:0;font-size:14px}
+.apd-b{padding:14px 16px;overflow-y:auto;flex:1;min-height:0}
+.apd-list{display:grid;gap:8px}
+.apd-row{display:flex;align-items:flex-start;gap:10px;width:100%;text-align:left;padding:10px 11px;border:1px solid var(--border);border-radius:10px;background:var(--panel);color:var(--fg);cursor:pointer;transition:border-color .15s}
+.apd-row:hover{border-color:var(--rule)}
+.apd-row.crit{border-color:color-mix(in srgb,var(--st-critical) 45%,var(--border))}
+.apd-row.done{opacity:.72}
+.apd-row.inter{border-color:color-mix(in srgb,var(--st-approval) 45%,var(--border))}
+.apd-row .g{flex:none;width:26px;height:26px;border-radius:7px;display:grid;place-items:center;background:var(--hl);color:var(--muted)}
+.apd-row .g svg{width:14px;height:14px}
+.apd-row .tt{min-width:0;flex:1;display:grid;gap:3px;font-size:12.5px}
+.apd-row .tt b{color:var(--fg);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.apd-row .tt>span{color:var(--muted);font-size:11.5px;line-height:1.4}
+.apd-row .tt .m{display:flex;gap:5px;flex-wrap:wrap;margin-top:2px}
+.apd .apcard{margin:0}
+.stat.click{cursor:pointer;text-align:left;font:inherit;color:inherit;transition:border-color .15s}
+.stat.click:hover{border-color:var(--rule)}
+.gov-chip{white-space:nowrap}
+@media(prefers-reduced-motion:reduce){.apd{translate:0 0;transition:opacity .12s ease,visibility 0s .12s}.apd.open{transition:opacity .12s ease,visibility 0s 0s}}
+/* inside the phone frame, fixed is relative to the frame, so the closed drawer must not sit past its edge */
+.apd.phone:not(.open){display:none}
+.stat.click{width:100%;min-width:0;display:block}

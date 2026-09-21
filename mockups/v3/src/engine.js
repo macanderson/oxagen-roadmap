@@ -277,7 +277,7 @@ function coachStrip(a){
   var t=agentTok(a); if(!t) return '';
   var items=coachAgent(a), sp=money(a.spend30)||0;
   return '<div class="grid g2" style="margin-bottom:16px">'+
-   '<div class="panel" style="margin:0"><div class="panel-h"><h3>Where the tokens went · 30 days</h3><span class="mono dim" style="margin-left:auto;font-size:11px">'+tokn(t.total)+' tok · '+usd(fmt2(sp))+' · <span class="basis">'+(t.observed?'gateway_observed':'client_attested')+'</span></span></div>'+
+   '<div class="panel" style="margin:0"><div class="panel-h"><h3>30-day token use</h3><span class="mono dim" style="margin-left:auto;font-size:11px">'+tokn(t.total)+' tok · '+usd(fmt2(sp))+' · <span class="basis">'+(t.observed?'gateway_observed':'client_attested')+'</span></span></div>'+
     '<div class="panel-b">'+tokBars(t,{tight:true})+'<div class="hr"></div><dl class="kv">'+
     '<dt>Cache hit rate</dt><dd>'+per(t.cacheRate)+' · '+tokn(t.cacheRead)+' of '+tokn(t.tokIn)+' input tokens served from cache</dd>'+
     '<dt>Per run</dt><dd>'+tokn(t.perRun)+' tok · '+(a.runs30?usd(fmt2(sp/a.runs30)):'—')+'</dd>'+
@@ -338,7 +338,7 @@ function runSummary(R){
   if(!R.summary) return '';
   var live=R.status==="live"||R.status==="parked", g=R.gen||{};
   return '<section class="sumry" aria-label="Summary">'+
-   '<div class="row" style="justify-content:space-between;gap:12px"><p class="eyebrow q" style="margin:0">Summary · '+(live?"so far":"what this run changed")+'</p>'+
+   '<div class="row" style="justify-content:space-between;gap:12px"><p class="eyebrow q" style="margin:0">Summary</p>'+
    '<span class="b b-q" style="font-size:10.5px">generated · not the record</span></div>'+
    involved(R)+
    '<p class="lede">'+h(R.summary)+'</p>'+
@@ -482,7 +482,7 @@ function runOutputs(R){
       '<button class="ro-link" onclick="roMore(\''+key+'\')">fold these back</button></li>';
   });
   return '<section class="ro" aria-label="What this run produced">'+
-   '<div class="ro-h"><p class="eyebrow q" style="margin:0">What this run produced · in the order it happened</p>'+
+   '<div class="ro-h"><p class="eyebrow q" style="margin:0">Outputs</p>'+
     '<span class="ro-tally">'+h(tally)+'</span>'+
     (reads?'<button class="ro-link" onclick="roToggleReads()">'+(S.ro.reads?"Hide reads":"Show reads")+'</button>':'')+
    '</div>'+
@@ -1139,7 +1139,7 @@ function pAgentSource(r){
   if(S.state==="denied") return deniedState("this agent’s definition","agent.write on "+w.slug);
   if(!S.ed||S.ed.slug!==slug)S.ed={slug:slug,sel:[0,0],find:"",cur:-1,matches:0};
   var dirty=defDirty(slug), pend=S.defPending[slug];
-  return '<div class="phead"><div class="t"><p class="eyebrow">Agent · source</p><h1 class="mono" style="font-size:18px">'+h(path)+'</h1>'+
+  return '<div class="phead"><div class="t"><p class="eyebrow">Agent source</p><h1 class="mono" style="font-size:18px">'+h(path)+'</h1>'+
    '<div class="row" style="margin-top:8px"><span class="b b-q mono">'+h(w.main)+'</span>'+
    (pend?'<span class="b b-approval"><span class="d"></span>'+h(pend.branch)+'</span>':'<span class="b b-q mono">'+h(w.branch)+' @ '+h(a.commit)+'</span>')+
    '<span class="b b-q">source of truth</span><span class="b b-q mono">'+h(a.key)+'</span></div>'+
@@ -1528,15 +1528,75 @@ function topbar(r){
    '<div class="crumbs">'+crumbs(r)+'</div>'+
    '<div class="sp"></div>'+
    '<button class="kbtn" onclick="openDialog(\'cmd\')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><span class="kt">Search or run an action</span><kbd>⌘K</kbd></button>'+
-   '<button class="iconbtn" onclick="asstToggle()" aria-pressed="'+(S.asst?"true":"false")+'" aria-label="Assistant" aria-controls="asst">'+icon("assistant")+'</button>'+
    '<button class="iconbtn" onclick="openDialog(\'notifs\')" aria-label="Notifications, '+notifUnread()+' unread">'+
      '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 8-3 8h18s-3-1-3-8"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>'+
      (notifUnread()?'<span class="dot"></span>':'')+'</button>'+
+   apdButton()+
    '<div class="rel"><button class="iconbtn" onclick="toggleLayer(\'user\')" aria-label="Account" style="padding:0;border-radius:50%;overflow:hidden">'+personAv("marcus",30)+'</button>'+
      (S.layer==="user"?userMenu():'')+'</div>'+
    '</header>';
 }
 function toggleLayer(n){S.layer=S.layer===n?null:n;render();}
+
+/* ============================== Approvals drawer ==============================
+   Every call parked for a human, across the organization, behind one button in the topbar on every
+   page. The count is what is waiting now: pending approvals plus an open interjection. The drawer
+   lists them, and picking one shows the whole card (the same approvalCard the run page shows), so
+   a decision never needs the Fleet page. Fleet keeps its "waiting on a human" tile and nothing else. */
+S.apd={open:false,sel:null};
+function apdPending(){return APPROVALS.filter(function(a){return apState(a.id).status==="pending";});}
+function apdInterjections(){return WS.filter(function(w){return skWaiting(w);}).map(function(w){return {ws:w};});}
+function apdCount(){return apdPending().length+apdInterjections().length;}
+function apdButton(){
+  var n=apdCount();
+  return '<button class="iconbtn apd-btn" onclick="apdToggle()" aria-pressed="'+(S.apd.open?"true":"false")+'" aria-controls="apdrawer" aria-label="Approvals, '+n+' waiting">'+
+   '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 5 6v6c0 4 3 7.5 7 9 4-1.5 7-5 7-9V6z"/><path d="M12 8v4l2.5 1.5"/></svg>'+
+   (n?'<span class="cnt">'+(n>99?"99+":n)+'</span>':'')+'</button>';
+}
+function apdToggle(v){S.apd.open=(v===undefined)?!S.apd.open:!!v; if(!S.apd.open)S.apd.sel=null; S.layer=null; render();}
+function apdSelect(id){S.apd.sel=id;render();var d=el("apdrawer");if(d)d.scrollTop=0;}
+function apdBack(){S.apd.sel=null;render();}
+function apdRow(a){
+  var st=apState(a.id), done=st.status!=="pending", sec=apLeft(a.id), r=run(a.run), w=wsBySlug(a.ws);
+  var crit=a.risk==="critical"||a.side==="irreversible"||a.tainted;
+  var title=a.amount?usd(a.amount)+' '+h(a.currency)+' · '+h(a.tool):h(a.tool);
+  return '<button class="apd-row'+(crit?' crit':'')+(done?' done':'')+'" onclick="apdSelect(\''+a.id+'\')" aria-label="Open approval '+h(a.id)+'">'+
+   '<span class="g">'+icon("shield")+'</span>'+
+   '<span class="tt"><b>'+title+'</b><span>'+h(a.agent.split(".").pop())+(r?' · '+h(r.taskTitle):'')+(w?' · '+h(w.name):'')+'</span>'+
+    '<span class="m">'+riskBadge(a.risk)+(a.side==="irreversible"?'<span class="b b-denied mono">irreversible</span>':'')+(a.tainted?'<span class="b b-critical"><span class="d"></span>tainted</span>':'')+'</span></span>'+
+   (done?'<span class="b '+(st.status==="approved"?'b-allowed':'b-denied')+'" style="flex:none"><span class="d"></span>'+h(st.status)+'</span>'
+        :'<span class="apsm-clk'+(sec<120?' warn':'')+'" data-countdown="'+a.id+'" style="flex:none">'+mmss(sec)+'</span>')+'</button>';
+}
+function apdInterjectionRow(x){
+  var w=x.ws;
+  return '<div class="apd-row inter" style="cursor:default"><span class="g">'+icon("assistant")+'</span>'+
+   '<span class="tt"><b>Interjection · '+h(SKRUN.agent.split(".").pop())+' is paused</b><span>It started in <span class="mono">'+h(SKRUN.repo)+'</span>, which no workspace owns. Skills are on in '+h(w.name)+', so there is a config to resolve and nothing to resolve it against. Nothing has been charged since 09:14:02Z; at 30 minutes it times out to <span class="mono">deny</span>.</span></span>'+
+   '<button class="btn sm primary" style="flex:none" onclick="apdToggle(false);go(\'#/'+ORG.slug+'/'+w.slug+'/runs/'+SKRUN.id+'\')">Answer it</button></div>';
+}
+function apdBody(){
+  if(S.apd.sel){
+    var a=null; APPROVALS.forEach(function(x){if(x.id===S.apd.sel)a=x;});
+    if(!a) return '<div class="apd-b"><p class="muted">That approval is no longer listed.</p></div>';
+    return '<div class="apd-b"><button class="btn sm" onclick="apdBack()" style="margin-bottom:12px">‹ All approvals</button>'+approvalCard(a)+'</div>';
+  }
+  var pend=apdPending(), inter=apdInterjections(), done=APPROVALS.filter(function(a){return apState(a.id).status!=="pending";});
+  return '<div class="apd-b">'+
+   (inter.length||pend.length
+     ?'<p class="eyebrow q" style="margin:0 0 8px">'+(pend.length+inter.length)+' waiting on you</p><div class="apd-list">'+inter.map(apdInterjectionRow).join("")+pend.map(apdRow).join("")+'</div>'
+     :'<div style="text-align:center;padding:26px 6px"><p class="muted" style="font-size:12.5px;margin:0">Nothing is waiting on a human.</p><p class="dim" style="font-size:11.5px;margin:8px 0 0">A call parks here when policy returns <span class="mono">approve</span>. Denials never park; they end the call and are free.</p></div>')+
+   (done.length?'<p class="eyebrow q" style="margin:18px 0 8px">'+done.length+' resolved today</p><div class="apd-list">'+done.map(apdRow).join("")+'</div>':'')+
+   '<div class="note" style="margin-top:14px;font-size:11.5px">A resolution mints a single-use approval token bound to the call digest, the agent, the run, and an expiry. It cannot be replayed on a second call. On expiry the call ends and the reason reaches the model.</div></div>';
+}
+function apdHtml(){
+  var n=apdCount();
+  return '<div class="apd-scrim'+(S.apd.open?' open':'')+'" onclick="apdToggle(false)"></div>'+
+   '<aside id="apdrawer" class="apd'+(S.apd.open?' open':'')+(isPhone()?' phone':'')+'" role="complementary" aria-label="Approvals"'+(S.apd.open?'':' inert aria-hidden="true"')+'>'+
+   '<div class="apd-h"><h3>Approvals</h3><span class="b '+(n?'b-approval':'b-q')+'"><span class="d"></span>'+n+' waiting</span>'+
+    '<button class="iconbtn" style="margin-left:auto" onclick="apdToggle(false)" aria-label="Close approvals">'+
+    '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>'+
+   apdBody()+'</aside>';
+}
+document.addEventListener("keydown",function(e){if(e.key==="Escape"&&S.apd.open&&!S.dlg){apdToggle(false);}});
 function notifIcon(tone){
   var sv='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">';
   if(tone==="allowed") return sv+'<path d="m5 12 5 5 9-10"/></svg>';
@@ -1622,19 +1682,19 @@ function pFleet(){
   var tokShown=list.reduce(function(t,r){return t+runMetrics(r).tokTotal;},0);
 
   return ''+
-  '<div class="phead"><div class="t"><p class="eyebrow">Workspace · '+h(w.name)+'</p>'+
-   '<h1>Fleet</h1><p>Every run in this workspace, live and recent. Runs are not started here — agents start them, and this is where you stop, steer, or open one.</p></div>'+
+  '<div class="phead"><div class="t"><p class="eyebrow">'+h(w.name)+'</p>'+
+   '<h1>Fleet</h1><p>Every run in this workspace, live and recent.</p></div>'+
    '<div class="acts"><button class="btn" onclick="openSteerFleet()">Steer</button>'+
    '<button class="btn" onclick="regStart()">Register Agent</button></div></div>'+
-  obFleetBanners(w,fr)+skFleetBanner(w)+
+  obFleetBanners(w,fr)+
 
   '<div class="grid g4" style="margin-bottom:16px">'+
    '<div class="stat"><span class="k">Live runs</span><span class="v">'+live+'</span><span class="s">of '+agentsShown+' agent'+(agentsShown===1?'':'s')+' in this workspace</span></div>'+
-   '<div class="stat"><span class="k">Waiting on a human</span><span class="v" style="color:var(--st-approval)">'+(pend.length+skw+sigs.length)+'</span><span class="s">'+waitLabel+'</span></div>'+
-   '<div class="stat"><span class="k">Spend, runs shown</span><span class="v">'+usd(spendShown)+'</span><span class="s">'+basisLabel+' · '+ORG.currency+'</span></div>'+
-   '<div class="stat"><span class="k">Tokens, runs shown</span><span class="v">'+tokn(tokShown)+'</span><span class="s">'+(cacheRate==null?'no cache figure recorded':per(cacheRate)+' served from cache · spend-weighted')+'</span></div></div>'+
+   '<button class="stat click" onclick="apdToggle(true)" aria-label="Open approvals"><span class="k">Waiting on a human</span><span class="v" style="color:var(--st-approval)">'+(pend.length+skw+sigs.length)+'</span><span class="s">'+waitLabel+' · open the drawer</span></button>'+
+   '<div class="stat"><span class="k">Spend shown</span><span class="v">'+usd(spendShown)+'</span><span class="s">'+basisLabel+' · '+ORG.currency+'</span></div>'+
+   '<div class="stat"><span class="k">Tokens shown</span><span class="v">'+tokn(tokShown)+'</span><span class="s">'+(cacheRate==null?'no cache figure recorded':per(cacheRate)+' served from cache')+'</span></div></div>'+
 
-  (fr?obOfferCard(fr):'')+approvalsPanel(w.slug,fr?fr.id:undefined)+'<div style="height:14px"></div>'+
+  (fr?obOfferCard(fr):'')+
    '<div class="panel"><div class="panel-h"><h3>Runs</h3>'+
     '<div class="sp">'+
      ['all','live','parked','sealed'].map(function(f){return '<button class="btn sm'+(S.runFilter===f?' sel':'')+'" onclick="S.runFilter=\''+f+'\';render()">'+f+'</button>';}).join("")+
@@ -1683,7 +1743,7 @@ function mandateBar(m,showReserve){
   var left=showReserve?m.remaining:fmt2(lim-money(m.used));
   return '<div>'+
    '<div class="row" style="justify-content:space-between;margin-bottom:7px">'+
-    '<span class="eyebrow q" style="margin:0">Remaining authority · '+h(m.period)+' · September 2026</span>'+
+    '<span class="eyebrow q" style="margin:0">Remaining authority</span>'+
     '<span class="mono" style="font-size:12px;color:var(--muted)">of '+usd(m.perPeriod)+' '+h(m.currency)+'</span></div>'+
    '<div class="mbar" role="img" aria-label="'+usd(m.used)+' settled, '+(showReserve?usd(m.reserved)+' reserved by this call, ':'')+usd(left)+' remaining of '+usd(m.perPeriod)+'">'+
     '<i class="used" style="width:'+usedPct.toFixed(2)+'%"></i>'+(showReserve?'<i class="res" style="width:'+resPct.toFixed(2)+'%"></i>':'')+'</div>'+
@@ -1786,7 +1846,7 @@ function approvalCard(a){
   var slug=a.agent.split(".").pop();
   return '<div class="apcard'+(crit?' crit':'')+(done?' done':'')+'" id="ap-'+a.id+'">'+
    '<div class="aphead"><div style="min-width:0">'+
-    '<p class="eyebrow" style="margin-bottom:6px">'+(done?'Approval '+h(st.status):'Approval required')+' · governed action</p>'+
+    '<p class="eyebrow" style="margin-bottom:6px">'+(done?'Approval '+h(st.status):'Approval required')+'</p>'+
     (a.amount?'<div class="amt">'+usd(a.amount)+'<span class="cur">'+h(a.currency)+'</span></div>':'<div class="amt" style="font-size:17px">'+h(a.tool)+'</div>')+
     '<div class="row" style="margin-top:6px;gap:7px">'+agentCard(a.agent,{layout:"compact",key:a.agent})+'</div>'+
     '<div class="muted" style="font-size:12.5px;margin-top:4px">'+(a.amount?'<span class="mono">'+h(a.tool)+'</span> → ':'')+'<span class="mono">'+h(a.counterparty)+'</span>'+
@@ -1823,7 +1883,7 @@ function approvalCard(a){
       '<dt>Run</dt><dd><a class="mono" href="#/'+ORG.slug+'/'+a.ws+'/runs/'+a.run+'">'+h(a.run)+'</a></dd></dl></div>'+
     '</div>'+
     taintBlock(a)+
-    '<div><p class="eyebrow q" style="margin-bottom:2px">Rules that fired · policy '+h(a.policy)+'</p>'+rulesList(a)+'</div>'+
+    '<div><p class="eyebrow q" style="margin-bottom:2px">Rules that fired</p>'+rulesList(a)+'</div>'+
     (a.approvers?'<div class="note">Eligible approvers: '+h(a.approvers)+'</div>':'')+
    '</div>'+
    decisionFoot(a)+'</div>';
@@ -1907,8 +1967,8 @@ function tick(){
   var expired=false;
   APPROVALS.forEach(function(a){
     var st=apState(a.id); if(st.status!=="pending") return;
-    var sec=apLeft(a.id), e=document.querySelector('[data-countdown="'+a.id+'"]');
-    if(e){e.textContent=mmss(sec);e.classList.toggle("warn",sec<120);}
+    var sec=apLeft(a.id), es=document.querySelectorAll('[data-countdown="'+a.id+'"]');
+    for(var k=0;k<es.length;k++){es[k].textContent=mmss(sec);es[k].classList.toggle("warn",sec<120);}
     if(sec<=0){approvalSettle(a,"expired","—","approval timeout");expired=true;
       toast("Approval expired after "+a.timeout+" — "+a.tool+" ended and "+(mandateFor(a)?"the reservation was released. ":"nothing was dispatched. ")+"The reason “approval timeout” reached the model.","denied");}
   });
@@ -2282,7 +2342,7 @@ function runInstruments(R){
 function promptRow(R){
   /* the window is runContext's: the same request, total and blocks the Context tab accounts for */
   var m=runMetrics(R),op=PEOPLE[R.op],W=runContext(R);
-  var head='<div class="panel pr-row"><div class="panel-h"><h3>The prompt</h3>';
+  var head='<div class="panel pr-row"><div class="panel-h"><h3>Prompt</h3>';
   var said='<div class="pr-text"><p class="eyebrow q">Written by '+h(op?op.name:R.op)+'</p><p class="q">“'+h(R.taskTitle)+(R.task?'. Task '+h(R.task)+'.':'')+'”</p></div>';
   if(W.none) return head+'<span class="mono dim" style="font-size:11px">'+tokn(m.promptTok)+' tok written</span></div>'+
    '<div class="panel-b pr-b">'+said+'<div class="pr-exp"><p class="eyebrow q">What reached the model on the first call</p>'+
@@ -2293,7 +2353,7 @@ function promptRow(R){
    '<span class="mono dim" style="font-size:11px">'+tokn(m.promptTok)+' tok written · '+tokn(win)+' tok sent</span>'+
    '<button class="btn sm" style="margin-left:auto" onclick="S.tab.run=\'context\';render()">Open the window</button></div>'+
    '<div class="panel-b pr-b">'+said+
-    '<div class="pr-exp" data-pr-win="'+win+'" data-pr-ts="'+ts+'"><p class="eyebrow q">What reached the model on the first call · model.request seq '+W.req.seq+'</p>'+
+    '<div class="pr-exp" data-pr-win="'+win+'" data-pr-ts="'+ts+'"><p class="eyebrow q">First request</p>'+
      '<div class="pr-bars">'+parts.map(function(p,i){return '<div class="pr-bar"'+tipAttr(p[0]+" · "+tokn(p[1])+" tok · "+pct(p[1],win))+'><span class="l">'+p[0]+'</span><span class="t"><i style="width:'+Math.round(p[1]/Math.max(1,win)*100)+'%;opacity:'+(1-i*0.28)+'"></i></span><span class="v">'+tokn(p[1])+'</span></div>';}).join("")+'</div>'+
      '<p class="muted" style="font-size:11.5px;margin:8px 0 0">One sentence expanded to '+tokn(win)+' tokens; '+pct(W.cached,win)+' of it came from cache, so it was paid for once.</p></div>'+
    '</div></div>';
@@ -2310,19 +2370,19 @@ function callsPanel(R){
   var hmx=Math.max.apply(null,Object.keys(m.hist).map(function(k){return m.hist[k];}));
   var hrows=Object.keys(m.hist).sort().map(function(k){
     return '<div class="hrow"><span class="hk">'+k+' tool'+(k==="1"?"":"s")+'</span><span class="fb"'+tipAttr(m.hist[k]+" batches asked for "+k+" tool"+(k==="1"?"":"s")+" at once")+'><i style="width:'+Math.round(m.hist[k]/hmx*100)+'%"></i></span><span class="hv">'+m.hist[k]+'</span></div>';}).join("");
-  return '<div class="panel" style="margin-bottom:16px"><div class="panel-h"><h3>Calls, concurrency and prefetch</h3>'+
+  return '<div class="panel" style="margin-bottom:16px"><div class="panel-h"><h3>Tool calls</h3>'+
    '<span class="mono dim" style="font-size:11px;margin-left:auto">'+m.calls.length+' calls · '+m.batches.length+' batches · '+m.families.length+' families</span></div>'+
    '<div class="cc">'+
-    '<div class="cc-c wide"><p class="eyebrow q">By family · what the calls acted on</p>'+
+    '<div class="cc-c wide"><p class="eyebrow q">Calls by family</p>'+
      '<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Family</th><th class="num">Calls</th><th></th><th class="num">Share</th><th class="num">Wall clock</th><th class="num">Failed</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
      '<p class="muted" style="font-size:11.5px;margin:9px 0 0">A family says what a tool <b>acts on</b>. It is orthogonal to the hazard and to what the belt decided.</p></div>'+
-    '<div class="cc-c"><p class="eyebrow q">Concurrency · tools per batch</p>'+
+    '<div class="cc-c"><p class="eyebrow q">Tools per batch</p>'+
      '<div class="hist">'+hrows+'</div>'+
      '<dl class="kv" style="margin-top:12px"><dt>Batches</dt><dd>'+m.batches.length+' · <b>'+m.par+'</b> ran more than one tool</dd>'+
      '<dt>Widest batch</dt><dd>'+m.maxPar+' tools at once</dd>'+
      '<dt>Mean fan-out</dt><dd>'+m.fan.toFixed(2)+' tools per batch</dd>'+
      '<dt>Wall clock won</dt><dd><b>'+msDur(m.serialMs-m.toolMs)+'</b> · '+msDur(m.toolMs)+' together against '+msDur(m.serialMs)+' in turn</dd></dl></div>'+
-    '<div class="cc-c"><p class="eyebrow q">Speculative prefetch · started before the step was final</p>'+
+    '<div class="cc-c"><p class="eyebrow q">Speculative prefetch</p>'+
      '<div class="spec"><div class="sv">'+m.used+'<small> of '+m.started+' used</small></div>'+
       '<div class="stk"><i class="fk-model" style="flex:'+m.used+'"'+tipAttr(m.used+" prefetched reads the model went on to ask for")+'></i><i style="flex:'+Math.max(0,m.discarded)+';background:var(--rule)"'+tipAttr(m.discarded+" discarded unread")+'></i></div>'+
       stackLeg([["used",m.used,"fk-model",m.used],["discarded",m.discarded,"neu",m.discarded]])+'</div>'+
@@ -2757,7 +2817,7 @@ function linkedWork(R){
   var files=g.files.length?'<div class="panel lw-files" style="margin-bottom:16px"><div class="panel-h"><h3>Files changed</h3><span class="dsum"><b class="a" style="color:var(--st-allowed)">+'+dm.add+'</b> <b class="d" style="color:var(--st-denied)">\u2212'+dm.del+'</b><span class="dbar" aria-hidden="true"><i class="a" style="flex:'+dm.add+'"></i><i class="d" style="flex:'+dm.del+'"></i></span>\u00b7 '+g.files.length+' file'+(g.files.length===1?'':'s')+' \u00b7 as the harness reported them</span></div><div class="panel-b" style="padding-top:2px">'+
    g.files.map(function(f){var rows=txDiffRows(f.before,f.after),st=diffStat(rows);return '<details><summary><span class="p">'+h(f.path)+'</span>'+(f.note?'<span class="dim" style="font-size:11px;flex:none">'+h(f.note)+'</span>':'')+'<span class="dstat"><b class="a">+'+st.add+'</b> <b class="d">−'+st.del+'</b></span></summary>'+diffHtml(rows,3)+'</details>';}).join("")+'</div></div>':'';
   return '<section aria-label="Linked work">'+
-   '<div class="lw-note"><p class="eyebrow q" style="margin:0">Linked work · edges on the run node</p>'+
+   '<div class="lw-note"><p class="eyebrow q" style="margin:0">Linked work</p>'+
     '<span><span class="edge observed">observed</span> written by Oxagen from a tool call routed through it</span>'+
     '<span><span class="edge stated">stated</span> carried by the task</span>'+
     '<span><span class="edge inferred">inferred</span> a light-tier model read the frames and proposed it, scored and cited · '+inf+' of '+(g.repos.length+g.issues.length+g.artifacts.length)+'</span></div>'+
@@ -3174,7 +3234,7 @@ function frameDetail(f){
     var L=frList(R),carried=null,quote=(/“([^”]*)”/.exec(f.sum)||[])[1]||f.text||f.sum;
     for(var i=f.seq+1;i<L.length;i++)if(L[i].kind==="model.request"){carried=L[i];break;}
     return '<div class="panel" style="background:var(--ink)"><div class="panel-b">'+
-     '<p class="eyebrow q">Delivered at the next boundary, attributed to the operator</p>'+
+     '<p class="eyebrow q">Delivery</p>'+
      '<p style="margin:0;color:var(--fg)">“'+h(quote)+'”</p>'+
      '<div class="kv" style="margin-top:12px"><dt>Issuer</dt><dd>'+h(String(f.sum).split(" · ")[0])+' · operator authority</dd>'+
      '<dt>Injected into</dt><dd>'+(carried?frameBtn(carried.seq,"model.request · frame "+carried.seq)+', immediately after the cached system block':'the next model request')+'</dd>'+
@@ -3367,7 +3427,7 @@ function contextTab(R){
   }).join("");
 
   var top = '<div class="panel" style="margin-bottom:14px">'+
-   '<div class="panel-h"><h3>The window, as it was sent</h3>'+
+   '<div class="panel-h"><h3>Prompt window</h3>'+
     '<div class="sp"><span class="b b-q mono" data-ctx-req="'+W.req.seq+'">model.request · seq '+W.req.seq+' · '+h(W.req.t)+'</span>'+
     '<span class="b b-q" data-ctx-total="'+W.total+'">'+tokn(W.total)+' tok in</span></div></div>'+
    '<div class="panel-b"><div class="compbar">'+bar+'</div><div class="legend">'+legend+'</div>'+
@@ -3420,7 +3480,7 @@ function contextTab(R){
   var budgetPanel;
   if(own){
     var upct = Math.round(CTXW.used/CTXW.budget*100);
-    budgetPanel = '<div class="panel"><div class="panel-h"><h3>Retrieval, in numbers</h3></div><div class="panel-b">'+
+    budgetPanel = '<div class="panel"><div class="panel-h"><h3>Retrieval stats</h3></div><div class="panel-b">'+
      '<div class="meter"><div class="lab">Frame budget used<b>'+tokn(CTXW.used)+' / '+tokn(CTXW.budget)+'</b></div>'+
      '<div class="bar"><i style="width:'+upct+'%;background:var(--st-proven)"></i></div></div>'+
      '<dl class="kv" style="margin-top:13px">'+
@@ -3435,7 +3495,7 @@ function contextTab(R){
      'The assembler does not fill headroom for its own sake.</div></div></div>';
   } else {
     var used = W.ctx, bpct = Math.min(100,Math.round(used/Math.max(1,W.budget)*100)), dig = W.ca?(/sha256:\S+/.exec(W.ca.sum)||[])[0]:null;
-    budgetPanel = '<div class="panel"><div class="panel-h"><h3>Retrieval, in numbers</h3></div><div class="panel-b">'+
+    budgetPanel = '<div class="panel"><div class="panel-h"><h3>Retrieval stats</h3></div><div class="panel-b">'+
      '<div class="meter"><div class="lab">Frame budget used<b>'+tokn(used)+' / '+tokn(W.budget)+'</b></div>'+
      '<div class="bar"><i style="width:'+bpct+'%;background:var(--st-proven)"></i></div></div>'+
      '<dl class="kv" style="margin-top:13px">'+
@@ -3920,7 +3980,7 @@ function costTab(R){
   var legend='<div class="row" style="gap:14px;margin-top:10px;font-size:11.5px;color:var(--muted)">'+
     [["var(--st-approval)","turn cost"],["var(--st-denied)","turn carrying a finding"]].map(function(x){return '<span><i style="display:inline-block;width:9px;height:9px;border-radius:2px;background:'+x[0]+';margin-right:5px"></i>'+x[1]+'</span>';}).join("")+
     '<span><i style="display:inline-block;width:14px;border-top:2px dashed var(--fg);margin-right:5px;vertical-align:middle"></i>cost so far</span></div>';
-  return '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Run waterfall</h3>'+
+  return '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Waterfall</h3>'+
     '<div class="sp" style="margin-left:auto;display:flex;gap:6px;align-items:center;flex-wrap:wrap">'+
      (finds.length?'<span class="b b-denied"><span class="d"></span>'+finds.length+' finding'+(finds.length===1?'':'s')+'</span>':'')+
      '<span class="b b-q">'+s.n+' turn'+(s.n===1?'':'s')+' · '+usd(R.cost)+' '+h(R.basis)+'</span></div></div>'+
@@ -4093,8 +4153,8 @@ function pAgents(){
      '<button class="btn sm danger" onclick="openDialog(\'delagent\',\''+a.key+'\')">Deregister</button></td></tr>';
   }).join("");
 
-  return '<div class="phead"><div class="t"><p class="eyebrow">Workspace · '+h(w.name)+'</p><h1>Identities</h1>'+
-   '<p>Identity in Postgres, definition in git. The two halves are joined by the agent key and by <span class="mono">definition_digest</span>, the hash of the file at the commit the agent last ran from.</p></div>'+
+  return '<div class="phead"><div class="t"><p class="eyebrow">'+h(w.name)+'</p><h1>Identities</h1>'+
+   '<p>Identity in Postgres, definition in git.</p></div>'+
    '<div class="acts"><button class="btn" onclick="wzOpen(\'agent\')">New agent</button>'+
    '<button class="btn" onclick="openDialog(\'register\')">Register an agent</button>'+
    '<button class="btn primary" onclick="openDialog(\'wrap\')">Wrap Claude Code</button></div></div>'+
@@ -4115,7 +4175,7 @@ function pAgents(){
    '<div class="tw"><table><thead><tr><th>Identity</th><th>Harness</th><th>Operator</th><th>Status</th><th>Tier</th>'+
    '<th class="num">Belt</th><th class="num">Runs 30d</th><th class="num">Spend 30d</th><th class="num">Tokens 30d</th><th>Mandates</th><th>Incidents</th><th></th>'+
    '</tr></thead><tbody>'+rows+'</tbody></table></div></div>'+
-   '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>The tier ladder</h3><span class="b b-q" style="margin-left:auto">computed per run from what was actually routed</span></div>'+
+   '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Tier ladder</h3><span class="b b-q" style="margin-left:auto">computed per run from what was actually routed</span></div>'+
    '<div class="panel-b">'+tierLadder(null)+'<div class="note" style="margin-top:12px">Every agent here sits on <span class="mono">observe</span> or <span class="mono">harness</span>. A control claim carries its scope: for actions routed through Oxagen, the server decides. Everything else on the harness tier is delivered, recorded, client-attested, and fail-open.</div></div></div>';
 }
 
@@ -4443,7 +4503,7 @@ function aIdentity(a,r){
     '</dl></div></div></div>'+
 
   '<div class="grid g2">'+
-   '<div class="panel"><div class="panel-h"><h3>What this tier delivers</h3></div><div class="panel-b">'+tierLadder(a.tier)+'<dl class="kv" style="margin-top:14px">'+
+   '<div class="panel"><div class="panel-h"><h3>Tier delivery</h3></div><div class="panel-b">'+tierLadder(a.tier)+'<dl class="kv" style="margin-top:14px">'+
     '<dt>Model calls</dt><dd>'+(TIER_RANK[a.tier]>=2?'routed through the loopback proxy on the host. Tokens are counted from the bytes that pass through it and the run token is the only credential the call carries. Spend is <span class="basis">gateway_observed</span>.':'not routed through Oxagen. The harness calls its provider with its own key and reports usage. Spend is <span class="basis">client_attested</span>.')+'</dd>'+
     '<dt>MCP tool calls</dt><dd>'+(TIER_RANK[a.tier]>=2?'every MCP server the harness holds is reached through the gateway and decided on the server.':a.tier==="harness"?'the ones registered with Oxagen’s MCP server are routed through Oxagen and decided on the server. Any other MCP server the harness holds is not.':'recorded only')+'</dd>'+
     '<dt>Harness-native tools</dt><dd>'+(a.tier==="contained"?'the four blocking hook events can refuse, and the sandbox refuses a write to the settings file, the hook entries or the hook binary':TIER_RANK[a.tier]>=1?'the four blocking hook events can refuse: client-attested and fail-open':'recorded only')+'</dd>'+
@@ -4531,7 +4591,7 @@ function aToolbelt(a,r){
       'cannot call, it cannot find, and so cannot be prompt-injected into calling.</div></div></div>';
 
   return '<div class="grid">'+
-  '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>How this belt was computed</h3>'+
+  '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Belt computation</h3>'+
    '<p class="muted" style="margin:2px 0 0;font-size:12px">At run start, cached with the bundle version, recomputed on any deny-generation bump.</p></div>'+
    '<span class="b b-q mono" style="margin-left:auto;font-size:10.5px">'+h(activePolicy())+' · deny gen '+S.denyGen+'</span></div>'+
    '<div class="panel-b" style="display:grid;gap:12px">'+
@@ -4543,7 +4603,7 @@ function aToolbelt(a,r){
    '</b> of them. A call by name to anything outside the belt is rejected before lookup, recorded as '+
    '<span class="mono">unknown_tool</span>, and counted toward an automatic halt.</p></div></div>'+
 
-  '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>What the model receives</h3>'+
+  '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Model view</h3>'+
    '<p class="muted" style="margin:2px 0 0;font-size:12px">'+
    (total>FULL_BELT_LIMIT
     ? 'The belt is '+total+' tools, over this workspace\'s full-belt limit of '+FULL_BELT_LIMIT+', so it is presented as a searchable belt.'
@@ -4612,11 +4672,11 @@ function aToolbelt(a,r){
    (total>belt.length?'<div class="panel-b"><p class="muted" style="margin:0;font-size:12px">The remaining '+(total-belt.length)+
      ' are the same github and harness families at other versions.</p></div>':'')+'</div>'+
 
-  '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>What this agent cannot see</h3>'+
+  '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Off the belt</h3>'+
    '<p class="muted" style="margin:2px 0 0;font-size:12px">A sample of the '+(verCount()-total).toLocaleString()+
    ' registry versions outside this belt, and why each one is out.</p></div>'+
    '<span class="b b-denied" style="margin-left:auto"><span class="d"></span>not visible to the model</span></div>'+
-   '<div class="tw"><table><thead><tr><th>Tool</th><th>Why it is not on the belt</th></tr></thead><tbody>'+
+   '<div class="tw"><table><thead><tr><th>Tool</th><th>Reason</th></tr></thead><tbody>'+
    outside.map(function(x){return '<tr><td>'+toolCell(x.id,{sz:"sm"})+'</td><td class="muted">'+h(x.why)+'</td></tr>';}).join("")+
    '</tbody></table></div></div></div>';
 }
@@ -4836,7 +4896,7 @@ function pMandate(r){
    '<div class="stat"><span class="k">Per period</span><span class="v">'+usd(m.perPeriod)+'</span><span class="s">'+h(m.period)+' · '+m.callsPerDay+' calls per day</span></div>'+
    '<div class="stat"><span class="k">Settled</span><span class="v">'+usd(m.used)+'</span><span class="s">this period, from the ledger</span></div>'+
    '<div class="stat"><span class="k">Remaining</span><span class="v" style="color:var(--st-approval)">'+usd(m.remaining)+'</span><span class="s">after '+usd(m.reserved)+' reserved at decision time</span></div></div>'+
-   '<div class="split"><div class="panel"><div class="panel-h"><h3>The ledger</h3>'+
+   '<div class="split"><div class="panel"><div class="panel-h"><h3>Ledger</h3>'+
     '<span class="b b-q" style="margin-left:auto">reservations at decision time · settlements at receipt time</span></div>'+
     '<div class="panel-b" style="border-bottom:1px solid var(--border)">'+
     mandateBar(m,showRes)+
@@ -4851,7 +4911,7 @@ function pMandate(r){
        '<td>'+(x.rcp&&receiptById(x.rcp)?'<a class="mono" style="font-size:11.5px" href="#" onclick="event.preventDefault();openDialog(\'receipt\',\''+h(x.rcp)+'\')">'+h(x.rcp)+'</a>':
          x.rcp?'<span class="mono dim" style="font-size:11.5px">'+h(x.rcp)+'</span>':'<span class="dim">\u2014</span>')+'</td></tr>';}).join("")+
     '</tbody></table></div></div>'+
-   '<div><div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>The grant</h3></div><div class="panel-b"><dl class="kv">'+
+   '<div><div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Grant</h3></div><div class="panel-b"><dl class="kv">'+
     '<dt>Agent</dt><dd>'+agentCard(m.agent,{layout:"compact",key:m.agent})+'</dd>'+
     '<dt>Granted by</dt><dd>'+h(m.by)+' · <span class="mono">'+h(m.roleAt)+'</span> at grant</dd>'+
     '<dt>Second approver</dt><dd>'+h(m.second)+'</dd>'+
@@ -4937,7 +4997,7 @@ function pTools(){
      '<div class="panel-b">'+toolCatsBody()+'</div></div>'+
      '</div>';
   } else if(t==="connections"){
-    body='<div class="panel"><div class="panel-h"><h3>Connections — the customer’s credentials, held in the vault</h3>'+
+    body='<div class="panel"><div class="panel-h"><h3>Connections</h3>'+
      '<button class="btn sm" style="margin-left:auto" onclick="openDialog(\'connection\')">Add a connection</button></div>'+
      '<div class="panel-b" style="border-bottom:1px solid var(--border)"><p class="muted" style="margin:0;font-size:12.5px">'+
      'Enveloped under the organization key, every read audited. <b>No agent holds any of these.</b> For each dispatched call the broker mints the narrowest credential the provider allows.</p></div>'+
@@ -4993,7 +5053,7 @@ function pTools(){
      '<p class="muted" style="font-size:12px;margin-bottom:11px">All derived from the call and the record. None from prose.</p>'+
      '<div class="row">'+["tool version","risk","side effect","egress","financial class","amount by path","counterparty","repository","path prefix","recipient domain","taint and its sources","time window","rate","sequence","operator role","enforcement tier","budget position","mandate position"]
       .map(function(c){return '<span class="b b-q" style="font-size:10.5px">'+h(c)+'</span>';}).join("")+'</div>'+
-     '<div class="hr"></div><p class="eyebrow q">A sequence rule, as shipped</p>'+
+     '<div class="hr"></div><p class="eyebrow q">Sequence rule</p>'+
      '<pre><span class="c">// a payment requires a prior quote call in the same run</span>\n'+
      '<span class="k">forbid</span> (principal, action == Action::<span class="s">"stripe__create_payment"</span>, resource)\n'+
      '<span class="k">unless</span> { context.run.has_prior_call(<span class="s">"stripe__list_prices"</span>) };</pre></div></div></div>';
@@ -5008,11 +5068,11 @@ function pTools(){
      '<span class="b b-q mono" style="font-size:10.5px">deny generation '+S.denyGen+'</span></div>'+
      '<div class="panel-b"><div class="ks-wire"><span>tool version</span><span>tool server</span><span>connection</span><span>agent</span>'+
      '<span>operator’s agents</span><span>workspace</span><span>organization</span><span class="out">class</span></div></div></div>'+
-     '<div><p class="eyebrow q">Class switches · organization-wide, in one action</p><div class="ks-stack">'+cls.map(switchCard).join("")+'</div></div>'+
+     '<div><p class="eyebrow q">Class switches</p><div class="ks-stack">'+cls.map(switchCard).join("")+'</div></div>'+
      '<div><p class="eyebrow q">Scoped switches</p><div class="grid g2">'+rest.map(switchCard).join("")+'</div></div></div>';
   }
-  return '<div class="phead"><div class="t"><p class="eyebrow">Workspace · '+h(w.name)+'</p><h1>Tools</h1>'+
-   '<p>The registry is the only source of tools an agent can see. What an agent can do with it is grants, mandates, approval rules, and the switches below.</p></div>'+
+  return '<div class="phead"><div class="t"><p class="eyebrow">'+h(w.name)+'</p><h1>Tools</h1>'+
+   '<p>The registry is the only source of tools an agent can see.</p></div>'+
    '<div class="acts"><button class="btn" onclick="openDialog(\'import\')">Import server</button>'+
    '<button class="btn primary" onclick="wzOpen(\'tool\')">New tool</button>'+
    '<button class="btn danger" onclick="openDialog(\'switch\')">Flip a kill switch</button></div></div>'+(S.killBanner||"")+tabs+body;
@@ -5047,11 +5107,11 @@ function grantsLog(){
   return '<div class="panel" style="margin-top:14px"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Credential grants log</h3>'+
    '<p class="muted" style="margin:2px 0 0;font-size:12px">'+total.toLocaleString()+' grants in 30 days across '+CONNECTIONS.length+' connections. Each one is recorded on its call’s frames and receipt.</p></div>'+
    '<span class="b b-q grants-shown">'+GRANTS.length+' most recent shown</span></div>'+
-   '<div class="tw"><table data-lt="1"><thead><tr><th>Grant</th><th>Tool version</th><th>Agent · run</th><th>Connection</th><th>Scope</th><th>TTL</th><th>State</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
+   '<div class="tw"><table data-lt="1"><thead><tr><th>Grant</th><th>Tool version</th><th>Agent and run</th><th>Connection</th><th>Scope</th><th>TTL</th><th>State</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
    '<div class="panel-b"><p class="muted" style="margin:0;font-size:12px">TTL defaults to the call’s expected duration plus a margin, never more than one hour. The agent sees the result, never the credential.</p></div></div>';
 }
 function brokerChooses(){
-  return '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>How the broker chooses</h3>'+
+  return '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Broker selection</h3>'+
    '<p class="muted" style="margin:2px 0 0;font-size:12px">For each dispatched call, the narrowest credential the provider allows, in this order.</p></div></div>'+
    '<div class="tw"><table data-lt="1"><thead><tr><th>Provider capability</th><th>What the broker mints</th><th>Here</th></tr></thead><tbody>'+
    BROKER_CAPS.map(function(x){var cs=CONNECTIONS.filter(function(c){return c.downscope===x[0];});
@@ -5366,7 +5426,7 @@ function prpDetail(p){
    '<div class="split"><div>'+
     '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Proposed record</h3><span class="b b-q mono" style="margin-left:auto">'+h(p.id)+'</span></div>'+
      '<div class="recs" data-lt="1">'+recordCard({kind:p.kind,force:p.force,st:p.st,scope:"workspace",id:p.lineage},{right:'<span class="b b-q">steers nothing yet</span>',meta:'<span>from <b>'+h(p.from)+'</b></span>'})+'</div></div>'+
-    '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Why the promoter raised it</h3></div><div class="panel-b"><p style="margin:0;font-size:13px;line-height:1.6;color:var(--body)">'+h(m.rationale(s))+'</p></div></div>'+
+    '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Promoter evidence</h3></div><div class="panel-b"><p style="margin:0;font-size:13px;line-height:1.6;color:var(--body)">'+h(m.rationale(s))+'</p></div></div>'+
     '<div class="panel"><div class="panel-h"><h3>Supporting runs</h3><span class="b b-q" style="margin-left:auto" data-prp-support>'+h(m.support(s))+'</span></div>'+
      '<div class="tw"><table><thead><tr><th>Run</th><th>Frame</th><th>Outcome</th><th>Record</th></tr></thead><tbody data-prp-rows="'+s.runs+'">'+rows+'</tbody></table></div>'+
     '</div></div>'+
@@ -5597,7 +5657,7 @@ function recprDetail(def){
      '<dt>ledger</dt><dd>promotions.jsonl not written · regulated mode only; this workspace is team</dd></dl>'+
      '<div class="row" style="margin-top:13px;gap:8px;flex-wrap:wrap">'+
      '<button class="btn" onclick="go(\'#/'+ORG.slug+'/audit/events\')">Audit log</button></div></div></div>'
-   : '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>What merge will do</h3></div><div class="panel-b"><dl class="kv">'+
+   : '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Merge effects</h3></div><div class="panel-b"><dl class="kv">'+
      '<dt>1</dt><dd>write a promotion_event with the author, the pull request and the commit</dd>'+
      '<dt>2</dt><dd>re-index the record from the merged commit; a hash mismatch blocks delivery</dd>'+
      '<dt>3</dt><dd>bump the bundle v'+sb.v+' → v'+(sb.v+1)+' and re-sign it · '+tokn(sb.tok)+' → '+tokn(sb.tok+r.tok)+' steering tokens a turn</dd>'+
@@ -5632,7 +5692,7 @@ function prTable(){
   PROPOSALS.forEach(function(q){ if(q.id!==CTXPR.prp&&q.pr!=="—")
     rows.push([null,q.pr,q.st,"context/"+q.lineage,"the promoter",'<span class="b b-approval"><span class="d"></span>'+h(q.checks)+'</span>',false]);});
   return '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Open and recent Context PRs</h3>'+
-   '<span class="b b-q" style="margin-left:auto">governance: team · code-owner review required</span></div>'+
+   '<span class="b b-q" style="margin-left:auto">governance: '+h(wsGov(ws()))+' · '+h(govDesc(wsGov(ws())))+'</span></div>'+
    '<div class="tw"><table data-lt="off"><thead><tr><th>Pull request</th><th>Branch</th><th>Opened by</th><th>State</th></tr></thead><tbody>'+
    rows.map(function(x){
      return '<tr'+(x[0]?' class="click'+(x[6]?' on':'')+'" onclick="prSelect(\''+h(x[0])+'\')" aria-current="'+(x[6]?"true":"false")+'"':'')+'>'+
@@ -5684,7 +5744,7 @@ function ctxprTab(){
      '<dt>ledger</dt><dd>promotions.jsonl not written · regulated mode only; this workspace is team</dd></dl>'+
      '<div class="row" style="margin-top:13px;gap:8px;flex-wrap:wrap"><button class="btn" onclick="S.tab.run=\'context\';S.ctxSel=\'steering\';go(\'#/'+ORG.slug+'/'+S.ws+'/runs/run_01K5RS7M2E8FJ3QW\')">See it in run_01K5RS7M2E8FJ3QW</button>'+
      '<button class="btn" onclick="go(\'#/'+ORG.slug+'/audit/events\')">Audit log</button></div></div></div>'
-   : '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>What merge will do</h3></div><div class="panel-b"><dl class="kv">'+
+   : '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Merge effects</h3></div><div class="panel-b"><dl class="kv">'+
      '<dt>1</dt><dd>write a promotion_event with the approver, the pull request and the commit</dd>'+
      '<dt>2</dt><dd>re-index the record from the merged commit; a hash mismatch blocks delivery</dd>'+
      '<dt>3</dt><dd>bump the bundle v'+sb.v+' → v'+(sb.v+1)+' and re-sign it · '+tokn(sb.tok)+' → '+tokn(sb.tok+CTXPR.record.tok)+' steering tokens a turn</dd>'+
@@ -5762,6 +5822,25 @@ function stgOpenCount(){
    PROPOSALS.filter(function(q){return q.id!==CTXPR.prp&&q.pr!=="—";}).length;
 }
 /* The header and the seven tabs. `on` is the tab in view; `primary` is that tab's one gold action. */
+function wsGov(w){return (w&&w.governance)||"team";}
+function govDesc(m){var x=WZ_MODES.filter(function(y){return y[0]===m;})[0];return x?x[1]:"";}
+function govChip(w){
+  return '<button class="btn sm gov-chip" onclick="openDialog(\'govmode\',\''+h(w.slug)+'\')" title="Change the governance mode">Governance: <span class="mono">'+h(wsGov(w))+'</span></button>';
+}
+function govSet(slug,mode){
+  var w=wsBySlug(slug); if(!w) return; var was=wsGov(w); w.governance=mode; closeDialog();
+  act(was===mode?"Governance mode is already "+mode+"; nothing to change.":"Context PR opened on "+w.main+": .oxagen/rules/governance.toml sets mode = "+mode+". It takes effect on merge for everything already in flight; nothing else in Oxagen writes that file.","gold");
+}
+DLG_EXT.govmode=function(){
+  var w=S.dlg==="govmode"?wsBySlug(S.dlgArg):null; if(!w) return {t:"Governance mode",w:false,b:"",f:""};
+  var cur=S.govPick||wsGov(w);
+  return {t:"Governance mode · "+w.name,s:".oxagen/rules/governance.toml on "+w.main,w:false,
+   b:'<div class="wz-pick" style="grid-template-columns:1fr">'+WZ_MODES.map(function(m){var on=cur===m[0];
+      return '<button class="wz-card'+(on?" on":"")+'" onclick="S.govPick=\''+m[0]+'\';render()"><span class="tx"><b>'+h(m[0])+(m[0]===wsGov(w)?' <span class="dim" style="font-weight:400">· now</span>':'')+'</b><span class="d">'+h(m[1])+' '+h(m[2])+'</span></span></button>';}).join("")+'</div>'+
+    '<pre style="margin-top:12px">'+h(oxGovernanceToml(cur))+'</pre>'+
+    '<div class="note" style="margin-top:12px">The mode is read off the file when a pull request is opened and again when it is merged, so raising it takes effect on everything already in flight. Lowering it is an org-owner action with approval, recorded as a security event.</div>',
+   f:'<button class="btn" onclick="S.govPick=null;closeDialog()">Cancel</button><button class="btn primary" onclick="var m=S.govPick||\''+h(wsGov(w))+'\';S.govPick=null;govSet(\''+h(w.slug)+'\',m)">Open the Context PR</button>'};
+};
 function stgHub(on,body,primary){
   var w=ws(), skN=skOn(w)?SKILLS.filter(function(s){return s.state==="ok";}).length:0;
   var n={records:RECORDS.filter(function(r){return r.status==="published";}).length,skills:skN,
@@ -5770,10 +5849,9 @@ function stgHub(on,body,primary){
   var tabs='<div class="tabs stg-tabs" role="tablist" aria-label="Steering">'+STG_TABS.map(function(x){
     return '<button class="tab" role="tab" aria-selected="'+(on===x[0])+'" onclick="stgTab(\''+x[0]+'\')">'+x[1]+
      (n[x[0]]?'<span class="n">'+n[x[0]]+'</span>':'')+'</button>';}).join("")+'</div>';
-  return '<div class="phead"><div class="t"><p class="eyebrow">Workspace · '+h(w.name)+'</p><h1>Steering</h1>'+
-   '<p>Everything that can steer an agent in this workspace competes in one assembler. Each item is a file in '+h(w.main)+
-   ', proposed as a pull request and published by a merge. Preview shows what an agent would receive, what was cut, and why.</p></div>'+
-   '<div class="acts">'+(primary||'')+'</div></div>'+tabs+body;
+  return '<div class="phead"><div class="t"><p class="eyebrow">'+h(w.name)+'</p><h1>Steering</h1>'+
+   '<p>Everything that can steer an agent in this workspace competes in one assembler.</p></div>'+
+   '<div class="acts">'+govChip(w)+(primary||'')+'</div></div>'+tabs+body;
 }
 
 /* ---- the sources, read into one shape ---- */
@@ -5925,10 +6003,10 @@ function stgMemoryTab(w){
      '<td class="mono" style="font-size:11.5px">'+h(m.lastRecalled)+'<span class="sub">'+m.recalls30+' recalls in 30 days</span></td>'+
      '<td class="num">'+tokn(m.token_cost)+' tok</td><td>'+st+'</td></tr>';}).join("");
   var agg='<div class="grid g4" style="margin-bottom:14px">'+
-   '<div class="stat"><span class="k">Memories</span><span class="v">'+L.length+'</span><span class="s">folded from '+G.folded+' run notes and steers · one item per lineage</span></div>'+
-   '<div class="stat"><span class="k">Sources</span><span class="v">'+G.runs+'<small>runs</small></span><span class="s">'+G.steers+' operator steers · '+G.notes+' agent notes · newest provenance kept</span></div>'+
-   '<div class="stat"><span class="k">Recalled 30d</span><span class="v">'+G.recalls.toLocaleString()+'</span><span class="s">across every run in '+h(w.name)+' · '+tokn(L.reduce(function(n,m){return n+(m.token_cost||0)*(m.recalls30||0);},0))+' tok delivered</span></div>'+
-   '<div class="stat"><span class="k">By class</span><span class="v" style="font-size:15px;padding-top:6px">'+Object.keys(G.cls).map(function(k){return '<span class="mono">'+h(k)+'</span> '+G.cls[k];}).join(' · ')+'</span><span class="s">a RULE never enters memory: it is proposed as a record instead</span></div></div>';
+   '<div class="stat"><span class="k">Memories</span><span class="v">'+L.length+'</span><span class="s">folded from '+G.folded+' run notes and steers</span></div>'+
+   '<div class="stat"><span class="k">Sources</span><span class="v">'+G.runs+'<small>runs</small></span><span class="s">'+G.steers+' operator steers and '+G.notes+' agent notes</span></div>'+
+   '<div class="stat"><span class="k">Recalled 30d</span><span class="v">'+G.recalls.toLocaleString()+'</span><span class="s">'+tokn(L.reduce(function(n,m){return n+(m.token_cost||0)*(m.recalls30||0);},0))+' tokens delivered</span></div>'+
+   '<div class="stat"><span class="k">By class</span><span class="v" style="font-size:15px;padding-top:6px">'+Object.keys(G.cls).map(function(k){return '<span class="mono">'+h(k)+'</span> '+G.cls[k];}).join(' · ')+'</span><span class="s">a rule is proposed as a record instead</span></div></div>';
   return agg+'<div class="note" style="margin-bottom:14px"><b>A published must beats recalled memory.</b> Memory is what an agent’s own runs left behind. It is recalled, never published, so it competes only in the volatile selection, as <span class="mono">may</span> or <span class="mono">info</span>, and it gives way wherever a published record says otherwise. To make a memory binding, promote it: a proposal, a pull request, a merge.</div>'+
    '<div class="panel"><div class="panel-h"><h3>Recalled memory</h3><span class="b b-q" style="margin-left:auto">'+L.length+' items · recalled per prompt, never in the stable prefix</span></div>'+
    '<div class="tw"><table><thead><tr><th>Memory</th><th>Class</th><th>Force</th><th>Scope</th><th>Last recalled</th><th>Token cost</th><th>In the assembler</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
@@ -5948,7 +6026,7 @@ function stgOntologyTab(w){
   return '<div class="note" style="margin-bottom:14px">An ontology note defines one entity or one term the way this workspace uses it. It compiles to text like any other item, enters the volatile selection as <span class="mono">info</span>, and grants nothing.</div>'+
    '<div class="panel"><div class="panel-h"><h3>Entity and term definitions</h3><span class="b b-q" style="margin-left:auto">'+L.length+' notes · files under .oxagen/ontology/</span></div>'+
    '<div class="tw"><table><thead><tr><th>Term</th><th>Kind</th><th>Definition</th><th>Force</th><th>About</th><th>Token cost</th><th>File</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>'+
-   '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Where these are indexed</h3></div><div class="panel-b"><dl class="kv">'+
+   '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Index</h3></div><div class="panel-b"><dl class="kv">'+
    '<dt>Today</dt><dd>The Postgres registry. The assembler reads every item, these notes included, from the registry behind one port.</dd>'+
    '<dt>Later</dt><dd>The graph becomes the index (Phase 3 of the plan), once the knowledge graph is on by default. Each item is projected one way, registry to graph, and verified by hash. Postgres stays as the fallback behind the same port.</dd>'+
    '<dt>Not here</dt><dd>There is no ontology engine and there are no connectors on this tab. A note is a file somebody wrote and somebody merged.</dd></dl></div></div>';
@@ -5972,9 +6050,9 @@ function stgPolicyTab(w){
      '<td class="num">'+tokn(g.token_cost)+' tok</td>'+
      '<td><button class="btn sm" onclick="'+e[1]+'">'+h(e[0])+'</button></td></tr>';}).join("");
   return '<div class="grid g2" style="margin-bottom:14px">'+
-   '<div class="panel"><div class="panel-h"><h3>The first compilation: text</h3></div><div class="panel-b"><p class="muted" style="margin:0;font-size:13px">Every item compiles to text the model reads. Text is advisory: it is ranked, budgeted, and may be dropped. The other six tabs are this plane.</p></div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>The second compilation: gates</h3></div><div class="panel-b"><p class="muted" style="margin:0;font-size:13px">An item with an enforcement grant also compiles to a gate. A gate is deterministic, never budgeted and never ranked, and it answers when the index is down. This tab is that plane.</p></div></div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>Gates, and the notice each one puts into steering</h3>'+
+   '<div class="panel"><div class="panel-h"><h3>Text compilation</h3></div><div class="panel-b"><p class="muted" style="margin:0;font-size:13px">Every item compiles to text the model reads. Text is advisory: it is ranked, budgeted, and may be dropped. The other six tabs are this plane.</p></div></div>'+
+   '<div class="panel"><div class="panel-h"><h3>Gate compilation</h3></div><div class="panel-b"><p class="muted" style="margin:0;font-size:13px">An item with an enforcement grant also compiles to a gate. A gate is deterministic, never budgeted and never ranked, and it answers when the index is down. This tab is that plane.</p></div></div></div>'+
+   '<div class="panel"><div class="panel-h"><h3>Gate notices</h3>'+
    '<span class="b b-q" style="margin-left:auto">'+L.length+' gates · '+tokn(tok)+' tok of notices · pol_v41</span></div>'+
    '<div class="tw"><table><thead><tr><th>Gate</th><th>Outcome</th><th>Applies to</th><th>Gate notice</th><th>Notice cost</th><th>Edited on</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
    '<div class="panel-b"><div class="note">A gate notice is one line, so the agent does not spend turns walking into a denial. The assembler puts every notice that applies at the head of the stable prefix and never drops one. Gates are edited where they always were: decision rules and kill switches on Tools, a mandate on its own page. Nothing is edited here.</div>'+
@@ -6025,7 +6103,7 @@ function pvResult(M){
    pvPart("3 · Skills","files in the checkout · "+h(M.repo),M.sync?'Sync is <b>'+h((SYNC_STATE[M.sync.state]||{}).l||M.sync.state)+'</b> for this repository'+(M.sync.synced?', at <span class="mono">'+h(M.sync.synced)+'</span>':'')+'.':"",
      skills,"No skill is synced into this repository.")+
    '</div>'+
-   '<div class="panel"><div class="panel-h"><h3>The manifest: what was cut, and why</h3><span class="b b-q" style="margin-left:auto">'+M.cut.length+' cut · recorded on a run as a <span class="mono">steering.manifest</span> frame</span></div>'+
+   '<div class="panel"><div class="panel-h"><h3>Manifest cuts</h3><span class="b b-q" style="margin-left:auto">'+M.cut.length+' cut · recorded on a run as a <span class="mono">steering.manifest</span> frame</span></div>'+
    (M.cut.length?stgCutTable(M):'<div class="panel-b">'+stgCutTable(M)+'</div>')+
    '<div class="panel-b"><div class="note">Two injection points are not on this page. MCP tool results carry their own text, call by call. The model request itself is not one Oxagen can write to: that needs the <span class="mono">gateway</span> tier, which is not available yet.</div></div></div>';
 }
@@ -6137,7 +6215,7 @@ function pSteering(){
      '  proposals/*.toml           <span class="c"># candidates; steer nothing</span>\n'+
      '  agents/&lt;slug&gt;.toml         <span class="c"># one per agent</span></pre>'+
      '<div class="note" style="margin-top:12px">Stella symlinks into this directory rather than copying it, so its loader and its CI validation work unchanged on the same files with no second copy that could drift. Oxagen reads <span class="mono">.oxagen/</span> and nothing else.</div></div></div>'+
-     '<div class="panel"><div class="panel-h"><h3>Where Oxagen can inject</h3><span class="b b-q" style="margin-left:auto">five points · four in use</span></div><div class="panel-b">'+
+     '<div class="panel"><div class="panel-h"><h3>Injection points</h3><span class="b b-q" style="margin-left:auto">five points · four in use</span></div><div class="panel-b">'+
      '<p class="muted" style="font-size:12.5px;margin:0 0 12px">The harness owns the context window. Oxagen competes for its own slice of it, at exactly these points, and every delivery is recorded.</p>'+
      '<ul class="chain stg-inj"><li class="on"><span class="h">1 · SessionStart additional context</span><div>The stable prefix: gate notices, then <span class="mono">must</span> and <span class="mono">should</span>. Capped at 16 KiB, cached in the signed bundle, works offline.</div></li>'+
      '<li class="on"><span class="h">2 · UserPromptSubmit additional context</span><div>The volatile selection: <span class="mono">may</span> and <span class="mono">info</span>, picked for the prompt under a token budget.</div></li>'+
@@ -6326,12 +6404,12 @@ function repoTab(){
    '<tbody>'+trows+'</tbody></table></div>'+
    '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">Changing which repository is <span class="mono">main</span> is an organization-owner action with approval, and it lands in the audit record as a security event. The production branch never moves on its own: when GitHub’s default branch changes, the App records it and prompts, and the binding stays where it is until somebody confirms.</div></div></div>'+
    '<div class="grid g2" style="margin-top:14px">'+
-   '<div class="panel"><div class="panel-h"><h3>What linking does, in order</h3></div><div class="panel-b">'+
+   '<div class="panel"><div class="panel-h"><h3>Linking steps</h3></div><div class="panel-b">'+
    '<ul class="chain"><li class="on"><span class="h">1 · Confirm the production branch</span><div>GitHub’s default branch is the suggestion, never the decision. Only this branch’s commits update the code graph.</div></li>'+
    '<li class="on"><span class="h">2 · Subscribe to events</span><div>Every event the product uses, recorded idempotently on GitHub’s delivery id. Each <span class="mono">push</span> carries the previous head, so a gap is visible in the events themselves.</div></li>'+
    '<li class="on"><span class="h">3 · Import issues</span><div>One resumable backfill where Issues is enabled; events keep the rows current afterwards.</div></li>'+
    '<li class="on"><span class="h">4 · Build the code graph</span><div>A shallow clone of the production head, indexed with the same tree-sitter grammars the protocol provider uses, then discarded.</div></li></ul></div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>The permissions this needs</h3></div><div class="panel-b">'+
+   '<div class="panel"><div class="panel-h"><h3>Permissions</h3></div><div class="panel-b">'+
    '<div class="kv"><dt>Contents</dt><dd>read <b>and write</b> — the branch and the file every pull request carries</dd>'+
    '<dt>Pull requests</dt><dd>read <b>and write</b> — opening one, and reading its head</dd>'+
    '<dt>Checks</dt><dd><b>write</b> — the check runs on the head commit, and the CI a governed change needs</dd>'+
@@ -6374,12 +6452,12 @@ function copyTab(){
    '<div class="tw"><table><thead><tr><th>Directory</th><th>Repository</th><th>Branch</th><th>.oxagen/</th><th>Symlinks</th><th>Bundle</th><th>Last seen</th></tr></thead>'+
    '<tbody>'+trows+'</tbody></table></div></div>'+
    '<div class="grid g2" style="margin-top:14px">'+
-   '<div class="panel"><div class="panel-h"><h3>Two files, and only one of them is yours to review</h3></div><div class="panel-b">'+
+   '<div class="panel"><div class="panel-h"><h3>Files to review</h3></div><div class="panel-b">'+
    '<pre>.oxagen/\n  workspace.toml     <span class="c"># committed. reviewed. the source of truth.</span>\n'+
    '  workspace.json     <span class="c"># gitignored · this machine’s link</span>\n'+
    '  rules/\n  proposals/\n  agents/\n  skills/\n  tools/</pre>'+
    '<div class="note" style="margin-top:12px">The committed file says what the workspace is. The gitignored one says which workspace <em>this checkout</em> is talking to, which is a fact about a laptop and not about the product — so it is never reviewed, never merged, and never the same file in two places.</div></div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>Syncing, in both directions</h3></div><div class="panel-b">'+
+   '<div class="panel"><div class="panel-h"><h3>Sync</h3></div><div class="panel-b">'+
    '<div class="kv"><dt><span class="mono">oxagen init</span></dt><dd>Links this directory. Reads the git remote, matches it to a repository the installation can reach, and writes <span class="mono">.oxagen/workspace.json</span>. Idempotent.</dd>'+
    '<dt><span class="mono">oxagen pull</span></dt><dd>Fast-forwards <span class="mono">.oxagen/</span> to the production branch and re-points the Stella symlinks. It never merges your work.</dd>'+
    '<dt><span class="mono">oxagen status</span></dt><dd>What this copy has against what is published: the bundle version, the records in force, and anything uncommitted under <span class="mono">.oxagen/</span>.</dd>'+
@@ -6417,7 +6495,7 @@ function chgTab(){
    '<div class="tw"><table><thead><tr><th>Change</th><th>Kind</th><th>Pull request</th><th>Opened by</th><th>State</th><th class="num">Checks</th><th>Opened</th></tr></thead>'+
    '<tbody>'+trows+'</tbody></table></div>'+
    '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">A change is in force from the merge commit, not from when it was written. While a pull request is open the thing it carries steers nothing: it is not in the compiled bundle, not in the record index, and the bundle version has not moved.</div></div></div>'+
-   '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>What opens one, without anybody asking</h3></div><div class="panel-b">'+
+   '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Automatic proposals</h3></div><div class="panel-b">'+
    '<div class="kv"><dt>the promoter</dt><dd>Aggregates records across runs by lineage and opens a proposal with the runs it cites. There is no threshold; a person reads the support and decides.</dd>'+
    '<dt>the reconciler</dt><dd>Reads <span class="mono">.oxagen/workspace.toml</span> against what the control plane has, and opens one pull request per real difference. It never edits live state to match the file.</dd>'+
    '<dt>a person</dt><dd>Every creation wizard — agent, tool, skill, record — ends here. None of them has a Save button that ends in a database.</dd></div>'+
@@ -6475,7 +6553,7 @@ function oxprDetail(p){
       '<button class="btn'+(canMerge?' primary':'')+'"'+(canMerge?'':' disabled')+' onclick="act(\'Merged '+h(p.pr)+'\',\'gold\')">Merge pull request</button>'+
       '<button class="btn" onclick="act(\'Closed '+h(p.pr)+' without merging\')">Close without merging</button>'+
       '<span class="grow"></span><span class="dim" style="font-size:11.5px">'+
-      (canMerge?'governance: team · a code-owner review is required on GitHub':'Merge stays disabled until every check reports.')+'</span></div>')+
+      (canMerge?'governance: '+h(wsGov(ws()))+' · '+h(govDesc(wsGov(ws())))+' on GitHub':'Merge stays disabled until every check reports.')+'</span></div>')+
    '</div></div>';
 }
 
@@ -6515,7 +6593,7 @@ function cfgTab(){
    '<dt><span class="mono">team</span></dt><dd>A code-owner review is required. This is what a missing file means.</dd>'+
    '<dt><span class="mono">regulated</span></dt><dd>A named approver from a role must approve, and the promotion ledger is hash-chained.</dd></div>'+
    '<div class="note" style="margin-top:12px">The mode is read on the production branch when a pull request is opened and again when it is merged — so raising it takes effect on everything still open, and it is changed by a pull request like everything else, never by a settings screen. A file that exists but names no mode refuses both, rather than quietly falling back to <span class="mono">team</span>.</div></div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>The whole tree</h3></div><div class="panel-b">'+
+   '<div class="panel"><div class="panel-h"><h3>Tree</h3></div><div class="panel-b">'+
    '<pre>.oxagen/\n  workspace.toml             <span class="c"># linked repos, servers, budgets</span>\n'+
    '  workspace.json             <span class="c"># gitignored · this machine’s link</span>\n'+
    '  rules/\n    governance.toml          <span class="c"># mode = team</span>\n'+
@@ -6549,8 +6627,8 @@ function pRepos(){
   /* the page header gives up the gold when the tab below holds the one primary action */
   /* Give up the header's gold only where the tab below actually renders an enabled one. */
   var tabPrimary=(t==="changes"&&oxprCanMerge(selectedOxpr()))||t==="copies";
-  return '<div class="phead"><div class="t"><p class="eyebrow">Workspace · '+h(w.name)+'</p><h1>Repositories</h1>'+
-   '<p>Where this workspace’s files live, who has them on disk, and every change Oxagen has proposed to them. The record mirrors what git holds; git decides what is in force.</p></div>'+
+  return '<div class="phead"><div class="t"><p class="eyebrow">'+h(w.name)+'</p><h1>Repositories</h1>'+
+   '<p>Where this workspace’s files live and every change Oxagen has proposed to them.</p></div>'+
    '<div class="acts"><button class="btn'+(tabPrimary?'':' primary')+'" onclick="wzOpen(\'init\')">Add Oxagen to a repository</button></div></div>'+tabs+body;
 }
 
@@ -6570,10 +6648,10 @@ function pSpend(){
    .map(function(x){return '<button class="tab" role="tab" aria-selected="'+(t===x[0])+'" onclick="spendGo(\''+x[0]+'\')">'+x[1]+(x[2]?'<span class="n">'+x[2]+'</span>':'')+'</button>';}).join("")+'</div>';
 
   var strip='<div class="grid g4" style="margin-bottom:16px">'+
-   '<div class="stat"><span class="k">Spend · '+h(SPEND.month)+'</span><span class="v">'+usd(fmt2(spendMonthTotal()))+'</span><span class="s"><span class="basis">gateway_observed</span> + <span class="basis">client_attested</span> · USD</span></div>'+
-   '<div class="stat"><span class="k">Tokens</span><span class="v">'+tokn(WT.total)+'</span><span class="s">'+tokn(WT.tokIn)+' in · '+tokn(WT.tokOut)+' out · '+per(WT.cacheRate)+' served from cache</span></div>'+
-   '<div class="stat"><span class="k">Observed by the gateway</span><span class="v">'+per(WT.observed)+'</span><span class="s">of tokens counted by the proxy · the rest self-reported by the harness</span></div>'+
-   '<div class="stat"><span class="k">Wasted</span><span class="v" style="color:var(--st-critical)">'+usd(SPEND.wasteTotal)+'</span><span class="s">'+per(SPEND.wasteShare)+' of spend · the frames show it bought nothing</span></div></div>';
+   '<div class="stat"><span class="k">Spend</span><span class="v">'+usd(fmt2(spendMonthTotal()))+'</span><span class="s"><span class="basis">gateway_observed</span> + <span class="basis">client_attested</span> · USD</span></div>'+
+   '<div class="stat"><span class="k">Tokens</span><span class="v">'+tokn(WT.total)+'</span><span class="s">'+per(WT.cacheRate)+' served from cache</span></div>'+
+   '<div class="stat"><span class="k">Observed by the gateway</span><span class="v">'+per(WT.observed)+'</span><span class="s">of tokens counted by the proxy</span></div>'+
+   '<div class="stat"><span class="k">Wasted</span><span class="v" style="color:var(--st-critical)">'+usd(SPEND.wasteTotal)+'</span><span class="s">'+per(SPEND.wasteShare)+' of spend</span></div></div>';
 
   var body="", drill=S.spendDrill&&spendDrillOk(S.spendDrill)?S.spendDrill:null;
   if(drill){
@@ -6596,7 +6674,7 @@ function pSpend(){
     var legend=lead.map(function(f,i){return '<span><i style="opacity:'+ramp[i%ramp.length]+'"></i>'+h(f.kind)+' <span class="mono">'+Math.round(parseFloat(f.save)/total*100)+'%</span></span>';}).join("")+
       (tail.length?'<span><i style="opacity:.22"></i>'+tail.length+' smaller findings <span class="mono">'+Math.round(tail.reduce(function(s,f){return s+parseFloat(f.save);},0)/total*100)+'%</span></span>':'');
     body='<div class="sv-hero">'+
-     '<div><p class="eyebrow">Savings identified · '+h(SPEND.month)+'</p><div class="sv-amt">'+fmt$(total)+'</div>'+
+     '<div><p class="eyebrow">Savings identified</p><div class="sv-amt">'+fmt$(total)+'</div>'+
      '<div class="sv-sub">'+(total/spendN*100).toFixed(1)+'% of '+usd(fmt2(spendMonthTotal()))+' spent this month · about '+usd(Math.round(total*12).toLocaleString())+' a year at this run rate</div></div>'+
      '<div><div class="sv-strip" role="img" aria-label="Share of identified savings by finding">'+strip+'</div><div class="sv-legend">'+legend+'</div>'+
      '<div class="sv-facts"><span><b>'+FINDINGS.length+'</b> findings</span><span><b>'+Object.keys(opsN).length+'</b> operators involved</span>'+
@@ -6649,8 +6727,8 @@ function pSpend(){
        '<div class="dim" style="font-size:11px">'+per(u)+'</div></td></tr>';}).join("")+
      '</tbody></table></div><div class="panel-b"><div class="note">Hard budgets are checked at each hook boundary, from a running counter in Postgres fed by the usage each harness reports. A breach is a <span class="mono">policy.decision</span> frame and a pause at the next boundary: client-attested and fail-open. Observed metering and an enforced ceiling arrive with the <span class="mono">gateway</span> tier, which is not available yet.</div></div></div>';
   }
-  return '<div class="phead"><div class="t"><p class="eyebrow">Workspace · '+h(w.name)+'</p><h1>Spend</h1>'+
-   '<p>Customers pay for tokens; this page answers what the tokens bought. Every number carries its basis, and this page is for the customer’s money — Oxagen’s own revenue is on Billing.</p></div>'+
+  return '<div class="phead"><div class="t"><p class="eyebrow">'+h(w.name)+'</p><h1>Spend</h1>'+
+   '<p>What the tokens bought, with the basis on every number.</p></div>'+
    '<div class="acts"><button class="btn" onclick="openDialog(\'spendexport\')">Export report</button>'+
    '<button class="btn primary" onclick="openDialog(\'budget\')">Set a budget</button></div></div>'+(drill?'':strip)+tabs+body;
 }
@@ -6679,7 +6757,7 @@ function spendTokens(WT){
     '<dt>Cache write cost share</dt><dd>'+per(tokShare(WT.cacheWrite*1.25,WT.tokIn))+' · high when a prefix is written and never read</dd>'+
     '<dt>Effective input price</dt><dd>$1.88 per million across every input class</dd>'+
     '<dt>Unmapped classes</dt><dd>0 · a class Oxagen does not know is stored under its raw name and priced at zero, so the gap stays visible</dd></dl></div></div>'+
-   '<div class="panel" style="margin:0"><div class="panel-h"><h3>What the prompts were made of</h3><span class="mono dim" style="margin-left:auto;font-size:11px">measured from the request, every call</span></div>'+
+   '<div class="panel" style="margin:0"><div class="panel-h"><h3>Prompt composition</h3><span class="mono dim" style="margin-left:auto;font-size:11px">measured from the request, every call</span></div>'+
     '<div class="panel-b">'+tokBars(WT)+'</div>'+
     '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">Tool definitions, context frames and steering are measured by Oxagen from the request it assembled; tool results and conversation are the rest of the input. A part that grows without its citation rate growing is a finding, and Coaching says what to change.</div></div></div></div>'+
    '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>By harness</h3><span class="b b-q" style="margin-left:auto">'+per(WT.observed)+' of tokens observed by the gateway</span></div>'+
@@ -6709,10 +6787,10 @@ function spendCoaching(){
   var pick='<div class="tabs" role="tablist" style="margin-bottom:12px">'+[["agents","Agent coaching",aItems.length],["operators","Operator coaching",oItems.length]].map(function(x){
     return '<button class="tab" role="tab" aria-selected="'+(sub===x[0])+'" onclick="S.coachFor=\''+x[0]+'\';render()">'+x[1]+'<span class="n">'+x[2]+'</span></button>';}).join("")+'</div>';
   var strip='<div class="grid g4" style="margin-bottom:14px">'+
-   '<div class="stat"><span class="k">Agent coaching</span><span class="v">'+aItems.length+'</span><span class="s">'+fmt$(at)+' a month at stake · from the token record</span></div>'+
-   '<div class="stat"><span class="k">Operator coaching</span><span class="v">'+oItems.length+'</span><span class="s">'+fmt$(ot)+' a month · patterns across an operator\u2019s agents</span></div>'+
-   '<div class="stat"><span class="k">Signals read</span><span class="v">7</span><span class="s">tool-definition share · cache hit rate · result bodies · context citation · reasoning share · retries · cache writes</span></div>'+
-   '<div class="stat"><span class="k">Memories aggregated</span><span class="v">'+MEMORY.length+'</span><span class="s">operator steers and agent notes folded into steering memory · <a href="#/'+ORG.slug+'/'+w.slug+'/steering/memory">open</a></span></div></div>';
+   '<div class="stat"><span class="k">Agent coaching</span><span class="v">'+aItems.length+'</span><span class="s">'+fmt$(at)+' a month at stake</span></div>'+
+   '<div class="stat"><span class="k">Operator coaching</span><span class="v">'+oItems.length+'</span><span class="s">'+fmt$(ot)+' a month at stake</span></div>'+
+   '<div class="stat"><span class="k">Signals read</span><span class="v">7</span><span class="s">from the token record</span></div>'+
+   '<div class="stat"><span class="k">Memories aggregated</span><span class="v">'+MEMORY.length+'</span><span class="s"><a href="#/'+ORG.slug+'/'+w.slug+'/steering/memory">Steering memory</a></span></div></div>';
   var body;
   if(sub==="operators"){
     body=opList.length?opList.map(function(p){var items=oItems.filter(function(x){return x.who===p;}), t=operatorTok(p), who=PEOPLE[p];
@@ -6842,13 +6920,13 @@ function spendDrill(dr){
     var ramp=[1,.8,.64,.5,.38,.28], direct=fs.filter(function(f){return fndDirect(f,kind);}).length;
     var strip=fs.map(function(f,i){return '<i style="flex:'+n$(f.save)+';opacity:'+ramp[i%ramp.length]+'" title="'+h(f.kind)+' · '+usd(f.save)+'"></i>';}).join("");
     var legend=fs.map(function(f,i){return '<span><i style="opacity:'+ramp[i%ramp.length]+'"></i>'+h(f.kind)+' <span class="mono">'+Math.round(n$(f.save)/save*100)+'%</span></span>';}).join("");
-    hero='<div class="sv-hero"><div><p class="eyebrow">Potential savings · '+h(E.name)+'</p><div class="sv-amt">'+fmt$(save)+'</div>'+
+    hero='<div class="sv-hero"><div><p class="eyebrow">Potential savings</p><div class="sv-amt">'+fmt$(save)+'</div>'+
      '<div class="sv-sub">'+(save/spend*100).toFixed(1)+'% of the '+fmt$(spend)+' this '+kind+' spent in '+h(SPEND.month)+' · about '+fmt$(save*12)+' a year at this run rate</div></div>'+
      '<div><div class="sv-strip" role="img" aria-label="Share of potential savings by finding">'+strip+'</div><div class="sv-legend">'+legend+'</div>'+
      '<div class="sv-facts"><span><b>'+fs.length+'</b> finding'+(fs.length>1?'s':'')+'</span><span><b>'+direct+'</b> on this '+kind+' directly'+
      (fs.length-direct?' · <b>'+(fs.length-direct)+'</b> attributed through evidence':'')+'</span><span>every one opens to its evidence</span></div></div></div>';
   } else {
-    hero='<div class="sv-hero"><div><p class="eyebrow">Potential savings · '+h(E.name)+'</p><div class="sv-amt dim">$0.00</div>'+
+    hero='<div class="sv-hero"><div><p class="eyebrow">Potential savings</p><div class="sv-amt dim">$0.00</div>'+
      '<div class="sv-sub">No findings cite this '+kind+'. Every dollar below is accounted for in the metrics; nothing measured here is identified as removable.</div></div>'+
      '<div class="sv-facts" style="align-self:end"><span><b>0</b> findings</span><span>findings are frame patterns, re-derived on every rollup</span></div></div>';
   }
@@ -6903,7 +6981,7 @@ function spendDrill(dr){
   else cuts=xcut("By agent",d.agents,"agent",spend)+xcut("By tool",d.tools,"tool",spend)+xcut("By model",d.models,"model",spend);
   cuts='<div class="grid g3" style="margin-bottom:14px">'+cuts+'</div>';
 
-  var fnd='<div class="panel"><div class="panel-h"><h3>Findings · presented as potential savings</h3>'+
+  var fnd='<div class="panel"><div class="panel-h"><h3>Findings</h3>'+
    '<span class="dim mono" style="margin-left:auto;font-size:11px">'+(fs.length?fs.length+' · measured minus counterfactual':'none this month')+'</span></div>'+
    '<div class="panel-b" style="display:grid;gap:10px">'+
    (fs.length?fs.map(function(f,i){return fndCard(f,i,save,top,"of this "+kind+"’s savings");}).join(""):
@@ -6936,7 +7014,7 @@ function spendByTool(){
   var avgRun=tools.slice().sort(function(a,b){return b.perRun-a.perRun;}).map(function(r){
     return bar(r.t,r.perRun,mxRun,money(r.perRun)+' <span class="dim" style="font-weight:500">per run</span>',"var(--st-approval)");}).join("");
   return '<div class="grid g3" style="margin-bottom:14px">'+
-   '<div class="panel"><div class="panel-h"><h3>Cumulative · '+h(SPEND.month)+'</h3><span class="b b-q" style="margin-left:auto">share of '+money(total)+'</span></div>'+
+   '<div class="panel"><div class="panel-h"><h3>Cumulative spend</h3><span class="b b-q" style="margin-left:auto">share of '+money(total)+'</span></div>'+
     '<div class="panel-b" style="display:grid;gap:11px">'+cum+'</div></div>'+
    '<div class="panel"><div class="panel-h"><h3>Average per call</h3><span class="b b-q" style="margin-left:auto">spend ÷ calls</span></div>'+
     '<div class="panel-b" style="display:grid;gap:11px">'+avg+'</div></div>'+
@@ -6961,7 +7039,7 @@ function spendWaste(){
   var byRun={}; RUNS.forEach(function(r){byRun[r.id]=r;});
   var mx=Math.max.apply(null,SPEND.wasteByCause.map(function(c){return parseFloat(c.spend.replace(/,/g,""));}));
   var strip='<div class="grid g4" style="margin-bottom:16px">'+
-   '<div class="stat"><span class="k">Wasted · '+h(SPEND.month)+'</span><span class="v" style="color:var(--st-critical)">'+usd(SPEND.wasteTotal)+'</span><span class="s"><span class="basis">client_attested</span> · USD</span></div>'+
+   '<div class="stat"><span class="k">Wasted</span><span class="v" style="color:var(--st-critical)">'+usd(SPEND.wasteTotal)+'</span><span class="s"><span class="basis">client_attested</span> · USD</span></div>'+
    '<div class="stat"><span class="k">Share of spend</span><span class="v">'+per(SPEND.wasteShare)+'</span><span class="s">of '+usd(fmt2(spendMonthTotal()))+' this month</span></div>'+
    '<div class="stat"><span class="k">Runs with waste</span><span class="v">'+SPEND.wasteRuns+'</span><span class="s">of '+SPEND.runs.toLocaleString()+' sealed runs</span></div>'+
    '<div class="stat"><span class="k">Largest cause</span><span class="v" style="font-size:17px;padding-top:4px">'+h(SPEND.wasteByCause[0].c)+'</span><span class="s">'+usd(SPEND.wasteByCause[0].spend)+' · '+SPEND.wasteByCause[0].runs+' runs</span></div></div>';
@@ -7023,13 +7101,13 @@ function spendAgentHistory(E){
     .map(function(x){return {m:x.m,v:x.runs?x.spend/x.runs:0,cur:x.cur,spend:x.spend,runs:x.runs,cache:x.cache};});
   var mx=Math.max.apply(null,pts.map(function(p){return p.v;})), first=pts[0], last=pts[pts.length-1];
   return '<div class="grid g2 agent-hist" style="margin-bottom:14px">'+
-   '<div class="panel"><div class="panel-h"><h3>Spend per run, by month</h3><span class="b b-allowed" style="margin-left:auto">'+
+   '<div class="panel"><div class="panel-h"><h3>Monthly spend per run</h3><span class="b b-allowed" style="margin-left:auto">'+
     Math.round((1-last.v/first.v)*100)+'% lower since '+h(first.m)+'</span></div><div class="panel-b" style="display:grid;gap:9px">'+
    pts.map(function(p){return '<div class="meter"><div class="lab"><span'+(p.cur?' style="color:var(--fg);font-weight:600"':'')+'>'+h(p.m)+'</span>'+
      '<b>'+fmt$(p.v)+' <span class="dim" style="font-weight:500">· '+fmt$(p.spend)+' ÷ '+p.runs+' · cache '+per(p.cache)+'</span></b></div>'+
      '<div class="bar"><i style="width:'+Math.max(1,Math.round(p.v/mx*100))+'%;background:var(--st-allowed)"></i></div></div>';}).join("")+
    '</div><div class="panel-b" style="border-top:1px solid var(--border)"><p class="muted" style="margin:0;font-size:12px">Spend ÷ sealed runs. It fell as the cache hit rate rose: the same work, fewer tokens paid at full price.</p></div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>Where the tokens went · '+h(SPEND.month)+'</h3><span class="b b-q" style="margin-left:auto">'+tokn(t.total)+' tok</span></div><div class="panel-b">'+tokBars(t,{tight:true})+'</div></div></div>';
+   '<div class="panel"><div class="panel-h"><h3>Token use</h3><span class="b b-q" style="margin-left:auto">'+tokn(t.total)+' tok</span></div><div class="panel-b">'+tokBars(t,{tight:true})+'</div></div></div>';
 }
 /* ============================== Organization ============================== */
 /* API keys — each one is a service principal with its own grants. Ported from the CIO console (w10 #/a-intel/api-keys). */
@@ -7075,7 +7153,7 @@ function pOrganization(){
      '</tbody></table></div><div class="panel-b">'+
      '<div class="note">Changing a role is a governed action. It passes IAM, writes an audit record, and bills as one action.</div></div></div>'+
      '<div class="grid g2" style="margin-top:14px">'+
-     '<div class="panel"><div class="panel-h"><h3>The delegation ceiling</h3></div><div class="panel-b">'+
+     '<div class="panel"><div class="panel-h"><h3>Delegation ceiling</h3></div><div class="panel-b">'+
      '<p class="muted" style="font-size:12.5px">An agent’s effective permission is its own grants intersected with the invoking human’s grants. Subagents can only narrow. This is what stops a confused deputy.</p>'+
      '<pre>effective = agent.grants\n          ∩ operator.grants\n          ∩ policy_bundle\n          ∩ kill_switches</pre></div></div>'+
      rolesInUsePanel()+'</div>';
@@ -7098,7 +7176,7 @@ function pOrganization(){
       '<td class="tkey" style="font-size:12px">'+h(w.main)+'</td><td class="mono">'+h(w.branch)+'</td>'+
       '<td class="mono dim" style="font-size:11.5px">'+(w.linked.length?h(w.linked.join(", ")):"—")+'</td>'+
       '<td class="num">'+w.agents+'</td><td>'+h(w.owner)+'</td>'+
-      '<td><span class="b b-q">team</span><div class="dim mono" style="font-size:11px">'+h(w.retention)+' · ns '+h(w.ns)+'</div></td>'+
+      '<td><span class="b b-q">'+h(wsGov(w))+'</span><div class="dim mono" style="font-size:11px">'+h(w.retention)+' · ns '+h(w.ns)+'</div></td>'+
       '<td class="rowacts"><button class="btn sm" onclick="S.ws=\''+w.slug+'\';go(\'#/'+ORG.slug+'/'+w.slug+'\')">Open</button><button class="btn sm" onclick="openDialog(\'editws\',\''+w.slug+'\')">Edit</button><button class="btn sm danger" onclick="openDialog(\'archivews\',\''+w.slug+'\')">Archive</button></td></tr>';}).join("")+
      '</tbody></table></div><div class="panel-b">'+
      '<div class="note">Changing which repository is main is an org-owner action with approval, recorded as a security event. A repository may be linked to more than one workspace; it is main for at most one.</div></div></div>';
@@ -7138,7 +7216,7 @@ function pOrganization(){
      '<pre>$ oxagen login --org a-intel\n$ oxagen run list --workspace core-platform --since 24h\n$ oxagen run export run_01K5RS7M2E8FJ3QW --with-bodies --out ./run_01K5RS7M2E8FJ3QW.bundle\n$ oxagen agent status a-intel.finops.invoice-bot</pre></div></div>';
   }
   return '<div class="phead"><div class="t"><p class="eyebrow">Organization</p><h1>'+h(ORG.name)+'</h1>'+
-   '<p>People and roles, workspaces, model funding and routes, the data plane, and API keys. Three pages sit at organization scope; this is the first.</p></div>'+
+   '<p>People, roles, workspaces, model routes, the data plane, and API keys.</p></div>'+
    '<div class="acts"><button class="btn" onclick="openDialog(\'invite\')">Invite</button>'+
    '<button class="btn primary" onclick="openDialog(\'newws\')">Create a workspace</button></div></div>'+tabs+body;
 }
@@ -7199,7 +7277,7 @@ function orgRoutesPanel(){
   var total=orgRoutesTotal();
   return '<div class="panel"><div class="panel-h"><h3>Model routes — Oxagen’s own work only</h3>'+
    '<div class="sp"><span class="b b-q">customer agents call their providers with their own keys, and Oxagen records what each harness reports</span></div></div><div class="tw"><table data-lt="off">'+
-   '<thead><tr><th>Tier</th><th>Provider</th><th>Route</th><th>Fallback</th><th class="num">Use · '+h(SPEND.month)+'</th><th class="num">Cost · '+h(SPEND.month)+'</th><th></th></tr></thead><tbody>'+
+   '<thead><tr><th>Tier</th><th>Provider</th><th>Route</th><th>Fallback</th><th class="num">Use</th><th class="num">Cost</th><th></th></tr></thead><tbody>'+
    ORG_ROUTES.map(function(r,i){var u=orgRouteUse(r);
     return '<tr data-route="'+h(r.tier)+'" data-cost="'+u.cost.toFixed(2)+'"><td><span class="mono">'+h(r.tier)+'</span><div class="dim" style="font-size:11px;max-width:34ch">'+h(r.use)+'</div></td>'+
      '<td style="font-size:12px">'+h(r.provider)+'</td>'+
@@ -7376,7 +7454,7 @@ function pBilling(){
     '<button class="btn" onclick="go(\'#/'+ORG.slug+'/'+S.ws+'\')">Back to Fleet</button>');
 
   return '<div class="phead"><div class="t"><p class="eyebrow">Organization</p><h1>Billing</h1>'+
-   '<p>What Anderson Intelligence Corp. pays Oxagen. The customer’s own model and tool spend is on the Spend page and is billed at zero — the two are kept apart on purpose.</p></div>'+
+   '<p>What Anderson Intelligence Corp. pays Oxagen.</p></div>'+
    '<div class="acts"><button class="btn" onclick="openDialog(\'plan\')">Change plan</button></div></div>'+
    '<div class="grid g4" style="margin-bottom:16px">'+
    '<div class="stat"><span class="k">Plan</span><span class="v" style="font-size:19px">'+h(BILLING.plan)+'</span><span class="s">monthly, cancel any time</span></div>'+
@@ -7405,13 +7483,13 @@ function pBilling(){
      '<td><span class="b b-allowed"><span class="d"></span>'+h(i.st)+'</span></td><td>'+h(i.d)+'</td>'+
      '<td><a href="#">Open in Stripe ↗</a></td></tr>';}).join("")+
     '</tbody></table></div></div></div>'+
-   '<div><div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>The price list</h3></div><div class="tw"><table class="narrow"><tbody>'+
+   '<div><div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Price list</h3></div><div class="tw"><table class="narrow"><tbody>'+
     [["Free","every governance feature, an included monthly allowance, 30 days of evidence, 3 seats"],["Governed actions, blocks of 10,000","$30.00 per block at the published rate"],["Negotiated agreement","the same four figures, per organization"],
      ["Invoice billing","never capped · overage invoiced at the contracted rate at period end"],["Evidence retention","13 months included on paid plans, then $0.10 per GB-month"],
      ["Tokens Oxagen buys for you","at cost, no markup, capped"],["Enterprise, annual","from $60,000 per year"]]
     .map(function(p){return '<tr><td style="font-size:12.5px">'+h(p[0])+'</td><td class="num mono" style="font-size:11.5px">'+h(p[1])+'</td></tr>';}).join("")+
     '</tbody></table></div><div class="panel-b"><p class="muted" style="font-size:12px;margin:0">No credits, no resellers, and no revenue dashboard. The free tier is the whole product, limited by retention and seats, never by features or volume. Upgrading is a governance decision, not a volume accident.</p></div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>What counts</h3></div><div class="panel-b">'+
+   '<div class="panel"><div class="panel-h"><h3>Billable units</h3></div><div class="panel-b">'+
     '<ul class="chain"><li class="on"><span class="h">Priced</span><div>A governed action: a call Oxagen decided, delivered and recorded, with its receipt in the chain.</div></li>'+
     '<li class="on"><span class="h">Reported</span><div>Sealed runs, tokens by class, retained evidence: secondary meters, never priced.</div></li>'+
     '<li class="on"><span class="h">Free</span><div>Denials, runs Oxagen halted before a model call, runs of the in-app agent. You never pay for Oxagen saying no.</div></li></ul></div></div></div></div>';
@@ -7609,7 +7687,7 @@ function auditReceipts(){
    '<button class="btn" onclick="S.rq=el(\'rq\').value;render()">Search</button></div>'+
    '<div class="chips">'+chips.map(function(c){return '<button class="btn sm'+((S.rq||"")===c?' sel':'')+'" onclick="S.rq=\''+c+'\';render()">'+h(c)+'</button>';}).join("")+
    (q?'<button class="btn sm ghost" onclick="S.rq=\'\';render()">clear</button>':'')+'</div></div>'+
-   (hits.length?'<div class="tw"><table><thead><tr><th>Receipt</th><th>When</th><th>Agent · operator</th><th>Tool version</th><th>Decision</th><th class="num">Amount</th><th>External effect</th><th>Tier</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
+   (hits.length?'<div class="tw"><table><thead><tr><th>Receipt</th><th>When</th><th>Agent and operator</th><th>Tool version</th><th>Decision</th><th class="num">Amount</th><th>External effect</th><th>Tier</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
     :emptyState("No receipt matches “"+(S.rq||"")+"”","Receipts are searchable by agent key, tool version, external effect id, call digest and approver. A call that was denied has a receipt too — denials are recorded, they just never dispatched.",'<button class="btn" onclick="S.rq=\'\';render()">Clear the search</button>'))+
    '<div class="panel-b"><div class="note">'+hits.length+' of '+RECEIPTS.length+' receipts shown. A receipt for a client-attested call exists too, and its authority group says <span class="mono">recorded</span> where a call routed through Oxagen says <span class="mono">decided on the server</span>. The rendering refuses to say otherwise.</div></div></div>';
 }
@@ -7626,7 +7704,7 @@ function auditExports(){
   var kinds=["run.sealed","approval.requested","tool_call.denied","kill_switch.flipped","mandate.exception"];
   return '<div class="callout" style="margin-bottom:14px">An export is a verifiable bundle: archive segments, attestations, key ids, and a verifier script. The segment was written at seal time, so it is never a later copy of the graph — it is the same bytes the graph indexed, written once. A customer’s auditor checks it offline, without trusting Oxagen or the worker’s harness.</div>'+
    '<div class="grid g2">'+cards+'</div>'+
-   '<div class="grid g2" style="margin-top:14px"><div class="panel"><div class="panel-h"><h3>The verifier</h3><span style="margin-left:auto">'+auditStore("ships inside every bundle")+'</span></div><div class="panel-b">'+
+   '<div class="grid g2" style="margin-top:14px"><div class="panel"><div class="panel-h"><h3>Verifier</h3><span style="margin-left:auto">'+auditStore("ships inside every bundle")+'</span></div><div class="panel-b">'+
    '<pre>$ tar xf exp_01K4Q7M1.tar.zst &amp;&amp; cd exp_01K4Q7M1\n$ ./oxagen-verify --bundle . --release-key rel-2026-03\n\n  manifest            31 segments, 188,440 frame envelopes (NDJSON)\n  merkle roots        31 / 31 recomputed and matched\n  seal attestations   962 / 962 signatures verified ('+h(ORG.attester)+', key_ox_aintel_2026Q1)\n  chain continuity    no gaps, no reordering\n  key ids present     kek_aintel_2026Q2, kek_aintel_2026Q3\n  tiers               harness 953 · observe 9\n\n  <span class="s">OK</span>  the bundle is internally consistent and signed by Oxagen release key rel-2026-03</pre>'+
    '<div class="note" style="margin-top:12px">The verifier runs offline and needs no Oxagen service. It recomputes every Merkle root and checks every seal signature against the published key, so an auditor never has to trust Oxagen’s word for the chain.</div></div></div>'+
    '<div class="panel"><div class="panel-h"><h3>Outbound events</h3><span class="b b-q" style="margin-left:auto">Series A</span></div><div class="panel-b">'+
@@ -7679,7 +7757,7 @@ function pAudit(){
   var tabs={events:auditEvents,incidents:auditIncidents,receipts:auditReceipts,exports:auditExports,keys:auditKeys,retention:auditRetention};
   var body=(tabs[t]||auditEvents)();
   return '<div class="phead"><div class="t"><p class="eyebrow">Organization</p><h1>Audit</h1>'+
-   '<p>What happened, who allowed it, under what authority, and what it cost. Every explanation here is a chain with links to frames, records, and commits — never a summary.</p>'+
+   '<p>What happened, who allowed it, under what authority, and what it cost.</p>'+
    '<p class="mono dim" style="font-size:11.5px;margin-top:6px">control-plane events retained 7 years · run ledger forever · bodies 7 years by default · '+h(ORG.slug)+'</p></div>'+
    '<div class="acts"><button class="btn primary" onclick="openDialog(\'newexport\')">Export evidence bundle</button></div></div>'+auditTabs(t)+body;
 }
@@ -7998,7 +8076,7 @@ function skSearch(w){
     keys.map(function(k){return '<button class="btn sm" onclick="SKS.q=\''+k+'\';render()">'+h(k)+'</button>';}).join("")+
    '</div>'+
    '<div class="grid g2" style="gap:12px">'+
-    '<div class="panel"><div class="panel-h"><h3>What decided this</h3></div><div class="panel-b">'+
+    '<div class="panel"><div class="panel-h"><h3>Decision</h3></div><div class="panel-b">'+
      '<dl class="kv">'+
       '<dt>Config</dt><dd><span class="mono">'+h(SK_CFG.ver)+'</span> · merged as '+h(SK_CFG.pr)+' by '+h(PEOPLE[SK_CFG.by].name)+'</dd>'+
       '<dt>Sources on</dt><dd>'+SK_CFG.sources.filter(function(x){return x.on;}).length+' of '+SK_CFG.sources.length+' · <span class="mono">a-intel/mobile</span> is linked but off</dd>'+
@@ -8157,7 +8235,7 @@ function skLoop(w){
      ].map(function(x){
       return '<div class="sx-row"><div class="sx-ki">'+icon(x[0])+'</div><div><div class="nm">'+h(x[1])+'</div>'+
        '<div class="st">'+h(x[2])+'</div></div><div class="rt"></div></div>';}).join("")+'</div></div></div>'+
-    '<div class="panel"><div class="panel-h"><h3>What it is not allowed to do</h3></div><div class="panel-b">'+
+    '<div class="panel"><div class="panel-h"><h3>Denied actions</h3></div><div class="panel-b">'+
      '<div class="sx-skl">'+[
       ["Rewrite what the agent said","An interjection is a new frame beside the agent’s turn. The agent’s own output is never edited, and a replay shows both."],
       ["Answer on the operator’s behalf","No default answer, no remembered answer, no “last time you chose…”. On timeout the run continues with nothing, which is the conservative end."],
@@ -9310,7 +9388,7 @@ function dialog(){
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Incident raised. It is a security event with who, why, and what it stopped.\')">Raise it</button>'},
    "switch":switchDialog(),
    policy:{t:"Edit policy",w:true,b:
-     '<p class="eyebrow q">pol_v42 · draft</p>'+
+     '<p class="eyebrow q">pol_v42 draft</p>'+
      '<pre><span class="c">// require approval for every irreversible call in core-platform</span>\n'+
      '<span class="k">permit</span> (principal, action, resource)\n<span class="k">when</span> { context.tool.side_effect == <span class="s">"irreversible"</span> }\n'+
      '<span class="k">advice</span> <span class="s">"require_approval"</span>;</pre>'+
@@ -10076,13 +10154,14 @@ function memberDelDlg(){
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn danger"'+(owns?' disabled':'')+' onclick="memberRemove(\''+h(S.dlgArg)+'\')">Remove</button>'};
 }
 function wsById(slug){for(var i=0;i<WS.length;i++){if(WS[i].slug===slug)return WS[i];}return null;}
-function wsSave(){var w=wsById(S.dlgArg);if(!w)return;var n=el("wsName"),b=el("wsBranch"),r=el("wsRet");if(n&&n.value.trim())w.name=n.value.trim();if(b)w.branch=b.value;if(r)w.retention=r.value;closeDialog();act("Workspace "+w.name+" updated. Recorded as a security event"+(w.retention==="digest_only"?"; digest_only is recorded as a completeness gap on every run.":"."));}
+function wsSave(){var w=wsById(S.dlgArg);if(!w)return;var n=el("wsName"),b=el("wsBranch"),r=el("wsRet"),g=el("wsGov");if(n&&n.value.trim())w.name=n.value.trim();if(b)w.branch=b.value;if(r)w.retention=r.value;if(g&&g.value!==wsGov(w)){w.governance=g.value;act("Context PR opened on "+w.main+": governance.toml sets mode = "+g.value+".","gold");}closeDialog();act("Workspace "+w.name+" updated. Recorded as a security event"+(w.retention==="digest_only"?"; digest_only is recorded as a completeness gap on every run.":"."));}
 function wsEditDlg(){
   var w=S.dlg==="editws"?wsById(S.dlgArg):null; if(!w) return {t:"Edit workspace",w:false,b:"",f:""};
   return {t:"Edit workspace",s:w.slug,w:false,b:'<div class="field"><label>Name</label><input id="wsName" value="'+h(w.name)+'" aria-label="Name"></div>'+
    '<div class="field"><label>Main repository</label><input value="'+h(w.main)+'" readonly aria-label="Main repository"><div class="hint">Changing main is an org-owner action with approval.</div></div>'+
    '<div class="field"><label>Production branch</label><select id="wsBranch" aria-label="Production branch">'+["main","release","production"].map(function(x){return '<option'+(w.branch===x?' selected':'')+'>'+x+'</option>';}).join("")+'</select></div>'+
-   '<div class="field"><label>Governance mode</label><select aria-label="Governance mode"><option>team — one code-owner review</option><option>solo — merge on green checks</option><option>regulated — two reviews and a promotion ledger</option></select></div>'+
+   '<div class="field"><label for="wsGov">Governance mode</label><select id="wsGov" aria-label="Governance mode">'+WZ_MODES.map(function(m){return '<option value="'+m[0]+'"'+(wsGov(w)===m[0]?' selected':'')+'>'+m[0]+' · '+h(m[1])+'</option>';}).join("")+'</select>'+
+    '<div class="hint">Written to <span class="mono">.oxagen/rules/governance.toml</span> through a Context PR; it takes effect on merge.</div></div>'+
    '<div class="field"><label>Namespace</label><input value="'+h(w.ns||w.slug.split("-")[0])+'" disabled aria-label="Namespace"><div class="hint">Immutable. It is in every agent key here: <span class="mono">'+h(ORG.slug+"."+(w.ns||w.slug.split("-")[0]))+'.&lt;agent&gt;</span>.</div></div>'+
    '<div class="field"><label for="wsRet">Retention mode</label><select id="wsRet">'+[["content_exact","keep prompts and tool bodies in full"],["digest_only","digests only, lowers the replay grade"]].map(function(x){return '<option value="'+x[0]+'"'+((w.retention||"content_exact")===x[0]?' selected':'')+'>'+x[0]+' — '+x[1]+'</option>';}).join("")+'</select>'+
    '<div class="hint"><span class="mono">digest_only</span> is an opt-down: recorded as a completeness gap on every run, because a replay without bodies is a timeline, not a replay.</div></div>'+
@@ -10786,7 +10865,7 @@ function orgKeyPanel(){
     '<button class="btn" onclick="openDialog(\'funding\')">Change source</button></div>'+
    '</div>'+
    (none?'':'<div class="panel-b" style="border-top:1px solid var(--border)">'+
-    '<p class="eyebrow q" style="margin:0 0 8px">Reconciliation · '+h(SPEND.month)+'</p>'+
+    '<p class="eyebrow q" style="margin:0 0 8px">Reconciliation</p>'+
     '<dl class="kv">'+
     '<dt>OpenRouter reports</dt><dd><span class="mono">'+usd(ORG_KEY.providerUsd)+'</span> on <span class="mono">'+h(ORG_KEY.provisionedId)+'</span></dd>'+
     '<dt>Our credit ledger</dt><dd><span class="mono">'+usd(ORG_KEY.ledgerUsd)+'</span> debited to this organization</dd>'+
@@ -12754,7 +12833,7 @@ function render(){
 
   var shell=r.page!=="register"&&r.page!=="welcome";
   el("app").innerHTML=r.page==="register"?pRegister(r):r.page==="welcome"?scnRailFloat()+pWelcome(r):'<div class="app">'+sidebar(r)+'<div class="main">'+topbar(r)+
-    '<main class="page" id="pg">'+scnRail()+page+'</main></div></div>'+(isPhone()?mobileNav(r):"");
+    '<main class="page" id="pg">'+scnRail()+page+'</main></div></div>'+apdHtml()+(isPhone()?mobileNav(r):"");
   document.documentElement.classList.toggle("has-mnav",shell&&isPhone());
   if(r.page==="register")regSchedule(regStepOf(r));
   else if(r.page==="welcome")regSchedule(r.step);

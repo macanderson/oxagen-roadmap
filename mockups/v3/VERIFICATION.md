@@ -11,6 +11,10 @@
   "not proof that it was not").
 - `node tools/build-mockup.mjs --check` and `node tools/build-mockup-v2.mjs --check` still pass:
   v1 and v2 are byte-for-byte unchanged.
+- The approvals drawer: opens from the topbar button on every page, lists 17 waiting items
+  (16 parked approvals and 1 interjection), selecting one renders the full approval card with its
+  three actions, Escape closes it, and the countdowns keep ticking inside it. Screenshots
+  `review/approvals-drawer*.png`, `review/governance-mode.png`.
 - Screenshots in `review/`: Fleet (light, dark, mobile), Spend findings, tokens, coaching (desktop
   and mobile), agent drill, wasted spend, run transcript and cost, agent page, identities,
   auto-approvals, steering memory and skills, billing.
