@@ -89,6 +89,9 @@ const clickPg = async (page, re) => await page.evaluate(src => {
   await page.waitForTimeout(200);
   await page.fill("#wzDesc", STATEMENT);
   await page.evaluate(s => { const t = document.getElementById("wzDesc"); t.value = s; t.dispatchEvent(new Event("input", { bubbles: true })); }, STATEMENT);
+  // the wand writes the prose the record carries, and step 2 opens when it has
+  await page.evaluate(() => document.getElementById("wzWandBtn").click());
+  await page.waitForTimeout(120);
   ok(await primary(page), "step 1 advances once there is a description");
   await page.waitForTimeout(200);
 
@@ -133,7 +136,8 @@ const clickPg = async (page, re) => await page.evaluate(src => {
   ok(txt.includes(opened.prNumber), "the tab shows the new PR");
   ok(/Opened by/.test(txt), "the table says who opened each PR");
   ok(txt.includes("a-intel/platform#519"), "the promoter's PR is still listed beside it");
-  ok(/What merge will do/.test(txt), "it says what merge will do, before it does it");
+  ok(/Merge effects/.test(txt), "it says what merge will do, before it does it");
+  ok(/checks/.test(txt), "each row says where its checks stand");
   await shot(page, "rec-e2e-2-pr-open");
 
   // merge is blocked until the checks report, and the block is real
@@ -214,7 +218,9 @@ const clickPg = async (page, re) => await page.evaluate(src => {
   ok(after.hasRecpr === false, "closing removes the PR");
   ok(after.records === before.records, "and publishes nothing");
   ok(after.bundleV === before.bundleV, "and leaves the bundle alone");
-  ok(/no Context PR yet|Open and recent/.test(await pgText(page)), "the tab falls back to the promoter's view");
+  const rest = await pgText(page);
+  ok(/a-intel\/platform#519/.test(rest) && !/Prefer short branch names/.test(rest),
+    "the discarded PR is gone and the promoter's are still listed");
   ok(errs.length === 0, "no errors on discard: " + errs.join(" | "));
   await page.close();
 }
