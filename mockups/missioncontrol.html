@@ -1348,42 +1348,6 @@ table{color:inherit}
 .rng-prev{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:6px}
 .rowacts{white-space:nowrap}
 .rowacts .btn{margin-right:4px}
-/* Auto-approval rules: one horizontal card per rule, stacked. Toggle spine | body | rail.
-   The body carries the name and provenance on top and three labelled facts below; the rail
-   carries the 30-day count and the actions. Every value is a single line that ellipsises
-   behind a title, so a long rule name or tool pattern never wraps however narrow the page. */
-.arules{display:grid;gap:10px;padding:12px 16px}
-.arule{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:16px;align-items:start;padding:14px 16px;border:1px solid var(--border);border-radius:12px;background:var(--ink);cursor:pointer;transition:border-color .15s}
-.arule>*{min-width:0}
-.arule:hover{border-color:var(--rule)}
-.arule.off .ar-body,.arule.off .ar-n{opacity:.55}
-.ar-tog{padding-top:3px}
-.ar-head{display:flex;align-items:center;gap:8px;min-width:0}
-.ar-head .b{flex:none}
-.ar-name{flex:0 1 auto;min-width:0;font-size:14.5px;font-weight:600;color:var(--fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.5}
-.ar-sub{font-family:var(--mono);font-size:10.5px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
-.ar-facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px 20px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
-@media(min-width:1180px){.ar-facts{grid-template-columns:minmax(0,1.2fr) minmax(0,1.1fr) minmax(0,1.7fr)}}
-.ar-f{min-width:0}
-.ar-f .k{display:block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:600;margin-bottom:4px;white-space:nowrap}
-.ar-f .v{display:block;font-size:12.5px;color:var(--body);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.8}
-.ar-f .v.mono{font-size:11.5px;color:var(--fg)}
-.ar-f .v .scs{gap:10px;vertical-align:middle}
-.ar-f .v .b{vertical-align:middle;font-weight:500;margin-left:4px}
-.ar-f .v .b:first-of-type{margin-left:6px}
-.ar-rail{display:grid;gap:10px;justify-items:end;text-align:right;align-self:stretch;align-content:space-between}
-.ar-stat{display:grid;justify-items:end}
-.ar-n{font-size:24px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.05;color:var(--fg)}
-.ar-stat .s{font-size:11px;color:var(--muted);white-space:nowrap;margin-top:3px}
-.ar-stat .s.held{color:var(--dim)}
-.ar-acts{display:flex;gap:6px}
-@media(max-width:1180px){.arule{grid-template-columns:auto minmax(0,1fr)}.ar-rail{grid-column:2;grid-auto-flow:column;justify-content:space-between;align-items:center;text-align:left;justify-items:start;gap:16px}.ar-stat{grid-auto-flow:column;align-items:baseline;gap:8px;justify-items:start}.ar-stat .s{margin-top:0}.ar-stat .s.held::before{content:"· ";color:var(--rule)}}
-#viewport.phone .arules{padding:10px 12px}
-#viewport.phone .arule{grid-template-columns:auto minmax(0,1fr);gap:12px;padding:12px}
-#viewport.phone .ar-rail{grid-column:1/-1;grid-auto-flow:row;justify-content:stretch;align-items:start;text-align:left;justify-items:start;gap:8px}
-#viewport.phone .ar-stat{grid-auto-flow:column;align-items:baseline;gap:8px;justify-items:start}#viewport.phone .ar-stat .s{margin-top:0}#viewport.phone .ar-stat .s.held::before{content:"· ";color:var(--rule)}
-#viewport.phone .ar-facts{grid-template-columns:minmax(0,1fr)}
-#viewport.phone .ar-head{flex-wrap:wrap;gap:4px 8px}#viewport.phone .ar-name{flex-basis:100%}
 #viewport.phone .perm-grid{grid-template-columns:minmax(0,1fr)}
 .field label.check{display:flex;font-size:inherit;font-weight:inherit;color:inherit;margin-bottom:8px}
 .field .check input{width:auto;flex:none;margin:3px 0 0}
@@ -3987,7 +3951,7 @@ function approvalCard(a){
     '<div class="row" style="margin-top:9px">'+riskBadge(a.risk)+
      '<span class="b '+(a.side==="irreversible"?"b-denied":"b-q")+' mono">side_effect '+h(a.side)+'</span>'+
      (a.tainted?'<span class="b b-critical"><span class="d"></span>tainted</span>':'')+
-     '<span class="b b-q mono">egress '+h(a.egress)+'</span>'+tierBadge(a.tier)+'</div>'+autoEligibilityLine(a)+'</div>'+
+     '<span class="b b-q mono">egress '+h(a.egress)+'</span>'+tierBadge(a.tier)+'</div></div>'+
     '<div class="r"><span class="eyebrow q" style="font-size:10px;margin:0">'+(done?'resolved':'times out in')+'</span>'+clk+
      '<span class="dim mono" style="font-size:10.5px">parked '+h(a.parkedAt||"")+' · timeout '+h(a.timeout)+'</span>'+
      (done?'':'<span class="dim" style="font-size:11px;max-width:22ch;text-align:right">on expiry the call ends and the reason reaches the model</span>')+'</div></div>'+
@@ -6943,8 +6907,7 @@ function aMandates(a,r){
     ["Financial class",'moves_funds, read from the tool version\'s declared <span class="mono">amount_path</span>'],
     ["Mandate lookup",'none for <span class="mono">'+h(a.key)+'</span>'],
     ["Decision",gate("deny")+' <span class="mono">no_mandate</span> · mandate ledger unchanged · no credential minted']])+
-   '<div class="row"><button class="btn" onclick="openDialog(\'mandate\')">Request a mandate</button>'+
-   '<button class="btn ghost" onclick="go(\'#/'+ORG.slug+'/'+S.ws+'/tools/mandates\')">Open the mandates ledger</button></div>'+
+   '<div class="row"><button class="btn" onclick="openDialog(\'mandate\')">Request a mandate</button></div>'+
    '</div></div>';
 
   return '<div class="panel"><div class="panel-h"><h3>Mandates held</h3>'+
@@ -8568,7 +8531,7 @@ function stgGateEdit(g){
   var base="#/"+ORG.slug+"/";
   if(g.edit==="mandate") return ['Open the mandate',"go('"+base+(g.ws||S.ws)+"/agents/"+g.agent+"/mandates/"+g.mandate+"')"];
   if(g.edit==="record") return ['Open the record',"go('"+crecUrl(g.record)+"')"];
-  if(g.edit==="agents") return ['Open Tools · Mandates',"go('"+base+S.ws+"/tools/mandates')"];
+  if(g.edit==="agents") return ['Open Agent IAM',"go('"+base+S.ws+"/agents')"];
   if(g.edit==="tools/switches") return ['Open Tools · Kill switches',"go('"+base+S.ws+"/tools/switches')"];
   return ['Open Tools · Policy',"go('"+base+S.ws+"/tools/policy')"];
 }
@@ -11927,8 +11890,6 @@ function dialog(){
    incidentclose:incidentResolveDlg(),
    assignrole:assignRoleDlg(),
    identity:identityDlg(),
-   ruleedit:S.dlg==="ruleedit"?ruleEditDlg():{t:"Rule",w:true,b:"",f:""},
-   ruledel:ruleDelDlg(),
    delagent:agentDelDlg(),
    removemember:memberDelDlg(),
    editws:wsEditDlg(),
@@ -12314,7 +12275,7 @@ var CMDS=[
    ["run_01K4QJ9E4T6YUI1O · stella-ci · compacted","#/a-intel/core-platform/runs/run_01K4QJ9E4T6YUI1O"]]},
  {g:"Actions — each one is a governed action",i:[
    ["Pause every live run in this workspace",null],["Steer the fleet","!openSteerFleet()"],["Register an agent","!regStart()"],
-   ["Grant a mandate",null],["Create a role","!roleNew()"],["Create an auto-approval rule","!ruleNew()"],["Flip a kill switch",null],
+   ["Grant a mandate",null],["Create a role","!roleNew()"],["Flip a kill switch",null],
    ["Export a signed bundle",null],["Create an API key",null]]}
 ];
 S.cmdq=""; S.cmdSel=0; S.cmdCaret=null;
@@ -12573,125 +12534,9 @@ function identityDlg(){
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="identitySave()">Request the change</button>'};
 }
 
-/* ---- auto-approval rules: skip the human gate when the record earns it ----
-   A rule names the tier the agent must be on, the runs it must have behind it in 30 days, and an
-   amount ceiling. An agent with any tamper incident in the window never qualifies. Every input is
-   a count off the record; there is no score. */
+/* The enforcement tiers, and the glob a tool pattern is matched with. */
 var TIER_RANK={observe:0,harness:1,gateway:2,contained:3};
-var AUTORULES=[
- {id:"aar_01K5RT7Q",name:"Trusted release tooling",tool:"github__create_release@*",ws:"core-platform",minTier:"gateway",minRuns:100,maxAmount:null,on:true,by:"Priya Natarajan",at:"2026-08-30",hits30:14,skipped30:3},
- {id:"aar_01K5RT8C",name:"Small vendor payments",tool:"stripe__create_payment@*",ws:"finops",minTier:"contained",minRuns:200,maxAmount:"250.00",on:true,by:"Dana Okafor",at:"2026-09-02",hits30:41,skipped30:6},
- {id:"aar_01K5RT9A",name:"Linear triage writes",tool:"linear__*",ws:"core-platform",minTier:"harness",minRuns:20,maxAmount:null,on:false,by:"Marcus Bell",at:"2026-09-08",hits30:0,skipped30:0}
-];
-var RULE_TOOLS=["github__create_release@*","github__create_pull_request@*","github__merge_pull_request@*","stripe__create_payment@*","aws_billing__purchase_savings_plan@*","linear__*","bash__run@*","write__file@*","edit__file@*","*"];
-S.ruleEdit=null; S.ruleN=0;
-function ruleById(id){for(var i=0;i<AUTORULES.length;i++){if(AUTORULES[i].id===id)return AUTORULES[i];}return null;}
 function globMatch(pat,s){return new RegExp("^"+String(pat).replace(/[.+?^\$\{\}()|[\]\\]/g,"\\$&").replace(/\*/g,".*")+"$").test(String(s));}
-function ruleQualifies(r,a){return !!a&&(TIER_RANK[a.tier]||0)>=(TIER_RANK[r.minTier]||0)&&(a.runs30||0)>=(r.minRuns||0)&&tamperCount(a)===0;}
-function ruleReq(r){return [r.minTier+' tier or above',(r.minRuns||0)+' runs in 30 days','no tamper incident'].concat(r.maxAmount!=null?['amount ≤ '+usd(r.maxAmount)]:[]);}
-function ruleAgents(r){return AGENTS.filter(function(a){return r.ws==="*"||a.ws===r.ws;});}
-function autoEligibility(ap){
-  var a=agent(ap.agent);
-  var rules=AUTORULES.filter(function(r){return r.on&&(r.ws==="*"||r.ws===ap.ws)&&globMatch(r.tool,ap.tool);});
-  if(!rules.length) return null;
-  var r=rules[0], why=[];
-  if(!a) why.push("agent unknown");
-  else { if((TIER_RANK[a.tier]||0)<(TIER_RANK[r.minTier]||0)) why.push(a.tier+" tier, rule needs "+r.minTier);
-    if((a.runs30||0)<(r.minRuns||0)) why.push((a.runs30||0)+" runs in 30 days &lt; "+r.minRuns);
-    if(tamperCount(a)) why.push(tamperCount(a)+" tamper incident"+(tamperCount(a)===1?"":"s")+" in the window"); }
-  if(r.maxAmount!=null&&ap.amount&&money(ap.amount)>money(r.maxAmount)) why.push(usd(ap.amount)+" above the "+usd(r.maxAmount)+" ceiling");
-  if(ap.tainted) why.push("tainted input never auto-approves");
-  if(ap.risk==="critical") why.push("critical hazard never auto-approves");
-  var floors=ap.tainted||ap.risk==="critical";
-  return {rule:r,ok:!why.length,why:why,floor:floors};
-}
-function autoEligibilityLine(ap){
-  var e=autoEligibility(ap); if(!e) return '';
-  return '<div style="font-size:11.5px;margin-top:7px;color:var(--muted)"><span class="b '+(e.ok?"b-allowed":"b-q")+'" style="margin-right:6px">'+(e.ok?'auto-approval eligible':'not auto-approved')+'</span>'+
-   'rule <span class="mono">'+h(e.rule.name)+'</span> · '+ruleReq(e.rule).slice(0,2).join(' · ')+
-   (e.ok?' · parked anyway: '+(ap.mandate?'the mandate requires a human above its threshold':ap.side==="irreversible"?'the policy requires a human on an irreversible side effect, which outranks any rule':'policy returned approve')+'':' · '+e.why.join(", "))+'</div>';
-}
-function autoRulesBody(){
-  var w=ws(), on=AUTORULES.filter(function(r){return r.on;}).length;
-  var hits=AUTORULES.reduce(function(s,r){return s+r.hits30;},0), skipped=AUTORULES.reduce(function(s,r){return s+r.skipped30;},0);
-  /* One card per rule (see .arule). The list is searched, sorted and paged by ltCards
-     through its LT_CARDS entry, ten to a page, so a long list never grows the page. */
-  var cards=AUTORULES.slice().sort(function(a,b){return b.at.localeCompare(a.at)||b.id.localeCompare(a.id);}).map(function(r){
-    var pool=ruleAgents(r), q=pool.filter(function(a){return ruleQualifies(r,a);});
-    var wsName=r.ws==="*"?'every workspace':r.ws, prov=r.id+' · '+r.by+' · '+r.at;
-    var req=ruleReq(r).slice(0,3).map(function(x){return '<span class="b b-q">'+h(x)+'</span>';});
-    var reqT=ruleReq(r).join(' · ');
-    var names=q.map(function(a){return a.key.split(".").pop();});
-    var chips=names.slice(0,2).map(function(n){return '<span class="b b-q mono">'+h(n)+'</span>';}).join("")+(names.length>2?'<span class="dim"> +'+(names.length-2)+'</span>':'');
-    return '<article class="arule'+(r.on?'':' off')+'" onclick="ruleOpen(\''+r.id+'\')">'+
-     '<div class="ar-tog" onclick="event.stopPropagation()"><button class="rl-tog" role="switch" aria-checked="'+r.on+'" aria-label="'+(r.on?'Disable':'Enable')+' '+h(r.name)+'" onclick="ruleToggle(\''+r.id+'\')"></button></div>'+
-     '<div class="ar-body">'+
-      '<div class="ar-head"><span class="ar-name" title="'+h(r.name)+'">'+h(r.name)+'</span><span class="b b-q ar-ws" title="Applies in '+h(wsName)+'">'+h(wsName)+'</span>'+(r.on?'':'<span class="b b-q">Off</span>')+'</div>'+
-      '<div class="ar-sub" title="'+h(prov)+'">'+h(prov)+'</div>'+
-      '<div class="ar-facts">'+
-       '<div class="ar-f"><span class="k">Tool</span><span class="v mono" title="'+h(r.tool)+'">'+h(r.tool)+'</span></div>'+
-       '<div class="ar-f"><span class="k">Requires</span><span class="v" title="'+h(reqT)+'"><span class="scs">'+req.join("")+'</span>'+(r.maxAmount!=null?'<span class="b b-q">≤ '+usd(r.maxAmount)+'</span>':'')+'</span></div>'+
-       '<div class="ar-f"><span class="k">Qualifying now</span><span class="v" title="'+h(q.length+' of '+pool.length+(names.length?': '+names.join(", "):''))+'">'+q.length+' of '+pool.length+chips+'</span></div>'+
-      '</div></div>'+
-     '<div class="ar-rail"><div class="ar-stat"><span class="ar-n">'+r.hits30+'</span><span class="s">approved 30d</span><span class="s held">'+r.skipped30+' held by a floor</span></div>'+
-      '<div class="ar-acts" onclick="event.stopPropagation()"><button class="btn sm" onclick="ruleOpen(\''+r.id+'\')">Edit</button><button class="btn sm danger" onclick="openDialog(\'ruledel\',\''+r.id+'\')">Delete</button></div></div></article>';
-  }).join("");
-  return '<div class="grid g4" style="margin-bottom:16px">'+
-   '<div class="stat"><span class="k">Rules on</span><span class="v">'+on+'</span><span class="s">of '+AUTORULES.length+' · in the policy bundle</span></div>'+
-   '<div class="stat"><span class="k">Auto-approved 30d</span><span class="v" style="color:var(--st-allowed)">'+hits+'</span><span class="s">each one a frame with the rule id</span></div>'+
-   '<div class="stat"><span class="k">Held by a floor</span><span class="v">'+skipped+'</span><span class="s">tainted, critical, or above a ceiling</span></div>'+
-   '<div class="stat"><span class="k">Median wait saved</span><span class="v">3m 40s</span><span class="s">per call, against a human gate</span></div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>Auto-approvals</h3>'+
-   '<span class="dim" style="font-size:12px">a rule replaces the human gate for agents whose tier, run count and incident record meet its floor</span>'+
-   '<div class="sp"><button class="btn sm primary" onclick="ruleNew()">Create rule</button></div></div>'+
-   '<div class="arules">'+cards+'</div>'+
-   '<div class="panel-b"><div class="note">Deny wins. A rule never auto-approves tainted input, a critical hazard, a call outside a mandate, or an agent with a tamper incident in the window. Every auto-approval is a <span class="mono">policy.decision</span> frame naming the rule, so a replay shows who decided: the rule, and the person who created it.</div></div></div>';
-}
-function ruleNew(){S.ruleEdit={id:null,name:"",tool:RULE_TOOLS[0],ws:ws().slug,minTier:"gateway",minRuns:50,maxAmount:"",on:true,isNew:true};openDialog("ruleedit");}
-function ruleOpen(id){var r=ruleById(id);if(!r)return;S.ruleEdit={id:r.id,name:r.name,tool:r.tool,ws:r.ws,minTier:r.minTier,minRuns:r.minRuns,maxAmount:r.maxAmount==null?"":r.maxAmount,on:r.on,isNew:false};openDialog("ruleedit");}
-function ruleToggle(id){var r=ruleById(id);if(!r)return;r.on=!r.on;render();act("Rule “"+r.name+"” "+(r.on?"enabled":"disabled")+". Bundle bumped; the next call sees it.");}
-function ruleLive(){
-  var d=S.ruleEdit; if(!d) return;
-  var tsel=el("ruleTier"); if(tsel) d.minTier=tsel.value;
-  var rn=el("ruleRuns"); if(rn) d.minRuns=Math.max(0,parseInt(rn.value,10)||0);
-  var wsel=el("ruleWs"); if(wsel) d.ws=wsel.value;
-  var pool=ruleAgents({ws:d.ws}), q=pool.filter(function(a){return ruleQualifies(d,a);});
-  var pv=el("rulePrev"); if(pv) pv.innerHTML='<b style="color:var(--fg)">'+q.length+' of '+pool.length+'</b> agents qualify now'+(q.length?': '+q.map(function(a){return '<span class="mono">'+h(a.key.split(".").pop())+'</span>';}).join(", "):'')+'.';
-}
-function ruleSave(){
-  var d=S.ruleEdit; if(!d) return; ruleLive();
-  var name=(el("ruleName")?el("ruleName").value:d.name).trim(), tool=el("ruleTool")?el("ruleTool").value:d.tool, amt=el("ruleAmt")?el("ruleAmt").value.trim():"";
-  if(!name){act("Give the rule a name people will read in the audit record.");return;}
-  var rec={name:name,tool:tool,ws:d.ws,minTier:d.minTier,minRuns:d.minRuns,maxAmount:amt?amt:null,on:el("ruleOn")?el("ruleOn").checked:d.on};
-  if(d.isNew){ S.ruleN++; rec.id="aar_01K5RV"+("0"+S.ruleN).slice(-2)+"Z"; rec.by=PEOPLE.marcus.name; rec.at="2026-09-11"; rec.hits30=0; rec.skipped30=0; AUTORULES.push(rec);
-    closeDialog(); act("Rule “"+name+"” created. It is in the bundle at the next bump; every auto-approval it makes names it.","gold"); }
-  else { var r=ruleById(d.id); if(r){for(var k in rec)r[k]=rec[k];} closeDialog(); act("Rule “"+name+"” updated. Bundle bumped."); }
-}
-function ruleDeleteConfirm(id){var i=-1;AUTORULES.forEach(function(r,ix){if(r.id===id)i=ix;});if(i<0)return;var n=AUTORULES[i].name;AUTORULES.splice(i,1);closeDialog();act("Rule “"+n+"” deleted. Calls it covered park for a human again from the next bundle.");}
-function ruleEditDlg(){
-  var d=S.ruleEdit; if(!d) return {t:"Rule",w:true,b:"",f:""};
-  var pool=ruleAgents({ws:d.ws}), q=pool.filter(function(a){return ruleQualifies(d,a);});
-  var b='<div class="grid g2"><div class="field"><label>Name</label><input id="ruleName" value="'+h(d.name)+'" placeholder="Trusted release tooling" aria-label="Name" oninput="S.ruleEdit.name=this.value"></div>'+
-   '<div class="field"><label>Workspace</label><select id="ruleWs" aria-label="Workspace" onchange="ruleLive()">'+WS.map(function(w){return '<option value="'+h(w.slug)+'"'+(d.ws===w.slug?' selected':'')+'>'+h(w.name)+'</option>';}).join("")+'<option value="*"'+(d.ws==="*"?' selected':'')+'>every workspace</option></select></div></div>'+
-   '<div class="field"><label>Applies to</label><select id="ruleTool" aria-label="Tool pattern" onchange="S.ruleEdit.tool=this.value">'+RULE_TOOLS.map(function(t){return '<option'+(d.tool===t?' selected':'')+'>'+h(t)+'</option>';}).join("")+'</select>'+
-    '<div class="hint">A tool version pattern. The rule only matters where the gate is <span class="mono">require_approval</span>; a deny stays a deny.</div></div>'+
-   '<div class="grid g2"><div class="field"><label>Minimum tier</label><select id="ruleTier" aria-label="Minimum tier" onchange="ruleLive()">'+["harness","gateway","contained"].map(function(t){return '<option value="'+t+'"'+(d.minTier===t?' selected':'')+'>'+t+'</option>';}).join("")+'</select>'+
-    '<div class="hint">Computed per run from what was routed. Only <span class="mono">gateway</span> and above have observed metering; only <span class="mono">contained</span> is enforced against the host.</div></div>'+
-   '<div class="field"><label>Minimum runs in 30 days</label><input id="ruleRuns" type="number" min="0" step="10" value="'+(d.minRuns||0)+'" aria-label="Minimum runs" oninput="ruleLive()">'+
-    '<div class="hint">Runs sealed in the window with no tamper incident against the agent. One incident and the agent drops out of every rule until the window clears.</div></div></div>'+
-   '<div class="grid g2"><div class="field"><label>Amount ceiling (USD, optional)</label><input id="ruleAmt" value="'+h(d.maxAmount||"")+'" placeholder="250.00" aria-label="Amount ceiling"><div class="hint">Read from the call by the tool’s <span class="mono">amount_path</span>. Above it, a human decides.</div></div>'+
-   '<div class="field"><label>State</label><label class="check" style="margin:0;padding:8px 11px"><input id="ruleOn" type="checkbox"'+(d.on?' checked':'')+' style="width:auto"><span class="grow"><span class="n" style="font-family:var(--font)">Enabled</span><span class="d">Off keeps the rule but parks every call for a human.</span></span></label></div></div>'+
-   '<div class="banner" style="margin-bottom:12px"><span id="rulePrev"><b style="color:var(--fg)">'+q.length+' of '+pool.length+'</b> agents qualify now'+(q.length?': '+q.map(function(a){return '<span class="mono">'+h(a.key.split(".").pop())+'</span>';}).join(", "):'')+'.</span></div>'+
-   '<div class="note">Floors you cannot switch off: tainted input, critical hazard, calls outside a mandate, a tamper incident in the window. Every auto-approval is a frame that names this rule and you.</div>';
-  return {t:d.isNew?"Create an auto-approval rule":"Edit rule",s:d.isNew?"":d.id,w:true,b:b,
-   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="ruleSave()">'+(d.isNew?'Create rule':'Save changes')+'</button>'};
-}
-function ruleDelDlg(){
-  var r=S.dlg==="ruledel"?ruleById(S.dlgArg):null; if(!r) return {t:"Delete rule",w:false,b:"",f:""};
-  return {t:"Delete rule",s:r.name,w:false,b:'<p style="font-size:13px">Calls matching <span class="mono">'+h(r.tool)+'</span> in '+(r.ws==="*"?'every workspace':'<b>'+h(r.ws)+'</b>')+' park for a human again from the next bundle. The '+r.hits30+' approvals it made stay in the record with its id.</p>'+
-   '<div class="note">Prefer switching it off if you might want it back — a deleted rule id is never reused.</div>',
-   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn" onclick="ruleToggle(\''+h(r.id)+'\');closeDialog()">Switch off instead</button><button class="btn danger" onclick="ruleDeleteConfirm(\''+h(r.id)+'\')">Delete rule</button>'};
-}
 
 /* ---- the missing delete and edit affordances: agents, members, workspaces ---- */
 function agentDelete(key){
