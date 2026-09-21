@@ -70,8 +70,9 @@ const shot = async (page, name) => { if (shots) await page.screenshot({ path: pa
   // tucked behind the rail rather than over it
   ok(Number(h.zPanel) < Number(h.zSide), "the panel paints under the rail (" + h.zPanel + " < " + h.zSide + ")");
 
-  const topbarBtn = await page.evaluate(() => !!document.querySelector('.top .iconbtn[aria-controls="asst"]'));
-  ok(topbarBtn, "the top bar carries its own way in");
+  const ctls = await page.evaluate(() => [...document.querySelectorAll('[aria-controls="asst"]')]
+    .map(x => (x.closest(".top") ? "top" : x.closest(".side") ? "side" : "loose")));
+  ok(ctls.length === 1 && ctls[0] === "side", "the sidebar launcher is the only way in, got " + ctls.join(","));
 
   await page.evaluate(() => document.querySelector(".asst-launch").click());
   await page.waitForTimeout(450);
@@ -121,7 +122,7 @@ const shot = async (page, name) => { if (shots) await page.screenshot({ path: pa
   await shot(page, "asst-engine-down");
   await page.evaluate(() => { [...document.querySelectorAll("#asst .btn")].find(b => /Retry/.test(b.textContent)).click(); });
   await page.waitForTimeout(300);
-  ok(/every turn is a run of its own/.test((await host(page)).text), "Retry brings the conversation back");
+  ok(/Narrow its belt/.test((await host(page)).text), "Retry brings the conversation back");
   ok(errs.length === 0, "engine-down errors: " + errs.join(" | "));
   await page.close();
 }
@@ -141,16 +142,16 @@ const shot = async (page, name) => { if (shots) await page.screenshot({ path: pa
   await page.close();
 }
 
-/* ---------------- the organization's model key, and what it is for ---------------- */
+/* ---------------- the organization's funding source, and what it is for ---------------- */
 {
   const { page, errs } = await open("#/a-intel");
   await page.evaluate(() => { S.tab.organization = "funding"; render(); });
   await page.waitForTimeout(350);
   const r = await page.evaluate(() => {
-    const p = [...document.querySelectorAll("#pg .panel")].find(x => /Model key/.test(x.querySelector(".panel-h h3")?.textContent || ""));
+    const p = [...document.querySelectorAll("#pg .panel")].find(x => /Funding source/.test(x.querySelector(".panel-h h3")?.textContent || ""));
     return { found: !!p, text: p ? p.innerText.replace(/\s+/g, " ") : "" };
   });
-  ok(r.found, "the funding tab carries a Model key panel");
+  ok(r.found, "the funding tab carries a Funding source panel");
   ok(/platform_minted/.test(r.text), "it names the minted source");
   ok(/sk-or-v1-a3f1/.test(r.text) && !/sk-or-v1-a3f1\w{8}/.test(r.text), "it shows a prefix, not a secret");
   ok(/never returned/.test(r.text), "it says the secret is never returned");
@@ -158,7 +159,7 @@ const shot = async (page, name) => { if (shots) await page.screenshot({ path: pa
   ok(/Reconciliation/i.test(r.text), "it carries the reconciliation block");
   ok(/OpenRouter reports/.test(r.text) && /credit ledger/.test(r.text), "reconciliation names two independent sources");
   ok(/engine\.oxagen\.sh/.test(r.text), "it names the engine the key is spent through");
-  await shot(page, "org-model-key");
+  await shot(page, "org-funding-source");
 
   for (const [dlg, want] of [["mintkey", /provisioning/i], ["rotateorgkey", /Rotation/i], ["revokeorgkey", /stops for everyone/i]]) {
     await page.evaluate(k => openDialog(k), dlg);
@@ -168,14 +169,30 @@ const shot = async (page, name) => { if (shots) await page.screenshot({ path: pa
     await page.evaluate(() => closeDialog());
     await page.waitForTimeout(120);
   }
-  // the funding-source dialog offers all three, and says which one reconciles
-  await page.evaluate(() => openDialog("funding"));
-  await page.waitForTimeout(200);
-  const f = await page.evaluate(() => document.querySelector("#layer .dlg-b")?.innerText.replace(/\s+/g, " ") || "");
-  for (const src of ["platform_minted", "platform", "customer_key"]) ok(f.includes(src), "funding dialog offers " + src);
-  ok(/reconciles per organization/.test(f), "funding dialog says which source reconciles");
-  ok(/undifferentiated/.test(f), "funding dialog says why the shared key cannot");
-  await page.evaluate(() => closeDialog());
+  // the panel itself carries the picker, and picking customer_key asks for a key
+  const src = await page.evaluate(() => {
+    const sel = document.getElementById("orgFundSrc");
+    return sel ? { opts: [...sel.options].map(o => o.value), on: sel.value } : null;
+  });
+  ok(!!src, "the panel carries the funding-source picker");
+  for (const v of ["platform_minted", "platform", "customer_key"]) ok(src.opts.includes(v), "the picker offers " + v);
+  ok(src.on === "platform_minted", "this organization is on its own minted key");
+
+  const byok = await page.evaluate(() => {
+    orgKeySourceSet("customer_key");
+    const before = { held: orgKeyHeld(), state: orgKeyState(), field: !!document.getElementById("byokKey") };
+    document.getElementById("byokKey").value = "sk-or-v1-abcdef0123456789";
+    orgKeySave();
+    const after = { prefix: ORG_KEY.customerPrefix, state: orgKeyState() };
+    orgKeyClear();
+    const cleared = orgKeyState();
+    orgKeySourceSet("platform_minted");
+    return { before, after, cleared };
+  });
+  ok(byok.before.field, "customer_key shows a field to paste your own key into");
+  ok(!byok.before.held && byok.before.state === "none", "until you save one, no key is held and nothing is charged");
+  ok(byok.after.prefix === "sk-or-v1-abcd" && byok.after.state === "ok", "saving a key holds a prefix, never the secret");
+  ok(byok.cleared === "none", "removing it leaves the organization without a key");
 
   // revoking turns the assistant off, and the panel says so rather than erroring
   await page.evaluate(() => { openDialog("revokeorgkey"); });

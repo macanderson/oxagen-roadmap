@@ -9,9 +9,9 @@
  },
  {
   "t": "09:02:40",
-  "ev": "run.proven",
+  "ev": "run.sealed",
   "who": "a-intel.core.stella-ci",
-  "what": "verdict flipped \u00b7 oracle test_flip \u00b7 a-intel/platform#482",
+  "what": "sealed · 186 frames · 41,200 tokens · a-intel/platform#482",
   "sev": "info",
   "ref": "run_01K5RQ4B9C7XTN2P"
  },
@@ -19,7 +19,7 @@
   "t": "08:41:07",
   "ev": "api_key.created",
   "who": "Sofia Ruiz",
-  "what": "svc_auditor_bkpm \u00b7 grants audit.read, receipt.read, export.read \u00b7 expires 2026-10-02",
+  "what": "svc_auditor_bkpm · grants audit.read, receipt.read, export.read · expires 2026-10-02",
   "sev": "info",
   "ref": "svc_auditor_bkpm"
  },
@@ -27,7 +27,7 @@
   "t": "08:40:22",
   "ev": "mandate.exception",
   "who": "gateway",
-  "what": "Stripe charge ch_3Qa8 with no receipt \u00b7 $18.00 USD",
+  "what": "Stripe charge ch_3Qa8 with no receipt · $18.00 USD",
   "sev": "critical",
   "ref": "exc_01K5RN2P"
  },
@@ -35,7 +35,7 @@
   "t": "07:38:12",
   "ev": "run.sealed",
   "who": "a-intel.core.release-manager",
-  "what": "verdict tampered \u00b7 witness fingerprint moved",
+  "what": "receipt rewritten after seal · chain kept the original hash",
   "sev": "warning",
   "ref": "run_01K5RG6H1L4OIU9Y"
  },
@@ -43,7 +43,7 @@
   "t": "07:41:31",
   "ev": "tool_call.denied",
   "who": "a-intel.core.triage",
-  "what": "bash__run@1 \u00b7 tainted argument \u00b7 approval expired",
+  "what": "bash__run@1 · tainted argument · approval expired",
   "sev": "warning",
   "ref": "apr_01K5RH8M2"
  },
@@ -51,7 +51,7 @@
   "t": "2026-09-10 23:12",
   "ev": "kill_switch.flipped",
   "who": "Marcus Bell",
-  "what": "tool server slack \u00b7 17 tool versions \u00b7 8 agents \u00b7 1.9.0 shipped an unapproved output schema change",
+  "what": "tool server slack · 17 tool versions · 8 agents · 1.9.0 shipped an unapproved output schema change",
   "sev": "warning",
   "ref": "ks_srv_slack"
  },
@@ -59,7 +59,7 @@
   "t": "2026-09-10 16:04",
   "ev": "key.rotated",
   "who": "Priya Natarajan",
-  "what": "organization key-encryption key \u00b7 kek_aintel_2026Q3",
+  "what": "organization key-encryption key · kek_aintel_2026Q3",
   "sev": "info",
   "ref": "kek_aintel_2026Q3"
  },
@@ -67,7 +67,7 @@
   "t": "2026-09-10 11:22",
   "ev": "steering_published",
   "who": "Marcus Bell",
-  "what": "ctx.release.notes-format \u00b7 a-intel/platform#488 merged",
+  "what": "ctx.release.notes-format · a-intel/platform#488 merged",
   "sev": "info",
   "ref": "a4c91e2"
  },
@@ -75,7 +75,7 @@
   "t": "2026-09-09 16:40",
   "ev": "invitation.sent",
   "who": "Priya Natarajan",
-  "what": "kai@a-intel.example \u00b7 org.auditor \u00b7 expires 2026-09-16",
+  "what": "kai@a-intel.example · org.auditor · expires 2026-09-16",
   "sev": "info",
   "ref": "inv_01K5KQ2W"
  },
@@ -83,7 +83,7 @@
   "t": "2026-09-08 16:22",
   "ev": "policy_version.activated",
   "who": "Priya Natarajan",
-  "what": "pol_v41 \u00b7 38 rules \u00b7 42 tests pass",
+  "what": "pol_v41 · 38 rules · 42 tests pass",
   "sev": "info",
   "ref": "pol_v41"
  },
@@ -91,7 +91,7 @@
   "t": "2026-07-02 08:30",
   "ev": "kill_switch.flipped",
   "who": "Priya Natarajan",
-  "what": "github__delete_repository@1 \u00b7 never callable by an agent in this organization",
+  "what": "github__delete_repository@1 · never callable by an agent in this organization",
   "sev": "warning",
   "ref": "ks_tv_del"
  }

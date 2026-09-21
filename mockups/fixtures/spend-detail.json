@@ -2,8 +2,6 @@
  "operator:marcus": {
   "cache": 0.84,
   "wasted": 2614.2,
-  "accepted": 1102.3,
-  "unproven": 4535.34,
   "perRun": 4.17,
   "trend": "+6% vs August",
   "modelCalls": 98410,
@@ -66,8 +64,6 @@
  "operator:priya": {
   "cache": 0.77,
   "wasted": 1318.4,
-  "accepted": 2106.11,
-  "unproven": 910.63,
   "perRun": 5.58,
   "trend": "-2% vs August",
   "modelCalls": 22810,
@@ -122,8 +118,6 @@
  "operator:dana": {
   "cache": 0.74,
   "wasted": 797.82,
-  "accepted": 0,
-  "unproven": 1834.25,
   "perRun": 3.86,
   "trend": "+9% vs August",
   "modelCalls": 9308,
@@ -178,8 +172,6 @@
  "agent:a-intel.core.stella-ci": {
   "cache": 0.88,
   "wasted": 61.2,
-  "accepted": 0,
-  "unproven": 223.51,
   "perRun": 2.27,
   "ratio": 0.71,
   "trend": "-8% vs August",
@@ -227,8 +219,6 @@
  "agent:a-intel.core.release-manager": {
   "cache": 0.72,
   "wasted": 204.6,
-  "accepted": 88.4,
-  "unproven": 205.86,
   "perRun": 2.89,
   "ratio": 0.48,
   "trend": "-3% vs August",
@@ -276,8 +266,6 @@
  "agent:a-intel.core.triage": {
   "cache": 0.83,
   "wasted": 141.3,
-  "accepted": 0,
-  "unproven": 363.21,
   "perRun": 0.3,
   "ratio": 0.44,
   "trend": "+12% vs August",
@@ -327,8 +315,6 @@
  "agent:a-intel.finops.invoice-bot": {
   "cache": 0.41,
   "wasted": 38.1,
-  "accepted": 0,
-  "unproven": 96.34,
   "perRun": 1.09,
   "ratio": 0.52,
   "trend": "+1% vs August",
@@ -368,8 +354,6 @@
  "agent:a-intel.core.docs-writer": {
   "cache": 0.69,
   "wasted": 14.8,
-  "accepted": 71.09,
-  "unproven": 0,
   "perRun": 1.11,
   "ratio": 0.38,
   "trend": "-1% vs August",
@@ -413,7 +397,6 @@
  "tool:claude_code__Bash": {
   "cache": 0.81,
   "wasted": 1512.4,
-  "provenShare": 0.46,
   "resTok": 4100,
   "rerun": 0.31,
   "retry": 0.02,
@@ -460,7 +443,6 @@
  "tool:search_graph": {
   "cache": 0.94,
   "wasted": 88.1,
-  "provenShare": 0.52,
   "resTok": 900,
   "rerun": 0.06,
   "retry": 0,
@@ -515,7 +497,6 @@
  "tool:aws_billing__get_cost_and_usage": {
   "cache": 0.41,
   "wasted": 704.3,
-  "provenShare": 0,
   "resTok": 41200,
   "rerun": 0.12,
   "retry": 0.01,
@@ -550,7 +531,6 @@
  "tool:linear__update_issue": {
   "cache": 0.86,
   "wasted": 41.2,
-  "provenShare": 0.12,
   "resTok": 600,
   "rerun": 0.04,
   "retry": 0.01,
@@ -585,7 +565,6 @@
  "tool:github__create_pull_request": {
   "cache": 0.79,
   "wasted": 118.6,
-  "provenShare": 0.61,
   "resTok": 6200,
   "rerun": 0.12,
   "retry": 0.12,
@@ -628,7 +607,6 @@
  "tool:slack__post_message": {
   "cache": 0.83,
   "wasted": 4.1,
-  "provenShare": 0.58,
   "resTok": 300,
   "rerun": 0.01,
   "retry": 0,
@@ -667,7 +645,6 @@
  "tool:snowflake__run_query": {
   "cache": 0.52,
   "wasted": 96.4,
-  "provenShare": 0.22,
   "resTok": 18400,
   "rerun": 0.08,
   "retry": 0.03,
@@ -706,7 +683,6 @@
  "tool:slack__get_thread": {
   "cache": 0.8,
   "wasted": 6.2,
-  "provenShare": 0.4,
   "resTok": 2800,
   "rerun": 0.02,
   "retry": 0,
@@ -737,7 +713,6 @@
  "tool:slack__list_channels": {
   "cache": 0.71,
   "wasted": 84.2,
-  "provenShare": 0.3,
   "resTok": 3400,
   "rerun": 0,
   "retry": 0,
@@ -776,7 +751,6 @@
  "tool:stripe__create_payment": {
   "cache": 0.77,
   "wasted": 0,
-  "provenShare": 0,
   "resTok": 400,
   "rerun": 0,
   "retry": 0,

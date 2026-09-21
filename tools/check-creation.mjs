@@ -58,6 +58,13 @@ const primary = async page => await page.evaluate(() => {
 async function type(page, sel, text) {
   await page.fill(sel, text);
   await page.evaluate(([s, t]) => { const e = document.querySelector(s); e.value = t; e.dispatchEvent(new Event("input", { bubbles: true })); }, [sel, text]);
+  if (sel === "#wzDesc") await wand(page);
+}
+/* oxagen.assistant rewrites the description in place, and the next step opens when it has. */
+async function wand(page) {
+  const pressed = await page.evaluate(() => { const b = document.getElementById("wzWandBtn"); if (!b) return false; b.click(); return true; });
+  ok(pressed, "the describe step carries the wand");
+  await page.waitForTimeout(120);
 }
 const shot = async (page, name) => { if (shots) await page.screenshot({ path: path.join(shots, name + ".png"), fullPage: true }); };
 

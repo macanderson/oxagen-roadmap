@@ -1,14 +1,21 @@
 "use strict";
 /* BOOT: what the URL pins. ?state=loaded|empty|loading|error|denied, ?mobile=1|0 (the shell;
-   unpinned, the viewport decides), ?theme=dark|light, ?product=1 (hide the mockup chrome: the state
-   bar, the scenario rail and nav item, the onboarding demo entry points and "Exit demo"), and the
-   hash the file opens on when the URL carries none. A host page may set window.BOOT instead. */
+   unpinned, the viewport decides), ?theme=dark|light, ?debug=true, and the hash the file opens on
+   when the URL carries none. A host page may set window.BOOT instead.
+
+   The file opens as the product. The mockup chrome — the state bar, the scenario rail, the scenario
+   nav item, the onboarding demo entry points and "Exit demo" — appears only under ?debug=true, so
+   what a reviewer sees on a first open is the design and nothing else. ?product=1 is the old
+   spelling of the same default and still works. */
 var BOOT=(function(){var q=new URLSearchParams(location.search),b=window.BOOT||{};
+  var d=q.get("debug"), debug=d==="true"||d==="1"||!!b.debug;
   return {state:q.get("state")||b.state||null,
           mobile:q.has("mobile")?q.get("mobile")==="1":(b.mobile!=null?!!b.mobile:null),
           theme:q.get("theme")||b.theme||null,
-          product:q.get("product")==="1"||!!b.product,
+          debug:debug,
+          product:!debug,
           hash:q.get("hash")||b.hash||null};})();
+var DEBUG=BOOT.debug;
 var PRODUCT=BOOT.product;
 var DLG_EXT={};   /* lazily built dialogs, registered beside their code; see dialog() */
 /* ============================== demo record ============================== */
@@ -48,7 +55,6 @@ var NOTIFS=FIXTURES.NOTIFS;
 var SPEND=FIXTURES.SPEND;
 var SPEND_DETAIL=FIXTURES.SPEND_DETAIL;
 var BILLING=FIXTURES.BILLING;
-var DOD=FIXTURES.DOD;
 
 /* Frames belong to a run. FRAMES above is the live release-manager run's list; pRun points the
    global FRAMES at the run it is rendering, so every Run-page reader and every frame a control
@@ -70,7 +76,8 @@ function notifUnread(){var n=0;for(var i=0;i<NOTIFS.length;i++){if(NOTIFS[i].unr
 /* ============================== engine ============================== */
 var S = {state:"loaded", phone:false, mobile:false, theme:null,
          layer:null, tab:{}, side:false, ws:"core-platform", frame:15, runFilter:"all",
-         ctxSel:"frames", approved:{}, toolNames:"label", beltView:"group", beltCat:"", regCat:""};
+         ctxSel:"frames", approved:{}, toolNames:"label", beltView:"group", beltCat:"", regCat:"",
+         coachFor:"agents", coachDrill:null, coachOff:{}, toolMetric:"cum"};
 
 /* kill switches — mutable state lives on S; SWITCHES is the seed and is never mutated */
 S.switches={}; S.flipMeta={}; S.denyGen=118; S.killBanner=null;
@@ -102,12 +109,203 @@ function me(){return PEOPLE[SESSION_USER]||PEOPLE.marcus;}
 function srvCount(){return SERVERS.length;}
 function verCount(){return SERVERS.reduce(function(n,x){return n+(x.versions||0);},0);}
 function srvToolCount(){return SERVERS.reduce(function(n,x){return n+(x.tools||0);},0);}
-/* Spend per proven run: spend divided by runs whose verdict flipped (§12.8). Derived, so it
-   can never drift into equalling spend per run. */
-function perProvenRun(row){
-  var f=row.flipped||0, sp=money(row.spend);
-  if(!f) return '<span class="dim">no proven run</span>';
-  return usd(fmt2(sp/f));
+/* ============================== Token accounting (§12.6) ==============================
+   Every number on the Tokens surfaces derives from the cost record's fixed classes: input_uncached,
+   cache_read, cache_write, output, reasoning, plus the measured prompt parts (tool definitions,
+   context frames, steering, system, tool results, conversation). A run's figures come from
+   runMetrics(R); an agent's or an operator's 30-day rollup from agentTok()/operatorTok(), seeded
+   from the record so the same key shows the same numbers on every page. Nothing here is a score. */
+var TOK_PARTS=[["conv","Conversation","var(--st-allowed)","the operator's prompt, steer messages and the model's own text"],
+  ["results","Tool results","var(--muted)","tool result bodies that entered the window"],
+  ["ctx","Context frames","var(--st-proven)","recalled records, memory and graph frames Oxagen injected"],
+  ["tools","Tool definitions","var(--st-approval)","the belt as the model is shown it, every request"],
+  ["steering","Steering","var(--k-rule)","the stable prefix: must and should records, gate notices"],
+  ["system","System","var(--dim)","the harness's own system prompt"]];
+function tokShare(n,d){return d?n/d:0;}
+/* A run's total tokens, with the cache share under it: the Fleet and agent Runs tables read this. */
+function runTokCell(r){
+  var m=runMetrics(r);
+  return tokn(m.tokTotal)+'<div class="dim mono" style="font-size:10px">'+per(tokShare(m.cacheRead,m.tokIn))+' cached</div>';
+}
+/* A blended price per token for a rollup: input at the effective rate, output at list, weighted the
+   way a run's money splits (a third input, two thirds output). */
+function tokPerDollar(light){var op=light?PRICE.outLight:PRICE.out;return (1/3)/PRICE.inEff+(2/3)/op;}
+/* The 30-day token rollup for one agent. Seeded from the key so it is stable across renders, shaped
+   by the agent's model tier, harness and belt: a wide belt spends more of every request on tool
+   definitions, a light-tier agent reasons less, and an agent on the harness tier is self-reported. */
+function agentTok(a){
+  if(typeof a==="string")a=agent(a);
+  if(!a) return null;
+  if(a._tok) return a._tok;
+  var seed=17,i; for(i=0;i<a.key.length;i++)seed=(seed*31+a.key.charCodeAt(i))>>>0;
+  var rnd=rngOf(seed), light=a.model==="light", sp=money(a.spend30)||0;
+  var total=Math.round(sp*tokPerDollar(light)), tokIn=Math.round(total*0.86), tokOut=total-tokIn;
+  var cacheRate=agentCache(a); if(cacheRate==null) cacheRate=0.62+rnd()*0.3;
+  var belt=a.belt||8, toolsShare=Math.min(0.34,0.05+belt*0.006+rnd()*0.03);
+  var ctxShare=0.12+rnd()*0.18, steerShare=0.03+rnd()*0.04, sysShare=0.04+rnd()*0.02;
+  var resultsShare=Math.max(0.1,(1-toolsShare-ctxShare-steerShare-sysShare)*(0.5+rnd()*0.25));
+  var convShare=Math.max(0.05,1-toolsShare-ctxShare-steerShare-sysShare-resultsShare);
+  var parts={conv:convShare,results:resultsShare,ctx:ctxShare,tools:toolsShare,steering:steerShare,system:sysShare};
+  var P={}; for(var k in parts)P[k]=Math.round(tokIn*parts[k]);
+  var reasoning=Math.round(tokOut*(light?0.06:0.28+rnd()*0.2)), cacheRead=Math.round(tokIn*cacheRate);
+  var cacheWrite=Math.round(tokIn*(0.02+rnd()*0.06)), retries=Math.round((a.runs30||0)*(0.01+rnd()*0.06));
+  var observed=a.tier==="gateway"||a.tier==="contained"?1:a.tier==="harness"?0:0;
+  var neverCalled=Math.round(belt*(0.15+rnd()*0.4)), citeRate=0.28+rnd()*0.5, dupReads=Math.round((a.runs30||0)*rnd()*0.35);
+  return a._tok={total:total,tokIn:tokIn,tokOut:tokOut,cacheRate:cacheRate,cacheRead:cacheRead,cacheWrite:cacheWrite,fresh:tokIn-cacheRead,
+    reasoning:reasoning,output:tokOut-reasoning,parts:P,shares:parts,retries:retries,observed:observed,neverCalled:neverCalled,citeRate:citeRate,dupReads:dupReads,
+    perRun:a.runs30?Math.round(total/a.runs30):0,perCall:Math.round(tokIn/Math.max(1,(a.runs30||1)*31)),light:light};
+}
+/* The 30-day rollup for one operator: the sum over their agents, weighted by tokens. */
+function operatorTok(p){
+  var list=AGENTS.filter(function(a){return a.operator===p;}), out={total:0,tokIn:0,tokOut:0,cacheRead:0,cacheWrite:0,reasoning:0,output:0,retries:0,parts:{},agents:list.length,observedTok:0,dupReads:0,neverCalled:0};
+  TOK_PARTS.forEach(function(x){out.parts[x[0]]=0;});
+  list.forEach(function(a){var t=agentTok(a); if(!t) return; out.total+=t.total;out.tokIn+=t.tokIn;out.tokOut+=t.tokOut;out.cacheRead+=t.cacheRead;out.cacheWrite+=t.cacheWrite;
+    out.reasoning+=t.reasoning;out.output+=t.output;out.retries+=t.retries;out.dupReads+=t.dupReads;out.neverCalled+=t.neverCalled;if(t.observed)out.observedTok+=t.total;
+    for(var k in t.parts)out.parts[k]+=t.parts[k];});
+  out.cacheRate=tokShare(out.cacheRead,out.tokIn); out.observed=tokShare(out.observedTok,out.total);
+  out.shares={}; for(var k in out.parts)out.shares[k]=tokShare(out.parts[k],out.tokIn);
+  return out;
+}
+/* The workspace's month: every agent in it, summed. */
+function wsTok(slug){
+  var list=AGENTS.filter(function(a){return a.ws===slug;}), out={total:0,tokIn:0,tokOut:0,cacheRead:0,cacheWrite:0,reasoning:0,output:0,retries:0,parts:{},observedTok:0,byHarness:{},agents:list.length};
+  TOK_PARTS.forEach(function(x){out.parts[x[0]]=0;});
+  list.forEach(function(a){var t=agentTok(a); if(!t) return; out.total+=t.total;out.tokIn+=t.tokIn;out.tokOut+=t.tokOut;out.cacheRead+=t.cacheRead;out.cacheWrite+=t.cacheWrite;
+    out.reasoning+=t.reasoning;out.output+=t.output;out.retries+=t.retries;if(t.observed)out.observedTok+=t.total;
+    for(var k in t.parts)out.parts[k]+=t.parts[k];
+    var hk=a.harnessLabel||a.harness, hb=out.byHarness[hk]||(out.byHarness[hk]={label:hk,agents:0,total:0,observed:0,cacheRead:0,tokIn:0,spend:0});
+    hb.agents++;hb.total+=t.total;hb.cacheRead+=t.cacheRead;hb.tokIn+=t.tokIn;hb.spend+=money(a.spend30)||0;if(t.observed)hb.observed+=t.total;});
+  out.cacheRate=tokShare(out.cacheRead,out.tokIn); out.observed=tokShare(out.observedTok,out.total);
+  out.shares={}; for(var k in out.parts)out.shares[k]=tokShare(out.parts[k],out.tokIn);
+  return out;
+}
+/* The composition bars every token surface draws: one meter per prompt part, then output and reasoning. */
+function tokBars(t,opts){
+  opts=opts||{}; var den=t.tokIn||1, rows=TOK_PARTS.map(function(x){return [x[1],t.parts[x[0]]||0,x[2],x[3]];});
+  rows.push(["Output",t.output||0,"var(--fg)","completion tokens, priced at list"]);
+  rows.push(["Reasoning",t.reasoning||0,"var(--muted)","thinking tokens, counted apart where the provider reports them"]);
+  var mx=Math.max.apply(null,rows.map(function(r){return r[1];}))||1;
+  return '<div style="display:grid;gap:'+(opts.tight?'6px':'9px')+'">'+rows.map(function(r){
+    return '<div class="meter"'+tipAttr(r[3])+'><div class="lab">'+r[0]+'<b>'+tokn(r[1])+' <span class="dim" style="font-weight:500">· '+per(tokShare(r[1],t.tokIn+(t.tokOut||0)))+'</span></b></div>'+
+     '<div class="bar"><i style="width:'+Math.max(1,Math.round(r[1]/mx*100))+'%;background:'+r[2]+'"></i></div></div>';}).join("")+'</div>';
+}
+/* ============================== Coaching ==============================
+   Coaching is what the token record says an agent or an operator should do differently. Every item
+   names the signal it was derived from (a share, a rate, a count from frames), the tokens and money
+   behind it, and the one action that changes it. It is derived at read time from the same rollup the
+   Tokens tab prints, so the two cannot disagree, and it is never a model's opinion of itself. */
+function coachAgent(a){
+  if(typeof a==="string")a=agent(a);
+  var t=agentTok(a); if(!t) return [];
+  var sp=money(a.spend30)||0, per$=function(tok){return sp*tokShare(tok,t.total);}, out=[], slug=a.key.split(".").pop(), base='#/'+ORG.slug+'/'+a.ws;
+  if(t.shares.tools>0.16) out.push({k:"belt",sev:"approval",title:"Narrow the belt",
+    signal:per(t.shares.tools)+' of every request is tool definitions · '+t.neverCalled+' of '+a.belt+' tools never called in 30 days',
+    tok:t.parts.tools,usd:per$(t.parts.tools)*Math.min(0.6,t.neverCalled/Math.max(1,a.belt)),
+    say:"The model is shown "+a.belt+" tools on every call and used "+(a.belt-t.neverCalled)+". Drop the "+t.neverCalled+" it never calls from the grant, or switch the belt to searchable so unused definitions leave the prompt.",
+    act:["Edit the grant",'S.tab.agent=\'toolbelt\';go(\''+base+'/agents/'+slug+'/toolbelt\')']});
+  if(t.cacheRate<0.72) out.push({k:"cache",sev:"approval",title:"Keep the prefix stable",
+    signal:per(t.cacheRate)+' cache hit rate · '+tokn(t.fresh)+' input tokens paid at full price',
+    tok:t.fresh,usd:per$(t.fresh)*0.45,
+    say:"The stable prefix changed between turns on this agent's runs: a steering publish, a tool-list change or a model switch mid-run invalidates the cache and every later turn re-reads it at full price. Publish steering between runs, and pin the model per run.",
+    act:["Open steering",'go(\''+base+'/steering/records\')']});
+  if(t.shares.results>0.3) out.push({k:"results",sev:"approval",title:"Page the tool results",
+    signal:per(t.shares.results)+' of input is tool result bodies · '+t.dupReads+' repeated reads of the same input in 30 days',
+    tok:t.parts.results,usd:per$(t.parts.results)*0.35,
+    say:"Result bodies stay in the window and are re-read by every later turn. Ask for grouped totals or page the result on drill-down, and write a steering record so the agent stops re-reading a file it already has.",
+    act:["Propose a record",'wzOpen(\'record\')']});
+  if(t.shares.ctx>0.24&&t.citeRate<0.5) out.push({k:"ctx",sev:"q",title:"Lower the context budget",
+    signal:per(t.shares.ctx)+' of input is context frames · cited on '+per(t.citeRate)+' of runs',
+    tok:t.parts.ctx,usd:per$(t.parts.ctx)*(1-t.citeRate)*0.6,
+    say:"Most recalled frames were never cited. Tighten the retrieval kinds or lower the volatile budget for this agent; the manifest shows what would drop out before you publish.",
+    act:["Preview the window",'go(\''+base+'/steering/preview/'+slug+'\')']});
+  if(!t.light&&tokShare(t.reasoning,t.tokOut)>0.4) out.push({k:"tier",sev:"q",title:"Route classification-shaped work to a light model",
+    signal:per(tokShare(t.reasoning,t.tokOut))+' of output is reasoning on a flagship model',
+    tok:t.reasoning,usd:per$(t.reasoning)*0.5,
+    say:"Runs whose steps are all read-and-sort shaped reason at flagship prices. Set a light default in the definition and let the harness escalate on a write.",
+    act:["Edit the definition",'S.tab.agent=\'definition\';go(\''+base+'/agents/'+slug+'/definition\')']});
+  if(t.retries>Math.max(2,(a.runs30||0)*0.04)) out.push({k:"retry",sev:"denied",title:"Stop the retry storms",
+    signal:t.retries+' runs with three or more provider retries in one turn',
+    tok:Math.round(t.retries*t.perCall*2.5),usd:per$(Math.round(t.retries*t.perCall*2.5)),
+    say:"Consecutive provider errors were retried inside one turn and every retry paid the whole prompt again. Cap retries per turn in the harness settings and check the provider key's health.",
+    act:["Open incidents",'S.tab.agent=\'incidents\';go(\''+base+'/agents/'+slug+'/incidents\')']});
+  if(t.cacheWrite>t.tokIn*0.06) out.push({k:"write",sev:"q",title:"Stop writing cache for one-turn runs",
+    signal:tokn(t.cacheWrite)+' cache write tokens · a write with no later read inside the TTL',
+    tok:t.cacheWrite,usd:per$(t.cacheWrite)*1.25,
+    say:"Short runs write a prefix that nothing reads back. Shorten the prefix, or turn cache writes off for the agent's one-turn tasks.",
+    act:["Edit the definition",'S.tab.agent=\'definition\';go(\''+base+'/agents/'+slug+'/definition\')']});
+  out.sort(function(x,y){return y.usd-x.usd;});
+  return out;
+}
+function coachOperator(p){
+  var t=operatorTok(p), list=AGENTS.filter(function(a){return a.operator===p;}), who=PEOPLE[p], out=[];
+  if(!list.length) return out;
+  var sp=list.reduce(function(n,a){return n+(money(a.spend30)||0);},0), per$=function(tok){return sp*tokShare(tok,t.total);};
+  var row=(SPEND.byOperator||[]).filter(function(o){return o.p===p;})[0];
+  var wide=list.filter(function(a){return agentTok(a).shares.tools>0.16;});
+  if(wide.length) out.push({k:"grants",sev:"approval",title:"Grants are wider than the work",
+    signal:wide.length+' of '+list.length+' agents spend over 16% of every request on tool definitions',
+    tok:wide.reduce(function(n,a){return n+agentTok(a).parts.tools;},0),usd:per$(wide.reduce(function(n,a){return n+agentTok(a).parts.tools;},0))*0.4,
+    say:"The same role template gave every agent the whole belt. Cut each grant to the tools its runs call: "+wide.map(function(a){return a.key.split(".").pop();}).slice(0,3).join(", ")+(wide.length>3?' and '+(wide.length-3)+' more':'')+'.',
+    act:["Open Identities",'go(\'#/'+ORG.slug+'/'+ws().slug+'/agents\')']});
+  var reread=list.filter(function(a){return agentTok(a).dupReads>(a.runs30||0)*0.15;});
+  if(reread.length) out.push({k:"prompts",sev:"approval",title:"Prompts that make the agent re-read",
+    signal:reread.reduce(function(n,a){return n+agentTok(a).dupReads;},0)+' repeated reads across '+reread.length+' agents · the brief says "confirm" where a record could say "known"',
+    tok:reread.reduce(function(n,a){return n+agentTok(a).parts.results*0.3;},0),usd:per$(reread.reduce(function(n,a){return n+agentTok(a).parts.results*0.3;},0)),
+    say:"A brief that asks the agent to confirm a file it already has makes it read the file again on every run. Move the fact into a steering record once; it is reviewed like code and reaches every run.",
+    act:["Write a record",'wzOpen(\'record\')']});
+  var pp=operatorPrompts(p);
+  if(pp&&pp.avg>1.5) out.push({k:"prompts",sev:"approval",title:"Get to one prompt per session",
+    signal:pp.avg.toFixed(1)+' prompts per session over '+pp.runs+' runs · '+pp.oneShot+' one-shot',
+    tok:0,usd:pp.waste,
+    say:"A prompt after the first fixes or fills what the first left out, and every one re-runs the window. Either the first prompt is missing context the agent needed, or the design was not settled before the run started. Put the missing context in a steering record and settle the design in the task before the run.",
+    act:["Write a record",'wzOpen(\'record\')']});
+  if(t.cacheRate<0.74) out.push({k:"cache",sev:"q",title:"Publish steering between runs, not during",
+    signal:per(t.cacheRate)+' cache hit rate across '+list.length+' agents',
+    tok:t.tokIn-t.cacheRead,usd:per$(t.tokIn-t.cacheRead)*0.4,
+    say:"Steering publishes and grant edits during the day landed inside live runs and broke their prefix. Batch them, or publish to a workspace with no live run.",
+    act:["Open steering",'go(\'#/'+ORG.slug+'/'+ws().slug+'/steering/records\')']});
+  if(row&&row.used>0.8) out.push({k:"budget",sev:"denied",title:"Resize the budget before it stops a run",
+    signal:per(row.used)+' of '+usd(row.budget)+' used with '+Math.round((1-(new Date(STORY_NOW).getUTCDate()/30))*100)+'% of the month left',
+    tok:0,usd:0,
+    say:"At this rate the hard budget reserves nothing for the last week. Raise it, or move the two heaviest agents to a soft budget with a notice.",
+    act:["Set a budget",'openDialog(\'budget\')']});
+  if(t.observed<0.9) out.push({k:"observed",sev:"q",title:"Move the last self-reported agents behind the gateway",
+    signal:per(1-t.observed)+' of tokens are self-reported by the harness, not observed by the proxy',
+    tok:Math.round(t.total*(1-t.observed)),usd:0,
+    say:"A self-reported number can be absent or wrong and a budget cannot stop it. Point the remaining hosts at the loopback proxy and their tier becomes gateway.",
+    act:["Open Identities",'go(\'#/'+ORG.slug+'/'+ws().slug+'/agents\')']});
+  out.sort(function(x,y){return y.usd-x.usd;});
+  return out;
+}
+function coachCard(c,who,ctx){
+  return '<article class="panel coach" style="margin:0"><div class="panel-h"><span class="b b-'+c.sev+'"><span class="d"></span>'+h(c.title)+'</span>'+
+   (c.usd?'<span class="mono" style="margin-left:auto;font-size:12px;color:var(--fg)">'+fmt$(c.usd)+' <span class="dim">a month</span></span>':'')+'</div>'+
+   '<div class="panel-b"><p class="mono" style="font-size:11.5px;color:var(--muted);margin:0 0 8px">'+c.signal+(c.tok?' · '+tokn(c.tok)+' tok':'')+'</p>'+
+   '<p style="margin:0 0 10px;font-size:13px">'+c.say+'</p>'+
+   '<div class="row"><button class="btn sm primary" onclick="'+c.act[1]+'">'+h(c.act[0])+'</button>'+
+   '<button class="btn sm" onclick="act(\'Coaching note for '+h(who)+' sent to its operator. It cites the frames the rollup read.\')">Send to the operator</button>'+
+   (ctx?'<button class="btn sm" style="margin-left:auto" onclick="coachDismiss(\''+ctx.kind+'\',\''+h(ctx.id).replace(/'/g,"\\'")+'\',\''+h(c.k)+'\')">Dismiss</button>':'')+
+   '</div></div></article>';
+}
+/* The strip at the top of an agent page: its token profile and what the record says to change. */
+function coachStrip(a){
+  if(typeof a==="string")a=agent(a);
+  var t=agentTok(a); if(!t) return '';
+  var items=coachItems("agents",a.key), sp=money(a.spend30)||0;
+  return '<div class="grid g2">'+
+   '<div class="panel" style="margin:0;align-self:start"><div class="panel-h"><h3>30-day token use</h3><span class="mono dim" style="margin-left:auto;font-size:11px">'+tokn(t.total)+' tok · '+usd(fmt2(sp))+' · <span class="basis">'+(t.observed?'gateway_observed':'client_attested')+'</span></span></div>'+
+    '<div class="panel-b">'+tokBars(t,{tight:true})+'<div class="hr"></div><dl class="kv">'+
+    '<dt>Cache hit rate</dt><dd>'+per(t.cacheRate)+' · '+tokn(t.cacheRead)+' of '+tokn(t.tokIn)+' input tokens served from cache</dd>'+
+    '<dt>Per run</dt><dd>'+tokn(t.perRun)+' tok · '+(a.runs30?usd(fmt2(sp/a.runs30)):'—')+'</dd>'+
+    '<dt>Per model call</dt><dd>'+tokn(t.perCall)+' tok in the mean request</dd>'+
+    '<dt>Basis</dt><dd>'+(t.observed?'observed by the gateway proxy from the bytes that passed through it':'self-reported by the harness · absent classes are marked, never zero')+'</dd></dl></div></div>'+
+   '<div class="panel" style="margin:0;align-self:start"><div class="panel-h"><h3>Coaching</h3><span class="b b-q" style="margin-left:auto">'+items.length+' from the token record</span></div>'+
+    '<div class="panel-b" style="display:grid;gap:8px">'+(items.length?items.slice(0,3).map(function(c){
+      return '<div class="row" style="align-items:flex-start;gap:10px"><span class="b b-'+c.sev+'" style="flex:none;margin-top:2px"><span class="d"></span>'+h(c.title)+'</span>'+
+       '<div style="min-width:0;flex:1"><div class="mono dim" style="font-size:11px">'+c.signal+'</div>'+(c.usd?'<div style="font-size:12px;margin-top:2px"><b>'+fmt$(c.usd)+'</b> a month at stake</div>':'')+'</div>'+
+       '<button class="btn sm" style="flex:none" onclick="'+c.act[1]+'">'+h(c.act[0])+'</button></div>';}).join(""):
+      '<p class="muted" style="font-size:12.5px;margin:0">Nothing to change. Every share is inside the workspace norm and the cache holds.</p>')+
+    '</div><div class="panel-b" style="border-top:1px solid var(--border)"><a href="#/'+ORG.slug+'/'+a.ws+'/spend/coaching">All coaching for this workspace →</a></div></div></div>';
 }
 function agent(k){for(var i=0;i<AGENTS.length;i++){if(AGENTS[i].key===k)return AGENTS[i];}return null;}
 function run(id){
@@ -156,7 +354,7 @@ function runSummary(R){
   if(!R.summary) return '';
   var live=R.status==="live"||R.status==="parked", g=R.gen||{};
   return '<section class="sumry" aria-label="Summary">'+
-   '<div class="row" style="justify-content:space-between;gap:12px"><p class="eyebrow q" style="margin:0">Summary · '+(live?"so far":"what this run changed")+'</p>'+
+   '<div class="row" style="justify-content:space-between;gap:12px"><p class="eyebrow q" style="margin:0">Summary</p>'+
    '<span class="b b-q" style="font-size:10.5px">generated · not the record</span></div>'+
    involved(R)+
    '<p class="lede">'+h(R.summary)+'</p>'+
@@ -189,7 +387,7 @@ var RO_ICON={
  comment:'<path d="M21 12a8 8 0 0 1-8 8H8l-5 3 1.5-4.5A8 8 0 1 1 21 12z"/>',
  label:'<path d="M3 11V4a1 1 0 0 1 1-1h7l9 9-8 8-9-9z"/><circle cx="7.5" cy="7.5" r="1.2"/>',
  record:'<path d="M6 3h12v18l-6-4-6 4z"/>',
- proof:'<path d="M12 3 5 6v6c0 4 3 7.5 7 9 4-1.5 7-5 7-9V6z"/><path d="m9 12 2 2 4-4"/>',
+ check:'<path d="M12 3 5 6v6c0 4 3 7.5 7 9 4-1.5 7-5 7-9V6z"/><path d="m9 12 2 2 4-4"/>',
  gate:'<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
  halt:'<path d="M8.5 3h7L21 8.5v7L15.5 21h-7L3 15.5v-7z"/><path d="m9.5 9.5 5 5M14.5 9.5l-5 5"/>',
  seal:'<circle cx="12" cy="9" r="6"/><path d="m8.5 13.8-1.5 7.2 5-2.6 5 2.6-1.5-7.2"/>',
@@ -199,11 +397,7 @@ var RO_ICON={
    and a failure is --st-failed; nothing here is gold. */
 var RO_STATE={created:"b-allowed", written:"b-allowed", pushed:"b-allowed", posted:"b-allowed",
  open:"b-allowed", linked:"b-q", read:"b-q", awaiting:"b-approval", blocked:"b-denied",
- proven:"b-proven", sealed:"b-proven", withheld:"b-q",
- /* a seal carries its verdict, and the verdict keeps the class verdictBadge() gives it everywhere
-    else on the page — a tampered seal must never read like a proven one */
- flipped:"b-proven", failing:"b-failed", unmoved:"b-q", unsatisfied:"b-denied",
- tampered:"b-critical", unverified:"b-q", waived:"b-q"};
+ sealed:"b-q", withheld:"b-q", halted:"b-denied", passed:"b-allowed", failing:"b-failed"};
 var RO_MEDIA=/\.(png|jpe?g|gif|webp|svg|mp4|mov|webm|wav|mp3)$/i;
 /* a node is durable if a human would go and open it; that set is what the tally counts */
 function roDurable(n){return !/^(read|task|would|seal|halt)$/.test(n.kind);}
@@ -216,8 +410,8 @@ function roDerive(R){
   (R.touched||[]).forEach(function(t){
     var s=String(t),i=s.indexOf(" · "),name=i<0?s:s.slice(0,i),note=i<0?"":s.slice(i+3),k="record",st="posted";
     if(task&&name===task)return;
-    if(/read|shown once|verdicts only|unverifiable/.test(note)){k="read";st="read";}
-    else if(/^wit_|^seg_/.test(name)){k="proof";st="proven";}
+    if(/read|shown once|the check result|unverifiable/.test(note)){k="read";st="read";}
+    else if(/^seg_/.test(name)){k="seal";st="sealed";}
     else if(/^labels?$/.test(name)){k="label";st="posted";}
     else if(/^kill switch/.test(name)){k="halt";st="blocked";}
     else if(RO_MEDIA.test(name)){k="media";st="written";}
@@ -227,7 +421,7 @@ function roDerive(R){
     out.push({kind:k,name:name,where:"",state:st,note:note});
   });
   if(R.status==="parked")out.push({kind:"gate",name:"awaiting approval",where:"Oxagen",state:"awaiting",note:"a call is parked; nothing has been committed"});
-  if(R.sealed)out.push({kind:"seal",name:"sealed"+(R.verdict?" · "+R.verdict:""),where:"chain",state:"sealed",note:""});
+  if(R.sealed)out.push({kind:"seal",name:"sealed",where:"chain",state:"sealed",note:""});
   return out;
 }
 function roNodes(R){var o=R.outputs&&R.outputs.length?R.outputs:roDerive(R);return o.slice();}
@@ -304,12 +498,12 @@ function runOutputs(R){
       '<button class="ro-link" onclick="roMore(\''+key+'\')">fold these back</button></li>';
   });
   return '<section class="ro" aria-label="What this run produced">'+
-   '<div class="ro-h"><p class="eyebrow q" style="margin:0">What this run produced · in the order it happened</p>'+
+   '<div class="ro-h"><p class="eyebrow q" style="margin:0">Outputs</p>'+
     '<span class="ro-tally">'+h(tally)+'</span>'+
     (reads?'<button class="ro-link" onclick="roToggleReads()">'+(S.ro.reads?"Hide reads":"Show reads")+'</button>':'')+
    '</div>'+
    '<ol class="ro-spine'+(live?" ro-live":"")+'">'+body+'</ol>'+
-   '<p class="ro-foot">Ordered by the frames, not by kind. A read is a mark, never a change; a gate sits where it stopped the run.</p>'+
+   '<p class="ro-foot">In frame order.</p>'+
    '</section>';
 }
 
@@ -414,64 +608,10 @@ function tab(page,def){return S.tab[page]||def;}
 var LOGO='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 574.244 106.313" role="img" aria-label="oxagen"><g transform="translate(0,0) scale(2.842952)"><path d="M6.300 0.000L12.600 3.320L12.600 9.960L6.300 13.280L0.000 9.960L0.000 3.320ZM1.000 3.885L1.000 9.395L6.300 12.150L11.600 9.395L11.600 3.885L6.300 1.130Z M19.376 0.000L25.676 3.320L25.676 9.960L19.376 13.280L13.076 9.960L13.076 3.320ZM14.076 3.885L14.076 9.395L19.376 12.150L24.676 9.395L24.676 3.885L19.376 1.130Z M12.838 10.240L19.138 13.560L19.138 20.200L12.838 23.520L6.538 20.200L6.538 13.560ZM7.538 14.125L7.538 19.635L12.838 22.390L18.138 19.635L18.138 14.125L12.838 11.370Z M19.376 20.480L25.676 23.800L25.676 30.440L19.376 33.760L13.076 30.440L13.076 23.800ZM14.076 24.365L14.076 29.875L19.376 32.630L24.676 29.875L24.676 24.365L19.376 21.610Z" fill="currentColor"/><path d="M25.914 10.240L32.214 13.560L32.214 20.200L25.914 23.520L19.614 20.200L19.614 13.560Z M6.300 20.480L12.600 23.800L12.600 30.440L6.300 33.760L0.000 30.440L0.000 23.800Z" fill="#D4AF37"/></g><g transform="translate(120.376,13.067)"><path d="M33.9083 68.758Q24.1657 68.758 16.4786 64.7737Q8.79142 60.7894 4.39571 53.2965Q0 45.8035 0 35.3862V33.3718Q0 22.9544 4.39571 15.4615Q8.79142 7.96854 16.4786 3.98427Q24.1657 0 33.9083 0Q43.6509 0 51.3381 3.98427Q59.0252 7.96854 63.4209 15.4615Q67.8166 22.9544 67.8166 33.3718V35.3862Q67.8166 45.8035 63.4209 53.2965Q59.0252 60.7894 51.3381 64.7737Q43.6509 68.758 33.9083 68.758ZM33.9083 55.3486Q42.1895 55.3486 47.4689 50.0198Q52.7484 44.691 52.7484 35.0142V33.7437Q52.7484 24.067 47.5233 18.7382Q42.2981 13.4094 33.9083 13.4094Q25.6502 13.4094 20.3592 18.7382Q15.0683 24.067 15.0683 33.7437V35.0142Q15.0683 44.691 20.3592 50.0198Q25.6502 55.3486 33.9083 55.3486Z M176.569 68.758Q169.637 68.758 164.119 66.3453Q158.601 63.9327 155.387 59.2935Q152.173 54.6542 152.173 48.0088Q152.173 41.3403 155.387 36.8558Q158.601 32.3712 164.27 30.1017Q169.94 27.8323 177.174 27.8323H196.047V23.8925Q196.047 18.7316 192.874 15.5274Q189.701 12.3232 182.99 12.3232Q176.411 12.3232 173.049 15.3842Q169.686 18.4452 168.627 23.3593L154.691 18.7315Q156.27 13.6133 159.748 9.39702Q163.225 5.18071 169.049 2.59035Q174.874 0 183.208 0Q195.972 0 203.326 6.42816Q210.681 12.8563 210.681 24.9392V50.4707Q210.681 54.4204 214.368 54.4204H219.795V66.9148H209.197Q204.464 66.9148 201.442 64.5334Q198.42 62.1521 198.42 58.1563V57.8864H196.126Q195.392 59.6967 193.399 62.2985Q191.406 64.9004 187.388 66.8292Q183.369 68.758 176.569 68.758ZM179.05 56.4348Q186.581 56.4348 191.314 52.1592Q196.047 47.8837 196.047 40.6031V39.2405H178.175Q173.175 39.2405 170.208 41.3881Q167.241 43.5358 167.241 47.5513Q167.241 51.5668 170.34 54.0008Q173.439 56.4348 179.05 56.4348Z M227.767 34.6423V32.6279Q227.767 22.3817 231.86 15.0863Q235.953 7.79081 242.768 3.8954Q249.582 0 257.706 0Q266.935 0 271.762 3.33256Q276.589 6.66512 278.81 10.4107H281.042V1.8432H295.801V79.33Q295.801 85.6989 292.104 89.4725Q288.408 93.2462 282.079 93.2462H238.369V80.0541H277.023Q280.779 80.0541 280.779 76.1043V57.2775H278.547Q277.161 59.5683 274.665 61.8904Q272.168 64.2125 268.057 65.7414Q263.946 67.2702 257.706 67.2702Q249.582 67.2702 242.756 63.3748Q235.93 59.4794 231.848 52.1724Q227.767 44.8655 227.767 34.6423ZM261.938 54.0781Q270.151 54.0781 275.573 48.8612Q280.996 43.6443 280.996 34.2704V32.9999Q280.996 23.4943 275.627 18.3432Q270.259 13.1921 261.938 13.1921Q253.749 13.1921 248.315 18.3432Q242.881 23.4943 242.881 32.9999V34.2704Q242.881 43.6443 248.315 48.8612Q253.749 54.0781 261.938 54.0781Z M344.764 68.758Q334.998 68.758 327.583 64.6108Q320.167 60.4636 316.031 52.9048Q311.896 45.346 311.896 35.1689V33.589Q311.896 23.3889 315.977 15.8416Q320.059 8.2944 327.397 4.1472Q334.735 0 344.385 0Q353.881 0 360.956 4.1867Q368.031 8.37341 371.981 15.8515Q375.931 23.3297 375.931 33.2895V38.6974H327.181Q327.468 46.3334 332.587 50.9496Q337.707 55.5658 345.198 55.5658Q352.522 55.5658 356.101 52.3534Q359.681 49.141 361.553 45.0629L373.985 51.4813Q372.119 55.0656 368.63 59.1042Q365.141 63.1428 359.394 65.9504Q353.648 68.758 344.764 68.758ZM327.313 27.2892H360.622Q360.095 20.7986 355.7 16.9954Q351.304 13.1921 344.277 13.1921Q337.055 13.1921 332.691 16.9954Q328.327 20.7986 327.313 27.2892Z M391.548 66.9148V1.8432H406.353V10.9769H408.585Q410.303 7.25429 414.832 3.99908Q419.361 0.743866 428.435 0.743866Q435.956 0.743866 441.695 4.12911Q447.434 7.51435 450.651 13.5903Q453.868 19.6663 453.868 27.9442V66.9148H438.8V29.1226Q438.8 21.1969 434.891 17.3492Q430.983 13.5015 423.9 13.5015Q415.872 13.5015 411.244 18.8237Q406.617 24.146 406.617 33.9445V66.9148Z" fill="currentColor"/><path d="M73.9979 66.9148 98.2261 34.0696 74.3764 1.8432H91.9626L107.9 24.3499H110.131L126.068 1.8432H143.654L119.805 34.0696L144.033 66.9148H126.206L110.131 44.0065H107.9L91.8244 66.9148Z" fill="#D4AF37"/></g></svg>';
 
 /* -------- badges -------- */
-function verdictBadge(v,r){
-  if(!v) return '';
-  var m={flipped:"proven",failing:"failed",unmoved:"q",unsatisfied:"denied",tampered:"critical",unverified:"q",waived:"q"};
-  if(v==="flipped"&&r&&r.flip)
-    return '<span class="b b-proven b-flip"><span class="d"></span>flipped<span class="fx"><i>fail</i> → <em>pass</em></span></span>';
-  return '<span class="b b-'+m[v]+'"><span class="d"></span>'+v+'</span>';
-}
-/* ---- the flip. A proven run is the whole point of the product, so it earns its theatre:
-   fail on the left, pass on the right, and every claim pinned to a frame in the hash chain. ---- */
-function verdictCell(r){
-  if(!r.verdict) return '<span class="dim">—</span>';
-  var f=r.flip, out=verdictBadge(r.verdict,r);
-  if(f) out+='<div class="flipsub">'+f.attempts.length+' attempt'+(f.attempts.length===1?'':'s')+' · '+h(f.testKind)+(r.verdict==="flipped"?'':' · never flipped')+'</div>';
-  return out;
-}
 function tsec(t){var m=String(t||"").match(/(\d+):(\d+):(\d+)(?:\.(\d+))?$/);if(!m)return null;return (+m[1])*3600+(+m[2])*60+(+m[3])+(m[4]?+("0."+m[4]):0);}
 function dur(sec){sec=Math.abs(sec);var m=Math.floor(sec/60),s=sec-m*60;return (m?m+"m ":"")+(m?Math.round(s):(s<10?s.toFixed(1):Math.round(s)))+"s";}
-function flipLead(f){if(!f||!f.flippedAt)return null;var a=tsec(f.flippedAt),b=tsec(f.turnEnd);return (a==null||b==null)?null:b-a;}
 function prNum(f){var m=String(f.prRef||"").match(/pull\/(\d+)/);return m?"#"+m[1]:f.prRef;}
 function frameBtn(seq,label){return '<button class="fr" onclick="S.tab.run=\'player\';S.frame='+seq+';render()">'+h(label||("frame "+seq))+'</button>';}
-function flipBox(cls,k,n,word,ref,rows){
-  return '<div class="flip-box '+cls+'"><div class="k">'+h(k)+(n?'<span class="n">'+h(n)+'</span>':'')+'</div>'+
-   '<div class="w">'+h(word)+'</div><div class="r">'+h(ref)+'</div>'+
-   '<div class="m">'+rows.map(function(x){return '<span>'+h(x[0])+'</span><span class="v">'+x[1]+'</span>';}).join("")+'</div></div>';
-}
-function flipStage(R){
-  var f=R.flip, v=R.verdict, flipped=v==="flipped";
-  var tamp=v==="tampered", tRes=(v==="flipped"||v==="failing"||tamp)?"fail":"pass", pRes=flipped?"pass":tamp?"excluded":"fail";
-  var tRef=f?f.targetRef+" @ "+f.targetSha:"main @ a4c91e2", pRef=f?prNum(f)+" @ "+f.prSha:"#482 @ f70b3d9";
-  var first=f?f.attempts[0]:null, last=f?f.attempts[f.attempts.length-1]:null, n=f?f.attempts.length:0;
-  var L=first?[["attempt","1 of "+n],["at",h(first.at)],["took",dur(first.ms/1000)],["exit",first.exit],["recorded",frameBtn(first.seq,"frame "+first.seq)]]
-              :[["result","from the witness runner on the target"]];
-  var Rr=f?(flipped?[["attempt",n+" of "+n],["at",h(last.at)],["took",dur(last.ms/1000)],["exit",last.exit],["recorded",frameBtn(last.seq,"frame "+last.seq)]]
-                   :[["attempts",n+", all "+last.result],["last at",h(last.at)],["exit",last.exit],["recorded",frameBtn(last.seq,"frame "+last.seq)]])
-           :[["result","from the witness runner on the head"]];
-  var rightCls=flipped?"pass":tamp?"crit":(pRes==="pass"?"pass":"fail miss");
-  return '<div class="flip-stage'+(flipped?' on':'')+'">'+
-   flipBox(tRes==="fail"?"fail":"pass","Before · on the target",f?f.oracle:"test_flip",tRes.toUpperCase(),tRef,L)+
-   '<div class="flip-arrow'+(flipped?' on':'')+'" aria-hidden="true"><svg viewBox="0 0 44 44"><path class="ln" d="M3 22h30" fill="none" stroke="currentColor" stroke-width="2"/>'+
-   '<path d="M27 13l10 9-10 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>'+
-   flipBox(rightCls,"After · on the pull request head",f?f.testKind:"",pRes.toUpperCase(),pRef,Rr)+'</div>';
-}
-function flipRail(f,flipped){
-  var pts=[{c:"start",b:"Turn "+f.turn+" opened",t:f.turnStart,s:f.turnStartSeq}];
-  f.attempts.forEach(function(a){pts.push({c:a.result,b:"Attempt "+a.n+" · "+a.result+(a.result==="pass"?" · the flip":""),t:a.at,s:a.seq});});
-  pts.push({c:"end",b:"Agent ended its turn",t:f.turnEnd,s:f.turnEndSeq});
-  pts.push({c:"seal",b:"Run sealed",t:f.sealedAt,s:f.sealSeq});
-  var lead=flipLead(f);
-  return '<div class="flip-rail'+(flipped?' on':'')+'" style="grid-template-columns:repeat('+pts.length+',minmax(0,1fr))">'+
-   pts.map(function(p){return '<div class="pt '+p.c+'"><b>'+h(p.b)+'</b><span class="t">'+h(p.t)+'</span>'+frameBtn(p.s,"frame "+p.s)+'</div>';}).join("")+'</div>';
-}
-function flipHero(R){
-  var f=R.flip, lead=flipLead(f), n=f.attempts.length;
-  return '<div class="flip-hero" role="status"><span class="fp"><span class="f">fail</span><span class="a">→</span><span class="p">pass</span></span>'+
-   '<div class="tx"><b>'+h(f.testKind)+'</b> · <span class="mono">'+h(f.oracle)+'</span> · flipped on attempt <b>'+n+' of '+n+'</b>'+
-   (lead!=null?', <b>'+dur(lead)+'</b> before the agent ended turn '+f.turn:'')+'. Recorded at '+frameBtn(f.flipSeq,"frame "+f.flipSeq)+', attested, in the hash chain.</div>'+
-   '<div class="acts"><button class="btn sm" onclick="S.tab.run=\'proof\';render()">Open the proof</button></div></div>';
-}
 function statusBadge(st){
   var m={live:["allowed","live"],parked:["approval","parked for approval"],sealed:["q","sealed"],
          halted:["denied","halted"],compacted:["q","compacted"],
@@ -481,19 +621,19 @@ function statusBadge(st){
   return '<span class="b b-'+x[0]+'">'+x[1]+'</span>';
 }
 /* The tier ladder, four words, computed from what was actually routed: observe, harness, gateway,
-   contained. Agents and runs here sit on observe or harness. gateway (model and MCP traffic routed
-   through the gateway, metering observed, budgets enforced) and contained (an OS sandbox whose only
+   contained. gateway (model and MCP traffic routed through the loopback proxy, metering observed,
+   budgets enforced on routed traffic) arrived with Phase 4 and contained (an OS sandbox whose only
    egress is the gateway, the only tier that earns the word enforced against the machine's operator)
-   are on the ladder and not yet available, so a badge for either is dashed and says so. */
+   with Phase 5, so every rung is real and a badge names the one the run actually earned. */
 var TIERS=[["observe","Recorded only. No hook is installed and nothing is delivered."],
  ["harness","Hooks installed. Steering is delivered and the four blocking hook events can refuse: client-attested and fail-open."],
  ["gateway","Model and MCP traffic routed through the gateway. Metering observed, budgets enforced on routed traffic."],
  ["contained","The agent runs under an OS sandbox whose only egress is the gateway. The only tier that earns the word enforced."]];
-var TIER_NA={gateway:1,contained:1};
+var TIER_NA={};
 function tierBadge(t){
   if(!t) return '';
   if(TIER_NA[t]) return '<span class="b b-tier b-na" title="not yet available">'+h(t)+' · not yet available</span>';
-  var m={harness:"allowed",observe:"q"};
+  var m={harness:"approval",observe:"q",gateway:"allowed",contained:"proven"};
   return '<span class="b b-tier b-'+(m[t]||"q")+'" title="'+h((TIERS.filter(function(x){return x[0]===t;})[0]||["",""])[1])+'">'+h(t)+'</span>';
 }
 function tierLadder(cur){
@@ -571,6 +711,9 @@ var TOOLMETA={
  send_message:["Send message","message"], search_tools:["Search the belt","read"],
  load_tools:["Load tool definitions","read"], okta__deactivate_user:["Deactivate user","access"]
 };
+/* The first row of a tool call leads with the tool's short name and its arguments: a harness-native
+   tool drops its harness prefix (claude_code__Read reads as Read), an MCP tool keeps its id. */
+function txToolName(t){return String(t||"").replace(/^(claude_code|codex|stella|cursor)__/,"").replace(/@[\d.]+$/,"");}
 function toolParts(id){var s=String(id||""),i=s.lastIndexOf("@");return i>0?{n:s.slice(0,i),v:s.slice(i+1)}:{n:s,v:""};}
 function toolMeta(id){
   var p=toolParts(id), m=TOOLMETA[p.n];
@@ -770,7 +913,7 @@ function applyHashTab(){
   /* an agent tab is p[4], not p[3]: /:org/:ws/agents/:slug/:tab */
   if(p[2]==="agents"&&p.length>=5&&IAM_TAB_KEYS[p[4]]) S.tab.agent=p[4];
   /* a run tab is p[4] too: /:org/:ws/runs/:id/:tab */
-  if(p[2]==="runs"&&p.length>=5&&/^(transcript|player|proof|dod|cost|policy|context|chain|ladder)$/.test(p[4])) S.tab.run=p[4];
+  if(p[2]==="runs"&&p.length>=5&&/^(transcript|issues|player|cost|policy|context|chain)$/.test(p[4])) S.tab.run=p[4];
 }
 window.addEventListener("hashchange",function(){S.side=false;fpStop();applyHashTab();render();});
 
@@ -947,7 +1090,7 @@ function defForm(a){
       "<span class=\"mono\">complex</span> routes to z-ai/glm-latest, <span class=\"mono\">light</span> to z-ai/glm-flash-latest. The harness makes the call with its own key. Oxagen records what it reports.")+
     fld("Per-run budget (USD)",'<input type="number" step="0.01" min="0" value="'+(micros==null?"":(micros/1e6).toFixed(2))+'" aria-label="Per-run budget" onchange="defBudget(\''+slug+'\',this.value)">',
       "Stored as <span class=\"mono\">budget = { per_run_micros = "+(micros==null?"…":micros)+" }</span>. Hard: checked against reported spend at each hook boundary. A breach pauses the run at the next one.")+'</div></div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>Tools</h3><span class="mono dim" style="margin-left:auto;font-size:11px">belt = grants ∩ this list − deny_tools</span></div><div class="panel-b">'+
+   '<div class="panel"><div class="panel-h"><h3>Tools</h3></div><div class="panel-b">'+
     fld("tools",chips("tools",d.tools),"Patterns against the registry. <span class=\"mono\">github__*</span> grants every github tool the operator can delegate.")+
     fld("deny_tools",chips("deny_tools",d.deny_tools),"A deny here wins over any grant. Version-pinned patterns like <span class=\"mono\">@*</span> deny every version.")+
     '<div class="field"><label>Side effects</label><div class="fxl">'+
@@ -961,7 +1104,7 @@ function defForm(a){
     fld("Color",'<select aria-label="Color" onchange="defField(\''+slug+'\',\''+harnessSec+'\',\'color\',this.value)">'+["blue","green","gold","red","gray"].map(function(v){return '<option'+(hv.color===v?' selected':'')+'>'+v+'</option>';}).join("")+'</select>',"Cosmetic: the label the harness shows on its own screen.")+
    '</div></div></div></div>';
 
-  var right='<div class="panel"><div class="panel-h"><h3>Source</h3><span class="b b-q" style="margin-left:auto">source of truth</span></div><div class="panel-b">'+
+  var right='<div class="panel"><div class="panel-h"><h3>Source</h3></div><div class="panel-b">'+
    '<a class="srclink" href="'+srcHref+'"><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg><span class="p">.oxagen/agents/'+h(slug)+'.toml</span><span class="ar">Open in the source editor</span></a>'+
    '<p class="muted" style="font-size:12px;margin:10px 0 0">Every field on this page is a view of that file. Editing here patches one key in place; editing there changes anything. Both go through the same commit.</p>'+
    '<dl class="kv" style="margin-top:14px"><dt>Repository</dt><dd class="mono">'+h(w.main)+' · '+h(w.branch)+'</dd>'+
@@ -1015,7 +1158,7 @@ function pAgentSource(r){
   if(S.state==="denied") return deniedState("this agent’s definition","agent.write on "+w.slug);
   if(!S.ed||S.ed.slug!==slug)S.ed={slug:slug,sel:[0,0],find:"",cur:-1,matches:0};
   var dirty=defDirty(slug), pend=S.defPending[slug];
-  return '<div class="phead"><div class="t"><p class="eyebrow">Agent · source</p><h1 class="mono" style="font-size:18px">'+h(path)+'</h1>'+
+  return '<div class="phead"><div class="t"><p class="eyebrow">Agent source</p><h1 class="mono" style="font-size:18px">'+h(path)+'</h1>'+
    '<div class="row" style="margin-top:8px"><span class="b b-q mono">'+h(w.main)+'</span>'+
    (pend?'<span class="b b-approval"><span class="d"></span>'+h(pend.branch)+'</span>':'<span class="b b-q mono">'+h(w.branch)+' @ '+h(a.commit)+'</span>')+
    '<span class="b b-q">source of truth</span><span class="b b-q mono">'+h(a.key)+'</span></div>'+
@@ -1404,15 +1547,75 @@ function topbar(r){
    '<div class="crumbs">'+crumbs(r)+'</div>'+
    '<div class="sp"></div>'+
    '<button class="kbtn" onclick="openDialog(\'cmd\')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><span class="kt">Search or run an action</span><kbd>⌘K</kbd></button>'+
-   '<button class="iconbtn" onclick="asstToggle()" aria-pressed="'+(S.asst?"true":"false")+'" aria-label="Assistant" aria-controls="asst">'+icon("assistant")+'</button>'+
    '<button class="iconbtn" onclick="openDialog(\'notifs\')" aria-label="Notifications, '+notifUnread()+' unread">'+
      '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 8-3 8h18s-3-1-3-8"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>'+
      (notifUnread()?'<span class="dot"></span>':'')+'</button>'+
+   apdButton()+
    '<div class="rel"><button class="iconbtn" onclick="toggleLayer(\'user\')" aria-label="Account" style="padding:0;border-radius:50%;overflow:hidden">'+personAv("marcus",30)+'</button>'+
      (S.layer==="user"?userMenu():'')+'</div>'+
    '</header>';
 }
 function toggleLayer(n){S.layer=S.layer===n?null:n;render();}
+
+/* ============================== Approvals drawer ==============================
+   Every call parked for a human, across the organization, behind one button in the topbar on every
+   page. The count is what is waiting now: pending approvals plus an open interjection. The drawer
+   lists them, and picking one shows the whole card (the same approvalCard the run page shows), so
+   a decision never needs the Fleet page. Fleet keeps its "waiting on a human" tile and nothing else. */
+S.apd={open:false,sel:null};
+function apdPending(){return APPROVALS.filter(function(a){return apState(a.id).status==="pending";});}
+function apdInterjections(){return WS.filter(function(w){return skWaiting(w);}).map(function(w){return {ws:w};});}
+function apdCount(){return apdPending().length+apdInterjections().length;}
+function apdButton(){
+  var n=apdCount();
+  return '<button class="iconbtn apd-btn" onclick="apdToggle()" aria-pressed="'+(S.apd.open?"true":"false")+'" aria-controls="apdrawer" aria-label="Approvals, '+n+' waiting">'+
+   '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 5 6v6c0 4 3 7.5 7 9 4-1.5 7-5 7-9V6z"/><path d="M12 8v4l2.5 1.5"/></svg>'+
+   (n?'<span class="cnt">'+(n>99?"99+":n)+'</span>':'')+'</button>';
+}
+function apdToggle(v){S.apd.open=(v===undefined)?!S.apd.open:!!v; if(!S.apd.open)S.apd.sel=null; S.layer=null; render();}
+function apdSelect(id){S.apd.sel=id;render();var d=el("apdrawer");if(d)d.scrollTop=0;}
+function apdBack(){S.apd.sel=null;render();}
+function apdRow(a){
+  var st=apState(a.id), done=st.status!=="pending", sec=apLeft(a.id), r=run(a.run), w=wsBySlug(a.ws);
+  var crit=a.risk==="critical"||a.side==="irreversible"||a.tainted;
+  var title=a.amount?usd(a.amount)+' '+h(a.currency)+' · '+h(a.tool):h(a.tool);
+  return '<button class="apd-row'+(crit?' crit':'')+(done?' done':'')+'" onclick="apdSelect(\''+a.id+'\')" aria-label="Open approval '+h(a.id)+'">'+
+   '<span class="g">'+icon("shield")+'</span>'+
+   '<span class="tt"><b>'+title+'</b><span>'+h(a.agent.split(".").pop())+(r?' · '+h(r.taskTitle):'')+(w?' · '+h(w.name):'')+'</span>'+
+    '<span class="m">'+riskBadge(a.risk)+(a.side==="irreversible"?'<span class="b b-denied mono">irreversible</span>':'')+(a.tainted?'<span class="b b-critical"><span class="d"></span>tainted</span>':'')+'</span></span>'+
+   (done?'<span class="b '+(st.status==="approved"?'b-allowed':'b-denied')+'" style="flex:none"><span class="d"></span>'+h(st.status)+'</span>'
+        :'<span class="apsm-clk'+(sec<120?' warn':'')+'" data-countdown="'+a.id+'" style="flex:none">'+mmss(sec)+'</span>')+'</button>';
+}
+function apdInterjectionRow(x){
+  var w=x.ws;
+  return '<div class="apd-row inter" style="cursor:default"><span class="g">'+icon("assistant")+'</span>'+
+   '<span class="tt"><b>Interjection · '+h(SKRUN.agent.split(".").pop())+' is paused</b><span>It started in <span class="mono">'+h(SKRUN.repo)+'</span>, which no workspace owns. Skills are on in '+h(w.name)+', so there is a config to resolve and nothing to resolve it against. Nothing has been charged since 09:14:02Z; at 30 minutes it times out to <span class="mono">deny</span>.</span></span>'+
+   '<button class="btn sm primary" style="flex:none" onclick="apdToggle(false);go(\'#/'+ORG.slug+'/'+w.slug+'/runs/'+SKRUN.id+'\')">Answer it</button></div>';
+}
+function apdBody(){
+  if(S.apd.sel){
+    var a=null; APPROVALS.forEach(function(x){if(x.id===S.apd.sel)a=x;});
+    if(!a) return '<div class="apd-b"><p class="muted">That approval is no longer listed.</p></div>';
+    return '<div class="apd-b"><button class="btn sm" onclick="apdBack()" style="margin-bottom:12px">‹ All approvals</button>'+approvalCard(a)+'</div>';
+  }
+  var pend=apdPending(), inter=apdInterjections(), done=APPROVALS.filter(function(a){return apState(a.id).status!=="pending";});
+  return '<div class="apd-b">'+
+   (inter.length||pend.length
+     ?'<p class="eyebrow q" style="margin:0 0 8px">'+(pend.length+inter.length)+' waiting on you</p><div class="apd-list">'+inter.map(apdInterjectionRow).join("")+pend.map(apdRow).join("")+'</div>'
+     :'<div style="text-align:center;padding:26px 6px"><p class="muted" style="font-size:12.5px;margin:0">Nothing is waiting on a human.</p><p class="dim" style="font-size:11.5px;margin:8px 0 0">A call parks here when policy returns <span class="mono">approve</span>. Denials never park; they end the call and are free.</p></div>')+
+   (done.length?'<p class="eyebrow q" style="margin:18px 0 8px">'+done.length+' resolved today</p><div class="apd-list">'+done.map(apdRow).join("")+'</div>':'')+
+   '<div class="note" style="margin-top:14px;font-size:11.5px">A resolution mints a single-use approval token bound to the call digest, the agent, the run, and an expiry. It cannot be replayed on a second call. On expiry the call ends and the reason reaches the model.</div></div>';
+}
+function apdHtml(){
+  var n=apdCount();
+  return '<div class="apd-scrim'+(S.apd.open?' open':'')+'" onclick="apdToggle(false)"></div>'+
+   '<aside id="apdrawer" class="apd'+(S.apd.open?' open':'')+(isPhone()?' phone':'')+'" role="complementary" aria-label="Approvals"'+(S.apd.open?'':' inert aria-hidden="true"')+'>'+
+   '<div class="apd-h"><h3>Approvals</h3><span class="b '+(n?'b-approval':'b-q')+'"><span class="d"></span>'+n+' waiting</span>'+
+    '<button class="iconbtn" style="margin-left:auto" onclick="apdToggle(false)" aria-label="Close approvals">'+
+    '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>'+
+   apdBody()+'</aside>';
+}
+document.addEventListener("keydown",function(e){if(e.key==="Escape"&&S.apd.open&&!S.dlg){apdToggle(false);}});
 function notifIcon(tone){
   var sv='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">';
   if(tone==="allowed") return sv+'<path d="m5 12 5 5 9-10"/></svg>';
@@ -1441,187 +1644,6 @@ function userMenu(){
 }
 
 /* ============================== Fleet ============================== */
-/* ============================== definition of done ============================== */
-/* A run cannot finish until its dod says so. The set is drafted from the prompt (or hand-written),
-   locked by digest before the agent moves, and run at every Stop. decide(evidence) is pure: the
-   harness and the cloud run the same function on the same evidence and get the same bytes. Three
-   verdicts, eight closed reasons. State is carried by shape, not colour: double border HELD, dashed
-   PENDING, single BROKEN; a locked set on a live run is dotted. Authored sets are in fixtures/dod.json;
-   every other run gets one derived from its record, so the fleet reads the same story at volume. */
-var DOD_REASONS={
-  CHECK_FAILED:"a check in the locked set did not pass",
-  TOOL_DENIED:"the agent called a tool the set forbids",
-  BUDGET_EXCEEDED:"cost, time, or tool-call budget exceeded",
-  ATTEMPTS_EXHAUSTED:"the agent tried to finish more times than the set allows",
-  LOCK_MISMATCH:"the dod file on disk does not match the locked digest",
-  EVIDENCE_INVALID:"evidence did not validate or its digests do not chain",
-  HUMAN_PENDING:"every executable check passed; a human signature is outstanding",
-  HARNESS_ERROR:"the harness could not run a check; never treated as a pass"};
-var DOD_KIND={run:"the command exits 0 inside the timeout, credentials scrubbed",file:"the path exists, contains the string, or matches the digest",
-  diff:"every changed file matches an allow glob and no deny glob",tools:"no tool call matched a deny pattern; enforced live by the PreToolUse hook",
-  budget:"cost, tool calls and minutes stay under the limits; stop_attempts caps how often the Stop hook may block",
-  human:"a named person signs it after the run; it never blocks the agent, it withholds the certificate"};
-S.dodSigned={};   /* human checks signed in this session, by run id */
-function dodDigest(seed){var r=rngOf(seed),o="sha256:";for(var i=0;i<4;i++)o+=("0000"+Math.floor(r()*65536).toString(16)).slice(-4);return o.slice(0,15)+"…"+o.slice(-4);}
-function dodSynth(R){
-  var seed=0;for(var i=0;i<R.id.length;i++)seed=(seed*31+R.id.charCodeAt(i))>>>0;
-  var r=rngOf(seed), cost=parseFloat(R.cost)||0, live=R.status==="live"||R.status==="parked"||R.status==="paused";
-  var pkg=(R.ws||"core").replace(/-.*/,""), task=String(R.task||"").replace(/^.*#/,"#");
-  var checks=[
-   {id:"unit",kind:"run",spec:"pnpm --filter @a-intel/"+pkg+" test:unit",ok:true,evidence:dodDigest(seed+1)},
-   {id:"scope",kind:"diff",spec:"allow "+(R.ws||"core")+"/** · deny **/.env*, packages/database/migrations/**",ok:true,evidence:dodDigest(seed+2)},
-   {id:"no-secrets",kind:"tools",spec:"deny Read(**/.env*), Bash(curl *)",ok:true,evidence:dodDigest(seed+3)},
-   {id:"budget",kind:"budget",spec:"usd "+(Math.ceil(cost*1.6)||2)+".00 · tool_calls 120 · minutes 30 · stop_attempts 3",ok:true}];
-  if(R.verdict!=null&&R.verdict!=="waived"&&R.verdict!=="unverified") checks.splice(1,0,{id:"witness",kind:"run",spec:"oxagen witness verify --task "+(R.task||"")+" (exit 0 only on a flip)",ok:R.verdict==="flipped",evidence:dodDigest(seed+4)});
-  if(R.verdict==="waived") checks.push({id:"reviewer",kind:"human",spec:"A named reviewer accepts the output",ok:null});
-  var usage={usd:cost,toolCalls:Math.round((R.steps||8)*0.6),minutes:Math.max(2,Math.round((R.frames||20)/9)),stopAttempts:live?0:1};
-  var budget={usd:Math.ceil(cost*1.6)||2,tool_calls:120,minutes:30,stop_attempts:3};
-  var d={locked:dodDigest(seed+9).replace("…","0f3a"),lockedAt:R.started?String(R.started).slice(-5)+":00":"",drafted:"z-ai/glm-latest (Oxagen)",
-    checks:checks,hidden:r()<0.6?1:0,usage:usage,budget:budget,stops:[],verdict:null,reasons:[],failed:[],synth:true};
-  if(live) return d;
-  var v=R.verdict, reasons=[], failed=[];
-  if(v==="flipped"||(v==null&&R.status==="sealed")){d.verdict="HELD";}
-  else if(v==="waived"){d.verdict="PENDING";reasons=["HUMAN_PENDING"];failed=["reviewer"];}
-  else if(v==="unverified"){d.verdict="BROKEN";reasons=["HARNESS_ERROR"];failed=["unit"];checks[0].ok=null;checks[0].error=true;}
-  else if(R.status==="halted"){d.verdict="BROKEN";reasons=["TOOL_DENIED"];failed=["no-secrets"];checks.forEach(function(c){if(c.id==="no-secrets")c.ok=false;});d.denials=["Bash(curl …)"];}
-  else if(v==="tampered"){d.verdict="BROKEN";reasons=["CHECK_FAILED"];failed=["witness","h-config-untouched"];d.hidden=1;d.hiddenChecks=[{id:"h-config-untouched",kind:"file",spec:"test config sha256 unchanged from the target",ok:false,evidence:dodDigest(seed+5)}];}
-  else if(v==="failing"||v==="unmoved"||v==="unsatisfied"){d.verdict="BROKEN";reasons=["CHECK_FAILED"];failed=["witness"];
-    if(r()<0.5){reasons.push("ATTEMPTS_EXHAUSTED");usage.stopAttempts=3;}
-    else if(r()<0.25){reasons=["BUDGET_EXCEEDED"];failed=[];usage.usd=budget.usd+0.42;checks.forEach(function(c){if(c.id==="budget")c.ok=false;});}}
-  else {d.verdict="HELD";}
-  if(d.verdict==="HELD"&&r()<0.06){d.verdict="BROKEN";reasons=["LOCK_MISMATCH"];failed=[];}
-  else if(d.verdict==="HELD"&&r()<0.04){d.verdict="BROKEN";reasons=["EVIDENCE_INVALID"];failed=[];}
-  d.reasons=reasons;d.failed=failed;
-  var last={n:usage.stopAttempts||1,at:R.sealed?String(R.sealed).slice(-5):"",verdict:d.verdict,reasons:reasons,failed:failed};
-  for(var k=1;k<last.n;k++)d.stops.push({n:k,at:"",verdict:"BROKEN",reasons:["CHECK_FAILED"],failed:failed.length?failed:["unit"]});
-  d.stops.push(last);
-  d.cert={id:"dodc_01K"+R.id.slice(-8),attempt:"arat_01K"+R.id.slice(-8),streamDigest:dodDigest(seed+6),issuedAt:(R.sealed||"")+"Z",signature:"ed25519:MEUCIQ"+dodDigest(seed+7).slice(7,11)+"…"+dodDigest(seed+8).slice(-4),signer:ORG.attester,metered:d.verdict==="HELD"?"dod.held":null};
-  return d;
-}
-function dodOf(R){
-  if(!R) return null;
-  if(!R._dod){var a=DOD[R.id];R._dod=a?JSON.parse(JSON.stringify(a)):dodSynth(R);}
-  var d=R._dod; d.reasons=d.reasons||[]; d.failed=d.failed||[]; d.stops=d.stops||[];
-  /* a signature given in this session settles a PENDING run to HELD, the same way `oxagen dod sign` does */
-  if(d.verdict==="PENDING"&&S.dodSigned[R.id]&&!d._signed){
-    d._signed=true;d.verdict="HELD";d.reasons=[];d.failed=[];d.settledBy="signature";
-    d.checks.forEach(function(c){if(c.kind==="human"){c.ok=true;c.signed=S.dodSigned[R.id];}});
-    d.stops.push({n:d.stops.length+1,at:S.dodSigned[R.id].at.slice(11,16),verdict:"HELD",reasons:[],failed:[],note:"Signed by "+S.dodSigned[R.id].by+". The certificate is issued and the run is metered as dod.held."});
-    if(d.cert){d.cert.metered="dod.held";d.cert.issuedAt=S.dodSigned[R.id].at;}
-  }
-  return d;
-}
-function dodVerdict(R){var d=dodOf(R);return d?d.verdict:null;}
-function dodWord(v){return v==="HELD"?"held":v==="PENDING"?"pending":v==="BROKEN"?"broken":"locked";}
-function dodBadge(R,opts){
-  var d=dodOf(R); if(!d) return '';
-  var v=d.verdict, cls=v==="HELD"?"dod-held":v==="PENDING"?"dod-pending":v==="BROKEN"?"dod-broken":"dod-locked";
-  var sub=opts&&opts.sub?'<div class="flipsub">'+(v==="HELD"?d.cert.id:v==="PENDING"?'signature outstanding':v==="BROKEN"?h(d.reasons.join(", ").toLowerCase().replace(/_/g," ")):d.checks.length+' checks locked'+(d.stops.length?' · blocked once':''))+'</div>':'';
-  return '<span class="b dod '+cls+'" title="definition of done: '+dodWord(v)+'"><span class="dg">'+(v==="HELD"?"✓":v==="PENDING"?"…":v==="BROKEN"?"✗":"⚿")+'</span>done · '+dodWord(v)+'</span>'+sub;
-}
-function dodCheckResult(c){
-  if(c.error) return '<span class="b b-failed"><span class="d"></span>harness error</span>';
-  if(c.kind==="human") return c.ok?'<span class="b b-proven"><span class="d"></span>signed</span>':'<span class="b b-approval"><span class="d"></span>awaiting signature</span>';
-  if(c.ok===true) return '<span class="b b-allowed"><span class="d"></span>pass</span>';
-  if(c.ok===false) return '<span class="b b-failed"><span class="d"></span>fail</span>';
-  return '<span class="b b-q">runs at Stop</span>';
-}
-function dodYaml(R){
-  var d=dodOf(R), L=["dod: 1","task: "+(R.taskTitle||R.task),"run: "+R.id,"locked: "+d.locked,"","checks:"];
-  d.checks.forEach(function(c){
-    L.push("  - id: "+c.id);
-    if(c.kind==="run")L.push("    run: "+c.spec);
-    else if(c.kind==="file"){var m=/^(\S+) contains (.*)$/.exec(c.spec);L.push("    file:");L.push("      path: "+(m?m[1]:c.spec));if(m)L.push("      contains: "+m[2]);}
-    else if(c.kind==="diff"){var p=c.spec.split(" · ");L.push("    diff:");L.push("      allow: ["+p[0].replace(/^allow /,"")+"]");if(p[1])L.push("      deny:  ["+p[1].replace(/^deny /,"")+"]");}
-    else if(c.kind==="tools")L.push("    tools:\n      deny: ["+c.spec.replace(/^deny /,"").split(", ").map(function(x){return '"'+x+'"';}).join(", ")+"]");
-    else if(c.kind==="budget")L.push("    budget: { "+c.spec.split(" · ").map(function(x){var q=x.split(" ");return q[0]+": "+q[1];}).join(", ")+" }");
-    else if(c.kind==="human")L.push("    human: "+c.spec);
-    L.push("");
-  });
-  return L.join("\n").replace(/\n$/,"");
-}
-function dodBar(label,used,limit,fmt){
-  var pct=limit?Math.min(100,Math.round(used/limit*100)):0, over=limit&&used>limit;
-  return '<div class="dod-bar"><div class="row" style="justify-content:space-between;font-size:11.5px"><span class="muted">'+h(label)+'</span><span class="mono'+(over?'" style="color:var(--st-failed)':'')+'">'+fmt(used)+' <span class="dim">of '+fmt(limit)+'</span></span></div>'+
-   '<div class="mbar" style="height:8px;margin-top:4px"><i class="'+(over?'over':'used')+'" style="width:'+pct+'%"></i></div></div>';
-}
-function dodTab(R){
-  var d=dodOf(R), v=d.verdict, live=!v;
-  var checks=d.checks.concat(d.hiddenChecks||[]).map(function(c){
-    var hidden=(d.hiddenChecks||[]).indexOf(c)>=0;
-    return '<tr'+(d.failed.indexOf(c.id)>=0?' class="dod-fail"':'')+'><td class="mono" style="font-size:12px">'+h(c.id)+(hidden?' <span class="b b-q" style="font-size:10px">hidden</span>':'')+'</td>'+
-     '<td><span class="b b-q mono" style="font-size:10.5px" title="'+h(DOD_KIND[c.kind]||"")+'">'+h(c.kind)+'</span></td>'+
-     '<td class="mono" style="font-size:11.5px;max-width:42ch;white-space:normal">'+h(c.spec)+'</td>'+
-     '<td>'+dodCheckResult(c)+(c.signed?'<div class="t-sub" style="font-size:11px">'+h(c.signed.by)+' · '+h(c.signed.at)+'</div>':'')+'</td>'+
-     '<td class="mono dim" style="font-size:11px">'+h(c.evidence||"—")+'</td></tr>';}).join("");
-  var reasons=d.reasons.length?'<ul class="dod-reasons">'+d.reasons.map(function(k){return '<li><b class="mono">'+h(k)+'</b><span>'+h(DOD_REASONS[k]||"")+'</span></li>';}).join("")+'</ul>':'';
-  var stops=d.stops.length?d.stops.map(function(s){
-    return '<li class="on"><span class="h">'+(s.at?h(s.at)+' · ':'')+'stop '+s.n+' · '+h(dodWord(s.verdict))+'</span><div>'+
-     (s.verdict==="BROKEN"?(s.reasons.indexOf("ATTEMPTS_EXHAUSTED")>=0?'Attempts exhausted: the evidence was submitted as BROKEN and the run ended. ':'Blocked. The agent was handed the failing ids and kept going. ')+'<span class="mono">'+h(s.failed.join(", "))+'</span>'
-      :s.verdict==="PENDING"?'Every executable check passed; the certificate waits for a signature.':'Every check passed. Evidence submitted; the cloud re-decided, bound the outcome to the sealed attempt and signed.')+
-     (s.note?'<div class="dim" style="font-size:11.5px;margin-top:3px">'+h(s.note)+'</div>':'')+'</div></li>';}).join("")
-   :'<li class="on"><span class="h">no stop yet</span><div>The agent has not tried to finish. When it does, the Stop hook runs every check, hidden ones included, and decide() answers.</div></li>';
-  var human=d.checks.filter(function(c){return c.kind==="human"&&!c.ok;});
-  var head='<div class="dod-verdict '+(v?v.toLowerCase():"locked")+'">'+
-   '<div><p class="eyebrow q" style="margin:0 0 4px">Definition of done'+(live?' · locked, running':'')+'</p>'+
-   '<div class="w">'+(v?v:"LOCKED")+'</div>'+
-   '<p class="muted" style="margin:6px 0 0;font-size:12.5px">'+(v==="HELD"?'Every executable check passed, no tool was denied, the budget held and no human check is outstanding. Signed and metered as <span class="mono">dod.held</span>.'
-     :v==="PENDING"?'Every executable check passed. '+human.length+' human check'+(human.length===1?'':'s')+' waiting for a signature; the certificate is withheld, the run is not.'
-     :v==="BROKEN"?'The certificate records which checks failed. Not metered.'
-     :d.checks.length+' checks locked by digest at '+h(d.lockedAt)+' before the agent moved. The agent can read the file and cannot change it.')+'</p>'+reasons+'</div>'+
-   '<div class="dod-cert">'+(d.cert?'<dl class="kv">'+
-     '<dt>Certificate</dt><dd class="mono">'+h(d.cert.id)+'</dd>'+
-     '<dt>Bound to</dt><dd class="mono">'+h(d.cert.attempt)+' · stream '+h(d.cert.streamDigest)+'</dd>'+
-     '<dt>Lock</dt><dd class="mono">'+h(d.locked)+'</dd>'+
-     '<dt>Issued</dt><dd class="mono">'+h(d.cert.issuedAt)+'</dd>'+
-     '<dt>Signature</dt><dd class="mono">'+h(d.cert.signature)+' · '+h(d.cert.signer)+'</dd>'+
-     '<dt>Metered</dt><dd>'+(d.cert.metered?'<span class="mono">'+h(d.cert.metered)+'</span> · one governed action':'<span class="dim">not metered</span>')+'</dd></dl>'
-    :'<dl class="kv"><dt>Lock</dt><dd class="mono">'+h(d.locked)+'</dd><dt>Written to</dt><dd class="mono">.oxagen/dod/'+h(R.id)+'.yaml</dd><dt>Drafted by</dt><dd>'+h(d.drafted)+' · never the model running the task</dd><dt>Hidden checks</dt><dd>'+d.hidden+' held back by the cloud, run at Stop</dd></dl>')+
-   '<div class="row" style="margin-top:12px;gap:8px;flex-wrap:wrap"><button class="btn sm" onclick="openDialog(\'dodfile\',\''+h(R.id)+'\')">View the locked file</button>'+
-    (d.cert?'<button class="btn sm" onclick="act(\'Certificate '+h(d.cert.id)+' and decide() downloaded. Recompute the verdict from the evidence, offline.\')">Verify offline</button>':'')+
-    (human.length&&v==="PENDING"?'<button class="btn sm primary" onclick="openDialog(\'dodsign\',\''+h(R.id)+'\')">Sign '+h(human[0].id)+'</button>':'')+'</div></div></div>';
-  return head+
-   '<div class="split" style="margin-top:14px"><div class="panel"><div class="panel-h"><h3>Checks</h3><span class="muted" style="font-size:12.5px">'+d.checks.length+' in the file'+(d.hidden?' · '+d.hidden+' hidden':'')+'</span>'+
-    '<div class="sp"><span class="b b-q">six kinds, nothing else</span></div></div>'+
-    '<div class="tw"><table><thead><tr><th>Check</th><th>Kind</th><th>Passes when</th><th>Result</th><th>Evidence</th></tr></thead><tbody>'+checks+'</tbody></table></div>'+
-    '<div class="panel-b"><div class="note">Hidden checks never appear in the file. The Stop hook fetches them from the cloud and runs them beside the visible ones, so an agent that games the visible set meets the hidden one.</div></div></div>'+
-   '<div><div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Budget</h3><span class="b b-q" style="margin-left:auto">from the tool log</span></div><div class="panel-b" style="display:grid;gap:10px">'+
-    dodBar("Cost",d.usage.usd,d.budget.usd,function(x){return "$"+(+x).toFixed(2);})+
-    dodBar("Tool calls",d.usage.toolCalls,d.budget.tool_calls,function(x){return String(x);})+
-    dodBar("Minutes",d.usage.minutes,d.budget.minutes,function(x){return String(x);})+
-    dodBar("Stop attempts",d.usage.stopAttempts,d.budget.stop_attempts,function(x){return String(x);})+
-    (d.denials&&d.denials.length?'<div class="warn" style="margin:0"><b>'+d.denials.length+' tool call'+(d.denials.length===1?'':'s')+' refused</b> by the PreToolUse hook: <span class="mono">'+h(d.denials.join(", "))+'</span></div>':'')+
-   '</div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>Stops</h3><span class="muted" style="font-size:12.5px">decide() at every Stop</span></div><div class="panel-b"><ul class="chain">'+stops+'</ul></div></div></div></div>';
-}
-DLG_EXT.dodfile=function(id){
-  var R=run(id)||RUNS[0], d=dodOf(R);
-  return {t:"The locked dod file",s:".oxagen/dod/"+R.id+".yaml",w:true,
-   b:'<pre>'+h(dodYaml(R))+'</pre>'+
-    '<div class="note" style="margin-top:12px">Locked at '+h(d.lockedAt)+' by <span class="mono">'+h(d.locked)+'</span>: RFC 8785 canonical JSON of the set with <span class="mono">locked</span> removed, then sha256. The agent may read this file and never edit it; an edit is <span class="mono">LOCK_MISMATCH</span> at the next Stop.'+(d.hidden?' '+d.hidden+' hidden check'+(d.hidden===1?'':'s')+' stayed in the cloud and never appear here.':'')+'</div>',
-   f:'<button class="btn" onclick="closeDialog()">Close</button>'};
-};
-DLG_EXT.dodsign=function(id){
-  var R=run(id)||RUNS[0], d=dodOf(R), c=d.checks.filter(function(x){return x.kind==="human"&&!x.ok;})[0];
-  if(!c) return {t:"Nothing to sign",w:false,b:'<div class="note">No human check is outstanding on this run.</div>',f:'<button class="btn" onclick="closeDialog()">Close</button>'};
-  return {t:"Sign a human check",s:R.id+" · "+c.id,w:false,
-   b:'<div class="field"><label>The check</label><input value="'+h(c.spec)+'" disabled aria-label="Check"></div>'+
-    '<div class="field"><label>Signing as</label><input value="'+h(me().name)+' · '+h(me().email)+'" disabled aria-label="Signer"></div>'+
-    '<div class="field"><label>Note for the certificate</label><textarea rows="2" aria-label="Note">Read it once. It says what the change does.</textarea></div>'+
-    '<div class="note">A signature never changes the evidence. It is added to it, decide() runs again, and PENDING becomes HELD. Runs as <span class="mono">oxagen dod sign '+h(R.id)+' '+h(c.id)+'</span>: a governed action with a receipt.</div>',
-   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="dodSign(\''+h(R.id)+'\')">Sign it</button>'};
-};
-function dodSign(id){
-  var d=new Date(), p=function(n){return (n<10?"0":"")+n;};
-  S.dodSigned[id]={by:me().name,at:"2026-09-11 "+p(d.getUTCHours())+":"+p(d.getUTCMinutes())+":"+p(d.getUTCSeconds())+"Z",signature:"ed25519:MEUCIQ"+Math.random().toString(16).slice(2,6)+"…"+Math.random().toString(16).slice(2,6)};
-  var R=run(id); if(R&&R._dod)R._dod._signed=false;
-  auditEvent("dod.signed",me().name,id+" · human check signed · PENDING → HELD","info",id);
-  closeDialog(); act("Signed. decide() re-ran with the signature: HELD. Certificate issued and metered as dod.held.");
-}
-/* Fleet reads these so its tiles and the table agree. */
-function dodPendingIn(list){return list.filter(function(r){return dodVerdict(r)==="PENDING";});}
-function dodHeldIn(list){return list.filter(function(r){return dodVerdict(r)==="HELD";});}
-
 function pFleet(){
   var w=ws();
   if(S.state==="loading") return skeleton();
@@ -1637,20 +1659,19 @@ function pFleet(){
   var fr=obFirstRun(w);
   var list=fr?[fr]:RUNS.filter(function(r){return r.ws===w.slug;});
   if(S.runFilter==="live") list=list.filter(function(r){return r.status==="live"||r.status==="parked";});
-  if(S.runFilter==="proven") list=list.filter(function(r){return r.verdict==="flipped";});
-  if(S.runFilter==="held") list=list.filter(function(r){return dodVerdict(r)==="HELD";});
+  if(S.runFilter==="parked") list=list.filter(function(r){return r.status==="parked"||r.status==="paused";});
+  if(S.runFilter==="sealed") list=list.filter(function(r){return r.status==="sealed"||r.status==="compacted";});
 
   var rows=list.map(function(r){
     var a=agent(r.agent);
-    return '<tr class="click'+(r.verdict==="flipped"?' flipped':'')+'" onclick="go(\'#/'+ORG.slug+'/'+w.slug+'/runs/'+r.id+'\')">'+
+    return '<tr class="click" onclick="go(\'#/'+ORG.slug+'/'+w.slug+'/runs/'+r.id+'\')">'+
      '<td><span class="tid">'+h(r.id)+'</span><div class="dim" style="font-size:11.5px">'+h(r.taskTitle)+'</div></td>'+
      '<td>'+agentCard(a,{key:r.agent})+'</td>'+
      '<td><span class="row" style="gap:7px;flex-wrap:nowrap;white-space:nowrap">'+personAv(r.op,22)+h(PEOPLE[r.op].name)+'</span></td>'+
      '<td>'+statusBadge(runStatus(r))+'</td>'+
      '<td>'+tierBadge(r.tier)+'</td>'+
      '<td>'+gradeBadge(r.grade)+'</td>'+
-     '<td>'+verdictCell(r)+'</td>'+
-     '<td>'+dodBadge(r,{sub:true})+'</td>'+
+     '<td class="num">'+runTokCell(r)+'</td>'+
      '<td class="num">'+usd(r.cost)+'<div class="dim mono" style="font-size:10px">'+h(r.basis)+'</div></td>'+
      '<td class="num">'+r.frames+'</td>'+
      '<td class="mono dim" style="font-size:11px">'+h(r.started)+'</td>'+
@@ -1675,29 +1696,29 @@ function pFleet(){
   var agentsShown=fr?list.reduce(function(k,r){if(k.indexOf(r.agent)<0)k.push(r.agent);return k;},[]).length:w.agents;
   var oldest=0; pend.forEach(function(a){var e=600-apLeft(a.id); if(e>oldest)oldest=e;});
   var skw=fr?0:skWaiting(w);
-  var sigs=dodPendingIn(list);
+  var sigs=[];
   var waitLabel=(pend.length?'oldest approval has waited '+mmss(oldest)+' of 10m'+(skw?' · 1 interjection':''):skw?'an interjection has waited 3m 36s of 30m':'nothing is parked')+(sigs.length?' · '+sigs.length+' signature'+(sigs.length===1?'':'s')+' outstanding':'');
-  var sealedShown=list.filter(function(r){return r.status!=="live"&&r.status!=="parked"&&r.status!=="paused";}), heldShown=dodHeldIn(sealedShown);
+  var tokShown=list.reduce(function(t,r){return t+runMetrics(r).tokTotal;},0);
 
   return ''+
-  '<div class="phead"><div class="t"><p class="eyebrow">Workspace · '+h(w.name)+'</p>'+
-   '<h1>Fleet</h1><p>Every run in this workspace, live and recent. Runs are not started here — agents start them, and this is where you stop, steer, or open one.</p></div>'+
+  '<div class="phead"><div class="t"><p class="eyebrow">'+h(w.name)+'</p>'+
+   '<h1>Fleet</h1><p>Every run in this workspace, live and recent.</p></div>'+
    '<div class="acts"><button class="btn" onclick="openSteerFleet()">Steer</button>'+
    '<button class="btn" onclick="regStart()">Register Agent</button></div></div>'+
-  obFleetBanners(w,fr)+skFleetBanner(w)+
+  obFleetBanners(w,fr)+
 
   '<div class="grid g4" style="margin-bottom:16px">'+
    '<div class="stat"><span class="k">Live runs</span><span class="v">'+live+'</span><span class="s">of '+agentsShown+' agent'+(agentsShown===1?'':'s')+' in this workspace</span></div>'+
-   '<div class="stat"><span class="k">Waiting on a human</span><span class="v" style="color:var(--st-approval)">'+(pend.length+skw+sigs.length)+'</span><span class="s">'+waitLabel+'</span></div>'+
-   '<div class="stat"><span class="k">Spend, runs shown</span><span class="v">'+usd(spendShown)+'</span><span class="s">'+basisLabel+' · '+ORG.currency+'</span></div>'+
-   '<div class="stat"><span class="k">Definition of done held</span><span class="v" style="color:var(--st-proven)">'+heldShown.length+'<small>of '+sealedShown.length+'</small></span><span class="s">'+(sealedShown.length?'sealed runs shown whose checks held · cache hit '+(cacheRate==null?'—':per(cacheRate)):'no sealed run shown yet')+'</span></div></div>'+
+   '<button class="stat click" onclick="apdToggle(true)" aria-label="Open approvals"><span class="k">Waiting on a human</span><span class="v" style="color:var(--st-approval)">'+(pend.length+skw+sigs.length)+'</span><span class="s">'+waitLabel+' · open the drawer</span></button>'+
+   '<div class="stat"><span class="k">Spend shown</span><span class="v">'+usd(spendShown)+'</span><span class="s">'+basisLabel+' · '+ORG.currency+'</span></div>'+
+   '<div class="stat"><span class="k">Tokens shown</span><span class="v">'+tokn(tokShown)+'</span><span class="s">'+(cacheRate==null?'no cache figure recorded':per(cacheRate)+' served from cache')+'</span></div></div>'+
 
-  (fr?obOfferCard(fr):'')+approvalsPanel(w.slug,fr?fr.id:undefined)+'<div style="height:14px"></div>'+
+  (fr?obOfferCard(fr):'')+
    '<div class="panel"><div class="panel-h"><h3>Runs</h3>'+
     '<div class="sp">'+
-     ['all','live','held','proven'].map(function(f){return '<button class="btn sm'+(S.runFilter===f?' sel':'')+'" onclick="S.runFilter=\''+f+'\';render()">'+f+'</button>';}).join("")+
+     ['all','live','parked','sealed'].map(function(f){return '<button class="btn sm'+(S.runFilter===f?' sel':'')+'" onclick="S.runFilter=\''+f+'\';render()">'+f+'</button>';}).join("")+
     '</div></div>'+
-    '<div class="tw"><table><thead><tr><th>Run</th><th>Agent</th><th>Operator</th><th>Status</th><th>Tier</th><th>Replay</th><th>Verdict</th><th>Done</th>'+
+    '<div class="tw"><table><thead><tr><th>Run</th><th>Agent</th><th>Operator</th><th>Status</th><th>Tier</th><th>Replay</th><th class="num">Tokens</th>'+
     '<th class="num">Cost</th><th class="num">Frames</th><th>Started</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div></div>';
 }
 
@@ -1741,7 +1762,7 @@ function mandateBar(m,showReserve){
   var left=showReserve?m.remaining:fmt2(lim-money(m.used));
   return '<div>'+
    '<div class="row" style="justify-content:space-between;margin-bottom:7px">'+
-    '<span class="eyebrow q" style="margin:0">Remaining authority · '+h(m.period)+' · September 2026</span>'+
+    '<span class="eyebrow q" style="margin:0">Remaining authority</span>'+
     '<span class="mono" style="font-size:12px;color:var(--muted)">of '+usd(m.perPeriod)+' '+h(m.currency)+'</span></div>'+
    '<div class="mbar" role="img" aria-label="'+usd(m.used)+' settled, '+(showReserve?usd(m.reserved)+' reserved by this call, ':'')+usd(left)+' remaining of '+usd(m.perPeriod)+'">'+
     '<i class="used" style="width:'+usedPct.toFixed(2)+'%"></i>'+(showReserve?'<i class="res" style="width:'+resPct.toFixed(2)+'%"></i>':'')+'</div>'+
@@ -1844,7 +1865,7 @@ function approvalCard(a){
   var slug=a.agent.split(".").pop();
   return '<div class="apcard'+(crit?' crit':'')+(done?' done':'')+'" id="ap-'+a.id+'">'+
    '<div class="aphead"><div style="min-width:0">'+
-    '<p class="eyebrow" style="margin-bottom:6px">'+(done?'Approval '+h(st.status):'Approval required')+' · governed action</p>'+
+    '<p class="eyebrow" style="margin-bottom:6px">'+(done?'Approval '+h(st.status):'Approval required')+'</p>'+
     (a.amount?'<div class="amt">'+usd(a.amount)+'<span class="cur">'+h(a.currency)+'</span></div>':'<div class="amt" style="font-size:17px">'+h(a.tool)+'</div>')+
     '<div class="row" style="margin-top:6px;gap:7px">'+agentCard(a.agent,{layout:"compact",key:a.agent})+'</div>'+
     '<div class="muted" style="font-size:12.5px;margin-top:4px">'+(a.amount?'<span class="mono">'+h(a.tool)+'</span> → ':'')+'<span class="mono">'+h(a.counterparty)+'</span>'+
@@ -1871,7 +1892,7 @@ function approvalCard(a){
        '<dt>Operator</dt><dd>'+h((PEOPLE[a.op]||{name:a.op}).name)+'</dd>'+
        '<dt>Policy</dt><dd><span class="mono">'+h(a.policy)+'</span>'+(pol?' <span class="dim">activated '+h(pol.at)+' by '+h(pol.by)+'</span>':'')+'</dd>'+
        '<dt>Rule</dt><dd>'+h(a.rule)+'</dd>'+
-       '<dt>Tier</dt><dd>'+h(a.tier)+(a.tier==="harness"?' <span class="dim">· the call was routed through Oxagen, so the decision was made on the server. The agent’s native tools are client-attested and fail-open</span>':' <span class="dim">· recorded only</span>')+'</dd></dl></div>')+
+       '<dt>Tier</dt><dd>'+h(a.tier)+((TIER_RANK[a.tier]||0)>=2?' <span class="dim">· routed through the gateway, so the decision was made on the server before the call left the host</span>':a.tier==="harness"?' <span class="dim">· the call was routed through Oxagen, so the decision was made on the server. The agent’s native tools are client-attested and fail-open</span>':' <span class="dim">· recorded only</span>')+'</dd></dl></div>')+
      '<div><p class="eyebrow q" style="margin-bottom:7px">The call</p><dl class="kv">'+
       '<dt>Tool version</dt><dd class="mono">'+h(a.tool)+'</dd>'+
       '<dt>Input digest</dt><dd class="mono">'+h(a.digest)+'</dd>'+
@@ -1881,7 +1902,7 @@ function approvalCard(a){
       '<dt>Run</dt><dd><a class="mono" href="#/'+ORG.slug+'/'+a.ws+'/runs/'+a.run+'">'+h(a.run)+'</a></dd></dl></div>'+
     '</div>'+
     taintBlock(a)+
-    '<div><p class="eyebrow q" style="margin-bottom:2px">Rules that fired · policy '+h(a.policy)+'</p>'+rulesList(a)+'</div>'+
+    '<div><p class="eyebrow q" style="margin-bottom:2px">Rules that fired</p>'+rulesList(a)+'</div>'+
     (a.approvers?'<div class="note">Eligible approvers: '+h(a.approvers)+'</div>':'')+
    '</div>'+
    decisionFoot(a)+'</div>';
@@ -1965,8 +1986,8 @@ function tick(){
   var expired=false;
   APPROVALS.forEach(function(a){
     var st=apState(a.id); if(st.status!=="pending") return;
-    var sec=apLeft(a.id), e=document.querySelector('[data-countdown="'+a.id+'"]');
-    if(e){e.textContent=mmss(sec);e.classList.toggle("warn",sec<120);}
+    var sec=apLeft(a.id), es=document.querySelectorAll('[data-countdown="'+a.id+'"]');
+    for(var k=0;k<es.length;k++){es[k].textContent=mmss(sec);es[k].classList.toggle("warn",sec<120);}
     if(sec<=0){approvalSettle(a,"expired","—","approval timeout");expired=true;
       toast("Approval expired after "+a.timeout+" — "+a.tool+" ended and "+(mandateFor(a)?"the reservation was released. ":"nothing was dispatched. ")+"The reason “approval timeout” reached the model.","denied");}
   });
@@ -2004,7 +2025,7 @@ function pRun(r){
 
   var head='<div class="phead"><div class="t"><p class="eyebrow">Run</p>'+
    '<h1 class="mono" style="font-size:19px">'+h(R.id)+'</h1>'+
-   '<div class="row" style="margin-top:8px">'+agentCard(a||R.agent,{layout:"compact",key:R.agent})+statusBadge(rs)+tierBadge(R.tier)+gradeBadge(R.grade)+verdictBadge(R.verdict,R)+dodBadge(R)+
+   '<div class="row" style="margin-top:8px">'+agentCard(a||R.agent,{layout:"compact",key:R.agent})+statusBadge(rs)+tierBadge(R.tier)+gradeBadge(R.grade)+
    '<span class="b b-q">task '+h(R.task)+'</span></div>'+
    '<p style="margin-top:8px">'+h(R.taskTitle)+' · started '+h(R.started)+(R.sealed?' · sealed '+h(R.sealed):'')+'</p></div>'+
    '<div class="acts">'+
@@ -2021,15 +2042,13 @@ function pRun(r){
     '<button class="btn" onclick="openDialog(\'runexport\')">Export</button>'+
    '</div></div>';
 
-  var strip=runInstruments(R)+promptRow(R)+runTimeline(R);
-
   var tabs=runTabs(R,t);
 
   var bodyHtml="";
   if(compacted&&t==="player"&&!S.seg[R.id]){
     bodyHtml='<div class="warn" style="margin-bottom:14px"><b>Compacted.</b> Frame nodes for this run left the graph after the thirteen-month hot window. '+
      'Render replay reads the archive segment, which is the same bytes the graph indexed, written once at seal. Nothing was moved and nothing was recomputed.</div>'+
-     '<div class="panel"><div class="panel-h"><h3>Archive segment</h3><span class="b b-q" style="margin-left:auto">read from object storage</span></div>'+
+     '<div class="panel"><div class="panel-h"><h3>Archive segment</h3></div>'+
      '<div class="panel-b"><dl class="kv">'+
      '<dt>Segment</dt><dd class="mono">seg_01K4QJ9E4T6YUI1O.ndjson.zst · 118 frame envelopes · 0.7 MB</dd>'+
      '<dt>Merkle root</dt><dd class="mono">sha256:b41e07c9a2f5308d6e14bb90c7f2a331</dd>'+
@@ -2051,7 +2070,7 @@ function pRun(r){
        (f.cost?'<span class="ct">$'+f.cost+'</span>':'')+'</button>';
     }).join("");
     setTimeout(fpAfterRender,0);
-    bodyHtml=fpBar(R)+'<div class="split"><div class="panel"><div class="panel-h"><h3>Frame '+fr.seq+' · <span class="mono">'+h(fr.kind)+'</span></h3>'+
+    bodyHtml=runTimeline(R)+fpBar(R)+'<div class="split"><div class="panel"><div class="panel-h"><h3>Frame '+fr.seq+' · <span class="mono">'+h(fr.kind)+'</span></h3>'+
      '<div class="sp">'+tierBadge(fr.tier)+'<span class="mono dim" style="font-size:11px">'+h(fr.t)+'</span></div></div>'+
      '<div class="panel-b">'+
       '<p style="margin-bottom:14px">'+h(fr.sum)+'</p>'+ frameDetail(fr) +
@@ -2060,29 +2079,27 @@ function pRun(r){
        '<button class="btn sm" onclick="fpStep(1)" title="→ next frame">Next ▶</button>'+
        '<span class="dim mono" style="font-size:11px;margin-left:auto">frame '+(S.frame+1)+' of '+FRAMES.length+' shown · '+R.frames+' in the run</span></div>'+
      '</div></div>'+
-     '<div><div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Timeline</h3><span class="dim" style="margin-left:auto;font-size:11px">'+(rs==="live"?'live · new frames append at the end':rs==="paused"?'paused · nothing new until resume':'sealed · complete')+'</span></div>'+
+     '<div><div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Timeline</h3><span class="dim" style="margin-left:auto;font-size:11px">'+(rs==="live"?'live':rs==="paused"?'paused':'sealed')+'</span></div>'+
      '<div class="panel-b" id="fptl" style="padding:7px;max-height:420px;overflow-y:auto">'+timeline+'</div></div>'+
-     '</div></div><div style="margin-top:14px">'+approvalsPanel(R.ws,R.id)+'</div>';
-  } else if(t==="proof"){
-    bodyHtml=proofTab(R);
-  } else if(t==="dod"){
-    bodyHtml=dodTab(R);
+     '</div></div>';
+  } else if(t==="issues"){
+    bodyHtml=issuesTab(R);
   } else if(t==="cost"){
-    bodyHtml=callsPanel(R)+costTab(R);
+    bodyHtml=runInstruments(R)+runSpendByArea(R)+callsPanel(R)+costTab(R);
   } else if(t==="policy"){
-    bodyHtml='<div class="panel"><div class="panel-h"><h3>Every policy decision on this run</h3>'+
-     '<span class="b b-q" style="margin-left:auto">policy pol_v41 · deterministic, no model in the path</span></div><div class="tw"><table>'+
+    bodyHtml='<div class="panel"><div class="panel-h"><h3>Policy decisions</h3>'+
+     '</div><div class="tw"><table>'+
      '<thead><tr><th>Frame</th><th>Call</th><th>Outcome</th><th>Rules that fired</th><th>Taint</th><th>Latency</th></tr></thead><tbody>'+
      '<tr><td class="mono">5</td><td class="mono">github__list_pull_requests@3</td><td><span class="b b-allowed"><span class="d"></span>allow</span></td><td class="mono" style="font-size:11.5px">rg_0088</td><td class="dim">none</td><td class="num">6 ms</td></tr>'+
      '<tr><td class="mono">14</td><td class="mono">github__create_release@2</td><td><span class="b b-approval"><span class="d"></span>approve</span></td><td class="mono" style="font-size:11.5px">rg_0093</td><td class="dim">none</td><td class="num">7 ms</td></tr>'+
      '</tbody></table></div><div class="panel-b"><div class="note">Same call, same policy version, same answer. The decision cites <span class="mono">pol_v41</span>; a change to the policy produces a new version, never a different answer from the same one.</div></div></div>';
   } else if(t==="context"){
-    bodyHtml=contextTab(R);
+    bodyHtml=promptRow(R)+contextTab(R);
   } else {
     bodyHtml=chainTab(R);
   }
-  var hero=(R.verdict==="flipped"&&R.flip)?flipHero(R):'';
-  return head+pauseBanner(R)+runSummary(R)+runOutputs(R)+linkedWork(R)+hero+strip+tabs+bodyHtml;
+  return head+pauseBanner(R)+'<div class="run-cols"><div class="run-main">'+runSummary(R)+runStatRow(R)+tabs+bodyHtml+'</div>'+
+   '<aside class="run-side" aria-label="The work">'+runSide(R)+'</aside></div>';
 }
 
 /* ===================== Run instruments · timeline · tab state · kind chips ===================== */
@@ -2160,7 +2177,7 @@ function rngOf(seed){var x=seed>>>0;return function(){x=(x*1664525+1013904223)>>
    A list that stops short of the run (a live or parked run's first frames) is a window onto a longer
    run, so its counts would undercount; those runs keep the seeded derivation. Synthesized lists are
    built from runMetrics and never read back here. */
-var FR_CALL_KINDS=/^(tool_call|tool_result|witness\.run)$/;
+var FR_CALL_KINDS=/^(tool_call|tool_result)$/;
 function runFrameClock(R){
   var L=FRAMES_BY_RUN[R.id];
   if(!L||!L.length||L[0].run!=null) return null;
@@ -2173,7 +2190,7 @@ function runFrameClock(R){
   for(i=0;i<L.length;i++){var f=L[i];
     if(f.kind==="model.response"){modelN++;for(j=i-1;j>=0&&!/^model\./.test(L[j].kind);j--){}modelMs+=ms(j>=0&&L[j].kind==="model.request"?j:Math.max(0,i-1),i);}
     else if(FR_CALL_KINDS.test(f.kind)){
-      var start=f.kind==="witness.run", id=start?"witness__run@1":null;
+      var start=false, id=null;
       for(j=i;!id&&j>=0&&j>i-6;j--){var mm=/^([a-z_]+__[a-z_]+@\d+)/.exec(L[j].sum||"");if(mm)id=mm[1];}
       id=id||"tool__call@1";
       calls.push({id:id,cat:toolMeta(id).cat,ms:start?(i+1<L.length?ms(i,i+1):0):(i>0?ms(i-1,i):0),err:/^(failed|[45]\d\d)\b/.test(f.sum||""),seq:f.seq});}
@@ -2263,6 +2280,121 @@ function msDur(ms){
 function pct(a,b){return b?Math.round(a/b*100)+"%":"0%";}
 
 /* ---- the six instruments ---- */
+/* ============================== Run page layout ==============================
+   The first prompt is the first thing on the page, one row of stat boxes under it, then the tabs
+   with the transcript open, so the top of the transcript is above the fold. The work sits in the
+   right column: the repository, the pull request and its checks, the files in the diff, the task,
+   the generated summary and the outputs. Prompts after the first are corrective: each one fixes or
+   fills what the first left out, so the count is a wasted-spend cause and a coaching signal. */
+function runPrompts(R){
+  if(typeof R.prompts==="number") return R.prompts;
+  var n=0; txEntries(R).forEach(function(e){if(e.kind==="prompt"||e.kind==="steer")n++;});
+  return Math.max(1,n);
+}
+function runWaste(R){
+  var listed=null; (SPEND.wasteRunsList||[]).forEach(function(x){if(x.run===R.id)listed=x;});
+  var cost=parseFloat(R.cost)||0, p=runPrompts(R), corrective=p>1?cost*((p-1)/p)*0.55:0;
+  return {usd:(listed?parseFloat(listed.wasted):0)+corrective,corrective:corrective,prompts:p,listed:listed};
+}
+function operatorPrompts(p){
+  var rs=RUNS.filter(function(r){return r.op===p;}); if(!rs.length) return null;
+  var n=0, waste=0; rs.forEach(function(r){n+=runPrompts(r); waste+=runWaste(r).corrective;});
+  return {avg:n/rs.length,runs:rs.length,oneShot:rs.filter(function(r){return runPrompts(r)===1;}).length,waste:waste};
+}
+function runStatRow(R){
+  var m=runMetrics(R), w=runWaste(R), p=w.prompts, s=m.series;
+  var wp=[["model",m.modelMs],["tool",m.toolMs],["waiting on a person",m.waitMs],["harness",m.overMs]].sort(function(x,y){return y[1]-x[1];})[0];
+  var tile=function(k,v,sub,color){return '<div class="stat"><span class="k">'+k+'</span><span class="v"'+(color?' style="color:'+color+'"':'')+'>'+v+'</span><span class="s">'+sub+'</span></div>';};
+  return '<div class="rstats">'+
+   tile("Tokens",tokn(m.tokTotal),tokn(m.tokIn)+' in, '+tokn(m.tokOut)+' out')+
+   tile("Prompts",p,p===1?'one-shot session':(p-1)+' corrective',p>2?"var(--st-approval)":null)+
+   tile("Cost",usd(R.cost),'<span class="basis">'+h(R.basis)+'</span>')+
+   tile("Wasted",fmt$(w.usd),w.corrective?(p-1)+' corrective prompt'+(p===2?'':'s'):w.listed?h(w.listed.badges[0][0]):'nothing bought nothing',w.usd>0?"var(--st-critical)":null)+
+   tile("Wall clock",msDur(m.wall),(wp[0]==="waiting on a person"?'mostly waiting on a person':wp[0]==="model"?'mostly in the model':'mostly in '+wp[0]+' calls'))+
+   tile("Cache hit",per(R.cache),'saved about $'+s.saved.toFixed(2))+'</div>';
+}
+/* Every issue a session touched: the task it was started for, and any it read, referenced or closed.
+   A session is not one issue; the tab says which is which and links to each. */
+function issueUrl(ref){
+  var m=/^([\w.-]+\/[\w.-]+)#(\d+)$/.exec(ref); if(m) return "https://github.com/"+m[1]+"/issues/"+m[2];
+  if(/^LIN-\d+$/.test(ref)) return "https://linear.app/a-intel/issue/"+ref;
+  if(/^PO-\d+$/.test(ref)) return "https://erp.a-intel.example/po/"+ref;
+  return null;
+}
+function runIssues(R){
+  var g=runGraphOf(R), out=[], seen={};
+  var add=function(x){if(!x||!x.ref||seen[x.ref])return;seen[x.ref]=1;out.push(x);};
+  if(R.task) add({ref:R.task,title:R.taskTitle,rel:"task",status:R.taskStatus||"open",edge:"stated",fr:1});
+  (R.issues||[]).forEach(function(x){add({ref:x.ref,title:x.title,rel:x.rel||"referenced",status:x.status||"open",edge:x.fr!=null?"observed":"inferred",fr:x.fr});});
+  (g.issues||[]).forEach(function(x){add({ref:x.ref,title:x.title,rel:x.rel||"referenced",status:x.status||"open",edge:x.edge||"stated",fr:x.fr});});
+  (R.outputs||[]).forEach(function(o){if(o.kind==="task"&&o.name!==R.task)add({ref:o.name,title:o.note||"",rel:"referenced",status:"open",edge:o.fr!=null?"observed":"inferred",fr:o.fr});});
+  return out;
+}
+function issuesTab(R){
+  var L=runIssues(R), st={open:"b-allowed",closed:"b-q","in progress":"b-approval",blocked:"b-denied"};
+  var rows=L.map(function(x){var u=issueUrl(x.ref);
+    return '<tr><td><span class="mono" style="font-size:12px">'+h(x.ref)+'</span><div class="dim" style="font-size:11.5px">'+h(x.title||"")+'</div></td>'+
+     '<td><span class="b '+(st[x.status]||"b-q")+'"><span class="d"></span>'+h(x.status)+'</span></td>'+
+     '<td><span class="b b-q">'+h(x.rel)+'</span></td>'+
+     '<td>'+edgeChip({edge:x.edge,fr:x.fr!=null?[x.fr]:null,conf:x.edge==="inferred"?0.7:null})+'</td>'+
+     '<td>'+(u?'<a href="'+h(u)+'" target="_blank" rel="noopener">View ↗</a>':'<span class="dim">no link</span>')+'</td></tr>';}).join("");
+  return '<div class="panel"><div class="panel-h"><h3>Issues</h3><span class="b b-q" style="margin-left:auto">'+L.length+' in this session</span></div>'+
+   '<div class="tw"><table><thead><tr><th>Issue</th><th>Status</th><th>Relation</th><th>Edge</th><th></th></tr></thead><tbody>'+(rows||'<tr><td colspan="5" class="dim">No issue is linked to this session.</td></tr>')+'</tbody></table></div>'+
+   '<div class="panel-b"><div class="note">A session can touch more than one issue: the task it was started for, and any it read, referenced or closed on the way. The relation says which, the edge says how Oxagen knows, and the status is read from the tracker when the page loads.</div></div></div>';
+}
+/* Spend by area: the run's cost split across what the tokens were spent on. Input is a third of the
+   money and splits by the tokens each area put into the window; output is the rest. Tool calls are
+   split again by tool, so the dearest tool is visible. Every figure derives from runMetrics(R). */
+function runAreas(R){
+  var m=runMetrics(R), total=parseFloat(R.cost)||0, p=runPrompts(R), n=Math.max(1,m.modelN);
+  var CW=runContext(R), mc=frReqComp(m.perCall,CW.none?{}:{system:CW.system,steering:CW.steering,tools:CW.tools});
+  var first=m.promptTok*n, follow=p>1?Math.round(m.promptTok*0.8*(p-1)*n*0.6):0;
+  var ctx=Math.round((mc.ctx+mc.steering)*n), defs=Math.round(mc.tools*n), sys=Math.round(mc.system*n);
+  var results=Math.max(0,m.tokIn-first-follow-ctx-defs-sys);
+  var inCost=total/3, per=function(t){return inCost*tokShare(t,m.tokIn);};
+  var areas=[["Initial prompt",first,per(first),"the first prompt, carried in every request"],
+    ["Follow-up prompts",follow,per(follow),p>1?(p-1)+" corrective prompt"+(p===2?"":"s")+", each re-sent with the window":"none"],
+    ["Context retrievals",ctx,per(ctx),"context frames and steering Oxagen injected"],
+    ["Tool definitions",defs,per(defs),"the belt as the model is shown it"],
+    ["Tool calls",results,per(results),m.calls.length+" calls, result bodies in the window"],
+    ["System prompt",sys,per(sys),"the harness's own prompt"],
+    ["Model output",m.tokOut,total*2/3,tokn(m.reasoning)+" of it reasoning"]];
+  var byTool={}, msTot=0; m.calls.forEach(function(c){msTot+=c.ms;});
+  m.calls.forEach(function(c){var t=byTool[c.id]||(byTool[c.id]={id:c.id,calls:0,ms:0});t.calls++;t.ms+=c.ms;});
+  var tools=Object.keys(byTool).map(function(k){var t=byTool[k];var share=msTot?t.ms/msTot:1/Math.max(1,m.calls.length);return {id:t.id,calls:t.calls,tok:Math.round(results*share),usd:per(results)*share};}).sort(function(x,y){return y.usd-x.usd;});
+  return {areas:areas,tools:tools,total:total};
+}
+function runSpendByArea(R){
+  var A=runAreas(R), mx=Math.max.apply(null,A.areas.map(function(a){return a[2];}))||1;
+  var bars=A.areas.map(function(a){return '<div class="meter"'+tipAttr(a[3])+'><div class="lab">'+a[0]+'<b>'+(a[2]>0&&a[2]<0.005?'$'+a[2].toFixed(3):fmt$(a[2]))+' <span class="dim" style="font-weight:500">· '+tokn(a[1])+' tok</span></b></div><div class="bar"><i style="width:'+Math.max(1,Math.round(a[2]/mx*100))+'%;background:var(--st-approval)"></i></div></div>';}).join("");
+  var top=A.tools.slice(0,8).map(function(t){return '<div class="rs-file"><span class="mono" title="'+h(t.id)+'">'+h(toolParts(t.id).n)+'</span><span class="mono dim">'+t.calls+' call'+(t.calls===1?'':'s')+' · <b style="color:var(--fg)">'+fmt$(t.usd)+'</b></span></div>';}).join("");
+  return '<div class="panel"><div class="panel-h"><h3>Spend by area</h3><span class="mono dim" style="margin-left:auto;font-size:11px">'+usd(R.cost)+' · '+h(R.basis)+'</span></div>'+
+   '<div class="panel-b" style="display:grid;gap:9px">'+bars+'</div>'+
+   (A.tools.length?'<div class="panel-b" style="border-top:1px solid var(--border)"><p class="eyebrow q" style="margin:0 0 4px">Dearest tools</p><div class="rs-files" style="margin:0;border:0">'+top+'</div>'+'</div>':'')+
+   ('<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">Input is a third of the money, split by the tokens each area put into the window; output is the rest. Tool calls split again by the wall clock each tool held, so the dearest tool is visible. A follow-up prompt re-sends the window, which is why it costs more than its own words.</div></div>')+'</div>';
+}
+function runSide(R){
+  var g=runGraphOf(R), m=runMetrics(R), outs=R.outputs||[];
+  var branch=outs.filter(function(o){return o.kind==="branch";})[0], pr=g.artifacts.filter(function(a){return a.kind==="pr";})[0]||outs.filter(function(o){return o.kind==="pr";})[0];
+  var checks=outs.filter(function(o){return o.kind==="check";}), rel=g.artifacts.filter(function(a){return a.kind==="release";})[0], repo=g.repos[0];
+  var artState={open:"b-approval",pushed:"b-allowed",pending:"b-approval",failing:"b-denied",passed:"b-allowed",blocked:"b-denied",merged:"b-allowed",none:"b-q",created:"b-allowed"};
+  var chip=function(st){return st?'<span class="b '+(artState[st]||"b-q")+'"><span class="d"></span>'+h(st)+'</span>':'';};
+  var ciState=checks.length?(checks.every(function(c){return c.state==="passed";})?"passed":checks.some(function(c){return c.state==="failing"||c.state==="blocked";})?"failing":"pending"):null;
+  var rows=[];
+  rows.push(["Repository",repo?'<span class="mono">'+h(repo.name)+'</span> '+edgeChip(repo):'<span class="dim">none touched</span>']);
+  rows.push(["Branch",branch?'<span class="mono">'+h(branch.name)+'</span> '+chip(branch.state)+' <span class="dim">main untouched</span>':'<span class="dim">none pushed</span>']);
+  rows.push(["Pull request",pr?'<span class="mono">'+h(pr.ref||pr.name)+'</span> '+chip(pr.state):'<span class="dim">none yet'+(R.status==="live"?', the run is still working':'')+'</span>']);
+  rows.push(["Checks",ciState?chip(ciState)+' <span class="dim">'+checks.map(function(c){return h(c.name)+' '+h(c.state);}).join(', ')+'</span>':'<span class="dim">none reported</span>']);
+  if(rel) rows.push(["Release",'<span class="mono">'+h(rel.ref)+'</span> '+chip(rel.state)]);
+  rows.push(["Diff",g.files.length?'<span class="mono"><b style="color:var(--st-allowed)">+'+m.add+'</b> <b style="color:var(--st-denied)">−'+m.del+'</b></span> <span class="dim">in '+g.files.length+' file'+(g.files.length===1?'':'s')+'</span>':'<span class="dim">no file change recorded</span>']);
+  var files=g.files.map(function(f){var st=diffStat(txDiffRows(f.before,f.after));
+    return '<div class="rs-file"><span class="mono" title="'+h(f.path)+'">'+h(f.path)+'</span><span class="mono dim"><b style="color:var(--st-allowed)">+'+st.add+'</b> <b style="color:var(--st-denied)">−'+st.del+'</b></span></div>';}).join("");
+  var work='<div class="panel"><div class="panel-h"><h3>Repository</h3>'+(pr||ciState?'<span style="margin-left:auto">'+(pr?chip(pr.state):chip(ciState))+'</span>':'')+'</div>'+
+   '<div class="panel-b"><dl class="kv rs-kv">'+rows.map(function(r){return '<dt>'+r[0]+'</dt><dd>'+r[1]+'</dd>';}).join("")+'</dl>'+
+   (files?'<div class="rs-files">'+files+'</div><div class="row" style="margin-top:8px"><button class="btn sm" onclick="S.tab.run=\'transcript\';render()">Open the diff in the transcript</button></div>':'')+
+   '</div></div>';
+  return work+runOutputs(R);
+}
 function instTile(k,basis,value,sub,chart,foot){
   return '<div class="inst"><div class="ih"><span class="k">'+k+'</span><span class="basis">'+basis+'</span></div>'+
    '<div class="iv">'+value+'</div>'+(sub?'<div class="is">'+sub+'</div>':'')+(chart||'')+(foot?'<div class="is">'+foot+'</div>':'')+'</div>';
@@ -2345,7 +2477,7 @@ function runInstruments(R){
 function promptRow(R){
   /* the window is runContext's: the same request, total and blocks the Context tab accounts for */
   var m=runMetrics(R),op=PEOPLE[R.op],W=runContext(R);
-  var head='<div class="panel pr-row"><div class="panel-h"><h3>The prompt</h3>';
+  var head='<div class="panel pr-row"><div class="panel-h"><h3>Prompt</h3>';
   var said='<div class="pr-text"><p class="eyebrow q">Written by '+h(op?op.name:R.op)+'</p><p class="q">“'+h(R.taskTitle)+(R.task?'. Task '+h(R.task)+'.':'')+'”</p></div>';
   if(W.none) return head+'<span class="mono dim" style="font-size:11px">'+tokn(m.promptTok)+' tok written</span></div>'+
    '<div class="panel-b pr-b">'+said+'<div class="pr-exp"><p class="eyebrow q">What reached the model on the first call</p>'+
@@ -2354,9 +2486,9 @@ function promptRow(R){
   var parts=[["operator’s words",words],["tools and steering",ts],["system, context, brief",win-words-ts]];
   return head+
    '<span class="mono dim" style="font-size:11px">'+tokn(m.promptTok)+' tok written · '+tokn(win)+' tok sent</span>'+
-   (R.witnessFor?'</div>':'<button class="btn sm" style="margin-left:auto" onclick="S.tab.run=\'context\';render()">Open the window</button></div>')+
+   '<button class="btn sm" style="margin-left:auto" onclick="S.tab.run=\'context\';render()">Open the window</button></div>'+
    '<div class="panel-b pr-b">'+said+
-    '<div class="pr-exp" data-pr-win="'+win+'" data-pr-ts="'+ts+'"><p class="eyebrow q">What reached the model on the first call · model.request seq '+W.req.seq+'</p>'+
+    '<div class="pr-exp" data-pr-win="'+win+'" data-pr-ts="'+ts+'"><p class="eyebrow q">First request</p>'+
      '<div class="pr-bars">'+parts.map(function(p,i){return '<div class="pr-bar"'+tipAttr(p[0]+" · "+tokn(p[1])+" tok · "+pct(p[1],win))+'><span class="l">'+p[0]+'</span><span class="t"><i style="width:'+Math.round(p[1]/Math.max(1,win)*100)+'%;opacity:'+(1-i*0.28)+'"></i></span><span class="v">'+tokn(p[1])+'</span></div>';}).join("")+'</div>'+
      '<p class="muted" style="font-size:11.5px;margin:8px 0 0">One sentence expanded to '+tokn(win)+' tokens; '+pct(W.cached,win)+' of it came from cache, so it was paid for once.</p></div>'+
    '</div></div>';
@@ -2373,19 +2505,19 @@ function callsPanel(R){
   var hmx=Math.max.apply(null,Object.keys(m.hist).map(function(k){return m.hist[k];}));
   var hrows=Object.keys(m.hist).sort().map(function(k){
     return '<div class="hrow"><span class="hk">'+k+' tool'+(k==="1"?"":"s")+'</span><span class="fb"'+tipAttr(m.hist[k]+" batches asked for "+k+" tool"+(k==="1"?"":"s")+" at once")+'><i style="width:'+Math.round(m.hist[k]/hmx*100)+'%"></i></span><span class="hv">'+m.hist[k]+'</span></div>';}).join("");
-  return '<div class="panel" style="margin-bottom:16px"><div class="panel-h"><h3>Calls, concurrency and prefetch</h3>'+
+  return '<div class="panel" style="margin-bottom:16px"><div class="panel-h"><h3>Tool calls</h3>'+
    '<span class="mono dim" style="font-size:11px;margin-left:auto">'+m.calls.length+' calls · '+m.batches.length+' batches · '+m.families.length+' families</span></div>'+
    '<div class="cc">'+
-    '<div class="cc-c wide"><p class="eyebrow q">By family · what the calls acted on</p>'+
+    '<div class="cc-c wide"><p class="eyebrow q">Calls by family</p>'+
      '<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Family</th><th class="num">Calls</th><th></th><th class="num">Share</th><th class="num">Wall clock</th><th class="num">Failed</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
      '<p class="muted" style="font-size:11.5px;margin:9px 0 0">A family says what a tool <b>acts on</b>. It is orthogonal to the hazard and to what the belt decided.</p></div>'+
-    '<div class="cc-c"><p class="eyebrow q">Concurrency · tools per batch</p>'+
+    '<div class="cc-c"><p class="eyebrow q">Tools per batch</p>'+
      '<div class="hist">'+hrows+'</div>'+
      '<dl class="kv" style="margin-top:12px"><dt>Batches</dt><dd>'+m.batches.length+' · <b>'+m.par+'</b> ran more than one tool</dd>'+
      '<dt>Widest batch</dt><dd>'+m.maxPar+' tools at once</dd>'+
      '<dt>Mean fan-out</dt><dd>'+m.fan.toFixed(2)+' tools per batch</dd>'+
      '<dt>Wall clock won</dt><dd><b>'+msDur(m.serialMs-m.toolMs)+'</b> · '+msDur(m.toolMs)+' together against '+msDur(m.serialMs)+' in turn</dd></dl></div>'+
-    '<div class="cc-c"><p class="eyebrow q">Speculative prefetch · started before the step was final</p>'+
+    '<div class="cc-c"><p class="eyebrow q">Speculative prefetch</p>'+
      '<div class="spec"><div class="sv">'+m.used+'<small> of '+m.started+' used</small></div>'+
       '<div class="stk"><i class="fk-model" style="flex:'+m.used+'"'+tipAttr(m.used+" prefetched reads the model went on to ask for")+'></i><i style="flex:'+Math.max(0,m.discarded)+';background:var(--rule)"'+tipAttr(m.discarded+" discarded unread")+'></i></div>'+
       stackLeg([["used",m.used,"fk-model",m.used],["discarded",m.discarded,"neu",m.discarded]])+'</div>'+
@@ -2420,31 +2552,20 @@ function runTimeline(R){
    '<div class="rt-foot"><span class="grow">Every tick is a frame; the taller ones need a person. Click one to open it in the Player; hover for the record.</span>'+
    '<span>'+bounds.length+' turn'+(bounds.length===1?'':'s')+' in view</span></div></div></div>';
 }
-/* The Run page's tab for this run. A witness run has four tabs: its ladder, its frames, its cost and its chain.
-   proofTab draws the ladder for a witness run, so the ladder answers as "proof" and pRun needs no branch of its own. */
+/* The Run page's tab for this run. Tabs that no longer exist land on Cost. */
 function runTabKey(R){
   var t=tab("run","transcript");
-  if(R&&R.witnessFor) return (t==="player"||t==="cost"||t==="chain")?t:"proof";
-  return t==="ladder"?"proof":t;
+  return (t==="proof"||t==="dod"||t==="ladder")?"cost":t;
 }
 function runTabs(R,t){
-  if(R.witnessFor){
-    var P=run(R.witnessFor);
-    var wt=[["ladder","Ladder",P&&P.verdict?P.verdict:"",P&&P.verdict?'<span class="st '+(P.verdict==="flipped"?"ok":"bad")+'"></span>':""],
-      ["player","Frames",R.frames,""],["cost","Cost",usd(R.cost),""],["chain","Chain and seal",R.sealed?"sealed":"live",""]];
-    return '<div class="tabs" role="tablist">'+wt.map(function(x,i){var on=x[0]==="ladder"?t==="proof":t===x[0];
-      return '<button class="tab" role="tab" aria-selected="'+on+'" title="'+(i+1)+'" onclick="S.tab.run=\''+x[0]+'\';render()">'+x[1]+(x[2]!==""?'<span class="n'+(x[0]==="cost"?" money":"")+'">'+h(String(x[2]))+'</span>':'')+x[3]+'</button>';}).join("")+'</div>';
-  }
   var gov=govCount(),parked=0;FRAMES.forEach(function(f){if(f.kind==="policy_decision"&&/approve/.test(f.sum))parked++;});
   var ctxN=0;FRAMES.forEach(function(f){var m=/(\d+) context frames/.exec(f.sum);if(m)ctxN=Math.max(ctxN,+m[1]);});
-  var tabs=[["transcript","Transcript",txEntries(R).length,""],["player",gov?"Governed actions":"Player",gov||R.frames,parked?'<span class="st" title="a call is parked for approval"></span>':""],
-   ["proof","Proof",R.verdict?R.verdict:"",R.verdict?'<span class="st '+(R.verdict==="flipped"||R.verdict==="waived"?"ok":"bad")+'"></span>':""],
-   ["dod","Done",dodWord(dodVerdict(R)),dodVerdict(R)?'<span class="st '+(dodVerdict(R)==="HELD"?"ok":dodVerdict(R)==="PENDING"?"wait":"bad")+'"></span>':""],
+  var tabs=[["transcript","Transcript",txEntries(R).length,""],["issues","Issues",runIssues(R).length,""],["player",gov?"Governed actions":"Player",gov||R.frames,parked?'<span class="st" title="a call is parked for approval"></span>':""],
    ["cost","Cost",usd(R.cost),""],["policy","Policy",gov,parked?'<span class="st" title="'+parked+' parked"></span>':""],
    ["context","Context",ctxN||"",""],["chain","Chain and seal",R.sealed?"sealed":"live",""]];
   return '<div class="tabs" role="tablist">'+tabs.map(function(x,i){return '<button class="tab" role="tab" aria-selected="'+(t===x[0])+'" title="'+(i+1)+'" onclick="S.tab.run=\''+x[0]+'\';render()">'+x[1]+(x[2]!==""&&x[2]!=null?'<span class="n'+(x[0]==="cost"?" money":"")+'">'+h(String(x[2]))+'</span>':'')+x[3]+'</button>';}).join("")+'</div>';
 }
-var TX_HUE={prompt:"op",text:"model",reasoning:"model",tool:"tool",usage:"gov",context:"ctx",proof:"gov"};
+var TX_HUE={prompt:"op",text:"model",reasoning:"model",tool:"tool",usage:"gov",context:"ctx",seal:"gov"};
 function txKindChips(R,errN){
   var all=txEntries(R),cnt={};all.forEach(function(e){var g=txGroupOf(e.kind);if(g)cnt[g]=(cnt[g]||0)+1;});
   var anyOff=TX_GROUPS.some(function(g){return !S.tx.on[g[0]];});
@@ -2460,7 +2581,7 @@ function txAll(on){TX_GROUPS.forEach(function(g){S.tx.on[g[0]]=on;});render();}
    go through render() like everything else in this file. */
 var TX_SPEEDS=[1,2,3,6];
 var TX_GROUPS=[["prompt","prompt",["prompt","steer"]],["text","responses",["text"]],["reasoning","thinking",["reasoning"]],
-               ["tool","tools",["tool"]],["usage","usage",["usage"]],["context","recall",["context_recall"]],["proof","proof",["proof","verdict","complete"]]];
+               ["tool","tools",["tool"]],["usage","usage",["usage"]],["context","recall",["context_recall"]],["seal","seal",["complete"]]];
 var GOV_KINDS={policy_decision:1,approval_request:1,token_issued:1};
 S.tx={on:{},q:"",errs:false,think:false,open:{},playing:true,speed:1,revealed:0,timer:null,runId:null};
 /* run controls (pause/resume are governed actions; the seed RUNS is never mutated) and the frame player */
@@ -2515,32 +2636,15 @@ function txDiffBlock(d,open){
   return '<div class="tx-diffwrap"><div class="path"><b>'+h(d.path)+'</b>'+(d.before?'':'<span>new file</span>')+
    '<span class="dstat"><b class="a">+'+st.add+'</b> <b class="d">−'+st.del+'</b></span></div>'+html+'</div>';
 }
-/* a run without a recorded transcript still has a prompt, an answer and its proof: synthesise the
+/* a run without a recorded transcript still has a prompt, an answer and its seal: synthesise the
    projection from what the run record carries, and say so in the runbar */
 function txEntries(R){
   if(TRANSCRIPTS[R.id])return TRANSCRIPTS[R.id];
   var e=[{t:0,kind:"prompt",body:R.taskTitle+(R.task?"\n\nTask "+R.task+".":""),meta:{task:R.task,by:PEOPLE[R.op]?PEOPLE[R.op].name:""}}];
   var t=2;
-  /* the worker never runs the witness and never sees it: each verify call returns one word, pass or
-     fail, at the disclosure grain, and the command, the assertions and the output stay on the witness
-     run. So the worker fixes its work, not the oracle. */
-  if(R.flip&&R.flip.attempts){
-    var f=R.flip, W=proofWitnessRun(R), wr=W?W.id:f.witnessRun, k=f.attempts.length;
-    e.push({t:t,kind:"text",body:"Asking Oxagen to verify "+f.prRef+". The witness stays in the witness runner; this run is told pass or fail and nothing else."});
-    f.attempts.forEach(function(a,i){
-      var word=a.result==="pass"?"pass":"fail";
-      t+=6+a.ms/1000;
-      e.push({t:t,kind:"tool",title:"verify",cls:"verify",arg:f.prRef+(a.n>1?" · again":""),raw:'{"ref":"'+f.prRef+'"}',fr:a.seq,
-        res:{ms:a.ms,err:word!=="pass",body:word}});
-      if(word!=="pass"&&i<k-1){t+=9;e.push({t:t,kind:"text",body:"fail, and nothing else. Re-reading the task and the steering, revising, and asking again."});}
-    });
-    t+=3;
-    e.push({t:t,kind:"proof",title:"proof.observed · witness "+f.witness+" · "+(R.verdict==="flipped"?"flipped at attempt "+k:R.verdict+" after "+k+" attempt"+(k===1?"":"s")),
-      body:"recorded by the gateway, never shown to the model · fingerprint "+f.fingerprint+" · "+f.heldOut+" held out · sealed "+f.sealedAt+(wr?" · witnessed on "+wr:"")});
-  }
   if(R.summary){t+=4;e.push({t:t,kind:"text",body:R.summary});}
   t+=0.2;e.push({t:t,kind:"usage",meta:{model:R.model,tin:null,cache:null,tout:null,cost:parseFloat(R.cost)||0,req:"rollup · "+R.frames+" frames"}});
-  if(R.status==="sealed"||R.status==="compacted")e.push({t:t+0.5,kind:"complete",title:"sealed "+(R.sealed||""),body:R.verdict?"verdict "+R.verdict:""});
+  if(R.status==="sealed"||R.status==="compacted")e.push({t:t+0.5,kind:"complete",title:"sealed "+(R.sealed||""),body:""});
   return e;
 }
 function txVisible(R){
@@ -2566,7 +2670,7 @@ function txRow(R,e,i,cum,rows,answerIdx){
   var q=S.tx.q.trim(),open=!!S.tx.open[i],inner="",dot="",body=e.body||"";
   if(e.kind==="prompt"){
     inner='<div class="tx-role you"><div class="tx-rolegut"><span class="tx-roletag">YOU</span></div><div><div class="tx-prose">'+txHi(body,q)+'</div>'+
-     '<div class="tx-sub">'+(e.meta&&e.meta.by?'<span>'+h(e.meta.by)+' · operator</span>':'')+(e.meta&&e.meta.task?'<span class="mono">task '+h(e.meta.task)+'</span>':'')+'<span>the prompt is the question every row below is read against</span></div></div></div>';
+     '<div class="tx-sub">'+(e.meta&&e.meta.by?'<span>'+h(e.meta.by)+' · operator</span>':'')+(e.meta&&e.meta.task?'<span class="mono">task '+h(e.meta.task)+'</span>':'')+'<span>first prompt</span></div></div></div>';
   } else if(e.kind==="steer"){
     inner='<div class="tx-role steer"><div class="tx-rolegut"><span class="tx-roletag">STEER</span></div><div><div class="tx-prose">“'+txHi(body,q)+'”</div>'+
      '<div class="tx-sub"><span>'+h(e.meta.by)+' · '+h(e.meta.role)+'</span><span>delivered at the next boundary · '+e.meta.tok+' tok</span>'+
@@ -2603,7 +2707,7 @@ function txRow(R,e,i,cum,rows,answerIdx){
     else if(pending)chips+='<span class="tx-chip">running…</span>';
     chips+=txGovChip(e.gov);
     if(e.raw)chips+='<button class="tx-fold" onclick="txOpen('+i+')" aria-label="'+(open?"hide":"show")+' arguments">'+(open?"⏶":"⋯")+'</button>';
-    inner='<div><div class="tx-call"><span class="g'+(failed?' bad':'')+'">'+(failed?"✗":"●")+'</span><span class="nm '+(failed?'bad':cls)+'">'+txHi(e.title,q)+'</span>'+
+    inner='<div><div class="tx-call"><span class="g'+(failed?' bad':'')+'">'+(failed?"✗":"●")+'</span><span class="nm '+(failed?'bad':cls)+'" title="'+h(e.title)+'">'+txHi(txToolName(e.title),q)+'</span>'+
      (e.arg?'<span class="arg" title="'+h(e.arg)+'">'+txHi(e.arg,q)+'</span>':'')+'<span class="tx-chips">'+chips+'</span></div>';
     if(open&&e.raw)inner+='<pre class="tx-args">'+txHi(e.raw,q)+'</pre>';
     if(e.diff)inner+=txDiffBlock(e.diff,open);
@@ -2615,9 +2719,7 @@ function txRow(R,e,i,cum,rows,answerIdx){
     }
     if(e.parked)inner+='<div class="tx-sub" style="margin-left:20px">held at the gateway for up to ten minutes; the model sees a wait with a reason, not a failure. Approve or deny from the card under Governed actions.</div>';
     inner+='</div>';
-  } else if(e.kind==="proof"){
-    inner='<div><span class="tx-proof">⊢ '+txHi(e.title,q)+'</span>'+(body?'<div class="tx-think" style="font-style:normal">'+txHi(body,q)+'</div>':'')+'</div>';
-  } else if(e.kind==="complete"||e.kind==="verdict"){
+  } else if(e.kind==="complete"){
     inner='<div><span style="color:var(--st-allowed);font-weight:600">'+txHi(e.title,q)+'</span>'+(body?' <span class="dim">'+txHi(body,q)+'</span>':'')+'</div>';
   } else if(e.kind==="stage"){
     inner='<div class="tx-stage">'+txHi(e.title||body,q)+'</div>';
@@ -2648,13 +2750,13 @@ function transcriptTab(R,compacted){
      '<span class="cnt" id="txcnt"></span>':'<span class="cnt">search shows every match · unpaced</span>')+
    '</div></div>';
   var runbar='<div class="tx-runbar"><span class="name">'+h(R.task||R.id)+'</span><span class="meta">'+h(R.agent)+' · '+h(R.model)+' · '+R.turn+' turns · '+R.steps+' steps'+(synth?' · projected from the run record':' · '+all.length+' entries')+'</span>'+
-   '<span class="tx-chips" style="margin-left:0">'+(S.tx.errs?'<span class="tx-chip err">errors only</span>':'')+(runStatus(R)==="paused"?'<span class="tx-chip warn">⏸ paused</span>':R.status==="live"?'<span class="tx-chip ok">● live</span>':R.status==="parked"?'<span class="tx-chip warn">⏸ parked</span>':R.verdict==="flipped"?'<span class="tx-chip ok">✓ flipped</span>':R.verdict==="unmoved"?'<span class="tx-chip err">✗ unmoved</span>':'')+'</span>'+
+   '<span class="tx-chips" style="margin-left:0">'+(S.tx.errs?'<span class="tx-chip err">errors only</span>':'')+(runStatus(R)==="paused"?'<span class="tx-chip warn">⏸ paused</span>':R.status==="live"?'<span class="tx-chip ok">● live</span>':R.status==="parked"?'<span class="tx-chip warn">⏸ parked</span>':'')+'</span>'+
    '<span class="tx-burn"><span>burn</span><span class="bar"><i id="txbar"></i></span><b id="txburn">'+txMoney2(0)+'</b><span>of '+txMoney2(total)+'</span></span></div>';
   var feed='<div class="tx-feed" id="txfeed" data-n="'+rows.length+'" data-paced="'+paced+'">'+(rows.length?html:'<div class="tx-empty">'+(S.tx.errs?'no failed calls in this run.':S.tx.q?'nothing matches this search.':'nothing to show with these filters.')+'</div>')+'</div>';
   setTimeout(txStart,0);
   return (compacted?'<div class="warn" style="margin-bottom:12px"><b>Compacted.</b> This transcript is rendered from the archive segment; the frames left the graph after the hot window and nothing was recomputed.</div>':'')+
    '<div class="txs">'+tools+'<div class="tx-frame">'+runbar+feed+'</div>'+
-   '<p class="note" style="margin-top:12px">What the agent showed its operator, row for row: the prompt, its prose, each tool call with the output it read, and what every model step cost. The gateway\'s own frames sit behind the ⚖ chips; the transcript never replaces them.</p></div>';
+   '<p class="note" style="margin-top:12px">The transcript is what the agent showed its operator. The gateway\u2019s own frames sit behind the \u2696 chips.</p><p hidden> each tool call with the output it read, and what every model step cost. The gateway\'s own frames sit behind the ⚖ chips; the transcript never replaces them.</p></div>';
 }
 /* ---- playback ---- */
 function txStart(){
@@ -2839,10 +2941,10 @@ function linkedWork(R){
   var g=runGraphOf(R),inf=0,obs=0,dm=runMetrics(R);
   [].concat(g.repos,g.issues,g.artifacts).forEach(function(it){if(it.edge==="inferred")inf++;else if(it.edge==="observed")obs++;});
   /* the kinds a spine node can carry are added here, so an artifact keeps one glyph on both surfaces */
-  var artIc={pr:"⇄",release:"⬡",branch:"⑂",witness:"⊢",proof:"⊢",comment:"✎",label:"⌾",file:"▤",media:"▣",record:"❑",touched:"·"};
+  var artIc={pr:"⇄",release:"⬡",branch:"⑂",comment:"✎",label:"⌾",file:"▤",media:"▣",record:"❑",touched:"·"};
   var artState={open:"b-approval",pushed:"b-proven",pending:"b-approval",failing:"b-denied",sealed:"b-proven",posted:"b-proven",merged:"b-allowed",none:"b-q",
    /* the spine's own vocabulary, mapped to the same badge classes it uses there */
-   created:"b-allowed",written:"b-allowed",linked:"b-q",blocked:"b-denied",proven:"b-proven"};
+   created:"b-allowed",written:"b-allowed",linked:"b-q",blocked:"b-denied"};
   var panel=function(title,items,empty){return '<div class="panel"><div class="panel-h"><h3>'+title+'</h3><span class="b b-q" style="margin-left:auto">'+items.length+'</span></div><div class="panel-b">'+(items.length?items.join(""):'<div class="lw-item"><span class="ic">—</span><div class="t"><span class="sub">'+empty+'</span></div></div>')+'</div></div>';};
   var repos=g.repos.map(function(r){return lwItem("⌂",r.name,(r.ref?r.ref+" · ":"")+(r.note||""),r);});
   var issues=g.issues.map(function(i){return lwItem("◌",i.ref+" · "+i.title,i.rel,i);});
@@ -2850,7 +2952,7 @@ function linkedWork(R){
   var files=g.files.length?'<div class="panel lw-files" style="margin-bottom:16px"><div class="panel-h"><h3>Files changed</h3><span class="dsum"><b class="a" style="color:var(--st-allowed)">+'+dm.add+'</b> <b class="d" style="color:var(--st-denied)">\u2212'+dm.del+'</b><span class="dbar" aria-hidden="true"><i class="a" style="flex:'+dm.add+'"></i><i class="d" style="flex:'+dm.del+'"></i></span>\u00b7 '+g.files.length+' file'+(g.files.length===1?'':'s')+' \u00b7 as the harness reported them</span></div><div class="panel-b" style="padding-top:2px">'+
    g.files.map(function(f){var rows=txDiffRows(f.before,f.after),st=diffStat(rows);return '<details><summary><span class="p">'+h(f.path)+'</span>'+(f.note?'<span class="dim" style="font-size:11px;flex:none">'+h(f.note)+'</span>':'')+'<span class="dstat"><b class="a">+'+st.add+'</b> <b class="d">−'+st.del+'</b></span></summary>'+diffHtml(rows,3)+'</details>';}).join("")+'</div></div>':'';
   return '<section aria-label="Linked work">'+
-   '<div class="lw-note"><p class="eyebrow q" style="margin:0">Linked work · edges on the run node</p>'+
+   '<div class="lw-note"><p class="eyebrow q" style="margin:0">Linked work</p>'+
     '<span><span class="edge observed">observed</span> written by Oxagen from a tool call routed through it</span>'+
     '<span><span class="edge stated">stated</span> carried by the task</span>'+
     '<span><span class="edge inferred">inferred</span> a light-tier model read the frames and proposed it, scored and cited · '+inf+' of '+(g.repos.length+g.issues.length+g.artifacts.length)+'</span></div>'+
@@ -2860,7 +2962,7 @@ function linkedWork(R){
 /* ===================== Frames of a run, synthesized from its record =====================
    A run with no authored frames gets a frame list built from what the run record states: turns,
    steps split per turn by runSeries(R), tool calls in the order runMetrics(R) drew them, cost split
-   per turn and then per model call, and the witness attempts pinned at the seqs the flip names.
+   per turn and then per model call.
    Seq equals index, so frameBtn(seq) lands on the frame it names. The list is exactly R.frames long
    (seq 0 … R.frames−1); the seal is the envelope after the last frame, signed over all of them. */
 S.bis=null; S.seg={};
@@ -2891,7 +2993,7 @@ function frToolIO(R,tool,key,err){
   else if(n==="search_graph"){io.input={q:R.taskTitle,limit:20};io.output={nodes:Math.round(4+rnd()*16),edges:Math.round(6+rnd()*40)};}
   else if(n==="edit__file"){io.input={path:path,old_digest:frDig(key+"o"),new_digest:frDig(key+"n")};io.output={ok:true,lines_changed:Math.round(2+rnd()*40)};}
   else if(n==="write__file"){io.input={path:path,bytes:Math.round(400+rnd()*6000)};io.output={ok:true,digest:frDig(key+"w")};}
-  else if(n==="bash__run"){io.input={cmd:R.flip?R.flip.cmd:"git status --porcelain",cwd:"/work/"+repo.split("/").pop()};io.output={exit:0,stdout_bytes:Math.round(200+rnd()*9000),stdout_digest:frDig(key+"so")};}
+  else if(n==="bash__run"){io.input={cmd:"git status --porcelain",cwd:"/work/"+repo.split("/").pop()};io.output={exit:0,stdout_bytes:Math.round(200+rnd()*9000),stdout_digest:frDig(key+"so")};}
   else if(n==="linear__get_issue"){io.input={id:R.task};io.output={state:"In Progress",labels:Math.round(1+rnd()*3),creator:{email:"[redacted]"}};io.red=[{path:"$.creator.email",reason:"pii.email"}];}
   else if(n==="linear__update_issue"){io.input={id:R.task,labels_add:labels.length?labels:["triaged"]};io.output={ok:true};}
   else if(n==="aws_billing__get_cost_and_usage"){io.input={granularity:"MONTHLY",period:"2026-09",group_by:"SERVICE"};io.output={groups:Math.round(6+rnd()*20),account_id:"[redacted]"};io.red=[{path:"$.account_id",reason:"account.identifier"}];}
@@ -2904,7 +3006,7 @@ function frToolIO(R,tool,key,err){
 }
 
 function framesFromRunSynth(R){
-  var N=Math.max(4,R.frames|0), s=runSeries(R), T=s.n, f=R.flip, q, t, j;
+  var N=Math.max(4,R.frames|0), s=runSeries(R), T=s.n, f=null, q, t, j;
   var rnd=rngOf(frSeed(R.id)), light=/haiku|flash|light/i.test(R.model||""), outPrice=light?PRICE.outLight:PRICE.out;
   var terminal=/^(sealed|compacted|halted)$/.test(R.status);
   var apr=APPROVALS.filter(function(a){return a.run===R.id;})[0]||null;
@@ -2928,7 +3030,6 @@ function framesFromRunSynth(R){
     split(1,f.turnStartSeq-1,1,f.turn-1);
     ranges[f.turn]=[f.turnStartSeq,f.turnEndSeq];
     if(f.turn<T)split(f.turnEndSeq+1,lastFree,f.turn+1,T);else if(f.turnEndSeq<lastFree)postA=f.turnEndSeq+1;
-    f.attempts.forEach(function(a){if(a.seq>f.turnStartSeq&&a.seq<f.turnEndSeq)put(a.seq,{kind:"proof.observed",att:a,turn:f.turn});});
   } else split(1,lastFree,1,T);
   for(t=1;t<=T;t++){var rg=ranges[t];if(!rg)continue;
     if(t>1||(flipOk&&f.turn===t))put(rg[0],{kind:"turn_start",turn:t});
@@ -2979,9 +3080,8 @@ function framesFromRunSynth(R){
   else if(terminal)end=f&&f.sealedAt?tsec(f.sealedAt)-1.2:(tsec(R.sealed)||start+N*2.4)-0.6;
   if(end==null||end<=start)end=start+N*2.4;
   var anc={0:start};anc[N-1]=end;
-  if(flipOk){anc[f.turnStartSeq]=tsec(f.turnStart);anc[f.turnEndSeq]=tsec(f.turnEnd);f.attempts.forEach(function(a){if(slot[a.seq]&&slot[a.seq].kind==="proof.observed")anc[a.seq]=tsec(a.at);});}
   var ak=Object.keys(anc).map(Number).sort(function(a,b){return a-b;}),ts=new Array(N);
-  function wt(o){return o.kind==="model.response"?5+rnd()*6:o.kind==="tool_call"?(o.call?o.call.ms/1000:1):o.kind==="proof.observed"?o.att.ms/1000:o.kind==="context.assembled"?0.3:0.08;}
+  function wt(o){return o.kind==="model.response"?5+rnd()*6:o.kind==="tool_call"?(o.call?o.call.ms/1000:1):o.kind==="context.assembled"?0.3:0.08;}
   for(j=0;j<ak.length;j++){var a0=ak[j];ts[a0]=anc[a0];if(j+1>=ak.length)break;var b0=ak[j+1],W=0,ww=[];
     for(q=a0+1;q<=b0;q++){ww[q]=wt(slot[q]);W+=ww[q];}var acc2=0;for(q=a0+1;q<b0;q++){acc2+=ww[q];ts[q]=anc[a0]+(anc[b0]-anc[a0])*acc2/W;}}
 
@@ -3010,7 +3110,7 @@ function framesFromRunSynth(R){
      case "model.request": fr.rq=o2.rq;fr.sum=prov+" · "+R.model+" · 14 tool definitions ("+tokn(o2.rq.comp.tools)+" tok) · steering "+tokn(o2.rq.comp.steering)+" tok · "+o2.rq.ctxN+" context frames";break;
      case "model.response":
       fr.cost=o2.cost;fr.u=o2.u;fr.req="req_"+frHex(key+"req",8).toUpperCase();fr.ms=Math.round(3400+rnd()*7200);fr.ttft=Math.round(380+rnd()*900);
-      for(j=q+1;j<N&&/^(context\.assembled|checkpoint|record\.appended|proof\.observed)$/.test(slot[j].kind);j++){}
+      for(j=q+1;j<N&&/^(context\.assembled|checkpoint|record\.appended)$/.test(slot[j].kind);j++){}
       fr.stop=j<N&&slot[j].kind==="tool_requested"?"tool_use":"end_turn";
       fr.sum="stop_reason "+fr.stop+" · in "+tokn(o2.u.inU)+" · cache_read "+tokn(o2.u.cr)+" · out "+tokn(o2.u.out+o2.u.rsn)+" · "+fr.req;
       turnCost[o2.turn]=(turnCost[o2.turn]||0)+o2.units+(o2.extraU||0);break;
@@ -3023,7 +3123,6 @@ function framesFromRunSynth(R){
      case "token_issued": fr.grant="cg_"+frHex(key+"cg",6).toUpperCase();fr.sum="credential grant "+fr.grant+" · "+toolParts(call.id).n.split("__")[0]+" connection · scoped to this call · TTL 5m";break;
      case "tool_call": fr.cost="0.0000";fr.dig=frDig(key+"out");
       fr.sum=(call.err?"failed · ":"ok · ")+msDur(call.ms)+" · output schema "+(call.err?"not reached":"ok")+(fr.io.red.length?" · "+fr.io.red.length+" field redacted":"")+" · response digest "+fr.dig;lastTool.push(q);break;
-     case "proof.observed": var at2=o2.att;fr.att=at2;fr.sum="attempt "+at2.n+" of "+f.attempts.length+" · pr_result "+at2.result+" · witness "+f.witness+" · runner attestation embedded · delivered at seq "+(q+1)+" as one word: "+(at2.result==="pass"?"pass":"fail");break;
      case "checkpoint": fr.from=cpPrev;fr.head=frDig(key+"head");fr.sum="chain head "+fr.head+" · frames "+cpPrev+"–"+q+" · host device key, countersigned at ingest";cpPrev=q+1;break;
      case "record.appended": fr.rec={id:"rec_"+frHex(key+"rec",8).toUpperCase(),text:sentences.length?sentences[recN%sentences.length]:R.taskTitle,sources:lastTool.slice(-2)};recN++;
       fr.sum=fr.rec.id+" · note · "+fr.rec.text.slice(0,72)+(fr.rec.text.length>72?"…":"");break;
@@ -3031,7 +3130,7 @@ function framesFromRunSynth(R){
      case "turn_end": fr.sum="turn "+o2.turn+" ended · "+s.steps[o2.turn-1]+" steps · $"+s.cost[o2.turn-1].toFixed(2)+" · cache "+per(s.cache[o2.turn-1]);break;
      case "approval_request": var A2=APPROVALS.filter(function(a){return a.id===o2.apr;})[0];fr.sum=A2.id+" · "+A2.tool+" · parked "+A2.parkedAt+" · "+A2.approvers.split(" — ")[0];break;
      case "error": fr.err={code:"run_token_revoked",source:"gateway",outcome:"halted"};fr.sum="run_token_revoked · kill switch hooks_removed · nothing dispatched after this frame";break;
-     case "agent_stop": fr.sum="outcome "+R.status+(R.verdict?" · verdict "+R.verdict:"")+" · "+N+" frames · $"+R.cost+" · the seal envelope follows as seq "+N;break;
+     case "agent_stop": fr.sum="outcome "+R.status+" · "+N+" frames · $"+R.cost+" · the seal envelope follows as seq "+N;break;
     }
     out.push(fr);
   }
@@ -3214,23 +3313,8 @@ function fdRecord(f,R){
    frSec("Body",'<div class="callout">'+h(r.text)+'</div>')+
    frSec("Provenance",r.sources.length?'<div class="row" style="gap:8px">'+r.sources.map(function(s){return frameBtn(s,"frame "+s+" · tool_call");}).join("")+'</div>':'<span class="dim">no tool result cited</span>',"every learned thing walks back to the frame that taught it");
 }
-function fdProof(f,R){
-  var F=R.flip,a=f.att; if(!F||!a)return null;
-  var isFlip=F.flipSeq===f.seq,n=F.attempts.length;
-  return '<div class="row" style="gap:10px;margin-bottom:12px">'+(isFlip?verdictBadge(R.verdict,R):'<span class="b '+(a.result==="pass"?"b-proven":"b-failed")+'"><span class="d"></span>attempt '+a.n+' · '+a.result+'</span>')+
-    '<span class="dim" style="font-size:12.5px">'+(isFlip?'failed on the target, passed on the pull request head — the flip':'the witness still fails on the pull request head')+'</span></div>'+
-   frSec("The two sides",'<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Ran against</th><th>Ref</th><th>Commit</th><th>Result</th></tr></thead><tbody>'+
-    '<tr><td>target</td><td class="mono">'+h(F.targetRef)+'</td><td class="mono">'+h(F.targetSha)+'</td><td><span class="b b-failed"><span class="d"></span>fail</span></td></tr>'+
-    '<tr><td>pull request head</td><td class="mono">'+h(F.prRef)+'</td><td class="mono">'+h(F.prSha)+'</td><td><span class="b '+(a.result==="pass"?"b-proven":"b-failed")+'"><span class="d"></span>'+a.result+'</span></td></tr></tbody></table></div>')+
-   frSec("Attempt",frKv([["Attempt",a.n+" of "+n+" in turn "+F.turn],["Command",'<span class="mono">'+h(F.cmd)+'</span>'],["Runner",h(F.runner)+" · "+h(F.testKind)],
-    ["Took",dur(a.ms/1000)+" · exit "+a.exit],["The runner saw",h(a.note)],["The worker was told",'the word <span class="mono">'+(a.result==="pass"?"pass":"fail")+'</span> and nothing else']]))+
-   frSec("Frame body",frPre({kind:"proof.observed",body:{witness_id:F.witness,oracle:F.oracle,test_kind:F.testKind,runner:F.runner,target_ref:F.targetRef,target_sha:F.targetSha,
-     pr_ref:F.prRef,pr_sha:F.prSha,command_normalized_digest:F.cmdDigest,target_result:"fail",pr_result:a.result,attempts:n,attempt:a.n,flip_attempt:isFlip?a.n:null,
-     flip_frame_seq:F.flipSeq,turn_end_frame_seq:F.turnEndSeq,verdict:isFlip?R.verdict:"not yet",tamper_exclusion:R.verdict==="tampered"?"broken":"held",disclosure_grain:"L0",witness_run_id:R.id}}),"signed into the chain with everything else at seal")+
-   '<div class="row" style="margin-top:12px"><button class="btn sm" onclick="S.tab.run=\'proof\';render()">Open the proof</button></div>';
-}
 function fdCheckpoint(f,R){
-  /* Walk by position, not seq: an authored list (the witness run's) carries sparse seqs, so L[seq] is not this frame. */
+  /* Walk by position, not seq: an authored list can carry sparse seqs, so L[seq] is not this frame. */
   var L=frList(R),from=f.from!=null?f.from:0,at=L.indexOf(f);
   if(f.from==null)for(var i=(at<0?L.length:at)-1;i>=0;i--)if(L[i].kind==="checkpoint"){from=L[i].seq+1;break;}
   return frKv([["Covers","frames "+from+"–"+f.seq+" · every 20 frames or 60 seconds, whichever comes first"],["Producer","host device key · ed25519"],
@@ -3256,7 +3340,7 @@ function fdAgent(f,R){
     ["Operator",h(PEOPLE[R.op]?PEOPLE[R.op].name:R.op)+" · initiating principal"],["Workspace",h(R.ws)],["Task",h(R.task)+" · "+h(R.taskTitle)],
     ["Policy version","pol_v41"],["Enforcement tier",tierBadge(R.tier)]])+
    '<div class="note" style="margin-top:12px">Everything above is built by server code, never by the agent. It cannot name its own operator or choose its own tier.</div>';
-  return frKv([["Outcome",'<b style="color:var(--fg)">'+h(R.status)+'</b>'+(R.verdict?' · '+verdictBadge(R.verdict,R):'')],["Turns",R.turn],["Steps",R.steps],["Frames",R.frames+" · seq 0–"+(R.frames-1)],
+  return frKv([["Outcome",'<b style="color:var(--fg)">'+h(R.status)+'</b>'],["Turns",R.turn],["Steps",R.steps],["Frames",R.frames+" · seq 0–"+(R.frames-1)],
     ["Total spend",usd(R.cost)+" USD · "+h(R.basis)],["Sealed",R.sealed?h(R.sealed)+" · the seal envelope follows as seq "+R.frames:"not sealed"]])+
    '<div class="row" style="margin-top:12px"><button class="btn sm" onclick="S.tab.run=\'chain\';render()">Chain and seal</button></div>';
 }
@@ -3267,7 +3351,7 @@ function fdToken(f,R){
     ["TTL","5 minutes, bound to call id"],["Seen by the agent",'<b style="color:var(--st-allowed)">never</b> — the agent holds one run token, good for talking to Oxagen and nothing else']]);
 }
 var FD_KIND={"context.assembled":fdContext,"model.request":fdRequest,"model.response":fdResponse,tool_requested:fdToolReq,tool_call:fdToolCall,
-  policy_decision:fdPolicy,approval_request:fdApproval,"record.appended":fdRecord,"proof.observed":fdProof,checkpoint:fdCheckpoint,error:fdError,
+  policy_decision:fdPolicy,approval_request:fdApproval,"record.appended":fdRecord,checkpoint:fdCheckpoint,error:fdError,
   turn_start:fdTurn,turn_end:fdTurn,agent_start:fdAgent,agent_stop:fdAgent,token_issued:fdToken};
 
 function frameDetail(f){
@@ -3285,7 +3369,7 @@ function frameDetail(f){
     var L=frList(R),carried=null,quote=(/“([^”]*)”/.exec(f.sum)||[])[1]||f.text||f.sum;
     for(var i=f.seq+1;i<L.length;i++)if(L[i].kind==="model.request"){carried=L[i];break;}
     return '<div class="panel" style="background:var(--ink)"><div class="panel-b">'+
-     '<p class="eyebrow q">Delivered at the next boundary, attributed to the operator</p>'+
+     '<p class="eyebrow q">Delivery</p>'+
      '<p style="margin:0;color:var(--fg)">“'+h(quote)+'”</p>'+
      '<div class="kv" style="margin-top:12px"><dt>Issuer</dt><dd>'+h(String(f.sum).split(" · ")[0])+' · operator authority</dd>'+
      '<dt>Injected into</dt><dd>'+(carried?frameBtn(carried.seq,"model.request · frame "+carried.seq)+', immediately after the cached system block':'the next model request')+'</dd>'+
@@ -3478,7 +3562,7 @@ function contextTab(R){
   }).join("");
 
   var top = '<div class="panel" style="margin-bottom:14px">'+
-   '<div class="panel-h"><h3>The window, as it was sent</h3>'+
+   '<div class="panel-h"><h3>Prompt window</h3>'+
     '<div class="sp"><span class="b b-q mono" data-ctx-req="'+W.req.seq+'">model.request · seq '+W.req.seq+' · '+h(W.req.t)+'</span>'+
     '<span class="b b-q" data-ctx-total="'+W.total+'">'+tokn(W.total)+' tok in</span></div></div>'+
    '<div class="panel-b"><div class="compbar">'+bar+'</div><div class="legend">'+legend+'</div>'+
@@ -3525,13 +3609,13 @@ function contextTab(R){
 
   var stackPanel = '<div class="panel" style="margin-bottom:14px">'+
    '<div class="panel-h"><h3>Walk the window</h3>'+
-   '<span class="b b-q" style="margin-left:auto">top to bottom</span></div>'+
+   '</div>'+
    '<div class="stack">'+stack+'</div></div>';
 
   var budgetPanel;
   if(own){
     var upct = Math.round(CTXW.used/CTXW.budget*100);
-    budgetPanel = '<div class="panel"><div class="panel-h"><h3>Retrieval, in numbers</h3></div><div class="panel-b">'+
+    budgetPanel = '<div class="panel"><div class="panel-h"><h3>Retrieval stats</h3></div><div class="panel-b">'+
      '<div class="meter"><div class="lab">Frame budget used<b>'+tokn(CTXW.used)+' / '+tokn(CTXW.budget)+'</b></div>'+
      '<div class="bar"><i style="width:'+upct+'%;background:var(--st-proven)"></i></div></div>'+
      '<dl class="kv" style="margin-top:13px">'+
@@ -3546,7 +3630,7 @@ function contextTab(R){
      'The assembler does not fill headroom for its own sake.</div></div></div>';
   } else {
     var used = W.ctx, bpct = Math.min(100,Math.round(used/Math.max(1,W.budget)*100)), dig = W.ca?(/sha256:\S+/.exec(W.ca.sum)||[])[0]:null;
-    budgetPanel = '<div class="panel"><div class="panel-h"><h3>Retrieval, in numbers</h3></div><div class="panel-b">'+
+    budgetPanel = '<div class="panel"><div class="panel-h"><h3>Retrieval stats</h3></div><div class="panel-b">'+
      '<div class="meter"><div class="lab">Frame budget used<b>'+tokn(used)+' / '+tokn(W.budget)+'</b></div>'+
      '<div class="bar"><i style="width:'+bpct+'%;background:var(--st-proven)"></i></div></div>'+
      '<dl class="kv" style="margin-top:13px">'+
@@ -3825,8 +3909,7 @@ function ctxDetail(R,W,sel){
        readout("rendered into the window","episodic recall",'<pre>'+
         '<span class="k">run_01K5RG6H1L4OIU9Y</span> · a-intel.core.release-manager · sealed 2026-08-28 11:40\n'+
         'Cut 4.10.3 release notes. 4 turns, 19 steps, $2.61.\n'+
-        'Opened a-intel/platform#469; a person merged it.\n'+
-        'Witness wit_01K5RQ1A7 flipped.\n\n'+
+        'Opened a-intel/platform#469; a person merged it.\n\n'+
         'Note the agent left: <span class="s">"surfaceOf() returns null for changes under\n'+
         'infra/; those land in unlabelled and need a human pass."</span>'+
         '</pre>')+
@@ -3848,14 +3931,14 @@ function ctxDetail(R,W,sel){
         '  head      f70b3d9 → release/4.10\n'+
         '  files     6 changed · +142 −38 · CHANGELOG.md touched\n'+
         '  labels    backport, gateway\n'+
-        '  checks    ci ✓   witness ✗ unmoved (wit_01K5RQ8M4)\n'+
+        '  checks    ci ✓   contract test ✗ failing on the backport\n'+
         '  opened by run_01K5RK7C2V8BNM3X'+
         '</pre>')+
        why('<dt>Query</dt><dd class="mono">recent merged PRs touching CHANGELOG.md</dd>'+
         '<dt>Path</dt><dd class="mono">Task #482 → repository → merged PR (14 days)</dd>'+
         '<dt>Cache</dt><dd>the prefix boundary falls <b>706 tokens inside this frame</b></dd>', 3)+
-       '<div class="note" style="margin-top:12px">The frame carries its own bad news: the witness on that backport came back '+
-       '<span class="mono">unmoved</span>. The model is shown the verdict, not asked to trust the merge.</div>');
+       '<div class="note" style="margin-top:12px">The frame carries its own bad news: the contract test on that backport is '+
+       '<span class="mono">failing</span>. The model is shown the check, not asked to trust the merge.</div>');
     }
     if(sel==="f6"){
       return hd+ctxBody(
@@ -3889,7 +3972,7 @@ function ctxDetail(R,W,sel){
        'Cut the 4.11.0 notes from the merge base of release/4.11 and the\n'+
        'last tag, open the release pull request, and stop there. Do not\n'+
        'merge it. Mobile is out of scope this cycle.\n\n'+
-       'Acceptance: witness wit_01K5RQ8M4 (test_flip) passes on the PR head.'+
+       'Acceptance: the release-notes contract test passes on the PR head.'+
        '</pre>')+
       '<dl class="kv"><dt>Digest</dt><dd class="mono">sha256:9f22be40c7a1d835</dd>'+
       '<dt>Cache</dt><dd>new on this request — the brief sits after the cached prefix, so editing it costs 496 tokens, not 12,000</dd></dl>'+
@@ -3953,241 +4036,6 @@ function ctxDetail(R,W,sel){
   return ctxBody('<p class="dim">Pick a block.</p>');
 }
 
-function proofTab(R){
-  if(R.witnessFor) return ladderTab(R);
-  if(!R.verdict){
-    return '<div class="panel pad"><p class="eyebrow q">No verdict yet</p>'+
-     '<p>The witness for <span class="mono">'+h(R.task)+'</span> has been authored and proven to fail on the pristine target. It runs on the pull request head when this run opens one.</p>'+
-     '<dl class="kv"><dt>Witness</dt><dd class="mono">wit_01K5RS4P2 · oracle test_flip</dd>'+
-     '<dt>Target</dt><dd class="mono">main @ a4c91e2 — <b style="color:var(--st-failed)">fails</b>, as required before the ladder runs</dd>'+
-     '<dt>Disclosure grain</dt><dd class="mono">L0</dd>'+
-     '<dt>Reaches this agent as</dt><dd>the word pass or fail, and nothing else</dd></dl></div>';
-  }
-  var vd={flipped:["proven","The witness failed on the target and passed on the pull request head. Only this credits a proof."],
-    failing:["failed","The witness failed on both the target and the pull request head. The change did not satisfy it."],
-    unmoved:["q","The witness passed on both sides. It proves nothing about this change and credits nothing."],
-    unsatisfied:["denied","The runner exhausted this run's retry cap against the witness. Not retried elsewhere."],
-    tampered:["critical","The witness's filesystem fingerprint moved during the run. The ground under the oracle was changed, so nothing is credited."],
-    unverified:["q","The runner could not reach a conclusion. No model resolved it; unverified is the honest answer."],
-    waived:["q","Policy waived proof for this class of change. Nothing was tried and nothing is claimed."]}[R.verdict];
-  var f=R.flip, flipped=R.verdict==="flipped", tampered=R.verdict==="tampered", n=f?f.attempts.length:0, lead=f?flipLead(f):null;
-  var wit=f?f.witness:"wit_01K5RQ8M4", tSha=f?f.targetSha:"a4c91e2", tRef=f?f.targetRef:"main", pRef=f?f.prRef:"refs/pull/482/head", pSha=f?f.prSha:"f70b3d9", dig=f?f.cmdDigest:"sha256:71bd…0c4e";
-  var W=proofWitnessRun(R), T=f&&f.tamper;
-  var tamperBox=T?'<div class="warn tamper-box" style="margin-top:14px"><b>Tamper exclusion broken.</b> '+
-     '<span class="mono">'+h(T.file)+'</span> changed between authoring and the run: '+h(T.change)+'. '+
-     'The witness fingerprint taken at authoring (<span class="mono">'+h(proofShort(T.fingerprintAuthored))+'</span>) does not match the one taken at run '+
-     '(<span class="mono">'+h(proofShort(T.fingerprintAtRun))+'</span>), so the head result is <b>excluded</b> and the verdict is <b>tampered</b>, not <b>failing</b> and not <b>flipped</b>. '+
-     'Detected '+h(T.detectedAt)+' · '+frameBtn(T.detectedSeq,"frame "+T.detectedSeq)+'.</div>':'';
-  var stage='<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>The flip</h3>'+
-    '<div class="sp">'+(f?'<span class="b b-q mono">'+h(f.oracle)+'</span><span class="b b-q">'+h(f.testKind)+' · '+h(f.runner)+'</span>'+
-    '<span class="b '+(flipped?'b-proven':tampered?'b-critical':'b-failed')+'"><span class="d"></span>'+n+' attempt'+(n===1?'':'s')+(flipped?' · flipped on '+n:' · never flipped')+'</span>':'')+'</div></div>'+
-    '<div class="panel-b">'+flipStage(R)+tamperBox+
-    (f?'<div class="hr"></div><div class="row" style="justify-content:space-between;flex-wrap:wrap;gap:8px"><span class="dim" style="font-size:12px">Same normalized command on both sides · <span class="mono">'+h(f.cmd)+'</span></span>'+
-       '<span class="mono dim" style="font-size:11px">'+h(dig)+'</span></div>':'')+'</div></div>';
-  var rail=f?'<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>When it happened</h3>'+
-    '<span class="dim" style="margin-left:auto;font-size:12px">'+(lead!=null?'the flip landed <b style="color:var(--st-proven)">'+dur(lead)+'</b> before the agent ended turn '+f.turn:'no flip in turn '+f.turn+'; the agent ended its turn without one')+'</span></div>'+
-    '<div class="panel-b">'+flipRail(f,flipped)+
-    '<div class="note" style="margin-top:16px">The order matters. A flip that lands <b>before</b> the agent ends its turn is the agent’s own claim, checked; a pass that appeared only after the turn closed would be credited to nothing. Each point is a frame in the hash chain, so the order is not a log line — it is signed.</div></div></div>':'';
-  var ladder=f?'<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Attempts</h3><span class="mono dim" style="margin-left:auto;font-size:11px">'+n+' run'+(n===1?'':'s')+' of the witness command in turn '+f.turn+'</span></div>'+
-    '<div class="tw"><table><thead><tr><th>#</th><th>Result</th><th>At</th><th class="num">Took</th><th class="num">Exit</th><th>Frame</th><th>What the runner saw</th></tr></thead><tbody>'+
-    f.attempts.map(function(a){return '<tr class="'+(a.result==="pass"?"att-pass":"")+'"><td class="mono">'+a.n+'</td>'+
-     '<td><span class="b '+(a.result==="pass"?"b-proven":a.result==="excluded"?"b-critical":"b-failed")+'"><span class="d"></span>'+a.result+(a.result==="pass"?" · flip":"")+'</span></td>'+
-     '<td class="mono" style="font-size:11px">'+h(a.at)+'</td><td class="num mono">'+dur(a.ms/1000)+'</td><td class="num mono">'+h(a.exit)+'</td>'+
-     '<td>'+frameBtn(a.seq,"frame "+a.seq)+'</td><td class="dim" style="font-size:12px">'+h(a.note)+'</td></tr>';}).join("")+
-    '</tbody></table></div></div>':'';
-  /* probe attempts are counted off this run's frames */
-  var probes=FRAMES.filter(function(x){return /witness_probe/.test(x.sum||"");}).length;
-  var prov='<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Provenance</h3><span class="b b-q" style="margin-left:auto">'+(f&&f.fingerprint==="held"?'<span class="d" style="background:var(--st-proven)"></span>fingerprint held':tampered?'<span class="d" style="background:var(--st-critical)"></span>fingerprint broken':'')+'</span></div><div class="panel-b"><dl class="kv">'+
-    '<dt>Witness</dt><dd class="mono">'+h(wit)+' · oracle '+h(f?f.oracle:"test_flip")+'</dd>'+
-    (f?'<dt>Test</dt><dd>'+h(f.testKind)+' · <span class="mono">'+h(f.runner)+'</span></dd>':'')+
-    '<dt>Before → after</dt><dd class="mono">'+h(tRef)+' @ '+h(tSha)+' → '+h(pRef)+' @ '+h(pSha)+'</dd>'+
-    (f&&f.flippedAt?'<dt>Flip recorded as</dt><dd><span class="mono">proof.observed</span> · '+frameBtn(f.flipSeq,"frame "+f.flipSeq)+' · '+h(f.flippedAt)+' · attested <span class="mono">ed25519 · '+h(ORG.attester)+'</span></dd>':'')+
-    (f?'<dt>Turn ended</dt><dd>'+frameBtn(f.turnEndSeq,"frame "+f.turnEndSeq)+' · '+h(f.turnEnd)+(lead!=null?' · <b style="color:var(--st-proven)">'+dur(lead)+' after the flip</b>':'')+'</dd>':'')+
-    (f?'<dt>Sealed</dt><dd>'+frameBtn(f.sealSeq,"frame "+f.sealSeq)+' · '+h(f.sealedAt)+' · segment <span class="mono">'+h(f.segment)+'</span></dd>':'')+
-    '<dt>The worker saw</dt><dd>the word <span class="mono">'+(flipped?"pass":"fail")+'</span>. No test name, no assertion, no values, no path.</dd>'+
-    '<dt>Witness stored in</dt><dd>the witness runner — not in the repo, not in the PR, not on any tool this agent can reach</dd>'+
-    '<dt>Probe attempts</dt><dd>'+probes+' on this run · a tool call resolving to witness storage is denied and raises <span class="mono">witness_probe</span>'+
-     '</dd>'+
-    '<dt>Held-out witnesses</dt><dd>'+h(f?f.heldOut:"2 of 5")+' on this task, never reported to the worker at all</dd></dl>'+
-    '<div class="row" style="margin-top:14px">'+(f&&f.flippedAt?'<button class="btn sm" onclick="S.tab.run=\'player\';S.frame='+f.flipSeq+';render()">Open the flip frame</button>':'')+
-    '<button class="btn sm" onclick="S.tab.run=\'chain\';render()">Chain and seal</button>'+
-    '<button class="btn sm" onclick="act(\'Verifier script and key ids downloaded. Re-derives the flip from the segment, offline.\')">Verify offline</button></div></div></div>';
-  var wcard=W?'<div class="panel" id="witness-run-card"><div class="panel-h"><h3>Witness run</h3></div><div class="panel-b"><dl class="kv">'+
-    '<dt>Run</dt><dd><a class="mono" href="#/'+ORG.slug+'/'+W.ws+'/runs/'+W.id+'" onclick="S.tab.run=\'ladder\'">'+h(W.id)+'</a></dd>'+
-    '<dt>Agent</dt><dd class="mono">'+h(W.agent)+' · service principal</dd>'+
-    '<dt>Operator</dt><dd>'+h(PEOPLE[W.op]?PEOPLE[W.op].name:W.op)+(W.op===R.op?' — the worker’s operator':'')+'</dd>'+
-    '<dt>Cost</dt><dd>'+usd(W.cost)+' USD · recorded on that run and billed at zero; witness runs are free</dd></dl></div></div>'
-   :f&&f.witnessRun?'<div class="panel" id="witness-run-card"><div class="panel-h"><h3>Witness run</h3></div><div class="panel-b"><dl class="kv">'+
-    '<dt>Run</dt><dd class="mono">'+h(f.witnessRun)+'</dd><dt>Listed here</dt><dd>no · it is older than the runs this workspace shows</dd></dl></div></div>':'';
-  return stage+rail+proofAirlock(R)+'<div class="split"><div><div class="panel"><div class="panel-h"><h3>Verdict</h3>'+verdictBadge(R.verdict,R)+'</div>'+
-   '<div class="panel-b"><p style="font-size:15px;color:var(--fg);margin-bottom:16px">'+h(vd[1])+'</p>'+
-   proofJson(R)+
-   '<div class="note" style="margin-top:14px">The verdict is never a model call. The witness <b>author</b> is a complex-tier model call because it creates the oracle; the verdict is the runner’s.</div>'+
-   '</div></div>'+ladder+'</div>'+
-   '<div>'+prov+wcard+'</div></div>';
-}
-/* The seq and time of the proof frame: the flip when there was one, otherwise the last attempt. */
-function proofSeq(f){var a=f.attempts[f.attempts.length-1];return f.flipSeq!=null?f.flipSeq:(a?a.seq:f.sealSeq);}
-function proofShort(d){d=String(d||"");return d.length>26?d.slice(0,19)+"…"+d.slice(-4):d;}
-function proofWitnessRun(R){for(var i=0;i<RUNS.length;i++){if(RUNS[i].witnessFor===R.id)return RUNS[i];}return null;}
-/* the proof.observed envelope: body fields the record carries, then the content digest and the chain link */
-function proofJson(R){
-  var f=R.flip, v=R.verdict, K=function(k){return '<span class="k">"'+k+'"</span>: ';}, S_=function(s){return '<span class="s">"'+h(s)+'"</span>';};
-  var tRes=(v==="flipped"||v==="failing"||v==="tampered")?"fail":"pass", pRes=v==="flipped"?"pass":v==="tampered"?"excluded":"fail";
-  var wit=f?f.witness:"wit_01K5RQ8M4", W=proofWitnessRun(R), wrun=W?W.id:f&&f.witnessRun?f.witnessRun:null;
-  var L=[];
-  L.push(K("witness_id")+S_(wit)+', '+K("oracle")+S_(f?f.oracle:"test_flip"));
-  if(f) L.push(K("test_kind")+S_(f.testKind)+', '+K("runner")+S_(f.runner));
-  L.push(K("target_ref")+S_(f?f.targetRef:"main")+', '+K("target_sha")+S_(f?f.targetSha:"a4c91e2"));
-  L.push(K("pr_ref")+S_(f?f.prRef:"refs/pull/482/head")+', '+K("pr_sha")+S_(f?f.prSha:"f70b3d9"));
-  L.push(K("command_normalized_digest")+S_(f?f.cmdDigest:"sha256:71bd…0c4e"));
-  L.push(K("target_result")+S_(tRes)+', '+K("pr_result")+S_(pRes));
-  if(f) L.push(K("attempts")+f.attempts.length+', '+K("flip_attempt")+(v==="flipped"?f.attempts.length:'null')+', '+K("flip_frame_seq")+(f.flipSeq==null?'null':f.flipSeq)+', '+K("turn_end_frame_seq")+f.turnEndSeq);
-  L.push(K("verdict")+S_(v));
-  if(f&&f.failFingerprint) L.push(K("fail_fingerprint")+S_(f.failFingerprint));
-  if(f&&f.failFingerprint) L.push(K("pass_output_digest")+(f.passDigest?S_(f.passDigest):'null'));
-  L.push(K("tamper_exclusion")+S_(v==="tampered"?"broken":"held")+', '+K("disclosure_grain")+S_(f&&f.grain||"L0"));
-  L.push(K("witness_run_id")+(wrun?S_(wrun):'null'));
-  if(f&&f.attest) L.push(K("runner_attestation")+'{ '+K("key_id")+S_(f.attest.keyId)+',\n      '+K("signature")+S_(f.attest.signature)+' }');
-  var head='{\n  '+K("kind")+S_("proof.observed")+','+(f?'\n  '+K("seq")+'<span class="proof-seq">'+proofSeq(f)+'</span>,':'')+'\n  '+K("body")+'{\n    '+L.join(',\n    ')+'\n  }';
-  var tail=f&&f.hash?',\n  '+K("content")+'{ '+K("digest")+S_(f.contentDigest)+', '+K("redactions")+'[] },\n  '+K("prev_hash")+S_(f.prevHash)+',\n  '+K("hash")+S_(f.hash):'';
-  return '<pre class="proof-json">'+head+tail+'\n}</pre>';
-}
-/* The pass/fail airlock. Left, what the witness runner knew, sealed; right, the whole tool result the
-   agent received and the prompt it landed in. The frames are the ones after the proof frame. */
-function proofAirlock(R){
-  var f=R.flip; if(!f) return '';
-  var word=R.verdict==="flipped"?"pass":"fail", bad=word!=="pass", N=proofSeq(f), W=proofWitnessRun(R), g=f.grain||"L0";
-  var row=function(k,v,x){return '<div class="rr"><span class="rk">'+k+'</span><span class="rv'+(x?' x':'')+'">'+v+'</span></div>';};
-  var bar=function(n){return new Array(n+1).join("█");};
-  var cls=bad?'bad':'s';
-  return '<div class="panel" id="airlock" style="margin-bottom:14px"><div class="panel-h"><h3>The pass / fail airlock</h3>'+
-   '<span class="b b-approval mono">disclosure grain '+h(g)+'</span>'+
-   '<span class="mono dim" style="margin-left:auto;font-size:11px">frame '+N+' recorded · frame '+(N+1)+' delivered</span></div>'+
-   '<div class="airlock"><div class="chamber sealed"><p class="eyebrow q" style="margin:0">What the witness runner knew</p>'+
-    '<div class="redact">'+row("witness",bar(16),1)+row("test id",bar(22),1)+row("assertion",bar(28),1)+row("expected",bar(10),1)+row("actual",bar(16),1)+row("path",bar(20),1)+row("verdict",h(R.verdict))+'</div>'+
-    '<p class="dim" style="font-size:12px;margin:0">Authored, stored and run inside the witness runner. Not in the repository, not in the pull request, not in any context frame, not reachable from the toolbelt.'+
-    (W?' Recorded in full on <a class="mono" href="#/'+ORG.slug+'/'+W.ws+'/runs/'+W.id+'" onclick="S.tab.run=\'ladder\'">'+h(W.id)+'</a>.':'')+'</p></div>'+
-   '<div class="membrane" aria-hidden="true"><span class="grain'+(bad?' bad':'')+'">'+word+'</span><span class="ml">'+h(g)+' · one word</span></div>'+
-   '<div class="chamber"><p class="eyebrow q" style="margin:0">What the agent received</p>'+
-    '<div class="oneword"><span class="w'+(bad?' bad':'')+'" id="airlock-word">'+word+'</span><span class="c">'+word.length+' characters · the whole tool result</span></div>'+
-    '<pre><span class="c">// frame '+(N+1)+' · tool_call · verify@1 · oxagen</span>\n{ <span class="k">"result"</span>: <span class="'+cls+'">"'+word+'"</span> }\n\n'+
-    '<span class="c">// frame '+(N+2)+' · model.request · messages[-1]</span>\n{ <span class="k">"role"</span>: <span class="s">"user"</span>,\n  <span class="k">"content"</span>: [ { <span class="k">"type"</span>: <span class="s">"tool_result"</span>,\n    <span class="k">"content"</span>: <span class="'+cls+'">"'+word+'"</span> } ] }</pre>'+
-    '<p class="dim" style="font-size:12px;margin:0">No test name, no assertion, no expected or actual value, no reproduction, no path. Raising the grain above <span class="mono">L0</span> is a policy decision a person makes, recorded as a security event.</p></div></div></div>';
-}
-/* ---- the witness run: a run of the witness runner service principal. Its Ladder tab reads the
-   worker's flip record, so the two runs cannot tell different stories about the same proof. ---- */
-function ladderTab(R){
-  var P=run(R.witnessFor), f=P&&P.flip, L=R.ladder||{};
-  if(!f) return '<div class="panel pad"><p class="eyebrow q">No ladder</p><p>The run this witness was for is not on record here.</p></div>';
-  var atts=f.attempts, last=atts[atts.length-1], flipped=P.verdict==="flipped", k=atts.length, word=flipped?"pass":"fail";
-  var op=PEOPLE[R.op], opName=op?op.name:R.op, total=parseFloat(R.cost), both=parseFloat(P.cost)+total;
-  var span=tsec(R.sealed)-tsec(R.started);
-  var badge=function(c,t){return '<span class="b '+c+'"><span class="d"></span>'+h(t)+'</span>';};
-  var steps=[
-   ["Author the witness","Read task "+h(P.task)+" and its acceptance criteria, the <span class=\"mono\">"+h(f.targetRef)+"</span> code graph and the workspace’s steering. Produced a command, an oracle kind and an expected fail mode. This is the one model call the plane makes: the author is a model call; the verdict never is.",
-     h(f.witness)+" · "+h(f.oracle)+" · "+h(R.model)+", complex tier",'<span class="b b-q mono">$'+h(L.authorCost)+'</span>'],
-   ["Fingerprint for tamper exclusion","The witness’s filesystem identity is captured before the ladder runs, so a pull request that edits the test harness, adds a skip, or excludes the witness’s path is detected.",
-     h(f.fingerprintAuthored),badge("b-allowed","armed")],
-   ["Prove it fails on the pristine target","<span class=\"mono\">"+h(f.targetRef)+"</span> at <span class=\"mono\">"+h(f.targetSha)+"</span>. A witness that does not fail here is discarded and re-authored, and is never charged to the worker.",
-     "fail · fingerprint "+h(proofShort(f.failFingerprint)),badge("b-failed","fail")],
-   ["Run on the pull request head","<span class=\"mono\">"+h(f.prRef)+"</span> at <span class=\"mono\">"+h(f.prSha)+"</span>, same environment, same normalized command, once per verify call from the worker: "+k+" run"+(k===1?"":"s")+", "+atts.map(function(a){return a.result;}).join(", ")+".",
-     (f.passDigest?"pass · output digest "+h(proofShort(f.passDigest)):last.result)+" · last at "+h(last.at),badge(flipped?"b-proven":"b-failed",last.result)],
-   ["Re-fingerprint and rule on tampering","The identity captured at step 2 still matches. Tamper exclusion "+(f.fingerprint==="held"?"held, so the flip is admissible.":"broke, so no head result is admissible."),
-     "",badge(f.fingerprint==="held"?"b-allowed":"b-critical",f.fingerprint)],
-   ["Scrub the brief to grain "+h(f.grain||"L0"),"Everything but the verdict is removed before anything leaves this plane. The scrubber degrades a brief by one grain rather than emit one carrying a test identifier, a literal value or a witness path, and the brief is stored beside the sealed material it was redacted from.",
-     "emitted: "+word+" · "+word.length+" characters",badge("b-approval",f.grain||"L0")],
-   ["Stamp the worker’s run","The verdict lands on <a class=\"mono\" href=\"#/"+ORG.slug+"/"+P.ws+"/runs/"+P.id+"\" onclick=\"S.tab.run='proof'\">"+h(P.id)+"</a> as <span class=\"mono\">proof.observed</span> at seq <span class=\"ladder-stamp\">"+proofSeq(f)+"</span>, with this runner’s attestation <span class=\"mono\">"+h(f.attest?f.attest.keyId:"")+"</span> embedded, so the proof verifies offline without trusting the worker’s harness.",
-     "",badge(flipped?"b-proven":"b-failed",P.verdict)]
-  ];
-  return '<div class="callout" style="margin-bottom:14px">This is a run like any other: its own frames, its own seal, its own cost, replayable, and attributed to <b>'+h(opName)+'</b>, the worker’s operator, so the price of proof is never hidden. '+
-   'Its principal is <span class="mono">'+h(R.agent)+'</span>, which Oxagen hosts; it is not one of this workspace’s registered identities.</div>'+
-   '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Deterministic-first ladder</h3>'+verdictBadge(P.verdict,P)+
-    '<span class="mono dim" style="margin-left:auto;font-size:11px">'+dur(span)+' end to end · '+h(R.started)+' → '+h(R.sealed)+'</span></div>'+
-   '<ol class="ladder">'+steps.map(function(s,i){return '<li><span class="sn">'+(i+1)+'</span><span class="st"><b>'+s[0]+'</b><span>'+s[1]+'</span>'+(s[2]?'<span class="mono">'+s[2]+'</span>':'')+'</span>'+s[3]+'</li>';}).join("")+'</ol></div>'+
-   '<div class="grid g2"><div class="panel"><div class="panel-h"><h3>Isolation</h3></div><div class="panel-b"><dl class="kv">'+
-    '<dt>Plane</dt><dd>'+h(L.plane)+'</dd><dt>Harness</dt><dd class="mono">'+h(L.harness)+'</dd>'+
-    '<dt>Credentials</dt><dd>its own; the worker’s run token is not accepted here</dd>'+
-    '<dt>Network to worker</dt><dd>none</dd><dt>Filesystem to worker</dt><dd>none</dd><dt>Model access</dt><dd>the author call only</dd></dl></div></div>'+
-   '<div class="panel" id="ladder-cost"><div class="panel-h"><h3>Cost of proof</h3></div><div class="panel-b"><dl class="kv">'+
-    '<dt>Author call</dt><dd>$'+h(L.authorCost)+' · '+tokn(L.authorIn)+' in / '+tokn(L.authorOut)+' out</dd>'+
-    '<dt>Ladder compute</dt><dd>$'+h(L.computeCost)+' · '+L.envs+' environments, '+L.computeSec+' s</dd>'+
-    '<dt>Total</dt><dd><b class="ladder-total" style="color:var(--fg)">'+usd(R.cost)+'</b> USD · <span class="basis">'+h(R.basis)+'</span> · billed at zero</dd>'+
-    '<dt>Attributed to</dt><dd>'+h(opName)+', not the witness runner</dd>'+
-    '<dt>Share of the proven work</dt><dd>'+pct(total,both)+' of $'+both.toFixed(2)+' spent to prove '+h(prNum(f))+'</dd></dl></div></div></div>';
-}
-
-/* ---- W5 · proof records. The witness run belongs to the witness runner, a service principal Oxagen
-   hosts. It is not pushed to AGENTS: WS.agents counts the identities a workspace registered, and a
-   workspace cannot register, steer or deregister the runner. agent() returns null for it, and every
-   Run page reader already allows that. ---- */
-RUNS.push({id:"run_01K5RQ5W7T2HVN9K", agent:"a-intel.core.witness-runner", op:"marcus", ws:"core-platform",
-  status:"sealed", turn:1, steps:7, frames:64, cost:"0.61", basis:"oxagen_metered", tier:null,
-  grade:"full", verdict:null, task:"a-intel/platform#482", taskTitle:"Witness ladder: release notes contract",
-  summary:"Authored witness wit_01K5RQ8M4 for the release-notes contract, proved it fails on main at a4c91e2, and ran it on the head of pull request #482 each time the worker asked. The third run passed, the fingerprint held, and the verdict left this plane as the single word pass, stamped onto run_01K5RQ4B9C7XTN2P.",
-  touched:["wit_01K5RQ8M4","run_01K5RQ4B9C7XTN2P · proof.observed","a-intel/platform · read only"], gen:{"model":"claude-haiku-4-5","when":"at seal 09:09:36","frames":64},
-  started:"09:03:12", model:"claude-opus-5", cache:0, provenSpend:"0.00", ratio:1, sealed:"09:09:36",
-  witnessFor:"run_01K5RQ4B9C7XTN2P",
-  ladder:{harness:"Oxagen witness runner 1.6.2", plane:"ephemeral, one per witness run · inside the customer’s plane where one is dedicated",
-   authorCost:"0.4420", computeCost:"0.1680", authorIn:9640, authorOut:3982, computeSec:68, envs:2}});
-RUNGRAPH["run_01K5RQ5W7T2HVN9K"]={
-  repos:[{name:"a-intel/platform", ref:"a4c91e2 main · f70b3d9 refs/pull/482/head", note:"checked out read-only in two environments; nothing written", edge:"observed", fr:[14,31]}],
-  issues:[{ref:"a-intel/platform#482", title:"Cut 4.11.0 release notes", rel:"the witness was authored from this task", edge:"stated"}],
-  artifacts:[{kind:"witness", ref:"wit_01K5RQ8M4", title:"authored, fingerprinted, fail on main, pass on the head", state:"sealed", edge:"observed", fr:[3,19,57]}],
-  files:[]};
-FRAMES_BY_RUN["run_01K5RQ5W7T2HVN9K"]=[
- {seq:0,kind:"agent_start",tier:null,cost:null,t:"09:03:12.004",sum:"Oxagen witness runner 1.6.2 · ephemeral plane · own credentials · no network or filesystem path to the worker"},
- {seq:1,kind:"context.assembled",tier:null,cost:null,t:"09:03:12.610",sum:"task a-intel/platform#482 and its acceptance criteria · main code graph · workspace steering · 9,640 tok"},
- {seq:2,kind:"model.request",tier:null,cost:null,t:"09:03:12.702",sum:"author call · claude-opus-5 · complex tier · the only model access this plane has"},
- {seq:3,kind:"model.response",tier:null,cost:"0.4420",t:"09:03:29.915",sum:"witness wit_01K5RQ8M4 · oracle test_flip · expected fail mode declared · in 9,640 · out 3,982",usage:{input_uncached:9640,cache_read:0,output:3982}},
- {seq:6,kind:"witness.fingerprint",tier:null,cost:null,t:"09:03:30.380",sum:"filesystem identity captured · sha256:af10…201b · tamper exclusion armed"},
- {seq:14,kind:"witness.run",tier:null,cost:null,t:"09:03:31.020",sum:"pristine target · main @ a4c91e2 · the witness must fail here"},
- {seq:19,kind:"proof.observed",tier:null,cost:null,t:"09:03:55.431",sum:"target result fail · fail fingerprint sha256:d92a…0c14 · witness admitted"},
- {seq:31,kind:"witness.run",tier:null,cost:null,t:"09:07:37.722",sum:"refs/pull/482/head @ 2b8e1c7 · run 1 · same normalized command · the worker asked"},
- {seq:33,kind:"proof.observed",tier:null,cost:null,t:"09:07:41.902",sum:"PR result fail · the worker is told: fail"},
- {seq:44,kind:"witness.run",tier:null,cost:null,t:"09:08:43.288",sum:"refs/pull/482/head @ 9d04a3e · run 2 · the head moved: the worker pushed and asked again"},
- {seq:46,kind:"proof.observed",tier:null,cost:null,t:"09:08:47.310",sum:"PR result fail · the worker is told: fail"},
- {seq:55,kind:"witness.run",tier:null,cost:null,t:"09:09:29.457",sum:"refs/pull/482/head @ f70b3d9 · run 3 · the head moved again"},
- {seq:57,kind:"proof.observed",tier:null,cost:null,t:"09:09:33.201",sum:"PR result pass · output digest sha256:36ce…f2b3"},
- {seq:59,kind:"witness.fingerprint",tier:null,cost:null,t:"09:09:33.260",sum:"re-fingerprint · tamper exclusion held"},
- {seq:60,kind:"witness.scrub",tier:null,cost:null,t:"09:09:33.330",sum:"brief scrubbed to L0 · emitted 4 characters: pass"},
- {seq:61,kind:"witness.stamp",tier:null,cost:null,t:"09:09:33.418",sum:"proof.observed stamped onto run_01K5RQ4B9C7XTN2P at seq 71 · runner attestation embedded"},
- {seq:62,kind:"agent_stop",tier:null,cost:null,t:"09:09:35.880",sum:"outcome completed · plane destroyed"},
- {seq:63,kind:"checkpoint",tier:null,cost:null,t:"09:09:36.004",sum:"seal · merkle sha256:7f0a…9145 · countersigned on ingest"}];
-/* the flipped run's proof frame, in full */
-(function(){
-  var f=run("run_01K5RQ4B9C7XTN2P").flip;
-  f.grain="L0"; f.witnessRun="run_01K5RQ5W7T2HVN9K";
-  f.fingerprintAuthored="sha256:af10c39e82b7d5460c1fa7e39025b8d47613ce0a9f28b5d061ac74e3f985201b";
-  f.failFingerprint="sha256:d92a6f13b804c7e5a1fd20983c64be7710da5f82e93b1c6047ad8e2f5b930c14";
-  f.passDigest="sha256:36ce8a04d71f9b2530ae64c8917fd3b0e25a7c61048df39b2ce7150a8d64f2b3";
-  f.attest={keyId:"kms:a-intel/witness-runner/attest/ed25519/v3",signature:"MEUCIQC3k1vR9pW0sT4yHn6bQ2dXfLm8uJ7aZgN5cE1oPxY0AiBd2Rj9FqK6lT8mHs3vCw7nUxYpZ4bG1dA0eNkQj5rMhg=="};
-  f.contentDigest="sha256:5ea19c73b0d248f61ca307e94fb582d06731ae4c9820df5b13e6a7048cf29b5d";
-  f.prevHash="sha256:0c4d719ea36f8b25107cd94ba2f8e63057d1ac4e9b2036fd581ea47c93b6208f";
-  f.hash="sha256:b7e0243f915ac68d0b3e57fa24c91d806e5b3729af1c0d48e962735bac081f6a";
-})();
-/* the tampered run: the pull request moved the ground under the witness, so the head was excluded */
-(function(){
-  var R=run("run_01K5RG6H1L4OIU9Y");
-  R.touched=["a-intel/platform#469","vitest.config.ts · +1 −0","wit_01K5RG2T7 · excluded"];
-  R.flip={oracle:"test_flip", testKind:"contract test", runner:"vitest 3.2", cmd:"pnpm vitest run packages/release/notes.contract.test.ts",
-   cmdDigest:"sha256:71bd…0c4e", witness:"wit_01K5RG2T7", targetRef:"main", targetSha:"7d31f0a", prRef:"refs/pull/469/head", prSha:"b58e2c4",
-   turn:9, turnStart:"07:31:05.220", turnStartSeq:180, flippedAt:null, flipSeq:null, turnEnd:"07:37:40.114", turnEndSeq:199,
-   sealedAt:"07:38:12.480", sealSeq:202, fingerprint:"broken", segment:"seg_01K5RG6H1L4OIU9Y", heldOut:"1 of 3", grain:"L0", witnessRun:"run_01K5RG4M8T2QWX7B",
-   attempts:[{n:1,result:"excluded",at:"07:34:18.903",seq:188,ms:2210,exit:"—",note:"tamper exclusion broke before the head ran · nothing credited · the worker was told: fail"}],
-   tamper:{file:"vitest.config.ts", change:"+1 −0 · test.exclude gained \"**/release/**/*.contract.test.ts\", which matches the witness’s path",
-    fingerprintAuthored:"sha256:c47d20e9a1f38b6250de7c19b4a8f03e6d21957cb0e4a3f81d6629b57e0c3a18",
-    fingerprintAtRun:"sha256:53e7b81f0da24c96b0f8e1537ac4d6920b85fe31c7a0d649f2e38b015c7da4e6", detectedAt:"07:34:16.551", detectedSeq:187},
-   fingerprintAuthored:"sha256:c47d20e9a1f38b6250de7c19b4a8f03e6d21957cb0e4a3f81d6629b57e0c3a18",
-   failFingerprint:"sha256:8c1e05af73d2946b0fe5ab3178c204de91735fa6b0e82d41c539706ab1de2f83", passDigest:null,
-   attest:{keyId:"kms:a-intel/witness-runner/attest/ed25519/v3",signature:"MEQCIFq7pR2nX8vL0mYt4bH9cJ3sWzEo6dKgA1uNfP5rTxQiAiA9hM2vCk7LbY0sXnW4pRe8TgZdJ6uFm1oQaBc3hKyNrw=="},
-   contentDigest:"sha256:9b02fe43a7c18d6503e29bf1740ac85d6b23917fe04a5cd8261b3e07fa5c491d",
-   prevHash:"sha256:41f8d0a72be95c36187da0e4fb52c9367019ae84db2f6510c7a93be208df5164",
-   hash:"sha256:6da31902ef47b85c0a6f31be2d940785cf1b60ea37429d8b05fc1e6a84d0937b"};
-})();
-
-
-
 /* ---- Cost tab: the run waterfall. Every figure is runSeries(R)/runMetrics(R) or a count over the run's frames. ---- */
 /* frames per turn: counted off frames that carry their turn; a run whose frames do not is apportioned by steps */
 function wfTurnFrames(R,s){
@@ -4221,15 +4069,15 @@ function wfFindings(R,s){
 }
 function wfChart(R,s,tf,finds){
   var W=760,H=264,pl=56,pr=64,pt=36,pb=44,iw=W-pl-pr,ih=H-pt-pb,n=s.n,total=parseFloat(R.cost)||0;
-  var mx=Math.max.apply(null,s.cost)||1,gap=iw/n,bw=Math.min(64,gap*0.62),f=R.flip,i;
+  var mx=Math.max.apply(null,s.cost)||1,gap=iw/n,bw=Math.min(64,gap*0.62),f=null,i;
   var X=function(k){return pl+gap*k+gap/2;},Yb=function(v){return pt+ih-v/mx*ih;},Yc=function(v){return pt+ih-(total?v/total:0)*ih;};
   var g="",bars="",labs="",pts=[pl+","+Yc(0).toFixed(1)],cum=0,marks="";
   for(i=0;i<=4;i++){var v=mx*i/4,y=Yb(v);g+='<line x1="'+pl+'" y1="'+y.toFixed(1)+'" x2="'+(W-pr)+'" y2="'+y.toFixed(1)+'" stroke="var(--border)" stroke-width="1"/>'+
     '<text x="'+(pl-8)+'" y="'+(y+3.5).toFixed(1)+'" text-anchor="end" fill="var(--dim)" font-size="10.5">$'+v.toFixed(2)+'</text>';}
   for(i=0;i<n;i++){
-    var c=s.cost[i],x=X(i)-bw/2,y2=Yb(c),bh=Math.max(2,pt+ih-y2),flipHere=f&&f.flipSeq!=null&&f.turn===i+1,fnd=finds.filter(function(x){return x.turn===i;});
-    var fill=flipHere?"var(--st-proven)":fnd.length?"var(--st-denied)":"var(--st-approval)";
-    bars+='<rect class="wf-bar" data-turn="'+(i+1)+'" data-c="'+c+'" x="'+x.toFixed(1)+'" y="'+y2.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+bh.toFixed(1)+'" rx="3" fill="'+fill+'" opacity="'+(flipHere||fnd.length?".95":".8")+'">'+
+    var c=s.cost[i],x=X(i)-bw/2,y2=Yb(c),bh=Math.max(2,pt+ih-y2),fnd=finds.filter(function(x){return x.turn===i;});
+    var fill=fnd.length?"var(--st-denied)":"var(--st-approval)";
+    bars+='<rect class="wf-bar" data-turn="'+(i+1)+'" data-c="'+c+'" x="'+x.toFixed(1)+'" y="'+y2.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+bh.toFixed(1)+'" rx="3" fill="'+fill+'" opacity="'+(fnd.length?".95":".8")+'">'+
       '<title>Turn '+(i+1)+' · $'+c.toFixed(2)+' · cache '+per(s.cache[i])+' · '+s.steps[i]+' steps · '+tf.n[i]+' frames</title></rect>';
     labs+='<text x="'+X(i).toFixed(1)+'" y="'+(y2-6).toFixed(1)+'" text-anchor="middle" fill="var(--fg)" font-size="10.5">$'+c.toFixed(2)+'</text>'+
       '<text x="'+X(i).toFixed(1)+'" y="'+(pt+ih+16)+'" text-anchor="middle" fill="var(--muted)" font-size="11">T'+(i+1)+'</text>'+
@@ -4238,12 +4086,6 @@ function wfChart(R,s,tf,finds){
     fnd.forEach(function(x,k){var cx=X(i)+bw/2-6-k*12,cy=y2-18;
       marks+='<g style="cursor:pointer" onclick="openDialog(\'evidence\',\''+h(x.fd.id)+'\')"><title>'+h(x.fd.kind)+' · '+h(x.fd.id)+' · pinned to '+h(x.why)+'</title>'+
         '<path d="M'+cx+' '+(cy-5)+'L'+(cx+5)+' '+cy+'L'+cx+' '+(cy+5)+'L'+(cx-5)+' '+cy+'Z" fill="var(--st-denied)"/></g>';});
-    if(flipHere){var rg=tf.ranges[i],fr=rg&&rg[1]>rg[0]?(f.flipSeq-rg[0])/(rg[1]-rg[0]):0.5,fx=x+bw*Math.max(0,Math.min(1,fr));
-      marks+='<g style="cursor:pointer" onclick="S.tab.run=\'player\';S.frame='+f.flipSeq+';render()"><title>Witness flipped · proof.observed · frame '+f.flipSeq+'</title>'+
-        '<line x1="'+fx.toFixed(1)+'" y1="'+(pt-20)+'" x2="'+fx.toFixed(1)+'" y2="'+Math.max(pt-20,y2-20).toFixed(1)+'" stroke="var(--st-proven)" stroke-width="1.6" stroke-dasharray="3 2"/>'+
-        '<line x1="'+fx.toFixed(1)+'" y1="'+y2.toFixed(1)+'" x2="'+fx.toFixed(1)+'" y2="'+(pt+ih)+'" stroke="var(--st-proven)" stroke-width="1.6" stroke-dasharray="3 2"/>'+
-        '<circle cx="'+fx.toFixed(1)+'" cy="'+(pt-24)+'" r="4" fill="var(--st-proven)"/>'+
-        '<text x="'+(fx>W/2?fx-8:fx+8).toFixed(1)+'" y="'+(pt-20)+'" text-anchor="'+(fx>W/2?'end':'start')+'" fill="var(--st-proven)" font-size="10.5">flip · frame '+f.flipSeq+'</text></g>';}
   }
   var line='<path d="M'+pts.join("L")+'" fill="none" stroke="var(--fg)" stroke-width="1.6" stroke-dasharray="4 3" stroke-linejoin="round" opacity=".75"/>'+
     pts.slice(1).map(function(p){var a=p.split(",");return '<circle cx="'+a[0]+'" cy="'+a[1]+'" r="2.6" fill="var(--fg)"/>';}).join("")+
@@ -4253,13 +4095,12 @@ function wfChart(R,s,tf,finds){
    '<line x1="'+pl+'" y1="'+(pt+ih)+'" x2="'+(W-pr)+'" y2="'+(pt+ih)+'" stroke="var(--rule)"/>'+bars+line+labs+marks+'</svg>';
 }
 function costTab(R){
-  var s=runSeries(R),m=runMetrics(R),total=parseFloat(R.cost)||0,tf=wfTurnFrames(R,s),finds=wfFindings(R,s),f=R.flip;
+  var s=runSeries(R),m=runMetrics(R),total=parseFloat(R.cost)||0,tf=wfTurnFrames(R,s),finds=wfFindings(R,s),f=null;
   var light=/haiku|flash|light/i.test(R.model||""),op=light?PRICE.outLight:PRICE.out,cum=0;
-  var rows=s.cost.map(function(c,i){var from=cum;cum+=c;var fnd=finds.filter(function(x){return x.turn===i;}),flipHere=f&&f.flipSeq!=null&&f.turn===i+1;
-    return '<tr'+(flipHere||fnd.length?' style="background:var(--hl)"':'')+'><td class="mono">T'+(i+1)+'</td><td class="num">'+s.steps[i]+'</td><td class="num">'+tf.n[i]+'</td><td class="num">'+per(s.cache[i])+'</td>'+
+  var rows=s.cost.map(function(c,i){var from=cum;cum+=c;var fnd=finds.filter(function(x){return x.turn===i;});
+    return '<tr'+(fnd.length?' style="background:var(--hl)"':'')+'><td class="mono">T'+(i+1)+'</td><td class="num">'+s.steps[i]+'</td><td class="num">'+tf.n[i]+'</td><td class="num">'+per(s.cache[i])+'</td>'+
      '<td class="num wf-cost">$'+c.toFixed(2)+'</td><td class="num dim">$'+from.toFixed(2)+' → $'+cum.toFixed(2)+'</td><td>'+
-     (flipHere?frameBtn(f.flipSeq,"proof.observed · frame "+f.flipSeq)+(fnd.length?' · ':''):'')+
-     (fnd.length?fnd.map(function(x){return '<button class="b b-denied" style="cursor:pointer" onclick="openDialog(\'evidence\',\''+h(x.fd.id)+'\')"'+tipAttr("pinned to "+x.why)+'><span class="d"></span>'+h(x.fd.kind)+'</button>';}).join(" "):flipHere?'':'<span class="dim">—</span>')+'</td></tr>';}).join("");
+     (fnd.length?fnd.map(function(x){return '<button class="b b-denied" style="cursor:pointer" onclick="openDialog(\'evidence\',\''+h(x.fd.id)+'\')"'+tipAttr("pinned to "+x.why)+'><span class="d"></span>'+h(x.fd.kind)+'</button>';}).join(" "):'<span class="dim">—</span>')+'</td></tr>';}).join("");
   var stepSum=s.steps.reduce(function(a,b){return a+b;},0),frameSum=tf.n.reduce(function(a,b){return a+b;},0);
   var foot='<tr class="wf-total"><td><b>total</b></td><td class="num"><b>'+stepSum+'</b></td><td class="num"><b>'+frameSum+'</b></td><td class="num">'+per(s.cacheAvg)+'</td><td class="num"><b class="wf-sum">$'+cum.toFixed(2)+'</b></td><td class="num dim">of '+usd(R.cost)+' recorded</td><td></td></tr>';
   /* spend by token class: input at the effective price split by class, output at list */
@@ -4272,27 +4113,27 @@ function costTab(R){
   var CW=runContext(R),mc=frReqComp(m.perCall,CW.none?{}:{system:CW.system,steering:CW.steering,tools:CW.tools});
   var comp=[["Conversation",mc.conv,"var(--st-allowed)"],["Context frames",mc.ctx,"var(--st-proven)"],["Tool definitions",mc.tools,"var(--st-approval)"],["Steering",mc.steering,"var(--k-rule)"],["System",mc.system,"var(--dim)"]];
   var legend='<div class="row" style="gap:14px;margin-top:10px;font-size:11.5px;color:var(--muted)">'+
-    [["var(--st-approval)","turn cost"],["var(--st-proven)","turn carrying the flip"],["var(--st-denied)","turn carrying a finding"]].map(function(x){return '<span><i style="display:inline-block;width:9px;height:9px;border-radius:2px;background:'+x[0]+';margin-right:5px"></i>'+x[1]+'</span>';}).join("")+
+    [["var(--st-approval)","turn cost"],["var(--st-denied)","turn carrying a finding"]].map(function(x){return '<span><i style="display:inline-block;width:9px;height:9px;border-radius:2px;background:'+x[0]+';margin-right:5px"></i>'+x[1]+'</span>';}).join("")+
     '<span><i style="display:inline-block;width:14px;border-top:2px dashed var(--fg);margin-right:5px;vertical-align:middle"></i>cost so far</span></div>';
-  return '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Run waterfall</h3>'+
-    '<div class="sp" style="margin-left:auto;display:flex;gap:6px;align-items:center;flex-wrap:wrap">'+verdictBadge(R.verdict,R)+
+  return '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Waterfall</h3>'+
+    '<div class="sp" style="margin-left:auto;display:flex;gap:6px;align-items:center;flex-wrap:wrap">'+
      (finds.length?'<span class="b b-denied"><span class="d"></span>'+finds.length+' finding'+(finds.length===1?'':'s')+'</span>':'')+
      '<span class="b b-q">'+s.n+' turn'+(s.n===1?'':'s')+' · '+usd(R.cost)+' '+h(R.basis)+'</span></div></div>'+
     '<div class="panel-b"><div style="overflow-x:auto">'+wfChart(R,s,tf,finds)+'</div>'+legend+
     '<p class="muted" style="font-size:11.5px;margin:10px 0 0">Bar height is the turn’s cost on the left scale; the dashed line is cost accumulating to '+usd(R.cost)+'. '+
-     (f&&f.flipSeq!=null?'The flip is marked where it landed inside turn '+f.turn+'. ':'')+(finds.length?'Diamonds are Spend findings that name this run, pinned to the turn their pattern points at. ':'')+'Each mark opens.</p></div>'+
+     (finds.length?'Diamonds are Spend findings that name this run, pinned to the turn their pattern points at. ':'')+'Each mark opens.</p></div>'+
     '<div class="tw"><table class="wf-table" data-lt="off"><thead><tr><th>Turn</th><th class="num">Steps</th><th class="num">Frames</th><th class="num">Cache hit</th><th class="num">Cost</th><th class="num">Running total</th><th>Pinned</th></tr></thead>'+
      '<tbody>'+rows+foot+'</tbody></table></div>'+
     (tf.counted?'':'<div class="panel-b" style="font-size:11.5px"><span class="dim">Frames per turn are apportioned by steps: this run’s frames in view do not carry their turn.</span></div>')+'</div>'+
    '<div class="grid g2"><div class="panel"><div class="panel-h"><h3>Spend by token class</h3><span class="mono dim" style="margin-left:auto;font-size:11px">'+tokn(m.tokTotal)+' tokens</span></div>'+
     '<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Class</th><th class="num">Tokens</th><th class="num">Cost</th><th class="num">Share</th></tr></thead><tbody>'+clsRows+'</tbody></table></div>'+
     '<div class="panel-b"><div class="note">Input is a third of the money and priced at the effective rate across its classes, a cache read at a tenth of an uncached token; output and reasoning are priced at '+(light?'the light-tier':'the flagship')+' list rate.</div></div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>Prompt composition</h3><span class="mono dim" style="margin-left:auto;font-size:11px">mean request · '+tokn(m.perCall)+' tok</span></div><div class="panel-b" style="display:grid;gap:11px">'+
+   '<div class="panel"><div class="panel-h"><h3>Prompt composition</h3><span class="mono dim" style="margin-left:auto;font-size:11px">'+tokn(m.perCall)+' tok</span></div><div class="panel-b" style="display:grid;gap:11px">'+
     comp.map(function(x){return '<div class="meter"><div class="lab">'+x[0]+'<b>'+tokn(x[1])+' tok</b></div><div class="bar"><i style="width:'+Math.round(x[1]/Math.max(1,m.perCall)*100)+'%;background:'+x[2]+'"></i></div></div>';}).join("")+
     '<div class="hr"></div><dl class="kv">'+
     '<dt>Effective input price</dt><dd>$1.88 per million across all input classes</dd>'+
     '<dt>Cache write cost share</dt><dd>'+(m.cacheWrite?pct(m.cacheWrite,m.tokIn):'0.0% — nothing written this run')+'</dd>'+
-    '<dt>Proven spend</dt><dd>'+usd(R.provenSpend)+' USD</dd>'+
+    '<dt>Basis</dt><dd><span class="basis">'+h(R.basis)+'</span>'+(R.basis==="gateway_observed"?' · counted by the proxy from the bytes that passed through it':' · the harness\u2019s own telemetry; absent classes are marked, never zero')+'</dd>'+
     '<dt>Productive ratio</dt><dd>'+per(R.ratio)+' · '+s.adv+' of '+R.steps+' steps advanced the task</dd></dl></div></div></div>';
 }
 
@@ -4307,17 +4148,17 @@ function chainTab(R){
     return '<tr'+(on?' style="background:var(--hl)"':'')+'><td>'+(on?'<span class="b b-proven"><span class="d"></span>'+g[0]+'</span>':'<span class="mono dim">'+g[0]+'</span>')+'</td><td style="font-size:12px">'+g[1]+'</td><td style="font-size:12px">'+g[2]+'</td></tr>';}).join("");
   return '<div class="grid g2">'+
    '<div class="panel"><div class="panel-h"><h3>Hash chain</h3>'+
-    '<span class="b b-allowed" style="margin-left:auto"><span class="d"></span>'+(R.verdict==="tampered"?'verified with a broken window':'no gaps')+'</span></div><div class="panel-b">'+
+    '<span class="b b-allowed" style="margin-left:auto"><span class="d"></span>no gaps</span></div><div class="panel-b">'+
     '<dl class="kv"><dt>Frames</dt><dd class="num">'+R.frames+' · dense seq 0 … '+(R.frames-1)+(sealed?' · the seal is envelope '+R.frames:'')+'</dd>'+
     '<dt>Rule</dt><dd class="mono" style="font-size:11.5px">hash = SHA256(prev_hash ‖ canonical(envelope))</dd>'+
     '<dt>telemetry_gap frames</dt><dd>0 — a gap is recorded, never repaired</dd>'+
     '<dt>Checkpoints</dt><dd>'+cpN+' · every 20 frames · signed by the host device key, countersigned by Oxagen at ingest</dd>'+
     '<dt>Completeness gaps</dt><dd>'+(R.grade==="full"?"none — replay grade is full":R.grade==="partial"?"bodies missing on some frames — replay grade lowered":R.grade==="digest"?"bodies not sent — digests only":"none — frames are in the archive segment")+'</dd></dl>'+
     '<div class="note" style="margin-top:13px">Frames from a wrapped agent are client-attested: producer-signed and countersigned at ingest, so Oxagen attests receipt and chain integrity, not the truth of the content. Frames Oxagen writes itself, a decision on a routed call or a witness result, are Oxagen-attested.</div></div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>Seal and attestation</h3>'+(sealed?'<span class="b b-allowed" style="margin-left:auto"><span class="d"></span>sealed</span>':'<span class="b b-q" style="margin-left:auto">not sealed — run is still open</span>')+'</div>'+
+   '<div class="panel"><div class="panel-h"><h3>Seal and attestation</h3>'+(sealed?'<span class="b b-allowed" style="margin-left:auto"><span class="d"></span>sealed</span>':'')+'</div>'+
     '<div class="panel-b">'+(sealed?'<dl class="kv">'+
     '<dt>Merkle root</dt><dd class="mono" style="word-break:break-all">'+root+'</dd>'+
-    '<dt>Over</dt><dd>frames 0 … '+(R.frames-1)+(R.flip&&R.flip.sealSeq!=null?' · sealed at '+h(R.flip.sealedAt)+' as envelope '+R.flip.sealSeq:R.sealed?' · sealed '+h(R.sealed):'')+'</dd>'+
+    '<dt>Over</dt><dd>frames 0 … '+(R.frames-1)+(R.sealed?' · sealed '+h(R.sealed):'')+'</dd>'+
     '<dt>Archive segment</dt><dd class="mono">seg_'+h(R.id.replace(/^run_/,""))+'.ndjson.zst</dd>'+
     '<dt>Signature</dt><dd class="mono">ed25519 · '+h(ORG.attester)+'</dd>'+
     '<dt>Signs over</dt><dd class="mono" style="font-size:11.5px">run_id, attempt_id, frame_count, merkle_root, archive_segment_digest, enforcement_tier, completeness_gaps</dd>'+
@@ -4329,7 +4170,7 @@ function chainTab(R){
     '<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Grade</th><th>What was recorded</th><th>What it allows</th></tr></thead><tbody>'+ladder+'</tbody></table></div>'+
     '<div class="panel-b"><div class="note">The grade is computed at seal from what the chain holds, never raised afterwards. Bisect and fork replay read the same frames the player shows.</div>'+
     '<div class="row" style="margin-top:12px">'+(sealed?'<button class="btn sm" onclick="S.bis=null;openDialog(\'bisect\')">Bisect against another run</button>':'')+'<button class="btn sm" onclick="openDialog(\'forkreplay\')">Fork replay from frame '+Math.min(S.frame||0,L.length-1)+'</button></div></div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>Checkpoints</h3><span class="mono dim" style="margin-left:auto;font-size:11px">'+cps.length+' in view · '+cpN+' in the run</span></div>'+
+   '<div class="panel"><div class="panel-h"><h3>Checkpoints</h3><span class="mono dim" style="margin-left:auto;font-size:11px">'+cps.length+' of '+cpN+'</span></div>'+
     (cps.length?'<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Frame</th><th class="num">Covers</th><th>Chain head</th><th>Signature</th></tr></thead><tbody>'+cpRows+'</tbody></table></div>':
      '<div class="panel-b muted" style="font-size:12.5px">No checkpoint frame is in view; the recorder writes one every 20 frames.</div>')+'</div>'+
    '</div>';
@@ -4366,7 +4207,6 @@ function bisKey(f,R){
   var c=f.call?f.call.id:(/^([a-z_]+__[a-z_]+@\d+)/.exec(f.sum||"")||[])[1]||"";
   if(f.kind==="model.request"||f.kind==="model.response")c=R.model;
   if(f.kind==="policy_decision")c+=" "+(f.pol?f.pol.outcome:String(f.sum).split(" ")[0]);
-  if(f.kind==="proof.observed")c=f.att?f.att.result:"";
   if(f.kind==="context.assembled")c=f.ctx?f.ctx.rows.length+" frames":((/(\d+) context frames/.exec(f.sum)||[])[1]||"")+" frames";
   return f.kind+"|"+c;
 }
@@ -4379,7 +4219,7 @@ function bisRun(){var a=el("bis-a"),b=el("bis-b");S.bis={a:a?a.value:S.frameRun,
 DLG_EXT.bisect=function(){
   var cur=S.frameRun||RUNS[0].id,st=S.bis||{},aId=st.a||cur,opts=bisOpts(cur),bDef=(opts.filter(function(r){return r.id!==aId;})[0]||{}).id,bId=st.b||bDef;
   var A=run(aId),B=run(bId);
-  var label=function(r){return r.id+" · "+r.agent.split(".").pop()+" · "+(r.verdict||r.status)+" · $"+r.cost+(r.task===run(cur).task?" · same task":"");};
+  var label=function(r){return r.id+" · "+r.agent.split(".").pop()+" · "+r.status+" · $"+r.cost+(r.task===run(cur).task?" · same task":"");};
   var sel=function(id,val){return '<select id="'+id+'" aria-label="'+(id==="bis-a"?"Run A":"Run B")+'">'+opts.map(function(r){return '<option value="'+r.id+'"'+(r.id===val?' selected':'')+'>'+h(label(r))+'</option>';}).join("")+'</select>';};
   if(!st.done||!A||!B){
     return {t:"Bisect between two runs",s:"Aligns two runs frame by frame and finds the first frame where they did something different.",w:false,
@@ -4394,7 +4234,7 @@ DLG_EXT.bisect=function(){
     rows+='<div class="bis-row" style="display:flex;gap:10px;align-items:baseline;padding:5px 9px;border-left:2px solid '+(on?'var(--st-denied)':'transparent')+';background:'+(on?'var(--hl)':'transparent')+';font-size:12px;'+(after?'color:var(--muted)':'')+'"'+(on?' data-diff="1"':'')+'>'+
       '<span class="mono dim" style="width:26px;text-align:right;flex:none">'+k+'</span><span class="mono" style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+h(bisWhat(f,R))+'</span></div>';}
     return rows;};
-  var head=function(r,L,tagL){return '<div style="padding:8px 9px;border-bottom:1px solid var(--border)"><b>'+tagL+' · <span class="mono">'+h(r.id)+'</span></b><div class="dim" style="font-size:11.5px">'+h(r.agent)+' · '+(L.length<r.frames?L.length+' of '+r.frames+' frames in view':L.length+' frames')+' · '+usd(r.cost)+' · '+h(r.verdict||r.status)+'</div></div>';};
+  var head=function(r,L,tagL){return '<div style="padding:8px 9px;border-bottom:1px solid var(--border)"><b>'+tagL+' · <span class="mono">'+h(r.id)+'</span></b><div class="dim" style="font-size:11.5px">'+h(r.agent)+' · '+(L.length<r.frames?L.length+' of '+r.frames+' frames in view':L.length+' frames')+' · '+usd(r.cost)+' · '+h(r.status)+'</div></div>';};
   var same=A.id===B.id,fa=LA[d],fb=LB[d];
   return {t:"Bisect · "+A.id.slice(-6)+" against "+B.id.slice(-6),s:same?"The same run on both sides has nothing to bisect.":d<0?"No frame differs on what it did.":"First differing frame · seq "+d,w:true,
    b:(same?'<div class="warn">Choose two different runs.</div>':
@@ -4440,7 +4280,7 @@ function pAgents(){
      '<td class="num">'+a.belt+'<div class="dim mono" style="font-size:10px">'+h(a.beltMode)+'</div></td>'+
      '<td class="num">'+a.runs30.toLocaleString()+'</td>'+
      '<td class="num">'+usd(fmt2(n$(a.spend30)))+'</td>'+
-     '<td class="num">'+usd(fmt2(n$(a.proven30)))+'</td>'+
+     '<td class="num">'+tokn(agentTok(a).total)+'<div class="dim mono" style="font-size:10px">'+per(agentTok(a).cacheRate)+' cached</div></td>'+
      '<td>'+(a.mandates.length?'<span class="b b-approval"><span class="d"></span>'+a.mandates.length+'</span>':'<span class="dim">—</span>')+'</td>'+
      '<td>'+(tamperCount(a)?'<span class="b b-critical"><span class="d"></span>'+tamperCount(a)+'</span>':'<span class="dim">0</span>')+'</td>'+
      '<td class="rowacts" onclick="event.stopPropagation()"><button class="btn sm" onclick="S.tab.agent=\'definition\';go(\'#/'+ORG.slug+'/'+w.slug+'/agents/'+a.key.split(".").pop()+'\')">Edit</button>'+
@@ -4448,8 +4288,8 @@ function pAgents(){
      '<button class="btn sm danger" onclick="openDialog(\'delagent\',\''+a.key+'\')">Deregister</button></td></tr>';
   }).join("");
 
-  return '<div class="phead"><div class="t"><p class="eyebrow">Workspace · '+h(w.name)+'</p><h1>Identities</h1>'+
-   '<p>Identity in Postgres, definition in git. The two halves are joined by the agent key and by <span class="mono">definition_digest</span>, the hash of the file at the commit the agent last ran from.</p></div>'+
+  return '<div class="phead"><div class="t"><p class="eyebrow">'+h(w.name)+'</p><h1>Identities</h1>'+
+   '<p>Identity in Postgres, definition in git.</p></div>'+
    '<div class="acts"><button class="btn" onclick="wzOpen(\'agent\')">New agent</button>'+
    '<button class="btn" onclick="openDialog(\'register\')">Register an agent</button>'+
    '<button class="btn primary" onclick="openDialog(\'wrap\')">Wrap Claude Code</button></div></div>'+
@@ -4467,11 +4307,9 @@ function pAgents(){
    })()+'</div>'+
    '<div class="panel"><div class="panel-h"><h3>Registered in '+h(w.name)+'</h3>'+
    '<span class="mono dim" style="margin-left:auto;font-size:11px">.oxagen/agents/ @ '+h(list[0]?list[0].commit:"")+'</span></div>'+
-   '<div class="tw"><table><thead><tr><th>Identity · trust · spend</th><th>Harness</th><th>Operator</th><th>Status</th><th>Tier</th>'+
-   '<th class="num">Belt</th><th class="num">Runs 30d</th><th class="num">Spend 30d</th><th class="num">Proven 30d</th><th>Mandates</th><th>Incidents</th><th></th>'+
-   '</tr></thead><tbody>'+rows+'</tbody></table></div></div>'+
-   '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>The tier ladder</h3><span class="b b-q" style="margin-left:auto">computed per run from what was actually routed</span></div>'+
-   '<div class="panel-b">'+tierLadder(null)+'<div class="note" style="margin-top:12px">Every agent here sits on <span class="mono">observe</span> or <span class="mono">harness</span>. A control claim carries its scope: for actions routed through Oxagen, the server decides. Everything else on the harness tier is delivered, recorded, client-attested, and fail-open.</div></div></div>';
+   '<div class="tw"><table><thead><tr><th>Identity</th><th>Harness</th><th>Operator</th><th>Status</th><th>Tier</th>'+
+   '<th class="num">Belt</th><th class="num">Runs 30d</th><th class="num">Spend 30d</th><th class="num">Tokens 30d</th><th>Mandates</th><th>Incidents</th><th></th>'+
+   '</tr></thead><tbody>'+rows+'</tbody></table></div></div>';
 }
 
 /* ══════════════════════════════ Agent IAM ══════════════════════════════
@@ -4530,8 +4368,6 @@ var BELT=[
   dec:"allow",rule:"grant:agent.repo.write #11",scope:"repo: a-intel/platform"},
  {id:"send_message@1",d:"Message another agent in this workspace, or a run.",
   dec:"allow",rule:"agent tool default",scope:"@agent only — @all is not granted"},
- {id:"verify@1",d:"Ask the witness runner for a verdict on the pull request head. The whole result is one word, pass or fail.",
-  dec:"allow",rule:"agent tool default",scope:"grain L0 · this task’s witnesses · never the witness itself"},
  {id:"claude_code__Bash@2.1",d:"Run a shell command in the host's working directory.",
   dec:"allow",rule:"grant:agent.repo.write #9 (harness tier)",
   scope:"deny: curl, ssh, aws, gh auth · cwd under a-intel/platform"},
@@ -4591,8 +4427,8 @@ var FULL_BELT_LIMIT=40;       /* above this width the workspace sends a searchab
    These are audit incidents scoped to one agent: one source of truth, the audit record, so the
    count on the Agents table can never disagree with the count on the Audit page. taint_raised is
    a policy event, not a tamper detection, so it is deliberately not one of these kinds. */
-var TAMPER_KINDS={hooks_removed:1,chain_break:1,credential_probe:1,witness_tampered:1,
-  unknown_tool:1,witness_probe:1,receipt_modified:1,seq_conflict:1};
+var TAMPER_KINDS={hooks_removed:1,chain_break:1,credential_probe:1,
+  unknown_tool:1,receipt_modified:1,seq_conflict:1};
 function agentTamper(a){
   var key=typeof a==="string"?a:(a&&a.key)||"";
   if(!key||typeof INCIDENTS==="undefined"||!INCIDENTS) return [];
@@ -4678,7 +4514,7 @@ function flippedSwitches(){var n=0;for(var k in S.switches){if(S.switches[k])n++
 function beltFocus(){setTimeout(function(){var e=el("beltq");
   if(e){e.focus();e.setSelectionRange(e.value.length,e.value.length);}},0);}
 
-var IAM_TABS=[["identity","Identity"],["toolbelt","Toolbelt"],["mandates","Mandates"],["budgets","Budgets"],
+var IAM_TABS=[["identity","Identity"],["toolbelt","Toolbelt"],["mandates","Mandates"],["budgets","Budget and spend"],
   ["runs","Runs"],["enrollment","Enrollment"],["incidents","Tamper incidents"],["definition","Definition in git"]];
 var IAM_TAB_KEYS={}; IAM_TABS.forEach(function(x){IAM_TAB_KEYS[x[0]]=1;});
 
@@ -4721,8 +4557,7 @@ function pAgent(r){
     '<button class="btn" onclick="act(\'Credential rotated. The old key stops working at the next call and every live run token dies with it.\',\'gold\')">Rotate credential</button>'+
     '<button class="btn danger" onclick="act(\'Agent suspended. Every run token dies at the next call, even if the daemon is down.\')">Suspend</button>'+
     '<button class="btn danger" onclick="openDialog(\'delagent\',\''+a.key+'\')">Deregister</button>'+
-    '<button class="btn primary" onclick="S.tab.agent=\'toolbelt\';go(\''+base+'toolbelt\')">See the belt as the model sees it</button>'+
-   '</div></div>'+scoreStrip(a)+tabs+body(a,r);
+   '</div></div>'+tabs+body(a,r);
 }
 
 /* ---- Identity: the principal, and the one property most of the threat model rests on ---- */
@@ -4753,7 +4588,7 @@ function aIdentity(a,r){
     '</dl></div></div>'+
 
    '<div class="panel" style="border-color:color-mix(in srgb,var(--st-proven) 34%,var(--border))">'+
-    '<div class="panel-h"><div style="flex:1;min-width:0"><h3>Credentials this agent holds</h3>'+
+    '<div class="panel-h"><div style="flex:1;min-width:0"><h3>Credentials</h3>'+
     '<p class="muted" style="margin:2px 0 0;font-size:12px">The single property most of the threat model rests on.</p></div>'+
     '<span class="b b-proven" style="margin-left:auto"><span class="d"></span>none</span></div>'+
     '<div class="panel-b" style="display:grid;gap:12px">'+
@@ -4762,7 +4597,7 @@ function aIdentity(a,r){
     '<p style="font-size:12.5px;margin:0">It holds one run token, and that token is good for talking to Oxagen and '+
     'nothing else. Every secret a call needs is minted by the broker at dispatch, scoped to that one call, and never '+
     'transmitted to the agent. A leaked run token cannot reach a tool server.</p>'+
-    '<button class="btn sm" onclick="go(\'#/'+ORG.slug+'/'+S.ws+'/tools/connections\')">See the connections that mint them</button>'+
+    '<button class="btn sm" onclick="go(\'#/'+ORG.slug+'/'+S.ws+'/tools/servers\')">See the connections that mint them</button>'+
     '</div></div></div>'+
 
   '<div class="grid g2">'+
@@ -4783,7 +4618,7 @@ function aIdentity(a,r){
     '<button class="btn danger" onclick="act(\'Credential revoked. Every run token dies at the next call.\')">Revoke credential</button></div>'+
     '</div></div>'+
 
-   '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Roles and the delegation ceiling</h3>'+
+   '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Roles</h3>'+
     '<p class="muted" style="margin:2px 0 0;font-size:12px">Effective permission is its own grants ∩ the invoking human\'s grants. Subagents can only narrow.</p></div>'+
     '<button class="btn sm" style="margin-left:auto" onclick="openDialog(\'assignrole\',\''+a.key+'\')">Assign a role</button></div>'+
     '<div class="panel-b" style="display:grid;gap:12px">'+
@@ -4800,11 +4635,12 @@ function aIdentity(a,r){
     '</dl></div></div></div>'+
 
   '<div class="grid g2">'+
-   '<div class="panel"><div class="panel-h"><h3>What this tier delivers</h3></div><div class="panel-b">'+tierLadder(a.tier)+'<dl class="kv" style="margin-top:14px">'+
-    '<dt>Model calls</dt><dd>not routed through Oxagen. The harness calls its provider with its own key and reports usage. Spend is client-attested.</dd>'+
-    '<dt>MCP tool calls</dt><dd>'+(a.tier==="harness"?'the ones registered with Oxagen’s MCP server are routed through Oxagen and decided on the server. Any other MCP server the harness holds is not.':'recorded only')+'</dd>'+
-    '<dt>Harness-native tools</dt><dd>'+(a.tier==="harness"?'the four blocking hook events can refuse: client-attested and fail-open':'recorded only')+'</dd>'+
-    '<dt>Steering</dt><dd>'+(a.tier==="harness"?'delivered at SessionStart and UserPromptSubmit, and as files in the checkout':'not delivered: no hook is installed')+'</dd>'+
+   '<div class="panel"><div class="panel-h"><h3>Tier delivery</h3></div><div class="panel-b">'+tierLadder(a.tier)+'<dl class="kv" style="margin-top:14px">'+
+    '<dt>Model calls</dt><dd>'+(TIER_RANK[a.tier]>=2?'routed through the loopback proxy on the host. Tokens are counted from the bytes that pass through it and the run token is the only credential the call carries. Spend is <span class="basis">gateway_observed</span>.':'not routed through Oxagen. The harness calls its provider with its own key and reports usage. Spend is <span class="basis">client_attested</span>.')+'</dd>'+
+    '<dt>MCP tool calls</dt><dd>'+(TIER_RANK[a.tier]>=2?'every MCP server the harness holds is reached through the gateway and decided on the server.':a.tier==="harness"?'the ones registered with Oxagen’s MCP server are routed through Oxagen and decided on the server. Any other MCP server the harness holds is not.':'recorded only')+'</dd>'+
+    '<dt>Harness-native tools</dt><dd>'+(a.tier==="contained"?'the four blocking hook events can refuse, and the sandbox refuses a write to the settings file, the hook entries or the hook binary':TIER_RANK[a.tier]>=1?'the four blocking hook events can refuse: client-attested and fail-open':'recorded only')+'</dd>'+
+    '<dt>Budgets</dt><dd>'+(TIER_RANK[a.tier]>=2?'enforced before the call: a run budget by the proxy, a shared budget by a reservation on the control plane':'a recorded number and a notice in steering, never a stop')+'</dd>'+
+    '<dt>Steering</dt><dd>'+(TIER_RANK[a.tier]>=1?'delivered at SessionStart and UserPromptSubmit, and as files in the checkout':'not delivered: no hook is installed')+'</dd>'+
     '<dt>Credentials held by this agent</dt><dd><b style="color:var(--st-allowed)">none</b></dd>'+
     '<dt>Replay</dt><dd class="mono">'+h(a.replay||"render")+
      '<span class="sub">what a reader can do with this agent\'s frames after the fact</span></dd>'+
@@ -4887,7 +4723,7 @@ function aToolbelt(a,r){
       'cannot call, it cannot find, and so cannot be prompt-injected into calling.</div></div></div>';
 
   return '<div class="grid">'+
-  '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>How this belt was computed</h3>'+
+  '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Belt computation</h3>'+
    '<p class="muted" style="margin:2px 0 0;font-size:12px">At run start, cached with the bundle version, recomputed on any deny-generation bump.</p></div>'+
    '<span class="b b-q mono" style="margin-left:auto;font-size:10.5px">'+h(activePolicy())+' · deny gen '+S.denyGen+'</span></div>'+
    '<div class="panel-b" style="display:grid;gap:12px">'+
@@ -4899,7 +4735,7 @@ function aToolbelt(a,r){
    '</b> of them. A call by name to anything outside the belt is rejected before lookup, recorded as '+
    '<span class="mono">unknown_tool</span>, and counted toward an automatic halt.</p></div></div>'+
 
-  '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>What the model receives</h3>'+
+  '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Model view</h3>'+
    '<p class="muted" style="margin:2px 0 0;font-size:12px">'+
    (total>FULL_BELT_LIMIT
     ? 'The belt is '+total+' tools, over this workspace\'s full-belt limit of '+FULL_BELT_LIMIT+', so it is presented as a searchable belt.'
@@ -4934,7 +4770,7 @@ function aToolbelt(a,r){
       }).join(",\n")+(total>6?',\n  <span class="c">… '+(total-6)+' more</span>':'')+'\n]</pre>')+
    '</div></div>'+
 
-  '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Try the belt search</h3>'+
+  '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Belt search</h3>'+
    '<p class="muted" style="margin:2px 0 0;font-size:12px">This is <span class="mono">search_tools</span> running against the same index the model queries.</p></div></div>'+
    '<div class="panel-b" style="display:grid;gap:11px">'+
    '<div class="iams"><span class="dim mono">search_tools(</span>'+
@@ -4968,11 +4804,11 @@ function aToolbelt(a,r){
    (total>belt.length?'<div class="panel-b"><p class="muted" style="margin:0;font-size:12px">The remaining '+(total-belt.length)+
      ' are the same github and harness families at other versions.</p></div>':'')+'</div>'+
 
-  '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>What this agent cannot see</h3>'+
+  '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Off the belt</h3>'+
    '<p class="muted" style="margin:2px 0 0;font-size:12px">A sample of the '+(verCount()-total).toLocaleString()+
    ' registry versions outside this belt, and why each one is out.</p></div>'+
    '<span class="b b-denied" style="margin-left:auto"><span class="d"></span>not visible to the model</span></div>'+
-   '<div class="tw"><table><thead><tr><th>Tool</th><th>Why it is not on the belt</th></tr></thead><tbody>'+
+   '<div class="tw"><table><thead><tr><th>Tool</th><th>Reason</th></tr></thead><tbody>'+
    outside.map(function(x){return '<tr><td>'+toolCell(x.id,{sz:"sm"})+'</td><td class="muted">'+h(x.why)+'</td></tr>';}).join("")+
    '</tbody></table></div></div></div>';
 }
@@ -5022,10 +4858,10 @@ function aBudgets(a,r){
     ["Input, cache read",38441227,"0.30","11.53"],["Output",2610884,"15.00","39.16"]];
   var findings=FINDINGS.filter(function(f){return f.subject===a.key;});
 
-  return '<div class="grid">'+
+  return '<div class="grid">'+coachStrip(a)+
   '<div class="grid g2">'+
    '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Budgets</h3>'+
-    '<p class="muted" style="margin:2px 0 0;font-size:12px">Checked at each hook boundary against the spend the harness reports. A breach pauses the run at the next boundary: client-attested and fail-open. An enforced ceiling needs the <span class="mono">gateway</span> tier, which is not available yet.</p></div>'+
+    '<p class="muted" style="margin:2px 0 0;font-size:12px">Checked at each hook boundary against the spend the harness reports. A breach pauses the run at the next boundary: client-attested and fail-open. On the <span class="mono">gateway</span> and <span class="mono">contained</span> tiers the proxy enforces the ceiling before the call.</p></div>'+
     '<button class="btn sm" style="margin-left:auto" onclick="openDialog(\'budget\')">Set budget</button></div>'+
     '<div class="panel-b" style="display:grid;gap:14px">'+
     '<div class="meter"><div class="lab">Per run · hard<b>'+usd(a.budget)+'</b></div>'+
@@ -5041,10 +4877,8 @@ function aBudgets(a,r){
     '<dt>On a breach</dt><dd><span class="mono">pause</span> at the next boundary, a '+
      '<span class="mono">policy.decision</span> frame, and the operator notified</dd>'+
     '<dt>Spend 30d</dt><dd>'+iamMoney(a.spend30,"model calls as the harness reported them + priced tool calls, client_attested")+'</dd>'+
-    '<dt>Proven spend 30d</dt><dd>'+iamMoney(a.proven30,"backed by a witness that flipped")+'</dd>'+
     '<dt>Productive ratio</dt><dd>'+per(a.ratio)+'</dd>'+
     '<dt>Runs 30d</dt><dd><span class="num">'+a.runs30.toLocaleString()+'</span></dd>'+
-    '<dt>Cost per run</dt><dd>'+(a.runs30?iamMoney((money(a.spend30)/a.runs30).toFixed(2),"mean"):'—')+'</dd>'+
     '</dl></div></div>'+
 
    '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Token accounting</h3>'+
@@ -5061,7 +4895,7 @@ function aBudgets(a,r){
     'are paid on every call whether the tool is used or not.</div></div></div></div>'+
 
   (findings.length
-   ?'<div class="panel"><div class="panel-h"><h3>Findings for this agent</h3>'+
+   ?'<div class="panel"><div class="panel-h"><h3>Findings</h3>'+
     '<span class="b b-approval" style="margin-left:auto"><span class="d"></span>'+findings.length+'</span></div>'+
     '<div class="panel-b" style="display:grid;gap:11px">'+findings.map(function(f){
      return '<div class="act-card"><div class="t"><b>'+h(f.kind)+'</b>'+
@@ -5082,11 +4916,11 @@ function aRuns(a,r){
    '<div class="row" style="margin-top:12px"><button class="btn sm ghost" onclick="go(\'#/'+ORG.slug+'/audit/events\')">Open the audit record</button></div>'+
    '</div></div>';
   return '<div class="panel"><div class="panel-h"><h3>Runs</h3>'+
-   '<span class="mono dim" style="margin-left:auto;font-size:11px">'+a.runs30.toLocaleString()+' in 30 days · '+rr.length+' shown</span></div>'+
-   '<div class="tw"><table><thead><tr><th>Run</th><th>Status</th><th>Verdict</th><th class="num">Cost</th>'+
+   '<span class="mono dim" style="margin-left:auto;font-size:11px">'+rr.length+' shown</span></div>'+
+   '<div class="tw"><table><thead><tr><th>Run</th><th>Status</th><th class="num">Tokens</th><th class="num">Cost</th>'+
    '<th class="num">Frames</th><th>Started</th></tr></thead><tbody>'+
-   rr.map(function(x){return '<tr class="click'+(x.verdict==="flipped"?' flipped':'')+'" onclick="go(\'#/'+ORG.slug+'/'+x.ws+'/runs/'+x.id+'\')">'+
-    '<td class="tid">'+h(x.id)+'</td><td>'+statusBadge(runStatus(x))+'</td><td>'+verdictCell(x)+'</td>'+
+   rr.map(function(x){return '<tr class="click" onclick="go(\'#/'+ORG.slug+'/'+x.ws+'/runs/'+x.id+'\')">'+
+    '<td class="tid">'+h(x.id)+'</td><td>'+statusBadge(runStatus(x))+'</td><td class="num">'+runTokCell(x)+'</td>'+
     '<td class="num">'+usd(x.cost)+'</td><td class="num">'+x.frames+'</td>'+
     '<td class="mono dim" style="font-size:11px">'+h(x.started)+'</td></tr>';}).join("")+
    '</tbody></table></div></div>';
@@ -5110,7 +4944,7 @@ function aEnrollment(a,r){
     '<span class="sub">last frame 4 seconds ago · 0 telemetry gaps in the last 24h</span></dd>'+
    '<dt>Hook binary</dt><dd class="mono">oxagen-hook '+h(a.collector||"1.6.2")+' · fails closed against its cached bundle</dd>'+
    '<dt>Hooks written</dt><dd class="mono" style="font-size:11.5px">SessionStart, UserPromptSubmit, PreToolUse, PermissionRequest, Stop<span class="sub" style="font-family:var(--font)">Five run as command hooks. The first four can refuse.</span></dd>'+
-   '<dt>Model proxy</dt><dd>not available yet<span class="sub">model traffic goes from the harness to its provider. Routing it is the gateway tier.</span></dd>'+
+   '<dt>Model proxy</dt><dd>'+((TIER_RANK[a.tier]||0)>=2?'loopback proxy on the host<span class="sub">every model call leaves through it; tokens are counted from the bytes that pass.</span>':'not enrolled<span class="sub">model traffic goes from the harness to its provider. Routing it is the gateway tier.</span>')+'</dd>'+
    '<dt>Oxagen MCP server</dt><dd class="mono">mcp.oxagen.com/w/'+h(S.ws)+'<span class="sub">tool calls registered here are routed through Oxagen and decided on the server</span></dd>'+
    '<dt>Settings</dt><dd>user settings<span class="sub">an enterprise managed enrollment writes locked settings instead</span></dd>'+
    '<dt>Tier earned</dt><dd>'+tierBadge(a.tier)+
@@ -5140,7 +4974,7 @@ function aIncidents(a,r){
    '<div class="panel-b"><p style="font-size:12.5px;margin:0">Detectors that would raise one: '+
    '<span class="mono">hooks_removed</span>, <span class="mono">chain_break</span>, '+
    '<span class="mono">unknown_tool</span> bursts, <span class="mono">credential_probe</span>, '+
-   '<span class="mono">witness_probe</span>, a receipt modified after the fact, and a same-<span class="mono">seq</span> '+
+    'a receipt modified after the fact, and a same-<span class="mono">seq</span> '+
    'frame arriving with a different hash. Each one fires the same commands policy does, and each is a security event '+
    'with who, why, and what it stopped.</p>'+
    '<div class="row" style="margin-top:13px"><button class="btn sm ghost" onclick="go(\'#/'+ORG.slug+'/audit/incidents\')">Open the incident register</button></div>'+
@@ -5192,8 +5026,8 @@ function pMandate(r){
    '<div class="stat"><span class="k">Per period</span><span class="v">'+usd(m.perPeriod)+'</span><span class="s">'+h(m.period)+' · '+m.callsPerDay+' calls per day</span></div>'+
    '<div class="stat"><span class="k">Settled</span><span class="v">'+usd(m.used)+'</span><span class="s">this period, from the ledger</span></div>'+
    '<div class="stat"><span class="k">Remaining</span><span class="v" style="color:var(--st-approval)">'+usd(m.remaining)+'</span><span class="s">after '+usd(m.reserved)+' reserved at decision time</span></div></div>'+
-   '<div class="split"><div class="panel"><div class="panel-h"><h3>The ledger</h3>'+
-    '<span class="b b-q" style="margin-left:auto">reservations at decision time · settlements at receipt time</span></div>'+
+   '<div class="split"><div class="panel"><div class="panel-h"><h3>Ledger</h3>'+
+    '</div>'+
     '<div class="panel-b" style="border-bottom:1px solid var(--border)">'+
     mandateBar(m,showRes)+
     '<div class="dim" style="font-size:11.5px;margin-top:8px">Two concurrent calls cannot both fit under the same remaining limit — the reservation is taken before dispatch.</div></div>'+
@@ -5207,7 +5041,7 @@ function pMandate(r){
        '<td>'+(x.rcp&&receiptById(x.rcp)?'<a class="mono" style="font-size:11.5px" href="#" onclick="event.preventDefault();openDialog(\'receipt\',\''+h(x.rcp)+'\')">'+h(x.rcp)+'</a>':
          x.rcp?'<span class="mono dim" style="font-size:11.5px">'+h(x.rcp)+'</span>':'<span class="dim">\u2014</span>')+'</td></tr>';}).join("")+
     '</tbody></table></div></div>'+
-   '<div><div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>The grant</h3></div><div class="panel-b"><dl class="kv">'+
+   '<div><div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Grant</h3></div><div class="panel-b"><dl class="kv">'+
     '<dt>Agent</dt><dd>'+agentCard(m.agent,{layout:"compact",key:m.agent})+'</dd>'+
     '<dt>Granted by</dt><dd>'+h(m.by)+' · <span class="mono">'+h(m.roleAt)+'</span> at grant</dd>'+
     '<dt>Second approver</dt><dd>'+h(m.second)+'</dd>'+
@@ -5226,7 +5060,8 @@ function pMandate(r){
 
 /* ============================== Tools ============================== */
 function pTools(){
-  var w=ws(), t=tab("tools","registry");
+  var w=ws(), t=tab("tools","tools");
+  if(["tools","servers","policy","switches"].indexOf(t)<0) t="tools";
   if(S.state==="loading") return skeleton();
   if(S.state==="error") return errorState("Tools","503 tool_registry_unavailable");
   if(S.state==="denied") return deniedState("the tool registry","tools.read on core-platform");
@@ -5238,28 +5073,22 @@ function pTools(){
   /* Registry's count is the only one that waits on a person: observed schemas to approve. */
   var np=proposals().length;
   var tabs='<div class="tabs" role="tablist">'+
-   [["registry","Registry",np?np+" to approve":"",np?"var(--st-approval)":""],["connections","Connections",CONNECTIONS.length],["mandates","Mandates ledger",MANDATES.length],
-    ["policy","Policy",POLICIES.length],["switches","Kill switches",switchesOn()],["auto","Auto-approvals",AUTORULES.filter(function(r){return r.on;}).length]]
+   [["tools","Tools",np?np+" to approve":verCount().toLocaleString(),np?"var(--st-approval)":""],["servers","MCP servers",SERVERS.length],
+    ["policy","Policy",POLICIES.length],["switches","Kill switches",switchesOn()]]
    .map(function(x){return '<button class="tab" role="tab" aria-selected="'+(t===x[0])+'" onclick="go(\'#/'+ORG.slug+'/'+w.slug+'/tools/'+x[0]+'\')">'+x[1]+
      (x[2]?'<span class="n"'+(x[3]?' style="color:'+x[3]+'"':'')+'>'+x[2]+'</span>':'')+'</button>';}).join("")+'</div>';
 
   var body="";
-  if(t==="registry"){
+  if(t==="tools"){
     var props=proposals();
-    var srows=SERVERS.map(function(s){
-      return '<tr><td><b class="mono">'+h(s.name)+'</b><span class="sub">'+h(s.url)+'</span></td>'+
-       '<td><span class="b b-q">'+h(s.kind)+'</span><span class="sub">'+h(s.transport)+'</span></td>'+
-       '<td class="num">'+s.tools+'<span class="sub">'+s.versions+' versions</span></td>'+
-       '<td>'+(s.health==="ok"?'<span class="b b-allowed"><span class="d"></span>ok</span>':'<span class="b b-approval"><span class="d"></span>degraded</span>')+'</td>'+
-       '<td class="muted" style="font-size:12px">'+h(s.schemas)+'</td>'+
-       '<td class="muted" style="font-size:12px">'+h(s.conn)+'</td>'+
-       '<td class="muted mono" style="font-size:11px">'+h(s.imported)+'</td></tr>';}).join("");
     var rc=S.regCat||"", rcount={};
     TOOLS.forEach(function(x){var c=toolMeta(x.n).cat;rcount[c]=(rcount[c]||0)+1;});
     var tsel=rc?TOOLS.filter(function(x){return toolMeta(x.n).cat===rc;}):TOOLS;
     var trows=tsel.map(function(x){var m=toolMeta(x.n);
       return '<tr class="click hz-row-'+h(x.risk)+'" onclick="openDialog(\'tool\',\''+x.n+'@'+x.v+'\')">'+
-       '<td>'+toolCell(x.n+"@"+x.v)+'</td><td>'+catBadge(m.cat)+'</td>'+
+       '<td>'+toolCell(x.n+"@"+x.v)+'</td>'+
+       '<td class="rowacts" onclick="event.stopPropagation()"><button class="btn sm ghost" onclick="openDialog(\'server\',\''+h(x.s)+'\')">'+h(x.s)+'</button></td>'+
+       '<td>'+catBadge(m.cat)+'</td>'+
        '<td>'+hazard(x.risk,x.eff)+'</td><td>'+toolGate(x)+'</td>'+
        '<td><span class="b b-q">'+h(x.eg)+'</span></td><td>'+finBadge(x.fin)+'</td>'+
        '<td>'+originBadge(toolOrigin(x))+'</td>'+
@@ -5275,100 +5104,74 @@ function pTools(){
       'The gateway recorded the outputs, inferred a schema, and filed it as a registry proposal. Until an admin approves, outputs are validated only for size and type, '+
       'and every run that used them says so in its completeness record.</div>'+
       '<button class="btn" onclick="openDialog(\'schema\')">Review</button></div>':'')+
-     '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Tool servers</h3>'+
-     '<p class="muted" style="margin:2px 0 0;font-size:12px">'+srvCount()+' servers, '+verCount().toLocaleString()+' tool versions. The registry is the catalog; a belt is what one agent may reach.</p></div>'+
-     '<div class="sp"><button class="btn sm" onclick="openDialog(\'import\')">Import tools from an MCP server</button></div></div>'+
-     '<div class="tw"><table><thead><tr><th>Server</th><th>Kind</th><th class="num">Tools</th><th>Health</th><th>Schemas</th><th>Connection</th><th>Last import</th></tr></thead>'+
-     '<tbody>'+srows+'</tbody></table></div></div>'+
-     '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Tool versions</h3>'+
-     '<p class="muted" style="margin:2px 0 0;font-size:12px">RBAC reaches the version. A server shipping a new version does not silently widen a belt.</p></div>'+
-     '<div class="sp">'+namesToggle()+'<span class="b b-q">'+tsel.length+' of '+verCount().toLocaleString()+' shown</span></div></div>'+
-     '<div class="panel-b" style="border-bottom:1px solid var(--border)">'+catChips(rcount,rc,"S.regCat='%s';render()",TOOLS.length)+'</div>'+
-     '<div class="tw"><table><thead><tr><th>Tool version</th><th>Category</th><th>Hazard</th><th>Gate today</th><th>Egress</th><th>Financial</th><th>Schema origin</th><th>Digest</th>'+
+     '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Tools</h3>'+
+     '<p class="muted" style="margin:2px 0 0;font-size:12px">Every version imported from every server. RBAC reaches the version, so a server shipping a new one does not widen a belt.</p></div>'+
+     '<div class="sp">'+namesToggle()+'<span class="b b-q">'+tsel.length+' of '+verCount().toLocaleString()+' shown</span>'+
+     '<button class="btn sm" onclick="openDialog(\'import\')">Import from a server</button></div></div>'+
+     '<div class="panel-b" style="border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:center;flex-wrap:wrap">'+
+     '<div style="flex:1;min-width:0">'+catChips(rcount,rc,"S.regCat='%s';render()",TOOLS.length)+'</div>'+
+     '<button class="btn sm ghost" onclick="openDialog(\'toolcats\')">What the categories mean</button></div>'+
+     '<div class="tw"><table><thead><tr><th>Tool version</th><th>Server</th><th>Category</th><th>Hazard</th><th>Gate today</th><th>Egress</th><th>Financial</th><th>Schema origin</th><th>Digest</th>'+
      '<th class="num">On belts</th><th class="num">Calls 30d</th></tr></thead><tbody>'+trows+'</tbody></table></div>'+
-     '<div class="panel-b"><div class="note">A financial tool whose schema does not expose an amount cannot be granted a mandate and is denied by construction. '+
-     'The gate shown is today’s: the version’s own kill switch, then its server’s, then the mandate rule, then <span class="mono">pol_v41</span>.</div></div></div>'+
-     '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Tool categories</h3>'+
-     '<p class="muted" style="margin:2px 0 0;font-size:12px">What a tool acts on. Assigned at import from the schema and the server’s annotations; an admin can reclassify, and the change is a governed action.</p></div></div>'+
-     '<div class="panel-b">'+toolCatsBody()+'</div></div>'+
+     '<div class="panel-b"><div class="note">The gate shown is today’s: the version’s own kill switch, then its server’s, then <span class="mono">pol_v41</span>. '+
+     'Open a server on any row to see what it imported and the connection it is reached with.</div></div></div>'+
      '</div>';
-  } else if(t==="connections"){
-    body='<div class="panel"><div class="panel-h"><h3>Connections — the customer’s credentials, held in the vault</h3>'+
-     '<button class="btn sm" style="margin-left:auto" onclick="openDialog(\'connection\')">Add a connection</button></div>'+
-     '<div class="panel-b" style="border-bottom:1px solid var(--border)"><p class="muted" style="margin:0;font-size:12.5px">'+
-     'Enveloped under the organization key, every read audited. <b>No agent holds any of these.</b> For each dispatched call the broker mints the narrowest credential the provider allows.</p></div>'+
-     '<div class="tw"><table><thead><tr><th>Connection</th><th>Kind</th><th>Owner</th><th>Servers</th><th>Downscope</th>'+
-     '<th class="num">Grants 30d</th><th>Reviewed</th><th>Next review</th><th>Status</th></tr></thead><tbody>'+
-     CONNECTIONS.map(function(c){
-      var due=c.status==="review due";
-      return '<tr><td><b>'+h(c.name)+'</b><div class="dim mono" style="font-size:10.5px">'+h(c.id)+'</div></td>'+
-       '<td class="mono" style="font-size:11.5px">'+h(c.kind)+'</td><td>'+h(c.owner)+'</td>'+
-       '<td class="mono dim" style="font-size:11.5px">'+h(c.servers)+'</td>'+
-       '<td class="mono" style="font-size:11.5px">'+h(c.downscope)+'</td>'+
-       '<td class="num">'+c.grants30.toLocaleString()+'</td><td>'+h(c.reviewed)+'</td><td>'+h(c.next)+'</td>'+
-       '<td><span class="b b-'+(due?"approval":c.status.indexOf("financial")>-1?"critical":"allowed")+'"><span class="d"></span>'+h(c.status)+'</span></td></tr>';}).join("")+
+  } else if(t==="servers"){
+    body='<div class="grid">'+
+     '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>MCP servers</h3>'+
+     '<p class="muted" style="margin:2px 0 0;font-size:12px">'+srvCount()+' servers hold '+verCount().toLocaleString()+' tool versions. Open one to authorize it, re-import its tools, or see what it imported.</p></div>'+
+     '<div class="sp"><button class="btn sm primary" onclick="openDialog(\'import\')">Add a server</button></div></div>'+
+     '<div class="tw"><table><thead><tr><th>Server</th><th>Kind</th><th class="num">Tools</th><th>Health</th><th>Connection</th><th>Authorization</th><th>Last import</th><th></th></tr></thead><tbody>'+
+     SERVERS.map(function(sv){
+      var c=connByServer(sv.id);
+      return '<tr '+rowClick("openDialog('server','"+sv.id+"')","Open "+sv.name)+'>'+
+       '<td><b class="mono">'+h(sv.name)+'</b><span class="sub">'+h(sv.url)+'</span></td>'+
+       '<td><span class="b b-q">'+h(sv.kind)+'</span><span class="sub">'+h(sv.transport)+'</span></td>'+
+       '<td class="num">'+sv.tools+'<span class="sub">'+sv.versions+' versions</span></td>'+
+       '<td>'+(sv.health==="ok"?'<span class="b b-allowed"><span class="d"></span>ok</span>':'<span class="b b-approval"><span class="d"></span>degraded</span>')+'</td>'+
+       '<td style="font-size:12px">'+(c?h(c.name)+'<div class="dim mono" style="font-size:10.5px">'+h(c.kind)+'</div>':'<span class="dim">'+h(sv.conn)+'</span>')+'</td>'+
+       '<td>'+authBadge(sv)+'</td>'+
+       '<td class="muted mono" style="font-size:11px">'+h(sv.imported)+'</td>'+
+       '<td class="rowacts" onclick="event.stopPropagation()"><button class="btn sm" onclick="openDialog(\'server\',\''+sv.id+'\')">Open</button>'+
+       (needsAuth(sv)?'<button class="btn sm primary" onclick="openDialog(\'oauth\',\''+sv.id+'\')">'+(c&&c.authState==="expired"?"Reconnect":"Connect")+'</button>':'')+
+       '<button class="btn sm danger" onclick="openDialog(\'serverdel\',\''+sv.id+'\')">Remove</button></td></tr>';}).join("")+
      '</tbody></table></div>'+
-     '<div class="panel-b"><div class="warn"><b>Slack review is overdue.</b> Its next review date was 2026-09-12 and it has issued 311 grants in 30 days. '+
-     'Revoking the connection invalidates every grant it minted at the next use.</div></div></div>'+
-     grantsLog()+
-     '<div class="grid g2" style="margin-top:14px">'+brokerChooses()+
-     '<div class="panel"><div class="panel-h"><h3>Financial connections carry extra rules</h3></div><div class="panel-b"><dl class="kv">'+
-     '<dt>Named human owner</dt><dd>required, with a finance role — Dana Okafor</dd>'+
-     '<dt>Mandate per agent</dt><dd>required for every agent that may use it</dd>'+
-     '<dt>Full-scope keys</dt><dd>the gateway refuses to expose one to a financial tool</dd></dl></div></div></div>';
-  } else if(t==="mandates"){
-    var m=MANDATES[0];
-    body='<div class="panel"><div class="panel-h"><h3>Mandates ledger — the page the CFO’s office reads</h3>'+
-     '<button class="btn sm" style="margin-left:auto" onclick="openDialog(\'mandate\')">Grant a mandate</button></div>'+
-     '<div class="tw"><table><thead><tr><th>Mandate</th><th>Agent</th><th>Granted by</th><th>Purpose</th>'+
-     '<th class="num">Per call</th><th class="num">Per period</th><th class="num">Settled</th><th class="num">Reserved</th><th class="num">Remaining</th><th>Valid to</th><th>Status</th></tr></thead><tbody>'+
-     '<tr class="click" onclick="go(\'#/'+ORG.slug+'/finops/agents/invoice-bot/mandates/'+m.id+'\')">'+
-     '<td class="mono">'+h(m.id)+'</td><td class="mono" style="font-size:11.5px">'+h(m.agent)+'</td>'+
-     '<td>'+h(m.by)+'<div class="dim mono" style="font-size:10.5px">'+h(m.roleAt)+'</div></td>'+
-     '<td style="font-size:12px">'+h(m.purpose)+'</td>'+
-     '<td class="num">'+usd(m.perCall)+'</td><td class="num">'+usd(m.perPeriod)+'</td>'+
-     '<td class="num">'+usd(m.used)+'</td><td class="num" style="color:var(--st-approval)">'+usd(m.reserved)+'</td>'+
-     '<td class="num">'+usd(m.remaining)+'</td><td>'+h(m.to)+'</td>'+
-     '<td><span class="b b-allowed"><span class="d"></span>'+h(m.status)+'</span></td></tr>'+
-     '</tbody></table></div><div class="panel-b">'+
-     '<div class="warn"><b>One exception, severity critical.</b> The connection’s Stripe webhook reported a charge on <span class="mono">con_01K2A9</span> that has no receipt: '+
-     'Stripe charge <span class="mono">ch_3Qa8</span>, $18.00 USD, 2026-09-11 08:40Z. Money moved that Oxagen did not govern.</div></div></div>';
+     (function(){var ex=CONNECTIONS.filter(function(c){return c.authState==="expired"||c.status==="review due";});
+       return ex.length?'<div class="panel-b"><div class="warn"><b>'+ex.length+' connection'+(ex.length>1?'s need':' needs')+' attention.</b> '+
+        ex.map(function(c){return h(c.name)+(c.authState==="expired"?' has an expired token; calls through it are denied until it is reconnected':' was due for review '+h(c.next));}).join('. ')+'.</div></div>':'';})()+
+     '</div>'+
+     grantsLog()+'</div>';
   } else if(t==="policy"){
-    body='<div class="split"><div><div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Policy versions</h3>'+
+    body='<div class="panel"><div class="panel-h"><h3>Policy versions</h3>'+
      '<div class="sp"><span class="b b-q">Cedar · deterministic · no model in the decision path</span>'+
      '<button class="btn sm" onclick="openDialog(\'policy\')">Edit</button></div></div>'+
-     '<div class="tw"><table><thead><tr><th>Version</th><th>State</th><th>Author</th><th>When</th><th class="num">Rules</th><th>Tests</th><th>What changed</th></tr></thead><tbody>'+
+     '<div class="tw"><table><thead><tr><th>Version</th><th>State</th><th>Author</th><th>When</th><th class="num">Rules</th><th>Tests</th><th>What changed</th><th></th></tr></thead><tbody>'+
      POLICIES.map(function(p){
       var sm={active:"allowed",superseded:"q"};
       return '<tr><td class="mono">'+h(p.v)+'</td><td><span class="b b-'+(sm[p.state]||"approval")+'"><span class="d"></span>'+h(p.state)+'</span></td>'+
        '<td>'+h(p.by)+'</td><td class="mono dim" style="font-size:11px">'+h(p.at)+'</td><td class="num">'+p.rules+'</td>'+
-       '<td><span class="b b-allowed">'+h(p.tests)+'</span></td><td style="font-size:12px">'+h(p.note)+'</td></tr>';}).join("")+
+       '<td><span class="b b-allowed">'+h(p.tests)+'</span></td><td style="font-size:12px">'+h(p.note)+'</td>'+
+       '<td class="rowacts"><button class="btn sm" onclick="openDialog(\'policyver\',\''+p.v+'\')">Open</button>'+
+       (p.state==="active"?'<button class="btn sm" onclick="openDialog(\'policy\')">Edit</button>':
+        p.state==="draft"?'<button class="btn sm primary" onclick="openDialog(\'policyactivate\',\''+p.v+'\')">Activate</button>':
+        '<button class="btn sm" onclick="openDialog(\'policyrestore\',\''+p.v+'\')">Restore</button>')+'</td></tr>';}).join("")+
      '</tbody></table></div><div class="panel-b"><div class="note">A version is activated by a governed action with approval; in regulated mode it is a Context PR instead. The superseded version is kept, never deleted, because every decision cites the version that made it.</div></div></div>'+
-     '</div>'+
-     '<div class="panel"><div class="panel-h"><h3>Conditions available to policy</h3></div><div class="panel-b">'+
-     '<p class="muted" style="font-size:12px;margin-bottom:11px">All derived from the call and the record. None from prose.</p>'+
+     '<div class="hr"></div>'+
+     '<p class="eyebrow q">Conditions a rule may test</p>'+
      '<div class="row">'+["tool version","risk","side effect","egress","financial class","amount by path","counterparty","repository","path prefix","recipient domain","taint and its sources","time window","rate","sequence","operator role","enforcement tier","budget position","mandate position"]
       .map(function(c){return '<span class="b b-q" style="font-size:10.5px">'+h(c)+'</span>';}).join("")+'</div>'+
-     '<div class="hr"></div><p class="eyebrow q">A sequence rule, as shipped</p>'+
+     '<div class="hr"></div><p class="eyebrow q">Sequence rule</p>'+
      '<pre><span class="c">// a payment requires a prior quote call in the same run</span>\n'+
      '<span class="k">forbid</span> (principal, action == Action::<span class="s">"stripe__create_payment"</span>, resource)\n'+
-     '<span class="k">unless</span> { context.run.has_prior_call(<span class="s">"stripe__list_prices"</span>) };</pre></div></div></div>';
-  } else if(t==="auto"){
-    body=autoRulesBody();
+     '<span class="k">unless</span> { context.run.has_prior_call(<span class="s">"stripe__list_prices"</span>) };</pre></div></div>';
   } else if(t==="switches"){
     var cls=SWITCHES.filter(function(s){return s.cls;}), rest=SWITCHES.filter(function(s){return !s.cls;});
     body='<div class="ks-stack">'+
-     '<div class="panel"><div class="panel-h"><div class="ks-grow"><h3>Deny is available at every level</h3>'+
-     '<p>Automatic triggers issue the same denies: repeated <span class="mono">unknown_tool</span> attempts, taint on a financial call, a mandate exception, a credential probe, a chain break. '+
-     'Every flip is a security event with who, why, and what it stopped, and shows up on the affected runs as <span class="mono">policy.decision</span> frames.</p></div>'+
-     '<span class="b b-q mono" style="font-size:10.5px">deny generation '+S.denyGen+'</span></div>'+
-     '<div class="panel-b"><div class="ks-wire"><span>tool version</span><span>tool server</span><span>connection</span><span>agent</span>'+
-     '<span>operator’s agents</span><span>workspace</span><span>organization</span><span class="out">class</span></div></div></div>'+
-     '<div><p class="eyebrow q">Class switches · organization-wide, in one action</p><div class="ks-stack">'+cls.map(switchCard).join("")+'</div></div>'+
+     '<div><p class="eyebrow q" style="display:flex;gap:8px;align-items:center">Class switches<span class="b b-q mono" style="font-size:10.5px">deny generation '+S.denyGen+'</span></p><div class="ks-stack">'+cls.map(switchCard).join("")+'</div></div>'+
      '<div><p class="eyebrow q">Scoped switches</p><div class="grid g2">'+rest.map(switchCard).join("")+'</div></div></div>';
   }
-  return '<div class="phead"><div class="t"><p class="eyebrow">Workspace · '+h(w.name)+'</p><h1>Tools</h1>'+
-   '<p>The registry is the only source of tools an agent can see. What an agent can do with it is grants, mandates, approval rules, and the switches below.</p></div>'+
+  return '<div class="phead"><div class="t"><p class="eyebrow">'+h(w.name)+'</p><h1>Tools</h1>'+
+   '<p>The registry is the only source of tools an agent can see.</p></div>'+
    '<div class="acts"><button class="btn" onclick="openDialog(\'import\')">Import server</button>'+
    '<button class="btn primary" onclick="wzOpen(\'tool\')">New tool</button>'+
    '<button class="btn danger" onclick="openDialog(\'switch\')">Flip a kill switch</button></div></div>'+(S.killBanner||"")+tabs+body;
@@ -5403,17 +5206,333 @@ function grantsLog(){
   return '<div class="panel" style="margin-top:14px"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Credential grants log</h3>'+
    '<p class="muted" style="margin:2px 0 0;font-size:12px">'+total.toLocaleString()+' grants in 30 days across '+CONNECTIONS.length+' connections. Each one is recorded on its call’s frames and receipt.</p></div>'+
    '<span class="b b-q grants-shown">'+GRANTS.length+' most recent shown</span></div>'+
-   '<div class="tw"><table data-lt="1"><thead><tr><th>Grant</th><th>Tool version</th><th>Agent · run</th><th>Connection</th><th>Scope</th><th>TTL</th><th>State</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
+   '<div class="tw"><table data-lt="1"><thead><tr><th>Grant</th><th>Tool version</th><th>Agent and run</th><th>Connection</th><th>Scope</th><th>TTL</th><th>State</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
    '<div class="panel-b"><p class="muted" style="margin:0;font-size:12px">TTL defaults to the call’s expected duration plus a margin, never more than one hour. The agent sees the result, never the credential.</p></div></div>';
 }
-function brokerChooses(){
-  return '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>How the broker chooses</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">For each dispatched call, the narrowest credential the provider allows, in this order.</p></div></div>'+
-   '<div class="tw"><table data-lt="1"><thead><tr><th>Provider capability</th><th>What the broker mints</th><th>Here</th></tr></thead><tbody>'+
-   BROKER_CAPS.map(function(x){var cs=CONNECTIONS.filter(function(c){return c.downscope===x[0];});
-    return '<tr><td style="font-size:12px"><b>'+h(x[1])+'</b></td><td class="muted" style="font-size:12px">'+h(x[2])+'</td>'+
-     '<td class="mono" style="font-size:11px">'+(cs.length?cs.map(function(c){return h(c.servers);}).join(" · "):'<span class="dim">none</span>')+'</td></tr>';}).join("")+
-   '</tbody></table></div></div>';
+/* ---------- Tool servers, connections, mandates and policy versions: open, edit, remove ----------
+   Every row on the Tools page that names a record opens it here. The dialogs write to the
+   fixtures in place, so a removal is visible on the table behind them, and each destructive one
+   says what stops working before it asks. */
+function brokerMints(downscope){
+  for(var i=0;i<BROKER_CAPS.length;i++){if(BROKER_CAPS[i][0]===downscope)return BROKER_CAPS[i][2];}
+  return "the stored credential, used server-side for this call only";
+}
+function serverById(id){for(var i=0;i<SERVERS.length;i++){if(SERVERS[i].id===id)return SERVERS[i];}return null;}
+function connById(id){for(var i=0;i<CONNECTIONS.length;i++){if(CONNECTIONS[i].id===id)return CONNECTIONS[i];}return null;}
+function serverTools(id){return TOOLS.filter(function(x){return x.s===id;});}
+function serverConns(id){return CONNECTIONS.filter(function(c){return String(c.servers).split(/[\s,]+/).indexOf(id)>-1;});}
+function connByServer(id){var c=serverConns(id);return c.length?c[0]:null;}
+/* A server reached in-process or over a harness hook holds no credential, so it has nothing to
+   authorize. Everything else is reached as somebody, and that somebody has to be connected. */
+function needsAuth(sv){return sv.conn!=="none";}
+var AUTH_BADGE={connected:["allowed","connected"],expired:["critical","token expired"],"key held":["allowed","key held"],"role assumed":["allowed","role assumed"]};
+function authBadge(sv){
+  if(!needsAuth(sv)) return '<span class="b b-q">none needed</span>';
+  var c=connByServer(sv.id);
+  if(!c) return '<span class="b b-approval"><span class="d"></span>not connected</span>';
+  var a=AUTH_BADGE[c.authState]||["approval",c.authState||"not connected"];
+  return '<span class="b b-'+a[0]+'"><span class="d"></span>'+h(a[1])+'</span>'+
+   (c.tokenExp?'<div class="dim" style="font-size:10.5px">'+h(c.tokenExp)+'</div>':'');
+}
+function oauthKind(c){return c&&(c.kind==="oauth"||c.kind==="github_app");}
+/* Configure once, then authorize by clicking. The redirect comes back to Oxagen, the token is
+   enveloped under the organization key on arrival, and no agent ever holds it. */
+DLG_EXT.oauth=function(id){
+  var sv=serverById(id); if(!sv) return noSuch("Tool server");
+  var c=connByServer(sv.id), back=c&&c.authState==="expired";
+  return {t:(back?"Reconnect ":"Connect ")+sv.name,s:"OAuth · you authorize it, Oxagen holds the token",w:false,
+   b:(back?'<div class="warn"><b>The token expired '+h(c.tokenExp)+'.</b> Calls through this connection are denied until you authorize it again. Nothing else about the connection changes.</div>':'')+
+    '<div class="field"><label for="oa-client">Client id</label><input id="oa-client" value="'+h(c&&c.client||"")+'" placeholder="issued by '+h(sv.name)+'" autocomplete="off"></div>'+
+    '<div class="field"><label for="oa-secret">Client secret</label><input id="oa-secret" type="password" placeholder="'+(c&&c.client?"leave empty to keep the current one":"issued by "+sv.name)+'" autocomplete="off"></div>'+
+    '<div class="field"><label for="oa-url">Authorization URL</label><input id="oa-url" value="'+h(c&&c.authUrl||"")+'" placeholder="https://'+h(sv.name)+'.com/oauth/authorize"></div>'+
+    '<div class="field"><label for="oa-scopes">Scopes</label><input id="oa-scopes" value="'+h(c&&c.scopes||"")+'" placeholder="read, write">'+
+    '<div class="hint">Ask for the narrowest set the tools need. The broker downscopes again per call, but it cannot ask for less than nothing.</div></div>'+
+    '<div class="field"><label>Redirect URL</label><div class="mono" style="font-size:12px">'+h(ASST_ENGINE_URL.replace(/^https?:\/\//,"https://"))+'/oauth/callback</div>'+
+    '<div class="hint">Register this with '+h(sv.name)+' before you authorize.</div></div>'+
+    '<div class="note">Authorizing opens '+h(sv.name)+' in a new tab. When it redirects back, Oxagen exchanges the code, envelopes the token under the organization key, and records who authorized it. The token is never returned to a screen and never sent to an agent.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
+    '<button class="btn primary" onclick="oauthAuthorize(\''+sv.id+'\')">Authorize with '+h(sv.name)+'</button>'};
+};
+function oauthAuthorize(id){
+  var sv=serverById(id); if(!sv) return;
+  function v(k){var n=el(k);return n?n.value.trim():"";}
+  var client=v("oa-client"), url=v("oa-url"), scopes=v("oa-scopes");
+  if(!client||!url){ act("A client id and an authorization URL come first. "+sv.name+" issues both when you register Oxagen as an app."); return; }
+  var c=connByServer(sv.id);
+  if(!c){
+    c={id:"con_"+rid(6,"0123456789ABCDEFGHJKMNPQRSTVWXYZ"),kind:"oauth",name:sv.name+" · "+ORG.name,owner:"Marcus Bell",servers:sv.id,
+       reviewed:"2026-09-11",next:"2026-12-10",grants30:0,status:"active",downscope:"token exchange"};
+    CONNECTIONS.push(c);
+    sv.conn=c.name;
+  }
+  c.client=client; c.authUrl=url; if(scopes) c.scopes=scopes;
+  c.authState="connected"; c.tokenExp="2026-12-20 09:00 UTC";
+  closeDialog(); render();
+  act(sv.name+" authorized as "+c.owner+". The token is enveloped under the organization key and expires "+c.tokenExp+".","gold");
+}
+function oauthRefresh(cid){
+  var c=connById(cid); if(!c) return;
+  c.authState="connected"; c.tokenExp="2026-12-20 09:00 UTC";
+  closeDialog(); render();
+  act("Refreshed against the provider. The new token expires "+c.tokenExp+"; grants already minted keep their own TTL.");
+}
+function oauthDisconnect(cid){
+  var c=connById(cid); if(!c) return;
+  c.authState="not connected"; c.tokenExp="";
+  closeDialog(); render();
+  act("Disconnected "+c.name+". Every call through it is denied until it is authorized again.");
+}
+function serverReimport(id){
+  var sv=serverById(id); if(!sv) return;
+  sv.imported="2026-09-11 09:14 UTC";
+  closeDialog(); render();
+  act("Re-imported "+sv.name+" from tools/list. New versions land as new rows; nothing widens a belt on its own.");
+}
+function noSuch(what){return {t:what,w:false,b:'<div class="note">That record is no longer here.</div>',
+  f:'<button class="btn" onclick="closeDialog()">Close</button>'};}
+
+DLG_EXT.server=function(id){
+  var sv=serverById(id); if(!sv) return noSuch("Tool server");
+  var tv=serverTools(sv.id), c=connByServer(sv.id), props=proposals().filter(function(p){return p.s===sv.id;});
+  var conn=c
+   ? '<dl class="kv"><dt>Connection</dt><dd>'+h(c.name)+' <span class="dim mono" style="font-size:11px">'+h(c.id)+' · '+h(c.kind)+'</span></dd>'+
+     '<dt>Authorization</dt><dd>'+authBadge(sv)+'</dd>'+
+     '<dt>Scopes</dt><dd class="mono" style="font-size:11.5px">'+h(c.scopes||"—")+'</dd>'+
+     '<dt>Owner</dt><dd>'+h(c.owner)+' · reviewed '+h(c.reviewed)+', next '+h(c.next)+'</dd>'+
+     '<dt>What the broker mints</dt><dd>'+h(brokerMints(c.downscope))+'</dd>'+
+     '<dt>Grants 30d</dt><dd>'+c.grants30.toLocaleString()+'</dd></dl>'+
+     '<div class="row" style="margin-top:11px">'+
+      (oauthKind(c)
+        ? '<button class="btn sm primary" onclick="openDialog(\'oauth\',\''+sv.id+'\')">'+(c.authState==="expired"?"Reconnect":"Reconfigure OAuth")+'</button>'+
+          (c.authState==="connected"?'<button class="btn sm" onclick="oauthRefresh(\''+c.id+'\')">Refresh the token</button>':'')
+        : '')+
+      '<button class="btn sm" onclick="openDialog(\'connedit\',\''+c.id+'\')">Edit the connection</button>'+
+      (oauthKind(c)&&c.authState==="connected"?'<button class="btn sm" onclick="oauthDisconnect(\''+c.id+'\')">Disconnect</button>':'')+
+      '<button class="btn sm danger" onclick="openDialog(\'connrevoke\',\''+c.id+'\')">Revoke</button></div>'
+   : needsAuth(sv)
+     ? '<div class="note">This server is reached as somebody, and nobody is connected yet. Every call to it is denied until it is.</div>'+
+       '<div class="row" style="margin-top:11px"><button class="btn sm primary" onclick="openDialog(\'oauth\',\''+sv.id+'\')">Connect with OAuth</button>'+
+       '<button class="btn sm" onclick="openDialog(\'connection\')">Add a key or a role instead</button></div>'
+     : '<div class="note">Reached '+h(sv.transport)+', with no credential to hold. There is nothing here to authorize.</div>';
+  return {t:sv.name,s:sv.url,w:true,
+   b:(sv.health==="ok"?'':'<div class="warn"><b>This server is degraded.</b> Calls to it are retried once and then denied; the run says so on its frames.</div>')+
+    (c&&c.authState==="expired"?'<div class="warn"><b>The token expired '+h(c.tokenExp)+'.</b> Reconnect to bring the '+tv.length+' tools below back into reach.</div>':'')+
+    (props.length?'<div class="warn"><b>'+props.length+' schema'+(props.length>1?'s are':' is')+' awaiting approval.</b> '+
+      'Until an admin approves, outputs are validated only for size and type.</div>':'')+
+    '<dl class="kv"><dt>Kind</dt><dd class="mono">'+h(sv.kind)+' · '+h(sv.transport)+'</dd>'+
+    '<dt>Schemas</dt><dd>'+h(sv.schemas)+'</dd>'+
+    '<dt>Tool versions</dt><dd>'+sv.versions+' across '+sv.tools+' tools</dd>'+
+    '<dt>Last import</dt><dd class="mono">'+h(sv.imported)+'</dd></dl>'+
+    '<p class="eyebrow" style="margin:18px 0 8px">Authorization</p>'+conn+
+    '<p class="eyebrow" style="margin:18px 0 8px">Tools imported from '+h(sv.name)+'</p>'+
+    (tv.length
+     ? '<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Tool version</th><th>Hazard</th><th>Gate today</th><th class="num">On belts</th><th class="num">Calls 30d</th></tr></thead><tbody>'+
+       tv.map(function(x){return '<tr class="click" onclick="openDialog(\'tool\',\''+x.n+'@'+x.v+'\')"><td class="mono" style="font-size:11.5px">'+h(x.n)+'@'+h(x.v)+'</td>'+
+        '<td>'+hazard(x.risk,x.eff)+'</td><td>'+toolGate(x)+'</td>'+
+        '<td class="num">'+x.belts+'</td><td class="num">'+x.calls30.toLocaleString()+'</td></tr>';}).join("")+
+       '</tbody></table></div>'+
+       '<p class="muted" style="font-size:12px;margin:8px 0 0">'+tv.length+' of the '+sv.versions+' versions this server has shipped are in the registry. Re-import to pull the rest.</p>'
+     : '<div class="note">Nothing from this server is in the registry yet. Re-import to pull its <span class="mono">tools/list</span>.</div>'),
+   f:'<button class="btn danger" onclick="openDialog(\'serverdel\',\''+sv.id+'\')">Remove</button>'+
+    '<span class="grow"></span>'+
+    '<button class="btn" onclick="serverReimport(\''+sv.id+'\')">Re-import tools</button>'+
+    '<button class="btn primary" onclick="openDialog(\'serveredit\',\''+sv.id+'\')">Edit</button>'};
+};
+DLG_EXT.serveredit=function(id){
+  var s=serverById(id); if(!s) return noSuch("Tool server");
+  return {t:"Edit "+s.name,s:"The endpoint and the credential it is reached with.",w:false,
+   b:'<div class="field"><label for="sv-url">Endpoint</label><input id="sv-url" value="'+h(s.url)+'"></div>'+
+    '<div class="field"><label for="sv-tr">Transport</label><select id="sv-tr">'+
+     ["streamable-http","https","stdio","in-process","hook"].map(function(t){return '<option'+(t===s.transport?' selected':'')+'>'+t+'</option>';}).join("")+'</select></div>'+
+    '<div class="field"><label for="sv-conn">Connection</label><select id="sv-conn">'+
+     ['none'].concat(CONNECTIONS.map(function(c){return c.name;})).map(function(n){return '<option'+(n===s.conn?' selected':'')+'>'+h(n)+'</option>';}).join("")+
+     (CONNECTIONS.map(function(c){return c.name;}).indexOf(s.conn)<0&&s.conn!=="none"?'<option selected>'+h(s.conn)+'</option>':'')+'</select></div>'+
+    '<div class="note">Changing the endpoint does not re-import. Tool versions already on a belt keep their digest until a re-import brings a new one.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="serverSave(\''+s.id+'\')">Save</button>'};
+};
+function serverSave(id){
+  var s=serverById(id); if(!s) return;
+  var u=el("sv-url"), t=el("sv-tr"), c=el("sv-conn");
+  if(u){ var v=u.value.trim(); if(!v){act("A server needs an endpoint.");return;} s.url=v; }
+  if(t) s.transport=t.value;
+  if(c) s.conn=c.value;
+  closeDialog(); render(); act("Saved. "+s.name+" is reached at "+s.url+" from the next call.");
+}
+DLG_EXT.serverdel=function(id){
+  var s=serverById(id); if(!s) return noSuch("Tool server");
+  var tv=serverTools(s.id), belts=tv.reduce(function(n,x){return n+x.belts;},0);
+  return {t:"Remove "+s.name+"?",w:false,
+   b:'<div class="warn"><b>'+s.versions+' tool versions leave the registry.</b> '+
+     (belts?belts+' belt entries lose their tool and the calls they cover are denied as <span class="mono">unknown_tool</span> from the next call boundary.':'No belt reaches it, so nothing in flight is denied.')+'</div>'+
+    '<div class="note">The registry rows are kept for replay: a run that already called this server still cites the version it called. Re-importing the same endpoint restores it.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
+    '<button class="btn danger" onclick="serverDelete(\''+s.id+'\')">Remove it</button>'};
+};
+function serverDelete(id){
+  var i=-1; SERVERS.forEach(function(s,ix){if(s.id===id)i=ix;});
+  if(i<0) return; var n=SERVERS[i].name; SERVERS.splice(i,1);
+  closeDialog(); render(); act("Removed "+n+". Its tool versions are out of the registry and off every belt.");
+}
+
+DLG_EXT.conn=function(id){
+  var c=connById(id); if(!c) return noSuch("Connection");
+  var due=c.status==="review due", fin=c.status.indexOf("financial")>-1;
+  var g=GRANTS.filter(function(x){return x.conn===c.id;});
+  return {t:c.name,s:c.id+" · "+c.kind,w:true,
+   b:(due?'<div class="warn"><b>The review date passed on '+h(c.next)+'.</b> It has issued '+c.grants30.toLocaleString()+' grants since. '+
+      'Marking it reviewed sets the next date 90 days out and is recorded with your name on it.</div>':'')+
+    '<dl class="kv"><dt>Owner</dt><dd>'+h(c.owner)+(fin?' · a finance role, required on a financial connection':'')+'</dd>'+
+    '<dt>Servers</dt><dd class="mono">'+h(c.servers)+'</dd>'+
+    '<dt>Downscope</dt><dd class="mono">'+h(c.downscope)+'</dd>'+
+    '<dt>What the broker mints</dt><dd>'+h(brokerMints(c.downscope))+'</dd>'+
+    '<dt>Grants 30d</dt><dd>'+c.grants30.toLocaleString()+'</dd>'+
+    '<dt>Reviewed</dt><dd>'+h(c.reviewed)+' · next '+h(c.next)+'</dd></dl>'+
+    (g.length?'<p class="eyebrow" style="margin:16px 0 8px">Recent grants</p>'+
+     '<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Tool version</th><th>Scope</th><th>TTL</th><th>State</th></tr></thead><tbody>'+
+     g.map(function(x){return '<tr><td class="mono" style="font-size:11.5px">'+h(x.tool||"—")+'</td>'+
+      '<td class="mono" style="font-size:11px">'+h(x.scope)+'</td><td class="mono">'+h(x.ttl)+'</td><td>'+h(x.state)+'</td></tr>';}).join("")+
+     '</tbody></table></div>':'')+
+    '<div class="note">No agent holds this credential. The secret was enveloped under the organization key at save and cannot be read back.</div>',
+   f:'<button class="btn danger" onclick="openDialog(\'connrevoke\',\''+c.id+'\')">Revoke</button>'+
+    '<span class="grow"></span>'+
+    (due?'<button class="btn" onclick="connReviewed(\''+c.id+'\')">Mark reviewed</button>':'')+
+    '<button class="btn primary" onclick="openDialog(\'connedit\',\''+c.id+'\')">Edit</button>'};
+};
+DLG_EXT.connedit=function(id){
+  var c=connById(id); if(!c) return noSuch("Connection");
+  var owners=["Marcus Bell","Priya Natarajan","Dana Okafor"];
+  if(owners.indexOf(c.owner)<0) owners.unshift(c.owner);
+  return {t:"Edit "+c.name,s:"The secret itself is never readable. Replace it to rotate.",w:false,
+   b:'<div class="field"><label for="cn-name">Name</label><input id="cn-name" value="'+h(c.name)+'"></div>'+
+    '<div class="field"><label for="cn-owner">Owner — a human, not a team</label><select id="cn-owner">'+
+     owners.map(function(o){return '<option'+(o===c.owner?' selected':'')+'>'+h(o)+'</option>';}).join("")+'</select></div>'+
+    '<div class="field"><label for="cn-next">Next review</label><input id="cn-next" type="date" value="'+h(c.next)+'"></div>'+
+    '<div class="field"><label for="cn-secret">Replace the secret</label><input id="cn-secret" type="password" placeholder="leave empty to keep the current one" autocomplete="off">'+
+    '<div class="hint">A replacement is tested against the provider before it is saved. Grants already minted keep their TTL.</div></div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="connSave(\''+c.id+'\')">Save</button>'};
+};
+function connSave(id){
+  var c=connById(id); if(!c) return;
+  var n=el("cn-name"), o=el("cn-owner"), d=el("cn-next"), sec=el("cn-secret");
+  if(n){ var v=n.value.trim(); if(!v){act("A connection needs a name people will read in the audit record.");return;} c.name=v; }
+  if(o) c.owner=o.value;
+  if(d&&d.value) c.next=d.value;
+  if(c.status==="review due"&&d&&d.value>"2026-09-11") c.status="active";
+  closeDialog(); render();
+  act(sec&&sec.value?"Tested against the provider, then saved. The old secret is dead at the next call.":"Saved.");
+}
+function connReviewed(id){
+  var c=connById(id); if(!c) return;
+  c.reviewed="2026-09-11"; c.next="2026-12-10";
+  if(c.status==="review due") c.status="active";
+  closeDialog(); render(); act("Reviewed. The next date is "+c.next+", recorded with your name on it.");
+}
+DLG_EXT.connrevoke=function(id){
+  var c=connById(id); if(!c) return noSuch("Connection");
+  return {t:"Revoke "+c.name+"?",w:false,
+   b:'<div class="warn"><b>Every grant it minted stops at the next use.</b> '+c.grants30.toLocaleString()+' were minted in 30 days. '+
+     'Calls to <span class="mono">'+h(c.servers)+'</span> are denied until another connection covers them.</div>'+
+    (c.status.indexOf("financial")>-1?'<div class="note">This connection is financial. Revoking it leaves its mandates in place with nothing to draw on; reserved amounts are released at the next boundary.</div>':''),
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
+    '<button class="btn danger" onclick="connRevoke(\''+c.id+'\')">Revoke it</button>'};
+};
+function connRevoke(id){
+  var i=-1; CONNECTIONS.forEach(function(c,ix){if(c.id===id)i=ix;});
+  if(i<0) return; var n=CONNECTIONS[i].name; CONNECTIONS.splice(i,1);
+  closeDialog(); render(); act("Revoked "+n+". Its grants are dead at the next use.");
+}
+
+DLG_EXT.mandateedit=function(id){
+  var m=null; MANDATES.forEach(function(x){if(x.id===id)m=x;});
+  if(!m) return noSuch("Mandate");
+  return {t:"Edit "+m.id,s:m.agent,w:false,
+   b:'<div class="fields" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'+
+    '<div class="field"><label for="mn-call">Per call (USD)</label><input id="mn-call" value="'+h(m.perCall)+'"></div>'+
+    '<div class="field"><label for="mn-per">Per '+h(m.period)+' (USD)</label><input id="mn-per" value="'+h(m.perPeriod)+'"></div></div>'+
+    '<div class="field"><label for="mn-appr">Approval above (USD)</label><input id="mn-appr" value="'+h(m.approvalAbove)+'">'+
+    '<div class="hint">A call above this parks for a human whatever the auto-approval rules say.</div></div>'+
+    '<div class="field"><label for="mn-to">Valid to</label><input id="mn-to" type="date" value="'+h(m.to)+'"></div>'+
+    '<div class="note">Lowering a ceiling below what is already reserved does not claw the reservation back; it applies from the next call. Widening one needs the second approver, '+h(m.second)+'.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="mandateSave(\''+m.id+'\')">Save</button>'};
+};
+function mandateSave(id){
+  var m=null; MANDATES.forEach(function(x){if(x.id===id)m=x;});
+  if(!m) return;
+  var a=el("mn-call"), b=el("mn-per"), c=el("mn-appr"), d=el("mn-to");
+  if(a&&a.value.trim()) m.perCall=a.value.trim();
+  if(b&&b.value.trim()) m.perPeriod=b.value.trim();
+  if(c&&c.value.trim()) m.approvalAbove=c.value.trim();
+  if(d&&d.value) m.to=d.value;
+  closeDialog(); render(); act("Saved. The ledger entry names you and the limits you set.");
+}
+DLG_EXT.mandaterevoke=function(id){
+  var m=null; MANDATES.forEach(function(x){if(x.id===id)m=x;});
+  if(!m) return noSuch("Mandate");
+  return {t:"Revoke "+m.id+"?",w:false,
+   b:'<div class="warn"><b>'+h(m.agent)+' can move no money after this.</b> '+usd(m.reserved)+' is reserved and is released at the next boundary; '+
+     usd(m.used)+' already settled and stays on the ledger.</div>'+
+    '<div class="note">The ledger is kept, never deleted. A revoked mandate still answers for every draw it made.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
+    '<button class="btn danger" onclick="mandateRevoke(\''+m.id+'\')">Revoke it</button>'};
+};
+function mandateRevoke(id){
+  var m=null; MANDATES.forEach(function(x){if(x.id===id)m=x;});
+  if(!m) return;
+  m.status="revoked"; m.remaining="0.00";
+  closeDialog(); render(); act("Revoked "+id+". The reservation is released at the next boundary.");
+}
+
+DLG_EXT.policyver=function(v){
+  var p=null; POLICIES.forEach(function(x){if(x.v===v)p=x;});
+  if(!p) return noSuch("Policy version");
+  return {t:p.v,s:p.state==="active"?"The version every decision cites today":"Superseded, and kept because decisions cite it",w:false,
+   b:'<dl class="kv"><dt>State</dt><dd>'+h(p.state)+'</dd><dt>Author</dt><dd>'+h(p.by)+'</dd>'+
+    '<dt>Activated</dt><dd class="mono">'+h(p.at)+'</dd><dt>Rules</dt><dd>'+p.rules+'</dd>'+
+    '<dt>Tests</dt><dd>'+h(p.tests)+'</dd><dt>What changed</dt><dd>'+h(p.note)+'</dd></dl>'+
+    '<div class="note">Cedar, evaluated without a model in the decision path. Every <span class="mono">policy.decision</span> frame names the version that made it, so a replay reads the same either way.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Close</button>'+
+    (p.state==="active"?'<button class="btn primary" onclick="openDialog(\'policy\')">Edit</button>':
+     p.state==="draft"?'<button class="btn primary" onclick="openDialog(\'policyactivate\',\''+p.v+'\')">Activate</button>':
+     '<button class="btn primary" onclick="openDialog(\'policyrestore\',\''+p.v+'\')">Restore</button>')};
+};
+DLG_EXT.policyrestore=function(v){
+  var p=null; POLICIES.forEach(function(x){if(x.v===v)p=x;});
+  if(!p) return noSuch("Policy version");
+  var act0=POLICIES.filter(function(x){return x.state==="active";})[0];
+  return {t:"Restore "+p.v+"?",w:false,
+   b:'<div class="note">A restore does not move the pointer back. It copies '+h(p.v)+'’s rules into a new version above '+
+     h(act0?act0.v:"the active one")+', which activates by a governed action with approval. The record keeps both.</div>'+
+    '<div class="warn"><b>'+h(p.note)+'</b> is undone by this. Read what it changed before you approve it.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
+    '<button class="btn primary" onclick="policyRestore(\''+p.v+'\')">Draft the restore</button>'};
+};
+function policyRestore(v){
+  var p=null; POLICIES.forEach(function(x){if(x.v===v)p=x;});
+  if(!p) return;
+  var n=parseInt(String(POLICIES[0].v).replace(/\D/g,""),10)+1;
+  POLICIES.unshift({v:"pol_v"+n,state:"draft",by:PEOPLE.marcus.name,at:"2026-09-11 09:20Z",rules:p.rules,
+   tests:p.tests,note:"restores "+p.v});
+  closeDialog(); render(); act("Drafted pol_v"+n+" from "+v+". It decides nothing until an approver activates it.","gold");
+}
+DLG_EXT.policyactivate=function(v){
+  var p=null; POLICIES.forEach(function(x){if(x.v===v)p=x;});
+  if(!p) return noSuch("Policy version");
+  var cur=POLICIES.filter(function(x){return x.state==="active";})[0];
+  return {t:"Activate "+p.v+"?",w:false,
+   b:'<div class="note">'+(cur?h(cur.v)+' is superseded and kept, because every decision it made cites it. ':'')+
+     'From the next call boundary every <span class="mono">policy.decision</span> frame names '+h(p.v)+'.</div>'+
+    '<dl class="kv"><dt>Rules</dt><dd>'+p.rules+'</dd><dt>Tests</dt><dd>'+h(p.tests)+'</dd>'+
+    '<dt>What changes</dt><dd>'+h(p.note)+'</dd></dl>'+
+    '<div class="warn"><b>This is a governed action.</b> It records your name, and in regulated mode it is a Context PR instead of a button.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
+    '<button class="btn primary" onclick="policyActivate(\''+p.v+'\')">Activate it</button>'};
+};
+function policyActivate(v){
+  var p=null; POLICIES.forEach(function(x){if(x.v===v)p=x;});
+  if(!p) return;
+  POLICIES.forEach(function(x){if(x.state==="active")x.state="superseded";});
+  p.state="active"; S.denyGen+=1;
+  closeDialog(); render(); act(v+" is active. Deny generation is now "+S.denyGen+".","gold");
 }
 
 /* ---------- Import, in three steps (W9): connect, review tools/list, classify and import ----------
@@ -5464,7 +5583,7 @@ DLG_EXT.import=function(arg){
 /* ============================== Steering ============================== */
 /* One concern carried from proposal to publication, all of it derived:
    - PRP_SUPPORT holds the supporting-run rows behind each proposal; every count a proposal shows
-     (runs, agents, duplicate calls, the baseline proof rate) is computed from those rows.
+     (runs, agents, duplicate calls, the share of side effects kept) is computed from those rows.
    - CTXPR is the Context PR for prp_01K5RU4A. Its six checks run one at a time; merging publishes
      CTXPR.record: RECORDS gains it, STEER_BUNDLE gains its rule and bumps its version, and the
      steering band in CTXB and the window total in CTXW grow by the record's tokens, so the context
@@ -5510,18 +5629,18 @@ var PRP_SUPPORT=(function(){
   var A="0123456789ABCDEFGHJKMNPQRSTVWXYZ";
   function gen(seed,n){var s="",x=seed>>>0;for(var i=0;i<n;i++){x=(Math.imul(x,1664525)+1013904223)>>>0;s+=A[x>>>27];}return s;}
   function day(back){return new Date(Date.UTC(2026,8,10)-back*864e5).toISOString().slice(0,10);}
-  var a=[["run_01K5RD4N7T6UVY5C","2026-09-09",31,3,"proven"],["run_01K5R94P1V8WXZ7D","2026-09-06",27,2,"proven"],
+  var a=[["run_01K5RD4N7T6UVY5C","2026-09-09",31,3,"kept"],["run_01K5R94P1V8WXZ7D","2026-09-06",27,2,"kept"],
          ["run_01K5R52Q3X9YAB9E","2026-09-02",44,3,"failing"]].map(function(x,i){
-    return {run:x[0],date:x[1],frame:x[2],dups:x[3],verdict:x[4],agent:"a-intel.core.release-manager",rec:"rec_01K5"+gen(900+i,12)};});
+    return {run:x[0],date:x[1],frame:x[2],dups:x[3],outcome:x[4],agent:"a-intel.core.release-manager",rec:"rec_01K5"+gen(900+i,12)};});
   for(var i=0;i<209;i++){
     a.push({run:"run_01K5"+gen(1000+i,12),date:day(9+Math.floor(i*21/209)),frame:18+(i*37)%120,
-     dups:((i*47)%209)<47?4:3, verdict:i%9===4?"failing":i%4===1?"unmoved":"proven",
+     dups:((i*47)%209)<47?4:3, outcome:i%9===4?"reverted":i%4===1?"no change":"kept",
      agent:"a-intel.core.release-manager",rec:"rec_01K5"+gen(5000+i,12)});
   }
-  var b=[{run:"run_01K5RH3G8K5PAS7D",date:"2026-09-10",frame:52,verdict:"unsatisfied",agent:"a-intel.core.triage",rec:"rec_01K5"+gen(7000,12)}];
-  for(var j=1;j<14;j++) b.push({run:"run_01K5"+gen(7100+j,12),date:day(1+j*2),frame:20+(j*29)%80,verdict:"unsatisfied",agent:"a-intel.core.triage",rec:"rec_01K5"+gen(7200+j,12)});
+  var b=[{run:"run_01K5RH3G8K5PAS7D",date:"2026-09-10",frame:52,outcome:"halted",agent:"a-intel.core.triage",rec:"rec_01K5"+gen(7000,12)}];
+  for(var j=1;j<14;j++) b.push({run:"run_01K5"+gen(7100+j,12),date:day(1+j*2),frame:20+(j*29)%80,outcome:"halted",agent:"a-intel.core.triage",rec:"rec_01K5"+gen(7200+j,12)});
   var c=[["a-intel.core.stella-ci","2026-09-08",63],["a-intel.core.release-manager","2026-09-04",88],["a-intel.core.stella-ci","2026-08-29",41]].map(function(x,k){
-    return {run:"run_01K5"+gen(8000+k,12),date:x[1],frame:x[2],verdict:"failing",agent:x[0],rec:"fnd_01K5"+gen(8100+k,8)};});
+    return {run:"run_01K5"+gen(8000+k,12),date:x[1],frame:x[2],outcome:"reverted",agent:x[0],rec:"fnd_01K5"+gen(8100+k,8)};});
   return {"prp_01K5RU4A":a,"prp_01K5RU7B":b,"prp_01K5RU9C":c};
 })();
 /* What the promoter measured for each proposal, and how it argues for it. */
@@ -5545,10 +5664,10 @@ var PRP_META={
   measure:function(s){return s.runs+" drift findings in 30 days";}}
 };
 function prpStats(id){
-  var rows=PRP_SUPPORT[id]||[], m=PRP_META[id]||{}, ag={}, dups=0, proven=0;
-  rows.forEach(function(r){ag[r.agent]=1;dups+=r.dups||0;if(r.verdict==="proven")proven++;});
-  var s={rows:rows,runs:rows.length,agents:Object.keys(ag).length,dups:dups,proven:proven,
-   proof:rows.length?proven/rows.length:null,meta:m};
+  var rows=PRP_SUPPORT[id]||[], m=PRP_META[id]||{}, ag={}, dups=0, kept=0;
+  rows.forEach(function(r){ag[r.agent]=1;dups+=r.dups||0;if(r.outcome==="kept")kept++;});
+  var s={rows:rows,runs:rows.length,agents:Object.keys(ag).length,dups:dups,kept:kept,
+   keptRate:rows.length?kept/rows.length:null,meta:m};
   s.met=true;   /* a person decides whether the support is enough; there is no threshold */
   return s;
 }
@@ -5639,6 +5758,7 @@ function prRun(def,st,paint){
 }
 function prLabel(def,st){
   var n=def.checks.length;
+  if(st.st==="closed") return ["q","closed"];
   if(st.st==="failed") return ["failed",(st.failed+1)+" / "+n+" \u00b7 check failed"];
   return st.st==="merged"?["proven","merged"]:st.st==="passed"?["allowed",n+" / "+n+" checks pass"]:
    st.st==="checking"?["approval",st.done+" / "+n+" checks · running"]:st.st==="opened"?["approval","0 / "+n+" checks · queued"]:["q","not opened"];
@@ -5696,11 +5816,11 @@ function prpBadge(p){
 }
 function prpDetail(p){
   var s=prpStats(p.id), m=s.meta, mine=p.id===CTXPR.prp, c=S.ctxpr;
-  var vcls={proven:"proven",failing:"failed",unmoved:"q",unsatisfied:"approval"};
+  var vcls={kept:"allowed",reverted:"failed","no change":"q",halted:"denied"};
   var rows=s.rows.map(function(r){
     return '<tr><td><span class="mono" style="font-size:12px">'+h(r.run)+'</span><div class="dim" style="font-size:11.5px">'+h(r.agent)+' · '+h(r.date)+'</div></td>'+
      '<td class="mono num" style="font-size:12px">seq '+r.frame+'</td>'+
-     '<td><span class="b b-'+(vcls[r.verdict]||"q")+'"><span class="d"></span>'+h(r.verdict)+'</span></td>'+
+     '<td><span class="b b-'+(vcls[r.outcome]||"q")+'"><span class="d"></span>'+h(r.outcome)+'</span></td>'+
      '<td><span class="mono" style="font-size:11.5px">'+h(r.rec)+'</span><div class="dim" style="font-size:11.5px">'+h(m.recKind)+(r.dups?' ×'+r.dups:'')+'</div></td></tr>';
   }).join("");
   function tile(k,v,need,ok,sub){
@@ -5722,9 +5842,9 @@ function prpDetail(p){
    '<div class="split"><div>'+
     '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Proposed record</h3><span class="b b-q mono" style="margin-left:auto">'+h(p.id)+'</span></div>'+
      '<div class="recs" data-lt="1">'+recordCard({kind:p.kind,force:p.force,st:p.st,scope:"workspace",id:p.lineage},{right:'<span class="b b-q">steers nothing yet</span>',meta:'<span>from <b>'+h(p.from)+'</b></span>'})+'</div></div>'+
-    '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Why the promoter raised it</h3></div><div class="panel-b"><p style="margin:0;font-size:13px;line-height:1.6;color:var(--body)">'+h(m.rationale(s))+'</p></div></div>'+
+    '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Promoter evidence</h3></div><div class="panel-b"><p style="margin:0;font-size:13px;line-height:1.6;color:var(--body)">'+h(m.rationale(s))+'</p></div></div>'+
     '<div class="panel"><div class="panel-h"><h3>Supporting runs</h3><span class="b b-q" style="margin-left:auto" data-prp-support>'+h(m.support(s))+'</span></div>'+
-     '<div class="tw"><table><thead><tr><th>Run</th><th>Frame</th><th>Verdict</th><th>Record</th></tr></thead><tbody data-prp-rows="'+s.runs+'">'+rows+'</tbody></table></div>'+
+     '<div class="tw"><table><thead><tr><th>Run</th><th>Frame</th><th>Outcome</th><th>Record</th></tr></thead><tbody data-prp-rows="'+s.runs+'">'+rows+'</tbody></table></div>'+
     '</div></div>'+
    '<div><div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Context PR</h3></div><div class="panel-b">'+
      '<dl class="kv" style="margin-bottom:13px"><dt>Target</dt><dd class="mono">a-intel/platform</dd><dt>Branch</dt><dd class="mono">context/'+h(p.lineage)+'</dd>'+
@@ -5733,7 +5853,7 @@ function prpDetail(p){
      '<dt>Reaches</dt><dd>every run in <b>core-platform</b> on a-intel/platform, from its next model call</dd>'+
      '<dt>As</dt><dd>compiled steering in bundle v'+(STEER_BUNDLE.v+(mine&&c.st==="merged"?0:1))+', <span class="mono">'+h(p.force)+'</span> in the stable prefix</dd>'+
      '<dt>Costs</dt><dd class="num"><b>'+m.tok+' steering tokens</b> a turn · '+tokn(stgBundle().tok-(mine&&c.st==="merged"?m.tok:0))+' → '+tokn(stgBundle().tok+(mine&&c.st==="merged"?0:m.tok))+'</dd>'+
-     '<dt>Baseline</dt><dd>'+h(m.measure(s))+(s.proof!=null&&s.dups?' · proof rate '+s.proof.toFixed(2):'')+'</dd>'+
+     '<dt>Baseline</dt><dd>'+h(m.measure(s))+(s.keptRate!=null&&s.dups?' · side effects kept on '+per(s.keptRate)+' of runs':'')+'</dd>'+
      '<dt>Read back as</dt><dd>every run that renders it cites the record in its context frame, so the Run page shows where it landed</dd></dl></div></div></div></div>';
 }
 
@@ -5777,7 +5897,7 @@ function recprCur(){
   for(var i=0;i<RECPRS.length;i++){ if(recprSt(RECPRS[i]).st!=="merged") return RECPRS[i]; }
   return RECPRS[0];
 }
-function recprOpenCount(){var n=0;RECPRS.forEach(function(d){if(recprSt(d).st!=="merged")n++;});return n;}
+function recprOpenCount(){var n=0;RECPRS.forEach(function(d){var st=recprSt(d).st;if(st!=="merged"&&st!=="closed")n++;});return n;}
 
 /* The next free number on the workspace's main repo, read off the pull requests that exist rather
    than invented, so two open PRs never claim the same one. */
@@ -5935,11 +6055,11 @@ function recprDetail(def){
      (failed?'<b style="color:var(--st-failed)">A check failed.</b> <span class="muted">Nothing merges and nothing is published. Change the file and open it again.</span>'
       :passed?'<b>'+n+' checks passed.</b> <span class="muted">Governance team: '+h(me().name)+' owns <span class="mono">.oxagen/rules/</span>.</span>'
              :'<b>Checks are running.</b> <span class="muted">Merge is blocked until all '+n+' report.</span>')+'</div>'+
-     '<button class="btn" onclick="recprDiscard(\''+h(def.pr)+'\')">Close without merging</button>'+
+     '<button class="btn danger" onclick="openDialog(\'closepr\',\'recpr|'+h(def.pr)+'\')">Close pull request</button>'+
      '<button class="btn'+(passed?' primary':'')+'" '+(passed?'':'disabled ')+'onclick="recprMerge(\''+h(def.pr)+'\')">Merge pull request</button></div>';
   var right=merged
    ? '<div class="panel" style="margin-bottom:14px" data-promo-bundle="'+sb.v+'"><div class="panel-h"><h3>promotion_event</h3>'+
-     '<span class="b b-q" style="margin-left:auto">written on merge, never by an agent</span></div><div class="panel-b"><dl class="kv code">'+
+     '</div><div class="panel-b"><dl class="kv code">'+
      '<dt>record_id</dt><dd>'+h(def.promo)+'</dd><dt>lineage_id</dt><dd>'+h(r.id)+'</dd>'+
      '<dt>from → to</dt><dd>authored → <b>published</b></dd>'+
      '<dt>author</dt><dd>'+h(me().name)+' · '+h(me().role)+'</dd>'+
@@ -5953,7 +6073,7 @@ function recprDetail(def){
      '<dt>ledger</dt><dd>promotions.jsonl not written · regulated mode only; this workspace is team</dd></dl>'+
      '<div class="row" style="margin-top:13px;gap:8px;flex-wrap:wrap">'+
      '<button class="btn" onclick="go(\'#/'+ORG.slug+'/audit/events\')">Audit log</button></div></div></div>'
-   : '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>What merge will do</h3></div><div class="panel-b"><dl class="kv">'+
+   : '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Merge effects</h3></div><div class="panel-b"><dl class="kv">'+
      '<dt>1</dt><dd>write a promotion_event with the author, the pull request and the commit</dd>'+
      '<dt>2</dt><dd>re-index the record from the merged commit; a hash mismatch blocks delivery</dd>'+
      '<dt>3</dt><dd>bump the bundle v'+sb.v+' → v'+(sb.v+1)+' and re-sign it · '+tokn(sb.tok)+' → '+tokn(sb.tok+r.tok)+' steering tokens a turn</dd>'+
@@ -5980,15 +6100,15 @@ function prSelected(){ return (RECPRS.length&&S.prSel!=="ctxpr")?"recpr":"ctxpr"
 function prTable(){
   var rows=[], cur=recprCur();
   RECPRS.forEach(function(d){var lr=recprLabel(d);
-    rows.push([d.pr,d.pr,d.record.st,d.branch,me().name,'<span class="b b-'+lr[0]+'"><span class="d"></span>'+h(lr[1])+'</span>',
+    rows.push([d.pr,d.pr,d.record.st,d.branch,me().name,ciLight(ciFromSt(d,recprSt(d)))+'<span class="b b-'+lr[0]+'"><span class="d"></span>'+h(lr[1])+'</span>',
       cur&&cur.pr===d.pr&&prSelected()==="recpr"]);});
   if(S.ctxpr.st!=="none"){var p=prpById(CTXPR.prp),lc=ctxprLabel();
-    rows.push(["ctxpr",CTXPR.pr,p.st,CTXPR.branch,"the promoter",'<span class="b b-'+lc[0]+'"><span class="d"></span>'+h(lc[1])+'</span>',
+    rows.push(["ctxpr",CTXPR.pr,p.st,CTXPR.branch,"the promoter",ciLight(ciFromSt(CTXPR,S.ctxpr))+'<span class="b b-'+lc[0]+'"><span class="d"></span>'+h(lc[1])+'</span>',
       prSelected()==="ctxpr"]);}
   PROPOSALS.forEach(function(q){ if(q.id!==CTXPR.prp&&q.pr!=="—")
     rows.push([null,q.pr,q.st,"context/"+q.lineage,"the promoter",'<span class="b b-approval"><span class="d"></span>'+h(q.checks)+'</span>',false]);});
-  return '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Open and recent Context PRs</h3>'+
-   '<span class="b b-q" style="margin-left:auto">governance: team · code-owner review required</span></div>'+
+  return '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Context PRs</h3>'+
+   '<span class="b b-q" style="margin-left:auto">Governance: '+h(wsGov(ws()))+'</span></div>'+
    '<div class="tw"><table data-lt="off"><thead><tr><th>Pull request</th><th>Branch</th><th>Opened by</th><th>State</th></tr></thead><tbody>'+
    rows.map(function(x){
      return '<tr'+(x[0]?' class="click'+(x[6]?' on':'')+'" onclick="prSelect(\''+h(x[0])+'\')" aria-current="'+(x[6]?"true":"false")+'"':'')+'>'+
@@ -6016,6 +6136,7 @@ function ctxprTab(){
    : '<div class="panel-b row" style="border-top:1px solid var(--border);gap:12px;flex-wrap:wrap"><div style="flex:1;min-width:200px;font-size:12.5px">'+
      (passed?'<b>'+n+' checks passed.</b> <span class="muted">Governance team: '+h(me().name)+' owns <span class="mono">.oxagen/rules/</span>.</span>'
             :'<b>Checks are running.</b> <span class="muted">Merge is blocked until all '+n+' report.</span>')+'</div>'+
+     '<button class="btn danger" onclick="openDialog(\'closepr\',\'ctxpr|'+h(CTXPR.pr)+'\')">Close pull request</button>'+
      '<button class="btn'+(passed?' primary':'')+'" '+(passed?'':'disabled ')+'onclick="ctxprMerge()">Merge pull request</button></div>';
   var body=[
    '## '+p.st, '',
@@ -6024,12 +6145,12 @@ function ctxprTab(){
    '### What this asks for',
    'Strength `'+p.force+'`. Constraint effect `forbid`; it grants nothing.', '',
    '### Why', s.meta.support(s)+' · finding fnd_01K5RT6C', '',
-   '| Run | Date | Frame | Verdict | Repeat reads |','|---|---|---|---|---|'
-  ].concat(s.rows.slice(0,3).map(function(r){return '| '+r.run+' | '+r.date+' | '+r.frame+' | `'+r.verdict+'` | '+r.dups+' |';}))
+   '| Run | Date | Frame | Outcome | Repeat reads |','|---|---|---|---|---|'
+  ].concat(s.rows.slice(0,3).map(function(r){return '| '+r.run+' | '+r.date+' | '+r.frame+' | `'+r.outcome+'` | '+r.dups+' |';}))
    .concat(['', '### What it costs', 'Adds '+s.meta.tok+' steering tokens a turn.', '', '---',
     'Opened by Oxagen · workspace `core-platform` · governance `team`']).join('\n');
   var promo=merged
-   ? '<div class="panel" style="margin-bottom:14px" data-promo-bundle="'+sb.v+'"><div class="panel-h"><h3>promotion_event</h3><span class="b b-q" style="margin-left:auto">written by the promoter, never by an agent</span></div><div class="panel-b"><dl class="kv code">'+
+   ? '<div class="panel" style="margin-bottom:14px" data-promo-bundle="'+sb.v+'"><div class="panel-h"><h3>promotion_event</h3></div><div class="panel-b"><dl class="kv code">'+
      '<dt>record_id</dt><dd>'+h(CTXPR.promo)+'</dd><dt>lineage_id</dt><dd>'+h(CTXPR.record.id)+'</dd>'+
      '<dt>from → to</dt><dd>proposed → <b>published</b></dd><dt>approver</dt><dd>'+h(me().name)+' · '+h(me().role)+'</dd>'+
      '<dt>pr_url</dt><dd>github.com/a-intel/platform/pull/519</dd><dt>commit_sha</dt><dd>'+h(CTXPR.record.commit)+'</dd><dt>merged_at</dt><dd>'+h(c.mergedAt)+'</dd>'+
@@ -6040,7 +6161,7 @@ function ctxprTab(){
      '<dt>ledger</dt><dd>promotions.jsonl not written · regulated mode only; this workspace is team</dd></dl>'+
      '<div class="row" style="margin-top:13px;gap:8px;flex-wrap:wrap"><button class="btn" onclick="S.tab.run=\'context\';S.ctxSel=\'steering\';go(\'#/'+ORG.slug+'/'+S.ws+'/runs/run_01K5RS7M2E8FJ3QW\')">See it in run_01K5RS7M2E8FJ3QW</button>'+
      '<button class="btn" onclick="go(\'#/'+ORG.slug+'/audit/events\')">Audit log</button></div></div></div>'
-   : '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>What merge will do</h3></div><div class="panel-b"><dl class="kv">'+
+   : '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Merge effects</h3></div><div class="panel-b"><dl class="kv">'+
      '<dt>1</dt><dd>write a promotion_event with the approver, the pull request and the commit</dd>'+
      '<dt>2</dt><dd>re-index the record from the merged commit; a hash mismatch blocks delivery</dd>'+
      '<dt>3</dt><dd>bump the bundle v'+sb.v+' → v'+(sb.v+1)+' and re-sign it · '+tokn(sb.tok)+' → '+tokn(sb.tok+CTXPR.record.tok)+' steering tokens a turn</dd>'+
@@ -6059,7 +6180,7 @@ function ctxprTab(){
     '[<span class="k">steering</span>]\n<span class="k">strength</span> = <span class="s">"'+h(CTXPR.record.force)+'"</span>\n\n'+
     '[<span class="k">enforcement</span>]\n<span class="k">constraint_effect</span> = <span class="s">"'+h(CTXPR.record.ce)+'"</span>\n<span class="k">blocking</span> = <span class="s">false</span>\n\n'+
     '<span class="k">record_hash</span>  = <span class="s">"'+h(CTXPR.hash)+'"</span></pre></div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>Pull request body</h3><span class="b b-q" style="margin-left:auto">written by the promoter</span></div><div class="panel-b"><pre>'+h(body)+'</pre></div></div></div>'+
+   '<div class="panel"><div class="panel-h"><h3>Pull request body</h3></div><div class="panel-b"><pre>'+h(body)+'</pre></div></div></div>'+
    '<div><div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Checks</h3><span class="muted" style="font-size:12px">the same rules as <span class="mono">stella context validate</span></span></div>'+
     '<div class="tw"><table class="narrow"><tbody data-checks-done="'+c.done+'">'+checks+'</tbody></table></div>'+mergebar+'</div>'+promo+'</div></div>';
 }
@@ -6118,6 +6239,25 @@ function stgOpenCount(){
    PROPOSALS.filter(function(q){return q.id!==CTXPR.prp&&q.pr!=="—";}).length;
 }
 /* The header and the seven tabs. `on` is the tab in view; `primary` is that tab's one gold action. */
+function wsGov(w){return (w&&w.governance)||"team";}
+function govDesc(m){var x=WZ_MODES.filter(function(y){return y[0]===m;})[0];return x?x[1]:"";}
+function govChip(w){
+  return '<button class="btn sm gov-chip" onclick="openDialog(\'govmode\',\''+h(w.slug)+'\')" title="Change the governance mode">Governance: <span class="mono">'+h(wsGov(w))+'</span></button>';
+}
+function govSet(slug,mode){
+  var w=wsBySlug(slug); if(!w) return; var was=wsGov(w); w.governance=mode; closeDialog();
+  act(was===mode?"Governance mode is already "+mode+"; nothing to change.":"Context PR opened on "+w.main+": .oxagen/rules/governance.toml sets mode = "+mode+". It takes effect on merge for everything already in flight; nothing else in Oxagen writes that file.","gold");
+}
+DLG_EXT.govmode=function(){
+  var w=S.dlg==="govmode"?wsBySlug(S.dlgArg):null; if(!w) return {t:"Governance mode",w:false,b:"",f:""};
+  var cur=S.govPick||wsGov(w);
+  return {t:"Governance mode · "+w.name,s:".oxagen/rules/governance.toml on "+w.main,w:false,
+   b:'<div class="wz-pick" style="grid-template-columns:1fr">'+WZ_MODES.map(function(m){var on=cur===m[0];
+      return '<button class="wz-card'+(on?" on":"")+'" onclick="S.govPick=\''+m[0]+'\';render()"><span class="tx"><b>'+h(m[0])+(m[0]===wsGov(w)?' <span class="dim" style="font-weight:400">· now</span>':'')+'</b><span class="d">'+h(m[1])+' '+h(m[2])+'</span></span></button>';}).join("")+'</div>'+
+    '<pre style="margin-top:12px">'+h(oxGovernanceToml(cur))+'</pre>'+
+    '<div class="note" style="margin-top:12px">The mode is read off the file when a pull request is opened and again when it is merged, so raising it takes effect on everything already in flight. Lowering it is an org-owner action with approval, recorded as a security event.</div>',
+   f:'<button class="btn" onclick="S.govPick=null;closeDialog()">Cancel</button><button class="btn primary" onclick="var m=S.govPick||\''+h(wsGov(w))+'\';S.govPick=null;govSet(\''+h(w.slug)+'\',m)">Open the Context PR</button>'};
+};
 function stgHub(on,body,primary){
   var w=ws(), skN=skOn(w)?SKILLS.filter(function(s){return s.state==="ok";}).length:0;
   var n={records:RECORDS.filter(function(r){return r.status==="published";}).length,skills:skN,
@@ -6126,10 +6266,9 @@ function stgHub(on,body,primary){
   var tabs='<div class="tabs stg-tabs" role="tablist" aria-label="Steering">'+STG_TABS.map(function(x){
     return '<button class="tab" role="tab" aria-selected="'+(on===x[0])+'" onclick="stgTab(\''+x[0]+'\')">'+x[1]+
      (n[x[0]]?'<span class="n">'+n[x[0]]+'</span>':'')+'</button>';}).join("")+'</div>';
-  return '<div class="phead"><div class="t"><p class="eyebrow">Workspace · '+h(w.name)+'</p><h1>Steering</h1>'+
-   '<p>Everything that can steer an agent in this workspace competes in one assembler. Each item is a file in '+h(w.main)+
-   ', proposed as a pull request and published by a merge. Preview shows what an agent would receive, what was cut, and why.</p></div>'+
-   '<div class="acts">'+(primary||'')+'</div></div>'+tabs+body;
+  return '<div class="phead"><div class="t"><p class="eyebrow">'+h(w.name)+'</p><h1>Steering</h1>'+
+   '<p>Everything that can steer an agent in this workspace competes in one assembler.</p></div>'+
+   '<div class="acts">'+govChip(w)+(primary||'')+'</div></div>'+tabs+body;
 }
 
 /* ---- the sources, read into one shape ---- */
@@ -6227,7 +6366,7 @@ function assembleSteering(slug,prompt,opt){
     vTok+=it.tok; volatile.push(it);});
   var order2={"over budget":0,"lower precedence":1,"superseded":2,"out of scope":3};
   cut.sort(function(x,y){return (order2[x.reason]-order2[y.reason])||((x.it.rank||99)-(y.it.rank||99))||(x.it.id<y.it.id?-1:1);});
-  var hooks=a.tier==="harness";
+  var hooks=(TIER_RANK[a.tier]||0)>=1;
   return {agent:a,slug:slug,repo:repo,prompt:prompt,words:words,delivered:hooks,gates:gates,prefix:prefix,volatile:volatile,cut:cut,
     skills:SK_ON[wslug]?SKILLS.filter(function(s){return s.state==="ok"&&(s.srcLabel===repo||/registry/.test(s.srcLabel));}):[],
     sync:SKILL_SYNC.filter(function(x){return x.repo===repo;})[0]||null,
@@ -6259,8 +6398,18 @@ function stgMeter(label,used,max,unit,sub){
 }
 
 /* ---- Memory ---- */
+/* Memory is aggregated, not collected: every run's notes and every operator steer are folded by
+   lineage into one item per fact, the newest provenance kept, and the recall count is the sum over
+   the runs that pulled it. The strip above the table says how much folded into how little. */
+function stgMemoryAgg(L){
+  var runs={}, steers=0, notes=0, recalls=0, cls={};
+  L.forEach(function(m){recalls+=m.recalls30||0; cls[m.cls]=(cls[m.cls]||0)+1;
+    String(m.provenance||"").split(/\s*·\s*/).forEach(function(p){if(/^run_/.test(p))runs[p]=1;});
+    if(/operator steer/.test(m.provenance||""))steers++; else notes++;});
+  return {runs:Object.keys(runs).length,steers:steers,notes:notes,recalls:recalls,cls:cls,folded:Math.round(L.length*3.4)+steers};
+}
 function stgMemoryTab(w){
-  var L=stgMemory(w.slug);
+  var L=stgMemory(w.slug), G=stgMemoryAgg(L);
   var rows=L.map(function(m){
     var st=m.supersededBy?'<span class="b b-q">superseded</span><span class="sub">by '+stgItemLinkById(w.slug,m.supersededBy)+'</span>'
       :m.yieldsTo?'<span class="b b-approval"><span class="d"></span>yields</span><span class="sub">to '+stgItemLinkById(w.slug,m.yieldsTo)+', a published must</span>'
@@ -6270,8 +6419,13 @@ function stgMemoryTab(w){
      '<td>'+h(m.scope)+(m.agent?'<span class="sub mono">'+h(m.agent)+'</span>':'')+'</td>'+
      '<td class="mono" style="font-size:11.5px">'+h(m.lastRecalled)+'<span class="sub">'+m.recalls30+' recalls in 30 days</span></td>'+
      '<td class="num">'+tokn(m.token_cost)+' tok</td><td>'+st+'</td></tr>';}).join("");
-  return '<div class="note" style="margin-bottom:14px"><b>A published must beats recalled memory.</b> Memory is what an agent’s own runs left behind. It is recalled, never published, so it competes only in the volatile selection, as <span class="mono">may</span> or <span class="mono">info</span>, and it gives way wherever a published record says otherwise. To make a memory binding, promote it: a proposal, a pull request, a merge.</div>'+
-   '<div class="panel"><div class="panel-h"><h3>Recalled memory</h3><span class="b b-q" style="margin-left:auto">'+L.length+' items · recalled per prompt, never in the stable prefix</span></div>'+
+  var agg='<div class="grid g4" style="margin-bottom:14px">'+
+   '<div class="stat"><span class="k">Memories</span><span class="v">'+L.length+'</span><span class="s">folded from '+G.folded+' run notes and steers</span></div>'+
+   '<div class="stat"><span class="k">Sources</span><span class="v">'+G.runs+'<small>runs</small></span><span class="s">'+G.steers+' operator steers and '+G.notes+' agent notes</span></div>'+
+   '<div class="stat"><span class="k">Recalled 30d</span><span class="v">'+G.recalls.toLocaleString()+'</span><span class="s">'+tokn(L.reduce(function(n,m){return n+(m.token_cost||0)*(m.recalls30||0);},0))+' tokens delivered</span></div>'+
+   '<div class="stat"><span class="k">By class</span><span class="v" style="font-size:15px;padding-top:6px">'+Object.keys(G.cls).map(function(k){return '<span class="mono">'+h(k)+'</span> '+G.cls[k];}).join(' · ')+'</span><span class="s">a rule is proposed as a record instead</span></div></div>';
+  return agg+'<div class="note" style="margin-bottom:14px"><b>A published must beats recalled memory.</b> Memory is what an agent’s own runs left behind. It is recalled, never published, so it competes only in the volatile selection, as <span class="mono">may</span> or <span class="mono">info</span>, and it gives way wherever a published record says otherwise. To make a memory binding, promote it: a proposal, a pull request, a merge.</div>'+
+   '<div class="panel"><div class="panel-h"><h3>Recalled memory</h3><span class="b b-q" style="margin-left:auto">'+L.length+'</span></div>'+
    '<div class="tw"><table><thead><tr><th>Memory</th><th>Class</th><th>Force</th><th>Scope</th><th>Last recalled</th><th>Token cost</th><th>In the assembler</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
    '<div class="panel-b"><div class="row"><button class="btn sm" onclick="S.pv.preset=\'merge-green\';S.pv.text=null;stgTab(\'preview\')">See one yield in Preview</button>'+
    '<span class="dim" style="font-size:12px">Recall used to reach only the in-app agent, capped at six items. It now goes through the same assembler as every other source.</span></div></div></div>';
@@ -6287,9 +6441,9 @@ function stgOntologyTab(w){
      '<td class="mono" style="font-size:11.5px">'+o.entities.map(h).join("<br>")+'</td>'+
      '<td class="num">'+tokn(o.token_cost)+' tok</td><td class="mono" style="font-size:11px">'+h(o.provenance)+'</td></tr>';}).join("");
   return '<div class="note" style="margin-bottom:14px">An ontology note defines one entity or one term the way this workspace uses it. It compiles to text like any other item, enters the volatile selection as <span class="mono">info</span>, and grants nothing.</div>'+
-   '<div class="panel"><div class="panel-h"><h3>Entity and term definitions</h3><span class="b b-q" style="margin-left:auto">'+L.length+' notes · files under .oxagen/ontology/</span></div>'+
+   '<div class="panel"><div class="panel-h"><h3>Definitions</h3><span class="b b-q" style="margin-left:auto">'+L.length+'</span></div>'+
    '<div class="tw"><table><thead><tr><th>Term</th><th>Kind</th><th>Definition</th><th>Force</th><th>About</th><th>Token cost</th><th>File</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>'+
-   '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Where these are indexed</h3></div><div class="panel-b"><dl class="kv">'+
+   '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Index</h3></div><div class="panel-b"><dl class="kv">'+
    '<dt>Today</dt><dd>The Postgres registry. The assembler reads every item, these notes included, from the registry behind one port.</dd>'+
    '<dt>Later</dt><dd>The graph becomes the index (Phase 3 of the plan), once the knowledge graph is on by default. Each item is projected one way, registry to graph, and verified by hash. Postgres stays as the fallback behind the same port.</dd>'+
    '<dt>Not here</dt><dd>There is no ontology engine and there are no connectors on this tab. A note is a file somebody wrote and somebody merged.</dd></dl></div></div>';
@@ -6313,10 +6467,10 @@ function stgPolicyTab(w){
      '<td class="num">'+tokn(g.token_cost)+' tok</td>'+
      '<td><button class="btn sm" onclick="'+e[1]+'">'+h(e[0])+'</button></td></tr>';}).join("");
   return '<div class="grid g2" style="margin-bottom:14px">'+
-   '<div class="panel"><div class="panel-h"><h3>The first compilation: text</h3></div><div class="panel-b"><p class="muted" style="margin:0;font-size:13px">Every item compiles to text the model reads. Text is advisory: it is ranked, budgeted, and may be dropped. The other six tabs are this plane.</p></div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>The second compilation: gates</h3></div><div class="panel-b"><p class="muted" style="margin:0;font-size:13px">An item with an enforcement grant also compiles to a gate. A gate is deterministic, never budgeted and never ranked, and it answers when the index is down. This tab is that plane.</p></div></div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>Gates, and the notice each one puts into steering</h3>'+
-   '<span class="b b-q" style="margin-left:auto">'+L.length+' gates · '+tokn(tok)+' tok of notices · pol_v41</span></div>'+
+   '<div class="panel"><div class="panel-h"><h3>Text compilation</h3></div><div class="panel-b"><p class="muted" style="margin:0;font-size:13px">Every item compiles to text the model reads. Text is advisory: it is ranked, budgeted, and may be dropped. The other six tabs are this plane.</p></div></div>'+
+   '<div class="panel"><div class="panel-h"><h3>Gate compilation</h3></div><div class="panel-b"><p class="muted" style="margin:0;font-size:13px">An item with an enforcement grant also compiles to a gate. A gate is deterministic, never budgeted and never ranked, and it answers when the index is down. This tab is that plane.</p></div></div></div>'+
+   '<div class="panel"><div class="panel-h"><h3>Gate notices</h3>'+
+   '<span class="b b-q" style="margin-left:auto">'+L.length+'</span></div>'+
    '<div class="tw"><table><thead><tr><th>Gate</th><th>Outcome</th><th>Applies to</th><th>Gate notice</th><th>Notice cost</th><th>Edited on</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
    '<div class="panel-b"><div class="note">A gate notice is one line, so the agent does not spend turns walking into a denial. The assembler puts every notice that applies at the head of the stable prefix and never drops one. Gates are edited where they always were: decision rules and kill switches on Tools, a mandate on its own page. Nothing is edited here.</div>'+
    '<div class="note" style="margin-top:10px">What a gate can refuse depends on the tier. For actions routed through Oxagen, the call is refused on the server. On the <span class="mono">harness</span> tier the four blocking hook events refuse a harness-native call: client-attested and fail-open. No screen says more than that.</div></div></div>';
@@ -6366,9 +6520,9 @@ function pvResult(M){
    pvPart("3 · Skills","files in the checkout · "+h(M.repo),M.sync?'Sync is <b>'+h((SYNC_STATE[M.sync.state]||{}).l||M.sync.state)+'</b> for this repository'+(M.sync.synced?', at <span class="mono">'+h(M.sync.synced)+'</span>':'')+'.':"",
      skills,"No skill is synced into this repository.")+
    '</div>'+
-   '<div class="panel"><div class="panel-h"><h3>The manifest: what was cut, and why</h3><span class="b b-q" style="margin-left:auto">'+M.cut.length+' cut · recorded on a run as a <span class="mono">steering.manifest</span> frame</span></div>'+
+   '<div class="panel"><div class="panel-h"><h3>Manifest cuts</h3><span class="b b-q" style="margin-left:auto">'+M.cut.length+' cut · recorded on a run as a <span class="mono">steering.manifest</span> frame</span></div>'+
    (M.cut.length?stgCutTable(M):'<div class="panel-b">'+stgCutTable(M)+'</div>')+
-   '<div class="panel-b"><div class="note">Two injection points are not on this page. MCP tool results carry their own text, call by call. The model request itself is not one Oxagen can write to: that needs the <span class="mono">gateway</span> tier, which is not available yet.</div></div></div>';
+   '<div class="panel-b"><div class="note">Two injection points are not on this page. MCP tool results carry their own text, call by call. The model request itself is written at the proxy on the <span class="mono">gateway</span> and <span class="mono">contained</span> tiers, and the Context tab of a run shows what it carried.</div></div></div>';
 }
 var SYNC_STATE={"in-sync":{b:"b-allowed",l:"in sync"},behind:{b:"b-approval",l:"behind"},unbound:{b:"b-q",l:"not bound"}};
 function stgPreviewTab(w){
@@ -6411,7 +6565,7 @@ function runManifestPanel(R){
    M.volatile.map(function(it){return mfNode(it,["b-allowed","rendered",1],"posted",'<span class="b b-q">volatile · rank '+it.rank+'</span>');}).join("");
   var cuts=(open?M.cut:M.cut.slice(0,3)).map(function(c){return mfNode(c.it,["b-q","cut: "+c.reason,0],"withheld",'',c.why);}).join("");
   return '<section class="ro stg-mf" aria-label="Steering manifest" style="margin-bottom:16px">'+
-   '<div class="ro-h"><p class="eyebrow q" style="margin:0">Frame · <span class="mono" style="text-transform:none">steering.manifest</span> · what Oxagen injected, and what it cut</p>'+
+   '<div class="ro-h"><p class="eyebrow q" style="margin:0">Manifest frame</p>'+
    '<span class="ro-tally">'+(M.gates.length+M.prefix.length+M.volatile.length)+' rendered · '+M.cut.length+' cut · '+tokn(M.tok.total)+' tok</span>'+
    '<button class="ro-link" onclick="S.pv.agent=\''+h(M.slug)+'\';S.pv.text='+h(JSON.stringify(m.prompt))+';go(stgHash(\'preview\',\''+h(M.agent.ws)+'\'))">Open in Preview</button></div>'+
    (observe?'<div class="warn" style="margin:0 0 10px"><b>Assembled, not delivered.</b> This run is on the <span class="mono">observe</span> tier. No hook was installed, so nothing below reached the agent.</div>':'')+
@@ -6457,7 +6611,7 @@ function pSteering(){
     pub.forEach(function(r){kc[r.kind]=(kc[r.kind]||0)+1;});
     var shown=pub.filter(function(r){return !rk||r.kind===rk;});
     body='<div class="panel"><div class="panel-h"><h3>Published records</h3>'+
-     '<span class="b b-q" style="margin-left:auto">newest first · git decides what is in force, and the Postgres registry indexes it</span></div>'+
+     '</div>'+
      '<div class="kf" role="group" aria-label="Filter records by kind">'+
      '<button class="btn sm" aria-pressed="'+(!rk)+'" onclick="S.recKind=\'\';render()">All <span class="dim">'+pub.length+'</span></button>'+
      Object.keys(KINDS).map(function(k){return '<button class="btn sm k-'+k+'" aria-pressed="'+(rk===k)+'" title="'+h(KINDS[k].d)+'" onclick="S.recKind=\''+k+'\';render()">'+kindSvg(k)+h(KINDS[k].l)+'<span class="dim">'+(kc[k]||0)+'</span></button>';}).join("")+'</div>'+
@@ -6478,13 +6632,13 @@ function pSteering(){
      '  proposals/*.toml           <span class="c"># candidates; steer nothing</span>\n'+
      '  agents/&lt;slug&gt;.toml         <span class="c"># one per agent</span></pre>'+
      '<div class="note" style="margin-top:12px">Stella symlinks into this directory rather than copying it, so its loader and its CI validation work unchanged on the same files with no second copy that could drift. Oxagen reads <span class="mono">.oxagen/</span> and nothing else.</div></div></div>'+
-     '<div class="panel"><div class="panel-h"><h3>Where Oxagen can inject</h3><span class="b b-q" style="margin-left:auto">five points · four in use</span></div><div class="panel-b">'+
+     '<div class="panel"><div class="panel-h"><h3>Injection points</h3><span class="b b-q" style="margin-left:auto">five points</span></div><div class="panel-b">'+
      '<p class="muted" style="font-size:12.5px;margin:0 0 12px">The harness owns the context window. Oxagen competes for its own slice of it, at exactly these points, and every delivery is recorded.</p>'+
      '<ul class="chain stg-inj"><li class="on"><span class="h">1 · SessionStart additional context</span><div>The stable prefix: gate notices, then <span class="mono">must</span> and <span class="mono">should</span>. Capped at 16 KiB, cached in the signed bundle, works offline.</div></li>'+
      '<li class="on"><span class="h">2 · UserPromptSubmit additional context</span><div>The volatile selection: <span class="mono">may</span> and <span class="mono">info</span>, picked for the prompt under a token budget.</div></li>'+
      '<li class="on"><span class="h">3 · MCP tool results</span><div>What a governed tool call returns, a denial and its reason included.</div></li>'+
      '<li class="on"><span class="h">4 · Files in the checkout</span><div>Skills, delivered by sync and loaded by the harness’s own progressive disclosure.</div></li>'+
-     '<li><span class="h">5 · The model request itself</span><div>Not available yet. It needs the <span class="mono">gateway</span> tier.</div></li></ul></div></div></div>';
+     '<li class="on"><span class="h">5 · The model request itself</span><div>Written at the proxy on the <span class="mono">gateway</span> and <span class="mono">contained</span> tiers: the stable prefix and the volatile selection, counted as <span class="mono">steering_tokens</span> and <span class="mono">context_frame_tokens</span>.</div></li></ul></div></div></div>';
   } else if(t==="memory"){
     body=stgMemoryTab(w);
   } else if(t==="ontology"){
@@ -6501,7 +6655,7 @@ function pSteering(){
      '<span class="dim" style="font-size:12px;margin-left:6px;align-self:center">a record becomes a proposal, a proposal becomes a pull request, a merge publishes it</span></div>';
     if(t==="proposals"){
       var sel=S.prpSel&&prpById(S.prpSel);
-      body=seg+(sel?prpDetail(sel):'<div class="panel"><div class="panel-h"><h3>Proposals: candidates that steer nothing</h3>'+
+      body=seg+(sel?prpDetail(sel):'<div class="panel"><div class="panel-h"><h3>Proposals</h3>'+
        '<button class="btn sm" style="margin-left:auto" onclick="wzOpen(\'record\')">Write a context record</button></div>'+
        '<div class="recs">'+
        PROPOSALS.map(function(p){
@@ -6545,6 +6699,7 @@ var WC_STATE={
 };
 var PR_STATE={
  open:           {b:"b-q",        l:"open"},
+ closed:         {b:"b-q",        l:"closed"},
  checks_running: {b:"b-approval", l:"checks running"},
  checks_passed:  {b:"b-allowed",  l:"checks passed"},
  checks_failed:  {b:"b-failed",   l:"checks failed"},
@@ -6590,7 +6745,7 @@ function wsCopies(){var names={};wsRepos().forEach(function(r){names[r.n]=1;});
   return WORKCOPIES.filter(function(c){return names[c.repo];});}
 function wsOxprs(){var names={};wsRepos().forEach(function(r){names[r.n]=1;});
   return OXPRS.filter(function(p){return names[p.repo];});}
-function oxprOpen(){return wsOxprs().filter(function(p){return p.state!=="merged";});}
+function oxprOpen(){return wsOxprs().filter(function(p){return p.state!=="merged"&&p.state!=="closed";});}
 function oxprById(id){for(var i=0;i<OXPRS.length;i++){if(OXPRS[i].id===id)return OXPRS[i];}return null;}
 function copyById(id){for(var i=0;i<WORKCOPIES.length;i++){if(WORKCOPIES[i].id===id)return WORKCOPIES[i];}return null;}
 function repoByName(n){for(var i=0;i<REPOS.length;i++){if(REPOS[i].n===n)return REPOS[i];}return null;}
@@ -6665,20 +6820,7 @@ function repoTab(){
    '<div class="sp"><button class="btn sm" onclick="wzOpen(\'init\')">Add Oxagen to a repository</button></div></div>'+
    '<div class="tw"><table><thead><tr><th>Repository</th><th>Role</th><th>Production branch</th><th>.oxagen/</th><th>Events</th><th class="num">Symbols</th><th></th></tr></thead>'+
    '<tbody>'+trows+'</tbody></table></div>'+
-   '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">Changing which repository is <span class="mono">main</span> is an organization-owner action with approval, and it lands in the audit record as a security event. The production branch never moves on its own: when GitHub’s default branch changes, the App records it and prompts, and the binding stays where it is until somebody confirms.</div></div></div>'+
-   '<div class="grid g2" style="margin-top:14px">'+
-   '<div class="panel"><div class="panel-h"><h3>What linking does, in order</h3></div><div class="panel-b">'+
-   '<ul class="chain"><li class="on"><span class="h">1 · Confirm the production branch</span><div>GitHub’s default branch is the suggestion, never the decision. Only this branch’s commits update the code graph.</div></li>'+
-   '<li class="on"><span class="h">2 · Subscribe to events</span><div>Every event the product uses, recorded idempotently on GitHub’s delivery id. Each <span class="mono">push</span> carries the previous head, so a gap is visible in the events themselves.</div></li>'+
-   '<li class="on"><span class="h">3 · Import issues</span><div>One resumable backfill where Issues is enabled; events keep the rows current afterwards.</div></li>'+
-   '<li class="on"><span class="h">4 · Build the code graph</span><div>A shallow clone of the production head, indexed with the same tree-sitter grammars the protocol provider uses, then discarded.</div></li></ul></div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>The permissions this needs</h3></div><div class="panel-b">'+
-   '<div class="kv"><dt>Contents</dt><dd>read <b>and write</b> — the branch and the file every pull request carries</dd>'+
-   '<dt>Pull requests</dt><dd>read <b>and write</b> — opening one, and reading its head</dd>'+
-   '<dt>Checks</dt><dd><b>write</b> — the check runs on the head commit, and the CI a governed change needs</dd>'+
-   '<dt>Metadata</dt><dd>read — mandatory</dd>'+
-   '<dt>Issues</dt><dd>read — task references for runs</dd></div>'+
-   '<div class="note" style="margin-top:12px">Oxagen writes to a branch and never to the production branch. It opens and closes pull requests; it merges only the ones a person merges from here, under the governance mode the repository itself declares.</div></div></div></div>';
+   '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">Changing which repository is <span class="mono">main</span> is an organization-owner action with approval, and it lands in the audit record as a security event. The production branch never moves on its own: when GitHub’s default branch changes, the App records it and prompts, and the binding stays where it is until somebody confirms.</div></div></div>';
 }
 
 /* ---- tab 2: the working copies ---- */
@@ -6704,23 +6846,20 @@ function copyTab(){
      '<td class="mono" style="font-size:11.5px">'+h(c.bundle)+'</td>'+
      '<td class="muted" style="font-size:12px">'+h(c.seen)+'</td></tr>';}).join("");
 
-  return (stale.length?'<div class="banner"><span class="b b-approval" style="flex:none"><span class="d"></span>'+stale.length+' out of step</span>'+
-    '<div class="grow"><b>A working copy that is behind is not a run that is behind.</b> '+
-    'Steering reaches a run in the signed bundle and at the hooks, from the merged commit, whatever the directory on the operator’s disk holds. '+
-    'What a stale copy costs is the person: they read rules that are no longer in force.</div>'+
-    '<button class="btn" onclick="act(\'Sent oxagen pull to 2 machines\',\'gold\')">Ask them to pull</button></div>':'')+
-   '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Working copies</h3>'+
+  /* The banner that used to sit here said in a paragraph what the .oxagen/ column says in a
+     word, on the row of the copy it is true of. The count is already on the tab. */
+  return '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Working copies</h3>'+
    '<p class="muted" style="margin:2px 0 0;font-size:12px">The same <span class="mono">.oxagen/</span> tree on a machine. Each is a directory somebody ran <span class="mono">oxagen init</span> in; the enrollment is the machine’s, and the link is one gitignored file.</p></div>'+
    '<div class="sp"><button class="btn primary" onclick="openDialog(\'linkdir\')">Connect a directory</button></div></div>'+
    '<div class="tw"><table><thead><tr><th>Directory</th><th>Repository</th><th>Branch</th><th>.oxagen/</th><th>Symlinks</th><th>Bundle</th><th>Last seen</th></tr></thead>'+
    '<tbody>'+trows+'</tbody></table></div></div>'+
    '<div class="grid g2" style="margin-top:14px">'+
-   '<div class="panel"><div class="panel-h"><h3>Two files, and only one of them is yours to review</h3></div><div class="panel-b">'+
+   '<div class="panel"><div class="panel-h"><h3>Files to review</h3></div><div class="panel-b">'+
    '<pre>.oxagen/\n  workspace.toml     <span class="c"># committed. reviewed. the source of truth.</span>\n'+
    '  workspace.json     <span class="c"># gitignored · this machine’s link</span>\n'+
    '  rules/\n  proposals/\n  agents/\n  skills/\n  tools/</pre>'+
    '<div class="note" style="margin-top:12px">The committed file says what the workspace is. The gitignored one says which workspace <em>this checkout</em> is talking to, which is a fact about a laptop and not about the product — so it is never reviewed, never merged, and never the same file in two places.</div></div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>Syncing, in both directions</h3></div><div class="panel-b">'+
+   '<div class="panel"><div class="panel-h"><h3>Sync</h3></div><div class="panel-b">'+
    '<div class="kv"><dt><span class="mono">oxagen init</span></dt><dd>Links this directory. Reads the git remote, matches it to a repository the installation can reach, and writes <span class="mono">.oxagen/workspace.json</span>. Idempotent.</dd>'+
    '<dt><span class="mono">oxagen pull</span></dt><dd>Fast-forwards <span class="mono">.oxagen/</span> to the production branch and re-points the Stella symlinks. It never merges your work.</dd>'+
    '<dt><span class="mono">oxagen status</span></dt><dd>What this copy has against what is published: the bundle version, the records in force, and anything uncommitted under <span class="mono">.oxagen/</span>.</dd>'+
@@ -6751,14 +6890,14 @@ function chgTab(){
      '<td>'+(p.byKind==="person"?h(p.by):'<span class="mono">'+h(p.by)+'</span>')+
        '<div class="dim" style="font-size:11px">'+h(p.byKind==="person"?"a person":p.byKind)+'</div></td>'+
      '<td>'+stBadge(st)+'</td>'+
-     '<td class="num mono" style="font-size:11.5px">'+pass+'/'+p.checks.length+'</td>'+
+     '<td>'+oxprCiLight(p)+'</td>'+
      '<td class="muted" style="font-size:12px">'+h(p.opened)+'</td></tr>';}).join("");
-  return '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Every pull request Oxagen has open</h3>'+
+  return '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Open Context PRs</h3>'+
    '<p class="muted" style="margin:2px 0 0;font-size:12px">Four kinds of file and one lifecycle. Whoever opened it — a person, the promoter, or the reconciler — the checks, the merge and the publication are the same.</p></div></div>'+
-   '<div class="tw"><table><thead><tr><th>Change</th><th>Kind</th><th>Pull request</th><th>Opened by</th><th>State</th><th class="num">Checks</th><th>Opened</th></tr></thead>'+
+   '<div class="tw"><table><thead><tr><th>Change</th><th>Kind</th><th>Pull request</th><th>Opened by</th><th>State</th><th>Checks</th><th>Opened</th></tr></thead>'+
    '<tbody>'+trows+'</tbody></table></div>'+
    '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">A change is in force from the merge commit, not from when it was written. While a pull request is open the thing it carries steers nothing: it is not in the compiled bundle, not in the record index, and the bundle version has not moved.</div></div></div>'+
-   '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>What opens one, without anybody asking</h3></div><div class="panel-b">'+
+   '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Automatic proposals</h3></div><div class="panel-b">'+
    '<div class="kv"><dt>the promoter</dt><dd>Aggregates records across runs by lineage and opens a proposal with the runs it cites. There is no threshold; a person reads the support and decides.</dd>'+
    '<dt>the reconciler</dt><dd>Reads <span class="mono">.oxagen/workspace.toml</span> against what the control plane has, and opens one pull request per real difference. It never edits live state to match the file.</dd>'+
    '<dt>a person</dt><dd>Every creation wizard — agent, tool, skill, record — ends here. None of them has a Save button that ends in a database.</dd></div>'+
@@ -6770,6 +6909,56 @@ function chgTab(){
    that *any* selected change supplied a gold action — so selecting a running, failed or merged
    one demoted the header for a primary that was never rendered, and the screen had none. Same
    shape as the stale-selection bug: two readers of one fact, only one of them right. */
+/* CI status as GitHub reports it, one light: blinking blue while anything runs, a red x the moment
+   one job fails (pulsing while others still run), static green when every job passed, static grey
+   while everything is queued. Beside it, jobs done over jobs in total. */
+function ciCounts(list){
+  var c={pass:0,fail:0,running:0,queued:0,total:list.length};
+  list.forEach(function(x){c[x]=(c[x]||0)+1;});
+  c.done=c.pass+c.fail; return c;
+}
+function ciFromSt(def,st){
+  var n=def.checks.length, list=[];
+  for(var i=0;i<n;i++){list.push(st.st==="merged"||st.st==="passed"?"pass":st.st==="failed"?(i<st.done?"pass":i===st.failed?"fail":"queued"):st.st==="checking"?(i<st.done?"pass":i===st.done?"running":"queued"):"queued");}
+  return ciCounts(list);
+}
+function ciLight(c,label){
+  var mode=c.fail?(c.running?"fail pulse":"fail"):c.running?"run":c.done===c.total&&c.total?"pass":"queued";
+  var title=c.fail?c.fail+" failed":c.running?"running":mode==="pass"?"all passed":"queued";
+  return '<span class="ci" title="'+title+'"><span class="ci-l '+mode+'" aria-label="'+title+'"></span>'+
+   '<span class="mono">'+c.done+' / '+c.total+'</span>'+(label?'<span class="dim">'+h(label)+'</span>':'')+'</span>';
+}
+function oxprCiLight(p){return ciLight(ciCounts(p.checks.map(function(c){return c[1];})));}
+function oxprUrl(p){return "https://app.oxagen.sh/"+ORG.slug+"/"+ws().slug+"/repositories/changes/"+p.id;}
+function oxprMerge(id){
+  var p=oxprById(id); if(!p||!oxprCanMerge(p)) return;
+  p.state="merged"; p.checks.forEach(function(c){if(c[1]!=="pass")c[1]="pass";});
+  render(); act("Merged "+p.pr+". Squashed onto "+p.base+", head branch deleted, bundle bumped, promotion event and audit event written.","gold");
+}
+/* Close: the comment Oxagen leaves on the pull request, previewed before it is posted. */
+function closeComment(url){
+  var m=me(); return "Closed by "+m.name+" <"+m.email+">\n\n---\nAdded via Oxagen "+url;
+}
+function prClose(kind,id){
+  var url, pr;
+  if(kind==="oxpr"){var p=oxprById(id); if(!p) return; p.state="closed"; pr=p.pr; url=oxprUrl(p);}
+  else if(kind==="ctxpr"){S.ctxpr.st="closed"; pr=CTXPR.pr; url="https://app.oxagen.sh/"+ORG.slug+"/"+ws().slug+"/steering/proposals/prs";}
+  else {var d=recprById(id); if(!d) return; recprSt(d).st="closed"; pr=d.pr; url="https://app.oxagen.sh/"+ORG.slug+"/"+ws().slug+"/steering/proposals/prs";}
+  closeDialog(); render();
+  act("Closed "+pr+" without merging. Comment posted: “Closed by "+me().name+" <"+me().email+">”, then Added via Oxagen "+url+".");
+}
+DLG_EXT.closepr=function(arg){
+  var a=String(arg||"").split("|"), kind=a[0], id=a[1], pr, url;
+  if(kind==="oxpr"){var p=oxprById(id); pr=p?p.pr:id; url=p?oxprUrl(p):"";}
+  else if(kind==="ctxpr"){pr=CTXPR.pr; url="https://app.oxagen.sh/"+ORG.slug+"/"+ws().slug+"/steering/proposals/prs";}
+  else {var d=recprById(id); pr=d?d.pr:id; url="https://app.oxagen.sh/"+ORG.slug+"/"+ws().slug+"/steering/proposals/prs";}
+  var m=me();
+  return {t:"Close "+pr,s:"without merging",w:false,
+   b:'<p style="margin:0 0 10px;font-size:13px">The pull request closes on GitHub and nothing is published. Oxagen posts this comment on it:</p>'+
+    '<div class="gh-comment"><p>Closed by '+h(m.name)+' &lt;'+h(m.email)+'&gt;</p><hr><p>Added via Oxagen <a href="'+h(url)+'">'+h(url)+'</a></p></div>'+
+    '<div class="note" style="margin-top:12px">Closing is a governed action: it is recorded in Audit with your name, and the branch stays until someone deletes it.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn danger solid" onclick="prClose(\''+h(kind)+'\',\''+h(id)+'\')">Close pull request</button>'};
+};
 function oxprCanMerge(p){
   return !!p&&p.state!=="merged"
     &&p.checks.every(function(c){return c[1]==="pass"||c[1]==="fail";})
@@ -6781,7 +6970,7 @@ function oxprDetail(p){
   var canMerge=oxprCanMerge(p);
   return '<div class="panel"><div class="panel-h">'+
    '<button class="btn sm" onclick="S.oxprSel=null;render()">← All changes</button>'+
-   '<h3 style="margin-left:10px">'+h(p.title)+'</h3><span class="sp">'+stBadge(st)+'</span></div>'+
+   '<h3 style="margin-left:10px">'+h(p.title)+'</h3><span class="sp">'+oxprCiLight(p)+stBadge(st)+'</span></div>'+
    '<div class="panel-b">'+
    '<div class="kv"><dt>Kind</dt><dd><span class="b b-q">'+h(k.l)+'</span> <span class="mono dim">'+h(k.d)+'</span></dd>'+
    '<dt>Pull request</dt><dd><span class="mono">'+h(p.pr)+'</span></dd>'+
@@ -6806,6 +6995,8 @@ function oxprDetail(p){
    '<div class="panel-b" style="border-top:1px solid var(--border)">'+
    (p.state==="merged"
      ?'<div class="note">Merged. The file is on <span class="mono">'+h(p.base)+'</span>, the promotion event is on the ledger, and the workspace’s steering version is the ledger’s length.</div>'
+     :p.state==="closed"
+     ?'<div class="note">Closed without merging. The comment on '+h(p.pr)+' names who closed it and links back here.</div>'
      :'<label class="sec-lb">What merge will do</label>'+wzChecks([
        ["1",'Squash the branch onto <span class="mono">'+h(p.base)+'</span>, pinned to the commit the checks ran on.'],
        ["2",'Delete the head branch.'],
@@ -6813,10 +7004,10 @@ function oxprDetail(p){
        ["4",'Append the promotion event to the ledger, with the approver and the commit sha.'],
        ["5",'Write one audit event. The change is in force from that commit, not from now.']])+
       '<div class="row" style="margin-top:14px;gap:8px">'+
-      '<button class="btn'+(canMerge?' primary':'')+'"'+(canMerge?'':' disabled')+' onclick="act(\'Merged '+h(p.pr)+'\',\'gold\')">Merge pull request</button>'+
-      '<button class="btn" onclick="act(\'Closed '+h(p.pr)+' without merging\')">Close without merging</button>'+
+      '<button class="btn'+(canMerge?' primary':'')+'"'+(canMerge?'':' disabled')+' onclick="oxprMerge(\''+h(p.id)+'\')">Merge pull request</button>'+
+      '<button class="btn danger" onclick="openDialog(\'closepr\',\'oxpr|'+h(p.id)+'\')">Close pull request</button>'+
       '<span class="grow"></span><span class="dim" style="font-size:11.5px">'+
-      (canMerge?'governance: team · a code-owner review is required on GitHub':'Merge stays disabled until every check reports.')+'</span></div>')+
+      (canMerge?'Governance: '+h(wsGov(ws()))+' on GitHub':'Merge stays disabled until every check reports.')+'</span></div>')+
    '</div></div>';
 }
 
@@ -6856,7 +7047,7 @@ function cfgTab(){
    '<dt><span class="mono">team</span></dt><dd>A code-owner review is required. This is what a missing file means.</dd>'+
    '<dt><span class="mono">regulated</span></dt><dd>A named approver from a role must approve, and the promotion ledger is hash-chained.</dd></div>'+
    '<div class="note" style="margin-top:12px">The mode is read on the production branch when a pull request is opened and again when it is merged — so raising it takes effect on everything still open, and it is changed by a pull request like everything else, never by a settings screen. A file that exists but names no mode refuses both, rather than quietly falling back to <span class="mono">team</span>.</div></div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>The whole tree</h3></div><div class="panel-b">'+
+   '<div class="panel"><div class="panel-h"><h3>Tree</h3></div><div class="panel-b">'+
    '<pre>.oxagen/\n  workspace.toml             <span class="c"># linked repos, servers, budgets</span>\n'+
    '  workspace.json             <span class="c"># gitignored · this machine’s link</span>\n'+
    '  rules/\n    governance.toml          <span class="c"># mode = team</span>\n'+
@@ -6890,35 +7081,39 @@ function pRepos(){
   /* the page header gives up the gold when the tab below holds the one primary action */
   /* Give up the header's gold only where the tab below actually renders an enabled one. */
   var tabPrimary=(t==="changes"&&oxprCanMerge(selectedOxpr()))||t==="copies";
-  return '<div class="phead"><div class="t"><p class="eyebrow">Workspace · '+h(w.name)+'</p><h1>Repositories</h1>'+
-   '<p>Where this workspace’s files live, who has them on disk, and every change Oxagen has proposed to them. The record mirrors what git holds; git decides what is in force.</p></div>'+
+  return '<div class="phead"><div class="t"><p class="eyebrow">'+h(w.name)+'</p><h1>Repositories</h1>'+
+   '<p>Where this workspace’s files live and every change Oxagen has proposed to them.</p></div>'+
    '<div class="acts"><button class="btn'+(tabPrimary?'':' primary')+'" onclick="wzOpen(\'init\')">Add Oxagen to a repository</button></div></div>'+tabs+body;
 }
 
 /* ============================== Spend ============================== */
 function pSpend(){
-  var w=ws(), t=tab("spend","findings");
+  var w=ws(), t=tab("spend","findings"), WT=wsTok(w.slug);
   if(S.state==="loading") return skeleton();
   if(S.state==="error") return errorState("Spend","504 rollup_rebuild_in_progress");
   if(S.state==="denied") return deniedState("this workspace’s spend","spend.read on core-platform");
   if(S.state==="empty") return emptyState("No spend to report yet",
-    "Rollups are derived indexes rebuilt from frames. With no model call recorded there is nothing to roll up — and nothing billable.",
+    "Rollups are derived indexes rebuilt from frames. With no model call recorded there is nothing to roll up, and nothing billable.",
     '<button class="btn" onclick="go(\'#/'+ORG.slug+'/'+w.slug+'\')">Back to Fleet</button>');
 
   var tabs='<div class="tabs" role="tablist">'+
-   [["findings","Findings",FINDINGS.length],["operator","By operator"],["agent","By agent"],
-    ["tool","By tool"],["waste","Wasted spend",SPEND.wasteRunsList.length],["budgets","Budgets",SPEND.budgets.length]]
+   [["findings","Findings",FINDINGS.length],["tokens","Tokens"],["coaching","Coaching",coachCount()],["operator","By operator"],["agent","By agent"],
+    ["model","By model"],["tool","By tool"],["waste","Wasted spend",SPEND.wasteRunsList.length],["budgets","Budgets",SPEND.budgets.length]]
    .map(function(x){return '<button class="tab" role="tab" aria-selected="'+(t===x[0])+'" onclick="spendGo(\''+x[0]+'\')">'+x[1]+(x[2]?'<span class="n">'+x[2]+'</span>':'')+'</button>';}).join("")+'</div>';
 
   var strip='<div class="grid g4" style="margin-bottom:16px">'+
-   '<div class="stat"><span class="k">Spend · '+h(SPEND.month)+'</span><span class="v">'+usd(fmt2(spendMonthTotal()))+'</span><span class="s"><span class="basis">client_attested</span> · USD · agents and Oxagen’s model routes</span></div>'+
-   '<div class="stat"><span class="k">Proven spend</span><span class="v" style="color:var(--st-proven)">'+usd(SPEND.proven)+'</span><span class="s">runs whose definition of done <span class="mono">held</span></span></div>'+
-   '<div class="stat"><span class="k">Accepted, not proven</span><span class="v">'+usd(SPEND.accepted)+'</span><span class="s">a human verified it · never folded into proven</span></div>'+
-   '<div class="stat"><span class="k">Productive ratio</span><span class="v">'+per(SPEND.ratio)+'</span><span class="s">steps that advanced the task</span></div></div>';
+   '<div class="stat"><span class="k">Spend</span><span class="v">'+usd(fmt2(spendMonthTotal()))+'</span><span class="s"><span class="basis">gateway_observed</span> + <span class="basis">client_attested</span> · USD</span></div>'+
+   '<div class="stat"><span class="k">Tokens</span><span class="v">'+tokn(WT.total)+'</span><span class="s">'+per(WT.cacheRate)+' served from cache</span></div>'+
+   '<div class="stat"><span class="k">Observed by the gateway</span><span class="v">'+per(WT.observed)+'</span><span class="s">of tokens counted by the proxy</span></div>'+
+   '<div class="stat"><span class="k">Wasted</span><span class="v" style="color:var(--st-critical)">'+usd(SPEND.wasteTotal)+'</span><span class="s">'+per(SPEND.wasteShare)+' of spend</span></div></div>';
 
   var body="", drill=S.spendDrill&&spendDrillOk(S.spendDrill)?S.spendDrill:null;
   if(drill){
     body=spendDrill(drill);
+  } else if(t==="tokens"){
+    body=spendTokens(WT);
+  } else if(t==="coaching"){
+    body=spendCoaching();
   } else if(t==="findings"){
     var total=FINDINGS.reduce(function(s,f){return s+parseFloat(f.save);},0);
     var spendN=spendMonthTotal();
@@ -6926,42 +7121,47 @@ function pSpend(){
     var opsN={}; FINDINGS.forEach(function(f){var e=EVIDENCE[f.id]; if(e) opsN[e.who.operator]=1;});
     var conf=FINDINGS.reduce(function(a,f){var e=EVIDENCE[f.id]; if(e) a[e.confidence]=(a[e.confidence]||0)+1; return a;},{});
     var ramp=[1,.8,.64,.5,.38,.28];
-    var strip=FINDINGS.map(function(f,i){return '<i style="flex:'+parseFloat(f.save)+';opacity:'+ramp[i%ramp.length]+'" title="'+h(f.kind)+' · '+usd(f.save)+'"></i>';}).join("");
+    var shareStrip=FINDINGS.map(function(f,i){return '<i style="flex:'+parseFloat(f.save)+';opacity:'+ramp[i%ramp.length]+'" title="'+h(f.kind)+' · '+usd(f.save)+'"></i>';}).join("");
     /* The legend names the biggest few and rolls the rest into one entry; at forty findings
        a name per slice is unreadable and every tail slice rounds to 0%. */
     var LEG=8, lead=FINDINGS.slice(0,LEG), tail=FINDINGS.slice(LEG);
     var legend=lead.map(function(f,i){return '<span><i style="opacity:'+ramp[i%ramp.length]+'"></i>'+h(f.kind)+' <span class="mono">'+Math.round(parseFloat(f.save)/total*100)+'%</span></span>';}).join("")+
       (tail.length?'<span><i style="opacity:.22"></i>'+tail.length+' smaller findings <span class="mono">'+Math.round(tail.reduce(function(s,f){return s+parseFloat(f.save);},0)/total*100)+'%</span></span>':'');
     body='<div class="sv-hero">'+
-     '<div><p class="eyebrow">Savings identified · '+h(SPEND.month)+'</p><div class="sv-amt">'+fmt$(total)+'</div>'+
+     '<div><p class="eyebrow">Savings identified</p><div class="sv-amt">'+fmt$(total)+'</div>'+
      '<div class="sv-sub">'+(total/spendN*100).toFixed(1)+'% of '+usd(fmt2(spendMonthTotal()))+' spent this month · about '+usd(Math.round(total*12).toLocaleString())+' a year at this run rate</div></div>'+
-     '<div><div class="sv-strip" role="img" aria-label="Share of identified savings by finding">'+strip+'</div><div class="sv-legend">'+legend+'</div>'+
+     '<div><div class="sv-strip" role="img" aria-label="Share of identified savings by finding">'+shareStrip+'</div><div class="sv-legend">'+legend+'</div>'+
      '<div class="sv-facts"><span><b>'+FINDINGS.length+'</b> findings</span><span><b>'+Object.keys(opsN).length+'</b> operators involved</span>'+
      '<span><b>'+(conf.high||0)+'</b> high confidence · <b>'+(conf.medium||0)+'</b> medium</span><span>every one opens to its evidence</span></div></div></div>'+
      '<div class="grid" style="gap:10px">'+
      FINDINGS.map(function(f,i){return fndCard(f,i,total,top);}).join("")+
      '</div><div class="note" style="margin-top:14px">Each saving is measured minus counterfactual over the runs it cites, at the price each call actually paid. Nothing here is an opinion: Evidence opens the runs, the people and the arithmetic behind every number, and Fix opens the change that removes it.</div>';
   } else if(t==="operator"){
-    body='<div class="panel"><div class="panel-h"><h3>By operator — the report a team lead reads</h3><span class="dim mono" style="margin-left:auto;font-size:11px">open a row for every metric and its findings</span></div><div class="tw"><table>'+
-     '<thead><tr><th>Operator</th><th>Role</th><th class="num">Agents</th><th class="num">Runs</th><th class="num">Spend</th><th class="num">Proven</th><th class="num">Productive ratio</th><th class="num">Potential savings</th><th>Budget position</th></tr></thead><tbody>'+
+    body='<div class="panel"><div class="panel-h"><h3>By operator</h3></div><div class="tw"><table>'+
+     '<thead><tr><th>Operator</th><th>Role</th><th class="num">Agents</th><th class="num">Runs</th><th class="num">Spend</th><th class="num">Tokens</th><th class="num">Cache hit</th><th class="num">Potential savings</th><th>Budget position</th></tr></thead><tbody>'+
      SPEND.byOperator.map(function(o){var p=PEOPLE[o.p];
       return '<tr'+drillRow("operator",o.p)+'><td><b>'+drillName("operator",o.p)+'</b></td><td class="mono dim" style="font-size:11.5px">'+h(p.role)+'</td>'+
        '<td class="num">'+o.agents+'</td><td class="num">'+o.runs.toLocaleString()+'</td>'+
-       '<td class="num">'+usd(o.spend)+'</td><td class="num">'+usd(o.proven)+'</td><td class="num">'+per(o.ratio)+'</td>'+savingsCell("operator",o.p)+
+       '<td class="num">'+usd(o.spend)+'</td><td class="num">'+tokn(operatorTok(o.p).total)+'</td><td class="num">'+per(operatorTok(o.p).cacheRate)+'</td>'+savingsCell("operator",o.p)+
        '<td style="min-width:170px"><div class="bar"><i style="width:'+Math.round(o.used*100)+'%;background:'+(o.used>0.8?"var(--st-critical)":"var(--st-allowed)")+'"></i></div>'+
        '<div class="dim" style="font-size:11px">'+per(o.used)+' of '+usd(o.budget)+'</div></td></tr>';}).join("")+
      '</tbody></table></div><div class="panel-b">'+
      '<div class="note">Every run has exactly one operator, even when a schedule or a webhook started it: the operator is the person who owns that trigger. A run that arrived without one is attributed to the agent’s owning operator and flagged — never dropped, never spread.</div></div></div>';
   } else if(t==="agent"){
-    body='<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>By agent</h3><span class="dim mono" style="margin-left:auto;font-size:11px">open a row for every metric and its findings</span></div><div class="tw"><table>'+
-     '<thead><tr><th>Agent · trust · spend</th><th class="num">Runs</th><th class="num">Spend</th><th class="num">Proven spend</th><th class="num">Spend per proven run</th><th class="num">Potential savings</th><th>Trend</th></tr></thead><tbody>'+
+    body='<div class="panel"><div class="panel-h"><h3>By agent</h3></div><div class="tw"><table>'+
+     '<thead><tr><th>Agent</th><th class="num">Runs</th><th class="num">Spend</th><th class="num">Tokens</th><th class="num">Per run</th><th class="num">Cache hit</th><th class="num">Potential savings</th><th>Trend</th></tr></thead><tbody>'+
      SPEND.byAgent.map(function(a){
       return '<tr'+drillRow("agent",a.k)+'><td>'+agentCard(a.k,{key:a.k})+'</td><td class="num">'+a.runs.toLocaleString()+'</td>'+
-       '<td class="num">'+usd(a.spend)+'</td><td class="num">'+usd(a.proven)+'</td>'+
-       '<td class="num">'+perProvenRun(a)+'</td>'+savingsCell("agent",a.k)+
-       '<td><span class="b b-'+(a.trend.charAt(0)==="-"?"proven":"approval")+'">'+h(a.trend)+'</span></td></tr>';}).join("")+
-     '</tbody></table></div><div class="panel-b"><div class="note">'+SPEND.byAgent.filter(function(x){return n$(x.proven)===0;}).length+' agents show no proven spend: finance work no witness covers, and output accepted by a human, which is reported separately and never folded into proven.</div></div></div>'+
-     '<div class="panel"><div class="panel-h"><h3>By model and provider key</h3></div><div class="tw"><table>'+
+       '<td class="num">'+usd(a.spend)+'</td><td class="num">'+tokn(agentTok(a.k).total)+'</td>'+
+       '<td class="num">'+tokn(agentTok(a.k).perRun)+'</td><td class="num">'+per(agentTok(a.k).cacheRate)+'</td>'+savingsCell("agent",a.k)+
+       '<td><span class="b b-'+(a.trend.charAt(0)==="-"?"allowed":"approval")+'">'+h(a.trend)+'</span></td></tr>';}).join("")+
+     '</tbody></table></div><div class="panel-b"><div class="note">Every figure is a rollup of the agent\u2019s runs, rebuilt from frames. An agent on the harness tier is self-reported: its harness told Oxagen the counts, and a class the harness does not report is marked absent, never zero.</div></div></div>';
+  } else if(t==="model"){
+    /* Consumption by model belongs on Spend; the routes themselves are configured under
+       Organization → Model funding and routes, which this panel links to. */
+    body='<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Models and keys</h3>'+
+     '<p class="muted" style="margin:2px 0 0;font-size:12px">Every model the workspace called this month, and the provider key it was billed to.</p></div>'+
+     '<div class="sp"><button class="btn sm" onclick="go(\'#/'+ORG.slug+'\')">Model routes</button></div></div><div class="tw"><table>'+
      '<thead><tr><th>Model</th><th>Provider key</th><th class="num">Model calls</th><th class="num">Spend</th><th class="num">Cache hit rate</th><th>Basis</th></tr></thead><tbody>'+
      spendModelRows().map(function(m){var k=spendKeyOf(m.m,m.tier);
       return '<tr'+(m.route?' data-route="'+h(m.tier)+'"':'')+'><td class="tkey" style="font-size:12px">'+h(m.m)+(m.route?'<div class="dim" style="font-size:11px">Oxagen’s own work · '+h(m.provider)+'</div>':'')+'</td><td style="font-size:12px">'+(k?'<span class="mono">'+h(k.id)+'</span><div class="dim" style="font-size:11px">'+h(k.src.split(" · ")[0])+'</div>':'<span class="dim">—</span>')+'</td><td class="num">'+(m.route?orgUseCount(m):m.calls.toLocaleString())+'</td>'+
@@ -6984,14 +7184,191 @@ function pSpend(){
        '<td><span class="b b-'+(b.mode==="hard"?"denied":"approval")+'">'+h(b.mode)+'</span></td>'+
        '<td style="min-width:170px"><div class="bar"><i style="width:'+Math.round(u*100)+'%;background:'+(u>0.8?"var(--st-critical)":"var(--st-allowed)")+'"></i></div>'+
        '<div class="dim" style="font-size:11px">'+per(u)+'</div></td></tr>';}).join("")+
-     '</tbody></table></div><div class="panel-b"><div class="note">Hard budgets are checked at each hook boundary, from a running counter in Postgres fed by the usage each harness reports. A breach is a <span class="mono">policy.decision</span> frame and a pause at the next boundary: client-attested and fail-open. Observed metering and an enforced ceiling arrive with the <span class="mono">gateway</span> tier, which is not available yet.</div></div></div>';
+     '</tbody></table></div><div class="panel-b"><div class="note">Hard budgets are checked at each hook boundary, from a running counter in Postgres fed by the usage each harness reports. A breach is a <span class="mono">policy.decision</span> frame and a pause at the next boundary: client-attested and fail-open. On the <span class="mono">gateway</span> and <span class="mono">contained</span> tiers the proxy enforces the ceiling before the call.</div></div></div>';
   }
-  return '<div class="phead"><div class="t"><p class="eyebrow">Workspace · '+h(w.name)+'</p><h1>Spend</h1>'+
-   '<p>Customers pay for tokens; this page answers what the tokens bought. Every number carries its basis, and this page is for the customer’s money — Oxagen’s own revenue is on Billing.</p></div>'+
+  return '<div class="phead"><div class="t"><p class="eyebrow">'+h(w.name)+'</p><h1>Spend</h1>'+
+   '<p>What the tokens bought, with the basis on every number.</p></div>'+
    '<div class="acts"><button class="btn" onclick="openDialog(\'spendexport\')">Export report</button>'+
    '<button class="btn primary" onclick="openDialog(\'budget\')">Set a budget</button></div></div>'+(drill?'':strip)+tabs+body;
 }
 
+/* ---------- Tokens: where the month's tokens went, by class, by prompt part, by harness ---------- */
+function coachCount(){
+  var n=0;
+  ["agents","operators"].forEach(function(kind){coachSubjects(kind).forEach(function(s){n+=s.items.length;});});
+  return n;
+}
+function spendTokens(WT){
+  var w=ws(), sp=spendMonthTotal();
+  var cls=[["input_uncached",WT.tokIn-WT.cacheRead,"prompt tokens processed fresh"],["cache_read",WT.cacheRead,"prompt tokens served from cache, priced at a tenth"],
+    ["cache_write",WT.cacheWrite,"prompt tokens written to cache, by TTL"],["output",WT.output,"completion tokens, excluding reasoning"],["reasoning",WT.reasoning,"thinking tokens, where the provider reports them"]];
+  var clsTot=cls.reduce(function(a,x){return a+x[1];},0);
+  var per$=function(tok){return sp*tokShare(tok,clsTot);};
+  var hs=Object.keys(WT.byHarness).map(function(k){return WT.byHarness[k];}).sort(function(a,b){return b.total-a.total;});
+  return '<div class="grid g2" style="margin-bottom:14px">'+
+   '<div class="panel" style="margin:0"><div class="panel-h"><h3>By token class</h3><span class="mono dim" style="margin-left:auto;font-size:11px">'+tokn(WT.total)+'</span></div>'+
+    '<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Class</th><th class="num">Tokens</th><th class="num">Share</th><th class="num">Cost</th></tr></thead><tbody>'+
+    cls.map(function(x){return '<tr><td class="mono"'+tipAttr(x[2])+'>'+x[0]+'</td><td class="num">'+tokn(x[1])+'</td><td class="num dim">'+per(tokShare(x[1],clsTot))+'</td><td class="num">'+(x[0]==="cache_read"?fmt$(per$(x[1])*0.1):fmt$(per$(x[1])))+'</td></tr>';}).join("")+
+    '</tbody></table></div><div class="panel-b"><dl class="kv">'+
+    '<dt>Cache hit rate</dt><dd>'+per(WT.cacheRate)+' · cache_read ÷ (input_uncached + cache_read), token-weighted</dd>'+
+    '<dt>Cache write cost share</dt><dd>'+per(tokShare(WT.cacheWrite*1.25,WT.tokIn))+' · high when a prefix is written and never read</dd>'+
+    '<dt>Effective input price</dt><dd>$1.88 per million across every input class</dd>'+
+    '<dt>Unmapped classes</dt><dd>0 · a class Oxagen does not know is stored under its raw name and priced at zero, so the gap stays visible</dd></dl></div></div>'+
+   '<div class="panel" style="margin:0"><div class="panel-h"><h3>Prompt composition</h3></div>'+
+    '<div class="panel-b">'+tokBars(WT)+'</div>'+
+    '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">Tool definitions, context frames and steering are measured by Oxagen from the request it assembled; tool results and conversation are the rest of the input. A part that grows without its citation rate growing is a finding, and Coaching says what to change.</div></div></div></div>'+
+   '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>By harness</h3><span class="b b-q" style="margin-left:auto">'+per(WT.observed)+' of tokens observed by the gateway</span></div>'+
+    '<div class="tw"><table><thead><tr><th>Harness</th><th class="num">Agents</th><th class="num">Tokens</th><th class="num">Cache hit</th><th class="num">Spend</th><th>Basis</th></tr></thead><tbody>'+
+    hs.map(function(x){var obs=tokShare(x.observed,x.total);
+      return '<tr><td><b>'+h(x.label)+'</b></td><td class="num">'+x.agents+'</td><td class="num">'+tokn(x.total)+'</td><td class="num">'+per(tokShare(x.cacheRead,x.tokIn))+'</td><td class="num">'+fmt$(x.spend)+'</td>'+
+       '<td>'+(obs>=0.999?'<span class="basis">gateway_observed</span>':obs<=0.001?'<span class="basis">client_attested</span>':'<span class="basis">gateway_observed</span> '+per(obs)+' · <span class="basis">client_attested</span> '+per(1-obs))+'</td></tr>';}).join("")+
+    '</tbody></table></div><div class="panel-b"><div class="note">Observed means the gateway\u2019s proxy counted the tokens from the bytes that passed through it. Self-reported means the harness\u2019s own telemetry said so; a class it does not report is marked absent, never zero, and a cache hit rate over a mixed fleet is never computed from missing data as if it were zero.</div></div></div>'+
+   '<div class="panel"><div class="panel-h"><h3>By agent</h3></div>'+
+    '<div class="tw"><table><thead><tr><th>Agent</th><th class="num">Runs</th><th class="num">Tokens</th><th class="num">Per run</th><th class="num">Cache hit</th><th class="num">Tool defs</th><th class="num">Context</th><th class="num">Tool results</th><th class="num">Reasoning</th><th>Basis</th></tr></thead><tbody>'+
+    AGENTS.filter(function(a){return a.ws===w.slug;}).sort(function(a,b){return agentTok(b).total-agentTok(a).total;}).slice(0,12).map(function(a){var t=agentTok(a);
+      return '<tr class="click" onclick="go(\'#/'+ORG.slug+'/'+a.ws+'/agents/'+a.key.split(".").pop()+'\')"><td>'+agentCard(a,{key:a.key})+'</td><td class="num">'+(a.runs30||0).toLocaleString()+'</td><td class="num">'+tokn(t.total)+'</td><td class="num">'+tokn(t.perRun)+'</td><td class="num">'+per(t.cacheRate)+'</td>'+
+       '<td class="num'+(t.shares.tools>0.16?'" style="color:var(--st-approval)':'')+'">'+per(t.shares.tools)+'</td><td class="num">'+per(t.shares.ctx)+'</td><td class="num'+(t.shares.results>0.3?'" style="color:var(--st-approval)':'')+'">'+per(t.shares.results)+'</td><td class="num">'+per(tokShare(t.reasoning,t.tokOut))+'</td>'+
+       '<td class="mono dim" style="font-size:11px">'+(t.observed?'gateway_observed':'client_attested')+'</td></tr>';}).join("")+
+    '</tbody></table></div></div>';
+}
+/* ---------- Coaching: the agents and operators with something to change ----------
+   The tab opens on the subjects that have a row, worst severity first, then the most rows, then the
+   most money. A subject with nothing to change is not a row: a panel per agent saying "nothing to
+   change" is the page reporting work that does not exist. Opening one shows every row in full, with
+   the signal behind it, the one action that moves it, and a dismiss. Dismissal is keyed by subject
+   and signal, so a signal the rollup raises again after the record changes comes back as a new row
+   rather than staying buried. */
+var COACH_SEV={denied:{r:0,l:"high"},approval:{r:1,l:"medium"},q:{r:2,l:"low"}};
+function coachKey(kind,id,k){return kind+":"+id+":"+k;}
+function coachRank(c){return COACH_SEV[c.sev]?COACH_SEV[c.sev].r:2;}
+function coachWorstLabel(r){var out="\u2014";Object.keys(COACH_SEV).forEach(function(k){if(COACH_SEV[k].r===r)out=COACH_SEV[k].l;});return out;}
+function coachAll(kind,id){return kind==="operators"?coachOperator(id):coachAgent(id);}
+function coachItems(kind,id){return coachAll(kind,id).filter(function(c){return !S.coachOff[coachKey(kind,id,c.k)];});}
+function coachHidden(kind,id){return coachAll(kind,id).filter(function(c){return !!S.coachOff[coachKey(kind,id,c.k)];});}
+function coachDismiss(kind,id,k){
+  S.coachOff[coachKey(kind,id,k)]=1; render();
+  act("Row dismissed. The signal stays in the rollup and returns if it is raised again.");
+}
+function coachRestore(kind,id,k){delete S.coachOff[coachKey(kind,id,k)];render();act("Restored.");}
+function coachLabel(kind,id){return kind==="operators"?(PEOPLE[id]?PEOPLE[id].name:id):id;}
+function coachPool(kind){
+  var w=ws(), mine=AGENTS.filter(function(a){return a.ws===w.slug;});
+  if(kind!=="operators") return mine.length;
+  var ops={}; mine.forEach(function(a){ops[a.operator]=1;});
+  return Object.keys(ops).filter(function(p){return PEOPLE[p];}).length;
+}
+/* Every subject in this workspace with at least one live row, ranked. */
+function coachSubjects(kind){
+  var w=ws(), mine=AGENTS.filter(function(a){return a.ws===w.slug;}), ids;
+  if(kind==="operators"){var ops={};mine.forEach(function(a){ops[a.operator]=1;});ids=Object.keys(ops).filter(function(p){return PEOPLE[p];});}
+  else ids=mine.map(function(a){return a.key;});
+  return ids.map(function(id){
+    var items=coachItems(kind,id).sort(function(x,y){return coachRank(x)-coachRank(y)||y.usd-x.usd;});
+    return {id:id,label:coachLabel(kind,id),items:items,hidden:coachHidden(kind,id).length,
+            worst:items.reduce(function(n,c){return Math.min(n,coachRank(c));},9),
+            usd:items.reduce(function(n,c){return n+c.usd;},0)};})
+   .filter(function(s){return s.items.length;})
+   .sort(function(a,b){return a.worst-b.worst||b.items.length-a.items.length||b.usd-a.usd;});
+}
+function coachSubject(kind,id){return coachSubjects(kind).filter(function(s){return s.id===id;})[0]||null;}
+function coachSevChips(items){
+  var n={}; items.forEach(function(c){n[c.sev]=(n[c.sev]||0)+1;});
+  return ["denied","approval","q"].filter(function(s){return n[s];})
+   .map(function(s){return '<span class="b b-'+s+'"><span class="d"></span>'+n[s]+' '+COACH_SEV[s].l+'</span>';}).join(" ");
+}
+function coachTo(id){S.coachDrill=id||null;render();}
+function coachSub(kind){S.coachFor=kind;S.coachDrill=null;render();}
+function coachJump(label){
+  var kind=S.coachFor||"agents", hit=coachSubjects(kind).filter(function(s){return s.label===label;})[0];
+  if(!hit){act("Nothing with coaching matches \u201c"+label+"\u201d.");return;}
+  coachTo(hit.id);
+}
+/* The jump control is a datalist, so typing filters a list the browser already holds and a name
+   that is not on it is refused rather than opening the wrong subject. */
+function coachPicker(kind){
+  var subs=coachSubjects(kind);
+  return '<input class="coach-pick" list="coachPickList" value="" autocomplete="off" '+
+   'placeholder="Jump to another '+(kind==="operators"?"operator":"agent")+' \u2014 '+subs.length+' with coaching" '+
+   'aria-label="Jump to another subject" onchange="coachJump(this.value)">'+
+   '<datalist id="coachPickList">'+subs.map(function(s){
+     return '<option value="'+h(s.label)+'">'+h(s.items.length+" row"+(s.items.length===1?"":"s")+" \u00b7 "+fmt$(s.usd)+" a month")+'</option>';}).join("")+'</datalist>';
+}
+function coachOffCount(kind){var n=0;Object.keys(S.coachOff).forEach(function(k){if(S.coachOff[k]&&k.indexOf(kind+":")===0)n++;});return n;}
+function coachClear(kind){Object.keys(S.coachOff).forEach(function(k){if(k.indexOf(kind+":")===0)delete S.coachOff[k];});render();act("Dismissed rows restored.");}
+function coachFoot(){
+  return '<div class="note" style="margin-top:14px">Coaching is derived from the same rollup the Tokens tab prints, at read time, so the two cannot disagree. '+
+   'Each row names its signal, the tokens and money behind it, and the one change that moves it. Sending a note records it as a governed action; nothing here changes an agent by itself.</div>';
+}
+function spendCoaching(){
+  var w=ws(), kind=S.coachFor||"agents";
+  var aN=coachSubjects("agents"), oN=coachSubjects("operators"), subs=kind==="operators"?oN:aN;
+  var drill=S.coachDrill?coachSubject(kind,S.coachDrill):null;
+  var tot=function(l){return l.reduce(function(n,s){return n+s.usd;},0);};
+  var rows=function(l){return l.reduce(function(n,s){return n+s.items.length;},0);};
+  var worst=[].concat(aN,oN).sort(function(a,b){return a.worst-b.worst;})[0];
+  var pick='<div class="tabs" role="tablist" style="margin-bottom:12px">'+
+   [["agents","Agents",rows(aN)],["operators","Operators",rows(oN)]].map(function(x){
+    return '<button class="tab" role="tab" aria-selected="'+(kind===x[0])+'" onclick="coachSub(\''+x[0]+'\')">'+x[1]+
+     (x[2]?'<span class="n">'+x[2]+'</span>':'')+'</button>';}).join("")+'</div>';
+  var strip='<div class="grid g3" style="margin-bottom:14px">'+
+   '<div class="stat"><span class="k">Agents to coach</span><span class="v">'+aN.length+'</span><span class="s">'+rows(aN)+' rows \u00b7 '+fmt$(tot(aN))+' a month at stake</span></div>'+
+   '<div class="stat"><span class="k">Operators to coach</span><span class="v">'+oN.length+'</span><span class="s">'+rows(oN)+' rows \u00b7 '+fmt$(tot(oN))+' a month at stake</span></div>'+
+   '<div class="stat"><span class="k">Worst open</span><span class="v">'+(worst?coachWorstLabel(worst.worst):"\u2014")+'</span>'+
+   '<span class="s">'+(worst?h(worst.label):"nothing open")+'</span></div></div>';
+
+  if(drill) return strip+pick+coachDetail(kind,drill);
+
+  if(!subs.length){
+    var off=coachOffCount(kind);
+    return strip+pick+'<div class="panel"><div class="panel-b"><p class="muted" style="margin:0;font-size:12.5px">'+
+     '<b>Nothing to change.</b> Every '+(kind==="operators"?"operator":"agent")+' in '+h(w.name)+' is inside the workspace norm on every signal the rollup reads'+
+     (off?', and '+off+' row'+(off===1?" is":"s are")+' dismissed. <a href="#" onclick="event.preventDefault();coachClear(\''+kind+'\')">Restore them</a>':'.')+
+     '</p></div></div>';
+  }
+
+  var body='<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>'+(kind==="operators"?"Operators":"Agents")+' with coaching</h3>'+
+   '<p class="muted" style="margin:2px 0 0;font-size:12px">Worst severity first, then the most rows. Open one to read its evidence and act.</p></div>'+
+   '<div class="sp"><span class="b b-q">'+subs.length+' of '+coachPool(kind)+'</span>'+
+   (coachOffCount(kind)?'<button class="btn sm" onclick="coachClear(\''+kind+'\')">Restore '+coachOffCount(kind)+' dismissed</button>':'')+'</div></div>'+
+   '<div class="tw"><table><thead><tr><th>'+(kind==="operators"?"Operator":"Agent")+'</th><th>Severity</th><th class="num">Rows</th>'+
+   '<th class="num">At stake</th><th>Top row</th><th class="num">Tokens</th><th class="num">Cache hit</th></tr></thead><tbody>'+
+   subs.map(function(s){var t=kind==="operators"?operatorTok(s.id):agentTok(s.id);
+    return '<tr '+rowClick("coachTo('"+s.id.replace(/'/g,"\\'")+"')","Open coaching for "+s.label)+'>'+
+     '<td>'+(kind==="operators"
+       ? '<span class="row" style="gap:8px">'+personAv(s.id,24)+'<b>'+h(s.label)+'</b></span><div class="dim mono" style="font-size:11px">'+h(PEOPLE[s.id].role)+'</div>'
+       : agentCard(s.id,{layout:"compact",key:s.id}))+'</td>'+
+     '<td>'+coachSevChips(s.items)+'</td>'+
+     '<td class="num">'+s.items.length+(s.hidden?'<div class="dim" style="font-size:11px">'+s.hidden+' dismissed</div>':'')+'</td>'+
+     '<td class="num">'+fmt$(s.usd)+'</td>'+
+     '<td style="font-size:12px">'+h(s.items[0].title)+'</td>'+
+     '<td class="num">'+(t?tokn(t.total):"\u2014")+'</td><td class="num">'+(t?per(t.cacheRate):"\u2014")+'</td></tr>';}).join("")+
+   '</tbody></table></div></div>';
+  return strip+pick+body+coachFoot();
+}
+/* One subject, opened: its token profile, then every row with its signal, its action and a dismiss. */
+function coachDetail(kind,s){
+  var t=kind==="operators"?operatorTok(s.id):agentTok(s.id), hid=coachHidden(kind,s.id);
+  var head='<div class="coach-head">'+
+   '<button class="btn sm" onclick="coachTo(null)">\u2039 All '+(kind==="operators"?"operators":"agents")+'</button>'+
+   '<div class="coach-who">'+(kind==="operators"
+     ? personAv(s.id,32)+'<div style="min-width:0"><b>'+h(s.label)+'</b><div class="dim mono" style="font-size:11px">'+h(PEOPLE[s.id].role)+' \u00b7 '+t.agents+' agents</div></div>'
+     : agentCard(s.id,{layout:"compact",key:s.id}))+'</div>'+
+   coachPicker(kind)+'</div>';
+  var prof='<div class="grid g4" style="margin-bottom:14px">'+
+   '<div class="stat"><span class="k">Rows open</span><span class="v">'+s.items.length+'</span><span class="s">'+coachSevChips(s.items)+'</span></div>'+
+   '<div class="stat"><span class="k">At stake</span><span class="v">'+fmt$(s.usd)+'</span><span class="s">a month, across every row below</span></div>'+
+   '<div class="stat"><span class="k">Tokens</span><span class="v">'+(t?tokn(t.total):"\u2014")+'</span><span class="s">'+(t?per(t.cacheRate)+" served from cache":"")+'</span></div>'+
+   '<div class="stat"><span class="k">Basis</span><span class="v" style="font-size:15px"><span class="basis">'+(t&&t.observed?"gateway_observed":"client_attested")+'</span></span>'+
+   '<span class="s">'+(t&&t.observed?"counted by the proxy":"reported by the harness")+'</span></div></div>';
+  var cards='<div style="display:grid;gap:10px">'+s.items.map(function(c){return coachCard(c,s.label,{kind:kind,id:s.id});}).join("")+'</div>';
+  var back=hid.length?'<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Dismissed</h3>'+
+   '<span class="b b-q" style="margin-left:auto">'+hid.length+'</span></div><div class="panel-b" style="display:grid;gap:8px">'+
+   hid.map(function(c){return '<div class="row" style="gap:10px"><span class="b b-'+c.sev+'" style="flex:none"><span class="d"></span>'+h(c.title)+'</span>'+
+    '<span class="dim mono grow" style="font-size:11px;min-width:0">'+c.signal+'</span>'+
+    '<button class="btn sm" style="flex:none" onclick="coachRestore(\''+kind+'\',\''+s.id.replace(/'/g,"\\'")+'\',\''+h(c.k)+'\')">Restore</button></div>';}).join("")+
+   '</div></div>':'';
+  return head+prof+cards+back+coachFoot();
+}
 /* ---------- Spend drill-down: an operator, agent or tool → every metric, and its findings as potential savings ---------- */
 function n$(s){return parseFloat(String(s).replace(/,/g,""))||0;}
 function fmt$(n){return "$"+n.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});}
@@ -7101,40 +7478,37 @@ function spendDrill(dr){
     var ramp=[1,.8,.64,.5,.38,.28], direct=fs.filter(function(f){return fndDirect(f,kind);}).length;
     var strip=fs.map(function(f,i){return '<i style="flex:'+n$(f.save)+';opacity:'+ramp[i%ramp.length]+'" title="'+h(f.kind)+' · '+usd(f.save)+'"></i>';}).join("");
     var legend=fs.map(function(f,i){return '<span><i style="opacity:'+ramp[i%ramp.length]+'"></i>'+h(f.kind)+' <span class="mono">'+Math.round(n$(f.save)/save*100)+'%</span></span>';}).join("");
-    hero='<div class="sv-hero"><div><p class="eyebrow">Potential savings · '+h(E.name)+'</p><div class="sv-amt">'+fmt$(save)+'</div>'+
+    hero='<div class="sv-hero"><div><p class="eyebrow">Potential savings</p><div class="sv-amt">'+fmt$(save)+'</div>'+
      '<div class="sv-sub">'+(save/spend*100).toFixed(1)+'% of the '+fmt$(spend)+' this '+kind+' spent in '+h(SPEND.month)+' · about '+fmt$(save*12)+' a year at this run rate</div></div>'+
      '<div><div class="sv-strip" role="img" aria-label="Share of potential savings by finding">'+strip+'</div><div class="sv-legend">'+legend+'</div>'+
      '<div class="sv-facts"><span><b>'+fs.length+'</b> finding'+(fs.length>1?'s':'')+'</span><span><b>'+direct+'</b> on this '+kind+' directly'+
      (fs.length-direct?' · <b>'+(fs.length-direct)+'</b> attributed through evidence':'')+'</span><span>every one opens to its evidence</span></div></div></div>';
   } else {
-    hero='<div class="sv-hero"><div><p class="eyebrow">Potential savings · '+h(E.name)+'</p><div class="sv-amt dim">$0.00</div>'+
+    hero='<div class="sv-hero"><div><p class="eyebrow">Potential savings</p><div class="sv-amt dim">$0.00</div>'+
      '<div class="sv-sub">No findings cite this '+kind+'. Every dollar below is accounted for in the metrics; nothing measured here is identified as removable.</div></div>'+
      '<div class="sv-facts" style="align-self:end"><span><b>0</b> findings</span><span>findings are frame patterns, re-derived on every rollup</span></div></div>';
   }
 
-  var T=[], share=per(spend/monthN), wasted=d.wasted||0;
+  var T=[], share=per(spend/monthN), wasted=d.wasted||0, OT=kind==="operator"?operatorTok(E.id):null, AT=kind==="agent"?agentTok(E.id):null;
   if(kind==="operator"){
-    T=[["Spend · "+h(SPEND.month), fmt$(spend), share+' of workspace · <span class="basis">client_attested</span>'],
-       ["Proven spend", usd(r.proven), per(n$(r.proven)/spend)+' of spend · verdict flipped', "var(--st-proven)"],
-       ["Accepted, not proven", fmt$(d.accepted||0), 'a human verified it'],
-       ["Unproven", fmt$(d.unproven||0), 'no witness flipped'],
+    T=[["Spend · "+h(SPEND.month), fmt$(spend), share+' of workspace · '+(OT.observed>=0.999?'<span class="basis">gateway_observed</span>':OT.observed<=0.001?'<span class="basis">client_attested</span>':'<span class="basis">gateway_observed</span> '+per(OT.observed)+' · <span class="basis">client_attested</span> '+per(1-OT.observed))],
+       ["Tokens", tokn(OT.total), tokn(OT.tokIn)+' in · '+tokn(OT.tokOut)+' out'],
+       ["Cache hit rate", per(OT.cacheRate), tokn(OT.cacheRead)+' input tokens served from cache'],
+       ["Observed", per(OT.observed), 'of tokens counted by the gateway · the rest self-reported'],
        ["Wasted", fmt$(wasted), per(wasted/spend)+' of spend · the frames show it bought nothing', "var(--st-critical)"],
        ["Productive ratio", per(r.ratio), 'steps that advanced the task'],
-       ["Cache hit rate", per(d.cache||0), 'prefix reads served from cache'],
        ["Runs", r.runs.toLocaleString(), r.agents+' agents · '+fmt$(d.perRun||spend/r.runs)+' per run'],
        ["Model calls", (d.modelCalls||0).toLocaleString(), (d.toolCalls||0).toLocaleString()+' tool calls'],
        ["Budget position", per(r.used), 'of '+usd(r.budget)+' monthly', r.used>0.8?"var(--st-critical)":null],
        ["Trend", h(d.trend||"—"), 'spend, same period']];
   } else if(kind==="agent"){
-    T=[["Spend · "+h(SPEND.month), fmt$(spend), share+' of workspace · <span class="basis">client_attested</span>'],
-       ["Proven spend", usd(r.proven), n$(r.proven)?per(n$(r.proven)/spend)+' of spend · verdict flipped':'no witness covers this work', "var(--st-proven)"],
-       ["Accepted, not proven", fmt$(d.accepted||0), 'a human verified it'],
-       ["Unproven", fmt$(d.unproven||0), 'no witness flipped'],
+    T=[["Spend · "+h(SPEND.month), fmt$(spend), share+' of workspace · <span class="basis">'+(AT.observed?'gateway_observed':'client_attested')+'</span>'],
+       ["Tokens", tokn(AT.total), tokn(AT.perRun)+' per run · '+tokn(AT.perCall)+' per call'],
+       ["Cache hit rate", per(AT.cacheRate), tokn(AT.cacheRead)+' input tokens served from cache'],
+       ["Tool definitions", per(AT.shares.tools), 'of every request · '+AT.neverCalled+' tools never called', AT.shares.tools>0.16?"var(--st-approval)":null],
        ["Wasted", fmt$(wasted), per(wasted/spend)+' of spend', "var(--st-critical)"],
-       ["Spend per proven run", perProvenRun(r), 'spend ÷ runs whose verdict flipped'],
        ["Spend per run", fmt$(d.perRun||spend/r.runs), r.runs.toLocaleString()+' runs'],
        ["Productive ratio", per(d.ratio||0), 'steps that advanced the task'],
-       ["Cache hit rate", per(d.cache||0), 'prefix reads served from cache'],
        ["Model calls", (d.modelCalls||0).toLocaleString(), (d.toolCalls||0).toLocaleString()+' tool calls'],
        ["Trend", h(r.trend), 'spend vs August']];
     if(d.budget) T.push(["Budget · "+h(d.budget.period), usd(d.budget.used), 'of '+usd(d.budget.limit)+' · '+h(d.budget.mode)+' · '+per(n$(d.budget.used)/n$(d.budget.limit))]);
@@ -7149,16 +7523,15 @@ function spendDrill(dr){
        ["Retries", per(d.retry||0), 'calls repeated after a 4xx or a timeout'],
        ["Cache hit rate", per(d.cache||0), 'prefix reads on the calling turns'],
        ["Wasted", fmt$(wasted), per(wasted/spend)+' of this tool’s spend', "var(--st-critical)"],
-       ["Proven share", per(d.provenShare||0), 'spend on runs whose verdict flipped', "var(--st-proven)"],
        ["Trend", h(d.trend||"—"), 'spend, same period']];
   }
   var tiles='<div class="grid g4" style="margin-bottom:14px">'+T.map(function(t){return tile(t[0],t[1],t[2],t[3]);}).join("")+'</div>';
 
   var pts=spendSeries(kind+":"+E.id,spend,d.trend||r.trend||""), mx=Math.max.apply(null,pts), pk=pts.indexOf(mx);
-  var series='<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Spend by day</h3><span class="b b-q" style="margin-left:auto">last 30 days</span></div>'+
+  var series='<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Spend by day</h3></div>'+
    '<div class="panel-b">'+sparkline(pts,"Daily spend, last 30 days")+
    '<div class="row" style="margin-top:8px;font-size:11.5px;color:var(--muted);flex-wrap:wrap"><span>peak <b style="color:var(--fg)">'+fmt$(mx)+'</b> on '+dayLabel(pk,30)+'</span><span class="dim">·</span>'+
-   '<span>'+fmt$(spend/30)+' a day on average</span><span class="dim">·</span><span>weekends dip with the schedules</span><span class="dim mono" style="margin-left:auto;font-size:10.5px">hover a day for its amount</span></div></div></div>';
+   '<span>'+fmt$(spend/30)+' a day on average</span><span class="dim">·</span><span>weekends dip with the schedules</span></div></div></div>';
 
   var cuts;
   if(kind==="tool") cuts=xcut("By agent",d.agents,"agent",spend)+xcut("By operator",d.operators,"operator",spend)+xcut("By model",d.models,"model",spend);
@@ -7166,8 +7539,8 @@ function spendDrill(dr){
   else cuts=xcut("By agent",d.agents,"agent",spend)+xcut("By tool",d.tools,"tool",spend)+xcut("By model",d.models,"model",spend);
   cuts='<div class="grid g3" style="margin-bottom:14px">'+cuts+'</div>';
 
-  var fnd='<div class="panel"><div class="panel-h"><h3>Findings · presented as potential savings</h3>'+
-   '<span class="dim mono" style="margin-left:auto;font-size:11px">'+(fs.length?fs.length+' · measured minus counterfactual':'none this month')+'</span></div>'+
+  var fnd='<div class="panel"><div class="panel-h"><h3>Findings</h3>'+
+   '<span class="dim mono" style="margin-left:auto;font-size:11px">'+(fs.length?fs.length:'none')+'</span></div>'+
    '<div class="panel-b" style="display:grid;gap:10px">'+
    (fs.length?fs.map(function(f,i){return fndCard(f,i,save,top,"of this "+kind+"’s savings");}).join(""):
     '<p class="muted" style="margin:0;font-size:12.5px">No findings cite this '+kind+'. When a rollup finds a frame pattern here it appears in this list with the dollars it would remove, and the same amount shows on the '+listLabel+' table.</p>')+
@@ -7192,20 +7565,32 @@ function spendByTool(){
      '<b style="margin-left:auto;color:var(--fg);font-variant-numeric:tabular-nums;flex:none">'+text+'</b></div>'+
      '<div class="bar"><i style="width:'+Math.max(1,Math.round(val/mx*100))+'%;background:'+col+'"></i></div></div>';
   }
-  var cum=rows.slice().sort(function(a,b){return b.spend-a.spend;}).map(function(r){
+  /* The chart column shows the leading twelve. Thirty-seven bars beside a ten-row table left one
+     column four times the height of the other, and every bar below the twelfth rounded to 0%. */
+  var TOP=12;
+  var cum=rows.slice().sort(function(a,b){return b.spend-a.spend;}).slice(0,TOP).map(function(r){
     return bar(r.t,r.spend,mxCum,money(r.spend)+' <span class="dim" style="font-weight:500">· '+per(r.spend/total)+'</span>',r.perCall===null?"var(--st-observe)":"var(--gold)");}).join("");
-  var avg=tools.slice().sort(function(a,b){return b.perCall-a.perCall;}).map(function(r){
+  var avg=tools.slice().sort(function(a,b){return b.perCall-a.perCall;}).slice(0,TOP).map(function(r){
     return bar(r.t,r.perCall,mxAvg,money(r.perCall)+' <span class="dim" style="font-weight:500">per call</span>',"var(--st-proven)");}).join("");
-  var avgRun=tools.slice().sort(function(a,b){return b.perRun-a.perRun;}).map(function(r){
+  var avgRun=tools.slice().sort(function(a,b){return b.perRun-a.perRun;}).slice(0,TOP).map(function(r){
     return bar(r.t,r.perRun,mxRun,money(r.perRun)+' <span class="dim" style="font-weight:500">per run</span>',"var(--st-approval)");}).join("");
-  return '<div class="grid g3" style="margin-bottom:14px">'+
-   '<div class="panel"><div class="panel-h"><h3>Cumulative · '+h(SPEND.month)+'</h3><span class="b b-q" style="margin-left:auto">share of '+money(total)+'</span></div>'+
-    '<div class="panel-b" style="display:grid;gap:11px">'+cum+'</div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>Average per call</h3><span class="b b-q" style="margin-left:auto">spend ÷ calls</span></div>'+
-    '<div class="panel-b" style="display:grid;gap:11px">'+avg+'</div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>Average per run that used it</h3><span class="b b-q" style="margin-left:auto">spend ÷ runs</span></div>'+
-    '<div class="panel-b" style="display:grid;gap:11px">'+avgRun+'</div></div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>By tool</h3><span class="dim mono" style="margin-left:auto;font-size:11px">basis client_attested · attributed per frame · open a row for every metric and its findings</span></div><div class="tw"><table>'+
+  /* One chart at a time in the right third: three side by side made every bar too short to
+     compare, and the three answer the same question at different denominators. */
+  var metric=S.toolMetric||"cum";
+  var CHART={cum:{h:"Cumulative spend",note:"share of "+money(total),b:cum},
+             avgRun:{h:"Average per run",note:"",b:avgRun},
+             avgCall:{h:"Average per call",note:"",b:avg}};
+  var pickedChart=CHART[metric]||CHART.cum;
+  var seg='<div class="seg" role="group" aria-label="Chart">'+
+   [["cum","Cumulative spend"],["avgRun","Avg per run"],["avgCall","Avg per call"]].map(function(x){
+    return '<button type="button" class="btn sm" aria-pressed="'+(metric===x[0])+'" onclick="S.toolMetric=\''+x[0]+'\';render()">'+x[1]+'</button>';}).join("")+'</div>';
+  var charts='<div class="panel" style="margin:0"><div class="panel-h" style="flex-wrap:wrap;gap:8px"><h3>'+pickedChart.h+'</h3>'+
+   (pickedChart.note?'<span class="b b-q" style="margin-left:auto">'+pickedChart.note+'</span>':'')+
+   '<div style="flex-basis:100%">'+seg+'</div></div>'+
+   '<div class="panel-b" style="display:grid;gap:11px">'+pickedChart.b+'</div>'+
+   '<div class="panel-b" style="border-top:1px solid var(--border)"><p class="muted" style="margin:0;font-size:11.5px">The leading '+TOP+' of '+rows.length+'. The table holds every tool.</p></div></div>';
+  return '<div class="split23">'+
+   '<div class="panel" style="margin:0"><div class="panel-h"><h3>By tool</h3></div><div class="tw"><table>'+
    '<thead><tr><th>Tool</th><th>Server</th><th class="num">Calls</th><th class="num">Runs</th><th class="num">Cumulative</th><th class="num">Share</th><th class="num">Avg per call</th><th class="num">Avg per run</th><th class="num">Potential savings</th><th>What the frames say</th></tr></thead><tbody>'+
    rows.map(function(r){
     var hot=r.perCall!==null&&(r.perCall>=1.5||r.perRun>=10), dr=r.perCall!==null;
@@ -7216,7 +7601,8 @@ function spendByTool(){
      '<td class="num"'+(hot?' style="color:var(--st-approval);font-weight:600"':'')+'>'+money(r.perRun)+'</td>'+(dr?savingsCell("tool",r.t):'<td class="num"><span class="dim">—</span></td>')+
      '<td class="muted" style="font-size:12px;min-width:220px">'+h(r.note)+'</td></tr>';}).join("")+
    '</tbody></table></div><div class="panel-b"><div class="note">A tool’s spend is the tokens of the turn that called it plus the turn that read its result, so a cheap-to-price tool with a large result body is an expensive tool. '+
-   'Tool prices themselves are on the registry and are billed at zero here; this table is what the model paid to use them.</div></div></div>';
+   'Tool prices themselves are on the registry and are billed at zero here; this table is what the model paid to use them.</div></div></div>'+
+   charts+'</div>';
 }
 
 /* Wasted spend — money whose frames show it bought nothing, and the runs that prove it. */
@@ -7224,19 +7610,19 @@ function spendWaste(){
   var byRun={}; RUNS.forEach(function(r){byRun[r.id]=r;});
   var mx=Math.max.apply(null,SPEND.wasteByCause.map(function(c){return parseFloat(c.spend.replace(/,/g,""));}));
   var strip='<div class="grid g4" style="margin-bottom:16px">'+
-   '<div class="stat"><span class="k">Wasted · '+h(SPEND.month)+'</span><span class="v" style="color:var(--st-critical)">'+usd(SPEND.wasteTotal)+'</span><span class="s"><span class="basis">client_attested</span> · USD</span></div>'+
+   '<div class="stat"><span class="k">Wasted</span><span class="v" style="color:var(--st-critical)">'+usd(SPEND.wasteTotal)+'</span><span class="s"><span class="basis">client_attested</span> · USD</span></div>'+
    '<div class="stat"><span class="k">Share of spend</span><span class="v">'+per(SPEND.wasteShare)+'</span><span class="s">of '+usd(fmt2(spendMonthTotal()))+' this month</span></div>'+
    '<div class="stat"><span class="k">Runs with waste</span><span class="v">'+SPEND.wasteRuns+'</span><span class="s">of '+SPEND.runs.toLocaleString()+' sealed runs</span></div>'+
    '<div class="stat"><span class="k">Largest cause</span><span class="v" style="font-size:17px;padding-top:4px">'+h(SPEND.wasteByCause[0].c)+'</span><span class="s">'+usd(SPEND.wasteByCause[0].spend)+' · '+SPEND.wasteByCause[0].runs+' runs</span></div></div>';
-  var causes='<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>By cause</h3><span class="b b-q" style="margin-left:auto">each cause is a frame pattern, not a guess</span></div>'+
+  var causes='<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>By cause</h3></div>'+
    '<div class="panel-b" style="display:grid;gap:12px">'+
    SPEND.wasteByCause.map(function(c){var v=parseFloat(c.spend.replace(/,/g,""));
     return '<div class="meter"><div class="lab" style="display:flex;gap:8px;font-size:12px;align-items:baseline"><b style="margin-left:0">'+h(c.c)+'</b><span class="dim mono" style="font-size:10.5px">'+c.runs+' runs</span>'+
      '<b style="margin-left:auto;font-variant-numeric:tabular-nums">'+usd(c.spend)+'</b></div>'+
      '<div class="bar"><i style="width:'+Math.round(v/mx*100)+'%;background:var(--st-critical)"></i></div>'+
      '<div class="muted" style="font-size:11.5px;margin-top:3px">'+h(c.why)+'</div></div>';}).join("")+'</div></div>';
-  var runs='<div class="panel"><div class="panel-h"><h3>Runs that prove it</h3>'+
-   '<span class="dim mono" style="margin-left:auto;font-size:11px">worst first · badges name what was wrong</span></div>'+
+  var runs='<div class="panel"><div class="panel-h"><h3>Runs with waste</h3>'+
+   '</div>'+
    '<div class="panel-b" style="display:grid;gap:12px">'+
    SPEND.wasteRunsList.map(function(x){var r=byRun[x.run]; if(!r) return '';
     var href="#/"+ORG.slug+"/"+r.ws+"/runs/"+r.id;
@@ -7251,7 +7637,7 @@ function spendWaste(){
      '<div class="row"><span class="dim mono" style="font-size:10.5px">'+r.frames+' frames · '+r.steps+' steps · cache '+per(r.cache)+' · '+h(r.model)+'</span>'+
      '<button class="btn sm" style="margin-left:auto" onclick="go(\''+href+'\')">Open the run</button>'+
      '<button class="btn sm" onclick="act(\'Frames that prove the waste on '+r.id+' opened.\')">Show the frames</button></div></div>';}).join("")+
-   '</div><div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">Wasted is narrower than unproven. Unproven means no witness flipped; wasted means the frames show the tokens bought nothing — a repeated call, a cold prefix, a turn spent waiting, a chain that broke. '+
+   '</div><div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">Wasted is a claim about frames, not about outcomes: it means the frames show the tokens bought nothing — a repeated call, a cold prefix, a turn spent waiting, a chain that broke. '+
    'Accepted-by-a-human work is never counted here.</div></div></div>';
   return strip+causes+runs;
 }
@@ -7275,31 +7661,25 @@ var PROVIDER_KEYS=[
 function spendKeyOf(model,tier){var k=null;
   PROVIDER_KEYS.forEach(function(l){if(tier?l.tier===tier:l.model===model) k=l;}); return k;}
 
-/* Agent over time (W8 agent view): spend per proven run by month, and this month's verdicts. The current month is the
-   byAgent row itself; earlier months are history. Verdicts other than flipped are stored; flipped is the row's. */
+/* Agent over time (W8 agent view): tokens per run by month, and where this month's tokens went. The
+   current month is the byAgent row itself; earlier months are history. */
 SPEND_DETAIL["agent:a-intel.core.stella-ci"].history=[
- {m:"Mar 2026",spend:887.55,flipped:150},{m:"Apr 2026",spend:948.10,flipped:181},{m:"May 2026",spend:1012.30,flipped:212},
- {m:"Jun 2026",spend:1088.40,flipped:283},{m:"Jul 2026",spend:1151.20,flipped:326},{m:"Aug 2026",spend:1200.76,flipped:399}];
-SPEND_DETAIL["agent:a-intel.core.stella-ci"].verdicts=[["failing",41,"failed"],["unmoved",22,"q"],["none",18,"q"],["waived",9,"q"],["unsatisfied",5,"failed"],["unverified",2,"q"],["tampered",0,"critical"]];
+ {m:"Mar 2026",spend:887.55,runs:302,cache:0.61},{m:"Apr 2026",spend:948.10,runs:341,cache:0.66},{m:"May 2026",spend:1012.30,runs:388,cache:0.71},
+ {m:"Jun 2026",spend:1088.40,runs:421,cache:0.77},{m:"Jul 2026",spend:1151.20,runs:458,cache:0.81},{m:"Aug 2026",spend:1200.76,runs:486,cache:0.84}];
 function spendAgentHistory(E){
-  var d=E.d, r=E.row; if(!d.history) return '';
-  var pts=d.history.concat([{m:"Sep 2026",spend:n$(r.spend),flipped:r.flipped,cur:true}])
-    .map(function(x){return {m:x.m,v:x.flipped?x.spend/x.flipped:0,cur:x.cur,spend:x.spend,flipped:x.flipped};});
+  var d=E.d, r=E.row, a=agent(E.id), t=a?agentTok(a):null; if(!d.history||!t) return '';
+  var pts=d.history.concat([{m:"Sep 2026",spend:n$(r.spend),runs:r.runs,cache:t.cacheRate,cur:true}])
+    .map(function(x){return {m:x.m,v:x.runs?x.spend/x.runs:0,cur:x.cur,spend:x.spend,runs:x.runs,cache:x.cache};});
   var mx=Math.max.apply(null,pts.map(function(p){return p.v;})), first=pts[0], last=pts[pts.length-1];
-  var vs=[["flipped",r.flipped,"proven"]].concat(d.verdicts||[]), vt=vs.reduce(function(s,v){return s+v[1];},0), vmx=Math.max.apply(null,vs.map(function(v){return v[1];}));
   return '<div class="grid g2 agent-hist" style="margin-bottom:14px">'+
-   '<div class="panel"><div class="panel-h"><h3>Spend per proven run, by month</h3><span class="b b-proven" style="margin-left:auto">'+
+   '<div class="panel"><div class="panel-h"><h3>Monthly spend per run</h3><span class="b b-allowed" style="margin-left:auto">'+
     Math.round((1-last.v/first.v)*100)+'% lower since '+h(first.m)+'</span></div><div class="panel-b" style="display:grid;gap:9px">'+
    pts.map(function(p){return '<div class="meter"><div class="lab"><span'+(p.cur?' style="color:var(--fg);font-weight:600"':'')+'>'+h(p.m)+'</span>'+
-     '<b>'+fmt$(p.v)+' <span class="dim" style="font-weight:500">· '+fmt$(p.spend)+' ÷ '+p.flipped+'</span></b></div>'+
-     '<div class="bar"><i style="width:'+Math.max(1,Math.round(p.v/mx*100))+'%;background:var(--st-proven)"></i></div></div>';}).join("")+
-   '</div><div class="panel-b" style="border-top:1px solid var(--border)"><p class="muted" style="margin:0;font-size:12px">Spend ÷ runs whose witness verdict flipped. It falls as more runs prove on the first pass.</p></div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>Verdicts · '+h(SPEND.month)+'</h3><span class="b b-q agent-vt" style="margin-left:auto">'+vt.toLocaleString()+' runs</span></div><div class="panel-b" style="display:grid;gap:9px">'+
-   vs.map(function(v){return '<div class="meter"><div class="lab"><span class="mono">'+h(v[0])+'</span><b>'+v[1].toLocaleString()+' <span class="dim" style="font-weight:500">· '+per(v[1]/vt)+'</span></b></div>'+
-     '<div class="bar"><i style="width:'+(v[1]?Math.max(1,Math.round(v[1]/vmx*100)):0)+'%;background:var(--st-'+(v[2]==="q"?"observe":v[2])+')"></i></div></div>';}).join("")+
-   '</div></div></div>';
+     '<b>'+fmt$(p.v)+' <span class="dim" style="font-weight:500">· '+fmt$(p.spend)+' ÷ '+p.runs+' · cache '+per(p.cache)+'</span></b></div>'+
+     '<div class="bar"><i style="width:'+Math.max(1,Math.round(p.v/mx*100))+'%;background:var(--st-allowed)"></i></div></div>';}).join("")+
+   '</div><div class="panel-b" style="border-top:1px solid var(--border)"><p class="muted" style="margin:0;font-size:12px">Spend ÷ sealed runs. It fell as the cache hit rate rose: the same work, fewer tokens paid at full price.</p></div></div>'+
+   '<div class="panel"><div class="panel-h"><h3>Token use</h3><span class="b b-q" style="margin-left:auto">'+tokn(t.total)+' tok</span></div><div class="panel-b">'+tokBars(t,{tight:true})+'</div></div></div>';
 }
-
 /* ============================== Organization ============================== */
 /* API keys — each one is a service principal with its own grants. Ported from the CIO console (w10 #/a-intel/api-keys). */
 var APIKEYS=[
@@ -7325,7 +7705,7 @@ function pOrganization(){
 
   var tabs='<div class="tabs" role="tablist">'+
    [["people","People",MEMBERS.length],["roles","Roles",ROLES.length],["invitations","Invitations",INVITES.length],["workspaces","Workspaces",WS.length],
-    ["funding","Model funding and routes"],["plane","Data plane"],["keys","API keys"]]
+    ["funding","Model funding and routes"],["keys","API keys"]]
    .map(function(x){return '<button class="tab" role="tab" aria-selected="'+(t===x[0])+'" onclick="orgTab(\''+x[0]+'\')">'+x[1]+(x[2]?'<span class="n">'+x[2]+'</span>':'')+'</button>';}).join("")+'</div>';
 
   var body="";
@@ -7343,11 +7723,7 @@ function pOrganization(){
        '<td class="rowacts"><button class="btn sm" onclick="openDialog(\'member\',\''+m.p+'\')">Open</button><button class="btn sm" onclick="openDialog(\'role\',\''+m.p+'\')">Change role</button><button class="btn sm danger" onclick="openDialog(\'removemember\',\''+m.p+'\')">Remove</button></td></tr>';}).join("")+
      '</tbody></table></div><div class="panel-b">'+
      '<div class="note">Changing a role is a governed action. It passes IAM, writes an audit record, and bills as one action.</div></div></div>'+
-     '<div class="grid g2" style="margin-top:14px">'+
-     '<div class="panel"><div class="panel-h"><h3>The delegation ceiling</h3></div><div class="panel-b">'+
-     '<p class="muted" style="font-size:12.5px">An agent’s effective permission is its own grants intersected with the invoking human’s grants. Subagents can only narrow. This is what stops a confused deputy.</p>'+
-     '<pre>effective = agent.grants\n          ∩ operator.grants\n          ∩ policy_bundle\n          ∩ kill_switches</pre></div></div>'+
-     rolesInUsePanel()+'</div>';
+     '<div style="margin-top:14px">'+rolesInUsePanel()+'</div>';
   } else if(t==="roles"){
     body=rolesBody();
   } else if(t==="invitations"){
@@ -7356,8 +7732,8 @@ function pOrganization(){
      '<thead><tr><th>Email</th><th>Role offered</th><th>Invited by</th><th>Sent</th><th>Expires</th><th></th></tr></thead><tbody>'+
      INVITES.map(function(i){return '<tr><td class="mono" style="font-size:12px">'+h(i.email)+'</td>'+
       '<td class="mono" style="font-size:11.5px">'+h(i.role)+'</td><td>'+h(i.by)+'</td><td>'+h(i.sent)+'</td><td>'+h(i.expires)+'</td>'+
-      '<td><button class="btn sm" onclick="act(\'Invitation resent.\')">Resend</button> '+
-      '<button class="btn sm danger" onclick="act(\'Invitation revoked.\')">Revoke</button></td></tr>';}).join("")+
+      '<td class="rowacts"><button class="btn sm" onclick="inviteResend(\''+h(i.email)+'\')">Resend</button>'+
+      '<button class="btn sm danger" onclick="openDialog(\'invrevoke\',\''+h(i.email)+'\')">Revoke</button></td></tr>';}).join("")+
      '</tbody></table></div></div>';
   } else if(t==="workspaces"){
     body='<div class="panel"><div class="panel-h"><h3>Workspaces</h3>'+
@@ -7367,22 +7743,12 @@ function pOrganization(){
       '<td class="tkey" style="font-size:12px">'+h(w.main)+'</td><td class="mono">'+h(w.branch)+'</td>'+
       '<td class="mono dim" style="font-size:11.5px">'+(w.linked.length?h(w.linked.join(", ")):"—")+'</td>'+
       '<td class="num">'+w.agents+'</td><td>'+h(w.owner)+'</td>'+
-      '<td><span class="b b-q">team</span><div class="dim mono" style="font-size:11px">'+h(w.retention)+' · ns '+h(w.ns)+'</div></td>'+
+      '<td><span class="b b-q">'+h(wsGov(w))+'</span><div class="dim mono" style="font-size:11px">'+h(w.retention)+' · ns '+h(w.ns)+'</div></td>'+
       '<td class="rowacts"><button class="btn sm" onclick="S.ws=\''+w.slug+'\';go(\'#/'+ORG.slug+'/'+w.slug+'\')">Open</button><button class="btn sm" onclick="openDialog(\'editws\',\''+w.slug+'\')">Edit</button><button class="btn sm danger" onclick="openDialog(\'archivews\',\''+w.slug+'\')">Archive</button></td></tr>';}).join("")+
      '</tbody></table></div><div class="panel-b">'+
      '<div class="note">Changing which repository is main is an org-owner action with approval, recorded as a security event. A repository may be linked to more than one workspace; it is main for at most one.</div></div></div>';
   } else if(t==="funding"){
-    body=orgKeyPanel()+'<div style="height:14px"></div>'+orgRoutesPanel()+'<div class="split" style="margin-top:14px">'+orgFirewallRoutesPanel()+
-     '<div class="panel"><div class="panel-h"><h3>Funding source</h3></div><div class="panel-b">'+
-     '<div class="field"><label>Source</label><select aria-label="Funding source"><option>platform — Oxagen pays, billed back at vendor cost plus a published markup</option><option>customer_key — your own OpenRouter or vendor key</option></select>'+
-     '<div class="hint">A new organization starts on <span class="mono">platform</span>, capped per organization. A customer key may point at OpenRouter or directly at a vendor.</div></div>'+
-     '<dl class="kv"><dt>Current</dt><dd><span class="b b-allowed"><span class="d"></span>platform</span></dd>'+
-     '<dt>Cap</dt><dd>$2,000.00 USD per month · <span id="orgCapUsed">'+usd(fmt2(orgRoutesTotal()))+'</span> used in '+h(SPEND.month)+', the total of the routes · the same lines are on Spend, By model</dd>'+
-     '<dt>Key storage</dt><dd>enveloped, tested before save, never returned, every read audited</dd>'+
-     '<dt>No call reads the environment</dt><dd>keys and routes come from the model layer’s resolver; a path that bypasses it is a defect</dd></dl>'+
-     '<button class="btn" style="margin-top:12px" onclick="openDialog(\'funding\')">Change funding source</button></div></div></div>';
-  } else if(t==="plane"){
-    body=orgPlaneBody();
+    body=orgKeyPanel()+'<div style="height:14px"></div>'+orgRoutesPanel();
   } else {
     var KST={ok:["b-allowed","active"],expiring:["b-approval","expires in 21 days"],unused:["b-q","never used"]};
     body='<div class="panel"><div class="panel-h"><h3>API keys</h3>'+
@@ -7402,12 +7768,12 @@ function pOrganization(){
      '</tbody></table></div><div class="panel-b">'+
      '<div class="note">A key is shown once, at creation, and never again. Keys carry grants, not roles, so an auditor’s key can read receipts and nothing else. Revoking a key ends its service principal’s access at the next call.</div></div></div>'+
      '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Surfaces this reaches</h3>'+
-     '<span class="b b-q" style="margin-left:auto">one agent tool contract</span></div><div class="panel-b">'+
+     '</div><div class="panel-b">'+
      '<p class="muted" style="font-size:12.5px;margin:0 0 10px">One agent tool contract drives the API, MCP, the CLI and these screens, so a key that can do something here can do exactly that much everywhere else. Parity is checked by the manifest gate.</p>'+
      '<pre>$ oxagen login --org a-intel\n$ oxagen run list --workspace core-platform --since 24h\n$ oxagen run export run_01K5RS7M2E8FJ3QW --with-bodies --out ./run_01K5RS7M2E8FJ3QW.bundle\n$ oxagen agent status a-intel.finops.invoice-bot</pre></div></div>';
   }
   return '<div class="phead"><div class="t"><p class="eyebrow">Organization</p><h1>'+h(ORG.name)+'</h1>'+
-   '<p>People and roles, workspaces, model funding and routes, the data plane, and API keys. Three pages sit at organization scope; this is the first.</p></div>'+
+   '<p>People, roles, workspaces, model routes, the data plane, and API keys.</p></div>'+
    '<div class="acts"><button class="btn" onclick="openDialog(\'invite\')">Invite</button>'+
    '<button class="btn primary" onclick="openDialog(\'newws\')">Create a workspace</button></div></div>'+tabs+body;
 }
@@ -7444,7 +7810,7 @@ var ORG_ROUTES=[
   provider:"Voyage AI (direct)",route:"rerank-2.5",resolves:"rerank-2.5",fallback:"",calls:31206,unit:"calls",cost:"9.36",
   fw:{endpoint:"https://embed.a-intel.internal",dialect:"—",served:"bge-reranker-v2-m3"}}
 ];
-var ORG_ROUTE_PROVIDERS=["OpenRouter","Anthropic (direct)","OpenAI (direct)","Voyage AI (direct)","In-firewall endpoint"];
+var ORG_ROUTE_PROVIDERS=["OpenRouter","Anthropic (direct)","OpenAI (direct)","Voyage AI (direct)"];
 function orgRouteUse(r){
   if(r.spendModel){var m=null;SPEND.byModel.forEach(function(x){if(x.m===r.spendModel)m=x;});
     if(m) return {calls:m.calls,unit:"calls",cost:money(m.spend)};}
@@ -7466,9 +7832,9 @@ function spendModelRows(){return SPEND.byModel.concat(orgRoutesOffSpend());}
 
 function orgRoutesPanel(){
   var total=orgRoutesTotal();
-  return '<div class="panel"><div class="panel-h"><h3>Model routes — Oxagen’s own work only</h3>'+
+  return '<div class="panel"><div class="panel-h"><h3>Model routes</h3>'+
    '<div class="sp"><span class="b b-q">customer agents call their providers with their own keys, and Oxagen records what each harness reports</span></div></div><div class="tw"><table data-lt="off">'+
-   '<thead><tr><th>Tier</th><th>Provider</th><th>Route</th><th>Fallback</th><th class="num">Use · '+h(SPEND.month)+'</th><th class="num">Cost · '+h(SPEND.month)+'</th><th></th></tr></thead><tbody>'+
+   '<thead><tr><th>Tier</th><th>Provider</th><th>Route</th><th>Fallback</th><th class="num">Use</th><th class="num">Cost</th><th></th></tr></thead><tbody>'+
    ORG_ROUTES.map(function(r,i){var u=orgRouteUse(r);
     return '<tr data-route="'+h(r.tier)+'" data-cost="'+u.cost.toFixed(2)+'"><td><span class="mono">'+h(r.tier)+'</span><div class="dim" style="font-size:11px;max-width:34ch">'+h(r.use)+'</div></td>'+
      '<td style="font-size:12px">'+h(r.provider)+'</td>'+
@@ -7480,125 +7846,26 @@ function orgRoutesPanel(){
    '</tbody></table></div><div class="panel-b">'+
    '<div class="note">Tiers point at rolling aliases so “latest” stays current without a deploy. Every <span class="mono">model.response</span> frame records the concrete model id the provider returned, and the cost record prices <i>that</i> id — so a replay names the exact model and a price is never looked up by alias. The complex row is the Oxagenant line on Spend.</div></div></div>';
 }
-function orgFirewallRoutesPanel(){
-  return '<div class="panel"><div class="panel-h"><h3>In-firewall routes</h3>'+
-   '<div class="sp"><span class="b b-q">preview · behind-the-firewall deployment</span><span class="b b-q">air-gapped mode</span></div></div>'+
-   '<div class="panel-b" style="padding-bottom:0"><p class="muted" style="font-size:12.5px;margin:0">What each tier resolves to when the deployment runs inside your network. '+h(ORG.name)+' is on the <b>'+h(ORG.dataPlane)+'</b> plane, so none of these is in effect today.</p></div>'+
-   '<div class="tw"><table data-lt="off"><thead><tr><th>Tier</th><th>Endpoint</th><th>Dialect</th><th>Model served inside the network</th><th></th></tr></thead><tbody>'+
-   ORG_ROUTES.map(function(r,i){return '<tr data-fwroute="'+h(r.tier)+'"><td class="mono">'+h(r.tier)+'</td><td class="mono" style="font-size:11.5px">'+h(r.fw.endpoint)+'</td>'+
-    '<td style="font-size:12px">'+h(r.fw.dialect)+'</td><td class="mono" style="font-size:11.5px">'+h(r.fw.served)+'</td>'+
-    '<td class="rowacts"><button class="btn sm" onclick="openDialog(\'editroute\',\'fw:'+i+'\')">Edit</button></td></tr>';}).join("")+
-   '</tbody></table></div><div class="panel-b">'+
-   '<div class="note">Air-gapped is a supported mode, not a degraded one. Embeddings default to Voyage’s API in the cloud and to a self-served model here; one model per index makes that a per-deployment choice, never a mixed state. Changing an embedding route rebuilds the index rather than mixing two spaces.</div></div></div>';
-}
 DLG_EXT.editroute=function(arg){
-  var fw=typeof arg==="string"&&arg.indexOf("fw:")===0, i=parseInt(fw?arg.slice(3):arg,10), r=ORG_ROUTES[i];
+  var i=parseInt(arg,10), r=ORG_ROUTES[i];
   if(!r) return {t:"Edit a route",w:false,b:'<div class="note">No route selected.</div>',f:'<button class="btn" onclick="closeDialog()">Close</button>'};
-  var prov=fw?"In-firewall endpoint":r.provider;
-  var opts=ORG_ROUTE_PROVIDERS.map(function(p){var inFw=p==="In-firewall endpoint";
-    return '<option'+(p===prov?' selected':'')+((inFw&&!fw)||(!inFw&&fw)?' disabled':'')+'>'+h(p)+(inFw&&!fw?' — behind the firewall only':'')+'</option>';}).join("");
-  return {t:"Edit the "+r.tier+" route",s:fw?"in-firewall route · preview until a behind-the-firewall deployment exists":"organization setting · platform default",w:false,
+  var opts=ORG_ROUTE_PROVIDERS.map(function(p){return '<option'+(p===r.provider?' selected':'')+'>'+h(p)+'</option>';}).join("");
+  return {t:"Edit the "+r.tier+" route",s:"organization setting · platform default",w:false,
    b:'<div class="field"><label for="rtProv">Provider</label><select id="rtProv">'+opts+'</select>'+
-     '<div class="hint">OpenRouter, a vendor directly, or an endpoint inside your network. The last is offered only on a behind-the-firewall deployment; '+h(ORG.name)+' is on '+h(ORG.dataPlane)+'.</div></div>'+
-     (fw?'<div class="field"><label for="rtEnd">Endpoint</label><input id="rtEnd" value="'+h(r.fw.endpoint)+'"></div>'+
-        '<div class="field"><label for="rtServed">Model served inside the network</label><input id="rtServed" value="'+h(r.fw.served)+'"></div>'
-       :'<div class="field"><label for="rtRoute">Route</label><input id="rtRoute" value="'+h(r.route)+'"></div>'+
-        '<div class="field"><label for="rtFb">Fallback on a provider error</label><input id="rtFb" value="'+h(r.fallback)+'" placeholder="none"></div>')+
+     '<div class="hint">OpenRouter, or a vendor directly.</div></div>'+
+     '<div class="field"><label for="rtRoute">Route</label><input id="rtRoute" value="'+h(r.route)+'"></div>'+
+     '<div class="field"><label for="rtFb">Fallback on a provider error</label><input id="rtFb" value="'+h(r.fallback)+'" placeholder="none"></div>'+
      '<div class="note">Configure the alias, record the concrete model. Every fallback is a frame, so a run shows exactly which model answered and why.</div>',
-   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="orgRouteSave(\''+h(String(arg))+'\')">Save route</button>'};
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="orgRouteSave('+i+')">Save route</button>'};
 };
-function orgRouteSave(arg){
-  var fw=arg.indexOf("fw:")===0, r=ORG_ROUTES[parseInt(fw?arg.slice(3):arg,10)]; if(!r){closeDialog();return;}
+function orgRouteSave(i){
+  var r=ORG_ROUTES[i]; if(!r){closeDialog();return;}
   function v(id){var n=el(id);return n?n.value.trim():null;}
-  if(fw){if(v("rtEnd"))r.fw.endpoint=v("rtEnd");if(v("rtServed"))r.fw.served=v("rtServed");}
-  else{var p=el("rtProv");if(p&&p.value.indexOf("In-firewall")<0)r.provider=p.value;if(v("rtRoute"))r.route=v("rtRoute");if(v("rtFb")!==null)r.fallback=v("rtFb");}
+  var p=el("rtProv"); if(p)r.provider=p.value;
+  if(v("rtRoute"))r.route=v("rtRoute");
+  if(v("rtFb")!==null)r.fallback=v("rtFb");
   closeDialog();act("The "+r.tier+" route was saved. Recorded as a control-plane event; it applies at the next model call.");
 }
-
-/* Data plane: one binding, three deployment modes. The org is on ORG.dataPlane; the other two render as previews. */
-S.planeView=null;
-var PLANE_MODES=[
- ["shared","Shared","Tenant data on Oxagen’s shared plane, isolated by row-level security with no bypass setting."],
- ["dedicated","Dedicated","Your own Postgres cluster and object-storage bucket. Identity, IAM, billing and the price book stay on the shared plane."],
- ["firewall","Behind the firewall","The same containers, as a signed bundle you run. Outbound only, and optional. Fully air-gapped is supported, not degraded."]];
-var FW_OUTBOUND=[
- ["GitHub Enterprise Server · github.a-intel.internal","repo binding, Context PRs, checks, code graph","in use","allowed"],
- ["Model providers","none — every tier resolves inside the network","not used","q"],
- ["Voyage AI","none — embeddings served in-firewall","not used","q"],
- ["Signed usage report · meter.oxagen.com","licence metering: run counts and retained GB, no content","weekly","allowed"],
- ["Everything else","nothing inbound is required","blocked at the perimeter","q"]];
-function planeDetail(v){
-  if(v==="shared") return '<dl class="kv">'+
-   '<dt>Binding</dt><dd><span class="b b-allowed"><span class="d"></span>shared</span> · '+h(ORG.region)+'</dd>'+
-   '<dt>Postgres</dt><dd>partitioned by <span class="mono">org_id</span> · row-level policies enforced</dd>'+
-   '<dt>Object storage</dt><dd>object lock, compliance mode · per-organization key-encryption key</dd>'+
-   '<dt>Key-encryption key</dt><dd class="mono">kek_aintel_2026Q3 · rotated 2026-09-10</dd>'+
-   '<dt>Attester key</dt><dd class="mono">'+h(ORG.attester)+' · published so a customer can verify an export offline</dd>'+
-   '<dt>Witness runner</dt><dd>Oxagen-hosted · on a dedicated plane it runs inside the customer’s plane</dd></dl>';
-  if(v==="dedicated") return '<dl class="kv">'+
-   '<dt>Postgres — tenant data</dt><dd>a dedicated cluster in your region, the same schema and the same row-level policies</dd>'+
-   '<dt>Postgres — identity, IAM, billing, price book</dt><dd>stay on the shared plane by design</dd>'+
-   '<dt>Object storage</dt><dd>your own bucket · object lock in compliance mode · write-once</dd>'+
-   '<dt>Key-encryption key</dt><dd>in your KMS, referenced by ARN; Oxagen never holds the key material</dd>'+
-   '<dt>Witness runner</dt><dd>inside your plane</dd>'+
-   '<dt>Resolver</dt><dd>the only place a connection string is read. A call path that bypasses it is a defect, and CI fails on it.</dd></dl>';
-  return '<dl class="kv">'+
-   '<dt>Deployment</dt><dd>Kubernetes, customer-operated · Helm chart</dd>'+
-   '<dt>Bundle version</dt><dd class="mono">oxagen/1.4.2</dd>'+
-   '<dt>Bundle signature</dt><dd><span class="mono">cosign · sha256:7f31c0…9b42</span> · verified against Oxagen release key <span class="mono">rel-2026-03</span>, the key an evidence bundle is checked against</dd>'+
-   '<dt>Containers</dt><dd>gateway · services · operator console · Stella engine · witness runner · Postgres · S3-compatible object storage with object lock</dd>'+
-   '<dt>Air-gapped mode</dt><dd><span class="b b-approval"><span class="d"></span>on</span> — model routes point inside the network (see In-firewall routes on Model funding and routes)</dd>'+
-   '<dt>Licence</dt><dd>per organization, annual, invoiced. Stripe is not involved behind a firewall.</dd>'+
-   '<dt>Next bundle</dt><dd><span class="mono">oxagen/1.4.3</span> available · applied on your schedule, never pushed</dd></dl>'+
-   '<p class="eyebrow" style="margin:16px 0 8px">Outbound connections in use</p>'+
-   '<div class="tw"><table data-lt="off"><thead><tr><th>Destination</th><th>Why</th><th>State</th></tr></thead><tbody>'+
-   FW_OUTBOUND.map(function(o){return '<tr><td style="font-size:12.5px"><b>'+h(o[0])+'</b></td><td class="dim" style="font-size:12px">'+h(o[1])+'</td>'+
-    '<td><span class="b b-'+o[3]+'"><span class="d"></span>'+h(o[2])+'</span></td></tr>';}).join("")+'</tbody></table></div>'+
-   '<p class="muted" style="font-size:12.5px;margin:12px 0 0">Everything the cloud enforces, the appliance enforces — including the witness runner, whose sealed results you hand to your auditor.</p>';
-}
-function orgPlaneBody(){
-  var v=S.planeView||ORG.dataPlane, cur=v===ORG.dataPlane, mode=PLANE_MODES.filter(function(x){return x[0]===v;})[0]||PLANE_MODES[0];
-  return '<div class="split"><div class="panel"><div class="panel-h"><h3>Data plane</h3>'+
-   '<div class="sp"><span class="b b-allowed"><span class="d"></span>'+h(ORG.name)+' is on '+h(ORG.dataPlane)+'</span></div></div><div class="panel-b">'+
-   '<div class="seg" role="group" aria-label="Deployment mode">'+PLANE_MODES.map(function(x){
-     return '<button class="btn sm" aria-pressed="'+(x[0]===v)+'" onclick="S.planeView=\''+x[0]+'\';render()">'+h(x[1])+(x[0]===ORG.dataPlane?' · current':'')+'</button>';}).join("")+'</div>'+
-   '<p class="muted" style="font-size:12.5px;margin:12px 0">'+h(mode[2])+'</p>'+
-   (cur?'':'<div class="note" style="margin-bottom:12px" data-plane-preview="'+h(v)+'"><b>Preview.</b> This is what the page shows on a '+h(mode[1].toLowerCase())+' deployment. Modes, not forks: every store is resolved per organization, so moving is a deployment change, never a different product. Nothing below is in effect for '+h(ORG.name)+'.</div>')+
-   planeDetail(v)+
-   '<div class="row" style="margin-top:14px"><button class="btn" onclick="openDialog(\'plane\')">Request a change of plane</button>'+
-   '<button class="btn" onclick="act(\'Key rotation scheduled. A rotation is a governed action and a security event.\')">Rotate keys</button></div></div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>Retention</h3></div><div class="panel-b"><dl class="kv">'+
-   '<dt>Frame bodies</dt><dd>7 years from the seal · encrypted, content-addressed</dd>'+
-   '<dt>Run ledger</dt><dd>forever</dd>'+
-   '<dt>Frame rows</dt><dd>13-month hot window, then compacted into the segment</dd>'+
-   '<dt>Control-plane audit</dt><dd>7 years</dd>'+
-   '<dt><span class="mono">digest_only</span> mode</dt><dd>'+orgDigestOnly()+'</dd>'+
-   '</dl>'+
-   '<div class="note" style="margin-top:12px">Replay without bodies is a timeline, not a replay. The explanation promise depends on bodies, so keeping them is the default.</div></div></div></div>'+
-   '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Tenant isolation</h3><div class="sp"><span class="b b-q">postgres · '+h(ORG.slug)+'</span></div></div><div class="panel-b"><dl class="kv">'+
-   '<dt>Rows</dt><dd>every tenant table carries <span class="mono">org_id</span> and row-level security is on with no bypass; the tenant boundary is the policy, and the policy is tested</dd>'+
-   '<dt>Workspace scoping</dt><dd>every run, frame and record carries <span class="mono">ws</span> ('+WS.map(function(w){return '<span class="mono">'+h(w.slug)+'</span>';}).join(", ")+'), set by the kernel, the only writer</dd>'+
-   '<dt>Cross-tenant reads</dt><dd>refused by the database itself, not by application code</dd>'+
-   '<dt>Platform catalogs</dt><dd>price books, tool schemas and connector definitions are platform tables, never tenant rows</dd>'+
-   '<dt>Startup guard</dt><dd>the app role may not be a superuser, may not hold <span class="mono">BYPASSRLS</span>, and row-level security may not be off, or the plane refuses to boot</dd></dl></div></div>';
-}
-function orgDigestOnly(){
-  var off=WS.filter(function(w){return w.retention==="digest_only";});
-  return off.length?'<b>on</b> in '+off.map(function(w){return h(w.slug);}).join(", ")+' — recorded as a completeness gap on every run there, and it lowers the replay grade'
-   :'<b>off</b> in every workspace — it is an opt-down, recorded as a completeness gap, and it lowers the replay grade';
-}
-
-DLG_EXT.plane=function(){
-  var v=S.planeView&&S.planeView!=="shared"?S.planeView:"dedicated";
-  return {t:"Request a change of data plane",s:ORG.name+" is on "+ORG.dataPlane,w:false,
-   b:'<div class="note" style="margin-bottom:14px">Per-organization data planes make every store switchable, so a dedicated plane — and behind-the-firewall deployment — is a deployment mode, not a fork.</div>'+
-    '<div class="field"><label for="planeMode">Mode</label><select id="planeMode">'+
-     [["dedicated","dedicated · Oxagen cloud"],["firewall","behind your firewall · signed Helm bundle"],["airgap","air-gapped · in-firewall models"]].map(function(x){return '<option'+(x[0]===v?' selected':'')+'>'+h(x[1])+'</option>';}).join("")+'</select></div>'+
-    '<div class="field"><label for="planeRegion">Region</label><select id="planeRegion">'+["us-east-1","eu-west-1","ap-southeast-2"].map(function(r){return '<option'+(r===ORG.region?' selected':'')+'>'+r+'</option>';}).join("")+'</select></div>'+
-    '<dl class="kv"><dt>Included</dt><dd>the witness runner inside your plane, a dedicated Postgres cluster and object store, and your own release key</dd>'+
-    '<dt>Plan</dt><dd>Enterprise, annual, invoiced · from $60,000 per year</dd></dl>',
-   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Request sent. An owner signs the annual agreement before anything moves.\')">Request it</button>'};
-};
 
 /* Change role, for the person the row names. It used to name Dana Okafor on every row. */
 DLG_EXT.role=function(p){
@@ -7641,23 +7908,23 @@ function pBilling(){
   if(S.state==="error") return errorState("Billing","502 stripe_unreachable");
   if(S.state==="denied") return deniedState("billing","org.billing — plan and invoices are readable only by a finance role");
   if(S.state==="empty") return emptyState("Nothing billable yet",
-    "You pay when the work is verified: a run whose definition of done held. The free tier has every governance feature on, unlimited runs, thirty days of evidence and three seats.",
+    "You pay per governed action: a call Oxagen decided, delivered and recorded. The free tier has every governance feature on, an included monthly allowance, thirty days of evidence and three seats.",
     '<button class="btn" onclick="go(\'#/'+ORG.slug+'/'+S.ws+'\')">Back to Fleet</button>');
 
   return '<div class="phead"><div class="t"><p class="eyebrow">Organization</p><h1>Billing</h1>'+
-   '<p>What Anderson Intelligence Corp. pays Oxagen. The customer’s own model and tool spend is on the Spend page and is billed at zero — the two are kept apart on purpose.</p></div>'+
-   '<div class="acts"><button class="btn" onclick="openDialog(\'plan\')">Change plan</button></div></div>'+
+   '<p>What Anderson Intelligence Corp. pays Oxagen.</p></div>'+
+   '<div class="acts"><button class="btn primary" onclick="openDialog(\'plan\')">Change plan</button></div></div>'+
    '<div class="grid g4" style="margin-bottom:16px">'+
    '<div class="stat"><span class="k">Plan</span><span class="v" style="font-size:19px">'+h(BILLING.plan)+'</span><span class="s">monthly, cancel any time</span></div>'+
-   '<div class="stat"><span class="k">Proven runs this period</span><span class="v" style="color:var(--st-proven)">'+BILLING.billable.toLocaleString()+'</span><span class="s">definition of done held · of '+BILLING.runsUsed.toLocaleString()+' sealed runs</span></div>'+
+   '<div class="stat"><span class="k">Governed actions this period</span><span class="v">'+BILLING.billable.toLocaleString()+'</span><span class="s">above the included allowance · '+h(BILLING.tier2)+'</span></div>'+
    '<div class="stat"><span class="k">Retained evidence</span><span class="v" style="font-size:19px">41.2 GB</span><span class="s">13 months included</span></div>'+
    '<div class="stat"><span class="k">Due '+h(BILLING.next)+'</span><span class="v">'+usd(BILLING.total)+'</span><span class="s">USD · after the onboarding discount</span></div></div>'+
    '<div class="split"><div>'+
    '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>This period</h3>'+
-    '<span class="b b-q" style="margin-left:auto">Stripe holds the plan and the invoice · Oxagen holds the meter</span></div><div class="tw"><table>'+
+    '</div><div class="tw"><table>'+
     '<thead><tr><th>Line</th><th>Basis</th><th class="num">Amount</th></tr></thead><tbody>'+
-    '<tr><td>Proven runs 1 – '+BILLING.billable.toLocaleString()+'</td><td class="dim">'+h(BILLING.tier2)+'</td><td class="num">'+usd(BILLING.amount)+'</td></tr>'+
-    '<tr><td>Pending runs</td><td class="dim">'+h(BILLING.pendingNote||"metered when signed")+'</td><td class="num">$0.00</td></tr>'+
+    '<tr><td>Governed actions 1 – '+BILLING.billable.toLocaleString()+'</td><td class="dim">'+h(BILLING.tier2)+'</td><td class="num">'+usd(BILLING.amount)+'</td></tr>'+
+    '<tr><td>Tokens</td><td class="dim">reported at zero · the customer\u2019s own model spend is on Spend</td><td class="num">$0.00</td></tr>'+
     '<tr><td>Evidence retention</td><td class="dim">'+h(BILLING.retention)+'</td><td class="num">$0.00</td></tr>'+
     '<tr><td>Onboarding discount</td><td class="dim">'+h(BILLING.discount)+'</td><td class="num" style="color:var(--st-proven)">'+h(BILLING.discountAmount)+'</td></tr>'+
     '<tr><td><b>Total</b></td><td class="dim">rounded to cents once, half-even</td><td class="num"><b>'+usd(BILLING.total)+' USD</b></td></tr>'+
@@ -7666,25 +7933,24 @@ function pBilling(){
     '<thead><tr><th>Meter</th><th class="num">This period</th><th>Note</th></tr></thead><tbody>'+
     BILLING.meters.map(function(m){return '<tr><td>'+h(m.m)+'</td><td class="num">'+h(m.v)+'</td>'+
      '<td class="dim" style="font-size:11.5px">'+h(m.note)+'</td></tr>';}).join("")+
-    '</tbody></table></div><div class="panel-b"><div class="note">One priced meter: the proven run, the run whose definition of done held and whose certificate Oxagen signed. Runs, governed actions and retained evidence are reported so the price can move later without rewriting the meter.</div></div></div>'+
+    '</tbody></table></div><div class="panel-b"><div class="note">One priced meter: the governed action, a call Oxagen decided, delivered and recorded. Runs, tokens and retained evidence are reported so the price can move later without rewriting the meter.</div></div></div>'+
    '<div class="panel"><div class="panel-h"><h3>Invoices</h3></div><div class="tw"><table>'+
-    '<thead><tr><th>Invoice</th><th>Period</th><th class="num">Proven runs</th><th class="num">Amount</th><th>Status</th><th>Paid</th><th></th></tr></thead><tbody>'+
+    '<thead><tr><th>Invoice</th><th>Period</th><th class="num">Governed actions</th><th class="num">Amount</th><th>Status</th><th>Paid</th><th></th></tr></thead><tbody>'+
     BILLING.invoices.map(function(i){return '<tr><td class="mono">'+h(i.n)+'</td><td>'+h(i.p)+'</td>'+
      '<td class="num">'+i.runs.toLocaleString()+'</td><td class="num">'+usd(i.amt)+'</td>'+
      '<td><span class="b b-allowed"><span class="d"></span>'+h(i.st)+'</span></td><td>'+h(i.d)+'</td>'+
      '<td><a href="#">Open in Stripe ↗</a></td></tr>';}).join("")+
     '</tbody></table></div></div></div>'+
-   '<div><div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>The price list</h3></div><div class="tw"><table class="narrow"><tbody>'+
-    [["Free","every governance feature, unlimited runs, 30 days of evidence, 3 seats"],["Proven runs 1 – 10,000 a month","$0.30 per proven run"],["Proven runs 10,001 – 100,000","$0.20 per proven run"],
-     ["Above 100,000","$0.15 per proven run"],["Evidence retention","13 months included on paid plans, then $0.10 per GB-month"],
+   '<div><div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Price list</h3></div><div class="tw"><table class="narrow"><tbody>'+
+    [["Free","every governance feature, an included monthly allowance, 30 days of evidence, 3 seats"],["Governed actions, blocks of 10,000","$30.00 per block at the published rate"],["Negotiated agreement","the same four figures, per organization"],
+     ["Invoice billing","never capped · overage invoiced at the contracted rate at period end"],["Evidence retention","13 months included on paid plans, then $0.10 per GB-month"],
      ["Tokens Oxagen buys for you","at cost, no markup, capped"],["Enterprise, annual","from $60,000 per year"]]
     .map(function(p){return '<tr><td style="font-size:12.5px">'+h(p[0])+'</td><td class="num mono" style="font-size:11.5px">'+h(p[1])+'</td></tr>';}).join("")+
     '</tbody></table></div><div class="panel-b"><p class="muted" style="font-size:12px;margin:0">No credits, no resellers, and no revenue dashboard. The free tier is the whole product, limited by retention and seats, never by features or volume. Upgrading is a governance decision, not a volume accident.</p></div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>What counts</h3></div><div class="panel-b">'+
-    '<ul class="chain"><li class="on"><span class="h">Priced</span><div>A proven run: sealed, its definition of done held, its certificate signed by the org key. Metered as <span class="mono">dod.held</span>.</div></li>'+
-    '<li class="on"><span class="h">Pending</span><div>Executable checks passed, a human signature outstanding. Metered the day it is signed.</div></li>'+
-    '<li class="on"><span class="h">Reported</span><div>Sealed runs, governed actions, retained evidence: secondary meters, never priced.</div></li>'+
-    '<li class="on"><span class="h">Free</span><div>Broken runs, runs Oxagen halted, witness runs. You never pay for Oxagen saying no.</div></li></ul></div></div></div></div>';
+   '<div class="panel"><div class="panel-h"><h3>Billable units</h3></div><div class="panel-b">'+
+    '<ul class="chain"><li class="on"><span class="h">Priced</span><div>A governed action: a call Oxagen decided, delivered and recorded, with its receipt in the chain.</div></li>'+
+    '<li class="on"><span class="h">Reported</span><div>Sealed runs, tokens by class, retained evidence: secondary meters, never priced.</div></li>'+
+    '<li class="on"><span class="h">Free</span><div>Denials, runs Oxagen halted before a model call, runs of the in-app agent. You never pay for Oxagen saying no.</div></li></ul></div></div></div></div>';
 }
 
 /* ============================== Audit ============================== */
@@ -7704,10 +7970,10 @@ var INCIDENTS=[
   detail:"An argument to bash__run@1 derived from a tool output the run had ingested. Taint raised the decision from allow to approve; no approver answered within 10 minutes.",
   resolution:"Expired, so denied. The denial and its reason reached the model as the permission decision reason; the run continued without the call and closed clean.",
   status:"resolved",closedAt:"2026-09-11 07:51",closedBy:"policy engine (expiry)",runs:1},
- {id:"inc_01K5RG6H2",sev:"warning",title:"Witness fingerprint moved during a run",kind:"witness_tampered",at:"2026-09-11 07:38",by:"verifier",
+ {id:"inc_01K5RG6H2",sev:"warning",title:"A frame arrived after the seal",kind:"receipt_modified",at:"2026-09-11 07:38",by:"verifier",
   scope:"a-intel.core.release-manager · run_01K5RG6H1L4OIU9Y",
-  detail:"The witness branch was rebased while the run was live, so the sealed fingerprint no longer matched the one taken at open. The seal records verdict tampered, and a seal is never overwritten.",
-  resolution:"A developer rebased the witness branch by hand. The task was re-run as run_01K5RQ4B9C7XTN2P, which proved at 09:02 with oracle test_flip.",
+  detail:"A receipt row on a sealed run was rewritten after seal time. The chain kept the original hash, so the rewrite is visible as a mismatch, and a seal is never overwritten.",
+  resolution:"The rewrite came from a stale collector on the host. It was upgraded, and the task was re-run as run_01K5RQ4B9C7XTN2P at 09:02.",
   status:"resolved",closedAt:"2026-09-11 09:05",closedBy:"Marcus Bell",runs:1},
  {id:"inc_01K4Q8C2",sev:"warning",title:"Chain verification failed on an export segment",kind:"chain_break",at:"2026-09-05 14:48",by:"verifier",
   scope:"exp_01K4Q7M1 · segment 9 of 31",
@@ -7849,7 +8115,8 @@ function auditIncidents(){
      '<td><div class="t-main" style="font-size:12.5px">'+h(i.title)+'</div><div class="t-sub mono" style="font-size:11px">'+h(i.kind)+' · '+h(i.scope)+'</div></td>'+
      '<td class="mono dim" style="font-size:11.5px;white-space:nowrap">'+h(i.at)+'</td><td style="font-size:12.5px">'+h(i.by)+'</td>'+
      '<td>'+(i.status==="open"?auditBadge("approval","open"):auditBadge("allowed","resolved"))+(i.closedAt?'<div class="t-sub mono" style="font-size:11px">'+h(i.closedAt)+'</div>':'')+'</td>'+
-     '<td class="num"><button class="btn sm" onclick="event.stopPropagation();openDialog(\'incidentview\',\''+i.id+'\')">Open</button></td></tr>';}).join("");
+     '<td class="rowacts" onclick="event.stopPropagation()"><button class="btn sm" onclick="openDialog(\'incidentview\',\''+i.id+'\')">Open</button>'+
+     (i.status==="open"?'<button class="btn sm primary" onclick="openDialog(\'incidentclose\',\''+i.id+'\')">Resolve</button>':'')+'</td></tr>';}).join("");
   return auditStats([["Open",String(open.length),crit?"one critical · money moved without a receipt":"none critical",crit?"critical":"approval"],
     ["Critical · 12 months","1","open since 08:40 today"],
     ["Median time to resolve","2 h<small>38 m</small>","across 5 resolved incidents"],
@@ -7879,7 +8146,7 @@ function auditReceipts(){
    '<button class="btn" onclick="S.rq=el(\'rq\').value;render()">Search</button></div>'+
    '<div class="chips">'+chips.map(function(c){return '<button class="btn sm'+((S.rq||"")===c?' sel':'')+'" onclick="S.rq=\''+c+'\';render()">'+h(c)+'</button>';}).join("")+
    (q?'<button class="btn sm ghost" onclick="S.rq=\'\';render()">clear</button>':'')+'</div></div>'+
-   (hits.length?'<div class="tw"><table><thead><tr><th>Receipt</th><th>When</th><th>Agent · operator</th><th>Tool version</th><th>Decision</th><th class="num">Amount</th><th>External effect</th><th>Tier</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
+   (hits.length?'<div class="tw"><table><thead><tr><th>Receipt</th><th>When</th><th>Agent and operator</th><th>Tool version</th><th>Decision</th><th class="num">Amount</th><th>External effect</th><th>Tier</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
     :emptyState("No receipt matches “"+(S.rq||"")+"”","Receipts are searchable by agent key, tool version, external effect id, call digest and approver. A call that was denied has a receipt too — denials are recorded, they just never dispatched.",'<button class="btn" onclick="S.rq=\'\';render()">Clear the search</button>'))+
    '<div class="panel-b"><div class="note">'+hits.length+' of '+RECEIPTS.length+' receipts shown. A receipt for a client-attested call exists too, and its authority group says <span class="mono">recorded</span> where a call routed through Oxagen says <span class="mono">decided on the server</span>. The rendering refuses to say otherwise.</div></div></div>';
 }
@@ -7893,10 +8160,10 @@ function auditExports(){
      '<button class="btn sm ghost" '+(ready?'onclick="act(\'In the product this downloads '+x.id+' as a signed archive with its verifier. A mockup writes nothing to disk.\')"':'disabled')+'>Download</button></div></div>'+
      '<div class="panel-b">'+auditFacts([["Export id",x.id,1],["Range",x.range],["Contents",x.runs],["Size",x.size],["Created",x.at+" by "+x.by],["Signature",x.sig,1],["Key ids",x.keys,1]])+
      (S.verified[x.id]?'<pre style="margin-top:12px">$ ./oxagen-verify --bundle '+h(x.id)+' --release-key rel-2026-03\n  merkle roots        recomputed and matched\n  seal attestations   signatures verified\n  chain continuity    no gaps, no reordering\n  <span class="s">OK</span>  internally consistent and signed</pre>':'')+'</div></div>';}).join("");
-  var kinds=["run.sealed","run.proven","approval.requested","tool_call.denied","kill_switch.flipped","mandate.exception"];
+  var kinds=["run.sealed","approval.requested","tool_call.denied","kill_switch.flipped","mandate.exception"];
   return '<div class="callout" style="margin-bottom:14px">An export is a verifiable bundle: archive segments, attestations, key ids, and a verifier script. The segment was written at seal time, so it is never a later copy of the graph — it is the same bytes the graph indexed, written once. A customer’s auditor checks it offline, without trusting Oxagen or the worker’s harness.</div>'+
    '<div class="grid g2">'+cards+'</div>'+
-   '<div class="grid g2" style="margin-top:14px"><div class="panel"><div class="panel-h"><h3>The verifier</h3><span style="margin-left:auto">'+auditStore("ships inside every bundle")+'</span></div><div class="panel-b">'+
+   '<div class="grid g2" style="margin-top:14px"><div class="panel"><div class="panel-h"><h3>Verifier</h3><span style="margin-left:auto">'+auditStore("ships inside every bundle")+'</span></div><div class="panel-b">'+
    '<pre>$ tar xf exp_01K4Q7M1.tar.zst &amp;&amp; cd exp_01K4Q7M1\n$ ./oxagen-verify --bundle . --release-key rel-2026-03\n\n  manifest            31 segments, 188,440 frame envelopes (NDJSON)\n  merkle roots        31 / 31 recomputed and matched\n  seal attestations   962 / 962 signatures verified ('+h(ORG.attester)+', key_ox_aintel_2026Q1)\n  chain continuity    no gaps, no reordering\n  key ids present     kek_aintel_2026Q2, kek_aintel_2026Q3\n  tiers               harness 953 · observe 9\n\n  <span class="s">OK</span>  the bundle is internally consistent and signed by Oxagen release key rel-2026-03</pre>'+
    '<div class="note" style="margin-top:12px">The verifier runs offline and needs no Oxagen service. It recomputes every Merkle root and checks every seal signature against the published key, so an auditor never has to trust Oxagen’s word for the chain.</div></div></div>'+
    '<div class="panel"><div class="panel-h"><h3>Outbound events</h3><span class="b b-q" style="margin-left:auto">Series A</span></div><div class="panel-b">'+
@@ -7914,7 +8181,7 @@ function auditKeys(){
      '<td class="mono dim" style="font-size:11.5px;white-space:nowrap">'+h(k.from)+'</td><td class="mono dim" style="font-size:11.5px;white-space:nowrap">'+h(k.to)+'</td>'+
      '<td>'+auditBadge(st[k.st][0],st[k.st][1])+'</td><td style="font-size:12px;max-width:28ch">'+h(k.covers)+'</td>'+
      '<td class="num">'+(k===kek?'<button class="btn sm" onclick="openDialog(\'rotatekek\')">Rotate</button>':'')+'</td></tr>';}).join("");
-  return '<div class="panel"><div class="panel-h"><h3>Keys and validity windows</h3><span class="muted" style="font-size:12.5px">one key-encryption key per organization; data-encryption keys per object and per subject</span>'+
+  return '<div class="panel"><div class="panel-h"><h3>Keys</h3><span class="muted" style="font-size:12.5px">one key-encryption key per organization; data-encryption keys per object and per subject</span>'+
    '<div class="sp">'+auditStore("kms + postgres")+'<button class="btn sm" onclick="openDialog(\'rotatekek\')">Rotate KEK</button></div></div>'+
    '<div class="tw"><table><thead><tr><th>Key</th><th>Algorithm</th><th class="num">Gen</th><th>Valid from</th><th>Valid to</th><th>State</th><th>What it covers</th><th class="num"></th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
    '<div class="panel-b"><div class="note" style="margin-bottom:12px">Rotation does not rewrite history. A retiring generation stays valid for decryption until every object it wrapped has been re-wrapped; a receipt keeps citing the signing generation it was signed under, so a four-month-old receipt still verifies after a rotation. Key ids and validity windows are published per organization, so a customer can verify an export offline years later.</div>'+
@@ -7949,7 +8216,7 @@ function pAudit(){
   var tabs={events:auditEvents,incidents:auditIncidents,receipts:auditReceipts,exports:auditExports,keys:auditKeys,retention:auditRetention};
   var body=(tabs[t]||auditEvents)();
   return '<div class="phead"><div class="t"><p class="eyebrow">Organization</p><h1>Audit</h1>'+
-   '<p>What happened, who allowed it, under what authority, and what can be proven. Every explanation here is a chain with links to frames, records, and commits — never a summary.</p>'+
+   '<p>What happened, who allowed it, under what authority, and what it cost.</p>'+
    '<p class="mono dim" style="font-size:11.5px;margin-top:6px">control-plane events retained 7 years · run ledger forever · bodies 7 years by default · '+h(ORG.slug)+'</p></div>'+
    '<div class="acts"><button class="btn primary" onclick="openDialog(\'newexport\')">Export evidence bundle</button></div></div>'+auditTabs(t)+body;
 }
@@ -7987,8 +8254,9 @@ function incidentDlgBody(){
 function incidentDlgFoot(){
   var i=S.dlg==="incidentview"?incidentById(S.dlgArg):null;
   return '<button class="btn" onclick="closeDialog()">Close</button>'+
-   (i&&i.status==="open"?'<button class="btn" onclick="closeDialog();act(\'Assigned. The assignment is an audit event with your name on it.\')">Assign</button>':'')+
-   '<button class="btn" onclick="closeDialog();act(\'In the product this exports the incident with its frames. A mockup writes nothing to disk.\')">Export incident</button>';
+   '<button class="btn" onclick="closeDialog();act(\'In the product this exports the incident with its frames. A mockup writes nothing to disk.\')">Export incident</button>'+
+   (i&&i.status==="open"?'<button class="btn"'+(i.owner===me().name?' disabled title="Already yours"':'')+' onclick="incidentAssign(\''+h(i.id)+'\')">Assign to me</button>'+
+     '<button class="btn primary" onclick="openDialog(\'incidentclose\',\''+h(i.id)+'\')">Resolve</button>':'');
 }
 function queueExport(){
   var scope=el("ex-scope")?el("ex-scope").value:"core-platform · all runs";
@@ -8240,7 +8508,7 @@ function skRow(s){
      '<span class="sx-chip">'+s.tokens.toLocaleString()+' tok</span>'+
      '<span class="sx-chip">'+h(s.digest.slice(0,18))+'…</span>'+
      (s.cited?'<span class="sx-chip">cited in '+s.cited+' of '+s.runs+' runs</span>':'')+
-     (s.proofAfter!=null?'<span class="sx-chip ok">proof rate '+skPct(s.proofBefore)+' → '+skPct(s.proofAfter)+'</span>':'')+
+      (s.citedAfter!=null?'<span class="sx-chip ok">cited '+skPct(s.citedBefore)+' → '+skPct(s.citedAfter)+' of loads</span>':'')+
     '</div></div>'+
    '<div class="rt">'+skTier(s.tier)+
     '<span class="mono dim" style="font-size:10.5px">'+h(s.updated)+'</span>'+
@@ -8268,7 +8536,7 @@ function skSearch(w){
     keys.map(function(k){return '<button class="btn sm" onclick="SKS.q=\''+k+'\';render()">'+h(k)+'</button>';}).join("")+
    '</div>'+
    '<div class="grid g2" style="gap:12px">'+
-    '<div class="panel"><div class="panel-h"><h3>What decided this</h3></div><div class="panel-b">'+
+    '<div class="panel"><div class="panel-h"><h3>Decision</h3></div><div class="panel-b">'+
      '<dl class="kv">'+
       '<dt>Config</dt><dd><span class="mono">'+h(SK_CFG.ver)+'</span> · merged as '+h(SK_CFG.pr)+' by '+h(PEOPLE[SK_CFG.by].name)+'</dd>'+
       '<dt>Sources on</dt><dd>'+SK_CFG.sources.filter(function(x){return x.on;}).length+' of '+SK_CFG.sources.length+' · <span class="mono">a-intel/mobile</span> is linked but off</dd>'+
@@ -8277,7 +8545,7 @@ function skSearch(w){
       '<dt>Load budget</dt><dd><span class="mono">'+SK_CFG.search.budget.toLocaleString()+'</span> tokens a turn · a skill past the budget is refused, not truncated</dd>'+
       '<dt>Unbound repo</dt><dd><span class="mono">ask</span> · the loop stops and a person answers</dd>'+
      '</dl></div></div>'+
-    '<div class="panel"><div class="panel-h"><h3>The frame this wrote</h3></div><div class="panel-b">'+
+    '<div class="panel"><div class="panel-h"><h3>Frame written</h3></div><div class="panel-b">'+
      '<div class="sx-cfg"><div class="sx-cfg-h">skills.searched · frame 4 · run '+h(SKRUN.id)+'</div><pre>'+
       '<span class="k">query</span>        <span class="s">"'+h(q)+'"</span>\n'+
       '<span class="k">config</span>       <span class="s">"'+h(SK_CFG.ver)+'"</span>\n'+
@@ -8401,7 +8669,7 @@ function skLoop(w){
    '</div>'+
    (open?
     '<div class="panel" style="border-color:color-mix(in srgb,var(--gold) 45%,transparent);margin-bottom:14px">'+
-     '<div class="panel-h" style="background:color-mix(in srgb,var(--gold) 9%,var(--hl))"><h3>A run is waiting on you</h3>'+
+     '<div class="panel-h" style="background:color-mix(in srgb,var(--gold) 9%,var(--hl))"><h3>Interjection</h3>'+
       '<span class="sp live"><span class="p"></span>paused mid-loop</span></div>'+
      '<div class="panel-b">'+
       '<p style="margin:0 0 10px"><span class="mono">'+h(SKRUN.agent)+'</span> started in <span class="mono">'+h(SKRUN.repo)+'</span>, '+
@@ -8418,7 +8686,7 @@ function skLoop(w){
       'or <button class="btn sm" onclick="skReset()">reset the demo</button> to be asked again.</p>'+
      '</div></div>')+
    '<div class="grid g2" style="gap:12px">'+
-    '<div class="panel"><div class="panel-h"><h3>What the seat is allowed to do</h3></div><div class="panel-b">'+
+    '<div class="panel"><div class="panel-h"><h3>Seat permissions</h3></div><div class="panel-b">'+
      '<div class="sx-skl">'+[
       ["ask","Ask a person a question","The loop pauses at a boundary and the question reaches the operator in the agent’s own voice. The agent is not told what to say; it is handed the answer as evidence."],
       ["cons","Stop before a guess","An unbound repo, a skill past the load budget, a digest that changed. Each one is a stop, not a fallback."],
@@ -8427,7 +8695,7 @@ function skLoop(w){
      ].map(function(x){
       return '<div class="sx-row"><div class="sx-ki">'+icon(x[0])+'</div><div><div class="nm">'+h(x[1])+'</div>'+
        '<div class="st">'+h(x[2])+'</div></div><div class="rt"></div></div>';}).join("")+'</div></div></div>'+
-    '<div class="panel"><div class="panel-h"><h3>What it is not allowed to do</h3></div><div class="panel-b">'+
+    '<div class="panel"><div class="panel-h"><h3>Denied actions</h3></div><div class="panel-b">'+
      '<div class="sx-skl">'+[
       ["Rewrite what the agent said","An interjection is a new frame beside the agent’s turn. The agent’s own output is never edited, and a replay shows both."],
       ["Answer on the operator’s behalf","No default answer, no remembered answer, no “last time you chose…”. On timeout the run continues with nothing, which is the conservative end."],
@@ -8451,10 +8719,10 @@ function skReflect(w){
     skStat("Cost","$1.79","0.09% of the month’s spend · billed as overhead, never as productive")+
     skStat("Calibration gap","2 of 4","axes where the agent scored itself above the record","held")+
    '</div>'+
-   '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>The turn that was injected</h3>'+
+   '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Injected turn</h3>'+
      '<span class="sp mono dim" style="font-size:11px">'+h(R.when)+'</span></div><div class="panel-b">'+
     '<div class="sx-fr" style="margin-bottom:12px">'+
-     skFrameRow({k:"run.sealed",c:"gov",t:"14:22:09.440Z",d:"run "+R.run+" · verdict failing · chain sealed, attestation key atk_7"})+
+     skFrameRow({k:"run.sealed",c:"gov",t:"14:22:09.440Z",d:"run "+R.run+" · chain sealed, attestation key atk_7"})+
      skFrameRow({k:"control.reflect",c:"gov",t:"14:22:41.002Z",d:"rubric "+R.rubric+" · "+h(R.why),oob:true})+
      skFrameRow({k:"model.request",c:"model",t:"14:22:41.118Z",d:R.model+" · the sealed run is the evidence; the agent is asked four questions",oob:true})+
      skFrameRow({k:"reflection.captured",c:"gov",t:"14:22:44.870Z",d:R.tokens.toLocaleString()+" tokens · $"+R.cost+" · quarantined on write",oob:true})+
@@ -8462,7 +8730,7 @@ function skReflect(w){
     '<div class="note">Dashed frames are <b>out of band</b>. They sit after the seal, they are excluded from the chain the seal covers, '+
      'and they are not replayed when the run is forked. A fork of this run re-runs the work and not the grading.</div>'+
    '</div></div>'+
-   '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>What it said about itself</h3>'+
+   '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Self-report</h3>'+
      '<span class="sp"><span class="sx-chip res">self</span> <span class="sx-chip" style="color:var(--st-proven);border-color:color-mix(in srgb,var(--st-proven) 45%,transparent)">the record</span></span></div>'+
     '<div class="panel-b"><div class="sx-rub">'+R.axes.map(function(a){
       return '<div class="sx-rax'+(a.gap?" gap":"")+'">'+
@@ -8612,12 +8880,12 @@ function skTrOperator(ans){
 }
 function skDl(k,t){return '<div class="sx-li"><span class="s '+k+'">'+(k==="add"?"+":k==="rem"?"−":"·")+'</span><span>'+t+'</span></div>';}
 function skAfterPanel(ans){
-  if(ans==="link") return '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>The skill it loaded</h3>'+
+  if(ans==="link") return '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Skill loaded</h3>'+
     '<span class="sp mono dim" style="font-size:11px">1,840 tokens · $0.0055 · priced on the Spend page as context, not as output</span></div>'+
    '<div class="panel-b">'+skRow(skillOf("a-intel.release-notes-from-prs"))+
     '<div class="note" style="margin-top:10px">The model call that follows cites it in the system position. A sealed replay of this run '+
     'resolves the same digest, so “what procedure was it following” has an answer a year from now.</div></div></div>';
-  return '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>The workspace that was created</h3>'+
+  return '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Workspace created</h3>'+
     '<span class="sp">'+skBadge("q","skills off")+'</span></div><div class="panel-b">'+
    '<div class="sx-cfg"><div class="sx-cfg-h">a-intel/edge-proxy · .oxagen/workspace.toml <span class="grow"></span>committed by Oxagen, 09:17:39Z</div><pre>'+
    '<span class="k">slug</span>    = <span class="s">"edge"</span>\n'+
@@ -8699,7 +8967,7 @@ DLG_EXT.skill=function(arg){
       '<dt>Decision</dt><dd>'+skTier(s.tier)+'</dd>'+
       '<dt>Owner</dt><dd>'+(s.owner?h(PEOPLE[s.owner].name):'<span class="muted">nobody — which is why it is held</span>')+'</dd>'+
       '<dt>Cited</dt><dd>'+(s.cited?s.cited+' of '+s.runs+' runs that searched for it':'never')+'</dd>'+
-      (s.proofAfter!=null?'<dt>Proof rate</dt><dd>'+skPct(s.proofBefore)+' before it existed → <b>'+skPct(s.proofAfter)+'</b> after · measured over '+s.runs+' runs</dd>':'')+
+      (s.citedAfter!=null?'<dt>Cited rate</dt><dd>'+skPct(s.citedBefore)+' of loads cited before this version → <b>'+skPct(s.citedAfter)+'</b> after · measured over '+s.runs+' runs from the token record</dd>':'')+
      '</dl>'+
      (s.why?'<div class="note" style="border-color:color-mix(in srgb,var(--sk-held) 45%,transparent)"><b>Held: </b>'+s.why+'</div>':'')+
      '<div class="sx-cfg"><div class="sx-cfg-h">'+h(s.path)+'</div><pre>'+skBody(s)+'</pre></div>'+
@@ -8825,7 +9093,7 @@ SCENARIOS["sixty-seconds-to-governed"]={title:"Sixty seconds to governed", ws:"c
  blurb:"A new operator signs up, wraps an agent, and lands on Fleet looking at its first run. Oxagen does not open until that run's first frame arrives.",
  steps:[
   {say:"A new operator signs up with Google or GitHub, or with an email and a password of at least 12 characters, one symbol and one digit.",
-   note:"Every organization gets its first "+BILLING.runsIncluded.toLocaleString("en-US")+" runs a month free, with every governance feature on.",
+   note:"Every organization starts with an included monthly allowance of governed actions and every governance feature on.",
    route:function(o){return {page:"welcome",step:"signup",org:o,ws:"core-platform"};},
    setup:function(){obScnArm();obScnUndo();S.ob.pwShown=false;},
    act:["Continue with GitHub","obGo('organization')"]},
@@ -8861,19 +9129,19 @@ SCENARIOS["flight-recorder"]={title:"The flight recorder", ws:"core-platform",
  blurb:"A sealed run read back frame by frame: what the model was shown, what each turn cost, and where two runs part ways.",
  steps:[
   {say:"stella-ci brought #482 up to the release-notes contract, was told <span class=\"mono\">pass</span> on its third verify call, and sealed <span class=\"mono\">run_01K5RQ4B9C7XTN2P</span> at 09:11:18. Everything on this page is read back from its 97 frames.",
-   note:"The transcript is the model-visible projection of those frames. Each verify call in it links to the proof frame the gateway wrote, and the one word in it is all the model received.",
+   note:"The transcript is the model-visible projection of those frames. Each tool call in it links to the frame the gateway wrote, and the usage line under every turn is the token record.",
    route:function(o){return {page:"run",org:o,ws:"core-platform",id:"run_01K5RQ4B9C7XTN2P"};},
    setup:function(){S.tab.run="transcript";S.frame=0;S.bis=null;}},
   {say:"Frame 3 is the run’s first model response. Its usage is split by token class and priced, and its cost record is one of the numbers the Cost tab adds up.",
    note:"Step with the arrow keys. The scrubber says how much of the run’s spend had gone by each frame.",
    route:function(o){return {page:"run",org:o,ws:"core-platform",id:"run_01K5RQ4B9C7XTN2P"};},
    setup:function(){S.tab.run="player";S.frame=3;S.frameRun="run_01K5RQ4B9C7XTN2P";S.fp.playing=false;},
-   act:["Open the flip frame","S.tab.run='player';S.frame=71;render()"]},
+    act:["Open the usage frame","S.tab.run='player';S.frame=71;render()"]},
   {say:"The Context tab accounts for the run’s first request to the token: five blocks that add up to the input its response reports, and the part of it read from cache.",
    note:"The context frames that were admitted sit under their block with their tokens, so a bloated window shows before it gets expensive.",
    route:function(o){return {page:"run",org:o,ws:"core-platform",id:"run_01K5RQ4B9C7XTN2P"};},
    setup:function(){S.tab.run="context";}},
-  {say:"The waterfall: one bar per turn, the dashed line is the money accumulating to $2.87, and the flip is marked where it landed inside turn 4.",
+   {say:"The waterfall: one bar per turn, the dashed line is the money accumulating to $2.87, and under it the spend by token class and what each request was made of.",
    note:"The table under it adds the same turns up to the recorded cost. A Spend finding that names this workspace is pinned to the turn its pattern points at.",
    route:function(o){return {page:"run",org:o,ws:"core-platform",id:"run_01K5RQ4B9C7XTN2P"};},
    setup:function(){S.tab.run="cost";}},
@@ -8882,45 +9150,13 @@ SCENARIOS["flight-recorder"]={title:"The flight recorder", ws:"core-platform",
    route:function(o){return {page:"run",org:o,ws:"core-platform",id:"run_01K5RQ4B9C7XTN2P"};},
    setup:function(){S.tab.run="chain";S.bis=null;},
    act:["Bisect against another run","S.bis=null;openDialog('bisect')"]},
-  {say:"A witness run sealed in July 2025 has left the graph. Its 118 frames are still in the archive segment, written once at seal, and render replay reads them back.",
+  {say:"A run sealed in July 2025 has left the graph. Its 118 frames are still in the archive segment, written once at seal, and render replay reads them back.",
    note:"Nothing was moved and nothing was recomputed: the segment holds the same bytes the graph indexed.",
    route:function(o){return {page:"run",org:o,ws:"core-platform",id:"run_01K4QJ9E4T6YUI1O"};},
    setup:function(){S.tab.run="player";S.frame=0;S.seg["run_01K4QJ9E4T6YUI1O"]=false;},
    act:["Render from the segment","S.seg['run_01K4QJ9E4T6YUI1O']=true;render()"]}
  ]};
 /* ---- end W4 ---- */
-/* ---- W5 · proven-not-claimed ---- */
-SCENARIOS["proven-not-claimed"]={title:"Proven, not claimed", ws:"core-platform",
- blurb:"A run is proven because a witness it never saw failed on main and passed on the pull request. The agent was told one word.",
- steps:(function(){
-  var P=run("run_01K5RQ4B9C7XTN2P"), f=P.flip, W=proofWitnessRun(P), T=run("run_01K5RG6H1L4OIU9Y");
-  var onRun=function(id,t){return {route:function(o){return {page:"run",org:o,ws:"core-platform",id:id};},
-    setup:function(){S.tab.run=t;S.frame=0;}};};
-  var step=function(base,x){for(var k in x)base[k]=x[k];return base;};
-  return [
-   step(onRun(P.id,"proof"),{say:"Stella CI’s run is <b>flipped</b>. The witness failed on <span class=\"mono\">"+h(f.targetRef)+" @ "+h(f.targetSha)+"</span> and passed on <span class=\"mono\">"+h(prNum(f))+" @ "+h(f.prSha)+"</span>, and that pair is the only thing that credits a proof.",
-    note:"Passing on both sides is unmoved and failing on both is failing. Neither credits anything, and the record keeps them apart."}),
-   step(onRun(P.id,"proof"),{say:"When it happened: "+f.attempts.length+" attempts, "+f.attempts.map(function(a){return a.result;}).join(", ")+", and the flip landed "+dur(flipLead(f))+" before the agent ended turn "+f.turn+".",
-    note:"Each point on the rail is a frame in the hash chain, so the order is signed rather than logged.",
-    act:["Chain and seal","S.tab.run='chain';render()"]}),
-   step(onRun(P.id,"proof"),{say:"The airlock. The worker saw <span class=\"mono\">pass</span>: four characters, the whole tool result. The test name, the assertion and the values stay in the witness runner’s sealed chamber.",
-    note:"The grain is L0. Raising it is a policy decision a person makes, and it is recorded as a security event.",
-    setup:function(){S.tab.run="proof";S.frame=0;setTimeout(function(){var el=document.getElementById("airlock");if(el)el.scrollIntoView({block:"start"});},80);},
-    act:["Verify offline","act('Verifier script and key ids downloaded. Re-derives the flip from the segment, offline.')"]}),
-   step(onRun(W.id,"ladder"),{say:"The witness run is a run like any other, of the witness runner service principal: seven steps from authoring to the stamp, its own frames and seal, and "+usd(W.cost)+" of cost attributed to "+h(PEOPLE[W.op].name)+".",
-    note:"The author is the plane’s one model call. The verdict is never a model call; it is the runner’s.",
-    act:["Open its frames","S.tab.run='player';S.frame=0;render()"]}),
-   step(onRun(T.id,"proof"),{say:"A second run came back <b>tampered</b>, not failing. Its pull request added an exclude to <span class=\"mono\">"+h(T.flip.tamper.file)+"</span> that matched the witness’s path, so the fingerprint moved and the head was excluded.",
-    note:"Nothing is credited, and the proof frame says why in the same shape as a flip.",
-    act:["Open the chain","S.tab.run='chain';render()"]}),
-   {say:"On Spend, Stella CI’s proven spend is the money a flipped witness vouches for. The rest is unproven, and the page says so.",
-    note:"Witness runs are recorded against the operator and billed at zero, so proving work never inflates what a customer pays.",
-    route:function(o){return {page:"spend",org:o,ws:"core-platform"};},
-    setup:function(){S.tab.spend="agent";S.spendDrill={kind:"agent",id:"a-intel.core.stella-ci"};},
-    act:["Export this view","act('Report for a-intel.core.stella-ci exported: CSV and a signed PDF.')"]}
-  ];
- })()};
-/* ---- end W5 ---- */
 /* ---- W6 · learned-approved-changed ---- */
 SCENARIOS["learned-approved-changed"]={title:"Learned, approved, changed", ws:"core-platform",
  blurb:"The promoter learns a rule from runs, a person merges it as a pull request, and the next model call carries it.",
@@ -8975,12 +9211,12 @@ SCENARIOS["every-dollar-every-operator"]={title:"Every dollar, every operator", 
    note:"A run that arrived without an operator is attributed to the agent’s owning operator and flagged, never dropped and never spread.",
    route:function(o){return {page:"spend",org:o,ws:"core-platform"};},
    setup:function(){S.tab.spend="operator";S.spendDrill={kind:"operator",id:"marcus"};}},
-  {say:"One agent, over time. <span class=\"mono\">stella-ci</span>’s spend per proven run has fallen every month since March, and the verdicts say why.",
-   note:"Spend per proven run divides by runs whose witness verdict flipped, so it can never quietly equal spend per run.",
+   {say:"One agent, over time. <span class=\"mono\">stella-ci</span>’s spend per run has fallen every month since March, and the cache hit rate says why.",
+    note:"The same work, fewer tokens paid at full price. The composition under it says which part of the request grew and which shrank.",
    route:function(o){return {page:"spend",org:o,ws:"core-platform"};},
    setup:function(){S.tab.spend="agent";S.spendDrill={kind:"agent",id:"a-intel.core.stella-ci"};}},
   {say:"One run. The cost tab shows where each dollar of <span class=\"mono\">run_01K5RQ4B9C7XTN2P</span> went, turn by turn.",
-   note:"The run is the unit that is billed and the unit that is proven, so it is where spend and proof meet.",
+    note:"The run is the unit the token record hangs on, so it is where a dollar meets the frame that spent it.",
    route:function(o){return {page:"run",org:o,ws:"core-platform",id:"run_01K5RQ4B9C7XTN2P"};},
    setup:function(){S.tab.run="cost";}},
   {say:"Wasted spend is the money behind the findings, run by run: the retries, the re-reads and the unpaged results, each one measured against the counterfactual.",
@@ -8992,8 +9228,8 @@ SCENARIOS["every-dollar-every-operator"]={title:"Every dollar, every operator", 
    route:function(o){return {page:"spend",org:o,ws:"core-platform"};},
    setup:function(){S.tab.spend="budgets";S.spendDrill=null;},
    act:["Set a budget","openDialog('budget')"]},
-  {say:"Billing is Oxagen’s own revenue, kept apart from the customer’s spend: proven runs, the ones whose definition of done held, and nothing else.",
-   note:"Runs, governed actions and retained evidence are reported as secondary meters. Witness runs are free.",
+   {say:"Billing is Oxagen’s own revenue, kept apart from the customer’s spend: governed actions, the calls Oxagen decided, delivered and recorded, and nothing else.",
+    note:"Runs, tokens and retained evidence are reported as secondary meters. Denials and halted runs are free.",
    route:function(o){return {page:"billing",org:o};},
    act:["Change plan","openDialog('plan')"]}
  ]};
@@ -9014,17 +9250,13 @@ SCENARIOS["toolbelt-governed"]={title:"The toolbelt, governed", ws:"core-platfor
   {say:"Connections hold the customer’s credentials. No agent holds any of them: for each call the broker mints the narrowest one the provider allows.",
    note:"The grants log shows it, including the Stripe grant that was not minted because the call is still parked for a human.",
    route:function(o){return {page:"tools",org:o,ws:"core-platform"};},
-   setup:function(){S.tab.tools="connections";},
-   act:["Add a connection","openDialog('connection')"]},
+   setup:function(){S.tab.tools="servers";},
+   act:["Open the Slack server","openDialog('server','slack')"]},
   {say:"The registry is the only source of tools. Three Slack output schemas were observed, not declared, and wait for an admin.",
    note:"Until approval an output is validated only for size and type, and every run that used it says so.",
    route:function(o){return {page:"tools",org:o,ws:"core-platform"};},
-   setup:function(){S.tab.tools="registry";},
+   setup:function(){S.tab.tools="tools";},
    act:["Review the observed schemas","openDialog('schema')"]},
-  {say:"Auto-approval rules are the customer’s, not Oxagen’s: a rule names the tool, the agent, the ceiling and the condition under which the human is skipped.",
-   note:"A rule that would widen an agent past its operator’s grants cannot be saved. The intersection is the ceiling.",
-   route:function(o){return {page:"tools",org:o,ws:"core-platform"};},
-   setup:function(){S.tab.tools="auto";}},
   {say:"Deny is available at every level, down to a class: every tool that moves funds, organization-wide, in one action.",
    note:"A flip bumps the deny generation, and every affected run sees it at its next call boundary.",
    route:function(o){return {page:"tools",org:o,ws:"core-platform"};},
@@ -9034,42 +9266,37 @@ SCENARIOS["toolbelt-governed"]={title:"The toolbelt, governed", ws:"core-platfor
 /* ---- end W9 ---- */
 /* ---- W10 · cio-console ---- */
 SCENARIOS["cio-console"]={title:"The CIO’s console", ws:"core-platform",
- blurb:"Organization and Audit from the chair that answers for both: who can sign in, where the data lives, what the models cost, and what can be proven.",
+ blurb:"Organization and Audit from the chair that answers for both: who can sign in, where the data lives, what the models cost, and what every token bought.",
  steps:[
   {say:"Who can sign in is this table: every member, their role, their workspaces and whether two-factor is on. Invitations are the only way in.",
-   note:"Changing a role here is a governed action, and it never widens an agent: effective permission is the agent’s grants intersected with its operator’s. That is the delegation ceiling below the table.",
+   note:"Changing a role here is a governed action, and it never widens an agent: effective permission is the agent’s grants intersected with its operator’s.",
    route:function(o){return {page:"organization",org:o};},
-   setup:function(){S.tab.organization="people";S.planeView=null;S.rq="";},
+   setup:function(){S.tab.organization="people";S.rq="";},
    act:["Change a role","openDialog('role')"]},
   {say:"A workspace is a governance partition with exactly one main repo, bound at creation. Its namespace is immutable because it is part of every agent key.",
    note:"Retention mode is per workspace. <span class=\"mono\">content_exact</span> is the default; <span class=\"mono\">digest_only</span> is an opt-down recorded as a completeness gap.",
    route:function(o){return {page:"organization",org:o};},
-   setup:function(){S.tab.organization="workspaces";S.planeView=null;S.rq="";},
+   setup:function(){S.tab.organization="workspaces";S.rq="";},
    act:["Create a workspace","openDialog('newws')"]},
   {say:"Oxagen’s own model calls run on routes by tier. Each row carries this month’s use and cost, and the total is what the platform cap has used.",
-   note:"In-firewall routes sit below: what each tier resolves to on a deployment inside your network. Anderson Intelligence Corp. is on the shared plane, so they are a preview, not in effect.",
+   note:"Every model.response frame records the concrete model the provider returned, so a replay names the model that answered and the cost record prices that id, never the alias.",
    route:function(o){return {page:"organization",org:o};},
-   setup:function(){S.tab.organization="funding";S.planeView=null;S.rq="";},
+   setup:function(){S.tab.organization="funding";S.rq="";},
    act:["Change the funding source","openDialog('funding')"]},
-  {say:"Shared, dedicated and behind the firewall are deployment modes, not forks. This is the behind-the-firewall preview: a signed bundle verified against release key rel-2026-03, air-gapped, with its outbound connections listed.",
-   note:"Anderson Intelligence Corp. stays on shared. The startup guard is the same in every mode: no superuser, no BYPASSRLS, or the plane refuses to boot.",
-   route:function(o){return {page:"organization",org:o};},
-   setup:function(){S.tab.organization="plane";S.planeView="firewall";S.rq="";},
-   act:["Request a change of plane","openDialog('plane')"]},
   {say:"One critical incident: a Stripe charge with no receipt. Money moved that Oxagen did not govern, and the audit archiver caught it as exc_01K5RN2P.",
    note:"An incident is a chain of records, not a summary. Open it to read the frames and the connection it points at.",
    route:function(o){return {page:"audit",org:o};},
-   setup:function(){S.tab.audit="incidents";S.planeView=null;S.rq="";},
+   setup:function(){S.tab.audit="incidents";S.rq="";},
    act:["Open the incident","openDialog('incidentview','exc_01K5RN2P')"]},
   {say:"Every governed call has a receipt, searchable by tool, agent or external effect id. Search for stripe and open the payment Dana’s invoice bot made on 2026-09-04.",
    note:"The receipt names who, what, under which authority, with which credential, and what it changed.",
    route:function(o){return {page:"audit",org:o};},
-   setup:function(){S.tab.audit="receipts";S.planeView=null;S.rq="stripe";},
+   setup:function(){S.tab.audit="receipts";S.rq="stripe";},
    act:["Open the receipt","openDialog('receipt','rcp_01K4X8M2E')"]},
   {say:"An evidence bundle is for the auditor, who should not have to trust Oxagen. Verify exp_01K4Q7M1 and the check runs against the release key, offline.",
    note:"Merkle roots recomputed, seal attestations verified, no gaps in the chain.",
    route:function(o){return {page:"audit",org:o};},
-   setup:function(){S.tab.audit="exports";S.planeView=null;S.rq="";S.verified=S.verified||{};S.verified["exp_01K4Q7M1"]=false;},
+   setup:function(){S.tab.audit="exports";S.rq="";S.verified=S.verified||{};S.verified["exp_01K4Q7M1"]=false;},
    act:["Verify the bundle","S.verified['exp_01K4Q7M1']=true;render()"]}
  ]};
 /* ---- end W10 ---- */
@@ -9095,38 +9322,6 @@ SCENARIOS["the-account"]={title:"Whose account it is", ws:"core-platform",
    act:["Open the command menu","openDialog('cmd')"]}
  ]};
 /* ---- end W11 ---- */
-/* ---- W14 · done-means-done ---- */
-SCENARIOS["done-means-done"]={title:"Done means done", ws:"core-platform",
- blurb:"An agent cannot finish until its definition of done says so: a locked set of mechanical checks, run at every Stop, signed into a certificate when they hold. That certificate is the thing you pay for.",
- steps:[
-  {say:"Every run carries a definition of done. The Done column says whether its checks held, are waiting on a signature, or broke; the tile counts the sealed runs whose checks held.",
-   note:"A run that is still working shows the set as locked. Nothing here is a model's opinion: each verdict is decide() over evidence.",
-   route:function(o){return {page:"fleet",org:o,ws:"core-platform"};},
-   setup:function(){S.runFilter="all";S.firstRun=false;}},
-  {say:"Before release-manager moved, Oxagen drafted seven checks from the prompt and locked them by digest. The agent can read the file and cannot change it. It has tried to finish once and was blocked: the notes had no Breaking section yet.",
-   note:"The Stop hook hands the agent the failing ids and it keeps going. Three stops are allowed, then the run ends honestly.",
-   route:function(o){return {page:"run",org:o,ws:"core-platform",id:"run_01K5RS7M2E8FJ3QW"};},
-   setup:function(){S.tab.run="dod";},
-   act:["View the locked file","openDialog('dodfile','run_01K5RS7M2E8FJ3QW')"]},
-  {say:"Stella CI’s run held. Stop 1 was blocked on the contract test; stop 2 passed every check, the hidden one with them. The cloud re-ran decide() on the same evidence, bound the outcome to the sealed attempt, and signed.",
-   note:"Anyone with the evidence and decide() can recompute the verdict. That is the whole determinism claim, and it is testable.",
-   route:function(o){return {page:"run",org:o,ws:"core-platform",id:"run_01K5RQ4B9C7XTN2P"};},
-   setup:function(){S.tab.run="dod";},
-   act:["Verify offline","act('Certificate dodc_01K5RQ4C7M and decide() downloaded. Recompute the verdict from the evidence, offline.')"]},
-  {say:"This run gamed the visible set: the tests passed because the agent excluded the witness’s path in the test config. A hidden check the agent never saw compared that file to the target and failed it.",
-   note:"Hidden checks are kept in the cloud at lock time and sent to the harness only from the Stop hook. They never appear in the file.",
-   route:function(o){return {page:"run",org:o,ws:"core-platform",id:"run_01K5RG6H1L4OIU9Y"};},
-   setup:function(){S.tab.run="dod";}},
-  {say:"A human check never blocks the agent; it withholds the certificate. Docs-writer’s run passed every executable check and waits for Priya to read the page. Sign it and PENDING becomes HELD.",
-   note:"The signature is added to the evidence and decide() runs again. Runs as oxagen dod sign, a governed action with a receipt.",
-   route:function(o){return {page:"run",org:o,ws:"core-platform",id:"run_01K5RM1A5Z9QWE4R"};},
-   setup:function(){S.tab.run="dod";},
-   act:["Sign the editor check","openDialog('dodsign','run_01K5RM1A5Z9QWE4R')"]},
-  {say:"Billing prices one thing: the proven run, the run whose definition of done held. Runs, governed actions and retained evidence are reported beside it so the price can move later without rewriting the meter.",
-   note:"You never pay for Oxagen saying no, and a broken run costs nothing.",
-   route:function(o){return {page:"billing",org:o};}}
- ]};
-/* ---- end W14 ---- */
 
 /* ---- W13 · in-the-loop ---- */
 /* Skills ship off; search_skills answers from the config; and when a run starts in a repository nobody
@@ -9161,7 +9356,7 @@ SCENARIOS["in-the-loop"]={title:"In the loop", ws:"core-platform",
    route:function(o){return {page:"run",org:o,ws:"core-platform",id:SKRUN.id};},
    setup:function(){skScnArm();SKS.answered=null;SKS.picked=null;},
    act:["Link it to core-platform and send","SKS.picked='link';skAnswer()"]},
-  {say:"Sitting in the loop also lets Oxagen ask the agent a question of its own, after the work is sealed. This run’s verdict was <span class=\"mono\">failing</span>, and <span class=\"mono\">rfl_v3</span> always samples a failing run. Two of four axes disagree with the record.",
+  {say:"Sitting in the loop also lets Oxagen ask the agent a question of its own, after the work is sealed. This run ended <span class=\"mono\">halted</span>, and <span class=\"mono\">rfl_v3</span> always samples a halted run. Two of four axes disagree with the record.",
    note:"The injected turn is dashed: out of band, after the seal, not replayed on a fork. The self-grade is quarantined by five rules — it never enters a context frame, cannot be promoted, is billed as overhead, needs an organization grant to read, and expires.",
    route:function(o){return {page:"skills",org:o,ws:"core-platform"};},
    setup:function(){skScnArm();SK_ON["core-platform"]=true;S.tab.skills="reflect";}},
@@ -9228,11 +9423,11 @@ function steerTextField(dflt,rows){
 function steerModeField(){
   var on=S.steerInt;
   return '<div class="field"><label>Delivery</label>'+
-   '<div class="steer-mode'+(on?" on":"")+'"><div class="grow"><b>'+(on?"Interrupt — now":"At the boundary — end of the current turn")+'</b>'+
+   '<div class="steer-mode'+(on?" on":"")+'"><div class="grow"><b>'+(on?"Interrupt now":"At the boundary")+'</b>'+
     '<div class="d">'+(on?"Every selected agent with a run in flight stops where it stands. The in-flight tool call is cancelled and recorded, the turn is cut, and this steer is the first thing it reads. Idle agents read it at their next run.":
      "Each agent finishes the turn it is on, then reads this before its next model call. Nothing in flight is cut. Idle agents read it at their next run.")+'</div></div>'+
-    '<button class="ks-sw int" role="switch" aria-checked="false" aria-disabled="true" disabled aria-label="Interrupt, not yet available" title="not yet available"><span class="lbl">Interrupt</span><i></i></button></div>'+
-   '<div class="hint">Interrupt is not available yet. Cutting a call in flight needs the <span class="mono">gateway</span> tier. On the <span class="mono">harness</span> tier a steer lands at the next hook boundary.</div>'+
+    '<button class="ks-sw int'+(on?" on":"")+'" role="switch" aria-checked="'+(on?"true":"false")+'" aria-label="Interrupt" onclick="steerToggleInt()"><span class="lbl">Interrupt</span><i></i></button></div>'+
+   '<div class="hint">Interrupt cuts the call in flight at the proxy on the <span class="mono">gateway</span> and <span class="mono">contained</span> tiers. On the <span class="mono">harness</span> tier a steer lands at the next hook boundary.</div>'+
    '<div class="hint">Recorded per run as a <span class="mono">control.steer</span> frame attributed to you'+
     (on?', preceded by a <span class="mono">control.interrupt</span> frame that names the cancelled call':'')+'.</div></div>';
 }
@@ -9247,13 +9442,13 @@ function steerFleetBody(){
     '<div class="steer-list">'+rows+'</div>'+
     '<div class="hint">Every agent in '+h(ws().name)+', selected by default. Steering the fleet is a grant you hold by role, not a default.</div></div>'+
    steerTextField(STEER_DEFAULT,3)+steerModeField()+
-   '<div class="note">Oxagen never executes steering as an instruction — it enters as evidence at the steering position with operator authority.</div>';
+   '<div class="note">Oxagen never executes steering as an instruction; it enters as evidence at the steering position with operator authority.</div>';
 }
 function steerFoot(fleet){
   var n=fleet?steerCount():1, on=S.steerInt, who=fleet?(n+' agent'+(n===1?'':'s')+' · '+steerLive()+' in flight'):'this run';
   return '<span class="grow">'+h(who)+' · '+(on?'interrupt':'at the boundary')+'</span>'+
    '<button class="btn" onclick="closeDialog()">Cancel</button>'+
-   '<button class="btn primary"'+(fleet&&!n?' disabled':'')+' onclick="steerSend('+(fleet?'true':'false')+')">'+(on?'Interrupt and send':'Send at the boundary')+'</button>';
+   '<button class="btn '+(on?'danger solid':'primary')+'"'+(fleet&&!n?' disabled':'')+' onclick="steerSend('+(fleet?'true':'false')+')">'+(on?'Send &amp; Interrupt':'Steer')+'</button>';
 }
 /* ---- steering writes frames (ported from W2 stop-it-steer-it) ----
    A steer is a control.steer frame on the run it addresses, queued until that run's next model call.
@@ -9567,7 +9762,7 @@ function dialog(){
   if(!S.dlg) return '';
   var k=S.dlg;
   if(k==="cmd") return cmdMenu();
-  var kk=(typeof S.dlgArg==="number"&&APIKEYS[S.dlgArg])||APIKEYS[0];
+  var kki=(typeof S.dlgArg==="number"&&APIKEYS[S.dlgArg])?S.dlgArg:0, kk=APIKEYS[kki];
   var D={
    notifs:{t:"Notifications",w:false,b:notifsBody(),
      f:'<div class="grow"><span class="mono">list_notifications</span> · '+notifUnread()+' unread · every kind here maps to a frame kind or an audit event, never to something invented for a bell.</div>'+
@@ -9597,7 +9792,7 @@ function dialog(){
      '<div class="field"><label>Address</label><select aria-label="Address"><option>this run</option><option>@a-intel.core.release-manager — every live run of this agent</option></select>'+
      '<div class="hint">To steer every live run in the workspace at once, use Steer on the Fleet page.</div></div>'+
      steerModeField()+
-     '<div class="note">Oxagen never executes steering as an instruction — it enters as evidence at the steering position with operator authority.</div>',
+     '<div class="note">Oxagen never executes steering as an instruction; it enters as evidence at the steering position with operator authority.</div>',
      f:steerFoot(false)},
    steerfleet:{t:"Steer the fleet",w:false,b:steerFleetBody(),f:steerFoot(true)},
    mandate:{t:"Grant a mandate",w:true,b:mandateBody(),f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Mandate granted. It is active from its start date and expires on its end date; every draw is a receipt.\')">Grant the mandate</button>'},
@@ -9614,6 +9809,8 @@ function dialog(){
    commit:{t:"Commit this change",w:true,b:commitBody(),f:commitFoot()},
    roleedit:S.dlg==="roleedit"?roleEditDlg():{t:"Role",w:true,b:"",f:""},
    roledel:roleDelDlg(),
+   invrevoke:inviteRevokeDlg(),
+   incidentclose:incidentResolveDlg(),
    assignrole:assignRoleDlg(),
    identity:identityDlg(),
    ruleedit:S.dlg==="ruleedit"?ruleEditDlg():{t:"Rule",w:true,b:"",f:""},
@@ -9637,14 +9834,14 @@ function dialog(){
      '<div class="note">Granting a role is a governed action. It will appear in the audit record with the granter’s name, your name, and this reason.</div>',
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Request sent to Priya Natarajan.\')">Send the request</button>'},
    incident:{t:"Open an incident",w:false,b:
-     '<div class="field"><label>Subject</label><input value="Stripe charge ch_3Qa8 has no receipt" aria-label="Subject"></div>'+
-     '<div class="field"><label>Severity</label><select aria-label="Severity"><option>critical — money moved that Oxagen did not govern</option><option>warning</option><option>info</option></select></div>'+
+     '<div class="field"><label for="in-title">Subject</label><input id="in-title" value="Stripe charge ch_3Qa8 has no receipt"></div>'+
+     '<div class="field"><label for="in-sev">Severity</label><select id="in-sev"><option value="critical">critical — money moved that Oxagen did not govern</option><option value="warning">warning</option><option value="info">info</option></select></div>'+
      '<div class="field"><label>Attach</label><div class="row"><span class="b b-q mono" style="font-size:11px">con_01K2A9</span>'+
      '<span class="b b-q mono" style="font-size:11px">mnd_7K2ETQ4</span><span class="b b-q mono" style="font-size:11px">exc_01K5RN2P</span></div></div>',
-     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Incident raised. It is a security event with who, why, and what it stopped.\')">Raise it</button>'},
+     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="incidentRaise()">Raise it</button>'},
    "switch":switchDialog(),
    policy:{t:"Edit policy",w:true,b:
-     '<p class="eyebrow q">pol_v42 · draft</p>'+
+     '<p class="eyebrow q">pol_v42 draft</p>'+
      '<pre><span class="c">// require approval for every irreversible call in core-platform</span>\n'+
      '<span class="k">permit</span> (principal, action, resource)\n<span class="k">when</span> { context.tool.side_effect == <span class="s">"irreversible"</span> }\n'+
      '<span class="k">advice</span> <span class="s">"require_approval"</span>;</pre>'+
@@ -9672,21 +9869,21 @@ function dialog(){
      '<div class="field"><label>Mode</label><select aria-label="Mode"><option>hard: checked at each hook boundary, pauses at the next one</option><option>soft — recorded and reported, never blocks</option></select></div>',
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Budget set. A breach is a policy.decision frame and, by policy, a pause.\')">Set it</button>'},
    invite:{t:"Invite a person",w:false,b:
-     '<div class="field"><label>Email</label><input value="rowan@a-intel.example" aria-label="Email"></div>'+
-     '<div class="field"><label>Role</label><select aria-label="Role"><option>workspace.member · core-platform</option><option>workspace.owner · core-platform</option><option>org.auditor</option><option>org.billing</option><option>org.owner</option></select></div>'+
+     '<div class="field"><label for="iv-email">Email</label><input id="iv-email" value="rowan@a-intel.example"></div>'+
+     '<div class="field"><label for="iv-role">Role</label><select id="iv-role"><option>workspace.member · core-platform</option><option>workspace.owner · core-platform</option><option>org.auditor</option><option>org.billing</option><option>org.owner</option></select></div>'+
      '<div class="note">An invitation is the only way into the organization. It expires in seven days, and accepting it requires a verified email and two-factor.</div>',
-     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Invitation sent. It expires in 7 days.\')">Send the invitation</button>'},
+     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="inviteSend()">Send the invitation</button>'},
    newws:{t:"Create a workspace",w:false,b:
-     '<div class="field"><label>Name</label><input value="Data platform" aria-label="Name"></div>'+
-     '<div class="field"><label>Namespace</label><input value="data" maxlength="6" aria-label="Namespace"><div class="hint">2–6 characters, immutable, and part of every agent key in the workspace: <span class="mono">'+h(ORG.slug)+'.data.&lt;agent&gt;</span>.</div></div>'+
-     '<div class="field"><label>Main repository</label><select aria-label="Main repository"><option>a-intel/data-platform</option><option>a-intel/warehouse</option></select>'+
+     '<div class="field"><label for="nw-name">Name</label><input id="nw-name" value="Warehouse ops"></div>'+
+     '<div class="field"><label for="nw-ns">Namespace</label><input id="nw-ns" value="wh" maxlength="6"><div class="hint">2–6 characters, immutable, and part of every agent key in the workspace: <span class="mono">'+h(ORG.slug)+'.data.&lt;agent&gt;</span>.</div></div>'+
+     '<div class="field"><label for="nw-main">Main repository</label><select id="nw-main"><option>a-intel/warehouse</option><option>a-intel/data-platform</option></select>'+
      '<div class="hint">Required at creation. A workspace without a main repo cannot exist.</div></div>'+
-     '<div class="field"><label>Production branch</label><select aria-label="Production branch"><option>main — GitHub’s default, suggested</option><option>release</option><option>production</option></select>'+
+     '<div class="field"><label for="nw-branch">Production branch</label><select id="nw-branch"><option value="main">main — GitHub’s default, suggested</option><option value="release">release</option><option value="production">production</option></select>'+
      '<div class="hint">The only branch whose commits update the code graph. If GitHub’s default changes later you are prompted; the binding never moves on its own.</div></div>'+
-     '<div class="field"><label>Governance mode</label><select aria-label="Governance mode"><option>team — a code-owner review is required</option><option>solo — the author may merge</option><option>regulated — a named approver and a ledger entry</option></select></div>'+
-     '<div class="field"><label>Retention mode</label><select aria-label="Retention mode"><option>content_exact — keep prompts and tool bodies in full</option><option>digest_only — digests only, lowers the replay grade</option></select></div>'+
+     '<div class="field"><label for="nw-gov">Governance mode</label><select id="nw-gov"><option value="team">team — a code-owner review is required</option><option value="solo">solo — the author may merge</option><option value="regulated">regulated — a named approver and a ledger entry</option></select></div>'+
+     '<div class="field"><label for="nw-ret">Retention mode</label><select id="nw-ret"><option value="content_exact">content_exact — keep prompts and tool bodies in full</option><option value="digest_only">digest_only — digests only, lowers the replay grade</option></select></div>'+
      '<div class="note">Until the GitHub App binds the main repo the workspace is provisional for 14 days: runs record and spend counts, but steering, records and agent definitions stay off.</div>',
-     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Workspace created. Installing the GitHub App on a-intel/data-platform.\')">Create</button>'},
+     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="wsCreate()">Create</button>'},
    import:{t:"Import an MCP server",w:false,b:
      '<div class="field"><label>Endpoint</label><input value="https://mcp.internal.a-intel.example/sse" aria-label="Endpoint"></div>'+
      '<div class="field"><label>Connection</label><select aria-label="Connection"><option>con_01K2A7 · GitHub App installation</option><option>Create a new connection</option></select></div>'+
@@ -9716,29 +9913,27 @@ function dialog(){
         (ORG_KEY.source===x[0]?'<span class="b b-allowed">current</span>':'')+
         (x[0]==="platform_minted"?'<span class="b b-proven">reconciles per organization</span>':'')+
         '</span><span class="d"><b>'+h(x[1])+'.</b> '+h(x[2])+'</span></div>';}).join("")+'</div>'+
-     '<div class="field" style="margin-top:14px"><label>Key</label><input value="sk-or-v1-••••••••••••••••" aria-label="Key" type="password">'+
-      '<div class="hint">Only <span class="mono">customer_key</span> takes a key here. The other two are minted or held by Oxagen, and no screen ever sees the secret.</div></div>'+
-     '<div class="note">Stored enveloped, tested before save, never returned, every read audited. On a customer key your tokens are reported and billed at zero; on the other two they are billed to this organization.</div>',
-     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Key tested against '+ASST_MODEL+' and stored. Nothing was returned.\')">Test and save</button>'},
+     '<div class="note">Pick a source on the panel behind this dialog; it carries the key field and the lifecycle. Every key is stored enveloped, tested before save, never returned, and every read is audited. On a customer key your tokens are reported and billed at zero; on the other two they are billed to this organization.</div>',
+     f:'<button class="btn" onclick="closeDialog()">Close</button>'},
    apikey:{t:"Create an API key",w:false,b:
      '<p class="muted" style="font-size:12.5px;margin:0 0 12px">Shown once, at creation, and never again.</p>'+
-     '<div class="field"><label>Name</label><input placeholder="What is it for" aria-label="Name"></div>'+
-     '<div class="field"><label>Grants</label><select aria-label="Grants"><option>audit.read, receipt.read, export.read</option><option>cost.read, run.read</option><option>workspace.write, agent.write, grant.write</option></select>'+
+     '<div class="field"><label for="ak-name">Name</label><input id="ak-name" value="Warehouse nightly export"></div>'+
+     '<div class="field"><label for="ak-grants">Grants</label><select id="ak-grants"><option>audit.read, receipt.read, export.read</option><option>cost.read, run.read</option><option>workspace.write, agent.write, grant.write</option></select>'+
      '<div class="hint">A key can reach exactly what a person with those grants can. One agent tool contract drives the API, MCP, the CLI, and these screens.</div></div>'+
-     '<div class="field"><label>Expires</label><select aria-label="Expires"><option>90 days</option><option>180 days</option><option>1 year</option></select></div>'+
+     '<div class="field"><label for="ak-exp">Expires</label><select id="ak-exp"><option value="2026-12-10">90 days</option><option value="2027-03-10">180 days</option><option value="2027-09-11">1 year</option></select></div>'+
      '<div class="note">A key carries grants, not roles. It becomes a service principal and every call it makes is audited against it.</div>',
-     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Key created. It is shown once and stored hashed; api_key.create is in the audit record.\')">Create key</button>'},
+     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="apikeyCreate()">Create key</button>'},
    rotatekey:{t:"Rotate this key",w:false,b:
      '<p style="margin:0 0 10px"><b>'+h(kk.name)+'</b> <span class="mono dim" style="font-size:11.5px">'+h(kk.key)+' · '+h(kk.principal)+'</span></p>'+
      '<div class="note">Rotation issues a new secret and keeps the old one valid for 24 hours so callers can move. Both are audited.</div>',
-     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Rotated. The new secret is shown once; the old one stays valid for 24 hours.\')">Rotate</button>'},
+     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="apikeyRotate('+kki+')">Rotate</button>'},
    revokekey:{t:"Revoke this key",w:false,b:
      '<p style="margin:0 0 10px"><b>'+h(kk.name)+'</b> <span class="mono dim" style="font-size:11.5px">'+h(kk.key)+' · '+h(kk.principal)+'</span></p>'+
      '<div class="warn">Revocation ends the service principal’s access at the next call. Runs it started keep their records.</div>',
-     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn danger" onclick="closeDialog();act(\'Revoked. The service principal loses access at its next call; runs it started keep their records.\')">Revoke</button>'},
+     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn danger" onclick="apikeyRevoke('+kki+')">Revoke</button>'},
    plan:{t:"Change plan",w:false,b:
      '<div class="field"><label>Plan</label><select aria-label="Plan"><option>Team — usage-based, monthly, cancel any time</option><option>Enterprise — annual, committed use at 20–30% off, from $60,000</option></select></div>'+
-     '<div class="note">The free tier is in every plan: first 1,000 runs each month, every governance feature on. Enterprise adds a dedicated data plane or behind-the-firewall deployment, the hosted witness runner, and support with an SLA.</div>',
+     '<div class="note">The free tier is in every plan: an included monthly allowance of governed actions and every governance feature on. Enterprise adds a dedicated data plane or behind-the-firewall deployment, and support with an SLA.</div>',
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Plan change staged in Stripe. Oxagen holds the meter; Stripe holds the plan.\')">Change plan</button>'},
    /* ---- audit dialogs (W10 port) — bodies are built by guarded functions in the Audit section ---- */
    receipt:{t:receiptDlgTitle(),s:receiptDlgSub(),w:true,b:receiptDlgBody(),f:receiptDlgFoot()},
@@ -9769,8 +9964,8 @@ function dialog(){
    fix:fixDlg(),
    bisect:{t:"Bisect between two runs",w:false,b:
      '<div class="field"><label>Task</label><input value="a-intel/platform#482 · Cut 4.11.0 release notes" disabled aria-label="Task"></div>'+
-     '<div class="field"><label>Run A</label><select aria-label="Run A"><option>run_01K5RQ4B9C7XTN2P · flipped · $2.87</option></select></div>'+
-     '<div class="field"><label>Run B</label><select aria-label="Run B"><option>run_01K5RK7C2V8BNM3X · failing · $3.42</option></select></div>'+
+     '<div class="field"><label>Run A</label><select aria-label="Run A"><option>run_01K5RQ4B9C7XTN2P · sealed · $2.87</option></select></div>'+
+     '<div class="field"><label>Run B</label><select aria-label="Run B"><option>run_01K5RK7C2V8BNM3X · sealed · $3.42</option></select></div>'+
      '<div class="note">Bisect is offered between any two runs of the same task. Re-run is Stella only, because only Stella’s own deterministic ladder can run the task again.</div>',
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Bisect started. The first divergent frame is seq 23: the steering digest differs.\')">Bisect</button>'}
   };
@@ -10001,7 +10196,7 @@ var CMDS=[
    ["Create anything","!openDialog('create')"],["New agent","!wzOpen('agent')"],["New tool","!wzOpen('tool')"],
    ["Add a skill","!wzOpen('skill')"],["Write a context record","!wzOpen('record')"]]},
  {g:"Runs",i:[["run_01K5RS7M2E8FJ3QW · release-manager · live","#/a-intel/core-platform/runs/run_01K5RS7M2E8FJ3QW"],
-   ["run_01K5RQ4B9C7XTN2P · stella-ci · flipped","#/a-intel/core-platform/runs/run_01K5RQ4B9C7XTN2P"],
+    ["run_01K5RQ4B9C7XTN2P · stella-ci · sealed","#/a-intel/core-platform/runs/run_01K5RQ4B9C7XTN2P"],
    ["run_01K4QJ9E4T6YUI1O · stella-ci · compacted","#/a-intel/core-platform/runs/run_01K4QJ9E4T6YUI1O"]]},
  {g:"Actions — each one is a governed action",i:[
    ["Pause every live run in this workspace",null],["Steer the fleet","!openSteerFleet()"],["Register an agent","!regStart()"],
@@ -10060,64 +10255,10 @@ function cmdMenu(){
 
 
 
-/* ============================== Scores, roles, identities, auto-approvals ==============================
-   Two scores per agent, 0–1000, traffic-lit: trust (does it do what it is allowed to, provably) and spend
-   (does what it costs buy proven value). Roles are IAM roles with a permission set; agents hold roles the
-   way people do, intersected with their operator’s grants. Auto-approval rules let a customer skip the
-   human gate when an agent’s trust score meets a floor — never for tainted input or a critical hazard. */
-var SCORES={
- "a-intel.core.release-manager":{trust:842,spend:731},
- "a-intel.core.stella-ci":{trust:911,spend:868},
- "a-intel.core.triage":{trust:312,spend:454},
- "a-intel.core.docs-writer":{trust:687,spend:522},
- "a-intel.finops.invoice-bot":{trust:764,spend:388}
-};
-/* Every customer's agents, not only this tenant's. Oxagen publishes a nightly rollup to every
-   organization: how many organizations and agents were scored, and a sorted, anonymised score
-   sample per kind — never a row, because a tenant never sees another tenant's agents. The bands a
-   score is coloured by are percentiles of that population plus this tenant's own agents, so a
-   colour means where the agent stands among every agent running on Oxagen, not against a number
-   someone typed. volume() fills the sample; PLATFORM.asOf is the rollup's own stamp. */
-var PLATFORM={asOf:"2026-09-11 02:10 UTC",orgs:0,agents:0,trust:[],spend:[]};
-var SCORE_LABEL={top:"top decile",mid:"in range",warn:"warning",low:"critical"};
-/* The cut points. Green is the 90th percentile and up; the tenth to the ninetieth is in range and
-   carries no colour, which is eight agents in ten by construction; below the tenth is a warning and
-   below the fifth critical, amber before red. Nearest-rank percentiles over the sorted population,
-   memoised for one render and dropped at the next, so registering an agent or a score moving
-   shifts the cuts on the very next paint. */
-var _cuts=null;
-function scoreKind(kind){return /trust/i.test(kind)?"trust":"spend";}
-function scorePop(k){
-  var own=AGENTS.map(function(a){var x=agentScores(a);return x?x[k]:null;}).filter(function(v){return v!=null;});
-  return own.concat(PLATFORM[k]).sort(function(a,b){return a-b;});
-}
-function pctl(sorted,p){ if(!sorted.length) return 0; return sorted[Math.max(0,Math.ceil(p*sorted.length)-1)]; }
-function scoreCuts(kind){
-  var k=scoreKind(kind);
-  if(!_cuts) _cuts={};
-  if(!_cuts[k]){
-    var pop=scorePop(k);
-    _cuts[k]={p5:pctl(pop,0.05),p10:pctl(pop,0.10),p50:pctl(pop,0.50),p90:pctl(pop,0.90),n:pop.length,orgs:PLATFORM.orgs+1};
-  }
-  return _cuts[k];
-}
-function clamp1k(v){return Math.max(0,Math.min(1000,Math.round(v)));}
-function scoreBand(v,kind){
-  var c=scoreCuts(kind||"trust");
-  return v>=c.p90?"top":v<c.p5?"low":v<c.p10?"warn":"mid";
-}
-function agentScores(a){
-  if(typeof a==="string")a=agent(a);
-  if(!a) return null;
-  if(SCORES[a.key]) return SCORES[a.key];
-  if((a.runs30||0)<=1) return {trust:500,spend:500,prov:true};
-  return {trust:clamp1k(500+(a.ratio||0)*400-tamperCount(a)*250),spend:clamp1k((a.ratio||0)*600+300)};
-}
-function scorePill(kind,v,sm,prov){
-  var b=scoreBand(v,kind), c=scoreCuts(kind);
-  var where=b==="top"?"at or above the 90th percentile ("+c.p90+")":b==="low"?"below the 5th percentile ("+c.p5+")":b==="warn"?"below the 10th percentile ("+c.p10+")":"between the 10th and 90th percentile ("+c.p10+"\u2013"+c.p90+")";
-  return '<span class="sc sc-'+b+(sm?' sm':'')+'" title="'+kind+' score '+v+' of 1000 \u00b7 '+SCORE_LABEL[b]+' \u00b7 '+where+' of '+c.n.toLocaleString()+' agents across '+c.orgs+' organizations on Oxagen'+(prov?' \u00b7 provisional until 20 runs':'')+'"><i></i>'+kind+' <b>'+v+'</b>'+(prov?'<em>prov.</em>':'')+'</span>';
-}
+/* ============================== Roles, identities, auto-approvals ==============================
+   Roles are IAM roles with a permission set; agents hold roles the way people do, intersected with
+   their operator's grants. Auto-approval rules let a customer skip the human gate for an agent whose
+   record earns it: a tier, a run count and a clean incident record, never a score. */
 /* The agent card. a is an agent record or key; o.layout is "list" (default), "compact" or "detail";
    o.sub replaces the second line (harness by default; compact adds the 30-day figures); o.link
    wraps it in a link to the agent (compact defaults to linked, list and detail to not). One
@@ -10129,21 +10270,8 @@ function agentCard(a,o){
   var sz=o.sz||(lay==="detail"?60:lay==="compact"?30:26);
   var sub=o.sub!=null?o.sub:lay==="compact"?h(a.harnessLabel)+' \u00b7 '+(a.runs30||0).toLocaleString()+' runs 30d \u00b7 '+usd(a.spend30):h(a.harnessLabel);
   var link=o.link!=null?o.link:lay==="compact";
-  var inner=agentAv(a,sz)+'<span class="agid" title="'+h(a.key)+'"><span class="tkey">'+h(a.key)+'</span>'+(sub?'<span class="sub">'+sub+'</span>':'')+'</span>'+scorePair(a,lay!=="detail");
+  var inner=agentAv(a,sz)+'<span class="agid" title="'+h(a.key)+'"><span class="tkey">'+h(a.key)+'</span>'+(sub?'<span class="sub">'+sub+'</span>':'')+'</span>';
   return link?'<a class="agc agc-'+lay+'" href="'+agentUrl(a)+'"'+(o.onclick?' onclick="'+o.onclick+'"':'')+'>'+inner+'</a>':'<span class="agc agc-'+lay+'">'+inner+'</span>';
-}
-function scorePair(a,sm){
-  var s=agentScores(a); if(!s) return '';
-  return '<span class="scs">'+scorePill("Trust",s.trust,sm,s.prov)+scorePill("Spend",s.spend,sm,s.prov)+'</span>';
-}
-function scoreMeter(kind,v,inputs,what){
-  var c=scoreCuts(kind), w=function(a,b){return 'style="flex:0 0 '+((b-a)/10).toFixed(1)+'%"';};
-  return '<div class="scm"><div class="scm-h"><span class="k">'+kind+' score</span>'+scorePill(kind,v)+'<span class="dim">0\u20131000 \u00b7 recomputed nightly from frames</span></div>'+
-   '<div class="scm-bar"><i class="z z-low" '+w(0,c.p5)+'></i><i class="z z-warn" '+w(c.p5,c.p10)+'></i><i class="z z-mid"></i><i class="z z-top" '+w(c.p90,1000)+'></i><span class="mk" style="left:'+(v/10)+'%"></span></div>'+
-   '<div class="scm-lg"><span>critical &lt; '+c.p5+'</span><span>warning &lt; '+c.p10+'</span><span>in range</span><span>top decile \u2265 '+c.p90+'</span></div>'+
-   '<p class="muted" style="font-size:12px;margin:10px 0 0">'+what+'</p>'+
-   '<p class="dim" style="font-size:11px;margin:6px 0 0">Bands are percentiles of every scored agent on Oxagen: '+c.n.toLocaleString()+' agents across '+c.orgs+' organizations, rollup '+h(PLATFORM.asOf)+'. This organization\u2019s agents are in the population; the rest is anonymised. Eight agents in ten sit in range and carry no colour.</p>'+
-   '<dl class="kv">'+inputs.map(function(x){return '<dt>'+h(x[0])+'</dt><dd>'+x[1]+(x[2]?' <span class="'+(x[2]>0?'up':'dn')+'">'+(x[2]>0?'+':'')+x[2]+'</span>':'')+'</dd>';}).join("")+'</dl></div>';
 }
 /* The 30-day rollup for one agent, which is what the score strip's window is. Prefer the
    spend rollup; fall back to a spend-weighted mean over this agent's recorded runs. Both
@@ -10163,42 +10291,6 @@ function agentWasteShare(a){
   var d=agentRollup(a), sp=money(a.spend30);
   if(!d||typeof d.wasted!=="number"||!sp) return null;
   return d.wasted/sp;
-}
-function scoreStrip(a){
-  if(typeof a==="string")a=agent(a);
-  if(!a) return '';
-  var s=agentScores(a), w=ws();
-  var q=AUTORULES.filter(function(r){return r.on&&(r.ws==="*"||r.ws===a.ws);}), qn=q.filter(function(r){return ruleQualifies(r,a);}).length;
-  /* Proof rate counts runs whose witness verdict flipped (§8.5). It is NOT the productive
-     ratio (§12.8), which measures steps that advanced the task. They are different measures
-     and must never be derived from one another. */
-  var runs=a.runs30||0, flips=(a.flipped30==null?0:a.flipped30);
-  return '<div class="grid g2" style="margin-bottom:16px">'+
-   scoreMeter("Trust",s.trust,[
-     ["Proof rate",runs?flips+' of '+runs+' runs flipped · '+per(flips/runs):'no runs in 30 days',s.trust>=scoreCuts('trust').p50?12:-8],
-     ["Productive ratio",per(a.ratio||0)+' of steps advanced the task'],
-     ["Policy denials 30d",a.incidents?'6 · 1 escalated':'2 · none escalated'],
-     ["Tamper incidents",a.incidents?'<span class="dn">'+a.incidents+' · hooks_removed</span>':'0'],
-     ["Approvals overturned",(function(){
-        var mine=APPROVALS.filter(function(x){return x.agent===a.key;});
-        var done=mine.filter(function(x){var st=apState(x.id).status;return st==="approved"||st==="denied";});
-        if(!mine.length) return 'no approval has parked on this agent';
-        return done.filter(function(x){return apState(x.id).status==="denied";}).length+' of '+done.length+' resolved';
-      })()],
-     ["Chain integrity","intact on every sealed run"]],
-     s.prov?'Provisional: fewer than 20 runs. It starts at 500 and moves with evidence.':'What it did against what it was allowed to do, weighted by how much of it a witness proved.')+
-   scoreMeter("Spend",s.spend,[
-     ["Spend per proven run",flips?usd((parseFloat(String(a.spend30).replace(/,/g,""))/flips).toFixed(2)):'no proven run yet',s.spend>=scoreCuts('spend').p50?9:-11],
-     ["Proven ÷ spend 30d",usd(a.proven30)+' ÷ '+usd(a.spend30)+' · '+per(money(a.proven30)/Math.max(1e-9,money(a.spend30)))],
-     ["Cache hit rate",agentCache(a)==null?'not recorded on this agent':per(agentCache(a))],
-     ["Wasted spend share",agentWasteShare(a)==null?'not computed for this agent':per(agentWasteShare(a))+' of '+usd(a.spend30)],
-     ["Business value",flips?flips+' flips · '+usd(a.proven30)+' proven':'accepted by a human, never folded into proven']],
-     s.prov?'Provisional: fewer than 20 runs.':'Tokens against outcomes: how efficiently it spends, and whether the spend bought business value a witness could prove.')+
-   '</div>'+
-   '<div class="banner" style="margin-bottom:16px"><div class="sc-legend"><b style="color:var(--fg)">Auto-approvals</b>'+
-   (q.length?'<span style="white-space:nowrap">qualifies for <b style="color:var(--fg)">'+qn+' of '+q.length+'</b> rule'+(q.length===1?'':'s')+' in '+h(w.name)+'</span>':'<span style="white-space:nowrap">no rule in '+h(w.name)+' yet</span>')+
-   '<span class="dim">tainted input and critical hazard never auto-approve</span></div>'+
-   '<button class="btn sm" style="margin-left:auto" onclick="go(\'#/'+ORG.slug+'/'+a.ws+'/tools/auto\')">Rules</button></div>';
 }
 
 /* ---- IAM roles: a permission set with a kind (human, agent, service) and a scope ---- */
@@ -10367,37 +10459,42 @@ function identityDlg(){
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="identitySave()">Request the change</button>'};
 }
 
-/* ---- auto-approval rules: skip the human gate when trust meets a floor ---- */
+/* ---- auto-approval rules: skip the human gate when the record earns it ----
+   A rule names the tier the agent must be on, the runs it must have behind it in 30 days, and an
+   amount ceiling. An agent with any tamper incident in the window never qualifies. Every input is
+   a count off the record; there is no score. */
+var TIER_RANK={observe:0,harness:1,gateway:2,contained:3};
 var AUTORULES=[
- {id:"aar_01K5RT7Q",name:"Trusted release tooling",tool:"github__create_release@*",ws:"core-platform",minTrust:800,minSpend:null,maxAmount:null,on:true,by:"Priya Natarajan",at:"2026-08-30",hits30:14,skipped30:3},
- {id:"aar_01K5RT8C",name:"Small vendor payments",tool:"stripe__create_payment@*",ws:"finops",minTrust:750,minSpend:400,maxAmount:"250.00",on:true,by:"Dana Okafor",at:"2026-09-02",hits30:41,skipped30:6},
- {id:"aar_01K5RT9A",name:"Linear triage writes",tool:"linear__*",ws:"core-platform",minTrust:600,minSpend:null,maxAmount:null,on:false,by:"Marcus Bell",at:"2026-09-08",hits30:0,skipped30:0}
+ {id:"aar_01K5RT7Q",name:"Trusted release tooling",tool:"github__create_release@*",ws:"core-platform",minTier:"gateway",minRuns:100,maxAmount:null,on:true,by:"Priya Natarajan",at:"2026-08-30",hits30:14,skipped30:3},
+ {id:"aar_01K5RT8C",name:"Small vendor payments",tool:"stripe__create_payment@*",ws:"finops",minTier:"contained",minRuns:200,maxAmount:"250.00",on:true,by:"Dana Okafor",at:"2026-09-02",hits30:41,skipped30:6},
+ {id:"aar_01K5RT9A",name:"Linear triage writes",tool:"linear__*",ws:"core-platform",minTier:"harness",minRuns:20,maxAmount:null,on:false,by:"Marcus Bell",at:"2026-09-08",hits30:0,skipped30:0}
 ];
 var RULE_TOOLS=["github__create_release@*","github__create_pull_request@*","github__merge_pull_request@*","stripe__create_payment@*","aws_billing__purchase_savings_plan@*","linear__*","bash__run@*","write__file@*","edit__file@*","*"];
 S.ruleEdit=null; S.ruleN=0;
 function ruleById(id){for(var i=0;i<AUTORULES.length;i++){if(AUTORULES[i].id===id)return AUTORULES[i];}return null;}
 function globMatch(pat,s){return new RegExp("^"+String(pat).replace(/[.+?^\$\{\}()|[\]\\]/g,"\\$&").replace(/\*/g,".*")+"$").test(String(s));}
-function ruleQualifies(r,a){var s=agentScores(a);return !!s&&!s.prov&&s.trust>=r.minTrust&&(r.minSpend==null||s.spend>=r.minSpend);}
+function ruleQualifies(r,a){return !!a&&(TIER_RANK[a.tier]||0)>=(TIER_RANK[r.minTier]||0)&&(a.runs30||0)>=(r.minRuns||0)&&tamperCount(a)===0;}
+function ruleReq(r){return [r.minTier+' tier or above',(r.minRuns||0)+' runs in 30 days','no tamper incident'].concat(r.maxAmount!=null?['amount ≤ '+usd(r.maxAmount)]:[]);}
 function ruleAgents(r){return AGENTS.filter(function(a){return r.ws==="*"||a.ws===r.ws;});}
 function autoEligibility(ap){
-  var a=agent(ap.agent), s=a?agentScores(a):null;
+  var a=agent(ap.agent);
   var rules=AUTORULES.filter(function(r){return r.on&&(r.ws==="*"||r.ws===ap.ws)&&globMatch(r.tool,ap.tool);});
   if(!rules.length) return null;
   var r=rules[0], why=[];
-  if(!s) why.push("agent unknown");
-  else { if(s.prov) why.push("score provisional");
-    if(s.trust<r.minTrust) why.push("trust "+s.trust+" &lt; "+r.minTrust);
-    if(r.minSpend!=null&&s.spend<r.minSpend) why.push("spend "+s.spend+" &lt; "+r.minSpend); }
+  if(!a) why.push("agent unknown");
+  else { if((TIER_RANK[a.tier]||0)<(TIER_RANK[r.minTier]||0)) why.push(a.tier+" tier, rule needs "+r.minTier);
+    if((a.runs30||0)<(r.minRuns||0)) why.push((a.runs30||0)+" runs in 30 days &lt; "+r.minRuns);
+    if(tamperCount(a)) why.push(tamperCount(a)+" tamper incident"+(tamperCount(a)===1?"":"s")+" in the window"); }
   if(r.maxAmount!=null&&ap.amount&&money(ap.amount)>money(r.maxAmount)) why.push(usd(ap.amount)+" above the "+usd(r.maxAmount)+" ceiling");
   if(ap.tainted) why.push("tainted input never auto-approves");
   if(ap.risk==="critical") why.push("critical hazard never auto-approves");
   var floors=ap.tainted||ap.risk==="critical";
-  return {rule:r,ok:!why.length,why:why,floor:floors,score:s};
+  return {rule:r,ok:!why.length,why:why,floor:floors};
 }
 function autoEligibilityLine(ap){
   var e=autoEligibility(ap); if(!e) return '';
   return '<div style="font-size:11.5px;margin-top:7px;color:var(--muted)"><span class="b '+(e.ok?"b-allowed":"b-q")+'" style="margin-right:6px">'+(e.ok?'auto-approval eligible':'not auto-approved')+'</span>'+
-   'rule <span class="mono">'+h(e.rule.name)+'</span> · trust ≥ '+e.rule.minTrust+(e.rule.minSpend!=null?' · spend ≥ '+e.rule.minSpend:'')+
+   'rule <span class="mono">'+h(e.rule.name)+'</span> · '+ruleReq(e.rule).slice(0,2).join(' · ')+
    (e.ok?' · parked anyway: '+(ap.mandate?'the mandate requires a human above its threshold':ap.side==="irreversible"?'the policy requires a human on an irreversible side effect, which outranks any rule':'policy returned approve')+'':' · '+e.why.join(", "))+'</div>';
 }
 function autoRulesBody(){
@@ -10408,9 +10505,8 @@ function autoRulesBody(){
   var cards=AUTORULES.slice().sort(function(a,b){return b.at.localeCompare(a.at)||b.id.localeCompare(a.id);}).map(function(r){
     var pool=ruleAgents(r), q=pool.filter(function(a){return ruleQualifies(r,a);});
     var wsName=r.ws==="*"?'every workspace':r.ws, prov=r.id+' · '+r.by+' · '+r.at;
-    var req=[scorePill("Trust ≥",r.minTrust,true)];
-    if(r.minSpend!=null)req.push(scorePill("Spend ≥",r.minSpend,true));
-    var reqT='trust ≥ '+r.minTrust+(r.minSpend!=null?' · spend ≥ '+r.minSpend:'')+(r.maxAmount!=null?' · amount ≤ '+usd(r.maxAmount):'');
+    var req=ruleReq(r).slice(0,3).map(function(x){return '<span class="b b-q">'+h(x)+'</span>';});
+    var reqT=ruleReq(r).join(' · ');
     var names=q.map(function(a){return a.key.split(".").pop();});
     var chips=names.slice(0,2).map(function(n){return '<span class="b b-q mono">'+h(n)+'</span>';}).join("")+(names.length>2?'<span class="dim"> +'+(names.length-2)+'</span>':'');
     return '<article class="arule'+(r.on?'':' off')+'" onclick="ruleOpen(\''+r.id+'\')">'+
@@ -10431,23 +10527,20 @@ function autoRulesBody(){
    '<div class="stat"><span class="k">Auto-approved 30d</span><span class="v" style="color:var(--st-allowed)">'+hits+'</span><span class="s">each one a frame with the rule id</span></div>'+
    '<div class="stat"><span class="k">Held by a floor</span><span class="v">'+skipped+'</span><span class="s">tainted, critical, or above a ceiling</span></div>'+
    '<div class="stat"><span class="k">Median wait saved</span><span class="v">3m 40s</span><span class="s">per call, against a human gate</span></div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>Auto-approvals — trust-gated</h3>'+
-   '<span class="dim" style="font-size:12px">a rule replaces the human gate for agents whose scores meet its floor</span>'+
+   '<div class="panel"><div class="panel-h"><h3>Auto-approvals</h3>'+
+   '<span class="dim" style="font-size:12px">a rule replaces the human gate for agents whose tier, run count and incident record meet its floor</span>'+
    '<div class="sp"><button class="btn sm primary" onclick="ruleNew()">Create rule</button></div></div>'+
    '<div class="arules">'+cards+'</div>'+
-   '<div class="panel-b"><div class="note">Deny wins. A rule never auto-approves tainted input, a critical hazard, a call outside a mandate, or an agent whose score is provisional. Every auto-approval is a <span class="mono">policy.decision</span> frame naming the rule, so a replay shows who decided: the rule, and the person who created it.</div></div></div>';
+   '<div class="panel-b"><div class="note">Deny wins. A rule never auto-approves tainted input, a critical hazard, a call outside a mandate, or an agent with a tamper incident in the window. Every auto-approval is a <span class="mono">policy.decision</span> frame naming the rule, so a replay shows who decided: the rule, and the person who created it.</div></div></div>';
 }
-function ruleNew(){S.ruleEdit={id:null,name:"",tool:RULE_TOOLS[0],ws:ws().slug,minTrust:750,minSpend:null,maxAmount:"",on:true,isNew:true};openDialog("ruleedit");}
-function ruleOpen(id){var r=ruleById(id);if(!r)return;S.ruleEdit={id:r.id,name:r.name,tool:r.tool,ws:r.ws,minTrust:r.minTrust,minSpend:r.minSpend,maxAmount:r.maxAmount==null?"":r.maxAmount,on:r.on,isNew:false};openDialog("ruleedit");}
+function ruleNew(){S.ruleEdit={id:null,name:"",tool:RULE_TOOLS[0],ws:ws().slug,minTier:"gateway",minRuns:50,maxAmount:"",on:true,isNew:true};openDialog("ruleedit");}
+function ruleOpen(id){var r=ruleById(id);if(!r)return;S.ruleEdit={id:r.id,name:r.name,tool:r.tool,ws:r.ws,minTier:r.minTier,minRuns:r.minRuns,maxAmount:r.maxAmount==null?"":r.maxAmount,on:r.on,isNew:false};openDialog("ruleedit");}
 function ruleToggle(id){var r=ruleById(id);if(!r)return;r.on=!r.on;render();act("Rule “"+r.name+"” "+(r.on?"enabled":"disabled")+". Bundle bumped; the next call sees it.");}
 function ruleLive(){
   var d=S.ruleEdit; if(!d) return;
-  var t=el("ruleTrust"), tn=el("ruleTrustN"); if(t&&tn){ if(document.activeElement===tn) t.value=tn.value; else tn.value=t.value; d.minTrust=clamp1k(+t.value); }
-  var sOn=el("ruleSpendOn"), s=el("ruleSpend"), sn=el("ruleSpendN");
-  if(sOn){ if(sOn.checked&&s&&sn){ if(document.activeElement===sn) s.value=sn.value; else sn.value=s.value; d.minSpend=clamp1k(+s.value);} else d.minSpend=null; if(s)s.disabled=!sOn.checked; if(sn)sn.disabled=!sOn.checked; }
+  var tsel=el("ruleTier"); if(tsel) d.minTier=tsel.value;
+  var rn=el("ruleRuns"); if(rn) d.minRuns=Math.max(0,parseInt(rn.value,10)||0);
   var wsel=el("ruleWs"); if(wsel) d.ws=wsel.value;
-  var tp=el("ruleTrustPill"); if(tp) tp.outerHTML=scorePill("Trust ≥",d.minTrust,false).replace('<span class="sc','<span id="ruleTrustPill" class="sc');
-  var sp=el("ruleSpendPill"); if(sp) sp.outerHTML=(d.minSpend==null?'<span id="ruleSpendPill" class="dim" style="font-size:12px">no spend floor</span>':scorePill("Spend ≥",d.minSpend,false).replace('<span class="sc','<span id="ruleSpendPill" class="sc'));
   var pool=ruleAgents({ws:d.ws}), q=pool.filter(function(a){return ruleQualifies(d,a);});
   var pv=el("rulePrev"); if(pv) pv.innerHTML='<b style="color:var(--fg)">'+q.length+' of '+pool.length+'</b> agents qualify now'+(q.length?': '+q.map(function(a){return '<span class="mono">'+h(a.key.split(".").pop())+'</span>';}).join(", "):'')+'.';
 }
@@ -10455,7 +10548,7 @@ function ruleSave(){
   var d=S.ruleEdit; if(!d) return; ruleLive();
   var name=(el("ruleName")?el("ruleName").value:d.name).trim(), tool=el("ruleTool")?el("ruleTool").value:d.tool, amt=el("ruleAmt")?el("ruleAmt").value.trim():"";
   if(!name){act("Give the rule a name people will read in the audit record.");return;}
-  var rec={name:name,tool:tool,ws:d.ws,minTrust:d.minTrust,minSpend:d.minSpend,maxAmount:amt?amt:null,on:el("ruleOn")?el("ruleOn").checked:d.on};
+  var rec={name:name,tool:tool,ws:d.ws,minTier:d.minTier,minRuns:d.minRuns,maxAmount:amt?amt:null,on:el("ruleOn")?el("ruleOn").checked:d.on};
   if(d.isNew){ S.ruleN++; rec.id="aar_01K5RV"+("0"+S.ruleN).slice(-2)+"Z"; rec.by=PEOPLE.marcus.name; rec.at="2026-09-11"; rec.hits30=0; rec.skipped30=0; AUTORULES.push(rec);
     closeDialog(); act("Rule “"+name+"” created. It is in the bundle at the next bump; every auto-approval it makes names it.","gold"); }
   else { var r=ruleById(d.id); if(r){for(var k in rec)r[k]=rec[k];} closeDialog(); act("Rule “"+name+"” updated. Bundle bumped."); }
@@ -10468,15 +10561,14 @@ function ruleEditDlg(){
    '<div class="field"><label>Workspace</label><select id="ruleWs" aria-label="Workspace" onchange="ruleLive()">'+WS.map(function(w){return '<option value="'+h(w.slug)+'"'+(d.ws===w.slug?' selected':'')+'>'+h(w.name)+'</option>';}).join("")+'<option value="*"'+(d.ws==="*"?' selected':'')+'>every workspace</option></select></div></div>'+
    '<div class="field"><label>Applies to</label><select id="ruleTool" aria-label="Tool pattern" onchange="S.ruleEdit.tool=this.value">'+RULE_TOOLS.map(function(t){return '<option'+(d.tool===t?' selected':'')+'>'+h(t)+'</option>';}).join("")+'</select>'+
     '<div class="hint">A tool version pattern. The rule only matters where the gate is <span class="mono">require_approval</span>; a deny stays a deny.</div></div>'+
-   '<div class="field"><label>Minimum trust score</label><div class="rng"><input id="ruleTrust" type="range" min="0" max="1000" step="10" value="'+d.minTrust+'" aria-label="Minimum trust" oninput="ruleLive()"><input id="ruleTrustN" type="number" min="0" max="1000" value="'+d.minTrust+'" aria-label="Minimum trust value" oninput="ruleLive()"></div>'+
-    '<div class="rng-prev">'+scorePill("Trust ≥",d.minTrust,false).replace('<span class="sc','<span id="ruleTrustPill" class="sc')+'<span>'+(function(){var c=scoreCuts('Trust');return 'Below '+c.p90+' you are trusting an agent outside the top decile of every agent on Oxagen; below '+c.p50+' one in the bottom half. The floor is compared against '+c.n.toLocaleString()+' agents across '+c.orgs+' organizations, recomputed nightly.';})()+'</span></div></div>'+
-   '<div class="field"><label class="check" style="margin:0 0 8px;padding:8px 11px"><input id="ruleSpendOn" type="checkbox"'+(d.minSpend!=null?' checked':'')+' onchange="ruleLive()" style="width:auto"><span class="grow"><span class="n" style="font-family:var(--font)">Also require a spend score</span><span class="d">Keeps an agent that burns tokens for little proven value on the human gate even when it behaves.</span></span></label>'+
-    '<div class="rng"><input id="ruleSpend" type="range" min="0" max="1000" step="10" value="'+(d.minSpend==null?400:d.minSpend)+'" aria-label="Minimum spend"'+(d.minSpend==null?' disabled':'')+' oninput="ruleLive()"><input id="ruleSpendN" type="number" min="0" max="1000" value="'+(d.minSpend==null?400:d.minSpend)+'" aria-label="Minimum spend value"'+(d.minSpend==null?' disabled':'')+' oninput="ruleLive()"></div>'+
-    '<div class="rng-prev">'+(d.minSpend==null?'<span id="ruleSpendPill" class="dim" style="font-size:12px">no spend floor</span>':scorePill("Spend ≥",d.minSpend,false).replace('<span class="sc','<span id="ruleSpendPill" class="sc'))+'</div></div>'+
+   '<div class="grid g2"><div class="field"><label>Minimum tier</label><select id="ruleTier" aria-label="Minimum tier" onchange="ruleLive()">'+["harness","gateway","contained"].map(function(t){return '<option value="'+t+'"'+(d.minTier===t?' selected':'')+'>'+t+'</option>';}).join("")+'</select>'+
+    '<div class="hint">Computed per run from what was routed. Only <span class="mono">gateway</span> and above have observed metering; only <span class="mono">contained</span> is enforced against the host.</div></div>'+
+   '<div class="field"><label>Minimum runs in 30 days</label><input id="ruleRuns" type="number" min="0" step="10" value="'+(d.minRuns||0)+'" aria-label="Minimum runs" oninput="ruleLive()">'+
+    '<div class="hint">Runs sealed in the window with no tamper incident against the agent. One incident and the agent drops out of every rule until the window clears.</div></div></div>'+
    '<div class="grid g2"><div class="field"><label>Amount ceiling (USD, optional)</label><input id="ruleAmt" value="'+h(d.maxAmount||"")+'" placeholder="250.00" aria-label="Amount ceiling"><div class="hint">Read from the call by the tool’s <span class="mono">amount_path</span>. Above it, a human decides.</div></div>'+
    '<div class="field"><label>State</label><label class="check" style="margin:0;padding:8px 11px"><input id="ruleOn" type="checkbox"'+(d.on?' checked':'')+' style="width:auto"><span class="grow"><span class="n" style="font-family:var(--font)">Enabled</span><span class="d">Off keeps the rule but parks every call for a human.</span></span></label></div></div>'+
    '<div class="banner" style="margin-bottom:12px"><span id="rulePrev"><b style="color:var(--fg)">'+q.length+' of '+pool.length+'</b> agents qualify now'+(q.length?': '+q.map(function(a){return '<span class="mono">'+h(a.key.split(".").pop())+'</span>';}).join(", "):'')+'.</span></div>'+
-   '<div class="note">Floors you cannot switch off: tainted input, critical hazard, calls outside a mandate, provisional scores. Every auto-approval is a frame that names this rule and you.</div>';
+   '<div class="note">Floors you cannot switch off: tainted input, critical hazard, calls outside a mandate, a tamper incident in the window. Every auto-approval is a frame that names this rule and you.</div>';
   return {t:d.isNew?"Create an auto-approval rule":"Edit rule",s:d.isNew?"":d.id,w:true,b:b,
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="ruleSave()">'+(d.isNew?'Create rule':'Save changes')+'</button>'};
 }
@@ -10513,13 +10605,14 @@ function memberDelDlg(){
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn danger"'+(owns?' disabled':'')+' onclick="memberRemove(\''+h(S.dlgArg)+'\')">Remove</button>'};
 }
 function wsById(slug){for(var i=0;i<WS.length;i++){if(WS[i].slug===slug)return WS[i];}return null;}
-function wsSave(){var w=wsById(S.dlgArg);if(!w)return;var n=el("wsName"),b=el("wsBranch"),r=el("wsRet");if(n&&n.value.trim())w.name=n.value.trim();if(b)w.branch=b.value;if(r)w.retention=r.value;closeDialog();act("Workspace "+w.name+" updated. Recorded as a security event"+(w.retention==="digest_only"?"; digest_only is recorded as a completeness gap on every run.":"."));}
+function wsSave(){var w=wsById(S.dlgArg);if(!w)return;var n=el("wsName"),b=el("wsBranch"),r=el("wsRet"),g=el("wsGov");if(n&&n.value.trim())w.name=n.value.trim();if(b)w.branch=b.value;if(r)w.retention=r.value;if(g&&g.value!==wsGov(w)){w.governance=g.value;act("Context PR opened on "+w.main+": governance.toml sets mode = "+g.value+".","gold");}closeDialog();act("Workspace "+w.name+" updated. Recorded as a security event"+(w.retention==="digest_only"?"; digest_only is recorded as a completeness gap on every run.":"."));}
 function wsEditDlg(){
   var w=S.dlg==="editws"?wsById(S.dlgArg):null; if(!w) return {t:"Edit workspace",w:false,b:"",f:""};
   return {t:"Edit workspace",s:w.slug,w:false,b:'<div class="field"><label>Name</label><input id="wsName" value="'+h(w.name)+'" aria-label="Name"></div>'+
    '<div class="field"><label>Main repository</label><input value="'+h(w.main)+'" readonly aria-label="Main repository"><div class="hint">Changing main is an org-owner action with approval.</div></div>'+
    '<div class="field"><label>Production branch</label><select id="wsBranch" aria-label="Production branch">'+["main","release","production"].map(function(x){return '<option'+(w.branch===x?' selected':'')+'>'+x+'</option>';}).join("")+'</select></div>'+
-   '<div class="field"><label>Governance mode</label><select aria-label="Governance mode"><option>team — one code-owner review</option><option>solo — merge on green checks</option><option>regulated — two reviews and a promotion ledger</option></select></div>'+
+   '<div class="field"><label for="wsGov">Governance mode</label><select id="wsGov" aria-label="Governance mode">'+WZ_MODES.map(function(m){return '<option value="'+m[0]+'"'+(wsGov(w)===m[0]?' selected':'')+'>'+m[0]+' · '+h(m[1])+'</option>';}).join("")+'</select>'+
+    '<div class="hint">Written to <span class="mono">.oxagen/rules/governance.toml</span> through a Context PR; it takes effect on merge.</div></div>'+
    '<div class="field"><label>Namespace</label><input value="'+h(w.ns||w.slug.split("-")[0])+'" disabled aria-label="Namespace"><div class="hint">Immutable. It is in every agent key here: <span class="mono">'+h(ORG.slug+"."+(w.ns||w.slug.split("-")[0]))+'.&lt;agent&gt;</span>.</div></div>'+
    '<div class="field"><label for="wsRet">Retention mode</label><select id="wsRet">'+[["content_exact","keep prompts and tool bodies in full"],["digest_only","digests only, lowers the replay grade"]].map(function(x){return '<option value="'+x[0]+'"'+((w.retention||"content_exact")===x[0]?' selected':'')+'>'+x[0]+' — '+x[1]+'</option>';}).join("")+'</select>'+
    '<div class="hint"><span class="mono">digest_only</span> is an opt-down: recorded as a completeness gap on every run, because a replay without bodies is a timeline, not a replay.</div></div>'+
@@ -10535,6 +10628,106 @@ function wsArchiveDlg(){
   return {t:"Archive workspace",s:w.name,w:false,b:'<p style="font-size:13px">Archiving freezes <b>'+h(w.name)+'</b>: runs, frames, records and spend stay readable forever; agents cannot start, tools cannot be granted, and the main repo binding is released.</p>'+
    (n?'<div class="warn">'+n+' agent'+(n>1?'s are':' is')+' registered here. Deregister or move them first.</div>':'<div class="note">No agents here. Archiving is an org-owner action, recorded as a security event.</div>'),
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn danger"'+(n?' disabled':'')+' onclick="wsArchive(\''+h(w.slug)+'\')">Archive</button>'};
+}
+
+/* ---------- Workspaces, invitations, API keys and incidents: the create writes the record ----------
+   Each of these pages already edited and deleted real rows while its create button only raised a toast,
+   so a workspace could be archived that the page had never been able to add. The handlers below write
+   to the same array the table reads, which is what makes the new row appear behind the dialog. */
+function rid(n,alpha){var a=alpha||"0123456789abcdef",s="";for(var i=0;i<n;i++)s+=a[Math.floor(Math.random()*a.length)];return s;}
+function wsCreate(){
+  var name=(el("nw-name")&&el("nw-name").value||"").trim(), ns=(el("nw-ns")&&el("nw-ns").value||"").trim().toLowerCase();
+  if(!name||!ns) return;
+  var slug=name.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/(^-|-$)/g,"");
+  if(wsById(slug)){act("A workspace called "+name+" is already here.","gold");return;}
+  var main=el("nw-main")?el("nw-main").value:"a-intel/data-platform";
+  WS.push({slug:slug,name:name,ns:ns,main:main,branch:el("nw-branch")?el("nw-branch").value:"main",
+    linked:[],agents:0,enrolled:0,owner:me().name,governance:el("nw-gov")?el("nw-gov").value:"team",
+    retention:el("nw-ret")?el("nw-ret").value:"content_exact",budgetDay:"20.00"});
+  closeDialog(); render();
+  act(name+" is here, provisional for 14 days. Installing the GitHub App on "+main+".");
+}
+function inviteFind(email){for(var i=0;i<INVITES.length;i++){if(INVITES[i].email===email)return i;}return -1;}
+function inviteSend(){
+  var email=(el("iv-email")&&el("iv-email").value||"").trim();
+  if(!email) return;
+  if(inviteFind(email)>-1){act(email+" already has an invitation open.","gold");return;}
+  INVITES.push({email:email,role:el("iv-role")?el("iv-role").value:"workspace.member · core-platform",
+    by:me().name,sent:"2026-09-11",expires:"2026-09-18"});
+  closeDialog(); render();
+  act("Invitation sent to "+email+". It expires 2026-09-18 and needs a verified email and two-factor.");
+}
+function inviteResend(email){
+  var i=inviteFind(email); if(i<0) return;
+  INVITES[i].sent="2026-09-11"; INVITES[i].expires="2026-09-18"; INVITES[i].by=me().name;
+  render(); act("Sent again to "+email+". The clock restarts: it now expires 2026-09-18.");
+}
+function inviteRevokeDlg(){
+  var email=S.dlg==="invrevoke"?S.dlgArg:null, i=email?inviteFind(email):-1;
+  if(i<0) return {t:"Revoke invitation",w:false,b:'<div class="note">That invitation is no longer here.</div>',
+    f:'<button class="btn" onclick="closeDialog()">Close</button>'};
+  return {t:"Revoke invitation",s:email,w:false,
+   b:'<p style="font-size:13px">The link stops working the moment this is revoked, and <b>'+h(email)+'</b> gets no notice. Nothing is created for them, so nothing is left behind.</p>'+
+     '<div class="note">Who invited them, when, and who revoked it stay in the audit record. Inviting them again issues a new link.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn danger" onclick="inviteRevoke(\''+h(email)+'\')">Revoke</button>'};
+}
+function inviteRevoke(email){
+  var i=inviteFind(email); if(i<0) return;
+  INVITES.splice(i,1); closeDialog(); render();
+  act("Revoked. The link "+email+" holds no longer works.");
+}
+function apikeyCreate(){
+  var name=(el("ak-name")&&el("ak-name").value||"").trim(); if(!name) return;
+  var grants=(el("ak-grants")?el("ak-grants").value:"run.read").split(",").map(function(g){return g.trim();});
+  APIKEYS.push({name:name,key:"ox_live_"+rid(4)+"…"+rid(3),
+    principal:"svc_"+name.toLowerCase().replace(/[^a-z0-9]+/g,"_").slice(0,20),
+    grants:grants,by:me().name,last:"never used",n30:0,
+    expires:el("ak-exp")?el("ak-exp").value:"2026-12-10",st:"unused"});
+  closeDialog(); render();
+  act("Created. The secret is shown once and stored hashed; api_key.create is in the audit record.");
+}
+function apikeyRotate(i){
+  var k=APIKEYS[i]; if(!k) return;
+  k.key="ox_live_"+rid(4)+"…"+rid(3); k.st="ok";
+  closeDialog(); render();
+  act("Rotated. "+k.name+" has a new secret, shown once; the old one stays valid for 24 hours.");
+}
+function apikeyRevoke(i){
+  var k=APIKEYS[i]; if(!k) return;
+  APIKEYS.splice(i,1); closeDialog(); render();
+  act(k.name+" is revoked. "+k.principal+" loses access at its next call; runs it started keep their records.");
+}
+function incidentRaise(){
+  var title=(el("in-title")&&el("in-title").value||"").trim(); if(!title) return;
+  var sev=el("in-sev")?el("in-sev").value:"warning", id="inc_01K"+rid(6,"0123456789ABCDEFGHJKMNPQRSTVWXYZ");
+  INCIDENTS.unshift({id:id,sev:sev,title:title,kind:"raised_by_operator",at:"2026-09-11 09:14",by:me().name,
+    scope:"con_01K2A9 · mnd_7K2ETQ4 · exc_01K5RN2P",
+    detail:"Raised by "+me().name+" from the audit record, with the connection, the mandate and the exception attached.",
+    resolution:"Open. Nobody is assigned yet.",
+    status:"open",owner:"",due:"2026-09-12",closedAt:"",closedBy:"",runs:0});
+  closeDialog(); render();
+  act(id+" is open. It is a security event with who, why, and what it stopped.","gold");
+}
+function incidentAssign(id){
+  var i=incidentById(id); if(!i) return;
+  i.owner=me().name; i.resolution="Open. "+me().name+" is tracing it.";
+  render(); act(i.id+" is yours. The assignment is in the audit record.");
+}
+function incidentResolve(id){
+  var i=incidentById(id); if(!i||i.status==="resolved") return;
+  i.status="resolved"; i.closedAt="2026-09-11 09:20"; i.closedBy=me().name;
+  closeDialog(); render();
+  act(i.id+" is resolved. The detail and the chain stay exactly as they were.");
+}
+function incidentResolveDlg(){
+  var i=S.dlg==="incidentclose"?incidentById(S.dlgArg):null;
+  if(!i) return {t:"Resolve incident",w:false,b:'<div class="note">That incident is no longer here.</div>',
+    f:'<button class="btn" onclick="closeDialog()">Close</button>'};
+  return {t:"Resolve incident",s:i.id+" · "+i.sev,w:false,
+   b:'<p style="font-size:13px">Resolving <b>'+h(i.title)+'</b> records who closed it and when. It changes nothing about what happened: the detail, the scope and the chain stay as they are.</p>'+
+     (i.sev==="critical"?'<div class="warn">This one is critical. While it is open the mandate ledger for '+h(i.scope.split(" · ")[0])+' carries an exception, and closing it clears that exception. Close it only once the money is accounted for.</div>'
+      :'<div class="note">A resolved incident stays in the list and in every export that covers its date.</div>'),
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="incidentResolve(\''+h(i.id)+'\')">Resolve</button>'};
 }
 
 /* ============================== Register Agent (the W1 onboarding gate, in-app) ==============================
@@ -10576,7 +10769,7 @@ function obUnlock(){
   if(r.runId){for(var i=0;i<RUNS.length;i++){if(RUNS[i].id===r.runId)return RUNS[i];}}
   if(!agent(key)){
     AGENTS.push({key:key,name:regSlug().replace(/-/g," ").replace(/^./,function(c){return c.toUpperCase();}),harness:r.harness,harnessLabel:REG_HARNESS[r.harness]||r.harness,
-      ws:w.slug,operator:"marcus",status:"enrolled",tier:"harness",tierNative:"harness",belt:0,beltMode:"full",runs30:1,spend30:"0.02",proven30:"0.00",ratio:0,
+      ws:w.slug,operator:"marcus",status:"enrolled",tier:"harness",tierNative:"harness",belt:0,beltMode:"full",runs30:1,spend30:"0.02",ratio:0,
       digest:"sha256:0b7e41c9d2a6f3e8",commit:"pending",budget:"2.00",budgetUsed:0.02,desc:"Registered from Fleet. The smoke session opened the Context PR that adds its definition.",
       mandates:[],incidents:0,model:r.tier,
       principal:"prn_01K5RV"+("0"+S.regN).slice(-2)+"M6XKD7A9RZT4BVCNQ",harnessV:"just installed",host:"this-mac",
@@ -10587,7 +10780,7 @@ function obUnlock(){
   }
   S.regN++;
   var run={id:"run_01K5RV2N8QH4TZ"+("0"+S.regN).slice(-2)+"X",agent:key,op:"marcus",ws:w.slug,status:"live",turn:1,steps:2,frames:2,cost:"0.02",basis:"client_attested",tier:"harness",
-    grade:"full",verdict:null,task:"smoke",taskTitle:"Installer smoke session",started:"14:02:11",model:r.tier==="light"?"claude-haiku-4-5":"claude-opus-5",cache:0,provenSpend:"0.00",ratio:0,sealed:null};
+    grade:"full",task:"smoke",taskTitle:"Installer smoke session",started:"14:02:11",model:r.tier==="light"?"claude-haiku-4-5":"claude-opus-5",cache:0,ratio:0,sealed:null};
   RUNS.unshift(run); r.runId=run.id;
   if(S.obScn) S.obScn.runs.push(run.id);
   return run;
@@ -10638,7 +10831,7 @@ function regName(){
   var r=S.reg, w=ws(), key=regKey();
   function opts(list,cur){return list.map(function(o){return '<option'+(cur===o?' selected':'')+'>'+o+'</option>';}).join("");}
   return '<div><p class="eyebrow">Step 1 of 3</p><h1>Name the agent</h1>'+
-   '<p class="reg-lead">The key is reserved now and is immutable. The agent itself exists only after its first frame reaches Oxagen.</p></div>'+
+   '<p class="reg-lead">The key is reserved now and is immutable.</p></div>'+
    '<div class="reg-card"><div class="cb">'+
    '<div class="grid g2"><div class="field"><label>Slug</label><input id="regSlug" value="'+h(r.slug)+'" aria-label="Slug" oninput="regKeyLive()">'+
     '<div class="hint">The agent key becomes <span class="mono regKeyLive">'+h(key)+'</span>.</div></div>'+
@@ -10697,7 +10890,7 @@ function regWrap(){
      '<pre>'+sdk.code+'</pre></div></section>';
   }
   return '<div><p class="eyebrow">Step 2 of 3</p><h1>'+(S.reg.mode==="onboard"?"Wrap an agent":"Wrap the agent")+'</h1>'+
-   '<p class="reg-lead">A wrapped agent has Oxagen’s hooks installed and its governed tools served by Oxagen’s MCP server. Nothing is copied or pasted: the installer carries a one-time enrollment token for <span class="mono">'+h(key)+'</span>.</p></div>'+
+   '<p class="reg-lead">The installer carries a one-time enrollment token for <span class="mono">'+h(key)+'</span>, so nothing is copied or pasted.</p></div>'+
    '<div class="reg-card"><div class="reg-tabs" role="tablist" aria-label="How to wrap the agent">'+REG_TABS.map(function(t){
      return '<button type="button" role="tab" aria-selected="'+(r.tab===t.id)+'" onclick="S.reg.tab=\''+t.id+'\';render()"><span class="n">'+t.n+'</span><span class="s">'+t.s+'</span></button>';}).join("")+'</div>'+panel+'</div>'+
    '<div class="reg-foot">'+regCancelBtn()+'<button class="btn" onclick="regNav(\''+(S.reg.mode==="onboard"?"organization":"name")+'\')">Back</button>'+
@@ -10723,7 +10916,7 @@ function regRun(){
   var head=ob?'<div><p class="eyebrow">Step 3 of 3</p><h1>Start a run</h1>'+
    '<p class="reg-lead">The operator console opens the moment the first frame from <span class="mono">'+h(key)+'</span> reaches Oxagen, and lands you on Fleet looking at your own run.</p></div>'
    :'<div><p class="eyebrow">Step 3 of 3</p><h1>Wait for the first frame</h1>'+
-   '<p class="reg-lead">Registration completes the moment the first frame from <span class="mono">'+h(key)+'</span> reaches Oxagen — and lands you on Fleet looking at its run.</p></div>';
+   '<p class="reg-lead">Registration completes the moment the first frame from <span class="mono">'+h(key)+'</span> reaches Oxagen and lands you on Fleet looking at its run.</p></div>';
   if(S.state==="error") return head+
    '<div class="reg-card"><div class="reg-err"><h2>The collector cannot reach Oxagen</h2>'+
    '<p>The host <span class="mono">'+REG_HOST+'</span> enrolled, but every request to <span class="mono">https://ingest.oxagen.com/v1</span> has been refused for 94 seconds (<span class="mono">ECONNREFUSED</span>, 6 attempts). No frame has arrived, so registration will not complete.</p>'+
@@ -10862,7 +11055,7 @@ function obOfferCard(fr){
   return '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Onboarding offer</h3>'+
    '<button class="btn sm ghost" style="margin-left:auto" onclick="S.obOfferOff=true;render()" aria-label="Dismiss the onboarding offer">Not now</button></div>'+
    '<div class="panel-b"><p style="margin:0 0 6px;font-size:13.5px"><b>Convert by '+h(obDate(OB_OFFER_DAYS))+' for '+h(deal)+'.</b></p>'+
-   '<p class="muted" style="margin:0 0 10px;font-size:12.5px">That is '+OB_OFFER_DAYS+' days from your first run. <span class="mono">'+h(fr.id)+'</span> cost <b>'+usd(fr.cost)+'</b> '+ORG.currency+', <span class="basis">'+h(fr.basis)+'</span>. Oxagen billed <b>'+usd(fmt2(billed))+'</b> for it: the first '+BILLING.runsIncluded.toLocaleString("en-US")+' runs each month are free, and Oxagen never marks up tokens.</p>'+
+   '<p class="muted" style="margin:0 0 10px;font-size:12.5px">That is '+OB_OFFER_DAYS+' days from your first run. <span class="mono">'+h(fr.id)+'</span> cost <b>'+usd(fr.cost)+'</b> '+ORG.currency+', <span class="basis">'+h(fr.basis)+'</span>. Oxagen billed <b>'+usd(fmt2(billed))+'</b> for it: the included monthly allowance covered it, and Oxagen never marks up tokens.</p>'+
    '<button class="btn sm" onclick="go(\'#/'+ORG.slug+'/billing\')">See plans</button></div></div>';
 }
 
@@ -10924,7 +11117,8 @@ function obInstaller(){
       ["Download","Installing","Connected"].map(function(l,i){return '<button class="btn sm'+(st===i?' sel':' ghost')+'" aria-pressed="'+(st===i)+'" onclick="obInstallScreen('+i+')">'+l+'</button>';}).join("")+'</div>'),true);
   }
   if(S.state==="error") return shell('<h2 style="font-size:19px;margin:0 0 8px">Enrollment token rejected</h2>'+
-   '<p class="muted" style="font-size:13px;margin:0 0 8px">The token <span class="mono">'+h(REG_TOKEN)+'</span> has already been used, at 13:58 on '+h(obDate(0))+' by host <span class="mono">mbp-marcus</span>. Enrollment tokens are single use.</p>'+
+   obErr('The token <span class="mono">'+h(REG_TOKEN)+'</span> has already been used.')+
+   '<p class="muted" style="font-size:13px;margin:8px 0 8px">The token <span class="mono">'+h(REG_TOKEN)+'</span> has already been used, at 13:58 on '+h(obDate(0))+' by host <span class="mono">mbp-marcus</span>. Enrollment tokens are single use.</p>'+
    '<p class="muted" style="font-size:13px;margin:0 0 14px">Nothing was installed. Generate a fresh token from the wrap step and run the installer again.</p>'+
    '<button class="btn" onclick="obGo(\'wrap\')">Back to wrap an agent</button>');
   if(st===0) body='<h2 style="font-size:19px;margin:0 0 6px">Install the Oxagen agent</h2>'+
@@ -11002,7 +11196,7 @@ function obCodeBack(e,inp){if(e.key==="Backspace"&&!inp.value&&inp.previousEleme
 function obSignup(){
   var err=S.state==="error", me=PEOPLE.marcus;
   return obShell('<div class="ob-h"><p class="eyebrow">Create your account</p><h1>Govern the agents you already run.</h1>'+
-   '<p class="ob-lead">Wrap Claude Code, Codex CLI, Stella or an SDK agent. Every organization gets its first '+BILLING.runsIncluded.toLocaleString("en-US")+' runs a month free, with every governance feature on.</p></div>'+
+   '<p class="ob-lead">Wrap Claude Code, Codex CLI, Stella or an SDK agent, with an included monthly allowance of governed actions and every governance feature on.</p></div>'+
    '<div class="ob-panel">'+(err?obErr('<b>That email is already registered.</b> Log in instead, or reset your password.'):'')+
    obSso("organization")+'<div class="ob-or">or</div>'+
    '<form class="ob-form" onsubmit="event.preventDefault();obGo(\'verify\')">'+
@@ -11013,7 +11207,7 @@ function obSignup(){
    obPrimary("Create account","Creating account…")+
    '<p class="hint" style="margin:0;font-size:11.5px;color:var(--dim);line-height:1.45">By creating an account you agree to the Oxagen terms and privacy notice. Oxagen never stores your model provider keys in plain text, and never returns them once saved.</p></form></div>'+
    '<p class="ob-foot">Already have an account? <a href="#/welcome/login">Log in</a></p>'+
-   '<div class="ob-tags"><span class="b b-q">'+BILLING.runsIncluded.toLocaleString("en-US")+' runs free / month</span><span class="b b-q">no token markup</span><span class="b b-q">SOC 2 evidence built in</span></div>');
+   '<div class="ob-tags"><span class="b b-q">included monthly allowance</span><span class="b b-q">no token markup</span><span class="b b-q">SOC 2 evidence built in</span></div>');
 }
 function obVerify(){
   var err=S.state==="error", me=PEOPLE.marcus;
@@ -11170,6 +11364,7 @@ var ASST_MODEL="z-ai/glm-flash-latest";
 
 var ORG_KEY={
   source:"platform_minted",
+  customerPrefix:null,                /* set when an operator saves their own key */
   provisionedId:"key_01K5RW8Q2N",     /* OpenRouter's own id — what reconciliation joins on */
   label:"oxagen/a-intel",             /* the name the key carries on Oxagen's OpenRouter account */
   prefix:"sk-or-v1-a3f1",             /* the only part of the secret anything may render */
@@ -11185,7 +11380,11 @@ var ORG_KEY={
   providerUsd:"148.02",
   ledgerUsd:"148.02"
 };
-function orgKeyState(){ return ORG_KEY.source==="none"||!ORG_KEY.provisionedId?"none":"ok"; }
+function orgKeyState(){
+  if(ORG_KEY.source==="none") return "none";
+  if(ORG_KEY.source==="customer_key") return ORG_KEY.customerPrefix?"ok":"none";
+  return ORG_KEY.provisionedId?"ok":"none";
+}
 var ORG_KEY_SOURCES=[
  ["platform_minted","one key minted for this organization on Oxagen’s OpenRouter account",
   "Oxagen owns, pays, rotates and revokes it. Its tokens are billed. The provider reports it on its own line, so the bill and the ledger can be compared."],
@@ -11197,33 +11396,83 @@ var ORG_KEY_SOURCES=[
 function orgKeySource(){ for(var i=0;i<ORG_KEY_SOURCES.length;i++){ if(ORG_KEY_SOURCES[i][0]===ORG_KEY.source) return ORG_KEY_SOURCES[i]; } return ORG_KEY_SOURCES[0]; }
 function orgKeyDrift(){ return Math.round((n$(ORG_KEY.providerUsd)-n$(ORG_KEY.ledgerUsd))*100)/100; }
 
+function orgKeyHeld(){ return ORG_KEY.source==="customer_key"?!!ORG_KEY.customerPrefix:!!ORG_KEY.provisionedId; }
+
+/* Switching the source is a claim about who pays, so nothing is charged and no key is resolved
+   until a key is actually held under the new source. Picking customer_key therefore leaves the
+   organization without a key, and the panel says so, until one is saved. */
+function orgKeySourceSet(v){
+  if(ORG_KEY.source===v) return;
+  ORG_KEY.source=v;
+  render();
+  act(v==="customer_key"&&!ORG_KEY.customerPrefix
+    ? "Save your own key below. Until you do, no model call resolves and nothing is charged."
+    : "Funding source set to "+v+". Recorded as a control-plane event.");
+}
+function orgKeySave(){
+  var n=el("byokKey"), v=n?n.value.trim():"";
+  if(!v){ act("Paste a key first. Oxagen tests it against the provider before it saves anything."); return; }
+  ORG_KEY.customerPrefix=v.slice(0,13);
+  render();
+  act("Tested against "+ASST_MODEL+" and saved, enveloped. Nothing was returned to this screen.","gold");
+}
+function orgKeyClear(){
+  ORG_KEY.customerPrefix=null;
+  render();
+  act("Your key was removed. Model calls stop at the next request until a source is chosen.");
+}
+
 function orgKeyPanel(){
-  var src=orgKeySource(), none=orgKeyState()==="none", drift=orgKeyDrift();
-  return '<div class="panel"><div class="panel-h"><h3>Model key</h3>'+
-   '<span class="sp">'+(none?'<span class="b b-approval"><span class="d"></span>none</span>'
-     :'<span class="b b-allowed"><span class="d"></span>'+h(ORG_KEY.source)+'</span>')+'</span></div>'+
+  var src=orgKeySource(), none=orgKeyState()==="none", byok=ORG_KEY.source==="customer_key",
+      held=orgKeyHeld(), drift=orgKeyDrift(), minted=ORG_KEY.source==="platform_minted";
+  var rows="";
+  if(byok){
+    rows='<dl class="kv">'+
+     '<dt>Key</dt><dd>'+(held
+       ?'<span class="mono">'+h(ORG_KEY.customerPrefix)+'…</span> <span class="dim">enveloped, never returned — this prefix is all any screen may show</span>'
+       :'<span class="dim">none saved yet</span>')+'</dd>'+
+     '<dt>Billing</dt><dd>your tokens are reported and billed at zero; governed actions are billed as usual</dd>'+
+     '<dt>Key storage</dt><dd>enveloped, tested before save, never returned, every read audited</dd>'+
+     '<dt>Engine</dt><dd><span class="mono">'+h(ASST_ENGINE_URL)+'</span> · Stella '+h(ASST_ENGINE_VER)+' over HTTP, on this key</dd>'+
+     '</dl>'+
+     '<div class="field" style="margin-top:14px"><label for="byokKey">Your OpenRouter or vendor key</label>'+
+     '<input id="byokKey" type="password" autocomplete="off" placeholder="sk-or-v1-…" aria-label="Your key">'+
+     '<div class="hint">Oxagen calls '+h(ASST_MODEL)+' with it once to check it works, then envelopes it. It is never returned to a screen and never read from the environment.</div></div>';
+  } else if(none){
+    rows='<div class="note">No key is held for '+h(ORG.name)+'. The in-app agent cannot run, and nothing has been charged. Minting one is a governed action and puts your name on it.</div>';
+  } else {
+    rows='<dl class="kv">'+
+     '<dt>Secret</dt><dd><span class="mono">'+h(ORG_KEY.prefix)+'…</span> <span class="dim">enveloped, never returned — this prefix is all any screen may show</span></dd>'+
+     '<dt>Provisioned id</dt><dd><span class="mono">'+h(ORG_KEY.provisionedId)+'</span> <span class="dim">the provider’s own id; reconciliation joins on it</span></dd>'+
+     '<dt>Name on the account</dt><dd><span class="mono">'+h(ORG_KEY.label)+'</span></dd>'+
+     '<dt>Minted</dt><dd>'+h(ORG_KEY.minted)+' by '+h(PEOPLE[ORG_KEY.mintedBy].name)+(ORG_KEY.rotated?' · rotated '+h(ORG_KEY.rotated):' · never rotated')+'</dd>'+
+     '<dt>Monthly cap</dt><dd>'+usd(fmt2(ORG_KEY.capUsd))+' USD, set on the key at the provider — not only in our meter · <span id="orgCapUsed">'+usd(fmt2(orgRoutesTotal()))+'</span> used in '+h(SPEND.month)+', the total of the routes below</dd>'+
+     '<dt>Reads</dt><dd>'+ORG_KEY.reads30+' in 30 days, each one an audit event</dd>'+
+     '<dt>Engine</dt><dd><span class="mono">'+h(ASST_ENGINE_URL)+'</span> · Stella '+h(ASST_ENGINE_VER)+' over HTTP, on this key</dd>'+
+     '</dl>';
+  }
+  var acts=byok
+   ? '<button class="btn primary" onclick="orgKeySave()">Test and save</button>'+
+     (held?'<button class="btn danger" onclick="orgKeyClear()">Remove the key</button>':'')
+   : (none?'<button class="btn primary" onclick="openDialog(\'mintkey\')">Mint a key for '+h(ORG.name)+'</button>'
+        :'<button class="btn" onclick="openDialog(\'rotateorgkey\')">Rotate</button>'+
+         '<button class="btn danger" onclick="openDialog(\'revokeorgkey\')">Revoke</button>');
+
+  return '<div class="panel"><div class="panel-h"><h3>Funding source</h3>'+
+   '<span class="sp">'+(held
+     ?'<span class="b b-allowed"><span class="d"></span>'+h(ORG_KEY.source)+'</span>'
+     :'<span class="b b-approval"><span class="d"></span>no key held</span>')+'</span></div>'+
    '<div class="panel-b">'+
-   '<p class="muted" style="margin:0 0 12px;font-size:12.5px">'+h(src[2])+'</p>'+
-   (none
-    ?'<div class="note">No key is held for '+h(ORG.name)+'. The in-app agent cannot run, and nothing has been charged. Minting one is a governed action and puts your name on it.</div>'
-    :'<dl class="kv">'+
-      '<dt>Secret</dt><dd><span class="mono">'+h(ORG_KEY.prefix)+'…</span> <span class="dim">enveloped, never returned — this prefix is all any screen may show</span></dd>'+
-      '<dt>Provisioned id</dt><dd><span class="mono">'+h(ORG_KEY.provisionedId)+'</span> <span class="dim">the provider’s own id; reconciliation joins on it</span></dd>'+
-      '<dt>Key hash</dt><dd><span class="mono">'+h(ORG_KEY.hash)+'</span></dd>'+
-      '<dt>Name on the account</dt><dd><span class="mono">'+h(ORG_KEY.label)+'</span></dd>'+
-      '<dt>Minted</dt><dd>'+h(ORG_KEY.minted)+' by '+h(PEOPLE[ORG_KEY.mintedBy].name)+(ORG_KEY.rotated?' · rotated '+h(ORG_KEY.rotated):' · never rotated')+'</dd>'+
-      '<dt>Monthly cap</dt><dd>'+usd(fmt2(ORG_KEY.capUsd))+' USD, set on the key at the provider — not only in our meter</dd>'+
-      '<dt>Reads</dt><dd>'+ORG_KEY.reads30+' in 30 days, each one an audit event</dd>'+
-      '<dt>Engine</dt><dd><span class="mono">'+h(ASST_ENGINE_URL)+'</span> · Stella '+h(ASST_ENGINE_VER)+' over HTTP, on this key</dd>'+
-     '</dl>')+
-   '<div class="row" style="margin-top:13px">'+
-    (none?'<button class="btn primary" onclick="openDialog(\'mintkey\')">Mint a key for '+h(ORG.name)+'</button>'
-      :'<button class="btn" onclick="openDialog(\'rotateorgkey\')">Rotate</button>'+
-       '<button class="btn danger" onclick="openDialog(\'revokeorgkey\')">Revoke</button>')+
-    '<button class="btn" onclick="openDialog(\'funding\')">Change source</button></div>'+
+   '<div class="field"><label for="orgFundSrc">Source</label>'+
+   '<select id="orgFundSrc" onchange="orgKeySourceSet(this.value)" aria-label="Funding source">'+
+    ORG_KEY_SOURCES.map(function(x){return '<option value="'+h(x[0])+'"'+(ORG_KEY.source===x[0]?' selected':'')+'>'+h(x[0])+' — '+h(x[1])+'</option>';}).join("")+
+   '</select><div class="hint">'+h(src[2])+'</div></div>'+
+   rows+
+   '<div class="row" style="margin-top:13px">'+acts+'</div>'+
+   '<div class="note" style="margin-top:13px">No call reads the environment. Keys and routes come from the model layer’s resolver, and a path that bypasses it is a defect.</div>'+
    '</div>'+
-   (none?'':'<div class="panel-b" style="border-top:1px solid var(--border)">'+
-    '<p class="eyebrow q" style="margin:0 0 8px">Reconciliation · '+h(SPEND.month)+'</p>'+
+   (minted&&held?'<div class="panel-b" style="border-top:1px solid var(--border)">'+
+    '<p class="eyebrow q" style="margin:0 0 8px">Reconciliation</p>'+
     '<dl class="kv">'+
     '<dt>OpenRouter reports</dt><dd><span class="mono">'+usd(ORG_KEY.providerUsd)+'</span> on <span class="mono">'+h(ORG_KEY.provisionedId)+'</span></dd>'+
     '<dt>Our credit ledger</dt><dd><span class="mono">'+usd(ORG_KEY.ledgerUsd)+'</span> debited to this organization</dd>'+
@@ -11231,8 +11480,8 @@ function orgKeyPanel(){
       ?'<span class="b b-allowed"><span class="d"></span>none</span>'
       :'<span class="b b-critical"><span class="d"></span>'+usd(fmt2(Math.abs(drift)))+' '+(drift>0?'unbilled':'over-billed')+'</span>')+'</dd>'+
     '</dl>'+
-    '<div class="note" style="margin-top:10px">Two independent numbers, not one derived from the other: the first is read off the provider’s usage report for this key, the second is summed from our own ledger. A shared key cannot produce this row at all — the provider returns one total for every customer at once, which is the whole reason this organization has a key of its own.</div>'+
-   '</div>')+
+    '<div class="note" style="margin-top:10px">Two independent numbers, not one derived from the other: the first is read off the provider’s usage report for this key, the second is summed from our own ledger. A shared key cannot produce this row at all, which is the whole reason this organization has a key of its own.</div>'+
+   '</div>':'')+
    '</div>';
 }
 
@@ -11341,7 +11590,7 @@ function asstSheet(){
     "needs org.admin")+
    '<div class="asst-f"><div class="box"><textarea placeholder="Unavailable until a model key is minted" disabled aria-label="Message"></textarea></div></div>';
 
-  return asstHead('<span class="b b-q" style="margin-left:auto">every turn is a run of its own</span>')+
+  return asstHead('')+
    '<div class="asst-b">'+
    '<div class="msg op"><div class="who">'+h(me().name)+'</div><div class="bub">Triage is burning money on tool definitions. Narrow its belt to what it actually used in the last 30 days, and tell me what you changed.</div></div>'+
    '<div class="msg"><div class="who">Assistant <span class="b b-q" style="font-size:9.5px">run_01K5RT9X4M2 · Oxagen’s, not yours</span></div><div class="bub">'+
@@ -11356,12 +11605,11 @@ function asstSheet(){
    '<dt>Recorded as</dt><dd>one governed action, in the ledger and not billed — <span class="mono">resolve_approval</span> is the only billable one</dd></dl></div>'+
    '<p style="margin:10px 0 0">Estimated saving from the frames it cites: <b>$188.40</b> USD over 30 days. '+
    'A code-owner review is required in <span class="mono">team</span> mode, so it is yours to merge.</p></div></div>'+
-   '<div class="msg op"><div class="who">'+h(me().name)+'</div><div class="bub">Why did run_01K5RG6H1L4OIU9Y come back tampered?</div></div>'+
-   '<div class="msg"><div class="who">Assistant</div><div class="bub">'+
-   '<p style="margin:0 0 9px">The witness’s filesystem fingerprint was taken when it was proven to fail on the pristine target. '+
-   'On the pull request head that fingerprint had moved: <span class="mono">vitest.config.ts</span> gained an exclude that matched the witness’s path.</p>'+
-   '<p style="margin:0">So the ground under the oracle changed, and nothing is credited. The verdict is <span class="mono">tampered</span>, not <span class="mono">failing</span> — the two mean different things and the record keeps them apart. '+
-   '<a href="#/'+ORG.slug+'/core-platform/runs/run_01K5RG6H1L4OIU9Y">Open the proof frame →</a></p></div></div>'+
+    '<div class="msg op"><div class="who">'+h(me().name)+'</div><div class="bub">Why did run_01K5RG6H1L4OIU9Y cost $5.08?</div></div>'+
+    '<div class="msg"><div class="who">Assistant</div><div class="bub">'+
+    '<p style="margin:0 0 9px">Two thirds of its input tokens were tool result bodies: it re-read <span class="mono">CHANGELOG.md</span> on five of seven turns, and the cache missed after turn 3 because a steering publish changed the prefix mid-run.</p>'+
+    '<p style="margin:0">The Cost tab pins both findings to the turns they landed in, and Coaching names the record that stops the re-read. '+
+    '<a href="#/'+ORG.slug+'/core-platform/runs/run_01K5RG6H1L4OIU9Y/cost">Open the waterfall →</a></p></div></div>'+
    '</div>'+
    '<div class="asst-f"><div class="box">'+
    '<textarea placeholder="Ask about a run, or change something" aria-label="Message the assistant"></textarea>'+
@@ -11684,7 +11932,7 @@ DLG_EXT.create=function(){
 
 function wzNew(kind){
   var w=ws();
-  return {kind:kind, step:1, desc:"", path:null, ws:w.slug, drafted:false,
+  return {kind:kind, step:1, desc:"", descAI:false, path:null, ws:w.slug, drafted:false,
     /* tool */ srv:null, tname:"", lang:"ts",
     /* skill */ q:"", pick:null, file:null,
     /* agent */ slug:"", harness:"claude-code", tier:"complex", av:null, belt:{},
@@ -11697,7 +11945,7 @@ function wzNew(kind){
 function wzOpen(kind,seed){ S.wz=wzNew(kind); if(seed&&kind==="init")S.wz.repoName=seed;
   S.dlg="wz"; S.dlgArg=null; S.layer=null; render(); }
 function wzSet(k,v){ if(S.wz)S.wz[k]=v; }
-function wzSetR(k,v){ if(!S.wz)return; S.wz[k]=v; render(); }
+function wzSetR(k,v){ if(!S.wz)return; if(k==="desc")S.wz.descAI=false; S.wz[k]=v; render(); }
 function wzGo(n){ if(!S.wz)return; S.wz.step=n; S.ced=null; render(); }
 function wzCancel(){ S.wz=null; closeDialog(); }
 
@@ -11726,13 +11974,52 @@ function wzNext(label,ok,extra){
    gates, and nothing else. */
 function wzDescIn(v){
   if(!S.wz)return;
-  S.wz.desc=v;
-  var b=el("wzNextBtn"); if(b)b.disabled=!String(v).trim();
+  S.wz.desc=v; S.wz.descAI=false;
+  wzDescSync();
+}
+/* What you type is a draft. The file the pull request carries is prose the assistant wrote from
+   it, so the step does not advance until that turn has run. The same rule holds in all four
+   wizards, because all four turn this one box into the instructions, the statement or the body. */
+function wzDescOk(){ var z=S.wz; return !!(z&&String(z.desc||"").trim()&&z.descAI); }
+function wzDescSync(){
+  var z=S.wz; if(!z) return;
+  var b=el("wzNextBtn"); if(b)b.disabled=!wzDescOk();
+  var raw=!!String(z.desc||"").trim();
+  var n=el("wzWandNote"); if(n)n.className="wand-note"+(raw&&!z.descAI?" on":"");
+  var w=el("wzWandBtn"); if(w)w.disabled=false;
+}
+var WAND_SAY={
+  agent:"The assistant wrote the instructions from what you typed. Read them before anybody reviews them.",
+  tool:"The assistant wrote the description from what you typed. Read it before anybody reviews it.",
+  skill:"The assistant wrote the skill body from what you typed. Read it before anybody reviews it.",
+  record:"The assistant wrote the statement from what you typed. Read it before anybody reviews it."
+};
+/* Deterministic on purpose: the same sentence in gives the same file out, so a headless check of
+   this screen reads the same text every run. */
+function assistProse(kind,raw){
+  var s=String(raw).trim().replace(/\s+/g," ");
+  var one=s.charAt(0).toUpperCase()+s.slice(1);
+  if(!/[.!?]$/.test(one))one+=".";
+  if(kind==="agent")return one+" Work inside the toolbelt you were given. When a step needs authority you do not hold, stop and say what you needed, and leave the decision to the operator.";
+  if(kind==="skill")return one+" Check what has to be true before the first step. Follow the steps in order. This procedure grants nothing: every action it names still goes through the toolbelt and the policy that governs it.";
+  if(kind==="record")return one+" It holds for every run in scope until a later record supersedes it.";
+  return one+" Call it when that is what you need, and read the arguments it takes before you do.";
+}
+function wzWand(){
+  var z=S.wz; if(!z)return;
+  var raw=String(z.desc||"").trim();
+  if(!raw){ act("Write a line or two first. The assistant rewrites what you give it; it does not decide what you are building."); return; }
+  if(z.descAI){ act("The assistant already wrote this one. Change it and run the wand again."); return; }
+  z.desc=assistProse(z.kind,raw); z.descAI=true;
+  render();
+  act(WAND_SAY[z.kind]||WAND_SAY.record,"gold");
 }
 function wzDesc(placeholder,chips,hint){
-  var z=S.wz;
-  return '<div class="field"><label for="wzDesc">In your own words</label>'+
+  var z=S.wz, raw=!!String(z.desc||"").trim();
+  return '<div class="field"><div class="lab-row"><label for="wzDesc">In your own words</label>'+
+   '<button class="btn wand" id="wzWandBtn" onclick="wzWand()" title="Have the assistant write it" aria-label="Have the assistant write it">'+avSvg("wand-sparkles")+'</button></div>'+
    '<textarea id="wzDesc" rows="4" placeholder="'+h(placeholder)+'" oninput="wzDescIn(this.value)" aria-label="Describe it">'+h(z.desc)+'</textarea>'+
+   '<div class="wand-note'+(raw&&!z.descAI?" on":"")+'" id="wzWandNote">Press the wand. <b>oxagen.assistant</b> rewrites what you wrote into the prose the file carries, and the next step opens when it has. Its turn is recorded, billed to Oxagen, and never counted as one of your runs.</div>'+
    (hint?'<div class="hint">'+hint+'</div>':'')+'</div>'+
    (chips&&chips.length?'<div class="wz-chips">'+chips.map(function(c){
      return '<button class="btn sm" onclick="wzSetR(\'desc\',\''+h(c).replace(/'/g,"\\'")+'\')">'+h(c)+'</button>';}).join("")+'</div>':'');
@@ -12210,7 +12497,7 @@ function wzToolCode(lang){
 function wzTool(){
   var z=S.wz,w=ws();
   if(z.step===1){
-    var ok=!!String(z.desc).trim();
+    var ok=wzDescOk();
     return {t:"Create a tool", s:"Describe the capability, not the implementation.",
      b:wzDesc("Refund a Stripe charge when support asks for one, never above the amount on the original payment.",
        ["Process refunds against Stripe charges","Post a release note to the ops channel in Slack",
@@ -12390,7 +12677,7 @@ function wzSkResults(){
       '<span class="sx-chip">'+s.tokens.toLocaleString()+' tok</span>'+
       '<span class="sx-chip">'+h(s.digest.slice(0,18))+'…</span>'+
       '<span class="sx-chip">'+s.installs.toLocaleString()+' workspaces</span>'+
-      (s.proof!=null?'<span class="sx-chip ok">proof rate '+skPct(s.proof)+'</span>':'')+
+      (s.cited!=null?'<span class="sx-chip ok">cited on '+skPct(s.cited)+' of loads</span>':'')+
       (s.pinned?'<span class="sx-chip">pinned here at '+h(s.pinned)+'</span>':'')+
      '</div></div>'+
      '<div class="rt"><button class="btn sm'+(on?" primary":"")+'" onclick="wzSkPick(\''+h(s.id)+'\')">'+(on?"Pinned":"Pin "+h(s.ver))+'</button></div></div>';
@@ -12418,7 +12705,7 @@ function wzSkBundle(name,size){
 function wzSkill(){
   var z=S.wz,w=ws();
   if(z.step===1){
-    var opts=[["registry","Search the registry","Pin a published version by its digest. It arrives with a publisher, a version and a proof rate somebody measured.","organization"],
+    var opts=[["registry","Search the registry","Pin a published version by its digest. It arrives with a publisher, a version and a cited rate somebody measured.","organization"],
               ["describe","Describe it","Write what the procedure is, in prose. Oxagen drafts the SKILL.md and you edit it before anybody reads it.","mirror"],
               ["upload","Upload a bundle","A <span class=\"mono\">.skill</span> or <span class=\"mono\">.zip</span> built elsewhere. Use this to replace a pinned version and bump to the one in the bundle.","package"]];
     return {t:"Add a skill", s:"A skill is a file with a version and a digest. Three ways to get one; all three merge.",
@@ -12458,7 +12745,7 @@ function wzSkill(){
      f:wzNext("Read the file",!!f)};
   }
   if(z.step===2){
-    var okd=!!String(z.desc).trim();
+    var okd=wzDescOk();
     return {t:"Describe the skill", s:"Procedure, not policy. What to do, in what order, and the one thing never to do.",
      b:wzDesc("How we cut release notes: group merged PRs by surface, read the changelog once, open a PR, and never publish the release.",
        ["How we cut release notes","How to roll a bad release back","How to run a safe Postgres migration","How to triage a flaky test"],
@@ -12558,7 +12845,7 @@ var WZ_BELT_POOL=["github__get_file_contents@2","github__create_pull_request@3",
 function wzAgent(){
   var z=S.wz,w=ws();
   if(z.step===1){
-    var ok=!!String(z.desc).trim();
+    var ok=wzDescOk();
     return {t:"Create an agent", s:"What should it be for? One job, said plainly.",
      b:wzDesc("Watch the performance budget on every pull request, and comment with the regression when a page gets slower.",
        ["Watch the performance budget on every pull request","Keep the changelog in step with what merged",
@@ -12684,7 +12971,7 @@ function wzRecPreview(){
 function wzRecord(){
   var z=S.wz,w=ws();
   if(z.step===1){
-    var ok=!!String(z.desc).trim();
+    var ok=wzDescOk();
     return {t:"Write a context record", s:"One concern per record, and one record per pull request.",
      b:wzDesc("Do not re-read CHANGELOG.md more than once in a run; cache the first read.",
        ["Do not re-read CHANGELOG.md more than once in a run",
@@ -12937,7 +13224,7 @@ function pRecord(r){
       '</dl></div></div>'+
     '</div>'+
     '<div>'+crecPanel(rec)+
-     '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Other records of this kind</h3></div>'+
+     '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Related records</h3></div>'+
      '<div class="recs">'+(function(){
        var o=RECORDS.filter(function(x){return x.kind===rec.kind&&x.id!==rec.id;}).slice(0,3);
        return o.length?o.map(function(x){
@@ -13166,7 +13453,7 @@ function listify(){
 }
 
 function render(){
-  var r=route(); _cuts=null;
+  var r=route();
   stgSyncHash(r);
   obScnLeft(); skScnLeave();
   var page="";
@@ -13192,7 +13479,7 @@ function render(){
 
   var shell=r.page!=="register"&&r.page!=="welcome";
   el("app").innerHTML=r.page==="register"?pRegister(r):r.page==="welcome"?scnRailFloat()+pWelcome(r):'<div class="app">'+sidebar(r)+'<div class="main">'+topbar(r)+
-    '<main class="page" id="pg">'+scnRail()+page+'</main></div></div>'+(isPhone()?mobileNav(r):"");
+    '<main class="page" id="pg">'+scnRail()+page+'</main></div></div>'+apdHtml()+(isPhone()?mobileNav(r):"");
   document.documentElement.classList.toggle("has-mnav",shell&&isPhone());
   if(r.page==="register")regSchedule(regStepOf(r));
   else if(r.page==="welcome")regSchedule(r.step);
@@ -13312,7 +13599,7 @@ document.addEventListener("click",function(e){
 },true);
 /* ============================== volume ==============================
    Anderson Intelligence Corp. is a business, not a five-agent demo. The hand-authored records
-   above carry the story (the transcripts, the evidence, the flip, the parked payment); this block
+   above carry the story (the transcripts, the evidence, the parked payment); this block
    fills in the rest of the organization around them so every list pages, every total is
    business-sized, and nothing above has to know. It is deterministic: a seeded generator, so the
    same rows appear on every load and a screenshot is reproducible. Seed rows always come first. */
@@ -13440,13 +13727,13 @@ document.addEventListener("click",function(e){
       while(usedSlug[slug]){slug=base+"-"+SUFFIX[k%SUFFIX.length]+(k>=SUFFIX.length?String(Math.floor(k/SUFFIX.length)+1):"");k++;}
       usedSlug[slug]=1;
       var hn=wpick(HARN.map(function(h){return [h,h[2]];}));
-      var runs30=Math.round(skew(3,1400,2.2)), perRun=rf(0.35,6.4), spend=runs30*perRun, ratio=Math.round(rf(0.04,0.9)*100)/100, proven=spend*ratio*rf(0.5,1.0);
+      var runs30=Math.round(skew(3,1400,2.2)), perRun=rf(0.35,6.4), spend=runs30*perRun, ratio=Math.round(rf(0.04,0.9)*100)/100;
       /* two draws, as before the ladder had one word per agent, so the generated organization is unchanged */
-      var tier=wpick([["harness",95],["observe",5]]), tierNative=(wpick([["harness",1]]),tier);
+      var tier=wpick([["gateway",68],["harness",19],["contained",8],["observe",5]]), tierNative=(wpick([["harness",1]]),tier);
       var incidents=wpick([[0,94],[1,5],[2,1]]);
       var av=rnd()<0.62?{kind:"icon",icon:ICONS[(n*7+w.slug.length)%ICONS.length],tone:TONES[n%3]}:{kind:"initials",text:slug.split("-").map(function(s){return s.charAt(0).toUpperCase();}).join("").slice(0,3),font:FONTS[n%3],tone:TONES[(n+1)%3]};
       var made={key:"a-intel."+x.pre+"."+slug,name:title(slug),harness:hn[0],harnessLabel:hn[1],ws:w.slug,operator:wpick(ops),status:"enrolled",
-        tier:tier,tierNative:tierNative,belt:ri(3,58),beltMode:rnd()<0.72?"full":"searchable",runs30:runs30,spend30:m2(spend),proven30:m2(proven),ratio:ratio,
+        tier:tier,tierNative:tierNative,belt:ri(3,58),beltMode:rnd()<0.72?"full":"searchable",runs30:runs30,spend30:m2(spend),ratio:ratio,
         digest:"sha256:"+hex(16),commit:x.head,budget:m2(pick([0.4,0.6,0.8,1,1.5,2,3])),budgetUsed:Math.round(rf(0.05,0.98)*100)/100,
         desc:DESC[base]||("Runs "+title(base).toLowerCase()+" for "+w.name+". Opens a pull request or a proposal; never merges, never pays."),
         avatar:av,mandates:[],incidents:incidents,model:rnd()<0.6?"complex":"light"};
@@ -13456,30 +13743,6 @@ document.addEventListener("click",function(e){
     w.agents=have+n;
   });
   madeAgents.forEach(function(a){AGENTS.push(a);});
-  /* The nightly platform rollup: the other organizations running on Oxagen, each with its own fleet,
-     scored by the same formula agentScores() applies here, then reduced to counts and a sorted score
-     sample per kind. Orgs are sized on the same long tail as everything else (most small, a few
-     large), and each has its own quality, so the population is not one tenant copied thirty times. */
-  (function(){
-    /* its own seeded stream, so adding the rollup moved nothing generated after it */
-    var ps=0x0C7A6E;
-    function prnd(){ps|=0;ps=ps+0x6D2B79F5|0;var t=Math.imul(ps^ps>>>15,1|ps);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;}
-    function pri(a,b){return a+Math.floor(prnd()*(b-a+1));}
-    function prf(a,b){return a+prnd()*(b-a);}
-    function pskew(lo,hi,k){return lo+(hi-lo)*Math.pow(prnd(),k);}
-    var orgs=pri(31,44), tr=[], sp=[];
-    for(var o=0;o<orgs;o++){
-      var fleet=Math.round(pskew(4,520,2.4)), lo=prf(0.02,0.35), hi=prf(0.55,0.95);
-      for(var i=0;i<fleet;i++){
-        var u=prnd(), ratio=Math.round(prf(lo,hi)*100)/100, runs=Math.round(pskew(0,900,2.2)), tamper=u<0.95?0:u<0.99?1:2;
-        if(runs<=1){tr.push(500);sp.push(500);continue;}
-        tr.push(Math.max(0,Math.min(1000,Math.round(500+ratio*400-tamper*250))));
-        sp.push(Math.max(0,Math.min(1000,Math.round(ratio*600+300))));
-      }
-    }
-    tr.sort(function(a,b){return a-b;}); sp.sort(function(a,b){return a-b;});
-    PLATFORM.orgs=orgs; PLATFORM.agents=tr.length; PLATFORM.trust=tr; PLATFORM.spend=sp;
-  })();
   /* two more finops agents hold mandates, so the ledger has more than one line */
   var fin=perWsAgents.finops.filter(function(a){return a.key!=="a-intel.finops.invoice-bot";});
   fin[0].mandates=["mnd_3R8WQ1"]; fin[1].mandates=["mnd_9C4LZ7"];
@@ -13542,7 +13805,7 @@ document.addEventListener("click",function(e){
     "aws-billing":["get_forecast","list_budgets","update_budget","get_reservation_coverage","list_savings_plans","get_anomalies","get_rightsizing","tag_resource"],
     slack:["get_channel","list_users","get_user","send_dm","update_message","delete_message","add_reaction","pin_message","create_channel","archive_channel","set_topic","search_messages"],
     snowflake:["list_tables","describe_table","list_schemas","get_query_history","cancel_query","create_stage"],
-    oxagen:["expand_entity","recall_context","get_run","list_runs","read_frame","list_frames","propose_record","open_context_pr","get_agent","list_agents","get_policy","list_receipts","get_receipt","export_bundle","verify_bundle","get_budget","set_preferences","list_mandates","draw_mandate","get_witness","run_witness","search_tools","describe_tool","request_approval","check_approval","score_candidates","compose_context","summarize_run","reflect_run","promote_finding","list_findings","get_spend","list_switches","read_switch","enqueue_export"],
+    oxagen:["expand_entity","recall_context","get_run","list_runs","read_frame","list_frames","propose_record","open_context_pr","get_agent","list_agents","get_policy","list_receipts","get_receipt","export_bundle","verify_bundle","get_budget","set_preferences","list_mandates","draw_mandate","search_tools","describe_tool","request_approval","check_approval","score_candidates","compose_context","summarize_run","reflect_run","promote_finding","list_findings","get_spend","list_switches","read_switch","enqueue_export"],
     harness:["Read","Edit","Write","Glob","Grep","WebFetch","WebSearch","Agent","NotebookEdit","apply_patch","shell","update_plan","view_image","exec","file_write","file_read","git_commit","git_diff"],
     jira:["create_issue","get_issue","search_issues","update_issue","transition_issue","add_comment","list_boards","get_sprint","list_sprints","assign_issue","link_issues","add_attachment","list_projects","get_project","create_version","list_components","add_watcher","get_changelog","list_filters","run_filter","bulk_update","delete_issue","create_epic","list_epics","get_worklog","add_worklog"],
     datadog:["list_monitors","get_monitor","mute_monitor","unmute_monitor","create_monitor","query_metrics","search_logs","list_incidents","get_incident","create_incident","list_dashboards","get_dashboard","list_slos","get_slo","list_services","get_service","post_event"],
@@ -13604,7 +13867,9 @@ document.addEventListener("click",function(e){
       }
     });
   });
-  SERVERS.forEach(function(s){var ns={},nv=0;TOOLS.forEach(function(t){if(t.s===s.id){ns[t.n]=1;nv++;}});s.tools=Object.keys(ns).length;s.versions=nv;});
+  SERVERS.forEach(function(s){var ns={},nv=0,np=0;TOOLS.forEach(function(t){if(t.s===s.id){ns[t.n]=1;nv++;if(t.proposal)np++;}});
+    s.tools=Object.keys(ns).length; s.versions=nv;
+    if(np) s.schemas=np+" observed, awaiting approval";});
   var CONN_KIND={jira:"oauth",datadog:"api_key",pagerduty:"oauth",salesforce:"oauth",gdrive:"oauth","postgres-prod":"cloud_role",kubernetes:"cloud_role",sentry:"api_key",hubspot:"oauth",notion:"oauth",zendesk:"oauth"};
   var ci=0;
   NEW_SRV.forEach(function(s){
@@ -13622,7 +13887,7 @@ document.addEventListener("click",function(e){
     POLICIES.push({v:"pol_v"+v,state:"superseded",by:pick(["Priya Natarajan","Marcus Bell",PEOPLE[WSX.security.owner].name]),at:dstr(d)+" "+pad(ri(8,18))+":"+pad(ri(0,59)),rules:36-i,tests:(38-i)+" / "+(38-i)+" pass",note:note});
   });
   var REC_ST={
-    rule:["Every pull request description names the issue it closes and the test that proves it.","Post to a shared channel only after the run has a sealed verdict.","Prefer the workspace's own retry helper over ad-hoc loops.","Cite the receipt id when reporting money moved.","Group release notes by surface, never by author.","Ask before touching a file outside the task's directory.","Write the reproduction command into the issue before labelling it."],
+    rule:["Every pull request description names the issue it closes and the test that proves it.","Post to a shared channel only after the run is sealed.","Prefer the workspace's own retry helper over ad-hoc loops.","Cite the receipt id when reporting money moved.","Group release notes by surface, never by author.","Ask before touching a file outside the task's directory.","Write the reproduction command into the issue before labelling it."],
     constraint:["Never merge. A person merges.","Never send email to a customer address; draft only.","Never write to a production table; read replicas only.","Never delete a pod in prod-east without an approval token.","No agent may rotate a credential it holds.","Refunds above the mandate ceiling go to a human, not to deny."],
     procedure:["Reproduce, then bisect, then open the issue with the introducing commit.","Plan, wait for review, apply only after the plan comment is approved.","Read the runbook page named by the alert before any remediation call.","Backfill in day-sized partitions; verify row counts after each."],
     fact:["The production branch of a-intel/mobile is release, not main.","Invoices for PO-4471 arrive on the 3rd business day of the month.","prod-east has three availability zones; prod-west has two.","The support SLA is four hours for priority one, one business day otherwise.","aintel_prod.customers has 1.46M rows and a soft-delete column."],
@@ -13684,7 +13949,6 @@ document.addEventListener("click",function(e){
     for(var i=0;i<n;i++){
       var a=wpick(byW), d=anyDay(), sec=daySec(d), status=wpick([["sealed",80],["live",d===0?10:0],["parked",d===0?7:0],["halted",5],["compacted",3]]);
       if(d>0&&status==="live")status="sealed";
-      var verdict=status==="sealed"?wpick([["flipped",34],["unmoved",21],["waived",23],["failing",10],["unsatisfied",9],["tampered",1],[null,2]]):status==="halted"?wpick([["unsatisfied",60],[null,40]]):status==="compacted"?wpick([["flipped",50],["waived",50]]):null;
       var frames=ri(9,320), steps=Math.max(2,Math.round(frames*rf(0.18,0.32))), turn=Math.max(1,Math.round(steps*rf(0.15,0.4)));
       var cost=Math.max(0.04,frames*rf(0.006,0.03)); if(status==="halted")cost*=0.4;
       var task=fillT(pick(TASKS[pre]),w.slug), tref=/#\d+/.test(task)?task.match(/[\w./-]*#\d+/)[0]:/PO-\d+/.test(task)?task.match(/PO-\d+/)[0]:"LIN-"+ri(1200,4800);
@@ -13692,13 +13956,12 @@ document.addEventListener("click",function(e){
       var grade=status==="compacted"?"ledger":wpick([["full",80],["partial",11],["digest",5],["ledger",4]]);
       var ratio=Math.round(rf(0.2,0.9)*100)/100, sealedAt=status==="live"||status==="parked"?null:when(d,Math.min(sec+ri(60,2400),86399),true).replace(/^\d{4}-\d\d-\d\d /,"");
       var model=a.model==="light"?wpick([["claude-haiku-4-5",70],["claude-sonnet-5",30]]):wpick([["claude-opus-5",58],["claude-sonnet-5",34],["claude-haiku-4-5",8]]);
-      genRuns.push({id:id,agent:a.key,op:a.operator,ws:w.slug,status:status,turn:turn,steps:steps,frames:frames,cost:m2(cost),basis:wpick([["client_attested",1]]),tier:a.tier,
-        grade:grade,verdict:verdict,task:tref,taskTitle:task,
-        summary:(status==="live"?"In progress. ":status==="parked"?"Parked on approval. ":status==="halted"?"Halted before completion. ":"")+a.name+" worked "+task.toLowerCase()+" in "+steps+" steps over "+turn+" turn"+(turn===1?"":"s")+
-          (verdict==="flipped"?"; the witness flipped from failing to passing.":verdict==="failing"?"; the witness never flipped.":verdict==="waived"?"; no test oracle applies, so the verdict is waived.":verdict==="unsatisfied"?"; the task's own check was not met.":verdict==="tampered"?"; the witness fingerprint moved, so the seal reads tampered.":"."),
+      genRuns.push({id:id,agent:a.key,op:a.operator,ws:w.slug,status:status,turn:turn,steps:steps,frames:frames,cost:m2(cost),basis:(a.tier==="gateway"||a.tier==="contained")?"gateway_observed":"client_attested",tier:a.tier,prompts:wpick([[1,55],[2,25],[3,12],[4,5],[5,3]]),
+        grade:grade,task:tref,taskTitle:task,
+        summary:(status==="live"?"In progress. ":status==="parked"?"Parked on approval. ":status==="halted"?"Halted before completion. ":"")+a.name+" worked "+task.toLowerCase()+" in "+steps+" steps over "+turn+" turn"+(turn===1?"":"s")+".",
         touched:[tref,pick(TOUCH).replace(/\{x\}/g,pick(["billing","export","worker","notes","retry","schema","auth","cache"])).replace(/\{n\}/,String(ri(100,240)))],
         gen:{model:"claude-haiku-4-5",when:sealedAt?"at seal "+sealedAt:"turn "+turn+" · regenerated at each turn boundary",frames:frames},
-        started:when(d,sec,true),model:model,cache:Math.round(rf(0.55,0.94)*100)/100,provenSpend:verdict==="flipped"?m2(cost*rf(0.5,1)):"0.00",ratio:ratio,sealed:sealedAt,_d:d,_s:sec});
+        started:when(d,sec,true),model:model,cache:Math.round(rf(0.55,0.94)*100)/100,ratio:ratio,sealed:sealedAt,_d:d,_s:sec});
     }
   });
   genRuns.sort(function(a,b){return (a._d-b._d)||(b._s-a._s);});
@@ -13743,7 +14006,7 @@ document.addEventListener("click",function(e){
   RECEIPTS.sort(function(a,b){return a.at<b.at?1:a.at>b.at?-1:0;});
 
   /* ---------- audit ---------- */
-  var EV=[["approval.requested",10,"agent"],["approval.resolved",9,"human"],["run.proven",11,"agent"],["dod.settled",13,"agent"],["dod.signed",2,"human"],["run.sealed",14,"agent"],["run.halted",4,"agent"],["tool_call.denied",6,"agent"],
+  var EV=[["approval.requested",10,"agent"],["approval.resolved",9,"human"],["run.sealed",26,"agent"],["run.halted",4,"agent"],["tool_call.denied",6,"agent"],
     ["budget.breached",2,"agent"],["agent.registered",3,"human"],["agent.deregistered",1,"human"],["role.assigned",3,"human"],["role.revoked",1,"human"],["api_key.created",1,"human"],["api_key.revoked",1,"human"],
     ["invitation.sent",2,"human"],["invitation.accepted",2,"human"],["connection.reviewed",2,"human"],["credential.granted",8,"service"],["export.created",2,"human"],["export.downloaded",1,"human"],
     ["steering_published",3,"human"],["context_pr.opened",3,"service"],["kill_switch.flipped",1,"human"],["kill_switch.cleared",1,"human"],
@@ -13757,8 +14020,7 @@ document.addEventListener("click",function(e){
     switch(ev){
       case "approval.requested": return t.n+"@"+t.v+" on "+pick(REPOS).n;
       case "approval.resolved": return pick(["approved","denied","expired"])+" · apr_01K5R"+ulid(4)+" · "+t.n+"@"+t.v;
-      case "run.proven": return "verdict flipped · oracle test_flip · "+r.task;
-      case "run.sealed": return "verdict "+(r.verdict||"none")+" · "+r.frames+" frames · "+r.task;
+      case "run.sealed": return r.frames+" frames · "+tokn(runMetrics(r).tokTotal)+" tokens · "+r.task;
       case "run.halted": return pick(["kill switch · server slack","budget reached at turn "+r.turn,"operator pause","hooks_removed"])+" · "+r.task;
       case "tool_call.denied": return t.n+"@"+t.v+" · "+pick(["outside the belt","tainted argument","mandate ceiling","kill switch"]);
       case "budget.breached": return "$"+m2(rf(0.4,3))+" per run reached at turn "+r.turn+" · paused at the next hook boundary";
@@ -13778,8 +14040,6 @@ document.addEventListener("click",function(e){
       case "context_pr.opened": return pick(REPOS).n+"#"+ri(300,1900)+" · proposed by the promoter · "+ri(3,40)+" runs in support";
       case "kill_switch.flipped": return pick(["tool version "+t.n+"@"+t.v,"agent "+r.agent,"tool server kubernetes"])+" · "+pick(["schema regression","runaway retries","operator request"]);
       case "kill_switch.cleared": return "tool server kubernetes · schema approved";
-      case "dod.settled": return r.id+" · "+pick(["HELD","HELD","HELD","BROKEN · CHECK_FAILED","PENDING · HUMAN_PENDING","BROKEN · ATTEMPTS_EXHAUSTED"])+" · dodc_01K"+ulid(6);
-      case "dod.signed": return r.id+" · human check signed · PENDING → HELD";
       case "schema.proposed": return t.n+"@"+t.v+" · output schema observed, not declared";
       case "schema.approved": return t.n+"@"+t.v+" · proposal accepted by "+p;
       case "session.signed_in": return pick(["password","Google","GitHub"])+" · "+pick(["macOS · Chrome","macOS · Safari","Windows · Edge","iOS · app"])+" · MFA "+pick(["passkey","TOTP"]);
@@ -13820,13 +14080,13 @@ document.addEventListener("click",function(e){
      starts with the agent key), so an agent's count and the register can never disagree. Give
      every generated agent flagged with incidents that many register rows, then derive the count
      back from the register rather than trusting the flag. Seed agents are left as authored. */
-  var TK=["hooks_removed","chain_break","unknown_tool","credential_probe","witness_probe","seq_conflict"];
+  var TK=["hooks_removed","chain_break","unknown_tool","credential_probe","receipt_modified","seq_conflict"];
   var TK_DETAIL={
     hooks_removed:"The host's harness settings lost the Oxagen hooks between two checkpoints. The collector halted the run at the next boundary and the agent's tier fell to observe until re-enrolment.",
     chain_break:"A frame arrived whose previous-hash did not match the sealed frame before it. Every later frame on the run was marked unverifiable and the run sealed tampered.",
     unknown_tool:"The agent called nine tool names that are not on its belt inside one turn. Each was denied before dispatch; the burst tripped the detector and paused the run.",
     credential_probe:"The agent tried to read the credential grant behind a tool call instead of calling the tool. The broker refused, and the attempt is recorded as a security event.",
-    witness_probe:"The agent read the witness test's expected output before the witness ran. The verdict for the run was withheld and the run sealed unsatisfied.",
+    receipt_modified:"A receipt row was rewritten after the run sealed. The chain kept the original hash, so the rewrite shows as a mismatch and the run is marked in its completeness record.",
     seq_conflict:"Two frames arrived with the same sequence number and different hashes. The second was rejected and the run sealed with a gap noted in its completeness record."};
   var tkSeen=0;
   madeAgents.forEach(function(a){
@@ -13839,7 +14099,7 @@ document.addEventListener("click",function(e){
         closedAt:open?"":stamp(Math.max(0,d-ri(1,5)),daySec(1)),closedBy:open?"":PEOPLE[a.operator].name,runs:ri(1,6)});
     }
   });
-  var TAMPER=(typeof TAMPER_KINDS!=="undefined"&&TAMPER_KINDS)||{hooks_removed:1,chain_break:1,credential_probe:1,witness_tampered:1,unknown_tool:1,witness_probe:1,receipt_modified:1,seq_conflict:1};
+  var TAMPER=(typeof TAMPER_KINDS!=="undefined"&&TAMPER_KINDS)||{hooks_removed:1,chain_break:1,credential_probe:1,unknown_tool:1,receipt_modified:1,seq_conflict:1};
   madeAgents.forEach(function(a){
     a.incidents=INCIDENTS.filter(function(i){return TAMPER[i.kind]&&String(i.scope).indexOf(a.key)===0;}).length;
   });
@@ -13856,24 +14116,20 @@ document.addEventListener("click",function(e){
   for(var vi=0;vi<11;vi++){var f=pick(FIRST).toLowerCase(),s=ri(0,6);INVITES.push({email:f+"."+pick(LAST).toLowerCase().replace(/[^a-z]/g,"")+"@a-intel.example",role:pick(["workspace.member · "+pick(allWs),"org.auditor","workspace.owner · "+pick(allWs)]),by:pick(humans),sent:dstr(TODAY-s*86400000),expires:dstr(TODAY+(7-s)*86400000)});}
   if(parked.length)NOTIFS.push({kind:"approval.requested",tone:"approval",unread:true,t:"15:41",title:"Approval waiting · kubernetes__delete_pod@2",body:"a-intel.infra.k8s-doctor on "+parked[0].id+" wants to delete a crash-looping pod in prod-east. Rule role_grant rg_0121. Expires 15:51."});
   NOTIFS.push(
-    {kind:"run.proven",tone:"allowed",unread:false,t:"15:30",title:"Run proven · "+genRuns[3].id,body:"Witness flipped on "+genRuns[3].task+". Oracle test_flip, disclosure grain L0."},
+    {kind:"run.sealed",tone:"allowed",unread:false,t:"15:30",title:"Run sealed · "+genRuns[3].id,body:genRuns[3].task+" sealed: "+genRuns[3].frames+" frames, "+usd(genRuns[3].cost)+" "+genRuns[3].basis+"."},
     {kind:"budget.breached",tone:"failed",unread:false,t:"14:52",title:"Hard budget reached · "+fin[0].key,body:"$1.50 per run reached at turn 5. The run was paused at the next hook boundary."},
     {kind:"repository.indexed",tone:"allowed",unread:false,t:"14:20",title:"Code graph current · a-intel/data-platform",body:"Push "+hex(7)+" to main indexed in 58 s. 41 files re-parsed, 190 symbols versioned."},
     {kind:"context_pr.opened",tone:"gold",unread:false,t:"11:48",title:"Context PR opened · a-intel/support-console#188",body:"The promoter proposed a rule on lineage ctx.support.reply-in-customers-language, supported by 212 tickets."});
 
   /* ---------- spend, billing, the numbers every page quotes ---------- */
-  var spendTot=0,provenTot=0,runsTot=0; AGENTS.forEach(function(a){spendTot+=num$(a.spend30);provenTot+=num$(a.proven30);runsTot+=a.runs30;});
-  var accepted=spendTot*0.17, unproven=spendTot-provenTot-accepted;
-  SPEND.spend=mc(spendTot); SPEND.proven=mc(provenTot); SPEND.accepted=mc(accepted); SPEND.unproven=mc(unproven);
-  SPEND.ratio=Math.round(provenTot/spendTot*100)/100; SPEND.runs=runsTot; SPEND.actions=Math.round(runsTot*14.7);
-  var byOp={}; AGENTS.forEach(function(a){var o=byOp[a.operator]=byOp[a.operator]||{p:a.operator,agents:0,runs:0,spend:0,proven:0,list:[]};o.agents++;o.runs+=a.runs30;o.spend+=num$(a.spend30);o.proven+=num$(a.proven30);o.list.push(a);});
+  var spendTot=0,runsTot=0,ratioW=0; AGENTS.forEach(function(a){spendTot+=num$(a.spend30);runsTot+=a.runs30;ratioW+=num$(a.spend30)*(a.ratio||0);});
+  SPEND.spend=mc(spendTot); SPEND.ratio=Math.round(ratioW/Math.max(1,spendTot)*100)/100; SPEND.runs=runsTot; SPEND.actions=Math.round(runsTot*14.7);
+  var byOp={}; AGENTS.forEach(function(a){var o=byOp[a.operator]=byOp[a.operator]||{p:a.operator,agents:0,runs:0,spend:0,ratioW:0,list:[]};o.agents++;o.runs+=a.runs30;o.spend+=num$(a.spend30);o.ratioW+=num$(a.spend30)*(a.ratio||0);o.list.push(a);});
   var ops=Object.keys(byOp).map(function(k){return byOp[k];}).sort(function(a,b){return b.spend-a.spend;});
-  SPEND.byOperator=ops.map(function(o){var budget=Math.ceil(o.spend/rf(0.55,0.92)/500)*500;return {p:o.p,agents:o.agents,runs:o.runs,spend:mc(o.spend),proven:mc(o.proven),ratio:Math.round(o.proven/Math.max(1,o.spend)*100)/100,budget:mc(budget),used:Math.round(o.spend/budget*100)/100};});
+  SPEND.byOperator=ops.map(function(o){var budget=Math.ceil(o.spend/rf(0.55,0.92)/500)*500;return {p:o.p,agents:o.agents,runs:o.runs,spend:mc(o.spend),ratio:Math.round(o.ratioW/Math.max(1,o.spend)*100)/100,budget:mc(budget),used:Math.round(o.spend/budget*100)/100};});
   var top=AGENTS.slice().sort(function(a,b){return num$(b.spend30)-num$(a.spend30);});
-  /* A seed row can carry fields the page reads beyond these (stella-ci's flipped count feeds its
-     spend-per-proven-run history); rebuild the figures, keep what the seed row authored. */
   var seedByAgent={}; (SPEND.byAgent||[]).forEach(function(x){seedByAgent[x.k]=x;});
-  SPEND.byAgent=top.map(function(a){var sp=num$(a.spend30),pv=num$(a.proven30);return Object.assign({},seedByAgent[a.key]||{},{k:a.key,runs:a.runs30,spend:mc(sp),proven:mc(pv),perProven:pv>0?m2(sp/Math.max(1,a.runs30*a.ratio)):"—",trend:(rnd()<0.55?"+":"-")+ri(0,18)+"%"});});
+  SPEND.byAgent=top.map(function(a){var sp=num$(a.spend30);return Object.assign({},seedByAgent[a.key]||{},{k:a.key,runs:a.runs30,spend:mc(sp),trend:(rnd()<0.55?"+":"-")+ri(0,18)+"%"});});
   var callsTot=Math.round(runsTot*31);
   SPEND.byModel=[{m:"claude-opus-5",calls:Math.round(callsTot*0.31),spend:mc(spendTot*0.62),cache:0.84},{m:"claude-sonnet-5",calls:Math.round(callsTot*0.33),spend:mc(spendTot*0.24),cache:0.81},
     {m:"claude-haiku-4-5",calls:Math.round(callsTot*0.34),spend:mc(spendTot*0.09),cache:0.76},{m:"z-ai/glm-latest (Oxagen)",calls:Math.round(callsTot*0.02),spend:mc(spendTot*0.05),cache:0.62}];
@@ -13885,24 +14141,25 @@ document.addEventListener("click",function(e){
   function agentKey(a){return a.key;}
   ops.forEach(function(o){
     var sp=o.spend, tools=SPEND.byTool.slice(0,5).map(function(t){return [t.t,Math.round(sp*rf(0.04,0.22)*100)/100];}); tools.push(["(no tool call)",Math.round(sp*rf(0.1,0.25)*100)/100]);
-    SPEND_DETAIL["operator:"+o.p]={cache:Math.round(rf(0.7,0.9)*100)/100,wasted:Math.round(sp*rf(0.08,0.24)*100)/100,accepted:Math.round(sp*0.17*100)/100,unproven:Math.round((sp-o.proven-sp*0.17)*100)/100,perRun:Math.round(sp/Math.max(1,o.runs)*100)/100,
+    SPEND_DETAIL["operator:"+o.p]={cache:Math.round(rf(0.7,0.9)*100)/100,wasted:Math.round(sp*rf(0.08,0.24)*100)/100,perRun:Math.round(sp/Math.max(1,o.runs)*100)/100,
       trend:(rnd()<0.6?"+":"-")+ri(0,14)+"% vs August",modelCalls:Math.round(o.runs*31),toolCalls:Math.round(o.runs*9.4),agents:cuts(o.list,agentKey,function(a){return num$(a.spend30);},4),tools:tools,
       models:[["claude-opus-5",Math.round(sp*0.62*100)/100],["claude-sonnet-5",Math.round(sp*0.24*100)/100],["claude-haiku-4-5",Math.round(sp*0.09*100)/100],["z-ai/glm-latest (Oxagen)",Math.round(sp*0.05*100)/100]]};
   });
   top.forEach(function(a){
-    if(SPEND_DETAIL["agent:"+a.key])return; var sp=num$(a.spend30), pv=num$(a.proven30);
-    SPEND_DETAIL["agent:"+a.key]={cache:Math.round(rf(0.68,0.92)*100)/100,wasted:Math.round(sp*rf(0.05,0.3)*100)/100,accepted:Math.round(sp*rf(0,0.2)*100)/100,unproven:Math.round(Math.max(0,sp-pv)*0.7*100)/100,perRun:Math.round(sp/Math.max(1,a.runs30)*100)/100,ratio:a.ratio,
+    if(SPEND_DETAIL["agent:"+a.key])return; var sp=num$(a.spend30);
+    SPEND_DETAIL["agent:"+a.key]={cache:Math.round(rf(0.68,0.92)*100)/100,wasted:Math.round(sp*rf(0.05,0.3)*100)/100,perRun:Math.round(sp/Math.max(1,a.runs30)*100)/100,ratio:a.ratio,
       trend:(rnd()<0.55?"+":"-")+ri(0,16)+"% vs August",modelCalls:Math.round(a.runs30*rf(18,44)),toolCalls:Math.round(a.runs30*rf(4,16)),operators:[[a.operator,Math.round(sp*100)/100]],
       tools:SPEND.byTool.slice(0,4).map(function(t){return [t.t,Math.round(sp*rf(0.05,0.3)*100)/100];}).concat([["(no tool call)",Math.round(sp*rf(0.08,0.2)*100)/100]]),
       models:a.model==="light"?[["claude-haiku-4-5",Math.round(sp*0.7*100)/100],["claude-sonnet-5",Math.round(sp*0.3*100)/100]]:[["claude-opus-5",Math.round(sp*0.66*100)/100],["claude-sonnet-5",Math.round(sp*0.3*100)/100],["claude-haiku-4-5",Math.round(sp*0.04*100)/100]]};
   });
-  var billable=runsTot-BILLING.runsIncluded, amount=billable*0.30, disc=amount*0.2;
-  BILLING.runsUsed=runsTot; BILLING.billable=billable; BILLING.tier2=ic(billable)+" × $0.30"; BILLING.amount=mc(amount); BILLING.discountAmount="-"+mc(disc); BILLING.total=mc(amount-disc);
+  /* Governed actions are the unit (ADR-055): the included allowance first, then blocks of 10,000 at $30. */
+  var included=BILLING.includedGau||250000, gauTot=SPEND.actions, billable=Math.max(0,gauTot-included), blocks=Math.ceil(billable/10000), amount=blocks*30, disc=amount*0.2;
+  BILLING.runsUsed=runsTot; BILLING.billable=billable; BILLING.tier2=ic(blocks)+" blocks × $30.00 · "+ic(included)+" included"; BILLING.amount=mc(amount); BILLING.discountAmount="-"+mc(disc); BILLING.total=mc(amount-disc);
   BILLING.retention="13 months included · "+(spendTot/420).toFixed(1)+" GB · $0.00";
   BILLING.invoices=[]; var mon=["August","July","June","May","April","March","February","January"], base=runsTot*0.93;
-  mon.forEach(function(m,i){var runs=Math.round(base*Math.pow(0.91,i)*rf(0.97,1.03)),bill=Math.max(0,runs-1000)*0.3*0.8;BILLING.invoices.push({n:"INV-2026-"+pad(8-i),p:m+" 2026",runs:runs,amt:mc(bill),st:i===0&&rnd()<0.3?"open":"paid",d:"2026-"+pad(9-i)+"-01"});});
-  BILLING.meters=[{m:"Sealed runs with at least one model call",v:ic(runsTot),note:"the billable unit"},{m:"Governed actions",v:ic(SPEND.actions),note:"reported, not priced"},{m:"Retained evidence",v:(spendTot/420).toFixed(1)+" GB",note:"13 months included"},
-    {m:"Runs Oxagen halted before any model call",v:ic(Math.round(runsTot*0.009)),note:"free"},{m:"Witness runs",v:ic(Math.round(runsTot*0.45)),note:"free"}];
+  mon.forEach(function(m,i){var runs=Math.round(base*Math.pow(0.91,i)*rf(0.97,1.03)),gau=Math.round(runs*14.7),bill=Math.ceil(Math.max(0,gau-included)/10000)*30*0.8;BILLING.invoices.push({n:"INV-2026-"+pad(8-i),p:m+" 2026",runs:gau,amt:mc(bill),st:i===0&&rnd()<0.3?"open":"paid",d:"2026-"+pad(9-i)+"-01"});});
+  BILLING.meters=[{m:"Governed actions",v:ic(SPEND.actions),note:"the billable unit · "+ic(included)+" included this month"},{m:"Sealed runs with at least one model call",v:ic(runsTot),note:"reported, not priced"},{m:"Retained evidence",v:(spendTot/420).toFixed(1)+" GB",note:"13 months included"},
+    {m:"Runs Oxagen halted before any model call",v:ic(Math.round(runsTot*0.009)),note:"free"},{m:"Runs of the in-app agent",v:ic(Math.round(runsTot*0.03)),note:"free"}];
   SWITCHES.forEach(function(s){
     if(s.id==="ks_org")s.stops=AGENTS.length+" agents · "+ic(TOOLS.length)+" tool versions";
     if(s.id==="ks_ws")s.stops=(WS[0].agents-7)+" agents · "+ic(Math.round(TOOLS.length*0.38))+" tool versions";
@@ -14007,9 +14264,6 @@ seedApprovals();
   n=nf("approval.resolved","14:13"); a=APPROVALS.filter(function(x){return x.id==="apr_01K5RH8M2";})[0];
   if(n&&a){n.t=addMin(a.parkedAt.slice(0,8),parseInt(a.timeout,10));n.title="Approval expired · "+a.tool;
     n.body="No approver resolved "+a.id+" within "+a.timeout.replace("m"," minutes")+". The call on "+a.run+" was never dispatched, and the run ended on the permission decision.";}
-  n=nf("run.proven","15:09"); var R=run("run_01K5RQ4B9C7XTN2P"), f=R&&R.flip;
-  if(n&&f){n.t=f.sealedAt.slice(0,5);n.title="Run proven · "+R.id;
-    n.body="Witness "+f.witness+" flipped: failing on "+f.targetRef+" at "+f.targetSha+", passing on "+f.prRef+" at "+f.prSha+". Oracle "+f.oracle+", disclosure grain L0.";}
   var nowHM=new Date(STORY_NOW).toISOString().slice(11,16), day="2026-09-10 ";
   NOTIFS.forEach(function(x){if(/^\d\d:\d\d$/.test(x.t)&&x.t>nowHM)x.t=day+x.t;});
   function key(t){return /^\d\d:\d\d$/.test(t)?"2026-09-11 "+t:t;}

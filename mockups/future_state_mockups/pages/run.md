@@ -1,0 +1,105 @@
+# Run
+
+| | |
+|---|---|
+| Route | `#/a-intel/core-platform/runs/<run id>` |
+| Scope | workspace |
+| Spec | §14 Mission Control; Appendix F page 2 |
+| Design | `mockups/src/engine.js` → `pRun(r)`, built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
+| States | loaded · empty · loading · error · access denied |
+| Storybook | `Oxagen / … / run`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
+| Audit | `run.audit-prompt.md` |
+
+## Job
+
+A run whose loop Oxagen has stopped on an interjection renders a different page at the same route: `run-interjection.md`.
+
+A frame-by-frame player for one run: the transcript at three zoom levels under a transport, what the agent was told, each model exchange, tool calls with their validation results, policy decisions, proof, the definition of done, a cost strip and chain status. Every explanation is a chain of links to frames, records and commits.
+
+## What is on the page
+
+**Header** — eyebrow “Run”, h1 “<run id> (mono)”. Under the id: the agent card (compact layout: avatar, key, harness, runs, trust and spend scores), status dot + word (live / sealed / failed…), tier badge (`observe` or `harness`; `gateway` and `contained` are not yet available and never appear on a run), replay badge, verdict badge, the dod badge (done · held / pending / broken / locked, by shape), task chip (`task a-intel/platform#482`), and the task line with the start time. A generated **Summary · so far** panel is labelled “generated · not the record”: the agent and operator, the generated prose, and the model, time and frame count that produced it.
+Actions: **❙❙ Pause run** (opens the pause dialog; Resume when paused) · **Steer** · **Cancel** (danger) · **Export** (opens the run-export dialog)
+
+- **What this run produced · in the order it happened** (`<RunOutputs>`, `runOutputs(R)`) — the run's outputs as one time-ordered spine, decided 2026-09-17 as Option Story (`design/run-outputs/DECISION.md`, feedback item 7). One node per thing the run produced, in the order the frames produced it: kind glyph on the spine, name in mono, where it landed, a state badge (created · written · pushed · open · linked · awaiting · blocked · withheld, or the verdict on a seal), a one-line note, a diff stat on a file, a thumbnail on a media asset, and an `fr N` chip that opens the frame that produced it. A **read is never a node** — it is a hairline tick with one line of text, so `CHANGELOG.md · read once` cannot read like a change. A **governed gate** sits at the position it stopped the run, in `--st-approval`, carrying **Review the approval**, and is followed by a dashed **would** node naming what has *not* happened (`4.11.0 release · withheld · not published; main untouched`). A sealed run ends at its seal, badged with its verdict. Header carries the tally (`3 artifacts · 2 reads · 1 gate`) and **Hide reads**; more than three durable nodes of one kind in a row fold to the first two plus a count. Nothing here is gold. Data: `RUNS[id].outputs`; a run without one derives a spine from `touched`.
+- **Linked work graph** panels: Repositories · Issues and tasks · Pull requests and artifacts · Files changed (with `txDiffBlock` diffs) · The prompt · Timeline.
+- **Tabs** (counts are live): Transcript (N) · Governed actions (N) · Proof · Done (held / pending / broken / locked) · Cost ($) · Policy (N) · Context (N) · Chain and seal (live/sealed). A tab routes from the hash: `/runs/<id>/<tab>`.
+- **Transcript** — the row-for-row view the operator saw: prompt, prose, each tool call with the output it read, and what every model step cost. Filter chips: prompt · responses · thinking · tools · usage · recall · proof · errors; **expand thinking**. Transport: ⏮ ◀ ❙❙ ▶ ⏭ and speed 1× 2× 3× 6×. ⚖ chips open Oxagen’s own frame (`allow rg_0088`, `approve rg_0093`); the transcript never replaces the frames. **Check it against the frames** jumps to the governed-actions view.
+- **Governed actions** — the frames Oxagen wrote for calls routed through it: frame N · kind (`approval_request`, `control.steer`, `tool_requested`…), and the **Approvals** strip for this run with the four hops (Approval · Call · Rule · Approvers · Waited).
+- **Proof** — Witness · Target · Disclosure grain · “Reaches this agent as”; the flip (failing on target sha, passing on PR sha), the oracle, the sealed-at time.
+- **Done** — the definition of done (`dod-spec.md`). The verdict card: the word by shape (HELD double, PENDING dashed, BROKEN single, LOCKED dotted), what it means, the closed reasons with their one-line meanings; beside it the certificate (Certificate · Bound to (attempt · stream digest) · Lock · Issued · Signature · Metered) or, while locked, Lock · Written to · Drafted by · Hidden checks; **View the locked file** (dialog: the YAML, the lock rule), **Verify offline**, **Sign <check>** (PENDING only; dialog: the check, the signer, a note → HELD). Checks table: Check · Kind · Passes when · Result (pass / fail / harness error / awaiting signature / signed / runs at Stop) · Evidence (sha256), hidden checks marked; a failed check’s row is tinted. Budget: Cost · Tool calls · Minutes · Stop attempts as bars against the set’s limits, plus refused tool calls. Stops: every Stop as a chain entry with its verdict, failing ids and note.
+- **Cost** — Calls, concurrency and prefetch (Batches · Widest batch · Mean fan-out · Wall clock won; a Family/Calls/Share/Wall clock/Failed table), Run waterfall (Turn · Steps · Frames · Cache hit · Cost · Running total · Pinned; an SVG with evidence pins that open the evidence dialog), Spend by token class (Class · Tokens · Cost · Share), Prompt composition (Eligible · Hit rate · Wall clock saved · Billed · Effective input price · Cache write cost share · Proven spend · Productive ratio); **Duplicate tool calls** finding.
+- **Policy** — “Every policy decision on this run”: Frame · Call · Outcome · Rules that fired · Taint · Latency.
+- **Context** — first the **`steering.manifest` frame**: what Oxagen injected for this run and what it cut, as one spine in assembly order, following the run outputs decision (`design/run-outputs/DECISION.md`): gate notices, then the stable prefix (`must`, `should`), then the volatile selection with each item’s rank, then the cut items as dashed nodes with the reason (`over budget`, `lower precedence`, `superseded`, `out of scope`) and the why. Every node links the item to where it is authored (the record page, the skill, the Memory, Ontology, or Policy tab of Steering) and shows its kind, force, and token cost. The header tally reads “N rendered · N cut · N tok”; the token total equals the `steering.compiled` band of the window below. More than three cuts fold to three plus a count. **Open in Preview** opens Steering · Preview with this run’s agent and prompt. The footer says the frame was written once, beside `context.assembled`, on the bundle version the run started on, that the prefix went in at SessionStart and the volatile selection at UserPromptSubmit, and that a record merged later is not in it. A run on the `observe` tier says “Assembled, not delivered”. Nothing on the spine is gold. Then the window as it was sent (block by block), `context.frames` (Kind · Frame · Tok · Score · Cited), Walk the window, Retrieval in numbers (Candidates scored · Admitted · Held back · Below the floor · Headroom left · Composition digest).
+- **Chain and seal** — Hash chain (Frames · Rule · `telemetry_gap` frames), Seal and attestation, Replay grade (Grade · What was recorded · What it allows), Checkpoints; **Fork replay from frame N** (opens the fork-replay dialog), **Bisect** (dialog: run A vs run B; Stella only for re-run).
+
+**Dialogs this page opens:** `pause`, `steer`, `forkreplay`, `bisect`, `runexport`, `evidence (a pinned finding)`, `approve / deny (from the approvals strip)`, `dodfile`, `dodsign`.
+
+**Shell.** Sidebar (organization switcher, workspace switcher, Workspace nav: Fleet · Agent IAM · Tools · Steering · Spend; Organization nav: Organization · Billing · Audit; agent count · data plane · connection badge), top bar (breadcrumbs, ⌘K search-or-run, notifications with unread dot, account avatar → user menu: Account, Preferences, Security and sessions, Privacy and data, Switch theme, Sign out).
+
+## Data sources
+
+Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBacked` in production). From `docs/implementation-plan.md` §3; the *mockup collection* column names the file in `mockups/fixtures/` (as `FIXTURES.<NAME>`) or the constant in `mockups/src/engine.js` that the design renders from.
+
+| Element | Mockup collection | Target store (spec) | Backing today (repo) | Status |
+|---|---|---|---|---|
+| Header, cost strip | `RUNS[id]`, `runMetrics` | `:Run`, `cost.run_totals` | `RunStore.getRunByPublicId`, `sumTokenUsageByExecutionStep` | 🟡 |
+| Frames / transport | `FRAMES`, `TRANSCRIPTS` | `:Frame` + object bodies | `agent_run_events` via `readAttemptEventsSince`; `tacho_events` (ClickHouse) | 🟡 events ✅, digest chain ✅; model/tool frame kinds partial; bodies ❌ |
+| Chain / seal | chain tab | `:Checkpoint`, `:Seal` | `agent_run_attempt_seals`; `tacho.checkpoints` | ✅ |
+| Steer (delivery mode) | `steerSend` | `control.commands` `steer` | tacho `message` command | 🟡 no delivery mode |
+| Run outputs (the story) | `RUNS[id].outputs` | `:Frame` tool I/O classified by artifact kind, + `control.approvals` for the gate | none — the gate is `agent.approval_requests`, the artifacts are not classified anywhere | ❌ |
+| Linked work graph | `RUNGRAPH` | `FOR_TASK`, `OPENED_BY`, code graph | none | ❌ |
+| Context window | `CTXW/CTXB/CTXF/CTXX` | `USED_CONTEXT` edges | `run-evidence` ContextFrame schemas, not persisted | ❌ (G10) |
+| Proof / flip | `R.flip` | `:Witness`, `:Verdict` | none (M6) | ❌ (G7) |
+| Steering manifest | `STEERING_MANIFESTS` (the run’s prompt and bundle version); the lists come from `assembleSteering()` | the `steering.manifest` frame the assembler records on every run | none; no assembler exists on `main` | ❌ |
+| Name + summary | `R.summary` | `light` tier classifier | none | ❌ (G14) |
+| File diffs | `RUNGRAPH.files`, `txDiffBlock` | tool I/O with file-tool classification | `tacho.session_files` | 🟡 |
+| Fork / bisect / export | toast | Series A / M1 | none | ❌ |
+| Pause / cancel | toast + `pauseRun` | `control.commands` | `tacho.control_commands` via `dispatch_tacho_command`; ledger-ingested runs through a revocable run token (G17) | 🟡 wrapped runs ✅ · ledger runs ❌ (G17, built now) |
+| Approvals on this run | `APPROVALS` filtered by run | `control.approvals` | `agent.approval_requests` filtered on `run_id` (nullable, set from `ctx.agentRun`) | ✅ / 🟡 chain |
+
+## Functionality
+
+- Three zoom levels (turns, steps, everything) and a transport with scrub, step, play/pause and ×1–×6.
+- Every trust badge (tier, replay grade, attestation, cost basis) shows the recorded value and nothing stronger; a client-attested window is labelled as such.
+- Every number that is money shows its basis; cost per turn comes from the run’s own per-turn ledger (`RUN_TURNS`), and the header total is the sum of it.
+- Approvals on the run resolve through the same approve/deny dialogs as Fleet; the strip and the Fleet card read the same `S.ap` record.
+- The approvals strip lists the requests whose `run_id` is this run: `agent.approval_requests` gains a nullable `run_id` set from `ctx.agentRun`, and `list_approvals` filters on it (2026-09-15, maintainer decision).
+- Cancel works on a ledger-ingested run as on a wrapped run: the ledger ingest contract carries a revocable run token, and cancel revokes it (2026-09-15, maintainer decision; G17).
+- Evidence pins on the waterfall open the evidence dialog for the finding they cite; a pin never asserts more than the frame it points at.
+
+## States
+
+- **loaded** — the page as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell).
+- **empty** — “This run has no frames yet” — a run token was minted and the agent has not made its first model call; a run with no frames has cost nothing and is not billable. Action: **Back to Fleet**.
+- **loading** — the shell stays; the page body is replaced by the skeleton (four tile blocks and a panel of seven rows), so the operator keeps their bearings.
+- **error** — “This run could not be loaded” — `502 frame_store_unreachable`. Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by Oxagen. Actions: **Try again**, **Open an incident**; a trace id, region and timestamp line.
+- **access denied** — “You cannot see this run” — the roles the signed-in person holds on the organization do not include `run.read on core-platform`. Copy explains an owner can grant it and that the grant is itself a governed action in the audit record. Actions: **Request access** (opens the request-access dialog), **Back to Fleet**. Below: *Signed in as* (name · role), *Needed* (the permission), *Decided by* (`pol_v41` · deny wins over every allow).
+
+## Mobile
+
+Top bar collapses to hamburger · current crumb · search glyph · notifications · avatar. A fixed five-slot thumb bar replaces the sidebar: **Fleet** (count = approvals waiting), **Agents**, **Tools**, **Spend**, **More** (count = open critical incidents). **More** is a bottom sheet listing Steering (with Skills inside it), Organization, Billing, Audit, Search, Notifications, Account, Switch organization, Switch workspace. The hamburger opens the full sidebar as a drawer over a scrim. Every dialog rises from the bottom edge as a sheet with a drag handle and full-width footer buttons; every list table becomes a stack of cards, each cell labelled with its column header; touch targets are ≥ 44 px; inputs are 16 px; nothing scrolls sideways.
+
+## Permissions
+
+- Read: `run.read`
+- Writes (each a governed action recorded in Audit): `run.command (pause/resume/cancel/steer)`, `approval.resolve`, `run.export`, `run.fork (Series A)`
+
+## Backend gaps this page depends on
+
+- G6 recorder + frame bodies
+- G7 witness/verdict
+- G9 steer delivery mode
+- G10 USED_CONTEXT edges
+- G14 run namer/summariser
+- G17 revocable run token on the ledger ingest contract (Cancel on ledger-ingested runs)
+
+## Rules every build of this page must keep
+
+- Every badge that describes trust (enforcement tier, replay grade, attestation, cost basis) shows the recorded value and nothing stronger; a client-attested window is labelled as such.
+- Every number that is money shows its basis. Headers are rollups of the rows beneath them, never typed twice.
+- Every explanation is a chain of links to frames, records and commits, not a summary.
+- Exactly one gold action per screen. Gold is identity; it never encodes state. State reads as a dot and a word, so it survives greyscale.
+- A not-loaded state replaces the page body, never the shell. Stub controls say what the product would do; nothing silently does nothing.
+- A count in navigation appears only where something waits on a person.
+- G15 the definition of done (`dod-spec.md`): `dod.dod_sets`, `dod.dod_certificates`, the four `dod.*` capabilities

@@ -12,26 +12,26 @@
 
 ## Job
 
-The registry (servers, tool versions, schemas, safety classification), connections and their owners with credential grants, the mandates ledger, policy versions with their tests, kill switches, and the auto-approval rules.
+Every tool version imported, the MCP servers they came from with the connection each is reached through, policy versions with their tests, and kill switches. A tool is identified by `name@schema-version` everywhere, and a server is where you authorize, re-import and remove it.
 
 ## What is on the page
 
-**Header** — eyebrow “Workspace · <workspace name>”, h1 “Tools”.
-Actions: **Import server** (opens the import dialog: pull `tools/list` from an MCP server, version it, store both schemas) · **New tool** (gold; opens the tool wizard) · **Flip a kill switch** (opens the switch dialog)
+**Header**: eyebrow is the workspace name (“Core platform”), h1 “Tools”, subtext “The registry is the only source of tools an agent can see.”
+Actions: **Import server** (opens `import`: pull `tools/list` from an MCP server, version it, store both schemas; three steps Connect → Classify → Import N tools) · **New tool** (gold; opens the tool wizard) · **Flip a kill switch** (danger; opens `switch`). A tool belongs to a server, so every route into a server passes through the MCP servers tab or a Server cell on the Tools tab.
 
-- **Tabs** (`/tools/<tab>`): Registry (N to approve) · Connections (N) · Mandates ledger (N) · Policy (N) · Kill switches (N on) · Auto-approvals (N).
-- **Registry** — banner “N awaiting approval: output schemas were observed, not declared” (**Review** opens the schema dialog); Tool servers table: Server · Kind · Tools · Health · Schemas · Connection · Last import (**Import tools from an MCP server**); Tool versions table: Tool version · Category · Hazard · Gate today · Egress · Financial · Schema origin · Digest · On belts · Calls 30d (Labels / API names toggle; category chips with counts across the ten categories, By category / Flat). A row opens the tool dialog. Note: the gate shown is today’s — the version’s own kill switch, then its server’s, then the mandate rule, then `pol_v41`.
-- **Connections** — the customer’s credentials in the vault: Connection · Kind · Owner · Servers · Downscope · Grants 30d · Reviewed · Next review · Status (**Add a connection**); Credential grants log: Grant · Tool version · Agent · run · Connection · Scope · TTL · State; How the broker chooses: Provider capability · What the broker mints · Here; Financial connections carry extra rules: Named human owner · Mandate per agent · Full-scope keys · Named human owner.
-- **Mandates ledger** — Mandate · Agent · Granted by · Purpose · Per call · Per period · Settled · Reserved · Remaining · Valid to · Status (**Grant a mandate** opens the mandate dialog).
-- **Policy** — Policy versions: Version · State · Author · When · Rules · Tests · What changed (**Edit** opens the policy dialog); a note that activation is a governed action with approval and the superseded version is kept; Conditions available to policy; a sequence rule as shipped.
-- **Kill switches** — “Deny is available at every level”: platform-wide classes (every `moves_funds` tool, every irreversible tool, every tool with egress: third_party), organization, workspace, server, tool version, connection, key, category, agent, person. Each switch: allowing / denying toggle, Blast radius · Takes effect · Flipped by · Reason. Flipping bumps `deny_generation` so every live run token is re-checked at the next call.
-- **Auto-approvals** — trust-gated rules: Rule · Applies to · Requires · Qualifying now · Approved 30d · On (**Create rule**, **Edit**, **Delete**); tiles: Rules on · Auto-approved 30d (each one a frame with the rule id) · Held by a floor (tainted, critical, or above a ceiling) · Median wait saved.
+- **Tabs** (`/tools/<tab>`): Tools (N versions, or “N to approve” in approval colour when an observed schema waits) · MCP servers (N) · Policy (N) · Kill switches (N on). A tab id that is no longer served falls back to Tools, so an old link never renders an empty page.
+- **Tools**: banner “N awaiting approval: N output schemas were observed, not declared…” (**Review** opens `schema`); **Tools** (“Every version imported from every server. RBAC reaches the version, so a server shipping a new one does not widen a belt.”; Labels / API names toggle; badge “N of N shown”; category chips with counts across the ten categories; **Import from a server** opens `import`; facets Schema origin, Egress, Financial): Tool version · Server · Category · Hazard · Gate today · Egress · Financial · Schema origin · Digest · On belts · Calls 30d. A row opens `tool`; the Server cell is a button that opens that server’s drill-down. The category chips sit on their own row with **What the categories mean**, which opens `toolcats`. The note: “The gate shown is today’s: the version’s own kill switch, then its server’s, then `pol_v41`. Open a server on any row to see what it imported and the connection it is reached with.”
+- **MCP servers**: **MCP servers** (“N servers hold N tool versions. Open one to authorize it, re-import its tools, or see what it imported.”; **Add a server** is the tab’s gold action and opens `import`): Server · Kind · Tools · Health · Connection · Authorization · Last import. The Authorization cell is a badge over the token expiry: connected, token expired, key held, role assumed, not connected, or “none needed” for a server reached in-process or over a harness hook. A row opens `server` and carries **Open** · **Connect** or **Reconnect**, when the server takes a credential · **Remove**. A warning under the table counts the connections with an expired token or a passed review date and is derived from the rows. **Credential grants log**: Grant · Tool version · Agent and run · Connection · Scope · TTL · State.
+- **Server drill-down** (`server`, wide): warnings for a degraded server, an expired token, and schemas awaiting approval; Kind · Schemas · Tool versions · Last import; then **Authorization** and **Tools imported from <server>**. Authorization shows the connection, its id and kind, the badge, the scopes granted, the owner with the review dates, what the broker mints for that downscope, and grants in 30 days, with **Reconfigure OAuth** or **Reconnect**, **Refresh the token**, **Edit the connection**, **Disconnect** and **Revoke**. A server with no connection offers **Connect with OAuth** and **Add a key or a role instead**; a server that holds no credential says there is nothing to authorize. The tools table lists only that server’s versions (Tool version · Hazard · Gate today · On belts · Calls 30d) and each row opens `tool`. Footer: **Remove** · **Re-import tools** · **Edit**.
+- **OAuth** (`oauth`, from a server row or its drill-down): Client id · Client secret · Authorization URL · Scopes · the read-only Redirect URL to register with the provider, over the note that authorizing opens the provider, Oxagen exchanges the code, envelopes the token under the organization key, and records who authorized it. **Authorize with <server>** refuses without a client id and an authorization URL; on success the connection reads connected with its new expiry, and a server that had no connection gets one. **Refresh the token** re-authorizes in place and leaves grants already minted on their own TTL. **Disconnect** keeps the connection and denies every call through it until it is authorized again.
+- **Policy**: **Policy versions** (**Edit** opens `policy`): Version · State · Author · When · Rules · Tests · What changed. A row carries **Open** (`policyver`) and then **Edit** when it is active, **Activate** (`policyactivate`) when it is a draft, **Restore** (`policyrestore`, which drafts a new version above the active one) when it is superseded. Below the table, a note that activation is a governed action with approval and the superseded version is kept, then **Conditions a rule may test** and the “Sequence rule” example, folded into this panel rather than standing beside it.
+- **Kill switches**: “Class switches” (every `moves_funds` tool, every irreversible tool, every tool with egress: third_party), carrying the deny generation badge, and “Scoped switches” (organization, workspace, server, tool version, connection, key, category, agent, person). Each switch: allowing / denying toggle, Blast radius · Takes effect · Flipped by · Reason. Flipping bumps `deny_generation` so every live run token is re-checked at the next call.
 
-**Dialogs this page opens:** `import`, `wz (tool wizard: describe → recommendation → manifest or import → code in four languages → pull request)`, `connection`, `tool`, `schema (approve observed)`, `mandate`, `policy (edit)`, `switch`.
+**Dialogs this page opens:** `import`, `wz` (tool wizard: describe → recommendation → manifest or import → code in four languages → pull request), `connection`, `tool`, `toolcats`, `schema` (approve observed), `server` · `serveredit` · `serverdel`, `oauth`, `connedit` · `connrevoke`, `policy` (edit) · `policyver` · `policyactivate` · `policyrestore`, `switch`, `request-access` (from denied), `incident` (from error).
 
 Every creation wizard is `DLG_EXT.wz`; its spec is `docs/creation-spec.md`.
 
-**Shell.** Sidebar (organization switcher, workspace switcher, Workspace nav: Fleet · Agent IAM · Tools · Steering · Spend; Organization nav: Organization · Billing · Audit; agent count · data plane · connection badge), top bar (breadcrumbs, ⌘K search-or-run, notifications with unread dot, account avatar → user menu: Account, Preferences, Security and sessions, Privacy and data, Switch theme, Sign out).
+**Shell.** Sidebar (organization switcher, workspace switcher, Workspace nav: Fleet · Agent IAM · Tools · Steering · Repositories · Spend; Organization nav: Organization · Billing · Audit; foot: the assistant launcher, agent count · data plane, connection badge). Top bar: hamburger, breadcrumbs, ⌘K search-or-run, notifications with unread dot, the approvals button (left of the avatar, count of everything waiting on you across the organization; opens the drawer described in `fleet.md`; account avatar → user menu. No assistant button in the top bar.
 
 ## Data sources
 
@@ -41,50 +41,52 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 |---|---|---|---|---|
 | Servers | `SERVERS` | `tools.tool_servers` | `mcp.mcp_servers`, `mcp.registries` | ✅ |
 | Tool versions + classification | `TOOLS` | `tools.tool_versions` | `agent.tools`/`tool_versions`, `mcp.tool_snapshots` | 🟡 risk/side-effect/consequence tags to verify |
-| Connections, grants | `CONNECTIONS` | `tools.connections` | `ingestion.source_connections`, `mcp.credentials` | 🟡 |
-| Mandates ledger | `MANDATES` | `tools.mandate_ledger` | none | ❌ (G1) |
+| Connections, grants, OAuth state | `CONNECTIONS` (`authState`, `scopes`, `tokenExp`, `client`, `authUrl`) | `tools.connections` | `ingestion.source_connections`, `mcp.credentials` | 🟡 token lifecycle to verify |
 | Policy versions | `POLICIES` | `tools.policy_versions` (Cedar, tests) | none | ❌ (G2) |
 | Kill switches | `SWITCHES`, `S.switches`, `S.denyGen` | `control.commands` + `deny_generation` | `iam.emergency_denies`, `authorization_deny_generations` | 🟡 |
-| Auto-approval rules | `AUTORULES` | not in App. A | none | ❌ (G12, spec decision first) |
 | Observed schemas | `OBSERVED_SCHEMAS` | `schema_origin=observed_proposed` | none | ❌ |
 
 ## Functionality
 
 - Tool identity is `name@schema-version` everywhere (registry, approval, kill switch, `tool_requested` frame). The cell shows the human label over the mono API name; a toggle swaps them.
-- Category is a registry attribute, never a policy: only risk, side effect, financial effect and egress carry a decision by themselves.
+- Category is a registry attribute, never a policy: only risk, side effect, financial effect, and egress carry a decision by themselves.
 - Until an observed output schema is approved, outputs are validated only for size and type and every run that used them says so in its completeness record.
-- Policy is deterministic, versioned and tested; activation is a governed action with approval.
-- A kill switch flip is recorded with who, when and why (`S.flipMeta`) and shows its blast radius before confirming.
+- Policy is deterministic, versioned, and tested; activation is a governed action with approval.
+- A kill switch flip is recorded with who, when, and why (`S.flipMeta`) and shows its blast radius before confirming.
+- A connection is authorized by a person, never by an agent. The token is exchanged by Oxagen, enveloped under the organization key, and never returned to a screen; the broker downscopes it again for each call.
+- An expired token denies every call through its connection until somebody reconnects, and the server row, the drill-down and the warning under the table all say so from the same record.
 
 ## States
 
-- **loaded** — the page as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell).
-- **empty** — “No tool server is registered” — no belt, every call by name is `unknown_tool`. Actions: **Import from an MCP server**, **Add a connection**. The wizard reaches the same importer, from a description rather than a URL.
-- **loading** — the shell stays; the page body is replaced by the skeleton (four tile blocks and a panel of seven rows), so the operator keeps their bearings.
-- **error** — “Tools could not be loaded” — `503 tool_registry_unavailable`. Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by Oxagen. Actions: **Try again**, **Open an incident**; a trace id, region and timestamp line.
-- **access denied** — “You cannot see the tool registry” — the roles the signed-in person holds on the organization do not include `tools.read on core-platform`. Copy explains an owner can grant it and that the grant is itself a governed action in the audit record. Actions: **Request access** (opens the request-access dialog), **Back to Fleet**. Below: *Signed in as* (name · role), *Needed* (the permission), *Decided by* (`pol_v41` · deny wins over every allow).
+- **loaded**: the page as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell).
+- **empty**: “No tool server is registered”. “Until a server is imported, no agent in this workspace has a belt, and every call by name is `unknown_tool`. Import an MCP server to pull its `tools/list`, version it, and store both schemas.” Actions: **Import from an MCP server** (gold), **Add a connection**. The wizard reaches the same importer, from a description rather than a URL.
+- **loading**: the shell stays; the page body is replaced by the skeleton (four tile blocks and a panel of seven rows), so you keep your bearings.
+- **error**: “Tools could not be loaded”. “The control plane answered `503 tool_registry_unavailable`. Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by Oxagen.” Actions: **Try again**, **Open an incident**; the line “trace 01K5RSXQ7F2E · us-east-1 · 2026-09-11 09:16:04Z”.
+- **access denied**: “You cannot see the tool registry”. “Your roles on Anderson Intelligence Corp. do not include `tools.read on core-platform`. An organization owner can grant it; the grant is a governed action and lands in the audit record with your name on it.” Actions: **Request access** (opens `request-access`), **Back to Fleet**. Below: *Signed in as* (Marcus Bell · workspace.owner · core-platform), *Needed* (`tools.read on core-platform`), *Decided by* (`pol_v41` · deny wins over every allow).
 
 ## Mobile
 
-Top bar collapses to hamburger · current crumb · search glyph · notifications · avatar. A fixed five-slot thumb bar replaces the sidebar: **Fleet** (count = approvals waiting), **Agents**, **Tools**, **Spend**, **More** (count = open critical incidents). **More** is a bottom sheet listing Steering (with Skills inside it), Organization, Billing, Audit, Search, Notifications, Account, Switch organization, Switch workspace. The hamburger opens the full sidebar as a drawer over a scrim. Every dialog rises from the bottom edge as a sheet with a drag handle and full-width footer buttons; every list table becomes a stack of cards, each cell labelled with its column header; touch targets are ≥ 44 px; inputs are 16 px; nothing scrolls sideways.
+Top bar collapses to hamburger · current crumb · search glyph · notifications · approvals · avatar. A fixed five-slot thumb bar replaces the sidebar: **Fleet** (count = approvals waiting plus an interjection), **Agents**, **Tools**, **Spend**, **More** (count = open critical incidents). **More** is a bottom sheet listing Steering (with Skills inside it), Repositories, Organization, Billing, Audit, Search, Notifications, Account, Switch organization, Switch workspace. The tab strip scrolls in its own row; the server drill-down rises as a sheet and its two tables stack as cards. Every dialog rises from the bottom edge as a sheet with a drag handle and full-width footer buttons; every list table becomes a stack of cards, each cell labelled with its column header; touch targets are ≥ 44 px; inputs are 16 px; nothing else scrolls sideways.
 
 ## Permissions
 
 - Read: `tools.read`
-- Writes (each a governed action recorded in Audit): `tools.import`, `tools.schema.approve`, `connection.add`, `mandate.grant`, `policy.edit / policy.activate`, `switch.flip`, `autorule.edit`
+- Writes (each a governed action recorded in Audit): `tools.import`, `tools.server.edit`, `tools.server.remove`, `tools.schema.approve`, `connection.add`, `connection.authorize`, `connection.edit`, `connection.review`, `connection.revoke`, `policy.edit / policy.activate`, `switch.flip`
 
 ## Backend gaps this page depends on
 
-- G1 mandates
 - G2 policy versions with tests
-- G12 auto-approval store
+- the OAuth token lifecycle: client registration, code exchange, refresh, and the audit record of who authorized
 - observed-schema proposals
 
 ## Rules every build of this page must keep
 
-- Every badge that describes trust (enforcement tier, replay grade, attestation, cost basis) shows the recorded value and nothing stronger; a client-attested window is labelled as such.
-- Every number that is money shows its basis. Headers are rollups of the rows beneath them, never typed twice.
-- Every explanation is a chain of links to frames, records and commits, not a summary.
-- Exactly one gold action per screen. Gold is identity; it never encodes state. State reads as a dot and a word, so it survives greyscale.
+- Every badge that describes trust (enforcement tier, hazard, gate, schema origin, authorization) shows the recorded value and nothing stronger.
+- Every number that is money shows its basis. Headers are rollups of the rows beneath them, never typed twice; Qualifying now is recomputed from the agent records on every render.
+- Every explanation is a chain of links to frames, records, and commits, not a summary.
+- Exactly one gold action per screen (New tool in the header; Add a server is the MCP servers tab’s primary). Gold is identity; it never encodes state. State reads as a dot and a word, so it survives greyscale.
+- No heading carries a comma, a mid-dot, or a not/never contrast; subtext under a heading is one sentence or nothing.
 - A not-loaded state replaces the page body, never the shell. Stub controls say what the product would do; nothing silently does nothing.
+- Every record this page creates can be opened, edited and removed from the row that names it. A destructive action says what stops working before it asks, and what is kept for replay.
+- No panel repeats a dialog the page already opens, and no panel states a rule the rows beside it already show.
 - A count in navigation appears only where something waits on a person.

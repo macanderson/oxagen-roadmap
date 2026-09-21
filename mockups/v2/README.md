@@ -32,7 +32,7 @@ Token efficiency is explicitly **cached input tokens / total input tokens**, wei
 ## Sources
 
 - App baseline: `oxagen/apps/app/src/features/{shell,fleet}`, `apps/app/src/app/globals.css` and `packages/ui` house tokens.
-- Original mocks and unchanged wizards: `mockups/src`, `mockups/fixtures`.
+- Original mocks and unchanged wizards: `mockups/future_state_mockups/src`, `mockups/future_state_mockups/fixtures`.
 - Stella: `oxagen-brand/logo/svg/stella-icon-light.svg` and `stella-icon-dark.svg`, copied unchanged.
 - Claude Code, Claude Desktop, Codex, Cursor and ChatGPT: [Lobe Icons SVG collection](https://github.com/lobehub/lobe-icons/tree/master/packages/static-svg/icons). Original filenames: `claudecode-color.svg`, `claude-color.svg`, `codex-color.svg`, `cursor.svg`, `openai.svg`. Retrieved September 19, 2026. MIT license retained in `assets/LICENSE-lobe-icons.txt`; brand marks remain their owners' trademarks.
 - Brand references checked: [Cursor](https://cursor.com/brand), [Anthropic](https://brandfolder.com/anthropic/), [OpenAI](https://openai.com/brand/).

@@ -2,6 +2,7 @@ import { readFileSync, writeFileSync, mkdirSync, readdirSync } from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import path from 'node:path';
 import { buildMockup, root } from './build-mockup.mjs';
+const FUTURE = path.join(root, 'mockups/future_state_mockups');
 const dir = path.join(root, 'mockups/v2');
 export function buildMockupV2() {
   const assets = Object.fromEntries(readdirSync(path.join(dir, 'assets')).filter(f => f.endsWith('.svg')).map(f => [f, 'data:image/svg+xml;base64,' + readFileSync(path.join(dir, 'assets', f)).toString('base64')]));
@@ -11,7 +12,7 @@ export function buildMockupV2() {
   // Extend the original engine after fixture expansion, before its first render.
   // Original registration, record, skill and agent wizard functions are reused verbatim.
   const marker = 'if(PRODUCT){var chromeEl=';
-  let html = buildMockup();
+  let html = buildMockup({ src: path.join(FUTURE, 'src'), fix: path.join(FUTURE, 'fixtures') });
   if (html.split(marker).length !== 2) throw new Error('Original mockup boot marker changed');
   html = html.replace('</head>', `<style>${css}</style></head>`)
     .replace(marker, `var V2_ASSETS=${JSON.stringify(assets)};\n${data}\n${js}\n${marker}`)

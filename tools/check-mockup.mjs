@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Opens mockups/missioncontrol.html in headless Chromium, once per view in mockups/catalog.mjs,
 // and asserts each view is what its URL says: the page, in the state, in the shell, with nothing
-// from the mockup chrome left in when ?product=1; then walks every guided scenario step by step.
+// from the mockup chrome, which only ?debug=true brings back; then walks every guided scenario step by step.
 //
 //   node tools/check-mockup.mjs                    # every page × state × shell, then every scenario
 //   node tools/check-mockup.mjs --only fleet       # one page id, or one scenario id
@@ -28,8 +28,8 @@ import { fileURLToPath } from "node:url";
 import { launchChromium } from "./lib/playwright.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-// MOCKUP=v3 checks mockups/v3 (its own catalog and file); unset, the v1 master.
-const VERSION = process.env.MOCKUP === "v3" ? "v3" : "";
+// MOCKUP=future checks mockups/future_state_mockups (its own catalog and file); unset, the master.
+const VERSION = process.env.MOCKUP === "future" ? "future_state_mockups" : "";
 const CATALOG = VERSION ? `../mockups/${VERSION}/catalog.mjs` : "../mockups/catalog.mjs";
 const { PAGES, SCENARIOS, mockupUrl, scenarioHash, ORG } = await import(CATALOG);
 const FILE = "file://" + path.join(root, VERSION ? `mockups/${VERSION}/missioncontrol.html` : "mockups/missioncontrol.html");
@@ -164,7 +164,7 @@ if (doScenarios) for (const s of SCENARIOS) {
   page.on("pageerror", e => errors.push(String(e.message || e)));
   page.on("dialog", d => d.dismiss());
   await page.goto("about:blank");
-  await page.goto(mockupUrl(FILE, { product: false, hash: scenarioHash(s) }));
+  await page.goto(mockupUrl(FILE, { debug: true, hash: scenarioHash(s) }));
   await page.waitForTimeout(300);
   const meta = await page.evaluate(id => {
     const sc = SCENARIOS[id];
