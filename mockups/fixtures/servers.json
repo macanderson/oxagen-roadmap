@@ -12,7 +12,7 @@
   "versions": 63,
   "health": "ok",
   "imported": "2026-09-02 09:14 UTC",
-  "conn": "GitHub App · a-intel",
+  "conn": "GitHub App \u00b7 a-intel",
   "schemas": "declared"
  },
  {
@@ -28,7 +28,7 @@
   "versions": 24,
   "health": "ok",
   "imported": "2026-08-28 16:02 UTC",
-  "conn": "Linear OAuth · Platform",
+  "conn": "Linear OAuth \u00b7 Platform",
   "schemas": "declared"
  },
  {
@@ -44,7 +44,7 @@
   "versions": 29,
   "health": "ok",
   "imported": "2026-09-05 11:40 UTC",
-  "conn": "Stripe restricted key · finops",
+  "conn": "Stripe restricted key \u00b7 finops",
   "schemas": "declared"
  },
  {
@@ -60,7 +60,7 @@
   "versions": 11,
   "health": "ok",
   "imported": "2026-08-19 08:55 UTC",
-  "conn": "AWS role · OxagenToolBroker",
+  "conn": "AWS role \u00b7 OxagenToolBroker",
   "schemas": "declared by admin"
  },
  {
@@ -76,7 +76,7 @@
   "versions": 17,
   "health": "degraded",
   "imported": "2026-09-09 21:31 UTC",
-  "conn": "Slack OAuth · a-intel-eng",
+  "conn": "Slack OAuth \u00b7 a-intel-eng",
   "schemas": "3 observed, awaiting approval"
  },
  {
@@ -92,7 +92,7 @@
   "versions": 9,
   "health": "ok",
   "imported": "2026-07-30 13:12 UTC",
-  "conn": "Snowflake key · analytics",
+  "conn": "Snowflake key \u00b7 analytics",
   "schemas": "imported"
  },
  {
@@ -109,7 +109,7 @@
   "health": "ok",
   "imported": "ships with the release",
   "conn": "none",
-  "schemas": "declared (Zod → JSON Schema)"
+  "schemas": "declared (Zod \u2192 JSON Schema)"
  },
  {
   "id": "harness",

@@ -11,7 +11,6 @@
   "dig": "sha256:9f14c2…",
   "price": "0.00",
   "cred": "github_app → installation token",
-  "belts": 6,
   "calls30": 1284
  },
  {
@@ -26,7 +25,6 @@
   "dig": "sha256:c81d6e…",
   "price": "0.00",
   "cred": "github_app → installation token",
-  "belts": 2,
   "calls30": 47
  },
  {
@@ -41,7 +39,6 @@
   "dig": "sha256:0d51c9…",
   "price": "0.00",
   "cred": "github_app → installation token",
-  "belts": 0,
   "calls30": 0
  },
  {
@@ -56,7 +53,6 @@
   "dig": "sha256:4fe8b1…",
   "price": "0.00",
   "cred": "api_key → restricted key",
-  "belts": 1,
   "calls30": 63,
   "amount": "$.amount",
   "currency": "$.currency",
@@ -75,7 +71,6 @@
   "dig": "sha256:77a3d0…",
   "price": "0.00",
   "cred": "api_key → restricted key",
-  "belts": 1,
   "calls30": 4,
   "amount": "$.amount",
   "currency": "$.currency",
@@ -94,7 +89,6 @@
   "dig": "sha256:b1cc4a…",
   "price": "0.00",
   "cred": "cloud_role → STS session policy",
-  "belts": 1,
   "calls30": 2,
   "amount": "$.commitment.hourly_usd",
   "currency": "USD (fixed)",
@@ -113,7 +107,6 @@
   "dig": "sha256:90bb47…",
   "price": "0.01",
   "cred": "cloud_role → STS session policy",
-  "belts": 9,
   "calls30": 3106
  },
  {
@@ -128,7 +121,6 @@
   "dig": "sha256:8e2b45…",
   "price": "0.00",
   "cred": "oauth → token exchange",
-  "belts": 11,
   "calls30": 2417
  },
  {
@@ -143,7 +135,6 @@
   "dig": "sha256:1c5f80…",
   "price": "0.00",
   "cred": "oauth → token exchange",
-  "belts": 8,
   "calls30": 912
  },
  {
@@ -158,7 +149,6 @@
   "dig": "sha256:pending",
   "price": "0.00",
   "cred": "oauth → token exchange",
-  "belts": 8,
   "calls30": 341,
   "proposal": true
  },
@@ -174,7 +164,6 @@
   "dig": "sha256:pending",
   "price": "0.00",
   "cred": "oauth → token exchange",
-  "belts": 3,
   "calls30": 58,
   "proposal": true
  },
@@ -190,7 +179,6 @@
   "dig": "sha256:pending",
   "price": "0.00",
   "cred": "oauth → token exchange",
-  "belts": 8,
   "calls30": 204,
   "proposal": true
  },
@@ -206,7 +194,6 @@
   "dig": "sha256:5a94ee…",
   "price": "0.04",
   "cred": "api_key → none",
-  "belts": 2,
   "calls30": 188
  },
  {
@@ -221,7 +208,6 @@
   "dig": "sha256:d4c118…",
   "price": "0.00",
   "cred": "none",
-  "belts": 14,
   "calls30": 8841
  },
  {
@@ -236,7 +222,6 @@
   "dig": "sha256:3ab704…",
   "price": "0.00",
   "cred": "github_app → installation token",
-  "belts": 24,
   "calls30": 4102
  },
  {
@@ -251,7 +236,6 @@
   "dig": "sha256:71be05…",
   "price": "0.00",
   "cred": "github_app → installation token",
-  "belts": 3,
   "calls30": 38
  },
  {
@@ -266,7 +250,6 @@
   "dig": "sha256:22e9af…",
   "price": "0.00",
   "cred": "github_app → installation token",
-  "belts": 29,
   "calls30": 7418
  },
  {
@@ -281,7 +264,6 @@
   "dig": "sha256:1f77ba…",
   "price": "0.00",
   "cred": "github_app → installation token",
-  "belts": 31,
   "calls30": 9204
  },
  {
@@ -296,7 +278,6 @@
   "dig": "sha256:5d0c31…",
   "price": "0.00",
   "cred": "github_app → installation token",
-  "belts": 27,
   "calls30": 3881
  },
  {
@@ -311,7 +292,6 @@
   "dig": "sha256:aa7712…",
   "price": "0.00",
   "cred": "github_app → installation token",
-  "belts": 0,
   "calls30": 0
  },
  {
@@ -326,7 +306,6 @@
   "dig": "sha256:64f9c0…",
   "price": "0.00",
   "cred": "oauth → token exchange",
-  "belts": 18,
   "calls30": 5140
  },
  {
@@ -341,7 +320,6 @@
   "dig": "sha256:66a0fd…",
   "price": "0.00",
   "cred": "none",
-  "belts": 14,
   "calls30": 6602
  },
  {
@@ -356,7 +334,6 @@
   "dig": "sha256:f2118a…",
   "price": "0.00",
   "cred": "none",
-  "belts": 11,
   "calls30": 418
  },
  {
@@ -371,7 +348,6 @@
   "dig": "sha256:b70d2c…",
   "price": "0.00",
   "cred": "none",
-  "belts": 31,
   "calls30": 8117
  },
  {
@@ -386,7 +362,6 @@
   "dig": "sha256:cc6a83…",
   "price": "0.00",
   "cred": "none",
-  "belts": 31,
   "calls30": 10488
  },
  {
@@ -401,7 +376,6 @@
   "dig": "sha256:e1f7b4…",
   "price": "0.00",
   "cred": "none",
-  "belts": 31,
   "calls30": 1204
  },
  {
@@ -416,7 +390,6 @@
   "dig": "sha256:39cd77…",
   "price": "0.00",
   "cred": "none",
-  "belts": 22,
   "calls30": 311
  },
  {
@@ -431,7 +404,6 @@
   "dig": "sha256:7b0e52…",
   "price": "0.00",
   "cred": "none",
-  "belts": 31,
   "calls30": 742
  },
  {
@@ -446,7 +418,6 @@
   "dig": "sha256:aa01f3…",
   "price": "0.00",
   "cred": "none",
-  "belts": 9,
   "calls30": 2841
  },
  {
@@ -461,7 +432,6 @@
   "dig": "sha256:b52c09…",
   "price": "0.00",
   "cred": "none",
-  "belts": 9,
   "calls30": 1990
  },
  {
@@ -476,7 +446,6 @@
   "dig": "sha256:04ae19…",
   "price": "0.00",
   "cred": "none",
-  "belts": 31,
   "calls30": 12904
  },
  {
@@ -491,7 +460,6 @@
   "dig": "sha256:5d2e91…",
   "price": "0.00",
   "cred": "none",
-  "belts": 31,
   "calls30": 2104
  }
 ]

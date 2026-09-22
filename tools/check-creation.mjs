@@ -97,7 +97,7 @@ const shot = async (page, name) => { if (shots) await page.screenshot({ path: pa
   await page.evaluate(() => { [...document.querySelectorAll("#layer .dlg-f button")].find(b => /Open the importer/.test(b.textContent)).click(); });
   await page.waitForTimeout(150);
   d = await dlg(page);
-  ok(/Import tools from an MCP server/.test(d.title), "importer opened, got " + d.title);
+  ok(/Import tools from a provider/.test(d.title), "importer opened, got " + d.title);
   ok(errs.length === 0, "tool import path errors: " + errs.join(" | "));
   await page.close();
 }

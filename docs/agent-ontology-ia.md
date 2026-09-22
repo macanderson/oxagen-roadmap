@@ -8,9 +8,8 @@ It is the reasoning behind the changes to `mockups/src/engine.js` and the page s
 
 ## What this change lands
 
-The ontology below is the target. What is built now is its navigation and the surfaces the
-navigation needed: the workspace nav, the tabs on Agents, Tools and Steering, and the pages and
-tabs that did not exist before. Every table rev1 already had keeps the columns it had.
+The ontology below is the target. What is built now is its navigation, the surfaces the navigation
+needed, and the two registry tables that had to name the objects the navigation introduced.
 
 Landed:
 
@@ -26,12 +25,13 @@ Landed:
 - **Runtimes**: the host registry and one host, with the agents on it and the tier its seam earns.
 - The toolbelt, provider and runtime registries behind those surfaces, with the toolbelt
   drill-down and the provider drill-down.
+- The **Composition** column set on the Agents registry, with the column-set control beside it.
+  **Operations** holds the rev1 columns, renamed from Identity to Agent, and no number is deleted.
+- The **Toolbelts** and **Agents** columns on the Tools registry, in place of On belts. Both are
+  derived from the assignment record, so removing a tool from a belt changes the row.
 
-Left for a later change, so this one stays a navigation change:
+Left for a later change:
 
-- The **Composition** column set on the Agents registry, and the column-set control beside it. The
-  registry keeps its rev1 columns, renamed from Identity to Agent.
-- The **Toolbelts** and **Agents** columns on the Tools registry. The tool row keeps On belts.
 - Every other column, tile and panel on a page that already existed.
 
 ## The object
@@ -123,13 +123,16 @@ The registry of actors. Each row answers who the agent is, what it is for, who o
 it, what it can reach, where it runs, which principal represents it, whether it is healthy, and what
 it did recently.
 
-The table keeps its rev1 columns in this change, with Identity renamed to Agent: Agent · Harness ·
-Operator · Status · Tier · Belt · Runs 30d · Spend 30d · Tokens 30d · Mandates · Incidents.
+The table carries two column sets, and the choice is a control on the panel header.
 
-The composition the ontology asks for — Agent · Purpose · Owner · Steering · Toolbelt · Runtime ·
-Principal · Health · Activity, chosen from a control on the panel header — is a column change on a
-table rev1 already had, so it waits for the change that reworks the registry. What an agent is made
-of is already readable on the agent's own Overview tab. No number is deleted either way.
+**Composition** (the default): Agent · Purpose · Owner · Steering · Toolbelt · Runtime · Principal ·
+Health · Activity.
+
+**Operations**: the rev1 columns, unchanged. Identity · Harness · Operator · Status · Tier · Belt ·
+Runs 30d · Spend 30d · Tokens 30d · Mandates · Incidents.
+
+No number is deleted. The default view answers what the agent is. The second answers how it is
+doing. Both read the same records.
 
 ### Agent detail
 
@@ -167,16 +170,15 @@ Provider  ──exposes──▶  Tool  ──composes into──▶  Toolbelt  
 **A provider row** carries: provider · transport · tools exposed · connection health ·
 authorization · toolbelts depending on it · agents depending on it · last import.
 
-**A tool row** carries its rev1 columns with the Server column renamed: tool version · provider ·
-category · hazard · gate today · egress · financial · schema origin · digest · on belts · calls 30d.
-The toolbelts and agents a tool reaches are read from the Toolbelts tab and from the provider
-drill-down until the registry's own columns change.
+**A tool row** carries: tool version · provider · category · hazard · gate today · egress ·
+financial · schema origin · digest · toolbelts · agents · calls 30d.
 
 **A toolbelt row** carries: toolbelt · tools · providers represented · agents assigned · policy
 bindings · effective availability (what is denied right now by a switch, an expired token or a
 policy).
 
-Opening a tool says which provider exposes it, what governs it, whether it is healthy, whether a switch applies, and whether access is
+Opening a tool says which provider exposes it, which toolbelts include it, which agents receive it
+through them, what governs it, whether it is healthy, whether a switch applies, and whether access is
 denied right now. Opening a provider says what system it is, how it is connected, what it exposes,
 and which agents ultimately depend on it.
 

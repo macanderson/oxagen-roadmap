@@ -85,7 +85,7 @@ var S = {state:"loaded", phone:false, mobile:false, theme:null,
          layer:null, tab:{}, side:false, ws:"core-platform", frame:15, runFilter:"all",
          ctxSel:"frames", approved:{}, toolNames:"label", beltView:"group", beltCat:"", regCat:"",
          coachFor:"agents", coachDrill:null, coachOff:{}, toolMetric:"cum",
-         libKind:"", beltPick:""};
+         agentView:"composition", libKind:"", beltPick:""};
 
 /* kill switches — mutable state lives on S; SWITCHES is the seed and is never mutated */
 S.switches={}; S.flipMeta={}; S.denyGen=118; S.killBanner=null;
@@ -784,7 +784,7 @@ function gate(g,note){return '<span class="gt gt-'+h(g)+'"'+(note?' title="'+h(n
 function toolGateKind(t){
   var id=t.n+"@"+t.v, killed=false;
   SWITCHES.forEach(function(s){ if(!S.switches[s.id])return;
-    if((s.lvl==="Tool version"&&s.target===id)||(s.lvl==="Tool server"&&s.target===t.s)) killed=true; });
+    if((s.lvl==="Tool version"&&s.target===id)||(s.lvl==="Provider"&&s.target===t.s)) killed=true; });
   if(killed) return "killed";
   if(t.fin!=="none") return "mandate";
   if(t.eff==="irreversible") return "require_approval";
@@ -794,7 +794,7 @@ function toolGate(t){
   var id=t.n+"@"+t.v, k=toolGateKind(t);
   if(k==="killed"){
     var srv=null, tv=null;
-    SWITCHES.forEach(function(s){ if(!S.switches[s.id])return; if(s.lvl==="Tool version"&&s.target===id)tv=s; if(s.lvl==="Tool server"&&s.target===t.s)srv=s; });
+    SWITCHES.forEach(function(s){ if(!S.switches[s.id])return; if(s.lvl==="Tool version"&&s.target===id)tv=s; if(s.lvl==="Provider"&&s.target===t.s)srv=s; });
     return gate("killed",tv?("flipped by "+tv.by+" · "+tv.why):("provider switch is on · "+(srv?srv.why:"")));
   }
   if(k==="mandate") return gate("mandate","financial effect "+t.fin+": a mandate is required, and its own rule decides when a person approves");
@@ -4464,7 +4464,7 @@ DLG_EXT.forkreplay=function(){
     frSec("What is replayed, what runs live",
      row(tag("b-q","from the recording"),'<b>Frames 0–'+f.seq+'</b> replay exactly as recorded. No model is called and no tool is dispatched for any of them.')+
      row(tag("b-allowed","runs live"),'<b>The next model call</b>'+(first?' (recorded at '+frameBtn(first.seq,"frame "+first.seq)+')':'')+' is made for real against <span class="mono">'+h(R.model)+'</span> with the recorded prompt. It costs money and the answer may differ — that is the point of a fork.')+
-     row(tag("b-proven","from the cassette"),'<b>'+toolsAfter+' tool call'+(toolsAfter===1?'':'s')+' after this frame</b> are served from the recording when the canonical input digest matches, byte for byte. Nothing reaches a real tool server.')+
+     row(tag("b-proven","from the cassette"),'<b>'+toolsAfter+' tool call'+(toolsAfter===1?'':'s')+' after this frame</b> are served from the recording when the canonical input digest matches, byte for byte. Nothing reaches a real provider.')+
      row(tag("b-denied","denied"),'<b>A tool call whose input digest differs</b> has no cassette entry. It is denied, not dispatched: a fork cannot open a pull request, move money, or write to a repository.'))+
     frSec("Cost and record",frKv([["Spent by this frame","$"+spent.toFixed(2)+" of "+usd(R.cost)+" · not spent again"],
      ["Estimated spend",first?"about $"+(parseFloat(first.cost)||0).toFixed(2)+" for the first live call; $"+est.toFixed(2)+" if the fork runs to the end":"no model call follows this frame in view"],
@@ -4552,6 +4552,7 @@ function agentRuntime(a){
   for(var i=0;i<RUNTIMES.length;i++){if(RUNTIMES[i].id===a.host)return RUNTIMES[i];}
   return null;
 }
+function agentViewSet(){return S.agentView==="operations"?"operations":"composition";}
 
 function pAgents(){
   var w=ws();
@@ -4563,24 +4564,54 @@ function pAgents(){
     '<button class="btn primary" onclick="openDialog(\'wrap\')">Wrap Claude Code</button>'+
     '<button class="btn" onclick="openDialog(\'register\')">Register an agent</button>');
 
-  var list=AGENTS.filter(function(a){return a.ws===w.slug;});
-  var rows=list.map(function(a){
-    return '<tr class="click" onclick="go(\'#/'+ORG.slug+'/'+w.slug+'/agents/'+defSlug(a)+'\')">'+
-     '<td>'+agentCard(a,{sub:h(a.desc)})+'</td>'+
-     '<td>'+h(a.harnessLabel)+'<div class="dim mono" style="font-size:10.5px">'+h(a.harness)+'</div></td>'+
-     '<td><span class="row" style="gap:7px;flex-wrap:nowrap;white-space:nowrap">'+personAv(a.operator,22)+h(PEOPLE[a.operator].name)+'</span></td>'+
-     '<td><span class="b b-allowed"><span class="d"></span>'+h(a.status)+'</span></td>'+
-     '<td>'+tierBadge(a.tier)+'</td>'+
-     '<td class="num">'+a.belt+'<div class="dim mono" style="font-size:10px">'+h(a.beltMode)+'</div></td>'+
-     '<td class="num">'+a.runs30.toLocaleString()+'</td>'+
-     '<td class="num">'+usd(fmt2(n$(a.spend30)))+'</td>'+
-     '<td class="num">'+tokn(agentTok(a).total)+'<div class="dim mono" style="font-size:10px">'+per(agentTok(a).cacheRate)+' cached</div></td>'+
-     '<td>'+(a.mandates.length?'<span class="b b-approval"><span class="d"></span>'+a.mandates.length+'</span>':'<span class="dim">—</span>')+'</td>'+
-     '<td>'+(tamperCount(a)?'<span class="b b-critical"><span class="d"></span>'+tamperCount(a)+'</span>':'<span class="dim">0</span>')+'</td>'+
-     '<td class="rowacts" onclick="event.stopPropagation()"><button class="btn sm" onclick="S.tab.agent=\'definition\';go(\'#/'+ORG.slug+'/'+w.slug+'/agents/'+defSlug(a)+'\')">Edit</button>'+
+  var list=AGENTS.filter(function(a){return a.ws===w.slug;}), view=agentViewSet();
+  var acts=function(a){
+    return '<td class="rowacts" onclick="event.stopPropagation()"><button class="btn sm" onclick="S.tab.agent=\'definition\';go(\'#/'+ORG.slug+'/'+w.slug+'/agents/'+defSlug(a)+'\')">Edit</button>'+
      '<button class="btn sm" onclick="openDialog(\'assignrole\',\''+a.key+'\')">Roles</button>'+
-     '<button class="btn sm danger" onclick="openDialog(\'delagent\',\''+a.key+'\')">Deregister</button></td></tr>';
-  }).join("");
+     '<button class="btn sm danger" onclick="openDialog(\'delagent\',\''+a.key+'\')">Deregister</button></td>';
+  };
+  var head, rows;
+  if(view==="composition"){
+    head='<th>Agent</th><th>Purpose</th><th>Owner</th><th>Steering</th><th>Toolbelt</th><th>Runtime</th>'+
+      '<th>Principal</th><th>Health</th><th>Activity</th><th></th>';
+    rows=list.map(function(a){
+      var belts=beltsOfAgent(a.key), M=agentSteering(a), hl=agentHealth(a), rt=agentRuntime(a);
+      return '<tr class="click" onclick="go(\'#/'+ORG.slug+'/'+w.slug+'/agents/'+defSlug(a)+'\')">'+
+       '<td>'+agentCard(a)+'</td>'+
+       '<td style="font-size:12px;max-width:26ch">'+h(a.desc)+'</td>'+
+       '<td><span class="row" style="gap:7px;flex-wrap:nowrap;white-space:nowrap">'+personAv(a.operator,22)+h(PEOPLE[a.operator].name)+'</span></td>'+
+       '<td>'+(M?(M.gates.length+M.prefix.length+M.volatile.length)+' items<div class="dim mono" style="font-size:10px">'+tokn(M.tok.total)+' tok'+(M.delivered?'':' · not delivered')+'</div>'
+               :'<span class="dim">—</span>')+'</td>'+
+       '<td>'+belts.length+' belt'+(belts.length===1?'':'s')+'<div class="dim mono" style="font-size:10px">'+beltTotal(a)+' tools · '+h(a.beltMode)+'</div></td>'+
+       '<td class="mono" style="font-size:11.5px">'+h(a.host||"—")+'<div class="dim" style="font-size:10px;font-family:var(--font)">'+h(rt?rt.kind+" · "+a.tier:a.tier)+'</div></td>'+
+       '<td class="mono dim" style="font-size:11px">'+h(a.principal||"prn_pending")+'</td>'+
+       '<td><span class="b b-'+hl[0]+'"><span class="d"></span>'+h(hl[1])+'</span></td>'+
+       '<td class="num">'+a.runs30.toLocaleString()+'<div class="dim mono" style="font-size:10px">runs 30d</div></td>'+
+       acts(a)+'</tr>';
+    }).join("");
+  } else {
+    head='<th>Agent</th><th>Harness</th><th>Operator</th><th>Status</th><th>Tier</th>'+
+      '<th class="num">Belt</th><th class="num">Runs 30d</th><th class="num">Spend 30d</th><th class="num">Tokens 30d</th>'+
+      '<th>Mandates</th><th>Incidents</th><th></th>';
+    rows=list.map(function(a){
+      return '<tr class="click" onclick="go(\'#/'+ORG.slug+'/'+w.slug+'/agents/'+defSlug(a)+'\')">'+
+       '<td>'+agentCard(a,{sub:h(a.desc)})+'</td>'+
+       '<td>'+h(a.harnessLabel)+'<div class="dim mono" style="font-size:10.5px">'+h(a.harness)+'</div></td>'+
+       '<td><span class="row" style="gap:7px;flex-wrap:nowrap;white-space:nowrap">'+personAv(a.operator,22)+h(PEOPLE[a.operator].name)+'</span></td>'+
+       '<td><span class="b b-allowed"><span class="d"></span>'+h(a.status)+'</span></td>'+
+       '<td>'+tierBadge(a.tier)+'</td>'+
+       '<td class="num">'+a.belt+'<div class="dim mono" style="font-size:10px">'+h(a.beltMode)+'</div></td>'+
+       '<td class="num">'+a.runs30.toLocaleString()+'</td>'+
+       '<td class="num">'+usd(fmt2(n$(a.spend30)))+'</td>'+
+       '<td class="num">'+tokn(agentTok(a).total)+'<div class="dim mono" style="font-size:10px">'+per(agentTok(a).cacheRate)+' cached</div></td>'+
+       '<td>'+(a.mandates.length?'<span class="b b-approval"><span class="d"></span>'+a.mandates.length+'</span>':'<span class="dim">—</span>')+'</td>'+
+       '<td>'+(tamperCount(a)?'<span class="b b-critical"><span class="d"></span>'+tamperCount(a)+'</span>':'<span class="dim">0</span>')+'</td>'+
+       acts(a)+'</tr>';
+    }).join("");
+  }
+  var viewPick='<div class="kf" role="group" aria-label="Columns" style="padding:0;border:0">'+
+   [["composition","Composition"],["operations","Operations"]].map(function(x){
+     return '<button class="btn sm" aria-pressed="'+(view===x[0])+'" onclick="S.agentView=\''+x[0]+'\';render()">'+x[1]+'</button>';}).join("")+'</div>';
 
   return '<div class="phead"><div class="t"><p class="eyebrow">'+h(w.name)+'</p><h1>Agents</h1>'+
    '<p>Every actor in this workspace and what it is made of.</p></div>'+
@@ -4599,11 +4630,14 @@ function pAgents(){
      '<div class="stat"><span class="k">Holding a mandate</span><span class="v">'+withMandate.length+'</span><span class="s">'+(withMandate.length?withMandate.map(function(x){return x.key+' · in '+(wsBySlug(x.ws)||{name:x.ws}).name;}).join(', '):'no agent holds one')+'</span></div>'+
      fleetTamperStat(list);
    })()+'</div>'+
-   '<div class="panel"><div class="panel-h"><h3>Registered in '+h(w.name)+'</h3>'+
-   '<span class="mono dim" style="margin-left:auto;font-size:11px">.oxagen/agents/ @ '+h(list[0]?list[0].commit:"")+'</span></div>'+
-   '<div class="tw"><table><thead><tr><th>Agent</th><th>Harness</th><th>Operator</th><th>Status</th><th>Tier</th>'+
-   '<th class="num">Belt</th><th class="num">Runs 30d</th><th class="num">Spend 30d</th><th class="num">Tokens 30d</th><th>Mandates</th><th>Incidents</th><th></th>'+
-   '</tr></thead><tbody>'+rows+'</tbody></table></div></div>';
+   '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Registered in '+h(w.name)+'</h3>'+
+   '<p class="muted" style="margin:2px 0 0;font-size:12px">'+(view==="composition"
+     ? 'Each row names the reusable objects this agent holds a reference to.'
+     : 'Each row is what this agent did and what it cost over the last 30 days.')+'</p></div>'+
+   '<div class="sp">'+viewPick+'<span class="mono dim" style="font-size:11px">.oxagen/agents/ @ '+h(list[0]?list[0].commit:"")+'</span></div></div>'+
+   '<div class="tw"><table><thead><tr>'+head+'</tr></thead><tbody>'+rows+'</tbody></table></div>'+
+   '<div class="panel-b"><div class="note">An agent has one principal and runs on one runtime. Its steering, its toolbelts and '+
+   'its tools are workspace objects it refers to, so changing one changes every agent that refers to it.</div></div></div>';
 }
 
 /* ══════════════════════════════ Agents ══════════════════════════════
@@ -4940,7 +4974,7 @@ function aIdentity(a,r){
               ["Run token","one, and it reaches Oxagen only"]])+
     '<p style="font-size:12.5px;margin:0">It holds one run token, and that token is good for talking to Oxagen and '+
     'nothing else. Every secret a call needs is minted by the broker at dispatch, scoped to that one call, and never '+
-    'transmitted to the agent. A leaked run token cannot reach a tool server.</p>'+
+    'transmitted to the agent. A leaked run token cannot reach a provider.</p>'+
     '<button class="btn sm" onclick="go(\'#/'+ORG.slug+'/'+S.ws+'/tools/providers\')">See the connections that mint them</button>'+
     '</div></div></div>'+
 
@@ -4963,7 +4997,7 @@ function aIdentity(a,r){
     '</div></div>'+
 
    '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Trust relationships</h3>'+
-    '<p class="muted" style="margin:2px 0 0;font-size:12px">Who this principal answers to.</p></div></div>'+
+    '<p class="muted" style="margin:2px 0 0;font-size:12px">Who this principal answers to, and what will speak for it.</p></div></div>'+
     '<div class="panel-b"><dl class="kv">'+
     '<dt>Accountable human</dt><dd>'+h(op.name)+' · <span class="mono">'+h(op.role)+'</span>'+
      '<span class="sub">every run of this agent carries their name as <span class="mono">initiating_principal</span></span></dd>'+
@@ -5458,7 +5492,7 @@ function actAccounting(a){
     'are paid on every call whether the tool is used or not.</div></div></div>'+
 
    '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Last 30 days</h3>'+
-    '<p class="muted" style="margin:2px 0 0;font-size:12px">Read from the run records.</p></div>'+
+    '<p class="muted" style="margin:2px 0 0;font-size:12px">Read from the run records, not from the agent row.</p></div>'+
     '<button class="btn sm" style="margin-left:auto" onclick="go(\'#/'+ORG.slug+'/'+S.ws+'/spend\')">Open on Spend</button></div>'+
     '<div class="panel-b" style="display:grid;gap:14px"><dl class="kv">'+
     '<dt>Runs</dt><dd><span class="num">'+a.runs30.toLocaleString()+'</span></dd>'+
@@ -5600,7 +5634,7 @@ function pTools(){
     var rc=S.regCat||"", rcount={};
     TOOLS.forEach(function(x){var c=toolMeta(x.n).cat;rcount[c]=(rcount[c]||0)+1;});
     var tsel=rc?TOOLS.filter(function(x){return toolMeta(x.n).cat===rc;}):TOOLS;
-    var trows=tsel.map(function(x){var m=toolMeta(x.n);
+    var trows=tsel.map(function(x){var m=toolMeta(x.n), tb=beltsWithTool(x.n+"@"+x.v);
       return '<tr class="click hz-row-'+h(x.risk)+'" onclick="openDialog(\'tool\',\''+x.n+'@'+x.v+'\')">'+
        '<td>'+toolCell(x.n+"@"+x.v)+'</td>'+
        '<td class="rowacts" onclick="event.stopPropagation()"><button class="btn sm ghost" onclick="openDialog(\'server\',\''+h(x.s)+'\')">'+h(x.s)+'</button></td>'+
@@ -5609,7 +5643,8 @@ function pTools(){
        '<td><span class="b b-q">'+h(x.eg)+'</span></td><td>'+finBadge(x.fin)+'</td>'+
        '<td>'+originBadge(toolOrigin(x))+'</td>'+
        '<td class="mono dim" style="font-size:11px">'+h(toolDigest(x))+'</td>'+
-       '<td class="num">'+x.belts+'</td><td class="num">'+x.calls30.toLocaleString()+'</td></tr>';}).join("");
+       '<td>'+(tb.length?tb.map(function(b){return '<span class="b b-q" style="font-size:10.5px">'+h(b.name)+'</span>';}).join(""):'<span class="dim">—</span>')+'</td>'+
+       '<td class="num">'+agentsWithTool(x.n+"@"+x.v).length+'</td><td class="num">'+x.calls30.toLocaleString()+'</td></tr>';}).join("");
     body='<div class="grid">'+
      (props.length?'<div class="banner"><span class="b b-approval" style="flex:none"><span class="d"></span>'+props.length+' awaiting approval</span>'+
       '<div class="grow"><b>'+props.length+' output schema'+(props.length>1?'s were':' was')+' observed, not declared.</b>'+
@@ -5628,7 +5663,7 @@ function pTools(){
      '<div style="flex:1;min-width:0">'+catChips(rcount,rc,"S.regCat='%s';render()",TOOLS.length)+'</div>'+
      '<button class="btn sm ghost" onclick="openDialog(\'toolcats\')">What the categories mean</button></div>'+
      '<div class="tw"><table><thead><tr><th>Tool version</th><th>Provider</th><th>Category</th><th>Hazard</th><th>Gate today</th><th>Egress</th><th>Financial</th><th>Schema origin</th><th>Digest</th>'+
-     '<th class="num">On belts</th><th class="num">Calls 30d</th></tr></thead><tbody>'+trows+'</tbody></table></div>'+
+     '<th>Toolbelts</th><th class="num">Agents</th><th class="num">Calls 30d</th></tr></thead><tbody>'+trows+'</tbody></table></div>'+
      '<div class="panel-b"><div class="note">The gate shown is today’s: the version’s own kill switch, then its provider’s, then <span class="mono">pol_v41</span>. '+
      'A toolbelt decides which agents are shown the tool; the gate decides whether the call survives. Open a provider on any row '+
      'to see what it imported and the connection it is reached with.</div></div></div>'+
@@ -5636,7 +5671,7 @@ function pTools(){
   } else if(t==="toolbelts"){
     body='<div class="grid">'+
      '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Toolbelts</h3>'+
-     '<p class="muted" style="margin:2px 0 0;font-size:12px">A toolbelt is a named set of tool versions assigned to agents.</p></div>'+
+     '<p class="muted" style="margin:2px 0 0;font-size:12px">A toolbelt is a named set of tool versions assigned to agents. It decides what a model is shown, and nothing else.</p></div>'+
      '<div class="sp"><span class="b b-q">'+TOOLBELTS.length+' belts · '+beltToolCount()+' tool versions</span>'+
      '<button class="btn sm primary" onclick="openDialog(\'beltnew\')">New toolbelt</button></div></div>'+
      '<div class="tw"><table><thead><tr><th>Toolbelt</th><th>Owner</th><th class="num">Tools</th><th>Providers</th>'+
@@ -5750,8 +5785,10 @@ function pTools(){
   }
   return '<div class="phead"><div class="t"><p class="eyebrow">'+h(w.name)+'</p><h1>Tools</h1>'+
    '<p>The registry is the only source of tools an agent can see.</p></div>'+
-   '<div class="acts"><button class="btn" onclick="openDialog(\'import\')">Import server</button>'+
-   '<button class="btn primary" onclick="wzOpen(\'tool\')">New tool</button>'+
+   '<div class="acts"><button class="btn" onclick="openDialog(\'import\')">Import a provider</button>'+
+   /* One gold action per screen. Toolbelts, Providers and Policy each carry their own primary, so
+      on those tabs the header yields the gold and New tool reads as a plain action. */
+   '<button class="btn'+(t==="toolbelts"||t==="providers"||t==="policy"?'':' primary')+'" onclick="wzOpen(\'tool\')">New tool</button>'+
    '<button class="btn danger" onclick="openDialog(\'switch\')">Flip a kill switch</button></div></div>'+(S.killBanner||"")+tabs+body;
 }
 
@@ -5788,7 +5825,7 @@ function grantsLog(){
    '<div class="tw"><table data-lt="1"><thead><tr><th>Grant</th><th>Tool version</th><th>Agent and run</th><th>Connection</th><th>Scope</th><th>TTL</th><th>State</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
    '<div class="panel-b"><p class="muted" style="margin:0;font-size:12px">TTL defaults to the call’s expected duration plus a margin, never more than one hour. The agent sees the result, never the credential.</p></div></div>';
 }
-/* ---------- Tool servers, connections, mandates and policy versions: open, edit, remove ----------
+/* ---------- Providers, connections, mandates and policy versions: open, edit, remove ----------
    Every row on the Tools page that names a record opens it here. The dialogs write to the
    fixtures in place, so a removal is visible on the table behind them, and each destructive one
    says what stops working before it asks. */
@@ -5871,7 +5908,7 @@ function noSuch(what){return {t:what,w:false,b:'<div class="note">That record is
   f:'<button class="btn" onclick="closeDialog()">Close</button>'};}
 
 DLG_EXT.server=function(id){
-  var sv=serverById(id); if(!sv) return noSuch("Tool server");
+  var sv=serverById(id); if(!sv) return noSuch("Provider");
   var tv=serverTools(sv.id), c=connByServer(sv.id), props=proposals().filter(function(p){return p.s===sv.id;});
   var conn=c
    ? '<dl class="kv"><dt>Connection</dt><dd><a href="#" onclick="event.preventDefault();openDialog(\'conn\',\''+h(c.id)+'\')">'+h(c.name)+'</a> '+
@@ -5917,7 +5954,7 @@ DLG_EXT.server=function(id){
      ? '<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Tool version</th><th>Hazard</th><th>Gate today</th><th class="num">Agents</th><th class="num">Calls 30d</th></tr></thead><tbody>'+
        tv.map(function(x){return '<tr class="click" onclick="openDialog(\'tool\',\''+x.n+'@'+x.v+'\')"><td class="mono" style="font-size:11.5px">'+h(x.n)+'@'+h(x.v)+'</td>'+
         '<td>'+hazard(x.risk,x.eff)+'</td><td>'+toolGate(x)+'</td>'+
-        '<td class="num">'+x.belts+'</td><td class="num">'+x.calls30.toLocaleString()+'</td></tr>';}).join("")+
+        '<td class="num">'+agentsWithTool(x.n+"@"+x.v).length+'</td><td class="num">'+x.calls30.toLocaleString()+'</td></tr>';}).join("")+
        '</tbody></table></div>'+
        '<p class="muted" style="font-size:12px;margin:8px 0 0">'+tv.length+' of the '+sv.versions+' versions this provider has shipped are in the registry. Re-import to pull the rest.</p>'
      : '<div class="note">Nothing from this provider is in the registry yet. Re-import to pull its tool list.</div>'),
@@ -5993,11 +6030,11 @@ function serverSave(id){
   closeDialog(); render(); act("Saved. "+s.system+" is reached at "+s.url+" from the next call.");
 }
 DLG_EXT.serverdel=function(id){
-  var s=serverById(id); if(!s) return noSuch("Tool server");
-  var tv=serverTools(s.id), belts=tv.reduce(function(n,x){return n+x.belts;},0);
+  var s=serverById(id); if(!s) return noSuch("Provider");
+  var tv=serverTools(s.id), belts=providerBelts(s.id).length;
   return {t:"Remove "+s.name+"?",w:false,
    b:'<div class="warn"><b>'+s.versions+' tool versions leave the registry.</b> '+
-     (belts?belts+' belt entries lose their tool and the calls they cover are denied as <span class="mono">unknown_tool</span> from the next call boundary.':'No belt reaches it, so nothing in flight is denied.')+'</div>'+
+     (belts?belts+(belts>1?' toolbelts lose a tool and the calls they cover':' toolbelt loses a tool and the calls it covers')+' are denied as <span class="mono">unknown_tool</span> from the next call boundary.':'No belt reaches it, so nothing in flight is denied.')+'</div>'+
     '<div class="note">The registry rows are kept for replay: a run that already called this server still cites the version it called. Re-importing the same endpoint restores it.</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
     '<button class="btn danger" onclick="serverDelete(\''+s.id+'\')">Remove it</button>'};
@@ -6016,7 +6053,7 @@ DLG_EXT.conn=function(id){
    b:(due?'<div class="warn"><b>The review date passed on '+h(c.next)+'.</b> It has issued '+c.grants30.toLocaleString()+' grants since. '+
       'Marking it reviewed sets the next date 90 days out and is recorded with your name on it.</div>':'')+
     '<dl class="kv"><dt>Owner</dt><dd>'+h(c.owner)+(fin?' · a finance role, required on a financial connection':'')+'</dd>'+
-    '<dt>Servers</dt><dd class="mono">'+h(c.servers)+'</dd>'+
+    '<dt>Providers</dt><dd class="mono">'+h(c.servers)+'</dd>'+
     '<dt>Downscope</dt><dd class="mono">'+h(c.downscope)+'</dd>'+
     '<dt>What the broker mints</dt><dd>'+h(brokerMints(c.downscope))+'</dd>'+
     '<dt>Grants 30d</dt><dd>'+c.grants30.toLocaleString()+'</dd>'+
@@ -6269,11 +6306,11 @@ DLG_EXT.import=function(arg){
   var picked=impPicked();
   var steps='<div class="row imp-steps" style="gap:8px;margin-bottom:14px;font-size:12px">'+[[1,"Connect"],[2,"Review tools/list"],[3,"Classify and import"]].map(function(x){
     return '<span class="b '+(x[0]===step?"b-approval":x[0]<step?"b-allowed":"b-q")+'"'+(x[0]===step?' aria-current="step"':'')+'>'+(x[0]<step?"✓":x[0])+' · '+x[1]+'</span>';}).join('<span class="dim">→</span>')+'</div>';
-  if(step===1) return {t:"Import tools from an MCP server",s:"The registry is the only source of tools an agent can see. Nothing reaches a belt until it is here.",w:false,
-   b:steps+'<div class="field"><label for="imp-url">Server URL</label><input id="imp-url" value="https://mcp.confluence.a-intel.internal/mcp"></div>'+
+  if(step===1) return {t:"Import tools from a provider",s:"The registry is the only source of tools an agent can see. Nothing reaches a belt until it is here.",w:false,
+   b:steps+'<div class="field"><label for="imp-url">Endpoint URL</label><input id="imp-url" value="https://mcp.confluence.a-intel.internal/mcp"></div>'+
     '<div class="field"><label for="imp-tr">Transport</label><select id="imp-tr"><option>streamable-http</option><option>sse</option><option>stdio</option></select></div>'+
     '<div class="field"><label for="imp-conn">Connection</label><select id="imp-conn"><option>Create one after import</option>'+CONNECTIONS.map(function(c){return '<option>'+h(c.id+' · '+c.name)+'</option>';}).join("")+'</select></div>'+
-    '<div class="note">Oxagen calls <span class="mono">tools/list</span>, versions every tool it finds, and stores both schemas. Where a server declares no <span class="mono">outputSchema</span>, the gateway records observed outputs and files a registry proposal for an admin to approve.</div>',
+    '<div class="note">Oxagen calls <span class="mono">tools/list</span>, versions every tool it finds, and stores both schemas. Where a provider declares no <span class="mono">outputSchema</span>, the gateway records observed outputs and files a registry proposal for an admin to approve.</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="S.dlgArg=2;render()">Connect</button>'};
   if(step===2) return {t:"Review tools/list",s:IMPORT_TOOLS.length+" tools returned by mcp.confluence.a-intel.internal · protocol 2025-06-18",w:true,
    b:steps+IMPORT_TOOLS.map(function(t){
@@ -7641,7 +7678,7 @@ function stgRecordsTab(w){
      '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">Every record compiles to text. A record with an enforcement grant also compiles to a gate, which is listed on Policy with the notice it puts back into steering. A record can never grant authority: the checks enforce <span class="mono">constraint_effect ∈ {require, forbid}</span>, and a repository record may narrow what a workspace record allows, never widen it.</div></div></div>'+
      '<div class="grid g2" style="margin-top:14px">'+
      '<div class="panel"><div class="panel-h"><h3>On disk</h3></div><div class="panel-b">'+
-     '<pre>.oxagen/\n  workspace.toml             <span class="c"># linked repos, tool servers, budgets</span>\n'+
+     '<pre>.oxagen/\n  workspace.toml             <span class="c"># linked repos, providers, budgets</span>\n'+
      '  rules/\n    governance.toml          <span class="c"># mode = team</span>\n'+
      '    promotions.jsonl         <span class="c"># hash-chained ledger (regulated mode)</span>\n'+
      '    ctx.release.notes-format.toml\n    ctx.release.never-merge.toml\n    ctx.platform.changelog-once.toml\n'+
@@ -8628,7 +8665,7 @@ function spendDrill(dr){
   var eyebrow, sub, a=null;
   if(kind==="operator"){var p=PEOPLE[E.id]; eyebrow=kindLabel+' · '+p.role; sub=r.agents+' agents · '+r.runs.toLocaleString()+' runs · '+SPEND.month;}
   else if(kind==="agent"){a=AGENTS.filter(function(x){return x.key===E.id;})[0]; eyebrow=kindLabel+(a?' · '+a.harnessLabel+' · operator '+PEOPLE[a.operator].name:''); sub=r.runs.toLocaleString()+' runs · '+SPEND.month;}
-  else {eyebrow=kindLabel+' · server '+r.s; sub=r.calls.toLocaleString()+' calls across '+r.runs.toLocaleString()+' runs · '+SPEND.month+(r.note&&r.note!=="—"?' · '+r.note:'');}
+  else {eyebrow=kindLabel+' · provider '+r.s; sub=r.calls.toLocaleString()+' calls across '+r.runs.toLocaleString()+' runs · '+SPEND.month+(r.note&&r.note!=="—"?' · '+r.note:'');}
 
   var head='<div class="drill-bar"><a href="'+spendHref(kind)+'" onclick="event.preventDefault();spendGo(\''+kind+'\')">← '+listLabel+'</a><span class="dim">/</span><span class="mono">'+h(E.name)+'</span></div>'+
    '<div class="phead drill-head" style="margin-bottom:14px"><div class="t"><p class="eyebrow">'+h(eyebrow)+'</p><h2'+(kind==="operator"?'':' class="mono"')+'>'+h(E.name)+'</h2><p>'+h(sub)+'</p></div>'+
@@ -9234,9 +9271,9 @@ var INCIDENTS=[
   detail:"The Claude Code harness on mbp-01 reported its permission hooks gone between two steps. Oxagen dropped the run to observe tier for its remainder and labeled every later frame client-attested.",
   resolution:"A local harness update rewrote settings.json. Hooks restored and the host re-enrolled through the wrapper. Frames from the observe window stay labeled as such; the label is never upgraded after the fact.",
   status:"resolved",closedAt:"2026-09-02 11:20",closedBy:"Marcus Bell",runs:1},
- {id:"inc_01K4J9RW",sev:"info",title:"Run token presented directly to a tool server",kind:"credential_probe",at:"2026-08-25 09:55",by:"gateway",
+ {id:"inc_01K4J9RW",sev:"info",title:"Run token presented directly to a provider",kind:"credential_probe",at:"2026-08-25 09:55",by:"gateway",
   scope:"a-intel.core.stella-ci · run_01K4J9RW2P",
-  detail:"A run token was sent to api.github.com instead of the tool gateway. GitHub rejected it; the gateway recorded the attempt. Tool servers accept broker credentials only, so the token was never valid there.",
+  detail:"A run token was sent to api.github.com instead of the tool gateway. GitHub rejected it; the gateway recorded the attempt. Providers accept broker credentials only, so the token was never valid there.",
   resolution:"A retry path in a custom script bypassed the MCP endpoint. Script corrected; no credential was exposed.",
   status:"resolved",closedAt:"2026-08-25 10:31",closedBy:"Marcus Bell",runs:1}
 ];
@@ -9265,7 +9302,7 @@ var RECEIPTS=[
   what:[["Tool version","notion__append_block@2",1],["Schema digest","sha256:5b1290aa04e7c3d1",1],["Input digest","sha256:9e33abc027f14d86",1],["Input","attested by the client · size and type checked only"]],
   authority:[["Decision","observed — Oxagen did not decide this call"],["Policy version","n/a at observe tier"],["Rules fired","none — no gate ran"],["Grants used","not consulted"],["Delegation ceiling","not evaluated"],["Mandate","n/a"],["Approval","n/a"],["Taint sources","not computed"]],
   credential:[["Credential grant","none — the agent used its own credential"],["Connection","not brokered"],["Minted","—"],["TTL","—"],["Provider token id","—"],["Agent saw","whatever it held. Oxagen cannot say."]],
-  effectRows:[["Dispatched","reported by the client at 2026-09-10 13:02:44.207Z"],["Tool server","notion (unverified)"],["Response digest","sha256:1f770233bd9a4c08 (client-attested)",1],["Output validation","size and type only"],["External effect id","blk_9a71… (client-attested)",1],["Idempotency key","not enforced"]],
+  effectRows:[["Dispatched","reported by the client at 2026-09-10 13:02:44.207Z"],["Provider","notion (unverified)"],["Response digest","sha256:1f770233bd9a4c08 (client-attested)",1],["Output validation","size and type only"],["External effect id","blk_9a71… (client-attested)",1],["Idempotency key","not enforced"]],
   integrity:[["Frame hash","sha256:aa77110c2e5d93b4",1],["Chain position","4 of 9 · verified"],["Gateway signature","ed25519 · "+ORG.attester+" · signs the record, not the call",1],["Tier","observe · recorded only. This receipt can never be shown as decided by Oxagen."]]}
 ];
 
@@ -10492,6 +10529,10 @@ var SCENARIOS={
     note:"Reservations are taken at decision time and settlements at receipt time, so two concurrent calls cannot both fit under the same remaining limit. If nobody answered at the last step, arriving here records Marcus Bell's approval.",
     route:function(o){return {page:"mandate",org:o,ws:"finops",id:"invoice-bot",mid:"mnd_7K2ETQ4"};},
     setup:function(){var a=approvalById("apr_01K5RN9T4");if(apState(a.id).status==="pending")approvalSettle(a,"approved","Marcus Bell","AWS line on PO-4471 checked against the September statement.");}},
+   {say:"The agent's Permissions tab is what the CFO's office reads: the mandates it holds, with what is settled, reserved and remaining, from the same record the card and the receipt read.",
+    note:"One record, three readers. None of them keeps its own total.",
+    route:function(o){return {page:"agent",org:o,ws:"finops",id:"invoice-bot",b:"permissions"};},
+    setup:function(){S.tab.agent="permissions";}},
    {say:"The receipt names the human, the rule that fired, and the money. That record is the product.",
     note:"Same trail whether a person did it or an agent did it for them, which is what makes the audit log answerable.",
     route:function(o){return {page:"audit",org:o};},
@@ -11283,16 +11324,11 @@ function dialog(){
      '<div class="field"><label for="nw-ret">Retention mode</label><select id="nw-ret"><option value="content_exact">content_exact — keep prompts and tool bodies in full</option><option value="digest_only">digest_only — digests only, lowers the replay grade</option></select></div>'+
      '<div class="note">Until the GitHub App binds the main repo the workspace is provisional for 14 days: runs record and spend counts, but steering, records and agent definitions stay off.</div>',
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="wsCreate()">Create</button>'},
-   import:{t:"Import an MCP server",w:false,b:
-     '<div class="field"><label>Endpoint</label><input value="https://mcp.internal.a-intel.example/sse" aria-label="Endpoint"></div>'+
-     '<div class="field"><label>Connection</label><select aria-label="Connection"><option>con_01K2A7 · GitHub App installation</option><option>Create a new connection</option></select></div>'+
-     '<div class="note">Schemas are imported from <span class="mono">tools/list</span>. Where a server declares no <span class="mono">outputSchema</span>, the gateway records observed outputs, infers one, and files it as a registry proposal an admin approves. Until approval the output is validated only for size and type, and the run’s completeness record says so.</div>',
-     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Imported 11 tool versions. 3 have no declared output schema and will be observed.\')">Import</button>'},
    schema:schemaDlg(),
    toolcats:{t:"Tool categories",w:true,b:toolCatsBody(),f:'<span class="grow" style="font-size:12.5px;color:var(--muted)">Category is a registry attribute, not a policy: a rule may reference it, but only risk, side effect, financial effect and egress carry a decision by themselves.</span><button class="btn" onclick="closeDialog()">Close</button>'},
    tool:toolDlg(),
    connection:{t:"Add a connection",w:false,
-    s:"The customer’s credential to a tool server. It is tested before it is saved, and it is never readable afterwards.",
+    s:"The customer’s credential to a provider. It is tested before it is saved, and it is never readable afterwards.",
     b:'<div class="fields">'+
      '<div class="field"><label for="c-name">Name</label><input id="c-name" value="Datadog API key · platform" autofocus></div>'+
      '<div class="field"><label for="c-kind">Kind</label><select id="c-kind"><option>oauth</option><option selected>api_key</option><option>cloud_role</option><option>github_app</option></select></div>'+
@@ -11403,7 +11439,7 @@ function schemaDlg(){
    b:'<p class="eyebrow q"><span class="mono">'+h(t.n)+'@'+h(t.v)+'</span> · the slack server declares no outputSchema for this tool</p>'+
      '<div class="note" style="margin-bottom:14px"><b>What has been happening until now.</b> The gateway recorded this tool’s outputs and validated them only for size and type. '+
      'Every run that used it says so in its completeness record. Approving the inferred schema turns strict validation on from the next call.</div>'+
-     '<dl class="kv"><dt>Observations</dt><dd><span class="num">'+t.calls30.toLocaleString()+'</span> responses over 30 days, from '+t.belts+' agents</dd>'+
+     '<dl class="kv"><dt>Observations</dt><dd><span class="num">'+t.calls30.toLocaleString()+'</span> responses over 30 days, from '+agentsWithTool(t.n+"@"+t.v).length+' agents</dd>'+
      '<dt>Inferred from</dt><dd>the intersection of every observation · 0 outliers discarded</dd>'+
      '<dt>Digest on approval</dt><dd class="mono">sha256:'+t.n.length.toString(16)+'c4f9…7b02</dd></dl>'+
      codePair([{lab:"Inferred output schema",sp:"what approval enforces",code:OBSERVED_SCHEMAS[t.n]||"{}"},
@@ -11432,7 +11468,7 @@ function toolDlg(){
      pj("body",'{ '+pj("type",ps("string"))+', '+pj("maxLength","65536")+' }')+',\n    '+
      pj("draft",'{ '+pj("type",ps("boolean"))+' }')+'\n  }\n}';
   return {t:t.n,w:true,
-   b:'<div style="margin-bottom:12px">'+toolCell(t.n+"@"+t.v,{sz:"lg",sub:"server "+t.s})+'</div>'+
+   b:'<div style="margin-bottom:12px">'+toolCell(t.n+"@"+t.v,{sz:"lg",sub:"provider "+t.s})+'</div>'+
      '<div class="row" style="margin-bottom:6px;gap:10px">'+catBadge(toolMeta(t.n).cat)+hazard(t.risk,t.eff)+toolGate(t)+'<span class="b b-q">egress '+h(t.eg)+'</span>'+finBadge(t.fin)+'</div>'+
      '<p class="muted" style="font-size:12px;margin:0 0 14px">'+h(TCAT[toolMeta(t.n).cat].s)+'</p>'+
      '<dl class="kv"><dt>Schema digest</dt><dd class="mono">'+h(toolDigest(t))+'</dd>'+
@@ -11446,7 +11482,7 @@ function toolDlg(){
      '<p class="eyebrow q" style="margin:14px 0 8px">Input schema</p><pre>'+schema+'</pre>'+
      '<p class="muted" style="font-size:12px;margin:12px 0 0">Validation is strict in both directions: no additional properties, formats enforced, size caps. '+
      'A failure is <span class="mono">schema_violation</span> and the call is denied. The canonical input digest is computed here and is the call’s identity for idempotency, approval binding, and the receipt.</p>',
-   f:'<span style="margin-right:auto;font-size:12.5px;color:var(--muted)">On <b class="num">'+t.belts+'</b> belts · <b class="num">'+t.calls30.toLocaleString()+'</b> calls in 30 days</span>'+
+   f:'<span style="margin-right:auto;font-size:12.5px;color:var(--muted)">On <b class="num">'+beltsWithTool(t.n+"@"+t.v).length+'</b> belts ·<b class="num">'+t.calls30.toLocaleString()+'</b> calls in 30 days</span>'+
      '<button class="btn" onclick="closeDialog()">Close</button>'};
 }
 
@@ -13281,7 +13317,7 @@ S.wz=null;
 var CREATE={
  agent:{l:"Agent",d:"A principal that does work here, with a definition, a belt and a budget.",i:"agents",
    file:".oxagen/agents/&lt;slug&gt;.toml",need:"agent.write"},
- tool:{l:"Tool",d:"A capability an agent can be granted. Imported from an MCP server, or built here.",i:"tools",
+ tool:{l:"Tool",d:"A capability an agent can be granted. Imported from a provider, or built here.",i:"tools",
    file:".oxagen/tools/&lt;name&gt;.toml",need:"tools.admin"},
  skill:{l:"Skill",d:"Procedure written down: a file, a version and a digest.",i:"skills",
    file:".oxagen/skills/&lt;name&gt;/SKILL.md",need:"skills.admin"},
@@ -13930,7 +13966,7 @@ function wzTool(){
      b:wzDesc("Refund a Stripe charge when support asks for one, never above the amount on the original payment.",
        ["Process refunds against Stripe charges","Post a release note to the ops channel in Slack",
         "Read rows out of the Snowflake warehouse","Retire a feature flag in our own admin API"],
-       "Oxagen matches this against every MCP server it can already reach before it offers to write a line of code. Importing is nearly always the cheaper answer: an imported tool arrives with a schema, a publisher and a credential story.")+
+       "Oxagen matches this against every provider it can already reach before it offers to write a line of code. Importing is nearly always the cheaper answer: an imported tool arrives with a schema, a publisher and a credential story.")+
       '<div class="note">A tool is not permission. Whatever you create here lands in the registry callable by nobody until a role puts it on a belt.</div>',
      f:wzNext("Match it",ok)};
   }
@@ -13950,7 +13986,7 @@ function wzTool(){
        '<span class="wz-opt-kv"><span><i>Publisher</i>'+h(s.publisher)+'</span><span><i>Transport</i><span class="mono">'+h(s.transport)+'</span></span>'+
         '<span><i>Credential</i><span class="mono">'+h(s.cred)+'</span></span><span><i>Downscope</i><span class="mono">'+h(s.downscope)+'</span></span></span>'+
        '</button>';})():
-      '<div class="wz-opt off"><span class="wz-opt-h"><b>Import an MCP server</b><span class="b b-q">nothing matched</span></span>'+
+      '<div class="wz-opt off"><span class="wz-opt-h"><b>Import a provider</b><span class="b b-q">nothing matched</span></span>'+
       '<span class="d">No server in the catalogue answers this description. That is the case where writing one is the right answer.</span></div>';
     var build='<button class="wz-opt'+(z.path==="build"?" on":"")+'" onclick="wzSetR(\'path\',\'build\')" aria-pressed="'+(z.path==="build")+'">'+
      '<span class="wz-opt-h"><b>Build it</b>'+(rec==="build"?'<span class="b b-allowed">recommended</span>':'')+'</span>'+
@@ -15270,7 +15306,7 @@ document.addEventListener("click",function(e){
     {name:"ops/slack-schema-approval",pr:"a-intel/platform#515",ahead:6,by:"priya",when:"2 days ago"},
     {name:"agents/dependency-bot-weekly",pr:"a-intel/platform#509",ahead:1,by:people[3].key,when:"4 days ago"});
 
-  /* ---------- tool servers and the registry ---------- */
+  /* ---------- providers and the registry ---------- */
   var SRV_TOOLS={
     github:["create_issue","list_issues","get_issue","update_issue","add_issue_comment","list_commits","get_commit","create_branch","list_branches","push_files","search_code","list_releases","get_release","request_review","fork_repository","delete_file","create_repository","get_me","list_workflows","run_workflow","get_workflow_run","list_tags","get_tag","search_repositories","list_collaborators","add_collaborator","remove_collaborator","create_label","update_pull_request","list_pull_request_files","get_pull_request_diff","create_review","dismiss_review","list_deployments","create_deployment","list_secrets","set_secret","list_webhooks","create_webhook","get_repository"],
     linear:["create_issue","get_issue","list_issues","search_issues","add_comment","list_projects","get_project","create_project","update_project","list_cycles","get_cycle","list_teams","list_users","assign_issue","set_priority","link_issue","archive_issue"],
@@ -15512,8 +15548,8 @@ document.addEventListener("click",function(e){
       case "export.downloaded": return "exp_01K5R"+ulid(4)+" · signature verified";
       case "steering_published": return pick(RECORDS).id+" · "+pick(REPOS).n+"#"+ri(300,1900)+" merged";
       case "context_pr.opened": return pick(REPOS).n+"#"+ri(300,1900)+" · proposed by the promoter · "+ri(3,40)+" runs in support";
-      case "kill_switch.flipped": return pick(["tool version "+t.n+"@"+t.v,"agent "+r.agent,"tool server kubernetes"])+" · "+pick(["schema regression","runaway retries","operator request"]);
-      case "kill_switch.cleared": return "tool server kubernetes · schema approved";
+      case "kill_switch.flipped": return pick(["tool version "+t.n+"@"+t.v,"agent "+r.agent,"provider kubernetes"])+" · "+pick(["schema regression","runaway retries","operator request"]);
+      case "kill_switch.cleared": return "provider kubernetes · schema approved";
       case "schema.proposed": return t.n+"@"+t.v+" · output schema observed, not declared";
       case "schema.approved": return t.n+"@"+t.v+" · proposal accepted by "+p;
       case "session.signed_in": return pick(["password","Google","GitHub"])+" · "+pick(["macOS · Chrome","macOS · Safari","Windows · Edge","iOS · app"])+" · MFA "+pick(["passkey","TOTP"]);
@@ -15535,7 +15571,7 @@ document.addEventListener("click",function(e){
   seedAudit.concat(genAudit).sort(function(a,b){return b._k-a._k;}).forEach(function(e){delete e._k;AUDIT.push(e);});
 
   /* ---------- incidents, exports, keys ---------- */
-  var INC=[["warning","Kill switch flipped on a tool server","kill_switch","tool server kubernetes · 2 observed output schemas","k8s-mcp 2.3.1 changed the shape of get_logs and list_pods output. The gateway recorded the outputs, inferred a schema and parked both as proposals; the server switch is on until an admin approves."],
+  var INC=[["warning","Kill switch flipped on a provider","kill_switch","provider kubernetes · 2 observed output schemas","k8s-mcp 2.3.1 changed the shape of get_logs and list_pods output. The gateway recorded the outputs, inferred a schema and parked both as proposals; the provider switch is on until an admin approves."],
     ["critical","Budget breached three times in one hour","budget_breach","{agent} · {ws}","The agent hit its per-run ceiling on three consecutive runs while retrying the same failing command. Each run paused at the next hook boundary once reported spend crossed the ceiling."],
     ["warning","Approval expired with money reserved","approval_expired","{agent} · finops","No approver resolved the parked payment inside ten minutes. The mandate released the reservation; nothing moved. The operator was paged by the gateway."],
     ["info","Tainted argument raised to approval","taint_raised","{agent} · {ws}","A shell argument was copied byte-for-byte from a tool result. Policy raised the call to approval; the operator denied it and the run halted cleanly."],
