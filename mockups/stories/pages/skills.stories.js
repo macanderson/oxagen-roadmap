@@ -4,7 +4,7 @@ import { view, argTypes } from "../_view.js";
 import spec from "../../pages/skills.md?raw";
 
 export default {
-  title: "Oxagen/Workspace/Steering · Skills",
+  title: "Oxagen/Workspace/Steering · Library · Skills",
   tags: ["autodocs"],
   argTypes,
   args: { shell: "desktop", theme: "system", product: true, hash: "#/a-intel/core-platform/steering/skills" },

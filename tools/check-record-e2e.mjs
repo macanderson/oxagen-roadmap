@@ -196,7 +196,7 @@ const clickPg = async (page, re) => await page.evaluate(src => {
   await shot(page, "rec-e2e-5-record-page");
 
   // and it is in the list it belongs to
-  await page.evaluate(() => { S.tab.steering = "records"; S.prSel = null; go("#/a-intel/core-platform/steering"); });
+  await page.evaluate(() => { S.prSel = null; go("#/a-intel/core-platform/steering/records"); });
   await page.waitForTimeout(400);
   ok((await pgText(page)).includes("hand-edit a generated migration"), "it appears in Published records");
   ok(errs.length === 0, "no page errors across the whole path: " + errs.join(" | "));

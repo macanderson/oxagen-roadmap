@@ -37,7 +37,7 @@ reviews it, and the wizard says so on every drafting step.
 
 | Page | Action | Opens |
 |---|---|---|
-| Agent IAM | **New agent** | `wzOpen("agent")` |
+| Agents | **New agent** | `wzOpen("agent")` |
 | Tools | **New tool** | `wzOpen("tool")` |
 | Steering · Skills | **Add a skill** | `wzOpen("skill")` |
 | Steering (every other tab) | **Write a context record** | `wzOpen("record")` |

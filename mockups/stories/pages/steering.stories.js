@@ -4,10 +4,10 @@ import { view, argTypes } from "../_view.js";
 import spec from "../../pages/steering.md?raw";
 
 export default {
-  title: "Oxagen/Workspace/Steering · Records",
+  title: "Oxagen/Workspace/Steering · Library",
   tags: ["autodocs"],
   argTypes,
-  args: { shell: "desktop", theme: "system", product: true, hash: "#/a-intel/core-platform/steering/records" },
+  args: { shell: "desktop", theme: "system", product: true, hash: "#/a-intel/core-platform/steering/library" },
   parameters: { docs: { description: { component: spec } } },
   render: view,
 };

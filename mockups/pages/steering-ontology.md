@@ -4,7 +4,7 @@
 |---|---|
 | Route | `#/a-intel/core-platform/steering/ontology` |
 | Scope | workspace |
-| Spec | the steering and gateway plan, Phase 2 (story sheet decisions 4, 7, and 9); `steering.md` is the hub this tab belongs to |
+| Spec | the steering and gateway plan, Phase 2 (story sheet decisions 4, 7, and 9); `steering.md` is the hub, and Ontology is a shelf of its Library tab |
 | Design | `mockups/src/engine.js` → `stgOntologyTab()`, inside `pSteering()` and `stgHub()`, built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded · empty · loading · error · access denied |
 | Storybook | `Oxagen / … / steering-ontology`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
@@ -18,7 +18,7 @@ A home for the entity and term definitions that steer. It is a small tab, not a 
 
 **Hub header.** Eyebrow: the workspace name, h1 “Steering”, subtext “Everything that can steer an agent in this workspace competes in one assembler.” Actions: the governance chip **Governance: team** and **Write a context record** (gold; opens the record wizard). The chip and its `govmode` dialog are specified in `steering.md`.
 
-**The seven tabs, in this order:** Records (59) · Skills (6) · Memory (6) · Ontology (4) · Policy (6) · Proposals (15) · Preview. Each tab is a URL segment, `#/:org/:ws/steering/<tab>`. The hash is read on load and on `hashchange`; a tab changed by code writes the hash back with `replaceState`, so every view is a link. Ontology is selected.
+**The five tabs, in this order:** Library (75) · Assignments (4) · Gates (6) · Proposals (15) · Compiler. Each tab is a URL segment, `#/:org/:ws/steering/<tab>`. The hash is read on load and on `hashchange`; a tab changed by code writes the hash back with `replaceState`, so every view is a link. Library is selected, and the shelf row beneath it presses Ontology (4 of 75): All · Records · Skills · Memory · Ontology, each a chip with a count and `aria-pressed`. `/steering/ontology` still resolves and lights this shelf.
 
 - A lead note, verbatim: “An ontology note defines one entity or one term the way this workspace uses it. It compiles to text like any other item, enters the volatile selection as info, and grants nothing. A note is a file somebody wrote and somebody merged, under `.oxagen/ontology/` on a-intel/platform, so writing, changing and retiring one each open a pull request.”
 - **Definitions** panel, badge “4”, and **New definition** in the header. Columns: Term (bold, with its id under it, `ont.release-train`) · Kind (`term`, `entity`, `alias`, or `boundary`) · Definition (the body, at most 52ch wide) · Force (`info`, or `retiring` in approval colour while a removal is open) · About (the repositories, records, or skills it is linked to, one per line in mono) · Token cost (“34 tok”) · File (`.oxagen/ontology/<name>.toml @ <commit>`) · row actions.
@@ -33,7 +33,7 @@ A home for the entity and term definitions that steer. It is a small tab, not a 
 
 **Dialogs this page opens:** `govmode`, `wz (record wizard)`, `ontology`, `ontnew`, `ontedit`, `ontretire`.
 
-**Shell.** As `steering.md`: sidebar with Steering lit and Repositories between Steering and Spend, top bar with breadcrumbs, ⌘K search-or-run, notifications, the **Approvals** button (count of everything waiting on you across the organization) that opens the drawer `#apdrawer`, and the account avatar. No assistant button in the top bar. Skills has no nav entry of its own.
+**Shell.** As `steering.md`: sidebar with Steering lit and Runtimes between Steering and Repositories, top bar with breadcrumbs, ⌘K search-or-run, notifications, the **Approvals** button (count of everything waiting on you across the organization) that opens the drawer `#apdrawer`, and the account avatar. No assistant button in the top bar. Skills has no nav entry of its own.
 
 ## Data sources
 
@@ -52,14 +52,14 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 ## States
 
 - **loaded**: the tab as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell).
-- **empty**: the hub header, the chip, and the seven tabs stay; the header holds no gold. The body is “No ontology notes yet”: “A note defines one entity or one term the way this workspace uses it. Notes are files under `.oxagen/ontology/` on a-intel/platform, published by a merge.” Action: **Write a context record** (gold).
+- **empty**: the hub header, the chip, and the five tabs stay; the header holds no gold. The body is “No ontology notes yet”: “A note defines one entity or one term the way this workspace uses it. Notes are files under `.oxagen/ontology/` on a-intel/platform, published by a merge.” Action: **Write a context record** (gold).
 - **loading**: the shell stays; the page body, hub header included, is replaced by the skeleton (four tile blocks and a panel of seven rows).
 - **error**: “Steering could not be loaded”. “The control plane answered `503 record_index_unavailable`. Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by Oxagen.” Actions: **Try again**, **Open an incident**; the trace line.
 - **access denied**: “You cannot see this workspace’s steering”, naming `steering.read on core-platform`. Actions: **Request access**, **Back to Fleet**. Below: *Signed in as*, *Needed*, *Decided by* (`pol_v41` · deny wins over every allow).
 
 ## Mobile
 
-The seven tabs are one scrolling strip with scroll snap, and the tab in view is scrolled to on render; the page itself never scrolls sideways. Top bar collapses to hamburger · current crumb · search glyph · notifications · approvals · avatar. A fixed five-slot thumb bar replaces the sidebar: **Fleet**, **Agents**, **Tools**, **Spend**, **More**. **More** is a bottom sheet listing Steering (with Skills inside it), Repositories, Organization, Billing, Audit, Search, Notifications, Account, Switch organization, Switch workspace, and it is the lit slot on every Steering tab. Every dialog rises from the bottom edge as a sheet; the table becomes a stack of cards, each cell labelled with its column header; touch targets are ≥ 44 px; inputs are 16 px.
+The five tabs are one scrolling strip with scroll snap, and the tab in view is scrolled to on render; the page itself never scrolls sideways. The shelf row wraps under the Library tab, Ontology pressed among it. Top bar collapses to hamburger · current crumb · search glyph · notifications · approvals · avatar. A fixed five-slot thumb bar replaces the sidebar: **Fleet**, **Agents**, **Tools**, **Spend**, **More**. **More** is a bottom sheet listing Steering (with its shelves inside), Runtimes, Repositories, Organization, Billing, Audit, Search, Notifications, Account, Switch organization, Switch workspace, and it is the lit slot on every Steering tab. Every dialog rises from the bottom edge as a sheet; the table becomes a stack of cards, each cell labelled with its column header; touch targets are ≥ 44 px; inputs are 16 px.
 
 ## Permissions
 

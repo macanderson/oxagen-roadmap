@@ -4,7 +4,7 @@ import { view, argTypes } from "../_view.js";
 import spec from "../../pages/steering-ontology.md?raw";
 
 export default {
-  title: "Oxagen/Workspace/Steering · Ontology",
+  title: "Oxagen/Workspace/Steering · Library · Ontology",
   tags: ["autodocs"],
   argTypes,
   args: { shell: "desktop", theme: "system", product: true, hash: "#/a-intel/core-platform/steering/ontology" },

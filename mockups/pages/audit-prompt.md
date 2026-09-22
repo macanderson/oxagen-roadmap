@@ -48,8 +48,8 @@ Record PASS / FAIL / N/A per check with evidence (file:line, selector + text, or
    FAIL if any of them is.
 
 ### B. Shell (desktop)
-4. Sidebar: organization switcher and workspace switcher at the top; Workspace nav Fleet, Agent IAM,
-   Tools, Steering, Repositories, Spend; Organization nav Organization, Billing, Audit; the footer
+4. Sidebar: organization switcher and workspace switcher at the top; Workspace nav Fleet, Agents,
+   Tools, Steering, Runtimes, Repositories, Spend; Organization nav Organization, Billing, Audit; the footer
    (agent count, data plane, connection); the assistant launcher at the foot of the sidebar.
 5. Nav counts appear only where something waits on a person: Fleet (live runs), Steering
    (proposals), Audit (open critical incidents). Any other count is a FAIL.
