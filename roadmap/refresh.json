@@ -121,6 +121,7 @@
     "docs/adr/ADR-116-clickhouse-reads-scope-the-source-and-migrations-share-a-lock.md",
     "docs/adr/ADR-117-bound-github-retries-and-use-managed-graph-transactions.md",
     "docs/adr/ADR-118-approved-built-in-calls-resume-once.md",
+    "docs/adr/ADR-119-tool-changes-invalidate-approval-rules.md",
     "docs/adr/ADR-120-shared-org-rows-require-org-scope-to-write.md",
     "docs/adr/ADR-121-github-record-identity-and-poll-completeness.md",
     "docs/adr/ADR-122-external-mcp-decision-rules.md",
@@ -137,7 +138,12 @@
     "docs/adr/ADR-134-durable-ai-usage-settlement.md",
     "docs/adr/ADR-135-rev1-console-scope-and-cutover-evidence.md",
     "docs/adr/ADR-136-immutable-configuration-clone-and-retire.md",
-    "docs/adr/ADR-137-standing-decisions-are-workspace-context-records.md"
+    "docs/adr/ADR-137-standing-decisions-are-workspace-context-records.md",
+    "docs/adr/ADR-138-an-external-tools-identity-is-case-folded-at-the-decision-gate.md",
+    "docs/adr/ADR-138-the-gateway-brokers-the-vendor-credential-a-wrapped-harness-holds-a-run-token.md",
+    "docs/adr/ADR-139-one-store-for-a-runs-content-on-the-host.md",
+    "docs/adr/ADR-140-one-tool-call-seals-one-frame.md",
+    "docs/adr/ADR-141-what-counts-as-an-installed-cursor-and-where-a-cursor-steer-lands.md"
   ],
   "adrs": {
     "ADR-001": {
@@ -1084,6 +1090,14 @@
       "status": "accepted",
       "title": "Approved built-in calls resume once"
     },
+    "ADR-119": {
+      "date": "2026-09-19",
+      "decision": "Tool classification and publication are governance writes. Each acquires the workspace rule-set lock before reading or writing tool versions. Rule authoring uses the same lock. The tool change, affected rules, and invalidation events commit together. Role and callback reads reuse the same transaction to avoid waiting writers exhausting the pool around a nested connection checkout.",
+      "id": "ADR-119",
+      "path": "docs/adr/ADR-119-tool-changes-invalidate-approval-rules.md",
+      "status": "accepted",
+      "title": "Tool changes invalidate approval rules"
+    },
     "ADR-120": {
       "date": "2026-09-19",
       "decision": "For nullable workspace tables, INSERT and UPDATE require the current workspace to match the row. A null-workspace row requires a cleared workspace setting, as supplied by `withOrgDb`. The same predicate governs the old rows of UPDATE and DELETE.",
@@ -1211,6 +1225,38 @@
       "path": "docs/adr/ADR-137-standing-decisions-are-workspace-context-records.md",
       "status": null,
       "title": "Standing decisions are workspace context records, stored once"
+    },
+    "ADR-138": {
+      "date": "2026-09-22",
+      "decision": "The decision gate folds the case of an external tool identity on both sides of a rule match. `canonicalToolIdentity` lower-cases a name whose first segment is `mcp` or `file-mcp` and returns every other name untouched; `capabilityMatches` compares the folded pattern against the folded candidate, so `evaluateRules`, `requiredFactKeys` and the gate's external fact collection all read one identity.",
+      "id": "ADR-138",
+      "path": "docs/adr/ADR-138-an-external-tools-identity-is-case-folded-at-the-decision-gate.md",
+      "status": "accepted",
+      "title": "An external tool's identity is case-folded at the decision gate"
+    },
+    "ADR-139": {
+      "date": "2026-09-22",
+      "decision": "The WAL body file is the one store for a run's content on a host. Every other place the content passes through is a hand-off: it is bounded, it is retried, and it does not decide what the host holds.",
+      "id": "ADR-139",
+      "path": "docs/adr/ADR-139-one-store-for-a-runs-content-on-the-host.md",
+      "status": "accepted",
+      "title": "One store for a run's content on the host"
+    },
+    "ADR-140": {
+      "date": null,
+      "decision": "One `tool_call` frame exists per `tool_use_id` per chain. The first source to report a call seals it. A later sighting of that call from another source seals nothing.",
+      "id": "ADR-140",
+      "path": "docs/adr/ADR-140-one-tool-call-seals-one-frame.md",
+      "status": null,
+      "title": "One tool call seals one frame, sealed by the source that reports it first"
+    },
+    "ADR-141": {
+      "date": "2026-09-22",
+      "decision": "### A Cursor steer lands at `stop`, as a follow-up message",
+      "id": "ADR-141",
+      "path": "docs/adr/ADR-141-what-counts-as-an-installed-cursor-and-where-a-cursor-steer-lands.md",
+      "status": "accepted",
+      "title": "What counts as an installed Cursor, and where a Cursor steer lands"
     }
   },
   "baseline": "2026-09-18T20:52:30Z",
@@ -1568,6 +1614,19 @@
       "status": "decided",
       "title": "Approved built-in calls resume once"
     },
+    "ADR-119": {
+      "blocks": [],
+      "decided": "ADR-119: Tool changes invalidate approval rules. Tool classification and publication are governance writes. Each acquires the workspace rule-set lock before reading or writing tool versions. Rule authoring uses the same lock. The tool change, affected rules, and invalidation events commit together. Role and callback reads reuse the same transaction to avoid waiting writers exhausting the pool around a nested connection checkout.",
+      "decided_on": "2026-09-19",
+      "id": "ADR-119",
+      "origin": "adr",
+      "pr": null,
+      "question": "Decided in the repository: Tool changes invalidate approval rules.",
+      "recommendation": null,
+      "source": "docs/adr/ADR-119-tool-changes-invalidate-approval-rules.md",
+      "status": "decided",
+      "title": "Tool changes invalidate approval rules"
+    },
     "ADR-120": {
       "blocks": [],
       "decided": "ADR-120: Shared organization rows require organization scope to write. For nullable workspace tables, INSERT and UPDATE require the current workspace to match the row. A null-workspace row requires a cleared workspace setting, as supplied by `withOrgDb`. The same predicate governs the old rows of UPDATE and DELETE.",
@@ -1775,6 +1834,58 @@
       "source": "docs/adr/ADR-137-standing-decisions-are-workspace-context-records.md",
       "status": "decided",
       "title": "Standing decisions are workspace context records, stored once"
+    },
+    "ADR-138": {
+      "blocks": [],
+      "decided": "ADR-138: An external tool's identity is case-folded at the decision gate. The decision gate folds the case of an external tool identity on both sides of a rule match. `canonicalToolIdentity` lower-cases a name whose first segment is `mcp` or `file-mcp` and returns every other name untouched; `capabilityMatches` compares the folded pattern against the folded candidate, so `evaluateRules`, `requiredFactKeys` and the gate's external fact collection all read one identity.",
+      "decided_on": "2026-09-22",
+      "id": "ADR-138",
+      "origin": "adr",
+      "pr": 3723,
+      "question": "Decided in the repository: An external tool's identity is case-folded at the decision gate.",
+      "recommendation": null,
+      "source": "docs/adr/ADR-138-an-external-tools-identity-is-case-folded-at-the-decision-gate.md",
+      "status": "decided",
+      "title": "An external tool's identity is case-folded at the decision gate"
+    },
+    "ADR-139": {
+      "blocks": [],
+      "decided": "ADR-139: One store for a run's content on the host. The WAL body file is the one store for a run's content on a host. Every other place the content passes through is a hand-off: it is bounded, it is retried, and it does not decide what the host holds.",
+      "decided_on": "2026-09-22",
+      "id": "ADR-139",
+      "origin": "adr",
+      "pr": 3723,
+      "question": "Decided in the repository: One store for a run's content on the host.",
+      "recommendation": null,
+      "source": "docs/adr/ADR-139-one-store-for-a-runs-content-on-the-host.md",
+      "status": "decided",
+      "title": "One store for a run's content on the host"
+    },
+    "ADR-140": {
+      "blocks": [],
+      "decided": "ADR-140: One tool call seals one frame, sealed by the source that reports it first. One `tool_call` frame exists per `tool_use_id` per chain. The first source to report a call seals it. A later sighting of that call from another source seals nothing.",
+      "decided_on": "2026-09-22",
+      "id": "ADR-140",
+      "origin": "adr",
+      "pr": 3723,
+      "question": "Decided in the repository: One tool call seals one frame, sealed by the source that reports it first.",
+      "recommendation": null,
+      "source": "docs/adr/ADR-140-one-tool-call-seals-one-frame.md",
+      "status": "decided",
+      "title": "One tool call seals one frame, sealed by the source that reports it first"
+    },
+    "ADR-141": {
+      "blocks": [],
+      "decided": "ADR-141: What counts as an installed Cursor, and where a Cursor steer lands. ### A Cursor steer lands at `stop`, as a follow-up message",
+      "decided_on": "2026-09-22",
+      "id": "ADR-141",
+      "origin": "adr",
+      "pr": 3723,
+      "question": "Decided in the repository: What counts as an installed Cursor, and where a Cursor steer lands.",
+      "recommendation": null,
+      "source": "docs/adr/ADR-141-what-counts-as-an-installed-cursor-and-where-a-cursor-steer-lands.md",
+      "status": "decided",
+      "title": "What counts as an installed Cursor, and where a Cursor steer lands"
     },
     "I-oxagen#2961": {
       "blocks": [],
@@ -2245,9 +2356,9 @@
       "title": "P0 · app+ops/CI · Two files from an already-merged PR export test-only helpers and fail every PR's required checks job"
     }
   },
-  "generated_at": "2026-09-22T06:33:16.871Z",
+  "generated_at": "2026-09-22T10:19:35.597Z",
   "heads": {
-    "oxagen": "ae2d2c666eab723792c6c1c9b6eb73b20637cc7c"
+    "oxagen": "d75b9e1e1641c8cda5f2209ed221dde01d673054"
   },
   "issues": {
     "oxagen#1": {
@@ -5206,7 +5317,7 @@
     },
     "oxagen#3212": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-22T06:43:05Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": false,
@@ -5230,9 +5341,9 @@
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "P2 · platform/Tacho · Let the connection test reach its own time limit",
-      "updated_at": "2026-09-22T06:14:48Z"
+      "updated_at": "2026-09-22T06:43:05Z"
     },
     "oxagen#3213": {
       "author": "macanderson",
@@ -8033,7 +8144,7 @@
     },
     "oxagen#3328": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-22T06:43:04Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": false,
@@ -8061,9 +8172,9 @@
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "P2 · kernel/Steering · Report guidance checks honestly when a read fails",
-      "updated_at": "2026-09-22T06:15:48Z"
+      "updated_at": "2026-09-22T06:43:04Z"
     },
     "oxagen#3329": {
       "author": "macanderson",
@@ -17717,7 +17828,7 @@
     },
     "oxagen#3669": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-22T06:43:05Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": false,
@@ -17742,9 +17853,9 @@
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "P1 · kernel/Skills · Skill search preview exposes named withheld skills over MCP (residue #3630)",
-      "updated_at": "2026-09-22T06:23:47Z"
+      "updated_at": "2026-09-22T06:43:05Z"
     },
     "oxagen#3670": {
       "author": "macanderson",
@@ -17930,7 +18041,7 @@
     },
     "oxagen#3676": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-22T06:43:06Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": true,
@@ -17961,9 +18072,9 @@
         "docs/specs/tacho/",
         "docs/specs/tacho/spec.md"
       ],
-      "state": "open",
+      "state": "closed",
       "title": "P2 · evidence/Tacho · PR #3628 follow-ups (residue #3628)",
-      "updated_at": "2026-09-22T06:24:13Z"
+      "updated_at": "2026-09-22T06:43:06Z"
     },
     "oxagen#3677": {
       "author": "macanderson",
@@ -18910,7 +19021,7 @@
     },
     "oxagen#3710": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-22T06:44:02Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": true,
@@ -18921,7 +19032,7 @@
         "no-issue",
         "closes-nothing"
       ],
-      "merged_at": null,
+      "merged_at": "2026-09-22T06:44:02Z",
       "milestone": null,
       "needs_decision": false,
       "number": 3710,
@@ -18935,9 +19046,9 @@
         "ADR-067",
         "docs/specs/tacho/spec.md"
       ],
-      "state": "open",
+      "state": "closed",
       "title": "feat(tacho): compile an agent's mandate into the steering bundle's permissions and budget",
-      "updated_at": "2026-09-22T06:28:51Z"
+      "updated_at": "2026-09-22T06:44:04Z"
     },
     "oxagen#3711": {
       "author": "macanderson",
@@ -19070,7 +19181,7 @@
       "closed_at": null,
       "closes": [],
       "decision_question": null,
-      "has_spec_backing": true,
+      "has_spec_backing": false,
       "html_url": "https://github.com/macanderson/oxagen/pull/3716",
       "is_pr": true,
       "kind": null,
@@ -19086,12 +19197,10 @@
       "priority": null,
       "refs": [],
       "repo": "oxagen",
-      "spec_refs": [
-        "ADR-110"
-      ],
+      "spec_refs": [],
       "state": "open",
-      "title": "feat(tacho): arm the model gateway and report when a host leaves it",
-      "updated_at": "2026-09-22T06:30:59Z"
+      "title": "feat(tacho): store a workspace session policy and report when a host leaves the gateway",
+      "updated_at": "2026-09-22T08:52:06Z"
     },
     "oxagen#3717": {
       "author": "macanderson",
@@ -19247,12 +19356,10 @@
     },
     "oxagen#3723": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-22T06:43:03Z",
       "closes": [
         3212,
-        3293,
         3328,
-        3534,
         3669,
         3676
       ],
@@ -19264,14 +19371,14 @@
       "labels": [
         "migration-required"
       ],
-      "merged_at": null,
+      "merged_at": "2026-09-22T06:43:03Z",
       "milestone": null,
       "needs_decision": false,
       "number": 3723,
       "pillar": null,
       "priority": null,
       "refs": [
-        3694
+        3293
       ],
       "repo": "oxagen",
       "spec_refs": [
@@ -19280,9 +19387,9 @@
         "ADR-140",
         "ADR-141"
       ],
-      "state": "open",
+      "state": "closed",
       "title": "fix: the top 25 defects, weighted to run recording, the gateway, and steering",
-      "updated_at": "2026-09-22T06:25:41Z"
+      "updated_at": "2026-09-22T06:43:06Z"
     },
     "oxagen#3724": {
       "author": "macanderson",
@@ -19314,7 +19421,7 @@
     },
     "oxagen#3725": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-22T08:25:37Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": true,
@@ -19322,7 +19429,7 @@
       "is_pr": true,
       "kind": null,
       "labels": [],
-      "merged_at": null,
+      "merged_at": "2026-09-22T08:25:37Z",
       "milestone": null,
       "needs_decision": false,
       "number": 3725,
@@ -19336,9 +19443,59 @@
         "ADR-138",
         "ADR-094"
       ],
-      "state": "open",
+      "state": "closed",
       "title": "tacho: the gateway brokers the vendor credential and the harness holds a run token (ADR-138)",
-      "updated_at": "2026-09-22T06:28:32Z"
+      "updated_at": "2026-09-22T08:25:47Z"
+    },
+    "oxagen#3726": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/issues/3726",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3726,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Queued · surfaces/Tacho · An ambiguous model body is forwarded and priced against a model that may not have run",
+      "updated_at": "2026-09-22T08:48:00Z"
+    },
+    "oxagen#3727": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/issues/3727",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3727,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Queued · surfaces/Tacho · A saved model allowlist governs nothing until an ADR says whose word arms it",
+      "updated_at": "2026-09-22T08:52:36Z"
     },
     "oxagen#4": {
       "author": "macanderson",
@@ -19953,6 +20110,29 @@
       "title": "Mobile-first frontend review: thumb navigation, touch targets, responsive fixes + Terracotta theme retune",
       "updated_at": "2026-09-20T22:16:41Z"
     },
+    "oxagen-roadmap#62": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen-roadmap/pull/62",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 62,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen-roadmap",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Agents, Tools, and Steering on one ontology",
+      "updated_at": "2026-09-22T08:55:06Z"
+    },
     "oxagen-roadmap#64": {
       "author": "macanderson",
       "closed_at": "2026-09-22T04:53:54Z",
@@ -20000,6 +20180,31 @@
       "state": "closed",
       "title": "Record the gateway credential seam in the spec and the plan",
       "updated_at": "2026-09-22T06:20:32Z"
+    },
+    "oxagen-roadmap#66": {
+      "author": "macanderson",
+      "closed_at": "2026-09-22T06:34:06Z",
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen-roadmap/pull/66",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": "2026-09-22T06:34:06Z",
+      "milestone": null,
+      "needs_decision": false,
+      "number": 66,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen-roadmap",
+      "spec_refs": [
+        "ADR-138"
+      ],
+      "state": "closed",
+      "title": "Name the repository the refresh reads, and refresh it",
+      "updated_at": "2026-09-22T06:34:19Z"
     },
     "roadmap#39": {
       "author": "macanderson",
@@ -35928,9 +36133,39 @@
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "dod",
-      "last_merge": "2026-09-21T20:31:47Z",
+      "last_merge": "2026-09-22T08:25:37Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-22T08:25:37Z",
+          "number": 3725,
+          "repo": "oxagen",
+          "title": "tacho: the gateway brokers the vendor credential and the harness holds a run token (ADR-138)",
+          "touched": [
+            "packages/tacho"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-22T06:44:02Z",
+          "number": 3710,
+          "repo": "oxagen",
+          "title": "feat(tacho): compile an agent's mandate into the steering bundle's permissions and budget",
+          "touched": [
+            "packages/tacho"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-22T06:43:03Z",
+          "number": 3723,
+          "repo": "oxagen",
+          "title": "fix: the top 25 defects, weighted to run recording, the gateway, and steering",
+          "touched": [
+            "packages/tacho"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-21T20:31:47Z",
@@ -36100,49 +36335,29 @@
           "touched": [
             "packages/tacho"
           ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-20T06:09:36Z",
-          "number": 3564,
-          "repo": "oxagen",
-          "title": "Preserve legacy GitHub identity with mapped URL properties",
-          "touched": [
-            "packages/tacho"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-20T05:58:00Z",
-          "number": 3548,
-          "repo": "oxagen",
-          "title": "Invalidate approval rules when tool authority or measures change",
-          "touched": [
-            "packages/tacho"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-20T05:32:42Z",
-          "number": 3566,
-          "repo": "oxagen",
-          "title": "Unblock production release and preserve approval and tenant safeguards",
-          "touched": [
-            "packages/tacho"
-          ]
         }
       ],
       "open_issues": 0,
-      "refreshed_at": "2026-09-21T22:12:53.518Z",
+      "refreshed_at": "2026-09-22T10:19:35.597Z",
       "shared_page": false
     },
     "D3": {
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "dod",
-      "last_merge": "2026-09-21T09:30:19Z",
+      "last_merge": "2026-09-22T06:43:03Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-22T06:43:03Z",
+          "number": 3723,
+          "repo": "oxagen",
+          "title": "fix: the top 25 defects, weighted to run recording, the gateway, and steering",
+          "touched": [
+            "packages/billing/src"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-21T09:30:19Z",
@@ -36285,16 +36500,26 @@
         }
       ],
       "open_issues": 0,
-      "refreshed_at": "2026-09-21T13:05:20.786Z",
+      "refreshed_at": "2026-09-22T10:19:35.597Z",
       "shared_page": false
     },
     "D4": {
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "dod",
-      "last_merge": "2026-09-21T05:40:42Z",
+      "last_merge": "2026-09-22T06:43:03Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-22T06:43:03Z",
+          "number": 3723,
+          "repo": "oxagen",
+          "title": "fix: the top 25 defects, weighted to run recording, the gateway, and steering",
+          "touched": [
+            "packages/ai/src"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-21T05:40:42Z",
@@ -36317,7 +36542,7 @@
         }
       ],
       "open_issues": 0,
-      "refreshed_at": "2026-09-21T06:47:15.704Z",
+      "refreshed_at": "2026-09-22T10:19:35.597Z",
       "shared_page": false
     },
     "D5": {
@@ -36536,9 +36761,19 @@
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "witness",
-      "last_merge": "2026-09-21T19:47:50Z",
+      "last_merge": "2026-09-22T06:43:03Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-22T06:43:03Z",
+          "number": 3723,
+          "repo": "oxagen",
+          "title": "fix: the top 25 defects, weighted to run recording, the gateway, and steering",
+          "touched": [
+            "packages/handlers/src/tacho.events.ingest.ts"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-21T19:47:50Z",
@@ -36581,7 +36816,7 @@
         }
       ],
       "open_issues": 0,
-      "refreshed_at": "2026-09-21T22:12:53.518Z",
+      "refreshed_at": "2026-09-22T10:19:35.597Z",
       "shared_page": false
     },
     "W3": {
@@ -36642,9 +36877,19 @@
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "witness",
-      "last_merge": "2026-09-21T19:14:53Z",
+      "last_merge": "2026-09-22T06:43:03Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-22T06:43:03Z",
+          "number": 3723,
+          "repo": "oxagen",
+          "title": "fix: the top 25 defects, weighted to run recording, the gateway, and steering",
+          "touched": [
+            "packages/run-ledger"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-21T19:14:53Z",
@@ -36737,7 +36982,7 @@
         }
       ],
       "open_issues": 0,
-      "refreshed_at": "2026-09-21T22:12:53.518Z",
+      "refreshed_at": "2026-09-22T10:19:35.597Z",
       "shared_page": false
     },
     "W7": {
@@ -37892,7 +38137,7 @@
         }
       ],
       "kind": "surface",
-      "last_merge": "2026-09-21T08:55:18Z",
+      "last_merge": "2026-09-22T08:25:37Z",
       "links": [
         {
           "number": 3301,
@@ -37914,6 +38159,27 @@
         }
       ],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-22T08:25:37Z",
+          "number": 3725,
+          "repo": "oxagen",
+          "title": "tacho: the gateway brokers the vendor credential and the harness holds a run token (ADR-138)",
+          "touched": [
+            "packages/tacho/src/cli/enroll.ts",
+            "packages/tacho/src/cli/unenroll.ts"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-22T06:43:03Z",
+          "number": 3723,
+          "repo": "oxagen",
+          "title": "fix: the top 25 defects, weighted to run recording, the gateway, and steering",
+          "touched": [
+            "packages/tacho/src/cli/enroll.ts"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-21T08:55:18Z",
@@ -38037,7 +38303,7 @@
       ],
       "open_issues": 2,
       "page": "apps/app/src/app/[org]/[ws]/register/[step]/page.tsx",
-      "refreshed_at": "2026-09-21T13:05:20.786Z",
+      "refreshed_at": "2026-09-22T10:19:35.597Z",
       "shared_page": true
     },
     "login": {
@@ -38772,14 +39038,23 @@
     },
     "record": {
       "built_status": "partial",
-      "closed_issues": 0,
+      "closed_issues": 1,
       "gap_refs": [],
       "kind": "surface",
       "last_merge": "2026-09-21T12:35:24Z",
-      "links": [],
+      "links": [
+        {
+          "number": 3395,
+          "repo": "oxagen",
+          "state": "closed",
+          "title": "P0 · app/Steering · Add a page for one published guidance record"
+        }
+      ],
       "merged_prs": [
         {
-          "closes": [],
+          "closes": [
+            3395
+          ],
           "merged_at": "2026-09-21T12:35:24Z",
           "number": 3622,
           "repo": "oxagen",
@@ -38803,7 +39078,7 @@
       "open_issues": 0,
       "page": "apps/app/src/app/[org]/[ws]/steering/records/[lineage]/page.tsx",
       "reason": "page exists: apps/app/src/app/[org]/[ws]/steering/records/[lineage]/page.tsx",
-      "refreshed_at": "2026-09-22T06:33:16.871Z",
+      "refreshed_at": "2026-09-22T10:19:35.597Z",
       "shared_page": false
     },
     "register-name": {
@@ -40117,7 +40392,7 @@
         }
       ],
       "kind": "surface",
-      "last_merge": "2026-09-21T23:43:24Z",
+      "last_merge": "2026-09-22T06:44:02Z",
       "links": [
         {
           "number": 2592,
@@ -40169,6 +40444,17 @@
         }
       ],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-22T06:44:02Z",
+          "number": 3710,
+          "repo": "oxagen",
+          "title": "feat(tacho): compile an agent's mandate into the steering bundle's permissions and budget",
+          "touched": [
+            "packages/handlers/src/lib/tacho-host.ts",
+            "packages/tacho/src/claude-code/hook-client.ts"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-21T23:43:24Z",
@@ -40275,7 +40561,7 @@
       ],
       "open_issues": 4,
       "page": "apps/app/src/app/[org]/[ws]/steering/page.tsx",
-      "refreshed_at": "2026-09-22T00:50:05.433Z",
+      "refreshed_at": "2026-09-22T10:19:35.597Z",
       "shared_page": false
     },
     "tools": {
@@ -40814,9 +41100,19 @@
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "surface",
-      "last_merge": "2026-09-20T00:12:22Z",
+      "last_merge": "2026-09-22T06:43:03Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-22T06:43:03Z",
+          "number": 3723,
+          "repo": "oxagen",
+          "title": "fix: the top 25 defects, weighted to run recording, the gateway, and steering",
+          "touched": [
+            "packages/oxagen/src/contracts/context.record.publish.ts"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-20T00:12:22Z",
@@ -40830,7 +41126,7 @@
       ],
       "open_issues": 0,
       "page": null,
-      "refreshed_at": "2026-09-20T01:38:24.805Z",
+      "refreshed_at": "2026-09-22T10:19:35.597Z",
       "shared_page": false
     },
     "wizard-repository-init": {
@@ -40903,8 +41199,8 @@
     }
   },
   "last_run": {
-    "at": "2026-09-22T06:33:16.871Z",
-    "calls": 7,
+    "at": "2026-09-22T10:19:35.597Z",
+    "calls": 14,
     "quiet": false
   },
   "milestones": {
@@ -40925,12 +41221,12 @@
     "M1": {
       "built": 10,
       "last_merge": {
-        "merged_at": "2026-09-22T00:37:37Z",
-        "number": 3705,
+        "merged_at": "2026-09-22T08:25:37Z",
+        "number": 3725,
         "repo": "oxagen",
-        "title": "fix(fleet): show the enforcement tier on every run row"
+        "title": "tacho: the gateway brokers the vendor credential and the harness holds a run token (ADR-138)"
       },
-      "merged_prs": 51,
+      "merged_prs": 53,
       "not_started": 1,
       "open_issues": 7,
       "partial": 5,
@@ -40981,12 +41277,12 @@
     "M5": {
       "built": 0,
       "last_merge": {
-        "merged_at": "2026-09-21T23:43:24Z",
-        "number": 3645,
+        "merged_at": "2026-09-22T06:44:02Z",
+        "number": 3710,
         "repo": "oxagen",
-        "title": "Clone immutable configurations and retain retirement validity"
+        "title": "feat(tacho): compile an agent's mandate into the steering bundle's permissions and budget"
       },
-      "merged_prs": 19,
+      "merged_prs": 21,
       "not_started": 6,
       "open_issues": 5,
       "partial": 4,
@@ -40995,12 +41291,12 @@
     "M6": {
       "built": 0,
       "last_merge": {
-        "merged_at": "2026-09-21T23:43:24Z",
-        "number": 3645,
+        "merged_at": "2026-09-22T06:44:02Z",
+        "number": 3710,
         "repo": "oxagen",
-        "title": "Clone immutable configurations and retain retirement validity"
+        "title": "feat(tacho): compile an agent's mandate into the steering bundle's permissions and budget"
       },
-      "merged_prs": 10,
+      "merged_prs": 11,
       "not_started": 0,
       "open_issues": 4,
       "partial": 1,
@@ -51305,6 +51601,45 @@
       "repo": "oxagen",
       "title": "docs(mission-control): re-verify Fleet, Run, Approvals and Agents rows in GAP-INVENTORY"
     },
+    "oxagen#3710": {
+      "added": [
+        "packages/handlers/src/lib/tacho-mandate.test.ts",
+        "packages/handlers/src/lib/tacho-mandate.ts"
+      ],
+      "author": "macanderson",
+      "closes": [],
+      "files": [
+        "docs/VISION.md",
+        "docs/capabilities/schemas/create_tacho_enrollment.json",
+        "docs/capabilities/schemas/enroll_host.json",
+        "docs/capabilities/schemas/get_tacho_bundle.json",
+        "docs/specs/tacho/spec.md",
+        "packages/handlers/src/lib/tacho-host-bundle.test.ts",
+        "packages/handlers/src/lib/tacho-host-enroll.ts",
+        "packages/handlers/src/lib/tacho-host.ts",
+        "packages/handlers/src/lib/tacho-mandate.test.ts",
+        "packages/handlers/src/lib/tacho-mandate.ts",
+        "packages/handlers/src/lib/tacho-steering.test.ts",
+        "packages/handlers/src/tacho.bundle.get.ts",
+        "packages/handlers/src/tacho.control.test.ts",
+        "packages/handlers/src/tacho.events.ingest.test.ts",
+        "packages/oxagen/src/iam/resolve.ts",
+        "packages/tacho/README.md",
+        "packages/tacho/src/claude-code/hook-client.test.ts",
+        "packages/tacho/src/claude-code/hook-client.ts",
+        "packages/tacho/src/collector/model-proxy.test.ts",
+        "packages/tacho/src/wire.ts"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3710",
+      "merged_at": "2026-09-22T06:44:02Z",
+      "number": 3710,
+      "refs": [
+        3299
+      ],
+      "repo": "oxagen",
+      "title": "feat(tacho): compile an agent's mandate into the steering bundle's permissions and budget"
+    },
     "oxagen#3711": {
       "added": [
         ".cursor/environment.json",
@@ -51404,6 +51739,257 @@
       "refs": [],
       "repo": "oxagen",
       "title": "Change the steering governance mode"
+    },
+    "oxagen#3723": {
+      "added": [
+        "docs/adr/ADR-138-an-external-tools-identity-is-case-folded-at-the-decision-gate.md",
+        "docs/adr/ADR-139-one-store-for-a-runs-content-on-the-host.md",
+        "docs/adr/ADR-140-one-tool-call-seals-one-frame.md",
+        "docs/adr/ADR-141-what-counts-as-an-installed-cursor-and-where-a-cursor-steer-lands.md",
+        "docs/capabilities/schemas/summarize_skill_search.json",
+        "docs/capabilities/skill.search.summarize.md",
+        "packages/agent/src/runtime/workspace-instructions.test.ts",
+        "packages/agent/src/runtime/workspace-instructions.ts",
+        "packages/database/atlas/migrations/20260922120000_audit_partition_granular_failures.sql",
+        "packages/handlers/src/lib/transcript-assembly.test.ts",
+        "packages/handlers/src/skill.search.summarize.test.ts",
+        "packages/handlers/src/skill.search.summarize.ts",
+        "packages/oxagen/src/contracts/skill.search.summarize.ts",
+        "packages/tacho/src/claude-code/recorder-rollback.test.ts",
+        "packages/tacho/src/claude-code/recorder-tool-call.test.ts",
+        "packages/tacho/src/claude-code/tool-call-dedupe.ts",
+        "packages/tacho/src/cli/detect.test.ts",
+        "packages/tacho/src/host/wal-index.test.ts",
+        "packages/tacho/src/host/wal-index.ts",
+        "packages/telemetry/src/migrate-ledger-repair.test.ts"
+      ],
+      "author": "macanderson",
+      "closes": [
+        3212,
+        3328,
+        3669,
+        3676
+      ],
+      "files": [
+        "apps/api/src/__tests__/error.test.ts",
+        "apps/api/src/middleware/error.ts",
+        "apps/app/messages/skills.json",
+        "apps/app/src/features/skills/action-failure.test.tsx",
+        "apps/app/src/features/skills/action-failure.ts",
+        "apps/app/src/features/skills/search.test.tsx",
+        "apps/app/src/features/skills/search.tsx",
+        "apps/app/src/features/skills/skills.test.tsx",
+        "apps/app/src/features/skills/versions.test.tsx",
+        "apps/app/src/features/skills/versions.tsx",
+        "apps/app/src/i18n/messages.d.ts",
+        "apps/docs/content/docs/cli/wrap-an-agent.mdx",
+        "apps/mcp/src/tools/skill.search.summarize.ts",
+        "docs/adr/ADR-101-four-first-class-harnesses.md",
+        "docs/adr/ADR-119-tool-changes-invalidate-approval-rules.md",
+        "docs/adr/ADR-125-audit-partition-maintenance-and-telemetry-boundaries.md",
+        "docs/adr/ADR-138-an-external-tools-identity-is-case-folded-at-the-decision-gate.md",
+        "docs/adr/ADR-139-one-store-for-a-runs-content-on-the-host.md",
+        "docs/adr/ADR-140-one-tool-call-seals-one-frame.md",
+        "docs/adr/ADR-141-what-counts-as-an-installed-cursor-and-where-a-cursor-steer-lands.md",
+        "docs/adr/README.md",
+        "docs/capabilities/_index.md",
+        "docs/capabilities/context.record.publish.md",
+        "docs/capabilities/get_model_credential.md",
+        "docs/capabilities/schemas/README.md",
+        "docs/capabilities/schemas/_index.json",
+        "docs/capabilities/schemas/preview_skill_search.json",
+        "docs/capabilities/schemas/publish_context_record.json",
+        "docs/capabilities/schemas/summarize_skill_search.json",
+        "docs/capabilities/set_approval_rules.md",
+        "docs/capabilities/set_model_credential.md",
+        "docs/capabilities/skill.search.preview.md",
+        "docs/capabilities/skill.search.summarize.md",
+        "docs/ops/store-migrations.md",
+        "docs/specs/skill-resolution-config.md",
+        "docs/specs/tacho/spec.md",
+        "packages/agent/src/runtime/assistant-run.ts",
+        "packages/agent/src/runtime/assistant-turn.test.ts",
+        "packages/agent/src/runtime/assistant-turn.ts",
+        "packages/agent/src/runtime/engine/provider.test.ts",
+        "packages/agent/src/runtime/engine/provider.ts",
+        "packages/agent/src/runtime/governed-turn.test.ts",
+        "packages/agent/src/runtime/governed-turn.ts",
+        "packages/agent/src/runtime/tool-belt.ts",
+        "packages/agent/src/runtime/tool-budget.test.ts",
+        "packages/agent/src/runtime/tool-budget.ts",
+        "packages/agent/src/runtime/workspace-instructions.test.ts",
+        "packages/agent/src/runtime/workspace-instructions.ts",
+        "packages/ai/src/credential-probe.test.ts",
+        "packages/ai/src/credential-probe.ts",
+        "packages/ai/src/index.ts",
+        "packages/ai/src/models.test.ts",
+        "packages/ai/src/models.ts",
+        "packages/ai/src/stream.test.ts",
+        "packages/ai/src/stream.ts",
+        "packages/billing/package.json",
+        "packages/billing/src/price-book.test.ts",
+        "packages/billing/src/price-book.ts",
+        "packages/billing/src/unpriced-models.test.ts",
+        "packages/config/src/public-url.test.ts",
+        "packages/config/src/public-url.ts",
+        "packages/database/atlas/migrations/20260922120000_audit_partition_granular_failures.sql",
+        "packages/database/atlas/migrations/atlas.sum",
+        "packages/database/integration/audit-partition-maintenance.test.ts",
+        "packages/database/src/schema/security.ts",
+        "packages/database/storage-manifest.json",
+        "packages/handlers/src/asset.upload.test.ts",
+        "packages/handlers/src/asset.upload.ts",
+        "packages/handlers/src/context.record.publish.test.ts",
+        "packages/handlers/src/context.record.publish.ts",
+        "packages/handlers/src/lib/transcript-assembly.test.ts",
+        "packages/handlers/src/lib/transcript-assembly.ts",
+        "packages/handlers/src/org.model_credential.get.test.ts",
+        "packages/handlers/src/org.model_credential.get.ts",
+        "packages/handlers/src/register.ts",
+        "packages/handlers/src/run.transcript.get.ts",
+        "packages/handlers/src/skill-config.store.test.ts",
+        "packages/handlers/src/skill-config.store.ts",
+        "packages/handlers/src/skill-resolution.test.ts",
+        "packages/handlers/src/skill-resolution.ts",
+        "packages/handlers/src/skill.search.preview.test.ts",
+        "packages/handlers/src/skill.search.preview.ts",
+        "packages/handlers/src/skill.search.summarize.test.ts",
+        "packages/handlers/src/skill.search.summarize.ts",
+        "packages/handlers/src/tacho.events.ingest.test.ts",
+        "packages/handlers/src/tacho.events.ingest.ts",
+        "packages/handlers/src/workspace.settings.write.test.ts",
+        "packages/handlers/src/workspace.settings.write.ts",
+        "packages/inngest-functions/src/functions/security.audit-partition-rollover.test.ts",
+        "packages/inngest-functions/src/functions/security.audit-partition-rollover.ts",
+        "packages/oxagen/capabilities.manifest.json",
+        "packages/oxagen/src/contracts.generated.ts",
+        "packages/oxagen/src/contracts/context.record.publish.ts",
+        "packages/oxagen/src/contracts/index.ts",
+        "packages/oxagen/src/contracts/org.model_credential.shared.ts",
+        "packages/oxagen/src/contracts/org.model_credential.verify.test.ts",
+        "packages/oxagen/src/contracts/skill.search.preview.ts",
+        "packages/oxagen/src/contracts/skill.search.summarize.ts",
+        "packages/rules/src/evaluate.test.ts",
+        "packages/rules/src/evaluate.ts",
+        "packages/rules/src/gate.test.ts",
+        "packages/rules/src/index.ts",
+        "packages/run-ledger/src/assembly-write.test.ts",
+        "packages/run-ledger/src/assembly-write.ts",
+        "packages/run-ledger/src/event-payload-registry.test.ts",
+        "packages/run-ledger/src/event-payload-registry.ts",
+        "packages/run-ledger/src/run-frames.ts",
+        "packages/tacho/src/claude-code/recorder-rollback.test.ts",
+        "packages/tacho/src/claude-code/recorder-tool-call.test.ts",
+        "packages/tacho/src/claude-code/recorder.ts",
+        "packages/tacho/src/claude-code/tool-call-dedupe.ts",
+        "packages/tacho/src/cli/cli.test.ts",
+        "packages/tacho/src/cli/deps.test.ts",
+        "packages/tacho/src/cli/deps.ts",
+        "packages/tacho/src/cli/detect.test.ts",
+        "packages/tacho/src/cli/detect.ts",
+        "packages/tacho/src/cli/enroll.ts",
+        "packages/tacho/src/collector/collector-units.test.ts",
+        "packages/tacho/src/collector/daemon-git.test.ts",
+        "packages/tacho/src/collector/daemon.test.ts",
+        "packages/tacho/src/collector/daemon.ts",
+        "packages/tacho/src/collector/spool.ts",
+        "packages/tacho/src/host/host-primitives.test.ts",
+        "packages/tacho/src/host/paths.ts",
+        "packages/tacho/src/host/wal-index.test.ts",
+        "packages/tacho/src/host/wal-index.ts",
+        "packages/tacho/src/host/wal.test.ts",
+        "packages/tacho/src/host/wal.ts",
+        "packages/tacho/src/wire.test.ts",
+        "packages/tacho/src/wire.ts",
+        "packages/telemetry/src/clickhouse.test.ts",
+        "packages/telemetry/src/clickhouse.ts",
+        "packages/telemetry/src/cost-frames.test.ts",
+        "packages/telemetry/src/cost-frames.ts",
+        "packages/telemetry/src/migrate-ledger-repair.test.ts",
+        "packages/telemetry/src/migrate.ts",
+        "tools/scripts/env-check.ts"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3723",
+      "merged_at": "2026-09-22T06:43:03Z",
+      "number": 3723,
+      "refs": [
+        3293
+      ],
+      "repo": "oxagen",
+      "title": "fix: the top 25 defects, weighted to run recording, the gateway, and steering"
+    },
+    "oxagen#3725": {
+      "added": [
+        ".agent/memory/code-reviewer/reflections/2026-09-22-adr138-credential-seam-review.md",
+        ".agent/memory/test-engineer/reflections/2026-09-22-adr138-credential-seam-coverage.md",
+        "docs/adr/ADR-138-the-gateway-brokers-the-vendor-credential-a-wrapped-harness-holds-a-run-token.md",
+        "packages/tacho/src/cli/credential.ts",
+        "packages/tacho/src/collector/credential-issuer.test.ts",
+        "packages/tacho/src/collector/credential-issuer.ts",
+        "packages/tacho/src/collector/model-routes.test.ts",
+        "packages/tacho/src/host/credential-store.test.ts",
+        "packages/tacho/src/host/credential-store.ts",
+        "packages/tacho/src/host/model-credential.test.ts",
+        "packages/tacho/src/host/model-credential.ts",
+        "packages/tacho/src/host/run-token.test.ts",
+        "packages/tacho/src/host/run-token.ts"
+      ],
+      "author": "macanderson",
+      "closes": [],
+      "files": [
+        ".agent/memory/code-reviewer/reflections/2026-09-22-adr138-credential-seam-review.md",
+        ".agent/memory/shared/lessons.md",
+        ".agent/memory/test-engineer/lessons.md",
+        ".agent/memory/test-engineer/reflections/2026-09-22-adr138-credential-seam-coverage.md",
+        "apps/desktop/src/agents.test.ts",
+        "apps/desktop/src/agents.ts",
+        "apps/desktop/src/tacho-status.test.ts",
+        "apps/desktop/src/tacho-status.ts",
+        "docs/adr/ADR-138-the-gateway-brokers-the-vendor-credential-a-wrapped-harness-holds-a-run-token.md",
+        "docs/capabilities/schemas/fetch_commands.json",
+        "docs/capabilities/schemas/ingest_tacho_events.json",
+        "docs/specs/gateway/spec.md",
+        "packages/oxagen/src/contracts/tacho.command.fetch.test.ts",
+        "packages/oxagen/src/contracts/tacho.command.fetch.ts",
+        "packages/tacho/README.md",
+        "packages/tacho/src/cli/cli.test.ts",
+        "packages/tacho/src/cli/credential.ts",
+        "packages/tacho/src/cli/deps.ts",
+        "packages/tacho/src/cli/enroll.ts",
+        "packages/tacho/src/cli/index.ts",
+        "packages/tacho/src/cli/install-rig.ts",
+        "packages/tacho/src/cli/main.ts",
+        "packages/tacho/src/cli/status.ts",
+        "packages/tacho/src/cli/unenroll.ts",
+        "packages/tacho/src/collector/collector-units.test.ts",
+        "packages/tacho/src/collector/credential-issuer.test.ts",
+        "packages/tacho/src/collector/credential-issuer.ts",
+        "packages/tacho/src/collector/daemon.ts",
+        "packages/tacho/src/collector/model-proxy.test.ts",
+        "packages/tacho/src/collector/model-proxy.ts",
+        "packages/tacho/src/collector/model-routes.test.ts",
+        "packages/tacho/src/collector/model-routes.ts",
+        "packages/tacho/src/collector/server.ts",
+        "packages/tacho/src/host/credential-store.test.ts",
+        "packages/tacho/src/host/credential-store.ts",
+        "packages/tacho/src/host/index.ts",
+        "packages/tacho/src/host/model-credential.test.ts",
+        "packages/tacho/src/host/model-credential.ts",
+        "packages/tacho/src/host/paths.ts",
+        "packages/tacho/src/host/run-token.test.ts",
+        "packages/tacho/src/host/run-token.ts",
+        "packages/tacho/src/wire.ts"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3725",
+      "merged_at": "2026-09-22T08:25:37Z",
+      "number": 3725,
+      "refs": [
+        3299
+      ],
+      "repo": "oxagen",
+      "title": "tacho: the gateway brokers the vendor credential and the harness holds a run token (ADR-138)"
     },
     "stella#6527": {
       "added": [],
@@ -52007,8 +52593,8 @@
     }
   },
   "since": {
-    "oxagen": "2026-09-22T06:30:59Z",
-    "oxagen-roadmap": "2026-09-22T06:20:32Z",
-    "stella": "2026-09-22T06:33:16.871Z"
+    "oxagen": "2026-09-22T08:52:36Z",
+    "oxagen-roadmap": "2026-09-22T08:55:06Z",
+    "stella": "2026-09-22T10:19:35.597Z"
   }
 }
