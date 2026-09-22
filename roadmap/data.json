@@ -145,7 +145,7 @@
     },
     {
       "id": "agents",
-      "title": "Agent IAM",
+      "title": "Agents",
       "area": "workspace",
       "route": "#/a-intel/core-platform/agents",
       "spec_path": "mockups/pages/agents.md",
@@ -157,8 +157,10 @@
         "apps/app/src/data/live/agents.ts",
         "packages/database/atlas/migrations/20260915013000_agent_identity_and_definition_of_record.sql"
       ],
-      "gap_summary": "The identities list is live over the agent identity and definition-of-record tables (ADR-057) with incidents. Trust/spend scores and percentiles were cut (#2969). The list lacks the mockup's score distribution and the New agent wizard entry.",
+      "gap_summary": "The identities list is live over the agent identity and definition-of-record tables (ADR-057) with incidents. Trust/spend scores and percentiles were cut (#2969). The list lacks the mockup's score distribution and the New agent wizard entry. The mockup renamed the nav item and the page to Agents and dropped the tier-ladder panel when the agent ontology landed in #63 (docs/agent-ontology-ia.md); the build still says Agent IAM. The registry carries two column sets there, Composition and the rev1 Operations set, and the build has neither control nor the composition columns.",
       "gaps": [
+        "Nav and page still read Agent IAM; the registry is the agent registry",
+        "No Composition column set (Agent, Purpose, Owner, Steering, Toolbelt, Runtime, Principal, Health, Activity) and no control to choose it",
         "No 'New agent' wizard entry (creation-spec); only Register exists",
         "No score distribution rollup (cut, G11)"
       ],
@@ -186,10 +188,13 @@
         "apps/app/src/features/agents/enrollment.tsx",
         "apps/app/src/features/agents/actions.ts"
       ],
-      "gap_summary": "Detail has identity, toolbelt, enrollment, incidents, mandates (with Request a mandate) and definition sections, and writes retire_agent and rotate_agent_credential. The budgets and runs tabs are missing, and a mandate row has no detail page to open.",
+      "gap_summary": "Detail has identity, toolbelt, enrollment, incidents, mandates (with Request a mandate) and definition sections, and writes retire_agent and rotate_agent_credential. The mockup recut the tabs when the agent ontology landed in #63 (docs/agent-ontology-ia.md): Overview, Identity, Steering, Toolbelt, Runtime, Permissions, Activity and Definition in git, with Overview and Steering new, Permissions absorbing roles, mandates and budgets, Activity absorbing runs, incidents and token accounting, and Runtime absorbing enrollment and tier delivery read from the runtime record. Every rev1 tab id still resolves. The build has none of the recut: budgets and runs are still missing outright, and a mandate row has no detail page to open.",
       "gaps": [
-        "Budgets tab (billing.budget.set / workspace budget policy) not on the page",
-        "Runs tab (list_runs filtered by agent) not on the page",
+        "Overview tab: the composition card (principal, steering, toolbelt, runtime, owner, permissions) not on the page",
+        "Steering tab: what reaches this agent, at what precedence and token cost, not on the page",
+        "Runtime tab: enrollment and tier delivery are two sections, not one tab read from the runtime record",
+        "Permissions tab: roles, budgets and mandates are not one tab",
+        "Activity tab: runs and token accounting not on the page",
         "Mandate rows do not open a mandate detail page (route owed by #2957)",
         "Trust/spend scores cut (#2969)"
       ],
@@ -276,8 +281,10 @@
         "packages/database/atlas/migrations/20260915210000_tools_classification_grants_kill_switches.sql",
         "packages/oxagen/src/contracts/approval_rule.set.ts"
       ],
-      "gap_summary": "Registry, Connections (credential grants log), Kill switches and Mandates ledger tabs are live, with import_tools, set_tool_classification and set_kill_switch writes. The Auto-approvals tab is missing even though the rule store and contracts landed (ADR-070), and policy versions and observed-schema proposals have no store.",
+      "gap_summary": "Registry, Connections (credential grants log), Kill switches and Mandates ledger tabs are live, with import_tools, set_tool_classification and set_kill_switch writes. The Auto-approvals tab is missing even though the rule store and contracts landed (ADR-070), and policy versions and observed-schema proposals have no store. The mockup added a Toolbelts tab and renamed MCP servers to Providers when the agent ontology landed in #63 (docs/agent-ontology-ia.md): a toolbelt is the reusable set of tool versions assigned to agents and the only edge from the registry to an agent, and a provider row carries the system it is with transport as a column rather than its name. Neither exists in the build, and no capability lists toolbelts.",
       "gaps": [
+        "Toolbelts tab: no reusable belt object, and no capability lists or assigns one",
+        "Providers tab: the tab is still MCP servers, and a provider row cannot hold an http, sdk or native integration",
         "Auto-approvals tab (approval_rule.list/set/delete/enabled.set exist; #2970 app half)",
         "Policy tab: Cedar policy versions with tests (G2)",
         "Observed-schema proposals banner and approve dialog",
@@ -288,7 +295,9 @@
         "G1 mandates (built)",
         "G2 policy versions with tests",
         "G12 auto-approval store (built as ADR-070)",
-        "observed-schema proposals"
+        "observed-schema proposals",
+        "toolbelt store: a named set of tool versions, assigned to agents",
+        "provider record: the system, its transport and its wire, beside the endpoint"
       ],
       "plan_lane": "P4",
       "priority": "P1",
@@ -316,8 +325,12 @@
         "docs/adr/ADR-097-steering-and-gating-are-two-planes-authored-on-one-surface-and-compiled-twice.md",
         "packages/database/atlas/migrations/20260915060000_steering_proposals_and_context_pr.sql"
       ],
-      "gap_summary": "Records, proposals and Context PRs tabs are live with open_context_pr, merge_context_pr and dismiss_proposal (ADR-061). Phase 0 merged on 2026-09-18 (#3289, ADR-091): the bundle's context.system now compiles every active must and should record, the etag moves when a record merges, and a wrapped Claude Code run receives it through the SessionStart hook. Issue #2592 stays open until a merged record is seen in a production run, and #3302 means a record published through publish_context_record (no kind or force) never reaches an agent. The six-phase plan is decided (#3294: ADR-093 one assembler, ADR-097 two planes). Phase 1 (one SteeringItem, assembleSteering, the steering.manifest frame, #3296) and Phase 2 (this page becomes the hub with seven tabs, #3297) are not started.",
+      "gap_summary": "Records, proposals and Context PRs tabs are live with open_context_pr, merge_context_pr and dismiss_proposal (ADR-061). Phase 0 merged on 2026-09-18 (#3289, ADR-091): the bundle's context.system now compiles every active must and should record, the etag moves when a record merges, and a wrapped Claude Code run receives it through the SessionStart hook. Issue #2592 stays open until a merged record is seen in a production run, and #3302 means a record published through publish_context_record (no kind or force) never reaches an agent. The six-phase plan is decided (#3294: ADR-093 one assembler, ADR-097 two planes). Phase 1 (one SteeringItem, assembleSteering, the steering.manifest frame, #3296) and Phase 2 (this page becomes the hub with seven tabs, #3297) are not started. Phase 2's shape is now decided in the mockup (the agent ontology landed in #63 (docs/agent-ontology-ia.md)): five tabs, not seven. Library holds Records, Skills, Memory and Ontology as shelves of one list, Assignments is new and says which agent receives what, Policy is renamed Gates because Tools has its own Policy tab, and Preview is renamed Compiler. Every rev1 route still resolves. The build has Records, Proposals and Context PRs and none of the five-tab shape.",
       "gaps": [
+        "Library tab: one list with Records, Skills, Memory and Ontology as shelves, and one count both read",
+        "Assignments tab: which agents receive which artifacts, and by what scope",
+        "Gates tab: the gate plane, renamed from Policy",
+        "Compiler tab: one assembly in full, renamed from Preview",
         "Records published through publish_context_record carry no kind or force, so the Phase 0 filter never selects them (#3302)",
         "Bundle permissions, tools and budget: permissions and tools still empty; session_limit_usd is now enforced only at the loopback proxy (#3319)",
         "Write a context record wizard (creation-spec §5)",
@@ -369,6 +382,30 @@
           "number": 3312
         }
       ]
+    },
+    {
+      "id": "runtimes",
+      "title": "Runtimes",
+      "area": "workspace",
+      "route": "#/a-intel/core-platform/runtimes",
+      "spec_path": "mockups/pages/runtimes.md",
+      "scope_verdict": "new",
+      "built_status": "not-started",
+      "built_evidence": [],
+      "gap_summary": "New page in the mockup, from the agent ontology landed in #63 (docs/agent-ontology-ia.md). A runtime is the host an agent runs on, and it is shared: several agents run on one host through one set of hooks, and the tier is a property of that seam rather than of the agent. Today the only way to read one is to open an agent and look at its Enrollment tab, so nothing in the product answers what is on this machine or which agents lose their hooks if this collector stops. The page lists every enrolled host with its harness, model surface, tier, agents, collector, hooks, health and last checkpoint, and the drill-down is the agent's Runtime panel read from the host. It enrols nothing: enrollment is an installer, run on the host itself.",
+      "gaps": [
+        "No page and no route: #/:org/:ws/runtimes does not exist in the build",
+        "No capability lists enrolled hosts; host facts are readable only per agent",
+        "No host drill-down with the agents on it",
+        "The tier ladder is on the agent page only, though the tier is earned by the host"
+      ],
+      "backend_gaps": [
+        "runtime registry: one row per enrolled host, with its collector, hooks and last checkpoint",
+        "agents-by-host read: the inverse of the agent's host field"
+      ],
+      "plan_lane": "P3",
+      "priority": "P2",
+      "issue_links": []
     },
     {
       "id": "repositories",
@@ -1846,6 +1883,45 @@
       "status": "decided",
       "decided_on": "2026-09-18",
       "decided": "Oxagen becomes a control plane: a gateway that runs every agent inside a sandbox Oxagen controls. This builds on D24 (sandbox as the top tier) and D23 (the gateway lives in tachod). It is now the main product. Mission Control ships full functionality for every wireframe except the DoD (M3) and the witness protocol (M4), which already sit deprioritized under D15 and D19. Positioning must not read as sandbox infrastructure, the way Modal or E2B are read."
+    },
+    {
+      "id": "D29",
+      "title": "The Agents table's two column sets",
+      "question": "Does the Agents registry take the Composition column set (Agent, Purpose, Owner, Steering, Toolbelt, Runtime, Principal, Health, Activity) beside the rev1 Operations set, chosen from the panel header?",
+      "recommendation": "Taken in the mockup. The build has neither set nor the control, so it is open against the app.",
+      "source": "docs/agent-ontology-ia.md; the mockup shipped in #63",
+      "blocks": [
+        "agents"
+      ],
+      "status": "open",
+      "decided_on": null,
+      "decided": null
+    },
+    {
+      "id": "D30",
+      "title": "Transport on a provider row",
+      "question": "Does a provider row carry the system it is (GitHub, Stripe) with transport as a column, replacing the Kind column that names the protocol?",
+      "recommendation": "Decided: taken. A provider is the system the tools belong to, and MCP is one transport among eight.",
+      "source": "docs/agent-ontology-ia.md; the mockup shipped in #63",
+      "blocks": [
+        "tools"
+      ],
+      "status": "decided",
+      "decided_on": "2026-09-22",
+      "decided": "Taken in the mockup: servers.json gained system, desc, transport and wire, and the Providers table reads them. The build still shows an MCP servers tab, which is the gap on the Tools surface."
+    },
+    {
+      "id": "D31",
+      "title": "The vocabulary sweep beyond the nav",
+      "question": "Do principal, tool, permission and assignment replace service account, capability, entitlement and binding in body copy across every surface, or only where the nav already changed?",
+      "recommendation": "Sweep it in one pass with its own review, not surface by surface: a half-swept vocabulary reads as two products.",
+      "source": "docs/agent-ontology-ia.md 'Words'",
+      "blocks": [
+        "scope"
+      ],
+      "status": "open",
+      "decided_on": null,
+      "decided": null
     }
   ],
   "feedback": [
@@ -2022,7 +2098,7 @@
       },
       {
         "id": "agents",
-        "title": "Agent IAM",
+        "title": "Agents",
         "group": "Workspace",
         "hash": "#/a-intel/core-platform/agents",
         "states": [
@@ -2041,6 +2117,66 @@
         "states": [
           "loaded",
           "empty",
+          "loading",
+          "error",
+          "denied"
+        ]
+      },
+      {
+        "id": "agent-toolbelt",
+        "title": "Agent · Toolbelt",
+        "group": "Workspace",
+        "hash": "#/a-intel/core-platform/agents/triage/toolbelt",
+        "states": [
+          "loaded",
+          "loading",
+          "error",
+          "denied"
+        ]
+      },
+      {
+        "id": "agent-steering",
+        "title": "Agent · Steering",
+        "group": "Workspace",
+        "hash": "#/a-intel/core-platform/agents/triage/steering",
+        "states": [
+          "loaded",
+          "loading",
+          "error",
+          "denied"
+        ]
+      },
+      {
+        "id": "agent-runtime",
+        "title": "Agent · Runtime",
+        "group": "Workspace",
+        "hash": "#/a-intel/core-platform/agents/triage/runtime",
+        "states": [
+          "loaded",
+          "loading",
+          "error",
+          "denied"
+        ]
+      },
+      {
+        "id": "agent-permissions",
+        "title": "Agent · Permissions",
+        "group": "Workspace",
+        "hash": "#/a-intel/core-platform/agents/triage/permissions",
+        "states": [
+          "loaded",
+          "loading",
+          "error",
+          "denied"
+        ]
+      },
+      {
+        "id": "agent-activity",
+        "title": "Agent · Activity",
+        "group": "Workspace",
+        "hash": "#/a-intel/core-platform/agents/triage/activity",
+        "states": [
+          "loaded",
           "loading",
           "error",
           "denied"
@@ -2085,13 +2221,155 @@
         ]
       },
       {
-        "id": "steering",
-        "title": "Steering",
+        "id": "toolbelts",
+        "title": "Tools · Toolbelts",
         "group": "Workspace",
-        "hash": "#/a-intel/core-platform/steering",
+        "hash": "#/a-intel/core-platform/tools/toolbelts",
         "states": [
           "loaded",
           "empty",
+          "loading",
+          "error",
+          "denied"
+        ]
+      },
+      {
+        "id": "providers",
+        "title": "Tools · Providers",
+        "group": "Workspace",
+        "hash": "#/a-intel/core-platform/tools/providers",
+        "states": [
+          "loaded",
+          "empty",
+          "loading",
+          "error",
+          "denied"
+        ]
+      },
+      {
+        "id": "steering",
+        "title": "Steering · Library",
+        "group": "Workspace",
+        "hash": "#/a-intel/core-platform/steering/library",
+        "states": [
+          "loaded",
+          "empty",
+          "loading",
+          "error",
+          "denied"
+        ]
+      },
+      {
+        "id": "steering-records",
+        "title": "Steering · Library · Records",
+        "group": "Workspace",
+        "hash": "#/a-intel/core-platform/steering/records",
+        "states": [
+          "loaded",
+          "empty",
+          "loading",
+          "error",
+          "denied"
+        ]
+      },
+      {
+        "id": "steering-memory",
+        "title": "Steering · Library · Memory",
+        "group": "Workspace",
+        "hash": "#/a-intel/core-platform/steering/memory",
+        "states": [
+          "loaded",
+          "empty",
+          "loading",
+          "error",
+          "denied"
+        ]
+      },
+      {
+        "id": "steering-ontology",
+        "title": "Steering · Library · Ontology",
+        "group": "Workspace",
+        "hash": "#/a-intel/core-platform/steering/ontology",
+        "states": [
+          "loaded",
+          "empty",
+          "loading",
+          "error",
+          "denied"
+        ]
+      },
+      {
+        "id": "steering-assignments",
+        "title": "Steering · Assignments",
+        "group": "Workspace",
+        "hash": "#/a-intel/core-platform/steering/assignments",
+        "states": [
+          "loaded",
+          "empty",
+          "loading",
+          "error",
+          "denied"
+        ]
+      },
+      {
+        "id": "steering-gates",
+        "title": "Steering · Gates",
+        "group": "Workspace",
+        "hash": "#/a-intel/core-platform/steering/gates",
+        "states": [
+          "loaded",
+          "empty",
+          "loading",
+          "error",
+          "denied"
+        ]
+      },
+      {
+        "id": "steering-proposals",
+        "title": "Steering · Proposals",
+        "group": "Workspace",
+        "hash": "#/a-intel/core-platform/steering/proposals",
+        "states": [
+          "loaded",
+          "empty",
+          "loading",
+          "error",
+          "denied"
+        ]
+      },
+      {
+        "id": "steering-compiler",
+        "title": "Steering · Compiler",
+        "group": "Workspace",
+        "hash": "#/a-intel/core-platform/steering/compiler/release-manager",
+        "states": [
+          "loaded",
+          "empty",
+          "loading",
+          "error",
+          "denied"
+        ]
+      },
+      {
+        "id": "runtimes",
+        "title": "Runtimes",
+        "group": "Workspace",
+        "hash": "#/a-intel/core-platform/runtimes",
+        "states": [
+          "loaded",
+          "empty",
+          "loading",
+          "error",
+          "denied"
+        ]
+      },
+      {
+        "id": "runtime",
+        "title": "Runtime",
+        "group": "Workspace",
+        "hash": "#/a-intel/core-platform/runtimes/mbell-mbp-16",
+        "states": [
+          "loaded",
           "loading",
           "error",
           "denied"
@@ -2137,9 +2415,9 @@
       },
       {
         "id": "skills",
-        "title": "Skills",
+        "title": "Steering · Library · Skills",
         "group": "Workspace",
-        "hash": "#/a-intel/core-platform/skills",
+        "hash": "#/a-intel/core-platform/steering/skills",
         "states": [
           "loaded",
           "empty",
@@ -2150,9 +2428,9 @@
       },
       {
         "id": "skills-off",
-        "title": "Skills · off (the default)",
+        "title": "Steering · Library · Skills · off (the default)",
         "group": "Workspace",
-        "hash": "#/a-intel/finops/skills",
+        "hash": "#/a-intel/finops/steering/skills",
         "states": [
           "loaded"
         ]
@@ -2161,7 +2439,7 @@
         "id": "skill-source",
         "title": "Skill source",
         "group": "Workspace",
-        "hash": "#/a-intel/core-platform/skills/a-intel.release-notes-from-prs/source",
+        "hash": "#/a-intel/core-platform/steering/skills/a-intel.release-notes-from-prs/source",
         "states": [
           "loaded",
           "loading",
@@ -2401,7 +2679,8 @@
         "group": "Onboarding",
         "hash": "#/welcome/installer",
         "states": [
-          "loaded"
+          "loaded",
+          "error"
         ]
       }
     ],
@@ -2429,12 +2708,6 @@
         "id": "flight-recorder",
         "ws": "core-platform",
         "title": "Oxagen Flight Recorder"
-      },
-      {
-        "n": 5,
-        "id": "proven-not-claimed",
-        "ws": "core-platform",
-        "title": "Proven, Not Claimed"
       },
       {
         "n": 6,
@@ -2471,12 +2744,6 @@
         "id": "in-the-loop",
         "ws": "core-platform",
         "title": "In the Loop"
-      },
-      {
-        "n": 14,
-        "id": "done-means-done",
-        "ws": "core-platform",
-        "title": "Done Means Done"
       }
     ]
   },

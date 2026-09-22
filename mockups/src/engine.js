@@ -7536,6 +7536,11 @@ function runManifestPanel(R){
    'The stable prefix went in at SessionStart, the volatile selection at UserPromptSubmit. A recorded frame never changes: a record merged after this run started is not in it.</p></section>';
 }
 
+/* One word per scope. The bundle and the workspace instructions say `org`; the record generator
+   says `organization`. Both reach the library, so the word is normalised where it is read. */
+var STG_SCOPE_ALIAS={organization:"org"};
+function stgScope(it){var s=(it&&it.scope)||"workspace";return STG_SCOPE_ALIAS[s]||s;}
+
 /* ---- Library: every shelf at once ----
    One table over stgLibraryItems(), the list every count on the tab reads. A shelf filters this
    list; it never holds a different one. Order is the assembler's: a record, an instruction, a
@@ -7550,7 +7555,7 @@ function stgLibraryAll(w,only){
     return '<tr><td style="max-width:54ch"><b style="font-weight:500">'+h(it.body||"")+'</b>'+
       '<span class="sub">'+stgItemLink(it)+'</span></td>'+
      '<td>'+stgKindChip(it)+'</td><td>'+forceBadge(it.force)+'</td>'+
-     '<td>'+h(it.scope||"workspace")+(it.repo?'<span class="sub mono">'+h(it.repo)+'</span>':'')+
+     '<td>'+h(stgScope(it))+(it.repo?'<span class="sub mono">'+h(it.repo)+'</span>':'')+
       (it.agent?'<span class="sub mono">'+h(it.agent)+'</span>':'')+'</td>'+
      '<td>'+compileChip(it.grant)+'</td>'+
      '<td class="num">'+tokn(it.tok||0)+' tok</td>'+
@@ -7590,9 +7595,10 @@ function stgAssignTab(w){
      '<td class="num">'+tokn(M.tok.total)+' tok</td>'+
      '<td><button class="btn sm" onclick="pvAgent(\''+h(x.slug)+'\')">Open the compiler</button></td></tr>';}).join("");
   /* The inverse view: what decides reach. Scope is the only assignment mechanism, so it is
-     spelled out rather than left to be inferred from the table above. */
-  var items=stgItems(w.slug), sc={};
-  items.forEach(function(it){var k=it.scope||"workspace"; sc[k]=(sc[k]||0)+1;});
+     spelled out rather than left to be inferred from the table above. It counts the library, not
+     the assembler's selection, so this panel and the Library tab report one number. */
+  var items=stgLibraryItems(w.slug), sc={};
+  items.forEach(function(it){var k=stgScope(it); sc[k]=(sc[k]||0)+1;});
   var SC=[["org","Every workspace in the organization."],
           ["workspace","Every agent in this workspace."],
           ["repository","Only an agent whose run works in that repository."],
