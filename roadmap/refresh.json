@@ -135,7 +135,9 @@
     "docs/adr/ADR-132-the-mockup-css-is-the-design-of-record.md",
     "docs/adr/ADR-133-the-governance-mode-in-force-decides-how-it-changes.md",
     "docs/adr/ADR-134-durable-ai-usage-settlement.md",
-    "docs/adr/ADR-135-rev1-console-scope-and-cutover-evidence.md"
+    "docs/adr/ADR-135-rev1-console-scope-and-cutover-evidence.md",
+    "docs/adr/ADR-136-immutable-configuration-clone-and-retire.md",
+    "docs/adr/ADR-137-standing-decisions-are-workspace-context-records.md"
   ],
   "adrs": {
     "ADR-001": {
@@ -1193,6 +1195,22 @@
       "path": "docs/adr/ADR-135-rev1-console-scope-and-cutover-evidence.md",
       "status": null,
       "title": "Rev1 console scope and cutover evidence"
+    },
+    "ADR-136": {
+      "date": "2026-09-20",
+      "decision": "A registered configuration keeps its slug for its lifetime. Organi",
+      "id": "ADR-136",
+      "path": "docs/adr/ADR-136-immutable-configuration-clone-and-retire.md",
+      "status": "accepted",
+      "title": "Clone and retire immutable configuration identities"
+    },
+    "ADR-137": {
+      "date": null,
+      "decision": "The six standing decisions are context records in `context-record/v0.1` TOML, one file per lineage, under `.oxagen/rules/` in the oxagen repository only:",
+      "id": "ADR-137",
+      "path": "docs/adr/ADR-137-standing-decisions-are-workspace-context-records.md",
+      "status": null,
+      "title": "Standing decisions are workspace context records, stored once"
     }
   },
   "baseline": "2026-09-18T20:52:30Z",
@@ -1732,6 +1750,32 @@
       "status": "decided",
       "title": "Rev1 console scope and cutover evidence"
     },
+    "ADR-136": {
+      "blocks": [],
+      "decided": "ADR-136: Clone and retire immutable configuration identities. A registered configuration keeps its slug for its lifetime. Organi",
+      "decided_on": "2026-09-21",
+      "id": "ADR-136",
+      "origin": "adr",
+      "pr": 3645,
+      "question": "Decided in the repository: Clone and retire immutable configuration identities.",
+      "recommendation": null,
+      "source": "docs/adr/ADR-136-immutable-configuration-clone-and-retire.md",
+      "status": "decided",
+      "title": "Clone and retire immutable configuration identities"
+    },
+    "ADR-137": {
+      "blocks": [],
+      "decided": "ADR-137: Standing decisions are workspace context records, stored once. The six standing decisions are context records in `context-record/v0.1` TOML, one file per lineage, under `.oxagen/rules/` in the oxagen repository only:",
+      "decided_on": "2026-09-22",
+      "id": "ADR-137",
+      "origin": "adr",
+      "pr": 3704,
+      "question": "Decided in the repository: Standing decisions are workspace context records, stored once.",
+      "recommendation": null,
+      "source": "docs/adr/ADR-137-standing-decisions-are-workspace-context-records.md",
+      "status": "decided",
+      "title": "Standing decisions are workspace context records, stored once"
+    },
     "I-oxagen#2961": {
       "blocks": [],
       "decided": null,
@@ -2201,9 +2245,9 @@
       "title": "P0 · app+ops/CI · Two files from an already-merged PR export test-only helpers and fail every PR's required checks job"
     }
   },
-  "generated_at": "2026-09-21T22:12:53.518Z",
+  "generated_at": "2026-09-22T00:50:05.433Z",
   "heads": {
-    "oxagen": "ed6dca32fd89b3d589693fe71dff4aaf073e7ca2"
+    "oxagen": "fccdca099f5d9c14b52fd5ba4e049b523b8aab0c"
   },
   "issues": {
     "oxagen#1": {
@@ -16960,7 +17004,7 @@
     },
     "oxagen#3645": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-21T23:43:24Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": true,
@@ -16970,7 +17014,7 @@
       "labels": [
         "closes-nothing"
       ],
-      "merged_at": null,
+      "merged_at": "2026-09-21T23:43:24Z",
       "milestone": null,
       "needs_decision": false,
       "number": 3645,
@@ -16982,13 +17026,14 @@
       ],
       "repo": "oxagen",
       "spec_refs": [
+        "ADR-136",
         "ADR-133",
         "ADR-091",
-        "ADR-136"
+        "ADR-128"
       ],
-      "state": "open",
+      "state": "closed",
       "title": "Clone immutable configurations and retain retirement validity",
-      "updated_at": "2026-09-21T21:39:11Z"
+      "updated_at": "2026-09-21T23:43:27Z"
     },
     "oxagen#3646": {
       "author": "macanderson",
@@ -17536,7 +17581,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "P2 · evidence/Tacho · File rollup drops identity for rows written before this deploy (residue #3650)",
-      "updated_at": "2026-09-21T08:14:28Z"
+      "updated_at": "2026-09-22T00:32:40Z"
     },
     "oxagen#3665": {
       "author": "macanderson",
@@ -18537,22 +18582,358 @@
       "has_spec_backing": false,
       "html_url": "https://github.com/macanderson/oxagen/issues/3698",
       "is_pr": false,
-      "kind": null,
+      "kind": "defect",
       "labels": [
-        "triage"
+        "P1",
+        "agent-escalated",
+        "kind:defect",
+        "area:data",
+        "job:meter",
+        "pillar:stability",
+        "size/S"
       ],
       "merged_at": null,
       "milestone": null,
       "needs_decision": false,
       "number": 3698,
+      "pillar": "stability",
+      "priority": "P1",
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "P1 · ops/Platform · captureError() never lands a row in production's error_events table",
+      "updated_at": "2026-09-22T00:14:25Z"
+    },
+    "oxagen#3699": {
+      "author": "macanderson",
+      "closed_at": "2026-09-22T00:09:44Z",
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3699",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": "2026-09-22T00:09:44Z",
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3699,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        3653
+      ],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-038"
+      ],
+      "state": "closed",
+      "title": "Block a deploy whose migration has not reached production",
+      "updated_at": "2026-09-22T00:09:46Z"
+    },
+    "oxagen#3700": {
+      "author": "macanderson",
+      "closed_at": "2026-09-21T23:39:33Z",
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3700",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "no-issue",
+        "closes-nothing"
+      ],
+      "merged_at": "2026-09-21T23:39:33Z",
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3700,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "Feat/oxagen founders story",
+      "updated_at": "2026-09-21T23:41:59Z"
+    },
+    "oxagen#3701": {
+      "author": "macanderson",
+      "closed_at": "2026-09-22T00:10:18Z",
+      "closes": [
+        3698,
+        1,
+        2
+      ],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3701",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "no-issue",
+        "closes-nothing"
+      ],
+      "merged_at": "2026-09-22T00:10:18Z",
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3701,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "fix: verify the error_events write path and the tables migrations create (#3698)",
+      "updated_at": "2026-09-22T00:10:33Z"
+    },
+    "oxagen#3702": {
+      "author": "github-actions[bot]",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/issues/3702",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "P1",
+        "store-drift",
+        "area:knowledge",
+        "area:ops",
+        "job:govern",
+        "job:ground",
+        "job:rate"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3702,
+      "pillar": null,
+      "priority": "P1",
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-137"
+      ],
+      "state": "open",
+      "title": "P1 · Ops · SCR corpus has drifted between the org repos",
+      "updated_at": "2026-09-22T00:30:27Z"
+    },
+    "oxagen#3703": {
+      "author": "cursor[bot]",
+      "closed_at": "2026-09-22T00:30:41Z",
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3703",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "no-issue",
+        "closes-nothing"
+      ],
+      "merged_at": "2026-09-22T00:30:41Z",
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3703,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "Give each migration gate its own Atlas tarball",
+      "updated_at": "2026-09-22T00:44:25Z"
+    },
+    "oxagen#3704": {
+      "author": "macanderson",
+      "closed_at": "2026-09-22T00:30:06Z",
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3704",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": "2026-09-22T00:30:06Z",
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3704,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        3702
+      ],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-137",
+        "ADR-038"
+      ],
+      "state": "closed",
+      "title": "Standing decisions are context records in .oxagen/rules",
+      "updated_at": "2026-09-22T00:30:10Z"
+    },
+    "oxagen#3705": {
+      "author": "macanderson",
+      "closed_at": "2026-09-22T00:37:37Z",
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3705",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "no-issue",
+        "closes-nothing"
+      ],
+      "merged_at": "2026-09-22T00:37:37Z",
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3705,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "fix(fleet): show the enforcement tier on every run row",
+      "updated_at": "2026-09-22T00:37:38Z"
+    },
+    "oxagen#3706": {
+      "author": "macanderson",
+      "closed_at": "2026-09-22T00:32:03Z",
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3706",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "no-issue",
+        "closes-nothing"
+      ],
+      "merged_at": "2026-09-22T00:32:03Z",
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3706,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "docs(audit): model gateway wired-vs-armed audit",
+      "updated_at": "2026-09-22T00:32:26Z"
+    },
+    "oxagen#3707": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [
+        3664
+      ],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3707",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3707,
       "pillar": null,
       "priority": null,
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [],
       "state": "open",
-      "title": "Queued · ops/Platform · captureError() never lands a row in production's error_events table",
-      "updated_at": "2026-09-21T21:38:03Z"
+      "title": "fix: enrich a relative file row when a later observation arrives",
+      "updated_at": "2026-09-22T00:48:53Z"
+    },
+    "oxagen#3708": {
+      "author": "macanderson",
+      "closed_at": "2026-09-22T00:41:23Z",
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3708",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "no-issue",
+        "closes-nothing"
+      ],
+      "merged_at": "2026-09-22T00:41:23Z",
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3708,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-072",
+        "ADR-024"
+      ],
+      "state": "closed",
+      "title": "feat(agents): kill switch from the agent page",
+      "updated_at": "2026-09-22T00:42:26Z"
+    },
+    "oxagen#3709": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3709",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "no-issue",
+        "closes-nothing"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3709,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "docs(mission-control): re-verify Fleet, Run, Approvals and Agents rows in GAP-INVENTORY",
+      "updated_at": "2026-09-22T00:42:32Z"
+    },
+    "oxagen#3710": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3710",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3710,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        3299
+      ],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-067",
+        "docs/specs/tacho/spec.md"
+      ],
+      "state": "open",
+      "title": "feat(tacho): compile an agent's mandate into the steering bundle's permissions and budget",
+      "updated_at": "2026-09-22T00:47:27Z"
     },
     "oxagen#4": {
       "author": "macanderson",
@@ -19540,6 +19921,52 @@
       "state": "closed",
       "title": "Feat/mission control mockup v3",
       "updated_at": "2026-09-21T21:36:00Z"
+    },
+    "roadmap#61": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen-roadmap/pull/61",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 61,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "roadmap",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Feat/mission control mockup v3",
+      "updated_at": "2026-09-22T00:22:44Z"
+    },
+    "roadmap#62": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen-roadmap/pull/62",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 62,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "roadmap",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Agents, Tools, and Steering on one ontology",
+      "updated_at": "2026-09-22T00:47:37Z"
     },
     "stella#1044": {
       "author": "macanderson",
@@ -34677,7 +35104,7 @@
     },
     "stella#6545": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-21T23:41:55Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": false,
@@ -34687,7 +35114,7 @@
       "labels": [
         "closes-nothing"
       ],
-      "merged_at": null,
+      "merged_at": "2026-09-21T23:41:55Z",
       "milestone": null,
       "needs_decision": false,
       "number": 6545,
@@ -34698,9 +35125,187 @@
       ],
       "repo": "stella",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "feat(forge): sign every forge body in Rust, and redirect the gh verbs it covers",
-      "updated_at": "2026-09-21T21:21:00Z"
+      "updated_at": "2026-09-21T23:44:32Z"
+    },
+    "stella#6546": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/stella/issues/6546",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 6546,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "stella",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Commit attribution is asked for in the prompt, not appended in Rust",
+      "updated_at": "2026-09-21T23:20:34Z"
+    },
+    "stella#6547": {
+      "author": "macanderson",
+      "closed_at": "2026-09-21T23:42:29Z",
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/stella/pull/6547",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "no-issue",
+        "closes-nothing"
+      ],
+      "merged_at": "2026-09-21T23:42:29Z",
+      "milestone": null,
+      "needs_decision": false,
+      "number": 6547,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "stella",
+      "spec_refs": [
+        "ADR-038"
+      ],
+      "state": "closed",
+      "title": "Add SCR-006: a schema change is labelled and migrated before its deploy",
+      "updated_at": "2026-09-21T23:47:05Z"
+    },
+    "stella#6548": {
+      "author": "github-actions[bot]",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/stella/issues/6548",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "main-red"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 6548,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "stella",
+      "spec_refs": [],
+      "state": "open",
+      "title": "main is red: prose fails on the merged tree",
+      "updated_at": "2026-09-21T23:47:00Z"
+    },
+    "stella#6549": {
+      "author": "github-actions[bot]",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/stella/pull/6549",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "no-issue"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 6549,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "stella",
+      "spec_refs": [],
+      "state": "open",
+      "title": "chore(release): sync versions to 0.9.434 [skip release]",
+      "updated_at": "2026-09-22T00:06:17Z"
+    },
+    "stella#6550": {
+      "author": "cursor[bot]",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/stella/pull/6550",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "closes-nothing"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 6550,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "stella",
+      "spec_refs": [],
+      "state": "open",
+      "title": "fix(docs): register SCR-006 in the document manifest",
+      "updated_at": "2026-09-21T23:59:48Z"
+    },
+    "stella#6551": {
+      "author": "cursor[bot]",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/stella/pull/6551",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 6551,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        6545
+      ],
+      "repo": "stella",
+      "spec_refs": [],
+      "state": "open",
+      "title": "fix(stella-tools): name real forge inputs in gh redirects",
+      "updated_at": "2026-09-22T00:24:46Z"
+    },
+    "stella#6552": {
+      "author": "cursor[bot]",
+      "closed_at": null,
+      "closes": [
+        6548
+      ],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/stella/pull/6552",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 6552,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "stella",
+      "spec_refs": [],
+      "state": "open",
+      "title": "fix(docs): rewrite SCR-006 so the prose gate accepts it",
+      "updated_at": "2026-09-22T00:05:11Z"
     },
     "stella#834": {
       "author": "macanderson",
@@ -35283,9 +35888,19 @@
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "dod",
-      "last_merge": "2026-09-21T21:41:25Z",
+      "last_merge": "2026-09-22T00:37:37Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-22T00:37:37Z",
+          "number": 3705,
+          "repo": "oxagen",
+          "title": "fix(fleet): show the enforcement tier on every run row",
+          "touched": [
+            "apps/app/src/features/fleet/runs-table.tsx"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-21T21:41:25Z",
@@ -35348,7 +35963,7 @@
         }
       ],
       "open_issues": 0,
-      "refreshed_at": "2026-09-21T22:12:53.518Z",
+      "refreshed_at": "2026-09-22T00:50:05.433Z",
       "shared_page": false
     },
     "D8": {
@@ -35979,9 +36594,30 @@
         }
       ],
       "kind": "surface",
-      "last_merge": "2026-09-20T23:56:42Z",
+      "last_merge": "2026-09-22T00:41:23Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-22T00:41:23Z",
+          "number": 3708,
+          "repo": "oxagen",
+          "title": "feat(agents): kill switch from the agent page",
+          "touched": [
+            "apps/app/src/features/agents/agent.tsx",
+            "apps/app/src/features/agents/actions.ts"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-21T23:43:24Z",
+          "number": 3645,
+          "repo": "oxagen",
+          "title": "Clone immutable configurations and retain retirement validity",
+          "touched": [
+            "apps/app/src/features/agents/agent.tsx"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-20T23:56:42Z",
@@ -36060,7 +36696,7 @@
       ],
       "open_issues": 0,
       "page": "apps/app/src/app/[org]/[ws]/agents/[agent]/page.tsx",
-      "refreshed_at": "2026-09-21T01:16:49.988Z",
+      "refreshed_at": "2026-09-22T00:50:05.433Z",
       "shared_page": false
     },
     "agent-source": {
@@ -36283,7 +36919,7 @@
         }
       ],
       "kind": "surface",
-      "last_merge": "2026-09-21T21:41:25Z",
+      "last_merge": "2026-09-22T00:37:37Z",
       "links": [
         {
           "number": 3282,
@@ -36299,6 +36935,16 @@
         }
       ],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-22T00:37:37Z",
+          "number": 3705,
+          "repo": "oxagen",
+          "title": "fix(fleet): show the enforcement tier on every run row",
+          "touched": [
+            "apps/app/src/features/fleet/runs-table.tsx"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-21T21:41:25Z",
@@ -36508,23 +37154,11 @@
           "touched": [
             "apps/app/src/features/fleet/fleet.builders.ts"
           ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-18T23:51:19Z",
-          "number": 3366,
-          "repo": "oxagen",
-          "title": "run replay 3/3: the Run page transcript, player, chain and cost",
-          "touched": [
-            "apps/app/src/features/fleet/fleet.builders.ts",
-            "apps/app/src/data/live/runs.ts",
-            "apps/app/src/data/live/mappers/runs.ts"
-          ]
         }
       ],
       "open_issues": 1,
       "page": "apps/app/src/app/[org]/[ws]/page.tsx",
-      "refreshed_at": "2026-09-21T22:12:53.518Z",
+      "refreshed_at": "2026-09-22T00:50:05.433Z",
       "shared_page": false
     },
     "forgot-password": {
@@ -38745,7 +39379,7 @@
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "surface",
-      "last_merge": "2026-09-21T12:19:40Z",
+      "last_merge": "2026-09-21T23:43:24Z",
       "links": [
         {
           "number": 3098,
@@ -38761,6 +39395,16 @@
         }
       ],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-21T23:43:24Z",
+          "number": 3645,
+          "repo": "oxagen",
+          "title": "Clone immutable configurations and retain retirement validity",
+          "touched": [
+            "apps/app/src/features/skills/sections.tsx"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-21T12:19:40Z",
@@ -38816,16 +39460,26 @@
       ],
       "open_issues": 2,
       "page": "apps/app/src/app/[org]/[ws]/skills/page.tsx",
-      "refreshed_at": "2026-09-21T13:05:20.786Z",
+      "refreshed_at": "2026-09-22T00:50:05.433Z",
       "shared_page": true
     },
     "skills-off": {
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "surface",
-      "last_merge": "2026-09-21T12:19:40Z",
+      "last_merge": "2026-09-21T23:43:24Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-21T23:43:24Z",
+          "number": 3645,
+          "repo": "oxagen",
+          "title": "Clone immutable configurations and retain retirement validity",
+          "touched": [
+            "apps/app/src/features/skills/sections.tsx"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-21T12:19:40Z",
@@ -38869,7 +39523,7 @@
       ],
       "open_issues": 0,
       "page": "apps/app/src/app/[org]/[ws]/skills/page.tsx",
-      "refreshed_at": "2026-09-21T13:05:20.786Z",
+      "refreshed_at": "2026-09-22T00:50:05.433Z",
       "shared_page": true
     },
     "spend": {
@@ -38951,7 +39605,7 @@
         }
       ],
       "kind": "surface",
-      "last_merge": "2026-09-21T12:35:24Z",
+      "last_merge": "2026-09-21T23:43:24Z",
       "links": [
         {
           "number": 2592,
@@ -39003,6 +39657,17 @@
         }
       ],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-21T23:43:24Z",
+          "number": 3645,
+          "repo": "oxagen",
+          "title": "Clone immutable configurations and retain retirement validity",
+          "touched": [
+            "apps/app/src/features/steering/records.tsx",
+            "docs/adr/ADR-091-one-record-steers-one-agent.md"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-21T12:35:24Z",
@@ -39098,7 +39763,7 @@
       ],
       "open_issues": 4,
       "page": "apps/app/src/app/[org]/[ws]/steering/page.tsx",
-      "refreshed_at": "2026-09-21T13:05:20.786Z",
+      "refreshed_at": "2026-09-22T00:50:05.433Z",
       "shared_page": false
     },
     "tools": {
@@ -39726,8 +40391,8 @@
     }
   },
   "last_run": {
-    "at": "2026-09-21T22:12:53.518Z",
-    "calls": 17,
+    "at": "2026-09-22T00:50:05.433Z",
+    "calls": 18,
     "quiet": false
   },
   "milestones": {
@@ -39748,12 +40413,12 @@
     "M1": {
       "built": 10,
       "last_merge": {
-        "merged_at": "2026-09-21T21:41:25Z",
-        "number": 3696,
+        "merged_at": "2026-09-22T00:37:37Z",
+        "number": 3705,
         "repo": "oxagen",
-        "title": "A transcript row is the thing the run did, and an operator is named, never keyed"
+        "title": "fix(fleet): show the enforcement tier on every run row"
       },
-      "merged_prs": 50,
+      "merged_prs": 51,
       "not_started": 1,
       "open_issues": 7,
       "partial": 5,
@@ -39762,12 +40427,12 @@
     "M2": {
       "built": 4,
       "last_merge": {
-        "merged_at": "2026-09-21T21:41:25Z",
-        "number": 3696,
+        "merged_at": "2026-09-22T00:41:23Z",
+        "number": 3708,
         "repo": "oxagen",
-        "title": "A transcript row is the thing the run did, and an operator is named, never keyed"
+        "title": "feat(agents): kill switch from the agent page"
       },
-      "merged_prs": 17,
+      "merged_prs": 19,
       "not_started": 2,
       "open_issues": 4,
       "partial": 2,
@@ -39776,12 +40441,12 @@
     "M3": {
       "built": 1,
       "last_merge": {
-        "merged_at": "2026-09-21T21:41:25Z",
-        "number": 3696,
+        "merged_at": "2026-09-22T00:37:37Z",
+        "number": 3705,
         "repo": "oxagen",
-        "title": "A transcript row is the thing the run did, and an operator is named, never keyed"
+        "title": "fix(fleet): show the enforcement tier on every run row"
       },
-      "merged_prs": 31,
+      "merged_prs": 32,
       "not_started": 0,
       "open_issues": 4,
       "partial": 2,
@@ -39790,12 +40455,12 @@
     "M4": {
       "built": 1,
       "last_merge": {
-        "merged_at": "2026-09-21T21:41:25Z",
-        "number": 3696,
+        "merged_at": "2026-09-22T00:37:37Z",
+        "number": 3705,
         "repo": "oxagen",
-        "title": "A transcript row is the thing the run did, and an operator is named, never keyed"
+        "title": "fix(fleet): show the enforcement tier on every run row"
       },
-      "merged_prs": 31,
+      "merged_prs": 32,
       "not_started": 0,
       "open_issues": 3,
       "partial": 2,
@@ -39804,12 +40469,12 @@
     "M5": {
       "built": 0,
       "last_merge": {
-        "merged_at": "2026-09-21T12:35:24Z",
-        "number": 3622,
+        "merged_at": "2026-09-21T23:43:24Z",
+        "number": 3645,
         "repo": "oxagen",
-        "title": "feat(app): a page for one published guidance record (#3395)"
+        "title": "Clone immutable configurations and retain retirement validity"
       },
-      "merged_prs": 18,
+      "merged_prs": 19,
       "not_started": 6,
       "open_issues": 5,
       "partial": 4,
@@ -39818,12 +40483,12 @@
     "M6": {
       "built": 0,
       "last_merge": {
-        "merged_at": "2026-09-21T12:35:24Z",
-        "number": 3622,
+        "merged_at": "2026-09-21T23:43:24Z",
+        "number": 3645,
         "repo": "oxagen",
-        "title": "feat(app): a page for one published guidance record (#3395)"
+        "title": "Clone immutable configurations and retain retirement validity"
       },
-      "merged_prs": 9,
+      "merged_prs": 10,
       "not_started": 0,
       "open_issues": 4,
       "partial": 1,
@@ -49218,6 +49883,123 @@
       "repo": "oxagen",
       "title": "Require justifications for new system database bypasses"
     },
+    "oxagen#3645": {
+      "added": [
+        "apps/api/src/routes/v1/configuration.clone.get.ts",
+        "apps/api/src/routes/v1/configuration.clone.propose.ts",
+        "apps/app/src/features/create/clone-actions.test.ts",
+        "apps/app/src/features/create/clone-actions.ts",
+        "apps/app/src/features/create/clone-editor.test.tsx",
+        "apps/app/src/features/create/clone-editor.tsx",
+        "apps/app/src/ui/clone-button.test.tsx",
+        "apps/app/src/ui/clone-button.tsx",
+        "apps/mcp/src/tools/configuration.clone.get.ts",
+        "apps/mcp/src/tools/configuration.clone.propose.ts",
+        "docs/adr/ADR-136-immutable-configuration-clone-and-retire.md",
+        "docs/capabilities/configuration.clone.get.md",
+        "docs/capabilities/configuration.clone.propose.md",
+        "docs/capabilities/schemas/get_clone_draft.json",
+        "docs/capabilities/schemas/propose_configuration_clone.json",
+        "packages/database/atlas/migrations/20260921170000_configuration_validity.sql",
+        "packages/handlers/src/configuration-clone-draft.test.ts",
+        "packages/handlers/src/configuration-clone-draft.ts",
+        "packages/handlers/src/configuration-clone-source.test.ts",
+        "packages/handlers/src/configuration-clone-source.ts",
+        "packages/handlers/src/configuration.clone.get.test.ts",
+        "packages/handlers/src/configuration.clone.get.ts",
+        "packages/handlers/src/configuration.clone.propose.test.ts",
+        "packages/handlers/src/configuration.clone.propose.ts",
+        "packages/handlers/src/context.record.promote.pg.test.ts",
+        "packages/oxagen/src/configuration-clone.test.ts",
+        "packages/oxagen/src/configuration-clone.ts",
+        "packages/oxagen/src/contracts/configuration.clone.get.ts",
+        "packages/oxagen/src/contracts/configuration.clone.propose.ts"
+      ],
+      "author": "macanderson",
+      "closes": [],
+      "files": [
+        "apps/api/src/app.ts",
+        "apps/api/src/routes/v1/configuration.clone.get.ts",
+        "apps/api/src/routes/v1/configuration.clone.propose.ts",
+        "apps/app/capability-ui-map.json",
+        "apps/app/messages/create.json",
+        "apps/app/src/features/agents/agent.test.tsx",
+        "apps/app/src/features/agents/agent.tsx",
+        "apps/app/src/features/create/clone-actions.test.ts",
+        "apps/app/src/features/create/clone-actions.ts",
+        "apps/app/src/features/create/clone-editor.test.tsx",
+        "apps/app/src/features/create/clone-editor.tsx",
+        "apps/app/src/features/create/create-host.test.tsx",
+        "apps/app/src/features/create/create-host.tsx",
+        "apps/app/src/features/skills/sections.tsx",
+        "apps/app/src/features/skills/versions.test.tsx",
+        "apps/app/src/features/steering/records.tsx",
+        "apps/app/src/i18n/messages.d.ts",
+        "apps/app/src/shared/create.test.ts",
+        "apps/app/src/shared/create.ts",
+        "apps/app/src/ui/clone-button.test.tsx",
+        "apps/app/src/ui/clone-button.tsx",
+        "apps/mcp/src/tools/configuration.clone.get.ts",
+        "apps/mcp/src/tools/configuration.clone.propose.ts",
+        "docs/adr/ADR-091-one-record-steers-one-agent.md",
+        "docs/adr/ADR-128-source-identifiers-determine-draft-filenames.md",
+        "docs/adr/ADR-136-immutable-configuration-clone-and-retire.md",
+        "docs/adr/README.md",
+        "docs/capabilities/_index.md",
+        "docs/capabilities/configuration.clone.get.md",
+        "docs/capabilities/configuration.clone.propose.md",
+        "docs/capabilities/schemas/README.md",
+        "docs/capabilities/schemas/_index.json",
+        "docs/capabilities/schemas/get_clone_draft.json",
+        "docs/capabilities/schemas/promote_context_record.json",
+        "docs/capabilities/schemas/propose_configuration_clone.json",
+        "docs/capabilities/schemas/propose_record.json",
+        "packages/database/atlas/migrations/20260921170000_configuration_validity.sql",
+        "packages/database/atlas/migrations/atlas.sum",
+        "packages/database/src/schema/agent.ts",
+        "packages/database/storage-manifest.json",
+        "packages/handlers/src/agent.identity.test.ts",
+        "packages/handlers/src/agent.retire.ts",
+        "packages/handlers/src/configuration-clone-draft.test.ts",
+        "packages/handlers/src/configuration-clone-draft.ts",
+        "packages/handlers/src/configuration-clone-source.test.ts",
+        "packages/handlers/src/configuration-clone-source.ts",
+        "packages/handlers/src/configuration.clone.get.test.ts",
+        "packages/handlers/src/configuration.clone.get.ts",
+        "packages/handlers/src/configuration.clone.propose.test.ts",
+        "packages/handlers/src/configuration.clone.propose.ts",
+        "packages/handlers/src/context.proposal.create.ts",
+        "packages/handlers/src/context.proposal.shared.ts",
+        "packages/handlers/src/context.record.promote.pg.test.ts",
+        "packages/handlers/src/context.record.promote.test.ts",
+        "packages/handlers/src/context.record.promote.ts",
+        "packages/handlers/src/context.steering.store.pg.test.ts",
+        "packages/handlers/src/context.steering.store.ts",
+        "packages/handlers/src/context.steering.test-support.ts",
+        "packages/handlers/src/register.ts",
+        "packages/oxagen/capabilities.manifest.json",
+        "packages/oxagen/package.json",
+        "packages/oxagen/src/configuration-clone.test.ts",
+        "packages/oxagen/src/configuration-clone.ts",
+        "packages/oxagen/src/contracts.generated.ts",
+        "packages/oxagen/src/contracts/configuration.clone.get.ts",
+        "packages/oxagen/src/contracts/configuration.clone.propose.ts",
+        "packages/oxagen/src/contracts/context.record.promote.test.ts",
+        "packages/oxagen/src/contracts/context.record.promote.ts",
+        "packages/oxagen/src/contracts/context.steering.shared.ts",
+        "packages/oxagen/src/contracts/index.ts"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3645",
+      "merged_at": "2026-09-21T23:43:24Z",
+      "number": 3645,
+      "refs": [
+        3590,
+        2961
+      ],
+      "repo": "oxagen",
+      "title": "Clone immutable configurations and retain retirement validity"
+    },
     "oxagen#3646": {
       "added": [
         ".github/workflows/ci-atlas.yaml"
@@ -49772,6 +50554,212 @@
       "repo": "oxagen",
       "title": "A transcript row is the thing the run did, and an operator is named, never keyed"
     },
+    "oxagen#3699": {
+      "added": [
+        ".github/actions/open-store-tunnels/action.yml",
+        ".github/workflows/migration-label.yml",
+        "docs/scr/SCR-006-schema-changes-are-labelled.md",
+        "infra/tools/check-postgres-drift.sh",
+        "infra/tools/tests/check-postgres-drift.test.sh",
+        "infra/tools/tests/migration-gate.test.sh"
+      ],
+      "author": "macanderson",
+      "closes": [],
+      "files": [
+        ".github/actions/open-store-tunnels/action.yml",
+        ".github/workflows/migration-label.yml",
+        ".github/workflows/pipeline.yml",
+        ".github/workflows/store-migrate-drift.yml",
+        "AGENTS.md",
+        "CLAUDE.md",
+        "docs/scr/SCR-006-schema-changes-are-labelled.md",
+        "infra/tools/check-postgres-drift.sh",
+        "infra/tools/tests/check-postgres-drift.test.sh",
+        "infra/tools/tests/check-store-drift.test.sh",
+        "infra/tools/tests/migration-gate.test.sh",
+        "package.json"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3699",
+      "merged_at": "2026-09-22T00:09:44Z",
+      "number": 3699,
+      "refs": [
+        3653
+      ],
+      "repo": "oxagen",
+      "title": "Block a deploy whose migration has not reached production"
+    },
+    "oxagen#3700": {
+      "added": [],
+      "author": "macanderson",
+      "closes": [],
+      "files": [
+        "apps/web/story/index.html"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3700",
+      "merged_at": "2026-09-21T23:39:33Z",
+      "number": 3700,
+      "refs": [],
+      "repo": "oxagen",
+      "title": "Feat/oxagen founders story"
+    },
+    "oxagen#3701": {
+      "added": [
+        "packages/telemetry/src/error-events-conformance.test.ts",
+        "packages/telemetry/src/error-events-write.integration.test.ts"
+      ],
+      "author": "macanderson",
+      "closes": [
+        3698,
+        1,
+        2
+      ],
+      "files": [
+        "infra/tools/check-store-drift.sh",
+        "infra/tools/tests/check-store-drift.test.sh",
+        "packages/telemetry/src/error-events-conformance.test.ts",
+        "packages/telemetry/src/error-events-write.integration.test.ts"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3701",
+      "merged_at": "2026-09-22T00:10:18Z",
+      "number": 3701,
+      "refs": [],
+      "repo": "oxagen",
+      "title": "fix: verify the error_events write path and the tables migrations create (#3698)"
+    },
+    "oxagen#3703": {
+      "added": [],
+      "author": "cursor[bot]",
+      "closes": [],
+      "files": [
+        ".github/workflows/migration-label.yml",
+        "infra/tools/check-postgres-drift.sh",
+        "infra/tools/run-db-migrations.sh",
+        "infra/tools/tests/check-postgres-drift.test.sh",
+        "infra/tools/tests/render-remote-migration.test.sh"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3703",
+      "merged_at": "2026-09-22T00:30:41Z",
+      "number": 3703,
+      "refs": [],
+      "repo": "oxagen",
+      "title": "Give each migration gate its own Atlas tarball"
+    },
+    "oxagen#3704": {
+      "added": [
+        ".agent/memory/root/reflections/2026-09-22-scr-toml-steering-records.md",
+        ".oxagen/rules/ctx.scr.001-no-full-suite-builds.toml",
+        ".oxagen/rules/ctx.scr.002-durability-first.toml",
+        ".oxagen/rules/ctx.scr.003-dod-verified-close.toml",
+        ".oxagen/rules/ctx.scr.004-fix-over-file.toml",
+        ".oxagen/rules/ctx.scr.005-triage-separation.toml",
+        ".oxagen/rules/ctx.scr.006-schema-change-labelled.toml",
+        "docs/adr/ADR-137-standing-decisions-are-workspace-context-records.md"
+      ],
+      "author": "macanderson",
+      "closes": [],
+      "files": [
+        ".agent/memory/root/lessons.md",
+        ".agent/memory/root/reflections/2026-09-22-scr-toml-steering-records.md",
+        ".agent/memory/shared/lessons.md",
+        ".claude/hooks/no-full-test-builds.sh",
+        ".github/workflows/scr-corpus-check.yml",
+        ".oxagen/rules/ctx.scr.001-no-full-suite-builds.toml",
+        ".oxagen/rules/ctx.scr.002-durability-first.toml",
+        ".oxagen/rules/ctx.scr.003-dod-verified-close.toml",
+        ".oxagen/rules/ctx.scr.004-fix-over-file.toml",
+        ".oxagen/rules/ctx.scr.005-triage-separation.toml",
+        ".oxagen/rules/ctx.scr.006-schema-change-labelled.toml",
+        ".stella/commands/triage-sweep.md",
+        "AGENTS.md",
+        "CLAUDE.md",
+        "POST_CUSTOMER_ERA.md",
+        "docs/adr/ADR-038-adopt-standing-decisions-scr-corpus.md",
+        "docs/adr/ADR-039-centralize-scr-enforcement-in-oxagen.md",
+        "docs/adr/ADR-137-standing-decisions-are-workspace-context-records.md",
+        "docs/scr/README.md",
+        "docs/scr/SCR-001-no-full-suite-builds.md",
+        "docs/scr/SCR-002-durability-first-architecture.md",
+        "docs/scr/SCR-003-dod-verified-close.md",
+        "docs/scr/SCR-004-residue-becomes-issues.md",
+        "docs/scr/SCR-005-triage-separation-of-duties.md",
+        "docs/scr/SCR-006-schema-changes-are-labelled.md",
+        "tools/scripts/scr-corpus-check.mjs",
+        "tools/scripts/scr-corpus-check.test.ts"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3704",
+      "merged_at": "2026-09-22T00:30:06Z",
+      "number": 3704,
+      "refs": [
+        3702
+      ],
+      "repo": "oxagen",
+      "title": "Standing decisions are context records in .oxagen/rules"
+    },
+    "oxagen#3705": {
+      "added": [],
+      "author": "macanderson",
+      "closes": [],
+      "files": [
+        "apps/app/messages/fleet.json",
+        "apps/app/src/features/fleet/fleet.test.tsx",
+        "apps/app/src/features/fleet/runs-table.tsx",
+        "apps/app/src/i18n/messages.d.ts"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3705",
+      "merged_at": "2026-09-22T00:37:37Z",
+      "number": 3705,
+      "refs": [],
+      "repo": "oxagen",
+      "title": "fix(fleet): show the enforcement tier on every run row"
+    },
+    "oxagen#3706": {
+      "added": [
+        "docs/audits/2026-09-21-model-gateway-arming.md"
+      ],
+      "author": "macanderson",
+      "closes": [],
+      "files": [
+        "docs/audits/2026-09-21-model-gateway-arming.md"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3706",
+      "merged_at": "2026-09-22T00:32:03Z",
+      "number": 3706,
+      "refs": [],
+      "repo": "oxagen",
+      "title": "docs(audit): model gateway wired-vs-armed audit"
+    },
+    "oxagen#3708": {
+      "added": [
+        "apps/app/src/features/agents/kill-switch.test.tsx",
+        "apps/app/src/features/agents/kill-switch.tsx"
+      ],
+      "author": "macanderson",
+      "closes": [],
+      "files": [
+        "apps/app/messages/agents.json",
+        "apps/app/src/features/agents/actions.test.ts",
+        "apps/app/src/features/agents/actions.ts",
+        "apps/app/src/features/agents/agent.test.tsx",
+        "apps/app/src/features/agents/agent.tsx",
+        "apps/app/src/features/agents/kill-switch.test.tsx",
+        "apps/app/src/features/agents/kill-switch.tsx",
+        "apps/app/src/i18n/messages.d.ts"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3708",
+      "merged_at": "2026-09-22T00:41:23Z",
+      "number": 3708,
+      "refs": [],
+      "repo": "oxagen",
+      "title": "feat(agents): kill switch from the agent page"
+    },
     "stella#6527": {
       "added": [],
       "author": "dependabot[bot]",
@@ -50249,11 +51237,133 @@
       "refs": [],
       "repo": "stella",
       "title": "chore(release): sync versions to 0.9.432 [skip release]"
+    },
+    "stella#6545": {
+      "added": [
+        "crates/stella-cli/src/forge_install.rs",
+        "crates/stella-tools/src/forge.rs",
+        "crates/stella-tools/src/forge/issue.rs",
+        "crates/stella-tools/src/forge/issue/tests.rs",
+        "crates/stella-tools/src/forge/pr.rs",
+        "crates/stella-tools/src/forge/pr/tests.rs",
+        "crates/stella-tools/src/forge/redirect.rs",
+        "crates/stella-tools/src/forge/watch.rs",
+        "docs/adr/0044-a-forge-tool-groups-verbs-over-one-object.md",
+        "docs/tools/issue.toml",
+        "docs/tools/pull_request.toml",
+        "docs/tools/watch_ci.toml"
+      ],
+      "author": "macanderson",
+      "closes": [],
+      "files": [
+        "AGENTS.md",
+        "CLAUDE.md",
+        "Cargo.lock",
+        "crates/stella-autonomy/src/attribution.rs",
+        "crates/stella-cli/src/agent.rs",
+        "crates/stella-cli/src/agent/prompt.rs",
+        "crates/stella-cli/src/agent/prompt/parity.rs",
+        "crates/stella-cli/src/command_deck/issues.rs",
+        "crates/stella-cli/src/driver_plugin/tests.rs",
+        "crates/stella-cli/src/forge_install.rs",
+        "crates/stella-cli/src/issue_provider.rs",
+        "crates/stella-cli/src/main.rs",
+        "crates/stella-cli/src/pull_request_provider.rs",
+        "crates/stella-cli/src/self_driving_cmd/backlog.rs",
+        "crates/stella-cli/src/self_driving_cmd/backlog/record.rs",
+        "crates/stella-cli/src/self_driving_cmd/claim_mirror.rs",
+        "crates/stella-cli/src/self_driving_cmd/closures.rs",
+        "crates/stella-cli/src/self_driving_cmd/deliver.rs",
+        "crates/stella-cli/src/self_driving_cmd/lifecycle.rs",
+        "crates/stella-cli/src/self_driving_cmd/ready.rs",
+        "crates/stella-cli/src/self_driving_cmd/residue.rs",
+        "crates/stella-cli/src/self_driving_cmd/supply.rs",
+        "crates/stella-cli/src/self_driving_cmd/triage.rs",
+        "crates/stella-cli/src/self_driving_cmd/work.rs",
+        "crates/stella-cli/src/tool_docs.rs",
+        "crates/stella-cli/src/write_dirs.rs",
+        "crates/stella-protocol/src/issue.rs",
+        "crates/stella-protocol/src/pull_request.rs",
+        "crates/stella-tool-facts/src/catalog.rs",
+        "crates/stella-tool-facts/src/policy.rs",
+        "crates/stella-tools/Cargo.toml",
+        "crates/stella-tools/README.md",
+        "crates/stella-tools/src/bash.rs",
+        "crates/stella-tools/src/forge.rs",
+        "crates/stella-tools/src/forge/issue.rs",
+        "crates/stella-tools/src/forge/issue/tests.rs",
+        "crates/stella-tools/src/forge/pr.rs",
+        "crates/stella-tools/src/forge/pr/tests.rs",
+        "crates/stella-tools/src/forge/redirect.rs",
+        "crates/stella-tools/src/forge/watch.rs",
+        "crates/stella-tools/src/lib.rs",
+        "crates/stella-tools/src/loop_comparability.rs",
+        "crates/stella-tools/src/registry.rs",
+        "crates/stella-tui/src/tool_class.rs",
+        "docs/adr/0044-a-forge-tool-groups-verbs-over-one-object.md",
+        "docs/adr/README.md",
+        "docs/manifest.json",
+        "docs/tools/README.md",
+        "docs/tools/ask_question.toml",
+        "docs/tools/bash.toml",
+        "docs/tools/delegate.toml",
+        "docs/tools/delete_file.toml",
+        "docs/tools/delete_state.toml",
+        "docs/tools/edit_file.toml",
+        "docs/tools/get_environment.toml",
+        "docs/tools/get_state.toml",
+        "docs/tools/issue.toml",
+        "docs/tools/list_state.toml",
+        "docs/tools/pull_request.toml",
+        "docs/tools/read_file.toml",
+        "docs/tools/save_state.toml",
+        "docs/tools/search.toml",
+        "docs/tools/task_assign.toml",
+        "docs/tools/task_cancel.toml",
+        "docs/tools/task_complete.toml",
+        "docs/tools/task_create.toml",
+        "docs/tools/task_list.toml",
+        "docs/tools/task_start.toml",
+        "docs/tools/watch_ci.toml",
+        "docs/tools/write_file.toml",
+        "docs/why-stella.md",
+        "stella.example.toml",
+        "website/content/docs/agent-tools/index.mdx",
+        "website/content/docs/configuration/settings.mdx",
+        "website/content/docs/configuration/stella-toml.mdx"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/stella/pull/6545",
+      "merged_at": "2026-09-21T23:41:55Z",
+      "number": 6545,
+      "refs": [
+        1377
+      ],
+      "repo": "stella",
+      "title": "feat(forge): sign every forge body in Rust, and redirect the gh verbs it covers"
+    },
+    "stella#6547": {
+      "added": [
+        "docs/scr/SCR-006-schema-changes-are-labelled.md"
+      ],
+      "author": "macanderson",
+      "closes": [],
+      "files": [
+        "AGENTS.md",
+        "docs/scr/SCR-006-schema-changes-are-labelled.md"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/stella/pull/6547",
+      "merged_at": "2026-09-21T23:42:29Z",
+      "number": 6547,
+      "refs": [],
+      "repo": "stella",
+      "title": "Add SCR-006: a schema change is labelled and migrated before its deploy"
     }
   },
   "since": {
-    "oxagen": "2026-09-21T21:41:28Z",
-    "roadmap": "2026-09-21T21:36:00Z",
-    "stella": "2026-09-21T21:21:00Z"
+    "oxagen": "2026-09-22T00:48:53Z",
+    "roadmap": "2026-09-22T00:47:37Z",
+    "stella": "2026-09-22T00:24:46Z"
   }
 }
