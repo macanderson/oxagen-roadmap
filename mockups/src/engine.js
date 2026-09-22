@@ -8792,13 +8792,38 @@ function auditExports(){
     var ready=x.st==="ready";
     return '<div class="panel"><div class="panel-h"><h3 style="font-size:13px">'+h(x.what)+'</h3>'+(ready?auditBadge("allowed","ready"):auditBadge("approval","building"))+
      '<div class="sp"><button class="btn sm" '+(ready?'onclick="S.verified[\''+x.id+'\']=true;render()"':'disabled')+'>Verify bundle</button>'+
-     '<button class="btn sm ghost" '+(ready?'onclick="act(\'In the product this downloads '+x.id+' as a signed archive with its verifier. A mockup writes nothing to disk.\')"':'disabled')+'>Download</button></div></div>'+
+     '<button class="btn sm ghost" '+(ready?'onclick="act(\'In the product this downloads '+x.id+' as a signed archive with its verifier. A mockup writes nothing to disk.\')"':'disabled')+'>Download</button>'+
+     '<button class="btn sm ghost" onclick="openDialog(\'exportdel\',\''+h(x.id)+'\')">'+(ready?'Delete':'Cancel')+'</button></div></div>'+
      '<div class="panel-b">'+auditFacts([["Export id",x.id,1],["Range",x.range],["Contents",x.runs],["Size",x.size],["Created",x.at+" by "+x.by],["Signature",x.sig,1],["Key ids",x.keys,1]])+
      (S.verified[x.id]?'<pre style="margin-top:12px">$ ./oxagen-verify --bundle '+h(x.id)+' --release-key rel-2026-03\n  merkle roots        recomputed and matched\n  seal attestations   signatures verified\n  chain continuity    no gaps, no reordering\n  <span class="s">OK</span>  internally consistent and signed</pre>':'')+'</div></div>';}).join("");
   return '<div class="callout" style="margin-bottom:14px">An export is a verifiable bundle: archive segments, attestations, key ids, and a verifier script. The segment was written at seal time, so it is never a later copy of the graph. It is the same bytes the graph indexed, written once. A customer’s auditor checks it offline, without trusting Oxagen or the worker’s harness.</div>'+
    '<div class="grid g2">'+cards+'</div>';
 }
 
+function exportById(id){for(var i=0;i<EXPORTS.length;i++){if(EXPORTS[i].id===id)return EXPORTS[i];}return null;}
+DLG_EXT.exportdel=function(id){
+  var x=exportById(id); if(!x) return noSuch("Export");
+  var building=x.st!=="ready";
+  return {t:building?"Cancel this build?":"Delete this bundle?", s:x.id, w:false,
+   b:'<div class="note">'+h(x.what)+'<br><span class="dim">'+h(x.range)+(building?'':' \u00b7 '+h(x.size))+'</span></div>'+
+     '<div class="warn" style="margin-top:12px">'+(building
+      ?'The build stops and no bundle is written. Nothing has been signed yet.'
+      :'The archive copy and its verifier leave object storage. Anyone holding a downloaded copy keeps a bundle that still verifies, because the signature is over the bytes and not over this row.')+'</div>'+
+     '<div class="note" style="margin-top:12px">This removes a copy, not the record. The segments, frames and receipts it was built from stay where the seal wrote them, so you can export the same range again and get the same bytes.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Keep it</button>'+
+     '<button class="btn danger" onclick="exportDelete(\''+h(x.id)+'\')">'+(building?'Stop the build':'Delete it')+'</button>'};
+};
+function exportDelete(id){
+  var i=-1; EXPORTS.forEach(function(x,ix){if(x.id===id)i=ix;});
+  if(i<0) return; var x=EXPORTS[i], building=x.st!=="ready";
+  EXPORTS.splice(i,1);
+  if(S.verified)delete S.verified[id];
+  auditEvent(building?"export.cancelled":"export.deleted",me().name,id+" \u00b7 "+x.what,"info",id);
+  closeDialog(); render();
+  act(building
+   ?"Build stopped. "+id+" was never signed, so nothing left storage."
+   :"Deleted "+id+". The segments it was built from are untouched, and export.deleted is in the audit record.");
+}
 function auditKeys(){
   var st={active:["allowed","active"],retiring:["approval","retiring"],retired:["q","retired"],expired:["q","expired"]};
   var kek=KEYS.filter(function(k){return k.st==="active"&&/^kek_/.test(k.id);})[0];
