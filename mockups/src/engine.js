@@ -2033,11 +2033,11 @@ function pRun(r){
    '<div class="acts">'+
     (rs==="live"?'<button class="btn" onclick="openDialog(\'pause\')" title="Takes effect at the next boundary · run.pause">❙❙ Pause run</button>'+
       '<button class="btn" onclick="openSteer()">Steer</button>'+
-      '<button class="btn danger" onclick="act(\'Cancel issued. Run token revoked; process kill is best effort and recorded.\')">Cancel</button>':
+      '<button class="btn danger" onclick="openDialog(\'cancelrun\')">Cancel</button>':
      rs==="pausing"?'<button class="btn" disabled>❙❙ Pausing…</button><button class="btn" onclick="openSteer()">Steer</button>':
      rs==="paused"?'<button class="btn" onclick="resumeRun(\''+R.id+'\')" title="run.resume · the reason reaches the model as a control frame">▶ Resume run</button>'+
       '<button class="btn" onclick="openSteer()">Steer</button>'+
-      '<button class="btn danger" onclick="act(\'Cancel issued. Run token revoked; process kill is best effort and recorded.\')">Cancel</button>':
+      '<button class="btn danger" onclick="openDialog(\'cancelrun\')">Cancel</button>':
      rs==="resuming"?'<button class="btn" disabled>▶ Resuming…</button>':
       '<button class="btn" onclick="openDialog(\'forkreplay\')" title="fork a new attempt from frame '+S.frame+'">Fork replay</button>'+
       '<button class="btn" onclick="S.bis=null;openDialog(\'bisect\')">Bisect</button>')+
@@ -4798,8 +4798,8 @@ function pAgent(r){
    '<p style="margin-top:8px">'+h(a.desc)+'</p></div>'+
    '<div class="acts">'+
     '<button class="btn" onclick="openAvatar(\'agent:'+a.key+'\')">Edit avatar</button>'+
-    '<button class="btn" onclick="act(\'Credential rotated. The old key stops working at the next call and every live run token dies with it.\',\'gold\')">Rotate credential</button>'+
-    '<button class="btn danger" onclick="act(\'Agent suspended. Every run token dies at the next call, even if the daemon is down.\')">Suspend</button>'+
+    '<button class="btn" onclick="openDialog(\'rotatecred\',\''+a.key+'\')">Rotate credential</button>'+
+    '<button class="btn danger" onclick="openDialog(\'suspendagent\',\''+a.key+'\')">Suspend</button>'+
     '<button class="btn danger" onclick="openDialog(\'delagent\',\''+a.key+'\')">Deregister</button>'+
    '</div></div>'+tabs+body(a,r);
 }
@@ -4859,7 +4859,7 @@ function aIdentity(a,r){
        :'checkpoints are unsigned until a host enrolls')+'</span></dd>'+
     '</dl>'+
     '<div class="row" style="margin-top:14px"><button class="btn" onclick="openDialog(\'identity\',\''+a.key+'\')">Change identity</button>'+
-    '<button class="btn danger" onclick="act(\'Credential revoked. Every run token dies at the next call.\')">Revoke credential</button></div>'+
+    '<button class="btn danger" onclick="openDialog(\'revokecred\',\''+a.key+'\')">Revoke credential</button></div>'+
     '</div></div>'+
 
    '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Roles</h3>'+
@@ -5197,7 +5197,7 @@ function aEnrollment(a,r){
    '</dl>'+
    '<div class="row" style="margin-top:14px">'+
    '<button class="btn" onclick="act(\'Smoke session queued. One turn, recorded like any other run.\')">Run a smoke session</button>'+
-   '<button class="btn danger" onclick="act(\'Host revoked. Calls routed through Oxagen are refused from now on. The hooks on the host are removed at its next check-in.\')">Unenroll</button></div>'+
+   '<button class="btn danger" onclick="openDialog(\'unenroll\',\''+a.key+'\')">Unenroll</button></div>'+
    '</div></div>'+
    '<div class="panel"><div class="panel-h"><h3>Rollback</h3></div><div class="panel-b">'+
    '<p class="muted" style="font-size:12.5px;margin:0 0 10px">Shown beside the installer from the first screen, and never hidden afterwards.</p>'+
@@ -6725,7 +6725,7 @@ function stgOpenItem(it){
   if(it.kind==="record") return stgRecord(it.id)?"go('"+crecUrl(it.id)+"')":"stgTab('records')";
   if(it.kind==="skill") return "openDialog('skill','"+it.skill+"')";
   if(it.kind==="policy") return "stgTab('policy')";
-  if(it.kind==="memory") return "stgTab('memory')";
+  if(it.kind==="memory") return memById(it.id)?"openDialog('memory','"+it.id+"')":"stgTab('memory')";
   if(it.kind==="ontology") return "stgTab('ontology')";
   return "stgTab('records')";
 }
@@ -6754,7 +6754,7 @@ function stgMemoryTab(w){
     var st=m.supersededBy?'<span class="b b-q">superseded</span><span class="sub">by '+stgItemLinkById(w.slug,m.supersededBy)+'</span>'
       :m.yieldsTo?'<span class="b b-approval"><span class="d"></span>yields</span><span class="sub">to '+stgItemLinkById(w.slug,m.yieldsTo)+', a published must</span>'
       :'<span class="b b-allowed"><span class="d"></span>competes</span>';
-    return '<tr><td><b style="font-weight:500">'+h(m.body)+'</b><span class="sub mono">'+h(m.id)+' · '+h(m.provenance)+'</span></td>'+
+    return '<tr '+rowClick("openDialog('memory','"+h(m.id)+"')","Open "+m.id)+'><td><b style="font-weight:500">'+h(m.body)+'</b><span class="sub mono">'+h(m.id)+' · '+h(m.provenance)+'</span></td>'+
      '<td><span class="b b-q mono">'+h(m.cls)+'</span></td><td>'+forceBadge(m.force)+'</td>'+
      '<td>'+h(m.scope)+(m.agent?'<span class="sub mono">'+h(m.agent)+'</span>':'')+'</td>'+
      '<td class="mono" style="font-size:11.5px">'+h(m.lastRecalled)+'<span class="sub">'+m.recalls30+' recalls in 30 days</span></td>'+
@@ -6770,6 +6770,53 @@ function stgMemoryTab(w){
    '<div class="panel-b"><div class="row"><button class="btn sm" onclick="S.pv.preset=\'merge-green\';S.pv.text=null;stgTab(\'preview\')">See one yield in Preview</button>'+
    '<span class="dim" style="font-size:12px">Recall used to reach only the in-app agent, capped at six items. It now goes through the same assembler as every other source.</span></div></div></div>';
 }
+
+/* ---- one memory. The tab told you to promote a memory and no row offered it, and nothing
+   forgot one either: a fact an agent got wrong kept being recalled with no way to stop it. ---- */
+function memById(id){for(var i=0;i<MEMORY.length;i++){if(MEMORY[i].id===id)return MEMORY[i];}return null;}
+function memPosition(m){
+  if(m.supersededBy)return "Superseded by "+h(m.supersededBy)+". It is kept for the runs that carried it and is never selected again.";
+  if(m.yieldsTo)return "It yields to "+h(m.yieldsTo)+", a published must. Where the two disagree, the published record is what the agent reads.";
+  return "It competes in the volatile selection at force "+h(m.force)+". A published record beats it wherever the two are about the same thing.";
+}
+DLG_EXT.memory=function(id){
+  var m=memById(id); if(!m)return noSuch("Memory");
+  var run=String(m.provenance||"").split(/\s*·\s*/)[0];
+  return {t:m.body,s:"A memory, recalled and never published",w:false,
+   b:'<dl class="kv"><dt>Class</dt><dd><span class="b b-q mono">'+h(m.cls)+'</span> at '+forceBadge(m.force)+'</dd>'+
+     '<dt>Scope</dt><dd>'+h(m.scope)+(m.agent?' · <span class="mono">'+h(m.agent)+'</span>':'')+'</dd>'+
+     '<dt>Where it came from</dt><dd><span class="mono" style="font-size:11.5px">'+h(m.provenance)+'</span></dd>'+
+     '<dt>Recalled</dt><dd>'+m.recalls30+' times in 30 days, last on '+h(m.lastRecalled)+'</dd>'+
+     '<dt>Cost</dt><dd>'+tokn(m.token_cost)+' tokens every time it is selected, so '+tokn(m.token_cost*m.recalls30)+' over those 30 days</dd>'+
+     '<dt>In force since</dt><dd><span class="mono">'+h(m.valid_from)+'</span></dd></dl>'+
+     '<div class="note" style="margin-top:12px">'+memPosition(m)+'</div>'+
+     (/^run_/.test(run)?'<div class="field" style="margin-top:12px"><label>The run that left it</label>'+
+       '<button class="btn sm" onclick="closeDialog();go(\'#/'+ORG.slug+'/'+S.ws+'/runs/'+h(run)+'\')">Open '+h(run)+'</button></div>':''),
+   f:'<button class="btn" onclick="closeDialog()">Close</button>'+
+     '<button class="btn danger" onclick="openDialog(\'memforget\',\''+h(m.id)+'\')">Forget</button>'+
+     '<button class="btn primary" onclick="memPromote(\''+h(m.id)+'\')">Promote to a record</button>'};
+};
+DLG_EXT.memforget=function(id){
+  var m=memById(id); if(!m)return noSuch("Memory");
+  return {t:"Forget this memory?",w:false,
+   b:'<div class="note">The assembler stops selecting it, and '+h(m.agent||"every agent in scope")+' stops being told it. The runs it was folded from are untouched: every frame stays, and every run that carried it keeps naming the hash it carried.</div>'+
+     (m.recalls30?'<div class="warn">It was recalled '+m.recalls30+' times in the last 30 days. Whatever those runs did with it, they did because of this.</div>':'')+
+     '<div class="note" style="margin-top:10px">Promote is the other answer. If the memory is right, a record makes it binding instead of leaving it to compete.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Keep it</button>'+
+     '<button class="btn danger" onclick="memForget(\''+h(m.id)+'\')">Forget it</button>'};
+};
+function memForget(id){
+  var m=memById(id), i=MEMORY.indexOf(m); if(i<0)return;
+  MEMORY.splice(i,1); closeDialog(); render();
+  act("Forgot "+m.id+". The assembler stops selecting it; every run that carried it is untouched.");
+}
+function memPromote(id){
+  var m=memById(id); if(!m)return;
+  wzOpen("record");
+  if(S.wz){S.wz.desc=m.body; S.wz.descAI=false; S.wz.fromMemory=m.id;}
+  render();
+}
+
 function stgItemLinkById(wslug,id){var it=stgItemById(wslug,id);return it?stgItemLink(it):'<span class="mono">'+h(id)+'</span>';}
 
 /* ---- Ontology ---- */
@@ -7660,14 +7707,16 @@ function pSpend(){
   } else {
     body='<div class="panel"><div class="panel-h"><h3>Budgets</h3>'+
      '<button class="btn sm" style="margin-left:auto" onclick="openDialog(\'budget\')">Set a budget</button></div><div class="tw"><table>'+
-     '<thead><tr><th>Scope</th><th>Period</th><th class="num">Limit</th><th class="num">Used</th><th>Mode</th><th>Position</th></tr></thead><tbody>'+
-     SPEND.budgets.map(function(b){
+     '<thead><tr><th>Scope</th><th>Period</th><th class="num">Limit</th><th class="num">Used</th><th>Mode</th><th>Position</th><th></th></tr></thead><tbody>'+
+     SPEND.budgets.map(function(b,i){
       var u=parseFloat(b.used.replace(/,/g,""))/parseFloat(b.limit.replace(/,/g,""));
       return '<tr><td class="tkey" style="font-size:12px">'+h(b.scope)+'</td><td>'+h(b.period)+'</td>'+
        '<td class="num">'+usd(b.limit)+'</td><td class="num">'+usd(b.used)+'</td>'+
        '<td><span class="b b-'+(b.mode==="hard"?"denied":"approval")+'">'+h(b.mode)+'</span></td>'+
        '<td style="min-width:170px"><div class="bar"><i style="width:'+Math.round(u*100)+'%;background:'+(u>0.8?"var(--st-critical)":"var(--st-allowed)")+'"></i></div>'+
-       '<div class="dim" style="font-size:11px">'+per(u)+'</div></td></tr>';}).join("")+
+       '<div class="dim" style="font-size:11px">'+per(u)+'</div></td>'+
+       '<td class="num" style="white-space:nowrap"><button class="btn sm" onclick="openDialog(\'budgetedit\',\''+i+'\')">Edit</button> '+
+       '<button class="btn sm danger" onclick="openDialog(\'budgetdel\',\''+i+'\')">Remove</button></td></tr>';}).join("")+
      '</tbody></table></div><div class="panel-b"><div class="note">Hard budgets are checked at each hook boundary, from a running counter in Postgres fed by the usage each harness reports. A breach is a <span class="mono">policy.decision</span> frame and a pause at the next boundary: client-attested and fail-open. On the <span class="mono">gateway</span> and <span class="mono">contained</span> tiers the proxy enforces the ceiling before the call.</div></div></div>';
   }
   return '<div class="phead"><div class="t"><p class="eyebrow">'+h(w.name)+'</p><h1>Spend</h1>'+
@@ -9205,6 +9254,7 @@ function skRow(s){
     '</div></div>'+
    '<div class="rt">'+skTier(s.tier)+
     '<span class="mono dim" style="font-size:10.5px">'+h(s.updated)+'</span>'+
+    (s.retiring?'<span class="b b-approval"><span class="d"></span>retiring</span>':'')+
     '<button class="btn sm" onclick="openDialog(\'skill\',\''+s.id+'\')">Open</button>'+
     (s.state==="ok"?'<button class="btn sm" onclick="go(\'#/'+ORG.slug+'/'+ws().slug+'/steering/skills/'+encodeURIComponent(s.id)+'/source\')">Edit</button>':'')+'</div>'+
    '</div>';
@@ -9667,10 +9717,59 @@ DLG_EXT.skill=function(arg){
      '<div class="note" style="margin-top:9px">This is the whole of it. A skill has no code to run and no credential to hold — '+
       'it is prose an agent reads, and every action it describes still goes through the toolbelt and the policy that governs it.</div>',
    f:'<span class="grow mono dim" style="font-size:11px">'+h(s.srcLabel)+'</span>'+
+     '<button class="btn" onclick="closeDialog()">Close</button>'+
+     '<button class="btn danger" onclick="openDialog(\'skretire\',\''+h(s.id)+'\')">Retire</button>'+
      (s.state==="unapproved"
-      ?'<button class="btn" onclick="closeDialog()">Close</button><button class="btn primary" onclick="closeDialog();act(\'Digest diff sent to Priya Natarajan. It stays held until she approves it.\',\'approval\')">Send the digest for approval</button>'
-      :'<button class="btn" onclick="closeDialog()">Close</button><button class="btn primary" onclick="closeDialog();go(\'#/'+ORG.slug+'/'+ws().slug+'/steering/skills/'+encodeURIComponent(s.id)+'/source\')">Edit the file</button>')};
+      ?'<button class="btn primary" onclick="closeDialog();act(\'Digest diff sent to Priya Natarajan. It stays held until she approves it.\',\'approval\')">Send the digest for approval</button>'
+      :'<button class="btn primary" onclick="closeDialog();go(\'#/'+ORG.slug+'/'+ws().slug+'/steering/skills/'+encodeURIComponent(s.id)+'/source\')">Edit the file</button>')};
 };
+
+/* ---- retiring a skill. One written here is a file; one installed is a line in workspace.toml.
+   Both are a pull request, because both are committed and reviewed. ---- */
+function skInTree(s){return s.src==="repo"||s.src==="linked";}
+function skRetireFile(s){return skInTree(s)?s.path:".oxagen/workspace.toml";}
+function skRetireRepo(s){return skInTree(s)?s.srcLabel:ws().main;}
+function skPr(s){
+  var inTree=skInTree(s), repo=skRetireRepo(s), r=repoByName(repo),
+      leaf=s.id.split(".").pop();
+  var p={id:"oxpr_sk_"+leaf.slice(0,14),kind:"skill",title:s.id,
+   repo:repo,base:(r&&r.branch)||ws().branch,branch:"skills/retire-"+leaf,
+   pr:repo+"#"+(524+OXPRS.length),by:PEOPLE.marcus.name,byKind:"person",
+   opened:"just now",state:"checks_running",
+   trigger:"An operator retired "+s.id+".",
+   files:[[inTree?"del":"mod",skRetireFile(s),inTree?"the procedure is removed":"the install line is removed"]],
+   checks:[["schema","pass",inTree?"No other file in this tree names this skill.":"workspace.toml still parses and every other install resolves."],
+    ["citation_check","pass",(s.cited&&s.runs)?s.cited+" of "+s.runs+" runs cited it; each keeps the digest it recorded.":"No run has ever cited it."],
+    ["grant_scan","pass","A skill grants nothing, so removing it takes no authority from any agent."],
+    ["load_cost","pass","The search budget frees "+s.tokens.toLocaleString()+" tokens a turn it was loaded into."]]};
+  OXPRS.unshift(p);
+  return p;
+}
+DLG_EXT.skretire=function(id){
+  var s=skillOf(id); if(!s)return noSuch("Skill");
+  if(s.retiring)return {t:s.id+" is already being retired",w:false,
+   b:'<div class="note">A pull request removes it and is waiting on its checks. Open it on the Changes tab.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Close</button>'};
+  var inTree=skInTree(s);
+  return {t:"Retire "+s.id+"?",w:false,
+   b:'<div class="note">'+(inTree
+     ?'A skill is a file, so retiring it is a pull request that removes <span class="mono">'+h(s.path)+'</span> on '+h(s.srcLabel)+'.'
+     :'This one is installed, not written here. Retiring it is a pull request that takes its install line out of <span class="mono">.oxagen/workspace.toml</span>, and leaves it published where it came from.')+
+    ' A search still returns it until that merges.</div>'+
+    '<div class="warn">'+((s.cited&&s.runs)
+     ?s.cited+' of '+s.runs+' runs cited it. Each keeps the digest it recorded, and nothing rewrites what those runs were steered by.'
+     :'No run has ever cited it, so no run changes.')+'</div>',
+   f:'<button class="btn" onclick="closeDialog()">Keep it</button>'+
+    '<button class="btn danger" onclick="skRetire(\''+h(s.id)+'\')">Open the pull request</button>'};
+};
+function skRetire(id){
+  var s=skillOf(id); if(!s)return;
+  s.retiring=true;
+  var p=skPr(s);
+  closeDialog(); render();
+  act("Opened "+p.pr+" to retire "+s.id+". A search still returns it until that merges.","gold");
+}
+
 function skBody(s){
   var m={
    "a-intel.release-notes-from-prs":'<span class="c">---</span>\n<span class="k">name</span>: release-notes-from-prs\n<span class="k">scope</span>: workspace:core-platform\n<span class="c">---</span>\n\n<span class="k"># Cutting release notes</span>\n\n1. List the pull requests merged into <span class="s">main</span> since the last tag.\n2. Group them under <span class="s">Features</span>, <span class="s">Fixes</span>, <span class="s">Breaking</span>. A PR with no label goes to Fixes.\n3. Read CHANGELOG.md <span class="k">once</span>. It is 40k tokens; re-reading it is the single largest\n   waste in this task’s history.\n4. Write the draft to <span class="s">release/&lt;version&gt;-notes</span>. Open a PR.\n5. <span class="k">Never</span> publish the release. That is github__create_release, it needs approval,\n   and it is not yours to ask for.',
@@ -10536,12 +10635,8 @@ function dialog(){
      '<div class="field"><label>Include</label><select aria-label="Include"><option>Everything on this page — by operator, agent, tool, wasted spend, budgets</option><option>By operator and agent only</option><option>By tool only</option><option>Wasted spend only</option></select></div>'+
      '<div class="note">Delivered as CSV and a signed PDF to <span class="mono">marcus@a-intel.example</span>. Every figure carries its basis; the report is built from frames, so a large range takes a few minutes.</div>',
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'The report is being generated and will be sent to your email momentarily\')">Generate report</button>'},
-   budget:{t:"Set a budget",w:false,b:
-     '<div class="field"><label>Scope</label><select aria-label="Scope"><option>agent · a-intel.core.triage</option><option>operator · Marcus Bell</option><option>workspace · core-platform</option><option>organization · a-intel</option></select></div>'+
-     '<div class="field"><label>Period</label><select aria-label="Period"><option>per run</option><option>daily</option><option>monthly</option></select></div>'+
-     '<div class="field"><label>Limit (USD)</label><input value="0.25" aria-label="Limit"><div class="hint">Stored as integer micro-USD. Current highest run this month: $0.29.</div></div>'+
-     '<div class="field"><label>Mode</label><select aria-label="Mode"><option>hard: checked at each hook boundary, pauses at the next one</option><option>soft — recorded and reported, never blocks</option></select></div>',
-     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Budget set. A breach is a policy.decision frame and, by policy, a pause.\')">Set it</button>'},
+   budget:{t:"Set a budget",w:false,b:budgetForm(null),
+     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="budgetSave(-1)">Set it</button>'},
    invite:{t:"Invite a person",w:false,b:
      '<div class="field"><label for="iv-email">Email</label><input id="iv-email" value="rowan@a-intel.example"></div>'+
      '<div class="field"><label for="iv-role">Role</label><select id="iv-role"><option>workspace.member · core-platform</option><option>workspace.owner · core-platform</option><option>org.auditor</option><option>org.billing</option><option>org.owner</option></select></div>'+
@@ -10636,12 +10731,6 @@ function dialog(){
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Policy saved. Recorded as retention.policy_changed; it applies to new seals from now.\')">Save policy</button>'},
    evidence:evidenceDlg(),
    fix:fixDlg(),
-   bisect:{t:"Bisect between two runs",w:false,b:
-     '<div class="field"><label>Task</label><input value="a-intel/platform#482 · Cut 4.11.0 release notes" disabled aria-label="Task"></div>'+
-     '<div class="field"><label>Run A</label><select aria-label="Run A"><option>run_01K5RQ4B9C7XTN2P · sealed · $2.87</option></select></div>'+
-     '<div class="field"><label>Run B</label><select aria-label="Run B"><option>run_01K5RK7C2V8BNM3X · sealed · $3.42</option></select></div>'+
-     '<div class="note">Bisect is offered between any two runs of the same task. Re-run is Stella only, because only Stella’s own deterministic ladder can run the task again.</div>',
-     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Bisect started. The first divergent frame is seq 23: the steering digest differs.\')">Bisect</button>'}
   };
   var d=DLG_EXT[k]?DLG_EXT[k](S.dlgArg):D[k];
   if(!d) return '';
@@ -11090,6 +11179,100 @@ function roleDelDlg(){
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn danger"'+(n.total?' disabled':'')+' onclick="roleDeleteConfirm(\''+h(r.id)+'\')">Delete role</button>'};
 }
 
+
+
+/* ---- confirmations for the five destructive actions that used to fire on one click ---- */
+DLG_EXT.rotatecred=function(key){
+  var a=agent(key); if(!a)return noSuch("Agent");
+  return {t:"Rotate the credential on "+a.key+"?",w:false,
+   b:'<div class="note">A new key is minted and handed to the host at its next check-in. The old key stops working at the next call, and every live run token dies with it.</div>'+
+     '<div class="warn">A run in flight on this agent ends at its next call, not at a boundary. Its frames up to that point are kept.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
+     '<button class="btn primary" onclick="closeDialog();act(\'Credential rotated on '+h(a.key)+'. The old key stops working at the next call and every live run token dies with it.\',\'gold\')">Rotate it</button>'};
+};
+DLG_EXT.revokecred=function(key){
+  var a=agent(key); if(!a)return noSuch("Agent");
+  return {t:"Revoke the credential on "+a.key+"?",w:false,
+   b:'<div class="note">Nothing is minted to replace it. '+h(a.key)+' cannot call anything until a new credential is issued, and every run token dies at the next call.</div>'+
+     '<div class="warn">Rotate is the reversible one. Revoke leaves the agent unable to run.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Keep it</button>'+
+     '<button class="btn danger" onclick="closeDialog();act(\'Credential revoked on '+h(a.key)+'. Every run token dies at the next call.\')">Revoke it</button>'};
+};
+DLG_EXT.suspendagent=function(key){
+  var a=agent(key); if(!a)return noSuch("Agent");
+  return {t:"Suspend "+a.key+"?",w:false,
+   b:'<div class="note">Suspension is reversible and keeps the registration, the roles and the mandates. Every run token dies at the next call, even if the daemon is down, because the refusal is on the server.</div>'+
+     '<div class="note" style="margin-top:10px">Deregister is the one that ends the agent. This one you can undo.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
+     '<button class="btn danger" onclick="closeDialog();act(\'Agent '+h(a.key)+' suspended. Every run token dies at the next call, even if the daemon is down.\')">Suspend it</button>'};
+};
+DLG_EXT.unenroll=function(key){
+  var a=agent(key); if(!a)return noSuch("Agent");
+  return {t:"Unenroll "+(a.host||"the host")+"?",w:false,
+   b:'<div class="note">Calls routed through Oxagen are refused from this host from now on. The hooks on the host are removed at its next check-in, so a host that is offline keeps them until it returns.</div>'+
+     '<div class="warn">Checkpoints from this host are unsigned after this, and the chain records the gap.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Keep it enrolled</button>'+
+     '<button class="btn danger" onclick="closeDialog();act(\'Host revoked. Calls routed through Oxagen are refused from now on. The hooks on the host are removed at its next check-in.\')">Unenroll it</button>'};
+};
+DLG_EXT.cancelrun=function(){
+  return {t:"Cancel this run?",w:false,
+   b:'<div class="note">Cancel is not a pause. The run token is revoked at once, and killing the process is best effort: a host that is offline stops when it next checks in.</div>'+
+     '<div class="warn">Work already written to a working copy stays written. Nothing is rolled back, and the run seals where it stopped.</div>'+
+     '<div class="note" style="margin-top:10px">Pause stops it at the next boundary and can be resumed. Cancel cannot.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Let it run</button>'+
+     '<button class="btn danger" onclick="closeDialog();act(\'Cancel issued. Run token revoked; process kill is best effort and recorded.\')">Cancel the run</button>'};
+};
+
+/* ---- budgets: one form for the create and the edit, so the two can never drift ---- */
+var BUDGET_SCOPES=["organization · a-intel","workspace · core-platform","workspace · finops",
+  "operator · Marcus Bell","agent · a-intel.core.triage"];
+function budgetForm(b){
+  var sc=b?b.scope:BUDGET_SCOPES[4], pd=b?b.period:"per run", lim=b?b.limit:"0.25", md=b?b.mode:"hard";
+  function opt(v,cur,label){return '<option value="'+h(v)+'"'+(v===cur?' selected':'')+'>'+h(label||v)+'</option>';}
+  return '<div class="field"><label for="bgScope">Scope</label><select id="bgScope" aria-label="Scope">'+
+     BUDGET_SCOPES.map(function(v){return opt(v,sc);}).join("")+'</select>'+
+     (b?'<div class="hint">Changing the scope moves the budget. The spend already recorded against the old scope stays there.</div>':'')+'</div>'+
+   '<div class="field"><label for="bgPeriod">Period</label><select id="bgPeriod" aria-label="Period">'+
+     ["per run","daily","monthly"].map(function(v){return opt(v,pd);}).join("")+'</select></div>'+
+   '<div class="field"><label for="bgLimit">Limit (USD)</label><input id="bgLimit" value="'+h(lim)+'" aria-label="Limit">'+
+     '<div class="hint">Stored as integer micro-USD. Current highest run this month: $0.29.</div></div>'+
+   '<div class="field"><label for="bgMode">Mode</label><select id="bgMode" aria-label="Mode">'+
+     opt("hard",md,"hard: checked at each hook boundary, pauses at the next one")+
+     opt("soft",md,"soft: recorded and reported, never blocks")+'</select></div>';
+}
+function budgetAt(i){i=parseInt(i,10);return (i>=0&&i<SPEND.budgets.length)?SPEND.budgets[i]:null;}
+DLG_EXT.budgetedit=function(arg){
+  var b=budgetAt(arg); if(!b)return noSuch("Budget");
+  return {t:"Edit the budget on "+b.scope,w:false,b:budgetForm(b)+
+    '<div class="note">A lower limit applies from the next boundary. It does not undo spend already recorded in this period, so a budget cut below what is used reads as breached at once.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
+     '<button class="btn primary" onclick="budgetSave('+parseInt(arg,10)+')">Save</button>'};
+};
+DLG_EXT.budgetdel=function(arg){
+  var b=budgetAt(arg); if(!b)return noSuch("Budget");
+  return {t:"Remove the budget on "+b.scope+"?",w:false,
+   b:'<div class="note">'+h(b.scope)+' has no ceiling after this. Runs there are still metered and still cost money, and the spend already recorded stays on the ledger.</div>'+
+     (b.mode==="hard"?'<div class="warn">This is a hard budget. Removing it means nothing pauses a run on this scope at a hook boundary.</div>':''),
+   f:'<button class="btn" onclick="closeDialog()">Keep it</button>'+
+     '<button class="btn danger" onclick="budgetDel('+parseInt(arg,10)+')">Remove it</button>'};
+};
+function budgetVal(id,dflt){var e=document.getElementById(id);return e?e.value:dflt;}
+function budgetSave(i){
+  var scope=budgetVal("bgScope",BUDGET_SCOPES[4]), period=budgetVal("bgPeriod","per run"),
+      limit=String(budgetVal("bgLimit","0.25")).replace(/[^0-9.,]/g,""), mode=budgetVal("bgMode","hard");
+  if(!limit||isNaN(parseFloat(limit.replace(/,/g,"")))){toast("A budget needs a limit in USD.","denied");return;}
+  var b=budgetAt(i);
+  if(b){ b.scope=scope; b.period=period; b.limit=limit; b.mode=mode;
+    closeDialog(); render(); act("Budget on "+scope+" set to $"+limit+" "+period+", "+mode+". It applies from the next boundary.","gold");
+  } else { SPEND.budgets.push({scope:scope,period:period,limit:limit,used:"0.00",mode:mode});
+    closeDialog(); render(); act("Budget set on "+scope+": $"+limit+" "+period+", "+mode+". A breach is a policy.decision frame and, by policy, a pause.","gold"); }
+}
+function budgetDel(i){
+  var b=budgetAt(i); if(!b)return;
+  SPEND.budgets.splice(i,1); closeDialog(); render();
+  act("Budget on "+b.scope+" removed. Runs there are metered and uncapped.");
+}
+
 /* ---- identities and role assignment on an agent ---- */
 function agentRoleChips(a){
   var list=agentRolesOf(a.key);
@@ -11128,7 +11311,7 @@ function identityDlg(){
    '<div class="field"><label>Principal</label><input value="prn_01K2M7A4E8 · kind agent" readonly aria-label="Principal"><div class="hint">The principal is the agent’s IAM identity. It is created at registration and never reused.</div></div>'+
    '<div class="field"><label>Acts on behalf of</label><select id="idOp" aria-label="Parent user">'+Object.keys(PEOPLE).map(function(k){return '<option value="'+k+'"'+(a.operator===k?' selected':'')+'>'+h(PEOPLE[k].name)+' · '+h(PEOPLE[k].role)+'</option>';}).join("")+'</select>'+
     '<div class="hint">The parent user sets the delegation ceiling: the agent can never do what this person cannot.</div></div>'+
-   '<div class="field"><label>Roles held</label><div>'+agentRolesOf(a.key).map(function(r){return '<span class="b b-q mono" style="margin:0 3px 3px 0;font-weight:500">'+h(r)+'</span>';}).join("")+'</div><div class="hint">Change roles from the Identity panel with Assign role and the × on each chip.</div></div>'+
+   '<div class="field"><label>Roles held</label><div>'+agentRoleChips(a)+'</div><div class="hint">A role takes effect at the next run start, when the belt is recomputed.</div></div>'+
    '<div class="note">Changing the parent user is a governed action with approval by the new parent. The old ceiling applies until they accept.</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="identitySave()">Request the change</button>'};
 }
@@ -12658,6 +12841,24 @@ DLG_EXT.linkdir=function(){
 };
 
 /* ---- one working copy ---- */
+
+/* ---- disconnecting a working copy. The link is one gitignored file on a laptop, so this is
+   not a pull request: nothing committed changes, and the directory is left exactly as it is. ---- */
+DLG_EXT.copyoff=function(id){
+  var c=copyById(id); if(!c)return noSuch("Working copy");
+  return {t:"Disconnect "+c.path+"?",w:false,
+   b:'<div class="note">Oxagen forgets this directory. <span class="mono">'+h(c.machine)+'</span> stops reporting it, and the gitignored <span class="mono">.oxagen/workspace.json</span> in it stops resolving. Nothing on disk is deleted and nothing committed changes.</div>'+
+     (c.dirty?'<div class="warn">'+c.dirty+' uncommitted edit'+(c.dirty>1?'s':'')+' under <span class="mono">.oxagen/</span> here are carried by no pull request. Disconnecting does not lose them, and it does not propose them either.</div>':'')+
+     '<div class="note" style="margin-top:10px">Running <span class="mono">oxagen init</span> in the directory again links it back.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Keep it</button>'+
+     '<button class="btn danger" onclick="copyDisconnect(\''+h(c.id)+'\')">Disconnect it</button>'};
+};
+function copyDisconnect(id){
+  var c=copyById(id), i=WORKCOPIES.indexOf(c); if(i<0)return;
+  WORKCOPIES.splice(i,1); closeDialog(); render();
+  act(c.path+" on "+c.machine+" disconnected. The directory is untouched; oxagen init links it back.");
+}
+
 DLG_EXT.workcopy=function(){
   var c=copyById(S.dlgArg); if(!c) return {t:"Working copy",w:false,b:"",f:'<button class="btn" onclick="closeDialog()">Close</button>'};
   var st=WC_STATE[c.oxagen]||WC_STATE.unbound, ok=c.oxagen==="in-sync", sym=c.symlinks==="ok";
@@ -12681,8 +12882,39 @@ DLG_EXT.workcopy=function(){
        '<div class="hint">Turning these into a pull request is <span class="mono">oxagen propose</span>. Opening and merging it happen in Oxagen, because both gate on a role only a signed-in person holds.</div></div>':''),
    f:'<span class="grow mono dim" style="font-size:11px">'+h(c.id)+'</span>'+
      '<button class="btn" onclick="closeDialog()">Close</button>'+
+     '<button class="btn danger" onclick="openDialog(\'copyoff\',\''+h(c.id)+'\')">Disconnect</button>'+
      (ok&&sym?'':'<button class="btn primary" onclick="closeDialog();act(\'Asked '+h(c.machine)+' to run oxagen pull\',\'gold\')">Ask for a pull</button>')};
 };
+
+
+/* ---- linking and unlinking a repository. The main repo is neither: moving main is an
+   organization-owner action with approval, and this dialog offers it nowhere. ---- */
+DLG_EXT.repounlink=function(n){
+  var w=ws(), r=repoByName(n);
+  if(!r||n===w.main)return noSuch("Repository");
+  var copies=WORKCOPIES.filter(function(c){return c.repo===n;}).length;
+  return {t:"Unlink "+n+" from "+w.name+"?",w:false,
+   b:'<div class="note">Its issues and events stop reaching this workspace, and a run can no longer bind to it here. The repository is untouched: nothing is deleted, no branch moves, and <span class="mono">.oxagen/</span> stays where it is.</div>'+
+     ((r.ox||"governed")==="governed"?'<div class="warn">Records published in this repository stop steering runs in '+h(w.name)+' the moment this is written. Runs already recorded keep naming the hashes they carried.</div>':'')+
+     (copies?'<div class="warn">'+copies+' working cop'+(copies>1?'ies are':'y is')+' linked through it. '+(copies>1?'They stop':'It stops')+' appearing on the Working copies tab.</div>':''),
+   f:'<button class="btn" onclick="closeDialog()">Keep it linked</button>'+
+     '<button class="btn danger" onclick="repoUnlink(\''+h(n)+'\')">Unlink it</button>'};
+};
+function repoLink(n){
+  var w=ws(), r=repoByName(n); if(!r||n===w.main)return;
+  w.linked=(w.linked||[]);
+  if(w.linked.indexOf(n)<0)w.linked.push(n);
+  r.role="linked";
+  closeDialog(); render();
+  act(n+" linked to "+w.name+". Its issues and events reach this workspace, and a run may bind to it.","gold");
+}
+function repoUnlink(n){
+  var w=ws(), r=repoByName(n); if(!r||n===w.main)return;
+  var i=(w.linked||[]).indexOf(n); if(i>=0)w.linked.splice(i,1);
+  r.role="available";
+  closeDialog(); render();
+  act(n+" unlinked from "+w.name+". Runs already recorded keep naming it; nothing new binds to it here.");
+}
 
 /* ---- one repository ---- */
 DLG_EXT.repo=function(){
@@ -12710,8 +12942,11 @@ DLG_EXT.repo=function(){
         :'Runs on this repository are steered by '+h(w.main)+' and by nothing of its own. There is nowhere to publish a repository-scoped record until the tree exists.')+'</div>'),
    f:'<span class="grow mono dim" style="font-size:11px">'+h(r.n)+'</span>'+
      '<button class="btn" onclick="closeDialog()">Close</button>'+
+     (r.n===w.main?''
+      :avail?'<button class="btn primary" onclick="repoLink(\''+h(r.n)+'\')">Link to this workspace</button>'
+      :'<button class="btn danger" onclick="openDialog(\'repounlink\',\''+h(r.n)+'\')">Unlink</button>')+
      (gov?'<button class="btn" onclick="closeDialog();S.tab.repositories=\'changes\';go(\'#/'+ORG.slug+'/'+w.slug+'/repositories/changes\')">See its changes</button>'
-      :'<button class="btn primary" onclick="closeDialog();wzOpen(\'init\',\''+h(r.n)+'\')">Add Oxagen</button>')};
+      :'<button class="btn'+(avail?'':' primary')+'" onclick="closeDialog();wzOpen(\'init\',\''+h(r.n)+'\')">Add Oxagen</button>')};
 };
 
 /* ============================== adding Oxagen to a repository ==============================
@@ -13748,6 +13983,48 @@ function srcPrOpen(){
   S.srcPr=null; closeDialog(); act(p.msg,"gold");
 }
 
+
+/* ---- archiving a record. The archived status was rendered in three places and produced by
+   nothing, so a record could be published and amended but never taken out of force. ---- */
+function crecPr(rec){
+  var w=ws();
+  var p={id:"oxpr_rec_"+String(rec.id).slice(-14),kind:"record",title:rec.st,
+   repo:w.main,base:w.branch,branch:"context/"+rec.id+".archive",
+   pr:w.main+"#"+(528+OXPRS.length),by:PEOPLE.marcus.name,byKind:"person",
+   opened:"just now",state:"checks_running",
+   trigger:"An operator archived "+rec.id+".",
+   files:[["mod",".oxagen/rules/"+rec.id+".toml",'status = "archived"']],
+   checks:[["schema","pass","context-record/v0.1 still valid with the new status."],
+    ["lineage","pass",h(rec.id)+" keeps its lineage. An archived record is the same record, out of force."],
+    ["dependent_records","pass","No published record in "+h(w.name)+" cites this one as the reason it narrows."],
+    ["bundle_recompilation","pass","The bundle loses "+(crecBundleRow(rec)?crecBundleRow(rec).tok+" tokens":"nothing, because it was not compiled")+" at v"+(STEER_BUNDLE.v+1)+"."]]};
+  OXPRS.unshift(p);
+  return p;
+}
+DLG_EXT.crecarchive=function(id){
+  var rec=stgRecord(id); if(!rec)return noSuch("Record");
+  if(rec.status==="archived")return {t:rec.id+" is already archived",w:false,
+   b:'<div class="note">It is out of force and kept. Every run it steered still names its hash.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Close</button>'};
+  var pend=S.recPending[rec.id];
+  if(pend)return {t:rec.id+" already has a pull request open",w:false,
+   b:'<div class="note">Branch <span class="mono">'+h(pend.branch)+'</span> is waiting on its checks. Land or close that one first, so two changes are never proposed over the same file.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Close</button>'};
+  return {t:"Archive "+rec.id+"?",w:false,
+   b:'<div class="note">Archiving is a pull request that sets <span class="mono">status = "archived"</span> on <span class="mono">.oxagen/rules/'+h(rec.id)+'.toml</span>. The file stays, the lineage stays, and the record stops compiling into the bundle when it merges. It is in force until then.</div>'+
+     (rec.ce?'<div class="warn">This record carries <span class="mono">'+h(rec.ce)+'</span>, so it compiles to a gate as well as to text. The gate goes with it, and what it refused today is allowed once this merges.</div>':'')+
+     '<div class="note" style="margin-top:10px">Nothing is deleted. Every run this record steered keeps naming its hash, and a later record may supersede it instead.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Keep it in force</button>'+
+     '<button class="btn danger" onclick="crecArchive(\''+h(rec.id)+'\')">Open the pull request</button>'};
+};
+function crecArchive(id){
+  var rec=stgRecord(id); if(!rec)return;
+  var p=crecPr(rec);
+  S.recPending[rec.id]={branch:p.branch,kind:"record"};
+  closeDialog(); render();
+  act("Opened "+p.pr+" to archive "+rec.id+". It is in force until that merges.","gold");
+}
+
 function pRecord(r){
   var w=ws(), rec=stgRecord(decodeURIComponent(r.id||""))||RECORDS[0];
   if(S.state==="loading") return skeleton();
@@ -13767,6 +14044,7 @@ function pRecord(r){
    '</div>'+
    '<p style="margin-top:10px">'+h(KINDS[rec.kind].d)+'. It is in force because <span class="mono">'+h(rec.commit||"")+'</span> merged, and it stops being in force the same way.</p></div>'+
    '<div class="acts"><button class="btn" data-ced-dirty onclick="cedRevert(\''+key+'\')" disabled>Discard</button>'+
+   (arch?'':'<button class="btn danger" onclick="openDialog(\'crecarchive\',\''+h(rec.id)+'\')">Archive</button>')+
    '<button class="btn primary" onclick="crecSave(stgRecord(\''+h(rec.id)+'\'))">Propose a change</button></div></div>'+
    '<div class="crec-grid">'+
     '<div>'+

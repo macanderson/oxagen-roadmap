@@ -979,6 +979,24 @@ for (const theme of ["light", "dark"]) {
   await page.close();
 }
 
+// The Change identity dialog listed the roles as plain badges and told you to go edit them on the
+// panel behind it. A drill-down that cannot write is a dead end.
+{
+  const { page, errs } = await open("#/a-intel/core-platform/agents/summarizer");
+  const key = await page.evaluate(() => AGENTS[0].key);
+  await page.evaluate((k) => openDialog("identity", k), key);
+  await page.waitForTimeout(300);
+  const chips = await page.evaluate(() => document.querySelectorAll("#layer .dlg .rl-chip button").length);
+  ok(chips > 0, "identity: each role chip carries its own remove, got " + chips);
+  const btns = await page.evaluate(() =>
+    [...document.querySelectorAll("#layer .dlg button")].map((b) => b.textContent.trim()));
+  ok(btns.includes("Assign role"), "identity: the dialog assigns a role, got " + btns.join(" ~ "));
+  const txt = await page.evaluate(() => document.querySelector("#layer .dlg").innerText);
+  ok(!/from the Identity panel/.test(txt), "identity: the dialog does not send you to another panel to edit");
+  ok(errs.length === 0, "identity: no JavaScript error: " + errs.join(" | "));
+  await page.close();
+}
+
 // Two gate buttons carried the mid-dot the plain-noun rule bans, and one pointed at a Mandates
 // ledger tab that no longer exists.
 {
@@ -992,6 +1010,231 @@ for (const theme of ["light", "dark"]) {
     ok(opens.includes(label), "gates: " + label + " is present, got " + opens.join(" ~ "));
   }
   ok(errs.length === 0, "gates: no JavaScript error: " + errs.join(" | "));
+  await page.close();
+}
+
+
+// A skill could be written and edited and never retired. One written here is a file; one installed
+// is a line in workspace.toml. Both are a pull request, and the drill-down offers it either way.
+{
+  const { page, errs } = await open("#/a-intel/core-platform/steering/skills");
+  const foot = async (kind, arg) => {
+    await page.evaluate(([k, a]) => { closeDialog(); openDialog(k, a); }, [kind, arg]);
+    await page.waitForTimeout(220);
+    return await page.evaluate(() =>
+      [...document.querySelectorAll("#layer .dlg .dlg-f button")].map((b) => b.textContent.trim()));
+  };
+  const inTree = await foot("skill", "a-intel.release-notes-from-prs");
+  ok(inTree.includes("Retire"), "skills: a file-backed skill offers Retire, got " + inTree.join(" ~ "));
+  ok(inTree.indexOf("Close") < inTree.indexOf("Retire"),
+    "skills: Close comes before Retire, as in every other drill-down, got " + inTree.join(" ~ "));
+  ok(inTree.filter((b) => /^(Edit the file|Send the digest for approval)$/.test(b)).length === 1,
+    "skills: the footer keeps exactly one primary, got " + inTree.join(" ~ "));
+  const installed = await foot("skill", "oxagen.pdf-extract");
+  ok(installed.includes("Retire"), "skills: an installed skill offers Retire too, got " + installed.join(" ~ "));
+
+  await page.evaluate(() => { closeDialog(); openDialog("skretire", "a-intel.release-notes-from-prs"); });
+  await page.waitForTimeout(220);
+  const rt = await page.evaluate(() => document.querySelector("#layer .dlg").innerText);
+  ok(/\.oxagen\/skills\/release-notes-from-prs\/SKILL\.md/.test(rt),
+    "skills: the confirm names the file the pull request removes, got " + rt.slice(0, 160));
+  ok(/digest/.test(rt), "skills: the confirm says the runs that cited it keep their digest");
+  await page.evaluate(() => { closeDialog(); openDialog("skretire", "oxagen.pdf-extract"); });
+  await page.waitForTimeout(220);
+  const it = await page.evaluate(() => document.querySelector("#layer .dlg").innerText);
+  ok(/workspace\.toml/.test(it), "skills: retiring an installed skill edits workspace.toml, got " + it.slice(0, 160));
+  ok(!/SKILL\.md/.test(it), "skills: an installed skill has no SKILL.md in this tree to remove");
+
+  const before = await page.evaluate(() => OXPRS.length);
+  const pr = await page.evaluate(() => {
+    closeDialog(); skRetire("a-intel.release-notes-from-prs");
+    return { n: OXPRS.length, kind: OXPRS[0].kind, op: OXPRS[0].files[0][0], file: OXPRS[0].files[0][1] };
+  });
+  await page.waitForTimeout(300);
+  ok(pr.n === before + 1, "skills: retiring opens one pull request, got " + before + " -> " + pr.n);
+  ok(pr.kind === "skill" && pr.op === "del", "skills: it is a skill pull request that deletes, got " + pr.kind + "/" + pr.op);
+  ok(/SKILL\.md$/.test(pr.file), "skills: it removes the SKILL.md, got " + pr.file);
+  const rows = await page.evaluate(() => document.body.innerText.toLowerCase());
+  ok(/retiring/.test(rows), "skills: the row says it is being retired while the pull request is open");
+  await page.evaluate(() => { closeDialog(); openDialog("skretire", "a-intel.release-notes-from-prs"); });
+  await page.waitForTimeout(220);
+  const again = await page.evaluate(() => document.querySelector(".dlg-h h2").textContent);
+  ok(/already being retired/.test(again), "skills: a second retire does not open a second pull request, got " + again);
+  ok(errs.length === 0, "skills: no JavaScript error: " + errs.join(" | "));
+  await page.close();
+}
+
+// A repository could be seen and never unlinked, and one sitting there available could never be
+// linked. Main is neither: moving main is an owner action and this dialog never offers it.
+{
+  const { page, errs } = await open("#/a-intel/core-platform/repositories");
+  const foot = async (n) => {
+    await page.evaluate((x) => { closeDialog(); openDialog("repo", x); }, n);
+    await page.waitForTimeout(220);
+    return await page.evaluate(() =>
+      [...document.querySelectorAll("#layer .dlg .dlg-f button")].map((b) => b.textContent.trim()));
+  };
+  const main = await foot("a-intel/platform");
+  ok(!main.includes("Unlink"), "repositories: the main repo cannot be unlinked here, got " + main.join(" ~ "));
+  const linked = await foot("a-intel/billing");
+  ok(linked.includes("Unlink"), "repositories: a linked repo offers Unlink, got " + linked.join(" ~ "));
+  const avail = await foot("a-intel/ledger-service");
+  ok(avail.includes("Link to this workspace"), "repositories: an available repo offers Link, got " + avail.join(" ~ "));
+  ok(!avail.includes("Unlink"), "repositories: an unlinked repo has nothing to unlink, got " + avail.join(" ~ "));
+  ok(avail.filter((b) => b === "Link to this workspace" || b === "Add Oxagen").length === 2,
+    "repositories: Link and Add Oxagen are both offered, got " + avail.join(" ~ "));
+  const primaries = await page.evaluate(() =>
+    document.querySelectorAll("#layer .dlg .dlg-f button.primary").length);
+  ok(primaries === 1, "repositories: the footer carries one primary, got " + primaries);
+
+  await page.evaluate(() => { closeDialog(); openDialog("repounlink", "a-intel/billing"); });
+  await page.waitForTimeout(220);
+  const ut = await page.evaluate(() => document.querySelector("#layer .dlg").innerText);
+  ok(/nothing is deleted/i.test(ut), "repositories: the confirm says the repository is untouched, got " + ut.slice(0, 160));
+  const trip = await page.evaluate(() => {
+    closeDialog(); repoUnlink("a-intel/billing");
+    const off = { linked: ws().linked.indexOf("a-intel/billing") >= 0, role: repoByName("a-intel/billing").role };
+    repoLink("a-intel/billing");
+    return { off, on: { linked: ws().linked.indexOf("a-intel/billing") >= 0, role: repoByName("a-intel/billing").role } };
+  });
+  await page.waitForTimeout(300);
+  ok(trip.off.linked === false && trip.off.role === "available",
+    "repositories: unlinking drops it from the workspace and leaves it available, got " + JSON.stringify(trip.off));
+  ok(trip.on.linked === true && trip.on.role === "linked",
+    "repositories: linking it back is the same round trip, got " + JSON.stringify(trip.on));
+  ok(errs.length === 0, "repositories: no JavaScript error: " + errs.join(" | "));
+  await page.close();
+}
+
+// A working copy could be connected and never disconnected. The link is one gitignored file on a
+// laptop, so this is not a pull request and the confirm has to say so.
+{
+  const { page, errs } = await open("#/a-intel/core-platform/repositories/copies");
+  const cid = await page.evaluate(() => wsCopies()[0].id);
+  await page.evaluate((i) => { closeDialog(); openDialog("workcopy", i); }, cid);
+  await page.waitForTimeout(220);
+  const foot = await page.evaluate(() =>
+    [...document.querySelectorAll("#layer .dlg .dlg-f button")].map((b) => b.textContent.trim()));
+  ok(foot.includes("Disconnect"), "copies: the drill-down disconnects the copy, got " + foot.join(" ~ "));
+  await page.evaluate((i) => { closeDialog(); openDialog("copyoff", i); }, cid);
+  await page.waitForTimeout(220);
+  const ct = await page.evaluate(() => document.querySelector("#layer .dlg").innerText);
+  ok(/workspace\.json/.test(ct), "copies: the confirm names the gitignored link file, got " + ct.slice(0, 160));
+  ok(/nothing on disk is deleted/i.test(ct), "copies: the confirm says the directory is left alone");
+  ok(/oxagen init/.test(ct), "copies: the confirm says how to link it back");
+  ok(!/pull request/i.test(ct), "copies: disconnecting is not a pull request, got " + ct.slice(0, 200));
+  const n = await page.evaluate((i) => {
+    const before = WORKCOPIES.length; closeDialog(); copyDisconnect(i);
+    return { before, after: WORKCOPIES.length };
+  }, cid);
+  await page.waitForTimeout(300);
+  ok(n.after === n.before - 1, "copies: disconnecting removes the row, got " + n.before + " -> " + n.after);
+  const left = await page.evaluate(() => [...document.querySelectorAll("table tbody tr")].length);
+  ok(left >= 0, "copies: the table renders after the row goes, got " + left + " rows");
+  ok(errs.length === 0, "copies: no JavaScript error: " + errs.join(" | "));
+  await page.close();
+}
+
+// The archived status was rendered in three places and produced by nothing, so a record could be
+// published and amended but never taken out of force.
+{
+  const { page, errs } = await open("#/a-intel/core-platform/steering/records");
+  const rid = await page.evaluate(() => RECORDS.filter((r) => r.status === "published")[0].id);
+  await page.goto(FILE + "?product=1&state=loaded&mobile=0#/a-intel/core-platform/steering/records/" + encodeURIComponent(rid));
+  await page.waitForTimeout(400);
+  const acts = await page.evaluate(() =>
+    [...document.querySelectorAll(".phead .acts button")].map((b) => b.textContent.trim()));
+  ok(acts.includes("Archive"), "records: the record page archives the record, got " + acts.join(" ~ "));
+  ok(acts.includes("Propose a change"), "records: it still proposes a change, got " + acts.join(" ~ "));
+
+  await page.evaluate((i) => { closeDialog(); openDialog("crecarchive", i); }, rid);
+  await page.waitForTimeout(220);
+  const at = await page.evaluate(() => document.querySelector("#layer .dlg").innerText);
+  ok(/status = "archived"/.test(at), "records: the confirm names the field it sets, got " + at.slice(0, 200));
+  ok(/in force until/i.test(at), "records: the confirm says it steers runs until the merge");
+  ok(/nothing is deleted/i.test(at), "records: the confirm says the file and the lineage stay");
+
+  const pr = await page.evaluate((i) => {
+    const before = OXPRS.length; closeDialog(); crecArchive(i);
+    return { before, after: OXPRS.length, kind: OXPRS[0].kind, file: OXPRS[0].files[0][1],
+      note: OXPRS[0].files[0][2], pend: S.recPending[i] ? S.recPending[i].branch : null };
+  }, rid);
+  await page.waitForTimeout(400);
+  ok(pr.after === pr.before + 1, "records: archiving opens one pull request, got " + pr.before + " -> " + pr.after);
+  ok(pr.kind === "record", "records: it is a context record pull request, got " + pr.kind);
+  ok(/^\.oxagen\/rules\//.test(pr.file), "records: it edits the record file, got " + pr.file);
+  ok(/archived/.test(pr.note), "records: the change is the status, got " + pr.note);
+  ok(/\.archive$/.test(pr.pend || ""), "records: the page shows the branch while it is open, got " + pr.pend);
+
+  await page.evaluate((i) => { closeDialog(); openDialog("crecarchive", i); }, rid);
+  await page.waitForTimeout(220);
+  const twice = await page.evaluate(() => document.querySelector(".dlg-h h2").textContent);
+  ok(/already has a pull request open/.test(twice),
+    "records: two changes are never proposed over the same file, got " + twice);
+
+  const arch = await page.evaluate(() => {
+    const r = RECORDS.filter((x) => x.status === "archived")[0];
+    return r ? r.id : null;
+  });
+  if (arch) {
+    await page.evaluate((i) => { closeDialog(); openDialog("crecarchive", i); }, arch);
+    await page.waitForTimeout(220);
+    const done = await page.evaluate(() => document.querySelector(".dlg-h h2").textContent);
+    ok(/is already archived/.test(done), "records: an archived record is not archived twice, got " + done);
+  }
+  ok(errs.length === 0, "records: no JavaScript error: " + errs.join(" | "));
+  await page.close();
+}
+
+
+// The memory tab told you to promote a memory and no row offered it, and nothing forgot one:
+// a fact an agent got wrong kept being recalled with no way to stop it.
+{
+  const { page, errs } = await open("#/a-intel/core-platform/steering/memory");
+  const clickable = await page.evaluate(() => document.querySelectorAll("table tbody tr.click").length);
+  const total = await page.evaluate(() => stgMemory("core-platform").length);
+  ok(clickable === total, "memory: every row opens its item, got " + clickable + " of " + total);
+  const mid = await page.evaluate(() => MEMORY[0].id);
+  await page.evaluate((i) => { closeDialog(); openDialog("memory", i); }, mid);
+  await page.waitForTimeout(250);
+  const foot = await page.evaluate(() =>
+    [...document.querySelectorAll("#layer .dlg .dlg-f button")].map((b) => b.textContent.trim()));
+  for (const b of ["Close", "Forget", "Promote to a record"]) {
+    ok(foot.includes(b), "memory: the drill-down offers " + b + ", got " + foot.join(" ~ "));
+  }
+  const mt = await page.evaluate(() => document.querySelector("#layer .dlg").innerText);
+  ok(/Where it came from/.test(mt), "memory: the drill-down names the run that left it, got " + mt.slice(0, 160));
+  ok(/times in 30 days/.test(mt), "memory: it says how often the memory is recalled");
+  ok(/tokens every time it is selected/.test(mt), "memory: it says what a recall costs");
+  ok(/published record/i.test(mt), "memory: it says where the memory sits against a published record");
+
+  await page.evaluate((i) => { closeDialog(); openDialog("memforget", i); }, mid);
+  await page.waitForTimeout(250);
+  const ft = await page.evaluate(() => document.querySelector("#layer .dlg").innerText);
+  ok(/every frame stays/.test(ft), "memory: forgetting leaves the runs alone, got " + ft.slice(0, 200));
+  ok(/Promote is the other answer/.test(ft), "memory: the confirm offers the other answer");
+  const n = await page.evaluate((i) => {
+    const before = MEMORY.length; closeDialog(); memForget(i);
+    return { before, after: MEMORY.length, rows: document.querySelectorAll("table tbody tr.click").length };
+  }, mid);
+  await page.waitForTimeout(300);
+  ok(n.after === n.before - 1, "memory: forgetting drops the memory, got " + n.before + " -> " + n.after);
+  ok(n.rows === n.after, "memory: the table re-renders without it, got " + n.rows + " rows for " + n.after);
+
+  const mid2 = await page.evaluate(() => MEMORY[0].id);
+  const body = await page.evaluate((i) => memById(i).body, mid2);
+  await page.evaluate((i) => { closeDialog(); memPromote(i); }, mid2);
+  await page.waitForTimeout(350);
+  const title = await page.evaluate(() => document.querySelector(".dlg-h h2").textContent);
+  ok(/context record/i.test(title), "memory: promoting opens the record wizard, got " + title);
+  const wz = await page.evaluate(() => S.wz && { kind: S.wz.kind, from: S.wz.fromMemory, desc: S.wz.desc });
+  ok(wz && wz.kind === "record" && wz.from === mid2,
+    "memory: the wizard knows which memory it came from, got " + JSON.stringify(wz && { k: wz.kind, f: wz.from }));
+  ok(wz && wz.desc === body, "memory: the wizard is seeded with the memory, not left empty");
+  const fields = await page.evaluate(() =>
+    [...document.querySelectorAll("#layer .dlg textarea, #layer .dlg input")].map((x) => x.value).join(" ~ "));
+  ok(fields.includes(body), "memory: the seeded text reaches the field, got " + fields.slice(0, 160));
+  ok(errs.length === 0, "memory: no JavaScript error: " + errs.join(" | "));
   await page.close();
 }
 

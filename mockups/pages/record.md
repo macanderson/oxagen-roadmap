@@ -17,7 +17,7 @@ One published context record, presented by its kind. The statement is the record
 ## What is on the page
 
 **Header**: eyebrow “**Steering** · record” (Steering is a link back to the Records tab of the hub, `#/…/steering/records`); breadcrumbs Steering / <lineage>. The kind glyph in a tinted tile, then the statement as the h1 (up to 62ch, never truncated). Chips: the kind badge, the steering force, the constraint effect where the kind has one, the scope, `published` (or `archived`), and the pending branch badge when a proposal is open against it. Subtext, one line: the kind's one-line description, then “It is in force because <commit> merged, and it stops being in force the same way.”
-Actions: **Discard** (enabled only when the statement is modified) · **Propose a change** (gold)
+Actions: **Discard** (enabled only when the statement is modified) · **Archive** (red; opens `crecarchive`; absent on a record that is already archived) · **Propose a change** (gold)
 
 - **Statement editor**: the shared code editor (`cedHtml`) over the statement and nothing else, path label `.oxagen/rules/<lineage>.toml · statement`, bar “unchanged” (or the change state) and “188 tok in the bundle” (or “not compiled”). Line-number gutter, markdown syntax highlighting, current-line band, **Find ⌘F** with a match count, a status line with `Ln/Col`, the grammar, a line and character count, and the key hints. Under it a note: this is the statement and nothing else; the lineage, the force, the scope and the effect are the rest of the file, and each one is changed the same way, a pull request against the main repo.
 - **Lineage** panel (badge “the graph remembers everything; git decides what is in force”): Lineage, File (`.oxagen/rules/<lineage>.toml` on <main repo>), Published by (<commit> on <date>), Effect (the effect line, “rendered 212 · cited 212 · violated 0”, or “never rendered”), and Schema (`context-record/v0.1`).
@@ -38,6 +38,8 @@ Every kind panel ends with **What it can never do.**, the one sentence that stop
 - **Related records**: up to three, as record cards with an **Open** button, under Sort, Rows, and a pager; or “None. This is the only <kind> in <workspace>.”
 
 **Dialogs this page opens:** `srcpr`, **Propose a change to this record**: the lead (“A published record is changed the way it was published: a branch, a pull request, the same six checks, and a merge. Nothing here edits what is in force.”), the statement diff against what is in force with a `+n / −n` count, the branch `context/<lineage>.amend`, and the six checks (Schema; Lineage, an amended record is the same record; record_hash recomputation, the old hash stays on every run that carried it; Secret and PII scan; Conflict against active records, re-run in full; constraint_effect unchanged). Footer **Cancel** · **Open the pull request** (gold; disabled when nothing changed). Opening reports “a-intel/platform#528 opened. <lineage> changes when it merges; until then every run still gets the words that are in force now.”
+
+`crecarchive`, **Archive <lineage>?**: archiving is a pull request that sets `status = "archived"` on `.oxagen/rules/<lineage>.toml`. The file stays, the lineage stays, and the record stops compiling into the bundle when it merges; it is in force until then. A record carrying a constraint effect says so, because the gate goes with it and what it refused today is allowed once this merges. Nothing is deleted: every run it steered keeps naming its hash, and a later record may supersede it instead. Footer: **Keep it in force** · **Open the pull request** (red). A record that already has a pull request open against it says so and offers Close instead, so two changes are never proposed over the same file; one already archived says so too.
 
 **Shell.** As `steering.md`: sidebar (Workspace nav: Fleet · Agent IAM · Tools · Steering · Repositories · Spend; Organization nav: Organization · Billing · Audit) with Steering lit, top bar with breadcrumbs, ⌘K search-or-run, notifications, the **Approvals** button (count of everything waiting on you across the organization) that opens the drawer `#apdrawer`, and the account avatar. No assistant button in the top bar.
 
@@ -78,7 +80,7 @@ Top bar collapses to hamburger · current crumb · search glyph · notifications
 ## Permissions
 
 - Read: `steering.read`
-- Writes (each a governed action recorded in Audit): `steering.write (commit to a branch)`, `repo.pr.open`
+- Writes (each a governed action recorded in Audit): `steering.write (commit to a branch)`, `repo.pr.open`, `steering.archive (open the pull request that takes a record out of force)`
 
 ## Backend gaps this page depends on
 
