@@ -68,7 +68,7 @@
   "tokens": 1320,
   "tier": "approval",
   "state": "ok",
-  "st": "Expand, backfill, contract — and never in one deploy. Names the four migrations that took production down in 2025.",
+  "st": "Expand, backfill, contract, never in one deploy. Names the four migrations that took production down in 2025.",
   "cited": 37,
   "runs": 41,
   "owner": "dana",

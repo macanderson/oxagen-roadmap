@@ -60,7 +60,7 @@ that the version bumps before the merge, and checks every page's entry point is 
 Every assertion names a string the surface is supposed to render, never a value read back out of
 the field the bug would corrupt. It was mutation-tested against four deliberate regressions —
 collapsing the six kind panels into one, putting the tool matcher back on substring matching,
-emptying the editor gutter, and scoping the phone rule to `#viewport` only — and catches all four.
+emptying the editor gutter, and scoping the phone rule to `#viewport` only, and catches all four.
 
 ## The assistant guard
 
@@ -71,8 +71,8 @@ node tools/check-assistant.mjs --shots   # a screenshot per state
 
 The in-app agent (spec §4.4) is neither a page nor a dialog: it is a permanent host beside `#layer`
 that `render()` reclasses but never rebuilds, which is exactly the property a tidy-up of `render()`
-would break. This asserts the behaviour that property exists for — a half-typed message survives a
-re-render, and the host is the same DOM node afterwards — plus the closed panel being `inert` and
+would break. This asserts the behaviour that property exists for: a half-typed message survives a
+re-render, and the host is the same DOM node afterwards, plus the closed panel being `inert` and
 `aria-hidden`, the panel painting under the rail rather than over it, Escape closing it without also
 changing the route, the turn badge naming whose run it is and never linking into the tenant's run
 index, and both refusals (engine down, no model key) saying so by name with the message box disabled
@@ -80,8 +80,8 @@ rather than degrading into something that looks like an answer. It then walks th
 model key on the funding tab: the prefix rather than the secret, the provisioned id reconciliation
 joins on, the two independent numbers in the reconciliation block, and mint, rotate and revoke.
 
-Mutation-tested against three deliberate regressions — rebuilding the sheet on every render,
-removing the no-key refusal, and dropping the `inert` guard — and catches all three.
+Mutation-tested against three deliberate regressions (rebuilding the sheet on every render,
+removing the no-key refusal, and dropping the `inert` guard) and catches all three.
 
 ## The record end-to-end guard
 
@@ -96,7 +96,7 @@ place the guarantee can be lost. This walks the whole path in one session and as
 that make it a governed publication rather than a save button: while the pull request is open the
 record is **not** in Records, **not** in the compiled bundle, **not** in the audit log and the
 bundle version has not moved; merge is blocked until every check reports, and forcing it through
-publishes nothing; merge publishes exactly once — one record, one rule, one version, one audit
+publishes nothing; merge publishes exactly once: one record, one rule, one version, one audit
 event; and the promoter's own pull request is untouched throughout. It then opens the record's page
 and finds it in the list, and separately checks that closing a pull request without merging leaves
 nothing behind and that a kind which constrains nothing takes the other branch of the sixth check.
@@ -108,7 +108,7 @@ on screen claiming otherwise); a second operator pull request does not erase the
 statement containing a quote still produces a file that parses with the app's own TOML reader.
 
 Counts are read before and after and compared, never read back out of the thing under test.
-The second review round found three more, each also reproduced first — and the first of them was a
+The second review round found three more, each also reproduced first, and the first of them was a
 defect introduced by fixing the first round. Making pull requests a collection opened a window where
 two of them run the uniqueness predicate before either publishes, both go green, and merging both
 publishes the duplicate anyway. So the check counts competing **open** pull requests (earliest claim
@@ -116,16 +116,16 @@ wins), and **every check with a predicate is re-run at merge**: one that went gr
 may not be green now. Alongside it: every compiled bundle version derives its own digest, so a panel
 claiming the bundle was re-signed renders one; and the multi-line TOML writer escapes backslashes
 and reaches its closing fence with a line continuation, because a bare newline before the fence is
-part of the value — without it every round-trip appended a blank line, which also hit the agent
+part of the value, because without it every round-trip appended a blank line, which also hit the agent
 definition editor.
 
-Mutation-tested against thirteen deliberate regressions — publishing when the pull request opens
+Mutation-tested against thirteen deliberate regressions (publishing when the pull request opens
 rather than when it merges, merging without waiting for the checks, dropping the newest-first order
 on the records list, replacing the per-record check text with a fixed string, removing the lineage
 predicate, making the check runner ignore every test, collapsing the pull-request collection back to
 one, dropping the TOML escaping, ignoring competing open pull requests, skipping the re-check at
 merge, leaving a new bundle version without a digest, unescaping nothing on the way back in, and
-writing a bare newline before the closing fence — and catches all thirteen. The escaping one is
+writing a bare newline before the closing fence) and catches all thirteen. The escaping one is
 worth seeing fail: with it removed, `Path:\deploy\q` comes back as `Path:deployq`.
 
 ## Writing a scenario

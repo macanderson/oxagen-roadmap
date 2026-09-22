@@ -21,7 +21,7 @@
   "tainted": false,
   "tier": "harness",
   "parkedAt": "09:31:08Z",
-  "approvers": "role:org.billing — Marcus Bell, Priya Natarajan · Dana Okafor is the operator of this run and is excluded by fin.no_self_approval",
+  "approvers": "role:org.billing (Marcus Bell, Priya Natarajan). Dana Okafor is the operator of this run and is excluded by fin.no_self_approval",
   "rules": [
    {
     "id": "mandate.approval.always_for",
@@ -72,7 +72,7 @@
   "tainted": false,
   "tier": "harness",
   "parkedAt": "09:14:51Z",
-  "approvers": "role:workspace.owner — Marcus Bell, Priya Natarajan",
+  "approvers": "role:workspace.owner (Marcus Bell, Priya Natarajan)",
   "rules": [
    {
     "id": "rg_0093.require_approval",
@@ -113,7 +113,7 @@
   "tainted": true,
   "tier": "harness",
   "parkedAt": "07:31:31Z",
-  "approvers": "role:workspace.owner — Marcus Bell, Priya Natarajan",
+  "approvers": "role:workspace.owner (Marcus Bell, Priya Natarajan)",
   "taint": [
    {
     "frame": 9,

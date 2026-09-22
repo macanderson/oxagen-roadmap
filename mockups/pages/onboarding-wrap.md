@@ -17,7 +17,7 @@ Step 2 of 3 of the gate: wrap the first agent. This is the Register agent wrap s
 ## What is on the page
 
 **Header.** Eyebrow “Step 2 of 3”, h1 “Wrap an agent”, lead “The installer carries a one-time enrollment token for `a-intel.core.release-manager`, so nothing is copied or pasted.”
-Actions (card footer): **Cancel** · **Back** · caption “Nothing completes until a frame arrives.” · **I have already installed it — continue**. The gold action is **Download for <OS>** inside the Claude Code and Codex CLI panels. The SDK panel has no gold action.
+Actions (card footer): **Cancel** · **Back** · caption “Nothing completes until a frame arrives.” · **I have already installed it**. The gold action is **Download for <OS>** inside the Claude Code and Codex CLI panels. The SDK panel has no gold action.
 
 - Harness tabs (`role=tablist`, “How to wrap the agent”): **Claude Code** “one click · harness” · **Codex CLI** “one click · harness” · **SDK agent** “five lines · harness”. Claude Code is preselected (the onboarding record’s harness is `claude-code`).
 - The three panels are the ones in `register-wrap.md`, word for word, with the key `a-intel.core.release-manager` in the SDK code: Claude Code (h3 with “recommended”, the installer copy, the tier ladder This agent `harness` · Next rung `gateway` · Top rung `contained`, the tier sentence, the Download column with OS tabs macOS · Windows · Linux, **Download for macOS**, the `REG_PKG` package line, the token box with `oxe_1time_7QK4M2NV9XR3T8ZP` and “expires in 30 min · single use”, and `oxagen agent enroll --token …`); Codex CLI (the `~/.codex/config.toml` copy, “or observe” on the ladder, “profile: codex-cli”, `oxagen agent enroll --harness codex-cli`); SDK agent (the five-line copy, the “Agent credential” box, the install line, language tabs TypeScript · Python · Go, **Copy the five lines**, the code).
@@ -36,7 +36,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 
 ## Functionality
 
-- Identical to `register-wrap.md`. **Download for <OS>** records the harness, toasts “Signed installer for <OS> downloaded with the one-time token embedded.”, and moves to Start a run. **I have already installed it — continue** moves there without changing the harness.
+- Identical to `register-wrap.md`. **Download for <OS>** records the harness, toasts “Signed installer for <OS> downloaded with the one-time token embedded.”, and moves to Start a run. **I have already installed it** moves there without changing the harness.
 - **Back** returns to Name the organization, not to an agent name step. Either Cancel (`obExit`) clears the onboarding state and goes to Fleet.
 - The tier ladder shows all four tiers as real: `harness` for this agent, `gateway` and `contained` as the next rungs, and `observe` as the fallback for a Codex CLI without an approval hook.
 

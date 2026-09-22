@@ -60,7 +60,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 ## States
 
 - **loaded**: the page as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell).
-- **empty**: “No runs yet in Core platform”. “Nothing has reached Oxagen from this workspace. A run appears the moment a registered agent makes its first model call — you do not create runs here, agents do.” Actions: **Register Agent**, **Open Agents**.
+- **empty**: “No runs yet in Core platform”. “Nothing has reached Oxagen from this workspace. A run appears the moment a registered agent makes its first model call. You do not create runs here, agents do.” Actions: **Register Agent**, **Open Agents**.
 - **loading**: the shell stays; the page body is replaced by the skeleton (four tile blocks and a panel of seven rows), so you keep your bearings.
 - **error**: “Fleet could not be loaded”. “The control plane answered `503 run_index_unavailable`. Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by Oxagen.” Actions: **Try again**, **Open an incident**; the line “trace 01K5RSXQ7F2E · us-east-1 · 2026-09-11 09:16:04Z”.
 - **access denied**: “You cannot see this workspace”. “Your roles on Anderson Intelligence Corp. do not include `workspace.read on core-platform`. An organization owner can grant it; the grant is a governed action and lands in the audit record with your name on it.” Actions: **Request access** (opens `request-access`), **Back to Fleet**. Below: *Signed in as* (Marcus Bell · workspace.owner · core-platform), *Needed* (`workspace.read on core-platform`), *Decided by* (`pol_v41` · deny wins over every allow).

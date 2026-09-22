@@ -95,7 +95,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 ## States
 
 - **loaded**: the page as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell).
-- **empty**: “This workspace has no repository yet”. “A workspace without a main repo cannot exist, so this state is the moment between creating one and binding it. The main repo is where steering and configuration are managed in source control — until it is bound, there is nowhere for a record to be published to.” Action: **Add Oxagen to a repository** (gold). The header and tabs are not rendered.
+- **empty**: “This workspace has no repository yet”. “A workspace without a main repo cannot exist, so this state is the moment between creating one and binding it. The main repo is where steering and configuration are managed in source control. Until it is bound, there is nowhere for a record to be published to.” Action: **Add Oxagen to a repository** (gold). The header and tabs are not rendered.
 - **loading**: the shell stays; the page body is replaced by the skeleton.
 - **error**: “Repositories could not be loaded”. “The control plane answered `503 installation_unreachable`. Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by Oxagen.” Actions: **Try again**, **Open an incident**; the trace line.
 - **access denied**: “You cannot see this workspace’s repositories”, naming `repository.read on core-platform`. Actions: **Request access**, **Back to Fleet**. Below: *Signed in as*, *Needed*, *Decided by* (`pol_v41` · deny wins over every allow).

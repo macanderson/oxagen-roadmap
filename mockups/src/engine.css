@@ -479,7 +479,7 @@ tbody tr.click:hover .drill-lnk{border-bottom-style:solid}
 .dlg .tabs{margin:0;padding:0 18px}
 .dlg .tab{margin-bottom:-1px}
 .avat{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:var(--hl);border:1px solid var(--border);font-size:17px;font-weight:600;letter-spacing:.02em;color:var(--body);flex:none}
-/* avatars — people are round, agents are squircles; the kind (icon, initials, photo) and the tone live on the record.
+/* avatars: people are round, agents are squircles; the kind (icon, initials, photo) and the tone live on the record.
    Three tones, all from the house scale and nothing else: solid · soft · line. No free colour, no gradient.
    Every tone is relative to the theme (solid = the foreground ink as a disc, soft = a lifted panel, line = a hairline), so the
    three stay distinct on ink and on paper alike and the glyph always has full contrast against its ground. */
@@ -575,7 +575,7 @@ a.inv-i:hover *{text-decoration:none}
 .cmd-i .r{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--dim)}
 
 /* ---------- notifications ---------- */
-/* a bordered list of items — the notifications dialog, reusable elsewhere */
+/* a bordered list of items: the notifications dialog, reusable elsewhere */
 .lst{display:flex;flex-direction:column;border:1px solid var(--border);border-radius:10px;overflow:hidden}
 .lst>*{border-bottom:1px solid var(--border)}
 .lst>*:last-child{border-bottom:0}
@@ -861,7 +861,7 @@ html.has-mnav #toast.phone{bottom:calc(88px + env(safe-area-inset-bottom))}
 .rulerow .b{flex:none;min-width:74px;justify-content:center}
 .apfoot{padding:14px 16px;border-top:1px solid var(--border);display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--void)}
 .apfoot .r{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-/* toast stack — one row per event, newest at the bottom */
+/* toast stack: one row per event, newest at the bottom */
 #toast{position:fixed;left:50%;bottom:70px;transform:translateX(-50%);z-index:300;display:grid;gap:8px;justify-items:center;pointer-events:none;width:max-content;max-width:92vw}
 .toast{background:var(--panel);border:1px solid var(--rule);border-radius:11px;padding:11px 16px;box-shadow:var(--shadow);font-size:12.5px;display:flex;align-items:center;gap:10px;max-width:min(560px,92vw);color:var(--fg)}
 .toast .d{width:7px;height:7px;border-radius:50%;flex:none}
@@ -1019,7 +1019,7 @@ details.cm-diff[open] summary::before{content:"▾"}
 .wand-note{display:none;margin-top:8px;font-size:12px;color:var(--muted)}
 .wand-note.on{display:block}
 .wand-note b{color:var(--fg)}
-/* ---- Register Agent gate — the W1 onboarding screens, run in-app from Fleet ---- */
+/* ---- Register Agent gate: the W1 onboarding screens, run in-app from Fleet ---- */
 .reg-gate{min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:0 20px 72px;position:relative}
 .reg-top{width:100%;max-width:772px;display:flex;align-items:center;gap:12px;padding:18px 0 0}
 .reg-top .brandmark{margin:0}
@@ -1230,7 +1230,7 @@ button.edge:hover{color:var(--fg)}
    artifact gets a ringed node and a card; a read gets a hairline tick and a line of text, never a
    card, because the difference between "looked at" and "changed" is the whole point. The gate
    borrows --st-approval and nothing here is gold: gold is identity, not state. The spine of a live
-   run fades out at the bottom — the story is not finished. */
+   run fades out at the bottom. The story is not finished. */
 .ro{border:1px solid var(--border);border-radius:12px;background:var(--panel);padding:15px 18px 13px;margin-bottom:16px}
 .ro-h{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
 .ro-tally{font-family:var(--mono);font-size:11px;color:var(--dim);margin-left:auto}
@@ -1291,10 +1291,10 @@ button.edge:hover{color:var(--fg)}
    scores sit on one line in every layout; the identity block is the only part allowed to give way
    (it ellipsises), the scores are flex:none, so they can never drop under the name however narrow
    the host gets. Three layouts on one markup (agentCard()):
-     list     — a row among other agents: a table cell, a picker, a drill-down
-     compact  — one agent on a record that is about something else: a run, an approval, a mandate;
+     list:     a row among other agents, in a table cell, a picker, or a drill-down
+     compact:  one agent on a record about something else (a run, an approval, a mandate);
                 bordered so it reads as a card, and a link to the agent
-     detail   — the agent's own record: the key is the page title, the scores are the page's numbers */
+     detail:   the agent's own record, where the key is the page title and the scores are the page's numbers */
 .agc{display:flex;align-items:center;gap:10px;flex-wrap:nowrap;min-width:0;color:inherit;text-decoration:none}
 .agc .agid{min-width:0;max-width:240px;display:flex;flex-direction:column;line-height:1.3}
 .agc .agid>*{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -1426,7 +1426,7 @@ table{color:inherit}
 .tx-kind[aria-pressed="false"] span:not(.d){text-decoration:line-through}
 .tx-kind.all{color:var(--muted);padding-left:8px}
 .tx-kind.err .d{display:none}
-/* ---- Onboarding demo — W1's sign-up, log-in and gate screens, reachable from the account dialog. Demo chrome; not shipped. ---- */
+/* ---- Onboarding demo: W1's sign-up, log-in and gate screens, reachable from the account dialog. Demo chrome; not shipped. ---- */
 .ob-auth{min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:0 20px 56px;position:relative;isolation:isolate}
 .ob-auth::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.5;background:repeating-linear-gradient(0deg,transparent 0 47px,var(--border) 47px 48px),repeating-linear-gradient(90deg,transparent 0 47px,var(--border) 47px 48px);-webkit-mask-image:linear-gradient(180deg,#000 0%,transparent 78%);mask-image:linear-gradient(180deg,#000 0%,transparent 78%)}
 .ob-top{width:100%;max-width:1180px;padding:26px 0 0;display:flex;align-items:center;gap:12px}
@@ -1624,7 +1624,7 @@ tr.dod-fail td{background:color-mix(in srgb,var(--st-failed) 6%,transparent)}
 .sx-chip.ok{color:var(--sk-on);border-color:color-mix(in srgb,var(--sk-on) 42%,transparent)}
 .sx-chip.res{color:var(--sk-res);border-color:color-mix(in srgb,var(--sk-res) 45%,transparent)}
 
-/* the search console — what the agent asked, what the config answered */
+/* the search console: what the agent asked, what the config answered */
 .sx-sbox{border:1px solid var(--border);border-radius:12px;background:var(--panel);overflow:hidden}
 .sx-sbox .sq{display:flex;align-items:center;gap:9px;padding:11px 13px;border-bottom:1px solid var(--border);background:var(--hl);flex-wrap:wrap}
 .sx-sbox .sq .lbl{font-family:var(--mono);font-size:11px;color:var(--accent-text);flex:none}
@@ -1698,7 +1698,7 @@ tr.dod-fail td{background:color-mix(in srgb,var(--st-failed) 6%,transparent)}
 .sx-rax .rsay{font-size:12px;color:var(--muted);margin-top:5px;border-left:2px solid var(--rule);padding-left:8px}
 .sx-rax.gap{border-color:color-mix(in srgb,var(--st-failed) 45%,transparent)}
 
-/* the quarantine box — the promise that research data stays research data */
+/* the quarantine box: the promise that research data stays research data */
 .sx-quar{border:1px solid color-mix(in srgb,var(--sk-res) 50%,transparent);border-radius:12px;background:color-mix(in srgb,var(--sk-res) 7%,var(--panel));padding:14px 16px}
 .sx-quar h3{display:flex;align-items:center;gap:8px;color:var(--fg);margin-bottom:8px}
 .sx-quar ol{margin:0;padding-left:18px;color:var(--body);font-size:12.8px;line-height:1.7}
@@ -1874,7 +1874,7 @@ button.wz-opt:hover{border-color:var(--rule)}
    fully behind it when closed (.side paints at z-index 55, the panel at 50). It overlays the page
    instead of reflowing it: an operator opens the agent to ask about what is already on screen, so
    the screen must not move underneath them. The host (#asst, beside #layer) is permanent and
-   render() only rewrites its contents when what it renders changes — that is what lets the
+   render() only rewrites its contents when what it renders changes, and that is what lets the
    transition survive a re-render, and what keeps a half-typed message alive. */
 .asst{position:fixed;top:0;bottom:0;left:var(--side-w);width:min(430px,calc(100vw - var(--side-w) - 56px));
   background:var(--panel);border-right:1px solid var(--border);z-index:50;display:flex;flex-direction:column;
@@ -1891,7 +1891,7 @@ button.wz-opt:hover{border-color:var(--rule)}
   .asst{translate:0 0;transition:opacity .12s ease,visibility 0s .12s}
   .asst.open{translate:0 0;transition:opacity .12s ease,visibility 0s 0s}
 }
-/* the launcher at the foot of the rail — the point the panel flies out of */
+/* the launcher at the foot of the rail: the point the panel flies out of */
 .asst-launch{width:100%;display:flex;align-items:center;gap:9px;padding:7px 9px;margin-bottom:9px;
   border:1px solid var(--border);border-radius:10px;background:var(--panel);color:var(--muted);
   text-align:left;transition:border-color .15s,color .15s}

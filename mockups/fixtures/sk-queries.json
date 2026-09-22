@@ -61,6 +61,6 @@
   "held": [
    "oxagen.pdf-extract"
   ],
-  "none": "The only skill that matches is held on its digest. An unapproved skill is not a low-ranked result — it is not a result."
+  "none": "The only skill that matches is held on its digest. An unapproved skill is not a low-ranked result. It is not a result."
  }
 }

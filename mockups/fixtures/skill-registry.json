@@ -51,7 +51,7 @@
   "digest": "sha256:1a7fe4b309cd8265",
   "tokens": 1320,
   "installs": 2870,
-  "st": "Expand, backfill, contract — and never in one deploy. Names the four migrations that took production down in 2025.",
+  "st": "Expand, backfill, contract, never in one deploy. Names the four migrations that took production down in 2025.",
   "match": [
    "migration",
    "postgres",

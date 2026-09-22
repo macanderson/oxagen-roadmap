@@ -3,8 +3,8 @@
    unpinned, the viewport decides), ?theme=dark|light, ?debug=true, and the hash the file opens on
    when the URL carries none. A host page may set window.BOOT instead.
 
-   The file opens as the product. The mockup chrome — the state bar, the scenario rail, the scenario
-   nav item, the onboarding demo entry points and "Exit demo" — appears only under ?debug=true, so
+   The file opens as the product. The mockup chrome (the state bar, the scenario rail, the scenario
+   nav item, the onboarding demo entry points and "Exit demo") appears only under ?debug=true, so
    what a reviewer sees on a first open is the design and nothing else. ?product=1 is the old
    spelling of the same default and still works. */
 var BOOT=(function(){var q=new URLSearchParams(location.search),b=window.BOOT||{};
@@ -79,11 +79,11 @@ var S = {state:"loaded", phone:false, mobile:false, theme:null,
          ctxSel:"frames", approved:{}, toolNames:"label", beltView:"group", beltCat:"", regCat:"",
          coachFor:"agents", coachDrill:null, coachOff:{}, toolMetric:"cum"};
 
-/* kill switches — mutable state lives on S; SWITCHES is the seed and is never mutated */
+/* kill switches: mutable state lives on S; SWITCHES is the seed and is never mutated */
 S.switches={}; S.flipMeta={}; S.denyGen=118; S.killBanner=null;
 SWITCHES.forEach(function(s){S.switches[s.id]=s.on;});
 
-/* approvals — resolution state lives on S; APPROVALS is the seed and is never mutated.
+/* approvals: resolution state lives on S; APPROVALS is the seed and is never mutated.
    "waited" in the seed becomes a live deadline so the clock on the card is real. */
 function seedApprovals(){
   S.ap={};
@@ -363,14 +363,14 @@ function runSummary(R){
    '<button class="btn sm" onclick="S.tab.run=\'player\';S.frame=0;render()">Check it against the frames</button></div></section>';
 }
 
-/* ===================== <RunOutputs> — the story of what a run produced =====================
+/* ===================== <RunOutputs>: the story of what a run produced =====================
    Decided 2026-09-17 (design/run-outputs/DECISION.md), against feedback item 7. The organising
-   principle is TIME: a run's outputs read in the order the run produced them — read, wrote, cut a
+   principle is TIME: a run's outputs read in the order the run produced them: read, wrote, cut a
    branch, then the gate it is parked on, then what it would do next, then the seal. The other two
    candidates are folded in rather than competing: disposition is the state badge on each node
    (created · written · read · awaiting · blocked), artifact kind is the node's glyph and its own
    second line. A gate is a node on the spine at the position it stopped the run, because that
-   position is the fact — the pending approval on a live run is the most important thing about its
+   position is the fact. The pending approval on a live run is the most important thing about its
    outputs and it used to be invisible.
    Reads never get a node. They are quiet marks on the spine, which is what finally stops
    `CHANGELOG.md · read once` from reading like a change.
@@ -737,7 +737,7 @@ function catBadge(c){var d=TCAT[c]||TCAT.record;return '<span class="tcb t-'+h(c
 function toolCell(id,o){
   o=o||{}; var m=toolMeta(id), api=S.toolNames==="api", d=TCAT[m.cat];
   var apiHtml=h(m.n)+(m.v?'<span class="v">@'+h(m.v)+'</span>':''), sub=o.sub?' · '+h(o.sub):'';
-  return '<span class="tc t-'+m.cat+(o.sz?' '+o.sz:'')+(api?' api':'')+'" title="'+h(m.n+(m.v?'@'+m.v:''))+' — '+h(m.l)+' · '+h(d.l)+'">'+
+  return '<span class="tc t-'+m.cat+(o.sz?' '+o.sz:'')+(api?' api':'')+'" title="'+h(m.n+(m.v?'@'+m.v:''))+': '+h(m.l)+' · '+h(d.l)+'">'+
    '<span class="ti">'+catSvg(m.cat)+'</span>'+
    (api?'<span class="tl">'+apiHtml+'</span><span class="ta">'+h(m.l)+sub+'</span>'
        :'<span class="tl">'+h(m.l)+'</span><span class="ta">'+apiHtml+sub+'</span>')+'</span>';
@@ -974,7 +974,7 @@ function tomlParse(text){
         var parts=[]; if(buf.length)parts.push(buf);
         i++;
         /* the value spans lines, so the escapes have to be undone here too, not only on the
-           single-line path above — that asymmetry is what let a backslash through unread */
+           single-line path above. That asymmetry is what let a backslash through unread */
         for(;i<n;i++){k=lines[i].indexOf('"""');if(k>=0){parts.push(lines[i].slice(0,k));return [tomlUnesc(parts.join("\n")),-1];}parts.push(lines[i]);}
         err("unterminated multi-line string",ln);
       }
@@ -1010,7 +1010,7 @@ function tomlLit(v){
   return tomlStr(v);
 }
 /* A basic multi-line string processes escapes, so a backslash in operator text has to be written
-   as one — otherwise `Path:\deploy` is either an invalid escape or quietly changes meaning. The
+   as one. Otherwise `Path:\deploy` is either an invalid escape or quietly changes meaning. The
    closing fence is reached with a line-continuation backslash rather than a bare newline, because a
    newline before the fence is part of the value: without it every save through this writer appended
    one more blank line to whatever it round-tripped. */
@@ -1646,7 +1646,7 @@ function pFleet(){
   if(S.state==="error") return errorState("Fleet","503 run_index_unavailable");
   if(S.state==="denied") return deniedState("this workspace","workspace.read on core-platform");
   if(S.state==="empty") return emptyState("No runs yet in "+w.name,
-    "Nothing has reached Oxagen from this workspace. A run appears the moment a registered agent makes its first model call — you do not create runs here, agents do.",
+    "Nothing has reached Oxagen from this workspace. A run appears the moment a registered agent makes its first model call. You do not create runs here, agents do.",
     '<button class="btn primary" onclick="regStart()">Register Agent</button>'+
     '<button class="btn" onclick="go(\'#/'+ORG.slug+'/'+w.slug+'/agents\')">Open Agents</button>');
 
@@ -1725,7 +1725,7 @@ function approvalsPanel(wsSlug,inRun){
     return '<div class="panel"><div class="panel-h"><h3>Approvals</h3></div>'+
      '<div class="panel-b"><div style="text-align:center;padding:22px 6px">'+
      '<p class="muted" style="font-size:12.5px;margin:0">Nothing is waiting on a human.</p>'+
-     '<p class="dim" style="font-size:11.5px;margin:8px 0 0">A call parks here when policy returns <span class="mono">approve</span>. Denials never park — they end the call and are free.</p>'+
+     '<p class="dim" style="font-size:11.5px;margin:8px 0 0">A call parks here when policy returns <span class="mono">approve</span>. Denials never park. They end the call and are free.</p>'+
      '</div></div></div>';
   }
   var cards=list.map(function(a){
@@ -1752,7 +1752,7 @@ function fmt2(n){return n.toLocaleString("en-US",{minimumFractionDigits:2,maximu
 function mandateFor(a){for(var i=0;i<MANDATES.length;i++){if(MANDATES[i].id===a.mandate)return MANDATES[i];}return null;}
 function approvalById(id){for(var i=0;i<APPROVALS.length;i++){if(APPROVALS[i].id===id)return APPROVALS[i];}return null;}
 
-/* remaining authority — settled, reserved by this call, remaining; one bar for the card and the mandate page */
+/* remaining authority: settled, reserved by this call, remaining; one bar for the card and the mandate page */
 function mandateBar(m,showReserve){
   var lim=money(m.perPeriod), usedPct=money(m.used)/lim*100, resPct=showReserve?money(m.reserved)/lim*100:0;
   var left=showReserve?m.remaining:fmt2(lim-money(m.used));
@@ -1800,7 +1800,7 @@ function taintBlock(a){
   return '<div class="taint"><div class="row" style="margin-bottom:8px"><span class="b b-critical"><span class="d"></span>tainted · '+a.taint.length+' source'+(a.taint.length===1?'':'s')+'</span>'+
    '<span class="muted" style="font-size:12px">Arguments that derive from untrusted tool output. Taint on a write raises the decision to approval.</span></div>'+
    a.taint.map(function(t){return '<div class="srcrow"><a class="mono" href="#/'+ORG.slug+'/'+a.ws+'/runs/'+a.run+'" style="flex:none">frame #'+t.frame+'</a>'+
-    '<span class="mono" style="color:var(--fg);flex:none">'+h(t.path)+'</span><span class="muted" style="min-width:0">'+h(t.tool)+' — '+h(t.note)+'</span></div>';}).join("")+'</div>';
+    '<span class="mono" style="color:var(--fg);flex:none">'+h(t.path)+'</span><span class="muted" style="min-width:0">'+h(t.tool)+': '+h(t.note)+'</span></div>';}).join("")+'</div>';
 }
 /* footer: pending → the two decisions (they open the existing dialogs); resolved → what happened */
 function decisionFoot(a){
@@ -1813,7 +1813,7 @@ function decisionFoot(a){
    '<span class="muted" style="font-size:12.5px">by '+h(st.by)+' · single-use token bound to <span class="mono">'+h(a.digest)+'</span> minted and consumed · call dispatched'+
    (st.ext?' · <span class="mono">'+h(st.ext)+'</span>':'')+'</span>'+open+'</div>';
   if(st.status==="denied") return '<div class="apfoot"><span class="b b-denied"><span class="d"></span>denied</span>'+
-   '<span class="muted" style="font-size:12.5px">by '+h(st.by)+' — “'+h(st.reason||"no reason given")+'” · '+rel+'nothing dispatched</span>'+open+'</div>';
+   '<span class="muted" style="font-size:12.5px">by '+h(st.by)+': “'+h(st.reason||"no reason given")+'” · '+rel+'nothing dispatched</span>'+open+'</div>';
   if(st.status==="expired") return '<div class="apfoot"><span class="b b-denied"><span class="d"></span>expired</span>'+
    '<span class="muted" style="font-size:12.5px">no human resolved it inside '+h(a.timeout)+' · the reason “approval timeout” reached the model as the permission decision · '+rel+'nothing dispatched</span>'+open+'</div>';
   return '<div class="apfoot"><span class="muted" style="font-size:11.5px;flex:1;min-width:220px">Approving mints a single-use token bound to this exact call digest. Denying '+(m?'releases '+usd(m.reserved)+' back to the mandate and ':'')+'ends the call; the reason reaches the model.</span>'+
@@ -1903,17 +1903,17 @@ function approvalCard(a){
    '</div>'+
    decisionFoot(a)+'</div>';
 }
-/* resolve — called by the approve / deny dialog footers; the reason is the dialog's textarea */
+/* resolve: called by the approve / deny dialog footers; the reason is the dialog's textarea */
 function resolveApproval(id,status){
   var a=approvalById(id)||APPROVALS[0];
   var st=apState(a.id), m=mandateFor(a);
   var ta=document.querySelector("#layer textarea"), reason=ta?ta.value.trim():"";
   if(st.status!=="pending"){ closeDialog(); toast("Already "+st.status+(st.by&&st.by!=="—"?" by "+st.by:"")+". A decision is written once.","approval"); return; }
-  if(status==="denied"&&!reason){ if(ta)ta.focus(); toast("A denial needs a reason — it reaches the model as the permission decision reason.","denied"); return; }
+  if(status==="denied"&&!reason){ if(ta)ta.focus(); toast("A denial needs a reason. It reaches the model as the permission decision reason.","denied"); return; }
   approvalSettle(a,status,"Marcus Bell",reason);
   closeDialog();
   if(status==="approved"){
-    toast("Token apt_"+a.digest.slice(7,15)+" minted — single-use, bound to the call digest, this agent, this run, and a 60-second expiry. Credential brokered, "+a.tool+" dispatched.","allowed");
+    toast("Token apt_"+a.digest.slice(7,15)+" minted: single-use, bound to the call digest, this agent, this run, and a 60-second expiry. Credential brokered, "+a.tool+" dispatched.","allowed");
     setTimeout(function(){toast("Receipt "+st.rcp+" written, signed and chained at frame "+st.rcpSeq+" on "+a.run+". "+(m?"Mandate settled: "+usd(m.remaining)+" left this period.":"The token was consumed on dispatch; the agent never held it."),"allowed");},1300);
   } else {
     toast("Denied. Nothing dispatched, no credential minted"+(st.released?", "+usd(fmt2(st.released))+" released back to the mandate":"")+". Your reason reaches the model as the permission decision reason.","denied");
@@ -1961,7 +1961,7 @@ function approvalReceipt(a,st,R,m,L){
   var ok=st.status==="approved", ag=agent(a.agent)||{}, op=PEOPLE[a.op]||{name:a.op,role:""}, dg=a.digest.slice(7,15), when="2026-09-11 "+st.at+"Z";
   var fired=(a.rules||[]).filter(function(x){return x.v==="approve";}).map(function(x){return x.id;}).join(" · ")||a.rule;
   return {id:st.rcp,at:when,agent:a.agent,operator:op.name,tool:a.tool,decision:ok?"approve":"deny",tier:a.tier,apr:a.id,
-   effect:ok?st.ext:"none — "+st.status+" before dispatch",amount:a.amount?"$"+a.amount+" "+a.currency:"—",ws:a.ws,runId:a.run,
+   effect:ok?st.ext:"none: "+st.status+" before dispatch",amount:a.amount?"$"+a.amount+" "+a.currency:"—",ws:a.ws,runId:a.run,
    who:[["Operator",op.name+" · "+op.role],["Agent",a.agent+(ag.principal?" · "+ag.principal:""),1],["Run · turn · step",a.run+(R?" · "+R.turn+" · "+R.steps:""),1],["Task",R?R.task+" · "+R.taskTitle:"—"]],
    what:[["Tool version",a.tool,1],["Input digest",a.digest,1]]
      .concat(a.amount?[["Amount",Math.round(money(a.amount)*1e6).toLocaleString("en-US")+" micro-"+a.currency+" → $"+a.amount+" "+a.currency]]:[])
@@ -1972,12 +1972,12 @@ function approvalReceipt(a,st,R,m,L){
      ["Approver reason",st.reason?"“"+st.reason+"”":"none given"],
      ["Taint sources",a.taint&&a.taint.length?a.taint.map(function(t){return "frame "+t.frame+" · "+t.tool+" · "+t.path;}).join("; "):"none"]],
    credential:ok?[["Credential grant",st.cg,1],["Minted",m?"restricted key · payment_intents:write · counterparty "+a.counterparty+" only":"scoped to "+a.counterparty],["TTL","60 seconds, bound to the call id"],["Agent saw","the result. Never the credential."]]
-     :[["Credential grant","none — nothing was minted"],["Agent saw","the decision and its reason"]],
+     :[["Credential grant","none: nothing was minted"],["Agent saw","the decision and its reason"]],
    effectRows:ok?[["Dispatched",when],["External effect id",st.ext,1],["Idempotency key","idk_"+dg+" · no duplicate suppressed",1]]
      :[["Dispatched","never"],["External effect id","none"]],
    integrity:[["Receipt frame",(L?"seq "+st.rcpSeq+" on ":"")+a.run,1],["Gateway signature","ed25519 · "+ORG.attester+" · verified",1],["Tier",a.tier]]};
 }
-/* countdown — patches the clocks in place; a full render would wipe an open dialog's textarea */
+/* countdown: patches the clocks in place; a full render would wipe an open dialog's textarea */
 function tick(){
   var expired=false;
   APPROVALS.forEach(function(a){
@@ -1985,13 +1985,13 @@ function tick(){
     var sec=apLeft(a.id), es=document.querySelectorAll('[data-countdown="'+a.id+'"]');
     for(var k=0;k<es.length;k++){es[k].textContent=mmss(sec);es[k].classList.toggle("warn",sec<120);}
     if(sec<=0){approvalSettle(a,"expired","—","approval timeout");expired=true;
-      toast("Approval expired after "+a.timeout+" — "+a.tool+" ended and "+(mandateFor(a)?"the reservation was released. ":"nothing was dispatched. ")+"The reason “approval timeout” reached the model.","denied");}
+      toast("Approval expired after "+a.timeout+". "+a.tool+" ended and "+(mandateFor(a)?"the reservation was released. ":"nothing was dispatched. ")+"The reason “approval timeout” reached the model.","denied");}
   });
   if(expired) render();
 }
 setInterval(tick,1000);
 
-/* toast — a stack, one row per event, tone dot in mc's decision vocabulary: allowed | approval | denied | critical | gold */
+/* toast. A stack, one row per event, tone dot in mc's decision vocabulary: allowed | approval | denied | critical | gold */
 function act(msg,tone){ S.toast=msg; toast(msg,tone); }
 function toast(msg,tone){
   var host=el("toast"); if(!host) return;
@@ -2230,7 +2230,7 @@ function runMetrics(R){
   var fan=calls.length/Math.max(1,batches.length);
   var hist={};batches.forEach(function(x){hist[x.length]=(hist[x.length]||0)+1;});
   var errs=calls.filter(function(c){return c.err;}).length;
-  /* wall clock a batch costs is its slowest call, not the sum — that is the point of running them together */
+  /* wall clock a batch costs is its slowest call, not the sum. That is the point of running them together */
   var toolMs=batches.reduce(function(a,x){return a+x.reduce(function(m,c){return Math.max(m,c.ms);},0);},0);
   var serialMs=calls.reduce(function(a,c){return a+c.ms;},0);
 
@@ -2647,7 +2647,7 @@ function runInstruments(R){
     '<div class="cols">'+costCols+'<span class="base"></span></div><div class="ax"><span>turn 1</span><span>turn '+s.n+(R.status==="live"?" · live":"")+'</span></div>',
     'cache hit <b>'+per(R.cache)+'</b> · saved ≈ <b>$'+s.saved.toFixed(2)+'</b> against an uncached prompt');
 
-  /* 2 · wall clock — model, tool, waiting on a person, harness */
+  /* 2 · wall clock: model, tool, waiting on a person, harness */
   var wp=[["model",m.modelMs,"fk-model",msDur(m.modelMs)],["tool",m.toolMs,"fk-tool",msDur(m.toolMs)],
           ["waiting on a person",m.waitMs,"fk-gov",msDur(m.waitMs)],["harness",m.overMs,"neu",msDur(m.overMs)]];
   var lead=wp.slice().sort(function(x,y){return y[1]-x[1];})[0];
@@ -2676,7 +2676,7 @@ function runInstruments(R){
     stackLeg([["model calls",m.modelN,"fk-model",m.modelN],["tool calls",m.calls.length,"fk-tool",m.calls.length]]),
     '<b>'+m.fan.toFixed(1)+'</b> tools per batch · <b>'+(m.calls.length/Math.max(1,m.modelN)).toFixed(2)+'</b> tool calls per model call');
 
-  /* 5 · tool calls by family — magnitude in one hue, identity in the icon and the label */
+  /* 5 · tool calls by family: magnitude in one hue, identity in the icon and the label */
   var fmx=m.families.length?m.families[0].n:1;
   var famRows=m.families.slice(0,4).map(function(f){
     return '<button type="button" class="frow t-'+f.cat+'"'+tipAttr(TCAT[f.cat].l+" · "+f.n+" calls · "+f.tools+" distinct tools · "+msDur(f.ms)+(f.err?" · "+f.err+" failed":""))+' onclick="S.tab.run=\'cost\';render()">'+
@@ -2914,7 +2914,7 @@ function txRow(R,e,i,cum,rows,answerIdx){
      '<div class="tx-think">'+txHi(fd?tf.head:body,q)+(fd?' …':'')+'</div></div>';
   } else if(e.kind==="usage"){
     var m=e.meta||{};
-    inner='<div class="tx-usage"><span class="u">usage — '+h(m.model||"")+(m.tin!=null?' · in '+tokn(m.tin)+' · cache '+tokn(m.cache||0)+' · out '+tokn(m.tout||0):'')+(m.req?' · '+h(m.req):'')+'</span>'+
+    inner='<div class="tx-usage"><span class="u">usage: '+h(m.model||"")+(m.tin!=null?' · in '+tokn(m.tin)+' · cache '+tokn(m.cache||0)+' · out '+tokn(m.tout||0):'')+(m.req?' · '+h(m.req):'')+'</span>'+
      '<span class="tx-chips"><span class="tx-chip cost">'+txMoney(m.cost||0)+'</span><span class="tx-chip burn">Σ '+txMoney(cum)+'</span>'+
      (e.fr!=null?'<button class="tx-chip gov" onclick="S.tab.run=\'player\';S.frame='+e.fr+';render()">model.response · fr '+e.fr+'</button>':'')+'</span></div>';
   } else if(e.kind==="context_recall"){
@@ -3045,8 +3045,8 @@ function pauseBody(){
    'The run keeps its token and its budget reservation; pending approvals keep their clocks.</p>'+
    '<dl class="kv" style="margin-bottom:12px"><dt>Run</dt><dd class="mono">'+h(R.id)+'</dd><dt>Position</dt><dd>turn '+R.turn+' · step '+R.steps+' · frame '+R.frames+'</dd>'+
    '<dt>Recorded as</dt><dd><span class="mono">control.pause</span> frame · operator authority</dd></dl>'+
-   '<div class="field"><label>Reason — the model reads this on resume, so write it for the agent</label>'+
-   '<textarea id="pause-reason" rows="2" aria-label="Reason">Holding while finance confirms PO-4471 line 3.</textarea></div>'+
+   '<div class="field"><label>Reason</label>'+
+   '<textarea id="pause-reason" rows="2" aria-label="Reason">Holding while finance confirms PO-4471 line 3.</textarea><div class="hint">The model reads this on resume, so write it for the agent.</div></div>'+
    '<div class="note">Pause is not cancel. Nothing is revoked, and the run resumes exactly where it stopped; the gap is visible in the chain and the receipts.</div>';
 }
 function pauseRun(id){
@@ -3367,7 +3367,7 @@ function framesFromRunSynth(R){
       fr.sum=fr.rec.id+" · note · "+fr.rec.text.slice(0,72)+(fr.rec.text.length>72?"…":"");break;
      case "turn_start": fr.sum="turn "+o2.turn+" of "+T+" · "+s.steps[o2.turn-1]+" steps follow";break;
      case "turn_end": fr.sum="turn "+o2.turn+" ended · "+s.steps[o2.turn-1]+" steps · $"+s.cost[o2.turn-1].toFixed(2)+" · cache "+per(s.cache[o2.turn-1]);break;
-     case "approval_request": var A2=APPROVALS.filter(function(a){return a.id===o2.apr;})[0];fr.sum=A2.id+" · "+A2.tool+" · parked "+A2.parkedAt+" · "+A2.approvers.split(" — ")[0];break;
+     case "approval_request": var A2=APPROVALS.filter(function(a){return a.id===o2.apr;})[0];fr.sum=A2.id+" · "+A2.tool+" · parked "+A2.parkedAt+" · "+A2.approvers.split(" (")[0];break;
      case "error": fr.err={code:"run_token_revoked",source:"gateway",outcome:"halted"};fr.sum="run_token_revoked · kill switch hooks_removed · nothing dispatched after this frame";break;
      case "agent_stop": fr.sum="outcome "+R.status+" · "+N+" frames · $"+R.cost+" · the seal envelope follows as seq "+N;break;
     }
@@ -3529,7 +3529,7 @@ function fdPolicy(f,R){
     conds.map(function(x){var v=x[2],cls=/^(pass|held|allow)$/.test(v)?"b-allowed":v==="approve"?"b-approval":v==="constrain"?"b-q":"b-denied";
      return '<tr><td class="mono" style="font-size:11.5px">'+h(x[0])+'</td><td style="font-size:12px">'+h(x[1])+'</td><td><span class="b '+cls+'"><span class="d"></span>'+h(v)+'</span></td></tr>';}).join("")+
     '</tbody></table></div>',"derived from the call and the record, none from prose")+
-   frSec("Decision",frPre({outcome:approve?"approve":"allow",policy_version:A?A.policy:"pol_v41",rules_fired:[rule],delegation_ceiling:"agent ∩ operator — held",
+   frSec("Decision",frPre({outcome:approve?"approve":"allow",policy_version:A?A.policy:"pol_v41",rules_fired:[rule],delegation_ceiling:"agent ∩ operator: held",
      taint:{marked:!!(A&&A.tainted),sources:A&&A.taint?A.taint.map(function(x){return x.path;}):[]},kill_switches:"none armed for this tool",enforcement_tier:R.tier}));
 }
 function fdApproval(f,R){
@@ -3539,7 +3539,7 @@ function fdApproval(f,R){
   var facts=frKv([["Approval",'<span class="mono">'+h(A.id)+'</span>'],["Call",'<span class="mono">'+h(A.tool)+'</span> · '+riskBadge(A.risk)],
     ["Rule",h(A.rule)],A.amount?["Amount",usd(A.amount)+" "+h(A.currency)+" · "+h(A.counterparty)]:null,["Approvers",h(A.approvers)],["Waited",h(A.waited)+" of "+h(A.timeout)]]);
   if(A.waited==="expired")return '<div class="warn"><b>Expired.</b> Nobody answered inside '+h(A.timeout)+'. The call ended and the reason reached the model as the permission decision; nothing dispatched.</div>'+facts;
-  if(ap.status!=="pending")return '<div class="note">Resolved — <b>'+h(ap.status)+'</b>'+(ap.by&&ap.by!=="—"?' by '+h(ap.by):'')+'. The decision is a frame of its own.</div>'+facts;
+  if(ap.status!=="pending")return '<div class="note">Resolved: <b>'+h(ap.status)+'</b>'+(ap.by&&ap.by!=="—"?' by '+h(ap.by):'')+'. The decision is a frame of its own.</div>'+facts;
   return '<div class="warn"><b>Parked.</b> The call is held for up to '+h(A.timeout)+'. The model is shown a wait with a reason, not a failure. '+
    'On resolution the gateway mints a single-use approval token bound to this exact call digest.</div>'+facts+
    '<div class="row" style="margin-top:13px"><button class="btn" onclick="openDialog(\'approve\',\''+A.id+'\')">Approve</button>'+
@@ -3587,7 +3587,7 @@ function fdToken(f,R){
   var c=frCallOf(f,R),vendor=c?toolParts(c.id).n.split("__")[0]:"github";
   return frKv([["Credential grant",'<span class="mono">'+h(f.grant||"cg_01K5RS8")+'</span>'],["Connection",h(vendor)+" · brokered by the gateway"],
     ["Minted",c?'a token scoped to <span class="mono">'+h(c.id)+'</span> and this call id':'installation token limited to <span class="mono">a-intel/platform</span>'],
-    ["TTL","5 minutes, bound to call id"],["Seen by the agent",'<b style="color:var(--st-allowed)">never</b> — the agent holds one run token, good for talking to Oxagen and nothing else']]);
+    ["TTL","5 minutes, bound to call id"],["Seen by the agent",'<b style="color:var(--st-allowed)">never</b>. The agent holds one run token, good for talking to Oxagen and nothing else']]);
 }
 var FD_KIND={"context.assembled":fdContext,"model.request":fdRequest,"model.response":fdResponse,tool_requested:fdToolReq,tool_call:fdToolCall,
   policy_decision:fdPolicy,approval_request:fdApproval,"record.appended":fdRecord,checkpoint:fdCheckpoint,error:fdError,
@@ -3663,7 +3663,7 @@ var CTXF = [
   label:"ctx.platform.changelog-once", node:"nd_mem_01H2FD"}
 ];
 
-/* candidates that were retrieved and then kept out — the half of the story the old table hid */
+/* candidates that were retrieved and then kept out: the half of the story the old table hid */
 var CTXX = [
  {id:"x1", kind:"doc", tok:3940, score:0.88, why:"cap",
   label:"CHANGELOG.md · chunk 1 of 9"},
@@ -3806,7 +3806,7 @@ function contextTab(R){
     '<span class="b b-q" data-ctx-total="'+W.total+'">'+tokn(W.total)+' tok in</span></div></div>'+
    '<div class="panel-b"><div class="compbar">'+bar+'</div><div class="legend">'+legend+'</div>'+
    '<div class="note" style="margin-top:13px">'+(own?'This is the whole of what the model received. ':'This run’s first model request, read from its frames. ')+
-   'Five blocks, in this order, and nothing else — no ambient file, no hidden preamble, no tool it was not handed. '+
+   'Five blocks, in this order, and nothing else: no ambient file, no hidden preamble, no tool it was not handed. '+
    tokn(W.cached)+' tokens came from cache and '+tokn(W.fresh)+' were new. '+
    (W.derived?'The response records the total; where no frame states a block, the split follows the assembler’s composition rule. ':'')+
    'Click a band, or walk the window on the right.</div></div></div>';
@@ -3864,7 +3864,7 @@ function contextTab(R){
      '<dt>Below the floor</dt><dd class="num">'+CTXW.floor+' · score &lt; 0.60</dd>'+
      '<dt>Headroom left</dt><dd class="num">'+tokn(CTXW.headroom)+' tok</dd>'+
      '<dt>Composition digest</dt><dd class="mono">'+h(CTXW.digest)+'</dd></dl>'+
-     '<div class="note" style="margin-top:12px">The budget was not what bound this turn — '+tokn(CTXW.headroom)+
+     '<div class="note" style="margin-top:12px">The budget was not what bound this turn. '+tokn(CTXW.headroom)+
      ' tokens went unused. The score floor and the one-chunk-per-document cap did the cutting. '+
      'The assembler does not fill headroom for its own sake.</div></div></div>';
   } else {
@@ -3966,7 +3966,7 @@ function ctxDetail(R,W,sel){
        'run         run_01K5RS7M2E8FJ3QW\n'+
        'workspace   a-intel / core-platform\n'+
        'operator    Marcus Bell · workspace.owner\n'+
-       'authority   agent <span class="k">∩</span> operator — the narrower of the two,\n'+
+       'authority   agent <span class="k">∩</span> operator: the narrower of the two,\n'+
        '            re-evaluated on every call\n'+
        'run token   15 minutes · talks to Oxagen and nothing else\n'+
        '<span class="c"># no provider key, no customer credential, no vault handle</span>'+
@@ -3997,7 +3997,7 @@ function ctxDetail(R,W,sel){
       '<div data-bundle-readout="'+sb.v+'">'+readout("bundle v"+sb.v+" · verbatim",sb.rules.length+" rules",'<pre>'+pre+'</pre>')+'</div>'+
       '<dl class="kv"><dt>Sources merged</dt><dd>3 · org, workspace core-platform, agent</dd>'+
       '<dt>Tokens per turn</dt><dd class="num">'+tokn(sb.tok)+(nw.length?' · <b>'+tokn(live.tok)+'</b> from the next call · +'+nwTok+' from the new record':'')+'</dd>'+
-      '<dt>Shadowed at compile</dt><dd class="mono">ctx.release.notes-format-legacy (org) — lost to the workspace rule</dd>'+
+      '<dt>Shadowed at compile</dt><dd class="mono">ctx.release.notes-format-legacy (org), lost to the workspace rule</dd>'+
       '<dt>Digest</dt><dd class="mono">'+h(sb.digest)+'</dd>'+
       '<dt>Chained into</dt><dd class="mono">run.start · seq 0</dd></dl>'+
       '<div class="note" style="margin-top:12px">Conflicts resolve when the bundle compiles, not when the model reads. '+
@@ -4037,8 +4037,8 @@ function ctxDetail(R,W,sel){
        '<span class="c"># the schema to what this run is scoped to, before the model sees it.</span>'+
        '</pre>')+
       '<div class="note">A tool the belt does not carry cannot be named. A name the model invents is refused at the gateway '+
-      'before it becomes a call, and the refusal is a frame. Narrowing the schema — the single-value <span class="mono">repo</span> '+
-      'enum above — is cheaper than catching a wrong repo at policy time, and the model never spends a turn on an option it does not have.</div>');
+      'before it becomes a call, and the refusal is a frame. Narrowing the schema (the single-value <span class="mono">repo</span> '+
+      'enum above) is cheaper than catching a wrong repo at policy time, and the model never spends a turn on an option it does not have.</div>');
   }
 
   if(sel==="frames"){
@@ -4054,20 +4054,20 @@ function ctxDetail(R,W,sel){
     CTXF.forEach(function(f,k){if(brk==null&&run0+f.tok>into)brk={ix:k+1,at:into-run0};run0+=f.tok;});
     return ctxHd('Block 4 · <span class="mono">context.frames</span>', tokBadge(W.ctx)+cacheBadge("mixed"))+
      ctxBody(
-      '<p>Six frames pulled from the workspace record for this turn — three quarters of the window. '+
+      '<p>Six frames pulled from the workspace record for this turn, three quarters of the window. '+
       'Pick a row to read what the model actually got, and why it was there.</p>'+
       '<div class="tw"><table class="narrow"><thead><tr><th>Kind</th><th>Frame</th><th class="num">Tok</th><th class="num">Score</th><th>Cited</th></tr></thead><tbody>'+
       rows+'</tbody></table></div>'+
       '<div class="hr"></div>'+
       '<p class="eyebrow q">Where the cache stops</p>'+
       '<p>The cached prefix is '+tokn(W.cached)+' tokens: blocks 1 to 3 ('+tokn(above)+') and then '+tokn(into)+' tokens into this one. '+
-      'Caching is prefix-based, so it stops at a token, not at a frame edge'+(brk?' — the breakpoint for this request sits '+
+      'Caching is prefix-based, so it stops at a token, not at a frame edge'+(brk?'. The breakpoint for this request sits '+
       '<b>'+tokn(brk.at)+' tokens inside frame '+brk.ix+'</b>':'')+'.</p>'+
       '<div class="note">Frame order is a cost decision. Stable frames first pushes the boundary further down the window; '+
       'a volatile frame near the top invalidates everything under it. This run reorders by volatility, not by score.</div>'+
       '<div class="hr"></div>'+
       '<div class="warn"><b>Two frames were rendered and never cited.</b> The episode at frame 4 and the memory at frame 6 '+
-      'cost 3,410 tokens a turn and earned nothing. Both have a named cause and a named fix — open them.</div>');
+      'cost 3,410 tokens a turn and earned nothing. Both have a named cause and a named fix. Open them.</div>');
   }
 
   var f = ctxFrame(sel);
@@ -4079,7 +4079,7 @@ function ctxDetail(R,W,sel){
       return '<p class="eyebrow q" style="margin-top:16px">Why it was in the window</p>'+
         '<dl class="kv">'+rows+
         '<dt>Score · rank</dt><dd class="num">'+f.score.toFixed(2)+' · '+extra+' of '+CTXW.scored+' scored</dd>'+
-        '<dt>Grain</dt><dd class="mono">'+f.grain+' — rendered in full</dd>'+
+        '<dt>Grain</dt><dd class="mono">'+f.grain+', rendered in full</dd>'+
         '<dt>Graph node</dt><dd class="mono">'+h(f.node)+'</dd></dl>';
     };
 
@@ -4101,7 +4101,7 @@ function ctxDetail(R,W,sel){
         '<dt>Path</dt><dd class="mono">Task #482 → concerns → Repository</dd>'+
         '<dt>Read from</dt><dd>GitHub connector <span class="mono">con_01K2A7</span> at 09:14:01</dd>'+
         '<dt>Age at assembly</dt><dd>1.2 seconds</dd>', 1)+
-       '<div class="note" style="margin-top:12px">One hop, one second old, and it decided the shape of everything after it — '+
+       '<div class="note" style="margin-top:12px">One hop, one second old, and it decided the shape of everything after it: '+
        'the branch to compare against and who has to approve the result.</div>');
     }
     if(sel==="f2"){
@@ -4113,14 +4113,14 @@ function ctxDetail(R,W,sel){
         '- Parked calls report a wait to the model, with a reason. (#471)\n\n'+
         '<span class="k">### Ledger</span>\n'+
         '- cost_micros replaces cost_cents everywhere. (#455)\n\n'+
-        '<span class="k">## [4.10.3] — 2026-08-28</span>\n\n'+
+        '<span class="k">## [4.10.3] - 2026-08-28</span>\n\n'+
         '<span class="k">### Gateway</span>\n'+
         '- Fix: workspace kill switch did not deny harness-tier calls. (#449)'+
         '</pre>')+
        why('<dt>Query</dt><dd class="mono">changelog format · unreleased entries</dd>'+
         '<dt>Index</dt><dd class="mono">idx_docs_v3 · 9 chunks scored</dd>'+
         '<dt>Version</dt><dd class="mono">CHANGELOG.md @ a4c91e2</dd>'+
-        '<dt>Chunk cap</dt><dd>one chunk per document per turn — this one scored highest</dd>', 2)+
+        '<dt>Chunk cap</dt><dd>one chunk per document per turn: this one scored highest</dd>', 2)+
        '<div class="note" style="margin-top:12px">Chunks 1 and 2 scored 0.88 and 0.85 and did not get in. They are under '+
        '<b>Retrieved, kept out</b>. If the release notes come back missing an older entry, that cap is the first thing to loosen.</div>');
     }
@@ -4141,7 +4141,7 @@ function ctxDetail(R,W,sel){
         '<dt>Index</dt><dd class="mono">idx_sym_v2 · symbol graph</dd>'+
         '<dt>Version</dt><dd class="mono">scripts/release.ts @ a4c91e2</dd>', 4)+
        '<div class="note" style="margin-top:12px">The steering rule in block 2 has an edge to the function that implements it, '+
-       'so the model is told the rule and shown the code that enforces it. Nobody wrote that pairing by hand — the edge is in the graph.</div>');
+       'so the model is told the rule and shown the code that enforces it. Nobody wrote that pairing by hand. The edge is in the graph.</div>');
     }
     if(sel==="f4"){
       return hd+ctxBody(
@@ -4155,17 +4155,17 @@ function ctxDetail(R,W,sel){
        why('<dt>Query</dt><dd class="mono">prior runs · same agent · same task shape</dd>'+
         '<dt>Index</dt><dd class="mono">idx_epi_v1 · floor 0.60</dd>'+
         '<dt>Margin over floor</dt><dd class="num">0.02</dd>'+
-        '<dt>Cited</dt><dd><b style="color:var(--st-failed)">never</b> — rendered in full, used in nothing</dd>', 22)+
+        '<dt>Cited</dt><dd><b style="color:var(--st-failed)">never</b>: rendered in full, used in nothing</dd>', 22)+
        '<div class="warn" style="margin-top:13px"><b>This is the context-bloat finding.</b> The last three runs of this agent '+
-       'each pulled an episode that scored just over the floor, and cited none of them — 4,900 tokens, $0.31, nothing bought. '+
+       'each pulled an episode that scored just over the floor, and cited none of them: 4,900 tokens, $0.31, nothing bought. '+
        'Raising this agent’s episodic floor from 0.60 to 0.70 drops all three and keeps every episode that was ever cited.</div>'+
-       '<div class="row" style="margin-top:13px"><button class="btn sm" onclick="act(\'Proposed: episodic floor 0.60 → 0.70 for a-intel.core.release-manager. Replayed over 30 days of context frames — 41 runs affected, 0 cited episodes lost.\')">Try the floor change</button>'+
+       '<div class="row" style="margin-top:13px"><button class="btn sm" onclick="act(\'Proposed: episodic floor 0.60 → 0.70 for a-intel.core.release-manager. Replayed over 30 days of context frames: 41 runs affected, 0 cited episodes lost.\')">Try the floor change</button>'+
        '<button class="btn sm" onclick="S.tab.run=\'cost\';render()">See it on Cost</button></div>');
     }
     if(sel==="f5"){
       return hd+ctxBody(
        readout("rendered into the window","1,808 tok",'<pre>'+
-        '<span class="k">PullRequest</span> a-intel/platform#476 — Backport 4.10.3 to release\n'+
+        '<span class="k">PullRequest</span> a-intel/platform#476: Backport 4.10.3 to release\n'+
         '  state     merged · 2026-09-10 16:02 · Marcus Bell\n'+
         '  head      f70b3d9 → release/4.10\n'+
         '  files     6 changed · +142 −38 · CHANGELOG.md touched\n'+
@@ -4197,7 +4197,7 @@ function ctxDetail(R,W,sel){
        'The assembler de-duplicates inside the memory index but not across the steering bundle, so every request in every run '+
        'of this agent carries 1,770 tokens of a rule the model has already read.</div>'+
        '<div class="row" style="margin-top:13px"><button class="btn sm" onclick="S.ctxSel=\'steering\';render()">Show me the duplicate in block 2</button>'+
-       '<button class="btn sm" onclick="act(\'Finding filed: assembler does not de-duplicate memory frames against the compiled steering bundle. Scope — every agent with a memory index. Estimated 1,770 tok per request on this agent alone.\')">File the finding</button></div>');
+       '<button class="btn sm" onclick="act(\'Finding filed: assembler does not de-duplicate memory frames against the compiled steering bundle. Scope: every agent with a memory index. Estimated 1,770 tok per request on this agent alone.\')">File the finding</button></div>');
     }
   }
 
@@ -4206,7 +4206,7 @@ function ctxDetail(R,W,sel){
      ctxBody(
       '<p>The operator’s own words, quoted into the window and attributed. The last block, and the only one written by a person for this run.</p>'+
       readout("verbatim, attributed to Marcus Bell","a-intel/platform#482",'<pre>'+
-       '<span class="k">Task</span> a-intel/platform#482 — Cut 4.11.0 release notes\n'+
+       '<span class="k">Task</span> a-intel/platform#482: Cut 4.11.0 release notes\n'+
        '<span class="c">opened by Marcus Bell · 2026-09-11 09:13 · workspace.owner</span>\n\n'+
        'Cut the 4.11.0 notes from the merge base of release/4.11 and the\n'+
        'last tag, open the release pull request, and stop there. Do not\n'+
@@ -4214,9 +4214,9 @@ function ctxDetail(R,W,sel){
        'Acceptance: the release-notes contract test passes on the PR head.'+
        '</pre>')+
       '<dl class="kv"><dt>Digest</dt><dd class="mono">sha256:9f22be40c7a1d835</dd>'+
-      '<dt>Cache</dt><dd>new on this request — the brief sits after the cached prefix, so editing it costs 496 tokens, not 12,000</dd></dl>'+
+      '<dt>Cache</dt><dd>new on this request: the brief sits after the cached prefix, so editing it costs 496 tokens, not 12,000</dd></dl>'+
       '<div class="note" style="margin-top:12px">Quoted as evidence, not executed. If the brief asked for something the steering '+
-      'in block 2 forbids, the steering still wins and the call is refused at the gateway — the brief cannot raise the operator’s '+
+      'in block 2 forbids, the steering still wins and the call is refused at the gateway. The brief cannot raise the operator’s '+
       'own authority, and an operator cannot write themselves a wider one.</div>');
   }
 
@@ -4230,9 +4230,9 @@ function ctxDetail(R,W,sel){
     if(x.why==="cap"){
       return hdx+ctxBody(
        '<p class="mono" style="color:var(--fg)">'+h(x.label)+'</p>'+
-       '<dl class="kv"><dt>Score</dt><dd class="num">'+x.score.toFixed(2)+' — above the 0.60 floor</dd>'+
+       '<dl class="kv"><dt>Score</dt><dd class="num">'+x.score.toFixed(2)+', above the 0.60 floor</dd>'+
        '<dt>Reason</dt><dd>one chunk per document per turn. Chunk 3 scored 0.91 and took the slot.</dd>'+
-       '<dt>Budget at the time</dt><dd class="num">6,796 tok free — the budget would have taken it</dd></dl>'+
+       '<dt>Budget at the time</dt><dd class="num">6,796 tok free, the budget would have taken it</dd></dl>'+
        '<div class="note" style="margin-top:12px">The cap is there so one long document cannot crowd out every other kind of '+
        'evidence: without it, five changelog chunks would have filled the window and the repository state, the symbol and the '+
        'prior pull request would all have been squeezed out. It cost 7,550 tokens of changelog this turn, and there was room for it. '+
@@ -4248,11 +4248,11 @@ function ctxDetail(R,W,sel){
         '  kind       fact\n'+
         '  node       Contract a-intel ↔ Northwind\n'+
         '  tags       finance, counterparty\n'+
-        '  reason     agent holds L0 on tag:finance — title only\n'+
+        '  reason     agent holds L0 on tag:finance, title only\n'+
         '  to read it raise the agent’s grain, or ask an operator who holds L1'+
         '</pre>')+
        '<dl class="kv"><dt>Decided by</dt><dd class="mono">pol_v41 · rule rg_0101 · at assembly, before the model call</dd>'+
-       '<dt>Rendered into the window</dt><dd><b style="color:var(--st-allowed)">nothing</b> — the stub above is returned only if the agent asks for it</dd>'+
+       '<dt>Rendered into the window</dt><dd><b style="color:var(--st-allowed)">nothing</b>: the stub above is returned only if the agent asks for it</dd>'+
        '<dt>Recorded as</dt><dd class="mono">context.withheld · seq 1 · in the hash chain</dd></dl>'+
        '<div class="note" style="margin-top:12px">The agent is allowed to know this node exists. That is a deliberate choice: an '+
        'agent that hits a wall it can name will say so, and an operator can widen the grain. Compare it with the permission case below, '+
@@ -4261,13 +4261,13 @@ function ctxDetail(R,W,sel){
     return hdx+ctxBody(
      '<p class="mono" style="color:var(--fg)">'+h(x.label)+'</p>'+
      '<p>The index matched it. It was removed before scoring was reported, and nothing about it reached the window.</p>'+
-     '<dl class="kv"><dt>Owner</dt><dd>workspace <span class="mono">finops</span> — core-platform agents have no read path</dd>'+
+     '<dl class="kv"><dt>Owner</dt><dd>workspace <span class="mono">finops</span>: core-platform agents have no read path</dd>'+
      '<dt>Decided by</dt><dd class="mono">pol_v41 · workspace isolation · at assembly</dd>'+
-     '<dt>The agent was told</dt><dd><b style="color:var(--st-failed)">nothing at all</b> — not the title, not that it exists</dd>'+
+     '<dt>The agent was told</dt><dd><b style="color:var(--st-failed)">nothing at all</b>, not the title, not that it exists</dd>'+
      '<dt>Recorded as</dt><dd class="mono">context.withheld · seq 1 · visible to an auditor, not to the agent</dd></dl>'+
      '<div class="warn" style="margin-top:13px"><b>Told, versus not told.</b> Grain withholds a body and admits the node exists. '+
      'Permission withholds the existence. An agent that learns it cannot read <span class="mono">incident-2026-08-30</span> has '+
-     'learned that there was an incident on 30 August — so across a workspace boundary, Oxagen does not say it. '+
+     'learned that there was an incident on 30 August, so across a workspace boundary, Oxagen does not say it. '+
      'The withholding is still in the hash chain, and an auditor with both workspaces can see it.</div>'+
      '<div class="row" style="margin-top:13px"><button class="btn sm" onclick="S.ctxSel=\'x3\';render()">Compare with the grain case</button></div>');
   }
@@ -4371,7 +4371,7 @@ function costTab(R){
     comp.map(function(x){return '<div class="meter"><div class="lab">'+x[0]+'<b>'+tokn(x[1])+' tok</b></div><div class="bar"><i style="width:'+Math.round(x[1]/Math.max(1,m.perCall)*100)+'%;background:'+x[2]+'"></i></div></div>';}).join("")+
     '<div class="hr"></div><dl class="kv">'+
     '<dt>Effective input price</dt><dd>$1.88 per million across all input classes</dd>'+
-    '<dt>Cache write cost share</dt><dd>'+(m.cacheWrite?pct(m.cacheWrite,m.tokIn):'0.0% — nothing written this run')+'</dd>'+
+    '<dt>Cache write cost share</dt><dd>'+(m.cacheWrite?pct(m.cacheWrite,m.tokIn):'0.0%, nothing written this run')+'</dd>'+
     '<dt>Basis</dt><dd><span class="basis">'+h(R.basis)+'</span>'+(R.basis==="gateway_observed"?' · counted by the proxy from the bytes that passed through it':' · the harness\u2019s own telemetry; absent classes are marked, never zero')+'</dd>'+
     '<dt>Productive ratio</dt><dd>'+per(R.ratio)+' · '+s.adv+' of '+R.steps+' steps advanced the task</dd></dl></div></div></div>';
 }
@@ -4390,9 +4390,9 @@ function chainTab(R){
     '<span class="b b-allowed" style="margin-left:auto"><span class="d"></span>no gaps</span></div><div class="panel-b">'+
     '<dl class="kv"><dt>Frames</dt><dd class="num">'+R.frames+' · dense seq 0 … '+(R.frames-1)+(sealed?' · the seal is envelope '+R.frames:'')+'</dd>'+
     '<dt>Rule</dt><dd class="mono" style="font-size:11.5px">hash = SHA256(prev_hash ‖ canonical(envelope))</dd>'+
-    '<dt>telemetry_gap frames</dt><dd>0 — a gap is recorded, never repaired</dd>'+
+    '<dt>telemetry_gap frames</dt><dd>0, a gap is recorded and never repaired</dd>'+
     '<dt>Checkpoints</dt><dd>'+cpN+' · every 20 frames · signed by the host device key, countersigned by Oxagen at ingest</dd>'+
-    '<dt>Completeness gaps</dt><dd>'+(R.grade==="full"?"none — replay grade is full":R.grade==="partial"?"bodies missing on some frames — replay grade lowered":R.grade==="digest"?"bodies not sent — digests only":"none — frames are in the archive segment")+'</dd></dl>'+
+    '<dt>Completeness gaps</dt><dd>'+(R.grade==="full"?"none, replay grade is full":R.grade==="partial"?"bodies missing on some frames, replay grade lowered":R.grade==="digest"?"bodies not sent, digests only":"none, frames are in the archive segment")+'</dd></dl>'+
     '<div class="note" style="margin-top:13px">Frames from a wrapped agent are client-attested: producer-signed and countersigned at ingest, so Oxagen attests receipt and chain integrity, not the truth of the content. Frames Oxagen writes itself, a decision on a routed call or a witness result, are Oxagen-attested.</div></div></div>'+
    '<div class="panel"><div class="panel-h"><h3>Seal and attestation</h3>'+(sealed?'<span class="b b-allowed" style="margin-left:auto"><span class="d"></span>sealed</span>':'')+'</div>'+
     '<div class="panel-b">'+(sealed?'<dl class="kv">'+
@@ -4430,14 +4430,14 @@ DLG_EXT.forkreplay=function(){
      ["Recorded context","the exact context frames and steering frame "+f.seq+" saw, by content digest"],["Policy version","pol_v41 · the version the recording ran under"]]))+
     frSec("What is replayed, what runs live",
      row(tag("b-q","from the recording"),'<b>Frames 0–'+f.seq+'</b> replay exactly as recorded. No model is called and no tool is dispatched for any of them.')+
-     row(tag("b-allowed","runs live"),'<b>The next model call</b>'+(first?' (recorded at '+frameBtn(first.seq,"frame "+first.seq)+')':'')+' is made for real against <span class="mono">'+h(R.model)+'</span> with the recorded prompt. It costs money and the answer may differ — that is the point of a fork.')+
+     row(tag("b-allowed","runs live"),'<b>The next model call</b>'+(first?' (recorded at '+frameBtn(first.seq,"frame "+first.seq)+')':'')+' is made for real against <span class="mono">'+h(R.model)+'</span> with the recorded prompt. It costs money and the answer may differ. That is the point of a fork.')+
      row(tag("b-proven","from the cassette"),'<b>'+toolsAfter+' tool call'+(toolsAfter===1?'':'s')+' after this frame</b> are served from the recording when the canonical input digest matches, byte for byte. Nothing reaches a real tool server.')+
      row(tag("b-denied","denied"),'<b>A tool call whose input digest differs</b> has no cassette entry. It is denied, not dispatched: a fork cannot open a pull request, move money, or write to a repository.'))+
     frSec("Cost and record",frKv([["Spent by this frame","$"+spent.toFixed(2)+" of "+usd(R.cost)+" · not spent again"],
      ["Estimated spend",first?"about $"+(parseFloat(first.cost)||0).toFixed(2)+" for the first live call; $"+est.toFixed(2)+" if the fork runs to the end":"no model call follows this frame in view"],
      unseen?["Not in view",unseen+" recorded frames after the last one shown; the estimate covers only frames in view"]:null,
      ["Billed as","a run, on the same operator and agent"],["Recorded as","its own frames, its own chain, its own seal"],
-     ["This run",'<span style="color:var(--st-allowed)">unchanged — sealed runs are immutable</span>']])),
+     ["This run",'<span style="color:var(--st-allowed)">unchanged: sealed runs are immutable</span>']])),
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><span class="grow"></span>'+
     '<button class="btn primary"'+(blocked?' disabled':'')+' onclick="closeDialog();act(\'Fork replay started from frame '+f.seq+' as a new attempt linked to '+R.id+'. Tool results after it are served from the cassette.\')">Start fork replay</button>'};
 };
@@ -4463,7 +4463,7 @@ DLG_EXT.bisect=function(){
   if(!st.done||!A||!B){
     return {t:"Bisect between two runs",s:"Aligns two runs frame by frame and finds the first frame where they did something different.",w:false,
      b:'<div class="field"><label>Run A</label>'+sel("bis-a",aId)+'</div><div class="field"><label>Run B</label>'+sel("bis-b",bId)+'</div>'+
-      '<div class="note">Runs of the same task are listed first, then runs of the same agent. Frames are compared on what they did — the kind, the tool and version, the model, the policy outcome — not on times or digests, which always differ.</div>',
+      '<div class="note">Runs of the same task are listed first, then runs of the same agent. Frames are compared on what they did (the kind, the tool and version, the model, the policy outcome), not on times or digests, which always differ.</div>',
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="bisRun()">Bisect</button>'};
   }
   var LA=runFrames(A),LB=runFrames(B),n=Math.max(LA.length,LB.length),d=-1,i;
@@ -4492,8 +4492,8 @@ DLG_EXT.runexport=function(){
   return {t:"Export this run",s:"segment, attestation, key ids and the verifier",w:false,
    b:'<div class="field"><label>Scope</label><select id="ex-scope" aria-label="Scope"><option>run '+h(R.id)+' · '+R.frames+' frames'+(sealed?' and the seal':'')+'</option><option>task '+h(R.task)+' · every run</option><option>agent '+h(R.agent)+' · all runs</option></select></div>'+
     '<div class="field"><label>Format</label><select aria-label="Format"><option>Signed bundle (segment + verifier)</option><option>Frames as NDJSON</option><option>Receipts as CSV</option></select></div>'+
-    frKv([["Segment",'<span class="mono">seg_'+h(R.id.replace(/^run_/,""))+'.ndjson.zst</span> · '+R.frames+' frame envelopes'],["Replay grade",h(R.grade)],["Seal",sealed?"included · verifies offline":"not yet — the run is open, so the bundle carries checkpoints only"]])+
-    '<div class="callout" style="margin-top:12px">Runs as <span class="mono">export_data</span> — a governed action with third-party egress. Bodies for erased subjects are not in the bundle; their digests are, so the chain still verifies.</div>',
+    frKv([["Segment",'<span class="mono">seg_'+h(R.id.replace(/^run_/,""))+'.ndjson.zst</span> · '+R.frames+' frame envelopes'],["Replay grade",h(R.grade)],["Seal",sealed?"included · verifies offline":"not yet: the run is open, so the bundle carries checkpoints only"]])+
+    '<div class="callout" style="margin-top:12px">Runs as <span class="mono">export_data</span>, a governed action with third-party egress. Bodies for erased subjects are not in the bundle; their digests are, so the chain still verifies.</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="queueExport()">Build bundle</button>'};
 };
 
@@ -4504,7 +4504,7 @@ function pAgents(){
   if(S.state==="error") return errorState("Identities","503 iam_principals_unavailable");
   if(S.state==="denied") return deniedState("the identities in this workspace","agent.read on core-platform");
   if(S.state==="empty") return emptyState("No identities registered in "+w.name,
-    "An agent's identity lives in Postgres; its definition is a file in <span class=\"mono\">.oxagen/agents/</span> in the main repo. Registering one opens a Context PR — nothing is written to Postgres first.",
+    "An agent's identity lives in Postgres; its definition is a file in <span class=\"mono\">.oxagen/agents/</span> in the main repo. Registering one opens a Context PR. Nothing is written to Postgres first.",
     '<button class="btn primary" onclick="openDialog(\'wrap\')">Wrap Claude Code</button>'+
     '<button class="btn" onclick="openDialog(\'register\')">Register an agent</button>');
 
@@ -4562,8 +4562,8 @@ function pAgents(){
    where W9 had a read-only listing) and Runs (W9 had none).
 
    Tool facts are NOT repeated here. A belt row carries only what is true of the tool *on this
-   belt* — the description the model is shown, the decision this agent's grants produced, the
-   rule that produced it, the ceiling — and inherits risk, side effect, egress, financial class
+   belt*: the description the model is shown, the decision this agent's grants produced, the
+   rule that produced it, and the ceiling. It inherits risk, side effect, egress, financial class
    and schema digest from the registry entry in TOOLS. One source of truth per fact, so
    approving an observed schema on the Tools page changes the digest shown here too. */
 
@@ -4606,7 +4606,7 @@ var BELT=[
  {id:"open_context_pr@1",d:"Open a Context PR on the main repo from a proposal.",
   dec:"allow",rule:"grant:agent.repo.write #11",scope:"repo: a-intel/platform"},
  {id:"send_message@1",d:"Message another agent in this workspace, or a run.",
-  dec:"allow",rule:"agent tool default",scope:"@agent only — @all is not granted"},
+  dec:"allow",rule:"agent tool default",scope:"@agent only, @all is not granted"},
  {id:"claude_code__Bash@2.1",d:"Run a shell command in the host's working directory.",
   dec:"allow",rule:"grant:agent.repo.write #9 (harness tier)",
   scope:"deny: curl, ssh, aws, gh auth · cwd under a-intel/platform"},
@@ -4806,7 +4806,7 @@ function aIdentity(a,r){
     var ro=roleById(roleBase(x));
     return '<dt class="mono">'+h(x)+'</dt><dd class="mono" style="font-size:11.5px">'+
      (ro?h(ro.perms.join(" · ")):'—')+'<span class="sub">'+(ro?h(ro.desc):'not a registered role')+'</span></dd>';
-   }).join(""):'<dt>Roles</dt><dd class="dim">none held — it can reach nothing but its own run channel</dd>';
+   }).join(""):'<dt>Roles</dt><dd class="dim">none held: it can reach nothing but its own run channel</dd>';
 
   return '<div class="grid">'+
   '<div class="grid g2">'+
@@ -4815,7 +4815,7 @@ function aIdentity(a,r){
     '<div class="panel-b"><dl class="kv">'+
     '<dt>Agent key</dt><dd class="mono">'+h(a.key)+'</dd>'+
     '<dt>Principal</dt><dd class="mono">'+h(a.principal||"prn_pending")+
-     '<span class="sub">minted at registration and never reused — a retired agent\'s runs keep their identity</span></dd>'+
+     '<span class="sub">minted at registration and never reused. A retired agent\'s runs keep their identity</span></dd>'+
     '<dt>Kind</dt><dd>agent · workspace <span class="mono">'+h(w.slug)+'</span> required</dd>'+
     '<dt>Harness</dt><dd>'+h(a.harnessLabel)+' <span class="mono dim">'+h(a.harnessV||"—")+'</span></dd>'+
     '<dt>Model tier</dt><dd>'+h(a.model)+' → <span class="mono">'+
@@ -4869,8 +4869,8 @@ function aIdentity(a,r){
     '<dt>Spend ceiling</dt><dd>'+iamMoney(a.budget,"per run, checked at each hook boundary")+' · '+
      iamMoney(a.budgetDay||a.budget,"per day, on reported spend")+'</dd>'+
     '<dt>Can move money</dt><dd>'+(a.mandates.length
-      ?'<span class="b b-approval"><span class="d"></span>'+a.mandates.length+' mandate</span> — and only inside it'
-      :'<span class="b b-allowed"><span class="d"></span>no</span> — no mandate, so a financial call is denied before dispatch')+'</dd>'+
+      ?'<span class="b b-approval"><span class="d"></span>'+a.mandates.length+' mandate</span>, and only inside it'
+      :'<span class="b b-allowed"><span class="d"></span>no</span>: no mandate, so a financial call is denied before dispatch')+'</dd>'+
     '</dl></div></div></div>'+
 
   '<div class="grid g2">'+
@@ -4986,7 +4986,7 @@ function aToolbelt(a,r){
    '<div class="panel-b" style="display:grid;gap:12px">'+
    (mode==="searchable"
     ? '<div class="note"><b>Searchable belt.</b> The request carries two meta-tools plus the tools pinned as '+
-      'always-present — '+pinned.length+' definitions instead of '+total+'. Both meta-tools are themselves governed calls '+
+      'always-present: '+pinned.length+' definitions instead of '+total+'. Both meta-tools are themselves governed calls '+
       'recorded as frames, so the record shows what the model looked for and what it was shown.</div>'+
       '<pre><span class="c">// the tools block of the next model request, verbatim</span>\n[\n'+
       pinned.map(function(x){
@@ -4999,7 +4999,7 @@ function aToolbelt(a,r){
       'the model saw.</p>'
     : '<div class="note"><b>Full belt.</b> Every definition is in the request, and there are no meta-tools to call. '+
       (total>FULL_BELT_LIMIT
-       ? 'At '+total+' tools this belt is over the workspace limit of '+FULL_BELT_LIMIT+' — this is the view a smaller belt gets, shown here for comparison.'
+       ? 'At '+total+' tools this belt is over the workspace limit of '+FULL_BELT_LIMIT+'. This is the view a smaller belt gets, shown here for comparison.'
        : 'At '+total+' tools it is under the limit of '+FULL_BELT_LIMIT+', which is how this agent actually runs.')+
       ' The tool-definition token count is measured on every model call, and the findings job flags belts wider than the agent uses.</div>'+
       '<pre><span class="c">// '+total+' definitions · '+(total*323).toLocaleString()+' tokens of tool definitions</span>\n[\n'+
@@ -5053,7 +5053,7 @@ function aMandates(a,r){
    '<span class="b b-proven" style="margin-left:auto"><span class="d"></span>cannot move money</span></div>'+
    '<div class="panel-b" style="display:grid;gap:13px">'+
    '<p style="font-size:13px;margin:0">A financial tool call from this agent is denied before dispatch. That is true whether '+
-   'the tool is on its belt or not, and it is checked at step 5 of the call pipeline — before any credential is minted and '+
+   'the tool is on its belt or not, and it is checked at step 5 of the call pipeline, before any credential is minted and '+
    'before anything is sent to a tool server.</p>'+
    iamChain([
     ["Call",'<span class="mono">stripe__create_payment@5</span> · amount $1,204.18 USD'],
@@ -5232,7 +5232,7 @@ function pMandate(r){
   if(!m)m=MANDATES[0];
   if(S.state==="loading") return skeleton();
   if(S.state==="error") return errorState("This mandate","503 mandate_ledger_unavailable");
-  if(S.state==="denied") return deniedState("this mandate","org.billing — mandates are readable only by a finance role");
+  if(S.state==="denied") return deniedState("this mandate","org.billing: mandates are readable only by a finance role");
   if(S.state==="empty") return emptyState("This mandate has never been drawn on",
     "It is active and its ledger is empty. Remaining authority equals the full period limit.","");
   /* the bar shows a reservation only while one is held; a decision settles or releases it */
@@ -5253,7 +5253,7 @@ function pMandate(r){
     '</div>'+
     '<div class="panel-b" style="border-bottom:1px solid var(--border)">'+
     mandateBar(m,showRes)+
-    '<div class="dim" style="font-size:11.5px;margin-top:8px">Two concurrent calls cannot both fit under the same remaining limit — the reservation is taken before dispatch.</div></div>'+
+    '<div class="dim" style="font-size:11.5px;margin-top:8px">Two concurrent calls cannot both fit under the same remaining limit. The reservation is taken before dispatch.</div></div>'+
     '<div class="tw"><table><thead><tr><th>When</th><th>Call</th><th class="num">Amount</th><th>State</th><th>External id</th><th>Receipt</th></tr></thead><tbody>'+
     (m.ledger||[]).map(function(x){
       var sb={settled:"allowed",reserved:"approval",released:"denied"}[x.state]||"q";
@@ -5643,8 +5643,8 @@ DLG_EXT.connedit=function(id){
   if(owners.indexOf(c.owner)<0) owners.unshift(c.owner);
   return {t:"Edit "+c.name,s:"The secret itself is never readable. Replace it to rotate.",w:false,
    b:'<div class="field"><label for="cn-name">Name</label><input id="cn-name" value="'+h(c.name)+'"></div>'+
-    '<div class="field"><label for="cn-owner">Owner — a human, not a team</label><select id="cn-owner">'+
-     owners.map(function(o){return '<option'+(o===c.owner?' selected':'')+'>'+h(o)+'</option>';}).join("")+'</select></div>'+
+    '<div class="field"><label for="cn-owner">Owner</label><select id="cn-owner">'+
+     owners.map(function(o){return '<option'+(o===c.owner?' selected':'')+'>'+h(o)+'</option>';}).join("")+'</select><div class="hint">A human, not a team.</div></div>'+
     '<div class="field"><label for="cn-next">Next review</label><input id="cn-next" type="date" value="'+h(c.next)+'"></div>'+
     '<div class="field"><label for="cn-secret">Replace the secret</label><input id="cn-secret" type="password" placeholder="leave empty to keep the current one" autocomplete="off">'+
     '<div class="hint">A replacement is tested against the provider before it is saved. Grants already minted keep their TTL.</div></div>',
@@ -5743,7 +5743,7 @@ DLG_EXT.policynew=function(base){
   if(!from) return noSuch("Policy version");
   return {t:"Draft a policy version",s:"A draft decides nothing until an approver activates it",w:false,
    b:'<div class="field"><label for="pn-base">Based on</label><select id="pn-base">'+
-     opts.map(function(x){return '<option value="'+h(x.v)+'"'+(x.v===from.v?" selected":"")+'>'+h(x.v)+' — '+h(x.state)+', '+x.rules+' rules</option>';}).join("")+
+     opts.map(function(x){return '<option value="'+h(x.v)+'"'+(x.v===from.v?" selected":"")+'>'+h(x.v)+': '+h(x.state)+', '+x.rules+' rules</option>';}).join("")+
      '</select><div class="hint">The draft opens as a copy of this version’s rules.</div></div>'+
      '<div class="field"><label for="pn-note">What changes</label><input id="pn-note" placeholder="Raises any egress call to approval">'+
      '<div class="hint">One sentence. The version list and every restore dialog show it.</div></div>'+
@@ -6017,15 +6017,15 @@ S.oxprSel=null;   /* the selected row on Repositories › Changes */
 
 /* ---- the Context PR lifecycle, shared by the promoter's and the operator's ----
    Two things open a Context PR: the promoter, out of runs it aggregated into a proposal, and a
-   person, out of the record wizard. They differ in what they can show for themselves — the
-   promoter cites runs and a confidence, a person cites themselves — and they are identical in
+   person, out of the record wizard. They differ in what they can show for themselves: the
+   promoter cites runs and a confidence, a person cites themselves. They are identical in
    everything that decides whether the record publishes: the same six checks, the same merge, the
    same promotion event, the same bundle bump. So the lifecycle is parameterised over a PR
    definition and its own state, and the two differ only in what they render. */
 function prStop(st){st.timers.forEach(clearTimeout);st.timers=[];}
 /* The digest of a compiled bundle, derived from what is in it. Publishing compiles a new version,
    and a version with no digest is a bundle the promotion panel and the run's context tab claim was
-   re-signed while rendering nothing — so it is computed here rather than read from a fixed map. */
+   re-signed while rendering nothing, so it is computed here rather than read from a fixed map. */
 function steerDigestOf(v){
   var seed=v+"|"+STEER_BUNDLE.rules.map(function(r){return r.id+":"+r.tok;}).join(",");
   return "sha256:"+sha7(seed)+sha7(seed+"#")+"c4";
@@ -6043,7 +6043,7 @@ function prPublish(def,on){
     RECORDS.splice(i,1);
     /* The record and its compiled rule go in together and come out together, so the version moves
        with the rule and not with the record. Splicing on a bare indexOf would pass -1 through and
-       take the last rule in the bundle instead — a wrong rule removed and a version decremented
+       take the last rule in the bundle instead: a wrong rule removed and a version decremented
        for a compile that never happened. */
     var ri=STEER_BUNDLE.rules.indexOf(def.rule);
     if(ri>=0){ STEER_BUNDLE.rules.splice(ri,1); STEER_BUNDLE.v--; }
@@ -6111,8 +6111,8 @@ DLG_EXT.ctxpr=function(arg){
   return {t:"Open a Context PR",s:p.lineage+" · "+p.id,w:true,b:
    (open?'<div class="callout" style="margin-bottom:14px"><span class="mono">'+h(CTXPR.pr)+'</span> is already open for this concern. One concern, one pull request.</div>':'')+
    '<div class="field"><label>Concern</label><input value="'+h(p.st)+'" aria-label="Concern"><div class="hint">One concern per pull request.</div></div>'+
-   '<div class="field"><label>Kind</label><select aria-label="Kind"><option>'+h(p.kind)+' — as the promoter proposed it</option><option>rule — a directive that steers behaviour</option><option>constraint — a hard boundary, require or forbid</option><option>procedure — steps, in order</option><option>fact — a checkable claim</option><option>memory — a durable recollection</option><option>preference — soft, often unfalsifiable</option></select></div>'+
-   '<div class="field"><label>Scope</label><select aria-label="Scope"><option>workspace — opens on a-intel/platform</option><option>repository — opens on the linked repo itself</option></select>'+
+   '<div class="field"><label>Kind</label><select aria-label="Kind"><option>'+h(p.kind)+': as the promoter proposed it</option><option>rule: a directive that steers behaviour</option><option>constraint: a hard boundary, require or forbid</option><option>procedure: steps, in order</option><option>fact: a checkable claim</option><option>memory: a durable recollection</option><option>preference: soft, often unfalsifiable</option></select></div>'+
+   '<div class="field"><label>Scope</label><select aria-label="Scope"><option>workspace: opens on a-intel/platform</option><option>repository: opens on the linked repo itself</option></select>'+
    '<div class="hint">The promoter picks the scope from where the evidence came.</div></div>'+
    '<div class="field"><label>Constraint effect</label><select aria-label="Constraint effect"><option>forbid</option><option>require</option></select>'+
    '<div class="hint">A record can never grant authority. These are the only two values.</div></div>'+
@@ -6187,7 +6187,7 @@ function prpDetail(p){
 
    There can be several open at once, because "one concern per pull request" limits what one PR may
    carry, not how many concerns a person may have in flight. They live in session state, like the
-   promoter's — nothing here is a new store. */
+   promoter's: nothing here is a new store. */
 var RECPRS=[];
 S.recprs={};          /* pr id -> {st, done, failed, timers, mergedAt} */
 S.prSel=null;
@@ -6195,7 +6195,7 @@ S.prSel=null;
 function recprById(pr){for(var i=0;i<RECPRS.length;i++){if(RECPRS[i].pr===pr)return RECPRS[i];}return null;}
 /* Who else holds this lineage: a published record, or an open pull request opened before this one.
    RECPRS is newest first, so a higher index was opened earlier and wins the claim. Checking only
-   RECORDS is not enough — two pull requests can both run their checks before either merges, and
+   RECORDS is not enough. Two pull requests can both run their checks before either merges, and
    without this both reach `passed` and the second publishes a duplicate under a published id. */
 function lineageClaim(def){
   var id=def.record.id;
@@ -6298,7 +6298,7 @@ function wzRecOpenPr(){
     ok:function(){return "no published record holds "+def.record.id+"; this pull request is its only holder";},
     bad:function(){var c=lineageClaim(def);
       return c==="published"
-        ?def.record.id+" is already published. One lineage, one record — amend the published one instead of opening a second under its id."
+        ?def.record.id+" is already published. One lineage, one record: amend the published one instead of opening a second under its id."
         :def.record.id+" is already claimed by "+c+", which was opened first. Close one of them, or give this record a lineage of its own.";}},
    {n:"record_hash recomputation",ms:600,
     ok:function(){return "recomputed over the canonical bytes · "+def.hash.slice(0,20)+"… matches the file";}},
@@ -6347,7 +6347,7 @@ function recprBody(def){
    'Written by '+me().name+' in the record wizard on '+r.pub+'.', '',
    '### What this asks for',
    'Kind `'+r.kind+'`. Strength `'+r.force+'`.'+(r.ce?' Constraint effect `'+r.ce+'`; it grants nothing.':' It constrains nothing and grants nothing.'), '',
-   'Scope `'+r.scope+'` — '+(r.scope==="workspace"?'every agent in '+w.name:r.scope==="repository"?'the linked repository itself':'one agent’s runs and no other')+'.', '',
+   'Scope `'+r.scope+'`: '+(r.scope==="workspace"?'every agent in '+w.name:r.scope==="repository"?'the linked repository itself':'one agent’s runs and no other')+'.', '',
    '### Why',
    (def.desc||'(no rationale given)'), '',
    '### What it costs',
@@ -7218,7 +7218,7 @@ function oxState(r){return OX_STATE[r.ox||"governed"]||OX_STATE.governed;}
 /* A workspace names its main repo in ws.json; REPOS may hold no row for it, because the seed
    fixtures only carry core-platform's and the volume generator grows rows for the workspaces it
    invents rather than the ones already there. Three separate findings on this page were the same
-   omission read three ways — a Repositories tab claiming zero bound repositories, a Configuration
+   omission read three ways: a Repositories tab claiming zero bound repositories, a Configuration
    panel labelled with one repository and rendering another's head, and a main repo absent from
    every list that derives from this one. So the record is minted here, once, rather than at each
    call site: a workspace's main repo always exists, whether or not anybody has indexed it. */
@@ -7255,10 +7255,10 @@ function stBadge(m){return '<span class="b '+m.b+'"><span class="d"></span>'+h(m
    string elsewhere, because the review step shows this exact text and the operator edits it. */
 /* `role` is the operator's choice on step 1, not a fact about the workspace as it stands. The
    file used to derive it from `w.main`, so a repository chosen as the new main was drafted as
-   `linked` — the one line the review step exists to let somebody read, contradicting the choice
+   `linked`: the one line the review step exists to let somebody read, contradicting the choice
    two steps earlier, and leaving an empty workspace unable to draft the main binding it needs. */
 function oxWorkspaceToml(w,repo,mode,role){
-  return '# .oxagen/workspace.toml — committed, reviewed, and the source of truth.\n'+
+  return '# .oxagen/workspace.toml: committed, reviewed, and the source of truth.\n'+
    '# The local link (org, workspace, machine) is .oxagen/workspace.json, which is gitignored.\n'+
    'schema = "oxagen-workspace/v0.1"\n'+
    'org = "'+ORG.slug+'"\n'+
@@ -7276,7 +7276,7 @@ function oxWorkspaceToml(w,repo,mode,role){
    'per_run_usd = 2.40\n';
 }
 function oxGovernanceToml(mode){
-  return '# .oxagen/rules/governance.toml — read on the production branch when a pull request is\n'+
+  return '# .oxagen/rules/governance.toml: read on the production branch when a pull request is\n'+
    '# opened and again when it is merged. A missing file means team.\n'+
    'mode = "'+mode+'"\n'+
    'separation_of_duties = '+(mode==="regulated"?"true":"false")+'\n';
@@ -7289,7 +7289,7 @@ function repoTab(){
   var banner=unbound.length?'<div class="banner"><span class="b b-approval" style="flex:none"><span class="d"></span>'+
    unbound.length+' linked repositor'+(unbound.length>1?'ies carry':'y carries')+' no .oxagen/</span>'+
    '<div class="grow"><b>A run on '+h(unbound.map(function(r){return r.n;}).join(", "))+' is steered by the main repo and by nothing of its own.</b> '+
-   'Repository-scoped records live in that repository, so until it has a <span class="mono">.oxagen/</span> tree there is nowhere to put one — '+
+   'Repository-scoped records live in that repository, so until it has a <span class="mono">.oxagen/</span> tree there is nowhere to put one, '+
    'and a record that tried would have to claim workspace scope, which the checks refuse.</div>'+
    '<button class="btn" onclick="wzOpen(\'init\',\''+h(unbound[0].n)+'\')">Add Oxagen</button></div>':'';
 
@@ -7320,7 +7320,7 @@ function repoTab(){
 function copyTab(){
   var w=ws(), rows=wsCopies();
   /* The header gives up its gold on this tab, so an empty list that omitted Connect would leave
-     the screen with no primary action and no way to link its first directory — which is the one
+     the screen with no primary action and no way to link its first directory, which is the one
      thing this tab exists to do. */
   if(!rows.length) return '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Working copies</h3>'+
    '<p class="muted" style="margin:2px 0 0;font-size:12px">No directory on anybody’s disk is linked to '+h(w.name)+' yet.</p></div>'+
@@ -7351,7 +7351,7 @@ function copyTab(){
    '<pre>.oxagen/\n  workspace.toml     <span class="c"># committed. reviewed. the source of truth.</span>\n'+
    '  workspace.json     <span class="c"># gitignored · this machine’s link</span>\n'+
    '  rules/\n  proposals/\n  agents/\n  skills/\n  tools/</pre>'+
-   '<div class="note" style="margin-top:12px">The committed file says what the workspace is. The gitignored one says which workspace <em>this checkout</em> is talking to, which is a fact about a laptop and not about the product — so it is never reviewed, never merged, and never the same file in two places.</div></div></div>'+
+   '<div class="note" style="margin-top:12px">The committed file says what the workspace is. The gitignored one says which workspace <em>this checkout</em> is talking to, which is a fact about a laptop and not about the product, so it is never reviewed, never merged, and never the same file in two places.</div></div></div>'+
    '<div class="panel"><div class="panel-h"><h3>Sync</h3></div><div class="panel-b">'+
    '<div class="kv"><dt><span class="mono">oxagen init</span></dt><dd>Links this directory. Reads the git remote, matches it to a repository the installation can reach, and writes <span class="mono">.oxagen/workspace.json</span>. Idempotent.</dd>'+
    '<dt><span class="mono">oxagen pull</span></dt><dd>Fast-forwards <span class="mono">.oxagen/</span> to the production branch and re-points the Stella symlinks. It never merges your work.</dd>'+
@@ -7386,20 +7386,20 @@ function chgTab(){
      '<td>'+oxprCiLight(p)+'</td>'+
      '<td class="muted" style="font-size:12px">'+h(p.opened)+'</td></tr>';}).join("");
   return '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Open Context PRs</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">Four kinds of file and one lifecycle. Whoever opened it — a person, the promoter, or the reconciler — the checks, the merge and the publication are the same.</p></div></div>'+
+   '<p class="muted" style="margin:2px 0 0;font-size:12px">Four kinds of file and one lifecycle. Whoever opened it (a person, the promoter, or the reconciler), the checks, the merge and the publication are the same.</p></div></div>'+
    '<div class="tw"><table><thead><tr><th>Change</th><th>Kind</th><th>Pull request</th><th>Opened by</th><th>State</th><th>Checks</th><th>Opened</th></tr></thead>'+
    '<tbody>'+trows+'</tbody></table></div>'+
    '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">A change is in force from the merge commit, not from when it was written. While a pull request is open the thing it carries steers nothing: it is not in the compiled bundle, not in the record index, and the bundle version has not moved.</div></div></div>'+
    '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Automatic proposals</h3></div><div class="panel-b">'+
    '<div class="kv"><dt>the promoter</dt><dd>Aggregates records across runs by lineage and opens a proposal with the runs it cites. There is no threshold; a person reads the support and decides.</dd>'+
    '<dt>the reconciler</dt><dd>Reads <span class="mono">.oxagen/workspace.toml</span> against what the control plane has, and opens one pull request per real difference. It never edits live state to match the file.</dd>'+
-   '<dt>a person</dt><dd>Every creation wizard — agent, tool, skill, record — ends here. None of them has a Save button that ends in a database.</dd></div>'+
-   '<div class="note" style="margin-top:12px">Drift is reported, never repaired in place. A reconciler that silently edited either side would make the file a description of the past and the product unreviewable — the pull request is the only place a person can say which of the two was right.</div></div></div>';
+   '<dt>a person</dt><dd>Every creation wizard (agent, tool, skill, record) ends here. None of them has a Save button that ends in a database.</dd></div>'+
+   '<div class="note" style="margin-top:12px">Drift is reported, never repaired in place. A reconciler that silently edited either side would make the file a description of the past and the product unreviewable. The pull request is the only place a person can say which of the two was right.</div></div></div>';
 }
 
 /* Merge is enabled only when every check has reported, none failed, and the pull request is not
    already merged. The detail view computed this inline while the page header separately assumed
-   that *any* selected change supplied a gold action — so selecting a running, failed or merged
+   that *any* selected change supplied a gold action, so selecting a running, failed or merged
    one demoted the header for a primary that was never rendered, and the screen had none. Same
    shape as the stale-selection bug: two readers of one fact, only one of them right. */
 /* CI status as GitHub reports it, one light: blinking blue while anything runs, a red x the moment
@@ -7511,7 +7511,7 @@ function cfgTab(){
      has bound, so its first row can be an unrelated repository wearing this workspace's name. */
   var repo=repoByName(w.main)||repoRecordFor(w.main,w);
   /* Drift is a fact about one workspace's file against one workspace's live state. These rows are
-     core-platform's — its Linear server, its budget, its unbound linked repo — so rendering them
+     core-platform's (its Linear server, its budget, its unbound linked repo), so rendering them
      under another workspace would report drift that workspace does not have, and send the
      operator to a reconciliation pull request that is not its own. A workspace with nothing
      recorded says so. */
@@ -7531,7 +7531,7 @@ function cfgTab(){
         '<td>'+(d[3]==="the file"?'<span class="b b-q">the file</span>':'<span class="b b-approval">a person decides</span>')+'</td></tr>';}).join("")+
       '</tbody></table></div>'+
       '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">Two of these the reconciler can argue for, because it read both sides. The third it cannot: a repository with no <span class="mono">.oxagen/</span> is a decision about scope, not a difference between two records, so it waits for a person.</div></div>'
-     :'<div class="panel-b"><div class="note">The reconciler last read <span class="mono">'+h(w.main)+'</span> against the control plane and found nothing between them. Drift is reported here, never repaired in place — so an empty table is the reconciler saying the file and the live state agree, not that nobody looked.</div></div>')+
+     :'<div class="panel-b"><div class="note">The reconciler last read <span class="mono">'+h(w.main)+'</span> against the control plane and found nothing between them. Drift is reported here, never repaired in place, so an empty table is the reconciler saying the file and the live state agree, not that nobody looked.</div></div>')+
    '</div></div>'+
    '<div class="grid g2" style="margin-top:14px">'+
    '<div class="panel"><div class="panel-h"><h3>.oxagen/rules/governance.toml</h3></div><div class="panel-b">'+
@@ -7539,7 +7539,7 @@ function cfgTab(){
    '<div class="kv" style="margin-top:12px"><dt><span class="mono">solo</span></dt><dd>The author may merge their own.</dd>'+
    '<dt><span class="mono">team</span></dt><dd>A code-owner review is required. This is what a missing file means.</dd>'+
    '<dt><span class="mono">regulated</span></dt><dd>A named approver from a role must approve, and the promotion ledger is hash-chained.</dd></div>'+
-   '<div class="note" style="margin-top:12px">The mode is read on the production branch when a pull request is opened and again when it is merged — so raising it takes effect on everything still open, and it is changed by a pull request like everything else, never by a settings screen. A file that exists but names no mode refuses both, rather than quietly falling back to <span class="mono">team</span>.</div></div></div>'+
+   '<div class="note" style="margin-top:12px">The mode is read on the production branch when a pull request is opened and again when it is merged, so raising it takes effect on everything still open, and it is changed by a pull request like everything else, never by a settings screen. A file that exists but names no mode refuses both, rather than quietly falling back to <span class="mono">team</span>.</div></div></div>'+
    '<div class="panel"><div class="panel-h"><h3>Tree</h3></div><div class="panel-b">'+
    '<pre>.oxagen/\n  workspace.toml             <span class="c"># linked repos, servers, budgets</span>\n'+
    '  workspace.json             <span class="c"># gitignored · this machine’s link</span>\n'+
@@ -7559,7 +7559,7 @@ function pRepos(){
   if(S.state==="error") return errorState("Repositories","503 installation_unreachable");
   if(S.state==="denied") return deniedState("this workspace’s repositories","repository.read on "+w.slug);
   if(S.state==="empty") return emptyState("This workspace has no repository yet",
-    "A workspace without a main repo cannot exist, so this state is the moment between creating one and binding it. The main repo is where steering and configuration are managed in source control — until it is bound, there is nowhere for a record to be published to.",
+    "A workspace without a main repo cannot exist, so this state is the moment between creating one and binding it. The main repo is where steering and configuration are managed in source control. Until it is bound, there is nowhere for a record to be published to.",
     '<button class="btn primary" onclick="wzOpen(\'init\')">Add Oxagen to a repository</button>');
 
   var open=oxprOpen().length, stale=wsCopies().filter(function(c){return c.oxagen!=="in-sync";}).length;
@@ -7639,7 +7639,7 @@ function pSpend(){
        '<td style="min-width:170px"><div class="bar"><i style="width:'+Math.round(o.used*100)+'%;background:'+(o.used>0.8?"var(--st-critical)":"var(--st-allowed)")+'"></i></div>'+
        '<div class="dim" style="font-size:11px">'+per(o.used)+' of '+usd(o.budget)+'</div></td></tr>';}).join("")+
      '</tbody></table></div><div class="panel-b">'+
-     '<div class="note">Every run has exactly one operator, even when a schedule or a webhook started it: the operator is the person who owns that trigger. A run that arrived without one is attributed to the agent’s owning operator and flagged — never dropped, never spread.</div></div></div>';
+     '<div class="note">Every run has exactly one operator, even when a schedule or a webhook started it: the operator is the person who owns that trigger. A run that arrived without one is attributed to the agent’s owning operator and flagged, never dropped and never spread.</div></div></div>';
   } else if(t==="agent"){
     body='<div class="panel"><div class="panel-h"><h3>By agent</h3></div><div class="tw"><table>'+
      '<thead><tr><th>Agent</th><th class="num">Runs</th><th class="num">Spend</th><th class="num">Tokens</th><th class="num">Per run</th><th class="num">Cache hit</th><th class="num">Potential savings</th><th>Trend</th></tr></thead><tbody>'+
@@ -7783,7 +7783,7 @@ function coachJump(label){
 function coachPicker(kind){
   var subs=coachSubjects(kind);
   return '<input class="coach-pick" list="coachPickList" value="" autocomplete="off" '+
-   'placeholder="Jump to another '+(kind==="operators"?"operator":"agent")+' \u2014 '+subs.length+' with coaching" '+
+   'placeholder="Jump to another '+(kind==="operators"?"operator":"agent")+': '+subs.length+' with coaching" '+
    'aria-label="Jump to another subject" onchange="coachJump(this.value)">'+
    '<datalist id="coachPickList">'+subs.map(function(s){
      return '<option value="'+h(s.label)+'">'+h(s.items.length+" row"+(s.items.length===1?"":"s")+" \u00b7 "+fmt$(s.usd)+" a month")+'</option>';}).join("")+'</datalist>';
@@ -8039,13 +8039,13 @@ function spendDrill(dr){
    '<div class="panel-b" style="display:grid;gap:10px">'+
    (fs.length?fs.map(function(f,i){return fndCard(f,i,save,top,"of this "+kind+"’s savings");}).join(""):
     '<p class="muted" style="margin:0;font-size:12.5px">No findings cite this '+kind+'. When a rollup finds a frame pattern here it appears in this list with the dollars it would remove, and the same amount shows on the '+listLabel+' table.</p>')+
-   '</div>'+(fs.length?'<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">A finding counts toward this '+kind+' when it is the subject, or when its evidence names it — the badge says which level it was found at. '+
+   '</div>'+(fs.length?'<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">A finding counts toward this '+kind+' when it is the subject, or when its evidence names it. The badge says which level it was found at. '+
    'Potential savings are measured minus counterfactual over the cited runs, at the price each call actually paid; Fix opens the change that removes it.</div></div>':'')+'</div>';
 
   return head+hero+tiles+series+(kind==="agent"?spendAgentHistory(E):"")+cuts+fnd;
 }
 
-/* Spend by tool — cumulative on the left, average per call on the right, the numbers underneath. */
+/* Spend by tool: cumulative on the left, average per call on the right, the numbers underneath. */
 function spendByTool(){
   var rows=SPEND.byTool, tools=rows.filter(function(r){return r.perCall!==null;});
   var total=rows.reduce(function(s,r){return s+r.spend;},0);
@@ -8100,7 +8100,7 @@ function spendByTool(){
    charts+'</div>';
 }
 
-/* Wasted spend — money whose frames show it bought nothing, and the runs that prove it. */
+/* Wasted spend: money whose frames show it bought nothing, and the runs that prove it. */
 function spendWaste(){
   var byRun={}; RUNS.forEach(function(r){byRun[r.id]=r;});
   var mx=Math.max.apply(null,SPEND.wasteByCause.map(function(c){return parseFloat(c.spend.replace(/,/g,""));}));
@@ -8132,7 +8132,7 @@ function spendWaste(){
      '<div class="row"><span class="dim mono" style="font-size:10.5px">'+r.frames+' frames · '+r.steps+' steps · cache '+per(r.cache)+' · '+h(r.model)+'</span>'+
      '<button class="btn sm" style="margin-left:auto" onclick="go(\''+href+'\')">Open the run</button>'+
      '<button class="btn sm" onclick="act(\'Frames that prove the waste on '+r.id+' opened.\')">Show the frames</button></div></div>';}).join("")+
-   '</div><div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">Wasted is a claim about frames, not about outcomes: it means the frames show the tokens bought nothing — a repeated call, a cold prefix, a turn spent waiting, a chain that broke. '+
+   '</div><div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">Wasted is a claim about frames, not about outcomes: it means the frames show the tokens bought nothing: a repeated call, a cold prefix, a turn spent waiting, a chain that broke. '+
    'Accepted-by-a-human work is never counted here.</div></div></div>';
   return strip+causes+runs;
 }
@@ -8176,11 +8176,11 @@ function spendAgentHistory(E){
    '<div class="panel"><div class="panel-h"><h3>Token use</h3><span class="b b-q" style="margin-left:auto">'+tokn(t.total)+' tok</span></div><div class="panel-b">'+tokBars(t,{tight:true})+'</div></div></div>';
 }
 /* ============================== Organization ============================== */
-/* API keys — each one is a service principal with its own grants. Ported from the CIO console (w10 #/a-intel/api-keys). */
+/* API keys: each one is a service principal with its own grants. Ported from the CIO console (w10 #/a-intel/api-keys). */
 var APIKEYS=[
  {name:"FinOps export",key:"ox_live_7f2c…a19",principal:"svc_finops_export",grants:["cost.read","run.read"],by:"Dana Okafor",last:"2026-09-11 06:00Z",n30:1204,expires:"2027-01-04",st:"ok"},
  {name:"Terraform provisioning",key:"ox_live_a91b…4dd",principal:"svc_terraform",grants:["workspace.write","agent.write","grant.write"],by:"Marcus Bell",last:"2026-09-10 22:14Z",n30:37,expires:"2026-12-01",st:"ok"},
- {name:"Auditor read-only — Brandt KPM",key:"ox_live_3kd0…77c",principal:"svc_auditor_bkpm",grants:["audit.read","receipt.read","export.read"],by:"Sofia Ruiz",last:"2026-09-11 08:41Z",n30:212,expires:"2026-10-02",st:"expiring"},
+ {name:"Auditor read-only: Brandt KPM",key:"ox_live_3kd0…77c",principal:"svc_auditor_bkpm",grants:["audit.read","receipt.read","export.read"],by:"Sofia Ruiz",last:"2026-09-11 08:41Z",n30:212,expires:"2026-10-02",st:"expiring"},
  {name:"CI smoke checks",key:"ox_live_ee54…0b2",principal:"svc_ci",grants:["run.read"],by:"Helena Vogt",last:"never used",n30:0,expires:"2026-11-15",st:"unused"}
 ];
 /* The keys tab has its own address (#/a-intel/api-keys) so it can be linked from the command menu and the docs; the other tabs live on #/a-intel. */
@@ -8193,7 +8193,7 @@ function pOrganization(){
   var t=tab("organization","people");
   if(S.state==="loading") return skeleton();
   if(S.state==="error") return errorState("Organization","503 control_plane_unavailable");
-  if(S.state==="denied") return deniedState("this organization’s settings","org.admin — members, funding, and the data plane are owner-only");
+  if(S.state==="denied") return deniedState("this organization’s settings","org.admin: members, funding, and the data plane are owner-only");
   if(S.state==="empty") return emptyState("This organization has no workspaces",
     "A workspace owns one main repo, one steering set, a set of agents, tool grants, and budgets. A workspace without a main repo cannot exist.",
     '<button class="btn primary" onclick="openDialog(\'newws\')">Create a workspace</button>');
@@ -8337,7 +8337,7 @@ function orgRoutesPanel(){
      '<td class="rowacts"><button class="btn sm" onclick="openDialog(\'editroute\','+i+')">Edit</button></td></tr>';}).join("")+
    '<tr><td colspan="5"><b>Total</b> <span class="dim" style="font-size:11.5px">· basis client_attested · '+h(ORG.currency)+'</span></td><td class="num" id="orgRoutesTotal"><b>'+usd(fmt2(total))+'</b></td><td></td></tr>'+
    '</tbody></table></div><div class="panel-b">'+
-   '<div class="note">Tiers point at rolling aliases so “latest” stays current without a deploy. Every <span class="mono">model.response</span> frame records the concrete model id the provider returned, and the cost record prices <i>that</i> id — so a replay names the exact model and a price is never looked up by alias. The complex row is the Oxagenant line on Spend.</div></div></div>';
+   '<div class="note">Tiers point at rolling aliases so “latest” stays current without a deploy. Every <span class="mono">model.response</span> frame records the concrete model id the provider returned, and the cost record prices <i>that</i> id, so a replay names the exact model and a price is never looked up by alias. The complex row is the Oxagenant line on Spend.</div></div></div>';
 }
 DLG_EXT.editroute=function(arg){
   var i=parseInt(arg,10), r=ORG_ROUTES[i];
@@ -8484,7 +8484,7 @@ DLG_EXT.member=function(p){
 function pBilling(){
   if(S.state==="loading") return skeleton();
   if(S.state==="error") return errorState("Billing","502 stripe_unreachable");
-  if(S.state==="denied") return deniedState("billing","org.billing — plan and invoices are readable only by a finance role");
+  if(S.state==="denied") return deniedState("billing","org.billing: plan and invoices are readable only by a finance role");
   if(S.state==="empty") return emptyState("Nothing billable yet",
     "You pay per governed action: a call Oxagen decided, delivered and recorded. The free tier has every governance feature on, an included monthly allowance, thirty days of evidence and three seats.",
     '<button class="btn" onclick="go(\'#/'+ORG.slug+'/'+S.ws+'\')">Back to Fleet</button>');
@@ -8529,7 +8529,7 @@ function pBilling(){
 }
 
 /* ============================== Audit ============================== */
-/* The CIO's console (ported from W10). Every tab reads a record and links to frames, records, and commits — never a summary.
+/* The CIO's console (ported from W10). Every tab reads a record and links to frames, records, and commits, never a summary.
    Data for the Audit page lives here, beside the code that reads it. AUDIT (events) is shared and lives above. */
 var AUD_SEV={critical:"critical",warning:"approval",info:"q"};
 var AUD_DEC={allow:"allowed",allowed:"allowed",approve:"approval",deny:"denied",denied:"denied",observed:"q"};
@@ -8567,46 +8567,46 @@ var INCIDENTS=[
   status:"resolved",closedAt:"2026-08-25 10:31",closedBy:"Marcus Bell",runs:1}
 ];
 
-/* fact rows: [label, value, mono?] — values are escaped at render */
+/* fact rows: [label, value, mono?]. Values are escaped at render */
 var RECEIPTS=[
  {id:"rcp_01K4X8M2E",at:"2026-09-04 10:22:41.908Z",agent:"a-intel.finops.invoice-bot",operator:"Dana Okafor",tool:"stripe__create_payment@4",decision:"approve",tier:"harness",
   effect:"pi_3QaL8f2Xk",amount:"$884.60 USD",ws:"finops",runId:"run_01K5RF2J7M3EDC5F",
   who:[["Operator","Dana Okafor · usr_01K2A9DQ · org.billing"],["Agent","a-intel.finops.invoice-bot · prn_01K3Q2",1],["Run · turn · step","run_01K5RF2J7M3EDC5F · 2 · 5",1],["Task","PO-4471 · monthly infrastructure invoices"]],
   what:[["Tool version","stripe__create_payment@4",1],["Schema digest","sha256:0b41e7c9a2f53081",1],["Input digest","sha256:c81f04ea6b2d93a7",1],["Amount ($.amount)","88460000 micro-USD → $884.60 USD"],["Counterparty ($.recipient)","vendor:aws",1],["Input","retained in full · content_exact · 2 fields redacted before write"]],
-  authority:[["Decision","approve → approved, then allow on token"],["Policy version","pol_v41 (signed)",1],["Rules fired","mnd_7K2ETQ4.approval.above_micros · rg_0112",1],["Grants used","role finops.operator → stripe__create_payment@*",1],["Delegation ceiling","held — agent ∩ operator"],["Mandate","mnd_7K2ETQ4 · $884.60 reserved, then settled · $1,115.40 remaining this month",1],["Approval token","apt_01K4X7Q4 · single-use · bound to the call digest · approver Priya Natarajan",1],["Approver reason","“PO-4471 line 3, checked against the quote.”"],["Taint sources","none"]],
+  authority:[["Decision","approve → approved, then allow on token"],["Policy version","pol_v41 (signed)",1],["Rules fired","mnd_7K2ETQ4.approval.above_micros · rg_0112",1],["Grants used","role finops.operator → stripe__create_payment@*",1],["Delegation ceiling","held: agent ∩ operator"],["Mandate","mnd_7K2ETQ4 · $884.60 reserved, then settled · $1,115.40 remaining this month",1],["Approval token","apt_01K4X7Q4 · single-use · bound to the call digest · approver Priya Natarajan",1],["Approver reason","“PO-4471 line 3, checked against the quote.”"],["Taint sources","none"]],
   credential:[["Credential grant","cg_01K4X7T1",1],["Connection","con_01K2A9 · stripe · owner Dana Okafor · reviewed 2026-08-01",1],["Minted","restricted key · payment_intents:write · customer cus_aintel only"],["TTL","10 minutes, bound to the call id"],["Provider token id","rk_live_…9f2",1],["Agent saw","the result. Never the key."]],
   effectRows:[["Dispatched","2026-09-04 10:22:41.908Z · api.stripe.com"],["Response digest","sha256:7e10b4c9d2a3f508",1],["Output validation","pass"],["Redactions","2 (card last4, email)"],["External effect id","pi_3QaL8f2Xk",1],["Idempotency key","idk_c81f04ea · no duplicate suppressed",1]],
   integrity:[["Frame hash","sha256:41c907e2bd38f450",1],["Chain position","27 of 31 · verified"],["Gateway signature","ed25519 · "+ORG.attester+" · verified",1],["Tier","harness · this call was routed through Oxagen, which carried the credential"]]},
  {id:"rcp_01K5RH8M2",at:"2026-09-11 07:41:31.512Z",agent:"a-intel.core.triage",operator:"Marcus Bell",tool:"bash__run@1",decision:"deny",tier:"harness",
-  effect:"none — denied before dispatch",amount:"—",ws:"core-platform",runId:"run_01K5RH8M2V",
+  effect:"none: denied before dispatch",amount:"—",ws:"core-platform",runId:"run_01K5RH8M2V",
   who:[["Operator","Marcus Bell · usr_01K2B7XN · workspace.owner"],["Agent","a-intel.core.triage · prn_01K3T8",1],["Run · turn · step","run_01K5RH8M2V · 4 · 19",1],["Task","triage inbound issues on a-intel/platform"]],
   what:[["Tool version","bash__run@1",1],["Schema digest","sha256:9c1f4ad20b77e012",1],["Input digest","sha256:c0771e9d44a2b8f3",1],["Command ($.cmd)","curl -s $ISSUE_URL | sh",1],["Input","retained in full · content_exact"]],
   authority:[["Decision","approve → expired → denied"],["Policy version","pol_v41 (signed)",1],["Rules fired","taint.write_or_exec → approve · approval.ttl.10m",1],["Grants used","role core.contributor → bash__run@*",1],["Delegation ceiling","held"],["Mandate","n/a"],["Approval","apr_01K5RH8M2 · no approver answered in 10 minutes",1],["Taint sources","frm_01K5RH8M2V-112 (tool output: issue body, ingested at turn 3)",1]],
-  credential:[["Credential grant","none minted — denied before brokerage"],["Connection","not brokered"],["Minted","—"],["TTL","—"],["Provider token id","—"],["Agent saw","the denial and the reason. Nothing else."]],
+  credential:[["Credential grant","none minted: denied before brokerage"],["Connection","not brokered"],["Minted","—"],["TTL","—"],["Provider token id","—"],["Agent saw","the denial and the reason. Nothing else."]],
   effectRows:[["Dispatched","never"],["Response digest","—"],["Output validation","—"],["Redactions","—"],["External effect id","none"],["Idempotency key","idk_c0771e9d (unused)",1]],
   integrity:[["Frame hash","sha256:31be0d7712c4a9e8",1],["Chain position","19 of 26 · verified"],["Gateway signature","ed25519 · "+ORG.attester+" · verified",1],["Tier","harness · routed through Oxagen. Denials are recorded and cost nothing"]]},
  {id:"rcp_01K4ZA0J3",at:"2026-09-10 13:02:44.207Z",agent:"a-intel.core.docs-writer",operator:"Helena Vogt",tool:"notion__append_block@2",decision:"observed",tier:"observe",
   effect:"blk_9a71… (client-attested)",amount:"—",ws:"core-platform",runId:"run_01K5ZA0J2M",
   who:[["Operator","Helena Vogt · usr_01K2C4VG · workspace.member"],["Agent","a-intel.core.docs-writer · prn_01K3V2",1],["Run · turn · step","run_01K5ZA0J2M · 1 · 4",1],["Task","architecture notes"]],
   what:[["Tool version","notion__append_block@2",1],["Schema digest","sha256:5b1290aa04e7c3d1",1],["Input digest","sha256:9e33abc027f14d86",1],["Input","attested by the client · size and type checked only"]],
-  authority:[["Decision","observed — Oxagen did not decide this call"],["Policy version","n/a at observe tier"],["Rules fired","none — no gate ran"],["Grants used","not consulted"],["Delegation ceiling","not evaluated"],["Mandate","n/a"],["Approval","n/a"],["Taint sources","not computed"]],
-  credential:[["Credential grant","none — the agent used its own credential"],["Connection","not brokered"],["Minted","—"],["TTL","—"],["Provider token id","—"],["Agent saw","whatever it held. Oxagen cannot say."]],
+  authority:[["Decision","observed: Oxagen did not decide this call"],["Policy version","n/a at observe tier"],["Rules fired","none: no gate ran"],["Grants used","not consulted"],["Delegation ceiling","not evaluated"],["Mandate","n/a"],["Approval","n/a"],["Taint sources","not computed"]],
+  credential:[["Credential grant","none: the agent used its own credential"],["Connection","not brokered"],["Minted","—"],["TTL","—"],["Provider token id","—"],["Agent saw","whatever it held. Oxagen cannot say."]],
   effectRows:[["Dispatched","reported by the client at 2026-09-10 13:02:44.207Z"],["Tool server","notion (unverified)"],["Response digest","sha256:1f770233bd9a4c08 (client-attested)",1],["Output validation","size and type only"],["External effect id","blk_9a71… (client-attested)",1],["Idempotency key","not enforced"]],
   integrity:[["Frame hash","sha256:aa77110c2e5d93b4",1],["Chain position","4 of 9 · verified"],["Gateway signature","ed25519 · "+ORG.attester+" · signs the record, not the call",1],["Tier","observe · recorded only. This receipt can never be shown as decided by Oxagen."]]}
 ];
 
 var EXPORTS=[
- {id:"exp_01K5R2A8",what:"Receipt export — September, financial class (CSV + JSON)",range:"2026-09-01 → 2026-09-11",runs:"1,204 receipts · every financial.effect ≠ none",size:"46 MB",at:"2026-09-11 07:02",by:"Dana Okafor",st:"ready",sig:"ed25519:MEQCIGa1…9c07",keys:"kek_aintel_2026Q3"},
- {id:"exp_01K4Q7M1",what:"Evidence bundle — all runs of a-intel.finops.invoice-bot",range:"2026-01-01 → 2026-09-05",runs:"962 runs · 31 archive segments · 188,440 frames",size:"0.8 GB",at:"2026-09-05 14:20",by:"Sofia Ruiz",st:"ready",sig:"ed25519:MEUCIQD8…4f21",keys:"kek_aintel_2026Q2, kek_aintel_2026Q3"},
- {id:"exp_01K5RV3E",what:"Evidence bundle — core-platform, August 2026",range:"2026-08-01 → 2026-08-31",runs:"4,118 runs · 118 archive segments · 1,004,212 frames",size:"3.9 GB",at:"2026-09-11 09:41",by:"Sofia Ruiz",st:"building",sig:"pending",keys:"kek_aintel_2026Q3"}
+ {id:"exp_01K5R2A8",what:"Receipt export: September, financial class (CSV + JSON)",range:"2026-09-01 → 2026-09-11",runs:"1,204 receipts · every financial.effect ≠ none",size:"46 MB",at:"2026-09-11 07:02",by:"Dana Okafor",st:"ready",sig:"ed25519:MEQCIGa1…9c07",keys:"kek_aintel_2026Q3"},
+ {id:"exp_01K4Q7M1",what:"Evidence bundle: all runs of a-intel.finops.invoice-bot",range:"2026-01-01 → 2026-09-05",runs:"962 runs · 31 archive segments · 188,440 frames",size:"0.8 GB",at:"2026-09-05 14:20",by:"Sofia Ruiz",st:"ready",sig:"ed25519:MEUCIQD8…4f21",keys:"kek_aintel_2026Q2, kek_aintel_2026Q3"},
+ {id:"exp_01K5RV3E",what:"Evidence bundle: core-platform, August 2026",range:"2026-08-01 → 2026-08-31",runs:"4,118 runs · 118 archive segments · 1,004,212 frames",size:"3.9 GB",at:"2026-09-11 09:41",by:"Sofia Ruiz",st:"building",sig:"pending",keys:"kek_aintel_2026Q3"}
 ];
 
 var KEYS=[
  {name:"KEK · organization",id:"kek_aintel_2026Q3",alg:"AES-256-GCM (KMS)",gen:"3",from:"2026-09-10 16:04",to:"2026-12-31",st:"active",covers:"all new bodies, segments, subject keys"},
- {name:"KEK · organization",id:"kek_aintel_2026Q2",alg:"AES-256-GCM (KMS)",gen:"2",from:"2026-06-14 09:00",to:"2026-09-10 16:04",st:"retiring",covers:"1.42M objects — decrypt only, re-wrap 61% done"},
- {name:"KEK · organization",id:"kek_aintel_2026Q1",alg:"AES-256-GCM (KMS)",gen:"1",from:"2026-03-01 09:00",to:"2026-06-14 09:00",st:"retired",covers:"0 objects — re-wrap complete"},
+ {name:"KEK · organization",id:"kek_aintel_2026Q2",alg:"AES-256-GCM (KMS)",gen:"2",from:"2026-06-14 09:00",to:"2026-09-10 16:04",st:"retiring",covers:"1.42M objects: decrypt only, re-wrap 61% done"},
+ {name:"KEK · organization",id:"kek_aintel_2026Q1",alg:"AES-256-GCM (KMS)",gen:"1",from:"2026-03-01 09:00",to:"2026-06-14 09:00",st:"retired",covers:"0 objects: re-wrap complete"},
  {name:"Run attestation · receipts and seals",id:ORG.attester,alg:"Ed25519",gen:"3",from:"2026-07-01",to:"2026-12-31",st:"active",covers:"signs every receipt and seal · published"},
- {name:"Run attestation · receipts and seals",id:"key_ox_aintel_2026Q1",alg:"Ed25519",gen:"2",from:"2026-01-01",to:"2026-07-01",st:"retiring",covers:"verify only — 3.1M receipts still cite it"},
+ {name:"Run attestation · receipts and seals",id:"key_ox_aintel_2026Q1",alg:"Ed25519",gen:"2",from:"2026-01-01",to:"2026-07-01",st:"retiring",covers:"verify only: 3.1M receipts still cite it"},
  {name:"Host device key · mbp-01",id:"dev_mbp01_ed1",alg:"Ed25519",gen:"1",from:"2026-02-14",to:"2027-02-14",st:"active",covers:"signs Claude Code checkpoints"},
  {name:"Host device key · ci-runner-04",id:"dev_ci04_ed1",alg:"Ed25519",gen:"1",from:"2026-05-03",to:"2027-05-03",st:"active",covers:"signs Stella CI checkpoints"},
  {name:"Host device key · mbp-tlang",id:"dev_tlang_ed1",alg:"Ed25519",gen:"1",from:"2025-11-20",to:"2026-09-01",st:"expired",covers:"unenrolled 2026-09-01; runs keep their signatures"}
@@ -8707,7 +8707,7 @@ function auditReceipts(){
      '<td>'+toolCell(r.tool,{sz:"sm"})+'</td><td>'+auditBadge(AUD_DEC[r.decision]||"q",r.decision)+'</td>'+
      '<td class="num mono" style="font-size:12px">'+h(r.amount)+'</td><td class="mono" style="font-size:11.5px">'+h(r.effect)+'</td><td>'+tierBadge(r.tier)+'</td></tr>';}).join("");
   var chips=["stripe","harness","observe","deny","a-intel.finops.invoice-bot","pi_3QaL8f2Xk"];
-  return '<div class="panel"><div class="panel-h"><h3>Receipt search</h3><span class="muted" style="font-size:12.5px">one signed record per tool call — what an auditor, a security lead or a CFO opens</span>'+
+  return '<div class="panel"><div class="panel-h"><h3>Receipt search</h3><span class="muted" style="font-size:12.5px">one signed record per tool call</span>'+
    '<div class="sp">'+auditStore("postgres frames + object storage bodies")+'</div></div>'+
    '<div class="panel-b" style="border-bottom:1px solid var(--border)"><div class="row"><div class="field" style="margin:0;flex:1;min-width:200px">'+
    '<input id="rq" value="'+h(S.rq||"")+'" placeholder="agent key, tool, external effect id, call digest, receipt id" aria-label="Search receipts" onkeydown="if(event.key===\'Enter\'){S.rq=this.value;render();}"></div>'+
@@ -8715,7 +8715,7 @@ function auditReceipts(){
    '<div class="chips">'+chips.map(function(c){return '<button class="btn sm'+((S.rq||"")===c?' sel':'')+'" onclick="S.rq=\''+c+'\';render()">'+h(c)+'</button>';}).join("")+
    (q?'<button class="btn sm ghost" onclick="S.rq=\'\';render()">clear</button>':'')+'</div></div>'+
    (hits.length?'<div class="tw"><table><thead><tr><th>Receipt</th><th>When</th><th>Agent and operator</th><th>Tool version</th><th>Decision</th><th class="num">Amount</th><th>External effect</th><th>Tier</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
-    :emptyState("No receipt matches “"+(S.rq||"")+"”","Receipts are searchable by agent key, tool version, external effect id, call digest and approver. A call that was denied has a receipt too — denials are recorded, they just never dispatched.",'<button class="btn" onclick="S.rq=\'\';render()">Clear the search</button>'))+
+    :emptyState("No receipt matches “"+(S.rq||"")+"”","Receipts are searchable by agent key, tool version, external effect id, call digest and approver. A call that was denied has a receipt too. Denials are recorded, they just never dispatched.",'<button class="btn" onclick="S.rq=\'\';render()">Clear the search</button>'))+
    '<div class="panel-b"><div class="note">'+hits.length+' of '+RECEIPTS.length+' receipts shown. A receipt for a client-attested call exists too, and its authority group says <span class="mono">recorded</span> where a call routed through Oxagen says <span class="mono">decided on the server</span>. The rendering refuses to say otherwise.</div></div></div>';
 }
 
@@ -8728,7 +8728,7 @@ function auditExports(){
      '<button class="btn sm ghost" '+(ready?'onclick="act(\'In the product this downloads '+x.id+' as a signed archive with its verifier. A mockup writes nothing to disk.\')"':'disabled')+'>Download</button></div></div>'+
      '<div class="panel-b">'+auditFacts([["Export id",x.id,1],["Range",x.range],["Contents",x.runs],["Size",x.size],["Created",x.at+" by "+x.by],["Signature",x.sig,1],["Key ids",x.keys,1]])+
      (S.verified[x.id]?'<pre style="margin-top:12px">$ ./oxagen-verify --bundle '+h(x.id)+' --release-key rel-2026-03\n  merkle roots        recomputed and matched\n  seal attestations   signatures verified\n  chain continuity    no gaps, no reordering\n  <span class="s">OK</span>  internally consistent and signed</pre>':'')+'</div></div>';}).join("");
-  return '<div class="callout" style="margin-bottom:14px">An export is a verifiable bundle: archive segments, attestations, key ids, and a verifier script. The segment was written at seal time, so it is never a later copy of the graph — it is the same bytes the graph indexed, written once. A customer’s auditor checks it offline, without trusting Oxagen or the worker’s harness.</div>'+
+  return '<div class="callout" style="margin-bottom:14px">An export is a verifiable bundle: archive segments, attestations, key ids, and a verifier script. The segment was written at seal time, so it is never a later copy of the graph. It is the same bytes the graph indexed, written once. A customer’s auditor checks it offline, without trusting Oxagen or the worker’s harness.</div>'+
    '<div class="grid g2">'+cards+'</div>';
 }
 
@@ -8751,7 +8751,7 @@ function auditKeys(){
 function auditRetention(){
   return '<div class="panel"><div class="panel-h"><h3>Retention</h3><span class="muted" style="font-size:12.5px">keep everything, at full fidelity, for seven years, and make it cheap by writing it once</span>'+
    '<div class="sp">'+auditStore("organization policy")+'<button class="btn sm" onclick="openDialog(\'retention\')">Edit policy</button></div></div>'+
-   '<div class="panel-b">'+auditFacts([["Body retention","7 years from the seal — organizations may set longer"],
+   '<div class="panel-b">'+auditFacts([["Body retention","7 years from the seal, organizations may set longer"],
      ["Hot window","13 months, then frame rows are compacted into the segment. Bodies are never moved."],
      ["Replay of a compacted run","reads the segment, not the hot table. Same bytes, same grade."],
      ["Workspace opt-down",WS.map(function(w){return w.slug+" "+(w.retention||"content_exact");}).join(" · "),1],
@@ -8802,7 +8802,7 @@ function incidentDlgBody(){
    '<div class="rg"><h4>What happened</h4><div class="rb"><p style="margin:0;font-size:13px">'+h(i.detail)+'</p></div></div>'+
    '<div class="rg"><h4>'+(i.status==="open"?"Where it stands":"Resolution")+'</h4><div class="rb"><p style="margin:0 0 10px;font-size:13px">'+h(i.resolution)+'</p>'+
    (i.status==="open"?auditFacts([["Owner",i.owner],["Due",i.due],["Detected by",i.by]])
-    :auditFacts([["Closed",i.closedAt+" by "+i.closedBy],["Detected by",i.by],["Runs affected",i.runs===0?"none — no run carried this":String(i.runs)]]))+'</div></div>';
+    :auditFacts([["Closed",i.closedAt+" by "+i.closedBy],["Detected by",i.by],["Runs affected",i.runs===0?"none: no run carried this":String(i.runs)]]))+'</div></div>';
 }
 function incidentDlgFoot(){
   var i=S.dlg==="incidentview"?incidentById(S.dlgArg):null;
@@ -8814,14 +8814,14 @@ function incidentDlgFoot(){
 function queueExport(){
   var scope=el("ex-scope")?el("ex-scope").value:"core-platform · all runs";
   var id=auditUlid("exp");
-  EXPORTS.unshift({id:id,what:"Evidence bundle — "+scope,range:(el("ex-from")?el("ex-from").value:"2026-08-01")+" → "+(el("ex-to")?el("ex-to").value:"2026-08-31"),
+  EXPORTS.unshift({id:id,what:"Evidence bundle: "+scope,range:(el("ex-from")?el("ex-from").value:"2026-08-01")+" → "+(el("ex-to")?el("ex-to").value:"2026-08-31"),
     runs:"counting segments…",size:"—",at:"2026-09-11 "+auditNow().slice(0,5),by:"Priya Natarajan",st:"building",sig:"pending",keys:"kek_aintel_2026Q3"});
   auditEvent("export.created","Priya Natarajan",id+" · "+scope,"info",id);
   closeDialog(); auditGo("exports"); act("Export queued as "+id+". The bundle is signed when it finishes and includes the verifier script.");
 }
 function rotateKek(){
   var cur=null; for(var i=0;i<KEYS.length;i++){if(KEYS[i].st==="active"&&/^kek_/.test(KEYS[i].id))cur=KEYS[i];}
-  if(cur){cur.st="retiring";cur.to="2026-09-11 "+auditNow().slice(0,5);cur.covers="decrypt only — re-wrap 0% done";}
+  if(cur){cur.st="retiring";cur.to="2026-09-11 "+auditNow().slice(0,5);cur.covers="decrypt only: re-wrap 0% done";}
   var gen=cur?String(Number(cur.gen)+1):"4";
   KEYS.unshift({name:"KEK · organization",id:"kek_aintel_2026Q4",alg:"AES-256-GCM (KMS)",gen:gen,from:"2026-09-11 "+auditNow().slice(0,5),to:"2027-03-31",st:"active",covers:"all new bodies, segments, subject keys"});
   auditEvent("key.rotated","Priya Natarajan","organization key-encryption key · kek_aintel_2026Q4 · gen "+gen,"info","kek_aintel_2026Q4");
@@ -8864,18 +8864,18 @@ function ksAgentsFor(kind,target){
    return PEOPLE[a.operator]&&PEOPLE[a.operator].name===target;});
 }
 function ksTargets(kind){
-  if(kind==="Agent") return AGENTS.map(function(a){return {v:a.key,lab:a.key+" — "+a.name};});
+  if(kind==="Agent") return AGENTS.map(function(a){return {v:a.key,lab:a.key+": "+a.name};});
   if(kind==="Device"){
    var seen={},out=[];
    AGENTS.forEach(function(a){ if(!a.host||!a.enrolled||seen[a.host])return; seen[a.host]=1;
     var n=ksAgentsFor("Device",a.host).length;
-    out.push({v:a.host,lab:a.host+" — "+n+" agent"+(n===1?"":"s")+", key "+(a.devKey||"—")});});
+    out.push({v:a.host,lab:a.host+": "+n+" agent"+(n===1?"":"s")+", key "+(a.devKey||"—")});});
    return out;
   }
   var ps={},ls=[];
   AGENTS.forEach(function(a){var p=PEOPLE[a.operator]; if(!p||ps[p.name])return; ps[p.name]=1;
    var n=ksAgentsFor("Operator’s agents",p.name).length;
-   ls.push({v:p.name,lab:p.name+" — "+n+" agent"+(n===1?"":"s")});});
+   ls.push({v:p.name,lab:p.name+": "+n+" agent"+(n===1?"":"s")});});
   return ls;
 }
 function ksBlast(kind,target){
@@ -8979,8 +8979,8 @@ function switchDialog(){
      :'Denied calls resume at the next boundary. Nothing that was denied while the switch was on is retried.')+'</div></div>'+
     (on&&s.cls?'<div class="note deny" style="margin-bottom:14px"><b>This is a class switch.</b> It does not name a server or an agent: it matches on the tool version’s declared class, '+
      'so a tool imported tomorrow with <span class="mono">financial.effect: moves_funds</span> is denied the moment it enters the registry.</div>':'')+
-    '<div class="field"><label for="killwhy">Reason — recorded on every denied call and read by the model</label>'+
-    '<textarea id="killwhy" rows="2">'+(on?"Suspected compromise of the Stripe restricted key. Hold every money movement until the rotation is confirmed.":"Rotation confirmed at 15:02 UTC; the security owner signed off.")+'</textarea></div>'+
+    '<div class="field"><label for="killwhy">Reason</label>'+
+    '<textarea id="killwhy" rows="2">'+(on?"Suspected compromise of the Stripe restricted key. Hold every money movement until the rotation is confirmed.":"Rotation confirmed at 15:02 UTC; the security owner signed off.")+'</textarea><div class="hint">Recorded on every denied call and read by the model.</div></div>'+
     '<dl class="kv"><dt>Takes effect</dt><dd>next call boundary · deny generation bumps '+S.denyGen+' → '+(S.denyGen+1)+'</dd>'+
     '<dt>Behind it</dt><dd>run-token revocation for anything that keeps calling</dd>'+
     '<dt>Recorded as</dt><dd>a security event, and a <span class="mono">policy.decision</span> frame on every affected run</dd></dl>',
@@ -9005,7 +9005,7 @@ function doFlip(id){
 function closeDialog(){S.dlg=null;S.dlgArg=null;render();}
 
 /* ============================== Skills · resolution, the seat in the loop, reflection ==============================
-   Oxagen does not run a skill — the harness does. What it governs is resolution: which skills a
+   Oxagen does not run a skill. The harness does. What it governs is resolution: which skills a
    workspace's config lets an agent find, which it may load, what that cost, and what was held back
    and why. W13, the in-the-loop scenario, walks it. */
 
@@ -9097,7 +9097,7 @@ function skGate(w){
     '</div><div style="margin-left:auto">'+skBadge("q","off")+'</div></div>'+
     '<div class="gbody">'+
      '<div class="gcol"><h4>'+icon("proc")+'What turning it on does</h4><ul>'+
-      '<li>Adds one tool to every agent’s belt in this workspace: <span class="mono">search_skills</span>. Not a list of skills — a door.</li>'+
+      '<li>Adds one tool to every agent’s belt in this workspace: <span class="mono">search_skills</span>. Not a list of skills. A door.</li>'+
       '<li>Lets the harness load a skill file into the agent’s context, at a token cost this page prices to the cent.</li>'+
       '<li>Starts a <span class="mono">skills.searched</span> and a <span class="mono">skills.loaded</span> frame on every run that uses one, so a sealed run says exactly what procedure it was carrying.</li>'+
       '<li>Makes <span class="mono">.oxagen/skills.toml</span> a governed file. Changing it is a Context PR, not a settings screen.</li>'+
@@ -9167,7 +9167,7 @@ function skCatalog(w){
      '<span class="sp mono dim" style="font-size:11px">these do not appear in a search, at any rank</span></div>'+
     '<div class="panel-b"><div class="sx-skl">'+held.map(skRow).join("")+'</div>'+
     '<div class="note" style="margin-top:10px">A held skill is not a low-scoring result. It is not a result. '+
-    'The agent is told the count of what was withheld and the reason class, never the name — otherwise the withholding leaks the thing it withholds.</div>'+
+    'The agent is told the count of what was withheld and the reason class, never the name. Otherwise the withholding leaks the thing it withholds.</div>'+
     '</div></div>';
 }
 function skRow(s){
@@ -9278,7 +9278,7 @@ function skRunQuery(){
   render();
   var r=SK_QUERIES[SKS.q];
   if(!r) act("No canned answer for that query in this mockup.","gold");
-  else if(!r.hits.length) act("Empty result, with a reason. Not an error — the agent carries on knowing it has no procedure for this.","gold");
+  else if(!r.hits.length) act("Empty result, with a reason. Not an error. The agent carries on knowing it has no procedure for this.","gold");
   else act(r.hits.length+" returned, "+r.held.length+" withheld. Recorded as a skills.searched frame.");
 }
 
@@ -9319,8 +9319,8 @@ function skCfgFile(){
   '<span class="k">budget</span>    = <span class="n">'+SK_CFG.search.budget+'</span>                  <span class="c"># tokens a turn; past it a load is refused, never truncated</span>\n\n'+
   '[<span class="k">unbound_repo</span>]\n'+
   '<span class="ad"><span class="k">policy</span>    = <span class="s">"ask"</span>                    <span class="c"># stop the loop and put it to a person</span></span>\n'+
-  '<span class="c"># "deny"  — the run starts with no skills and is told so</span>\n'+
-  '<span class="c"># "allow" — not available. There is no config to resolve, so there is nothing to allow.</span>\n\n'+
+  '<span class="c"># "deny":  the run starts with no skills and is told so</span>\n'+
+  '<span class="c"># "allow": not available. There is no config to resolve, so there is nothing to allow.</span>\n\n'+
   '[<span class="k">reflection</span>]\n'+
   '<span class="k">enabled</span>   = <span class="n">true</span>\n'+
   '<span class="k">rubric</span>    = <span class="s">"'+h(SK_CFG.reflect.rubric)+'"</span>\n'+
@@ -9349,7 +9349,7 @@ function skLoop(w){
       '<span class="sp live"><span class="p"></span>paused mid-loop</span></div>'+
      '<div class="panel-b">'+
       '<p style="margin:0 0 10px"><span class="mono">'+h(SKRUN.agent)+'</span> started in <span class="mono">'+h(SKRUN.repo)+'</span>, '+
-       'a repository no workspace in <b>'+h(ORG.name)+'</b> owns. Skills are on here, so there is a config to resolve — and nothing to resolve it against. '+
+       'a repository no workspace in <b>'+h(ORG.name)+'</b> owns. Skills are on here, so there is a config to resolve, and nothing to resolve it against. '+
        'Oxagen stopped the run at its first hook, before the first model call, and put the question to you <b>through the agent</b>.</p>'+
       '<button class="btn primary" onclick="go(\''+base+'/runs/'+SKRUN.id+'\')">Open the run and answer it</button>'+
      '</div></div>'
@@ -9426,7 +9426,7 @@ function skReflect(w){
 
 /* ============================== the run, from three sides ==============================
    Not a second run page: pRun() hands this one run to this renderer, because the thing it has to
-   show — the same moment from the agent's side, the operator's side and the record's — has no
+   show (the same moment from the agent's side, the operator's side and the record's) has no
    counterpart in a run that was never interrupted. */
 function skRunPage(){
   var w=ws(), ans=SKS.answered;
@@ -9441,7 +9441,7 @@ function skRunPage(){
    (ans?
     '<div class="note" style="margin:12px 0"><b>Answered.</b> '+
      (ans==="link"?'<span class="mono">a-intel/edge-proxy</span> is a linked repo of <b>core-platform</b>, the run resolved '+h(SK_CFG.ver)+', and one skill is loaded.'
-                  :'The workspace <b>edge</b> exists, <span class="mono">a-intel/edge-proxy</span> is its main repo, and — because that is what a new workspace ships as — <b>skills are off in it</b>. The run carries none, and the agent was told so in one line.')+
+                  :'The workspace <b>edge</b> exists, <span class="mono">a-intel/edge-proxy</span> is its main repo, and, because that is what a new workspace ships as, <b>skills are off in it</b>. The run carries none, and the agent was told so in one line.')+
      ' <button class="btn sm" onclick="skReset()">Ask again</button></div>'
     :
     '<div class="note" style="margin:12px 0;border-color:color-mix(in srgb,var(--gold) 42%,transparent);background:color-mix(in srgb,var(--gold) 7%,var(--panel))">'+
@@ -9482,12 +9482,12 @@ function skTrAgent(ans){
       (ans==="link"
        ? '<p>Bound. I have <span class="mono">a-intel.release-notes-from-prs@2.1.0</span> and I am following it: group the merged pull requests, write the draft to a release branch, publish nothing.</p>'+
          '<p style="color:var(--muted);font-size:12px">2 skills were withheld from my search. I am told the count and the reason class, not the names.</p>'
-       : '<p>Working in <b>edge</b>. I have no skills in this workspace — skills are off here — so I will do this from the commit history directly and write the draft to a branch.</p>'+
+       : '<p>Working in <b>edge</b>. I have no skills in this workspace (skills are off here), so I will do this from the commit history directly and write the draft to a branch.</p>'+
          '<p style="color:var(--muted);font-size:12px">I will say so in the pull request, because a reviewer should know this was done without the release-notes procedure.</p>')+
      '</div>';
   }
   return out+'</div>'+
-   '<div class="note" style="margin-top:9px">The question reaches '+h(PEOPLE[SKRUN.op].name.split(" ")[0])+' <b>where they already are</b> — '+
+   '<div class="note" style="margin-top:9px">The question reaches '+h(PEOPLE[SKRUN.op].name.split(" ")[0])+' <b>where they already are</b>, '+
    'in the agent’s own surface. There is no second inbox to check, and the agent is not the author of the question.</div>';
 }
 function skPick(k,n,d){
@@ -9503,14 +9503,14 @@ function skTrOperator(ans){
    'a rule, a grant, a receipt, and a name that stays on it.</p></div></div>';
   return '<div class="sx-tr">'+
    '<div class="sx-msg gw"><div class="mh"><b>control.interject</b><span class="sx-chip held">the loop is held</span><span class="tm">09:14:02Z</span></div>'+
-    '<p><span class="mono">repo.unknown</span> — <span class="mono">'+h(SKRUN.remote)+'</span> resolves to no workspace in <span class="mono">'+h(ORG.slug)+'</span>.</p>'+
+    '<p><span class="mono">repo.unknown</span>: <span class="mono">'+h(SKRUN.remote)+'</span> resolves to no workspace in <span class="mono">'+h(ORG.slug)+'</span>.</p>'+
     '<p><span class="mono">skills.enabled = true</span> and <span class="mono">unbound_repo = ask</span>, so Oxagen put it to a person instead of resolving nothing quietly.</p>'+
    '</div>'+
    '<div class="sx-paths">'+
     '<div class="sx-path'+(SKS.picked==="link"?" on":"")+'"><h3>'+icon("git")+'Link</h3>'+
      '<p class="muted" style="font-size:12px;margin:0">to <b>core-platform</b></p>'+
      '<div class="sx-dl">'+
-      skDl("add","Inherits <span class=\"mono\">"+SK_CFG.ver+"</span> — 7 skills in scope, 1 withheld")+
+      skDl("add","Inherits <span class=\"mono\">"+SK_CFG.ver+"</span>: 7 skills in scope, 1 withheld")+
       skDl("add","Inherits the belt, the $2.00 run budget and the harness tier")+
       skDl("add","Becomes the third linked repo · indexed into the code graph")+
       skDl("same","Marcus already owns this workspace, so no new grant")+
@@ -9523,11 +9523,11 @@ function skTrOperator(ans){
       skDl("rem","No belt, no budget, no price book until somebody sets them")+
       skDl("add","Its own spend, its own audit, its own owner")+
       skDl("add","<span class=\"mono\">a-intel/edge-proxy</span> becomes its main repo, branch <span class=\"mono\">main</span>")+
-      skDl("same","This run continues either way — with a procedure, or without one")+
+      skDl("same","This run continues either way, with a procedure or without one")+
      '</div></div>'+
    '</div>'+
    '<div class="note" style="margin-top:10px">Notice what the second path does: a brand new workspace comes up with skills <b>off</b>, '+
-    'in the middle of a run that was asking for skills. The default is not a first-run nicety — it holds every time a workspace is made.</div>'+
+    'in the middle of a run that was asking for skills. The default is not a first-run nicety. It holds every time a workspace is made.</div>'+
    '<div class="sx-held" style="margin-top:10px;border-style:solid;border-color:var(--border);background:var(--ink)">'+
     '<div class="nm" style="text-decoration:none;color:var(--fg)">If nobody answers</div>'+
     '<div class="why">At 30 minutes this times out to <span class="mono">deny</span>. The run continues with no skills and the agent is told why, '+
@@ -9564,7 +9564,7 @@ function skAnswer(){
   render();
   act(SKS.answered==="link"
     ? "Answered. a-intel/edge-proxy is linked to core-platform; the run resolved skl_v7 and loaded one skill."
-    : "Answered. Workspace edge created — with skills off, which is what every workspace ships as.",
+    : "Answered. Workspace edge created with skills off, which is what every workspace ships as.",
     SKS.answered==="link"?"":"gold");
 }
 function skReset(){
@@ -9621,13 +9621,13 @@ DLG_EXT.skill=function(arg){
       '<dt>Kind</dt><dd>'+h(s.kind)+'</dd>'+
       '<dt>Load cost</dt><dd><span class="mono">'+s.tokens.toLocaleString()+'</span> tokens · $'+(s.tokens*0.000003).toFixed(4)+' a turn it is loaded into</dd>'+
       '<dt>Decision</dt><dd>'+skTier(s.tier)+'</dd>'+
-      '<dt>Owner</dt><dd>'+(s.owner?h(PEOPLE[s.owner].name):'<span class="muted">nobody — which is why it is held</span>')+'</dd>'+
+      '<dt>Owner</dt><dd>'+(s.owner?h(PEOPLE[s.owner].name):'<span class="muted">nobody, which is why it is held</span>')+'</dd>'+
       '<dt>Cited</dt><dd>'+(s.cited?s.cited+' of '+s.runs+' runs that searched for it':'never')+'</dd>'+
       (s.citedAfter!=null?'<dt>Cited rate</dt><dd>'+skPct(s.citedBefore)+' of loads cited before this version → <b>'+skPct(s.citedAfter)+'</b> after · measured over '+s.runs+' runs from the token record</dd>':'')+
      '</dl>'+
      (s.why?'<div class="note" style="border-color:color-mix(in srgb,var(--sk-held) 45%,transparent)"><b>Held: </b>'+s.why+'</div>':'')+
      '<div class="sx-cfg"><div class="sx-cfg-h">'+h(s.path)+'</div><pre>'+skBody(s)+'</pre></div>'+
-     '<div class="note" style="margin-top:9px">This is the whole of it. A skill has no code to run and no credential to hold — '+
+     '<div class="note" style="margin-top:9px">This is the whole of it. A skill has no code to run and no credential to hold, '+
       'it is prose an agent reads, and every action it describes still goes through the toolbelt and the policy that governs it.</div>',
    f:'<span class="grow mono dim" style="font-size:11px">'+h(s.srcLabel)+'</span>'+
      '<button class="btn" onclick="closeDialog()">Close</button>'+
@@ -10032,9 +10032,9 @@ SCENARIOS["the-account"]={title:"Whose account it is", ws:"core-platform",
 function skScnArm(){S.skScn=true;}
 function skScnLeave(){ if(!S.skScn||S.scn) return; S.skScn=false; SK_ON["core-platform"]=true; SK_ON["finops"]=false; SKS.answered=null; SKS.picked=null; SKS.q="cut the first release notes"; }
 SCENARIOS["in-the-loop"]={title:"In the loop", ws:"core-platform",
- blurb:"Skills ship off. The search is the config, not the model. And when a run starts in a repository nobody bound, Oxagen stops the loop and asks a person — through the agent.",
+ blurb:"Skills ship off. The search is the config, not the model. And when a run starts in a repository nobody bound, Oxagen stops the loop and asks a person, through the agent.",
  steps:[
-  {say:"FinOps has skills off. Not disabled by an admin — this is what a workspace is made as. The page says what turning them on would do and, just as carefully, what it would not do.",
+  {say:"FinOps has skills off. Not disabled by an admin. This is what a workspace is made as. The page says what turning them on would do and, just as carefully, what it would not do.",
    note:"The table underneath shows both workspaces, each with its creation date and the value it shipped with. The default is visible rather than implied.",
    route:function(o){return {page:"skills",org:o,ws:"finops"};},
    setup:function(){skScnArm();SK_ON["finops"]=false;SK_ON["core-platform"]=true;SKS.answered=null;SKS.picked=null;}},
@@ -10048,7 +10048,7 @@ SCENARIOS["in-the-loop"]={title:"In the loop", ws:"core-platform",
    route:function(o){return {page:"skills",org:o,ws:"core-platform"};},
    setup:function(){skScnArm();SK_ON["core-platform"]=true;S.tab.skills="search";SKS.q="cut the first release notes";},
    act:["Ask as the agent","skRunQuery()"]},
-  {say:"A run just started in <span class=\"mono\">a-intel/edge-proxy</span>. Nobody has bound that repository to a workspace. Skills are on, so there is a config to resolve and nothing to resolve it against — and Oxagen is not going to guess.",
+  {say:"A run just started in <span class=\"mono\">a-intel/edge-proxy</span>. Nobody has bound that repository to a workspace. Skills are on, so there is a config to resolve and nothing to resolve it against, and Oxagen is not going to guess.",
    note:"The run is <b>paused</b>, not failed and not queued. The clock is not running and nothing has been charged since 09:14:02Z. It sits above Fleet with the approvals, because it is waiting on a person.",
    route:function(o){return {page:"fleet",org:o,ws:"core-platform"};},
    setup:function(){skScnArm();SK_ON["core-platform"]=true;SKS.answered=null;SKS.picked=null;S.runFilter="all";}},
@@ -10058,10 +10058,10 @@ SCENARIOS["in-the-loop"]={title:"In the loop", ws:"core-platform",
    setup:function(){skScnArm();SKS.answered=null;SKS.picked=null;},
    act:["Link it to core-platform and send","SKS.picked='link';skAnswer()"]},
   {say:"Sitting in the loop also lets Oxagen ask the agent a question of its own, after the work is sealed. This run ended <span class=\"mono\">halted</span>, and <span class=\"mono\">rfl_v3</span> always samples a halted run. Two of four axes disagree with the record.",
-   note:"The injected turn is dashed: out of band, after the seal, not replayed on a fork. The self-grade is quarantined by five rules — it never enters a context frame, cannot be promoted, is billed as overhead, needs an organization grant to read, and expires.",
+   note:"The injected turn is dashed: out of band, after the seal, not replayed on a fork. The self-grade is quarantined by five rules: it never enters a context frame, cannot be promoted, is billed as overhead, needs an organization grant to read, and expires.",
    route:function(o){return {page:"skills",org:o,ws:"core-platform"};},
    setup:function(){skScnArm();SK_ON["core-platform"]=true;S.tab.skills="reflect";}},
-  {say:"The config is a file with a history: five policy versions, each a pull request. The last row is the one that matters — core-platform was created on 2026-07-30 with skills off, and stayed off for three days until Marcus opened <span class=\"mono\">a-intel/platform#402</span>.",
+  {say:"The config is a file with a history: five policy versions, each a pull request. The last row is the one that matters: core-platform was created on 2026-07-30 with skills off, and stayed off for three days until Marcus opened <span class=\"mono\">a-intel/platform#402</span>.",
    note:"The default is not a first-run nicety. It holds every time a workspace is made.",
    route:function(o){return {page:"skills",org:o,ws:"core-platform"};},
    setup:function(){skScnArm();SK_ON["core-platform"]=true;S.tab.skills="versions";},
@@ -10377,7 +10377,7 @@ DLG_EXT.deliveryreport=function(){
     "“One-year compute savings plan, quoted on PO-4471.”",
     [["Credential grant","cg_01K4W2M3",1],["Minted","AWS STS session · savingsplans:CreateSavingsPlan only"],["TTL","10 minutes, bound to the call id"],["Agent saw","the result. Never the key."]],
     [["Dispatched","2026-09-02 07:12:09.331Z · savingsplans.amazonaws.com"],["Output validation","pass"],["External effect id","sp-0a4f91c",1]]),
-   rc("rcp_01K4V7D3N","2026-09-01 06:48:52.017Z","stripe__create_payment@4","none — dispatch failed, reservation released","$0.00 USD","run_01K4V7B2K5",
+   rc("rcp_01K4V7D3N","2026-09-01 06:48:52.017Z","stripe__create_payment@4","none: dispatch failed, reservation released","$0.00 USD","run_01K4V7B2K5",
     m.id+".approval.always_for",m.id+" · reservation released on dispatch failure · $0.00 settled · $"+m.perPeriod+" remaining this month","apt_01K4V7A1 · single-use · approver Priya Natarajan",
     "“First September run; amount checked against the statement.”",
     [["Credential grant","cg_01K4V7C8",1],["Minted","restricted key · payment_intents:write"],["TTL","10 minutes, bound to the call id"],["Agent saw","the error. Never the key."]],
@@ -10470,7 +10470,7 @@ function dialog(){
        '<button class="btn" onclick="markAllRead()">Mark all read</button>'},
    approve:{t:"Approve this action",w:false,b:approveBody(),f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="resolveApproval(S.dlgArg,\'approved\')">Approve and mint the token</button>'},
    deny:{t:"Deny this action",w:false,b:denyBody(),f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn danger" onclick="resolveApproval(S.dlgArg,\'denied\')">Deny with this reason</button>'},
-   account:{t:"Account",w:false,tabs:accountTabs(),b:accountBody(),f:S.dlgArg==="onboarding"?'<span class="grow">Demo chrome, not product UI — nothing on these screens writes anything.</span><button class="btn" onclick="closeDialog()">Close</button>':'<span class="grow">Changes here run as <span class="mono">set_preferences</span> — a governed action, audited like any other.</span>'+
+   account:{t:"Account",w:false,tabs:accountTabs(),b:accountBody(),f:S.dlgArg==="onboarding"?'<span class="grow">Demo chrome, not product UI. Nothing on these screens writes anything.</span><button class="btn" onclick="closeDialog()">Close</button>':'<span class="grow">Changes here run as <span class="mono">set_preferences</span>, a governed action, audited like any other.</span>'+
      '<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Saved. set_preferences recorded as a frame.\')">Save</button>'},
    "org-switch":{t:"Switch organization",w:false,b:
      '<div class="field"><input placeholder="Search organizations" aria-label="Search organizations"></div>'+
@@ -10490,7 +10490,7 @@ function dialog(){
        '<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="pauseRun(S.dlgArg)">Pause at the next boundary</button>'},
    steer:{t:"Steer this run",w:false,b:
      steerTextField("Skip the mobile repo this cycle; 4.11.0 is platform only.")+
-     '<div class="field"><label>Address</label><select aria-label="Address"><option>this run</option><option>@a-intel.core.release-manager — every live run of this agent</option></select>'+
+     '<div class="field"><label>Address</label><select aria-label="Address"><option>this run</option><option>@a-intel.core.release-manager: every live run of this agent</option></select>'+
      '<div class="hint">To steer every live run in the workspace at once, use Steer on the Fleet page.</div></div>'+
      steerModeField()+
      '<div class="note">Oxagen never executes steering as an instruction; it enters as evidence at the steering position with operator authority.</div>',
@@ -10499,8 +10499,8 @@ function dialog(){
    mandate:{t:"Grant a mandate",w:true,b:mandateBody(),f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Mandate granted. It is active from its start date and expires on its end date; every draw is a receipt.\')">Grant the mandate</button>'},
    ctxpr:{t:"Open a Context PR",w:true,b:
      '<div class="field"><label>Concern</label><input value="Do not re-read CHANGELOG.md more than once in a run" aria-label="Concern"><div class="hint">One concern per pull request.</div></div>'+
-     '<div class="field"><label>Kind</label><select aria-label="Kind"><option>rule — a directive that steers behaviour</option><option>constraint — a hard boundary, require or forbid</option><option>procedure — steps, in order</option><option>fact — a checkable claim</option><option>memory — a durable recollection</option><option>preference — soft, often unfalsifiable</option></select></div>'+
-     '<div class="field"><label>Scope</label><select aria-label="Scope"><option>workspace — opens on a-intel/platform</option><option>repository — opens on the linked repo itself</option></select>'+
+     '<div class="field"><label>Kind</label><select aria-label="Kind"><option>rule: a directive that steers behaviour</option><option>constraint: a hard boundary, require or forbid</option><option>procedure: steps, in order</option><option>fact: a checkable claim</option><option>memory: a durable recollection</option><option>preference: soft, often unfalsifiable</option></select></div>'+
+     '<div class="field"><label>Scope</label><select aria-label="Scope"><option>workspace: opens on a-intel/platform</option><option>repository: opens on the linked repo itself</option></select>'+
      '<div class="hint">The promoter picks the scope from where the evidence came.</div></div>'+
      '<div class="field"><label>Constraint effect</label><select aria-label="Constraint effect"><option>forbid</option><option>require</option></select>'+
      '<div class="hint">A record can never grant authority. These are the only two values.</div></div>'+
@@ -10534,7 +10534,7 @@ function dialog(){
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Request sent to Priya Natarajan.\')">Send the request</button>'},
    incident:{t:"Open an incident",w:false,b:
      '<div class="field"><label for="in-title">Subject</label><input id="in-title" value="Stripe charge ch_3Qa8 has no receipt"></div>'+
-     '<div class="field"><label for="in-sev">Severity</label><select id="in-sev"><option value="critical">critical — money moved that Oxagen did not govern</option><option value="warning">warning</option><option value="info">info</option></select></div>'+
+     '<div class="field"><label for="in-sev">Severity</label><select id="in-sev"><option value="critical">critical: money moved that Oxagen did not govern</option><option value="warning">warning</option><option value="info">info</option></select></div>'+
      '<div class="field"><label>Attach</label><div class="row"><span class="b b-q mono" style="font-size:11px">con_01K2A9</span>'+
      '<span class="b b-q mono" style="font-size:11px">mnd_7K2ETQ4</span><span class="b b-q mono" style="font-size:11px">exc_01K5RN2P</span></div></div>',
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="incidentRaise()">Raise it</button>'},
@@ -10545,7 +10545,7 @@ function dialog(){
       '<option>Quarter to date · Q3 2026</option><option>Year to date · 2026</option><option>Custom range</option></select></div>'+
      '<div class="fields" style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><div class="field"><label>From</label><input type="date" value="2026-09-01" aria-label="From"></div>'+
       '<div class="field"><label>To</label><input type="date" value="2026-09-11" aria-label="To"></div></div>'+
-     '<div class="field"><label>Include</label><select aria-label="Include"><option>Everything on this page — by operator, agent, tool, wasted spend, budgets</option><option>By operator and agent only</option><option>By tool only</option><option>Wasted spend only</option></select></div>'+
+     '<div class="field"><label>Include</label><select aria-label="Include"><option>Everything on this page: by operator, agent, tool, wasted spend, budgets</option><option>By operator and agent only</option><option>By tool only</option><option>Wasted spend only</option></select></div>'+
      '<div class="note">Delivered as CSV and a signed PDF to <span class="mono">marcus@a-intel.example</span>. Every figure carries its basis; the report is built from frames, so a large range takes a few minutes.</div>',
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'The report is being generated and will be sent to your email momentarily\')">Generate report</button>'},
    budget:{t:"Set a budget",w:false,b:budgetForm(null),
@@ -10560,10 +10560,10 @@ function dialog(){
      '<div class="field"><label for="nw-ns">Namespace</label><input id="nw-ns" value="wh" maxlength="6"><div class="hint">2–6 characters, immutable, and part of every agent key in the workspace: <span class="mono">'+h(ORG.slug)+'.data.&lt;agent&gt;</span>.</div></div>'+
      '<div class="field"><label for="nw-main">Main repository</label><select id="nw-main"><option>a-intel/warehouse</option><option>a-intel/data-platform</option></select>'+
      '<div class="hint">Required at creation. A workspace without a main repo cannot exist.</div></div>'+
-     '<div class="field"><label for="nw-branch">Production branch</label><select id="nw-branch"><option value="main">main — GitHub’s default, suggested</option><option value="release">release</option><option value="production">production</option></select>'+
+     '<div class="field"><label for="nw-branch">Production branch</label><select id="nw-branch"><option value="main">main: GitHub’s default, suggested</option><option value="release">release</option><option value="production">production</option></select>'+
      '<div class="hint">The only branch whose commits update the code graph. If GitHub’s default changes later you are prompted; the binding never moves on its own.</div></div>'+
-     '<div class="field"><label for="nw-gov">Governance mode</label><select id="nw-gov"><option value="team">team — a code-owner review is required</option><option value="solo">solo — the author may merge</option><option value="regulated">regulated — a named approver and a ledger entry</option></select></div>'+
-     '<div class="field"><label for="nw-ret">Retention mode</label><select id="nw-ret"><option value="content_exact">content_exact — keep prompts and tool bodies in full</option><option value="digest_only">digest_only — digests only, lowers the replay grade</option></select></div>'+
+     '<div class="field"><label for="nw-gov">Governance mode</label><select id="nw-gov"><option value="team">team: a code-owner review is required</option><option value="solo">solo: the author may merge</option><option value="regulated">regulated: a named approver and a ledger entry</option></select></div>'+
+     '<div class="field"><label for="nw-ret">Retention mode</label><select id="nw-ret"><option value="content_exact">content_exact: keep prompts and tool bodies in full</option><option value="digest_only">digest_only: digests only, lowers the replay grade</option></select></div>'+
      '<div class="note">Until the GitHub App binds the main repo the workspace is provisional for 14 days: runs record and spend counts, but steering, records and agent definitions stay off.</div>',
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="wsCreate()">Create</button>'},
    import:{t:"Import an MCP server",w:false,b:
@@ -10580,7 +10580,7 @@ function dialog(){
      '<div class="field"><label for="c-name">Name</label><input id="c-name" value="Datadog API key · platform" autofocus></div>'+
      '<div class="field"><label for="c-kind">Kind</label><select id="c-kind"><option>oauth</option><option selected>api_key</option><option>cloud_role</option><option>github_app</option></select></div>'+
      '</div>'+
-     '<div class="field"><label for="c-owner">Owner — a human, not a team</label><select id="c-owner"><option>Marcus Bell · ws.owner</option><option>Priya Natarajan · org.owner</option><option>Dana Okafor · org.billing</option></select></div>'+
+     '<div class="field"><label for="c-owner">Owner</label><select id="c-owner"><option>Marcus Bell · ws.owner</option><option>Priya Natarajan · org.owner</option><option>Dana Okafor · org.billing</option></select><div class="hint">A human, not a team.</div></div>'+
      '<div class="field"><label for="c-review">Review date</label><input id="c-review" type="date" value="2026-12-31"></div>'+
      '<div class="field"><label for="c-secret">Secret</label><input id="c-secret" type="password" value="dd_api_0000000000000000" autocomplete="off">'+
      '<div class="hint">Enveloped under the organization’s key. Every read is audited. There is no way to read it back.</div></div>'+
@@ -10614,10 +10614,10 @@ function dialog(){
      '<div class="warn">Revocation ends the service principal’s access at the next call. Runs it started keep their records.</div>',
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn danger" onclick="apikeyRevoke('+kki+')">Revoke</button>'},
    plan:{t:"Change plan",w:false,b:
-     '<div class="field"><label>Plan</label><select aria-label="Plan"><option>Team — usage-based, monthly, cancel any time</option><option>Enterprise — annual, committed use at 20–30% off, from $60,000</option></select></div>'+
+     '<div class="field"><label>Plan</label><select aria-label="Plan"><option>Team: usage-based, monthly, cancel any time</option><option>Enterprise: annual, committed use at 20–30% off, from $60,000</option></select></div>'+
      '<div class="note">The free tier is in every plan: an included monthly allowance of governed actions and every governance feature on. Enterprise adds a dedicated data plane or behind-the-firewall deployment, and support with an SLA.</div>',
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Plan change staged in Stripe. Oxagen holds the meter; Stripe holds the plan.\')">Change plan</button>'},
-   /* ---- audit dialogs (W10 port) — bodies are built by guarded functions in the Audit section ---- */
+   /* ---- audit dialogs (W10 port): bodies are built by guarded functions in the Audit section ---- */
    receipt:{t:receiptDlgTitle(),s:receiptDlgSub(),w:true,b:receiptDlgBody(),f:receiptDlgFoot()},
    incidentview:{t:incidentDlgTitle(),s:incidentDlgSub(),w:true,b:incidentDlgBody(),f:incidentDlgFoot()},
    exportevents:{t:"Export events",s:"CSV · the same rows the API and MCP return",w:false,b:
@@ -10627,14 +10627,14 @@ function dialog(){
      '<div class="field"><label>Scope</label><select id="ex-scope" aria-label="Scope"><option>core-platform · all runs</option><option>finops · all runs</option><option>financial tool calls only · all workspaces</option><option>agent a-intel.finops.invoice-bot · all runs</option></select></div>'+
      '<div class="grid g2" style="gap:12px"><div class="field"><label>From</label><input id="ex-from" value="2026-08-01" aria-label="From"></div><div class="field"><label>To</label><input id="ex-to" value="2026-08-31" aria-label="To"></div></div>'+
      '<div class="field"><label>Format</label><select aria-label="Format"><option>Signed bundle (segments + verifier)</option><option>Receipts as CSV</option><option>Receipts as JSON</option></select></div>'+
-     '<div class="callout">Runs as <span class="mono">export_data</span> — a governed action with third-party egress. The bundle carries the verifier, so whoever receives it can check it without Oxagen.</div>',
+     '<div class="callout">Runs as <span class="mono">export_data</span>, a governed action with third-party egress. The bundle carries the verifier, so whoever receives it can check it without Oxagen.</div>',
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="queueExport()">Build bundle</button>'},
    rotatekek:{t:"Rotate the key-encryption key",s:"a new generation, nothing rewritten",w:false,b:
      '<dl class="kv"><dt>New generation</dt><dd>kek_aintel_2026Q4 in <span class="mono">arn:aws:kms:us-east-1:4471…:key/9c2f</span></dd>'+
      '<dt>Takes effect</dt><dd>immediately for new bodies, segments and subject keys</dd>'+
      '<dt>Old generation</dt><dd>kek_aintel_2026Q3 becomes <span class="b b-approval">retiring</span> and stays valid for decryption until re-wrap completes</dd>'+
      '<dt>Re-wrap</dt><dd>runs in the archiver, roughly 6 days at current volume</dd>'+
-     '<dt>Receipts</dt><dd>keep citing the signing generation they were signed under — an old receipt still verifies</dd>'+
+     '<dt>Receipts</dt><dd>keep citing the signing generation they were signed under, and an old receipt still verifies</dd>'+
      '<dt>Recorded as</dt><dd><span class="mono">key.rotated</span> with who, when and the generation</dd></dl>',
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="rotateKek()">Rotate</button>'},
    retention:{t:"Retention policy",s:"organization-wide",w:false,b:
@@ -10751,18 +10751,18 @@ function approveBody(){
    '  <span class="k">"idempotency_key"</span>: <span class="s">"idk_'+h(a.digest.slice(7,15))+'"</span>\n}</pre>'+
    '<div class="hr"></div>'+
    (m?'<p class="eyebrow q">Mandate position after this call</p>'+
-    '<dl class="kv" style="margin-bottom:14px"><dt>Per call limit</dt><dd>'+usd(m.perCall)+' — <b style="color:var(--st-denied)">this call exceeds it</b>, which is why it is here</dd>'+
+    '<dl class="kv" style="margin-bottom:14px"><dt>Per call limit</dt><dd>'+usd(m.perCall)+': <b style="color:var(--st-denied)">this call exceeds it</b>, which is why it is here</dd>'+
     '<dt>Remaining this period</dt><dd>'+usd(m.remaining)+' of '+usd(m.perPeriod)+'</dd>'+
-    '<dt>Reserved for this call</dt><dd>'+usd(m.reserved)+' — taken at decision time so a second call cannot fit under the same limit</dd>'+
+    '<dt>Reserved for this call</dt><dd>'+usd(m.reserved)+', taken at decision time so a second call cannot fit under the same limit</dd>'+
     '<dt>Counterparty</dt><dd><span class="mono">'+h(a.counterparty)+'</span> · on the allow list</dd></dl>':'')+
-   '<div class="field"><label>Reason — this reaches the model as the permission decision reason</label>'+
-   '<textarea rows="2" aria-label="Reason">PO-4471 line 3, checked against the quote.</textarea></div>'+
+   '<div class="field"><label>Reason</label>'+
+   '<textarea rows="2" aria-label="Reason">PO-4471 line 3, checked against the quote.</textarea><div class="hint">This reaches the model as the permission decision reason.</div></div>'+
    '<div class="note">The token is single-use and bound to the call digest, the agent, the run, and an expiry. It cannot be reused on a second call, or on this call modified.</div>';
 }
 function denyBody(){
-  return '<div class="field"><label>Reason — the model reads this, so write it for the agent</label>'+
-   '<textarea rows="3" aria-label="Reason">Not this cycle. Open the release PR and leave the tag to a person.</textarea></div>'+
-   '<div class="note">Deny, approve, and expiry are all frames. A denial ends the call and is free — the customer never pays for Oxagen saying no.</div>';
+  return '<div class="field"><label>Reason</label>'+
+   '<textarea rows="3" aria-label="Reason">Not this cycle. Open the release PR and leave the tag to a person.</textarea><div class="hint">The model reads this, so write it for the agent.</div></div>'+
+   '<div class="note">Deny, approve, and expiry are all frames. A denial ends the call and is free. The customer never pays for Oxagen saying no.</div>';
 }
 function mandateBody(){
   return '<div class="field"><label>Agent</label><select aria-label="Agent"><option>a-intel.finops.invoice-bot</option></select></div>'+
@@ -10775,7 +10775,7 @@ function mandateBody(){
    '<div class="field"><label>Counterparties allowed</label><input value="vendor:aws, vendor:github" aria-label="Counterparties"><div class="hint">Everything else is denied.</div></div>'+
    '<div class="field"><label>Tools</label><input value="stripe__create_payment@*, aws_billing__purchase_savings_plan@2" aria-label="Tools"></div>'+
    '<div class="field"><label>Approval above (USD)</label><input value="100.00" aria-label="Approval above"><div class="hint">Always required for <span class="mono">moves_funds</span>, whatever this says.</div></div>'+
-   '<div class="field"><label>Purpose — for the CFO’s office, not for you</label><input value="monthly infrastructure invoices, PO-4471" aria-label="Purpose"></div>'+
+   '<div class="field"><label>Purpose</label><input value="monthly infrastructure invoices, PO-4471" aria-label="Purpose"><div class="hint">For the CFO’s office, not for you.</div></div>'+
    '<div class="grid g2"><div class="field"><label>Valid from</label><input type="date" value="2026-09-01" aria-label="Valid from"></div>'+
    '<div class="field"><label>Valid to</label><input type="date" value="2026-12-31" aria-label="Valid to"><div class="hint">Mandates expire. There is no unbounded option.</div></div></div>'+
    '<div class="note">Granting a mandate is a governed action by a person with a finance role. Every draw on it is a receipt, and the ledger below the mandate shows what is used, reserved and left.</div>';
@@ -10796,14 +10796,14 @@ function accountBody(){
     var opt=function(v,l){return '<option value="'+v+'"'+(th===v?' selected':'')+'>'+l+'</option>';};
     return '<div class="row2">'+
      '<div class="field"><label for="ac-loc">Locale</label><select id="ac-loc">'+
-     '<option>English (United States)</option><option disabled>Deutsch — Series A</option><option disabled>日本語 — Series A</option></select>'+
-     '<div class="hint">Dates, numbers and currencies format to this. Prose the models generate — findings, explanations — is generated in this locale and recorded on the frame. Machine-readable fields in records, receipts and exports are never translated.</div></div>'+
+     '<option>English (United States)</option><option disabled>Deutsch: Series A</option><option disabled>日本語: Series A</option></select>'+
+     '<div class="hint">Dates, numbers and currencies format to this. Prose the models generate (findings, explanations) is generated in this locale and recorded on the frame. Machine-readable fields in records, receipts and exports are never translated.</div></div>'+
      '<div class="field"><label for="ac-cur">Display currency</label><select id="ac-cur">'+
-     '<option>USD — US dollar</option><option disabled>EUR — Series A</option></select>'+
+     '<option>USD: US dollar</option><option disabled>EUR: Series A</option></select>'+
      '<div class="hint">Display only. The value of record stays the provider’s billing currency, and every converted number carries its rate and source.</div></div></div>'+
      '<div class="row2">'+
      '<div class="field"><label for="ac-tz">Time zone</label><select id="ac-tz">'+
-     '<option>UTC — every timestamp in this mockup</option><option>America/Los_Angeles</option></select></div>'+
+     '<option>UTC: every timestamp in this mockup</option><option>America/Los_Angeles</option></select></div>'+
      '<div class="field"><label for="ac-th">Theme</label><select id="ac-th" onchange="setTheme(this.value)">'+
      opt("system","Match the system")+opt("dark","Ink")+opt("light","Paper")+'</select></div></div>'+
      '<div class="field"><label>Preview</label><div class="panel panel-b">'+kvl([
@@ -10825,19 +10825,19 @@ function accountBody(){
        return '<div class="li"><div class="bd2"><div class="t1">'+h(x[0])+(x[3]?'<span class="b b-allowed"><span class="d"></span>this device</span>':'')+'</div>'+
         '<div class="t2">'+h(x[1])+'</div></div><time>'+h(x[2])+'</time>'+
         (x[3]?'':'<button class="btn sm" onclick="act(\'Session revoked. It ends at its next request.\')">Revoke</button>')+'</div>';}).join("")+'</div>'+
-     '<div class="hint">Revoking a session ends it at the next request. It does not touch an agent credential or a run token — those are revoked on the Agents page, and that is what makes a halt stick.</div></div>';
+     '<div class="hint">Revoking a session ends it at the next request. It does not touch an agent credential or a run token. Those are revoked on the Agents page, and that is what makes a halt stick.</div></div>';
   }
   if(tab==="privacy"){
     return '<div class="field"><label>Export</label>'+
-     '<div class="hint">A signed bundle: archive segments, attestations, key ids and a verifier script, so an auditor can check the chain offline without trusting Oxagen. Runs as <span class="mono">export_data</span> — a governed action with third-party egress.</div>'+
+     '<div class="hint">A signed bundle: archive segments, attestations, key ids and a verifier script, so an auditor can check the chain offline without trusting Oxagen. Runs as <span class="mono">export_data</span>, a governed action with third-party egress.</div>'+
      '<div class="row" style="margin-top:4px"><button class="btn" onclick="act(\'Export queued. You will get a signed bundle and a verifier script.\')">Export my activity</button>'+
      '<button class="btn" onclick="act(\'An organization export needs an org owner. Priya Natarajan has been asked.\')">Export the organization</button></div></div>'+
      '<div class="field"><label>Erasure</label>'+
      '<div class="hint">Frame bodies are written once and kept for seven years; personal data is redacted before write. Erasure of a data subject is handled as a support request against that policy, not as a button.</div></div>'+
      '<div class="field"><label>What is kept, and for how long</label>'+kvl([
        ["frame bodies","7 years from the seal · write-once · per-organization key"],
-       ["run ledger","forever — run, attempt, seal, attestation, frame digests and costs"],
-       ["retention mode","content_exact — bodies retained, replay grade full"],
+       ["run ledger","forever: run, attempt, seal, attestation, frame digests and costs"],
+       ["retention mode","content_exact: bodies retained, replay grade full"],
        ["data plane","shared · us-west-2"]],"code")+'</div>';
   }
   /* profile */
@@ -10864,17 +10864,17 @@ var CMDS=[
    ["Tools","#/a-intel/core-platform/tools","⌘ 3"],
    ["Steering","#/a-intel/core-platform/steering","⌘ 4"],["Spend","#/a-intel/core-platform/spend","⌘ 5"],
    ["Organization","#/a-intel"],["API keys","#/a-intel/api-keys"],["Billing","#/a-intel/billing"],["Audit","#/a-intel/audit"],
-   ["Onboarding demo — sign up","#/welcome"],["Onboarding demo — log in","#/welcome/login"]]},
- {g:"The assistant \u2014 it acts through these same actions",i:[
+   ["Onboarding demo: sign up","#/welcome"],["Onboarding demo: log in","#/welcome/login"]]},
+ {g:"The assistant",i:[
    ["Open the assistant","!asstToggle(true)"],["Ask why a run came back tampered","!asstToggle(true)"],
    ["Ask what an agent cost this month","!asstToggle(true)"],["Mint a model key for this organization","!openDialog('mintkey')"]]},
- {g:"Create \u2014 each one ends on a pull request",i:[
+ {g:"Create",i:[
    ["Create anything","!openDialog('create')"],["New agent","!wzOpen('agent')"],["New tool","!wzOpen('tool')"],
    ["Add a skill","!wzOpen('skill')"],["Write a context record","!wzOpen('record')"]]},
  {g:"Runs",i:[["run_01K5RS7M2E8FJ3QW · release-manager · live","#/a-intel/core-platform/runs/run_01K5RS7M2E8FJ3QW"],
     ["run_01K5RQ4B9C7XTN2P · stella-ci · sealed","#/a-intel/core-platform/runs/run_01K5RQ4B9C7XTN2P"],
    ["run_01K4QJ9E4T6YUI1O · stella-ci · compacted","#/a-intel/core-platform/runs/run_01K4QJ9E4T6YUI1O"]]},
- {g:"Actions — each one is a governed action",i:[
+ {g:"Actions",i:[
    ["Pause every live run in this workspace",null],["Steer the fleet","!openSteerFleet()"],["Register an agent","!regStart()"],
    ["Grant a mandate",null],["Create a role","!roleNew()"],["Flip a kill switch",null],
    ["Export a signed bundle",null],["Create an API key",null]]}
@@ -10907,7 +10907,7 @@ function cmdMenu(){
   function grp(label,note,rows,key){return rows.length?'<div class="cmd-g" data-g="'+key+'">'+h(label)+(note?'<span class="c">'+h(note)+'</span>':'')+'</div>'+rows.join(""):'';}
   var nav=CMDS.map(function(gr){
     var rows=gr.i.filter(function(it){return cmdHit(it[0]);}).map(function(it){
-      var onclick=it[1]&&it[1][0]==="!"?'closeDialog();'+it[1].slice(1):it[1]?'closeDialog();go(\''+it[1]+'\')':'closeDialog();act(\''+h(it[0]).replace(/'/g,"")+' — recorded as a governed action with a receipt.\')';
+      var onclick=it[1]&&it[1][0]==="!"?'closeDialog();'+it[1].slice(1):it[1]?'closeDialog();go(\''+it[1]+'\')':'closeDialog();act(\''+h(it[0]).replace(/'/g,"")+': recorded as a governed action with a receipt.\')';
       return item(onclick,'<span>'+h(it[0])+'</span>'+(it[2]?'<span class="r">'+h(it[2])+'</span>':''));});
     return grp(gr.g,"",rows,"nav");
   }).join("");
@@ -10922,7 +10922,7 @@ function cmdMenu(){
   return '<div class="scrim" onclick="if(event.target===this){S.cmdq=\'\';closeDialog();}">'+
    '<div class="cmd" role="dialog" aria-modal="true" aria-label="Command menu">'+
    '<div class="cmd-in"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>'+
-   '<input id="cmdq" value="'+h(S.cmdq)+'" placeholder="Search runs, agents, tools, records — or run an action" aria-label="Command menu" autocomplete="off" oninput="cmdInput(this)" onkeydown="cmdKey(event)"></div>'+
+   '<input id="cmdq" value="'+h(S.cmdq)+'" placeholder="Search runs, agents, tools and records, or run an action" aria-label="Command menu" autocomplete="off" oninput="cmdInput(this)" onkeydown="cmdKey(event)"></div>'+
    '<div class="cmd-l">'+body+'</div>'+
    '<div class="cmd-in cmd-foot">'+
    '<span class="mono">⇅</span> move <span class="mono">↩</span> open <span class="mono">esc</span> close'+
@@ -11039,7 +11039,7 @@ function rolesBody(){
   return '<div class="panel"><div class="panel-h"><h3>Roles</h3>'+
    '<div class="sp"><span class="b b-q">postgres · iam</span><button class="btn sm primary" onclick="roleNew()">Create role</button></div></div>'+
    '<div class="tw"><table><thead><tr><th>Role</th><th>Kind</th><th>Scope</th><th>Permissions</th><th>Held by</th><th>Origin</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
-   '<div class="panel-b"><div class="note">A role is a permission set, nothing more. An agent’s effective permission is its roles ∩ its operator’s grants ∩ the policy bundle ∩ the kill switches — a role can widen what an agent may ask for, never what its operator may.</div></div></div>';
+   '<div class="panel-b"><div class="note">A role is a permission set, nothing more. An agent’s effective permission is its roles ∩ its operator’s grants ∩ the policy bundle ∩ the kill switches. A role can widen what an agent may ask for, never what its operator may.</div></div></div>';
 }
 function roleNew(){S.roleEdit={id:"",kind:"agent",scope:"workspace",desc:"",perms:{},isNew:true};openDialog("roleedit");}
 function roleOpen(id){var r=roleById(id);if(!r)return;var p={};r.perms.forEach(function(x){p[x]=true;});S.roleEdit={id:r.id,orig:r.id,kind:r.kind,scope:r.scope,desc:r.desc,perms:p,builtin:r.builtin,isNew:false};openDialog("roleedit");}
@@ -11052,10 +11052,10 @@ function roleSave(){
   var kind=el("roleKind")?el("roleKind").value:d.kind, scope=el("roleScope")?el("roleScope").value:d.scope;
   var perms=Object.keys(d.perms).filter(function(k){return d.perms[k];});
   if(!id){act("A role needs a name.");return;}
-  if(!perms.length){act("A role with no permissions grants nothing — pick at least one.");return;}
+  if(!perms.length){act("A role with no permissions grants nothing. Pick at least one.");return;}
   if(d.isNew){ if(roleById(id)){act("A role named "+id+" already exists.");return;}
     ROLES.push({id:id,kind:kind,scope:scope,desc:desc,perms:perms,builtin:false,by:PEOPLE.marcus.name,at:"2026-09-11"});
-    closeDialog(); act("Role "+id+" created — a governed action, recorded with your name on it.","gold");
+    closeDialog(); act("Role "+id+" created. A governed action, recorded with your name on it.","gold");
   } else { var r=roleById(d.orig); if(r){r.desc=desc;r.kind=kind;r.scope=scope;r.perms=perms;}
     closeDialog(); act("Role "+d.orig+" updated. Every holder’s effective permission is recomputed at its next call."); }
 }
@@ -11077,7 +11077,7 @@ function roleEditDlg(){
    '<div class="row" style="justify-content:space-between;margin-bottom:4px"><label style="font-size:12px;font-weight:600;color:var(--muted)">Permissions · <span id="rolePermN">'+n+'</span> selected</label>'+(ro?'<span class="b b-q">built-in · read-only</span>':'')+'</div>'+
    '<div class="perm-grid">'+PERMS.map(function(g){return '<div class="pg"><div class="h">'+h(g[0])+'</div>'+g[1].map(function(p){
      return '<label class="check"><input type="checkbox"'+(d.perms[p]?' checked':'')+(ro?' disabled':'')+' onchange="rolePerm(\''+p+'\',this.checked)"><span class="n mono">'+h(p)+'</span></label>';}).join("")+'</div>';}).join("")+'</div>'+
-   (holders&&holders.total?'<div class="banner" style="margin-bottom:12px"><span>Held by '+holders.total+' principal'+(holders.total>1?'s':'')+'. Saving changes their effective permission at the next call — nothing in flight is cut.</span></div>':'')+
+   (holders&&holders.total?'<div class="banner" style="margin-bottom:12px"><span>Held by '+holders.total+' principal'+(holders.total>1?'s':'')+'. Saving changes their effective permission at the next call. Nothing in flight is cut.</span></div>':'')+
    '<div class="note">Saving is a governed action: it passes IAM, writes an audit record, and bills as one action. <span class="mono">org.*</span> is the only wildcard and only <span class="mono">org.owner</span> carries it.</div>';
   var f='<button class="btn" onclick="closeDialog()">'+(ro?'Close':'Cancel')+'</button>'+
    (ro?'<button class="btn primary" onclick="roleDup(\''+h(d.orig)+'\')">Duplicate as custom</button>':'<button class="btn primary" onclick="roleSave()">'+(d.isNew?'Create role':'Save changes')+'</button>');
@@ -11088,7 +11088,7 @@ function roleDelDlg(){
   var n=roleAssignees(r.id);
   return {t:"Delete role",s:r.id,w:false,b:
    '<p style="font-size:13px">This removes <span class="mono">'+h(r.id)+'</span> from IAM. Its definition and every grant it carried stay in the audit record.</p>'+
-   (n.total?'<div class="warn">Held by '+n.total+' principal'+(n.total>1?'s':'')+'. Reassign them first — a role cannot be deleted out from under a holder.</div>':'<div class="note">Nobody holds it. Deleting is a governed action and is recorded.</div>'),
+   (n.total?'<div class="warn">Held by '+n.total+' principal'+(n.total>1?'s':'')+'. Reassign them first. A role cannot be deleted out from under a holder.</div>':'<div class="note">Nobody holds it. Deleting is a governed action and is recorded.</div>'),
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn danger"'+(n.total?' disabled':'')+' onclick="roleDeleteConfirm(\''+h(r.id)+'\')">Delete role</button>'};
 }
 
@@ -11189,7 +11189,7 @@ function budgetDel(i){
 /* ---- identities and role assignment on an agent ---- */
 function agentRoleChips(a){
   var list=agentRolesOf(a.key);
-  return (list.length?list.map(function(r){return '<span class="rl-chip"><span>'+h(r)+'</span><button type="button" aria-label="Remove '+h(r)+'" title="Remove role" onclick="roleUnassign(\''+h(a.key)+'\',\''+h(r)+'\')">×</button></span>';}).join(""):'<span class="dim">none — it can call nothing</span>')+
+  return (list.length?list.map(function(r){return '<span class="rl-chip"><span>'+h(r)+'</span><button type="button" aria-label="Remove '+h(r)+'" title="Remove role" onclick="roleUnassign(\''+h(a.key)+'\',\''+h(r)+'\')">×</button></span>';}).join(""):'<span class="dim">none, it can call nothing</span>')+
    '<div><button class="btn sm" style="margin-top:6px" onclick="openDialog(\'assignrole\',\''+h(a.key)+'\')">Assign role</button></div>';
 }
 function roleUnassign(key,r){var l=agentRolesOf(key);var i=l.indexOf(r);if(i>=0)l.splice(i,1);render();act("Removed "+r+" from "+key+". Its belt is recomputed at the next run start.");}
@@ -11206,7 +11206,7 @@ function assignRoleDlg(){
   var first=opts.filter(function(r){return held.indexOf(r.id)<0;})[0]||opts[0];
   return {t:"Assign a role",s:a.key,w:false,b:
    '<div class="field"><label>Role</label><select id="asgRole" aria-label="Role" onchange="var s=el(\'asgScopeF\');if(s)s.hidden=(roleById(this.value)||{}).scope!==\'repository\'">'+
-    opts.map(function(r){return '<option value="'+h(r.id)+'"'+(first&&r.id===first.id?' selected':'')+(held.indexOf(r.id)>=0?' disabled':'')+'>'+h(r.id)+(held.indexOf(r.id)>=0?' · held':'')+' — '+h(r.desc)+'</option>';}).join("")+'</select>'+
+    opts.map(function(r){return '<option value="'+h(r.id)+'"'+(first&&r.id===first.id?' selected':'')+(held.indexOf(r.id)>=0?' disabled':'')+'>'+h(r.id)+(held.indexOf(r.id)>=0?' · held':'')+': '+h(r.desc)+'</option>';}).join("")+'</select>'+
     '<div class="hint">Only agent-kind roles are listed. <a href="#" onclick="closeDialog();orgTab(\'roles\');return false">Manage roles</a></div></div>'+
    '<div class="field" id="asgScopeF"'+(first&&first.scope==="repository"?'':' hidden')+'><label>Repository</label><select id="asgScope" aria-label="Repository">'+[ws().main].concat(ws().linked||[]).map(function(x){return '<option>'+h(x)+'</option>';}).join("")+'</select>'+
     '<div class="hint">A repository-scoped role is bound to one repo.</div></div>'+
@@ -11245,8 +11245,8 @@ function agentDelDlg(){
   var live=RUNS.filter(function(r){return r.agent===a.key&&r.status==="live";}).length;
   return {t:"Deregister agent",s:a.key,w:false,b:
    '<p style="font-size:13px">This ends the agent’s identity. Its credential is revoked, every run token dies at the next call, and a Context PR archives <span class="mono">.oxagen/agents/'+h(a.key.split(".").pop())+'.toml</span>.</p>'+
-   '<dl class="kv"><dt>Kept</dt><dd>every run, frame, receipt and score — the record is never deleted</dd><dt>Ends</dt><dd>'+agentRolesOf(a.key).length+' role'+(agentRolesOf(a.key).length===1?'':'s')+', '+a.mandates.length+' mandate'+(a.mandates.length===1?'':'s')+', the host enrollment</dd>'+
-   (live?'<dt>In flight</dt><dd><span style="color:var(--st-failed)">'+live+' live run'+(live>1?'s':'')+'</span> — cancelled at the next boundary and recorded</dd>':'')+'</dl>'+
+   '<dl class="kv"><dt>Kept</dt><dd>every run, frame, receipt and score: the record is never deleted</dd><dt>Ends</dt><dd>'+agentRolesOf(a.key).length+' role'+(agentRolesOf(a.key).length===1?'':'s')+', '+a.mandates.length+' mandate'+(a.mandates.length===1?'':'s')+', the host enrollment</dd>'+
+   (live?'<dt>In flight</dt><dd><span style="color:var(--st-failed)">'+live+' live run'+(live>1?'s':'')+'</span>, cancelled at the next boundary and recorded</dd>':'')+'</dl>'+
    '<label class="check" style="margin-top:12px"><input type="checkbox" id="delAgentOk" onchange="el(\'delAgentBtn\').disabled=!this.checked"><span class="grow"><span class="n" style="font-family:var(--font)">I understand this cannot be undone</span><span class="d">Re-registering creates a new principal with a provisional score.</span></span></label>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button id="delAgentBtn" class="btn danger" disabled onclick="agentDelete(\''+h(a.key)+'\')">Deregister</button>'};
 }
@@ -11255,7 +11255,7 @@ function memberDelDlg(){
   var p=S.dlg==="removemember"?PEOPLE[S.dlgArg]:null; if(!p) return {t:"Remove person",w:false,b:"",f:""};
   var owns=AGENTS.filter(function(a){return a.operator===S.dlgArg;}).length;
   return {t:"Remove from the organization",s:p.name,w:false,b:'<p style="font-size:13px">'+h(p.name)+' loses <span class="mono">'+h(p.role)+'</span> and every workspace grant. Their sessions end now.</p>'+
-   (owns?'<div class="warn">'+owns+' agent'+(owns>1?'s act':' acts')+' on their behalf. Each one’s delegation ceiling collapses to nothing until a new parent user accepts — reassign them first from the agent’s Identity panel.</div>':'<div class="note">No agent acts on their behalf. Removing is a governed action and is recorded.</div>'),
+   (owns?'<div class="warn">'+owns+' agent'+(owns>1?'s act':' acts')+' on their behalf. Each one’s delegation ceiling collapses to nothing until a new parent user accepts. Reassign them first from the agent’s Identity panel.</div>':'<div class="note">No agent acts on their behalf. Removing is a governed action and is recorded.</div>'),
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn danger"'+(owns?' disabled':'')+' onclick="memberRemove(\''+h(S.dlgArg)+'\')">Remove</button>'};
 }
 function wsById(slug){for(var i=0;i<WS.length;i++){if(WS[i].slug===slug)return WS[i];}return null;}
@@ -11268,7 +11268,7 @@ function wsEditDlg(){
    '<div class="field"><label for="wsGov">Governance mode</label><select id="wsGov" aria-label="Governance mode">'+WZ_MODES.map(function(m){return '<option value="'+m[0]+'"'+(wsGov(w)===m[0]?' selected':'')+'>'+m[0]+' · '+h(m[1])+'</option>';}).join("")+'</select>'+
     '<div class="hint">Written to <span class="mono">.oxagen/rules/governance.toml</span> through a Context PR; it takes effect on merge.</div></div>'+
    '<div class="field"><label>Namespace</label><input value="'+h(w.ns||w.slug.split("-")[0])+'" disabled aria-label="Namespace"><div class="hint">Immutable. It is in every agent key here: <span class="mono">'+h(ORG.slug+"."+(w.ns||w.slug.split("-")[0]))+'.&lt;agent&gt;</span>.</div></div>'+
-   '<div class="field"><label for="wsRet">Retention mode</label><select id="wsRet">'+[["content_exact","keep prompts and tool bodies in full"],["digest_only","digests only, lowers the replay grade"]].map(function(x){return '<option value="'+x[0]+'"'+((w.retention||"content_exact")===x[0]?' selected':'')+'>'+x[0]+' — '+x[1]+'</option>';}).join("")+'</select>'+
+   '<div class="field"><label for="wsRet">Retention mode</label><select id="wsRet">'+[["content_exact","keep prompts and tool bodies in full"],["digest_only","digests only, lowers the replay grade"]].map(function(x){return '<option value="'+x[0]+'"'+((w.retention||"content_exact")===x[0]?' selected':'')+'>'+x[0]+': '+x[1]+'</option>';}).join("")+'</select>'+
    '<div class="hint"><span class="mono">digest_only</span> is an opt-down: recorded as a completeness gap on every run, because a replay without bodies is a timeline, not a replay.</div></div>'+
    '<dl class="kv"><dt>Toolbelt limit</dt><dd>'+FULL_BELT_LIMIT+' tools, then the belt is sent searchable</dd>'+
    '<dt>Default budget</dt><dd>'+usd(w.budgetDay||"20.00")+' per day per agent · hard · a new agent starts here</dd>'+
@@ -11386,7 +11386,7 @@ function incidentResolveDlg(){
 
 /* ============================== Register Agent (the W1 onboarding gate, in-app) ==============================
    Fleet's "Register Agent" runs the onboarding gate inside the app: name the agent, wrap it, wait for its
-   first frame. Nothing completes until that frame reaches Oxagen — the ping is also the installer's smoke
+   first frame. Nothing completes until that frame reaches Oxagen. The ping is also the installer's smoke
    test, so there is one path, not two. Cancel is on every step (and Esc) and leaves nothing behind.
    Mutable state lives on S.reg and is null outside the flow; timers are tracked so Cancel can clear them. */
 var REG_TABS=[{id:"cc",n:"Claude Code",s:"one click · harness"},{id:"codex",n:"Codex CLI",s:"one click · harness"},{id:"sdk",n:"SDK agent",s:"five lines · harness"}];
@@ -11457,7 +11457,7 @@ function regFinish(){
   if(ob) S.firstRun=run2.id;
   go('#/'+ORG.slug+'/'+w.slug);
   act(ob?'Welcome to Oxagen. First frame received from '+key+', its run is live on Fleet, and the organization is out of the gate.'
-        :key+' registered — first frame received. Its smoke run is live on Fleet.','gold');
+        :key+' registered. First frame received. Its smoke run is live on Fleet.','gold');
 }
 function regInstall(harness){
   if(!S.reg) S.reg=regNew();
@@ -11479,7 +11479,7 @@ function regShell(step,inner){
    inner+
    '<p class="reg-cap" style="margin-top:22px;text-align:center">'+(ob
     ?'The operator console does not open until an agent has talked to Oxagen. That first frame is also the installer’s smoke test, so there is one path, not two.'
-    :'Registration does not complete until the agent has talked to Oxagen. That first frame is also the installer’s smoke test, so there is one path, not two. Cancel at any time — nothing is kept until the frame arrives.')+'</p></div></div>';
+    :'Registration does not complete until the agent has talked to Oxagen. That first frame is also the installer’s smoke test, so there is one path, not two. Cancel at any time. Nothing is kept until the frame arrives.')+'</p></div></div>';
 }
 function regName(){
   var r=S.reg, w=ws(), key=regKey();
@@ -11548,7 +11548,7 @@ function regWrap(){
    '<div class="reg-card"><div class="reg-tabs" role="tablist" aria-label="How to wrap the agent">'+REG_TABS.map(function(t){
      return '<button type="button" role="tab" aria-selected="'+(r.tab===t.id)+'" onclick="S.reg.tab=\''+t.id+'\';render()"><span class="n">'+t.n+'</span><span class="s">'+t.s+'</span></button>';}).join("")+'</div>'+panel+'</div>'+
    '<div class="reg-foot">'+regCancelBtn()+'<button class="btn" onclick="regNav(\''+(S.reg.mode==="onboard"?"organization":"name")+'\')">Back</button>'+
-   '<div class="sp"><span class="reg-cap">Nothing completes until a frame arrives.</span><button class="btn" onclick="regInstall(null)">I have already installed it — continue</button></div></div>';
+   '<div class="sp"><span class="reg-cap">Nothing completes until a frame arrives.</span><button class="btn" onclick="regInstall(null)">I have already installed it</button></div></div>';
 }
 function regLines(){
   var t=S.reg?S.reg.tab:"cc", hooks, base;
@@ -11576,7 +11576,7 @@ function regRun(){
    '<p>The host <span class="mono">'+REG_HOST+'</span> enrolled, but every request to <span class="mono">https://ingest.oxagen.com/v1</span> has been refused for 94 seconds (<span class="mono">ECONNREFUSED</span>, 6 attempts). No frame has arrived, so registration will not complete.</p>'+
    '<p>Check that outbound 443 to <span class="mono">ingest.oxagen.com</span> is allowed, then run <span class="mono">oxagen agent status</span>.</p>'+
    '<p class="mono dim" style="font-size:11px">request req_01JQ8F4B1PC7QM · host '+REG_HOST+'</p>'+
-   '<button class="btn" onclick="act(\'Checked again — still refused. Nothing has changed on the host.\')">Check again</button></div></div>'+
+   '<button class="btn" onclick="act(\'Checked again. Still refused. Nothing has changed on the host.\')">Check again</button></div></div>'+
    '<div class="reg-foot">'+regCancelBtn()+'<button class="btn" onclick="regNav(\'wrap\')">Back</button></div>';
   var lines=regLines(), shown=r.first?lines.length:Math.min(r.log,lines.length-1);
   var body, foot;
@@ -11596,7 +11596,7 @@ function regRun(){
      '<div><span class="t">&nbsp;</span><span class="dim">waiting…</span></div></div>'+
      '<p class="muted" style="font-size:12.5px;margin:12px 0 0">Start '+h(hl)+' in any repository on <span class="mono">'+REG_HOST+'</span>. The installer already ran a one-turn smoke session; if it is still in flight this flips on its own.</p></div></div>';
     foot='<div class="reg-foot">'+regCancelBtn()+'<button class="btn" onclick="regNav(\'wrap\')">Back</button>'+
-     '<div class="sp">'+(ob&&!S.scn?'<button class="btn ghost" onclick="obGo(\'installer\')">Open the installer</button>':'')+'<span class="reg-cap">There is no Done button — the frame is the completion.</span></div></div>';
+     '<div class="sp">'+(ob&&!S.scn?'<button class="btn ghost" onclick="obGo(\'installer\')">Open the installer</button>':'')+'<span class="reg-cap">There is no Done button. The frame is the completion.</span></div></div>';
   }
   return head+body+(ob?obRepoPanel():"")+foot;
 }
@@ -11635,13 +11635,13 @@ function regSchedule(step){
   }
 }
 
-/* ============================== Onboarding demo (W1 — sixty seconds to governed) ==============================
+/* ============================== Onboarding demo (W1: sixty seconds to governed) ==============================
    Sign-up, verification, log-in and the three-step gate, reachable from the account dialog, the user menu and ⌘K.
-   Demo chrome only — none of it ships in the live app. The gate reuses the Register Agent screens in "onboard"
+   Demo chrome only. None of it ships in the live app. The gate reuses the Register Agent screens in "onboard"
    mode, so the wrap and first-frame panels here are the same components Fleet's Register Agent uses.
    Mutable state: S.ob for the auth forms, S.reg (mode "onboard") for the gate; both are cleared on exit. */
 var OB_STEPS=[
- {id:"signup",lab:"Sign up",sub:"Create the account — Google, GitHub, or email and password"},
+ {id:"signup",lab:"Sign up",sub:"Create the account: Google, GitHub, or email and password"},
  {id:"verify",lab:"Verify email",sub:"Six-digit code, good for ten minutes"},
  {id:"organization",lab:"Name the organization",sub:"Tenant, namespace and the first workspace"},
  {id:"wrap",lab:"Wrap an agent",sub:"Claude Code, Codex CLI or an SDK agent"},
@@ -11673,7 +11673,7 @@ function obGo(step){
 }
 function obExit(){regClear();S.reg=null;go('#/'+ORG.slug+'/'+ws().slug);if(!PRODUCT)act('Onboarding demo closed. Nothing was written.');}
 function obSignedIn(){regClear();S.reg=null;go('#/'+ORG.slug+'/'+ws().slug);act('Signed in as '+PEOPLE.marcus.name+'. The session is recorded like any other governed action.');}
-function obBind(){if(S.reg)S.reg.repo="bound";delete ws().provisional;render();act('GitHub App installed on '+ws().main+'. Main repo bound — Context PRs, checks and the code graph are on.');}
+function obBind(){if(S.reg)S.reg.repo="bound";delete ws().provisional;render();act('GitHub App installed on '+ws().main+'. Main repo bound. Context PRs, checks and the code graph are on.');}
 function obSkip(){
   var w=ws(); if(S.reg)S.reg.repo="skipped";
   if(!w.provisional){w.provisional={since:obDate(0),until:obDate(OB_PROVISIONAL_DAYS)}; if(S.obScn)S.obScn.prov.push(w.slug);}
@@ -11803,7 +11803,7 @@ function obAccountTab(){
   function row(s,i){return '<div><span class="sn">'+(typeof i==="number"?i+1:"·")+'</span><div class="bd2"><div class="t1">'+h(s.lab)+'</div><div class="t2">'+h(s.sub)+'</div></div>'+
    '<button class="btn sm" onclick="obGo(\''+s.id+'\')">Open</button></div>';}
   return '<div class="note" style="margin-bottom:16px"><b>Clickable demo only.</b> These are the screens a new operator sees before Oxagen opens, sign-up through the first frame. They are reachable from here so a walkthrough can start from the account you are signed in as. Nothing on them writes anything; Exit demo on any screen brings you back here, still signed in.</div>'+
-   '<div class="field"><label>The path — sixty seconds to governed</label><div class="ob-steps">'+OB_STEPS.map(row).join("")+'</div></div>'+
+   '<div class="field"><label>The path</label><div class="ob-steps">'+OB_STEPS.map(row).join("")+'</div></div>'+
    '<div class="field"><label>Also in the set</label><div class="ob-steps">'+OB_ALT.map(function(s){return row(s,null);}).join("")+'</div></div>'+
    '<div class="row"><button class="btn primary" onclick="obGo(\'signup\')">Start from sign-up</button>'+
    '<span class="dim" style="font-size:12px">The mockup-state bar still applies: error and denied render each screen’s failure.</span></div>';
@@ -11958,7 +11958,7 @@ function obOrg(){
    '</div></div>'+
    '<div class="reg-foot">'+regCancelBtn()+'<div class="sp"><span class="reg-cap">Creates <span class="mono">org_'+h(ORG.slug)+'</span> and its graph database.</span><button class="btn primary" onclick="regNav(\'wrap\')">Continue</button></div></div>';
 }
-/* step 3, onboard mode: the repo the installer saw — bind it, or stay provisional */
+/* step 3, onboard mode: the repo the installer saw: bind it, or stay provisional */
 function obRepoPanel(){
   var r=S.reg, w=ws();
   if(r.repo==="bound") return '<div class="reg-card ob-repo"><div class="ch"><span class="reg-ok"><span class="dot"></span>bound</span><h3>Main repo</h3></div><div class="cb">'+
@@ -11972,7 +11972,7 @@ function obRepoPanel(){
    '<p class="muted" style="font-size:12.5px;margin:0 0 12px">Read from the git remote of <span class="mono">~/src/platform</span>, the directory the installer ran in. Production branch <span class="mono">'+h(w.branch)+'</span>.</p>'+
    '<button class="btn'+(r.first?"":" primary")+'" onclick="obBind()">'+OB_ICON.github+'<span>Bind '+h(w.main)+' as the main repo</span></button>'+
    '<p class="muted" style="font-size:12.5px;margin:12px 0 0">One click installs the GitHub App on <span class="mono">'+h(w.main)+'</span>: repo binding, Context PRs, checks, merge handling and the code graph.</p>'+
-   '<div class="hr"></div><p class="muted" style="font-size:12.5px;margin:0"><button type="button" class="ob-link" style="color:var(--muted)" onclick="obSkip()">Skip for now</button> — '+h(w.slug)+' stays <b>provisional for '+OB_PROVISIONAL_DAYS+' days</b>. Runs record and spend counts, but steering, context records and agent definitions stay off until a main repo is bound.</p></div></div>';
+   '<div class="hr"></div><p class="muted" style="font-size:12.5px;margin:0"><button type="button" class="ob-link" style="color:var(--muted)" onclick="obSkip()">Skip for now</button> and '+h(w.slug)+' stays <b>provisional for '+OB_PROVISIONAL_DAYS+' days</b>. Runs record and spend counts, but steering, context records and agent definitions stay off until a main repo is bound.</p></div></div>';
 }
 function pWelcome(r){
   var step=r.step||"signup";
@@ -12001,7 +12001,7 @@ function pWelcome(r){
    and `customer_key`, the customer's own key with its tokens billed at zero. A third was added on
    2026-09-15 (maintainer decision) and it is now the default for a new organization:
 
-     platform_minted — Oxagen mints one OpenRouter key per organization through the provisioning
+     platform_minted: Oxagen mints one OpenRouter key per organization through the provisioning
      API, on Oxagen's own account, and holds it enveloped. Oxagen owns it, pays for it, and can
      rotate or revoke it, so the tokens are billed like `platform`. What it buys is reconciliation:
      OpenRouter's own usage report carries one line per provisioned key, so the provider's number
@@ -12019,7 +12019,7 @@ var ASST_MODEL="z-ai/glm-flash-latest";
 var ORG_KEY={
   source:"platform_minted",
   customerPrefix:null,                /* set when an operator saves their own key */
-  provisionedId:"key_01K5RW8Q2N",     /* OpenRouter's own id — what reconciliation joins on */
+  provisionedId:"key_01K5RW8Q2N",     /* OpenRouter's own id: what reconciliation joins on */
   label:"oxagen/a-intel",             /* the name the key carries on Oxagen's OpenRouter account */
   prefix:"sk-or-v1-a3f1",             /* the only part of the secret anything may render */
   hash:"sha256:7c41e0b9ad2f8365",
@@ -12083,7 +12083,7 @@ function orgKeyPanel(){
   if(byok){
     rows='<dl class="kv">'+
      '<dt>Key</dt><dd>'+(held
-       ?'<span class="mono">'+h(ORG_KEY.customerPrefix)+'…</span> <span class="dim">enveloped, never returned — this prefix is all any screen may show</span>'
+       ?'<span class="mono">'+h(ORG_KEY.customerPrefix)+'…</span> <span class="dim">enveloped, never returned, and this prefix is all any screen may show</span>'
        :'<span class="dim">none saved yet</span>')+'</dd>'+
      '<dt>Billing</dt><dd>your tokens are reported and billed at zero; governed actions are billed as usual</dd>'+
      '<dt>Key storage</dt><dd>enveloped, tested before save, never returned, every read audited</dd>'+
@@ -12096,11 +12096,11 @@ function orgKeyPanel(){
     rows='<div class="note">No key is held for '+h(ORG.name)+'. The in-app agent cannot run, and nothing has been charged. Minting one is a governed action and puts your name on it.</div>';
   } else {
     rows='<dl class="kv">'+
-     '<dt>Secret</dt><dd><span class="mono">'+h(ORG_KEY.prefix)+'…</span> <span class="dim">enveloped, never returned — this prefix is all any screen may show</span></dd>'+
+     '<dt>Secret</dt><dd><span class="mono">'+h(ORG_KEY.prefix)+'…</span> <span class="dim">enveloped, never returned, and this prefix is all any screen may show</span></dd>'+
      '<dt>Provisioned id</dt><dd><span class="mono">'+h(ORG_KEY.provisionedId)+'</span> <span class="dim">the provider’s own id; reconciliation joins on it</span></dd>'+
      '<dt>Name on the account</dt><dd><span class="mono">'+h(ORG_KEY.label)+'</span></dd>'+
      '<dt>Minted</dt><dd>'+h(ORG_KEY.minted)+' by '+h(PEOPLE[ORG_KEY.mintedBy].name)+(ORG_KEY.rotated?' · rotated '+h(ORG_KEY.rotated):' · never rotated')+'</dd>'+
-     '<dt>Monthly cap</dt><dd>'+usd(fmt2(ORG_KEY.capUsd))+' USD, set on the key at the provider — not only in our meter · <span id="orgCapUsed">'+usd(fmt2(orgRoutesTotal()))+'</span> used in '+h(SPEND.month)+', the total of the routes below</dd>'+
+     '<dt>Monthly cap</dt><dd>'+usd(fmt2(ORG_KEY.capUsd))+' USD, set on the key at the provider, not only in our meter · <span id="orgCapUsed">'+usd(fmt2(orgRoutesTotal()))+'</span> used in '+h(SPEND.month)+', the total of the routes below</dd>'+
      '<dt>Reads</dt><dd>'+ORG_KEY.reads30+' in 30 days, each one an audit event</dd>'+
      '<dt>Engine</dt><dd><span class="mono">'+h(ASST_ENGINE_URL)+'</span> · Stella '+h(ASST_ENGINE_VER)+' over HTTP, on this key</dd>'+
      '</dl>';
@@ -12119,7 +12119,7 @@ function orgKeyPanel(){
    '<div class="panel-b">'+
    '<div class="field"><label for="orgFundSrc">Source</label>'+
    '<select id="orgFundSrc" onchange="orgKeySourceSet(this.value)" aria-label="Funding source">'+
-    ORG_KEY_SOURCES.map(function(x){return '<option value="'+h(x[0])+'"'+(ORG_KEY.source===x[0]?' selected':'')+'>'+h(x[0])+' — '+h(x[1])+'</option>';}).join("")+
+    ORG_KEY_SOURCES.map(function(x){return '<option value="'+h(x[0])+'"'+(ORG_KEY.source===x[0]?' selected':'')+'>'+h(x[0])+': '+h(x[1])+'</option>';}).join("")+
    '</select><div class="hint">'+h(src[2])+'</div></div>'+
    rows+
    '<div class="row" style="margin-top:13px">'+acts+'</div>'+
@@ -12142,7 +12142,7 @@ function orgKeyPanel(){
 DLG_EXT.mintkey=function(){
   return {t:"Mint a model key for "+ORG.name, s:"Oxagen calls OpenRouter’s provisioning API and holds what comes back. The secret is never returned to this screen.", w:false,
    b:'<div class="field"><label>Name on the account</label><input value="oxagen/'+h(ORG.slug)+'" aria-label="Name"><div class="hint">What the key is called on Oxagen’s OpenRouter account. It is how a person reading the provider’s bill finds this organization.</div></div>'+
-     '<div class="field"><label>Monthly cap</label><input value="2000.00" aria-label="Monthly cap"><div class="hint">Set on the key at the provider, not only in our meter — so a bug in our metering cannot spend past it.</div></div>'+
+     '<div class="field"><label>Monthly cap</label><input value="2000.00" aria-label="Monthly cap"><div class="hint">Set on the key at the provider, not only in our meter, so a bug in our metering cannot spend past it.</div></div>'+
      '<div class="field"><label>What this writes</label>'+
       '<div class="sx-cfg"><div class="sx-cfg-h">POST https://openrouter.ai/api/v1/keys</div><pre>'+
       '<span class="k">name</span>  = <span class="s">"oxagen/'+h(ORG.slug)+'"</span>\n'+
@@ -12156,14 +12156,14 @@ DLG_EXT.mintkey=function(){
 DLG_EXT.rotateorgkey=function(){
   return {t:"Rotate this key", s:ORG_KEY.provisionedId+" · "+ORG_KEY.label, w:false,
    b:'<div class="note">Rotation provisions a new key at the provider and envelopes it, then revokes the old one once the engine has picked the new one up. Turns in flight finish on the key they started with.</div>'+
-     '<dl class="kv" style="margin-top:12px"><dt>This month on the old key</dt><dd><span class="mono">'+usd(ORG_KEY.providerUsd)+'</span> — it stays on the provider’s report under <span class="mono">'+h(ORG_KEY.provisionedId)+'</span>, so the month still reconciles across both</dd></dl>',
+     '<dl class="kv" style="margin-top:12px"><dt>This month on the old key</dt><dd><span class="mono">'+usd(ORG_KEY.providerUsd)+'</span>, and it stays on the provider’s report under <span class="mono">'+h(ORG_KEY.provisionedId)+'</span>, so the month still reconciles across both</dd></dl>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
      '<button class="btn primary" onclick="closeDialog();act(\'Rotated. The new key is enveloped and in force; the old one is revoked and keeps its line on this month\\u2019s provider report.\')">Rotate</button>'};
 };
 DLG_EXT.revokeorgkey=function(){
   return {t:"Revoke this key", s:ORG_KEY.provisionedId+" · "+ORG_KEY.label, w:false,
    b:'<div class="warn"><b>The in-app agent stops for everyone in '+h(ORG.name)+'.</b> Revocation ends the key at the provider at the next call. Nothing else changes: no run, no receipt and no record depends on it, and the month’s spend stays on the provider’s report.</div>'+
-     '<div class="note" style="margin-top:12px">Oxagen’s own work — reflection, promotion rationale, Context PR bodies, run names — routes on the tiers above and is unaffected.</div>',
+     '<div class="note" style="margin-top:12px">Oxagen’s own work (reflection, promotion rationale, Context PR bodies, run names) routes on the tiers above and is unaffected.</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
      '<button class="btn danger" onclick="ORG_KEY.source=\'none\';ORG_KEY.provisionedId=null;closeDialog();act(\'Revoked at the provider. The in-app agent is unavailable in '+h(ORG.name)+' until a key is minted.\')">Revoke</button>'};
 };
@@ -12171,13 +12171,13 @@ DLG_EXT.revokeorgkey=function(){
 /* ============================== the in-app agent ==============================
    Restored 2026-09-15. The scope review of 2026-09-14 proposed cutting it, the maintainer kept it
    the same day ("dont cut the in app agent"), and the chrome removed that morning was never put
-   back — see scope-review.md, the In-app agent row. Spec §4.4: it opens as a flyout from the
+   back. See scope-review.md, the In-app agent row. Spec §4.4: it opens as a flyout from the
    sidebar, each of its turns is a run of its own, and it acts through the same agent tools a person
    clicks, so what it does passes IAM and lands in the record like an action taken on a page.
 
    Two things it is not. It is not a second way to get authority: it holds none and carries no
    credential, and every action it takes is the same governed action the page would have taken. And
-   its runs are Oxagen's, not the tenant's — they never appear in Fleet, in the run index or in
+   its runs are Oxagen's, not the tenant's. They never appear in Fleet, in the run index or in
    Spend's run counts. What they do cost is the second meter: usage credits (§12.1), against the
    organization's balance, served by the Stella engine over HTTP on the org's own model key (§4.5).
 
@@ -12256,7 +12256,7 @@ function asstSheet(){
    '<dt>Change</dt><dd>tools narrowed 52 → 18</dd>'+
    '<dt>Decision</dt><dd>allow · <span class="mono">pol_v41</span> · rule <span class="mono">rg_0041</span></dd>'+
    '<dt>Receipt</dt><dd><a class="mono" href="#/'+ORG.slug+'/audit/receipts" onclick="openDialog(\'receipt\',\'rcp_01K5RTB4Q\')">rcp_01K5RTB4Q</a></dd>'+
-   '<dt>Recorded as</dt><dd>one governed action, in the ledger and not billed — <span class="mono">resolve_approval</span> is the only billable one</dd></dl></div>'+
+   '<dt>Recorded as</dt><dd>one governed action, in the ledger and not billed, and <span class="mono">resolve_approval</span> is the only billable one</dd></dl></div>'+
    '<p style="margin:10px 0 0">Estimated saving from the frames it cites: <b>$188.40</b> USD over 30 days. '+
    'A code-owner review is required in <span class="mono">team</span> mode, so it is yours to merge.</p></div></div>'+
     '<div class="msg op"><div class="who">'+h(me().name)+'</div><div class="bub">Why did run_01K5RG6H1L4OIU9Y cost $5.08?</div></div>'+
@@ -12268,11 +12268,11 @@ function asstSheet(){
    '<div class="asst-f"><div class="box">'+
    '<textarea placeholder="Ask about a run, or change something" aria-label="Message the assistant"></textarea>'+
    '<button class="btn primary sm" onclick="act(\'Turn posted. It opens a run of the in-app agent: recorded with frames and a receipt, metered in usage credits, and never counted among your runs.\')">Send</button></div>'+
-   '<p class="dim" style="font-size:11px;margin:8px 0 0">It acts through the same governed actions these screens use. It holds no authority and no credentials, and its model calls are billed to this organization’s credit balance — <span class="mono">'+h(ASST_MODEL)+'</span> on <span class="mono">'+h(ASST_ENGINE_URL)+'</span>.</p></div>';
+   '<p class="dim" style="font-size:11px;margin:8px 0 0">It acts through the same governed actions these screens use. It holds no authority and no credentials, and its model calls are billed to this organization’s credit balance: <span class="mono">'+h(ASST_MODEL)+'</span> on <span class="mono">'+h(ASST_ENGINE_URL)+'</span>.</p></div>';
 }
 
 /* ============================== Creating things ==============================
-   Four things an operator creates in Oxagen — an agent, a tool, a skill, a context record — and
+   Four things an operator creates in Oxagen (an agent, a tool, a skill, a context record) and
    one shape for all four, because all four are the same kind of object: a file in a repository.
 
      describe it → Oxagen drafts → you read the file → a pull request → it exists on merge
@@ -12293,8 +12293,8 @@ var MCP_CATALOG=FIXTURES.MCP_CATALOG;
 var SKILL_REGISTRY=FIXTURES.SKILL_REGISTRY;
 
 /* ---- a code editor that is not the agent definition ----
-   pAgentSource has one, wired to S.defSrc and to TOML. This is the same editor — same markup, same
-   CSS, same gutter, same find — over any string in S.cedVal and any of six grammars, so the record
+   pAgentSource has one, wired to S.defSrc and to TOML. This is the same editor (same markup, same
+   CSS, same gutter, same find) over any string in S.cedVal and any of six grammars, so the record
    page and the wizards get a real editor rather than a textarea with a monospace font. One is on
    screen at a time, so the ids are fixed. */
 S.cedVal={}; S.cedBase={}; S.ced=null;
@@ -12418,7 +12418,7 @@ function hlCode(src,lang){
 /* A statement and a SKILL.md are prose, and prose that scrolls sideways cannot be read; a TOML
    definition is code, and code that reflows cannot be read either. So the grammar decides: markdown
    wraps, everything else does not. Wrapping means a logical line is more than one visual line, so
-   the gutter cannot be a column of fixed-height rows — cedPaint measures each rendered line and
+   the gutter cannot be a column of fixed-height rows: cedPaint measures each rendered line and
    gives its number the same height. */
 function cedWraps(lang){ return lang==="md"; }
 function cedHtml(key,path,lang,opts){
@@ -12580,7 +12580,7 @@ DLG_EXT.create=function(){
       '<span class="tx"><b>'+h(c.l)+'</b><span class="d">'+h(c.d)+'</span>'+
       '<span class="fp mono">'+c.file+'</span></span></button>';}).join("")+'</div>'+
     '<div class="note" style="margin-top:14px">None of these writes a row. Each one ends on a pull request against '+h(w.main)+
-    ', and the thing exists when somebody merges it — which is also the only place a reviewer can stop it.</div>',
+    ', and the thing exists when somebody merges it, which is also the only place a reviewer can stop it.</div>',
   f:'<span class="grow mono dim" style="font-size:11px">'+h(w.name)+' · '+h(w.main)+'</span><button class="btn" onclick="closeDialog()">Close</button>'};
 };
 
@@ -12595,7 +12595,7 @@ function wzNew(kind){
 }
 /* `seed` is what the operator was looking at when they asked. Without it, a row's own action
    opens a wizard on whatever the candidate list happens to put first, so clicking Add Oxagen on
-   one repository can present another — and the wizard's whole first step is that choice. */
+   one repository can present another, and the wizard's whole first step is that choice. */
 function wzOpen(kind,seed){ S.wz=wzNew(kind); if(seed&&kind==="init")S.wz.repoName=seed;
   S.dlg="wz"; S.dlgArg=null; S.layer=null; render(); }
 function wzSet(k,v){ if(S.wz)S.wz[k]=v; }
@@ -12623,7 +12623,7 @@ function wzBack(){ return '<button class="btn" onclick="wzGo('+(S.wz.step-1)+')"
 function wzNext(label,ok,extra){
   return '<button class="btn primary" id="wzNextBtn" onclick="'+(extra||"")+'wzGo('+(S.wz.step+1)+')"'+(ok?'':' disabled')+'>'+h(label||"Next")+'</button>';
 }
-/* Typing in the description must not re-render — a full render would rebuild the textarea and take
+/* Typing in the description must not re-render: a full render would rebuild the textarea and take
    the caret with it. So the input event writes the draft and moves the one control the description
    gates, and nothing else. */
 function wzDescIn(v){
@@ -12684,7 +12684,7 @@ function wzDesc(placeholder,chips,hint){
    it is free, and it is not one of the tenant's runs. */
 function wzDraftNote(what){
   return '<div class="wz-asst"><span class="ic">'+icon("mirror")+'</span><div><b>'+h(what)+'</b>'+
-   '<p>Drafted by <span class="mono">oxagen.assistant</span> from what you wrote. Its turn is recorded with frames and a receipt, billed to Oxagen, and it is not one of your runs — it will never appear in Fleet or in Spend. Every line below is yours to change before anybody reviews it.</p></div></div>';
+   '<p>Drafted by <span class="mono">oxagen.assistant</span> from what you wrote. Its turn is recorded with frames and a receipt, billed to Oxagen, and it is not one of your runs. It will never appear in Fleet or in Spend. Every line below is yours to change before anybody reviews it.</p></div></div>';
 }
 function wzFiles(rows){
   return '<div class="wz-files">'+rows.map(function(r){
@@ -12705,7 +12705,7 @@ function wzBranch(){
 }
 /* `base` is the repository the pull request targets. It is the workspace's main repo for the
    three wizards that publish workspace-scoped files, and the repository being initialised for
-   the one that does not — a header naming the wrong repository is a header nobody can trust. */
+   the one that does not: a header naming the wrong repository is a header nobody can trust. */
 function wzPrStep(title,lead,files,checks,btn,msg,base){
   var w=ws();
   return {b:'<p style="margin-bottom:14px">'+lead+'</p>'+
@@ -12732,7 +12732,7 @@ DLG_EXT.wz=function(){
 /* ---- connecting a directory ----------------------------------------------------------------
    There is no browse button, because the browser cannot see a filesystem and a path typed into a
    web form proves nothing about what is at it. The directory identifies itself: the operator runs
-   one command in it, and what arrives is the git remote, the branch and the head — facts the
+   one command in it, and what arrives is the git remote, the branch and the head, facts the
    machine read, which is what makes the row worth showing. The code is short-lived and the
    enrollment, not the code, is what the copy is afterwards known by. */
 DLG_EXT.linkdir=function(){
@@ -12743,7 +12743,7 @@ DLG_EXT.linkdir=function(){
      '<pre>oxagen init --org ' + h(ORG.slug) + ' --workspace ' + h(w.slug) + '\n\n<span class="c"># Pairing code: 4QF2-91KD  ·  expires in 9:41</span></pre>'+
      '<div class="hint">The code authorises the pairing once. What identifies the copy afterwards is the machine’s enrollment, so a code that leaks after it is spent links nothing.</div></div>'+
      '<div class="field"><label>What it writes, and what it does not</label>'+
-     wzChecks([["writes",'<span class="mono">.oxagen/workspace.json</span> — org, workspace, path, machine. Gitignored, never reviewed, never merged.'],
+     wzChecks([["writes",'<span class="mono">.oxagen/workspace.json</span>: org, workspace, path, machine. Gitignored, never reviewed, never merged.'],
        ["links",'<span class="mono">.stella/rules</span>, <span class="mono">.stella/proposals</span> and <span class="mono">.stella/agents</span> as symlinks into <span class="mono">.oxagen/</span>, so there is no second copy that could drift.'],
        ["does not write",'anything under <span class="mono">.oxagen/</span> that is committed. If the repository has no <span class="mono">.oxagen/</span> tree at all, it says so and offers the pull request that adds one.'],
        ["does not read",'your working tree. Oxagen reads <span class="mono">.oxagen/</span> and nothing else; what a run needs from the rest of the repository reaches it as frames, at the hooks.']])+'</div>'+
@@ -12788,7 +12788,7 @@ DLG_EXT.workcopy=function(){
       :'<div class="note" style="margin-top:14px;border-left-color:var(--st-approval)">'+
        (sym?'':'<b>Stella will load nothing here.</b> The symlinks under <span class="mono">.stella/</span> are absent, so its loader has no rules directory to read. <span class="mono">oxagen init</span> re-creates them. ')+
        (c.oxagen==="behind"?'This copy is behind the production branch, so the person reading it is reading rules that are no longer in force. It does not change what a run is steered by: steering reaches a run from the merged commit, in the signed bundle.'
-        :c.oxagen==="uncommitted"?'There are edits under <span class="mono">.oxagen/</span> that no pull request carries. They steer nothing — not here, and not in a run — until one does.':'')+'</div>')+
+        :c.oxagen==="uncommitted"?'There are edits under <span class="mono">.oxagen/</span> that no pull request carries. They steer nothing, not here and not in a run, until one does.':'')+'</div>')+
      (c.dirty?'<div class="field" style="margin-top:14px"><label>Uncommitted under .oxagen/</label>'+
        wzFiles([["mod",".oxagen/rules/ctx.mobile.release-train.toml","statement edited locally"],
                 ["add",".oxagen/agents/screenshot-bot.toml","never committed"]])+
@@ -12832,7 +12832,7 @@ function repoUnlink(n){
 /* ---- one repository ---- */
 DLG_EXT.repo=function(){
   /* Through wsRepos(), not REPOS: a workspace's main repo may have no fixture row, and the row
-     the operator just clicked came from wsRepos() — looking it up anywhere else opens an empty
+     the operator just clicked came from wsRepos(): looking it up anywhere else opens an empty
      dialog for the one repository the page is most about. */
   var r=wsRepos().filter(function(x){return x.n===S.dlgArg;})[0]||repoByName(S.dlgArg);
   if(!r) return {t:"Repository",w:false,b:"",f:'<button class="btn" onclick="closeDialog()">Close</button>'};
@@ -12864,14 +12864,14 @@ DLG_EXT.repo=function(){
 
 /* ============================== adding Oxagen to a repository ==============================
    The fifth thing an operator creates, and the one the other four need first: the .oxagen/ tree
-   itself. Same shape as the rest — describe it, Oxagen drafts the files, you read them, a pull
-   request puts them there — with one difference that matters. This wizard is the only one that
+   itself. Same shape as the rest: describe it, Oxagen drafts the files, you read them, a pull
+   request puts them there, with one difference that matters. This wizard is the only one that
    can run against a repository Oxagen has never written to, so it says, before it drafts
    anything, what it is about to be allowed to do and what it will still not be able to do.
 
    It writes governance.toml, which nothing else in the product writes. A workspace's governance
    mode is read off that file on every open and every merge, so the mode a repository starts
-   under has to be chosen by a person, once, here — and changed the same way everything else is,
+   under has to be chosen by a person, once, here, and changed the same way everything else is,
    by a pull request. */
 function wzInitRepo(){
   var z=S.wz, n=z.repoName||wzInitCandidates()[0];
@@ -12899,7 +12899,7 @@ function wzInit(){
   var z=S.wz, r=wzInitRepo(), w=ws(), cands=wzInitCandidates();
   if(z.step===1){
     return {b:'<p style="margin-bottom:14px">Oxagen governs the files in a repository; it does not keep a copy of them. '+
-      'So the first thing it does in a repository is put the directory there — on a branch, in a pull request, which somebody reads.</p>'+
+      'So the first thing it does in a repository is put the directory there, on a branch, in a pull request, which somebody reads.</p>'+
       '<div class="field"><label for="wzRepo">Repository</label>'+
       '<select id="wzRepo" onchange="wzSetR(\'repoName\',this.value)">'+
       cands.map(function(n){var c=repoByName(n);
@@ -12914,13 +12914,13 @@ function wzInit(){
          '<span class="tx"><b>'+h(x[1])+'</b><span class="d">'+h(x[2])+'</span></span></button>';}).join("")+'</div>'+
       '<div class="note" style="margin-top:14px">'+
       ((z.role||"linked")==="main"
-        ?h(w.main)+' is this workspace’s main repo today. Merging this makes '+h(r.n)+' the main repo instead — an organization-owner action with approval, recorded as a security event, and the one change on this page a reviewer cannot undo by closing the pull request.'
+        ?h(w.main)+' is this workspace’s main repo today. Merging this makes '+h(r.n)+' the main repo instead, an organization-owner action with approval, recorded as a security event, and the one change on this page a reviewer cannot undo by closing the pull request.'
         :h(w.main)+' is already this workspace’s main repo, so this one is linked.')+'</div>',
      t:"Add Oxagen to a repository", s:"the directory every other file needs",
      f:wzNext("Next",true)};
   }
   if(z.step===2){
-    return {b:'<p style="margin-bottom:14px">Two things are decided once here, and both are then changed the way everything else is — by a pull request against this repository.</p>'+
+    return {b:'<p style="margin-bottom:14px">Two things are decided once here, and both are then changed the way everything else is, by a pull request against this repository.</p>'+
       '<div class="field"><label for="wzBr">Production branch</label>'+
       '<select id="wzBr" onchange="wzSetR(\'branch\',this.value)">'+
       [r.branch,"main","release","production"].filter(function(v,i,a){return a.indexOf(v)===i;})
@@ -12965,7 +12965,7 @@ function wzInit(){
      f:wzNext("Next",true)};
   }
   var pr=wzPrStep("Add Oxagen to "+r.n,
-    'The pull request puts the directory in <span class="mono">'+h(r.n)+'</span>. Until somebody merges it, this repository is ungoverned and nothing here is in force — which is also the only place a reviewer can stop it.',
+    'The pull request puts the directory in <span class="mono">'+h(r.n)+'</span>. Until somebody merges it, this repository is ungoverned and nothing here is in force, which is also the only place a reviewer can stop it.',
     wzInitFiles(),
     [["schema","<span class=\"mono\">workspace.toml</span> parses, and every repository it declares resolves through this installation."],
      ["layout","No <span class=\"mono\">.oxagen/</span> exists on "+h(z.branch||r.branch)+". Nothing is overwritten, and a repository that already has one is refused rather than merged into."],
@@ -12983,7 +12983,7 @@ function wzInit(){
    a publisher and a credential story, and a tool you write arrives with none of those until you
    write them too. */
 /* On whole words, never on substrings. "admin" contains "dm", and a matcher that does not know
-   that will offer to import Slack for a feature-flag tool — which is worse than offering nothing,
+   that will offer to import Slack for a feature-flag tool, which is worse than offering nothing,
    because the operator has no way to tell a real match from a spelling accident. */
 function mcpHas(text,k){
   return new RegExp("(^|[^a-z0-9])"+k.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"(s|es)?([^a-z0-9]|$)").test(text);
@@ -13009,8 +13009,8 @@ function wzWords(text){
     .filter(function(x){return x&&!WZ_STOP[x];});
 }
 /* A first guess at the name, in the registry's own shape: <namespace>__<verb>_<object>. It is a
-   guess and it is meant to be edited — the manifest is the source of truth and the operator reads
-   it on the next step — but a guess that repeats a word reads as a bug, so the namespace is taken
+   guess and it is meant to be edited (the manifest is the source of truth and the operator reads
+   it on the next step), but a guess that repeats a word reads as a bug, so the namespace is taken
    from a word the name does not already use. */
 function wzToolName(){
   var z=S.wz; if(z.tname) return z.tname;
@@ -13054,7 +13054,7 @@ function wzToolTitle(){
 function wzToolManifest(){
   var n=wzToolName(),hz=wzToolHaz(),cat=wzToolCat(),sum=String(S.wz.desc||"").trim().replace(/\s+/g," ");
   if(sum.length>140)sum=sum.slice(0,137)+"…";
-  return '# '+n+'@1 — the registry entry. Merging this file is what creates the tool version;\n'+
+  return '# '+n+'@1: the registry entry. Merging this file is what creates the tool version;\n'+
    '# it grants nothing. A role has to put it on a belt before any agent can call it.\n'+
    'name    = "'+n+'"\n'+
    'version = 1\n'+
@@ -13097,7 +13097,7 @@ var WZ_LANGS=[["ts","TypeScript"],["py","Python"],["go","Go"],["rust","Rust"]];
 function wzToolCode(lang){
   var n=wzToolName(),hz=wzToolHaz(),fin=hz.fin!=="none";
   var fn=n.replace(/__/g,"_");
-  if(lang==="ts") return '// tools/'+n+'.ts — the handler. Oxagen never runs this; your MCP server does.\n'+
+  if(lang==="ts") return '// tools/'+n+'.ts: the handler. Oxagen never runs this; your MCP server does.\n'+
    '// What Oxagen governs is the call that reaches it, and the receipt that leaves.\n'+
    'import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";\n'+
    'import { z } from "zod";\n\n'+
@@ -13122,7 +13122,7 @@ function wzToolCode(lang){
    '    return { content: [{ type: "text", text: await res.text() }] };\n'+
    '  });\n'+
    '}\n';
-  if(lang==="py") return '# tools/'+fn+'.py — the handler. Oxagen never runs this; your MCP server does.\n'+
+  if(lang==="py") return '# tools/'+fn+'.py: the handler. Oxagen never runs this; your MCP server does.\n'+
    'from mcp.server.fastmcp import FastMCP, Context\n'+
    'from pydantic import BaseModel, Field\n'+
    'import httpx\n\n'+
@@ -13148,7 +13148,7 @@ function wzToolCode(lang){
    '        )\n'+
    '    r.raise_for_status()\n'+
    '    return r.text\n';
-  if(lang==="go") return '// tools/'+fn+'.go — the handler. Oxagen never runs this; your MCP server does.\n'+
+  if(lang==="go") return '// tools/'+fn+'.go: the handler. Oxagen never runs this; your MCP server does.\n'+
    'package tools\n\n'+
    'import (\n'+
    '\t"context"\n'+
@@ -13179,7 +13179,7 @@ function wzToolCode(lang){
    '\t\treturn &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: string(b)}}}, out, nil\n'+
    '\t})\n'+
    '}\n';
-  return '// src/tools/'+fn+'.rs — the handler. Oxagen never runs this; your MCP server does.\n'+
+  return '// src/tools/'+fn+'.rs: the handler. Oxagen never runs this; your MCP server does.\n'+
    'use rmcp::{tool, tool_router, ErrorData, model::CallToolResult, handler::server::wrapper::Parameters};\n'+
    'use schemars::JsonSchema;\n'+
    'use serde::Deserialize;\n\n'+
@@ -13275,10 +13275,10 @@ function wzTool(){
         ?catBadge(cl.category||"read")+hazard(cl.risk||"low",eff)+
          '<span class="b b-q">egress '+h(cl.egress||"internal")+'</span>'+finBadge(cl.financial||"none")+
          '<span class="b b-q mono">'+h(doc.name||"")+'@'+h(String(doc.version||1))+'</span>'
-        :'<span class="b b-denied">the file does not parse — the chips are read from it, so they are empty until it does</span>')+'</div>'+
+        :'<span class="b b-denied">the file does not parse, and the chips are read from it, so they are empty until it does</span>')+'</div>'+
       cedHtml(key,".oxagen/tools/"+wzToolName()+".toml","toml",{small:true,
         bar:'<button class="btn sm" data-ced-dirty onclick="cedRevert(\''+key+'\')" disabled>Revert</button>'})+
-      '<div class="note" style="margin-top:12px">Declare the worst case, not the common case. The gate a call gets is computed from these four fields and nothing else — a tool classified <span class="mono">read</span> that writes is how an audit finds you.</div>',
+      '<div class="note" style="margin-top:12px">Declare the worst case, not the common case. The gate a call gets is computed from these four fields and nothing else. A tool classified <span class="mono">read</span> that writes is how an audit finds you.</div>',
      f:wzNext("Show me the code",!!doc)};
   }
   if(z.step===4){
@@ -13372,7 +13372,7 @@ function wzSkQ(v){ S.wz.q=v; var r=el("wzres"); if(r)r.innerHTML=wzSkResults(); 
 function wzSkPick(id){ S.wz.pick=S.wz.pick===id?null:id; S.ced=null; render(); }
 function wzSkResults(){
   var rows=skrMatch(S.wz.q);
-  if(!rows.length) return '<div class="panel-b dim">Nothing in the registry matches that. Describing it is the other way in — go back a step.</div>';
+  if(!rows.length) return '<div class="panel-b dim">Nothing in the registry matches that. Describing it is the other way in. Go back a step.</div>';
   return '<div class="sx-skl">'+rows.map(function(s){
     var on=S.wz.pick===s.id, held=!s.verified;
     return '<div class="sx-row'+(held?" held":"")+(on?" wz-on":"")+'"><div class="sx-ki">'+icon(s.kind==="constraint"?"cons":"proc")+'</div>'+
@@ -13408,7 +13408,7 @@ function wzSkBundle(name,size){
   z.file={name:name,size:size,ver:ver,from:from,body:body,digest:"sha256:"+sha7(name+body)+sha7(body)+"a4",
     files:["SKILL.md","examples/before.md","examples/after.md","LICENSE"]};
   S.ced=null; render();
-  act("Read "+name+" — "+Math.round(size/1024)+" KB, 4 files. Nothing is written until the pull request merges.");
+  act("Read "+name+": "+Math.round(size/1024)+" KB, 4 files. Nothing is written until the pull request merges.");
 }
 function wzSkill(){
   var z=S.wz,w=ws();
@@ -13429,7 +13429,7 @@ function wzSkill(){
      b:'<div class="field"><label for="wzq">What should it know how to do?</label>'+
        '<input id="wzq" value="'+h(z.q)+'" placeholder="cutting a release, refunding a charge, a safe migration" oninput="wzSkQ(this.value)" aria-label="Search the skill registry"></div>'+
        '<div id="wzres">'+wzSkResults()+'</div>'+
-       '<div class="note" style="margin-top:12px">Pinning takes the version and the digest, not "latest". A publisher shipping a new version is a digest diff somebody has to approve — which is exactly what <span class="mono">market = "hold"</span> means in this workspace.</div>',
+       '<div class="note" style="margin-top:12px">Pinning takes the version and the digest, not "latest". A publisher shipping a new version is a digest diff somebody has to approve, which is exactly what <span class="mono">market = "hold"</span> means in this workspace.</div>',
      f:wzNext("Read the file",!!z.pick)};
   }
   if(z.step===2&&z.path==="upload"){
@@ -13437,7 +13437,7 @@ function wzSkill(){
     return {t:"Upload a bundle", s:"A bundle is read, parsed and hashed here. Nothing is stored until it merges.",
      b:'<div class="field"><label>Replaces</label>'+
        '<select aria-label="Replaces" onchange="S.wz.replaces=this.value||null;S.wz.file=null;S.ced=null;render()">'+
-       '<option value="">nothing — this is a new skill</option>'+
+       '<option value="">nothing: this is a new skill</option>'+
        SKILLS.map(function(s){return '<option value="'+h(s.id)+'"'+(z.replaces===s.id?' selected':'')+'>'+h(s.id)+' @'+h(s.ver)+'</option>';}).join("")+
        '</select><div class="hint">Replacing takes the version out of the bundle and bumps the pinned one to it. The old version stays readable: every run that loaded it named its digest.</div></div>'+
        '<div class="field"><label>Bundle</label>'+
@@ -13458,7 +13458,7 @@ function wzSkill(){
      b:wzDesc("How we cut release notes: group merged PRs by surface, read the changelog once, open a PR, and never publish the release.",
        ["How we cut release notes","How to roll a bad release back","How to run a safe Postgres migration","How to triage a flaky test"],
        "A skill tells an agent what to <i>do</i>. That is why the whole feature ships off, and why this ends in a pull request rather than a save.")+
-      '<div class="note">Do not write authority into it. “You may merge” in a skill file grants nothing — the toolbelt decides, and a skill that implies otherwise is a skill that will be wrong in a run somebody has to read.</div>',
+      '<div class="note">Do not write authority into it. “You may merge” in a skill file grants nothing. The toolbelt decides, and a skill that implies otherwise is a skill that will be wrong in a run somebody has to read.</div>',
      f:wzNext("Draft the file",okd)};
   }
   if(z.step===3){
@@ -13482,13 +13482,13 @@ function wzSkill(){
   if(z.path==="upload"&&z.file)z.file.files.slice(1).forEach(function(x){files.push(["add",".oxagen/skills/"+slug+"/"+x,"from the bundle"]);});
   if(z.path==="registry")files.push(["mod",".oxagen/skills.toml","pins "+z.pick+"@"+(skrById(z.pick)||{}).ver]);
   var pr2=wzPrStep("Open the pull request",
-    rep?("Merging this bumps <span class=\"mono\">"+h(slug)+"</span> from "+h(z.file.from)+" to "+h(z.file.ver)+" and repins every agent that resolves it — at the next run each one starts, never one already in flight.")
+    rep?("Merging this bumps <span class=\"mono\">"+h(slug)+"</span> from "+h(z.file.from)+" to "+h(z.file.ver)+" and repins every agent that resolves it. At the next run each one starts, never one already in flight.")
       :("Merging this makes <span class=\"mono\">"+h(slug)+"</span> resolvable in "+h(w.name)+". The digest is taken at merge."),
     files,
     [["Frontmatter","<span class=\"mono\">name</span>, <span class=\"mono\">version</span> and <span class=\"mono\">scope</span> are present and the name matches the directory"],
      ["Version","semver, and strictly greater than the version it replaces"],
      ["Digest","recomputed over the canonical bytes at merge; it is what a run records when it loads this"],
-     ["Grants","the file names no authority it does not have — a skill cannot raise a tier or add a tool"],
+     ["Grants","the file names no authority it does not have: a skill cannot raise a tier or add a tool"],
      ["Secret and PII scan","the body and every example are scanned · a literal credential fails the check"],
      ["Load cost",wzSkTokens().toLocaleString()+" tokens, inside this workspace's "+SK_CFG.search.budget.toLocaleString()+"-token search budget"]],
     "Open the pull request",
@@ -13543,7 +13543,7 @@ function wzAgentToml(){
    '[instructions]\n'+
    'body = """\n'+(d||"What this agent is for.")+'\n\n'+
    'Work inside the toolbelt you were given. When a step needs authority you do\n'+
-   'not hold, stop and say which one — do not route around it.\n"""\n\n'+
+   'not hold, stop and say which one. Do not route around it.\n"""\n\n'+
    '[harness.'+z.harness+']\n'+
    'color = "gold"\n';
 }
@@ -13584,7 +13584,7 @@ function wzAgent(){
   if(z.step===3){
     var key="wz:agent:"+wzAgentSlug(), src=cedSeed(key,wzAgentToml());
     var parsed=(function(){try{return {d:tomlParse(src),e:null};}catch(e){return {d:null,e:e};}})();
-    return {t:"The definition", s:".oxagen/agents/"+wzAgentSlug()+".toml — the file every field on the agent page is a view of.",
+    return {t:"The definition", s:".oxagen/agents/"+wzAgentSlug()+".toml: the file every field on the agent page is a view of.",
      b:wzDraftNote("A definition, drafted from what you wrote.")+
       '<div class="wz-derived">'+(parsed.d
         ?'<span class="b b-q mono">'+h(parsed.d.slug||"")+'</span><span class="b b-q">'+h(parsed.d.model_tier||"")+'</span>'+
@@ -13593,7 +13593,7 @@ function wzAgent(){
         :'<span class="b b-denied">'+h(String(parsed.e&&parsed.e.message||"the file does not parse"))+'</span>')+'</div>'+
       cedHtml(key,".oxagen/agents/"+wzAgentSlug()+".toml","toml",{small:true,
         bar:'<button class="btn sm" data-ced-dirty onclick="cedRevert(\''+key+'\')" disabled>Revert</button>'})+
-      '<div class="note" style="margin-top:12px"><span class="mono">tools</span> is a request, not a grant. What the agent can actually reach is this list intersected with the roles it holds and with your own grants — never wider than either.</div>',
+      '<div class="note" style="margin-top:12px"><span class="mono">tools</span> is a request, not a grant. What the agent can actually reach is this list intersected with the roles it holds and with your own grants, never wider than either.</div>',
      f:wzNext("Pick the belt",!!parsed.d)};
   }
   if(z.step===4){
@@ -13610,7 +13610,7 @@ function wzAgent(){
      b:rows+
       '<div class="note" style="margin-top:10px">'+(picked.length?
         (parks.length?'<b>'+parks.length+' of these park for a person.</b> '+parks.map(function(x){return '<span class="mono">'+h(x)+'</span>';}).join(", ")+
-          ' are irreversible or high risk, so a call to one stops at the gateway and waits for an approver — every time, until somebody writes an auto-approval rule for it.'
+          ' are irreversible or high risk, so a call to one stops at the gateway and waits for an approver, every time, until somebody writes an auto-approval rule for it.'
          :'<b>Nothing on this belt parks.</b> Every tool picked is a read or a reversible write, so runs finish without waiting on a person.')
         :'Nothing picked. The definition falls back to <span class="mono">search_graph</span> and <span class="mono">recall_context</span>, which is a belt that can read the graph and nothing else.')+'</div>',
      f:wzNext("Open the pull request",true,"wzAgentSync();")};
@@ -13641,7 +13641,7 @@ var KIND_USE={
    never:"It cannot grant authority, and it cannot make a denied call allowed.",
    deliver:"Compiled into the steering block of the policy bundle. <span class=\"mono\">must</span> and <span class=\"mono\">should</span> sit in the stable prefix every turn; <span class=\"mono\">may</span> and <span class=\"mono\">info</span> are selected by relevance."},
  constraint:{use:"A boundary with two values and no middle: require this, or forbid that.",
-   never:"It can narrow what is allowed. It can never widen it — a <span class=\"mono\">require</span> does not create the permission it requires.",
+   never:"It can narrow what is allowed. It can never widen it. A <span class=\"mono\">require</span> does not create the permission it requires.",
    deliver:"Compiled into the stable prefix at whatever force it carries, and asserted by the checks against every other published record on the same subject."},
  procedure:{use:"Steps, in order, where the order is the point.",
    never:"A step is not an authority. Naming a governed action in step 4 does not put it on a belt.",
@@ -13650,7 +13650,7 @@ var KIND_USE={
    never:"It steers nothing by itself. A fact that needs to change behaviour is a rule that cites it.",
    deliver:"Delivered as a <span class=\"mono\">fact</span> context frame with provenance to this record and its commit, <span class=\"mono\">valid_from</span> set to the merge time."},
  memory:{use:"Something that happened, that explains what an agent is about to see.",
-   never:"It never forbids anything, and it is never evidence on its own — it is why a retry is not a regression, not proof that it was not.",
+   never:"It never forbids anything, and it is never evidence on its own. It is why a retry is not a regression, not proof that it was not.",
    deliver:"Delivered as a <span class=\"mono\">memory</span> context frame, selected by relevance, never pinned into the prefix."},
  preference:{use:"A soft leaning, usually unfalsifiable, that you would rather have than not.",
    never:"It never blocks a call, and a run that ignored it is not a failing run.",
@@ -13674,7 +13674,7 @@ function wzRecPreview(){
   var z=S.wz;
   return recordCard({kind:z.rkind||"rule",force:z.force,ce:wzRecCe()?z.ce:null,scope:z.scope,
     status:"published",st:cedText("wz:record")||wzRecStatement(),id:wzRecLineage()},
-    {right:'<span class="b b-approval"><span class="d"></span>not published — this is the preview</span>'});
+    {right:'<span class="b b-approval"><span class="d"></span>not published: this is the preview</span>'});
 }
 function wzRecord(){
   var z=S.wz,w=ws();
@@ -13686,7 +13686,7 @@ function wzRecord(){
         "The release manager opens the release pull request; a person merges it",
         "Cut a release in this order: freeze, dry-run migrations, tag, publish",
         "The checkout e2e suite flaked on Safari through August"],
-       "Say the thing itself, not the reason for it. The reason belongs in the rationale on the pull request, where a reviewer reads it once — not in the bundle, where every agent pays for it on every turn.")+
+       "Say the thing itself, not the reason for it. The reason belongs in the rationale on the pull request, where a reviewer reads it once, not in the bundle, where every agent pays for it on every turn.")+
       '<div class="note">A record steers. It never grants: there is no sentence you can write here that makes a denied call allowed.</div>',
      f:wzNext("Pick a kind",ok)};
   }
@@ -13733,18 +13733,18 @@ function wzRecord(){
        ["Schema","<span class=\"mono\">context-record/v0.1</span> valid \u00b7 1 file, 1 record, 1 lineage"],
        ["Lineage uniqueness",(function(){var id=wzRecLineage();
          return RECORDS.some(function(r){return r.status==="published"&&r.id===id;})
-          ?'<span style="color:var(--st-failed)"><b>'+h(id)+' is already published.</b></span> This check will fail and nothing will merge \u2014 amend the published record instead of opening a second under its id.'
+          ?'<span style="color:var(--st-failed)"><b>'+h(id)+' is already published.</b></span> This check will fail and nothing will merge. Amend the published record instead of opening a second under its id.'
           :"no published record holds <span class=\"mono\">"+h(id)+"</span>; this pull request would be its only holder";})()],
        ["record_hash recomputation","recomputed over the canonical bytes and compared to the file"],
        ["Secret and PII scan","the statement, the rationale and the evidence are scanned \u00b7 a name or a key in any of them fails"],
        ["Conflict against active records",others+" published records checked \u00b7 a <span class=\"mono\">forbid</span> that contradicts an active <span class=\"mono\">require</span> on the same subject fails"],
        ["constraint_effect \u2208 {require, forbid}",wzRecCe()?("<span class=\"mono\">"+h(z.ce)+"</span> \u00b7 grants nothing"):"not a constraining kind \u00b7 the field is absent, which is also a pass"]
      ])+
-      '<div class="note" style="margin-top:14px">The fifth one is the check that earns the others. Two people can each write a sensible record, six weeks apart, that together say a call must happen and must not — and the only place that is catchable is here, before either reaches a run.</div>',
+      '<div class="note" style="margin-top:14px">The fifth one is the check that earns the others. Two people can each write a sensible record, six weeks apart, that together say a call must happen and must not, and the only place that is catchable is here, before either reaches a run.</div>',
      f:wzNext("Open the pull request",true)};
   }
   var pr4=wzPrStep("Open the pull request",
-    "Merge is the publication. Nothing steers until then, and the record is in force from the merge commit \u2014 not from when you wrote it.",
+    "Merge is the publication. Nothing steers until then, and the record is in force from the merge commit, not from when you wrote it.",
     [["add",".oxagen/rules/"+wzRecLineage()+".toml","the record"]],
     [["Schema","<span class=\"mono\">context-record/v0.1</span>"],["Lineage",h(wzRecLineage())+" is free"],
      ["Hash","recomputed at merge"],["Secrets","statement, rationale and evidence"],
@@ -13832,14 +13832,14 @@ function crecPanel(rec){
      '<p class="eyebrow q" style="margin:0 0 6px">When it happened</p>'+
      '<dl class="kv"><dt>Recorded</dt><dd>'+h(rec.pub||"\u2014")+'</dd>'+
      '<dt>Explains</dt><dd>what an agent is about to see, so it does not read a known flake as a new regression</dd>'+
-     '<dt>Selection</dt><dd>by relevance, never pinned \u2014 '+cited+' of '+rendered+' runs that carried it actually used it</dd>'+
+     '<dt>Selection</dt><dd>by relevance, never pinned: '+cited+' of '+rendered+' runs that carried it actually used it</dd>'+
      '<dt>Decay</dt><dd>none automatic. A memory that stops being true is archived by a pull request, like everything else.</dd></dl>'+
      never+foot;
   }
   if(k==="preference"){
     return head+deliver+
      '<p class="eyebrow q" style="margin:0 0 6px">Soft, and recorded as soft</p>'+
-     '<div class="note">Nothing here blocks a call. "Violated" on a preference reads as <b>not followed</b>, and a run that did not follow it is not a failing run \u2014 which is why the counter below is grey and not red.</div>'+
+     '<div class="note">Nothing here blocks a call. "Violated" on a preference reads as <b>not followed</b>, and a run that did not follow it is not a failing run, which is why the counter below is grey and not red.</div>'+
      /* cited is not followed, and rendered minus cited is not "did not follow": a run can follow a
         preference without citing it. So the meters keep the record's own three words. */
      '<div style="margin-top:14px">'+crecMeter("Runs it was rendered into",rendered,rendered)+
@@ -13849,7 +13849,7 @@ function crecPanel(rec){
   }
   return head+deliver+
    '<p class="eyebrow q" style="margin:0 0 6px">Where it sits</p>'+
-   '<dl class="kv"><dt>Force</dt><dd><span class="mono">'+h(rec.force||"should")+'</span> \u2014 '+
+   '<dl class="kv"><dt>Force</dt><dd><span class="mono">'+h(rec.force||"should")+'</span>: '+
      (rec.force==="must"||rec.force==="should"?"the stable prefix, every turn in scope":"selected by relevance")+'</dd>'+
    (rec.ce?'<dt>Effect</dt><dd><span class="b b-'+(rec.ce==="forbid"?"denied":"approval")+'">'+h(rec.ce)+'</span></dd>':'')+
    '<dt>Bundle</dt><dd>'+(row?'<span class="mono">v'+stgBundle().v+'</span> \u00b7 '+row.tok+' of '+stgBundle().tok.toLocaleString()+' tokens':'not in the compiled bundle')+'</dd>'+
@@ -13866,7 +13866,7 @@ function crecSave(rec){
     lead:"A published record is changed the way it was published: a branch, a pull request, the same six checks, and a merge. Nothing here edits what is in force.",
     branch:"context/"+rec.id+".amend",
     checks:[["Schema","<span class=\"mono\">context-record/v0.1</span> still valid after the edit"],
-      ["Lineage","<span class=\"mono\">"+h(rec.id)+"</span> keeps its lineage \u2014 an amended record is the same record, not a new one"],
+      ["Lineage","<span class=\"mono\">"+h(rec.id)+"</span> keeps its lineage: an amended record is the same record, not a new one"],
       ["record_hash recomputation","recomputed over the new bytes \u00b7 the old hash stays on every run that carried it"],
       ["Secret and PII scan","the new statement is scanned"],
       ["Conflict against active records","re-run in full, because the words changed"],
@@ -13963,7 +13963,7 @@ function pRecord(r){
     '<div>'+
      cedHtml(key,".oxagen/rules/"+rec.id+".toml \u00b7 statement","md",
       {bar:'<span class="b b-q">'+(crecBundleRow(rec)?crecBundleRow(rec).tok+' tok in the bundle':'not compiled')+'</span>'})+
-     '<div class="note" style="margin-top:12px">This is the statement and nothing else. The lineage, the force, the scope and the effect are the rest of the file, and each one is changed the same way \u2014 a pull request against '+h(w.main)+'.</div>'+
+     '<div class="note" style="margin-top:12px">This is the statement and nothing else. The lineage, the force, the scope and the effect are the rest of the file, and each one is changed the same way, a pull request against '+h(w.main)+'.</div>'+
      '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Lineage</h3>'+
       '<span class="sp mono dim" style="font-size:11px">the graph remembers everything; git decides what is in force</span></div>'+
       '<div class="panel-b"><dl class="kv">'+
@@ -14335,7 +14335,7 @@ if(el("chrome")){
   el("cPhone").addEventListener("click",function(){S.phone=!S.phone;render();});
   el("cTheme").addEventListener("click",toggleTheme);
   el("cIndex").addEventListener("click",function(){openDialog("cmd");});
-  el("cReset").addEventListener("click",function(){seedApprovals();SKS.answered=null;SKS.picked=null;S.dlg=null;S.dlgArg=null;render();toast("Approvals reset — every parked call is pending again with a fresh clock, and the interjection is waiting again.","gold");});
+  el("cReset").addEventListener("click",function(){seedApprovals();SKS.answered=null;SKS.picked=null;S.dlg=null;S.dlgArg=null;render();toast("Approvals reset. Every parked call is pending again with a fresh clock, and the interjection is waiting again.","gold");});
 }
 /* a resize across the phone breakpoint re-lays the shell; BOOT.mobile pins it either way */
 (function(){var t=null;window.addEventListener("resize",function(){if(BOOT.mobile!=null)return;clearTimeout(t);t=setTimeout(function(){var m=mobileMedia();if(m!==S.mobile){S.mobile=m;S.side=false;render();}},120);});})();
@@ -14729,7 +14729,7 @@ document.addEventListener("click",function(e){
       amount:amt!=null?mc(amt):null,currency:amt!=null?"USD":null,counterparty:fin?(w==="support"?"customer:cus_"+ulid(6):"vendor:aws"):(tool.indexOf("github")===0?"a-intel/platform":tool.split("__")[0]),
       rule:fin?"mandate "+(w==="support"?"mnd_9C4LZ7":"mnd_3R8WQ1")+" · approval.above_micros":"role_grant rg_0"+ri(100,140)+" · effect = require_approval on side_effect:irreversible",
       mandate:fin?(w==="support"?"mnd_9C4LZ7":"mnd_3R8WQ1"):null,policy:"pol_v41",digest:"sha256:"+hex(16),waited:ri(0,8)+"m "+ri(0,59)+"s",timeout:"10m",tainted:rnd()<0.15,tier:"harness",parkedAt:r.started.slice(-8)+"Z",
-      approvers:fin?"role:org.billing — Dana Okafor, Priya Natarajan":"role:workspace.owner — "+PEOPLE[WSX[w].owner].name+", Priya Natarajan",
+      approvers:fin?"role:org.billing (Dana Okafor, Priya Natarajan)":"role:workspace.owner ("+PEOPLE[WSX[w].owner].name+", Priya Natarajan)",
       rules:[{id:fin?"mandate.approval.always_for":"role_grant.effect",v:"approve",text:fin?"The mandate requires approval for every call whose financial effect is "+(w==="support"?"moves_funds":"commits_spend")+".":"The grant that admits "+tool+" requires approval for irreversible side effects."},
              {id:"policy.taint",v:"allow",text:"No argument of this call was copied from a tool output; the call is untainted."},
              {id:"fin.no_self_approval",v:"constrain",text:PEOPLE[r.op].name+" is the operator of this run and cannot resolve its own approval."}]});
@@ -14751,7 +14751,7 @@ document.addEventListener("click",function(e){
       who:[["Operator",PEOPLE[a.operator].name+" · usr_01K"+ulid(5)+" · "+PEOPLE[a.operator].role.split(" · ")[0]],["Agent",a.key+" · prn_01K"+ulid(4),1],["Run · turn · step",r.id+" · "+ri(1,r.turn)+" · "+ri(1,r.steps),1],["Task",r.task+" · "+r.taskTitle]],
       what:[["Tool version",t.n+"@"+t.v,1],["Schema digest","sha256:"+hex(16),1],["Input digest","sha256:"+hex(16),1]].concat(finT?[["Amount ($.amount)",Math.round(amt*1e6)+" micro-USD → $"+mc(amt)+" USD"],["Counterparty",t.fin==="moves_funds"?"customer:cus_"+ulid(6):"vendor:aws",1]]:[]).concat([["Input","retained in full · content_exact · "+ri(1,6)+" fields"]]),
       authority:[["Decision",dec==="deny"?"denied · rule rg_0"+ri(80,140):dec==="approve"?"approved by "+PEOPLE[WSX[r.ws].owner].name+" · apr_01K5R"+ulid(4):"allowed · rule rg_0"+ri(80,140)+" · "+ri(3,14)+" ms"],["Policy","pol_v41",1],["Belt",a.key+" · "+a.belt+" tool versions · "+a.beltMode],["Taint",rnd()<0.9?"untainted":"tainted · raised to approval"]],
-      credential:dec==="deny"?[["Grant","none — the call never dispatched"]]:[["Grant","cg_01K5R"+ulid(4)+" · "+t.cred,1],["TTL","5 minutes · single use"],["Scope",t.s+" · "+(t.eg==="internal"?"internal":"third party")]],
+      credential:dec==="deny"?[["Grant","none: the call never dispatched"]]:[["Grant","cg_01K5R"+ulid(4)+" · "+t.cred,1],["TTL","5 minutes · single use"],["Scope",t.s+" · "+(t.eg==="internal"?"internal":"third party")]],
       effectRows:dec==="deny"?[["External effect","none"]]:[["External effect",eff,1],["Dispatched",ds+" "+tm+"Z"],["Latency",ri(80,2400)+" ms"]],
       integrity:[["Frame",r.id+" · seq "+ri(2,r.frames),1],["Frame hash","sha256:"+hex(16),1],["Signed by",ORG.attester,1],["Segment",(r.status==="compacted"?"archived · seg_01K"+ulid(6):"hot · not yet archived")]]});
   }
@@ -14855,7 +14855,7 @@ document.addEventListener("click",function(e){
   madeAgents.forEach(function(a){
     a.incidents=INCIDENTS.filter(function(i){return TAMPER[i.kind]&&String(i.scope).indexOf(a.key)===0;}).length;
   });
-  var EXP_WHAT=["Receipt export — {m}, financial class (CSV + JSON)","Evidence bundle — {ws}, {m}","Audit events — {m} (JSON)","Evidence bundle — all runs of {agent}","Spend attribution — {m} (CSV)","Receipt export — {ws}, {m}"];
+  var EXP_WHAT=["Receipt export: {m}, financial class (CSV + JSON)","Evidence bundle: {ws}, {m}","Audit events: {m} (JSON)","Evidence bundle: all runs of {agent}","Spend attribution: {m} (CSV)","Receipt export: {ws}, {m}"];
   for(var ei=0;ei<9;ei++){
     var r=pick(genRuns), m=pick(["July 2026","August 2026","June 2026","Q2 2026"]), what=pick(EXP_WHAT).replace("{m}",m).replace("{ws}",r.ws).replace("{agent}",r.agent), d=ri(1,70);
     EXPORTS.push({id:"exp_01K"+ulid(6),what:what,range:m.indexOf("Q2")===0?"2026-04-01 → 2026-06-30":m.indexOf("June")===0?"2026-06-01 → 2026-06-30":m.indexOf("July")===0?"2026-07-01 → 2026-07-31":"2026-08-01 → 2026-08-31",
@@ -14863,7 +14863,7 @@ document.addEventListener("click",function(e){
       size:/bundle/.test(what)?(rf(0.4,6.2)).toFixed(1)+" GB":ri(8,410)+" MB",at:stamp(d,daySec(d)),by:pick(["Sofia Ruiz","Dana Okafor","Priya Natarajan",pick(humans)]),st:rnd()<0.9?"ready":"expired",sig:"ed25519:"+ulid(6)+"…"+hex(4),keys:"kek_aintel_2026Q"+ri(2,3)});
   }
   var KEYN=[["Data platform exports","svc_data_export",["cost.read","run.read","export.create"]],["Grafana read-only","svc_grafana",["run.read","frame.read"]],["Support console","svc_support_console",["run.read","receipt.read"]],["Security SIEM feed","svc_siem",["audit.read","receipt.read"]],
-    ["Terraform · staging","svc_terraform_stg",["workspace.write","agent.write"]],["Release pipeline","svc_release",["run.read","export.create"]],["Growth CRM sync","svc_crm_sync",["run.read"]],["Mobile CI","svc_mobile_ci",["run.read"]],["Auditor read-only — Halden LLP","svc_auditor_hll",["audit.read","receipt.read","export.read"]],["Backfill runner","svc_backfill",["run.read","cost.read"]]];
+    ["Terraform · staging","svc_terraform_stg",["workspace.write","agent.write"]],["Release pipeline","svc_release",["run.read","export.create"]],["Growth CRM sync","svc_crm_sync",["run.read"]],["Mobile CI","svc_mobile_ci",["run.read"]],["Auditor read-only: Halden LLP","svc_auditor_hll",["audit.read","receipt.read","export.read"]],["Backfill runner","svc_backfill",["run.read","cost.read"]]];
   KEYN.forEach(function(k,i){var st=wpick([["ok",70],["expiring",15],["unused",15]]),d=ri(0,20);APIKEYS.push({name:k[0],key:"ox_live_"+hex(4)+"…"+hex(3),principal:k[1],grants:k[2],by:pick(humans),last:st==="unused"?"never used":stamp(d,daySec(d))+"Z",n30:st==="unused"?0:Math.round(skew(3,9000,2.5)),expires:dstr(TODAY+(st==="expiring"?ri(5,25):ri(40,400))*86400000),st:st});});
   for(var vi=0;vi<11;vi++){var f=pick(FIRST).toLowerCase(),s=ri(0,6);INVITES.push({email:f+"."+pick(LAST).toLowerCase().replace(/[^a-z]/g,"")+"@a-intel.example",role:pick(["workspace.member · "+pick(allWs),"org.auditor","workspace.owner · "+pick(allWs)]),by:pick(humans),sent:dstr(TODAY-s*86400000),expires:dstr(TODAY+(7-s)*86400000)});}
   if(parked.length)NOTIFS.push({kind:"approval.requested",tone:"approval",unread:true,t:"15:41",title:"Approval waiting · kubernetes__delete_pod@2",body:"a-intel.infra.k8s-doctor on "+parked[0].id+" wants to delete a crash-looping pod in prod-east. Rule role_grant rg_0121. Expires 15:51."});

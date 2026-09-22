@@ -7,7 +7,7 @@
 //   node tools/check-creation.mjs --shots   # also write a screenshot per step to .claude/shots/
 //
 // Every assertion names a string the surface is supposed to render, never a value read back out of
-// the field the bug would corrupt — a check that reads its expectation out of the thing under test
+// the field the bug would corrupt, a check that reads its expectation out of the thing under test
 // can never fail. The three mutations this was written against, each of which it catches:
 //   * collapse crecPanel's six kind branches into one  -> 12 fails
 //   * put mcpMatch back on substring matching          -> the no-match path never reaches the manifest
@@ -317,12 +317,12 @@ for (const [kind, [id, signature]] of Object.entries(KINDS)) {
   // .eyebrow uppercases, and innerText returns what is rendered, so the comparison is case-blind.
   const panel = r.panel.toLowerCase();
   const has = sig => panel.includes(sig.toLowerCase());
-  ok(has(signature), kind + ': its own treatment \u2014 the panel must contain "' + signature + '"');
+  ok(has(signature), kind + ': its own treatment: the panel must contain "' + signature + '"');
   for (const [other, pair] of Object.entries(KINDS))
     if (other !== kind) ok(!has(pair[1]), kind + ": must not borrow " + other + "'s treatment (" + pair[1] + ")");
   seen.add(signature);
   ok(has("can never do"), kind + ": says what the kind can never do");
-  ok(r.wraps, kind + ": the statement editor wraps — prose that scrolls sideways cannot be read");
+  ok(r.wraps, kind + ": the statement editor wraps, because prose that scrolls sideways cannot be read");
   ok(r.noSideScroll, kind + ": the statement editor has no horizontal scroll");
   ok(r.align && r.align.rows >= 1 && r.align.worst <= 1,
      kind + ": every gutter number sits on its own line, worst offset " + (r.align ? r.align.worst : "no gutter") + "px");

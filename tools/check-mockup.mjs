@@ -211,7 +211,7 @@ if (doScenarios) for (const s of SCENARIOS) {
         ok(!after.dlg, `${tag}: Next closed the act's dialog (still open: ${after.dlg})`);
       }
     }
-    ok(errors.length === before, `${tag}: no page errors${errors.length > before ? " — " + errors.slice(before).join(" | ") : ""}`);
+    ok(errors.length === before, `${tag}: no page errors${errors.length > before ? ": " + errors.slice(before).join(" | ") : ""}`);
   }
   await page.evaluate(h => { location.hash = h; }, `#/${meta.slug}/${meta.ws}/scenarios/${id}/1`);
   await page.waitForTimeout(200);

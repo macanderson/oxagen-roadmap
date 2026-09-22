@@ -192,7 +192,7 @@
   "method": [
    [
     "Measured",
-    "Every model call on a-intel.core.triage carried 9,140 tokens of tool definitions — 52 tools on the belt."
+    "Every model call on a-intel.core.triage carried 9,140 tokens of tool definitions, 52 tools on the belt."
    ],
    [
     "Baseline",
@@ -460,7 +460,7 @@
    ],
    [
     "What they did",
-    "Those tail steps re-read the file just written, re-listed the directory, and asked the model whether it was done — 2.1 model calls per tail step."
+    "Those tail steps re-read the file just written, re-listed the directory, and asked the model whether it was done, 2.1 model calls per tail step."
    ],
    [
     "Nothing kept",

@@ -15,7 +15,7 @@ record must be derived the same way in the fixture, or two pages disagree.
 |---|---|---|
 | `org.json` | `ORG` | the organization: slug, name, plan, data plane, attester key, region, governance mode |
 | `ws.json` | `WS` | the workspaces: slug, name, main repo and branch, linked repos, agent count, owner |
-| `branches.json` | `BRANCHES` | branches on the workspace's primary repo — what the commit dialog offers beside "+ New branch" |
+| `branches.json` | `BRANCHES` | branches on the workspace's primary repo: what the commit dialog offers beside "+ New branch" |
 | `av-sample-photo.json` | `AV_SAMPLE_PHOTO` | a stylised sample portrait so the photo path renders without a network or an upload |
 | `people.json` | `PEOPLE` | the people, keyed by handle: name, role, email, two-factor, avatar |
 | `agents.json` | `AGENTS` | the seed agents with their identity (principal, harness, host, credential, budget) merged in |
@@ -27,7 +27,7 @@ record must be derived the same way in the fixture, or two pages disagree.
 | `transcripts.json` | `TRANSCRIPTS` | the model-visible transcript of the story runs: prompt, prose, tool calls, usage |
 | `rungraph.json` | `RUNGRAPH` | Every item is an edge on the run node. `edge` says who wrote it: observed = the gateway, from a tool call it saw (cites frames); stated = carried by the task or the mandate; inferred = a light-tier model read the frames and proposed it with a confidence and the frames it leaned on. An inferred edge is labelled as such everywhere it appears and never stands in for the record. |
 | `findings.json` | `FINDINGS` | the Spend findings, each a costed problem with the frames that prove it |
-| `evidence.json` | `EVIDENCE` | Evidence behind each Spend finding — keyed by finding id so the FINDINGS seed stays untouched. Every saving is measured minus counterfactual over the cited runs; nothing here is a model's opinion. |
+| `evidence.json` | `EVIDENCE` | Evidence behind each Spend finding, keyed by finding id so the FINDINGS seed stays untouched. Every saving is measured minus counterfactual over the cited runs; nothing here is a model's opinion. |
 | `fix.json` | `FIX` | What Fix opens, by finding kind. A Context PR when the fix is a steering record the agent will read; a help article when the fix is in the customer's own agent code or configuration. |
 | `servers.json` | `SERVERS` | the tool servers in the registry: kind, transport, tools, versions, health, connection |
 | `tools.json` | `TOOLS` | The registry, as W9 drew it: one row per tool version. `proposal` marks an observed output schema awaiting approval; S.approved[n] flips it to observed_approved at runtime. |
@@ -35,7 +35,7 @@ record must be derived the same way in the fixture, or two pages disagree.
 | `mandates.json` | `MANDATES` | the mandates: limits by measure, counterparties, tools, approval rule, validity, ledger position |
 | `policies.json` | `POLICIES` | the policy versions: state, author, rules, tests, what changed |
 | `switches.json` | `SWITCHES` | the kill switches, class and scoped, with their default position |
-| `repos.json` | `REPOS` | the repositories linked to workspaces, with production branch, code-graph state, and whether the repository carries a `.oxagen/` tree (`ox`). A row with `role: "available"` is one the installation can reach that no workspace has bound — the init wizard's target. |
+| `repos.json` | `REPOS` | the repositories linked to workspaces, with production branch, code-graph state, and whether the repository carries a `.oxagen/` tree (`ox`). A row with `role: "available"` is one the installation can reach that no workspace has bound, the init wizard's target. |
 | `workcopies.json` | `WORKCOPIES` | the same `.oxagen/` tree on a machine: the directory, its git remote and head, whether it is in sync with the production branch, whether Stella's symlinks are there, and the steering bundle it last saw |
 | `oxprs.json` | `OXPRS` | every pull request Oxagen has open, across all six kinds of file (`bootstrap`, `record`, `skill`, `agent`, `tool`, `config`), each with who opened it, the files it carries and its checks. The `record` rows are the same lifecycle the Steering page's Context PRs tab shows; this collection is the whole of it. |
 | `records.json` | `RECORDS` | the published context records and their lineage. Seed rows carry the `SteeringItem` fields the hub shows and the assembler reads: `tok` (token cost), `grant` (the enforcement grant: `gate`, `rule`, `outcome`, `on`; absent means the record compiles to text only), `about` (relevance terms), `repo` (on a repository-scoped record), and `hash`. A row the volume generator grows has no `hash` and takes no part in the assembler. |
@@ -49,7 +49,7 @@ record must be derived the same way in the fixture, or two pages disagree.
 | `members.json` | `MEMBERS` | organization membership: person, workspaces, status, two-factor, last seen |
 | `invites.json` | `INVITES` | open invitations |
 | `audit.json` | `AUDIT` | seed control-plane audit events |
-| `notifs.json` | `NOTIFS` | every kind maps to a frame kind or an audit event — nothing invented for a bell. tone is mc's decision vocabulary: approval \| failed \| allowed \| gold \| critical |
+| `notifs.json` | `NOTIFS` | every kind maps to a frame kind or an audit event, and nothing is invented for a bell. tone is mc's decision vocabulary: approval \| failed \| allowed \| gold \| critical |
 | `spend.json` | `SPEND` | the month's spend rollups: totals, by operator, agent, model and tool, wasted spend, budgets. Token rollups are derived in the engine (`agentTok`, `operatorTok`, `wsTok`) |
 | `spend-detail.json` | `SPEND_DETAIL` | Drill-down detail behind every row of By operator, By agent and By tool. Keyed "kind:id". Cross-cuts (agents / operators / tools / models) are [name, spend] pairs that sum to at most the entity's own spend; a name that is not itself a row (e.g. "19 other agents") is not drillable. |
 | `billing.json` | `BILLING` | the plan, this period's lines, meters and invoices |
@@ -63,7 +63,7 @@ record must be derived the same way in the fixture, or two pages disagree.
 | `sk-hist.json` | `SK_HIST` | the config's version history, each a pull request |
 | `sk-created.json` | `SK_CREATED` | when each workspace was created, with skills off |
 
-## `runs[].outputs` — the `<RunOutputs>` spine
+## `runs[].outputs`, the `<RunOutputs>` spine
 
 Decided 2026-09-17 (`design/run-outputs/DECISION.md`, feedback item 7). A run's outputs are a
 list of nodes **in the order the run produced them**, not a bag of strings. The flat `touched`
@@ -74,7 +74,7 @@ items a human would go and open, or what the run was still waiting on. Each node
 |---|---|
 | `kind` | `task` · `read` · `file` · `branch` · `pr` · `release` · `media` · `comment` · `label` · `record` · `check` · `gate` · `halt` · `would` · `seal`. Picks the glyph and how the node renders. |
 | `name` | what it is called; rendered monospace (a path, a ref, a tool name, an id) |
-| `where` | where it landed — the repo, the branch, the ledger, the gateway |
+| `where` | where it landed: the repo, the branch, the ledger, the gateway |
 | `state` | its disposition: `created` `written` `pushed` `posted` `open` `linked` `read` `awaiting` `blocked` `failing` `passed` `withheld`, or `sealed` on a `seal`. Drives the badge and the node's ring colour. |
 | `note` | one line of prose: what the reader needs and nothing more |
 | `at` | wall-clock time, optional |

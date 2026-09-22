@@ -99,7 +99,7 @@
    },
    "res": {
     "ms": 604,
-    "body": "212 lines\n# Changelog\n\n## 4.10.3 — 2026-08-27\n\n### Fixes\n- Worker restart no longer drops the in-flight approval (#452)\n- Ledger export escapes commas in vendor names (#449)\n\n### Breaking\n- none\n\n## 4.10.2 — 2026-08-12\n…"
+    "body": "212 lines\n# Changelog\n\n## 4.10.3 - 2026-08-27\n\n### Fixes\n- Worker restart no longer drops the in-flight approval (#452)\n- Ledger export escapes commas in vendor names (#449)\n\n### Breaking\n- none\n\n## 4.10.2 - 2026-08-12\n…"
    }
   },
   {
@@ -142,11 +142,11 @@
    "title": "write_file",
    "cls": "mutate",
    "arg": "release/4.11.0-notes.md",
-   "raw": "{\"path\":\"release/4.11.0-notes.md\",\"content\":\"# 4.11.0 — 2026-09-11 …\"}",
+   "raw": "{\"path\":\"release/4.11.0-notes.md\",\"content\":\"# 4.11.0 - 2026-09-11 …\"}",
    "diff": {
     "path": "release/4.11.0-notes.md",
     "before": "",
-    "after": "# 4.11.0 — 2026-09-11\n\n27 pull requests merged since 4.10.3 (a-intel/platform only; a-intel/mobile ships separately this cycle).\n\n## Features\n- Run tokens carry a delegation ceiling; a call above it is parked, never denied silently (#478)\n- `oxagen runs export` writes a signed bundle with the verifier script alongside (#480)\n- Context recall reports its budget per provider (#474)\n- Kill switches gained a deny generation, visible in every later decision (#469)\n- Oxagen shows a run's cost basis next to the number (#472)\n\n## Fixes\n- Cache reads were mis-attributed when steering landed mid-conversation (#477)\n- `github__create_release` schema accepted an empty tag (#475)\n- Approval cards no longer expire early when the clock skews (#470)\n- Ledger rollups double-counted a retried model call (#468)\n\n## Breaking\n- `policy.decide` no longer returns allow for an untainted call with no matching rule; the default is approve (#481)\n- `frame.kind` value `tool_call` is renamed `tool.call` in exports (#479)"
+    "after": "# 4.11.0 - 2026-09-11\n\n27 pull requests merged since 4.10.3 (a-intel/platform only; a-intel/mobile ships separately this cycle).\n\n## Features\n- Run tokens carry a delegation ceiling; a call above it is parked, never denied silently (#478)\n- `oxagen runs export` writes a signed bundle with the verifier script alongside (#480)\n- Context recall reports its budget per provider (#474)\n- Kill switches gained a deny generation, visible in every later decision (#469)\n- Oxagen shows a run's cost basis next to the number (#472)\n\n## Fixes\n- Cache reads were mis-attributed when steering landed mid-conversation (#477)\n- `github__create_release` schema accepted an empty tag (#475)\n- Approval cards no longer expire early when the clock skews (#470)\n- Ledger rollups double-counted a retried model call (#468)\n\n## Breaking\n- `policy.decide` no longer returns allow for an untainted call with no matching rule; the default is approve (#481)\n- `frame.kind` value `tool_call` is renamed `tool.call` in exports (#479)"
    },
    "res": {
     "ms": 41,
@@ -163,7 +163,7 @@
    "res": {
     "ms": 2310,
     "err": true,
-    "body": "> a-intel-platform@4.10.3 release:lint\n> node scripts/release-lint.mjs release/4.11.0-notes.md\n\nerror: heading order — Breaking must precede Fixes (line 12)\n  rule: ctx.release.notes-format §2\n  found: Features, Fixes, Breaking\n  want:  Features, Breaking, Fixes\n\n1 error, 0 warnings\n ELIFECYCLE  Command failed with exit code 1."
+    "body": "> a-intel-platform@4.10.3 release:lint\n> node scripts/release-lint.mjs release/4.11.0-notes.md\n\nerror: heading order, Breaking must precede Fixes (line 12)\n  rule: ctx.release.notes-format §2\n  found: Features, Fixes, Breaking\n  want:  Features, Breaking, Fixes\n\n1 error, 0 warnings\n ELIFECYCLE  Command failed with exit code 1."
    }
   },
   {
@@ -197,8 +197,8 @@
    "raw": "{\"path\":\"release/4.11.0-notes.md\",\"old_string\":\"## Fixes\\n…## Breaking\\n…\",\"new_string\":\"## Breaking\\n…## Fixes\\n…\"}",
    "diff": {
     "path": "release/4.11.0-notes.md",
-    "before": "# 4.11.0 — 2026-09-11\n\n27 pull requests merged since 4.10.3 (a-intel/platform only; a-intel/mobile ships separately this cycle).\n\n## Features\n- Run tokens carry a delegation ceiling; a call above it is parked, never denied silently (#478)\n- `oxagen runs export` writes a signed bundle with the verifier script alongside (#480)\n- Context recall reports its budget per provider (#474)\n- Kill switches gained a deny generation, visible in every later decision (#469)\n- Oxagen shows a run's cost basis next to the number (#472)\n\n## Fixes\n- Cache reads were mis-attributed when steering landed mid-conversation (#477)\n- `github__create_release` schema accepted an empty tag (#475)\n- Approval cards no longer expire early when the clock skews (#470)\n- Ledger rollups double-counted a retried model call (#468)\n\n## Breaking\n- `policy.decide` no longer returns allow for an untainted call with no matching rule; the default is approve (#481)\n- `frame.kind` value `tool_call` is renamed `tool.call` in exports (#479)",
-    "after": "# 4.11.0 — 2026-09-11\n\n27 pull requests merged since 4.10.3 (a-intel/platform only; a-intel/mobile ships separately this cycle).\n\n## Features\n- Run tokens carry a delegation ceiling; a call above it is parked, never denied silently (#478)\n- `oxagen runs export` writes a signed bundle with the verifier script alongside (#480)\n- Context recall reports its budget per provider (#474)\n- Kill switches gained a deny generation, visible in every later decision (#469)\n- Oxagen shows a run's cost basis next to the number (#472)\n\n## Breaking\n- `policy.decide` no longer returns allow for an untainted call with no matching rule; the default is approve (#481)\n- `frame.kind` value `tool_call` is renamed `tool.call` in exports (#479)\n\n## Fixes\n- Cache reads were mis-attributed when steering landed mid-conversation (#477)\n- `github__create_release` schema accepted an empty tag (#475)\n- Approval cards no longer expire early when the clock skews (#470)\n- Ledger rollups double-counted a retried model call (#468)"
+    "before": "# 4.11.0 - 2026-09-11\n\n27 pull requests merged since 4.10.3 (a-intel/platform only; a-intel/mobile ships separately this cycle).\n\n## Features\n- Run tokens carry a delegation ceiling; a call above it is parked, never denied silently (#478)\n- `oxagen runs export` writes a signed bundle with the verifier script alongside (#480)\n- Context recall reports its budget per provider (#474)\n- Kill switches gained a deny generation, visible in every later decision (#469)\n- Oxagen shows a run's cost basis next to the number (#472)\n\n## Fixes\n- Cache reads were mis-attributed when steering landed mid-conversation (#477)\n- `github__create_release` schema accepted an empty tag (#475)\n- Approval cards no longer expire early when the clock skews (#470)\n- Ledger rollups double-counted a retried model call (#468)\n\n## Breaking\n- `policy.decide` no longer returns allow for an untainted call with no matching rule; the default is approve (#481)\n- `frame.kind` value `tool_call` is renamed `tool.call` in exports (#479)",
+    "after": "# 4.11.0 - 2026-09-11\n\n27 pull requests merged since 4.10.3 (a-intel/platform only; a-intel/mobile ships separately this cycle).\n\n## Features\n- Run tokens carry a delegation ceiling; a call above it is parked, never denied silently (#478)\n- `oxagen runs export` writes a signed bundle with the verifier script alongside (#480)\n- Context recall reports its budget per provider (#474)\n- Kill switches gained a deny generation, visible in every later decision (#469)\n- Oxagen shows a run's cost basis next to the number (#472)\n\n## Breaking\n- `policy.decide` no longer returns allow for an untainted call with no matching rule; the default is approve (#481)\n- `frame.kind` value `tool_call` is renamed `tool.call` in exports (#479)\n\n## Fixes\n- Cache reads were mis-attributed when steering landed mid-conversation (#477)\n- `github__create_release` schema accepted an empty tag (#475)\n- Approval cards no longer expire early when the clock skews (#470)\n- Ledger rollups double-counted a retried model call (#468)"
    },
    "res": {
     "ms": 38,

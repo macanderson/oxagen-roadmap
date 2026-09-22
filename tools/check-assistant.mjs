@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // The in-app agent (spec §4.4) and the organization's model key (§4.5) in headless Chromium.
-// check-mockup.mjs opens pages and check-creation.mjs opens dialogs; the assistant is neither — it
+// check-mockup.mjs opens pages and check-creation.mjs opens dialogs; the assistant is neither, so it
 // is a permanent host beside #layer that render() reclasses but never rebuilds, which is exactly
 // the property most likely to be broken by someone tidying render().
 //
@@ -8,9 +8,9 @@
 //   node tools/check-assistant.mjs --shots   # also write a screenshot per state to .claude/shots/
 //
 // The load-bearing assertions, and why each is here rather than assumed:
-//   * a half-typed message survives a re-render — the whole reason the host is permanent
-//   * the host is the same DOM node across renders — a rebuilt node cannot run a CSS transition
-//   * the assistant's turn never links into the tenant's run index — its runs are Oxagen's
+//   * a half-typed message survives a re-render, the whole reason the host is permanent
+//   * the host is the same DOM node across renders, and a rebuilt node cannot run a CSS transition
+//   * the assistant's turn never links into the tenant's run index, because its runs are Oxagen's
 //   * with no key the panel refuses by name and charges nothing, rather than degrading quietly
 //   * reconciliation shows two independent numbers, not one derived from the other
 import { mkdirSync } from "node:fs";
@@ -91,7 +91,7 @@ const shot = async (page, name) => { if (shots) await page.screenshot({ path: pa
   const kept = await page.evaluate(() => document.querySelector("#asst textarea").value);
   ok(kept === "half a question about run_01K5", "a half-typed message survives a re-render, got " + JSON.stringify(kept));
   const same = await page.evaluate(() => window.__n === document.getElementById("asst"));
-  ok(same, "the host is the same DOM node after a render — a rebuilt node cannot run the transition");
+  ok(same, "the host is the same DOM node after a render, and a rebuilt node cannot run the transition");
 
   /* its runs are Oxagen's: nothing in the panel links into the tenant's run index by the turn id */
   ok(!h.links.some(x => /runs\/run_01K5RT9X4M2/.test(x)), "the turn id is not a link into the tenant's run index");

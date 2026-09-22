@@ -160,7 +160,7 @@
     "name": "contract test",
     "where": "pull request checks",
     "state": "passed",
-    "note": "fail \u00b7 fail \u00b7 pass \u2014 the contract test on the pull request head",
+    "note": "fail \u00b7 fail \u00b7 pass: the contract test on the pull request head",
     "fr": 58
    },
    {

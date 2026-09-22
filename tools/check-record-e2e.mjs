@@ -8,14 +8,14 @@
 //
 // What it is really guarding, and why each is here rather than assumed:
 //   * the record does NOT exist in Records, in the bundle or on its own page while the PR is open
-//   * merge is blocked until every check reports — the button is disabled, and clicking does nothing
+//   * merge is blocked until every check reports, so the button is disabled, and clicking does nothing
 //   * merge publishes exactly once: Records gains one row, the bundle gains one rule and one version
 //   * the promoter's pull request is untouched by any of it
 //   * closing without merging leaves nothing behind
 //   * a lineage that is already published FAILS its check, and nothing merges (PR #36 review, P1)
 //   * a second operator PR does not erase the first (P2)
 //   * a statement with a quote still produces a file that parses as TOML (P3)
-//   * two OPEN pull requests cannot both publish one lineage — the later one fails, and the
+//   * two OPEN pull requests cannot both publish one lineage, and the later one fails, and the
 //     uniqueness check is re-run at merge, not only when the check first ran (second review, P1)
 //   * every compiled bundle version gets its own digest, so a panel claiming it was re-signed
 //     renders one (second review, P2)
@@ -318,7 +318,7 @@ const clickPg = async (page, re) => await page.evaluate(src => {
   const tricky = 'Always say "ready" before a deploy, and never use a \\ in a branch name.';
   await page.evaluate(d => { wzOpen("record"); S.wz.desc = d; S.wz.rkind = "rule"; wzGo(3); wzGo(5); wzRecOpenPr(); }, tricky);
   await page.waitForTimeout(400);
-  // the file the PR carries must parse with the app's own TOML reader — two independent things:
+  // the file the PR carries must parse with the app's own TOML reader, which is two independent things:
   // what is rendered, and what the parser makes of it.
   const r = await page.evaluate(() => {
     const def = recprCur(), text = recprFileText(def);

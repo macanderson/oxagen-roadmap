@@ -16,8 +16,8 @@ rev1 is measured against.
 The URL contract: `?debug=true`, `?state=`, `?mobile=`, `?theme=` and the `#/a-intel/...`
 routes. `mockups/catalog.mjs` lists every page and scenario.
 
-The file opens as the product. The mockup chrome — the state bar, the scenario rail, the
-scenario nav item, the onboarding demo entry points and Exit demo — appears only under
+The file opens as the product. The mockup chrome (the state bar, the scenario rail, the
+scenario nav item, the onboarding demo entry points and Exit demo) appears only under
 `?debug=true`, so a reviewer's first open shows the design and nothing else. `?product=1` is
 the old spelling of the same default and still works.
 
