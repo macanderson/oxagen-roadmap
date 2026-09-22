@@ -23,25 +23,34 @@ loaded, the gate steps have loading and denied, and the first-run step an error.
 | `<page>.audit-prompt.md` | A prompt to paste into an agent session that audits the built page against `<page>.md`, check by check, and reports PASS/FAIL with evidence. |
 | `audit-prompt.md` | The whole-app prompt: shell, the approvals drawer, mobile shell, auth sequences, cross-cutting rules; it runs every per-page prompt. |
 
-Pages (39): fleet · run · run-interjection · agents · agent · agent-source · mandate · tools ·
-steering · skills · skills-off · skill-source · steering-memory · steering-ontology · steering-policy ·
-steering-proposals · steering-preview · record · repositories · spend · organization ·
+Pages (42): fleet · run · run-interjection · agents · agent · agent-source · mandate · tools ·
+runtimes · steering · steering-records · skills · skills-off · skill-source · steering-memory ·
+steering-ontology · steering-assignments · steering-gates · steering-proposals · steering-compiler ·
+record · repositories · spend · organization ·
 organization-api-keys · organization-roles · billing · audit ·
 register-name · register-wrap · register-run · signup · verify-email · login · two-factor ·
 forgot-password · reset-password · accept-invitation · onboarding-organization · onboarding-wrap ·
 onboarding-run · installer.
 
-What the design assumes: every phase of the plan (0 to 5) has shipped. Steering is the hub with seven
-tabs (Records, Skills, Memory, Ontology, Policy, Proposals, Preview) and one assembler; the tier ladder
+A spec can cover more than one route. `runtimes.md` covers the host list and one host. `tools.md`
+covers all five of its tabs, Toolbelts and Providers among them. `agent.md` covers every tab of the
+agent detail.
+
+What the design assumes: every phase of the plan (0 to 5) has shipped. Steering is the hub with five
+tabs (Library, Assignments, Gates, Proposals, Compiler) and one assembler; the tier ladder
 is complete (`observe`, `harness`, `gateway`, `contained`) and most agents run `gateway` with observed
 metering; token accounting follows spec §12.6; coaching derives from the token record; approvals live
 in a drawer opened from the topbar on every page; the governance mode is a workspace setting on the
 Steering header. Not in the design: the witness runner, proof, the definition of done, agent scores,
 proven spend.
 
-`steering.md` specifies the hub and Records. `skills.md`, `skills-off.md` and `skill-source.md` are
-the Skills tab, which has no nav entry of its own (the old `#/:org/:ws/skills…` routes still resolve).
-The other five tabs have a spec each.
+`steering.md` specifies the hub and the Library tab. Each shelf of the Library has its own spec:
+`steering-records.md`, `steering-memory.md`, `steering-ontology.md`, and the three Skills specs
+`skills.md`, `skills-off.md` and `skill-source.md`. Skills has no nav entry of its own, and the old
+`#/:org/:ws/skills…` routes still resolve. The other four tabs have a spec each:
+`steering-assignments.md`, `steering-gates.md`, `steering-proposals.md`, and `steering-compiler.md`.
+`/steering/policy` lands on Gates and `/steering/preview/<agent>` lands on the Compiler, so every
+link written before the rename still works.
 
 The five creation wizards (agent, tool, skill, context record, and the `.oxagen/` directory itself)
 are dialogs rather than pages, so they have no `<page>.md`; their spec is `docs/creation-spec.md`, and

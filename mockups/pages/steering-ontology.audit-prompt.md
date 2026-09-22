@@ -20,7 +20,7 @@ You are auditing the **Steering · Ontology** tab of Oxagen (`#/a-intel/core-pla
 Work through every check. For each, record PASS, FAIL, or N/A (with why). Cite evidence: a file and line in the build, a screenshot path, or a DOM selector and its text.
 
 1. **Route and shell.** The build serves the route. Steering is lit in the sidebar. There is no Skills nav entry. The breadcrumb ends on Steering. The top bar has the Approvals button left of the avatar with the organization-wide waiting count; it opens the drawer `#apdrawer`, a selected row shows the approval card with Approve and Deny, and Escape closes it. No assistant button in the top bar.
-2. **Hub header, chip, and tabs.** Eyebrow is the workspace name, h1 “Steering”, the one-sentence subtext, the governance chip “Governance: <mode>”. Seven tabs in this order: Records, Skills, Memory, Ontology, Policy, Proposals, Preview, with counts. This tab is selected. Each tab is a URL segment, and reloading the URL lands on the same tab.
+2. **Hub header, chip, and tabs.** Eyebrow is the workspace name, h1 “Steering”, the one-sentence subtext, the governance chip “Governance: <mode>”. Five tabs in this order: Library, Assignments, Gates, Proposals, Compiler, with counts. Library is selected, and the shelf row under it (All, Records, Skills, Memory, Ontology, each with a count and `aria-pressed`) presses Ontology. Each tab is a URL segment, and reloading the URL lands on the same tab and the same shelf.
 3. **One gold action.** Write a context record in the hub header is the one gold action. The chip is not gold.
 4. **Sections and tables.** The build has each item below with the same headings and every column named, in that order.
    - The lead note, verbatim.
@@ -29,13 +29,13 @@ Work through every check. For each, record PASS, FAIL, or N/A (with why). Cite e
 5. **Actions.** Write a context record opens the record wizard. No row on this tab is a control; nothing is edited here.
 6. **Data sources.** For each row of the spec’s data-source table, find the adapter or query in the build that feeds it. ✅ rows are wired to the named store; 🟡 rows are wired for the fields that exist and render `NotBacked` for the rest; ❌ rows render `NotBacked` with the milestone named. A fixture reaching production is a FAIL.
 7. **States.** Force each state and compare copy and controls with the design:
-   - **empty** (`state=empty`): the hub header, chip, and tabs stay; the body is “No ontology notes yet” with its sentences and Write a context record.
+   - **empty** (`state=empty`): the hub header, chip, and five tabs stay; the body is “No ontology notes yet” with its sentences and Write a context record.
    - **loading** (`state=loading`): the shell stays and the body is the skeleton; no data, no zeros, no stale rows.
    - **error** (`state=error`): “Steering could not be loaded”, `503 record_index_unavailable`, Try again, Open an incident, and the trace line.
    - **access denied** (`state=denied`): “You cannot see this workspace’s steering”, naming `steering.read on core-platform`, with Request access and Back to Fleet.
 8. **Trust language.** No copy names an ontology engine or a connector. The index today is the Postgres registry. A note grants nothing. No verdict, proof, or witness vocabulary.
 9. **Plain nouns.** No heading on the built tab carries a comma, a mid-dot, or a not/never contrast; subtext is one sentence.
-10. **Mobile.** At 390 × 844 with a touch pointer: the seven tabs are one scrolling strip and the selected tab is in view; the table renders as labelled cards; the page never scrolls sideways; tap targets are ≥ 44 px; inputs are 16 px; More is the lit thumb-bar slot.
+10. **Mobile.** At 390 × 844 with a touch pointer: the five tabs are one scrolling strip and the selected tab is in view; the shelf row wraps under Library with Ontology pressed; the table renders as labelled cards; the page never scrolls sideways; tap targets are ≥ 44 px; inputs are 16 px; More is the lit thumb-bar slot.
 11. **Accessibility.** Tabs use `role=tablist/tab` with `aria-selected`; grouped toggles use `aria-pressed`; state is never colour alone; focus is visible; the tab is operable by keyboard end to end.
 12. **Permissions.** Read requires `steering.read`, checked server-side. `context.propose` is gated server-side.
 13. **Nothing extra.** List anything on the built tab that is not in the spec. Each is a finding.

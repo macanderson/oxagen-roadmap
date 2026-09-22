@@ -26,13 +26,13 @@ Work through every check. For each, record PASS, FAIL, or N/A (with why). Cite e
 5. **The kind panels, the check this page exists for.** Open all six records above and capture the kind panel from each. Assert:
    - Six records produce **six different panels**. Compare the first 90 characters of each panel’s text; two that match is a FAIL.
    - Every panel opens with How it reaches a run.
-   - `constraint` and only `constraint` renders the require/forbid boundary block, in the state hue for its effect, and the block names the gate on Steering · Policy only when the record carries a grant.
+   - `constraint` and only `constraint` renders the require/forbid boundary block, in the state hue for its effect, and the block names the gate on Steering · Gates only when the record carries a grant.
    - `procedure` renders the statement as an ordered list of at least three steps, markers in the kind hue.
    - `fact` names what would falsify it and its `valid_from`.
    - `memory` says nothing decays automatically and that it is never pinned.
    - `preference` says “violated” reads as *not followed* and does not colour that counter red.
    - Every one of the six ends with a **What it can never do.** line.
-6. **Token figures and counters reconcile.** The editor bar's bundle tokens equal the record's card on the Records tab and its row in the bundle. The three meters equal the Effect line in the Lineage panel: rendered is the total, cited and the third meter are shares of it. No counter is labelled score, verdict, proven, or proof.
+6. **Token figures and counters reconcile.** The editor bar's bundle tokens equal the record's card on the Records shelf and its row in the bundle. The three meters equal the Effect line in the Lineage panel: rendered is the total, cited and the third meter are shares of it. No counter is labelled score, verdict, proven, or proof.
 7. **Lineage panel and related records.** Lineage, file path, publishing commit and date, effect line, schema. Up to three other records of the same kind, each with an Open button that routes to it; or the honest line when there are none.
 8. **Actions and dialogs.** Discard is disabled until the draft differs and returns it to what is in force. Propose a change opens `srcpr` with a real line diff and a `+n / −n` count, its primary disabled when nothing changed, and the six checks named as the spec lists them. Opening the pull request records the pending branch and shows it in the header, and **the record in force is unchanged**: verify the statement the bundle would compile is still the merged one. A control that silently does nothing is a FAIL.
 9. **Data sources.** For each row of the spec’s data-source table, find the adapter or query in the build. ✅ rows wired to the named store; 🟡 rows wired for the fields that exist and rendering `NotBacked` (never a zero) for the rest; ❌ rows rendering `NotBacked` with the milestone named. A fixture reaching production is a FAIL.

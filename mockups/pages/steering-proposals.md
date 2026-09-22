@@ -18,7 +18,7 @@ The way in: a record becomes a proposal, a proposal becomes a pull request, a me
 
 **Hub header.** Eyebrow: the workspace name, h1 “Steering”, subtext “Everything that can steer an agent in this workspace competes in one assembler.” Actions: the governance chip **Governance: team** and **Write a context record** (gold; opens the record wizard). The header gives up the gold when the view below holds the one primary action (Open a Context PR on a proposal that has none, Merge pull request on a pull request that passed). The chip and its `govmode` dialog are specified in `steering.md`.
 
-**The seven tabs, in this order:** Records (59) · Skills (6) · Memory (6) · Ontology (4) · Policy (6) · Proposals (15) · Preview. The Proposals count is candidates plus open pull requests. Each tab is a URL segment, `#/:org/:ws/steering/<tab>`. Proposals is selected.
+**The five tabs, in this order:** Library (75) · Assignments (4) · Gates (6) · Proposals (15) · Compiler. The Proposals count is candidates plus open pull requests. Each tab is a URL segment, `#/:org/:ws/steering/<tab>`. Proposals is selected.
 
 - A two-way control under the tabs (`aria-pressed`): **Candidates (9)** and **Context PRs (6)**, with the line “a record becomes a proposal, a proposal becomes a pull request, a merge publishes it”. Candidates is `/steering/proposals`; Context PRs is `/steering/proposals/prs` (`/steering/prs` still resolves).
 - **Candidates**: the panel “Proposals” with a small **Write a context record** in its header, Sort, Rows, and a pager. Each proposal is a record card: the kind badge, force, its state badge (`candidate`, `open Context PR`, `merged`, or for the promoter's live proposal `ready for a Context PR`, `open Context PR` with the check state, or `published`), its checks badge (“6 / 6 checks pass”, “5 / 6 · conflict check running”), **Review**; the statement; then “from <source>” (findings job with its finding id, reflector with a run id, or a person), the support line computed from the supporting runs (“682 duplicate tool calls across 212 runs”, “14 unsatisfied runs in 30 days”, “3 data-layer drift findings”), the proposal id, scope, and lineage.
@@ -35,7 +35,7 @@ The way in: a record becomes a proposal, a proposal becomes a pull request, a me
 
 **Dialogs this tab opens:** `govmode`, `wz (record wizard)`, `ctxpr` (Open a Context PR: Concern, Kind, Scope, Constraint effect, Supporting evidence, and the note that merge is the publication).
 
-**Shell.** As `steering.md`: sidebar with Steering lit and Repositories between Steering and Spend, top bar with breadcrumbs, ⌘K search-or-run, notifications, the **Approvals** button (count of everything waiting on you across the organization) that opens the drawer `#apdrawer`, and the account avatar. No assistant button in the top bar. Skills has no nav entry of its own.
+**Shell.** As `steering.md`: sidebar with Steering lit and Runtimes between Steering and Repositories, top bar with breadcrumbs, ⌘K search-or-run, notifications, the **Approvals** button (count of everything waiting on you across the organization) that opens the drawer `#apdrawer`, and the account avatar. No assistant button in the top bar. Skills has no nav entry of its own.
 
 ## Data sources
 
@@ -58,14 +58,14 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 ## States
 
 - **loaded**: the tab as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell).
-- **empty**: the hub header, the chip, and the seven tabs stay; the header holds no gold. The body is “No proposals yet”: “Nothing has been proposed from this workspace’s runs, and no pull request is open against `.oxagen/rules/`. A proposal steers nothing until a person opens a pull request from it and someone merges that.” Action: **Write a context record** (gold).
+- **empty**: the hub header, the chip, and the five tabs stay; the header holds no gold. The body is “No proposals yet”: “Nothing has been proposed from this workspace’s runs, and no pull request is open against `.oxagen/rules/`. A proposal steers nothing until a person opens a pull request from it and someone merges that.” Action: **Write a context record** (gold).
 - **loading**: the shell stays; the page body, hub header included, is replaced by the skeleton (four tile blocks and a panel of seven rows).
 - **error**: “Steering could not be loaded”. “The control plane answered `503 record_index_unavailable`. Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by Oxagen.” Actions: **Try again**, **Open an incident**; the trace line.
 - **access denied**: “You cannot see this workspace’s steering”, naming `steering.read on core-platform`. Actions: **Request access**, **Back to Fleet**. Below: *Signed in as*, *Needed*, *Decided by* (`pol_v41` · deny wins over every allow).
 
 ## Mobile
 
-The seven tabs are one scrolling strip with scroll snap, and the tab in view is scrolled to on render; the page itself never scrolls sideways. The two columns of a proposal and of a pull request stack. Top bar collapses to hamburger · current crumb · search glyph · notifications · approvals · avatar. A fixed five-slot thumb bar replaces the sidebar: **Fleet**, **Agents**, **Tools**, **Spend**, **More**. **More** is a bottom sheet listing Steering (with Skills inside it), Repositories, Organization, Billing, Audit, Search, Notifications, Account, Switch organization, Switch workspace, and it is the lit slot on every Steering tab. Every dialog rises from the bottom edge as a sheet; every list table becomes a stack of cards, each cell labelled with its column header; touch targets are ≥ 44 px; inputs are 16 px.
+The five tabs are one scrolling strip with scroll snap, and the tab in view is scrolled to on render; the page itself never scrolls sideways. The two columns of a proposal and of a pull request stack. Top bar collapses to hamburger · current crumb · search glyph · notifications · approvals · avatar. A fixed five-slot thumb bar replaces the sidebar: **Fleet**, **Agents**, **Tools**, **Spend**, **More**. **More** is a bottom sheet listing Steering (with its shelves inside), Runtimes, Repositories, Organization, Billing, Audit, Search, Notifications, Account, Switch organization, Switch workspace, and it is the lit slot on every Steering tab. Every dialog rises from the bottom edge as a sheet; every list table becomes a stack of cards, each cell labelled with its column header; touch targets are ≥ 44 px; inputs are 16 px.
 
 ## Permissions
 

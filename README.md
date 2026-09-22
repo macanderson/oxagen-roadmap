@@ -110,8 +110,9 @@ Everything a URL of it pins is read at runtime, so there is one file where there
 | `?state=empty#/a-intel/core-platform/tools` | one page in one state; the states are `loaded`, `empty`, `loading`, `error`, `denied` |
 | `#/a-intel/core-platform/scenarios/flight-recorder/1` | a guided scenario (the W flows) on step 1 |
 | `#/a-intel/core-platform/runs/run_01K5RQ4B9C7XTN2P/cost` | a run tab by hash: `transcript`, `player`, `cost`, `policy`, `context`, `chain` |
-| `#/a-intel/core-platform/steering/preview/release-manager` | a Steering tab by hash: `records`, `skills[/<view>]`, `memory`, `ontology`, `policy`, `proposals[/prs]`, `preview[/<agent>]` |
-| `#/a-intel/core-platform/skills` | an old route: Skills moved under Steering, and this still resolves to `…/steering/skills` |
+| `#/a-intel/core-platform/steering/compiler/release-manager` | a Steering tab by hash: `library`, `assignments`, `gates`, `proposals[/prs]`, `compiler[/<agent>]`; a library shelf is its own segment, `records`, `skills[/<view>]`, `memory`, `ontology` |
+| `#/a-intel/core-platform/skills` | an old route: Skills is a shelf of the Steering library, and this still resolves to `…/steering/skills` |
+| `#/a-intel/core-platform/runtimes/mbell-mbp-16` | one enrolled host, with the agents on it and the tier its seam earns |
 | `?theme=dark` | pinned theme |
 
 The onboarding screens live at `#/welcome…` and are reachable from the Account dialog's Onboarding
@@ -119,8 +120,8 @@ tab, the user menu, and ⌘K. Nothing on them writes anything.
 
 ## What the mockups depict
 
-Every phase of the steering and gateway plan (0 to 5), shipped. Steering is the hub: seven tabs
-(Records, Skills, Memory, Ontology, Policy, Proposals, Preview), one assembler where every item
+Every phase of the steering and gateway plan (0 to 5), shipped. Steering is the hub: five tabs
+(Library, Assignments, Gates, Proposals, Compiler), one assembler where every item
 competes, and a `steering.manifest` frame on every run. The tier ladder is complete: `observe`,
 `harness`, `gateway`, `contained`. Most agents run `gateway` with `gateway_observed` metering and
 enforced budgets; Stella CI runs `contained`. Token accounting follows the spec's cost record
@@ -213,7 +214,7 @@ Four things an operator creates — an agent, a tool, a skill and a context reco
 for all four, because all four are a file in a repository: describe it, Oxagen drafts the file, you
 read the file, a pull request publishes it. Nothing in it writes a row. `docs/creation-spec.md` is
 the spec; the wizards are `DLG_EXT.wz` in `mockups/src/engine.js` and reached from `Create` in ⌘K
-and from each page's own action. The tool wizard matches a description against the MCP servers
+and from each page's own action. The tool wizard matches a description against the providers
 Oxagen can already reach (`mockups/fixtures/mcp-catalog.json`) and offers to import before it offers
 to generate a handler in TypeScript, Python, Go or Rust. The skill wizard searches the registry
 (`mockups/fixtures/skill-registry.json`), drafts from prose, or takes a `.skill` bundle that
