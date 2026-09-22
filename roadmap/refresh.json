@@ -2356,9 +2356,9 @@
       "title": "P0 · app+ops/CI · Two files from an already-merged PR export test-only helpers and fail every PR's required checks job"
     }
   },
-  "generated_at": "2026-09-22T18:51:30.530Z",
+  "generated_at": "2026-09-22T21:43:59.864Z",
   "heads": {
-    "oxagen": "1ea1a213e60a6ffe36f9f24789a2840feb2767f5"
+    "oxagen": "b3046e4d762564214b4d81484f329c72a0690fef"
   },
   "issues": {
     "oxagen#1": {
@@ -19580,7 +19580,7 @@
     },
     "oxagen#3731": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-22T20:09:18Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": false,
@@ -19591,7 +19591,7 @@
         "closes-nothing",
         "migration-required"
       ],
-      "merged_at": null,
+      "merged_at": "2026-09-22T20:09:18Z",
       "milestone": null,
       "needs_decision": false,
       "number": 3731,
@@ -19602,9 +19602,9 @@
       ],
       "repo": "oxagen",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "Run export: download a bundle and verify it offline with oxagen verify",
-      "updated_at": "2026-09-22T18:11:18Z"
+      "updated_at": "2026-09-22T20:09:20Z"
     },
     "oxagen#3732": {
       "author": "macanderson",
@@ -19632,7 +19632,7 @@
       ],
       "state": "open",
       "title": "feat(spend): cost-center chargeback on Spend",
-      "updated_at": "2026-09-22T18:10:25Z"
+      "updated_at": "2026-09-22T20:52:59Z"
     },
     "oxagen#3733": {
       "author": "macanderson",
@@ -19716,7 +19716,57 @@
       ],
       "state": "open",
       "title": "feat(auth): enterprise SSO over OIDC and SAML with IdP group-to-role mapping",
-      "updated_at": "2026-09-22T18:39:55Z"
+      "updated_at": "2026-09-22T20:48:09Z"
+    },
+    "oxagen#3736": {
+      "author": "oxagen-connect[bot]",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3736",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "no-issue"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3736,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Context PR: ctx.product.do-not-build-typecheck",
+      "updated_at": "2026-09-22T20:16:12Z"
+    },
+    "oxagen#3737": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/issues/3737",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3737,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Queued · data/Migrations · usage_outbox names its FK differently from Drizzle and leaves its grant unguarded",
+      "updated_at": "2026-09-22T20:40:29Z"
     },
     "oxagen#4": {
       "author": "macanderson",
@@ -36354,9 +36404,20 @@
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "dod",
-      "last_merge": "2026-09-22T18:13:04Z",
+      "last_merge": "2026-09-22T20:09:18Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-22T20:09:18Z",
+          "number": 3731,
+          "repo": "oxagen",
+          "title": "Run export: download a bundle and verify it offline with oxagen verify",
+          "touched": [
+            "apps/cli/src",
+            "packages/tacho"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-22T18:13:04Z",
@@ -36546,20 +36607,10 @@
           "touched": [
             "packages/tacho"
           ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-20T20:55:31Z",
-          "number": 3599,
-          "repo": "oxagen",
-          "title": "Fix tachod startup conflicts, compaction hooks, and stream error reporting",
-          "touched": [
-            "packages/tacho"
-          ]
         }
       ],
       "open_issues": 0,
-      "refreshed_at": "2026-09-22T18:51:30.530Z",
+      "refreshed_at": "2026-09-22T21:43:59.864Z",
       "shared_page": false
     },
     "D3": {
@@ -36982,9 +37033,19 @@
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "witness",
-      "last_merge": "2026-09-22T06:43:03Z",
+      "last_merge": "2026-09-22T20:09:18Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-22T20:09:18Z",
+          "number": 3731,
+          "repo": "oxagen",
+          "title": "Run export: download a bundle and verify it offline with oxagen verify",
+          "touched": [
+            "packages/database/src/schema/run-evidence-foundation.ts"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-22T06:43:03Z",
@@ -37037,7 +37098,7 @@
         }
       ],
       "open_issues": 0,
-      "refreshed_at": "2026-09-22T10:19:35.597Z",
+      "refreshed_at": "2026-09-22T21:43:59.864Z",
       "shared_page": false
     },
     "W3": {
@@ -37098,9 +37159,19 @@
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "witness",
-      "last_merge": "2026-09-22T06:43:03Z",
+      "last_merge": "2026-09-22T20:09:18Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-22T20:09:18Z",
+          "number": 3731,
+          "repo": "oxagen",
+          "title": "Run export: download a bundle and verify it offline with oxagen verify",
+          "touched": [
+            "packages/run-ledger"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-22T06:43:03Z",
@@ -37203,18 +37274,29 @@
         }
       ],
       "open_issues": 0,
-      "refreshed_at": "2026-09-22T10:19:35.597Z",
+      "refreshed_at": "2026-09-22T21:43:59.864Z",
       "shared_page": false
     },
     "W7": {
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "witness",
-      "last_merge": null,
+      "last_merge": "2026-09-22T20:09:18Z",
       "links": [],
-      "merged_prs": [],
+      "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-22T20:09:18Z",
+          "number": 3731,
+          "repo": "oxagen",
+          "title": "Run export: download a bundle and verify it offline with oxagen verify",
+          "touched": [
+            "packages/oxagen/src/contracts/run.export.ts"
+          ]
+        }
+      ],
       "open_issues": 0,
-      "refreshed_at": "2026-09-18T23:26:29.677Z",
+      "refreshed_at": "2026-09-22T21:43:59.864Z",
       "shared_page": false
     },
     "W8": {
@@ -39849,7 +39931,7 @@
         }
       ],
       "kind": "surface",
-      "last_merge": "2026-09-21T21:41:25Z",
+      "last_merge": "2026-09-22T20:09:18Z",
       "links": [
         {
           "number": 3282,
@@ -39883,6 +39965,20 @@
         }
       ],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-22T20:09:18Z",
+          "number": 3731,
+          "repo": "oxagen",
+          "title": "Run export: download a bundle and verify it offline with oxagen verify",
+          "touched": [
+            "apps/app/src/features/run/record-actions.tsx",
+            "apps/app/src/features/run/actions.ts",
+            "apps/app/src/features/run/run.test.tsx",
+            "apps/app/src/features/run/controls.test.tsx",
+            "packages/oxagen/src/contracts/run.export.ts"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-21T21:41:25Z",
@@ -40104,24 +40200,11 @@
             "apps/app/src/features/run/actions.ts",
             "apps/app/src/features/run/run.test.tsx"
           ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-19T02:41:50Z",
-          "number": 3337,
-          "repo": "oxagen",
-          "title": "Every date in the app renders in your time zone, Pacific by default",
-          "touched": [
-            "apps/app/src/features/run/header.tsx",
-            "apps/app/src/features/run/frames.tsx",
-            "apps/app/src/features/run/cost.tsx",
-            "apps/app/src/ui/generated-summary.tsx"
-          ]
         }
       ],
       "open_issues": 2,
       "page": "apps/app/src/app/[org]/[ws]/runs/[run]/page.tsx",
-      "refreshed_at": "2026-09-21T22:12:53.518Z",
+      "refreshed_at": "2026-09-22T21:43:59.864Z",
       "shared_page": true
     },
     "run-interjection": {
@@ -41473,8 +41556,8 @@
     }
   },
   "last_run": {
-    "at": "2026-09-22T18:51:30.530Z",
-    "calls": 8,
+    "at": "2026-09-22T21:43:59.864Z",
+    "calls": 6,
     "quiet": false
   },
   "milestones": {
@@ -41495,12 +41578,12 @@
     "M1": {
       "built": 10,
       "last_merge": {
-        "merged_at": "2026-09-22T18:13:04Z",
-        "number": 3730,
+        "merged_at": "2026-09-22T20:09:18Z",
+        "number": 3731,
         "repo": "oxagen",
-        "title": "feat(tacho): route Stella's Anthropic calls through the gateway"
+        "title": "Run export: download a bundle and verify it offline with oxagen verify"
       },
-      "merged_prs": 55,
+      "merged_prs": 56,
       "not_started": 1,
       "open_issues": 7,
       "partial": 5,
@@ -41523,12 +41606,12 @@
     "M3": {
       "built": 1,
       "last_merge": {
-        "merged_at": "2026-09-22T16:43:54Z",
-        "number": 3716,
+        "merged_at": "2026-09-22T20:09:18Z",
+        "number": 3731,
         "repo": "oxagen",
-        "title": "feat(tacho): store a workspace session policy and report when a host leaves the gateway"
+        "title": "Run export: download a bundle and verify it offline with oxagen verify"
       },
-      "merged_prs": 33,
+      "merged_prs": 34,
       "not_started": 0,
       "open_issues": 4,
       "partial": 2,
@@ -41537,12 +41620,12 @@
     "M4": {
       "built": 1,
       "last_merge": {
-        "merged_at": "2026-09-22T16:43:54Z",
-        "number": 3716,
+        "merged_at": "2026-09-22T20:09:18Z",
+        "number": 3731,
         "repo": "oxagen",
-        "title": "feat(tacho): store a workspace session policy and report when a host leaves the gateway"
+        "title": "Run export: download a bundle and verify it offline with oxagen verify"
       },
-      "merged_prs": 33,
+      "merged_prs": 34,
       "not_started": 0,
       "open_issues": 3,
       "partial": 2,
@@ -52457,6 +52540,106 @@
       "repo": "oxagen",
       "title": "feat(tacho): route Stella's Anthropic calls through the gateway"
     },
+    "oxagen#3731": {
+      "added": [
+        "apps/api/src/__tests__/routes.run-export-download.test.ts",
+        "apps/api/src/routes/v1/run.export.download.ts",
+        "apps/api/src/routes/v1/run.export.get.ts",
+        "apps/app/src/features/run/record-actions.test.tsx",
+        "apps/app/src/shared/run-export-download-url.test.ts",
+        "apps/app/src/shared/run-export-download-url.ts",
+        "apps/cli/src/commands/verify.test.ts",
+        "apps/cli/src/commands/verify.ts",
+        "apps/mcp/src/tools/run.export.get.ts",
+        "docs/capabilities/run.export.get.md",
+        "docs/capabilities/schemas/get_run_export.json",
+        "docs/guides/export-and-verify.md",
+        "packages/database/atlas/migrations/20260922150000_run_export_bundle_bytes.sql",
+        "packages/handlers/src/lib/run-export-download.ts",
+        "packages/handlers/src/run.export.get.test.ts",
+        "packages/handlers/src/run.export.get.ts",
+        "packages/oxagen/src/contracts/run.export.get.test.ts",
+        "packages/oxagen/src/contracts/run.export.get.ts",
+        "packages/tacho/src/evidence/run-export.test.ts",
+        "packages/tacho/src/evidence/run-export.ts"
+      ],
+      "author": "macanderson",
+      "closes": [],
+      "files": [
+        ".env.example",
+        "apps/api/src/__tests__/routes.run-export-download.test.ts",
+        "apps/api/src/__tests__/routes.run.test.ts",
+        "apps/api/src/app.ts",
+        "apps/api/src/routes/v1/run.export.download.ts",
+        "apps/api/src/routes/v1/run.export.get.ts",
+        "apps/app/capability-ui-map.json",
+        "apps/app/messages/run.json",
+        "apps/app/src/features/run/actions.test.ts",
+        "apps/app/src/features/run/actions.ts",
+        "apps/app/src/features/run/controls.test.tsx",
+        "apps/app/src/features/run/record-actions.test.tsx",
+        "apps/app/src/features/run/record-actions.tsx",
+        "apps/app/src/features/run/run.test.tsx",
+        "apps/app/src/i18n/messages.d.ts",
+        "apps/app/src/shared/run-export-download-url.test.ts",
+        "apps/app/src/shared/run-export-download-url.ts",
+        "apps/app/src/ui/money-format.test.ts",
+        "apps/app/src/ui/money-format.ts",
+        "apps/app/src/ui/navigation.tsx",
+        "apps/cli/package.json",
+        "apps/cli/src/commands/__tests__/run.test.ts",
+        "apps/cli/src/commands/run.ts",
+        "apps/cli/src/commands/verify.test.ts",
+        "apps/cli/src/commands/verify.ts",
+        "apps/cli/src/program.ts",
+        "apps/mcp/src/tools/run.export.get.ts",
+        "apps/mcp/src/tools/run.handlers.test.ts",
+        "docs/capabilities/_index.md",
+        "docs/capabilities/run.export.get.md",
+        "docs/capabilities/run.export.md",
+        "docs/capabilities/schemas/README.md",
+        "docs/capabilities/schemas/_index.json",
+        "docs/capabilities/schemas/get_run_export.json",
+        "docs/guides/export-and-verify.md",
+        "docs/mission-control/GAP-INVENTORY.md",
+        "packages/config/src/registry.ts",
+        "packages/database/atlas/migrations/20260922150000_run_export_bundle_bytes.sql",
+        "packages/database/atlas/migrations/atlas.sum",
+        "packages/database/src/schema/run-evidence-foundation.ts",
+        "packages/database/storage-manifest.json",
+        "packages/handlers/src/lib/run-export-download.ts",
+        "packages/handlers/src/register.ts",
+        "packages/handlers/src/run.export.get.test.ts",
+        "packages/handlers/src/run.export.get.ts",
+        "packages/inngest-functions/src/functions/evidence.run-export.test.ts",
+        "packages/inngest-functions/src/functions/evidence.run-export.ts",
+        "packages/inngest-functions/src/lib/run-export-bundle.test.ts",
+        "packages/inngest-functions/src/lib/run-export-bundle.ts",
+        "packages/inngest-functions/src/lib/run-record.ts",
+        "packages/oxagen/capabilities.manifest.json",
+        "packages/oxagen/src/contracts.generated.ts",
+        "packages/oxagen/src/contracts/index.ts",
+        "packages/oxagen/src/contracts/run.export.get.test.ts",
+        "packages/oxagen/src/contracts/run.export.get.ts",
+        "packages/oxagen/src/contracts/run.export.ts",
+        "packages/run-ledger/src/frame-body.ts",
+        "packages/run-ledger/src/run-store.test.ts",
+        "packages/run-ledger/src/run-store.ts",
+        "packages/tacho/src/evidence/index.ts",
+        "packages/tacho/src/evidence/run-export.test.ts",
+        "packages/tacho/src/evidence/run-export.ts",
+        "pnpm-lock.yaml"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3731",
+      "merged_at": "2026-09-22T20:09:18Z",
+      "number": 3731,
+      "refs": [
+        2952
+      ],
+      "repo": "oxagen",
+      "title": "Run export: download a bundle and verify it offline with oxagen verify"
+    },
     "stella#6527": {
       "added": [],
       "author": "dependabot[bot]",
@@ -53059,8 +53242,8 @@
     }
   },
   "since": {
-    "oxagen": "2026-09-22T18:39:55Z",
-    "oxagen-roadmap": "2026-09-22T18:13:08Z",
-    "stella": "2026-09-22T18:51:30.530Z"
+    "oxagen": "2026-09-22T20:52:59Z",
+    "oxagen-roadmap": "2026-09-22T21:43:59.864Z",
+    "stella": "2026-09-22T21:43:59.864Z"
   }
 }
