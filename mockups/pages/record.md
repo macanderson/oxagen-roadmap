@@ -39,6 +39,8 @@ Every kind panel ends with **What it can never do.**, the one sentence that stop
 
 **Dialogs this page opens:** `srcpr`, **Propose a change to this record**: the lead (“A published record is changed the way it was published: a branch, a pull request, the same six checks, and a merge. Nothing here edits what is in force.”), the statement diff against what is in force with a `+n / −n` count, the branch `context/<lineage>.amend`, and the six checks (Schema; Lineage, an amended record is the same record; record_hash recomputation, the old hash stays on every run that carried it; Secret and PII scan; Conflict against active records, re-run in full; constraint_effect unchanged). Footer **Cancel** · **Open the pull request** (gold; disabled when nothing changed). Opening reports “a-intel/platform#528 opened. <lineage> changes when it merges; until then every run still gets the words that are in force now.”
 
+`crecarchive`, **Archive <lineage>?**: archiving is a pull request that sets `status = "archived"` on `.oxagen/rules/<lineage>.toml`. The file stays, the lineage stays, and the record stops compiling into the bundle when it merges; it is in force until then. A record carrying a constraint effect says so, because the gate goes with it and what it refused today is allowed once this merges. Nothing is deleted: every run it steered keeps naming its hash, and a later record may supersede it instead. Footer: **Keep it in force** · **Open the pull request** (red). A record that already has a pull request open against it says so and offers Close instead, so two changes are never proposed over the same file; one already archived says so too.
+
 **Shell.** As `steering.md`: sidebar (Workspace nav: Fleet · Agents · Tools · Steering · Runtimes · Repositories · Spend; Organization nav: Organization · Billing · Audit) with Steering lit, top bar with breadcrumbs, ⌘K search-or-run, notifications, the **Approvals** button (count of everything waiting on you across the organization) that opens the drawer `#apdrawer`, and the account avatar. No assistant button in the top bar.
 
 ## Data sources
@@ -78,7 +80,7 @@ Top bar collapses to hamburger · current crumb · search glyph · notifications
 ## Permissions
 
 - Read: `steering.read`
-- Writes (each a governed action recorded in Audit): `steering.write (commit to a branch)`, `repo.pr.open`
+- Writes (each a governed action recorded in Audit): `steering.write (commit to a branch)`, `repo.pr.open`, `steering.archive (open the pull request that takes a record out of force)`
 
 ## Backend gaps this page depends on
 

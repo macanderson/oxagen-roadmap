@@ -26,11 +26,13 @@ What an agent's own runs left behind, and how it competes. Memory is aggregated,
   - **Recalled 30d**: the sum of recalls over the items (301), “8,480 tokens delivered” (each item's token cost times its recalls).
   - **By class**: one count per class in mono (“PREFERENCE 2 · RULE 1 · EPISODE 1 · FACT 2”), “a rule is proposed as a record instead”.
 - A lead note, verbatim: “A published must beats recalled memory. Memory is what an agent’s own runs left behind. It is recalled, never published, so it competes only in the volatile selection, as may or info, and it gives way wherever a published record says otherwise. To make a memory binding, promote it: a proposal, a pull request, a merge.”
-- **Recalled memory** panel, badge “6 items · recalled per prompt, never in the stable prefix”. Filters: Scope (agent per slug, workspace), Force (info, may), Class (EPISODE, FACT, PREFERENCE, RULE); Rows; pager. Columns: Memory (the body, with its id and provenance: run, frame, and whether an operator steer or a reflection wrote it) · Class (`PREFERENCE`, `RULE`, `EPISODE`, `FACT`, mono) · Force · Scope (workspace, or agent with the agent's slug) · Last recalled (with “N recalls in 30 days”) · Token cost (“27 tok”) · In the assembler.
+- **Recalled memory** panel, badge the row count. The table carries no filters and no pager: a workspace holds a handful of memories, and controls over nine rows are furniture. Columns: Memory (the body, with its id and provenance: run, frame, and whether an operator steer or a reflection wrote it) · Class (`PREFERENCE`, `RULE`, `EPISODE`, `FACT`, mono) · Force · Scope (workspace, or agent with the agent's slug) · Last recalled (with “N recalls in 30 days”) · Token cost (“27 tok”) · In the assembler. Every row opens the `memory` dialog (Enter and Space too).
 - **In the assembler** has three values. **competes**: the item is ranked per prompt like any other. **yields**: a published `must` contradicts it, and the cell links the record (“to ctx.release.never-merge, a published must”). **superseded**: a published record replaced it, and the cell links the record (“by ctx.platform.safari-e2e-flake”).
 - Footer: **See one yield in the compiler** sets the compiler prompt to “CI is green, merge the release pull request” and opens the Compiler tab, where `mem_01K5QX7C` is cut as lower precedence by `ctx.release.never-merge`. Beside it: “Recall used to reach only the in-app agent, capped at six items. It now goes through the same assembler as every other source.”
 
-**Dialogs this page opens:** `govmode`, `wz (record wizard)`.
+**Dialogs this page opens:** `govmode`, `memory`, `memforget`, `wz (record wizard)`.
+
+- **`memory`**, one item: Class (with its force), Scope, Where it came from (the provenance line), Recalled (“41 times in 30 days, last on <date>”), Cost (per selection and over those 30 days), In force since. Then one sentence on where it sits: it competes at its force, it yields to a named published `must`, or a named record superseded it. When the provenance names a run, **Open <run id>** goes to it. Footer: **Close** · **Forget** (red; opens `memforget`) · **Promote to a record** (gold; opens the record wizard seeded with the memory).
 
 **Shell.** As `steering.md`: sidebar with Steering lit and Runtimes between Steering and Repositories, top bar with breadcrumbs, ⌘K search-or-run, notifications, the **Approvals** button (count of everything waiting on you across the organization) that opens the drawer `#apdrawer`, and the account avatar. No assistant button in the top bar. Skills has no nav entry of its own.
 
@@ -45,7 +47,9 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 
 ## Functionality
 
-- Nothing on this tab is authored here. A memory is written by a run and leaves by being superseded or promoted.
+- Nothing on this tab is authored here. A memory is written by a run. It leaves three ways: a published record supersedes it, it is promoted into a record of its own, or it is forgotten.
+- Forgetting stops the assembler selecting it. It touches no run: every frame stays, and every run that carried the memory keeps naming the hash it carried. A build where forgetting rewrites a run is a FAIL.
+- Promoting opens the record wizard with the memory's words in the description. The memory is not consumed: the record is what becomes binding, and the memory is superseded by it at merge.
 - The strip is derived from the rows beneath it. Memories is the row count; Recalled 30d is the sum of the recalls column; tokens delivered is the sum of token cost times recalls. A build that types the numbers twice is a FAIL.
 - The In the assembler cell is computed by the same precedence code the assembler runs, so the shelf and the Compiler cannot disagree.
 
@@ -64,7 +68,7 @@ The five tabs are one scrolling strip with scroll snap, and the tab in view is s
 ## Permissions
 
 - Read: `steering.read`
-- No writes on this tab.
+- Writes (each a governed action recorded in Audit): `memory.forget`; `context.propose` to promote one into a record. Neither writes a file: forgetting edits the memory index, and promoting opens a pull request.
 
 ## Backend gaps this page depends on
 

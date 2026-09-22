@@ -17,7 +17,7 @@ One mandate: the delegated financial authority an agent holds, its limits, what 
 ## What is on the page
 
 **Header**: eyebrow “Mandate”, h1 the mandate id (mono). Badges: status (`active`, `expired`, or revoked), “granted by <name>”, the currency; then the purpose (“monthly infrastructure invoices, PO-4471”).
-Actions: **Change limits** (opens `mandate`) · **Revoke** (danger; toast “Mandate revoked. In-flight calls that have not dispatched end now.”). Neither is gold.
+Actions: **Change limits** (opens `mandateedit` on this mandate) · **Revoke** (danger; opens `mandaterevoke` on this mandate). Neither is gold.
 
 **Summary tiles** (one number and one basis line each):
 - **Per call**: $ limit · “read from the call by amount_path”.
@@ -29,7 +29,7 @@ Actions: **Change limits** (opens `mandate`) · **Revoke** (danger; toast “Man
 - **Grant** panel (right): Agent (compact agent card) · Granted by (“<name> · <role> at grant”) · Second approver · Effect · Counterparties (allow, deny) · Tools · Approval (“above $, always for <effect>, approvers <role>”) · Valid (from → to).
 - **Ledger** panel (right, below the grant): every draw has a receipt and every receipt has a frame; on this mandate an exception (“One exception, severity critical. The connection’s Stripe webhook reported charge `ch_3Qa8` for $18.00 USD on `con_01K2A9`, and no receipt exists for it. Money moved that Oxagen did not govern.”) with **Open on Audit**; on any other mandate the note “Every draw on this mandate has a receipt and every receipt has a frame. Nothing is outstanding for September.”
 
-**Dialogs this page opens:** `mandate` (change limits), `receipt`, `request-access` (from denied), `incident` (from error). Revoke is a button with a toast, not a dialog.
+**Dialogs this page opens:** `mandateedit` (per call, per period, approval above, valid to; Save writes the ledger entry), `mandaterevoke` (names what is reserved and what already settled, then Revoke it), `receipt`, `request-access` (from denied), `incident` (from error). Both carry the id of the mandate the route names, so neither can act on a different one.
 
 **Shell.** Sidebar (organization switcher, workspace switcher, Workspace nav: Fleet · Agents · Tools · Steering · Runtimes · Repositories · Spend; Organization nav: Organization · Billing · Audit; foot: the assistant launcher, agent count · data plane, connection badge). Top bar: hamburger, breadcrumbs (… / Agents / <slug> / <mandate id>), ⌘K search-or-run, notifications with unread dot, the approvals button (left of the avatar, count of everything waiting on you across the organization; opens the drawer described in `fleet.md`), account avatar → user menu. No assistant button in the top bar.
 

@@ -25,8 +25,10 @@ Work through every check. For each, record PASS, FAIL, or N/A (with why). Cite e
 4. **Sections and tables.** The build has each item below with the same headings and every column named, in that order.
    - The aggregation strip: Memories, Sources, Recalled 30d, By class, each with the basis line the spec quotes.
    - The precedence note, verbatim: a published must beats recalled memory.
-   - Recalled memory table with its badge: Memory · Class · Force · Scope · Last recalled · Token cost · In the assembler; filters Scope, Force, Class; Rows; pager.
+   - Recalled memory table with its badge, the row count: Memory · Class · Force · Scope · Last recalled · Token cost · In the assembler. No filters and no pager.
    - In the assembler renders competes, yields (linking the must that wins), or superseded (linking the record).
+   - Every row opens the `memory` dialog, by click, Enter, and Space.
+   - `memory` names Class, Scope, Where it came from, Recalled, Cost, and In force since, says in one sentence where the memory sits against a published record, and offers Close, Forget, and Promote to a record. Forgetting confirms first (`memforget`), says every frame stays, names the recall count, and drops the row. Promoting opens the record wizard with the memory's words already in the description.
    - The footer button and the sentence beside it.
 5. **Token figures reconcile.** Memories equals the row count. Recalled 30d equals the sum of the recalls column. Tokens delivered equals the sum over rows of token cost times recalls. By class counts equal the Class column. Any figure typed rather than derived is a FAIL.
 6. **Actions.** See one yield in the compiler opens the Compiler tab with the merge prompt, and the yielding memory is in the manifest cuts as lower precedence.

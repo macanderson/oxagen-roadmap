@@ -6,6 +6,34 @@ sets the ontology those three surfaces are rebuilt on, names every rename, and s
 It is the reasoning behind the changes to `mockups/src/engine.js` and the page specs in
 `mockups/pages/`.
 
+## What this change lands
+
+The ontology below is the target. What is built now is its navigation, the surfaces the navigation
+needed, and the two registry tables that had to name the objects the navigation introduced.
+
+Landed:
+
+- The workspace nav: **Agent IAM becomes Agents**, and **Runtimes** is added.
+- Tools carries five tabs: Tools, **Toolbelts** (new), **Providers** (was MCP servers), Policy,
+  Kill switches. `#/:org/:ws/tools/servers` still resolves.
+- Steering carries five tabs: **Library** (Records, Skills, Memory and Ontology as its shelves),
+  **Assignments** (new), **Gates** (was Policy), Proposals, **Compiler** (was Preview). Every rev1
+  Steering URL still lands.
+- The agent detail carries seven tabs: **Overview** (new), Identity, **Steering** (new), Toolbelt,
+  **Runtime** (was Enrollment), **Permissions** (Roles, Mandates and Budgets), **Activity** (Runs,
+  Tamper incidents and the accounting). Every rev1 tab id still resolves to the tab that absorbed it.
+- **Runtimes**: the host registry and one host, with the agents on it and the tier its seam earns.
+- The toolbelt, provider and runtime registries behind those surfaces, with the toolbelt
+  drill-down and the provider drill-down.
+- The **Composition** column set on the Agents registry, with the column-set control beside it.
+  **Operations** holds the rev1 columns, renamed from Identity to Agent, and no number is deleted.
+- The **Toolbelts** and **Agents** columns on the Tools registry, in place of On belts. Both are
+  derived from the assignment record, so removing a tool from a belt changes the row.
+
+Left for a later change:
+
+- Every other column, tile and panel on a page that already existed.
+
 ## The object
 
 An agent is the primary object. Everything else is something the agent has, uses, is assigned, or

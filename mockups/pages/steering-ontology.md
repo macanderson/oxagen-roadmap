@@ -20,11 +20,18 @@ A home for the entity and term definitions that steer. It is a small tab, not a 
 
 **The five tabs, in this order:** Library (75) · Assignments (4) · Gates (6) · Proposals (15) · Compiler. Each tab is a URL segment, `#/:org/:ws/steering/<tab>`. The hash is read on load and on `hashchange`; a tab changed by code writes the hash back with `replaceState`, so every view is a link. Library is selected, and the shelf row beneath it presses Ontology (4 of 75): All · Records · Skills · Memory · Ontology, each a chip with a count and `aria-pressed`. `/steering/ontology` still resolves and lights this shelf.
 
-- A lead note, verbatim: “An ontology note defines one entity or one term the way this workspace uses it. It compiles to text like any other item, enters the volatile selection as info, and grants nothing.”
-- **Definitions** panel, badge “4”. Filter: Kind (entity, term); Rows; pager (“1–4 of 4”). Columns: Term (bold, with its id under it, `ont.release-train`) · Kind (`term` or `entity`) · Definition (the body, at most 52ch wide) · Force (`info`) · About (the repositories, records, or skills it is linked to, one per line in mono) · Token cost (“34 tok”) · File (`.oxagen/ontology/<name>.toml @ <commit>`).
-- **Index** panel, three rows of a key-value list. **Today**: “The Postgres registry. The assembler reads every item, these notes included, from the registry behind one port.” **Later**: “The graph becomes the index (Phase 3 of the plan), once the knowledge graph is on by default. Each item is projected one way, registry to graph, and verified by hash. Postgres stays as the fallback behind the same port.” **Not here**: “There is no ontology engine and there are no connectors on this tab. A note is a file somebody wrote and somebody merged.”
+- A lead note, verbatim: “An ontology note defines one entity or one term the way this workspace uses it. It compiles to text like any other item, enters the volatile selection as info, and grants nothing. A note is a file somebody wrote and somebody merged, under `.oxagen/ontology/` on a-intel/platform, so writing, changing and retiring one each open a pull request.”
+- **Definitions** panel, badge “4”, and **New definition** in the header. Columns: Term (bold, with its id under it, `ont.release-train`) · Kind (`term`, `entity`, `alias`, or `boundary`) · Definition (the body, at most 52ch wide) · Force (`info`, or `retiring` in approval colour while a removal is open) · About (the repositories, records, or skills it is linked to, one per line in mono) · Token cost (“34 tok”) · File (`.oxagen/ontology/<name>.toml @ <commit>`) · row actions.
+- A row opens the note in `ontology`, which reads out its kind, definition, entities, force, token cost, file, hash, and the date it came into force, and carries **Edit** and **Retire**. The row carries the same two buttons.
 
-**Dialogs this page opens:** `govmode`, `wz (record wizard)`.
+**Writing, changing, and retiring a note.** Each is a pull request against `a-intel/platform`, because the note is a file there, and the row changes the moment the request is opened so the page never claims a merge it has not seen.
+
+- `ontnew` takes Term, Kind, Definition, and About. The wand on Definition has **oxagen.assistant** rewrite what you wrote; it does not decide what the term means. A note with no term or no definition is refused, and so is a second definition of a term this workspace already defines. The note is added to the table and the pull request adds `.oxagen/ontology/<term>.toml`.
+- `ontedit` takes the same four fields. Saving opens a pull request that modifies the file; the definition in force does not change until it merges. A note with a removal open refuses the edit and says to close that pull request first.
+- `ontretire` opens a pull request that removes the file. The note keeps informing the model until that merges, and its Force cell reads `retiring` in the meantime. A second retirement is refused.
+- Token cost is computed from the words of the definition, so it cannot go stale.
+
+**Dialogs this page opens:** `govmode`, `wz (record wizard)`, `ontology`, `ontnew`, `ontedit`, `ontretire`.
 
 **Shell.** As `steering.md`: sidebar with Steering lit and Runtimes between Steering and Repositories, top bar with breadcrumbs, ⌘K search-or-run, notifications, the **Approvals** button (count of everything waiting on you across the organization) that opens the drawer `#apdrawer`, and the account avatar. No assistant button in the top bar. Skills has no nav entry of its own.
 
@@ -38,7 +45,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 
 ## Functionality
 
-- A note is authored through the same pull request flow as a record: Write a context record, kind chosen in the wizard.
+- A note is written, changed, and retired on this tab, and each of the three opens a Context PR the same way a record does.
 - Delivery never waits for the graph.
 - The badge count is the row count and the tab count is the same number.
 
@@ -57,7 +64,7 @@ The five tabs are one scrolling strip with scroll snap, and the tab in view is s
 ## Permissions
 
 - Read: `steering.read`
-- Writes: `context.propose`, the same governed action that opens any Context PR.
+- Writes: `context.propose`, the same governed action that opens any Context PR. Writing, changing, and retiring a note each go through it.
 
 ## Backend gaps this page depends on
 

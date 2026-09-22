@@ -57,16 +57,17 @@ Actions: **Import a provider** (opens `import`: pull `tools/list`, version every
 
 ### Policy tab
 
-- **Policy versions** (badge “Cedar · deterministic · no model in the decision path”; **Edit** opens `policy`): Version · State · Author · When · Rules · Tests · What changed. A row carries **Open** (`policyver`) and then **Edit** when it is active, **Activate** (`policyactivate`) when it is a draft, **Restore** (`policyrestore`, which drafts a new version above the active one) when it is superseded. Below the table, a note that activation is a governed action with approval, a Context PR in regulated mode, and that the superseded version is kept because every decision cites the version that made it.
-- **Conditions a rule may test**, as chips, then the **Sequence rule** example, folded into this panel rather than standing beside it.
-- **Auto-approvals**, below a divider. Four stats: Rules on (of N, in the policy bundle) · Auto-approved 30d (each one a frame with the rule id) · Held by a floor (tainted, critical, or above a ceiling) · Median wait saved (per call, against a human gate). The panel caption: a rule replaces the human gate for agents whose tier, run count and incident record meet its floor. **Create rule** is the panel's primary action. One card per rule, searched, sorted and paged ten to a page: the allowing / denying switch, the rule name, the workspace it applies in, its provenance line (id · author · date), Tool · Requires (the first three requirements and the amount ceiling) · Qualifying now (“N of M” with the first two agent names), and a rail carrying approved 30d, held by a floor, **Edit** and **Delete**. The closing note: deny wins, a rule never auto-approves tainted input, a critical hazard, a call outside a mandate, or an agent with a tamper incident in the window, and every auto-approval is a `policy.decision` frame naming the rule.
-- **Rule dialog** (`ruleedit`): Name · Workspace · Applies to · Minimum tier (harness, gateway, contained) · Minimum runs in 30 days · Amount ceiling · State, with the live “N of N agents qualify now” banner that recomputes on every change, the floors note, and **Cancel** · **Create rule** or **Save changes**. The delete dialog (`ruledel`) offers switching the rule off instead.
+- **Policy versions** (the header carries **Draft a version**, which opens `policynew`): Version · State · Author · When · Rules · Tests · What changed. The Tests badge reads as a pass only when the tests have run; a fresh draft says “not run yet”. A row carries **Open** (`policyver`) and then, by state, **Draft a change** (`policynew`, based on that version) when it is active, **Edit** (`policyedit`) · **Activate** (`policyactivate`) · **Discard** (`policydiscard`) when it is a draft, **Restore** (`policyrestore`, which drafts a new version above the active one) when it is superseded. A draft is the only version that edits or deletes: `policyedit` and `policydiscard` opened on an active or superseded version refuse and offer **Draft a change** instead, because every decision cites the version that made it. Below the table, a note saying activation is a governed action with approval and what a draft may do. The panel header carries the store name, `tools.policy_versions`, in place of a language badge. Then **Where a version lives** (rows Store · In regulated mode · Compiled from · Who reads it · What it writes), **Conditions a rule may test**, and the “Sequence rule” example with a plain sentence above it saying what the rule denies and what lets it through.
 
 ### Kill switches tab
 
-- **Class switches** (every `moves_funds` tool, every irreversible tool, every tool with egress: third_party), carrying the deny generation badge, and **Scoped switches** (organization, workspace, provider, tool version, connection, key, category, agent, person). Each switch: allowing / denying toggle, Blast radius · Takes effect · Flipped by · Reason. Flipping bumps `deny_generation` so every live run token is re-checked at the next call.
+- “Class switches” (every `moves_funds` tool, every irreversible tool, every tool with egress: third_party), carrying the deny generation badge, and “Scoped switches”, whose header carries **Create a switch** (`switchnew`). Each switch: allowing / denying toggle, Blast radius · Takes effect · Flipped by · Reason. Flipping bumps `deny_generation` so every live run token is re-checked at the next call.
+  - The organization switch, the workspace switch and the three class switches ship with the workspace and are on the page the day it exists. They cannot be edited or removed: something has to stay flippable when an incident starts.
+  - `switchnew` creates a switch over one of the three identities an incident names: an **Agent**, an **Enrolled device** (the host an agent runs on, offered with its device key), or an **Operator’s agents**. The target list and the blast radius recompute as the scope changes, counted off the agent list rather than written down. A new switch is created allowing, and a second switch on a target something already covers is refused.
+  - A switch you created carries **Edit** (`switchedit`) and **Remove** (`switchdel`) on its card. `switchdel` on a denying switch refuses and offers to clear it first, because clearing records who allowed the traffic and removing does not.
 
-**Dialogs this page opens:** `import`, `wz` (tool wizard: describe → recommendation → manifest or import → code in four languages → pull request), `connection`, `tool`, `toolcats`, `schema` (approve observed), `belt` · `beltnew`, `server` · `serveredit` · `serverdel`, `oauth`, `conn` · `connedit` · `connrevoke`, `policy` (edit) · `policyver` · `policyactivate` · `policyrestore`, `ruleedit` · `ruledel`, `switch`, `request-access` (from denied), `incident` (from error).
+
+**Dialogs this page opens:** `import`, `wz` (tool wizard: describe → recommendation → manifest or import → code in four languages → pull request), `connection`, `tool`, `toolcats`, `schema` (approve observed), `belt` · `beltnew`, `server` · `serveredit` · `serverdel`, `oauth`, `conn` · `connedit` · `connrevoke`, `policynew` · `policyedit` · `policyver` · `policyactivate` · `policydiscard` · `policyrestore`, `switch` · `switchnew` · `switchedit` · `switchdel`, `request-access` (from denied), `incident` (from error).
 
 Every creation wizard is `DLG_EXT.wz`; its spec is `docs/creation-spec.md`.
 
@@ -83,8 +84,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 | Toolbelts | `TOOLBELTS` (`FIXTURES.TOOLBELTS.belts`) | `tools.toolbelts` | none | ❌ |
 | Toolbelt assignments | `TOOLBELT_ASSIGN` (`FIXTURES.TOOLBELTS.assign`), read by `AGENT_BELTS` | `tools.toolbelt_assignments` | none | ❌ |
 | Connections, grants, OAuth state | `CONNECTIONS` (`authState`, `scopes`, `tokenExp`, `client`, `authUrl`) | `tools.connections` | `ingestion.source_connections`, `mcp.credentials` | 🟡 token lifecycle to verify |
-| Policy versions | `POLICIES` | `tools.policy_versions` (Cedar, tests) | none | ❌ (G2) |
-| Auto-approval rules | `AUTORULES` | `tools.auto_approval_rules` in the policy bundle | none | ❌ |
+| Policy versions | `POLICIES` | `tools.policy_versions`, one row per version holding the rules and the tests; in regulated mode the rules are a file in `.oxagen/policy/` and the row is the compiled copy | none | ❌ (G2) |
 | Kill switches | `SWITCHES`, `S.switches`, `S.denyGen` | `control.commands` + `deny_generation` | `iam.emergency_denies`, `authorization_deny_generations` | 🟡 |
 | Observed schemas | `OBSERVED_SCHEMAS` | `schema_origin=observed_proposed` | none | ❌ |
 
@@ -99,6 +99,9 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 - Category is a registry attribute, never a policy: only risk, side effect, financial effect, and egress carry a decision by themselves.
 - Until an observed output schema is approved, outputs are validated only for size and type and every run that used them says so in its completeness record.
 - Policy is deterministic, versioned, and tested; activation is a governed action with approval.
+- A policy version is a record in Postgres, not a context record, and it never reaches a model. The gateway evaluates it on every tool call before the call leaves, with no model in the decision path, and writes one `policy.decision` frame naming the version and the rules that fired.
+- A version compiles from the rules on this page plus the enforcement grants on each agent and the role grants on each operator, so a grant is never restated as a rule.
+- The page names no policy language. Where rule source is shown, a plain sentence above it says what the rule denies and what lets it through.
 - A kill switch flip is recorded with who, when, and why (`S.flipMeta`) and shows its blast radius before confirming.
 - A connection is authorized by a person, never by an agent. The token is exchanged by Oxagen, enveloped under the organization key, and never returned to a screen; the broker downscopes it again for each call.
 - An expired token denies every call through its connection until somebody reconnects, and the provider row, the drill-down and the warning under the table all say so from the same record.
@@ -118,7 +121,7 @@ Top bar collapses to hamburger · current crumb · search glyph · notifications
 ## Permissions
 
 - Read: `tools.read`
-- Writes (each a governed action recorded in Audit): `tools.import`, `tools.provider.edit`, `tools.provider.remove`, `tools.schema.approve`, `toolbelt.create`, `toolbelt.edit`, `toolbelt.assign`, `connection.add`, `connection.authorize`, `connection.edit`, `connection.review`, `connection.revoke`, `policy.edit / policy.activate`, `switch.flip`
+- Writes (each a governed action recorded in Audit): `tools.import`, `tools.provider.edit`, `tools.provider.remove`, `tools.schema.approve`, `toolbelt.create`, `toolbelt.edit`, `toolbelt.assign`, `connection.add`, `connection.authorize`, `connection.edit`, `connection.review`, `connection.revoke`, `policy.draft / policy.edit / policy.discard / policy.activate`, `switch.create / switch.edit / switch.remove / switch.flip`
 
 ## Backend gaps this page depends on
 
@@ -132,7 +135,7 @@ Top bar collapses to hamburger · current crumb · search glyph · notifications
 
 - No heading, tab, panel, column, button or note calls a provider an MCP server. Transport is a column; MCP is one of its values.
 - Every badge that describes trust (enforcement tier, hazard, gate, schema origin, authorization) shows the recorded value and nothing stronger.
-- Every number that is money shows its basis. Headers are rollups of the rows beneath them, never typed twice; Qualifying now is recomputed from the agent records on every render.
+- Every number that is money shows its basis. Headers are rollups of the rows beneath them, never typed twice.
 - A toolbelt row names the providers behind it and the agents assigned it, and both are derived from the belt's tool versions and the assignment record.
 - Every explanation is a chain of links to frames, records, and commits, not a summary.
 - Exactly one gold action per screen (New tool in the header; a tab that holds its own primary takes the gold from the header, which is New toolbelt on Toolbelts, Add a provider on Providers, and Create rule on Policy). Gold is identity; it never encodes state. State reads as a dot and a word, so it survives greyscale.

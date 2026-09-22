@@ -446,6 +446,798 @@ for (const theme of ["light", "dark"]) {
   await page.close();
 }
 
+// A policy version is created, edited and discarded from the Policy tab rather than a wizard, and
+// the constraint is the point: a draft is the only version that edits or deletes, because an active
+// or superseded one is cited by every decision it made.
+{
+  const { page, errs } = await open("#/a-intel/core-platform/tools/policy");
+  const dtxt = () => page.evaluate(() => { const d = document.querySelector("#layer .dlg"); return d ? d.innerText : ""; });
+  const rows = () => page.evaluate(() => [...document.querySelectorAll("table tbody tr")].map((r) => r.innerText).join("|"));
+
+  ok(/Draft a version/.test(await page.evaluate(() => document.body.innerText)), "policy: the panel header drafts a version");
+  ok(/Discard/.test(await rows()), "policy: the draft row carries Discard");
+
+  await page.evaluate(() => openDialog("policynew"));
+  await page.waitForTimeout(120);
+  ok(/Draft a policy version/.test(await dtxt()), "policy: the create dialog opens");
+  await page.evaluate(() => { document.getElementById("pn-note").value = ""; policyDraft(); });
+  await page.waitForTimeout(120);
+  ok(await page.evaluate(() => !!document.getElementById("pn-note")), "policy: a draft with no sentence is refused");
+  await page.evaluate(() => { document.getElementById("pn-note").value = "Raises any egress call to approval"; policyDraft(); });
+  await page.waitForTimeout(200);
+  ok(/pol_v43/.test(await rows()), "policy: the new draft is listed");
+  ok(/Raises any egress call to approval/.test(await rows()), "policy: its sentence is listed");
+  ok(/not run yet/.test(await rows()), "policy: a fresh draft has no test run behind it");
+
+  await page.evaluate(() => openDialog("policyedit", "pol_v43"));
+  await page.waitForTimeout(120);
+  ok(/Edit pol_v43/.test(await dtxt()), "policy: a draft edits");
+  await page.evaluate(() => { document.getElementById("pe-note").value = "Raises any egress call, and any tainted write"; policySaveDraft("pol_v43"); });
+  await page.waitForTimeout(200);
+  ok(/any tainted write/.test(await rows()), "policy: the edit is saved");
+
+  await page.evaluate(() => openDialog("policyedit", "pol_v41"));
+  await page.waitForTimeout(120);
+  ok(/cannot be edited/.test(await dtxt()), "policy: the active version refuses an edit");
+  await page.evaluate(() => openDialog("policydiscard", "pol_v41"));
+  await page.waitForTimeout(120);
+  ok(/cannot be discarded/.test(await dtxt()), "policy: the active version refuses a discard");
+  await page.evaluate(() => closeDialog());
+
+  await page.evaluate(() => openDialog("policydiscard", "pol_v43"));
+  await page.waitForTimeout(120);
+  ok(/Discard pol_v43/.test(await dtxt()), "policy: the discard dialog opens");
+  await page.evaluate(() => policyDiscard("pol_v43"));
+  await page.waitForTimeout(200);
+  const left = await rows();
+  ok(!/pol_v43/.test(left), "policy: the draft row is gone");
+  ok(/pol_v41/.test(left) && /pol_v42/.test(left), "policy: the other versions are untouched");
+  ok(errs.length === 0, "policy: no JavaScript error: " + errs.join(" | "));
+  await page.close();
+}
+
+// A kill switch is created over the three identities an incident names: an agent, the device it
+// runs on, or everything one operator answers for. The switches that ship with the workspace are
+// the ones that must not be removable, and a denying switch is cleared before it is removed.
+{
+  const { page, errs } = await open("#/a-intel/core-platform/tools/switches");
+  const dtxt = () => page.evaluate(() => { const d = document.querySelector("#layer .dlg"); return d ? d.innerText : ""; });
+  const pg = () => page.evaluate(() => document.body.innerText);
+
+  ok(/Create a switch/.test(await pg()), "switches: the scoped section creates a switch");
+  ok(/core-platform/.test(await pg()), "switches: the workspace-wide switch is there on day one");
+
+  await page.evaluate(() => openDialog("switchnew"));
+  await page.waitForTimeout(150);
+  ok(/Create a kill switch/.test(await dtxt()), "switches: the create dialog opens");
+  const scopes = await page.evaluate(() => [...document.querySelectorAll("#ks-kind option")].map((o) => o.value).join("|"));
+  ok(/Agent/.test(scopes) && /Device/.test(scopes) && /Operator/.test(scopes), "switches: agent, device and operator are the scopes, got " + scopes);
+
+  // A device switch names the host, and its blast radius counts the agents enrolled on it.
+  await page.evaluate(() => { document.getElementById("ks-kind").value = "Device"; ksRefresh(); });
+  await page.waitForTimeout(120);
+  const devs = await page.evaluate(() => [...document.querySelectorAll("#ks-target option")].map((o) => o.value).join("|"));
+  ok(/mbp-01/.test(devs), "switches: an enrolled host is offered, got " + devs);
+  ok(/agent/.test(await dtxt()), "switches: the device blast radius counts agents");
+
+  await page.evaluate(() => { document.getElementById("ks-target").value = "mbp-01"; ksRefresh(); document.getElementById("ks-why").value = "Held ready for an incident on this host"; ksCreate(); });
+  await page.waitForTimeout(250);
+  ok(/mbp-01/.test(await pg()), "switches: the new switch is on the page");
+  ok(/allowing/.test(await pg()), "switches: a new switch is created allowing");
+
+  // Nothing may cover the same target twice.
+  await page.evaluate(() => openDialog("switchnew"));
+  await page.waitForTimeout(120);
+  await page.evaluate(() => { document.getElementById("ks-kind").value = "Device"; ksRefresh(); });
+  await page.waitForTimeout(100);
+  await page.evaluate(() => { document.getElementById("ks-target").value = "mbp-01"; ksCreate(); });
+  await page.waitForTimeout(150);
+  ok(await page.evaluate(() => !!document.getElementById("ks-target")), "switches: a second switch on the same target is refused");
+  await page.evaluate(() => closeDialog());
+
+  const made = await page.evaluate(() => (SWITCHES.filter((x) => x.made)[0] || {}).id);
+  ok(!!made, "switches: the created switch is marked as one you made");
+
+  await page.evaluate((id) => openDialog("switchedit", id), made);
+  await page.waitForTimeout(120);
+  ok(/Edit the switch/.test(await dtxt()), "switches: a switch you made edits");
+  await page.evaluate((id) => { document.getElementById("ks-why").value = "Rotated to the CI host"; ksSave(id); }, made);
+  await page.waitForTimeout(200);
+
+  // The shipped switches refuse both.
+  await page.evaluate(() => openDialog("switchedit", "ks_ws"));
+  await page.waitForTimeout(120);
+  ok(/cannot be edited/.test(await dtxt()), "switches: the workspace switch refuses an edit");
+  await page.evaluate(() => openDialog("switchdel", "ks_ws"));
+  await page.waitForTimeout(120);
+  ok(/cannot be removed/.test(await dtxt()), "switches: the workspace switch refuses a removal");
+  await page.evaluate(() => closeDialog());
+
+  // Denying first: a removal that would silently allow traffic is refused.
+  await page.evaluate((id) => { S.switches[id] = true; openDialog("switchdel", id); }, made);
+  await page.waitForTimeout(120);
+  ok(/Clear it before you remove it/.test(await dtxt()), "switches: a denying switch is cleared before it is removed");
+  await page.evaluate((id) => { S.switches[id] = false; openDialog("switchdel", id); }, made);
+  await page.waitForTimeout(120);
+  ok(/Remove the switch/.test(await dtxt()), "switches: an allowing switch removes");
+  await page.evaluate((id) => ksRemove(id), made);
+  await page.waitForTimeout(250);
+  const cards = await page.evaluate(() => [...document.querySelectorAll(".panel-h h3")].map((x) => x.textContent).join("|"));
+  ok(!/mbp-01/.test(cards), "switches: the created switch card is gone, got " + cards);
+  ok(/core-platform/.test(cards) && /every irreversible tool/.test(cards), "switches: the shipped switches are untouched");
+  ok(errs.length === 0, "switches: no JavaScript error: " + errs.join(" | "));
+  await page.close();
+}
+
+// An ontology note is a file on the workspace repository, so writing, changing and retiring one
+// each open a pull request and nothing on the page claims a merge it has not seen.
+{
+  const { page, errs } = await open("#/a-intel/core-platform/steering/ontology");
+  const dtxt = () => page.evaluate(() => { const d = document.querySelector("#layer .dlg"); return d ? d.innerText : ""; });
+  const terms = () => page.evaluate(() => [...document.querySelectorAll("table tbody tr td:first-child b")].map((x) => x.textContent).join("|"));
+  const prs = () => page.evaluate(() => OXPRS.filter((x) => x.kind === "ontology").map((x) => x.files[0][0] + ":" + x.files[0][1]).join("|"));
+
+  ok(/release train/.test(await terms()), "ontology: the shipped definitions are listed");
+  ok(await page.evaluate(() => !!document.querySelector("[onclick*=\"ontnew\"]")), "ontology: the panel writes a new definition");
+  ok(!(await page.evaluate(() => [...document.querySelectorAll(".panel-h h3")].map((x) => x.textContent).join("|"))).includes("Index"), "ontology: the Index roadmap panel is gone");
+
+  // Opening a row reads the note; it offers both writes.
+  await page.evaluate(() => openDialog("ontology", "ont.release-train"));
+  await page.waitForTimeout(150);
+  ok(/grants nothing/.test(await dtxt()), "ontology: the drill-down says the note grants nothing");
+  ok(/Edit/.test(await dtxt()) && /Retire/.test(await dtxt()), "ontology: the drill-down edits and retires");
+
+  // Writing one.
+  await page.evaluate(() => openDialog("ontnew"));
+  await page.waitForTimeout(150);
+  ok(/Write an ontology note/.test(await dtxt()), "ontology: the create dialog opens");
+  const kinds = await page.evaluate(() => [...document.querySelectorAll("#on-kind option")].map((o) => o.value).join("|"));
+  ok(/term/.test(kinds) && /entity/.test(kinds) && /alias/.test(kinds) && /boundary/.test(kinds), "ontology: the four note kinds are offered, got " + kinds);
+
+  await page.evaluate(() => ontCreate());
+  await page.waitForTimeout(120);
+  ok(/Name the term/.test(await page.evaluate(() => document.body.innerText)), "ontology: a note with no term is refused");
+
+  // The wand rewrites what you wrote; it does not decide what the term means.
+  await page.evaluate(() => { document.getElementById("on-term").value = "freeze window"; document.getElementById("on-body").value = "the hours before a cut when nothing lands"; ontWand("on"); });
+  await page.waitForTimeout(120);
+  const tightened = await page.evaluate(() => document.getElementById("on-body").value);
+  ok(/^The hours/.test(tightened) && /grants nothing/.test(tightened), "ontology: the wand tightens the definition, got " + tightened);
+
+  await page.evaluate(() => { document.getElementById("on-ent").value = "a-intel/platform"; ontCreate(); });
+  await page.waitForTimeout(250);
+  ok(/freeze window/.test(await terms()), "ontology: the new definition is in the table");
+  ok(/add:\.oxagen\/ontology\/freeze-window\.toml/.test(await prs()), "ontology: writing one opens a pull request that adds the file, got " + (await prs()));
+  const cost = await page.evaluate(() => (ONTOLOGY.filter((x) => x.term === "freeze window")[0] || {}).token_cost);
+  ok(cost > 0, "ontology: the token cost is computed from the words, got " + cost);
+
+  // Two notes may not define the same term.
+  await page.evaluate(() => openDialog("ontnew"));
+  await page.waitForTimeout(120);
+  await page.evaluate(() => { document.getElementById("on-term").value = "freeze window"; document.getElementById("on-body").value = "Something else entirely."; ontCreate(); });
+  await page.waitForTimeout(150);
+  ok(await page.evaluate(() => !!document.getElementById("on-term")), "ontology: a second definition of the same term is refused");
+  await page.evaluate(() => closeDialog());
+
+  // Changing one.
+  await page.evaluate(() => openDialog("ontedit", "ont.freeze-window"));
+  await page.waitForTimeout(150);
+  ok(/Edit freeze window/.test(await dtxt()), "ontology: a note edits");
+  await page.evaluate(() => { document.getElementById("oe-term").value = "release freeze"; ontSave("ont.freeze-window"); });
+  await page.waitForTimeout(250);
+  ok(/release freeze/.test(await terms()), "ontology: the changed term is in the table");
+  ok(/mod:\.oxagen\/ontology\/release-freeze\.toml/.test(await prs()), "ontology: changing one opens a pull request that modifies the file, got " + (await prs()));
+
+  // Retiring one. The note keeps informing the model until the removal merges.
+  await page.evaluate(() => openDialog("ontretire", "ont.freeze-window"));
+  await page.waitForTimeout(150);
+  ok(/removes/.test(await dtxt()), "ontology: retiring a note says it removes the file");
+  await page.evaluate(() => ontRetire("ont.freeze-window"));
+  await page.waitForTimeout(250);
+  ok(/del:\.oxagen\/ontology\/release-freeze\.toml/.test(await prs()), "ontology: retiring one opens a pull request that removes the file, got " + (await prs()));
+  ok(/release freeze/.test(await terms()), "ontology: a note being retired is still in the table");
+  ok(await page.evaluate(() => [...document.querySelectorAll("table tbody tr")].some((r) => /release freeze/.test(r.innerText) && /retiring/.test(r.innerText))), "ontology: its row says it is being retired");
+
+  // A second retirement, and an edit against one, both refuse.
+  await page.evaluate(() => openDialog("ontedit", "ont.freeze-window"));
+  await page.waitForTimeout(120);
+  ok(/Close that pull request/.test(await dtxt()), "ontology: a note being retired refuses an edit");
+  await page.evaluate(() => openDialog("ontretire", "ont.freeze-window"));
+  await page.waitForTimeout(120);
+  ok(/already being retired/.test(await dtxt()), "ontology: a note being retired refuses a second retirement");
+  await page.evaluate(() => closeDialog());
+
+  ok(errs.length === 0, "ontology: no JavaScript error: " + errs.join(" | "));
+  await page.close();
+}
+
+// What a run ran on prints above the fold, and where the record argues the model or the effort
+// setting was the wrong size, the run says so in both directions. Effort prints a value only where
+// Oxagen proxied the model call and could read the request body.
+{
+  const { page, errs } = await open("#/a-intel/core-platform/runs/run_01K5RN8F3J2GHY6T");
+  const rig = () => page.evaluate(() => { const r = document.querySelector(".rig"); return r ? r.innerText : ""; });
+  const panel = () => page.evaluate(() => {
+    const h = [...document.querySelectorAll(".panel-h h3")].find((x) => x.textContent === "Model fit");
+    return h ? h.closest(".panel").innerText : "";
+  });
+  const fitOf = (id, k) => page.evaluate(([i, key]) => runFit(RUNS.find((r) => r.id === i))[key].verdict, [id, k]);
+
+  // The header strip. This run is gateway tier, so all three print.
+  ok(/OpenAI Agents SDK/.test(await rig()), "run rig: the harness prints above the fold, got " + (await rig()));
+  ok(/claude-opus-5/.test(await rig()), "run rig: the model prints above the fold");
+  ok(/effort high/.test(await rig()), "run rig: the effort setting prints above the fold");
+  ok(await page.evaluate(() => {
+    const r = document.querySelector(".rig"), t = document.querySelector(".tabs");
+    return !!r && (!t || r.getBoundingClientRect().top < t.getBoundingClientRect().bottom + 40);
+  }), "run rig: the strip sits above the tab bar");
+
+  // Both readings, and the change each asks for.
+  ok(/Wrong model tier/.test(await rig()), "run rig: an overkill model is badged in the header");
+  ok(/Wrong effort setting/.test(await rig()), "run rig: an overkill effort setting is badged in the header");
+  await page.evaluate(() => { S.tab.run = "cost"; render(); });
+  await page.waitForTimeout(200);
+  ok(/generated · not the record/.test(await panel()), "run fit: the panel says the reading is generated");
+  ok(/Read from this run only/.test(await panel()), "run fit: the panel cites what it read");
+  ok(/Move this agent to/.test(await panel()), "run fit: the model card offers the change");
+  ok(/Set effort to/.test(await panel()), "run fit: the effort card offers the change");
+
+  // The change is a pull request against the agent definition, never a write from this page.
+  const before = await page.evaluate(() => OXPRS.length);
+  await page.evaluate(() => openDialog("fitchange", "run_01K5RN8F3J2GHY6T:model"));
+  await page.waitForTimeout(150);
+  const fd = await page.evaluate(() => { const d = document.querySelector("#layer .dlg"); return d ? d.innerText : ""; });
+  ok(/\.oxagen\/agents\//.test(fd), "run fit: the change is a pull request against the agent file, got " + fd.slice(0, 120));
+  ok(/sealed/.test(fd) || /this run/.test(fd), "run fit: the dialog says the sealed run keeps the model it ran on");
+  await page.evaluate(() => fitPr("run_01K5RN8F3J2GHY6T:model"));
+  await page.waitForTimeout(150);
+  ok((await page.evaluate(() => OXPRS.length)) === before + 1, "run fit: the change opens exactly one pull request");
+  ok(await page.evaluate(() => /^mod$/.test(OXPRS[0].files[0][0]) && /\.oxagen\/agents\//.test(OXPRS[0].files[0][1])),
+    "run fit: the pull request modifies the agent definition");
+
+  // Both directions fire somewhere in the record, so neither branch is dead code.
+  const verdicts = await page.evaluate(() => {
+    const t = {};
+    RUNS.forEach((r) => { const f = runFit(r); t["m:" + f.model.verdict] = 1; t["e:" + f.effort.verdict] = 1; });
+    return Object.keys(t).sort().join("|");
+  });
+  ok(/m:over/.test(verdicts), "run fit: the model-overkill direction fires, got " + verdicts);
+  ok(/m:under/.test(verdicts), "run fit: the model-undersized direction fires, got " + verdicts);
+  ok(/e:over/.test(verdicts), "run fit: the effort-overkill direction fires, got " + verdicts);
+  ok(/e:under/.test(verdicts), "run fit: the effort-undersized direction fires, got " + verdicts);
+
+  // Effort is read out of the request body, so a harness-tier run says it was not captured and
+  // never guesses a value.
+  ok((await fitOf("run_01K5RM1A5Z9QWE4R", "effort")) === "unseen", "run fit: a harness-tier run captures no effort");
+  ok(await page.evaluate(() => !runEffort(RUNS.find((r) => r.id === "run_01K5RM1A5Z9QWE4R")).v),
+    "run fit: an uncaptured effort holds no value");
+  await page.close();
+  ok(errs.length === 0, "run fit: no JavaScript error: " + errs.join(" | "));
+}
+
+{
+  const { page, errs } = await open("#/a-intel/core-platform/runs/run_01K5RM1A5Z9QWE4R");
+  const rig = await page.evaluate(() => { const r = document.querySelector(".rig"); return r ? r.innerText : ""; });
+  ok(/not captured/.test(rig), "run rig: a harness-tier run reads not captured, got " + rig);
+  ok(!/effort (low|medium|high)/.test(rig), "run rig: a harness-tier run prints no effort value");
+  await page.evaluate(() => { S.tab.run = "cost"; render(); });
+  await page.waitForTimeout(200);
+  const txt = await page.evaluate(() => {
+    const h = [...document.querySelectorAll(".panel-h h3")].find((x) => x.textContent === "Model fit");
+    return h ? h.closest(".panel").innerText : "";
+  });
+  ok(/did not capture the effort setting/.test(txt), "run fit: the panel says why the effort setting was not captured");
+  ok(/gateway and contained tiers/.test(txt), "run fit: the panel names the tiers where effort is captured");
+  ok(errs.length === 0, "run fit: no JavaScript error on a harness-tier run: " + errs.join(" | "));
+  await page.close();
+}
+
+// A person reading a sealed run has to be able to walk to the work: the repository, the branch, the
+// pull requests, and the directory on the machine the agent ran on, each one a link or a copy.
+{
+  const { page, errs } = await open("#/a-intel/core-platform/runs/run_01K5RQ4B9C7XTN2P");
+  const where = () => page.evaluate(() => { const w = document.querySelector(".where"); return w ? w.innerText : ""; });
+  const hrefs = () => page.evaluate(() => [...document.querySelectorAll(".where a")].map((a) => a.getAttribute("href")).join(" "));
+
+  ok(/a-intel\/platform/.test(await where()), "run where: the repository prints, got " + (await where()));
+  ok(/github\.com\/a-intel\/platform(\s|$)/.test(await hrefs()), "run where: the repository links out, got " + (await hrefs()));
+  ok(/refs\/pull\/482\/head/.test(await where()), "run where: the branch prints");
+  ok(/a-intel\/platform#482/.test(await where()), "run where: the pull request prints");
+  ok(/\/pull\/482$/m.test((await hrefs()).split(" ").pop() || "") || /\/pull\/482\b/.test(await hrefs()),
+    "run where: the pull request links out, got " + (await hrefs()));
+  ok(/ci-runner-07:/.test(await where()), "run where: the machine prints");
+  ok(/\/home\/runner\/work\/platform/.test(await where()), "run where: the checkout path prints");
+
+  // A pull request head has no /tree address, so the branch chip links to the pull request instead.
+  ok(!/\/tree\/refs\/pull/.test(await hrefs()), "run where: a pull request head is not linked as a branch");
+
+  // The path is a copy target, and copying says so.
+  await page.evaluate(() => copyPath("/tmp/x"));
+  await page.waitForTimeout(120);
+  ok(/Copied \/tmp\/x/.test(await page.evaluate(() => document.body.innerText)), "run where: the path copies");
+
+  // The whole strip sits in the header, above the tab bar.
+  ok(await page.evaluate(() => {
+    const w = document.querySelector(".where"), t = document.querySelector(".tabs");
+    return !!w && !!t && w.getBoundingClientRect().top < t.getBoundingClientRect().top;
+  }), "run where: the strip sits above the tab bar");
+
+  // Linked work reached no screen before this; the Issues tab is where it lives.
+  await page.evaluate(() => { S.tab.run = "issues"; render(); });
+  await page.waitForTimeout(250);
+  const heads = await page.evaluate(() => [...document.querySelectorAll(".panel-h h3")].map((x) => x.textContent).join("|"));
+  ok(/Pull requests and artifacts/.test(heads), "run where: the artifacts panel renders, got " + heads);
+  ok(/Repositories/.test(heads), "run where: the repositories panel renders");
+  ok((heads.match(/Issues/g) || []).length === 1, "run where: the issues list is not printed twice, got " + heads);
+  ok(await page.evaluate(() => [...document.querySelectorAll(".lw-item a")].some((a) => /github\.com/.test(a.getAttribute("href")))),
+    "run where: an artifact links to the forge");
+  ok(errs.length === 0, "run where: no JavaScript error: " + errs.join(" | "));
+  await page.close();
+}
+
+// A run with no recorded checkout on its host says the path was worked out, and never presents it
+// as a fact Oxagen holds.
+{
+  const { page, errs } = await open("#/a-intel/core-platform/runs/run_01K5RS7M2E8FJ3QW");
+  const w = await page.evaluate(() => { const x = document.querySelector(".where"); return x ? x.innerText : ""; });
+  ok(/derived/.test(w), "run where: an unrecorded checkout is marked derived, got " + w);
+  ok(/mbell-mbp-16:/.test(w), "run where: the derived path names the host the agent ran on");
+  ok(/no pull request/.test(w), "run where: a run that opened none says so");
+  ok(errs.length === 0, "run where: no JavaScript error on a derived path: " + errs.join(" | "));
+  await page.close();
+}
+
+// The Changes panel and the header strip read the same run, so they must name the same pull
+// request. The panel used to print "none yet" on a run that pushed to a pull request head.
+{
+  const { page, errs } = await open("#/a-intel/core-platform/runs/run_01K5RQ4B9C7XTN2P");
+  const panel = () => page.evaluate(() => {
+    const hs = [...document.querySelectorAll(".panel")];
+    const p = hs.find((x) => /Changes/.test(x.querySelector(".panel-h h3")?.textContent || ""));
+    return p ? p.innerText : "";
+  });
+  const t = await panel();
+  ok(t !== "", "run changes: the panel renders");
+  ok(/a-intel\/platform#482/.test(t), "run changes: the pull request the run pushed to prints, got " + t);
+  ok(!/none yet/.test(t), "run changes: a run with a pull request does not read none yet");
+  ok(/Base\s*\n?\s*main/.test(t), "run changes: the base branch prints, got " + t);
+
+  // The pull request is a link out, and the strip above agrees with it.
+  ok(await page.evaluate(() => {
+    const p = [...document.querySelectorAll(".panel")].find((x) => /Changes/.test(x.querySelector(".panel-h h3")?.textContent || ""));
+    return !!p && [...p.querySelectorAll("a")].some((a) => /\/pull\/482/.test(a.getAttribute("href") || ""));
+  }), "run changes: the pull request links out");
+
+  // The strip carries the repository and the branch, so the panel no longer repeats them.
+  const heads = await page.evaluate(() => [...document.querySelectorAll(".panel-h h3")].map((x) => x.textContent).join("|"));
+  ok(!/^Repository$|\|Repository\|/.test(heads), "run changes: the old Repository panel is gone, got " + heads);
+  ok(!/\bRepository\b/.test(t), "run changes: the panel does not repeat the repository row");
+  ok(!/^Branch\b/m.test(t), "run changes: the panel does not repeat the branch row");
+  ok(errs.length === 0, "run changes: no JavaScript error: " + errs.join(" | "));
+  await page.close();
+}
+
+// The policy page never answered where a version is kept or what reads it, and it named a policy
+// language instead.
+{
+  const { page, errs } = await open("#/a-intel/core-platform/tools/policy");
+  const txt = await page.evaluate(() => document.body.innerText);
+  ok(!/Cedar/i.test(txt), "policy: the page names no policy language");
+  ok(/tools\.policy_versions/.test(txt), "policy: the store is named");
+
+  const heads = await page.evaluate(() => [...document.querySelectorAll(".panel-h h3")].map((x) => x.textContent).join("|"));
+  ok(/Where a version lives/.test(heads), "policy: the storage panel renders, got " + heads);
+
+  const where = await page.evaluate(() => {
+    const p = [...document.querySelectorAll(".panel")].find((x) => /Where a version lives/.test(x.querySelector(".panel-h h3")?.textContent || ""));
+    return p ? p.innerText : "";
+  });
+  for (const row of ["Store", "In regulated mode", "Compiled from", "Who reads it", "What it writes"]) {
+    ok(new RegExp(row).test(where), "policy: the storage panel states " + row);
+  }
+  ok(/not a context record/.test(where), "policy: a version is distinguished from a context record");
+  ok(/\.oxagen\/policy\//.test(where), "policy: regulated mode names the file");
+  ok(/policy\.decision/.test(where), "policy: the frame it writes is named");
+
+  // The rule sample is glossed in plain words before the source.
+  ok(await page.evaluate(() => {
+    const pre = [...document.querySelectorAll("pre")].find((x) => /forbid/.test(x.textContent));
+    if (!pre) return false;
+    const prev = pre.previousElementSibling;
+    return !!prev && /denies a payment unless/.test(prev.textContent);
+  }), "policy: the rule sample carries a plain sentence above it");
+
+  // Opening a version says where it is kept.
+  await page.evaluate(() => openDialog("policyver", POLICIES.filter((p) => p.state === "active")[0].v));
+  await page.waitForTimeout(200);
+  const dtext = await page.evaluate(() => { const d = document.querySelector("#layer .dlg"); return d ? d.innerText : ""; });
+  ok(/Stored in/.test(dtext), "policy: the version dialog says where it is stored, got " + dtext.slice(0, 200));
+  ok(!/Cedar/i.test(dtext), "policy: the version dialog names no policy language");
+  ok(errs.length === 0, "policy: no JavaScript error: " + errs.join(" | "));
+  await page.close();
+}
+
+// The mandate page wired Change limits to the grant wizard, so editing opened a form that creates
+// a second mandate, and Revoke was a toast that reported a write it never made.
+{
+  const { page, errs } = await open("#/a-intel/finops/agents/invoice-bot/mandates/mnd_7K2ETQ4");
+  const acts = await page.evaluate(() =>
+    [...document.querySelectorAll(".phead .acts button")].map((b) => b.getAttribute("onclick") + "|" + b.textContent.trim()));
+  ok(acts.some((a) => /openDialog\('mandateedit','mnd_7K2ETQ4'\)\|Change limits/.test(a)),
+    "mandate: Change limits opens the edit dialog on this mandate, got " + acts.join(" ~ "));
+  ok(acts.some((a) => /openDialog\('mandaterevoke','mnd_7K2ETQ4'\)\|Revoke/.test(a)),
+    "mandate: Revoke opens the revoke dialog on this mandate, got " + acts.join(" ~ "));
+  ok(!acts.some((a) => /openDialog\('mandate'[,)]/.test(a)), "mandate: no header button opens the grant wizard");
+  ok(!acts.some((a) => /\bact\(/.test(a)), "mandate: no header button is a toast stub, got " + acts.join(" ~ "));
+
+  await page.evaluate(() => openDialog("mandateedit", "mnd_7K2ETQ4"));
+  await page.waitForTimeout(250);
+  const ed = await page.evaluate(() => { const d = document.querySelector("#layer .dlg"); return d ? d.innerText : ""; });
+  ok(/Edit mnd_7K2ETQ4/.test(ed), "mandate: the edit dialog names this mandate, got " + ed.slice(0, 120));
+  ok(/Per call/.test(ed) && /Approval above/.test(ed), "mandate: the edit dialog carries the ceilings");
+  ok(!/auto-approval/i.test(ed), "mandate: the edit hint does not defer to auto-approval rules, which are cut");
+
+  await page.evaluate(() => { closeDialog(); openDialog("mandaterevoke", "mnd_7K2ETQ4"); });
+  await page.waitForTimeout(250);
+  const rv = await page.evaluate(() => { const d = document.querySelector("#layer .dlg"); return d ? d.innerText : ""; });
+  ok(/Revoke mnd_7K2ETQ4/.test(rv), "mandate: the revoke dialog names this mandate, got " + rv.slice(0, 120));
+  ok(/reserved/.test(rv) && /settled/.test(rv), "mandate: the revoke dialog says what is reserved and what settled");
+  ok(/ledger is kept, never deleted/i.test(rv), "mandate: the revoke dialog keeps the ledger");
+  ok(errs.length === 0, "mandate: no JavaScript error: " + errs.join(" | "));
+  await page.close();
+}
+
+// The connection drill uniquely holds the recent grants, the review date and what the broker mints.
+// Cutting the standalone Connections tab left nothing that reached it.
+{
+  const { page, errs } = await open("#/a-intel/core-platform/tools/servers");
+  const linked = await page.evaluate(() =>
+    [...document.querySelectorAll(".grant-row")].map((r) => {
+      const a = r.children[3].querySelector("a");
+      return a ? a.getAttribute("onclick") || "" : "no link";
+    }));
+  ok(linked.length > 0 && linked.every((a) => /openDialog\('conn','con_/.test(a)),
+    "grants log: every connection cell opens its drill, got " + linked.join(" ~ "));
+
+  await page.evaluate(() => openDialog("conn", "con_01K2A9"));
+  await page.waitForTimeout(250);
+  const cd = await page.evaluate(() => { const d = document.querySelector("#layer .dlg"); return d ? d.innerText : ""; });
+  ok(/con_01K2A9/.test(cd), "connection drill: it opens on the connection asked for, got " + cd.slice(0, 80));
+  ok(/Downscope/.test(cd), "connection drill: the downscope prints");
+  ok(/Recent grants/i.test(cd), "connection drill: the recent grants print");
+  ok(/next 20\d\d-\d\d-\d\d/.test(cd), "connection drill: the next review date prints");
+  const cacts = await page.evaluate(() => {
+    const d = document.querySelector("#layer .dlg");
+    return d ? [...d.querySelectorAll("button,a")].map((b) => b.getAttribute("onclick") || "").join(" ") : "";
+  });
+  ok(/connedit/.test(cacts), "connection drill: it reaches the editor, got " + cacts.slice(0, 200));
+  ok(/connrevoke/.test(cacts), "connection drill: it reaches revoke, got " + cacts.slice(0, 200));
+
+  // The server drill names its connection, so it must reach the drill too.
+  await page.evaluate(() => { closeDialog(); openDialog("server", "jira"); });
+  await page.waitForTimeout(250);
+  const sv = await page.evaluate(() => {
+    const d = document.querySelector("#layer .dlg");
+    if (!d) return "nodialog";
+    const a = [...d.querySelectorAll("a")].find((x) => /openDialog\('conn'/.test(x.getAttribute("onclick") || ""));
+    return a ? a.getAttribute("onclick") : "none";
+  });
+  ok(/openDialog\('conn','con_/.test(sv), "server drill: the connection name opens its drill, got " + sv);
+  ok(errs.length === 0, "connection drill: no JavaScript error: " + errs.join(" | "));
+  await page.close();
+}
+
+// The Data plane tab went out with a commit that named every other tab it cut and never named this
+// one, while organization.md still lists it as backed today.
+{
+  const { page, errs } = await open("#/a-intel");
+  const tabs = await page.evaluate(() =>
+    [...document.querySelectorAll('[role="tab"]')].map((t) => t.textContent.replace(/\d+$/, "").trim()));
+  ok(tabs.includes("Data plane"), "organization: the Data plane tab is present, got " + tabs.join(" ~ "));
+  ok(tabs.length === 7, "organization: seven tabs, got " + tabs.length + ": " + tabs.join(" ~ "));
+
+  const sub = await page.evaluate(() => {
+    const ps = [...document.querySelectorAll(".phead .t p")];
+    return ps.length ? ps[ps.length - 1].textContent.trim() : "";
+  });
+  for (const word of ["People", "roles", "invitations", "workspaces", "API keys"]) {
+    ok(sub.includes(word), "organization: the subtext names " + word + ", got " + sub);
+  }
+
+  // Task #24 cut the Model key and In-firewall routes panels and moved the key facts into
+  // Funding source. The spec described the old shape for four commits.
+  await page.evaluate(() => orgTab("funding"));
+  await page.waitForTimeout(350);
+  const fheads = await page.evaluate(() => [...document.querySelectorAll(".panel-h h3")].map((x) => x.textContent.trim()));
+  ok(fheads.join(" ~ ") === "Funding source ~ Model routes",
+    "funding: Funding source then Model routes, got " + fheads.join(" ~ "));
+  const ftxt = await page.evaluate(() =>
+    [...document.querySelectorAll(".panel")].map((x) => x.innerText).join("\n"));
+  ok(/client_attested/.test(ftxt), "funding: the Total row names its basis");
+  ok(/Rotate/.test(ftxt) && /Revoke/.test(ftxt), "funding: the held key carries rotate and revoke");
+
+  await page.evaluate(() => orgTab("plane"));
+  await page.waitForTimeout(350);
+  const heads = await page.evaluate(() => [...document.querySelectorAll(".panel-h h3")].map((x) => x.textContent.trim()));
+  for (const head of ["Data plane", "Retention", "Tenant isolation"]) {
+    ok(heads.includes(head), "data plane: the " + head + " panel renders, got " + heads.join(" ~ "));
+  }
+  const ptxt = await page.evaluate(() =>
+    [...document.querySelectorAll(".panel")].map((x) => x.innerText).join("\n"));
+  for (const word of ["Shared", "Dedicated", "Behind the firewall", "Request a change of plane", "Rotate keys"]) {
+    ok(ptxt.includes(word), "data plane: " + word + " prints");
+  }
+  ok(!/In-firewall routes/.test(ptxt), "data plane: it does not point at the In-firewall routes panel, which is cut");
+  ok(!/—/.test(ptxt), "data plane: no em dash on the tab");
+
+  await page.evaluate(() => openDialog("plane"));
+  await page.waitForTimeout(250);
+  const pd = await page.evaluate(() => { const d = document.querySelector("#layer .dlg"); return d ? d.innerText : ""; });
+  ok(/Request a change of data plane/.test(pd), "data plane: the dialog opens, got " + pd.slice(0, 120));
+  ok(!/—/.test(pd), "data plane: no em dash in the dialog");
+  ok(errs.length === 0, "data plane: no JavaScript error: " + errs.join(" | "));
+  await page.close();
+}
+
+// The Change identity dialog listed the roles as plain badges and told you to go edit them on the
+// panel behind it. A drill-down that cannot write is a dead end.
+{
+  const { page, errs } = await open("#/a-intel/core-platform/agents/summarizer");
+  const key = await page.evaluate(() => AGENTS[0].key);
+  await page.evaluate((k) => openDialog("identity", k), key);
+  await page.waitForTimeout(300);
+  const chips = await page.evaluate(() => document.querySelectorAll("#layer .dlg .rl-chip button").length);
+  ok(chips > 0, "identity: each role chip carries its own remove, got " + chips);
+  const btns = await page.evaluate(() =>
+    [...document.querySelectorAll("#layer .dlg button")].map((b) => b.textContent.trim()));
+  ok(btns.includes("Assign role"), "identity: the dialog assigns a role, got " + btns.join(" ~ "));
+  const txt = await page.evaluate(() => document.querySelector("#layer .dlg").innerText);
+  ok(!/from the Identity panel/.test(txt), "identity: the dialog does not send you to another panel to edit");
+  ok(errs.length === 0, "identity: no JavaScript error: " + errs.join(" | "));
+  await page.close();
+}
+
+// Two gate buttons carried the mid-dot the plain-noun rule bans, and one pointed at a Mandates
+// ledger tab that no longer exists.
+{
+  const { page, errs } = await open("#/a-intel/core-platform/steering/policy");
+  const opens = await page.evaluate(() =>
+    [...document.querySelectorAll("button")].map((b) => b.textContent.trim()).filter((t) => /^Open /.test(t)));
+  ok(opens.length > 0, "gates: an Edited on button opens its editor");
+  ok(!opens.some((l) => /·/.test(l)), "gates: no Open button carries a mid-dot, got " + opens.join(" ~ "));
+  ok(!opens.some((l) => /Mandates/.test(l)), "gates: no Open button points at the cut Mandates ledger, got " + opens.join(" ~ "));
+  for (const label of ["Open the policy tab", "Open the kill switches tab", "Open the record"]) {
+    ok(opens.includes(label), "gates: " + label + " is present, got " + opens.join(" ~ "));
+  }
+  ok(errs.length === 0, "gates: no JavaScript error: " + errs.join(" | "));
+  await page.close();
+}
+
+
+// A skill could be written and edited and never retired. One written here is a file; one installed
+// is a line in workspace.toml. Both are a pull request, and the drill-down offers it either way.
+{
+  const { page, errs } = await open("#/a-intel/core-platform/steering/skills");
+  const foot = async (kind, arg) => {
+    await page.evaluate(([k, a]) => { closeDialog(); openDialog(k, a); }, [kind, arg]);
+    await page.waitForTimeout(220);
+    return await page.evaluate(() =>
+      [...document.querySelectorAll("#layer .dlg .dlg-f button")].map((b) => b.textContent.trim()));
+  };
+  const inTree = await foot("skill", "a-intel.release-notes-from-prs");
+  ok(inTree.includes("Retire"), "skills: a file-backed skill offers Retire, got " + inTree.join(" ~ "));
+  ok(inTree.indexOf("Close") < inTree.indexOf("Retire"),
+    "skills: Close comes before Retire, as in every other drill-down, got " + inTree.join(" ~ "));
+  ok(inTree.filter((b) => /^(Edit the file|Send the digest for approval)$/.test(b)).length === 1,
+    "skills: the footer keeps exactly one primary, got " + inTree.join(" ~ "));
+  const installed = await foot("skill", "oxagen.pdf-extract");
+  ok(installed.includes("Retire"), "skills: an installed skill offers Retire too, got " + installed.join(" ~ "));
+
+  await page.evaluate(() => { closeDialog(); openDialog("skretire", "a-intel.release-notes-from-prs"); });
+  await page.waitForTimeout(220);
+  const rt = await page.evaluate(() => document.querySelector("#layer .dlg").innerText);
+  ok(/\.oxagen\/skills\/release-notes-from-prs\/SKILL\.md/.test(rt),
+    "skills: the confirm names the file the pull request removes, got " + rt.slice(0, 160));
+  ok(/digest/.test(rt), "skills: the confirm says the runs that cited it keep their digest");
+  await page.evaluate(() => { closeDialog(); openDialog("skretire", "oxagen.pdf-extract"); });
+  await page.waitForTimeout(220);
+  const it = await page.evaluate(() => document.querySelector("#layer .dlg").innerText);
+  ok(/workspace\.toml/.test(it), "skills: retiring an installed skill edits workspace.toml, got " + it.slice(0, 160));
+  ok(!/SKILL\.md/.test(it), "skills: an installed skill has no SKILL.md in this tree to remove");
+
+  const before = await page.evaluate(() => OXPRS.length);
+  const pr = await page.evaluate(() => {
+    closeDialog(); skRetire("a-intel.release-notes-from-prs");
+    return { n: OXPRS.length, kind: OXPRS[0].kind, op: OXPRS[0].files[0][0], file: OXPRS[0].files[0][1] };
+  });
+  await page.waitForTimeout(300);
+  ok(pr.n === before + 1, "skills: retiring opens one pull request, got " + before + " -> " + pr.n);
+  ok(pr.kind === "skill" && pr.op === "del", "skills: it is a skill pull request that deletes, got " + pr.kind + "/" + pr.op);
+  ok(/SKILL\.md$/.test(pr.file), "skills: it removes the SKILL.md, got " + pr.file);
+  const rows = await page.evaluate(() => document.body.innerText.toLowerCase());
+  ok(/retiring/.test(rows), "skills: the row says it is being retired while the pull request is open");
+  await page.evaluate(() => { closeDialog(); openDialog("skretire", "a-intel.release-notes-from-prs"); });
+  await page.waitForTimeout(220);
+  const again = await page.evaluate(() => document.querySelector(".dlg-h h2").textContent);
+  ok(/already being retired/.test(again), "skills: a second retire does not open a second pull request, got " + again);
+  ok(errs.length === 0, "skills: no JavaScript error: " + errs.join(" | "));
+  await page.close();
+}
+
+// A repository could be seen and never unlinked, and one sitting there available could never be
+// linked. Main is neither: moving main is an owner action and this dialog never offers it.
+{
+  const { page, errs } = await open("#/a-intel/core-platform/repositories");
+  const foot = async (n) => {
+    await page.evaluate((x) => { closeDialog(); openDialog("repo", x); }, n);
+    await page.waitForTimeout(220);
+    return await page.evaluate(() =>
+      [...document.querySelectorAll("#layer .dlg .dlg-f button")].map((b) => b.textContent.trim()));
+  };
+  const main = await foot("a-intel/platform");
+  ok(!main.includes("Unlink"), "repositories: the main repo cannot be unlinked here, got " + main.join(" ~ "));
+  const linked = await foot("a-intel/billing");
+  ok(linked.includes("Unlink"), "repositories: a linked repo offers Unlink, got " + linked.join(" ~ "));
+  const avail = await foot("a-intel/ledger-service");
+  ok(avail.includes("Link to this workspace"), "repositories: an available repo offers Link, got " + avail.join(" ~ "));
+  ok(!avail.includes("Unlink"), "repositories: an unlinked repo has nothing to unlink, got " + avail.join(" ~ "));
+  ok(avail.filter((b) => b === "Link to this workspace" || b === "Add Oxagen").length === 2,
+    "repositories: Link and Add Oxagen are both offered, got " + avail.join(" ~ "));
+  const primaries = await page.evaluate(() =>
+    document.querySelectorAll("#layer .dlg .dlg-f button.primary").length);
+  ok(primaries === 1, "repositories: the footer carries one primary, got " + primaries);
+
+  await page.evaluate(() => { closeDialog(); openDialog("repounlink", "a-intel/billing"); });
+  await page.waitForTimeout(220);
+  const ut = await page.evaluate(() => document.querySelector("#layer .dlg").innerText);
+  ok(/nothing is deleted/i.test(ut), "repositories: the confirm says the repository is untouched, got " + ut.slice(0, 160));
+  const trip = await page.evaluate(() => {
+    closeDialog(); repoUnlink("a-intel/billing");
+    const off = { linked: ws().linked.indexOf("a-intel/billing") >= 0, role: repoByName("a-intel/billing").role };
+    repoLink("a-intel/billing");
+    return { off, on: { linked: ws().linked.indexOf("a-intel/billing") >= 0, role: repoByName("a-intel/billing").role } };
+  });
+  await page.waitForTimeout(300);
+  ok(trip.off.linked === false && trip.off.role === "available",
+    "repositories: unlinking drops it from the workspace and leaves it available, got " + JSON.stringify(trip.off));
+  ok(trip.on.linked === true && trip.on.role === "linked",
+    "repositories: linking it back is the same round trip, got " + JSON.stringify(trip.on));
+  ok(errs.length === 0, "repositories: no JavaScript error: " + errs.join(" | "));
+  await page.close();
+}
+
+// A working copy could be connected and never disconnected. The link is one gitignored file on a
+// laptop, so this is not a pull request and the confirm has to say so.
+{
+  const { page, errs } = await open("#/a-intel/core-platform/repositories/copies");
+  const cid = await page.evaluate(() => wsCopies()[0].id);
+  await page.evaluate((i) => { closeDialog(); openDialog("workcopy", i); }, cid);
+  await page.waitForTimeout(220);
+  const foot = await page.evaluate(() =>
+    [...document.querySelectorAll("#layer .dlg .dlg-f button")].map((b) => b.textContent.trim()));
+  ok(foot.includes("Disconnect"), "copies: the drill-down disconnects the copy, got " + foot.join(" ~ "));
+  await page.evaluate((i) => { closeDialog(); openDialog("copyoff", i); }, cid);
+  await page.waitForTimeout(220);
+  const ct = await page.evaluate(() => document.querySelector("#layer .dlg").innerText);
+  ok(/workspace\.json/.test(ct), "copies: the confirm names the gitignored link file, got " + ct.slice(0, 160));
+  ok(/nothing on disk is deleted/i.test(ct), "copies: the confirm says the directory is left alone");
+  ok(/oxagen init/.test(ct), "copies: the confirm says how to link it back");
+  ok(!/pull request/i.test(ct), "copies: disconnecting is not a pull request, got " + ct.slice(0, 200));
+  const n = await page.evaluate((i) => {
+    const before = WORKCOPIES.length; closeDialog(); copyDisconnect(i);
+    return { before, after: WORKCOPIES.length };
+  }, cid);
+  await page.waitForTimeout(300);
+  ok(n.after === n.before - 1, "copies: disconnecting removes the row, got " + n.before + " -> " + n.after);
+  const left = await page.evaluate(() => [...document.querySelectorAll("table tbody tr")].length);
+  ok(left >= 0, "copies: the table renders after the row goes, got " + left + " rows");
+  ok(errs.length === 0, "copies: no JavaScript error: " + errs.join(" | "));
+  await page.close();
+}
+
+// The archived status was rendered in three places and produced by nothing, so a record could be
+// published and amended but never taken out of force.
+{
+  const { page, errs } = await open("#/a-intel/core-platform/steering/records");
+  const rid = await page.evaluate(() => RECORDS.filter((r) => r.status === "published")[0].id);
+  await page.goto(FILE + "?product=1&state=loaded&mobile=0#/a-intel/core-platform/steering/records/" + encodeURIComponent(rid));
+  await page.waitForTimeout(400);
+  const acts = await page.evaluate(() =>
+    [...document.querySelectorAll(".phead .acts button")].map((b) => b.textContent.trim()));
+  ok(acts.includes("Archive"), "records: the record page archives the record, got " + acts.join(" ~ "));
+  ok(acts.includes("Propose a change"), "records: it still proposes a change, got " + acts.join(" ~ "));
+
+  await page.evaluate((i) => { closeDialog(); openDialog("crecarchive", i); }, rid);
+  await page.waitForTimeout(220);
+  const at = await page.evaluate(() => document.querySelector("#layer .dlg").innerText);
+  ok(/status = "archived"/.test(at), "records: the confirm names the field it sets, got " + at.slice(0, 200));
+  ok(/in force until/i.test(at), "records: the confirm says it steers runs until the merge");
+  ok(/nothing is deleted/i.test(at), "records: the confirm says the file and the lineage stay");
+
+  const pr = await page.evaluate((i) => {
+    const before = OXPRS.length; closeDialog(); crecArchive(i);
+    return { before, after: OXPRS.length, kind: OXPRS[0].kind, file: OXPRS[0].files[0][1],
+      note: OXPRS[0].files[0][2], pend: S.recPending[i] ? S.recPending[i].branch : null };
+  }, rid);
+  await page.waitForTimeout(400);
+  ok(pr.after === pr.before + 1, "records: archiving opens one pull request, got " + pr.before + " -> " + pr.after);
+  ok(pr.kind === "record", "records: it is a context record pull request, got " + pr.kind);
+  ok(/^\.oxagen\/rules\//.test(pr.file), "records: it edits the record file, got " + pr.file);
+  ok(/archived/.test(pr.note), "records: the change is the status, got " + pr.note);
+  ok(/\.archive$/.test(pr.pend || ""), "records: the page shows the branch while it is open, got " + pr.pend);
+
+  await page.evaluate((i) => { closeDialog(); openDialog("crecarchive", i); }, rid);
+  await page.waitForTimeout(220);
+  const twice = await page.evaluate(() => document.querySelector(".dlg-h h2").textContent);
+  ok(/already has a pull request open/.test(twice),
+    "records: two changes are never proposed over the same file, got " + twice);
+
+  const arch = await page.evaluate(() => {
+    const r = RECORDS.filter((x) => x.status === "archived")[0];
+    return r ? r.id : null;
+  });
+  if (arch) {
+    await page.evaluate((i) => { closeDialog(); openDialog("crecarchive", i); }, arch);
+    await page.waitForTimeout(220);
+    const done = await page.evaluate(() => document.querySelector(".dlg-h h2").textContent);
+    ok(/is already archived/.test(done), "records: an archived record is not archived twice, got " + done);
+  }
+  ok(errs.length === 0, "records: no JavaScript error: " + errs.join(" | "));
+  await page.close();
+}
+
+
+// The memory tab told you to promote a memory and no row offered it, and nothing forgot one:
+// a fact an agent got wrong kept being recalled with no way to stop it.
+{
+  const { page, errs } = await open("#/a-intel/core-platform/steering/memory");
+  const clickable = await page.evaluate(() => document.querySelectorAll("table tbody tr.click").length);
+  const total = await page.evaluate(() => stgMemory("core-platform").length);
+  ok(clickable === total, "memory: every row opens its item, got " + clickable + " of " + total);
+  const mid = await page.evaluate(() => MEMORY[0].id);
+  await page.evaluate((i) => { closeDialog(); openDialog("memory", i); }, mid);
+  await page.waitForTimeout(250);
+  const foot = await page.evaluate(() =>
+    [...document.querySelectorAll("#layer .dlg .dlg-f button")].map((b) => b.textContent.trim()));
+  for (const b of ["Close", "Forget", "Promote to a record"]) {
+    ok(foot.includes(b), "memory: the drill-down offers " + b + ", got " + foot.join(" ~ "));
+  }
+  const mt = await page.evaluate(() => document.querySelector("#layer .dlg").innerText);
+  ok(/Where it came from/.test(mt), "memory: the drill-down names the run that left it, got " + mt.slice(0, 160));
+  ok(/times in 30 days/.test(mt), "memory: it says how often the memory is recalled");
+  ok(/tokens every time it is selected/.test(mt), "memory: it says what a recall costs");
+  ok(/published record/i.test(mt), "memory: it says where the memory sits against a published record");
+
+  await page.evaluate((i) => { closeDialog(); openDialog("memforget", i); }, mid);
+  await page.waitForTimeout(250);
+  const ft = await page.evaluate(() => document.querySelector("#layer .dlg").innerText);
+  ok(/every frame stays/.test(ft), "memory: forgetting leaves the runs alone, got " + ft.slice(0, 200));
+  ok(/Promote is the other answer/.test(ft), "memory: the confirm offers the other answer");
+  const n = await page.evaluate((i) => {
+    const before = MEMORY.length; closeDialog(); memForget(i);
+    return { before, after: MEMORY.length, rows: document.querySelectorAll("table tbody tr.click").length };
+  }, mid);
+  await page.waitForTimeout(300);
+  ok(n.after === n.before - 1, "memory: forgetting drops the memory, got " + n.before + " -> " + n.after);
+  ok(n.rows === n.after, "memory: the table re-renders without it, got " + n.rows + " rows for " + n.after);
+
+  const mid2 = await page.evaluate(() => MEMORY[0].id);
+  const body = await page.evaluate((i) => memById(i).body, mid2);
+  await page.evaluate((i) => { closeDialog(); memPromote(i); }, mid2);
+  await page.waitForTimeout(350);
+  const title = await page.evaluate(() => document.querySelector(".dlg-h h2").textContent);
+  ok(/context record/i.test(title), "memory: promoting opens the record wizard, got " + title);
+  const wz = await page.evaluate(() => S.wz && { kind: S.wz.kind, from: S.wz.fromMemory, desc: S.wz.desc });
+  ok(wz && wz.kind === "record" && wz.from === mid2,
+    "memory: the wizard knows which memory it came from, got " + JSON.stringify(wz && { k: wz.kind, f: wz.from }));
+  ok(wz && wz.desc === body, "memory: the wizard is seeded with the memory, not left empty");
+  const fields = await page.evaluate(() =>
+    [...document.querySelectorAll("#layer .dlg textarea, #layer .dlg input")].map((x) => x.value).join(" ~ "));
+  ok(fields.includes(body), "memory: the seeded text reaches the field, got " + fields.slice(0, 160));
+  ok(errs.length === 0, "memory: no JavaScript error: " + errs.join(" | "));
+  await page.close();
+}
+
 await browser.close();
 console.log(`${passes} passed, ${fails} failed`);
 process.exit(fails ? 1 : 0);
