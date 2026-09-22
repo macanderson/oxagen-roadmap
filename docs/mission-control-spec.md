@@ -353,7 +353,7 @@ An agent is registered once, in a workspace, with:
 - `harness`: `stella` | `claude-code` | `claude-agent-sdk` | `custom`.
 - `principal_id`.
 - A **long-lived agent credential**. This is an API key issued to the operator once. It is stored as a hash (a one-way fingerprint of the key), locked to one purpose, and revocable.
-- **Short-lived run tokens** (target, not built: no run token exists on `main` at 2026-09-18, and they arrive with the gateway in Phase 4, §17.2) minted by the gateway at run start. The default life is fifteen minutes, refreshed on the control channel. Every model-proxy and tool-gateway call carries a run token. Revoking the agent credential or suspending the agent invalidates every run token at the next call. This is what makes a halt stick (§7.4).
+- **Short-lived run tokens** minted by the gateway. The default life is fifteen minutes. Every model-proxy call carries a run token, and revoking the host or rotating the gateway's signing key invalidates every run token at the next call. This is what makes a halt stick (§7.4). **Built for model calls on 2026-09-22 (oxagen ADR-138):** `tachod` signs `oxrt_` tokens, Claude Code fetches one through `apiKeyHelper` every five minutes and on any 401, Codex holds a static one bounded by the enrollment's expiry, and every mint is a `token_issued` frame. Run tokens on tool-gateway calls arrive with the MCP aggregator.
 - For hook-enrolled hosts (Claude Code), the host device key (Ed25519) from the agent enrollment. It signs checkpoints.
 
 Delegation ceiling: an agent can never do more than the person it acts for. Its effective permission is its own grants intersected with the invoking human's grants. Subagents can only narrow. This carries over from the agent-RBAC spec (RBAC is role-based access control, permissions granted by role).
@@ -480,7 +480,7 @@ Latency budget for steps 1 through 5 and 9 through 10 combined: 20 ms at p99 for
 
 ### 6.8 The credential broker
 
-**A wrapped agent holds no credentials. Not an API key, not an OAuth token, not a cloud role, not a GitHub token.** (OAuth is the standard for letting one service act on a user's behalf.) It holds one run token that is good for talking to Oxagen and nothing else. One credential is outside this rule by design: the model vendor's own credential (an API key or a subscription login) stays on the agent's machine, and the loopback proxy forwards it without Oxagen ever holding it (§7.1). This paragraph describes tool credentials, and it is a target: the broker and run tokens are not built at 2026-09-18. Most of the threat model rests on this single property. It is what makes a Fortune 500 tool estate governable: every secret stays in one place, under one audit log.
+**A wrapped agent holds no credentials. Not an API key, not an OAuth token, not a cloud role, not a GitHub token.** (OAuth is the standard for letting one service act on a user's behalf.) It holds one run token that is good for talking to Oxagen and nothing else. The model vendor's own credential (an API key or a bearer) stays on the agent's machine, and since 2026-09-22 it is the gateway daemon that holds it, not the harness (oxagen ADR-138): `tacho enroll` takes the key out of the harness's files into the gateway's sealed custody under `TACHO_HOME`, and the proxy swaps the harness's run token for it on every call. A subscription login has no key to take and crosses the proxy as the harness's own; the record says which on every frame (`oxagen.credential_basis`). Oxagen's servers never hold a model credential (§7.1). The rest of this section describes tool credentials, and it is a target: the tool-credential broker is not built at 2026-09-22. Most of the threat model rests on this single property. It is what makes a Fortune 500 tool estate governable: every secret stays in one place, under one audit log.
 
 **Connections** are the customer's credentials to tool servers and APIs, stored in the vault (enveloped under the organization's key, every read audited). They include OAuth grants with refresh tokens, API keys, cloud roles Oxagen may assume, and GitHub App installations. A connection is bound to a workspace and to the tool servers it authorizes. It has an owner (a human) and a review date.
 
@@ -588,7 +588,7 @@ Running the proxy on loopback inside `tachod`, and not as a service in Oxagen's 
 
 - No extra network hop, and no new availability dependency on Oxagen's cloud.
 - **Prompt bodies never leave the machine.** Only digests and usage go up. Oxagen does not take custody of a customer's source code in transit.
-- **The vendor credential stays on the machine.** The proxy forwards the harness's own credential. Oxagen never holds it.
+- **The vendor credential stays on the machine.** Oxagen's servers never hold it. From 2026-09-22 (oxagen ADR-138) the gateway daemon holds it in custody and the harness holds a run token; a provider whose key could not be taken (a subscription login) keeps the harness's own credential, forwarded untouched, and the frame says which.
 - Metering becomes **observed** instead of self-reported, for every harness, including Codex and Stella.
 - Per-turn steering injection, an enforced `session_limit_usd` and a real `interrupt` become possible (§7.3, §12.5).
 
