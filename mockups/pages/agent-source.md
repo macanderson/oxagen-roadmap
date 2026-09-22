@@ -12,14 +12,14 @@
 
 ## Job
 
-The agent’s definition file `.oxagen/agents/<slug>.toml` in a source editor. Every field on the agent form is a view of this file; saving opens the same commit dialog the form uses; nothing is written to Postgres.
+The agent’s definition file `.oxagen/agents/<name>.md` in a source editor: `agent-definition/v0.2` (ADR-138), YAML frontmatter with the harness vocabulary at the top level (`name`, `description`) and everything Oxagen validates under `oxagen:`, then the instructions as the markdown body. Every field on the agent form is a view of this file; saving opens the same commit dialog the form uses; nothing is written to Postgres.
 
 ## What is on the page
 
-**Header**: eyebrow “Agent source”, h1 `.oxagen/agents/<slug>.toml` (mono). Chips: the main repo (`a-intel/platform`), branch @ commit (`main @ a4c91e2`, or the pending branch badge when a commit exists on a branch but is not merged), “source of truth”, the agent key. Subtext: “Every field on the agent form is a view of this file. Saving opens the same commit dialog the form uses; nothing is written to Postgres.”
+**Header**: eyebrow “Agent source”, h1 `.oxagen/agents/<name>.md` (mono). Chips: the main repo (`a-intel/platform`), branch @ commit (`main @ a4c91e2`, or the pending branch badge when a commit exists on a branch but is not merged), “source of truth”, the agent key. Subtext: “Every field on the agent form is a view of this file. Saving opens the same commit dialog the form uses; nothing is written to Postgres.”
 Actions: **Back to the form** · **Discard** (enabled when dirty) · **Save** (gold; opens the commit dialog).
 
-- **Editor** panel: a bar with the path, a modified dot and *modified* / *unchanged*, **Find** (aria-label “Find in file”, ⌘F) with a match count; a gutter with line numbers and a textarea labelled with the path (`#edT`); a status line with the cursor position (“Ln 21, Col 1”), “TOML”, “Spaces: 2”, “LF”, “UTF-8”, and the key hints “⌘S save · Tab indent · ⇧Tab outdent · ⌘/ comment · ⌘F find · ⌘Z undo”. TOML is parsed on every edit (`tomlParse`) and a parse error is shown at its line.
+- **Editor** panel: a bar with the path, a modified dot and *modified* / *unchanged*, **Find** (aria-label “Find in file”, ⌘F) with a match count; a gutter with line numbers and a textarea labelled with the path (`#edT`); a status line with the cursor position (“Ln 21, Col 1”), “Frontmatter markdown”, “Spaces: 2”, “LF”, “UTF-8”, and the key hints “⌘S save · Tab indent · ⇧Tab outdent · ⌘/ comment · ⌘F find · ⌘Z undo”. The frontmatter is parsed on every edit (`fmParse`) and a parse error is shown at its line; the fences and the header highlight as YAML and the body as markdown (`hlFrontmatter`), and a header line that is not `key: value`, a list item or a comment is underlined.
 - **Commit dialog** (`commit`): the diff of the draft against the base, a Branch select (`BRANCHES` on the workspace’s main repo, or **+ New branch** with a “New branch name” field), a Summary and a Description (with **Redraft**), an “Open a pull request” checkbox, **Cancel** and the primary button (Commit, or Commit and open a pull request; disabled until the branch and summary are filled). Committing records `S.defPending[slug]`; the running definition is still main’s until merged.
 
 **Dialogs this page opens:** `commit` (branch, message, diff), `request-access` (from denied), `incident` (from error). Discard is a button, not a dialog.
@@ -32,7 +32,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 
 | Element | Mockup collection | Target store (spec) | Backing today (repo) | Status |
 |---|---|---|---|---|
-| The file | `defBase(slug)` / `defSrc(slug)` from `agentTomlSeed` | `.oxagen/agents/<slug>.toml` at `definition_path`, `definition_digest`, `commit_sha` | DB-backed `agent.definition.*` | 🟡 |
+| The file | `defBase(slug)` / `defSrc(slug)` from `agentDefSeed` | `.oxagen/agents/<name>.md` at `definition_path`, `definition_digest`, `commit_sha`; the same bytes at `.claude/agents/<name>.md` | DB-backed `agent.definition.*` | 🟡 |
 | Branches | `BRANCHES` | git branches on `wrk.repositories` main repo | `ingestion.repository_bindings` (+heads) | 🟡 |
 | Commit / PR | `S.defPending` | Context PR lifecycle (spec §10.3) | `agent.context_promotions` | 🟡 |
 
@@ -61,7 +61,7 @@ Top bar collapses to hamburger · current crumb · search glyph · notifications
 
 ## Backend gaps this page depends on
 
-- Definitions are DB-backed today; the app must read and write `.oxagen/agents/*.toml` through the repo binding
+- Definitions are DB-backed today; the app must read and write `.oxagen/agents/*.md` through the repo binding, and write the byte-identical `.claude/agents/*.md` in the same pull request
 
 ## Rules every build of this page must keep
 

@@ -28,7 +28,7 @@ Actions: **Edit avatar** (opens `avatar`) · **Rotate credential** · **Suspend*
 - **Runs**: “N shown”; Run · Status · Tokens (total, “N% cached” beneath) · Cost · Frames · Started; a row opens the Run page; **Open the audit record**.
 - **Enrollment**: **Host** (Device · Device key · Collector · Hook binary · Hooks written (SessionStart, UserPromptSubmit, PreToolUse, PermissionRequest, Stop; “Five run as command hooks. The first four can refuse.”) · Model proxy (`loopback proxy on the host` at the `gateway` tier and above, otherwise the tier it needs) · Oxagen MCP server · Settings · Tier earned · Last checkpoint; **Run a smoke session**), **Rollback** (**Unenroll**). An agent with no host offers **Wrap it** (gold; opens `wrap`) and **Show the CLI path** (opens `register`).
 - **Tamper incidents**: one card per incident (What happened · What it stopped · Closed · Owner · Incident; **Open on Audit**), or **No tamper incident recorded** with **Open the incident register**. The count equals the Audit page’s, read from the same record.
-- **Definition in git** (`defForm`): the TOML rendered as a form: Identity · Model and budget · Tools (Side effects) · Instructions · Harness · Source (Repository · `definition_digest` · At commit · Generated beside it; **Open the source**) · Changing this agent (**Save changes** or **Open a pull request**, **Discard**; a pull request; the principal is retired, never deleted).
+- **Definition in git** (`defForm`): the frontmatter rendered as a form: Identity · Model and budget · Tools (Side effects) · Instructions (the markdown body) · Harness · Source (Repository · `definition_digest` · At commit · Bridge copy, the same bytes at `.claude/agents/<name>.md`; **Open the source**) · Changing this agent (**Save changes** or **Open a pull request**, **Discard**; a pull request; the principal is retired, never deleted).
 
 **Dialogs this page opens:** `delagent`, `assignrole`, `identity`, `avatar`, `budget`, `evidence`, `fix`, `mandate`, `toolcats`, `commit`, `wrap`, `register`, `request-access` (from denied), `incident` (from error).
 
@@ -49,7 +49,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 | Coaching | `coachAgent(a)` | derived at read time from `cost.daily_totals`; `list_coaching` (read, `noBillingGate`) | none | ❌ |
 | Runs | `RUNS` by agent, `runMetrics` | `:Run`, `cost.run_totals` | `agent.agent_runs` | 🟡 |
 | Incidents | `INCIDENTS` (`agentTamper`) | incident kinds | `tacho.incidents` | ✅ |
-| Definition in git | `agentTomlSeed`, `S.defBase/defSrc` | `definition_path/digest/commit_sha` | DB-backed `agent.definition.*`, not `.oxagen/agents/*.toml` | 🟡 |
+| Definition in git | `agentDefSeed`, `S.defBase/defSrc` | `definition_path/digest/commit_sha` | DB-backed `agent.definition.*`, not `.oxagen/agents/*.md` | 🟡 |
 
 ## Functionality
 
@@ -57,7 +57,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 - The belt is computed at run start from grants × policy; the page shows the same list the model receives, and a search over it (`search_tools`) when the belt is *searchable*.
 - Coaching is derived at read time from the same rollup the token panel prints (`agentTok`), so the two cannot disagree; every item names its signal, the tokens and money behind it, and one action. It is never a model’s opinion of itself.
 - Tab is part of the route so a link to `/agents/<slug>/toolbelt` lands on the tab.
-- Every field on the Definition tab is a view of the TOML file; editing goes through the source page and a commit dialog.
+- Every field on the Definition tab is a view of the frontmatter markdown file (`agent-definition/v0.2`); editing goes through the source page and a commit dialog.
 
 ## States
 

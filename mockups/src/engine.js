@@ -576,7 +576,7 @@ function avatarBody(){
   }
   out+='</div></div>';
   out+='<div class="note" style="margin-top:6px">'+(forPerson?'Saved with <span class="mono">set_preferences</span> and recorded as a frame, like any change to your account.':
-   'Part of the definition: written as <span class="mono">avatar</span> in <span class="mono">.oxagen/agents/&lt;slug&gt;.toml</span>, so it rides a Context PR and shows wherever the agent does.')+'</div>';
+   'Part of the definition: written as <span class="mono">avatar</span> in <span class="mono">.oxagen/agents/&lt;name&gt;.md</span>, so it rides a Context PR and shows wherever the agent does.')+'</div>';
   return out;
 }
 function avatarDlg(){
@@ -922,40 +922,195 @@ var PAGES={fleet:"Fleet",run:"Run",agents:"Agent IAM",agent:"Agent IAM",mandate:
   agentsource:"Agent IAM",steering:"Steering",record:"Steering",repositories:"Repositories",spend:"Spend",organization:"Organization",billing:"Billing",audit:"Audit",
   scenarios:"Scenarios",skills:"Steering",skillsource:"Steering"};
 
-/* ============================== agent definition: the TOML file is the record ==============================
+/* ============================== agent definition: the frontmatter markdown file is the record ==============================
+   .oxagen/agents/<name>.md is agent-definition/v0.2 (ADR-138): YAML frontmatter, then the instructions
+   as the markdown body. The top level of the frontmatter is the harness vocabulary (name, description,
+   and whatever a harness reads), and everything Oxagen validates sits under one oxagen: table. name is
+   the slug: the file stem and the last segment of the agent key. The Claude Code bridge is the same
+   bytes at .claude/agents/<name>.md, checked equal; nothing is generated.
    S.defBase[slug]  = the file at the head of the branch it was last committed to (main until the first commit)
    S.defSrc[slug]   = the working draft, shared by the form and the source editor
    S.defPending     = a commit that exists on a branch but is not merged; the running definition is still main's */
 S.defSrc={}; S.defBase={}; S.defPending={}; S.ed=null; S.cm=null;
 function defSlug(a){return a.key.split(".").pop();}
 function agentBySlug(slug){for(var i=0;i<AGENTS.length;i++){if(defSlug(AGENTS[i])===slug)return AGENTS[i];}return null;}
-function agentTomlSeed(a){
+function agentDefSeed(a){
   var slug=defSlug(a);
   var instr=slug==="release-manager"
    ?"You prepare releases for this repository. Read the changelog\nconventions in .oxagen/rules before writing notes. Open a pull\nrequest; a person merges it."
    :"You are "+a.name+". "+a.desc+"\nWork inside the toolbelt you were given; when a step needs\nauthority you do not hold, stop and say so.";
-  return '# .oxagen/agents/'+slug+'.toml\n'+
-   'schema = "agent-definition/v0.1"\n'+
-   'slug = "'+slug+'"\n'+
-   'name = "'+a.name+'"\n'+
-   'description = "'+a.desc+'"\n'+
-   'model_tier = "'+a.model+'"\n'+
-   'tools = ["github__*", "linear__get_issue", "search_graph", "recall_context"]\n'+
-   'deny_tools = ["github__merge_pull_request@*", "github__delete_*@*"]\n'+
-   'side_effects = ["read", "write"]\n'+
-   'budget = { per_run_micros = '+Math.round(parseFloat(a.budget)*1e6)+' }\n\n'+
-   '[instructions]\n'+
-   'body = """\n'+instr+'\n"""\n\n'+
-   '[harness.'+a.harness+']\n'+
-   'color = "blue"\n';
+  return '---\n'+
+   'name: '+slug+'\n'+
+   'description: '+yamlStr(a.desc)+'\n'+
+   'oxagen:\n'+
+   '  schema: agent-definition/v0.2\n'+
+   '  title: '+yamlStr(a.name)+'\n'+
+   '  model_tier: '+a.model+'\n'+
+   '  belt:\n'+
+   '    allow: [github__*, linear__get_issue, search_graph, recall_context]\n'+
+   '    deny: [github__merge_pull_request@*, github__delete_*@*]\n'+
+   '  side_effects: [read, write]\n'+
+   '  budget:\n'+
+   '    per_run_micros: '+Math.round(parseFloat(a.budget)*1e6)+'\n'+
+   '  harness:\n'+
+   '    '+a.harness+':\n'+
+   '      color: blue\n'+
+   '---\n'+instr+'\n';
 }
-function defBase(slug){if(S.defBase[slug]==null)S.defBase[slug]=agentTomlSeed(agentBySlug(slug));return S.defBase[slug];}
+function defBase(slug){if(S.defBase[slug]==null)S.defBase[slug]=agentDefSeed(agentBySlug(slug));return S.defBase[slug];}
 function defSrc(slug){if(S.defSrc[slug]==null)S.defSrc[slug]=defBase(slug);return S.defSrc[slug];}
 function defDirty(slug){return defSrc(slug)!==defBase(slug);}
 function defDiscard(slug){S.defSrc[slug]=defBase(slug);render();}
 function sha7(s){var x=2166136261;for(var i=0;i<s.length;i++){x^=s.charCodeAt(i);x=Math.imul(x,16777619)>>>0;}return ("0000000"+x.toString(16)).slice(-7);}
 
-/* ---- TOML subset: enough for an agent definition (strings, multi-line strings, numbers, booleans, arrays, inline tables, [tables]) ---- */
+/* ---- frontmatter markdown: the one reader for a record and an agent definition ----
+   A document is a --- fence, a YAML header, a --- fence and a body. The header reader covers the
+   YAML a definition or a record carries: key: value, nested maps by indentation, block lists, flow
+   lists and maps, quoted and plain scalars, numbers, booleans and | block scalars. It throws with a
+   line number, and the form shows what it could read. */
+function fmParse(text){
+  var lines=String(text).replace(/\r\n?/g,"\n").split("\n");
+  function err(m,ln){var e=new Error(m+" (line "+(ln+1)+")");e.line=ln+1;throw e;}
+  if(!/^---\s*$/.test(lines[0]||""))err("a frontmatter document opens with a --- fence",0);
+  var close=-1;for(var c=1;c<lines.length;c++){if(/^---\s*$/.test(lines[c])){close=c;break;}}
+  if(close<0)err("the frontmatter never closes: no second --- fence",lines.length-1);
+  var i=1,n=close;
+  function indentOf(l){return /^( *)/.exec(l)[1].length;}
+  function blank(l){return !l.trim()||/^\s*#/.test(l);}
+  function skip(){while(i<n&&blank(lines[i]))i++;}
+  function isDash(l){return /^ *-(\s|$)/.test(l);}
+  function ws(s,p){while(p<s.length&&(s[p]===" "||s[p]==="\t"))p++;return p;}
+  function dq(s,p,ln){var q=p+1;for(;q<s.length;q++){if(s[q]==="\\"){q++;continue;}if(s[q]==='"')break;}if(q>=s.length)err("unterminated string",ln);var v;try{v=JSON.parse(s.slice(p,q+1));}catch(e){err("bad escape in a string",ln);}return [v,q+1];}
+  function sq(s,p,ln){var out="",q=p+1;for(;q<s.length;q++){if(s[q]==="'"){if(s[q+1]==="'"){out+="'";q++;continue;}return [out,q+1];}out+=s[q];}err("unterminated string",ln);}
+  function typed(s){if(s==="true")return true;if(s==="false")return false;if(s==="null"||s==="~"||s==="")return null;if(/^[-+]?(?:\d[\d_]*)(?:\.\d[\d_]*)?(?:[eE][-+]?\d+)?$/.test(s))return parseFloat(s.replace(/_/g,""));return s;}
+  /* one value: a quoted string, a flow list or map, or a plain scalar up to `stop` */
+  function flow(s,p,ln,stop){
+    p=ws(s,p);var c=s[p];
+    if(c==='"')return dq(s,p,ln);
+    if(c==="'")return sq(s,p,ln);
+    if(c==="["){var arr=[];p++;for(;;){p=ws(s,p);if(s[p]==="]")return [arr,p+1];if(p>=s.length)err("unterminated flow list",ln);var r=flow(s,p,ln,",]");arr.push(r[0]);p=ws(s,r[1]);if(s[p]===",")p++;else if(s[p]!=="]")err("expected , or ] in a flow list",ln);}}
+    if(c==="{"){var obj={};p++;for(;;){p=ws(s,p);if(s[p]==="}")return [obj,p+1];if(p>=s.length)err("unterminated flow map",ln);var k=/^("(?:[^"\\]|\\.)*"|'[^']*'|[^,{}\[\]:#\s][^,{}\[\]:]*?)\s*:\s*/.exec(s.slice(p));if(!k)err("expected key: value in a flow map",ln);p+=k[0].length;var r2=flow(s,p,ln,",}");obj[k[1].replace(/^["']|["']$/g,"")]=r2[0];p=ws(s,r2[1]);if(s[p]===",")p++;else if(s[p]!=="}")err("expected , or } in a flow map",ln);}}
+    var q=p;while(q<s.length&&stop.indexOf(s[q])<0){if(s[q]==="#"&&(q===p||/\s/.test(s[q-1])))break;q++;}
+    return [typed(s.slice(p,q).trim()),q];
+  }
+  function scalar(rest,ln){var r=flow(rest,0,ln,""),tail=rest.slice(r[1]).trim();if(tail&&tail[0]!=="#")err("unexpected text after the value",ln);return r[0];}
+  function blockScalar(ind,mark){
+    var out=[],fold=mark[0]===">";
+    while(i<n){var l=lines[i];if(l.trim()&&indentOf(l)<=ind)break;out.push(l);i++;}
+    var min=Infinity;out.forEach(function(l){if(l.trim())min=Math.min(min,indentOf(l));});
+    if(min===Infinity)return "";
+    var s=out.map(function(l){return l.slice(min);}).join(fold?" ":"\n").replace(/\s+$/,"");
+    return /-$/.test(mark)?s:s+"\n";
+  }
+  function node(ind){skip();if(i>=n)return null;return isDash(lines[i])?list(ind):map(ind);}
+  function map(ind){
+    var obj={};
+    for(;;){
+      skip();if(i>=n)break;
+      var l=lines[i],id=indentOf(l);if(id<ind)break;
+      if(/^\s*\t/.test(l))err("a tab in the frontmatter; use spaces",i);
+      if(id>ind)err("unexpected indentation",i);
+      if(isDash(l))break;
+      var m=/^ *("(?:[^"\\]|\\.)*"|'[^']*'|[^\s"'#:\[\]{},-][^:]*?)\s*:(?:\s+(.*))?$/.exec(l);
+      if(!m)err("expected key: value",i);
+      var key=m[1].replace(/^["']|["']$/g,""),rest=(m[2]||"").trim(),ln=i;i++;
+      if(rest===""||rest[0]==="#"){
+        skip();
+        if(i<n&&(indentOf(lines[i])>ind||(indentOf(lines[i])===ind&&isDash(lines[i]))))obj[key]=node(indentOf(lines[i]));
+        else obj[key]=null;
+      }else if(/^[|>][-+]?$/.test(rest))obj[key]=blockScalar(ind,rest);
+      else obj[key]=scalar(rest,ln);
+    }
+    return obj;
+  }
+  function list(ind){
+    var arr=[];
+    for(;;){
+      skip();if(i>=n)break;
+      var l=lines[i],id=indentOf(l);if(id<ind)break;
+      if(id>ind)err("unexpected indentation",i);
+      var m=/^ *-(?:\s+(.*))?$/.exec(l);if(!m)break;
+      var rest=(m[1]||"").trim(),ln=i;i++;
+      if(rest==="")arr.push(null);
+      else if(/^[^\s"'#:\[\]{},-][^:]*?\s*:(\s|$)/.test(rest)){lines[ln]=Array(ind+3).join(" ")+rest;i=ln;arr.push(map(ind+2));}
+      else arr.push(scalar(rest,ln));
+    }
+    return arr;
+  }
+  var data=map(0);
+  skip();
+  if(i<n)err("expected key: value",i);
+  return {data:data,body:lines.slice(close+1).join("\n")};
+}
+/* The body as the record reads it: CRLF folded, leading and trailing whitespace trimmed. */
+function bodyText(body){return String(body).replace(/\r\n?/g,"\n").trim();}
+/* A string as YAML writes it: plain when nothing in it can be read as syntax, quoted otherwise. */
+function yamlStr(v){
+  var s=String(v);
+  var plain=/^[A-Za-z0-9_][^\n\t:#,\[\]{}"'\\]*$/.test(s)&&!/ $/.test(s)&&!/^(true|false|null|yes|no|on|off)$/i.test(s)&&!/^[-+]?\d/.test(s);
+  return plain?s:JSON.stringify(s);
+}
+function yamlLit(v){
+  if(Array.isArray(v))return "["+v.map(yamlLit).join(", ")+"]";
+  if(typeof v==="number"||typeof v==="boolean")return String(v);
+  if(v===null||v===undefined)return "null";
+  if(typeof v==="object")return "{ "+Object.keys(v).map(function(k){return k+": "+yamlLit(v[k]);}).join(", ")+" }";
+  return yamlStr(v);
+}
+/* One member by path, or undefined. */
+function fmMember(data,path){var o=data;for(var j=0;j<path.length;j++){if(!o||typeof o!=="object"||Array.isArray(o))return undefined;o=o[path[j]];}return o;}
+/* Replace one member's literal in place, by path, and keep every other byte, comments included. A
+   member that is not there yet is added under the deepest parent that is, at the end of its block. */
+function fmSet(text,path,lit){
+  var lines=String(text).split("\n"),close=-1,i;
+  if(!/^---\s*$/.test(lines[0]||""))return text;
+  for(i=1;i<lines.length;i++){if(/^---\s*$/.test(lines[i])){close=i;break;}}
+  if(close<0)return text;
+  function indentOf(l){return /^( *)/.exec(l)[1].length;}
+  function keyOf(l){var m=/^ *("(?:[^"\\]|\\.)*"|'[^']*'|[^\s"'#:\[\]{},-][^:]*?)\s*:(\s|$)/.exec(l);return m?m[1].replace(/^["']|["']$/g,""):null;}
+  function blockEnd(from,indent){var e=from+1,last=from;while(e<close){var l=lines[e];if(l.trim()){if(indentOf(l)<=indent)break;last=e;}e++;}return last+1;}
+  var stack=[],found=-1,best={depth:0,line:0,indent:-2};
+  for(i=1;i<close;i++){
+    var l=lines[i];if(!l.trim()||/^\s*#/.test(l))continue;
+    var id=indentOf(l),k=keyOf(l);
+    while(stack.length&&stack[stack.length-1].indent>=id)stack.pop();
+    if(k===null)continue;
+    stack.push({key:k,indent:id});
+    var match=stack.length<=path.length&&stack.every(function(s,j){return s.key===path[j];});
+    if(match&&stack.length===path.length){found=i;break;}
+    if(match&&stack.length>best.depth)best={depth:stack.length,line:i,indent:id};
+  }
+  if(found>=0){
+    var end=blockEnd(found,indentOf(lines[found])),m=/^( *[^:]*?\s*:)/.exec(lines[found]);
+    lines.splice(found,end-found,m[1]+" "+lit);
+    return lines.join("\n");
+  }
+  var at,ind,rest=path.slice(best.depth);
+  if(best.depth===0){at=close;ind=0;}else{at=blockEnd(best.line,best.indent);ind=best.indent+2;}
+  var add=rest.map(function(k,j){return Array(ind+j*2+1).join(" ")+k+(j===rest.length-1?": "+lit:":");});
+  lines.splice.apply(lines,[at,0].concat(add));
+  return lines.join("\n");
+}
+/* Replace the body and keep the header byte for byte. */
+function fmSetBody(text,body){
+  var lines=String(text).split("\n"),close=-1;
+  if(!/^---\s*$/.test(lines[0]||""))return text;
+  for(var c=1;c<lines.length;c++){if(/^---\s*$/.test(lines[c])){close=c;break;}}
+  if(close<0)return text;
+  return lines.slice(0,close+1).join("\n")+"\n"+bodyText(body)+"\n";
+}
+function defDoc(slug){try{var d=fmParse(defSrc(slug));return {doc:d.data,body:bodyText(d.body),err:null};}catch(e){return {doc:{},body:"",err:e};}}
+/* The oxagen: table of a parsed definition, or an empty one. */
+function defOx(d){return d&&d.oxagen&&typeof d.oxagen==="object"&&!Array.isArray(d.oxagen)?d.oxagen:{};}
+function defSet(slug,path,val){S.defSrc[slug]=fmSet(defSrc(slug),path,yamlLit(val));}
+function defChip(slug,which,i,val){var belt=defOx(defDoc(slug).doc).belt||{};var arr=(Array.isArray(belt[which])?belt[which]:[]).slice();if(i<0){if(arr.indexOf(val)>=0)return;arr.push(val);}else arr.splice(i,1);defSet(slug,["oxagen","belt",which],arr);render();}
+function defFx(slug,val,on){var ox=defOx(defDoc(slug).doc);var arr=(Array.isArray(ox.side_effects)?ox.side_effects:[]).filter(function(x){return x!==val;});if(on)arr.push(val);var order=["read","write","irreversible"];arr.sort(function(a,b){return order.indexOf(a)-order.indexOf(b);});defSet(slug,["oxagen","side_effects"],arr);render();}
+function defBudget(slug,usd){var n=Math.round(parseFloat(usd)*1e6);if(isNaN(n)||n<0){render();return;}defSet(slug,["oxagen","budget","per_run_micros"],n);render();}
+function defField(slug,path,val){defSet(slug,String(path).split("."),val);render();}
+function defInstr(slug,val){S.defSrc[slug]=fmSetBody(defSrc(slug),val.replace(/\r/g,""));render();}
+
+/* ---- TOML subset, kept for the tool manifest: .oxagen/tools/<name>.toml is configuration, every field a
+   value, and stays TOML (ADR-138). Strings, multi-line strings, numbers, booleans, arrays, inline tables, [tables]. ---- */
 function tomlParse(text){
   var doc={}, cur=doc, lines=text.split("\n"), i=0, n=lines.length;
   function err(m,ln){var e=new Error(m+" (line "+(ln+1)+")");e.line=ln+1;throw e;}
@@ -1002,21 +1157,6 @@ function tomlParse(text){
   }
   return doc;
 }
-function tomlStr(v){return '"'+String(v).replace(/\\/g,"\\\\").replace(/"/g,'\\"').replace(/\n/g,"\\n")+'"';}
-function tomlLit(v){
-  if(Array.isArray(v))return "["+v.map(tomlLit).join(", ")+"]";
-  if(typeof v==="number"||typeof v==="boolean")return String(v);
-  if(v&&typeof v==="object")return "{ "+Object.keys(v).map(function(k){return k+" = "+tomlLit(v[k]);}).join(", ")+" }";
-  return tomlStr(v);
-}
-/* A basic multi-line string processes escapes, so a backslash in operator text has to be written
-   as one — otherwise `Path:\deploy` is either an invalid escape or quietly changes meaning. The
-   closing fence is reached with a line-continuation backslash rather than a bare newline, because a
-   newline before the fence is part of the value: without it every save through this writer appended
-   one more blank line to whatever it round-tripped. */
-function tomlMulti(v){
-  return '"""\n'+String(v).replace(/\\/g,"\\\\").replace(/"""/g,'\\"""')+'\\\n"""';
-}
 /* the escapes a basic string may carry, applied to the multi-line form too */
 function tomlUnesc(raw){
   var out="",i=0,ESC2={n:"\n",t:"\t",r:"\r",'"':'"',"\\":"\\"};
@@ -1029,47 +1169,21 @@ function tomlUnesc(raw){
   }
   return out;
 }
-/* Replace one key's literal in place and keep every other byte, comments included. section null = the root table. */
-function tomlSet(text,section,key,lit){
-  var lines=text.split("\n"), start=-1, end=lines.length, i, j;
-  if(section===null){start=0;for(i=0;i<lines.length;i++){if(/^\s*\[/.test(lines[i])){end=i;break;}}}
-  else{for(i=0;i<lines.length;i++){var t=/^\s*\[\[?([^\]]+)\]\]?/.exec(lines[i]);if(t&&t[1].trim()===section){start=i+1;for(j=start;j<lines.length;j++){if(/^\s*\[/.test(lines[j])){end=j;break;}}break;}}}
-  if(start<0){while(lines.length&&lines[lines.length-1]==="")lines.pop();lines.push("","["+section+"]",key+" = "+lit,"");return lines.join("\n");}
-  var re=new RegExp("^(\\s*"+key.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"\\s*=\\s*)");
-  for(i=start;i<end;i++){
-    var m=re.exec(lines[i]); if(!m)continue;
-    var rest=lines[i].slice(m[1].length), tail="", span=1;
-    if(rest.indexOf('"""')===0&&rest.indexOf('"""',3)<0){for(var k=i+1;k<end;k++){span++;if(lines[k].indexOf('"""')>=0)break;}}
-    else{var cm=/\s+#.*$/.exec(rest);if(cm)tail=cm[0];}
-    var repl=(m[1]+lit+tail).split("\n");
-    lines.splice.apply(lines,[i,span].concat(repl));
-    return lines.join("\n");
-  }
-  var at=end; while(at>start&&lines[at-1]==="")at--;
-  lines.splice(at,0,key+" = "+lit);
-  return lines.join("\n");
-}
-function defDoc(slug){try{return {doc:tomlParse(defSrc(slug)),err:null};}catch(e){return {doc:{},err:e};}}
-function defSet(slug,section,key,val,multi){S.defSrc[slug]=tomlSet(defSrc(slug),section,key,multi?tomlMulti(val):tomlLit(val));}
-function defChip(slug,key,i,val){var d=defDoc(slug).doc;var arr=(Array.isArray(d[key])?d[key]:[]).slice();if(i<0){if(arr.indexOf(val)>=0)return;arr.push(val);}else arr.splice(i,1);defSet(slug,null,key,arr);render();}
-function defFx(slug,val,on){var d=defDoc(slug).doc;var arr=(Array.isArray(d.side_effects)?d.side_effects:[]).filter(function(x){return x!==val;});if(on)arr.push(val);var order=["read","write","irreversible"];arr.sort(function(a,b){return order.indexOf(a)-order.indexOf(b);});defSet(slug,null,"side_effects",arr);render();}
-function defBudget(slug,usd){var n=Math.round(parseFloat(usd)*1e6);if(isNaN(n)||n<0){render();return;}defSet(slug,null,"budget",{per_run_micros:n});render();}
-function defField(slug,section,key,val){defSet(slug,section,key,val);render();}
-function defInstr(slug,val){defSet(slug,"instructions","body",val.replace(/\r/g,""),true);render();}
+
 
 /* ---- the definition tab: a form over the file, with the file one link away ---- */
 function defForm(a){
-  var slug=defSlug(a), w=ws(), r=defDoc(slug), d=r.doc, perr=r.err, dirty=defDirty(slug), pend=S.defPending[slug];
+  var slug=defSlug(a), w=ws(), r=defDoc(slug), d=r.doc, ox=defOx(d), belt=ox.belt&&typeof ox.belt==="object"?ox.belt:{}, perr=r.err, dirty=defDirty(slug), pend=S.defPending[slug];
   var srcHref='#/'+ORG.slug+'/'+S.ws+'/agents/'+slug+'/source';
   var rows=dirty?diffLines(defBase(slug),defSrc(slug)):null, st=rows?diffStat(rows):null;
   function fld(label,html,hint){return '<div class="field"><label>'+label+'</label>'+html+(hint?'<div class="hint">'+hint+'</div>':'')+'</div>';}
-  function txt(section,key,val,ro){return '<input '+(ro?'readonly ':'')+'value="'+h(val==null?"":val)+'" aria-label="'+h(key)+'"'+(ro?' class="mono"':' onchange="defField(\''+slug+'\','+(section?"'"+section+"'":"null")+',\''+key+'\',this.value)"')+'>';}
-  function chips(key,arr){arr=Array.isArray(arr)?arr:[];return '<div class="chips">'+arr.map(function(v,i){return '<span class="chip mono"><span>'+h(v)+'</span><button type="button" aria-label="Remove '+h(v)+'" onclick="defChip(\''+slug+'\',\''+key+'\','+i+',null)">×</button></span>';}).join("")+
-    '<input class="mono" placeholder="add a tool pattern, Enter to keep" aria-label="Add to '+key+'" onkeydown="if(event.key===\'Enter\'&&this.value.trim()){defChip(\''+slug+'\',\''+key+'\',-1,this.value.trim());event.preventDefault();}"></div>';}
-  var fx=Array.isArray(d.side_effects)?d.side_effects:[];
+  function txt(path,label,val,ro){return '<input '+(ro?'readonly ':'')+'value="'+h(val==null?"":val)+'" aria-label="'+h(label)+'"'+(ro?' class="mono"':' onchange="defField(\''+slug+'\',\''+path+'\',this.value)"')+'>';}
+  function chips(which,label,arr){arr=Array.isArray(arr)?arr:[];return '<div class="chips">'+arr.map(function(v,i){return '<span class="chip mono"><span>'+h(v)+'</span><button type="button" aria-label="Remove '+h(v)+'" onclick="defChip(\''+slug+'\',\''+which+'\','+i+',null)">×</button></span>';}).join("")+
+    '<input class="mono" placeholder="add a tool pattern, Enter to keep" aria-label="Add to '+label+'" onkeydown="if(event.key===\'Enter\'&&this.value.trim()){defChip(\''+slug+'\',\''+which+'\',-1,this.value.trim());event.preventDefault();}"></div>';}
+  var fx=Array.isArray(ox.side_effects)?ox.side_effects:[];
   function check(v,label,desc,locked){var on=fx.indexOf(v)>=0;return '<label class="check'+(locked?' off':'')+'"><input type="checkbox"'+(on?' checked':'')+(locked?' disabled':'')+' onchange="defFx(\''+slug+'\',\''+v+'\',this.checked)"><span class="grow"><span class="n">'+v+'</span><div class="d">'+desc+'</div></span></label>';}
-  var micros=d.budget&&typeof d.budget.per_run_micros==="number"?d.budget.per_run_micros:null;
-  var harnessSec="harness."+a.harness, hv=(d.harness&&d.harness[a.harness])||{};
+  var micros=ox.budget&&typeof ox.budget.per_run_micros==="number"?ox.budget.per_run_micros:null;
+  var harnessSec="oxagen.harness."+a.harness, hv=(ox.harness&&ox.harness[a.harness])||{};
 
   var bar="";
   if(perr) bar='<div class="def-bar"><span class="err">The file does not parse: '+h(perr.message)+'.</span> The form shows what it could read; fix the line in the source editor.'+
@@ -1082,46 +1196,46 @@ function defForm(a){
     (pend.pr?'':'<span class="sp"><button class="btn sm" onclick="openCommit(\''+slug+'\',\'form\')">Open a pull request</button></span>')+'</div>';
 
   var left='<div class="def-form">'+
-   '<div class="panel"><div class="panel-h"><h3>Identity</h3><span class="mono dim" style="margin-left:auto;font-size:11px">root table</span></div><div class="panel-b">'+
-    '<div class="fields">'+fld("Schema",txt(null,"schema",d.schema,true))+fld("Slug",txt(null,"slug",d.slug,true),"Immutable. The agent key <span class=\"mono\">"+h(a.key)+"</span> is derived from it.")+'</div>'+
-    fld("Name",txt(null,"name",d.name))+
-    fld("Description",txt(null,"description",d.description),"One sentence. Shown on the Agents list and in every receipt this agent produces.")+'</div></div>'+
+   '<div class="panel"><div class="panel-h"><h3>Identity</h3><span class="mono dim" style="margin-left:auto;font-size:11px">frontmatter</span></div><div class="panel-b">'+
+    '<div class="fields">'+fld("Schema",txt("oxagen.schema","schema",ox.schema,true))+fld("Name",txt("name","name",d.name,true),"Immutable. The file stem, and the last segment of the agent key <span class=\"mono\">"+h(a.key)+"</span>.")+'</div>'+
+    fld("Title",txt("oxagen.title","title",ox.title),"The display name. Shown on the Agents list and in every receipt this agent produces.")+
+    fld("Description",txt("description","description",d.description),"One sentence. The harness reads it when it picks a subagent.")+'</div></div>'+
    '<div class="panel"><div class="panel-h"><h3>Model and budget</h3></div><div class="panel-b"><div class="fields">'+
-    fld("Model tier",'<select aria-label="Model tier" onchange="defField(\''+slug+'\',null,\'model_tier\',this.value)">'+["complex","light"].map(function(v){return '<option'+(d.model_tier===v?' selected':'')+'>'+v+'</option>';}).join("")+'</select>',
+    fld("Model tier",'<select aria-label="Model tier" onchange="defField(\''+slug+'\',\'oxagen.model_tier\',this.value)">'+["complex","light"].map(function(v){return '<option'+(ox.model_tier===v?' selected':'')+'>'+v+'</option>';}).join("")+'</select>',
       "<span class=\"mono\">complex</span> routes to z-ai/glm-latest, <span class=\"mono\">light</span> to z-ai/glm-flash-latest. The harness makes the call with its own key. Oxagen records what it reports.")+
     fld("Per-run budget (USD)",'<input type="number" step="0.01" min="0" value="'+(micros==null?"":(micros/1e6).toFixed(2))+'" aria-label="Per-run budget" onchange="defBudget(\''+slug+'\',this.value)">',
-      "Stored as <span class=\"mono\">budget = { per_run_micros = "+(micros==null?"…":micros)+" }</span>. Hard: checked against reported spend at each hook boundary. A breach pauses the run at the next one.")+'</div></div></div>'+
+      "Stored as <span class=\"mono\">oxagen.budget.per_run_micros: "+(micros==null?"…":micros)+"</span>. Hard: checked against reported spend at each hook boundary. A breach pauses the run at the next one.")+'</div></div></div>'+
    '<div class="panel"><div class="panel-h"><h3>Tools</h3></div><div class="panel-b">'+
-    fld("tools",chips("tools",d.tools),"Patterns against the registry. <span class=\"mono\">github__*</span> grants every github tool the operator can delegate.")+
-    fld("deny_tools",chips("deny_tools",d.deny_tools),"A deny here wins over any grant. Version-pinned patterns like <span class=\"mono\">@*</span> deny every version.")+
+    fld("belt.allow",chips("allow","belt.allow",belt.allow),"Patterns against the registry. <span class=\"mono\">github__*</span> grants every github tool the operator can delegate.")+
+    fld("belt.deny",chips("deny","belt.deny",belt.deny),"A deny here wins over any grant. Version-pinned patterns like <span class=\"mono\">@*</span> deny every version.")+
     '<div class="field"><label>Side effects</label><div class="fxl">'+
      check("read","May read through the gateway.")+check("write","May write through the gateway; every write is a receipt.")+
      check("irreversible","Needs a mandate. This agent holds "+(a.mandates.length||"none")+".",!a.mandates.length)+'</div></div></div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>Instructions</h3><span class="mono dim" style="margin-left:auto;font-size:11px">[instructions] body</span></div><div class="panel-b">'+
-    '<div class="field"><textarea class="mono" rows="6" aria-label="Instructions" onchange="defInstr(\''+slug+'\',this.value)">'+h((d.instructions&&d.instructions.body)||"")+'</textarea>'+
-    '<div class="hint">Compiled into the harness file beside this one. The checks scan it for secrets and PII before a merge.</div></div></div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>Harness</h3><span class="mono dim" style="margin-left:auto;font-size:11px">['+h(harnessSec)+']</span></div><div class="panel-b"><div class="fields">'+
+   '<div class="panel"><div class="panel-h"><h3>Instructions</h3><span class="mono dim" style="margin-left:auto;font-size:11px">the body</span></div><div class="panel-b">'+
+    '<div class="field"><textarea class="mono" rows="6" aria-label="Instructions" onchange="defInstr(\''+slug+'\',this.value)">'+h(r.body)+'</textarea>'+
+    '<div class="hint">The markdown body under the frontmatter, copied byte for byte to <span class="mono">.claude/agents/'+h(slug)+'.md</span>. The checks scan it for secrets and PII before a merge.</div></div></div></div>'+
+   '<div class="panel"><div class="panel-h"><h3>Harness</h3><span class="mono dim" style="margin-left:auto;font-size:11px">'+h(harnessSec)+'</span></div><div class="panel-b"><div class="fields">'+
     fld("Harness",'<input readonly class="mono" value="'+h(a.harness)+'" aria-label="Harness">',"Set at registration. Changing it is a new agent.")+
-    fld("Color",'<select aria-label="Color" onchange="defField(\''+slug+'\',\''+harnessSec+'\',\'color\',this.value)">'+["blue","green","gold","red","gray"].map(function(v){return '<option'+(hv.color===v?' selected':'')+'>'+v+'</option>';}).join("")+'</select>',"Cosmetic: the label the harness shows on its own screen.")+
+    fld("Color",'<select aria-label="Color" onchange="defField(\''+slug+'\',\''+harnessSec+'.color\',this.value)">'+["blue","green","gold","red","gray"].map(function(v){return '<option'+(hv.color===v?' selected':'')+'>'+v+'</option>';}).join("")+'</select>',"Cosmetic: the label the harness shows on its own screen.")+
    '</div></div></div></div>';
 
   var right='<div class="panel"><div class="panel-h"><h3>Source</h3></div><div class="panel-b">'+
-   '<a class="srclink" href="'+srcHref+'"><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg><span class="p">.oxagen/agents/'+h(slug)+'.toml</span><span class="ar">Open in the source editor</span></a>'+
+   '<a class="srclink" href="'+srcHref+'"><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg><span class="p">.oxagen/agents/'+h(slug)+'.md</span><span class="ar">Open in the source editor</span></a>'+
    '<p class="muted" style="font-size:12px;margin:10px 0 0">Every field on this page is a view of that file. Editing here patches one key in place; editing there changes anything. Both go through the same commit.</p>'+
    '<dl class="kv" style="margin-top:14px"><dt>Repository</dt><dd class="mono">'+h(w.main)+' · '+h(w.branch)+'</dd>'+
    '<dt>definition_digest</dt><dd class="mono">'+h(a.digest)+'</dd>'+
    '<dt>At commit</dt><dd class="mono">'+h(a.commit)+(dirty?' · <span style="color:var(--st-approval)">draft '+sha7(defSrc(slug))+'</span>':'')+'</dd>'+
-   '<dt>Generated beside it</dt><dd class="mono">.claude/agents/'+h(slug)+'.md</dd></dl></div></div>'+
+   '<dt>Bridge copy</dt><dd class="mono">.claude/agents/'+h(slug)+'.md · the same bytes</dd></dl></div></div>'+
    '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Changing this agent</h3></div><div class="panel-b">'+
    '<ul class="chain"><li class="on"><span class="h">1 · Edit here or in the repo</span><div>Either opens a Context PR. Nothing is written to Postgres first.</div></li>'+
-   '<li class="on"><span class="h">2 · Checks</span><div>Schema, tools that exist in the registry, no <span class="mono">irreversible</span> without a mandate, and a secret and PII scan on the instructions.</div></li>'+
+   '<li class="on"><span class="h">2 · Checks</span><div>Schema, belt patterns that exist in the registry, no <span class="mono">irreversible</span> without a mandate, a secret and PII scan on the body, and the bridge copy byte-identical.</div></li>'+
    '<li class="on"><span class="h">3 · Review</span><div>Governance mode <span class="mono">team</span>: a code-owner review is required.</div></li>'+
    '<li class="on"><span class="h">4 · Merge is the change</span><div>The principal, roles, and toolbelt update. Open your coding agent in the repo and it is there.</div></li></ul>'+
    '<div class="note" style="margin-top:13px">Deleting an agent is a pull request that removes the file. The principal is retired, never deleted, so its runs keep their identity.</div></div></div>';
   return bar+'<div class="split">'+left+'<div>'+right+'</div></div>';
 }
 
-/* ---- TOML highlighter: one regex pass, classes only, colours come from the theme tokens ---- */
+/* ---- TOML highlighter for the tool manifest: one regex pass, classes only, colours come from the theme tokens ---- */
 function hlToml(src){
   var re=/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:[^"\\\n]|\\.)*"|'[^'\n]*')|(#[^\n]*)|(\[\[?[^\]\n]*\]\]?)|(\b(?:true|false)\b)|([-+]?\d[\d_]*(?:\.\d[\d_]*)?(?:[eE][-+]?\d+)?\b)|([A-Za-z0-9_\-]+(?:\.[A-Za-z0-9_\-]+)*(?=\s*=))|([=\[\]{},])|(\n)|([ \t]+)|([^\s"'#\[\]{},=]+|.)/g;
   var out="",m,lineStart=true,afterEq=false;
@@ -1142,6 +1256,44 @@ function hlToml(src){
   }
   return out;
 }
+/* ---- frontmatter highlighter: the header as YAML, the body as markdown. One pass per line, classes only,
+   colours come from the theme tokens. A header line that is neither key: value, a list item, a comment nor
+   the continuation of a block scalar is marked tk-e, because a definition file has a schema. ---- */
+function hlYamlValue(v){
+  var re=/("(?:[^"\\]|\\.)*"|'(?:[^']|'')*')|(#.*)|([\[\]{},]|^[|>][-+]?$)|(\b(?:true|false|null)\b)|([-+]?\d[\d_]*(?:\.\d[\d_]*)?(?:[eE][-+]?\d+)?(?![^\s,\]}]))|(\s+)|([^\s"'#\[\]{},]+|.)/g;
+  var out="",m;
+  while((m=re.exec(v))){
+    if(m[1])out+=cedTk("tk-s",m[0]);
+    else if(m[2])out+=cedTk("tk-c",m[0]);
+    else if(m[3])out+=cedTk("tk-p",m[0]);
+    else if(m[4])out+=cedTk("tk-b",m[0]);
+    else if(m[5])out+=cedTk("tk-n",m[0]);
+    else if(m[6])out+=m[0];
+    else out+=cedTk("tk-s",m[0]);
+  }
+  return out;
+}
+function hlYamlLine(l,prevIndent){
+  if(!l.trim())return h(l);
+  if(/^\s*#/.test(l))return cedTk("tk-c",l);
+  var m=/^( *)(-(?:\s+|$))?(?:("(?:[^"\\]|\\.)*"|'[^']*'|[^\s"'#:\[\]{},-][^:]*?)(\s*:)(?:(\s+)|$))?([\s\S]*)$/.exec(l);
+  var ind=m[1],dash=m[2]||"",key=m[3],colon=m[4]||"",sp=m[5]||"",rest=m[6]||"";
+  if(key==null&&!dash)return ind.length>prevIndent?cedTk("tk-s",l):cedTk("tk-e",l);
+  return h(ind)+(dash?cedTk("tk-p",dash):"")+(key!=null?cedTk("tk-k",key)+cedTk("tk-p",colon)+h(sp):"")+hlYamlValue(rest);
+}
+function hlFrontmatter(src){
+  var lines=src.split("\n"),out=[],prev=-1,i;
+  if(!/^---\s*$/.test(lines[0]||""))return cedTk("tk-e",lines[0]||"")+(lines.length>1?"\n"+hlMdBody(lines.slice(1).join("\n")):"");
+  out.push(cedTk("tk-t",lines[0]));
+  for(i=1;i<lines.length;i++){
+    var l=lines[i];
+    if(/^---\s*$/.test(l)){out.push(cedTk("tk-t",l));break;}
+    out.push(hlYamlLine(l,prev));
+    var k=/^( *)[^\s#-]/.exec(l);if(k&&/:(\s|$)/.test(l))prev=k[1].length;
+  }
+  if(i<lines.length-1)out.push(hlMdBody(lines.slice(i+1).join("\n")));
+  return out.join("\n");
+}
 function edMarks(text,q,cur){
   if(!q)return "";
   var lo=text.toLowerCase(),ql=q.toLowerCase(),out="",p=0,i,n=0;
@@ -1153,7 +1305,7 @@ function edMarks(text,q,cur){
 
 /* ---- the source editor page ---- */
 function pAgentSource(r){
-  var a=agentBySlug(r.id)||AGENTS[0], slug=defSlug(a), w=ws(), path='.oxagen/agents/'+slug+'.toml';
+  var a=agentBySlug(r.id)||AGENTS[0], slug=defSlug(a), w=ws(), path='.oxagen/agents/'+slug+'.md';
   if(S.state==="loading") return skeleton();
   if(S.state==="error") return errorState("This file","502 git_read_unreachable");
   if(S.state==="denied") return deniedState("this agent’s definition","agent.write on "+w.slug);
@@ -1174,7 +1326,7 @@ function pAgentSource(r){
     '<div class="ed-scroll" id="edS"><div class="ed-gut" id="edG" aria-hidden="true"></div>'+
     '<div class="ed-wrap"><div class="ed-cl" id="edCL"></div><pre class="ed-mk" id="edM" aria-hidden="true"></pre><pre class="ed-hl" id="edH" aria-hidden="true"></pre>'+
     '<textarea id="edT" class="ed-t" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" wrap="off" aria-label="'+h(path)+'"></textarea></div></div>'+
-    '<div class="ed-status"><span id="edPos">Ln 1, Col 1</span><span>TOML</span><span>Spaces: 2</span><span>LF</span><span>UTF-8</span><span class="ed-sp"></span>'+
+    '<div class="ed-status"><span id="edPos">Ln 1, Col 1</span><span>Frontmatter markdown</span><span>Spaces: 2</span><span>LF</span><span>UTF-8</span><span class="ed-sp"></span>'+
     '<span class="keys dim">⌘S save · Tab indent · ⇧Tab outdent · ⌘/ comment · ⌘F find · ⌘Z undo</span></div></div>';
 }
 function edMount(){
@@ -1197,7 +1349,7 @@ function edMount(){
 function edPaint(){
   var t=el("edT"),H=el("edH"),G=el("edG"),M=el("edM"); if(!t||!H)return;
   var text=t.value;
-  H.innerHTML=hlToml(text)+"\n";
+  H.innerHTML=hlFrontmatter(text)+"\n";
   M.innerHTML=edMarks(text,S.ed.find,S.ed.cur)+"\n";
   var n=text.split("\n").length,g="";for(var i=1;i<=n;i++)g+=i+"\n";
   G.textContent=g;
@@ -1304,8 +1456,10 @@ function codePair(panes,cls){
 }
 
 /* ---- the light-tier draft: structured field diff in, title + description + branch name out ---- */
+/* The definition as one tree for the diff: the frontmatter, plus the body as `instructions`. */
+function defTree(text){var d=fmParse(text),t={};for(var k in d.data)t[k]=d.data[k];t.instructions=bodyText(d.body);return t;}
 function defChanges(slug){
-  var base,cur;try{base=tomlParse(defBase(slug));}catch(e){base={};}try{cur=tomlParse(defSrc(slug));}catch(e){return null;}
+  var base,cur;try{base=defTree(defBase(slug));}catch(e){base={};}try{cur=defTree(defSrc(slug));}catch(e){return null;}
   var out=[];
   function walk(a,b,path){var keys={};Object.keys(a||{}).concat(Object.keys(b||{})).forEach(function(k){keys[k]=1;});
     Object.keys(keys).forEach(function(k){var x=a?a[k]:undefined,y=b?b[k]:undefined,p=path?path+"."+k:k;
@@ -1315,29 +1469,29 @@ function defChanges(slug){
 }
 function draftCommit(slug){
   var ch=defChanges(slug)||[], a=agentBySlug(slug);
-  var AREA={model_tier:"model routing","budget.per_run_micros":"budget",tools:"toolbelt",deny_tools:"toolbelt",side_effects:"side effects","instructions.body":"instructions",name:"metadata",description:"metadata"};
+  var AREA={"oxagen.model_tier":"model routing","oxagen.budget.per_run_micros":"budget","oxagen.belt.allow":"toolbelt","oxagen.belt.deny":"toolbelt","oxagen.side_effects":"side effects",instructions:"instructions",name:"metadata","oxagen.title":"metadata",description:"metadata"};
   function fmt(v){if(v===undefined)return "unset";if(Array.isArray(v))return "["+v.join(", ")+"]";if(typeof v==="string"&&v.length>48)return JSON.stringify(v.slice(0,45)+"…");return JSON.stringify(v);}
   function money(m){return "$"+((m||0)/1e6).toFixed(2);}
   var areas={},lines=[],risk=[];
   ch.forEach(function(c){
-    var area=AREA[c.key]||(c.key.indexOf("harness.")===0?"harness":"definition");areas[area]=1;
+    var area=AREA[c.key]||(c.key.indexOf("oxagen.harness.")===0?"harness":"definition");areas[area]=1;
     var f=Array.isArray(c.from)?c.from:[],t=Array.isArray(c.to)?c.to:[];
-    if(c.key==="budget.per_run_micros")lines.push("Per-run budget "+money(c.from)+" to "+money(c.to)+(c.to<c.from?"; the highest run this month was "+usd(a.budgetUsed.toFixed(2))+".":"."));
-    else if(c.key==="model_tier")lines.push("Model tier "+c.from+" to "+c.to+(c.to==="light"?"; classification-shaped work stays on the light tier.":"; reasoning steps go to the complex tier."));
-    else if(c.key==="tools"||c.key==="deny_tools"){var added=t.filter(function(x){return f.indexOf(x)<0;}),removed=f.filter(function(x){return t.indexOf(x)<0;});
-      if(added.length)lines.push((c.key==="tools"?"Grants ":"Denies ")+added.join(", ")+".");
-      if(removed.length)lines.push((c.key==="tools"?"Withdraws ":"Stops denying ")+removed.join(", ")+".");
-      if(c.key==="tools"&&added.length)risk.push("widens the toolbelt");if(c.key==="deny_tools"&&removed.length)risk.push("removes a deny");}
-    else if(c.key==="side_effects"){lines.push("Side effects "+fmt(c.from)+" to "+fmt(c.to)+".");if(t.indexOf("irreversible")>=0&&f.indexOf("irreversible")<0)risk.push("adds irreversible, which needs a mandate");}
-    else if(c.key==="instructions.body")lines.push("Rewrites the instructions ("+String(c.from||"").split(/\s+/).filter(Boolean).length+" to "+String(c.to||"").split(/\s+/).filter(Boolean).length+" words).");
+    if(c.key==="oxagen.budget.per_run_micros")lines.push("Per-run budget "+money(c.from)+" to "+money(c.to)+(c.to<c.from?"; the highest run this month was "+usd(a.budgetUsed.toFixed(2))+".":"."));
+    else if(c.key==="oxagen.model_tier")lines.push("Model tier "+c.from+" to "+c.to+(c.to==="light"?"; classification-shaped work stays on the light tier.":"; reasoning steps go to the complex tier."));
+    else if(c.key==="oxagen.belt.allow"||c.key==="oxagen.belt.deny"){var added=t.filter(function(x){return f.indexOf(x)<0;}),removed=f.filter(function(x){return t.indexOf(x)<0;});
+      if(added.length)lines.push((c.key==="oxagen.belt.allow"?"Grants ":"Denies ")+added.join(", ")+".");
+      if(removed.length)lines.push((c.key==="oxagen.belt.allow"?"Withdraws ":"Stops denying ")+removed.join(", ")+".");
+      if(c.key==="oxagen.belt.allow"&&added.length)risk.push("widens the toolbelt");if(c.key==="oxagen.belt.deny"&&removed.length)risk.push("removes a deny");}
+    else if(c.key==="oxagen.side_effects"){lines.push("Side effects "+fmt(c.from)+" to "+fmt(c.to)+".");if(t.indexOf("irreversible")>=0&&f.indexOf("irreversible")<0)risk.push("adds irreversible, which needs a mandate");}
+    else if(c.key==="instructions")lines.push("Rewrites the instructions ("+String(c.from||"").split(/\s+/).filter(Boolean).length+" to "+String(c.to||"").split(/\s+/).filter(Boolean).length+" words).");
     else lines.push(c.key+" "+fmt(c.from)+" to "+fmt(c.to)+".");
   });
   var al=Object.keys(areas),title,c0=ch[0];
-  if(!ch.length)title="Reformat "+slug+".toml, no field changed";
-  else if(ch.length===1)title=c0.key==="model_tier"?"Move "+slug+" to the "+c0.to+" tier"
-    :c0.key==="budget.per_run_micros"?(c0.to<c0.from?"Lower":"Raise")+" "+slug+" per-run budget to "+money(c0.to)
-    :c0.key==="instructions.body"?"Rewrite "+slug+" instructions"
-    :c0.key==="tools"||c0.key==="deny_tools"?"Change "+slug+" toolbelt"
+  if(!ch.length)title="Reformat "+slug+".md, no field changed";
+  else if(ch.length===1)title=c0.key==="oxagen.model_tier"?"Move "+slug+" to the "+c0.to+" tier"
+    :c0.key==="oxagen.budget.per_run_micros"?(c0.to<c0.from?"Lower":"Raise")+" "+slug+" per-run budget to "+money(c0.to)
+    :c0.key==="instructions"?"Rewrite "+slug+" instructions"
+    :c0.key==="oxagen.belt.allow"||c0.key==="oxagen.belt.deny"?"Change "+slug+" toolbelt"
     :"Update "+slug+" "+c0.key.split(".").pop();
   else title="Update "+slug+": "+al.join(", ");
   var kind=risk.length?"widens authority":!ch.length?"formatting":(al.length===1&&(al[0]==="metadata"||al[0]==="harness"))?"cosmetic":"behavioural";
@@ -1360,10 +1514,10 @@ function cmBranch(){if(!S.cm)return null;return S.cm.branch==="__new"?null:BRANC
 function commitBody(){
   if(S.dlg!=="commit"||!S.cm)return '';
   var c=S.cm,w=ws(),a=agentBySlug(c.slug),d=c.draft,ex=cmBranch();
-  var pend=S.defPending[c.slug],rows=diffLines(c.prOnly?agentTomlSeed(a):defBase(c.slug),defSrc(c.slug)),st=diffStat(rows);
+  var pend=S.defPending[c.slug],rows=diffLines(c.prOnly?agentDefSeed(a):defBase(c.slug),defSrc(c.slug)),st=diffStat(rows);
   var lock='<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>';
   var against=pend&&c.branch===pend.branch&&!c.prOnly?pend.branch:w.branch;
-  return '<p class="eyebrow q"><span class="mono" style="text-transform:none;letter-spacing:0">.oxagen/agents/'+h(c.slug)+'.toml</span> · <span class="dstat"><b class="a">+'+st.add+'</b> <b class="d">−'+st.del+'</b></span> · '+(c.prOnly?'already on the branch, no pull request yet':'from the '+(c.from==="editor"?"source editor":"form"))+'</p>'+
+  return '<p class="eyebrow q"><span class="mono" style="text-transform:none;letter-spacing:0">.oxagen/agents/'+h(c.slug)+'.md</span> · <span class="dstat"><b class="a">+'+st.add+'</b> <b class="d">−'+st.del+'</b></span> · '+(c.prOnly?'already on the branch, no pull request yet':'from the '+(c.from==="editor"?"source editor":"form"))+'</p>'+
    '<div class="cm-repo"><span class="k">Repository</span><span class="v">'+h(w.main)+'<span class="b b-q" style="gap:4px">'+lock+' primary</span></span>'+
    '<span class="k">Base</span><span class="v">'+h(w.branch)+' @ '+h(a.commit)+'</span>'+
    '<span class="hint">The primary repository bound to workspace '+h(w.name)+'. Every agent definition in this workspace lives here; it is not chosen per change.</span></div>'+
@@ -1446,7 +1600,7 @@ function icon(n){
    cons:'<path d="M12 3l8 3.5v5c0 4.6-3.2 8.6-8 9.5-4.8-.9-8-4.9-8-9.5v-5z"/><path d="M9 12h6"/>'};
   return '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">'+(p[n]||'')+'</svg>';
 }
-/* The six record kinds of context-record/v0.1. Icon + hue per kind; the statement is always the headline. */
+/* The six record kinds of context-record/v0.2. Icon + hue per kind; the statement is always the headline. */
 var KINDS={
  rule:{l:"rule",d:"A directive that steers behaviour",i:'<path d="M4 12h14M13 7l5 5-5 5"/>'},
  constraint:{l:"constraint",d:"A hard boundary: require or forbid",i:'<path d="M12 3l8 3.5v5c0 4.6-3.2 8.6-8 9.5-4.8-.9-8-4.9-8-9.5v-5z"/><path d="M9 12h6"/>'},
@@ -2496,12 +2650,12 @@ function runFitPanel(R){
    card(f.model,"model")+card(f.effort,"effort")+
    '<div class="panel-b"><div class="note">Read from this run only: '+h(f.read)+
    '. A reading is an argument, not a verdict, and it changes nothing until somebody merges the change to '+
-   (a?'<span class="mono">.oxagen/agents/'+h(a.key.split(".").pop())+'.toml</span>':'the agent definition')+'.</div></div></div>';
+   (a?'<span class="mono">.oxagen/agents/'+h(a.key.split(".").pop())+'.md</span>':'the agent definition')+'.</div></div></div>';
 }
 DLG_EXT.fitchange=function(arg){
   var parts=String(arg||"").split(":"), R=run(parts[0]); if(!R)return noSuch("Run");
   var f=runFit(R), x=parts[1]==="effort"?f.effort:f.model, a=agent(R.agent);
-  var file=".oxagen/agents/"+(a?a.key.split(".").pop():"agent")+".toml";
+  var file=".oxagen/agents/"+(a?a.key.split(".").pop():"agent")+".md";
   return {t:parts[1]==="effort"?"Set effort to "+x.suggest:"Move to "+x.suggestLab,w:false,
    b:'<div class="note">'+h(x.say)+'</div>'+
     '<dl class="kv" style="margin-top:14px"><dt>Agent</dt><dd>'+(a?h(a.name):h(R.agent))+'</dd>'+
@@ -2522,8 +2676,8 @@ function fitPr(arg){
    pr:ws().main+"#"+(524+OXPRS.length),by:PEOPLE.marcus.name,byKind:"person",
    opened:"just now",state:"checks_running",
    trigger:"A model fit reading of "+R.id+" argued the "+(parts[1]==="effort"?"effort setting":"model tier")+" was the wrong size.",
-   files:[["mod",".oxagen/agents/"+slug+".toml",(parts[1]==="effort"?"effort = ":"model = ")+x.suggest]],
-   checks:[["schema","pass","agent-definition/v0.3; "+(parts[1]==="effort"?"effort":"model")+" is a value the harness accepts."],
+   files:[["mod",".oxagen/agents/"+slug+".md",(parts[1]==="effort"?"effort: ":"model: ")+x.suggest],["mod",".claude/agents/"+slug+".md","the same bytes"]],
+   checks:[["schema","pass","agent-definition/v0.2; "+(parts[1]==="effort"?"effort":"model")+" is a value the harness accepts."],
     ["belt_unchanged","pass","The toolbelt and its tier are untouched, so nothing this agent may do changes."],
     ["budget_fit","pass","The agent's daily budget covers the new price at its 30-day run count."]]};
   OXPRS.unshift(p);
@@ -4563,7 +4717,7 @@ function pAgents(){
    route, so a link can point at one of them.
 
    Ported whole from the W9 toolbelt walkthrough. Two tabs stay mc's, because mc's are richer:
-   Definition in git (a live form over the TOML plus the source editor and the commit dialog,
+   Definition in git (a live form over the frontmatter plus the source editor and the commit dialog,
    where W9 had a read-only listing) and Runs (W9 had none).
 
    Tool facts are NOT repeated here. A belt row carries only what is true of the tool *on this
@@ -4580,7 +4734,7 @@ var BELT=[
  {id:"github__create_issue_comment@2",d:"Comment on an issue or pull request.",
   dec:"allow",rule:"grant:agent.repo.write #1",scope:"repositories: a-intel/*"},
  {id:"github__merge_pull_request@4",d:"Merge a pull request into its base branch.",
-  dec:"deny",rule:"definition deny_tools: github__merge_pull_request@*",pinned:true,scope:"—",
+  dec:"deny",rule:"definition belt.deny: github__merge_pull_request@*",pinned:true,scope:"—",
   note:"A grant reaches this version and the registry default would only hold it for approval. The definition denies it, and a deny wins at the call."},
  {id:"github__create_release@2",d:"Publish a release and its notes against a tag.",
   dec:"require_approval",rule:"pol_v41 rule rg_0093 (side_effect:irreversible)",
@@ -4592,7 +4746,7 @@ var BELT=[
  {id:"github__get_file_contents@2",d:"Read one file at a ref.",
   dec:"allow",rule:"grant:agent.repo.write #1",scope:"repositories: a-intel/*"},
  {id:"github__delete_branch@1",d:"Delete a branch reference.",
-  dec:"deny",rule:"definition deny_tools: github__delete_*@*",scope:"—"},
+  dec:"deny",rule:"definition belt.deny: github__delete_*@*",scope:"—"},
  {id:"linear__get_issue@2",d:"Read one issue with its state, labels and links.",
   dec:"allow",rule:"grant:agent.repo.write #4",scope:"teams: Platform, Mobile"},
  {id:"linear__update_issue@3",d:"Change an issue's state, assignee or labels.",
@@ -4899,12 +5053,12 @@ function aIdentity(a,r){
     '<p class="muted" style="margin:2px 0 0;font-size:12px">Identity is in Postgres; the definition is a file, and the file is the source of truth.</p></div>'+
     '<button class="btn sm" style="margin-left:auto" onclick="S.tab.agent=\'definition\';go(\'#/'+ORG.slug+'/'+S.ws+'/agents/'+sl+'/definition\')">Open the file</button></div>'+
     '<div class="panel-b"><dl class="kv">'+
-    '<dt>Path</dt><dd class="mono">.oxagen/agents/'+h(sl)+'.toml</dd>'+
+    '<dt>Path</dt><dd class="mono">.oxagen/agents/'+h(sl)+'.md</dd>'+
     '<dt>Repo</dt><dd class="mono">'+h(w.main)+' @ '+h(w.branch)+'</dd>'+
     '<dt>Commit</dt><dd class="mono">'+h(a.commit)+'</dd>'+
     '<dt>definition_digest</dt><dd class="mono">'+h(a.digest)+'</dd>'+
-    '<dt>Generated beside it</dt><dd class="mono">.claude/agents/'+h(sl)+'.md'+
-     '<span class="sub">A pull request that edits a generated file without regenerating it fails the checks.</span></dd>'+
+    '<dt>Bridge copy</dt><dd class="mono">.claude/agents/'+h(sl)+'.md'+
+     '<span class="sub">The same bytes, so Claude Code and Cursor read the definition where they look. A pull request where the two files differ fails the checks.</span></dd>'+
     '</dl></div></div></div></div>';
 }
 
@@ -6017,7 +6171,7 @@ function prpById(id){for(var i=0;i<PROPOSALS.length;i++){if(PROPOSALS[i].id===id
 var CTXPR={prp:"prp_01K5RU4A", pr:"a-intel/platform#519", branch:"context/ctx.release.no-reread-changelog",
  base:"a4c91e2", head:"7d2e91a", promo:"rec_01K5RW2P7QH4", evt:"evt_01K5RW2Q8", hash:"sha256:9a41c0e7bd238f45",
  checks:[
-  {n:"Schema",ms:900,ok:"context-record/v0.1 valid · 1 file, 1 record, 1 lineage"},
+  {n:"Schema",ms:900,ok:"context-record/v0.2 valid · 1 file, 1 record, 1 lineage"},
   {n:"Lineage uniqueness",ms:700,ok:"no published record holds ctx.release.no-reread-changelog; this proposal is its only holder"},
   {n:"record_hash recomputation",ms:600,ok:"recomputed over the canonical bytes · sha256:9a41c0e7bd238f45 matches the file"},
   {n:"Secret and PII scan",ms:900,ok:"statement, rationale and evidence scanned · 0 findings"},
@@ -6188,7 +6342,7 @@ function prpDetail(p){
     '</div></div>'+
    '<div><div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Context PR</h3></div><div class="panel-b">'+
      '<dl class="kv" style="margin-bottom:13px"><dt>Target</dt><dd class="mono">a-intel/platform</dd><dt>Branch</dt><dd class="mono">context/'+h(p.lineage)+'</dd>'+
-     '<dt>File</dt><dd class="mono">.oxagen/rules/'+h(p.lineage)+'.toml</dd><dt>Governance</dt><dd>team · a code-owner review is required</dd></dl>'+action+'</div></div>'+
+     '<dt>File</dt><dd class="mono">.oxagen/rules/'+h(p.lineage)+'.md</dd><dt>Governance</dt><dd>team · a code-owner review is required</dd></dl>'+action+'</div></div>'+
     '<div class="panel"><div class="panel-h"><h3>If it publishes</h3></div><div class="panel-b"><dl class="kv">'+
      '<dt>Reaches</dt><dd>every run in <b>core-platform</b> on a-intel/platform, from its next model call</dd>'+
      '<dt>As</dt><dd>compiled steering in bundle v'+(STEER_BUNDLE.v+(mine&&c.st==="merged"?0:1))+', <span class="mono">'+h(p.force)+'</span> in the stable prefix</dd>'+
@@ -6308,9 +6462,9 @@ function wzRecOpenPr(){
      open at once and each still reports on its own file. */
   def.checks=[
    {n:"Schema",ms:900,
-    test:function(){return !!tomlOf(recprFileText(def));},
-    ok:"context-record/v0.1 valid · 1 file, 1 record, 1 lineage",
-    bad:"the record file does not parse as TOML"},
+    test:function(){return !!fmOf(recprFileText(def));},
+    ok:"context-record/v0.2 valid · 1 file, 1 record, 1 lineage",
+    bad:"the record file does not parse as frontmatter markdown"},
    {n:"Lineage uniqueness",ms:700,
     /* A real check, not a sentence, and it is re-run at merge because another pull request can
        claim the lineage after this one went green. */
@@ -6339,27 +6493,32 @@ function wzRecOpenPr(){
   act("Branch "+def.branch+" pushed and "+def.pr+" opened. "+def.checks.length+" checks queued; it steers nothing until it merges.","gold");
 }
 
-/* The file the pull request carries. The statement is operator text, so it is escaped as TOML —
-   a quote or a backslash in it must not be able to produce a file that does not parse while the
-   schema check says it does. tomlStr and tomlMulti are the same serialisers the agent definition
-   editor writes with. */
+/* The file the pull request carries: context-record/v0.2 (ADR-138). The frontmatter is the record
+   object and the statement is the markdown body, verbatim, so a quote or a backslash in operator
+   text is written as it was typed and never escaped. fmParse is the reader the schema check runs. */
+function lineageSlug(id){return String(id).replace(/^ctx\./,"").toLowerCase().replace(/[^a-z0-9]/g,"_");}
 function recprFileText(def){
-  var r=def.record, multi=/\n/.test(r.st);
-  return '# .oxagen/rules/'+r.id+'.toml\n'+
-   'schema = "context-record/v0.1"\n'+
-   'lineage_id = '+tomlStr(r.id)+'\n'+
-   'kind = '+tomlStr(r.kind)+'\n'+
-   'sharing_scope = '+tomlStr(r.scope)+'\n'+
-   'statement = '+(multi?tomlMulti(r.st):tomlStr(r.st))+'\n\n'+
-   '[steering]\nstrength = '+tomlStr(r.force)+'\n\n'+
-   (r.ce?'[enforcement]\nconstraint_effect = '+tomlStr(r.ce)+'\nblocking = false\n\n'
-        :'# no [enforcement] table: a '+r.kind+' constrains nothing\n\n')+
-   'record_hash = '+tomlStr(def.hash)+'\n';
+  var r=def.record;
+  return '---\n'+
+   'schema: context-record/v0.2\n'+
+   'set_id: '+ORG.slug+'.'+def.ws+'\n'+
+   'lineage_id: '+r.id+'\n'+
+   'record_id: rec_'+lineageSlug(r.id)+'_'+(sha7(r.st)+sha7(r.id)).slice(0,12)+'\n'+
+   'record_hash: '+def.hash+'\n'+
+   'kind: '+r.kind+'\n'+
+   'origin: user\n'+
+   'sharing_scope: '+r.scope+'\n'+
+   'status: active\n'+
+   'provenance:\n  source_kind: proposal\n  source_uri: oxagen:proposal/prp_'+sha7(def.pr)+'\n'+
+   'steering:\n  force: '+r.force+'\n'+
+   (r.ce?'enforcement:\n  constraint_effect: '+r.ce+'\n  blocking: false\n'
+        :'# no enforcement table: a '+r.kind+' constrains nothing\n')+
+   '---\n'+bodyText(r.st)+'\n';
 }
-function tomlOf(text){try{return tomlParse(text);}catch(e){return null;}}
+function fmOf(text){try{return fmParse(text);}catch(e){return null;}}
 function recprFile(def){
   /* highlighted with the same grammar the source editor uses, so what is shown is what parses */
-  return '<pre>'+hlToml(recprFileText(def))+'</pre>';
+  return '<pre>'+hlFrontmatter(recprFileText(def))+'</pre>';
 }
 function recprBody(def){
   var r=def.record, w=ws();
@@ -6511,15 +6670,20 @@ function ctxprTab(){
    '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Context PR · <span class="mono">'+h(CTXPR.pr)+'</span></h3>'+
     '<span class="b b-'+l[0]+'" style="margin-left:auto" data-ctxpr-state="'+c.st+'"><span class="d"></span>'+h(l[1])+'</span></div><div class="panel-b">'+
     '<p class="eyebrow q">Branch <span class="mono">'+h(CTXPR.branch)+'</span> · base main · '+h(CTXPR.base)+' · one concern per PR</p>'+
-    '<pre><span class="c"># .oxagen/rules/'+h(CTXPR.record.id)+'.toml</span>\n'+
-    '<span class="k">schema</span>       = <span class="s">"context-record/v0.1"</span>\n'+
-    '<span class="k">lineage_id</span>   = <span class="s">"'+h(CTXPR.record.id)+'"</span>\n'+
-    '<span class="k">kind</span>         = <span class="s">"'+h(CTXPR.record.kind)+'"</span>\n'+
-    '<span class="k">sharing_scope</span>= <span class="s">"workspace"</span>\n'+
-    '<span class="k">statement</span>    = <span class="s">"'+h(CTXPR.record.st)+'"</span>\n\n'+
-    '[<span class="k">steering</span>]\n<span class="k">strength</span> = <span class="s">"'+h(CTXPR.record.force)+'"</span>\n\n'+
-    '[<span class="k">enforcement</span>]\n<span class="k">constraint_effect</span> = <span class="s">"'+h(CTXPR.record.ce)+'"</span>\n<span class="k">blocking</span> = <span class="s">false</span>\n\n'+
-    '<span class="k">record_hash</span>  = <span class="s">"'+h(CTXPR.hash)+'"</span></pre></div></div>'+
+    '<pre><span class="c"># .oxagen/rules/'+h(CTXPR.record.id)+'.md</span>\n'+
+    '---\n<span class="k">schema</span>: <span class="s">context-record/v0.2</span>\n'+
+    '<span class="k">set_id</span>: <span class="s">'+h(ORG.slug)+'.core-platform</span>\n'+
+    '<span class="k">lineage_id</span>: <span class="s">'+h(CTXPR.record.id)+'</span>\n'+
+    '<span class="k">record_id</span>: <span class="s">rec_'+h(lineageSlug(CTXPR.record.id))+'_'+h((sha7(CTXPR.record.st)+sha7(CTXPR.record.id)).slice(0,12))+'</span>\n'+
+    '<span class="k">record_hash</span>: <span class="s">'+h(CTXPR.hash)+'</span>\n'+
+    '<span class="k">kind</span>: <span class="s">'+h(CTXPR.record.kind)+'</span>\n'+
+    '<span class="k">origin</span>: <span class="s">inferred</span>\n'+
+    '<span class="k">sharing_scope</span>: <span class="s">workspace</span>\n'+
+    '<span class="k">status</span>: <span class="s">active</span>\n'+
+    '<span class="k">provenance</span>:\n  <span class="k">source_kind</span>: <span class="s">proposal</span>\n  <span class="k">source_uri</span>: <span class="s">oxagen:proposal/'+h(CTXPR.prp)+'</span>\n'+
+    '<span class="k">steering</span>:\n  <span class="k">force</span>: <span class="s">'+h(CTXPR.record.force)+'</span>\n'+
+    '<span class="k">enforcement</span>:\n  <span class="k">constraint_effect</span>: <span class="s">'+h(CTXPR.record.ce)+'</span>\n  <span class="k">blocking</span>: <span class="s">false</span>\n'+
+    '---\n'+h(CTXPR.record.st)+'</pre></div></div>'+
    '<div class="panel"><div class="panel-h"><h3>Pull request body</h3></div><div class="panel-b"><pre>'+h(body)+'</pre></div></div></div>'+
    '<div><div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Checks</h3><span class="muted" style="font-size:12px">the same rules as <span class="mono">stella context validate</span></span></div>'+
     '<div class="tw"><table class="narrow"><tbody data-checks-done="'+c.done+'">'+checks+'</tbody></table></div>'+mergebar+'</div>'+promo+'</div></div>';
@@ -6630,12 +6794,12 @@ function stgItems(wslug,asOf){
     if(asOf!=null&&(b.since||0)>asOf) return;
     var r=stgRecord(b.id)||{};
     push({id:b.id,lineage:b.id,kind:"record",sub:r.kind||"rule",force:r.force||b.force,scope:r.scope||b.scope,repo:r.repo||b.repo,agent:b.agent,
-      body:r.st||b.st,tok:b.tok,grant:r.grant||null,about:r.about||b.about||[],provenance:".oxagen/rules/"+b.id+".toml"+(r.commit?" @ "+r.commit:""),
+      body:r.st||b.st,tok:b.tok,grant:r.grant||null,about:r.about||b.about||[],provenance:".oxagen/rules/"+b.id+".md"+(r.commit?" @ "+r.commit:""),
       hash:r.hash||"",valid_from:r.pub||""});});
   if(wslug==="core-platform") RECORDS.forEach(function(r){
     if(r.status!=="published"||!r.hash) return;
     push({id:r.id,lineage:r.id,kind:"record",sub:r.kind,force:r.force,scope:r.scope,repo:r.repo,body:r.st,tok:recTok(r),grant:r.grant||null,
-      about:r.about||[],provenance:".oxagen/rules/"+r.id+".toml @ "+r.commit,hash:r.hash,valid_from:r.pub});});
+      about:r.about||[],provenance:".oxagen/rules/"+r.id+".md @ "+r.commit,hash:r.hash,valid_from:r.pub});});
   STG_PREVIEW.instructions.forEach(function(x){ if(stgInWs(x,wslug)) push(stgNorm(x)); });
   if(SK_ON[wslug]) SKILLS.forEach(function(s){
     if(s.state!=="ok") return;
@@ -7156,12 +7320,12 @@ function pSteering(){
      '<pre>.oxagen/\n  workspace.toml             <span class="c"># linked repos, tool servers, budgets</span>\n'+
      '  rules/\n    governance.toml          <span class="c"># mode = team</span>\n'+
      '    promotions.jsonl         <span class="c"># hash-chained ledger (regulated mode)</span>\n'+
-     '    ctx.release.notes-format.toml\n    ctx.release.never-merge.toml\n    ctx.platform.changelog-once.toml\n'+
-     (stgRecord(CTXPR.record.id)?'    '+h(CTXPR.record.id)+'.toml  <span class="c"># merged in '+h(CTXPR.pr)+'</span>\n':'')+
+     '    ctx.release.notes-format.md  <span class="c"># context-record/v0.2: frontmatter, then the statement</span>\n    ctx.release.never-merge.md\n    ctx.platform.changelog-once.md\n'+
+     (stgRecord(CTXPR.record.id)?'    '+h(CTXPR.record.id)+'.md  <span class="c"># merged in '+h(CTXPR.pr)+'</span>\n':'')+
      '  skills/&lt;name&gt;/SKILL.md     <span class="c"># governed files, delivered by sync</span>\n'+
      '  ontology/*.toml            <span class="c"># entity and term definitions</span>\n'+
      '  proposals/*.toml           <span class="c"># candidates; steer nothing</span>\n'+
-     '  agents/&lt;slug&gt;.toml         <span class="c"># one per agent</span></pre>'+
+     '  agents/&lt;name&gt;.md           <span class="c"># one per agent; the same bytes at .claude/agents/</span></pre>'+
      '<div class="note" style="margin-top:12px">Stella symlinks into this directory rather than copying it, so its loader and its CI validation work unchanged on the same files with no second copy that could drift. Oxagen reads <span class="mono">.oxagen/</span> and nothing else.</div></div></div>'+
      '<div class="panel"><div class="panel-h"><h3>Injection points</h3><span class="b b-q" style="margin-left:auto">five points</span></div><div class="panel-b">'+
      '<p class="muted" style="font-size:12.5px;margin:0 0 12px">The harness owns the context window. Oxagen competes for its own slice of it, at exactly these points, and every delivery is recorded.</p>'+
@@ -7211,9 +7375,9 @@ function pSteering(){
 
 var OXPR_KIND={
  bootstrap:{l:"Oxagen init", d:"the .oxagen/ tree itself",        i:"repo"},
- record:   {l:"context record", d:".oxagen/rules/<lineage>.toml", i:"steering"},
+ record:   {l:"context record", d:".oxagen/rules/<lineage>.md",   i:"steering"},
  skill:    {l:"skill",       d:".oxagen/skills/<name>/SKILL.md",  i:"skills"},
- agent:    {l:"agent",       d:".oxagen/agents/<slug>.toml",      i:"agents"},
+ agent:    {l:"agent",       d:".oxagen/agents/<name>.md",        i:"agents"},
  tool:     {l:"tool",        d:".oxagen/tools/<name>.toml",       i:"tools"},
  config:   {l:"configuration", d:".oxagen/workspace.toml",        i:"org"}
 };
@@ -7583,9 +7747,9 @@ function cfgTab(){
    '  workspace.json             <span class="c"># gitignored · this machine’s link</span>\n'+
    '  rules/\n    governance.toml          <span class="c"># mode = team</span>\n'+
    '    promotions.jsonl         <span class="c"># hash-chained ledger (regulated)</span>\n'+
-   '    ctx.&lt;set&gt;.&lt;slug&gt;.toml     <span class="c"># one published record per lineage</span>\n'+
+   '    ctx.&lt;set&gt;.&lt;slug&gt;.md       <span class="c"># one published record per lineage</span>\n'+
    '  proposals/*.toml           <span class="c"># candidates; steer nothing</span>\n'+
-   '  agents/&lt;slug&gt;.toml         <span class="c"># one per agent</span>\n'+
+   '  agents/&lt;name&gt;.md           <span class="c"># one per agent; the same bytes at .claude/agents/</span>\n'+
    '  skills/&lt;name&gt;/SKILL.md     <span class="c"># pinned by version and digest</span>\n'+
    '  tools/&lt;name&gt;.toml          <span class="c"># manifest, schema, handler beside it</span></pre>'+
    '<div class="note" style="margin-top:12px">Oxagen reads <span class="mono">.oxagen/</span> and nothing else. Whatever sits under <span class="mono">.stella/</span> is invisible to it, and it never looks.</div></div></div></div>';
@@ -9980,7 +10144,7 @@ SCENARIOS["learned-approved-changed"]={title:"Learned, approved, changed", ws:"c
    note:"Recorded frames never change. The manifest links every item back to where it is authored, and the readout says what the next bundle adds.",
    route:function(o){return {page:"run",org:o,ws:"core-platform",id:"run_01K5RS7M2E8FJ3QW"};},
    setup:function(){if(S.ctxpr.st!=="merged")ctxprSet("merged");S.tab.run="context";S.ctxSel="steering";}},
-  {say:"An agent's own definition is a file too: <span class=\"mono\">.oxagen/agents/docs-writer.toml</span>. Changing it is a pull request with checks, merged by a person, the same way the rule was.",
+  {say:"An agent's own definition is a file too: <span class=\"mono\">.oxagen/agents/docs-writer.md</span>. Changing it is a pull request with checks, merged by a person, the same way the rule was.",
    note:"Steering records say how to behave. The definition says what the agent is and what it may hold.",
    route:function(o){return {page:"agent",org:o,ws:"core-platform",id:"docs-writer",b:"definition"};},
    setup:function(){S.tab.agent="definition";}}
@@ -10511,15 +10675,19 @@ function fixDlg(){
   if(x.shape==="pr"){
     return {t:"Fix · Open a Context PR",w:true,s:f.kind+" on "+f.subject+" · "+usd(f.save)+" at stake",
      b:'<p class="eyebrow q">Branch <span class="mono">'+h(x.branch)+'</span> · one concern per PR · the agent reads this on its next run</p>'+
-       '<pre><span class="c"># .oxagen/rules/'+h(x.lineage)+'.toml</span>\n'+
-       '<span class="k">schema</span>       = <span class="s">"context-record/v0.1"</span>\n'+
-       '<span class="k">lineage_id</span>   = <span class="s">"'+h(x.lineage)+'"</span>\n'+
-       '<span class="k">kind</span>         = <span class="s">"'+h(x.kind)+'"</span>\n'+
-       '<span class="k">sharing_scope</span>= <span class="s">"workspace"</span>\n'+
-       '<span class="k">statement</span>    = <span class="s">"'+h(x.statement)+'"</span>\n\n'+
-       '[<span class="k">steering</span>]\n<span class="k">strength</span> = <span class="s">"should"</span>\n\n'+
-       '[<span class="k">enforcement</span>]\n<span class="k">constraint_effect</span> = <span class="s">"'+h(x.effect)+'"</span>\n<span class="k">blocking</span> = <span class="s">false</span>\n\n'+
-       '[<span class="k">evidence</span>]\n<span class="k">finding</span> = <span class="s">"'+h(f.id)+'"</span>\n<span class="k">runs</span>    = <span class="s">"'+h(f.frames)+'"</span>\n<span class="k">saving</span>  = <span class="s">"'+h(f.save)+' USD / '+h(f.window)+'"</span></pre>'+
+       '<pre><span class="c"># .oxagen/rules/'+h(x.lineage)+'.md</span>\n'+
+       '---\n<span class="k">schema</span>: <span class="s">context-record/v0.2</span>\n'+
+       '<span class="k">set_id</span>: <span class="s">'+h(ORG.slug)+'.'+h(ws().slug)+'</span>\n'+
+       '<span class="k">lineage_id</span>: <span class="s">'+h(x.lineage)+'</span>\n'+
+       '<span class="k">kind</span>: <span class="s">'+h(x.kind)+'</span>\n'+
+       '<span class="k">origin</span>: <span class="s">inferred</span>\n'+
+       '<span class="k">sharing_scope</span>: <span class="s">workspace</span>\n'+
+       '<span class="k">status</span>: <span class="s">active</span>\n'+
+       '<span class="k">provenance</span>:\n  <span class="k">source_kind</span>: <span class="s">finding</span>\n  <span class="k">source_uri</span>: <span class="s">oxagen:finding/'+h(f.id)+'</span>\n'+
+       '<span class="k">steering</span>:\n  <span class="k">force</span>: <span class="s">should</span>\n'+
+       '<span class="k">enforcement</span>:\n  <span class="k">constraint_effect</span>: <span class="s">'+h(x.effect)+'</span>\n  <span class="k">blocking</span>: <span class="s">false</span>\n'+
+       '<span class="k">evidence</span>:\n  <span class="k">runs</span>: <span class="s">'+h(f.frames)+'</span>\n  <span class="k">saving</span>: <span class="s">'+h(f.save)+' USD / '+h(f.window)+'</span>\n'+
+       '---\n'+h(x.statement)+'</pre>'+
        '<div class="grid g2" style="margin-top:14px"><div><p class="eyebrow q">Why a Context PR</p><p style="margin:0;font-size:12.5px;color:var(--body)">'+
        'The waste is in how the agent behaves, not in its code: the brief says to confirm the changelog, so it re-reads the file. A steering record changes the behaviour without a deploy; it is reviewed like code, published on merge and delivered at the steering position of the next run. '+
        'Supporting evidence: '+evLink+'.</p></div>'+
@@ -10612,7 +10780,7 @@ function dialog(){
       '<button class="btn sm" style="margin-left:auto;flex:none" onclick="openAvatar(\'new\')">Design</button></div></div>'+
      '<div class="field"><label>Harness</label><select aria-label="Harness"><option>claude-code</option><option>stella</option><option>codex-cli</option><option>claude-agent-sdk</option><option>custom</option></select></div>'+
      '<div class="field"><label>Model tier</label><select aria-label="Model tier"><option>complex</option><option>light</option></select></div>'+
-     '<div class="note">This does not write Postgres. It opens a Context PR that adds <span class="mono">.oxagen/agents/perf-watch.toml</span> and the generated harness file beside it; merge creates the principal, the roles the definition asks for, and the toolbelt.</div>',
+     '<div class="note">This does not write Postgres. It opens a Context PR that adds <span class="mono">.oxagen/agents/perf-watch.md</span> and the same bytes at <span class="mono">.claude/agents/perf-watch.md</span>; merge creates the principal, the roles the definition asks for, and the toolbelt.</div>',
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'a-intel/platform#522 opened. The agent exists when it merges.\')">Open the Context PR</button>'},
    "request-access":{t:"Request access",w:false,b:
      '<div class="field"><label>Role requested</label><input value="workspace.read on core-platform" aria-label="Role"></div>'+
@@ -11331,7 +11499,7 @@ function agentDelDlg(){
   var a=S.dlg==="delagent"?agent(S.dlgArg):null; if(!a) return {t:"Deregister agent",w:false,b:"",f:""};
   var live=RUNS.filter(function(r){return r.agent===a.key&&r.status==="live";}).length;
   return {t:"Deregister agent",s:a.key,w:false,b:
-   '<p style="font-size:13px">This ends the agent’s identity. Its credential is revoked, every run token dies at the next call, and a Context PR archives <span class="mono">.oxagen/agents/'+h(a.key.split(".").pop())+'.toml</span>.</p>'+
+   '<p style="font-size:13px">This ends the agent’s identity. Its credential is revoked, every run token dies at the next call, and a Context PR archives <span class="mono">.oxagen/agents/'+h(a.key.split(".").pop())+'.md</span>.</p>'+
    '<dl class="kv"><dt>Kept</dt><dd>every run, frame, receipt and score — the record is never deleted</dd><dt>Ends</dt><dd>'+agentRolesOf(a.key).length+' role'+(agentRolesOf(a.key).length===1?'':'s')+', '+a.mandates.length+' mandate'+(a.mandates.length===1?'':'s')+', the host enrollment</dd>'+
    (live?'<dt>In flight</dt><dd><span style="color:var(--st-failed)">'+live+' live run'+(live>1?'s':'')+'</span> — cancelled at the next boundary and recorded</dd>':'')+'</dl>'+
    '<label class="check" style="margin-top:12px"><input type="checkbox" id="delAgentOk" onchange="el(\'delAgentBtn\').disabled=!this.checked"><span class="grow"><span class="n" style="font-family:var(--font)">I understand this cannot be undone</span><span class="d">Re-registering creates a new principal with a provisional score.</span></span></label>',
@@ -12339,7 +12507,7 @@ function asstSheet(){
    'Narrowing the belt is a change to the agent definition, so it is a Context PR, not a write to Postgres. I opened one.</p>'+
    '<div class="act-card"><div class="t"><span class="b b-allowed"><span class="d"></span>action</span><code>open_context_pr</code></div>'+
    '<dl class="kv" style="font-size:11.5px"><dt>Pull request</dt><dd><a href="#">a-intel/platform#521</a></dd>'+
-   '<dt>File</dt><dd class="mono" style="font-size:11px">.oxagen/agents/triage.toml</dd>'+
+   '<dt>File</dt><dd class="mono" style="font-size:11px">.oxagen/agents/triage.md</dd>'+
    '<dt>Change</dt><dd>tools narrowed 52 → 18</dd>'+
    '<dt>Decision</dt><dd>allow · <span class="mono">pol_v41</span> · rule <span class="mono">rg_0041</span></dd>'+
    '<dt>Receipt</dt><dd><a class="mono" href="#/'+ORG.slug+'/audit/receipts" onclick="openDialog(\'receipt\',\'rcp_01K5RTB4Q\')">rcp_01K5RTB4Q</a></dd>'+
@@ -12380,7 +12548,7 @@ var MCP_CATALOG=FIXTURES.MCP_CATALOG;
 var SKILL_REGISTRY=FIXTURES.SKILL_REGISTRY;
 
 /* ---- a code editor that is not the agent definition ----
-   pAgentSource has one, wired to S.defSrc and to TOML. This is the same editor — same markup, same
+   pAgentSource has one, wired to S.defSrc and to the frontmatter reader. This is the same editor — same markup, same
    CSS, same gutter, same find — over any string in S.cedVal and any of six grammars, so the record
    page and the wizards get a real editor rather than a textarea with a monospace font. One is on
    screen at a time, so the ids are fixed. */
@@ -12394,6 +12562,7 @@ function cedRevert(key){ S.cedVal[key]=S.cedBase[key]; var t=el("cedT"); if(t){t
 
 var CED_LANG={
  toml:{label:"TOML",line:"#"},
+ fm:{label:"Frontmatter markdown",line:null},
  md:{label:"Markdown",line:null},
  json:{label:"JSON",line:null},
  ts:{label:"TypeScript",line:"//",block:["/*","*/"],str:"\"'`",
@@ -12414,7 +12583,7 @@ function cedTk(cls,t){ return cls?'<span class="'+cls+'">'+h(t)+'</span>':h(t); 
 
 /* One tokeniser, driven by the language's comment, string, keyword and type spelling. It is a
    highlighter, not a parser: it never claims a token is wrong, because a half-typed line is not an
-   error. Only hlToml marks bad tokens, and only because a definition file has a schema. */
+   error. Only hlToml and hlFrontmatter mark bad tokens, and only because a manifest and a definition have a schema. */
 function hlLang(src,spec){
   var out="",i=0,n=src.length,str=spec.str||"";
   while(i<n){
@@ -12466,23 +12635,20 @@ function hlJson(src){
 }
 
 /* Markdown, line by line, because a skill file is frontmatter and prose and the frontmatter is the
-   part with a grammar. */
+   part with a grammar: a document that opens with a fence is highlighted as one. */
 function hlMdInline(s){
   return h(s).replace(/`[^`\n]+`/g,function(x){return '<span class="tk-s">'+x+'</span>';})
              .replace(/\*\*[^*\n]+\*\*/g,function(x){return '<span class="tk-b">'+x+'</span>';});
 }
 function hlMd(src){
-  var lines=src.split("\n"),fm=false,fence=false,out=[];
-  lines.forEach(function(l,i){
+  if(/^---\s*$/.test(src.split("\n")[0]||""))return hlFrontmatter(src);
+  return hlMdBody(src);
+}
+function hlMdBody(src){
+  var lines=src.split("\n"),fence=false,out=[];
+  lines.forEach(function(l){
     if(/^```/.test(l)){fence=!fence;out.push(cedTk("tk-c",l));return;}
     if(fence){out.push(cedTk("tk-s",l));return;}
-    if(i===0&&/^---\s*$/.test(l)){fm=true;out.push(cedTk("tk-c",l));return;}
-    if(fm){
-      if(/^---\s*$/.test(l)){fm=false;out.push(cedTk("tk-c",l));return;}
-      var m=/^(\s*[\w.-]+)(\s*:\s*)([\s\S]*)$/.exec(l);
-      if(m){out.push(cedTk("tk-k",m[1])+cedTk("tk-p",m[2])+cedTk("tk-s",m[3]));return;}
-      out.push(h(l));return;
-    }
     if(/^#{1,6}\s/.test(l)){out.push(cedTk("tk-t",l));return;}
     if(/^\s*>/.test(l)){out.push(cedTk("tk-c",l));return;}
     var b=/^(\s*(?:\d+\.|[-*+]))(\s[\s\S]*)$/.exec(l);
@@ -12494,6 +12660,7 @@ function hlMd(src){
 
 function hlCode(src,lang){
   if(lang==="toml")return hlToml(src);
+  if(lang==="fm")return hlFrontmatter(src);
   if(lang==="md")return hlMd(src);
   if(lang==="json")return hlJson(src);
   return hlLang(src,CED_LANG[lang]||CED_LANG.ts);
@@ -12502,8 +12669,8 @@ function hlCode(src,lang){
 /* The editor's markup. `opts.bar` is what sits between the path and the find box; `opts.small`
    shortens it for a dialog. The gutter, the current-line band and the find marks are painted by
    cedPaint, which render() calls through cedMount. */
-/* A statement and a SKILL.md are prose, and prose that scrolls sideways cannot be read; a TOML
-   definition is code, and code that reflows cannot be read either. So the grammar decides: markdown
+/* A statement and a SKILL.md are prose, and prose that scrolls sideways cannot be read; a manifest
+   and a definition are code, and code that reflows cannot be read either. So the grammar decides: markdown
    wraps, everything else does not. Wrapping means a logical line is more than one visual line, so
    the gutter cannot be a column of fixed-height rows — cedPaint measures each rendered line and
    gives its number the same height. */
@@ -12647,13 +12814,13 @@ S.wz=null;
 
 var CREATE={
  agent:{l:"Agent",d:"A principal that does work here, with a definition, a belt and a budget.",i:"agents",
-   file:".oxagen/agents/&lt;slug&gt;.toml",need:"agent.write"},
+   file:".oxagen/agents/&lt;name&gt;.md",need:"agent.write"},
  tool:{l:"Tool",d:"A capability an agent can be granted. Imported from an MCP server, or built here.",i:"tools",
    file:".oxagen/tools/&lt;name&gt;.toml",need:"tools.admin"},
  skill:{l:"Skill",d:"Procedure written down: a file, a version and a digest.",i:"skills",
    file:".oxagen/skills/&lt;name&gt;/SKILL.md",need:"skills.admin"},
  record:{l:"Context record",d:"One statement that steers every agent it reaches.",i:"steering",
-   file:".oxagen/rules/&lt;lineage&gt;.toml",need:"steering.write"},
+   file:".oxagen/rules/&lt;lineage&gt;.md",need:"steering.write"},
  init:{l:"Oxagen directory",d:"The .oxagen/ tree in a repository that has none. The one the other four need first.",i:"repo",
    file:".oxagen/ &lt;in a repository&gt;",need:"repository.admin"}
 };
@@ -12877,8 +13044,8 @@ DLG_EXT.workcopy=function(){
        (c.oxagen==="behind"?'This copy is behind the production branch, so the person reading it is reading rules that are no longer in force. It does not change what a run is steered by: steering reaches a run from the merged commit, in the signed bundle.'
         :c.oxagen==="uncommitted"?'There are edits under <span class="mono">.oxagen/</span> that no pull request carries. They steer nothing — not here, and not in a run — until one does.':'')+'</div>')+
      (c.dirty?'<div class="field" style="margin-top:14px"><label>Uncommitted under .oxagen/</label>'+
-       wzFiles([["mod",".oxagen/rules/ctx.mobile.release-train.toml","statement edited locally"],
-                ["add",".oxagen/agents/screenshot-bot.toml","never committed"]])+
+       wzFiles([["mod",".oxagen/rules/ctx.mobile.release-train.md","statement edited locally"],
+                ["add",".oxagen/agents/screenshot-bot.md","never committed"]])+
        '<div class="hint">Turning these into a pull request is <span class="mono">oxagen propose</span>. Opening and merging it happen in Oxagen, because both gate on a role only a signed-in person holds.</div></div>':''),
    f:'<span class="grow mono dim" style="font-size:11px">'+h(c.id)+'</span>'+
      '<button class="btn" onclick="closeDialog()">Close</button>'+
@@ -13609,30 +13776,33 @@ function wzAgentBelt(){
    somebody changed by hand is theirs, and a checkbox does not get to overwrite it. */
 function wzAgentSync(){
   var key="wz:agent:"+wzAgentSlug();
-  if(!cedDirty(key))cedReseed(key,wzAgentToml());
+  if(!cedDirty(key))cedReseed(key,wzAgentDef());
 }
-function wzAgentToml(){
+function wzAgentDef(){
   var z=S.wz, slug=wzAgentSlug(), d=String(z.desc||"").trim().replace(/\s+/g," ");
   var one=d.length>110?d.slice(0,107)+"…":d;
   var belt=wzAgentBelt();
-  return '# .oxagen/agents/'+slug+'.toml\n'+
+  return '---\n'+
    '# The definition is the record. Merging this creates the principal, the roles it asks for and\n'+
    '# the toolbelt; nothing here is written to Postgres by this screen.\n'+
-   'schema = "agent-definition/v0.1"\n'+
-   'slug = "'+slug+'"\n'+
-   'name = "'+slug.replace(/-/g," ").replace(/^./,function(c){return c.toUpperCase();})+'"\n'+
-   'description = "'+one.replace(/"/g,'\\"')+'"\n'+
-   'model_tier = "'+z.tier+'"\n'+
-   'tools = '+(belt.length?'['+belt.map(function(x){return '"'+x+'"';}).join(", ")+']':'["search_graph", "recall_context"]')+'\n'+
-   'deny_tools = ["github__merge_pull_request@*", "github__delete_*@*"]\n'+
-   'side_effects = ["read", "write"]\n'+
-   'budget = { per_run_micros = 4000000 }\n\n'+
-   '[instructions]\n'+
-   'body = """\n'+(d||"What this agent is for.")+'\n\n'+
+   'name: '+slug+'\n'+
+   'description: '+yamlStr(one||"What this agent is for.")+'\n'+
+   'oxagen:\n'+
+   '  schema: agent-definition/v0.2\n'+
+   '  title: '+yamlStr(slug.replace(/-/g," ").replace(/^./,function(c){return c.toUpperCase();}))+'\n'+
+   '  model_tier: '+z.tier+'\n'+
+   '  belt:\n'+
+   '    allow: '+(belt.length?'['+belt.map(yamlStr).join(", ")+']':'[search_graph, recall_context]')+'\n'+
+   '    deny: [github__merge_pull_request@*, github__delete_*@*]\n'+
+   '  side_effects: [read, write]\n'+
+   '  budget:\n'+
+   '    per_run_micros: 4000000\n'+
+   '  harness:\n'+
+   '    '+z.harness+':\n'+
+   '      color: gold\n'+
+   '---\n'+(d||"What this agent is for.")+'\n\n'+
    'Work inside the toolbelt you were given. When a step needs authority you do\n'+
-   'not hold, stop and say which one — do not route around it.\n"""\n\n'+
-   '[harness.'+z.harness+']\n'+
-   'color = "gold"\n';
+   'not hold, stop and say which one. Do not route around it.\n';
 }
 var WZ_BELT_POOL=["github__get_file_contents@2","github__create_pull_request@3","github__create_release@2",
  "linear__get_issue@2","linear__update_issue@3","slack__post_message@2","snowflake__run_query@2",
@@ -13669,18 +13839,19 @@ function wzAgent(){
      f:wzNext("Write the definition",!!wzAgentSlug())};
   }
   if(z.step===3){
-    var key="wz:agent:"+wzAgentSlug(), src=cedSeed(key,wzAgentToml());
-    var parsed=(function(){try{return {d:tomlParse(src),e:null};}catch(e){return {d:null,e:e};}})();
-    return {t:"The definition", s:".oxagen/agents/"+wzAgentSlug()+".toml — the file every field on the agent page is a view of.",
+    var key="wz:agent:"+wzAgentSlug(), src=cedSeed(key,wzAgentDef());
+    var parsed=(function(){try{return {d:fmParse(src).data,e:null};}catch(e){return {d:null,e:e};}})();
+    var pox=parsed.d?defOx(parsed.d):{}, pbelt=pox.belt&&typeof pox.belt==="object"?pox.belt:{};
+    return {t:"The definition", s:".oxagen/agents/"+wzAgentSlug()+".md, the file every field on the agent page is a view of.",
      b:wzDraftNote("A definition, drafted from what you wrote.")+
       '<div class="wz-derived">'+(parsed.d
-        ?'<span class="b b-q mono">'+h(parsed.d.slug||"")+'</span><span class="b b-q">'+h(parsed.d.model_tier||"")+'</span>'+
-         '<span class="b b-q">'+((parsed.d.tools||[]).length)+' tool patterns</span>'+
-         '<span class="b b-denied">'+((parsed.d.deny_tools||[]).length)+' denied</span>'
+        ?'<span class="b b-q mono">'+h(parsed.d.name||"")+'</span><span class="b b-q">'+h(pox.model_tier||"")+'</span>'+
+         '<span class="b b-q">'+((pbelt.allow||[]).length)+' tool patterns</span>'+
+         '<span class="b b-denied">'+((pbelt.deny||[]).length)+' denied</span>'
         :'<span class="b b-denied">'+h(String(parsed.e&&parsed.e.message||"the file does not parse"))+'</span>')+'</div>'+
-      cedHtml(key,".oxagen/agents/"+wzAgentSlug()+".toml","toml",{small:true,
+      cedHtml(key,".oxagen/agents/"+wzAgentSlug()+".md","fm",{small:true,
         bar:'<button class="btn sm" data-ced-dirty onclick="cedRevert(\''+key+'\')" disabled>Revert</button>'})+
-      '<div class="note" style="margin-top:12px"><span class="mono">tools</span> is a request, not a grant. What the agent can actually reach is this list intersected with the roles it holds and with your own grants — never wider than either.</div>',
+      '<div class="note" style="margin-top:12px"><span class="mono">belt.allow</span> is a request, not a grant. What the agent can actually reach is this list intersected with the roles it holds and with your own grants — never wider than either.</div>',
      f:wzNext("Pick the belt",!!parsed.d)};
   }
   if(z.step===4){
@@ -13705,12 +13876,13 @@ function wzAgent(){
   var slug2=wzAgentSlug();
   var pr3=wzPrStep("Open the pull request",
     "Merging this creates the principal <span class=\"mono\">"+h(wzAgentKey())+"</span>, the roles the definition asks for, and its toolbelt. Until then the agent does not exist and nothing can be attributed to it.",
-    [["add",".oxagen/agents/"+slug2+".toml","the definition"],
-     ["add",".oxagen/agents/"+slug2+"."+(S.wz.harness==="claude-code"?"claude.md":S.wz.harness==="stella"?"stella.toml":"agent.json"),"the generated harness file"],
+    [["add",".oxagen/agents/"+slug2+".md","the definition"],
+     ["add",".claude/agents/"+slug2+".md","the same bytes; Claude Code and Cursor read it there, Stella through its symlink"],
      ["mod",".oxagen/workspace.toml","adds "+slug2+" to this workspace\u2019s agents"]],
-    [["Schema","<span class=\"mono\">agent-definition/v0.1</span> valid · slug matches the filename"],
+    [["Schema","<span class=\"mono\">agent-definition/v0.2</span> valid · name matches the filename"],
+     ["Bridge","<span class=\"mono\">.claude/agents/"+h(slug2)+".md</span> is byte-identical to the definition"],
      ["Key uniqueness","<span class=\"mono\">"+h(wzAgentKey())+"</span> is not held by another agent, live or archived"],
-     ["Belt","every pattern in <span class=\"mono\">tools</span> resolves to a version in the registry; a pattern that resolves to nothing fails"],
+     ["Belt","every pattern in <span class=\"mono\">belt.allow</span> resolves to a version in the registry; a pattern that resolves to nothing fails"],
      ["Authority","the definition asks for nothing wider than the roles it names, and nothing wider than yours"],
      ["Budget","<span class=\"mono\">per_run_micros</span> is set; an agent with no budget cannot start a run"]],
     "Open the pull request",
@@ -13795,7 +13967,7 @@ function wzRecord(){
     var forces=z.rkind==="preference"?["may","info"]:z.rkind==="memory"||z.rkind==="fact"?["info"]:["must","should","may","info"];
     if(forces.indexOf(z.force)<0)z.force=forces[0];
     return {t:"The statement", s:"This is the record. Everything else about it is metadata.",
-     b:cedHtml(key,".oxagen/rules/"+wzRecLineage()+".toml \u00b7 statement","md",{small:true,
+     b:cedHtml(key,".oxagen/rules/"+wzRecLineage()+".md \u00b7 statement","md",{small:true,
         bar:'<span class="b b-q">'+wzRecTok()+' tok</span><button class="btn sm" data-ced-dirty onclick="cedRevert(\''+key+'\')" disabled>Revert</button>'})+
       '<div class="fields" style="margin-top:14px">'+
       '<div class="field"><label for="wzForce">Force</label><select id="wzForce" onchange="wzSetR(\'force\',this.value)" aria-label="Force">'+
@@ -13817,7 +13989,7 @@ function wzRecord(){
     var others=RECORDS.filter(function(x){return x.status==="published";}).length;
     return {t:"What the checks will assert", s:"Six of them, on the pull request, before anybody can merge it.",
      b:wzChecks([
-       ["Schema","<span class=\"mono\">context-record/v0.1</span> valid \u00b7 1 file, 1 record, 1 lineage"],
+       ["Schema","<span class=\"mono\">context-record/v0.2</span> valid \u00b7 1 file, 1 record, 1 lineage"],
        ["Lineage uniqueness",(function(){var id=wzRecLineage();
          return RECORDS.some(function(r){return r.status==="published"&&r.id===id;})
           ?'<span style="color:var(--st-failed)"><b>'+h(id)+' is already published.</b></span> This check will fail and nothing will merge \u2014 amend the published record instead of opening a second under its id.'
@@ -13832,8 +14004,8 @@ function wzRecord(){
   }
   var pr4=wzPrStep("Open the pull request",
     "Merge is the publication. Nothing steers until then, and the record is in force from the merge commit \u2014 not from when you wrote it.",
-    [["add",".oxagen/rules/"+wzRecLineage()+".toml","the record"]],
-    [["Schema","<span class=\"mono\">context-record/v0.1</span>"],["Lineage",h(wzRecLineage())+" is free"],
+    [["add",".oxagen/rules/"+wzRecLineage()+".md","the record"]],
+    [["Schema","<span class=\"mono\">context-record/v0.2</span>"],["Lineage",h(wzRecLineage())+" is free"],
      ["Hash","recomputed at merge"],["Secrets","statement, rationale and evidence"],
      ["Conflicts","against every published record"],["Effect",wzRecCe()?h(z.ce):"none \u00b7 this kind constrains nothing"]],
     "Open the pull request",
@@ -13948,11 +14120,11 @@ function crecPanel(rec){
 }
 
 function crecSave(rec){
-  S.srcPr={key:crecKey(rec),path:".oxagen/rules/"+rec.id+".toml",id:rec.id,kind:"record",
+  S.srcPr={key:crecKey(rec),path:".oxagen/rules/"+rec.id+".md",id:rec.id,kind:"record",
     title:"Propose a change to this record",
     lead:"A published record is changed the way it was published: a branch, a pull request, the same six checks, and a merge. Nothing here edits what is in force.",
     branch:"context/"+rec.id+".amend",
-    checks:[["Schema","<span class=\"mono\">context-record/v0.1</span> still valid after the edit"],
+    checks:[["Schema","<span class=\"mono\">context-record/v0.2</span> still valid after the edit"],
       ["Lineage","<span class=\"mono\">"+h(rec.id)+"</span> keeps its lineage \u2014 an amended record is the same record, not a new one"],
       ["record_hash recomputation","recomputed over the new bytes \u00b7 the old hash stays on every run that carried it"],
       ["Secret and PII scan","the new statement is scanned"],
@@ -13993,8 +14165,8 @@ function crecPr(rec){
    pr:w.main+"#"+(528+OXPRS.length),by:PEOPLE.marcus.name,byKind:"person",
    opened:"just now",state:"checks_running",
    trigger:"An operator archived "+rec.id+".",
-   files:[["mod",".oxagen/rules/"+rec.id+".toml",'status = "archived"']],
-   checks:[["schema","pass","context-record/v0.1 still valid with the new status."],
+   files:[["mod",".oxagen/rules/"+rec.id+".md",'status: archived']],
+   checks:[["schema","pass","context-record/v0.2 still valid with the new status."],
     ["lineage","pass",h(rec.id)+" keeps its lineage. An archived record is the same record, out of force."],
     ["dependent_records","pass","No published record in "+h(w.name)+" cites this one as the reason it narrows."],
     ["bundle_recompilation","pass","The bundle loses "+(crecBundleRow(rec)?crecBundleRow(rec).tok+" tokens":"nothing, because it was not compiled")+" at v"+(STEER_BUNDLE.v+1)+"."]]};
@@ -14011,7 +14183,7 @@ DLG_EXT.crecarchive=function(id){
    b:'<div class="note">Branch <span class="mono">'+h(pend.branch)+'</span> is waiting on its checks. Land or close that one first, so two changes are never proposed over the same file.</div>',
    f:'<button class="btn" onclick="closeDialog()">Close</button>'};
   return {t:"Archive "+rec.id+"?",w:false,
-   b:'<div class="note">Archiving is a pull request that sets <span class="mono">status = "archived"</span> on <span class="mono">.oxagen/rules/'+h(rec.id)+'.toml</span>. The file stays, the lineage stays, and the record stops compiling into the bundle when it merges. It is in force until then.</div>'+
+   b:'<div class="note">Archiving is a pull request that sets <span class="mono">status: archived</span> in the frontmatter of <span class="mono">.oxagen/rules/'+h(rec.id)+'.md</span>. The file stays, the lineage stays, and the record stops compiling into the bundle when it merges. It is in force until then.</div>'+
      (rec.ce?'<div class="warn">This record carries <span class="mono">'+h(rec.ce)+'</span>, so it compiles to a gate as well as to text. The gate goes with it, and what it refused today is allowed once this merges.</div>':'')+
      '<div class="note" style="margin-top:10px">Nothing is deleted. Every run this record steered keeps naming its hash, and a later record may supersede it instead.</div>',
    f:'<button class="btn" onclick="closeDialog()">Keep it in force</button>'+
@@ -14025,6 +14197,30 @@ function crecArchive(id){
   act("Opened "+p.pr+" to archive "+rec.id+". It is in force until that merges.","gold");
 }
 
+/* The record's frontmatter as it is on disk: every member but the statement, which the editor holds. */
+function crecFileText(rec){
+  var w=ws();
+  return '---\n'+
+   'schema: context-record/v0.2\n'+
+   'set_id: '+ORG.slug+'.'+w.slug+'\n'+
+   'lineage_id: '+rec.id+'\n'+
+   'record_id: rec_'+lineageSlug(rec.id)+'_'+(sha7(rec.st||"")+sha7(rec.id)).slice(0,12)+'\n'+
+   'record_hash: '+(rec.hash||"sha256:"+sha7(rec.st||"")+sha7(rec.id))+'\n'+
+   'kind: '+rec.kind+'\n'+
+   'origin: '+(rec.origin||"user")+'\n'+
+   'sharing_scope: '+(rec.scope||"workspace")+'\n'+
+   'status: '+(rec.status==="archived"?"archived":"active")+'\n'+
+   'provenance:\n  source_kind: proposal\n  source_uri: oxagen:proposal/prp_'+sha7(rec.id)+'\n'+
+   'steering:\n  force: '+(rec.force||"info")+'\n'+
+   (rec.ce?'enforcement:\n  constraint_effect: '+rec.ce+'\n  blocking: false\n':'')+
+   '---\n';
+}
+function crecFilePanel(rec){
+  return '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Frontmatter</h3>'+
+   '<span class="sp mono dim" style="font-size:11px">.oxagen/rules/'+h(rec.id)+'.md</span></div>'+
+   '<div class="panel-b"><pre>'+hlFrontmatter(crecFileText(rec))+'</pre>'+
+   '<div class="note" style="margin-top:12px">The record object, in the protocol’s member names. The statement is the markdown body below it, which the editor above holds. Both are the same file, and the hash covers both.</div></div></div>';
+}
 function pRecord(r){
   var w=ws(), rec=stgRecord(decodeURIComponent(r.id||""))||RECORDS[0];
   if(S.state==="loading") return skeleton();
@@ -14048,18 +14244,19 @@ function pRecord(r){
    '<button class="btn primary" onclick="crecSave(stgRecord(\''+h(rec.id)+'\'))">Propose a change</button></div></div>'+
    '<div class="crec-grid">'+
     '<div>'+
-     cedHtml(key,".oxagen/rules/"+rec.id+".toml \u00b7 statement","md",
+     cedHtml(key,".oxagen/rules/"+rec.id+".md \u00b7 statement","md",
       {bar:'<span class="b b-q">'+(crecBundleRow(rec)?crecBundleRow(rec).tok+' tok in the bundle':'not compiled')+'</span>'})+
-     '<div class="note" style="margin-top:12px">This is the statement and nothing else. The lineage, the force, the scope and the effect are the rest of the file, and each one is changed the same way \u2014 a pull request against '+h(w.main)+'.</div>'+
+     '<div class="note" style="margin-top:12px">This is the statement and nothing else: the markdown body of the file. The lineage, the force, the scope and the effect are its frontmatter, and each one is changed the same way \u2014 a pull request against '+h(w.main)+'.</div>'+
      '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Lineage</h3>'+
       '<span class="sp mono dim" style="font-size:11px">the graph remembers everything; git decides what is in force</span></div>'+
       '<div class="panel-b"><dl class="kv">'+
       '<dt>Lineage</dt><dd><span class="mono">'+h(rec.id)+'</span></dd>'+
-      '<dt>File</dt><dd><span class="mono">.oxagen/rules/'+h(rec.id)+'.toml</span> on '+h(w.main)+'</dd>'+
+      '<dt>File</dt><dd><span class="mono">.oxagen/rules/'+h(rec.id)+'.md</span> on '+h(w.main)+'</dd>'+
       '<dt>Published by</dt><dd><span class="mono">'+h(rec.commit||"\u2014")+'</span> on '+h(rec.pub||"\u2014")+'</dd>'+
       '<dt>Effect</dt><dd>'+h(rec.effect||"never rendered")+'</dd>'+
-      '<dt>Schema</dt><dd><span class="mono">context-record/v0.1</span></dd>'+
+      '<dt>Schema</dt><dd><span class="mono">context-record/v0.2</span></dd>'+
       '</dl></div></div>'+
+     crecFilePanel(rec)+
     '</div>'+
     '<div>'+crecPanel(rec)+
      '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Related records</h3></div>'+

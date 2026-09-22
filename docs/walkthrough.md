@@ -104,7 +104,7 @@ A run that starts in a repository no workspace owns, with skills on, has a confi
 
 ### 14. Agents
 
-The Agents list (Agent IAM in the nav) holds every agent identity in the workspace. Identity lives in Postgres and the definition lives in git, joined by the agent key and the definition digest. From here an operator registers, enrolls, assigns roles and deregisters. Registering opens a Context PR that adds `.oxagen/agents/<slug>.toml`, and deregistering retires the principal so its runs keep their identity.
+The Agents list (Agent IAM in the nav) holds every agent identity in the workspace. Identity lives in Postgres and the definition lives in git, joined by the agent key and the definition digest. From here an operator registers, enrolls, assigns roles and deregisters. Registering opens a Context PR that adds `.oxagen/agents/<name>.md` and the same bytes at `.claude/agents/<name>.md`, and deregistering retires the principal so its runs keep their identity.
 
 **Sources** · Prompt: [agents.audit-prompt.md](../mockups/pages/agents.audit-prompt.md), [W9 prompt](demo-mockup-prompts.md#w9-the-toolbelt-governed) · Spec: [§6.2 Agent identity and credentials](mission-control-spec.md#62-agent-identity-and-credentials) · Plan: [Batch 2, lane P3](implementation-plan.md#batch-2-pages-on-fixtures-10-lanes-in-parallel), [data mapping](implementation-plan.md#31-workspace-pages) · Page: [Agent IAM](../mockups/missioncontrol.html?product=1&state=loaded&mobile=0#/a-intel/core-platform/agents) ([mobile](../mockups/missioncontrol.html?product=1&state=loaded&mobile=1#/a-intel/core-platform/agents)), [agents.md](../mockups/pages/agents.md)
 
@@ -118,7 +118,7 @@ Scenario: `toolbelt-governed` starts here on the Toolbelt tab ([W9](../mockups/m
 
 ### 16. The agent's source
 
-The agent's definition file, `.oxagen/agents/<slug>.toml`, opens in a source editor. Every field on the agent's Definition tab is a view of this file, and the draft is shared between the form and the editor until it is discarded or committed. Saving opens the same commit dialog the form uses, so a change to an agent is a pull request and nothing is written to Postgres.
+The agent's definition file, `.oxagen/agents/<name>.md` (`agent-definition/v0.2`: YAML frontmatter, the instructions as the markdown body), opens in a source editor. Every field on the agent's Definition tab is a view of this file, and the draft is shared between the form and the editor until it is discarded or committed. Saving opens the same commit dialog the form uses, so a change to an agent is a pull request and nothing is written to Postgres.
 
 **Sources** · Prompt: [agent-source.audit-prompt.md](../mockups/pages/agent-source.audit-prompt.md), [W6 prompt](demo-mockup-prompts.md#w6-it-learned-you-approved-it-changed) · Spec: [§10.2 On-disk layout](mission-control-spec.md#102-on-disk-layout-oxagen) · Plan: [Batch 2, lane P3](implementation-plan.md#batch-2-pages-on-fixtures-10-lanes-in-parallel), [data mapping](implementation-plan.md#31-workspace-pages) · Page: [Agent source](../mockups/missioncontrol.html?product=1&state=loaded&mobile=0#/a-intel/core-platform/agents/release-manager/source) ([mobile](../mockups/missioncontrol.html?product=1&state=loaded&mobile=1#/a-intel/core-platform/agents/release-manager/source)), [agent-source.md](../mockups/pages/agent-source.md)
 

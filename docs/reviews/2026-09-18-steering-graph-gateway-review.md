@@ -13,6 +13,10 @@
 | **Build order and issues** | The phase names and numbers are the review's. The order of build is Phase 0 in review (PR #3289, branch `steering/phase0-one-record-steers`), Phase 4 in build (branches `gateway-model-proxy` and `desktop-install-hardening`), then Phases 1, 2, 3 and 5. Issues, all in macanderson/oxagen: epic #3295. Phase 0 #2592 (reopened, P0). Phase 1 #3296. Phase 2 #3297. Phase 3 #3298. Phase 4 #3299 (P0, in build). Phase 5 #3300. Desktop review #3301. Defects #3302, #3303, #3304 and #3305 |
 | **Copies** | The oxagen monorepo carries this same record at `docs/audits/2026-09-18-steering-graph-gateway-review.md`. The text below the rule is the review as it was written and is not edited |
 
+## File format note (2026-09-22)
+
+ADR-138 moved the record and agent files this review names. A context record is `.oxagen/rules/<lineage>.md` (`context-record/v0.2`: YAML frontmatter as the record object, the statement as the markdown body, the hash unchanged) and an agent definition is `.oxagen/agents/<name>.md` (`agent-definition/v0.2`), with a byte-identical copy at `.claude/agents/<name>.md` in place of a generated harness file. Read every `.toml` record or agent path below as that `.md` file. `workspace.toml`, `governance.toml` and `skills.toml` are unchanged. The review body is kept as written.
+
 ## Corrections found on verification (2026-09-18)
 
 The review below is kept as written. These five points were checked at oxagen `main` `02278c913` after it was written, and the specs, the plan and the ADRs follow this section where it differs from the body.

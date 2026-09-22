@@ -105,7 +105,7 @@ It also covers what the review of PR #36 found, each reproduced before it was fi
 is already published **fails** its check so nothing merges (without it, two descriptions sharing
 their first four words publish two records under one id, with the tokens counted twice and the check
 on screen claiming otherwise); a second operator pull request does not erase the first; and a
-statement containing a quote still produces a file that parses with the app's own TOML reader.
+statement containing a quote still produces a file that parses with the app's own frontmatter reader.
 
 Counts are read before and after and compared, never read back out of the thing under test.
 The second review round found three more, each also reproduced first — and the first of them was a
@@ -114,19 +114,18 @@ two of them run the uniqueness predicate before either publishes, both go green,
 publishes the duplicate anyway. So the check counts competing **open** pull requests (earliest claim
 wins), and **every check with a predicate is re-run at merge**: one that went green five minutes ago
 may not be green now. Alongside it: every compiled bundle version derives its own digest, so a panel
-claiming the bundle was re-signed renders one; and the multi-line TOML writer escapes backslashes
-and reaches its closing fence with a line continuation, because a bare newline before the fence is
-part of the value — without it every round-trip appended a blank line, which also hit the agent
-definition editor.
+claiming the bundle was re-signed renders one; and the statement is the markdown body of the record
+file, written as typed, so a quote or a backslash in operator text never meets an escape, and the
+reader trims the body the way the record codec does (`context-record/v0.2`, ADR-138).
 
 Mutation-tested against thirteen deliberate regressions — publishing when the pull request opens
 rather than when it merges, merging without waiting for the checks, dropping the newest-first order
 on the records list, replacing the per-record check text with a fixed string, removing the lineage
 predicate, making the check runner ignore every test, collapsing the pull-request collection back to
-one, dropping the TOML escaping, ignoring competing open pull requests, skipping the re-check at
-merge, leaving a new bundle version without a digest, unescaping nothing on the way back in, and
-writing a bare newline before the closing fence — and catches all thirteen. The escaping one is
-worth seeing fail: with it removed, `Path:\deploy\q` comes back as `Path:deployq`.
+one, escaping the statement body, ignoring competing open pull requests, skipping the re-check at
+merge, leaving a new bundle version without a digest, trimming nothing on the way back in, and
+writing the statement into the frontmatter instead of the body — and catches all thirteen. The
+escaping one is worth seeing fail: with the body escaped, `Path:\deploy\q` comes back as `Path:deployq`.
 
 ## Writing a scenario
 

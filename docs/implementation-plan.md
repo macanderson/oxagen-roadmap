@@ -142,7 +142,7 @@ Status comes from table and contract names in the repo. **Batch 3 lanes must con
 | **Agents** · identity, harness, operator | `AGENTS` | `iam.principals` kind=agent | `iam.principals` + `agent.agents`/`agent_versions`; `agent.definition.*` | ✅ |
 | Agents · roles, toolbelt grants | `S.agentRoles`, belt rows | `iam.role_grants`, assignments | same names; `agent.role.*`, `iam.role.list` | ✅ |
 | Agents · enrollment | `status`, `tier` | `control.enrollments` | `tacho.hosts`; `tacho.enrollment.{create,revoke}` | ✅ |
-| Agents · definition in git + source editor | `pAgentSource`, commit dialog | `definition_path/digest/commit_sha` | DB-backed `agent.definition.*`, not `.oxagen/agents/*.toml` | 🟡 |
+| Agents · definition in git + source editor | `pAgentSource`, commit dialog | `definition_path/digest/commit_sha` | DB-backed `agent.definition.*`, not `.oxagen/agents/*.md` | 🟡 |
 | Agents · credentials | identity tab | `iam.credentials` | `auth.api_keys` (hosts), `mcp.credentials` | 🟡 |
 | Agents · mandates | `MANDATES` | `tools.mandates`, `mandate_ledger` | none | ❌ |
 | Agents · budgets | `budget`, `budgetUsed` | `billing.budgets` | `billing.spend_budgets`, `workspace_budget_policy` | ✅ |

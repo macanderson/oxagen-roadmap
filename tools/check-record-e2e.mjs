@@ -14,13 +14,13 @@
 //   * closing without merging leaves nothing behind
 //   * a lineage that is already published FAILS its check, and nothing merges (PR #36 review, P1)
 //   * a second operator PR does not erase the first (P2)
-//   * a statement with a quote still produces a file that parses as TOML (P3)
+//   * a statement with a quote still produces a file that parses as frontmatter markdown (P3)
 //   * two OPEN pull requests cannot both publish one lineage — the later one fails, and the
 //     uniqueness check is re-run at merge, not only when the check first ran (second review, P1)
 //   * every compiled bundle version gets its own digest, so a panel claiming it was re-signed
 //     renders one (second review, P2)
-//   * every string shape round-trips through the TOML writer and the reader: quotes, backslashes,
-//     newlines, and a trailing newline (second review, P2)
+//   * every string shape round-trips through the frontmatter writer and the reader: quotes,
+//     backslashes, newlines, and a trailing newline (second review, P2)
 // Counts are read before and after and compared, never read back out of the thing under test.
 import { mkdirSync } from "node:fs";
 import path from "node:path";
@@ -236,12 +236,12 @@ const clickPg = async (page, re) => await page.evaluate(src => {
   const txt = await pgText(page);
   ok(/not a constraining kind/.test(txt), "a memory passes the constraint check by not having one");
   ok(!/constraint_effect = /.test(txt), "and claims no constraint_effect");
-  ok(/no \[enforcement\] table/.test(txt), "its file says why it has no enforcement table");
+  ok(/no enforcement table/.test(txt), "its file says why it has no enforcement table");
   // and the structural fact, not only the sentence about it
   const f = await page.evaluate(() => { const d = recprCur(); return { text: recprFileText(d), ce: d.record.ce }; });
   ok(f.ce === null, "a memory carries no constraint effect");
-  ok(!/^\[enforcement\]/m.test(f.text), "and its file has no [enforcement] table at all");
-  ok(!/constraint_effect\s*=/.test(f.text), "and never writes a constraint_effect key");
+  ok(!/^enforcement:/m.test(f.text), "and its file has no enforcement table at all");
+  ok(!/constraint_effect\s*:/.test(f.text), "and never writes a constraint_effect key");
   ok(/info/.test(txt), "a memory carries info force");
   ok(errs.length === 0, "no errors on the memory path: " + errs.join(" | "));
   await page.close();
@@ -312,24 +312,27 @@ const clickPg = async (page, re) => await page.evaluate(src => {
   await page.close();
 }
 
-/* ---------- P3: operator text is serialised as TOML, not just HTML-escaped ---------- */
+/* ---------- P3: operator text is the body of the file, verbatim, and still parses ---------- */
 {
   const { page, errs } = await open();
   const tricky = 'Always say "ready" before a deploy, and never use a \\ in a branch name.';
   await page.evaluate(d => { wzOpen("record"); S.wz.desc = d; S.wz.rkind = "rule"; wzGo(3); wzGo(5); wzRecOpenPr(); }, tricky);
   await page.waitForTimeout(400);
-  // the file the PR carries must parse with the app's own TOML reader — two independent things:
-  // what is rendered, and what the parser makes of it.
+  // the file the PR carries must parse with the app's own frontmatter reader, and the statement is
+  // its body, so a quote or a backslash is written as typed: two independent things, what is
+  // rendered and what the reader makes of it.
   const r = await page.evaluate(() => {
     const def = recprCur(), text = recprFileText(def);
     let parsed = null, err = null;
-    try { parsed = tomlParse(text); } catch (e) { err = String(e.message || e); }
-    return { text, err, statement: parsed && parsed.statement, rendered: document.querySelector("#pg pre").innerText };
+    try { parsed = fmParse(text); } catch (e) { err = String(e.message || e); }
+    return { text, err, statement: parsed && bodyText(parsed.body), schema: parsed && parsed.data.schema,
+      rendered: document.querySelector("#pg pre").innerText };
   });
-  ok(r.err === null, "the record file parses as TOML, got " + r.err);
+  ok(r.err === null, "the record file parses as frontmatter markdown, got " + r.err);
+  ok(r.schema === "context-record/v0.2", "and carries the v0.2 schema tag, got " + r.schema);
   ok(r.statement === (await page.evaluate(() => recprCur().record.st)),
      "and round-trips the statement exactly, got " + JSON.stringify(r.statement));
-  ok(/\\"ready\\"/.test(r.text) || r.text.includes('\\"ready\\"'), "the quotes are escaped in the file, got " + JSON.stringify(r.text.split("\n").find(l => /statement/.test(l))));
+  ok(r.text.includes('say "ready" before'), "the quotes are in the body as typed, got " + JSON.stringify(r.text.split("\n").find(l => /ready/.test(l))));
   await page.waitForFunction(() => recprCur() && recprSt(recprCur()).st === "passed", null, { timeout: 15000 }).catch(() => {});
   ok((await world(page)).recprState === "passed", "and its schema check passes honestly");
   await shot(page, "rec-e2e-8-quoted-statement");
@@ -411,32 +414,34 @@ const clickPg = async (page, re) => await page.evaluate(src => {
   await page.close();
 }
 
-/* ---------- second review, P2b: the TOML writer and reader agree on every shape ---------- */
+/* ---------- second review, P2b: the frontmatter writer and reader agree on every shape ---------- */
 {
   const { page, errs } = await open();
   const cases = await page.evaluate(() => {
-    const vs = ["plain one liner", 'has a "quote" in it', "has a \\ backslash", "two\nlines",
+    const vs = ["plain one liner", 'has a "quote" in it', "has a \\ backslash", "two\nlines", "a: colon", "# not a comment",
                 "two\nlines with a \\ backslash", 'multi\nline with "quotes" and \\ and a trailing newline\n'];
+    // a frontmatter member, through yamlStr, and the same text as the body, through bodyText
     return vs.map(v => {
-      const doc = "k = " + (/\n/.test(v) ? tomlMulti(v) : tomlStr(v)) + "\n";
-      let back = null, err = null;
-      try { back = tomlParse(doc).k; } catch (e) { err = String(e.message || e); }
-      return { v, back, err, equal: back === v };
+      let member = null, body = null, err = null;
+      try { member = fmParse("---\nk: " + yamlStr(v) + "\n---\n").data.k; body = bodyText(fmParse("---\nk: 1\n---\n" + v + "\n").body); }
+      catch (e) { err = String(e.message || e); }
+      return { v, member, body, err, equal: member === v && body === bodyText(v) };
     });
   });
-  cases.forEach(c => ok(c.equal, "TOML round-trip " + JSON.stringify(c.v) + (c.equal ? "" : " -> " + JSON.stringify(c.back) + (c.err ? " err=" + c.err : ""))));
+  cases.forEach(c => ok(c.equal, "frontmatter round-trip " + JSON.stringify(c.v) + (c.equal ? "" : " -> " + JSON.stringify(c.member) + " / " + JSON.stringify(c.body) + (c.err ? " err=" + c.err : ""))));
   // and the same through the record the wizard actually writes
   const rec = await page.evaluate(() => {
     const body = "Deploy from the bundle at:\nPath:\\deploy\\q and never by hand.";
     wzOpen("record"); S.wz.desc = "Deploy from the bundle path."; S.wz.rkind = "rule"; wzGo(3);
     S.cedVal["wz:record"] = body; wzGo(5); wzRecOpenPr();
     const def = recprCur(); let parsed = null, err = null;
-    try { parsed = tomlParse(recprFileText(def)); } catch (e) { err = String(e.message || e); }
-    return { err, equal: parsed && parsed.statement === def.record.st, statement: parsed && parsed.statement };
+    try { parsed = fmParse(recprFileText(def)); } catch (e) { err = String(e.message || e); }
+    const statement = parsed && bodyText(parsed.body);
+    return { err, equal: parsed && statement === def.record.st, statement };
   });
   ok(rec.err === null, "a multi-line statement with a backslash still parses, got " + rec.err);
   ok(rec.equal, "and round-trips exactly, got " + JSON.stringify(rec.statement));
-  ok(errs.length === 0, "no errors on the TOML path: " + errs.join(" | "));
+  ok(errs.length === 0, "no errors on the frontmatter path: " + errs.join(" | "));
   await page.close();
 }
 

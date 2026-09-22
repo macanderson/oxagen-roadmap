@@ -219,7 +219,8 @@ const shot = async (page, name) => { if (shots) await page.screenshot({ path: pa
   await primary(page); await page.waitForTimeout(200);
   d = await dlg(page);
   ok(d.ced && d.gutter > 15, "agent definition: editor, " + d.gutter + " lines");
-  ok(/\[instructions\]/.test(d.body), "agent definition has instructions");
+  ok(/schema: agent-definition\/v0\.2/.test(d.body), "agent definition is a v0.2 frontmatter file");
+  ok(/Work inside the toolbelt/.test(d.body), "agent definition has instructions in its body");
   await primary(page); await page.waitForTimeout(200);
   d = await dlg(page);
   ok(/Nothing on this belt parks|Nothing picked/.test(d.body), "agent belt: says what parks");
@@ -1150,7 +1151,7 @@ for (const theme of ["light", "dark"]) {
   await page.evaluate((i) => { closeDialog(); openDialog("crecarchive", i); }, rid);
   await page.waitForTimeout(220);
   const at = await page.evaluate(() => document.querySelector("#layer .dlg").innerText);
-  ok(/status = "archived"/.test(at), "records: the confirm names the field it sets, got " + at.slice(0, 200));
+  ok(/status: archived/.test(at), "records: the confirm names the field it sets, got " + at.slice(0, 200));
   ok(/in force until/i.test(at), "records: the confirm says it steers runs until the merge");
   ok(/nothing is deleted/i.test(at), "records: the confirm says the file and the lineage stay");
 

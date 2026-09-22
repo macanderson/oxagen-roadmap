@@ -217,7 +217,7 @@ This is not the mirror problem (two copies that drift apart), because every fact
 
 Platform engineers call this pattern GitOps: the desired state lives in git, a controller reconciles the live system to it, and drift is detected and reported. Oxagen is the controller. Steering, skills and definitions are the desired state. The registry, the index and the wrapped agents are the live system.
 
-**Today.** Records live in Postgres (`agent.context_records`, `packages/database/src/schema/agent.ts:1303`) with their versions, promotions ledger and proposals, mirrored in git as `.oxagen/rules/*.toml`. The graph holds no steering: neither `packages/ontology` nor `packages/ingestion` writes a `:Record` node. Memory is in the graph as `:AgentMemory` and reaches only the in-app agent (§10.4). The knowledge graph is off unless `NEO4J_URI` is set. ClickHouse is still in the tree. Retiring it is a target of this specification and is not part of the 2026-09-18 refactor path.
+**Today.** Records live in Postgres (`agent.context_records`, `packages/database/src/schema/agent.ts:1303`) with their versions, promotions ledger and proposals, mirrored in git as `.oxagen/rules/*.md`. The graph holds no steering: neither `packages/ontology` nor `packages/ingestion` writes a `:Record` node. Memory is in the graph as `:AgentMemory` and reaches only the in-app agent (§10.4). The knowledge graph is off unless `NEO4J_URI` is set. ClickHouse is still in the tree. Retiring it is a target of this specification and is not part of the 2026-09-18 refactor path.
 
 ### 4.3 Language and runtime
 
@@ -358,31 +358,35 @@ An agent is registered once, in a workspace, with:
 
 Delegation ceiling: an agent can never do more than the person it acts for. Its effective permission is its own grants intersected with the invoking human's grants. Subagents can only narrow. This carries over from the agent-RBAC spec (RBAC is role-based access control, permissions granted by role).
 
-**Identity in Postgres, definition in git.** An agent has two halves. Its **identity** lives in Postgres: principal, credentials, roles, mandates, the things that must be revocable in one second. Its **definition** is a file in the workspace's main repo under `.oxagen/agents/<slug>.toml`. That file says what the agent is for, its instructions, which tools it may use, which model tier, and harness-specific settings. It is the source of truth for the definition. Two things join the halves. The first is the agent key (`org_ns.ws_ns.slug`, where `slug` is the file name). The second is `definition_digest`, the digest (a fixed-length fingerprint) of the file at the commit the agent last ran from. Runs record that digest as the agent's version.
+**Identity in Postgres, definition in git.** An agent has two halves. Its **identity** lives in Postgres: principal, credentials, roles, mandates, the things that must be revocable in one second. Its **definition** is a file in the workspace's main repo under `.oxagen/agents/<name>.md`: `agent-definition/v0.2` (ADR-138), YAML frontmatter with the instructions as the markdown body. The top level of the frontmatter is the harness vocabulary, the members a Claude Code subagent file carries (`name`, `description`, and optionally `model`, `color`, `tools`). Everything Oxagen validates sits under one `oxagen` table: the schema tag, the display title, the model tier, the belt (`allow` and `deny`), the side effects, the budget, and harness-specific settings. It is the source of truth for the definition. Two things join the halves. The first is the agent key (`org_ns.ws_ns.name`, where `name` is the frontmatter `name` and the file stem). The second is `definition_digest`, the digest (a fixed-length fingerprint) of the file at the commit the agent last ran from. Runs record that digest as the agent's version.
 
-```toml
-# .oxagen/agents/release-manager.toml
-schema = "agent-definition/v0.1"
-slug = "release-manager"
-name = "Release manager"
-description = "Prepares release notes and opens the release PR. Never merges."
-model_tier = "complex"                     # or a pinned model id
-tools = ["github__*", "linear__get_issue", "search_graph", "recall_context"]
-deny_tools = ["github__merge_pull_request@*", "github__delete_*@*"]
-side_effects = ["read", "write"]           # never "irreversible"
-budget = { per_run_micros = 2000000 }
-[instructions]
-body = """
+```markdown
+---
+name: release-manager
+description: Prepares release notes and opens the release PR. Never merges.
+oxagen:
+  schema: agent-definition/v0.2
+  title: Release manager
+  model_tier: complex            # or a pinned model id
+  belt:
+    allow: [github__*, linear__get_issue, search_graph, recall_context]
+    deny: [github__merge_pull_request@*, github__delete_*@*]
+  side_effects: [read, write]    # never irreversible
+  budget:
+    per_run_micros: 2000000
+  harness:
+    claude-code:
+      color: blue
+    codex-cli:
+      sandbox: read-only
+---
 You prepare releases for this repository. Read the changelog conventions in
 .oxagen/rules before writing notes. Open a pull request; a person merges it.
-"""
-[harness.claude-code]
-color = "blue"
-[harness.codex-cli]
-sandbox = "read-only"
 ```
 
-**One source, every harness.** Each coding harness keeps agent definitions in its own place and format. Claude Code reads `.claude/agents/<name>.md` (front matter plus instructions). Codex CLI reads its own agent files. Stella reads the canonical format (the single official form). Oxagen generates the harness files from the canonical one, in the same pull request. So the repo carries `.oxagen/agents/release-manager.toml` and beside it `.claude/agents/release-manager.md` and the Codex equivalent. Each generated file has a header naming the source file and its digest, and is marked generated. The set of formats is an adapter table in Oxagen. A harness changing its format is a table change, not a product change. Stella needs no generated file: `.stella/agents` is a symlink to `.oxagen/agents` (§10.2). A pull request that edits a generated file without regenerating it fails the checks. The canonical file is the only one a person or agent edits.
+`tools` at the top level means what it means to the harness. The belt Oxagen enforces is `oxagen.belt.allow` and `oxagen.belt.deny`, so the two vocabularies cannot collide.
+
+**One source, every harness.** The canonical file is the subagent file Claude Code, Cursor and Stella read: frontmatter markdown. Claude Code reads `.claude/agents/<name>.md`, and the bridge is a byte-identical copy. `propose_agent` writes `.oxagen/agents/<name>.md` and the same bytes at `.claude/agents/<name>.md` in one pull request, and the checks compare the two files for equality. Nothing is generated and there is no header to keep current. GitHub's Contents API cannot write a symlink and a symlink breaks Cursor on Windows, so a copy checked equal is the bridge. Stella needs no copy: `.stella/agents` is a symlink to `.oxagen/agents` (§10.2). Codex reads its own agent files; delivering the definition there is an adapter question this specification leaves open. A pull request where the two files differ fails the checks. Either file may be edited; the check makes them one file in two places (ADR-138).
 
 **The loop the operator sees.** Creating or changing an agent in Mission Control (`register_agent`, `update_agent`) does not write Postgres first. It opens a Context PR on the main repo. That PR adds or changes the canonical file and the generated files. The checks validate the definition: the schema, tools that exist in the registry, no `irreversible` without a mandate, and instructions that pass the secret and PII scan. Merge creates or updates the principal, the roles the definition asks for, and the toolbelt. The next time the operator opens their coding agent in that repo, the agent is there. The same works in reverse. An agent definition committed by hand appears in Mission Control on merge. Its identity is created, and its status is `unenrolled` until credentials are issued. Deleting an agent is a PR that removes the file. The principal is retired, never deleted, so its runs keep their identity.
 
@@ -922,7 +926,7 @@ A repository may be linked to more than one workspace in the same organization. 
 
 ### 10.2 On-disk layout: `.oxagen/`
 
-The directory is `.oxagen/`. The word `.stella` never appears in an Oxagen product, in a customer's repository, or in this specification's file names. The file format inside it is the context-record format Stella already implements and validates. Nothing is invented. Only the directory name is Oxagen's.
+The directory is `.oxagen/`. The word `.stella` never appears in an Oxagen product, in a customer's repository, or in this specification's file names. The file format inside it is `context-record/v0.2` (ADR-138): frontmatter markdown, with the record object in the YAML header and the statement as the body. The record hash is unchanged from the TOML form the files carried before 2026-09-22, so every id and hash Stella stamped stays valid; Stella adopts a frontmatter reader for `.oxagen/rules` and `.oxagen/agents`. Only the directory name is Oxagen's.
 
 ```
 .oxagen/
@@ -930,14 +934,14 @@ The directory is `.oxagen/`. The word `.stella` never appears in an Oxagen produ
   rules/
     governance.toml          # mode = solo | team | regulated; separation flag
     promotions.jsonl         # hash-chained promotion ledger (regulated mode)
-    ctx.<set>.<slug>.toml    # one published record per lineage id
+    ctx.<set>.<slug>.md      # one published record per lineage id (context-record/v0.2)
   proposals/*.toml           # candidates; steer nothing
-  agents/<slug>.toml         # agent definitions, one per agent (§6.2); harness files are generated beside them
+  agents/<name>.md           # agent definitions, one per agent (§6.2); the same bytes at .claude/agents/<name>.md
   skills.toml                # which skill sources and skills are in scope; absent means off (§10.6)
   skills/<id>/SKILL.md       # governed skills, delivered to the harness by sync (§10.6)
 ```
 
-Each record is one TOML file, a plain-text settings format. The file holds `schema = "context-record/v0.1"`, the record's `lineage_id`, kind, statement, steering and enforcement blocks, truth probes, and `record_hash`, a fingerprint of the record's content. Custom agents never parse the file. Oxagen serves published records as context frames and as compiled steering text. So the file format is a publication concern, not an integration concern.
+Each record is one frontmatter markdown file. The YAML frontmatter is the record object, flat, in the protocol's snake_case member names: `schema: context-record/v0.2`, `set_id`, the record's `lineage_id`, `record_id`, `record_hash` (a fingerprint of the record's content), kind, origin, sharing scope, status, provenance, and the steering and enforcement tables and truth probes. The markdown body is the statement. `schema` and `set_id` are file members and stay out of the hash; every other member enters it, so a v0.1 TOML record re-encoded this way keeps its id and hash. Custom agents never parse the file. Oxagen serves published records as context frames and as compiled steering text. So the file format is a publication concern, not an integration concern.
 
 **Stella symlinks, it does not copy.** When Stella initializes in a repository and finds `.oxagen/`, it creates symlinks, pointers to another path rather than copies. The same happens when a workspace is bound after Stella was already initialized there. The symlinks are `.stella/rules → ../.oxagen/rules`, `.stella/proposals → ../.oxagen/proposals`, and `.stella/agents → ../.oxagen/agents`. With them, Stella's loader, its CI validation, and `stella context propose` work unchanged on the Oxagen-governed files. There is no second copy that could drift. `.stella/private/` stays a real, gitignored directory. Oxagen reads `.oxagen/` and nothing else. Whatever sits under `.stella/` is invisible to Oxagen, and Oxagen never inspects it. The symlink is Stella's responsibility (Stella issue #6507). Stella refuses to initialize a second rules directory beside an existing `.oxagen/`.
 
@@ -979,7 +983,7 @@ Every route is recorded. The assembler's **manifest** says what was rendered and
 
 | Source | Where it lives | Reaches an agent? |
 |---|---|---|
-| Context records | Postgres `agent.context_records` with versions, the promotions ledger and proposals. Mirrored in git as `.oxagen/rules/*.toml` | **No.** No run-time reader exists. ADR-051's injection path was removed by ADR-043 and never re-landed (issue #2592). Only a harness that reads the checkout itself sees them. Phase 0 is the first reader: ADR-091, in review as oxagen PR #3289, and not on `main` |
+| Context records | Postgres `agent.context_records` with versions, the promotions ledger and proposals. Mirrored in git as `.oxagen/rules/*.md` | **No.** No run-time reader exists. ADR-051's injection path was removed by ADR-043 and never re-landed (issue #2592). Only a harness that reads the checkout itself sees them. Phase 0 is the first reader: ADR-091, in review as oxagen PR #3289, and not on `main` |
 | Bundle `context.system` | `packages/tacho/src/wire.ts:375`, consumed at `packages/tacho/src/collector/hook-handler.ts:322` | **No.** The server hardcodes `null` (`packages/handlers/src/lib/tacho-host.ts:276`) |
 | Bundle permissions, tools and budget | `tacho-host.ts:269-275` | **No.** Always empty, with `budget.mode = "observed"`. Nothing reads `session_limit_usd` |
 | Skills | `tacho.sessions.skills_available`, an inventory of what the harness reported (`packages/database/src/schema/tacho.ts:358`) | **No.** Observation only. No skills package, table or loader exists |
@@ -1560,7 +1564,7 @@ The review's defects are filed on their own: #3302 (the `publish_context_record`
 | **Decided 2026-09-18: subscription logins through a base URL proxy** | Closed. Both OpenAI and Anthropic work through a base URL proxy, subscription logins included, and neither vendor's terms explicitly forbid it: validated by the maintainer on 2026-09-18 (ADR-094). It was the review's one unverified risk, and it does not gate Phase 4 (§17.2) | A vendor changing its terms or its login flow. A host whose harness cannot be pointed at the proxy stays at the `harness` tier and the record says so |
 | Sandbox scope | The sandbox is the top tier, not the only tier, and hooks stay. `oxagen run -- <agent>` targets CI, headless runs, cloud runners and managed devices first | It is never made mandatory on a developer's own laptop. A customer who asks for that gets managed settings and the `gateway` tier first |
 | Approval tokens | Biscuit v2 as designed (a Biscuit token is a signed token that its holder can narrow without asking the issuer again) | If SDK support in Python or Go lags, fall back to a signed JWT (JSON Web Token) with the same claims |
-| Steering format | `.oxagen/rules`, in the context-record TOML format that Stella implements. Stella symlinks to it | The directory name is fixed. If a second agent needs its own path, it gets a symlink the same way Stella does |
+| Steering format | `.oxagen/rules`, in the context-record frontmatter markdown format (`context-record/v0.2`, ADR-138), which Stella adopts a reader for. Stella symlinks to it | The directory name is fixed. If a second agent needs its own path, it gets a symlink the same way Stella does |
 | Protocol trace journal | Export a `contextgraph-trace` journal per run and pass its oracles | The journal is a sketch (`0.1`). Pin its fixtures by commit, like the frame fixtures |
 | Rolling model aliases | Tiers point at `z-ai/glm-latest` and `z-ai/glm-flash-latest`. Frames record the concrete model, meaning the exact model id behind the alias | If an alias flips to a model with a different price or behavior mid-month, the price book flags it by concrete id. An organization can pin a model |
 | Billable unit | The governed action unit: one billable governed action is one GAU, and `resolve_approval` is the only billable governed action (§12.1). Proven spend and held runs are report figures | GAU pricing was set on 2026-09-14 and reaffirmed on 2026-09-15. Making another governed action billable is a maintainer decision, and the price list stays as it is |
@@ -1830,7 +1834,7 @@ Money is `bigint` micro-USD unless a `currency` column says otherwise. Secrets a
 | `harness` | text | `stella`, `claude-code`, `codex-cli`, `openai-agents-sdk`, `claude-agent-sdk`, `custom`, `oxagen-service` |
 | `harness_version` | text | |
 | `parent_user_id` | uuid → `auth.users` | the operator an agent acts for |
-| `definition_path` | text | `.oxagen/agents/<slug>.toml` in the main repo (§6.2) |
+| `definition_path` | text | `.oxagen/agents/<name>.md` in the main repo (§6.2) |
 | `definition_digest`, `definition_commit_sha` | text | at the last merged commit |
 | `status` | text | `unenrolled`, `active`, `suspended`, `retired` |
 | `display_name` | text | |
@@ -2523,7 +2527,7 @@ The current repository registers 229 real contracts (244 names minus test fixtur
 | `create_api_key` | create_api_key | purpose-locked keys for humans and services |
 | `rotate_api_key` | rotate_api_key | a new secret, the old one valid for 24 hours; ships in rev1 (2026-09-15, maintainer decision) |
 | `revoke_api_key` | revoke_api_key | |
-| `register_agent` | create_agent_def, suggest_agent_def, summarize_agent_def | opens a Context PR adding `.oxagen/agents/<slug>.toml` and the generated harness files; identity is created on merge |
+| `register_agent` | create_agent_def, suggest_agent_def, summarize_agent_def | opens a Context PR adding `.oxagen/agents/<name>.md` and the same bytes at `.claude/agents/<name>.md`; identity is created on merge |
 | `update_agent` | update_agent_def, revise_agent_def, publish_agent_def, deploy_agent | a Context PR changing the definition; identity and belt update on merge |
 | `retire_agent` | delete_agent_def | a Context PR removing the file; principal retired, never deleted |
 | `get_agent` | get_agent_def, get_agent_role | identity, roles, belt, mandates |

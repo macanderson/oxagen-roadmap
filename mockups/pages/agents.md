@@ -49,7 +49,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 
 ## Functionality
 
-- Registering opens a Context PR that adds `.oxagen/agents/<slug>.toml`; nothing is written to Postgres until the first frame arrives.
+- Registering opens a Context PR that adds `.oxagen/agents/<name>.md` and the same bytes at `.claude/agents/<name>.md`; nothing is written to Postgres until the first frame arrives.
 - Deregister retires the principal (never deletes it) so its runs keep their identity; the file removal is a pull request.
 - Tile counts are rollups: Identities here and Enrolled from the workspace row, Holding a mandate and Tamper incidents summed over the agent records across the organization, which is the scope their captions name.
 - The Incidents column and the Tamper incidents tile read `agentTamper(a)` off the same `INCIDENTS` record the Audit page reads, so the two pages cannot disagree.

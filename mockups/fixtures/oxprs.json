@@ -88,15 +88,15 @@
   "files": [
    [
     "add",
-    ".oxagen/rules/ctx.release.no-reread-changelog.toml",
-    "one record, kind = rule, force = should"
+    ".oxagen/rules/ctx.release.no-reread-changelog.md",
+    "one record, kind: rule, force: should"
    ]
   ],
   "checks": [
    [
     "schema",
     "pass",
-    "context-record/v0.1; one [[record]]; every required member present."
+    "context-record/v0.2; one record per file; every required member present."
    ],
    [
     "lineage_uniqueness",
@@ -199,15 +199,15 @@
   "files": [
    [
     "mod",
-    ".oxagen/agents/release-manager.toml",
-    "per_run_micros and deny_tools"
+    ".oxagen/agents/release-manager.md",
+    "per_run_micros and belt.deny"
    ]
   ],
   "checks": [
    [
     "schema",
     "pass",
-    "agent-definition/v0.1; slug matches the file stem."
+    "agent-definition/v0.2; name matches the file stem; .claude/agents/release-manager.md is byte-identical."
    ],
    [
     "belt",
@@ -285,15 +285,15 @@
   "files": [
    [
     "add",
-    ".oxagen/rules/ctx.platform.changelog-once.toml",
-    "kind = rule, force = should"
+    ".oxagen/rules/ctx.platform.changelog-once.md",
+    "kind: rule, force: should"
    ]
   ],
   "checks": [
    [
     "schema",
     "pass",
-    "context-record/v0.1."
+    "context-record/v0.2."
    ],
    [
     "lineage_uniqueness",
