@@ -28,13 +28,13 @@ Actions: **Add Oxagen to a repository** (gold; opens the init wizard). The heade
 A banner when a linked repository carries no tree: “1 linked repository carries no .oxagen/”, “A run on a-intel/mobile is steered by the main repo and by nothing of its own.”, the reason there is nowhere to publish a repository-scoped record, and **Add Oxagen**. Then the **Repositories** panel, subtext “One main repo, any number of linked. The main repo holds the workspace’s steering and configuration; a linked repo may hold records that steer only runs on it.”, a small **Add Oxagen to a repository** in its header, filters Role and `.oxagen/`, Rows, a pager. Columns: Repository (with language · visibility · pushed when the seed carries them) · Role · Production branch (with its head) · `.oxagen/` (with “N files”) · Events (“ok · 8,142 deliveries / 30d · 0 gaps”) · Symbols · action (“nothing waiting”, or **Add Oxagen**).
 
 - **Role** is the workspace's word, not GitHub's: `main` (exactly one, required at creation), `linked` (zero or more), `not linked`. A repository may be linked to more than one workspace in the organization and is main for at most one.
-- **`.oxagen/`** is `governed` or `no .oxagen/`. Every row opens the `repo` dialog (Enter and Space too): production branch and head, visibility, `.oxagen/` state with its file count and commit, issues, events, code graph, data layer, working copies, and the scope of records published there; an ungoverned one offers **Add Oxagen** instead of **See its changes**.
+- **`.oxagen/`** is `governed` or `no .oxagen/`. Every row opens the `repo` dialog (Enter and Space too): production branch and head, visibility, `.oxagen/` state with its file count and commit, issues, events, code graph, data layer, working copies, and the scope of records published there; an ungoverned one offers **Add Oxagen** instead of **See its changes**. A linked repository also offers **Unlink** (red; opens `repounlink`), and one that is not linked offers **Link to this workspace** (gold). The main repo offers neither, because moving main is an owner action and this dialog never offers it.
 - A note: changing which repository is `main` is an organization-owner action with approval, recorded as a security event; the production branch never moves on its own.
 - Oxagen writes to a branch and never to the production branch, and merges only what a person merges from here, under the governance mode the repository itself declares. The App permissions the binding asks for are named where they are granted, in the install flow, not restated on this tab.
 
 ### Working copies
 
-A banner when copies are out of step: “N out of step”, “A working copy that is behind is not a run that is behind.”, steering reaches a run from the merged commit whatever the directory holds, and **Ask them to pull**. The **Working copies** panel, subtext on `oxagen init` and the one gitignored file, **Connect a directory** (gold; opens `linkdir`). Columns: Directory (with machine · person) · Repository · Branch (with head) · `.oxagen/` (`in sync`, `behind`, `uncommitted`, `unbound`, with “N uncommitted”) · Symlinks (`ok` / `missing`) · Bundle · Last seen. Every row opens the `workcopy` dialog. With no copies, the panel says none is linked yet and keeps Connect a directory.
+The **Working copies** panel, subtext on `oxagen init` and the one gitignored file, **Connect a directory** (gold; opens `linkdir`). Columns: Directory (with machine · person) · Repository · Branch (with head) · `.oxagen/` (`in sync`, `behind`, `uncommitted`, `unbound`, with “N uncommitted”) · Symlinks (`ok` / `missing`) · Bundle · Last seen. Every row opens the `workcopy` dialog, whose footer carries **Disconnect** (red; opens `copyoff`). With no copies, the panel says none is linked yet and keeps Connect a directory.
 
 - **Files to review**: the tree with `workspace.toml` (“committed. reviewed. the source of truth.”) and `workspace.json` (“gitignored · this machine’s link”), and the note on why the two are never the same file in two places.
 - **Sync**: `oxagen init` (links the directory, idempotent), `oxagen pull` (fast-forwards `.oxagen/`, re-points the Stella symlinks, never merges your work), `oxagen status`, `oxagen propose`. Opening and merging a proposal's pull request happen here, because both gate on a role only a signed-in person holds. A note: a copy whose symlinks read `missing` is one where Stella will load nothing.
@@ -54,7 +54,10 @@ The **Open Context PRs** panel, subtext “Four kinds of file and one lifecycle.
 - **`.oxagen/rules/governance.toml`** with the three modes: `solo` (the author may merge their own), `team` (a code-owner review is required; what a missing file means), `regulated` (a named approver from a role, hash-chained ledger). It is read when a pull request is opened **and again when it is merged**, so raising the mode takes effect on everything still open. A file that exists but names no mode refuses both. The workspace's current mode is the chip on Steering (`steering.md`), and changing it is a Context PR.
 - **Tree**: `.oxagen/` as it is on disk, `workspace.json` gitignored, `rules/` with `governance.toml`, `promotions.jsonl`, and one published record per lineage, `proposals/`, `agents/`, `skills/<name>/SKILL.md` (“pinned by version and digest”), `tools/<name>.toml`. Oxagen reads `.oxagen/` and nothing else; whatever sits under `.stella/` is invisible to it.
 
-**Dialogs this page opens:** `wz (init wizard)`, `linkdir`, `workcopy`, `repo`.
+**Dialogs this page opens:** `wz (init wizard)`, `linkdir`, `workcopy`, `copyoff`, `repo`, `repounlink`.
+
+- **`repounlink`**: what stops reaching the workspace (issues, events, and any run binding), that the repository itself is untouched, that records published there stop steering runs here at once while the runs already recorded keep their hashes, and how many working copies go with it. Footer: **Keep it linked** · **Unlink it** (red). Unlinking leaves the repository in the table as not linked, so linking it back is the same round trip.
+- **`copyoff`**: Oxagen forgets the directory, the machine stops reporting it, the gitignored `workspace.json` stops resolving, nothing on disk is deleted, and `oxagen init` links it back. It names any uncommitted edits under `.oxagen/` and says disconnecting neither loses nor proposes them. This is the one path on the page that is not a pull request, because nothing committed changes. Footer: **Keep it** · **Disconnect it** (red).
 
 ### The init wizard
 
@@ -81,7 +84,8 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 
 ## Functionality
 
-- Every path on this page ends on a pull request. Nothing here writes a row, and nothing merges without a person.
+- Every path that changes a file ends on a pull request. Nothing here merges without a person.
+- Linking and unlinking a repository, and disconnecting a working copy, are the exceptions: the first two are workspace membership and the third is one gitignored file on a laptop. None of the three changes a committed file, so none opens a pull request, and each says so where it is confirmed.
 - Changing which repository is `main` is an organization-owner action with approval, recorded as a security event.
 - The production branch never moves on its own: a default-branch change on GitHub is recorded and prompts.
 - A repository-scoped record may narrow what a workspace record allows. It may never widen it, and one claiming workspace scope fails the checks.
@@ -103,7 +107,7 @@ Top bar collapses to hamburger · current crumb · search glyph · notifications
 ## Permissions
 
 - Read: `repository.read`
-- Writes (each a governed action recorded in Audit): `repository.link (add Oxagen to a repository)`, `repository.admin (change which repo is main)`, `context.propose (open a pull request)`, `context.review (merge one)`, `workcopy.link (connect a directory)`
+- Writes (each a governed action recorded in Audit): `repository.link (add Oxagen to a repository)`, `repository.admin (change which repo is main)`, `context.propose (open a pull request)`, `context.review (merge one)`, `workcopy.link (connect a directory)`, `workcopy.unlink (disconnect one)`, `repository.link (link or unlink a repository)`
 
 ## Backend gaps this page depends on
 

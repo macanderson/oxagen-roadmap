@@ -496,7 +496,9 @@ tbody tr.click:hover .drill-lnk{border-bottom-style:solid}
 .avx.f-mono{font-family:var(--mono);font-weight:600}
 .inv{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px}
 .inv-i{display:inline-flex;align-items:center;gap:9px;padding:5px 12px 5px 6px;border:1px solid var(--border);border-radius:999px;background:var(--ink);color:var(--fg);font-size:12.5px;text-decoration:none;max-width:100%;min-width:0}
-a.inv-i:hover{border-color:var(--rule);text-decoration:none}
+a.inv-i{transition:border-color .15s,background .15s}
+a.inv-i:hover{border-color:var(--gold);background:var(--hl);text-decoration:none}
+a.inv-i:hover *{text-decoration:none}
 .inv-i .tx{display:flex;flex-direction:column;min-width:0;line-height:1.25}
 .inv-i .tx b{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .inv-i .tx span{font-size:10.5px;color:var(--dim);font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -1300,7 +1302,9 @@ button.edge:hover{color:var(--fg)}
 .agc>.scs{flex:none;margin-left:auto;padding-left:6px}
 .agc-compact{display:inline-flex;max-width:100%;padding:5px 11px 5px 6px;border:1px solid var(--border);border-radius:10px;background:var(--ink)}
 .agc-compact .agid{max-width:280px}
-a.agc-compact:hover{background:var(--hl)}
+a.agc-compact{transition:border-color .15s,background .15s}
+a.agc-compact:hover{background:var(--hl);border-color:var(--gold)}
+a.agc:hover,a.agc:hover *{text-decoration:none}
 .agc-compact>.scs{margin-left:4px}
 .agc-detail{gap:16px}
 .agc-detail .agid{max-width:none}
@@ -1335,42 +1339,6 @@ table{color:inherit}
 .rng-prev{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:6px}
 .rowacts{white-space:nowrap}
 .rowacts .btn{margin-right:4px}
-/* Auto-approval rules: one horizontal card per rule, stacked. Toggle spine | body | rail.
-   The body carries the name and provenance on top and three labelled facts below; the rail
-   carries the 30-day count and the actions. Every value is a single line that ellipsises
-   behind a title, so a long rule name or tool pattern never wraps however narrow the page. */
-.arules{display:grid;gap:10px;padding:12px 16px}
-.arule{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:16px;align-items:start;padding:14px 16px;border:1px solid var(--border);border-radius:12px;background:var(--ink);cursor:pointer;transition:border-color .15s}
-.arule>*{min-width:0}
-.arule:hover{border-color:var(--rule)}
-.arule.off .ar-body,.arule.off .ar-n{opacity:.55}
-.ar-tog{padding-top:3px}
-.ar-head{display:flex;align-items:center;gap:8px;min-width:0}
-.ar-head .b{flex:none}
-.ar-name{flex:0 1 auto;min-width:0;font-size:14.5px;font-weight:600;color:var(--fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.5}
-.ar-sub{font-family:var(--mono);font-size:10.5px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
-.ar-facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px 20px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
-@media(min-width:1180px){.ar-facts{grid-template-columns:minmax(0,1.2fr) minmax(0,1.1fr) minmax(0,1.7fr)}}
-.ar-f{min-width:0}
-.ar-f .k{display:block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:600;margin-bottom:4px;white-space:nowrap}
-.ar-f .v{display:block;font-size:12.5px;color:var(--body);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.8}
-.ar-f .v.mono{font-size:11.5px;color:var(--fg)}
-.ar-f .v .scs{gap:10px;vertical-align:middle}
-.ar-f .v .b{vertical-align:middle;font-weight:500;margin-left:4px}
-.ar-f .v .b:first-of-type{margin-left:6px}
-.ar-rail{display:grid;gap:10px;justify-items:end;text-align:right;align-self:stretch;align-content:space-between}
-.ar-stat{display:grid;justify-items:end}
-.ar-n{font-size:24px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.05;color:var(--fg)}
-.ar-stat .s{font-size:11px;color:var(--muted);white-space:nowrap;margin-top:3px}
-.ar-stat .s.held{color:var(--dim)}
-.ar-acts{display:flex;gap:6px}
-@media(max-width:1180px){.arule{grid-template-columns:auto minmax(0,1fr)}.ar-rail{grid-column:2;grid-auto-flow:column;justify-content:space-between;align-items:center;text-align:left;justify-items:start;gap:16px}.ar-stat{grid-auto-flow:column;align-items:baseline;gap:8px;justify-items:start}.ar-stat .s{margin-top:0}.ar-stat .s.held::before{content:"· ";color:var(--rule)}}
-#viewport.phone .arules{padding:10px 12px}
-#viewport.phone .arule{grid-template-columns:auto minmax(0,1fr);gap:12px;padding:12px}
-#viewport.phone .ar-rail{grid-column:1/-1;grid-auto-flow:row;justify-content:stretch;align-items:start;text-align:left;justify-items:start;gap:8px}
-#viewport.phone .ar-stat{grid-auto-flow:column;align-items:baseline;gap:8px;justify-items:start}#viewport.phone .ar-stat .s{margin-top:0}#viewport.phone .ar-stat .s.held::before{content:"· ";color:var(--rule)}
-#viewport.phone .ar-facts{grid-template-columns:minmax(0,1fr)}
-#viewport.phone .ar-head{flex-wrap:wrap;gap:4px 8px}#viewport.phone .ar-name{flex-basis:100%}
 #viewport.phone .perm-grid{grid-template-columns:minmax(0,1fr)}
 .field label.check{display:flex;font-size:inherit;font-weight:inherit;color:inherit;margin-bottom:8px}
 .field .check input{width:auto;flex:none;margin:3px 0 0}
@@ -2073,3 +2041,17 @@ button.wz-opt:hover{border-color:var(--rule)}
 .gh-comment{border:1px solid var(--border);border-radius:10px;padding:10px 14px;background:var(--panel-h);font-size:13px}
 .gh-comment p{margin:0}.gh-comment hr{border:0;border-top:1px solid var(--rule);margin:8px 0}
 .gh-comment a{overflow-wrap:anywhere}
+
+/* The run header's second strip: where the work is. Every chip here is a link out or a copy, so
+   they carry a hover the badges around them do not. */
+.where{gap:6px;flex-wrap:wrap}
+.where .b svg{width:12px;height:12px;flex:none;opacity:.8}
+a.b.lk,button.b.lk{cursor:pointer;font-family:inherit;transition:border-color .15s,background .15s}
+a.b.lk:hover,button.b.lk:hover{border-color:var(--gold);background:var(--hl);text-decoration:none}
+a.b.lk:hover *,button.b.lk:hover *{text-decoration:none}
+.where .b.mono{font-size:10.5px}
+/* A checkout path is one unbreakable string and is routinely longer than a phone is wide, so the
+   chip truncates from the left and keeps the directory, which is the end a person reads. */
+.where .b{max-width:100%;min-width:0}
+.where .b.mono{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.where .b.mono svg{flex:none}
