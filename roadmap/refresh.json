@@ -2245,9 +2245,9 @@
       "title": "P0 · app+ops/CI · Two files from an already-merged PR export test-only helpers and fail every PR's required checks job"
     }
   },
-  "generated_at": "2026-09-22T00:50:05.433Z",
+  "generated_at": "2026-09-22T05:40:19.960Z",
   "heads": {
-    "oxagen": "fccdca099f5d9c14b52fd5ba4e049b523b8aab0c"
+    "oxagen": "978e4c3785b399e44c46ef2579f8806472bcd736"
   },
   "issues": {
     "oxagen#1": {
@@ -17581,7 +17581,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "P2 · evidence/Tacho · File rollup drops identity for rows written before this deploy (residue #3650)",
-      "updated_at": "2026-09-22T00:32:40Z"
+      "updated_at": "2026-09-22T03:53:08Z"
     },
     "oxagen#3665": {
       "author": "macanderson",
@@ -18850,7 +18850,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "fix: enrich a relative file row when a later observation arrives",
-      "updated_at": "2026-09-22T00:48:53Z"
+      "updated_at": "2026-09-22T03:53:38Z"
     },
     "oxagen#3708": {
       "author": "macanderson",
@@ -18883,7 +18883,7 @@
     },
     "oxagen#3709": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-22T01:16:41Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": false,
@@ -18894,7 +18894,7 @@
         "no-issue",
         "closes-nothing"
       ],
-      "merged_at": null,
+      "merged_at": "2026-09-22T01:16:41Z",
       "milestone": null,
       "needs_decision": false,
       "number": 3709,
@@ -18903,9 +18903,9 @@
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "docs(mission-control): re-verify Fleet, Run, Approvals and Agents rows in GAP-INVENTORY",
-      "updated_at": "2026-09-22T00:42:32Z"
+      "updated_at": "2026-09-22T01:16:42Z"
     },
     "oxagen#3710": {
       "author": "macanderson",
@@ -18916,7 +18916,10 @@
       "html_url": "https://github.com/macanderson/oxagen/pull/3710",
       "is_pr": true,
       "kind": null,
-      "labels": [],
+      "labels": [
+        "no-issue",
+        "closes-nothing"
+      ],
       "merged_at": null,
       "milestone": null,
       "needs_decision": false,
@@ -18933,7 +18936,209 @@
       ],
       "state": "open",
       "title": "feat(tacho): compile an agent's mandate into the steering bundle's permissions and budget",
-      "updated_at": "2026-09-22T00:47:27Z"
+      "updated_at": "2026-09-22T01:18:58Z"
+    },
+    "oxagen#3711": {
+      "author": "macanderson",
+      "closed_at": "2026-09-22T01:19:59Z",
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3711",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "no-issue",
+        "closes-nothing"
+      ],
+      "merged_at": "2026-09-22T01:19:59Z",
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3711,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "chore(cursor): add Cloud Agent dev environment",
+      "updated_at": "2026-09-22T01:20:07Z"
+    },
+    "oxagen#3712": {
+      "author": "cursor[bot]",
+      "closed_at": "2026-09-22T01:12:11Z",
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3712",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "closes-nothing"
+      ],
+      "merged_at": "2026-09-22T01:12:11Z",
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3712,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "Read the Aurora writer host from the parameter the deploy role can get",
+      "updated_at": "2026-09-22T01:12:41Z"
+    },
+    "oxagen#3713": {
+      "author": "cursor[bot]",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3713",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "closes-nothing"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3713,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "fix(ci): do not treat a denied SSM lookup as an unregistered node",
+      "updated_at": "2026-09-22T01:37:21Z"
+    },
+    "oxagen#3714": {
+      "author": "cursor[bot]",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3714",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "closes-nothing"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3714,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "fix: name the Postgres apply path that can reach Aurora",
+      "updated_at": "2026-09-22T01:48:16Z"
+    },
+    "oxagen#3715": {
+      "author": "macanderson",
+      "closed_at": "2026-09-22T03:24:03Z",
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3715",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "closes-nothing"
+      ],
+      "merged_at": "2026-09-22T03:24:03Z",
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3715,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "Grant the deploy role ssm:DescribeInstanceInformation",
+      "updated_at": "2026-09-22T03:24:05Z"
+    },
+    "oxagen#3716": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3716",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "closes-nothing",
+        "migration-required"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3716,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "feat(tacho): arm the model gateway and report when a host leaves it",
+      "updated_at": "2026-09-22T04:47:50Z"
+    },
+    "oxagen#3717": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/issues/3717",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3717,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-078"
+      ],
+      "state": "open",
+      "title": "Stella model calls bypass the gateway: no base URL is written at enrollment",
+      "updated_at": "2026-09-22T03:47:55Z"
+    },
+    "oxagen#3718": {
+      "author": "oxagen-connect[bot]",
+      "closed_at": "2026-09-22T05:28:44Z",
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3718",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": "2026-09-22T05:28:44Z",
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3718,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "Change the steering governance mode",
+      "updated_at": "2026-09-22T05:28:46Z"
     },
     "oxagen#4": {
       "author": "macanderson",
@@ -19924,7 +20129,7 @@
     },
     "roadmap#61": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-22T01:02:12Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": false,
@@ -19932,7 +20137,7 @@
       "is_pr": true,
       "kind": null,
       "labels": [],
-      "merged_at": null,
+      "merged_at": "2026-09-22T01:02:11Z",
       "milestone": null,
       "needs_decision": false,
       "number": 61,
@@ -19941,9 +20146,9 @@
       "refs": [],
       "repo": "roadmap",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "Feat/mission control mockup v3",
-      "updated_at": "2026-09-22T00:22:44Z"
+      "updated_at": "2026-09-22T01:02:12Z"
     },
     "roadmap#62": {
       "author": "macanderson",
@@ -19966,7 +20171,53 @@
       "spec_refs": [],
       "state": "open",
       "title": "Agents, Tools, and Steering on one ontology",
-      "updated_at": "2026-09-22T00:47:37Z"
+      "updated_at": "2026-09-22T04:21:21Z"
+    },
+    "roadmap#63": {
+      "author": "macanderson",
+      "closed_at": "2026-09-22T04:17:07Z",
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen-roadmap/pull/63",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": "2026-09-22T04:17:07Z",
+      "milestone": null,
+      "needs_decision": false,
+      "number": 63,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "roadmap",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "The navigation of the agent ontology",
+      "updated_at": "2026-09-22T04:17:21Z"
+    },
+    "roadmap#64": {
+      "author": "macanderson",
+      "closed_at": "2026-09-22T04:53:54Z",
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen-roadmap/pull/64",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": "2026-09-22T04:53:54Z",
+      "milestone": null,
+      "needs_decision": false,
+      "number": 64,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "roadmap",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "The roadmap for the agent ontology, and four things the merge left",
+      "updated_at": "2026-09-22T04:53:54Z"
     },
     "stella#1044": {
       "author": "macanderson",
@@ -36594,9 +36845,19 @@
         }
       ],
       "kind": "surface",
-      "last_merge": "2026-09-22T00:41:23Z",
+      "last_merge": "2026-09-22T03:24:03Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-22T03:24:03Z",
+          "number": 3715,
+          "repo": "oxagen",
+          "title": "Grant the deploy role ssm:DescribeInstanceInformation",
+          "touched": [
+            "apps/app/src/features/agents/actions.ts"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-22T00:41:23Z",
@@ -36696,7 +36957,7 @@
       ],
       "open_issues": 0,
       "page": "apps/app/src/app/[org]/[ws]/agents/[agent]/page.tsx",
-      "refreshed_at": "2026-09-22T00:50:05.433Z",
+      "refreshed_at": "2026-09-22T05:40:19.960Z",
       "shared_page": false
     },
     "agent-source": {
@@ -39149,6 +39410,18 @@
       "refreshed_at": "2026-09-21T22:12:53.518Z",
       "shared_page": true
     },
+    "runtimes": {
+      "closed_issues": 0,
+      "gap_refs": [],
+      "kind": "surface",
+      "last_merge": null,
+      "links": [],
+      "merged_prs": [],
+      "open_issues": 0,
+      "page": null,
+      "refreshed_at": "2026-09-22T05:40:19.960Z",
+      "shared_page": false
+    },
     "signup": {
       "closed_issues": 0,
       "gap_refs": [],
@@ -40391,8 +40664,8 @@
     }
   },
   "last_run": {
-    "at": "2026-09-22T00:50:05.433Z",
-    "calls": 18,
+    "at": "2026-09-22T05:40:19.960Z",
+    "calls": 10,
     "quiet": false
   },
   "milestones": {
@@ -40427,12 +40700,12 @@
     "M2": {
       "built": 4,
       "last_merge": {
-        "merged_at": "2026-09-22T00:41:23Z",
-        "number": 3708,
+        "merged_at": "2026-09-22T03:24:03Z",
+        "number": 3715,
         "repo": "oxagen",
-        "title": "feat(agents): kill switch from the agent page"
+        "title": "Grant the deploy role ssm:DescribeInstanceInformation"
       },
-      "merged_prs": 19,
+      "merged_prs": 20,
       "not_started": 2,
       "open_issues": 4,
       "partial": 2,
@@ -50760,6 +51033,98 @@
       "repo": "oxagen",
       "title": "feat(agents): kill switch from the agent page"
     },
+    "oxagen#3709": {
+      "added": [],
+      "author": "macanderson",
+      "closes": [],
+      "files": [
+        "docs/mission-control/GAP-INVENTORY.md"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3709",
+      "merged_at": "2026-09-22T01:16:41Z",
+      "number": 3709,
+      "refs": [],
+      "repo": "oxagen",
+      "title": "docs(mission-control): re-verify Fleet, Run, Approvals and Agents rows in GAP-INVENTORY"
+    },
+    "oxagen#3711": {
+      "added": [
+        ".cursor/environment.json",
+        ".cursor/scripts/install.sh",
+        ".cursor/scripts/start.sh"
+      ],
+      "author": "macanderson",
+      "closes": [],
+      "files": [
+        ".cursor/environment.json",
+        ".cursor/scripts/install.sh",
+        ".cursor/scripts/start.sh"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3711",
+      "merged_at": "2026-09-22T01:19:59Z",
+      "number": 3711,
+      "refs": [],
+      "repo": "oxagen",
+      "title": "chore(cursor): add Cloud Agent dev environment"
+    },
+    "oxagen#3712": {
+      "added": [
+        ".agent/memory/ci-review/reflections/2026-09-22-migration-gate-host.md"
+      ],
+      "author": "cursor[bot]",
+      "closes": [],
+      "files": [
+        ".agent/memory/ci-review/reflections/2026-09-22-migration-gate-host.md",
+        ".agent/memory/shared/lessons.md",
+        ".github/workflows/pipeline.yml",
+        "infra/tools/run-db-migrations.sh",
+        "infra/tools/tests/render-remote-migration.test.sh"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3712",
+      "merged_at": "2026-09-22T01:12:11Z",
+      "number": 3712,
+      "refs": [],
+      "repo": "oxagen",
+      "title": "Read the Aurora writer host from the parameter the deploy role can get"
+    },
+    "oxagen#3715": {
+      "added": [],
+      "author": "macanderson",
+      "closes": [],
+      "files": [
+        "apps/app/src/features/agents/actions.ts",
+        "infra/stacks-new/ci-deploy/roles.tf",
+        "infra/tools/run-db-migrations.sh",
+        "tools/scripts/env-check.ts"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3715",
+      "merged_at": "2026-09-22T03:24:03Z",
+      "number": 3715,
+      "refs": [],
+      "repo": "oxagen",
+      "title": "Grant the deploy role ssm:DescribeInstanceInformation"
+    },
+    "oxagen#3718": {
+      "added": [
+        ".oxagen/rules/governance.toml"
+      ],
+      "author": "oxagen-connect[bot]",
+      "closes": [],
+      "files": [
+        ".oxagen/rules/governance.toml"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3718",
+      "merged_at": "2026-09-22T05:28:44Z",
+      "number": 3718,
+      "refs": [],
+      "repo": "oxagen",
+      "title": "Change the steering governance mode"
+    },
     "stella#6527": {
       "added": [],
       "author": "dependabot[bot]",
@@ -51362,8 +51727,8 @@
     }
   },
   "since": {
-    "oxagen": "2026-09-22T00:48:53Z",
-    "roadmap": "2026-09-22T00:47:37Z",
-    "stella": "2026-09-22T00:24:46Z"
+    "oxagen": "2026-09-22T05:28:46Z",
+    "roadmap": "2026-09-22T04:53:54Z",
+    "stella": "2026-09-22T05:40:19.960Z"
   }
 }
