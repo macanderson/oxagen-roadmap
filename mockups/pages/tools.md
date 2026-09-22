@@ -23,7 +23,7 @@ The vocabulary is fixed: tool, not capability; toolbelt, not toolset; provider, 
 ## What is on the page
 
 **Header**: eyebrow is the workspace name (“Core platform”), h1 “Tools”, subtext “The registry is the only source of tools an agent can see.”
-Actions: **Import provider** (opens `import`: pull `tools/list`, version every tool, store both schemas; three steps Connect → Review tools/list → Classify and import) · **New tool** (gold; opens the tool wizard) · **Flip a kill switch** (danger; opens `switch`). A tool belongs to a provider, so every route into a provider passes through the Providers tab, a Provider cell on the Tools tab, or a Providers cell on the Toolbelts tab.
+Actions: **Import a provider** (opens `import`: pull `tools/list`, version every tool, store both schemas; three steps Connect → Review tools/list → Classify and import) · **New tool** (opens the tool wizard; gold on Tools and Kill switches, plain where the tab carries its own primary) · **Flip a kill switch** (danger; opens `switch`). A tool belongs to a provider, so every route into a provider passes through the Providers tab, a Provider cell on the Tools tab, or a Providers cell on the Toolbelts tab.
 
 - **Tabs** (`/tools/<tab>`): Tools (N versions, or “N to approve” in approval colour when an observed schema waits) · Toolbelts (N) · Providers (N) · Policy (N) · Kill switches (N on). A tab id that is no longer served falls back to Tools, so an old link never renders an empty page. `#/:org/:ws/tools/servers` is kept as an alias of `#/:org/:ws/tools/providers`.
 
@@ -32,7 +32,7 @@ Actions: **Import provider** (opens `import`: pull `tools/list`, version every t
 - Banner “N awaiting approval: N output schemas were observed, not declared…”, naming the providers that declare no `outputSchema`; **Review** opens `schema`.
 - **Tools** panel. Caption: “Every version imported from every provider. RBAC reaches the version, so a provider shipping a new one does not widen a toolbelt.” Panel header carries the Labels / API names toggle, the badge “N of N shown”, and **Import a provider** (opens `import`).
 - Category chips with counts sit on their own row across the ten categories, with **What the categories mean** beside them, which opens `toolcats`.
-- Table: Tool version · Provider · Category · Hazard · Gate today · Egress · Financial · Schema origin · Digest · Toolbelts · Agents · Calls 30d. The Toolbelts cell lists every belt that carries the version, or a dash when no belt does. A row opens `tool`; the Provider cell is a button that opens that provider's drill-down.
+- Table: Tool version · Provider · Category · Hazard · Gate today · Egress · Financial · Schema origin · Digest · Toolbelts · Agents · Calls 30d. The Toolbelts cell lists every belt that carries the version, or a dash when no belt does, and Agents counts the agents those belts reach. Both are derived: `beltsWithTool` and `agentsWithTool` read the assignment record, so removing a tool from a belt changes the row. A row opens `tool`; the Provider cell is a button that opens that provider's drill-down.
 - The note: “The gate shown is today's: the version's own kill switch, then its provider's, then `pol_v41`. A toolbelt decides which agents are shown the tool; the gate decides whether the call survives. Open a provider on any row to see what it imported and the connection it is reached with.”
 
 ### Toolbelts tab
@@ -95,6 +95,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 - `#/:org/:ws/tools/servers` still resolves. `pTools()` rewrites the tab id to `providers`, so every link written before the rename lands on the Providers tab.
 - A toolbelt is the only edge from the registry to an agent: what a model is shown is the union of the belts assigned to it and nothing else. Assigning a belt is not a permission, and the principal and the policy still decide every call.
 - A belt's availability is derived, never typed: `beltGates` counts each version by the gate it meets today, and `beltAvailability` reads a version behind a kill switch or missing from the registry as unavailable.
+- Every belt and agent count is derived the same way. `beltsWithTool` and `agentsWithTool` give a tool version its Toolbelts and Agents cells, `providerBelts` and `providerAgents` give a provider its own, and the tools fixture carries no count of either. A figure that survives removing a tool from a belt is a defect.
 - Category is a registry attribute, never a policy: only risk, side effect, financial effect, and egress carry a decision by themselves.
 - Until an observed output schema is approved, outputs are validated only for size and type and every run that used them says so in its completeness record.
 - Policy is deterministic, versioned, and tested; activation is a governed action with approval.

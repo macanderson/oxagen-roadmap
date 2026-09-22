@@ -91,7 +91,7 @@
  "Tool-list bloat": {
   "shape": "article",
   "title": "Why a 52-tool belt costs you on every call",
-  "why": "Tool definitions are not free context. Every model call carries the JSON schema of every tool on the belt, and the model reads all of it before it reads the task. On a-intel.core.triage that block is 9,140 tokens, and 34 of the 52 tools were never called in 1,340 runs. The agent was wrapped with each MCP server's full export, which is the default when a wrap grants a server instead of a tool.",
+  "why": "Tool definitions are not free context. Every model call carries the JSON schema of every tool on the belt, and the model reads all of it before it reads the task. On a-intel.core.triage that block is 9,140 tokens, and 34 of the 52 tools were never called in 1,340 runs. The agent was wrapped with each provider's full export, which is the default when a wrap grants a provider instead of a tool.",
   "before": {
    "lang": "yaml",
    "code": "<span class=\"c\"># agents/triage/wrap.yaml — as it stands</span>\n<span class=\"k\">grants</span>:\n  - <span class=\"k\">server</span>: <span class=\"s\">github</span>      <span class=\"c\"># 41 tools · 12 called</span>\n  - <span class=\"k\">server</span>: <span class=\"s\">linear</span>      <span class=\"c\"># 18 tools · 4 called</span>\n  - <span class=\"k\">server</span>: <span class=\"s\">slack</span>       <span class=\"c\"># 14 tools · 2 called</span>"

@@ -260,7 +260,7 @@
    [
     "no_authority",
     "pass",
-    "Declaring a server grants nobody a tool; a belt still does that."
+    "Declaring a provider grants nobody a tool; a belt still does that."
    ],
    [
     "secret_pii_scan",

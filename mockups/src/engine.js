@@ -783,7 +783,7 @@ function gate(g,note){return '<span class="gt gt-'+h(g)+'"'+(note?' title="'+h(n
 function toolGateKind(t){
   var id=t.n+"@"+t.v, killed=false;
   SWITCHES.forEach(function(s){ if(!S.switches[s.id])return;
-    if((s.lvl==="Tool version"&&s.target===id)||(s.lvl==="Tool server"&&s.target===t.s)) killed=true; });
+    if((s.lvl==="Tool version"&&s.target===id)||(s.lvl==="Provider"&&s.target===t.s)) killed=true; });
   if(killed) return "killed";
   if(t.fin!=="none") return "mandate";
   if(t.eff==="irreversible") return "require_approval";
@@ -793,7 +793,7 @@ function toolGate(t){
   var id=t.n+"@"+t.v, k=toolGateKind(t);
   if(k==="killed"){
     var srv=null, tv=null;
-    SWITCHES.forEach(function(s){ if(!S.switches[s.id])return; if(s.lvl==="Tool version"&&s.target===id)tv=s; if(s.lvl==="Tool server"&&s.target===t.s)srv=s; });
+    SWITCHES.forEach(function(s){ if(!S.switches[s.id])return; if(s.lvl==="Tool version"&&s.target===id)tv=s; if(s.lvl==="Provider"&&s.target===t.s)srv=s; });
     return gate("killed",tv?("flipped by "+tv.by+" · "+tv.why):("provider switch is on · "+(srv?srv.why:"")));
   }
   if(k==="mandate") return gate("mandate","financial effect "+t.fin+": a mandate is required, and its own rule decides when a person approves");
@@ -5400,7 +5400,7 @@ function pTools(){
        '<td>'+originBadge(toolOrigin(x))+'</td>'+
        '<td class="mono dim" style="font-size:11px">'+h(toolDigest(x))+'</td>'+
        '<td>'+(tb.length?tb.map(function(b){return '<span class="b b-q" style="font-size:10.5px">'+h(b.name)+'</span>';}).join(""):'<span class="dim">—</span>')+'</td>'+
-       '<td class="num">'+x.belts+'</td><td class="num">'+x.calls30.toLocaleString()+'</td></tr>';}).join("");
+       '<td class="num">'+agentsWithTool(x.n+"@"+x.v).length+'</td><td class="num">'+x.calls30.toLocaleString()+'</td></tr>';}).join("");
     body='<div class="grid">'+
      (props.length?'<div class="banner"><span class="b b-approval" style="flex:none"><span class="d"></span>'+props.length+' awaiting approval</span>'+
       '<div class="grow"><b>'+props.length+' output schema'+(props.length>1?'s were':' was')+' observed, not declared.</b>'+
@@ -5530,8 +5530,10 @@ function pTools(){
   }
   return '<div class="phead"><div class="t"><p class="eyebrow">'+h(w.name)+'</p><h1>Tools</h1>'+
    '<p>The registry is the only source of tools an agent can see.</p></div>'+
-   '<div class="acts"><button class="btn" onclick="openDialog(\'import\')">Import server</button>'+
-   '<button class="btn primary" onclick="wzOpen(\'tool\')">New tool</button>'+
+   '<div class="acts"><button class="btn" onclick="openDialog(\'import\')">Import a provider</button>'+
+   /* One gold action per screen. Toolbelts, Providers and Policy each carry their own primary, so
+      on those tabs the header yields the gold and New tool reads as a plain action. */
+   '<button class="btn'+(t==="toolbelts"||t==="providers"||t==="policy"?'':' primary')+'" onclick="wzOpen(\'tool\')">New tool</button>'+
    '<button class="btn danger" onclick="openDialog(\'switch\')">Flip a kill switch</button></div></div>'+(S.killBanner||"")+tabs+body;
 }
 
@@ -5567,7 +5569,7 @@ function grantsLog(){
    '<div class="tw"><table data-lt="1"><thead><tr><th>Grant</th><th>Tool version</th><th>Agent and run</th><th>Connection</th><th>Scope</th><th>TTL</th><th>State</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
    '<div class="panel-b"><p class="muted" style="margin:0;font-size:12px">TTL defaults to the call’s expected duration plus a margin, never more than one hour. The agent sees the result, never the credential.</p></div></div>';
 }
-/* ---------- Tool servers, connections, mandates and policy versions: open, edit, remove ----------
+/* ---------- Providers, connections, mandates and policy versions: open, edit, remove ----------
    Every row on the Tools page that names a record opens it here. The dialogs write to the
    fixtures in place, so a removal is visible on the table behind them, and each destructive one
    says what stops working before it asks. */
@@ -5650,7 +5652,7 @@ function noSuch(what){return {t:what,w:false,b:'<div class="note">That record is
   f:'<button class="btn" onclick="closeDialog()">Close</button>'};}
 
 DLG_EXT.server=function(id){
-  var sv=serverById(id); if(!sv) return noSuch("Tool server");
+  var sv=serverById(id); if(!sv) return noSuch("Provider");
   var tv=serverTools(sv.id), c=connByServer(sv.id), props=proposals().filter(function(p){return p.s===sv.id;});
   var conn=c
    ? '<dl class="kv"><dt>Connection</dt><dd>'+h(c.name)+' <span class="dim mono" style="font-size:11px">'+h(c.id)+' · '+h(c.kind)+'</span></dd>'+
@@ -5695,7 +5697,7 @@ DLG_EXT.server=function(id){
      ? '<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Tool version</th><th>Hazard</th><th>Gate today</th><th class="num">Agents</th><th class="num">Calls 30d</th></tr></thead><tbody>'+
        tv.map(function(x){return '<tr class="click" onclick="openDialog(\'tool\',\''+x.n+'@'+x.v+'\')"><td class="mono" style="font-size:11.5px">'+h(x.n)+'@'+h(x.v)+'</td>'+
         '<td>'+hazard(x.risk,x.eff)+'</td><td>'+toolGate(x)+'</td>'+
-        '<td class="num">'+x.belts+'</td><td class="num">'+x.calls30.toLocaleString()+'</td></tr>';}).join("")+
+        '<td class="num">'+agentsWithTool(x.n+"@"+x.v).length+'</td><td class="num">'+x.calls30.toLocaleString()+'</td></tr>';}).join("")+
        '</tbody></table></div>'+
        '<p class="muted" style="font-size:12px;margin:8px 0 0">'+tv.length+' of the '+sv.versions+' versions this provider has shipped are in the registry. Re-import to pull the rest.</p>'
      : '<div class="note">Nothing from this provider is in the registry yet. Re-import to pull its tool list.</div>'),
@@ -5771,11 +5773,11 @@ function serverSave(id){
   closeDialog(); render(); act("Saved. "+s.system+" is reached at "+s.url+" from the next call.");
 }
 DLG_EXT.serverdel=function(id){
-  var s=serverById(id); if(!s) return noSuch("Tool server");
-  var tv=serverTools(s.id), belts=tv.reduce(function(n,x){return n+x.belts;},0);
+  var s=serverById(id); if(!s) return noSuch("Provider");
+  var tv=serverTools(s.id), belts=providerBelts(s.id).length;
   return {t:"Remove "+s.name+"?",w:false,
    b:'<div class="warn"><b>'+s.versions+' tool versions leave the registry.</b> '+
-     (belts?belts+' belt entries lose their tool and the calls they cover are denied as <span class="mono">unknown_tool</span> from the next call boundary.':'No belt reaches it, so nothing in flight is denied.')+'</div>'+
+     (belts?belts+(belts>1?' toolbelts lose a tool and the calls they cover':' toolbelt loses a tool and the calls it covers')+' are denied as <span class="mono">unknown_tool</span> from the next call boundary.':'No belt reaches it, so nothing in flight is denied.')+'</div>'+
     '<div class="note">The registry rows are kept for replay: a run that already called this server still cites the version it called. Re-importing the same endpoint restores it.</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
     '<button class="btn danger" onclick="serverDelete(\''+s.id+'\')">Remove it</button>'};
@@ -5794,7 +5796,7 @@ DLG_EXT.conn=function(id){
    b:(due?'<div class="warn"><b>The review date passed on '+h(c.next)+'.</b> It has issued '+c.grants30.toLocaleString()+' grants since. '+
       'Marking it reviewed sets the next date 90 days out and is recorded with your name on it.</div>':'')+
     '<dl class="kv"><dt>Owner</dt><dd>'+h(c.owner)+(fin?' · a finance role, required on a financial connection':'')+'</dd>'+
-    '<dt>Servers</dt><dd class="mono">'+h(c.servers)+'</dd>'+
+    '<dt>Providers</dt><dd class="mono">'+h(c.servers)+'</dd>'+
     '<dt>Downscope</dt><dd class="mono">'+h(c.downscope)+'</dd>'+
     '<dt>What the broker mints</dt><dd>'+h(brokerMints(c.downscope))+'</dd>'+
     '<dt>Grants 30d</dt><dd>'+c.grants30.toLocaleString()+'</dd>'+
@@ -5966,11 +5968,11 @@ DLG_EXT.import=function(arg){
   var picked=impPicked();
   var steps='<div class="row imp-steps" style="gap:8px;margin-bottom:14px;font-size:12px">'+[[1,"Connect"],[2,"Review tools/list"],[3,"Classify and import"]].map(function(x){
     return '<span class="b '+(x[0]===step?"b-approval":x[0]<step?"b-allowed":"b-q")+'"'+(x[0]===step?' aria-current="step"':'')+'>'+(x[0]<step?"✓":x[0])+' · '+x[1]+'</span>';}).join('<span class="dim">→</span>')+'</div>';
-  if(step===1) return {t:"Import tools from an MCP server",s:"The registry is the only source of tools an agent can see. Nothing reaches a belt until it is here.",w:false,
-   b:steps+'<div class="field"><label for="imp-url">Server URL</label><input id="imp-url" value="https://mcp.confluence.a-intel.internal/mcp"></div>'+
+  if(step===1) return {t:"Import tools from a provider",s:"The registry is the only source of tools an agent can see. Nothing reaches a belt until it is here.",w:false,
+   b:steps+'<div class="field"><label for="imp-url">Endpoint URL</label><input id="imp-url" value="https://mcp.confluence.a-intel.internal/mcp"></div>'+
     '<div class="field"><label for="imp-tr">Transport</label><select id="imp-tr"><option>streamable-http</option><option>sse</option><option>stdio</option></select></div>'+
     '<div class="field"><label for="imp-conn">Connection</label><select id="imp-conn"><option>Create one after import</option>'+CONNECTIONS.map(function(c){return '<option>'+h(c.id+' · '+c.name)+'</option>';}).join("")+'</select></div>'+
-    '<div class="note">Oxagen calls <span class="mono">tools/list</span>, versions every tool it finds, and stores both schemas. Where a server declares no <span class="mono">outputSchema</span>, the gateway records observed outputs and files a registry proposal for an admin to approve.</div>',
+    '<div class="note">Oxagen calls <span class="mono">tools/list</span>, versions every tool it finds, and stores both schemas. Where a provider declares no <span class="mono">outputSchema</span>, the gateway records observed outputs and files a registry proposal for an admin to approve.</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="S.dlgArg=2;render()">Connect</button>'};
   if(step===2) return {t:"Review tools/list",s:IMPORT_TOOLS.length+" tools returned by mcp.confluence.a-intel.internal · protocol 2025-06-18",w:true,
    b:steps+IMPORT_TOOLS.map(function(t){
@@ -8126,7 +8128,7 @@ function spendDrill(dr){
   var eyebrow, sub, a=null;
   if(kind==="operator"){var p=PEOPLE[E.id]; eyebrow=kindLabel+' · '+p.role; sub=r.agents+' agents · '+r.runs.toLocaleString()+' runs · '+SPEND.month;}
   else if(kind==="agent"){a=AGENTS.filter(function(x){return x.key===E.id;})[0]; eyebrow=kindLabel+(a?' · '+a.harnessLabel+' · operator '+PEOPLE[a.operator].name:''); sub=r.runs.toLocaleString()+' runs · '+SPEND.month;}
-  else {eyebrow=kindLabel+' · server '+r.s; sub=r.calls.toLocaleString()+' calls across '+r.runs.toLocaleString()+' runs · '+SPEND.month+(r.note&&r.note!=="—"?' · '+r.note:'');}
+  else {eyebrow=kindLabel+' · provider '+r.s; sub=r.calls.toLocaleString()+' calls across '+r.runs.toLocaleString()+' runs · '+SPEND.month+(r.note&&r.note!=="—"?' · '+r.note:'');}
 
   var head='<div class="drill-bar"><a href="'+spendHref(kind)+'" onclick="event.preventDefault();spendGo(\''+kind+'\')">← '+listLabel+'</a><span class="dim">/</span><span class="mono">'+h(E.name)+'</span></div>'+
    '<div class="phead drill-head" style="margin-bottom:14px"><div class="t"><p class="eyebrow">'+h(eyebrow)+'</p><h2'+(kind==="operator"?'':' class="mono"')+'>'+h(E.name)+'</h2><p>'+h(sub)+'</p></div>'+
@@ -8676,7 +8678,7 @@ var RECEIPTS=[
   what:[["Tool version","notion__append_block@2",1],["Schema digest","sha256:5b1290aa04e7c3d1",1],["Input digest","sha256:9e33abc027f14d86",1],["Input","attested by the client · size and type checked only"]],
   authority:[["Decision","observed — Oxagen did not decide this call"],["Policy version","n/a at observe tier"],["Rules fired","none — no gate ran"],["Grants used","not consulted"],["Delegation ceiling","not evaluated"],["Mandate","n/a"],["Approval","n/a"],["Taint sources","not computed"]],
   credential:[["Credential grant","none — the agent used its own credential"],["Connection","not brokered"],["Minted","—"],["TTL","—"],["Provider token id","—"],["Agent saw","whatever it held. Oxagen cannot say."]],
-  effectRows:[["Dispatched","reported by the client at 2026-09-10 13:02:44.207Z"],["Tool server","notion (unverified)"],["Response digest","sha256:1f770233bd9a4c08 (client-attested)",1],["Output validation","size and type only"],["External effect id","blk_9a71… (client-attested)",1],["Idempotency key","not enforced"]],
+  effectRows:[["Dispatched","reported by the client at 2026-09-10 13:02:44.207Z"],["Provider","notion (unverified)"],["Response digest","sha256:1f770233bd9a4c08 (client-attested)",1],["Output validation","size and type only"],["External effect id","blk_9a71… (client-attested)",1],["Idempotency key","not enforced"]],
   integrity:[["Frame hash","sha256:aa77110c2e5d93b4",1],["Chain position","4 of 9 · verified"],["Gateway signature","ed25519 · "+ORG.attester+" · signs the record, not the call",1],["Tier","observe · recorded only. This receipt can never be shown as decided by Oxagen."]]}
 ];
 
@@ -10545,16 +10547,11 @@ function dialog(){
      '<div class="field"><label for="nw-ret">Retention mode</label><select id="nw-ret"><option value="content_exact">content_exact — keep prompts and tool bodies in full</option><option value="digest_only">digest_only — digests only, lowers the replay grade</option></select></div>'+
      '<div class="note">Until the GitHub App binds the main repo the workspace is provisional for 14 days: runs record and spend counts, but steering, records and agent definitions stay off.</div>',
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="wsCreate()">Create</button>'},
-   import:{t:"Import an MCP server",w:false,b:
-     '<div class="field"><label>Endpoint</label><input value="https://mcp.internal.a-intel.example/sse" aria-label="Endpoint"></div>'+
-     '<div class="field"><label>Connection</label><select aria-label="Connection"><option>con_01K2A7 · GitHub App installation</option><option>Create a new connection</option></select></div>'+
-     '<div class="note">Schemas are imported from <span class="mono">tools/list</span>. Where a server declares no <span class="mono">outputSchema</span>, the gateway records observed outputs, infers one, and files it as a registry proposal an admin approves. Until approval the output is validated only for size and type, and the run’s completeness record says so.</div>',
-     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Imported 11 tool versions. 3 have no declared output schema and will be observed.\')">Import</button>'},
    schema:schemaDlg(),
    toolcats:{t:"Tool categories",w:true,b:toolCatsBody(),f:'<span class="grow" style="font-size:12.5px;color:var(--muted)">Category is a registry attribute, not a policy: a rule may reference it, but only risk, side effect, financial effect and egress carry a decision by themselves.</span><button class="btn" onclick="closeDialog()">Close</button>'},
    tool:toolDlg(),
    connection:{t:"Add a connection",w:false,
-    s:"The customer’s credential to a tool server. It is tested before it is saved, and it is never readable afterwards.",
+    s:"The customer’s credential to a provider. It is tested before it is saved, and it is never readable afterwards.",
     b:'<div class="fields">'+
      '<div class="field"><label for="c-name">Name</label><input id="c-name" value="Datadog API key · platform" autofocus></div>'+
      '<div class="field"><label for="c-kind">Kind</label><select id="c-kind"><option>oauth</option><option selected>api_key</option><option>cloud_role</option><option>github_app</option></select></div>'+
@@ -10671,7 +10668,7 @@ function schemaDlg(){
    b:'<p class="eyebrow q"><span class="mono">'+h(t.n)+'@'+h(t.v)+'</span> · the slack server declares no outputSchema for this tool</p>'+
      '<div class="note" style="margin-bottom:14px"><b>What has been happening until now.</b> The gateway recorded this tool’s outputs and validated them only for size and type. '+
      'Every run that used it says so in its completeness record. Approving the inferred schema turns strict validation on from the next call.</div>'+
-     '<dl class="kv"><dt>Observations</dt><dd><span class="num">'+t.calls30.toLocaleString()+'</span> responses over 30 days, from '+t.belts+' agents</dd>'+
+     '<dl class="kv"><dt>Observations</dt><dd><span class="num">'+t.calls30.toLocaleString()+'</span> responses over 30 days, from '+agentsWithTool(t.n+"@"+t.v).length+' agents</dd>'+
      '<dt>Inferred from</dt><dd>the intersection of every observation · 0 outliers discarded</dd>'+
      '<dt>Digest on approval</dt><dd class="mono">sha256:'+t.n.length.toString(16)+'c4f9…7b02</dd></dl>'+
      codePair([{lab:"Inferred output schema",sp:"what approval enforces",code:OBSERVED_SCHEMAS[t.n]||"{}"},
@@ -10700,7 +10697,7 @@ function toolDlg(){
      pj("body",'{ '+pj("type",ps("string"))+', '+pj("maxLength","65536")+' }')+',\n    '+
      pj("draft",'{ '+pj("type",ps("boolean"))+' }')+'\n  }\n}';
   return {t:t.n,w:true,
-   b:'<div style="margin-bottom:12px">'+toolCell(t.n+"@"+t.v,{sz:"lg",sub:"server "+t.s})+'</div>'+
+   b:'<div style="margin-bottom:12px">'+toolCell(t.n+"@"+t.v,{sz:"lg",sub:"provider "+t.s})+'</div>'+
      '<div class="row" style="margin-bottom:6px;gap:10px">'+catBadge(toolMeta(t.n).cat)+hazard(t.risk,t.eff)+toolGate(t)+'<span class="b b-q">egress '+h(t.eg)+'</span>'+finBadge(t.fin)+'</div>'+
      '<p class="muted" style="font-size:12px;margin:0 0 14px">'+h(TCAT[toolMeta(t.n).cat].s)+'</p>'+
      '<dl class="kv"><dt>Schema digest</dt><dd class="mono">'+h(toolDigest(t))+'</dd>'+
@@ -10714,7 +10711,7 @@ function toolDlg(){
      '<p class="eyebrow q" style="margin:14px 0 8px">Input schema</p><pre>'+schema+'</pre>'+
      '<p class="muted" style="font-size:12px;margin:12px 0 0">Validation is strict in both directions: no additional properties, formats enforced, size caps. '+
      'A failure is <span class="mono">schema_violation</span> and the call is denied. The canonical input digest is computed here and is the call’s identity for idempotency, approval binding, and the receipt.</p>',
-   f:'<span style="margin-right:auto;font-size:12.5px;color:var(--muted)">On <b class="num">'+t.belts+'</b> belts · <b class="num">'+t.calls30.toLocaleString()+'</b> calls in 30 days</span>'+
+   f:'<span style="margin-right:auto;font-size:12.5px;color:var(--muted)">On <b class="num">'+beltsWithTool(t.n+"@"+t.v).length+'</b> belts ·<b class="num">'+t.calls30.toLocaleString()+'</b> calls in 30 days</span>'+
      '<button class="btn" onclick="closeDialog()">Close</button>'};
 }
 
@@ -12568,7 +12565,7 @@ S.wz=null;
 var CREATE={
  agent:{l:"Agent",d:"A principal that does work here, with a definition, a belt and a budget.",i:"agents",
    file:".oxagen/agents/&lt;slug&gt;.toml",need:"agent.write"},
- tool:{l:"Tool",d:"A capability an agent can be granted. Imported from an MCP server, or built here.",i:"tools",
+ tool:{l:"Tool",d:"A capability an agent can be granted. Imported from a provider, or built here.",i:"tools",
    file:".oxagen/tools/&lt;name&gt;.toml",need:"tools.admin"},
  skill:{l:"Skill",d:"Procedure written down: a file, a version and a digest.",i:"skills",
    file:".oxagen/skills/&lt;name&gt;/SKILL.md",need:"skills.admin"},
@@ -13183,7 +13180,7 @@ function wzTool(){
        '<span class="wz-opt-kv"><span><i>Publisher</i>'+h(s.publisher)+'</span><span><i>Transport</i><span class="mono">'+h(s.transport)+'</span></span>'+
         '<span><i>Credential</i><span class="mono">'+h(s.cred)+'</span></span><span><i>Downscope</i><span class="mono">'+h(s.downscope)+'</span></span></span>'+
        '</button>';})():
-      '<div class="wz-opt off"><span class="wz-opt-h"><b>Import an MCP server</b><span class="b b-q">nothing matched</span></span>'+
+      '<div class="wz-opt off"><span class="wz-opt-h"><b>Import a provider</b><span class="b b-q">nothing matched</span></span>'+
       '<span class="d">No server in the catalogue answers this description. That is the case where writing one is the right answer.</span></div>';
     var build='<button class="wz-opt'+(z.path==="build"?" on":"")+'" onclick="wzSetR(\'path\',\'build\')" aria-pressed="'+(z.path==="build")+'">'+
      '<span class="wz-opt-h"><b>Build it</b>'+(rec==="build"?'<span class="b b-allowed">recommended</span>':'')+'</span>'+
