@@ -3,9 +3,9 @@
   "thesis": "The mockups are the spec. This page measures the distance between them and the build, carries the witness and the definition of done that make a run provable, and lists the decisions that unblock the work. GitHub status is live. Everything else is editable here, by you or by the assistant.",
   "repos": {
     "owner": "macanderson",
-    "roadmap": "roadmap",
+    "roadmap": "oxagen-roadmap",
     "tracked": [
-      "roadmap",
+      "oxagen-roadmap",
       "oxagen",
       "stella"
     ]

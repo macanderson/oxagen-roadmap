@@ -2245,9 +2245,9 @@
       "title": "P0 · app+ops/CI · Two files from an already-merged PR export test-only helpers and fail every PR's required checks job"
     }
   },
-  "generated_at": "2026-09-22T05:40:19.960Z",
+  "generated_at": "2026-09-22T06:33:16.871Z",
   "heads": {
-    "oxagen": "978e4c3785b399e44c46ef2579f8806472bcd736"
+    "oxagen": "ae2d2c666eab723792c6c1c9b6eb73b20637cc7c"
   },
   "issues": {
     "oxagen#1": {
@@ -5232,7 +5232,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "P2 · platform/Tacho · Let the connection test reach its own time limit",
-      "updated_at": "2026-09-20T02:25:34Z"
+      "updated_at": "2026-09-22T06:14:48Z"
     },
     "oxagen#3213": {
       "author": "macanderson",
@@ -6937,7 +6937,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "P2 · platform/Tacho · Accept delivered commands that include supported extra fields",
-      "updated_at": "2026-09-20T02:25:22Z"
+      "updated_at": "2026-09-22T06:16:10Z"
     },
     "oxagen#3294": {
       "author": "macanderson",
@@ -8063,7 +8063,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "P2 · kernel/Steering · Report guidance checks honestly when a read fails",
-      "updated_at": "2026-09-20T22:38:01Z"
+      "updated_at": "2026-09-22T06:15:48Z"
     },
     "oxagen#3329": {
       "author": "macanderson",
@@ -13954,7 +13954,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "P1 · kernel/Steering · Keep published guidance current and safe to retry",
-      "updated_at": "2026-09-20T02:38:04Z"
+      "updated_at": "2026-09-22T06:24:39Z"
     },
     "oxagen#3535": {
       "author": "macanderson",
@@ -17553,7 +17553,7 @@
     },
     "oxagen#3664": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-22T05:50:00Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": false,
@@ -17579,9 +17579,9 @@
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "P2 · evidence/Tacho · File rollup drops identity for rows written before this deploy (residue #3650)",
-      "updated_at": "2026-09-22T03:53:08Z"
+      "updated_at": "2026-09-22T06:29:36Z"
     },
     "oxagen#3665": {
       "author": "macanderson",
@@ -17744,7 +17744,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "P1 · kernel/Skills · Skill search preview exposes named withheld skills over MCP (residue #3630)",
-      "updated_at": "2026-09-21T10:20:18Z"
+      "updated_at": "2026-09-22T06:23:47Z"
     },
     "oxagen#3670": {
       "author": "macanderson",
@@ -17958,11 +17958,12 @@
       ],
       "repo": "oxagen",
       "spec_refs": [
-        "docs/specs/tacho/"
+        "docs/specs/tacho/",
+        "docs/specs/tacho/spec.md"
       ],
       "state": "open",
       "title": "P2 · evidence/Tacho · PR #3628 follow-ups (residue #3628)",
-      "updated_at": "2026-09-21T10:20:27Z"
+      "updated_at": "2026-09-22T06:24:13Z"
     },
     "oxagen#3677": {
       "author": "macanderson",
@@ -18829,7 +18830,7 @@
     },
     "oxagen#3707": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-22T05:49:58Z",
       "closes": [
         3664
       ],
@@ -18839,7 +18840,7 @@
       "is_pr": true,
       "kind": null,
       "labels": [],
-      "merged_at": null,
+      "merged_at": "2026-09-22T05:49:58Z",
       "milestone": null,
       "needs_decision": false,
       "number": 3707,
@@ -18848,9 +18849,9 @@
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "fix: enrich a relative file row when a later observation arrives",
-      "updated_at": "2026-09-22T03:53:38Z"
+      "updated_at": "2026-09-22T06:29:02Z"
     },
     "oxagen#3708": {
       "author": "macanderson",
@@ -18936,7 +18937,7 @@
       ],
       "state": "open",
       "title": "feat(tacho): compile an agent's mandate into the steering bundle's permissions and budget",
-      "updated_at": "2026-09-22T01:18:58Z"
+      "updated_at": "2026-09-22T06:28:51Z"
     },
     "oxagen#3711": {
       "author": "macanderson",
@@ -18991,7 +18992,7 @@
     },
     "oxagen#3713": {
       "author": "cursor[bot]",
-      "closed_at": null,
+      "closed_at": "2026-09-22T05:51:19Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": false,
@@ -19001,7 +19002,7 @@
       "labels": [
         "closes-nothing"
       ],
-      "merged_at": null,
+      "merged_at": "2026-09-22T05:51:19Z",
       "milestone": null,
       "needs_decision": false,
       "number": 3713,
@@ -19010,13 +19011,13 @@
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "fix(ci): do not treat a denied SSM lookup as an unregistered node",
-      "updated_at": "2026-09-22T01:37:21Z"
+      "updated_at": "2026-09-22T05:51:58Z"
     },
     "oxagen#3714": {
       "author": "cursor[bot]",
-      "closed_at": null,
+      "closed_at": "2026-09-22T05:51:32Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": false,
@@ -19035,9 +19036,9 @@
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "fix: name the Postgres apply path that can reach Aurora",
-      "updated_at": "2026-09-22T01:48:16Z"
+      "updated_at": "2026-09-22T05:51:32Z"
     },
     "oxagen#3715": {
       "author": "macanderson",
@@ -19069,7 +19070,7 @@
       "closed_at": null,
       "closes": [],
       "decision_question": null,
-      "has_spec_backing": false,
+      "has_spec_backing": true,
       "html_url": "https://github.com/macanderson/oxagen/pull/3716",
       "is_pr": true,
       "kind": null,
@@ -19085,10 +19086,12 @@
       "priority": null,
       "refs": [],
       "repo": "oxagen",
-      "spec_refs": [],
+      "spec_refs": [
+        "ADR-110"
+      ],
       "state": "open",
       "title": "feat(tacho): arm the model gateway and report when a host leaves it",
-      "updated_at": "2026-09-22T04:47:50Z"
+      "updated_at": "2026-09-22T06:30:59Z"
     },
     "oxagen#3717": {
       "author": "macanderson",
@@ -19139,6 +19142,203 @@
       "state": "closed",
       "title": "Change the steering governance mode",
       "updated_at": "2026-09-22T05:28:46Z"
+    },
+    "oxagen#3719": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/issues/3719",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3719,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Queued · evidence/Tacho · Two callers still seal a frame before the WAL write that can lose it",
+      "updated_at": "2026-09-22T05:56:54Z"
+    },
+    "oxagen#3720": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/issues/3720",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3720,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Queued · platform/Gateway · A model credential stored before the address guard can still hold a password",
+      "updated_at": "2026-09-22T05:57:10Z"
+    },
+    "oxagen#3721": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/issues/3721",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3721,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Queued · billing/Spend · The run cost rollup cannot price the server tool requests it now observes",
+      "updated_at": "2026-09-22T05:57:28Z"
+    },
+    "oxagen#3722": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/issues/3722",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3722,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [
+        "docs/specs/tacho/spec.md"
+      ],
+      "state": "open",
+      "title": "Queued · evidence/Tacho · A session whose batch never ships has no size or age bound on disk",
+      "updated_at": "2026-09-22T05:57:47Z"
+    },
+    "oxagen#3723": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [
+        3212,
+        3293,
+        3328,
+        3534,
+        3669,
+        3676
+      ],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3723",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "migration-required"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3723,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        3694
+      ],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-138",
+        "ADR-139",
+        "ADR-140",
+        "ADR-141"
+      ],
+      "state": "open",
+      "title": "fix: the top 25 defects, weighted to run recording, the gateway, and steering",
+      "updated_at": "2026-09-22T06:25:41Z"
+    },
+    "oxagen#3724": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/issues/3724",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3724,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-138",
+        "docs/specs/gateway/spec.md"
+      ],
+      "state": "open",
+      "title": "Queued · evidence/Fleet · A host's credential basis reaches the control plane and is dropped on the floor",
+      "updated_at": "2026-09-22T06:03:07Z"
+    },
+    "oxagen#3725": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3725",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3725,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        3299
+      ],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-138",
+        "ADR-094"
+      ],
+      "state": "open",
+      "title": "tacho: the gateway brokers the vendor credential and the harness holds a run token (ADR-138)",
+      "updated_at": "2026-09-22T06:28:32Z"
     },
     "oxagen#4": {
       "author": "macanderson",
@@ -19752,6 +19952,54 @@
       "state": "closed",
       "title": "Mobile-first frontend review: thumb navigation, touch targets, responsive fixes + Terracotta theme retune",
       "updated_at": "2026-09-20T22:16:41Z"
+    },
+    "oxagen-roadmap#64": {
+      "author": "macanderson",
+      "closed_at": "2026-09-22T04:53:54Z",
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen-roadmap/pull/64",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": "2026-09-22T04:53:54Z",
+      "milestone": null,
+      "needs_decision": false,
+      "number": 64,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen-roadmap",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "The roadmap for the agent ontology, and four things the merge left",
+      "updated_at": "2026-09-22T04:53:54Z"
+    },
+    "oxagen-roadmap#65": {
+      "author": "macanderson",
+      "closed_at": "2026-09-22T06:20:31Z",
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen-roadmap/pull/65",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": "2026-09-22T06:20:31Z",
+      "milestone": null,
+      "needs_decision": false,
+      "number": 65,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen-roadmap",
+      "spec_refs": [
+        "ADR-138"
+      ],
+      "state": "closed",
+      "title": "Record the gateway credential seam in the spec and the plan",
+      "updated_at": "2026-09-22T06:20:32Z"
     },
     "roadmap#39": {
       "author": "macanderson",
@@ -38524,23 +38772,14 @@
     },
     "record": {
       "built_status": "partial",
-      "closed_issues": 1,
+      "closed_issues": 0,
       "gap_refs": [],
       "kind": "surface",
       "last_merge": "2026-09-21T12:35:24Z",
-      "links": [
-        {
-          "number": 3395,
-          "repo": "oxagen",
-          "state": "closed",
-          "title": "P0 · app/Steering · Add a page for one published guidance record"
-        }
-      ],
+      "links": [],
       "merged_prs": [
         {
-          "closes": [
-            3395
-          ],
+          "closes": [],
           "merged_at": "2026-09-21T12:35:24Z",
           "number": 3622,
           "repo": "oxagen",
@@ -38564,7 +38803,7 @@
       "open_issues": 0,
       "page": "apps/app/src/app/[org]/[ws]/steering/records/[lineage]/page.tsx",
       "reason": "page exists: apps/app/src/app/[org]/[ws]/steering/records/[lineage]/page.tsx",
-      "refreshed_at": "2026-09-21T13:05:20.786Z",
+      "refreshed_at": "2026-09-22T06:33:16.871Z",
       "shared_page": false
     },
     "register-name": {
@@ -40664,8 +40903,8 @@
     }
   },
   "last_run": {
-    "at": "2026-09-22T05:40:19.960Z",
-    "calls": 10,
+    "at": "2026-09-22T06:33:16.871Z",
+    "calls": 7,
     "quiet": false
   },
   "milestones": {
@@ -51008,6 +51247,24 @@
       "repo": "oxagen",
       "title": "docs(audit): model gateway wired-vs-armed audit"
     },
+    "oxagen#3707": {
+      "added": [],
+      "author": "macanderson",
+      "closes": [
+        3664
+      ],
+      "files": [
+        "packages/handlers/src/lib/file-facts-rollup.pg.test.ts",
+        "packages/handlers/src/lib/file-facts-rollup.ts"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3707",
+      "merged_at": "2026-09-22T05:49:58Z",
+      "number": 3707,
+      "refs": [],
+      "repo": "oxagen",
+      "title": "fix: enrich a relative file row when a later observation arrives"
+    },
     "oxagen#3708": {
       "added": [
         "apps/app/src/features/agents/kill-switch.test.tsx",
@@ -51089,6 +51346,29 @@
       "refs": [],
       "repo": "oxagen",
       "title": "Read the Aurora writer host from the parameter the deploy role can get"
+    },
+    "oxagen#3713": {
+      "added": [
+        ".agent/memory/ci-review/reflections/2026-09-22-pr3713-env-check.md"
+      ],
+      "author": "cursor[bot]",
+      "closes": [],
+      "files": [
+        ".agent/memory/ci-review/reflections/2026-09-22-pr3713-env-check.md",
+        ".agent/memory/shared/lessons.md",
+        "infra/stacks-new/ci-deploy/roles.tf",
+        "infra/tools/run-db-migrations.sh",
+        "infra/tools/tests/render-remote-migration.test.sh",
+        "tools/scripts/env-check.test.ts",
+        "tools/scripts/env-check.ts"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3713",
+      "merged_at": "2026-09-22T05:51:19Z",
+      "number": 3713,
+      "refs": [],
+      "repo": "oxagen",
+      "title": "fix(ci): do not treat a denied SSM lookup as an unregistered node"
     },
     "oxagen#3715": {
       "added": [],
@@ -51727,8 +52007,8 @@
     }
   },
   "since": {
-    "oxagen": "2026-09-22T05:28:46Z",
-    "roadmap": "2026-09-22T04:53:54Z",
-    "stella": "2026-09-22T05:40:19.960Z"
+    "oxagen": "2026-09-22T06:30:59Z",
+    "oxagen-roadmap": "2026-09-22T06:20:32Z",
+    "stella": "2026-09-22T06:33:16.871Z"
   }
 }
