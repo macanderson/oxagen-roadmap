@@ -2356,9 +2356,9 @@
       "title": "P0 · app+ops/CI · Two files from an already-merged PR export test-only helpers and fail every PR's required checks job"
     }
   },
-  "generated_at": "2026-09-22T21:43:59.864Z",
+  "generated_at": "2026-09-22T23:50:54.893Z",
   "heads": {
-    "oxagen": "b3046e4d762564214b4d81484f329c72a0690fef"
+    "oxagen": "03b47a1ebe70d617e7c7c8ce19c3fcdb9d0dc085"
   },
   "issues": {
     "oxagen#1": {
@@ -19616,8 +19616,10 @@
       "is_pr": true,
       "kind": null,
       "labels": [
+        "no-issue",
         "closes-nothing",
-        "migration-required"
+        "migration-required",
+        "schema-change"
       ],
       "merged_at": null,
       "milestone": null,
@@ -19632,7 +19634,7 @@
       ],
       "state": "open",
       "title": "feat(spend): cost-center chargeback on Spend",
-      "updated_at": "2026-09-22T20:52:59Z"
+      "updated_at": "2026-09-22T23:42:52Z"
     },
     "oxagen#3733": {
       "author": "macanderson",
@@ -19698,8 +19700,10 @@
       "is_pr": true,
       "kind": null,
       "labels": [
+        "no-issue",
         "closes-nothing",
-        "migration-required"
+        "migration-required",
+        "schema-change"
       ],
       "merged_at": null,
       "milestone": null,
@@ -19708,7 +19712,8 @@
       "pillar": null,
       "priority": null,
       "refs": [
-        3734
+        3734,
+        3740
       ],
       "repo": "oxagen",
       "spec_refs": [
@@ -19716,7 +19721,7 @@
       ],
       "state": "open",
       "title": "feat(auth): enterprise SSO over OIDC and SAML with IdP group-to-role mapping",
-      "updated_at": "2026-09-22T20:48:09Z"
+      "updated_at": "2026-09-22T23:43:50Z"
     },
     "oxagen#3736": {
       "author": "oxagen-connect[bot]",
@@ -19728,7 +19733,8 @@
       "is_pr": true,
       "kind": null,
       "labels": [
-        "no-issue"
+        "no-issue",
+        "closes-nothing"
       ],
       "merged_at": null,
       "milestone": null,
@@ -19741,7 +19747,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "Context PR: ctx.product.do-not-build-typecheck",
-      "updated_at": "2026-09-22T20:16:12Z"
+      "updated_at": "2026-09-22T23:40:09Z"
     },
     "oxagen#3737": {
       "author": "macanderson",
@@ -19765,8 +19771,161 @@
       "repo": "oxagen",
       "spec_refs": [],
       "state": "open",
-      "title": "Queued · data/Migrations · usage_outbox names its FK differently from Drizzle and leaves its grant unguarded",
-      "updated_at": "2026-09-22T20:40:29Z"
+      "title": "Queued · data/Migrations · usage_outbox cannot be swept and names its FK differently from Drizzle",
+      "updated_at": "2026-09-22T23:27:33Z"
+    },
+    "oxagen#3738": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/issues/3738",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3738,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Queued · ops/Deploy · the deploy role can run any shell as root on the production node",
+      "updated_at": "2026-09-22T22:13:19Z"
+    },
+    "oxagen#3739": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3739",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "no-issue",
+        "closes-nothing"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3739,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-131"
+      ],
+      "state": "open",
+      "title": "Review of the last 100 commits: three P1s, six P2s, and the residue that could ride",
+      "updated_at": "2026-09-22T23:42:52Z"
+    },
+    "oxagen#3740": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/issues/3740",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3740,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-142"
+      ],
+      "state": "open",
+      "title": "Queued · auth/API · SSO lets an unverified claim block a domain, skips API keys under Require SSO, and cannot rotate its key (residue #3735)",
+      "updated_at": "2026-09-22T23:31:39Z"
+    },
+    "oxagen#3741": {
+      "author": "oxagen-connect[bot]",
+      "closed_at": "2026-09-22T23:33:43Z",
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3741",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": "2026-09-22T23:33:43Z",
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3741,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "Agent: budget-verify-2",
+      "updated_at": "2026-09-22T23:34:30Z"
+    },
+    "oxagen#3742": {
+      "author": "oxagen-connect[bot]",
+      "closed_at": "2026-09-22T23:35:55Z",
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3742",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": "2026-09-22T23:35:55Z",
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3742,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "Agent: budget-verify-2 (cache version for live budget-refusal test)",
+      "updated_at": "2026-09-22T23:35:57Z"
+    },
+    "oxagen#3743": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/issues/3743",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3743,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-057"
+      ],
+      "state": "open",
+      "title": "Queued · surfaces/Tacho · Committing an agent's budget through the definition-in-git flow never reaches the field the proxy reads",
+      "updated_at": "2026-09-22T23:42:32Z"
     },
     "oxagen#4": {
       "author": "macanderson",
@@ -36180,7 +36339,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "main is red: prose fails on the merged tree",
-      "updated_at": "2026-09-22T12:41:32Z"
+      "updated_at": "2026-09-22T23:43:28Z"
     },
     "stella#6549": {
       "author": "github-actions[bot]",
@@ -36192,7 +36351,8 @@
       "is_pr": true,
       "kind": null,
       "labels": [
-        "no-issue"
+        "no-issue",
+        "closes-nothing"
       ],
       "merged_at": null,
       "milestone": null,
@@ -36205,7 +36365,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "chore(release): sync versions to 0.9.434 [skip release]",
-      "updated_at": "2026-09-22T00:06:17Z"
+      "updated_at": "2026-09-22T23:41:41Z"
     },
     "stella#6550": {
       "author": "cursor[bot]",
@@ -36217,6 +36377,8 @@
       "is_pr": true,
       "kind": null,
       "labels": [
+        "unblocks-main",
+        "no-issue",
         "closes-nothing"
       ],
       "merged_at": null,
@@ -36230,7 +36392,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "fix(docs): register SCR-006 in the document manifest",
-      "updated_at": "2026-09-21T23:59:48Z"
+      "updated_at": "2026-09-22T23:41:03Z"
     },
     "stella#6551": {
       "author": "cursor[bot]",
@@ -36241,7 +36403,10 @@
       "html_url": "https://github.com/macanderson/stella/pull/6551",
       "is_pr": true,
       "kind": null,
-      "labels": [],
+      "labels": [
+        "no-issue",
+        "closes-nothing"
+      ],
       "merged_at": null,
       "milestone": null,
       "needs_decision": false,
@@ -36249,13 +36414,14 @@
       "pillar": null,
       "priority": null,
       "refs": [
-        6545
+        6545,
+        6553
       ],
       "repo": "stella",
       "spec_refs": [],
       "state": "open",
       "title": "fix(stella-tools): name real forge inputs in gh redirects",
-      "updated_at": "2026-09-22T00:24:46Z"
+      "updated_at": "2026-09-22T23:44:02Z"
     },
     "stella#6552": {
       "author": "cursor[bot]",
@@ -36268,7 +36434,9 @@
       "html_url": "https://github.com/macanderson/stella/pull/6552",
       "is_pr": true,
       "kind": null,
-      "labels": [],
+      "labels": [
+        "unblocks-main"
+      ],
       "merged_at": null,
       "milestone": null,
       "needs_decision": false,
@@ -36280,7 +36448,32 @@
       "spec_refs": [],
       "state": "open",
       "title": "fix(docs): rewrite SCR-006 so the prose gate accepts it",
-      "updated_at": "2026-09-22T00:05:11Z"
+      "updated_at": "2026-09-22T23:48:17Z"
+    },
+    "stella#6553": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/stella/issues/6553",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 6553,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "stella",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Signing an empty body twice stacks two footers (residue #6545)",
+      "updated_at": "2026-09-22T23:45:13Z"
     },
     "stella#834": {
       "author": "macanderson",
@@ -41556,8 +41749,8 @@
     }
   },
   "last_run": {
-    "at": "2026-09-22T21:43:59.864Z",
-    "calls": 6,
+    "at": "2026-09-22T23:50:54.893Z",
+    "calls": 7,
     "quiet": false
   },
   "milestones": {
@@ -52640,6 +52833,38 @@
       "repo": "oxagen",
       "title": "Run export: download a bundle and verify it offline with oxagen verify"
     },
+    "oxagen#3741": {
+      "added": [
+        ".claude/agents/budget-verify-2.md",
+        ".oxagen/agents/budget-verify-2.toml"
+      ],
+      "author": "oxagen-connect[bot]",
+      "closes": [],
+      "files": [
+        ".claude/agents/budget-verify-2.md",
+        ".oxagen/agents/budget-verify-2.toml"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3741",
+      "merged_at": "2026-09-22T23:33:43Z",
+      "number": 3741,
+      "refs": [],
+      "repo": "oxagen",
+      "title": "Agent: budget-verify-2"
+    },
+    "oxagen#3742": {
+      "added": [],
+      "author": "oxagen-connect[bot]",
+      "closes": [],
+      "files": [],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3742",
+      "merged_at": "2026-09-22T23:35:55Z",
+      "number": 3742,
+      "refs": [],
+      "repo": "oxagen",
+      "title": "Agent: budget-verify-2 (cache version for live budget-refusal test)"
+    },
     "stella#6527": {
       "added": [],
       "author": "dependabot[bot]",
@@ -53242,8 +53467,8 @@
     }
   },
   "since": {
-    "oxagen": "2026-09-22T20:52:59Z",
-    "oxagen-roadmap": "2026-09-22T21:43:59.864Z",
-    "stella": "2026-09-22T21:43:59.864Z"
+    "oxagen": "2026-09-22T23:43:50Z",
+    "oxagen-roadmap": "2026-09-22T23:50:54.893Z",
+    "stella": "2026-09-22T23:48:17Z"
   }
 }
