@@ -857,6 +857,144 @@ for (const theme of ["light", "dark"]) {
   await page.close();
 }
 
+// The mandate page wired Change limits to the grant wizard, so editing opened a form that creates
+// a second mandate, and Revoke was a toast that reported a write it never made.
+{
+  const { page, errs } = await open("#/a-intel/finops/agents/invoice-bot/mandates/mnd_7K2ETQ4");
+  const acts = await page.evaluate(() =>
+    [...document.querySelectorAll(".phead .acts button")].map((b) => b.getAttribute("onclick") + "|" + b.textContent.trim()));
+  ok(acts.some((a) => /openDialog\('mandateedit','mnd_7K2ETQ4'\)\|Change limits/.test(a)),
+    "mandate: Change limits opens the edit dialog on this mandate, got " + acts.join(" ~ "));
+  ok(acts.some((a) => /openDialog\('mandaterevoke','mnd_7K2ETQ4'\)\|Revoke/.test(a)),
+    "mandate: Revoke opens the revoke dialog on this mandate, got " + acts.join(" ~ "));
+  ok(!acts.some((a) => /openDialog\('mandate'[,)]/.test(a)), "mandate: no header button opens the grant wizard");
+  ok(!acts.some((a) => /\bact\(/.test(a)), "mandate: no header button is a toast stub, got " + acts.join(" ~ "));
+
+  await page.evaluate(() => openDialog("mandateedit", "mnd_7K2ETQ4"));
+  await page.waitForTimeout(250);
+  const ed = await page.evaluate(() => { const d = document.querySelector("#layer .dlg"); return d ? d.innerText : ""; });
+  ok(/Edit mnd_7K2ETQ4/.test(ed), "mandate: the edit dialog names this mandate, got " + ed.slice(0, 120));
+  ok(/Per call/.test(ed) && /Approval above/.test(ed), "mandate: the edit dialog carries the ceilings");
+  ok(!/auto-approval/i.test(ed), "mandate: the edit hint does not defer to auto-approval rules, which are cut");
+
+  await page.evaluate(() => { closeDialog(); openDialog("mandaterevoke", "mnd_7K2ETQ4"); });
+  await page.waitForTimeout(250);
+  const rv = await page.evaluate(() => { const d = document.querySelector("#layer .dlg"); return d ? d.innerText : ""; });
+  ok(/Revoke mnd_7K2ETQ4/.test(rv), "mandate: the revoke dialog names this mandate, got " + rv.slice(0, 120));
+  ok(/reserved/.test(rv) && /settled/.test(rv), "mandate: the revoke dialog says what is reserved and what settled");
+  ok(/ledger is kept, never deleted/i.test(rv), "mandate: the revoke dialog keeps the ledger");
+  ok(errs.length === 0, "mandate: no JavaScript error: " + errs.join(" | "));
+  await page.close();
+}
+
+// The connection drill uniquely holds the recent grants, the review date and what the broker mints.
+// Cutting the standalone Connections tab left nothing that reached it.
+{
+  const { page, errs } = await open("#/a-intel/core-platform/tools/servers");
+  const linked = await page.evaluate(() =>
+    [...document.querySelectorAll(".grant-row")].map((r) => {
+      const a = r.children[3].querySelector("a");
+      return a ? a.getAttribute("onclick") || "" : "no link";
+    }));
+  ok(linked.length > 0 && linked.every((a) => /openDialog\('conn','con_/.test(a)),
+    "grants log: every connection cell opens its drill, got " + linked.join(" ~ "));
+
+  await page.evaluate(() => openDialog("conn", "con_01K2A9"));
+  await page.waitForTimeout(250);
+  const cd = await page.evaluate(() => { const d = document.querySelector("#layer .dlg"); return d ? d.innerText : ""; });
+  ok(/con_01K2A9/.test(cd), "connection drill: it opens on the connection asked for, got " + cd.slice(0, 80));
+  ok(/Downscope/.test(cd), "connection drill: the downscope prints");
+  ok(/Recent grants/i.test(cd), "connection drill: the recent grants print");
+  ok(/next 20\d\d-\d\d-\d\d/.test(cd), "connection drill: the next review date prints");
+  const cacts = await page.evaluate(() => {
+    const d = document.querySelector("#layer .dlg");
+    return d ? [...d.querySelectorAll("button,a")].map((b) => b.getAttribute("onclick") || "").join(" ") : "";
+  });
+  ok(/connedit/.test(cacts), "connection drill: it reaches the editor, got " + cacts.slice(0, 200));
+  ok(/connrevoke/.test(cacts), "connection drill: it reaches revoke, got " + cacts.slice(0, 200));
+
+  // The server drill names its connection, so it must reach the drill too.
+  await page.evaluate(() => { closeDialog(); openDialog("server", "jira"); });
+  await page.waitForTimeout(250);
+  const sv = await page.evaluate(() => {
+    const d = document.querySelector("#layer .dlg");
+    if (!d) return "nodialog";
+    const a = [...d.querySelectorAll("a")].find((x) => /openDialog\('conn'/.test(x.getAttribute("onclick") || ""));
+    return a ? a.getAttribute("onclick") : "none";
+  });
+  ok(/openDialog\('conn','con_/.test(sv), "server drill: the connection name opens its drill, got " + sv);
+  ok(errs.length === 0, "connection drill: no JavaScript error: " + errs.join(" | "));
+  await page.close();
+}
+
+// The Data plane tab went out with a commit that named every other tab it cut and never named this
+// one, while organization.md still lists it as backed today.
+{
+  const { page, errs } = await open("#/a-intel");
+  const tabs = await page.evaluate(() =>
+    [...document.querySelectorAll('[role="tab"]')].map((t) => t.textContent.replace(/\d+$/, "").trim()));
+  ok(tabs.includes("Data plane"), "organization: the Data plane tab is present, got " + tabs.join(" ~ "));
+  ok(tabs.length === 7, "organization: seven tabs, got " + tabs.length + ": " + tabs.join(" ~ "));
+
+  const sub = await page.evaluate(() => {
+    const ps = [...document.querySelectorAll(".phead .t p")];
+    return ps.length ? ps[ps.length - 1].textContent.trim() : "";
+  });
+  for (const word of ["People", "roles", "invitations", "workspaces", "API keys"]) {
+    ok(sub.includes(word), "organization: the subtext names " + word + ", got " + sub);
+  }
+
+  // Task #24 cut the Model key and In-firewall routes panels and moved the key facts into
+  // Funding source. The spec described the old shape for four commits.
+  await page.evaluate(() => orgTab("funding"));
+  await page.waitForTimeout(350);
+  const fheads = await page.evaluate(() => [...document.querySelectorAll(".panel-h h3")].map((x) => x.textContent.trim()));
+  ok(fheads.join(" ~ ") === "Funding source ~ Model routes",
+    "funding: Funding source then Model routes, got " + fheads.join(" ~ "));
+  const ftxt = await page.evaluate(() =>
+    [...document.querySelectorAll(".panel")].map((x) => x.innerText).join("\n"));
+  ok(/client_attested/.test(ftxt), "funding: the Total row names its basis");
+  ok(/Rotate/.test(ftxt) && /Revoke/.test(ftxt), "funding: the held key carries rotate and revoke");
+
+  await page.evaluate(() => orgTab("plane"));
+  await page.waitForTimeout(350);
+  const heads = await page.evaluate(() => [...document.querySelectorAll(".panel-h h3")].map((x) => x.textContent.trim()));
+  for (const head of ["Data plane", "Retention", "Tenant isolation"]) {
+    ok(heads.includes(head), "data plane: the " + head + " panel renders, got " + heads.join(" ~ "));
+  }
+  const ptxt = await page.evaluate(() =>
+    [...document.querySelectorAll(".panel")].map((x) => x.innerText).join("\n"));
+  for (const word of ["Shared", "Dedicated", "Behind the firewall", "Request a change of plane", "Rotate keys"]) {
+    ok(ptxt.includes(word), "data plane: " + word + " prints");
+  }
+  ok(!/In-firewall routes/.test(ptxt), "data plane: it does not point at the In-firewall routes panel, which is cut");
+  ok(!/—/.test(ptxt), "data plane: no em dash on the tab");
+
+  await page.evaluate(() => openDialog("plane"));
+  await page.waitForTimeout(250);
+  const pd = await page.evaluate(() => { const d = document.querySelector("#layer .dlg"); return d ? d.innerText : ""; });
+  ok(/Request a change of data plane/.test(pd), "data plane: the dialog opens, got " + pd.slice(0, 120));
+  ok(!/—/.test(pd), "data plane: no em dash in the dialog");
+  ok(errs.length === 0, "data plane: no JavaScript error: " + errs.join(" | "));
+  await page.close();
+}
+
+// Two gate buttons carried the mid-dot the plain-noun rule bans, and one pointed at a Mandates
+// ledger tab that no longer exists.
+{
+  const { page, errs } = await open("#/a-intel/core-platform/steering/policy");
+  const opens = await page.evaluate(() =>
+    [...document.querySelectorAll("button")].map((b) => b.textContent.trim()).filter((t) => /^Open /.test(t)));
+  ok(opens.length > 0, "gates: an Edited on button opens its editor");
+  ok(!opens.some((l) => /·/.test(l)), "gates: no Open button carries a mid-dot, got " + opens.join(" ~ "));
+  ok(!opens.some((l) => /Mandates/.test(l)), "gates: no Open button points at the cut Mandates ledger, got " + opens.join(" ~ "));
+  for (const label of ["Open the policy tab", "Open the kill switches tab", "Open the record"]) {
+    ok(opens.includes(label), "gates: " + label + " is present, got " + opens.join(" ~ "));
+  }
+  ok(errs.length === 0, "gates: no JavaScript error: " + errs.join(" | "));
+  await page.close();
+}
+
 await browser.close();
 console.log(`${passes} passed, ${fails} failed`);
 process.exit(fails ? 1 : 0);

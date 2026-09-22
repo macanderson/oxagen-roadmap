@@ -5262,8 +5262,8 @@ function pMandate(r){
    '<span class="b b-q">granted by '+h(m.by)+'</span>'+
    '<span class="b b-q">'+h(m.currency)+'</span></div>'+
    '<p style="margin-top:8px">'+h(m.purpose)+'</p></div>'+
-   '<div class="acts"><button class="btn" onclick="openDialog(\'mandate\')">Change limits</button>'+
-   '<button class="btn danger" onclick="act(\'Mandate revoked. In-flight calls that have not dispatched end now.\')">Revoke</button></div></div>'+
+   '<div class="acts"><button class="btn" onclick="openDialog(\'mandateedit\',\''+h(m.id)+'\')">Change limits</button>'+
+   '<button class="btn danger" onclick="openDialog(\'mandaterevoke\',\''+h(m.id)+'\')">Revoke</button></div></div>'+
    '<div class="grid g4" style="margin-bottom:16px">'+
    '<div class="stat"><span class="k">Per call</span><span class="v">'+usd(m.perCall)+'</span><span class="s">read from the call by amount_path</span></div>'+
    '<div class="stat"><span class="k">Per period</span><span class="v">'+usd(m.perPeriod)+'</span><span class="s">'+h(m.period)+' · '+m.callsPerDay+' calls per day</span></div>'+
@@ -5457,7 +5457,8 @@ function grantsLog(){
     return '<tr class="grant-row"><td class="mono" style="font-size:11px">'+(g.id?h(g.id):'<span class="dim">—</span>')+'<div class="dim" style="font-size:10.5px">'+h(at||"")+'</div></td>'+
      '<td>'+toolCell(tool,{sz:"sm"})+'</td>'+
      '<td><span class="mono" style="font-size:11px">'+h(agent)+'</span><div class="dim mono" style="font-size:10.5px">'+h(run)+(g.seq?' · seq '+g.seq:'')+'</div></td>'+
-     '<td class="mono" style="font-size:11px">'+h(g.conn)+(c?'<div class="dim" style="font-size:10.5px;font-family:inherit">'+h(c.downscope)+'</div>':'')+'</td>'+
+     '<td class="mono" style="font-size:11px">'+(c?'<a href="#" onclick="event.preventDefault();openDialog(\'conn\',\''+h(c.id)+'\')">'+h(g.conn)+'</a>':h(g.conn))+
+      (c?'<div class="dim" style="font-size:10.5px;font-family:inherit">'+h(c.downscope)+'</div>':'')+'</td>'+
      '<td class="mono" style="font-size:11px;min-width:22ch">'+h(g.scope)+(g.note?'<div class="dim" style="font-size:10.5px">'+h(g.note)+'</div>':'')+(g.rcp?'<div style="font-size:10.5px">receipt '+receiptLink(g.rcp)+'</div>':'')+'</td>'+
      '<td class="mono">'+h(g.ttl)+'</td><td>'+st+'</td></tr>';}).join("");
   return '<div class="panel" style="margin-top:14px"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Credential grants log</h3>'+
@@ -5552,7 +5553,8 @@ DLG_EXT.server=function(id){
   var sv=serverById(id); if(!sv) return noSuch("Tool server");
   var tv=serverTools(sv.id), c=connByServer(sv.id), props=proposals().filter(function(p){return p.s===sv.id;});
   var conn=c
-   ? '<dl class="kv"><dt>Connection</dt><dd>'+h(c.name)+' <span class="dim mono" style="font-size:11px">'+h(c.id)+' · '+h(c.kind)+'</span></dd>'+
+   ? '<dl class="kv"><dt>Connection</dt><dd><a href="#" onclick="event.preventDefault();openDialog(\'conn\',\''+h(c.id)+'\')">'+h(c.name)+'</a> '+
+     '<span class="dim mono" style="font-size:11px">'+h(c.id)+' · '+h(c.kind)+'</span></dd>'+
      '<dt>Authorization</dt><dd>'+authBadge(sv)+'</dd>'+
      '<dt>Scopes</dt><dd class="mono" style="font-size:11.5px">'+h(c.scopes||"—")+'</dd>'+
      '<dt>Owner</dt><dd>'+h(c.owner)+' · reviewed '+h(c.reviewed)+', next '+h(c.next)+'</dd>'+
@@ -5707,7 +5709,7 @@ DLG_EXT.mandateedit=function(id){
     '<div class="field"><label for="mn-call">Per call (USD)</label><input id="mn-call" value="'+h(m.perCall)+'"></div>'+
     '<div class="field"><label for="mn-per">Per '+h(m.period)+' (USD)</label><input id="mn-per" value="'+h(m.perPeriod)+'"></div></div>'+
     '<div class="field"><label for="mn-appr">Approval above (USD)</label><input id="mn-appr" value="'+h(m.approvalAbove)+'">'+
-    '<div class="hint">A call above this parks for a human whatever the auto-approval rules say.</div></div>'+
+    '<div class="hint">A call above this parks for a human, and no rule elsewhere can release it.</div></div>'+
     '<div class="field"><label for="mn-to">Valid to</label><input id="mn-to" type="date" value="'+h(m.to)+'"></div>'+
     '<div class="note">Lowering a ceiling below what is already reserved does not claw the reservation back; it applies from the next call. Widening one needs the second approver, '+h(m.second)+'.</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="mandateSave(\''+m.id+'\')">Save</button>'};
@@ -6937,8 +6939,8 @@ function stgGateEdit(g){
   if(g.edit==="mandate") return ['Open the mandate',"go('"+base+(g.ws||S.ws)+"/agents/"+g.agent+"/mandates/"+g.mandate+"')"];
   if(g.edit==="record") return ['Open the record',"go('"+crecUrl(g.record)+"')"];
   if(g.edit==="agents") return ['Open Agent IAM',"go('"+base+S.ws+"/agents')"];
-  if(g.edit==="tools/switches") return ['Open Tools · Kill switches',"go('"+base+S.ws+"/tools/switches')"];
-  return ['Open Tools · Policy',"go('"+base+S.ws+"/tools/policy')"];
+  if(g.edit==="tools/switches") return ['Open the kill switches tab',"go('"+base+S.ws+"/tools/switches')"];
+  return ['Open the policy tab',"go('"+base+S.ws+"/tools/policy')"];
 }
 function stgPolicyTab(w){
   var L=stgGates(w.slug), tok=0; L.forEach(function(g){tok+=g.token_cost;});
@@ -8187,7 +8189,7 @@ function pOrganization(){
 
   var tabs='<div class="tabs" role="tablist">'+
    [["people","People",MEMBERS.length],["roles","Roles",ROLES.length],["invitations","Invitations",INVITES.length],["workspaces","Workspaces",WS.length],
-    ["funding","Model funding and routes"],["keys","API keys"]]
+    ["funding","Model funding and routes"],["plane","Data plane"],["keys","API keys"]]
    .map(function(x){return '<button class="tab" role="tab" aria-selected="'+(t===x[0])+'" onclick="orgTab(\''+x[0]+'\')">'+x[1]+(x[2]?'<span class="n">'+x[2]+'</span>':'')+'</button>';}).join("")+'</div>';
 
   var body="";
@@ -8231,6 +8233,8 @@ function pOrganization(){
      '<div class="note">Changing which repository is main is an org-owner action with approval, recorded as a security event. A repository may be linked to more than one workspace; it is main for at most one.</div></div></div>';
   } else if(t==="funding"){
     body=orgKeyPanel()+'<div style="height:14px"></div>'+orgRoutesPanel();
+  } else if(t==="plane"){
+    body=orgPlaneBody();
   } else {
     var KST={ok:["b-allowed","active"],expiring:["b-approval","expires in 21 days"],unused:["b-q","never used"]};
     body='<div class="panel"><div class="panel-h"><h3>API keys</h3>'+
@@ -8255,7 +8259,7 @@ function pOrganization(){
      '<pre>$ oxagen login --org a-intel\n$ oxagen run list --workspace core-platform --since 24h\n$ oxagen run export run_01K5RS7M2E8FJ3QW --with-bodies --out ./run_01K5RS7M2E8FJ3QW.bundle\n$ oxagen agent status a-intel.finops.invoice-bot</pre></div></div>';
   }
   return '<div class="phead"><div class="t"><p class="eyebrow">Organization</p><h1>'+h(ORG.name)+'</h1>'+
-   '<p>People, roles, workspaces, model routes, the data plane, and API keys.</p></div>'+
+   '<p>People, roles, invitations, workspaces, model funding and routes, and API keys.</p></div>'+
    '<div class="acts"><button class="btn" onclick="openDialog(\'invite\')">Invite</button>'+
    '<button class="btn primary" onclick="openDialog(\'newws\')">Create a workspace</button></div></div>'+tabs+body;
 }
@@ -8348,6 +8352,91 @@ function orgRouteSave(i){
   if(v("rtFb")!==null)r.fallback=v("rtFb");
   closeDialog();act("The "+r.tier+" route was saved. Recorded as a control-plane event; it applies at the next model call.");
 }
+
+/* Data plane: one binding, three deployment modes. The org is on ORG.dataPlane; the other two render as previews. */
+S.planeView=null;
+var PLANE_MODES=[
+ ["shared","Shared","Tenant data on Oxagen’s shared plane, isolated by row-level security with no bypass setting."],
+ ["dedicated","Dedicated","Your own Postgres cluster and object-storage bucket. Identity, IAM, billing and the price book stay on the shared plane."],
+ ["firewall","Behind the firewall","The same containers, as a signed bundle you run. Outbound only, and optional. Fully air-gapped is supported, not degraded."]];
+var FW_OUTBOUND=[
+ ["GitHub Enterprise Server · github.a-intel.internal","repo binding, Context PRs, checks, code graph","in use","allowed"],
+ ["Model providers","none, every tier resolves inside the network","not used","q"],
+ ["Voyage AI","none, embeddings served in-firewall","not used","q"],
+ ["Signed usage report · meter.oxagen.com","licence metering: run counts and retained GB, no content","weekly","allowed"],
+ ["Everything else","nothing inbound is required","blocked at the perimeter","q"]];
+function planeDetail(v){
+  if(v==="shared") return '<dl class="kv">'+
+   '<dt>Binding</dt><dd><span class="b b-allowed"><span class="d"></span>shared</span> · '+h(ORG.region)+'</dd>'+
+   '<dt>Postgres</dt><dd>partitioned by <span class="mono">org_id</span> · row-level policies enforced</dd>'+
+   '<dt>Object storage</dt><dd>object lock, compliance mode · per-organization key-encryption key</dd>'+
+   '<dt>Key-encryption key</dt><dd class="mono">kek_aintel_2026Q3 · rotated 2026-09-10</dd>'+
+    '<dt>Attester key</dt><dd class="mono">'+h(ORG.attester)+' · published so a customer can verify an export offline</dd>'+
+    '<dt>Gateway</dt><dd>Oxagen-hosted · the loopback proxy on every host reports to it, so metering is observed, never self-reported</dd></dl>';
+  if(v==="dedicated") return '<dl class="kv">'+
+   '<dt>Tenant data in Postgres</dt><dd>a dedicated cluster in your region, the same schema and the same row-level policies</dd>'+
+   '<dt>Identity and billing in Postgres</dt><dd>stay on the shared plane by design</dd>'+
+   '<dt>Object storage</dt><dd>your own bucket · object lock in compliance mode · write-once</dd>'+
+   '<dt>Key-encryption key</dt><dd>in your KMS, referenced by ARN; Oxagen never holds the key material</dd>'+
+    '<dt>Gateway</dt><dd>inside your plane</dd>'+
+    '<dt>Resolver</dt><dd>the only place a connection string is read. A call path that bypasses it is a defect, and CI fails on it.</dd></dl>';
+  return '<dl class="kv">'+
+   '<dt>Deployment</dt><dd>Kubernetes, customer-operated · Helm chart</dd>'+
+   '<dt>Bundle version</dt><dd class="mono">oxagen/1.4.2</dd>'+
+   '<dt>Bundle signature</dt><dd><span class="mono">cosign · sha256:7f31c0…9b42</span> · verified against Oxagen release key <span class="mono">rel-2026-03</span>, the key an evidence bundle is checked against</dd>'+
+   '<dt>Containers</dt><dd>gateway · services · operator console · Stella engine · Postgres · S3-compatible object storage with object lock</dd>'+
+   '<dt>Air-gapped mode</dt><dd><span class="b b-approval"><span class="d"></span>on</span>. Model routes resolve inside the network.</dd>'+
+   '<dt>Licence</dt><dd>per organization, annual, invoiced. Stripe is not involved behind a firewall.</dd>'+
+   '<dt>Next bundle</dt><dd><span class="mono">oxagen/1.4.3</span> available · applied on your schedule, never pushed</dd></dl>'+
+   '<p class="eyebrow" style="margin:16px 0 8px">Outbound connections in use</p>'+
+   '<div class="tw"><table data-lt="off"><thead><tr><th>Destination</th><th>Why</th><th>State</th></tr></thead><tbody>'+
+   FW_OUTBOUND.map(function(o){return '<tr><td style="font-size:12.5px"><b>'+h(o[0])+'</b></td><td class="dim" style="font-size:12px">'+h(o[1])+'</td>'+
+    '<td><span class="b b-'+o[3]+'"><span class="d"></span>'+h(o[2])+'</span></td></tr>';}).join("")+'</tbody></table></div>'+
+   '<p class="muted" style="font-size:12.5px;margin:12px 0 0">Everything the cloud enforces, the appliance enforces, including the gateway, whose sealed cost records you hand to your auditor.</p>';
+}
+function orgPlaneBody(){
+  var v=S.planeView||ORG.dataPlane, cur=v===ORG.dataPlane, mode=PLANE_MODES.filter(function(x){return x[0]===v;})[0]||PLANE_MODES[0];
+  return '<div class="split"><div class="panel"><div class="panel-h"><h3>Data plane</h3>'+
+   '<div class="sp"><span class="b b-allowed"><span class="d"></span>'+h(ORG.name)+' is on '+h(ORG.dataPlane)+'</span></div></div><div class="panel-b">'+
+   '<div class="seg" role="group" aria-label="Deployment mode">'+PLANE_MODES.map(function(x){
+     return '<button class="btn sm" aria-pressed="'+(x[0]===v)+'" onclick="S.planeView=\''+x[0]+'\';render()">'+h(x[1])+(x[0]===ORG.dataPlane?' · current':'')+'</button>';}).join("")+'</div>'+
+   '<p class="muted" style="font-size:12.5px;margin:12px 0">'+h(mode[2])+'</p>'+
+   (cur?'':'<div class="note" style="margin-bottom:12px" data-plane-preview="'+h(v)+'"><b>Preview.</b> This is what the page shows on a '+h(mode[1].toLowerCase())+' deployment. Modes, not forks: every store is resolved per organization, so moving is a deployment change, never a different product. Nothing below is in effect for '+h(ORG.name)+'.</div>')+
+   planeDetail(v)+
+   '<div class="row" style="margin-top:14px"><button class="btn" onclick="openDialog(\'plane\')">Request a change of plane</button>'+
+   '<button class="btn" onclick="act(\'Key rotation scheduled. A rotation is a governed action and a security event.\')">Rotate keys</button></div></div></div>'+
+   '<div class="panel"><div class="panel-h"><h3>Retention</h3></div><div class="panel-b"><dl class="kv">'+
+   '<dt>Frame bodies</dt><dd>7 years from the seal · encrypted, content-addressed</dd>'+
+   '<dt>Run ledger</dt><dd>forever</dd>'+
+   '<dt>Frame rows</dt><dd>13-month hot window, then compacted into the segment</dd>'+
+   '<dt>Control-plane audit</dt><dd>7 years</dd>'+
+   '<dt><span class="mono">digest_only</span> mode</dt><dd>'+orgDigestOnly()+'</dd>'+
+   '</dl>'+
+   '<div class="note" style="margin-top:12px">Replay without bodies is a timeline, not a replay. The explanation promise depends on bodies, so keeping them is the default.</div></div></div></div>'+
+   '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Tenant isolation</h3><div class="sp"><span class="b b-q">postgres · '+h(ORG.slug)+'</span></div></div><div class="panel-b"><dl class="kv">'+
+   '<dt>Rows</dt><dd>every tenant table carries <span class="mono">org_id</span> and row-level security is on with no bypass; the tenant boundary is the policy, and the policy is tested</dd>'+
+   '<dt>Workspace scoping</dt><dd>every run, frame and record carries <span class="mono">ws</span> ('+WS.map(function(w){return '<span class="mono">'+h(w.slug)+'</span>';}).join(", ")+'), set by the kernel, the only writer</dd>'+
+   '<dt>Cross-tenant reads</dt><dd>refused by the database itself, not by application code</dd>'+
+   '<dt>Platform catalogs</dt><dd>price books, tool schemas and connector definitions are platform tables, never tenant rows</dd>'+
+   '<dt>Startup guard</dt><dd>the app role may not be a superuser, may not hold <span class="mono">BYPASSRLS</span>, and row-level security may not be off, or the plane refuses to boot</dd></dl></div></div>';
+}
+function orgDigestOnly(){
+  var off=WS.filter(function(w){return w.retention==="digest_only";});
+  return off.length?'<b>on</b> in '+off.map(function(w){return h(w.slug);}).join(", ")+'. Every run there records a completeness gap, which lowers the replay grade'
+   :'<b>off</b> in every workspace. It is an opt-down, recorded as a completeness gap, and it lowers the replay grade';
+}
+
+DLG_EXT.plane=function(){
+  var v=S.planeView&&S.planeView!=="shared"?S.planeView:"dedicated";
+  return {t:"Request a change of data plane",s:ORG.name+" is on "+ORG.dataPlane,w:false,
+   b:'<div class="note" style="margin-bottom:14px">Per-organization data planes make every store switchable. A dedicated plane, and a behind-the-firewall deployment, is a deployment mode rather than a fork.</div>'+
+    '<div class="field"><label for="planeMode">Mode</label><select id="planeMode">'+
+     [["dedicated","dedicated · Oxagen cloud"],["firewall","behind your firewall · signed Helm bundle"],["airgap","air-gapped · in-firewall models"]].map(function(x){return '<option'+(x[0]===v?' selected':'')+'>'+h(x[1])+'</option>';}).join("")+'</select></div>'+
+    '<div class="field"><label for="planeRegion">Region</label><select id="planeRegion">'+["us-east-1","eu-west-1","ap-southeast-2"].map(function(r){return '<option'+(r===ORG.region?' selected':'')+'>'+r+'</option>';}).join("")+'</select></div>'+
+    '<dl class="kv"><dt>Included</dt><dd>the gateway inside your plane, a dedicated Postgres cluster and object store, and your own release key</dd>'+
+    '<dt>Plan</dt><dd>Enterprise, annual, invoiced · from $60,000 per year</dd></dl>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Request sent. An owner signs the annual agreement before anything moves.\')">Request it</button>'};
+};
 
 /* Change role, for the person the row names. It used to name Dana Okafor on every row. */
 DLG_EXT.role=function(p){
@@ -9674,10 +9763,6 @@ var SCENARIOS={
     note:"Reservations are taken at decision time and settlements at receipt time, so two concurrent calls cannot both fit under the same remaining limit. If nobody answered at the last step, arriving here records Marcus Bell's approval.",
     route:function(o){return {page:"mandate",org:o,ws:"finops",id:"invoice-bot",mid:"mnd_7K2ETQ4"};},
     setup:function(){var a=approvalById("apr_01K5RN9T4");if(apState(a.id).status==="pending")approvalSettle(a,"approved","Marcus Bell","AWS line on PO-4471 checked against the September statement.");}},
-   {say:"Tools, Mandates ledger, is the page the CFO's office reads: every mandate with what is settled, reserved and remaining, from the same record the card and the ledger read.",
-    note:"One record, three readers. None of them keeps its own total.",
-    route:function(o){return {page:"tools",org:o,ws:"finops"};},
-    setup:function(){S.tab.tools="mandates";}},
    {say:"The receipt names the human, the rule that fired, and the money. That record is the product.",
     note:"Same trail whether a person did it or an agent did it for them, which is what makes the audit log answerable.",
     route:function(o){return {page:"audit",org:o};},

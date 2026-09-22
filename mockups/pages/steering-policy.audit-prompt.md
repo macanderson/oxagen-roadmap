@@ -28,10 +28,10 @@ Work through every check. For each, record PASS, FAIL, or N/A (with why). Cite e
    - The gate kinds are decision rule, mandate, and kill switch, each with its source line; the Outcome badge is the same gate badge Tools renders.
    - The two closing notes, verbatim.
 5. **Figures reconcile.** The badge count equals the row count, and the Notice cost column sums to the token total the Preview tab reports for gates.
-6. **Actions.** Each Edited on button opens what the spec says: Tools · Policy, Tools · Kill switches, Tools · Mandates, a Mandate page, or the record. Nothing on this tab edits a gate.
+6. **Actions.** Each Edited on button opens what the spec says: the policy tab, the kill switches tab, a Mandate page, Agent IAM, or the record. No button label carries a mid-dot. Nothing on this tab edits a gate.
 7. **Data sources.** For each row of the spec’s data-source table, find the adapter or query in the build that feeds it. ✅ rows are wired to the named store; 🟡 rows are wired for the fields that exist and render `NotBacked` for the rest; ❌ rows render `NotBacked` with the milestone named. A fixture reaching production is a FAIL.
 8. **States.** Force each state and compare copy and controls with the design:
-   - **empty** (`state=empty`): the hub header, chip, and tabs stay; the body is “No gate applies to this workspace yet” with its sentences and Open Tools · Policy.
+   - **empty** (`state=empty`): the hub header, chip, and tabs stay; the body is “No gate applies to this workspace yet” with its sentences and Open the policy tab.
    - **loading** (`state=loading`): the shell stays and the body is the skeleton; no data, no zeros, no stale rows.
    - **error** (`state=error`): “Steering could not be loaded”, `503 record_index_unavailable`, Try again, Open an incident, and the trace line.
    - **access denied** (`state=denied`): “You cannot see this workspace’s steering”, naming `steering.read on core-platform`, with Request access and Back to Fleet.
