@@ -2356,9 +2356,9 @@
       "title": "P0 · app+ops/CI · Two files from an already-merged PR export test-only helpers and fail every PR's required checks job"
     }
   },
-  "generated_at": "2026-09-22T15:04:59.353Z",
+  "generated_at": "2026-09-22T18:51:30.530Z",
   "heads": {
-    "oxagen": "d75b9e1e1641c8cda5f2209ed221dde01d673054"
+    "oxagen": "1ea1a213e60a6ffe36f9f24789a2840feb2767f5"
   },
   "issues": {
     "oxagen#1": {
@@ -19178,7 +19178,7 @@
     },
     "oxagen#3716": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-22T16:43:54Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": false,
@@ -19189,7 +19189,7 @@
         "closes-nothing",
         "migration-required"
       ],
-      "merged_at": null,
+      "merged_at": "2026-09-22T16:43:54Z",
       "milestone": null,
       "needs_decision": false,
       "number": 3716,
@@ -19198,9 +19198,9 @@
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "feat(tacho): store a workspace session policy and report when a host leaves the gateway",
-      "updated_at": "2026-09-22T10:34:22Z"
+      "updated_at": "2026-09-22T16:43:57Z"
     },
     "oxagen#3717": {
       "author": "macanderson",
@@ -19227,7 +19227,7 @@
       ],
       "state": "open",
       "title": "Stella model calls bypass the gateway: no base URL is written at enrollment",
-      "updated_at": "2026-09-22T03:47:55Z"
+      "updated_at": "2026-09-22T16:54:29Z"
     },
     "oxagen#3718": {
       "author": "oxagen-connect[bot]",
@@ -19496,6 +19496,227 @@
       "state": "open",
       "title": "Queued · surfaces/Tacho · A saved model allowlist governs nothing until an ADR says whose word arms it",
       "updated_at": "2026-09-22T08:52:36Z"
+    },
+    "oxagen#3728": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/issues/3728",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3728,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Queued · surfaces/Tacho · A per-day agent budget is signed into the mandate and refuses nothing",
+      "updated_at": "2026-09-22T16:52:04Z"
+    },
+    "oxagen#3729": {
+      "author": "macanderson",
+      "closed_at": "2026-09-22T17:42:47Z",
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3729",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "closes-nothing"
+      ],
+      "merged_at": "2026-09-22T17:42:47Z",
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3729,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        3728
+      ],
+      "repo": "oxagen",
+      "spec_refs": [
+        "docs/specs/tacho/spec.md"
+      ],
+      "state": "closed",
+      "title": "fix(tacho): stop signing a daily budget nothing enforces",
+      "updated_at": "2026-09-22T17:42:49Z"
+    },
+    "oxagen#3730": {
+      "author": "macanderson",
+      "closed_at": "2026-09-22T18:13:04Z",
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3730",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": "2026-09-22T18:13:04Z",
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3730,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        3717
+      ],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-101"
+      ],
+      "state": "closed",
+      "title": "feat(tacho): route Stella's Anthropic calls through the gateway",
+      "updated_at": "2026-09-22T18:13:06Z"
+    },
+    "oxagen#3731": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3731",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "closes-nothing",
+        "migration-required"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3731,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        2952
+      ],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Run export: download a bundle and verify it offline with oxagen verify",
+      "updated_at": "2026-09-22T18:11:18Z"
+    },
+    "oxagen#3732": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3732",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "closes-nothing",
+        "migration-required"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3732,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-142"
+      ],
+      "state": "open",
+      "title": "feat(spend): cost-center chargeback on Spend",
+      "updated_at": "2026-09-22T18:10:25Z"
+    },
+    "oxagen#3733": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/issues/3733",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3733,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        2952
+      ],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Queued · evidence/Run · oxagen verify cannot recompute a wrapped session frame's hash from its export",
+      "updated_at": "2026-09-22T17:22:46Z"
+    },
+    "oxagen#3734": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/issues/3734",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3734,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-142"
+      ],
+      "state": "open",
+      "title": "Queued · auth/API · Removing someone from the identity provider leaves their Oxagen sessions and API keys live",
+      "updated_at": "2026-09-22T17:26:44Z"
+    },
+    "oxagen#3735": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3735",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "closes-nothing",
+        "migration-required"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3735,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        3734
+      ],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-142"
+      ],
+      "state": "open",
+      "title": "feat(auth): enterprise SSO over OIDC and SAML with IdP group-to-role mapping",
+      "updated_at": "2026-09-22T18:39:55Z"
     },
     "oxagen#4": {
       "author": "macanderson",
@@ -20112,7 +20333,7 @@
     },
     "oxagen-roadmap#62": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-22T18:13:08Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": false,
@@ -20120,7 +20341,7 @@
       "is_pr": true,
       "kind": null,
       "labels": [],
-      "merged_at": null,
+      "merged_at": "2026-09-22T18:13:08Z",
       "milestone": null,
       "needs_decision": false,
       "number": 62,
@@ -20129,9 +20350,9 @@
       "refs": [],
       "repo": "oxagen-roadmap",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "Agents, Tools, and Steering on one ontology",
-      "updated_at": "2026-09-22T08:55:06Z"
+      "updated_at": "2026-09-22T18:13:08Z"
     },
     "oxagen-roadmap#64": {
       "author": "macanderson",
@@ -36133,9 +36354,39 @@
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "dod",
-      "last_merge": "2026-09-22T08:25:37Z",
+      "last_merge": "2026-09-22T18:13:04Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-22T18:13:04Z",
+          "number": 3730,
+          "repo": "oxagen",
+          "title": "feat(tacho): route Stella's Anthropic calls through the gateway",
+          "touched": [
+            "packages/tacho"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-22T17:42:47Z",
+          "number": 3729,
+          "repo": "oxagen",
+          "title": "fix(tacho): stop signing a daily budget nothing enforces",
+          "touched": [
+            "packages/tacho"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-22T16:43:54Z",
+          "number": 3716,
+          "repo": "oxagen",
+          "title": "feat(tacho): store a workspace session policy and report when a host leaves the gateway",
+          "touched": [
+            "packages/tacho"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-22T08:25:37Z",
@@ -36305,40 +36556,10 @@
           "touched": [
             "packages/tacho"
           ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-20T17:31:24Z",
-          "number": 3574,
-          "repo": "oxagen",
-          "title": "Add CGP-backed local agent run checkpoints",
-          "touched": [
-            "packages/tacho"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-20T06:11:21Z",
-          "number": 3569,
-          "repo": "oxagen",
-          "title": "Fix approval resume receipt settlement and execution history",
-          "touched": [
-            "packages/tacho"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-20T06:10:53Z",
-          "number": 3568,
-          "repo": "oxagen",
-          "title": "Require the application role in authorization privilege proofs",
-          "touched": [
-            "packages/tacho"
-          ]
         }
       ],
       "open_issues": 0,
-      "refreshed_at": "2026-09-22T10:19:35.597Z",
+      "refreshed_at": "2026-09-22T18:51:30.530Z",
       "shared_page": false
     },
     "D3": {
@@ -37052,9 +37273,19 @@
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "witness",
-      "last_merge": "2026-09-21T21:41:25Z",
+      "last_merge": "2026-09-22T16:43:54Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-22T16:43:54Z",
+          "number": 3716,
+          "repo": "oxagen",
+          "title": "feat(tacho): store a workspace session policy and report when a host leaves the gateway",
+          "touched": [
+            "apps/app/src/data/contracts/spend.ts"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-21T21:41:25Z",
@@ -37109,7 +37340,7 @@
         }
       ],
       "open_issues": 0,
-      "refreshed_at": "2026-09-21T22:12:53.518Z",
+      "refreshed_at": "2026-09-22T18:51:30.530Z",
       "shared_page": false
     },
     "accept-invitation": {
@@ -37673,7 +37904,7 @@
         }
       ],
       "kind": "surface",
-      "last_merge": "2026-09-22T00:37:37Z",
+      "last_merge": "2026-09-22T16:43:54Z",
       "links": [
         {
           "number": 3282,
@@ -37689,6 +37920,16 @@
         }
       ],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-22T16:43:54Z",
+          "number": 3716,
+          "repo": "oxagen",
+          "title": "feat(tacho): store a workspace session policy and report when a host leaves the gateway",
+          "touched": [
+            "apps/app/src/features/fleet/fleet.builders.ts"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-22T00:37:37Z",
@@ -37898,21 +38139,11 @@
             "apps/app/src/features/onboarding/gate.tsx",
             "apps/app/src/ui/generated-summary.tsx"
           ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-19T01:58:06Z",
-          "number": 3276,
-          "repo": "oxagen",
-          "title": "feat(steering): warn and optionally refuse a prompt when a checkout's .oxagen/ is behind the production branch",
-          "touched": [
-            "apps/app/src/features/fleet/fleet.builders.ts"
-          ]
         }
       ],
       "open_issues": 1,
       "page": "apps/app/src/app/[org]/[ws]/page.tsx",
-      "refreshed_at": "2026-09-22T00:50:05.433Z",
+      "refreshed_at": "2026-09-22T18:51:30.530Z",
       "shared_page": false
     },
     "forgot-password": {
@@ -38137,7 +38368,7 @@
         }
       ],
       "kind": "surface",
-      "last_merge": "2026-09-22T08:25:37Z",
+      "last_merge": "2026-09-22T18:13:04Z",
       "links": [
         {
           "number": 3301,
@@ -38159,6 +38390,18 @@
         }
       ],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-22T18:13:04Z",
+          "number": 3730,
+          "repo": "oxagen",
+          "title": "feat(tacho): route Stella's Anthropic calls through the gateway",
+          "touched": [
+            "packages/tacho/src/cli/install-rig.test.ts",
+            "packages/tacho/src/cli/enroll.ts",
+            "packages/tacho/src/cli/unenroll.ts"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-22T08:25:37Z",
@@ -38303,7 +38546,7 @@
       ],
       "open_issues": 2,
       "page": "apps/app/src/app/[org]/[ws]/register/[step]/page.tsx",
-      "refreshed_at": "2026-09-22T10:19:35.597Z",
+      "refreshed_at": "2026-09-22T18:51:30.530Z",
       "shared_page": true
     },
     "login": {
@@ -39190,9 +39433,19 @@
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "surface",
-      "last_merge": "2026-09-21T07:59:24Z",
+      "last_merge": "2026-09-22T18:13:04Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-22T18:13:04Z",
+          "number": 3730,
+          "repo": "oxagen",
+          "title": "feat(tacho): route Stella's Anthropic calls through the gateway",
+          "touched": [
+            "packages/tacho/src/host/model-base-url.ts"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-21T07:59:24Z",
@@ -39246,7 +39499,7 @@
       ],
       "open_issues": 0,
       "page": "apps/app/src/app/[org]/[ws]/register/[step]/page.tsx",
-      "refreshed_at": "2026-09-21T13:05:20.786Z",
+      "refreshed_at": "2026-09-22T18:51:30.530Z",
       "shared_page": true
     },
     "repositories": {
@@ -40317,9 +40570,20 @@
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "surface",
-      "last_merge": "2026-09-21T09:30:19Z",
+      "last_merge": "2026-09-22T16:43:54Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-22T16:43:54Z",
+          "number": 3716,
+          "repo": "oxagen",
+          "title": "feat(tacho): store a workspace session policy and report when a host leaves the gateway",
+          "touched": [
+            "apps/app/src/features/spend/spend.tsx",
+            "apps/app/src/features/spend/actions.ts"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-21T09:30:19Z",
@@ -40376,7 +40640,7 @@
       ],
       "open_issues": 0,
       "page": "apps/app/src/app/[org]/[ws]/spend/page.tsx",
-      "refreshed_at": "2026-09-21T13:05:20.786Z",
+      "refreshed_at": "2026-09-22T18:51:30.530Z",
       "shared_page": false
     },
     "steering": {
@@ -40392,7 +40656,7 @@
         }
       ],
       "kind": "surface",
-      "last_merge": "2026-09-22T06:44:02Z",
+      "last_merge": "2026-09-22T16:43:54Z",
       "links": [
         {
           "number": 2592,
@@ -40444,6 +40708,16 @@
         }
       ],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-22T16:43:54Z",
+          "number": 3716,
+          "repo": "oxagen",
+          "title": "feat(tacho): store a workspace session policy and report when a host leaves the gateway",
+          "touched": [
+            "packages/handlers/src/lib/tacho-host.ts"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-22T06:44:02Z",
@@ -40561,7 +40835,7 @@
       ],
       "open_issues": 4,
       "page": "apps/app/src/app/[org]/[ws]/steering/page.tsx",
-      "refreshed_at": "2026-09-22T10:19:35.597Z",
+      "refreshed_at": "2026-09-22T18:51:30.530Z",
       "shared_page": false
     },
     "tools": {
@@ -41199,8 +41473,8 @@
     }
   },
   "last_run": {
-    "at": "2026-09-22T15:04:59.353Z",
-    "calls": 4,
+    "at": "2026-09-22T18:51:30.530Z",
+    "calls": 8,
     "quiet": false
   },
   "milestones": {
@@ -41221,12 +41495,12 @@
     "M1": {
       "built": 10,
       "last_merge": {
-        "merged_at": "2026-09-22T08:25:37Z",
-        "number": 3725,
+        "merged_at": "2026-09-22T18:13:04Z",
+        "number": 3730,
         "repo": "oxagen",
-        "title": "tacho: the gateway brokers the vendor credential and the harness holds a run token (ADR-138)"
+        "title": "feat(tacho): route Stella's Anthropic calls through the gateway"
       },
-      "merged_prs": 53,
+      "merged_prs": 55,
       "not_started": 1,
       "open_issues": 7,
       "partial": 5,
@@ -41235,12 +41509,12 @@
     "M2": {
       "built": 4,
       "last_merge": {
-        "merged_at": "2026-09-22T03:24:03Z",
-        "number": 3715,
+        "merged_at": "2026-09-22T16:43:54Z",
+        "number": 3716,
         "repo": "oxagen",
-        "title": "Grant the deploy role ssm:DescribeInstanceInformation"
+        "title": "feat(tacho): store a workspace session policy and report when a host leaves the gateway"
       },
-      "merged_prs": 20,
+      "merged_prs": 21,
       "not_started": 2,
       "open_issues": 4,
       "partial": 2,
@@ -41249,12 +41523,12 @@
     "M3": {
       "built": 1,
       "last_merge": {
-        "merged_at": "2026-09-22T00:37:37Z",
-        "number": 3705,
+        "merged_at": "2026-09-22T16:43:54Z",
+        "number": 3716,
         "repo": "oxagen",
-        "title": "fix(fleet): show the enforcement tier on every run row"
+        "title": "feat(tacho): store a workspace session policy and report when a host leaves the gateway"
       },
-      "merged_prs": 32,
+      "merged_prs": 33,
       "not_started": 0,
       "open_issues": 4,
       "partial": 2,
@@ -41263,12 +41537,12 @@
     "M4": {
       "built": 1,
       "last_merge": {
-        "merged_at": "2026-09-22T00:37:37Z",
-        "number": 3705,
+        "merged_at": "2026-09-22T16:43:54Z",
+        "number": 3716,
         "repo": "oxagen",
-        "title": "fix(fleet): show the enforcement tier on every run row"
+        "title": "feat(tacho): store a workspace session policy and report when a host leaves the gateway"
       },
-      "merged_prs": 32,
+      "merged_prs": 33,
       "not_started": 0,
       "open_issues": 3,
       "partial": 2,
@@ -41277,12 +41551,12 @@
     "M5": {
       "built": 0,
       "last_merge": {
-        "merged_at": "2026-09-22T06:44:02Z",
-        "number": 3710,
+        "merged_at": "2026-09-22T16:43:54Z",
+        "number": 3716,
         "repo": "oxagen",
-        "title": "feat(tacho): compile an agent's mandate into the steering bundle's permissions and budget"
+        "title": "feat(tacho): store a workspace session policy and report when a host leaves the gateway"
       },
-      "merged_prs": 21,
+      "merged_prs": 22,
       "not_started": 6,
       "open_issues": 5,
       "partial": 4,
@@ -41291,12 +41565,12 @@
     "M6": {
       "built": 0,
       "last_merge": {
-        "merged_at": "2026-09-22T06:44:02Z",
-        "number": 3710,
+        "merged_at": "2026-09-22T16:43:54Z",
+        "number": 3716,
         "repo": "oxagen",
-        "title": "feat(tacho): compile an agent's mandate into the steering bundle's permissions and budget"
+        "title": "feat(tacho): store a workspace session policy and report when a host leaves the gateway"
       },
-      "merged_prs": 11,
+      "merged_prs": 12,
       "not_started": 0,
       "open_issues": 4,
       "partial": 1,
@@ -51723,6 +51997,144 @@
       "repo": "oxagen",
       "title": "Grant the deploy role ssm:DescribeInstanceInformation"
     },
+    "oxagen#3716": {
+      "added": [
+        "apps/api/src/routes/v1/tacho.session_policy.read.test.ts",
+        "apps/api/src/routes/v1/tacho.session_policy.read.ts",
+        "apps/api/src/routes/v1/tacho.session_policy.write.test.ts",
+        "apps/api/src/routes/v1/tacho.session_policy.write.ts",
+        "apps/app/src/features/spend/gateway-form.test.ts",
+        "apps/app/src/features/spend/gateway-policy.test.tsx",
+        "apps/app/src/features/spend/gateway-policy.tsx",
+        "apps/mcp/src/tools/tacho.session_policy.read.ts",
+        "apps/mcp/src/tools/tacho.session_policy.write.ts",
+        "docs/capabilities/schemas/get_tacho_session_policy.json",
+        "docs/capabilities/schemas/update_tacho_session_policy.json",
+        "docs/capabilities/tacho.session_policy.read.md",
+        "docs/capabilities/tacho.session_policy.write.md",
+        "packages/database/atlas/migrations/20260922130000_tacho_session_policy.sql",
+        "packages/handlers/src/lib/tacho-session-policy.test.ts",
+        "packages/handlers/src/lib/tacho-session-policy.ts",
+        "packages/handlers/src/tacho.session_policy.read.test.ts",
+        "packages/handlers/src/tacho.session_policy.read.ts",
+        "packages/handlers/src/tacho.session_policy.write.test.ts",
+        "packages/handlers/src/tacho.session_policy.write.ts",
+        "packages/oxagen/src/contracts/tacho.session_policy.read.test.ts",
+        "packages/oxagen/src/contracts/tacho.session_policy.read.ts",
+        "packages/oxagen/src/contracts/tacho.session_policy.write.test.ts",
+        "packages/oxagen/src/contracts/tacho.session_policy.write.ts",
+        "packages/tacho/src/collector/model-allowlist.test.ts",
+        "packages/tacho/src/collector/model-allowlist.ts"
+      ],
+      "author": "macanderson",
+      "closes": [],
+      "files": [
+        "apps/api/src/app.ts",
+        "apps/api/src/routes/v1/tacho.session_policy.read.test.ts",
+        "apps/api/src/routes/v1/tacho.session_policy.read.ts",
+        "apps/api/src/routes/v1/tacho.session_policy.write.test.ts",
+        "apps/api/src/routes/v1/tacho.session_policy.write.ts",
+        "apps/app/capability-ui-map.json",
+        "apps/app/messages/spend.json",
+        "apps/app/mobile-parity.json",
+        "apps/app/src/data/contracts/spend.ts",
+        "apps/app/src/data/live/mappers/spend.ts",
+        "apps/app/src/data/live/spend.ts",
+        "apps/app/src/data/ports.ts",
+        "apps/app/src/features/agents/agents.builders.ts",
+        "apps/app/src/features/audit/audit.test.tsx",
+        "apps/app/src/features/audit/export.test.ts",
+        "apps/app/src/features/auth/cli-consent.test.tsx",
+        "apps/app/src/features/billing/billing.builders.ts",
+        "apps/app/src/features/fleet/fleet.builders.ts",
+        "apps/app/src/features/mandate/mandate.builders.ts",
+        "apps/app/src/features/onboarding/onboarding.builders.ts",
+        "apps/app/src/features/organization/organization.builders.ts",
+        "apps/app/src/features/organization/roles.test.tsx",
+        "apps/app/src/features/organization/workspaces.test.tsx",
+        "apps/app/src/features/run/run.builders.ts",
+        "apps/app/src/features/shell/landing.test.ts",
+        "apps/app/src/features/shell/shell-server.test.tsx",
+        "apps/app/src/features/shell/source.test.ts",
+        "apps/app/src/features/skills/skills.test.tsx",
+        "apps/app/src/features/spend/actions.test.ts",
+        "apps/app/src/features/spend/actions.ts",
+        "apps/app/src/features/spend/fleet-tiles.test.tsx",
+        "apps/app/src/features/spend/forms.ts",
+        "apps/app/src/features/spend/gateway-form.test.ts",
+        "apps/app/src/features/spend/gateway-policy.test.tsx",
+        "apps/app/src/features/spend/gateway-policy.tsx",
+        "apps/app/src/features/spend/pricing.test.tsx",
+        "apps/app/src/features/spend/spend.test.tsx",
+        "apps/app/src/features/spend/spend.tsx",
+        "apps/app/src/features/spend/view.ts",
+        "apps/app/src/features/tools/tools.builders.ts",
+        "apps/app/src/i18n/messages.d.ts",
+        "apps/app/src/test/steering-views.ts",
+        "apps/mcp/src/tools/tacho.session_policy.read.ts",
+        "apps/mcp/src/tools/tacho.session_policy.write.ts",
+        "docs/audits/2026-09-21-model-gateway-arming.md",
+        "docs/capabilities/schemas/README.md",
+        "docs/capabilities/schemas/_index.json",
+        "docs/capabilities/schemas/create_tacho_enrollment.json",
+        "docs/capabilities/schemas/enroll_host.json",
+        "docs/capabilities/schemas/fetch_commands.json",
+        "docs/capabilities/schemas/get_tacho_bundle.json",
+        "docs/capabilities/schemas/get_tacho_session_policy.json",
+        "docs/capabilities/schemas/ingest_tacho_events.json",
+        "docs/capabilities/schemas/list_tacho_hosts.json",
+        "docs/capabilities/schemas/update_tacho_session_policy.json",
+        "docs/capabilities/tacho.session_policy.read.md",
+        "docs/capabilities/tacho.session_policy.write.md",
+        "docs/mission-control/GAP-INVENTORY.md",
+        "packages/database/atlas/migrations/20260922130000_tacho_session_policy.sql",
+        "packages/database/atlas/migrations/atlas.sum",
+        "packages/database/src/index.ts",
+        "packages/database/src/schema/tacho.ts",
+        "packages/database/src/schema/workspace.ts",
+        "packages/database/src/tenant-policy.manifest.test.ts",
+        "packages/database/src/tenant-policy.manifest.ts",
+        "packages/database/storage-manifest.json",
+        "packages/handlers/src/lib/tacho-gateway-columns.ts",
+        "packages/handlers/src/lib/tacho-host-bundle.test.ts",
+        "packages/handlers/src/lib/tacho-host.ts",
+        "packages/handlers/src/lib/tacho-session-policy.test.ts",
+        "packages/handlers/src/lib/tacho-session-policy.ts",
+        "packages/handlers/src/register.ts",
+        "packages/handlers/src/tacho.control.test.ts",
+        "packages/handlers/src/tacho.enrollment.create.test.ts",
+        "packages/handlers/src/tacho.host.list.ts",
+        "packages/handlers/src/tacho.session_policy.read.test.ts",
+        "packages/handlers/src/tacho.session_policy.read.ts",
+        "packages/handlers/src/tacho.session_policy.write.test.ts",
+        "packages/handlers/src/tacho.session_policy.write.ts",
+        "packages/oxagen/capabilities.manifest.json",
+        "packages/oxagen/src/contracts.generated.ts",
+        "packages/oxagen/src/contracts/index.ts",
+        "packages/oxagen/src/contracts/tacho.command.fetch.test.ts",
+        "packages/oxagen/src/contracts/tacho.command.fetch.ts",
+        "packages/oxagen/src/contracts/tacho.host.list.test.ts",
+        "packages/oxagen/src/contracts/tacho.session_policy.read.test.ts",
+        "packages/oxagen/src/contracts/tacho.session_policy.read.ts",
+        "packages/oxagen/src/contracts/tacho.session_policy.write.test.ts",
+        "packages/oxagen/src/contracts/tacho.session_policy.write.ts",
+        "packages/oxagen/src/tacho/schemas.ts",
+        "packages/tacho/README.md",
+        "packages/tacho/src/collector/daemon.ts",
+        "packages/tacho/src/collector/model-allowlist.test.ts",
+        "packages/tacho/src/collector/model-allowlist.ts",
+        "packages/tacho/src/collector/model-proxy.test.ts",
+        "packages/tacho/src/collector/model-proxy.ts",
+        "packages/tacho/src/wire.ts"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3716",
+      "merged_at": "2026-09-22T16:43:54Z",
+      "number": 3716,
+      "refs": [],
+      "repo": "oxagen",
+      "title": "feat(tacho): store a workspace session policy and report when a host leaves the gateway"
+    },
     "oxagen#3718": {
       "added": [
         ".oxagen/rules/governance.toml"
@@ -51990,6 +52402,60 @@
       ],
       "repo": "oxagen",
       "title": "tacho: the gateway brokers the vendor credential and the harness holds a run token (ADR-138)"
+    },
+    "oxagen#3729": {
+      "added": [],
+      "author": "macanderson",
+      "closes": [],
+      "files": [
+        "apps/app/messages/agents.json",
+        "docs/specs/tacho/spec.md",
+        "packages/handlers/src/lib/tacho-mandate.test.ts",
+        "packages/handlers/src/lib/tacho-mandate.ts",
+        "packages/tacho/README.md",
+        "packages/tacho/src/wire.ts"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3729",
+      "merged_at": "2026-09-22T17:42:47Z",
+      "number": 3729,
+      "refs": [
+        3728
+      ],
+      "repo": "oxagen",
+      "title": "fix(tacho): stop signing a daily budget nothing enforces"
+    },
+    "oxagen#3730": {
+      "added": [
+        "packages/tacho/src/host/model-base-url-toml.ts"
+      ],
+      "author": "macanderson",
+      "closes": [],
+      "files": [
+        "docs/audits/2026-09-21-model-gateway-arming.md",
+        "packages/tacho/README.md",
+        "packages/tacho/src/cli/enroll.ts",
+        "packages/tacho/src/cli/install-rig.test.ts",
+        "packages/tacho/src/cli/status.ts",
+        "packages/tacho/src/cli/unenroll.ts",
+        "packages/tacho/src/collector/daemon.ts",
+        "packages/tacho/src/collector/model-proxy.test.ts",
+        "packages/tacho/src/collector/model-proxy.ts",
+        "packages/tacho/src/collector/model-routes.ts",
+        "packages/tacho/src/host/model-base-url-toml.ts",
+        "packages/tacho/src/host/model-base-url.test.ts",
+        "packages/tacho/src/host/model-base-url.ts",
+        "tools/scripts/env-check.ts"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3730",
+      "merged_at": "2026-09-22T18:13:04Z",
+      "number": 3730,
+      "refs": [
+        3717
+      ],
+      "repo": "oxagen",
+      "title": "feat(tacho): route Stella's Anthropic calls through the gateway"
     },
     "stella#6527": {
       "added": [],
@@ -52593,8 +53059,8 @@
     }
   },
   "since": {
-    "oxagen": "2026-09-22T13:16:21Z",
-    "oxagen-roadmap": "2026-09-22T15:04:59.353Z",
-    "stella": "2026-09-22T12:41:32Z"
+    "oxagen": "2026-09-22T18:39:55Z",
+    "oxagen-roadmap": "2026-09-22T18:13:08Z",
+    "stella": "2026-09-22T18:51:30.530Z"
   }
 }
