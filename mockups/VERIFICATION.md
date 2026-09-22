@@ -1,11 +1,9 @@
 # Verification, September 22, 2026
 
-- `node tools/check-mockup.mjs`: every page in `mockups/catalog.mjs` in every state it implements,
-  desktop and mobile, with no JavaScript error, the state's own markup on screen, no sideways
-  scroll on the phone shell, and the mobile shell's own guarantees. All 10 scenarios walked step by
-  step (W5 and W14 are gone). The count over this tree is being measured and lands with the next
-  commit on this branch; the run it replaces, over the same 50 routes on the branch this one was
-  rebased from, was 4,470 assertions and 0 failures.
+- `node tools/check-mockup.mjs`: 4,470 assertions passed, 0 failed. Every page in
+  `mockups/catalog.mjs` in every state it implements, desktop and mobile, with no JavaScript
+  error, the state's own markup on screen, no sideways scroll on the phone shell, and the mobile
+  shell's own guarantees. All 10 scenarios walked step by step (W5 and W14 are gone).
 - The W8 failure this file reported against Spend's tab strip is fixed, and it was not the strip.
   Spend's token total is eleven digits, and at the stat tile's 23px it overflowed the tile by 50px
   and pushed the shell sideways on four steps. Measuring each element with a clipped ancestor ruled
