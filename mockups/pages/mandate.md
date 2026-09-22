@@ -31,7 +31,7 @@ Actions: **Change limits** (opens `mandateedit` on this mandate) · **Revoke** (
 
 **Dialogs this page opens:** `mandateedit` (per call, per period, approval above, valid to; Save writes the ledger entry), `mandaterevoke` (names what is reserved and what already settled, then Revoke it), `receipt`, `request-access` (from denied), `incident` (from error). Both carry the id of the mandate the route names, so neither can act on a different one.
 
-**Shell.** Sidebar (organization switcher, workspace switcher, Workspace nav: Fleet · Agent IAM · Tools · Steering · Repositories · Spend; Organization nav: Organization · Billing · Audit; foot: the assistant launcher, agent count · data plane, connection badge). Top bar: hamburger, breadcrumbs (… / Agent IAM / <slug> / <mandate id>), ⌘K search-or-run, notifications with unread dot, the approvals button (left of the avatar, count of everything waiting on you across the organization; opens the drawer described in `fleet.md`), account avatar → user menu. No assistant button in the top bar.
+**Shell.** Sidebar (organization switcher, workspace switcher, Workspace nav: Fleet · Agents · Tools · Steering · Runtimes · Repositories · Spend; Organization nav: Organization · Billing · Audit; foot: the assistant launcher, agent count · data plane, connection badge). Top bar: hamburger, breadcrumbs (… / Agents / <slug> / <mandate id>), ⌘K search-or-run, notifications with unread dot, the approvals button (left of the avatar, count of everything waiting on you across the organization; opens the drawer described in `fleet.md`), account avatar → user menu. No assistant button in the top bar.
 
 ## Data sources
 

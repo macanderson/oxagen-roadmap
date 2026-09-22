@@ -4,7 +4,7 @@
 |---|---|
 | Route | `#/a-intel/finops/steering/skills` (the old `#/a-intel/finops/skills` still resolves): any workspace whose `skills.enabled` is false (absent) |
 | Scope | workspace |
-| Spec | see `skills.md`; `steering.md` is the hub this tab belongs to |
+| Spec | see `skills.md`; `steering.md` is the hub, and Skills is a shelf of its Library tab |
 | Design | `mockups/src/engine.js` → `pSkills()` → `skGate()`, rendered inside `stgHub()`, built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded (the gate renders in place of every view; loading, error, and denied are the Skills page's own, in `skills.md`) |
 | Storybook | `Oxagen / … / skills-off`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
@@ -16,7 +16,7 @@ Show that skills ship **off**: `skills.enabled = false` is the value a workspace
 
 ## What is on the page
 
-**Header**: the Steering hub header (eyebrow “FinOps”, h1 “Steering”, the one-sentence subtext), the governance chip **Governance: regulated** (FinOps runs in regulated mode), and the seven tabs with Skills selected and no count on it (Records 59 · Skills · Memory · Ontology 1 · Policy 3 · Proposals 15 · Preview). The hub header carries no gold action here, because the gate holds the one primary action.
+**Header**: the Steering hub header (eyebrow “FinOps”, h1 “Steering”, the one-sentence subtext), the governance chip **Governance: regulated** (FinOps runs in regulated mode), and the five tabs (Library 60 · Assignments 1 · Gates 3 · Proposals 15 · Compiler) with Library selected. The shelf row beneath it presses Skills, with no count on it: All 60 · Records 59 · Skills · Memory · Ontology 1. The hub header carries no gold action here, because the gate holds the one primary action.
 
 - **The gate**: lock glyph, h2 “Skills are off in FinOps”, sub “Every workspace ships this way. `skills.enabled = false` is the value a workspace is created with, not a value somebody set afterwards.”, badge **off**.
   - **What turning it on does**, four bullets: adds one tool to every agent’s belt in this workspace, `search_skills` (“Not a list of skills — a door.”); lets the harness load a skill file into the agent’s context, at a token cost this page prices to the cent; starts a `skills.searched` and a `skills.loaded` frame on every run that uses one, so a sealed run says exactly what procedure it was carrying; makes `.oxagen/skills.toml` a governed file, changed by a Context PR and not a settings screen.
@@ -27,7 +27,7 @@ Show that skills ship **off**: `skills.enabled = false` is the value a workspace
 
 **Dialogs this page opens:** `govmode` (see `steering.md`), `skenable`, `skcfg` (both in `skills.md`).
 
-**Shell.** As `steering.md`, on the FinOps workspace: sidebar with Steering lit (Fleet 1, Agent IAM 21, Steering 9), top bar with breadcrumbs ending on Skills, ⌘K search-or-run, notifications, the **Approvals** button (count of everything waiting on you across the organization) that opens the drawer `#apdrawer`, and the account avatar. No assistant button in the top bar.
+**Shell.** As `steering.md`, on the FinOps workspace: sidebar with Steering lit (Fleet 1, Agents 21, Steering 9), top bar with breadcrumbs ending on Skills, ⌘K search-or-run, notifications, the **Approvals** button (count of everything waiting on you across the organization) that opens the drawer `#apdrawer`, and the account avatar. No assistant button in the top bar.
 
 ## Data sources
 
@@ -50,7 +50,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 
 ## Mobile
 
-The seven hub tabs are one scrolling strip; the two gate columns stack; the footer buttons go full width; workspace rows drop the badge under the text. Top bar collapses to hamburger · current crumb · search glyph · notifications · approvals · avatar; the thumb bar is Fleet, Agents, Tools, Spend, More.
+The five hub tabs are one scrolling strip, Library lit with the shelf row wrapping under it and Skills pressed; the two gate columns stack; the footer buttons go full width; workspace rows drop the badge under the text. Top bar collapses to hamburger · current crumb · search glyph · notifications · approvals · avatar; the thumb bar is Fleet, Agents, Tools, Spend, More.
 
 ## Permissions
 

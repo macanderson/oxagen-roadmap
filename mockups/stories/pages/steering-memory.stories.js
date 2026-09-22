@@ -4,7 +4,7 @@ import { view, argTypes } from "../_view.js";
 import spec from "../../pages/steering-memory.md?raw";
 
 export default {
-  title: "Oxagen/Workspace/Steering · Memory",
+  title: "Oxagen/Workspace/Steering · Library · Memory",
   tags: ["autodocs"],
   argTypes,
   args: { shell: "desktop", theme: "system", product: true, hash: "#/a-intel/core-platform/steering/memory" },

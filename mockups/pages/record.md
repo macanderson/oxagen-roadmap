@@ -41,7 +41,7 @@ Every kind panel ends with **What it can never do.**, the one sentence that stop
 
 `crecarchive`, **Archive <lineage>?**: archiving is a pull request that sets `status = "archived"` on `.oxagen/rules/<lineage>.toml`. The file stays, the lineage stays, and the record stops compiling into the bundle when it merges; it is in force until then. A record carrying a constraint effect says so, because the gate goes with it and what it refused today is allowed once this merges. Nothing is deleted: every run it steered keeps naming its hash, and a later record may supersede it instead. Footer: **Keep it in force** · **Open the pull request** (red). A record that already has a pull request open against it says so and offers Close instead, so two changes are never proposed over the same file; one already archived says so too.
 
-**Shell.** As `steering.md`: sidebar (Workspace nav: Fleet · Agent IAM · Tools · Steering · Repositories · Spend; Organization nav: Organization · Billing · Audit) with Steering lit, top bar with breadcrumbs, ⌘K search-or-run, notifications, the **Approvals** button (count of everything waiting on you across the organization) that opens the drawer `#apdrawer`, and the account avatar. No assistant button in the top bar.
+**Shell.** As `steering.md`: sidebar (Workspace nav: Fleet · Agents · Tools · Steering · Runtimes · Repositories · Spend; Organization nav: Organization · Billing · Audit) with Steering lit, top bar with breadcrumbs, ⌘K search-or-run, notifications, the **Approvals** button (count of everything waiting on you across the organization) that opens the drawer `#apdrawer`, and the account avatar. No assistant button in the top bar.
 
 ## Data sources
 

@@ -1,0 +1,95 @@
+{
+ "belts": [
+  {
+   "id": "tb_repo_reader",
+   "name": "Repository reader",
+   "desc": "Read a repository: files at a ref, a commit with its checks, and the pull requests in flight.",
+   "owner": "platform",
+   "tools": ["github__get_file_contents@2", "github__get_commit@1", "github__list_pull_requests@2"],
+   "updated": "2026-09-02 09:20 UTC",
+   "by": "mbell"
+  },
+  {
+   "id": "tb_repo_contributor",
+   "name": "Repository contributor",
+   "desc": "Propose changes: open a pull request, comment on one, and open a Context PR.",
+   "owner": "platform",
+   "tools": ["github__create_pull_request@3", "github__create_issue_comment@2", "open_context_pr@1"],
+   "updated": "2026-09-02 09:22 UTC",
+   "by": "mbell"
+  },
+  {
+   "id": "tb_release_control",
+   "name": "Release control",
+   "desc": "Land and publish: merge a pull request, cut a release, delete the merged branch.",
+   "owner": "platform",
+   "tools": ["github__merge_pull_request@4", "github__create_release@2", "github__delete_branch@1"],
+   "updated": "2026-09-06 14:05 UTC",
+   "by": "mbell",
+   "note": "Every tool here is irreversible or denied. A grant reaching this belt still meets the policy at the call."
+  },
+  {
+   "id": "tb_context_graph",
+   "name": "Context graph",
+   "desc": "Search the workspace graph, traverse it, recall published records, and append new ones.",
+   "owner": "platform",
+   "tools": ["search_graph@1", "expand_graph@1", "recall_context@2", "append_record@2"],
+   "updated": "2026-08-30 11:41 UTC",
+   "by": "priya"
+  },
+  {
+   "id": "tb_workstation",
+   "name": "Workstation",
+   "desc": "Act on the host checkout: run a command, replace a string in a file, fetch a URL.",
+   "owner": "platform",
+   "tools": ["claude_code__Bash@2.1", "claude_code__Edit@2.1", "claude_code__WebFetch@2.1"],
+   "updated": "2026-09-08 08:12 UTC",
+   "by": "mbell",
+   "note": "Harness-native. Delivered only to an agent on the harness tier or above, because nothing below it installs a hook."
+  },
+  {
+   "id": "tb_issue_tracker",
+   "name": "Issue tracker",
+   "desc": "Read an issue with its state and links, and change its state, assignee or labels.",
+   "owner": "platform",
+   "tools": ["linear__get_issue@2", "linear__update_issue@3"],
+   "updated": "2026-08-28 16:10 UTC",
+   "by": "priya"
+  },
+  {
+   "id": "tb_messaging",
+   "name": "Messaging",
+   "desc": "Message another agent in the workspace, and post to a Slack channel the connection authorizes.",
+   "owner": "platform",
+   "tools": ["send_message@1", "slack__post_message@2"],
+   "updated": "2026-09-09 21:40 UTC",
+   "by": "mbell"
+  },
+  {
+   "id": "tb_payments",
+   "name": "Payments",
+   "desc": "Create and confirm a payment against a saved counterparty.",
+   "owner": "finops",
+   "tools": ["stripe__create_payment@5"],
+   "updated": "2026-09-05 11:52 UTC",
+   "by": "dsong",
+   "note": "Assigning this belt authorizes nothing. A financial call is denied before dispatch unless the agent holds a mandate covering it."
+  },
+  {
+   "id": "tb_cloud_cost",
+   "name": "Cloud cost",
+   "desc": "Read cost and usage for a linked cloud account.",
+   "owner": "finops",
+   "tools": ["aws_billing__get_cost_and_usage@1"],
+   "updated": "2026-08-19 09:02 UTC",
+   "by": "dsong"
+  }
+ ],
+ "assign": {
+  "a-intel.core.release-manager": ["tb_repo_reader", "tb_repo_contributor", "tb_release_control", "tb_context_graph", "tb_workstation", "tb_issue_tracker"],
+  "a-intel.core.stella-ci": ["tb_repo_reader", "tb_repo_contributor", "tb_context_graph", "tb_workstation", "tb_messaging"],
+  "a-intel.core.triage": ["tb_repo_reader", "tb_repo_contributor", "tb_release_control", "tb_context_graph", "tb_workstation", "tb_issue_tracker", "tb_messaging", "tb_cloud_cost"],
+  "a-intel.finops.invoice-bot": ["tb_context_graph", "tb_messaging", "tb_payments", "tb_cloud_cost"],
+  "a-intel.core.docs-writer": ["tb_repo_reader", "tb_repo_contributor", "tb_context_graph", "tb_workstation"]
+ }
+}

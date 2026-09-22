@@ -17,27 +17,34 @@ export const PAGES = [
   // workspace scope (spec Appendix F, pages 1–7)
   { id: "fleet",             title: "Fleet",                       group: "Workspace",    hash: `#/${ORG}/core-platform`,                                  states: ALL },
   { id: "run",               title: "Run",                         group: "Workspace",    hash: `#/${ORG}/core-platform/runs/run_01K5RS7M2E8FJ3QW`,         states: ALL },
-  { id: "agents",            title: "Agent IAM",                   group: "Workspace",    hash: `#/${ORG}/core-platform/agents`,                           states: ALL },
+  { id: "agents",            title: "Agents",                      group: "Workspace",    hash: `#/${ORG}/core-platform/agents`,                           states: ALL },
   { id: "agent",             title: "Agent",                       group: "Workspace",    hash: `#/${ORG}/core-platform/agents/triage`,                    states: ALL },
+  { id: "agent-toolbelt",    title: "Agent · Toolbelt",            group: "Workspace",    hash: `#/${ORG}/core-platform/agents/triage/toolbelt`,           states: NO_EMPTY },
   { id: "agent-source",      title: "Agent source",                group: "Workspace",    hash: `#/${ORG}/core-platform/agents/release-manager/source`,    states: NO_EMPTY },
   { id: "mandate",           title: "Mandate",                     group: "Workspace",    hash: `#/${ORG}/finops/agents/invoice-bot/mandates/mnd_7K2ETQ4`, states: ALL },
   { id: "tools",             title: "Tools",                       group: "Workspace",    hash: `#/${ORG}/core-platform/tools`,                            states: ALL },
-  // Steering is the hub: seven tabs, each a URL segment (#/:org/:ws/steering/<tab>). Records is the
-  // page itself; Skills keeps its three page ids; the other five tabs are pages of their own here so
-  // every tab is checked in every state and both shells.
-  { id: "steering",          title: "Steering · Records",          group: "Workspace",    hash: `#/${ORG}/core-platform/steering/records`,                 states: ALL },
-  { id: "steering-memory",   title: "Steering · Memory",           group: "Workspace",    hash: `#/${ORG}/core-platform/steering/memory`,                  states: ALL },
-  { id: "steering-ontology", title: "Steering · Ontology",         group: "Workspace",    hash: `#/${ORG}/core-platform/steering/ontology`,                states: ALL },
-  { id: "steering-policy",   title: "Steering · Policy",           group: "Workspace",    hash: `#/${ORG}/core-platform/steering/policy`,                  states: ALL },
+  { id: "toolbelts",         title: "Tools · Toolbelts",           group: "Workspace",    hash: `#/${ORG}/core-platform/tools/toolbelts`,                  states: ALL },
+  { id: "providers",         title: "Tools · Providers",           group: "Workspace",    hash: `#/${ORG}/core-platform/tools/providers`,                  states: ALL },
+  // Steering is the hub: five tabs, each a URL segment (#/:org/:ws/steering/<tab>). The Library
+  // holds four shelves and each shelf keeps the URL it had, so every old link still lands. Skills
+  // is a shelf with its own page and its own three page ids.
+  { id: "steering",          title: "Steering · Library",          group: "Workspace",    hash: `#/${ORG}/core-platform/steering/library`,                 states: ALL },
+  { id: "steering-records",  title: "Steering · Library · Records",group: "Workspace",    hash: `#/${ORG}/core-platform/steering/records`,                 states: ALL },
+  { id: "steering-memory",   title: "Steering · Library · Memory", group: "Workspace",    hash: `#/${ORG}/core-platform/steering/memory`,                  states: ALL },
+  { id: "steering-ontology", title: "Steering · Library · Ontology",group: "Workspace",   hash: `#/${ORG}/core-platform/steering/ontology`,                states: ALL },
+  { id: "steering-assignments", title: "Steering · Assignments",   group: "Workspace",    hash: `#/${ORG}/core-platform/steering/assignments`,             states: ALL },
+  { id: "steering-gates",    title: "Steering · Gates",            group: "Workspace",    hash: `#/${ORG}/core-platform/steering/gates`,                   states: ALL },
   { id: "steering-proposals",title: "Steering · Proposals",        group: "Workspace",    hash: `#/${ORG}/core-platform/steering/proposals`,               states: ALL },
-  { id: "steering-preview",  title: "Steering · Preview",          group: "Workspace",    hash: `#/${ORG}/core-platform/steering/preview/release-manager`, states: ALL },
+  { id: "steering-compiler", title: "Steering · Compiler",         group: "Workspace",    hash: `#/${ORG}/core-platform/steering/compiler/release-manager`,states: ALL },
+  { id: "runtimes",          title: "Runtimes",                    group: "Workspace",    hash: `#/${ORG}/core-platform/runtimes`,                         states: ALL },
+  { id: "runtime",           title: "Runtime",                     group: "Workspace",    hash: `#/${ORG}/core-platform/runtimes/mbell-mbp-16`,            states: NO_EMPTY },
   { id: "repositories",      title: "Repositories",                group: "Workspace",    hash: `#/${ORG}/core-platform/repositories`,                     states: ALL },
   { id: "record",            title: "Context record",              group: "Workspace",    hash: `#/${ORG}/core-platform/steering/records/ctx.release.never-merge`, states: NO_EMPTY },
   { id: "spend",             title: "Spend",                       group: "Workspace",    hash: `#/${ORG}/core-platform/spend`,                            states: ALL },
   // skills (W13), now the Skills tab of Steering: sync, resolution, the seat in the loop, reflection;
   // the off-by-default gate; the interjected run. The old #/:org/:ws/skills… routes still resolve.
-  { id: "skills",            title: "Steering · Skills",           group: "Workspace",    hash: `#/${ORG}/core-platform/steering/skills`,                  states: ALL },
-  { id: "skills-off",        title: "Steering · Skills · off (the default)", group: "Workspace", hash: `#/${ORG}/finops/steering/skills`,                 states: ["loaded"] },
+  { id: "skills",            title: "Steering · Library · Skills", group: "Workspace",    hash: `#/${ORG}/core-platform/steering/skills`,                  states: ALL },
+  { id: "skills-off",        title: "Steering · Library · Skills · off (the default)", group: "Workspace", hash: `#/${ORG}/finops/steering/skills`,        states: ["loaded"] },
   { id: "skill-source",      title: "Skill source",                group: "Workspace",    hash: `#/${ORG}/core-platform/steering/skills/a-intel.release-notes-from-prs/source`, states: NO_EMPTY },
   { id: "run-interjection",  title: "Run · interjection",          group: "Workspace",    hash: `#/${ORG}/core-platform/runs/run_01K6QW3D5N7TYBA2`,        states: NO_EMPTY },
   // organization scope (pages 8–10)

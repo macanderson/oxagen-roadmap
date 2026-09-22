@@ -10,8 +10,10 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import os from "node:os";
 
-const CACHE = path.join(os.homedir(), "Library/Caches/ms-playwright");
-const PLATFORMS = ["chrome-headless-shell-mac-arm64", "chrome-headless-shell-mac-x64", "chrome-headless-shell-linux"];
+// PLAYWRIGHT_BROWSERS_PATH wins where it is set, so a Linux box or a container that keeps its
+// browsers outside the home directory is read too; a Mac with the variable unset is unchanged.
+const CACHE = process.env.PLAYWRIGHT_BROWSERS_PATH || path.join(os.homedir(), "Library/Caches/ms-playwright");
+const PLATFORMS = ["chrome-headless-shell-mac-arm64", "chrome-headless-shell-mac-x64", "chrome-headless-shell-linux", "chrome-linux"];
 
 // The repo's own playwright comes first. A globally installed one is a different version asking for
 // a different browser revision, and `npx playwright install` fetches what the local copy asks for,
@@ -24,8 +26,10 @@ function findModule(root) {
     .find((d) => existsSync(path.join(d, "index.js")));
 }
 
+// A Linux build names the binary headless_shell and puts it under chrome-linux.
 const shellAt = (rev) => PLATFORMS
-  .map((p) => path.join(CACHE, `chromium_headless_shell-${rev}`, p, "chrome-headless-shell"))
+  .flatMap((p) => [path.join(CACHE, `chromium_headless_shell-${rev}`, p, "chrome-headless-shell"),
+                   path.join(CACHE, `chromium_headless_shell-${rev}`, p, "headless_shell")])
   .find(existsSync);
 
 /**
