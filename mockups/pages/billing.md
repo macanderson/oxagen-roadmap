@@ -31,8 +31,7 @@ Left column:
 - **Invoices**: Invoice, Period, Governed actions, Amount, Status, Paid, **Open in Stripe ↗**.
 
 Right column:
-- **Price list**: Free (every governance feature, an included monthly allowance, 30 days of evidence, 3 seats); Governed actions, blocks of 10,000 ($30.00 per block at the published rate); Negotiated agreement (the same four figures, per organization); Invoice billing (never capped, overage invoiced at the contracted rate at period end); Evidence retention (13 months included on paid plans, then $0.10 per GB-month); Tokens Oxagen buys for you (at cost, no markup, capped); Enterprise, annual (from $60,000 per year). A footer: no credits, no resellers, no revenue dashboard; the free tier is the whole product, limited by retention and seats, never by features or volume.
-- **Billable units**: **Priced** (a governed action, with its receipt in the chain), **Reported** (sealed runs, tokens by class, retained evidence), **Free** (denials, runs Oxagen halted before a model call, runs of the in-app agent).
+- **Price list**: Free (every governance feature, an included monthly allowance, 30 days of evidence, 3 seats); Governed actions, blocks of 10,000 ($30.00 per block at the published rate); Negotiated agreement (the same four figures, per organization); Invoice billing (never capped, overage invoiced at the contracted rate at period end); Evidence retention (13 months included on paid plans, then $0.10 per GB-month); Tokens Oxagen buys for you (at cost, no markup, capped); Enterprise, annual (from $60,000 per year).
 
 **Dialogs this page opens:** `plan` (a Plan select with Team and Enterprise, a note, **Change plan**), `incident` (error state), `request-access` (denied state).
 

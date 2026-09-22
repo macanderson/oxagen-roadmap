@@ -1112,12 +1112,7 @@ function defForm(a){
    '<dt>definition_digest</dt><dd class="mono">'+h(a.digest)+'</dd>'+
    '<dt>At commit</dt><dd class="mono">'+h(a.commit)+(dirty?' · <span style="color:var(--st-approval)">draft '+sha7(defSrc(slug))+'</span>':'')+'</dd>'+
    '<dt>Generated beside it</dt><dd class="mono">.claude/agents/'+h(slug)+'.md</dd></dl></div></div>'+
-   '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Changing this agent</h3></div><div class="panel-b">'+
-   '<ul class="chain"><li class="on"><span class="h">1 · Edit here or in the repo</span><div>Either opens a Context PR. Nothing is written to Postgres first.</div></li>'+
-   '<li class="on"><span class="h">2 · Checks</span><div>Schema, tools that exist in the registry, no <span class="mono">irreversible</span> without a mandate, and a secret and PII scan on the instructions.</div></li>'+
-   '<li class="on"><span class="h">3 · Review</span><div>Governance mode <span class="mono">team</span>: a code-owner review is required.</div></li>'+
-   '<li class="on"><span class="h">4 · Merge is the change</span><div>The principal, roles, and toolbelt update. Open your coding agent in the repo and it is there.</div></li></ul>'+
-   '<div class="note" style="margin-top:13px">Deleting an agent is a pull request that removes the file. The principal is retired, never deleted, so its runs keep their identity.</div></div></div>';
+   '<div class="note" style="margin-top:14px">Deleting an agent is a pull request that removes the file. The principal is retired, never deleted, so its runs keep their identity.</div>';
   return bar+'<div class="split">'+left+'<div>'+right+'</div></div>';
 }
 
@@ -5046,15 +5041,7 @@ function aToolbelt(a,r){
    '<div class="tw"><table'+(bv==="group"?' data-lt="off"':'')+'><thead><tr><th>Tool</th><th>Category</th><th>Decision</th>'+
    '<th>Hazard</th><th>Egress</th><th>Financial</th><th>Schema digest</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
    (total>belt.length?'<div class="panel-b"><p class="muted" style="margin:0;font-size:12px">The remaining '+(total-belt.length)+
-     ' are the same github and harness families at other versions.</p></div>':'')+'</div>'+
-
-  '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Off the belt</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">A sample of the '+(verCount()-total).toLocaleString()+
-   ' registry versions outside this belt, and why each one is out.</p></div>'+
-   '<span class="b b-denied" style="margin-left:auto"><span class="d"></span>not visible to the model</span></div>'+
-   '<div class="tw"><table><thead><tr><th>Tool</th><th>Reason</th></tr></thead><tbody>'+
-   outside.map(function(x){return '<tr><td>'+toolCell(x.id,{sz:"sm"})+'</td><td class="muted">'+h(x.why)+'</td></tr>';}).join("")+
-   '</tbody></table></div></div></div>';
+     ' are the same github and harness families at other versions.</p></div>':'')+'</div></div>';
 }
 
 /* ---- Mandates: nothing in a grant, a role, or a bundle can substitute for one ---- */
@@ -5097,8 +5084,10 @@ function aBudgets(a,r){
   var pct=dayCap?Math.min(100,dayUsed/dayCap*100):0;
   var dayCol=pct>80?"var(--st-critical)":pct>50?"var(--st-approval)":"var(--st-allowed)";
   var runPct=Math.round(a.budgetUsed/money(a.budget)*100);
-  var tok=[["Input, uncached",4182904,"3.00","12.55"],["Input, cache write",1904110,"3.75","7.14"],
-    ["Input, cache read",38441227,"0.30","11.53"],["Output",2610884,"15.00","39.16"]];
+  var T=agentTok(a), rate=T.light?[0.80,1.00,0.08,4.00]:[3.00,3.75,0.30,15.00];
+  var tok=[["Input, uncached",T.fresh,rate[0]],["Input, cache write",T.cacheWrite,rate[1]],
+    ["Input, cache read",T.cacheRead,rate[2]],["Output",T.tokOut,rate[3]]]
+    .map(function(x){return [x[0],x[1],x[2].toFixed(2),(x[1]/1e6*x[2]).toFixed(2)];});
   var findings=FINDINGS.filter(function(f){return f.subject===a.key;});
 
   return '<div class="grid">'+coachStrip(a)+
@@ -5130,11 +5119,11 @@ function aBudgets(a,r){
     '<th class="num">Rate</th><th class="num">Cost</th></tr></thead><tbody>'+
     tok.map(function(x){return '<tr><td>'+h(x[0])+'</td><td class="num">'+x[1].toLocaleString()+'</td>'+
      '<td class="num">'+usd(x[2])+' / M</td><td class="num">'+usd(x[3])+'</td></tr>';}).join("")+
-    '<tr><td>Tool definitions</td><td class="num">3,388,808</td><td class="num dim">counted as input</td>'+
-    '<td class="num">'+usd("10.17")+'</td></tr>'+
+    '<tr><td>Tool definitions</td><td class="num">'+T.parts.tools.toLocaleString()+'</td><td class="num dim">counted as input</td>'+
+    '<td class="num">'+usd((T.parts.tools/1e6*rate[0]).toFixed(2))+'</td></tr>'+
     '</tbody></table></div>'+
-    '<div class="panel-b"><div class="note">Cache hit rate <b class="num">87.1%</b> · tool-definition tokens are '+
-    '<b class="num">7.9%</b> of input. The findings job flags a belt wider than the agent uses, because those tokens '+
+    '<div class="panel-b"><div class="note">Cache hit rate <b class="num">'+Math.round(T.cacheRate*100)+'%</b> · tool-definition tokens are '+
+    '<b class="num">'+(T.parts.tools/T.tokIn*100).toFixed(1)+'%</b> of input. The findings job flags a belt wider than the agent uses, because those tokens '+
     'are paid on every call whether the tool is used or not.</div></div></div></div>'+
 
   (findings.length
@@ -5198,11 +5187,7 @@ function aEnrollment(a,r){
    '<div class="row" style="margin-top:14px">'+
    '<button class="btn" onclick="act(\'Smoke session queued. One turn, recorded like any other run.\')">Run a smoke session</button>'+
    '<button class="btn danger" onclick="openDialog(\'unenroll\',\''+a.key+'\')">Unenroll</button></div>'+
-   '</div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>Rollback</h3></div><div class="panel-b">'+
-   '<p class="muted" style="font-size:12.5px;margin:0 0 10px">Shown beside the installer from the first screen, and never hidden afterwards.</p>'+
-   '<pre>oxagen agent unenroll --host '+h(a.host||"this")+' \\\n  --restore-settings</pre>'+
-   '<div class="note" style="margin-top:12px">If hooks are stripped by hand instead, the next run records '+
+   '<div class="note" style="margin-top:14px">If hooks are stripped by hand instead of unenrolling, the next run records '+
    '<span class="mono">hooks_removed</span> and the tier falls to <span class="mono">observe</span>. It is never upgraded after the fact.</div>'+
    '</div></div></div>';
 }
@@ -5214,12 +5199,7 @@ function aIncidents(a,r){
    '<div class="panel-h"><div style="flex:1;min-width:0"><h3>No tamper incident recorded</h3>'+
    '<p class="muted" style="margin:2px 0 0;font-size:12px">Nothing has been detected on this agent in the retention window.</p></div>'+
    '<span class="b b-allowed" style="margin-left:auto"><span class="d"></span>clean · 90 days</span></div>'+
-   '<div class="panel-b"><p style="font-size:12.5px;margin:0">Detectors that would raise one: '+
-   '<span class="mono">hooks_removed</span>, <span class="mono">chain_break</span>, '+
-   '<span class="mono">unknown_tool</span> bursts, <span class="mono">credential_probe</span>, '+
-    'a receipt modified after the fact, and a same-<span class="mono">seq</span> '+
-   'frame arriving with a different hash. Each one fires the same commands policy does, and each is a security event '+
-   'with who, why, and what it stopped.</p>'+
+   '<div class="panel-b"><p style="font-size:12.5px;margin:0">A detection is a security event with who, why, and what it stopped, and it fires the same commands policy does.</p>'+
    '<div class="row" style="margin-top:13px"><button class="btn sm ghost" onclick="go(\'#/'+ORG.slug+'/audit/incidents\')">Open the incident register</button></div>'+
    '</div></div>';
 
@@ -7151,25 +7131,7 @@ function pSteering(){
         '<span class="b b-allowed"><span class="d"></span>published</span>'+
         '<button class="btn sm" onclick="go(\''+crecUrl(r.id)+'\')">Open</button>'});}).join(""):'<div class="panel-b dim">No record of that kind in this workspace.</div>')+'</div>'+
      '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">Every record compiles to text. A record with an enforcement grant also compiles to a gate, which is listed on Policy with the notice it puts back into steering. A record can never grant authority: the checks enforce <span class="mono">constraint_effect ∈ {require, forbid}</span>, and a repository record may narrow what a workspace record allows, never widen it.</div></div></div>'+
-     '<div class="grid g2" style="margin-top:14px">'+
-     '<div class="panel"><div class="panel-h"><h3>On disk</h3></div><div class="panel-b">'+
-     '<pre>.oxagen/\n  workspace.toml             <span class="c"># linked repos, tool servers, budgets</span>\n'+
-     '  rules/\n    governance.toml          <span class="c"># mode = team</span>\n'+
-     '    promotions.jsonl         <span class="c"># hash-chained ledger (regulated mode)</span>\n'+
-     '    ctx.release.notes-format.toml\n    ctx.release.never-merge.toml\n    ctx.platform.changelog-once.toml\n'+
-     (stgRecord(CTXPR.record.id)?'    '+h(CTXPR.record.id)+'.toml  <span class="c"># merged in '+h(CTXPR.pr)+'</span>\n':'')+
-     '  skills/&lt;name&gt;/SKILL.md     <span class="c"># governed files, delivered by sync</span>\n'+
-     '  ontology/*.toml            <span class="c"># entity and term definitions</span>\n'+
-     '  proposals/*.toml           <span class="c"># candidates; steer nothing</span>\n'+
-     '  agents/&lt;slug&gt;.toml         <span class="c"># one per agent</span></pre>'+
-     '<div class="note" style="margin-top:12px">Stella symlinks into this directory rather than copying it, so its loader and its CI validation work unchanged on the same files with no second copy that could drift. Oxagen reads <span class="mono">.oxagen/</span> and nothing else.</div></div></div>'+
-     '<div class="panel"><div class="panel-h"><h3>Injection points</h3><span class="b b-q" style="margin-left:auto">five points</span></div><div class="panel-b">'+
-     '<p class="muted" style="font-size:12.5px;margin:0 0 12px">The harness owns the context window. Oxagen competes for its own slice of it, at exactly these points, and every delivery is recorded.</p>'+
-     '<ul class="chain stg-inj"><li class="on"><span class="h">1 · SessionStart additional context</span><div>The stable prefix: gate notices, then <span class="mono">must</span> and <span class="mono">should</span>. Capped at 16 KiB, cached in the signed bundle, works offline.</div></li>'+
-     '<li class="on"><span class="h">2 · UserPromptSubmit additional context</span><div>The volatile selection: <span class="mono">may</span> and <span class="mono">info</span>, picked for the prompt under a token budget.</div></li>'+
-     '<li class="on"><span class="h">3 · MCP tool results</span><div>What a governed tool call returns, a denial and its reason included.</div></li>'+
-     '<li class="on"><span class="h">4 · Files in the checkout</span><div>Skills, delivered by sync and loaded by the harness’s own progressive disclosure.</div></li>'+
-     '<li class="on"><span class="h">5 · The model request itself</span><div>Written at the proxy on the <span class="mono">gateway</span> and <span class="mono">contained</span> tiers: the stable prefix and the volatile selection, counted as <span class="mono">steering_tokens</span> and <span class="mono">context_frame_tokens</span>.</div></li></ul></div></div></div>';
+     '</div>';
   } else if(t==="memory"){
     body=stgMemoryTab(w);
   } else if(t==="ontology"){
@@ -8301,11 +8263,7 @@ function pOrganization(){
        '<td style="white-space:nowrap"><button class="btn sm" onclick="openDialog(\'rotatekey\','+i+')">Rotate</button> '+
        '<button class="btn sm danger" onclick="openDialog(\'revokekey\','+i+')">Revoke</button></td></tr>';}).join("")+
      '</tbody></table></div><div class="panel-b">'+
-     '<div class="note">A key is shown once, at creation, and never again. Keys carry grants, not roles, so an auditor’s key can read receipts and nothing else. Revoking a key ends its service principal’s access at the next call.</div></div></div>'+
-     '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Surfaces this reaches</h3>'+
-     '</div><div class="panel-b">'+
-     '<p class="muted" style="font-size:12.5px;margin:0 0 10px">One agent tool contract drives the API, MCP, the CLI and these screens, so a key that can do something here can do exactly that much everywhere else. Parity is checked by the manifest gate.</p>'+
-     '<pre>$ oxagen login --org a-intel\n$ oxagen run list --workspace core-platform --since 24h\n$ oxagen run export run_01K5RS7M2E8FJ3QW --with-bodies --out ./run_01K5RS7M2E8FJ3QW.bundle\n$ oxagen agent status a-intel.finops.invoice-bot</pre></div></div>';
+     '<div class="note">A key is shown once, at creation, and never again. Keys carry grants, not roles, so an auditor’s key can read receipts and nothing else. Revoking a key ends its service principal’s access at the next call.</div></div></div>';
   }
   return '<div class="phead"><div class="t"><p class="eyebrow">Organization</p><h1>'+h(ORG.name)+'</h1>'+
    '<p>People, roles, invitations, workspaces, model funding and routes, and API keys.</p></div>'+
@@ -8566,11 +8524,8 @@ function pBilling(){
      ["Invoice billing","never capped · overage invoiced at the contracted rate at period end"],["Evidence retention","13 months included on paid plans, then $0.10 per GB-month"],
      ["Tokens Oxagen buys for you","at cost, no markup, capped"],["Enterprise, annual","from $60,000 per year"]]
     .map(function(p){return '<tr><td style="font-size:12.5px">'+h(p[0])+'</td><td class="num mono" style="font-size:11.5px">'+h(p[1])+'</td></tr>';}).join("")+
-    '</tbody></table></div><div class="panel-b"><p class="muted" style="font-size:12px;margin:0">No credits, no resellers, and no revenue dashboard. The free tier is the whole product, limited by retention and seats, never by features or volume. Upgrading is a governance decision, not a volume accident.</p></div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>Billable units</h3></div><div class="panel-b">'+
-    '<ul class="chain"><li class="on"><span class="h">Priced</span><div>A governed action: a call Oxagen decided, delivered and recorded, with its receipt in the chain.</div></li>'+
-    '<li class="on"><span class="h">Reported</span><div>Sealed runs, tokens by class, retained evidence: secondary meters, never priced.</div></li>'+
-    '<li class="on"><span class="h">Free</span><div>Denials, runs Oxagen halted before a model call, runs of the in-app agent. You never pay for Oxagen saying no.</div></li></ul></div></div></div></div>';
+    '</tbody></table></div></div>'+
+   '</div></div>';
 }
 
 /* ============================== Audit ============================== */
@@ -8658,13 +8613,6 @@ var KEYS=[
 ];
 
 
-
-var RETENTION_TIERS=[
- ["Ledger","Postgres","runs, attempts, seals, attestation, counts, cost, tier, gaps","forever","412k runs"],
- ["Frames","Postgres","frame rows with digests, cost, policy decisions","hot window · 13 months","2.6M frames"],
- ["Bodies and segments","Object storage, write-once","encrypted bodies; per-seal archive segment, Merkle root, attestation","7 years","41 GB"],
- ["Control-plane audit","Postgres","admin actions, IAM changes, repo bindings, plane changes, key rotations","7 years","118k events"]
-];
 
 /* ---- small renderers shared by the audit tabs ---- */
 function auditBadge(k,label){return '<span class="b b-'+k+'"><span class="d"></span>'+h(label)+'</span>';}
@@ -8780,16 +8728,8 @@ function auditExports(){
      '<button class="btn sm ghost" '+(ready?'onclick="act(\'In the product this downloads '+x.id+' as a signed archive with its verifier. A mockup writes nothing to disk.\')"':'disabled')+'>Download</button></div></div>'+
      '<div class="panel-b">'+auditFacts([["Export id",x.id,1],["Range",x.range],["Contents",x.runs],["Size",x.size],["Created",x.at+" by "+x.by],["Signature",x.sig,1],["Key ids",x.keys,1]])+
      (S.verified[x.id]?'<pre style="margin-top:12px">$ ./oxagen-verify --bundle '+h(x.id)+' --release-key rel-2026-03\n  merkle roots        recomputed and matched\n  seal attestations   signatures verified\n  chain continuity    no gaps, no reordering\n  <span class="s">OK</span>  internally consistent and signed</pre>':'')+'</div></div>';}).join("");
-  var kinds=["run.sealed","approval.requested","tool_call.denied","kill_switch.flipped","mandate.exception"];
   return '<div class="callout" style="margin-bottom:14px">An export is a verifiable bundle: archive segments, attestations, key ids, and a verifier script. The segment was written at seal time, so it is never a later copy of the graph — it is the same bytes the graph indexed, written once. A customer’s auditor checks it offline, without trusting Oxagen or the worker’s harness.</div>'+
-   '<div class="grid g2">'+cards+'</div>'+
-   '<div class="grid g2" style="margin-top:14px"><div class="panel"><div class="panel-h"><h3>Verifier</h3><span style="margin-left:auto">'+auditStore("ships inside every bundle")+'</span></div><div class="panel-b">'+
-   '<pre>$ tar xf exp_01K4Q7M1.tar.zst &amp;&amp; cd exp_01K4Q7M1\n$ ./oxagen-verify --bundle . --release-key rel-2026-03\n\n  manifest            31 segments, 188,440 frame envelopes (NDJSON)\n  merkle roots        31 / 31 recomputed and matched\n  seal attestations   962 / 962 signatures verified ('+h(ORG.attester)+', key_ox_aintel_2026Q1)\n  chain continuity    no gaps, no reordering\n  key ids present     kek_aintel_2026Q2, kek_aintel_2026Q3\n  tiers               harness 953 · observe 9\n\n  <span class="s">OK</span>  the bundle is internally consistent and signed by Oxagen release key rel-2026-03</pre>'+
-   '<div class="note" style="margin-top:12px">The verifier runs offline and needs no Oxagen service. It recomputes every Merkle root and checks every seal signature against the published key, so an auditor never has to trust Oxagen’s word for the chain.</div></div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>Outbound events</h3><span class="b b-q" style="margin-left:auto">Series A</span></div><div class="panel-b">'+
-   '<p class="muted" style="font-size:12.5px;margin-top:0">Subscriptions name the event kinds; only those are emitted and everything else never leaves. Payloads carry ids and a link to the run and frame, never raw prompt or tool bodies.</p>'+
-   '<div class="row">'+kinds.map(function(e){return '<span class="b b-q mono" style="font-size:10.5px">'+h(e)+'</span>';}).join("")+'</div>'+
-   '<div class="hr"></div><dl class="kv"><dt>Dead-letter view</dt><dd>0 undelivered</dd><dt>Delivery</dt><dd>signed webhook, HMAC with a rotating secret, ordered per run, at-least-once with backoff</dd></dl></div></div></div>';
+   '<div class="grid g2">'+cards+'</div>';
 }
 
 function auditKeys(){
@@ -8809,20 +8749,13 @@ function auditKeys(){
 }
 
 function auditRetention(){
-  var tiers=RETENTION_TIERS.map(function(t){
-    return '<tr><td class="t-main" style="font-size:12.5px">'+h(t[0])+'</td><td class="mono" style="font-size:11.5px">'+h(t[1])+'</td>'+
-     '<td style="font-size:12px;max-width:38ch">'+h(t[2])+'</td><td class="mono" style="font-size:11.5px">'+h(t[3])+'</td><td class="num mono">'+h(t[4])+'</td></tr>';}).join("");
   return '<div class="panel"><div class="panel-h"><h3>Retention</h3><span class="muted" style="font-size:12.5px">keep everything, at full fidelity, for seven years, and make it cheap by writing it once</span>'+
    '<div class="sp">'+auditStore("organization policy")+'<button class="btn sm" onclick="openDialog(\'retention\')">Edit policy</button></div></div>'+
-   '<div class="panel-b">'+auditFacts([     ["Body retention","7 years from the seal — organizations may set longer"],
+   '<div class="panel-b">'+auditFacts([["Body retention","7 years from the seal — organizations may set longer"],
      ["Hot window","13 months, then frame rows are compacted into the segment. Bodies are never moved."],
      ["Replay of a compacted run","reads the segment, not the hot table. Same bytes, same grade."],
      ["Workspace opt-down",WS.map(function(w){return w.slug+" "+(w.retention||"content_exact");}).join(" · "),1],
-     ["Cold storage cost","41 GB · $0.04 per month. The hot table, not the archive, is what needs a window."]])+'</div></div>'+
-   '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Archive tiers</h3><span style="margin-left:auto">'+auditStore("three stores, one policy")+'</span></div>'+
-   '<div class="tw"><table><thead><tr><th>Tier</th><th>Where</th><th>What it holds</th><th>Retention</th><th class="num">Held today</th></tr></thead><tbody>'+tiers+'</tbody></table></div></div>'+
-   '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Redaction</h3><span class="muted" style="font-size:12.5px">before write, never after</span></div>'+
-   '<div class="panel-b"><div class="note">Redaction detectors run before a body is written, so personal data does not enter the archive in the first place. What is written once stays written: the archive has no edit path, which is what makes an export verifiable.</div></div></div>';
+     ["Cold storage cost","41 GB · $0.04 per month. The hot table, not the archive, is what needs a window."]])+'</div></div>';
 }
 
 function pAudit(){
@@ -9427,27 +9360,7 @@ function skLoop(w){
       '<b>'+(SKS.answered==="link"?"link to core-platform":"create the workspace edge")+'</b>. '+
       '<a href="'+base+'/runs/'+h(SKRUN.id)+'">Open the run</a> to see the frames it wrote, '+
       'or <button class="btn sm" onclick="skReset()">reset the demo</button> to be asked again.</p>'+
-     '</div></div>')+
-   '<div class="grid g2" style="gap:12px">'+
-    '<div class="panel"><div class="panel-h"><h3>Seat permissions</h3></div><div class="panel-b">'+
-     '<div class="sx-skl">'+[
-      ["ask","Ask a person a question","The loop pauses at a boundary and the question reaches the operator in the agent’s own voice. The agent is not told what to say; it is handed the answer as evidence."],
-      ["cons","Stop before a guess","An unbound repo, a skill past the load budget, a digest that changed. Each one is a stop, not a fallback."],
-      ["mirror","Ask the agent to reflect","An out-of-band turn, after the work is sealed. Its output is quarantined; see the Reflection tab."],
-      ["proc","Record what it did","Every one of the above is a frame with a time, an author and a digest. Nothing above happens off the record."]
-     ].map(function(x){
-      return '<div class="sx-row"><div class="sx-ki">'+icon(x[0])+'</div><div><div class="nm">'+h(x[1])+'</div>'+
-       '<div class="st">'+h(x[2])+'</div></div><div class="rt"></div></div>';}).join("")+'</div></div></div>'+
-    '<div class="panel"><div class="panel-h"><h3>Denied actions</h3></div><div class="panel-b">'+
-     '<div class="sx-skl">'+[
-      ["Rewrite what the agent said","An interjection is a new frame beside the agent’s turn. The agent’s own output is never edited, and a replay shows both."],
-      ["Answer on the operator’s behalf","No default answer, no remembered answer, no “last time you chose…”. On timeout the run continues with nothing, which is the conservative end."],
-      ["Feed a reflection back into the work","A self-grade cannot become steering, cannot become a Context PR, and cannot change a later run’s context. The Reflection tab states it in five lines and the file enforces it."],
-      ["Hide that it happened","There is no silent interjection. A run that was asked something carries the question, the pause, the answer and the wait in its frames."]
-     ].map(function(x){
-      return '<div class="sx-row"><div class="sx-ki" style="color:var(--sk-held);border-color:color-mix(in srgb,var(--sk-held) 40%,transparent)">'+icon("lock")+'</div>'+
-       '<div><div class="nm">'+h(x[0])+'</div><div class="st">'+h(x[1])+'</div></div><div class="rt"></div></div>';}).join("")+'</div></div></div>'+
-   '</div>';
+     '</div></div>');
 }
 
 /* ---- reflection: captured, and then fenced ---- */
