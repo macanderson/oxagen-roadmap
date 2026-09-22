@@ -4220,7 +4220,7 @@ DLG_EXT.forkreplay=function(){
     frSec("What is replayed, what runs live",
      row(tag("b-q","from the recording"),'<b>Frames 0–'+f.seq+'</b> replay exactly as recorded. No model is called and no tool is dispatched for any of them.')+
      row(tag("b-allowed","runs live"),'<b>The next model call</b>'+(first?' (recorded at '+frameBtn(first.seq,"frame "+first.seq)+')':'')+' is made for real against <span class="mono">'+h(R.model)+'</span> with the recorded prompt. It costs money and the answer may differ — that is the point of a fork.')+
-     row(tag("b-proven","from the cassette"),'<b>'+toolsAfter+' tool call'+(toolsAfter===1?'':'s')+' after this frame</b> are served from the recording when the canonical input digest matches, byte for byte. Nothing reaches a real tool server.')+
+     row(tag("b-proven","from the cassette"),'<b>'+toolsAfter+' tool call'+(toolsAfter===1?'':'s')+' after this frame</b> are served from the recording when the canonical input digest matches, byte for byte. Nothing reaches a real provider.')+
      row(tag("b-denied","denied"),'<b>A tool call whose input digest differs</b> has no cassette entry. It is denied, not dispatched: a fork cannot open a pull request, move money, or write to a repository.'))+
     frSec("Cost and record",frKv([["Spent by this frame","$"+spent.toFixed(2)+" of "+usd(R.cost)+" · not spent again"],
      ["Estimated spend",first?"about $"+(parseFloat(first.cost)||0).toFixed(2)+" for the first live call; $"+est.toFixed(2)+" if the fork runs to the end":"no model call follows this frame in view"],
@@ -4730,7 +4730,7 @@ function aIdentity(a,r){
               ["Run token","one, and it reaches Oxagen only"]])+
     '<p style="font-size:12.5px;margin:0">It holds one run token, and that token is good for talking to Oxagen and '+
     'nothing else. Every secret a call needs is minted by the broker at dispatch, scoped to that one call, and never '+
-    'transmitted to the agent. A leaked run token cannot reach a tool server.</p>'+
+    'transmitted to the agent. A leaked run token cannot reach a provider.</p>'+
     '<button class="btn sm" onclick="go(\'#/'+ORG.slug+'/'+S.ws+'/tools/providers\')">See the connections that mint them</button>'+
     '</div></div></div>'+
 
@@ -7143,7 +7143,7 @@ function stgRecordsTab(w){
      '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">Every record compiles to text. A record with an enforcement grant also compiles to a gate, which is listed on Policy with the notice it puts back into steering. A record can never grant authority: the checks enforce <span class="mono">constraint_effect ∈ {require, forbid}</span>, and a repository record may narrow what a workspace record allows, never widen it.</div></div></div>'+
      '<div class="grid g2" style="margin-top:14px">'+
      '<div class="panel"><div class="panel-h"><h3>On disk</h3></div><div class="panel-b">'+
-     '<pre>.oxagen/\n  workspace.toml             <span class="c"># linked repos, tool servers, budgets</span>\n'+
+     '<pre>.oxagen/\n  workspace.toml             <span class="c"># linked repos, providers, budgets</span>\n'+
      '  rules/\n    governance.toml          <span class="c"># mode = team</span>\n'+
      '    promotions.jsonl         <span class="c"># hash-chained ledger (regulated mode)</span>\n'+
      '    ctx.release.notes-format.toml\n    ctx.release.never-merge.toml\n    ctx.platform.changelog-once.toml\n'+
@@ -8647,9 +8647,9 @@ var INCIDENTS=[
   detail:"The Claude Code harness on mbp-01 reported its permission hooks gone between two steps. Oxagen dropped the run to observe tier for its remainder and labeled every later frame client-attested.",
   resolution:"A local harness update rewrote settings.json. Hooks restored and the host re-enrolled through the wrapper. Frames from the observe window stay labeled as such; the label is never upgraded after the fact.",
   status:"resolved",closedAt:"2026-09-02 11:20",closedBy:"Marcus Bell",runs:1},
- {id:"inc_01K4J9RW",sev:"info",title:"Run token presented directly to a tool server",kind:"credential_probe",at:"2026-08-25 09:55",by:"gateway",
+ {id:"inc_01K4J9RW",sev:"info",title:"Run token presented directly to a provider",kind:"credential_probe",at:"2026-08-25 09:55",by:"gateway",
   scope:"a-intel.core.stella-ci · run_01K4J9RW2P",
-  detail:"A run token was sent to api.github.com instead of the tool gateway. GitHub rejected it; the gateway recorded the attempt. Tool servers accept broker credentials only, so the token was never valid there.",
+  detail:"A run token was sent to api.github.com instead of the tool gateway. GitHub rejected it; the gateway recorded the attempt. Providers accept broker credentials only, so the token was never valid there.",
   resolution:"A retry path in a custom script bypassed the MCP endpoint. Script corrected; no credential was exposed.",
   status:"resolved",closedAt:"2026-08-25 10:31",closedBy:"Marcus Bell",runs:1}
 ];
@@ -13160,7 +13160,7 @@ function wzTool(){
      b:wzDesc("Refund a Stripe charge when support asks for one, never above the amount on the original payment.",
        ["Process refunds against Stripe charges","Post a release note to the ops channel in Slack",
         "Read rows out of the Snowflake warehouse","Retire a feature flag in our own admin API"],
-       "Oxagen matches this against every MCP server it can already reach before it offers to write a line of code. Importing is nearly always the cheaper answer: an imported tool arrives with a schema, a publisher and a credential story.")+
+       "Oxagen matches this against every provider it can already reach before it offers to write a line of code. Importing is nearly always the cheaper answer: an imported tool arrives with a schema, a publisher and a credential story.")+
       '<div class="note">A tool is not permission. Whatever you create here lands in the registry callable by nobody until a role puts it on a belt.</div>',
      f:wzNext("Match it",ok)};
   }
@@ -14457,7 +14457,7 @@ document.addEventListener("click",function(e){
     {name:"ops/slack-schema-approval",pr:"a-intel/platform#515",ahead:6,by:"priya",when:"2 days ago"},
     {name:"agents/dependency-bot-weekly",pr:"a-intel/platform#509",ahead:1,by:people[3].key,when:"4 days ago"});
 
-  /* ---------- tool servers and the registry ---------- */
+  /* ---------- providers and the registry ---------- */
   var SRV_TOOLS={
     github:["create_issue","list_issues","get_issue","update_issue","add_issue_comment","list_commits","get_commit","create_branch","list_branches","push_files","search_code","list_releases","get_release","request_review","fork_repository","delete_file","create_repository","get_me","list_workflows","run_workflow","get_workflow_run","list_tags","get_tag","search_repositories","list_collaborators","add_collaborator","remove_collaborator","create_label","update_pull_request","list_pull_request_files","get_pull_request_diff","create_review","dismiss_review","list_deployments","create_deployment","list_secrets","set_secret","list_webhooks","create_webhook","get_repository"],
     linear:["create_issue","get_issue","list_issues","search_issues","add_comment","list_projects","get_project","create_project","update_project","list_cycles","get_cycle","list_teams","list_users","assign_issue","set_priority","link_issue","archive_issue"],
@@ -14698,8 +14698,8 @@ document.addEventListener("click",function(e){
       case "export.downloaded": return "exp_01K5R"+ulid(4)+" · signature verified";
       case "steering_published": return pick(RECORDS).id+" · "+pick(REPOS).n+"#"+ri(300,1900)+" merged";
       case "context_pr.opened": return pick(REPOS).n+"#"+ri(300,1900)+" · proposed by the promoter · "+ri(3,40)+" runs in support";
-      case "kill_switch.flipped": return pick(["tool version "+t.n+"@"+t.v,"agent "+r.agent,"tool server kubernetes"])+" · "+pick(["schema regression","runaway retries","operator request"]);
-      case "kill_switch.cleared": return "tool server kubernetes · schema approved";
+      case "kill_switch.flipped": return pick(["tool version "+t.n+"@"+t.v,"agent "+r.agent,"provider kubernetes"])+" · "+pick(["schema regression","runaway retries","operator request"]);
+      case "kill_switch.cleared": return "provider kubernetes · schema approved";
       case "schema.proposed": return t.n+"@"+t.v+" · output schema observed, not declared";
       case "schema.approved": return t.n+"@"+t.v+" · proposal accepted by "+p;
       case "session.signed_in": return pick(["password","Google","GitHub"])+" · "+pick(["macOS · Chrome","macOS · Safari","Windows · Edge","iOS · app"])+" · MFA "+pick(["passkey","TOTP"]);
@@ -14721,7 +14721,7 @@ document.addEventListener("click",function(e){
   seedAudit.concat(genAudit).sort(function(a,b){return b._k-a._k;}).forEach(function(e){delete e._k;AUDIT.push(e);});
 
   /* ---------- incidents, exports, keys ---------- */
-  var INC=[["warning","Kill switch flipped on a tool server","kill_switch","tool server kubernetes · 2 observed output schemas","k8s-mcp 2.3.1 changed the shape of get_logs and list_pods output. The gateway recorded the outputs, inferred a schema and parked both as proposals; the server switch is on until an admin approves."],
+  var INC=[["warning","Kill switch flipped on a provider","kill_switch","provider kubernetes · 2 observed output schemas","k8s-mcp 2.3.1 changed the shape of get_logs and list_pods output. The gateway recorded the outputs, inferred a schema and parked both as proposals; the provider switch is on until an admin approves."],
     ["critical","Budget breached three times in one hour","budget_breach","{agent} · {ws}","The agent hit its per-run ceiling on three consecutive runs while retrying the same failing command. Each run paused at the next hook boundary once reported spend crossed the ceiling."],
     ["warning","Approval expired with money reserved","approval_expired","{agent} · finops","No approver resolved the parked payment inside ten minutes. The mandate released the reservation; nothing moved. The operator was paged by the gateway."],
     ["info","Tainted argument raised to approval","taint_raised","{agent} · {ws}","A shell argument was copied byte-for-byte from a tool result. Policy raised the call to approval; the operator denied it and the run halted cleanly."],

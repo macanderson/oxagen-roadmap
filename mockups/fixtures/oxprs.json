@@ -238,7 +238,7 @@
   "byKind": "reconciler",
   "opened": "11 min ago",
   "state": "checks_passed",
-  "trigger": "linear was added as a tool server in the app; the file did not say so.",
+  "trigger": "linear was added as a provider in the app; the file did not say so.",
   "files": [
    [
     "mod",
