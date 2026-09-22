@@ -661,7 +661,11 @@ html.has-mnav #toast.phone{bottom:calc(88px + env(safe-area-inset-bottom))}
 #viewport.phone .menu-i{min-height:44px;font-size:14px}
 #viewport.phone .phead h1{font-size:20px}
 #viewport.phone .g3,#viewport.phone .g4{grid-template-columns:1fr 1fr}
+/* A stat tile is half the width on a phone, and Spend's token total is eleven digits. At 23px it
+   overflowed the tile by 50px and pushed the whole shell sideways, which is the W8 failure the
+   checker reported against the tab strip. 17px is the size the reconciliation tiles already use. */
 #viewport.phone .stat{padding:11px 12px}
+#viewport.phone .stat .v{font-size:17px}
 /* dialogs rise from the bottom edge as sheets; the primary action is full width under the thumb */
 #layer.phone .scrim{place-items:end center;padding:0}
 #layer.phone .dlg,#layer.phone .cmd{max-width:none;width:100%;border-radius:18px 18px 0 0;border-bottom:0;max-height:calc(100dvh - 24px);display:flex;flex-direction:column;

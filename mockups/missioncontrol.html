@@ -674,7 +674,11 @@ html.has-mnav #toast.phone{bottom:calc(88px + env(safe-area-inset-bottom))}
 #viewport.phone .menu-i{min-height:44px;font-size:14px}
 #viewport.phone .phead h1{font-size:20px}
 #viewport.phone .g3,#viewport.phone .g4{grid-template-columns:1fr 1fr}
+/* A stat tile is half the width on a phone, and Spend's token total is eleven digits. At 23px it
+   overflowed the tile by 50px and pushed the whole shell sideways, which is the W8 failure the
+   checker reported against the tab strip. 17px is the size the reconciliation tiles already use. */
 #viewport.phone .stat{padding:11px 12px}
+#viewport.phone .stat .v{font-size:17px}
 /* dialogs rise from the bottom edge as sheets; the primary action is full width under the thumb */
 #layer.phone .scrim{place-items:end center;padding:0}
 #layer.phone .dlg,#layer.phone .cmd{max-width:none;width:100%;border-radius:18px 18px 0 0;border-bottom:0;max-height:calc(100dvh - 24px);display:flex;flex-direction:column;
@@ -9632,6 +9636,11 @@ function runManifestPanel(R){
    'The stable prefix went in at SessionStart, the volatile selection at UserPromptSubmit. A recorded frame never changes: a record merged after this run started is not in it.</p></section>';
 }
 
+/* One word per scope. The bundle and the workspace instructions say `org`; the record generator
+   says `organization`. Both reach the library, so the word is normalised where it is read. */
+var STG_SCOPE_ALIAS={organization:"org"};
+function stgScope(it){var s=(it&&it.scope)||"workspace";return STG_SCOPE_ALIAS[s]||s;}
+
 /* ---- Library: every shelf at once ----
    One table over stgLibraryItems(), the list every count on the tab reads. A shelf filters this
    list; it never holds a different one. Order is the assembler's: a record, an instruction, a
@@ -9646,7 +9655,7 @@ function stgLibraryAll(w,only){
     return '<tr><td style="max-width:54ch"><b style="font-weight:500">'+h(it.body||"")+'</b>'+
       '<span class="sub">'+stgItemLink(it)+'</span></td>'+
      '<td>'+stgKindChip(it)+'</td><td>'+forceBadge(it.force)+'</td>'+
-     '<td>'+h(it.scope||"workspace")+(it.repo?'<span class="sub mono">'+h(it.repo)+'</span>':'')+
+     '<td>'+h(stgScope(it))+(it.repo?'<span class="sub mono">'+h(it.repo)+'</span>':'')+
       (it.agent?'<span class="sub mono">'+h(it.agent)+'</span>':'')+'</td>'+
      '<td>'+compileChip(it.grant)+'</td>'+
      '<td class="num">'+tokn(it.tok||0)+' tok</td>'+
@@ -9686,9 +9695,10 @@ function stgAssignTab(w){
      '<td class="num">'+tokn(M.tok.total)+' tok</td>'+
      '<td><button class="btn sm" onclick="pvAgent(\''+h(x.slug)+'\')">Open the compiler</button></td></tr>';}).join("");
   /* The inverse view: what decides reach. Scope is the only assignment mechanism, so it is
-     spelled out rather than left to be inferred from the table above. */
-  var items=stgItems(w.slug), sc={};
-  items.forEach(function(it){var k=it.scope||"workspace"; sc[k]=(sc[k]||0)+1;});
+     spelled out rather than left to be inferred from the table above. It counts the library, not
+     the assembler's selection, so this panel and the Library tab report one number. */
+  var items=stgLibraryItems(w.slug), sc={};
+  items.forEach(function(it){var k=stgScope(it); sc[k]=(sc[k]||0)+1;});
   var SC=[["org","Every workspace in the organization."],
           ["workspace","Every agent in this workspace."],
           ["repository","Only an agent whose run works in that repository."],
