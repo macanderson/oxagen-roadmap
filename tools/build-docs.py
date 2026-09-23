@@ -30,6 +30,7 @@ CATALOG = [
         ("witness", "witness-spec.md", "Specification"),
         ("desktop", "desktop-spec.md", "Specification"),
         ("creation", "creation-spec.md", "Specification"),
+        ("tasks", "tasks-spec.md", "Specification"),
         ("portability", "agent-portability-atlas.md", "Specification"),
         ("execution-portability", "agent-run-protocol.md", "Draft protocol"),
     ]),

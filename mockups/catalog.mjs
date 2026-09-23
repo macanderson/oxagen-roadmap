@@ -17,6 +17,15 @@ export const PAGES = [
   // workspace scope (spec Appendix F, pages 1–7)
   { id: "fleet",             title: "Fleet",                       group: "Workspace",    hash: `#/${ORG}/core-platform`,                                  states: ALL },
   { id: "run",               title: "Run",                         group: "Workspace",    hash: `#/${ORG}/core-platform/runs/run_01K5RS7M2E8FJ3QW`,         states: ALL },
+  // Tasks: work from the issue trackers, a definition of done per task, and the work orders that send it
+  { id: "tasks",             title: "Tasks",                       group: "Workspace",    hash: `#/${ORG}/core-platform/tasks`,                            states: ALL },
+  { id: "tasks-work-orders", title: "Tasks · Work orders",         group: "Workspace",    hash: `#/${ORG}/core-platform/tasks/work-orders`,                states: ALL },
+  { id: "tasks-workflows",   title: "Tasks · Workflows",           group: "Workspace",    hash: `#/${ORG}/core-platform/tasks/workflows`,                  states: ALL },
+  { id: "tasks-providers",   title: "Tasks · Providers",           group: "Workspace",    hash: `#/${ORG}/core-platform/tasks/providers`,                  states: ALL },
+  { id: "tasks-fields",      title: "Tasks · Fields",              group: "Workspace",    hash: `#/${ORG}/core-platform/tasks/fields`,                     states: ALL },
+  { id: "tasks-people",      title: "Tasks · People",              group: "Workspace",    hash: `#/${ORG}/core-platform/tasks/people`,                     states: ALL },
+  { id: "task",              title: "Task",                        group: "Workspace",    hash: `#/${ORG}/core-platform/tasks/tsk_01K6S7C5PA`,             states: NO_EMPTY },
+  { id: "work-order",        title: "Work order",                  group: "Workspace",    hash: `#/${ORG}/core-platform/tasks/work-orders/wo_01K6T9QX`,    states: NO_EMPTY },
   { id: "agents",            title: "Agents",                      group: "Workspace",    hash: `#/${ORG}/core-platform/agents`,                           states: ALL },
   { id: "agent",             title: "Agent",                       group: "Workspace",    hash: `#/${ORG}/core-platform/agents/triage`,                    states: ALL },
   { id: "agent-toolbelt",    title: "Agent · Toolbelt",            group: "Workspace",    hash: `#/${ORG}/core-platform/agents/triage/toolbelt`,           states: NO_EMPTY },

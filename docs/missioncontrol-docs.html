@@ -135,7 +135,7 @@ main hr+h2{border-top:0;padding-top:0;margin-top:0}
 <div class="site">
 <nav class="docs" aria-label="Documents">
   <a class="wordmark" href="#spec">o<span class="x">x</span>agen</a>
-  <p>Specifications</p><ol><li><a href="#spec" data-doc="spec">Oxagen Mission Control: Product and Technical Specification</a></li><li><a href="#dod" data-doc="dod">Oxagen DoD: the definition of done for agent runs</a></li><li><a href="#witness" data-doc="witness">Oxagen Witness: outcome verification</a></li><li><a href="#desktop" data-doc="desktop">Oxagen Desktop: product specification, rev 1</a></li><li><a href="#creation" data-doc="creation">Creating things in Oxagen: agents, tools, skills and context records</a></li><li><a href="#portability" data-doc="portability">The Agent Portability Atlas</a></li><li><a href="#execution-portability" data-doc="execution-portability">Agent Run Protocol (ARP)</a></li></ol><p>Plans and decisions</p><ol><li><a href="#plan" data-doc="plan">Oxagen Mission Control app: implementation plan</a></li><li><a href="#scope" data-doc="scope">Oxagen Mission Control: the scope review, and what it changed</a></li><li><a href="#scaleback" data-doc="scaleback">Scale back Mission Control: the mockup prompt</a></li></ol><p>The mockups</p><ol><li><a href="#prompts" data-doc="prompts">Oxagen Mission Control: mockup prompts, one per demo flow</a></li><li><a href="#consolidation" data-doc="consolidation">Consolidating W1–W11 into one design</a></li><li><a href="#feedback" data-doc="feedback">Feedback on the mockups</a></li><li><a href="#videos" data-doc="videos">Videos of the mockups, narrated</a></li><li><a href="#w13" data-doc="w13">W13: in the loop</a></li></ol>
+  <p>Specifications</p><ol><li><a href="#spec" data-doc="spec">Oxagen Mission Control: Product and Technical Specification</a></li><li><a href="#dod" data-doc="dod">Oxagen DoD: the definition of done for agent runs</a></li><li><a href="#witness" data-doc="witness">Oxagen Witness: outcome verification</a></li><li><a href="#desktop" data-doc="desktop">Oxagen Desktop: product specification, rev 1</a></li><li><a href="#creation" data-doc="creation">Creating things in Oxagen: agents, tools, skills and context records</a></li><li><a href="#tasks" data-doc="tasks">Tasks and work orders</a></li><li><a href="#portability" data-doc="portability">The Agent Portability Atlas</a></li><li><a href="#execution-portability" data-doc="execution-portability">Agent Run Protocol (ARP)</a></li></ol><p>Plans and decisions</p><ol><li><a href="#plan" data-doc="plan">Oxagen Mission Control app: implementation plan</a></li><li><a href="#scope" data-doc="scope">Oxagen Mission Control: the scope review, and what it changed</a></li><li><a href="#scaleback" data-doc="scaleback">Scale back Mission Control: the mockup prompt</a></li></ol><p>The mockups</p><ol><li><a href="#prompts" data-doc="prompts">Oxagen Mission Control: mockup prompts, one per demo flow</a></li><li><a href="#consolidation" data-doc="consolidation">Consolidating W1–W11 into one design</a></li><li><a href="#feedback" data-doc="feedback">Feedback on the mockups</a></li><li><a href="#videos" data-doc="videos">Videos of the mockups, narrated</a></li><li><a href="#w13" data-doc="w13">W13: in the loop</a></li></ol>
   <div class="foot">One file, every document. The markdown in <code>docs/</code> is the source; <code>tools/build-docs.py</code> writes this page.</div>
 </nav>
 <div>
@@ -8931,6 +8931,1205 @@ version lands in the registry callable by nobody until a role grant puts it on a
 <footer class="colophon"><span>Oxagen · Specification</span><span>Source: <code>docs/creation-spec.md</code></span></footer>
 </main>
 </div>
+</article><article id="tasks" class="doc" hidden>
+<header class="mast">
+  <p class="eyebrow">Oxagen · Specification</p>
+  <h1>Tasks and work orders</h1>
+  <dl class="facts"><dt>Status</dt><dd>Spec v1, for design review. No code is written against it yet.</dd><dt>Date</dt><dd>2026-09-23</dd><dt>Owner</dt><dd>Mac Anderson</dd><dt>Source</dt><dd><code>mockups/src/engine.js</code> (the Tasks section: <code>pTasks</code>, <code>pTask</code>, <code>pWorkOrder</code>, <code>DLG_EXT.ipwz</code>, <code>DLG_EXT.wo</code>, <code>DLG_EXT.certify</code>, <code>DLG_EXT.wfnew</code>), <code>mockups/fixtures/tasks.json</code>, rendered in <code>mockups/missioncontrol.html</code></dd><dt>Builds on</dt><dd>ADR-043 (Oxagen governs agents, it does not run them), ADR-096 (the launcher may contain the process), ADR-101 (four first-class harnesses), ADR-157 (ARP carries an operator-authored brief), ADR-053 (the assistant), ADR-052 (the governed action is the billable unit)</dd><dt>Related</dt><dd><code>creation-spec.md</code> (every definition is a file, and a wizard ends on a pull request), <code>dod-spec.md</code> (the run dod, a different object), <code>mission-control-spec.md</code> §1 (the operator), §7.6 (agent messages are quoted evidence), §11.2 (connectors)</dd><dt>Pages</dt><dd><code>mockups/pages/tasks.md</code>, <code>tasks-providers.md</code>, <code>task.md</code>, <code>work-order.md</code>, each with its audit prompt</dd><dt>Check</dt><dd><code>node tools/check-tasks.mjs</code> walks every flow below in the built mockup</dd></dl>
+</header>
+<div class="grid">
+<nav class="toc" aria-label="Contents of this document"><p>Contents</p><ol><li><a href="#tasks/1-the-situation">1. The situation</a></li><li><a href="#tasks/2-scope">2. Scope</a></li><li><a href="#tasks/3-the-flow">3. The flow</a></li><li><a href="#tasks/4-vocabulary">4. Vocabulary</a></li><li><a href="#tasks/5-connecting-a-provider">5. Connecting a provider</a></li><li><a href="#tasks/6-the-task-record">6. The task record</a></li><li><a href="#tasks/7-people">7. People</a></li><li><a href="#tasks/8-the-definition-of-done">8. The definition of done</a></li><li><a href="#tasks/9-sending-work">9. Sending work</a></li><li><a href="#tasks/10-workflows">10. Workflows</a></li><li><a href="#tasks/11-completing-work">11. Completing work</a></li><li><a href="#tasks/12-capabilities">12. Capabilities</a></li><li><a href="#tasks/13-storage">13. Storage</a></li><li><a href="#tasks/14-permissions">14. Permissions</a></li><li><a href="#tasks/15-pages-and-audits">15. Pages and audits</a></li><li><a href="#tasks/16-what-exists-today">16. What exists today</a></li><li><a href="#tasks/17-decisions-this-needs">17. Decisions this needs</a></li><li><a href="#tasks/18-open-questions">18. Open questions</a></li><li><a href="#tasks/19-definition-of-done-for-the-build">19. Definition of done for the build</a></li></ol></nav>
+<main>
+<h2 id="tasks/1-the-situation">1. The situation</h2>
+<p>Your work lives in GitHub issues, Linear, or Jira. Your agents are registered in Oxagen. Nothing
+joins the two. To put an agent on an issue you copy the issue into a prompt, you guess which
+repository it may touch, and nobody writes down what finished means. When the agent stops, you read
+the pull request and decide whether it did the job, against a standard that exists only in your head.</p>
+<p>This spec joins them. Oxagen reads your tasks from the tracker, drafts a definition of done for each
+one, and waits for a person to certify it. A certified task is ready. You pick ready tasks and send
+them to an agent you operate in a <strong>work order</strong>: one screen that merges every definition of done,
+drafts the prompt, lets you edit it and reference context records and other agents with <code>@</code>, and
+asks you to confirm the repositories the agent may change. A workflow chains agents, so a bug fixer
+hands to a validator, then a documenter, then an architect, and you accept the result.</p>
+<p>The Tasks page is where an operator sees all of it at once: what is waiting on you, what is ready,
+what is out with which agent, and what came back.</p>
+<h2 id="tasks/2-scope">2. Scope</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Day 1</th>
+<th>Later</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GitHub issues, Linear, and Jira Cloud</td>
+<td>Jira Server and Data Center, Azure DevOps, ServiceNow, Zendesk, and other case systems</td>
+</tr>
+<tr>
+<td>Thirteen fixed fields per task (§6.1)</td>
+<td>Custom fields</td>
+</tr>
+<tr>
+<td>Statuses in three categories, resolutions, and labels, each configurable with a mapping per provider</td>
+<td>Two-way sync of subject and description</td>
+</tr>
+<tr>
+<td>A colour per label</td>
+<td>Labels that carry definition-of-done items (§6.5)</td>
+</tr>
+<tr>
+<td>Mapping provider accounts to workspace members, with any account left not mapped</td>
+<td>Group and team mapping</td>
+</tr>
+<tr>
+<td>A definition of done drafted by <code>oxagen.assistant</code> for every open task imported</td>
+<td>Drafting from linked pull requests and comments</td>
+</tr>
+<tr>
+<td>Certification by a person, and readiness</td>
+<td>Certification rules per label or per repository</td>
+</tr>
+<tr>
+<td>One or more ready tasks sent in a work order to one agent you operate</td>
+<td>Rules that send without a person</td>
+</tr>
+<tr>
+<td>An editable prompt with <code>@</code> mentions of context records and agent profiles</td>
+<td><code>@</code> mentions of tasks, files and runs</td>
+</tr>
+<tr>
+<td>Repository confirmation and a spend cap per work order</td>
+<td>Per-item budgets</td>
+</tr>
+<tr>
+<td>Workflows of agents you operate, as files in <code>.oxagen/workflows/</code></td>
+<td>Workflows that include agents another person operates</td>
+</tr>
+<tr>
+<td>Claims by the agent and acceptance by a person</td>
+<td>Acceptance that closes the task and merges nothing else</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="tasks/3-the-flow">3. The flow</h2>
+<ol>
+<li><strong>Connect.</strong> A person with <code>issue_provider.connect</code> runs the six-step wizard (§5.1). Oxagen stores the
+token and starts reading.</li>
+<li><strong>Import.</strong> Every task in scope becomes a task record with the thirteen fields (§6.1).</li>
+<li><strong>Draft.</strong> <code>oxagen.assistant</code> drafts a definition of done for each open task (§8.2). The task is a draft.</li>
+<li><strong>Certify.</strong> A person reads the draft, edits it, and certifies it (§8.4). The task is ready.</li>
+<li><strong>Send.</strong> You select ready tasks, choose an agent you operate or a workflow, and send a work order (§9).</li>
+<li><strong>Pick up.</strong> The runtime the agent is enrolled on picks the work order up and starts the run (§9.6).</li>
+<li><strong>Claim.</strong> The agent claims each item with evidence (§11).</li>
+<li><strong>Hand off.</strong> In a workflow each stage hands to the next, and may return the work a bounded number of times (§10).</li>
+<li><strong>Accept.</strong> You accept the claimed items (§11). Nothing merges without a person.</li>
+</ol>
+<h2 id="tasks/4-vocabulary">4. Vocabulary</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Issue provider</strong></td>
+<td>A tracker Oxagen reads tasks from: GitHub, Linear, or Jira.</td>
+</tr>
+<tr>
+<td><strong>Connection</strong></td>
+<td>One authorized account of one provider in one workspace. A workspace may hold several, including two of the same provider.</td>
+</tr>
+<tr>
+<td><strong>Task</strong></td>
+<td>One issue, read into Oxagen with the thirteen fields. Its id is <code>tsk_&lt;ULID&gt;</code>, minted by Oxagen and stable across reconnects.</td>
+</tr>
+<tr>
+<td><strong>Definition of done</strong></td>
+<td>The ordered items that say what finished means for one task. Drafted by the assistant or a person, and certified by a person.</td>
+</tr>
+<tr>
+<td><strong>Item</strong></td>
+<td>One line of a definition of done: its text, its kind (<code>check</code> or <code>review</code>), its tag (<code>code</code>, <code>test</code>, <code>docs</code>, <code>review</code>), and its source.</td>
+</tr>
+<tr>
+<td><strong>Certification</strong></td>
+<td>A person's statement that the items define done. It records who, when, the digest of the items, and the version of the task they were read against.</td>
+</tr>
+<tr>
+<td><strong>Readiness</strong></td>
+<td>Oxagen's state for a task, separate from the provider's status (§8.6). A task is <strong>ready</strong> when it is certified and open.</td>
+</tr>
+<tr>
+<td><strong>Work order</strong></td>
+<td>Ready tasks, their merged definition of done, a prompt, the repositories it may change, and a spend cap, sent to one agent or one workflow.</td>
+</tr>
+<tr>
+<td><strong>Brief</strong></td>
+<td>The prompt a work order carries. It is the operator's, drafted by the assistant and made the operator's by the send.</td>
+</tr>
+<tr>
+<td><strong>Workflow</strong></td>
+<td>A file that names stages in order. Each stage is an agent you operate. The last stage is always a person.</td>
+</tr>
+<tr>
+<td><strong>Handoff</strong></td>
+<td>A stage passing the work to the next stage, with a note that reaches the next agent as quoted evidence.</td>
+</tr>
+<tr>
+<td><strong>Return</strong></td>
+<td>A stage sending the work back to an earlier stage, up to the number of returns the file allows.</td>
+</tr>
+<tr>
+<td><strong>Claim</strong></td>
+<td>An agent's statement, with evidence, that an item is met.</td>
+</tr>
+<tr>
+<td><strong>Acceptance</strong></td>
+<td>A person's statement that the claimed items are done.</td>
+</tr>
+<tr>
+<td><strong>Operator</strong></td>
+<td>The person accountable for an agent's runs (spec §1). Oxagen derives it from the agent principal's parent user (<code>principals.parent_user_id</code>). You may send work only to an agent whose operator you are.</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="tasks/5-connecting-a-provider">5. Connecting a provider</h2>
+<h3 id="tasks/5-1-the-wizard">5.1 The wizard</h3>
+<p>The Providers tab and the Tasks page header open it. It has six steps, and every step says what the
+next one needs.</p>
+<ol>
+<li><strong>Provider.</strong> GitHub, Linear, or Jira, each with its logo. A provider already connected is marked
+<code>connected</code> and can be connected again for another account.</li>
+<li><strong>Authorize.</strong> The permissions Oxagen asks for, in a table with the reason for each, then <strong>what it
+still cannot do</strong>: edit a subject or a description, delete an issue, act as you, read outside the
+scope you choose next, or assign a task to a person. Next is disabled until the provider returns a
+token.</li>
+<li><strong>Scope.</strong> The repositories, teams, or projects to import, and the filter: open issues and those
+closed in the last 30 days (the default), open only, or everything. Jira adds an optional JQL filter.
+The step estimates how many tasks the first read brings in.</li>
+<li><strong>Fields.</strong> The workspace's statuses, resolutions, and labels, each with the provider value the
+assistant suggested from the values the provider returned. Every suggestion is marked <code>suggested</code>
+and can be changed. Then the four write-back switches (§5.5).</li>
+<li><strong>People.</strong> Every account on the tasks in scope, with a suggested workspace member where one matches
+(§7). Each can be confirmed, changed, or left not mapped. A bot is never mapped.</li>
+<li><strong>Review.</strong> The whole connection on one screen, then what happens when you connect: Oxagen stores
+the token and reads the tasks, the assistant drafts a definition of done for each open one, every
+draft waits for a person, and nothing is sent to an agent.</li>
+</ol>
+<p><strong>Edit scope and fields</strong> on a provider card opens the same wizard at step 3, and its last button is
+<strong>Save</strong>.</p>
+<h3 id="tasks/5-2-authentication">5.2 Authentication</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Provider</th>
+<th>Method</th>
+<th>Scopes</th>
+<th>Token life</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GitHub</td>
+<td>The Oxagen GitHub App installation the workspace already uses for its repositories. Importing issues adds a permission an organization owner approves on github.com.</td>
+<td>Issues read and write, Metadata read, Pull requests read</td>
+<td>Installation tokens, minted per call and short-lived (ADR-020, ADR-151)</td>
+</tr>
+<tr>
+<td>Linear</td>
+<td>OAuth 2.0 with <code>actor=app</code>, so every write is signed by the Oxagen app</td>
+<td><code>read</code>, <code>comments:create</code></td>
+<td>Long-lived. Linear has no refresh endpoint, so Oxagen re-authorizes on a 401.</td>
+</tr>
+<tr>
+<td>Jira Cloud</td>
+<td>OAuth 2.0 (3LO) on one Atlassian site, resolved through the accessible-resources call</td>
+<td><code>read:jira-work</code>, <code>read:jira-user</code>, <code>write:jira-work</code>, <code>offline_access</code></td>
+<td>Rotating refresh tokens</td>
+</tr>
+</tbody>
+</table></div>
+<p>The token goes to the workspace credential store (<code>packages/plugins/src/credentials/workspace-credential.ts</code>),
+envelope-encrypted under the organization's key. Nobody can read it back, including the person who
+connected it. A write without a token fails closed.</p>
+<h3 id="tasks/5-3-reading">5.3 Reading</h3>
+<ul>
+<li><strong>Events.</strong> GitHub <code>issues</code> and <code>issue_comment</code> webhooks through the App, Linear webhooks, and Jira
+dynamic webhooks registered by the OAuth app. An event is a hint: Oxagen reads the issue again and
+applies what it read.</li>
+<li><strong>Reconcile.</strong> Every 15 minutes Oxagen lists what changed since its last read, so a missed event
+costs at most 15 minutes. A nightly pass reads everything in scope.</li>
+<li><strong>Identity.</strong> A task is unique by connection and provider id. GitHub keys by record type and
+database id, never by issue number (ADR-121), so a transferred issue stays the same task.</li>
+<li><strong>Order.</strong> A read older than the stored <code>updated at</code> is dropped.</li>
+</ul>
+<h3 id="tasks/5-4-writing-back">5.4 Writing back</h3>
+<p>Each connection carries four switches. Each write is a governed action made with the connection's
+token and recorded in Audit.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Switch</th>
+<th>Default</th>
+<th>What it writes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Post the definition of done when a person certifies it</td>
+<td>on</td>
+<td>A comment with the items and a link to the task in Oxagen</td>
+</tr>
+<tr>
+<td>Post a link when a work order is sent</td>
+<td>on</td>
+<td>A comment naming the work order and the agent</td>
+</tr>
+<tr>
+<td>Move the status when a work order starts</td>
+<td>off</td>
+<td>The provider status mapped to <code>in review</code> or <code>open</code></td>
+</tr>
+<tr>
+<td>Close the task when you accept the work</td>
+<td>off</td>
+<td>Closed, with the resolution mapped to <code>Fixed</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>Oxagen never edits a subject or a description, never deletes an issue, and never assigns a person.</p>
+<h3 id="tasks/5-5-disconnecting">5.5 Disconnecting</h3>
+<p>Disconnecting revokes the token at the provider and deletes it from the credential store. The
+tasks it imported stay, with their last-read values, marked disconnected. Certified definitions of
+done and sent work orders are unchanged. Connecting the same account again reads the same issues back
+into the same task ids.</p>
+<h2 id="tasks/6-the-task-record">6. The task record</h2>
+<h3 id="tasks/6-1-fields">6.1 Fields</h3>
+<p>Day 1 reads thirteen fields and nothing else. The Fields tab shows this table.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Field</th>
+<th>GitHub</th>
+<th>Linear</th>
+<th>Jira</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Task id</td>
+<td><code>tsk_&lt;ULID&gt;</code>, minted by Oxagen</td>
+<td>same</td>
+<td>same</td>
+</tr>
+<tr>
+<td>Number</td>
+<td><code>owner/repo#number</code></td>
+<td>identifier, <code>PLAT-231</code></td>
+<td>key, <code>OPS-88</code></td>
+</tr>
+<tr>
+<td>Subject</td>
+<td><code>title</code></td>
+<td><code>title</code></td>
+<td><code>summary</code></td>
+</tr>
+<tr>
+<td>Description</td>
+<td><code>body</code></td>
+<td><code>description</code></td>
+<td><code>description</code>, converted from ADF to Markdown</td>
+</tr>
+<tr>
+<td>Labels</td>
+<td><code>labels</code> and issue type</td>
+<td><code>labels</code> and <code>priority</code></td>
+<td><code>labels</code>, <code>priority</code>, and issue type</td>
+</tr>
+<tr>
+<td>Owner</td>
+<td>first assignee</td>
+<td><code>assignee</code></td>
+<td><code>assignee</code></td>
+</tr>
+<tr>
+<td>Created by</td>
+<td><code>user</code></td>
+<td><code>creator</code></td>
+<td><code>reporter</code></td>
+</tr>
+<tr>
+<td>Created at</td>
+<td><code>created_at</code></td>
+<td><code>createdAt</code></td>
+<td><code>created</code></td>
+</tr>
+<tr>
+<td>Updated by</td>
+<td>actor of the latest timeline event</td>
+<td>actor of the latest history entry</td>
+<td>author of the latest changelog entry</td>
+</tr>
+<tr>
+<td>Updated at</td>
+<td><code>updated_at</code></td>
+<td><code>updatedAt</code></td>
+<td><code>updated</code></td>
+</tr>
+<tr>
+<td>Closed at</td>
+<td><code>closed_at</code></td>
+<td><code>completedAt</code> or <code>canceledAt</code></td>
+<td><code>resolutiondate</code></td>
+</tr>
+<tr>
+<td>Status</td>
+<td><code>state</code> and the labels mapped to a status</td>
+<td>workflow state</td>
+<td>status and its category</td>
+</tr>
+<tr>
+<td>Resolution</td>
+<td><code>state_reason</code></td>
+<td>the completed or canceled state</td>
+<td><code>resolution</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>Two derivations are worth naming. <strong>Updated by</strong> is not a field in any of the three, so Oxagen reads
+the actor of the latest change. <strong>Owner</strong> is one person: GitHub allows several assignees, and day 1
+reads the first. Custom fields are not read. Each field Oxagen adds needs a mapping on three
+providers and a meaning in the brief, so custom fields wait for a schema of their own.</p>
+<h3 id="tasks/6-2-statuses">6.2 Statuses</h3>
+<p>A status belongs to one of three categories: <code>open</code>, <code>blocked</code>, or <code>closed</code>. Oxagen ships <code>Open</code>,
+<code>Blocked</code>, and <code>Closed</code>. A workspace may add statuses (the mockup adds <code>In review</code>, category
+<code>open</code>) and map each to provider values. When a task matches more than one, <code>closed</code> wins over
+<code>blocked</code>, and <code>blocked</code> wins over <code>open</code>. Only a task whose category is <code>open</code> can be sent.</p>
+<h3 id="tasks/6-3-resolutions">6.3 Resolutions</h3>
+<p>A closed task carries one resolution. Oxagen ships five, and a workspace may add more.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Resolution</th>
+<th>GitHub</th>
+<th>Linear</th>
+<th>Jira</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Fixed</td>
+<td><code>state_reason completed</code></td>
+<td>Done</td>
+<td>Done, Fixed</td>
+</tr>
+<tr>
+<td>Won't fix</td>
+<td><code>state_reason not_planned</code></td>
+<td>Canceled with label <code>wontfix</code></td>
+<td>Won't Do, Won't Fix</td>
+</tr>
+<tr>
+<td>Duplicate</td>
+<td><code>state_reason duplicate</code></td>
+<td>Duplicate</td>
+<td>Duplicate</td>
+</tr>
+<tr>
+<td>Cancelled</td>
+<td><code>not_planned</code> with label <code>cancelled</code></td>
+<td>Canceled</td>
+<td>Cancelled</td>
+</tr>
+<tr>
+<td>Other</td>
+<td>anything else</td>
+<td>anything else</td>
+<td>Cannot Reproduce, Incomplete, anything else</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="tasks/6-4-labels">6.4 Labels</h3>
+<p>A task carries any number of labels. A label has a name, a group, a colour, and a mapping to each
+provider's labels, priorities, or issue types. Oxagen ships ten.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Label</th>
+<th>Group</th>
+<th>Colour</th>
+<th>GitHub</th>
+<th>Linear</th>
+<th>Jira</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P0</td>
+<td>Priority</td>
+<td><code>#D6455E</code></td>
+<td>label <code>P0</code></td>
+<td>priority Urgent</td>
+<td>priority Highest</td>
+</tr>
+<tr>
+<td>P1</td>
+<td>Priority</td>
+<td><code>#E0803A</code></td>
+<td>label <code>P1</code></td>
+<td>priority High</td>
+<td>priority High</td>
+</tr>
+<tr>
+<td>P2</td>
+<td>Priority</td>
+<td><code>#3B82F6</code></td>
+<td>label <code>P2</code></td>
+<td>priority Medium</td>
+<td>priority Medium</td>
+</tr>
+<tr>
+<td>P3</td>
+<td>Priority</td>
+<td><code>#71717A</code></td>
+<td>label <code>P3</code></td>
+<td>priority Low</td>
+<td>priority Low, Lowest</td>
+</tr>
+<tr>
+<td>Bug</td>
+<td>Type</td>
+<td><code>#C0453C</code></td>
+<td>label <code>bug</code>, or issue type Bug</td>
+<td>label Bug</td>
+<td>issue type Bug</td>
+</tr>
+<tr>
+<td>New Feature</td>
+<td>Type</td>
+<td><code>#57A97C</code></td>
+<td>label <code>enhancement</code>, or issue type Feature</td>
+<td>label Feature</td>
+<td>issue type New Feature, Story</td>
+</tr>
+<tr>
+<td>Improvement</td>
+<td>Type</td>
+<td><code>#3FA2A2</code></td>
+<td>label <code>improvement</code></td>
+<td>label Improvement</td>
+<td>issue type Improvement</td>
+</tr>
+<tr>
+<td>Documentation</td>
+<td>Type</td>
+<td><code>#9D8BE3</code></td>
+<td>label <code>documentation</code></td>
+<td>label Docs</td>
+<td>label documentation</td>
+</tr>
+<tr>
+<td>Test</td>
+<td>Type</td>
+<td><code>#5B93D6</code></td>
+<td>label <code>test</code></td>
+<td>label Test</td>
+<td>label test</td>
+</tr>
+<tr>
+<td>Chore</td>
+<td>Type</td>
+<td><code>#A1A1AA</code></td>
+<td>label <code>chore</code></td>
+<td>label Chore</td>
+<td>issue type Task</td>
+</tr>
+</tbody>
+</table></div>
+<p>The colour is Oxagen's own. Oxagen never changes a label's colour in a provider. The label editor
+offers twelve swatches and a hex field, and previews the chip as you choose. Gold is not offered,
+because gold is the house identity colour and never encodes state. A provider label that maps to no
+Oxagen label is not read.</p>
+<h3 id="tasks/6-5-label-items">6.5 Label items</h3>
+<p>Day 1 a label is a tag. The design reserves more for it: <strong>a label will carry definition-of-done
+items</strong>, and when a task has the label, those items copy into the task's draft before the assistant
+adds its own. <code>Bug</code> would carry &quot;A test reproduces the defect and fails before the fix.&quot; <code>Documentation</code>
+would carry &quot;The docs page renders in the docs build.&quot; The copied items are marked with the label they
+came from, and the certifier sees them like any other item. The label editor shows the section now,
+marked <code>later</code>, so nobody is surprised by it.</p>
+<p>Those item templates steer agents, so they will be files: <code>.oxagen/dod/labels/&lt;label&gt;.toml</code>, changed
+by pull request like every other definition (<code>creation-spec.md</code>). This is the one place labels cross
+from settings into steering, and it is why it waits for its own change.</p>
+<h3 id="tasks/6-6-where-settings-live">6.6 Where settings live</h3>
+<p>Statuses, resolutions, labels, colours, and their mappings are workspace settings in Postgres. Each
+change is a governed action (<code>update_task_fields</code>) in Audit, and it applies to the next read of every
+task. They are not files, because they translate a tracker's words into Oxagen's and steer no agent.
+Connections and people mappings are rows too, because they hold a credential and personal data that
+do not belong in a repository.</p>
+<h2 id="tasks/7-people">7. People</h2>
+<p>The People tab, and step 5 of the wizard, map provider accounts to workspace members.</p>
+<ul>
+<li><strong>Suggestions.</strong> Oxagen suggests a member from two sources, in order: the member signed in to Oxagen
+with that provider account (<code>auth.accounts</code>), then a verified email that equals the member's. It
+never suggests from a display name.</li>
+<li><strong>Confirmation.</strong> A suggestion counts only when a person confirms it. <strong>Confirm all</strong> confirms every
+suggestion on the page at once.</li>
+<li><strong>Not mapped.</strong> Any account can stay not mapped. It still owns and creates tasks and appears under
+its own handle with its provider's mark. Nothing pretends it is a member.</li>
+<li><strong>Bots.</strong> A bot account (<code>dependabot[bot]</code>, Automation for Jira) is never mapped to a person.</li>
+<li><strong>Grants.</strong> Mapping grants nothing. A member's roles decide what they may do. Only a signed-in
+member can certify a definition of done or send a work order, whatever an account's mapping says.</li>
+<li><strong>Who maps.</strong> <code>identity_map.write</code>, held by workspace owners by default. Each change is a governed
+action (<code>map_provider_person</code>).</li>
+</ul>
+<h2 id="tasks/8-the-definition-of-done">8. The definition of done</h2>
+<h3 id="tasks/8-1-what-it-is">8.1 What it is</h3>
+<p>An ordered list of items. Each item has:</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Part</th>
+<th>Values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Text</td>
+<td>One sentence a reviewer can check.</td>
+</tr>
+<tr>
+<td>Kind</td>
+<td><code>check</code>: evidence can show it (a test, a diff, a check run). <code>review</code>: a person judges it.</td>
+</tr>
+<tr>
+<td>Tag</td>
+<td><code>code</code>, <code>test</code>, <code>docs</code>, or <code>review</code>. A workflow stage owns items by tag (§10).</td>
+</tr>
+<tr>
+<td>Source</td>
+<td><code>from the issue</code>, <code>oxagen.assistant</code>, <code>you</code>, or <code>edited by you</code>.</td>
+</tr>
+</tbody>
+</table></div>
+<p>This is not the run dod of <code>dod-spec.md</code>. That one is a locked file of executable checks that
+gates an agent's stop. This one is a list a person certifies before work starts and accepts after it
+ends. None of the run dod's verdict words apply here: an item is <code>open</code>, <code>claimed</code>, or <code>accepted</code>.
+Later, the run dod can compile a task's <code>check</code> items into its checks.</p>
+<h3 id="tasks/8-2-drafting">8.2 Drafting</h3>
+<p>Every open task a provider imports is drafted by <code>oxagen.assistant</code>, following the eight-step
+AI-assisted configuration pattern (<code>.claude/skills/ai-assisted-config/SKILL.md</code>).</p>
+<ol>
+<li><strong>Existing items first.</strong> A checklist already in the description (<code>- [ ]</code> lines, the shape every
+issue in <code>macanderson/oxagen</code> carries under SCR-003) becomes the first items, marked <code>from the issue</code>.</li>
+<li><strong>Then the assistant's items</strong>, drafted against the item schema from the subject, description,
+labels, and linked pull requests.</li>
+<li><strong>Notes.</strong> The assistant lists what the task leaves open and every assumption it made, on the task
+page under <strong>Assistant notes</strong>, for example &quot;The issue does not say which tacho version. The
+assistant assumed 1.6.2.&quot;</li>
+<li><strong>It never certifies.</strong> A draft is a draft until a person certifies it.</li>
+</ol>
+<p>The drafting turn runs as <code>oxagen.assistant</code>, is recorded like any turn, and never appears in Fleet or
+Spend. Drafting is bounded: closed tasks are not drafted, and a first import drafts at most 60 tasks a
+minute per workspace, oldest update first. A task still being drafted shows <code>drafting</code>, and <strong>Draft it
+now</strong> moves it to the front.</p>
+<h3 id="tasks/8-3-editing">8.3 Editing</h3>
+<p>A draft is editable by anyone with <code>task.edit_dod</code>: change an item's text, tag, or kind, remove it, add
+one, or redraft with the wand. Redrafting keeps every item a person wrote or edited. A certified list
+is read-only. <strong>Edit</strong> asks first, because editing sends the task back to draft until somebody
+certifies it again. Work orders already sent keep the list they were sent with.</p>
+<h3 id="tasks/8-4-certification">8.4 Certification</h3>
+<p><strong>Certify definition of done</strong> opens a dialog that lists every item. <strong>Certify</strong> is disabled until
+the certifier ticks <strong>I read every item</strong>. Certifying records <code>certify_task_dod</code> with:</p>
+<ul>
+<li>the certifier and the time</li>
+<li>the digest of the items: SHA-256 over their RFC 8785 canonical JSON, so the same list always has the same digest</li>
+<li>the provider version of the task it was read against (<code>updated_at</code>, or the provider's etag)</li>
+</ul>
+<p>If the connection allows it, Oxagen posts the list as a comment on the issue. In a workspace whose
+governance mode is <code>regulated</code>, the person who certifies a task cannot send it.</p>
+<h3 id="tasks/8-5-a-certified-task-that-changes">8.5 A certified task that changes</h3>
+<p>When a provider changes a certified task's subject, description, or labels, the certification is
+marked <code>changed</code> and the task leaves ready. A comment, an assignee, or a status change inside the same
+category does not. The task page shows the text it was certified against beside the text now, and the
+assistant suggests items for the new scope. <strong>Certify again</strong> makes it ready.</p>
+<h3 id="tasks/8-6-readiness">8.6 Readiness</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Readiness</th>
+<th>Meaning</th>
+<th>Next</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>drafting</code></td>
+<td>The assistant is reading the task.</td>
+<td><code>draft</code></td>
+</tr>
+<tr>
+<td><code>draft</code></td>
+<td>A draft waits for a person.</td>
+<td><code>ready</code> on certify</td>
+</tr>
+<tr>
+<td><code>changed</code></td>
+<td>The task changed after certification.</td>
+<td><code>ready</code> on certify again</td>
+</tr>
+<tr>
+<td><code>ready</code></td>
+<td>Certified, and its status category is <code>open</code>.</td>
+<td><code>sent</code></td>
+</tr>
+<tr>
+<td><code>sent</code></td>
+<td>In an open work order.</td>
+<td><code>accepted</code>, or <code>ready</code> if the work order stops</td>
+</tr>
+<tr>
+<td><code>accepted</code></td>
+<td>A person accepted every item.</td>
+<td>none</td>
+</tr>
+<tr>
+<td><code>closed</code></td>
+<td>Closed upstream without a certification.</td>
+<td>none</td>
+</tr>
+</tbody>
+</table></div>
+<p>A task is sendable when it is <code>ready</code> and its status category is <code>open</code>. A blocked task can be
+certified and cannot be sent until it is open again. The Tasks tab shows the reason on every checkbox
+it disables.</p>
+<h2 id="tasks/9-sending-work">9. Sending work</h2>
+<h3 id="tasks/9-1-selecting">9.1 Selecting</h3>
+<p>The Tasks tab lists tasks from every connection with a checkbox on each ready one. A selection can mix
+providers. The header's gold action, <strong>Create work order and send to agent</strong>, is disabled until one
+task is selected. The same button sits on a ready task's own page.</p>
+<h3 id="tasks/9-2-the-send-menu">9.2 The send menu</h3>
+<p>The button opens a menu. It lists:</p>
+<ul>
+<li><strong>Agents you operate</strong>: every agent in the workspace whose operator is you, each with its harness
+mark, avatar, name, harness, host, and enforcement tier. The four harnesses (Claude Code, Codex,
+Cursor, Stella) carry their own marks, and no harness is listed first by default (ADR-101).</li>
+<li><strong>Workflows</strong>: every published workflow whose agents you all operate, with the harness marks of its
+stages in order.</li>
+</ul>
+<p>A search field narrows both lists. An agent somebody else operates is not in the menu.</p>
+<h3 id="tasks/9-3-the-work-order-screen">9.3 The work order screen</h3>
+<p>Picking an entry opens the work order. It is one screen with six sections.</p>
+<ol>
+<li><strong>Tasks.</strong> A chip per task, each tagged to this work order and removable while more than one remains.</li>
+<li><strong>Sent to.</strong> The agent (harness mark, name, harness, host, tier, and &quot;operator: you&quot;) or the
+workflow's stages. A select switches to any other agent you operate or published workflow.</li>
+<li><strong>Definition of done.</strong> One master list: every certified item of every task, one row per distinct
+item, each tagged with the tasks it came from. Two tasks that ask for the same thing produce one item
+with two tags. In a workflow each item names the stage that owns it. Certified items are read-only.
+You may add items for this work order only, and your send certifies them.</li>
+<li><strong>Prompt.</strong> Drafted from the tasks, the items, the stages, and the repositories, and yours to edit.
+<strong>Draft it again</strong> replaces your edits with a new draft. Typing <code>@</code> opens mentions (§9.4). The label
+above the box says <code>drafted by oxagen.assistant</code> or <code>edited by you</code>.</li>
+<li><strong>Repositories.</strong> The repositories the work order may change, pre-checked from the tasks. A
+repository outside the agent's toolbelt is shown and disabled, with the reason. A work order narrows
+what the agent may write and never widens it. Below them, <strong>I confirm the repositories</strong> names the
+agents and the repositories. Branches and pull requests only: the production branch is never pushed.</li>
+<li><strong>Spend cap.</strong> A USD cap for the whole work order, every stage and every return. Each run also stays
+inside its own agent's per-run budget. When a stage runs on Cursor, the screen says the cap counts
+every stage but that one, because Cursor's model calls do not pass through the Oxagen gateway.</li>
+</ol>
+<p><strong>Send to <agent></strong> stays disabled until the repositories are confirmed, at least one repository is
+checked, and the prompt is not empty.</p>
+<h3 id="tasks/9-4-mentions">9.4 Mentions</h3>
+<p>Typing <code>@</code> in the prompt lists matching context records (<code>@ctx.release.never-merge</code>) and agent profiles
+(<code>@a-intel.core.validator</code>). Enter or Tab inserts the first match, and a click inserts any. Below the
+box, <strong>References</strong> lists every mention the prompt holds:</p>
+<ul>
+<li>A <strong>context record</strong> enters the brief as its statement, with its record hash and its token cost.</li>
+<li>An <strong>agent profile</strong> enters as the agent's name, harness, and job. It grants that agent nothing and
+sends it nothing. Work reaches another agent only through a workflow stage.</li>
+<li>A mention that resolves to nothing is flagged <code>not found</code>, and it stays text.</li>
+</ul>
+<p>The mention grammar in <code>packages/ai/src/prompts/mentions.ts</code> has no context-record or task type. It
+needs both (§17).</p>
+<h3 id="tasks/9-5-what-sending-records">9.5 What sending records</h3>
+<p><code>send_work_order</code> is a governed action. It records the work order, its tasks, its items with their
+certification digests, the prompt as sent with its digest, the repositories, the cap, and the target.
+A sent prompt cannot change. Each task moves to <code>sent</code> and shows the work order on its page. If the
+connection allows it, Oxagen posts a link on each issue. The sender lands on the work order page.</p>
+<h3 id="tasks/9-6-delivery">9.6 Delivery</h3>
+<p>Oxagen runs no agent (ADR-043). A work order is the operator's brief, and the runtime the agent is
+enrolled on starts the run. There are three ways it reaches a runtime.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Runtime</th>
+<th>How the run starts</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A wrapped harness on an enrolled host (Claude Code, Codex, Cursor, Stella)</td>
+<td>The host's collector receives the work order. <code>oxagen work start &lt;wo&gt;</code> starts the harness in the agent's working copy with the brief as its first prompt, and the hooks bind the session to the work order. The person at the host starts it on day 1. The contained launcher (<code>oxagen run</code>, ADR-096, Phase 5) starts it without one later.</td>
+</tr>
+<tr>
+<td>A CI agent (Stella CI)</td>
+<td>Oxagen sends a <code>repository_dispatch</code> event carrying the work order id, and the job reads the brief with its own credential.</td>
+</tr>
+<tr>
+<td>Any harness through ARP</td>
+<td>The brief is an <code>arp.capture-brief</code> document (ADR-157), so every harness that loads an ARP brief loads a work order.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Every run a work order starts records the work order id and its tasks as the run's task reference
+(<code>cost.run_totals.task_ref</code>, the task reference of the spec's run record), so the Run page's Issues tab lists them and Spend can drill by
+task. The agent reads its work order through <code>get_work_order</code> on the MCP surface.</p>
+<p>The repository list and the cap are enforced at the agent's tier. On <code>gateway</code> and <code>contained</code> a write
+to another repository is refused. On <code>harness</code> the refusal is a hook, client-attested and fail-open
+against the person at the keyboard. The work order page shows each agent's tier, so the page never
+claims more than the tier enforces.</p>
+<h2 id="tasks/10-workflows">10. Workflows</h2>
+<h3 id="tasks/10-1-the-file">10.1 The file</h3>
+<p>A workflow is a file in the workspace's main repository.</p>
+<pre><code class="language-toml"># .oxagen/workflows/fix-validate-document-review.toml
+schema = &quot;oxagen-workflow/v0.1&quot;
+name = &quot;Fix, validate, document, review&quot;
+
+[[stage]]
+role = &quot;Fix&quot;
+agent = &quot;a-intel.core.bug-fixer&quot;
+owns = [&quot;code&quot;]
+on_fail = &quot;stop&quot;
+
+[[stage]]
+role = &quot;Validate&quot;
+agent = &quot;a-intel.core.validator&quot;
+owns = [&quot;test&quot;]
+on_fail = &quot;return&quot;
+return_to = 1
+max_returns = 2
+
+[[stage]]
+role = &quot;Document&quot;
+agent = &quot;a-intel.core.documenter&quot;
+owns = [&quot;docs&quot;]
+on_fail = &quot;stop&quot;
+
+[[stage]]
+role = &quot;Review&quot;
+agent = &quot;a-intel.core.architect&quot;
+owns = [&quot;review&quot;]
+on_fail = &quot;return&quot;
+return_to = 1
+max_returns = 1
+
+[accept]
+by = &quot;operator&quot;   # the last stage is always a person
+</code></pre>
+<p>A stage owns the items whose tag it lists. An item whose tag no stage lists belongs to the last agent
+stage. The accept stage is implicit and cannot be removed.</p>
+<h3 id="tasks/10-2-building-one">10.2 Building one</h3>
+<p><strong>New workflow</strong> on the Workflows tab opens the builder. Write a sentence (&quot;A bug fixer passes a fix
+to a validator, which passes it to a documenter, which passes it to an architect for final review&quot;)
+and press the wand: the assistant drafts the stages in the order the sentence names them. Each stage
+has a role, an agent (only agents you operate, each with its harness), the tags it owns, and what
+happens on failure: stop and ask you, or return to an earlier stage at most one to three times. Stages
+can be added, removed, and reordered. The builder shows the file as it will be committed. <strong>Open pull
+request</strong> proposes it, and the workflow exists when the pull request merges (<code>creation-spec.md</code>).</p>
+<h3 id="tasks/10-3-running-one">10.3 Running one</h3>
+<p>A workflow runs nothing itself. Oxagen sequences work orders.</p>
+<ol>
+<li>Stage 1 receives the work order's brief with its own items marked.</li>
+<li>When the stage's items are claimed, its agent calls <code>hand_off_work_order</code> with a note. Oxagen sends
+the next stage its brief, with the note as quoted evidence. A handoff note is never an instruction
+to the next agent (spec §7.6).</li>
+<li>A stage that finds an earlier stage's item unmet calls <code>return_work_order</code> with the item numbers.
+Oxagen sends the work back to the stage the file names, and counts the return.</li>
+<li>When a stage exhausts its returns, the work order parks for the operator in the Approvals drawer.</li>
+<li>After the last agent stage, the work order waits on you.</li>
+</ol>
+<p>Every stage is its own run, by its own agent, on its own runtime, under its own mandate and budget.</p>
+<h3 id="tasks/10-4-rules">10.4 Rules</h3>
+<ul>
+<li>Day 1, every agent in a workflow must be one you operate. A workflow that names an agent somebody
+else operates is not offered to you.</li>
+<li>A workflow grants nothing. Each stage acts under its own agent's toolbelt and the work order's
+repository list.</li>
+<li>ADR-043 removed the old <code>workflow.*</code> capabilities, which executed agent turns on Oxagen's workers.
+This workflow executes nothing. It is a file that orders work orders, and it needs its own ADR (§17)
+so nobody mistakes one for the other.</li>
+</ul>
+<h2 id="tasks/11-completing-work">11. Completing work</h2>
+<ul>
+<li><strong>Claims.</strong> The agent calls <code>claim_dod_item</code> with the item number and its evidence: a commit, a test,
+a check run, or a pull request. A claim is the agent's word and is labelled as one.</li>
+<li><strong>Acceptance.</strong> When every item is claimed, the work order shows <code>waiting on you</code> and <strong>Accept the
+work</strong> turns gold. Accepting records <code>accept_work_order</code> with your name and accepts every claimed
+item. It merges nothing: pull requests are merged by a person in the repository.</li>
+<li><strong>Close.</strong> If the connection's close switch is on, Oxagen closes each task as <code>Fixed</code>. If it is off,
+the dialog says the task stays open in the provider.</li>
+<li><strong>Stop.</strong> <strong>Stop the work order</strong> cancels the live run at its next boundary and starts no later stage.
+Branches and pull requests stay. The tasks go back to ready with their certifications intact.</li>
+</ul>
+<h2 id="tasks/12-capabilities">12. Capabilities</h2>
+<p>Every name is verb-first snake_case (ADR-025). Management capabilities carry <code>noBillingGate: true</code>.
+The runs a work order starts are metered like any run.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>Surfaces</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>connect_issue_provider</code></td>
+<td>api, app, cli</td>
+<td>Stores the token and starts the first read</td>
+</tr>
+<tr>
+<td><code>list_issue_providers</code>, <code>get_issue_provider</code></td>
+<td>api, mcp, app, cli</td>
+<td></td>
+</tr>
+<tr>
+<td><code>update_issue_provider</code></td>
+<td>api, app, cli</td>
+<td>Scope, filter, and write-back switches</td>
+</tr>
+<tr>
+<td><code>sync_issue_provider</code></td>
+<td>api, app, cli</td>
+<td>Queues a read now</td>
+</tr>
+<tr>
+<td><code>disconnect_issue_provider</code></td>
+<td>api, app, cli</td>
+<td>Revokes and deletes the token</td>
+</tr>
+<tr>
+<td><code>get_task_fields</code>, <code>update_task_fields</code></td>
+<td>api, app, cli</td>
+<td>Statuses, resolutions, labels, colours, and mappings</td>
+</tr>
+<tr>
+<td><code>list_provider_people</code>, <code>map_provider_person</code></td>
+<td>api, app, cli</td>
+<td></td>
+</tr>
+<tr>
+<td><code>list_tasks</code>, <code>get_task</code></td>
+<td>api, mcp, app, cli, agent</td>
+<td></td>
+</tr>
+<tr>
+<td><code>draft_task_dod</code></td>
+<td>api, app</td>
+<td>Runs as <code>oxagen.assistant</code></td>
+</tr>
+<tr>
+<td><code>update_task_dod</code></td>
+<td>api, app, cli</td>
+<td>Draft only</td>
+</tr>
+<tr>
+<td><code>certify_task_dod</code></td>
+<td>api, app, cli</td>
+<td>Signed-in person only</td>
+</tr>
+<tr>
+<td><code>create_work_order</code>, <code>send_work_order</code></td>
+<td>api, app, cli</td>
+<td>Sender must operate every target agent</td>
+</tr>
+<tr>
+<td><code>get_work_order</code>, <code>list_work_orders</code></td>
+<td>api, mcp, app, cli, agent</td>
+<td>The agent reads its brief here</td>
+</tr>
+<tr>
+<td><code>claim_dod_item</code></td>
+<td>mcp, agent</td>
+<td>Agent only</td>
+</tr>
+<tr>
+<td><code>hand_off_work_order</code>, <code>return_work_order</code></td>
+<td>mcp, agent</td>
+<td>Agent only</td>
+</tr>
+<tr>
+<td><code>accept_work_order</code>, <code>stop_work_order</code></td>
+<td>api, app, cli</td>
+<td>Signed-in person only</td>
+</tr>
+<tr>
+<td><code>propose_workflow</code></td>
+<td>api, app, cli</td>
+<td>Opens the pull request, as <code>open_context_pr</code> does</td>
+</tr>
+</tbody>
+</table></div>
+<p>Existing capabilities it reuses: <code>suggest_connection_mappings</code> (field suggestions in step 4),
+<code>open_context_pr</code> (workflows), <code>dispatch_command</code> (cancelling a live run on stop), <code>ask_assistant</code>
+(drafting). The agent-facing tools (<code>get_work_order</code>, <code>claim_dod_item</code>, <code>hand_off_work_order</code>,
+<code>return_work_order</code>) must load in Claude Code, Codex, Cursor, and Stella (ADR-101).</p>
+<h2 id="tasks/13-storage">13. Storage</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Store</th>
+<th>What</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Postgres</td>
+<td><code>tasks.issue_providers</code>, <code>tasks.provider_people</code>, <code>tasks.tasks</code>, <code>tasks.task_labels</code>, <code>tasks.field_settings</code>, <code>tasks.dod_items</code>, <code>tasks.dod_certifications</code>, <code>tasks.work_orders</code>, <code>tasks.work_order_tasks</code>, <code>tasks.work_order_items</code>, <code>tasks.work_order_stages</code>, <code>tasks.item_claims</code>. Every table is tenant-scoped under RLS through <code>withTenantDb</code>.</td>
+</tr>
+<tr>
+<td>Credential store</td>
+<td>Provider tokens in <code>mcp.credentials</code>, envelope-encrypted, keyed by workspace and connection</td>
+</tr>
+<tr>
+<td>Neo4j</td>
+<td><code>(:Task)-[:IN]-&gt;(:WorkOrder)-[:STARTED]-&gt;(:Run)-[:OPENED]-&gt;(:PullRequest)</code>, and <code>(:Task)-[:CERTIFIED_BY]-&gt;(:Person)</code></td>
+</tr>
+<tr>
+<td>ClickHouse</td>
+<td><code>task.imported</code>, <code>task.changed</code>, <code>dod.drafted</code>, <code>dod.certified</code>, <code>work_order.sent</code>, <code>stage.handed_off</code>, <code>stage.returned</code>, <code>item.claimed</code>, <code>work_order.accepted</code>, <code>work_order.stopped</code></td>
+</tr>
+<tr>
+<td>Files</td>
+<td><code>.oxagen/workflows/&lt;slug&gt;.toml</code>, and later <code>.oxagen/dod/labels/&lt;label&gt;.toml</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>The Postgres tables are a schema change, so the pull request that adds them carries
+<code>migration-required</code> (SCR-006).</p>
+<h2 id="tasks/14-permissions">14. Permissions</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Permission</th>
+<th>Allows</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>task.read</code></td>
+<td>See tasks, work orders, workflows, providers, fields, and people</td>
+<td>every workspace member</td>
+</tr>
+<tr>
+<td><code>issue_provider.connect</code></td>
+<td>Connect, edit, sync, and disconnect a provider</td>
+<td>workspace owner</td>
+</tr>
+<tr>
+<td><code>task_fields.write</code></td>
+<td>Edit statuses, resolutions, labels, and colours</td>
+<td>workspace owner</td>
+</tr>
+<tr>
+<td><code>identity_map.write</code></td>
+<td>Map provider accounts</td>
+<td>workspace owner</td>
+</tr>
+<tr>
+<td><code>task.edit_dod</code></td>
+<td>Edit a draft definition of done</td>
+<td>workspace member</td>
+</tr>
+<tr>
+<td><code>task.certify</code></td>
+<td>Certify a definition of done</td>
+<td>workspace owner, and members granted it</td>
+</tr>
+<tr>
+<td><code>work_order.send</code></td>
+<td>Send a work order, to agents the sender operates</td>
+<td>workspace member</td>
+</tr>
+<tr>
+<td><code>work_order.accept</code></td>
+<td>Accept or stop a work order</td>
+<td>its sender, and workspace owners</td>
+</tr>
+<tr>
+<td><code>context.propose</code></td>
+<td>Open the pull request for a workflow</td>
+<td>workspace member</td>
+</tr>
+</tbody>
+</table></div>
+<p>Every write is gated server-side, whatever the UI hides.</p>
+<h2 id="tasks/15-pages-and-audits">15. Pages and audits</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Page</th>
+<th>Route</th>
+<th>Spec</th>
+<th>Audit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tasks (Tasks, Work orders, Workflows tabs, the send menu, the work order dialog, the workflow builder)</td>
+<td><code>#/:org/:ws/tasks</code>, <code>/tasks/work-orders</code>, <code>/tasks/workflows</code></td>
+<td><code>mockups/pages/tasks.md</code></td>
+<td><code>tasks.audit-prompt.md</code></td>
+</tr>
+<tr>
+<td>Providers, Fields, People, and the connection wizard</td>
+<td><code>#/:org/:ws/tasks/{providers,fields,people}</code></td>
+<td><code>mockups/pages/tasks-providers.md</code></td>
+<td><code>tasks-providers.audit-prompt.md</code></td>
+</tr>
+<tr>
+<td>One task</td>
+<td><code>#/:org/:ws/tasks/:taskId</code></td>
+<td><code>mockups/pages/task.md</code></td>
+<td><code>task.audit-prompt.md</code></td>
+</tr>
+<tr>
+<td>One work order</td>
+<td><code>#/:org/:ws/tasks/work-orders/:woId</code></td>
+<td><code>mockups/pages/work-order.md</code></td>
+<td><code>work-order.audit-prompt.md</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>Tasks is a Workspace nav item under Fleet. Its count is the drafts and changed certifications waiting on
+a person plus the work orders waiting on you, because a count in navigation appears only where
+something waits on a person. On a phone, Tasks is in the More sheet.</p>
+<h2 id="tasks/16-what-exists-today">16. What exists today</h2>
+<p>Legend: ✅ exists · 🟡 partial · ❌ missing. Read from <code>macanderson/oxagen</code> on 2026-09-23.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Need</th>
+<th>Today</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GitHub issue reading</td>
+<td>The ingestion connector reads issues into the graph (<code>packages/ingestion/src/connectors/github</code>), and the App binding covers repositories. <code>repository.link.ts</code> says issue import is not part of the binding.</td>
+<td>🟡</td>
+</tr>
+<tr>
+<td>Linear reading</td>
+<td>A read-only connector (<code>connectors/linear</code>) with OAuth <code>read</code> or a personal key</td>
+<td>🟡</td>
+</tr>
+<tr>
+<td>Jira</td>
+<td>Nothing</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Credential storage</td>
+<td>The workspace credential store with envelope encryption (<code>workspace-credential.ts</code>, <code>kms.ts</code>)</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Field mapping suggestions</td>
+<td><code>suggest_connection_mappings</code></td>
+<td>🟡</td>
+</tr>
+<tr>
+<td>Identity mapping</td>
+<td>Nothing. Connectors store the <code>login</code> string. <code>auth.accounts</code> holds the GitHub accounts people signed in with.</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Task, definition of done, certification, readiness</td>
+<td>Nothing names an issue, task, or ticket</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>The operator</td>
+<td>Derived from <code>principals.parent_user_id</code> in <code>list_agents</code></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Starting a run from Oxagen</td>
+<td>No capability starts a run. <code>dispatch_command</code> reaches live runs only. ARP carries a brief the operator starts.</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Workflows</td>
+<td>Removed by ADR-043 in their old form</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Mentions of context records</td>
+<td>The grammar has no context-record or task type</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>The run's task reference</td>
+<td><code>cost.run_totals.task_ref</code>, with nothing recording one</td>
+<td>🟡</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="tasks/17-decisions-this-needs">17. Decisions this needs</h2>
+<p>Each becomes an ADR before the code it governs merges.</p>
+<ol>
+<li><strong>A work order is the operator's brief, and the runtime starts the run.</strong> It settles delivery (§9.6)
+and keeps ADR-043 intact.</li>
+<li><strong>Workflows order work orders and execute nothing.</strong> It names the difference from the <code>workflow.*</code>
+that ADR-043 removed.</li>
+<li><strong>Task field settings are workspace settings, and label item templates are files.</strong> §6.5 and §6.6.</li>
+<li><strong>The task definition of done and the run dod are two objects.</strong> §8.1, and how the second may
+later compile the first.</li>
+<li><strong>The product words.</strong> &quot;Work order&quot; and &quot;send&quot;. ADR-113 reserves &quot;Dispatch&quot; as a name only the
+founder decides, so neither the UI nor a capability name uses it for this.</li>
+<li><strong>The mention grammar gains <code>context_record</code> and <code>task</code>.</strong> <code>packages/ai/src/prompts/mentions.ts</code>.</li>
+</ol>
+<h2 id="tasks/18-open-questions">18. Open questions</h2>
+<ul>
+<li>Should a certification expire, for a task that sits ready for months?</li>
+<li>Should a regulated workspace require two certifiers for a <code>P0</code>?</li>
+<li>Who pays for drafting the first import of a large tracker: Oxagen, as for every assistant turn, or
+the tenant above a threshold?</li>
+<li>Should acceptance of a work order that closed its tasks upstream reopen them when a provider reopens
+the issue?</li>
+</ul>
+<h2 id="tasks/19-definition-of-done-for-the-build">19. Definition of done for the build</h2>
+<ul>
+<li>[ ] A workspace connects GitHub, Linear, and Jira Cloud through the six-step wizard, each with its logo, its scopes, and what the token still cannot do.</li>
+<li>[ ] Each connection authenticates with the method in §5.2 and stores its token in the workspace credential store.</li>
+<li>[ ] More than one provider, and more than one account of one provider, can be connected to one workspace.</li>
+<li>[ ] Provider accounts map to workspace members with suggestions a person confirms, and any account can stay not mapped.</li>
+<li>[ ] Tasks import with the thirteen fields of §6.1 and no others.</li>
+<li>[ ] Statuses, resolutions, and labels are configurable with a mapping per provider, and every label has a colour.</li>
+<li>[ ] The ten default labels, five resolutions, and three status categories ship as specified.</li>
+<li>[ ] The label editor shows the definition-of-done section as <code>later</code>.</li>
+<li>[ ] Every open task imported gets a draft definition of done from <code>oxagen.assistant</code>, with its notes.</li>
+<li>[ ] A person certifies a definition of done, the certification records its digest and task version, and the task becomes ready.</li>
+<li>[ ] A certified task that changes upstream leaves ready and shows both versions.</li>
+<li>[ ] Only ready, open tasks can be selected. The send menu lists only agents the sender operates, each with its harness mark, and published workflows made of them.</li>
+<li>[ ] The work order screen merges every definition of done, tags each item with its tasks, drafts an editable prompt, resolves <code>@</code> mentions of context records and agent profiles, and will not send until the repositories are confirmed.</li>
+<li>[ ] A work order reaches the agent's runtime by one of the paths in §9.6, and the run records it as its task reference.</li>
+<li>[ ] A workflow file chains agents, hands off with quoted notes, returns within its bound, and parks for the operator when the bound is spent.</li>
+<li>[ ] The agent claims items with evidence, and a person accepts them. Nothing merges without a person.</li>
+<li>[ ] Every capability in §12 is gated, audited, documented, and tested, and the agent-facing tools load in all four harnesses.</li>
+<li>[ ] The four page audits in §15 pass against the build.</li>
+</ul>
+
+<footer class="colophon"><span>Oxagen · Specification</span><span>Source: <code>docs/tasks-spec.md</code></span></footer>
+</main>
+</div>
 </article><article id="portability" class="doc" hidden>
 <header class="mast">
   <p class="eyebrow">Oxagen · Specification</p>
@@ -13027,7 +14226,7 @@ need a decision before W13 is written into the spec.</li>
 </div>
 <script>
 (function(){
-  var TITLES={'spec': 'Oxagen Mission Control: Product and Technical Specification', 'dod': 'Oxagen DoD: the definition of done for agent runs', 'witness': 'Oxagen Witness: outcome verification', 'desktop': 'Oxagen Desktop: product specification, rev 1', 'creation': 'Creating things in Oxagen: agents, tools, skills and context records', 'portability': 'The Agent Portability Atlas', 'execution-portability': 'Agent Run Protocol (ARP)', 'plan': 'Oxagen Mission Control app: implementation plan', 'scope': 'Oxagen Mission Control: the scope review, and what it changed', 'scaleback': 'Scale back Mission Control: the mockup prompt', 'prompts': 'Oxagen Mission Control: mockup prompts, one per demo flow', 'consolidation': 'Consolidating W1–W11 into one design', 'feedback': 'Feedback on the mockups', 'videos': 'Videos of the mockups, narrated', 'w13': 'W13: in the loop'};
+  var TITLES={'spec': 'Oxagen Mission Control: Product and Technical Specification', 'dod': 'Oxagen DoD: the definition of done for agent runs', 'witness': 'Oxagen Witness: outcome verification', 'desktop': 'Oxagen Desktop: product specification, rev 1', 'creation': 'Creating things in Oxagen: agents, tools, skills and context records', 'tasks': 'Tasks and work orders', 'portability': 'The Agent Portability Atlas', 'execution-portability': 'Agent Run Protocol (ARP)', 'plan': 'Oxagen Mission Control app: implementation plan', 'scope': 'Oxagen Mission Control: the scope review, and what it changed', 'scaleback': 'Scale back Mission Control: the mockup prompt', 'prompts': 'Oxagen Mission Control: mockup prompts, one per demo flow', 'consolidation': 'Consolidating W1–W11 into one design', 'feedback': 'Feedback on the mockups', 'videos': 'Videos of the mockups, narrated', 'w13': 'W13: in the loop'};
   var first='spec';
   function show(){
     var h=location.hash.replace(/^#/,""), id=h.split("/")[0];

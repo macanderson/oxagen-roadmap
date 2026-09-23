@@ -39,6 +39,21 @@ A scenario in the catalog with no `SCENARIOS` entry fails; nothing skips.
 
 Run `build-mockup.mjs --check` on every edit to the sources; run `check-mockup.mjs` before you ship.
 
+## The tasks guard
+
+```sh
+node tools/check-tasks.mjs           # every Tasks flow
+node tools/check-tasks.mjs --shots   # also write a screenshot per step to .claude/shots/tasks/
+```
+
+Walks the Tasks surface (`docs/tasks-spec.md`) the way an operator meets it: connecting Jira through
+the six-step wizard with one account left not mapped; drafting a definition of done with the
+assistant, editing it and certifying it; a certified task that changed upstream; the send menu
+listing only agents the operator runs, each with its harness mark; the work order merging every
+definition of done, resolving `@` mentions and refusing to send until the repositories are
+confirmed; a workflow of four agents and a person, and the builder drafting one from a sentence;
+label colours; and accepting a claimed work order.
+
 ## The wizard guard
 
 ```sh
