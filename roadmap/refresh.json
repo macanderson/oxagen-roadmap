@@ -143,7 +143,8 @@
     "docs/adr/ADR-138-the-gateway-brokers-the-vendor-credential-a-wrapped-harness-holds-a-run-token.md",
     "docs/adr/ADR-139-one-store-for-a-runs-content-on-the-host.md",
     "docs/adr/ADR-140-one-tool-call-seals-one-frame.md",
-    "docs/adr/ADR-141-what-counts-as-an-installed-cursor-and-where-a-cursor-steer-lands.md"
+    "docs/adr/ADR-141-what-counts-as-an-installed-cursor-and-where-a-cursor-steer-lands.md",
+    "docs/adr/ADR-142-cost-center-chargeback.md"
   ],
   "adrs": {
     "ADR-001": {
@@ -1257,6 +1258,14 @@
       "path": "docs/adr/ADR-141-what-counts-as-an-installed-cursor-and-where-a-cursor-steer-lands.md",
       "status": "accepted",
       "title": "What counts as an installed Cursor, and where a Cursor steer lands"
+    },
+    "ADR-142": {
+      "date": null,
+      "decision": "### 1. The label list",
+      "id": "ADR-142",
+      "path": "docs/adr/ADR-142-cost-center-chargeback.md",
+      "status": null,
+      "title": "Cost-center chargeback on Spend"
     }
   },
   "baseline": "2026-09-18T20:52:30Z",
@@ -1887,6 +1896,19 @@
       "status": "decided",
       "title": "What counts as an installed Cursor, and where a Cursor steer lands"
     },
+    "ADR-142": {
+      "blocks": [],
+      "decided": "ADR-142: Cost-center chargeback on Spend. ### 1. The label list",
+      "decided_on": "2026-09-23",
+      "id": "ADR-142",
+      "origin": "adr",
+      "pr": 3732,
+      "question": "Decided in the repository: Cost-center chargeback on Spend.",
+      "recommendation": null,
+      "source": "docs/adr/ADR-142-cost-center-chargeback.md",
+      "status": "decided",
+      "title": "Cost-center chargeback on Spend"
+    },
     "I-oxagen#2961": {
       "blocks": [],
       "decided": null,
@@ -2356,9 +2378,9 @@
       "title": "P0 · app+ops/CI · Two files from an already-merged PR export test-only helpers and fail every PR's required checks job"
     }
   },
-  "generated_at": "2026-09-22T23:50:54.893Z",
+  "generated_at": "2026-09-23T02:36:18.625Z",
   "heads": {
-    "oxagen": "03b47a1ebe70d617e7c7c8ce19c3fcdb9d0dc085"
+    "oxagen": "c605b4febb244af5eebb3e925fdd22a42643a730"
   },
   "issues": {
     "oxagen#1": {
@@ -19608,7 +19630,7 @@
     },
     "oxagen#3732": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-23T02:28:29Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": true,
@@ -19621,7 +19643,7 @@
         "migration-required",
         "schema-change"
       ],
-      "merged_at": null,
+      "merged_at": "2026-09-23T02:28:29Z",
       "milestone": null,
       "needs_decision": false,
       "number": 3732,
@@ -19632,9 +19654,9 @@
       "spec_refs": [
         "ADR-142"
       ],
-      "state": "open",
+      "state": "closed",
       "title": "feat(spend): cost-center chargeback on Spend",
-      "updated_at": "2026-09-22T23:42:52Z"
+      "updated_at": "2026-09-23T02:28:31Z"
     },
     "oxagen#3733": {
       "author": "macanderson",
@@ -19721,11 +19743,11 @@
       ],
       "state": "open",
       "title": "feat(auth): enterprise SSO over OIDC and SAML with IdP group-to-role mapping",
-      "updated_at": "2026-09-22T23:43:50Z"
+      "updated_at": "2026-09-23T00:33:42Z"
     },
     "oxagen#3736": {
       "author": "oxagen-connect[bot]",
-      "closed_at": null,
+      "closed_at": "2026-09-23T00:10:17Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": false,
@@ -19733,8 +19755,7 @@
       "is_pr": true,
       "kind": null,
       "labels": [
-        "no-issue",
-        "closes-nothing"
+        "no-issue"
       ],
       "merged_at": null,
       "milestone": null,
@@ -19745,9 +19766,9 @@
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "Context PR: ctx.product.do-not-build-typecheck",
-      "updated_at": "2026-09-22T23:40:09Z"
+      "updated_at": "2026-09-23T00:10:17Z"
     },
     "oxagen#3737": {
       "author": "macanderson",
@@ -19825,7 +19846,7 @@
       ],
       "state": "open",
       "title": "Review of the last 100 commits: three P1s, six P2s, and the residue that could ride",
-      "updated_at": "2026-09-22T23:42:52Z"
+      "updated_at": "2026-09-23T00:02:34Z"
     },
     "oxagen#3740": {
       "author": "macanderson",
@@ -19926,6 +19947,121 @@
       "state": "open",
       "title": "Queued · surfaces/Tacho · Committing an agent's budget through the definition-in-git flow never reaches the field the proxy reads",
       "updated_at": "2026-09-22T23:42:32Z"
+    },
+    "oxagen#3744": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3744",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "closes-nothing"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3744,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-094",
+        "ADR-138",
+        "ADR-142",
+        "ADR-134",
+        "ADR-137",
+        "docs/specs/credential-custody/spec.md",
+        "docs/specs/gateway/spec.md"
+      ],
+      "state": "open",
+      "title": "docs(specs): credential custody inventory, and narrow a GitHub App token to a run's repository",
+      "updated_at": "2026-09-23T02:35:20Z"
+    },
+    "oxagen#3745": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3745",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "closes-nothing"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3745,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        3736
+      ],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "fix(app): send a context record's statement on one line from the wizard",
+      "updated_at": "2026-09-23T00:14:09Z"
+    },
+    "oxagen#3746": {
+      "author": "macanderson",
+      "closed_at": "2026-09-23T01:13:08Z",
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3746",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "no-issue",
+        "closes-nothing"
+      ],
+      "merged_at": "2026-09-23T01:13:08Z",
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3746,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "fix(tacho): write every event an ingest seals, starting with the dropped turn_end",
+      "updated_at": "2026-09-23T01:13:11Z"
+    },
+    "oxagen#3747": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3747",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "closes-nothing"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3747,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        3732
+      ],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-142"
+      ],
+      "state": "open",
+      "title": "feat(spend): charge agents to a cost center from their page, and backfill old runs",
+      "updated_at": "2026-09-23T02:35:57Z"
     },
     "oxagen#4": {
       "author": "macanderson",
@@ -36392,7 +36528,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "fix(docs): register SCR-006 in the document manifest",
-      "updated_at": "2026-09-22T23:41:03Z"
+      "updated_at": "2026-09-23T02:29:54Z"
     },
     "stella#6551": {
       "author": "cursor[bot]",
@@ -36448,7 +36584,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "fix(docs): rewrite SCR-006 so the prose gate accepts it",
-      "updated_at": "2026-09-22T23:48:17Z"
+      "updated_at": "2026-09-23T00:08:44Z"
     },
     "stella#6553": {
       "author": "macanderson",
@@ -36474,6 +36610,31 @@
       "state": "open",
       "title": "Signing an empty body twice stacks two footers (residue #6545)",
       "updated_at": "2026-09-22T23:45:13Z"
+    },
+    "stella#6554": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/stella/issues/6554",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 6554,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "stella",
+      "spec_refs": [],
+      "state": "open",
+      "title": "SCR-006 carries three short titles across the corpus (residue #6550)",
+      "updated_at": "2026-09-23T00:03:09Z"
     },
     "stella#834": {
       "author": "macanderson",
@@ -36597,9 +36758,29 @@
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "dod",
-      "last_merge": "2026-09-22T20:09:18Z",
+      "last_merge": "2026-09-23T02:28:29Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-23T02:28:29Z",
+          "number": 3732,
+          "repo": "oxagen",
+          "title": "feat(spend): cost-center chargeback on Spend",
+          "touched": [
+            "packages/tacho"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-23T01:13:08Z",
+          "number": 3746,
+          "repo": "oxagen",
+          "title": "fix(tacho): write every event an ingest seals, starting with the dropped turn_end",
+          "touched": [
+            "packages/tacho"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-22T20:09:18Z",
@@ -36780,39 +36961,29 @@
           "touched": [
             "packages/tacho"
           ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-20T22:16:54Z",
-          "number": 3601,
-          "repo": "oxagen",
-          "title": "fix(billing): repair the per-organisation key minter's silent wrong answers",
-          "touched": [
-            "packages/tacho"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-20T22:01:11Z",
-          "number": 3602,
-          "repo": "oxagen",
-          "title": "fix(tacho): stop pinning a platform's errno in the startup-listener test",
-          "touched": [
-            "packages/tacho"
-          ]
         }
       ],
       "open_issues": 0,
-      "refreshed_at": "2026-09-22T21:43:59.864Z",
+      "refreshed_at": "2026-09-23T02:36:18.625Z",
       "shared_page": false
     },
     "D3": {
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "dod",
-      "last_merge": "2026-09-22T06:43:03Z",
+      "last_merge": "2026-09-23T02:28:29Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-23T02:28:29Z",
+          "number": 3732,
+          "repo": "oxagen",
+          "title": "feat(spend): cost-center chargeback on Spend",
+          "touched": [
+            "packages/billing/src"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-22T06:43:03Z",
@@ -36965,7 +37136,7 @@
         }
       ],
       "open_issues": 0,
-      "refreshed_at": "2026-09-22T10:19:35.597Z",
+      "refreshed_at": "2026-09-23T02:36:18.625Z",
       "shared_page": false
     },
     "D4": {
@@ -37548,9 +37719,20 @@
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "witness",
-      "last_merge": "2026-09-22T16:43:54Z",
+      "last_merge": "2026-09-23T02:28:29Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-23T02:28:29Z",
+          "number": 3732,
+          "repo": "oxagen",
+          "title": "feat(spend): cost-center chargeback on Spend",
+          "touched": [
+            "apps/app/src/data/contracts/spend.ts",
+            "packages/database/src/schema/cost.ts"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-22T16:43:54Z",
@@ -37615,16 +37797,26 @@
         }
       ],
       "open_issues": 0,
-      "refreshed_at": "2026-09-22T18:51:30.530Z",
+      "refreshed_at": "2026-09-23T02:36:18.625Z",
       "shared_page": false
     },
     "accept-invitation": {
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "surface",
-      "last_merge": "2026-09-21T20:24:07Z",
+      "last_merge": "2026-09-23T02:28:29Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-23T02:28:29Z",
+          "number": 3732,
+          "repo": "oxagen",
+          "title": "feat(spend): cost-center chargeback on Spend",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-21T20:24:07Z",
@@ -37814,21 +38006,11 @@
           "touched": [
             "apps/app/src/app/"
           ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-18T23:51:19Z",
-          "number": 3366,
-          "repo": "oxagen",
-          "title": "run replay 3/3: the Run page transcript, player, chain and cost",
-          "touched": [
-            "apps/app/src/app/"
-          ]
         }
       ],
       "open_issues": 0,
       "page": "apps/app/src/app/(auth)/invite/[token]/page.tsx",
-      "refreshed_at": "2026-09-21T22:12:53.518Z",
+      "refreshed_at": "2026-09-23T02:36:18.625Z",
       "shared_page": false
     },
     "agent": {
@@ -38179,7 +38361,7 @@
         }
       ],
       "kind": "surface",
-      "last_merge": "2026-09-22T16:43:54Z",
+      "last_merge": "2026-09-23T02:28:29Z",
       "links": [
         {
           "number": 3282,
@@ -38195,6 +38377,16 @@
         }
       ],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-23T02:28:29Z",
+          "number": 3732,
+          "repo": "oxagen",
+          "title": "feat(spend): cost-center chargeback on Spend",
+          "touched": [
+            "apps/app/src/features/fleet/fleet.builders.ts"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-22T16:43:54Z",
@@ -38401,33 +38593,30 @@
             "apps/app/src/features/fleet/fleet.builders.ts",
             "apps/app/src/data/live/mappers/runs.ts"
           ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-19T02:41:50Z",
-          "number": 3337,
-          "repo": "oxagen",
-          "title": "Every date in the app renders in your time zone, Pacific by default",
-          "touched": [
-            "apps/app/src/features/fleet/runs-table.tsx",
-            "apps/app/src/features/fleet/fleet.builders.ts",
-            "apps/app/src/features/onboarding/gate.tsx",
-            "apps/app/src/ui/generated-summary.tsx"
-          ]
         }
       ],
       "open_issues": 1,
       "page": "apps/app/src/app/[org]/[ws]/page.tsx",
-      "refreshed_at": "2026-09-22T18:51:30.530Z",
+      "refreshed_at": "2026-09-23T02:36:18.625Z",
       "shared_page": false
     },
     "forgot-password": {
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "surface",
-      "last_merge": "2026-09-21T20:24:07Z",
+      "last_merge": "2026-09-23T02:28:29Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-23T02:28:29Z",
+          "number": 3732,
+          "repo": "oxagen",
+          "title": "feat(spend): cost-center chargeback on Spend",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-21T20:24:07Z",
@@ -38617,21 +38806,11 @@
           "touched": [
             "apps/app/src/app/"
           ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-18T23:51:19Z",
-          "number": 3366,
-          "repo": "oxagen",
-          "title": "run replay 3/3: the Run page transcript, player, chain and cost",
-          "touched": [
-            "apps/app/src/app/"
-          ]
         }
       ],
       "open_issues": 0,
       "page": "apps/app/src/app/(auth)/forgot-password/page.tsx",
-      "refreshed_at": "2026-09-21T22:12:53.518Z",
+      "refreshed_at": "2026-09-23T02:36:18.625Z",
       "shared_page": false
     },
     "installer": {
@@ -38828,9 +39007,19 @@
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "surface",
-      "last_merge": "2026-09-21T20:24:07Z",
+      "last_merge": "2026-09-23T02:28:29Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-23T02:28:29Z",
+          "number": 3732,
+          "repo": "oxagen",
+          "title": "feat(spend): cost-center chargeback on Spend",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-21T20:24:07Z",
@@ -39020,21 +39209,11 @@
           "touched": [
             "apps/app/src/app/"
           ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-18T23:51:19Z",
-          "number": 3366,
-          "repo": "oxagen",
-          "title": "run replay 3/3: the Run page transcript, player, chain and cost",
-          "touched": [
-            "apps/app/src/app/"
-          ]
         }
       ],
       "open_issues": 0,
       "page": "apps/app/src/app/(auth)/login/page.tsx",
-      "refreshed_at": "2026-09-21T22:12:53.518Z",
+      "refreshed_at": "2026-09-23T02:36:18.625Z",
       "shared_page": false
     },
     "mandate": {
@@ -39106,9 +39285,19 @@
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "surface",
-      "last_merge": "2026-09-21T20:24:07Z",
+      "last_merge": "2026-09-23T02:28:29Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-23T02:28:29Z",
+          "number": 3732,
+          "repo": "oxagen",
+          "title": "feat(spend): cost-center chargeback on Spend",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-21T20:24:07Z",
@@ -39298,21 +39487,11 @@
           "touched": [
             "apps/app/src/app/"
           ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-18T23:51:19Z",
-          "number": 3366,
-          "repo": "oxagen",
-          "title": "run replay 3/3: the Run page transcript, player, chain and cost",
-          "touched": [
-            "apps/app/src/app/"
-          ]
         }
       ],
       "open_issues": 0,
       "page": "apps/app/src/app/(onboarding)/new-organization/page.tsx",
-      "refreshed_at": "2026-09-21T22:12:53.518Z",
+      "refreshed_at": "2026-09-23T02:36:18.625Z",
       "shared_page": false
     },
     "onboarding-run": {
@@ -39402,7 +39581,7 @@
         }
       ],
       "kind": "surface",
-      "last_merge": "2026-09-21T11:03:09Z",
+      "last_merge": "2026-09-23T02:28:29Z",
       "links": [
         {
           "number": 3314,
@@ -39418,6 +39597,16 @@
         }
       ],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-23T02:28:29Z",
+          "number": 3732,
+          "repo": "oxagen",
+          "title": "feat(spend): cost-center chargeback on Spend",
+          "touched": [
+            "apps/app/src/app/[org]/page.tsx"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-21T11:03:09Z",
@@ -39495,7 +39684,7 @@
       ],
       "open_issues": 2,
       "page": "apps/app/src/app/[org]/page.tsx",
-      "refreshed_at": "2026-09-21T13:05:20.786Z",
+      "refreshed_at": "2026-09-23T02:36:18.625Z",
       "shared_page": false
     },
     "organization-api-keys": {
@@ -39898,9 +40087,19 @@
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "surface",
-      "last_merge": "2026-09-21T20:24:07Z",
+      "last_merge": "2026-09-23T02:28:29Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-23T02:28:29Z",
+          "number": 3732,
+          "repo": "oxagen",
+          "title": "feat(spend): cost-center chargeback on Spend",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-21T20:24:07Z",
@@ -40090,21 +40289,11 @@
           "touched": [
             "apps/app/src/app/"
           ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-18T23:51:19Z",
-          "number": 3366,
-          "repo": "oxagen",
-          "title": "run replay 3/3: the Run page transcript, player, chain and cost",
-          "touched": [
-            "apps/app/src/app/"
-          ]
         }
       ],
       "open_issues": 0,
       "page": "apps/app/src/app/(auth)/reset-password/page.tsx",
-      "refreshed_at": "2026-09-21T22:12:53.518Z",
+      "refreshed_at": "2026-09-23T02:36:18.625Z",
       "shared_page": false
     },
     "run": {
@@ -40469,9 +40658,19 @@
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "surface",
-      "last_merge": "2026-09-21T20:24:07Z",
+      "last_merge": "2026-09-23T02:28:29Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-23T02:28:29Z",
+          "number": 3732,
+          "repo": "oxagen",
+          "title": "feat(spend): cost-center chargeback on Spend",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-21T20:24:07Z",
@@ -40662,21 +40861,11 @@
           "touched": [
             "apps/app/src/app/"
           ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-18T23:51:19Z",
-          "number": 3366,
-          "repo": "oxagen",
-          "title": "run replay 3/3: the Run page transcript, player, chain and cost",
-          "touched": [
-            "apps/app/src/app/"
-          ]
         }
       ],
       "open_issues": 0,
       "page": "apps/app/src/app/(auth)/signup/page.tsx",
-      "refreshed_at": "2026-09-21T22:12:53.518Z",
+      "refreshed_at": "2026-09-23T02:36:18.625Z",
       "shared_page": false
     },
     "skill-source": {
@@ -40846,9 +41035,20 @@
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "surface",
-      "last_merge": "2026-09-22T16:43:54Z",
+      "last_merge": "2026-09-23T02:28:29Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-23T02:28:29Z",
+          "number": 3732,
+          "repo": "oxagen",
+          "title": "feat(spend): cost-center chargeback on Spend",
+          "touched": [
+            "apps/app/src/features/spend/spend.tsx",
+            "apps/app/src/features/spend/actions.ts"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-22T16:43:54Z",
@@ -40916,7 +41116,7 @@
       ],
       "open_issues": 0,
       "page": "apps/app/src/app/[org]/[ws]/spend/page.tsx",
-      "refreshed_at": "2026-09-22T18:51:30.530Z",
+      "refreshed_at": "2026-09-23T02:36:18.625Z",
       "shared_page": false
     },
     "steering": {
@@ -41191,9 +41391,19 @@
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "surface",
-      "last_merge": "2026-09-21T20:24:07Z",
+      "last_merge": "2026-09-23T02:28:29Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-23T02:28:29Z",
+          "number": 3732,
+          "repo": "oxagen",
+          "title": "feat(spend): cost-center chargeback on Spend",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-21T20:24:07Z",
@@ -41380,16 +41590,6 @@
           "number": 3380,
           "repo": "oxagen",
           "title": "Sync frontend PWA assets and Mission Control messaging from oxagen-brand tip",
-          "touched": [
-            "apps/app/src/app/"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-18T23:51:19Z",
-          "number": 3366,
-          "repo": "oxagen",
-          "title": "run replay 3/3: the Run page transcript, player, chain and cost",
           "touched": [
             "apps/app/src/app/"
           ]
@@ -41397,16 +41597,26 @@
       ],
       "open_issues": 0,
       "page": "apps/app/src/app/(auth)/two-factor/page.tsx",
-      "refreshed_at": "2026-09-21T22:12:53.518Z",
+      "refreshed_at": "2026-09-23T02:36:18.625Z",
       "shared_page": false
     },
     "verify-email": {
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "surface",
-      "last_merge": "2026-09-21T20:24:07Z",
+      "last_merge": "2026-09-23T02:28:29Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-23T02:28:29Z",
+          "number": 3732,
+          "repo": "oxagen",
+          "title": "feat(spend): cost-center chargeback on Spend",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-21T20:24:07Z",
@@ -41596,21 +41806,11 @@
           "touched": [
             "apps/app/src/app/"
           ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-18T23:51:19Z",
-          "number": 3366,
-          "repo": "oxagen",
-          "title": "run replay 3/3: the Run page transcript, player, chain and cost",
-          "touched": [
-            "apps/app/src/app/"
-          ]
         }
       ],
       "open_issues": 0,
       "page": "apps/app/src/app/(auth)/verify/page.tsx",
-      "refreshed_at": "2026-09-21T22:12:53.518Z",
+      "refreshed_at": "2026-09-23T02:36:18.625Z",
       "shared_page": false
     },
     "wizard-agent": {
@@ -41749,20 +41949,20 @@
     }
   },
   "last_run": {
-    "at": "2026-09-22T23:50:54.893Z",
-    "calls": 7,
+    "at": "2026-09-23T02:36:18.625Z",
+    "calls": 9,
     "quiet": false
   },
   "milestones": {
     "M0": {
       "built": 4,
       "last_merge": {
-        "merged_at": "2026-09-21T20:24:07Z",
-        "number": 3632,
+        "merged_at": "2026-09-23T02:28:29Z",
+        "number": 3732,
         "repo": "oxagen",
-        "title": "feat(run): build the outputs spine, so a run says what it produced"
+        "title": "feat(spend): cost-center chargeback on Spend"
       },
-      "merged_prs": 33,
+      "merged_prs": 34,
       "not_started": 0,
       "open_issues": 3,
       "partial": 1,
@@ -41771,12 +41971,12 @@
     "M1": {
       "built": 10,
       "last_merge": {
-        "merged_at": "2026-09-22T20:09:18Z",
-        "number": 3731,
+        "merged_at": "2026-09-23T02:28:29Z",
+        "number": 3732,
         "repo": "oxagen",
-        "title": "Run export: download a bundle and verify it offline with oxagen verify"
+        "title": "feat(spend): cost-center chargeback on Spend"
       },
-      "merged_prs": 56,
+      "merged_prs": 57,
       "not_started": 1,
       "open_issues": 7,
       "partial": 5,
@@ -41785,12 +41985,12 @@
     "M2": {
       "built": 4,
       "last_merge": {
-        "merged_at": "2026-09-22T16:43:54Z",
-        "number": 3716,
+        "merged_at": "2026-09-23T02:28:29Z",
+        "number": 3732,
         "repo": "oxagen",
-        "title": "feat(tacho): store a workspace session policy and report when a host leaves the gateway"
+        "title": "feat(spend): cost-center chargeback on Spend"
       },
-      "merged_prs": 21,
+      "merged_prs": 22,
       "not_started": 2,
       "open_issues": 4,
       "partial": 2,
@@ -41799,12 +41999,12 @@
     "M3": {
       "built": 1,
       "last_merge": {
-        "merged_at": "2026-09-22T20:09:18Z",
-        "number": 3731,
+        "merged_at": "2026-09-23T02:28:29Z",
+        "number": 3732,
         "repo": "oxagen",
-        "title": "Run export: download a bundle and verify it offline with oxagen verify"
+        "title": "feat(spend): cost-center chargeback on Spend"
       },
-      "merged_prs": 34,
+      "merged_prs": 35,
       "not_started": 0,
       "open_issues": 4,
       "partial": 2,
@@ -41813,12 +42013,12 @@
     "M4": {
       "built": 1,
       "last_merge": {
-        "merged_at": "2026-09-22T20:09:18Z",
-        "number": 3731,
+        "merged_at": "2026-09-23T02:28:29Z",
+        "number": 3732,
         "repo": "oxagen",
-        "title": "Run export: download a bundle and verify it offline with oxagen verify"
+        "title": "feat(spend): cost-center chargeback on Spend"
       },
-      "merged_prs": 34,
+      "merged_prs": 35,
       "not_started": 0,
       "open_issues": 3,
       "partial": 2,
@@ -52833,6 +53033,210 @@
       "repo": "oxagen",
       "title": "Run export: download a bundle and verify it offline with oxagen verify"
     },
+    "oxagen#3732": {
+      "added": [
+        "apps/api/src/routes/v1/cost_center.create.ts",
+        "apps/api/src/routes/v1/cost_center.delete.ts",
+        "apps/api/src/routes/v1/cost_center.list.ts",
+        "apps/api/src/routes/v1/cost_center.set.ts",
+        "apps/api/src/routes/v1/spend.cost_center_statement.export.ts",
+        "apps/app/src/features/organization/cost-center-actions.test.ts",
+        "apps/app/src/features/organization/cost-center-actions.ts",
+        "apps/app/src/features/organization/cost-center-controls.tsx",
+        "apps/app/src/features/organization/cost-centers.test.tsx",
+        "apps/app/src/features/organization/cost-centers.tsx",
+        "apps/app/src/features/spend/cost-centers.test.tsx",
+        "apps/app/src/features/spend/cost-centers.tsx",
+        "apps/mcp/src/tools/cost_center.create.ts",
+        "apps/mcp/src/tools/cost_center.delete.ts",
+        "apps/mcp/src/tools/cost_center.list.ts",
+        "apps/mcp/src/tools/cost_center.set.ts",
+        "apps/mcp/src/tools/spend.cost_center_statement.export.ts",
+        "docs/adr/ADR-142-cost-center-chargeback.md",
+        "docs/capabilities/cost_center.create.md",
+        "docs/capabilities/cost_center.delete.md",
+        "docs/capabilities/cost_center.list.md",
+        "docs/capabilities/cost_center.set.md",
+        "docs/capabilities/schemas/create_cost_center.json",
+        "docs/capabilities/schemas/delete_cost_center.json",
+        "docs/capabilities/schemas/export_cost_center_statement.json",
+        "docs/capabilities/schemas/list_cost_centers.json",
+        "docs/capabilities/schemas/set_cost_center.json",
+        "docs/capabilities/spend.cost_center_statement.export.md",
+        "packages/database/atlas/migrations/20260922160000_cost_centers.sql",
+        "packages/database/atlas/migrations/20260922160100_rls_cost_centers.sql",
+        "packages/handlers/src/cost_center.create.test.ts",
+        "packages/handlers/src/cost_center.create.ts",
+        "packages/handlers/src/cost_center.delete.test.ts",
+        "packages/handlers/src/cost_center.delete.ts",
+        "packages/handlers/src/cost_center.list.test.ts",
+        "packages/handlers/src/cost_center.list.ts",
+        "packages/handlers/src/cost_center.set.test.ts",
+        "packages/handlers/src/cost_center.set.ts",
+        "packages/handlers/src/cost_center.shared.ts",
+        "packages/handlers/src/cost_center.test-support.ts",
+        "packages/handlers/src/spend.cost_center_statement.export.test.ts",
+        "packages/handlers/src/spend.cost_center_statement.export.ts",
+        "packages/oxagen/src/contracts/cost_center.create.test.ts",
+        "packages/oxagen/src/contracts/cost_center.create.ts",
+        "packages/oxagen/src/contracts/cost_center.delete.test.ts",
+        "packages/oxagen/src/contracts/cost_center.delete.ts",
+        "packages/oxagen/src/contracts/cost_center.list.test.ts",
+        "packages/oxagen/src/contracts/cost_center.list.ts",
+        "packages/oxagen/src/contracts/cost_center.set.test.ts",
+        "packages/oxagen/src/contracts/cost_center.set.ts",
+        "packages/oxagen/src/contracts/cost_center.shared.ts",
+        "packages/oxagen/src/contracts/spend.cost_center_statement.export.test.ts",
+        "packages/oxagen/src/contracts/spend.cost_center_statement.export.ts"
+      ],
+      "author": "macanderson",
+      "closes": [],
+      "files": [
+        "apps/api/src/app.ts",
+        "apps/api/src/routes/v1/cost_center.create.ts",
+        "apps/api/src/routes/v1/cost_center.delete.ts",
+        "apps/api/src/routes/v1/cost_center.list.ts",
+        "apps/api/src/routes/v1/cost_center.set.ts",
+        "apps/api/src/routes/v1/spend.cost_center_statement.export.ts",
+        "apps/api/src/routes/v1/thin-capability-routes.test.ts",
+        "apps/app/capability-ui-map.json",
+        "apps/app/messages/organization.json",
+        "apps/app/messages/spend.json",
+        "apps/app/src/app/[org]/page.tsx",
+        "apps/app/src/app/[org]/pages.test.tsx",
+        "apps/app/src/data/contracts/org.ts",
+        "apps/app/src/data/contracts/spend.ts",
+        "apps/app/src/data/live/mappers/org.test.ts",
+        "apps/app/src/data/live/mappers/org.ts",
+        "apps/app/src/data/live/mappers/pretenant.test.ts",
+        "apps/app/src/data/live/org.test.ts",
+        "apps/app/src/data/live/org.ts",
+        "apps/app/src/data/ports.ts",
+        "apps/app/src/features/agents/agents.builders.ts",
+        "apps/app/src/features/audit/audit.test.tsx",
+        "apps/app/src/features/audit/export.test.ts",
+        "apps/app/src/features/auth/cli-consent.test.tsx",
+        "apps/app/src/features/billing/billing.builders.ts",
+        "apps/app/src/features/fleet/fleet.builders.ts",
+        "apps/app/src/features/mandate/mandate.builders.ts",
+        "apps/app/src/features/onboarding/onboarding.builders.ts",
+        "apps/app/src/features/organization/cost-center-actions.test.ts",
+        "apps/app/src/features/organization/cost-center-actions.ts",
+        "apps/app/src/features/organization/cost-center-controls.tsx",
+        "apps/app/src/features/organization/cost-centers.test.tsx",
+        "apps/app/src/features/organization/cost-centers.tsx",
+        "apps/app/src/features/organization/index.ts",
+        "apps/app/src/features/organization/organization.builders.ts",
+        "apps/app/src/features/organization/roles.test.tsx",
+        "apps/app/src/features/organization/workspace-governance.test.tsx",
+        "apps/app/src/features/organization/workspaces.test.tsx",
+        "apps/app/src/features/run/run.builders.ts",
+        "apps/app/src/features/shell/landing.test.ts",
+        "apps/app/src/features/shell/shell-server.test.tsx",
+        "apps/app/src/features/shell/source.test.ts",
+        "apps/app/src/features/skills/skills.test.tsx",
+        "apps/app/src/features/spend/actions.ts",
+        "apps/app/src/features/spend/cost-centers.test.tsx",
+        "apps/app/src/features/spend/cost-centers.tsx",
+        "apps/app/src/features/spend/dialogs.test.tsx",
+        "apps/app/src/features/spend/export-dialog.tsx",
+        "apps/app/src/features/spend/fleet-tiles.test.tsx",
+        "apps/app/src/features/spend/pricing.test.tsx",
+        "apps/app/src/features/spend/spend.test.tsx",
+        "apps/app/src/features/spend/spend.tsx",
+        "apps/app/src/features/spend/tables.tsx",
+        "apps/app/src/features/spend/view.ts",
+        "apps/app/src/features/tools/tools.builders.ts",
+        "apps/app/src/i18n/messages.d.ts",
+        "apps/app/src/test/steering-views.ts",
+        "apps/mcp/src/tools/cost_center.create.ts",
+        "apps/mcp/src/tools/cost_center.delete.ts",
+        "apps/mcp/src/tools/cost_center.list.ts",
+        "apps/mcp/src/tools/cost_center.set.ts",
+        "apps/mcp/src/tools/spend.cost_center_statement.export.ts",
+        "docs/adr/ADR-142-cost-center-chargeback.md",
+        "docs/adr/README.md",
+        "docs/capabilities/_index.md",
+        "docs/capabilities/cost_center.create.md",
+        "docs/capabilities/cost_center.delete.md",
+        "docs/capabilities/cost_center.list.md",
+        "docs/capabilities/cost_center.set.md",
+        "docs/capabilities/schemas/README.md",
+        "docs/capabilities/schemas/_index.json",
+        "docs/capabilities/schemas/create_cost_center.json",
+        "docs/capabilities/schemas/delete_cost_center.json",
+        "docs/capabilities/schemas/export_cost_center_statement.json",
+        "docs/capabilities/schemas/export_statement.json",
+        "docs/capabilities/schemas/get_spend.json",
+        "docs/capabilities/schemas/list_cost_centers.json",
+        "docs/capabilities/schemas/list_workspaces.json",
+        "docs/capabilities/schemas/set_cost_center.json",
+        "docs/capabilities/spend.cost_center_statement.export.md",
+        "docs/capabilities/spend.get.md",
+        "docs/capabilities/spend.statement.export.md",
+        "packages/billing/src/cost-rollup-store.pg.test.ts",
+        "packages/billing/src/cost-rollup-store.test.ts",
+        "packages/billing/src/cost-rollup-store.ts",
+        "packages/billing/src/cost-rollup.test.ts",
+        "packages/billing/src/cost-rollup.ts",
+        "packages/billing/src/findings-store.test.ts",
+        "packages/billing/src/findings.test.ts",
+        "packages/billing/src/price-card.pg.test.ts",
+        "packages/database/atlas/migrations/20260922160000_cost_centers.sql",
+        "packages/database/atlas/migrations/20260922160100_rls_cost_centers.sql",
+        "packages/database/atlas/migrations/atlas.sum",
+        "packages/database/src/schema/agent.ts",
+        "packages/database/src/schema/cost.ts",
+        "packages/database/src/schema/workspace.ts",
+        "packages/database/src/tenant-policy.manifest.test.ts",
+        "packages/database/src/tenant-policy.manifest.ts",
+        "packages/database/storage-manifest.json",
+        "packages/handlers/src/cost_center.create.test.ts",
+        "packages/handlers/src/cost_center.create.ts",
+        "packages/handlers/src/cost_center.delete.test.ts",
+        "packages/handlers/src/cost_center.delete.ts",
+        "packages/handlers/src/cost_center.list.test.ts",
+        "packages/handlers/src/cost_center.list.ts",
+        "packages/handlers/src/cost_center.set.test.ts",
+        "packages/handlers/src/cost_center.set.ts",
+        "packages/handlers/src/cost_center.shared.ts",
+        "packages/handlers/src/cost_center.test-support.ts",
+        "packages/handlers/src/register.ts",
+        "packages/handlers/src/role-check.test.ts",
+        "packages/handlers/src/spend.cost_center_statement.export.test.ts",
+        "packages/handlers/src/spend.cost_center_statement.export.ts",
+        "packages/handlers/src/spend.statement.export.ts",
+        "packages/handlers/src/spend.test-support.ts",
+        "packages/handlers/src/workspace.list.ts",
+        "packages/oxagen/capabilities.manifest.json",
+        "packages/oxagen/src/contracts.generated.ts",
+        "packages/oxagen/src/contracts/cost_center.create.test.ts",
+        "packages/oxagen/src/contracts/cost_center.create.ts",
+        "packages/oxagen/src/contracts/cost_center.delete.test.ts",
+        "packages/oxagen/src/contracts/cost_center.delete.ts",
+        "packages/oxagen/src/contracts/cost_center.list.test.ts",
+        "packages/oxagen/src/contracts/cost_center.list.ts",
+        "packages/oxagen/src/contracts/cost_center.set.test.ts",
+        "packages/oxagen/src/contracts/cost_center.set.ts",
+        "packages/oxagen/src/contracts/cost_center.shared.ts",
+        "packages/oxagen/src/contracts/index.ts",
+        "packages/oxagen/src/contracts/spend.cost_center_statement.export.test.ts",
+        "packages/oxagen/src/contracts/spend.cost_center_statement.export.ts",
+        "packages/oxagen/src/contracts/spend.shared.ts",
+        "packages/oxagen/src/contracts/spend.statement.export.ts",
+        "packages/oxagen/src/contracts/workspace.list.test.ts",
+        "packages/oxagen/src/contracts/workspace.list.ts",
+        "packages/tacho/src/host/model-base-url-toml.ts",
+        "tools/scripts/system-db-justifications.baseline.json"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3732",
+      "merged_at": "2026-09-23T02:28:29Z",
+      "number": 3732,
+      "refs": [],
+      "repo": "oxagen",
+      "title": "feat(spend): cost-center chargeback on Spend"
+    },
     "oxagen#3741": {
       "added": [
         ".claude/agents/budget-verify-2.md",
@@ -52864,6 +53268,31 @@
       "refs": [],
       "repo": "oxagen",
       "title": "Agent: budget-verify-2 (cache version for live budget-refusal test)"
+    },
+    "oxagen#3746": {
+      "added": [
+        "packages/tacho/src/claude-code/recorder-turn-gap.test.ts",
+        "packages/tacho/src/host/wal-chain-gap.test.ts"
+      ],
+      "author": "macanderson",
+      "closes": [],
+      "files": [
+        ".github/workflows/store-migrate-drift.yml",
+        "infra/tools/check-postgres-drift.sh",
+        "infra/tools/tests/check-postgres-drift.test.sh",
+        "packages/tacho/src/claude-code/recorder-turn-gap.test.ts",
+        "packages/tacho/src/claude-code/recorder.ts",
+        "packages/tacho/src/collector/daemon.ts",
+        "packages/tacho/src/host/wal-chain-gap.test.ts",
+        "packages/tacho/src/host/wal.ts"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3746",
+      "merged_at": "2026-09-23T01:13:08Z",
+      "number": 3746,
+      "refs": [],
+      "repo": "oxagen",
+      "title": "fix(tacho): write every event an ingest seals, starting with the dropped turn_end"
     },
     "stella#6527": {
       "added": [],
@@ -53467,8 +53896,8 @@
     }
   },
   "since": {
-    "oxagen": "2026-09-22T23:43:50Z",
-    "oxagen-roadmap": "2026-09-22T23:50:54.893Z",
-    "stella": "2026-09-22T23:48:17Z"
+    "oxagen": "2026-09-23T02:35:57Z",
+    "oxagen-roadmap": "2026-09-23T02:36:18.625Z",
+    "stella": "2026-09-23T02:29:54Z"
   }
 }
