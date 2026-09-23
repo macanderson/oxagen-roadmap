@@ -146,7 +146,8 @@
     "docs/adr/ADR-142-cost-center-chargeback.md",
     "docs/adr/ADR-143-the-gateway-brokers-the-vendor-credential-a-wrapped-harness-holds-a-run-token.md",
     "docs/adr/ADR-145-enterprise-sso-behind-better-auth.md",
-    "docs/adr/ADR-147-a-merge-queue-runs-the-full-gate-before-a-pr-lands-on-main.md"
+    "docs/adr/ADR-147-a-merge-queue-runs-the-full-gate-before-a-pr-lands-on-main.md",
+    "docs/adr/ADR-150-isolated-staging-before-production.md"
   ],
   "adrs": {
     "ADR-001": {
@@ -1292,6 +1293,14 @@
       "path": "docs/adr/ADR-147-a-merge-queue-runs-the-full-gate-before-a-pr-lands-on-main.md",
       "status": null,
       "title": "A merge queue runs the full gate before a PR lands on main"
+    },
+    "ADR-150": {
+      "date": null,
+      "decision": "Create staging in its own Terraform state, VPC, Aurora cluster, artifact bucket, application node, Parameter Store prefix, and GitHub deployment role. Reuse the network and application-node modules. Generate staging credentials independently. Do not copy production records or integration credentials.",
+      "id": "ADR-150",
+      "path": "docs/adr/ADR-150-isolated-staging-before-production.md",
+      "status": null,
+      "title": "Isolated staging before production"
     }
   },
   "baseline": "2026-09-18T20:52:30Z",
@@ -1961,6 +1970,19 @@
       "status": "decided",
       "title": "A merge queue runs the full gate before a PR lands on main"
     },
+    "ADR-150": {
+      "blocks": [],
+      "decided": "ADR-150: Isolated staging before production. Create staging in its own Terraform state, VPC, Aurora cluster, artifact bucket, application node, Parameter Store prefix, and GitHub deployment role. Reuse the network and application-node modules. Generate staging credentials independently. Do not copy production records or integration credentials.",
+      "decided_on": "2026-09-23",
+      "id": "ADR-150",
+      "origin": "adr",
+      "pr": 3765,
+      "question": "Decided in the repository: Isolated staging before production.",
+      "recommendation": null,
+      "source": "docs/adr/ADR-150-isolated-staging-before-production.md",
+      "status": "decided",
+      "title": "Isolated staging before production"
+    },
     "I-oxagen#2961": {
       "blocks": [],
       "decided": null,
@@ -2430,9 +2452,9 @@
       "title": "P0 · app+ops/CI · Two files from an already-merged PR export test-only helpers and fail every PR's required checks job"
     }
   },
-  "generated_at": "2026-09-23T07:57:50.446Z",
+  "generated_at": "2026-09-23T13:22:33.699Z",
   "heads": {
-    "oxagen": "39a0d67768482d5864b7d13352d86263c847e459"
+    "oxagen": "b709fffa891a9b100e5e5f7e27226113facf419b"
   },
   "issues": {
     "oxagen#1": {
@@ -18876,7 +18898,7 @@
     },
     "oxagen#3702": {
       "author": "github-actions[bot]",
-      "closed_at": null,
+      "closed_at": "2026-09-23T11:40:24Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": true,
@@ -18903,9 +18925,9 @@
       "spec_refs": [
         "ADR-137"
       ],
-      "state": "open",
+      "state": "closed",
       "title": "Production database schema is behind this repository",
-      "updated_at": "2026-09-22T13:16:21Z"
+      "updated_at": "2026-09-23T11:40:24Z"
     },
     "oxagen#3703": {
       "author": "cursor[bot]",
@@ -19551,7 +19573,7 @@
       "closed_at": null,
       "closes": [],
       "decision_question": null,
-      "has_spec_backing": false,
+      "has_spec_backing": true,
       "html_url": "https://github.com/macanderson/oxagen/issues/3727",
       "is_pr": false,
       "kind": null,
@@ -19566,10 +19588,12 @@
       "priority": null,
       "refs": [],
       "repo": "oxagen",
-      "spec_refs": [],
+      "spec_refs": [
+        "ADR-149"
+      ],
       "state": "open",
       "title": "Queued · surfaces/Tacho · A saved model allowlist governs nothing until an ADR says whose word arms it",
-      "updated_at": "2026-09-22T08:52:36Z"
+      "updated_at": "2026-09-23T08:08:44Z"
     },
     "oxagen#3728": {
       "author": "macanderson",
@@ -19762,7 +19786,7 @@
       ],
       "state": "open",
       "title": "Queued · auth/API · Removing someone from the identity provider leaves their Oxagen sessions and API keys live",
-      "updated_at": "2026-09-23T05:00:33Z"
+      "updated_at": "2026-09-23T08:17:27Z"
     },
     "oxagen#3735": {
       "author": "macanderson",
@@ -20147,7 +20171,7 @@
       ],
       "state": "open",
       "title": "feat(steering): assemble budgeted context and show delivery counts",
-      "updated_at": "2026-09-23T06:39:23Z"
+      "updated_at": "2026-09-23T08:22:28Z"
     },
     "oxagen#3749": {
       "author": "macanderson",
@@ -20433,7 +20457,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "fix(tacho): enforce the published definition budget",
-      "updated_at": "2026-09-23T07:54:31Z"
+      "updated_at": "2026-09-23T08:31:55Z"
     },
     "oxagen#3760": {
       "author": "macanderson",
@@ -20485,12 +20509,11 @@
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [
-        "ADR-149",
-        "ADR-147"
+        "ADR-149"
       ],
       "state": "open",
       "title": "feat(tacho): enforce workspace model lists independently of budgets",
-      "updated_at": "2026-09-23T06:20:34Z"
+      "updated_at": "2026-09-23T08:39:51Z"
     },
     "oxagen#3762": {
       "author": "macanderson",
@@ -20571,7 +20594,7 @@
     },
     "oxagen#3765": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-23T08:19:16Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": true,
@@ -20581,7 +20604,7 @@
       "labels": [
         "closes-nothing"
       ],
-      "merged_at": null,
+      "merged_at": "2026-09-23T08:19:15Z",
       "milestone": null,
       "needs_decision": false,
       "number": 3765,
@@ -20592,9 +20615,9 @@
       "spec_refs": [
         "ADR-150"
       ],
-      "state": "open",
+      "state": "closed",
       "title": "feat(infra): deploy isolated staging before production",
-      "updated_at": "2026-09-23T07:53:00Z"
+      "updated_at": "2026-09-23T08:40:43Z"
     },
     "oxagen#3766": {
       "author": "macanderson",
@@ -20698,7 +20721,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "fix(run): show harness identity and honest output gaps",
-      "updated_at": "2026-09-23T07:50:22Z"
+      "updated_at": "2026-09-23T09:05:25Z"
     },
     "oxagen#3770": {
       "author": "macanderson",
@@ -20749,7 +20772,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "feat(context): add readable labels and editable record slugs",
-      "updated_at": "2026-09-23T05:53:08Z"
+      "updated_at": "2026-09-23T08:50:35Z"
     },
     "oxagen#3772": {
       "author": "macanderson",
@@ -20777,7 +20800,7 @@
       ],
       "state": "open",
       "title": "feat(tacho): bind contained run tiers to registered launcher evidence",
-      "updated_at": "2026-09-23T07:05:28Z"
+      "updated_at": "2026-09-23T08:47:13Z"
     },
     "oxagen#3773": {
       "author": "macanderson",
@@ -20805,7 +20828,7 @@
       ],
       "state": "open",
       "title": "feat(run): name and summarize captured runs through Stella",
-      "updated_at": "2026-09-23T07:51:48Z"
+      "updated_at": "2026-09-23T09:05:14Z"
     },
     "oxagen#3774": {
       "author": "macanderson",
@@ -20830,7 +20853,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "feat(app): resurface token and model spend and keep onboarding waiting",
-      "updated_at": "2026-09-23T07:55:45Z"
+      "updated_at": "2026-09-23T08:41:15Z"
     },
     "oxagen#3775": {
       "author": "macanderson",
@@ -20855,7 +20878,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "feat(app): resurface agent composition and provider controls",
-      "updated_at": "2026-09-23T06:15:34Z"
+      "updated_at": "2026-09-23T08:46:31Z"
     },
     "oxagen#3776": {
       "author": "macanderson",
@@ -20905,7 +20928,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "feat(app): resurface shell activity and organization sections",
-      "updated_at": "2026-09-23T06:17:28Z"
+      "updated_at": "2026-09-23T08:44:42Z"
     },
     "oxagen#3778": {
       "author": "macanderson",
@@ -20930,7 +20953,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "feat(run): show checkout evidence and pull request CI",
-      "updated_at": "2026-09-23T06:52:04Z"
+      "updated_at": "2026-09-23T09:06:34Z"
     },
     "oxagen#3779": {
       "author": "macanderson",
@@ -20941,7 +20964,9 @@
       "html_url": "https://github.com/macanderson/oxagen/pull/3779",
       "is_pr": true,
       "kind": null,
-      "labels": [],
+      "labels": [
+        "closes-nothing"
+      ],
       "merged_at": null,
       "milestone": null,
       "needs_decision": false,
@@ -20952,8 +20977,8 @@
       "repo": "oxagen",
       "spec_refs": [],
       "state": "open",
-      "title": "feat(run): add consent and provider authorization for follow-through",
-      "updated_at": "2026-09-23T06:33:54Z"
+      "title": "feat(run): authorize issue providers and reconcile native issue receipts",
+      "updated_at": "2026-09-23T09:08:56Z"
     },
     "oxagen#3780": {
       "author": "macanderson",
@@ -20979,6 +21004,412 @@
       "state": "open",
       "title": "Queued · agents/Mandates · Merged Git definitions cannot activate (residue #3759)",
       "updated_at": "2026-09-23T07:53:46Z"
+    },
+    "oxagen#3781": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3781",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "no-issue"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3781,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "feat(app): open the permission catalogue from a button on Roles",
+      "updated_at": "2026-09-23T08:01:23Z"
+    },
+    "oxagen#3782": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/issues/3782",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3782,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Queued · surfaces/Tacho · A daemon test sees a sealed run's frames arrive out of order, once in two runs of the same code",
+      "updated_at": "2026-09-23T08:01:54Z"
+    },
+    "oxagen#3783": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3783",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "no-issue"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3783,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "test(tacho): a 429's named wait does not grow the command-poll backoff",
+      "updated_at": "2026-09-23T08:21:56Z"
+    },
+    "oxagen#3784": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/issues/3784",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3784,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Queued · evidence/Run · Enrichment scheduling misses revisions and repeats work (residue #3773)",
+      "updated_at": "2026-09-23T09:01:57Z"
+    },
+    "oxagen#3785": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3785",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "no-issue",
+        "migration-required"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3785,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-128",
+        "ADR-102",
+        "ADR-154",
+        "ADR-109",
+        "ADR-155",
+        "ADR-111",
+        "ADR-156",
+        "ADR-157",
+        "ADR-043",
+        "ADR-138",
+        "ADR-143",
+        "docs/specs/agent-run-protocol.md"
+      ],
+      "state": "open",
+      "title": "docs(adr): give ADRs 102, 109, 111 and 128 one file each",
+      "updated_at": "2026-09-23T08:41:58Z"
+    },
+    "oxagen#3786": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3786",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "no-issue"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3786,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-151"
+      ],
+      "state": "open",
+      "title": "docs(adr-151): add the per-harness credential inventory and the personal-token decision",
+      "updated_at": "2026-09-23T08:37:50Z"
+    },
+    "oxagen#3787": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [
+        3653
+      ],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3787",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "closes-nothing"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3787,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        3653
+      ],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "fix(ci): migration-gate applies production migrations before deploy",
+      "updated_at": "2026-09-23T08:54:45Z"
+    },
+    "oxagen#3788": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/issues/3788",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3788,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        3768
+      ],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-143",
+        "ADR-151",
+        "ADR-040"
+      ],
+      "state": "open",
+      "title": "Queued · evidence/Tacho · a git_push frame carries no credential_basis",
+      "updated_at": "2026-09-23T08:41:30Z"
+    },
+    "oxagen#3789": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3789",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "closes-nothing"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3789,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "feat(run): show reported tokens and provisional cost per turn",
+      "updated_at": "2026-09-23T09:09:55Z"
+    },
+    "oxagen#3790": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/issues/3790",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3790,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Queued · evidence/Run · Unrecorded harness facts omit the null value (residue #3769)",
+      "updated_at": "2026-09-23T09:04:17Z"
+    },
+    "oxagen#3791": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/issues/3791",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3791,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Queued · evidence/Run · Checkout completeness misses redactions and later context (residue #3778)",
+      "updated_at": "2026-09-23T09:04:21Z"
+    },
+    "oxagen#3792": {
+      "author": "macanderson",
+      "closed_at": "2026-09-23T09:12:14Z",
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3792",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "closes-nothing"
+      ],
+      "merged_at": "2026-09-23T09:12:14Z",
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3792,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-150"
+      ],
+      "state": "closed",
+      "title": "fix(ci): stop pull requests from evicting main's staging gate",
+      "updated_at": "2026-09-23T09:12:30Z"
+    },
+    "oxagen#3793": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3793",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "no-issue"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3793,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-150",
+        "ADR-147"
+      ],
+      "state": "open",
+      "title": "fix(ci): stop pull requests evicting main's staging run",
+      "updated_at": "2026-09-23T09:11:17Z"
+    },
+    "oxagen#3794": {
+      "author": "github-actions[bot]",
+      "closed_at": "2026-09-23T11:31:42Z",
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/issues/3794",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "main-unverified"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3794,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "main has commits nothing verified",
+      "updated_at": "2026-09-23T11:31:42Z"
+    },
+    "oxagen#3795": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3795",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 3795,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-130"
+      ],
+      "state": "open",
+      "title": "feat(app): rebuild the Run page to match the mockup",
+      "updated_at": "2026-09-23T09:16:52Z"
     },
     "oxagen#4": {
       "author": "macanderson",
@@ -43178,8 +43609,8 @@
     }
   },
   "last_run": {
-    "at": "2026-09-23T07:57:50.446Z",
-    "calls": 30,
+    "at": "2026-09-23T13:22:33.699Z",
+    "calls": 8,
     "quiet": false
   },
   "milestones": {
@@ -55377,6 +55808,64 @@
       "repo": "oxagen",
       "title": "fix(evidence): verify signed wrapped export content"
     },
+    "oxagen#3765": {
+      "added": [
+        ".agent/memory/ci-recovery/lessons.md",
+        ".agent/memory/ci-recovery/reflections/2026-09-23-main-ci-recovery.md",
+        ".github/workflows/staging.yml",
+        "docs/adr/ADR-150-isolated-staging-before-production.md",
+        "infra/modules/isolated-environment/main.tf",
+        "infra/modules/isolated-environment/outputs.tf",
+        "infra/modules/isolated-environment/runtime.tf",
+        "infra/modules/isolated-environment/variables.tf",
+        "infra/stacks-new/staging/.terraform.lock.hcl",
+        "infra/stacks-new/staging/main.tf",
+        "infra/stacks-new/staging/providers.tf",
+        "infra/stacks-new/staging/terraform.tfvars",
+        "infra/stacks-new/staging/variables.tf"
+      ],
+      "author": "macanderson",
+      "closes": [],
+      "files": [
+        ".agent/memory/ci-recovery/lessons.md",
+        ".agent/memory/ci-recovery/reflections/2026-09-23-main-ci-recovery.md",
+        ".github/actions/open-store-tunnels/action.yml",
+        ".github/actions/ship-to-node/action.yml",
+        ".github/workflows/pipeline.yml",
+        ".github/workflows/staging.yml",
+        "docs/adr/ADR-150-isolated-staging-before-production.md",
+        "docs/adr/README.md",
+        "infra/README.md",
+        "infra/modules/app-node/main.tf",
+        "infra/modules/app-node/monitoring.tf",
+        "infra/modules/app-node/user-data.sh.tftpl",
+        "infra/modules/app-node/variables.tf",
+        "infra/modules/isolated-environment/main.tf",
+        "infra/modules/isolated-environment/outputs.tf",
+        "infra/modules/isolated-environment/runtime.tf",
+        "infra/modules/isolated-environment/variables.tf",
+        "infra/stacks-new/staging/.terraform.lock.hcl",
+        "infra/stacks-new/staging/main.tf",
+        "infra/stacks-new/staging/providers.tf",
+        "infra/stacks-new/staging/terraform.tfvars",
+        "infra/stacks-new/staging/variables.tf",
+        "infra/tools/node/deploy-service.sh",
+        "infra/tools/tests/migration-gate.test.sh",
+        "tools/scripts/build-env.test.ts",
+        "tools/scripts/build-env.ts",
+        "tools/scripts/check-restart-alarm.mjs",
+        "tools/scripts/check-restart-alarm.test.ts",
+        "tools/scripts/package-for-node.sh",
+        "tools/scripts/package-for-node.test.ts"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3765",
+      "merged_at": "2026-09-23T08:19:15Z",
+      "number": 3765,
+      "refs": [],
+      "repo": "oxagen",
+      "title": "feat(infra): deploy isolated staging before production"
+    },
     "oxagen#3766": {
       "added": [
         ".agent/memory/worktree-recovery/lessons.md",
@@ -55436,6 +55925,22 @@
       "refs": [],
       "repo": "oxagen",
       "title": "fix(tacho): honor idle command polling and server retry intervals"
+    },
+    "oxagen#3792": {
+      "added": [],
+      "author": "macanderson",
+      "closes": [],
+      "files": [
+        ".github/workflows/staging.yml",
+        "docs/adr/ADR-150-isolated-staging-before-production.md"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3792",
+      "merged_at": "2026-09-23T09:12:14Z",
+      "number": 3792,
+      "refs": [],
+      "repo": "oxagen",
+      "title": "fix(ci): stop pull requests from evicting main's staging gate"
     },
     "stella#6527": {
       "added": [],
@@ -56124,8 +56629,8 @@
     }
   },
   "since": {
-    "oxagen": "2026-09-23T07:55:45Z",
-    "oxagen-roadmap": "2026-09-23T07:57:50.446Z",
-    "stella": "2026-09-23T04:21:20Z"
+    "oxagen": "2026-09-23T11:40:24Z",
+    "oxagen-roadmap": "2026-09-23T13:22:33.699Z",
+    "stella": "2026-09-23T13:22:33.699Z"
   }
 }
