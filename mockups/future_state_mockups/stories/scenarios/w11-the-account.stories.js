@@ -3,7 +3,7 @@
 import { view, argTypes } from "../_view.js";
 
 export default {
-  title: "Scenarios/W11 The Account",
+  title: "Future state/Scenarios/W11 The Account",
   argTypes,
   args: { shell: "desktop", theme: "system", product: false, hash: "#/a-intel/core-platform/scenarios/the-account/1" },
   render: view,

@@ -135,6 +135,7 @@ mockup; `mockups/pages/` is the spec of every page.
 
 ```sh
 npm install
+npm run dev              # Storybook on :6006 and Mission Control on :4400, both live from the sources
 npm run storybook        # every page in every state, desktop and mobile; every scenario
 npm run build-storybook  # a static site in storybook-static/
 ```

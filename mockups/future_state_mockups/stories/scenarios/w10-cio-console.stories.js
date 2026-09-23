@@ -3,7 +3,7 @@
 import { view, argTypes } from "../_view.js";
 
 export default {
-  title: "Scenarios/W10 The CIO's Console",
+  title: "Future state/Scenarios/W10 The CIO's Console",
   argTypes,
   args: { shell: "desktop", theme: "system", product: false, hash: "#/a-intel/core-platform/scenarios/cio-console/1" },
   render: view,
