@@ -12,7 +12,7 @@ You are auditing the **Spend** page of Oxagen (`#/a-intel/core-platform/spend[/<
 
 1. The page spec: `pages/spend.md` (read it first, in full).
 2. The design, rendered: the `spend` stories in Storybook (`npm run storybook`), one per state (loaded, empty, loading, error, access denied), desktop and mobile; or `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` in a browser or with Playwright. The other tabs and the drills are reachable from the loaded story.
-3. The product spec for context: `docs/specs/mission-control/spec.md` §12.6 (token classes), §12.7 (attribution), §12.8 (findings), §14 (Mission Control), Appendix A (target tables), Appendix E (contracts), Appendix F (the pages that survive); the data mapping in `docs/implementation-plan.md` §3.
+3. The product spec for context: `docs/mission-control-spec.md` §12.6 (token classes), §12.7 (attribution), §12.8 (findings), §14 (Mission Control), Appendix A (target tables), Appendix E (contracts), Appendix F (the pages that survive); the data mapping in `docs/implementation-plan.md` §3.
 4. The build under audit: `{{APP_ROOT}}` (the Next.js app), served at `{{APP_URL}}`. Route under audit: `/a-intel/core-platform/spend[/<tab>[/<drill>]]`.
 
 ## Procedure

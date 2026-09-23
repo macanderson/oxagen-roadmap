@@ -6,12 +6,11 @@
 | **Date** | 2026-09-12 |
 | **Owner** | Mac Anderson |
 | **Builds** | a new `apps/app` (`@oxagen/app`) in `~/Projects/oxagen`; today's app moves to `apps/app_deprecated` (`@oxagen/app-deprecated`) |
-| **Source** | `mission-control-spec.md` (§3, §4, §8.6, §14, §15, §19, App. A, B, F) · the mockups in this repository: `mockups/missioncontrol.html` built from `mockups/src` and `mockups/fixtures`, catalogued by Storybook (`npm run storybook`), every page's spec in `mockups/pages/<page>.md` · `docs/feedback-mockups.md` · the repo at `origin/main` |
-| **Amended** | 2026-09-14, by the scope review (`scope-review.md`): SSO and SCIM, policy simulation, the assurance suite, two-person mandates, steering effect and retirement, legal holds, erasure and reconciliation are out of every lane; the definition of done (`dod-spec.md`) is in. The in-app agent stays in scope (2026-09-14, maintainer decision), and its sidebar flyout is lane L3's (decision 9, 2026-09-15). Neo4j stays in the architecture (2026-09-15). Billing charges on two meters (spec §12.1; 2026-09-15): governed action units on one price list (2026-09-14, reaffirmed 2026-09-15), and usage credits for in-app AI usage. Rows below carry the change in place. |
-| **Decided** | 2026-09-15, maintainer decisions (spec §20). §0.1 lists the lanes each one binds. |
-| **Amended 2026-09-18** | By the steering, graph and gateway review, approved in full by the maintainer on 2026-09-18 (`docs/reviews/2026-09-18-steering-graph-gateway-review.md`). §0.2 records the decisions. §8 is the six-phase refactor path (Phase 0 to Phase 5), with the freeze on new governance ceremony in Phase 0. §8.7 is the dated decision that closed the review's one open risk. The build order is Phase 0 in review (oxagen PR #3289, ADR-091), Phase 4 in build, then Phases 1, 2, 3 and 5. The ADRs are ADR-091 and ADR-093 to ADR-097 (oxagen draft PR #3294), and the epic is oxagen issue #3295. §8.8 says where each phase sits against the batches, lanes and milestones, and which lanes it moves or retires. |
-| **Canonical copy** | This file is the only live copy of the plan. The oxagen monorepo carried a second copy at `docs/specs/mission-control/plan.md` until 2026-09-23, when it moved here as `docs/oxagen/specs/mission-control/plan.md` (oxagen issue #3895). §0.2 and §8 were identical in both copies. |
+| **Source** | `2026-09-11-oxagen-mission-control-spec.md` (§3, §4, §14, §15, §19, App. A, B, F) · mockups `~/Documents/Oxagen/Mockups` (`mc.html` @ tag `mc-baseline-w3`, W1–W12) · `docs/feedback-mockups.md` · the repo at `origin/main` |
+| **Amended 2026-09-18** | By the steering, graph and gateway review, approved in full by the maintainer on 2026-09-18 (`docs/audits/2026-09-18-steering-graph-gateway-review.md`). §0.2 records the decisions. §8 is the six-phase refactor path (Phase 0 to Phase 5), with the freeze on new governance ceremony in Phase 0. §8.7 is the dated decision that closed the review's one open risk. The build order is Phase 0 merged (oxagen PR #3289, `c9db463e9`, ADR-091), Phase 4 in build, then Phases 1, 2, 3 and 5. The ADRs are ADR-091 and ADR-093 to ADR-097 (oxagen draft PR #3294), and the epic is oxagen issue #3295. §8.8 says where each phase sits against the batches, lanes and milestones, and which lanes it moves or retires. |
+| **Canonical copy** | The canonical copy of this plan is `docs/implementation-plan.md` in https://github.com/macanderson/roadmap. This file is the copy carried in the oxagen monorepo. No build step joins the two, so a change is made in both by hand. §0.2 and §8 are identical in both copies. The rest of this copy predates the scope review of 2026-09-14 and the decisions of 2026-09-15 that the canonical copy carries. §0.1, the decisions of 2026-09-15, is in the canonical copy only. |
 | **Optimised for** | parallel agents: every lane owns a disjoint set of paths, and every batch lists what it waits on |
+| **Deletes** | nothing outside the new `apps/app`'s own scaffolding. Every feature spec §2.2 and App. E take off the surfaces is **de-registered, not deleted**: `DEREGISTERED.md` at the repo root records each one with its file paths, and `pnpm check:deregistered` fails the build if one of them disappears |
 
 ---
 
@@ -24,23 +23,9 @@
 | 3 | Every read goes through a **port** (`src/data/ports.ts`) with two adapters: `fixture` (the mockup's data, typed and integrity-checked) and `live` (today's tables through the kernel, run-ledger, tacho, ClickHouse). A port method with no backing store returns `NotBacked` and the page renders an honest "not recorded yet" state. | Of the 68 page-data slices mapped in §3, 22 have no store today, 27 are partial and only 19 are fully backed. Pages must not wait for M2–M6, and production must never show fixture data or a number stronger than what was recorded (spec §14 interaction rules). |
 | 4 | Every write is a server action that calls kernel `invoke()` through **one seam** (`src/server/invoke.ts`), which parses the contract's output schema. | Spec §14.1: one agent tool contract drives API, MCP, CLI and UI. The ui-parity gate already checks this. Today's `invokeOrgCapability` casts `as Promise<T>`; the new seam validates instead. |
 | 5 | Tabs are URL segments through optional catch-alls (`tools/[[...tab]]`); the default tab renders in place and never redirects. | Deep links in the mockups (`#/a-intel/core-platform/tools/connections`). Under `cacheComponents`, a bare parent `redirect()` after `await params` 500s. |
-| 6 | Pages are Server Components. Client islands only for the transport (player), approval countdown, dialogs, the command menu and list controls. Live data arrives over one SSE route with a `run_seq` cursor. | The run ledger already exposes `readAttemptEventsSince(runId, afterRunSeq, limit)`, a resumable cursor that maps directly onto `Last-Event-ID`. |
+| 6 | Pages are Server Components. Client islands only for the transport (player), approval countdown, dialogs, the command menu, the assistant flyout and list controls. Live data arrives over one SSE route with a `run_seq` cursor. | The run ledger already exposes `readAttemptEventsSince(runId, afterRunSeq, limit)`, a resumable cursor that maps directly onto `Last-Event-ID`. |
 | 7 | All interface prose lives in `messages/en.json` (ICU) via `next-intl`, without locale routing. | Spec §15 "Language": no hard-coded prose, ICU MessageFormat, English source, RTL-ready. Today's app has no catalog, so doing it from line one is cheaper than retrofitting. |
 | 8 | Money on the wire is `{ micros: string, currency, basis }`. Formatting happens only in `<Money>`. | Spec App. A: money is bigint micro-USD. The mockup stores `"2,450.00"`-style strings, which silently zero under `parseFloat`. |
-
-### 0.1 Maintainer decisions of 2026-09-15
-
-| Decision | Lanes | Change |
-|---|---|---|
-| 17: two meters | P8, A8, Billing writes | Billing renders two meters. Governed actions: GAU used against the allowance, blocks, auto top-up and the contracted rate (G13). In-app AI usage: the usage-credit balance, where 1 credit = $0.01, the credit gate debits each in-app agent model call at provider cost times the meter markup (`packages/billing/src/pricing.ts`), `create_org` writes the $5 signup grant, and credit packs (`purchase_credits`) top it up. No lane prices tokens at cost. |
-| 2, 7: purchases and upgrade | P8, A8, Billing writes | Billing keeps `purchase_credits` (credit packs, the usage-credit top-up) and `start_subscription_upgrade` (Build or Scale through Stripe Checkout). `get_rate_card`, `preview_action_cost` and `get_evidence_retention` retire at cutover (B5). |
-| 3: enterprise | P7, P8, A8, Organization writes | `enterprise-v2` leaves `SUBSCRIPTION_PLANS` and Stripe; a negotiated contract is a `billing.contract_terms` row. No lane gates a feature on the enterprise license: custom roles, IAM and SOC 2 controls are on for every tier. |
-| 5, 6, 12: invoice billing | A8 | Switching invoice billing off adds `overage_invoiced_gau` to `purchased_gau`. `invoice_gau_max` bounds overage beyond the monthly allowance, and the interim invoice fires at unit max + 1. An invoice-billed organization is suspended 5 days after an invoice is past due; metering continues; paying the full outstanding balance reactivates it. |
-| 8: approvals on a run | A2, P1, P2b | `agent.approval_requests.run_id` (nullable, set from `ctx.agentRun`); `list_approvals` filters on it; the Run strip reads it. |
-| 9: the shell | L3 | The shell keeps the sidebar flyout. The `small-approvals-bottom-dock-scenarios` branch is not adopted. |
-| 11: ledger-ingested runs | A2, Fleet / Run writes | G17, built now: the ledger ingest contract carries a revocable run token, and Halt and Cancel are enabled on ledger-ingested runs. |
-| 13: rev1 scope | P1, P6, P7, A6, Organization writes | Fix `macanderson/oxagen#3029`; Organization gets an in-app create-workspace form over `create_workspace`; the Spend lane ships in rev1 with Fleet's Spend and Cache-hit tiles. |
-| Override and confirmed defaults | P7, Organization writes | API key rotation (`rotate_api_key`, the rotatekey dialog) ships in rev1. Membership writes are free; `resolve_approval` is the only billable action. |
 
 ### 0.2 Maintainer decisions of 2026-09-18
 
@@ -60,10 +45,10 @@ Approved in full by the maintainer on 2026-09-18, from the steering, graph and g
 | 10 | The gateway: `tachod` grows into a hook adapter, a loopback model proxy, an MCP aggregator and a control channel | 4 | ADR-094, which amends ADR-051, ADR-056 and ADR-078 |
 | 11 | The tier ladder is four words, computed from what was actually routed: observe, harness, gateway, contained | 4, 5 | ADR-095, which amends ADR-078 §1 |
 | 12 | The sandbox is the top tier, not the only tier, and hooks stay. `oxagen run -- <agent>`. ADR-043 is revised by one sentence | 5 | ADR-096, which amends ADR-043 and ADR-064 |
-| 13 | The refactor path is six phases, and new governance ceremony is frozen until Phase 0 lands. The phase names and numbers are fixed. The order of build is Phase 0 in review, Phase 4 in build, then Phases 1, 2, 3 and 5 | §8 | ADR-091 §6 for the freeze |
+| 13 | The refactor path is six phases, and new governance ceremony is frozen until Phase 0 is proven: a merged record seen in a real run, recorded on #2592. The phase names and numbers are fixed. The order of build is Phase 0 merged, Phase 4 in build, then Phases 1, 2, 3 and 5 | §8 | ADR-091 §6 for the freeze |
 | 14 | Both OpenAI and Anthropic work through a base URL proxy, subscription logins included, and neither vendor's terms explicitly forbid it: validated by the maintainer on 2026-09-18. It was the review's one open risk. It is closed, and it does not gate Phase 4 | 4 | ADR-094 |
 
-The ADR titles: ADR-091, Phase 0 (oxagen PR #3289). ADR-097 "Steering and gating are two planes, authored on one surface and compiled twice". ADR-093 "One assembler decides what reaches the agent, and records what it cut". ADR-094 "tachod grows into the gateway: a loopback model proxy and an MCP aggregator". ADR-095 "The tier ladder is four words, computed from what was routed". ADR-096 "Oxagen may contain the process that runs turns: the contained tier". ADR-093 to ADR-097 are in oxagen draft PR #3294 (branch `steering-gateway-adrs`), which also amends ADR-008, 043, 051, 056, 064, 078 and 090. ADR-092 belongs to an unrelated decision (oxagen PR #3292).
+The ADR titles: ADR-091, Phase 0 (on `main`, oxagen PR #3289). ADR-097 "Steering and gating are two planes, authored on one surface and compiled twice". ADR-093 "One assembler decides what reaches the agent, and records what it cut". ADR-094 "tachod grows into the gateway: a loopback model proxy and an MCP aggregator". ADR-095 "The tier ladder is four words, computed from what was routed". ADR-096 "Oxagen may contain the process that runs turns: the contained tier". ADR-093 to ADR-097 are in oxagen draft PR #3294 (branch `steering-gateway-adrs`), which also amends ADR-008, 043, 051, 056, 064, 078 and 090. ADR-092 belongs to an unrelated decision (oxagen PR #3292).
 
 ---
 
@@ -98,21 +83,22 @@ The ADR titles: ADR-091, Phase 0 (oxagen PR #3289). ADR-097 "Steering and gating
 
 - **Coverage is complete.** Spec §19 lists every page, panel, dialog and flow with the states each needs (loaded, empty, loading, error, denied, phone), and every row links to a mockup.
 - **One demo record everywhere** (Anderson Intelligence Corp. / `core-platform` / Marcus Bell). It becomes the fixture adapter's seed.
-- **Errors are specified.** Each page has a named error code (Fleet `503 run_index_unavailable`, Run `502 frame_store_unreachable`, Agents `503 iam_principals_unavailable`, Mandate `503 mandate_ledger_unavailable`, Tools `503 tool_registry_unavailable`, Steering `503 record_index_unavailable`, Spend `504 rollup_rebuild_in_progress`, Organization `503 control_plane_unavailable`, Billing `502 stripe_unreachable`, Audit `503 audit_store_unavailable`). Each also has a named denied permission. These become the `PageState` contract (§4.8).
+- **Errors are specified.** Each page has a named error code (Fleet `503 run_index_unavailable`, Run `502 frame_store_unreachable`, Agents `503 iam_principals_unavailable`, Mandate `503 mandate_ledger_unavailable`, Tools `503 tool_registry_unavailable`, Ontology `504 graph_read_timeout`, Steering `503 record_index_unavailable`, Spend `504 rollup_rebuild_in_progress`, Organization `503 control_plane_unavailable`, Billing `502 stripe_unreachable`, Audit `503 audit_store_unavailable`). Each also has a named denied permission. These become the `PageState` contract (§4.8).
 - **Interaction rules are stated once.** Trust badges show the recorded value and nothing stronger; money shows its basis; explanations are chains of links.
 
 ### 2.2 What must be settled before or while building
 
 | # | Finding | Impact | Resolution in this plan |
 |---|---|---|---|
-| W1 | **The design baseline was split across branches** (resolved). Agent IAM was on `main` (54f9107; the 1b0634c first named here is an unmerged `worktree-audit-fix` commit). `approvalCardSm` and the flyout were on `small-approvals-bottom-dock-scenarios` (3f345d5, which merged the flyout as PR #1). `runMetrics(R)` was only in the `Specs/mockups/mc.html` scratch copy. | Twenty lanes reading "the mockup" would build three different apps. | **Baseline = tag `mc-baseline-w1`: one `mc.html` with Agent IAM + small approval card + sidebar flyout + `runMetrics` instruments.** Read it with `git show mc-baseline-w1:mc.html`; `tools/baseline/README.md` records what each decision came from, and `tools/baseline/check-baseline.mjs` checks it in a browser. Every lane prompt names the tag, never a branch or the Specs scratch. Where a W file or an older branch disagrees, the baseline wins (w2 and w3 still carry the bottom dock). Superseded by `mc-baseline-w2` (2026-09-13), which adds the W1–W11 parity work and the a-intel dataset, and by `mc-baseline-w3` (2026-09-13, PR #12), which makes every run's tool calls a subset of its agent's belt at registry versions. Lanes read the newest tag; `tools/baseline/README.md` lists them. 2026-09-15, maintainer decision: the shell keeps the sidebar flyout, and the `small-approvals-bottom-dock-scenarios` branch is not adopted. |
-| W2 | **`docs/feedback-mockups.md` items are in no mockup:** (1) approvals render first and collapse when empty; (2) the onboarding content floats right; (3) one-thumb mobile navigation; (4) LLM-generated run name and summary, plus a file-diff card under approvals; (5) run cost large, near the run name, basis in a dialog; (6) prompt shown inspectable but collapsed; (7) run outputs (PRs, files, media) as the story; (8) spend by operator, agent and run on Fleet. | These change the Run and Fleet pages. | In scope: 1, 2, 5, 6, 8 (clear enough to build). 4's UI is in scope; the classifier that writes `run.name`/`run.summary` is a backend gap (G14). **7 is decided: Option Story**, 2026-09-17 — the outputs render as one time-ordered spine with the governed gate in the position it stopped the run (`design/run-outputs/DECISION.md`); it is built in the mockup as `runOutputs(R)` on `runs[].outputs`, so `<RunOutputs>` builds to that, not to a plain first version. **3 still needs a design decision**; its lane builds behind the `<MobileNav>` seam with a plain bottom bar, so the design can drop in later. |
+| W1 | **The design baseline was split across branches** (resolved). Agent IAM was on `main` (54f9107; the 1b0634c first named here is an unmerged `worktree-audit-fix` commit). `approvalCardSm` and the flyout were on `small-approvals-bottom-dock-scenarios` (3f345d5, which merged the flyout as PR #1). `runMetrics(R)` was only in the `Specs/mockups/mc.html` scratch copy. | Twenty lanes reading "the mockup" would build three different apps. | **Baseline = tag `mc-baseline-w1`: one `mc.html` with Agent IAM + small approval card + sidebar flyout + `runMetrics` instruments.** Read it with `git show mc-baseline-w1:mc.html`; `tools/baseline/README.md` records what each decision came from, and `tools/baseline/check-baseline.mjs` checks it in a browser. Every lane prompt names the tag, never a branch or the Specs scratch. Where a W file or an older branch disagrees, the baseline wins (w2 and w3 still carry the bottom dock). Superseded by `mc-baseline-w2` (2026-09-13), which adds the W1–W11 parity work and the a-intel dataset, and by `mc-baseline-w3` (2026-09-13, PR #12), which makes every run's tool calls a subset of its agent's belt at registry versions. Lanes read the newest tag; `tools/baseline/README.md` lists them. |
+| W2 | **`docs/feedback-mockups.md` items are in no mockup:** (1) approvals render first and collapse when empty; (2) the onboarding content floats right; (3) one-thumb mobile navigation; (4) LLM-generated run name and summary, plus a file-diff card under approvals; (5) run cost large, near the run name, basis in a dialog; (6) prompt shown inspectable but collapsed; (7) run outputs (PRs, files, media) as the story; (8) spend by operator, agent and run on Fleet. | These change the Run and Fleet pages. | In scope: 1, 2, 5, 6, 8 (clear enough to build). 4's UI is in scope; the classifier that writes `run.name`/`run.summary` is a backend gap (G14). **3 and 7 need a design decision.** Their lanes build behind a component seam (`<MobileNav>`, `<RunOutputs>`) with a plain first version, so the design can drop in later. |
 | W3 | **Vocabulary drifts from the spec.** Replay grade: mockup `full/partial/digest/ledger` vs spec `inspect/view/fork/retry`. Egress: `third_party/internal/none` vs `local/org_tenant/third_party`. Schema origin: `observed` vs `observed_proposed/observed_approved`. Financial: `fin: moves_funds/commits_spend` vs `consequence_tags text[]`. Agent status `enrolled` vs `unenrolled/active/suspended/retired`. Verdict `null` vs `none`. Record kinds: 6 in the mockup (from Stella's `RecordKind`) vs "twelve kinds" in spec §3. | Types built from the mockup would diverge from the target schema on day one. | **View-model enums follow the spec (App. A).** The fixture adapter maps mockup values once, in one file. Record kinds: use the six real kinds; flag the spec's "twelve" as a spec defect to fix. |
 | W4 | **Fixture data has integrity defects.** `EVIDENCE` references agent `a-intel.finops.cost-reporter`, which is not in `AGENTS`. `FIX["Refetching a stable list"]` carries the cache-write finding's text. Several `NOTIFS`/`INCIDENTS`/`RECEIPTS` run ids are not in `RUNS`. `FRAMES` is one list shared by every run. The Mandate page always renders `MANDATES[0]`. | Ported naively, links 404 and every run shows the same frames. | The fixture adapter validates referential integrity in a unit test that **fails on a dangling id** (mutation-test it by deleting one agent). Frames are keyed by run. |
-| W5 | **Data was hard-coded in the mockup's markup** (resolved 2026-09-14): the seed dataset now lives in `mockups/fixtures/*.json`, one file per collection, and the engine binds them as `FIXTURES.<NAME>`. What is still derived in code (the toolbelt rows, the mandate ledger rows, the funding routes) is derived from those files. | A fixture adapter can read the JSON directly. | Types still come from spec App. A; the fixture adapter maps `mockups/fixtures/*.json` onto them in one file. |
+| W5 | **Data is hard-coded in the mockup's markup:** the agent toolbelt rows, the mandate ledger rows, Steering's effect and retirement rows, the funding routes table, the assistant transcript. | No collection to type from. | Types come from spec App. A (`iam.role_grants`, `tools.mandate_ledger`, `org.organizations.model_routes`) instead. |
 | W6 | **`kindBadge` was declared twice** in `mc.html`; the later role badge silently replaced the record-kind icon badge on Steering. The baseline renames the role one `roleKindBadge`, and `tsec` had the same collision (fixed by deleting the loose parser). | A defect in the mockup, not intent. | The React components are `RecordKindBadge` and `PrincipalKindBadge`, module-scoped, so the collision cannot recur. Steering uses the icon badge. |
 | W7 | **Features in the mockup with no spec table:** agent trust/spend `SCORES`, auto-approval rules `AUTORULES` (Tools › auto), the Org › roles editor with `PERMS`. | Planned, but with no store. | Built UI-first behind `NotBacked`. SCORES and AUTORULES are gaps G11/G12; they need a spec decision on whether they are columns on `iam.role_grants.conditions` or new tables. |
 | W8 | **About 60 write interactions are toast-only in the mockup.** | They have no payload contract. | §3 maps each write to an existing capability or to a gap. |
+| W9 | **The assistant's "engine down" state is unreachable** (nothing sets `S.asstEngine="down"`). | Spec §18 requires every screen to work with the engine down. | The flyout reads engine health from the port; e2e covers the down state. |
 
 ---
 
@@ -128,7 +114,7 @@ Status comes from table and contract names in the repo. **Batch 3 lanes must con
 | **Fleet** · runs list | `RUNS` | `:Run` + `cost.run_totals` | `agent.agent_runs` (+attempts, seals) via `@oxagen/run-ledger` `RunStore`; wrapped agents in `tacho.sessions`; cost from ClickHouse `token_usage` | 🟡 status/turns/steps ✅; tier, replay grade, verdict, proven spend ❌ |
 | Fleet · approvals panel | `APPROVALS` + `S.ap` | `control.approvals` | `agent.approval_requests`; `resolve_approval` | ✅ request/decision · 🟡 four-hop chain (rules, taint, mandate ❌) |
 | Fleet · spend by operator / agent / run (feedback 8) | `SPEND.byOperator` | `cost.run_totals` grouped | ClickHouse `readUsageBreakdown` | 🟡 |
-| Fleet · pause / resume / cancel | toast + `pauseRun` | `control.commands` | `tacho.control_commands` via `dispatch_tacho_command` | 🟡 wrapped (tacho) runs ✅ · ledger runs ❌ (G17, built now) |
+| Fleet · pause / resume / cancel | toast + `pauseRun` | `control.commands` | `tacho.control_commands` via `dispatch_tacho_command` | 🟡 wrapped (tacho) runs ✅ · ledger runs ❌ |
 | **Run** · header, cost strip | `RUNS[id]`, `runMetrics` | `:Run`, `cost.run_totals` | `RunStore.getRunByPublicId`, `sumTokenUsageByExecutionStep` | 🟡 |
 | Run · frames / transport | `FRAMES`, `TRANSCRIPTS` | `:Frame` + object bodies | `agent_run_events` via `readAttemptEventsSince`; `tacho_events` (ClickHouse) | 🟡 events ✅, digest chain ✅; model/tool frame kinds partial; bodies ❌ |
 | Run · chain / seal | chain tab | `:Checkpoint`, `:Seal` | `agent_run_attempt_seals`; `tacho.checkpoints` | ✅ |
@@ -150,18 +136,27 @@ Status comes from table and contract names in the repo. **Batch 3 lanes must con
 | Agents · incidents | `incidents` | `audit.audit_events` incident kinds | `tacho.incidents` | ✅ |
 | **Tools** · servers | `SERVERS` | `tools.tool_servers` | `mcp.mcp_servers`, `mcp.registries` | ✅ |
 | Tools · tool versions + classification | `TOOLS` | `tools.tool_versions` | `agent.tools`/`tool_versions`, `mcp.tool_snapshots` | 🟡 risk/side-effect/consequence tags/measures to verify |
-| Tools · policy versions | `POLICIES` | `tools.policy_versions` (Cedar, tests, no simulation) | none | ❌ |
 | Tools · connections | `CONNECTIONS` | `tools.connections` | `ingestion.source_connections`, `mcp.credentials` | 🟡 |
 | Tools · mandates ledger | `MANDATES` | `tools.mandate_ledger` | none | ❌ |
+| Tools · policy versions + simulation | `POLICIES`, `SIM` | `tools.policy_versions` (Cedar) | none | ❌ |
 | Tools · kill switches | `SWITCHES` | `control.commands` + `deny_generation` | `iam.emergency_denies`, `authorization_deny_generations` | 🟡 |
 | Tools · auto-approval rules | `AUTORULES` | not in App. A | none | ❌ G12 |
+| Tools · assurance | `ASSURANCE` | M2 suite | none | ❌ |
 | Tools · observed schemas | `OBSERVED_SCHEMAS` | `schema_origin=observed_proposed` | none | ❌ |
+| **Ontology** · model map | `CLASSES` | `:OntologyVersion`/`:Class` | `schema_registry.*` (Postgres) + Neo4j labels | 🟡 |
+| Ontology · graph, ask in plain English | graph tab | Cypher + citations | `ontology.query`, `ontology.neighbors`, `graph.*` | 🟡 Cypher shown ❌ |
+| Ontology · sources | `SOURCES` | `:Source`, `:SyncRun` | `ingestion.source_connections` | ✅ |
+| Ontology · repositories | `REPOS` | `wrk.repositories` | `ingestion.repository_bindings` (+heads, `github_installations`) | ✅ |
+| Ontology · versions | `ONTVERSIONS` | git `.oxagen/ontology/` | `schema_registry.schema_versions` | 🟡 |
+| Ontology · embedding indexes | `INDEXES` | Voyage vector indexes | none | ❌ |
 | **Steering** · records | `RECORDS` | `:Record` + git | `agent.context_records`, `context_record_versions`; `context.record.*` | ✅ |
 | Steering · proposals, Context PRs | `PROPOSALS` | `PROPOSES`, `PROMOTED_BY` | `agent.context_promotions`; `agent.memory_promotion.*` | 🟡 |
+| Steering · effect, retirement | hard-coded | effect metrics (M3) | none | ❌ |
 | **Spend** · totals, by operator/agent/model | `SPEND` | `cost.run_totals` | ClickHouse `token_usage`, `usage_events`; `billing.usage.breakdown` | 🟡 |
 | Spend · by tool | `SPEND.byTool` | `control.tool_calls` × price | ClickHouse `tool_invocations` | 🟡 |
 | Spend · proven vs unproven, productive ratio | `SPEND.proven`, `ratio` | `run_totals.verdict/productive_ratio` | none | ❌ |
 | Spend · findings + evidence + fix | `FINDINGS`, `EVIDENCE`, `FIX` | findings job (M2) | none | ❌ |
+| Spend · reconciliation | `SPEND.variance/matched` | `cost.reconciliations`, `provider_usage` | none (M5) | ❌ |
 | Spend · budgets | `SPEND.budgets` | `billing.budgets` | `billing.spend_budgets`; `billing.budget.{get,set}` | ✅ |
 
 ### 3.2 Organization pages and shell
@@ -175,28 +170,28 @@ Status comes from table and contract names in the repo. **Batch 3 lanes must con
 | Organization · data plane | plane tab | `org.data_planes` | same; `org.data_plane` | ✅ |
 | Organization · API keys | `APIKEYS` | `iam.credentials` | `auth.api_keys`; `api.key.{create,revoke,rotate}` | ✅ |
 | **Billing** · plan, invoices | `BILLING` | `billing.subscriptions` + Stripe | `billing.subscriptions`, `billing.invoices`; `billing.subscription.read` | ✅ |
-| Billing · GAU allowance, meters | `runsIncluded/runsUsed`, `meters` | `billing.gau_buckets`, `billing.gau_settlements`, `billing.contract_terms` (§12.1, App. A.8) | none on `main`; the tables on `app-rebuild` | ❌ billing rebuild |
-| Billing · usage credits (in-app AI usage) | none | `billing.credit_balances`, `billing.credit_lots`, `billing.credit_ledger` (§12.1, App. A.8) | same tables; the credit gate and `packages/billing/src/pricing.ts` meter markup; `purchase_credits` | ✅ |
+| Billing · run allowance, meters | `runsIncluded/runsUsed`, `meters` | per-run plan (§12.1) | credits model (`credit_ledger`) | ❌ billing rebuild |
 | **Audit** · events | `AUDIT` | `audit.audit_events` | ClickHouse `audit_events` + `security.security_events`; `audit.log.query` | 🟡 |
 | Audit · incidents | `INCIDENTS` | incident kinds | `tacho.incidents` | ✅ |
 | Audit · receipts | `RECEIPTS` | receipt frames | none | ❌ |
+| Audit · legal holds | `HOLDS` | `audit.legal_holds` | none | ❌ |
 | Audit · exports | `EXPORTS` | archive exports | `privacy.data.export` | 🟡 |
 | Audit · keys, KEK rotation | `KEYS` | KMS per org | none | ❌ |
+| Audit · erasure | `ERASURE` | crypto-shred | `privacy_erasure_requests` | 🟡 |
 | Audit · retention | `RETENTION_TIERS` | §13.3 tiers | `evidence.retention_policy_versions` | 🟡 |
-| **Shell** · notifications | `NOTIFS` | — | `notification.notifications` | ✅ |
+| Audit · assurance history | `ASSURANCE_HISTORY` | M2 suite | none | ❌ |
+| **Shell** · notifications | `NOTIFS` | none | `notification.notifications` | ✅ |
 | Shell · people, avatars | `PEOPLE` | `auth.users` | `auth.users`, `user_preferences`; `@oxagen/oxagen/avatar` | ✅ |
+| Shell · assistant flyout | static | `stella serve` (ADR-053) | `chat.stream`, stella-serve service | 🟡 |
 | **Auth + onboarding gate** | `#/welcome/*`, register flow | `org.onboarding_state` | Better Auth pages; `tacho.enrollment.create` | 🟡 no gate state |
-| **Run · definition of done** | `DOD` (`fixtures/dod.json`, derived for the rest) | `dod.dod_sets`, `dod.dod_certificates` (spec A.11) | none | ❌ G15 |
-| Fleet · Done column, held tile | derived from `DOD` | the same | none | ❌ G15 |
-| Billing · held runs (reported) | `BILLING` | `dod.dod_certificates` (§8.6); a report figure with no price (§12.1) | none | ❌ G15 |
 
 ### 3.3 What the mapping says
 
 **Tally: 68 slices: ✅ 19 · 🟡 27 · ❌ 22.**
 
 - **Backed or nearly backed:** org and workspace administration (members, workspaces, roles, API keys, data plane), agent identity/roles/enrollment, tool servers, sources and repositories, steering records, budgets, notifications. These pages can go live in Batch 3.
-- **Fixture-first by necessity:** mandates, policy versions, findings, proven spend, receipts, KEK rotation, run proof, the definition of done, context-window evidence, run graph. They map to spec milestones M2–M5 and have **no table today**. The app must ship them as `NotBacked` states, not wait for them.
-- **The biggest structural gap is the run record.** The spec puts runs, attempts, frames and seals in Postgres tables of their own (spec App. B); today they are in `agent.agent_runs*` plus ClickHouse `tacho_events`. The `RunReadPort` (§4.5) hides that choice, so the Run page is written once and the adapter changes when M1's recorder lands.
+- **Fixture-first by necessity:** mandates, policy versions and simulation, findings, proven spend, reconciliation, receipts, legal holds, KEK rotation, embedding indexes, run proof, context-window evidence, run graph. They map to spec milestones M2–M6 and have **no table today**. The app must ship them as `NotBacked` states, not wait for them.
+- **The biggest structural gap is the run record.** The spec puts runs and frames in Neo4j (`:Run`, `:Frame`); today they are in Postgres `agent.agent_runs*` plus ClickHouse `tacho_events`, and **no Run/Frame/Seal node exists in the graph.** The `RunReadPort` (§4.5) hides that choice, so the Run page is written once and the adapter changes when M1's recorder lands.
 - **Mockup-only concepts** (`SCORES`, `AUTORULES`, the role editor's `PERMS`) need a spec decision before any backend work.
 
 ### 3.4 Backend gaps (not app work, but the app's `NotBacked` states point at them)
@@ -204,21 +199,20 @@ Status comes from table and contract names in the repo. **Batch 3 lanes must con
 | Gap | Store / job | Unblocks | Spec milestone |
 |---|---|---|---|
 | G1 | `tools.mandates`, `tools.mandate_ledger` | Agents › mandates, Tools › mandates, approval four-hop chain | M2 |
-| G2 | `tools.policy_versions` with tests | Tools › policy | M2 |
+| G2 | `tools.policy_versions` + Cedar simulation | Tools › policy | M2 |
 | G3 | `cost.price_entries`, `cost.run_totals` rollup | Fleet cost, Spend totals with basis | M2 |
 | G4 | Findings job | Spend › findings | M2 |
+| G5 | `cost.provider_usage`, `cost.reconciliations` | Spend › reconciliation | M5 |
 | G6 | `:Run/:Attempt/:Frame/:Seal` recorder + frame bodies in object store | Run transport with bodies, replay grade | M1 |
 | G7 | `:Witness/:Verdict` | Run › proof, proven spend | M6 |
-| G8 | `audit.audit_events` in Postgres, `archive_segments` | Audit › exports, receipts | M1 |
+| G8 | `audit.audit_events` in Postgres, `legal_holds`, `archive_segments` | Audit › holds, exports, receipts | M5 |
 | G9 | `control.commands` `steer` with delivery mode for ledger runs | Run › steer on non-tacho runs | M1/M2 |
 | G10 | `USED_CONTEXT` edges from context assembly | Run › context | M3/M4 |
 | G11 | Agent trust/spend scores (spec decision first) | Agents scores, auto-approval eligibility | none |
 | G12 | Auto-approval rules store (spec decision first) | Tools › auto | M2 |
-| G13 | GAU buckets, settlements and contract terms (§12.1, App. A.8) | Billing meters | M2 |
+| G13 | Per-run billing allowance (§12.1) | Billing meters | M2 |
 | G14 | `light`-tier run namer/summariser | Run name + summary (feedback 4) | M1 |
-| G15 | `dod.dod_sets`, `dod.dod_certificates`, the four `dod.*` capabilities, the `dod.held` governed action, recorded and not billable (`dod-spec.md`) | Run › Done, Fleet › Done column, Billing › held runs | M3 |
-| G16 | `org.onboarding_state` + first-frame unlock | Onboarding gate | M1 |
-| G17 | Ledger ingest contract with a revocable run token (2026-09-15, maintainer decision: built now) | Halt and Cancel on ledger-ingested runs (Fleet, Run) | M1 |
+| G15 | `org.onboarding_state` + first-frame unlock | Onboarding gate | M1 |
 
 ---
 
@@ -251,7 +245,7 @@ apps/app/
    │  ├─ api/mc/[org]/[ws]/stream/route.ts              # SSE: fleet + run frames
    │  ├─ cli/authorize/  github/setup/                   # callbacks, carried over
    │  └─ [org]/
-   │     ├─ layout.tsx                                   # org shell
+   │     ├─ layout.tsx                                   # org shell, assistant host
    │     ├─ [[...tab]]/page.tsx                          # Organization
    │     ├─ billing/page.tsx
    │     ├─ audit/[[...tab]]/page.tsx
@@ -264,6 +258,7 @@ apps/app/
    │        ├─ agents/[agent]/source/page.tsx
    │        ├─ agents/[agent]/mandates/[mandate]/page.tsx
    │        ├─ tools/[[...tab]]/page.tsx
+   │        ├─ ontology/[[...tab]]/page.tsx
    │        ├─ steering/[[...tab]]/page.tsx
    │        ├─ spend/[[...drill]]/page.tsx
    │        └─ register/[[...step]]/page.tsx
@@ -577,7 +572,7 @@ export interface RunReadPort {
 export interface ApprovalReadPort {
   pending(scope: Scope, q?: { runId?: string }): Promise<Read<ApprovalItem[]>>;
 }
-// … AgentReadPort, ToolReadPort, SteeringReadPort, SpendReadPort,
+// … AgentReadPort, ToolReadPort, OntologyReadPort, SteeringReadPort, SpendReadPort,
 //   OrgReadPort, BillingReadPort, AuditReadPort, ShellReadPort
 
 export interface DataSource {
@@ -636,7 +631,7 @@ export const liveRuns: RunReadPort = {
 ```ts
 // src/data/adapters/fixture/integrity.test.ts
 import { describe, expect, it } from "vitest";
-import { seed } from "./seed"; // built from mockups/fixtures/*.json, mapped to spec vocabulary
+import { seed } from "./seed"; // ported from mc.html @ mc-baseline-w3, mapped to spec vocabulary
 
 describe("fixture referential integrity", () => {
   const agentKeys = new Set(seed.agents.map((a) => a.key));
@@ -937,13 +932,17 @@ import { NextResponse, type NextRequest } from "next/server";
 const PUBLIC = [/^\/(login|signup|verify|two-factor|forgot-password|reset-password)(\/|$)/, /^\/invite\//, /^\/api\/auth\//, /^\/cli\/authorize/, /^\/github\/setup/];
 
 // Appendix F: every old route → the page that absorbed it, for one release. [pattern, target]
+// The redirect is what gets removed after that release, never the page file behind it:
+// `/{org}/{ws}/marketplace` and `workbench/environments` point at de-registered features
+// whose screens stay in apps/app_deprecated on purpose (spec §2.2, DEREGISTERED.md).
 const LEGACY: Array<[RegExp, (m: RegExpMatchArray) => string]> = [
   [/^\/([^/]+)\/([^/]+)\/(sessions|workbench|dashboard)\/?$/, (m) => `/${m[1]}/${m[2]}`],
   [/^\/([^/]+)\/([^/]+)\/sessions\/([^/]+)/, (m) => `/${m[1]}/${m[2]}/runs/${m[3]}`],
   [/^\/([^/]+)\/([^/]+)\/workbench\/agents(?:\/new)?\/?$/, (m) => `/${m[1]}/${m[2]}/agents`],
   [/^\/([^/]+)\/([^/]+)\/workbench\/agents\/([^/]+)/, (m) => `/${m[1]}/${m[2]}/agents/${m[3]}`],
   [/^\/([^/]+)\/([^/]+)\/(workbench\/tools|marketplace|governance)(\/.*)?$/, (m) => `/${m[1]}/${m[2]}/tools`],
-  [/^\/([^/]+)\/([^/]+)\/knowledge(\/.*)?$/, (m) => `/${m[1]}/${m[2]}/steering`],
+  [/^\/([^/]+)\/([^/]+)\/knowledge\/memory/, (m) => `/${m[1]}/${m[2]}/steering`],
+  [/^\/([^/]+)\/([^/]+)\/knowledge(\/.*)?$/, (m) => `/${m[1]}/${m[2]}/ontology`],
   [/^\/([^/]+)\/([^/]+)\/settings\/spend-budgets/, (m) => `/${m[1]}/${m[2]}/spend/budgets`],
   [/^\/([^/]+)\/([^/]+)\/(settings|developer\/mcp)(\/.*)?$/, (m) => `/${m[1]}${m[3] === "developer/mcp" ? `/${m[2]}/agents` : ""}`],
   [/^\/([^/]+)\/(members|workspaces|new-workspace|developer\/tokens|settings)(\/.*)?$/, (m) => `/${m[1]}`],
@@ -1025,20 +1024,20 @@ flowchart LR
     L5[auth + onboarding]
   end
   B1 --> B2
-  subgraph B2["B2 Pages on fixtures · 10 lanes"]
+  subgraph B2["B2 Pages on fixtures · 11 lanes"]
     P1[Fleet] --- P2a[Run: transcript + transport] --- P2b[Run: side panels]
-    P3[Agents] --- P4[Tools] --- P5[Steering]
-    P6[Spend] --- P7[Organization] --- P8[Billing] --- P9[Audit]
+    P3[Agents] --- P4[Tools] --- P5[Ontology] --- P6[Steering]
+    P7[Spend] --- P8[Organization] --- P9[Billing] --- P10[Audit]
   end
   L1 --> B3
-  subgraph B3["B3 Live adapters · 9 lanes (starts with B2)"]
+  subgraph B3["B3 Live adapters · 10 lanes (starts with B2)"]
     A1[runs + frames] --- A2[approvals + commands] --- A3[agents + iam] --- A4[tools]
-    A5[steering] --- A6[spend + budgets] --- A7[org + keys]
-    A8[billing] --- A9[audit + incidents]
+    A5[ontology + repos] --- A6[steering] --- A7[spend + budgets] --- A8[org + keys]
+    A9[billing] --- A10[audit + incidents]
   end
   B2 --> B4
   B3 --> B4
-  subgraph B4["B4 Writes · 9 lanes"]
+  subgraph B4["B4 Writes · 10 lanes"]
     W[server actions per page]
   end
   B4 --> B5["B5 Cutover<br/>1 lane"]
@@ -1048,7 +1047,7 @@ flowchart LR
 
 | Step | Work | Files |
 |---|---|---|
-| 0.1 | `git mv apps/app apps/app_deprecated`; package name `@oxagen/app-deprecated`; remove its `vercel.json` and its `test:e2e` script (the deprecated app is no longer deployed, so its e2e does not gate). | `apps/app_deprecated/**` |
+| 0.1 | `git mv apps/app apps/app_deprecated`; package name `@oxagen/app-deprecated`; remove its `vercel.json` and its `test:e2e` script (the deprecated app is no longer deployed, so its e2e does not gate). Keep its `lint` and `typecheck` tasks: it is a permanent, unrouted archive of the de-registered screens (§5 Batch 5.5, `DEREGISTERED.md`), and an archive that stops compiling is an archive nobody can restore from. | `apps/app_deprecated/**` |
 | 0.2 | Scaffold `apps/app` from §4.2–4.4; copy `turbo.json` (the build env contract) and `instrumentation.ts`; copy `serverExternalPackages` + turbopack aliases; route skeletons that render `PageState not_backed`. | `apps/app/**` |
 | 0.3 | Shared enums (`src/data/contracts/common.ts`) and the `Read<T>` type land here, so B1's L2 and L3 can start without waiting on L1. | `apps/app/src/data/**` |
 | 0.4 | Path-keyed references (verified): `vitest.workspace.ts:18` (drop `apps/app`, the app runs Vitest 5 itself); `eslint.config.mjs:28` (also ignore `apps/app_deprecated/**`); `tools/scripts/lib/next-cache-guard.ts:20` and its test; `tools/scripts/lib/env-targets.ts:32` (same Vercel project `oxagen-v2-app`); `rotate-ai-gateway-key.ts:59`; `pipeline.yml:516`, `nightly.yml:363` artifact paths. | root + `tools/**` + `.github/**` |
@@ -1061,13 +1060,13 @@ flowchart LR
 
 | Lane | Owns | Delivers | Waits on |
 |---|---|---|---|
-| **L1 contracts + ports + fixture** | `src/data/**` | All view-model schemas (§4.5) for the nine pages, every port interface, the fixture seed read from `mockups/fixtures/*.json` with W3's vocabulary mapping (its `TOOLPOOL` and `AGENT_BELTS` agree: seed no tool call an agent's belt cannot make), the integrity test (W4), and the `mc_state` state switch for dev/e2e | B0 |
-| **L2 ui primitives** | `src/ui/**`, `.storybook/**` | `Money` (large-figure variant + basis dialog, feedback 5), `TierBadge`, `GradeBadge`, `VerdictBadge`, `StatusBadge`, `RiskBadge`, `EffectBadge`, `Gate`, `Hazard`, `ToolCell`, `RecordKindBadge`, `PrincipalKindBadge`, `Avatar` (initials/icon/photo × solid/soft/line), `PageState` + `Skeleton/Empty/Error/Denied/NotRecordedYet`, `DataTable` (search, sort, facet, rows per page, pager: the `listify()` behaviour as a component, opt-out by omission), `RouteTabs`, `FormDialog` (Base UI + `useActionState`), `Sparkline`, `Tile`, `Meter`, `DodBadge` (state by shape: double, dashed, single, dotted). House tokens only, Lucide only. Charts: identity is an icon, magnitude is one hue (the tool-family and record-kind tokens fail colour-vision checks as series colours). Stories with a11y addon. | B0 enums |
-| **L3 shell** | `src/app/[org]/layout.tsx`, `src/app/[org]/[ws]/layout.tsx`, `src/features/shell/**` | Sidebar, top bar, org/ws switchers, ⌘K command menu, notifications, Account dialog (profile, preferences, security, privacy), `<MobileNav>` seam with a plain bottom bar (feedback 3 pending design), theme (light/dark/system via `data-theme`) | B0 |
+| **L1 contracts + ports + fixture** | `src/data/**` | All view-model schemas (§4.5) for the ten pages, every port interface, the fixture seed ported from `mc.html` @ `mc-baseline-w3` with W3's vocabulary mapping (its `TOOLPOOL` and `AGENT_BELTS` agree: seed no tool call an agent's belt cannot make), the integrity test (W4), and the `mc_state` state switch for dev/e2e | B0 |
+| **L2 ui primitives** | `src/ui/**`, `.storybook/**` | `Money` (large-figure variant + basis dialog, feedback 5), `TierBadge`, `GradeBadge`, `VerdictBadge`, `StatusBadge`, `RiskBadge`, `EffectBadge`, `Gate`, `Hazard`, `ToolCell`, `RecordKindBadge`, `PrincipalKindBadge`, `Avatar` (initials/icon/photo × solid/soft/line), `PageState` + `Skeleton/Empty/Error/Denied/NotRecordedYet`, `DataTable` (search, sort, facet, rows per page, pager: the `listify()` behaviour as a component, opt-out by omission), `RouteTabs`, `FormDialog` (Base UI + `useActionState`), `Sparkline`, `Tile`, `Meter`. House tokens only, Lucide only. Charts: identity is an icon, magnitude is one hue (the tool-family and record-kind tokens fail colour-vision checks as series colours). Stories with a11y addon. | B0 enums |
+| **L3 shell** | `src/app/[org]/layout.tsx`, `src/app/[org]/[ws]/layout.tsx`, `src/features/shell/**` | Sidebar, top bar, org/ws switchers, ⌘K command menu, notifications, Account dialog (profile, preferences, security, privacy), assistant flyout host with the engine-down state (W9), `<MobileNav>` seam with a plain bottom bar (feedback 3 pending design), theme (light/dark/system via `data-theme`) | B0 |
 | **L4 server seams** | `src/server/**`, `src/app/api/mc/**`, `src/ui/hooks/**` | `session`, `requireViewer`, tenancy lookups ported from `resolve-org.ts` (incl. slug-history redirects, MFA gate), `invokeTool` (§4.6), cache tags, SSE route + `useFrames` + `useFleetLive` (§4.9) | B0 |
 | **L5 auth + onboarding** | `src/app/(auth)/**`, `src/app/(onboarding)/**`, `src/app/[org]/[ws]/register/**`, `src/features/onboarding/**`, `src/app/api/auth/**`, `src/proxy.ts` | Port the six auth pages + invite + create organization; onboarding gate name → wrap (Claude Code / Codex one-click, SDK snippet) → run, with feedback 2's layout fix; register flow reusing the same wrap/first-frame components; `proxy.ts` session gate (legacy redirects added in B5) | B0 |
 
-### Batch 2: pages on fixtures (10 lanes in parallel)
+### Batch 2: pages on fixtures (11 lanes in parallel)
 
 Each lane owns `src/app/<route>/**`, `src/features/<page>/**`, `messages/<page>.json`, `e2e/<page>*.spec.ts`. Each page reads **only** through `dataSource()` and renders all states from §19.
 
@@ -1075,18 +1074,17 @@ Each lane owns `src/app/<route>/**`, `src/features/<page>/**`, `messages/<page>.
 |---|---|---|---|
 | P1 | **Fleet** + approvals panel | runs table (filter all/live/proven), small approval card with four-hop chain, countdown, approve/deny dialog UI, operator/agent/run spend (feedback 8), fleet steer dialog | Owns `ApprovalsPanel`, exported for P2b's strip |
 | P2a | **Run**: header + transcript + transport | run name + large cost (feedback 5), collapsed inspectable prompt (feedback 6), transcript at three zoom levels, transport (scrub/step/play/pause, ×1–×4 per spec; mockup's ×6 dropped), pause/resume/steer banner states, frame detail | Uses `useFrames` |
-| P2b | **Run**: side panels | approvals strip (from P1), file-diff card under approvals (feedback 4), `<RunOutputs>` as the time-ordered spine (feedback 7, decided — `design/run-outputs/DECISION.md`; mockup: `runOutputs(R)`, data `runs[].outputs`), tabs proof/cost/policy/context/chain, `runMetrics` instruments, compacted/sealed variants | |
+| P2b | **Run**: side panels | approvals strip (from P1), file-diff card under approvals (feedback 4), `<RunOutputs>` seam (feedback 7), tabs proof/cost/policy/context/chain, `runMetrics` instruments, compacted/sealed variants | |
 | P3 | **Agents** (section "Agent IAM", list page "Identities" in the baseline) | list; detail tabs identity/definition/toolbelt/mandates/budgets/runs/enrollment; source editor + commit dialog; mandate detail (real `[mandate]` param, W4); register entry point | Editor is a client island |
-| P4 | **Tools** | tabs registry/connections/mandates/policy/switches/auto; kill-switch dialog with blast-radius text; observed-schema approval; policy draft with its tests | |
-| P5 | **Steering** | tabs records/proposals/prs; `RecordKindBadge` (W6); Context PR dialog | |
-| P6 | **Spend** | tabs findings/operator/agent/tool/waste/budgets; drill `spend/<kind>/<id>`; evidence + fix dialogs; export | |
-| P7 | **Organization** | tabs people/roles/invitations/workspaces/funding/plane/keys; role editor; API key create/rotate/revoke dialogs; the **Model key** panel on funding: the three funding sources, the prefix and provisioned id (never the secret), the cap set at the provider, and the reconciliation block comparing the provider's report against the credit ledger as two independent numbers | Mint/rotate/revoke dialogs; the write lane is B4 Organization |
-| P8 | **Billing** | two meters: GAU used against the allowance, blocks and auto top-up, and the contracted rate; the usage-credit balance for in-app AI usage (1 credit = $0.01, the signup grant, credit packs); the plan and invoices; held runs as a report figure | |
-| P9 | **Audit** | tabs events/incidents/receipts/exports/keys/retention; receipt viewer; export and KEK rotation dialogs | |
-| P10 | **Run · Done** | the Done tab (`dod-spec.md`): verdict by shape, certificate, checks with evidence digests, hidden checks, budget from the tool log, the stops; the locked-file dialog; the sign dialog | P2 |
-| P11 | **In-app agent** (spec §4.4) | the flyout: the launcher at the foot of the rail, the top-bar button, the ⌘K group, the mobile More tile, and the panel — a host the app reclasses but never rebuilds, so the transition runs and a half-typed message survives a re-render. Closed it is `inert` and `aria-hidden`; it paints under the rail; Escape closes it without changing the route. Both refusals are first-class: **engine down** (`stella serve` unreachable — a required service, no in-process fallback) and **no model key** (nothing to spend against, so nothing is charged). A turn's badge says the run is Oxagen's and never links into the tenant's run index. | Owns `#asst`; the transcript is `chat.conversations`/`chat.messages` (App. A.10). Not a route — the guard is `tools/check-assistant.mjs`, not a page story |
+| P4 | **Tools** | tabs registry/connections/mandates/policy/switches/auto/assurance; kill-switch dialog with blast-radius text; observed-schema approval; policy draft + simulation view | |
+| P5 | **Ontology** | tabs model/graph/sources/repositories/versions; embedding indexes list; ask-the-graph with Cypher + citations | Graph canvas behind a dynamic import |
+| P6 | **Steering** | tabs records/proposals/prs/effect/retirement; `RecordKindBadge` (W6); Context PR dialog | |
+| P7 | **Spend** | tabs findings/operator/agent/tool/waste/reconciliation/budgets; drill `spend/<kind>/<id>`; evidence + fix dialogs; export | |
+| P8 | **Organization** | tabs people/roles/invitations/workspaces/funding/plane/keys; role editor; API key create/rotate/revoke dialogs | |
+| P9 | **Billing** | plan, run allowance, meters, invoices | |
+| P10 | **Audit** | tabs events/incidents/receipts/holds/exports/keys/assurance/retention; receipt viewer; hold, export, KEK rotation, erasure dialogs | |
 
-### Batch 3: live adapters (9 lanes, start as soon as L1 merges; runs alongside B2)
+### Batch 3: live adapters (10 lanes, start as soon as L1 merges; runs alongside B2)
 
 Each lane owns `src/data/adapters/live/<domain>.ts` + `mappers/<domain>.ts` + tests. Every method is either **wired** (with a column-level mapping note in the PR, and a contract test parsing a real row through the view-model schema), or returns `notBacked(milestone, gap)`. **No method returns fabricated zeros.**
 
@@ -1095,28 +1093,30 @@ Each lane owns `src/data/adapters/live/<domain>.ts` + `mappers/<domain>.ts` + te
 | A1 | runs + frames | `RunStore.getRunByPublicId`, `listRunAttempts`, `readAttemptEventsSince`; tacho sessions for wrapped agents; cost via `sumTokenUsageByExecutionStep` | tier/grade/verdict (G6, G7), run graph, context (G10), name (G14) |
 | A2 | approvals + commands | `agent.approval_requests` read; command status from `tacho.control_commands` | four-hop mandate/rules (G1) |
 | A3 | agents + iam | `iam.principals`, roles, grants, assignments; `tacho.hosts`; `agent.definition.get/list`; `billing.spend_budgets`; `tacho.incidents` | mandates (G1), scores (G11) |
-| A4 | tools | `mcp.mcp_servers`, `agent.tools/tool_versions`, `mcp.tool_snapshots`, `ingestion.source_connections`; emergency denies as switches | policy (G2), auto rules (G12), observed schemas |
-| A5 | steering | `agent.context_records(_versions)`, `context_promotions` | none |
-| A6 | spend + budgets | ClickHouse `readUsageBreakdown` by operator/agent/model; `tool_invocations`; `billing.spend_budgets` | proven (G7), findings (G4) |
-| A7 | org + members + keys | `org.org_users`, `org.invitations`, `workspace.workspaces`, `iam.roles`, `org.data_planes`, `auth.api_keys`, `org.model_credentials` | the minted key's `provisioned_id`, `key_hash`, `prefix` and provider cap, and the provider usage report the reconciliation row reads (§4.5) |
-| A8 | billing | `billing.subscriptions`, invoices, Stripe via existing contracts; usage credits from `billing.credit_balances` and `billing.credit_ledger` | GAU meter (G13) |
-| A9 | audit + shell | ClickHouse `audit_events` + `security.security_events`, `tacho.incidents`, `privacy_*`, `notification.notifications` | receipts, holds, KEK (G8) |
+| A4 | tools | `mcp.mcp_servers`, `agent.tools/tool_versions`, `mcp.tool_snapshots`, `ingestion.source_connections`; emergency denies as switches | policy (G2), auto rules (G12), assurance, observed schemas |
+| A5 | ontology + repos | `schema_registry.*`, `ontology.query`/`graph.*`, `ingestion.repository_bindings`, `source_connections` | indexes, Cypher-shown |
+| A6 | steering | `agent.context_records(_versions)`, `context_promotions` | effect, retirement |
+| A7 | spend + budgets | ClickHouse `readUsageBreakdown` by operator/agent/model; `tool_invocations`; `billing.spend_budgets` | proven (G7), findings (G4), reconciliation (G5) |
+| A8 | org + members + keys | `org.org_users`, `org.invitations`, `workspace.workspaces`, `iam.roles`, `org.data_planes`, `auth.api_keys`, `org.model_credentials` | none |
+| A9 | billing | `billing.subscriptions`, invoices, Stripe via existing contracts | run allowance (G13) |
+| A10 | audit + shell | ClickHouse `audit_events` + `security.security_events`, `tacho.incidents`, `privacy_*`, `notification.notifications` | receipts, holds, KEK (G8) |
 
-### Batch 4: writes (9 lanes, after B2 page + B3 domain pair merge)
+### Batch 4: writes (10 lanes, after B2 page + B3 domain pair merge)
 
 Each lane owns `src/features/<page>/actions.ts` and wires its page's dialogs to server actions through `invokeTool`. An action with no contract renders its button disabled with the reason and gap id; it is never a silent toast.
 
 | Page | Existing contracts to wire | Disabled until |
 |---|---|---|
-| Fleet / Run | `resolve_approval`; `dispatch_tacho_command` (pause/resume/cancel/message for tacho runs) | steer with delivery mode on ledger runs (G9); halt and cancel on ledger-ingested runs (G17); fork/bisect (Series A); export (M1) |
+| Fleet / Run | `resolve_approval`; `dispatch_tacho_command` (pause/resume/cancel/message for tacho runs) | steer with delivery mode on ledger runs (G9); fork/bisect (Series A); export (M1) |
 | Agents | `agent.definition.{create,update,publish,revise,delete}`, `agent.role.*`, `tacho.enrollment.{create,revoke}`, `billing.budget.set` | mandates (G1) |
 | Tools | `agent.mcp.{register,set_enabled,delete}`, `agent.mcp_consent.resolve`, connection contracts | kill switch as `control.commands` (verify emergency-deny contract), policy (G2), auto rules (G12) |
+| Ontology | repo link/sync, source connect contracts (`repo.ts`, `connection.ts`, `integration.ts`), `ontology.query` | index upgrade, ontology proposal PR |
 | Steering | `context.record.*`, `agent.memory_promotion.*` | Context PR through GitHub App (M3) |
 | Spend | `billing.budget.set`, `workspace.budget_policy.*` | findings actions (G4), statement export (G5) |
-| Organization | `org.member_invite.*`, `org.member_role.change`, `workspace.create`, `workspace.settings.*`, `org.settings.write`, `org.model_credential`, `org.data_plane`, `api.key.{create,rotate,revoke}` | role editor custom roles (every tier, 2026-09-15, maintainer decision); `org.model_key.{mint,rotate,revoke}` against the provider's provisioning API (§4.5) |
-| Billing | `billing.subscription_upgrade.start` (Build or Scale through Stripe Checkout, kept in rev1), `purchase_credits` (credit packs for the usage-credit meter) | GAU blocks and auto top-up (G13) |
+| Organization | `org.member_invite.*`, `org.member_role.change`, `workspace.create`, `workspace.settings.*`, `org.settings.write`, `org.model_credential`, `org.data_plane`, `api.key.{create,rotate,revoke}` | role editor custom roles (enterprise) |
+| Billing | `billing.subscription_upgrade.start` | per-run plan (G13) |
 | Audit | `privacy.data.export`, `privacy.data.erase` | holds, KEK rotation (G8) |
-| Shell | account settings via Better Auth client | none |
+| Shell | `agent.memory.*` none; account settings via Better Auth client | assistant send until stella-serve turn contract is exposed to the app |
 
 Each wired action updates `apps/app/capability-ui-map.json` with its binding, which feeds the parity gate at cutover.
 
@@ -1126,7 +1126,7 @@ Each wired action updates `apps/app/capability-ui-map.json` with its binding, wh
 2. Flip `APP_DIR` in the three gates to `apps/app`; commit the new `capability-ui-map.json`, a regenerated `capability-ui-parity-baseline.json`, and `mobile-parity.json`; `check_manifest` e2e expectations point at the new per-page specs (§6 Q2).
 3. `pnpm gate` green; e2e green on the **live** adapter against a seeded local stack (`pnpm db:migrate`, `db:seed-platform`).
 4. Merge `app-rebuild` → `main`. The deploy pipeline builds `@oxagen/app` from `apps/app` exactly as before. Verify `app.oxagen.sh` serves `/login` and a seeded org's Fleet.
-5. One release later: delete `apps/app_deprecated`, drop its ESLint ignore and `APP_DIR` history.
+5. One release later: drop the Appendix F redirects and the `APP_DIR` history. **`apps/app_deprecated` is not deleted.** It is the only place today's marketplace, connector-setup and workbench-environments screens exist, and spec §2.2 de-registers those features without deleting them. The deprecated app stays in the workspace, unbuilt and undeployed (no `vercel.json`, no `test:e2e`), but still linted and typechecked — an excluded package rots silently, and a screen that no longer compiles has been deleted in every way that matters. `DEREGISTERED.md` records why it is there. Removing it takes an ADR that names it.
 
 ### Sizing (agent-days, rough)
 
@@ -1134,11 +1134,11 @@ Each wired action updates `apps/app/capability-ui-map.json` with its binding, wh
 |---|---|---|---|
 | B0 | 1 | 1.5 | 1.5 |
 | B1 | 5 | L2 primitives ≈ 3 | 3 |
-| B2 | 10 | P2a Run transport ≈ 4 | 4 (B3 overlaps) |
-| B3 | 9 | A1 runs ≈ 3 | (within B2) |
-| B4 | 9 | Organization ≈ 2 | 2 |
+| B2 | 11 | P2a Run transport ≈ 4 | 4 (B3 overlaps) |
+| B3 | 10 | A1 runs ≈ 3 | (within B2) |
+| B4 | 10 | Organization ≈ 2 | 2 |
 | B5 | 1 | 1.5 | 1.5 |
-| **Total** | | | **≈ 12 agent-days wall-clock** with 10 concurrent lanes |
+| **Total** | | | **≈ 12 agent-days wall-clock** with 11 concurrent lanes |
 
 ---
 
@@ -1166,14 +1166,16 @@ You are lane <ID> of batch <N> building the new Mission Control app at ~/Project
 on branch app-rebuild/<N>-<id>, PR target app-rebuild.
 
 Read first:
-- plan: `docs/implementation-plan.md` in the mockups repository (§0, §4, and your row in §5)
-- spec: `docs/mission-control-spec.md` (§3 vocabulary, §8.6, §14, §19 row for <page>). These docs/ copies are canonical.
-- the page's spec: `mockups/pages/<page>.md`, and its audit prompt beside it.
-- the mockup: `mockups/missioncontrol.html`, built from `mockups/src` and `mockups/fixtures` by
-  `node tools/build-mockup.mjs`. Open your page in Storybook (`npm run storybook`: every page in
-  every state, desktop and mobile, with the page's spec on its Docs tab), and walk your page's
-  scenario first (`#/a-intel/<ws>/scenarios/<id>/<step>`; the Scenarios stories). The fixtures are
-  the seed data; `mockups/fixtures/README.md` says what each collection is.
+- plan: `git -C ~/Documents/Oxagen/Mockups show origin/main:docs/2026-09-12-mission-control-app-implementation-plan.md`
+  (§0, §4, and your row in §5)
+- spec: `git -C ~/Documents/Oxagen/Mockups show origin/main:docs/2026-09-11-oxagen-mission-control-spec.md`
+  (§3 vocabulary, §14, §19 row for <page>). These docs/ copies are canonical, not ~/Documents/Oxagen/Specs.
+- mockup baseline: `git -C ~/Documents/Oxagen/Mockups show mc-baseline-w3:mc.html` (tag). It carries
+  everything in mc-baseline-w1 (Agent IAM, the small approval card, the sidebar flyout, the runMetrics
+  instruments), everything W1–W11 showed, per-run frames and context, the tenant Anderson Intelligence Corp.
+  at business scale, and the eleven flows as guided scenarios (`#/a-intel/<ws>/scenarios/<id>/<step>`):
+  walk your page's scenario first. Read no other branch and not Specs/mockups. Decisions and their
+  sources: tools/baseline/README.md at the same tag.
 
 You own ONLY: <paths>. Do not edit any other path; if you need a shared primitive, build it
 locally in your feature folder and note it under "promote" in the PR body.
@@ -1191,11 +1193,11 @@ stories for new components; PR body lists each §3 row you touched with its stat
 
 The adversarial review of 2026-09-18 (steering, the graph, and the gateway) read oxagen `main` and found that the spec's design was right and the code had diverged from it: almost nothing reaches a wrapped agent. The maintainer approved the review in full on 2026-09-18. This section is its refactor path: six phases, Phase 0 to Phase 5, each of which ships alone and is useful alone. The spec carries the design (§4.2, §7, §10.4 to §10.7, §13.6, §17.2, §21). File paths below were checked against oxagen `main` at `02278c913`.
 
-**Build order (2026-09-18).** The phase names and numbers do not change. Only the order of build does: Phase 0 is in review, Phase 4 is in build now in parallel with it, then Phases 1, 2, 3 and 5. All issues are in macanderson/oxagen, and the epic is #3295.
+**Build order (2026-09-18).** The phase names and numbers do not change. Only the order of build does: Phase 0 merged first (2026-09-18), Phase 4 is in build now, then Phases 1, 2, 3 and 5. All issues are in macanderson/oxagen, and the epic is #3295.
 
 | Order | Phase | Issue | State at 2026-09-18 | ADR |
 |---|---|---|---|---|
-| 1 | Phase 0 (§8.1) | #2592 (reopened, P0) | In review: PR #3289, branch `steering/phase0-one-record-steers` | ADR-091 |
+| 1 | Phase 0 (§8.1) | #2592 (reopened, P0) | Merged: PR #3289 (`c9db463e9`). #2592 closes when a merged record is seen in a real run | ADR-091 |
 | 2 | Phase 4 (§8.5) | #3299 (P0), and the desktop review #3301 | In build: branches `gateway-model-proxy` and `desktop-install-hardening` | ADR-094, ADR-095 |
 | 3 | Phase 1 (§8.2) | #3296 | Next | ADR-093, ADR-097 |
 | 4 | Phase 2 (§8.3) | #3297 | After Phase 1 | ADR-097 §5, ADR-093 §6 |
@@ -1204,27 +1206,27 @@ The adversarial review of 2026-09-18 (steering, the graph, and the gateway) read
 
 The review's defects are filed on their own and are fixed by the phase named: #3302 (the `publish_context_record` path leaves `kind` and `force` NULL, Phase 1), #3303 (`additionalInstructions` is unbudgeted and never checked against a rule, Phase 1), #3304 (Codex and Stella spend is absent, Phase 4) and #3305 (the public decks describe the removed runtime, no phase).
 
-**What is true on `main` today.** Records, the bundle's `context.system` (hardcoded `null`), bundle permissions and budget (always empty, `budget.mode = "observed"`) and skills (inventory only) do not steer any Claude Code or Codex run. Operator steer commands are the only live text channel from the server to a running wrapped agent. The wrapped tier is a recorder plus a kill switch. No model proxy exists and no sandbox exists. The MCP gateway is real and server-enforced, and it is registered only into Claude Desktop. Spend for Claude Code is self-reported, and Codex and Stella report none. Memory reaches only the in-app agent, capped at 6. No application imports `packages/engram` or `packages/context-provider`, though `tools/scripts/package.json` and `apps/app/next.config.ts` still name `@oxagen/engram`. The graph holds no steering. This paragraph describes `main`, and it stays true until PR #3289 and the Phase 4 branches merge.
+**What is true on `main` today.** Active `must` and `should` records reach a wrapped Claude Code run through the bundle's `context.system` at `SessionStart` (Phase 0, PR #3289, ADR-091). `may` and `info` records, bundle permissions and budget (always empty, `budget.mode = "observed"`) and skills (inventory only) do not steer any Claude Code or Codex run. Operator steer commands are the only live text channel from the server to a running wrapped agent. The wrapped tier is a recorder plus a kill switch that tells the agent what the workspace requires. No model proxy exists and no sandbox exists. The MCP gateway is real and server-enforced, and it is registered only into Claude Desktop. Spend for Claude Code is self-reported, and Codex and Stella report none. Memory reaches only the in-app agent, capped at 6. No application imports `packages/engram` or `packages/context-provider`, though `tools/scripts/package.json` and `apps/app/next.config.ts` still name `@oxagen/engram`. The graph holds no steering. This paragraph describes `main` with Phase 0 on it, and it stays true until the Phase 4 branches merge.
 
 ### 8.1 Phase 0. Make one record steer one agent
 
 | | |
 |---|---|
 | **Scope** | Compile the workspace's active records with `force` of `must` or `should` into `context.system` in `unsignedBundle`. Nothing else. Reopen issue #2592 against this seam, as ADR-051's supersession note asks. |
-| **Seam** | `packages/handlers/src/lib/tacho-host.ts:255` (`unsignedBundle`; `context: { system: null }` is line 276). The records come from `agent.context_records` (`packages/database/src/schema/agent.ts:1303`) through `packages/handlers/src/context.steering.store.ts`. The wire already allows it (`packages/tacho/src/wire.ts:375`, 16 KiB), and the daemon already delivers it (`packages/tacho/src/collector/hook-handler.ts:322`). The bundle etag already covers content, and the steering version is already the promotion ledger length (`context.steering.store.ts:190`), so a merge bumps the bundle with no new plumbing. |
+| **Seam** | `packages/handlers/src/lib/tacho-host.ts` (`unsignedBundle`, which took `context: { system: null }` before this phase and now takes `contextSystem` from `readWorkspaceSteering` in `packages/handlers/src/lib/tacho-steering.ts`). The records come from `agent.context_records` (`packages/database/src/schema/agent.ts:1303`) through `packages/handlers/src/context.steering.store.ts`. The wire already allows it (`packages/tacho/src/wire.ts:375`, 16 KiB), and the daemon already delivers it (`packages/tacho/src/collector/hook-handler.ts:322`). The bundle etag already covers content, and the steering version is already the promotion ledger length (`context.steering.store.ts:190`), so a merge bumps the bundle with no new plumbing. |
 | **Done when** | A record merged through a Context PR changes what a wrapped Claude Code run is told at `SessionStart`. The run's `oxagen.context_digest` attribute shows the new digest. A workspace with no `must` or `should` records still sends `null`. A text over 16 KiB is cut from the end (`should` before `must`) and the cut is logged. |
 | **Unblocks** | Everything. It is the first time the governance flow has an effect on an agent. |
 | **Depends on** | Nothing. Days, not weeks. |
-| **Tracking** | Issue #2592 (reopened, P0). In review as oxagen PR #3289, branch `steering/phase0-one-record-steers`, which adds ADR-091. Its `compileSteering` is the first version of the stable prefix (ADR-093 §1). |
-| **The freeze** | **New governance ceremony is frozen until Phase 0 lands.** No new check type, governance mode, review role, ledger field, promotion threshold or proposal workflow is started. The ceremony was built before the delivery, and this phase is the delivery. Work in flight on existing flows finishes. Bug fixes are not ceremony. |
+| **Tracking** | Issue #2592 (reopened, P0). Merged as oxagen PR #3289 (`c9db463e9`, 2026-09-18), which added ADR-091. Its `compileSteering` is the first version of the stable prefix (ADR-093 §1). #2592 closes when a merged record is seen in a real run's `agent_start`. |
+| **The freeze** | **New governance ceremony is frozen until Phase 0 is proven: a merged record seen in a real run's `agent_start`, recorded on #2592** (ADR-091 §6). No new check type, governance mode, review role, ledger field, promotion threshold or proposal workflow is started. The ceremony was built before the delivery, and this phase is the delivery. Work in flight on existing flows finishes. Bug fixes are not ceremony. |
 
 ### 8.2 Phase 1. One type, one assembler
 
 | | |
 |---|---|
-| **Scope** | `SteeringItem` and `assembleSteering(run, budget)` returning the stable prefix, the volatile selection and the manifest (spec §10.5 is the contract). Source adapters: the record registry, `:AgentMemory`, gate notices from rules and mandates, skill descriptions, and `promptConfig.additionalInstructions`. The index port with its Postgres implementation. `UserPromptSubmit` calls the assembler with the prompt as the query, under a tight timeout, and fails open. Precedence fixed in one place. The two publish paths collapse so every row carries `kind` and `force`. The in-app agent uses the same assembler. The `steering.manifest` frame. |
-| **Seam** | `packages/context-provider` becomes the assembler's home and reuses `packWithinBudget` (`packages/context-provider/src/budget.ts:37`). `packages/engram` is deleted or folded in. Deleting it needs an ADR that names the files (the de-registered rule in `CLAUDE.md`), so folding is the default. No application imports it, and `tools/scripts/package.json` and `apps/app/next.config.ts` still name it, so either path edits both. `packages/tacho/src/collector/hook-handler.ts:383` (`UserPromptSubmit`). `packages/handlers/src/context.record.publish.ts` and `packages/handlers/src/context.pr.merge.ts` (the two publish paths). `packages/agent/src/runtime/assistant-turn.ts` and `assistant-recall.ts:23` (`RECALL_LIMIT = 6`), and `packages/ai/src/prompts/registry.ts:82` (the unconditional append of additional instructions). Phase 0's compile step moves behind the assembler's prefix. |
-| **Done when** | Every run that reached an injection point carries a `steering.manifest` frame listing what was rendered and what was cut, with a reason each. One function produces what the wrapped agent and the in-app agent are told. A slow or failing assembler never holds a prompt: the hook answers `{}` and the manifest says `fail_open`. A recalled memory is never rendered as a rule. No `agent.context_records` row has a null `kind` or `force`. |
+| **Scope** | `SteeringItem` and `assembleSteering(run, budget)` returning the stable prefix, the volatile selection and the manifest (spec §10.5 is the contract). Source adapters: the record registry, `:AgentMemory`, gate notices from rules and mandates, skill descriptions, and `promptConfig.additionalInstructions`. The index port with its Postgres implementation. The signed local index seam for wrapped runs (spec §10.5): the bundle gains `steering.items`, every active item in the host's scope with its id, hash, kind, force, scope, validity, body and scoring terms, compiled beside `context.system` and emitted only to a host that advertises `BUNDLE_FEATURE_STEERING_ITEMS` in `bundleFeatures`, the same gate `gateway_tools` uses today, because `policyBundleSchema` is strict and an older daemon would reject the whole bundle. A host without the feature keeps `context.system` and Phase 0's behaviour; the field becomes required once the fleet is upgraded. The assembler's pure core lives in `@oxagen/tacho`, the leaf, so `tacho-hook` builds the prefix per session at `SessionStart` from the items in scope of the session's repository binding, and ranks the volatile selection at `UserPromptSubmit` with the prompt on the machine, under a tight timeout, failing open. `@oxagen/context-provider` imports the same core and adds the adapters and the Postgres index. Precedence fixed in one place. The two publish paths collapse so every row carries `kind` and `force`. The in-app agent uses the same assembler. The `steering.manifest` frame. |
+| **Seam** | `packages/context-provider` becomes the assembler's home and reuses `packWithinBudget` (`packages/context-provider/src/budget.ts:37`). `packages/engram` is deleted or folded in. Deleting it needs an ADR that names the files (the de-registered rule in `CLAUDE.md`), so folding is the default. No application imports it, and `tools/scripts/package.json` and `apps/app/next.config.ts` still name it, so either path edits both. `packages/tacho/src/collector/hook-handler.ts:383` (`UserPromptSubmit`). `packages/tacho/src/wire.ts` (the bundle schema gains `steering.items`) and `packages/handlers/src/lib/tacho-host.ts` (compiles them). A new `packages/tacho/src/steering/` for the pure core, which keeps the leaf constraint because it imports nothing from `@oxagen/*`. `packages/handlers/src/context.record.publish.ts` and `packages/handlers/src/context.pr.merge.ts` (the two publish paths). `packages/agent/src/runtime/assistant-turn.ts` and `assistant-recall.ts:23` (`RECALL_LIMIT = 6`), and `packages/ai/src/prompts/registry.ts:82` (the unconditional append of additional instructions). Phase 0's compile step moves behind the assembler's prefix. |
+| **Done when** | Every run that reached an injection point carries a `steering.manifest` frame listing what was rendered and what was cut, with a reason each. One function produces what the wrapped agent and the in-app agent are told. Two sessions on one host in two repositories each receive their own repository-scoped `must`. A `UserPromptSubmit` on a wrapped run ranks with the prompt on the machine, no request from `tacho-hook` to Oxagen's servers carries the prompt, and a rig proves it. A daemon built before `steering.items` still parses every bundle the control plane signs for it, and an enrollment test with a host that advertises only `gateway_tools` proves it. A slow or failing assembler never holds a prompt: the hook answers `{}` and the manifest says `fail_open`. A recalled memory is never rendered as a rule. No `agent.context_records` row has a null `kind` or `force`. |
 | **Unblocks** | Phase 2's Preview, which is this function with no run. Effect measurement, retirement and promotion, which need the manifest. Phase 4's gate compilation. |
 | **Depends on** | Phase 0. |
 | **Tracking** | Issue #3296. ADR-093 and ADR-097. Closes defects #3302 and #3303. An override cannot replace the governance prompt (`chat.system` is append-only, and only `conversation.title` is overridable), so #3303 is about the appended text being unranked and unbudgeted, not about replacement. |
@@ -1255,21 +1257,21 @@ The review's defects are filed on their own and are fixed by the phase named: #3
 
 | | |
 |---|---|
-| **Scope** | `tachod` grows into the gateway. Add the loopback model proxy: Anthropic Messages and OpenAI Responses passthrough with streaming, and enrollment writes the base URL. Move metering to observed. Enforce `session_limit_usd`. Re-land ADR-051's per-turn volatile injection at the proxy. Implement a real `interrupt`. Turn the MCP gateway into an aggregator for wrapped harnesses: enrollment re-serves the harness's existing MCP servers through loopback with displace-and-restore, and pins managed settings where a vendor offers them. Fill bundle permissions from the second compilation of Phase 1. Prompt bodies never leave the machine: only digests and usage go up. The vendor credential stays on the machine. Update the desktop installer to install and remove the gateway cleanly, with a line-by-line bug review of `apps/desktop` in the same effort. |
+| **Scope** | `tachod` grows into the gateway. Add the loopback model proxy: Anthropic Messages and OpenAI Responses passthrough with streaming, and enrollment writes the base URL. Bind every proxied request to one run before it is forwarded, as spec §7.1 sets out: by the connecting process for every wrapped session (a hook cannot change a running process's base URL, and the run-scoped URL is for a launcher that sets it before the process starts), matched to a harness pid the session registry holds keyed by session id. Capture that pid at `SessionStart` for every process-bound harness: Claude Code exports `CLAUDE_PID` and Stella's is found by `tacho-hook` today, Codex passes none, and `claude_ppid` in the envelope is never assigned. The MCP aggregator binds by the same rule: the stdio shim sends its parent pid, the harness, with every message, and the aggregator selects the run from the session registry (spec §7.1). A request that binds to no run is forwarded, recorded as unattributed against the host, and drops the tier of every run open on that host to `harness` for that window. With the control channel down, the proxy admits calls only until the cached bundle expires, records `revocation_freshness` on each, and then refuses every proxied call until a fresh bundle arrives. Move metering to observed. Enforce `session_limit_usd` locally at the proxy, admitting a call by its ceiling and never by the balance before it (the ceiling prices every class of spec §12.6 the request can incur: input at the higher of the uncached and cache-write price, the output cap with reasoning inside it, and each enabled provider-hosted tool at its per-request price times a bounded use count; a request the proxy cannot bound is refused), and enforce shared hard budgets (organization, workspace, operator, agent) by an atomic reservation of that ceiling on the control plane before the call, settled to observed usage after it, with a per-host lease for the offline case (spec §12.5). A bundled copy of a shared counter is never the admission check. Re-land ADR-051's per-turn volatile injection at the proxy. Implement a real `interrupt`. Turn the MCP gateway into an aggregator for wrapped harnesses: enrollment re-serves the harness's existing MCP servers through loopback with displace-and-restore, and pins managed settings where a vendor offers them. Fill bundle permissions from the second compilation of Phase 1. The proxy forwards prompt bodies to the vendor only. No prompt body is sent to Oxagen's servers: only digests and usage go up. The vendor credential stays on the machine. Update the desktop installer to install and remove the gateway cleanly, with a line-by-line bug review of `apps/desktop` in the same effort. |
 | **Seam** | `packages/tacho/src/collector/` (`daemon.ts`, `server.ts`, `loopback-guard.ts`, `mcp-gateway.ts`). `packages/tacho/src/cli/enroll.ts` and `unenroll.ts`. `packages/tacho/src/host/settings-writer.ts`, `codex-writer.ts`, `stella-writer.ts` and `mcp-config-writer.ts` (`mergeOxagenMcpServer` and `stripOxagenMcpServer` are the displace-and-restore it extends). `packages/tacho/src/wire.ts:370` (`session_limit_usd`, which nothing reads today). `packages/handlers/src/lib/tacho-host.ts:269` (the empty permissions and the `observed` budget). Oxagen Desktop installs it (`apps/desktop`, the desktop spec §14). |
-| **Done when** | A wrapped run whose model and MCP traffic went through `tachod` reads `gateway`, and a run that did not still reads `harness`. Spend is observed for Claude Code, Codex and Stella alike, and every number carries its basis. A breached `session_limit_usd` refuses the next model call. `interrupt` stops an in-flight response and the partial output is recorded and billed. Enrollment writes a base URL only after the daemon is confirmed listening. Unenroll and uninstall restore every file they touched before they stop the daemon, so no harness is left pointing at a dead base URL. Uninstall leaves the home directory byte-identical to its state before install, except for a documented allowlist, and a temp-HOME snapshot rig proves it. No prompt body appears in anything sent to Oxagen's servers. |
+| **Done when** | A wrapped run whose model and MCP traffic went through `tachod` reads `gateway`, and a run that did not still reads `harness`. Two wrapped sessions on one host, running at once, each get their own spend, steering and `session_limit_usd`, and every `model.request` frame names its binding (`token` or `process`). A request the proxy cannot bind is forwarded, recorded as unattributed against the host, and every run open on that host during it reads `harness`. Spend is observed for Claude Code, Codex and Stella alike, and every number carries its basis. A call whose ceiling passes the remaining `session_limit_usd` is refused before it is forwarded, a request with no output cap gets one the balance affords, and a rig proves that a completion admitted with a cent left cannot finish at ten dollars. A `tachod` restart mid-session restores the run's spent and every offline lease's remaining amount from the host WAL with every unsettled ceiling counted in full, and a rig that kills the daemon during a streaming call, online and with the control channel down, proves the run cannot spend `session_limit_usd` twice and a lease cannot be drawn twice. A request that enables a cache write or a provider-hosted tool is admitted by a ceiling that prices them, and a request the proxy cannot bound is refused. Two hosts spending at once against one workspace hard budget cannot together pass it by more than their outstanding leases plus the stated estimator error, and a rig with two proxies racing one counter proves it. Two Codex sessions on one host each get their own run, because the hook captured each one's pid, and two wrapped sessions calling the same MCP server through the aggregator each get their own agent's permissions and their own `tool.requested` frames. Two concurrent model calls from one run with a dollar of `session_limit_usd` left admit one ceiling, not two, and a same-proxy race rig proves it. A host revoked while its control channel is down stops proxying no later than its cached bundle's expiry, and a rig proves it. `interrupt` stops an in-flight response and the partial output is recorded and billed. Enrollment writes a base URL only after the daemon is confirmed listening. Unenroll and uninstall restore every file they touched before they stop the daemon, so no harness is left pointing at a dead base URL. Uninstall leaves the home directory byte-identical to its state before install, except for a documented allowlist, and a temp-HOME snapshot rig proves it. No prompt body appears in anything sent to Oxagen's servers. |
 | **Unblocks** | The words "observed" and "enforced" for routed traffic. Spend for every harness. Phase 5. |
 | **Depends on** | Nothing to start. It is in build now, in parallel with Phase 0. Two parts wait for Phase 1, which writes what they carry: per-turn volatile injection (the proxy ships the seam for it) and bundle permissions from the second compilation (ADR-097 §3). The subscription login question is closed and gates nothing (§8.7). |
-| **Tracking** | Issue #3299 (P0, in build), branch `gateway-model-proxy`: the loopback model proxy in `tachod`, enrollment writes the base URLs, observed metering, the enforced `session_limit_usd`, real `interrupt`, and the seam for per-turn injection. Issue #3301, branch `desktop-install-hardening`: a line-by-line bug review of `apps/desktop`, install and uninstall fixed and proven against a temp-HOME snapshot rig, and the installer updated for the gateway. Closes defect #3304. ADR-094 and ADR-095. **2026-09-22, the credential seam (oxagen ADR-138):** enrollment takes the vendor key into the gateway's custody and hands the harness a run token (M1's run tokens, for model calls); the proxy verifies and swaps, refuses a foreign credential, and every frame carries `oxagen.credential_basis`. This is the last planned enhancement of the tacho gateway before Phase 5. |
-| **Settled by ADR-094 and spec §13.6** | Prompt bodies never leave the machine, so model-call frames from the gateway carry digests and usage only, never bodies. What hook-tier frames carry today is unchanged. The spec's audit rule of full frame bodies (§13.1) applies where Oxagen is itself in the path of the body. ADR-094 does not name where the volatile ranking runs. It is a build choice inside that rule, made when the Phase 1 assembler exists. |
+| **Tracking** | Issue #3299 (P0, in build), branch `gateway-model-proxy`: the loopback model proxy in `tachod`, the request-to-run binding, enrollment writes the base URLs, observed metering, the enforced `session_limit_usd`, real `interrupt`, and the seam for per-turn injection. Issue #3301, branch `desktop-install-hardening`: a line-by-line bug review of `apps/desktop`, install and uninstall fixed and proven against a temp-HOME snapshot rig, and the installer updated for the gateway. Closes defect #3304. ADR-094 and ADR-095. |
+| **Settled by ADR-094 and spec §13.6** | No prompt body is sent to Oxagen's servers, so model-call frames from the gateway carry digests and usage only, never bodies. What hook-tier frames carry today is unchanged. The spec's audit rule of full frame bodies (§13.1) applies where Oxagen is itself in the path of the body. ADR-093 names where the volatile ranking runs for a wrapped run: on the machine, in `tacho-hook`, against the signed items the bundle carries (Phase 1, §8.2). ADR-094 does not speak to it. |
 
 ### 8.6 Phase 5. The contained tier
 
 | | |
 |---|---|
-| **Scope** | `oxagen run -- <agent>`: a supervisor that launches the agent under an OS sandbox with egress limited to the gateway. CI, headless runs, cloud runners and managed devices first. Never mandatory on a developer's own laptop. `contained` becomes the top word of the ladder. The witness runner of ADR-064 is built on the same launcher. ADR-043 is revised by one sentence: "Oxagen does not run turns, but it may contain the process that does. A launcher that confines a process is not an agent runtime." |
+| **Scope** | `oxagen run -- <agent>`: a supervisor that launches the agent under an OS sandbox with the three controls ADR-096 requires, each attested by the launcher: gateway-only egress for every process in the sandbox; a filesystem policy whose writable set is the workspace the launcher was given, with the harness's settings file, its hook entries and the `tacho-hook` binary read-only; and hook integrity at launch, the launcher starting the binary it chose with the hook entries it wrote, recording a digest of that configuration, and the sandbox denying writes to it for the life of the run. The launcher also sets the run-scoped base URL before the process starts (spec §7.1). CI, headless runs, cloud runners and managed devices first. Never mandatory on a developer's own laptop. `contained` becomes the top word of the ladder. The witness runner of ADR-064 is built on the same launcher. ADR-043 is revised by one sentence: "Oxagen does not run turns, but it may contain the process that does. A launcher that confines a process is not an agent runtime." |
 | **Seam** | A new verb in `apps/cli/src/program.ts`, beside `oxagen tacho` (line 669) and `oxagen agent` (line 881). The tier enum `TACHO_ENFORCEMENT_TIERS` (`packages/database/src/schema/tacho.ts:74`) and `TACHO_HARNESS_TIERS` (`packages/tacho/src/wire.ts:175`) gain `contained` as a wire-compatible addition with no rename, as ADR-095 "The tier ladder is four words, computed from what was routed" sets out. `ENFORCEMENT_TIERS` (`packages/tacho/src/envelope.ts:63`) is the envelope's copy of the same three words. |
-| **Done when** | A run under the launcher cannot reach a model or a tool server except through the gateway, a probe that tries is refused and recorded, and the run's tier reads `contained`. A run outside the launcher never reads `contained`. |
+| **Done when** | A run under the launcher cannot reach a model or a tool server except through the gateway, a probe that tries is refused and recorded, a connection from inside the sandbox that binds to no run is refused rather than forwarded, a write to the settings file, a hook entry or the `tacho-hook` binary from inside the sandbox is refused and recorded, the launch attestation carries the configuration digest and all three controls, and the run's tier reads `contained`. A run whose attestation lacks any of the three controls reads `gateway` at most. A run outside the launcher never reads `contained`. |
 | **Unblocks** | The word "enforced" against the machine's operator. The witness runner, and with it milestone M6. |
 | **Depends on** | Phase 4. |
 | **Tracking** | Issue #3300. ADR-096 and ADR-095. |
@@ -1298,5 +1300,5 @@ Batches B0 to B5 built the new `apps/app`, and the cutover has shipped (`app.oxa
 | Gap **G10** (`USED_CONTEXT` edges from context assembly) | Superseded. The `steering.manifest` frame of Phase 1 is the record of what a run was told. Edges in the graph arrive with Phase 3 | The manifest needs no graph |
 | Gap **G17** (a revocable run token on the ledger ingest contract, decided 2026-09-15) | Stands, and is not on `main` yet. It is separate from the gateway's run tokens, which are Phase 4 | Two different tokens |
 | Gaps **G3**, **G4** and lanes **P6**, **A6** (Spend) | They stand. Every spend number shows its basis, and until Phase 4 the basis for a wrapped agent is `self-reported`, with Codex and Stella absent (defect #3304) | No proxy on `main`, no observed metering |
-| Any lane or gap that adds steering ceremony (a new check, governance mode, review role, ledger field or promotion threshold) | Frozen until Phase 0 lands | §8.1 |
+| Any lane or gap that adds steering ceremony (a new check, governance mode, review role, ledger field or promotion threshold) | Frozen until Phase 0 is proven on #2592 | §8.1 |
 | Any lane that assumes the model proxy, run tokens, enforced budgets or a sandbox exist | Waits for Phase 4 or Phase 5, and renders `NotBacked` until then (decision 3) | The tier ladder cannot be over-stated |

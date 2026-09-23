@@ -12,7 +12,7 @@ You are auditing the **Organization: Roles** page of Oxagen (`#/a-intel/roles`) 
 
 1. The page spec: `pages/organization-roles.md` (read it first, in full).
 2. The design, rendered: the `organization-roles` stories in Storybook (`npm run storybook`), one per state (loaded, empty, loading, error, access denied), desktop and mobile; or `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` in a browser or with Playwright.
-3. The product spec for context: `docs/specs/mission-control/spec.md` §14 (Mission Control), Appendix A (target tables), Appendix E (contracts), Appendix F (the pages that survive); the data mapping in `docs/implementation-plan.md` §3.
+3. The product spec for context: `docs/mission-control-spec.md` §14 (Mission Control), Appendix A (target tables), Appendix E (contracts), Appendix F (the pages that survive); the data mapping in `docs/implementation-plan.md` §3.
 4. The build under audit: `{{APP_ROOT}}` (the Next.js app), served at `{{APP_URL}}`. Route under audit: `/a-intel/roles`.
 
 ## Procedure

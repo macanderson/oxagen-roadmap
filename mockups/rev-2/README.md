@@ -85,5 +85,5 @@ provider.
 
 - `mockups/src` and `mockups/fixtures`, built by `tools/build-mockup.mjs`. The future-state
   sources are `mockups/future_state_mockups/{src,fixtures}`, built by `tools/build-mockup-future.mjs`.
-- Spec: `oxagen/docs/specs/mission-control/spec.md` §12.6 to §12.9 for the token classes, the
+- Spec: `docs/mission-control-spec.md` §12.6 to §12.9 for the token classes, the
   derived metrics and the findings; `plan.md` §8 for the phases the mock assumes shipped.
