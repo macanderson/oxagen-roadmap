@@ -1,0 +1,1 @@
+- [2026-09-23] Run this roadmap’s site preparation script from site and verify SVG URLs in the served tree; source-relative paths can pass a build and fail in the browser. (source: reflections/2026-09-23-machine-first-onboarding.md, agent: root)
