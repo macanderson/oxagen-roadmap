@@ -1,0 +1,10 @@
+{
+ "slug": "a-intel",
+ "name": "Anderson Intelligence Corp.",
+ "currency": "USD",
+ "plan": "Team",
+ "dataPlane": "shared",
+ "attester": "key_ox_aintel_2026Q3",
+ "region": "us-east-1",
+ "governance": "team"
+}

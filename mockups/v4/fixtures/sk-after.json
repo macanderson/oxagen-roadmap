@@ -1,0 +1,88 @@
+{
+ "link": [
+  {
+   "k": "control.answer",
+   "c": "op",
+   "t": "09:17:38.902Z",
+   "d": "marcus · link a-intel/edge-proxy to core-platform as a linked repo"
+  },
+  {
+   "k": "repo.bound",
+   "c": "gov",
+   "t": "09:17:39.004Z",
+   "d": "a-intel/edge-proxy · linked repo of core-platform · receipt rcp_01K6QW44"
+  },
+  {
+   "k": "skills.resolved",
+   "c": "gov",
+   "t": "09:17:39.011Z",
+   "d": "config skl_v7 · 7 skills in scope · 1 withheld"
+  },
+  {
+   "k": "skills.searched",
+   "c": "gov",
+   "t": "09:17:39.318Z",
+   "d": "“cut the first release notes” · 3 returned, 2 withheld",
+   "hot": true
+  },
+  {
+   "k": "skills.loaded",
+   "c": "ctx",
+   "t": "09:17:39.402Z",
+   "d": "a-intel.release-notes-from-prs@2.1.0 · 1,840 tokens · $0.0055",
+   "hot": true
+  },
+  {
+   "k": "context.assembled",
+   "c": "ctx",
+   "t": "09:17:39.410Z",
+   "d": "6 context frames · 9,204 tokens · 1 skill"
+  },
+  {
+   "k": "model.request",
+   "c": "model",
+   "t": "09:17:39.455Z",
+   "d": "turn 1 · claude-sonnet-5 · the skill is cited in the system position"
+  }
+ ],
+ "create": [
+  {
+   "k": "control.answer",
+   "c": "op",
+   "t": "09:17:38.902Z",
+   "d": "marcus · create workspace edge, bind a-intel/edge-proxy as its main repo"
+  },
+  {
+   "k": "workspace.created",
+   "c": "gov",
+   "t": "09:17:39.140Z",
+   "d": "edge · owner marcus · skills.enabled = false · receipt rcp_01K6QW45",
+   "hot": true
+  },
+  {
+   "k": "repo.bound",
+   "c": "gov",
+   "t": "09:17:39.208Z",
+   "d": "a-intel/edge-proxy · main repo of edge · production branch main"
+  },
+  {
+   "k": "skills.resolved",
+   "c": "gov",
+   "t": "09:17:39.215Z",
+   "d": "skills are off in edge · 0 skills in scope · search_skills is not on the belt",
+   "hot": true
+  },
+  {
+   "k": "context.assembled",
+   "c": "ctx",
+   "t": "09:17:39.221Z",
+   "d": "4 context frames · 3,110 tokens · 0 skills"
+  },
+  {
+   "k": "model.request",
+   "c": "model",
+   "t": "09:17:39.266Z",
+   "d": "turn 1 · claude-sonnet-5 · the agent is told, in one line, that it has none"
+  }
+ ]
+}

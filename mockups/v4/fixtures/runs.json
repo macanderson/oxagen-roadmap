@@ -1,0 +1,945 @@
+[
+ {
+  "id": "run_01K5RS7M2E8FJ3QW",
+  "agent": "a-intel.core.release-manager",
+  "op": "marcus",
+  "ws": "core-platform",
+  "status": "live",
+  "turn": 7,
+  "steps": 41,
+  "frames": 186,
+  "cost": "4.13",
+  "basis": "gateway_observed",
+  "tier": "gateway",
+  "effort": "medium",
+  "grade": "full",
+  "task": "a-intel/platform#482",
+  "taskTitle": "Cut 4.11.0 release notes",
+  "summary": "Drafting the 4.11.0 release notes from the 38 pull requests merged since 4.10.3. So far it has read CHANGELOG.md once, grouped 31 changes under Features, Fixes and Breaking, and written the draft to release/4.11.0-notes. It is waiting on approval for github__create_release; nothing has been published and nothing touched main.",
+  "touched": [
+   "a-intel/platform#482",
+   "release/4.11.0-notes",
+   "CHANGELOG.md \u00b7 read once"
+  ],
+  "outputs": [
+   {
+    "kind": "task",
+    "name": "a-intel/platform#482",
+    "where": "GitHub",
+    "state": "linked",
+    "note": "Cut 4.11.0 release notes",
+    "at": "09:14:02",
+    "fr": 1
+   },
+   {
+    "kind": "read",
+    "name": "CHANGELOG.md",
+    "where": "a-intel/platform",
+    "state": "read",
+    "note": "read once, never modified",
+    "at": "09:15:20",
+    "fr": 6
+   },
+   {
+    "kind": "read",
+    "name": "38 merged pull requests",
+    "where": "a-intel/platform",
+    "state": "read",
+    "note": "since 4.10.3",
+    "at": "09:16:41",
+    "fr": 9
+   },
+   {
+    "kind": "branch",
+    "name": "release/4.11.0-notes",
+    "where": "a-intel/platform",
+    "state": "created",
+    "note": "cut from main \u00b7 1 commit",
+    "at": "09:21:07",
+    "fr": 28
+   },
+   {
+    "kind": "file",
+    "name": "RELEASE-4.11.0.md",
+    "where": "release/4.11.0-notes",
+    "state": "written",
+    "note": "31 changes grouped under Features, Fixes and Breaking",
+    "stat": {
+     "add": 118,
+     "del": 0
+    },
+    "at": "09:22:41",
+    "fr": 33
+   },
+   {
+    "kind": "gate",
+    "name": "github__create_release",
+    "where": "Oxagen \u00b7 rule rg_0093",
+    "state": "awaiting",
+    "note": "parked at Oxagen, on a call routed through it; the model sees a wait with a reason, not a failure",
+    "at": "09:24:16",
+    "fr": 41
+   },
+   {
+    "kind": "would",
+    "name": "4.11.0 release",
+    "where": "GitHub releases",
+    "state": "withheld",
+    "note": "not published; main untouched"
+   }
+  ],
+  "gen": {
+   "model": "claude-haiku-4-5",
+   "when": "turn 7 \u00b7 regenerated at each turn boundary",
+   "frames": 186
+  },
+  "started": "09:14:02",
+  "model": "claude-opus-5",
+  "cache": 0.83,
+  "ratio": 0.71,
+  "sealed": null,
+  "prompts": 2,
+  "issues": [
+   {
+    "ref": "a-intel/platform#480",
+    "title": "Notes contract test",
+    "rel": "referenced",
+    "status": "closed",
+    "fr": 5
+   }
+  ]
+ },
+ {
+  "id": "run_01K5RQ4B9C7XTN2P",
+  "agent": "a-intel.core.stella-ci",
+  "op": "marcus",
+  "ws": "core-platform",
+  "status": "sealed",
+  "turn": 4,
+  "steps": 23,
+  "frames": 97,
+  "cost": "2.87",
+  "basis": "gateway_observed",
+  "tier": "contained",
+  "effort": "low",
+  "grade": "full",
+  "task": "a-intel/platform#482",
+  "taskTitle": "Bring #482 up to the release-notes contract",
+  "summary": "Brought pull request #482 up to the release-notes contract and ran the contract test three times on the pull request head. The first two runs failed and the third passed.",
+  "touched": [
+   "a-intel/platform#482",
+   "refs/pull/482/head \u00b7 2 pushes, main untouched"
+  ],
+  "outputs": [
+   {
+    "kind": "task",
+    "name": "a-intel/platform#482",
+    "where": "GitHub",
+    "state": "linked",
+    "note": "Cut 4.11.0 release notes",
+    "fr": 1
+   },
+   {
+    "kind": "read",
+    "name": "release-notes contract",
+    "where": "a-intel/platform",
+    "state": "read",
+    "note": "read twice",
+    "fr": 5
+   },
+   {
+    "kind": "branch",
+    "name": "refs/pull/482/head",
+    "where": "a-intel/platform",
+    "state": "pushed",
+    "note": "2 pushes \u00b7 main untouched",
+    "fr": 22
+   },
+   {
+    "kind": "check",
+    "name": "contract test",
+    "where": "pull request checks",
+    "state": "passed",
+    "note": "fail \u00b7 fail \u00b7 pass \u2014 the contract test on the pull request head",
+    "fr": 58
+   },
+   {
+    "kind": "seal",
+    "name": "sealed",
+    "where": "chain",
+    "state": "sealed",
+    "note": "3 attempts, the third passed"
+   }
+  ],
+  "gen": {
+   "model": "claude-haiku-4-5",
+   "when": "at seal 09:11:18",
+   "frames": 97
+  },
+  "started": "09:02:40",
+  "model": "claude-opus-5",
+  "cache": 0.91,
+  "ratio": 0.88,
+  "sealed": "09:11:18",
+  "prompts": 1,
+  "issues": [
+   {
+    "ref": "a-intel/platform#476",
+    "title": "Backport 4.10.3 to release",
+    "rel": "referenced",
+    "status": "closed",
+    "fr": 22
+   }
+  ]
+ },
+ {
+  "id": "run_01K5RP2D6H4KLM8V",
+  "agent": "a-intel.core.triage",
+  "op": "marcus",
+  "ws": "core-platform",
+  "status": "sealed",
+  "turn": 2,
+  "steps": 9,
+  "frames": 38,
+  "cost": "0.94",
+  "basis": "gateway_observed",
+  "tier": "gateway",
+  "effort": "high",
+  "grade": "full",
+  "task": "a-intel/platform#511",
+  "taskTitle": "Label: flaky worker restart",
+  "summary": "Labeled a-intel/platform#511 flaky-test and area:worker after reproducing the restart twice in nine steps, and posted the reproduction command as a comment. No code changed and no branch was created.",
+  "touched": [
+   "a-intel/platform#511",
+   "labels \u00b7 flaky-test, area:worker"
+  ],
+  "outputs": [
+   {
+    "kind": "task",
+    "name": "a-intel/platform#511",
+    "where": "GitHub",
+    "state": "linked",
+    "note": "Worker restarts under load",
+    "fr": 1
+   },
+   {
+    "kind": "read",
+    "name": "worker restart logs",
+    "where": "a-intel/platform",
+    "state": "read",
+    "note": "reproduced twice in nine steps",
+    "fr": 4
+   },
+   {
+    "kind": "label",
+    "name": "flaky-test, area:worker",
+    "where": "a-intel/platform#511",
+    "state": "posted",
+    "note": "2 labels added",
+    "fr": 12
+   },
+   {
+    "kind": "comment",
+    "name": "reproduction command",
+    "where": "a-intel/platform#511",
+    "state": "posted",
+    "note": "one comment",
+    "fr": 15
+   },
+   {
+    "kind": "seal",
+    "name": "sealed",
+    "where": "chain",
+    "state": "sealed",
+    "note": "no code changed and no branch was created"
+   }
+  ],
+  "gen": {
+   "model": "claude-haiku-4-5",
+   "when": "at seal 08:53:30",
+   "frames": 38
+  },
+  "started": "08:51:07",
+  "model": "claude-haiku-4-5",
+  "cache": 0.64,
+  "ratio": 0.44,
+  "sealed": "08:53:30",
+  "prompts": 3,
+  "issues": [
+   {
+    "ref": "LIN-2044",
+    "title": "Flaky worker restart on Safari",
+    "rel": "duplicate of",
+    "status": "in progress",
+    "fr": 14
+   }
+  ]
+ },
+ {
+  "id": "run_01K5RN8F3J2GHY6T",
+  "agent": "a-intel.finops.invoice-bot",
+  "op": "dana",
+  "ws": "finops",
+  "status": "parked",
+  "turn": 3,
+  "steps": 11,
+  "frames": 52,
+  "cost": "1.36",
+  "basis": "gateway_observed",
+  "tier": "gateway",
+  "effort": "high",
+  "grade": "full",
+  "task": "PO-4471",
+  "taskTitle": "September infrastructure invoices",
+  "summary": "Matched three September infrastructure invoices to PO-4471, totalling $18,472.36, and prepared one Stripe payment under mandate mnd_7K2ETQ4. It is parked on approval for stripe__create_payment; no money has moved.",
+  "touched": [
+   "PO-4471",
+   "mnd_7K2ETQ4",
+   "3 invoices \u00b7 $18,472.36"
+  ],
+  "outputs": [
+   {
+    "kind": "task",
+    "name": "PO-4471",
+    "where": "the ledger",
+    "state": "linked",
+    "note": "September infrastructure invoices",
+    "fr": 1
+   },
+   {
+    "kind": "read",
+    "name": "3 invoices",
+    "where": "the ledger",
+    "state": "read",
+    "note": "matched to PO-4471 \u00b7 $18,472.36",
+    "fr": 7
+   },
+   {
+    "kind": "record",
+    "name": "mnd_7K2ETQ4",
+    "where": "mandates",
+    "state": "linked",
+    "note": "the mandate this payment would draw on",
+    "fr": 11
+   },
+   {
+    "kind": "gate",
+    "name": "stripe__create_payment",
+    "where": "Oxagen \u00b7 mandate mnd_7K2ETQ4",
+    "state": "awaiting",
+    "note": "parked on approval; no money has moved",
+    "fr": 19
+   },
+   {
+    "kind": "would",
+    "name": "$18,472.36 payment",
+    "where": "Stripe",
+    "state": "withheld",
+    "note": "prepared, not sent"
+   }
+  ],
+  "gen": {
+   "model": "claude-haiku-4-5",
+   "when": "turn 3 \u00b7 regenerated at each turn boundary",
+   "frames": 52
+  },
+  "started": "08:40:19",
+  "model": "claude-opus-5",
+  "cache": 0.77,
+  "ratio": 0.66,
+  "sealed": null,
+  "prompts": 1
+ },
+ {
+  "id": "run_01K5RM1A5Z9QWE4R",
+  "agent": "a-intel.core.docs-writer",
+  "op": "priya",
+  "ws": "core-platform",
+  "status": "sealed",
+  "turn": 3,
+  "steps": 14,
+  "frames": 61,
+  "cost": "0.61",
+  "basis": "client_attested",
+  "tier": "harness",
+  "grade": "full",
+  "task": "a-intel/platform#498",
+  "taskTitle": "Operator guide: kill switches",
+  "summary": "Rewrote the kill-switches section of the operator guide, adding the deny-generation explanation and two worked examples (+84 / \u221212 lines in docs/operator/kill-switches.md), and opened pull request #498. The verdict is waived: prose carries no test test.",
+  "touched": [
+   "a-intel/platform#498",
+   "docs/operator/kill-switches.md"
+  ],
+  "outputs": [
+   {
+    "kind": "task",
+    "name": "a-intel/platform#498",
+    "where": "GitHub",
+    "state": "linked",
+    "note": "Operator guide: kill switches",
+    "fr": 1
+   },
+   {
+    "kind": "read",
+    "name": "docs/operator/kill-switches.md",
+    "where": "a-intel/platform",
+    "state": "read",
+    "note": "read before the rewrite",
+    "fr": 3
+   },
+   {
+    "kind": "file",
+    "name": "docs/operator/kill-switches.md",
+    "where": "a-intel/platform",
+    "state": "written",
+    "note": "deny-generation explanation and two worked examples",
+    "stat": {
+     "add": 84,
+     "del": 12
+    },
+    "fr": 21
+   },
+   {
+    "kind": "pr",
+    "name": "a-intel/platform#498",
+    "where": "GitHub",
+    "state": "open",
+    "note": "1 file changed \u00b7 awaiting review",
+    "fr": 30
+   },
+   {
+    "kind": "seal",
+    "name": "sealed",
+    "where": "chain",
+    "state": "sealed",
+    "note": "prose carries no test"
+   }
+  ],
+  "gen": {
+   "model": "claude-haiku-4-5",
+   "when": "at seal 08:31:04",
+   "frames": 61
+  },
+  "started": "08:22:55",
+  "model": "claude-opus-5",
+  "cache": 0.88,
+  "ratio": 0.52,
+  "sealed": "08:31:04",
+  "prompts": 2
+ },
+ {
+  "id": "run_01K5RK7C2V8BNM3X",
+  "agent": "a-intel.core.release-manager",
+  "op": "marcus",
+  "ws": "core-platform",
+  "status": "sealed",
+  "turn": 6,
+  "steps": 33,
+  "frames": 141,
+  "cost": "3.42",
+  "basis": "gateway_observed",
+  "tier": "gateway",
+  "effort": "high",
+  "grade": "full",
+  "task": "a-intel/platform#476",
+  "taskTitle": "Backport 4.10.3 to release",
+  "summary": "Tried to backport 4.10.3 onto release/4.10 across four attempts. Every cherry-pick left a conflict marker in packages/release/backport.ts and the integration test never passed. Pull request #476 is open with a failing check; nothing merged.",
+  "touched": [
+   "a-intel/platform#476",
+   "packages/release/backport.ts",
+   "release/4.10"
+  ],
+  "outputs": [
+   {
+    "kind": "task",
+    "name": "a-intel/platform#476",
+    "where": "GitHub",
+    "state": "linked",
+    "note": "Backport 4.10.3 onto release/4.10",
+    "fr": 1
+   },
+   {
+    "kind": "branch",
+    "name": "release/4.10",
+    "where": "a-intel/platform",
+    "state": "pushed",
+    "note": "4 cherry-pick attempts",
+    "fr": 9
+   },
+   {
+    "kind": "file",
+    "name": "packages/release/backport.ts",
+    "where": "release/4.10",
+    "state": "blocked",
+    "note": "a conflict marker was left in every attempt",
+    "stat": {
+     "add": 61,
+     "del": 47
+    },
+    "fr": 26
+   },
+   {
+    "kind": "pr",
+    "name": "a-intel/platform#476",
+    "where": "GitHub",
+    "state": "failing",
+    "note": "open with a failing integration check \u00b7 nothing merged",
+    "fr": 44
+   },
+   {
+    "kind": "seal",
+    "name": "sealed",
+    "where": "chain",
+    "state": "sealed",
+    "note": "the integration test never passed"
+   }
+  ],
+  "gen": {
+   "model": "claude-haiku-4-5",
+   "when": "at seal 08:19:47",
+   "frames": 141
+  },
+  "started": "07:58:11",
+  "model": "claude-opus-5",
+  "cache": 0.8,
+  "ratio": 0.39,
+  "sealed": "08:19:47",
+  "prompts": 4,
+  "issues": [
+   {
+    "ref": "a-intel/platform#471",
+    "title": "Release branch protection",
+    "rel": "blocked by",
+    "status": "open",
+    "fr": 9
+   },
+   {
+    "ref": "a-intel/platform#469",
+    "title": "4.10.2 release notes",
+    "rel": "referenced",
+    "status": "closed",
+    "fr": 31
+   }
+  ]
+ },
+ {
+  "id": "run_01K5RH3G8K5PAS7D",
+  "agent": "a-intel.core.triage",
+  "op": "marcus",
+  "ws": "core-platform",
+  "status": "halted",
+  "turn": 1,
+  "steps": 3,
+  "frames": 14,
+  "cost": "0.22",
+  "basis": "gateway_observed",
+  "tier": "gateway",
+  "effort": "medium",
+  "grade": "partial",
+  "task": "a-intel/platform#514",
+  "taskTitle": "Reproduce: checkout 500",
+  "summary": "Halted after three steps. The run token was revoked by the hooks_removed kill switch before the agent wrote a label or a comment; the only frames are two reads of the issue and the policy decision that stopped it.",
+  "touched": [
+   "a-intel/platform#514",
+   "kill switch \u00b7 hooks_removed"
+  ],
+  "outputs": [
+   {
+    "kind": "task",
+    "name": "a-intel/platform#514",
+    "where": "GitHub",
+    "state": "linked",
+    "note": "the issue the run was given",
+    "fr": 1
+   },
+   {
+    "kind": "read",
+    "name": "a-intel/platform#514",
+    "where": "GitHub",
+    "state": "read",
+    "note": "read twice; the only work the run got to do",
+    "fr": 2
+   },
+   {
+    "kind": "halt",
+    "name": "kill switch \u00b7 hooks_removed",
+    "where": "Oxagen",
+    "state": "blocked",
+    "note": "the run token was revoked before a label or a comment was written",
+    "fr": 3
+   }
+  ],
+  "gen": {
+   "model": "claude-haiku-4-5",
+   "when": "at halt 07:41:39",
+   "frames": 14
+  },
+  "started": "07:41:03",
+  "model": "claude-haiku-4-5",
+  "cache": 0.12,
+  "ratio": 0,
+  "sealed": "07:41:39",
+  "prompts": 2
+ },
+ {
+  "id": "run_01K5RG6H1L4OIU9Y",
+  "agent": "a-intel.core.release-manager",
+  "op": "marcus",
+  "ws": "core-platform",
+  "status": "sealed",
+  "turn": 9,
+  "steps": 47,
+  "frames": 203,
+  "cost": "5.08",
+  "basis": "gateway_observed",
+  "tier": "gateway",
+  "grade": "full",
+  "task": "a-intel/platform#469",
+  "taskTitle": "Release 4.10.2 notes",
+  "summary": "Produced the 4.10.2 release notes and opened pull request #469, and a receipt row on the run was rewritten after the seal, so the chain shows a mismatch from frame #171 and the frames after it are unverifiable.",
+  "touched": [
+   "a-intel/platform#469",
+   "frames 88\u2013102 \u00b7 unverifiable"
+  ],
+  "outputs": [
+   {
+    "kind": "task",
+    "name": "a-intel/platform#469",
+    "where": "GitHub",
+    "state": "linked",
+    "note": "Cut 4.10.2 release notes",
+    "fr": 1
+   },
+   {
+    "kind": "file",
+    "name": "RELEASE-4.10.2.md",
+    "where": "a-intel/platform#469",
+    "state": "written",
+    "note": "the 4.10.2 notes",
+    "stat": {
+     "add": 96,
+     "del": 0
+    },
+    "fr": 30
+   },
+   {
+    "kind": "file",
+    "name": "vitest.config.ts",
+    "where": "a-intel/platform#469",
+    "state": "blocked",
+    "note": "added an exclude to the test config",
+    "stat": {
+     "add": 1,
+     "del": 0
+    },
+    "fr": 61
+   },
+   {
+    "kind": "pr",
+    "name": "a-intel/platform#469",
+    "where": "GitHub",
+    "state": "open",
+    "note": "2 files changed",
+    "fr": 72
+   },
+   {
+    "kind": "check",
+    "name": "contract test",
+    "where": "pull request checks",
+    "state": "blocked",
+    "note": "the fingerprint moved between authoring and the run \u00b7 head result excluded",
+    "fr": 94
+   },
+   {
+    "kind": "seal",
+    "name": "sealed",
+    "where": "chain",
+    "state": "sealed",
+    "note": "nothing is credited until a clean run re-derives the notes"
+   }
+  ],
+  "gen": {
+   "model": "claude-haiku-4-5",
+   "when": "at seal 07:38:12",
+   "frames": 203
+  },
+  "started": "07:02:38",
+  "model": "claude-opus-5",
+  "cache": 0.74,
+  "ratio": 0.58,
+  "sealed": "07:38:12",
+  "prompts": 3
+ },
+ {
+  "id": "run_01K5RF2J7M3EDC5F",
+  "agent": "a-intel.finops.invoice-bot",
+  "op": "dana",
+  "ws": "finops",
+  "status": "sealed",
+  "turn": 2,
+  "steps": 7,
+  "frames": 31,
+  "cost": "0.78",
+  "basis": "gateway_observed",
+  "tier": "gateway",
+  "effort": "medium",
+  "grade": "full",
+  "task": "PO-4471",
+  "taskTitle": "August reconciliation follow-up",
+  "summary": "Reconciled the August statement against PO-4471, found one duplicated line of $412.00 on the vendor side and left a note on the ledger entry. No payment was attempted; no test applies to a reconciliation, so the record carries the note and the ledger entry.",
+  "touched": [
+   "PO-4471",
+   "ledger note \u00b7 $412.00 duplicate"
+  ],
+  "outputs": [
+   {
+    "kind": "task",
+    "name": "PO-4471",
+    "where": "the ledger",
+    "state": "linked",
+    "note": "August statement reconciliation",
+    "fr": 1
+   },
+   {
+    "kind": "read",
+    "name": "August statement",
+    "where": "the ledger",
+    "state": "read",
+    "note": "read line by line against PO-4471",
+    "fr": 4
+   },
+   {
+    "kind": "record",
+    "name": "ledger note \u00b7 $412.00 duplicate",
+    "where": "PO-4471",
+    "state": "posted",
+    "note": "one duplicated line on the vendor side",
+    "fr": 18
+   },
+   {
+    "kind": "seal",
+    "name": "sealed",
+    "where": "chain",
+    "state": "sealed",
+    "note": "no payment was attempted; reconciliation has no test"
+   }
+  ],
+  "gen": {
+   "model": "claude-haiku-4-5",
+   "when": "at seal 07:01:02",
+   "frames": 31
+  },
+  "started": "06:55:20",
+  "model": "claude-opus-5",
+  "cache": 0.85,
+  "ratio": 0.61,
+  "sealed": "07:01:02",
+  "prompts": 1
+ },
+ {
+  "id": "run_01K4QJ9E4T6YUI1O",
+  "agent": "a-intel.core.stella-ci",
+  "op": "marcus",
+  "ws": "core-platform",
+  "status": "compacted",
+  "turn": 5,
+  "steps": 28,
+  "frames": 118,
+  "cost": "2.13",
+  "basis": "gateway_observed",
+  "tier": "contained",
+  "effort": "high",
+  "grade": "ledger",
+  "task": "a-intel/platform#204",
+  "taskTitle": "Contract test: idempotency key path",
+  "summary": "Contract-tested the idempotency-key path flip on pull request #204. The first attempt reproduced a duplicate charge on a replayed key; the second returned the first receipt. Sealed 2025-07-02; the frames now live in the archive segment and this summary was kept with the ledger.",
+  "touched": [
+   "a-intel/platform#204",
+   "tests/integration/test_idempotency_key.py",
+   "seg_01K4QJ9E4T6YUI1O"
+  ],
+  "outputs": [
+   {
+    "kind": "task",
+    "name": "a-intel/platform#204",
+    "where": "GitHub",
+    "state": "linked",
+    "note": "Idempotency key replays a charge",
+    "fr": 1
+   },
+   {
+    "kind": "file",
+    "name": "tests/integration/test_idempotency_key.py",
+    "where": "a-intel/platform#204",
+    "state": "written",
+    "note": "the replay case the flip turns on",
+    "stat": {
+     "add": 38,
+     "del": 2
+    },
+    "fr": 22
+   },
+   {
+    "kind": "check",
+    "name": "seg_01K4QJ9E4T6YUI1O",
+    "where": "pull request checks",
+    "state": "passed",
+    "note": "a duplicate charge first, the first receipt second \u00b7 frames compacted",
+    "fr": 49
+   },
+   {
+    "kind": "seal",
+    "name": "sealed 2025-07-02",
+    "where": "chain",
+    "state": "sealed",
+    "note": "this summary was kept with the ledger"
+   }
+  ],
+  "gen": {
+   "model": "claude-haiku-4-5",
+   "when": "at seal 2025-07-02 11:39",
+   "frames": 118
+  },
+  "started": "2025-07-02 11:20:44",
+  "model": "claude-opus-5",
+  "cache": 0.86,
+  "ratio": 0.81,
+  "sealed": "2025-07-02 11:39:10",
+  "prompts": 1
+ },
+ {
+  "id": "run_01K5RE9P4Q2WSX6C",
+  "agent": "a-intel.core.docs-writer",
+  "op": "priya",
+  "ws": "core-platform",
+  "status": "sealed",
+  "turn": 2,
+  "steps": 8,
+  "frames": 34,
+  "cost": "0.44",
+  "basis": "client_attested",
+  "tier": "harness",
+  "grade": "digest",
+  "task": "\u2014",
+  "taskTitle": "Style pass on CLI reference",
+  "summary": "Made 41 wording and heading-case edits across docs/cli/reference.md and opened pull request #503. Observed at client tier, so only digests were recorded and the change is unverified: this summary is drawn from what the harness reported, not from what Oxagen saw.",
+  "touched": [
+   "a-intel/platform#503",
+   "docs/cli/reference.md"
+  ],
+  "outputs": [
+   {
+    "kind": "task",
+    "name": "a-intel/platform#503",
+    "where": "GitHub",
+    "state": "linked",
+    "note": "CLI reference wording pass",
+    "fr": 1
+   },
+   {
+    "kind": "file",
+    "name": "docs/cli/reference.md",
+    "where": "a-intel/platform#503",
+    "state": "written",
+    "note": "41 wording and heading-case edits \u00b7 digests only, no bodies",
+    "stat": {
+     "add": 41,
+     "del": 41
+    },
+    "fr": 19
+   },
+   {
+    "kind": "pr",
+    "name": "a-intel/platform#503",
+    "where": "GitHub",
+    "state": "open",
+    "note": "1 file changed",
+    "fr": 26
+   },
+   {
+    "kind": "seal",
+    "name": "sealed",
+    "where": "chain",
+    "state": "sealed",
+    "note": "client tier; drawn from what the harness reported, not what Oxagen saw"
+   }
+  ],
+  "gen": {
+   "model": "claude-haiku-4-5",
+   "when": "at seal 06:34:51",
+   "frames": 34
+  },
+  "started": "06:30:12",
+  "model": "claude-opus-5",
+  "cache": 0,
+  "ratio": 0.5,
+  "sealed": "06:34:51",
+  "prompts": 2
+ },
+ {
+  "id": "run_01K5RD1X8N7BVF3G",
+  "agent": "a-intel.core.stella-ci",
+  "op": "marcus",
+  "ws": "core-platform",
+  "status": "sealed",
+  "turn": 3,
+  "steps": 17,
+  "frames": 72,
+  "cost": "1.66",
+  "basis": "gateway_observed",
+  "tier": "contained",
+  "effort": "low",
+  "grade": "full",
+  "task": "a-intel/platform#505",
+  "taskTitle": "Contract test: retry budget invariant",
+  "summary": "Contract-tested the retry budget invariant flip on pull request #505 after five attempts: four panicked with an off-by-one at the budget boundary, the fifth passed. Sealed with 2 of 4 fingerprints held out; nothing was written to the repository.",
+  "touched": [
+   "a-intel/platform#505",
+   "retry \u00b7 budget_invariant"
+  ],
+  "outputs": [
+   {
+    "kind": "task",
+    "name": "a-intel/platform#505",
+    "where": "GitHub",
+    "state": "linked",
+    "note": "Retry budget invariant",
+    "fr": 1
+   },
+   {
+    "kind": "read",
+    "name": "retry \u00b7 budget_invariant",
+    "where": "a-intel/platform#505",
+    "state": "read",
+    "note": "5 attempts read from the harness",
+    "fr": 8
+   },
+   {
+    "kind": "check",
+    "name": "contract test",
+    "where": "pull request checks",
+    "state": "passed",
+    "note": "four panicked at the budget boundary, the fifth passed \u00b7 2 of 4 fingerprints held out",
+    "fr": 57
+   },
+   {
+    "kind": "seal",
+    "name": "sealed",
+    "where": "chain",
+    "state": "sealed",
+    "note": "nothing was written to the repository"
+   }
+  ],
+  "gen": {
+   "model": "claude-haiku-4-5",
+   "when": "at seal 06:22:09",
+   "frames": 72
+  },
+  "started": "06:11:44",
+  "model": "claude-opus-5",
+  "cache": 0.89,
+  "ratio": 0.84,
+  "sealed": "06:22:09",
+  "prompts": 1
+ }
+]

@@ -1,0 +1,116 @@
+[
+ {
+  "id": "ks_org",
+  "lvl": "Organization",
+  "target": "a-intel",
+  "on": false,
+  "scope": "Every agent, every workspace",
+  "by": null,
+  "at": null,
+  "why": null,
+  "stops": "50 agents · 3,182 tool versions"
+ },
+ {
+  "id": "ks_ws",
+  "lvl": "Workspace",
+  "target": "core-platform",
+  "on": false,
+  "scope": "Every agent in this workspace",
+  "by": null,
+  "at": null,
+  "why": null,
+  "stops": "31 agents · 1,204 tool versions"
+ },
+ {
+  "id": "ks_cls_funds",
+  "lvl": "Class",
+  "target": "every moves_funds tool",
+  "on": false,
+  "scope": "Organization-wide, in one action",
+  "by": null,
+  "at": null,
+  "why": null,
+  "stops": "7 tool versions · 2 agents · 2 mandates · 1 run in flight",
+  "cls": true,
+  "headline": true
+ },
+ {
+  "id": "ks_cls_irrev",
+  "lvl": "Class",
+  "target": "every irreversible tool",
+  "on": false,
+  "scope": "Organization-wide, in one action",
+  "by": null,
+  "at": null,
+  "why": null,
+  "stops": "41 tool versions · 24 agents · 6 runs in flight",
+  "cls": true
+ },
+ {
+  "id": "ks_cls_egress",
+  "lvl": "Class",
+  "target": "every tool with egress: third_party",
+  "on": false,
+  "scope": "Organization-wide, in one action",
+  "by": null,
+  "at": null,
+  "why": null,
+  "stops": "128 tool versions · 46 agents · 14 runs in flight",
+  "cls": true
+ },
+ {
+  "id": "ks_srv_slack",
+  "lvl": "Provider",
+  "target": "slack",
+  "on": true,
+  "scope": "Every tool from this provider",
+  "by": "Marcus Bell",
+  "at": "2026-09-10 23:12 UTC",
+  "why": "Server shipped 1.9.0 with an output schema change we had not approved.",
+  "stops": "17 tool versions · 8 agents · 0 runs in flight"
+ },
+ {
+  "id": "ks_tv_del",
+  "lvl": "Tool version",
+  "target": "github__delete_repository@1",
+  "on": true,
+  "scope": "This version only",
+  "by": "Priya Natarajan",
+  "at": "2026-07-02 08:30 UTC",
+  "why": "Never to be callable by an agent in this organization.",
+  "stops": "1 tool version · 0 agents"
+ },
+ {
+  "id": "ks_conn_sf",
+  "lvl": "Connection",
+  "target": "con_8QP0 · Snowflake key · analytics",
+  "on": false,
+  "scope": "Kills the connection and every credential grant behind it",
+  "by": null,
+  "at": null,
+  "why": null,
+  "stops": "9 tool versions · 2 agents · 31 grants in the last 24h"
+ },
+ {
+  "id": "ks_agent_tri",
+  "lvl": "Agent",
+  "target": "a-intel.core.triage",
+  "on": false,
+  "scope": "This agent, every run",
+  "by": null,
+  "at": null,
+  "why": null,
+  "stops": "18 tool versions · 1 agent · 2 runs in flight"
+ },
+ {
+  "id": "ks_op_dana",
+  "lvl": "Operator’s agents",
+  "target": "Dana Okafor",
+  "on": false,
+  "scope": "Every agent this operator is accountable for",
+  "by": null,
+  "at": null,
+  "why": null,
+  "stops": "4 agents · 3 runs in flight"
+ }
+]

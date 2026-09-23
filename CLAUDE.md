@@ -15,6 +15,6 @@ docs and mockups, every repo.
 
 ## Mockups
 
-`mockups/` is the authoritative design of rev1 and `mockups/pages/*.md` its per-page specs and
-audit prompts. `mockups/future_state_mockups/` is the first version (witness runner, proof, the
+`mockups/` is version 5 and `mockups/pages/*.md` its per-page specs and audit prompts.
+Version 5 must match the rebaselined product. `mockups/v4/` is the frozen previous reference. `mockups/future_state_mockups/` is the first version (witness runner, proof, the
 definition of done, agent scores); it is not the target. `mockups/v2/` is a shelved redesign.

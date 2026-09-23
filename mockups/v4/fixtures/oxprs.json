@@ -1,0 +1,325 @@
+[
+ {
+  "id": "oxpr_01K6T4A2",
+  "kind": "bootstrap",
+  "title": "Add Oxagen to a-intel/mobile",
+  "repo": "a-intel/mobile",
+  "base": "release",
+  "branch": "oxagen/init",
+  "pr": "a-intel/mobile#118",
+  "by": "Marcus Bell",
+  "byKind": "person",
+  "opened": "6 min ago",
+  "state": "checks_running",
+  "trigger": "An operator added this repository to core-platform.",
+  "files": [
+   [
+    "add",
+    ".oxagen/workspace.toml",
+    "the linked-repo declaration, servers and budgets"
+   ],
+   [
+    "add",
+    ".oxagen/rules/governance.toml",
+    "mode = team"
+   ],
+   [
+    "add",
+    ".oxagen/rules/.gitkeep",
+    "published records land here"
+   ],
+   [
+    "add",
+    ".oxagen/proposals/.gitkeep",
+    "candidates; steer nothing"
+   ],
+   [
+    "add",
+    ".oxagen/agents/.gitkeep",
+    "one definition per agent"
+   ],
+   [
+    "mod",
+    ".gitignore",
+    "ignore .stella/private/ and the local .oxagen/workspace.json"
+   ]
+  ],
+  "checks": [
+   [
+    "schema",
+    "pass",
+    "workspace.toml parses; every declared repo resolves through the installation."
+   ],
+   [
+    "layout",
+    "pass",
+    "No .oxagen/ existed on release. Nothing is overwritten."
+   ],
+   [
+    "governance",
+    "running",
+    "mode = team is one of solo | team | regulated."
+   ],
+   [
+    "secret_pii_scan",
+    "queued",
+    "No credential, key or personal datum in any added file."
+   ],
+   [
+    "no_authority",
+    "queued",
+    "Nothing here grants a tool, a tier or a budget rise."
+   ]
+  ]
+ },
+ {
+  "id": "oxpr_01K6T4B7",
+  "kind": "record",
+  "title": "ctx.release.no-reread-changelog",
+  "repo": "a-intel/platform",
+  "base": "main",
+  "branch": "context/ctx.release.no-reread-changelog",
+  "pr": "a-intel/platform#523",
+  "by": "the promoter",
+  "byKind": "promoter",
+  "opened": "38 min ago",
+  "state": "checks_passed",
+  "trigger": "14 runs across 3 agents re-read CHANGELOG.md more than once.",
+  "files": [
+   [
+    "add",
+    ".oxagen/rules/ctx.release.no-reread-changelog.toml",
+    "one record, kind = rule, force = should"
+   ]
+  ],
+  "checks": [
+   [
+    "schema",
+    "pass",
+    "context-record/v0.1; one [[record]]; every required member present."
+   ],
+   [
+    "lineage_uniqueness",
+    "pass",
+    "ctx.release.no-reread-changelog is published nowhere else."
+   ],
+   [
+    "record_hash",
+    "pass",
+    "rec_release_no_reread_changelog_9a41c0e7bd23 recomputes from the file."
+   ],
+   [
+    "secret_pii_scan",
+    "pass",
+    "No credential, email, SSN or card number in statement, rationale or evidence."
+   ],
+   [
+    "conflict_against_active",
+    "pass",
+    "No active constraint of the opposite effect on this lineage."
+   ],
+   [
+    "constraint_effect",
+    "pass",
+    "kind = rule carries no effect, as the rule requires."
+   ]
+  ]
+ },
+ {
+  "id": "oxpr_01K6T4C3",
+  "kind": "skill",
+  "title": "a-intel.release-notes-from-prs 2.1.0 → 2.2.0",
+  "repo": "a-intel/platform",
+  "base": "main",
+  "branch": "skills/a-intel.release-notes-from-prs",
+  "pr": "a-intel/platform#522",
+  "by": "Priya Natarajan",
+  "byKind": "person",
+  "opened": "2 h ago",
+  "state": "checks_failed",
+  "trigger": "A .skill bundle was uploaded to replace the pinned version.",
+  "files": [
+   [
+    "mod",
+    ".oxagen/skills/a-intel.release-notes-from-prs/SKILL.md",
+    "2.1.0 → 2.2.0"
+   ],
+   [
+    "mod",
+    ".oxagen/skills.toml",
+    "the pinned digest moves"
+   ]
+  ],
+  "checks": [
+   [
+    "frontmatter",
+    "pass",
+    "name, version, description and license present."
+   ],
+   [
+    "semver",
+    "pass",
+    "2.2.0 is strictly greater than the 2.1.0 it replaces."
+   ],
+   [
+    "digest",
+    "pass",
+    "sha256:7c1e…04b9 recomputed from the bundle at this commit."
+   ],
+   [
+    "grants",
+    "fail",
+    "The bundle adds github__merge_pull_request to its tool list. A skill cannot raise a tier or add a tool."
+   ],
+   [
+    "secret_pii_scan",
+    "queued",
+    "Did not run: grants stopped the run."
+   ],
+   [
+    "load_cost",
+    "queued",
+    "Did not run: grants stopped the run."
+   ]
+  ]
+ },
+ {
+  "id": "oxpr_01K6T4D9",
+  "kind": "agent",
+  "title": "release-manager · budget and belt",
+  "repo": "a-intel/platform",
+  "base": "main",
+  "branch": "agents/release-manager",
+  "pr": "a-intel/platform#521",
+  "by": "Marcus Bell",
+  "byKind": "person",
+  "opened": "3 h ago",
+  "state": "checks_passed",
+  "trigger": "Edited in the agent source editor.",
+  "files": [
+   [
+    "mod",
+    ".oxagen/agents/release-manager.toml",
+    "per_run_micros and deny_tools"
+   ]
+  ],
+  "checks": [
+   [
+    "schema",
+    "pass",
+    "agent-definition/v0.1; slug matches the file stem."
+   ],
+   [
+    "belt",
+    "pass",
+    "Every tool named resolves in the registry at a pinned version."
+   ],
+   [
+    "budget",
+    "pass",
+    "$2.40 per run is inside the workspace ceiling."
+   ],
+   [
+    "secret_pii_scan",
+    "pass",
+    "Nothing found."
+   ]
+  ]
+ },
+ {
+  "id": "oxpr_01K6T4E5",
+  "kind": "config",
+  "title": "Reconcile workspace.toml against live state",
+  "repo": "a-intel/platform",
+  "base": "main",
+  "branch": "oxagen/reconcile-2026-09-17",
+  "pr": "a-intel/platform#524",
+  "by": "the reconciler",
+  "byKind": "reconciler",
+  "opened": "11 min ago",
+  "state": "checks_passed",
+  "trigger": "linear was added as a provider in the app; the file did not say so.",
+  "files": [
+   [
+    "mod",
+    ".oxagen/workspace.toml",
+    "[servers.linear] added; budget.monthly_usd 400 → 600"
+   ]
+  ],
+  "checks": [
+   [
+    "schema",
+    "pass",
+    "workspace.toml parses."
+   ],
+   [
+    "drift_is_real",
+    "pass",
+    "Both differences were read from the control plane at a4c91e2, not guessed."
+   ],
+   [
+    "no_authority",
+    "pass",
+    "Declaring a provider grants nobody a tool; a belt still does that."
+   ],
+   [
+    "secret_pii_scan",
+    "pass",
+    "The server is named; its credential is not in the file."
+   ]
+  ]
+ },
+ {
+  "id": "oxpr_01K6T4F1",
+  "kind": "record",
+  "title": "ctx.platform.changelog-once",
+  "repo": "a-intel/platform",
+  "base": "main",
+  "branch": "context/ctx.platform.changelog-once",
+  "pr": "a-intel/platform#519",
+  "by": "Marcus Bell",
+  "byKind": "person",
+  "opened": "yesterday",
+  "state": "merged",
+  "trigger": "Written in the record wizard.",
+  "files": [
+   [
+    "add",
+    ".oxagen/rules/ctx.platform.changelog-once.toml",
+    "kind = rule, force = should"
+   ]
+  ],
+  "checks": [
+   [
+    "schema",
+    "pass",
+    "context-record/v0.1."
+   ],
+   [
+    "lineage_uniqueness",
+    "pass",
+    "Published nowhere else."
+   ],
+   [
+    "record_hash",
+    "pass",
+    "Recomputes from the file."
+   ],
+   [
+    "secret_pii_scan",
+    "pass",
+    "Nothing found."
+   ],
+   [
+    "conflict_against_active",
+    "pass",
+    "No opposing constraint."
+   ],
+   [
+    "constraint_effect",
+    "pass",
+    "kind = rule carries no effect."
+   ]
+  ]
+ }
+]

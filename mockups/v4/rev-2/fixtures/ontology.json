@@ -1,0 +1,129 @@
+[
+ {
+  "id": "ont.release-train",
+  "lineage": "ont.release-train",
+  "kind": "ontology",
+  "noteKind": "term",
+  "term": "release train",
+  "force": "info",
+  "scope": "workspace",
+  "body": "The release train is the weekly cut of a-intel/platform from main to a release/x.y branch. A change that misses the freeze rides the next train.",
+  "token_cost": 34,
+  "about": [
+   "release",
+   "train",
+   "freeze",
+   "cut",
+   "branch"
+  ],
+  "provenance": ".oxagen/ontology/release-train.toml @ d17e40b",
+  "hash": "sha256:2f90b1c46ea7d853",
+  "valid_from": "2026-08-21",
+  "entities": [
+   "a-intel/platform",
+   "release/4.11"
+  ]
+ },
+ {
+  "id": "ont.surface",
+  "lineage": "ont.surface",
+  "kind": "ontology",
+  "noteKind": "term",
+  "term": "surface",
+  "force": "info",
+  "scope": "workspace",
+  "body": "A surface is one customer-facing part of the product: API, console, CLI, mobile. Release notes group by surface.",
+  "token_cost": 29,
+  "about": [
+   "surface",
+   "release",
+   "notes",
+   "api",
+   "console",
+   "cli",
+   "mobile"
+  ],
+  "provenance": ".oxagen/ontology/surface.toml @ a4c91e2",
+  "hash": "sha256:83c1d7e05b294fa6",
+  "valid_from": "2026-09-04",
+  "entities": [
+   "ctx.release.notes-format"
+  ]
+ },
+ {
+  "id": "ont.ledger-service",
+  "lineage": "ont.ledger-service",
+  "kind": "ontology",
+  "noteKind": "entity",
+  "term": "ledger-service",
+  "force": "info",
+  "scope": "workspace",
+  "body": "ledger-service is the double-entry ledger behind billing. It lives in a-intel/billing, owns the entries table, and is the only writer to it.",
+  "token_cost": 33,
+  "about": [
+   "ledger",
+   "billing",
+   "entries",
+   "invoice",
+   "migration",
+   "database"
+  ],
+  "provenance": ".oxagen/ontology/ledger-service.toml @ 7ac20e9",
+  "hash": "sha256:b05e93a7c4d1862f",
+  "valid_from": "2026-07-16",
+  "entities": [
+   "a-intel/billing"
+  ]
+ },
+ {
+  "id": "ont.flaky",
+  "lineage": "ont.flaky",
+  "kind": "ontology",
+  "noteKind": "term",
+  "term": "flaky",
+  "force": "info",
+  "scope": "workspace",
+  "body": "A test is flaky when it fails and passes on the same commit under the same seed control. One red run is not flaky.",
+  "token_cost": 30,
+  "about": [
+   "flaky",
+   "test",
+   "triage",
+   "seed",
+   "retry",
+   "label"
+  ],
+  "provenance": ".oxagen/ontology/flaky.toml @ 5b3c9e0",
+  "hash": "sha256:6a27f0d19c83e54b",
+  "valid_from": "2026-09-02",
+  "entities": [
+   "a-intel.triage-a-flaky-test"
+  ]
+ },
+ {
+  "id": "ont.po",
+  "lineage": "ont.purchase-order",
+  "kind": "ontology",
+  "noteKind": "entity",
+  "term": "purchase order",
+  "force": "info",
+  "scope": "workspace",
+  "ws": "finops",
+  "body": "A purchase order (PO-nnnn) is the approval to spend with one vendor for one purpose. An invoice with no purchase order is not payable.",
+  "token_cost": 32,
+  "about": [
+   "purchase",
+   "order",
+   "invoice",
+   "vendor",
+   "payment",
+   "reconciliation"
+  ],
+  "provenance": ".oxagen/ontology/purchase-order.toml @ 19be4c2",
+  "hash": "sha256:d7140ea93f6b25c8",
+  "valid_from": "2026-06-30",
+  "entities": [
+   "mnd_7K2ETQ4"
+  ]
+ }
+]
