@@ -1,7 +1,9 @@
-"""Prove the sections shared by the roadmap and oxagen spec copies are byte-identical.
+"""Prove the sections shared by the roadmap and oxagen desktop spec copies are byte-identical.
 
-No build step joins the two repositories, so the headers of the spec, the plan and
-the desktop spec name sections that must match. This compares them.
+No build step joins the two repositories, so the header of the desktop spec names the
+sections that must match. This compares them. The oxagen copies of the Mission Control
+spec and plan were retired on 2026-09-23 (oxagen issue #3895), so only the desktop pair
+is left.
 
     python3 tools/check-spec-sync.py <roadmap checkout> <oxagen checkout>
 
@@ -16,22 +18,13 @@ if len(sys.argv) != 3:
 RMR = sys.argv[1].rstrip('/') + '/'
 OXR = sys.argv[2].rstrip('/') + '/'
 PAIRS = {
-    'spec': (OXR + 'docs/specs/mission-control/spec.md', RMR + 'docs/mission-control-spec.md'),
-    'plan': (OXR + 'docs/specs/mission-control/plan.md', RMR + 'docs/implementation-plan.md'),
     'desktop': (OXR + 'docs/specs/oxagen-desktop/spec.md', RMR + 'docs/desktop-spec.md'),
 }
 SECTIONS = {
-    'spec': ['### 4.2 ', '### 7.1 ', '### 7.2 ', '### 7.3 ', '### 10.4 ', '### 10.5 ', '### 10.6 ',
-             '### 10.7 ', '### 12.5 ', '### 13.6 ', '### 17.2 ', '## 21. '],
-    'plan': ['### 0.2 ', '## 8. '],
     'desktop': ['## 14. '],
 }
 # single lines that must exist exactly once in each copy and be identical
-LINES = {
-    'spec': ["| 6 | Oxagen's connection", '| 7 | Intervention is', '| **Enforcement tier** | ', '| **Gateway** | ',
-             '| `steering.manifest` | ', '| Claude Code and Codex model calls | ',
-             '| **Decided 2026-09-18: subscription logins', '| Sandbox scope | ', '| `budget` | '],
-}
+LINES = {}
 
 
 def sec(text, h):

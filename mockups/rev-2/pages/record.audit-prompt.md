@@ -12,7 +12,7 @@ You are auditing the **Context record** page of Oxagen (`#/a-intel/core-platform
 
 1. The page spec: `mockups/pages/record.md` (read it first, in full), and the hub it belongs to, `mockups/pages/steering.md`.
 2. The design, rendered: the `record` stories in Storybook (`npm run storybook`), one per state (loaded, loading, error, access denied), desktop and mobile; or `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` in a browser or with Playwright. Open it once per kind: `ctx.release.notes-format` (rule), `ctx.release.never-merge` (constraint), `ctx.platform.release-order` (procedure), `ctx.platform.changelog-once` (fact), `ctx.platform.safari-e2e-flake` (memory), `ctx.triage.short-labels` (preference). The checker is `node tools/check-mockup.mjs`.
-3. The product spec for context: `docs/specs/mission-control/spec.md` §10 (context and steering), §12.7 (attribution), Appendix F, Appendix A; `docs/creation-spec.md` §5.
+3. The product spec for context: `docs/mission-control-spec.md` §10 (context and steering), §12.7 (attribution), Appendix F, Appendix A; `docs/creation-spec.md` §5.
 4. The build under audit: `{{APP_ROOT}}` (the Next.js app), served at `{{APP_URL}}`. Route under audit: `/a-intel/core-platform/steering/records/<lineage>`.
 
 ## Procedure

@@ -17,10 +17,10 @@ Close enough is a fail.
 2. `mockups/missioncontrol.html?product=1&state=loaded&mobile=0` (the whole design, desktop) and
    `…&mobile=1` (the whole design, mobile), or the Product stories in Storybook. Open them and
    navigate; everything on them is the design.
-3. `docs/specs/mission-control/spec.md` §12.6 to §12.9 (tokens, attribution, findings), §14
+3. `docs/mission-control-spec.md` §12.6 to §12.9 (tokens, attribution, findings), §14
    (Mission Control), §14.1 (surfaces), Appendix A (target tables), Appendix E (contracts),
    Appendix F (the pages that survive).
-4. `docs/specs/mission-control/plan.md` §3 (data mapping), §4.8 (page states), §4.10 (tabs as
+4. `docs/implementation-plan.md` §3 (data mapping), §4.8 (page states), §4.10 (tabs as
    segments), §4.11 (session gate and Appendix F redirects), §8 (the phases the design assumes
    shipped: every phase, 0 to 5).
 
