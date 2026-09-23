@@ -12140,256 +12140,57 @@ function incidentResolveDlg(){
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="incidentResolve(\''+h(i.id)+'\')">Resolve</button>'};
 }
 
-/* ============================== Register Agent (the W1 onboarding gate, in-app) ==============================
-   Fleet's "Register Agent" runs the onboarding gate inside the app: name the agent, wrap it, wait for its
-   first frame. Nothing completes until that frame reaches Oxagen — the ping is also the installer's smoke
-   test, so there is one path, not two. Cancel is on every step (and Esc) and leaves nothing behind.
-   Mutable state lives on S.reg and is null outside the flow; timers are tracked so Cancel can clear them. */
-var REG_TABS=[{id:"cc",n:"Claude Code",s:"one click · harness"},{id:"codex",n:"Codex CLI",s:"one click · harness"},{id:"sdk",n:"SDK agent",s:"five lines · harness"}];
-var REG_TOKEN="oxe_1time_7QK4M2NV9XR3T8ZP";
+/* V5 registration proposal. These transitions simulate server receipts for design review. */
+var REG_TOKEN="preview-pairing-code";
 var REG_HOST="mbell-mbp.local";
-var REG_PKG={macos:{f:"Oxagen-Agent-2.4.0.pkg",s:"14.2 MB",note:"notarized · Developer ID",sha:"sha256:3f9c71d2…b40a"},
-    windows:{f:"Oxagen-Agent-2.4.0.msi",s:"16.8 MB",note:"signed · EV certificate",sha:"sha256:7a21ce55…19f3"},
-    linux:{f:"oxagen-agent_2.4.0_amd64.deb",s:"12.9 MB",note:"deb, rpm and curl script",sha:"sha256:c40b8e19…62dd"}};
-var REG_HARNESS={"claude-code":"Claude Code","codex-cli":"Codex CLI",stella:"Stella","claude-agent-sdk":"Claude Agent SDK",custom:"Custom"};
-S.reg=null; S.regN=0;
-function regTabFor(harness){return harness==="claude-code"?"cc":harness==="codex-cli"?"codex":"sdk";}
-function regNew(){return {slug:"perf-watch",harness:"claude-code",tier:"complex",os:"macos",lang:"ts",tab:"cc",log:0,first:false,polling:false,countdown:false,timers:[]};}
-function regHash(step){if(S.reg&&S.reg.mode==="onboard")return obHash(step);return '#/'+ORG.slug+'/'+ws().slug+'/register'+(step&&step!=="name"?'/'+step:'');}
-function regCancelBtn(){return '<button class="btn" onclick="regCancel()">'+(S.reg&&S.reg.mode==="onboard"&&!PRODUCT?"Exit demo":"Cancel")+'</button>';}
-function regStart(){S.dlg=null;S.dlgArg=null;S.layer=null;S.reg=regNew();regNav("name");}
+var REG_PKG={macos:{f:"Enrollment helper",s:"Preview",note:"Signature checked before opening",sha:"Shown at download"},windows:{f:"Enrollment helper"},linux:{f:"Enrollment helper"}};
+var REG_HARNESS={"claude-code":"Claude Code","codex-cli":"Codex",stella:"Stella",cursor:"Cursor","claude-agent-sdk":"Claude Agent SDK",custom:"Custom"};
+var REG_TABS=[];
+var REG_DETECTED=[{id:"claude-code",version:"2.1.4",registered:true,agent:"Release manager",path:"/usr/local/bin/claude"},{id:"codex-cli",version:"0.115.0",registered:false,path:"/usr/local/bin/codex"},{id:"stella",version:"0.9.434",registered:false,path:"/usr/local/bin/stella"},{id:"cursor",version:"2.6.0",registered:false,path:"/Applications/Cursor.app"}];
+S.reg=null;S.regN=0;
+function regNew(){return {slug:"",harness:null,operator:"marcus",tier:"complex",os:"macos",mode:"register",machineChecks:0,softwareChecks:0,installed:[false,false],busy:false,first:false,countdown:false,paused:false,seconds:5,scenario:"normal",timers:[]};}
+function regTabFor(harness){return harness;}
+function regHash(step){if(S.reg&&S.reg.mode==="onboard")return obHash(step==="verify-run"?"test-run":step);return '#/'+ORG.slug+'/'+ws().slug+'/register/'+(step||"machine");}
+function regStepOf(r){if(!S.reg)S.reg=regNew();var step=r.step||"machine";var aliases={name:"machine",wrap:"machine",run:"verify-run","test-run":"verify-run"};step=aliases[step]||step;return ["machine","software","harness","verify-run","ready"].indexOf(step)>=0?step:"machine";}
+function regStart(){regClear();S.dlg=null;S.layer=null;S.reg=regNew();regNav("machine");}
 function regNav(step){var hh=regHash(step);if(location.hash!==hh)location.hash=hh;else render();}
-function regLater(fn,ms){var t=setTimeout(fn,ms);if(S.reg)S.reg.timers.push(t);return t;}
-function regClear(){if(!S.reg)return;S.reg.timers.forEach(function(t){clearTimeout(t);clearInterval(t);});S.reg.timers=[];S.reg.polling=false;S.reg.countdown=false;}
-function regSlug(){var r=S.reg||regNew();return (r.slug||"").trim().toLowerCase().replace(/[^a-z0-9-]+/g,"-").replace(/^-+|-+$/g,"")||"agent";}
+function regLater(fn,ms){var state=S.reg,t=setTimeout(function(){if(S.reg===state)fn();},ms);if(state)state.timers.push(t);return t;}
+function regClear(){if(!S.reg)return;S.reg.timers.forEach(function(t){clearTimeout(t);clearInterval(t);});S.reg.timers=[];S.reg.busy=false;S.reg.countdown=false;}
+function regSlug(){return ((S.reg&&S.reg.slug)||"new-agent").trim().toLowerCase().replace(/[^a-z0-9-]+/g,"-").replace(/^-+|-+$/g,"")||"new-agent";}
 function regKey(){return ORG.slug+"."+ws().slug.split("-")[0]+"."+regSlug();}
-function regKeyLive(){S.reg.slug=el("regSlug").value;var k=regKey();document.querySelectorAll(".regKeyLive").forEach(function(n){n.textContent=k;});}
-function regStepOf(r){var s=r.step||"name";if(!S.reg)S.reg=regNew();return s==="wrap"||s==="run"?s:"name";}
-function regCancel(){
-  if(S.reg&&S.reg.mode==="onboard")return obExit();
-  var wasLive=!!(S.reg&&S.reg.first);
-  regClear(); S.reg=null;
-  go('#/'+ORG.slug+'/'+ws().slug);
-  act(wasLive?'Registration cancelled. The enrollment was revoked and the smoke run discarded.':'Registration cancelled. Nothing was installed and nothing was written.');
-}
-/* The first frame unlocks: the agent (when it is new) and its smoke run are written once per flow. */
-function obUnlock(){
-  if(!S.reg) return null;
-  var r=S.reg, key=regKey(), w=ws();
-  if(r.runId){for(var i=0;i<RUNS.length;i++){if(RUNS[i].id===r.runId)return RUNS[i];}}
-  if(!agent(key)){
-    AGENTS.push({key:key,name:regSlug().replace(/-/g," ").replace(/^./,function(c){return c.toUpperCase();}),harness:r.harness,harnessLabel:REG_HARNESS[r.harness]||r.harness,
-      ws:w.slug,operator:"marcus",status:"enrolled",tier:"harness",tierNative:"harness",belt:0,beltMode:"full",runs30:1,spend30:"0.02",ratio:0,
-      digest:"sha256:0b7e41c9d2a6f3e8",commit:"pending",budget:"2.00",budgetUsed:0.02,desc:"Registered from Fleet. The smoke session opened the Context PR that adds its definition.",
-      mandates:[],incidents:0,model:r.tier,
-      principal:"prn_01K5RV"+("0"+S.regN).slice(-2)+"M6XKD7A9RZT4BVCNQ",harnessV:"just installed",host:"this-mac",
-      enrolled:true,budgetDay:"20.00",usedDay:"0.02",replay:"fork",cred:"oxa_live_"+regSlug().slice(0,4)+"…0001",
-      issued:"just now",lastUsed:"just now",tokens:1,devKey:"ed25519:new…host",firstFrame:"just now",collector:"1.6.2"});
-    w.agents=(w.agents||0)+1;
-    if(S.obScn) S.obScn.agents.push({key:key,ws:w.slug});
-  }
-  S.regN++;
-  var run={id:"run_01K5RV2N8QH4TZ"+("0"+S.regN).slice(-2)+"X",agent:key,op:"marcus",ws:w.slug,status:"live",turn:1,steps:2,frames:2,cost:"0.02",basis:"client_attested",tier:"harness",
-    grade:"full",task:"smoke",taskTitle:"Installer smoke session",started:"14:02:11",model:r.tier==="light"?"claude-haiku-4-5":"claude-opus-5",cache:0,ratio:0,sealed:null};
-  RUNS.unshift(run); r.runId=run.id;
-  if(S.obScn) S.obScn.runs.push(run.id);
-  return run;
-}
-function regFinish(){
-  if(!S.reg) return;
-  var r=S.reg, key=regKey(), w=ws(), ob=r.mode==="onboard";
-  regClear();
-  /* Under a scenario the frame unlocks in place: navigating would drop the rail. Pressing the
-     button once it is unlocked moves to the scenario's Fleet step instead. */
-  if(ob&&S.scn){
-    var had=!!r.runId, run=obUnlock();
-    if(had){var fs=obScnStepOf("fleet"); if(fs){scnGo(scnHref(S.scn.id,fs));return;}}
-    render();
-    act('First frame received from '+key+'. Oxagen is unlocked; '+run.id+' is live.','gold');
-    return;
-  }
-  var run2=obUnlock();
-  S.reg=null; S.runFilter="all";
-  if(ob) S.firstRun=run2.id;
-  go('#/'+ORG.slug+'/'+w.slug);
-  act(ob?'Welcome to Oxagen. First frame received from '+key+', its run is live on Fleet, and the organization is out of the gate.'
-        :key+' registered — first frame received. Its smoke run is live on Fleet.','gold');
-}
-function regInstall(harness){
-  if(!S.reg) S.reg=regNew();
-  if(harness){ S.reg.harness=harness; act('Signed installer for '+({macos:"macOS",windows:"Windows",linux:"Linux"}[S.reg.os])+' downloaded with the one-time token embedded.'); }
-  S.reg.log=0; S.reg.first=false; regClear();
-  regNav("run");
-}
+function regKeyLive(){S.reg.slug=el("regSlug").value;document.querySelectorAll(".regKeyLive").forEach(function(n){n.textContent=regKey();});var next=el("regTestNext");if(next)next.disabled=!S.reg.slug.trim();}
+function regCancelBtn(){return '<button class="btn" onclick="regCancel()">Save and exit</button>';}
+function regCancel(){regClear();S.reg=null;go('#/'+ORG.slug+'/'+ws().slug);act('Setup paused. Completed machine enrollment and installed software remain.');}
+function regSignalRows(rows,count){return '<ol class="reg-signals" aria-live="polite">'+rows.map(function(row,i){var done=i<count;return '<li class="'+(done?'is-done':'')+'"><span class="reg-light" aria-hidden="true">'+(done?'✓':'○')+'</span><span><b>'+h(row[0])+'</b><small>'+h(done?row[1]:row[2])+'</small></span><span class="reg-signal-word">'+(done?'Verified':'Waiting')+'</span></li>';}).join('')+'</ol>';}
+function regMark(id){var asset=id==="codex-cli"?"codex":id;return '<span class="reg-harness-mark"><img class="reg-mark-light" alt="" src="'+FIXTURES.HARNESS_MARKS[asset].light+'"><img class="reg-mark-dark" alt="" src="'+FIXTURES.HARNESS_MARKS[asset].dark+'"></span>';}
 function regShell(step,inner){
-  var ob=!!(S.reg&&S.reg.mode==="onboard");
-  var steps=ob?[{id:"organization",n:1,lab:"Name the organization"},{id:"wrap",n:2,lab:"Wrap an agent"},{id:"run",n:3,lab:"Start a run"}]
-              :[{id:"name",n:1,lab:"Name the agent"},{id:"wrap",n:2,lab:"Wrap the agent"},{id:"run",n:3,lab:"Wait for the first frame"}];
-  var cur=step==="wrap"?2:step==="run"?3:1, me=PEOPLE.marcus;
-  return '<div class="reg-gate"><div class="reg-top"><div class="brandmark">'+LOGO+'</div><span class="who">'+h(me.email)+'</span>'+
-   '<button class="btn sm" onclick="regCancel()">'+(ob&&!PRODUCT?"Exit demo":"Cancel")+'</button></div>'+
-   '<div class="reg-in"><nav class="reg-steps" aria-label="'+(ob?"Onboarding":"Register an agent")+'">'+steps.map(function(s){
-     var done=s.n<cur;
-     return '<button type="button"'+(done?' class="done" onclick="regNav(\''+s.id+'\')"':'')+(s.n===cur?' aria-current="step"':'')+(s.n>cur?' disabled':'')+'>'+
-      '<span class="sn">'+(done?'✓':s.n)+'</span><span class="slab">'+h(s.lab)+'</span></button>';}).join("")+'</nav>'+
-   inner+
-   '<p class="reg-cap" style="margin-top:22px;text-align:center">'+(ob
-    ?'The operator console does not open until an agent has talked to Oxagen. That first frame is also the installer’s smoke test, so there is one path, not two.'
-    :'Registration does not complete until the agent has talked to Oxagen. That first frame is also the installer’s smoke test, so there is one path, not two. Cancel at any time — nothing is kept until the frame arrives.')+'</p></div></div>';
+ var current=step==="machine"?1:step==="software"?2:3,steps=[{id:"machine",n:1,label:"Enroll the machine"},{id:"software",n:2,label:"Install the tools"},{id:"harness",n:3,label:"Register the agent"}];
+ return '<div class="reg-gate"><div class="reg-top"><div class="brandmark">'+LOGO+'</div><span class="who">'+h(PEOPLE.marcus.email)+'</span>'+regCancelBtn()+'</div><div class="reg-in reg-v5">'+
+ '<div class="reg-preview"><b>V5 wireframe</b><span>Checks, versions, and runs below are simulated. Product changes await approval.</span></div>'+
+ '<nav class="reg-steps" aria-label="Agent setup">'+steps.map(function(s){return '<button '+(s.n===current?'aria-current="step"':'')+(s.n>current?' disabled':'')+' onclick="regNav(\''+s.id+'\')"><span class="sn">'+(s.n<current?'✓':s.n)+'</span><span class="slab">'+h(s.label)+'</span></button>';}).join('')+'</nav>'+inner+
+ '<details class="reg-review"><summary>Preview controls</summary><div class="row"><label for="regScenario">State</label><select id="regScenario" onchange="regPreview(this.value)">'+[['normal','Normal flow'],['error','Connection failure'],['tools-error','Upgrade failure'],['empty','No harnesses detected'],['registered','All harnesses registered'],['waiting','Test prompt pending']].map(function(x){return '<option value="'+x[0]+'"'+(S.reg.scenario===x[0]?' selected':'')+'>'+x[1]+'</option>';}).join('')+'</select><button class="btn sm" onclick="regStart()">Restart preview</button></div></details></div></div>';
 }
-function regName(){
-  var r=S.reg, w=ws(), key=regKey();
-  function opts(list,cur){return list.map(function(o){return '<option'+(cur===o?' selected':'')+'>'+o+'</option>';}).join("");}
-  return '<div><p class="eyebrow">Step 1 of 3</p><h1>Name the agent</h1>'+
-   '<p class="reg-lead">The key is reserved now and is immutable.</p></div>'+
-   '<div class="reg-card"><div class="cb">'+
-   '<div class="grid g2"><div class="field"><label>Slug</label><input id="regSlug" value="'+h(r.slug)+'" aria-label="Slug" oninput="regKeyLive()">'+
-    '<div class="hint">The agent key becomes <span class="mono regKeyLive">'+h(key)+'</span>.</div></div>'+
-   '<div class="field"><label>Workspace</label><input value="'+h(w.name)+' · '+h(w.main)+'" aria-label="Workspace" readonly>'+
-    '<div class="hint">Its definition file lands in <span class="mono">.oxagen/agents/</span> in the main repo.</div></div></div>'+
-   '<div class="grid g2"><div class="field"><label>Harness</label><select aria-label="Harness" onchange="S.reg.harness=this.value;S.reg.tab=regTabFor(this.value);render()">'+opts(["claude-code","codex-cli","stella","claude-agent-sdk","custom"],r.harness)+'</select>'+
-    '<div class="hint">Picks the installer on the next step. It can be changed there.</div></div>'+
-   '<div class="field"><label>Model tier</label><select aria-label="Model tier" onchange="S.reg.tier=this.value">'+opts(["complex","light"],r.tier)+'</select>'+
-    '<div class="hint">The harness calls the model with its own key. The tier is recorded on every frame.</div></div></div>'+
-   '<div class="note">Continue mints a one-time enrollment token for <span class="mono regKeyLive">'+h(key)+'</span>. Nothing is written to Postgres and no PR is opened until the first frame arrives; the smoke session then opens the Context PR that adds the definition file.</div>'+
-   '</div></div>'+
-   '<div class="reg-foot">'+regCancelBtn()+'<div class="sp"><button class="btn primary" onclick="regNav(\'wrap\')">Continue</button></div></div>';
-}
-function regWrap(){
-  var r=S.reg, key=regKey();
-  var osName={macos:"macOS",windows:"Windows",linux:"Linux"};
-  var osFile=REG_PKG[r.os];
-  function osTabs(){return '<div class="reg-os" role="tablist" aria-label="Operating system">'+["macos","windows","linux"].map(function(o){
-    return '<button type="button" role="tab" aria-selected="'+(r.os===o)+'" onclick="S.reg.os=\''+o+'\';render()">'+osName[o]+'</button>';}).join("")+'</div>';}
-  function tok(){return '<div class="reg-tok">one-time enrollment token embedded<br><b>'+REG_TOKEN+'</b><br><span class="dim">expires in 30 min · single use</span></div>';}
-  function earn(rows){return '<div class="reg-earn">'+rows.map(function(x){return '<div><span>'+x[0]+'</span>'+tierBadge(x[1])+(x[2]||'')+'</div>';}).join("")+'</div>';}
-  var panel;
-  if(r.tab==="cc"){
-    panel='<section class="reg-wp" role="tabpanel"><div class="wm"><h3>Claude Code <span class="b" style="color:var(--st-allowed);border-color:color-mix(in srgb,var(--st-allowed) 45%,transparent);background:color-mix(in srgb,var(--st-allowed) 12%,transparent)">recommended</span></h3>'+
-     '<p>The installer writes the hooks, installs the <span class="mono">oxagend</span> collector and the <span class="mono">oxagen-hook</span> binary, registers them to start at login, and enrolls this host with an Ed25519 device key. Nothing is copied or pasted: the one-time enrollment token is embedded in the download.</p>'+
-     earn([["This agent","harness"],["Next rung","gateway"],["Top rung","contained"]])+
-     '<p class="dim">The tier is computed per run from what was actually routed, never from what the adapter can do on paper. Hooks deliver steering and can refuse at four events, client-attested and fail-open. No report can render a stronger word than the tier allows.</p></div>'+
-     '<div class="wa"><p class="eyebrow q">Download</p>'+osTabs()+
-     '<button class="btn primary" style="justify-content:center" onclick="regInstall(\'claude-code\')">Download for '+osName[r.os]+'</button>'+
-     '<div class="dim mono" style="font-size:11px;line-height:1.6">'+osFile.f+'<br>'+osFile.s+' · '+osFile.note+'<br>'+osFile.sha+'</div>'+tok()+
-     '<span class="dim" style="font-size:12px">or run</span><pre>oxagen agent enroll --token '+REG_TOKEN+'</pre></div></section>';
-  } else if(r.tab==="codex"){
-    panel='<section class="reg-wp" role="tabpanel"><div class="wm"><h3>Codex CLI</h3>'+
-     '<p>The same installer, with the Codex profile. It writes <span class="mono">~/.codex/config.toml</span>: the Oxagen MCP server, the notify hook to the collector, and the approval policy routed through Oxagen.</p>'+
-     earn([["This agent","harness",' <span class="b b-q">or observe</span>'],["Next rung","gateway"],["Top rung","contained"]])+
-     '<p class="dim">Which of the two the native tools earn depends on the harness version. On versions that do not expose an approval hook the agent is recorded only, and the run says so.</p></div>'+
-     '<div class="wa"><p class="eyebrow q">Download</p>'+osTabs()+
-     '<button class="btn primary" style="justify-content:center" onclick="regInstall(\'codex-cli\')">Download for '+osName[r.os]+'</button>'+
-     '<div class="dim mono" style="font-size:11px;line-height:1.6">'+osFile.f+'<br>'+osFile.s+' · '+osFile.note+'<br>profile: codex-cli</div>'+tok()+
-     '<span class="dim" style="font-size:12px">or run</span><pre>oxagen agent enroll --harness codex-cli</pre></div></section>';
-  } else {
-    var sdk={
-     ts:{install:"npm i @oxagen/sdk",code:'<span class="k">import</span> { oxagen } <span class="k">from</span> <span class="s">"@oxagen/sdk"</span>;\n<span class="k">const</span> agent = oxagen.agent.wrap({\n  key: <span class="s">"'+h(key)+'"</span>,\n  token: process.env.OXAGEN_AGENT_TOKEN,\n});'},
-     py:{install:"pip install oxagen",code:'<span class="k">from</span> oxagen <span class="k">import</span> oxagen\nagent = oxagen.agent.wrap(\n    key=<span class="s">"'+h(key)+'"</span>,\n    token=os.environ[<span class="s">"OXAGEN_AGENT_TOKEN"</span>],\n)'},
-     go:{install:"go get github.com/oxagen/oxagen-go",code:'<span class="k">import</span> <span class="s">"github.com/oxagen/oxagen-go"</span>\nagent := oxagen.Agent.Wrap(oxagen.WrapOptions{\n    Key:   <span class="s">"'+h(key)+'"</span>,\n    Token: os.Getenv(<span class="s">"OXAGEN_AGENT_TOKEN"</span>),\n})'}}[r.lang];
-    panel='<section class="reg-wp" role="tabpanel"><div class="wm"><h3>SDK agent</h3>'+
-     '<p>Five lines in your own process. <span class="mono">oxagen.agent.wrap({})</span> installs a frame emitter, the checkpoint gate before each turn, and the Oxagen MCP endpoint as the agent’s tool server. Works with the OpenAI Agents SDK, the Claude Agent SDK, Stella, and any custom loop.</p>'+
-     earn([["This agent","harness"],["Next rung","gateway"],["Top rung","contained"]])+'</div>'+
-     '<div class="wa"><p class="eyebrow q">Agent credential</p>'+
-     '<div class="reg-tok">issued once to the operator<br><b>oxa_live_••••••••••••3f7a</b><br><span class="dim">hashed at rest · purpose-locked · revocable</span></div>'+
-     '<p class="dim" style="margin:0;font-size:12px">Set it as <span class="mono">OXAGEN_AGENT_TOKEN</span>. Oxagen mints short-lived run tokens from it at run start. Revoking the credential kills every run token at the next call.</p>'+
-     '<pre><span class="c">$</span> '+h(sdk.install)+'</pre></div>'+
-     '<div class="wfull"><div class="row"><div class="reg-os" role="tablist" aria-label="Language" style="max-width:300px;flex:1">'+["ts","py","go"].map(function(l){
-       return '<button type="button" role="tab" aria-selected="'+(r.lang===l)+'" onclick="S.reg.lang=\''+l+'\';render()">'+({ts:"TypeScript",py:"Python",go:"Go"}[l])+'</button>';}).join("")+'</div>'+
-     '<button class="btn" style="margin-left:auto" onclick="act(\'Five lines copied.\')">Copy the five lines</button></div>'+
-     '<pre>'+sdk.code+'</pre></div></section>';
-  }
-  return '<div><p class="eyebrow">Step 2 of 3</p><h1>'+(S.reg.mode==="onboard"?"Wrap an agent":"Wrap the agent")+'</h1>'+
-   '<p class="reg-lead">The installer carries a one-time enrollment token for <span class="mono">'+h(key)+'</span>, so nothing is copied or pasted.</p></div>'+
-   '<div class="reg-card"><div class="reg-tabs" role="tablist" aria-label="How to wrap the agent">'+REG_TABS.map(function(t){
-     return '<button type="button" role="tab" aria-selected="'+(r.tab===t.id)+'" onclick="S.reg.tab=\''+t.id+'\';render()"><span class="n">'+t.n+'</span><span class="s">'+t.s+'</span></button>';}).join("")+'</div>'+panel+'</div>'+
-   '<div class="reg-foot">'+regCancelBtn()+'<button class="btn" onclick="regNav(\''+(S.reg.mode==="onboard"?"organization":"name")+'\')">Back</button>'+
-   '<div class="sp"><span class="reg-cap">Nothing completes until a frame arrives.</span><button class="btn" onclick="regInstall(null)">I have already installed it — continue</button></div></div>';
-}
-function regLines(){
-  var t=S.reg?S.reg.tab:"cc", hooks, base;
-  if(t==="codex"){hooks="~/.codex/config.toml written · notify hook → collector";base="signed policy bundle fetched · v41 · cached for offline";}
-  else if(t==="sdk"){hooks="oxagen.agent.wrap() attached · frame emitter, checkpoint gate";base="OXAGEN_AGENT_TOKEN accepted · run token minted";}
-  else {hooks="hooks written · ~/.claude/settings.json · 5 events";base="signed policy bundle fetched · v41 · cached for offline";}
-  return [
-   {t:"14:01:48",x:"host enrolled · device key ed25519:7f3a…c19e"},
-   {t:"14:01:52",x:"collector oxagend running · pid 4412 · launchd com.oxagen.oxagend"},
-   {t:"14:01:55",x:hooks},
-   {t:"14:01:58",x:base},
-   {t:"14:02:01",x:"hooks answered · SessionStart 41 ms · tier harness"},
-   {t:"14:02:04",x:"MCP endpoint registered · 0 tools granted yet"},
-   {t:"14:02:11",x:"frame received · seq 0 · agent_start",hit:true}];
-}
-function regRun(){
-  var r=S.reg, key=regKey(), me=PEOPLE.marcus, hl=REG_HARNESS[r.harness]||r.harness;
-  var ob=r.mode==="onboard";
-  var head=ob?'<div><p class="eyebrow">Step 3 of 3</p><h1>Start a run</h1>'+
-   '<p class="reg-lead">The operator console opens the moment the first frame from <span class="mono">'+h(key)+'</span> reaches Oxagen, and lands you on Fleet looking at your own run.</p></div>'
-   :'<div><p class="eyebrow">Step 3 of 3</p><h1>Wait for the first frame</h1>'+
-   '<p class="reg-lead">Registration completes the moment the first frame from <span class="mono">'+h(key)+'</span> reaches Oxagen and lands you on Fleet looking at its run.</p></div>';
-  if(S.state==="error") return head+
-   '<div class="reg-card"><div class="reg-err"><h2>The collector cannot reach Oxagen</h2>'+
-   '<p>The host <span class="mono">'+REG_HOST+'</span> enrolled, but every request to <span class="mono">https://ingest.oxagen.com/v1</span> has been refused for 94 seconds (<span class="mono">ECONNREFUSED</span>, 6 attempts). No frame has arrived, so registration will not complete.</p>'+
-   '<p>Check that outbound 443 to <span class="mono">ingest.oxagen.com</span> is allowed, then run <span class="mono">oxagen agent status</span>.</p>'+
-   '<p class="mono dim" style="font-size:11px">request req_01JQ8F4B1PC7QM · host '+REG_HOST+'</p>'+
-   '<button class="btn" onclick="act(\'Checked again — still refused. Nothing has changed on the host.\')">Check again</button></div></div>'+
-   '<div class="reg-foot">'+regCancelBtn()+'<button class="btn" onclick="regNav(\'wrap\')">Back</button></div>';
-  var lines=regLines(), shown=r.first?lines.length:Math.min(r.log,lines.length-1);
-  var body, foot;
-  if(r.first){
-    body='<div class="reg-card"><div class="ch"><span class="reg-ok"><span class="dot"></span>connected</span><h3>First frame received</h3><span class="sp">14:02:11.402</span></div>'+
-     '<div class="cb"><div class="reg-frames">'+
-     '<div><span class="sq">0</span><span class="ts">14:02:11.402</span><span class="kd">agent_start</span><span class="bd">harness='+h(r.harness)+' · host='+REG_HOST+' · attested=device-key · countersigned</span></div>'+
-     '<div><span class="sq">1</span><span class="ts">14:02:11.418</span><span class="kd">oxagen:run.start</span><span class="bd">agent='+h(key)+' · operator='+h(me.name)+' · tier=harness · steering=none published</span></div></div>'+
-     '<div class="row" style="margin-top:12px">'+tierBadge("harness")+'<span class="b b-q">replay grade: full</span><span class="b b-q">chain intact</span></div>'+
-     '<p class="muted" style="font-size:12.5px;margin:12px 0 0">The tier is computed from what was actually routed, not from what the adapter can do on paper. The hooks answered, so this run is <b>harness</b>: delivered, recorded, client-attested, fail-open.</p></div></div>';
-    foot='<div class="reg-foot">'+regCancelBtn()+''+
-     '<div class="sp"><span class="reg-cap" id="regAuto">'+(r.runId?'Unlocked · <span class="mono">'+h(r.runId)+'</span> is live':'Opening automatically…')+'</span><button class="btn primary" onclick="regFinish()">'+(ob?"Open Oxagen":"Open in Fleet")+'</button></div></div>';
-  } else {
-    body='<div class="reg-card"><div class="ch"><span class="reg-spin"></span><h3>Waiting for the first frame</h3><span class="sp">polling · 1s</span></div>'+
-     '<div class="cb"><div class="row" style="margin-bottom:12px"><span class="b b-q mono">'+h(key)+'</span><span class="b b-q">'+h(hl)+'</span><span class="b b-q">host '+REG_HOST+'</span></div>'+
-     '<div class="reg-log">'+lines.slice(0,shown).map(function(l,i){return '<div class="'+(l.hit?'hit':'')+(i===shown-1?' new':'')+'"><span class="t">'+l.t+'</span><span>'+l.x+'</span></div>';}).join("")+
-     '<div><span class="t">&nbsp;</span><span class="dim">waiting…</span></div></div>'+
-     '<p class="muted" style="font-size:12.5px;margin:12px 0 0">Start '+h(hl)+' in any repository on <span class="mono">'+REG_HOST+'</span>. The installer already ran a one-turn smoke session; if it is still in flight this flips on its own.</p></div></div>';
-    foot='<div class="reg-foot">'+regCancelBtn()+'<button class="btn" onclick="regNav(\'wrap\')">Back</button>'+
-     '<div class="sp">'+(ob&&!S.scn?'<button class="btn ghost" onclick="obGo(\'installer\')">Open the installer</button>':'')+'<span class="reg-cap">There is no Done button — the frame is the completion.</span></div></div>';
-  }
-  return head+body+(ob?obRepoPanel():"")+foot;
-}
-function pRegister(r){
-  if(S.reg&&S.reg.mode==="onboard"){regClear();S.reg=null;}
-  var step=regStepOf(r);
-  if(S.state==="loading") return regShell(step,skeleton());
-  if(S.state==="denied") return regShell(step,deniedState("agent registration","agent.register on "+ws().slug));
-  return regShell(step,step==="name"?regName():step==="wrap"?regWrap():regRun());
-}
-/* the poll that flips on the first frame, and the auto-open countdown after it. Called from render(). */
-function regSchedule(step){
-  if(!S.reg||step!=="run"||S.state!=="loaded") return;
-  var g=S.reg;
-  if(!g.first&&!g.polling){
-    g.polling=true;
-    regLater(function tick(){
-      if(!S.reg) return;
-      var rr=route(), on=(rr.page==="register"&&regStepOf(rr)==="run")||(rr.page==="welcome"&&rr.step==="run");
-      if(!on||S.state!=="loaded"){S.reg.polling=false;return;}
-      S.reg.log++;
-      if(S.reg.log>=6){S.reg.polling=false;S.reg.first=true;render();return;}
-      render(); regLater(tick,780);
-    },520);
-  }
-  if(g.first&&!g.countdown&&!g.runId){
-    g.countdown=true;
-    var n=6, t=setInterval(function(){
-      var e=el("regAuto");
-      if(!e||!S.reg){clearInterval(t);return;}
-      n--;
-      if(n<=0){clearInterval(t);regFinish();return;}
-      e.textContent="Opening automatically in "+n+"…";
-    },1000);
-    g.timers.push(t);
-  }
-}
+function regPreview(value){regClear();S.reg.scenario=value;S.reg.harness=null;S.state="loaded";if(value==="tools-error"){S.reg.machineChecks=3;S.reg.installed=[true,false];S.reg.softwareChecks=1;regNav("software");}else if(value==="empty"||value==="registered"){S.reg.machineChecks=3;S.reg.softwareChecks=2;regNav("harness");}else if(value==="waiting"){S.reg.harness="codex-cli";S.reg.slug="codex-work";regNav("verify-run");}else{S.reg.machineChecks=0;regNav("machine");}}
+function regMachine(){var r=S.reg;return '<p class="eyebrow">Step 1 of 3</p><h1>Enroll this machine</h1><p class="reg-lead">Connect the computer where your agents work.</p>'+ '<div class="reg-card"><div class="ch"><h3>Machine connection</h3><span class="sp">'+h(ws().name)+'</span></div><div class="cb"><p class="muted">Open the enrollment helper on this computer, then keep this page open.</p>'+regSignalRows([['Machine reached',REG_HOST+' is connected.','Waiting for the local helper.'],['Machine identity verified','The device key matches this enrollment.','Waiting for the device response.'],['Enrollment confirmed','This machine belongs to '+ORG.name+'.','Waiting for Oxagen to confirm enrollment.']],r.machineChecks)+
+ (r.scenario==="error"?'<div class="note" role="alert">The machine could not connect. Check its connection, then retry. No agent has been registered.</div>':'')+
+ (r.machineChecks===3?'<p class="reg-progress" role="status">Machine enrolled. Moving to the tool check.</p>':'')+'</div></div><div class="reg-foot"><span class="reg-cap">An enrolled machine can hold several agents.</span><div class="sp"><button class="btn primary" onclick="regEnroll()"'+(r.busy?' disabled':'')+'>'+(r.busy?'Waiting for the machine':r.scenario==="error"?'Retry enrollment':'Enroll this machine')+'</button></div></div>';}
+function regEnroll(){regClear();S.reg.scenario="normal";S.reg.busy=true;S.reg.machineChecks=0;render();[1,2,3].forEach(function(n){regLater(function(){S.reg.machineChecks=n;render();if(n===3)regLater(function(){S.reg.busy=false;regNav("software");},900);},n*950);});}
+function regSoftware(){var r=S.reg,rows=[{name:"Tacho",installed:"Not installed",current:"2.1.1",action:"Install"},{name:"Oxagen",installed:"2.0.9",current:"2.1.1",action:"Upgrade"}];return '<p class="eyebrow">Step 2 of 3</p><h1>Install the tools</h1><p class="reg-lead">Keep Tacho and Oxagen current on '+h(REG_HOST)+'.</p><div class="reg-card"><div class="cb"><div class="reg-software">'+rows.map(function(x,i){var ok=r.installed[i];return '<section class="reg-tool"><div class="row"><h3>'+x.name+'</h3><span class="'+(ok?'reg-ok':'dim')+'">'+(ok?'✓ Up to date':x.action+' needed')+'</span></div><dl><div><dt>Installed</dt><dd class="mono">'+(ok?x.current:x.installed)+'</dd></div><div><dt>Latest release</dt><dd class="mono">'+x.current+'</dd></div></dl><p class="muted">'+(i===0?'Records the agent’s activity.':'Connects this machine to Oxagen.')+'</p><button class="btn" onclick="regInstallTool('+i+')"'+(ok||r.busy?' disabled':'')+'>'+ (ok?'Verified':x.action+' '+x.name)+'</button></section>';}).join('')+'</div>'+ (r.scenario==="tools-error"?'<div class="note" role="alert">The Oxagen upgrade failed. Tacho stays installed. Retry the upgrade to continue.</div>':'')+'<p class="reg-cap" role="status">'+(r.softwareChecks===2?'Both versions verified. Scanning for harnesses.':r.busy?'Waiting for the machine to report its installed versions.':'This screen advances when the machine reports both tools at the current release.')+'</p></div></div><div class="reg-foot"><button class="btn" onclick="regNav(\'machine\')">Back</button><div class="sp"><button class="btn primary" onclick="regInstall()"'+(r.busy?' disabled':'')+'>Install or upgrade both</button></div></div>';}
+function regInstallTool(i){S.reg.busy=true;S.reg.scenario="normal";render();regLater(function(){S.reg.busy=false;S.reg.installed[i]=true;S.reg.softwareChecks=S.reg.installed.filter(Boolean).length;render();if(S.reg.softwareChecks===2)regLater(function(){regNav("harness");},1000);},1100);}
+function regInstall(){regClear();S.reg.busy=true;S.reg.scenario="normal";render();regLater(function(){S.reg.installed[0]=true;S.reg.softwareChecks=S.reg.installed.filter(Boolean).length;render();},1000);regLater(function(){S.reg.installed=[true,true];S.reg.softwareChecks=2;S.reg.busy=false;render();regLater(function(){regNav("harness");},1000);},2200);}
+function regHarness(){var r=S.reg,empty=r.scenario==="empty",all=r.scenario==="registered";return '<p class="eyebrow">Step 3 of 3</p><h1>Choose a harness</h1><p class="reg-lead">Select the harness you want to register on '+h(REG_HOST)+'.</p><div class="reg-card"><div class="ch"><h3>Detected harnesses</h3><span class="sp">'+(empty?'0':REG_DETECTED.length)+' detected</span><button class="btn sm" onclick="S.reg.scenario=\'normal\';render()">Scan again</button></div><div class="cb">'+(empty?'<p>No supported harness was detected. Install a harness on this machine, then scan again.</p>':REG_DETECTED.map(function(x){var registered=x.registered||all;return '<div class="reg-harness '+(r.harness===x.id?'selected':'')+'">'+regMark(x.id)+'<div class="reg-harness-info"><b>'+REG_HARNESS[x.id]+'</b><span class="mono dim">'+x.version+'</span><small class="mono">'+x.path+'</small></div><div class="reg-harness-action">'+(registered?'<span class="reg-ok">✓ Registered</span><small>'+h(x.agent||'Existing agent')+'</small><button class="btn sm" onclick="go(\'#/'+ORG.slug+'/'+ws().slug+'/agents\')">View agents</button>':'<button class="btn" aria-pressed="'+(r.harness===x.id)+'" onclick="S.reg.harness=\''+x.id+'\';S.reg.slug=\''+(x.id==="codex-cli"?'codex':x.id)+'-work\';render()">'+(r.harness===x.id?'Selected':'Select')+'</button><small>Not registered</small>')+'</div></div>';}).join(''))+'</div></div>'+(!r.harness?'':'<div class="reg-card"><div class="cb grid g2"><div class="field"><label for="regSlug">Agent name</label><input id="regSlug" value="'+h(r.slug)+'" oninput="regKeyLive()"><p class="hint mono regKeyLive">'+h(regKey())+'</p></div><div class="field"><label for="regOperator">Responsible operator</label><select id="regOperator" onchange="S.reg.operator=this.value">'+['marcus','priya'].map(function(id){return '<option value="'+id+'"'+(id===r.operator?' selected':'')+'>'+h(PEOPLE[id].name)+'</option>';}).join('')+'</select><p class="hint">This person is accountable for the agent.</p></div></div></div>')+'<div class="reg-foot"><button class="btn" onclick="regNav(\'software\')">Back</button><div class="sp"><button id="regTestNext" class="btn primary" onclick="regNav(\'verify-run\')"'+(!r.harness||!r.slug.trim()?' disabled':'')+'>Continue to test run</button></div></div>';}
+function regPrompt(){return 'Confirm that this '+(REG_HARNESS[S.reg.harness]||'agent')+' run reaches Oxagen. Reply with a short hello. Do not change any files. Setup reference: OX-7QK4.';}
+function regRun(){var r=S.reg;if(!r.harness)return regHarness();return '<p class="eyebrow">Step 3 of 3</p><h1>Send a test prompt</h1><p class="reg-lead">Open '+h(REG_HARNESS[r.harness])+' on '+h(REG_HOST)+' and send this prompt.</p><div class="reg-card"><div class="ch">'+regMark(r.harness)+'<h3>'+h(REG_HARNESS[r.harness])+'</h3><span class="sp">Awaiting test run</span></div><div class="cb"><p>Responsible operator: <b>'+h(PEOPLE[r.operator].name)+'</b></p><pre id="regTestPrompt" class="reg-prompt">'+h(regPrompt())+'</pre><button class="btn primary" onclick="copyPath(regPrompt())">Copy test prompt</button>'+regSignalRows([['Selected harness seen','Matched to this machine and harness.','Waiting for '+REG_HARNESS[r.harness]+'.'],['Test prompt received','Matched to this setup request.','Waiting for the prompt to reach Oxagen.'],['Run recorded','The run is available in Fleet.','Waiting for the run receipt.']],r.first?3:0)+'<div class="note">The agent stays unregistered until Oxagen receives this test run. A running collector or another harness’s activity does not complete this step.</div></div></div><div class="reg-foot"><button class="btn" onclick="regNav(\'harness\')">Back</button><span class="reg-cap">Keep this page open while you send the prompt.</span></div><div class="reg-preview-event"><span>Wireframe event</span><button class="btn sm" onclick="regReceive()">Preview matching run received</button></div>';}
+function regReceive(){if(!S.reg.harness)return;S.reg.first=true;S.reg.seconds=5;S.reg.paused=false;obUnlock();regNav("ready");}
+function obUnlock(){var r=S.reg;if(!r||!r.first)return null;if(r.runId)return RUNS.find(function(x){return x.id===r.runId;});var key=regKey(),w=ws();S.regN++;if(!agent(key)){AGENTS.push({key:key,name:r.slug,harness:r.harness,harnessLabel:REG_HARNESS[r.harness],ws:w.slug,operator:r.operator,status:"enrolled",tier:"observe",tierNative:"observe",belt:0,beltMode:"full",runs30:1,spend30:"0.02",ratio:0,digest:"preview",commit:"pending",budget:"2.00",budgetUsed:0.02,desc:"Registered after its test prompt reached Oxagen.",mandates:[],incidents:0,model:"complex",principal:"prn_preview_"+S.regN,harnessV:REG_DETECTED.find(function(x){return x.id===r.harness;}).version,host:REG_HOST,enrolled:true,budgetDay:"20.00",usedDay:"0.02",replay:"inspect",cred:"",tokens:0});w.agents=(w.agents||0)+1;}var run={id:"run_01K5RV2N8QH4TZ"+("0"+S.regN).slice(-2)+"X",agent:key,op:r.operator,ws:w.slug,status:"live",turn:1,steps:1,frames:3,cost:"0.02",basis:"client_attested",tier:"observe",grade:"partial",task:"setup",taskTitle:"Agent connection check",started:"just now",model:"recorded by harness",cache:0,ratio:0,sealed:null};RUNS.unshift(run);r.runId=run.id;return run;}
+function regReady(){var r=S.reg;if(!r.first)return regRun();return '<p class="eyebrow">Setup complete</p><h1>Your agent is registered</h1><p class="reg-lead">Oxagen received the test prompt from '+h(REG_HARNESS[r.harness])+'.</p><div class="reg-card"><div class="cb">'+regSignalRows([['Machine enrolled',REG_HOST,''],['Harness matched',REG_HARNESS[r.harness],''],['Test run received',r.runId,'']],3)+'<p><b>'+h(r.slug)+'</b> is assigned to '+h(PEOPLE[r.operator].name)+'.</p></div></div><div class="reg-foot"><button class="btn" onclick="regPauseCountdown()">'+(r.paused?'Resume countdown':'Pause countdown')+'</button><div class="sp"><p id="regAuto" class="reg-cap" role="status" aria-live="polite">'+(r.paused?'Automatic navigation is paused.':'Mission Control opens in '+r.seconds+' seconds. Your run will be visible in Fleet.')+'</p><button class="btn primary" onclick="regFinish()">Launch Mission Control</button></div></div>';}
+function regPauseCountdown(){S.reg.paused=!S.reg.paused;render();}
+function regFinish(){if(!S.reg||!S.reg.first)return;var r=S.reg,run=r.runId;regClear();S.reg=null;S.firstRun=run;S.runFilter="all";go('#/'+ORG.slug+'/'+ws().slug);act('Agent registered. Your test run is visible in Fleet.');}
+function regName(){return regMachine();}
+function regWrap(){return regMachine();}
+function regPageBody(step){return step==="machine"?regMachine():step==="software"?regSoftware():step==="harness"?regHarness():step==="ready"?regReady():regRun();}
+function pRegister(r){if(S.reg&&S.reg.mode==="onboard"){regClear();S.reg=null;}var step=regStepOf(r);if(S.state==="loading")return regShell(step,skeleton());if(S.state==="denied")return regShell(step,deniedState("agent setup","registration in "+ws().name));if(S.state==="error")S.reg.scenario="error";return regShell(step,regPageBody(step));}
+function regSchedule(step){if(!S.reg||!S.reg.first||regStepOf({step:step})!=="ready"||S.reg.countdown||S.state!=="loaded")return;var r=S.reg;r.countdown=true;var timer=setInterval(function(){if(S.reg!==r){clearInterval(timer);return;}if(r.paused)return;r.seconds--;if(r.seconds<=0){clearInterval(timer);regFinish();return;}var node=el("regAuto");if(node)node.textContent='Mission Control opens in '+r.seconds+' seconds. Your run will be visible in Fleet.';},1000);r.timers.push(timer);}
 
 /* ============================== Onboarding demo (W1 — sixty seconds to governed) ==============================
    Sign-up, verification, log-in and the three-step gate, reachable from the account dialog, the user menu and ⌘K.
@@ -12400,15 +12201,16 @@ var OB_STEPS=[
  {id:"signup",lab:"Sign up",sub:"Create the account — Google, GitHub, or email and password"},
  {id:"verify",lab:"Verify email",sub:"Six-digit code, good for ten minutes"},
  {id:"organization",lab:"Name the organization",sub:"Tenant, namespace and the first workspace"},
- {id:"wrap",lab:"Wrap an agent",sub:"Claude Code, Codex CLI or an SDK agent"},
- {id:"run",lab:"Start a run",sub:"The first frame is what opens Oxagen"}];
+ {id:"machine",lab:"Enroll the machine",sub:"Verify its connection and machine identity"},
+ {id:"software",lab:"Install the tools",sub:"Install or upgrade Tacho and Oxagen"},
+ {id:"harness",lab:"Register the agent",sub:"Select a detected harness and verify a matching test run"}];
 var OB_ALT=[
  {id:"login",lab:"Log in",sub:"Returning operator, then two-factor"},
  {id:"forgot",lab:"Forgot password",sub:"Reset link, good for sixty minutes"},
  {id:"reset",lab:"Set a new password",sub:"Logs out every other device"},
  {id:"invite",lab:"Accept an invitation",sub:"Joining an organization someone else created"},
  {id:"installer",lab:"The installer",sub:"The signed package's own screens: download, install, connected"}];
-var OB_GATE={organization:1,wrap:1,run:1};
+var OB_GATE={installer:1,organization:1,wrap:1,run:1,machine:1,software:1,harness:1,"test-run":1,ready:1};
 var OB_ICON={
  google:'<svg width="15" height="15" viewBox="0 0 18 18" aria-hidden="true"><path fill="#4285F4" d="M17.6 9.2c0-.6-.05-1.2-.16-1.8H9v3.4h4.8a4.1 4.1 0 0 1-1.8 2.7v2.2h2.9c1.7-1.6 2.7-3.9 2.7-6.5z"/><path fill="#34A853" d="M9 18c2.4 0 4.5-.8 6-2.2l-2.9-2.2c-.8.5-1.8.9-3.1.9-2.4 0-4.4-1.6-5.1-3.8H.9v2.3A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.9 10.7a5.4 5.4 0 0 1 0-3.4V5H.9a9 9 0 0 0 0 8z"/><path fill="#EA4335" d="M9 3.6c1.3 0 2.5.5 3.4 1.3l2.6-2.6A9 9 0 0 0 .9 5l3 2.3C4.6 5.2 6.6 3.6 9 3.6z"/></svg>',
  github:'<svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 .4a7.6 7.6 0 0 0-2.4 14.8c.38.07.52-.16.52-.36v-1.3c-2.1.46-2.55-1-2.55-1-.35-.88-.85-1.12-.85-1.12-.7-.47.05-.46.05-.46.77.06 1.17.79 1.17.79.68 1.17 1.79.83 2.23.64.07-.5.27-.83.48-1.03-1.68-.19-3.45-.84-3.6-3.73 0-.82.3-1.5.77-2.02-.08-.19-.33-.96.07-2 0 0 .63-.2 2.07.77a7.1 7.1 0 0 1 3.77 0c1.44-.97 2.07-.77 2.07-.77.4 1.04.15 1.81.07 2 .48.52.77 1.2.77 2.02 0 2.9-1.77 3.53-3.46 3.72.28.24.52.7.52 1.42v2.1c0 .2.14.44.52.36A7.6 7.6 0 0 0 8 .4z"/></svg>',
@@ -12452,7 +12254,7 @@ function obFleetBanners(w,fr){
    '<div class="grow"><b>'+h(w.name)+' is provisional until '+h(w.provisional.until)+'.</b>Runs record and spend counts. Steering, context records and agent definitions stay off until a main repo is bound, because there is nowhere to publish them to.</div>'+
    '<button class="btn sm" onclick="obBind()">Bind '+h(w.main)+'</button></div>';
   if(fr) out+='<div class="banner" style="margin-bottom:14px"><span class="b b-q" style="flex:none">first run</span>'+
-   '<div class="grow"><b>One run so far.</b>This workspace has recorded the installer’s smoke session, <span class="mono">'+h(fr.id)+'</span> from <span class="mono">'+h(fr.agent)+'</span>, and nothing else. The tiles below read off that run.</div>'+
+   '<div class="grow"><b>One run so far.</b>This workspace has recorded your test run, <span class="mono">'+h(fr.id)+'</span> from <span class="mono">'+h(fr.agent)+'</span>, and nothing else. The tiles below read off that run.</div>'+
    '<button class="btn sm" onclick="S.firstRun=null;render()">Show the seeded fleet</button></div>';
   return out;
 }
@@ -12736,7 +12538,9 @@ function pWelcome(r){
     if(!S.reg||S.reg.mode!=="onboard"){regClear();S.reg=obNew();}
     if(S.state==="loading") return regShell(step,skeleton());
     if(S.state==="denied") return regShell(step,deniedState("onboarding","org.create for "+PEOPLE.marcus.email));
-    return regShell(step,step==="organization"?obOrg():step==="wrap"?regWrap():regRun());
+    if(step==="organization")return regShell(step,obOrg());
+    var setupStep=step==="installer"?"software":regStepOf({step:step});
+    return regShell(setupStep,regPageBody(setupStep));
   }
   if(step==="installer") return obInstaller();
   if(step==="verify") return obVerify();

@@ -58,9 +58,9 @@ export const PAGES = [
   { id: "billing",           title: "Billing",                     group: "Organization", hash: `#/${ORG}/billing`,                                        states: ALL },
   { id: "audit",             title: "Audit",                       group: "Organization", hash: `#/${ORG}/audit`,                                          states: ALL },
   // register an agent (the gate Fleet opens; three steps)
-  { id: "register-name",     title: "Register agent · Name",       group: "Register",     hash: `#/${ORG}/core-platform/register/name`,                    states: ["loaded", "loading", "denied"] },
-  { id: "register-wrap",     title: "Register agent · Wrap",       group: "Register",     hash: `#/${ORG}/core-platform/register/wrap`,                    states: ["loaded", "loading", "denied"] },
-  { id: "register-run",      title: "Register agent · First run",  group: "Register",     hash: `#/${ORG}/core-platform/register/run`,                     states: ["loaded", "loading", "error", "denied"] },
+  { id: "register-name",     title: "Register agent · Machine",       group: "Register",     hash: `#/${ORG}/core-platform/register/machine`,                    states: ["loaded", "loading", "denied"] },
+  { id: "register-wrap",     title: "Register agent · Software",       group: "Register",     hash: `#/${ORG}/core-platform/register/software`,                    states: ["loaded", "loading", "denied"] },
+  { id: "register-run",      title: "Register agent · Harness",  group: "Register",     hash: `#/${ORG}/core-platform/register/harness`,                     states: ["loaded", "loading", "error", "denied"] },
   // sign-in flows (Appendix F: seven of them, not counted as pages) and the onboarding gate
   { id: "signup",            title: "Sign up",                     group: "Auth",         hash: "#/welcome/signup",                                        states: ["loaded", "loading", "error"] },
   { id: "verify-email",      title: "Verify email",                group: "Auth",         hash: "#/welcome/verify",                                        states: ["loaded", "loading", "error"] },
@@ -70,8 +70,8 @@ export const PAGES = [
   { id: "reset-password",    title: "Reset password",              group: "Auth",         hash: "#/welcome/reset",                                         states: ["loaded", "loading", "error", "denied"] },
   { id: "accept-invitation", title: "Accept invitation",           group: "Auth",         hash: "#/welcome/invite",                                        states: ["loaded", "loading", "error", "denied"] },
   { id: "onboarding-organization", title: "Onboarding · Organization", group: "Onboarding", hash: "#/welcome/organization",                              states: ["loaded", "loading", "error", "denied"] },
-  { id: "onboarding-wrap",   title: "Onboarding · Wrap an agent",  group: "Onboarding",   hash: "#/welcome/wrap",                                          states: ["loaded", "loading", "denied"] },
-  { id: "onboarding-run",    title: "Onboarding · First run",      group: "Onboarding",   hash: "#/welcome/run",                                           states: ["loaded", "loading", "error", "denied"] },
+  { id: "onboarding-wrap",   title: "Onboarding · Machine",  group: "Onboarding",   hash: "#/welcome/machine",                                          states: ["loaded", "loading", "denied"] },
+  { id: "onboarding-run",    title: "Onboarding · Harness",      group: "Onboarding",   hash: "#/welcome/harness",                                           states: ["loaded", "loading", "error", "denied"] },
   { id: "installer",         title: "Installer",                   group: "Onboarding",   hash: "#/welcome/installer",                                     states: ["loaded", "error"] },
 ];
 

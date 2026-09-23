@@ -1,71 +1,38 @@
-# Onboarding · Wrap an agent
+# Onboarding machine enrollment
 
-| | |
-|---|---|
-| Route | `#/welcome/wrap` |
-| Scope | onboarding gate |
-| Spec | §14 Mission Control; Appendix F onboarding (the gate) |
-| Design | `mockups/src/engine.js` → `pWelcome(r) → regWrap()` in onboard mode, built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
-| States | loaded · loading · access denied |
-| Storybook | `Oxagen / … / onboarding-wrap`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
-| Audit | `onboarding-wrap.audit-prompt.md` |
+After organization setup, onboarding uses the shared machine-first sequence.
 
-## Job
+[Open the interactive wireframe](../missioncontrol.html#/welcome/machine).
 
-Step 2 of 3 of the gate: wrap the first agent. This is the Register agent wrap screen in onboard mode, carrying the enrollment token for the organization’s first agent key, `a-intel.core.release-manager`.
+## Approval boundary
 
-## What is on the page
+This is the v5 proposal requested on September 22, 2026. It requires Mac’s approval before the product implements this onboarding flow. The existing v4 snapshot is unchanged. The wireframe simulates receipts, software versions, and harness detection. Its timers do not represent backend verification.
 
-**Header.** Eyebrow “Step 2 of 3”, h1 “Wrap an agent”, lead “The installer carries a one-time enrollment token for `a-intel.core.release-manager`, so nothing is copied or pasted.”
-Actions (card footer): **Cancel** · **Back** · caption “Nothing completes until a frame arrives.” · **I have already installed it — continue**. The gold action is **Download for <OS>** inside the Claude Code and Codex CLI panels. The SDK panel has no gold action.
+## Shared sequence
 
-- Harness tabs (`role=tablist`, “How to wrap the agent”): **Claude Code** “one click · harness” · **Codex CLI** “one click · harness” · **SDK agent** “five lines · harness”. Claude Code is preselected (the onboarding record’s harness is `claude-code`).
-- The three panels are the ones in `register-wrap.md`, word for word, with the key `a-intel.core.release-manager` in the SDK code: Claude Code (h3 with “recommended”, the installer copy, the tier ladder This agent `harness` · Next rung `gateway` · Top rung `contained`, the tier sentence, the Download column with OS tabs macOS · Windows · Linux, **Download for macOS**, the `REG_PKG` package line, the token box with `oxe_1time_7QK4M2NV9XR3T8ZP` and “expires in 30 min · single use”, and `oxagen agent enroll --token …`); Codex CLI (the `~/.codex/config.toml` copy, “or observe” on the ladder, “profile: codex-cli”, `oxagen agent enroll --harness codex-cli`); SDK agent (the five-line copy, the “Agent credential” box, the install line, language tabs TypeScript · Python · Go, **Copy the five lines**, the code).
+1. Enroll the machine. Connection, device identity, and server enrollment checks turn green with a checkmark and status text. Advance when all three are verified.
+2. Check Tacho and Oxagen separately. Show installed and latest versions, with Install or Upgrade for either tool. Advance only after the machine reports both current versions.
+3. Detect harnesses on that machine. Show SVG marks, versions, paths, and registration state. Select an unregistered harness, name the agent, and assign its responsible human operator. Open that harness and submit the displayed test prompt. Keep registration pending until the server correlates the resulting run to this organization, workspace, machine, harness, and setup request. Activity from another harness or an old run cannot complete setup.
+4. Show registration success and the received run. Beside **Launch Mission Control**, announce: “Mission Control opens in 5 seconds. Your run will be visible in Fleet.” Count down, allow Pause countdown, and let the button navigate immediately. Fleet shows that received run.
 
-**Shell.** No sidebar and no topbar, so this page has no approvals button and no approvals drawer. The gate shell (`regShell` in onboard mode): brandmark, `marcus@a-intel.example`, **Cancel**; the rail (`nav` labelled “Onboarding”) with step 1 Name the organization done (✓, a button back), step 2 Wrap an agent current, step 3 Start a run disabled; the caption “The operator console does not open until an agent has talked to Oxagen. That first frame is also the installer’s smoke test, so there is one path, not two.” The phone layout is the same card at full width.
+Machine enrollment persists independently of agent registration. Save and exit preserves completed enrollment and installed software. Retrying an installation preserves the other tool. The UI does not claim to remove local software when someone exits.
 
-## Data sources
+## Wireframe controls
 
-Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBacked` in production). From `docs/implementation-plan.md` §3; the *mockup collection* column names the file in `mockups/fixtures/` (as `FIXTURES.<NAME>`) or the constant in `mockups/src/engine.js` that the design renders from.
+Open **Preview controls** to inspect a connection failure, upgrade failure, no detected harnesses, already registered harnesses, or a pending test. The separate **Preview matching run received** button simulates the server signal. It is a design-review control, not a product action.
 
-| Element | Mockup collection | Target store (spec) | Backing today (repo) | Status |
-|---|---|---|---|---|
-| Enrollment token, harness tab | `S.reg` (mode `onboard`, `obNew`), `REG_TABS`, `REG_TOKEN` | `control.enrollments` | `tacho.hosts`; `tacho.enrollment.create` | ✅ |
-| Signed packages | `REG_PKG` | release artefacts (signed) | release pipeline | 🟡 |
-| Tier ladder | `TIERS`, `tierBadge` | `iam.principals.tier` (per run, from what was routed) | `tacho` run records | ✅ |
+## Implementation conditions
 
-## Functionality
+- Start machine enrollment through a small local enrollment helper before requiring either full CLI installation. Its download and launch transport need implementation after approval. A browser alone cannot attest a machine.
+- Reuse the approved runtime and harness IAM identities. Confirm the device key for an existing enrollment. Do not deduplicate by hostname.
+- The displayed software versions are fixtures. Production must use the release manifest and the machine’s reports, with a retry state when either is unavailable.
+- The responsible operator is explicit and editable. A machine’s operating-system username is not the operator.
+- The first test prompt is a connection check. Its receipt does not prove governance enforcement or the truth of agent output.
+- Match the test run with a scoped, expiring enrollment reference, not a free-text substring alone. Reject stale, replayed, foreign-machine, and wrong-harness receipts.
+- Keep the existing organization setup before this shared machine-first sequence. Both onboarding and Register an agent use the same sequence.
+- Light and dark themes use retained SVG brand variants. Unknown harnesses keep their names and a neutral icon. Green checks also carry shape and text.
+- Mobile stacks the software cards and harness actions. Inputs and buttons remain usable without horizontal scrolling.
 
-- Identical to `register-wrap.md`. **Download for <OS>** records the harness, toasts “Signed installer for <OS> downloaded with the one-time token embedded.”, and moves to Start a run. **I have already installed it — continue** moves there without changing the harness.
-- **Back** returns to Name the organization, not to an agent name step. Either Cancel (`obExit`) clears the onboarding state and goes to Fleet.
-- The tier ladder shows all four tiers as real: `harness` for this agent, `gateway` and `contained` as the next rungs, and `observe` as the fallback for a Codex CLI without an approval hook.
+## Verification for approval
 
-## States
-
-- **loaded**: the page as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell), Claude Code tab and macOS selected.
-- **loading**: the shell and the rail stay. The card is replaced by the skeleton (four tile blocks and a panel of seven rows), so you keep your bearings.
-- **access denied**: “You cannot see onboarding”, then “Your roles on Anderson Intelligence Corp. do not include `org.create for marcus@a-intel.example`. An organization owner can grant it; the grant is a governed action and lands in the audit record with your name on it.” Actions: **Request access** (gold, opens dialog `request-access`), **Back to Fleet**. Below: *Signed in as* “Marcus Bell · workspace.owner · core-platform”, *Needed* “org.create for marcus@a-intel.example”, *Decided by* “pol_v41 · deny wins over every allow”.
-
-## Mobile
-
-The card fills the width with 16 px gutters. The two panel columns stack. Buttons are full width and at least 44 px tall. Code blocks scroll sideways inside the card.
-
-## Permissions
-
-- Read: `authenticated`
-- Writes (each a governed action recorded in Audit): `enrollment.create`
-
-## Backend gaps this page depends on
-
-- none
-
-## Rules every build of this page must keep
-
-- Every badge that describes trust (enforcement tier, replay grade, attestation, cost basis) shows the recorded value and nothing stronger. A client-attested window is labelled as such.
-- Every number that is money shows its basis. Headers are rollups of the rows beneath them, never typed twice.
-- Every explanation is a chain of links to frames, records, and commits, not a summary.
-- Exactly one gold action per screen. Gold is identity and never encodes state. State reads as a dot and a word, so it survives greyscale.
-- A not-loaded state replaces the page body, never the shell. Stub controls say what the product would do. Nothing silently does nothing.
-- A count in navigation appears only where something waits on a person.
-- Headings are plain nouns: no heading carries a comma, a mid-dot, or a not/never contrast, and subtext under a heading is one sentence or nothing.
-- Nothing on the page mentions a witness, a proof, a verdict, a definition of done, a trust or spend score, or a per-run price.
+Check the normal flow, each tool upgraded independently, failed enrollment, failed upgrade, absent harnesses, registered harnesses, wrong or missing test signal, countdown pause, immediate navigation, and dark/light mobile layouts before implementing the proposal.
