@@ -33,6 +33,11 @@ Left column:
 Right column:
 - **Price list**: Free (every governance feature, an included monthly allowance, 30 days of evidence, 3 seats); Governed actions, blocks of 10,000 ($30.00 per block at the published rate); Negotiated agreement (the same four figures, per organization); Invoice billing (never capped, overage invoiced at the contracted rate at period end); Evidence retention (13 months included on paid plans, then $0.10 per GB-month); Tokens Oxagen buys for you (at cost, no markup, capped); Enterprise, annual (from $60,000 per year). A footer: no credits, no resellers, no revenue dashboard; the free tier is the whole product, limited by retention and seats, never by features or volume.
 - **Billable units**: **Priced** (a governed action, with its receipt in the chain), **Reported** (sealed runs, tokens by class, retained evidence), **Free** (denials, runs Oxagen halted before a model call, runs of the in-app agent).
+- **Auto top-up** (below Billable units): a switch "Buy more automatically when this period's allowance runs out", a **Blocks per top-up** field (1 to 100) with the governed actions it buys, the saved payment method it charges or a line saying the next purchase saves one, the last top-up this month and its status (paid, open with its invoice under Invoices, or failed), and **Save**. An owner or admin can change it; everyone else reads it with a line naming who can.
+- **Buy governed actions**: a **Governed actions** quantity in blocks of 10,000, the total at the organization's contracted rate, a note that Checkout saves the card, and **Continue to Checkout** (opens Stripe Checkout). An owner or a billing member can buy; everyone else sees the line naming who can. An organization billed by invoice does not buy blocks and is told so.
+- **Token balance**: the balance, the basis "Pays for the tokens Oxagen buys for the in-app agent, at cost with no markup. The balance is the cap.", preset top-up amounts, a whole-dollar amount with its minimum, and **Continue to Checkout**. When the balance is spent, a line says the in-app agent's turns on Oxagen's model key stop until a top-up lands. A top-up needs a Build plan or above.
+
+These three panels are kept from the shipped Billing page (Mac, 2026-09-23). The rendered mock does not draw them yet. This section is their design. None of their buttons is gold. The token balance is the cap on the price list's "Tokens Oxagen buys for you" row. It buys nothing else and prices nothing, so the footer's "no credits" still holds.
 
 **Dialogs this page opens:** `plan` (a Plan select with Team and Enterprise, a note, **Change plan**), `incident` (error state), `request-access` (denied state).
 
@@ -48,6 +53,8 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 | Governed-action meter, blocks, contracted rate | `BILLING.billable`, `BILLING.tier2`, `meters` | `billing.gau_buckets`, `billing.gau_settlements`, `billing.contract_terms` (§12.1 as amended, App. A.8) | the same tables on `macanderson/oxagen` `app-rebuild` | 🟡 billing rebuild (G13) |
 | Reported meters: sealed runs, tokens, halted runs, in-app runs | `BILLING.meters` | `cost.run_totals`, `cost.daily_totals` | ClickHouse `token_usage` | 🟡 |
 | Retained evidence | `BILLING.retention` | evidence store size by organization | `evidence.retention_policy_versions` | 🟡 |
+| Auto top-up, block purchase | none (kept panels, not drawn) | `billing.gau_buckets` + Stripe Checkout | `set_auto_topup`, `purchase_gau_bucket` | ✅ |
+| Token balance | none (kept panel, not drawn) | usage-credit balance + Stripe Checkout | `purchase_credits` and the balance read | ✅ |
 | Onboarding discount | `BILLING.discount` | deferred (spec §20, the 7-day offer) | none | ❌ deferred |
 
 ## Functionality
@@ -58,11 +65,12 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 - Tokens are never marked up. The customer's own model spend is on Spend; the Tokens line here is reported at zero. Tokens Oxagen buys for the organization's own model routes are at cost and capped.
 - Stripe holds the plan and the invoice; Oxagen holds the meter. A row of Invoices opens the Stripe-hosted invoice. **Change plan** stages the change in Stripe (`start_subscription_upgrade`, kept in rev1); Enterprise is annual and negotiated per organization.
 - The Total is rounded to cents once, half-even, at the statement line.
+- **Buy governed actions** buys blocks through Stripe Checkout (`purchase_gau_bucket`) at the contracted rate. **Auto top-up** (`set_auto_topup`) buys the chosen number of blocks on the saved card when the period's allowance runs out. **Token balance** tops up the cap on tokens Oxagen buys for the in-app agent (`purchase_credits`). Each is a governed action, and each Checkout return shows a one-line banner saying what lands once Stripe confirms the payment.
 
 ## States
 
 - **loaded**: the page as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell).
-- **empty**: "Nothing billable yet". You pay per governed action: a call Oxagen decided, delivered and recorded. The free tier has every governance feature on, an included monthly allowance, thirty days of evidence and three seats. Action: **Back to Fleet**.
+- **empty**: "Nothing billable yet". You pay per governed action: a call Oxagen decided, delivered and recorded. The free tier has every governance feature on, an included monthly allowance, thirty days of evidence and three seats. Action: **Back to Fleet**. Below the empty panel, **Buy governed actions** stays so an organization can buy its first block.
 - **loading**: the shell stays; the page body is replaced by the skeleton (four tile blocks and a panel of seven rows), so you keep your bearings.
 - **error**: "Billing could not be loaded". The control plane answered `502 stripe_unreachable`. Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by Oxagen. Actions: **Try again**, **Open an incident**; a trace id, region and timestamp line.
 - **access denied**: "You cannot see billing". Your roles on the organization do not include `org.billing` (plan and invoices are readable only by a finance role). An organization owner can grant it; the grant is a governed action and lands in the audit record with your name on it. Actions: **Request access** (opens `request-access`), **Back to Fleet**. Below: *Signed in as* (name, role), *Needed* (the permission), *Decided by* (`pol_v41`, deny wins over every allow).
@@ -74,7 +82,7 @@ The top bar collapses to hamburger, current crumb, search glyph, notifications, 
 ## Permissions
 
 - Read: `org.billing`
-- Writes (each a governed action recorded in Audit): `billing.plan.change`
+- Writes (each a governed action recorded in Audit): `billing.plan.change`; buying blocks and topping up the token balance (owner or billing member); changing auto top-up (owner or admin)
 
 ## Backend gaps this page depends on
 

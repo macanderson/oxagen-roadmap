@@ -12,7 +12,7 @@ You are auditing the **Billing** page of Oxagen (`#/a-intel/billing`) for confor
 
 1. The page spec: `pages/billing.md` (read it first, in full).
 2. The design, rendered: the `billing` stories in Storybook (`npm run storybook`), one per state (loaded, empty, loading, error, access denied), desktop and mobile; or `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` in a browser or with Playwright.
-3. The product spec for context: `docs/specs/mission-control/spec.md` §12.1 as amended by ADR-055 (the governed action is the billable unit), §14 (Mission Control), Appendix A.8 (billing tables), Appendix E (contracts), Appendix F (the pages that survive); `docs/adr/ADR-055-gau-buckets-and-contracted-rates.md`; the data mapping in `docs/implementation-plan.md` §3.
+3. The product spec for context: `docs/mission-control-spec.md` §12.1 as amended by ADR-055 (the governed action is the billable unit), §14 (Mission Control), Appendix A.8 (billing tables), Appendix E (contracts), Appendix F (the pages that survive); `docs/adr/ADR-055-gau-buckets-and-contracted-rates.md`; the data mapping in `docs/implementation-plan.md` §3.
 4. The build under audit: `{{APP_ROOT}}` (the Next.js app), served at `{{APP_URL}}`. Route under audit: `/a-intel/billing`.
 
 ## Procedure
