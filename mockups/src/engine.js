@@ -7608,7 +7608,10 @@ function stgLibraryAll(w,only){
    '<div class="panel"><div class="panel-h"><h3>'+(only?h(STG_LIB_LABEL[only]||only):'Everything written down')+'</h3>'+
    '<span class="b b-q" style="margin-left:auto">'+L.length+'</span>'+
    '<button class="btn sm" onclick="stgTab(\'assignments\')">Who receives it</button></div>'+
-   '<div class="tw"><table><thead><tr><th>Item</th><th>Kind</th><th>Force</th><th>Scope</th><th>Compiles to</th><th>Token cost</th><th>Source</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>';
+   '<div class="tw"><table><thead><tr><th>Item</th><th>Kind</th><th>Force</th><th>Scope</th><th>Compiles to</th><th>Token cost</th><th>Source</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>'+
+   /* The two planes (steering.md "Two planes that never merge"), said on the page itself: the
+      Library is text, and a gate is decided somewhere else. */
+   '<div class="note" style="margin-top:14px">Steering is what the model reads: advisory, ranked, budgeted, and it may be dropped. Gating is what gets refused: deterministic, never budgeted, never ranked. The Library, Assignments, and the Compiler are the text plane. Gates is the gate plane.</div>';
 }
 
 /* ---- Assignments: which agent receives what ----

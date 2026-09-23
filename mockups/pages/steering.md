@@ -56,6 +56,7 @@ The All shelf is one table over `stgLibraryItems()`, the list every count on the
 - A lead note, verbatim: “A shelf is a filter on this list, never a second list. The assembler reads exactly these items, in this order, and decides per run which of them a given agent is shown. Assignments says who receives what; the compiler shows one decision in full.”
 - **Everything written down** panel, badged with the item count, with **Who receives it** in its header, which opens Assignments. Columns: **Item** (the body, with a link to its source) · **Kind** · **Force** · **Scope** (with the repository or agent it names) · **Compiles to** · **Token cost** · **Source** (its provenance line).
 - Order is the assembler's: a record, then an instruction, a skill, a definition, and a memory, and within a kind by force (`STG_KIND_ORDER`, then `STG_FORCE_ORDER`, then id).
+- Under the panel, a second note, verbatim: “Steering is what the model reads: advisory, ranked, budgeted, and it may be dropped. Gating is what gets refused: deterministic, never budgeted, never ranked. The Library, Assignments, and the Compiler are the text plane. Gates is the gate plane.”
 - **Compiles to** has two values. **compiles to text**: no enforcement grant. **compiles to text and a gate**: the item carries one, and the chip is a button that opens Gates.
 
 The Records, Memory, and Ontology shelves render the bodies specified in `steering-records.md`, `steering-memory.md`, and `steering-ontology.md`. The Skills shelf is its own page, `skills.md`, and shows the shelf row.
