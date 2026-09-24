@@ -17,7 +17,7 @@ Where an operator sees every task from every tracker, which of them are ready, a
 
 ## What is on the page
 
-**Header**: eyebrow the workspace name ("Core platform"), h1 "Tasks", subtext "Work from your issue trackers, the definition of done for each task, and the work orders that send it to agents."
+**Header**: eyebrow the workspace name ("Core platform"), h1 "Tasks", subtext "Work from your issue trackers and help desks, the definition of done for each task, and the work orders that send it to agents."
 Actions: on the Tasks tab, **Connect an issue provider** (plain) and **Create work order and send to agent** (gold, disabled until a task is selected). On Workflows, **Connect an issue provider** (plain) and **New workflow** (gold). On every other tab, **Connect an issue provider** (gold).
 
 - **Tabs**: Tasks (N) · Work orders (N) · Workflows · Providers (N) · Fields · People (N). Tasks counts drafts and changed certifications waiting on a person. Work orders counts those waiting on you. Providers counts connections. People counts suggestions waiting for confirmation. A tab with nothing waiting shows no count.
@@ -89,7 +89,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 ## States
 
 - **loaded**: the page as described, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell), with GitHub and Linear connected.
-- **empty**: "No issue provider is connected to this workspace". "Tasks arrive from GitHub, Linear or Jira. Connect one, choose what it imports, and oxagen.assistant drafts a definition of done for every open task it reads." Action: **Connect an issue provider** (gold). The header and tabs are not rendered. A workspace with no connection renders this state whatever the tab.
+- **empty**: "No issue provider is connected to this workspace". "Tasks arrive from an issue tracker or a help desk: GitHub, Linear, Jira, ServiceNow, Salesforce Service Cloud, or Zendesk. Connect one, choose what it imports, and oxagen.assistant drafts a definition of done for every open task it reads." Action: **Connect an issue provider** (gold). The header and tabs are not rendered. A workspace with no connection renders this state whatever the tab.
 - **loading**: the shell stays; the body is the skeleton.
 - **error**: "Tasks could not be loaded", `503 issue_index_unavailable`, the three sentences, **Try again**, **Open an incident**, the trace line.
 - **access denied**: "You cannot see this workspace's tasks", naming `task.read on core-platform`, **Request access**, **Back to Fleet**, Signed in as, Needed, Decided by.

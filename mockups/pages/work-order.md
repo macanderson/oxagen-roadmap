@@ -39,7 +39,7 @@ Then two columns.
 
 ## Dialogs
 
-- **`woaccept`**: "Accept the work", "You accept N items the agents claimed, with the evidence each one cited." The note that accepting records `accept_work_order` and merges nothing, naming the pull request a person merges on GitHub, and what the connection's close switch does. Footer **Cancel**, **Accept every item** (gold). Accepting marks every item `accepted`, the state `accepted`, and each task `accepted`.
+- **`woaccept`**: "Accept the work", "You accept N items the agents claimed, with the evidence each one cited." The note that accepting records `accept_work_order` and merges nothing, naming the pull request a person merges on GitHub, and what the connection's close switch does: "The <provider> connection closes each <issue / incident / case / ticket> as Done, the resolution for work a person accepted.", or with the switch off "… stays open there until somebody closes it. Turned on, it closes each one as Done." Footer **Cancel**, **Accept every item** (gold). Accepting marks every item `accepted`, the state `accepted`, and each task `accepted`.
 - **`wostop`**: "Stop this work order?", "The live run gets a cancel at its next boundary, and no later stage starts.", and that branches and pull requests stay and the tasks go back to ready with their certifications unchanged. Footer **Keep it running**, **Stop it** (red).
 
 ## Data sources
