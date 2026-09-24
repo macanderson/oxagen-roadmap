@@ -54,6 +54,8 @@ const host = async page => await page.evaluate(() => {
     links: [...a.querySelectorAll("a[href]")].map(x => x.getAttribute("href")),
     zPanel: getComputedStyle(a).zIndex,
     zSide: (() => { const s = document.querySelector(".side"); return s ? getComputedStyle(s).zIndex : null; })(),
+    closeGap: (() => { const hd = a.querySelector(".asst-h"), x = hd && hd.querySelector(".iconbtn");
+      return hd && x ? Math.round(hd.getBoundingClientRect().right - x.getBoundingClientRect().right) : -1; })(),
   };
 });
 const shot = async (page, name) => { if (shots) await page.screenshot({ path: path.join(shots, name + ".png") }); };
@@ -119,6 +121,7 @@ const shot = async (page, name) => { if (shots) await page.screenshot({ path: pa
   ok(/503/.test(h.text), "engine down: it names the code");
   ok(h.disabled, "engine down: the message box is disabled rather than accepting a turn that cannot run");
   ok(/engine down/i.test(h.launcherText), "engine down: the launcher says so too, got " + h.launcherText);
+  ok(h.closeGap >= 0 && h.closeGap <= 20, "engine down: the close button sits at the right edge, " + h.closeGap + "px in");
   await shot(page, "asst-engine-down");
   await page.evaluate(() => { [...document.querySelectorAll("#asst .btn")].find(b => /Retry/.test(b.textContent)).click(); });
   await page.waitForTimeout(300);
@@ -137,6 +140,7 @@ const shot = async (page, name) => { if (shots) await page.screenshot({ path: pa
   ok(/nothing has been charged/i.test(h.text), "no key: it says nothing was charged");
   ok(h.disabled, "no key: the message box is disabled");
   ok(/no model key/i.test(h.launcherText), "no key: the launcher says so, got " + h.launcherText);
+  ok(h.closeGap >= 0 && h.closeGap <= 20, "no key: the close button sits at the right edge, " + h.closeGap + "px in");
   await shot(page, "asst-no-key");
   ok(errs.length === 0, "no-key errors: " + errs.join(" | "));
   await page.close();
