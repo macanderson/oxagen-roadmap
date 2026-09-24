@@ -17,6 +17,7 @@
 //      send until the repositories are confirmed; sending tags the tasks and opens the work order
 //   6. a workflow chains stages and ends with a person; the builder drafts stages from a sentence
 //   7. labels carry a colour and a mapping, and a claimed work order can be accepted
+//   8. the task and the work order each copy a prompt that names the other
 // Every assertion names a string the surface is supposed to render, never a value read back out of
 // the control under test.
 import { mkdirSync } from "node:fs";
@@ -233,6 +234,44 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
   await footBtn(w.page, "Accept every item").click();
   ok(/3 \/ 3/.test(await text(w.page)) && /accepted/.test(await text(w.page)), "accept: every item accepted");
   await done(w.page, [...errs, ...w.errs], "accept");
+}
+
+/* 8. copy prompt */
+{
+  // The clipboard of a headless file:// page refuses writes, so the check keeps what the page sends it.
+  const grab = page => page.evaluate(() => {
+    window.__copied = null;
+    Object.defineProperty(navigator, "clipboard", { configurable: true, value: { writeText: t => { window.__copied = t; return Promise.resolve(); } } });
+  });
+  const copied = page => page.evaluate(() => window.__copied || "");
+  const w = await open(H + "/work-orders/wo_01K6T9QX");
+  await grab(w.page);
+  await w.page.click(".phead >> text=Copy prompt");
+  await w.page.waitForTimeout(100);
+  let c = await copied(w.page);
+  ok(/You have a work order from Marcus Bell/.test(c) && /claim_dod_item/.test(c), "copy: the work order copies the prompt as sent");
+  ok(/Work order wo_01K6T9QX: Same-minute migration stamps/.test(c) && /sha256:ab41c7e09f3d2865/.test(c), "copy: the work order names itself and its digest");
+  ok(/Task a-intel\/platform#587/.test(c) && /tsk_01K6SF2W6Q: https:\/\/app\.oxagen\.sh\/a-intel\/core-platform\/tasks\/tsk_01K6SF2W6Q/.test(c), "copy: the work order links its task");
+  ok(/Prompt copied, with 1 task\./.test(await text(w.page, "#toast")), "copy: the work order toast counts the tasks");
+  await done(w.page, w.errs, "copy work order");
+  const t = await open(H + "/tsk_01K6SF2W6Q");
+  await grab(t.page);
+  await t.page.click(".phead >> text=Copy prompt");
+  await t.page.waitForTimeout(100);
+  c = await copied(t.page);
+  ok(/Task a-intel\/platform#587/.test(c) && /https:\/\/github\.com\/a-intel\/platform\/issues\/587/.test(c), "copy: the task names its issue");
+  ok(/Certified by Marcus Bell/.test(c) && /\[test\] A test covers a same-minute pair/.test(c), "copy: the task carries its certified definition of done");
+  ok(/wo_01K6T9QX: Same-minute migration stamps/.test(c) && /tasks\/work-orders\/wo_01K6T9QX/.test(c), "copy: the task links its work order");
+  ok(/Prompt copied, with 1 work order\./.test(await text(t.page, "#toast")), "copy: the task toast counts the work orders");
+  await t.page.close();
+  const d = await open(H + "/tsk_01K6S7C5PA");
+  await grab(d.page);
+  await d.page.click(".phead >> text=Copy prompt");
+  await d.page.waitForTimeout(100);
+  c = await copied(d.page);
+  ok(/A draft\. Nobody has certified it\./.test(c) && !/Certified by/.test(c), "copy: a draft is not called certified");
+  ok(/No work order carries this task/.test(c), "copy: a task in no work order says so");
+  await done(d.page, [...t.errs, ...d.errs], "copy task");
 }
 
 await browser.close();

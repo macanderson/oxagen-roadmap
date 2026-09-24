@@ -4733,6 +4733,20 @@ function copyPath(txt){
   try{ if(navigator.clipboard&&navigator.clipboard.writeText){ var p=navigator.clipboard.writeText(txt); wrote=true; if(p&&p.catch)p.catch(function(){}); } }catch(e){ wrote=false; }
   act(wrote?"Copied "+txt:txt);
 }
+/* Longer text than a path, so a refusal cannot be shown in a toast to select by hand. The toast waits
+   for the clipboard to answer, tries a selected textarea when it refuses, and says so when both do. */
+function copyText(txt,said){
+  var byHand=function(){
+    var ta=document.createElement("textarea"), ok=false;
+    ta.value=txt; ta.setAttribute("readonly",""); ta.style.cssText="position:fixed;top:0;left:0;opacity:0";
+    document.body.appendChild(ta); ta.select();
+    try{ ok=document.execCommand("copy"); }catch(e){ ok=false; }
+    ta.remove();
+    if(ok) act(said); else act("The browser refused the clipboard. Nothing was copied.","denied");
+  };
+  try{ if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(function(){act(said);},byHand); return; } }catch(e){}
+  byHand();
+}
 /* The second header strip: the repository, the branch, the pull requests, and the checkout. */
 function runWhere(R){
   var k=runWork(R);
@@ -18571,7 +18585,8 @@ function pTask(r){
   var res=t.resolution?tRes(t.resolution):null;
   return '<div class="phead"><div class="t"><p class="eyebrow">'+ipLogo(t.kind,13)+' <span class="id">'+h(t.num)+'</span></p><h1>'+h(t.subject)+'</h1>'+
    '<p>Imported from '+h(k.l)+'. Updated '+h(t.updatedAt)+'.</p></div>'+
-   '<div class="acts"><a class="btn" href="'+h(providerUrl(t))+'" target="_blank" rel="noopener">Open in '+h(k.l)+'</a>'+prim+'</div></div>'+
+   '<div class="acts"><button class="btn" onclick="copyTaskPrompt(\''+t.id+'\')" title="Copy the task and its work orders as text">Copy prompt</button>'+
+   '<a class="btn" href="'+h(providerUrl(t))+'" target="_blank" rel="noopener">Open in '+h(k.l)+'</a>'+prim+'</div></div>'+
    changedBanner+
    '<div class="split23"><div>'+
     '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Description</h3></div><div class="panel-b"><p class="tk-body">'+h(t.body)+'</p></div></div>'+
@@ -18663,7 +18678,7 @@ function pWorkOrder(r){
   var tgt=w.target.kind==="workflow"?'the '+(wfById(w.target.id)||{}).name+' workflow':(a?a.name:w.target.id);
   return '<div class="phead"><div class="t"><p class="eyebrow mono id">'+h(w.id)+'</p><h1>'+h(w.title)+'</h1>'+
    '<p>Sent by '+h(PEOPLE[w.by].name)+' on '+h(w.sent)+' to '+h(tgt)+'.</p></div>'+
-   '<div class="acts">'+(w.status!=="accepted"&&w.status!=="stopped"?'<button class="btn danger" onclick="openDialog(\'wostop\',\''+w.id+'\')">Stop the work order</button>':'')+
+   '<div class="acts"><button class="btn" onclick="copyWoPrompt(\''+w.id+'\')" title="Copy the prompt as sent with its references">Copy prompt</button>'+(w.status!=="accepted"&&w.status!=="stopped"?'<button class="btn danger" onclick="openDialog(\'wostop\',\''+w.id+'\')">Stop the work order</button>':'')+
    '<button class="btn'+(canAccept?' primary':'')+'"'+(canAccept?'':' disabled title="Every item must be claimed first"')+' onclick="openDialog(\'woaccept\',\''+w.id+'\')">Accept the work</button></div></div>'+
    '<div class="grid g4" style="margin-bottom:16px">'+
     tile("State",'<span style="font-size:17px">'+woBadge(w)+'</span>',w.status==="waiting on you"?"every item is claimed":w.status==="accepted"?"on "+h(w.accepted):"stage "+w.stage+" of "+wf.stages.length)+
@@ -18683,8 +18698,75 @@ function pWorkOrder(r){
     '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Repositories</h3></div><div class="panel-b">'+w.repos.map(function(n){return '<div class="row" style="margin-bottom:4px"><span class="row-ic">'+icon("repo")+'</span><span class="mono">'+h(n)+'</span></div>';}).join("")+
      '<div class="note" style="margin-top:8px">Branches and pull requests only. The production branch is never pushed.</div>'+(last.pr?'<div class="dim" style="font-size:12px;margin-top:8px">Pull request <span class="mono">'+h(last.pr)+'</span></div>':'')+'</div></div>'+
     '<div class="panel"><div class="panel-h"><h3>Prompt</h3><span class="mono dim" style="font-size:11px;margin-left:auto">'+h(w.digest)+'</span></div><div class="panel-b">'+
-     '<pre class="wo-pre">'+h(w.prompt||woDraftPrompt(w.tasks,w.target,w.repos,[]))+'</pre><div class="dim" style="font-size:11.5px;margin-top:6px">As sent. A sent prompt cannot change.</div></div></div>'+
+     '<pre class="wo-pre">'+h(woSentPrompt(w))+'</pre><div class="dim" style="font-size:11.5px;margin-top:6px">As sent. A sent prompt cannot change.</div></div></div>'+
    '</div></div>';
+}
+function woSentPrompt(w){return w.prompt||woDraftPrompt(w.tasks,w.target,w.repos,[]);}
+
+/* ============================== copy prompt ==============================
+   The brief as text, for a harness Oxagen does not deliver to. A task names every work order that carries
+   it and a work order names every task it carries, so a pasted prompt leads from either to the other. */
+function appUrl(route){return "https://app.oxagen.sh"+route.replace(/^#/,"");}
+function taskWorkOrders(t){return WORKORDERS.filter(function(w){return w.tasks.indexOf(t.id)>=0;});}
+function woTargetWords(w){return w.target.kind==="workflow"?"the "+woTargetName(w.target)+" workflow":woTargetName(w.target);}
+/* Read by an agent, so the state a person sees as "waiting on you" names the person instead. */
+function woStateWords(w){return w.status==="waiting on you"?"waiting on a person to accept":w.status==="parked"?"parked for a person":(WO_ST[w.status]||WO_ST.sent).l;}
+function taskPromptText(id){
+  var t=taskById(id); if(!t)return "";
+  var wos=taskWorkOrders(t), L=[];
+  var by=t.certifiedBy?(PEOPLE[t.certifiedBy]||{}).name||t.certifiedBy:"";
+  L.push("Task "+t.num+": "+t.subject);
+  L.push("  "+providerUrl(t));
+  L.push("  Oxagen task "+t.id+": "+appUrl(taskUrl(t)));
+  L.push("");
+  L.push("Description");
+  L.push(t.body);
+  L.push("");
+  /* The assistant drafts and never certifies, so a draft reads as a draft. */
+  if(!t.dod.length) L.push(t.ready==="drafting"?"Definition of done: none yet. oxagen.assistant is drafting one."
+    :t.ready==="closed"?"Definition of done: none. The task closed upstream before anybody certified one."
+    :"Definition of done: no items yet. Nobody has certified one.");
+  else {
+    L.push(t.ready==="ready"||t.ready==="sent"||t.ready==="accepted"?"Definition of done. Certified by "+by+" on "+t.certifiedAt+", "+t.digest+"."
+      :t.ready==="changed"?"Definition of done. Certified by "+by+" on "+t.certifiedAt+", before the description changed. It no longer matches the task."
+      :"Definition of done. A draft. Nobody has certified it.");
+    t.dod.forEach(function(d,i){L.push((i+1)+". ["+d.tag+"] "+d.t);});
+  }
+  L.push("");
+  if(!wos.length) L.push("No work order carries this task.");
+  else {
+    L.push("Work orders");
+    wos.forEach(function(w){var pr=(w.runs[w.runs.length-1]||{}).pr;
+      L.push("- "+w.id+": "+w.title);
+      L.push("  Sent "+w.sent+" to "+woTargetWords(w)+". State: "+woStateWords(w)+".");
+      L.push("  "+appUrl(woUrl(w)));
+      if(pr) L.push("  Pull request "+pr);});
+  }
+  return L.join("\n");
+}
+function woPromptText(id){
+  var w=woById(id); if(!w)return "";
+  var tasks=w.tasks.map(taskById).filter(Boolean), pr=(w.runs[w.runs.length-1]||{}).pr, L=[];
+  L.push(woSentPrompt(w));
+  L.push("");
+  L.push("References");
+  L.push("- Work order "+w.id+": "+w.title);
+  L.push("  "+appUrl(woUrl(w)));
+  L.push("  The prompt above is as sent. Digest "+w.digest+".");
+  tasks.forEach(function(t){
+    L.push("- Task "+t.num+": "+t.subject);
+    L.push("  "+providerUrl(t));
+    L.push("  Oxagen task "+t.id+": "+appUrl(taskUrl(t)));});
+  if(pr) L.push("- Pull request "+pr);
+  return L.join("\n");
+}
+function copyTaskPrompt(id){
+  var n=taskWorkOrders(taskById(id)||{id:id}).length;
+  copyText(taskPromptText(id),"Prompt copied, with "+(n?n+" work order"+(n>1?"s":""):"no work order")+".");
+}
+function copyWoPrompt(id){
+  var n=((woById(id)||{}).tasks||[]).length;
+  copyText(woPromptText(id),"Prompt copied, with "+n+" task"+(n>1?"s":"")+".");
 }
 
 /* ============================== the work order dialog ==============================
