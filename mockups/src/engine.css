@@ -2168,3 +2168,7 @@ tr[aria-selected="true"] td{background:color-mix(in srgb,var(--gold) 7%,transpar
 .wf-lab{font-size:12px;font-weight:600;color:var(--muted);margin-bottom:5px}
 .wf-st .dod-in{width:auto;flex:0 1 180px}
 .wf-st select.sel-sm{max-width:260px}
+.wo-starts{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
+.wo-starts li{display:flex;gap:8px;align-items:flex-start;font-size:12.5px;color:var(--body);line-height:1.5}
+.wo-starts li .hx{margin-top:3px}
+.wo-starts li.off{color:var(--muted)}

@@ -15922,7 +15922,8 @@ function stageChain(wf,opts){
     var a=agent(s.agent);
     var cls=opts.state?opts.state(i):"";
     return '<div class="stage '+cls+'"><span class="r"><i>'+(i+1)+'</i>'+h(s.role)+'</span>'+
-      '<span class="ag">'+(a?hxIcon(a.harness,14)+agentAv(a,18)+'<b>'+h(a.name)+'</b>'+tierBadge(a.tier):'<span class="dim">no agent</span>')+'</span>'+
+      '<span class="ag">'+(a?hxIcon(a.harness,14)+agentAv(a,18)+'<b>'+h(a.name)+'</b>':'<span class="dim">no agent</span>')+'</span>'+
+      (a?'<span class="sub">'+h(a.harnessLabel)+' '+tierBadge(a.tier)+'</span>':'')+
       (opts.sub?'<span class="sub">'+opts.sub(i,s)+'</span>':'<span class="sub">owns '+s.owns.map(tagChip).join(" ")+'</span>')+'</div>';
   });
   st.push('<div class="stage you '+(opts.state?opts.state(wf.stages.length):"")+'"><span class="r"><i>'+(wf.stages.length+1)+'</i>Accept</span><span class="ag">'+personAv(TK_ME,18)+'<b>You</b></span><span class="sub">a person accepts every item</span></div>');
@@ -16412,6 +16413,26 @@ function woOpen(target){
   S.wo.prompt=woDraftPrompt(ids,target,Object.keys(repos),[]);
   S.layer=null; S.dlg="wo"; S.dlgArg=null; render();
 }
+/* Where a work order's run starts (docs/tasks-spec.md §9.6). The machine's owner opts in on the machine
+   and sets the lowest tier a remote start may run at; a CI runner's opt-in is the workflow file in the
+   repository. A host with no opt-in starts nothing, and a person there runs the command. */
+var RT_START={
+ "mbell-mbp-16":{owner:"marcus",opt:true,floor:"harness"},
+ "mbp-01":{owner:"priya",opt:true,floor:"contained"},
+ "priya-mbp-14":{owner:"priya",opt:false},
+ "ci-runner-07":{ci:true},
+ "ci-runner-08":{ci:true}
+};
+function woStartLine(a){
+  var r=RT_START[a.host], who='<b>'+h(a.name)+'</b>';
+  if(r&&r.ci) return '<li>'+hxIcon(a.harness,13)+'<span>'+who+' starts on <span class="mono">'+h(a.host)+'</span> through <span class="mono">repository_dispatch</span>. The workflow file in the repository is the opt-in.</span></li>';
+  if(r&&r.opt){
+    var own=r.owner===TK_ME, o=PEOPLE[r.owner];
+    return '<li>'+hxIcon(a.harness,13)+'<span>'+who+' starts on <span class="mono">'+h(a.host)+'</span>, '+(own?'your machine':h(o.name)+'\u2019s machine')+
+      '. '+(own?'You':h(o.name.split(" ")[0]))+' allow'+(own?'':'s')+' remote starts of this agent at <span class="mono">'+h(r.floor)+'</span> or above, so it runs at <span class="mono">'+h(r.floor==="contained"?"contained":a.tier)+'</span>.</span></li>';
+  }
+  return '<li class="off">'+hxIcon(a.harness,13)+'<span>'+who+'\u2019s host <span class="mono">'+h(a.host||"none")+'</span> does not accept remote starts. After you send, a person there runs <span class="mono">oxagen work start</span> with the work order id.</span></li>';
+}
 function woAgentsOf(target){
   if(!target)return [];
   if(target.kind==="agent"){var a=agent(target.id);return a?[a]:[];}
@@ -16529,7 +16550,8 @@ function woSend(){
   tasks.forEach(function(t){t.ready="sent";t.wo=id;delete S.tsel[t.id];});
   S.wo=null; S.dlg=null; S.dspIds=[];
   go("#/"+ORG.slug+"/"+S.ws+"/tasks/work-orders/"+id);
-  act("Work order "+id+" sent to "+woTargetName(WORKORDERS[0].target)+". It starts when "+(agents[0]&&agents[0].host?agents[0].host:"the agent’s runtime")+" picks it up.","gold");
+  var r0=agents[0]&&RT_START[agents[0].host];
+  act("Work order "+id+" sent to "+woTargetName(WORKORDERS[0].target)+". "+(r0&&(r0.ci||r0.opt)?"Oxagen starts it on "+agents[0].host+" when the host picks it up.":"Its host does not accept remote starts. Run oxagen work start "+id+" there."),"gold");
 }
 DLG_EXT.wo=function(){
   var z=S.wo; if(!z)return {t:"Work order",w:false,b:"",f:'<button class="btn" onclick="closeDialog()">Close</button>'};
@@ -16547,7 +16569,9 @@ DLG_EXT.wo=function(){
      return '<span class="chip">'+ipLogo(t.kind,12)+'<span class="mono">'+h(t.num)+'</span><span>'+h(t.subject)+'</span>'+(z.tasks.length>1?'<button aria-label="Remove '+h(t.num)+'" onclick="woDropTask(\''+t.id+'\')">×</button>':'')+'</span>';}).join("")+'</div>'+
      '<div class="hint">Each task is tagged to this work order, and each shows it on its own page.</div></section>'+
    '<section class="wo-sec"><h4>Sent to</h4><div class="field" style="margin-bottom:10px"><select aria-label="Sent to" onchange="woSetTarget(this.value)">'+opts+'</select>'+
-     '<div class="hint">Agents where you are the registered operator, and the published workflows made of them.</div></div>'+who+'</section>'+
+     '<div class="hint">Agents where you are the registered operator, and the published workflows made of them.</div></div>'+who+
+     '<ul class="wo-starts" aria-label="Where it starts">'+agents.map(woStartLine).join("")+'</ul>'+
+     '<div class="hint">Oxagen starts the harness and hands it this brief. The harness runs every turn.</div></section>'+
    '<section class="wo-sec"><h4>Definition of done</h4><p class="hint" style="margin:0 0 8px">'+items.length+' items from '+z.tasks.length+' task'+(z.tasks.length>1?'s':'')+'. Certified items are read-only here.</p>'+
      '<ol class="dod-list">'+items.map(function(it,i){var ow=woOwner(wf,it.tag);
        return '<li class="dod-i"><span class="n">'+(i+1)+'</span><div class="tx"><span>'+h(it.t)+'</span><div class="meta">'+tagChip(it.tag)+

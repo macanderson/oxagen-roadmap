@@ -13,8 +13,9 @@
 //   2. draft a definition of done with the assistant, edit it, and certify it
 //   3. a certified task that changes upstream leaves ready
 //   4. only ready tasks can be selected; the send menu lists only agents you operate, with harness marks
-//   5. the work order merges every definition of done, drafts a prompt, resolves @ mentions, and will not
-//      send until the repositories are confirmed; sending tags the tasks and opens the work order
+//   5. the work order merges every definition of done, says where each run starts and on whose opt-in,
+//      drafts a prompt, resolves @ mentions, and will not send until the repositories are confirmed;
+//      sending tags the tasks and opens the work order
 //   6. a workflow chains stages and ends with a person; the builder drafts stages from a sentence
 //   7. labels carry a colour and a mapping, and a claimed work order can be accepted
 // Every assertion names a string the surface is supposed to render, never a value read back out of
@@ -159,6 +160,16 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
   let d = await dlgText(page);
   ok(/2 tasks to Bug fixer/.test(await text(page, "#layer .dlg-h")), "work order: names the tasks and the agent");
   ok(/8 items from 2 tasks/.test(d), "work order: merges both definitions of done");
+  ok(/Bug fixer starts on mbell-mbp-16, your machine/.test(d), "start: names the host and whose machine it is");
+  ok(/The harness runs every turn/.test(d), "start: says Oxagen starts the process and runs no turn");
+  await page.selectOption('select[aria-label="Sent to"]', "agent:a-intel.core.triage");
+  d = await dlgText(page);
+  ok(/mbp-01, Priya Natarajan.s machine/.test(d) && /runs at contained/.test(d), "start: another person's machine runs at the floor its owner set");
+  const offHost = await page.evaluate(() => (myAgents().filter(a => !RT_START[a.host])[0] || {}).key);
+  await page.selectOption('select[aria-label="Sent to"]', "agent:" + offHost);
+  ok(/does not accept remote starts/.test(await dlgText(page)) && /oxagen work start/.test(await dlgText(page)), "start: a host that has not opted in starts nothing");
+  await page.selectOption('select[aria-label="Sent to"]', "agent:a-intel.core.bug-fixer");
+  d = await dlgText(page);
   ok(/#612/.test(d) && /PLAT-231/.test(d), "work order: tags each item with its task");
   const prompt = await page.inputValue("#woPrompt");
   ok(/Definition of done/.test(prompt) && /claim_dod_item/.test(prompt), "work order: drafts a prompt with the items and the claim tool");

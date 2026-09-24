@@ -53,7 +53,7 @@ what is out with which agent, and what came back.
 3. **Draft.** `oxagen.assistant` drafts a definition of done for each open task (§8.2). The task is a draft.
 4. **Certify.** A person reads the draft, edits it, and certifies it (§8.4). The task is ready.
 5. **Send.** You select ready tasks, choose an agent you operate or a workflow, and send a work order (§9).
-6. **Pick up.** The runtime the agent is enrolled on picks the work order up and starts the run (§9.6).
+6. **Start.** Oxagen starts the harness on a runtime the agent is enrolled on, if that machine's owner allowed it (§9.6). The harness runs every turn.
 7. **Claim.** The agent claims each item with evidence (§11).
 8. **Hand off.** In a workflow each stage hands to the next, and may return the work a bounded number of times (§10).
 9. **Accept.** You accept the claimed items (§11). Nothing merges without a person.
@@ -71,6 +71,7 @@ what is out with which agent, and what came back.
 | **Readiness** | Oxagen's state for a task, separate from the provider's status (§8.6). A task is **ready** when it is certified and open. |
 | **Work order** | Ready tasks, their merged definition of done, a prompt, the repositories it may change, and a spend cap, sent to one agent or one workflow. |
 | **Brief** | The prompt a work order carries. It is the operator's, drafted by the assistant and made the operator's by the send. |
+| **Remote start** | Oxagen starting a harness process on an enrolled host that opted in, through the launcher. Oxagen starts the process and runs no turn. |
 | **Workflow** | A file that names stages in order. Each stage is an agent you operate. The last stage is always a person. |
 | **Handoff** | A stage passing the work to the next stage, with a note that reaches the next agent as quoted evidence. |
 | **Return** | A stage sending the work back to an earlier stage, up to the number of returns the file allows. |
@@ -404,20 +405,53 @@ connection allows it, Oxagen posts a link on each issue. The sender lands on the
 
 ### 9.6 Delivery
 
-Oxagen runs no agent (ADR-043). A work order is the operator's brief, and the runtime the agent is
-enrolled on starts the run. There are three ways it reaches a runtime.
+Oxagen starts the run. It does not run it. Oxagen owns no turn loop: it assembles no turn, calls no
+model, picks no tool, and holds no vendor credential. It starts a harness process on a runtime the
+agent is enrolled on, hands that process the operator's brief, and records that it did. From the first
+prompt on, the harness runs every turn. This is the launcher of ADR-096 ("a launcher that confines a
+process is not an agent runtime") with a second trigger: a signed work order as well as a person at a
+terminal. §17, decision 1, records the choice.
 
 | Runtime | How the run starts |
 |---|---|
-| A wrapped harness on an enrolled host (Claude Code, Codex, Cursor, Stella) | The host's collector receives the work order. `oxagen work start <wo>` starts the harness in the agent's working copy with the brief as its first prompt, and the hooks bind the session to the work order. The person at the host starts it on day 1. The contained launcher (`oxagen run`, ADR-096, Phase 5) starts it without one later. |
-| A CI agent (Stella CI) | Oxagen sends a `repository_dispatch` event carrying the work order id, and the job reads the brief with its own credential. |
-| Any harness through ARP | The brief is an `arp.capture-brief` document (ADR-157), so every harness that loads an ARP brief loads a work order. |
+| An enrolled host (a laptop, a dev box, a VM) running a wrapped harness: Claude Code, Codex, Cursor, or Stella | The daemon already enrolled on the host pulls the work order, verifies it, and the launcher starts the harness in the agent's working copy with the brief as its first prompt. The hooks bind the session to the work order. |
+| A CI runner (Stella CI) | Oxagen sends a `repository_dispatch` event carrying the work order id. The workflow file in the repository is the opt-in, merged by pull request like every other definition. The job reads the brief with its own credential. |
+| A host that has not opted in | Nothing starts. The work order page shows the command a person at that host runs: `oxagen work start <wo>`. |
+
+The rules for a remote start:
+
+1. **The host pulls.** The enrolled daemon holds an outbound connection and fetches work orders
+   addressed to agents enrolled on it. Oxagen opens no inbound port and holds no SSH key.
+2. **The machine's owner opts in, on the machine.** `accept_work_orders` in the host's local
+   configuration names the agents that may be started there, and it defaults to off. The control plane
+   cannot set it. The owner turns it off locally at any time.
+3. **The owner sets the floor.** The same configuration names the lowest tier a remote start may run
+   at. On a machine the sender does not own, the default floor is `contained`, because enforcement
+   matters most where the operator is not the machine's owner (ADR-096). The owner may lower it, and
+   the work order screen shows the tier a start will run at.
+4. **The order is signed and bound.** The host checks the control plane's signature against a pinned
+   key (as ARP pins keys), an expiry of 15 minutes to pick it up, a nonce against replay, and that the
+   sender is the agent's operator.
+5. **The shape is fixed.** The launcher starts only a harness binary (`claude`, `codex`,
+   `cursor-agent`, `stella`), only in a working copy registered for a repository the work order may
+   change, with the brief passed as a file. No shell string, no permission-bypass flag, no change to
+   global configuration (the ARP rules, ADR-157).
+6. **The agent runs as itself.** The harness uses the agent's enrolled credential and its own model
+   login. Oxagen holds neither.
+7. **Stopping always works.** The person at the machine can kill the process, and `stop_work_order`
+   cancels it at the next boundary through `dispatch_command`.
+8. **It is recorded.** `start_run` is a governed action. The run carries a launch attestation: the
+   binary, the digest of its arguments, the working copy, the tier, and the work order.
+
+The brief is the operator's. `oxagen.assistant` drafts it, the operator reads it and may change it,
+and the send makes it theirs. The launcher passes it through verbatim and adds nothing, which is what
+ADR-096 means by "assembles no prompt".
 
 Every run a work order starts records the work order id and its tasks as the run's task reference
-(`cost.run_totals.task_ref`, the task reference of the spec's run record), so the Run page's Issues tab lists them and Spend can drill by
-task. The agent reads its work order through `get_work_order` on the MCP surface.
+(`cost.run_totals.task_ref`), so the Run page's Issues tab lists them and Spend can drill by task. The
+agent reads its work order through `get_work_order` on the MCP surface.
 
-The repository list and the cap are enforced at the agent's tier. On `gateway` and `contained` a write
+The repository list and the cap are enforced at the run's tier. On `gateway` and `contained` a write
 to another repository is refused. On `harness` the refusal is a hook, client-attested and fail-open
 against the person at the keyboard. The work order page shows each agent's tier, so the page never
 claims more than the tier enforces.
@@ -483,8 +517,8 @@ request** proposes it, and the workflow exists when the pull request merges (`cr
 A workflow runs nothing itself. Oxagen sequences work orders.
 
 1. Stage 1 receives the work order's brief with its own items marked.
-2. When the stage's items are claimed, its agent calls `hand_off_work_order` with a note. Oxagen sends
-   the next stage its brief, with the note as quoted evidence. A handoff note is never an instruction
+2. When the stage's items are claimed, its agent calls `hand_off_work_order` with a note. Oxagen starts
+   the next stage through §9.6 with its brief, and the note as quoted evidence. A handoff note is never an instruction
    to the next agent (spec §7.6).
 3. A stage that finds an earlier stage's item unmet calls `return_work_order` with the item numbers.
    Oxagen sends the work back to the stage the file names, and counts the return.
@@ -535,6 +569,7 @@ The runs a work order starts are metered like any run.
 | `certify_task_dod` | api, app, cli | Signed-in person only |
 | `create_work_order`, `send_work_order` | api, app, cli | Sender must operate every target agent |
 | `get_work_order`, `list_work_orders` | api, mcp, app, cli, agent | The agent reads its brief here |
+| `start_run` | api, cli | Starts a work order's run on an enrolled host through the launcher (§9.6). Called by the send, never by an agent. |
 | `claim_dod_item` | mcp, agent | Agent only |
 | `hand_off_work_order`, `return_work_order` | mcp, agent | Agent only |
 | `accept_work_order`, `stop_work_order` | api, app, cli | Signed-in person only |
@@ -601,36 +636,32 @@ Legend: ✅ exists · 🟡 partial · ❌ missing. Read from `macanderson/oxagen
 | Identity mapping | Nothing. Connectors store the `login` string. `auth.accounts` holds the GitHub accounts people signed in with. | ❌ |
 | Task, definition of done, certification, readiness | Nothing names an issue, task, or ticket | ❌ |
 | The operator | Derived from `principals.parent_user_id` in `list_agents` | ✅ |
-| Starting a run from Oxagen | No capability starts a run. `dispatch_command` reaches live runs only. ARP carries a brief the operator starts. | ❌ |
+| Starting a run from Oxagen | No capability starts a run. `dispatch_command` reaches live runs only. ARP carries a brief the operator starts. The ADR-096 launcher is Phase 5 and unbuilt. The daemon on wrapped hosts exists. | ❌ |
 | Workflows | Removed by ADR-043 in their old form | ❌ |
 | Mentions of context records | The grammar has no context-record or task type | ❌ |
 | The run's task reference | `cost.run_totals.task_ref`, with nothing recording one | 🟡 |
 
-## 17. Decisions this needs
+## 17. Decisions
 
-Each becomes an ADR before the code it governs merges.
+Each decision becomes an ADR before the code it governs merges. Each names the choice, why it is the
+durable one, and what it was chosen over.
 
-1. **A work order is the operator's brief, and the runtime starts the run.** It settles delivery (§9.6)
-   and keeps ADR-043 intact.
-2. **Workflows order work orders and execute nothing.** It names the difference from the `workflow.*`
-   that ADR-043 removed.
-3. **Task field settings are workspace settings, and label item templates are files.** §6.5 and §6.6.
-4. **The task definition of done and the run dod are two objects.** §8.1, and how the second may
-   later compile the first.
-5. **The product words.** "Work order" and "send". ADR-113 reserves "Dispatch" as a name only the
-   founder decides, so neither the UI nor a capability name uses it for this.
-6. **The mention grammar gains `context_record` and `task`.** `packages/ai/src/prompts/mentions.ts`.
+| # | Decision | Choice | Chosen over |
+|---|---|---|---|
+| 1 | How work reaches an agent | **Oxagen starts the harness on an enrolled runtime** through the ADR-096 launcher, triggered by a signed work order the host pulls, with the machine owner's opt-in and tier floor (§9.6). CI starts through `repository_dispatch`. | A person starts every run by hand (it makes Oxagen a clipboard, and unattended fleets and CI get nothing). Push over SSH or an inbound port (Oxagen would hold keys to customer machines). A second remote-execution channel beside the launcher (two code paths that start processes, two attestations). |
+| 2 | What a workflow is | **A file that orders work orders.** Oxagen keeps a state machine over handoffs and returns, and starts each stage through decision 1. It runs no turn. | Reviving `workflow.*` (ADR-043 removed it because Oxagen ran the turns). Letting the first agent call the next (the operator loses the handoff record, and the bounds live in a prompt). |
+| 3 | Where task settings live | **Workspace settings in Postgres** for statuses, resolutions, labels, colours, and mappings, each change a governed action with its history. Label item templates are **files** in `.oxagen/dod/labels/`. People mappings are **rows**. | Everything in `.oxagen/tasks.toml` (a colour change would need a pull request, and people mappings carry personal data that has no place in git). Everything in rows (label item templates steer agents, and every steering definition is a file). |
+| 4 | The two definitions of done | **Two objects.** The task definition of done is a list a person certifies and accepts. The run dod (`dod-spec.md`) may later compile a task's `check` items into executable checks, one way only. | One object for both (the run dod's verdict words would claim more than a person's acceptance). |
+| 5 | The words | **"Work order" for the object and "send" for the verb.** `dispatch_command` already means controlling a live run, so reusing "dispatch" would give one word two meanings in the API. ADR-113 leaves "Dispatch" as a product name for the founder; this choice keeps it free. | "Dispatch" for the verb and the button. "Job" (taken by CI) and "ticket" (the provider's word). |
+| 6 | Mentions | **Extend the existing grammar** in `packages/ai/src/prompts/mentions.ts` with `context_record` and `task`. A profile mention is a reference, never a recipient. | A second mention syntax for work orders. |
+| 7 | Who may send to whom | **Only to agents the sender operates**, every stage of a workflow included. A cross-operator handoff later needs the receiving operator's acceptance, so every run keeps exactly one accountable operator. | Anyone with `work_order.send` to any agent (the run's operator would answer for work they never agreed to). |
+| 8 | Separation of duties | In a `regulated` workspace **the certifier cannot send** the task they certified. Other modes allow it. | Two certifiers for every task (friction with no evidence it catches more). |
+| 9 | Certification lifetime | **No clock.** A certification ends when the task changes upstream (§8.5), when a person edits the list, or when the task closes. | An expiry date (it expires lists nobody changed and misses the change that matters). |
+| 10 | Who pays for drafting | **Oxagen**, as for every `oxagen.assistant` turn, bounded to open tasks and 60 drafts a minute per workspace. | The tenant (they are billed for a draft they did not ask for, which breaks the rule that the governed action is the billable unit, ADR-052). |
+| 11 | A task reopened upstream after acceptance | **It returns to draft** with its accepted list as the starting point and a note naming the reopen. The accepted work order stays accepted. | Reopening the work order (it rewrites a record a person signed). |
+| 12 | Linear authorization | **OAuth with `actor=app`** only. | Personal API keys (writes would carry a person's name, and the key outlives the person's access). |
 
-## 18. Open questions
-
-- Should a certification expire, for a task that sits ready for months?
-- Should a regulated workspace require two certifiers for a `P0`?
-- Who pays for drafting the first import of a large tracker: Oxagen, as for every assistant turn, or
-  the tenant above a threshold?
-- Should acceptance of a work order that closed its tasks upstream reopen them when a provider reopens
-  the issue?
-
-## 19. Definition of done for the build
+## 18. Definition of done for the build
 
 - [ ] A workspace connects GitHub, Linear, and Jira Cloud through the six-step wizard, each with its logo, its scopes, and what the token still cannot do.
 - [ ] Each connection authenticates with the method in §5.2 and stores its token in the workspace credential store.
@@ -645,7 +676,8 @@ Each becomes an ADR before the code it governs merges.
 - [ ] A certified task that changes upstream leaves ready and shows both versions.
 - [ ] Only ready, open tasks can be selected. The send menu lists only agents the sender operates, each with its harness mark, and published workflows made of them.
 - [ ] The work order screen merges every definition of done, tags each item with its tasks, drafts an editable prompt, resolves `@` mentions of context records and agent profiles, and will not send until the repositories are confirmed.
-- [ ] A work order reaches the agent's runtime by one of the paths in §9.6, and the run records it as its task reference.
+- [ ] Oxagen starts a work order's run on an enrolled host that opted in, under the eight rules of §9.6, or through `repository_dispatch` on CI, and the run records the work order as its task reference and carries a launch attestation.
+- [ ] A host that has not opted in starts nothing, and the work order page shows the command a person there runs.
 - [ ] A workflow file chains agents, hands off with quoted notes, returns within its bound, and parks for the operator when the bound is spent.
 - [ ] The agent claims items with evidence, and a person accepts them. Nothing merges without a person.
 - [ ] Every capability in §12 is gated, audited, documented, and tested, and the agent-facing tools load in all four harnesses.

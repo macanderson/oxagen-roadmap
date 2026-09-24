@@ -358,6 +358,6 @@
     { "key": "a-intel.core.documenter", "name": "Documenter", "harness": "cursor", "harnessLabel": "Cursor", "icon": "pencil-line", "tone": "line",
       "desc": "Writes the docs a definition of done names, in the pull request it was handed.", "runs30": 22, "spend30": "19.75", "tier": "harness", "host": "mbell-mbp-16" },
     { "key": "a-intel.core.architect", "name": "Architect", "harness": "stella", "harnessLabel": "Stella", "icon": "compass", "tone": "solid",
-      "desc": "Reviews a pull request against the architecture rules and the review items. Comments; never approves on its own.", "runs30": 31, "spend30": "57.60", "tier": "contained", "host": "stella-ci" }
+      "desc": "Reviews a pull request against the architecture rules and the review items. Comments; never approves on its own.", "runs30": 31, "spend30": "57.60", "tier": "contained", "host": "ci-runner-08" }
   ]
 }
