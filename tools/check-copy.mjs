@@ -37,6 +37,18 @@ const RULES = [
   ["math notation", /[∩∈≠]/],
   ["US spelling", /colour|behaviour|labelling|Cancelled/],
   ["uppercased id", /\b(WO|TSK|RUN)_[0-9A-Z]{6,}\b|A-INTEL\//],
+  // The rest of the review's glossary: one term per concept, and no internal names in page copy.
+  ["retired term", /\bfr \d|interjection|Wasted spend|[Mm]odel tier|Wrong (model )?tier|light tier|client tier|\bseams?\b|issue provider|Bind it|not bound|volatile selection|\bshelf\b|text plane|gate plane|a call at most|PER CALL/],
+  ["internal name", /\bkernel\b|reflector|archiver|player[’']s window|manifest gate|deny generation|hook boundary|shared plane|opt-down|[Bb]elt computation/],
+  ["rhetoric", /earns the word|stronger word than|says more than that|refuses to say otherwise|not a verdict|It is not a result/],
+  ["empty slot", /Task —\.|\btask —|µUSD/],
+  ["orphan pager", /\d+–\d+ of \d[\d,]* \d+\b/],
+  ["chip separator", /platformmbell|githuboxagen|cost\.readrun\.read|readerRepository|OpenChange role|EditRoles|\d items\d/],
+  ["minus sign", /(^|[\s(])-(\$?\d[\d,]*\.\d{2}\b|\d+(\.\d+)?%)/m],
+];
+// A raw key may stand in monospace, so this rule reads the page with .mono hidden as well.
+const PROSE_ONLY = [
+  ["raw key", /gateway_observed|client_attested|moves_funds|commits_spend|third_party|hooks_removed|chain_break|unknown_tool|initiating_principal|policy\.decision|per_run_micros|cache_write_5m|input_uncached|content_exact|deny_tools|above_micros/],
 ];
 
 const ORG = "a-intel";
@@ -93,12 +105,12 @@ const errors = [];
 page.on("pageerror", (e) => errors.push(String(e.message || e)));
 page.on("dialog", (d) => d.dismiss());
 
-const hits = new Map(RULES.map(([name]) => [name, []]));
+const hits = new Map([...RULES, ...PROSE_ONLY].map(([name]) => [name, []]));
 // Code samples (<pre>, <code>) are excluded: a TOML key or an SDK class such as McpServer is the
 // language's word, not the page's, so the rules read only the prose around them.
-const visibleText = () => {
+const visibleText = (hide = "pre, code") => {
   const off = document.createElement("style");
-  off.textContent = "pre, code { display: none !important; }";
+  off.textContent = `${hide} { display: none !important; }`;
   document.head.appendChild(off);
   const t = document.body.innerText.replace(/[ \t]+/g, " ");
   off.remove();
@@ -108,13 +120,13 @@ const visibleText = () => {
 // An empty state inside a page still has the page's heading, so it passes.
 const rendered = () => !!document.querySelector("#app h1, #app h2");
 
-async function audit(label, text) {
+async function audit(label, text, prose) {
   if (dump) writeFileSync(path.join(dump, label.replace(/[^a-z0-9._-]+/gi, "_").slice(0, 150) + ".txt"), text);
-  for (const [name, re] of RULES) {
+  for (const [name, re, t] of [...RULES.map((r) => [...r, text]), ...PROSE_ONLY.map((r) => [...r, prose])]) {
     const g = new RegExp(re.source, re.flags.includes("g") ? re.flags : re.flags + "g");
-    for (const m of text.matchAll(g)) {
+    for (const m of t.matchAll(g)) {
       const at = m.index;
-      hits.get(name).push(`${label}  …${text.slice(Math.max(0, at - 50), at + 50).replace(/\n/g, " ⏎ ")}…`);
+      hits.get(name).push(`${label}  …${t.slice(Math.max(0, at - 50), at + 50).replace(/\n/g, " ⏎ ")}…`);
     }
   }
 }
@@ -124,7 +136,7 @@ for (const hash of ROUTES) {
   await page.goto(`file://${FILE}?product=1${hash}`);
   await page.waitForTimeout(250);
   if (!hash.startsWith("#/welcome") && !(await page.evaluate(rendered))) errors.push(`${hash}: rendered no heading`);
-  await audit(hash, await page.evaluate(visibleText));
+  await audit(hash, await page.evaluate(visibleText), await page.evaluate(visibleText, "pre, code, .mono"));
 }
 for (const [name, js] of OVERLAYS) {
   await page.goto("about:blank");
@@ -132,7 +144,7 @@ for (const [name, js] of OVERLAYS) {
   await page.waitForTimeout(200);
   try { await page.evaluate(js); } catch (e) { errors.push(`${name}: ${e.message}`); continue; }
   await page.waitForTimeout(200);
-  await audit(name, await page.evaluate(visibleText));
+  await audit(name, await page.evaluate(visibleText), await page.evaluate(visibleText, "pre, code, .mono"));
 }
 await browser.close();
 
