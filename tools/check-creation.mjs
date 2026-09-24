@@ -222,7 +222,7 @@ const shot = async (page, name) => { if (shots) await page.screenshot({ path: pa
   ok(/\[instructions\]/.test(d.body), "agent definition has instructions");
   await primary(page); await page.waitForTimeout(200);
   d = await dlg(page);
-  ok(/Nothing on this belt parks|Nothing picked/.test(d.body), "agent belt: says what parks");
+  ok(/Nothing on this toolbelt parks|Nothing picked/.test(d.body), "agent belt: says what parks");
   await page.evaluate(() => { document.querySelectorAll("#layer .imp-tool input")[2].click(); });
   await page.waitForTimeout(200);
   d = await dlg(page);

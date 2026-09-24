@@ -130,7 +130,7 @@
   "runs": 0,
   "owner": "dana",
   "updated": "a month ago",
-  "why": "Published with <span class=\"mono\">scope = workspace:finops</span>. <b>core-platform</b> is not in its scope, so it is not in this belt and it does not come back from a search here.",
+  "why": "Published with <span class=\"mono\">scope = workspace:finops</span>. <b>core-platform</b> is not in its scope, so it is not in this toolbelt and it does not come back from a search here.",
   "citedBefore": null,
   "citedAfter": null
  },

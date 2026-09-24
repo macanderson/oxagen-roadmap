@@ -125,7 +125,7 @@ const shot = async (page, name) => { if (shots) await page.screenshot({ path: pa
   await shot(page, "asst-engine-down");
   await page.evaluate(() => { [...document.querySelectorAll("#asst .btn")].find(b => /Retry/.test(b.textContent)).click(); });
   await page.waitForTimeout(300);
-  ok(/Narrow its belt/.test((await host(page)).text), "Retry brings the conversation back");
+  ok(/Narrow its toolbelt/.test((await host(page)).text), "Retry brings the conversation back");
   ok(errs.length === 0, "engine-down errors: " + errs.join(" | "));
   await page.close();
 }

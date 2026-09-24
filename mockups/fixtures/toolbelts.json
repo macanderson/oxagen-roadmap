@@ -26,7 +26,7 @@
    "tools": ["github__merge_pull_request@4", "github__create_release@2", "github__delete_branch@1"],
    "updated": "2026-09-06 14:05 UTC",
    "by": "mbell",
-   "note": "Every tool here is irreversible or denied. A grant reaching this belt still meets the policy at the call."
+   "note": "Every tool here is irreversible or denied. A grant reaching this toolbelt still meets the policy at the call."
   },
   {
    "id": "tb_context_graph",
@@ -73,7 +73,7 @@
    "tools": ["stripe__create_payment@5"],
    "updated": "2026-09-05 11:52 UTC",
    "by": "dsong",
-   "note": "Assigning this belt authorizes nothing. A financial call is denied before dispatch unless the agent holds a mandate covering it."
+   "note": "Assigning this toolbelt authorizes nothing. A financial call is denied before dispatch unless the agent holds a mandate covering it."
   },
   {
    "id": "tb_cloud_cost",

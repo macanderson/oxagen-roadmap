@@ -94,7 +94,16 @@ page.on("pageerror", (e) => errors.push(String(e.message || e)));
 page.on("dialog", (d) => d.dismiss());
 
 const hits = new Map(RULES.map(([name]) => [name, []]));
-const visibleText = () => document.body.innerText.replace(/[ \t]+/g, " ");
+// Code samples (<pre>, <code>) are excluded: a TOML key or an SDK class such as McpServer is the
+// language's word, not the page's, so the rules read only the prose around them.
+const visibleText = () => {
+  const off = document.createElement("style");
+  off.textContent = "pre, code { display: none !important; }";
+  document.head.appendChild(off);
+  const t = document.body.innerText.replace(/[ \t]+/g, " ");
+  off.remove();
+  return t;
+};
 // A route that rendered no heading would pass every rule by showing nothing, so it fails on its own.
 // An empty state inside a page still has the page's heading, so it passes.
 const rendered = () => !!document.querySelector("#app h1, #app h2");

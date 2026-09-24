@@ -90,23 +90,23 @@
  },
  "Tool-list bloat": {
   "shape": "article",
-  "title": "Why a 52-tool belt costs you on every call",
-  "why": "Tool definitions are not free context. Every model call carries the JSON schema of every tool on the belt, and the model reads all of it before it reads the task. On a-intel.core.triage that block is 9,140 tokens, and 34 of the 52 tools were never called in 1,340 runs. The agent was wrapped with each provider's full export, which is the default when a wrap grants a provider instead of a tool.",
+  "title": "Why a 52-tool toolbelt costs you on every call",
+  "why": "Tool definitions are not free context. Every model call carries the JSON schema of every tool on the toolbelt, and the model reads all of it before it reads the task. On a-intel.core.triage that block is 9,140 tokens, and 34 of the 52 tools were never called in 1,340 runs. The agent was registered with each provider's full export, which is the default when a definition grants a provider instead of a tool.",
   "before": {
    "lang": "yaml",
-   "code": "<span class=\"c\"># agents/triage/wrap.yaml — as it stands</span>\n<span class=\"k\">grants</span>:\n  - <span class=\"k\">server</span>: <span class=\"s\">github</span>      <span class=\"c\"># 41 tools · 12 called</span>\n  - <span class=\"k\">server</span>: <span class=\"s\">linear</span>      <span class=\"c\"># 18 tools · 4 called</span>\n  - <span class=\"k\">server</span>: <span class=\"s\">slack</span>       <span class=\"c\"># 14 tools · 2 called</span>"
+   "code": "<span class=\"c\"># .oxagen/agents/triage.yaml — as it stands</span>\n<span class=\"k\">grants</span>:\n  - <span class=\"k\">provider</span>: <span class=\"s\">github</span>      <span class=\"c\"># 41 tools · 12 called</span>\n  - <span class=\"k\">provider</span>: <span class=\"s\">linear</span>      <span class=\"c\"># 18 tools · 4 called</span>\n  - <span class=\"k\">provider</span>: <span class=\"s\">slack</span>       <span class=\"c\"># 14 tools · 2 called</span>"
   },
   "after": {
    "lang": "yaml",
-   "code": "<span class=\"c\"># agents/triage/wrap.yaml — grant the 18 tools the runs call</span>\n<span class=\"k\">grants</span>:\n  - <span class=\"k\">server</span>: <span class=\"s\">github</span>\n    <span class=\"k\">tools</span>: [<span class=\"s\">get_issue</span>, <span class=\"s\">list_commits</span>, <span class=\"s\">add_labels</span>, <span class=\"s\">search__code</span>, <span class=\"s\">get_file_contents</span>, …]\n  - <span class=\"k\">server</span>: <span class=\"s\">linear</span>\n    <span class=\"k\">tools</span>: [<span class=\"s\">get_issue</span>, <span class=\"s\">update_issue</span>, <span class=\"s\">list_labels</span>, <span class=\"s\">create_comment</span>]\n  - <span class=\"k\">server</span>: <span class=\"s\">slack</span>\n    <span class=\"k\">tools</span>: [<span class=\"s\">post_message</span>, <span class=\"s\">get_thread</span>]"
+   "code": "<span class=\"c\"># .oxagen/agents/triage.yaml — grant the 18 tools the runs call</span>\n<span class=\"k\">grants</span>:\n  - <span class=\"k\">provider</span>: <span class=\"s\">github</span>\n    <span class=\"k\">tools</span>: [<span class=\"s\">get_issue</span>, <span class=\"s\">list_commits</span>, <span class=\"s\">add_labels</span>, <span class=\"s\">search__code</span>, <span class=\"s\">get_file_contents</span>, …]\n  - <span class=\"k\">provider</span>: <span class=\"s\">linear</span>\n    <span class=\"k\">tools</span>: [<span class=\"s\">get_issue</span>, <span class=\"s\">update_issue</span>, <span class=\"s\">list_labels</span>, <span class=\"s\">create_comment</span>]\n  - <span class=\"k\">provider</span>: <span class=\"s\">slack</span>\n    <span class=\"k\">tools</span>: [<span class=\"s\">post_message</span>, <span class=\"s\">get_thread</span>]"
   },
   "steps": [
-   "Grant tools, not servers. The belt is compiled from the grants, so the definition block shrinks to what is listed.",
+   "Grant tools, not providers. The toolbelt is compiled from the grants, so the definition block shrinks to what is listed.",
    "Set beltMode to searchable if the agent sometimes needs a rare tool: it then sees a one-line index and fetches a definition on demand.",
    "A tool that a run calls without a grant is denied and recorded, so a narrowing that was too tight shows up as a policy.decision frame, not a silent failure."
   ],
   "action": "Narrow the grants",
-  "done": "Draft wrap opened with the 18 called tools granted. Review it and publish; the belt recompiles on the next run."
+  "done": "Draft pull request opened with the 18 called tools granted. Review it and publish; the toolbelt recompiles on the next run."
  },
  "Wrong tier": {
   "shape": "article",
