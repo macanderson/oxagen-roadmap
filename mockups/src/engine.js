@@ -15829,18 +15829,33 @@ S.tsel={}; S.dodEdit={}; S.tkDrafting={}; S.wo=null; S.ipz=null; S.wfz=null; S.d
 })();
 
 /* ---- marks. Provider and harness logos are the simple-icons paths (CC0), drawn at one size and in the
-   brand colour where the brand has one. Codex and Stella have no mark in that set: Codex is a terminal
-   glyph and Stella the house star. ---- */
+   brand colour where the brand has one. Codex, Stella and ServiceNow have no mark in that set: Codex is a
+   terminal glyph, Stella the house star, and ServiceNow a green ring. Each provider also carries its own
+   word for the unit of work (issue, incident, case, ticket) and for a comment only staff can read, so no
+   screen says "issue" about a help desk. Trackers come first, so Jira stays the third card. ---- */
 var IP_KIND={
- github:{l:"GitHub",c:"currentColor",what:"repositories",d:"M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"},
- linear:{l:"Linear",c:"#5E6AD2",what:"teams",d:"M2.886 4.18A11.982 11.982 0 0 1 11.99 0C18.624 0 24 5.376 24 12.009c0 3.64-1.62 6.903-4.18 9.105L2.887 4.18ZM1.817 5.626l16.556 16.556c-.524.33-1.075.62-1.65.866L.951 7.277c.247-.575.537-1.126.866-1.65ZM.322 9.163l14.515 14.515c-.71.172-1.443.282-2.195.322L0 11.358a12 12 0 0 1 .322-2.195Zm-.17 4.862 9.823 9.824a12.02 12.02 0 0 1-9.824-9.824Z"},
- jira:{l:"Jira",c:"#2684FF",what:"projects",d:"M11.571 11.513H0a5.218 5.218 0 0 0 5.232 5.215h2.13v2.057A5.215 5.215 0 0 0 12.575 24V12.518a1.005 1.005 0 0 0-1.005-1.005zm5.723-5.756H5.736a5.215 5.215 0 0 0 5.215 5.214h2.129v2.058a5.218 5.218 0 0 0 5.215 5.214V6.758a1.001 1.001 0 0 0-1.001-1.001zM23.013 0H11.455a5.215 5.215 0 0 0 5.215 5.215h2.129v2.057A5.215 5.215 0 0 0 24 12.483V1.005A1.001 1.001 0 0 0 23.013 0Z"}
+ github:{l:"GitHub",c:"currentColor",what:"repositories",unit:"issue",note:"comment",grp:"tracker",desc:"Issues from the repositories the Oxagen GitHub App can reach.",
+   url:function(t){var m=t.num.match(/^(.+)#(\d+)$/);return m?"https://github.com/"+m[1]+"/issues/"+m[2]:"#";},d:"M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"},
+ linear:{l:"Linear",c:"#5E6AD2",what:"teams",unit:"issue",note:"comment",grp:"tracker",desc:"Issues from the Linear teams you choose.",
+   url:function(t){return "https://linear.app/a-intel/issue/"+t.num;},d:"M2.886 4.18A11.982 11.982 0 0 1 11.99 0C18.624 0 24 5.376 24 12.009c0 3.64-1.62 6.903-4.18 9.105L2.887 4.18ZM1.817 5.626l16.556 16.556c-.524.33-1.075.62-1.65.866L.951 7.277c.247-.575.537-1.126.866-1.65ZM.322 9.163l14.515 14.515c-.71.172-1.443.282-2.195.322L0 11.358a12 12 0 0 1 .322-2.195Zm-.17 4.862 9.823 9.824a12.02 12.02 0 0 1-9.824-9.824Z"},
+ jira:{l:"Jira",c:"#2684FF",what:"projects",unit:"issue",note:"comment",grp:"tracker",desc:"Jira Cloud issues from the projects you choose.",
+   url:function(t){return "https://a-intel.atlassian.net/browse/"+t.num;},d:"M11.571 11.513H0a5.218 5.218 0 0 0 5.232 5.215h2.13v2.057A5.215 5.215 0 0 0 12.575 24V12.518a1.005 1.005 0 0 0-1.005-1.005zm5.723-5.756H5.736a5.215 5.215 0 0 0 5.215 5.214h2.129v2.058a5.218 5.218 0 0 0 5.215 5.214V6.758a1.001 1.001 0 0 0-1.001-1.001zM23.013 0H11.455a5.215 5.215 0 0 0 5.215 5.215h2.129v2.057A5.215 5.215 0 0 0 24 12.483V1.005A1.001 1.001 0 0 0 23.013 0Z"},
+ servicenow:{l:"ServiceNow",c:"#62D84E",what:"assignment groups",unit:"incident",note:"work note",grp:"desk",desc:"Incidents from the assignment groups you choose.",
+   url:function(t){return "https://a-intel.service-now.com/incident.do?sysparm_query=number="+t.num;},r:"evenodd",d:"M12 2.5a9.5 9.5 0 1 0 0 19 9.5 9.5 0 0 0 0-19zm0 4.25a5.25 5.25 0 1 1 0 10.5 5.25 5.25 0 0 1 0-10.5z"},
+ salesforce:{l:"Salesforce",c:"#00A1E0",what:"queues",unit:"case",note:"internal comment",grp:"desk",desc:"Service Cloud cases from the queues you choose.",
+   url:function(t){return "https://a-intel.lightning.force.com/lightning/o/Case/list?q="+t.num;},d:"M10.006 5.415a4.195 4.195 0 013.045-1.306c1.56 0 2.954.9 3.69 2.205.63-.3 1.35-.45 2.1-.45 2.85 0 5.159 2.34 5.159 5.22s-2.31 5.22-5.176 5.22c-.345 0-.69-.044-1.02-.104a3.75 3.75 0 01-3.3 1.95c-.6 0-1.155-.15-1.65-.375A4.314 4.314 0 018.88 20.4a4.302 4.302 0 01-4.05-2.82c-.27.062-.54.076-.825.076-2.204 0-4.005-1.8-4.005-4.05 0-1.5.811-2.805 2.01-3.51-.255-.57-.39-1.2-.39-1.846 0-2.58 2.1-4.65 4.65-4.65 1.53 0 2.85.705 3.72 1.8"},
+ zendesk:{l:"Zendesk",c:"currentColor",what:"groups",unit:"ticket",note:"internal note",grp:"desk",desc:"Tickets from the Zendesk groups you choose.",
+   url:function(t){return "https://a-intel.zendesk.com/agent/tickets/"+String(t.num).replace(/^#/,"");},d:"M12.914 2.904V16.29L24 2.905H12.914zM0 2.906C0 5.966 2.483 8.45 5.543 8.45s5.542-2.484 5.543-5.544H0zm11.086 4.807L0 21.096h11.086V7.713zm7.37 7.84c-3.063 0-5.542 2.48-5.542 5.543H24c0-3.06-2.48-5.543-5.543-5.543z"}
 };
 function ipLogo(k,size){
   var m=IP_KIND[k]; if(!m)return "";
   size=size||15;
-  return '<span class="ipl" title="'+h(m.l)+'"><svg width="'+size+'" height="'+size+'" viewBox="0 0 24 24" role="img" aria-label="'+h(m.l)+'"><path fill="'+m.c+'" d="'+m.d+'"/></svg></span>';
+  return '<span class="ipl" title="'+h(m.l)+'"><svg width="'+size+'" height="'+size+'" viewBox="0 0 24 24" role="img" aria-label="'+h(m.l)+'"><path fill="'+m.c+'"'+(m.r?' fill-rule="'+m.r+'"':'')+' d="'+m.d+'"/></svg></span>';
 }
+/* A unit with its article, for "delete an incident" and "delete a case". */
+function ipUnitA(k){var u=IP_KIND[k].unit;return (/^[aeiou]/.test(u)?"an ":"a ")+u;}
+/* The providers the Fields tab and the field editors show a column for: the connected ones, in IP_KIND order. */
+function tkCols(){var have={};wsProviders().forEach(function(p){have[p.kind]=1;});return Object.keys(IP_KIND).filter(function(k){return have[k];});}
 var HX={
  "claude-code":{c:"#D97757",f:"m4.7144 15.9555 4.7174-2.6471.079-.2307-.079-.1275h-.2307l-.7893-.0486-2.6956-.0729-2.3375-.0971-2.2646-.1214-.5707-.1215-.5343-.7042.0546-.3522.4797-.3218.686.0608 1.5179.1032 2.2767.1578 1.6514.0972 2.4468.255h.3886l.0546-.1579-.1336-.0971-.1032-.0972L6.973 9.8356l-2.55-1.6879-1.3356-.9714-.7225-.4918-.3643-.4614-.1578-1.0078.6557-.7225.8803.0607.2246.0607.8925.686 1.9064 1.4754 2.4893 1.8336.3643.3035.1457-.1032.0182-.0728-.164-.2733-1.3539-2.4467-1.445-2.4893-.6435-1.032-.17-.6194c-.0607-.255-.1032-.4674-.1032-.7285L6.287.1335 6.6997 0l.9957.1336.419.3642.6192 1.4147 1.0018 2.2282 1.5543 3.0296.4553.8985.2429.8318.091.255h.1579v-.1457l.1275-1.706.2368-2.0947.2307-2.6957.0789-.7589.3764-.9107.7468-.4918.5828.2793.4797.686-.0668.4433-.2853 1.8517-.5586 2.9021-.3643 1.9429h.2125l.2429-.2429.9835-1.3053 1.6514-2.0643.7286-.8196.85-.9046.5464-.4311h1.0321l.759 1.1293-.34 1.1657-1.0625 1.3478-.8804 1.1414-1.2628 1.7-.7893 1.36.0729.1093.1882-.0183 2.8535-.607 1.5421-.2794 1.8396-.3157.8318.3886.091.3946-.3278.8075-1.967.4857-2.3072.4614-3.4364.8136-.0425.0304.0486.0607 1.5482.1457.6618.0364h1.621l3.0175.2247.7892.522.4736.6376-.079.4857-1.2142.6193-1.6393-.3886-3.825-.9107-1.3113-.3279h-.1822v.1093l1.0929 1.0686 2.0035 1.8092 2.5075 2.3314.1275.5768-.3218.4554-.34-.0486-2.2039-1.6575-.85-.7468-1.9246-1.621h-.1275v.17l.4432.6496 2.3436 3.5214.1214 1.0807-.17.3521-.6071.2125-.6679-.1214-1.3721-1.9246L14.38 17.959l-1.1414-1.9428-.1397.079-.674 7.2552-.3156.3703-.7286.2793-.6071-.4614-.3218-.7468.3218-1.4753.3886-1.9246.3157-1.53.2853-1.9004.17-.6314-.0121-.0425-.1397.0182-1.4328 1.9672-2.1796 2.9446-1.7243 1.8456-.4128.164-.7164-.3704.0667-.6618.4008-.5889 2.386-3.0357 1.4389-1.882.929-1.0868-.0062-.1579h-.0546l-6.3385 4.1164-1.1293.1457-.4857-.4554.0608-.7467.2307-.2429 1.9064-1.3114Z"},
  "claude-agent-sdk":{c:"#D97757",f:"M17.3041 3.541h-3.6718l6.696 16.918H24Zm-10.6082 0L0 20.459h3.7442l1.3693-3.5527h7.0052l1.3693 3.5528h3.7442L10.5363 3.5409Zm-.3712 10.2232 2.2914-5.9456 2.2914 5.9456Z"},
@@ -15876,11 +15891,7 @@ function myAgents(){
 }
 function taskUrl(t){return "#/"+ORG.slug+"/"+S.ws+"/tasks/"+t.id;}
 function woUrl(w){return "#/"+ORG.slug+"/"+(w.ws||S.ws)+"/tasks/work-orders/"+w.id;}
-function providerUrl(t){
-  if(t.kind==="github"){var m=t.num.match(/^(.+)#(\d+)$/);return m?"https://github.com/"+m[1]+"/issues/"+m[2]:"#";}
-  if(t.kind==="linear")return "https://linear.app/a-intel/issue/"+t.num;
-  return "https://a-intel.atlassian.net/browse/"+t.num;
-}
+function providerUrl(t){var m=IP_KIND[t.kind];return m?m.url(t):"#";}
 function readyCount(){return wsTasks().filter(function(t){return t.ready==="ready";}).length;}
 /* What waits on a person here is a draft nobody has certified, or a certification the task outgrew. */
 function tkWaiting(){return wsTasks().filter(function(t){return t.ready==="draft"||t.ready==="changed";}).length;}
@@ -15914,10 +15925,10 @@ function tkPerson(id,opts){
   if(!p) return '<span class="dim">—</span>';
   if(p.state==="mapped"&&PEOPLE[p.to]) return '<span class="tkp">'+personAv(p.to,20)+'<span>'+h(PEOPLE[p.to].name)+(opts.handle?'<span class="dim mono" style="font-size:11px;margin-left:6px">'+ipLogo(p.kind,11)+' '+h(p.handle)+'</span>':'')+'</span></span>';
   return '<span class="tkp">'+ipLogo(p.kind,14)+'<span class="mono">'+h(p.handle)+'</span>'+
-    (p.state==="bot"?'<span class="b b-q" style="font-size:10px">bot</span>':'<span class="b b-q" style="font-size:10px" title="not mapped to a workspace member">not mapped</span>')+'</span>';
+    (p.state==="bot"||p.state==="requester"?'<span class="b b-q" style="font-size:10px">'+p.state+'</span>':'<span class="b b-q" style="font-size:10px" title="not mapped to a workspace member">not mapped</span>')+'</span>';
 }
 var DOD_TAGS=["code","test","docs","review"];
-var DOD_SRC={issue:"from the issue",assistant:"oxagen.assistant",operator:"you"};
+var DOD_SRC={assistant:"oxagen.assistant",operator:"you"};
 function tagChip(t){return '<span class="tg tg-'+h(t)+'">'+h(t)+'</span>';}
 function stageChain(wf,opts){
   opts=opts||{};
@@ -15941,7 +15952,7 @@ function pTasks(){
   if(S.state==="error") return errorState("Tasks","503 issue_index_unavailable");
   if(S.state==="denied") return deniedState("this workspace’s tasks","task.read on "+w.slug);
   if(S.state==="empty"||!wsProviders().length) return emptyState("No issue provider is connected to this workspace",
-    "Tasks arrive from GitHub, Linear or Jira. Connect one, choose what it imports, and oxagen.assistant drafts a definition of done for every open task it reads.",
+    "Tasks arrive from an issue tracker or a help desk: GitHub, Linear, Jira, ServiceNow, Salesforce Service Cloud, or Zendesk. Connect one, choose what it imports, and oxagen.assistant drafts a definition of done for every open task it reads.",
     '<button class="btn primary" onclick="ipzOpen()">Connect an issue provider</button>');
 
   var tabs='<div class="tabs" role="tablist">'+
@@ -16165,7 +16176,7 @@ function tkFieldsTab(){
 }
 
 /* ---- tab: people ---- */
-var TP_STATE={mapped:{b:"b-allowed",l:"mapped"},suggested:{b:"b-approval",l:"suggested"},unmapped:{b:"b-q",l:"not mapped"},bot:{b:"b-q",l:"bot"}};
+var TP_STATE={mapped:{b:"b-allowed",l:"mapped"},suggested:{b:"b-approval",l:"suggested"},unmapped:{b:"b-q",l:"not mapped"},bot:{b:"b-q",l:"bot"},requester:{b:"b-q",l:"requester"}};
 function tkPeopleTab(){
   var sug=TPEOPLE.filter(function(p){return p.state==="suggested";});
   var banner=sug.length?'<div class="banner" style="margin-bottom:14px"><span class="b b-approval" style="flex:none"><span class="d"></span>'+sug.length+' suggested</span>'+
@@ -16216,7 +16227,7 @@ function dodCertify(id){
   t.ready="ready"; t.certifiedBy=TK_ME; t.certifiedAt="2026-09-11 09:16"; t.digest="sha256:"+(t.id.slice(-6)+"7c1e04b9d2").toLowerCase();
   delete t.was; closeDialog();
   var p=wsProviders().filter(function(x){return x.kind===t.kind;})[0];
-  act("Certified. certify_task_dod recorded with the digest of "+t.dod.length+" items"+(p&&p.writeback.certify?", and the list posted as a comment on "+t.num:"")+".","gold");
+  act("Certified. certify_task_dod recorded with the digest of "+t.dod.length+" items"+(p&&p.writeback.certify?", and the list posted as a "+IP_KIND[t.kind].note+" on "+t.num:"")+".","gold");
 }
 DLG_EXT.certify=function(id){
   var t=taskById(id); if(!t)return noSuch("Task");
@@ -16224,7 +16235,7 @@ DLG_EXT.certify=function(id){
   return {t:"Certify the definition of done",s:t.num+" "+t.subject,w:true,
    b:'<ol class="dod-ro">'+t.dod.map(function(d){return '<li><span>'+h(d.t)+'</span> '+tagChip(d.tag)+' <span class="tg">'+h(d.k)+'</span></li>';}).join("")+'</ol>'+
     '<div class="note" style="margin:14px 0">Certifying records <span class="mono">certify_task_dod</span> with your name, the digest of these '+t.dod.length+' items, and the version of the task in '+h(IP_KIND[t.kind].l)+' they were read against. If the task changes upstream, the certification is marked changed and the task leaves ready.</div>'+
-    (p&&p.writeback.certify?'<div class="note" style="margin-bottom:14px">Oxagen posts the list as a comment on '+h(t.num)+', because the '+h(IP_KIND[t.kind].l)+' connection allows it.</div>':'')+
+    (p&&p.writeback.certify?'<div class="note" style="margin-bottom:14px">Oxagen posts the list as a '+h(IP_KIND[t.kind].note)+' on '+h(t.num)+', because the '+h(IP_KIND[t.kind].l)+' connection allows it.</div>':'')+
     (w.governance==="regulated"?'<div class="warn" style="margin-bottom:14px"><b>Regulated workspace.</b> The person who certifies cannot send this task in a work order.</div>':'')+
     '<label class="check"><input type="checkbox" id="certOk" onchange="var b=el(\'certBtn\');if(b)b.disabled=!this.checked"><span class="grow"><span class="n">I read every item</span><span class="d">These items are what done means for this task.</span></span></label>',
    f:'<span class="grow mono dim" style="font-size:11px">needs <span style="color:var(--accent-text)">task.certify</span> on '+h(w.slug)+'</span>'+
@@ -16240,7 +16251,7 @@ DLG_EXT.dodreopen=function(id){
 function dodRows(t,edit){
   if(!t.dod.length) return '<p class="muted" style="margin:0">No items yet.</p>';
   return '<ol class="dod-list">'+t.dod.map(function(d,i){
-    var src=d.src==="edited"?"edited by you":DOD_SRC[d.src]||d.src;
+    var src=d.src==="edited"?"edited by you":d.src==="issue"?"from the "+IP_KIND[t.kind].unit:DOD_SRC[d.src]||d.src;
     return '<li class="dod-i"><span class="n">'+(i+1)+'</span><div class="tx">'+
      (edit?'<input class="dod-in" value="'+h(d.t)+'" aria-label="Item '+(i+1)+'" onchange="dodSet(\''+t.id+'\','+i+',\'t\',this.value)">':'<span>'+h(d.t)+'</span>')+
      '<div class="meta">'+
