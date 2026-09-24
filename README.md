@@ -224,6 +224,17 @@ to generate a handler in TypeScript, Python, Go or Rust. The skill wizard search
 replaces a pinned version. Two pages carry the editing half: `record` (a published record, presented
 by its kind, with its statement in a real editor) and `skill-source`.
 
+## Tasks and work orders
+
+Work arrives from GitHub, Linear and Jira and leaves for an agent only in a work order.
+`docs/tasks-spec.md` is the spec. A six-step wizard connects a provider and maps its accounts to
+members, leaving any not mapped. `oxagen.assistant` drafts a definition of done for every task and a
+person certifies it, which makes the task ready. A work order sends ready tasks to an agent the sender
+operates: the merged definition of done, an editable prompt with `@` mentions, and confirmed
+repositories. Workflows chain agents and end with a person. The pages are `tasks`, `tasks-providers`,
+`task` and `work-order` in `mockups/pages/`, each with its audit prompt, and
+`node tools/check-tasks.mjs` walks every flow.
+
 
 ## Docs site
 
