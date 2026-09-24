@@ -27,6 +27,7 @@ Work through every check. For each, record PASS, FAIL, or N/A (with why). Cite e
    - The delivery warning where the spec says it renders, verbatim.
    - Two meters: stable prefix bytes of 16,384 with the split line, volatile tokens of the budget with the fit and cut counts.
    - Three parts, each naming its injection point in its tally: SessionStart additional context capped at 16 KiB, UserPromptSubmit additional context with the budget, files in the checkout with the repository and sync state.
+   - Every row in the three parts and every cut carries the kind badge the Library table uses, never a grey “record · constraint” chip. The Kind filter lists the word on the badge.
    - Manifest cuts with its badge: Item · Kind · Force · Token cost · Cut because · Why, with the four reasons and no others, and the Why copy per reason.
    - The closing note, verbatim.
 5. **Token figures reconcile.** The prefix meter's tokens equal the compile header plus the gate notice rows plus the must and should rows. The volatile meter's tokens equal the sum of the volatile rows. The cut count in the meter, the badge, and the table are the same number. Bytes equal tokens times the bundle's bytes per token.
