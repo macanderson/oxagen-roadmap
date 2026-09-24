@@ -58,12 +58,12 @@
   "citedAfter": 0.34
  },
  {
-  "id": "a-intel.postgres-safe-migration",
+  "id": "a-intel.safe-db-migration",
   "ver": "1.2.0",
   "kind": "constraint",
   "src": "linked",
   "srcLabel": "a-intel/billing",
-  "path": ".oxagen/skills/postgres-safe-migration/SKILL.md",
+  "path": ".oxagen/skills/safe-db-migration/SKILL.md",
   "digest": "sha256:1a7fe4b309cd8265",
   "tokens": 1320,
   "tier": "approval",

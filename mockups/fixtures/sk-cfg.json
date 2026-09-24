@@ -35,7 +35,7 @@
   },
   {
    "k": "market",
-   "label": "Oxagen marketplace",
+   "label": "oxagen marketplace",
    "on": true,
    "n": 1,
    "d": "Third-party. Every version is held until a person approves its digest."

@@ -80,7 +80,7 @@
    "cache": 0.76
   },
   {
-   "m": "z-ai/glm-latest (Oxagen)",
+   "m": "z-ai/glm-latest (oxagen)",
    "calls": 1204,
    "spend": "1,082.45",
    "cache": 0.62
@@ -283,7 +283,7 @@
      "approval"
     ]
    ],
-   "what": "Triage labelled the issue but the check found the label already present. Five of nine steps changed nothing."
+   "what": "Triage labeled the issue but the check found the label already present. Five of nine steps changed nothing."
   },
   {
    "run": "run_01K5RS7M2E8FJ3QW",

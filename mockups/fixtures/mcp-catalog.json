@@ -31,7 +31,7 @@
   "downscope": "installation token, per repo",
   "fin": false,
   "installs": 9840,
-  "d": "Repositories, pull requests, issues, checks and releases. The server every Oxagen workspace already imports.",
+  "d": "Repositories, pull requests, issues, checks and releases. The server every oxagen workspace already imports.",
   "match": ["repo", "repository", "pull request", "pr", "issue", "issues", "branch", "commit", "release", "github", "code review", "merge", "changelog", "tag"],
   "tools": [
    { "n": "get_file_contents", "d": "Read one file at a ref.", "risk": "low", "eff": "read", "out": true, "fin": "none" },

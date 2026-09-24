@@ -37,7 +37,7 @@
    "A served repeat is recorded as a tool.call frame with a cache_hit mark, so the run stays fully sealed and the saving is measurable on this page."
   ],
   "action": "Cache identical command results",
-  "done": "result_cache set to turn_window on claude_code__Bash for the Claude Code and Stella harnesses. Recorded as a definition change; takes effect on the next run."
+  "done": "result_cache set to turn_window on claude_code__Bash for the Claude Code and stella harnesses. Recorded as a definition change; takes effect on the next run."
  },
  "Refetching a stable list": {
   "shape": "article",

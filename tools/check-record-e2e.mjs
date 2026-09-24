@@ -157,9 +157,9 @@ const clickPg = async (page, re) => await page.evaluate(src => {
   ok(passed.recprState === "passed", "every check reported, got " + passed.recprState);
   txt = await pgText(page);
   const checkNames = ["Schema", "Lineage uniqueness", "record_hash recomputation", "Secret and PII scan",
-    "Conflict against active records", "constraint_effect"];
+    "Conflict against active records", "Constraint is require or forbid"];
   checkNames.forEach(n => ok(txt.includes(n), "check listed: " + n));
-  ok(/constraint_effect = forbid/.test(txt), "the constraint check reports this record's own effect");
+  ok(/constraint forbid/.test(txt), "the constraint check reports this record's own effect");
   ok(passed.records === before.records, "passing checks still publishes nothing");
   await shot(page, "rec-e2e-3-checks-passed");
 
@@ -235,7 +235,7 @@ const clickPg = async (page, re) => await page.evaluate(src => {
   await page.waitForFunction(() => recprCur() && recprSt(recprCur()).st === "passed", null, { timeout: 15000 }).catch(() => {});
   const txt = await pgText(page);
   ok(/not a constraining kind/.test(txt), "a memory passes the constraint check by not having one");
-  ok(!/constraint_effect = /.test(txt), "and claims no constraint_effect");
+  ok(!/constraint (require|forbid) /.test(txt), "and claims no constraint effect");
   ok(/no \[enforcement\] table/.test(txt), "its file says why it has no enforcement table");
   // and the structural fact, not only the sentence about it
   const f = await page.evaluate(() => { const d = recprCur(); return { text: recprFileText(d), ce: d.record.ce }; });

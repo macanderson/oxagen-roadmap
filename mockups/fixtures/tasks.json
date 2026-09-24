@@ -56,8 +56,8 @@
       "map": { "github": "state_reason not_planned", "linear": "Canceled with label wontfix", "jira": "Won't Do, Won't Fix" } },
     { "key": "duplicate", "name": "Duplicate", "builtin": true,
       "map": { "github": "state_reason duplicate", "linear": "Duplicate", "jira": "Duplicate" } },
-    { "key": "cancelled", "name": "Cancelled", "builtin": true,
-      "map": { "github": "state_reason not_planned with label cancelled", "linear": "Canceled", "jira": "Cancelled" } },
+    { "key": "cancelled", "name": "Canceled", "builtin": true,
+      "map": { "github": "state_reason not_planned with label canceled", "linear": "Canceled", "jira": "Canceled" } },
     { "key": "other", "name": "Other", "builtin": true,
       "map": { "github": "anything else", "linear": "anything else", "jira": "Cannot Reproduce, Incomplete, anything else" } }
   ],
@@ -357,7 +357,7 @@
       "desc": "Runs the tests a definition of done names and returns the work when one fails. Writes tests only.", "runs30": 39, "spend30": "41.12", "tier": "gateway", "host": "ci-runner-07" },
     { "key": "a-intel.core.documenter", "name": "Documenter", "harness": "cursor", "harnessLabel": "Cursor", "icon": "pencil-line", "tone": "line",
       "desc": "Writes the docs a definition of done names, in the pull request it was handed.", "runs30": 22, "spend30": "19.75", "tier": "harness", "host": "mbell-mbp-16" },
-    { "key": "a-intel.core.architect", "name": "Architect", "harness": "stella", "harnessLabel": "Stella", "icon": "compass", "tone": "solid",
+    { "key": "a-intel.core.architect", "name": "Architect", "harness": "stella", "harnessLabel": "stella", "icon": "compass", "tone": "solid",
       "desc": "Reviews a pull request against the architecture rules and the review items. Comments; never approves on its own.", "runs30": 31, "spend30": "57.60", "tier": "contained", "host": "stella-ci" }
   ]
 }
