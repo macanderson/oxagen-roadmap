@@ -17,6 +17,7 @@
       "tasks": 142,
       "events": "ok · 3,412 deliveries / 30d · 0 gaps",
       "health": "ok",
+      "create": true,
       "writeback": { "certify": true, "send": true, "status": false, "close": false }
     },
     {
@@ -36,6 +37,7 @@
       "tasks": 88,
       "events": "ok · 1,207 deliveries / 30d · 1 gap recovered",
       "health": "ok",
+      "create": false,
       "writeback": { "certify": true, "send": true, "status": false, "close": false }
     }
   ],
@@ -55,12 +57,12 @@
   "resolutions": [
     { "key": "done", "name": "Done", "builtin": true,
       "map": { "github": "state_reason completed", "linear": "Done", "jira": "Done, Fixed",
-               "servicenow": "close code Solved (Permanently), Solved (Work Around), Solved Remotely", "salesforce": "status Closed", "zendesk": "status Solved" } },
+               "servicenow": "close code Solution provided, Workaround provided, Resolved by caller", "salesforce": "status Closed", "zendesk": "status Solved" } },
     { "key": "wont-do", "name": "Won't do", "builtin": true,
       "map": { "github": "state_reason not_planned", "linear": "Canceled with label Won't do", "jira": "Won't Do, Won't Fix",
-               "servicenow": "close code Not Solved (Not Reproducible), Not Solved (Too Costly)" } },
+               "servicenow": "close code No resolution provided" } },
     { "key": "duplicate", "name": "Duplicate", "builtin": true,
-      "map": { "github": "state_reason duplicate", "linear": "Duplicate", "jira": "Duplicate" } },
+      "map": { "github": "state_reason duplicate", "linear": "Duplicate", "jira": "Duplicate", "servicenow": "close code Duplicate" } },
     { "key": "cancelled", "name": "Cancelled", "builtin": true,
       "map": { "github": "state_reason not_planned with label cancelled", "linear": "Canceled", "jira": "Cancelled",
                "servicenow": "state Canceled" } },

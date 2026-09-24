@@ -16120,10 +16120,10 @@ function tkProvTab(){
       '<dt>Last sync</dt><dd>'+h(p.synced)+'</dd>'+
       '<dt>Connected</dt><dd>'+h(p.connected)+' by '+h(PEOPLE[p.by].name)+'</dd></dl>'+
       '<div class="field" style="margin:14px 0 0"><label>Writes to '+h(k.l)+'</label><ul class="wb">'+
-      wbLine(p.writeback.certify,"Post the definition of done as a comment when a person certifies it")+
-      wbLine(p.writeback.send,"Post a link to the work order when it is sent")+
+      wbLine(p.writeback.certify,"Post the definition of done as a "+k.note+" when a person certifies it")+
+      wbLine(p.writeback.send,"Post a link to the work order as a "+k.note+" when it is sent")+
       wbLine(p.writeback.status,"Move the status when a work order starts")+
-      wbLine(p.writeback.close,"Close the task as Fixed when you accept the work")+'</ul></div></div>'+
+      wbLine(p.writeback.close,"Close the "+k.unit+" as Done when you accept the work")+'</ul></div></div>'+
       '<div class="panel-b rowacts" style="border-top:1px solid var(--border)">'+
       '<button class="btn sm" onclick="act(\''+h(k.l)+' sync queued. sync_issue_provider recorded as a governed action.\')">Sync now</button>'+
       '<button class="btn sm" onclick="ipzOpen(\''+p.kind+'\',\''+p.id+'\')">Edit scope and fields</button>'+
@@ -16132,35 +16132,39 @@ function tkProvTab(){
   var have={}; wsProviders().forEach(function(p){have[p.kind]=1;});
   var avail=Object.keys(IP_KIND).filter(function(k){return !have[k];}).map(function(k){
     return '<div class="panel ipc avail"><div class="panel-b"><div class="row" style="flex-wrap:nowrap">'+ipLogo(k,24)+'<div style="flex:1;min-width:0"><b>'+h(IP_KIND[k].l)+'</b>'+
-      '<div class="muted" style="font-size:12px">Import issues from the '+h(IP_KIND[k].what)+' you choose.</div></div>'+
+      '<div class="muted" style="font-size:12px">'+h(IP_KIND[k].desc)+'</div></div>'+
       '<button class="btn sm" onclick="ipzOpen(\''+k+'\')">Connect</button></div></div></div>';});
   return '<div class="grid g2">'+cards.join("")+avail.join("")+'</div>'+
    '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>How imports work</h3></div><div class="panel-b">'+
-   wzChecks([["events","Each provider sends an event when an issue changes. Oxagen reads the issue again and updates the task."],
+   wzChecks([["events","Each provider sends an event when an issue, incident, case, or ticket changes. Oxagen reads it again and updates the task."],
      ["reconcile","Every 15 minutes Oxagen lists what changed since the last read, so a missed event costs at most 15 minutes."],
      ["fields","Oxagen reads the thirteen fields on the Fields tab and nothing else. Custom fields are not read."],
-     ["writes","Oxagen writes to a provider only what the switches on its card allow. It never edits a subject or a description."]])+'</div></div>';
+     ["writes","Oxagen writes to a provider only what the switches on its card allow. It never edits a subject or a description, and it never replies to a requester."],
+     ["creates","Oxagen creates a status, resolution, or label in a provider only when you choose Create for it. It never renames or deletes one."]])+'</div></div>';
 }
 
 /* ---- tab: fields ---- */
+/* Where each of the thirteen fields comes from, per provider. The tab shows a column for each connected
+   provider, so a workspace with one help desk reads one column, not six. */
 var TK_FIELDS=[
- ["Task id","tsk_ ULID, minted by Oxagen","",""],
- ["Number","owner/repo#number","identifier, PLAT-231","key, OPS-88"],
- ["Subject","title","title","summary"],
- ["Description","body","description","description, converted to Markdown"],
- ["Labels","labels, issue type","labels, priority","labels, priority, issue type"],
- ["Owner","first assignee","assignee","assignee"],
- ["Created by","user","creator","reporter"],
- ["Created at","created_at","createdAt","created"],
- ["Updated by","actor of the latest timeline event","actor of the latest history entry","author of the latest changelog entry"],
- ["Updated at","updated_at","updatedAt","updated"],
- ["Closed at","closed_at","completedAt or canceledAt","resolutiondate"],
- ["Status","state, and the labels mapped below","workflow state","status category"],
- ["Resolution","state_reason","the completed or canceled state","resolution"]
+ {f:"Task id",all:"tsk_ ULID, minted by Oxagen"},
+ {f:"Number",github:"owner/repo#number",linear:"identifier, PLAT-231",jira:"key, OPS-88",servicenow:"number, INC0012345",salesforce:"CaseNumber, 00001026",zendesk:"id, #4821"},
+ {f:"Subject",github:"title",linear:"title",jira:"summary",servicenow:"short_description",salesforce:"Subject",zendesk:"subject"},
+ {f:"Description",github:"body",linear:"description",jira:"description, converted to Markdown",servicenow:"description",salesforce:"Description",zendesk:"the first comment"},
+ {f:"Labels",github:"labels, issue type",linear:"labels, priority",jira:"labels, priority, issue type",servicenow:"priority, category",salesforce:"Priority, Type",zendesk:"tags, priority, type"},
+ {f:"Owner",github:"first assignee",linear:"assignee",jira:"assignee",servicenow:"assigned_to",salesforce:"Owner, when a person owns the case",zendesk:"assignee"},
+ {f:"Created by",github:"user",linear:"creator",jira:"reporter",servicenow:"caller_id, a requester",salesforce:"Contact, a requester",zendesk:"requester"},
+ {f:"Created at",github:"created_at",linear:"createdAt",jira:"created",servicenow:"opened_at",salesforce:"CreatedDate",zendesk:"created_at"},
+ {f:"Updated by",github:"actor of the latest timeline event",linear:"actor of the latest history entry",jira:"author of the latest changelog entry",servicenow:"sys_updated_by",salesforce:"LastModifiedBy",zendesk:"author of the latest audit"},
+ {f:"Updated at",github:"updated_at",linear:"updatedAt",jira:"updated",servicenow:"sys_updated_on",salesforce:"LastModifiedDate",zendesk:"updated_at"},
+ {f:"Closed at",github:"closed_at",linear:"completedAt or canceledAt",jira:"resolutiondate",servicenow:"resolved_at",salesforce:"ClosedDate",zendesk:"solved_at from ticket metrics"},
+ {f:"Status",github:"state, and the labels mapped below",linear:"workflow state",jira:"status category",servicenow:"state",salesforce:"Status",zendesk:"status"},
+ {f:"Resolution",github:"state_reason",linear:"the completed or canceled state",jira:"resolution",servicenow:"close_code",salesforce:"the closed Status",zendesk:"the solved status or its tags"}
 ];
-function mapCells(m){return ["github","linear","jira"].map(function(k){return '<td class="mono" style="font-size:11.5px">'+h(m[k]||"—")+'</td>';}).join("");}
+function mapCells(m){return tkCols().map(function(k){return '<td class="mono" style="font-size:11.5px">'+h(m[k]||"—")+'</td>';}).join("");}
 function tkFieldsTab(){
-  var fr=TK_FIELDS.map(function(f){return '<tr><td><b>'+h(f[0])+'</b></td><td class="mono" style="font-size:11.5px">'+h(f[1])+'</td><td class="mono" style="font-size:11.5px">'+h(f[2]||(f[0]==="Task id"?"":"—"))+'</td><td class="mono" style="font-size:11.5px">'+h(f[3]||"")+'</td></tr>';}).join("");
+  var cols=tkCols(), heads=cols.map(function(k){return IP_KIND[k].l;});
+  var fr=TK_FIELDS.map(function(f){return '<tr><td><b>'+h(f.f)+'</b></td>'+(f.all?'<td class="mono" style="font-size:11.5px" colspan="'+cols.length+'">'+h(f.all)+'</td>':mapCells(f))+'</tr>';}).join("");
   var sr=TSTATUS.map(function(s){return '<tr '+rowClick("openDialog('stedit','"+s.key+"')","Edit "+s.name)+'><td>'+tStatusBadge(s.key)+(s.builtin?'':' <span class="b b-q" style="font-size:10px">added</span>')+'</td><td>'+h(s.cat)+'</td>'+mapCells(s.map)+'</tr>';}).join("");
   var rr=TRES.map(function(s){return '<tr '+rowClick("openDialog('resedit','"+s.key+"')","Edit "+s.name)+'><td><b>'+h(s.name)+'</b></td>'+mapCells(s.map)+'</tr>';}).join("");
   var lr=TLABELS.map(function(l){return '<tr '+rowClick("openDialog('lbledit','"+l.key+"')","Edit "+l.name)+'><td>'+lblChip(l.key)+'</td><td class="mono" style="font-size:11.5px"><span class="swv" style="background:'+h(l.color)+'"></span>'+h(l.color)+'</td><td>'+h(l.group)+'</td>'+mapCells(l.map)+'<td><span class="b b-q" title="arrives after day 1">later</span></td></tr>';}).join("");
@@ -16168,11 +16172,11 @@ function tkFieldsTab(){
     return '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><div style="flex:1;min-width:0"><h3>'+title+'</h3><p class="muted" style="margin:2px 0 0;font-size:12px">'+sub+'</p></div>'+
       (btn?'<div class="sp">'+btn+'</div>':'')+'</div><div class="tw"><table data-lt="off"><thead><tr>'+head.map(function(x){return '<th>'+x+'</th>';}).join("")+'</tr></thead><tbody>'+rows+'</tbody></table></div></div>';
   }
-  return panel("Task fields","Thirteen fields, read the same way from every provider.","",["Field","GitHub","Linear","Jira"],fr)+
-   panel("Statuses","Every status belongs to one of three categories: open, blocked or closed.",'<button class="btn sm" onclick="openDialog(\'stedit\',\'new\')">Add status</button>',["Status","Category","GitHub","Linear","Jira"],sr)+
-   panel("Resolutions","A closed task carries one resolution.",'<button class="btn sm" onclick="openDialog(\'resedit\',\'new\')">Add resolution</button>',["Resolution","GitHub","Linear","Jira"],rr)+
-   panel("Labels","A label has a colour and a mapping to each provider’s own labels, priorities or issue types.",'<button class="btn sm" onclick="openDialog(\'lbledit\',\'new\')">Add label</button>',["Label","Colour","Group","GitHub","Linear","Jira","Definition of done items"],lr)+
-   '<div class="note">Field settings are workspace settings. Each change is a governed action in Audit and applies to the next read of every task. Later, a label carries definition-of-done items that copy into the draft of every task that has it, and those templates live in .oxagen/ as files.</div>';
+  return panel("Task fields","Thirteen fields, read the same way from every provider.","",["Field"].concat(heads),fr)+
+   panel("Statuses","Every status belongs to one of three categories: open, blocked, or closed.",'<button class="btn sm" onclick="openDialog(\'stedit\',\'new\')">Add status</button>',["Status","Category"].concat(heads),sr)+
+   panel("Resolutions","A closed task carries one resolution.",'<button class="btn sm" onclick="openDialog(\'resedit\',\'new\')">Add resolution</button>',["Resolution"].concat(heads),rr)+
+   panel("Labels","A label has a colour and a mapping to each provider’s own labels, priorities, types, or tags.",'<button class="btn sm" onclick="openDialog(\'lbledit\',\'new\')">Add label</button>',["Label","Colour","Group"].concat(heads,["Definition of done items"]),lr)+
+   '<div class="note">Field settings are workspace settings. Each change is a governed action in Audit and applies to the next read of every task. A value a provider lacks can be created there from its editor. Later, a label carries definition-of-done items that copy into the draft of every task that has it, and those templates live in .oxagen/ as files.</div>';
 }
 
 /* ---- tab: people ---- */
@@ -16333,12 +16337,18 @@ function woItemsFor(ids,extra){
   return out;
 }
 function woOwner(wf,tag){if(!wf)return null;for(var i=0;i<wf.stages.length;i++){if(wf.stages[i].owns.indexOf(tag)>=0)return i;}return wf.stages.length-1;}
+/* What accepting does to the tasks in their provider: the connection's close switch decides. */
+function woClose(w){
+  var t=taskById(w.tasks[0])||{}, m=IP_KIND[t.kind], p=wsProviders().filter(function(x){return x.kind===t.kind;})[0];
+  return m&&p?{m:m,on:!!p.writeback.close,nums:w.tasks.map(function(x){return (taskById(x)||{}).num;}).join(", ")}:null;
+}
 function woAccept(id){
   var w=woById(id); if(!w)return;
   w.status="accepted"; w.accepted="2026-09-11 09:18";
   (w.claims||[]).forEach(function(c){if(c)c.ok=TK_ME;});
   w.tasks.forEach(function(tid){var t=taskById(tid); if(t)t.ready="accepted";});
-  closeDialog(); act("Accepted. accept_work_order recorded. GitHub close on accept is off for this connection, so "+w.tasks.map(function(x){return (taskById(x)||{}).num;}).join(", ")+" stays open there.","gold");
+  var c=woClose(w);
+  closeDialog(); act("Accepted. accept_work_order recorded."+(c?(c.on?" Oxagen closes "+c.nums+" in "+c.m.l+" as Done.":" "+c.nums+" stays open in "+c.m.l+", because close on accept is off for that connection."):""),"gold");
 }
 function woStop(id){var w=woById(id); if(!w)return; w.status="stopped"; closeDialog(); act("Stopped. The runtime is told at its next boundary; the tasks go back to ready.");
   w.tasks.forEach(function(tid){var t=taskById(tid); if(t&&t.ready==="sent")t.ready="ready";});}
@@ -16348,7 +16358,9 @@ DLG_EXT.woaccept=function(id){
   return {t:"Accept the work",s:w.title,w:false,
    b:'<p>You accept '+items.length+' items the agents claimed, with the evidence each one cited.</p>'+
     '<div class="note" style="margin:12px 0">Accepting records <span class="mono">accept_work_order</span> with your name. It does not merge anything. The pull request '+h((w.runs[w.runs.length-1]||{}).pr||"")+' is merged by a person on GitHub.</div>'+
-    '<div class="note">The GitHub connection has close on accept off, so the task stays open there until somebody closes it.</div>',
+    (function(){var c=woClose(w); if(!c)return "";
+      return '<div class="note">'+(c.on?'The '+h(c.m.l)+' connection closes each '+h(c.m.unit)+' as Done, the resolution for work a person accepted.'
+        :'The '+h(c.m.l)+' connection has close on accept off, so each '+h(c.m.unit)+' stays open there until somebody closes it. Turned on, it closes each one as Done.')+'</div>';})(),
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="woAccept(\''+w.id+'\')">Accept every item</button>'};
 };
 DLG_EXT.wostop=function(id){
@@ -16593,76 +16605,168 @@ DLG_EXT.wo=function(){
    Provider, Authorize, Scope, Fields, People, Review. A connection is not a file: it holds a credential and
    an identity map, so it is a row in the workspace credential store and every step of it is a governed
    action. It sends nothing to any agent. */
+/* Each provider's wizard data. creates says what Oxagen makes in the provider when you choose Create for a
+   status, a resolution, or a label: [what it is called there, 1 if it needs createPerm]. null means the
+   provider has no such value to add. createPerm is the extra grant creating needs; the Authorize step asks
+   for it only while "Create values" is on. */
 var IPZ={
  github:{scope:[["a-intel/platform","main repo",true],["a-intel/billing","linked repo",true],["a-intel/mobile","linked repo",true],["a-intel/infra","linked repo",false],["a-intel/help-center","not linked",false]],
    scopeWhat:"Repositories the Oxagen GitHub App can reach",
-   perms:[["Issues","read and write","read issues, and post the comments you turn on"],["Metadata","read","list the repositories you choose"],["Pull requests","read","show the pull request linked to a task"]],
+   intro:"Oxagen uses the GitHub App already installed on <b>a-intel</b> for your repositories. Importing issues needs one more permission, which an organization owner approves on github.com.",
+   perms:[["Issues","read and write","read issues, post the comments you turn on, and create the labels you choose"],["Metadata","read","list the repositories you choose"],["Pull requests","read","show the pull request linked to a task"]],
+   createPerm:null,creates:{status:["label",0],res:["label",0],label:["label",0]},
+   createNote:"GitHub has no custom statuses or close reasons, so Oxagen creates each value as a label, with the Issues permission.",
    authBtn:"Request the Issues permission",
    authed:"Approved on github.com by mbell-ai. The installation 41829377 now has Issues: read and write.",
+   signs:true,account:"a-intel",accountLabel:"GitHub organization",auth:"GitHub App installation 41829377",
    people:[["mbell-ai","Marcus Bell","marcus@a-intel.example","marcus","verified email"],["priya-n","Priya Natarajan","priya@a-intel.example","priya","verified email"],["jonas-okoro","Jonas Okoro","jonas.okoro@a-intel.example","jonas","verified email"],["vk-dev","V. Kaur","",null,""],["dependabot[bot]","Dependabot","",null,"bot"]],
-   values:{status:["state open","state closed","label blocked","open with a linked pull request"],res:["state_reason completed","state_reason not_planned","state_reason duplicate"],label:["P0","P1","P2","P3","bug","enhancement","improvement","documentation","test","chore","good first issue"]},
+   values:{status:["state open","state closed","label blocked","open with a linked pull request"],res:["state_reason completed","state_reason not_planned","state_reason duplicate"],label:["label P0","label P1","label P2","label P3","label bug","label enhancement","label improvement","label documentation","label test","label chore","label good first issue"]},
    est:142},
- linear:{scope:[["PLAT","Platform",true],["INFRA","Infrastructure",true],["SUP","Support",false],["DATA","Data",false]],
+ linear:{keyed:true,scope:[["PLAT","Platform",true],["INFRA","Infrastructure",true],["SUP","Support",false],["DATA","Data",false]],
    scopeWhat:"Teams in the Anderson Intelligence workspace",
+   intro:"Oxagen asks Linear for a token that acts as the Oxagen app. Anything it posts is signed by Oxagen, not by you.",
    perms:[["read","read","read issues, teams, users and workflow states"],["comments:create","write","post the comments you turn on"],["actor=app","","comments post as Oxagen, never as you"]],
+   createPerm:["write","write","create the workflow states and labels you choose on the Fields step"],
+   creates:{status:["workflow state",1],res:["workflow state",1],label:["label",1]},
+   createNote:"Oxagen creates statuses and resolutions as workflow states, and labels as labels, with the write scope.",
    authBtn:"Authorize with Linear",
    authed:"Authorized by Marcus Bell in Linear. The token belongs to the Oxagen app, not to a person.",
+   signs:true,account:"Anderson Intelligence",accountLabel:"Linear workspace",auth:"OAuth 2.0 as an app actor",
    people:[["marcus","Marcus Bell","marcus@a-intel.example","marcus","verified email"],["priya","Priya Natarajan","priya@a-intel.example","priya","verified email"],["ines.h","Ines Haddad","ines.haddad@a-intel.example","ines","verified email"],["support-rota","Support rota","support@a-intel.example",null,""]],
-   values:{status:["Backlog","Todo","In Progress","In Review","Done","Canceled","Duplicate","label Blocked"],res:["Done","Canceled","Duplicate"],label:["priority Urgent","priority High","priority Medium","priority Low","Bug","Feature","Improvement","Docs","Test","Chore"]},
+   values:{status:["Backlog","Todo","In Progress","In Review","Done","Canceled","Duplicate","label Blocked"],res:["Done","Canceled","Duplicate"],label:["priority Urgent","priority High","priority Medium","priority Low","label Bug","label Feature","label Improvement","label Docs","label Test","label Chore"]},
    est:88},
- jira:{scope:[["OPS","Operations",true],["PLAT","Platform",true],["SEC","Security",false]],
+ jira:{keyed:true,site:{label:"Site",value:"a-intel.atlassian.net"},scope:[["OPS","Operations",true],["PLAT","Platform",true],["SEC","Security",false]],
    scopeWhat:"Projects on a-intel.atlassian.net",
-   perms:[["read:jira-work","read","read issues, statuses and resolutions"],["read:jira-user","read","read the people named on an issue"],["write:jira-work","write","post the comments and make the transitions you turn on"],["offline_access","","refresh the token without asking you again"]],
+   intro:"Oxagen asks Atlassian for a token on one Jira Cloud site. Jira Server and Data Center are not supported yet.",
+   perms:[["read:jira-work","read","read issues, statuses and resolutions"],["read:jira-user","read","read the people named on an issue"],["write:jira-work","write","post the comments and make the transitions you turn on, and add the labels you choose"],["offline_access","","refresh the token without asking you again"]],
+   createPerm:["manage:jira-configuration","admin","create the statuses and resolutions you choose on the Fields step. A Jira admin approves it."],
+   creates:{status:["status",1],res:["resolution",1],label:["label",0]},
+   createNote:"Oxagen creates statuses and resolutions with manage:jira-configuration. A new status reaches a project once a Jira admin adds it to the project’s workflow. A Jira label exists once an issue carries it, so Oxagen adds a label the first time it sets one.",
    authBtn:"Authorize with Atlassian",
    authed:"Authorized by Marcus Bell for a-intel.atlassian.net. Oxagen refreshes the token on its own.",
+   accountLabel:"Jira Cloud site",auth:"OAuth 2.0 (3LO) with offline access",
    people:[["Marcus Bell","Marcus Bell","marcus@a-intel.example","marcus","verified email"],["Priya Natarajan","Priya Natarajan","priya@a-intel.example","priya","verified email"],["Tobias Brennan","Tobias Brennan","tobias.brennan@a-intel.example","tobias","verified email"],["Automation for Jira","Automation for Jira","",null,"bot"]],
    values:{status:["category To Do","category In Progress","category Done","status Blocked","flagged","In Review"],res:["Done","Fixed","Won't Do","Won't Fix","Duplicate","Cancelled","Cannot Reproduce"],label:["priority Highest","priority High","priority Medium","priority Low","priority Lowest","issue type Bug","issue type Story","issue type New Feature","issue type Improvement","issue type Task","label documentation","label test"]},
-   est:64}
+   est:64},
+ servicenow:{site:{label:"Instance",value:"a-intel.service-now.com"},scope:[["Service Desk","first-line IT support",true],["Network","network operations",true],["Database","database administration",false],["Hardware","desk-side hardware",false]],
+   scopeWhat:"Assignment groups on a-intel.service-now.com",
+   intro:"Oxagen asks your ServiceNow instance for a token through an OAuth application an admin registers there. The token acts within the roles of the account that authorizes it.",
+   perms:[["useraccount","read and write","act as the account that authorizes, within its roles"],["itil role","read and write","read incidents in the groups you choose, and post the work notes you turn on"],["refresh token","","refresh the token without asking you again"]],
+   createPerm:["personalize_choices role","admin","add the state, close code, and category choices you choose on the Fields step. A ServiceNow admin grants it."],
+   creates:{status:["state choice",1],res:["close code choice",1],label:["category choice",1]},
+   createNote:"Oxagen adds choices to the incident table with the personalize_choices role. Priority comes from impact and urgency, so Oxagen never adds a priority.",
+   closeNote:"Resolving an incident runs the instance’s notifications, which by default email the caller.",
+   authBtn:"Authorize with ServiceNow",
+   authed:"Authorized by marcus.bell on a-intel.service-now.com. The token acts within that account’s roles.",
+   accountLabel:"ServiceNow instance",auth:"OAuth 2.0 through the instance’s application registry",
+   people:[["marcus.bell","Marcus Bell","marcus@a-intel.example","marcus","verified email"],["priya.natarajan","Priya Natarajan","priya@a-intel.example","priya","verified email"],["dana.okafor","Dana Okafor","dana@a-intel.example","dana","verified email"],["abel.tuter","Abel Tuter","abel.tuter@a-intel.example",null,"requester"],["system","System","",null,"bot"]],
+   values:{status:["state New","state In Progress","state On Hold","state Resolved","state Closed","state Canceled"],res:["close code Solution provided","close code Workaround provided","close code Resolved by caller","close code No resolution provided","close code Duplicate","close code Known error","close code User error","state Canceled"],label:["priority 1 - Critical","priority 2 - High","priority 3 - Moderate","priority 4 - Low","priority 5 - Planning","category Software","category Hardware","category Network","category Database","category Inquiry / Help"]},
+   est:57},
+ salesforce:{site:{label:"My Domain",value:"a-intel.my.salesforce.com"},scope:[["Tier 1 Support","first-line cases",true],["Billing Support","billing questions",true],["Escalations","cases a manager owns",false]],
+   scopeWhat:"Case queues in the a-intel org",
+   intro:"Oxagen asks Salesforce for a token through a connected app. The token acts as the account that authorizes it, within that account’s profile and permission sets.",
+   perms:[["api","read and write","read cases, and post the internal comments you turn on"],["refresh_token","","refresh the token without asking you again"]],
+   createPerm:["Customize Application","admin","add the Status, Type, and Priority values you choose on the Fields step, through the Metadata API. A Salesforce admin grants it."],
+   creates:{status:["Status value",1],res:["closed Status value",1],label:["Type value",1]},
+   createNote:"Oxagen adds picklist values through the Metadata API, which needs Customize Application. A new Status value reaches a case once an admin adds it to the support process.",
+   authBtn:"Authorize with Salesforce",
+   authed:"Authorized by Marcus Bell for a-intel.my.salesforce.com. Oxagen refreshes the token on its own.",
+   accountLabel:"Salesforce org",auth:"OAuth 2.0 through a connected app",
+   people:[["marcus@a-intel.example","Marcus Bell","marcus@a-intel.example","marcus","verified email"],["priya@a-intel.example","Priya Natarajan","priya@a-intel.example","priya","verified email"],["dana@a-intel.example","Dana Okafor","dana@a-intel.example","dana","verified email"],["Rosa Diaz","Rosa Diaz","rosa.diaz@northwind.example",null,"requester"],["Automated Process","Automated Process","",null,"bot"]],
+   values:{status:["status New","status Working","status Escalated","status Closed"],res:["status Closed"],label:["priority High","priority Medium","priority Low","type Problem","type Feature Request","type Question"]},
+   est:76},
+ zendesk:{site:{label:"Subdomain",value:"a-intel.zendesk.com"},scope:[["Support","first-line tickets",true],["Billing","billing questions",true],["Onboarding","new accounts",false]],
+   scopeWhat:"Groups in the a-intel Zendesk account",
+   intro:"Oxagen asks Zendesk for a token on one account. The token acts as the staff account that authorizes it.",
+   perms:[["read","read","read tickets, groups, and users"],["write","write","post the internal notes and make the status changes you turn on, and add the tags you choose"]],
+   createPerm:["admin role","admin","add the custom ticket statuses you choose on the Fields step. The account that authorizes must be a Zendesk admin."],
+   creates:{status:["custom status",1],res:["tag",0],label:["tag",0]},
+   createNote:"A Zendesk tag exists once a ticket carries it, so Oxagen adds a tag the first time it sets one. Custom statuses need an admin account. Priority and type are fixed in Zendesk, so Oxagen never adds one.",
+   closeNote:"Solving a ticket runs Zendesk’s triggers, which by default email the requester.",
+   authBtn:"Authorize with Zendesk",
+   authed:"Authorized by Marcus Bell for a-intel.zendesk.com. The token acts as that staff account.",
+   accountLabel:"Zendesk account",auth:"OAuth 2.0 as a staff account",
+   people:[["Marcus Bell","Marcus Bell","marcus@a-intel.example","marcus","verified email"],["Priya Natarajan","Priya Natarajan","priya@a-intel.example","priya","verified email"],["Dana Okafor","Dana Okafor","dana@a-intel.example","dana","verified email"],["Lena Fischer","Lena Fischer","lena@northwind.example",null,"requester"]],
+   values:{status:["status New","status Open","status Pending","status On-hold","status Solved","status Closed"],res:["status Solved"],label:["priority Urgent","priority High","priority Normal","priority Low","type Problem","type Incident","type Question","type Task","tag documentation","tag billing"]},
+   est:120}
 };
+var IPZ_KINDS=[["status","Statuses"],["res","Resolutions"],["label","Labels"]];
+function ipzList(kind){return kind==="status"?TSTATUS:kind==="res"?TRES:TLABELS;}
+function ipzFilters(k){var u=IP_KIND[k].unit+"s";return ["open "+u+", and "+u+" closed in the last 30 days","open "+u+" only","every "+IP_KIND[k].unit];}
+/* Everything the wizard holds for one provider; picking another provider starts it again. */
+function ipzFor(z,k){var d=IPZ[k];
+  z.kind=k; z.authed=false; z.site=d.site?d.site.value:""; z.filter=ipzFilters(k)[0]; z.create=true;
+  z.scope=d.scope.reduce(function(m,s){m[s[0]]=s[2];return m;},{});
+  z.people={}; d.people.forEach(function(p){z.people[p[0]]=p[3]||"";});
+  z.map={status:{},res:{},label:{}}; z.add={status:[],res:[],label:[]};
+}
 function ipzOpen(kind,editId){
-  var d=kind?IPZ[kind]:null;
-  S.ipz={step:kind?(editId?3:2):1,kind:kind||null,edit:editId||null,authed:!!editId,site:"a-intel.atlassian.net",
-    scope:d?d.scope.reduce(function(m,s){m[s[0]]=s[2];return m;},{}):{},filter:"open issues, and issues closed in the last 30 days",
-    wb:{certify:true,send:true,status:false,close:false},people:{}};
-  if(d)d.people.forEach(function(p){S.ipz.people[p[0]]=p[3]||"";});
+  S.ipz={step:kind?(editId?3:2):1,kind:null,edit:editId||null,wb:{certify:true,send:true,status:false,close:false}};
+  if(kind){ipzFor(S.ipz,kind); S.ipz.authed=!!editId;
+    var p=editId&&IPROV.filter(function(x){return x.id===editId;})[0];
+    if(p){S.ipz.filter=p.filter; S.ipz.wb=Object.assign({},p.writeback); S.ipz.create=p.create!==false;}}
   S.dlg="ipwz"; S.dlgArg=null; S.layer=null; render();
 }
 function ipzGo(n){if(!S.ipz)return; S.ipz.step=n; render();}
-function ipzPick(k){var z=S.ipz; z.kind=k; z.authed=false; var d=IPZ[k];
-  z.scope=d.scope.reduce(function(m,s){m[s[0]]=s[2];return m;},{}); z.people={}; d.people.forEach(function(p){z.people[p[0]]=p[3]||"";}); render();}
+function ipzPick(k){ipzFor(S.ipz,k); render();}
 function ipzAuth(){var z=S.ipz; z.authing=true; render(); setTimeout(function(){if(!S.ipz)return; S.ipz.authing=false; S.ipz.authed=true; render();},700);}
+function ipzCreateOn(v){S.ipz.create=v; S.ipz.authed=false; render();}
+/* What Oxagen would create for this kind of value, or null when it cannot. */
+function ipzCan(kind){var z=S.ipz, c=IPZ[z.kind].creates[kind]; return c&&(!c[1]||z.create)?c[0]:null;}
+/* The value as Oxagen writes it in the provider. A tag, or a Jira label, holds no spaces, so Won't do is wont_do there. */
+function ipNew(k,what,name){return what+" "+(what==="tag"||(k==="jira"&&what==="label")?name.toLowerCase().replace(/'/g,"").replace(/[^a-z0-9]+/g,"_").replace(/^_|_$/g,""):name);}
+function ipzSet(kind,key,v){S.ipz.map[kind][key]=v; render();}
+function ipzAdd(kind,i){var z=S.ipz, v=IPZ[z.kind].values[kind][i]; if(z.add[kind].indexOf(v)<0)z.add[kind].push(v); render();}
+function ipzUnadd(kind,i){S.ipz.add[kind].splice(i,1); render();}
+/* The provider value without its field word: "issue type Story" is Story, "priority Lowest" is Lowest. */
+function ipzPlain(v){return String(v).replace(/^(issue type|close code|state_reason|priority|category|status|state|label|type|tag)\s+/,"");}
+function ipzSuggest(kind,x,k){var v=x.map[k]||"";
+  return kind==="status"?v.replace(/,.*$/,""):kind==="res"?v.split(",")[0].replace(/ with .*/,""):v.split(",")[0];}
+function ipzCounts(){var z=S.ipz, c=0, a=0;
+  IPZ_KINDS.forEach(function(x){Object.keys(z.map[x[0]]).forEach(function(key){if(z.map[x[0]][key]==="__create")c++;}); a+=z.add[x[0]].length;});
+  return {create:c,add:a};}
 function ipzSteps(){return ["Provider","Authorize","Scope","Fields","People","Review"];}
 function ipzRail(){
   var st=ipzSteps(),cur=S.ipz.step;
   return '<div class="wz-rail" role="list">'+st.map(function(l,i){var n=i+1,cls=n===cur?"on":n<cur?"done":"";
     return '<span class="wz-st '+cls+'" role="listitem"'+(n===cur?' aria-current="step"':'')+'><i>'+(n<cur?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4 4L19 7"/></svg>':n)+'</i>'+h(l)+'</span>';}).join("")+'</div>';
 }
-function ipzMapRow(name,chip,vals,cur){
-  var has=vals.indexOf(cur)>=0;
-  return '<tr><td>'+chip+'</td><td><select class="sel-sm" aria-label="'+h(name)+'"><option value="">nothing</option>'+
-    vals.map(function(v){return '<option'+(v===cur?' selected':'')+'>'+h(v)+'</option>';}).join("")+(cur&&!has?'<option selected>'+h(cur)+'</option>':'')+'</select></td>'+
-    '<td>'+(cur?'<span class="b b-q" style="font-size:10px">suggested</span>':'<span class="dim" style="font-size:11px">—</span>')+'</td></tr>';
+/* One Oxagen value and the provider value it maps to. The select offers the provider's values, nothing,
+   and, where the provider can hold one, Create: Oxagen adds the value there when you connect. */
+function ipzMapRow(kind,x,chip){
+  var z=S.ipz, k=z.kind, vals=IPZ[k].values[kind], cur=ipzSuggest(kind,x,k), set=z.map[kind][x.key], v=set===undefined?cur:set;
+  var can=ipzCan(kind), has=vals.indexOf(v)>=0, P=IP_KIND[k].l;
+  var src=v==="__create"?'<span class="b b-approval" style="font-size:10px" title="Oxagen creates it as a '+h(can||"")+'">create</span>'
+    :v?'<span class="b b-q" style="font-size:10px">'+(set===undefined?'suggested':'chosen')+'</span>':'<span class="dim" style="font-size:11px">—</span>';
+  return '<tr><td>'+chip+'</td><td><select class="sel-sm" aria-label="'+h(x.name)+'" onchange="ipzSet(\''+kind+'\',\''+h(x.key)+'\',this.value)"><option value="">nothing</option>'+
+    vals.map(function(o){return '<option'+(o===v?' selected':'')+'>'+h(o)+'</option>';}).join("")+(v&&v!=="__create"&&!has?'<option selected>'+h(v)+'</option>':'')+
+    (can?'<option value="__create"'+(v==="__create"?' selected':'')+'>Create “'+h(x.name)+'” in '+h(P)+'</option>':'')+'</select></td><td>'+src+'</td></tr>';
 }
 function ipzBody(){
   var z=S.ipz, k=z.kind, d=k?IPZ[k]:null, m=k?IP_KIND[k]:null;
   if(z.step===1){
     var have={}; wsProviders().forEach(function(p){have[p.kind]=1;});
-    return {b:'<p style="margin-bottom:14px">Choose where the tasks come from. You can connect more than one, and more than one account of the same provider.</p><div class="wz-pick">'+
-      Object.keys(IP_KIND).map(function(x){var c=IP_KIND[x];
+    function cards(g){return '<div class="wz-pick">'+Object.keys(IP_KIND).filter(function(x){return IP_KIND[x].grp===g;}).map(function(x){var c=IP_KIND[x];
         return '<button class="wz-card ipz-card'+(z.kind===x?' on':'')+'" aria-pressed="'+(z.kind===x)+'" onclick="ipzPick(\''+x+'\')">'+
          '<span class="ic">'+ipLogo(x,26)+'</span><span class="tx"><b>'+h(c.l)+(have[x]?' <span class="b b-allowed" style="font-size:10px"><span class="d"></span>connected</span>':'')+'</b>'+
-         '<span class="d">'+(x==="github"?"Issues from the repositories the Oxagen GitHub App can reach.":x==="linear"?"Issues from the Linear teams you choose.":"Jira Cloud issues from the projects you choose.")+'</span></span></button>';}).join("")+'</div>',
+         '<span class="d">'+h(c.desc)+'</span></span></button>';}).join("")+'</div>';}
+    return {b:'<p style="margin-bottom:14px">Choose where the tasks come from. You can connect more than one, and more than one account of the same provider.</p>'+
+      '<div class="field"><label>Issue trackers</label>'+cards("tracker")+'</div><div class="field"><label>Help desks</label>'+cards("desk")+'</div>',
       f:'<button class="btn" onclick="S.ipz=null;closeDialog()">Cancel</button><button class="btn primary"'+(z.kind?'':' disabled')+' onclick="ipzGo(2)">Next</button>'};
   }
   if(z.step===2){
-    return {b:'<div class="row" style="margin-bottom:14px;flex-wrap:nowrap">'+ipLogo(k,28)+'<p style="margin:0">'+
-      (k==="github"?"Oxagen uses the GitHub App already installed on <b>a-intel</b> for your repositories. Importing issues needs one more permission, which an organization owner approves on github.com."
-       :k==="linear"?"Oxagen asks Linear for a token that acts as the Oxagen app. Anything it posts is signed by Oxagen, not by you."
-       :"Oxagen asks Atlassian for a token on one Jira Cloud site. Jira Server and Data Center are not supported yet.")+'</p></div>'+
-      (k==="jira"?'<div class="field"><label for="ipzSite">Site</label><input id="ipzSite" value="'+h(z.site)+'" oninput="S.ipz.site=this.value"></div>':'')+
+    var perms=d.perms.concat(d.createPerm&&z.create?[d.createPerm]:[]);
+    var cannot=[["edit","a subject or a description, or delete "+ipUnitA(k)],
+      d.signs?["act as you","every write is signed by the Oxagen app"]:["act as anyone else","every write appears under the account that authorizes, so authorize with one made for Oxagen"]]
+      .concat(m.grp==="desk"?[["reply to a requester","every "+m.note+" Oxagen posts is one only staff can read"]]:[])
+      .concat([["read more","than the "+m.what+" you choose next"],["rename or delete","a status, resolution, or label, including one Oxagen created"]]);
+    return {b:'<div class="row" style="margin-bottom:14px;flex-wrap:nowrap">'+ipLogo(k,28)+'<p style="margin:0">'+d.intro+'</p></div>'+
+      (d.site?'<div class="field"><label for="ipzSite">'+h(d.site.label)+'</label><input id="ipzSite" value="'+h(z.site)+'" oninput="S.ipz.site=this.value"></div>':'')+
+      (d.createPerm?'<label class="check" style="margin-bottom:12px"><input type="checkbox" id="ipzCreate"'+(z.create?' checked':'')+' onchange="ipzCreateOn(this.checked)"><span class="grow"><span class="n">Create values in '+h(m.l)+'</span>'+
+        '<span class="d">Asks for '+h(d.createPerm[0])+' too, so the Fields step can create the statuses, resolutions, and labels '+h(m.l)+' lacks.</span></span></label>':'')+
       '<div class="field"><label>What Oxagen asks for</label><div class="tw"><table data-lt="off"><thead><tr><th>Permission</th><th>Access</th><th>Why</th></tr></thead><tbody>'+
-       d.perms.map(function(p){return '<tr><td class="mono">'+h(p[0])+'</td><td>'+h(p[1]||"—")+'</td><td>'+h(p[2])+'</td></tr>';}).join("")+'</tbody></table></div></div>'+
-      '<div class="field"><label>What it still cannot do</label>'+wzChecks([["edit","a subject or a description, or delete an issue"],["act as you","every write is signed by the Oxagen app"],["read more","than the "+m.what+" you choose next"],["assign","a task to a person in "+m.l+" unless you turn that on"]])+'</div>'+
+       perms.map(function(p){return '<tr><td class="mono">'+h(p[0])+'</td><td>'+h(p[1]||"—")+'</td><td>'+h(p[2])+'</td></tr>';}).join("")+'</tbody></table></div></div>'+
+      '<div class="field"><label>What it still cannot do</label>'+wzChecks(cannot)+'</div>'+
       (z.authed?'<div class="banner"><span class="b b-allowed" style="flex:none"><span class="d"></span>authorized</span><div class="grow"><b>'+h(m.l)+' is authorized</b>'+h(d.authed)+'</div></div>'
         :'<button class="btn" '+(z.authing?'disabled':'')+' onclick="ipzAuth()">'+ipLogo(k,15)+h(z.authing?"Waiting for "+m.l+"…":d.authBtn)+'</button>')+
       '<div class="note" style="margin-top:14px">The token is stored in the workspace credential store, encrypted under the organization’s key. Nobody can read it back, including you.</div>',
@@ -16673,68 +16777,96 @@ function ipzBody(){
     return {b:'<div class="field"><label>'+h(d.scopeWhat)+'</label>'+d.scope.map(function(s){
         return '<label class="check" style="margin-bottom:8px"><input type="checkbox"'+(z.scope[s[0]]?' checked':'')+' onchange="S.ipz.scope[\''+h(s[0])+'\']=this.checked;render()"><span class="grow"><span class="n">'+h(s[0])+'</span><span class="d">'+h(s[1])+'</span></span></label>';}).join("")+'</div>'+
       '<div class="field"><label for="ipzFilter">Import</label><select id="ipzFilter" onchange="S.ipz.filter=this.value">'+
-       ["open issues, and issues closed in the last 30 days","open issues only","every issue"].map(function(o){return '<option'+(o===z.filter?' selected':'')+'>'+h(o)+'</option>';}).join("")+'</select>'+
+       ipzFilters(k).concat(ipzFilters(k).indexOf(z.filter)<0?[z.filter]:[]).map(function(o){return '<option'+(o===z.filter?' selected':'')+'>'+h(o)+'</option>';}).join("")+'</select>'+
        '<div class="hint">About '+Math.round(d.est*n/Math.max(1,d.scope.filter(function(s){return s[2];}).length))+' tasks on the first read. oxagen.assistant drafts a definition of done for each open one.</div></div>'+
-      (k==="jira"?'<div class="field"><label for="ipzJql">JQL filter</label><input id="ipzJql" class="mono" placeholder="labels != wontfix" aria-label="JQL filter"><div class="hint">Optional. Narrows what the chosen projects import.</div></div>':''),
+      (k==="jira"?'<div class="field"><label for="ipzJql">JQL filter</label><input id="ipzJql" class="mono" placeholder="priority in (Highest, High)" aria-label="JQL filter"><div class="hint">Optional. Narrows what the chosen projects import.</div></div>':''),
      f:'<button class="btn" onclick="ipzGo('+(z.edit?'':'2')+')"'+(z.edit?' disabled':'')+'>Back</button><button class="btn primary"'+(n?'':' disabled')+' onclick="ipzGo(4)">Next</button>'};
   }
   if(z.step===4){
-    var sr=TSTATUS.map(function(s){return ipzMapRow(s.name,tStatusBadge(s.key),d.values.status,(s.map[k]||"").replace(/,.*$/,""));}).join("");
-    var rr=TRES.map(function(s){return ipzMapRow(s.name,'<b>'+h(s.name)+'</b>',d.values.res,(s.map[k]||"").split(",")[0].replace(/ with .*/,""));}).join("");
-    var lr=TLABELS.map(function(l){return ipzMapRow(l.name,lblChip(l.key),d.values.label,(l.map[k]||"").split(",")[0]);}).join("");
-    function tb(title,rows){return '<div class="field"><label>'+title+'</label><div class="tw"><table data-lt="off"><thead><tr><th>Oxagen</th><th>'+h(m.l)+'</th><th>Source</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>';}
-    return {b:'<p style="margin-bottom:14px">oxagen.assistant suggested each mapping from the values '+h(m.l)+' returned. Change any of them. A value that maps to nothing is kept on the task as it is in '+h(m.l)+' and read as nothing.</p>'+
-      tb("Statuses",sr)+tb("Resolutions",rr)+tb("Labels",lr)+
+    function tb(kind,title){
+      var list=ipzList(kind), vals=d.values[kind];
+      var rows=list.map(function(x){return ipzMapRow(kind,x,kind==="status"?tStatusBadge(x.key):kind==="label"?lblChip(x.key):'<b>'+h(x.name)+'</b>');}).join("")+
+        z.add[kind].map(function(v,i){return '<tr><td><b>'+h(ipzPlain(v))+'</b></td><td class="mono" style="font-size:11.5px">'+h(v)+'</td><td><span class="b b-q" style="font-size:10px">added</span> '+
+          '<button class="btn sm" aria-label="Remove '+h(ipzPlain(v))+'" onclick="ipzUnadd(\''+kind+'\','+i+')">Remove</button></td></tr>';}).join("");
+      var used={}; list.forEach(function(x){var s=z.map[kind][x.key]; used[s===undefined?ipzSuggest(kind,x,k):s]=1;}); z.add[kind].forEach(function(v){used[v]=1;});
+      var only=vals.map(function(v,i){return used[v]?"":'<button class="btn sm" aria-label="Add '+h(ipzPlain(v))+' to Oxagen" onclick="ipzAdd(\''+kind+'\','+i+')">Add “'+h(ipzPlain(v))+'”</button>';}).filter(Boolean);
+      return '<div class="field"><label>'+title+'</label><div class="tw"><table data-lt="off"><thead><tr><th>Oxagen</th><th>'+h(m.l)+'</th><th>Source</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
+        (only.length?'<div class="row" style="gap:6px;margin-top:8px"><span class="dim" style="font-size:12px">Only in '+h(m.l)+'</span>'+only.join("")+'</div>':'')+'</div>';
+    }
+    var cnt=ipzCounts();
+    return {b:'<p style="margin-bottom:10px">oxagen.assistant suggested each mapping from the values '+h(m.l)+' returned. Change any of them. Choose Create to add an Oxagen value to '+h(m.l)+', or Add to bring a '+h(m.l)+' value into Oxagen. A value that maps to nothing is kept on the task as it is in '+h(m.l)+' and read as nothing.</p>'+
+      '<div class="note" style="margin-bottom:14px">'+h(d.createNote)+(d.createPerm&&!z.create?' Creating is off for this connection, so only what needs no extra permission can be created.':'')+
+        (cnt.create?' <b>'+cnt.create+' to create in '+h(m.l)+'.</b>':'')+'</div>'+
+      IPZ_KINDS.map(function(x){return tb(x[0],x[1]);}).join("")+
       '<div class="field"><label>Writes to '+h(m.l)+'</label>'+
-      [["certify","Post the definition of done as a comment when a person certifies it"],["send","Post a link to the work order when it is sent"],["status","Move the status when a work order starts"],["close","Close the task as Fixed when you accept the work"]].map(function(x){
-        return '<label class="check" style="margin-bottom:8px"><input type="checkbox"'+(z.wb[x[0]]?' checked':'')+' onchange="S.ipz.wb.'+x[0]+'=this.checked"><span class="grow"><span class="n">'+h(x[1])+'</span></span></label>';}).join("")+
+      [["certify","Post the definition of done as a "+m.note+" when a person certifies it"],["send","Post a link to the work order as a "+m.note+" when it is sent"],["status","Move the status when a work order starts"],["close","Close the "+m.unit+" as Done when you accept the work"]].map(function(x){
+        return '<label class="check" style="margin-bottom:8px"><input type="checkbox"'+(z.wb[x[0]]?' checked':'')+' onchange="S.ipz.wb.'+x[0]+'=this.checked"><span class="grow"><span class="n">'+h(x[1])+'</span>'+
+          (x[0]==="close"&&d.closeNote?'<span class="d">'+h(d.closeNote)+'</span>':'')+'</span></label>';}).join("")+
       '<div class="hint">Each write is a governed action, made with the connection’s token and recorded in Audit.</div></div>',
      f:'<button class="btn" onclick="ipzGo(3)">Back</button><button class="btn primary" onclick="ipzGo(5)">Next</button>'};
   }
   if(z.step===5){
     var members=["marcus","priya","dana","amara","jonas","ines","tobias"].filter(function(x){return PEOPLE[x];});
-    var mapped=d.people.filter(function(p){return z.people[p[0]];}).length;
+    var mapped=d.people.filter(function(p){return z.people[p[0]];}).length, req=d.people.some(function(p){return p[4]==="requester";});
     return {b:'<p style="margin-bottom:14px">These accounts appear on the tasks in scope. Each one whose verified email matches a workspace member is suggested. Confirm, change, or leave it not mapped.</p>'+
       '<div class="tw"><table data-lt="off"><thead><tr><th>Account</th><th>Email</th><th>Workspace member</th></tr></thead><tbody>'+
-      d.people.map(function(p){var bot=p[4]==="bot";
+      d.people.map(function(p){var fixed=p[4]==="bot"||p[4]==="requester";
         return '<tr><td><span class="tkp">'+ipLogo(k,13)+'<span><b class="mono">'+h(p[0])+'</b><div class="dim" style="font-size:11px">'+h(p[1])+'</div></span></span></td>'+
          '<td class="mono" style="font-size:11.5px">'+h(p[2]||"—")+'</td>'+
-         '<td>'+(bot?'<span class="b b-q">bot</span> <span class="dim" style="font-size:11px">never mapped</span>':
+         '<td>'+(fixed?'<span class="b b-q">'+h(p[4])+'</span> <span class="dim" style="font-size:11px">never mapped</span>':
           '<select class="sel-sm" aria-label="Member for '+h(p[0])+'" onchange="S.ipz.people[\''+h(p[0])+'\']=this.value;render()"><option value="">not mapped</option>'+
           members.map(function(x){return '<option value="'+x+'"'+(z.people[p[0]]===x?' selected':'')+'>'+h(PEOPLE[x].name)+'</option>';}).join("")+'</select>'+
           (z.people[p[0]]&&p[4]?' <span class="b b-q" style="font-size:10px">'+h(p[4])+'</span>':''))+'</td></tr>';}).join("")+'</tbody></table></div>'+
-      '<div class="note" style="margin-top:12px">'+mapped+' mapped, '+(d.people.length-mapped)+' not mapped. Mapping grants nothing. An account left not mapped still appears on its tasks under its own name, and you can map it later on the People tab.</div>',
+      '<div class="note" style="margin-top:12px">'+mapped+' mapped, '+(d.people.length-mapped)+' not mapped. Mapping grants nothing. An account left not mapped still appears on its tasks under its own name, and you can map it later on the People tab.'+
+        (req?' A requester is the person who asked for the work. Oxagen shows a requester by name and never maps one.':'')+'</div>',
      f:'<button class="btn" onclick="ipzGo(4)">Back</button><button class="btn primary" onclick="ipzGo(6)">Next</button>'};
   }
   var scope=d.scope.filter(function(s){return z.scope[s[0]];}).map(function(s){return s[0];});
-  var mappedN=d.people.filter(function(p){return z.people[p[0]];}).length;
-  return {b:'<dl class="kv" style="margin-bottom:14px"><dt>Provider</dt><dd>'+ipLogo(k,13)+' '+h(m.l)+(k==="jira"?' <span class="mono">'+h(z.site)+'</span>':'')+'</dd>'+
+  var mappedN=d.people.filter(function(p){return z.people[p[0]];}).length, c=ipzCounts();
+  var steps=["Oxagen stores the token and reads every task in scope."].concat(c.create?["Oxagen creates the "+c.create+" value"+(c.create>1?"s":"")+" you chose in "+m.l+", each one a governed action named create_provider_value."]:[],
+    ["oxagen.assistant drafts a definition of done for each open task. Its turns are recorded and never appear in Fleet or Spend.","Every draft waits for a person. No task is ready until somebody certifies it.","Nothing is sent to an agent. A work order is the only way work reaches one."]);
+  return {b:'<dl class="kv" style="margin-bottom:14px"><dt>Provider</dt><dd>'+ipLogo(k,13)+' '+h(m.l)+(d.site?' <span class="mono">'+h(z.site)+'</span>':'')+'</dd>'+
      '<dt>Authorization</dt><dd>'+h(d.authed)+'</dd>'+
      '<dt>'+h(m.what.charAt(0).toUpperCase()+m.what.slice(1))+'</dt><dd class="mono">'+h(scope.join(", "))+'</dd>'+
      '<dt>Import</dt><dd>'+h(z.filter)+'</dd>'+
-     '<dt>Fields</dt><dd>'+TSTATUS.length+' statuses, '+TRES.length+' resolutions and '+TLABELS.length+' labels mapped</dd>'+
+     '<dt>Fields</dt><dd>'+TSTATUS.length+' statuses, '+TRES.length+' resolutions, and '+TLABELS.length+' labels mapped.'+(c.create?' '+c.create+' to create in '+h(m.l)+'.':'')+(c.add?' '+c.add+' to add to Oxagen.':'')+'</dd>'+
      '<dt>People</dt><dd>'+mappedN+' mapped, '+(d.people.length-mappedN)+' not mapped</dd>'+
      '<dt>Writes</dt><dd>'+(["certify","send","status","close"].filter(function(x){return z.wb[x];}).join(", ")||"none")+'</dd></dl>'+
-    '<div class="field"><label>When you connect</label>'+wzChecks([["1","Oxagen stores the token and reads every task in scope."],["2","oxagen.assistant drafts a definition of done for each open task. Its turns are recorded and never appear in Fleet or Spend."],["3","Every draft waits for a person. No task is ready until somebody certifies it."],["4","Nothing is sent to an agent. A work order is the only way work reaches one."]])+'</div>',
+    '<div class="field"><label>When you connect</label>'+wzChecks(steps.map(function(s,i){return [String(i+1),s];}))+'</div>',
    f:'<button class="btn" onclick="ipzGo(5)">Back</button><button class="btn primary" onclick="ipzFinish()">'+(z.edit?'Save':'Connect '+h(m.l))+'</button>'};
+}
+/* Apply the Fields step: the mappings you changed, the values Oxagen creates in the provider, and the
+   provider values you added to Oxagen. */
+function ipzApply(z){
+  var k=z.kind, n=0;
+  IPZ_KINDS.forEach(function(x){var kind=x[0], list=ipzList(kind);
+    Object.keys(z.map[kind]).forEach(function(key){var o=list.filter(function(y){return y.key===key;})[0], v=z.map[kind][key]; if(!o)return;
+      if(v==="__create"){o.map[k]=ipNew(k,ipzCan(kind),o.name); n++;} else o.map[k]=v;});
+    z.add[kind].forEach(function(v){var name=ipzPlain(v), key=name.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+      if(list.some(function(y){return y.key===key;}))return;
+      var o={key:key,name:name,builtin:false,map:{}}; o.map[k]=v;
+      if(kind==="status")o.cat="open"; if(kind==="label"){o.group="Type";o.color="#A1A1AA";}
+      list.push(o);});});
+  return n;
 }
 function ipzFinish(){
   var z=S.ipz, k=z.kind, d=IPZ[k], m=IP_KIND[k];
-  var scope=d.scope.filter(function(s){return z.scope[s[0]];}).map(function(s){return k==="github"?s[0]:s[0]+" · "+s[1];});
+  var scope=d.scope.filter(function(s){return z.scope[s[0]];}).map(function(s){return d.keyed?s[0]+" · "+s[1]:s[0];});
+  var made=ipzApply(z), madeL=made?(made===1?" and create_provider_value for the value Oxagen creates":" and create_provider_value for each of the "+made+" values Oxagen creates"):"";
   if(z.edit){var p=IPROV.filter(function(x){return x.id===z.edit;})[0]; if(p){p.scope=scope;p.filter=z.filter;p.writeback=Object.assign({},z.wb);}
-    S.ipz=null; closeDialog(); act(m.l+" saved. update_issue_provider recorded; the next read applies it."); return;}
-  IPROV.push({id:"ipc_01K6TG"+k.slice(0,2).toUpperCase(),kind:k,ws:S.ws,account:k==="jira"?z.site:k==="linear"?"Anderson Intelligence":"a-intel",
-    accountLabel:k==="jira"?"Jira Cloud site":k==="linear"?"Linear workspace":"GitHub organization",auth:k==="jira"?"OAuth 2.0 (3LO) with offline access":k==="linear"?"OAuth 2.0 as an app actor":"GitHub App installation 41829377",
-    by:TK_ME,connected:"2026-09-11",scope:scope,scopeLabel:m.what,filter:z.filter,synced:"importing",tasks:0,events:"subscribed · waiting for the first delivery",health:"ok",writeback:Object.assign({},z.wb)});
-  d.people.forEach(function(p){var id=k.slice(0,3)+":"+p[0]; if(tPerson(id))return;
-    TPEOPLE.push({id:id,kind:k,handle:p[0],name:p[1],email:p[2]||null,to:z.people[p[0]]||null,match:z.people[p[0]]?(p[4]||"by hand"):null,state:p[4]==="bot"?"bot":z.people[p[0]]?"mapped":"unmapped"});});
+    S.ipz=null; closeDialog(); act(m.l+" saved. update_issue_provider recorded"+madeL+". The next read applies it."); return;}
+  IPROV.push({id:"ipc_01K6TG"+k.slice(0,2).toUpperCase(),kind:k,ws:S.ws,account:d.site?z.site:d.account,accountLabel:d.accountLabel,auth:d.auth,
+    by:TK_ME,connected:"2026-09-11",scope:scope,scopeLabel:m.what,filter:z.filter,synced:"importing",tasks:0,events:"subscribed · waiting for the first delivery",health:"ok",
+    create:!d.createPerm||z.create,writeback:Object.assign({},z.wb)});
+  d.people.forEach(function(p){var id=k.slice(0,3)+":"+p[0]; if(tPerson(id))return; var fixed=p[4]==="bot"||p[4]==="requester";
+    TPEOPLE.push({id:id,kind:k,handle:p[0],name:p[1],email:p[2]||null,to:fixed?null:z.people[p[0]]||null,match:!fixed&&z.people[p[0]]?(p[4]||"by hand"):null,state:fixed?p[4]:z.people[p[0]]?"mapped":"unmapped"});});
   S.ipz=null; closeDialog(); go("#/"+ORG.slug+"/"+S.ws+"/tasks/providers");
-  act(m.l+" connected. connect_issue_provider recorded. Importing "+scope.length+" "+m.what+"; drafts appear as each task is read.","gold");
+  act(m.l+" connected. connect_issue_provider recorded"+madeL+". Importing "+scope.length+" "+m.what+". Drafts appear as each task is read.","gold");
 }
 DLG_EXT.ipwz=function(){
   var z=S.ipz; if(!z)return {t:"Connect an issue provider",w:false,b:"",f:'<button class="btn" onclick="closeDialog()">Close</button>'};
   var part=ipzBody();
-  return {t:z.edit?"Edit "+IP_KIND[z.kind].l:"Connect an issue provider",s:z.edit?"Scope, fields and the writes it may make":"Import tasks from GitHub, Linear or Jira",w:true,
+  return {t:z.edit?"Edit "+IP_KIND[z.kind].l:"Connect an issue provider",s:z.edit?"Scope, fields and the writes it may make":"Import tasks from an issue tracker or a help desk",w:true,
    b:ipzRail()+part.b,
    f:'<span class="grow mono dim" style="font-size:11px">needs <span style="color:var(--accent-text)">issue_provider.connect</span> on '+h(S.ws)+'</span>'+part.f};
 };
@@ -16753,9 +16885,26 @@ function ipOff(id){var i=-1;IPROV.forEach(function(x,j){if(x.id===id)i=j;}); if(
 var LBL_SWATCHES=["#D6455E","#E0803A","#C9A227","#57A97C","#3FA2A2","#3B82F6","#5B93D6","#9D8BE3","#D677B5","#C0453C","#A1A1AA","#71717A"];
 function lblSw(c){S.lblDraft.color=c;var p=el("lblPrev");if(p)p.style.setProperty("--lc",c);var hx=el("lblHex");if(hx)hx.value=c;
   document.querySelectorAll(".sw").forEach(function(b){b.setAttribute("aria-pressed",b.getAttribute("data-c")===c?"true":"false");});}
-function mapFields(m,prefix){
-  return ["github","linear","jira"].map(function(k){return '<div class="field"><label for="'+prefix+k+'">'+ipLogo(k,12)+' '+IP_KIND[k].l+'</label><input id="'+prefix+k+'" class="mono" value="'+h(m[k]||"")+'"></div>';}).join("");
+/* What Oxagen would create in provider k for this kind of value: the name it has there, null when the
+   provider has no such value, or false when the connection lacks the permission creating needs. */
+function ipCan(k,kind){var c=IPZ[k]&&IPZ[k].creates[kind]; if(!c)return null; if(!c[1])return c[0];
+  var p=wsProviders().filter(function(x){return x.kind===k;})[0]; return p&&p.create?c[0]:false;}
+function mapFields(m,prefix,kind){
+  return tkCols().map(function(k){var can=ipCan(k,kind), P=IP_KIND[k].l;
+    return '<div class="field"><label for="'+prefix+k+'">'+ipLogo(k,12)+' '+h(P)+'</label><input id="'+prefix+k+'" class="mono" value="'+h(m[k]||"")+'" oninput="this.removeAttribute(\'data-create\')">'+
+      (can?'<button class="btn sm" style="margin-top:6px" onclick="edCreate(this,\''+prefix+'\',\''+k+'\',\''+kind+'\')">Create in '+h(P)+'</button>'
+       :can===false?'<div class="hint">Creating one needs '+h(IPZ[k].createPerm[0])+'. Edit the connection to ask for it.</div>':'')+'</div>';}).join("");
 }
+function edCreate(btn,prefix,k,kind){
+  var name=((el(kind==="label"?"lblName":kind==="status"?"stName":"resName")||{}).value||"").trim(), inp=el(prefix+k);
+  if(!name){act("Name it first.");return;}
+  inp.value=ipNew(k,ipCan(k,kind),name); inp.setAttribute("data-create","1"); btn.disabled=true; btn.textContent="Created when you save";
+}
+/* Reads the mapping inputs, and names the providers Oxagen creates the value in. */
+function mapRead(prefix){var map={}, made=[];
+  tkCols().forEach(function(k){var i=el(prefix+k); map[k]=(i||{}).value||""; if(i&&i.getAttribute("data-create"))made.push(IP_KIND[k].l);});
+  return {map:map,made:made};}
+function madeNote(made){return made.length?", with create_provider_value for "+(made.length>1?made.slice(0,-1).join(", ")+(made.length>2?",":"")+" and "+made[made.length-1]:made[0]):"";}
 DLG_EXT.lbledit=function(key){
   var l=key==="new"?{key:"new",name:"",group:"Type",color:"#5B93D6",map:{}}:tLabel(key); if(!l)return noSuch("Label");
   if(!S.lblDraft||S.lblDraft.key!==l.key)S.lblDraft={key:l.key,color:l.color};
@@ -16766,8 +16915,8 @@ DLG_EXT.lbledit=function(key){
     '<div class="field"><label>Colour</label><div class="row"><div class="swatches">'+LBL_SWATCHES.map(function(s){return '<button class="sw" data-c="'+s+'" style="background:'+s+'" aria-label="Colour '+s+'" aria-pressed="'+(s===c)+'" onclick="lblSw(\''+s+'\')"></button>';}).join("")+'</div>'+
       '<input id="lblHex" class="mono" style="width:110px" value="'+h(c)+'" aria-label="Hex colour" oninput="if(/^#[0-9a-f]{6}$/i.test(this.value))lblSw(this.value)">'+
       '<span class="lbl" id="lblPrev" style="--lc:'+h(c)+'"><i aria-hidden="true"></i><span id="lblPrevN">'+h(l.name||"Label")+'</span></span></div>'+
-      '<div class="hint">The colour is Oxagen’s. Oxagen never changes a label’s colour in a provider.</div></div>'+
-    '<div class="field"><label>Mapped from</label></div><div class="grid g3">'+mapFields(l.map,"lblm-")+'</div>'+
+      '<div class="hint">The colour is Oxagen’s. Oxagen sets a label’s colour in a provider once, when it creates the label there, and never changes it after.</div></div>'+
+    '<div class="field"><label>Mapped from</label></div><div class="grid g3">'+mapFields(l.map,"lblm-","label")+'</div>'+
     '<div class="field"><label>Definition of done items</label><div class="banner"><span class="b b-q" style="flex:none">later</span><div class="grow"><b>A label will carry definition-of-done items</b>'+
       'When a task has this label, its items copy into the task’s draft before oxagen.assistant adds its own. '+(l.key==="bug"?'Bug would carry “A test reproduces the defect and fails before the fix”.':'')+' The templates will live in .oxagen/dod/labels/ and change by pull request.</div></div></div>',
    f:'<span class="grow mono dim" style="font-size:11px">needs <span style="color:var(--accent-text)">task_fields.write</span> on '+h(S.ws)+'</span><button class="btn" onclick="closeDialog()">Cancel</button>'+
@@ -16776,10 +16925,10 @@ DLG_EXT.lbledit=function(key){
 function lblSave(key){
   var name=(el("lblName")||{}).value||"", color=S.lblDraft.color, group=(el("lblGroup")||{}).value||"Type";
   if(!name.trim()){act("Name the label first.");return;}
-  var map={}; ["github","linear","jira"].forEach(function(k){map[k]=(el("lblm-"+k)||{}).value||"";});
+  var r=mapRead("lblm-"), map=r.map;
   if(key==="new")TLABELS.push({key:name.toLowerCase().replace(/[^a-z0-9]+/g,"-"),name:name,group:group,color:color,map:map});
   else{var l=tLabel(key); l.name=name; l.color=color; l.group=group; l.map=map;}
-  S.lblDraft=null; closeDialog(); act("Label saved. update_task_fields recorded in Audit; the next read of every task applies it.");
+  S.lblDraft=null; closeDialog(); act("Label saved. update_task_fields recorded in Audit"+madeNote(r.made)+". The next read of every task applies it.");
 }
 DLG_EXT.stedit=function(key){
   var s=key==="new"?{key:"new",name:"",cat:"open",map:{},builtin:false}:tStatus(key); if(!s)return noSuch("Status");
@@ -16787,34 +16936,36 @@ DLG_EXT.stedit=function(key){
    b:'<div class="grid g2"><div class="field"><label for="stName">Name</label><input id="stName" value="'+h(s.name)+'"></div>'+
      '<div class="field"><label for="stCat">Category</label><select id="stCat"'+(s.builtin?' disabled':'')+'>'+["open","blocked","closed"].map(function(c){return '<option'+(c===s.cat?' selected':'')+'>'+c+'</option>';}).join("")+'</select>'+
      '<div class="hint">'+(s.builtin?'A built-in status keeps its category.':'The category decides what the status means: only an open task can be sent.')+'</div></div></div>'+
-    '<div class="field"><label>Mapped from</label></div><div class="grid g3">'+mapFields(s.map,"stm-")+'</div>',
+    '<div class="field"><label>Mapped from</label></div><div class="grid g3">'+mapFields(s.map,"stm-","status")+'</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="fieldSave(\'status\',\''+h(s.key)+'\')">Save status</button>'};
 };
 DLG_EXT.resedit=function(key){
   var s=key==="new"?{key:"new",name:"",map:{},builtin:false}:tRes(key); if(!s)return noSuch("Resolution");
   return {t:key==="new"?"Add a resolution":"Edit "+s.name,w:true,
-   b:'<div class="field"><label for="resName">Name</label><input id="resName" value="'+h(s.name)+'"></div><div class="field"><label>Mapped from</label></div><div class="grid g3">'+mapFields(s.map,"resm-")+'</div>',
+   b:'<div class="field"><label for="resName">Name</label><input id="resName" value="'+h(s.name)+'"></div><div class="field"><label>Mapped from</label></div><div class="grid g3">'+mapFields(s.map,"resm-","res")+'</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="fieldSave(\'resolution\',\''+h(s.key)+'\')">Save resolution</button>'};
 };
 function fieldSave(kind,key){
   var pre=kind==="status"?"st":"res", name=((el(pre+"Name")||{}).value||"").trim();
   if(!name){act("Name it first.");return;}
-  var map={}; ["github","linear","jira"].forEach(function(k){map[k]=(el(pre+"m-"+k)||{}).value||"";});
+  var r=mapRead(pre+"m-"), map=r.map;
   var list=kind==="status"?TSTATUS:TRES;
   if(key==="new")list.push(kind==="status"?{key:name.toLowerCase().replace(/[^a-z0-9]+/g,"-"),name:name,cat:(el("stCat")||{}).value||"open",builtin:false,map:map}:{key:name.toLowerCase().replace(/[^a-z0-9]+/g,"-"),name:name,builtin:false,map:map});
   else{var s=list.filter(function(x){return x.key===key;})[0]; s.name=name; s.map=map; if(kind==="status"&&!s.builtin)s.cat=(el("stCat")||{}).value||s.cat;}
-  closeDialog(); act("Saved. update_task_fields recorded in Audit.");
+  closeDialog(); act("Saved. update_task_fields recorded in Audit"+madeNote(r.made)+".");
 }
 DLG_EXT.pmap=function(id){
   var p=tPerson(id); if(!p)return noSuch("Account");
+  var fixed=p.state==="bot"||p.state==="requester";
   var members=Object.keys(PEOPLE).filter(function(k){return MEMBERS.some(function(m){return m.p===k&&(m.ws===S.ws||m.ws==="all");})||k==="marcus"||k==="priya";}).slice(0,40);
   return {t:"Map "+p.handle,s:IP_KIND[p.kind].l+" account",w:false,
    b:'<dl class="kv" style="margin-bottom:14px"><dt>Account</dt><dd>'+ipLogo(p.kind,13)+' <span class="mono">'+h(p.handle)+'</span> '+h(p.name)+'</dd><dt>Email</dt><dd class="mono">'+h(p.email||"none shared")+'</dd>'+
     (p.match?'<dt>Match</dt><dd>'+h(p.match)+'</dd>':'')+'</dl>'+
     (p.state==="bot"?'<div class="note">This is a bot account. A bot is never mapped to a person, and its tasks show its own handle.</div>':
+     p.state==="requester"?'<div class="note">This is a requester, the person who asked for the work. A requester is never mapped to a member, and Oxagen shows the requester by name on each task.</div>':
     '<div class="field"><label for="pmapSel">Workspace member</label><select id="pmapSel"><option value="">not mapped</option>'+members.map(function(k){return '<option value="'+k+'"'+(p.to===k?' selected':'')+'>'+h(PEOPLE[k].name)+'</option>';}).join("")+'</select></div>'+
     '<div class="note">Mapping says who this account is in Oxagen. It grants nothing: the member’s own roles decide what they may do, and only a signed-in member can certify or send.</div>'),
-   f:'<button class="btn" onclick="closeDialog()">'+(p.state==="bot"?'Close':'Cancel')+'</button>'+(p.state==="bot"?'':'<button class="btn primary" onclick="pmapSave(\''+p.id+'\')">Save</button>')};
+   f:'<button class="btn" onclick="closeDialog()">'+(fixed?'Close':'Cancel')+'</button>'+(fixed?'':'<button class="btn primary" onclick="pmapSave(\''+p.id+'\')">Save</button>')};
 };
 function pmapSave(id){var p=tPerson(id), v=(el("pmapSel")||{}).value||"";
   p.to=v||null; p.state=v?"mapped":"unmapped"; p.match=v?(p.match==="verified email"?"verified email":"by hand"):null;
