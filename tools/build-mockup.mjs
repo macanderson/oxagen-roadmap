@@ -48,10 +48,16 @@ function once(haystack, needle, what) {
 }
 
 // Another version (mockups/future_state_mockups) is the same build over its own src and fixtures.
+// The views the fleet operations wedge adds (docs/fleet-operations-wedge.md) live in their own file
+// beside the engine and load after it, in the same script. A version without the file builds as before.
+const EXTRA_JS = ["wedge.js", "boot.js"];
+
 export function buildMockup({ src = SRC, fix = FIX } = {}) {
   const css = readFileSync(path.join(src, "engine.css"), "utf8");
   const shell = readFileSync(path.join(src, "shell.html"), "utf8").trim();
-  const js = readFileSync(path.join(src, "engine.js"), "utf8");
+  const js = [readFileSync(path.join(src, "engine.js"), "utf8").trimEnd()]
+    .concat(EXTRA_JS.filter(f => existsSync(path.join(src, f))).map(f => readFileSync(path.join(src, f), "utf8").trimEnd()))
+    .join("\n\n");
   once(js, "var BOOT=(function(){", "BOOT block");
   once(js, "var PRODUCT=BOOT.product;", "PRODUCT line");
   once(shell, '<div id="chrome">', "#chrome block");

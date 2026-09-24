@@ -1,0 +1,125 @@
+{
+  "registration": {
+    "path": ".oxagen/sources.toml",
+    "repo": "a-intel/platform",
+    "commit": "a4c91e2",
+    "pr": "a-intel/platform#431",
+    "merged": "2026-09-02",
+    "by": "marcus"
+  },
+  "documents": [
+    {
+      "kind": "vision",
+      "id": "VISION",
+      "title": "Product vision",
+      "path": "docs/VISION.md",
+      "repo": "a-intel/platform",
+      "ws": "core-platform",
+      "status": "registered",
+      "commit": "a4c91e2",
+      "updated": "2026-09-02",
+      "owner": "marcus",
+      "sections": [
+        { "h": "Goals", "emits": "goal", "force": "should", "body": "Customers learn what changed in a release from its notes, without asking support.", "about": ["release", "notes", "customer", "changed"] },
+        { "h": "Constraints", "emits": "constraint", "force": "must", "body": "A release note never promises a date or a feature that has not merged.", "about": ["release", "note", "promise", "date", "merged"] },
+        { "h": "Context", "emits": "context", "force": "info", "body": "Platform ships a minor release every two weeks. Breaking changes wait for a major release unless security requires them.", "about": ["release", "minor", "breaking", "major", "security"] },
+        { "h": "Positioning", "emits": null, "body": "Not registered. The registration names Goals, Constraints and Context only." }
+      ]
+    },
+    {
+      "kind": "adr",
+      "id": "ADR-014",
+      "title": "Release notes come from merged pull requests",
+      "path": "docs/adr/ADR-014-release-notes-from-merged-prs.md",
+      "repo": "a-intel/platform",
+      "ws": "core-platform",
+      "status": "accepted",
+      "commit": "7c1e2d0",
+      "updated": "2026-07-18",
+      "owner": "priya",
+      "supersedes": "ADR-008",
+      "sections": [
+        { "h": "Decision", "emits": "procedure", "force": "should", "body": "Draft release notes from the pull requests merged since the last tag. One line per pull request, linked, under Features, Breaking and Fixes.", "about": ["release", "notes", "pull", "request", "tag", "breaking"] },
+        { "h": "Context", "emits": "context", "force": "info", "body": "Hand-written notes missed 11 of 94 changes in the first half of 2026. Every one of them had a merged pull request.", "about": ["release", "notes", "missed", "pull", "request"] }
+      ]
+    },
+    {
+      "kind": "adr",
+      "id": "ADR-021",
+      "title": "No agent merges to main",
+      "path": "docs/adr/ADR-021-no-agent-merges.md",
+      "repo": "a-intel/platform",
+      "ws": "core-platform",
+      "status": "accepted",
+      "commit": "7c1e2d0",
+      "updated": "2026-07-30",
+      "owner": "priya",
+      "sections": [
+        { "h": "Invariants", "emits": "invariant", "force": "must", "body": "No agent merges to main. A person merges every pull request.", "about": ["merge", "main", "pull", "request"], "enforcedBy": "gate.never-merge" },
+        { "h": "Decision", "emits": "procedure", "force": "should", "body": "An agent that finishes a change opens a pull request, requests review from the code owners, and stops.", "about": ["pull", "request", "review", "owners"] }
+      ]
+    },
+    {
+      "kind": "adr",
+      "id": "ADR-033",
+      "title": "CHANGELOG.md is append-only",
+      "path": "docs/adr/ADR-033-changelog-append-only.md",
+      "repo": "a-intel/platform",
+      "ws": "core-platform",
+      "status": "accepted",
+      "commit": "a4c91e2",
+      "updated": "2026-08-28",
+      "owner": "marcus",
+      "sections": [
+        { "h": "Decision", "emits": "constraint", "force": "should", "body": "CHANGELOG.md is append-only. Edit a release's section only before its tag.", "about": ["changelog", "release", "tag", "edit"] }
+      ]
+    },
+    {
+      "kind": "adr",
+      "id": "ADR-008",
+      "title": "Release notes are written by hand",
+      "path": "docs/adr/ADR-008-release-notes-by-hand.md",
+      "repo": "a-intel/platform",
+      "ws": "core-platform",
+      "status": "superseded",
+      "supersededBy": "ADR-014",
+      "commit": "2b90f41",
+      "updated": "2026-03-04",
+      "owner": "priya",
+      "sections": [
+        { "h": "Decision", "emits": "procedure", "force": "should", "body": "The release manager writes the notes by hand from the milestone.", "about": ["release", "notes", "milestone"] }
+      ]
+    }
+  ],
+  "bundles": {
+    "a-intel.release-notes-from-prs": {
+      "manifest": ".oxagen/skills/release-notes-from-prs/skill.toml",
+      "instructions": { "path": "SKILL.md", "tok": 1840 },
+      "references": [
+        { "path": "references/format.md", "tok": 420, "body": "The house format: Features, Breaking, Fixes. One line per pull request, past tense, linked." },
+        { "path": "references/labels.md", "tok": 180, "body": "Labels that decide a section: feature, breaking, fix. An unlabelled pull request goes under Fixes and is flagged." }
+      ],
+      "entrypoints": [
+        { "name": "group-prs", "path": "scripts/group-prs.ts", "runs": "node", "args": "{ since: string, repo: string }", "returns": "{ features: PR[], breaking: PR[], fixes: PR[] }", "digest": "sha256:9c41e07ab2d53f18", "desc": "Groups merged pull requests by label into Features, Breaking and Fixes." }
+      ]
+    },
+    "a-intel.rollback-a-bad-release": {
+      "manifest": ".oxagen/skills/rollback-a-bad-release/skill.toml",
+      "instructions": { "path": "SKILL.md", "tok": 1210 },
+      "references": [ { "path": "references/runbook.md", "tok": 960, "body": "The order of operations for pulling a release back off production." } ],
+      "entrypoints": []
+    }
+  },
+  "withheld": [
+    { "id": "a-intel.changelog-bot", "ver": "1.4.0", "reason": "unapproved_digest", "why": "Its digest changed on 2026-09-09 after Priya Natarajan approved 1.3.2. Nobody has approved the new one." },
+    { "id": "a-intel.mobile-release-notes", "ver": "2.0.1", "reason": "out_of_scope", "why": "Scoped to a-intel/mobile. This run works in a-intel/platform." }
+  ],
+  "resolutions": {
+    "run_01K5RS7M2E8FJ3QW": {
+      "config": "skills.toml @ skl_v7 (commit a4c91e2)",
+      "synced": ["a-intel.release-notes-from-prs@2.1.0", "a-intel.rollback-a-bad-release@1.4.2"],
+      "searched": null,
+      "loaded": [ { "id": "a-intel.release-notes-from-prs", "ver": "2.1.0", "t": 16.9, "at": "09:14:19", "how": "Claude Code read SKILL.md from the checkout after matching its description" } ]
+    }
+  }
+}
