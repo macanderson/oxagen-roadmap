@@ -206,6 +206,12 @@ p{margin:0 0 10px;color:var(--body)}
 .k-fact{--kc:var(--k-fact)} .k-memory{--kc:var(--k-memory)} .k-preference{--kc:var(--k-preference)}
 .kb{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:2px 8px 2px 6px;border-radius:6px;border:1px solid;white-space:nowrap;line-height:1.5;color:var(--kc);border-color:color-mix(in srgb,var(--kc) 45%,transparent);background:color-mix(in srgb,var(--kc) 12%,transparent)}
 .kb svg{width:12px;height:12px}
+/* A steering item that is none of the six kinds (an ontology note, an instruction, a gate notice)
+   keeps the badge's shape and icon in a neutral hue. .kb-src is the word beside the badge: a
+   skill's shelf, a memory's class. It sits under the badge in a table cell. */
+.k-item{--kc:var(--muted)}
+.kb-src{font-size:11px;color:var(--dim);white-space:nowrap}
+td .kb-src{display:block;margin-top:3px}
 .kg{display:inline-grid;place-items:center;width:16px;height:16px;vertical-align:-3px;margin-right:6px;color:var(--kc)}
 .kg svg{width:12px;height:12px}
 .recs{display:grid;gap:0}
@@ -7318,7 +7324,7 @@ function aSteering(a,r){
     var where=it.kind==="policy"?"gate plane":it.force==="must"||it.force==="should"?"stable prefix":"volatile · rank "+(it.rank||"—");
     return '<tr>'+
      '<td>'+stgItemLink(it)+'</td>'+
-     '<td>'+stgKindChip(it)+'</td>'+
+     '<td data-v="'+h(stgKindLabel(it))+'">'+stgKindChip(it)+'</td>'+
      '<td>'+forceBadge(it.force)+'</td>'+
      '<td><span class="b b-q">'+h(it.scope)+'</span></td>'+
      '<td style="font-size:12px;max-width:44ch">'+h(it.body)+'</td>'+
@@ -9401,7 +9407,32 @@ function assembleSteering(slug,prompt,opt){
 
 /* ---- shared pieces ---- */
 function forceBadge(f){return '<span class="b b-q fz fz-'+h(f)+'" title="steering force">'+h(f)+'</span>';}
-function stgKindChip(it){return '<span class="b b-q" title="SteeringItem kind">'+h(STG_KIND[it.kind]||it.kind)+(it.sub&&it.kind!=="policy"?' · '+h(String(it.sub).toLowerCase()):'')+'</span>';}
+/* The kind badge on every steering list: the Library, an agent's Steering tab, the compiler, and
+   a run's manifest. It is the Records shelf's badge, with the same icon and hue, so a kind reads the
+   same on every tab. A memory is itself one of the six kinds, and a record or a skill carries one
+   in `sub`. An ontology note, an instruction, and a gate notice carry none of the six, so they keep
+   the badge's shape and take their own icon in a neutral hue: the six hues mean the six kinds and
+   nothing else. The word the old grey chip put after its dot sits beside the badge: a skill's
+   shelf, a memory's class, an ontology note's kind. A record needs none, because the six kinds are
+   record kinds. */
+var STG_ITEM_BADGE={
+ skill:{l:"skill",d:"A governed SKILL.md, delivered by sync",i:'<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/>'},
+ ontology:{l:"ontology",d:"An entity or a term, defined the way this workspace uses it",i:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/>'},
+ instruction:{l:"instruction",d:"The workspace's additional instructions",i:'<path d="M4 6h16M4 10h11M4 14h16M4 18h11"/>'},
+ policy:{l:"gate notice",d:"The line a gate puts into steering about what it refuses",i:'<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>'}};
+function stgItemKind(it){
+  if(KINDS[it.kind]) return it.kind;
+  var s=String(it.sub||"").toLowerCase();
+  return (it.kind==="record"||it.kind==="skill")&&KINDS[s]?s:"";
+}
+function stgKindLabel(it){var k=stgItemKind(it);return k?KINDS[k].l:(STG_ITEM_BADGE[it.kind]||{l:STG_KIND[it.kind]||it.kind}).l;}
+function stgKindChip(it){
+  var k=stgItemKind(it), d=STG_ITEM_BADGE[it.kind]||{l:STG_KIND[it.kind]||it.kind,d:"",i:""};
+  var badge=k?kindBadge(k):'<span class="kb k-item" title="'+h(d.d)+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+d.i+'</svg>'+h(d.l)+'</span>';
+  var shelf=STG_KIND[it.kind]||it.kind, sub=String(it.sub||"").toLowerCase();
+  var src=it.kind==="record"||it.kind==="policy"?"":stgKindLabel(it)===shelf?sub:shelf;
+  return badge+(src?'<span class="kb-src">'+h(src)+'</span>':'');
+}
 function compileChip(grant){
   return grant?'<button class="b b-approval stg-cc" title="This record carries an enforcement grant. It compiles to text, and to a gate: '+h(grant.outcome)+' on '+h(grant.on)+'" onclick="event.stopPropagation();stgTab(\'gates\')"><span class="d"></span>compiles to text and a gate</button>'
     :'<span class="b b-q" title="No enforcement grant. The model reads it. Nothing refuses a call because of it.">compiles to text</span>';
@@ -9715,7 +9746,7 @@ function pvPart(title,point,sub,rows,empty){
 function stgCutTable(M){
   if(!M.cut.length) return '<p class="dim" style="font-size:12.5px;margin:0">Nothing was cut.</p>';
   return '<div class="tw"><table><thead><tr><th>Item</th><th>Kind</th><th>Force</th><th>Token cost</th><th>Cut because</th><th>Why</th></tr></thead><tbody>'+
-   M.cut.map(function(c){return '<tr><td>'+stgItemLink(c.it)+'</td><td>'+h(STG_KIND[c.it.kind])+'</td><td>'+forceBadge(c.it.force)+'</td>'+
+   M.cut.map(function(c){return '<tr><td>'+stgItemLink(c.it)+'</td><td data-v="'+h(stgKindLabel(c.it))+'">'+stgKindChip(c.it)+'</td><td>'+forceBadge(c.it.force)+'</td>'+
     '<td class="num">'+tokn(c.it.tok)+' tok</td><td><span class="b '+STG_REASON[c.reason]+'">'+(c.reason==="over budget"?'<span class="d"></span>':'')+h(c.reason)+'</span></td>'+
     '<td style="font-size:12.5px">'+h(c.why)+'</td></tr>';}).join("")+'</tbody></table></div>';
 }
@@ -9772,7 +9803,7 @@ function runManifest(R){
 function mfNode(it,state,cls,extra,why){
   return '<li class="ro-n k-record s-'+cls+'"><span class="ro-dot" aria-hidden="true">'+roSvg(it.kind==="policy"?"gate":it.kind==="skill"?"file":"record")+'</span>'+
    '<div class="ro-b"><div class="ro-t">'+stgItemLink(it)+'<span class="b '+state[0]+'">'+(state[2]?'<span class="d"></span>':'')+h(state[1])+'</span>'+
-   '<span class="b b-q">'+h(STG_KIND[it.kind])+' · '+h(it.force)+'</span><span class="b b-q mono">'+tokn(it.tok)+' tok</span>'+(extra||'')+'</div>'+
+   stgKindChip(it)+forceBadge(it.force)+'<span class="b b-q mono">'+tokn(it.tok)+' tok</span>'+(extra||'')+'</div>'+
    '<div class="ro-w"><span class="ro-note">'+h(why||it.body)+'</span></div></div></li>';
 }
 function runManifestPanel(R){
@@ -11138,14 +11169,14 @@ function pOrganization(){
      '<thead><tr><th>Person</th><th>Role</th><th>Workspaces</th><th>Two-factor</th><th>Last seen</th><th>Status</th><th></th></tr></thead><tbody>'+
      MEMBERS.map(function(m){var p=PEOPLE[m.p];
       return '<tr><td><b>'+h(p.name)+'</b><div class="dim mono" style="font-size:11px">'+h(p.email)+'</div></td>'+
-       '<td class="mono" style="font-size:11.5px">'+h(p.role)+'</td>'+
+       /* The role id alone, so the Role column has five values and earns a filter; the scope after " · " is the Workspaces column. */
+       '<td class="mono" style="font-size:11.5px">'+h(p.role.split(" · ")[0])+'</td>'+
        '<td>'+h(m.ws)+'</td><td>'+h(m.mfa)+'</td>'+
        '<td class="mono dim" style="font-size:11px">'+h(m.last)+'</td>'+
-       '<td><span class="b b-allowed"><span class="d"></span>'+h(m.status)+'</span></td>'+
+       '<td><span class="b '+(m.status==="active"?"b-allowed":"b-q")+'"><span class="d"></span>'+h(m.status)+'</span></td>'+
        '<td class="rowacts"><button class="btn sm" onclick="openDialog(\'member\',\''+m.p+'\')">Open</button><button class="btn sm" onclick="openDialog(\'role\',\''+m.p+'\')">Change role</button><button class="btn sm danger" onclick="openDialog(\'removemember\',\''+m.p+'\')">Remove</button></td></tr>';}).join("")+
      '</tbody></table></div><div class="panel-b">'+
-     '<div class="note">Changing a role is a governed action. It passes IAM, writes an audit record, and bills as one action.</div></div></div>'+
-     '<div style="margin-top:14px">'+rolesInUsePanel()+'</div>';
+     '<div class="note">Changing a role is a governed action. It passes IAM, writes an audit record, and bills as one action.</div></div></div>';
   } else if(t==="roles"){
     body=rolesBody();
   } else if(t==="invitations"){
@@ -13992,13 +14023,6 @@ function permChips(perms,max){
 /* Role kinds (human, agent, service), not record kinds. Named apart from kindBadge, which this used to
    shadow: one script, hoisted, later definition wins, so every record card got a role badge instead. */
 function roleKindBadge(k){return '<span class="b '+(k==="agent"?"b-proven":k==="service"?"b-approval":"b-q")+'">'+h(k)+'</span>';}
-function rolesInUsePanel(){
-  var list=ROLES.filter(function(r){return r.kind==="human";});
-  return '<div class="panel"><div class="panel-h"><h3>Roles in use</h3><button class="btn sm" style="margin-left:auto" onclick="orgTab(\'roles\')">Manage roles</button></div><div class="tw"><table class="narrow"><tbody>'+
-   list.map(function(r){var n=roleAssignees(r.id);return '<tr class="click" onclick="orgTab(\'roles\');roleOpen(\''+r.id+'\')"><td class="mono" style="font-size:11.5px">'+h(r.id)+'</td><td class="num">'+n.total+'</td>'+
-    '<td class="dim" style="font-size:11.5px">'+h(r.desc)+'</td></tr>';}).join("")+
-   '</tbody></table></div><div class="panel-b" style="padding-top:10px"><span class="dim" style="font-size:11.5px">'+ROLES.filter(function(r){return r.kind==="agent";}).length+' agent roles and '+ROLES.filter(function(r){return r.kind==="service";}).length+' service role are on the Roles tab.</span></div></div>';
-}
 function rolesBody(){
   var list=ROLES.slice();
   var rows=list.map(function(r){
@@ -17091,7 +17115,9 @@ function ltTable(table,prefix){
   var cols=ths.map(function(th,i){return {i:i,name:th.textContent.trim(),num:th.classList.contains("num")};});
   var sig=cols.map(function(c){return c.name;}).join("/");
   var st=ltState(prefix,sig);
-  var vals=rows.map(function(r){return cols.map(function(c){var cell=r.cells[c.i]; var t=cell?cell.textContent.replace(/\s+/g," ").trim():""; return {t:t,n:ltNum(t)};});});
+  /* A cell may name its own value in data-v, for sorting and filtering, where its text carries a
+     second word: a kind badge with a skill's shelf under it still filters as its kind. */
+  var vals=rows.map(function(r){return cols.map(function(c){var cell=r.cells[c.i]; var t=cell?(cell.getAttribute("data-v")||cell.textContent).replace(/\s+/g," ").trim():""; return {t:t,n:ltNum(t)};});});
   cols.forEach(function(c){ if(c.num)return; var k=0,tot=0; vals.forEach(function(v){if(v[c.i].t){tot++; if(v[c.i].n!=null)k++;}}); if(tot&&k/tot>=.6)c.num=true; });
   var texts=rows.map(function(r){return r.textContent.replace(/\s+/g," ").toLowerCase();});
   var facets=ltFacets(cols,vals,rows.length);
