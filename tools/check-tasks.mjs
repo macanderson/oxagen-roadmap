@@ -219,14 +219,14 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
   const { page, errs } = await open(H + "/fields");
   const t = await text(page);
   ok(/P0/.test(t) && /P3/.test(t) && /New Feature/.test(t) && /Documentation/.test(t) && /Chore/.test(t), "fields: the default labels ship");
-  ok(/Fixed/.test(t) && /Won't fix/.test(t) && /Duplicate/.test(t) && /Cancelled/.test(t) && /Other/.test(t), "fields: the default resolutions ship");
+  ok(/Fixed/.test(t) && /Won't fix/.test(t) && /Duplicate/.test(t) && /Canceled/.test(t) && /Other/.test(t), "fields: the default resolutions ship");
   ok(/Open/.test(t) && /Blocked/.test(t) && /Closed/.test(t), "fields: the three status categories");
   await page.click("text=New Feature >> nth=0");
   const d = await dlgText(page);
   ok(/A label will carry definition-of-done items/.test(d), "label: says labels will carry definition-of-done items");
-  await page.click('button[aria-label="Colour #9D8BE3"]');
+  await page.click('button[aria-label="Color #9D8BE3"]');
   await footBtn(page, "Save label").click();
-  ok(/#9D8BE3/.test(await text(page)), "label: the colour is saved");
+  ok(/#9D8BE3/.test(await text(page)), "label: the color is saved");
   await page.close();
   const w = await open(H + "/work-orders/wo_01K6TA2M");
   ok(!(await w.page.locator(".phead button", { hasText: "Accept the work" }).isDisabled()), "accept: enabled when every item is claimed");

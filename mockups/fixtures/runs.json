@@ -365,7 +365,7 @@
   "grade": "full",
   "task": "a-intel/platform#498",
   "taskTitle": "Operator guide: kill switches",
-  "summary": "Rewrote the kill-switches section of the operator guide, adding the deny-generation explanation and two worked examples (+84 / \u221212 lines in docs/operator/kill-switches.md), and opened pull request #498. The verdict is waived: prose carries no test test.",
+  "summary": "Rewrote the kill-switches section of the operator guide, adding the deny-generation explanation and two worked examples (+84 / \u221212 lines in docs/operator/kill-switches.md), and opened pull request #498. The verdict is waived: a prose change has no test to run.",
   "touched": [
    "a-intel/platform#498",
    "docs/operator/kill-switches.md"

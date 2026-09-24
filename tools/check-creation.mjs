@@ -823,7 +823,7 @@ for (const theme of ["light", "dark"]) {
   const { page, errs } = await open("#/a-intel/core-platform/tools/policy");
   const txt = await page.evaluate(() => document.body.innerText);
   ok(!/Cedar/i.test(txt), "policy: the page names no policy language");
-  ok(/tools\.policy_versions/.test(txt), "policy: the store is named");
+  ok(!/tools\.policy_versions/.test(txt), "policy: the page names no storage table");
 
   const heads = await page.evaluate(() => [...document.querySelectorAll(".panel-h h3")].map((x) => x.textContent).join("|"));
   ok(/Where a version lives/.test(heads), "policy: the storage panel renders, got " + heads);
@@ -1081,8 +1081,8 @@ for (const theme of ["light", "dark"]) {
   const avail = await foot("a-intel/ledger-service");
   ok(avail.includes("Link to this workspace"), "repositories: an available repo offers Link, got " + avail.join(" ~ "));
   ok(!avail.includes("Unlink"), "repositories: an unlinked repo has nothing to unlink, got " + avail.join(" ~ "));
-  ok(avail.filter((b) => b === "Link to this workspace" || b === "Add Oxagen").length === 2,
-    "repositories: Link and Add Oxagen are both offered, got " + avail.join(" ~ "));
+  ok(avail.filter((b) => b === "Link to this workspace" || b === "Add .oxagen/").length === 2,
+    "repositories: Link and Add .oxagen/ are both offered, got " + avail.join(" ~ "));
   const primaries = await page.evaluate(() =>
     document.querySelectorAll("#layer .dlg .dlg-f button.primary").length);
   ok(primaries === 1, "repositories: the footer carries one primary, got " + primaries);

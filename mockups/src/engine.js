@@ -4608,7 +4608,7 @@ function pAgents(){
   var acts=function(a){
     return '<td class="rowacts" onclick="event.stopPropagation()"><button class="btn sm" onclick="S.tab.agent=\'definition\';go(\'#/'+ORG.slug+'/'+w.slug+'/agents/'+defSlug(a)+'\')">Edit</button>'+
      '<button class="btn sm" onclick="openDialog(\'assignrole\',\''+a.key+'\')">Roles</button>'+
-     '<button class="btn sm danger" onclick="openDialog(\'delagent\',\''+a.key+'\')">Deregister</button></td>';
+     '<button class="btn sm danger" onclick="openDialog(\'delagent\',\''+a.key+'\')">Retire</button></td>';
   };
   var head, rows;
   if(view==="composition"){
@@ -4935,7 +4935,7 @@ function beltFocus(){setTimeout(function(){var e=el("beltq");
    are all ceilings on the principal, so they sit together under Permissions rather than beside
    the belt. The rev1 tab ids still resolve, so an old link lands on the tab that absorbed it. */
 var IAM_TABS=[["overview","Overview"],["identity","Identity"],["steering","Steering"],["toolbelt","Toolbelt"],
-  ["runtime","Runtime"],["permissions","Permissions"],["activity","Activity"],["definition","Definition in git"]];
+  ["runtime","Runtime"],["permissions","Permissions"],["activity","Activity"],["definition","Definition"]];
 var IAM_TAB_KEYS={}; IAM_TABS.forEach(function(x){IAM_TAB_KEYS[x[0]]=1;});
 var IAM_TAB_ALIAS={mandates:"permissions",budgets:"permissions",runs:"activity",
   enrollment:"runtime",incidents:"activity"};
@@ -4978,7 +4978,7 @@ function pAgent(r){
     '<button class="btn" onclick="openAvatar(\'agent:'+a.key+'\')">Edit avatar</button>'+
     '<button class="btn" onclick="openDialog(\'rotatecred\',\''+a.key+'\')">Rotate credential</button>'+
     '<button class="btn danger" onclick="openDialog(\'suspendagent\',\''+a.key+'\')">Suspend</button>'+
-    '<button class="btn danger" onclick="openDialog(\'delagent\',\''+a.key+'\')">Deregister</button>'+
+    '<button class="btn danger" onclick="openDialog(\'delagent\',\''+a.key+'\')">Retire agent</button>'+
    '</div></div>'+tabs+body(a,r);
 }
 
@@ -5001,7 +5001,7 @@ function aIdentity(a,r){
     '<dt>Operator</dt><dd>'+h(op.name)+
      '<span class="sub">accountable for every run · IAM field <span class="mono">initiating_principal</span></span></dd>'+
     '<dt>Lifecycle state</dt><dd><span class="b b-allowed"><span class="d"></span>'+h(a.status)+'</span>'+
-     '<span class="sub">registered → enrolled → active → retired. Deregistering retires the principal and never deletes it, so old runs keep their identity.</span></dd>'+
+     '<span class="sub">registered → enrolled → active → retired. Retiring ends the principal and never deletes it, so old runs keep their identity.</span></dd>'+
     '<dt>First frame</dt><dd class="mono">'+h(a.firstFrame||"—")+'</dd>'+
     '</dl></div></div>'+
 
@@ -5173,10 +5173,10 @@ function aSteering(a,r){
 /* ---- Runtime: the host this agent runs on, and what that seam earns ---- */
 function aRuntime(a,r){
   if(!a.enrolled) return '<div class="panel"><div class="panel-b">'+
-   emptyState("No runtime is enrolled for this agent",
-    "Until a host enrolls, this agent has an identity and a toolbelt but no hook is installed. Its runs would be graded <span class=\"mono\">observe</span>, and no report could say more.",
-    '<button class="btn primary" onclick="openDialog(\'wrap\')">Wrap it</button>'+
-    '<button class="btn" onclick="openDialog(\'register\')">Show the CLI path</button>')+'</div></div>';
+   emptyState("No runtime is enrolled",
+    "Until one is, runs are recorded at the <span class=\"mono\">observe</span> tier: nothing is delivered and nothing can be blocked.",
+    '<button class="btn primary" onclick="openDialog(\'wrap\')">Enroll a runtime</button>'+
+    '<button class="btn" onclick="openDialog(\'register\')">Show CLI steps</button>')+'</div></div>';
 
   return '<div class="grid">'+aRuntimeHost(a)+
   '<div class="grid g2">'+
@@ -7855,7 +7855,7 @@ function pRuntimes(r){
   if(S.state==="empty"||!L.length) return head+emptyState("No runtime is enrolled",
     "Until a host enrolls, an agent has an identity and a toolbelt but no hook is installed. Its runs are graded <span class=\"mono\">observe</span>, and no report can say more.",
     '<button class="btn primary" onclick="openDialog(\'wrap\')">Enroll a runtime</button>'+
-    '<button class="btn" onclick="openDialog(\'register\')">Show the CLI path</button>');
+    '<button class="btn" onclick="openDialog(\'register\')">Show CLI steps</button>');
   if(sel) return head+rtDetail(sel);
 
   var rows=L.map(function(rt){
@@ -8063,7 +8063,7 @@ function repoTab(){
    '<div class="grow"><b>A run on '+h(unbound.map(function(r){return r.n;}).join(", "))+' is steered by the main repo and by nothing of its own.</b> '+
    'Repository-scoped records live in that repository, so until it has a <span class="mono">.oxagen/</span> tree there is nowhere to put one — '+
    'and a record that tried would have to claim workspace scope, which the checks refuse.</div>'+
-   '<button class="btn" onclick="wzOpen(\'init\',\''+h(unbound[0].n)+'\')">Add oxagen</button></div>':'';
+   '<button class="btn" onclick="wzOpen(\'init\',\''+h(unbound[0].n)+'\')">Add .oxagen/</button></div>':'';
 
   var trows=rows.map(function(r){
     var st=oxState(r), avail=r.role==="available";
@@ -8077,12 +8077,12 @@ function repoTab(){
      '<td class="num">'+(avail?'<span class="dim">—</span>':r.symbols.toLocaleString())+'</td>'+
      '<td>'+(st===OX_STATE.governed
         ?'<span class="dim" style="font-size:11.5px">nothing waiting</span>'
-        :'<button class="btn sm" onclick="event.stopPropagation();wzOpen(\'init\',\''+h(r.n)+'\')">Add oxagen</button>')+'</td></tr>';}).join("");
+        :'<button class="btn sm" onclick="event.stopPropagation();wzOpen(\'init\',\''+h(r.n)+'\')">Add .oxagen/</button>')+'</td></tr>';}).join("");
 
   return banner+
    '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Repositories</h3>'+
    '<p class="muted" style="margin:2px 0 0;font-size:12px">One main repo, any number of linked. The main repo holds the workspace’s steering and configuration; a linked repo may hold records that steer only runs on it.</p></div>'+
-   '<div class="sp"><button class="btn sm" onclick="wzOpen(\'init\')">Add oxagen to a repository</button></div></div>'+
+   '<div class="sp"><button class="btn sm" onclick="wzOpen(\'init\')">Add .oxagen/</button></div></div>'+
    '<div class="tw"><table><thead><tr><th>Repository</th><th>Role</th><th>Production branch</th><th>.oxagen/</th><th>Events</th><th class="num">Symbols</th><th></th></tr></thead>'+
    '<tbody>'+trows+'</tbody></table></div>'+
    '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">Changing which repository is <span class="mono">main</span> is an organization-owner action with approval, and it lands in the audit record as a security event. The production branch never moves on its own: when GitHub’s default branch changes, the App records it and prompts, and the binding stays where it is until somebody confirms.</div></div></div>';
@@ -8332,7 +8332,7 @@ function pRepos(){
   if(S.state==="denied") return deniedState("this workspace’s repositories","repository.read on "+w.slug);
   if(S.state==="empty") return emptyState("This workspace has no repository yet",
     "A workspace without a main repo cannot exist, so this state is the moment between creating one and binding it. The main repo is where steering and configuration are managed in source control — until it is bound, there is nowhere for a record to be published to.",
-    '<button class="btn primary" onclick="wzOpen(\'init\')">Add oxagen to a repository</button>');
+    '<button class="btn primary" onclick="wzOpen(\'init\')">Add .oxagen/</button>');
 
   var open=oxprOpen().length, stale=wsCopies().filter(function(c){return c.oxagen!=="in-sync";}).length;
   var tabs='<div class="tabs" role="tablist">'+
@@ -8348,7 +8348,7 @@ function pRepos(){
   var tabPrimary=(t==="changes"&&oxprCanMerge(selectedOxpr()))||t==="copies";
   return '<div class="phead"><div class="t"><p class="eyebrow">'+h(w.name)+'</p><h1>Repositories</h1>'+
    '<p>Where this workspace’s files live and every change oxagen has proposed to them.</p></div>'+
-   '<div class="acts"><button class="btn'+(tabPrimary?'':' primary')+'" onclick="wzOpen(\'init\')">Add oxagen to a repository</button></div></div>'+tabs+body;
+   '<div class="acts"><button class="btn'+(tabPrimary?'':' primary')+'" onclick="wzOpen(\'init\')">Add .oxagen/</button></div></div>'+tabs+body;
 }
 
 /* ============================== Spend ============================== */
@@ -11928,8 +11928,8 @@ DLG_EXT.revokecred=function(key){
 DLG_EXT.suspendagent=function(key){
   var a=agent(key); if(!a)return noSuch("Agent");
   return {t:"Suspend "+a.key+"?",w:false,
-   b:'<div class="note">Suspension is reversible and keeps the registration, the roles and the mandates. Every run token dies at the next call, even if the daemon is down, because the refusal is on the server.</div>'+
-     '<div class="note" style="margin-top:10px">Deregister is the one that ends the agent. This one you can undo.</div>',
+   b:'<div class="note">Suspension is reversible and keeps the registration, the roles and the mandates. Every run token dies at the next call, even if the daemon is down, because oxagen refuses the call, not the agent’s host.</div>'+
+     '<div class="note" style="margin-top:10px">Retire ends the agent. You can undo a suspension.</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
      '<button class="btn danger" onclick="closeDialog();act(\'Agent '+h(a.key)+' suspended. Every run token dies at the next call, even if the daemon is down.\')">Suspend it</button>'};
 };
@@ -12055,17 +12055,17 @@ function agentDelete(key){
   var i=-1;AGENTS.forEach(function(a,ix){if(a.key===key)i=ix;});
   if(i<0)return; var a=AGENTS[i]; AGENTS.splice(i,1); delete S.agentRoles[key];
   WS.forEach(function(w){if(w.slug===a.ws&&w.agents>0)w.agents--;});
-  closeDialog(); go('#/'+ORG.slug+'/'+a.ws+'/agents'); act(key+" deregistered. Credential revoked, definition archived by Context PR, every run and frame kept.");
+  closeDialog(); go('#/'+ORG.slug+'/'+a.ws+'/agents'); act(key+" retired. Credential revoked, definition archived by a context PR, every run and frame kept.");
 }
 function agentDelDlg(){
-  var a=S.dlg==="delagent"?agent(S.dlgArg):null; if(!a) return {t:"Deregister agent",w:false,b:"",f:""};
+  var a=S.dlg==="delagent"?agent(S.dlgArg):null; if(!a) return {t:"Retire agent",w:false,b:"",f:""};
   var live=RUNS.filter(function(r){return r.agent===a.key&&r.status==="live";}).length;
-  return {t:"Deregister agent",s:a.key,w:false,b:
+  return {t:"Retire agent",s:a.key,w:false,b:
    '<p style="font-size:13px">This ends the agent’s identity. Its credential is revoked, every run token dies at the next call, and a Context PR archives <span class="mono">.oxagen/agents/'+h(a.key.split(".").pop())+'.toml</span>.</p>'+
    '<dl class="kv"><dt>Kept</dt><dd>every run, frame, receipt and score — the record is never deleted</dd><dt>Ends</dt><dd>'+agentRolesOf(a.key).length+' role'+(agentRolesOf(a.key).length===1?'':'s')+', '+a.mandates.length+' mandate'+(a.mandates.length===1?'':'s')+', the host enrollment</dd>'+
    (live?'<dt>In flight</dt><dd><span style="color:var(--st-failed)">'+live+' live run'+(live>1?'s':'')+'</span> — canceled at the next boundary and recorded</dd>':'')+'</dl>'+
    '<label class="check" style="margin-top:12px"><input type="checkbox" id="delAgentOk" onchange="el(\'delAgentBtn\').disabled=!this.checked"><span class="grow"><span class="n" style="font-family:var(--font)">I understand this cannot be undone</span><span class="d">Re-registering creates a new principal with a provisional score.</span></span></label>',
-   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button id="delAgentBtn" class="btn danger" disabled onclick="agentDelete(\''+h(a.key)+'\')">Deregister</button>'};
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button id="delAgentBtn" class="btn danger" disabled onclick="agentDelete(\''+h(a.key)+'\')">Retire</button>'};
 }
 function memberRemove(p){var i=-1;MEMBERS.forEach(function(m,ix){if(m.p===p)i=ix;});if(i<0)return;MEMBERS.splice(i,1);closeDialog();act(PEOPLE[p].name+" removed. Grants ended; runs stay attributed to them.");}
 function memberDelDlg(){
@@ -12097,7 +12097,7 @@ function wsArchiveDlg(){
   var w=S.dlg==="archivews"?wsById(S.dlgArg):null; if(!w) return {t:"Archive workspace",w:false,b:"",f:""};
   var n=AGENTS.filter(function(a){return a.ws===w.slug;}).length;
   return {t:"Archive workspace",s:w.name,w:false,b:'<p style="font-size:13px">Archiving freezes <b>'+h(w.name)+'</b>: runs, frames, records and spend stay readable forever; agents cannot start, tools cannot be granted, and the main repo binding is released.</p>'+
-   (n?'<div class="warn">'+n+' agent'+(n>1?'s are':' is')+' registered here. Deregister or move them first.</div>':'<div class="note">No agents here. Archiving is an org-owner action, recorded as a security event.</div>'),
+   (n?'<div class="warn">'+n+' agent'+(n>1?'s are':' is')+' registered here. Retire or move them first.</div>':'<div class="note">No agents here. Archiving is an org-owner action, recorded as a security event.</div>'),
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn danger"'+(n?' disabled':'')+' onclick="wsArchive(\''+h(w.slug)+'\')">Archive</button>'};
 }
 
@@ -13082,7 +13082,7 @@ function asstSheet(){
   return asstHead('')+
    '<div class="asst-b">'+
    '<div class="msg op"><div class="who">'+h(me().name)+'</div><div class="bub">Triage is burning money on tool definitions. Narrow its belt to what it actually used in the last 30 days, and tell me what you changed.</div></div>'+
-   '<div class="msg"><div class="who">'+stellaName()+' <span class="b b-q" style="font-size:9.5px"><span class="id">run_01K5RT9X4M2</span> · assistant run</span></div><div class="bub">'+
+   '<div class="msg"><div class="who">'+stellaName()+' <span class="b b-q" style="font-size:9.5px"><span class="id">run_01K5RT9X4M2</span> · oxagen’s run</span></div><div class="bub">'+
    '<p style="margin:0 0 10px">I read the finding and the belt. 34 of the 52 tools on <span class="mono">a-intel.core.triage</span> were never called in 1,340 runs. '+
    'Narrowing the belt is a change to the agent definition, so it goes through a Context PR. I opened one.</p>'+
    '<div class="act-card"><div class="t"><span class="b b-allowed"><span class="d"></span>action</span><code>open_context_pr</code></div>'+
@@ -13694,7 +13694,7 @@ DLG_EXT.repo=function(){
       :avail?'<button class="btn primary" onclick="repoLink(\''+h(r.n)+'\')">Link to this workspace</button>'
       :'<button class="btn danger" onclick="openDialog(\'repounlink\',\''+h(r.n)+'\')">Unlink</button>')+
      (gov?'<button class="btn" onclick="closeDialog();S.tab.repositories=\'changes\';go(\'#/'+ORG.slug+'/'+w.slug+'/repositories/changes\')">See its changes</button>'
-      :'<button class="btn'+(avail?'':' primary')+'" onclick="closeDialog();wzOpen(\'init\',\''+h(r.n)+'\')">Add oxagen</button>')};
+      :'<button class="btn'+(avail?'':' primary')+'" onclick="closeDialog();wzOpen(\'init\',\''+h(r.n)+'\')">Add .oxagen/</button>')};
 };
 
 /* ============================== adding Oxagen to a repository ==============================
@@ -13751,7 +13751,7 @@ function wzInit(){
       ((z.role||"linked")==="main"
         ?h(w.main)+' is this workspace’s main repo today. Merging this makes '+h(r.n)+' the main repo instead — an organization-owner action with approval, recorded as a security event, and the one change on this page a reviewer cannot undo by closing the pull request.'
         :h(w.main)+' is already this workspace’s main repo, so this one is linked.')+'</div>',
-     t:"Add oxagen to a repository", s:"the directory every other file needs",
+     t:"Add .oxagen/", s:"the directory every other file needs",
      f:wzNext("Next",true)};
   }
   if(z.step===2){
@@ -13768,7 +13768,7 @@ function wzInit(){
         return '<button class="wz-card'+(on?" on":"")+'" onclick="wzSetR(\'mode\',\''+m[0]+'\')">'+
          '<span class="tx"><b>'+h(m[0])+'</b><span class="d">'+h(m[1])+' '+h(m[2])+'</span></span></button>';}).join("")+'</div>'+
       '<div class="hint">This is read off <span class="mono">.oxagen/rules/governance.toml</span> when a pull request is opened and again when it is merged, so raising it takes effect on everything already in flight. Nothing else in oxagen writes that file.</div></div>',
-     t:"Add oxagen to a repository", s:"the directory every other file needs",
+     t:"Add .oxagen/", s:"the directory every other file needs",
      f:wzNext("Next",true)};
   }
   if(z.step===3){
@@ -13786,7 +13786,7 @@ function wzInit(){
         ["merge on its own","Merging gates on a role only a signed-in person holds, under the mode this repository declares."],
         ["read a secret","The scan refuses a pull request that carries one. Nothing in <span class=\"mono\">.oxagen/</span> holds a credential; a server is named there and its credential lives in the vault."],
         ["grant authority","Nothing in this tree can grant a tool, raise a tier or lift a budget. A record steers; a belt grants."]])+'</div>',
-     t:"Add oxagen to a repository", s:"the directory every other file needs",
+     t:"Add .oxagen/", s:"the directory every other file needs",
      f:wzNext("Draft the files",true)};
   }
   if(z.step===4){
@@ -13796,10 +13796,10 @@ function wzInit(){
       '<div class="field"><label>.oxagen/rules/governance.toml</label>'+
       '<pre>'+h(oxGovernanceToml(z.mode||"team"))+'</pre></div>'+
       '<div class="note">Every line is yours to change before anybody reviews it. What lands is what the pull request carries, not what this screen drafted.</div>',
-     t:"Add oxagen to a repository", s:"the directory every other file needs",
+     t:"Add .oxagen/", s:"the directory every other file needs",
      f:wzNext("Next",true)};
   }
-  var pr=wzPrStep("Add oxagen to "+r.n,
+  var pr=wzPrStep("Add .oxagen/ to "+r.n,
     'The pull request puts the directory in <span class="mono">'+h(r.n)+'</span>. Until somebody merges it, this repository is ungoverned and nothing here is in force — which is also the only place a reviewer can stop it.',
     wzInitFiles(),
     [["schema","<span class=\"mono\">workspace.toml</span> parses, and every repository it declares resolves through this installation."],
@@ -13807,7 +13807,7 @@ function wzInit(){
      ["governance","<span class=\"mono\">mode = "+h(z.mode||"team")+"</span> is one of the three. A file that parses but names no mode would refuse every later pull request, so it is refused now."],
      ["secret_pii_scan","No credential, key, email or personal datum in any added file."],
      ["no_authority","Nothing added grants a tool, raises a tier or lifts a budget."]],
-    "Open pull request", "Opened "+r.n+"#118 · Add oxagen", r.n);
+    "Open pull request", "Opened "+r.n+"#118 · Add .oxagen/", r.n);
   return {b:pr.b, t:pr.t, s:"the directory every other file needs",
    f:'<button class="btn primary" onclick="wzOpenPr(\''+pr.msg.replace(/'/g,"\\'")+'\')">'+h(pr.btn)+'</button>'};
 }
@@ -15214,7 +15214,15 @@ document.addEventListener("click",function(e){
   function ulid(n){var s="";for(var i=0;i<n;i++)s+=B32[Math.floor(rnd()*32)];return s;}
   function hex(n){var s="";for(var i=0;i<n;i++)s+="0123456789abcdef"[Math.floor(rnd()*16)];return s;}
   function pad(n){return (n<10?"0":"")+n;}
-  function title(s){return s.split("-").map(function(w){return w.charAt(0).toUpperCase()+w.slice(1);}).join(" ");}
+  /* slug to display name: "pr-reviewer" reads "PR Reviewer", not "Pr Reviewer" */
+  var ACRONYMS={pr:"PR",po:"PO",ci:"CI",us:"US",eu:"EU",apac:"APAC",api:"API",mcp:"MCP",totp:"TOTP"};
+  function title(s){return s.split("-").map(function(w){return ACRONYMS[w]||w.charAt(0).toUpperCase()+w.slice(1);}).join(" ");}
+  /* an agent's display name: sentence case, acronyms kept, a region suffix in parentheses ("Cost reporter (US)") */
+  function agentTitle(slug){
+    var w=slug.split("-"), region=/^(us|eu|apac)$/.test(w[w.length-1])?ACRONYMS[w.pop()]:"";
+    var t=w.map(function(x,i){return ACRONYMS[x]||(i?x:x.charAt(0).toUpperCase()+x.slice(1));}).join(" ");
+    return region?t+" ("+region+")":t;
+  }
   /* the story's clock: 2026-09-11, a little after 09:14 UTC. daysAgo 0 renders as a bare time, like the seed rows. */
   var TODAY=Date.UTC(2026,8,11), NOW_SEC=9*3600+14*60;
   function dstr(ms){var d=new Date(ms);return d.getUTCFullYear()+"-"+pad(d.getUTCMonth()+1)+"-"+pad(d.getUTCDate());}
@@ -15327,7 +15335,7 @@ document.addEventListener("click",function(e){
       var tier=wpick([["gateway",68],["harness",19],["contained",8],["observe",5]]), tierNative=(wpick([["harness",1]]),tier);
       var incidents=wpick([[0,94],[1,5],[2,1]]);
       var av=rnd()<0.62?{kind:"icon",icon:ICONS[(n*7+w.slug.length)%ICONS.length],tone:TONES[n%3]}:{kind:"initials",text:slug.split("-").map(function(s){return s.charAt(0).toUpperCase();}).join("").slice(0,3),font:FONTS[n%3],tone:TONES[(n+1)%3]};
-      var made={key:"a-intel."+x.pre+"."+slug,name:title(slug),harness:hn[0],harnessLabel:hn[1],ws:w.slug,operator:wpick(ops),status:"enrolled",
+      var made={key:"a-intel."+x.pre+"."+slug,name:agentTitle(slug),harness:hn[0],harnessLabel:hn[1],ws:w.slug,operator:wpick(ops),status:"enrolled",
         tier:tier,tierNative:tierNative,belt:ri(3,58),beltMode:rnd()<0.72?"full":"searchable",runs30:runs30,spend30:m2(spend),ratio:ratio,
         digest:"sha256:"+hex(16),commit:x.head,budget:m2(pick([0.4,0.6,0.8,1,1.5,2,3])),budgetUsed:Math.round(rf(0.05,0.98)*100)/100,
         desc:DESC[base]||("Runs "+title(base).toLowerCase()+" for "+w.name+". Opens a pull request or a proposal; never merges, never pays."),
@@ -15603,7 +15611,7 @@ document.addEventListener("click",function(e){
 
   /* ---------- audit ---------- */
   var EV=[["approval.requested",10,"agent"],["approval.resolved",9,"human"],["run.sealed",26,"agent"],["run.halted",4,"agent"],["tool_call.denied",6,"agent"],
-    ["budget.breached",2,"agent"],["agent.registered",3,"human"],["agent.deregistered",1,"human"],["role.assigned",3,"human"],["role.revoked",1,"human"],["api_key.created",1,"human"],["api_key.revoked",1,"human"],
+    ["budget.breached",2,"agent"],["agent.registered",3,"human"],["agent.retired",1,"human"],["role.assigned",3,"human"],["role.revoked",1,"human"],["api_key.created",1,"human"],["api_key.revoked",1,"human"],
     ["invitation.sent",2,"human"],["invitation.accepted",2,"human"],["connection.reviewed",2,"human"],["credential.granted",8,"service"],["export.created",2,"human"],["export.downloaded",1,"human"],
     ["steering_published",3,"human"],["context_pr.opened",3,"service"],["kill_switch.flipped",1,"human"],["kill_switch.cleared",1,"human"],
     ["schema.proposed",2,"service"],["schema.approved",1,"human"],["session.signed_in",6,"human"],["preferences.set",2,"human"]];
@@ -15621,7 +15629,7 @@ document.addEventListener("click",function(e){
       case "tool_call.denied": return t.n+"@"+t.v+" · "+pick(["outside the belt","tainted argument","mandate ceiling","kill switch"]);
       case "budget.breached": return "$"+m2(rf(0.4,3))+" per run reached at turn "+r.turn+" · paused at the next hook boundary";
       case "agent.registered": return r.agent+" · "+agentsBy[r.agent].harnessLabel+" · "+agentsBy[r.agent].tier+" tier";
-      case "agent.deregistered": return "a-intel."+pick(["core","data","growth"])+"."+pick(["stale-closer","weekly-digest","summarizer"])+"-old · runs retained";
+      case "agent.retired": return "a-intel."+pick(["core","data","growth"])+"."+pick(["stale-closer","weekly-digest","summarizer"])+"-old · runs retained";
       case "role.assigned": return p+" · "+pick(["workspace.member","workspace.owner","org.auditor"])+" · "+pick(allWs);
       case "role.revoked": return p+" · workspace.member · "+pick(allWs);
       case "api_key.created": return "svc_"+pick(["export","ci","terraform","auditor"])+"_"+ulid(4).toLowerCase()+" · grants run.read · expires "+dstr(TODAY+ri(30,180)*86400000);

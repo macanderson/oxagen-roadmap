@@ -2,7 +2,7 @@
  {
   "id": "oxpr_01K6T4A2",
   "kind": "bootstrap",
-  "title": "Add oxagen to a-intel/mobile",
+  "title": "Add .oxagen/ to a-intel/mobile",
   "repo": "a-intel/mobile",
   "base": "release",
   "branch": "oxagen/init",
