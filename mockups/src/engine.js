@@ -207,9 +207,9 @@ function coachAgent(a){
   var t=agentTok(a); if(!t) return [];
   var sp=money(a.spend30)||0, per$=function(tok){return sp*tokShare(tok,t.total);}, out=[], slug=a.key.split(".").pop(), base='#/'+ORG.slug+'/'+a.ws;
   if(t.shares.tools>0.16) out.push({k:"belt",sev:"approval",title:"Narrow the belt",
-    signal:per(t.shares.tools)+' of every request is tool definitions · '+t.neverCalled+' of '+a.belt+' tools never called in 30 days',
+    signal:per(t.shares.tools)+' of every request is tool definitions · '+t.neverCalled+' of '+plural(a.belt,"tool")+' never called in 30 days',
     tok:t.parts.tools,usd:per$(t.parts.tools)*Math.min(0.6,t.neverCalled/Math.max(1,a.belt)),
-    say:"The model is shown "+a.belt+" tools on every call and used "+(a.belt-t.neverCalled)+". Drop the "+t.neverCalled+" it never calls from the grant, or switch the belt to searchable so unused definitions leave the prompt.",
+    say:"The model is shown "+plural(a.belt,"tool")+" on every call and used "+(a.belt-t.neverCalled)+". Drop the "+t.neverCalled+" it never calls from the grant, or switch the belt to searchable so unused definitions leave the prompt.",
     act:["Edit the grant",'S.tab.agent=\'toolbelt\';go(\''+base+'/agents/'+slug+'/toolbelt\')']});
   if(t.cacheRate<0.72) out.push({k:"cache",sev:"approval",title:"Keep the prefix stable",
     signal:per(t.cacheRate)+' cache hit rate · '+tokn(t.fresh)+' input tokens paid at full price',
@@ -232,7 +232,7 @@ function coachAgent(a){
     say:"Runs whose steps are all read-and-sort shaped reason at flagship prices. Set a light default in the definition and let the harness escalate on a write.",
     act:["Edit the definition",'S.tab.agent=\'definition\';go(\''+base+'/agents/'+slug+'/definition\')']});
   if(t.retries>Math.max(2,(a.runs30||0)*0.04)) out.push({k:"retry",sev:"denied",title:"Stop the retry storms",
-    signal:t.retries+' runs with three or more provider retries in one turn',
+    signal:plural(t.retries,"run")+' with three or more provider retries in one turn',
     tok:Math.round(t.retries*t.perCall*2.5),usd:per$(Math.round(t.retries*t.perCall*2.5)),
     say:"Consecutive provider errors were retried inside one turn and every retry paid the whole prompt again. Cap retries per turn in the harness settings and check the provider key's health.",
     act:["Open incidents",'S.tab.agent=\'incidents\';go(\''+base+'/agents/'+slug+'/incidents\')']});
@@ -251,24 +251,24 @@ function coachOperator(p){
   var row=(SPEND.byOperator||[]).filter(function(o){return o.p===p;})[0];
   var wide=list.filter(function(a){return agentTok(a).shares.tools>0.16;});
   if(wide.length) out.push({k:"grants",sev:"approval",title:"Grants are wider than the work",
-    signal:wide.length+' of '+list.length+' agents spend over 16% of every request on tool definitions',
+    signal:wide.length+' of '+plural(list.length,"agent")+' spend over 16% of every request on tool definitions',
     tok:wide.reduce(function(n,a){return n+agentTok(a).parts.tools;},0),usd:per$(wide.reduce(function(n,a){return n+agentTok(a).parts.tools;},0))*0.4,
     say:"The same role template gave every agent the whole belt. Cut each grant to the tools its runs call: "+wide.map(function(a){return a.key.split(".").pop();}).slice(0,3).join(", ")+(wide.length>3?' and '+(wide.length-3)+' more':'')+'.',
     act:["Open Identities",'go(\'#/'+ORG.slug+'/'+ws().slug+'/agents\')']});
   var reread=list.filter(function(a){return agentTok(a).dupReads>(a.runs30||0)*0.15;});
   if(reread.length) out.push({k:"prompts",sev:"approval",title:"Prompts that make the agent re-read",
-    signal:reread.reduce(function(n,a){return n+agentTok(a).dupReads;},0)+' repeated reads across '+reread.length+' agents · the brief says "confirm" where a record could say "known"',
+    signal:reread.reduce(function(n,a){return n+agentTok(a).dupReads;},0)+' repeated reads across '+plural(reread.length,"agent")+' · the brief says "confirm" where a record could say "known"',
     tok:reread.reduce(function(n,a){return n+agentTok(a).parts.results*0.3;},0),usd:per$(reread.reduce(function(n,a){return n+agentTok(a).parts.results*0.3;},0)),
     say:"A brief that asks the agent to confirm a file it already has makes it read the file again on every run. Move the fact into a steering record once; it is reviewed like code and reaches every run.",
     act:["Write a record",'wzOpen(\'record\')']});
   var pp=operatorPrompts(p);
   if(pp&&pp.avg>1.5) out.push({k:"prompts",sev:"approval",title:"Get to one prompt per session",
-    signal:pp.avg.toFixed(1)+' prompts per session over '+pp.runs+' runs · '+pp.oneShot+' one-shot',
+    signal:plural(pp.avg.toFixed(1),"prompt")+' per session over '+plural(pp.runs,"run")+' · '+pp.oneShot+' one-shot',
     tok:0,usd:pp.waste,
     say:"A prompt after the first fixes or fills what the first left out, and every one re-runs the window. Either the first prompt is missing context the agent needed, or the design was not settled before the run started. Put the missing context in a steering record and settle the design in the task before the run.",
     act:["Write a record",'wzOpen(\'record\')']});
   if(t.cacheRate<0.74) out.push({k:"cache",sev:"q",title:"Publish steering between runs, not during",
-    signal:per(t.cacheRate)+' cache hit rate across '+list.length+' agents',
+    signal:per(t.cacheRate)+' cache hit rate across '+plural(list.length,"agent"),
     tok:t.tokIn-t.cacheRead,usd:per$(t.tokIn-t.cacheRead)*0.4,
     say:"Steering publishes and grant edits during the day landed inside live runs and broke their prefix. Batch them, or publish to a workspace with no live run.",
     act:["Open steering",'go(\'#/'+ORG.slug+'/'+ws().slug+'/steering\')']});
@@ -367,7 +367,7 @@ function runSummary(R){
    '<span class="b b-q" style="font-size:10.5px">generated · not the record</span></div>'+
    involved(R)+
    '<p class="lede">'+h(R.summary)+'</p>'+
-   '<div class="gen"><span class="grow">generated by <b>'+h(g.model||"")+'</b> · '+h(g.when||"")+' · read '+(g.frames||R.frames)+' frames · light tier · cost accounted to this run</span>'+
+   '<div class="gen"><span class="grow">generated by <b>'+h(g.model||"")+'</b> · '+h(g.when||"")+' · read '+plural((g.frames||R.frames),"frame")+' · light tier · cost accounted to this run</span>'+
    '<button class="btn sm" onclick="S.tab.run=\'player\';S.frame=0;render()">Check it against the frames</button></div></section>';
 }
 
@@ -611,7 +611,21 @@ function avSave(){
 }
 function per(n){return Math.round(n*100)+"%";}
 function ic0(n){return Math.round(n).toLocaleString("en-US");}
-function usd(a){return "$"+a;}
+// Every dollar figure goes through usd(): a dollar sign, thousands separators, two decimals (more when the
+// source carries them, as a per-million price does), and a true minus sign. A string with no number in it,
+// such as "—", passes through unchanged.
+function usd(a){
+  var s=String(a==null?"":a).replace(/[$,\s]/g,"").replace("−","-"),n=Number(s);
+  if(s===""||!isFinite(n))return /\d/.test(String(a))?"$"+a:String(a);
+  var d=(s.split(".")[1]||"").length;
+  return (n<0?"−":"")+"$"+Math.abs(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:Math.min(Math.max(2,d),6)});
+}
+// A whole-dollar figure, for yearly projections where cents would be false precision.
+function usd0(a){var n=Math.round(Number(String(a).replace(/[$,\s]/g,"").replace("−","-")));return isFinite(n)?(n<0?"−":"")+"$"+Math.abs(n).toLocaleString("en-US"):String(a);}
+// plural(3,"turn") is "3 turns"; plural(1,"turn") is "1 turn". Pass the plural when adding "s" is wrong.
+function plural(n,one,many){var v=typeof n==="number"?n.toLocaleString("en-US"):n;return v+" "+(Number(String(n).replace(/,/g,""))===1?one:(many||one+"s"));}
+// A true minus sign for a negative percentage or number shown as text.
+function minus(x){return String(x).replace(/^-/,"−");}
 function tab(page,def){return S.tab[page]||def;}
 
 var LOGO='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 574.244 106.313" role="img" aria-label="oxagen"><g transform="translate(0,0) scale(2.842952)"><path d="M6.300 0.000L12.600 3.320L12.600 9.960L6.300 13.280L0.000 9.960L0.000 3.320ZM1.000 3.885L1.000 9.395L6.300 12.150L11.600 9.395L11.600 3.885L6.300 1.130Z M19.376 0.000L25.676 3.320L25.676 9.960L19.376 13.280L13.076 9.960L13.076 3.320ZM14.076 3.885L14.076 9.395L19.376 12.150L24.676 9.395L24.676 3.885L19.376 1.130Z M12.838 10.240L19.138 13.560L19.138 20.200L12.838 23.520L6.538 20.200L6.538 13.560ZM7.538 14.125L7.538 19.635L12.838 22.390L18.138 19.635L18.138 14.125L12.838 11.370Z M19.376 20.480L25.676 23.800L25.676 30.440L19.376 33.760L13.076 30.440L13.076 23.800ZM14.076 24.365L14.076 29.875L19.376 32.630L24.676 29.875L24.676 24.365L19.376 21.610Z" fill="currentColor"/><path d="M25.914 10.240L32.214 13.560L32.214 20.200L25.914 23.520L19.614 20.200L19.614 13.560Z M6.300 20.480L12.600 23.800L12.600 30.440L6.300 33.760L0.000 30.440L0.000 23.800Z" fill="#D4AF37"/></g><g transform="translate(120.376,13.067)"><path d="M33.9083 68.758Q24.1657 68.758 16.4786 64.7737Q8.79142 60.7894 4.39571 53.2965Q0 45.8035 0 35.3862V33.3718Q0 22.9544 4.39571 15.4615Q8.79142 7.96854 16.4786 3.98427Q24.1657 0 33.9083 0Q43.6509 0 51.3381 3.98427Q59.0252 7.96854 63.4209 15.4615Q67.8166 22.9544 67.8166 33.3718V35.3862Q67.8166 45.8035 63.4209 53.2965Q59.0252 60.7894 51.3381 64.7737Q43.6509 68.758 33.9083 68.758ZM33.9083 55.3486Q42.1895 55.3486 47.4689 50.0198Q52.7484 44.691 52.7484 35.0142V33.7437Q52.7484 24.067 47.5233 18.7382Q42.2981 13.4094 33.9083 13.4094Q25.6502 13.4094 20.3592 18.7382Q15.0683 24.067 15.0683 33.7437V35.0142Q15.0683 44.691 20.3592 50.0198Q25.6502 55.3486 33.9083 55.3486Z M176.569 68.758Q169.637 68.758 164.119 66.3453Q158.601 63.9327 155.387 59.2935Q152.173 54.6542 152.173 48.0088Q152.173 41.3403 155.387 36.8558Q158.601 32.3712 164.27 30.1017Q169.94 27.8323 177.174 27.8323H196.047V23.8925Q196.047 18.7316 192.874 15.5274Q189.701 12.3232 182.99 12.3232Q176.411 12.3232 173.049 15.3842Q169.686 18.4452 168.627 23.3593L154.691 18.7315Q156.27 13.6133 159.748 9.39702Q163.225 5.18071 169.049 2.59035Q174.874 0 183.208 0Q195.972 0 203.326 6.42816Q210.681 12.8563 210.681 24.9392V50.4707Q210.681 54.4204 214.368 54.4204H219.795V66.9148H209.197Q204.464 66.9148 201.442 64.5334Q198.42 62.1521 198.42 58.1563V57.8864H196.126Q195.392 59.6967 193.399 62.2985Q191.406 64.9004 187.388 66.8292Q183.369 68.758 176.569 68.758ZM179.05 56.4348Q186.581 56.4348 191.314 52.1592Q196.047 47.8837 196.047 40.6031V39.2405H178.175Q173.175 39.2405 170.208 41.3881Q167.241 43.5358 167.241 47.5513Q167.241 51.5668 170.34 54.0008Q173.439 56.4348 179.05 56.4348Z M227.767 34.6423V32.6279Q227.767 22.3817 231.86 15.0863Q235.953 7.79081 242.768 3.8954Q249.582 0 257.706 0Q266.935 0 271.762 3.33256Q276.589 6.66512 278.81 10.4107H281.042V1.8432H295.801V79.33Q295.801 85.6989 292.104 89.4725Q288.408 93.2462 282.079 93.2462H238.369V80.0541H277.023Q280.779 80.0541 280.779 76.1043V57.2775H278.547Q277.161 59.5683 274.665 61.8904Q272.168 64.2125 268.057 65.7414Q263.946 67.2702 257.706 67.2702Q249.582 67.2702 242.756 63.3748Q235.93 59.4794 231.848 52.1724Q227.767 44.8655 227.767 34.6423ZM261.938 54.0781Q270.151 54.0781 275.573 48.8612Q280.996 43.6443 280.996 34.2704V32.9999Q280.996 23.4943 275.627 18.3432Q270.259 13.1921 261.938 13.1921Q253.749 13.1921 248.315 18.3432Q242.881 23.4943 242.881 32.9999V34.2704Q242.881 43.6443 248.315 48.8612Q253.749 54.0781 261.938 54.0781Z M344.764 68.758Q334.998 68.758 327.583 64.6108Q320.167 60.4636 316.031 52.9048Q311.896 45.346 311.896 35.1689V33.589Q311.896 23.3889 315.977 15.8416Q320.059 8.2944 327.397 4.1472Q334.735 0 344.385 0Q353.881 0 360.956 4.1867Q368.031 8.37341 371.981 15.8515Q375.931 23.3297 375.931 33.2895V38.6974H327.181Q327.468 46.3334 332.587 50.9496Q337.707 55.5658 345.198 55.5658Q352.522 55.5658 356.101 52.3534Q359.681 49.141 361.553 45.0629L373.985 51.4813Q372.119 55.0656 368.63 59.1042Q365.141 63.1428 359.394 65.9504Q353.648 68.758 344.764 68.758ZM327.313 27.2892H360.622Q360.095 20.7986 355.7 16.9954Q351.304 13.1921 344.277 13.1921Q337.055 13.1921 332.691 16.9954Q328.327 20.7986 327.313 27.2892Z M391.548 66.9148V1.8432H406.353V10.9769H408.585Q410.303 7.25429 414.832 3.99908Q419.361 0.743866 428.435 0.743866Q435.956 0.743866 441.695 4.12911Q447.434 7.51435 450.651 13.5903Q453.868 19.6663 453.868 27.9442V66.9148H438.8V29.1226Q438.8 21.1969 434.891 17.3492Q430.983 13.5015 423.9 13.5015Q415.872 13.5015 411.244 18.8237Q406.617 24.146 406.617 33.9445V66.9148Z" fill="currentColor"/><path d="M73.9979 66.9148 98.2261 34.0696 74.3764 1.8432H91.9626L107.9 24.3499H110.131L126.068 1.8432H143.654L119.805 34.0696L144.033 66.9148H126.206L110.131 44.0065H107.9L91.8244 66.9148Z" fill="#D4AF37"/></g></svg>';
@@ -1096,7 +1110,7 @@ function defForm(a){
   function chips(key,arr){arr=Array.isArray(arr)?arr:[];return '<div class="chips">'+arr.map(function(v,i){return '<span class="chip mono"><span>'+h(v)+'</span><button type="button" aria-label="Remove '+h(v)+'" onclick="defChip(\''+slug+'\',\''+key+'\','+i+',null)">×</button></span>';}).join("")+
     '<input class="mono" placeholder="add a tool pattern, Enter to keep" aria-label="Add to '+key+'" onkeydown="if(event.key===\'Enter\'&&this.value.trim()){defChip(\''+slug+'\',\''+key+'\',-1,this.value.trim());event.preventDefault();}"></div>';}
   var fx=Array.isArray(d.side_effects)?d.side_effects:[];
-  function check(v,label,desc,locked){var on=fx.indexOf(v)>=0;return '<label class="check'+(locked?' off':'')+'"><input type="checkbox"'+(on?' checked':'')+(locked?' disabled':'')+' onchange="defFx(\''+slug+'\',\''+v+'\',this.checked)"><span class="grow"><span class="n">'+v+'</span><div class="d">'+desc+'</div></span></label>';}
+  function check(v,label,desc,locked){var on=fx.indexOf(v)>=0;return '<label class="check'+(locked?' off':'')+'"><input type="checkbox"'+(on?' checked':'')+(locked?' disabled':'')+' onchange="defFx(\''+slug+'\',\''+v+'\',this.checked)"><span class="grow"><span class="n">'+label+'</span><div class="d">'+desc+'</div></span></label>';}
   var micros=d.budget&&typeof d.budget.per_run_micros==="number"?d.budget.per_run_micros:null;
   var harnessSec="harness."+a.harness, hv=(d.harness&&d.harness[a.harness])||{};
 
@@ -1124,8 +1138,8 @@ function defForm(a){
     fld("tools",chips("tools",d.tools),"Patterns against the registry. <span class=\"mono\">github__*</span> grants every github tool the operator can delegate.")+
     fld("deny_tools",chips("deny_tools",d.deny_tools),"A deny here wins over any grant. Version-pinned patterns like <span class=\"mono\">@*</span> deny every version.")+
     '<div class="field"><label>Side effects</label><div class="fxl">'+
-     check("read","May read through the gateway.")+check("write","May write through the gateway; every write is a receipt.")+
-     check("irreversible","Needs a mandate. This agent holds "+(a.mandates.length||"none")+".",!a.mandates.length)+'</div></div></div></div>'+
+     check("read","Read","May read through the gateway.")+check("write","Write","May write through the gateway. Every write is a receipt.")+
+     check("irreversible","Irreversible","Needs a mandate. This agent holds "+(a.mandates.length?plural(a.mandates.length,"mandate"):"none")+".",!a.mandates.length)+'</div></div></div></div>'+
    '<div class="panel"><div class="panel-h"><h3>Instructions</h3><span class="mono dim" style="margin-left:auto;font-size:11px">[instructions] body</span></div><div class="panel-b">'+
     '<div class="field"><textarea class="mono" rows="6" aria-label="Instructions" onchange="defInstr(\''+slug+'\',this.value)">'+h((d.instructions&&d.instructions.body)||"")+'</textarea>'+
     '<div class="hint">Compiled into the harness file beside this one. The checks scan it for secrets and PII before a merge.</div></div></div></div>'+
@@ -1346,7 +1360,7 @@ function draftCommit(slug){
   var ch=defChanges(slug)||[], a=agentBySlug(slug);
   var AREA={model_tier:"model routing","budget.per_run_micros":"budget",tools:"toolbelt",deny_tools:"toolbelt",side_effects:"side effects","instructions.body":"instructions",name:"metadata",description:"metadata"};
   function fmt(v){if(v===undefined)return "unset";if(Array.isArray(v))return "["+v.join(", ")+"]";if(typeof v==="string"&&v.length>48)return JSON.stringify(v.slice(0,45)+"…");return JSON.stringify(v);}
-  function money(m){return "$"+((m||0)/1e6).toFixed(2);}
+  function money(m){return usd(((m||0)/1e6).toFixed(2));}
   var areas={},lines=[],risk=[];
   ch.forEach(function(c){
     var area=AREA[c.key]||(c.key.indexOf("harness.")===0?"harness":"definition");areas[area]=1;
@@ -1906,7 +1920,7 @@ function approvalCard(a){
   return '<div class="apcard'+(crit?' crit':'')+(done?' done':'')+'" id="ap-'+a.id+'">'+
    '<div class="aphead"><div style="min-width:0">'+
     '<p class="eyebrow" style="margin-bottom:6px">'+(done?'Approval '+h(st.status):'Approval required')+'</p>'+
-    (a.amount?'<div class="amt">'+usd(a.amount)+'<span class="cur">'+h(a.currency)+'</span></div>':'<div class="amt" style="font-size:17px">'+h(a.tool)+'</div>')+
+    (a.amount?'<div class="amt">'+usd(a.amount)+' <span class="cur">'+h(a.currency)+'</span></div>':'<div class="amt" style="font-size:17px">'+h(a.tool)+'</div>')+
     '<div class="row" style="margin-top:6px;gap:7px">'+agentCard(a.agent,{layout:"compact",key:a.agent})+'</div>'+
     '<div class="muted" style="font-size:12.5px;margin-top:4px">'+(a.amount?'<span class="mono">'+h(a.tool)+'</span> → ':'')+'<span class="mono">'+h(a.counterparty)+'</span>'+
      (r?'<br>task <span class="mono">'+h(r.task)+'</span> '+h(r.taskTitle):'')+'</div>'+
@@ -2005,7 +2019,7 @@ function approvalReceipt(a,st,R,m,L){
   var ok=st.status==="approved", ag=agent(a.agent)||{}, op=PEOPLE[a.op]||{name:a.op,role:""}, dg=a.digest.slice(7,15), when="2026-09-11 "+st.at+"Z";
   var fired=(a.rules||[]).filter(function(x){return x.v==="approve";}).map(function(x){return x.id;}).join(" · ")||a.rule;
   return {id:st.rcp,at:when,agent:a.agent,operator:op.name,tool:a.tool,decision:ok?"approve":"deny",tier:a.tier,apr:a.id,
-   effect:ok?st.ext:"none — "+st.status+" before dispatch",amount:a.amount?"$"+a.amount+" "+a.currency:"—",ws:a.ws,runId:a.run,
+   effect:ok?st.ext:"none — "+st.status+" before dispatch",amount:a.amount?usd(a.amount)+" "+a.currency:"—",ws:a.ws,runId:a.run,
    who:[["Operator",op.name+" · "+op.role],["Agent",a.agent+(ag.principal?" · "+ag.principal:""),1],["Run · turn · step",a.run+(R?" · "+R.turn+" · "+R.steps:""),1],["Task",R?R.task+" · "+R.taskTitle:"—"]],
    what:[["Tool version",a.tool,1],["Input digest",a.digest,1]]
      .concat(a.amount?[["Amount",Math.round(money(a.amount)*1e6).toLocaleString("en-US")+" micro-"+a.currency+" → $"+a.amount+" "+a.currency]]:[])
@@ -2096,7 +2110,7 @@ function pRun(r){
      '<dt>Attestation</dt><dd class="mono">ed25519 · '+h(ORG.attester)+' · valid 2025-01-01 → 2026-12-31</dd>'+
      '<dt>Retained until</dt><dd>2032-07-02 · object lock, compliance mode</dd>'+
      '<dt>What remains in the graph</dt><dd>the run node, frame_count 118, merkle_root, segment_ref, and the rollups</dd>'+
-     '</dl><div class="row" style="margin-top:14px"><button class="btn primary" onclick="S.seg[\''+R.id+'\']=true;render();act(\'Segment fetched. Rendering '+R.frames+' frames from the archive.\')">Render from the segment</button>'+
+     '</dl><div class="row" style="margin-top:14px"><button class="btn primary" onclick="S.seg[\''+R.id+'\']=true;render();act(\'Segment fetched. Rendering '+plural(R.frames,"frame")+' from the archive.\')">Render from the segment</button>'+
      '<button class="btn" onclick="act(\'Verifier script and key ids downloaded.\')">Verify offline</button></div></div></div>';
   } else if(t==="transcript"){
     bodyHtml=transcriptTab(R,compacted);
@@ -2381,19 +2395,19 @@ function runFit(R){
     var lower=MODEL_LADDER[rung.rank-1];
     var save=Math.max(0,(parseFloat(R.cost)||0)-(m.tokIn*PRICE.inEff+m.tokOut*lower.out));
     fit.model={verdict:"over",title:"Wrong model tier",
-     say:"This run landed in "+R.turn+" turn"+(R.turn===1?"":"s")+" and "+m.steps+" steps, first try, with no tool call failing. "+
+     say:"This run landed in "+R.turn+" turn"+(R.turn===1?"":"s")+" and "+plural(m.steps,"step")+", first try, with no tool call failing. "+
       lower.lab+" answers this shape of work, and this run would have cost about "+usd(save.toFixed(2))+" less.",
      suggest:lower.m,suggestLab:lower.lab,delta:-save};
   } else if(redone&&rung.rank<MODEL_LADDER.length-1){
     var upper=MODEL_LADDER[rung.rank+1];
     var more=Math.max(0,(m.tokIn*PRICE.inEff+m.tokOut*upper.out)-(parseFloat(R.cost)||0))+w.usd;
     fit.model={verdict:"under",title:"Wrong model tier",
-     say:"This run took "+prompts+" prompts to land and wasted "+usd(fmt2(w.usd))+" getting there. "+
+     say:"This run took "+plural(prompts,"prompt")+" to land and wasted "+usd(fmt2(w.usd))+" getting there. "+
       upper.lab+" costs about "+usd(more.toFixed(2))+" more on this shape of work, and the correction is what you are paying for now.",
      suggest:upper.m,suggestLab:upper.lab,delta:more};
   } else {
     fit.model={verdict:"fit",title:"Model fit",
-     say:modelRung(R.model).lab+" matches this shape of work. Nothing in the record argues for moving it either way."};
+     say:modelRung(R.model).lab+" matches"+" this shape of work. Nothing in the record argues for moving it either way."};
   }
 
   /* The effort setting, only where Oxagen saw it. */
@@ -2409,12 +2423,12 @@ function runFit(R){
        suggest:EFFORT_LADDER[er-1],delta:-(m.reasoning*0.45*rung.out)};
     } else if(redone&&er<EFFORT_LADDER.length-1){
       fit.effort={verdict:"under",title:"Wrong effort setting",
-       say:"This run "+(prompts>1?"took "+prompts+" prompts to land":"had "+m.errs+" tool call"+(m.errs===1?"":"s")+" fail")+
+       say:"This run "+(prompts>1?"took "+plural(prompts,"prompt")+" to land":"had "+m.errs+" tool call"+(m.errs===1?"":"s")+" fail")+
         " on effort "+eff.v+". At "+EFFORT_LADDER[er+1]+" the model thinks before it acts, which is cheaper than being told again.",
        suggest:EFFORT_LADDER[er+1],delta:m.reasoning*0.6*rung.out};
     } else {
       fit.effort={verdict:"fit",title:"Effort setting",
-       say:"Effort "+eff.v+" matches this run. "+per(reasonShare)+" of the output was reasoning and nothing had to be done twice."};
+       say:"Effort "+eff.v+" matches"+" this run. "+per(reasonShare)+" of the output was reasoning and nothing had to be done twice."};
     }
   }
   fit.eff=eff;
@@ -2578,7 +2592,7 @@ function runStatRow(R){
    tile("Prompts",p,p===1?'one-shot session':(p-1)+' corrective',p>2?"var(--st-approval)":null)+
    tile("Cost",usd(R.cost),'<span class="basis">'+h(R.basis)+'</span>')+
    tile("Wasted",fmt$(w.usd),w.corrective?(p-1)+' corrective prompt'+(p===2?'':'s'):w.listed?h(w.listed.badges[0][0]):'nothing bought nothing',w.usd>0?"var(--st-critical)":null)+
-   tile("Wall clock",msDur(m.wall),(wp[0]==="waiting on a person"?'mostly waiting on a person':wp[0]==="model"?'mostly in the model':'mostly in '+wp[0]+' calls'))+
+   tile("Wall clock",msDur(m.wall),(wp[0]==="waiting on a person"?'mostly waiting on a person':wp[0]==="model"?'mostly in the model':'mostly in '+wp[0]+" calls"))+
    tile("Cache hit",per(R.cache),'saved about $'+s.saved.toFixed(2))+'</div>';
 }
 /* Every issue a session touched: the task it was started for, and any it read, referenced or closed.
@@ -2624,7 +2638,7 @@ function runAreas(R){
     ["Follow-up prompts",follow,per(follow),p>1?(p-1)+" corrective prompt"+(p===2?"":"s")+", each re-sent with the window":"none"],
     ["Context retrievals",ctx,per(ctx),"context frames and steering Oxagen injected"],
     ["Tool definitions",defs,per(defs),"the belt as the model is shown it"],
-    ["Tool calls",results,per(results),m.calls.length+" calls, result bodies in the window"],
+    ["Tool calls",results,per(results),plural(m.calls.length,"call")+", result bodies in the window"],
     ["System prompt",sys,per(sys),"the harness's own prompt"],
     ["Model output",m.tokOut,total*2/3,tokn(m.reasoning)+" of it reasoning"]];
   var byTool={}, msTot=0; m.calls.forEach(function(c){msTot+=c.ms;});
@@ -2686,7 +2700,7 @@ function runInstruments(R){
   var costCols=s.cost.map(function(c,i){
     return '<button type="button" class="c fk-model'+(i===s.n-1&&R.status==="live"?" cur":"")+'"'+tipAttr("Turn "+(i+1)+" · $"+c.toFixed(2)+" · cache "+per(s.cache[i])+(i===s.peak?" · dearest turn":""))+' aria-label="turn '+(i+1)+' $'+c.toFixed(2)+'" onclick="S.tab.run=\'cost\';render()">'+
       (i===s.peak?'<span class="lab">$'+c.toFixed(2)+'</span>':'')+'<i style="height:'+Math.max(4,Math.round(c/mx*100))+'%"></i></button>';}).join("");
-  var t1=instTile("Cost so far",h(R.basis),usd(R.cost)+'<small>USD</small>',
+  var t1=instTile("Cost so far",h(R.basis),usd(R.cost)+' <small>USD</small>',
     '<b>$'+s.perTurn.toFixed(2)+'</b> per turn · turn '+(s.peak+1)+' was the dearest'+(medRun!=null?' · '+deltaHtml(total,medRun,function(d){return "$"+d.toFixed(2);},false)+' vs this agent’s median run $'+medRun.toFixed(2):''),
     '<div class="cols">'+costCols+'<span class="base"></span></div><div class="ax"><span>turn 1</span><span>turn '+s.n+(R.status==="live"?" · live":"")+'</span></div>',
     'cache hit <b>'+per(R.cache)+'</b> · saved ≈ <b>$'+s.saved.toFixed(2)+'</b> against an uncached prompt');
@@ -2695,15 +2709,15 @@ function runInstruments(R){
   var wp=[["model",m.modelMs,"fk-model",msDur(m.modelMs)],["tool",m.toolMs,"fk-tool",msDur(m.toolMs)],
           ["waiting on a person",m.waitMs,"fk-gov",msDur(m.waitMs)],["harness",m.overMs,"neu",msDur(m.overMs)]];
   var lead=wp.slice().sort(function(x,y){return y[1]-x[1];})[0];
-  var t2=instTile("Wall clock",R.status==="live"?"so far":"start to seal",msDur(m.wall)+'<small>elapsed</small>',
-    '<b>'+pct(lead[1],m.wall)+'</b> of it '+(lead[0]==="waiting on a person"?'waiting on a person':lead[0]==="model"?'in the model':'in '+lead[0]+' calls')+
+  var t2=instTile("Wall clock",R.status==="live"?"so far":"start to seal",msDur(m.wall)+' <small>elapsed</small>',
+    '<b>'+pct(lead[1],m.wall)+'</b> of it '+(lead[0]==="waiting on a person"?'waiting on a person':lead[0]==="model"?'in the model':'in '+lead[0]+" calls")+
     (m.parked?' · '+m.parked+' call'+(m.parked===1?'':'s')+' parked for approval':''),
     stack3(wp,m.wall)+stackLeg(wp),
     'Running '+m.batches.length+' batch'+(m.batches.length===1?'':'es')+' together cost <b>'+msDur(m.toolMs)+'</b> of wall clock against <b>'+msDur(m.serialMs)+'</b> one at a time.');
 
   /* 3 · tokens */
   var tp=[["cache read",m.cacheRead,"fk-model",tokn(m.cacheRead)],["fresh input",m.fresh,"fk-tool",tokn(m.fresh)],["output",m.tokOut,"fk-gov",tokn(m.tokOut)]];
-  var t3=instTile("Tokens","in and out",tokn(m.tokTotal)+'<small>tokens</small>',
+  var t3=instTile("Tokens","in and out",tokn(m.tokTotal)+' <small>tokens</small>',
     '<b>'+tokn(m.tokIn)+'</b> in · <b>'+tokn(m.tokOut)+'</b> out'+(m.reasoning?' · '+tokn(m.reasoning)+' of the output was reasoning':''),
     stack3(tp,m.tokIn+m.tokOut)+stackLeg(tp),
     'Cache hit <b>'+per(R.cache)+'</b> of input · <b>'+tokn(m.perCall)+'</b> tokens per model call · effective input price $1.88 per million'+(m.cacheWrite?'':' · nothing written to cache'));
@@ -2711,10 +2725,10 @@ function runInstruments(R){
   /* 4 · steps and calls */
   var stepMx=Math.max.apply(null,s.steps)||1;
   var stepCols=s.steps.map(function(n,i){var mh=s.model[i]/stepMx*100,th=s.tool[i]/stepMx*100;
-    return '<button type="button" class="c" style="height:100%"'+tipAttr("Turn "+(i+1)+" · "+n+" steps · "+s.model[i]+" model · "+s.tool[i]+" tool")+' aria-label="turn '+(i+1)+' '+n+' steps" onclick="S.tab.run=\'player\';render()">'+
+    return '<button type="button" class="c" style="height:100%"'+tipAttr("Turn "+(i+1)+" · "+plural(n,"step")+" · "+s.model[i]+" model · "+s.tool[i]+" tool")+' aria-label="turn '+(i+1)+' '+plural(n,"step")+'" onclick="S.tab.run=\'player\';render()">'+
       (n===stepMx?'<span class="lab">'+n+'</span>':'')+'<i class="fk-tool" style="height:'+Math.max(2,Math.round(th))+'%"></i><i class="fk-model" style="height:'+Math.max(2,Math.round(mh))+'%"></i></button>';}).join("");
-  var t4=instTile("Shape of the run",FRAMES.length+' frames in view',
-    R.turn+'<small>turns</small><span class="sep">·</span>'+R.steps+'<small>steps</small><span class="sep">·</span>'+R.frames+'<small>frames</small>',
+  var t4=instTile("Shape of the run",plural(FRAMES.length,"frame")+' in view',
+    R.turn+' <small>'+(R.turn===1?"turn":"turns")+'</small><span class="sep"> · </span>'+R.steps+' <small>'+(R.steps===1?"step":"steps")+'</small><span class="sep"> · </span>'+R.frames+' <small>'+(R.frames===1?"frame":"frames")+'</small>',
     'A step is one model call or one tool call; a frame is one recorded event.',
     '<div class="cols">'+stepCols+'<span class="base"></span></div><div class="ax"><span>turn 1</span><span>turn '+s.n+'</span></div>'+
     stackLeg([["model calls",m.modelN,"fk-model",m.modelN],["tool calls",m.calls.length,"fk-tool",m.calls.length]]),
@@ -2723,12 +2737,12 @@ function runInstruments(R){
   /* 5 · tool calls by family — magnitude in one hue, identity in the icon and the label */
   var fmx=m.families.length?m.families[0].n:1;
   var famRows=m.families.slice(0,4).map(function(f){
-    return '<button type="button" class="frow t-'+f.cat+'"'+tipAttr(TCAT[f.cat].l+" · "+f.n+" calls · "+f.tools+" distinct tools · "+msDur(f.ms)+(f.err?" · "+f.err+" failed":""))+' onclick="S.tab.run=\'cost\';render()">'+
+    return '<button type="button" class="frow t-'+f.cat+'"'+tipAttr(TCAT[f.cat].l+" · "+plural(f.n,"call")+" · "+f.tools+" distinct tools · "+msDur(f.ms)+(f.err?" · "+f.err+" failed":""))+' onclick="S.tab.run=\'cost\';render()">'+
      '<span class="ti">'+catSvg(f.cat)+'</span><span class="fl">'+h(TCAT[f.cat].l)+'</span>'+
      '<span class="fb"><i style="width:'+Math.round(f.n/fmx*100)+'%"></i></span><span class="fn">'+f.n+'</span></button>';}).join("");
   var rest=m.families.slice(4).reduce(function(a,f){return a+f.n;},0);
   var t5=instTile("Tool calls",m.families.length+' famil'+(m.families.length===1?'y':'ies'),
-    m.calls.length+'<small>calls</small>'+(m.errs?'<small>'+deltaHtml(m.errs,0,function(d){return d+" failed";},false)+'</small>':''),
+    m.calls.length+' <small>'+(m.calls.length===1?"call":"calls")+'</small>'+(m.errs?'<small>'+deltaHtml(m.errs,0,function(d){return d+" failed";},false)+'</small>':''),
     '', '<div class="fams">'+famRows+(rest?'<div class="frow rest"><span class="ti"></span><span class="fl">other</span><span class="fb"><i style="width:'+Math.round(rest/fmx*100)+'%"></i></span><span class="fn">'+rest+'</span></div>':'')+'</div>',
     '<b>'+m.par+'</b> of '+m.batches.length+' batches ran in parallel · up to <b>'+m.maxPar+'</b> at once');
 
@@ -2737,10 +2751,10 @@ function runInstruments(R){
   var t6=instTile("Productive ratio","steps that advanced the task",
     per(R.ratio)+(ref!=null?'<small>'+deltaHtml(R.ratio*100,ref*100,function(d){return Math.round(d)+" pts";},true)+' vs 30-day '+per(ref)+'</small>':''),
     '',
-    '<div class="stk"><i class="fk-model" style="flex:'+s.adv+'"'+tipAttr(s.adv+" steps advanced the task")+'></i><i style="flex:'+s.idle+';background:var(--rule)"'+tipAttr(s.idle+" steps did not: retries, re-reads and waits")+'></i>'+
+    '<div class="stk"><i class="fk-model" style="flex:'+s.adv+'"'+tipAttr(plural(s.adv,"step")+" advanced the task")+'></i><i style="flex:'+s.idle+';background:var(--rule)"'+tipAttr(plural(s.idle,"step")+" did not: retries, re-reads and waits")+'></i>'+
     (ref!=null?'<span class="ref" style="left:'+Math.round(ref*100)+'%"'+tipAttr("this agent’s 30-day productive ratio · "+per(ref))+'></span>':'')+'</div>'+
     stackLeg([["advanced",s.adv,"fk-model",s.adv],["did not",s.idle,"neu",s.idle]]),
-    s.idle?'<b>'+s.idle+'</b> steps did not move the task: '+Math.ceil(s.idle*0.55)+' retries, '+Math.floor(s.idle*0.3)+' re-reads, '+Math.max(0,s.idle-Math.ceil(s.idle*0.55)-Math.floor(s.idle*0.3))+' waits.':'Every step advanced the task.');
+    s.idle?'<b>'+s.idle+'</b> steps did not move the task: '+plural(Math.ceil(s.idle*0.55),"retry","retries")+', '+plural(Math.floor(s.idle*0.3),"re-read")+', '+plural(Math.max(0,s.idle-Math.ceil(s.idle*0.55)-Math.floor(s.idle*0.3)),"wait")+'.':'Every step advanced the task.');
 
   return '<div class="inst-grid">'+t1+t2+t3+t4+t5+t6+'</div>';
 }
@@ -2778,7 +2792,7 @@ function callsPanel(R){
   var hrows=Object.keys(m.hist).sort().map(function(k){
     return '<div class="hrow"><span class="hk">'+k+' tool'+(k==="1"?"":"s")+'</span><span class="fb"'+tipAttr(m.hist[k]+" batches asked for "+k+" tool"+(k==="1"?"":"s")+" at once")+'><i style="width:'+Math.round(m.hist[k]/hmx*100)+'%"></i></span><span class="hv">'+m.hist[k]+'</span></div>';}).join("");
   return '<div class="panel" style="margin-bottom:16px"><div class="panel-h"><h3>Tool calls</h3>'+
-   '<span class="mono dim" style="font-size:11px;margin-left:auto">'+m.calls.length+' calls · '+m.batches.length+' batches · '+m.families.length+' families</span></div>'+
+   '<span class="mono dim" style="font-size:11px;margin-left:auto">'+plural(m.calls.length,"call")+' · '+m.batches.length+' batches · '+m.families.length+' families</span></div>'+
    '<div class="cc">'+
     '<div class="cc-c wide"><p class="eyebrow q">Calls by family</p>'+
      '<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Family</th><th class="num">Calls</th><th></th><th class="num">Share</th><th class="num">Wall clock</th><th class="num">Failed</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
@@ -2786,8 +2800,8 @@ function callsPanel(R){
     '<div class="cc-c"><p class="eyebrow q">Tools per batch</p>'+
      '<div class="hist">'+hrows+'</div>'+
      '<dl class="kv" style="margin-top:12px"><dt>Batches</dt><dd>'+m.batches.length+' · <b>'+m.par+'</b> ran more than one tool</dd>'+
-     '<dt>Widest batch</dt><dd>'+m.maxPar+' tools at once</dd>'+
-     '<dt>Mean fan-out</dt><dd>'+m.fan.toFixed(2)+' tools per batch</dd>'+
+     '<dt>Widest batch</dt><dd>'+plural(m.maxPar,"tool")+' at once</dd>'+
+     '<dt>Mean fan-out</dt><dd>'+plural(m.fan.toFixed(2),"tool")+' per batch</dd>'+
      '<dt>Wall clock won</dt><dd><b>'+msDur(m.serialMs-m.toolMs)+'</b> · '+msDur(m.toolMs)+' together against '+msDur(m.serialMs)+' in turn</dd></dl></div>'+
     '<div class="cc-c"><p class="eyebrow q">Speculative prefetch</p>'+
      '<div class="spec"><div class="sv">'+m.used+'<small> of '+m.started+' used</small></div>'+
@@ -2819,7 +2833,7 @@ function runTimeline(R){
       tipAttr("frame "+f.seq+" · "+f.kind+"\n"+f.t+(f.cost&&+f.cost?" · $"+f.cost:"")+"\n"+f.sum)+' aria-label="frame '+f.seq+' '+h(f.kind)+'" onclick="S.tab.run=\'player\';S.frame='+i+';render()"></button>';}).join("");
   var c=fkCounts(fr),leg=FK_ORDER.filter(function(k){return c[k];}).map(function(k){return '<span class="fk-'+k+'"><i></i>'+FK_LABEL[k]+' <b>'+c[k]+'</b></span>';}).join("");
   var el=Math.round(t1-t0),elapsed=el>=60?Math.floor(el/60)+"m "+(el%60)+"s":el+" s";
-  return '<div class="panel rt"><div class="panel-h"><h3>Timeline</h3><span class="mono dim" style="font-size:11px">'+fr.length+' frames shown · '+R.frames+' in the run</span><div class="rt-leg">'+leg+'</div></div>'+
+  return '<div class="panel rt"><div class="panel-h"><h3>Timeline</h3><span class="mono dim" style="font-size:11px">'+plural(fr.length,"frame")+' shown · '+R.frames+' in the run</span><div class="rt-leg">'+leg+'</div></div>'+
    '<div class="panel-b"><div class="rt-turns">'+turns+'</div><div class="rt-track">'+bands+ticks+'<div class="rt-axis"><span>'+h(fr[0].t.slice(0,8))+'</span><span>+'+elapsed+' · '+h(fr[fr.length-1].t.slice(0,8))+(R.status==="live"?' · live':'')+'</span></div></div><div class="rt-marks">'+marks+'</div>'+
    '<div class="rt-foot"><span class="grow">Every tick is a frame; the taller ones need a person. Click one to open it in the Player; hover for the record.</span>'+
    '<span>'+bounds.length+' turn'+(bounds.length===1?'':'s')+' in view</span></div></div></div>';
@@ -2865,13 +2879,14 @@ function txGroupOf(kind){for(var i=0;i<TX_GROUPS.length;i++){if(TX_GROUPS[i][2].
 /* the speed divides the ceiling as well as the gap: a run's gaps are either ~0 (one model step's rows) or
    many seconds (a model thinking), so a fixed 1.2 s cap would make 6× look like 1× */
 function txPaced(gap,speed){return Math.max(90/speed,Math.min(1400/speed,gap*1000/speed));}
+// A compacted run carries a dated start ("2025-07-02 11:20:44"). The clock reads only the time.
 function txClock(R,t){
-  var p=String(R.started||"00:00:00").split(":"),base=(+p[0])*3600+(+p[1])*60+(+p[2]);
+  var p=String(R.started||"00:00:00").split(" ").pop().split(":"),base=(+p[0])*3600+(+p[1])*60+(+p[2]);
   var s=base+t,hh=Math.floor(s/3600)%24,mm=Math.floor(s/60)%60,ss=s%60;
   return (hh<10?"0":"")+hh+":"+(mm<10?"0":"")+mm+":"+(ss<10?"0":"")+ss.toFixed(1);
 }
 function txMoney(n){return "$"+(Math.round(n*10000)/10000).toFixed(4);}
-function txMoney2(n){return "$"+n.toFixed(2);}
+function txMoney2(n){return usd(n.toFixed(2));}
 function txFold(text){
   var m=String(text).match(/^[\s\S]*?[.!?](?=\s|$)/);
   if(!m||m[0].length>=text.length-1)return {head:text,rest:""};
@@ -2915,7 +2930,7 @@ function txEntries(R){
   var e=[{t:0,kind:"prompt",body:R.taskTitle+(R.task?"\n\nTask "+R.task+".":""),meta:{task:R.task,by:PEOPLE[R.op]?PEOPLE[R.op].name:""}}];
   var t=2;
   if(R.summary){t+=4;e.push({t:t,kind:"text",body:R.summary});}
-  t+=0.2;e.push({t:t,kind:"usage",meta:{model:R.model,tin:null,cache:null,tout:null,cost:parseFloat(R.cost)||0,req:"rollup · "+R.frames+" frames"}});
+  t+=0.2;e.push({t:t,kind:"usage",meta:{model:R.model,tin:null,cache:null,tout:null,cost:parseFloat(R.cost)||0,req:"rollup · "+plural(R.frames,"frame")+""}});
   if(R.status==="sealed"||R.status==="compacted")e.push({t:t+0.5,kind:"complete",title:"sealed "+(R.sealed||""),body:""});
   return e;
 }
@@ -2964,7 +2979,7 @@ function txRow(R,e,i,cum,rows,answerIdx){
   } else if(e.kind==="context_recall"){
     var m2=e.meta||{},list=open?CTXF:CTXF.slice(0,3),hid=CTXF.length-list.length,hidTok=0;
     CTXF.slice(list.length).forEach(function(f){hidTok+=f.tok;});
-    inner='<div><button class="tx-fold" style="color:var(--st-proven);font-weight:600;font-size:12.5px" onclick="txOpen('+i+')">◉ recall · '+m2.frames+' frames · '+tokn(m2.tok)+' tok · '+m2.scored+' scored · '+m2.ms+' ms</button>'+
+    inner='<div><button class="tx-fold" style="color:var(--st-proven);font-weight:600;font-size:12.5px" onclick="txOpen('+i+')">◉ recall · '+plural(m2.frames,"frame")+' · '+tokn(m2.tok)+' tok · '+m2.scored+' scored · '+m2.ms+' ms</button>'+
      '<div class="tx-recall">'+list.map(function(f){return '<span class="k">'+h(f.kind)+'</span><span class="l">'+txHi(f.label,q)+(open?' <span class="dim">· '+h(f.node)+' · score '+f.score+'</span>':'')+'</span><span class="n">'+tokn(f.tok)+' tok</span>';}).join("")+'</div>'+
      (hid>0?'<button class="tx-fold" style="margin-left:20px" onclick="txOpen('+i+')">⋯ '+hid+' more · '+tokn(hidTok)+' tok · provenance</button>':'')+
      (e.fr!=null?'<div class="tx-sub" style="margin-left:20px"><button class="tx-chip gov" onclick="S.tab.run=\'player\';S.frame='+e.fr+';render()">context.assembled · fr '+e.fr+'</button><button class="tx-chip" style="cursor:pointer" onclick="S.tab.run=\'context\';render()">open the Context tab</button></div>':'')+'</div>';
@@ -2974,7 +2989,7 @@ function txRow(R,e,i,cum,rows,answerIdx){
     var chips="";
     if(e.diff){var st=diffStat(txDiffRows(e.diff.before,e.diff.after));chips+='<span class="tx-chip"><span style="color:var(--st-allowed)">+'+st.add+'</span> <span style="color:var(--st-denied)">−'+st.del+'</span></span>';}
     if(r&&r.ms!=null)chips+='<span class="tx-chip'+(failed?' err':'')+'">'+(r.ms>=1000?(r.ms/1000).toFixed(1)+' s':r.ms+' ms')+'</span>';
-    if(r&&r.body&&!e.diff){var ln=r.body.split("\n").length;if(ln>1)chips+='<span class="tx-chip'+(failed?' err':'')+'">'+ln+' lines</span>';}
+    if(r&&r.body&&!e.diff){var ln=r.body.split("\n").length;if(ln>1)chips+='<span class="tx-chip'+(failed?' err':'')+'">'+plural(ln,"line")+'</span>';}
     if(e.parked)chips+='<button class="tx-chip gov appr" onclick="S.tab.run=\'player\';S.frame='+e.parked.fr+';render()">⏸ parked · '+h(e.parked.ap)+' · fr '+e.parked.fr+'</button>';
     else if(pending)chips+='<span class="tx-chip">running…</span>';
     chips+=txGovChip(e.gov);
@@ -3009,7 +3024,7 @@ function transcriptTab(R,compacted){
   var synth=!TRANSCRIPTS[R.id];
   var tools='<div class="tx-tools">'+
    '<input type="search" value="'+h(S.tx.q)+'" placeholder="Search the transcript…" aria-label="search the transcript" oninput="txQ(this.value)">'+
-   (S.tx.q.trim()?'<span class="dim mono" style="font-size:10.5px">'+rows.length+' of '+all.length+' entries</span>':'')+
+   (S.tx.q.trim()?'<span class="dim mono" style="font-size:10.5px">'+rows.length+' of '+plural(all.length,"entry","entries")+'</span>':'')+
    txKindChips(R,errN)+
    '<div class="tx-play">'+
     '<button class="btn sm ghost" onclick="S.tx.think=!S.tx.think;S.tx.open={};render()">'+(S.tx.think?"collapse thinking":"expand thinking")+'</button>'+
@@ -3021,7 +3036,7 @@ function transcriptTab(R,compacted){
      '<span class="seg" style="margin-left:4px">'+TX_SPEEDS.map(function(s){return '<button class="btn sm" aria-pressed="'+(S.tx.speed===s)+'" onclick="txSpeed('+s+')">'+s+'×</button>';}).join("")+'</span>'+
      '<span class="cnt" id="txcnt"></span>':'<span class="cnt">search shows every match · unpaced</span>')+
    '</div></div>';
-  var runbar='<div class="tx-runbar"><span class="name">'+h(R.task||R.id)+'</span><span class="meta">'+h(R.agent)+' · '+h(R.model)+' · '+R.turn+' turns · '+R.steps+' steps'+(synth?' · projected from the run record':' · '+all.length+' entries')+'</span>'+
+  var runbar='<div class="tx-runbar"><span class="name">'+h(R.task||R.id)+'</span><span class="meta">'+h(R.agent)+' · '+h(R.model)+' · '+plural(R.turn,"turn")+' · '+plural(R.steps,"step")+(synth?' · projected from the run record':' · '+plural(all.length,"entry","entries"))+'</span>'+
    '<span class="tx-chips" style="margin-left:0">'+(S.tx.errs?'<span class="tx-chip err">errors only</span>':'')+(runStatus(R)==="paused"?'<span class="tx-chip warn">⏸ paused</span>':R.status==="live"?'<span class="tx-chip ok">● live</span>':R.status==="parked"?'<span class="tx-chip warn">⏸ parked</span>':'')+'</span>'+
    '<span class="tx-burn"><span>burn</span><span class="bar"><i id="txbar"></i></span><b id="txburn">'+txMoney2(0)+'</b><span>of '+txMoney2(total)+'</span></span></div>';
   var feed='<div class="tx-feed" id="txfeed" data-n="'+rows.length+'" data-paced="'+paced+'">'+(rows.length?html:'<div class="tx-empty">'+(S.tx.errs?'no failed calls in this run.':S.tx.q?'nothing matches this search.':'nothing to show with these filters.')+'</div>')+'</div>';
@@ -3409,11 +3424,11 @@ function framesFromRunSynth(R){
      case "checkpoint": fr.from=cpPrev;fr.head=frDig(key+"head");fr.sum="chain head "+fr.head+" · frames "+cpPrev+"–"+q+" · host device key, countersigned at ingest";cpPrev=q+1;break;
      case "record.appended": fr.rec={id:"rec_"+frHex(key+"rec",8).toUpperCase(),text:sentences.length?sentences[recN%sentences.length]:R.taskTitle,sources:lastTool.slice(-2)};recN++;
       fr.sum=fr.rec.id+" · note · "+fr.rec.text.slice(0,72)+(fr.rec.text.length>72?"…":"");break;
-     case "turn_start": fr.sum="turn "+o2.turn+" of "+T+" · "+s.steps[o2.turn-1]+" steps follow";break;
-     case "turn_end": fr.sum="turn "+o2.turn+" ended · "+s.steps[o2.turn-1]+" steps · $"+s.cost[o2.turn-1].toFixed(2)+" · cache "+per(s.cache[o2.turn-1]);break;
+     case "turn_start": fr.sum="turn "+o2.turn+" of "+T+" · "+plural(s.steps[o2.turn-1],"step")+" follow";break;
+     case "turn_end": fr.sum="turn "+o2.turn+" ended · "+plural(s.steps[o2.turn-1],"step")+" · $"+s.cost[o2.turn-1].toFixed(2)+" · cache "+per(s.cache[o2.turn-1]);break;
      case "approval_request": var A2=APPROVALS.filter(function(a){return a.id===o2.apr;})[0];fr.sum=A2.id+" · "+A2.tool+" · parked "+A2.parkedAt+" · "+A2.approvers.split(" — ")[0];break;
      case "error": fr.err={code:"run_token_revoked",source:"gateway",outcome:"halted"};fr.sum="run_token_revoked · kill switch hooks_removed · nothing dispatched after this frame";break;
-     case "agent_stop": fr.sum="outcome "+R.status+" · "+N+" frames · $"+R.cost+" · the seal envelope follows as seq "+N;break;
+     case "agent_stop": fr.sum="outcome "+R.status+" · "+plural(N,"frame")+" · $"+R.cost+" · the seal envelope follows as seq "+N;break;
     }
     out.push(fr);
   }
@@ -3614,7 +3629,7 @@ function fdError(f,R){
 function fdTurn(f,R){
   var s=runSeries(R),t=f.turn||1,L=frList(R),fs=L.filter(function(x){return x.turn===t;}),start=f.kind==="turn_start";
   return frKv([["Turn",t+" of "+s.n],["Frames",fs.length?fs.length+" · seq "+fs[0].seq+"–"+fs[fs.length-1].seq:"—"],["Steps",s.steps[t-1]+" · "+s.model[t-1]+" model calls, "+s.tool[t-1]+" tool calls"],
-    ["Turn spend","$"+s.cost[t-1].toFixed(2)+" USD"],["Cache hit rate",per(s.cache[t-1])]])+
+    ["Turn spend",usd(s.cost[t-1].toFixed(2))+" USD"],["Cache hit rate",per(s.cache[t-1])]])+
    '<div class="note" style="margin-top:12px">'+(start?'One prompt, a schedule or a resumed context, through to the agent stopping. ':'')+'Turns are derived from these frames and materialized in the rollups; the Cost tab draws them.</div>';
 }
 function fdAgent(f,R){
@@ -4033,12 +4048,12 @@ function ctxDetail(R,W,sel){
     }).join('\n\n');
     return ctxHd('Block 2 · <span class="mono">steering.compiled</span> · bundle v'+sb.v, tokBadge(sb.tok)+cacheBadge("read"))+
      ctxBody(
-      '<p>'+sb.rules.length+' rules, compiled from three scopes into one block. The model sees the result of the merge, never the merge itself.</p>'+
+      '<p>'+plural(sb.rules.length,"rule")+', compiled from three scopes into one block. The model sees the result of the merge, never the merge itself.</p>'+
       (nw.length?'<div class="callout" style="margin:11px 0" data-next-bundle="'+live.v+'" data-next-delta="'+nwTok+'">'+nw.map(function(r){
          return '<span class="mono" data-new-rule="'+h(r.id)+'">'+h(r.id)+'</span> <span class="b b-proven">new</span> · published in bundle v'+live.v+' · reaches this run at its next model call';}).join("<br>")+
         '<div style="margin-top:6px">'+h(CTXPR.pr)+' merged'+(S.ctxpr.mergedAt?' at '+h(S.ctxpr.mergedAt):'')+', after this request was sent. The window below is what the model read and does not change. '+
         'The next call’s steering block is '+tokn(sb.tok)+' → '+tokn(live.tok)+' tokens, <b>+'+tokn(nwTok)+'</b>; the prefix before the new rule stays cached, so those tokens are billed as fresh input.</div></div>':'')+
-      '<div data-bundle-readout="'+sb.v+'">'+readout("bundle v"+sb.v+" · verbatim",sb.rules.length+" rules",'<pre>'+pre+'</pre>')+'</div>'+
+      '<div data-bundle-readout="'+sb.v+'">'+readout("bundle v"+sb.v+" · verbatim",plural(sb.rules.length,"rule"),'<pre>'+pre+'</pre>')+'</div>'+
       '<dl class="kv"><dt>Sources merged</dt><dd>3 · org, workspace core-platform, agent</dd>'+
       '<dt>Tokens per turn</dt><dd class="num">'+tokn(sb.tok)+(nw.length?' · <b>'+tokn(live.tok)+'</b> from the next call · +'+nwTok+' from the new record':'')+'</dd>'+
       '<dt>Shadowed at compile</dt><dd class="mono">ctx.release.notes-format-legacy (org) — lost to the workspace rule</dd>'+
@@ -4361,7 +4376,7 @@ function wfChart(R,s,tf,finds){
     var c=s.cost[i],x=X(i)-bw/2,y2=Yb(c),bh=Math.max(2,pt+ih-y2),fnd=finds.filter(function(x){return x.turn===i;});
     var fill=fnd.length?"var(--st-denied)":"var(--st-approval)";
     bars+='<rect class="wf-bar" data-turn="'+(i+1)+'" data-c="'+c+'" x="'+x.toFixed(1)+'" y="'+y2.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+bh.toFixed(1)+'" rx="3" fill="'+fill+'" opacity="'+(fnd.length?".95":".8")+'">'+
-      '<title>Turn '+(i+1)+' · $'+c.toFixed(2)+' · cache '+per(s.cache[i])+' · '+s.steps[i]+' steps · '+tf.n[i]+' frames</title></rect>';
+      '<title>Turn '+(i+1)+' · $'+c.toFixed(2)+' · cache '+per(s.cache[i])+' · '+plural(s.steps[i],"step")+' · '+plural(tf.n[i],"frame")+'</title></rect>';
     labs+='<text x="'+X(i).toFixed(1)+'" y="'+(y2-6).toFixed(1)+'" text-anchor="middle" fill="var(--fg)" font-size="10.5">$'+c.toFixed(2)+'</text>'+
       '<text x="'+X(i).toFixed(1)+'" y="'+(pt+ih+16)+'" text-anchor="middle" fill="var(--muted)" font-size="11">T'+(i+1)+'</text>'+
       '<text x="'+X(i).toFixed(1)+'" y="'+(pt+ih+30)+'" text-anchor="middle" fill="var(--dim)" font-size="10">'+per(s.cache[i])+' cache</text>';
@@ -4417,7 +4432,7 @@ function costTab(R){
     '<dt>Effective input price</dt><dd>$1.88 per million across all input classes</dd>'+
     '<dt>Cache write cost share</dt><dd>'+(m.cacheWrite?pct(m.cacheWrite,m.tokIn):'0.0% — nothing written this run')+'</dd>'+
     '<dt>Basis</dt><dd><span class="basis">'+h(R.basis)+'</span>'+(R.basis==="gateway_observed"?' · counted by the proxy from the bytes that passed through it':' · the harness\u2019s own telemetry; absent classes are marked, never zero')+'</dd>'+
-    '<dt>Productive ratio</dt><dd>'+per(R.ratio)+' · '+s.adv+' of '+R.steps+' steps advanced the task</dd></dl></div></div></div>';
+    '<dt>Productive ratio</dt><dd>'+per(R.ratio)+' · '+s.adv+' of '+plural(R.steps,"step")+' advanced the task</dd></dl></div></div></div>';
 }
 
 /* ---- Chain and seal: dense seq, checkpoints off the frames, the replay-grade ladder ---- */
@@ -4477,7 +4492,7 @@ DLG_EXT.forkreplay=function(){
      row(tag("b-allowed","runs live"),'<b>The next model call</b>'+(first?' (recorded at '+frameBtn(first.seq,"frame "+first.seq)+')':'')+' is made for real against <span class="mono">'+h(R.model)+'</span> with the recorded prompt. It costs money and the answer may differ — that is the point of a fork.')+
      row(tag("b-proven","from the cassette"),'<b>'+toolsAfter+' tool call'+(toolsAfter===1?'':'s')+' after this frame</b> are served from the recording when the canonical input digest matches, byte for byte. Nothing reaches a real provider.')+
      row(tag("b-denied","denied"),'<b>A tool call whose input digest differs</b> has no cassette entry. It is denied, not dispatched: a fork cannot open a pull request, move money, or write to a repository.'))+
-    frSec("Cost and record",frKv([["Spent by this frame","$"+spent.toFixed(2)+" of "+usd(R.cost)+" · not spent again"],
+    frSec("Cost and record",frKv([["Spent by this frame",usd(spent.toFixed(2))+" of "+usd(R.cost)+" · not spent again"],
      ["Estimated spend",first?"about $"+(parseFloat(first.cost)||0).toFixed(2)+" for the first live call; $"+est.toFixed(2)+" if the fork runs to the end":"no model call follows this frame in view"],
      unseen?["Not in view",unseen+" recorded frames after the last one shown; the estimate covers only frames in view"]:null,
      ["Billed as","a run, on the same operator and agent"],["Recorded as","its own frames, its own chain, its own seal"],
@@ -4490,7 +4505,7 @@ function bisKey(f,R){
   var c=f.call?f.call.id:(/^([a-z_]+__[a-z_]+@\d+)/.exec(f.sum||"")||[])[1]||"";
   if(f.kind==="model.request"||f.kind==="model.response")c=R.model;
   if(f.kind==="policy_decision")c+=" "+(f.pol?f.pol.outcome:String(f.sum).split(" ")[0]);
-  if(f.kind==="context.assembled")c=f.ctx?f.ctx.rows.length+" frames":((/(\d+) context frames/.exec(f.sum)||[])[1]||"")+" frames";
+  if(f.kind==="context.assembled")c=f.ctx?plural(f.ctx.rows.length,"frame")+"":plural(((/(\d+) context frames/.exec(f.sum)||[])[1]||""),"frame");
   return f.kind+"|"+c;
 }
 function bisWhat(f,R){if(!f)return "no frame";var k=bisKey(f,R).split("|");return k[0]+(k[1]?" · "+k[1]:"");}
@@ -4517,7 +4532,7 @@ DLG_EXT.bisect=function(){
     rows+='<div class="bis-row" style="display:flex;gap:10px;align-items:baseline;padding:5px 9px;border-left:2px solid '+(on?'var(--st-denied)':'transparent')+';background:'+(on?'var(--hl)':'transparent')+';font-size:12px;'+(after?'color:var(--muted)':'')+'"'+(on?' data-diff="1"':'')+'>'+
       '<span class="mono dim" style="width:26px;text-align:right;flex:none">'+k+'</span><span class="mono" style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+h(bisWhat(f,R))+'</span></div>';}
     return rows;};
-  var head=function(r,L,tagL){return '<div style="padding:8px 9px;border-bottom:1px solid var(--border)"><b>'+tagL+' · <span class="mono">'+h(r.id)+'</span></b><div class="dim" style="font-size:11.5px">'+h(r.agent)+' · '+(L.length<r.frames?L.length+' of '+r.frames+' frames in view':L.length+' frames')+' · '+usd(r.cost)+' · '+h(r.status)+'</div></div>';};
+  var head=function(r,L,tagL){return '<div style="padding:8px 9px;border-bottom:1px solid var(--border)"><b>'+tagL+' · <span class="mono">'+h(r.id)+'</span></b><div class="dim" style="font-size:11.5px">'+h(r.agent)+' · '+(L.length<r.frames?L.length+' of '+plural(r.frames,"frame")+' in view':plural(L.length,"frame"))+' · '+usd(r.cost)+' · '+h(r.status)+'</div></div>';};
   var same=A.id===B.id,fa=LA[d],fb=LB[d];
   return {t:"Bisect · "+A.id.slice(-6)+" against "+B.id.slice(-6),s:same?"The same run on both sides has nothing to bisect.":d<0?"No frame differs on what it did.":"First differing frame · seq "+d,w:true,
    b:(same?'<div class="warn">Choose two different runs.</div>':
@@ -4534,7 +4549,7 @@ DLG_EXT.bisect=function(){
 DLG_EXT.runexport=function(){
   var R=run(S.frameRun)||RUNS[0],sealed=R.status!=="live"&&R.status!=="parked";
   return {t:"Export this run",s:"segment, attestation, key ids and the verifier",w:false,
-   b:'<div class="field"><label>Scope</label><select id="ex-scope" aria-label="Scope"><option>run '+h(R.id)+' · '+R.frames+' frames'+(sealed?' and the seal':'')+'</option><option>task '+h(R.task)+' · every run</option><option>agent '+h(R.agent)+' · all runs</option></select></div>'+
+   b:'<div class="field"><label>Scope</label><select id="ex-scope" aria-label="Scope"><option>run '+h(R.id)+' · '+plural(R.frames,"frame")+(sealed?' and the seal':'')+'</option><option>task '+h(R.task)+' · every run</option><option>agent '+h(R.agent)+' · all runs</option></select></div>'+
     '<div class="field"><label>Format</label><select aria-label="Format"><option>Signed bundle (segment + verifier)</option><option>Frames as NDJSON</option><option>Receipts as CSV</option></select></div>'+
     frKv([["Segment",'<span class="mono">seg_'+h(R.id.replace(/^run_/,""))+'.ndjson.zst</span> · '+R.frames+' frame envelopes'],["Replay grade",h(R.grade)],["Seal",sealed?"included · verifies offline":"not yet — the run is open, so the bundle carries checkpoints only"]])+
     '<div class="callout" style="margin-top:12px">Runs as <span class="mono">export_data</span> — a governed action with third-party egress. Bodies for erased subjects are not in the bundle; their digests are, so the chain still verifies.</div>',
@@ -4591,9 +4606,9 @@ function pAgents(){
        '<td>'+agentCard(a)+'</td>'+
        '<td style="font-size:12px;max-width:26ch">'+h(a.desc)+'</td>'+
        '<td><span class="row" style="gap:7px;flex-wrap:nowrap;white-space:nowrap">'+personAv(a.operator,22)+h(PEOPLE[a.operator].name)+'</span></td>'+
-       '<td>'+(M?(M.gates.length+M.prefix.length+M.volatile.length)+' items<div class="dim mono" style="font-size:10px">'+tokn(M.tok.total)+' tok'+(M.delivered?'':' · not delivered')+'</div>'
+       '<td>'+(M?plural((M.gates.length+M.prefix.length+M.volatile.length),"item")+'<div class="dim mono" style="font-size:10px">'+tokn(M.tok.total)+' tok'+(M.delivered?'':' · not delivered')+'</div>'
                :'<span class="dim">—</span>')+'</td>'+
-       '<td>'+belts.length+' belt'+(belts.length===1?'':'s')+'<div class="dim mono" style="font-size:10px">'+beltTotal(a)+' tools · '+h(a.beltMode)+'</div></td>'+
+       '<td>'+belts.length+' belt'+(belts.length===1?'':'s')+'<div class="dim mono" style="font-size:10px">'+plural(beltTotal(a),"tool")+' · '+h(a.beltMode)+'</div></td>'+
        '<td class="mono" style="font-size:11.5px">'+h(a.host||"—")+'<div class="dim" style="font-size:10px;font-family:var(--font)">'+h(rt?rt.kind+" · "+a.tier:a.tier)+'</div></td>'+
        '<td class="mono dim" style="font-size:11px">'+h(a.principal||"prn_pending")+'</td>'+
        '<td><span class="b b-'+hl[0]+'"><span class="d"></span>'+h(hl[1])+'</span></td>'+
@@ -5047,7 +5062,7 @@ function aOverview(a,r){
     '<div class="panel-b"><dl class="kv">'+
     part("Identity",'<span class="mono">'+h(a.principal||"prn_pending")+'</span>',
       'minted at registration and never reused',["Open",'S.tab.agent=\'identity\';go(\''+'#/'+ORG.slug+'/'+S.ws+'/agents/'+sl+'/identity\')'])+
-    part("Steering",M?(M.gates.length+M.prefix.length+M.volatile.length)+' items · <span class="mono">'+tokn(M.tok.total)+' tok</span>':'<span class="dim">no preview prompt is set up</span>',
+    part("Steering",M?plural((M.gates.length+M.prefix.length+M.volatile.length),"item")+' · <span class="mono">'+tokn(M.tok.total)+' tok</span>':'<span class="dim">no preview prompt is set up</span>',
       M?(M.delivered?'assembled from the workspace library and delivered at SessionStart and UserPromptSubmit'
                     :'assembled, and not delivered: no hook is installed on the observe tier')
        :'steering is a workspace library; this agent holds a reference, never a copy',
@@ -5126,9 +5141,9 @@ function aSteering(a,r){
       tokn(M.tok.prefix)+' tok: compile header '+M.budget.compileHeaderTok+', gate notices '+tokn(M.tok.gates)+
       ', must and should '+tokn(M.tok.prefix-M.tok.gates-M.budget.compileHeaderTok)+'.')+'</div>'+
     '<div class="panel pad">'+stgMeter("Volatile selection · token budget",M.tok.volatile,M.budget.volatileTok,"tok",
-      M.volatile.length+' items fit for the prompt “'+h(M.prompt)+'”. '+M.cut.length+' items cut in all.')+'</div></div>'+
+      plural(M.volatile.length,"item")+' fit for the prompt “'+h(M.prompt)+'”. '+plural(M.cut.length,"item")+' cut in all.')+'</div></div>'+
    '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>What reaches this agent</h3>'+
-    '<p class="muted" style="margin:2px 0 0;font-size:12px">'+live.length+' items compiled from the workspace library at '+tokn(M.tok.total)+' tok.</p></div>'+
+    '<p class="muted" style="margin:2px 0 0;font-size:12px">'+plural(live.length,"item")+' compiled from the workspace library at '+tokn(M.tok.total)+' tok.</p></div>'+
     '<div class="sp"><button class="btn sm" onclick="go(\'#/'+ORG.slug+'/'+S.ws+'/steering/assignments\')">Change what is assigned</button>'+
     '<button class="btn sm ghost" onclick="S.pv.agent=\''+h(sl)+'\';S.pv.text=null;go(\'#/'+ORG.slug+'/'+S.ws+'/steering/compiler\')">Open in the compiler</button></div></div>'+
     '<div class="tw"><table><thead><tr><th>Item</th><th>Kind</th><th>Force</th><th>Scope</th><th>Body</th>'+
@@ -5283,8 +5298,8 @@ function aToolbelt(a,r){
   '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Model view</h3>'+
    '<p class="muted" style="margin:2px 0 0;font-size:12px">'+
    (total>FULL_BELT_LIMIT
-    ? 'The belt is '+total+' tools, over this workspace\'s full-belt limit of '+FULL_BELT_LIMIT+', so it is presented as a searchable belt.'
-    : 'The belt is '+total+' tools, under this workspace\'s full-belt limit of '+FULL_BELT_LIMIT+', so every definition is in the request.')+
+    ? 'The belt is '+plural(total,"tool")+', over this workspace\'s full-belt limit of '+FULL_BELT_LIMIT+', so it is presented as a searchable belt.'
+    : 'The belt is '+plural(total,"tool")+', under this workspace\'s full-belt limit of '+FULL_BELT_LIMIT+', so every definition is in the request.')+
    '</p></div>'+
    '<div class="seg" role="group" aria-label="Belt presentation">'+
     '<button class="btn sm" aria-pressed="'+(mode==="searchable")+'" onclick="S.beltMode=\'searchable\';render()">Searchable belt</button>'+
@@ -5305,8 +5320,8 @@ function aToolbelt(a,r){
       'the model saw.</p>'
     : '<div class="note"><b>Full belt.</b> Every definition is in the request, and there are no meta-tools to call. '+
       (total>FULL_BELT_LIMIT
-       ? 'At '+total+' tools this belt is over the workspace limit of '+FULL_BELT_LIMIT+' — this is the view a smaller belt gets, shown here for comparison.'
-       : 'At '+total+' tools it is under the limit of '+FULL_BELT_LIMIT+', which is how this agent actually runs.')+
+       ? 'At '+plural(total,"tool")+' this belt is over the workspace limit of '+FULL_BELT_LIMIT+' — this is the view a smaller belt gets, shown here for comparison.'
+       : 'At '+plural(total,"tool")+' it is under the limit of '+FULL_BELT_LIMIT+', which is how this agent actually runs.')+
       ' The tool-definition token count is measured on every model call, and the findings job flags belts wider than the agent uses.</div>'+
       '<pre><span class="c">// '+total+' definitions · '+(total*323).toLocaleString()+' tokens of tool definitions</span>\n[\n'+
       belt.filter(function(x){return !x.meta;}).slice(0,6).map(function(x){
@@ -5582,7 +5597,7 @@ function pMandate(r){
    '<button class="btn danger" onclick="openDialog(\'mandaterevoke\',\''+h(m.id)+'\')">Revoke</button></div></div>'+
    '<div class="grid g4" style="margin-bottom:16px">'+
    '<div class="stat"><span class="k">Per call</span><span class="v">'+usd(m.perCall)+'</span><span class="s">read from the call by amount_path</span></div>'+
-   '<div class="stat"><span class="k">Per period</span><span class="v">'+usd(m.perPeriod)+'</span><span class="s">'+h(m.period)+' · '+m.callsPerDay+' calls per day</span></div>'+
+   '<div class="stat"><span class="k">Per period</span><span class="v">'+usd(m.perPeriod)+'</span><span class="s">'+h(m.period)+' · '+plural(m.callsPerDay,"call")+' per day</span></div>'+
    '<div class="stat"><span class="k">Settled</span><span class="v">'+usd(m.used)+'</span><span class="s">this period, from the ledger</span></div>'+
    '<div class="stat"><span class="k">Remaining</span><span class="v" style="color:var(--st-approval)">'+usd(m.remaining)+'</span><span class="s">after '+usd(m.reserved)+' reserved at decision time</span></div></div>'+
    '<div class="split"><div class="panel"><div class="panel-h"><h3>Ledger</h3>'+
@@ -5721,7 +5736,7 @@ function pTools(){
   } else if(t==="providers"){
     body='<div class="grid">'+
      '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Providers</h3>'+
-     '<p class="muted" style="margin:2px 0 0;font-size:12px">'+srvCount()+' providers hold '+verCount().toLocaleString()+' tool versions. A provider is the system the tools belong to; the transport is how Oxagen reaches it.</p></div>'+
+     '<p class="muted" style="margin:2px 0 0;font-size:12px">'+plural(srvCount(),"provider")+' hold '+verCount().toLocaleString()+' tool versions. A provider is the system the tools belong to; the transport is how Oxagen reaches it.</p></div>'+
      '<div class="sp"><button class="btn sm primary" onclick="openDialog(\'import\')">Add a provider</button></div></div>'+
      '<div class="tw"><table><thead><tr><th>Provider</th><th>Transport</th><th class="num">Tools</th><th>Toolbelts</th><th>Agents</th><th>Health</th><th>Connection</th><th>Authorization</th><th>Last import</th><th></th></tr></thead><tbody>'+
      PROVIDERS.map(function(sv){
@@ -5729,7 +5744,7 @@ function pTools(){
       return '<tr '+rowClick("openDialog('server','"+sv.id+"')","Open "+sv.name)+'>'+
        '<td><b>'+h(sv.system)+'</b><span class="sub">'+h(sv.desc)+'</span></td>'+
        '<td><span class="b b-q">'+h(sv.transport)+'</span><span class="sub mono" style="font-size:10.5px">'+h(sv.wire)+' · '+h(sv.url)+'</span></td>'+
-       '<td class="num">'+sv.tools+'<span class="sub">'+sv.versions+' versions</span></td>'+
+       '<td class="num">'+sv.tools+'<span class="sub">'+plural(sv.versions,"version")+'</span></td>'+
        '<td>'+(tb.length?tb.map(function(b){return '<span class="b b-q" style="font-size:10.5px">'+h(b.name)+'</span>';}).join(""):'<span class="dim">—</span>')+'</td>'+
        '<td class="num">'+(ag.length||'<span class="dim">—</span>')+'</td>'+
        '<td>'+(sv.health==="ok"?'<span class="b b-allowed"><span class="d"></span>ok</span>':'<span class="b b-approval"><span class="d"></span>degraded</span>')+'</td>'+
@@ -5831,7 +5846,7 @@ function grantsLog(){
      '<td class="mono" style="font-size:11px;min-width:22ch">'+h(g.scope)+(g.note?'<div class="dim" style="font-size:10.5px">'+h(g.note)+'</div>':'')+(g.rcp?'<div style="font-size:10.5px">receipt '+receiptLink(g.rcp)+'</div>':'')+'</td>'+
      '<td class="mono">'+h(g.ttl)+'</td><td>'+st+'</td></tr>';}).join("");
   return '<div class="panel" style="margin-top:14px"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Credential grants log</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">'+total.toLocaleString()+' grants in 30 days across '+CONNECTIONS.length+' connections. Each one is recorded on its call’s frames and receipt.</p></div>'+
+   '<p class="muted" style="margin:2px 0 0;font-size:12px">'+plural(total.toLocaleString(),"grant")+' in 30 days across '+CONNECTIONS.length+' connections. Each one is recorded on its call’s frames and receipt.</p></div>'+
    '<span class="b b-q grants-shown">'+GRANTS.length+' most recent shown</span></div>'+
    '<div class="tw"><table data-lt="1"><thead><tr><th>Grant</th><th>Tool version</th><th>Agent and run</th><th>Connection</th><th>Scope</th><th>TTL</th><th>State</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
    '<div class="panel-b"><p class="muted" style="margin:0;font-size:12px">TTL defaults to the call’s expected duration plus a margin, never more than one hour. The agent sees the result, never the credential.</p></div></div>';
@@ -5945,7 +5960,7 @@ DLG_EXT.server=function(id){
   var pbelt=providerBelts(sv.id), pag=providerAgents(sv.id);
   return {t:sv.system,s:sv.transport+" · "+sv.wire+" · "+sv.url,w:true,
    b:(sv.health==="ok"?'':'<div class="warn"><b>This provider is degraded.</b> Calls to it are retried once and then denied; the run says so on its frames.</div>')+
-    (c&&c.authState==="expired"?'<div class="warn"><b>The token expired '+h(c.tokenExp)+'.</b> Reconnect to bring the '+tv.length+' tools below back into reach.</div>':'')+
+    (c&&c.authState==="expired"?'<div class="warn"><b>The token expired '+h(c.tokenExp)+'.</b> Reconnect to bring the '+plural(tv.length,"tool")+' below back into reach.</div>':'')+
     (props.length?'<div class="warn"><b>'+props.length+' schema'+(props.length>1?'s are':' is')+' awaiting approval.</b> '+
       'Until an admin approves, outputs are validated only for size and type.</div>':'')+
     '<dl class="kv"><dt>System</dt><dd>'+h(sv.desc)+'</dd>'+
@@ -5953,7 +5968,7 @@ DLG_EXT.server=function(id){
      '<span class="sub">how Oxagen reaches it. The registry, the policy and the receipts are the same whichever it is.</span></dd>'+
     '<dt>Registry name</dt><dd class="mono">'+h(sv.name)+'</dd>'+
     '<dt>Schemas</dt><dd>'+h(sv.schemas)+'</dd>'+
-    '<dt>Tool versions</dt><dd>'+sv.versions+' across '+sv.tools+' tools</dd>'+
+    '<dt>Tool versions</dt><dd>'+sv.versions+' across '+plural(sv.tools,"tool")+'</dd>'+
     '<dt>Toolbelts</dt><dd>'+(pbelt.length?pbelt.map(function(b){return '<span class="b b-q" style="font-size:10.5px">'+h(b.name)+'</span>';}).join("")
       :'<span class="dim">on no toolbelt in this workspace</span>')+'</dd>'+
     '<dt>Agents reached</dt><dd>'+(pag.length?pag.map(function(k){return '<span class="b b-q" style="font-size:10.5px">'+h(k.split(".").pop())+'</span>';}).join("")
@@ -5967,7 +5982,7 @@ DLG_EXT.server=function(id){
         '<td>'+hazard(x.risk,x.eff)+'</td><td>'+toolGate(x)+'</td>'+
         '<td class="num">'+agentsWithTool(x.n+"@"+x.v).length+'</td><td class="num">'+x.calls30.toLocaleString()+'</td></tr>';}).join("")+
        '</tbody></table></div>'+
-       '<p class="muted" style="font-size:12px;margin:8px 0 0">'+tv.length+' of the '+sv.versions+' versions this provider has shipped are in the registry. Re-import to pull the rest.</p>'
+       '<p class="muted" style="font-size:12px;margin:8px 0 0">'+tv.length+' of the '+plural(sv.versions,"version")+' this provider has shipped are in the registry. Re-import to pull the rest.</p>'
      : '<div class="note">Nothing from this provider is in the registry yet. Re-import to pull its tool list.</div>'),
    f:'<button class="btn danger" onclick="openDialog(\'serverdel\',\''+sv.id+'\')">Remove</button>'+
     '<span class="grow"></span>'+
@@ -6061,7 +6076,7 @@ DLG_EXT.conn=function(id){
   var due=c.status==="review due", fin=c.status.indexOf("financial")>-1;
   var g=GRANTS.filter(function(x){return x.conn===c.id;});
   return {t:c.name,s:c.id+" · "+c.kind,w:true,
-   b:(due?'<div class="warn"><b>The review date passed on '+h(c.next)+'.</b> It has issued '+c.grants30.toLocaleString()+' grants since. '+
+   b:(due?'<div class="warn"><b>The review date passed on '+h(c.next)+'.</b> It has issued '+plural(c.grants30.toLocaleString(),"grant")+' since. '+
       'Marking it reviewed sets the next date 90 days out and is recorded with your name on it.</div>':'')+
     '<dl class="kv"><dt>Owner</dt><dd>'+h(c.owner)+(fin?' · a finance role, required on a financial connection':'')+'</dd>'+
     '<dt>Providers</dt><dd class="mono">'+h(c.servers)+'</dd>'+
@@ -6186,7 +6201,7 @@ DLG_EXT.policynew=function(base){
   if(!from) return noSuch("Policy version");
   return {t:"Draft a policy version",s:"A draft decides nothing until an approver activates it",w:false,
    b:'<div class="field"><label for="pn-base">Based on</label><select id="pn-base">'+
-     opts.map(function(x){return '<option value="'+h(x.v)+'"'+(x.v===from.v?" selected":"")+'>'+h(x.v)+' — '+h(x.state)+', '+x.rules+' rules</option>';}).join("")+
+     opts.map(function(x){return '<option value="'+h(x.v)+'"'+(x.v===from.v?" selected":"")+'>'+h(x.v)+' — '+h(x.state)+', '+plural(x.rules,"rule")+'</option>';}).join("")+
      '</select><div class="hint">The draft opens as a copy of this version’s rules.</div></div>'+
      '<div class="field"><label for="pn-note">What changes</label><input id="pn-note" placeholder="Raises any egress call to approval">'+
      '<div class="hint">One sentence. The version list and every restore dialog show it.</div></div>'+
@@ -6218,7 +6233,7 @@ DLG_EXT.policyedit=function(v){
      '<pre><span class="c">// '+h(p.note)+'</span>\n'+
      '<span class="k">permit</span> (principal, action, resource)\n<span class="k">when</span> { context.tool.side_effect == <span class="s">"irreversible"</span> }\n'+
      '<span class="k">advice</span> <span class="s">"require_approval"</span>;</pre>'+
-     '<div class="hint">'+p.rules+' rules in this draft. Editing the source is a Context PR against the policy record.</div></div>'+
+     '<div class="hint">'+plural(p.rules,"rule")+' in this draft. Editing the source is a Context PR against the policy record.</div></div>'+
      '<div class="field"><label>Tests that ship with it</label>'+
      '<div class="tw"><table class="narrow"><tbody>'+
      [["github__create_release@2 must require approval","pass"],
@@ -6323,7 +6338,7 @@ DLG_EXT.import=function(arg){
     '<div class="field"><label for="imp-conn">Connection</label><select id="imp-conn"><option>Create one after import</option>'+CONNECTIONS.map(function(c){return '<option>'+h(c.id+' · '+c.name)+'</option>';}).join("")+'</select></div>'+
     '<div class="note">Oxagen calls <span class="mono">tools/list</span>, versions every tool it finds, and stores both schemas. Where a provider declares no <span class="mono">outputSchema</span>, the gateway records observed outputs and files a registry proposal for an admin to approve.</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="S.dlgArg=2;render()">Connect</button>'};
-  if(step===2) return {t:"Review tools/list",s:IMPORT_TOOLS.length+" tools returned by mcp.confluence.a-intel.internal · protocol 2025-06-18",w:true,
+  if(step===2) return {t:"Review tools/list",s:plural(IMPORT_TOOLS.length,"tool")+" returned by mcp.confluence.a-intel.internal · protocol 2025-06-18",w:true,
    b:steps+IMPORT_TOOLS.map(function(t){
      return '<label class="check imp-tool" style="margin-bottom:8px"><input type="checkbox"'+(S.impPick[t.n]?' checked':'')+' onchange="S.impPick[\''+t.n+'\']=this.checked;render()">'+
       '<div class="grow">'+toolCell("confluence__"+t.n+"@1",{sz:"sm"})+'<div class="dim" style="font-size:11.5px;margin-top:3px">'+h(t.d)+'</div></div>'+
@@ -6338,9 +6353,9 @@ DLG_EXT.import=function(arg){
     picked.map(function(t){return '<tr class="imp-row"><td>'+toolCell("confluence__"+t.n+"@1",{sz:"sm"})+'</td><td>'+hazard(t.risk,t.eff)+'</td>'+
      '<td><span class="b b-q">internal</span></td><td>'+finBadge("none")+'</td><td>'+(t.out?'<span class="b b-allowed">declared</span>':'<span class="b b-approval">observed</span>')+'</td></tr>';}).join("")+
     '</tbody></table></div>'+
-    '<div class="note" style="margin-top:14px"><b>What import does not do.</b> It grants nothing. These '+picked.length+' versions take the registry from '+n0.toLocaleString()+' to '+(n0+picked.length).toLocaleString()+' tool versions and sit there, callable by nobody, until a role grant puts them on a belt.</div>',
+    '<div class="note" style="margin-top:14px"><b>What import does not do.</b> It grants nothing. These '+plural(picked.length,"version")+' take the registry from '+n0.toLocaleString()+' to '+(n0+picked.length).toLocaleString()+' tool versions and sit there, callable by nobody, until a role grant puts them on a belt.</div>',
    f:'<span class="grow">Credential kind <span class="mono">api_key</span> · downscoping <span class="mono">none available</span></span><button class="btn" onclick="S.dlgArg=2;render()">Back</button>'+
-    '<button class="btn primary" onclick="closeDialog();act(\'Imported '+picked.length+' tool versions from confluence. They are in the registry and on no belt.\')">Import '+picked.length+' tools</button>'};
+    '<button class="btn primary" onclick="closeDialog();act(\'Imported '+picked.length+' tool versions from confluence. They are in the registry and on no belt.\')">Import '+plural(picked.length,"tool")+'</button>'};
 };
 
 /* ============================== Steering ============================== */
@@ -6409,20 +6424,20 @@ var PRP_SUPPORT=(function(){
 /* What the promoter measured for each proposal, and how it argues for it. */
 var PRP_META={
  "prp_01K5RU4A":{confidence:0.97,tok:46,recKind:"observation · repeat read",
-  support:function(s){return tokn(s.dups)+" duplicate tool calls across "+s.runs+" runs";},
+  support:function(s){return tokn(s.dups)+" duplicate tool calls across "+plural(s.runs,"run");},
   rationale:function(s){return "a-intel.core.release-manager called github__get_file_contents@2 on CHANGELOG.md with an identical input digest "+
    tokn(s.dups)+" times beyond the first read, across "+s.runs+" sealed runs: "+(s.dups/s.runs).toFixed(1)+" repeat reads a run. "+
    "Every repeat returned the response digest of the first read, so nothing was learned by reading again, and each one put the 2,900-token file back into the window. "+
    "The brief tells the agent to confirm the changelog before each section. A rule that says to cache the first read changes that behaviour without editing the brief.";},
-  measure:function(s){return (s.dups/s.runs).toFixed(1)+" repeat reads a run · "+tokn(s.dups*2900)+" tokens re-entered the window over these "+s.runs+" runs";}},
+  measure:function(s){return (s.dups/s.runs).toFixed(1)+" repeat reads a run · "+tokn(s.dups*2900)+" tokens re-entered the window over these "+plural(s.runs,"run");}},
  "prp_01K5RU7B":{confidence:0.64,tok:38,recKind:"reflection · unsatisfied",
   support:function(s){return s.runs+" unsatisfied runs in 30 days";},
   rationale:function(s){return "The reflector marked "+s.runs+" triage runs unsatisfied in thirty days. In each, the agent labelled an issue it had not reproduced and a person relabelled it. "+
    "Support is one agent so far; a person decides whether that is enough to open a Context PR.";},
-  measure:function(s){return "relabels by a person on "+s.runs+" of "+s.runs+" runs";}},
+  measure:function(s){return "relabels by a person on "+s.runs+" of "+plural(s.runs,"run");}},
  "prp_01K5RU9C":{person:true,confidence:null,tok:29,recKind:"finding · data-layer drift",
   support:function(s){return s.runs+" data-layer drift findings";},
-  rationale:function(s){return "Marcus Bell raised this from "+s.runs+" drift findings across "+s.agents+" agents, each a migration renumbered after merge. "+
+  rationale:function(s){return "Marcus Bell raised this from "+s.runs+" drift findings across "+plural(s.agents,"agent")+", each a migration renumbered after merge. "+
    "A person's proposal goes through the same six checks as the promoter's.";},
   measure:function(s){return s.runs+" drift findings in 30 days";}}
 };
@@ -6588,7 +6603,7 @@ function prpDetail(p){
   }).join("");
   function tile(k,v,need,ok,sub){
     return '<div class="stat"><span class="k">'+k+'</span><span class="v" style="color:var(--st-'+(ok?"allowed":"approval")+')">'+v+
-     (need!=null?'<small>/ '+need+'</small>':'')+'</span><span class="s">'+sub+'</span></div>';
+     (need!=null?' <small>/ '+need+'</small>':'')+'</span><span class="s">'+sub+'</span></div>';
   }
   var tiles=tile("Supporting runs",s.runs,null,true,m.person?"proposed by a person":"sealed runs, from the rows below")+
    tile("Distinct agents",s.agents,null,true,"from the rows below")+
@@ -6903,7 +6918,7 @@ function ctxprTab(){
      '<button class="btn'+(passed?' primary':'')+'" '+(passed?'':'disabled ')+'onclick="ctxprMerge()">Merge pull request</button></div>';
   var body=[
    '## '+p.st, '',
-   'Promoted by the Oxagen promoter from **'+s.runs+' runs across '+s.agents+' agent'+(s.agents===1?'':'s')+'**,',
+   'Promoted by the Oxagen promoter from **'+plural(s.runs,"run")+' across '+s.agents+' agent'+(s.agents===1?'':'s')+'**,',
    'confidence '+s.meta.confidence.toFixed(2)+'.', '',
    '### What this asks for',
    'Strength `'+p.force+'`. Constraint effect `forbid`; it grants nothing.', '',
@@ -7262,7 +7277,7 @@ function stgMemoryTab(w){
      '<td class="num">'+tokn(m.token_cost)+' tok</td><td>'+st+'</td></tr>';}).join("");
   var agg='<div class="grid g4" style="margin-bottom:14px">'+
    '<div class="stat"><span class="k">Memories</span><span class="v">'+L.length+'</span><span class="s">folded from '+G.folded+' run notes and steers</span></div>'+
-   '<div class="stat"><span class="k">Sources</span><span class="v">'+G.runs+'<small>runs</small></span><span class="s">'+G.steers+' operator steers and '+G.notes+' agent notes</span></div>'+
+   '<div class="stat"><span class="k">Sources</span><span class="v">'+G.runs+' <small>'+(G.runs===1?"run":"runs")+'</small></span><span class="s">'+G.steers+' operator steers and '+G.notes+' agent notes</span></div>'+
    '<div class="stat"><span class="k">Recalled 30d</span><span class="v">'+G.recalls.toLocaleString()+'</span><span class="s">'+tokn(L.reduce(function(n,m){return n+(m.token_cost||0)*(m.recalls30||0);},0))+' tokens delivered</span></div>'+
    '<div class="stat"><span class="k">By class</span><span class="v" style="font-size:15px;padding-top:6px">'+Object.keys(G.cls).map(function(k){return '<span class="mono">'+h(k)+'</span> '+G.cls[k];}).join(' · ')+'</span><span class="s">a rule is proposed as a record instead</span></div></div>';
   return agg+'<div class="note" style="margin-bottom:14px"><b>A published must beats recalled memory.</b> Memory is what an agent’s own runs left behind. It is recalled, never published, so it competes only in the volatile selection, as <span class="mono">may</span> or <span class="mono">info</span>, and it gives way wherever a published record says otherwise. To make a memory binding, promote it: a proposal, a pull request, a merge.</div>'+
@@ -7545,7 +7560,7 @@ function pvResult(M){
   return undelivered+
    '<div class="grid g2" style="margin-bottom:14px">'+
     '<div class="panel pad">'+stgMeter("Stable prefix · SessionStart additional context",M.bytes,B.sessionStartBytes,"bytes",tokn(M.tok.prefix)+' tok: compile header '+B.compileHeaderTok+', gate notices '+tokn(M.tok.gates)+', must and should '+tokn(M.tok.prefix-M.tok.gates-B.compileHeaderTok)+'. Capped at 16 KiB.')+'</div>'+
-    '<div class="panel pad">'+stgMeter("Volatile selection · token budget",M.tok.volatile,B.volatileTok,"tok",M.volatile.length+' of '+(M.volatile.length+M.cut.filter(function(c){return c.reason==="over budget"&&c.it.rank;}).length)+' ranked items fit. '+M.cut.length+' items cut in all.')+'</div></div>'+
+    '<div class="panel pad">'+stgMeter("Volatile selection · token budget",M.tok.volatile,B.volatileTok,"tok",M.volatile.length+' of '+(M.volatile.length+M.cut.filter(function(c){return c.reason==="over budget"&&c.it.rank;}).length)+' ranked items fit. '+plural(M.cut.length,"item")+' cut in all.')+'</div></div>'+
    '<div class="panel pad" style="margin-bottom:14px">'+
    pvPart("1 · Stable prefix","SessionStart additional context · capped at 16 KiB","Gate notices first, then <span class=\"mono\">must</span>, then <span class=\"mono\">should</span>. Cached in the signed bundle, so it still arrives when the machine is offline. Never ranked.",
      M.gates.map(function(it){return pvRow(it,gate(it.outcome));}).join("")+M.prefix.map(function(it){return pvRow(it,it.grant?compileChip(it.grant):'');}).join(""),"Nothing in the stable prefix.")+
@@ -7638,7 +7653,7 @@ function stgLibraryAll(w,only){
   return '<div class="grid g4" style="margin-bottom:14px">'+
    '<div class="stat"><span class="k">Items</span><span class="v">'+L.length+'</span><span class="s">everything that can steer an agent here</span></div>'+
    '<div class="stat"><span class="k">By kind</span><span class="v" style="font-size:15px;padding-top:6px">'+(kinds||"—")+'</span><span class="s">one shape, every kind</span></div>'+
-   '<div class="stat"><span class="k">Compiled size</span><span class="v">'+tokn(tok)+'<small>tok</small></span><span class="s">if every item were rendered at once, which no run does</span></div>'+
+   '<div class="stat"><span class="k">Compiled size</span><span class="v">'+tokn(tok)+' <small>tok</small></span><span class="s">if every item were rendered at once, which no run does</span></div>'+
    '<div class="stat"><span class="k">Carry a grant</span><span class="v">'+grants+'</span><span class="s">these compile to a gate as well as to text</span></div></div>'+
    '<div class="note" style="margin-bottom:14px">A shelf is a filter on this list, never a second list. The assembler reads exactly these items, in this order, and decides per run which of them a given agent is shown. Assignments says who receives what; the compiler shows one decision in full.</div>'+
    '<div class="panel"><div class="panel-h"><h3>'+(only?h(STG_LIB_LABEL[only]||only):'Everything written down')+'</h3>'+
@@ -7683,12 +7698,12 @@ function stgAssignTab(w){
     return '<tr><td><span class="b b-q mono">'+h(s[0])+'</span></td><td class="num">'+sc[s[0]]+'</td><td>'+h(s[1])+'</td></tr>';}).join("");
   return '<div class="note" style="margin-bottom:14px">Nobody assigns a record to an agent. An item reaches an agent when its scope matches the run, and it is delivered when a hook is installed on the runtime. An agent on the <span class="mono">observe</span> tier is still assembled for, and receives nothing.</div>'+
    '<div class="panel"><div class="panel-h"><h3>What each agent receives</h3>'+
-   '<span class="b b-q" style="margin-left:auto">'+L.length+' agents</span>'+
+   '<span class="b b-q" style="margin-left:auto">'+plural(L.length,"agent")+'</span>'+
    '<button class="btn sm" onclick="stgTab(\'library\')">Open the library</button></div>'+
    '<div class="tw"><table><thead><tr><th>Agent</th><th>Repository</th><th>Delivery</th><th>Gates</th><th>Stable prefix</th><th>Volatile</th><th>Cut</th><th>Skills</th><th>Per run</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
    '<div class="panel-b"><div class="note">Each row is one assembly, for the prompt that agent is usually given. Change the prompt and the volatile selection changes with it; the gates and the stable prefix do not.</div></div></div>'+
    '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Scope</h3>'+
-   '<span class="b b-q" style="margin-left:auto">'+items.length+' items</span></div>'+
+   '<span class="b b-q" style="margin-left:auto">'+plural(items.length,"item")+'</span></div>'+
    '<div class="tw"><table><thead><tr><th>Scope</th><th>Items</th><th>Reaches</th></tr></thead><tbody>'+scrows+'</tbody></table></div>'+
    '<div class="panel-b"><div class="note">A repository record may narrow what a workspace record allows. It may never widen it, and the checks enforce that before a merge.</div></div></div>';
 }
@@ -8043,7 +8058,7 @@ function repoTab(){
        (repoMeta(r)?'<div class="dim" style="font-size:11px;margin-top:2px">'+h(repoMeta(r))+'</div>':'')+'</td>'+
      '<td>'+(r.role==="main"?'<span class="b b-proven">main</span>':r.role==="linked"?'<span class="b b-q">linked</span>':'<span class="b b-q" style="opacity:.7">not linked</span>')+'</td>'+
      '<td><span class="mono">'+h(r.branch)+'</span><div class="dim mono" style="font-size:11px">'+h(r.head)+'</div></td>'+
-     '<td>'+stBadge(st)+(r.oxFiles?'<div class="dim mono" style="font-size:11px;margin-top:2px">'+r.oxFiles+' files</div>':'')+'</td>'+
+     '<td>'+stBadge(st)+(r.oxFiles?'<div class="dim mono" style="font-size:11px;margin-top:2px">'+plural(r.oxFiles,"file")+'</div>':'')+'</td>'+
      '<td class="muted" style="font-size:12px">'+h(avail?"—":r.events)+'</td>'+
      '<td class="num">'+(avail?'<span class="dim">—</span>':r.symbols.toLocaleString())+'</td>'+
      '<td>'+(st===OX_STATE.governed
@@ -8589,7 +8604,7 @@ function coachDetail(kind,s){
   var head='<div class="coach-head">'+
    '<button class="btn sm" onclick="coachTo(null)">\u2039 All '+(kind==="operators"?"operators":"agents")+'</button>'+
    '<div class="coach-who">'+(kind==="operators"
-     ? personAv(s.id,32)+'<div style="min-width:0"><b>'+h(s.label)+'</b><div class="dim mono" style="font-size:11px">'+h(PEOPLE[s.id].role)+' \u00b7 '+t.agents+' agents</div></div>'
+     ? personAv(s.id,32)+'<div style="min-width:0"><b>'+h(s.label)+'</b><div class="dim mono" style="font-size:11px">'+h(PEOPLE[s.id].role)+' \u00b7 '+plural(t.agents,"agent")+'</div></div>'
      : agentCard(s.id,{layout:"compact",key:s.id}))+'</div>'+
    coachPicker(kind)+'</div>';
   var prof='<div class="grid g4" style="margin-bottom:14px">'+
@@ -8609,7 +8624,7 @@ function coachDetail(kind,s){
 }
 /* ---------- Spend drill-down: an operator, agent or tool → every metric, and its findings as potential savings ---------- */
 function n$(s){return parseFloat(String(s).replace(/,/g,""))||0;}
-function fmt$(n){return "$"+n.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});}
+function fmt$(n){return usd(Number(n).toFixed(2));}
 function spendHref(kind,id){return '#/'+ORG.slug+'/'+ws().slug+'/spend/'+kind+(id?'/'+encodeURIComponent(id):'');}
 /* Tabs and drills both write the hash: route() re-applies the hash's tab on every render, so state alone snaps back. */
 function spendGo(kind,id){
@@ -8702,12 +8717,12 @@ function spendDrill(dr){
   var save=fs.reduce(function(s,f){return s+n$(f.save);},0), top=fs.length?n$(fs[0].save):1;
   var kindLabel={operator:"Operator",agent:"Agent",tool:"Tool"}[kind], listLabel={operator:"By operator",agent:"By agent",tool:"By tool"}[kind];
   var eyebrow, sub, a=null;
-  if(kind==="operator"){var p=PEOPLE[E.id]; eyebrow=kindLabel+' · '+p.role; sub=r.agents+' agents · '+r.runs.toLocaleString()+' runs · '+SPEND.month;}
-  else if(kind==="agent"){a=AGENTS.filter(function(x){return x.key===E.id;})[0]; eyebrow=kindLabel+(a?' · '+a.harnessLabel+' · operator '+PEOPLE[a.operator].name:''); sub=r.runs.toLocaleString()+' runs · '+SPEND.month;}
-  else {eyebrow=kindLabel+' · provider '+r.s; sub=r.calls.toLocaleString()+' calls across '+r.runs.toLocaleString()+' runs · '+SPEND.month+(r.note&&r.note!=="—"?' · '+r.note:'');}
+  if(kind==="operator"){var p=PEOPLE[E.id]; eyebrow=h(kindLabel)+' · <span class="id">'+h(p.role)+'</span>'; sub=plural(r.agents,"agent")+' · '+plural(r.runs.toLocaleString(),"run")+' · '+SPEND.month;}
+  else if(kind==="agent"){a=AGENTS.filter(function(x){return x.key===E.id;})[0]; eyebrow=h(kindLabel+(a?' · '+a.harnessLabel+' · operator '+PEOPLE[a.operator].name:'')); sub=plural(r.runs.toLocaleString(),"run")+' · '+SPEND.month;}
+  else {eyebrow=h(kindLabel)+' · provider <span class="id">'+h(r.s)+'</span>'; sub=plural(r.calls.toLocaleString(),"call")+' across '+plural(r.runs.toLocaleString(),"run")+' · '+SPEND.month+(r.note&&r.note!=="—"?' · '+r.note:'');}
 
   var head='<div class="drill-bar"><a href="'+spendHref(kind)+'" onclick="event.preventDefault();spendGo(\''+kind+'\')">← '+listLabel+'</a><span class="dim">/</span><span class="mono">'+h(E.name)+'</span></div>'+
-   '<div class="phead drill-head" style="margin-bottom:14px"><div class="t"><p class="eyebrow">'+h(eyebrow)+'</p><h2'+(kind==="operator"?'':' class="mono"')+'>'+h(E.name)+'</h2><p>'+h(sub)+'</p></div>'+
+   '<div class="phead drill-head" style="margin-bottom:14px"><div class="t"><p class="eyebrow">'+eyebrow+'</p><h2'+(kind==="operator"?'':' class="mono"')+'>'+h(E.name)+'</h2><p>'+h(sub)+'</p></div>'+
    '<div class="acts">'+(a?'<button class="btn" onclick="go(\'#/'+ORG.slug+'/'+a.ws+'/agents/'+h(a.key)+'\')">Open the agent</button>':'')+
    '<button class="btn" onclick="act(\'Report for '+h(E.name)+' exported: CSV and a signed PDF.\')">Export this view</button></div></div>';
 
@@ -8735,7 +8750,7 @@ function spendDrill(dr){
        ["Observed", per(OT.observed), 'of tokens counted by the gateway · the rest self-reported'],
        ["Wasted", fmt$(wasted), per(wasted/spend)+' of spend · the frames show it bought nothing', "var(--st-critical)"],
        ["Productive ratio", per(r.ratio), 'steps that advanced the task'],
-       ["Runs", r.runs.toLocaleString(), r.agents+' agents · '+fmt$(d.perRun||spend/r.runs)+' per run'],
+       ["Runs", r.runs.toLocaleString(), plural(r.agents,"agent")+' · '+fmt$(d.perRun||spend/r.runs)+' per run'],
        ["Model calls", (d.modelCalls||0).toLocaleString(), (d.toolCalls||0).toLocaleString()+' tool calls'],
        ["Budget position", per(r.used), 'of '+usd(r.budget)+' monthly', r.used>0.8?"var(--st-critical)":null],
        ["Trend", h(d.trend||"—"), 'spend, same period']];
@@ -8743,9 +8758,9 @@ function spendDrill(dr){
     T=[["Spend · "+h(SPEND.month), fmt$(spend), share+' of workspace · <span class="basis">'+(AT.observed?'gateway_observed':'client_attested')+'</span>'],
        ["Tokens", tokn(AT.total), tokn(AT.perRun)+' per run · '+tokn(AT.perCall)+' per call'],
        ["Cache hit rate", per(AT.cacheRate), tokn(AT.cacheRead)+' input tokens served from cache'],
-       ["Tool definitions", per(AT.shares.tools), 'of every request · '+AT.neverCalled+' tools never called', AT.shares.tools>0.16?"var(--st-approval)":null],
+       ["Tool definitions", per(AT.shares.tools), 'of every request · '+plural(AT.neverCalled,"tool")+' never called', AT.shares.tools>0.16?"var(--st-approval)":null],
        ["Wasted", fmt$(wasted), per(wasted/spend)+' of spend', "var(--st-critical)"],
-       ["Spend per run", fmt$(d.perRun||spend/r.runs), r.runs.toLocaleString()+' runs'],
+       ["Spend per run", fmt$(d.perRun||spend/r.runs), plural(r.runs.toLocaleString(),"run")],
        ["Productive ratio", per(d.ratio||0), 'steps that advanced the task'],
        ["Model calls", (d.modelCalls||0).toLocaleString(), (d.toolCalls||0).toLocaleString()+' tool calls'],
        ["Trend", h(r.trend), 'spend vs August']];
@@ -8753,7 +8768,7 @@ function spendDrill(dr){
   } else {
     var total=SPEND.byTool.reduce(function(s,x){return s+x.spend;},0), hot=r.perCall>=1.5||r.perRun>=10;
     T=[["Spend · "+h(SPEND.month), fmt$(spend), per(spend/total)+' of tool-attributed spend · <span class="basis">client_attested</span>'],
-       ["Calls", r.calls.toLocaleString(), r.runs.toLocaleString()+' runs used it'],
+       ["Calls", r.calls.toLocaleString(), plural(r.runs.toLocaleString(),"run")+' used it'],
        ["Average per call", fmt$(r.perCall), 'the calling turn plus the turn that read the result'],
        ["Average per run", fmt$(r.perRun), hot?'high for the belt':'spend ÷ runs that used it', hot?"var(--st-approval)":null],
        ["Result body", (d.resTok||0).toLocaleString()+' <span class="dim" style="font-size:12px">tok</span>', 'average tokens returned per call'],
@@ -8795,7 +8810,7 @@ function spendByTool(){
   var mxCum=Math.max.apply(null,rows.map(function(r){return r.spend;}));
   var mxAvg=Math.max.apply(null,tools.map(function(r){return r.perCall;}));
   var mxRun=Math.max.apply(null,tools.map(function(r){return r.perRun;}));
-  function money(n){return "$"+n.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});}
+  function money(n){return usd(Number(n).toFixed(2));}
   function bar(label,val,mx,text,col){
     var lk=spendEntity("tool",label);
     return '<div class="meter"><div class="lab" style="display:flex;gap:8px;font-size:11.5px;color:var(--muted)">'+
@@ -8851,11 +8866,11 @@ function spendWaste(){
    '<div class="stat"><span class="k">Wasted</span><span class="v" style="color:var(--st-critical)">'+usd(SPEND.wasteTotal)+'</span><span class="s"><span class="basis">client_attested</span> · USD</span></div>'+
    '<div class="stat"><span class="k">Share of spend</span><span class="v">'+per(SPEND.wasteShare)+'</span><span class="s">of '+usd(fmt2(spendMonthTotal()))+' this month</span></div>'+
    '<div class="stat"><span class="k">Runs with waste</span><span class="v">'+SPEND.wasteRuns+'</span><span class="s">of '+SPEND.runs.toLocaleString()+' sealed runs</span></div>'+
-   '<div class="stat"><span class="k">Largest cause</span><span class="v" style="font-size:17px;padding-top:4px">'+h(SPEND.wasteByCause[0].c)+'</span><span class="s">'+usd(SPEND.wasteByCause[0].spend)+' · '+SPEND.wasteByCause[0].runs+' runs</span></div></div>';
+   '<div class="stat"><span class="k">Largest cause</span><span class="v" style="font-size:17px;padding-top:4px">'+h(SPEND.wasteByCause[0].c)+'</span><span class="s">'+usd(SPEND.wasteByCause[0].spend)+' · '+plural(SPEND.wasteByCause[0].runs,"run")+'</span></div></div>';
   var causes='<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>By cause</h3></div>'+
    '<div class="panel-b" style="display:grid;gap:12px">'+
    SPEND.wasteByCause.map(function(c){var v=parseFloat(c.spend.replace(/,/g,""));
-    return '<div class="meter"><div class="lab" style="display:flex;gap:8px;font-size:12px;align-items:baseline"><b style="margin-left:0">'+h(c.c)+'</b><span class="dim mono" style="font-size:10.5px">'+c.runs+' runs</span>'+
+    return '<div class="meter"><div class="lab" style="display:flex;gap:8px;font-size:12px;align-items:baseline"><b style="margin-left:0">'+h(c.c)+'</b><span class="dim mono" style="font-size:10.5px">'+plural(c.runs,"run")+'</span>'+
      '<b style="margin-left:auto;font-variant-numeric:tabular-nums">'+usd(c.spend)+'</b></div>'+
      '<div class="bar"><i style="width:'+Math.round(v/mx*100)+'%;background:var(--st-critical)"></i></div>'+
      '<div class="muted" style="font-size:11.5px;margin-top:3px">'+h(c.why)+'</div></div>';}).join("")+'</div></div>';
@@ -8872,7 +8887,7 @@ function spendWaste(){
      '<div class="row" style="margin-bottom:8px">'+badges+'</div>'+
      '<div class="bar" style="margin-bottom:8px"><i style="width:'+Math.round(frac*100)+'%;background:var(--st-critical)"></i></div>'+
      '<p class="muted" style="margin:0 0 9px;font-size:12.5px"><b style="color:var(--fg)">'+h(r.taskTitle)+'.</b> '+h(x.what)+'</p>'+
-     '<div class="row"><span class="dim mono" style="font-size:10.5px">'+r.frames+' frames · '+r.steps+' steps · cache '+per(r.cache)+' · '+h(r.model)+'</span>'+
+     '<div class="row"><span class="dim mono" style="font-size:10.5px">'+plural(r.frames,"frame")+' · '+plural(r.steps,"step")+' · cache '+per(r.cache)+' · '+h(r.model)+'</span>'+
      '<button class="btn sm" style="margin-left:auto" onclick="go(\''+href+'\')">Open the run</button>'+
      '<button class="btn sm" onclick="act(\'Frames that prove the waste on '+r.id+' opened.\')">Show the frames</button></div></div>';}).join("")+
    '</div><div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">Wasted is a claim about frames, not about outcomes: it means the frames show the tokens bought nothing — a repeated call, a cold prefix, a turn spent waiting, a chain that broke. '+
@@ -9219,7 +9234,7 @@ DLG_EXT.member=function(p){
      orgMemberWs(m).map(function(w){return '<tr><td class="mono" style="font-size:12px">'+h(w.slug)+'</td><td class="mono" style="font-size:12px">'+h(base)+(m.ws==="all"?' <span class="dim">· every workspace</span>':'')+'</td></tr>';}).join("")+
     '</tbody></table></div>'+
     '<p class="eyebrow" style="margin:16px 0 8px">Agents they operate · <span data-member-agents="'+ags.length+'">'+ags.length+'</span></p>'+
-    (ags.length?'<div class="tw"><table class="narrow"><tbody>'+ags.map(function(a){return '<tr data-member-agent><td class="tkey" style="font-size:12px">'+h(a.key)+'</td><td class="mono dim" style="font-size:11.5px">'+h(a.ws)+'</td><td class="num">'+a.runs30.toLocaleString("en-US")+' runs · 30 d</td></tr>';}).join("")+'</tbody></table></div>'
+    (ags.length?'<div class="tw"><table class="narrow"><tbody>'+ags.map(function(a){return '<tr data-member-agent><td class="tkey" style="font-size:12px">'+h(a.key)+'</td><td class="mono dim" style="font-size:11.5px">'+h(a.ws)+'</td><td class="num">'+plural(a.runs30.toLocaleString("en-US"),"run")+' · 30 d</td></tr>';}).join("")+'</tbody></table></div>'
      :'<p class="muted" style="font-size:12.5px;margin:0">None. An agent’s effective permission is its grants intersected with its operator’s, so this person narrows nothing today.</p>')+
     '<p class="eyebrow" style="margin:16px 0 8px">Mandates</p>'+
     '<dl class="kv"><dt>Granted</dt><dd>'+(granted.length?granted.map(function(x){return '<span class="mono">'+h(x.id)+'</span> to <span class="mono">'+h(x.agent)+'</span> · '+h(x.status);}).join("<br>"):'none')+'</dd>'+
@@ -9444,8 +9459,8 @@ function auditIncidents(){
      (i.status==="open"?'<button class="btn sm primary" onclick="openDialog(\'incidentclose\',\''+i.id+'\')">Resolve</button>':'')+'</td></tr>';}).join("");
   return auditStats([["Open",String(open.length),crit?"one critical · money moved without a receipt":"none critical",crit?"critical":"approval"],
     ["Critical · 12 months","1","open since 08:40 today"],
-    ["Median time to resolve","2 h<small>38 m</small>","across 5 resolved incidents"],
-    ["Money moved without a receipt","$18.00<small>USD</small>","one charge, 2026-09-11, open"]])+
+    ["Median time to resolve","2h <small>38m</small>","across 5 resolved incidents"],
+    ["Money moved without a receipt","$18.00 <small>USD</small>","one charge, 2026-09-11, open"]])+
    (crit?'<div class="warn" style="margin-bottom:14px"><b>Critical · '+h(crit.id)+' · open.</b> Stripe charge <span class="mono">ch_3Qa8</span>, $18.00 USD, attributable to <span class="mono">con_01K2A9</span>, has no receipt. Money moved that Oxagen did not govern. '+
     '<a href="#" onclick="event.preventDefault();openDialog(\'incidentview\',\''+crit.id+'\')">Open the incident</a></div>':'')+
    '<div class="panel"><div class="panel-h"><h3>Incidents</h3><span class="muted" style="font-size:12.5px">raised by the policy engine, the gateway and the verifier</span>'+
@@ -9473,7 +9488,7 @@ function auditReceipts(){
    (q?'<button class="btn sm ghost" onclick="S.rq=\'\';render()">clear</button>':'')+'</div></div>'+
    (hits.length?'<div class="tw"><table><thead><tr><th>Receipt</th><th>When</th><th>Agent and operator</th><th>Tool version</th><th>Decision</th><th class="num">Amount</th><th>External effect</th><th>Tier</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
     :emptyState("No receipt matches “"+(S.rq||"")+"”","Receipts are searchable by agent key, tool version, external effect id, call digest and approver. A call that was denied has a receipt too — denials are recorded, they just never dispatched.",'<button class="btn" onclick="S.rq=\'\';render()">Clear the search</button>'))+
-   '<div class="panel-b"><div class="note">'+hits.length+' of '+RECEIPTS.length+' receipts shown. A receipt for a client-attested call exists too, and its authority group says <span class="mono">recorded</span> where a call routed through Oxagen says <span class="mono">decided on the server</span>. The rendering refuses to say otherwise.</div></div></div>';
+   '<div class="panel-b"><div class="note">'+hits.length+' of '+plural(RECEIPTS.length,"receipt")+' shown. A receipt for a client-attested call exists too, and its authority group says <span class="mono">recorded</span> where a call routed through Oxagen says <span class="mono">decided on the server</span>. The rendering refuses to say otherwise.</div></div></div>';
 }
 
 function auditExports(){
@@ -9898,7 +9913,7 @@ function skGate(w){
       var on=skOn(x);
       return '<div class="sx-row"><div class="sx-ki">'+icon("skills")+'</div>'+
        '<div><div class="nm">'+h(x.slug)+'</div><div class="st">'+h(x.main)+' · created '+h(SK_CREATED[x.slug]||"—")+' with <span class="mono">skills.enabled = false</span></div>'+
-       '<div class="meta"><span class="sx-chip">'+x.agents+' agents</span><span class="sx-chip src">'+h(x.owner)+'</span>'+
+       '<div class="meta"><span class="sx-chip">'+plural(x.agents,"agent")+'</span><span class="sx-chip src">'+h(x.owner)+'</span>'+
         (on?'<span class="sx-chip ok">turned on '+(x.slug==="core-platform"?"2026-08-02 by Marcus Bell":"")+'</span>':'<span class="sx-chip">never turned on</span>')+'</div></div>'+
        '<div class="rt">'+(on?skBadge("allowed","on"):skBadge("q","off"))+'</div></div>';}).join("")+
     '</div></div></div>';
@@ -9915,7 +9930,7 @@ function skSyncPanel(w){
      return '<tr><td><b class="mono">'+h(x.repo)+'</b><span class="sub">'+h(x.note)+'</span></td>'+
       '<td><span class="b '+st.b+'">'+(x.state==="unbound"?'':'<span class="d"></span>')+h(st.l)+'</span></td>'+
       '<td class="mono" style="font-size:11.5px">'+(x.synced?h(x.synced)+'<span class="sub">head '+h(x.head)+' · '+h(x.at)+'</span>':'<span class="dim">never</span>')+'</td>'+
-      '<td class="num">'+x.skills+'<span class="sub">'+x.files+' files</span></td><td class="num">'+x.checkouts+'</td>'+
+      '<td class="num">'+x.skills+'<span class="sub">'+plural(x.files,"file")+'</span></td><td class="num">'+x.checkouts+'</td>'+
       '<td class="mono" style="font-size:11.5px">'+h(x.target)+'</td></tr>';}).join("")+'</tbody></table></div>'+
     '<div class="panel-b"><div class="note">Sync materializes the merged files into each enrolled checkout. The skill body never enters the assembler and is never budgeted there: the harness decides when to load it. '+
     'The <b>description line</b> is what competes, as an <span class="mono">info</span> item in the volatile selection. <button class="lnk" onclick="stgTab(\'compiler\')">See it compete in the compiler</button></div></div></div>';
@@ -9955,7 +9970,7 @@ function skRow(s){
      '<span class="sx-chip">'+h(s.kind)+'</span>'+
      '<span class="sx-chip">'+s.tokens.toLocaleString()+' tok</span>'+
      '<span class="sx-chip">'+h(s.digest.slice(0,18))+'…</span>'+
-     (s.cited?'<span class="sx-chip">cited in '+s.cited+' of '+s.runs+' runs</span>':'')+
+     (s.cited?'<span class="sx-chip">cited in '+s.cited+' of '+plural(s.runs,"run")+'</span>':'')+
       (s.citedAfter!=null?'<span class="sx-chip ok">cited '+skPct(s.citedBefore)+' → '+skPct(s.citedAfter)+' of loads</span>':'')+
     '</div></div>'+
    '<div class="rt">'+skTier(s.tier)+
@@ -10226,7 +10241,7 @@ function skRunPage(){
   if(S.state==="loading") return skeleton();
   if(S.state==="error") return errorState("This run","502 frame_store_unreachable");
   if(S.state==="denied") return deniedState("this run","runs.read on "+w.slug);
-  return '<div class="phead"><div class="t"><p class="eyebrow">Run · '+h(SKRUN.id)+'</p>'+
+  return '<div class="phead"><div class="t"><p class="eyebrow">Run · <span class="id">'+h(SKRUN.id)+'</span></p>'+
     '<h1>'+h(SKRUN.taskTitle)+'</h1>'+
     '<p><span class="mono">'+h(SKRUN.agent)+'</span> · '+h(SKRUN.harness)+' · '+
       h(PEOPLE[SKRUN.op].name)+' · harness tier · <span class="mono">'+h(SKRUN.remote)+'@'+h(SKRUN.sha)+'</span></p></div>'+
@@ -10402,7 +10417,7 @@ DLG_EXT.skcfg=function(){
      '<div class="sx-skl">'+SK_CFG.sources.map(function(x){
       return '<div class="sx-row'+(x.on?"":" held")+'"><div class="sx-ki">'+icon(x.k==="registry"?"organization":x.k==="market"?"tools":"git")+'</div>'+
        '<div><div class="nm">'+h(x.label)+'</div><div class="st">'+h(x.d)+'</div></div>'+
-       '<div class="rt">'+(x.on?skBadge("allowed",x.n+" skills"):skBadge("q","not a source"))+'</div></div>';}).join("")+'</div></div>',
+       '<div class="rt">'+(x.on?skBadge("allowed",plural(x.n,"skill")):skBadge("q","not a source"))+'</div></div>';}).join("")+'</div></div>',
    f:'<span class="grow mono dim" style="font-size:11px">changing this is a pull request, not a save button</span><button class="btn" onclick="closeDialog()">Close</button>'};
 };
 DLG_EXT.skill=function(arg){
@@ -10415,8 +10430,8 @@ DLG_EXT.skill=function(arg){
       '<dt>Load cost</dt><dd><span class="mono">'+s.tokens.toLocaleString()+'</span> tokens · $'+(s.tokens*0.000003).toFixed(4)+' a turn it is loaded into</dd>'+
       '<dt>Decision</dt><dd>'+skTier(s.tier)+'</dd>'+
       '<dt>Owner</dt><dd>'+(s.owner?h(PEOPLE[s.owner].name):'<span class="muted">nobody — which is why it is held</span>')+'</dd>'+
-      '<dt>Cited</dt><dd>'+(s.cited?s.cited+' of '+s.runs+' runs that searched for it':'never')+'</dd>'+
-      (s.citedAfter!=null?'<dt>Cited rate</dt><dd>'+skPct(s.citedBefore)+' of loads cited before this version → <b>'+skPct(s.citedAfter)+'</b> after · measured over '+s.runs+' runs from the token record</dd>':'')+
+      '<dt>Cited</dt><dd>'+(s.cited?s.cited+' of '+plural(s.runs,"run")+' that searched for it':'never')+'</dd>'+
+      (s.citedAfter!=null?'<dt>Cited rate</dt><dd>'+skPct(s.citedBefore)+' of loads cited before this version → <b>'+skPct(s.citedAfter)+'</b> after · measured over '+plural(s.runs,"run")+' from the token record</dd>':'')+
      '</dl>'+
      (s.why?'<div class="note" style="border-color:color-mix(in srgb,var(--sk-held) 45%,transparent)"><b>Held: </b>'+s.why+'</div>':'')+
      '<div class="sx-cfg"><div class="sx-cfg-h">'+h(s.path)+'</div><pre>'+skBody(s)+'</pre></div>'+
@@ -10445,7 +10460,7 @@ function skPr(s){
    trigger:"An operator retired "+s.id+".",
    files:[[inTree?"del":"mod",skRetireFile(s),inTree?"the procedure is removed":"the install line is removed"]],
    checks:[["schema","pass",inTree?"No other file in this tree names this skill.":"workspace.toml still parses and every other install resolves."],
-    ["citation_check","pass",(s.cited&&s.runs)?s.cited+" of "+s.runs+" runs cited it; each keeps the digest it recorded.":"No run has ever cited it."],
+    ["citation_check","pass",(s.cited&&s.runs)?s.cited+" of "+plural(s.runs,"run")+" cited it; each keeps the digest it recorded.":"No run has ever cited it."],
     ["grant_scan","pass","A skill grants nothing, so removing it takes no authority from any agent."],
     ["load_cost","pass","The search budget frees "+s.tokens.toLocaleString()+" tokens a turn it was loaded into."]]};
   OXPRS.unshift(p);
@@ -10463,7 +10478,7 @@ DLG_EXT.skretire=function(id){
      :'This one is installed, not written here. Retiring it is a pull request that takes its install line out of <span class="mono">.oxagen/workspace.toml</span>, and leaves it published where it came from.')+
     ' A search still returns it until that merges.</div>'+
     '<div class="warn">'+((s.cited&&s.runs)
-     ?s.cited+' of '+s.runs+' runs cited it. Each keeps the digest it recorded, and nothing rewrites what those runs were steered by.'
+     ?s.cited+' of '+plural(s.runs,"run")+' cited it. Each keeps the digest it recorded, and nothing rewrites what those runs were steered by.'
      :'No run has ever cited it, so no run changes.')+'</div>',
    f:'<button class="btn" onclick="closeDialog()">Keep it</button>'+
     '<button class="btn danger" onclick="skRetire(\''+h(s.id)+'\')">Open the pull request</button>'};
@@ -10610,7 +10625,7 @@ SCENARIOS["sixty-seconds-to-governed"]={title:"Sixty seconds to governed", ws:"c
    route:function(o){return {page:"welcome",step:"run",org:o,ws:"core-platform"};},
    setup:function(){obScnArm();if(!S.reg||S.reg.mode!=="onboard"){regClear();S.reg=obNew();}}},
   {say:"The installer read the git remote, so binding the main repo is one click: the GitHub App, Context PRs, checks and the code graph.",
-   note:"Skip for now and the workspace stays provisional for "+OB_PROVISIONAL_DAYS+" days. Runs record and spend counts; steering, context records and agent definitions stay off.",
+   note:"Skip for now and the workspace stays provisional for "+plural(OB_PROVISIONAL_DAYS,"day")+". Runs record and spend counts; steering, context records and agent definitions stay off.",
    route:function(o){return {page:"welcome",step:"run",org:o,ws:"core-platform"};},
    setup:function(){obScnArm();if(!S.reg||S.reg.mode!=="onboard"){regClear();S.reg=obNew();}S.reg.repo=null;obScnUnprov();},
    act:["Bind the main repo","obBind()"]},
@@ -10895,7 +10910,7 @@ function pScenarios(){
    '<p class="lede">'+ids.length+' demos, each one a walk through the real screens. A scenario owns no screens of its own, so it cannot drift away from the product it is demonstrating.</p>'+
    '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px">'+ids.map(function(id){var s=SCENARIOS[id];
      return '<div class="scn-card"><b>'+h(s.title)+'</b><p>'+h(s.blurb)+'</p>'+
-      '<p class="mono dim" style="font-size:11px;margin:0">'+s.steps.length+' steps \u00b7 workspace '+h(s.ws)+'</p>'+
+      '<p class="mono dim" style="font-size:11px;margin:0">'+plural(s.steps.length,"step")+' \u00b7 workspace '+h(s.ws)+'</p>'+
       '<div><button class="btn primary sm" onclick="go(\''+scnHref(id,1)+'\')">Start</button></div></div>';
    }).join("")+'</div>';
 }
@@ -11208,7 +11223,7 @@ function evidenceDlg(){
      '<div class="ev-who">'+avatarHtml(p.avatar,38,"person")+'<div style="min-width:0"><b style="font-size:13px">'+h(p.name)+'</b>'+
      '<div class="mono dim" style="font-size:11px">'+h(p.role)+' · operator on every run below</div>'+
      '<div style="font-size:12px;color:var(--muted);margin-top:5px">'+h(e.who.note)+'</div></div></div>'+
-     (a?agentCard(a,{layout:"compact",onclick:"closeDialog()",sub:h(a.harnessLabel)+' \u00b7 belt '+a.belt+' \u00b7 '+a.runs30.toLocaleString()+' runs 30d \u00b7 '+usd(a.spend30)+' spend'}):
+     (a?agentCard(a,{layout:"compact",onclick:"closeDialog()",sub:h(a.harnessLabel)+' \u00b7 belt '+a.belt+' \u00b7 '+plural(a.runs30.toLocaleString(),"run")+' 30d \u00b7 '+usd(a.spend30)+' spend'}):
        '<div class="ev-who"><span class="avat" style="border-radius:9px;font-family:var(--mono);font-size:11px">ag</span><div style="min-width:0"><b class="mono" style="font-size:12.5px">'+h(e.who.agent)+'</b><div class="mono dim" style="font-size:11px">'+h(f.level)+' level</div></div></div>')+
      '</div></div></div></div>',
    f:'<span class="grow">Every run above is a sealed record. Open one to read the frames the arithmetic came from.</span>'+
@@ -11272,12 +11287,12 @@ function dialog(){
    "org-switch":{t:"Switch organization",w:false,b:
      '<div class="field"><input placeholder="Search organizations" aria-label="Search organizations"></div>'+
      '<button class="cmd-i on" onclick="closeDialog()"><span class="av">A</span>'+
-     '<span style="flex:1;min-width:0"><b>Anderson Intelligence Corp.</b><br><span class="dim mono" style="font-size:11px">a-intel · Team · '+ic0(ORG.agents)+' agents</span></span><span class="r">current</span></button>'+
+     '<span style="flex:1;min-width:0"><b>Anderson Intelligence Corp.</b><br><span class="dim mono" style="font-size:11px">a-intel · Team · '+plural(ic0(ORG.agents),"agent")+'</span></span><span class="r">current</span></button>'+
      '<div class="note" style="margin-top:14px">An organization owns a key-encryption key, a Postgres partition, a billing account, and optionally a dedicated data plane. You belong to one here.</div>',
      f:'<button class="btn" onclick="closeDialog()">Close</button>'},
    "ws-switch":{t:"Switch workspace",w:false,b:
      WS.map(function(w){return '<button class="cmd-i'+(w.slug===S.ws?" on":"")+'" onclick="S.ws=\''+w.slug+'\';closeDialog();go(\'#/'+ORG.slug+'/'+w.slug+'\')">'+
-      '<span><b>'+h(w.name)+'</b><br><span class="dim mono" style="font-size:11px">'+h(w.main)+' · '+h(w.branch)+' · '+w.agents+' agents</span></span>'+
+      '<span><b>'+h(w.name)+'</b><br><span class="dim mono" style="font-size:11px">'+h(w.main)+' · '+h(w.branch)+' · '+plural(w.agents,"agent")+'</span></span>'+
       (w.slug===S.ws?'<span class="r">current</span>':'')+'</button>';}).join("")+
      '<div class="hr"></div><button class="btn" onclick="closeDialog();openDialog(\'newws\')">Create a workspace</button>',
      f:'<button class="btn" onclick="closeDialog()">Close</button>'},
@@ -11413,7 +11428,7 @@ function dialog(){
    receipt:{t:receiptDlgTitle(),s:receiptDlgSub(),w:true,b:receiptDlgBody(),f:receiptDlgFoot()},
    incidentview:{t:incidentDlgTitle(),s:incidentDlgSub(),w:true,b:incidentDlgBody(),f:incidentDlgFoot()},
    exportevents:{t:"Export events",s:"CSV · the same rows the API and MCP return",w:false,b:
-     '<div class="note">'+AUDIT.length.toLocaleString()+' events in the last 30 days, with actor, actor kind, action, target, result, severity and event id. Nothing in a control-plane event is a prompt or tool body, so this export carries no redaction step.</div>',
+     '<div class="note">'+plural(AUDIT.length.toLocaleString(),"event")+' in the last 30 days, with actor, actor kind, action, target, result, severity and event id. Nothing in a control-plane event is a prompt or tool body, so this export carries no redaction step.</div>',
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'In the product this downloads events.csv. A mockup writes nothing to disk.\')">Download CSV</button>'},
    newexport:{t:"Export an evidence bundle",s:"segments, attestations, key ids, and the verifier",w:false,b:
      '<div class="field"><label>Scope</label><select id="ex-scope" aria-label="Scope"><option>core-platform · all runs</option><option>finops · all runs</option><option>financial tool calls only · all workspaces</option><option>agent a-intel.finops.invoice-bot · all runs</option></select></div>'+
@@ -11478,7 +11493,7 @@ function schemaDlg(){
    b:'<p class="eyebrow q"><span class="mono">'+h(t.n)+'@'+h(t.v)+'</span> · the slack server declares no outputSchema for this tool</p>'+
      '<div class="note" style="margin-bottom:14px"><b>What has been happening until now.</b> The gateway recorded this tool’s outputs and validated them only for size and type. '+
      'Every run that used it says so in its completeness record. Approving the inferred schema turns strict validation on from the next call.</div>'+
-     '<dl class="kv"><dt>Observations</dt><dd><span class="num">'+t.calls30.toLocaleString()+'</span> responses over 30 days, from '+agentsWithTool(t.n+"@"+t.v).length+' agents</dd>'+
+     '<dl class="kv"><dt>Observations</dt><dd><span class="num">'+t.calls30.toLocaleString()+'</span> responses over 30 days, from '+plural(agentsWithTool(t.n+"@"+t.v).length,"agent")+'</dd>'+
      '<dt>Inferred from</dt><dd>the intersection of every observation · 0 outliers discarded</dd>'+
      '<dt>Digest on approval</dt><dd class="mono">sha256:'+t.n.length.toString(16)+'c4f9…7b02</dd></dl>'+
      codePair([{lab:"Inferred output schema",sp:"what approval enforces",code:OBSERVED_SCHEMAS[t.n]||"{}"},
@@ -11736,7 +11751,7 @@ function agentCard(a,o){
   o=o||{}; var lay=o.layout||"list";
   if(!a) return '<span class="agc agc-'+lay+'"><span class="agid"><span class="tkey">'+h(o.key||"")+'</span></span></span>';
   var sz=o.sz||(lay==="detail"?60:lay==="compact"?30:26);
-  var sub=o.sub!=null?o.sub:lay==="compact"?h(a.harnessLabel)+' \u00b7 '+(a.runs30||0).toLocaleString()+' runs 30d \u00b7 '+usd(a.spend30):h(a.harnessLabel);
+  var sub=o.sub!=null?o.sub:lay==="compact"?h(a.harnessLabel)+' \u00b7 '+plural((a.runs30||0).toLocaleString(),"run")+' 30d \u00b7 '+usd(a.spend30):h(a.harnessLabel);
   var link=o.link!=null?o.link:lay==="compact";
   var inner=agentAv(a,sz)+'<span class="agid"><span class="tkey">'+h(a.key)+'</span>'+(sub?'<span class="sub">'+sub+'</span>':'')+'</span>';
   return link?'<a class="agc agc-'+lay+'" href="'+agentUrl(a)+'"'+(o.onclick?' onclick="'+o.onclick+'"':'')+'>'+inner+'</a>':'<span class="agc agc-'+lay+'">'+inner+'</span>';
@@ -11815,7 +11830,7 @@ function rolesBody(){
     return '<tr class="click" onclick="roleOpen(\''+r.id+'\')"><td><span class="tkey">'+h(r.id)+'</span><div class="dim" style="font-size:11.5px">'+h(r.desc)+'</div></td>'+
      '<td>'+roleKindBadge(r.kind)+'</td><td class="mono" style="font-size:11.5px">'+h(r.scope)+'</td>'+
      '<td style="max-width:30ch">'+permChips(r.perms)+'</td>'+
-     '<td style="font-size:12px;white-space:nowrap">'+(n.total?[n.people?n.people+' people':'',n.agents?n.agents+' agent'+(n.agents>1?'s':''):'',n.svc?n.svc+' key'+(n.svc>1?'s':''):''].filter(Boolean).join(' · '):'<span class="dim">nobody</span>')+'</td>'+
+     '<td style="font-size:12px;white-space:nowrap">'+(n.total?[n.people?plural(n.people,"person","people")+'':'',n.agents?n.agents+' agent'+(n.agents>1?'s':''):'',n.svc?n.svc+' key'+(n.svc>1?'s':''):''].filter(Boolean).join(' · '):'<span class="dim">nobody</span>')+'</td>'+
      '<td style="font-size:11.5px">'+(locked?'<span class="b b-q">built-in</span>':'<span class="dim">'+h(r.by)+' · '+h(r.at)+'</span>')+'</td>'+
      '<td class="rowacts" onclick="event.stopPropagation()"><button class="btn sm" onclick="roleOpen(\''+r.id+'\')">'+(locked?'View':'Edit')+'</button>'+
       '<button class="btn sm" onclick="roleDup(\''+r.id+'\')">Duplicate</button>'+
@@ -12058,7 +12073,7 @@ function wsEditDlg(){
    '<div class="field"><label>Namespace</label><input value="'+h(w.ns||w.slug.split("-")[0])+'" disabled aria-label="Namespace"><div class="hint">Immutable. It is in every agent key here: <span class="mono">'+h(ORG.slug+"."+(w.ns||w.slug.split("-")[0]))+'.&lt;agent&gt;</span>.</div></div>'+
    '<div class="field"><label for="wsRet">Retention mode</label><select id="wsRet">'+[["content_exact","keep prompts and tool bodies in full"],["digest_only","digests only, lowers the replay grade"]].map(function(x){return '<option value="'+x[0]+'"'+((w.retention||"content_exact")===x[0]?' selected':'')+'>'+x[0]+' — '+x[1]+'</option>';}).join("")+'</select>'+
    '<div class="hint"><span class="mono">digest_only</span> is an opt-down: recorded as a completeness gap on every run, because a replay without bodies is a timeline, not a replay.</div></div>'+
-   '<dl class="kv"><dt>Toolbelt limit</dt><dd>'+FULL_BELT_LIMIT+' tools, then the belt is sent searchable</dd>'+
+   '<dl class="kv"><dt>Toolbelt limit</dt><dd>'+plural(FULL_BELT_LIMIT,"tool")+', then the belt is sent searchable</dd>'+
    '<dt>Default budget</dt><dd>'+usd(w.budgetDay||"20.00")+' per day per agent · hard · a new agent starts here</dd>'+
    '<dt>Agents</dt><dd>'+AGENTS.filter(function(a){return a.ws===w.slug;}).length+' registered · '+AGENTS.filter(function(a){return a.ws===w.slug&&(a.mandates||[]).length;}).length+' hold a mandate</dd></dl>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="wsSave()">Save</button>'};
@@ -12375,7 +12390,7 @@ function regRun(){
      '<div><span class="sq">1</span><span class="ts">14:02:11.418</span><span class="kd">oxagen:run.start</span><span class="bd">agent='+h(key)+' · operator='+h(me.name)+' · tier=harness · steering=none published</span></div></div>'+
      '<div class="row" style="margin-top:12px">'+tierBadge("harness")+'<span class="b b-q">replay grade: full</span><span class="b b-q">chain intact</span></div>'+
      '<p class="muted" style="font-size:12.5px;margin:12px 0 0">The tier is computed from what was actually routed, not from what the adapter can do on paper. The hooks answered, so this run is <b>harness</b>: delivered, recorded, client-attested, fail-open.</p></div></div>';
-    foot='<div class="reg-foot">'+regCancelBtn()+''+
+    foot='<div class="reg-foot">'+regCancelBtn()+
      '<div class="sp"><span class="reg-cap" id="regAuto">'+(r.runId?'Unlocked · <span class="mono">'+h(r.runId)+'</span> is live':'Opening automatically…')+'</span><button class="btn primary" onclick="regFinish()">'+(ob?"Open Oxagen":"Open in Fleet")+'</button></div></div>';
   } else {
     body='<div class="reg-card"><div class="ch"><span class="reg-spin"></span><h3>Waiting for the first frame</h3><span class="sp">polling · 1s</span></div>'+
@@ -12497,7 +12512,7 @@ function obOfferCard(fr){
   return '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Onboarding offer</h3>'+
    '<button class="btn sm ghost" style="margin-left:auto" onclick="S.obOfferOff=true;render()" aria-label="Dismiss the onboarding offer">Not now</button></div>'+
    '<div class="panel-b"><p style="margin:0 0 6px;font-size:13.5px"><b>Convert by '+h(obDate(OB_OFFER_DAYS))+' for '+h(deal)+'.</b></p>'+
-   '<p class="muted" style="margin:0 0 10px;font-size:12.5px">That is '+OB_OFFER_DAYS+' days from your first run. <span class="mono">'+h(fr.id)+'</span> cost <b>'+usd(fr.cost)+'</b> '+ORG.currency+', <span class="basis">'+h(fr.basis)+'</span>. Oxagen billed <b>'+usd(fmt2(billed))+'</b> for it: the included monthly allowance covered it, and Oxagen never marks up tokens.</p>'+
+   '<p class="muted" style="margin:0 0 10px;font-size:12.5px">That is '+plural(OB_OFFER_DAYS,"day")+' from your first run. <span class="mono">'+h(fr.id)+'</span> cost <b>'+usd(fr.cost)+'</b> '+ORG.currency+', <span class="basis">'+h(fr.basis)+'</span>. Oxagen billed <b>'+usd(fmt2(billed))+'</b> for it: the included monthly allowance covered it, and Oxagen never marks up tokens.</p>'+
    '<button class="btn sm" onclick="go(\'#/'+ORG.slug+'/billing\')">See plans</button></div></div>';
 }
 
@@ -12753,14 +12768,14 @@ function obRepoPanel(){
    '<div class="row" style="margin-bottom:10px"><span class="b b-q mono">'+h(w.main)+'</span><span class="b b-q">production branch: '+h(w.branch)+'</span><span class="b b-allowed"><span class="d"></span>GitHub App installed</span></div>'+
    '<p class="muted" style="font-size:12.5px;margin:0">Steering, context records and agent definitions will live in <span class="mono">'+h(w.main)+'</span> under <span class="mono">.oxagen/</span>, published through Context PRs.</p></div></div>';
   if(r.repo==="skipped") return '<div class="reg-card ob-repo"><div class="ch"><span class="b b-denied">provisional</span><h3>No main repo bound</h3></div><div class="cb">'+
-   '<p class="muted" style="font-size:12.5px;margin:0 0 10px"><b>'+h(w.slug)+' is provisional until '+h(w.provisional?w.provisional.until:obDate(OB_PROVISIONAL_DAYS))+'</b> ('+OB_PROVISIONAL_DAYS+' days). Runs record and spend counts. Steering, context records, and agent definitions stay off until a main repo is bound.</p>'+
+   '<p class="muted" style="font-size:12.5px;margin:0 0 10px"><b>'+h(w.slug)+' is provisional until '+h(w.provisional?w.provisional.until:obDate(OB_PROVISIONAL_DAYS))+'</b> ('+plural(OB_PROVISIONAL_DAYS,"day")+'). Runs record and spend counts. Steering, context records, and agent definitions stay off until a main repo is bound.</p>'+
    '<button class="btn sm" onclick="obBind()">Bind '+h(w.main)+' now</button></div></div>';
   return '<div class="reg-card ob-repo"><div class="ch"><h3>Repository detected</h3><span class="sp">reported by the installer</span></div><div class="cb">'+
    '<div class="row" style="margin-bottom:6px"><span class="b b-q mono">git@github.com:'+h(w.main)+'.git</span></div>'+
    '<p class="muted" style="font-size:12.5px;margin:0 0 12px">Read from the git remote of <span class="mono">~/src/platform</span>, the directory the installer ran in. Production branch <span class="mono">'+h(w.branch)+'</span>.</p>'+
    '<button class="btn'+(r.first?"":" primary")+'" onclick="obBind()">'+OB_ICON.github+'<span>Bind '+h(w.main)+' as the main repo</span></button>'+
    '<p class="muted" style="font-size:12.5px;margin:12px 0 0">One click installs the GitHub App on <span class="mono">'+h(w.main)+'</span>: repo binding, Context PRs, checks, merge handling and the code graph.</p>'+
-   '<div class="hr"></div><p class="muted" style="font-size:12.5px;margin:0"><button type="button" class="ob-link" style="color:var(--muted)" onclick="obSkip()">Skip for now</button> — '+h(w.slug)+' stays <b>provisional for '+OB_PROVISIONAL_DAYS+' days</b>. Runs record and spend counts, but steering, context records and agent definitions stay off until a main repo is bound.</p></div></div>';
+   '<div class="hr"></div><p class="muted" style="font-size:12.5px;margin:0"><button type="button" class="ob-link" style="color:var(--muted)" onclick="obSkip()">Skip for now</button> — '+h(w.slug)+' stays <b>provisional for '+plural(OB_PROVISIONAL_DAYS,"day")+'</b>. Runs record and spend counts, but steering, context records and agent definitions stay off until a main repo is bound.</p></div></div>';
 }
 function pWelcome(r){
   var step=r.step||"signup";
@@ -13053,7 +13068,7 @@ function asstSheet(){
   return asstHead('')+
    '<div class="asst-b">'+
    '<div class="msg op"><div class="who">'+h(me().name)+'</div><div class="bub">Triage is burning money on tool definitions. Narrow its belt to what it actually used in the last 30 days, and tell me what you changed.</div></div>'+
-   '<div class="msg"><div class="who">'+stellaName()+' <span class="b b-q" style="font-size:9.5px">run_01K5RT9X4M2 · Oxagen’s, not yours</span></div><div class="bub">'+
+   '<div class="msg"><div class="who">'+stellaName()+' <span class="b b-q" style="font-size:9.5px"><span class="id">run_01K5RT9X4M2</span> · assistant run</span></div><div class="bub">'+
    '<p style="margin:0 0 10px">I read the finding and the belt. 34 of the 52 tools on <span class="mono">a-intel.core.triage</span> were never called in 1,340 runs. '+
    'Narrowing the belt is a change to the agent definition, so it is a Context PR, not a write to Postgres. I opened one.</p>'+
    '<div class="act-card"><div class="t"><span class="b b-allowed"><span class="d"></span>action</span><code>open_context_pr</code></div>'+
@@ -13296,7 +13311,7 @@ function cedPaint(){
   var fn=el("cedFindN");
   if(fn)fn.textContent=S.ced.find?(S.ced.matches?(S.ced.cur>=0?cedMatchIndex()+" of ":"")+S.ced.matches:"0"):"";
   var cn=el("cedCount");
-  if(cn)cn.textContent=lines.length+" lines · "+text.length+" chars";
+  if(cn)cn.textContent=plural(lines.length,"line")+" · "+text.length+" chars";
   var dirty=text!==S.cedBase[S.ced.key];
   var dot=el("cedDot"); if(dot){ if(dirty)dot.setAttribute("data-on","1"); else dot.removeAttribute("data-on"); }
   var st=el("cedState"); if(st)st.textContent=dirty?"modified":"unchanged";
@@ -13647,7 +13662,7 @@ DLG_EXT.repo=function(){
   return {t:r.n, s:(r.n===w.main?"main repo":avail?"not linked to this workspace":"linked repo")+" · "+r.lang, w:false,
    b:'<div class="kv"><dt>Production branch</dt><dd><span class="mono">'+h(r.branch)+'</span> at <span class="mono">'+h(r.head)+'</span></dd>'+
      '<dt>Visibility</dt><dd>'+h(r.visibility)+'</dd>'+
-     '<dt>.oxagen/</dt><dd>'+stBadge(st)+(gov?' <span class="dim">· '+r.oxFiles+' files at <span class="mono">'+h(r.oxCommit)+'</span></span>':'')+'</dd>'+
+     '<dt>.oxagen/</dt><dd>'+stBadge(st)+(gov?' <span class="dim">· '+plural(r.oxFiles,"file")+' at <span class="mono">'+h(r.oxCommit)+'</span></span>':'')+'</dd>'+
      '<dt>Issues</dt><dd>'+h(r.issues)+'</dd>'+
      '<dt>Events</dt><dd>'+h(r.events)+'</dd>'+
      '<dt>Code graph</dt><dd>'+(avail?'<span class="dim">not indexed</span>':r.symbols.toLocaleString()+' symbols · indexed '+h(r.indexed))+'</dd>'+
@@ -14190,7 +14205,7 @@ function wzSkResults(){
       '<span class="sx-chip">'+h(s.kind)+'</span>'+
       '<span class="sx-chip">'+s.tokens.toLocaleString()+' tok</span>'+
       '<span class="sx-chip">'+h(s.digest.slice(0,18))+'…</span>'+
-      '<span class="sx-chip">'+s.installs.toLocaleString()+' workspaces</span>'+
+      '<span class="sx-chip">'+plural(s.installs.toLocaleString(),"workspace")+'</span>'+
       (s.cited!=null?'<span class="sx-chip ok">cited on '+skPct(s.cited)+' of loads</span>':'')+
       (s.pinned?'<span class="sx-chip">pinned here at '+h(s.pinned)+'</span>':'')+
      '</div></div>'+
@@ -14628,7 +14643,7 @@ function crecPanel(rec){
      '<p class="eyebrow q" style="margin:0 0 6px">The claim, and how it is checked</p>'+
      '<dl class="kv"><dt>Falsifiable by</dt><dd>anybody who finds a second changelog in this repository, or a <span class="mono">docs/releases</span> that is not generated</dd>'+
      '<dt>valid_from</dt><dd>'+h(rec.pub||"\u2014")+', the merge time of <span class="mono">'+h(rec.commit||"")+'</span></dd>'+
-     '<dt>Last confirmed</dt><dd>'+cited+' runs read it and none contradicted it</dd>'+
+     '<dt>Last confirmed</dt><dd>'+plural(cited,"run")+' read it and none contradicted it</dd>'+
      '<dt>Steers</dt><dd>nothing by itself</dd></dl>'+
      '<div class="note" style="margin-top:12px">A fact that needs to change behaviour is a rule that cites it. Keeping the two apart is what lets a fact go stale without silently turning off a rule.</div>'+
      never+foot;
@@ -14638,7 +14653,7 @@ function crecPanel(rec){
      '<p class="eyebrow q" style="margin:0 0 6px">When it happened</p>'+
      '<dl class="kv"><dt>Recorded</dt><dd>'+h(rec.pub||"\u2014")+'</dd>'+
      '<dt>Explains</dt><dd>what an agent is about to see, so it does not read a known flake as a new regression</dd>'+
-     '<dt>Selection</dt><dd>by relevance, never pinned \u2014 '+cited+' of '+rendered+' runs that carried it actually used it</dd>'+
+     '<dt>Selection</dt><dd>by relevance, never pinned \u2014 '+cited+' of '+plural(rendered,"run")+' that carried it actually used it</dd>'+
      '<dt>Decay</dt><dd>none automatic. A memory that stops being true is archived by a pull request, like everything else.</dd></dl>'+
      never+foot;
   }
@@ -14677,7 +14692,7 @@ function crecSave(rec){
       ["Secret and PII scan","the new statement is scanned"],
       ["Conflict against active records","re-run in full, because the words changed"],
       ["constraint_effect","unchanged \u00b7 <span class=\"mono\">"+h(rec.ce||"absent")+"</span>"]],
-    msg:ws().main+"#528 opened. "+rec.id+" changes when it merges; until then every run still gets the words that are in force now."};
+    msg:ws().main+"#528 opened. "+rec.id+" changes"+" when it merges; until then every run still gets the words that are in force now."};
   openDialog("srcpr");
 }
 DLG_EXT.srcpr=function(){
@@ -15525,7 +15540,7 @@ document.addEventListener("click",function(e){
       var effort=(a.tier==="gateway"||a.tier==="contained")?wpick([["high",44],["medium",34],["low",14],[null,8]]):null;
       genRuns.push({id:id,agent:a.key,op:a.operator,ws:w.slug,status:status,turn:turn,steps:steps,frames:frames,cost:m2(cost),basis:(a.tier==="gateway"||a.tier==="contained")?"gateway_observed":"client_attested",tier:a.tier,effort:effort,prompts:wpick([[1,55],[2,25],[3,12],[4,5],[5,3]]),
         grade:grade,task:tref,taskTitle:task,
-        summary:(status==="live"?"In progress. ":status==="parked"?"Parked on approval. ":status==="halted"?"Halted before completion. ":"")+a.name+" worked "+task.toLowerCase()+" in "+steps+" steps over "+turn+" turn"+(turn===1?"":"s")+".",
+        summary:(status==="live"?"In progress. ":status==="parked"?"Parked on approval. ":status==="halted"?"Halted before completion. ":"")+a.name+" worked "+task.toLowerCase()+" in "+plural(steps,"step")+" over "+turn+" turn"+(turn===1?"":"s")+".",
         touched:[tref,pick(TOUCH).replace(/\{x\}/g,pick(["billing","export","worker","notes","retry","schema","auth","cache"])).replace(/\{n\}/,String(ri(100,240)))],
         gen:{model:"claude-haiku-4-5",when:sealedAt?"at seal "+sealedAt:"turn "+turn+" · regenerated at each turn boundary",frames:frames},
         started:when(d,sec,true),model:model,cache:Math.round(rf(0.55,0.94)*100)/100,ratio:ratio,sealed:sealedAt,_d:d,_s:sec});
@@ -15564,7 +15579,7 @@ document.addEventListener("click",function(e){
     RECEIPTS.push({id:"rcp_01K"+ulid(9),at:ds+" "+tm+"."+pad(ri(0,99))+ri(0,9)+"Z",agent:a.key,operator:PEOPLE[a.operator].name,tool:t.n+"@"+t.v,decision:dec,tier:a.tier,
       effect:eff,amount:finT?"$"+mc(amt)+" USD":"—",ws:r.ws,runId:r.id,
       who:[["Operator",PEOPLE[a.operator].name+" · usr_01K"+ulid(5)+" · "+PEOPLE[a.operator].role.split(" · ")[0]],["Agent",a.key+" · prn_01K"+ulid(4),1],["Run · turn · step",r.id+" · "+ri(1,r.turn)+" · "+ri(1,r.steps),1],["Task",r.task+" · "+r.taskTitle]],
-      what:[["Tool version",t.n+"@"+t.v,1],["Schema digest","sha256:"+hex(16),1],["Input digest","sha256:"+hex(16),1]].concat(finT?[["Amount ($.amount)",Math.round(amt*1e6)+" micro-USD → $"+mc(amt)+" USD"],["Counterparty",t.fin==="moves_funds"?"customer:cus_"+ulid(6):"vendor:aws",1]]:[]).concat([["Input","retained in full · content_exact · "+ri(1,6)+" fields"]]),
+      what:[["Tool version",t.n+"@"+t.v,1],["Schema digest","sha256:"+hex(16),1],["Input digest","sha256:"+hex(16),1]].concat(finT?[["Amount ($.amount)",Math.round(amt*1e6)+" micro-USD → $"+mc(amt)+" USD"],["Counterparty",t.fin==="moves_funds"?"customer:cus_"+ulid(6):"vendor:aws",1]]:[]).concat([["Input","retained in full · content_exact · "+plural(ri(1,6),"field")]]),
       authority:[["Decision",dec==="deny"?"denied · rule rg_0"+ri(80,140):dec==="approve"?"approved by "+PEOPLE[WSX[r.ws].owner].name+" · apr_01K5R"+ulid(4):"allowed · rule rg_0"+ri(80,140)+" · "+ri(3,14)+" ms"],["Policy","pol_v41",1],["Belt",a.key+" · "+a.belt+" tool versions · "+a.beltMode],["Taint",rnd()<0.9?"untainted":"tainted · raised to approval"]],
       credential:dec==="deny"?[["Grant","none — the call never dispatched"]]:[["Grant","cg_01K5R"+ulid(4)+" · "+t.cred,1],["TTL","5 minutes · single use"],["Scope",t.s+" · "+(t.eg==="internal"?"internal":"third party")]],
       effectRows:dec==="deny"?[["External effect","none"]]:[["External effect",eff,1],["Dispatched",ds+" "+tm+"Z"],["Latency",ri(80,2400)+" ms"]],
@@ -15587,7 +15602,7 @@ document.addEventListener("click",function(e){
     switch(ev){
       case "approval.requested": return t.n+"@"+t.v+" on "+pick(REPOS).n;
       case "approval.resolved": return pick(["approved","denied","expired"])+" · apr_01K5R"+ulid(4)+" · "+t.n+"@"+t.v;
-      case "run.sealed": return r.frames+" frames · "+tokn(runMetrics(r).tokTotal)+" tokens · "+r.task;
+      case "run.sealed": return plural(r.frames,"frame")+" · "+tokn(runMetrics(r).tokTotal)+" tokens · "+r.task;
       case "run.halted": return pick(["kill switch · server slack","budget reached at turn "+r.turn,"operator pause","hooks_removed"])+" · "+r.task;
       case "tool_call.denied": return t.n+"@"+t.v+" · "+pick(["outside the belt","tainted argument","mandate ceiling","kill switch"]);
       case "budget.breached": return "$"+m2(rf(0.4,3))+" per run reached at turn "+r.turn+" · paused at the next hook boundary";
@@ -15604,7 +15619,7 @@ document.addEventListener("click",function(e){
       case "export.created": return "exp_01K5R"+ulid(4)+" · "+pick(["receipt export","evidence bundle"])+" · "+pick(allWs);
       case "export.downloaded": return "exp_01K5R"+ulid(4)+" · signature verified";
       case "steering_published": return pick(RECORDS).id+" · "+pick(REPOS).n+"#"+ri(300,1900)+" merged";
-      case "context_pr.opened": return pick(REPOS).n+"#"+ri(300,1900)+" · proposed by the promoter · "+ri(3,40)+" runs in support";
+      case "context_pr.opened": return pick(REPOS).n+"#"+ri(300,1900)+" · proposed by the promoter · "+plural(ri(3,40),"run")+" in support";
       case "kill_switch.flipped": return pick(["tool version "+t.n+"@"+t.v,"agent "+r.agent,"provider kubernetes"])+" · "+pick(["schema regression","runaway retries","operator request"]);
       case "kill_switch.cleared": return "provider kubernetes · schema approved";
       case "schema.proposed": return t.n+"@"+t.v+" · output schema observed, not declared";
@@ -15674,7 +15689,7 @@ document.addEventListener("click",function(e){
   for(var ei=0;ei<9;ei++){
     var r=pick(genRuns), m=pick(["July 2026","August 2026","June 2026","Q2 2026"]), what=pick(EXP_WHAT).replace("{m}",m).replace("{ws}",r.ws).replace("{agent}",r.agent), d=ri(1,70);
     EXPORTS.push({id:"exp_01K"+ulid(6),what:what,range:m.indexOf("Q2")===0?"2026-04-01 → 2026-06-30":m.indexOf("June")===0?"2026-06-01 → 2026-06-30":m.indexOf("July")===0?"2026-07-01 → 2026-07-31":"2026-08-01 → 2026-08-31",
-      runs:/Receipt|Audit|Spend/.test(what)?ic(ri(2000,90000))+" "+(/Audit/.test(what)?"events":/Spend/.test(what)?"cost records":"receipts"):ic(ri(400,6000))+" runs · "+ri(8,140)+" archive segments · "+ic(ri(40000,1400000))+" frames",
+      runs:/Receipt|Audit|Spend/.test(what)?ic(ri(2000,90000))+" "+(/Audit/.test(what)?"events":/Spend/.test(what)?"cost records":"receipts"):plural(ic(ri(400,6000)),"run")+" · "+ri(8,140)+" archive segments · "+plural(ic(ri(40000,1400000)),"frame"),
       size:/bundle/.test(what)?(rf(0.4,6.2)).toFixed(1)+" GB":ri(8,410)+" MB",at:stamp(d,daySec(d)),by:pick(["Sofia Ruiz","Dana Okafor","Priya Natarajan",pick(humans)]),st:rnd()<0.9?"ready":"expired",sig:"ed25519:"+ulid(6)+"…"+hex(4),keys:"kek_aintel_2026Q"+ri(2,3)});
   }
   var KEYN=[["Data platform exports","svc_data_export",["cost.read","run.read","export.create"]],["Grafana read-only","svc_grafana",["run.read","frame.read"]],["Support console","svc_support_console",["run.read","receipt.read"]],["Security SIEM feed","svc_siem",["audit.read","receipt.read"]],
@@ -15683,7 +15698,7 @@ document.addEventListener("click",function(e){
   for(var vi=0;vi<11;vi++){var f=pick(FIRST).toLowerCase(),s=ri(0,6);INVITES.push({email:f+"."+pick(LAST).toLowerCase().replace(/[^a-z]/g,"")+"@a-intel.example",role:pick(["workspace.member · "+pick(allWs),"org.auditor","workspace.owner · "+pick(allWs)]),by:pick(humans),sent:dstr(TODAY-s*86400000),expires:dstr(TODAY+(7-s)*86400000)});}
   if(parked.length)NOTIFS.push({kind:"approval.requested",tone:"approval",unread:true,t:"15:41",title:"Approval waiting · kubernetes__delete_pod@2",body:"a-intel.infra.k8s-doctor on "+parked[0].id+" wants to delete a crash-looping pod in prod-east. Rule role_grant rg_0121. Expires 15:51."});
   NOTIFS.push(
-    {kind:"run.sealed",tone:"allowed",unread:false,t:"15:30",title:"Run sealed · "+genRuns[3].id,body:genRuns[3].task+" sealed: "+genRuns[3].frames+" frames, "+usd(genRuns[3].cost)+" "+genRuns[3].basis+"."},
+    {kind:"run.sealed",tone:"allowed",unread:false,t:"15:30",title:"Run sealed · "+genRuns[3].id,body:genRuns[3].task+" sealed: "+plural(genRuns[3].frames,"frame")+", "+usd(genRuns[3].cost)+" "+genRuns[3].basis+"."},
     {kind:"budget.breached",tone:"failed",unread:false,t:"14:52",title:"Hard budget reached · "+fin[0].key,body:"$1.50 per run reached at turn 5. The run was paused at the next hook boundary."},
     {kind:"repository.indexed",tone:"allowed",unread:false,t:"14:20",title:"Code graph current · a-intel/data-platform",body:"Push "+hex(7)+" to main indexed in 58 s. 41 files re-parsed, 190 symbols versioned."},
     {kind:"context_pr.opened",tone:"gold",unread:false,t:"11:48",title:"Context PR opened · a-intel/support-console#188",body:"The promoter proposed a rule on lineage ctx.support.reply-in-customers-language, supported by 212 tickets."});
@@ -15728,10 +15743,10 @@ document.addEventListener("click",function(e){
   BILLING.meters=[{m:"Governed actions",v:ic(SPEND.actions),note:"the billable unit · "+ic(included)+" included this month"},{m:"Sealed runs with at least one model call",v:ic(runsTot),note:"reported, not priced"},{m:"Retained evidence",v:(spendTot/420).toFixed(1)+" GB",note:"13 months included"},
     {m:"Runs Oxagen halted before any model call",v:ic(Math.round(runsTot*0.009)),note:"free"},{m:"Runs of the in-app agent",v:ic(Math.round(runsTot*0.03)),note:"free"}];
   SWITCHES.forEach(function(s){
-    if(s.id==="ks_org")s.stops=AGENTS.length+" agents · "+ic(TOOLS.length)+" tool versions";
-    if(s.id==="ks_ws")s.stops=(WS[0].agents-7)+" agents · "+ic(Math.round(TOOLS.length*0.38))+" tool versions";
-    if(s.id==="ks_cls_irrev")s.stops=TOOLS.filter(function(t){return t.eff==="irreversible";}).length+" tool versions · "+Math.round(AGENTS.length*0.48)+" agents · "+RUNS.filter(function(r){return r.status==="live";}).length+" runs in flight";
-    if(s.id==="ks_cls_egress")s.stops=TOOLS.filter(function(t){return t.eg==="third_party";}).length+" tool versions · "+Math.round(AGENTS.length*0.9)+" agents · "+RUNS.filter(function(r){return r.status==="live"||r.status==="parked";}).length+" runs in flight";
+    if(s.id==="ks_org")s.stops=plural(AGENTS.length,"agent")+" · "+ic(TOOLS.length)+" tool versions";
+    if(s.id==="ks_ws")s.stops=plural((WS[0].agents-7),"agent")+" · "+ic(Math.round(TOOLS.length*0.38))+" tool versions";
+    if(s.id==="ks_cls_irrev")s.stops=TOOLS.filter(function(t){return t.eff==="irreversible";}).length+" tool versions · "+plural(Math.round(AGENTS.length*0.48),"agent")+" · "+plural(RUNS.filter(function(r){return r.status==="live";}).length,"run")+" in flight";
+    if(s.id==="ks_cls_egress")s.stops=TOOLS.filter(function(t){return t.eg==="third_party";}).length+" tool versions · "+plural(Math.round(AGENTS.length*0.9),"agent")+" · "+plural(RUNS.filter(function(r){return r.status==="live"||r.status==="parked";}).length,"run")+" in flight";
   });
   /* ---------- spend findings ----------
      One finding per real waste pattern the frames would show, spread across tools, agents,
@@ -15782,31 +15797,31 @@ document.addEventListener("click",function(e){
     var users=AGENTS.filter(function(a){return a.belt>10;}), a=pick(users);
     var kind=t.eff==="read"?pick(["Unpaged results","Refetching a stable list"]):"Repeated shell commands";
     pushFinding(kind,"tool",t.n,skew(120,4200,1.9),a.key,a.operator,
-      ic(Math.round(t.calls30*rf(0.2,0.9)))+" runs · "+ic(t.calls30)+" tool calls",
+      plural(ic(Math.round(t.calls30*rf(0.2,0.9))),"run")+" · "+ic(t.calls30)+" tool calls",
       ic(ri(9000,52000))+" tok",ic(ri(400,3200))+" tok (grouped)",
-      "Across "+ic(t.calls30)+" calls in 30 days the result body averaged "+ic(ri(9,48))+"k tokens and re-entered the context on every later turn of the run.");
+      "Across "+plural(ic(t.calls30),"call")+" in 30 days the result body averaged "+ic(ri(9,48))+"k tokens and re-entered the context on every later turn of the run.");
   });
   fndAgents.slice(0,14).forEach(function(a,k){
     var kind=["Tool-list bloat","Duplicate tool calls","Wrong tier","Unproductive tail"][k%4];
     pushFinding(kind,"agent",a.key,skew(40,2600,2.0),a.key,a.operator,
-      ic(a.runs30)+" runs · "+ic(Math.round(a.runs30*rf(3,11)))+" model calls",
-      kind==="Tool-list bloat"?ic(ri(3000,12000))+" tok":kind==="Wrong tier"?ri(8,31)+"%":ri(3,14)+" steps",
+      plural(ic(a.runs30),"run")+" · "+ic(Math.round(a.runs30*rf(3,11)))+" model calls",
+      kind==="Tool-list bloat"?ic(ri(3000,12000))+" tok":kind==="Wrong tier"?ri(8,31)+"%":plural(ri(3,14),"step"),
       kind==="Tool-list bloat"?ic(ri(600,2400))+" tok":kind==="Wrong tier"?"0%":"1 step",
-      kind==="Tool-list bloat"?("tool_definition_tokens averages "+ic(ri(3000,12000))+" per model call; "+ri(Math.max(1,Math.round(a.belt*0.45)),Math.max(2,a.belt-2))+" of the "+a.belt+" tools on the belt were never called in "+ic(a.runs30)+" runs.")
-      :kind==="Duplicate tool calls"?("The same read was issued with an identical input digest "+rf(1.8,4.6).toFixed(1)+" times per run on average across "+ic(a.runs30)+" runs.")
+      kind==="Tool-list bloat"?("tool_definition_tokens averages "+ic(ri(3000,12000))+" per model call; "+ri(Math.max(1,Math.round(a.belt*0.45)),Math.max(2,a.belt-2))+" of the "+plural(a.belt,"tool")+" on the belt were never called in "+plural(ic(a.runs30),"run")+".")
+      :kind==="Duplicate tool calls"?("The same read was issued with an identical input digest "+rf(1.8,4.6).toFixed(1)+" times per run on average across "+plural(ic(a.runs30),"run")+".")
       :kind==="Wrong tier"?(ri(78,96)+"% of this agent's steps are classification-shaped, but "+ri(8,31)+"% of its model calls went to a flagship model after a retry.")
-      :("On "+ic(Math.round(a.runs30*rf(0.2,0.7)))+" of "+ic(a.runs30)+" runs, more than six steps followed the last step that produced a kept side effect."));
+      :("On "+ic(Math.round(a.runs30*rf(0.2,0.7)))+" of "+plural(ic(a.runs30),"run")+", more than six steps followed the last step that produced a kept side effect."));
   });
   ops.slice(0,4).forEach(function(o){
     pushFinding("Cache writes never read","operator",PEOPLE[o.p].name,skew(20,420,1.8),o.list[0].key,o.p,
-      ic(Math.round(o.runs*0.04))+" runs","cache_write_5m on the final turn","no read inside the TTL",
+      plural(ic(Math.round(o.runs*0.04)),"run"),"cache_write_5m on the final turn","no read inside the TTL",
       "cache_write_5m on the last turn of "+ic(Math.round(o.runs*0.04))+" one-turn runs; nothing read the prefix inside the TTL.");
   });
   WS.slice(2,6).forEach(function(w){
     var a=perWsAgents[w.slug][0];
     pushFinding("Cache misses after a stable prefix changed","workspace",w.slug,skew(30,900,1.7),a.key,a.operator,
-      ic(ri(120,2400))+" runs · "+ic(ri(900,9000))+" model calls",ri(48,72)+"%",ri(84,94)+"%",
-      "Publishing a steering record mid-day changed the system-context digest on "+ic(ri(120,2400))+" runs in "+w.name+"; cache_read fell for two days before it settled.");
+      plural(ic(ri(120,2400)),"run")+" · "+ic(ri(900,9000))+" model calls",ri(48,72)+"%",ri(84,94)+"%",
+      "Publishing a steering record mid-day changed the system-context digest on "+plural(ic(ri(120,2400)),"run")+" in "+w.name+"; cache_read fell for two days before it settled.");
   });
   made.sort(function(a,b){return num$(b.save)-num$(a.save);}).forEach(function(f){FINDINGS.push(f);});
   FINDINGS.sort(function(a,b){return num$(b.save)-num$(a.save);});
@@ -16241,7 +16256,7 @@ function tkDraftNow(id){
   setTimeout(function(){
     var d=TK_DRAFTS[id]||{dod:[{t:"The change the task asks for is made",k:"check",tag:"code",src:"assistant"}],notes:[]};
     t.dod=d.dod.map(function(x){return Object.assign({},x);}); t.notes=d.notes.slice(); t.ready="draft"; delete S.tkDrafting[id];
-    render(); act("oxagen.assistant drafted "+t.dod.length+" items for "+t.num+". Read them, then certify.","gold");
+    render(); act("oxagen.assistant drafted "+plural(t.dod.length,"item")+" for "+t.num+". Read them, then certify.","gold");
   },900);
 }
 function tkEditable(t){return t.ready==="draft"||t.ready==="changed"||t.ready==="drafting";}
@@ -16255,14 +16270,14 @@ function dodCertify(id){
   t.ready="ready"; t.certifiedBy=TK_ME; t.certifiedAt="2026-09-11 09:16"; t.digest="sha256:"+(t.id.slice(-6)+"7c1e04b9d2").toLowerCase();
   delete t.was; closeDialog();
   var p=wsProviders().filter(function(x){return x.kind===t.kind;})[0];
-  act("Certified. certify_task_dod recorded with the digest of "+t.dod.length+" items"+(p&&p.writeback.certify?", and the list posted as a comment on "+t.num:"")+".","gold");
+  act("Certified. certify_task_dod recorded with the digest of "+plural(t.dod.length,"item")+(p&&p.writeback.certify?", and the list posted as a comment on "+t.num:"")+".","gold");
 }
 DLG_EXT.certify=function(id){
   var t=taskById(id); if(!t)return noSuch("Task");
   var p=wsProviders().filter(function(x){return x.kind===t.kind;})[0], w=ws();
   return {t:"Certify the definition of done",s:t.num+" "+t.subject,w:true,
    b:'<ol class="dod-ro">'+t.dod.map(function(d){return '<li><span>'+h(d.t)+'</span> '+tagChip(d.tag)+' <span class="tg">'+h(d.k)+'</span></li>';}).join("")+'</ol>'+
-    '<div class="note" style="margin:14px 0">Certifying records <span class="mono">certify_task_dod</span> with your name, the digest of these '+t.dod.length+' items, and the version of the task in '+h(IP_KIND[t.kind].l)+' they were read against. If the task changes upstream, the certification is marked changed and the task leaves ready.</div>'+
+    '<div class="note" style="margin:14px 0">Certifying records <span class="mono">certify_task_dod</span> with your name, the digest of these '+plural(t.dod.length,"item")+', and the version of the task in '+h(IP_KIND[t.kind].l)+' they were read against. If the task changes upstream, the certification is marked changed and the task leaves ready.</div>'+
     (p&&p.writeback.certify?'<div class="note" style="margin-bottom:14px">Oxagen posts the list as a comment on '+h(t.num)+', because the '+h(IP_KIND[t.kind].l)+' connection allows it.</div>':'')+
     (w.governance==="regulated"?'<div class="warn" style="margin-bottom:14px"><b>Regulated workspace.</b> The person who certifies cannot send this task in a work order.</div>':'')+
     '<label class="check"><input type="checkbox" id="certOk" onchange="var b=el(\'certBtn\');if(b)b.disabled=!this.checked"><span class="grow"><span class="n">I read every item</span><span class="d">These items are what done means for this task.</span></span></label>',
@@ -16324,7 +16339,7 @@ function pTask(r){
   if(t.ready==="changed") hist.push(["Changed upstream",t.updatedAt,"left ready"]);
   if(t.wo){var wo=woById(t.wo); if(wo)hist.push(["Sent in a work order",wo.sent,wo.id]); if(wo&&wo.accepted)hist.push(["Accepted",wo.accepted,PEOPLE[wo.by].name]);}
   var res=t.resolution?tRes(t.resolution):null;
-  return '<div class="phead"><div class="t"><p class="eyebrow">'+ipLogo(t.kind,13)+' '+h(t.num)+'</p><h1>'+h(t.subject)+'</h1>'+
+  return '<div class="phead"><div class="t"><p class="eyebrow">'+ipLogo(t.kind,13)+' <span class="id">'+h(t.num)+'</span></p><h1>'+h(t.subject)+'</h1>'+
    '<p>Imported from '+h(k.l)+'. Updated '+h(t.updatedAt)+'.</p></div>'+
    '<div class="acts"><a class="btn" href="'+h(providerUrl(t))+'" target="_blank" rel="noopener">Open in '+h(k.l)+'</a>'+prim+'</div></div>'+
    changedBanner+
@@ -16374,7 +16389,7 @@ DLG_EXT.woaccept=function(id){
   var w=woById(id); if(!w)return noSuch("Work order");
   var items=woItems(w);
   return {t:"Accept the work",s:w.title,w:false,
-   b:'<p>You accept '+items.length+' items the agents claimed, with the evidence each one cited.</p>'+
+   b:'<p>You accept '+plural(items.length,"item")+' the agents claimed, with the evidence each one cited.</p>'+
     '<div class="note" style="margin:12px 0">Accepting records <span class="mono">accept_work_order</span> with your name. It does not merge anything. The pull request '+h((w.runs[w.runs.length-1]||{}).pr||"")+' is merged by a person on GitHub.</div>'+
     '<div class="note">The GitHub connection has close on accept off, so the task stays open there until somebody closes it.</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="woAccept(\''+w.id+'\')">Accept every item</button>'};
@@ -16406,7 +16421,7 @@ function pWorkOrder(r){
   var stSub=function(i,s){
     var rs=w.runs.filter(function(x){return x.stage===i+1;}), lr=rs[rs.length-1];
     if(!lr)return '<span class="dim">waiting</span>';
-    return (lr.state==="live"?'<span class="b b-allowed"><span class="d"></span>live</span> ':'<span class="b b-q">sealed</span> ')+runLink(lr.run)+(rs.length>1?' <span class="dim">'+rs.length+' runs</span>':'');
+    return (lr.state==="live"?'<span class="b b-allowed"><span class="d"></span>live</span> ':'<span class="b b-q">sealed</span> ')+runLink(lr.run)+(rs.length>1?' <span class="dim">'+plural(rs.length,"run")+'</span>':'');
   };
   var rows=items.map(function(it,i){
     var c=(w.claims||[])[i], owner=woOwner(wf,it.tag);
@@ -16416,7 +16431,7 @@ function pWorkOrder(r){
      '<td>'+(c&&c.ok?'<span class="b b-allowed"><span class="d"></span>accepted</span>':c?'<span class="b b-approval"><span class="d"></span>claimed</span>':'<span class="b b-q"><span class="d"></span>open</span>')+'</td>'+
      '<td style="font-size:12px">'+(c?h(c.ev)+'<div class="dim mono" style="font-size:11px">'+h((agent(c.by)||{}).name||c.by)+' '+h(c.run)+'</div>':'<span class="dim">\u2014</span>')+'</td></tr>';}).join("");
   var tgt=w.target.kind==="workflow"?'the '+(wfById(w.target.id)||{}).name+' workflow':(a?a.name:w.target.id);
-  return '<div class="phead"><div class="t"><p class="eyebrow mono">'+h(w.id)+'</p><h1>'+h(w.title)+'</h1>'+
+  return '<div class="phead"><div class="t"><p class="eyebrow mono id">'+h(w.id)+'</p><h1>'+h(w.title)+'</h1>'+
    '<p>Sent by '+h(PEOPLE[w.by].name)+' on '+h(w.sent)+' to '+h(tgt)+'.</p></div>'+
    '<div class="acts">'+(w.status!=="accepted"&&w.status!=="stopped"?'<button class="btn danger" onclick="openDialog(\'wostop\',\''+w.id+'\')">Stop the work order</button>':'')+
    '<button class="btn'+(canAccept?' primary':'')+'"'+(canAccept?'':' disabled title="Every item must be claimed first"')+' onclick="openDialog(\'woaccept\',\''+w.id+'\')">Accept the work</button></div></div>'+
@@ -16428,7 +16443,7 @@ function pWorkOrder(r){
    '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Stages</h3></div><div class="panel-b">'+stageChain(wf,{state:stState,sub:stSub})+'</div></div>'+
    '<div class="split23"><div>'+
     '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Definition of done</h3>'+
-     '<p class="muted" style="margin:2px 0 0;font-size:12px">'+items.length+' items from '+w.tasks.length+' task'+(w.tasks.length>1?'s':'')+'.</p></div></div>'+
+     '<p class="muted" style="margin:2px 0 0;font-size:12px">'+plural(items.length,"item")+' from '+w.tasks.length+' task'+(w.tasks.length>1?'s':'')+'.</p></div></div>'+
      '<div class="tw"><table data-lt="off"><thead><tr><th>Item</th><th>Task</th><th>Stage</th><th>State</th><th>Evidence</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>'+
     '<div class="panel"><div class="panel-h"><h3>Handoffs</h3></div><div class="panel-b"><ol class="tk-hist">'+w.runs.map(function(x){
       return '<li><b>'+h(wf.stages[x.stage-1].role)+(x.returned?' returned the work':'')+'</b><span>'+runLink(x.run)+'</span><span class="dim">'+(x.note?h(x.note):'running')+'</span></li>';}).join("")+'</ol>'+
@@ -16565,7 +16580,7 @@ function woSend(){
   var id="wo_01K6TF"+String(3+WORKORDERS.length)+"Q";
   var tasks=z.tasks.map(taskById).filter(Boolean);
   var agents=woAgentsOf(z.target);
-  WORKORDERS.unshift({id:id,ws:S.ws,title:tasks.length===1?tasks[0].subject:tasks.length+" tasks: "+tasks.map(function(t){return t.num.replace(/^a-intel\/platform/,"");}).join(", "),
+  WORKORDERS.unshift({id:id,ws:S.ws,title:tasks.length===1?tasks[0].subject:plural(tasks.length,"task")+": "+tasks.map(function(t){return t.num.replace(/^a-intel\/platform/,"");}).join(", "),
     tasks:z.tasks.slice(),target:z.target,by:TK_ME,sent:"2026-09-11 09:17",status:"sent",stage:1,returns:0,repos:woRepoList(),
     digest:"sha256:"+id.slice(-8).toLowerCase()+"e1a9c04d",prompt:z.prompt,extra:z.extra.slice(),runs:[],claims:[]});
   tasks.forEach(function(t){t.ready="sent";t.wo=id;delete S.tsel[t.id];});
@@ -16590,7 +16605,7 @@ DLG_EXT.wo=function(){
      '<div class="hint">Each task is tagged to this work order, and each shows it on its own page.</div></section>'+
    '<section class="wo-sec"><h4>Sent to</h4><div class="field" style="margin-bottom:10px"><select aria-label="Sent to" onchange="woSetTarget(this.value)">'+opts+'</select>'+
      '<div class="hint">Agents where you are the registered operator, and the published workflows made of them.</div></div>'+who+'</section>'+
-   '<section class="wo-sec"><h4>Definition of done</h4><p class="hint" style="margin:0 0 8px">'+items.length+' items from '+z.tasks.length+' task'+(z.tasks.length>1?'s':'')+'. Certified items are read-only here.</p>'+
+   '<section class="wo-sec"><h4>Definition of done</h4><p class="hint" style="margin:0 0 8px">'+plural(items.length,"item")+' from '+z.tasks.length+' task'+(z.tasks.length>1?'s':'')+'. Certified items are read-only here.</p>'+
      '<ol class="dod-list">'+items.map(function(it,i){var ow=woOwner(wf,it.tag);
        return '<li class="dod-i"><span class="n">'+(i+1)+'</span><div class="tx"><span>'+h(it.t)+'</span><div class="meta">'+tagChip(it.tag)+
         it.from.map(function(id){var t=taskById(id);return '<span class="tg">'+ipLogo(t.kind,10)+' '+h(t.num.replace(/^a-intel\/platform/,""))+'</span>';}).join("")+
@@ -16608,7 +16623,7 @@ DLG_EXT.wo=function(){
        return '<label class="check'+(ok?'':' off')+'" style="margin-bottom:8px"><input type="checkbox"'+(on?' checked':'')+(ok?'':' disabled')+' onchange="woRepo(\''+h(r.n)+'\',this.checked)">'+
         '<span class="grow"><span class="n">'+h(r.n)+'</span><span class="d">'+(r.role==="main"?'main repo':'linked repo')+' · production branch '+h(r.branch)+(ok?'':' · outside '+h(first.name)+'’s toolbelt')+'</span></span></label>';}).join("")+
      '<label class="check" style="border-color:color-mix(in srgb,var(--gold) 40%,var(--border))"><input type="checkbox" id="woOk"'+(z.confirm?' checked':'')+(nrep?'':' disabled')+' onchange="woConfirm(this.checked)">'+
-      '<span class="grow"><span class="n">I confirm the repositories</span><span class="d">'+h(agents.map(function(a){return a.name;}).join(", "))+' may push branches and open pull requests on '+(nrep===1?woRepoList()[0]:nrep+' repositories')+'. Nothing is merged without a person.</span></span></label></section>'+
+      '<span class="grow"><span class="n">I confirm the repositories</span><span class="d">'+h(agents.map(function(a){return a.name;}).join(", "))+' may push branches and open pull requests on '+(nrep===1?woRepoList()[0]:plural(nrep,"repository","repositories"))+'. Nothing is merged without a person.</span></span></label></section>'+
    '<section class="wo-sec"><h4>Spend cap</h4><div class="field" style="margin:0;max-width:220px"><input value="'+h(z.cap)+'" aria-label="Spend cap in US dollars" inputmode="decimal" onchange="S.wo.cap=this.value"></div>'+
      '<div class="hint">USD for the whole work order, every stage and every return. Each run also stays inside its own agent’s budget of $'+h(first.budget||"2.00")+' per run.</div>'+(agents.some(function(a){return a.harness==="cursor";})?'<div class="warn" style="margin-top:8px"><b>Cursor is not metered.</b> Cursor\u2019s model calls do not pass through the Oxagen gateway, so the cap counts every stage but that one.</div>':'')+'</section>';
   return {t:"Work order",s:z.tasks.length+" task"+(z.tasks.length>1?"s":"")+" to "+woTargetName(z.target),w:true,b:b,
@@ -16702,7 +16717,7 @@ function ipzBody(){
         return '<label class="check" style="margin-bottom:8px"><input type="checkbox"'+(z.scope[s[0]]?' checked':'')+' onchange="S.ipz.scope[\''+h(s[0])+'\']=this.checked;render()"><span class="grow"><span class="n">'+h(s[0])+'</span><span class="d">'+h(s[1])+'</span></span></label>';}).join("")+'</div>'+
       '<div class="field"><label for="ipzFilter">Import</label><select id="ipzFilter" onchange="S.ipz.filter=this.value">'+
        ["open issues, and issues closed in the last 30 days","open issues only","every issue"].map(function(o){return '<option'+(o===z.filter?' selected':'')+'>'+h(o)+'</option>';}).join("")+'</select>'+
-       '<div class="hint">About '+Math.round(d.est*n/Math.max(1,d.scope.filter(function(s){return s[2];}).length))+' tasks on the first read. oxagen.assistant drafts a definition of done for each open one.</div></div>'+
+       '<div class="hint">About '+plural(Math.round(d.est*n/Math.max(1,d.scope.filter(function(s){return s[2];}).length)),"task")+' on the first read. oxagen.assistant drafts a definition of done for each open one.</div></div>'+
       (k==="jira"?'<div class="field"><label for="ipzJql">JQL filter</label><input id="ipzJql" class="mono" placeholder="labels != wontfix" aria-label="JQL filter"><div class="hint">Optional. Narrows what the chosen projects import.</div></div>':''),
      f:'<button class="btn" onclick="ipzGo('+(z.edit?'':'2')+')"'+(z.edit?' disabled':'')+'>Back</button><button class="btn primary"'+(n?'':' disabled')+' onclick="ipzGo(4)">Next</button>'};
   }
@@ -16771,7 +16786,7 @@ DLG_EXT.ipoff=function(id){
   var m=IP_KIND[p.kind], n=wsTasks().filter(function(t){return t.kind===p.kind;}).length;
   return {t:"Disconnect "+m.l+"?",w:false,
    b:'<p>Oxagen stops reading '+h(m.l)+' and revokes its token there. The token is deleted from the credential store.</p>'+
-    '<div class="note" style="margin:12px 0">The '+n+' tasks it imported stay, with the values last read and marked disconnected. Their certified definitions of done, and every work order already sent, are unchanged.</div>'+
+    '<div class="note" style="margin:12px 0">The '+plural(n,"task")+' it imported stay, with the values last read and marked disconnected. Their certified definitions of done, and every work order already sent, are unchanged.</div>'+
     '<div class="note">Connecting '+h(m.l)+' again reads the same tasks back into the same task ids.</div>',
    f:'<button class="btn" onclick="closeDialog()">Keep it connected</button><button class="btn danger" onclick="ipOff(\''+p.id+'\')">Disconnect it</button>'};
 };
