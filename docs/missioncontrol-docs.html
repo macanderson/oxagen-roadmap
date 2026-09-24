@@ -8935,18 +8935,19 @@ version lands in the registry callable by nobody until a role grant puts it on a
 <header class="mast">
   <p class="eyebrow">Oxagen · Specification</p>
   <h1>Tasks and work orders</h1>
-  <dl class="facts"><dt>Status</dt><dd>Spec v1, for design review. No code is written against it yet.</dd><dt>Date</dt><dd>2026-09-23</dd><dt>Owner</dt><dd>Mac Anderson</dd><dt>Source</dt><dd><code>mockups/src/engine.js</code> (the Tasks section: <code>pTasks</code>, <code>pTask</code>, <code>pWorkOrder</code>, <code>DLG_EXT.ipwz</code>, <code>DLG_EXT.wo</code>, <code>DLG_EXT.certify</code>, <code>DLG_EXT.wfnew</code>), <code>mockups/fixtures/tasks.json</code>, rendered in <code>mockups/missioncontrol.html</code></dd><dt>Builds on</dt><dd>ADR-043 (Oxagen governs agents, it does not run them), ADR-096 (the launcher may contain the process), ADR-101 (four first-class harnesses), ADR-157 (ARP carries an operator-authored brief), ADR-053 (the assistant), ADR-052 (the governed action is the billable unit)</dd><dt>Related</dt><dd><code>creation-spec.md</code> (every definition is a file, and a wizard ends on a pull request), <code>dod-spec.md</code> (the run dod, a different object), <code>mission-control-spec.md</code> §1 (the operator), §7.6 (agent messages are quoted evidence), §11.2 (connectors)</dd><dt>Pages</dt><dd><code>mockups/pages/tasks.md</code>, <code>tasks-providers.md</code>, <code>task.md</code>, <code>work-order.md</code>, each with its audit prompt</dd><dt>Check</dt><dd><code>node tools/check-tasks.mjs</code> walks every flow below in the built mockup</dd></dl>
+  <dl class="facts"><dt>Status</dt><dd>Spec v1, for design review. No code is written against it yet.</dd><dt>Date</dt><dd>2026-09-24</dd><dt>Owner</dt><dd>Mac Anderson</dd><dt>Source</dt><dd><code>mockups/src/engine.js</code> (the Tasks section: <code>pTasks</code>, <code>pTask</code>, <code>pWorkOrder</code>, <code>DLG_EXT.ipwz</code>, <code>DLG_EXT.wo</code>, <code>DLG_EXT.certify</code>, <code>DLG_EXT.wfnew</code>), <code>mockups/fixtures/tasks.json</code>, rendered in <code>mockups/missioncontrol.html</code></dd><dt>Builds on</dt><dd>ADR-043 (Oxagen governs agents, it does not run them), ADR-096 (the launcher may contain the process), ADR-101 (four first-class harnesses), ADR-157 (ARP carries an operator-authored brief), ADR-053 (the assistant), ADR-052 (the governed action is the billable unit)</dd><dt>Related</dt><dd><code>creation-spec.md</code> (every definition is a file, and a wizard ends on a pull request), <code>dod-spec.md</code> (the run dod, a different object), <code>mission-control-spec.md</code> §1 (the operator), §7.6 (agent messages are quoted evidence), §11.2 (connectors)</dd><dt>Pages</dt><dd><code>mockups/pages/tasks.md</code>, <code>tasks-providers.md</code>, <code>task.md</code>, <code>work-order.md</code>, each with its audit prompt</dd><dt>Check</dt><dd><code>node tools/check-tasks.mjs</code> walks every flow below in the built mockup</dd></dl>
 </header>
 <div class="grid">
 <nav class="toc" aria-label="Contents of this document"><p>Contents</p><ol><li><a href="#tasks/1-the-situation">1. The situation</a></li><li><a href="#tasks/2-scope">2. Scope</a></li><li><a href="#tasks/3-the-flow">3. The flow</a></li><li><a href="#tasks/4-vocabulary">4. Vocabulary</a></li><li><a href="#tasks/5-connecting-a-provider">5. Connecting a provider</a></li><li><a href="#tasks/6-the-task-record">6. The task record</a></li><li><a href="#tasks/7-people">7. People</a></li><li><a href="#tasks/8-the-definition-of-done">8. The definition of done</a></li><li><a href="#tasks/9-sending-work">9. Sending work</a></li><li><a href="#tasks/10-workflows">10. Workflows</a></li><li><a href="#tasks/11-completing-work">11. Completing work</a></li><li><a href="#tasks/12-capabilities">12. Capabilities</a></li><li><a href="#tasks/13-storage">13. Storage</a></li><li><a href="#tasks/14-permissions">14. Permissions</a></li><li><a href="#tasks/15-pages-and-audits">15. Pages and audits</a></li><li><a href="#tasks/16-what-exists-today">16. What exists today</a></li><li><a href="#tasks/17-decisions-this-needs">17. Decisions this needs</a></li><li><a href="#tasks/18-open-questions">18. Open questions</a></li><li><a href="#tasks/19-definition-of-done-for-the-build">19. Definition of done for the build</a></li></ol></nav>
 <main>
 <h2 id="tasks/1-the-situation">1. The situation</h2>
-<p>Your work lives in GitHub issues, Linear, or Jira. Your agents are registered in Oxagen. Nothing
-joins the two. To put an agent on an issue you copy the issue into a prompt, you guess which
-repository it may touch, and nobody writes down what finished means. When the agent stops, you read
+<p>Your work lives in an issue tracker (GitHub issues, Linear, or Jira) or a help desk (ServiceNow,
+Salesforce Service Cloud, or Zendesk). Your agents are registered in Oxagen. Nothing joins the two. To
+put an agent on an issue or a ticket you copy it into a prompt, you guess which repository it may
+touch, and nobody writes down what finished means. When the agent stops, you read
 the pull request and decide whether it did the job, against a standard that exists only in your head.</p>
-<p>This spec joins them. Oxagen reads your tasks from the tracker, drafts a definition of done for each
-one, and waits for a person to certify it. A certified task is ready. You pick ready tasks and send
+<p>This spec joins them. Oxagen reads your tasks from the tracker or the help desk, drafts a definition
+of done for each one, and waits for a person to certify it. A certified task is ready. You pick ready tasks and send
 them to an agent you operate in a <strong>work order</strong>: one screen that merges every definition of done,
 drafts the prompt, lets you edit it and reference context records and other agents with <code>@</code>, and
 asks you to confirm the repositories the agent may change. A workflow chains agents, so a bug fixer
@@ -8964,7 +8965,7 @@ what is out with which agent, and what came back.</p>
 <tbody>
 <tr>
 <td>GitHub issues, Linear, and Jira Cloud</td>
-<td>Jira Server and Data Center, Azure DevOps, ServiceNow, Zendesk, and other case systems</td>
+<td>Jira Server and Data Center, Azure DevOps, Jira Service Management as its own connection, Freshdesk, and HubSpot Service Hub</td>
 </tr>
 <tr>
 <td>Thirteen fixed fields per task (§6.1)</td>
@@ -8973,6 +8974,10 @@ what is out with which agent, and what came back.</p>
 <tr>
 <td>Statuses in three categories, resolutions, and labels, each configurable with a mapping per provider</td>
 <td>Two-way sync of subject and description</td>
+</tr>
+<tr>
+<td>Creating a status, resolution, or label in a provider when a person chooses Create (§5.6)</td>
+<td>Renaming or deleting a provider value</td>
 </tr>
 <tr>
 <td>A colour per label</td>
@@ -9012,6 +9017,9 @@ what is out with which agent, and what came back.</p>
 </tr>
 </tbody>
 </table></div>
+<p>The three help desks (ServiceNow, Salesforce Service Cloud, and Zendesk) are specified in full here
+and drawn in the mockup beside the trackers. Whether they ship with the trackers or after them is an
+open question (§18).</p>
 <h2 id="tasks/3-the-flow">3. The flow</h2>
 <ol>
 <li><strong>Connect.</strong> A person with <code>issue_provider.connect</code> runs the six-step wizard (§5.1). Oxagen stores the
@@ -9036,15 +9044,23 @@ token and starts reading.</li>
 <tbody>
 <tr>
 <td><strong>Issue provider</strong></td>
-<td>A tracker Oxagen reads tasks from: GitHub, Linear, or Jira.</td>
+<td>A tracker or a help desk Oxagen reads tasks from: GitHub, Linear, Jira, ServiceNow, Salesforce Service Cloud, or Zendesk. The wizard groups them as issue trackers and help desks.</td>
 </tr>
 <tr>
 <td><strong>Connection</strong></td>
 <td>One authorized account of one provider in one workspace. A workspace may hold several, including two of the same provider.</td>
 </tr>
 <tr>
+<td><strong>Provider value</strong></td>
+<td>A status, resolution, label, priority, type, category, or tag as a provider names it. A mapping joins each Oxagen value to provider values (§6).</td>
+</tr>
+<tr>
+<td><strong>Requester</strong></td>
+<td>The person who asked for the work on a help desk: a ServiceNow caller, a Salesforce contact, or a Zendesk requester. Oxagen shows a requester by name and never maps one (§7).</td>
+</tr>
+<tr>
 <td><strong>Task</strong></td>
-<td>One issue, read into Oxagen with the thirteen fields. Its id is <code>tsk_&lt;ULID&gt;</code>, minted by Oxagen and stable across reconnects.</td>
+<td>One issue, incident, case, or ticket, read into Oxagen with the thirteen fields. Its id is <code>tsk_&lt;ULID&gt;</code>, minted by Oxagen and stable across reconnects.</td>
 </tr>
 <tr>
 <td><strong>Definition of done</strong></td>
@@ -9053,6 +9069,10 @@ token and starts reading.</li>
 <tr>
 <td><strong>Item</strong></td>
 <td>One line of a definition of done: its text, its kind (<code>check</code> or <code>review</code>), its tag (<code>code</code>, <code>test</code>, <code>docs</code>, <code>review</code>), and its source.</td>
+</tr>
+<tr>
+<td><strong>Resolution</strong></td>
+<td>Why a closed task closed: Done, Won't do, Duplicate, Cancelled, or Other (§6.3).</td>
 </tr>
 <tr>
 <td><strong>Certification</strong></td>
@@ -9101,23 +9121,33 @@ token and starts reading.</li>
 <p>The Providers tab and the Tasks page header open it. It has six steps, and every step says what the
 next one needs.</p>
 <ol>
-<li><strong>Provider.</strong> GitHub, Linear, or Jira, each with its logo. A provider already connected is marked
-<code>connected</code> and can be connected again for another account.</li>
-<li><strong>Authorize.</strong> The permissions Oxagen asks for, in a table with the reason for each, then <strong>what it
-still cannot do</strong>: edit a subject or a description, delete an issue, act as you, read outside the
-scope you choose next, or assign a task to a person. Next is disabled until the provider returns a
-token.</li>
-<li><strong>Scope.</strong> The repositories, teams, or projects to import, and the filter: open issues and those
-closed in the last 30 days (the default), open only, or everything. Jira adds an optional JQL filter.
-The step estimates how many tasks the first read brings in.</li>
+<li><strong>Provider.</strong> Two groups, <strong>Issue trackers</strong> (GitHub, Linear, Jira) and <strong>Help desks</strong> (ServiceNow,
+Salesforce, Zendesk), each provider with its logo and one line on what it imports. A provider
+already connected is marked <code>connected</code> and can be connected again for another account.</li>
+<li><strong>Authorize.</strong> How this provider authorizes, in one paragraph. The site, where the provider has one
+(Jira site, ServiceNow instance, Salesforce My Domain, Zendesk subdomain). <strong>Create values in
+<provider></strong>, on by default, where creating a value needs more than reading does (§5.6). Then <strong>What
+Oxagen needs</strong>, a table with the reason for each permission, and <strong>What it still cannot do</strong>: edit a
+subject or a description, delete an issue, act as you (GitHub, Linear) or as anyone other than the
+account that authorizes (Jira and the help desks), reply to a requester (help desks), read outside
+the scope you choose next, assign a task to anyone, or rename or delete a provider value. Next is
+disabled until the provider returns a token.</li>
+<li><strong>Scope.</strong> The repositories, teams, projects, assignment groups, queues, or groups to import, and the
+filter: open ones and those closed in the last 30 days (the default), open only, or everything. The
+filter names the provider's unit: issues, incidents, cases, or tickets. Jira adds an optional JQL
+filter. The step estimates how many tasks the first read brings in.</li>
 <li><strong>Fields.</strong> The workspace's statuses, resolutions, and labels, each with the provider value the
 assistant suggested from the values the provider returned. Every suggestion is marked <code>suggested</code>
-and can be changed. Then the four write-back switches (§5.5).</li>
+and can be changed to another provider value, to nothing, or to <strong>Create “<name>” in <provider></strong>
+where the provider can hold one (§5.6). Below each table, <strong>Only in <provider></strong> lists the provider
+values no mapping uses, each with <strong>Add</strong>, which brings it into Oxagen as a new value. Then the four
+write-back switches (§5.4).</li>
 <li><strong>People.</strong> Every account on the tasks in scope, with a suggested workspace member where one matches
-(§7). Each can be confirmed, changed, or left not mapped. A bot is never mapped.</li>
-<li><strong>Review.</strong> The whole connection on one screen, then what happens when you connect: Oxagen stores
-the token and reads the tasks, the assistant drafts a definition of done for each open one, every
-draft waits for a person, and nothing is sent to an agent.</li>
+(§7). Each can be confirmed, changed, or left not mapped. A bot or a requester is never mapped.</li>
+<li><strong>Review.</strong> The whole connection on one screen, with how many values Oxagen creates in the provider
+and how many it adds to Oxagen. Then what happens when you connect: Oxagen stores the token and reads
+the tasks, creates each value you chose (<code>create_provider_value</code>), the assistant drafts a definition
+of done for each open one, every draft waits for a person, and nothing is sent to an agent.</li>
 </ol>
 <p><strong>Edit scope and fields</strong> on a provider card opens the same wizard at step 3, and its last button is
 <strong>Save</strong>.</p>
@@ -9141,29 +9171,56 @@ draft waits for a person, and nothing is sent to an agent.</li>
 <tr>
 <td>Linear</td>
 <td>OAuth 2.0 with <code>actor=app</code>, so every write is signed by the Oxagen app</td>
-<td><code>read</code>, <code>comments:create</code></td>
+<td><code>read</code>, <code>comments:create</code>, and <code>write</code> while Create values is on</td>
 <td>Long-lived. Linear has no refresh endpoint, so Oxagen re-authorizes on a 401.</td>
 </tr>
 <tr>
 <td>Jira Cloud</td>
 <td>OAuth 2.0 (3LO) on one Atlassian site, resolved through the accessible-resources call</td>
-<td><code>read:jira-work</code>, <code>read:jira-user</code>, <code>write:jira-work</code>, <code>offline_access</code></td>
+<td><code>read:jira-work</code>, <code>read:jira-user</code>, <code>write:jira-work</code>, <code>offline_access</code>, and <code>manage:jira-configuration</code> while Create values is on</td>
 <td>Rotating refresh tokens</td>
+</tr>
+<tr>
+<td>ServiceNow</td>
+<td>OAuth 2.0 through an application registry entry an admin creates on the instance</td>
+<td><code>useraccount</code>, with the <code>itil</code> role on the account that authorizes, and the <code>personalize_choices</code> role while Create values is on</td>
+<td>Refresh tokens, with a lifetime the instance sets</td>
+</tr>
+<tr>
+<td>Salesforce Service Cloud</td>
+<td>OAuth 2.0 web server flow through a connected app</td>
+<td><code>api</code>, <code>refresh_token</code>, and Customize Application on the account while Create values is on</td>
+<td>Refresh tokens. Salesforce does not rotate them.</td>
+</tr>
+<tr>
+<td>Zendesk</td>
+<td>OAuth 2.0 through an OAuth client on the account</td>
+<td><code>read</code>, <code>write</code>, and an admin account while Create values is on</td>
+<td>Long-lived. A Zendesk grant returns no refresh token.</td>
 </tr>
 </tbody>
 </table></div>
+<p><strong>Who a write appears as.</strong> GitHub and Linear sign every write as the Oxagen app. A Jira, ServiceNow,
+Salesforce, or Zendesk token acts as the account that authorizes it, within that account's roles, so
+every note and transition Oxagen makes appears under that account. The wizard says so under <strong>What it
+still cannot do</strong>, and asks you to authorize with an account made for Oxagen. A role on the account
+(ServiceNow, Salesforce, Zendesk) is not a scope the token asks for. The wizard lists it beside the
+scopes because the connection needs it all the same.</p>
 <p>The token goes to the workspace credential store (<code>packages/plugins/src/credentials/workspace-credential.ts</code>),
 envelope-encrypted under the organization's key. Nobody can read it back, including the person who
 connected it. A write without a token fails closed.</p>
 <h3 id="tasks/5-3-reading">5.3 Reading</h3>
 <ul>
-<li><strong>Events.</strong> GitHub <code>issues</code> and <code>issue_comment</code> webhooks through the App, Linear webhooks, and Jira
-dynamic webhooks registered by the OAuth app. An event is a hint: Oxagen reads the issue again and
-applies what it read.</li>
+<li><strong>Events.</strong> GitHub <code>issues</code> and <code>issue_comment</code> webhooks through the App, Linear webhooks, Jira
+dynamic webhooks registered by the OAuth app, Salesforce Change Data Capture on <code>Case</code>, and a Zendesk
+webhook that a trigger fires. ServiceNow offers no webhook a token can register, so a ServiceNow
+connection reads on the reconcile alone until an admin adds an outbound business rule. An event is a
+hint: Oxagen reads the task again and applies what it read.</li>
 <li><strong>Reconcile.</strong> Every 15 minutes Oxagen lists what changed since its last read, so a missed event
 costs at most 15 minutes. A nightly pass reads everything in scope.</li>
-<li><strong>Identity.</strong> A task is unique by connection and provider id. GitHub keys by record type and
-database id, never by issue number (ADR-121), so a transferred issue stays the same task.</li>
+<li><strong>Identity.</strong> A task is unique by connection and provider id: a ServiceNow <code>sys_id</code>, a Salesforce
+case <code>Id</code>, or a Zendesk ticket <code>id</code>. GitHub keys by record type and database id, never by issue
+number (ADR-121), so a transferred issue stays the same task.</li>
 <li><strong>Order.</strong> A read older than the stored <code>updated at</code> is dropped.</li>
 </ul>
 <h3 id="tasks/5-4-writing-back">5.4 Writing back</h3>
@@ -9179,14 +9236,14 @@ token and recorded in Audit.</p>
 </thead>
 <tbody>
 <tr>
-<td>Post the definition of done when a person certifies it</td>
+<td>Post the definition of done as a <note> when a person certifies it</td>
 <td>on</td>
-<td>A comment with the items and a link to the task in Oxagen</td>
+<td>A note with the items and a link to the task in Oxagen</td>
 </tr>
 <tr>
-<td>Post a link when a work order is sent</td>
+<td>Post a link to the work order as a <note> when it is sent</td>
 <td>on</td>
-<td>A comment naming the work order and the agent</td>
+<td>A note naming the work order and the agent</td>
 </tr>
 <tr>
 <td>Move the status when a work order starts</td>
@@ -9194,21 +9251,92 @@ token and recorded in Audit.</p>
 <td>The provider status mapped to <code>in review</code> or <code>open</code></td>
 </tr>
 <tr>
-<td>Close the task when you accept the work</td>
+<td>Close the <unit> as Done when you accept the work</td>
 <td>off</td>
-<td>Closed, with the resolution mapped to <code>Fixed</code></td>
+<td>The provider's closed status, with the provider value mapped to <code>Done</code></td>
 </tr>
 </tbody>
 </table></div>
-<p>Oxagen never edits a subject or a description, never deletes an issue, and never assigns a person.</p>
+<p>The note is the provider's own kind: a comment on GitHub, Linear, and Jira, a work note on ServiceNow,
+an internal comment on Salesforce, and an internal note on Zendesk. On a help desk only staff can read
+it. Each switch fills in the provider's note and unit (issue, incident, case, or ticket), so
+ServiceNow reads &quot;Close the incident as Done when you accept the work&quot;. Resolving a ServiceNow incident or solving a Zendesk ticket emails the requester by
+default, and the close switch says so.</p>
+<p>Oxagen never edits a subject or a description, never deletes an issue, never assigns anyone, and never
+replies to a requester.</p>
 <h3 id="tasks/5-5-disconnecting">5.5 Disconnecting</h3>
 <p>Disconnecting revokes the token at the provider and deletes it from the credential store. The
 tasks it imported stay, with their last-read values, marked disconnected. Certified definitions of
 done and sent work orders are unchanged. Connecting the same account again reads the same issues back
 into the same task ids.</p>
+<h3 id="tasks/5-6-creating-values-in-a-provider">5.6 Creating values in a provider</h3>
+<p>Mapping works in both directions. A provider value Oxagen lacks can be added to Oxagen, and an Oxagen
+value a provider lacks can be created there. You choose, one value at a time, on step 4 of the wizard
+or in a status, resolution, or label editor on the Fields tab. Oxagen creates nothing on its own.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Provider</th>
+<th>What Oxagen creates</th>
+<th>Permission it needs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GitHub</td>
+<td>A label, for a status, a resolution, or a label. GitHub has no custom statuses or close reasons.</td>
+<td>Issues read and write, already asked for</td>
+</tr>
+<tr>
+<td>Linear</td>
+<td>A workflow state for a status or a resolution, and a label for a label</td>
+<td><code>write</code></td>
+</tr>
+<tr>
+<td>Jira Cloud</td>
+<td>A status or a resolution. A label needs nothing, because a Jira label exists once an issue carries it.</td>
+<td><code>manage:jira-configuration</code>, which a Jira admin approves</td>
+</tr>
+<tr>
+<td>ServiceNow</td>
+<td>A choice on the incident table: a state, a close code, or a category</td>
+<td>the <code>personalize_choices</code> role on the account that authorizes</td>
+</tr>
+<tr>
+<td>Salesforce Service Cloud</td>
+<td>A Status value, a closed Status value, or a Type value, through the Metadata API</td>
+<td>Customize Application on the account that authorizes</td>
+</tr>
+<tr>
+<td>Zendesk</td>
+<td>A custom ticket status. A resolution or a label becomes a tag, which exists once a ticket carries it.</td>
+<td>an admin account for a custom status, and <code>write</code> for a tag</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>The switch.</strong> Step 2 carries <strong>Create values in <provider></strong>, on by default. Turned off, Oxagen asks
+only for what reading and the write-back switches need, and step 4 offers Create only where no more
+is needed (a GitHub label, a Jira label, a Zendesk tag). A field editor on a connection without the
+permission says what it lacks: &quot;Creating one needs write. Edit the connection to ask for it.&quot;</li>
+<li><strong>Names.</strong> A created value takes the Oxagen name. A tag and a Jira label hold no spaces, so <code>Won't do</code>
+becomes <code>wont_do</code> there.</li>
+<li><strong>Reach.</strong> A new Jira status reaches a project once a Jira admin adds it to the project's workflow. A
+new Salesforce Status value reaches a case once an admin adds it to the support process. Oxagen says
+so on step 4 and edits no workflow and no process.</li>
+<li><strong>Limits.</strong> Oxagen creates no ServiceNow priority, because the instance derives priority from impact
+and urgency. It creates no Zendesk priority or type, because Zendesk fixes both.</li>
+<li><strong>Colour.</strong> A label Oxagen creates takes its Oxagen colour once, where the provider has label colours
+(GitHub, Linear). Oxagen never changes the colour after.</li>
+<li><strong>The record.</strong> Each value created is a governed action, <code>create_provider_value</code>, made with the
+connection's token and recorded in Audit beside the <code>connect_issue_provider</code> or <code>update_task_fields</code>
+that asked for it.</li>
+<li><strong>Renaming and deleting.</strong> Oxagen renames and deletes no provider value, including one it created.</li>
+</ul>
 <h2 id="tasks/6-the-task-record">6. The task record</h2>
 <h3 id="tasks/6-1-fields">6.1 Fields</h3>
-<p>Day 1 reads thirteen fields and nothing else. The Fields tab shows this table.</p>
+<p>Day 1 reads thirteen fields and nothing else. The Fields tab shows one column for each connected
+provider.</p>
 <div class="tw"><table>
 <thead>
 <tr>
@@ -9299,10 +9427,102 @@ into the same task ids.</p>
 </tr>
 </tbody>
 </table></div>
-<p>Two derivations are worth naming. <strong>Updated by</strong> is not a field in any of the three, so Oxagen reads
-the actor of the latest change. <strong>Owner</strong> is one person: GitHub allows several assignees, and day 1
-reads the first. Custom fields are not read. Each field Oxagen adds needs a mapping on three
-providers and a meaning in the brief, so custom fields wait for a schema of their own.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Field</th>
+<th>ServiceNow</th>
+<th>Salesforce Service Cloud</th>
+<th>Zendesk</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Task id</td>
+<td><code>tsk_&lt;ULID&gt;</code>, minted by Oxagen</td>
+<td>same</td>
+<td>same</td>
+</tr>
+<tr>
+<td>Number</td>
+<td><code>number</code>, <code>INC0012345</code></td>
+<td><code>CaseNumber</code>, <code>00001026</code></td>
+<td><code>id</code>, <code>#4821</code></td>
+</tr>
+<tr>
+<td>Subject</td>
+<td><code>short_description</code></td>
+<td><code>Subject</code></td>
+<td><code>subject</code></td>
+</tr>
+<tr>
+<td>Description</td>
+<td><code>description</code></td>
+<td><code>Description</code></td>
+<td>the first comment</td>
+</tr>
+<tr>
+<td>Labels</td>
+<td><code>priority</code> and <code>category</code></td>
+<td><code>Priority</code> and <code>Type</code></td>
+<td><code>tags</code>, <code>priority</code>, and <code>type</code></td>
+</tr>
+<tr>
+<td>Owner</td>
+<td><code>assigned_to</code></td>
+<td><code>Owner</code>, when a person owns the case</td>
+<td><code>assignee</code></td>
+</tr>
+<tr>
+<td>Created by</td>
+<td><code>caller_id</code>, a requester</td>
+<td><code>Contact</code>, a requester</td>
+<td><code>requester</code></td>
+</tr>
+<tr>
+<td>Created at</td>
+<td><code>opened_at</code></td>
+<td><code>CreatedDate</code></td>
+<td><code>created_at</code></td>
+</tr>
+<tr>
+<td>Updated by</td>
+<td><code>sys_updated_by</code></td>
+<td><code>LastModifiedBy</code></td>
+<td>author of the latest audit</td>
+</tr>
+<tr>
+<td>Updated at</td>
+<td><code>sys_updated_on</code></td>
+<td><code>LastModifiedDate</code></td>
+<td><code>updated_at</code></td>
+</tr>
+<tr>
+<td>Closed at</td>
+<td><code>resolved_at</code></td>
+<td><code>ClosedDate</code></td>
+<td><code>solved_at</code> from ticket metrics</td>
+</tr>
+<tr>
+<td>Status</td>
+<td><code>state</code></td>
+<td><code>Status</code></td>
+<td><code>status</code></td>
+</tr>
+<tr>
+<td>Resolution</td>
+<td><code>close_code</code></td>
+<td>the closed <code>Status</code></td>
+<td>the solved status or its tags</td>
+</tr>
+</tbody>
+</table></div>
+<p>Three derivations are worth naming. <strong>Updated by</strong> is not a field in GitHub, Linear, or Jira, so
+Oxagen reads the actor of the latest change. <strong>Owner</strong> is one person: GitHub allows several assignees,
+and day 1 reads the first. <strong>Created by</strong> on a help desk is a requester, the customer or employee who
+raised the ticket, and a requester is never a workspace member (§7). Custom fields are not read. Each
+field Oxagen adds needs a mapping on six providers and a meaning in the brief, so custom fields wait
+for a schema of their own.</p>
 <h3 id="tasks/6-2-statuses">6.2 Statuses</h3>
 <p>A status belongs to one of three categories: <code>open</code>, <code>blocked</code>, or <code>closed</code>. Oxagen ships <code>Open</code>,
 <code>Blocked</code>, and <code>Closed</code>. A workspace may add statuses (the mockup adds <code>In review</code>, category
@@ -9321,15 +9541,15 @@ providers and a meaning in the brief, so custom fields wait for a schema of thei
 </thead>
 <tbody>
 <tr>
-<td>Fixed</td>
+<td>Done</td>
 <td><code>state_reason completed</code></td>
 <td>Done</td>
 <td>Done, Fixed</td>
 </tr>
 <tr>
-<td>Won't fix</td>
+<td>Won't do</td>
 <td><code>state_reason not_planned</code></td>
-<td>Canceled with label <code>wontfix</code></td>
+<td>Canceled with label <code>Won't do</code></td>
 <td>Won't Do, Won't Fix</td>
 </tr>
 <tr>
@@ -9352,9 +9572,56 @@ providers and a meaning in the brief, so custom fields wait for a schema of thei
 </tr>
 </tbody>
 </table></div>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Resolution</th>
+<th>ServiceNow</th>
+<th>Salesforce Service Cloud</th>
+<th>Zendesk</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Done</td>
+<td>close code Solution provided, Workaround provided, Resolved by caller</td>
+<td>status Closed</td>
+<td>status Solved</td>
+</tr>
+<tr>
+<td>Won't do</td>
+<td>close code No resolution provided</td>
+<td>not mapped</td>
+<td>not mapped</td>
+</tr>
+<tr>
+<td>Duplicate</td>
+<td>close code Duplicate</td>
+<td>not mapped</td>
+<td>not mapped</td>
+</tr>
+<tr>
+<td>Cancelled</td>
+<td>state Canceled</td>
+<td>not mapped</td>
+<td>not mapped</td>
+</tr>
+<tr>
+<td>Other</td>
+<td>anything else</td>
+<td>anything else</td>
+<td>anything else</td>
+</tr>
+</tbody>
+</table></div>
+<p>Oxagen's words are the words of done. A closed task is <code>Done</code>, <code>Won't do</code>, <code>Duplicate</code>, <code>Cancelled</code>,
+or <code>Other</code>, and those words read the same to a support team, an IT desk, and an engineering team. A
+provider's own words, such as Jira's <code>Fixed</code> and Zendesk's <code>Solved</code>, stay in the mapping column and
+never become Oxagen's. Salesforce and Zendesk have one closed state out of the box, so only <code>Done</code> maps
+there until a workspace maps more or creates the values (§5.6).</p>
 <h3 id="tasks/6-4-labels">6.4 Labels</h3>
 <p>A task carries any number of labels. A label has a name, a group, a colour, and a mapping to each
-provider's labels, priorities, or issue types. Oxagen ships ten.</p>
+provider's labels, priorities, types, categories, or tags. Oxagen ships ten.</p>
 <div class="tw"><table>
 <thead>
 <tr>
@@ -9449,7 +9716,80 @@ provider's labels, priorities, or issue types. Oxagen ships ten.</p>
 </tr>
 </tbody>
 </table></div>
-<p>The colour is Oxagen's own. Oxagen never changes a label's colour in a provider. The label editor
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Label</th>
+<th>ServiceNow</th>
+<th>Salesforce Service Cloud</th>
+<th>Zendesk</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P0</td>
+<td>priority 1 - Critical</td>
+<td>priority High</td>
+<td>priority Urgent</td>
+</tr>
+<tr>
+<td>P1</td>
+<td>priority 2 - High</td>
+<td>not mapped</td>
+<td>priority High</td>
+</tr>
+<tr>
+<td>P2</td>
+<td>priority 3 - Moderate</td>
+<td>priority Medium</td>
+<td>priority Normal</td>
+</tr>
+<tr>
+<td>P3</td>
+<td>priority 4 - Low, 5 - Planning</td>
+<td>priority Low</td>
+<td>priority Low</td>
+</tr>
+<tr>
+<td>Bug</td>
+<td>category Software</td>
+<td>type Problem</td>
+<td>type Problem</td>
+</tr>
+<tr>
+<td>New Feature</td>
+<td>not mapped</td>
+<td>type Feature Request</td>
+<td>not mapped</td>
+</tr>
+<tr>
+<td>Improvement</td>
+<td>not mapped</td>
+<td>not mapped</td>
+<td>not mapped</td>
+</tr>
+<tr>
+<td>Documentation</td>
+<td>not mapped</td>
+<td>not mapped</td>
+<td>tag <code>documentation</code></td>
+</tr>
+<tr>
+<td>Test</td>
+<td>not mapped</td>
+<td>not mapped</td>
+<td>not mapped</td>
+</tr>
+<tr>
+<td>Chore</td>
+<td>category Inquiry / Help</td>
+<td>type Question</td>
+<td>type Task</td>
+</tr>
+</tbody>
+</table></div>
+<p>The colour is Oxagen's own. Oxagen sets a label's colour in a provider once, when it creates the label
+there (§5.6), and never changes it after. The label editor
 offers twelve swatches and a hex field, and previews the chip as you choose. Gold is not offered,
 because gold is the house identity colour and never encodes state. A provider label that maps to no
 Oxagen label is not read.</p>
@@ -9479,7 +9819,11 @@ never suggests from a display name.</li>
 suggestion on the page at once.</li>
 <li><strong>Not mapped.</strong> Any account can stay not mapped. It still owns and creates tasks and appears under
 its own handle with its provider's mark. Nothing pretends it is a member.</li>
-<li><strong>Bots.</strong> A bot account (<code>dependabot[bot]</code>, Automation for Jira) is never mapped to a person.</li>
+<li><strong>Bots.</strong> A bot account (<code>dependabot[bot]</code>, Automation for Jira, the ServiceNow <code>system</code> user, the
+Salesforce Automated Process user) is never mapped to a person.</li>
+<li><strong>Requesters.</strong> A help desk's requester (a ServiceNow caller, a Salesforce contact, a Zendesk end
+user) raised a ticket and never works in the workspace, so Oxagen never maps one. The People tab
+lists the help desk's staff accounts only.</li>
 <li><strong>Grants.</strong> Mapping grants nothing. A member's roles decide what they may do. Only a signed-in
 member can certify a definition of done or send a work order, whatever an account's mapping says.</li>
 <li><strong>Who maps.</strong> <code>identity_map.write</code>, held by workspace owners by default. Each change is a governed
@@ -9510,7 +9854,7 @@ action (<code>map_provider_person</code>).</li>
 </tr>
 <tr>
 <td>Source</td>
-<td><code>from the issue</code>, <code>oxagen.assistant</code>, <code>you</code>, or <code>edited by you</code>.</td>
+<td><code>from the issue</code> (or incident, case, or ticket), <code>oxagen.assistant</code>, <code>you</code>, or <code>edited by you</code>.</td>
 </tr>
 </tbody>
 </table></div>
@@ -9548,8 +9892,9 @@ the certifier ticks <strong>I read every item</strong>. Certifying records <code
 <li>the digest of the items: SHA-256 over their RFC 8785 canonical JSON, so the same list always has the same digest</li>
 <li>the provider version of the task it was read against (<code>updated_at</code>, or the provider's etag)</li>
 </ul>
-<p>If the connection allows it, Oxagen posts the list as a comment on the issue. In a workspace whose
-governance mode is <code>regulated</code>, the person who certifies a task cannot send it.</p>
+<p>If the connection allows it, Oxagen posts the list as a comment on the issue, or as an internal note on
+a help desk (§5.4). In a workspace whose governance mode is <code>regulated</code>, the person who certifies a
+task cannot send it.</p>
 <h3 id="tasks/8-5-a-certified-task-that-changes">8.5 A certified task that changes</h3>
 <p>When a provider changes a certified task's subject, description, or labels, the certification is
 marked <code>changed</code> and the task leaves ready. A comment, an assignee, or a status change inside the same
@@ -9659,7 +10004,7 @@ needs both (§17).</p>
 <p><code>send_work_order</code> is a governed action. It records the work order, its tasks, its items with their
 certification digests, the prompt as sent with its digest, the repositories, the cap, and the target.
 A sent prompt cannot change. Each task moves to <code>sent</code> and shows the work order on its page. If the
-connection allows it, Oxagen posts a link on each issue. The sender lands on the work order page.</p>
+connection allows it, Oxagen posts a link on each issue or ticket. The sender lands on the work order page.</p>
 <h3 id="tasks/9-6-delivery">9.6 Delivery</h3>
 <p>Oxagen runs no agent (ADR-043). A work order is the operator's brief, and the runtime the agent is
 enrolled on starts the run. There are three ways it reaches a runtime.</p>
@@ -9770,8 +10115,8 @@ a check run, or a pull request. A claim is the agent's word and is labelled as o
 <li><strong>Acceptance.</strong> When every item is claimed, the work order shows <code>waiting on you</code> and <strong>Accept the
 work</strong> turns gold. Accepting records <code>accept_work_order</code> with your name and accepts every claimed
 item. It merges nothing: pull requests are merged by a person in the repository.</li>
-<li><strong>Close.</strong> If the connection's close switch is on, Oxagen closes each task as <code>Fixed</code>. If it is off,
-the dialog says the task stays open in the provider.</li>
+<li><strong>Close.</strong> If the connection's close switch is on, Oxagen closes each task as <code>Done</code>, with the
+provider value mapped to <code>Done</code>. If it is off, the dialog says the task stays open in the provider.</li>
 <li><strong>Stop.</strong> <strong>Stop the work order</strong> cancels the live run at its next boundary and starts no later stage.
 Branches and pull requests stay. The tasks go back to ready with their certifications intact.</li>
 </ul>
@@ -9800,7 +10145,7 @@ The runs a work order starts are metered like any run.</p>
 <tr>
 <td><code>update_issue_provider</code></td>
 <td>api, app, cli</td>
-<td>Scope, filter, and write-back switches</td>
+<td>Scope, filter, write-back switches, and <strong>Create values</strong></td>
 </tr>
 <tr>
 <td><code>sync_issue_provider</code></td>
@@ -9816,6 +10161,11 @@ The runs a work order starts are metered like any run.</p>
 <td><code>get_task_fields</code>, <code>update_task_fields</code></td>
 <td>api, app, cli</td>
 <td>Statuses, resolutions, labels, colours, and mappings</td>
+</tr>
+<tr>
+<td><code>create_provider_value</code></td>
+<td>api, app, cli</td>
+<td>Creates a status, resolution, or label in a provider with the connection's token (§5.6)</td>
 </tr>
 <tr>
 <td><code>list_provider_people</code>, <code>map_provider_person</code></td>
@@ -9901,7 +10251,7 @@ The runs a work order starts are metered like any run.</p>
 </tr>
 <tr>
 <td>ClickHouse</td>
-<td><code>task.imported</code>, <code>task.changed</code>, <code>dod.drafted</code>, <code>dod.certified</code>, <code>work_order.sent</code>, <code>stage.handed_off</code>, <code>stage.returned</code>, <code>item.claimed</code>, <code>work_order.accepted</code>, <code>work_order.stopped</code></td>
+<td><code>task.imported</code>, <code>task.changed</code>, <code>dod.drafted</code>, <code>dod.certified</code>, <code>work_order.sent</code>, <code>stage.handed_off</code>, <code>stage.returned</code>, <code>item.claimed</code>, <code>work_order.accepted</code>, <code>work_order.stopped</code>, <code>provider_value.created</code></td>
 </tr>
 <tr>
 <td>Files</td>
@@ -9928,12 +10278,12 @@ The runs a work order starts are metered like any run.</p>
 </tr>
 <tr>
 <td><code>issue_provider.connect</code></td>
-<td>Connect, edit, sync, and disconnect a provider</td>
+<td>Connect, edit, sync, and disconnect a provider, and choose <strong>Create values</strong></td>
 <td>workspace owner</td>
 </tr>
 <tr>
 <td><code>task_fields.write</code></td>
-<td>Edit statuses, resolutions, labels, and colours</td>
+<td>Edit statuses, resolutions, labels, and colours, and create a value in a provider</td>
 <td>workspace owner</td>
 </tr>
 <tr>
@@ -10036,6 +10386,26 @@ something waits on a person. On a phone, Tasks is in the More sheet.</p>
 <td>❌</td>
 </tr>
 <tr>
+<td>Zendesk reading</td>
+<td>A read-only connector polls the incremental export every 900 seconds with an OAuth token that has no refresh</td>
+<td>🟡</td>
+</tr>
+<tr>
+<td>Salesforce reading</td>
+<td>A read-only connector reads <code>Case</code> among its record types, with a refresh token it does not rotate</td>
+<td>🟡</td>
+</tr>
+<tr>
+<td>ServiceNow</td>
+<td>Nothing</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Creating a provider value</td>
+<td>Nothing. Every connector is read-only.</td>
+<td>❌</td>
+</tr>
+<tr>
 <td>Credential storage</td>
 <td>The workspace credential store with envelope encryption (<code>workspace-credential.ts</code>, <code>kms.ts</code>)</td>
 <td>✅</td>
@@ -10095,6 +10465,10 @@ later compile the first.</li>
 <li><strong>The product words.</strong> &quot;Work order&quot; and &quot;send&quot;. ADR-113 reserves &quot;Dispatch&quot; as a name only the
 founder decides, so neither the UI nor a capability name uses it for this.</li>
 <li><strong>The mention grammar gains <code>context_record</code> and <code>task</code>.</strong> <code>packages/ai/src/prompts/mentions.ts</code>.</li>
+<li><strong>The words of done.</strong> A closed task's resolutions are <code>Done</code>, <code>Won't do</code>, <code>Duplicate</code>, <code>Cancelled</code>,
+and <code>Other</code>, in every vertical. A provider's own words stay in its mapping (§6.3).</li>
+<li><strong>Oxagen creates a provider value only when a person chooses Create, and never renames or deletes
+one.</strong> §5.6.</li>
 </ol>
 <h2 id="tasks/18-open-questions">18. Open questions</h2>
 <ul>
@@ -10104,16 +10478,27 @@ founder decides, so neither the UI nor a capability name uses it for this.</li>
 the tenant above a threshold?</li>
 <li>Should acceptance of a work order that closed its tasks upstream reopen them when a provider reopens
 the issue?</li>
+<li>Do ServiceNow, Salesforce Service Cloud, and Zendesk ship with the three trackers, or after them? The
+mockup draws all six.</li>
+<li>The default labels (<code>Bug</code>, <code>Test</code>, <code>Chore</code>) and the item tags (<code>code</code>, <code>test</code>, <code>docs</code>) come from
+software work. Should a help-desk workspace get its own defaults?</li>
+<li>Should Jira Service Management be a card of its own, or a Jira Cloud connection that reads a service
+project?</li>
+<li>The scopes, roles, and event paths in §5.2, §5.3, and §5.6 were read from each provider's
+documentation, not tested against a live tenant, as of 2026-09-24. Each needs a check against a
+sandbox before its connector is built.</li>
 </ul>
 <h2 id="tasks/19-definition-of-done-for-the-build">19. Definition of done for the build</h2>
 <ul>
-<li>[ ] A workspace connects GitHub, Linear, and Jira Cloud through the six-step wizard, each with its logo, its scopes, and what the token still cannot do.</li>
+<li>[ ] A workspace connects GitHub, Linear, and Jira Cloud through the six-step wizard, each with its logo, its scopes, and what the token still cannot do. ServiceNow, Salesforce Service Cloud, and Zendesk join them once §18 settles when.</li>
+<li>[ ] <strong>Create values in <provider></strong> asks for the permission in §5.6, and each value a person creates records <code>create_provider_value</code>.</li>
 <li>[ ] Each connection authenticates with the method in §5.2 and stores its token in the workspace credential store.</li>
 <li>[ ] More than one provider, and more than one account of one provider, can be connected to one workspace.</li>
 <li>[ ] Provider accounts map to workspace members with suggestions a person confirms, and any account can stay not mapped.</li>
 <li>[ ] Tasks import with the thirteen fields of §6.1 and no others.</li>
 <li>[ ] Statuses, resolutions, and labels are configurable with a mapping per provider, and every label has a colour.</li>
-<li>[ ] The ten default labels, five resolutions, and three status categories ship as specified.</li>
+<li>[ ] The ten default labels, five resolutions (<code>Done</code>, <code>Won't do</code>, <code>Duplicate</code>, <code>Cancelled</code>, <code>Other</code>), and three status categories ship as specified.</li>
+<li>[ ] With the close switch on, accepting the work closes each task as <code>Done</code> in its provider.</li>
 <li>[ ] The label editor shows the definition-of-done section as <code>later</code>.</li>
 <li>[ ] Every open task imported gets a draft definition of done from <code>oxagen.assistant</code>, with its notes.</li>
 <li>[ ] A person certifies a definition of done, the certification records its digest and task version, and the task becomes ready.</li>
