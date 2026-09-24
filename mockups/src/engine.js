@@ -1664,13 +1664,21 @@ function notifIcon(tone){
   return sv+'<path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4M12 17.5v.5"/></svg>';
 }
 function notifsBody(){
-  return '<div class="lst">'+NOTIFS.map(function(n){
-    return '<div class="li'+(n.unread?" unread":"")+'"><span class="ic t-'+n.tone+'">'+notifIcon(n.tone)+'</span>'+
+  return '<div class="lst">'+NOTIFS.map(function(n,i){
+    /* An unread item is a button: selecting it marks that one read. A read item is plain text. */
+    var btn=n.unread?' role="button" tabindex="0" data-notif="'+i+'" aria-label="Mark read: '+h(n.title)+'" onclick="notifRead('+i+')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();notifRead('+i+')}"':'';
+    return '<div class="li'+(n.unread?" unread":"")+'"'+btn+'><span class="ic t-'+n.tone+'">'+notifIcon(n.tone)+'</span>'+
      '<div class="bd2"><div class="t1">'+h(n.title)+'</div><div class="t2">'+h(n.body)+'</div>'+
      '<div class="mono dim" style="font-size:11px;margin-top:3px">'+h(n.kind)+'</div></div>'+
      '<time>'+h(n.t)+'</time></div>';}).join("")+'</div>';
 }
-function markAllRead(){for(var i=0;i<NOTIFS.length;i++)NOTIFS[i].unread=false;closeDialog();act('Marked read. Reading a notification is itself recorded, so the audit record shows who saw what.');}
+/* Marks one notification read and keeps focus in the list: on the next unread item, else the dialog. */
+function notifRead(i){
+  if(!NOTIFS[i]||!NOTIFS[i].unread)return;
+  NOTIFS[i].unread=false;render();
+  var next=document.querySelector('.li[data-notif]');if(next)next.focus();
+}
+function markAllRead(){for(var i=0;i<NOTIFS.length;i++)NOTIFS[i].unread=false;closeDialog();act('All notifications marked read. Audit records who read each one.');}
 function userMenu(){
   return '<div class="menu"><div class="menu-hd"><b>Marcus Bell</b><span>marcus@a-intel.example</span></div>'+
    '<button class="menu-i" onclick="openDialog(\'account\',\'profile\')">Account</button>'+
@@ -11263,8 +11271,8 @@ function dialog(){
   var kki=(typeof S.dlgArg==="number"&&APIKEYS[S.dlgArg])?S.dlgArg:0, kk=APIKEYS[kki];
   var D={
    notifs:{t:"Notifications",w:false,b:notifsBody(),
-     f:'<div class="grow"><span class="mono">list_notifications</span> · '+notifUnread()+' unread · every kind here maps to a frame kind or an audit event, never to something invented for a bell.</div>'+
-       '<button class="btn" onclick="markAllRead()">Mark all read</button>'},
+     f:'<div class="grow">'+(notifUnread()?notifUnread()+' unread · select one to mark it read':'All read')+'</div>'+
+       '<button class="btn" onclick="markAllRead()"'+(notifUnread()?'':' disabled')+'>Mark all read</button>'},
    approve:{t:"Approve this action",w:false,b:approveBody(),f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="resolveApproval(S.dlgArg,\'approved\')">Approve and mint the token</button>'},
    deny:{t:"Deny this action",w:false,b:denyBody(),f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn danger" onclick="resolveApproval(S.dlgArg,\'denied\')">Deny with this reason</button>'},
    account:{t:"Account",w:false,tabs:accountTabs(),b:accountBody(),f:S.dlgArg==="onboarding"?'<span class="grow">Demo chrome, not product UI — nothing on these screens writes anything.</span><button class="btn" onclick="closeDialog()">Close</button>':'<span class="grow">Changes here run as <span class="mono">set_preferences</span> — a governed action, audited like any other.</span>'+
@@ -13003,21 +13011,62 @@ function asstMount(){
   var sig=S.asstEngine+"|"+ORG.slug+"|"+orgKeyState();
   if(host.getAttribute("data-sig")!==sig){
     host.setAttribute("data-sig",sig);
-    host.innerHTML=asstSheet();
+    host.innerHTML=asstSheet()+asstGrip();
   }
   host.className="asst"+(isPhone()?" phone":"")+(S.asst?" open":"");
+  asstApplyW(host);
   host.setAttribute("aria-hidden",S.asst?"false":"true");
   /* inert keeps the closed panel out of the tab order even mid-transition */
   if(S.asst)host.removeAttribute("inert"); else host.setAttribute("inert","");
 }
+/* "oxagen" set as the house wordmark sets it: Space Grotesk, lowercase, the x in gold. */
+function oxName(){ return '<span class="ox-name">o<span class="x">x</span>agen</span>'; }
+/* Line 1 names the agent, line 2 says whose it is. A down engine or a missing key adds a red dot on
+   the mark and a third line, so the launcher never reads ready when it is not. */
 function asstLaunch(){
-  var st=S.asstEngine==="down"?'<span class="down">engine down</span>'
-    :orgKeyState()==="none"?'<span class="down">no model key</span>'
-    :'<span>'+h(ASST_MODEL)+' · ready</span>';
+  var bad=S.asstEngine==="down"?"engine down":orgKeyState()==="none"?"no model key":"";
   return '<button class="asst-launch" onclick="asstToggle()" aria-controls="asst" aria-expanded="'+(S.asst?"true":"false")+'">'+
-   '<span class="asst-g">'+stellaMark()+'</span>'+
-   '<span class="tx"><b class="stl-ask">Ask '+stellaName()+'</b>'+st+'</span>'+
+   '<span class="asst-g'+(bad?" bad":"")+'">'+stellaMark()+'</span>'+
+   '<span class="tx"><b class="stl-ask">Ask '+stellaName()+'</b>'+
+   '<span class="sub">'+oxName()+'’s in-app AI assistant</span>'+
+   (bad?'<span class="down">'+bad+'</span>':'')+'</span>'+
    '<span class="cv"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span></button>';
+}
+/* The drawer widens from its right edge and never narrows past where it opened (430px). It always
+   leaves 56px of the page in view. The width is a per-viewer convenience, so it lives in this
+   browser only; a phone keeps the drawer full width and shows no edge. */
+var ASST_MIN=430, ASST_W_KEY="mc.asstW";
+S.asstW=(function(){try{var v=parseInt(localStorage.getItem(ASST_W_KEY),10);return v>=ASST_MIN?v:ASST_MIN;}catch(e){return ASST_MIN;}})();
+function asstMaxW(host){var l=host?parseFloat(getComputedStyle(host).left)||0:0;return Math.max(ASST_MIN,Math.floor(window.innerWidth-l-56));}
+function asstGrip(){
+  return '<div class="asst-grip" role="separator" aria-orientation="vertical" aria-label="Resize the assistant" tabindex="0" '+
+   'aria-valuemin="'+ASST_MIN+'" onpointerdown="asstGripStart(event)" onkeydown="asstGripKey(event)" title="Drag to widen"></div>';
+}
+function asstApplyW(host){
+  host=host||el("asst"); if(!host)return;
+  var w=Math.min(Math.max(ASST_MIN,S.asstW),asstMaxW(host));
+  host.style.setProperty("--asst-w",w+"px");
+  var g=host.querySelector(".asst-grip");
+  if(g){g.setAttribute("aria-valuenow",w);g.setAttribute("aria-valuemax",asstMaxW(host));}
+}
+function asstSetW(w,save){
+  var host=el("asst"); S.asstW=Math.min(Math.max(ASST_MIN,Math.round(w)),asstMaxW(host)); asstApplyW(host);
+  if(save){try{localStorage.setItem(ASST_W_KEY,String(S.asstW));}catch(e){}}
+}
+function asstGripStart(e){
+  var host=el("asst"); if(!host||isPhone())return;
+  e.preventDefault(); host.classList.add("resizing"); document.body.classList.add("asst-resizing");
+  var left=host.getBoundingClientRect().left;
+  function mv(ev){asstSetW(ev.clientX-left,false);}
+  function up(){window.removeEventListener("pointermove",mv);window.removeEventListener("pointerup",up);
+    host.classList.remove("resizing");document.body.classList.remove("asst-resizing");asstSetW(S.asstW,true);}
+  window.addEventListener("pointermove",mv); window.addEventListener("pointerup",up);
+}
+function asstGripKey(e){
+  var host=el("asst"), step=e.shiftKey?64:16, w=S.asstW;
+  if(e.key==="ArrowRight")w+=step; else if(e.key==="ArrowLeft")w-=step;
+  else if(e.key==="Home")w=ASST_MIN; else if(e.key==="End")w=asstMaxW(host); else return;
+  e.preventDefault(); asstSetW(w,true);
 }
 function asstStateBlock(title,body,acts,foot){
   return '<div class="asst-b"><div class="state-wrap" style="padding:30px 6px">'+
@@ -15124,7 +15173,7 @@ DLG_EXT.more=function(){
      (PRODUCT?'':t("scenarios","Scenarios","guided walkthroughs",'go(\''+base+'/scenarios\')'))+
      '</div><div class="hr"></div><div class="mgrid">'+
      '<button class="mtile" onclick="closeDialog();asstToggle(true)"><span class="ic">'+stellaMark()+'</span>'+
-      '<span class="tx"><b class="stl-ask">Ask '+stellaName()+'</b><span>ask about a run, or change something</span></span></button>'+
+      '<span class="tx"><b class="stl-ask">Ask '+stellaName()+'</b><span>'+oxName()+'’s in-app AI assistant</span></span></button>'+
      t("search","Search","or run an action",'openDialog(\'cmd\')')+
      t("bell","Notifications",notifUnread()+" unread",'openDialog(\'notifs\')',notifUnread(),true)+
      t("user","Account",me().name,'openDialog(\'account\',\'profile\')')+

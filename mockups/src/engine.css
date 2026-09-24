@@ -600,6 +600,8 @@ a.inv-i:hover *{text-decoration:none}
 .li time{font-family:var(--mono);font-size:10px;color:var(--dim);flex:0 0 auto;white-space:nowrap}
 .li.unread{background:color-mix(in srgb,var(--gold) 5%,var(--ink))}
 .li.unread .t1::before{content:"";display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--gold);margin-right:6px;vertical-align:middle}
+.li[role=button]{cursor:pointer}
+.li[role=button]:focus-visible{outline-offset:-2px;border-radius:0}
 .menu{position:absolute;top:42px;right:0;width:250px;background:var(--panel);border:1px solid var(--rule);border-radius:12px;box-shadow:var(--shadow);z-index:70;padding:6px;overflow:hidden}
 .menu-i{display:flex;align-items:center;gap:10px;width:100%;padding:8px 10px;border:0;background:none;border-radius:8px;color:var(--body);font-size:13px;text-align:left}
 .menu-i:hover{background:var(--hl);color:var(--fg)}
@@ -1886,7 +1888,8 @@ button.wz-opt:hover{border-color:var(--rule)}
    the screen must not move underneath them. The host (#asst, beside #layer) is permanent and
    render() only rewrites its contents when what it renders changes — that is what lets the
    transition survive a re-render, and what keeps a half-typed message alive. */
-.asst{position:fixed;top:0;bottom:0;left:var(--side-w);width:min(430px,calc(100vw - var(--side-w) - 56px));
+/* --asst-w is the width the operator dragged to; 430px is the floor and 56px of page always shows */
+.asst{position:fixed;top:0;bottom:0;left:var(--side-w);width:min(max(430px,var(--asst-w,430px)),calc(100vw - var(--side-w) - 56px));
   background:var(--panel);border-right:1px solid var(--border);z-index:50;display:flex;flex-direction:column;
   box-shadow:18px 0 44px rgba(0,0,0,.44);padding-bottom:env(safe-area-inset-bottom);
   translate:-100% 0;opacity:0;visibility:hidden;
@@ -1897,6 +1900,14 @@ button.wz-opt:hover{border-color:var(--rule)}
    translate composes with the centring transform rather than fighting it */
 .asst.phone{left:50%;width:100%;max-width:400px;transform:translateX(-50%);
   border-left:1px solid var(--rule);border-right:1px solid var(--rule);box-shadow:var(--shadow)}
+/* the right edge is the resize handle: an 8px strip that shows a rule and the ew-resize cursor on hover */
+.asst-grip{position:absolute;top:0;bottom:0;right:-5px;width:9px;cursor:ew-resize;z-index:2;touch-action:none}
+.asst-grip::after{content:"";position:absolute;top:0;bottom:0;left:4px;width:1px;background:transparent;transition:background .15s}
+.asst-grip:hover::after,.asst-grip:focus-visible::after,.asst.resizing .asst-grip::after{background:var(--muted);width:2px;left:3px}
+.asst-grip:focus-visible{outline:none}
+.asst.resizing{transition:none}
+body.asst-resizing{cursor:ew-resize;user-select:none}
+.asst.phone .asst-grip{display:none}
 @media(prefers-reduced-motion:reduce){
   .asst{translate:0 0;transition:opacity .12s ease,visibility 0s .12s}
   .asst.open{translate:0 0;transition:opacity .12s ease,visibility 0s 0s}
@@ -1909,9 +1920,16 @@ button.wz-opt:hover{border-color:var(--rule)}
 .asst-launch[aria-expanded="true"]{border-color:var(--gold)}
 .asst-launch .tx{min-width:0;flex:1}
 .asst-launch .tx b{display:block;font-size:13.5px;font-weight:600;color:var(--fg)}
-.asst-launch .tx>span{display:block;font-size:10.5px;color:var(--dim);font-family:var(--mono);
+.asst-launch .tx>span{display:block;font-size:11px;color:var(--dim);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.asst-launch .tx>span.down{color:var(--st-failed)}
+.asst-launch .tx>span.down{color:var(--st-failed);font-family:var(--mono);font-size:10.5px}
+/* a red dot on the mark when the engine is down or no key is set */
+.asst-g{position:relative}
+.asst-g.bad::after{content:"";position:absolute;top:-3px;right:-3px;width:8px;height:8px;border-radius:50%;
+  background:var(--st-failed);border:2px solid var(--panel)}
+/* "oxagen" in the wordmark's face, x in gold, as on line 2 of the launcher */
+.ox-name{font-family:var(--font-display);font-weight:600;color:var(--muted);letter-spacing:0}
+.ox-name .x{color:var(--gold)}
 .asst-launch .cv{flex:none;color:var(--dim);display:grid;place-items:center;
   transition:transform .3s cubic-bezier(.32,.72,0,1)}
 .asst-launch[aria-expanded="true"] .cv{transform:rotate(180deg);color:var(--gold)}

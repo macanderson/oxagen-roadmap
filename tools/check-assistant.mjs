@@ -68,7 +68,9 @@ const shot = async (page, name) => { if (shots) await page.screenshot({ path: pa
   ok(h.launcher, "the sidebar carries the launcher");
   ok(!h.open && h.hidden === "true" && h.inert, "closed by default: no .open, aria-hidden, inert");
   ok(h.expanded === "false", "the launcher reports collapsed");
-  ok(/ready/.test(h.launcherText), "the launcher says the engine is ready, got " + h.launcherText);
+  ok(/oxagen’s in-app AI assistant/.test(h.launcherText), "the launcher's second line says whose agent it is, got " + h.launcherText);
+  ok(!/engine down|no model key/i.test(h.launcherText), "a healthy launcher carries no fault line, got " + h.launcherText);
+  ok(!(await page.$(".asst-launch .asst-g.bad")), "a healthy launcher carries no fault dot");
   // tucked behind the rail rather than over it
   ok(Number(h.zPanel) < Number(h.zSide), "the panel paints under the rail (" + h.zPanel + " < " + h.zSide + ")");
 
@@ -121,6 +123,7 @@ const shot = async (page, name) => { if (shots) await page.screenshot({ path: pa
   ok(/503/.test(h.text), "engine down: it names the code");
   ok(h.disabled, "engine down: the message box is disabled rather than accepting a turn that cannot run");
   ok(/engine down/i.test(h.launcherText), "engine down: the launcher says so too, got " + h.launcherText);
+  ok(!!(await page.$(".asst-launch .asst-g.bad")), "engine down: the launcher mark carries the fault dot");
   ok(h.closeGap >= 0 && h.closeGap <= 20, "engine down: the close button sits at the right edge, " + h.closeGap + "px in");
   await shot(page, "asst-engine-down");
   await page.evaluate(() => { [...document.querySelectorAll("#asst .btn")].find(b => /Retry/.test(b.textContent)).click(); });
@@ -140,6 +143,7 @@ const shot = async (page, name) => { if (shots) await page.screenshot({ path: pa
   ok(/nothing has been charged/i.test(h.text), "no key: it says nothing was charged");
   ok(h.disabled, "no key: the message box is disabled");
   ok(/no model key/i.test(h.launcherText), "no key: the launcher says so, got " + h.launcherText);
+  ok(!!(await page.$(".asst-launch .asst-g.bad")), "no key: the launcher mark carries the fault dot");
   ok(h.closeGap >= 0 && h.closeGap <= 20, "no key: the close button sits at the right edge, " + h.closeGap + "px in");
   await shot(page, "asst-no-key");
   ok(errs.length === 0, "no-key errors: " + errs.join(" | "));
@@ -256,6 +260,11 @@ for (const theme of ["light", "dark"]) {
       textAst: ast ? getComputedStyle(ast).color : "",
       icon: !!document.querySelector(".asst-launch .asst-g svg.stl-mk"),
       iconAst: (() => { const p = document.querySelector(".asst-launch .stl-mk path"); return p ? getComputedStyle(p).fill : ""; })(),
+      sub: (() => { const s = document.querySelector(".asst-launch .tx .sub"); return s ? s.innerText.replace(/\s+/g, " ").trim() : ""; })(),
+      subSize: (() => { const s = document.querySelector(".asst-launch .tx .sub"); return s ? parseFloat(getComputedStyle(s).fontSize) : 0; })(),
+      askSize: b ? parseFloat(getComputedStyle(b).fontSize) : 0,
+      oxFace: (() => { const o = document.querySelector(".asst-launch .ox-name"); return o ? getComputedStyle(o).fontFamily : ""; })(),
+      oxX: (() => { const x = document.querySelector(".asst-launch .ox-name .x"); return x ? [x.textContent, getComputedStyle(x).color] : []; })(),
       closeGap: hd && x ? Math.round(hd.getBoundingClientRect().right - x.getBoundingClientRect().right) : -1,
     };
   });
@@ -268,6 +277,10 @@ for (const theme of ["light", "dark"]) {
   ok(/Space Grotesk/.test(m.face), theme + ": the launcher is set in Space Grotesk, got " + m.face);
   ok(m.textAst === GOLD, theme + ": the launcher asterisk is gold, got " + m.textAst);
   ok(m.icon && m.iconAst === GOLD, theme + ": the launcher shows Stella's icon, got " + m.iconAst);
+  ok(m.sub === "oxagen’s in-app AI assistant", theme + ": line 2 reads oxagen’s in-app AI assistant, got " + JSON.stringify(m.sub));
+  ok(m.subSize > 0 && m.subSize < m.askSize, theme + ": line 2 is smaller than line 1, " + m.subSize + " < " + m.askSize);
+  ok(/Space Grotesk/.test(m.oxFace), theme + ": oxagen on line 2 is set in Space Grotesk, got " + m.oxFace);
+  ok(m.oxX[0] === "x" && m.oxX[1] === GOLD, theme + ": the x in oxagen is gold, got " + m.oxX.join(" "));
   ok(m.closeGap >= 0 && m.closeGap <= 20, theme + ": the close button sits at the right edge, " + m.closeGap + "px in");
   await shot(page, "asst-brand-" + theme);
   ok(errs.length === 0, theme + " marks errors: " + errs.join(" | "));
@@ -277,20 +290,89 @@ for (const theme of ["light", "dark"]) {
   const { page, errs } = await open("#/a-intel/core-platform", { mobile: true });
   await page.evaluate(() => openDialog("more"));
   await page.waitForTimeout(400);
-  const { tile, face, others } = await page.evaluate(() => {
+  const { tile, face, sub, others } = await page.evaluate(() => {
     const all = [...document.querySelectorAll(".mtile")], t = all.find(x => x.querySelector(".stl-mk"));
     const b = t && t.querySelector(".tx b");
+    const sub = t && t.querySelector(".tx > span");
     return { tile: b ? b.innerText.replace(/\s+/g, " ").trim() : null, face: b ? getComputedStyle(b).fontFamily : "",
+      sub: sub ? sub.innerText.replace(/\s+/g, " ").trim() : null,
       others: all.filter(x => x !== t).map(x => getComputedStyle(x.querySelector(".tx b")).fontFamily).filter(f => /Space Grotesk/.test(f)).length };
   });
   ok(tile === "Ask stella*", "phone More sheet: the tile reads Ask stella*, got " + JSON.stringify(tile));
   ok(/Space Grotesk/.test(face), "phone More sheet: the Stella tile is set in Space Grotesk, got " + face);
+  ok(sub === "oxagen’s in-app AI assistant", "phone More sheet: the tile's second line matches the launcher, got " + JSON.stringify(sub));
   ok(others === 0, "phone More sheet: the other tiles keep the UI face, " + others + " took Space Grotesk");
   await shot(page, "asst-more-sheet");
   await page.evaluate(() => [...document.querySelectorAll(".mtile")].find(x => x.querySelector(".stl-mk")).click());
   await page.waitForTimeout(450);
   ok((await host(page)).open, "phone More sheet: the tile opens the panel");
   ok(errs.length === 0, "More sheet errors: " + errs.join(" | "));
+  await page.close();
+}
+
+/* ---------------- the drawer widens from its right edge, never below where it opened ---------------- */
+{
+  const { page, errs } = await open();
+  await page.evaluate(() => { try { localStorage.removeItem("mc.asstW"); } catch (e) {} S.asstW = ASST_MIN; asstToggle(true); });
+  await page.waitForTimeout(450);
+  const geo = () => page.evaluate(() => {
+    const a = document.getElementById("asst"), g = a.querySelector(".asst-grip"), r = a.getBoundingClientRect();
+    return { w: Math.round(r.width), left: Math.round(r.left), right: Math.round(r.right), vw: innerWidth,
+      role: g && g.getAttribute("role"), orient: g && g.getAttribute("aria-orientation"),
+      cursor: g ? getComputedStyle(g).cursor : "", now: g ? Number(g.getAttribute("aria-valuenow")) : 0,
+      gx: g ? Math.round(g.getBoundingClientRect().left + g.getBoundingClientRect().width / 2) : 0 };
+  });
+  let g = await geo();
+  ok(g.w === 430, "the drawer opens at 430px, got " + g.w);
+  ok(g.role === "separator" && g.orient === "vertical", "the right edge is a vertical separator, got " + g.role + "/" + g.orient);
+  ok(g.cursor === "ew-resize", "hovering the edge shows the resize cursor, got " + g.cursor);
+  ok(g.now === 430, "the separator reports its width, got " + g.now);
+
+  await page.focus("#asst .asst-grip");
+  await page.keyboard.press("ArrowRight");
+  ok((await geo()).w === 446, "ArrowRight widens by 16px, got " + (await geo()).w);
+  await page.keyboard.press("Home");
+  await page.keyboard.press("ArrowLeft");
+  ok((await geo()).w === 430, "ArrowLeft at the floor stays at 430px, got " + (await geo()).w);
+  await page.keyboard.press("End");
+  g = await geo();
+  ok(g.right === g.vw - 56, "End widens to leave 56px of page, right edge " + g.right + " of " + g.vw);
+
+  await page.keyboard.press("Home");
+  g = await geo();
+  await page.mouse.move(g.gx, 400);
+  await page.mouse.down();
+  await page.mouse.move(g.gx + 200, 400, { steps: 5 });
+  await page.mouse.up();
+  ok(Math.abs((await geo()).w - 630) <= 2, "dragging the edge 200px right widens to about 630px, got " + (await geo()).w);
+  g = await geo();
+  await page.mouse.move(g.gx, 400);
+  await page.mouse.down();
+  await page.mouse.move(g.gx - 600, 400, { steps: 5 });
+  await page.mouse.up();
+  ok((await geo()).w === 430, "dragging far left stops at 430px, got " + (await geo()).w);
+
+  await page.evaluate(() => asstSetW(560, true));
+  await page.reload();
+  await page.waitForTimeout(350);
+  await page.evaluate(() => asstToggle(true));
+  await page.waitForTimeout(450);
+  ok((await geo()).w === 560, "the width survives a reload in this browser, got " + (await geo()).w);
+  await shot(page, "asst-resized");
+  await page.evaluate(() => { try { localStorage.removeItem("mc.asstW"); } catch (e) {} });
+  ok(errs.length === 0, "resize errors: " + errs.join(" | "));
+  await page.close();
+}
+{
+  const { page, errs } = await open("#/a-intel/core-platform", { mobile: true });
+  await page.evaluate(() => asstToggle(true));
+  await page.waitForTimeout(450);
+  const p = await page.evaluate(() => {
+    const a = document.getElementById("asst"), g = a.querySelector(".asst-grip");
+    return { phone: a.classList.contains("phone"), grip: g ? getComputedStyle(g).display : "none" };
+  });
+  ok(p.phone && p.grip === "none", "phone: the drawer shows no resize edge, got " + JSON.stringify(p));
+  ok(errs.length === 0, "phone resize errors: " + errs.join(" | "));
   await page.close();
 }
 
