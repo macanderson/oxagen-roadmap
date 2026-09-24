@@ -153,9 +153,11 @@
     "docs/adr/ADR-155-the-book-has-one-manuscript.md",
     "docs/adr/ADR-156-website-leads-sync-to-attio-after-the-row-commits.md",
     "docs/adr/ADR-157-local-arp-checkpoints-prepare-external-runs.md",
+    "docs/adr/ADR-158-every-production-deploy-publishes-the-desktop-installers.md",
     "docs/adr/ADR-160-an-agent-day-is-a-utc-calendar-day.md",
     "docs/adr/ADR-161-backfilled-runs-are-rebuilt-from-local-transcripts-and-claim-no-governance.md",
-    "docs/adr/ADR-162-a-run-resolves-an-issue-when-dispatch-pr-link-and-merge-agree.md"
+    "docs/adr/ADR-162-a-run-resolves-an-issue-when-dispatch-pr-link-and-merge-agree.md",
+    "docs/adr/ADR-164-every-green-commit-ships-unless-newer-is-live.md"
   ],
   "adrs": {
     "ADR-001": {
@@ -1382,6 +1384,14 @@
       "status": "accepted",
       "title": "Local ARP checkpoints prepare external runs"
     },
+    "ADR-158": {
+      "date": "2026-09-24",
+      "decision": "1. **A production deploy publishes a build of the deployed commit.** `publish-installers` in `pipeline.yml` runs after every `deploy-node` leg has shipped and dispatches `desktop.yml` with `publish: true` and the commit. It carries the same forward-only rule as the deploy jobs (ADR-164): `desktop` is a service of its own, the job holds the `production-desktop` lock, it records the commit it dispatched, and a run whose commit is behind what is already recorded skips rather than replacing newer installers with older ones. `check-deploy-tip --guard` holds it to that shape.",
+      "id": "ADR-158",
+      "path": "docs/adr/ADR-158-every-production-deploy-publishes-the-desktop-installers.md",
+      "status": "accepted",
+      "title": "Every production deploy publishes the desktop installers"
+    },
     "ADR-160": {
       "date": null,
       "decision": "### A day",
@@ -1405,6 +1415,14 @@
       "path": "docs/adr/ADR-162-a-run-resolves-an-issue-when-dispatch-pr-link-and-merge-agree.md",
       "status": "accepted",
       "title": "A run resolves an issue when dispatch, PR link and merge agree"
+    },
+    "ADR-164": {
+      "date": null,
+      "decision": "A deploy job ships its commit unless a newer commit is already live for that service.",
+      "id": "ADR-164",
+      "path": "docs/adr/ADR-164-every-green-commit-ships-unless-newer-is-live.md",
+      "status": null,
+      "title": "Every green commit ships unless a newer one is already live"
     }
   },
   "baseline": "2026-09-18T20:52:30Z",
@@ -2074,6 +2092,19 @@
       "status": "decided",
       "title": "Local ARP checkpoints prepare external runs"
     },
+    "ADR-158": {
+      "blocks": [],
+      "decided": "ADR-158: Every production deploy publishes the desktop installers. 1. **A production deploy publishes a build of the deployed commit.** `publish-installers` in `pipeline.yml` runs after every `deploy-node` leg has shipped and dispatches `desktop.yml` with `publish: true` and the commit. It carries the same forward-only rule as the deploy jobs (ADR-164): `desktop` is a service of its own, the job holds the `production-desktop` lock, it records the commit it dispatched, and a run whose commit is behind what is already recorded skips rather than replacing newer installers with older ones. `check-deploy-tip --guard` holds it to that shape.",
+      "decided_on": "2026-09-24",
+      "id": "ADR-158",
+      "origin": "adr",
+      "pr": 3981,
+      "question": "Decided in the repository: Every production deploy publishes the desktop installers.",
+      "recommendation": null,
+      "source": "docs/adr/ADR-158-every-production-deploy-publishes-the-desktop-installers.md",
+      "status": "decided",
+      "title": "Every production deploy publishes the desktop installers"
+    },
     "ADR-160": {
       "blocks": [],
       "decided": "ADR-160: An agent's day is a UTC calendar day. ### A day",
@@ -2112,6 +2143,19 @@
       "source": "docs/adr/ADR-162-a-run-resolves-an-issue-when-dispatch-pr-link-and-merge-agree.md",
       "status": "decided",
       "title": "A run resolves an issue when dispatch, PR link and merge agree"
+    },
+    "ADR-164": {
+      "blocks": [],
+      "decided": "ADR-164: Every green commit ships unless a newer one is already live. A deploy job ships its commit unless a newer commit is already live for that service.",
+      "decided_on": "2026-09-24",
+      "id": "ADR-164",
+      "origin": "adr",
+      "pr": 4039,
+      "question": "Decided in the repository: Every green commit ships unless a newer one is already live.",
+      "recommendation": null,
+      "source": "docs/adr/ADR-164-every-green-commit-ships-unless-newer-is-live.md",
+      "status": "decided",
+      "title": "Every green commit ships unless a newer one is already live"
     },
     "I-oxagen#2961": {
       "blocks": [],
@@ -2335,9 +2379,9 @@
       "title": "P0 · app+ops/CI · Two files from an already-merged PR export test-only helpers and fail every PR's required checks job"
     }
   },
-  "generated_at": "2026-09-24T06:54:44.920Z",
+  "generated_at": "2026-09-24T12:25:37.282Z",
   "heads": {
-    "oxagen": "0b13038042829949447e681359f5ec368b720712"
+    "oxagen": "752f04c2460a44fa44b015a725872f19dd7e6b0b"
   },
   "issues": {
     "oxagen#1": {
@@ -8874,7 +8918,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "P2 · ops/Git hooks · Make local checks work in a fresh or partial checkout",
-      "updated_at": "2026-09-20T02:25:02Z"
+      "updated_at": "2026-09-24T12:11:31Z"
     },
     "oxagen#3405": {
       "author": "macanderson",
@@ -15600,7 +15644,7 @@
     },
     "oxagen#3692": {
       "author": "github-actions[bot]",
-      "closed_at": null,
+      "closed_at": "2026-09-24T11:51:50Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": false,
@@ -15627,9 +15671,9 @@
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "P1 · ops/Migrations · Bring the production databases up to date",
-      "updated_at": "2026-09-21T14:17:17Z"
+      "updated_at": "2026-09-24T11:51:50Z"
     },
     "oxagen#3693": {
       "author": "macanderson",
@@ -16550,7 +16594,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "Queued · surfaces/Tacho · A per-day agent budget is signed into the mandate and refuses nothing",
-      "updated_at": "2026-09-22T16:52:04Z"
+      "updated_at": "2026-09-24T12:04:46Z"
     },
     "oxagen#3729": {
       "author": "macanderson",
@@ -21176,11 +21220,12 @@
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [
-        "ADR-158"
+        "ADR-158",
+        "ADR-165"
       ],
       "state": "open",
       "title": "feat(billing): itemise every governed action on a ledger and bill wrapped and external tool calls",
-      "updated_at": "2026-09-24T06:45:42Z"
+      "updated_at": "2026-09-24T12:06:25Z"
     },
     "oxagen#3912": {
       "author": "macanderson",
@@ -22217,11 +22262,11 @@
       "spec_refs": [],
       "state": "open",
       "title": "main has commits nothing verified",
-      "updated_at": "2026-09-24T06:46:10Z"
+      "updated_at": "2026-09-24T11:46:32Z"
     },
     "oxagen#3953": {
       "author": "github-actions[bot]",
-      "closed_at": null,
+      "closed_at": "2026-09-24T11:55:25Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": false,
@@ -22242,9 +22287,9 @@
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "P0 · ops/CI · main is red: checks",
-      "updated_at": "2026-09-24T05:51:57Z"
+      "updated_at": "2026-09-24T11:55:26Z"
     },
     "oxagen#3954": {
       "author": "macanderson",
@@ -22276,7 +22321,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "P2 · app/Agents+Tools · The agent and Tools pages do not follow the rev1 tab layout",
-      "updated_at": "2026-09-24T01:13:56Z"
+      "updated_at": "2026-09-24T12:04:55Z"
     },
     "oxagen#3955": {
       "author": "macanderson",
@@ -22474,7 +22519,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "feat(app): match Run and Mandate to the rev1 mockups",
-      "updated_at": "2026-09-24T06:32:56Z"
+      "updated_at": "2026-09-24T12:15:25Z"
     },
     "oxagen#3969": {
       "author": "macanderson",
@@ -22627,7 +22672,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "feat(app): brand the in-app agent as Stella and say why a turn failed",
-      "updated_at": "2026-09-24T06:41:52Z"
+      "updated_at": "2026-09-24T12:13:19Z"
     },
     "oxagen#3975": {
       "author": "macanderson",
@@ -22656,7 +22701,7 @@
     },
     "oxagen#3976": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-24T09:32:53Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": false,
@@ -22664,7 +22709,7 @@
       "is_pr": true,
       "kind": null,
       "labels": [],
-      "merged_at": null,
+      "merged_at": "2026-09-24T09:32:53Z",
       "milestone": null,
       "needs_decision": false,
       "number": 3976,
@@ -22677,9 +22722,9 @@
       ],
       "repo": "oxagen",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "feat(app): reland the rev1 Steering hub with its shelves and tabs wired",
-      "updated_at": "2026-09-24T06:29:54Z"
+      "updated_at": "2026-09-24T09:32:55Z"
     },
     "oxagen#3977": {
       "author": "macanderson",
@@ -22753,7 +22798,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "feat(app): match Organization, API keys, Roles and Audit to the rev1 mockups",
-      "updated_at": "2026-09-24T06:40:17Z"
+      "updated_at": "2026-09-24T11:56:39Z"
     },
     "oxagen#3980": {
       "author": "macanderson",
@@ -22782,7 +22827,7 @@
     },
     "oxagen#3981": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-24T11:57:33Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": true,
@@ -22790,7 +22835,7 @@
       "is_pr": true,
       "kind": null,
       "labels": [],
-      "merged_at": null,
+      "merged_at": "2026-09-24T11:57:33Z",
       "milestone": null,
       "needs_decision": false,
       "number": 3981,
@@ -22801,11 +22846,12 @@
       ],
       "repo": "oxagen",
       "spec_refs": [
-        "ADR-158"
+        "ADR-158",
+        "ADR-164"
       ],
-      "state": "open",
+      "state": "closed",
       "title": "ci(desktop): publish the installers on every production deploy, and link them on every enrollment screen",
-      "updated_at": "2026-09-24T06:44:54Z"
+      "updated_at": "2026-09-24T11:57:36Z"
     },
     "oxagen#3982": {
       "author": "macanderson",
@@ -22834,7 +22880,7 @@
     },
     "oxagen#3983": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-24T12:05:52Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": false,
@@ -22842,7 +22888,7 @@
       "is_pr": true,
       "kind": null,
       "labels": [],
-      "merged_at": null,
+      "merged_at": "2026-09-24T12:05:52Z",
       "milestone": null,
       "needs_decision": false,
       "number": 3983,
@@ -22862,9 +22908,9 @@
       ],
       "repo": "oxagen",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "feat(app): match the shell to the rev1 mockups",
-      "updated_at": "2026-09-24T06:33:12Z"
+      "updated_at": "2026-09-24T12:05:54Z"
     },
     "oxagen#3984": {
       "author": "macanderson",
@@ -22893,7 +22939,7 @@
     },
     "oxagen#3986": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-24T10:58:58Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": false,
@@ -22901,7 +22947,7 @@
       "is_pr": true,
       "kind": null,
       "labels": [],
-      "merged_at": null,
+      "merged_at": "2026-09-24T10:58:58Z",
       "milestone": null,
       "needs_decision": false,
       "number": 3986,
@@ -22931,9 +22977,9 @@
       ],
       "repo": "oxagen",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "feat(app): close the remaining rev1 audit gaps on Agents and Runtimes",
-      "updated_at": "2026-09-24T06:51:21Z"
+      "updated_at": "2026-09-24T10:59:00Z"
     },
     "oxagen#3987": {
       "author": "macanderson",
@@ -22959,11 +23005,12 @@
       "repo": "oxagen",
       "spec_refs": [
         "ADR-159",
-        "ADR-060"
+        "ADR-060",
+        "ADR-110"
       ],
       "state": "open",
       "title": "feat(runs): cost a run while it runs and close a session that stops reporting",
-      "updated_at": "2026-09-24T06:47:40Z"
+      "updated_at": "2026-09-24T12:05:21Z"
     },
     "oxagen#3988": {
       "author": "macanderson",
@@ -23477,7 +23524,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "fix(context): name a blank-titled record from its lineage and keep typed names",
-      "updated_at": "2026-09-24T06:07:02Z"
+      "updated_at": "2026-09-24T12:06:15Z"
     },
     "oxagen#4012": {
       "author": "macanderson",
@@ -23552,7 +23599,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "fix(tacho): wait for launchd to drop the old daemon before a re-enroll bootstraps",
-      "updated_at": "2026-09-24T06:06:26Z"
+      "updated_at": "2026-09-24T12:05:57Z"
     },
     "oxagen#4015": {
       "author": "macanderson",
@@ -23742,7 +23789,7 @@
       ],
       "state": "open",
       "title": "fix(runs): give every recorded run a title, record why enrichment failed, and retry it",
-      "updated_at": "2026-09-24T06:00:08Z"
+      "updated_at": "2026-09-24T10:14:15Z"
     },
     "oxagen#4022": {
       "author": "macanderson",
@@ -23817,7 +23864,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "Queued · evidence/Run · A wrapped run's task, operator, end time and price are wrong",
-      "updated_at": "2026-09-24T03:22:24Z"
+      "updated_at": "2026-09-24T07:11:20Z"
     },
     "oxagen#4025": {
       "author": "macanderson",
@@ -23874,11 +23921,11 @@
       "spec_refs": [],
       "state": "open",
       "title": "fix(run): show a wrapped Claude Code session as its tool calls, not its permission checks",
-      "updated_at": "2026-09-24T06:27:57Z"
+      "updated_at": "2026-09-24T11:42:20Z"
     },
     "oxagen#4027": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-24T11:35:21Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": false,
@@ -23886,7 +23933,7 @@
       "is_pr": true,
       "kind": null,
       "labels": [],
-      "merged_at": null,
+      "merged_at": "2026-09-24T11:35:21Z",
       "milestone": null,
       "needs_decision": false,
       "number": 4027,
@@ -23898,9 +23945,9 @@
       ],
       "repo": "oxagen",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "fix(tacho): deliver steers and resume to an agent working on its own",
-      "updated_at": "2026-09-24T06:06:27Z"
+      "updated_at": "2026-09-24T11:35:24Z"
     },
     "oxagen#4028": {
       "author": "macanderson",
@@ -23932,7 +23979,7 @@
     },
     "oxagen#4029": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-24T12:19:26Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": false,
@@ -23940,7 +23987,7 @@
       "is_pr": true,
       "kind": null,
       "labels": [],
-      "merged_at": null,
+      "merged_at": "2026-09-24T12:19:26Z",
       "milestone": null,
       "needs_decision": false,
       "number": 4029,
@@ -23952,9 +23999,9 @@
       ],
       "repo": "oxagen",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "fix(run): record task, operator, end time and price facts for wrapped runs",
-      "updated_at": "2026-09-24T06:53:14Z"
+      "updated_at": "2026-09-24T12:19:29Z"
     },
     "oxagen#4031": {
       "author": "macanderson",
@@ -24019,7 +24066,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "P1 · app/Run · A live wrapped run shows its id as the title and no spend or harness PRs",
-      "updated_at": "2026-09-24T06:07:51Z"
+      "updated_at": "2026-09-24T12:04:36Z"
     },
     "oxagen#4033": {
       "author": "macanderson",
@@ -24042,11 +24089,12 @@
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [
+        "ADR-159",
         "ADR-158"
       ],
       "state": "open",
       "title": "feat(app): rebuild the Run page to the rev1 mockup, panel for panel",
-      "updated_at": "2026-09-24T06:50:10Z"
+      "updated_at": "2026-09-24T12:17:47Z"
     },
     "oxagen#4034": {
       "author": "macanderson",
@@ -24073,7 +24121,7 @@
       ],
       "state": "open",
       "title": "fix(runs): let operators command an observe-tier run whose host is live",
-      "updated_at": "2026-09-24T06:05:45Z"
+      "updated_at": "2026-09-24T11:45:24Z"
     },
     "oxagen#4035": {
       "author": "macanderson",
@@ -24161,7 +24209,7 @@
     },
     "oxagen#4039": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-24T09:54:18Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": true,
@@ -24169,7 +24217,7 @@
       "is_pr": true,
       "kind": null,
       "labels": [],
-      "merged_at": null,
+      "merged_at": "2026-09-24T09:54:18Z",
       "milestone": null,
       "needs_decision": false,
       "number": 4039,
@@ -24182,9 +24230,9 @@
       "spec_refs": [
         "ADR-164"
       ],
-      "state": "open",
+      "state": "closed",
       "title": "ci(deploy): ship every green commit unless a newer one is already live",
-      "updated_at": "2026-09-24T06:51:23Z"
+      "updated_at": "2026-09-24T09:58:50Z"
     },
     "oxagen#4040": {
       "author": "macanderson",
@@ -24213,11 +24261,11 @@
       "spec_refs": [],
       "state": "open",
       "title": "P2 · app/Tools+Agents+Run+Spend+Fleet · Pick records from a searchable list instead of pasting ids",
-      "updated_at": "2026-09-24T06:02:17Z"
+      "updated_at": "2026-09-24T10:23:43Z"
     },
     "oxagen#4041": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-24T08:46:15Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": false,
@@ -24227,20 +24275,18 @@
       "labels": [
         "no-issue"
       ],
-      "merged_at": null,
+      "merged_at": "2026-09-24T08:46:15Z",
       "milestone": null,
       "needs_decision": false,
       "number": 4041,
       "pillar": null,
       "priority": null,
-      "refs": [
-        3953
-      ],
+      "refs": [],
       "repo": "oxagen",
       "spec_refs": [],
-      "state": "open",
-      "title": "fix(app): await act when rendering the Run page in its tests",
-      "updated_at": "2026-09-24T06:09:38Z"
+      "state": "closed",
+      "title": "fix(app): return main's app tests to green after #4018",
+      "updated_at": "2026-09-24T08:46:17Z"
     },
     "oxagen#4042": {
       "author": "macanderson",
@@ -24301,7 +24347,7 @@
     },
     "oxagen#4044": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-24T07:42:58Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": false,
@@ -24320,9 +24366,9 @@
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "fix(app): stop exporting the two Run schemas only runs.ts uses",
-      "updated_at": "2026-09-24T06:54:09Z"
+      "updated_at": "2026-09-24T07:42:58Z"
     },
     "oxagen#4045": {
       "author": "macanderson",
@@ -24347,11 +24393,11 @@
       "spec_refs": [],
       "state": "open",
       "title": "feat(app): pick records by name in every form that took an id",
-      "updated_at": "2026-09-24T06:47:54Z"
+      "updated_at": "2026-09-24T12:14:30Z"
     },
     "oxagen#4046": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-24T07:11:28Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": true,
@@ -24372,13 +24418,13 @@
       "spec_refs": [
         "ADR-110"
       ],
-      "state": "open",
+      "state": "closed",
       "title": "Queued · app/Run · The Run header never shows when a run ended or who enrolled its host, because list_runs sends neither field",
-      "updated_at": "2026-09-24T06:48:11Z"
+      "updated_at": "2026-09-24T07:11:28Z"
     },
     "oxagen#4047": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-24T11:51:11Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": true,
@@ -24386,7 +24432,7 @@
       "is_pr": true,
       "kind": null,
       "labels": [],
-      "merged_at": null,
+      "merged_at": "2026-09-24T11:51:11Z",
       "milestone": null,
       "needs_decision": false,
       "number": 4047,
@@ -24407,9 +24453,231 @@
       "spec_refs": [
         "ADR-145"
       ],
-      "state": "open",
+      "state": "closed",
       "title": "fix(app): clear the sign-in screens' remaining rev1 audit fails",
-      "updated_at": "2026-09-24T06:50:05Z"
+      "updated_at": "2026-09-24T11:51:40Z"
+    },
+    "oxagen#4048": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/issues/4048",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 4048,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Queued · app/Run+Shell · A live run's transcript repeats its subagent steps on every poll, and large runs load slowly",
+      "updated_at": "2026-09-24T07:22:55Z"
+    },
+    "oxagen#4049": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [
+        13
+      ],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/4049",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "area:billing"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 4049,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        3944
+      ],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "fix(billing): price current Claude models at Anthropic list price",
+      "updated_at": "2026-09-24T11:40:43Z"
+    },
+    "oxagen#4050": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/issues/4050",
+      "is_pr": false,
+      "kind": "defect",
+      "labels": [
+        "P2",
+        "area:app",
+        "kind:defect",
+        "area:evidence",
+        "job:explain",
+        "pillar:reliability",
+        "model:tier-2",
+        "build-time:90mins"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 4050,
+      "pillar": "reliability",
+      "priority": "P2",
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "P2 · evidence/Run+Tacho · A turn's prompt is recorded twice and drawn twice",
+      "updated_at": "2026-09-24T11:40:03Z"
+    },
+    "oxagen#4051": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [
+        2,
+        4050,
+        1
+      ],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/4051",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 4051,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "fix(tacho,app): record and draw a turn's prompt once, and replay a hook whose write failed",
+      "updated_at": "2026-09-24T11:46:36Z"
+    },
+    "oxagen#4052": {
+      "author": "macanderson",
+      "closed_at": "2026-09-24T08:09:50Z",
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/4052",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 4052,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        3953
+      ],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "fix(app): unblock main by keeping runs.ts's internal schemas unexported",
+      "updated_at": "2026-09-24T08:09:50Z"
+    },
+    "oxagen#4053": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/issues/4053",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 4053,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Queued · app/Billing+Agents · A loading skeleton and its page both render main#main, so page-load fails on a strict-mode violation",
+      "updated_at": "2026-09-24T08:12:50Z"
+    },
+    "oxagen#4054": {
+      "author": "macanderson",
+      "closed_at": "2026-09-24T12:11:28Z",
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/issues/4054",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 4054,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "Queued · ops/CI · The pre-commit staged typecheck cannot resolve PageProps, so it refuses every commit that stages an app route",
+      "updated_at": "2026-09-24T12:11:30Z"
+    },
+    "oxagen#4055": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/issues/4055",
+      "is_pr": false,
+      "kind": "gap",
+      "labels": [
+        "P2",
+        "area:ops",
+        "job:govern",
+        "pillar:maintainability",
+        "kind:gap",
+        "size/XS",
+        "model:tier-2",
+        "build-time:60mins"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 4055,
+      "pillar": "maintainability",
+      "priority": "P2",
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-015"
+      ],
+      "state": "open",
+      "title": "P2 · ops/CI · CI never checks Biome formatting, so the rule only holds when the pre-commit hook isn't skipped",
+      "updated_at": "2026-09-24T10:12:52Z"
     },
     "oxagen#600": {
       "author": "macanderson",
@@ -25050,6 +25318,54 @@
       "state": "closed",
       "title": "fix(refresh): keep closed decision issues on a full run",
       "updated_at": "2026-09-24T06:10:54Z"
+    },
+    "oxagen-roadmap#76": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen-roadmap/issues/76",
+      "is_pr": false,
+      "kind": null,
+      "labels": [],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 76,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen-roadmap",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Move the witness and the definition of done to rev 2 on the roadmap",
+      "updated_at": "2026-09-24T07:07:57Z"
+    },
+    "oxagen-roadmap#77": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [
+        76
+      ],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen-roadmap/pull/77",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 77,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen-roadmap",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Move the witness and dod to rev 2 and rebuild the Now page",
+      "updated_at": "2026-09-24T07:22:27Z"
     },
     "stella#1044": {
       "author": "macanderson",
@@ -40036,6 +40352,62 @@
       "title": "chore(release): sync versions to 0.9.436 [skip release]",
       "updated_at": "2026-09-23T04:21:20Z"
     },
+    "stella#6557": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/stella/issues/6557",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "bug",
+        "P0",
+        "area:ci",
+        "use-model:balanced",
+        "pain:auditability",
+        "build-time:30mins",
+        "model:tier-2"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 6557,
+      "pillar": null,
+      "priority": "P0",
+      "refs": [],
+      "repo": "stella",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Triage workflow fails every run for two days: Anthropic API is out of credit",
+      "updated_at": "2026-09-24T11:12:24Z"
+    },
+    "stella#6558": {
+      "author": "macanderson",
+      "closed_at": "2026-09-24T11:12:14Z",
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/stella/issues/6558",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 6558,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "stella",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "Scheduled triage has failed every run for ~2.6 days on an exhausted Anthropic credit balance, so nothing is being triaged",
+      "updated_at": "2026-09-24T11:12:14Z"
+    },
     "stella#834": {
       "author": "macanderson",
       "closed_at": null,
@@ -40158,9 +40530,60 @@
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "dod",
-      "last_merge": "2026-09-24T06:36:04Z",
+      "last_merge": "2026-09-24T12:19:26Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T12:19:26Z",
+          "number": 4029,
+          "repo": "oxagen",
+          "title": "fix(run): record task, operator, end time and price facts for wrapped runs",
+          "touched": [
+            "packages/tacho"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T12:05:52Z",
+          "number": 3983,
+          "repo": "oxagen",
+          "title": "feat(app): match the shell to the rev1 mockups",
+          "touched": [
+            "apps/cli/src",
+            "packages/tacho"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T11:35:21Z",
+          "number": 4027,
+          "repo": "oxagen",
+          "title": "fix(tacho): deliver steers and resume to an agent working on its own",
+          "touched": [
+            "packages/tacho"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T09:54:18Z",
+          "number": 4039,
+          "repo": "oxagen",
+          "title": "ci(deploy): ship every green commit unless a newer one is already live",
+          "touched": [
+            "packages/tacho"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T09:32:53Z",
+          "number": 3976,
+          "repo": "oxagen",
+          "title": "feat(app): reland the rev1 Steering hub with its shelves and tabs wired",
+          "touched": [
+            "packages/tacho"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-24T06:36:04Z",
@@ -40312,69 +40735,29 @@
           "touched": [
             "packages/tacho"
           ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-23T18:38:12Z",
-          "number": 3798,
-          "repo": "oxagen",
-          "title": "fix(run-export): accept one trailing newline in frames.ndjson",
-          "touched": [
-            "packages/tacho"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-23T18:38:03Z",
-          "number": 3797,
-          "repo": "oxagen",
-          "title": "test(tacho): a drain that waits on another still ships what was appended meanwhile",
-          "touched": [
-            "packages/tacho"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-23T18:17:40Z",
-          "number": 3761,
-          "repo": "oxagen",
-          "title": "feat(tacho): enforce workspace model lists independently of budgets",
-          "touched": [
-            "packages/tacho"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-23T18:11:03Z",
-          "number": 3772,
-          "repo": "oxagen",
-          "title": "feat(tacho): bind contained run tiers to registered launcher evidence",
-          "touched": [
-            "packages/tacho"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-23T16:45:21Z",
-          "number": 3783,
-          "repo": "oxagen",
-          "title": "test(tacho): a 429's named wait does not grow the command-poll backoff",
-          "touched": [
-            "packages/tacho"
-          ]
         }
       ],
       "open_issues": 0,
-      "refreshed_at": "2026-09-24T06:54:44.920Z",
+      "refreshed_at": "2026-09-24T12:25:37.282Z",
       "shared_page": false
     },
     "D3": {
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "dod",
-      "last_merge": "2026-09-23T18:11:03Z",
+      "last_merge": "2026-09-24T12:19:26Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T12:19:26Z",
+          "number": 4029,
+          "repo": "oxagen",
+          "title": "fix(run): record task, operator, end time and price facts for wrapped runs",
+          "touched": [
+            "packages/billing/src"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-23T18:11:03Z",
@@ -40564,20 +40947,10 @@
           "touched": [
             "packages/billing/src"
           ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-18T21:36:05Z",
-          "number": 3322,
-          "repo": "oxagen",
-          "title": "billing: bill the in-app agent's platform-funded tokens at exactly cost",
-          "touched": [
-            "packages/billing/src"
-          ]
         }
       ],
       "open_issues": 0,
-      "refreshed_at": "2026-09-24T06:26:06.640Z",
+      "refreshed_at": "2026-09-24T12:25:37.282Z",
       "shared_page": false
     },
     "D4": {
@@ -41081,9 +41454,19 @@
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "witness",
-      "last_merge": "2026-09-24T02:37:02Z",
+      "last_merge": "2026-09-24T12:05:52Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T12:05:52Z",
+          "number": 3983,
+          "repo": "oxagen",
+          "title": "feat(app): match the shell to the rev1 mockups",
+          "touched": [
+            "packages/compliance/src/security-event-types.ts"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-24T02:37:02Z",
@@ -41146,7 +41529,7 @@
         }
       ],
       "open_issues": 0,
-      "refreshed_at": "2026-09-24T06:26:06.640Z",
+      "refreshed_at": "2026-09-24T12:25:37.282Z",
       "shared_page": false
     },
     "W5": {
@@ -41535,9 +41918,60 @@
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "surface",
-      "last_merge": "2026-09-24T06:36:04Z",
+      "last_merge": "2026-09-24T12:05:52Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T12:05:52Z",
+          "number": 3983,
+          "repo": "oxagen",
+          "title": "feat(app): match the shell to the rev1 mockups",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T11:57:33Z",
+          "number": 3981,
+          "repo": "oxagen",
+          "title": "ci(desktop): publish the installers on every production deploy, and link them on every enrollment screen",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T11:51:11Z",
+          "number": 4047,
+          "repo": "oxagen",
+          "title": "fix(app): clear the sign-in screens' remaining rev1 audit fails",
+          "touched": [
+            "apps/app/src/app/",
+            "apps/app/src/features/auth/invite-view.tsx"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T09:54:18Z",
+          "number": 4039,
+          "repo": "oxagen",
+          "title": "ci(deploy): ship every green commit unless a newer one is already live",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T09:32:53Z",
+          "number": 3976,
+          "repo": "oxagen",
+          "title": "feat(app): reland the rev1 Steering hub with its shelves and tabs wired",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-24T06:36:04Z",
@@ -41690,61 +42124,11 @@
           "touched": [
             "apps/app/src/app/"
           ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-23T18:18:29Z",
-          "number": 3775,
-          "repo": "oxagen",
-          "title": "feat(app): resurface agent composition and provider controls",
-          "touched": [
-            "apps/app/src/app/"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-23T07:40:52Z",
-          "number": 3735,
-          "repo": "oxagen",
-          "title": "feat(auth): enterprise SSO over OIDC and SAML with IdP group-to-role mapping",
-          "touched": [
-            "apps/app/src/app/"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-23T02:48:23Z",
-          "number": 3739,
-          "repo": "oxagen",
-          "title": "Review of the last 100 commits: three P1s, six P2s, and the residue that could ride",
-          "touched": [
-            "apps/app/src/app/"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-23T02:28:29Z",
-          "number": 3732,
-          "repo": "oxagen",
-          "title": "feat(spend): cost-center chargeback on Spend",
-          "touched": [
-            "apps/app/src/app/"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-21T20:24:07Z",
-          "number": 3632,
-          "repo": "oxagen",
-          "title": "feat(run): build the outputs spine, so a run says what it produced",
-          "touched": [
-            "apps/app/src/app/"
-          ]
         }
       ],
       "open_issues": 0,
       "page": "apps/app/src/app/(auth)/invite/[token]/page.tsx",
-      "refreshed_at": "2026-09-24T06:54:44.920Z",
+      "refreshed_at": "2026-09-24T12:25:37.282Z",
       "shared_page": false
     },
     "agent": {
@@ -42008,9 +42392,19 @@
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "surface",
-      "last_merge": "2026-09-24T04:44:24Z",
+      "last_merge": "2026-09-24T10:58:58Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T10:58:58Z",
+          "number": 3986,
+          "repo": "oxagen",
+          "title": "feat(app): close the remaining rev1 audit gaps on Agents and Runtimes",
+          "touched": [
+            "apps/app/src/features/agents/agents.tsx"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-24T04:44:24Z",
@@ -42107,7 +42501,7 @@
       ],
       "open_issues": 0,
       "page": "apps/app/src/app/[org]/[ws]/agents/page.tsx",
-      "refreshed_at": "2026-09-24T06:26:06.640Z",
+      "refreshed_at": "2026-09-24T12:25:37.282Z",
       "shared_page": false
     },
     "audit": {
@@ -42158,7 +42552,7 @@
       "closed_issues": 1,
       "gap_refs": [],
       "kind": "surface",
-      "last_merge": "2026-09-23T22:47:51Z",
+      "last_merge": "2026-09-24T11:57:33Z",
       "links": [
         {
           "number": 3323,
@@ -42174,6 +42568,16 @@
         }
       ],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T11:57:33Z",
+          "number": 3981,
+          "repo": "oxagen",
+          "title": "ci(desktop): publish the installers on every production deploy, and link them on every enrollment screen",
+          "touched": [
+            "apps/app/src/app/[org]/billing/page.tsx"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-23T22:47:51Z",
@@ -42281,7 +42685,7 @@
       ],
       "open_issues": 1,
       "page": "apps/app/src/app/[org]/billing/page.tsx",
-      "refreshed_at": "2026-09-24T06:26:06.640Z",
+      "refreshed_at": "2026-09-24T12:25:37.282Z",
       "shared_page": false
     },
     "fleet": {
@@ -42297,7 +42701,7 @@
         }
       ],
       "kind": "surface",
-      "last_merge": "2026-09-24T05:58:40Z",
+      "last_merge": "2026-09-24T12:19:26Z",
       "links": [
         {
           "number": 3282,
@@ -42313,6 +42717,58 @@
         }
       ],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T12:19:26Z",
+          "number": 4029,
+          "repo": "oxagen",
+          "title": "fix(run): record task, operator, end time and price facts for wrapped runs",
+          "touched": [
+            "apps/app/src/data/live/mappers/runs.ts"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T12:05:52Z",
+          "number": 3983,
+          "repo": "oxagen",
+          "title": "feat(app): match the shell to the rev1 mockups",
+          "touched": [
+            "apps/app/src/features/fleet/approvals-panel.tsx",
+            "apps/app/src/features/fleet/fleet.builders.ts",
+            "apps/app/src/data/live/approvals.ts"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T10:58:58Z",
+          "number": 3986,
+          "repo": "oxagen",
+          "title": "feat(app): close the remaining rev1 audit gaps on Agents and Runtimes",
+          "touched": [
+            "apps/app/src/features/fleet/fleet.builders.ts"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T09:32:53Z",
+          "number": 3976,
+          "repo": "oxagen",
+          "title": "feat(app): reland the rev1 Steering hub with its shelves and tabs wired",
+          "touched": [
+            "apps/app/src/features/fleet/fleet.builders.ts"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T08:46:15Z",
+          "number": 4041,
+          "repo": "oxagen",
+          "title": "fix(app): return main's app tests to green after #4018",
+          "touched": [
+            "apps/app/src/data/live/runs.ts"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-24T05:58:40Z",
@@ -42472,71 +42928,71 @@
             "apps/app/src/features/fleet/runs-table.tsx",
             "apps/app/src/features/fleet/stat-strip.tsx"
           ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-23T02:28:29Z",
-          "number": 3732,
-          "repo": "oxagen",
-          "title": "feat(spend): cost-center chargeback on Spend",
-          "touched": [
-            "apps/app/src/features/fleet/fleet.builders.ts"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-22T16:43:54Z",
-          "number": 3716,
-          "repo": "oxagen",
-          "title": "feat(tacho): store a workspace session policy and report when a host leaves the gateway",
-          "touched": [
-            "apps/app/src/features/fleet/fleet.builders.ts"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-22T00:37:37Z",
-          "number": 3705,
-          "repo": "oxagen",
-          "title": "fix(fleet): show the enforcement tier on every run row",
-          "touched": [
-            "apps/app/src/features/fleet/runs-table.tsx"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-21T21:41:25Z",
-          "number": 3696,
-          "repo": "oxagen",
-          "title": "A transcript row is the thing the run did, and an operator is named, never keyed",
-          "touched": [
-            "apps/app/src/features/fleet/runs-table.tsx"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-21T20:24:07Z",
-          "number": 3632,
-          "repo": "oxagen",
-          "title": "feat(run): build the outputs spine, so a run says what it produced",
-          "touched": [
-            "apps/app/src/features/fleet/fleet.builders.ts",
-            "apps/app/src/data/live/runs.ts"
-          ]
         }
       ],
       "open_issues": 1,
       "page": null,
-      "refreshed_at": "2026-09-24T06:26:06.640Z",
+      "refreshed_at": "2026-09-24T12:25:37.282Z",
       "shared_page": false
     },
     "forgot-password": {
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "surface",
-      "last_merge": "2026-09-24T06:36:04Z",
+      "last_merge": "2026-09-24T12:05:52Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T12:05:52Z",
+          "number": 3983,
+          "repo": "oxagen",
+          "title": "feat(app): match the shell to the rev1 mockups",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T11:57:33Z",
+          "number": 3981,
+          "repo": "oxagen",
+          "title": "ci(desktop): publish the installers on every production deploy, and link them on every enrollment screen",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T11:51:11Z",
+          "number": 4047,
+          "repo": "oxagen",
+          "title": "fix(app): clear the sign-in screens' remaining rev1 audit fails",
+          "touched": [
+            "apps/app/src/app/",
+            "apps/app/src/features/auth/password-reset-forms.tsx"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T09:54:18Z",
+          "number": 4039,
+          "repo": "oxagen",
+          "title": "ci(deploy): ship every green commit unless a newer one is already live",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T09:32:53Z",
+          "number": 3976,
+          "repo": "oxagen",
+          "title": "feat(app): reland the rev1 Steering hub with its shelves and tabs wired",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-24T06:36:04Z",
@@ -42687,61 +43143,11 @@
           "touched": [
             "apps/app/src/app/"
           ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-23T18:18:29Z",
-          "number": 3775,
-          "repo": "oxagen",
-          "title": "feat(app): resurface agent composition and provider controls",
-          "touched": [
-            "apps/app/src/app/"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-23T07:40:52Z",
-          "number": 3735,
-          "repo": "oxagen",
-          "title": "feat(auth): enterprise SSO over OIDC and SAML with IdP group-to-role mapping",
-          "touched": [
-            "apps/app/src/app/"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-23T02:48:23Z",
-          "number": 3739,
-          "repo": "oxagen",
-          "title": "Review of the last 100 commits: three P1s, six P2s, and the residue that could ride",
-          "touched": [
-            "apps/app/src/app/"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-23T02:28:29Z",
-          "number": 3732,
-          "repo": "oxagen",
-          "title": "feat(spend): cost-center chargeback on Spend",
-          "touched": [
-            "apps/app/src/app/"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-21T20:24:07Z",
-          "number": 3632,
-          "repo": "oxagen",
-          "title": "feat(run): build the outputs spine, so a run says what it produced",
-          "touched": [
-            "apps/app/src/app/"
-          ]
         }
       ],
       "open_issues": 0,
       "page": "apps/app/src/app/(auth)/forgot-password/page.tsx",
-      "refreshed_at": "2026-09-24T06:54:44.920Z",
+      "refreshed_at": "2026-09-24T12:25:37.282Z",
       "shared_page": false
     },
     "installer": {
@@ -42753,7 +43159,7 @@
         }
       ],
       "kind": "surface",
-      "last_merge": "2026-09-24T02:41:26Z",
+      "last_merge": "2026-09-24T11:57:33Z",
       "links": [
         {
           "number": 3301,
@@ -42775,6 +43181,16 @@
         }
       ],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T11:57:33Z",
+          "number": 3981,
+          "repo": "oxagen",
+          "title": "ci(desktop): publish the installers on every production deploy, and link them on every enrollment screen",
+          "touched": [
+            "apps/desktop/README.md"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-24T02:41:26Z",
@@ -42981,31 +43397,71 @@
             "packages/tacho/src/cli/enroll.ts",
             "packages/tacho/src/cli/unenroll.ts"
           ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-18T22:27:26Z",
-          "number": 3342,
-          "repo": "oxagen",
-          "title": "tacho: ship prompts, transcripts and per-call tokens so the Run page has cost and content",
-          "touched": [
-            "packages/tacho/src/cli/enroll.ts",
-            "packages/tacho/src/cli/unenroll.ts"
-          ]
         }
       ],
       "open_issues": 2,
       "page": "apps/app/src/app/[org]/[ws]/register/[step]/page.tsx",
-      "refreshed_at": "2026-09-24T06:26:06.640Z",
+      "refreshed_at": "2026-09-24T12:25:37.282Z",
       "shared_page": true
     },
     "login": {
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "surface",
-      "last_merge": "2026-09-24T06:36:04Z",
+      "last_merge": "2026-09-24T12:05:52Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T12:05:52Z",
+          "number": 3983,
+          "repo": "oxagen",
+          "title": "feat(app): match the shell to the rev1 mockups",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T11:57:33Z",
+          "number": 3981,
+          "repo": "oxagen",
+          "title": "ci(desktop): publish the installers on every production deploy, and link them on every enrollment screen",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T11:51:11Z",
+          "number": 4047,
+          "repo": "oxagen",
+          "title": "fix(app): clear the sign-in screens' remaining rev1 audit fails",
+          "touched": [
+            "apps/app/src/app/",
+            "apps/app/src/features/auth/login-form.tsx"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T09:54:18Z",
+          "number": 4039,
+          "repo": "oxagen",
+          "title": "ci(deploy): ship every green commit unless a newer one is already live",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T09:32:53Z",
+          "number": 3976,
+          "repo": "oxagen",
+          "title": "feat(app): reland the rev1 Steering hub with its shelves and tabs wired",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-24T06:36:04Z",
@@ -43156,62 +43612,11 @@
           "touched": [
             "apps/app/src/app/"
           ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-23T18:18:29Z",
-          "number": 3775,
-          "repo": "oxagen",
-          "title": "feat(app): resurface agent composition and provider controls",
-          "touched": [
-            "apps/app/src/app/"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-23T07:40:52Z",
-          "number": 3735,
-          "repo": "oxagen",
-          "title": "feat(auth): enterprise SSO over OIDC and SAML with IdP group-to-role mapping",
-          "touched": [
-            "apps/app/src/app/",
-            "apps/app/src/features/auth/login-form.tsx"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-23T02:48:23Z",
-          "number": 3739,
-          "repo": "oxagen",
-          "title": "Review of the last 100 commits: three P1s, six P2s, and the residue that could ride",
-          "touched": [
-            "apps/app/src/app/"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-23T02:28:29Z",
-          "number": 3732,
-          "repo": "oxagen",
-          "title": "feat(spend): cost-center chargeback on Spend",
-          "touched": [
-            "apps/app/src/app/"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-21T20:24:07Z",
-          "number": 3632,
-          "repo": "oxagen",
-          "title": "feat(run): build the outputs spine, so a run says what it produced",
-          "touched": [
-            "apps/app/src/app/"
-          ]
         }
       ],
       "open_issues": 0,
       "page": "apps/app/src/app/(auth)/login/page.tsx",
-      "refreshed_at": "2026-09-24T06:54:44.920Z",
+      "refreshed_at": "2026-09-24T12:25:37.282Z",
       "shared_page": false
     },
     "mandate": {
@@ -43283,9 +43688,59 @@
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "surface",
-      "last_merge": "2026-09-24T06:36:04Z",
+      "last_merge": "2026-09-24T12:05:52Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T12:05:52Z",
+          "number": 3983,
+          "repo": "oxagen",
+          "title": "feat(app): match the shell to the rev1 mockups",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T11:57:33Z",
+          "number": 3981,
+          "repo": "oxagen",
+          "title": "ci(desktop): publish the installers on every production deploy, and link them on every enrollment screen",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T11:51:11Z",
+          "number": 4047,
+          "repo": "oxagen",
+          "title": "fix(app): clear the sign-in screens' remaining rev1 audit fails",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T09:54:18Z",
+          "number": 4039,
+          "repo": "oxagen",
+          "title": "ci(deploy): ship every green commit unless a newer one is already live",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T09:32:53Z",
+          "number": 3976,
+          "repo": "oxagen",
+          "title": "feat(app): reland the rev1 Steering hub with its shelves and tabs wired",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-24T06:36:04Z",
@@ -43437,61 +43892,11 @@
           "touched": [
             "apps/app/src/app/"
           ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-23T18:18:52Z",
-          "number": 3795,
-          "repo": "oxagen",
-          "title": "feat(app): rebuild the Run page to match the mockup",
-          "touched": [
-            "apps/app/src/app/"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-23T18:18:29Z",
-          "number": 3775,
-          "repo": "oxagen",
-          "title": "feat(app): resurface agent composition and provider controls",
-          "touched": [
-            "apps/app/src/app/"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-23T07:40:52Z",
-          "number": 3735,
-          "repo": "oxagen",
-          "title": "feat(auth): enterprise SSO over OIDC and SAML with IdP group-to-role mapping",
-          "touched": [
-            "apps/app/src/app/"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-23T02:48:23Z",
-          "number": 3739,
-          "repo": "oxagen",
-          "title": "Review of the last 100 commits: three P1s, six P2s, and the residue that could ride",
-          "touched": [
-            "apps/app/src/app/"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-23T02:28:29Z",
-          "number": 3732,
-          "repo": "oxagen",
-          "title": "feat(spend): cost-center chargeback on Spend",
-          "touched": [
-            "apps/app/src/app/"
-          ]
         }
       ],
       "open_issues": 0,
       "page": "apps/app/src/app/(onboarding)/new-organization/page.tsx",
-      "refreshed_at": "2026-09-24T06:54:44.920Z",
+      "refreshed_at": "2026-09-24T12:25:37.282Z",
       "shared_page": false
     },
     "onboarding-run": {
@@ -43562,9 +43967,19 @@
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "surface",
-      "last_merge": "2026-09-24T02:39:04Z",
+      "last_merge": "2026-09-24T11:57:33Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T11:57:33Z",
+          "number": 3981,
+          "repo": "oxagen",
+          "title": "ci(desktop): publish the installers on every production deploy, and link them on every enrollment screen",
+          "touched": [
+            "apps/app/src/features/onboarding/ui/wrap-agent.tsx"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-24T02:39:04Z",
@@ -43620,7 +44035,7 @@
       ],
       "open_issues": 0,
       "page": "apps/app/src/app/[org]/[ws]/register/[step]/page.tsx",
-      "refreshed_at": "2026-09-24T06:26:06.640Z",
+      "refreshed_at": "2026-09-24T12:25:37.282Z",
       "shared_page": true
     },
     "organization": {
@@ -43861,7 +44276,7 @@
       "closed_issues": 1,
       "gap_refs": [],
       "kind": "surface",
-      "last_merge": "2026-09-23T23:47:37Z",
+      "last_merge": "2026-09-24T09:32:53Z",
       "links": [
         {
           "number": 3395,
@@ -43871,6 +44286,16 @@
         }
       ],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T09:32:53Z",
+          "number": 3976,
+          "repo": "oxagen",
+          "title": "feat(app): reland the rev1 Steering hub with its shelves and tabs wired",
+          "touched": [
+            "apps/app/src/data/contracts/steering.ts"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-23T23:47:37Z",
@@ -43939,7 +44364,7 @@
       "open_issues": 0,
       "page": "apps/app/src/app/[org]/[ws]/steering/records/[lineage]/page.tsx",
       "reason": "page exists: apps/app/src/app/[org]/[ws]/steering/records/[lineage]/page.tsx",
-      "refreshed_at": "2026-09-24T06:26:06.640Z",
+      "refreshed_at": "2026-09-24T12:25:37.282Z",
       "shared_page": false
     },
     "register-name": {
@@ -44103,9 +44528,19 @@
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "surface",
-      "last_merge": "2026-09-24T02:39:04Z",
+      "last_merge": "2026-09-24T11:57:33Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T11:57:33Z",
+          "number": 3981,
+          "repo": "oxagen",
+          "title": "ci(desktop): publish the installers on every production deploy, and link them on every enrollment screen",
+          "touched": [
+            "apps/app/src/features/onboarding/ui/wrap-agent.tsx"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-24T02:39:04Z",
@@ -44189,7 +44624,7 @@
       ],
       "open_issues": 0,
       "page": "apps/app/src/app/[org]/[ws]/register/[step]/page.tsx",
-      "refreshed_at": "2026-09-24T06:26:06.640Z",
+      "refreshed_at": "2026-09-24T12:25:37.282Z",
       "shared_page": true
     },
     "repositories": {
@@ -44345,9 +44780,60 @@
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "surface",
-      "last_merge": "2026-09-24T06:36:04Z",
+      "last_merge": "2026-09-24T12:05:52Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T12:05:52Z",
+          "number": 3983,
+          "repo": "oxagen",
+          "title": "feat(app): match the shell to the rev1 mockups",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T11:57:33Z",
+          "number": 3981,
+          "repo": "oxagen",
+          "title": "ci(desktop): publish the installers on every production deploy, and link them on every enrollment screen",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T11:51:11Z",
+          "number": 4047,
+          "repo": "oxagen",
+          "title": "fix(app): clear the sign-in screens' remaining rev1 audit fails",
+          "touched": [
+            "apps/app/src/app/",
+            "apps/app/src/features/auth/password-reset-forms.tsx"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T09:54:18Z",
+          "number": 4039,
+          "repo": "oxagen",
+          "title": "ci(deploy): ship every green commit unless a newer one is already live",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T09:32:53Z",
+          "number": 3976,
+          "repo": "oxagen",
+          "title": "feat(app): reland the rev1 Steering hub with its shelves and tabs wired",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-24T06:36:04Z",
@@ -44498,61 +44984,11 @@
           "touched": [
             "apps/app/src/app/"
           ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-23T18:18:29Z",
-          "number": 3775,
-          "repo": "oxagen",
-          "title": "feat(app): resurface agent composition and provider controls",
-          "touched": [
-            "apps/app/src/app/"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-23T07:40:52Z",
-          "number": 3735,
-          "repo": "oxagen",
-          "title": "feat(auth): enterprise SSO over OIDC and SAML with IdP group-to-role mapping",
-          "touched": [
-            "apps/app/src/app/"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-23T02:48:23Z",
-          "number": 3739,
-          "repo": "oxagen",
-          "title": "Review of the last 100 commits: three P1s, six P2s, and the residue that could ride",
-          "touched": [
-            "apps/app/src/app/"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-23T02:28:29Z",
-          "number": 3732,
-          "repo": "oxagen",
-          "title": "feat(spend): cost-center chargeback on Spend",
-          "touched": [
-            "apps/app/src/app/"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-21T20:24:07Z",
-          "number": 3632,
-          "repo": "oxagen",
-          "title": "feat(run): build the outputs spine, so a run says what it produced",
-          "touched": [
-            "apps/app/src/app/"
-          ]
         }
       ],
       "open_issues": 0,
       "page": "apps/app/src/app/(auth)/reset-password/page.tsx",
-      "refreshed_at": "2026-09-24T06:54:44.920Z",
+      "refreshed_at": "2026-09-24T12:25:37.282Z",
       "shared_page": false
     },
     "run": {
@@ -44572,7 +45008,7 @@
         }
       ],
       "kind": "surface",
-      "last_merge": "2026-09-24T05:58:40Z",
+      "last_merge": "2026-09-24T12:19:26Z",
       "links": [
         {
           "number": 3282,
@@ -44606,6 +45042,51 @@
         }
       ],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T12:19:26Z",
+          "number": 4029,
+          "repo": "oxagen",
+          "title": "fix(run): record task, operator, end time and price facts for wrapped runs",
+          "touched": [
+            "apps/app/src/features/run/run.tsx",
+            "apps/app/src/features/run/run.test.tsx"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T09:54:18Z",
+          "number": 4039,
+          "repo": "oxagen",
+          "title": "ci(deploy): ship every green commit unless a newer one is already live",
+          "touched": [
+            "apps/app/src/features/run/header.tsx",
+            "apps/app/src/features/run/run.test.tsx"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T09:32:53Z",
+          "number": 3976,
+          "repo": "oxagen",
+          "title": "feat(app): reland the rev1 Steering hub with its shelves and tabs wired",
+          "touched": [
+            "apps/app/src/features/run/header.tsx",
+            "apps/app/src/features/run/run.test.tsx"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T08:46:15Z",
+          "number": 4041,
+          "repo": "oxagen",
+          "title": "fix(app): return main's app tests to green after #4018",
+          "touched": [
+            "apps/app/src/features/run/header.tsx",
+            "apps/app/src/features/run/run.test.tsx",
+            "apps/app/src/data/live/runs.ts"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-24T05:58:40Z",
@@ -44795,55 +45276,11 @@
             "apps/app/src/features/run/run.test.tsx",
             "apps/app/src/data/live/runs.ts"
           ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-21T19:47:50Z",
-          "number": 3650,
-          "repo": "oxagen",
-          "title": "Preserve recorded file identity and session machine facts",
-          "touched": [
-            "apps/app/src/features/run/header.tsx",
-            "apps/app/src/features/run/run.test.tsx"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-21T19:14:53Z",
-          "number": 3637,
-          "repo": "oxagen",
-          "title": "Govern ledger evidence ingress with scoped credentials and run controls",
-          "touched": [
-            "apps/app/src/features/run/header.tsx",
-            "apps/app/src/features/run/run-controls.tsx",
-            "apps/app/src/features/run/run.test.tsx",
-            "apps/app/src/features/run/controls.test.tsx"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-21T11:03:09Z",
-          "number": 3682,
-          "repo": "oxagen",
-          "title": "fix(app): repair the lint and the test that have held main red since 08:33",
-          "touched": [
-            "apps/app/src/features/run/run.test.tsx"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-21T07:50:14Z",
-          "number": 3651,
-          "repo": "oxagen",
-          "title": "Fleet pages past page one, the transcript shows the prompt and tool I/O, and the run pages move",
-          "touched": [
-            "apps/app/src/features/run/header.tsx"
-          ]
         }
       ],
       "open_issues": 2,
       "page": "apps/app/src/app/[org]/[ws]/runs/[run]/page.tsx",
-      "refreshed_at": "2026-09-24T06:26:06.640Z",
+      "refreshed_at": "2026-09-24T12:25:37.282Z",
       "shared_page": true
     },
     "run-interjection": {
@@ -44937,9 +45374,60 @@
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "surface",
-      "last_merge": "2026-09-24T06:36:04Z",
+      "last_merge": "2026-09-24T12:05:52Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T12:05:52Z",
+          "number": 3983,
+          "repo": "oxagen",
+          "title": "feat(app): match the shell to the rev1 mockups",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T11:57:33Z",
+          "number": 3981,
+          "repo": "oxagen",
+          "title": "ci(desktop): publish the installers on every production deploy, and link them on every enrollment screen",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T11:51:11Z",
+          "number": 4047,
+          "repo": "oxagen",
+          "title": "fix(app): clear the sign-in screens' remaining rev1 audit fails",
+          "touched": [
+            "apps/app/src/app/",
+            "apps/app/src/features/auth/signup-form.tsx"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T09:54:18Z",
+          "number": 4039,
+          "repo": "oxagen",
+          "title": "ci(deploy): ship every green commit unless a newer one is already live",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T09:32:53Z",
+          "number": 3976,
+          "repo": "oxagen",
+          "title": "feat(app): reland the rev1 Steering hub with its shelves and tabs wired",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-24T06:36:04Z",
@@ -45091,61 +45579,11 @@
           "touched": [
             "apps/app/src/app/"
           ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-23T18:18:29Z",
-          "number": 3775,
-          "repo": "oxagen",
-          "title": "feat(app): resurface agent composition and provider controls",
-          "touched": [
-            "apps/app/src/app/"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-23T07:40:52Z",
-          "number": 3735,
-          "repo": "oxagen",
-          "title": "feat(auth): enterprise SSO over OIDC and SAML with IdP group-to-role mapping",
-          "touched": [
-            "apps/app/src/app/"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-23T02:48:23Z",
-          "number": 3739,
-          "repo": "oxagen",
-          "title": "Review of the last 100 commits: three P1s, six P2s, and the residue that could ride",
-          "touched": [
-            "apps/app/src/app/"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-23T02:28:29Z",
-          "number": 3732,
-          "repo": "oxagen",
-          "title": "feat(spend): cost-center chargeback on Spend",
-          "touched": [
-            "apps/app/src/app/"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-21T20:24:07Z",
-          "number": 3632,
-          "repo": "oxagen",
-          "title": "feat(run): build the outputs spine, so a run says what it produced",
-          "touched": [
-            "apps/app/src/app/"
-          ]
         }
       ],
       "open_issues": 0,
       "page": "apps/app/src/app/(auth)/signup/page.tsx",
-      "refreshed_at": "2026-09-24T06:54:44.920Z",
+      "refreshed_at": "2026-09-24T12:25:37.282Z",
       "shared_page": false
     },
     "skill-source": {
@@ -45455,7 +45893,7 @@
         }
       ],
       "kind": "surface",
-      "last_merge": "2026-09-24T02:41:09Z",
+      "last_merge": "2026-09-24T11:35:21Z",
       "links": [
         {
           "number": 2592,
@@ -45507,6 +45945,28 @@
         }
       ],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T11:35:21Z",
+          "number": 4027,
+          "repo": "oxagen",
+          "title": "fix(tacho): deliver steers and resume to an agent working on its own",
+          "touched": [
+            "packages/tacho/src/claude-code/hook-client.ts"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T09:32:53Z",
+          "number": 3976,
+          "repo": "oxagen",
+          "title": "feat(app): reland the rev1 Steering hub with its shelves and tabs wired",
+          "touched": [
+            "apps/app/src/app/[org]/[ws]/steering/page.tsx",
+            "apps/app/src/features/steering/records.tsx",
+            "apps/app/src/features/steering/actions.ts"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-24T02:41:09Z",
@@ -45698,31 +46158,11 @@
           "touched": [
             "apps/app/src/app/[org]/[ws]/steering/page.tsx"
           ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-20T01:40:26Z",
-          "number": 3522,
-          "repo": "oxagen",
-          "title": "Fix 20 reported authorization, billing, and reliability bugs",
-          "touched": [
-            "packages/handlers/src/lib/tacho-steering.ts"
-          ]
-        },
-        {
-          "closes": [
-            3302
-          ],
-          "merged_at": "2026-09-20T00:12:22Z",
-          "number": 3486,
-          "repo": "oxagen",
-          "title": "fix(context): require kind/force/statement on publish_context_record (#3302)",
-          "touched": []
         }
       ],
       "open_issues": 4,
       "page": "apps/app/src/app/[org]/[ws]/steering/page.tsx",
-      "refreshed_at": "2026-09-24T06:26:06.640Z",
+      "refreshed_at": "2026-09-24T12:25:37.282Z",
       "shared_page": false
     },
     "tools": {
@@ -45838,9 +46278,59 @@
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "surface",
-      "last_merge": "2026-09-24T06:36:04Z",
+      "last_merge": "2026-09-24T12:05:52Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T12:05:52Z",
+          "number": 3983,
+          "repo": "oxagen",
+          "title": "feat(app): match the shell to the rev1 mockups",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T11:57:33Z",
+          "number": 3981,
+          "repo": "oxagen",
+          "title": "ci(desktop): publish the installers on every production deploy, and link them on every enrollment screen",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T11:51:11Z",
+          "number": 4047,
+          "repo": "oxagen",
+          "title": "fix(app): clear the sign-in screens' remaining rev1 audit fails",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T09:54:18Z",
+          "number": 4039,
+          "repo": "oxagen",
+          "title": "ci(deploy): ship every green commit unless a newer one is already live",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T09:32:53Z",
+          "number": 3976,
+          "repo": "oxagen",
+          "title": "feat(app): reland the rev1 Steering hub with its shelves and tabs wired",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-24T06:36:04Z",
@@ -45991,70 +46481,70 @@
           "touched": [
             "apps/app/src/app/"
           ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-23T18:18:29Z",
-          "number": 3775,
-          "repo": "oxagen",
-          "title": "feat(app): resurface agent composition and provider controls",
-          "touched": [
-            "apps/app/src/app/"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-23T07:40:52Z",
-          "number": 3735,
-          "repo": "oxagen",
-          "title": "feat(auth): enterprise SSO over OIDC and SAML with IdP group-to-role mapping",
-          "touched": [
-            "apps/app/src/app/"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-23T02:48:23Z",
-          "number": 3739,
-          "repo": "oxagen",
-          "title": "Review of the last 100 commits: three P1s, six P2s, and the residue that could ride",
-          "touched": [
-            "apps/app/src/app/"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-23T02:28:29Z",
-          "number": 3732,
-          "repo": "oxagen",
-          "title": "feat(spend): cost-center chargeback on Spend",
-          "touched": [
-            "apps/app/src/app/"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-21T20:24:07Z",
-          "number": 3632,
-          "repo": "oxagen",
-          "title": "feat(run): build the outputs spine, so a run says what it produced",
-          "touched": [
-            "apps/app/src/app/"
-          ]
         }
       ],
       "open_issues": 0,
       "page": "apps/app/src/app/(auth)/two-factor/page.tsx",
-      "refreshed_at": "2026-09-24T06:54:44.920Z",
+      "refreshed_at": "2026-09-24T12:25:37.282Z",
       "shared_page": false
     },
     "verify-email": {
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "surface",
-      "last_merge": "2026-09-24T06:36:04Z",
+      "last_merge": "2026-09-24T12:05:52Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T12:05:52Z",
+          "number": 3983,
+          "repo": "oxagen",
+          "title": "feat(app): match the shell to the rev1 mockups",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T11:57:33Z",
+          "number": 3981,
+          "repo": "oxagen",
+          "title": "ci(desktop): publish the installers on every production deploy, and link them on every enrollment screen",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T11:51:11Z",
+          "number": 4047,
+          "repo": "oxagen",
+          "title": "fix(app): clear the sign-in screens' remaining rev1 audit fails",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T09:54:18Z",
+          "number": 4039,
+          "repo": "oxagen",
+          "title": "ci(deploy): ship every green commit unless a newer one is already live",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-24T09:32:53Z",
+          "number": 3976,
+          "repo": "oxagen",
+          "title": "feat(app): reland the rev1 Steering hub with its shelves and tabs wired",
+          "touched": [
+            "apps/app/src/app/"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-24T06:36:04Z",
@@ -46205,61 +46695,11 @@
           "touched": [
             "apps/app/src/app/"
           ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-23T18:18:29Z",
-          "number": 3775,
-          "repo": "oxagen",
-          "title": "feat(app): resurface agent composition and provider controls",
-          "touched": [
-            "apps/app/src/app/"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-23T07:40:52Z",
-          "number": 3735,
-          "repo": "oxagen",
-          "title": "feat(auth): enterprise SSO over OIDC and SAML with IdP group-to-role mapping",
-          "touched": [
-            "apps/app/src/app/"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-23T02:48:23Z",
-          "number": 3739,
-          "repo": "oxagen",
-          "title": "Review of the last 100 commits: three P1s, six P2s, and the residue that could ride",
-          "touched": [
-            "apps/app/src/app/"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-23T02:28:29Z",
-          "number": 3732,
-          "repo": "oxagen",
-          "title": "feat(spend): cost-center chargeback on Spend",
-          "touched": [
-            "apps/app/src/app/"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-21T20:24:07Z",
-          "number": 3632,
-          "repo": "oxagen",
-          "title": "feat(run): build the outputs spine, so a run says what it produced",
-          "touched": [
-            "apps/app/src/app/"
-          ]
         }
       ],
       "open_issues": 0,
       "page": "apps/app/src/app/(auth)/verify/page.tsx",
-      "refreshed_at": "2026-09-24T06:54:44.920Z",
+      "refreshed_at": "2026-09-24T12:25:37.282Z",
       "shared_page": false
     },
     "wizard-agent": {
@@ -46429,20 +46869,20 @@
     }
   },
   "last_run": {
-    "at": "2026-09-24T06:54:44.920Z",
-    "calls": 10,
+    "at": "2026-09-24T12:25:37.282Z",
+    "calls": 17,
     "quiet": false
   },
   "milestones": {
     "M0": {
       "built": 4,
       "last_merge": {
-        "merged_at": "2026-09-24T06:36:04Z",
-        "number": 3948,
+        "merged_at": "2026-09-24T12:05:52Z",
+        "number": 3983,
         "repo": "oxagen",
-        "title": "Restructure agent and tools pages into tab-based layouts"
+        "title": "feat(app): match the shell to the rev1 mockups"
       },
-      "merged_prs": 56,
+      "merged_prs": 61,
       "not_started": 0,
       "open_issues": 3,
       "partial": 1,
@@ -46451,12 +46891,12 @@
     "M1": {
       "built": 10,
       "last_merge": {
-        "merged_at": "2026-09-24T06:36:04Z",
-        "number": 3948,
+        "merged_at": "2026-09-24T12:19:26Z",
+        "number": 4029,
         "repo": "oxagen",
-        "title": "Restructure agent and tools pages into tab-based layouts"
+        "title": "fix(run): record task, operator, end time and price facts for wrapped runs"
       },
-      "merged_prs": 90,
+      "merged_prs": 98,
       "not_started": 1,
       "open_issues": 7,
       "partial": 5,
@@ -46465,12 +46905,12 @@
     "M2": {
       "built": 4,
       "last_merge": {
-        "merged_at": "2026-09-24T06:36:04Z",
-        "number": 3948,
+        "merged_at": "2026-09-24T11:57:33Z",
+        "number": 3981,
         "repo": "oxagen",
-        "title": "Restructure agent and tools pages into tab-based layouts"
+        "title": "ci(desktop): publish the installers on every production deploy, and link them on every enrollment screen"
       },
-      "merged_prs": 36,
+      "merged_prs": 38,
       "not_started": 2,
       "open_issues": 4,
       "partial": 2,
@@ -46479,12 +46919,12 @@
     "M3": {
       "built": 1,
       "last_merge": {
-        "merged_at": "2026-09-24T05:58:40Z",
-        "number": 4018,
+        "merged_at": "2026-09-24T12:19:26Z",
+        "number": 4029,
         "repo": "oxagen",
-        "title": "fix(runs): show the recorded rig, checkout, subagents and usage in the Run header"
+        "title": "fix(run): record task, operator, end time and price facts for wrapped runs"
       },
-      "merged_prs": 58,
+      "merged_prs": 65,
       "not_started": 0,
       "open_issues": 4,
       "partial": 2,
@@ -46493,12 +46933,12 @@
     "M4": {
       "built": 1,
       "last_merge": {
-        "merged_at": "2026-09-24T05:58:40Z",
-        "number": 4018,
+        "merged_at": "2026-09-24T12:19:26Z",
+        "number": 4029,
         "repo": "oxagen",
-        "title": "fix(runs): show the recorded rig, checkout, subagents and usage in the Run header"
+        "title": "fix(run): record task, operator, end time and price facts for wrapped runs"
       },
-      "merged_prs": 58,
+      "merged_prs": 64,
       "not_started": 0,
       "open_issues": 3,
       "partial": 2,
@@ -46507,12 +46947,12 @@
     "M5": {
       "built": 0,
       "last_merge": {
-        "merged_at": "2026-09-24T06:36:04Z",
-        "number": 3948,
+        "merged_at": "2026-09-24T11:35:21Z",
+        "number": 4027,
         "repo": "oxagen",
-        "title": "Restructure agent and tools pages into tab-based layouts"
+        "title": "fix(tacho): deliver steers and resume to an agent working on its own"
       },
-      "merged_prs": 36,
+      "merged_prs": 38,
       "not_started": 6,
       "open_issues": 5,
       "partial": 4,
@@ -46521,12 +46961,12 @@
     "M6": {
       "built": 0,
       "last_merge": {
-        "merged_at": "2026-09-24T02:41:09Z",
-        "number": 3990,
+        "merged_at": "2026-09-24T11:35:21Z",
+        "number": 4027,
         "repo": "oxagen",
-        "title": "feat(tacho): enforce the per-day agent budget on the UTC day (ADR-160)"
+        "title": "fix(tacho): deliver steers and resume to an agent working on its own"
       },
-      "merged_prs": 25,
+      "merged_prs": 27,
       "not_started": 0,
       "open_issues": 4,
       "partial": 1,
@@ -46557,6 +46997,7 @@
     "apps/app/src/app/[org]/[ws]/runs/[run]/page.tsx",
     "apps/app/src/app/[org]/[ws]/runtimes/[runtime]/page.tsx",
     "apps/app/src/app/[org]/[ws]/runtimes/page.tsx",
+    "apps/app/src/app/[org]/[ws]/skills/[...rest]/page.tsx",
     "apps/app/src/app/[org]/[ws]/skills/page.tsx",
     "apps/app/src/app/[org]/[ws]/spend/[[...tab]]/page.tsx",
     "apps/app/src/app/[org]/[ws]/steering/[...view]/page.tsx",
@@ -62375,6 +62816,520 @@
       "repo": "oxagen",
       "title": "fix(app): declare Fleet's SortKey as a union so no const sits unused"
     },
+    "oxagen#3976": {
+      "added": [
+        "apps/app/src/app/[org]/[ws]/skills/[...rest]/page.tsx",
+        "apps/app/src/features/steering/agents-read.ts",
+        "apps/app/src/features/steering/compiler-controls.tsx",
+        "apps/app/src/features/steering/gaps.ts",
+        "apps/app/src/features/steering/governance.test.tsx",
+        "apps/app/src/features/steering/governance.tsx",
+        "apps/app/src/features/steering/library-all.tsx",
+        "apps/app/src/features/steering/library-read.ts",
+        "apps/app/src/features/steering/memory-shelf.tsx",
+        "apps/app/src/features/steering/not-backed.tsx",
+        "apps/app/src/features/steering/page-state.tsx",
+        "apps/app/src/features/steering/records-panels.tsx",
+        "apps/app/src/features/steering/records-shelf.tsx",
+        "apps/app/src/features/steering/shelves.tsx",
+        "apps/app/src/features/steering/stub-action.tsx",
+        "apps/app/src/features/steering/tab-parts.tsx",
+        "apps/app/src/features/steering/tab-primary.ts",
+        "apps/app/src/features/steering/tabs/assignments.tsx",
+        "apps/app/src/features/steering/tabs/compiler.tsx",
+        "apps/app/src/features/steering/tabs/gates.tsx",
+        "apps/app/src/features/steering/tabs/instructions.tsx",
+        "apps/app/src/features/steering/tabs/memory.tsx",
+        "apps/app/src/features/steering/tabs/ontology.tsx",
+        "apps/app/src/features/steering/tabs/proposals.tsx",
+        "apps/app/src/features/steering/tabs/records.tsx",
+        "apps/app/src/features/steering/tabs/skill-source.tsx",
+        "apps/app/src/features/steering/tokens.ts",
+        "apps/app/src/ui/faceted-list-table.tsx",
+        "apps/app/src/ui/press-link.tsx"
+      ],
+      "author": "macanderson",
+      "closes": [],
+      "files": [
+        "apps/app/ARCHITECTURE.md",
+        "apps/app/capability-ui-map.json",
+        "apps/app/e2e/page-load.spec.ts",
+        "apps/app/messages/en.json",
+        "apps/app/messages/steering.json",
+        "apps/app/messages/ui.json",
+        "apps/app/src/app/[org]/[ws]/skills/[...rest]/page.tsx",
+        "apps/app/src/app/[org]/[ws]/steering/[...view]/page.tsx",
+        "apps/app/src/app/[org]/[ws]/steering/page.tsx",
+        "apps/app/src/app/[org]/pages.test.tsx",
+        "apps/app/src/data/contracts/money.ts",
+        "apps/app/src/data/contracts/steering.ts",
+        "apps/app/src/data/live/mappers/steering.ts",
+        "apps/app/src/data/live/steering.test.ts",
+        "apps/app/src/data/live/steering.ts",
+        "apps/app/src/data/ports.ts",
+        "apps/app/src/features/agents/agents.builders.ts",
+        "apps/app/src/features/audit/audit.test.tsx",
+        "apps/app/src/features/audit/export.test.ts",
+        "apps/app/src/features/auth/cli-consent.test.tsx",
+        "apps/app/src/features/billing/billing.builders.ts",
+        "apps/app/src/features/create/record-wizard.test.tsx",
+        "apps/app/src/features/fleet/fleet.builders.ts",
+        "apps/app/src/features/mandate/mandate.builders.ts",
+        "apps/app/src/features/onboarding/onboarding.builders.ts",
+        "apps/app/src/features/organization/organization.builders.ts",
+        "apps/app/src/features/organization/roles.test.tsx",
+        "apps/app/src/features/organization/workspaces.test.tsx",
+        "apps/app/src/features/repositories/change-detail.test.tsx",
+        "apps/app/src/features/run/header.tsx",
+        "apps/app/src/features/run/run.builders.ts",
+        "apps/app/src/features/run/run.test.tsx",
+        "apps/app/src/features/run/stats.tsx",
+        "apps/app/src/features/runtimes/runtimes.builders.ts",
+        "apps/app/src/features/shell/landing.test.ts",
+        "apps/app/src/features/shell/shell-server.test.tsx",
+        "apps/app/src/features/shell/source.test.ts",
+        "apps/app/src/features/skills/skills.test.tsx",
+        "apps/app/src/features/spend/fleet-tiles.test.tsx",
+        "apps/app/src/features/spend/pricing.test.tsx",
+        "apps/app/src/features/spend/spend.test.tsx",
+        "apps/app/src/features/steering/actions.test.ts",
+        "apps/app/src/features/steering/actions.ts",
+        "apps/app/src/features/steering/agents-read.ts",
+        "apps/app/src/features/steering/compiler-controls.tsx",
+        "apps/app/src/features/steering/create-action.test.tsx",
+        "apps/app/src/features/steering/create-action.tsx",
+        "apps/app/src/features/steering/gaps.ts",
+        "apps/app/src/features/steering/governance.test.tsx",
+        "apps/app/src/features/steering/governance.tsx",
+        "apps/app/src/features/steering/hub.tsx",
+        "apps/app/src/features/steering/index.ts",
+        "apps/app/src/features/steering/library-all.tsx",
+        "apps/app/src/features/steering/library-read.ts",
+        "apps/app/src/features/steering/memory-shelf.tsx",
+        "apps/app/src/features/steering/not-backed.tsx",
+        "apps/app/src/features/steering/page-state.tsx",
+        "apps/app/src/features/steering/records-panels.tsx",
+        "apps/app/src/features/steering/records-shelf.tsx",
+        "apps/app/src/features/steering/records.tsx",
+        "apps/app/src/features/steering/shelves.tsx",
+        "apps/app/src/features/steering/steering.test.tsx",
+        "apps/app/src/features/steering/steering.tsx",
+        "apps/app/src/features/steering/stub-action.tsx",
+        "apps/app/src/features/steering/tab-parts.tsx",
+        "apps/app/src/features/steering/tab-primary.ts",
+        "apps/app/src/features/steering/tabs.tsx",
+        "apps/app/src/features/steering/tabs/assignments.tsx",
+        "apps/app/src/features/steering/tabs/compiler.tsx",
+        "apps/app/src/features/steering/tabs/gates.tsx",
+        "apps/app/src/features/steering/tabs/instructions.tsx",
+        "apps/app/src/features/steering/tabs/memory.tsx",
+        "apps/app/src/features/steering/tabs/ontology.tsx",
+        "apps/app/src/features/steering/tabs/proposals.tsx",
+        "apps/app/src/features/steering/tabs/records.tsx",
+        "apps/app/src/features/steering/tabs/skill-source.tsx",
+        "apps/app/src/features/steering/tokens.ts",
+        "apps/app/src/features/steering/view.test.ts",
+        "apps/app/src/features/steering/view.ts",
+        "apps/app/src/features/steering/write-controls.test.tsx",
+        "apps/app/src/features/tools/tools.builders.ts",
+        "apps/app/src/i18n/messages.d.ts",
+        "apps/app/src/shared/legacy-routes.ts",
+        "apps/app/src/shared/safe-path.test.ts",
+        "apps/app/src/shared/safe-path.ts",
+        "apps/app/src/test/steering-views.ts",
+        "apps/app/src/ui/faceted-list-table.tsx",
+        "apps/app/src/ui/press-link.tsx",
+        "packages/handlers/src/lib/run-work.ts",
+        "packages/handlers/src/run.cost.test.ts",
+        "packages/handlers/src/run.work.get.test.ts",
+        "packages/handlers/src/run.work.get.ts",
+        "packages/oxagen/src/contracts/agent.memory.list.ts",
+        "packages/oxagen/src/contracts/agent.memory.update.ts",
+        "packages/tacho/src/host/wal-index.test.ts"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3976",
+      "merged_at": "2026-09-24T09:32:53Z",
+      "number": 3976,
+      "refs": [
+        3830,
+        3859,
+        3904
+      ],
+      "repo": "oxagen",
+      "title": "feat(app): reland the rev1 Steering hub with its shelves and tabs wired"
+    },
+    "oxagen#3981": {
+      "added": [
+        "apps/app/src/app/[org]/billing/layout.tsx",
+        "apps/app/src/shared/desktop-downloads.test.ts",
+        "apps/app/src/shared/desktop-downloads.ts",
+        "apps/app/src/ui/desktop-downloads.test.tsx",
+        "apps/app/src/ui/desktop-downloads.tsx",
+        "apps/desktop/scripts/check-latest.mjs",
+        "apps/docs/src/components/mdx/latest-downloads.tsx",
+        "docs/adr/ADR-158-every-production-deploy-publishes-the-desktop-installers.md",
+        "tools/scripts/build-version.test.ts",
+        "tools/scripts/desktop-build-version.ts",
+        "tools/scripts/lib/build-version.ts"
+      ],
+      "author": "macanderson",
+      "closes": [],
+      "files": [
+        ".github/workflows/desktop.yml",
+        ".github/workflows/pipeline.yml",
+        ".github/workflows/release.yml",
+        "AGENTS.md",
+        "apps/app/messages/ui.json",
+        "apps/app/src/app/[org]/billing/layout.tsx",
+        "apps/app/src/app/[org]/billing/page.tsx",
+        "apps/app/src/features/agents/agent.test.tsx",
+        "apps/app/src/features/agents/enrollment-controls.test.tsx",
+        "apps/app/src/features/agents/enrollment-controls.tsx",
+        "apps/app/src/features/agents/runtime.tsx",
+        "apps/app/src/features/onboarding/ui.test.tsx",
+        "apps/app/src/features/onboarding/ui/wrap-agent.tsx",
+        "apps/app/src/features/onboarding/ui/wrap-step.test.tsx",
+        "apps/app/src/features/onboarding/ui/wrap-step.tsx",
+        "apps/app/src/features/repositories/change-detail.test.tsx",
+        "apps/app/src/features/runtimes/controls.tsx",
+        "apps/app/src/features/runtimes/runtimes.test.tsx",
+        "apps/app/src/i18n/messages.d.ts",
+        "apps/app/src/shared/desktop-downloads.test.ts",
+        "apps/app/src/shared/desktop-downloads.ts",
+        "apps/app/src/ui/desktop-downloads.test.tsx",
+        "apps/app/src/ui/desktop-downloads.tsx",
+        "apps/app/src/ui/navigation.test.tsx",
+        "apps/app/src/ui/navigation.tsx",
+        "apps/desktop/README.md",
+        "apps/desktop/scripts/check-latest.mjs",
+        "apps/desktop/scripts/publish-downloads.mjs",
+        "apps/desktop/src/downloads.test.ts",
+        "apps/desktop/src/downloads.ts",
+        "apps/docs/content/docs/agent/custom-agents.mdx",
+        "apps/docs/content/docs/cli/account-setup.mdx",
+        "apps/docs/content/docs/cli/commands.mdx",
+        "apps/docs/content/docs/cli/wrap-an-agent.mdx",
+        "apps/docs/content/docs/getting-started.mdx",
+        "apps/docs/content/docs/index.mdx",
+        "apps/docs/src/components/mdx/latest-downloads.tsx",
+        "apps/docs/src/mdx-components.tsx",
+        "docs/adr/ADR-158-every-production-deploy-publishes-the-desktop-installers.md",
+        "docs/adr/README.md",
+        "tools/scripts/build-version.test.ts",
+        "tools/scripts/check-deploy-tip.mjs",
+        "tools/scripts/check-deploy-tip.test.ts",
+        "tools/scripts/desktop-build-version.ts",
+        "tools/scripts/lib/build-version.ts",
+        "tools/scripts/lib/versions.ts",
+        "tools/scripts/versions.test.ts"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3981",
+      "merged_at": "2026-09-24T11:57:33Z",
+      "number": 3981,
+      "refs": [
+        3977
+      ],
+      "repo": "oxagen",
+      "title": "ci(desktop): publish the installers on every production deploy, and link them on every enrollment screen"
+    },
+    "oxagen#3983": {
+      "added": [
+        ".agent/memory/test-engineer/reflections/2026-09-24-shell-lane-coverage-audit.md",
+        "apps/app/src/app/[org]/[ws]/error.tsx",
+        "apps/app/src/app/[org]/[ws]/loading.tsx",
+        "apps/app/src/app/[org]/error.tsx",
+        "apps/app/src/app/[org]/loading.tsx",
+        "apps/app/src/data/live/mappers/shell.ts",
+        "apps/app/src/features/fleet/approval-card-alone.test.tsx",
+        "apps/app/src/features/shell/activity-store.test.tsx",
+        "apps/app/src/features/shell/activity-store.ts",
+        "apps/app/src/features/shell/approvals-drawer.test.tsx",
+        "apps/app/src/features/shell/approvals-drawer.tsx",
+        "apps/app/src/features/shell/command-actions.test.ts",
+        "apps/app/src/features/shell/command-actions.ts",
+        "apps/app/src/features/shell/notification-actions.test.ts",
+        "apps/app/src/features/shell/notification-actions.ts",
+        "apps/app/src/features/shell/notifications-dialog.test.tsx",
+        "apps/app/src/features/shell/notifications-dialog.tsx",
+        "apps/app/src/features/shell/route-page-name.test.tsx",
+        "apps/app/src/features/shell/route-page-name.tsx",
+        "apps/app/src/features/shell/sidebar-sections.ts",
+        "apps/app/src/features/shell/use-activity.test.tsx",
+        "apps/app/src/features/shell/use-activity.ts",
+        "apps/app/src/features/shell/workspace-activity.test.tsx",
+        "apps/app/src/features/shell/workspace-activity.tsx",
+        "apps/app/src/features/shell/workspace-denied.test.tsx",
+        "apps/app/src/features/shell/workspace-denied.tsx",
+        "apps/app/src/shared/approvals-drawer.test.ts",
+        "apps/app/src/ui/page-states.test.tsx",
+        "apps/app/src/ui/page-states.tsx",
+        "apps/app/src/ui/route-tabs.test.tsx"
+      ],
+      "author": "macanderson",
+      "closes": [],
+      "files": [
+        ".agent/memory/test-engineer/lessons.md",
+        ".agent/memory/test-engineer/reflections/2026-09-24-shell-lane-coverage-audit.md",
+        "apps/api/src/routes/scim.test.ts",
+        "apps/api/src/routes/scim.ts",
+        "apps/app/ARCHITECTURE.md",
+        "apps/app/capability-ui-map.json",
+        "apps/app/messages/shell.json",
+        "apps/app/messages/ui.json",
+        "apps/app/mobile-parity.json",
+        "apps/app/src/app/[org]/[ws]/error.tsx",
+        "apps/app/src/app/[org]/[ws]/layout.test.tsx",
+        "apps/app/src/app/[org]/[ws]/layout.tsx",
+        "apps/app/src/app/[org]/[ws]/loading.tsx",
+        "apps/app/src/app/[org]/error.tsx",
+        "apps/app/src/app/[org]/loading.tsx",
+        "apps/app/src/app/[org]/pages.test.tsx",
+        "apps/app/src/app/globals.css",
+        "apps/app/src/app/layout.tsx",
+        "apps/app/src/data/contracts/approvals.ts",
+        "apps/app/src/data/contracts/shell.ts",
+        "apps/app/src/data/live/approvals.test.ts",
+        "apps/app/src/data/live/approvals.ts",
+        "apps/app/src/data/live/mappers/approvals.ts",
+        "apps/app/src/data/live/mappers/shell.ts",
+        "apps/app/src/data/live/shell.test.ts",
+        "apps/app/src/data/live/shell.ts",
+        "apps/app/src/data/ports.ts",
+        "apps/app/src/features/agents/agents.builders.ts",
+        "apps/app/src/features/audit/audit.test.tsx",
+        "apps/app/src/features/audit/export.test.ts",
+        "apps/app/src/features/audit/filters.test.ts",
+        "apps/app/src/features/auth/cli-consent.test.tsx",
+        "apps/app/src/features/billing/billing.builders.ts",
+        "apps/app/src/features/fleet/approval-card-alone.test.tsx",
+        "apps/app/src/features/fleet/approvals-panel.tsx",
+        "apps/app/src/features/fleet/client.ts",
+        "apps/app/src/features/fleet/fleet.builders.ts",
+        "apps/app/src/features/fleet/index.ts",
+        "apps/app/src/features/mandate/mandate.builders.ts",
+        "apps/app/src/features/onboarding/onboarding.builders.ts",
+        "apps/app/src/features/organization/organization.builders.ts",
+        "apps/app/src/features/organization/roles.test.tsx",
+        "apps/app/src/features/organization/scim-controls.tsx",
+        "apps/app/src/features/organization/sso-actions.test.ts",
+        "apps/app/src/features/organization/sso.test.tsx",
+        "apps/app/src/features/organization/sso.tsx",
+        "apps/app/src/features/organization/workspaces.test.tsx",
+        "apps/app/src/features/repositories/repository-dialog.tsx",
+        "apps/app/src/features/repositories/states.tsx",
+        "apps/app/src/features/run/run.builders.ts",
+        "apps/app/src/features/runtimes/runtimes.builders.ts",
+        "apps/app/src/features/shell/activity-actions.test.ts",
+        "apps/app/src/features/shell/activity-actions.ts",
+        "apps/app/src/features/shell/activity-store.test.tsx",
+        "apps/app/src/features/shell/activity-store.ts",
+        "apps/app/src/features/shell/activity.test.tsx",
+        "apps/app/src/features/shell/activity.tsx",
+        "apps/app/src/features/shell/approvals-drawer.test.tsx",
+        "apps/app/src/features/shell/approvals-drawer.tsx",
+        "apps/app/src/features/shell/assistant-launcher.tsx",
+        "apps/app/src/features/shell/client.ts",
+        "apps/app/src/features/shell/command-actions.test.ts",
+        "apps/app/src/features/shell/command-actions.ts",
+        "apps/app/src/features/shell/command-menu.tsx",
+        "apps/app/src/features/shell/commands.test.ts",
+        "apps/app/src/features/shell/commands.ts",
+        "apps/app/src/features/shell/index.ts",
+        "apps/app/src/features/shell/landing.test.ts",
+        "apps/app/src/features/shell/messages.test.ts",
+        "apps/app/src/features/shell/mobile-nav.test.tsx",
+        "apps/app/src/features/shell/mobile-nav.tsx",
+        "apps/app/src/features/shell/nav.test.ts",
+        "apps/app/src/features/shell/nav.ts",
+        "apps/app/src/features/shell/notification-actions.test.ts",
+        "apps/app/src/features/shell/notification-actions.ts",
+        "apps/app/src/features/shell/notifications-dialog.test.tsx",
+        "apps/app/src/features/shell/notifications-dialog.tsx",
+        "apps/app/src/features/shell/route-page-name.test.tsx",
+        "apps/app/src/features/shell/route-page-name.tsx",
+        "apps/app/src/features/shell/shell-chrome.tsx",
+        "apps/app/src/features/shell/shell-client.test.tsx",
+        "apps/app/src/features/shell/shell-client.tsx",
+        "apps/app/src/features/shell/shell-data.ts",
+        "apps/app/src/features/shell/shell-frame.tsx",
+        "apps/app/src/features/shell/shell-server.test.tsx",
+        "apps/app/src/features/shell/shell-state.tsx",
+        "apps/app/src/features/shell/shell.builders.ts",
+        "apps/app/src/features/shell/sidebar-sections.ts",
+        "apps/app/src/features/shell/sidebar.tsx",
+        "apps/app/src/features/shell/source.test.ts",
+        "apps/app/src/features/shell/source.ts",
+        "apps/app/src/features/shell/switchers.test.tsx",
+        "apps/app/src/features/shell/switchers.tsx",
+        "apps/app/src/features/shell/topbar.tsx",
+        "apps/app/src/features/shell/use-activity.test.tsx",
+        "apps/app/src/features/shell/use-activity.ts",
+        "apps/app/src/features/shell/user-menu.tsx",
+        "apps/app/src/features/shell/viewer-clock-seed.test.ts",
+        "apps/app/src/features/shell/viewer-clock.test.tsx",
+        "apps/app/src/features/shell/workspace-activity.test.tsx",
+        "apps/app/src/features/shell/workspace-activity.tsx",
+        "apps/app/src/features/shell/workspace-denied.test.tsx",
+        "apps/app/src/features/shell/workspace-denied.tsx",
+        "apps/app/src/features/skills/skills.test.tsx",
+        "apps/app/src/features/spend/fleet-tiles.test.tsx",
+        "apps/app/src/features/spend/pricing.test.tsx",
+        "apps/app/src/features/spend/spend.test.tsx",
+        "apps/app/src/features/tools/tools.builders.ts",
+        "apps/app/src/i18n/messages.d.ts",
+        "apps/app/src/server/viewer.test.ts",
+        "apps/app/src/server/viewer.ts",
+        "apps/app/src/shared/approvals-drawer.test.ts",
+        "apps/app/src/shared/approvals-drawer.ts",
+        "apps/app/src/test/arch/import-graph.test.ts",
+        "apps/app/src/test/arch/layers.ts",
+        "apps/app/src/test/arch/probes/import-graph/fleet-client.ts",
+        "apps/app/src/test/arch/probes/import-graph/shell-source-action.ts",
+        "apps/app/src/test/arch/route-guard.test.ts",
+        "apps/app/src/test/steering-views.ts",
+        "apps/app/src/ui/page-states.test.tsx",
+        "apps/app/src/ui/page-states.tsx",
+        "apps/app/src/ui/phone.css",
+        "apps/app/src/ui/route-tabs.test.tsx",
+        "apps/app/src/ui/route-tabs.tsx",
+        "apps/app/src/ui/sheet-dialog.test.tsx",
+        "apps/app/src/ui/sheet-dialog.tsx",
+        "apps/cli/src/commands/auth.ts",
+        "docs/capabilities/schemas/get_nav_counts.json",
+        "docs/capabilities/shell.nav_counts.get.md",
+        "packages/auth/src/scim-token.ts",
+        "packages/auth/src/sso/provision.test.ts",
+        "packages/auth/src/sso/sign-in.test.ts",
+        "packages/compliance/src/security-event-types.ts",
+        "packages/database/src/member-lifecycle.test.ts",
+        "packages/handlers/src/lib/scim/pg-store.test.ts",
+        "packages/handlers/src/lib/scim/pg-store.ts",
+        "packages/handlers/src/lib/scim/protocol.test.ts",
+        "packages/handlers/src/lib/scim/protocol.ts",
+        "packages/handlers/src/lib/scim/service.test.ts",
+        "packages/handlers/src/lib/scim/service.ts",
+        "packages/handlers/src/lib/scim/token-store.test.ts",
+        "packages/handlers/src/org.scim_token.test.ts",
+        "packages/handlers/src/org.sso.list.test.ts",
+        "packages/handlers/src/org.sso.list.ts",
+        "packages/handlers/src/scim.request.test.ts",
+        "packages/handlers/src/shell.nav_counts.get.test.ts",
+        "packages/handlers/src/shell.nav_counts.get.ts",
+        "packages/oxagen/capabilities.manifest.json",
+        "packages/oxagen/src/contracts/notification.list.ts",
+        "packages/oxagen/src/contracts/notification.mark.ts",
+        "packages/oxagen/src/contracts/org.scim_token.create.test.ts",
+        "packages/oxagen/src/contracts/scim.request.test.ts",
+        "packages/oxagen/src/contracts/shell.nav_counts.get.ts",
+        "packages/oxagen/src/contracts/tools.search.ts",
+        "packages/tacho/src/collector/hook-handler.ts"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3983",
+      "merged_at": "2026-09-24T12:05:52Z",
+      "number": 3983,
+      "refs": [
+        3806,
+        3816,
+        3846,
+        3847,
+        3848,
+        3849,
+        3850,
+        3851,
+        3862,
+        3969
+      ],
+      "repo": "oxagen",
+      "title": "feat(app): match the shell to the rev1 mockups"
+    },
+    "oxagen#3986": {
+      "added": [
+        ".agent/memory/test-engineer/reflections/2026-09-24-agents-runtimes-coverage-audit.md"
+      ],
+      "author": "macanderson",
+      "closes": [],
+      "files": [
+        ".agent/memory/shared/lessons.md",
+        ".agent/memory/test-engineer/lessons.md",
+        ".agent/memory/test-engineer/reflections/2026-09-24-agents-runtimes-coverage-audit.md",
+        "apps/app/ARCHITECTURE.md",
+        "apps/app/messages/agents.json",
+        "apps/app/messages/runtimes.json",
+        "apps/app/messages/ui.json",
+        "apps/app/src/data/contracts/agents.ts",
+        "apps/app/src/data/contracts/runtimes.ts",
+        "apps/app/src/data/live/agents.test.ts",
+        "apps/app/src/data/live/mappers/agents.test.ts",
+        "apps/app/src/data/live/mappers/agents.ts",
+        "apps/app/src/data/live/mappers/runtimes.ts",
+        "apps/app/src/data/live/runtimes.test.ts",
+        "apps/app/src/features/agents/agent-actions.test.tsx",
+        "apps/app/src/features/agents/agent-actions.tsx",
+        "apps/app/src/features/agents/agents-table.tsx",
+        "apps/app/src/features/agents/agents.builders.ts",
+        "apps/app/src/features/agents/agents.test.tsx",
+        "apps/app/src/features/agents/agents.tsx",
+        "apps/app/src/features/agents/parts.test.tsx",
+        "apps/app/src/features/agents/register-agent.tsx",
+        "apps/app/src/features/agents/role-controls.tsx",
+        "apps/app/src/features/agents/state-actions.tsx",
+        "apps/app/src/features/fleet/fleet.builders.ts",
+        "apps/app/src/features/runtimes/parts.tsx",
+        "apps/app/src/features/runtimes/runtime.tsx",
+        "apps/app/src/features/runtimes/runtimes.builders.ts",
+        "apps/app/src/features/runtimes/runtimes.test.tsx",
+        "apps/app/src/features/runtimes/runtimes.tsx",
+        "apps/app/src/features/tools/tools.builders.ts",
+        "apps/app/src/i18n/messages.d.ts",
+        "apps/app/src/test/steering-views.ts",
+        "apps/app/src/ui/list-table.test.tsx",
+        "apps/app/src/ui/list-table.tsx",
+        "apps/app/src/ui/phone.css",
+        "docs/capabilities/agent.list.md",
+        "docs/capabilities/schemas/list_agents.json",
+        "docs/capabilities/schemas/list_tacho_hosts.json",
+        "docs/capabilities/tacho.host.list.md",
+        "packages/agent/src/handlers/agent.list.test.ts",
+        "packages/agent/src/handlers/agent.list.ts",
+        "packages/handlers/src/tacho.control.test.ts",
+        "packages/handlers/src/tacho.host.list.ts",
+        "packages/oxagen/src/contracts/agent.list.test.ts",
+        "packages/oxagen/src/contracts/agent.list.ts",
+        "packages/oxagen/src/contracts/tacho.host.list.test.ts",
+        "packages/oxagen/src/tacho/schemas.ts"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/3986",
+      "merged_at": "2026-09-24T10:58:58Z",
+      "number": 3986,
+      "refs": [
+        3975,
+        3296,
+        3780,
+        3816,
+        3817,
+        3818,
+        3819,
+        3820,
+        3821,
+        3841,
+        3846,
+        3847,
+        3852,
+        3853,
+        3854,
+        3855,
+        3857,
+        3860,
+        3865,
+        3919
+      ],
+      "repo": "oxagen",
+      "title": "feat(app): close the remaining rev1 audit gaps on Agents and Runtimes"
+    },
     "oxagen#3990": {
       "added": [
         "docs/adr/ADR-160-an-agent-day-is-a-utc-calendar-day.md",
@@ -62686,6 +63641,92 @@
       "repo": "oxagen",
       "title": "fix(handlers): let ESLint's project service see the integration tests"
     },
+    "oxagen#4027": {
+      "added": [
+        ".oxagen/memories/tacho-steer-and-resume-never-reached-autonomous-agent.md",
+        "packages/tacho/src/collector/run-controls.test.ts"
+      ],
+      "author": "macanderson",
+      "closes": [],
+      "files": [
+        ".oxagen/memories/_index.md",
+        ".oxagen/memories/tacho-steer-and-resume-never-reached-autonomous-agent.md",
+        "packages/tacho/src/claude-code/hook-client.ts",
+        "packages/tacho/src/claude-code/recorder.ts",
+        "packages/tacho/src/collector/daemon.ts",
+        "packages/tacho/src/collector/hook-handler.ts",
+        "packages/tacho/src/collector/inbox.ts",
+        "packages/tacho/src/collector/model-proxy.test.ts",
+        "packages/tacho/src/collector/model-proxy.ts",
+        "packages/tacho/src/collector/registry.ts",
+        "packages/tacho/src/collector/run-controls.test.ts",
+        "packages/tacho/src/wire.ts"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/4027",
+      "merged_at": "2026-09-24T11:35:21Z",
+      "number": 4027,
+      "refs": [
+        4019,
+        4024
+      ],
+      "repo": "oxagen",
+      "title": "fix(tacho): deliver steers and resume to an agent working on its own"
+    },
+    "oxagen#4029": {
+      "added": [
+        ".oxagen/memories/price-book-alias-one-way-drops-hyphenated-claude-id.md"
+      ],
+      "author": "macanderson",
+      "closes": [],
+      "files": [
+        ".oxagen/memories/_index.md",
+        ".oxagen/memories/price-book-alias-one-way-drops-hyphenated-claude-id.md",
+        "apps/app/messages/run.json",
+        "apps/app/src/data/contracts/run-work.ts",
+        "apps/app/src/data/contracts/runs.ts",
+        "apps/app/src/data/live/mappers/runs.test.ts",
+        "apps/app/src/data/live/mappers/runs.ts",
+        "apps/app/src/data/live/runs.test.ts",
+        "apps/app/src/features/run/run.test.tsx",
+        "apps/app/src/features/run/run.tsx",
+        "apps/app/src/features/run/sections.test.tsx",
+        "apps/app/src/features/run/sections.tsx",
+        "apps/app/src/features/run/work-ci.test.tsx",
+        "apps/app/src/i18n/messages.d.ts",
+        "docs/capabilities/run.list.md",
+        "docs/capabilities/run.work.get.md",
+        "docs/capabilities/schemas/get_run.json",
+        "docs/capabilities/schemas/get_run_work.json",
+        "docs/capabilities/schemas/list_runs.json",
+        "packages/billing/src/price-sources.test.ts",
+        "packages/billing/src/price-sources.ts",
+        "packages/github/src/__tests__/fetch-client-read.test.ts",
+        "packages/github/src/fetch-client.ts",
+        "packages/github/src/index.ts",
+        "packages/github/src/types.ts",
+        "packages/handlers/src/lib/run-work-prs.test.ts",
+        "packages/handlers/src/lib/run-work-prs.ts",
+        "packages/handlers/src/run.list.test.ts",
+        "packages/handlers/src/run.list.ts",
+        "packages/oxagen/src/contracts/run.get.test.ts",
+        "packages/oxagen/src/contracts/run.list.test.ts",
+        "packages/oxagen/src/contracts/run.list.ts",
+        "packages/oxagen/src/contracts/run.work.get.ts",
+        "packages/tacho/src/collector/hook-handler.ts",
+        "packages/tacho/src/collector/run-controls.test.ts"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/4029",
+      "merged_at": "2026-09-24T12:19:26Z",
+      "number": 4029,
+      "refs": [
+        4024,
+        3944
+      ],
+      "repo": "oxagen",
+      "title": "fix(run): record task, operator, end time and price facts for wrapped runs"
+    },
     "oxagen#4031": {
       "added": [
         "docs/specs/tacho/backfill.md"
@@ -62755,6 +63796,134 @@
       ],
       "repo": "oxagen",
       "title": "fix(ci): unblock main: e2e teardown hang, #3925's lint and a11y gaps, the onboarding main landmark"
+    },
+    "oxagen#4039": {
+      "added": [
+        ".agent/memory/test-engineer/reflections/2026-09-24-pr3911-billing-coverage.md",
+        "apps/app/src/test/arch/loading-landmarks.test.ts",
+        "docs/adr/ADR-164-every-green-commit-ships-unless-newer-is-live.md"
+      ],
+      "author": "macanderson",
+      "closes": [],
+      "files": [
+        ".agent/memory/test-engineer/lessons.md",
+        ".agent/memory/test-engineer/reflections/2026-09-24-pr3911-billing-coverage.md",
+        ".env.example",
+        ".github/workflows/pipeline.yml",
+        "apps/app/src/app/[org]/billing/loading.tsx",
+        "apps/app/src/data/contracts/money.ts",
+        "apps/app/src/features/run/header.tsx",
+        "apps/app/src/features/run/loading.tsx",
+        "apps/app/src/features/run/run.test.tsx",
+        "apps/app/src/features/run/stats.tsx",
+        "apps/app/src/test/arch/loading-landmarks.test.ts",
+        "docs/adr/ADR-164-every-green-commit-ships-unless-newer-is-live.md",
+        "docs/adr/README.md",
+        "packages/config/src/registry.ts",
+        "packages/handlers/src/lib/run-work.ts",
+        "packages/handlers/src/run.cost.test.ts",
+        "packages/handlers/src/run.work.get.test.ts",
+        "packages/handlers/src/run.work.get.ts",
+        "packages/tacho/src/host/wal-index.test.ts",
+        "tools/scripts/check-deploy-tip.mjs",
+        "tools/scripts/check-deploy-tip.test.ts",
+        "tools/scripts/check-main-preflight.mjs"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/4039",
+      "merged_at": "2026-09-24T09:54:18Z",
+      "number": 4039,
+      "refs": [
+        3953
+      ],
+      "repo": "oxagen",
+      "title": "ci(deploy): ship every green commit unless a newer one is already live"
+    },
+    "oxagen#4041": {
+      "added": [],
+      "author": "macanderson",
+      "closes": [],
+      "files": [
+        "apps/app/src/data/contracts/run-work.ts",
+        "apps/app/src/data/contracts/runs.ts",
+        "apps/app/src/data/live/mappers/runs.test.ts",
+        "apps/app/src/data/live/runs.test.ts",
+        "apps/app/src/data/live/runs.ts",
+        "apps/app/src/features/run/header.tsx",
+        "apps/app/src/features/run/run.test.tsx"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/4041",
+      "merged_at": "2026-09-24T08:46:15Z",
+      "number": 4041,
+      "refs": [],
+      "repo": "oxagen",
+      "title": "fix(app): return main's app tests to green after #4018"
+    },
+    "oxagen#4047": {
+      "added": [
+        ".agent/memory/debugger/reflections/2026-09-24-run-header-main-test-failures.md",
+        "apps/app/src/features/auth/allowance.test.ts",
+        "apps/app/src/features/auth/allowance.ts",
+        "apps/app/src/features/auth/query-email.ts",
+        "apps/app/src/ui/focused-heading.tsx"
+      ],
+      "author": "macanderson",
+      "closes": [],
+      "files": [
+        ".agent/memory/debugger/lessons.md",
+        ".agent/memory/debugger/reflections/2026-09-24-run-header-main-test-failures.md",
+        ".agent/memory/shared/lessons.md",
+        "apps/app/ARCHITECTURE.md",
+        "apps/app/messages/auth.json",
+        "apps/app/src/app/(auth)/pages.test.tsx",
+        "apps/app/src/app/(auth)/signup/page.tsx",
+        "apps/app/src/app/(auth)/two-factor/page.tsx",
+        "apps/app/src/app/(auth)/verify/page.tsx",
+        "apps/app/src/features/auth/allowance.test.ts",
+        "apps/app/src/features/auth/allowance.ts",
+        "apps/app/src/features/auth/forms.test.tsx",
+        "apps/app/src/features/auth/index.ts",
+        "apps/app/src/features/auth/invite-decision.tsx",
+        "apps/app/src/features/auth/invite-view.tsx",
+        "apps/app/src/features/auth/login-form.tsx",
+        "apps/app/src/features/auth/password-reset-forms.tsx",
+        "apps/app/src/features/auth/query-email.ts",
+        "apps/app/src/features/auth/signup-form.tsx",
+        "apps/app/src/features/auth/views.test.tsx",
+        "apps/app/src/i18n/messages.d.ts",
+        "apps/app/src/proxy.test.ts",
+        "apps/app/src/proxy.ts",
+        "apps/app/src/server/tenancy-lookups.test.ts",
+        "apps/app/src/server/tenancy-lookups.ts",
+        "apps/app/src/server/viewer-resolution.test.ts",
+        "apps/app/src/server/viewer.test.ts",
+        "apps/app/src/server/viewer.ts",
+        "apps/app/src/shared/safe-path.test.ts",
+        "apps/app/src/shared/safe-path.ts",
+        "apps/app/src/test/arch/layers.ts",
+        "apps/app/src/test/arch/tenancy-lookups-tables.test.ts",
+        "apps/app/src/ui/focused-heading.tsx",
+        "apps/app/src/ui/form-feedback.tsx",
+        "apps/app/src/ui/form-primitives.test.tsx"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/4047",
+      "merged_at": "2026-09-24T11:51:11Z",
+      "number": 4047,
+      "refs": [
+        3883,
+        3884,
+        3885,
+        3886,
+        3887,
+        3888,
+        3938,
+        4042,
+        4043
+      ],
+      "repo": "oxagen",
+      "title": "fix(app): clear the sign-in screens' remaining rev1 audit fails"
     },
     "stella#6527": {
       "added": [],
@@ -63443,8 +64612,8 @@
     }
   },
   "since": {
-    "oxagen": "2026-09-24T06:54:09Z",
-    "oxagen-roadmap": "2026-09-24T06:10:54Z",
-    "stella": "2026-09-23T21:49:58Z"
+    "oxagen": "2026-09-24T12:19:29Z",
+    "oxagen-roadmap": "2026-09-24T07:22:27Z",
+    "stella": "2026-09-24T11:12:24Z"
   }
 }
