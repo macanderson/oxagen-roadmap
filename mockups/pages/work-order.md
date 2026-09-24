@@ -5,11 +5,11 @@
 | Route | `#/a-intel/core-platform/tasks/work-orders/<woId>`, for example `wo_01K6T9QX` |
 | Scope | workspace |
 | Spec | `docs/tasks-spec.md` §9.5 (what sending records), §9.6 (delivery), §10.3 (running a workflow), §11 (completing work) |
-| Design | `mockups/src/engine.js` → `pWorkOrder()`, `stageChain()`, `woItemsFor()`, `DLG_EXT.woaccept`, `DLG_EXT.wostop`; data `mockups/fixtures/tasks.json` |
+| Design | `mockups/src/engine.js` → `pWorkOrder()`, `stageChain()`, `woItemsFor()`, `woPromptText()`, `DLG_EXT.woaccept`, `DLG_EXT.wostop`; data `mockups/fixtures/tasks.json` |
 | States | loaded · loading · error · access denied |
 | Storybook | `Oxagen / Workspace / Work order`: one story per state, desktop and mobile |
 | Audit | `work-order.audit-prompt.md` |
-| Check | `node tools/check-tasks.mjs` (flows 5 and 7) |
+| Check | `node tools/check-tasks.mjs` (flows 5, 7, and 8) |
 
 ## Job
 
@@ -18,7 +18,9 @@ One work order from the moment it is sent to the moment a person accepts it: whi
 ## What is on the page
 
 **Header**: eyebrow the id in mono, h1 the title, subtext "Sent by <name> on <time> to <agent, or the <name> workflow>."
-Actions: **Stop the work order** (red, while it is not accepted or stopped) and **Accept the work** (gold when every item is claimed and the work order is not accepted; otherwise plain and disabled, titled "Every item must be claimed first").
+Actions: **Copy prompt** (plain), **Stop the work order** (red, while it is not accepted or stopped) and **Accept the work** (gold when every item is claimed and the work order is not accepted; otherwise plain and disabled, titled "Every item must be claimed first").
+
+**Copy prompt** copies the prompt exactly as sent, then **References**: the work order id, title, Oxagen link, and prompt digest, each task's number, subject, issue link, and Oxagen task id and link, and the pull request when one exists. The toast reads "Prompt copied, with N tasks."
 
 **Tiles**: State (the state badge; "stage N of M", "every item is claimed", or "on <time>"), Items claimed ("by the agents, with evidence"), Items accepted ("by a person"), Returns ("1 of 2", "work sent back to an earlier stage").
 
@@ -69,6 +71,6 @@ The stage chain stacks one card per row without arrows. The columns stack, the l
 
 - A claim is the agent's word, labelled with the agent and the run. An acceptance is a person's. The page never shows a claim as accepted.
 - Accept is enabled only when every item is claimed. Accepting merges nothing.
-- The prompt is shown as sent, with its digest, and cannot be edited here.
+- The prompt is shown as sent, with its digest, and cannot be edited here. The copied prompt is the same text, and the references follow it.
 - A handoff note is quoted evidence, and the page says so.
 - The page shows each stage agent's tier, and never claims enforcement stronger than that tier gives.

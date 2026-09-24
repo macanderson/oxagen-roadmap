@@ -5,11 +5,11 @@
 | Route | `#/a-intel/core-platform/tasks/<taskId>`, for example `tsk_01K6S7C5PA` |
 | Scope | workspace |
 | Spec | `docs/tasks-spec.md` §6 (the task record), §8 (the definition of done), §9.1 (selecting) |
-| Design | `mockups/src/engine.js` → `pTask()`, `dodRows()`, `tkDraftNow()`, `DLG_EXT.certify`, `DLG_EXT.dodreopen`; data `mockups/fixtures/tasks.json` |
+| Design | `mockups/src/engine.js` → `pTask()`, `dodRows()`, `tkDraftNow()`, `taskPromptText()`, `DLG_EXT.certify`, `DLG_EXT.dodreopen`; data `mockups/fixtures/tasks.json` |
 | States | loaded · loading · error · access denied |
 | Storybook | `Oxagen / Workspace / Task`: one story per state, desktop and mobile |
 | Audit | `task.audit-prompt.md` |
-| Check | `node tools/check-tasks.mjs` (flows 2 and 3) |
+| Check | `node tools/check-tasks.mjs` (flows 2, 3, and 8) |
 
 ## Job
 
@@ -18,7 +18,7 @@ One task: what the tracker says, what done means for it, who said so, and whethe
 ## What is on the page
 
 **Header**: eyebrow the provider's logo and the task number in mono ("a-intel/platform#633", "PLAT-231"), h1 the subject, subtext "Imported from <provider>. Updated <time>."
-Actions: **Open in <provider>** (plain; opens the issue), and one primary that follows readiness:
+Actions: **Copy prompt** (plain), **Open in <provider>** (plain; opens the issue), and one primary that follows readiness:
 
 | Readiness | Primary |
 |---|---|
@@ -28,6 +28,8 @@ Actions: **Open in <provider>** (plain; opens the issue), and one primary that f
 | `ready`, open | **Create work order and send to agent** (gold; the send menu of `tasks.md` with this task) |
 | `ready`, blocked | the same button, disabled, with the reason |
 | `sent`, `accepted` | **Open the work order** (gold) |
+
+**Copy prompt** copies the task as plain text to paste into an agent session. It carries the number, the subject, and the issue link, the Oxagen task id and link, the description, and the definition of done. The line above the items says who certified them and when, that they were certified before the description changed, or that they are a draft nobody has certified. Then **Work orders**: every work order that carries the task, each with its id, title, when it was sent and to whom, its state, its Oxagen link, and its pull request when one exists. A task in no work order says "No work order carries this task." The toast reads "Prompt copied, with N work orders.", or "Prompt copied, with no work order." for a task in none.
 
 **Changed** (readiness `changed` only): a banner, `changed`, "The description changed after certification", who edited it and when, and "The certification from <time> no longer matches the task, so it left ready." Then two panels side by side: **Certified against** and **Now**.
 
@@ -83,3 +85,4 @@ The two columns stack, the left first. The item rows keep their selects on one w
 - An upstream change to the subject, description, or labels marks a certification changed and shows both texts.
 - An item's source is always shown. An item a person edited says so.
 - An account that is not mapped is shown as itself.
+- The copied prompt says whether the definition of done is certified. A draft never reads as certified.
