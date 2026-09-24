@@ -9,14 +9,18 @@
 //   node tools/check-tasks.mjs --shots    # also write a screenshot per step to .claude/shots/tasks/
 //
 // The flows, in order:
-//   1. connect Jira through the six-step wizard, leave one account not mapped, and see it on Providers
+//   1. connect Jira through the six-step wizard, create one value in Jira, leave one account not mapped,
+//      and see it on Providers
+//  1b. connect ServiceNow with creation off, and see its column on Fields
 //   2. draft a definition of done with the assistant, edit it, and certify it
 //   3. a certified task that changes upstream leaves ready
 //   4. only ready tasks can be selected; the send menu lists only agents you operate, with harness marks
 //   5. the work order merges every definition of done, drafts a prompt, resolves @ mentions, and will not
 //      send until the repositories are confirmed; sending tags the tasks and opens the work order
 //   6. a workflow chains stages and ends with a person; the builder drafts stages from a sentence
-//   7. labels carry a colour and a mapping, and a claimed work order can be accepted
+//   7. labels carry a colour and a mapping, a resolution can be created in a provider, and a claimed work
+//      order can be accepted
+//   8. the task and the work order each copy a prompt that names the other
 // Every assertion names a string the surface is supposed to render, never a value read back out of
 // the control under test.
 import { mkdirSync } from "node:fs";
@@ -59,12 +63,15 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
   await page.click("text=Connect an issue provider");
   let d = await dlgText(page);
   ok(/Provider Authorize Scope Fields People Review/.test(d.replace(/[0-9]/g, "").replace(/\s+/g, " ")) || (await page.locator(".wz-st").count()) === 6, "wizard: six steps");
-  ok((await page.locator(".ipz-card").count()) === 3, "wizard: three providers to choose from");
+  ok((await page.locator(".ipz-card").count()) === 6, "wizard: six providers to choose from");
+  ok(/Issue trackers/.test(d) && /Help desks/.test(d) && /ServiceNow/.test(d) && /Salesforce/.test(d) && /Zendesk/.test(d), "wizard: offers the help desks beside the trackers");
   ok(await footBtn(page, "Next").isDisabled(), "wizard: Next waits for a choice");
   await page.click(".ipz-card >> nth=2");
   await footBtn(page, "Next").click();
   d = await dlgText(page);
   ok(/read:jira-work/.test(d) && /offline_access/.test(d), "wizard: Jira names the scopes it asks for");
+  ok(/Create values in Jira/.test(d) && /manage:jira-configuration/.test(d), "wizard: creating values asks for the Jira admin scope");
+  ok(/every write appears under the account that authorizes/.test(d), "wizard: says Jira writes carry the authorizing account");
   ok(/What it still cannot do/.test(d), "wizard: says what the token still cannot do");
   ok(/credential store/.test(d), "wizard: says where the token is kept");
   ok(await footBtn(page, "Next").isDisabled(), "wizard: Next waits for authorization");
@@ -79,6 +86,11 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
   ok(/Statuses/.test(d) && /Resolutions/.test(d) && /Labels/.test(d), "wizard: maps statuses, resolutions and labels");
   ok(/issue type Bug/.test(d) && /priority Highest/.test(d), "wizard: suggests Jira values for the labels");
   ok(/Post the definition of done as a comment/.test(d), "wizard: write-back switches");
+  ok(/Close the issue as Done when you accept the work/.test(d), "wizard: closing says Done");
+  ok((await page.locator("#layer .dlg option", { hasText: /^Create “/ }).count()) >= 1, "wizard: a value Jira lacks can be created there");
+  ok(/Only in Jira/.test(d) && /Add “security”/.test(d) && !/Add “Bug”/.test(d), "wizard: a value only Jira has can be added to Oxagen, and a mapped one is not offered");
+  await page.selectOption('#layer .dlg select[aria-label="Chore"]', "__create");
+  ok(/1 to create in Jira/.test(await dlgText(page)), "wizard: counts what it will create");
   await footBtn(page, "Next").click();
   d = await dlgText(page);
   ok(/Tobias Brennan/.test(d) && /Automation for Jira/.test(d), "wizard: lists the accounts in scope");
@@ -91,6 +103,7 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
   d = await dlgText(page);
   ok(/2 mapped, 2 not mapped/.test(d), "wizard: review repeats the mapping");
   ok(/Nothing is sent to an agent/.test(d), "wizard: review says nothing is sent to an agent");
+  ok(/1 to create in Jira/.test(d) && /create_provider_value/.test(d), "wizard: review names the value it creates");
   await footBtn(page, "Connect Jira").click();
   await page.waitForTimeout(200);
   t = await text(page);
@@ -101,6 +114,39 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
   t = await text(page);
   ok(/Automation for Jira/.test(t) && /not mapped/.test(t), "people: the new accounts are listed, one not mapped");
   await done(page, errs, "connect");
+}
+
+/* 1b. connecting a help desk */
+{
+  const { page, errs } = await open(H + "/providers");
+  await page.click("text=Connect an issue provider");
+  await page.click(".ipz-card >> text=ServiceNow");
+  await footBtn(page, "Next").click();
+  let d = await dlgText(page);
+  ok(/Instance/.test(d) && /itil role/.test(d) && /personalize_choices role/.test(d), "help desk: ServiceNow names its instance, role, and the role creating needs");
+  ok(/reply to a requester/.test(d) && /work note/.test(d), "help desk: says every work note is internal");
+  await page.click("#ipzCreate");
+  ok(!/personalize_choices role/.test(await text(page, "#layer .dlg table")), "help desk: turning creation off drops the admin role from the permissions");
+  await page.click("text=Authorize with ServiceNow");
+  await page.waitForTimeout(900);
+  await footBtn(page, "Next").click();
+  ok(/Assignment groups/.test(await dlgText(page)) && /open incidents/.test(await dlgText(page)), "help desk: scope lists assignment groups and incidents");
+  await footBtn(page, "Next").click();
+  d = await dlgText(page);
+  ok(/Post the definition of done as a work note/.test(d) && /Close the incident as Done/.test(d), "help desk: writes use ServiceNow's words");
+  ok(/email the caller/.test(d), "help desk: says resolving emails the caller");
+  ok((await page.locator("#layer .dlg option", { hasText: /^Create “/ }).count()) === 0, "help desk: nothing to create once creation is off");
+  await footBtn(page, "Next").click();
+  d = await dlgText(page);
+  ok(/requester/.test(d) && /never maps one/.test(d), "help desk: a requester is never mapped");
+  await footBtn(page, "Next").click();
+  await footBtn(page, "Connect ServiceNow").click();
+  await page.waitForTimeout(200);
+  ok(/a-intel\.service-now\.com/.test(await text(page)) && /ServiceNow instance/.test(await text(page)), "providers: ServiceNow is connected after the wizard");
+  await page.click("text=Fields");
+  await page.waitForTimeout(100);
+  ok(/close code Solution provided/.test(await text(page)), "fields: a connected help desk gets its own column");
+  await done(page, errs, "help desk");
 }
 
 /* 2. drafting and certifying a definition of done */
@@ -218,7 +264,8 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
   const { page, errs } = await open(H + "/fields");
   const t = await text(page);
   ok(/P0/.test(t) && /P3/.test(t) && /New Feature/.test(t) && /Documentation/.test(t) && /Chore/.test(t), "fields: the default labels ship");
-  ok(/Fixed/.test(t) && /Won't fix/.test(t) && /Duplicate/.test(t) && /Cancelled/.test(t) && /Other/.test(t), "fields: the default resolutions ship");
+  ok((await page.locator("td b", { hasText: /^Done$/ }).count()) >= 1 && /Won't do/.test(t) && /Duplicate/.test(t) && /Cancelled/.test(t) && /Other/.test(t), "fields: the default resolutions ship");
+  ok(!/Won't fix|\bFixed\b/.test(t.replace(/Done, Fixed|Won't Do, Won't Fix/g, "")), "fields: no resolution is named Fixed or Won't fix");
   ok(/Open/.test(t) && /Blocked/.test(t) && /Closed/.test(t), "fields: the three status categories");
   await page.click("text=New Feature >> nth=0");
   const d = await dlgText(page);
@@ -226,6 +273,13 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
   await page.click('button[aria-label="Colour #9D8BE3"]');
   await footBtn(page, "Save label").click();
   ok(/#9D8BE3/.test(await text(page)), "label: the colour is saved");
+  await page.locator("td b", { hasText: /^Won't do$/ }).click();
+  let r = await dlgText(page);
+  ok(/Creating one needs write/.test(r), "resolution: Linear without the write scope says what creating needs");
+  await page.click("#layer .dlg >> text=Create in GitHub");
+  await footBtn(page, "Save resolution").click();
+  ok(/create_provider_value for GitHub/.test(await text(page, "#toast")), "resolution: saving creates the value in GitHub");
+  ok(/label Won't do/.test(await text(page)), "resolution: the GitHub mapping names the label Oxagen creates");
   await page.close();
   const w = await open(H + "/work-orders/wo_01K6TA2M");
   ok(!(await w.page.locator(".phead button", { hasText: "Accept the work" }).isDisabled()), "accept: enabled when every item is claimed");
@@ -233,6 +287,44 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
   await footBtn(w.page, "Accept every item").click();
   ok(/3 \/ 3/.test(await text(w.page)) && /accepted/.test(await text(w.page)), "accept: every item accepted");
   await done(w.page, [...errs, ...w.errs], "accept");
+}
+
+/* 8. copy prompt */
+{
+  // The clipboard of a headless file:// page refuses writes, so the check keeps what the page sends it.
+  const grab = page => page.evaluate(() => {
+    window.__copied = null;
+    Object.defineProperty(navigator, "clipboard", { configurable: true, value: { writeText: t => { window.__copied = t; return Promise.resolve(); } } });
+  });
+  const copied = page => page.evaluate(() => window.__copied || "");
+  const w = await open(H + "/work-orders/wo_01K6T9QX");
+  await grab(w.page);
+  await w.page.click(".phead >> text=Copy prompt");
+  await w.page.waitForTimeout(100);
+  let c = await copied(w.page);
+  ok(/You have a work order from Marcus Bell/.test(c) && /claim_dod_item/.test(c), "copy: the work order copies the prompt as sent");
+  ok(/Work order wo_01K6T9QX: Same-minute migration stamps/.test(c) && /sha256:ab41c7e09f3d2865/.test(c), "copy: the work order names itself and its digest");
+  ok(/Task a-intel\/platform#587/.test(c) && /tsk_01K6SF2W6Q: https:\/\/app\.oxagen\.sh\/a-intel\/core-platform\/tasks\/tsk_01K6SF2W6Q/.test(c), "copy: the work order links its task");
+  ok(/Prompt copied, with 1 task\./.test(await text(w.page, "#toast")), "copy: the work order toast counts the tasks");
+  await done(w.page, w.errs, "copy work order");
+  const t = await open(H + "/tsk_01K6SF2W6Q");
+  await grab(t.page);
+  await t.page.click(".phead >> text=Copy prompt");
+  await t.page.waitForTimeout(100);
+  c = await copied(t.page);
+  ok(/Task a-intel\/platform#587/.test(c) && /https:\/\/github\.com\/a-intel\/platform\/issues\/587/.test(c), "copy: the task names its issue");
+  ok(/Certified by Marcus Bell/.test(c) && /\[test\] A test covers a same-minute pair/.test(c), "copy: the task carries its certified definition of done");
+  ok(/wo_01K6T9QX: Same-minute migration stamps/.test(c) && /tasks\/work-orders\/wo_01K6T9QX/.test(c), "copy: the task links its work order");
+  ok(/Prompt copied, with 1 work order\./.test(await text(t.page, "#toast")), "copy: the task toast counts the work orders");
+  await t.page.close();
+  const d = await open(H + "/tsk_01K6S7C5PA");
+  await grab(d.page);
+  await d.page.click(".phead >> text=Copy prompt");
+  await d.page.waitForTimeout(100);
+  c = await copied(d.page);
+  ok(/A draft\. Nobody has certified it\./.test(c) && !/Certified by/.test(c), "copy: a draft is not called certified");
+  ok(/No work order carries this task/.test(c), "copy: a task in no work order says so");
+  await done(d.page, [...t.errs, ...d.errs], "copy task");
 }
 
 await browser.close();
