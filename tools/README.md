@@ -39,6 +39,21 @@ A scenario in the catalog with no `SCENARIOS` entry fails; nothing skips.
 
 Run `build-mockup.mjs --check` on every edit to the sources; run `check-mockup.mjs` before you ship.
 
+## The tasks guard
+
+```sh
+node tools/check-tasks.mjs           # every Tasks flow
+node tools/check-tasks.mjs --shots   # also write a screenshot per step to .claude/shots/tasks/
+```
+
+Walks the Tasks surface (`docs/tasks-spec.md`) the way an operator meets it: connecting Jira through
+the six-step wizard with one account left not mapped; drafting a definition of done with the
+assistant, editing it and certifying it; a certified task that changed upstream; the send menu
+listing only agents the operator runs, each with its harness mark; the work order merging every
+definition of done, resolving `@` mentions and refusing to send until the repositories are
+confirmed; a workflow of four agents and a person, and the builder drafting one from a sentence;
+label colours; and accepting a claimed work order.
+
 ## The wizard guard
 
 ```sh
@@ -166,10 +181,10 @@ Test any keyboard interaction **twice in a row**: these bugs work exactly once.
 
 ## The spec copies in the oxagen repository
 
-`docs/mission-control-spec.md`, `docs/implementation-plan.md` and `docs/desktop-spec.md` each have a copy in the oxagen repository, and no build step joins them. Their headers name the sections that must match. After editing one of those sections in both repositories, run:
+`docs/desktop-spec.md` has a copy in the oxagen repository, and no build step joins them. Its header names the sections that must match. After editing one of those sections in both repositories, run:
 
 ```
 python3 tools/check-spec-sync.py . ~/Projects/oxagen
 ```
 
-It exits 0 when every shared section is byte-identical and 1 when one differs, and it names the section.
+It exits 0 when every shared section is byte-identical and 1 when one differs, and it names the section. The oxagen copies of the spec and the plan were retired on 2026-09-23, so `docs/mission-control-spec.md` and `docs/implementation-plan.md` are the only live copies.

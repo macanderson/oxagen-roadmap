@@ -17,10 +17,10 @@ Close enough is a fail.
 2. `mockups/missioncontrol.html?product=1&state=loaded&mobile=0` (the whole design, desktop) and
    `…&mobile=1` (the whole design, mobile), or the Product stories in Storybook. Open them and
    navigate; everything on them is the design.
-3. `docs/specs/mission-control/spec.md` §12.6 to §12.9 (tokens, attribution, findings), §14
+3. `docs/mission-control-spec.md` §12.6 to §12.9 (tokens, attribution, findings), §14
    (Mission Control), §14.1 (surfaces), Appendix A (target tables), Appendix E (contracts),
    Appendix F (the pages that survive).
-4. `docs/specs/mission-control/plan.md` §3 (data mapping), §4.8 (page states), §4.10 (tabs as
+4. `docs/implementation-plan.md` §3 (data mapping), §4.8 (page states), §4.10 (tabs as
    segments), §4.11 (session gate and Appendix F redirects), §8 (the phases the design assumes
    shipped: every phase, 0 to 5).
 
@@ -39,7 +39,8 @@ Record PASS / FAIL / N/A per check with evidence (file:line, selector + text, or
 
 ### A. Pages exist, nothing else does
 1. Exactly the routes in Appendix F exist: seven workspace pages (`/{org}/{ws}`, `/runs/{run}`,
-   `/agents[/{agent}[/source|/mandates/{id}]]`, `/tools`, `/steering`, `/spend`), three organization
+   `/agents[/{agent}[/source|/mandates/{id}]]`, `/tools`, `/steering`, `/spend`), Tasks
+   (`/tasks[/{tab}]`, `/tasks/{task}`, `/tasks/work-orders/{id}`, `docs/tasks-spec.md` §15), three organization
    pages (`/{org}`, `/{org}/billing`, `/{org}/audit`), the seven sign-in flows, the Register Agent
    gate and the onboarding gate. Every other route is a FAIL.
 2. Account is a dialog from the user menu, not a page. Approvals are a drawer from the topbar and a
@@ -48,11 +49,12 @@ Record PASS / FAIL / N/A per check with evidence (file:line, selector + text, or
    FAIL if any of them is.
 
 ### B. Shell (desktop)
-4. Sidebar: organization switcher and workspace switcher at the top; Workspace nav Fleet, Agents,
+4. Sidebar: organization switcher and workspace switcher at the top; Workspace nav Fleet, Tasks, Agents,
    Tools, Steering, Runtimes, Repositories, Spend; Organization nav Organization, Billing, Audit; the footer
    (agent count, data plane, connection); the assistant launcher at the foot of the sidebar.
-5. Nav counts appear only where something waits on a person: Fleet (live runs), Steering
-   (proposals), Audit (open critical incidents). Any other count is a FAIL.
+5. Nav counts appear only where something waits on a person: Fleet (live runs), Tasks (drafts and
+   changed certifications, and work orders waiting on you), Steering (proposals), Audit (open
+   critical incidents). Any other count is a FAIL.
 6. Topbar, left to right: breadcrumbs ending on the current page; ⌘K search-or-run listing every
    page and action; notifications with an unread dot; the approvals button with a numeric badge;
    the account avatar (Account, Preferences, Security and sessions, Privacy and data, Switch theme,

@@ -57,6 +57,14 @@ export function labelsToMeta(labels) {
  * and stops here.
  */
 const DECISION_ASK = /(?:needs?|requires?|wants?) (?:a |an )?(?:maintainer|owner|human)(?:'s|\u2019s)? (?:decision|call|choice|answer)|(?:a |the )?decision (?:that )?only (?:the )?(?:maintainer|owner|you) (?:can|must) (?:make|take)|maintainer (?:must|has to|needs to) (?:decide|choose|pick)/i;
+// What a full run keeps from the closed list: merged PRs, and closed issues that carry
+// `needs:decision`. Closing such an issue is how a decision gets settled, so dropping it would
+// leave those decisions off the page.
+export function keptOnFirstRun(it) {
+  if (it.pull_request) return !!it.pull_request.merged_at;
+  return labelsToMeta(it.labels).needs_decision;
+}
+
 const DECISION_LEAD = /^\s*(?:[:\u2014\u2013-]\s*|(?:on |about )?(?:whether|which|what|how|if)\b)/i;
 const DECISION_HEAD = /^#{1,4}\s*(?:the )?(?:decision needed|decision required|open questions?|the question|questions? for the maintainer|options|the choice)\s*$/im;
 const plain = (s) => String(s).replace(/`([^`]+)`/g, "$1").replace(/\*\*?([^*]+)\*\*?/g, "$1")

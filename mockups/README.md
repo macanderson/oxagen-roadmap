@@ -73,6 +73,15 @@ depended on proof: it is what the frames show bought nothing, so it stays with o
   per session is a wasted-spend cause and an operator coaching signal.
 - `pages/` holds the spec of every page and its audit prompt, rewritten for this mockup. They are
   what a build of rev1 is measured against.
+- Tasks (2026-09-23, `docs/tasks-spec.md`): a Workspace nav item under Fleet. Tasks arrive from
+  GitHub, Linear and Jira through a six-step connection wizard, with thirteen fixed fields,
+  configurable statuses, resolutions and coloured labels, and provider accounts mapped to members or
+  left not mapped. `oxagen.assistant` drafts a definition of done for every task and a person
+  certifies it. This is the task's definition of done, a list a person certifies and accepts. It is
+  not the run dod removed above, and none of that one's verdict words apply. Ready tasks go to an
+  agent the sender operates in a work order: the merged definition of done, an editable prompt with
+  `@` mentions of context records and agent profiles, and confirmed repositories. Workflows chain
+  agents (fix, validate, document, review) and end with a person. `tools/check-tasks.mjs` walks it.
 
 ## Data boundary
 
@@ -85,5 +94,5 @@ provider.
 
 - `mockups/src` and `mockups/fixtures`, built by `tools/build-mockup.mjs`. The future-state
   sources are `mockups/future_state_mockups/{src,fixtures}`, built by `tools/build-mockup-future.mjs`.
-- Spec: `oxagen/docs/specs/mission-control/spec.md` §12.6 to §12.9 for the token classes, the
+- Spec: `docs/mission-control-spec.md` §12.6 to §12.9 for the token classes, the
   derived metrics and the findings; `plan.md` §8 for the phases the mock assumes shipped.

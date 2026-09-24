@@ -23,7 +23,7 @@ loaded, the gate steps have loading and denied, and the first-run step an error.
 | `<page>.audit-prompt.md` | A prompt to paste into an agent session that audits the built page against `<page>.md`, check by check, and reports PASS/FAIL with evidence. |
 | `audit-prompt.md` | The whole-app prompt: shell, the approvals drawer, mobile shell, auth sequences, cross-cutting rules; it runs every per-page prompt. |
 
-Pages (42): fleet · run · run-interjection · agents · agent · agent-source · mandate · tools ·
+Pages (46): fleet · tasks · tasks-providers · task · work-order · run · run-interjection · agents · agent · agent-source · mandate · tools ·
 runtimes · steering · steering-records · skills · skills-off · skill-source · steering-memory ·
 steering-ontology · steering-assignments · steering-gates · steering-proposals · steering-compiler ·
 record · repositories · spend · organization ·
@@ -32,7 +32,10 @@ register-name · register-wrap · register-run · signup · verify-email · logi
 forgot-password · reset-password · accept-invitation · onboarding-organization · onboarding-wrap ·
 onboarding-run · installer.
 
-A spec can cover more than one route. `runtimes.md` covers the host list and one host. `tools.md`
+A spec can cover more than one route. `runtimes.md` covers the host list and one host. `tasks.md`
+covers the Tasks, Work orders and Workflows tabs, the send menu, the work order dialog and the
+workflow builder; `tasks-providers.md` covers the Providers, Fields and People tabs and the connection
+wizard. The feature's product spec is `docs/tasks-spec.md`, and `node tools/check-tasks.mjs` walks it. `tools.md`
 covers all five of its tabs, Toolbelts and Providers among them. `agent.md` covers every tab of the
 agent detail.
 

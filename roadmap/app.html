@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <title>Oxagen Roadmap</title>
-<meta name="description" content="The living roadmap for Oxagen: the gaps between the mockups and the build, the witness, the definition of done, the decisions, and the GitHub issues, live.">
+<meta name="description" content="The living roadmap for Oxagen: what rev 1 must have, the gaps between the mockups and the build, the decisions, and the GitHub issues, live. The witness and the definition of done are rev 2.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
 <style>
@@ -287,8 +287,11 @@ const linksOf = (it) => (itemState(it).linked_issues || []).concat((it.issue_lin
 
 /* ---------- router ---------- */
 const NAV = [
-  ["now", "Now"], ["gaps", "Gaps"], ["witness", "Witness"], ["done", "Done"], ["decisions", "Decisions"], ["issues", "Issues"], ["wireframes", "Wireframes"], ["docs", "Specs"],
+  ["now", "Now"], ["gaps", "Gaps"], ["decisions", "Decisions"], ["witness", "Witness"], ["done", "Done"], ["issues", "Issues"], ["wireframes", "Wireframes"], ["docs", "Specs"],
 ];
+// Nav groups by slice of NAV. The witness and the definition of done moved to rev 2 on 2026-09-24.
+const NAV_GROUPS = [["Rev 1", 0, 3], ["Rev 2", 3, 5], ["Work", 5, NAV.length]];
+const revOf = (x) => x?.rev || 1;
 function parseHash() {
   const h = location.hash.replace(/^#\/?/, "");
   const [path, qs] = h.split("?");
@@ -309,8 +312,8 @@ function renderNav() {
     decisions: DECISIONS.filter(d => decState(d).status !== "decided").length,
     issues: Object.values(S.issues).reduce((a, r) => a + (r.total || r.items?.length || 0), 0) || null,
   };
-  $("#nav").innerHTML = `<div class="sep">Roadmap</div>` + NAV.slice(0, 5).map(([r, t]) => `<a href="#/${r}" class="${S.route === r ? "active" : ""}">${t}${counts[r] != null ? `<span class="ct">${counts[r]}</span>` : ""}</a>`).join("") +
-    `<div class="sep">Work</div>` + NAV.slice(5).map(([r, t]) => `<a href="#/${r}" class="${S.route === r ? "active" : ""}">${t}${counts[r] != null ? `<span class="ct">${counts[r]}</span>` : ""}</a>`).join("") +
+  const link = ([r, t]) => `<a href="#/${r}" class="${S.route === r ? "active" : ""}">${t}${counts[r] != null ? `<span class="ct">${counts[r]}</span>` : ""}</a>`;
+  $("#nav").innerHTML = NAV_GROUPS.map(([g, a, b]) => `<div class="sep">${g}</div>` + NAV.slice(a, b).map(link).join("")).join("") +
     `<div class="sep">Links</div><a href="https://github.com/${ORG}/${ROADMAP_REPO}" target="_blank" rel="noopener">Repository ↗</a><a href="https://github.com/${ORG}" target="_blank" rel="noopener">${ORG} on GitHub ↗</a>`;
 }
 
@@ -318,7 +321,7 @@ function renderNav() {
 const chip = (t, cls = "") => `<span class="chip ${cls}">${esc(t)}</span>`;
 function statusChips(it) {
   const s = itemState(it);
-  return chip(statusOf(it).replace("-", " "), statusOf(it)) + chip(prioOf(it), prioOf(it).toLowerCase()) + (it.scope_verdict && it.scope_verdict !== "keep" ? chip(it.scope_verdict, it.scope_verdict) : "") + (it.plan_lane ? chip(it.plan_lane) : "") + (s.owner ? chip("@" + s.owner) : "");
+  return chip(statusOf(it).replace("-", " "), statusOf(it)) + chip(prioOf(it), prioOf(it).toLowerCase()) + (it.scope_verdict && it.scope_verdict !== "keep" ? chip(it.scope_verdict, it.scope_verdict) : "") + (revOf(it) === 2 ? chip("rev 2") : "") + (it.plan_lane ? chip(it.plan_lane) : "") + (s.owner ? chip("@" + s.owner) : "");
 }
 function itemCard(it) {
   const links = linksOf(it);
@@ -349,9 +352,11 @@ const PAGES = {
     const ghOn = ghLive();
     const unbacked = Object.entries(ANN).filter(([, a]) => (a.kind === "feature" || a.kind === "epic") && !a.has_spec_backing);
     const next = surf.filter(i => ["not-started","partial","fixtures-only"].includes(statusOf(i)) && ["P0","P1"].includes(prioOf(i))).sort((a, b) => prioOf(a).localeCompare(prioOf(b))).slice(0, 8);
-    const ms = D.milestones || [];
-    return `<div class="page-head"><div><div class="eyebrow gold">Oxagen</div><h1>What we build next</h1></div>
-      <p class="lead">${esc(D.thesis || "The mockups are the spec. This page measures the distance between them and the build, carries the witness and the definition of done that make a run provable, and lists the decisions that unblock the work. GitHub status is live. Everything else is editable here, by you or by the assistant.")}</p>
+    const ms = (D.milestones || []).filter(m => revOf(m) === 1);
+    const ms2 = (D.milestones || []).filter(m => revOf(m) === 2);
+    const rev2Open = ITEMS.filter(i => revOf(i) === 2 && statusOf(i) !== "built").length;
+    return `<div class="page-head"><div><div class="eyebrow gold">Must have</div><h1>Rev 1</h1></div>
+      <p class="lead">${esc(D.thesis || "Rev 1 is what the mockups draw, and the build must match it. This page lists what rev 1 must have: its milestones, how far the build is from the mockups, and the decisions that unblock the work. GitHub status is live. Everything else is editable here, by you or by the assistant.")}</p>
       <div class="actions"><button class="btn" data-ask="Suggest the five most valuable things to build next, with a one-line reason each, using the roadmap overview.">Ask what to build next</button></div></div>
       <div class="stats">
         <div class="stat"><div class="v">${surf.length}</div><div class="l">surfaces in the mockups</div><div class="s">${(D.catalog?.pages || []).length} pages · ${(D.catalog?.scenarios || []).length} scenarios</div></div>
@@ -364,13 +369,16 @@ const PAGES = {
       <div class="section" style="margin-top:0;border-top:0;padding-top:0"><h2>Build progress</h2>
         <div class="bar" style="height:10px;margin-bottom:8px"><i class="b" style="width:${100*built/surf.length}%"></i><i class="p" style="width:${100*(partial+fix)/surf.length}%"></i></div>
         <div class="small muted">Double border is built. Dashed is partial or on fixtures. Single is not started. State by shape, never by colour alone. ${esc(refreshedLine())}</div></div>
-      <div class="section"><h2>Milestones</h2><div class="card" style="gap:0">${ms.map(m => {
+      <div class="section"><h2>Rev 1 milestones</h2><div class="card" style="gap:0">${ms.map(m => {
         const its = (m.surfaces || []).map(id => byId[id]).filter(Boolean);
         const b = its.filter(i => statusOf(i) === "built").length, p = its.filter(i => ["partial","fixtures-only"].includes(statusOf(i))).length;
         return `<div class="milestone"><div class="id">${esc(m.id)}</div><div><div style="font-weight:600">${esc(m.title)}</div><div class="small muted">${its.length} surfaces · ${esc(m.weeks || "")}${m.summary ? " · " + esc(m.summary) : ""}</div>${RF.milestones[m.id] ? `<div class="small mono muted" style="margin-top:4px">${RF.milestones[m.id].open_issues} open issues linked or cited · ${RF.milestones[m.id].merged_prs} merges since ${fmtDate(RF.baseline)}${RF.milestones[m.id].last_merge ? ` · last <a href="https://github.com/${ORG}/${esc(RF.milestones[m.id].last_merge.repo)}/pull/${RF.milestones[m.id].last_merge.number}" target="_blank" rel="noopener">#${RF.milestones[m.id].last_merge.number}</a> ${fmtDate(RF.milestones[m.id].last_merge.merged_at)}` : ""}</div>` : ""}</div><div class="m3"><div class="bar"><i class="b" style="width:${its.length ? 100*b/its.length : 0}%"></i><i class="p" style="width:${its.length ? 100*p/its.length : 0}%"></i></div><div class="small mono muted" style="margin-top:4px">${b} built · ${p} partial · ${its.length - b - p} to go</div></div></div>`;
       }).join("") || '<div class="empty">No milestones in the data.</div>'}</div></div>
       <div class="section"><h2>Next up</h2><div class="grid">${next.map(itemCard).join("") || '<div class="empty">Nothing is queued. Every P0 and P1 surface is built.</div>'}</div></div>
       <div class="section"><h2>Decisions blocking work</h2><div class="grid">${openDec.slice(0, 6).map(decisionCard).join("") || '<div class="empty">No open decisions.</div>'}</div></div>
+      <div class="section"><h2>Rev 2</h2><p class="small muted" style="margin:0 0 10px">The witness and the definition of done left rev 1 on 2026-09-24, with ${rev2Open} features not built.</p>
+        <div class="card" style="gap:0">${ms2.map(m => `<div class="milestone"><div class="id">${esc(m.id)}</div><div><div style="font-weight:600">${esc(m.title)}</div><div class="small muted">${esc(m.weeks || "")}</div></div></div>`).join("")}
+        <div class="row" style="justify-content:flex-start;gap:8px;margin-top:10px"><a class="btn sm ghost" href="#/witness">Witness</a><a class="btn sm ghost" href="#/done">Definition of done</a></div></div></div>
       <div class="section"><h2>Recent activity</h2>${activityList()}</div>`;
   },
 
@@ -488,7 +496,7 @@ function featurePage(kind, title, summary, spec) {
   if (S.arg && byId[S.arg]) return itemDetail(byId[S.arg]);
   const list = ITEMS.filter(i => i.kind === kind);
   const need = list.filter(i => itemState(i).decision_needed);
-  return `<div class="page-head"><div><div class="eyebrow">${kind === "witness" ? "Proven, not claimed" : "A gate, not a badge"}</div><h1>${esc(title)}</h1></div>
+  return `<div class="page-head"><div><div class="eyebrow">Rev 2</div><h1>${esc(title)}</h1></div>
     <p class="lead">${esc(summary || "")}</p>
     <div class="actions"><a class="btn" href="${BLOB}${spec}" target="_blank" rel="noopener">Read the spec ↗</a><button class="btn" data-ask="For the ${kind === "witness" ? "witness" : "definition of done"} features, propose a build order that ships a first usable version fastest, and name the decision each step needs.">Ask for a build order</button></div></div>
     ${need.length ? `<div class="banner">${need.length} feature${need.length > 1 ? "s" : ""} here need a decision before they can be built. They are marked below.</div>` : ""}
@@ -915,9 +923,9 @@ function overview() {
   return {
     generated_at: D.generated_at, refreshed_at: RF.generated_at, repos: REPOS.map(r => `${ORG}/${r}`),
     counts: { built: surf.filter(i => statusOf(i) === "built").length, partial: surf.filter(i => ["partial","fixtures-only"].includes(statusOf(i))).length, not_started: surf.filter(i => statusOf(i) === "not-started").length, open_decisions: DECISIONS.filter(d => decState(d).status !== "decided").length, live_open_issues: Object.fromEntries(Object.entries(S.issues).map(([r, x]) => [r, x.total ?? x.items?.length])) },
-    items: ITEMS.map(i => ({ id: i.id, kind: i.kind, title: i.title, status: statusOf(i), priority: prioOf(i), scope: i.scope_verdict, lane: i.plan_lane, decision_needed: !!itemState(i).decision_needed })),
+    items: ITEMS.map(i => ({ id: i.id, rev: revOf(i), kind: i.kind, title: i.title, status: statusOf(i), priority: prioOf(i), scope: i.scope_verdict, lane: i.plan_lane, decision_needed: !!itemState(i).decision_needed })),
     decisions: DECISIONS.map(d => ({ id: d.id, title: d.title, status: decState(d).status || "open", blocks: d.blocks })),
-    milestones: (D.milestones || []).map(m => ({ id: m.id, title: m.title, surfaces: m.surfaces, progress: RF.milestones[m.id] || null })),
+    milestones: (D.milestones || []).map(m => ({ id: m.id, rev: revOf(m), title: m.title, surfaces: m.surfaces, progress: RF.milestones[m.id] || null })),
   };
 }
 const TOOLS = () => [
@@ -950,7 +958,7 @@ const TOOLS = () => [
 ];
 function instructions() {
   const it = S.arg && byId[S.arg];
-  return `You are the product-management partner bound to the Oxagen Roadmap page. Oxagen is workforce management for autonomous agents: give each agent an identity, set its authority and budget, equip it with tools and skills, and review what it did and what its operators spent, through a shared agent control plane. This page tracks the gap between the Oxagen mockups (the spec) and the oxagen build, plus the witness (proof) and definition-of-done features, open decisions, and live GitHub issues in ${ORG}/oxagen, ${ORG}/stella and ${ORG}/product-roadmap.
+  return `You are the product-management partner bound to the Oxagen Roadmap page. Oxagen is workforce management for autonomous agents: give each agent an identity, set its authority and budget, equip it with tools and skills, and review what it did and what its operators spent, through a shared agent control plane. This page tracks what rev 1 must have: the gap between the Oxagen mockups (the spec) and the oxagen build, open decisions, and live GitHub issues in ${ORG}/oxagen, ${ORG}/stella and ${ORG}/${ROADMAP_REPO}. The witness (proof) and definition-of-done features are rev 2 work since 2026-09-24; treat them as out of rev 1 scope unless asked.
 Voice: plain, specific, unhurried, a senior engineer who read the logs. No em dashes. Sentence case. Never strengthen a claim past the evidence. Say what you would do and why, then stop.
 You have tools. Read before you write: call get_roadmap_overview or get_item before making claims about an item. Only change data (update_item, record_decision, link_issue) when the viewer clearly asked for that change; otherwise propose it and ask. create_issue only opens a confirmation dialog, so you may use it freely when asked to draft an issue; write the body as a handoff: problem, spec paths, wireframe route, gaps as a checklist, what done looks like, and which pillar it moves (stability, reliability, maintainability, innovation, efficiency, performance).
 Keep answers under 250 words unless asked for a document. Use short lists. Reference items by title and id.
