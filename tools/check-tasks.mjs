@@ -11,6 +11,7 @@
 // The flows, in order:
 //   1. connect Jira through the six-step wizard, create one value in Jira, leave one account not mapped,
 //      and see it on Providers
+//  1b. connect ServiceNow with creation off, and see its column on Fields
 //   2. draft a definition of done with the assistant, edit it, and certify it
 //   3. a certified task that changes upstream leaves ready
 //   4. only ready tasks can be selected; the send menu lists only agents you operate, with harness marks
@@ -86,7 +87,7 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
   ok(/Post the definition of done as a comment/.test(d), "wizard: write-back switches");
   ok(/Close the issue as Done when you accept the work/.test(d), "wizard: closing says Done");
   ok((await page.locator("#layer .dlg option", { hasText: /^Create “/ }).count()) >= 1, "wizard: a value Jira lacks can be created there");
-  ok(/Only in Jira/.test(d) && (await page.locator("#layer .dlg button", { hasText: /^Add “/ }).count()) >= 1, "wizard: a value only Jira has can be added to Oxagen");
+  ok(/Only in Jira/.test(d) && /Add “security”/.test(d) && !/Add “Bug”/.test(d), "wizard: a value only Jira has can be added to Oxagen, and a mapped one is not offered");
   await page.selectOption('#layer .dlg select[aria-label="Chore"]', "__create");
   ok(/1 to create in Jira/.test(await dlgText(page)), "wizard: counts what it will create");
   await footBtn(page, "Next").click();
@@ -112,6 +113,39 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
   t = await text(page);
   ok(/Automation for Jira/.test(t) && /not mapped/.test(t), "people: the new accounts are listed, one not mapped");
   await done(page, errs, "connect");
+}
+
+/* 1b. connecting a help desk */
+{
+  const { page, errs } = await open(H + "/providers");
+  await page.click("text=Connect an issue provider");
+  await page.click(".ipz-card >> text=ServiceNow");
+  await footBtn(page, "Next").click();
+  let d = await dlgText(page);
+  ok(/Instance/.test(d) && /itil role/.test(d) && /personalize_choices role/.test(d), "help desk: ServiceNow names its instance, role, and the role creating needs");
+  ok(/reply to a requester/.test(d) && /work note/.test(d), "help desk: says every work note is internal");
+  await page.click("#ipzCreate");
+  ok(!/personalize_choices role/.test(await text(page, "#layer .dlg table")), "help desk: turning creation off drops the admin role from the permissions");
+  await page.click("text=Authorize with ServiceNow");
+  await page.waitForTimeout(900);
+  await footBtn(page, "Next").click();
+  ok(/Assignment groups/.test(await dlgText(page)) && /open incidents/.test(await dlgText(page)), "help desk: scope lists assignment groups and incidents");
+  await footBtn(page, "Next").click();
+  d = await dlgText(page);
+  ok(/Post the definition of done as a work note/.test(d) && /Close the incident as Done/.test(d), "help desk: writes use ServiceNow's words");
+  ok(/email the caller/.test(d), "help desk: says resolving emails the caller");
+  ok((await page.locator("#layer .dlg option", { hasText: /^Create “/ }).count()) === 0, "help desk: nothing to create once creation is off");
+  await footBtn(page, "Next").click();
+  d = await dlgText(page);
+  ok(/requester/.test(d) && /never maps one/.test(d), "help desk: a requester is never mapped");
+  await footBtn(page, "Next").click();
+  await footBtn(page, "Connect ServiceNow").click();
+  await page.waitForTimeout(200);
+  ok(/a-intel\.service-now\.com/.test(await text(page)) && /ServiceNow instance/.test(await text(page)), "providers: ServiceNow is connected after the wizard");
+  await page.click("text=Fields");
+  await page.waitForTimeout(100);
+  ok(/close code Solution provided/.test(await text(page)), "fields: a connected help desk gets its own column");
+  await done(page, errs, "help desk");
 }
 
 /* 2. drafting and certifying a definition of done */

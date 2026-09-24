@@ -15967,7 +15967,7 @@ function pTasks(){
     ?'<button class="btn" onclick="ipzOpen()">Connect an issue provider</button><button class="btn primary" onclick="wfzOpen()">New workflow</button>'
     :'<button class="btn primary" onclick="ipzOpen()">Connect an issue provider</button>';
   return '<div class="phead"><div class="t"><p class="eyebrow">'+h(w.name)+'</p><h1>Tasks</h1>'+
-   '<p>Work from your issue trackers, the definition of done for each task, and the work orders that send it to agents.</p></div>'+
+   '<p>Work from your issue trackers and help desks, the definition of done for each task, and the work orders that send it to agents.</p></div>'+
    '<div class="acts">'+acts+'</div></div>'+tabs+body;
 }
 
@@ -16606,15 +16606,15 @@ DLG_EXT.wo=function(){
    an identity map, so it is a row in the workspace credential store and every step of it is a governed
    action. It sends nothing to any agent. */
 /* Each provider's wizard data. creates says what Oxagen makes in the provider when you choose Create for a
-   status, a resolution, or a label: [what it is called there, 1 if it needs createPerm]. null means the
-   provider has no such value to add. createPerm is the extra grant creating needs; the Authorize step asks
+   status, a resolution, or a label: [what it is called there, 1 if it needs createPerm, the field word the
+   mapping reads it by]. null means the provider has no such value to add. createPerm is the extra grant creating needs; the Authorize step asks
    for it only while "Create values" is on. */
 var IPZ={
  github:{scope:[["a-intel/platform","main repo",true],["a-intel/billing","linked repo",true],["a-intel/mobile","linked repo",true],["a-intel/infra","linked repo",false],["a-intel/help-center","not linked",false]],
    scopeWhat:"Repositories the Oxagen GitHub App can reach",
    intro:"Oxagen uses the GitHub App already installed on <b>a-intel</b> for your repositories. Importing issues needs one more permission, which an organization owner approves on github.com.",
    perms:[["Issues","read and write","read issues, post the comments you turn on, and create the labels you choose"],["Metadata","read","list the repositories you choose"],["Pull requests","read","show the pull request linked to a task"]],
-   createPerm:null,creates:{status:["label",0],res:["label",0],label:["label",0]},
+   createPerm:null,creates:{status:["label",0,"label"],res:["label",0,"label"],label:["label",0,"label"]},
    createNote:"GitHub has no custom statuses or close reasons, so Oxagen creates each value as a label, with the Issues permission.",
    authBtn:"Request the Issues permission",
    authed:"Approved on github.com by mbell-ai. The installation 41829377 now has Issues: read and write.",
@@ -16627,7 +16627,7 @@ var IPZ={
    intro:"Oxagen asks Linear for a token that acts as the Oxagen app. Anything it posts is signed by Oxagen, not by you.",
    perms:[["read","read","read issues, teams, users and workflow states"],["comments:create","write","post the comments you turn on"],["actor=app","","comments post as Oxagen, never as you"]],
    createPerm:["write","write","create the workflow states and labels you choose on the Fields step"],
-   creates:{status:["workflow state",1],res:["workflow state",1],label:["label",1]},
+   creates:{status:["workflow state",1,""],res:["workflow state",1,""],label:["label",1,"label"]},
    createNote:"Oxagen creates statuses and resolutions as workflow states, and labels as labels, with the write scope.",
    authBtn:"Authorize with Linear",
    authed:"Authorized by Marcus Bell in Linear. The token belongs to the Oxagen app, not to a person.",
@@ -16640,20 +16640,20 @@ var IPZ={
    intro:"Oxagen asks Atlassian for a token on one Jira Cloud site. Jira Server and Data Center are not supported yet.",
    perms:[["read:jira-work","read","read issues, statuses and resolutions"],["read:jira-user","read","read the people named on an issue"],["write:jira-work","write","post the comments and make the transitions you turn on, and add the labels you choose"],["offline_access","","refresh the token without asking you again"]],
    createPerm:["manage:jira-configuration","admin","create the statuses and resolutions you choose on the Fields step. A Jira admin approves it."],
-   creates:{status:["status",1],res:["resolution",1],label:["label",0]},
+   creates:{status:["status",1,"status"],res:["resolution",1,""],label:["label",0,"label"]},
    createNote:"Oxagen creates statuses and resolutions with manage:jira-configuration. A new status reaches a project once a Jira admin adds it to the project’s workflow. A Jira label exists once an issue carries it, so Oxagen adds a label the first time it sets one.",
    authBtn:"Authorize with Atlassian",
    authed:"Authorized by Marcus Bell for a-intel.atlassian.net. Oxagen refreshes the token on its own.",
    accountLabel:"Jira Cloud site",auth:"OAuth 2.0 (3LO) with offline access",
    people:[["Marcus Bell","Marcus Bell","marcus@a-intel.example","marcus","verified email"],["Priya Natarajan","Priya Natarajan","priya@a-intel.example","priya","verified email"],["Tobias Brennan","Tobias Brennan","tobias.brennan@a-intel.example","tobias","verified email"],["Automation for Jira","Automation for Jira","",null,"bot"]],
-   values:{status:["category To Do","category In Progress","category Done","status Blocked","flagged","In Review"],res:["Done","Fixed","Won't Do","Won't Fix","Duplicate","Cancelled","Cannot Reproduce"],label:["priority Highest","priority High","priority Medium","priority Low","priority Lowest","issue type Bug","issue type Story","issue type New Feature","issue type Improvement","issue type Task","label documentation","label test"]},
+   values:{status:["category To Do","category In Progress","category Done","status Blocked","flagged","In Review"],res:["Done","Fixed","Won't Do","Won't Fix","Duplicate","Cancelled","Cannot Reproduce"],label:["priority Highest","priority High","priority Medium","priority Low","priority Lowest","issue type Bug","issue type Story","issue type New Feature","issue type Improvement","issue type Task","label documentation","label test","label security"]},
    est:64},
  servicenow:{site:{label:"Instance",value:"a-intel.service-now.com"},scope:[["Service Desk","first-line IT support",true],["Network","network operations",true],["Database","database administration",false],["Hardware","desk-side hardware",false]],
    scopeWhat:"Assignment groups on a-intel.service-now.com",
    intro:"Oxagen asks your ServiceNow instance for a token through an OAuth application an admin registers there. The token acts within the roles of the account that authorizes it.",
    perms:[["useraccount","read and write","act as the account that authorizes, within its roles"],["itil role","read and write","read incidents in the groups you choose, and post the work notes you turn on"],["refresh token","","refresh the token without asking you again"]],
    createPerm:["personalize_choices role","admin","add the state, close code, and category choices you choose on the Fields step. A ServiceNow admin grants it."],
-   creates:{status:["state choice",1],res:["close code choice",1],label:["category choice",1]},
+   creates:{status:["state choice",1,"state"],res:["close code choice",1,"close code"],label:["category choice",1,"category"]},
    createNote:"Oxagen adds choices to the incident table with the personalize_choices role. Priority comes from impact and urgency, so Oxagen never adds a priority.",
    closeNote:"Resolving an incident runs the instance’s notifications, which by default email the caller.",
    authBtn:"Authorize with ServiceNow",
@@ -16667,7 +16667,7 @@ var IPZ={
    intro:"Oxagen asks Salesforce for a token through a connected app. The token acts as the account that authorizes it, within that account’s profile and permission sets.",
    perms:[["api","read and write","read cases, and post the internal comments you turn on"],["refresh_token","","refresh the token without asking you again"]],
    createPerm:["Customize Application","admin","add the Status, Type, and Priority values you choose on the Fields step, through the Metadata API. A Salesforce admin grants it."],
-   creates:{status:["Status value",1],res:["closed Status value",1],label:["Type value",1]},
+   creates:{status:["Status value",1,"status"],res:["closed Status value",1,"status"],label:["Type value",1,"type"]},
    createNote:"Oxagen adds picklist values through the Metadata API, which needs Customize Application. A new Status value reaches a case once an admin adds it to the support process.",
    authBtn:"Authorize with Salesforce",
    authed:"Authorized by Marcus Bell for a-intel.my.salesforce.com. Oxagen refreshes the token on its own.",
@@ -16680,7 +16680,7 @@ var IPZ={
    intro:"Oxagen asks Zendesk for a token on one account. The token acts as the staff account that authorizes it.",
    perms:[["read","read","read tickets, groups, and users"],["write","write","post the internal notes and make the status changes you turn on, and add the tags you choose"]],
    createPerm:["admin role","admin","add the custom ticket statuses you choose on the Fields step. The account that authorizes must be a Zendesk admin."],
-   creates:{status:["custom status",1],res:["tag",0],label:["tag",0]},
+   creates:{status:["custom status",1,"status"],res:["tag",0,"tag"],label:["tag",0,"tag"]},
    createNote:"A Zendesk tag exists once a ticket carries it, so Oxagen adds a tag the first time it sets one. Custom statuses need an admin account. Priority and type are fixed in Zendesk, so Oxagen never adds one.",
    closeNote:"Solving a ticket runs Zendesk’s triggers, which by default email the requester.",
    authBtn:"Authorize with Zendesk",
@@ -16713,13 +16713,17 @@ function ipzAuth(){var z=S.ipz; z.authing=true; render(); setTimeout(function(){
 function ipzCreateOn(v){S.ipz.create=v; S.ipz.authed=false; render();}
 /* What Oxagen would create for this kind of value, or null when it cannot. */
 function ipzCan(kind){var z=S.ipz, c=IPZ[z.kind].creates[kind]; return c&&(!c[1]||z.create)?c[0]:null;}
-/* The value as Oxagen writes it in the provider. A tag, or a Jira label, holds no spaces, so Won't do is wont_do there. */
-function ipNew(k,what,name){return what+" "+(what==="tag"||(k==="jira"&&what==="label")?name.toLowerCase().replace(/'/g,"").replace(/[^a-z0-9]+/g,"_").replace(/^_|_$/g,""):name);}
+/* The mapping for a value Oxagen creates in provider k. A tag, or a Jira label, holds no spaces, so Won't do is
+   tag wont_do there. */
+function ipNew(k,kind,name){var w=IPZ[k].creates[kind][2], slug=w==="tag"||(k==="jira"&&w==="label");
+  return (w?w+" ":"")+(slug?name.toLowerCase().replace(/'/g,"").replace(/[^a-z0-9]+/g,"_").replace(/^_|_$/g,""):name);}
 function ipzSet(kind,key,v){S.ipz.map[kind][key]=v; render();}
 function ipzAdd(kind,i){var z=S.ipz, v=IPZ[z.kind].values[kind][i]; if(z.add[kind].indexOf(v)<0)z.add[kind].push(v); render();}
 function ipzUnadd(kind,i){S.ipz.add[kind].splice(i,1); render();}
 /* The provider value without its field word: "issue type Story" is Story, "priority Lowest" is Lowest. */
 function ipzPlain(v){return String(v).replace(/^(issue type|close code|state_reason|priority|category|status|state|label|type|tag)\s+/,"");}
+/* Each provider value a mapping names: "status New, Working" names New and Working. */
+function ipzTokens(m){return String(m||"").split(/,\s*(?:or\s+)?/).map(function(t){return ipzPlain(t.replace(/ with .*/,""));}).filter(Boolean);}
 function ipzSuggest(kind,x,k){var v=x.map[k]||"";
   return kind==="status"?v.replace(/,.*$/,""):kind==="res"?v.split(",")[0].replace(/ with .*/,""):v.split(",")[0];}
 function ipzCounts(){var z=S.ipz, c=0, a=0;
@@ -16759,12 +16763,12 @@ function ipzBody(){
     var cannot=[["edit","a subject or a description, or delete "+ipUnitA(k)],
       d.signs?["act as you","every write is signed by the Oxagen app"]:["act as anyone else","every write appears under the account that authorizes, so authorize with one made for Oxagen"]]
       .concat(m.grp==="desk"?[["reply to a requester","every "+m.note+" Oxagen posts is one only staff can read"]]:[])
-      .concat([["read more","than the "+m.what+" you choose next"],["rename or delete","a status, resolution, or label, including one Oxagen created"]]);
+      .concat([["read more","than the "+m.what+" you choose next"],["assign",ipUnitA(k)+" to anyone in "+m.l],["rename or delete","a status, resolution, or label, including one Oxagen created"]]);
     return {b:'<div class="row" style="margin-bottom:14px;flex-wrap:nowrap">'+ipLogo(k,28)+'<p style="margin:0">'+d.intro+'</p></div>'+
       (d.site?'<div class="field"><label for="ipzSite">'+h(d.site.label)+'</label><input id="ipzSite" value="'+h(z.site)+'" oninput="S.ipz.site=this.value"></div>':'')+
       (d.createPerm?'<label class="check" style="margin-bottom:12px"><input type="checkbox" id="ipzCreate"'+(z.create?' checked':'')+' onchange="ipzCreateOn(this.checked)"><span class="grow"><span class="n">Create values in '+h(m.l)+'</span>'+
-        '<span class="d">Asks for '+h(d.createPerm[0])+' too, so the Fields step can create the statuses, resolutions, and labels '+h(m.l)+' lacks.</span></span></label>':'')+
-      '<div class="field"><label>What Oxagen asks for</label><div class="tw"><table data-lt="off"><thead><tr><th>Permission</th><th>Access</th><th>Why</th></tr></thead><tbody>'+
+        '<span class="d">Needs '+h(d.createPerm[0])+' too, so the Fields step can create the statuses, resolutions, and labels '+h(m.l)+' lacks.</span></span></label>':'')+
+      '<div class="field"><label>What Oxagen needs</label><div class="tw"><table data-lt="off"><thead><tr><th>Permission</th><th>Access</th><th>Why</th></tr></thead><tbody>'+
        perms.map(function(p){return '<tr><td class="mono">'+h(p[0])+'</td><td>'+h(p[1]||"—")+'</td><td>'+h(p[2])+'</td></tr>';}).join("")+'</tbody></table></div></div>'+
       '<div class="field"><label>What it still cannot do</label>'+wzChecks(cannot)+'</div>'+
       (z.authed?'<div class="banner"><span class="b b-allowed" style="flex:none"><span class="d"></span>authorized</span><div class="grow"><b>'+h(m.l)+' is authorized</b>'+h(d.authed)+'</div></div>'
@@ -16788,8 +16792,9 @@ function ipzBody(){
       var rows=list.map(function(x){return ipzMapRow(kind,x,kind==="status"?tStatusBadge(x.key):kind==="label"?lblChip(x.key):'<b>'+h(x.name)+'</b>');}).join("")+
         z.add[kind].map(function(v,i){return '<tr><td><b>'+h(ipzPlain(v))+'</b></td><td class="mono" style="font-size:11.5px">'+h(v)+'</td><td><span class="b b-q" style="font-size:10px">added</span> '+
           '<button class="btn sm" aria-label="Remove '+h(ipzPlain(v))+'" onclick="ipzUnadd(\''+kind+'\','+i+')">Remove</button></td></tr>';}).join("");
-      var used={}; list.forEach(function(x){var s=z.map[kind][x.key]; used[s===undefined?ipzSuggest(kind,x,k):s]=1;}); z.add[kind].forEach(function(v){used[v]=1;});
-      var only=vals.map(function(v,i){return used[v]?"":'<button class="btn sm" aria-label="Add '+h(ipzPlain(v))+' to Oxagen" onclick="ipzAdd(\''+kind+'\','+i+')">Add “'+h(ipzPlain(v))+'”</button>';}).filter(Boolean);
+      var used={}; list.forEach(function(x){var s=z.map[kind][x.key]; ipzTokens(s===undefined?x.map[k]:s).forEach(function(t){used[t]=1;});});
+      z.add[kind].forEach(function(v){used[ipzPlain(v)]=1;});
+      var only=vals.map(function(v,i){return used[ipzPlain(v)]?"":'<button class="btn sm" aria-label="Add '+h(ipzPlain(v))+' to Oxagen" onclick="ipzAdd(\''+kind+'\','+i+')">Add “'+h(ipzPlain(v))+'”</button>';}).filter(Boolean);
       return '<div class="field"><label>'+title+'</label><div class="tw"><table data-lt="off"><thead><tr><th>Oxagen</th><th>'+h(m.l)+'</th><th>Source</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
         (only.length?'<div class="row" style="gap:6px;margin-top:8px"><span class="dim" style="font-size:12px">Only in '+h(m.l)+'</span>'+only.join("")+'</div>':'')+'</div>';
     }
@@ -16841,7 +16846,7 @@ function ipzApply(z){
   var k=z.kind, n=0;
   IPZ_KINDS.forEach(function(x){var kind=x[0], list=ipzList(kind);
     Object.keys(z.map[kind]).forEach(function(key){var o=list.filter(function(y){return y.key===key;})[0], v=z.map[kind][key]; if(!o)return;
-      if(v==="__create"){o.map[k]=ipNew(k,ipzCan(kind),o.name); n++;} else o.map[k]=v;});
+      if(v==="__create"){o.map[k]=ipNew(k,kind,o.name); n++;} else o.map[k]=v;});
     z.add[kind].forEach(function(v){var name=ipzPlain(v), key=name.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
       if(list.some(function(y){return y.key===key;}))return;
       var o={key:key,name:name,builtin:false,map:{}}; o.map[k]=v;
@@ -16898,7 +16903,7 @@ function mapFields(m,prefix,kind){
 function edCreate(btn,prefix,k,kind){
   var name=((el(kind==="label"?"lblName":kind==="status"?"stName":"resName")||{}).value||"").trim(), inp=el(prefix+k);
   if(!name){act("Name it first.");return;}
-  inp.value=ipNew(k,ipCan(k,kind),name); inp.setAttribute("data-create","1"); btn.disabled=true; btn.textContent="Created when you save";
+  inp.value=ipNew(k,kind,name); inp.setAttribute("data-create","1"); btn.disabled=true; btn.textContent="Created when you save";
 }
 /* Reads the mapping inputs, and names the providers Oxagen creates the value in. */
 function mapRead(prefix){var map={}, made=[];
