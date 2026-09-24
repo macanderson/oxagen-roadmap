@@ -1238,6 +1238,99 @@ for (const theme of ["light", "dark"]) {
   await page.close();
 }
 
+// Memories fold by concept. A memory keeps every saying that said the same thing, the Memory tab
+// counts the sayings it really folded, and a memory that reaches the workspace setting becomes a
+// proposal whose supporting runs are those sayings.
+{
+  const { page, errs } = await open("#/a-intel/core-platform/steering/memory");
+  const f = await page.evaluate(() => {
+    const L = stgMemory("core-platform"), sum = L.reduce((n, m) => n + (m.sayings || []).length, 0);
+    const shown = +document.querySelector("[data-mem-folded]")?.dataset.memFolded;
+    const proposed = document.querySelectorAll('td[data-mem-fold="proposed"]').length;
+    return { sum, shown, proposed, want: L.filter(m => m.proposedAs).length, n: L.length };
+  });
+  ok(f.sum > 0 && f.shown === f.sum, "fold: the tile counts the sayings folded, got " + f.shown + " for " + f.sum);
+  ok(f.proposed === f.want && f.want > 0, "fold: a proposed memory reads proposed, got " + f.proposed + " of " + f.want);
+  await page.selectOption("#memFoldN", "2");
+  await page.waitForTimeout(200);
+  const r = await page.evaluate(() => {
+    const want = stgMemory("core-platform").filter(m => !m.proposedAs && (m.sayings || []).length >= 2 &&
+      new Set((m.sayings || []).map(x => x.run)).size >= 2).length;
+    return { want, got: document.querySelectorAll('td[data-mem-fold="ready"]').length, set: S.memFold.sayings };
+  });
+  ok(r.set === 2 && r.want > 0 && r.got === r.want, "fold: lowering the setting marks what now meets it, got " + r.got + " of " + r.want);
+  await page.evaluate(() => { S.memFold.sayings = 3; render(); openDialog("memory", "mem_01K5R0N2"); });
+  await page.waitForTimeout(250);
+  const d = await page.evaluate(() => ({
+    says: +document.querySelector("#layer [data-mem-says]")?.dataset.memSays,
+    text: document.querySelector("#layer .dlg").innerText,
+    foot: [...document.querySelectorAll("#layer .dlg .dlg-f button")].map(b => b.textContent.trim()) }));
+  ok(d.says === 3, "fold: the memory lists its three sayings, got " + d.says);
+  ok(/Remember to not use the latest version of node/.test(d.text) && /Use Node version 20/.test(d.text),
+    "fold: both sayings keep their own words");
+  ok(d.foot.includes("Open the proposal") && !d.foot.includes("Promote to a record"),
+    "fold: a proposed memory opens its proposal instead of a second one, got " + d.foot.join(" ~ "));
+  await page.evaluate(() => [...document.querySelectorAll("#layer .dlg .dlg-f button")].find(b => /Open the proposal/.test(b.textContent)).click());
+  await page.waitForTimeout(350);
+  const p = await page.evaluate(() => ({ sel: S.prpSel, tab: S.tab.steering,
+    rows: +document.querySelector("[data-prp-rows]")?.getAttribute("data-prp-rows"),
+    text: document.querySelector("main")?.innerText || document.body.innerText }));
+  ok(p.sel === "prp_01K5RX1N" && p.tab === "proposals", "fold: the proposal opens, got " + p.sel + " on " + p.tab);
+  ok(p.rows === 3, "fold: the proposal cites each saying as a supporting run, got " + p.rows);
+  ok(/Remember to not use the latest version of node/.test(p.text), "fold: the evidence quotes the sayings");
+  ok(errs.length === 0, "fold: no JavaScript error: " + errs.join(" | "));
+  await page.close();
+}
+
+// The Run page has a Memories tab: what the run started, what it joined, and the self-grade, which
+// only research.read reads. Marcus is refused and sees what was captured; Priya reads the axes.
+{
+  const RD1X = "#/a-intel/core-platform/runs/run_01K5RD1X8N7BVF3G/memory";
+  const { page, errs } = await open(RD1X);
+  const m = await page.evaluate(() => {
+    const R = run("run_01K5RD1X8N7BVF3G");
+    return { tab: S.tab.run, shown: +document.querySelector("[data-run-memories]")?.dataset.runMemories,
+      want: MEMORY.reduce((n, x) => n + (x.sayings || []).filter(y => y.run === R.id).length, 0),
+      text: document.querySelector(".run-main").innerText,
+      sg: document.querySelector("[data-sg]")?.dataset.sg, axes: document.querySelectorAll(".run-main .sx-rax").length,
+      tabBtn: [...document.querySelectorAll(".tabs .tab")].map(b => b.textContent) };
+  });
+  ok(m.tab === "memory" && m.tabBtn.some(t => /^Memories/.test(t)), "run memories: the route opens the tab, got " + m.tab);
+  ok(m.want > 0 && m.shown === m.want, "run memories: one row per saying the run left, got " + m.shown + " of " + m.want);
+  ok(/\bnew\b/.test(m.text) && /\bjoined\b/.test(m.text), "run memories: it tells a started memory from a joined one");
+  ok(m.sg === "refused" && m.axes === 0, "run memories: without research.read the self-grade is refused, got " + m.sg + " with " + m.axes + " axes");
+  ok(/research\.read/.test(m.text) && /Request access/.test(m.text) && /rfl_v3/.test(m.text),
+    "run memories: the refusal names the grant and shows what was captured");
+  ok(errs.length === 0, "run memories: no JavaScript error: " + errs.join(" | "));
+  await page.close();
+
+  const pg = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+  const e2 = []; pg.on("pageerror", e => e2.push(String(e.message || e)));
+  await pg.goto(FILE + "?product=1&state=loaded&mobile=0&as=priya" + RD1X);
+  await pg.waitForTimeout(300);
+  const q = await pg.evaluate(() => ({ who: me().name, sg: document.querySelector("[data-sg]")?.dataset.sg,
+    axes: document.querySelectorAll(".run-main .sx-rax").length,
+    promote: [...document.querySelectorAll(".run-main button")].filter(b => /promote/i.test(b.textContent)).length }));
+  ok(q.who === "Priya Natarajan" && q.sg === "read" && q.axes === 4, "run memories: ?as=priya reads the four axes, got " + JSON.stringify(q));
+  ok(q.promote === 0, "run memories: nothing on the tab promotes a self-grade");
+  for (const [id, re, what] of [["run_01K5RS7M2E8FJ3QW", /Nothing is written until the seal[\s\S]*Captured after the seal/, "a live run writes nothing yet"],
+                                ["run_01K4QJ9E4T6YUI1O", /Deleted on 2025-12-29/, "a self-grade past retention is deleted"],
+                                ["run_01K5RQ4B9C7XTN2P", /joined/, "a saying link lands on the run that said it"]]) {
+    await pg.evaluate((h) => { location.hash = h; }, "#/a-intel/core-platform/runs/" + id + "/memory");
+    await pg.waitForTimeout(250);
+    const t = await pg.evaluate(() => document.querySelector(".run-main").innerText);
+    ok(re.test(t), "run memories: " + what + ", got " + t.slice(0, 160).replace(/\s+/g, " "));
+  }
+  await pg.evaluate((h) => { location.hash = h; }, "#/a-intel/core-platform/steering/skills/reflect");
+  await pg.waitForTimeout(250);
+  const k = await pg.evaluate(() => document.querySelector("main")?.innerText || document.body.innerText);
+  ok(/every sealed run/.test(k) && /611/.test(k) && /\$8\.61/.test(k), "reflection: every sealed run is captured, and the cost follows");
+  const ex = await pg.evaluate(() => { [...document.querySelectorAll("button")].find(b => /Export for research/.test(b.textContent)).click(); return S.toast; });
+  ok(/^Exported/.test(ex), "reflection: research.read exports, got " + ex);
+  ok(e2.length === 0, "run memories: no JavaScript error as priya: " + e2.join(" | "));
+  await pg.close();
+}
+
 await browser.close();
 console.log(`${passes} passed, ${fails} failed`);
 process.exit(fails ? 1 : 0);
