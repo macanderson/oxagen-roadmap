@@ -2,7 +2,7 @@
 
 One place to see what Oxagen is building next, exactly how it will look, and what is still undecided.
 
-- **The roadmap app** (`index.html`, built from `roadmap/`): the gaps between the Oxagen mockups and the build, the witness and definition-of-done features, the open decisions, and the GitHub issues, live. Published as a claude.ai artifact where Claude is bound to the page, and served by GitHub Pages at https://macanderson.github.io/roadmap/ as a read-only fallback.
+- **The roadmap app** (`index.html`, built from `roadmap/`): what rev 1 must have and the gaps between the Oxagen mockups and the build, the witness and definition-of-done features (rev 2), the open decisions, and the GitHub issues, live. Published as a claude.ai artifact where Claude is bound to the page, and served by GitHub Pages at https://macanderson.github.io/roadmap/ as a read-only fallback.
 - **The mockups** (`mockups/`): the master mockup, the authoritative design of rev1, every page in every state, desktop and mobile, and the guided scenarios. The roadmap frames them, so a card leads to its wireframe in one click. The first version, with the witness runner and the definition of done, is kept as `mockups/future_state_mockups/` and is not a target.
 - **The documents** (`docs/`): the Mission Control spec, the DoD spec, the witness spec, the desktop spec, the plan, the scope review, and the reviews.
 
@@ -37,7 +37,7 @@ What the app does, and where each part lives:
 |---|---|---|
 | Now | build progress by surface, the milestones, what to build next, the decisions blocking work, shared activity | `data.json` + the shared store |
 | Gaps | every mockup page and wizard with its build status, the concrete gaps, the backend gaps, the spec, the wireframe, the linked issues | `data.json` `surfaces[]`, the mockup pages' specs |
-| Witness, Done | the proof and definition-of-done features of the future state (not in rev1; removed from the design on 2026-09-21) | `docs/witness-spec.md`, `docs/dod-spec.md` |
+| Witness, Done | the proof and definition-of-done features, now rev 2 (removed from the rev1 design on 2026-09-21, moved to rev 2 on the roadmap on 2026-09-24) | `docs/witness-spec.md`, `docs/dod-spec.md` |
 | Decisions | each open question with its recommendation; decide it in place, argue it with Claude, or open it as an issue | `docs/implementation-plan.md` §6, the scope review, the feedback |
 | Issues | open issues in `macanderson/oxagen`, `macanderson/stella` and this repo, live through the viewer's GitHub connector, with the triage snapshot (theme, kind, spec backing) beside each | GitHub, `data.json` `issue_annotations` |
 | Wireframes | the master mockup framed: any page, any state, desktop or phone, any scenario | `mockups/missioncontrol.html` |
@@ -224,6 +224,17 @@ to generate a handler in TypeScript, Python, Go or Rust. The skill wizard search
 (`mockups/fixtures/skill-registry.json`), drafts from prose, or takes a `.skill` bundle that
 replaces a pinned version. Two pages carry the editing half: `record` (a published record, presented
 by its kind, with its statement in a real editor) and `skill-source`.
+
+## Tasks and work orders
+
+Work arrives from GitHub, Linear and Jira and leaves for an agent only in a work order.
+`docs/tasks-spec.md` is the spec. A six-step wizard connects a provider and maps its accounts to
+members, leaving any not mapped. `oxagen.assistant` drafts a definition of done for every task and a
+person certifies it, which makes the task ready. A work order sends ready tasks to an agent the sender
+operates: the merged definition of done, an editable prompt with `@` mentions, and confirmed
+repositories. Workflows chain agents and end with a person. The pages are `tasks`, `tasks-providers`,
+`task` and `work-order` in `mockups/pages/`, each with its audit prompt, and
+`node tools/check-tasks.mjs` walks every flow.
 
 
 ## Docs site
