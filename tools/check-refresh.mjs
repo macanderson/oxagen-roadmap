@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 import assert from "node:assert/strict";
 import {
   parseRefs, gapIssueRefs, labelsToMeta, appRouteCandidates, pageFor, touchedEvidence, deriveStatus,
-  matchAdrToDecision, milestoneRollup, stableStringify, decisionAsked,
+  matchAdrToDecision, milestoneRollup, stableStringify, decisionAsked, keptOnFirstRun,
 } from "./lib/refresh-rules.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -52,6 +52,14 @@ t("decisionAsked refuses an issue that only wears the label", () => {
   assert.equal(decisionAsked("This falls under case 3, a decision only the maintainer can make, real spend, or bigger than one session."), null);
   assert.equal(decisionAsked(""), null);
   assert.equal(decisionAsked(null), null);
+});
+
+t("keptOnFirstRun keeps merged PRs and closed decision issues from the closed list", () => {
+  assert.equal(keptOnFirstRun({ pull_request: { merged_at: "2026-09-19T00:00:00Z" }, labels: [] }), true);
+  assert.equal(keptOnFirstRun({ pull_request: { merged_at: null }, labels: [] }), false);
+  // A full run dropped closed issues that still ask a decision (oxagen#3681, #3353, #3246).
+  assert.equal(keptOnFirstRun({ labels: [{ name: "needs:decision" }] }), true);
+  assert.equal(keptOnFirstRun({ labels: [{ name: "kind:gap" }] }), false);
 });
 
 const PAGES = [

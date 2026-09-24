@@ -31,7 +31,7 @@ import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   parseRefs, gapIssueRefs, labelsToMeta, pageFor, touchedEvidence, deriveStatus,
-  matchAdrToDecision, milestoneRollup, stableStringify, decisionAsked,
+  matchAdrToDecision, milestoneRollup, stableStringify, decisionAsked, keptOnFirstRun,
 } from "./lib/refresh-rules.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -126,13 +126,13 @@ for (const repo of REPOS) {
   if (since) {
     list = await gh(`/repos/${ORG}/${repo}/issues?state=all&per_page=100&sort=updated&direction=asc&since=${encodeURIComponent(since)}`, { paginate: true });
   } else {
-    // First run: every open issue, plus what merged since the roadmap was written. Closed history
-    // is read on demand below, only where something on the roadmap points at it.
+    // First run: every open issue, plus what merged or was decided since the roadmap was written.
+    // Other closed history is read on demand below, only where something on the roadmap points at it.
     const open = await gh(`/repos/${ORG}/${repo}/issues?state=open&per_page=100`, { paginate: true });
     const mergedSince = CODE_REPOS.includes(repo)
       ? await gh(`/repos/${ORG}/${repo}/issues?state=closed&per_page=100&sort=updated&direction=desc&since=${encodeURIComponent(BASELINE)}`, { paginate: true })
       : [];
-    list = open.concat(mergedSince.filter((i) => i.pull_request?.merged_at));
+    list = open.concat(mergedSince.filter(keptOnFirstRun));
   }
   for (const it of list) recordIssue(repo, it);
   const newest = list.reduce((m, i) => (i.updated_at > m ? i.updated_at : m), since || "");
