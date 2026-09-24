@@ -1945,6 +1945,60 @@
       "status": "open",
       "decided_on": null,
       "decided": null
+    },
+    {
+      "id": "D32",
+      "title": "A writer per session in tachod",
+      "question": "Does tachod replace its one serial queue with a writer per session, and move bundle refresh, transcript reads and git work off the path that answers a hook?",
+      "recommendation": "Yes, once oxagen #3822 merges. The serial queue is the first thing to fail at 100 agents on one machine: past a 5 to 10 second wait every hook answers locally and spools, which lengthens the next replay. Prove it with a load test of 100 sessions by 1,000 hooks that holds p99 hook latency under 500 ms with flat memory.",
+      "source": "docs/reviews/2026-09-23-tacho-audit.html (Scale)",
+      "blocks": [
+        "M7"
+      ],
+      "status": "open",
+      "decided_on": null,
+      "decided": null
+    },
+    {
+      "id": "D33",
+      "title": "One capture contract for every level",
+      "question": "Do the gateway, the hooks and the observation sources seal one frame shape, with a call key on every model call and a tool use id on every tool call, judged by one ledger per session family, and does the server treat a changed hash on a re-sent sequence as a conflict?",
+      "recommendation": "Yes. Today the same model call or tool call has a different identity at each level and subagent work is counted twice. Adopt the run ledger's rules (dense sequence, content hash, conflict never overwrite, identity pinned at genesis) and derive every cost figure from one model-call projection.",
+      "source": "docs/reviews/2026-09-23-tacho-audit.html (Capture consistency)",
+      "blocks": [
+        "M7"
+      ],
+      "status": "open",
+      "decided_on": null,
+      "decided": null
+    },
+    {
+      "id": "D34",
+      "title": "Session status computed in one place",
+      "question": "Is session status one reducer in @oxagen/tacho that both tachod (the desktop's local session list) and ingest (the web session list) run, stored in a narrow status table with a stale state derived from the host heartbeat?",
+      "recommendation": "Yes. One reducer keeps the desktop and web lights identical; the states are starting, working, waiting on approval, waiting for a prompt, background work, compacting, paused, error, ended, crashed and stale. It unblocks the live Fleet list and the local list in the desktop app.",
+      "source": "docs/reviews/2026-09-23-tacho-audit.html (Session list)",
+      "blocks": [
+        "M7",
+        "fleet"
+      ],
+      "status": "open",
+      "decided_on": null,
+      "decided": null
+    },
+    {
+      "id": "D35",
+      "title": "Enrichment reads bodies only on opt-in",
+      "question": "Does automatic session enrichment on the Stella engine run at seal on digest-safe facts by default, read retained prompt bodies only when a workspace opts in, and stop at a monthly cap per organization?",
+      "recommendation": "Yes. Facts alone (files, commands, remotes, PR and push frames, the steering manifest) give repositories, PRs, outputs and a good title. Bodies add the summary and should be a deliberate choice, since today every live run is re-summarised from scratch every 5 minutes on the organization's credits.",
+      "source": "docs/reviews/2026-09-23-tacho-audit.html (Session enrichment)",
+      "blocks": [
+        "M7",
+        "run"
+      ],
+      "status": "open",
+      "decided_on": null,
+      "decided": null
     }
   ],
   "feedback": [

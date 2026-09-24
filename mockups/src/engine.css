@@ -193,6 +193,12 @@ p{margin:0 0 10px;color:var(--body)}
 .k-fact{--kc:var(--k-fact)} .k-memory{--kc:var(--k-memory)} .k-preference{--kc:var(--k-preference)}
 .kb{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:2px 8px 2px 6px;border-radius:6px;border:1px solid;white-space:nowrap;line-height:1.5;color:var(--kc);border-color:color-mix(in srgb,var(--kc) 45%,transparent);background:color-mix(in srgb,var(--kc) 12%,transparent)}
 .kb svg{width:12px;height:12px}
+/* A steering item that is none of the six kinds (an ontology note, an instruction, a gate notice)
+   keeps the badge's shape and icon in a neutral hue. .kb-src is the word beside the badge: a
+   skill's shelf, a memory's class. It sits under the badge in a table cell. */
+.k-item{--kc:var(--muted)}
+.kb-src{font-size:11px;color:var(--dim);white-space:nowrap}
+td .kb-src{display:block;margin-top:3px}
 .kg{display:inline-grid;place-items:center;width:16px;height:16px;vertical-align:-3px;margin-right:6px;color:var(--kc)}
 .kg svg{width:12px;height:12px}
 .recs{display:grid;gap:0}
@@ -630,7 +636,7 @@ html.has-mnav #toast.phone{bottom:calc(88px + env(safe-area-inset-bottom))}
 .mtile .ic{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;background:var(--panel);border:1px solid var(--border);color:var(--muted);flex:none}
 .mtile .tx{min-width:0;display:flex;flex-direction:column}
 .mtile .tx b{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.mtile .tx span{font-size:11px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mtile .tx>span{font-size:11px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mtile .ct{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--dim);background:var(--panel);border:1px solid var(--border);border-radius:5px;padding:0 5px;flex:none}
 .mtile .ct.hot{color:var(--st-approval);border-color:color-mix(in srgb,var(--st-approval) 40%,transparent)}
 /* drawer: a scrim behind the sidebar, and the drawer itself is the full height with big rows */
@@ -1902,18 +1908,22 @@ button.wz-opt:hover{border-color:var(--rule)}
 .asst-launch:hover{border-color:var(--rule);color:var(--fg)}
 .asst-launch[aria-expanded="true"]{border-color:var(--gold)}
 .asst-launch .tx{min-width:0;flex:1}
-.asst-launch .tx b{display:block;font-size:12.5px;font-weight:600;color:var(--fg)}
-.asst-launch .tx span{display:block;font-size:10.5px;color:var(--dim);font-family:var(--mono);
+.asst-launch .tx b{display:block;font-size:13.5px;font-weight:600;color:var(--fg)}
+.asst-launch .tx>span{display:block;font-size:10.5px;color:var(--dim);font-family:var(--mono);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.asst-launch .tx span.down{color:var(--st-failed)}
+.asst-launch .tx>span.down{color:var(--st-failed)}
 .asst-launch .cv{flex:none;color:var(--dim);display:grid;place-items:center;
   transition:transform .3s cubic-bezier(.32,.72,0,1)}
 .asst-launch[aria-expanded="true"] .cv{transform:rotate(180deg);color:var(--gold)}
 @media(prefers-reduced-motion:reduce){.asst-launch .cv{transition:none}}
-.asst-g{width:28px;height:28px;border-radius:9px;flex:none;display:grid;place-items:center;background:var(--gold);color:var(--on-gold)}
-.asst-g svg{width:15px;height:15px}
+.asst-g{width:28px;height:28px;border-radius:9px;flex:none;display:grid;place-items:center;background:var(--ink);border:1px solid var(--border)}
+.asst-g svg{width:14px;height:14px}
 .asst-launch .asst-g{width:24px;height:24px;border-radius:7px}
 .asst-h{padding:12px 15px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex:none}
+.asst-h .stl-wm{height:18px;width:auto;display:block;flex:none;color:var(--fg)}
+/* The close button sits at the right edge. A state badge, when there is one, takes the space before it. */
+.asst-h>.iconbtn{margin-left:auto}
+.asst-h>.b+.iconbtn{margin-left:0}
 .asst-b{flex:1;min-height:0;overflow-y:auto;padding:15px}
 .asst-f{border-top:1px solid var(--border);padding:11px 13px;flex:none}
 .asst-f .box{background:var(--ink);border:1px solid var(--border);border-radius:10px;padding:9px 11px;display:flex;gap:9px;align-items:flex-end}
@@ -1925,6 +1935,15 @@ button.wz-opt:hover{border-color:var(--rule)}
 .act-card{background:var(--ink);border:1px solid var(--border);border-radius:10px;padding:11px 13px;margin:9px 0;font-size:12.5px}
 .act-card .t{display:flex;align-items:center;gap:8px;margin-bottom:7px}
 .act-card .t code{font-size:11.5px}
+/* Stella's marks: the icon on the launcher, the wordmark in the header, and the name in the
+   wordmark's face wherever the agent is named. The asterisk is gold in both themes. */
+.stl-wm .ast,.stl-mk .ast{fill:var(--gold)}
+.stl-name{font-family:var(--font-display);font-weight:600;text-transform:none;letter-spacing:0;color:var(--fg)}
+.stl-name .ast{color:var(--gold)}
+/* "Ask stella*" sets the whole label in the wordmark's face, on the launcher and the phone tile */
+.stl-ask{font-family:var(--font-display)}
+.msg .who .stl-name{font-size:12.5px}
+.mtile .ic .stl-mk{width:15px;height:15px}
 
 /* ---- Steering hub: seven tabs, the assembler's preview, the manifest on a run ---- */
 .stg-seg{padding:0 0 12px;border-bottom:0}

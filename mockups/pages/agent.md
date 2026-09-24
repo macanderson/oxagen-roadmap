@@ -46,7 +46,7 @@ The agent-scoped view of the workspace library. Nothing is authored here.
 - When no steering is scoped to the agent and no preview prompt is set up, the tab is one panel, “No steering is assembled for this agent”, with **Open the library**.
 - On the `observe` tier, a warning bar above everything: nothing below reaches this agent, because no hook is installed, and what follows is what the assembler would deliver on `harness`.
 - Two meters: **Stable prefix · SessionStart additional context** in bytes against the 16 KiB cap, and **Volatile selection · token budget** in tokens, with the prompt it was ranked against.
-- **What reaches this agent**: Item · Kind · Force · Scope · Body · Source · Where it lands · Token cost. “Where it lands” is the gate plane, the stable prefix, or volatile with its rank. Header actions: **Change what is assigned** (Steering → Assignments) and **Open in the compiler** (Steering → Compiler, seeded with this agent).
+- **What reaches this agent**: Item · Kind · Force · Scope · Body · Source · Where it lands · Token cost. Kind is the kind badge the Library table shows (`steering.md`), and its filter lists the word on the badge. “Where it lands” is the gate plane, the stable prefix, or volatile with its rank. Header actions: **Change what is assigned** (Steering → Assignments) and **Open in the compiler** (Steering → Compiler, seeded with this agent).
 - **Cut for this agent**: Item · Kind · Force · Token cost · Cut because · Why, with the count in the panel header.
 
 ### Toolbelt
