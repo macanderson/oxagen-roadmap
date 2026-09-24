@@ -1,6 +1,6 @@
 {
   "generated_at": "2026-09-18T20:52:30Z",
-  "thesis": "The mockups are the spec. This page measures the distance between them and the build, carries the witness and the definition of done that make a run provable, and lists the decisions that unblock the work. GitHub status is live. Everything else is editable here, by you or by the assistant.",
+  "thesis": "Rev 1 is what the mockups draw, and the build must match it. This page lists what rev 1 must have: its milestones, how far the build is from the mockups, and the decisions that unblock the work. The witness and the definition of done moved to rev 2 on 2026-09-24. GitHub status is live. Everything else is editable here, by you or by the assistant.",
   "repos": {
     "owner": "macanderson",
     "roadmap": "oxagen-roadmap",
@@ -1271,7 +1271,8 @@
         "spec_ref": "docs/witness-spec.md §The witness record / §Eight weeks phase 1",
         "built_status": "not-started",
         "evidence": [],
-        "decision_needed": "Which record shape is canonical: the witness-spec YAML (14 oracle classes, funding, drafted_by) or the MC spec §8.5 witness (oracle kind, target/PR shas, command digest) that packages/run-evidence/src/proof.ts already types."
+        "decision_needed": "Which record shape is canonical: the witness-spec YAML (14 oracle classes, funding, drafted_by) or the MC spec §8.5 witness (oracle kind, target/PR shas, command digest) that packages/run-evidence/src/proof.ts already types.",
+        "rev": 2
       },
       {
         "id": "W2",
@@ -1285,7 +1286,8 @@
           "packages/handlers/src/tacho.events.ingest.ts",
           "packages/database/src/proof.ts"
         ],
-        "decision_needed": null
+        "decision_needed": null,
+        "rev": 2
       },
       {
         "id": "W3",
@@ -1295,7 +1297,8 @@
         "evidence": [
           "packages/run-evidence/src/proof.ts (ORACLE_KINDS, WITNESS_RESULTS, TAMPER_EXCLUSIONS enums only)"
         ],
-        "decision_needed": "Order of oracles: MC spec M4 says test-flip and build first; the witness spec's fourteen classes are Series A ('more oracles for the witness')."
+        "decision_needed": "Order of oracles: MC spec M4 says test-flip and build first; the witness spec's fourteen classes are Series A ('more oracles for the witness').",
+        "rev": 2
       },
       {
         "id": "W4",
@@ -1308,7 +1311,8 @@
           "apps/api/src/routes/v1/evidence.disclosure_grain.set.ts",
           "packages/compliance/src/security-event-types.ts"
         ],
-        "decision_needed": "The $200/month AWS budget cap for the runner plane is approved (MC spec §20 row 10); infra/ holds no runner service yet."
+        "decision_needed": "The $200/month AWS budget cap for the runner plane is approved (MC spec §20 row 10); infra/ holds no runner service yet.",
+        "rev": 2
       },
       {
         "id": "W5",
@@ -1318,7 +1322,8 @@
         "evidence": [
           "D18 (2026-09-18): witness authoring ships on every surface, MCP, CLI, API, and the web app, not CLI first."
         ],
-        "decision_needed": null
+        "decision_needed": null,
+        "rev": 2
       },
       {
         "id": "W6",
@@ -1328,7 +1333,8 @@
         "evidence": [
           "packages/run-ledger (attempt seals exist; no certificate)"
         ],
-        "decision_needed": "Whether the certificate is the DoD certificate with the witness as one check (scope-review 'two documents, one company') or a separate witness stamp."
+        "decision_needed": "Whether the certificate is the DoD certificate with the witness as one check (scope-review 'two documents, one company') or a separate witness stamp.",
+        "rev": 2
       },
       {
         "id": "W7",
@@ -1338,7 +1344,8 @@
         "evidence": [
           "packages/oxagen/src/contracts/run.export.ts (run export exists; no recompute-and-compare)"
         ],
-        "decision_needed": null
+        "decision_needed": null,
+        "rev": 2
       },
       {
         "id": "W8",
@@ -1350,7 +1357,8 @@
           "packages/handlers/src/run.proof.get.ts",
           "apps/app/src/app/[org]/[ws]/runs/[run]/page.tsx (stub)"
         ],
-        "decision_needed": null
+        "decision_needed": null,
+        "rev": 2
       },
       {
         "id": "W9",
@@ -1362,7 +1370,8 @@
           "apps/app/src/data/contracts/spend.ts",
           "packages/database/src/schema/cost.ts (run_totals.verdict)"
         ],
-        "decision_needed": null
+        "decision_needed": null,
+        "rev": 2
       },
       {
         "id": "W10",
@@ -1370,7 +1379,8 @@
         "spec_ref": "docs/witness-spec.md §API surface (webhooks), phase 5",
         "built_status": "not-started",
         "evidence": [],
-        "decision_needed": "Decided against for now: GAU is the one price list and proven spend carries no price (2026-09-14, reaffirmed 2026-09-15); stamps as a billable unit is not in scope."
+        "decision_needed": "Decided against for now: GAU is the one price list and proven spend carries no price (2026-09-14, reaffirmed 2026-09-15); stamps as a billable unit is not in scope.",
+        "rev": 2
       },
       {
         "id": "W11",
@@ -1378,9 +1388,11 @@
         "spec_ref": "docs/witness-spec.md §Components (Dataset Exporter), phase 5",
         "built_status": "not-started",
         "evidence": [],
-        "decision_needed": "Not in any milestone; needs an owner decision on whether the oracle-flip training pipeline is a product commitment."
+        "decision_needed": "Not in any milestone; needs an owner decision on whether the oracle-flip training pipeline is a product commitment.",
+        "rev": 2
       }
-    ]
+    ],
+    "rev": 2
   },
   "dod": {
     "summary": "The definition of done locks a set of mechanical checks before an agent starts and refuses to let it finish until they hold, then signs a certificate against the sealed run and records the non-billable dod.held action. Nothing of the runtime DoD exists in oxagen or stella: no packages/dod, no harness hooks, no dod.* contracts, no dod_sets/dod_certificates tables, no Done tab (the Run page is a stub). What exists is the repository-level dod GitHub check that gates pull requests on an issue checklist (ADR-049, dod-check/dod-recheck workflows) and Stella's task-contract DefinitionOfDone type, which the spec names as precedents.",
@@ -1393,7 +1405,8 @@
         "evidence": [
           "packages/run-evidence/src/digest.ts (digestJcs canonicalizer the lock reuses)"
         ],
-        "decision_needed": null
+        "decision_needed": null,
+        "rev": 2
       },
       {
         "id": "D2",
@@ -1404,7 +1417,8 @@
           "apps/cli/src (no dod command)",
           "packages/tacho (existing hook wrapper for Claude Code and Codex)"
         ],
-        "decision_needed": null
+        "decision_needed": null,
+        "rev": 2
       },
       {
         "id": "D3",
@@ -1415,7 +1429,8 @@
           "docs/adr/ADR-052-governed-action-as-the-billable-unit.md",
           "packages/billing/src (governed-action recorder exists; no dod.held)"
         ],
-        "decision_needed": "dod.held is 'recorded and not billable'; the recorder bills every non-noBillingGate invoke, so the contract must declare noBillingGate while still being recorded."
+        "decision_needed": "dod.held is 'recorded and not billable'; the recorder bills every non-noBillingGate invoke, so the contract must declare noBillingGate while still being recorded.",
+        "rev": 2
       },
       {
         "id": "D4",
@@ -1425,7 +1440,8 @@
         "evidence": [
           "packages/ai/src (the @oxagen/ai client dod.draft would call)"
         ],
-        "decision_needed": "Which model drafts (never the task model) and where its cost is charged: usage credits like the in-app agent, or platform-paid."
+        "decision_needed": "Which model drafts (never the task model) and where its cost is charged: usage credits like the in-app agent, or platform-paid.",
+        "rev": 2
       },
       {
         "id": "D5",
@@ -1433,7 +1449,8 @@
         "spec_ref": "docs/dod-spec.md phase 5",
         "built_status": "not-started",
         "evidence": [],
-        "decision_needed": null
+        "decision_needed": null,
+        "rev": 2
       },
       {
         "id": "D6",
@@ -1443,7 +1460,8 @@
         "evidence": [
           "apps/app/src/app/[org]/[ws]/runs/[run]/page.tsx (stub)"
         ],
-        "decision_needed": null
+        "decision_needed": null,
+        "rev": 2
       },
       {
         "id": "D7",
@@ -1454,7 +1472,8 @@
           "apps/app/src/features/fleet/runs-table.tsx",
           "apps/app/src/features/billing/billing.tsx"
         ],
-        "decision_needed": "Decided: held runs are a report figure with no price (scope review 2026-09-14); dod-spec's 'Billing prices the held run' sentence is stale."
+        "decision_needed": "Decided: held runs are a report figure with no price (scope review 2026-09-14); dod-spec's 'Billing prices the held run' sentence is stale.",
+        "rev": 2
       },
       {
         "id": "D8",
@@ -1464,7 +1483,8 @@
         "evidence": [
           "packages/oxagen/src/contracts/run.proof.get.ts"
         ],
-        "decision_needed": "Which of the six check kinds carries the witness (a run check calling the runner, or a seventh kind the spec forbids)."
+        "decision_needed": "Which of the six check kinds carries the witness (a run check calling the runner, or a seventh kind the spec forbids).",
+        "rev": 2
       },
       {
         "id": "D9",
@@ -1477,7 +1497,8 @@
           ".github/workflows/dod-close-guard.yml",
           "docs/adr/ADR-049-dod-recheck-reruns-the-old-run.md"
         ],
-        "decision_needed": "Later: whether the repo check reads a DoD certificate instead of a checklist."
+        "decision_needed": "Later: whether the repo check reads a DoD certificate instead of a checklist.",
+        "rev": 2
       },
       {
         "id": "D10",
@@ -1488,9 +1509,11 @@
           "/Users/macanderson/Projects/stella/crates/stella-protocol/src/task_contract.rs",
           "/Users/macanderson/Projects/stella/crates/stella-tools/src/tasks.rs"
         ],
-        "decision_needed": "Whether Stella's task DoD and Oxagen's run DoD share one schema when Stella is wrapped (ADR-080)."
+        "decision_needed": "Whether Stella's task DoD and Oxagen's run DoD share one schema when Stella is wrapped (ADR-080).",
+        "rev": 2
       }
-    ]
+    ],
+    "rev": 2
   },
   "decisions": [
     {
@@ -1978,7 +2001,8 @@
         "repositories"
       ],
       "weeks": "1–4",
-      "summary": "Acceptance A done: the real-Neo4j cross-tenant probe runs beside the Postgres RLS job in CI (#3310, ADR-098, rls-integration). B and C (a workspace is born with its main repository; a second repository links and unlinks) ride open PR #3326 (ADR-099). Exclusive main binding landed in #3269."
+      "summary": "Acceptance A done: the real-Neo4j cross-tenant probe runs beside the Postgres RLS job in CI (#3310, ADR-098, rls-integration). B and C (a workspace is born with its main repository; a second repository links and unlinks) ride open PR #3326 (ADR-099). Exclusive main binding landed in #3269.",
+      "rev": 1
     },
     {
       "id": "M1",
@@ -2002,7 +2026,8 @@
         "accept-invitation"
       ],
       "weeks": "3–8",
-      "summary": "The Run page landed (#3282): header, Transcript, Frames, Cost, run controls, export. No approve/deny, no stream yet."
+      "summary": "The Run page landed (#3282): header, Transcript, Frames, Cost, run controls, export. No approve/deny, no stream yet.",
+      "rev": 1
     },
     {
       "id": "M2",
@@ -2018,17 +2043,8 @@
         "wizard-tool"
       ],
       "weeks": "7–11",
-      "summary": "Billing laid out per design with Change plan wired (#3309); approvals, mandates and kill switches not started."
-    },
-    {
-      "id": "M3",
-      "title": "Done: the definition of done in five gated phases",
-      "surfaces": [
-        "run",
-        "fleet",
-        "billing"
-      ],
-      "weeks": "9–13"
+      "summary": "Billing laid out per design with Change plan wired (#3309); approvals, mandates and kill switches not started.",
+      "rev": 1
     },
     {
       "id": "M6",
@@ -2037,7 +2053,8 @@
         "steering"
       ],
       "weeks": "Phase 0 merged · Phase 4 merged, aggregator open · Phases 1, 2, 3, 5 next",
-      "summary": "Phase 0 merged (#3289, ADR-091; #2592 open until a production sighting). Phase 4 merged for the proxy, observed metering, session budget and interrupt (#3319, #3321); the MCP aggregator stays on #3299. ADRs 093 to 097 decided (#3294). Phases 1, 2, 3, 5 not started."
+      "summary": "Phase 0 merged (#3289, ADR-091; #2592 open until a production sighting). Phase 4 merged for the proxy, observed metering, session budget and interrupt (#3319, #3321); the MCP aggregator stays on #3299. ADRs 093 to 097 decided (#3294). Phases 1, 2, 3, 5 not started.",
+      "rev": 1
     },
     {
       "id": "M5",
@@ -2054,7 +2071,19 @@
         "wizard-repository-init",
         "audit"
       ],
-      "weeks": "12–15"
+      "weeks": "12–15",
+      "rev": 1
+    },
+    {
+      "id": "M3",
+      "title": "Done: the definition of done in five gated phases",
+      "surfaces": [
+        "run",
+        "fleet",
+        "billing"
+      ],
+      "weeks": "9–13",
+      "rev": 2
     },
     {
       "id": "M4",
@@ -2064,7 +2093,8 @@
         "spend",
         "fleet"
       ],
-      "weeks": "11–15"
+      "weeks": "11–15",
+      "rev": 2
     }
   ],
   "catalog": {
