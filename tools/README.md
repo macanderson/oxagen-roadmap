@@ -95,6 +95,11 @@ rather than degrading into something that looks like an answer. It then walks th
 model key on the funding tab: the prefix rather than the secret, the provisioned id reconciliation
 joins on, the two independent numbers in the reconciliation block, and mint, rotate and revoke.
 
+It also checks Stella's marks in both forced themes. The header carries the wordmark, its letters
+follow the theme, and its asterisk is gold. The launcher and the phone More tile read "Ask stella*"
+in Space Grotesk, the other More tiles keep the UI face, and the close button sits at the header's
+right edge.
+
 Mutation-tested against three deliberate regressions — rebuilding the sheet on every render,
 removing the no-key refusal, and dropping the `inert` guard — and catches all three.
 

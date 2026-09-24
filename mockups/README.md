@@ -59,6 +59,10 @@ depended on proof: it is what the frames show bought nothing, so it stays with o
   (the same one the run page shows) with approve and deny. Fleet keeps its "waiting on a human"
   tile, which opens the drawer, and loses the approvals panel and the interjection banner. The
   topbar's assistant button is gone; the launcher at the foot of the sidebar stays.
+- The in-app assistant carries Stella's marks from the house brand kit. The drawer header shows
+  the stella wordmark where it said Assistant. The sidebar launcher and the phone More tile show
+  Stella's icon and read "Ask stella*" in Space Grotesk, with a gold asterisk. The letters follow
+  the page's theme, including a forced `?theme=`, and the asterisk is gold in both themes.
 - The workspace governance mode (`solo`, `team`, `regulated`) is a setting: a chip on the Steering
   header opens a dialog that shows the three modes and the `governance.toml` it would write, the
   Edit workspace dialog carries the same select, and the Organization workspaces table reads it

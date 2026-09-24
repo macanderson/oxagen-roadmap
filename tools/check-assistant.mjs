@@ -225,6 +225,71 @@ for (const theme of ["light", "dark"]) {
   await page.close();
 }
 
+/* ---------------- Stella's marks ----------------
+   The header carries the wordmark, not the word "Assistant", and its letters follow the page's
+   theme while the asterisk stays gold. The launcher shows the icon and "Ask stella*" in the
+   wordmark's face. The kit's adaptive SVG switches ink by prefers-color-scheme, which ignores
+   ?theme=, so a forced theme is the case that proves the inlined marks read the tokens instead. */
+const GOLD = "rgb(212, 175, 55)";
+const sum = c => (c.match(/\d+/g) || []).slice(0, 3).reduce((a, n) => a + Number(n), 0);
+for (const theme of ["light", "dark"]) {
+  const { page, errs } = await open("#/a-intel/core-platform", { theme });
+  await page.evaluate(() => asstToggle(true));
+  await page.waitForTimeout(450);
+  const m = await page.evaluate(() => {
+    const hd = document.querySelector("#asst .asst-h"), wm = hd && hd.querySelector("svg.stl-wm");
+    const paths = wm ? wm.querySelectorAll("path") : [];
+    const b = document.querySelector(".asst-launch .tx b"), ast = b && b.querySelector(".ast");
+    const x = hd && hd.querySelector(".iconbtn");
+    return {
+      label: wm ? wm.getAttribute("aria-label") : null,
+      height: wm ? Math.round(wm.getBoundingClientRect().height) : 0,
+      letters: paths[0] ? getComputedStyle(paths[0]).fill : "",
+      asterisk: paths[1] ? getComputedStyle(paths[1]).fill : "",
+      headText: hd ? hd.innerText : "",
+      launch: b ? b.innerText.replace(/\s+/g, " ").trim() : "",
+      face: b ? getComputedStyle(b).fontFamily : "",
+      textAst: ast ? getComputedStyle(ast).color : "",
+      icon: !!document.querySelector(".asst-launch .asst-g svg.stl-mk"),
+      iconAst: (() => { const p = document.querySelector(".asst-launch .stl-mk path"); return p ? getComputedStyle(p).fill : ""; })(),
+      closeGap: hd && x ? Math.round(hd.getBoundingClientRect().right - x.getBoundingClientRect().right) : -1,
+    };
+  });
+  ok(m.label === "stella", theme + ": the header carries the stella wordmark, got " + m.label);
+  ok(m.height >= 14, theme + ": the wordmark has height, got " + m.height + "px");
+  ok(!/assistant/i.test(m.headText), theme + ": the header no longer says Assistant, got " + JSON.stringify(m.headText));
+  ok(theme === "dark" ? sum(m.letters) > 450 : sum(m.letters) < 300, theme + ": the wordmark letters follow the theme, got " + m.letters);
+  ok(m.asterisk === GOLD, theme + ": the wordmark asterisk is gold, got " + m.asterisk);
+  ok(m.launch === "Ask stella*", theme + ": the launcher reads Ask stella*, got " + JSON.stringify(m.launch));
+  ok(/Space Grotesk/.test(m.face), theme + ": the launcher is set in Space Grotesk, got " + m.face);
+  ok(m.textAst === GOLD, theme + ": the launcher asterisk is gold, got " + m.textAst);
+  ok(m.icon && m.iconAst === GOLD, theme + ": the launcher shows Stella's icon, got " + m.iconAst);
+  ok(m.closeGap >= 0 && m.closeGap <= 20, theme + ": the close button sits at the right edge, " + m.closeGap + "px in");
+  await shot(page, "asst-brand-" + theme);
+  ok(errs.length === 0, theme + " marks errors: " + errs.join(" | "));
+  await page.close();
+}
+{
+  const { page, errs } = await open("#/a-intel/core-platform", { mobile: true });
+  await page.evaluate(() => openDialog("more"));
+  await page.waitForTimeout(400);
+  const { tile, face, others } = await page.evaluate(() => {
+    const all = [...document.querySelectorAll(".mtile")], t = all.find(x => x.querySelector(".stl-mk"));
+    const b = t && t.querySelector(".tx b");
+    return { tile: b ? b.innerText.replace(/\s+/g, " ").trim() : null, face: b ? getComputedStyle(b).fontFamily : "",
+      others: all.filter(x => x !== t).map(x => getComputedStyle(x.querySelector(".tx b")).fontFamily).filter(f => /Space Grotesk/.test(f)).length };
+  });
+  ok(tile === "Ask stella*", "phone More sheet: the tile reads Ask stella*, got " + JSON.stringify(tile));
+  ok(/Space Grotesk/.test(face), "phone More sheet: the Stella tile is set in Space Grotesk, got " + face);
+  ok(others === 0, "phone More sheet: the other tiles keep the UI face, " + others + " took Space Grotesk");
+  await shot(page, "asst-more-sheet");
+  await page.evaluate(() => [...document.querySelectorAll(".mtile")].find(x => x.querySelector(".stl-mk")).click());
+  await page.waitForTimeout(450);
+  ok((await host(page)).open, "phone More sheet: the tile opens the panel");
+  ok(errs.length === 0, "More sheet errors: " + errs.join(" | "));
+  await page.close();
+}
+
 await browser.close();
 console.log(`${passes} passed, ${fails} failed`);
 process.exit(fails ? 1 : 0);
