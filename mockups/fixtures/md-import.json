@@ -1,0 +1,139 @@
+{
+  "root": "a-intel/platform",
+  "usd_per_ktok": 0.012,
+  "max_kb": 200,
+  "files": [
+    {
+      "path": "CLAUDE.md",
+      "lines": [
+        "# CLAUDE.md",
+        "",
+        "Guidance for coding agents working in a-intel/platform. Read AGENTS.md too.",
+        "",
+        "## Build and test",
+        "",
+        "- Run `pnpm test --filter <package>` for the package you changed. Never run the whole suite locally.",
+        "- Do not use npm or yarn in this repository. Use pnpm.",
+        "- Prefer small pull requests over one large one.",
+        "",
+        "## Code style",
+        "",
+        "- Every exported function must declare its return type.",
+        "- Prefer named exports over default exports.",
+        "- Keep React components under 200 lines.",
+        "",
+        "## Database",
+        "",
+        "- A database owner must review every migration before it merges.",
+        "- Never edit a migration that has shipped. Write a new one.",
+        "",
+        "```sh",
+        "pnpm db:migrate",
+        "```",
+        "",
+        "## Mobile",
+        "",
+        "- Never hand-edit files under ios/Generated. Regenerate them with `pnpm ios:codegen`.",
+        "",
+        "## Incidents",
+        "",
+        "Last time the billing webhook secret rotated, staging was down for an hour. Rotate it in staging first."
+      ]
+    },
+    {
+      "path": "AGENTS.md",
+      "lines": [
+        "# AGENTS.md",
+        "",
+        "Codex, Cursor and stella read this file. CLAUDE.md holds the same rules for Claude Code.",
+        "",
+        "## Rules",
+        "",
+        "- Run `pnpm test --filter <package>` for the package you changed. Never run the whole suite locally.",
+        "- Branch names start with the ticket key, for example `PLAT-412-fix-retry`.",
+        "- Do not commit `.env` files or anything under `secrets/`.",
+        "- Always open a draft pull request first, and mark it ready when CI is green.",
+        "",
+        "## Review",
+        "",
+        "1. Read the diff top to bottom before you comment.",
+        "2. Run the changed package's tests.",
+        "3. Leave one comment per finding, with the file and line.",
+        "4. Approve only when CI is green.",
+        "",
+        "The on-call rotation is in PagerDuty under Platform."
+      ]
+    },
+    {
+      "path": "apps/api/CLAUDE.md",
+      "lines": [
+        "# apps/api",
+        "",
+        "- Always build and test on Node 20. The latest Node release breaks main.",
+        "- Every route handler must validate its input with zod.",
+        "- Prefer a 404 over a 403 for a resource the caller cannot see.",
+        "- The API listens on port 4000 in development.",
+        "",
+        "```ts",
+        "// Never throw a raw string.",
+        "```"
+      ]
+    },
+    {
+      "path": "docs/runbooks/release.md",
+      "lines": [
+        "# Release runbook",
+        "",
+        "The release train leaves every Tuesday at 15:00 UTC.",
+        "",
+        "## Steps",
+        "",
+        "1. Cut the release branch from main.",
+        "2. Run `pnpm release:notes` and read the draft.",
+        "3. Open the release pull request.",
+        "4. Post the link in #releases.",
+        "",
+        "## Rules",
+        "",
+        "- Never let the agent merge the release pull request. The release manager opens it and a person merges it.",
+        "- Release notes should name the pull request for every change.",
+        "- Remember that 1.14 shipped a stale changelog because the notes job ran before the merge."
+      ]
+    },
+    {
+      "path": "README.md",
+      "lines": [
+        "# Anderson Intelligence platform",
+        "",
+        "The platform monorepo: the API, the web app, the iOS app, and the shared packages.",
+        "",
+        "## Getting started",
+        "",
+        "Install pnpm 9 and Node 20, then run `pnpm install`.",
+        "",
+        "You should run `pnpm dev` from the repository root.",
+        "",
+        "See CONTRIBUTING.md for how changes are reviewed."
+      ]
+    }
+  ],
+  "skipped": [
+    {
+      "path": "node_modules/",
+      "why": "a dependency directory"
+    },
+    {
+      "path": ".git/",
+      "why": "version control"
+    },
+    {
+      "path": "docs/img/topology.png",
+      "why": "not Markdown"
+    },
+    {
+      "path": "CHANGELOG.md",
+      "kb": 412,
+      "why": "over the 200 KB limit"
+    }
+  ]
+}
