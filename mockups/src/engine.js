@@ -8929,14 +8929,14 @@ function pOrganization(){
      '<thead><tr><th>Person</th><th>Role</th><th>Workspaces</th><th>Two-factor</th><th>Last seen</th><th>Status</th><th></th></tr></thead><tbody>'+
      MEMBERS.map(function(m){var p=PEOPLE[m.p];
       return '<tr><td><b>'+h(p.name)+'</b><div class="dim mono" style="font-size:11px">'+h(p.email)+'</div></td>'+
-       '<td class="mono" style="font-size:11.5px">'+h(p.role)+'</td>'+
+       /* The role id alone, so the Role column has five values and earns a filter; the scope after " · " is the Workspaces column. */
+       '<td class="mono" style="font-size:11.5px">'+h(p.role.split(" · ")[0])+'</td>'+
        '<td>'+h(m.ws)+'</td><td>'+h(m.mfa)+'</td>'+
        '<td class="mono dim" style="font-size:11px">'+h(m.last)+'</td>'+
-       '<td><span class="b b-allowed"><span class="d"></span>'+h(m.status)+'</span></td>'+
+       '<td><span class="b '+(m.status==="active"?"b-allowed":"b-q")+'"><span class="d"></span>'+h(m.status)+'</span></td>'+
        '<td class="rowacts"><button class="btn sm" onclick="openDialog(\'member\',\''+m.p+'\')">Open</button><button class="btn sm" onclick="openDialog(\'role\',\''+m.p+'\')">Change role</button><button class="btn sm danger" onclick="openDialog(\'removemember\',\''+m.p+'\')">Remove</button></td></tr>';}).join("")+
      '</tbody></table></div><div class="panel-b">'+
-     '<div class="note">Changing a role is a governed action. It passes IAM, writes an audit record, and bills as one action.</div></div></div>'+
-     '<div style="margin-top:14px">'+rolesInUsePanel()+'</div>';
+     '<div class="note">Changing a role is a governed action. It passes IAM, writes an audit record, and bills as one action.</div></div></div>';
   } else if(t==="roles"){
     body=rolesBody();
   } else if(t==="invitations"){
@@ -11783,13 +11783,6 @@ function permChips(perms,max){
 /* Role kinds (human, agent, service), not record kinds. Named apart from kindBadge, which this used to
    shadow: one script, hoisted, later definition wins, so every record card got a role badge instead. */
 function roleKindBadge(k){return '<span class="b '+(k==="agent"?"b-proven":k==="service"?"b-approval":"b-q")+'">'+h(k)+'</span>';}
-function rolesInUsePanel(){
-  var list=ROLES.filter(function(r){return r.kind==="human";});
-  return '<div class="panel"><div class="panel-h"><h3>Roles in use</h3><button class="btn sm" style="margin-left:auto" onclick="orgTab(\'roles\')">Manage roles</button></div><div class="tw"><table class="narrow"><tbody>'+
-   list.map(function(r){var n=roleAssignees(r.id);return '<tr class="click" onclick="orgTab(\'roles\');roleOpen(\''+r.id+'\')"><td class="mono" style="font-size:11.5px">'+h(r.id)+'</td><td class="num">'+n.total+'</td>'+
-    '<td class="dim" style="font-size:11.5px">'+h(r.desc)+'</td></tr>';}).join("")+
-   '</tbody></table></div><div class="panel-b" style="padding-top:10px"><span class="dim" style="font-size:11.5px">'+ROLES.filter(function(r){return r.kind==="agent";}).length+' agent roles and '+ROLES.filter(function(r){return r.kind==="service";}).length+' service role are on the Roles tab.</span></div></div>';
-}
 function rolesBody(){
   var list=ROLES.slice();
   var rows=list.map(function(r){
