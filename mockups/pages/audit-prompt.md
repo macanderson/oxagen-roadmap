@@ -58,7 +58,12 @@ Record PASS / FAIL / N/A per check with evidence (file:line, selector + text, or
 6. Topbar, left to right: breadcrumbs ending on the current page; ⌘K search-or-run listing every
    page and action; notifications with an unread dot; the approvals button with a numeric badge;
    the account avatar (Account, Preferences, Security and sessions, Privacy and data, Switch theme,
-   Sign out). No assistant button in the topbar.
+   Sign out). No assistant button in the topbar. The notifications button (aria-label
+   "Notifications, N unread") opens the "Notifications" dialog. Each unread item is a button
+   labelled "Mark read: <title>". A click, Enter, or Space marks that item read and moves focus to
+   the first unread item left. When none is left, focus stays in the dialog. A read item is plain
+   text. The footer reads "N unread · select one to mark it read", or "All read" with Mark all read
+   disabled. Mark all read closes the dialog. The unread dot goes once nothing is unread.
 7. The approvals drawer. The badge counts every pending approval across the organization plus an
    open interjection; it is present on every page including organization pages. Clicking opens a
    right-hand drawer titled "Approvals" with the count, a list under "N waiting on you" (an

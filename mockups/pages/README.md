@@ -37,7 +37,9 @@ covers the Tasks, Work orders and Workflows tabs, the send menu, the work order 
 workflow builder; `tasks-providers.md` covers the Providers, Fields and People tabs and the connection
 wizard. The feature's product spec is `docs/tasks-spec.md`, and `node tools/check-tasks.mjs` walks it. `tools.md`
 covers all five of its tabs, Toolbelts and Providers among them. `agent.md` covers every tab of the
-agent detail.
+agent detail. `run.md` covers every tab of the run, Memories among them. Cost centers span three
+specs: `organization.md` has the Cost centers tab, `agent.md` the agent's label, and `spend.md` the
+By cost center tab.
 
 What the design assumes: every phase of the plan (0 to 5) has shipped. Steering is the hub with five
 tabs (Library, Assignments, Gates, Proposals, Compiler) and one assembler; the tier ladder
@@ -55,9 +57,10 @@ proven spend.
 `/steering/policy` lands on Gates and `/steering/preview/<agent>` lands on the Compiler, so every
 link written before the rename still works.
 
-The five creation wizards (agent, tool, skill, context record, and the `.oxagen/` directory itself)
-are dialogs rather than pages, so they have no `<page>.md`; their spec is `docs/creation-spec.md`, and
-the three pages they end at (`record`, `skill-source` and `repositories`) are specified here.
+The six creation wizards (agent, tool, skill, context record, the Markdown import, and the `.oxagen/`
+directory itself) are dialogs rather than pages, so they have no `<page>.md`; their spec is
+`docs/creation-spec.md`, except the Markdown import's, which is in `steering.md`. The three pages
+they end at (`record`, `skill-source` and `repositories`) are specified here.
 
 Headings and labels on every page follow one rule: a heading names the thing, a caption states one
 fact, and no label carries a comma, a mid-dot, or a "not / never" contrast. Subtext under a heading

@@ -5,9 +5,9 @@
 | **Status** | Spec v1, for build — rev 1 scope |
 | **Date** | 2026-09-15 |
 | **Owner** | Mac Anderson |
-| **Source** | `mockups/src/engine.js` → `DLG_EXT.create`, `DLG_EXT.wz`, `wzTool`, `wzSkill`, `wzAgent`, `wzRecord`, `pRecord`, `pSkillSource`; rendered in `mockups/missioncontrol.html` |
+| **Source** | `mockups/src/engine.js` → `DLG_EXT.create`, `DLG_EXT.wz`, `wzTool`, `wzSkill`, `wzAgent`, `wzRecord`, `wzImport`, `wzImpPublish`, `pRecord`, `pSkillSource`; rendered in `mockups/missioncontrol.html` |
 | **Builds on** | ADR-043 (Oxagen governs, it does not run); `mission-control-spec.md` §10 (context and steering), §14 (Mission Control); `w13-in-the-loop-scenario.md` |
-| **Related** | `pages/record.md`, `pages/skill-source.md`, `pages/tools.md`, `pages/agents.md`, `pages/skills.md`, `pages/steering.md` |
+| **Related** | `pages/record.md`, `pages/skill-source.md`, `pages/tools.md`, `pages/agents.md`, `pages/skills.md`, `pages/steering.md`, `pages/steering-memory.md` |
 
 ## 1. One shape, four things
 
@@ -31,6 +31,12 @@ any turn, and it is billed to Oxagen, never to the tenant: it is not one of your
 appears in Fleet or in Spend. Every line it drafts is the operator's to change before anybody
 reviews it, and the wizard says so on every drafting step.
 
+**The Markdown import is the one exception.** It reads CLAUDE.md, AGENTS.md, and any Markdown file
+into records and memories. The records it accepts take the same road, one pull request per source
+file. A line it accepts as a memory is written when the import publishes, steers at `may` or
+`info`, and opens no pull request. The `create` chooser says so in its note. The wizard is
+specified under Markdown import in `mockups/pages/steering.md`.
+
 ### Entry points
 
 `Create` in ⌘K opens the chooser (`DLG_EXT.create`), and each page carries its own:
@@ -41,6 +47,7 @@ reviews it, and the wizard says so on every drafting step.
 | Tools | **New tool** | `wzOpen("tool")` |
 | Steering · Skills | **Add a skill** | `wzOpen("skill")` |
 | Steering (every other tab) | **Write a context record** | `wzOpen("record")` |
+| Steering (hub header, Proposals, and the empty All, Records, and Memory shelves) | **Import Markdown** | `wzOpen("import")` |
 
 Skills is a tab of Steering, not a page of its own. Steering is the hub for everything that steers
 an agent: Records, Skills, Memory, Ontology, Policy, Proposals, Preview (`mockups/pages/steering.md`).
@@ -153,7 +160,8 @@ stable prefix for `must` and `should`, the volatile selection for `may` and `inf
 
 ## 6. What this feature must never do
 
-- Write a row. Every path ends on a pull request.
+- Write a row. Every path ends on a pull request. A memory accepted in the Markdown import is the one
+  exception (§1), and it steers at `may` or `info`.
 - Let a record, a skill or a tool manifest grant authority. A record steers; a skill is prose; a tool
   version lands in the registry callable by nobody until a role grant puts it on a belt.
 - Show a number stronger than the record holds, or a gate softer than policy would apply.

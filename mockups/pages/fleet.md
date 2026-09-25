@@ -32,7 +32,7 @@ Actions: **Steer** (opens `steerfleet`, “Steer the fleet”: every agent in th
 
 **Dialogs this page opens:** `steerfleet`, `pause`, `approve`, `deny` (from the drawer), `request-access` (from denied), `incident` (from error).
 
-**Shell.** Sidebar (organization switcher, workspace switcher, Workspace nav: Fleet (count = approvals waiting plus an interjection) · Agents (agent count) · Tools · Steering (proposals plus a waiting interjection) · Runtimes (degraded hosts) · Repositories (open Context PRs) · Spend; Organization nav: Organization · Billing · Audit (open critical incidents); foot: the assistant launcher, agent count · data plane, connection badge). Top bar: hamburger, breadcrumbs, ⌘K search-or-run, notifications with unread dot, the approvals button (left of the avatar, count of everything waiting on you across the organization), account avatar → user menu (Account, Preferences, Security and sessions, Privacy and data, Switch theme, Sign out). No assistant button in the top bar.
+**Shell.** Sidebar (organization switcher, workspace switcher, Workspace nav: Fleet (count = approvals waiting plus an interjection) · Agents (agent count) · Tools · Steering (proposals plus a waiting interjection) · Runtimes (degraded hosts) · Repositories (open Context PRs) · Spend; Organization nav: Organization · Billing · Audit (open critical incidents); foot: the assistant launcher, agent count · data plane, connection badge). Top bar: hamburger, breadcrumbs, ⌘K search-or-run, notifications with unread dot (opens `notifs`, where selecting an unread item marks it read), the approvals button (left of the avatar, count of everything waiting on you across the organization), account avatar → user menu (Account, Preferences, Security and sessions, Privacy and data, Switch theme, Sign out). No assistant button in the top bar.
 
 ## Data sources
 
@@ -56,6 +56,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 - The drawer lists every pending request across the organization, including one raised outside a run (no `run_id`); the Run page lists only its own run's.
 - The tile figures are computed from the rows (`live`, `pend.length`, sum of cost, sum of tokens) so a header can never disagree with its table. The filter chips change the Spend shown and Tokens shown figures, and the labels say “shown” for that reason.
 - Nav count on Fleet = approvals waiting plus an open interjection; the topbar approvals button carries the organization-wide count.
+- The notifications dialog (`notifs`, from the top bar) lists `NOTIFS`. Each item shows its tone icon, title, body, kind in mono, and time. An unread item is a button (`data-notif`, aria-label “Mark read: <title>”): a click, Enter, or Space marks that one read, and focus moves to the first unread item still in the list. A read item is plain text. The footer reads “<N> unread · select one to mark it read”, or “All read” once nothing is unread. **Mark all read** marks the rest read, closes the dialog, and shows “All notifications marked read. Audit records who read each one.” It is disabled when nothing is unread. The top bar's dot and its aria-label “Notifications, <N> unread” follow the count. Neither action writes an audit event in the mockup.
 
 ## States
 

@@ -18,7 +18,7 @@ Records is a shelf of the **Library** tab, not a tab of its own. The route it ha
 
 ## What is on the page
 
-**Hub header, tabs, and shelf row.** As specified in `steering.md`: the eyebrow, h1 “Steering”, the one-sentence subtext, the governance chip, the five tabs (Library, Assignments, Gates, Proposals, Compiler) with Library selected, and the shelf row (All · Records · Skills · Memory · Ontology) with Records pressed. The gold action on this shelf is **Write a context record**, in the page header.
+**Hub header, tabs, and shelf row.** As specified in `steering.md`: the eyebrow, h1 “Steering”, the one-sentence subtext, the governance chip, the five tabs (Library, Assignments, Gates, Proposals, Compiler) with Library selected, and the shelf row (All · Records · Skills · Memory · Ontology) with Records pressed. The gold action on this shelf is **Write a context record**, in the page header. **Import Markdown** sits before it, plain.
 
 - **Published records** panel. Kind chips with counts: All 59 · rule 25 · constraint 12 · procedure 5 · fact 10 · memory 3 · preference 4 (`aria-pressed`, icon and hue per kind). List controls: Sort (Shown order, Statement A–Z, Statement Z–A), Rows (5, 10, 25, 50, All), and a pager (“1–10 of 59”, ‹ 1 2 3 4 5 6 ›). Cards are newest first, and the statement is always the headline.
 - Each card (`recordCard` with `item`): the kind badge, its **force**, its **constraint effect** where it has one, its **token cost** (“214 tok”), its **compilation** chip, the state badge **published** (or “new · bundle vN” beside it for a record the last merge published), and **Open**, which routes to `record.md`. The meta line: scope, the effect line (“rendered 212 · cited 188 · violated 3”), the lineage id, the commit, and the publication date.
@@ -27,7 +27,7 @@ Records is a shelf of the **Library** tab, not a tab of its own. The route it ha
 - **On disk** panel: the `.oxagen/` tree as a pre: `workspace.toml`, `rules/` with `governance.toml` (“mode = team”), `promotions.jsonl` (“hash-chained ledger (regulated mode)”), three record files, then `skills/<name>/SKILL.md` (“governed files, delivered by sync”), `ontology/*.toml`, `proposals/*.toml` (“candidates; steer nothing”), `agents/<slug>.toml`. A note: Stella symlinks into this directory rather than copying it; Oxagen reads `.oxagen/` and nothing else.
 - **Injection points** panel, badge “five points”, lead sentence “The harness owns the context window. Oxagen competes for its own slice of it, at exactly these points, and every delivery is recorded.” Five items: (1) SessionStart additional context, the stable prefix, capped at 16 KiB, cached in the signed bundle, works offline; (2) UserPromptSubmit additional context, the volatile selection under a token budget; (3) MCP tool results; (4) Files in the checkout, skills delivered by sync; (5) the model request itself, written at the proxy on the gateway and contained tiers, counted as `steering_tokens` and `context_frame_tokens`.
 
-**Dialogs this page opens:** `govmode`, `wz (record wizard)`.
+**Dialogs this page opens:** `govmode`, `wz (record wizard)`, `wz (Markdown import)`.
 
 **Shell.** As `steering.md`: sidebar with Steering lit and Runtimes between Steering and Repositories, top bar with breadcrumbs, ⌘K search-or-run, notifications, the **Approvals** button that opens the drawer `#apdrawer`, and the account avatar. The top bar has no assistant button. Skills has no nav entry of its own.
 
@@ -46,6 +46,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 ## Functionality
 
 - A record becomes published by being merged. Nothing on this shelf writes to the registry: **Write a context record** opens the wizard, and the wizard ends on a Context PR listed under Proposals.
+- **Import Markdown** opens the Markdown import (`steering.md`). It puts the lines accepted as records from one source file into one Context PR on the branch `context/import-<file slug>`, listed under Proposals, and they reach this shelf only when that pull request merges. Each gets the lineage `ctx.<first segment of the workspace slug>.<first four words>`, with `-2`, `-3` added where a record already holds it. A line that overlaps a published record's statement by 50% or more starts rejected with the note “Already published as <record> (N% word overlap).”
 - A record can never grant authority. An enforcement grant compiles a gate the policy already allows a record to narrow; it never widens one.
 - The compilation chip is a button only where the record carries a grant, and it opens Gates.
 - **Open** routes to the record page, `record.md`.
@@ -53,7 +54,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 ## States
 
 - **loaded**: the shelf as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell).
-- **empty**: the hub header, the governance chip, the five tabs, and the shelf row stay; the header holds no gold. The body is “Nothing steers this workspace yet”: “Published records live in `.oxagen/rules/` on a-intel/platform. A record becomes published by being merged, never by being saved here.” Action: **Write a context record** (gold).
+- **empty**: the hub header, the governance chip, the five tabs, and the shelf row stay; the header holds no gold. The body is “Nothing steers this workspace yet”: “Published records live in `.oxagen/rules/` on a-intel/platform. A record becomes published by being merged, never by being saved here.” Actions: **Import Markdown** (plain) and **Write a context record** (gold).
 - **loading**: the shell stays; the page body, hub header included, is replaced by the skeleton.
 - **error**: “Steering could not be loaded”. “The control plane answered `503 record_index_unavailable`. Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by Oxagen.” Actions: **Try again**, **Open an incident**; the line “trace 01K5RSXQ7F2E · us-east-1 · 2026-09-11 09:16:04Z”.
 - **access denied**: “You cannot see this workspace’s steering”. “Your roles on Anderson Intelligence Corp. do not include `steering.read on core-platform`. An organization owner can grant it; the grant is a governed action and lands in the audit record with your name on it.” Actions: **Request access**, **Back to Fleet**. Below: *Signed in as*, *Needed*, *Decided by*.
@@ -66,6 +67,7 @@ The five tabs are one scrolling strip and the shelf row is a second strip under 
 
 - Read: `steering.read`
 - Writes (each a governed action recorded in Audit): `context.propose (open a Context PR)`, `context.review`, `context.retire`.
+- The Markdown import names `steering.write · memory.write` in its footer. The mockup checks neither before the wizard opens.
 
 ## Backend gaps this page depends on
 

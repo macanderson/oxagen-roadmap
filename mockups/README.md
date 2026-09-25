@@ -70,7 +70,7 @@ depended on proof: it is what the frames show bought nothing, so it stays with o
 
 - The Run page leads with the generated summary, then one row of stat boxes (Tokens, Prompts,
   Cost, Wasted, Wall clock, Cache hit), then the tabs (Transcript open by default, Issues, Governed
-  actions, Cost, Policy, Context, Chain and seal) in a two-thirds column; the right third holds one
+  actions, Cost, Policy, Context, Memories, Chain and seal) in a two-thirds column; the right third holds one
   Repository panel (branch, pull request, checks, diff and files), the outputs, and spend by area
   (initial prompt, follow-up prompts, context retrievals, tool definitions, tool calls by tool, model
   output). The Issues tab lists every issue the session touched with its status, relation and link. A prompt after the first is corrective, so prompts
@@ -86,6 +86,20 @@ depended on proof: it is what the frames show bought nothing, so it stays with o
   agent the sender operates in a work order: the merged definition of done, an editable prompt with
   `@` mentions of context records and agent profiles, and confirmed repositories. Workflows chain
   agents (fix, validate, document, review) and end with a person. `tools/check-tasks.mjs` walks it.
+- Markdown import (2026-09-24, `pages/steering.md`): **Import Markdown** on the Steering header,
+  on Proposals, on the empty All, Records, and Memory shelves, and in the `create` chooser opens a
+  three-step wizard (Files, Review, Publish). stella reads CLAUDE.md, AGENTS.md, and any Markdown
+  file into candidate lines. You accept each one as a record or a memory. Records open one Context
+  PR per source file. Memories are written at publish, steer at `may` or `info`, and join a memory
+  that already says the same thing. An imported saying never counts as a run.
+- Run memories (2026-09-24, `pages/run.md`): a Memories tab on the Run page lists every saying the
+  run wrote, in frame order, and whether it started a memory or joined one. At the workspace's fold
+  setting a memory becomes a steering proposal that cites every saying (`prp_01K5RX1N`,
+  `pages/steering-proposals.md`).
+- Cost centers (2026-09-24, `pages/organization.md`, `pages/agent.md`, `pages/spend.md`): labels
+  that spend is charged back to (ADR-142). Organization gains a Cost centers tab with **Add a cost
+  center**, an agent names its own label or inherits its workspace's, and Spend gains a By cost
+  center tab with a chargeback export.
 
 ## Data boundary
 
