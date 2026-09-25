@@ -43,7 +43,7 @@ Columns, in order:
 |---|---|
 | select | A checkbox, `aria-label` “Select <number>”. The header cell is the visually hidden word “Select” |
 | Work item | The provider’s logo as an SVG (or the Oxagen mark, titled “Written in oxagen”, for an item written in Oxagen), the number in mono, and the subject under it |
-| Labels | Colour chips in the colours the Intake dialog sets |
+| Labels | Color chips in the colors the Intake dialog sets |
 | Status | Dot and word: Open, In review, Blocked, Closed |
 | Blocked by | Each blocker’s number in mono as a link with its state dot (open, done, or closed without done), “none” with no blocker, and “closed as Won’t do” beside a blocker that closed without done. The provider’s Blocked status stays in the Status column, and the two are never folded into one. Outlined as future-only |
 | Owner | The mapped member with avatar. An account that is not mapped reads as its provider handle with the provider’s logo and a `not mapped`, `bot` or `requester` badge |
